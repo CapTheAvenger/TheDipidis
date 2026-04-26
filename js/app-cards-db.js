@@ -1267,19 +1267,31 @@
                 return;
             }
             
-            const lowerSearch = searchTerm.toLowerCase();
-            
+            const lowerSearch = searchTerm.toLowerCase().trim();
+            // Multi-token AND: "Pad POR" → card must match both 'pad' and
+            // 'por' across name / set / number, so the autocomplete stays
+            // in sync with the omni-search filter below.
+            const tokens = lowerSearch.split(/\s+/).filter(Boolean);
+
             // Find matching cards (limit to 15 suggestions)
             const matches = [];
             const nameSet = new Set(); // Avoid duplicate names
-            
+
             for (const card of window.allCardsData) {
                 if (!card.name || nameSet.has(card.name)) continue;
-                
-                if (card.name.toLowerCase().includes(lowerSearch)) {
+
+                const haystack = [
+                    (card.name || '').toLowerCase(),
+                    (card.name_en || '').toLowerCase(),
+                    (card.name_de || '').toLowerCase(),
+                    (card.set || '').toLowerCase(),
+                    String(card.number || '').toLowerCase()
+                ].join(' ');
+
+                if (tokens.every(t => haystack.includes(t))) {
                     matches.push(card);
                     nameSet.add(card.name);
-                    
+
                     if (matches.length >= 15) break;
                 }
             }
@@ -1438,15 +1450,24 @@
             showAllCards = false;
             
             const searchInput = document.getElementById('cardSearch');
-            const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
+            const rawSearch = searchInput ? searchInput.value.toLowerCase().trim() : '';
+            const searchTerm = rawSearch;
+            // Multi-token AND search: "Pad POR" → ['pad', 'por'] each must
+            // match somewhere in the card's haystack (name EN/DE, set,
+            // number, dex). Single-token still works: "Pad" → ['pad'].
+            const searchTokens = rawSearch ? rawSearch.split(/\s+/).filter(Boolean) : [];
 
             // If any print of a card name matches EN/DE search, include all prints of that name.
+            // Built from the SHORTEST matching token (longest meaningful) so
+            // we don't accidentally include "all Charizard prints" when the
+            // user types "Pad POR" — only prints where every token matches
+            // should pass, handled by the per-card filter below.
             const searchMatchedCardNames = new Set();
-            if (searchTerm) {
+            if (searchTokens.length === 1) {
                 window.allCardsData.forEach(card => {
                     const nameEn = (card.name_en || card.name || '').toLowerCase();
                     const nameDe = (card.name_de || '').toLowerCase();
-                    if (nameEn.includes(searchTerm) || nameDe.includes(searchTerm)) {
+                    if (nameEn.includes(searchTokens[0]) || nameDe.includes(searchTokens[0])) {
                         searchMatchedCardNames.add((card.name || '').toLowerCase());
                     }
                 });
@@ -1524,23 +1545,41 @@
                     return false;
                 }
                 
-                // Search filter - Omni-Search: name (EN/DE), set+number, Pokédex number
-                if (searchTerm) {
+                // Search filter — Omni-Search: name (EN/DE), set+number,
+                // Pokédex number. Multi-token AND: "Pad POR" → must match
+                // both 'pad' and 'por' somewhere in the haystack so the
+                // user can combine name + set or name + number filters in
+                // one search field.
+                if (searchTokens.length > 0) {
                     const nameEn = (card.name_en || card.name || '').toLowerCase();
                     const nameDe = (card.name_de || '').toLowerCase();
                     const baseName = (card.name || '').toLowerCase();
                     const setCode = (card.set || '').toLowerCase();
                     const cardNum = String(card.number || '').toLowerCase();
                     const dexNum = (card.pokedex_number || '').toString();
-                    const setNumSpace = `${setCode} ${cardNum}`;
-                    const setNumCombined = `${setCode}${cardNum}`;
-                    const matchesSearch = searchMatchedCardNames.has(baseName) ||
-                                          nameEn.includes(searchTerm) ||
-                                          nameDe.includes(searchTerm) ||
-                                          setNumSpace.includes(searchTerm) ||
-                                          setNumCombined.includes(searchTerm) ||
-                                          (dexNum !== '' && dexNum === searchTerm) ||
-                                          (searchTerm.length >= 3 && dexNum !== '' && dexNum.includes(searchTerm));
+                    // One blob containing every searchable field, joined
+                    // with spaces. .includes(token) on this matches names,
+                    // set codes, numbers, dex IDs and any concat of them.
+                    const haystack = [nameEn, nameDe, baseName, setCode, cardNum, dexNum,
+                                      `${setCode} ${cardNum}`, `${setCode}${cardNum}`].join(' ');
+                    let matchesSearch;
+                    if (searchTokens.length === 1) {
+                        // Single-token path keeps the legacy "include all
+                        // prints of a matched name" behaviour so typing
+                        // "Charizard" still surfaces every print.
+                        const t = searchTokens[0];
+                        matchesSearch = searchMatchedCardNames.has(baseName) ||
+                                        haystack.includes(t) ||
+                                        (dexNum !== '' && dexNum === t) ||
+                                        (t.length >= 3 && dexNum !== '' && dexNum.includes(t));
+                    } else {
+                        // Multi-token: every token must match the haystack
+                        // (or, for very short tokens, the dex number).
+                        matchesSearch = searchTokens.every(t =>
+                            haystack.includes(t) ||
+                            (dexNum !== '' && (dexNum === t || (t.length >= 3 && dexNum.includes(t))))
+                        );
+                    }
                     if (!matchesSearch) {
                         failedSearch++;
                         return false;

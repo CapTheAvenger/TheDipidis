@@ -429,13 +429,13 @@ img[src*="limitlesstcg"] {
     border-collapse: collapse !important;
 }
 .meta-matchup-th-opponent {
-    width: 55% !important;
+    width: 56% !important;
 }
 .meta-matchup-th-winrate {
-    width: 20% !important;
+    width: 16% !important;   /* "WR" header — narrow column */
 }
 .meta-matchup-th-record {
-    width: 25% !important;
+    width: 28% !important;   /* fits "166 - 101 - 6" without (N games) */
 }
 .meta-matchup-td-opponent {
     white-space: normal !important;

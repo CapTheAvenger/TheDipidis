@@ -2178,15 +2178,15 @@
   }
   .city-league-info-table-header-archetype,
   .city-league-info-table-cell-archetype {
-    width: 55% !important;
+    width: 62% !important;
   }
   .city-league-info-table th:nth-child(2),
   .city-league-info-table td:nth-child(2) {
-    width: 20% !important;
+    width: 16% !important;   /* Count — short numbers + (+/-N) */
   }
   .city-league-info-table th:nth-child(3),
   .city-league-info-table td:nth-child(3) {
-    width: 25% !important;
+    width: 22% !important;   /* Ø Rank — paired with Δ in parens */
   }
   .city-league-info-table-cell {
     padding: 6px 4px !important;

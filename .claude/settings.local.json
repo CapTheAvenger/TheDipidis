@@ -22,7 +22,13 @@
       "Bash(git restore *)",
       "Bash(awk '/^        async function renderCurrentMetaTierList/,/^        }$/' js/app-tier-meta.js)",
       "Bash(node -c js/app-tier-meta.js)",
-      "Bash(node -c js/app-current-meta.js)"
+      "Bash(node -c js/app-current-meta.js)",
+      "Bash(gh pr create --title 'TrainerHill UX upgrades — 4 quick wins + Overall vs Top-8 dual-table' --body ' *)",
+      "Bash(gh pr *)",
+      "Bash(git merge *)",
+      "Bash(git commit *)",
+      "Bash(git stash *)",
+      "Bash(node -c js/app-meta-cards.js)"
     ]
   }
 }

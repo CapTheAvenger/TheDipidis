@@ -1070,7 +1070,15 @@
             const sortedCards = sortCardsByType([...cards]);
             const currentDeck = window.currentMetaDeck || {};
             const priceMap = getOverviewPriceLookupCache();
-            
+
+            // Decklist Skeleton activation flag — same gating logic as the
+            // City League Card Overview: bucket only when ONE archetype is
+            // selected, since cross-archetype % values aren't comparable.
+            const selectedArchForSkeleton = String(window.currentMetaArchetype || '').trim();
+            const useSkeletonLayout = selectedArchForSkeleton && selectedArchForSkeleton !== 'all';
+            const SKELETON_MAIN_MIN  = 85;
+            const SKELETON_NICHE_MAX = 50;
+
             const cardHtmls = [];
             sortedCards.forEach(card => {
                 const originalSetCode = card.set_code || '';
@@ -1217,10 +1225,21 @@
                         </div>`
                         : '';
                     
-                    cardHtmls.push(`
+                    // Coloured usage bar overlay — only in skeleton mode.
+                    const usagePct = Math.max(0, Math.min(100, resolvedPercentage || 0));
+                    const usageBarHtml = (useSkeletonLayout && usagePct > 0)
+                        ? `<div class="card-usage-bar"><div class="card-usage-fill" style="width:${usagePct}%;background:${
+                            usagePct >= SKELETON_MAIN_MIN ? '#27ae60'
+                            : usagePct >= SKELETON_NICHE_MAX ? '#f39c12'
+                            : '#7f8c8d'
+                        };"></div></div>`
+                        : '';
+
+                    cardHtmls.push({ pct: usagePct, html: `
                         <div class="card-item city-league-card-item" data-card-name="${cardName.toLowerCase()}" data-card-name-de="${germanCardNameEscaped}" data-card-set="${setCode.toLowerCase()}" data-card-number="${setNumber.toLowerCase()}" data-card-type="${filterCategory}">
                             <div class="card-image-container city-league-card-image-container">
                                 <img src="${imageUrl}" alt="${cardName}" loading="lazy" referrerpolicy="no-referrer" class="city-league-card-image" onerror="handleCardImageError(this, '${setCode}', '${setNumber}')" onclick="if (typeof event !== 'undefined' && event) event.stopPropagation(); showSingleCard(this.src, '${cardNameEscaped} (${setCode} ${setNumber})');">
+                                ${usageBarHtml}
                                 <div class="city-league-card-badge city-league-card-badge-max">${maxCount}</div>
                                 ${typeof getWishlistBadgeHtml === 'function' ? getWishlistBadgeHtml(cardName, setCode, setNumber) : ''}
                                 ${deckCount > 0 ? `<div class="city-league-card-badge city-league-card-badge-deck">${deckCount}</div>` : ''}
@@ -1247,25 +1266,56 @@
                                 </div>
                             </div>
                         </div>
-                `);
+                ` });
                 });
             });
-            
-            // Progressive batch rendering: show first cards instantly, load rest in background
-            // Increment generation counter to cancel any in-flight batch from a previous render call
+
+            // ── Render path ───────────────────────────────────────────
+            // Without skeleton: existing flat batch render. With skeleton:
+            // bucket already-rendered HTML by usage % into Main / Options /
+            // Niche sections. Same HTML strings, no re-render.
             const renderGen = ++_currentMetaRenderGen;
             const BATCH_SIZE = 12;
-            gridContainer.innerHTML = cardHtmls.slice(0, BATCH_SIZE).join('');
-            if (cardHtmls.length > BATCH_SIZE) {
-                let offset = BATCH_SIZE;
-                (function renderNextBatch() {
-                    if (renderGen !== _currentMetaRenderGen) return; // stale render — abort
-                    if (offset >= cardHtmls.length) return;
-                    const batch = cardHtmls.slice(offset, offset + BATCH_SIZE);
-                    gridContainer.insertAdjacentHTML('beforeend', batch.join(''));
-                    offset += BATCH_SIZE;
-                    requestAnimationFrame(renderNextBatch);
-                })();
+
+            if (!useSkeletonLayout) {
+                const flatHtmls = cardHtmls.map(c => c.html);
+                gridContainer.innerHTML = flatHtmls.slice(0, BATCH_SIZE).join('');
+                if (flatHtmls.length > BATCH_SIZE) {
+                    let offset = BATCH_SIZE;
+                    (function renderNextBatch() {
+                        if (renderGen !== _currentMetaRenderGen) return;
+                        if (offset >= flatHtmls.length) return;
+                        const batch = flatHtmls.slice(offset, offset + BATCH_SIZE);
+                        gridContainer.insertAdjacentHTML('beforeend', batch.join(''));
+                        offset += BATCH_SIZE;
+                        requestAnimationFrame(renderNextBatch);
+                    })();
+                }
+            } else {
+                const mainItems    = cardHtmls.filter(c => c.pct >= SKELETON_MAIN_MIN);
+                const optionsItems = cardHtmls.filter(c => c.pct >= SKELETON_NICHE_MAX && c.pct < SKELETON_MAIN_MIN);
+                const nicheItems   = cardHtmls.filter(c => c.pct < SKELETON_NICHE_MAX);
+
+                const sectionHtml = (titleHtml, items, opts) => {
+                    if (!items.length) return '';
+                    const inner = `<div class="card-grid card-grid-condensed deck-grid-skeleton-grid">${items.map(c => c.html).join('')}</div>`;
+                    if (opts && opts.collapsed) {
+                        return `<details class="meta-card-skeleton-section meta-card-skeleton-niche">
+                            <summary><span class="meta-card-skeleton-title">${titleHtml}</span><span class="meta-card-skeleton-count">${items.length}</span></summary>
+                            ${inner}
+                        </details>`;
+                    }
+                    return `<section class="meta-card-skeleton-section">
+                        <h3 class="meta-card-skeleton-title">${titleHtml} <span class="meta-card-skeleton-count">${items.length}</span></h3>
+                        ${inner}
+                    </section>`;
+                };
+
+                gridContainer.innerHTML = `<div class="meta-card-skeleton-wrap">
+                    ${sectionHtml('🟢 Main Cards <span class="meta-card-skeleton-hint">(≥' + SKELETON_MAIN_MIN + '% — staples)</span>', mainItems)}
+                    ${sectionHtml('🟡 Options <span class="meta-card-skeleton-hint">(' + SKELETON_NICHE_MAX + '–' + (SKELETON_MAIN_MIN - 1) + '% — flex)</span>', optionsItems)}
+                    ${sectionHtml('⚪ Niche <span class="meta-card-skeleton-hint">(<' + SKELETON_NICHE_MAX + '% — situational)</span>', nicheItems, { collapsed: true })}
+                </div>`;
             }
             document.getElementById('currentMetaDeckTableView')?.classList.add('d-none');
             visualContainer.classList.remove('d-none');

@@ -2576,7 +2576,17 @@
             // PERFORMANCE: Resolve once outside render loop (avoids repeated DOM query + N*M data scans)
             const selectedArchetypeForTrend = document.getElementById('cityLeagueArchetypeSelect')?.value || window.currentCityLeagueArchetype || 'all';
             const trendHistoryCache = new Map();
-            
+
+            // Decklist Skeleton activation flag — only when ONE specific
+            // archetype is selected. For "All Archetypes" the flat layout
+            // stays (cross-archetype share semantics differ).
+            const useSkeletonLayout = selectedArchetypeForTrend && selectedArchetypeForTrend !== 'all';
+            const SKELETON_MAIN_MIN  = 85; // staples
+            const SKELETON_NICHE_MAX = 50; // below this = situational
+
+            // cardHtmls now holds objects so we can bucket by usage % at the
+            // end. Each entry: { html, pct } — multiple versions of the same
+            // card share the same pct.
             const cardHtmls = [];
             sortedCards.forEach(card => {
                 // Get original card's set/number from the City League deck data
@@ -2752,10 +2762,22 @@
                     </div>`
                     : '';
                 
-                cardHtmls.push(`
+                // Coloured usage bar overlay — only in skeleton mode so the
+                // flat overview keeps its current visual contract.
+                const usagePct = Math.max(0, Math.min(100, rawPercentage || 0));
+                const usageBarHtml = (useSkeletonLayout && usagePct > 0)
+                    ? `<div class="card-usage-bar"><div class="card-usage-fill" style="width:${usagePct}%;background:${
+                        usagePct >= SKELETON_MAIN_MIN ? '#27ae60'
+                        : usagePct >= SKELETON_NICHE_MAX ? '#f39c12'
+                        : '#7f8c8d'
+                    };"></div></div>`
+                    : '';
+
+                cardHtmls.push({ pct: usagePct, html: `
                     <div class="card-item city-league-card-item" data-card-name="${cardName.toLowerCase()}" data-card-name-de="${germanCardNameEscaped}" data-card-set="${setCode.toLowerCase()}" data-card-number="${setNumber.toLowerCase()}" data-card-type="${filterCategory}">
                         <div class="card-image-container city-league-card-image-container">
                             <img src="${imageUrl}" alt="${cardName}" loading="lazy" referrerpolicy="no-referrer" class="city-league-card-image" onerror="handleCardImageError(this, '${setCode}', '${setNumber}')" onclick="if (typeof event !== 'undefined' && event) event.stopPropagation(); showSingleCard(this.src, '${cardNameEscaped} (${setCode} ${setNumber})');">
+                            ${usageBarHtml}
                             <!-- Red badge: Max Count (top-right) -->
                             <div class="city-league-card-badge city-league-card-badge-max">${finalMaxCount}</div>
                             ${typeof getWishlistBadgeHtml === 'function' ? getWishlistBadgeHtml(cardName, setCode, setNumber) : ''}
@@ -2786,25 +2808,60 @@
                             </div>
                         </div>
                     </div>
-                `);
+                ` });
                 }); // End of versionsToRender.forEach
             }); // End of sortedCards.forEach
-            
-            // Progressive batch rendering: show first cards instantly, load rest in background
-            // Increment generation counter to cancel any in-flight batch from a previous render call
+
+            // ── Render path ───────────────────────────────────────────
+            // Without skeleton: existing flat batch render (preserved
+            // behaviour for "All Archetypes"). With skeleton: split the
+            // already-rendered card HTML into Main / Options / Niche
+            // sections (no second render pass — same HTML strings).
             const renderGen = ++_cityLeagueRenderGen;
             const BATCH_SIZE = 12;
-            gridContainer.innerHTML = cardHtmls.slice(0, BATCH_SIZE).join('');
-            if (cardHtmls.length > BATCH_SIZE) {
-                let offset = BATCH_SIZE;
-                (function renderNextBatch() {
-                    if (renderGen !== _cityLeagueRenderGen) return; // stale render — abort
-                    if (offset >= cardHtmls.length) return;
-                    const batch = cardHtmls.slice(offset, offset + BATCH_SIZE);
-                    gridContainer.insertAdjacentHTML('beforeend', batch.join(''));
-                    offset += BATCH_SIZE;
-                    requestAnimationFrame(renderNextBatch);
-                })();
+
+            if (!useSkeletonLayout) {
+                const flatHtmls = cardHtmls.map(c => c.html);
+                gridContainer.innerHTML = flatHtmls.slice(0, BATCH_SIZE).join('');
+                if (flatHtmls.length > BATCH_SIZE) {
+                    let offset = BATCH_SIZE;
+                    (function renderNextBatch() {
+                        if (renderGen !== _cityLeagueRenderGen) return;
+                        if (offset >= flatHtmls.length) return;
+                        const batch = flatHtmls.slice(offset, offset + BATCH_SIZE);
+                        gridContainer.insertAdjacentHTML('beforeend', batch.join(''));
+                        offset += BATCH_SIZE;
+                        requestAnimationFrame(renderNextBatch);
+                    })();
+                }
+            } else {
+                // Bucket cards by usage % — Main / Options / Niche.
+                // Multiple versions of the same card already share the
+                // same `pct` so they end up in the same bucket together.
+                const mainItems    = cardHtmls.filter(c => c.pct >= SKELETON_MAIN_MIN);
+                const optionsItems = cardHtmls.filter(c => c.pct >= SKELETON_NICHE_MAX && c.pct < SKELETON_MAIN_MIN);
+                const nicheItems   = cardHtmls.filter(c => c.pct < SKELETON_NICHE_MAX);
+
+                const sectionHtml = (titleHtml, items, opts) => {
+                    if (!items.length) return '';
+                    const inner = `<div class="card-grid card-grid-condensed deck-grid-skeleton-grid">${items.map(c => c.html).join('')}</div>`;
+                    if (opts && opts.collapsed) {
+                        return `<details class="meta-card-skeleton-section meta-card-skeleton-niche">
+                            <summary><span class="meta-card-skeleton-title">${titleHtml}</span><span class="meta-card-skeleton-count">${items.length}</span></summary>
+                            ${inner}
+                        </details>`;
+                    }
+                    return `<section class="meta-card-skeleton-section">
+                        <h3 class="meta-card-skeleton-title">${titleHtml} <span class="meta-card-skeleton-count">${items.length}</span></h3>
+                        ${inner}
+                    </section>`;
+                };
+
+                gridContainer.innerHTML = `<div class="meta-card-skeleton-wrap">
+                    ${sectionHtml('🟢 Main Cards <span class="meta-card-skeleton-hint">(≥' + SKELETON_MAIN_MIN + '% — staples)</span>', mainItems)}
+                    ${sectionHtml('🟡 Options <span class="meta-card-skeleton-hint">(' + SKELETON_NICHE_MAX + '–' + (SKELETON_MAIN_MIN - 1) + '% — flex)</span>', optionsItems)}
+                    ${sectionHtml('⚪ Niche <span class="meta-card-skeleton-hint">(<' + SKELETON_NICHE_MAX + '% — situational)</span>', nicheItems, { collapsed: true })}
+                </div>`;
             }
             if (visualContainer) {
                 visualContainer.classList.remove('d-none', 'city-league-deck-visual-hidden');

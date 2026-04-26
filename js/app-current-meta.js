@@ -300,7 +300,13 @@
                             const tooltip = `${parsedWins}W - ${parsedLosses}L (${totalGames} ${t('heatmap.games')})`;
                             const safeRow = escapeJsStr(rowDeck);
                             const safeCol = escapeJsStr(colDeck);
-                            tableHtml += `<td class="${tdClass} heatmap-td-dyn" style="--heatmap-bg: ${bgColor}; --heatmap-color: ${textColor};" title="${tooltip}" onclick="showToast('${safeRow} vs ${safeCol}: ${tooltip}', 'info', 3000)">${winRate.toFixed(1)}%</td>`;
+                            // Inline sample-size below the WR. Cells with n<10 get a
+                            // muted "low" tag so users can see at a glance which numbers
+                            // are statistically thin (TrainerHill's confidence cue).
+                            const lowSample = totalGames < 10;
+                            const sampleClass = lowSample ? 'heatmap-td-n heatmap-td-n-low' : 'heatmap-td-n';
+                            const sampleHtml = `<small class="${sampleClass}">n=${totalGames}</small>`;
+                            tableHtml += `<td class="${tdClass} heatmap-td-dyn" style="--heatmap-bg: ${bgColor}; --heatmap-color: ${textColor};" title="${tooltip}" onclick="showToast('${safeRow} vs ${safeCol}: ${tooltip}', 'info', 3000)">${winRate.toFixed(1)}%${sampleHtml}</td>`;
                         }
                     });
                     tableHtml += '</tr>';

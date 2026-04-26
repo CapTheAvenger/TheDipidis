@@ -3,7 +3,26 @@
     "allow": [
       "Bash(python -m py_compile current_meta_analysis_scraper.py)",
       "Bash(python -m py_compile city_league_archetype_scraper.py)",
-      "Bash(git commit -m ' *)"
+      "Bash(git commit -m ' *)",
+      "Bash(git pull *)",
+      "Bash(git checkout *)",
+      "Bash(python -c ' *)",
+      "Bash(python -m py_compile backend/scrapers/online_tournament_scraper.py)",
+      "Bash(python backend/scrapers/online_tournament_scraper.py --dry-run --max-tournaments 5)",
+      "Bash(python backend/scrapers/online_tournament_scraper.py --max-tournaments 3)",
+      "Bash(node -c js/app-meta-call.js)",
+      "Bash(node -c js/i18n.js)",
+      "Bash(git ls-files *)",
+      "Bash(python backend/scrapers/online_tournament_scraper.py --max-tournaments 30)",
+      "Bash(gh pr create --title 'Meta Call Predictor 2.0 — online tournament top-8 + format-aware blending' --body ' *)",
+      "Bash(grep -n 'labs_tournament\\\\|online_tournament\\\\|}, *$' config/scraper_settings.json)",
+      "Bash(git mv *)",
+      "Bash(git rm *)",
+      "Bash(python -m py_compile backend/start_scraper_dashboard.py backend/scrapers/online_tournament_scraper.py)",
+      "Bash(git restore *)",
+      "Bash(awk '/^        async function renderCurrentMetaTierList/,/^        }$/' js/app-tier-meta.js)",
+      "Bash(node -c js/app-tier-meta.js)",
+      "Bash(node -c js/app-current-meta.js)"
     ]
   }
 }

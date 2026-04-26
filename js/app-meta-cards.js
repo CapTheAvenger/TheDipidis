@@ -1317,12 +1317,34 @@
                             ths[0].classList.add('meta-matchup-th-opponent');
                             ths[1].classList.add('meta-matchup-th-winrate');
                             ths[2].classList.add('meta-matchup-th-record');
+                            // Mobile is too narrow for "Win Rate" \u2014 render the
+                            // header as "WR" so the column itself can shrink
+                            // and Record gets the breathing room it needs.
+                            const winRateText = (ths[1].textContent || '').trim();
+                            if (/^win\s*rate$/i.test(winRateText)) {
+                                ths[1].textContent = 'WR';
+                            }
                         }
                     }
 
                     // Allow opponent name cells to wrap (not truncate)
                     table.querySelectorAll('tr td:first-child').forEach(td => {
                         td.classList.add('meta-matchup-td-opponent');
+                    });
+
+                    // Strip the trailing "(N games)" from each Record cell \u2014
+                    // the W-L-T already encodes the game count and the text
+                    // gets truncated on mobile anyway. Keeps the tally only.
+                    table.querySelectorAll('tr').forEach(tr => {
+                        const cells = tr.querySelectorAll('td');
+                        if (cells.length === 3) {
+                            const recordCell = cells[2];
+                            const original = recordCell.textContent || '';
+                            const cleaned = original.replace(/\s*\(\d+\s*games?\)\s*$/i, '').trim();
+                            if (cleaned !== original.trim()) {
+                                recordCell.textContent = cleaned;
+                            }
+                        }
                     });
                 });
             });

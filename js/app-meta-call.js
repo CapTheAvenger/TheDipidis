@@ -1083,7 +1083,7 @@ window.MetaCall = (function () {
       const wrPct   = r.avgWR.toFixed(1).replace('.', ',');
       return `<tr class="${isMine ? 'mc-rec-mine' : ''}">
         <td class="mc-rec-rank">${i + 1}</td>
-        <td class="mc-rec-name">${icon}<span>${esc(r.name)}</span>${isMine ? `<span class="mc-rec-mine-tag">${esc(t('mc.recYourDeck'))}</span>` : ''}</td>
+        <td class="mc-rec-name"><span class="mc-rec-name-inner">${icon}<span class="mc-rec-name-text">${esc(r.name)}</span>${isMine ? `<span class="mc-rec-mine-tag">${esc(t('mc.recYourDeck'))}</span>` : ''}</span></td>
         <td class="mc-rec-day2"><strong>${day2Pct}%</strong></td>
         <td class="mc-rec-wr">${wrPct}%</td>
         <td class="mc-rec-wins">∅ ${r.expWin.toFixed(1)}</td>

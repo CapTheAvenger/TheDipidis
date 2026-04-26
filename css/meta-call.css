@@ -1274,10 +1274,21 @@
     width: 100%;
     border-collapse: collapse;
     font-size: 0.92rem;
+    /* table-layout: fixed locks the per-column widths below so headers
+       and data cells stay perfectly aligned. Without it the browser
+       lets contents stretch each column independently — the bold
+       rank cell pushed everything right while the header row stayed
+       at default widths. */
+    table-layout: fixed;
+}
+.mc-rec-table th,
+.mc-rec-table td {
+    padding: 8px 10px;
+    border-bottom: 1px solid #f0f3f7;
+    vertical-align: middle;
 }
 .mc-rec-table th {
     text-align: left;
-    padding: 6px 10px;
     border-bottom: 2px solid #e0e6ed;
     font-size: 0.72rem;
     font-weight: 700;
@@ -1286,29 +1297,48 @@
     color: #6b7c93;
     white-space: nowrap;
 }
-.mc-rec-table td {
-    padding: 8px 10px;
-    border-bottom: 1px solid #f0f3f7;
-    vertical-align: middle;
-}
 .mc-rec-table tr:last-child td { border-bottom: none; }
 .mc-rec-table tr:hover td { background: rgba(46,204,113,0.06); }
+
+/* Explicit per-column widths so headers + data cells line up. */
+.mc-rec-table th:nth-child(1),
+.mc-rec-table td:nth-child(1) { width: 40px; text-align: center; }
+.mc-rec-table th:nth-child(2),
+.mc-rec-table td:nth-child(2) { width: auto; }
+.mc-rec-table th:nth-child(3),
+.mc-rec-table td:nth-child(3) { width: 90px; }
+.mc-rec-table th:nth-child(4),
+.mc-rec-table td:nth-child(4) { width: 90px; }
+.mc-rec-table th:nth-child(5),
+.mc-rec-table td:nth-child(5) { width: 90px; }
+
 .mc-rec-rank {
-    width: 32px;
     font-weight: 800;
     color: #95a5a6;
     font-variant-numeric: tabular-nums;
-    text-align: center;
 }
 .mc-rec-table tr:nth-child(1) .mc-rec-rank { color: #f1c40f; font-size: 1.05em; }
 .mc-rec-table tr:nth-child(2) .mc-rec-rank { color: #95a5a6; }
 .mc-rec-table tr:nth-child(3) .mc-rec-rank { color: #cd7f32; }
 .mc-rec-name {
-    display: flex;
-    align-items: center;
-    gap: 8px;
+    /* td stays as table-cell — flex on a <td> breaks the alignment
+       between header and data rows. Inner wrapper does the layout. */
     font-weight: 700;
     color: #1a2533;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.mc-rec-name-inner {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    max-width: 100%;
+}
+.mc-rec-name-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 .mc-rec-day2 {
     font-variant-numeric: tabular-nums;

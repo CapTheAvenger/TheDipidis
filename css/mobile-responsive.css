@@ -2171,10 +2171,33 @@
    one line per row, no truncation.
    --------------------------------------------------------- */
 @media (max-width: 768px) {
+  /* Lock the column layout so the archetype name has a guaranteed
+     ~55% of the row and never gets pushed into the count column. */
+  .city-league-info-table {
+    table-layout: fixed !important;
+  }
+  .city-league-info-table-header-archetype,
+  .city-league-info-table-cell-archetype {
+    width: 62% !important;
+  }
+  .city-league-info-table th:nth-child(2),
+  .city-league-info-table td:nth-child(2) {
+    width: 16% !important;   /* Count — short numbers + (+/-N) */
+  }
+  .city-league-info-table th:nth-child(3),
+  .city-league-info-table td:nth-child(3) {
+    width: 22% !important;   /* Ø Rank — paired with Δ in parens */
+  }
   .city-league-info-table-cell {
     padding: 6px 4px !important;
     font-size: 0.6em !important;
     line-height: 1.25 !important;
+  }
+  .city-league-info-table-cell-archetype {
+    /* Wrap if a name is unusually long instead of pushing into the
+       next column. Most names fit on one line at this font size. */
+    white-space: normal !important;
+    word-break: break-word !important;
   }
   .city-league-info-table-cell-archetype .archetype-jump-link {
     font-size: 0.95em !important;

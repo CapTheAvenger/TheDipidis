@@ -429,13 +429,16 @@ img[src*="limitlesstcg"] {
     border-collapse: collapse !important;
 }
 .meta-matchup-th-opponent {
-    width: 42% !important;
+    width: 50% !important;
+    text-align: left !important;
 }
 .meta-matchup-th-winrate {
-    width: 22% !important;   /* "WR" header — fits "65.8%" bold */
+    width: 16% !important;   /* "WR" header — just enough for "65.8%" */
+    text-align: center !important;
 }
 .meta-matchup-th-record {
-    width: 36% !important;   /* fits "166 - 101 - 6" bold */
+    width: 34% !important;   /* fits "166 - 101 - 6" with padding */
+    text-align: right !important;
 }
 .meta-matchup-td-opponent {
     white-space: normal !important;

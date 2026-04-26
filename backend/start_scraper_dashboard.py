@@ -35,8 +35,8 @@ def print_menu() -> None:
     print("-" * 52)
     print("  --- BATCH SHORTCUTS ---")
     print("  [B]  Base Data Update (1, 2, 3, 4 + 11)")
-    print("  [M]  Meta Update / Dienstags-Update (5 bis 11)")
-    print("  [F]  Full System Update (1 bis 11)")
+    print("  [M]  Meta Update / Dienstags-Update (5-10, 13, 11, 12)")
+    print("  [F]  Full System Update (1-10, 13, 11, 12)")
     print("  [0]  Exit")
     print("=" * 52)
 

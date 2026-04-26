@@ -2170,36 +2170,43 @@
    column ("Dragapult Dudunsparce" colliding with "115 (+11)" on
    the user's iPhone screenshot). Shrink the cell text + tighten
    padding so icon + name + count + change all fit on one line
-   per row.
+   per row. !important on the key properties so the rule wins
+   regardless of any later cell-level overrides; nothing else
+   sets these values, but the user already reported one no-op
+   round so let's not take chances.
    --------------------------------------------------------- */
 @media (max-width: 768px) {
   .city-league-info-table-cell {
-    padding: 7px 6px;
-    font-size: 0.72em;
-    line-height: 1.25;
+    padding: 6px 4px !important;
+    font-size: 0.65em !important;
+    line-height: 1.25 !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
   }
   .city-league-info-table-cell-archetype {
-    word-break: break-word;
+    word-break: break-word !important;
+    max-width: 60vw;
   }
   .city-league-info-table-cell-archetype .archetype-jump-link {
-    font-size: 0.95em;
-    font-weight: 700;
+    font-size: 0.95em !important;
+    font-weight: 700 !important;
   }
   .city-league-info-table-count-change {
-    font-size: 0.85em;
-    margin-left: 2px;
+    font-size: 0.85em !important;
+    margin-left: 2px !important;
+    white-space: nowrap;
   }
   .city-league-info-table-placement {
-    font-size: 0.95em;
+    font-size: 0.95em !important;
+    white-space: nowrap;
   }
   .city-league-info-table-header {
     font-size: 0.7em !important;
-    padding: 8px 6px !important;
+    padding: 7px 4px !important;
   }
-  /* Pokémon icons stay readable but a touch smaller so they
-     don't dominate the now-shrunken cell. */
+  /* Pokémon icons — small enough not to dominate the now-shrunken cell. */
   .city-league-info-table-cell-archetype .tcg-pokemon-icon {
-    width: 18px !important;
-    height: 18px !important;
+    width: 16px !important;
+    height: 16px !important;
   }
 }

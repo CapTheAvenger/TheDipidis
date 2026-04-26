@@ -13,6 +13,7 @@ window.MetaCall = (function () {
   let _tournamentStats = null; // normalize(deck) -> { broughtShare, top8Conv, top16Conv, ... }
   let _predictorMode  = 'A'; // 'A' = online-only fallback, 'B' = labs-major data available
   let _labsMajorRows  = 0;   // count of labs CSV rows that informed the mode decision
+  let _labsRowsByDeck = {};  // labs share data — kept after loadData so re-runs work
 
   let _settings = {
     totalPlayers  : 1300,
@@ -24,7 +25,8 @@ window.MetaCall = (function () {
     excludeBricks : false,
   };
 
-  let _personalShares   = {};  // deckName -> % estimate
+  let _personalShares   = {};  // deckName -> % estimate (manual "MY ESTIMATE" column)
+  let _tgFieldShares    = {};  // deckName (canonical) -> TG-reported share % — folds INTO the predictor's ONLINE % column, NOT into _personalShares
   let _winRateOverrides = {};  // deckName -> 0-100 (manual user overrides only)
   let _journalRateKeys  = [];  // opponents with 3+ journal games (for badge display)
   let _journalStats     = {};  // opponent -> {wins, losses, ties, total, winRate}
@@ -129,6 +131,99 @@ window.MetaCall = (function () {
 
     // Default: single-word species name — first word is the main
     return first;
+  }
+
+  // ── Predictor 2.0 — runnable on demand ────────────────────
+  // Extracted so a Testing Group import can update _tgFieldShares and
+  // re-run the prediction without a full data reload. Uses module
+  // state: _shareList (with raw .ladderShare), _tournamentStats,
+  // _labsRowsByDeck, _tgFieldShares, _predictorMode.
+  function _runPredictor() {
+    if (!_shareList) return;
+
+    // Use raw ladderShare (immutable) for normalisation — onlineShare
+    // gets overwritten by the predicted value at the end of the run, so
+    // re-running would compound if we read from it.
+    const totalLadder = _shareList.reduce((s, d) => s + (d.ladderShare || 0), 0) || 1;
+
+    // Field-WEIGHTED mean top-8 conversion — equals total_top8 /
+    // total_brought ≈ 8/100 = 0.08 for an 8-cut at 100-player events.
+    // 1.0× = "average deck cuts at the natural rate".
+    const convStats = _tournamentStats
+      ? Object.values(_tournamentStats).filter(s => s && s.broughtShare > 0)
+      : [];
+    const totalBroughtForConv = convStats.reduce((a, s) => a + s.broughtShare, 0) || 1;
+    const meanConv = convStats.length > 0
+      ? convStats.reduce((a, s) => a + (s.top8Conv || 0) * s.broughtShare, 0) / totalBroughtForConv
+      : 0.08;
+
+    // Testing Group share — present only when the user has imported a
+    // group via "Load into Meta Call". Renormalise to sum 100% so it
+    // aligns with the other %-shaped signals (ladder / brought).
+    const tgEntries  = Object.values(_tgFieldShares);
+    const tgTotal    = tgEntries.reduce((s, v) => s + v, 0);
+    const tgLoaded   = tgTotal > 0;
+    const labsTotalShare = Object.values(_labsRowsByDeck).reduce((s, d) => s + d.share, 0) || 1;
+
+    _shareList.forEach(d => {
+      const k = normalize(d.name);
+      const ladderPct  = (d.ladderShare / totalLadder) * 100;
+      const stats      = _tournamentStats ? _tournamentStats[k] : null;
+      const broughtPct = stats ? stats.broughtShare : 0;
+      const top8Conv   = stats ? stats.top8Conv : 0;
+      const convFactor = meanConv > 0
+        ? Math.max(0.5, Math.min(2.0, top8Conv / meanConv))
+        : 1.0;
+      const top8Boost  = broughtPct * convFactor;
+      const trendPct   = d.trend || 0;
+
+      // TG share for this deck (canonical lookup, normalised %).
+      const rawTgShare = _findByNormalized(_tgFieldShares, d.name) || 0;
+      const tgPct      = tgLoaded ? (rawTgShare / tgTotal) * 100 : 0;
+
+      let predicted;
+      if (_predictorMode === 'B') {
+        const labsRow = _labsRowsByDeck[k];
+        const labsPct = labsRow ? (labsRow.share / labsTotalShare) * 100 : 0;
+        predicted = 0.50 * labsPct
+                  + 0.30 * broughtPct
+                  + 0.20 * ladderPct;
+      } else if (tgLoaded) {
+        // Mode A + Testing Group: TG quantities reflect the user's
+        // expert prep insight from their group, so weight it heavily.
+        // Other signals downscaled proportionally — sum stays 1.0.
+        //   0.40 TG | 0.20 ladder | 0.20 brought | 0.10 top8 | 0.10 trend
+        predicted = 0.40 * tgPct
+                  + 0.20 * ladderPct
+                  + 0.20 * broughtPct
+                  + 0.10 * top8Boost
+                  + 0.10 * trendPct;
+      } else {
+        // Mode A baseline (no TG data).
+        //   0.25 ladder | 0.55 brought | 0.10 top8 | 0.10 trend
+        predicted = 0.25 * ladderPct
+                  + 0.55 * broughtPct
+                  + 0.10 * top8Boost
+                  + 0.10 * trendPct;
+      }
+      d.predictedShareRaw = Math.max(0, predicted);
+    });
+
+    // Concentration boost (^1.50) — mimics the major-tournament
+    // bandwagon ratio of ~1.875× on top picks.
+    const CONCENTRATION_EXP = 1.50;
+    _shareList.forEach(d => {
+      d.predictedShareRaw = Math.pow(d.predictedShareRaw, CONCENTRATION_EXP);
+    });
+
+    // Renormalise predicted shares to sum 100% so the field-composition
+    // budget logic works unchanged.
+    const predictedSum = _shareList.reduce((s, d) => s + (d.predictedShareRaw || 0), 0) || 1;
+    _shareList.forEach(d => {
+      d.predictedShare = (d.predictedShareRaw / predictedSum) * 100;
+      d.onlineShare    = d.predictedShare; // legacy field name used by buildField()
+    });
+    _shareList.sort((a, b) => b.predictedShare - a.predictedShare);
   }
 
   // ── Data Loading ───────────────────────────────────────────
@@ -240,80 +335,11 @@ window.MetaCall = (function () {
           }
         });
       }
+      // Cache labs data on the module so _runPredictor() can re-run later
+      // (e.g. after a Testing Group load) without hitting Firestore again.
+      _labsRowsByDeck = labsRowsByDeck;
 
-      // Field-WEIGHTED mean top-8 conversion — sum(top8Conv × brought) /
-      // sum(brought). This equals total_top8_slots / total_brought_decks
-      // ≈ 8/100 = 0.08 for a 100-player tournament with an 8-cut. So a
-      // factor of 1.0× = "average deck performs at the natural cut rate".
-      //
-      // The previous arithmetic mean was systematically pulled down by the
-      // long tail (lots of rare decks with 0–3% conv) and produced 2.0×
-      // clamps for almost every top deck, which inflated everyone's top-8
-      // boost equally and shrank the gap between top and bottom in the
-      // final renormalisation.
-      const convStats = Object.values(_tournamentStats).filter(s => s && s.broughtShare > 0);
-      const totalBroughtForConv = convStats.reduce((a, s) => a + s.broughtShare, 0) || 1;
-      const meanConv = convStats.length > 0
-        ? convStats.reduce((a, s) => a + (s.top8Conv || 0) * s.broughtShare, 0) / totalBroughtForConv
-        : 0.08;
-      _shareList.forEach(d => {
-        const k = normalize(d.name);
-        const ladderPct = (d.ladderShare / totalLadder) * 100;
-        const stats = _tournamentStats[k];
-        const broughtPct = stats ? stats.broughtShare : 0;
-        const top8Conv   = stats ? stats.top8Conv : 0;
-        // Convert factor relative to the EMPIRICAL mean conversion so a
-        // factor of 1.0 means "average deck", >1.0 means over-performing,
-        // <1.0 means under-performing — irrespective of tournament size.
-        const convFactor = meanConv > 0
-          ? Math.max(0.5, Math.min(2.0, top8Conv / meanConv))
-          : 1.0;
-        const top8Boost  = broughtPct * convFactor;
-        const trendPct   = d.trend || 0;
-
-        let predicted;
-        if (_predictorMode === 'B') {
-          const labsRow = labsRowsByDeck[k];
-          const labsPct = labsRow ? (labsRow.share / labsTotalShare) * 100 : 0;
-          predicted = 0.50 * labsPct
-                    + 0.30 * broughtPct
-                    + 0.20 * ladderPct;
-        } else {
-          // Brought-share dominates because online-tournament participation
-          // is the strongest day-1 signal for a major. Re-balanced from the
-          // initial 40/30/20/10 toward 25/55/10/10 because the previous
-          // weights systematically under-predicted top decks (Dragapult
-          // shipped 7.85% vs real Phase-1 15%).
-          predicted = 0.25 * ladderPct
-                    + 0.55 * broughtPct
-                    + 0.10 * top8Boost
-                    + 0.10 * trendPct;
-        }
-        // Floor at 0 — trend can drag a fading deck below zero otherwise.
-        d.predictedShareRaw = Math.max(0, predicted);
-      });
-
-      // Concentration boost — power-law inflation that mimics the
-      // major-tournament bandwagon effect. Online tournaments admit
-      // casual / rogue lineups that would never see a Regional; players
-      // at majors pile onto the top picks instead. Empirically tuned
-      // against Prague Phase-1 data: with the corrected weighted-mean
-      // convFactor and exponent 1.50, Dragapult lifts from raw 8%
-      // brought → ~13–15% predicted, matching the observed major-
-      // tournament concentration ratio of ~1.875× on top picks.
-      const CONCENTRATION_EXP = 1.50;
-      _shareList.forEach(d => {
-        d.predictedShareRaw = Math.pow(d.predictedShareRaw, CONCENTRATION_EXP);
-      });
-
-      // Renormalise predicted shares to sum 100% so the field-composition
-      // budget logic works unchanged.
-      const predictedSum = _shareList.reduce((s, d) => s + (d.predictedShareRaw || 0), 0) || 1;
-      _shareList.forEach(d => {
-        d.predictedShare = (d.predictedShareRaw / predictedSum) * 100;
-        d.onlineShare    = d.predictedShare; // legacy field name used by buildField()
-      });
-      _shareList.sort((a, b) => b.predictedShare - a.predictedShare);
+      _runPredictor();
 
       const matchResp = await fetch('data/limitless_online_decks_matchups.csv?t=' + Date.now());
       if (!matchResp.ok) throw new Error('matchup CSV not found');
@@ -1171,11 +1197,21 @@ window.MetaCall = (function () {
       ? `<span class="mc-badge-chip mc-badge-journal" title="${esc(t('mc.badgeJournal'))}">📓&nbsp;${jStats.wins}-${jStats.losses}-${jStats.ties} (${jStats.winRate}%)</span>`
       : '';
 
+    // Testing Group share chip — reflects what flowed INTO the
+    // predictor (raw TG quantity, normalised to %). Distinct from
+    // the 🎯 chip below which is per-matchup win-rate.
+    const rawTgShare = _findByNormalized(_tgFieldShares, deckName) || 0;
+    const tgShareTotal = Object.values(_tgFieldShares).reduce((s, v) => s + v, 0);
+    const tgShareChip = (rawTgShare > 0 && tgShareTotal > 0)
+      ? `<span class="mc-badge-chip mc-badge-tg-share" title="${esc(t('mc.badgeTgShare'))}">🧪&nbsp;${fmt((rawTgShare / tgShareTotal) * 100, 1)}%</span>`
+      : '';
+
     return `<span class="mc-deck-badge">
       <span class="mc-badge-chip" title="${esc(t('mc.badgeLadder'))}">🌐&nbsp;${fmt(ladderPct, 1)}%</span>
       <span class="mc-badge-chip" title="${esc(t('mc.badgeTournament'))}">🏆&nbsp;${fmt(broughtPct, 1)}%</span>
       <span class="mc-badge-chip" title="${esc(t('mc.badgeTop8Conv'))}">⬆️&nbsp;${fmt(convFactor, 1)}× T8</span>
       <span class="mc-badge-chip" title="${esc(t('mc.badgeTrend'))}">${trendArrow}&nbsp;${trendSign}${fmt(trendPct, 1)}%</span>
+      ${tgShareChip}
       ${tgChip}
       ${journalChip}
     </span>`;
@@ -1751,21 +1787,23 @@ window.MetaCall = (function () {
     // Normalize names from the online share list for fuzzy matching
     const shareNames = new Set(_shareList.map(d => normalize(d.name)));
 
-    // 1) Personal shares for matching decks, custom decks otherwise
-    _personalShares = {};
+    // 1) TG shares for matching decks → fold INTO the predictor (one of
+    //    its weighted signals), NOT into _personalShares. This leaves
+    //    the "MY ESTIMATE" column free for last-minute manual tweaks
+    //    on top of the TG-informed prediction. Unknown decks (not in
+    //    the online ladder list) still go to _customDecks since they
+    //    have no ladder/brought data to fold them into.
+    _tgFieldShares  = {};
     _customDecks    = [];
     decks.forEach(name => {
       const q = Number(qty[name]);
       if (isNaN(q) || q <= 0) return;
       if (name === 'Rest') return;  // skip the residual bucket
       if (shareNames.has(normalize(name))) {
-        // Find the actual canonical name in the online list
         const canonical = (_shareList.find(d => normalize(d.name) === normalize(name)) || {}).name || name;
-        _personalShares[canonical] = q;
-      } else {
-        if (_customDecks.length < MAX_CUSTOM) {
-          _customDecks.push({ name, share: q });
-        }
+        _tgFieldShares[canonical] = q;
+      } else if (_customDecks.length < MAX_CUSTOM) {
+        _customDecks.push({ name, share: q });
       }
     });
 
@@ -1789,12 +1827,15 @@ window.MetaCall = (function () {
       });
     }
 
+    // Re-run the predictor so TG shares immediately fold into the
+    // ONLINE % column rather than waiting for the next loadData call.
+    _runPredictor();
     renderAll();
 
     // Return a summary so TestingGroups can show the user what was
     // actually imported (helps debug when names don't match).
     const summary = {
-      personalCount: Object.keys(_personalShares).length,
+      personalCount: Object.keys(_tgFieldShares).length, // legacy key name; TG shares now
       customCount:   _customDecks.length,
       overrideCount: Object.keys(_winRateOverrides).length,
     };

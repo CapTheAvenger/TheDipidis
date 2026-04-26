@@ -1372,3 +1372,15 @@
     .mc-rec-table td { padding: 6px 6px; }
     .mc-rec-wins { display: none; }
 }
+
+/* TG-share chip — distinct teal so user sees it as a folded-in
+   prediction signal, not a per-matchup override. */
+.mc-badge-chip.mc-badge-tg-share {
+    background: rgba(26,188,156,0.14);
+    color: #117864;
+    border: 1px solid rgba(26,188,156,0.32);
+    font-weight: 700;
+}
+.mc-badge-chip.mc-badge-tg-share:hover {
+    background: rgba(26,188,156,0.24);
+}

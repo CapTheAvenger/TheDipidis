@@ -13,8 +13,9 @@ Run order (dependency-aware):
     - current_meta_analysis_scraper   → reads labs / online data
     - limitless_online_scraper        → standalone, but grouped here
 
-  Stage 3 – Enrichment (run after Stage 2):
-    - card_price_scraper              → enriches card data
+  Stage 3 – Enrichment (run after Stage 2, sequential — both touch price_data.csv):
+    - card_price_scraper              → Limitless-fallback for unmapped cards
+    - cardmarket_price_merger         → primary price source (reads data/price_guide.json + mapping)
     - generate_tooltips               → reads card data from Stage 2
 
 Usage:
@@ -60,9 +61,13 @@ STAGES = {
     ],
     3: [
         "card_price_scraper",
+        "cardmarket_price_merger",
         "generate_tooltips",
     ],
 }
+
+# Stages where order matters (no parallel execution within the stage).
+SEQUENTIAL_STAGES = {3}
 
 # Validation: check that these output files exist after each stage
 STAGE_OUTPUTS = {
@@ -116,6 +121,9 @@ def run_stage(stage_num: int, parallel: bool = True) -> bool:
     scrapers = STAGES.get(stage_num, [])
     if not scrapers:
         return True
+
+    if stage_num in SEQUENTIAL_STAGES:
+        parallel = False
 
     logger.info("=" * 60)
     logger.info("STAGE %d  (%s)", stage_num, "parallel" if parallel else "sequential")

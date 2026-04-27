@@ -28,7 +28,14 @@
       "Bash(git merge *)",
       "Bash(git commit *)",
       "Bash(git stash *)",
-      "Bash(node -c js/app-meta-cards.js)"
+      "Bash(node -c js/app-meta-cards.js)",
+      "Bash(git show *)",
+      "Read(//tmp/**)",
+      "Bash(node -c js/app-city-league.js)",
+      "Bash(node -c js/app-current-meta-analysis.js)"
+    ],
+    "additionalDirectories": [
+      "\\tmp"
     ]
   }
 }

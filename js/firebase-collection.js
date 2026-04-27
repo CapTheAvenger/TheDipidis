@@ -1158,7 +1158,10 @@ function updateWishlistUI(searchFilter = '', setFilter = '') {
       const safeNameJs = escapeJsSingleQuoted(card.name);
       const safeCardIdJs = escapeJsSingleQuoted(cardId);
 
-      const price = card.eur_price ? parseFloat(card.eur_price.replace(',', '.')) : 0;
+      // Wishlist uses Cardmarket "low" price (cheapest available) when present;
+      // falls back to "trend" (eur_price) for legacy/unmapped cards.
+      const wishlistPriceRaw = card.eur_low || card.eur_price;
+      const price = wishlistPriceRaw ? parseFloat(wishlistPriceRaw.replace(',', '.')) : 0;
       const priceDisplay = (!isNaN(price) && price > 0) ? `${price.toFixed(2).replace('.', ',')} €` : 'N/A';
       if (!isNaN(price) && price > 0) totalValue += price * wantedCount;
 

@@ -75,7 +75,10 @@ def create_merged_database():
         if p.get('eur_price'):
             prices_dict[key] = p
     fe_count = len(prices_dict)
-    # Backend prices override when they are newer (latest scrape)
+    # Backend prices override when they are newer (latest scrape).
+    # Exception: a frontend row carrying eur_low comes from the Cardmarket
+    # merger and is authoritative — never let a Limitless backend row
+    # overwrite it (would clobber the trend+low pair).
     be_override = 0
     for p in load_csv(backend_prices):
         key = f"{p.get('set')}_{p.get('number')}"
@@ -85,6 +88,8 @@ def create_merged_database():
         if not existing:
             prices_dict[key] = p
             be_override += 1
+        elif existing.get('eur_low'):
+            continue  # frontend row is from Cardmarket — keep it
         else:
             be_ts = p.get('last_updated', '')
             fe_ts = existing.get('last_updated', '')
@@ -107,9 +112,11 @@ def create_merged_database():
         
         if key in prices_dict:
             card['eur_price'] = prices_dict[key].get('eur_price', '')
+            card['eur_low'] = prices_dict[key].get('eur_low', '')
             card['price_last_updated'] = prices_dict[key].get('last_updated', '')
         else:
             card['eur_price'] = card.get('eur_price', '')
+            card['eur_low'] = card.get('eur_low', '')
             card['price_last_updated'] = card.get('price_last_updated', '')
             
         # For JP-origin cards, replace the Japanese scan with the English proxy
@@ -231,7 +238,7 @@ def create_merged_database():
         json.dump({'cards': merged_cards}, f, ensure_ascii=False, indent=2)
         
     csv_path = os.path.join(data_dir, 'all_cards_merged.csv')
-    fieldnames = ['name_en', 'name_de', 'set', 'number', 'pokedex_number', 'type', 'energy_type', 'rarity', 'image_url', 'international_prints', 'cardmarket_url', 'eur_price', 'price_last_updated']
+    fieldnames = ['name_en', 'name_de', 'set', 'number', 'pokedex_number', 'type', 'energy_type', 'rarity', 'image_url', 'international_prints', 'cardmarket_url', 'eur_price', 'eur_low', 'price_last_updated']
     
     with open(csv_path, 'w', newline='', encoding='utf-8-sig') as f:
         writer = csv.DictWriter(f, fieldnames=fieldnames, extrasaction='ignore')

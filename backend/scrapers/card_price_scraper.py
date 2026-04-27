@@ -8,6 +8,7 @@ Card Price Scraper - Limitless TCG Only (V5)
 """
 
 import csv
+import json
 import os
 import sys
 import time
@@ -34,8 +35,24 @@ def _load_settings() -> dict:
         "max_workers": 4,
         "batch_size": 100,
         "skip_cards_with_prices": False,
+        "skip_cardmarket_mapped": True,
+        "min_set": "",
         "only_update_sets": []
     })
+
+
+def _load_set_order() -> dict:
+    """Load {set_code: order} from sets.json. Higher = newer."""
+    sets_path = os.path.join(get_data_dir(), "sets.json")
+    if not os.path.isfile(sets_path):
+        return {}
+    try:
+        with open(sets_path, encoding="utf-8") as f:
+            raw = json.load(f)
+        return {str(k): int(v) for k, v in raw.items() if isinstance(v, (int, float))}
+    except Exception as e:
+        logger.warning("Konnte sets.json nicht laden: %s", e)
+        return {}
 
 
 def load_cards_to_update(csv_path: str) -> list:
@@ -146,12 +163,57 @@ def save_prices(prices: list, csv_path: str):
             writer.writerow(existing[k])
 
 
+def _load_cardmarket_mapped_keys() -> set:
+    """Returns the set of '{set}_{number}' keys that the Cardmarket merger covers.
+    Reads the project-root data/cardmarket_id_mapping.csv (built by cardmarket_id_mapper.py).
+    Cards in this set have authoritative prices from Cardmarket and don't need Limitless.
+    """
+    here = os.path.dirname(os.path.abspath(__file__))
+    project_root = os.path.dirname(os.path.dirname(here))
+    mapping_path = os.path.join(project_root, 'data', 'cardmarket_id_mapping.csv')
+    if not os.path.isfile(mapping_path):
+        return set()
+    keys = set()
+    with open(mapping_path, "r", encoding="utf-8-sig", newline="") as f:
+        for row in csv.DictReader(f):
+            keys.add(f"{row.get('set','')}_{row.get('number','')}")
+    return keys
+
+
 def scrape_prices(cards: list, settings: dict, csv_path: str) -> list:
+    # Filter 1: skip sets older than the configured rotation cutoff (e.g. min_set='TEF'
+    # → only TEF and newer). Useful so Limitless doesn't waste requests on
+    # legacy/legacy-extended sets nobody is buying.
+    min_set = (settings.get("min_set") or "").strip()
+    if min_set:
+        set_order = _load_set_order()
+        min_order = set_order.get(min_set)
+        if min_order is None:
+            logger.warning("  -> min_set '%s' nicht in sets.json — Filter inaktiv.", min_set)
+        else:
+            before = len(cards)
+            cards = [c for c in cards if set_order.get(c["set"], 0) >= min_order]
+            logger.info("  -> %s Karten aus Sets aelter als %s (order<%s) uebersprungen. Verbleibend: %s",
+                        before - len(cards), min_set, min_order, len(cards))
+
     only_sets = settings.get("only_update_sets", [])
     if only_sets:
         only_sets_lower = [s.lower() for s in only_sets]
         cards = [c for c in cards if c["set"].lower() in only_sets_lower]
         logger.info("  -> Gefiltert auf Sets: %s (%s Karten)", only_sets, len(cards))
+
+    # Filter 2: skip cards already covered by Cardmarket — Cardmarket is the
+    # authoritative source. Limitless only fills the gap for unmapped cards
+    # (DP/PL/SV-era + the 4 promo sets the mapper couldn't resolve).
+    if settings.get("skip_cardmarket_mapped", True):
+        mapped = _load_cardmarket_mapped_keys()
+        if mapped:
+            before = len(cards)
+            cards = [c for c in cards if f"{c['set']}_{c['number']}" not in mapped]
+            logger.info("  -> %s Karten via Cardmarket abgedeckt — uebersprungen. Verbleibend: %s",
+                        before - len(cards), len(cards))
+        else:
+            logger.info("  -> cardmarket_id_mapping.csv nicht gefunden — alle Karten werden gescraped.")
 
     if settings.get("skip_cards_with_prices"):
         prices_csv = csv_path

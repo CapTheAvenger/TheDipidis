@@ -20,7 +20,9 @@ def print_menu() -> None:
     print("  [1]  Update Sets (sets.json)")
     print("  [2]  All Cards Scraper (EN/DE)")
     print("  [3]  Japanese Cards Scraper")
-    print("  [4]  Card Price Scraper")
+    print("  [4]  Card Price Scraper (Limitless – Fallback fuer unmapped)")
+    print("  [14] Cardmarket Price Merger (taeglich, primaere Preisquelle)")
+    print("  [15] Cardmarket ID Mapper (einmalig / bei neuen Sets)")
     print("  --- META & TOURNAMENTS ---")
     print("  [5]  Current Meta Analysis (Play! & Live)")
     print("  [6]  Limitless Online Scraper (Trends)")
@@ -34,9 +36,9 @@ def print_menu() -> None:
     print("  [12] Archetype Icons (Pokemon-Bilder Mapping)")
     print("-" * 52)
     print("  --- BATCH SHORTCUTS ---")
-    print("  [B]  Base Data Update (1, 2, 3, 4 + 11)")
-    print("  [M]  Meta Update / Dienstags-Update (5-10, 13, 11, 12)")
-    print("  [F]  Full System Update (1-10, 13, 11, 12)")
+    print("  [B]  Base Data Update (1, 2, 3, 4, 14 + 11)")
+    print("  [M]  Meta Update / Dienstags-Update (5-10, 13, 14, 11, 12)")
+    print("  [F]  Full System Update (1, 2, 15, 3-10, 13, 14, 11, 12)")
     print("  [0]  Exit")
     print("=" * 52)
 
@@ -54,6 +56,8 @@ SCRIPTS = {
     "11": os.path.join("core", "prepare_card_data.py"),
     "12": os.path.join("scrapers", "archetype_icons_scraper.py"),
     "13": os.path.join("scrapers", "online_tournament_scraper.py"),
+    "14": os.path.join("scrapers", "cardmarket_price_merger.py"),
+    "15": os.path.join("scrapers", "cardmarket_id_mapper.py"),
 }
 
 TASK_NAMES = {
@@ -70,11 +74,13 @@ TASK_NAMES = {
     "11": "Prepare Frontend Data",
     "12": "Archetype Icons Scraper",
     "13": "Online Tournament Top-8 Scraper",
+    "14": "Cardmarket Price Merger",
+    "15": "Cardmarket ID Mapper",
 }
 
-BATCH_BASE = ["1", "2", "3", "4", "11"]
-BATCH_META = ["5", "6", "7", "8", "9", "10", "13", "11", "12"]
-BATCH_FULL = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "13", "11", "12"]
+BATCH_BASE = ["1", "2", "3", "4", "14", "11"]
+BATCH_META = ["5", "6", "7", "8", "9", "10", "13", "14", "11", "12"]
+BATCH_FULL = ["1", "2", "15", "3", "4", "5", "6", "7", "8", "9", "10", "13", "14", "11", "12"]
 
 def git_commit_push(description: str) -> None:
     """Bump version, stage all changes, commit, and push to origin main."""

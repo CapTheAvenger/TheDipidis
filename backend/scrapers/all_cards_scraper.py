@@ -119,18 +119,24 @@ def load_existing_cards(csv_path: str, rescrape_incomplete: bool = True):
             card_data["hp"] = hp_val
             card_data["card_text"] = card_text
 
-            has_basic = bool(image_url and rarity and intl)
+            type_lower = (row.get("type") or "").strip().lower()
+            # Basic Energy cards have no Rarity on Limitless by design — don't flag them.
+            is_basic_energy = type_lower == "basic energy"
+            has_basic = bool(image_url and intl and (rarity or is_basic_energy))
             only_self = False
             if intl:
                 p_list = [p.strip() for p in intl.split(",")]
                 only_self = (len(p_list) == 1 and p_list[0] == f"{set_code}-{set_number}")
 
-            # Also rescrape if energy_type is missing for Pokemon cards
-            is_pokemon_type = (row.get("type") or "").strip().lower() in (
+            # Also rescrape if energy_type is missing for Pokemon cards.
+            # Tag-Team cards (e.g. "Togepi & Cleffa & Igglybuff-GX") combine
+            # multiple types and don't expose a single energy_type on Limitless.
+            is_pokemon_type = type_lower in (
                 "basic", "stage 1", "stage 2", "vstar", "vmax", "v", "v-union",
                 "mega", "break", "restored", "legend"
             )
-            missing_energy = is_pokemon_type and not energy_type
+            is_tag_team = " & " in name_en
+            missing_energy = is_pokemon_type and not energy_type and not is_tag_team
 
             is_incomplete = not has_basic or (only_self and not cm_url) or missing_energy
 

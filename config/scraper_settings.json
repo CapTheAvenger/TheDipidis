@@ -28,8 +28,10 @@
         "max_workers": 8,
         "batch_size": 100,
         "skip_cards_with_prices": false,
-        "only_update_sets": ["POR", "ASC", "PFL", "MEG", "MEE", "MEP", "BLK", "WHT", "DRI", "JTG", "PRE", "SSP", "SCR", "SFA", "TWM", "TEF"],
-        "_comment": "Limitless TCG Only - kein Cardmarket, kein Selenium, kein Proxy"
+        "skip_cardmarket_mapped": true,
+        "min_set": "TEF",
+        "only_update_sets": [],
+        "_comment": "FALLBACK ONLY. Primaere Preisquelle ist der Cardmarket Price Merger ([14]). Filter (in Reihenfolge): (1) min_set: ueberspringe Sets aelter als dieses Set laut sets.json (z.B. 'TEF' = aktuelle Standard-Rotation). Leerstring '' = aus. (2) only_update_sets: optionale Whitelist von Set-Codes; [] = alle. (3) skip_cardmarket_mapped: ueberspringe alle Karten, die bereits in data/cardmarket_id_mapping.csv stehen. Standard-Setup (TEF + skip_cardmarket_mapped) bedeutet: Limitless scraped nur unmapped Karten in Standard-Sets — typisch eine Handvoll Lueckenfueller pro Lauf."
     },
 
     "current_meta_analysis": {

@@ -34,7 +34,7 @@ window.MetaCall = (function () {
   let _customDecks      = [];    // [{name, share}] — user-added decks expected at the tourney
   let _currentScenarioName = ''; // name of the currently loaded saved scenario
 
-  const TOP_N = 12;              // show top N decks; everything else rolls into Junk
+  const TOP_N = 20;              // show top N decks; everything else rolls into Junk
   const MAX_CUSTOM = 10;         // max custom decks the user can add
   const SCENARIOS_STORAGE_KEY = 'metacall_scenarios_v1';
   // Brand shown in share-image footer.
@@ -617,12 +617,11 @@ window.MetaCall = (function () {
   // The "winner" of the predicted meta — which deck a player should
   // bring to maximise their tournament-win chance.
   //
-  // Candidate pool: top 20 decks from the predicted share list (NOT
-  // limited to the field's TOP_N=12). This is on purpose — high-WR
-  // counter-meta picks like Crustle or Festival Lead live just below
-  // the top-12 cutoff, but they often have the BEST Day-2 odds against
-  // the actual top decks. Restricting recommendations to the field
-  // would hide them. The user explicitly asked for top-20 reach.
+  // Candidate pool: top 20 decks from the predicted share list (matches
+  // the field's TOP_N=20). High-WR counter-meta picks like Crustle or
+  // Festival Lead that sit just outside the top of the share list often
+  // have the BEST Day-2 odds against the actual top decks — keeping the
+  // pool at 20 ensures they're evaluated.
   function calcRecommendations(field, topN = 5) {
     if (!_shareList || !field || field.length === 0) return [];
 
@@ -630,7 +629,7 @@ window.MetaCall = (function () {
     const seen = new Set();
     const candidates = [];
 
-    // 1) Top-N from the share list — broader than the field's TOP_N=12.
+    // 1) Top-N from the share list (RECO_POOL_SIZE = field's TOP_N).
     _shareList.slice(0, RECO_POOL_SIZE).forEach(d => {
       const k = normalize(d.name);
       if (!k || seen.has(k)) return;
@@ -1020,7 +1019,7 @@ window.MetaCall = (function () {
 
     const thresholdPct = (_settings.day2Points / maxPts * 100).toFixed(1);
 
-    const topDecks = [...field].sort((a, b) => b.finalShare - a.finalShare).slice(0, 12);
+    const topDecks = [...field].sort((a, b) => b.finalShare - a.finalShare).slice(0, TOP_N);
     const maxEnc   = Math.max(...topDecks.map(d => _settings.rounds * d.finalShare / 100), 0.1);
     const encRows  = topDecks.map(deck => {
       const lambda = _settings.rounds * deck.finalShare / 100;

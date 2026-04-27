@@ -9044,13 +9044,13 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
     border: 1px solid rgba(52,152,219,0.25);
     border-radius: 999px;
     font-size: 0.86rem;
-    color: #cfdce9;
+    color: #1f2937;
     margin-bottom: 16px;
     max-width: 100%;
 }
 .tier-data-source-icon { font-size: 1.05em; flex: 0 0 auto; }
 .tier-data-source-text { line-height: 1.4; }
-.tier-data-source-text strong { color: #fff; }
+.tier-data-source-text strong { color: #0b66c3; }
 
 /* Improvers / Decliners — two side-by-side blocks above the tiers. */
 .tier-movers-row {
@@ -9060,15 +9060,15 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
     margin-bottom: 18px;
 }
 .tier-movers-block {
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.10);
+    background: #f9fafb;
+    border: 1px solid rgba(0,0,0,0.08);
     border-radius: 10px;
     padding: 12px 14px;
 }
 .tier-movers-block h3 {
     font-size: 1rem;
     margin: 0 0 8px;
-    color: #f4f7fb;
+    color: #1f2937;
 }
 .tier-movers-table {
     width: 100%;
@@ -9081,21 +9081,21 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.04em;
-    color: #95a5a6;
+    color: #6b7280;
     padding: 4px 6px;
-    border-bottom: 1px solid rgba(255,255,255,0.10);
+    border-bottom: 1px solid rgba(0,0,0,0.10);
 }
 .tier-movers-table td {
     padding: 6px 6px;
-    border-bottom: 1px solid rgba(255,255,255,0.05);
+    border-bottom: 1px solid rgba(0,0,0,0.06);
 }
 .tier-movers-table tr:last-child td { border-bottom: none; }
-.tier-mover-name  { color: #f4f7fb; font-weight: 600; }
-.tier-mover-share { color: #cfdce9; font-variant-numeric: tabular-nums; }
-.tier-mover-prev  { color: #8ea0b3; font-variant-numeric: tabular-nums; font-size: 0.82rem; }
+.tier-mover-name  { color: #1f2937; font-weight: 600; }
+.tier-mover-share { color: #374151; font-variant-numeric: tabular-nums; }
+.tier-mover-prev  { color: #6b7280; font-variant-numeric: tabular-nums; font-size: 0.82rem; }
 .tier-mover-delta { font-weight: 800; font-variant-numeric: tabular-nums; }
-.tier-mover-delta.tier-mover-up   { color: #2ecc71; }
-.tier-mover-delta.tier-mover-down { color: #e74c3c; }
+.tier-mover-delta.tier-mover-up   { color: #16a34a; }
+.tier-mover-delta.tier-mover-down { color: #dc2626; }
 
 /* Overall vs Top-8 dual-table panel — sits above the tier sections.
    Stacks vertically on mobile so each table gets full width. */
@@ -9106,15 +9106,15 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
     margin-bottom: 18px;
 }
 .cm-vs-top8-block {
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.10);
+    background: #f9fafb;
+    border: 1px solid rgba(0,0,0,0.08);
     border-radius: 10px;
     padding: 12px 14px;
 }
 .cm-vs-top8-block h3 {
     font-size: 1rem;
     margin: 0 0 8px;
-    color: #f4f7fb;
+    color: #1f2937;
 }
 .cm-vs-top8-table {
     width: 100%;
@@ -9127,18 +9127,18 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.04em;
-    color: #95a5a6;
+    color: #6b7280;
     padding: 4px 6px;
-    border-bottom: 1px solid rgba(255,255,255,0.10);
+    border-bottom: 1px solid rgba(0,0,0,0.10);
 }
 .cm-vs-top8-table td {
     padding: 6px 6px;
-    border-bottom: 1px solid rgba(255,255,255,0.05);
+    border-bottom: 1px solid rgba(0,0,0,0.06);
 }
 .cm-vs-top8-table tr:last-child td { border-bottom: none; }
-.cm-vt-rank  { width: 24px; color: #8ea0b3; font-weight: 700; }
-.cm-vt-name  { color: #f4f7fb; font-weight: 600; }
-.cm-vt-value { color: #cfdce9; font-variant-numeric: tabular-nums; text-align: right; }
+.cm-vt-rank  { width: 24px; color: #9ca3af; font-weight: 700; }
+.cm-vt-name  { color: #1f2937; font-weight: 600; }
+.cm-vt-value { color: #374151; font-variant-numeric: tabular-nums; text-align: right; }
 
 /* Sample-size n= label on heatmap cells — small subscript under WR. */
 .heatmap-td-n {

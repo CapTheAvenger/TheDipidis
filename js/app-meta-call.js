@@ -616,11 +616,48 @@ window.MetaCall = (function () {
   // not personal blend) and returns the top N by Day-2 probability.
   // The "winner" of the predicted meta — which deck a player should
   // bring to maximise their tournament-win chance.
+  //
+  // Candidate pool: top 20 decks from the predicted share list (NOT
+  // limited to the field's TOP_N=12). This is on purpose — high-WR
+  // counter-meta picks like Crustle or Festival Lead live just below
+  // the top-12 cutoff, but they often have the BEST Day-2 odds against
+  // the actual top decks. Restricting recommendations to the field
+  // would hide them. The user explicitly asked for top-20 reach.
   function calcRecommendations(field, topN = 5) {
     if (!_shareList || !field || field.length === 0) return [];
-    const candidates = field
-      .filter(d => d.name && d.name !== '_junk' && !d.isCustom)
-      .map(d => d.name);
+
+    const RECO_POOL_SIZE = 20;
+    const seen = new Set();
+    const candidates = [];
+
+    // 1) Top-N from the share list — broader than the field's TOP_N=12.
+    _shareList.slice(0, RECO_POOL_SIZE).forEach(d => {
+      const k = normalize(d.name);
+      if (!k || seen.has(k)) return;
+      seen.add(k);
+      candidates.push(d.name);
+    });
+
+    // 2) The user's currently-selected deck — always include so they
+    //    can see where their pick ranks even if it's outside top-20.
+    if (_settings.myDeck) {
+      const myK = normalize(_settings.myDeck);
+      if (myK && !seen.has(myK)) {
+        seen.add(myK);
+        candidates.push(_settings.myDeck);
+      }
+    }
+
+    // 3) Custom decks the user added to the field — they're intentional
+    //    candidates, evaluate them too.
+    (_customDecks || []).forEach(c => {
+      if (!c || !c.name) return;
+      const k = normalize(c.name);
+      if (!k || seen.has(k)) return;
+      seen.add(k);
+      candidates.push(c.name);
+    });
+
     const results = candidates.map(name => {
       const r = calcDay2(field, name);
       return {

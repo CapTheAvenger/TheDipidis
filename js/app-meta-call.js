@@ -14,6 +14,10 @@ window.MetaCall = (function () {
   let _predictorMode  = 'A'; // 'A' = online-only fallback, 'B' = labs-major data available
   let _labsMajorRows  = 0;   // count of labs CSV rows that informed the mode decision
   let _labsRowsByDeck = {};  // labs share data — kept after loadData so re-runs work
+  let _clCurrentByDeck = {}; // normalize(deck) -> share % from city_league_archetypes_comparison.csv (current Pokémon block)
+  let _clPastByDeck    = {}; // normalize(deck) -> share % from city_league_archetypes_comparison_M3.csv (previous block, M3)
+  let _useClCurrent    = false; // user toggle: include Current City League in predictor
+  let _useClPast       = false; // user toggle: include Past City League in predictor
 
   let _settings = {
     totalPlayers  : 1300,
@@ -78,6 +82,34 @@ window.MetaCall = (function () {
 
   function parseEU(str) {
     return parseFloat((str || '0').replace(',', '.')) || 0;
+  }
+
+  // Load a city_league_archetypes_comparison*.csv and return
+  // { normalize(deck) -> share% } using the `new_meta_share` column.
+  // Missing file = empty object (feature is opt-in, absence is fine).
+  async function _loadClShares(path) {
+    const out = {};
+    try {
+      const resp = await fetch(path + '?t=' + Date.now());
+      if (!resp.ok) {
+        console.warn('[MetaCall] CL fetch failed', path, resp.status);
+        return out;
+      }
+      const text = await resp.text();
+      const rows = parseCSV(text, ';');
+      rows.forEach(r => {
+        const name = (r.archetype || '').trim();
+        if (!name) return;
+        const share = parseEU(r.new_meta_share || '0');
+        if (share > 0) out[normalize(name)] = { name, share };
+      });
+      console.info('[MetaCall] CL loaded', path,
+        '— rows:', rows.length, 'with-share:', Object.keys(out).length,
+        'first-key:', Object.keys(rows[0] || {}).join('|'));
+    } catch (e) {
+      console.warn('[MetaCall] CL load threw', path, e);
+    }
+    return out;
   }
 
   // Extract the "main pokemon" for grouping purposes.
@@ -165,6 +197,15 @@ window.MetaCall = (function () {
     const tgLoaded   = tgTotal > 0;
     const labsTotalShare = Object.values(_labsRowsByDeck).reduce((s, d) => s + d.share, 0) || 1;
 
+    // City League shares — opt-in via _useClCurrent / _useClPast toggles.
+    // Each comparison file's `new_meta_share` doesn't necessarily sum to
+    // 100 (overlapping new/existing rows etc.), so normalise to a 100%
+    // basis to match ladder/brought/labs.
+    const clCurrentTotal = Object.values(_clCurrentByDeck).reduce((s, e) => s + e.share, 0) || 1;
+    const clPastTotal    = Object.values(_clPastByDeck).reduce((s, e) => s + e.share, 0) || 1;
+    const clCurrentActive = _useClCurrent && Object.keys(_clCurrentByDeck).length > 0;
+    const clPastActive    = _useClPast    && Object.keys(_clPastByDeck).length > 0;
+
     _shareList.forEach(d => {
       const k = normalize(d.name);
       const ladderPct  = (d.ladderShare / totalLadder) * 100;
@@ -181,8 +222,16 @@ window.MetaCall = (function () {
       const rawTgShare = _findByNormalized(_tgFieldShares, d.name) || 0;
       const tgPct      = tgLoaded ? (rawTgShare / tgTotal) * 100 : 0;
 
+      // City League shares for this deck (canonical lookup, normalised %).
+      const clCurEntry = _clCurrentByDeck[k];
+      const clPastEntry = _clPastByDeck[k];
+      const clCurPct  = clCurEntry  ? (clCurEntry.share  / clCurrentTotal) * 100 : 0;
+      const clPastPct = clPastEntry ? (clPastEntry.share / clPastTotal)    * 100 : 0;
+
       let predicted;
       if (_predictorMode === 'B') {
+        // Mode B: labs majors authoritative — CL toggles intentionally
+        // ignored. Labs already reflect the highest-leverage data.
         const labsRow = _labsRowsByDeck[k];
         const labsPct = labsRow ? (labsRow.share / labsTotalShare) * 100 : 0;
         predicted = 0.50 * labsPct
@@ -192,14 +241,39 @@ window.MetaCall = (function () {
         // Mode A + Testing Group: TG quantities reflect the user's
         // expert prep insight from their group, so weight it heavily.
         // Other signals downscaled proportionally — sum stays 1.0.
+        // CL toggles ignored here (TG already replaces 40% of formula).
         //   0.40 TG | 0.20 ladder | 0.20 brought | 0.10 top8 | 0.10 trend
         predicted = 0.40 * tgPct
                   + 0.20 * ladderPct
                   + 0.20 * broughtPct
                   + 0.10 * top8Boost
                   + 0.10 * trendPct;
+      } else if (clCurrentActive && clPastActive) {
+        // Mode A + both CL sources.
+        //   0.20 ladder | 0.40 brought | 0.10 top8 | 0.10 trend
+        //   + 0.12 cl_current + 0.08 cl_past
+        predicted = 0.20 * ladderPct
+                  + 0.40 * broughtPct
+                  + 0.10 * top8Boost
+                  + 0.10 * trendPct
+                  + 0.12 * clCurPct
+                  + 0.08 * clPastPct;
+      } else if (clCurrentActive) {
+        //   0.20 ladder | 0.45 brought | 0.10 top8 | 0.10 trend | 0.15 cl_current
+        predicted = 0.20 * ladderPct
+                  + 0.45 * broughtPct
+                  + 0.10 * top8Boost
+                  + 0.10 * trendPct
+                  + 0.15 * clCurPct;
+      } else if (clPastActive) {
+        //   0.20 ladder | 0.45 brought | 0.10 top8 | 0.10 trend | 0.15 cl_past
+        predicted = 0.20 * ladderPct
+                  + 0.45 * broughtPct
+                  + 0.10 * top8Boost
+                  + 0.10 * trendPct
+                  + 0.15 * clPastPct;
       } else {
-        // Mode A baseline (no TG data).
+        // Mode A baseline (no TG data, no CL toggles).
         //   0.25 ladder | 0.55 brought | 0.10 top8 | 0.10 trend
         predicted = 0.25 * ladderPct
                   + 0.55 * broughtPct
@@ -307,6 +381,14 @@ window.MetaCall = (function () {
         }
       } catch (_e) { /* optional source */ }
 
+      // City League aggregates (optional). Both files come from the
+      // city_league_archetype scraper and contain pre-aggregated shares
+      // per archetype. We use `new_meta_share` (current period within
+      // each file) as the deck's share; the field stays a number even
+      // when the comparison row is "NEU" (new arch).
+      _clCurrentByDeck = await _loadClShares('data/city_league_archetypes_comparison.csv');
+      _clPastByDeck    = await _loadClShares('data/city_league_archetypes_comparison_M3.csv');
+
       _predictorMode = _labsMajorRows > 0 ? 'B' : 'A';
 
       // ── Predictor 2.0 — compute predicted share per deck ──
@@ -335,6 +417,18 @@ window.MetaCall = (function () {
           }
         });
       }
+      // Same for CL — a deck that's prominent in City League but absent
+      // from the online ladder must still appear in _shareList so its CL
+      // weight isn't silently dropped. Toggle state is consulted at run
+      // time, so we add unconditionally when CL data exists.
+      [_clCurrentByDeck, _clPastByDeck].forEach(map => {
+        Object.values(map).forEach(d => {
+          const k = normalize(d.name);
+          if (!_shareList.find(x => normalize(x.name) === k)) {
+            _shareList.push({ name: d.name, onlineShare: 0, ladderShare: 0, trend: 0 });
+          }
+        });
+      });
       // Cache labs data on the module so _runPredictor() can re-run later
       // (e.g. after a Testing Group load) without hitting Firestore again.
       _labsRowsByDeck = labsRowsByDeck;
@@ -743,6 +837,57 @@ window.MetaCall = (function () {
 </div>`;
   }
 
+  // Source-mix panel — opt-in toggles for City League data. Disabled when
+  // Mode B (labs majors authoritative) or a Testing Group is loaded.
+  function renderSourcesPanel() {
+    const tgLoaded = Object.values(_tgFieldShares).reduce((s, v) => s + v, 0) > 0;
+    const modeBOverride = _predictorMode === 'B';
+    const tgOverride    = !modeBOverride && tgLoaded;
+    const lockReason = modeBOverride
+      ? 'Labs majors data is loaded — City League toggles inactive while in Mode B.'
+      : tgOverride
+        ? 'Testing Group is loaded — City League toggles inactive while TG drives the field.'
+        : '';
+
+    const hasCurrent = Object.keys(_clCurrentByDeck).length > 0;
+    const hasPast    = Object.keys(_clPastByDeck).length > 0;
+    if (!hasCurrent && !hasPast) return ''; // no CL data at all → hide panel
+
+    const lockedClass = lockReason ? ' mc-source-locked' : '';
+    const lockTitle = lockReason ? ` title="${esc(lockReason)}"` : '';
+    const cbAttrs = (active, hasData) =>
+      `${active ? 'checked' : ''}${(!hasData || lockReason) ? ' disabled' : ''}`;
+    const curCount  = Object.keys(_clCurrentByDeck).length;
+    const pastCount = Object.keys(_clPastByDeck).length;
+
+    return `
+<div class="metacall-panel${lockedClass}"${lockTitle}>
+  <div class="metacall-panel-title">
+    Data Sources
+    <span class="mc-badge">Optional</span>
+  </div>
+  <div class="mc-sources-row">
+    <label class="mc-source-toggle">
+      <input type="checkbox" ${cbAttrs(_useClCurrent, hasCurrent)}
+             onchange="MetaCall._onToggleSource('clCurrent', this.checked)">
+      <span class="mc-source-label">
+        <strong>Current City League</strong>
+        <span class="mc-source-meta">${hasCurrent ? curCount + ' archetypes' : 'no data'}</span>
+      </span>
+    </label>
+    <label class="mc-source-toggle">
+      <input type="checkbox" ${cbAttrs(_useClPast, hasPast)}
+             onchange="MetaCall._onToggleSource('clPast', this.checked)">
+      <span class="mc-source-label">
+        <strong>Past City League (M3)</strong>
+        <span class="mc-source-meta">${hasPast ? pastCount + ' archetypes' : 'no data'}</span>
+      </span>
+    </label>
+  </div>
+  ${lockReason ? `<div class="mc-source-lock-note">${esc(lockReason)}</div>` : ''}
+</div>`;
+  }
+
   function _renderFlatDeckRow(deck, maxShare) {
     const isJunk      = deck.name === '_junk';
     const isCustom    = !!deck.isCustom;
@@ -1118,6 +1263,7 @@ window.MetaCall = (function () {
   ${renderPredictorBanner()}
   ${renderScenariosBar()}
   ${renderSettingsPanel()}
+  ${renderSourcesPanel()}
   ${renderFieldPanel(field)}
   ${renderCustomDecksPanel()}
   ${renderMyDeckPanel()}
@@ -1178,17 +1324,26 @@ window.MetaCall = (function () {
   // Banner above the field panel that explains where the prediction
   // is sourced from. Mode A (online-only / fresh format) uses a warm
   // amber tone; Mode B (online + labs majors) uses a confident green.
+  // CL toggle state appended as suffix (Mode A only — B/TG ignore CL).
   function renderPredictorBanner() {
+    const tgLoaded = Object.values(_tgFieldShares).reduce((s, v) => s + v, 0) > 0;
+    const clTags = [];
+    if (_useClCurrent && Object.keys(_clCurrentByDeck).length > 0) clTags.push('CL Current');
+    if (_useClPast    && Object.keys(_clPastByDeck).length > 0)    clTags.push('CL Past');
+    const clSuffix = (clTags.length && _predictorMode === 'A' && !tgLoaded)
+      ? ` <span class="mc-predictor-banner-cl">+ ${clTags.join(' + ')}</span>`
+      : '';
+
     if (_predictorMode === 'B') {
       const tournNum = _labsMajorRows;
       return `<div class="mc-predictor-banner mc-predictor-banner-b">
         <span class="mc-predictor-banner-icon">📊</span>
-        <span class="mc-predictor-banner-text">${t('mc.bannerModeB').replace('{n}', tournNum)}</span>
+        <span class="mc-predictor-banner-text">${t('mc.bannerModeB').replace('{n}', tournNum)}${clSuffix}</span>
       </div>`;
     }
     return `<div class="mc-predictor-banner mc-predictor-banner-a">
       <span class="mc-predictor-banner-icon">⚡</span>
-      <span class="mc-predictor-banner-text">${t('mc.bannerModeA')}</span>
+      <span class="mc-predictor-banner-text">${t('mc.bannerModeA')}${clSuffix}</span>
     </div>`;
   }
 
@@ -1735,6 +1890,17 @@ window.MetaCall = (function () {
     refreshResults();
   }
 
+  // Toggle for the CL data sources panel. Mutates _useClCurrent /
+  // _useClPast, re-runs the predictor with the new mix, and re-renders
+  // so the field composition + recommendations reflect the new shares.
+  function _onToggleSource(key, on) {
+    if (key === 'clCurrent') _useClCurrent = !!on;
+    else if (key === 'clPast') _useClPast = !!on;
+    else return;
+    _runPredictor();
+    renderAll();
+  }
+
   function _onMyDeck(val) {
     _settings.myDeck = val;
     _winRateOverrides = {};
@@ -2165,6 +2331,7 @@ window.MetaCall = (function () {
     // MetaCall calculation expects.
     getDeckNames: () => (_shareList || []).map(d => d.name),
     _onSetting,
+    _onToggleSource,
     _onMyDeck,
     _onPersonalShare,
     _onWrOverride,

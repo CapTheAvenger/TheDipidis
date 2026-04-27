@@ -123,6 +123,18 @@
         return String(window.currentMetaArchetype || window.currentCityLeagueArchetype || window.pastMetaCurrentArchetype || '').trim();
     }
 
+    // Pull deck names from the MetaCall module (current_meta_card_data CSV).
+    // Eagerly loaded at app start by MetaCall.preload() — independent of
+    // whether the user has opened the Current Meta tab yet (where the
+    // <select id="currentMetaDeckSelect"> options get populated).
+    function getMetaCallDeckNames() {
+        try {
+            return (window.MetaCall && typeof window.MetaCall.getDeckNames === 'function')
+                ? window.MetaCall.getDeckNames()
+                : [];
+        } catch (_e) { return []; }
+    }
+
     function getValuesFromSelect(selectId) {
         const select = document.getElementById(selectId);
         if (!select) return [];
@@ -142,8 +154,15 @@
     }
 
     function getTopOpponentChoices() {
+        // Prefer the Current Meta dropdown when it's populated (it has deck
+        // counts in the labels for ranking). Fall back to MetaCall's deck
+        // list — already share-sorted desc — when the dropdown hasn't been
+        // built yet (user hasn't visited the Current Meta tab this session).
         const select = document.getElementById('currentMetaDeckSelect');
-        if (!select) return uniqueSorted(getValuesFromSelect('currentMetaDeckSelect')).slice(0, 8);
+        const hasOptions = !!(select && select.querySelectorAll('option').length > 0);
+        if (!hasOptions) {
+            return getMetaCallDeckNames().slice(0, 8);
+        }
 
         const parsed = Array.from(select.querySelectorAll('option'))
             .map(option => {
@@ -159,11 +178,14 @@
     }
 
     function getExtendedOpponentChoices() {
-        // Pulled from international Current Meta + Past Meta dropdowns.
-        // City League is intentionally excluded — those archetype names
-        // are German/regional and the user plays the international scene,
-        // so the names from there don't match what they need to log.
+        // Pulled from international Current Meta + Past Meta dropdowns,
+        // plus MetaCall's deck list as a safety net so suggestions work
+        // immediately on app load — before the user has opened either
+        // meta tab and triggered their <select> population. City League
+        // is intentionally excluded (German/regional names don't match
+        // the international archetypes the user logs).
         return uniqueSorted([
+            ...getMetaCallDeckNames(),
             ...getValuesFromSelect('currentMetaDeckSelect'),
             ...getValuesFromSelect('pastMetaDeckSelect')
         ]);
@@ -187,6 +209,7 @@
         const allOwnDeckChoices = uniqueSorted([
             getBattleJournalCurrentOwnDeck(),
             ...getBattleJournalSavedDeckNames(),
+            ...getMetaCallDeckNames(),
             ...getValuesFromSelect('currentMetaDeckSelect'),
             ...getValuesFromSelect('pastMetaDeckSelect')
         ]);
@@ -232,8 +255,15 @@
     }
 
     function bjShowAutocomplete(field) {
-        const { input, dropdown, choices } = _bjAutocompleteEls(field);
+        let { input, dropdown, choices } = _bjAutocompleteEls(field);
         if (!input || !dropdown) return;
+        // Cache may have been built before MetaCall.preload finished or
+        // before the meta-tab <select>s were populated. Lazy-refresh on
+        // first focus so the user always gets fresh suggestions.
+        if (!Array.isArray(choices) || choices.length === 0) {
+            try { renderDeckChoices(); } catch (_e) { /* tolerate */ }
+            choices = _bjAutocompleteEls(field).choices;
+        }
         if (!Array.isArray(choices) || choices.length === 0) {
             dropdown.classList.add('d-none');
             return;

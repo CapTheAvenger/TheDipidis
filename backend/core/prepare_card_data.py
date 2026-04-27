@@ -369,6 +369,9 @@ SYNC_PATTERNS = [
     "limitless_online_decks_comparison.html",
     "limitless_online_decks_comparison_local.html",
     "limitless_online_decks_matchups.csv",
+    # Labs Major Tournaments  →  Meta Call Predictor 2.0 Mode B
+    "labs_tournament_decks.csv",
+    "labs_tournaments.json",
 ]
 
 

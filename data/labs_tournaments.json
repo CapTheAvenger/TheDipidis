@@ -1,0 +1,410 @@
+[
+  {
+    "tournament_id": "0062",
+    "tournament_name": "Regional Championship Prague",
+    "tournament_date": "",
+    "tournament_type": "regional",
+    "country": "CZ",
+    "total_players": 1367
+  },
+  {
+    "tournament_id": "0061",
+    "tournament_name": "Regional Championship QuerÃ©taro",
+    "tournament_date": "",
+    "tournament_type": "regional",
+    "country": "MX",
+    "total_players": 1434
+  },
+  {
+    "tournament_id": "0060",
+    "tournament_name": "Regional Championship Orlando",
+    "tournament_date": "",
+    "tournament_type": "regional",
+    "country": "US",
+    "total_players": 2734
+  },
+  {
+    "tournament_id": "0058",
+    "tournament_name": "Regional Championship Houston",
+    "tournament_date": "",
+    "tournament_type": "regional",
+    "country": "US",
+    "total_players": 2633
+  },
+  {
+    "tournament_id": "0057",
+    "tournament_name": "Regional Championship Curitiba",
+    "tournament_date": "",
+    "tournament_type": "regional",
+    "country": "BR",
+    "total_players": 1447
+  },
+  {
+    "tournament_id": "0055",
+    "tournament_name": "Regional Championship Seattle",
+    "tournament_date": "",
+    "tournament_type": "regional",
+    "country": "US",
+    "total_players": 2224
+  },
+  {
+    "tournament_id": "0054",
+    "tournament_name": "International Championship London",
+    "tournament_date": "",
+    "tournament_type": "international",
+    "country": "GB",
+    "total_players": 4005
+  },
+  {
+    "tournament_id": "0053",
+    "tournament_name": "Regional Championship Santiago",
+    "tournament_date": "",
+    "tournament_type": "regional",
+    "country": "CL",
+    "total_players": 1668
+  },
+  {
+    "tournament_id": "0052",
+    "tournament_name": "Regional Championship Sydney",
+    "tournament_date": "",
+    "tournament_type": "regional",
+    "country": "AU",
+    "total_players": 697
+  },
+  {
+    "tournament_id": "0050",
+    "tournament_name": "Regional Championship MÃ©rida",
+    "tournament_date": "",
+    "tournament_type": "regional",
+    "country": "MX",
+    "total_players": 1680
+  },
+  {
+    "tournament_id": "0049",
+    "tournament_name": "Regional Championship Birmingham",
+    "tournament_date": "",
+    "tournament_type": "regional",
+    "country": "GB",
+    "total_players": 2340
+  },
+  {
+    "tournament_id": "0048",
+    "tournament_name": "Regional Championship Toronto",
+    "tournament_date": "",
+    "tournament_type": "regional",
+    "country": "CA",
+    "total_players": 2267
+  },
+  {
+    "tournament_id": "0047",
+    "tournament_name": "Regional Championship Stuttgart",
+    "tournament_date": "",
+    "tournament_type": "regional",
+    "country": "DE",
+    "total_players": 2195
+  },
+  {
+    "tournament_id": "0046",
+    "tournament_name": "International Championship SÃ£o Paulo",
+    "tournament_date": "",
+    "tournament_type": "international",
+    "country": "BR",
+    "total_players": 2115
+  },
+  {
+    "tournament_id": "0044",
+    "tournament_name": "Regional Championship Las Vegas",
+    "tournament_date": "",
+    "tournament_type": "regional",
+    "country": "US",
+    "total_players": 2912
+  },
+  {
+    "tournament_id": "0043",
+    "tournament_name": "Regional Championship GdaÅsk",
+    "tournament_date": "",
+    "tournament_type": "regional",
+    "country": "PL",
+    "total_players": 1673
+  },
+  {
+    "tournament_id": "0042",
+    "tournament_name": "Regional Championship Brisbane",
+    "tournament_date": "",
+    "tournament_type": "regional",
+    "country": "AU",
+    "total_players": 615
+  },
+  {
+    "tournament_id": "0041",
+    "tournament_name": "Regional Championship Lille",
+    "tournament_date": "",
+    "tournament_type": "regional",
+    "country": "FR",
+    "total_players": 2025
+  },
+  {
+    "tournament_id": "0040",
+    "tournament_name": "Regional Championship Milwaukee",
+    "tournament_date": "",
+    "tournament_type": "regional",
+    "country": "US",
+    "total_players": 2300
+  },
+  {
+    "tournament_id": "0039",
+    "tournament_name": "Regional Championship Belo Horizonte",
+    "tournament_date": "",
+    "tournament_type": "regional",
+    "country": "BR",
+    "total_players": 1111
+  },
+  {
+    "tournament_id": "0038",
+    "tournament_name": "Regional Championship Pittsburgh",
+    "tournament_date": "",
+    "tournament_type": "regional",
+    "country": "US",
+    "total_players": 2690
+  },
+  {
+    "tournament_id": "0037",
+    "tournament_name": "Regional Championship Monterrey",
+    "tournament_date": "",
+    "tournament_type": "regional",
+    "country": "MX",
+    "total_players": 1610
+  },
+  {
+    "tournament_id": "0036",
+    "tournament_name": "Regional Championship Frankfurt",
+    "tournament_date": "",
+    "tournament_type": "regional",
+    "country": "DE",
+    "total_players": 2423
+  },
+  {
+    "tournament_id": "0035",
+    "tournament_name": "World Championship Anaheim",
+    "tournament_date": "",
+    "tournament_type": "worlds",
+    "country": "US",
+    "total_players": 718
+  },
+  {
+    "tournament_id": "0034",
+    "tournament_name": "International Championship New Orleans",
+    "tournament_date": "",
+    "tournament_type": "international",
+    "country": "US",
+    "total_players": 3804
+  },
+  {
+    "tournament_id": "0032",
+    "tournament_name": "Regional Championship Portland",
+    "tournament_date": "",
+    "tournament_type": "regional",
+    "country": "US",
+    "total_players": 1685
+  },
+  {
+    "tournament_id": "0031",
+    "tournament_name": "Regional Championship Santiago",
+    "tournament_date": "",
+    "tournament_type": "regional",
+    "country": "CL",
+    "total_players": 1241
+  },
+  {
+    "tournament_id": "0029",
+    "tournament_name": "Regional Championship Melbourne",
+    "tournament_date": "",
+    "tournament_type": "regional",
+    "country": "AU",
+    "total_players": 561
+  },
+  {
+    "tournament_id": "0028",
+    "tournament_name": "Regional Championship Milwaukee",
+    "tournament_date": "",
+    "tournament_type": "regional",
+    "country": "US",
+    "total_players": 1651
+  },
+  {
+    "tournament_id": "0026",
+    "tournament_name": "Regional Championship Monterrey",
+    "tournament_date": "",
+    "tournament_type": "regional",
+    "country": "MX",
+    "total_players": 1317
+  },
+  {
+    "tournament_id": "0025",
+    "tournament_name": "Regional Championship Atlanta",
+    "tournament_date": "",
+    "tournament_type": "regional",
+    "country": "US",
+    "total_players": 2671
+  },
+  {
+    "tournament_id": "0024",
+    "tournament_name": "Regional Championship Brisbane",
+    "tournament_date": "",
+    "tournament_type": "regional",
+    "country": "AU",
+    "total_players": 468
+  },
+  {
+    "tournament_id": "0023",
+    "tournament_name": "Regional Championship Stockholm",
+    "tournament_date": "",
+    "tournament_type": "regional",
+    "country": "SE",
+    "total_players": 814
+  },
+  {
+    "tournament_id": "0021",
+    "tournament_name": "Regional Championship Vancouver",
+    "tournament_date": "",
+    "tournament_type": "regional",
+    "country": "CA",
+    "total_players": 1313
+  },
+  {
+    "tournament_id": "0022",
+    "tournament_name": "Regional Championship Fortaleza",
+    "tournament_date": "",
+    "tournament_type": "regional",
+    "country": "BR",
+    "total_players": 710
+  },
+  {
+    "tournament_id": "0020",
+    "tournament_name": "International Championship London",
+    "tournament_date": "",
+    "tournament_type": "international",
+    "country": "UK",
+    "total_players": 3354
+  },
+  {
+    "tournament_id": "0018",
+    "tournament_name": "Regional Championship MÃ©rida",
+    "tournament_date": "",
+    "tournament_type": "regional",
+    "country": "MX",
+    "total_players": 1149
+  },
+  {
+    "tournament_id": "0017",
+    "tournament_name": "Regional Championship San Antonio",
+    "tournament_date": "",
+    "tournament_type": "regional",
+    "country": "US",
+    "total_players": 2393
+  },
+  {
+    "tournament_id": "0016",
+    "tournament_name": "Regional Championship Rio de Janeiro",
+    "tournament_date": "",
+    "tournament_type": "regional",
+    "country": "BR",
+    "total_players": 1138
+  },
+  {
+    "tournament_id": "0015",
+    "tournament_name": "Regional Championship Birmingham",
+    "tournament_date": "",
+    "tournament_type": "regional",
+    "country": "UK",
+    "total_players": 2014
+  },
+  {
+    "tournament_id": "0014",
+    "tournament_name": "Regional Championship Toronto",
+    "tournament_date": "",
+    "tournament_type": "regional",
+    "country": "CA",
+    "total_players": 2135
+  },
+  {
+    "tournament_id": "0013",
+    "tournament_name": "Regional Championship Perth",
+    "tournament_date": "",
+    "tournament_type": "regional",
+    "country": "AU",
+    "total_players": 316
+  },
+  {
+    "tournament_id": "0011",
+    "tournament_name": "Regional Championship Stuttgart",
+    "tournament_date": "",
+    "tournament_type": "regional",
+    "country": "DE",
+    "total_players": 1698
+  },
+  {
+    "tournament_id": "0010",
+    "tournament_name": "Regional Championship Sacramento",
+    "tournament_date": "",
+    "tournament_type": "regional",
+    "country": "US",
+    "total_players": 1698
+  },
+  {
+    "tournament_id": "0009",
+    "tournament_name": "International Championship SÃ£o Paulo",
+    "tournament_date": "",
+    "tournament_type": "international",
+    "country": "BR",
+    "total_players": 1805
+  },
+  {
+    "tournament_id": "0007",
+    "tournament_name": "Regional Championship GdaÅsk",
+    "tournament_date": "",
+    "tournament_type": "regional",
+    "country": "PL",
+    "total_players": 1367
+  },
+  {
+    "tournament_id": "0006",
+    "tournament_name": "Regional Championship Lille",
+    "tournament_date": "",
+    "tournament_type": "regional",
+    "country": "FR",
+    "total_players": 1311
+  },
+  {
+    "tournament_id": "0005",
+    "tournament_name": "Regional Championship Louisville",
+    "tournament_date": "",
+    "tournament_type": "regional",
+    "country": "US",
+    "total_players": 1934
+  },
+  {
+    "tournament_id": "0003",
+    "tournament_name": "Regional Championship Joinville",
+    "tournament_date": "",
+    "tournament_type": "regional",
+    "country": "BR",
+    "total_players": 578
+  },
+  {
+    "tournament_id": "0002",
+    "tournament_name": "Regional Championship Dortmund",
+    "tournament_date": "",
+    "tournament_type": "regional",
+    "country": "DE",
+    "total_players": 1812
+  },
+  {
+    "tournament_id": "0001",
+    "tournament_name": "Regional Championship Baltimore",
+    "tournament_date": "",
+    "tournament_type": "regional",
+    "country": "US",
+    "total_players": 2301
+  }
+]

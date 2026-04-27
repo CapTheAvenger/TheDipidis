@@ -1384,3 +1384,20 @@
 .mc-badge-chip.mc-badge-tg-share:hover {
     background: rgba(26,188,156,0.24);
 }
+
+/* Recommendation rows are clickable — visual cue + keyboard support. */
+.mc-rec-row {
+    cursor: pointer;
+    transition: background 0.12s, transform 0.08s;
+}
+.mc-rec-row:hover .mc-rec-name-text {
+    text-decoration: underline;
+    color: #2980b9;
+}
+.mc-rec-row:active {
+    transform: translateX(1px);
+}
+.mc-rec-row:focus-visible {
+    outline: 2px solid rgba(46,204,113,0.55);
+    outline-offset: -2px;
+}

@@ -1107,7 +1107,11 @@ window.MetaCall = (function () {
         : '';
       const day2Pct = (r.day2Prob * 100).toFixed(1).replace('.', ',');
       const wrPct   = r.avgWR.toFixed(1).replace('.', ',');
-      return `<tr class="${isMine ? 'mc-rec-mine' : ''}">
+      const safeNameJs = escJs(r.name);
+      return `<tr class="mc-rec-row${isMine ? ' mc-rec-mine' : ''}"
+            onclick="MetaCall._jumpToDeckAnalysis('${safeNameJs}')"
+            title="${esc(t('mc.recJumpHint'))}"
+            tabindex="0">
         <td class="mc-rec-rank">${i + 1}</td>
         <td class="mc-rec-name"><span class="mc-rec-name-inner">${icon}<span class="mc-rec-name-text">${esc(r.name)}</span>${isMine ? `<span class="mc-rec-mine-tag">${esc(t('mc.recYourDeck'))}</span>` : ''}</span></td>
         <td class="mc-rec-day2"><strong>${day2Pct}%</strong></td>
@@ -2102,6 +2106,21 @@ window.MetaCall = (function () {
     }, { once: false });
   }
 
+  // Click-handler for a Recommendations row → jumps to the global
+  // Current Meta Deck Analysis tab with that archetype pre-selected,
+  // so the user lands directly on the deck-builder context for the
+  // pick they liked. Uses navigateToCurrentMetaWithDeck (same handler
+  // the tier cards use), which lives in app-core.js.
+  function _jumpToDeckAnalysis(deckName) {
+    if (!deckName) return;
+    if (typeof window.navigateToCurrentMetaWithDeck === 'function') {
+      window.navigateToCurrentMetaWithDeck(deckName);
+    } else if (typeof switchTabAndUpdateMenu === 'function') {
+      // Fallback: just open the Current Meta tab without preselect.
+      switchTabAndUpdateMenu('current-meta');
+    }
+  }
+
   return {
     init,
     preload: loadData,
@@ -2122,6 +2141,7 @@ window.MetaCall = (function () {
     _onCustomDeckName,
     _onCustomDeckShare,
     _testingGroupLoad,
+    _jumpToDeckAnalysis,
     _saveScenario,
     _onScenarioSelect,
     _deleteScenario,

@@ -85,6 +85,42 @@ window.MetaCall = (function () {
     });
   }
 
+  // Quote-aware CSV parser. The labs CSV is comma-delimited and contains
+  // fields with embedded commas wrapped in double quotes (e.g. the
+  // pokemon column: "dragapult, dusknoir"). The naive `parseCSV` above
+  // mis-splits those rows, so we use this for any source that needs
+  // RFC-4180-style quoting.
+  function parseCSVQuoted(text, sep) {
+    const splitLine = (line) => {
+      const out = [];
+      let cur = '';
+      let inQuotes = false;
+      for (let i = 0; i < line.length; i++) {
+        const c = line[i];
+        if (c === '"') {
+          if (inQuotes && line[i + 1] === '"') { cur += '"'; i++; }
+          else inQuotes = !inQuotes;
+        } else if (c === sep && !inQuotes) {
+          out.push(cur);
+          cur = '';
+        } else {
+          cur += c;
+        }
+      }
+      out.push(cur);
+      return out;
+    };
+    const lines = text.replace(/\r/g, '').split('\n');
+    if (lines.length < 2) return [];
+    const headers = splitLine(lines[0]).map(h => h.trim().replace(/^\uFEFF/, ''));
+    return lines.slice(1).filter(l => l.trim()).map(l => {
+      const vals = splitLine(l);
+      const obj = {};
+      headers.forEach((h, i) => { obj[h] = (vals[i] || '').trim(); });
+      return obj;
+    });
+  }
+
   function normalize(name) {
     // Strip whitespace, hyphens, and ALL common apostrophe variants so
     // deck names match regardless of which typography the source used.
@@ -681,7 +717,12 @@ window.MetaCall = (function () {
       try {
         const labsResp = await fetch('data/labs_tournament_decks.csv?t=' + Date.now());
         if (labsResp.ok) {
-          const labsRows = parseCSV(await labsResp.text(), ';');
+          // Labs CSV is comma-delimited with quoted fields (e.g. the
+          // `pokemon` column wraps values like "dragapult, dusknoir").
+          // The naive split-on-`;` we used before silently produced
+          // 1-column rows — every field except the first ended up
+          // empty, which is why the last-major card row never appeared.
+          const labsRows = parseCSVQuoted(await labsResp.text(), ',');
           // Pass 1: find the latest tournament. Limitless assigns
           // tournament_id sequentially, so the highest id is the most
           // recent — more reliable than tournament_date which is empty

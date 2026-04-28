@@ -189,8 +189,12 @@ def scrape_tournament_list(
 
 def scrape_tournament_decks(tournament_id: str) -> Tuple[List[Dict], int]:
     """
-    Scrape the /decks page for a single tournament.
-    Returns (deck_rows, total_player_count).
+    Scrape the /decks page for a single tournament, then merge in
+    conversion-rate data from /decks?conversion.
+
+    Returns (deck_rows, total_player_count). Each deck dict is augmented
+    with `top8_conv_rate`, `top16_conv_rate`, `top32_conv_rate` (0..1
+    fractions; missing columns stay 0.0).
     """
     url = f"{BASE_URL}/{tournament_id}/decks"
     logger.info("  Fetching %s", url)
@@ -198,9 +202,6 @@ def scrape_tournament_decks(tournament_id: str) -> Tuple[List[Dict], int]:
     if not soup:
         logger.warning("  Failed to fetch %s", url)
         return [], 0
-
-    # The page may also carry a tournament header – try to extract extra metadata
-    # (format/rotation not reliably present, so we skip for now)
 
     table = soup.find('table', attrs={'class': re.compile(r'data-table')})
     if not table:
@@ -260,19 +261,132 @@ def scrape_tournament_decks(tournament_id: str) -> Tuple[List[Dict], int]:
 
         total_players += player_count
         decks.append({
-            'deck_name'   : deck_name,
-            'deck_slug'   : deck_slug,
-            'pokemon'     : ', '.join(pokemon_names),
-            'player_count': player_count,
-            'share_pct'   : share_pct,
-            'wins'        : wins,
-            'losses'      : losses,
-            'ties'        : ties,
-            'win_pct'     : win_pct,
+            'deck_name'      : deck_name,
+            'deck_slug'      : deck_slug,
+            'pokemon'        : ', '.join(pokemon_names),
+            'player_count'   : player_count,
+            'share_pct'      : share_pct,
+            'wins'           : wins,
+            'losses'         : losses,
+            'ties'           : ties,
+            'win_pct'        : win_pct,
+            'top8_conv_rate' : 0.0,
+            'top16_conv_rate': 0.0,
+            'top32_conv_rate': 0.0,
         })
+
+    # ── Merge in conversion-rate data ────────────────────────────────────
+    conv_data = scrape_tournament_conversion(tournament_id)
+    if conv_data:
+        merged = 0
+        for deck in decks:
+            slug = deck['deck_slug']
+            if slug in conv_data:
+                deck.update(conv_data[slug])
+                merged += 1
+        logger.info("  → conv-rates merged for %d/%d decks", merged, len(decks))
 
     logger.info("  → %d decks, %d total players", len(decks), total_players)
     return decks, total_players
+
+
+# ── Conversion-rate page parser ──────────────────────────────────────────────
+
+# Column-header → output-key mapping. Limitless may use any subset; missing
+# columns just stay at 0.0 in the deck dict. Header text is matched
+# case-insensitively after stripping % signs and whitespace.
+_CONV_HEADER_KEYS = {
+    'top 8 conv':   'top8_conv_rate',
+    'top 8 rate':   'top8_conv_rate',
+    'top8 conv':    'top8_conv_rate',
+    'top 16 conv':  'top16_conv_rate',
+    'top 16 rate':  'top16_conv_rate',
+    'top16 conv':   'top16_conv_rate',
+    'top 32 conv':  'top32_conv_rate',
+    'top 32 rate':  'top32_conv_rate',
+    'top32 conv':   'top32_conv_rate',
+}
+
+
+def _parse_pct_to_fraction(txt: str) -> float:
+    """'15.6%' / '15,6 %' / '0.156' → 0.156 (clipped to 0..1)."""
+    if not txt:
+        return 0.0
+    cleaned = txt.replace('%', '').replace(',', '.').strip()
+    try:
+        v = float(cleaned)
+    except ValueError:
+        return 0.0
+    # Heuristic: values > 1 are percentage points; convert to fraction.
+    if v > 1.0:
+        v = v / 100.0
+    return max(0.0, min(1.0, round(v, 4)))
+
+
+def scrape_tournament_conversion(tournament_id: str) -> Dict[str, Dict[str, float]]:
+    """
+    Fetch labs.limitlesstcg.com/{id}/decks?conversion and return
+    { deck_slug: { 'top8_conv_rate': ..., 'top16_conv_rate': ..., 'top32_conv_rate': ... } }.
+
+    Defensive parser: discovers conversion columns from <th> headers.
+    On first run logs the headers it found, so any unexpected column
+    naming on a future tournament becomes visible. Returns empty dict
+    on failure (caller treats missing data as 0.0).
+    """
+    url = f"{BASE_URL}/{tournament_id}/decks?conversion"
+    logger.info("    Fetching conversion: %s", url)
+    soup = fetch_page_bs4(url)
+    if not soup:
+        logger.warning("    Conversion page fetch failed for %s — skipping", tournament_id)
+        return {}
+
+    table = soup.find('table', attrs={'class': re.compile(r'data-table')})
+    if not table:
+        logger.warning("    No conversion table found for %s", tournament_id)
+        return {}
+
+    # Map column index → output key based on header text.
+    headers_raw = [th.get_text(strip=True) for th in table.select('thead th')]
+    logger.info("    Conversion headers: %s", headers_raw)
+    col_keys: Dict[int, str] = {}
+    for i, h in enumerate(headers_raw):
+        norm = h.lower().replace('%', '').strip()
+        for hint, key in _CONV_HEADER_KEYS.items():
+            if hint in norm:
+                col_keys[i] = key
+                break
+
+    if not col_keys:
+        logger.warning(
+            "    No recognised conversion columns in %s — headers were %s. "
+            "Add the new header text to _CONV_HEADER_KEYS.", tournament_id, headers_raw
+        )
+        return {}
+    logger.info("    Conversion column mapping: %s", {headers_raw[i]: k for i, k in col_keys.items()})
+
+    out: Dict[str, Dict[str, float]] = {}
+    for row in table.select('tbody tr'):
+        cells = row.find_all('td')
+        if len(cells) < max(col_keys.keys()) + 1:
+            continue
+        # Find the deck slug — the deck-name cell carries an <a href=".../deck-slug">.
+        slug = ''
+        for c in cells:
+            a = c.find('a', href=True)
+            if a and '/' in a['href']:
+                slug = a['href'].rsplit('/', 1)[-1]
+                if slug:
+                    break
+        if not slug:
+            continue
+        entry: Dict[str, float] = {}
+        for idx, key in col_keys.items():
+            entry[key] = _parse_pct_to_fraction(cells[idx].get_text(strip=True))
+        if entry:
+            out[slug] = entry
+
+    logger.info("    Conversion: %d decks parsed", len(out))
+    return out
 
 
 # ── Output ────────────────────────────────────────────────────────────────────
@@ -283,6 +397,7 @@ CSV_FIELDS = [
     'deck_name', 'deck_slug', 'pokemon',
     'player_count', 'share_pct',
     'wins', 'losses', 'ties', 'win_pct',
+    'top8_conv_rate', 'top16_conv_rate', 'top32_conv_rate',
     'scraped_at',
 ]
 
@@ -297,21 +412,45 @@ def save_results(tournaments_meta: List[Dict], deck_rows: List[Dict]) -> None:
         json.dump(tournaments_meta, f, indent=2, ensure_ascii=False)
     logger.info("Saved tournament index → %s", json_path)
 
-    # Deck data CSV (appends to existing file if present; use --overwrite to replace)
     csv_path = os.path.join(data_dir, 'labs_tournament_decks.csv')
-    write_header = not os.path.exists(csv_path)
-    with open(csv_path, 'a', newline='', encoding='utf-8') as f:
-        writer = csv.DictWriter(f, fieldnames=CSV_FIELDS, extrasaction='ignore')
-        if write_header:
+    # Detect schema drift — if the existing file lacks any of the current
+    # CSV_FIELDS (e.g. after we added top8_conv_rate columns), we re-read
+    # all existing rows and write the file back with the new schema before
+    # appending. Missing fields default to '' so old data stays intact.
+    existing_rows: List[Dict] = []
+    if os.path.exists(csv_path):
+        with open(csv_path, 'r', newline='', encoding='utf-8') as f:
+            reader = csv.DictReader(f)
+            file_fields = set(reader.fieldnames or [])
+            schema_drift = not set(CSV_FIELDS).issubset(file_fields)
+            if schema_drift:
+                logger.info("CSV schema drift detected — rewriting %s with new columns", csv_path)
+                existing_rows = list(reader)
+
+    if existing_rows:
+        # Schema-upgrade rewrite: existing + new in one shot.
+        with open(csv_path, 'w', newline='', encoding='utf-8') as f:
+            writer = csv.DictWriter(f, fieldnames=CSV_FIELDS, extrasaction='ignore')
             writer.writeheader()
-        writer.writerows(deck_rows)
-    logger.info("Saved deck data → %s  (%d new rows)", csv_path, len(deck_rows))
+            writer.writerows(existing_rows)
+            writer.writerows(deck_rows)
+        logger.info("Saved deck data → %s  (rewrote %d rows + %d new)",
+                    csv_path, len(existing_rows), len(deck_rows))
+    else:
+        write_header = not os.path.exists(csv_path)
+        with open(csv_path, 'a', newline='', encoding='utf-8') as f:
+            writer = csv.DictWriter(f, fieldnames=CSV_FIELDS, extrasaction='ignore')
+            if write_header:
+                writer.writeheader()
+            writer.writerows(deck_rows)
+        logger.info("Saved deck data → %s  (%d new rows)", csv_path, len(deck_rows))
 
 
 def overwrite_results(tournaments_meta: List[Dict], deck_rows: List[Dict]) -> None:
-    os.makedirs(DATA_DIR, exist_ok=True)
+    data_dir = _get_data_dir()
+    os.makedirs(data_dir, exist_ok=True)
 
-    json_path = os.path.join(DATA_DIR, 'labs_tournaments.json')
+    json_path = os.path.join(data_dir, 'labs_tournaments.json')
     with open(json_path, 'w', encoding='utf-8') as f:
         json.dump(tournaments_meta, f, indent=2, ensure_ascii=False)
     logger.info("Overwrote tournament index → %s", json_path)

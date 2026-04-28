@@ -394,6 +394,76 @@ def load_previous_stats(stats_file: str) -> Dict[str, Dict[str, Any]]:
     
     return previous_data
 
+def write_history_snapshot(new_stats: Dict[str, Any]) -> None:
+    """Write today's deck-share snapshot to data/online_share_history/YYYY-MM-DD.csv.
+
+    Used by Predictor 3.0 to compute post-major and weekly trend signals from
+    historical share movement. Idempotent: overwrites if the file for today
+    already exists (so multiple scraper runs per day produce one final snapshot
+    rather than a stack of duplicates). Writes to BOTH backend/core/data/ and
+    project-root data/ (the frontend path) since prepare_card_data.py only
+    syncs individually-named files, not directory trees. Updates a sibling
+    manifest.json so the frontend can discover which dates are available
+    without listing the dir.
+    """
+    if not new_stats:
+        return
+
+    today = datetime.now().strftime("%Y-%m-%d")
+
+    rows = []
+    for deck_name, stats in new_stats.items():
+        rank = stats.get("rank", 999)
+        count = stats.get("count", 0)
+        share = stats.get("share_numeric", 0)
+        winrate = stats.get("win_rate_numeric", 0)
+        if not deck_name or count == 0:
+            continue
+        rows.append({
+            "deck_name": deck_name,
+            "rank":      rank if rank < 999 else "-",
+            "count":     count,
+            "share":     str(round(share, 2)).replace(".", ","),
+            "winrate":   str(round(winrate, 2)).replace(".", ","),
+        })
+    rows.sort(key=lambda r: r["rank"] if isinstance(r["rank"], int) else 999)
+
+    backend_data_dir = get_data_dir()
+    project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    target_dirs = [
+        os.path.join(backend_data_dir, "online_share_history"),
+        os.path.join(project_root,    "data", "online_share_history"),
+    ]
+    for history_dir in target_dirs:
+        os.makedirs(history_dir, exist_ok=True)
+        snap_path = os.path.join(history_dir, f"{today}.csv")
+        try:
+            with open(snap_path, "w", newline="", encoding="utf-8-sig") as f:
+                writer = csv.DictWriter(
+                    f,
+                    fieldnames=["deck_name", "rank", "count", "share", "winrate"],
+                    delimiter=";",
+                )
+                writer.writeheader()
+                writer.writerows(rows)
+            logger.info("History snapshot saved → %s (%d decks)", snap_path, len(rows))
+        except Exception as e:
+            logger.warning("Could not write history snapshot %s: %s", snap_path, e)
+            continue
+
+        # Refresh manifest so frontend can pick the closest available date.
+        manifest_path = os.path.join(history_dir, "manifest.json")
+        try:
+            existing_dates = sorted(
+                f[:-4] for f in os.listdir(history_dir)
+                if f.endswith(".csv") and len(f) == len("YYYY-MM-DD.csv")
+            )
+            with open(manifest_path, "w", encoding="utf-8") as f:
+                json.dump({"dates": existing_dates, "latest": existing_dates[-1] if existing_dates else None}, f, indent=2)
+        except Exception as e:
+            logger.warning("Could not update history manifest %s: %s", manifest_path, e)
+
+
 def create_comparison_report(old_stats: Dict[str, Any], new_stats: Dict[str, Any], output_file: str, settings: Dict[str, Any], matchup_data: Optional[Dict[str, Any]] = None, deck_lookup: Optional[Dict[str, Any]] = None):
     """Create a detailed comparison report between old and new statistics."""
     # Write comparison files to data/ folder
@@ -511,6 +581,12 @@ def create_comparison_report(old_stats: Dict[str, Any], new_stats: Dict[str, Any
         print(f"\nComparison report saved to: {comparison_csv}")
     except Exception as e:
         print(f"Error saving comparison CSV: {e}")
+
+    # Daily history snapshot for Predictor 3.0 trend signals.
+    try:
+        write_history_snapshot(new_stats)
+    except Exception as e:
+        logger.warning("History snapshot write failed: %s", e)
     
     # Create HTML report (data/ folder)
     try:

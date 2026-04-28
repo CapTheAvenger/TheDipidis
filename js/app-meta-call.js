@@ -27,6 +27,11 @@ window.MetaCall = (function () {
   let _labsConvByDeck    = {};   // normalize(deck) -> { top8: 0..1, n: count } across recent majors
   let _baselineSnapshotDate = null; // actual date used for the post-major baseline (for banner)
   let _lastAccuracyReport = null; // { mae, baselineDate, majorDate, decks } — shown next to the banner when a new major is detected
+  // ── Last major snapshot (for text-first deck cards) ───────
+  // Identified via the highest tournament_id (Limitless assigns sequentially)
+  // and exposes per-deck share + win_pct to the field-card renderer.
+  let _lastMajorInfo     = null; // { id, name, shortName, date, country, totalPlayers }
+  let _lastMajorByDeck   = {};   // normalize(deck) -> { share, winPct, players }
 
   let _settings = {
     totalPlayers  : 1300,
@@ -186,6 +191,31 @@ window.MetaCall = (function () {
   }
 
   function _clip(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+
+  // Short display name for a major tournament. Strips common Limitless
+  // prefixes so the field cards can fit "Prague" / "IC London" etc.
+  // Falls back to the full name when no known prefix matches.
+  function _shortMajorName(fullName) {
+    if (!fullName) return '';
+    const cleaned = fullName
+      // The labs CSV occasionally has mojibake on accented city names
+      // ("QuerÃ©taro"); collapse those back to ASCII so the short name
+      // doesn't carry corrupt bytes into the UI.
+      .replace(/Querétaro|QuerÃ©taro|Queretaro/i, 'Querétaro');
+    return cleaned
+      .replace(/^Regional Championship\s+/i, '')
+      .replace(/^International Championship\s+/i, 'IC ')
+      .replace(/^World Championship[s]?\s+/i, 'Worlds ')
+      .replace(/^Special Event\s+/i, '')
+      .trim();
+  }
+
+  // dd.MM. for short display under deck cards (e.g. "27.4.").
+  function _formatShortDate(iso) {
+    if (!iso || !/^\d{4}-\d{2}-\d{2}$/.test(iso)) return '';
+    const [, m, d] = iso.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    return `${parseInt(d, 10)}.${parseInt(m, 10)}.`;
+  }
 
   // Extract the "main pokemon" for grouping purposes.
   //
@@ -645,14 +675,47 @@ window.MetaCall = (function () {
       _labsMajorRows = 0;
       _lastMajorDate = null;
       _labsConvByDeck = {};
+      _lastMajorInfo = null;
+      _lastMajorByDeck = {};
       let labsRowsByDeck = {};
       try {
         const labsResp = await fetch('data/labs_tournament_decks.csv?t=' + Date.now());
         if (labsResp.ok) {
           const labsRows = parseCSV(await labsResp.text(), ';');
-          // Aggregate share_pct + conversion-rates per deck across the full
-          // labs CSV. tournament_date max → _lastMajorDate (used as baseline
-          // anchor for the post-major trend signal in Predictor 3.0).
+          // Pass 1: find the latest tournament. Limitless assigns
+          // tournament_id sequentially, so the highest id is the most
+          // recent — more reliable than tournament_date which is empty
+          // for some entries. Fall back to scraped_at if needed.
+          let latestId = null;
+          let latestRow = null;
+          labsRows.forEach(r => {
+            const tid = (r.tournament_id || '').trim();
+            if (!tid) return;
+            if (!latestId || tid > latestId) {
+              latestId = tid;
+              latestRow = r;
+            }
+          });
+          if (latestRow) {
+            // Try to derive a display date: tournament_date first,
+            // otherwise the date portion of scraped_at.
+            let displayDate = (latestRow.tournament_date || '').trim();
+            if (!/^\d{4}-\d{2}-\d{2}$/.test(displayDate)) {
+              const scrap = (latestRow.scraped_at || '').trim();
+              const m = scrap.match(/^(\d{4}-\d{2}-\d{2})/);
+              displayDate = m ? m[1] : '';
+            }
+            const fullName = (latestRow.tournament_name || '').trim();
+            _lastMajorInfo = {
+              id: latestId,
+              name: fullName,
+              shortName: _shortMajorName(fullName),
+              date: displayDate,
+              country: (latestRow.country || '').trim(),
+              totalPlayers: parseInt(latestRow.total_players || '0', 10) || 0
+            };
+          }
+          // Pass 2: aggregate per-deck data + capture last-major slice.
           labsRows.forEach(r => {
             if (!r.deck_name) return;
             const k = normalize(r.deck_name);
@@ -668,12 +731,26 @@ window.MetaCall = (function () {
               _labsConvByDeck[k].sum += t8;
               _labsConvByDeck[k].n += 1;
             }
-            // Track latest tournament date.
+            // Track latest tournament date (for trend snapshots).
             const td = (r.tournament_date || '').trim();
             if (td && /^\d{4}-\d{2}-\d{2}$/.test(td)) {
               if (!_lastMajorDate || td > _lastMajorDate) _lastMajorDate = td;
             }
+            // Capture the slice for the most-recent tournament so the
+            // field cards can show "last major" share + win-pct per deck.
+            if (latestId && (r.tournament_id || '').trim() === latestId) {
+              _lastMajorByDeck[k] = {
+                share: share,
+                winPct: parseEU(r.win_pct || '0'),
+                players: parseInt(r.player_count || '0', 10) || 0
+              };
+            }
           });
+          // Fall back to the latest row's display date if no
+          // tournament_date matched the YYYY-MM-DD pattern.
+          if (!_lastMajorDate && _lastMajorInfo && _lastMajorInfo.date) {
+            _lastMajorDate = _lastMajorInfo.date;
+          }
           _labsMajorRows = labsRows.length;
         }
       } catch (_e) { /* optional source */ }
@@ -1079,6 +1156,126 @@ window.MetaCall = (function () {
     return results
       .sort((a, b) => (b.day2Prob - a.day2Prob) || (b.avgWR - a.avgWR))
       .slice(0, topN);
+  }
+
+  // Dynamic recommendations split — Day-2-fähig list + Geheimtipps.
+  //
+  //  Day-2-fähig: every candidate with day2Prob ≥ 0.25 ("competitive
+  //               threshold" — at least a 1-in-4 chance to make Day 2),
+  //               bounded to [5..10] so the list always reads cleanly.
+  //               If the meta is shallow, top up to 5 with the next
+  //               best decks; if it's deep, cap at 10.
+  //
+  //  Geheimtipps: 3 off-radar picks below the Day-2 line. Filter to
+  //               candidates with online share < 3 % (genuinely under
+  //               the radar) that show at least one strong signal:
+  //               labs T8-conv ≥ 0.15, weekly trend ≥ +0.5 %, last-
+  //               major win-pct ≥ 50 %, OR own day2Prob ≥ 0.20. Each
+  //               pick comes with a text reason explaining the signal.
+  function calcRecommendationsSplit(field) {
+    if (!_shareList || !field || field.length === 0) {
+      return { day2: [], geheimtipps: [] };
+    }
+    // Wide candidate pool — same as calcRecommendations but bigger so we
+    // have enough room to surface off-radar decks for Geheimtipps.
+    const RECO_POOL_SIZE = 30;
+    const seen = new Set();
+    const candidates = [];
+    _shareList.slice(0, RECO_POOL_SIZE).forEach(d => {
+      const k = normalize(d.name);
+      if (!k || seen.has(k)) return;
+      seen.add(k);
+      candidates.push(d.name);
+    });
+    if (_settings.myDeck) {
+      const myK = normalize(_settings.myDeck);
+      if (myK && !seen.has(myK)) {
+        seen.add(myK);
+        candidates.push(_settings.myDeck);
+      }
+    }
+    (_customDecks || []).forEach(c => {
+      if (!c || !c.name) return;
+      const k = normalize(c.name);
+      if (!k || seen.has(k)) return;
+      seen.add(k);
+      candidates.push(c.name);
+    });
+
+    const evaluated = candidates.map(name => {
+      const r = calcDay2(field, name);
+      return {
+        name,
+        day2Prob: r.day2Prob,
+        expWin: r.expWin,
+        avgWR: (r.expWin / _settings.rounds) * 100
+      };
+    }).sort((a, b) => (b.day2Prob - a.day2Prob) || (b.avgWR - a.avgWR));
+
+    // Day-2 list — threshold then bounds.
+    const DAY2_THRESHOLD = 0.25;
+    const DAY2_MIN = 5;
+    const DAY2_MAX = 10;
+    let day2 = evaluated.filter(e => e.day2Prob >= DAY2_THRESHOLD);
+    if (day2.length < DAY2_MIN) day2 = evaluated.slice(0, DAY2_MIN);
+    if (day2.length > DAY2_MAX) day2 = day2.slice(0, DAY2_MAX);
+    const day2Names = new Set(day2.map(d => normalize(d.name)));
+
+    // Geheimtipps — off-radar, strong-signal picks below the Day-2 line.
+    const tipPool = evaluated.filter(e => {
+      const k = normalize(e.name);
+      if (day2Names.has(k)) return false;
+      const shareEntry = _shareList.find(d => normalize(d.name) === k);
+      const onlineShare = shareEntry ? shareEntry.onlineShare : 0;
+      return onlineShare < 3.0; // genuinely off-radar
+    });
+
+    const tips = tipPool.map(e => {
+      const k = normalize(e.name);
+      const shareEntry = _shareList.find(d => normalize(d.name) === k);
+      const onlineShare = shareEntry ? shareEntry.onlineShare : 0;
+      const trend       = shareEntry ? (shareEntry.trend || 0) : 0;
+      const labsConv    = _labsConvByDeck[k] && _labsConvByDeck[k].n > 0
+        ? _labsConvByDeck[k].sum / _labsConvByDeck[k].n
+        : 0;
+      const lm = _lastMajorByDeck[k];
+      const lmWr = lm ? lm.winPct : 0;
+      // Aggregate score — picks the deck that's most "underrated" on
+      // any of the strong-signal axes. Each axis contributes its own
+      // strength so we don't lose decks that are strong on just one.
+      let score = 0;
+      const reasons = [];
+      if (labsConv >= 0.15) {
+        score += labsConv * 100;
+        reasons.push({ kind: 'conv', value: labsConv });
+      }
+      if (trend >= 0.5) {
+        score += trend * 10;
+        reasons.push({ kind: 'trend', value: trend });
+      }
+      if (lm && lmWr >= 50) {
+        score += (lmWr - 50) * 1.5;
+        reasons.push({ kind: 'wr', value: lmWr, share: lm.share });
+      }
+      if (e.day2Prob >= 0.20) {
+        score += e.day2Prob * 30;
+        reasons.push({ kind: 'day2', value: e.day2Prob });
+      }
+      return {
+        ...e,
+        score,
+        reasons,
+        onlineShare,
+        labsConv,
+        trend,
+        lastMajor: lm || null
+      };
+    })
+    .filter(e => e.score > 0)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 3);
+
+    return { day2, geheimtipps: tips };
   }
 
   // Poisson P(k; λ)
@@ -1595,10 +1792,11 @@ window.MetaCall = (function () {
   // deck gets a small "you're playing this" badge so they see where
   // their pick ranks vs the alternatives.
   function renderRecommendationsPanel(field) {
-    const recs = calcRecommendations(field, 5);
-    if (!recs.length) return '';
+    const split = calcRecommendationsSplit(field);
+    if (!split.day2.length && !split.geheimtipps.length) return '';
     const myDeckNorm = normalize(_settings.myDeck || '');
-    const rows = recs.map((r, i) => {
+
+    const renderRow = (r, i) => {
       const isMine = myDeckNorm && normalize(r.name) === myDeckNorm;
       const icon = (typeof window.ArchetypeIcons !== 'undefined')
         ? window.ArchetypeIcons.getIconHtml(r.name, { size: 'sm', layout: 'inline' })
@@ -1616,25 +1814,98 @@ window.MetaCall = (function () {
         <td class="mc-rec-wr">${wrPct}%</td>
         <td class="mc-rec-wins">∅ ${r.expWin.toFixed(1)}</td>
       </tr>`;
-    }).join('');
+    };
+
+    const day2Rows = split.day2.map(renderRow).join('');
+
+    // Geheimtipps — text-first cards under the Day-2 list. Each one
+    // explains in plain language why the deck is being highlighted.
+    const tipsHtml = split.geheimtipps.length ? `
+      <div class="mc-tips-block">
+        <div class="mc-tips-title">${esc(t('mc.tipsTitle'))}</div>
+        <p class="mc-tips-hint">${esc(t('mc.tipsHint'))}</p>
+        <div class="mc-tips-grid">
+          ${split.geheimtipps.map((tip) => {
+            const safeNameJs = escJs(tip.name);
+            const icon = (typeof window.ArchetypeIcons !== 'undefined')
+              ? window.ArchetypeIcons.getIconHtml(tip.name, { size: 'sm', layout: 'inline' })
+              : '';
+            const day2Pct = (tip.day2Prob * 100).toFixed(1).replace('.', ',');
+            const reasonText = _formatTipReasons(tip);
+            return `<div class="mc-tip-card" tabindex="0"
+                  title="${esc(t('mc.recJumpHint'))}"
+                  onclick="MetaCall._jumpToDeckAnalysis('${safeNameJs}')">
+              <div class="mc-tip-head">
+                <span class="mc-tip-name">${icon}${esc(tip.name)}</span>
+                <span class="mc-tip-day2">${t('mc.recDay2')}: <strong>${day2Pct}%</strong></span>
+              </div>
+              <div class="mc-tip-reason">${esc(reasonText)}</div>
+            </div>`;
+          }).join('')}
+        </div>
+      </div>` : '';
+
+    const day2Section = split.day2.length ? `
+      <p class="mc-rec-hint">${esc(t('mc.recHintDay2'))}</p>
+      <table class="mc-rec-table">
+        <thead><tr>
+          <th>#</th>
+          <th>${t('mc.recDeck')}</th>
+          <th>${t('mc.recDay2')}</th>
+          <th>${t('mc.recAvgWr')}</th>
+          <th>${t('mc.recExpWins')}</th>
+        </tr></thead>
+        <tbody>${day2Rows}</tbody>
+      </table>` : '';
+
     return `
 <div class="metacall-panel mc-rec-panel">
   <div class="metacall-panel-title">
-    🏆 ${t('mc.panelRecommendations')}
-    <span class="mc-badge">${t('mc.recBadgeTopN').replace('{n}', recs.length)}</span>
+    ${t('mc.panelRecommendations')}
+    <span class="mc-badge">${t('mc.recBadgeDay2Count').replace('{n}', split.day2.length)}</span>
   </div>
-  <p class="mc-rec-hint">${t('mc.recHint')}</p>
-  <table class="mc-rec-table">
-    <thead><tr>
-      <th>#</th>
-      <th>${t('mc.recDeck')}</th>
-      <th>${t('mc.recDay2')}</th>
-      <th>${t('mc.recAvgWr')}</th>
-      <th>${t('mc.recExpWins')}</th>
-    </tr></thead>
-    <tbody>${rows}</tbody>
-  </table>
+  ${day2Section}
+  ${tipsHtml}
 </div>`;
+  }
+
+  // Build the human-readable reason line for a Geheimtipp. Picks the
+  // strongest reason (or combines two short ones) so the text stays
+  // scannable without burying the user in numbers.
+  function _formatTipReasons(tip) {
+    if (!tip.reasons || !tip.reasons.length) return '';
+    const fmt = (n, dp) => n.toFixed(dp).replace('.', ',');
+    const onlineShareTxt = `${fmt(tip.onlineShare, 1)} %`;
+    // Pick at most two reasons, prioritising labs conv > major WR > trend > day2.
+    const order = ['conv', 'wr', 'trend', 'day2'];
+    const sorted = tip.reasons.slice().sort(
+      (a, b) => order.indexOf(a.kind) - order.indexOf(b.kind)
+    );
+    const parts = sorted.slice(0, 2).map(r => {
+      switch (r.kind) {
+        case 'conv':
+          return t('mc.tipReasonConv')
+            .replace('{conv}', fmt(r.value * 100, 1))
+            .replace('{share}', onlineShareTxt);
+        case 'wr': {
+          const where = (_lastMajorInfo && _lastMajorInfo.shortName) || t('mc.intelMajorFallback');
+          return t('mc.tipReasonWr')
+            .replace('{wr}', fmt(r.value, 0))
+            .replace('{share}', `${fmt(r.share, 1)} %`)
+            .replace('{where}', where);
+        }
+        case 'trend':
+          return t('mc.tipReasonTrend')
+            .replace('{trend}', '+' + fmt(r.value, 1))
+            .replace('{share}', onlineShareTxt);
+        case 'day2':
+          return t('mc.tipReasonDay2')
+            .replace('{day2}', fmt(r.value * 100, 1))
+            .replace('{share}', onlineShareTxt);
+      }
+      return '';
+    }).filter(Boolean);
+    return parts.join(' · ');
   }
 
   // Banner above the field panel that explains where the prediction
@@ -1682,11 +1953,12 @@ window.MetaCall = (function () {
     </div>`;
   }
 
-  // Per-deck source breakdown rendered under the deck name in the
-  // field panel. Numbers are pulled from _shareList + _tournamentStats
-  // + trend so the user can see at a glance which signal pushed the
-  // prediction up or down. Falls back to "no tournament data" when
-  // the deck isn't in the online_tournament CSV.
+  // Per-deck text-first intel block rendered under the deck name in the
+  // field panel. Replaces the old icon-chip badge with a plain "Label:
+  // Value" list so beginners don't need to decode emojis. Each row is
+  // explicitly labelled and each number says exactly what it represents
+  // ("Online-Share heute", "Top-8-Conversion (Limitless online)", …).
+  // Last-major share + win-rate are shown when labs data is available.
   function _renderDeckBadge(deckName) {
     if (!_shareList) return '';
     const k = normalize(deckName);
@@ -1712,39 +1984,76 @@ window.MetaCall = (function () {
     const trendPct  = entry.trend || 0;
     const trendArrow = trendPct > 0 ? '↑' : (trendPct < 0 ? '↓' : '→');
     const trendSign  = trendPct > 0 ? '+' : '';
+    const trendCls   = trendPct > 0.05 ? ' mc-intel-trend-pos' : (trendPct < -0.05 ? ' mc-intel-trend-neg' : '');
     const fmt = (n, dp) => n.toFixed(dp).replace('.', ',');
-    // Personal data chips — only render when the user has a deck
-    // selected AND the data exists for this opponent. The values come
-    // from Testing Group win-rate overrides (manual / synced) and the
-    // Battle Journal record. Both are MY DECK's perspective vs the
-    // opponent shown in this row.
-    const tgVal = _findByNormalized(_winRateOverrides, deckName);
-    const tgChip = (tgVal !== undefined && tgVal !== '' && !isNaN(parseFloat(tgVal)))
-      ? `<span class="mc-badge-chip mc-badge-tg" title="${esc(t('mc.badgeTg'))}">🎯&nbsp;${fmt(parseFloat(tgVal), 0)}%</span>`
-      : '';
-    const jStats = _findByNormalized(_journalStats, deckName);
-    const journalChip = (jStats && jStats.total > 0)
-      ? `<span class="mc-badge-chip mc-badge-journal" title="${esc(t('mc.badgeJournal'))}">📓&nbsp;${jStats.wins}-${jStats.losses}-${jStats.ties} (${jStats.winRate}%)</span>`
-      : '';
 
-    // Testing Group share chip — reflects what flowed INTO the
-    // predictor (raw TG quantity, normalised to %). Distinct from
-    // the 🎯 chip below which is per-matchup win-rate.
+    // Public-data rows — always present if the deck is in the share list.
+    const rows = [];
+    rows.push(_intelRow(t('mc.intelOnlineShareToday'), `${fmt(ladderPct, 1)} %`));
+    if (broughtPct > 0) {
+      rows.push(_intelRow(
+        t('mc.intelTop8Conv'),
+        `${fmt(broughtPct, 1)} %`,
+        `${fmt(convFactor, 1)}× ${t('mc.intelTop8AvgSuffix')}`
+      ));
+    }
+    if (Math.abs(trendPct) > 0.05 || _baselineSnapshotDate) {
+      rows.push(_intelRow(
+        t('mc.intelTrend7d'),
+        `<span class="mc-intel-value-emph${trendCls}">${trendArrow} ${trendSign}${fmt(trendPct, 1)} %</span>`
+      ));
+    }
+
+    // Last-major row — only when labs data + this deck appeared at the
+    // most recent major. Tells the user "this is what actually happened
+    // last weekend" — the most concrete data point we can offer.
+    if (_lastMajorInfo && _lastMajorByDeck[k]) {
+      const lm   = _lastMajorByDeck[k];
+      const dateStr = _formatShortDate(_lastMajorInfo.date);
+      const where   = _lastMajorInfo.shortName || t('mc.intelMajorFallback');
+      const labelTxt = `${t('mc.intelLastMajor')} (${where}${dateStr ? ', ' + dateStr : ''})`;
+      const wr = lm.winPct > 0 ? `WR ${fmt(lm.winPct, 0)} %` : '';
+      rows.push(_intelRow(labelTxt, `${fmt(lm.share, 1)} %`, wr, 'mc-intel-row-major'));
+    }
+
+    // Personal data rows — only render when the user has data. Same
+    // information as the old icon chips, but with explicit text labels.
+    const tgVal = _findByNormalized(_winRateOverrides, deckName);
+    if (tgVal !== undefined && tgVal !== '' && !isNaN(parseFloat(tgVal))) {
+      rows.push(_intelRow(t('mc.intelTgWr'), `${fmt(parseFloat(tgVal), 0)} %`, '', 'mc-intel-row-personal'));
+    }
+    const jStats = _findByNormalized(_journalStats, deckName);
+    if (jStats && jStats.total > 0) {
+      rows.push(_intelRow(
+        t('mc.intelJournal'),
+        `${jStats.wins}–${jStats.losses}–${jStats.ties}`,
+        `${jStats.winRate} %`,
+        'mc-intel-row-personal'
+      ));
+    }
     const rawTgShare = _findByNormalized(_tgFieldShares, deckName) || 0;
     const tgShareTotal = Object.values(_tgFieldShares).reduce((s, v) => s + v, 0);
-    const tgShareChip = (rawTgShare > 0 && tgShareTotal > 0)
-      ? `<span class="mc-badge-chip mc-badge-tg-share" title="${esc(t('mc.badgeTgShare'))}">🧪&nbsp;${fmt((rawTgShare / tgShareTotal) * 100, 1)}%</span>`
-      : '';
+    if (rawTgShare > 0 && tgShareTotal > 0) {
+      rows.push(_intelRow(
+        t('mc.intelTgShare'),
+        `${fmt((rawTgShare / tgShareTotal) * 100, 1)} %`,
+        '',
+        'mc-intel-row-personal'
+      ));
+    }
 
-    return `<span class="mc-deck-badge">
-      <span class="mc-badge-chip" title="${esc(t('mc.badgeLadder'))}">🌐&nbsp;${fmt(ladderPct, 1)}%</span>
-      <span class="mc-badge-chip" title="${esc(t('mc.badgeTournament'))}">🏆&nbsp;${fmt(broughtPct, 1)}%</span>
-      <span class="mc-badge-chip" title="${esc(t('mc.badgeTop8Conv'))}">⬆️&nbsp;${fmt(convFactor, 1)}× T8</span>
-      <span class="mc-badge-chip" title="${esc(t('mc.badgeTrend'))}">${trendArrow}&nbsp;${trendSign}${fmt(trendPct, 1)}%</span>
-      ${tgShareChip}
-      ${tgChip}
-      ${journalChip}
-    </span>`;
+    return `<div class="mc-deck-intel">${rows.join('')}</div>`;
+  }
+
+  // Helper: render a single label/value/extra row for the intel block.
+  function _intelRow(label, value, extra, extraCls) {
+    const cls = 'mc-intel-row' + (extraCls ? ' ' + extraCls : '');
+    const extraHtml = extra ? `<span class="mc-intel-extra">${esc(extra)}</span>` : '';
+    return `<div class="${cls}">
+      <span class="mc-intel-label">${esc(label)}</span>
+      <span class="mc-intel-value">${value}</span>
+      ${extraHtml}
+    </div>`;
   }
 
   function refreshResults() {

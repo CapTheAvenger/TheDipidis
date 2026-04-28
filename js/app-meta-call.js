@@ -34,13 +34,24 @@ window.MetaCall = (function () {
   let _winRateOverrides = {};  // deckName -> 0-100 (manual user overrides only)
   let _journalRateKeys  = [];  // opponents with 3+ journal games (for badge display)
   let _journalStats     = {};  // opponent -> {wins, losses, ties, total, winRate}
-  let _groupByMain      = false; // group field table by main pokemon
-  let _customDecks      = [];    // [{name, share}] — user-added decks expected at the tourney
-  let _currentScenarioName = ''; // name of the currently loaded saved scenario
 
   const TOP_N = 20;              // show top N decks; everything else rolls into Junk
   const MAX_CUSTOM = 10;         // max custom decks the user can add
   const SCENARIOS_STORAGE_KEY = 'metacall_scenarios_v1';
+  // Persisted toggle state — see _toggleGroupField. Survives page reload
+  // so the user doesn't have to flip "Familie zusammenfassen" every time
+  // they open Meta Call.
+  const GROUP_BY_MAIN_STORAGE_KEY = 'metacall_group_by_main_v1';
+
+  // Group field table by main Pokémon family (Dragapult + Dragapult
+  // Blaziken + Dragapult Dusknoir → one "Dragapult" row that sums their
+  // shares). Default off; persisted across sessions.
+  let _groupByMain = false;
+  try {
+    _groupByMain = localStorage.getItem(GROUP_BY_MAIN_STORAGE_KEY) === '1';
+  } catch (_) { /* private mode — fall back to default */ }
+  let _customDecks      = [];    // [{name, share}] — user-added decks expected at the tourney
+  let _currentScenarioName = ''; // name of the currently loaded saved scenario
   // Brand shown in share-image footer.
   const BRAND_FOOTER = 'thedipidis.app';
 
@@ -2086,9 +2097,13 @@ window.MetaCall = (function () {
     if (arrow) arrow.textContent = opening ? '▼' : '▶';
   }
 
-  // Toggle flat ↔ grouped field view — preserve scroll so user sees the change
+  // Toggle flat ↔ grouped field view — preserve scroll so user sees the
+  // change. Choice persists in localStorage so the next visit picks up
+  // where the user left off (separate from per-scenario storage).
   function _toggleGroupField() {
     _groupByMain = !_groupByMain;
+    try { localStorage.setItem(GROUP_BY_MAIN_STORAGE_KEY, _groupByMain ? '1' : '0'); }
+    catch (_) { /* private mode — runtime state still works */ }
     const sy = window.scrollY;
     renderAll();
     requestAnimationFrame(() => requestAnimationFrame(() => window.scrollTo(0, sy)));

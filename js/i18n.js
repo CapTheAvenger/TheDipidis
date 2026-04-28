@@ -34,6 +34,7 @@ const translations = {
     'menu.howToUse':          'How to Use',
 
     // ── Tab labels ───────────────────────────────────────────
+    'tab.metaAnalysis':       'Meta & Deck Analysis',
     'tab.cityLeague':         'City League Meta',
     'tab.cityLeagueAnalysis': 'City League Deck Analysis',
     'tab.currentMeta':        'Current Meta',
@@ -44,6 +45,41 @@ const translations = {
     'tab.playtester':         'Playtester',
     'tab.profile':            'Profile',
     'tab.howToUse':           'How to Use',
+
+    // ── Meta & Deck Analysis Hub ─────────────────────────────
+    'metaHub.title':                            'Meta & Deck Analysis',
+    'metaHub.subtitle':                         'Pick a category to dive into the data — from Japan’s weekly meta to global online tournaments.',
+    'metaHub.backToOverview':                   '← Overview',
+    'metaHub.tile.cityLeague.title':            'City League Meta',
+    'metaHub.tile.cityLeague.bullets':          [
+        'Live meta share from Japan’s weekly cardshop tournaments',
+        'Tier shifts and momentum, week over week',
+        'Earliest leading indicator before international Majors'
+    ],
+    'metaHub.tile.cityLeagueAnalysis.title':    'Deck Analysis (Japan)',
+    'metaHub.tile.cityLeagueAnalysis.bullets':  [
+        'Deep-dive into individual decks from the City League scene',
+        'Card distributions, common stock lists and tech picks',
+        'Matchup win rates pulled from Japanese tournaments'
+    ],
+    'metaHub.tile.currentMeta.title':           'Current Meta (Global)',
+    'metaHub.tile.currentMeta.bullets':         [
+        'Online tournament data from play.limitlesstcg.com',
+        'Top-8 / Top-16 conversion rates per deck',
+        'Global view that’s closer to the EU/US competitive scene'
+    ],
+    'metaHub.tile.currentMetaAnalysis.title':   'Deck Analysis (Global)',
+    'metaHub.tile.currentMetaAnalysis.bullets': [
+        'Deep-dive into globally played online decks',
+        'Card lists, opening-hand stats and win rates',
+        'Detail view for players competing internationally'
+    ],
+    'metaHub.tile.pastMeta.title':              'Past Meta',
+    'metaHub.tile.pastMeta.bullets':            [
+        'Historical Major data (Regionals, Internationals, Worlds)',
+        'Results from previous Standard formats',
+        'Learn from history to sharpen future meta calls'
+    ],
 
     // ── Common buttons / actions ─────────────────────────────
     'btn.save':               'Save',
@@ -1288,6 +1324,7 @@ const translations = {
     'menu.howToUse':          'Anleitung',
 
     // ── Tab labels ───────────────────────────────────────────
+    'tab.metaAnalysis':       'Meta & Deck-Analyse',
     'tab.cityLeague':         'City League Meta',
     'tab.cityLeagueAnalysis': 'City League Deck-Analyse',
     'tab.currentMeta':        'Aktuelles Meta',
@@ -1298,6 +1335,41 @@ const translations = {
     'tab.playtester':         'Playtester',
     'tab.profile':            'Profil',
     'tab.howToUse':           'Anleitung',
+
+    // ── Meta & Deck Analysis Hub ─────────────────────────────
+    'metaHub.title':                            'Meta & Deck-Analyse',
+    'metaHub.subtitle':                         'Wähle eine Kategorie, um in die Daten einzutauchen — von Japans wöchentlichem Meta bis zu globalen Online-Turnieren.',
+    'metaHub.backToOverview':                   '← Übersicht',
+    'metaHub.tile.cityLeague.title':            'City League Meta',
+    'metaHub.tile.cityLeague.bullets':          [
+        'Aktuelle Meta-Verteilung aus japanischen Cardshop-Turnieren',
+        'Wöchentliche Trends und Tier-Bewegungen',
+        'Schnellster Frühindikator vor internationalen Major-Turnieren'
+    ],
+    'metaHub.tile.cityLeagueAnalysis.title':    'Deck-Analyse (Japan)',
+    'metaHub.tile.cityLeagueAnalysis.bullets':  [
+        'Tiefenanalyse einzelner Decks aus der City League',
+        'Karten-Verteilung, Standard-Listen und häufige Tech-Picks',
+        'Matchup-Win-Rates aus japanischen Turnieren'
+    ],
+    'metaHub.tile.currentMeta.title':           'Aktuelles Meta (Global)',
+    'metaHub.tile.currentMeta.bullets':         [
+        'Online-Turnier-Auswertung von play.limitlesstcg.com',
+        'Top-8 / Top-16-Conversion pro Deck',
+        'Globale Sicht, näher am EU/US-Wettbewerbsumfeld'
+    ],
+    'metaHub.tile.currentMetaAnalysis.title':   'Deck-Analyse (Global)',
+    'metaHub.tile.currentMetaAnalysis.bullets': [
+        'Tiefenanalyse globaler Online-Decks',
+        'Karten-Listen, Hand-Stats und Win-Rates',
+        'Detail-Sicht für Spieler, die international antreten'
+    ],
+    'metaHub.tile.pastMeta.title':              'Vergangenes Meta',
+    'metaHub.tile.pastMeta.bullets':            [
+        'Historische Major-Turnier-Daten (Regionals, IC, Worlds)',
+        'Ergebnisse vergangener Standard-Formate',
+        'Lerne aus der Geschichte für zukünftige Meta-Calls'
+    ],
 
     // ── Common buttons / actions ─────────────────────────────
     'btn.save':               'Speichern',

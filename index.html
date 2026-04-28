@@ -527,11 +527,7 @@
 
         <main class="tabs-container">
             <nav class="tab-navigation cards-tab-navigation" aria-label="Main navigation">
-                <button class="tab-btn active" onclick="switchTab('city-league')" data-i18n="tab.cityLeague">City League Meta</button>
-                <button class="tab-btn" onclick="switchTab('city-league-analysis')" data-i18n="tab.cityLeagueAnalysis">City League Deck Analysis</button>
-                <button class="tab-btn" onclick="switchTab('current-meta')" data-i18n="tab.currentMeta">Current Meta</button>
-                <button class="tab-btn" onclick="switchTab('current-analysis')" data-i18n="tab.currentMetaAnalysis">Current Meta Deck Analysis</button>
-                <button class="tab-btn" onclick="switchTab('past-meta')" data-i18n="tab.pastMeta">Past Meta</button>
+                <button class="tab-btn active" onclick="switchTab('meta-analysis-hub')" data-i18n="tab.metaAnalysis">Meta &amp; Deck Analysis</button>
                 <button class="tab-btn" onclick="switchTab('cards')" data-i18n="tab.cards">Cards</button>
                 <button class="tab-btn" onclick="switchTab('proxy')" data-i18n="tab.proxyPrinter">Proxy Printer</button>
                 <button class="tab-btn" onclick="switchTab('sandbox')" data-i18n="tab.playtester">Playtester</button>
@@ -542,8 +538,19 @@
                 <button class="tab-btn" onclick="switchTab('tutorial')" data-i18n="tab.howToUse">How to Use</button>
             </nav>
             
+            <!-- Meta & Deck Analysis Hub: Entry State (5 category tiles) -->
+            <div id="meta-analysis-hub" class="tab-content active">
+                <div class="meta-hub-container">
+                    <div class="meta-hub-header">
+                        <h2 data-i18n="metaHub.title">Meta &amp; Deck Analysis</h2>
+                        <p class="meta-hub-subtitle" data-i18n="metaHub.subtitle">Choose a category to start.</p>
+                    </div>
+                    <div class="meta-hub-tile-grid" id="metaHubTileGrid"></div>
+                </div>
+            </div>
+
             <!-- Tab 1: City League Meta -->
-            <div id="city-league" class="tab-content active">
+            <div id="city-league" class="tab-content">
                 <div id="city-league-component-container">
                     <div class="city-league-container">
                         <div class="city-league-header">
@@ -4314,6 +4321,7 @@
     <script src="js/app-features.js?v=202604281353" defer></script>
     <script src="js/archetype-icons.js?v=202604281353" defer></script>
     <script src="js/app-meta-call.js?v=202604281353" defer></script>
+    <script src="js/meta-analysis-hub.js?v=202604281353" defer></script>
     <script src="js/app-testing-groups.js?v=202604281353" defer></script>
     <script src="js/battle-journal.js?v=202604281353" defer></script>
     <script src="js/meta-binder.js?v=202604281353" defer></script>

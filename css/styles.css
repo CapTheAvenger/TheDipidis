@@ -9309,3 +9309,172 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
     }
     .tier-search-input { font-size: 0.86rem; padding: 8px 32px 8px 12px; }
 }
+
+/* ──────────────────────────────────────────────────────────────
+   Meta & Deck Analysis Hub
+   ────────────────────────────────────────────────────────────── */
+.meta-hub-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 24px 16px 48px;
+}
+.meta-hub-header {
+    text-align: center;
+    margin-bottom: 28px;
+}
+.meta-hub-header h2 {
+    font-size: 1.9rem;
+    margin: 0 0 8px;
+    color: #f4f7fb;
+}
+.meta-hub-subtitle {
+    color: rgba(244, 247, 251, 0.72);
+    font-size: 1rem;
+    margin: 0;
+}
+.meta-hub-tile-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 18px;
+    align-items: stretch;
+}
+.meta-hub-tile {
+    text-align: left;
+    padding: 22px 20px 20px;
+    background: linear-gradient(160deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.025) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    color: #f4f7fb;
+    cursor: pointer;
+    transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-height: 180px;
+    font: inherit;
+}
+.meta-hub-tile:hover,
+.meta-hub-tile:focus-visible {
+    transform: translateY(-2px);
+    border-color: rgba(99, 162, 255, 0.55);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.28);
+    background: linear-gradient(160deg, rgba(99, 162, 255, 0.10) 0%, rgba(255, 255, 255, 0.03) 100%);
+    outline: none;
+}
+.meta-hub-tile-title {
+    font-size: 1.18rem;
+    font-weight: 600;
+    line-height: 1.25;
+    color: #f4f7fb;
+}
+.meta-hub-tile-bullets {
+    list-style: disc;
+    margin: 0;
+    padding-left: 20px;
+    color: rgba(244, 247, 251, 0.78);
+    font-size: 0.92rem;
+    line-height: 1.45;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.meta-hub-tile-bullets li::marker {
+    color: rgba(99, 162, 255, 0.65);
+}
+
+/* Sub-navigation injected at the top of an active sub-tab */
+.meta-hub-subnav-host {
+    margin: 0 0 16px;
+}
+.meta-hub-subnav {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 10px 12px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 12px;
+    margin-bottom: 4px;
+}
+.meta-hub-subnav-back {
+    appearance: none;
+    background: rgba(99, 162, 255, 0.12);
+    border: 1px solid rgba(99, 162, 255, 0.35);
+    color: #f4f7fb;
+    padding: 6px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.88rem;
+    font-weight: 500;
+    transition: background 0.15s ease, border-color 0.15s ease;
+}
+.meta-hub-subnav-back:hover,
+.meta-hub-subnav-back:focus-visible {
+    background: rgba(99, 162, 255, 0.22);
+    border-color: rgba(99, 162, 255, 0.65);
+    outline: none;
+}
+.meta-hub-subnav-items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    flex: 1 1 auto;
+}
+.meta-hub-subnav-btn {
+    appearance: none;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    color: rgba(244, 247, 251, 0.78);
+    padding: 6px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.88rem;
+    font-weight: 500;
+    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+    white-space: nowrap;
+}
+.meta-hub-subnav-btn:hover,
+.meta-hub-subnav-btn:focus-visible {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.20);
+    color: #f4f7fb;
+    outline: none;
+}
+.meta-hub-subnav-btn.active {
+    background: rgba(99, 162, 255, 0.20);
+    border-color: rgba(99, 162, 255, 0.55);
+    color: #f4f7fb;
+}
+
+@media (max-width: 700px) {
+    .meta-hub-container {
+        padding: 18px 12px 36px;
+    }
+    .meta-hub-header h2 {
+        font-size: 1.5rem;
+    }
+    .meta-hub-tile-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+    .meta-hub-tile {
+        min-height: 0;
+        padding: 18px 16px 16px;
+    }
+    .meta-hub-tile-title {
+        font-size: 1.06rem;
+    }
+    .meta-hub-tile-bullets {
+        font-size: 0.88rem;
+    }
+    .meta-hub-subnav {
+        padding: 8px;
+    }
+    .meta-hub-subnav-btn,
+    .meta-hub-subnav-back {
+        font-size: 0.82rem;
+        padding: 5px 10px;
+    }
+}

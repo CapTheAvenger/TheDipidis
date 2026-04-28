@@ -15,7 +15,7 @@ function toggleMenuCluster(clusterId) {
 }
 
 function syncMenuClustersForTab(tabId) {
-    const metaTabs = new Set(['city-league', 'city-league-analysis', 'current-meta', 'current-analysis', 'past-meta']);
+    const metaTabs = new Set(['meta-analysis-hub', 'city-league', 'city-league-analysis', 'current-meta', 'current-analysis', 'past-meta']);
     const metaSubmenu = document.getElementById('menu-submenu-meta');
     const metaGroup = document.getElementById('menu-group-meta');
 

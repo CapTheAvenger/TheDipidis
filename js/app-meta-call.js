@@ -19,6 +19,15 @@ window.MetaCall = (function () {
   let _useClCurrent    = false; // user toggle: include Current City League in predictor
   let _useClPast       = false; // user toggle: include Past City League in predictor
 
+  // ── Predictor 3.0 — history-aware trend signals ───────────
+  let _lastMajorDate     = null; // 'YYYY-MM-DD' — most recent labs tournament_date
+  let _historyManifest   = null; // { dates: [...], latest: 'YYYY-MM-DD' } from data/online_share_history/manifest.json
+  let _snapshotAtMajor   = {};   // normalize(deck) -> share% on (closest available date ≤ _lastMajorDate)
+  let _snapshotWeekAgo   = {};   // normalize(deck) -> share% on (closest available date ≤ today-7d)
+  let _labsConvByDeck    = {};   // normalize(deck) -> { top8: 0..1, n: count } across recent majors
+  let _baselineSnapshotDate = null; // actual date used for the post-major baseline (for banner)
+  let _lastAccuracyReport = null; // { mae, baselineDate, majorDate, decks } — shown next to the banner when a new major is detected
+
   let _settings = {
     totalPlayers  : 1300,
     rounds        : 8,
@@ -38,6 +47,9 @@ window.MetaCall = (function () {
   const TOP_N = 20;              // show top N decks; everything else rolls into Junk
   const MAX_CUSTOM = 10;         // max custom decks the user can add
   const SCENARIOS_STORAGE_KEY = 'metacall_scenarios_v1';
+  const PREDICTOR_LOG_KEY      = 'metacall_predictor_log_v1';
+  const LAST_KNOWN_MAJOR_KEY   = 'metacall_last_known_major_v1';
+  const PREDICTOR_LOG_MAX      = 100;
   // Persisted toggle state — see _toggleGroupField. Survives page reload
   // so the user doesn't have to flip "Familie zusammenfassen" every time
   // they open Meta Call.
@@ -102,26 +114,78 @@ window.MetaCall = (function () {
     const out = {};
     try {
       const resp = await fetch(path + '?t=' + Date.now());
-      if (!resp.ok) {
-        console.warn('[MetaCall] CL fetch failed', path, resp.status);
-        return out;
-      }
-      const text = await resp.text();
-      const rows = parseCSV(text, ';');
+      if (!resp.ok) return out;
+      const rows = parseCSV(await resp.text(), ';');
       rows.forEach(r => {
         const name = (r.archetype || '').trim();
         if (!name) return;
         const share = parseEU(r.new_meta_share || '0');
         if (share > 0) out[normalize(name)] = { name, share };
       });
-      console.info('[MetaCall] CL loaded', path,
-        '— rows:', rows.length, 'with-share:', Object.keys(out).length,
-        'first-key:', Object.keys(rows[0] || {}).join('|'));
-    } catch (e) {
-      console.warn('[MetaCall] CL load threw', path, e);
-    }
+    } catch (_e) { /* tolerate missing source */ }
     return out;
   }
+
+  // Fetch online_share_history/manifest.json — frontend can't list dirs,
+  // so the limitless scraper writes a manifest of available date files.
+  async function _loadHistoryManifest() {
+    try {
+      const resp = await fetch('data/online_share_history/manifest.json?t=' + Date.now());
+      if (!resp.ok) return null;
+      const data = await resp.json();
+      if (data && Array.isArray(data.dates)) return data;
+    } catch (_e) { /* manifest missing — feature degrades gracefully */ }
+    return null;
+  }
+
+  // Pick the closest available date <= targetDate from the manifest. Returns
+  // ISO date string or null. Used so trend baselines fall back gracefully
+  // when the exact target date wasn't scraped (e.g. user installed app
+  // after the last major and has no day-of snapshot).
+  function _resolveHistoryDate(targetDateISO) {
+    if (!_historyManifest || !_historyManifest.dates || !targetDateISO) return null;
+    const dates = _historyManifest.dates.slice().sort();
+    let pick = null;
+    for (const d of dates) {
+      if (d <= targetDateISO) pick = d;
+      else break;
+    }
+    return pick;
+  }
+
+  // Load a per-date history snapshot CSV (deck_name; share columns) and
+  // return { normalize(deck) -> share% }. Empty when file is missing.
+  async function _loadHistorySnapshot(dateISO) {
+    if (!dateISO) return {};
+    const out = {};
+    try {
+      const resp = await fetch(`data/online_share_history/${dateISO}.csv?t=` + Date.now());
+      if (!resp.ok) return out;
+      const rows = parseCSV(await resp.text(), ';');
+      rows.forEach(r => {
+        const name = (r.deck_name || '').trim();
+        if (!name) return;
+        const share = parseEU(r.share || '0');
+        if (share > 0) out[normalize(name)] = { name, share };
+      });
+    } catch (_e) { /* tolerate */ }
+    return out;
+  }
+
+  // Subtract whole days from an ISO date string ('YYYY-MM-DD').
+  function _isoMinusDays(isoDate, days) {
+    if (!isoDate) return null;
+    const d = new Date(isoDate + 'T00:00:00Z');
+    if (isNaN(d.getTime())) return null;
+    d.setUTCDate(d.getUTCDate() - days);
+    return d.toISOString().slice(0, 10);
+  }
+
+  function _todayISO() {
+    return new Date().toISOString().slice(0, 10);
+  }
+
+  function _clip(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
 
   // Extract the "main pokemon" for grouping purposes.
   //
@@ -144,6 +208,72 @@ window.MetaCall = (function () {
     'Iron', 'Raging', 'Flutter', 'Walking', 'Brute', 'Sandy',
     'Roaring', 'Scream', 'Slither', 'Gouging',
   ]);
+
+  // Pretty display labels for the family-grouping header. The keys are
+  // whatever extractMainPokemon() returns; values are the Pokémon-Reports
+  // / Limitless-recap style names that read better at a glance.
+  // Unknown families fall back to extractMainPokemon's output. Add new
+  // entries as new ex/Mega Pokémon enter the meta — single-line to keep
+  // it easy to maintain.
+  const _FAMILY_DISPLAY_NAMES = {
+    'Dragapult':            'Dragapult ex',
+    'Mega Lucario':         'Mega Lucario ex',
+    'Mega Charizard':       'Mega Charizard ex',
+    'Mega Venusaur':        'Mega Venusaur ex',
+    'Mega Diancie':         'Mega Diancie ex',
+    'Mega Dragonite':       'Mega Dragonite ex',
+    'Mega Starmie':         'Mega Starmie ex',
+    'Mega Latias':          'Mega Latias ex',
+    'Mega Lopunny':         'Mega Lopunny ex',
+    'Mega Camerupt':        'Mega Camerupt ex',
+    'Mega Zygarde':         'Mega Zygarde ex',
+    'Mega Abomasnow':       'Mega Abomasnow ex',
+    'Mega Gengar':          'Mega Gengar ex',
+    'Mega Feraligatr':      'Mega Feraligatr ex',
+    'Mega Froslass':        'Mega Froslass ex',
+    'Mega Meganium':        'Mega Meganium ex',
+    'Mega Absol':           'Mega Absol ex',
+    'Alakazam':             'Alakazam ex',
+    'Hydreigon':            'Hydreigon ex',
+    'Hydrapple':            'Hydrapple ex',
+    'Yanmega':              'Yanmega ex',
+    'Decidueye':            'Decidueye ex',
+    'Ceruledge':            'Ceruledge ex',
+    'Greninja':             'Greninja ex',
+    'Archaludon':           'Archaludon ex',
+    'Mamoswine':            'Mamoswine ex',
+    'Slaking':              'Slaking ex',
+    'Farigiraf':            'Farigiraf ex',
+    'Blissey':              'Blissey ex',
+    'Cinderace':            'Cinderace ex',
+    'Miraidon':             'Miraidon ex',
+    'Palafin':              'Palafin ex',
+    'Terapagos':            'Terapagos ex',
+    'Flareon':              'Flareon ex',
+    'Scizor':               'Scizor ex',
+    "Cynthia's Garchomp":   "Cynthia's Garchomp ex",
+    "Steven's Metagross":   "Steven's Metagross ex",
+    "Marnie's Grimmsnarl":  "Marnie's Grimmsnarl ex",
+    "N's Zoroark":          "N's Zoroark ex",
+    "Rocket's Mewtwo":      "Rocket's Mewtwo ex",
+    "Iono's Bellibolt":     "Iono's Bellibolt ex",
+    "Hop's Zacian":         "Hop's Zacian ex",
+    "Hop's Trevenant":      "Hop's Trevenant",
+    "Lillie's Clefairy":    "Lillie's Clefairy ex",
+    "Erika's Victreebel":   "Erika's Victreebel ex",
+    "Ethan's Typhlosion":   "Ethan's Typhlosion ex",
+    "Ethan's Magcargo":     "Ethan's Magcargo",
+    "Misty's Gyarados":     "Misty's Gyarados ex",
+    "Alolan Exeggutor":     "Alolan Exeggutor ex",
+    "Bloodmoon Ursaluna":   "Bloodmoon Ursaluna ex",
+    "Iron Thorns":          "Iron Thorns ex",
+    "Raging Bolt":          "Raging Bolt ex",
+  };
+
+  function _familyDisplayName(main) {
+    if (!main || main === '_junk') return main;
+    return _FAMILY_DISPLAY_NAMES[main] || main;
+  }
 
   function extractMainPokemon(name) {
     if (!name || name === '_junk') return name;
@@ -217,6 +347,22 @@ window.MetaCall = (function () {
     const clCurrentActive = _useClCurrent && Object.keys(_clCurrentByDeck).length > 0;
     const clPastActive    = _useClPast    && Object.keys(_clPastByDeck).length > 0;
 
+    // Total online shares from snapshots — used to renormalise share-%
+    // inputs to a 100% basis (matches the field-shape of the other signals).
+    const totalSnapAtMajor = Object.values(_snapshotAtMajor).reduce((s, e) => s + e.share, 0) || 1;
+    const totalSnapWeekAgo = Object.values(_snapshotWeekAgo).reduce((s, e) => s + e.share, 0) || 1;
+
+    // Trend signal: ladder share shaped by relative momentum vs a baseline.
+    // Boosters move with the meta (factor > 1); fallers get damped.
+    // Clipped to [0.7, 1.3] to keep the predictor well-behaved when a
+    // deck moves dramatically in a single window.
+    const MOMENTUM_WEIGHT = 1.0;
+    function _trendSignal(currentSharePct, baselineSharePct) {
+      if (!baselineSharePct || baselineSharePct <= 0) return currentSharePct;
+      const factor = (currentSharePct - baselineSharePct) / baselineSharePct;
+      return currentSharePct * _clip(1 + factor * MOMENTUM_WEIGHT, 0.7, 1.3);
+    }
+
     _shareList.forEach(d => {
       const k = normalize(d.name);
       const ladderPct  = (d.ladderShare / totalLadder) * 100;
@@ -239,15 +385,42 @@ window.MetaCall = (function () {
       const clCurPct  = clCurEntry  ? (clCurEntry.share  / clCurrentTotal) * 100 : 0;
       const clPastPct = clPastEntry ? (clPastEntry.share / clPastTotal)    * 100 : 0;
 
+      // History-baseline shares (Predictor 3.0). Renormalise so the unit
+      // matches ladderPct (% of total online).
+      const majSnap = _snapshotAtMajor[k];
+      const wkSnap  = _snapshotWeekAgo[k];
+      const majBaselinePct = majSnap ? (majSnap.share / totalSnapAtMajor) * 100 : 0;
+      const wkBaselinePct  = wkSnap  ? (wkSnap.share  / totalSnapWeekAgo) * 100
+                                     // Fallback: comparison.csv carries last-week's share inline.
+                                     : Math.max(0, ladderPct - trendPct);
+      const postMajorSignal = _trendSignal(ladderPct, majBaselinePct);
+      const weeklySignal    = _trendSignal(ladderPct, wkBaselinePct);
+
+      // Labs Top-8 conversion boost — added in Predictor 3.0. 0.25 = 25%
+      // is the natural cut rate for an 8-cut in a 32-deck top, so anything
+      // above that means the deck overperforms relative to its representation.
+      const convStats3 = _labsConvByDeck[k];
+      const t8ConvAvg = (convStats3 && convStats3.n > 0) ? convStats3.sum / convStats3.n : 0;
+      const labsT8Boost = t8ConvAvg > 0 ? _clip(t8ConvAvg / 0.25, 0.5, 2.0) : 1.0;
+
       let predicted;
       if (_predictorMode === 'B') {
-        // Mode B: labs majors authoritative — CL toggles intentionally
-        // ignored. Labs already reflect the highest-leverage data.
+        // Mode B (Predictor 3.0): labs majors authoritative + conv-rate
+        // weighted, plus post-major and weekly trend signals from the
+        // online ladder. CL toggles ignored (labs already capture the
+        // highest-leverage data).
+        //   0.40 labs × t8_conv_boost
+        //   0.20 brought
+        //   0.15 ladder
+        //   0.15 post-major-trend
+        //   0.10 weekly-trend
         const labsRow = _labsRowsByDeck[k];
         const labsPct = labsRow ? (labsRow.share / labsTotalShare) * 100 : 0;
-        predicted = 0.50 * labsPct
-                  + 0.30 * broughtPct
-                  + 0.20 * ladderPct;
+        predicted = 0.40 * labsPct * labsT8Boost
+                  + 0.20 * broughtPct
+                  + 0.15 * ladderPct
+                  + 0.15 * postMajorSignal
+                  + 0.10 * weeklySignal;
       } else if (tgLoaded) {
         // Mode A + Testing Group: TG quantities reflect the user's
         // expert prep insight from their group, so weight it heavily.
@@ -284,12 +457,15 @@ window.MetaCall = (function () {
                   + 0.10 * trendPct
                   + 0.15 * clPastPct;
       } else {
-        // Mode A baseline (no TG data, no CL toggles).
-        //   0.25 ladder | 0.55 brought | 0.10 top8 | 0.10 trend
-        predicted = 0.25 * ladderPct
-                  + 0.55 * broughtPct
-                  + 0.10 * top8Boost
-                  + 0.10 * trendPct;
+        // Mode A baseline 3.0 (no TG data, no CL toggles, no labs).
+        //   0.40 ladder | 0.30 brought | 0.20 top8_conv_boost | 0.10 weekly_trend
+        // weeklySignal already incorporates the share-vs-week-ago dynamic;
+        // when no week-ago snapshot exists it falls back to (ladder - trendPct)
+        // so the formula degrades gracefully on first install.
+        predicted = 0.40 * ladderPct
+                  + 0.30 * broughtPct
+                  + 0.20 * top8Boost
+                  + 0.10 * weeklySignal;
       }
       d.predictedShareRaw = Math.max(0, predicted);
     });
@@ -309,6 +485,100 @@ window.MetaCall = (function () {
       d.onlineShare    = d.predictedShare; // legacy field name used by buildField()
     });
     _shareList.sort((a, b) => b.predictedShare - a.predictedShare);
+
+    // Append run-log entry — Part 6 / system-learning groundwork. Captures
+    // the top-5 predictions + mode + last-major anchor so we can later
+    // diff against actual major outcomes once new labs data lands.
+    _appendPredictorLogEntry();
+  }
+
+  function _appendPredictorLogEntry() {
+    if (!_shareList) return;
+    const top5 = _shareList.slice(0, 5).map(d => ({
+      name      : d.name,
+      predicted : Number(d.predictedShare.toFixed(2)),
+    }));
+    const entry = {
+      timestamp     : new Date().toISOString(),
+      mode          : _predictorMode,
+      lastMajorDate : _lastMajorDate || '',
+      baselineDate  : _baselineSnapshotDate || '',
+      topDecks      : top5,
+    };
+    try {
+      const raw = localStorage.getItem(PREDICTOR_LOG_KEY);
+      let log = [];
+      if (raw) {
+        try { log = JSON.parse(raw); if (!Array.isArray(log)) log = []; }
+        catch (_) { log = []; }
+      }
+      log.push(entry);
+      if (log.length > PREDICTOR_LOG_MAX) log = log.slice(-PREDICTOR_LOG_MAX);
+      localStorage.setItem(PREDICTOR_LOG_KEY, JSON.stringify(log));
+    } catch (_) { /* private mode / quota — log is nice-to-have */ }
+    console.info('[MetaCall] predictor run', entry.mode,
+      'top5:', top5.map(d => `${d.name}=${d.predicted}%`).join(', '));
+  }
+
+  // Detect when a new major tournament has appeared (vs the last one we
+  // saw on this device) and compute MAE between the prediction we made
+  // 7-14 days before the major vs the actual share at the major. Updates
+  // _lastAccuracyReport so the banner can surface it.
+  function _checkAccuracyAgainstNewMajor(labsRowsByDeck) {
+    if (!_lastMajorDate) return;
+    let prevSeen = null;
+    try { prevSeen = localStorage.getItem(LAST_KNOWN_MAJOR_KEY); } catch (_) { prevSeen = null; }
+    // Persist the current latest so subsequent loads only fire the
+    // accuracy check once per new major.
+    try { localStorage.setItem(LAST_KNOWN_MAJOR_KEY, _lastMajorDate); } catch (_) { /* tolerate */ }
+
+    if (!prevSeen || prevSeen >= _lastMajorDate) return;
+
+    // Find a predictor log entry from 7-14 days before the new major.
+    let log = [];
+    try {
+      const raw = localStorage.getItem(PREDICTOR_LOG_KEY);
+      log = raw ? JSON.parse(raw) : [];
+      if (!Array.isArray(log)) log = [];
+    } catch (_) { return; }
+    const targetMin = _isoMinusDays(_lastMajorDate, 14);
+    const targetMax = _isoMinusDays(_lastMajorDate, 7);
+    const candidates = log.filter(e => {
+      const ts = (e.timestamp || '').slice(0, 10);
+      return ts >= targetMin && ts <= targetMax;
+    });
+    if (candidates.length === 0) return;
+    // Use the most recent candidate (closest to the major).
+    const baseline = candidates[candidates.length - 1];
+    if (!baseline.topDecks || baseline.topDecks.length === 0) return;
+
+    // Actual major share per deck — from labs rows on the major's date,
+    // renormalised within the major (since one major = one event).
+    const majorDecks = Object.values(labsRowsByDeck).map(d => ({ name: d.name, share: d.share }));
+    const totalMajor = majorDecks.reduce((s, d) => s + d.share, 0) || 1;
+    const actualByName = {};
+    majorDecks.forEach(d => { actualByName[normalize(d.name)] = (d.share / totalMajor) * 100; });
+
+    let sumAbs = 0, n = 0;
+    const perDeck = [];
+    baseline.topDecks.forEach(td => {
+      const k = normalize(td.name);
+      if (!(k in actualByName)) return;
+      const diff = Math.abs((td.predicted || 0) - actualByName[k]);
+      sumAbs += diff;
+      n += 1;
+      perDeck.push({ name: td.name, predicted: td.predicted, actual: Number(actualByName[k].toFixed(2)), diff: Number(diff.toFixed(2)) });
+    });
+    if (n === 0) return;
+    const mae = Number((sumAbs / n).toFixed(2));
+    _lastAccuracyReport = {
+      mae,
+      baselineDate : (baseline.timestamp || '').slice(0, 10),
+      majorDate    : _lastMajorDate,
+      decks        : perDeck,
+    };
+    console.info('[MetaCall] new-major accuracy check — MAE=%s pp across %d top decks (baseline %s vs major %s)',
+      mae, n, _lastAccuracyReport.baselineDate, _lastMajorDate, perDeck);
   }
 
   // ── Data Loading ───────────────────────────────────────────
@@ -373,13 +643,16 @@ window.MetaCall = (function () {
       // Labs major-tournament data (Stage-1 scraper output). Optional —
       // presence flips Predictor 2.0 from Mode A to Mode B.
       _labsMajorRows = 0;
+      _lastMajorDate = null;
+      _labsConvByDeck = {};
       let labsRowsByDeck = {};
       try {
         const labsResp = await fetch('data/labs_tournament_decks.csv?t=' + Date.now());
         if (labsResp.ok) {
           const labsRows = parseCSV(await labsResp.text(), ';');
-          // Aggregate share_pct per deck across the full labs CSV (could
-          // refine later to filter by recent tournaments only).
+          // Aggregate share_pct + conversion-rates per deck across the full
+          // labs CSV. tournament_date max → _lastMajorDate (used as baseline
+          // anchor for the post-major trend signal in Predictor 3.0).
           labsRows.forEach(r => {
             if (!r.deck_name) return;
             const k = normalize(r.deck_name);
@@ -387,10 +660,36 @@ window.MetaCall = (function () {
             if (!labsRowsByDeck[k]) labsRowsByDeck[k] = { name: r.deck_name, share: 0, n: 0 };
             labsRowsByDeck[k].share += share;
             labsRowsByDeck[k].n += 1;
+            // Conversion rates (added in Predictor 3.0). Track per-deck
+            // averages weighted by tournaments seen.
+            const t8 = parseEU(r.top8_conv_rate || '0');
+            if (t8 > 0) {
+              if (!_labsConvByDeck[k]) _labsConvByDeck[k] = { sum: 0, n: 0 };
+              _labsConvByDeck[k].sum += t8;
+              _labsConvByDeck[k].n += 1;
+            }
+            // Track latest tournament date.
+            const td = (r.tournament_date || '').trim();
+            if (td && /^\d{4}-\d{2}-\d{2}$/.test(td)) {
+              if (!_lastMajorDate || td > _lastMajorDate) _lastMajorDate = td;
+            }
           });
           _labsMajorRows = labsRows.length;
         }
       } catch (_e) { /* optional source */ }
+
+      // History snapshots for Predictor 3.0 trend signals. Manifest
+      // tells us which dates are available; we pick closest dates ≤ the
+      // target. Both snapshots are optional — missing data just leaves
+      // the trend term at the deck's current ladder share (no boost or
+      // damping). Predictor 3.0 falls through to vanilla 2.0 behavior
+      // when neither snapshot resolves.
+      _historyManifest = await _loadHistoryManifest();
+      _baselineSnapshotDate = _resolveHistoryDate(_lastMajorDate);
+      _snapshotAtMajor = await _loadHistorySnapshot(_baselineSnapshotDate);
+      const weekAgoTarget = _isoMinusDays(_todayISO(), 7);
+      const weekAgoActual = _resolveHistoryDate(weekAgoTarget);
+      _snapshotWeekAgo = await _loadHistorySnapshot(weekAgoActual);
 
       // City League aggregates (optional). Both files come from the
       // city_league_archetype scraper and contain pre-aggregated shares
@@ -402,19 +701,20 @@ window.MetaCall = (function () {
 
       _predictorMode = _labsMajorRows > 0 ? 'B' : 'A';
 
-      // ── Predictor 2.0 — compute predicted share per deck ──
-      // Mode A (online-only):
-      //   predicted = 0.40 × ladder
-      //             + 0.30 × online_tournament_brought
-      //             + 0.20 × top8_conv_boost
-      //             + 0.10 × trend
-      // Mode B (with labs majors):
-      //   predicted = 0.50 × labs_recent_share
-      //             + 0.30 × online_tournament_brought
-      //             + 0.20 × ladder
-      //   (labs CSV has no placement column → folding the user-spec'd
-      //    "20% labs top8 + 20% online top8" into the 30% online_top8
-      //    + 20% ladder weights since we can't derive labs-top8 here.)
+      // ── Predictor 3.0 — compute predicted share per deck ──
+      // Mode A baseline (no labs, no TG, no CL):
+      //   0.40 × ladder + 0.30 × brought + 0.20 × top8_conv_boost
+      //                 + 0.10 × weekly_trend_signal
+      // Mode A + Testing Group / + CL toggles:
+      //   keep 2.x weights (TG/CL replace the brought/ladder pillar).
+      // Mode B (labs majors present):
+      //   0.40 × labs × t8_conv_boost
+      //   + 0.20 × brought
+      //   + 0.15 × ladder
+      //   + 0.15 × post_major_trend_signal
+      //   + 0.10 × weekly_trend_signal
+      // *_trend_signal(d) = ladder × clip(1 + (curr-base)/base, 0.7, 1.3)
+      // labs_t8_boost(d)  = clip(top8_conv_rate / 0.25, 0.5, 2.0)
       const totalLadder = _shareList.reduce((s, d) => s + d.onlineShare, 0) || 1;
       const labsTotalShare = Object.values(labsRowsByDeck).reduce((s, d) => s + d.share, 0) || 1;
       // Make sure every deck in labsRowsByDeck appears in _shareList so
@@ -443,6 +743,11 @@ window.MetaCall = (function () {
       // Cache labs data on the module so _runPredictor() can re-run later
       // (e.g. after a Testing Group load) without hitting Firestore again.
       _labsRowsByDeck = labsRowsByDeck;
+
+      // Detect a newly-arrived major and compute prediction MAE against
+      // it. Done before the first _runPredictor() so the banner can pick
+      // up the report on the initial render. Idempotent per major.
+      _checkAccuracyAgainstNewMajor(labsRowsByDeck);
 
       _runPredictor();
 
@@ -950,7 +1255,7 @@ window.MetaCall = (function () {
 <tr class="mc-group-header" onclick="MetaCall._toggleGroup('${gid}')">
   <td>
     <span class="mc-group-arrow" id="mc-gt-${gid}">▶</span>
-    <span class="mc-deck-name">${_mcIconHtml(group.main)}${esc(group.main)}</span>
+    <span class="mc-deck-name">${_mcIconHtml(group.main)}${esc(_familyDisplayName(group.main))}</span>
     <span class="mc-group-count">${group.variants.length} ${t('mc.variants')}</span>
   </td>
   <td><span class="mc-share-online">${group.totalOnline.toFixed(2)}%</span></td>
@@ -1336,6 +1641,11 @@ window.MetaCall = (function () {
   // is sourced from. Mode A (online-only / fresh format) uses a warm
   // amber tone; Mode B (online + labs majors) uses a confident green.
   // CL toggle state appended as suffix (Mode A only — B/TG ignore CL).
+  function _formatDDMM(iso) {
+    const m = (iso || '').match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    return m ? `${m[3]}.${m[2]}.` : (iso || '');
+  }
+
   function renderPredictorBanner() {
     const tgLoaded = Object.values(_tgFieldShares).reduce((s, v) => s + v, 0) > 0;
     const clTags = [];
@@ -1345,16 +1655,30 @@ window.MetaCall = (function () {
       ? ` <span class="mc-predictor-banner-cl">+ ${clTags.join(' + ')}</span>`
       : '';
 
+    // Predictor 3.0: when a post-major baseline snapshot is loaded, append
+    // "+ Online-Entwicklung seit DD.MM." so the user sees that the trend
+    // signal is live. Falls silent when no snapshot exists.
+    const trendSuffix = _baselineSnapshotDate
+      ? ` <span class="mc-predictor-banner-trend">+ Online-Entwicklung seit ${_formatDDMM(_baselineSnapshotDate)}</span>`
+      : '';
+
+    // Predictor 3.0 system-learning chip — shows MAE of the previous
+    // prediction once a fresh major has arrived. Surfaces the accuracy
+    // story so the user can tune trust over time.
+    const accuracySuffix = _lastAccuracyReport
+      ? ` <span class="mc-predictor-banner-accuracy" title="Mean Absolute Error of the prediction made ${_formatDDMM(_lastAccuracyReport.baselineDate)} vs the major on ${_formatDDMM(_lastAccuracyReport.majorDate)}">Letzte Prognose-Accuracy: ø ${String(_lastAccuracyReport.mae).replace('.', ',')} pp Abweichung</span>`
+      : '';
+
     if (_predictorMode === 'B') {
       const tournNum = _labsMajorRows;
       return `<div class="mc-predictor-banner mc-predictor-banner-b">
         <span class="mc-predictor-banner-icon">📊</span>
-        <span class="mc-predictor-banner-text">${t('mc.bannerModeB').replace('{n}', tournNum)}${clSuffix}</span>
+        <span class="mc-predictor-banner-text">${t('mc.bannerModeB').replace('{n}', tournNum)}${trendSuffix}${clSuffix}${accuracySuffix}</span>
       </div>`;
     }
     return `<div class="mc-predictor-banner mc-predictor-banner-a">
       <span class="mc-predictor-banner-icon">⚡</span>
-      <span class="mc-predictor-banner-text">${t('mc.bannerModeA')}${clSuffix}</span>
+      <span class="mc-predictor-banner-text">${t('mc.bannerModeA')}${trendSuffix}${clSuffix}${accuracySuffix}</span>
     </div>`;
   }
 
@@ -2249,6 +2573,81 @@ window.MetaCall = (function () {
     refreshScenariosBar();
   }
 
+  // Update the currently-loaded scenario in place: re-run the predictor
+  // against the latest CSV data, write the fresh predicted shares + a
+  // history snapshot back into the scenario, and surface a toast that
+  // tells the user how many decks shifted by >2pp.
+  function _refreshScenario() {
+    if (!_currentScenarioName) return;
+    const scenarios = _loadScenarios();
+    const scenario = scenarios[_currentScenarioName];
+    if (!scenario) return;
+
+    // Capture the previous top-deck shares so we can diff. Pulled from
+    // the most recent history snapshot; falls back to scenario.topDecks
+    // (older scenarios saved before we tracked history).
+    const lastHist = Array.isArray(scenario.history) && scenario.history.length
+      ? scenario.history[scenario.history.length - 1]
+      : null;
+    const prevByName = {};
+    const prevSrc = lastHist ? lastHist.topDecks : (scenario.topDecks || []);
+    (prevSrc || []).forEach(d => { if (d && d.name) prevByName[d.name] = d.predicted || 0; });
+
+    // Re-run with fresh inputs.
+    _runPredictor();
+
+    // Build the new top-10 snapshot.
+    const sorted = [..._shareList].sort((a, b) => b.predictedShare - a.predictedShare);
+    const top = sorted.slice(0, 10).map(d => {
+      const k = normalize(d.name);
+      const labsRow = _labsRowsByDeck[k];
+      const stats = _tournamentStats ? _tournamentStats[k] : null;
+      const conv = _labsConvByDeck[k];
+      return {
+        name      : d.name,
+        predicted : Number(d.predictedShare.toFixed(2)),
+        ladder    : Number((d.ladderShare || 0).toFixed(2)),
+        labs      : labsRow ? Number(labsRow.share.toFixed(2)) : 0,
+        brought   : stats ? Number(stats.broughtShare.toFixed(2)) : 0,
+        top8Conv  : (conv && conv.n > 0) ? Number((conv.sum / conv.n).toFixed(3)) : 0,
+      };
+    });
+
+    // Count significant moves vs previous snapshot (≥2pp predicted shift).
+    let movers = 0;
+    top.forEach(d => {
+      const prev = prevByName[d.name];
+      if (prev !== undefined && Math.abs(d.predicted - prev) >= 2) movers++;
+    });
+
+    const histEntry = {
+      updatedAt     : new Date().toISOString(),
+      predictorMode : _predictorMode,
+      lastMajorDate : _lastMajorDate || '',
+      baselineDate  : _baselineSnapshotDate || '',
+      topDecks      : top,
+    };
+
+    scenario.history = Array.isArray(scenario.history) ? scenario.history.slice() : [];
+    scenario.history.push(histEntry);
+    // Cap history at 25 entries to keep localStorage payload reasonable.
+    if (scenario.history.length > 25) scenario.history = scenario.history.slice(-25);
+    scenario.topDecks = top;        // also expose latest at top level for older readers
+    scenario.savedAt = histEntry.updatedAt;
+
+    scenarios[_currentScenarioName] = scenario;
+    if (!_writeScenarios(scenarios)) return;
+
+    const today = histEntry.updatedAt.slice(0, 10).split('-').reverse().join('.');
+    const msg = `Szenario auf Stand vom ${today} aktualisiert. ${movers} Decks haben sich um >2% verändert.`;
+    if (typeof window.showNotification === 'function') {
+      try { window.showNotification(msg, 'success'); } catch (_) { /* tolerate */ }
+    } else {
+      console.info('[MetaCall]', msg);
+    }
+    renderAll();
+  }
+
   function refreshScenariosBar() {
     const bar = document.getElementById('mc-scenarios-bar');
     if (bar) bar.outerHTML = renderScenariosBar();
@@ -2279,12 +2678,44 @@ window.MetaCall = (function () {
       hint = `<div class="mc-scenarios-hint">${esc(msg)} (${SCENARIOS_STORAGE_KEY}: ${status.bytes}B)</div>`;
     }
 
+    // Predictions-history block: show the last few snapshots' top-3 so
+    // the user can see how the prediction has evolved since they first
+    // saved the scenario. Only renders when a scenario is loaded AND
+    // it has history entries.
+    let historyBlock = '';
+    if (hasCurrent) {
+      const cur = scenarios[_currentScenarioName];
+      const hist = (cur && Array.isArray(cur.history)) ? cur.history.slice(-5).reverse() : [];
+      if (hist.length > 0) {
+        const histRows = hist.map(h => {
+          const dt = (h.updatedAt || '').slice(0, 10).split('-').reverse().join('.');
+          const top3 = (h.topDecks || []).slice(0, 3)
+            .map(d => `${esc(d.name)} ${d.predicted.toFixed(1)}%`).join(' · ');
+          const modeTag = h.predictorMode === 'B' ? 'B' : 'A';
+          return `<li class="mc-scenario-hist-row">
+            <span class="mc-scenario-hist-date">${dt}</span>
+            <span class="mc-scenario-hist-mode" title="Predictor mode">${modeTag}</span>
+            <span class="mc-scenario-hist-top">${top3 || '—'}</span>
+          </li>`;
+        }).join('');
+        historyBlock = `
+<details class="mc-scenario-history">
+  <summary>📜 Predictions-History (${(cur.history || []).length})</summary>
+  <ul class="mc-scenario-hist-list">${histRows}</ul>
+</details>`;
+      }
+    }
+
     return `
 <div class="mc-scenarios-bar" id="mc-scenarios-bar">
   <label class="mc-scenarios-label">💾 ${t('mc.scenarios')}</label>
   <select class="mc-scenarios-select" onchange="MetaCall._onScenarioSelect(this.value)">
     ${options}
   </select>
+  ${hasCurrent
+    ? `<button type="button" class="mc-scenarios-refresh-btn" onclick="MetaCall._refreshScenario()"
+              title="Mit aktuellen Daten aktualisieren + History-Eintrag">🔄</button>`
+    : ''}
   <button type="button" class="mc-scenarios-save-btn" onclick="MetaCall._saveScenario()">
     ${saveLabel}
   </button>
@@ -2293,6 +2724,7 @@ window.MetaCall = (function () {
               title="${esc(t('mc.scenarioDelete'))}">🗑</button>`
     : ''}
   ${hint}
+  ${historyBlock}
 </div>`;
   }
 
@@ -2363,6 +2795,7 @@ window.MetaCall = (function () {
     _saveScenario,
     _onScenarioSelect,
     _deleteScenario,
+    _refreshScenario,
     exportFieldShareImage,
     exportDay2ShareImage,
   };

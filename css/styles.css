@@ -9325,10 +9325,10 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
 .meta-hub-header h2 {
     font-size: 1.9rem;
     margin: 0 0 8px;
-    color: #f4f7fb;
+    color: var(--text-dark, #2c3e50);
 }
 .meta-hub-subtitle {
-    color: rgba(244, 247, 251, 0.72);
+    color: var(--text-light, #666);
     font-size: 1rem;
     margin: 0;
 }
@@ -9341,13 +9341,13 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
 .meta-hub-tile {
     text-align: left;
     padding: 22px 20px 20px;
-    background: linear-gradient(160deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.025) 100%);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: #ffffff;
+    border: 1px solid var(--border-light, #e0e0e0);
     border-radius: 16px;
-    color: #f4f7fb;
+    color: var(--text-primary, #333);
     cursor: pointer;
-    transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
+    transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
     display: flex;
     flex-direction: column;
     gap: 12px;
@@ -9357,30 +9357,29 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
 .meta-hub-tile:hover,
 .meta-hub-tile:focus-visible {
     transform: translateY(-2px);
-    border-color: rgba(99, 162, 255, 0.55);
-    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.28);
-    background: linear-gradient(160deg, rgba(99, 162, 255, 0.10) 0%, rgba(255, 255, 255, 0.03) 100%);
+    border-color: var(--pokemon-blue, #3B4CCA);
+    box-shadow: 0 8px 22px rgba(59, 76, 202, 0.18);
     outline: none;
 }
 .meta-hub-tile-title {
     font-size: 1.18rem;
-    font-weight: 600;
+    font-weight: 700;
     line-height: 1.25;
-    color: #f4f7fb;
+    color: var(--text-dark, #2c3e50);
 }
 .meta-hub-tile-bullets {
     list-style: disc;
     margin: 0;
     padding-left: 20px;
-    color: rgba(244, 247, 251, 0.78);
-    font-size: 0.92rem;
-    line-height: 1.45;
+    color: var(--text-muted, #4a4a4a);
+    font-size: 0.94rem;
+    line-height: 1.5;
     display: flex;
     flex-direction: column;
     gap: 4px;
 }
 .meta-hub-tile-bullets li::marker {
-    color: rgba(99, 162, 255, 0.65);
+    color: var(--pokemon-blue, #3B4CCA);
 }
 
 /* Sub-navigation injected at the top of an active sub-tab */
@@ -9393,27 +9392,27 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
     flex-wrap: wrap;
     gap: 8px;
     padding: 10px 12px;
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.07);
+    background: #ffffff;
+    border: 1px solid var(--border-light, #e0e0e0);
     border-radius: 12px;
-    margin-bottom: 4px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
 }
 .meta-hub-subnav-back {
     appearance: none;
-    background: rgba(99, 162, 255, 0.12);
-    border: 1px solid rgba(99, 162, 255, 0.35);
-    color: #f4f7fb;
+    background: rgba(59, 76, 202, 0.08);
+    border: 1px solid rgba(59, 76, 202, 0.30);
+    color: var(--pokemon-blue, #3B4CCA);
     padding: 6px 12px;
     border-radius: 8px;
     cursor: pointer;
     font-size: 0.88rem;
-    font-weight: 500;
+    font-weight: 600;
     transition: background 0.15s ease, border-color 0.15s ease;
 }
 .meta-hub-subnav-back:hover,
 .meta-hub-subnav-back:focus-visible {
-    background: rgba(99, 162, 255, 0.22);
-    border-color: rgba(99, 162, 255, 0.65);
+    background: rgba(59, 76, 202, 0.16);
+    border-color: rgba(59, 76, 202, 0.55);
     outline: none;
 }
 .meta-hub-subnav-items {
@@ -9424,9 +9423,9 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
 }
 .meta-hub-subnav-btn {
     appearance: none;
-    background: transparent;
-    border: 1px solid rgba(255, 255, 255, 0.10);
-    color: rgba(244, 247, 251, 0.78);
+    background: var(--bg-light, #f8f9fa);
+    border: 1px solid var(--border-light, #e0e0e0);
+    color: var(--text-muted, #4a4a4a);
     padding: 6px 12px;
     border-radius: 8px;
     cursor: pointer;
@@ -9437,15 +9436,15 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
 }
 .meta-hub-subnav-btn:hover,
 .meta-hub-subnav-btn:focus-visible {
-    background: rgba(255, 255, 255, 0.06);
-    border-color: rgba(255, 255, 255, 0.20);
-    color: #f4f7fb;
+    background: #ffffff;
+    border-color: var(--pokemon-blue, #3B4CCA);
+    color: var(--text-dark, #2c3e50);
     outline: none;
 }
 .meta-hub-subnav-btn.active {
-    background: rgba(99, 162, 255, 0.20);
-    border-color: rgba(99, 162, 255, 0.55);
-    color: #f4f7fb;
+    background: var(--pokemon-blue, #3B4CCA);
+    border-color: var(--pokemon-blue, #3B4CCA);
+    color: #ffffff;
 }
 
 @media (max-width: 700px) {
@@ -9467,7 +9466,7 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
         font-size: 1.06rem;
     }
     .meta-hub-tile-bullets {
-        font-size: 0.88rem;
+        font-size: 0.90rem;
     }
     .meta-hub-subnav {
         padding: 8px;

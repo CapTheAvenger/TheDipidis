@@ -1227,14 +1227,14 @@ const BASE_PATH = './data/';
         function switchTab(tabName) {
             const tabs = document.querySelectorAll('.tab-content');
             tabs.forEach(tab => tab.classList.remove('active'));
-            
+
             const buttons = document.querySelectorAll('.tab-btn');
             buttons.forEach(btn => btn.classList.remove('active'));
-            
+
             const selectedTab = document.getElementById(tabName);
             if (selectedTab) {
                 selectedTab.classList.add('active');
-                
+
                 // Load data for the tab
                 switch(tabName) {
                     case 'city-league':
@@ -1261,31 +1261,34 @@ const BASE_PATH = './data/';
                         break;
                 }
             }
-            
-            // Set active button
-            const activeBtn = Array.from(buttons).find(btn => 
-                btn.getAttribute('onclick')?.includes(tabName)
+
+            // Notify the Meta & Deck Analysis Hub so it can manage its sub-nav.
+            if (window.MetaAnalysisHub && typeof window.MetaAnalysisHub.onTabSwitched === 'function') {
+                window.MetaAnalysisHub.onTabSwitched(tabName);
+            }
+
+            // The hub tab uses the same top-nav button for all 5 sub-tabs.
+            // When entering a sub-tab, highlight the hub button instead.
+            const hubSubTabs = ['city-league', 'city-league-analysis', 'current-meta', 'current-analysis', 'past-meta'];
+            const buttonLookupName = hubSubTabs.includes(tabName) ? 'meta-analysis-hub' : tabName;
+
+            // Set active button (highlight the parent hub button when on a sub-tab)
+            const activeBtn = Array.from(buttons).find(btn =>
+                btn.getAttribute('onclick')?.includes(buttonLookupName)
             );
-            if (activeBtn) {
-                activeBtn.classList.add('active');
-                // Update browser tab title with active section name
-                const btnText = activeBtn.textContent.trim();
-                if (btnText) {
-                    document.title = btnText + ' – Pokémon TCG Hub';
-                    const badge = document.getElementById('current-tab-title');
-                    if (badge) badge.textContent = btnText;
-                }
-            } else {
-                // Fallback: menu-only tabs (calculator, etc.) — find via menu-item
-                const menuBtn = document.querySelector(`.menu-item[data-tab-id="${tabName}"] .menu-item-label`);
-                if (menuBtn) {
-                    const menuText = menuBtn.textContent.trim();
-                    if (menuText) {
-                        document.title = menuText + ' – Pokémon TCG Hub';
-                        const badge = document.getElementById('current-tab-title');
-                        if (badge) badge.textContent = menuText;
-                    }
-                }
+            if (activeBtn) activeBtn.classList.add('active');
+
+            // Update browser tab title with the actual section name. For hub
+            // sub-tabs, prefer the side-menu label (e.g. "Deck Analysis (Japan)")
+            // so the title reflects the specific area, not the hub.
+            const menuLabelEl = document.querySelector(`.menu-item[data-tab-id="${tabName}"] .menu-item-label`);
+            const titleText = menuLabelEl
+                ? menuLabelEl.textContent.trim()
+                : (activeBtn ? activeBtn.textContent.trim() : '');
+            if (titleText) {
+                document.title = titleText + ' – Pokémon TCG Hub';
+                const badge = document.getElementById('current-tab-title');
+                if (badge) badge.textContent = titleText;
             }
         }
 

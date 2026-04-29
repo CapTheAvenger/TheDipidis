@@ -1627,6 +1627,59 @@
 }
 .mc-intel-row-major .mc-intel-label { color: #1d6fb8; font-weight: 600; }
 .mc-intel-row-major .mc-intel-value { color: #0d4b87; }
+
+/* Last-Major block — header + 3 sub-rows (Tag 1 / Tag 2 / Conversion). */
+.mc-intel-major-block {
+    background: #f6fbff;
+    margin-top: 4px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: 1px solid #d8e9f9;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    align-self: stretch;
+}
+.mc-intel-major-header {
+    color: #1d6fb8;
+    font-weight: 700;
+    font-size: 0.86rem;
+    line-height: 1.3;
+    margin-bottom: 2px;
+    border-bottom: 1px dashed #cfe2f5;
+    padding-bottom: 4px;
+}
+.mc-intel-major-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 12px;
+    padding: 1px 0;
+}
+.mc-intel-major-label {
+    flex: 1 1 auto;
+    min-width: 0;
+    color: #4a5b73;
+    font-weight: 500;
+    font-size: 0.85rem;
+    line-height: 1.3;
+}
+.mc-intel-major-value {
+    flex: 0 0 auto;
+    margin-left: auto;
+    color: #0d4b87;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+.mc-intel-major-extra {
+    flex: 0 0 auto;
+    color: #5b87b5;
+    font-weight: 500;
+    font-size: 0.78rem;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
 .mc-intel-row-personal {
     background: #fffaf0;
     padding: 4px 8px;
@@ -1646,6 +1699,10 @@
     .mc-intel-row-major,
     .mc-intel-row-personal { padding: 5px 7px; }
     .mc-intel-extra { font-size: 0.72rem; }
+    .mc-intel-major-block { padding: 7px 9px; }
+    .mc-intel-major-header { font-size: 0.82rem; }
+    .mc-intel-major-label { font-size: 0.80rem; }
+    .mc-intel-major-extra { font-size: 0.74rem; }
 
     /* Make sure the intel block stacks UNDER the deck name on mobile.
        The td is a flex row by default — switch to column so the name

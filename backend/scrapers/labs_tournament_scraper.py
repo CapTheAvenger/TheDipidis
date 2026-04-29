@@ -273,6 +273,20 @@ def scrape_tournament_decks(tournament_id: str) -> Tuple[List[Dict], int]:
             'top8_conv_rate' : 0.0,
             'top16_conv_rate': 0.0,
             'top32_conv_rate': 0.0,
+            # Day-1 / Day-2 split (populated below from the per-day tabs).
+            'day1_players'      : 0,
+            'day1_share_pct'    : 0.0,
+            'day1_wins'         : 0,
+            'day1_losses'       : 0,
+            'day1_ties'         : 0,
+            'day1_win_pct'      : 0.0,
+            'day2_players'      : 0,
+            'day2_share_pct'    : 0.0,
+            'day2_wins'         : 0,
+            'day2_losses'       : 0,
+            'day2_ties'         : 0,
+            'day2_win_pct'      : 0.0,
+            'day1_to_day2_conv' : 0.0,
         })
 
     # ── Merge in conversion-rate data ────────────────────────────────────
@@ -286,6 +300,48 @@ def scrape_tournament_decks(tournament_id: str) -> Tuple[List[Dict], int]:
                 merged += 1
         logger.info("  → conv-rates merged for %d/%d decks", merged, len(decks))
 
+    # ── Merge in Day-1 + Day-2 splits (separate tabs on labs) ────────────
+    day1_data = scrape_tournament_day(tournament_id, 'day1')
+    if day1_data:
+        merged = 0
+        for deck in decks:
+            slug = deck['deck_slug']
+            if slug in day1_data:
+                d = day1_data[slug]
+                deck['day1_players']   = d.get('player_count', 0)
+                deck['day1_share_pct'] = d.get('share_pct', 0.0)
+                deck['day1_wins']      = d.get('wins', 0)
+                deck['day1_losses']    = d.get('losses', 0)
+                deck['day1_ties']      = d.get('ties', 0)
+                deck['day1_win_pct']   = d.get('win_pct', 0.0)
+                merged += 1
+        logger.info("  → Day-1 split merged for %d/%d decks", merged, len(decks))
+
+    day2_data = scrape_tournament_day(tournament_id, 'day2')
+    if day2_data:
+        merged = 0
+        for deck in decks:
+            slug = deck['deck_slug']
+            if slug in day2_data:
+                d = day2_data[slug]
+                deck['day2_players']   = d.get('player_count', 0)
+                deck['day2_share_pct'] = d.get('share_pct', 0.0)
+                deck['day2_wins']      = d.get('wins', 0)
+                deck['day2_losses']    = d.get('losses', 0)
+                deck['day2_ties']      = d.get('ties', 0)
+                deck['day2_win_pct']   = d.get('win_pct', 0.0)
+                merged += 1
+        logger.info("  → Day-2 split merged for %d/%d decks", merged, len(decks))
+
+    # Compute Day-1 → Day-2 conversion per deck. Conversion comes directly
+    # from the labs Conversion tab when scrape_tournament_conversion ran;
+    # if that didn't capture it but we have both day counts, derive it.
+    for deck in decks:
+        if deck['day1_to_day2_conv'] > 0:
+            continue  # already captured from the conversion tab
+        if deck['day1_players'] > 0 and deck['day2_players'] >= 0:
+            deck['day1_to_day2_conv'] = round(deck['day2_players'] / deck['day1_players'], 4)
+
     logger.info("  → %d decks, %d total players", len(decks), total_players)
     return decks, total_players
 
@@ -295,16 +351,29 @@ def scrape_tournament_decks(tournament_id: str) -> Tuple[List[Dict], int]:
 # Column-header → output-key mapping. Limitless may use any subset; missing
 # columns just stay at 0.0 in the deck dict. Header text is matched
 # case-insensitively after stripping % signs and whitespace.
+#
+# Some columns hold integer player counts (Day 1 / Day 2), others hold
+# percentages (Top-X conv rate, Day-1 → Day-2 conversion). The mapping
+# value is `(output_key, kind)` where kind is 'pct' (0..1 fraction) or
+# 'int' (raw count).
 _CONV_HEADER_KEYS = {
-    'top 8 conv':   'top8_conv_rate',
-    'top 8 rate':   'top8_conv_rate',
-    'top8 conv':    'top8_conv_rate',
-    'top 16 conv':  'top16_conv_rate',
-    'top 16 rate':  'top16_conv_rate',
-    'top16 conv':   'top16_conv_rate',
-    'top 32 conv':  'top32_conv_rate',
-    'top 32 rate':  'top32_conv_rate',
-    'top32 conv':   'top32_conv_rate',
+    'top 8 conv':   ('top8_conv_rate',     'pct'),
+    'top 8 rate':   ('top8_conv_rate',     'pct'),
+    'top8 conv':    ('top8_conv_rate',     'pct'),
+    'top 16 conv':  ('top16_conv_rate',    'pct'),
+    'top 16 rate':  ('top16_conv_rate',    'pct'),
+    'top16 conv':   ('top16_conv_rate',    'pct'),
+    'top 32 conv':  ('top32_conv_rate',    'pct'),
+    'top 32 rate':  ('top32_conv_rate',    'pct'),
+    'top32 conv':   ('top32_conv_rate',    'pct'),
+    # Day-1 → Day-2 conversion view. The "Conversion" tab on labs
+    # exposes Day 1 / Day 2 player counts and the resulting Day-1→Day-2
+    # rate as their own columns.
+    'day 1':        ('day1_players',       'int'),
+    'day1':         ('day1_players',       'int'),
+    'day 2':        ('day2_players',       'int'),
+    'day2':         ('day2_players',       'int'),
+    'conversion':   ('day1_to_day2_conv',  'pct'),
 }
 
 
@@ -323,15 +392,32 @@ def _parse_pct_to_fraction(txt: str) -> float:
     return max(0.0, min(1.0, round(v, 4)))
 
 
+def _parse_int_count(txt: str) -> int:
+    """'188' / '1,300' / '—' → integer (0 on failure)."""
+    if not txt:
+        return 0
+    cleaned = txt.replace(',', '').replace('.', '').strip()
+    if not cleaned or not cleaned.isdigit():
+        return 0
+    try:
+        return int(cleaned)
+    except ValueError:
+        return 0
+
+
 def scrape_tournament_conversion(tournament_id: str) -> Dict[str, Dict[str, float]]:
     """
     Fetch labs.limitlesstcg.com/{id}/decks?conversion and return
-    { deck_slug: { 'top8_conv_rate': ..., 'top16_conv_rate': ..., 'top32_conv_rate': ... } }.
+    { deck_slug: { 'top8_conv_rate': ..., 'day1_players': ..., 'day2_players': ...,
+                   'day1_to_day2_conv': ..., ... } }.
 
     Defensive parser: discovers conversion columns from <th> headers.
     On first run logs the headers it found, so any unexpected column
     naming on a future tournament becomes visible. Returns empty dict
     on failure (caller treats missing data as 0.0).
+
+    Output values are floats for percentages and ints for raw counts —
+    the column kind comes from _CONV_HEADER_KEYS.
     """
     url = f"{BASE_URL}/{tournament_id}/decks?conversion"
     logger.info("    Fetching conversion: %s", url)
@@ -345,15 +431,15 @@ def scrape_tournament_conversion(tournament_id: str) -> Dict[str, Dict[str, floa
         logger.warning("    No conversion table found for %s", tournament_id)
         return {}
 
-    # Map column index → output key based on header text.
+    # Map column index → (output key, kind) based on header text.
     headers_raw = [th.get_text(strip=True) for th in table.select('thead th')]
     logger.info("    Conversion headers: %s", headers_raw)
-    col_keys: Dict[int, str] = {}
+    col_keys: Dict[int, Tuple[str, str]] = {}
     for i, h in enumerate(headers_raw):
         norm = h.lower().replace('%', '').strip()
-        for hint, key in _CONV_HEADER_KEYS.items():
+        for hint, mapping in _CONV_HEADER_KEYS.items():
             if hint in norm:
-                col_keys[i] = key
+                col_keys[i] = mapping
                 break
 
     if not col_keys:
@@ -362,7 +448,7 @@ def scrape_tournament_conversion(tournament_id: str) -> Dict[str, Dict[str, floa
             "Add the new header text to _CONV_HEADER_KEYS.", tournament_id, headers_raw
         )
         return {}
-    logger.info("    Conversion column mapping: %s", {headers_raw[i]: k for i, k in col_keys.items()})
+    logger.info("    Conversion column mapping: %s", {headers_raw[i]: m for i, m in col_keys.items()})
 
     out: Dict[str, Dict[str, float]] = {}
     for row in table.select('tbody tr'):
@@ -380,12 +466,93 @@ def scrape_tournament_conversion(tournament_id: str) -> Dict[str, Dict[str, floa
         if not slug:
             continue
         entry: Dict[str, float] = {}
-        for idx, key in col_keys.items():
-            entry[key] = _parse_pct_to_fraction(cells[idx].get_text(strip=True))
+        for idx, (key, kind) in col_keys.items():
+            txt = cells[idx].get_text(strip=True)
+            entry[key] = _parse_int_count(txt) if kind == 'int' else _parse_pct_to_fraction(txt)
         if entry:
             out[slug] = entry
 
     logger.info("    Conversion: %d decks parsed", len(out))
+    return out
+
+
+def scrape_tournament_day(tournament_id: str, day: str) -> Dict[str, Dict[str, float]]:
+    """
+    Fetch labs.limitlesstcg.com/{id}/decks?{day1|day2} and return
+    { deck_slug: { 'player_count', 'share_pct', 'wins', 'losses',
+                   'ties', 'win_pct' } }.
+
+    Same column layout as the default deck table — `day` ∈ {'day1','day2'}.
+    Returns empty dict when the page is missing (small tournaments without
+    a Day-2 cut won't have a Day-2 view).
+    """
+    if day not in ('day1', 'day2'):
+        return {}
+    url = f"{BASE_URL}/{tournament_id}/decks?{day}"
+    logger.info("    Fetching %s: %s", day, url)
+    soup = fetch_page_bs4(url)
+    if not soup:
+        logger.warning("    %s page fetch failed for %s — skipping", day, tournament_id)
+        return {}
+
+    table = soup.find('table', attrs={'class': re.compile(r'data-table')})
+    if not table:
+        logger.info("    No %s table for %s — likely no day-2 cut at this event", day, tournament_id)
+        return {}
+
+    out: Dict[str, Dict[str, float]] = {}
+    for row in table.select('tbody tr'):
+        cells = row.find_all('td')
+        if len(cells) < 5:
+            continue
+
+        # Cell 1: Player count
+        try:
+            player_count = int(cells[1].get_text(strip=True))
+        except ValueError:
+            continue
+
+        # Cell 2: Deck slug (anchor href)
+        deck_link = cells[2].find('a')
+        if not deck_link:
+            continue
+        slug = deck_link.get('href', '').rsplit('/', 1)[-1]
+        if not slug:
+            continue
+
+        # Cell 3: Share %
+        share_text = cells[3].get_text(strip=True).replace('%', '').strip()
+        try:
+            share_pct = round(float(share_text), 4)
+        except ValueError:
+            share_pct = 0.0
+
+        # Cell 4: W-L-T record
+        record_text = cells[4].get_text(strip=True)
+        wins = losses = ties = 0
+        rm = re.match(r'(\d+)\s*-\s*(\d+)\s*-\s*(\d+)', record_text)
+        if rm:
+            wins, losses, ties = int(rm.group(1)), int(rm.group(2)), int(rm.group(3))
+
+        # Cell 5: Win %
+        win_pct = 0.0
+        if len(cells) > 5:
+            wp_text = cells[5].get_text(strip=True).replace('%', '').strip()
+            try:
+                win_pct = round(float(wp_text), 4)
+            except ValueError:
+                pass
+
+        out[slug] = {
+            'player_count': player_count,
+            'share_pct'   : share_pct,
+            'wins'        : wins,
+            'losses'      : losses,
+            'ties'        : ties,
+            'win_pct'     : win_pct,
+        }
+
+    logger.info("    %s: %d decks parsed", day, len(out))
     return out
 
 
@@ -398,6 +565,12 @@ CSV_FIELDS = [
     'player_count', 'share_pct',
     'wins', 'losses', 'ties', 'win_pct',
     'top8_conv_rate', 'top16_conv_rate', 'top32_conv_rate',
+    # Day-1 / Day-2 split (added with Day-1+Day-2 tab scraping).
+    # Existing rows get '' for these on schema-drift rewrites; the
+    # frontend treats missing values as 0 and falls back to overall.
+    'day1_players', 'day1_share_pct', 'day1_wins', 'day1_losses', 'day1_ties', 'day1_win_pct',
+    'day2_players', 'day2_share_pct', 'day2_wins', 'day2_losses', 'day2_ties', 'day2_win_pct',
+    'day1_to_day2_conv',
     'scraped_at',
 ]
 

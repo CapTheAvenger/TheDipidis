@@ -738,11 +738,21 @@ window.MetaCall = (function () {
             }
             // Capture the slice for the most-recent tournament so the
             // field cards can show "last major" share + win-pct per deck.
+            // Day-1 / Day-2 fields stay 0 when the CSV pre-dates the
+            // Day-1+Day-2 scraper extension — the renderer falls back
+            // to the overall row in that case.
             if (latestId && (r.tournament_id || '').trim() === latestId) {
               _lastMajorByDeck[k] = {
-                share: share,
-                winPct: parseEU(r.win_pct || '0'),
-                players: parseInt(r.player_count || '0', 10) || 0
+                share:        share,
+                winPct:       parseEU(r.win_pct || '0'),
+                players:      parseInt(r.player_count || '0', 10) || 0,
+                day1Players:  parseInt(r.day1_players || '0', 10) || 0,
+                day1Share:    parseEU(r.day1_share_pct || '0'),
+                day1WinPct:   parseEU(r.day1_win_pct || '0'),
+                day2Players:  parseInt(r.day2_players || '0', 10) || 0,
+                day2Share:    parseEU(r.day2_share_pct || '0'),
+                day2WinPct:   parseEU(r.day2_win_pct || '0'),
+                dayConv:      parseEU(r.day1_to_day2_conv || '0')
               };
             }
           });
@@ -2004,16 +2014,28 @@ window.MetaCall = (function () {
       ));
     }
 
-    // Last-major row — only when labs data + this deck appeared at the
+    // Last-major block — only when labs data + this deck appeared at the
     // most recent major. Tells the user "this is what actually happened
     // last weekend" — the most concrete data point we can offer.
+    //
+    // Layout has two modes:
+    //   Detailed (Day-1+Day-2 scraping): header + Tag-1 / Tag-2 / Conv
+    //                                    rows, grouped in a soft-blue card.
+    //   Legacy   (CSV pre-dates the per-day scraper): single row with
+    //                                    overall share + WR (old format).
     if (_lastMajorInfo && _lastMajorByDeck[k]) {
-      const lm   = _lastMajorByDeck[k];
+      const lm      = _lastMajorByDeck[k];
       const dateStr = _formatShortDate(_lastMajorInfo.date);
       const where   = _lastMajorInfo.shortName || t('mc.intelMajorFallback');
       const labelTxt = `${t('mc.intelLastMajor')} (${where}${dateStr ? ', ' + dateStr : ''})`;
-      const wr = lm.winPct > 0 ? `WR ${fmt(lm.winPct, 0)} %` : '';
-      rows.push(_intelRow(labelTxt, `${fmt(lm.share, 1)} %`, wr, 'mc-intel-row-major'));
+      const hasDaySplit = (lm.day1Players > 0) || (lm.day1Share > 0) ||
+                          (lm.day2Players > 0) || (lm.day2Share > 0);
+      if (hasDaySplit) {
+        rows.push(_intelMajorBlock(labelTxt, lm));
+      } else {
+        const wr = lm.winPct > 0 ? `WR ${fmt(lm.winPct, 0)} %` : '';
+        rows.push(_intelRow(labelTxt, `${fmt(lm.share, 1)} %`, wr, 'mc-intel-row-major'));
+      }
     }
 
     // Personal data rows — only render when the user has data. Same
@@ -2053,6 +2075,42 @@ window.MetaCall = (function () {
       <span class="mc-intel-label">${esc(label)}</span>
       <span class="mc-intel-value">${value}</span>
       ${extraHtml}
+    </div>`;
+  }
+
+  // Helper: render the Last-Major block with Tag-1 / Tag-2 / Conversion
+  // sub-rows. Visual: one bordered card (matching mc-intel-row-major) with
+  // a header line and 2-3 sub-rows inside. Sub-rows that have no data
+  // (e.g. Day-2 = 0 because the deck didn't make Day 2) are still shown
+  // with an em-dash so the user sees that the deck dropped.
+  function _intelMajorBlock(headerLabel, lm) {
+    const fmt = (n, dp) => n.toFixed(dp).replace('.', ',');
+    const made   = lm.day2Players > 0;
+    const conv   = (lm.dayConv && lm.dayConv > 0)
+      ? lm.dayConv
+      : (lm.day1Players > 0 ? lm.day2Players / lm.day1Players : 0);
+    const labelTag1 = t('mc.intelMajorDay1');
+    const labelTag2 = t('mc.intelMajorDay2');
+    const labelConv = t('mc.intelMajorDayConv');
+
+    const fmtRow = (label, value, extra) => `
+      <div class="mc-intel-major-row">
+        <span class="mc-intel-major-label">${esc(label)}</span>
+        <span class="mc-intel-major-value">${value}</span>
+        ${extra ? `<span class="mc-intel-major-extra">${esc(extra)}</span>` : ''}
+      </div>`;
+
+    const day1Val = lm.day1Share > 0 ? `${fmt(lm.day1Share, 1)} %` : '—';
+    const day1Wr  = lm.day1WinPct > 0 ? `WR ${fmt(lm.day1WinPct, 0)} %` : '';
+    const day2Val = made ? `${fmt(lm.day2Share, 1)} %` : '—';
+    const day2Wr  = (made && lm.day2WinPct > 0) ? `WR ${fmt(lm.day2WinPct, 0)} %` : '';
+    const convVal = conv > 0 ? `${fmt(conv * 100, 1)} %` : '—';
+
+    return `<div class="mc-intel-major-block">
+      <div class="mc-intel-major-header">${esc(headerLabel)}</div>
+      ${fmtRow(labelTag1, day1Val, day1Wr)}
+      ${fmtRow(labelTag2, day2Val, day2Wr)}
+      ${fmtRow(labelConv, convVal)}
     </div>`;
   }
 

@@ -33,6 +33,22 @@ window.MetaCall = (function () {
   let _lastMajorInfo     = null; // { id, name, shortName, date, country, totalPlayers }
   let _lastMajorByDeck   = {};   // normalize(deck) -> { share, winPct, players }
 
+  // ── Predictor 4.0a — Meta Dynamics (counter-meta surge detection) ──
+  // After a major, decks that overperformed surge on the online ladder
+  // (Bandwagon). Counters against them rise next as the meta reacts.
+  // 4.0a doesn't shift the surge deck itself (weekly_trend already
+  // does that) — it boosts the COUNTERS to surge decks, with magnitude
+  // weighted by surge size, days-since-major decay, and matchup WR.
+  // Numbers populated lazily during _runPredictor; surface only via
+  // background prediction adjustment + a dev-console log (no UI noise).
+  const PREDICTOR_4_SURGE_PP        = 1.0;   // pp gain to qualify as a surge
+  const PREDICTOR_4_COUNTER_WR_MIN  = 0.55;  // min WR vs surge to count as counter
+  const PREDICTOR_4_COUNTER_AMP     = 2.0;   // multiplier on (WR - threshold)
+  const PREDICTOR_4_DECAY_DAYS      = 21;    // hype fully fades after 21 days
+  const PREDICTOR_4_BOOST_CAP_PP    = 0.5;   // hard cap (pre-concentration); ^1.5 amplifies it
+  let _metaDynamicsByDeck = {}; // normalize(deck) -> { boost: pp, reasons: [...] }
+  let _metaDynamicsLastLogId = null; // tournament id we last printed the dev log for
+
   let _settings = {
     totalPlayers  : 1300,
     rounds        : 8,
@@ -392,6 +408,132 @@ window.MetaCall = (function () {
     return first;
   }
 
+  // ── Predictor 4.0a — Meta Dynamics ─────────────────────────
+  // Detect surge decks (online share gain since last major) and boost
+  // their counters. Returns nothing — populates _metaDynamicsByDeck.
+  //
+  // Inputs:
+  //   _shareList[i].ladderShare       (current online share, raw count)
+  //   _snapshotAtMajor[k].share       (online share at major day)
+  //   _matchupMap[ck][sk].pWin        (counter-vs-surge win rate, 0..1)
+  //   _lastMajorInfo.date             (drives the linear decay over 21d)
+  //
+  // Output per counter deck:
+  //   { boost: pp, reasons: [{ vs: surgeDeck, surge: pp, wr: 0..1, contrib: pp }, ...] }
+  //
+  // Falls through silently when a required input is missing — early in
+  // a format the model just contributes 0 and the rest of the predictor
+  // runs unchanged.
+  function _computeMetaDynamics() {
+    _metaDynamicsByDeck = {};
+
+    if (!_matchupMap || !_lastMajorInfo || !_lastMajorInfo.date) return;
+    if (!_shareList || _shareList.length === 0) return;
+
+    // Decay: 1.0 right after major, 0.0 after PREDICTOR_4_DECAY_DAYS.
+    // Skip the whole calculation when hype has fully decayed — the
+    // surge has already been baked into the regular weekly_trend
+    // signal by then.
+    const today = new Date();
+    const majorDate = new Date(_lastMajorInfo.date);
+    if (isNaN(majorDate.getTime())) return;
+    const daysSince = Math.max(0, Math.floor((today - majorDate) / 86400000));
+    const decay = Math.max(0, 1 - daysSince / PREDICTOR_4_DECAY_DAYS);
+    if (decay <= 0) return;
+
+    // Renormalise both share basises to %.
+    const totalLadder = _shareList.reduce((s, d) => s + (d.ladderShare || 0), 0) || 1;
+    const totalSnap   = Object.values(_snapshotAtMajor).reduce((s, e) => s + e.share, 0) || 1;
+
+    // Find surge decks: current online share - share-at-major.
+    const surges = [];
+    _shareList.forEach(d => {
+      const k = normalize(d.name);
+      const baselineSnap = _snapshotAtMajor[k];
+      if (!baselineSnap) return; // no baseline → can't measure surge
+      const currentPct  = (d.ladderShare / totalLadder) * 100;
+      const baselinePct = (baselineSnap.share / totalSnap) * 100;
+      const delta = currentPct - baselinePct;
+      if (delta >= PREDICTOR_4_SURGE_PP) {
+        surges.push({
+          name: d.name,
+          key: k,
+          surgePp: delta,
+          hype: delta * decay
+        });
+      }
+    });
+
+    if (surges.length === 0) return;
+
+    // For each candidate deck (anything with online share — counters can
+    // sit at low share themselves), sum boost over surge decks beat ≥ 55%.
+    // Lookup is direct (counter → surge) first, with reverse-lookup
+    // fallback so we don't miss matchups stored only one-way.
+    _shareList.forEach(c => {
+      const ck = normalize(c.name);
+      let totalBoost = 0;
+      const reasons = [];
+      surges.forEach(s => {
+        if (ck === s.key) return; // a deck can't counter itself
+        const direct  = _matchupMap[ck] && _matchupMap[ck][s.key];
+        const reverse = _matchupMap[s.key] && _matchupMap[s.key][ck];
+        let wr;
+        if (direct && typeof direct.pWin === 'number') {
+          wr = direct.pWin;
+        } else if (reverse && typeof reverse.pWin === 'number') {
+          // c's WR vs s = 1 - (s's WR vs c) - tie share, but tie is small
+          // and roughly symmetric → use 1 - pWin as a close approximation.
+          wr = 1 - reverse.pWin;
+        } else {
+          return; // no matchup data
+        }
+        if (wr < PREDICTOR_4_COUNTER_WR_MIN) return;
+        const contrib = s.hype * (wr - PREDICTOR_4_COUNTER_WR_MIN) * PREDICTOR_4_COUNTER_AMP;
+        if (contrib <= 0) return;
+        totalBoost += contrib;
+        reasons.push({ vs: s.name, surgePp: s.surgePp, wr, contrib });
+      });
+      if (totalBoost > 0) {
+        // Cap so 4.0a never dominates the prediction. The cap also
+        // protects against runaway boosts when many surges stack up.
+        const capped = Math.min(totalBoost, PREDICTOR_4_BOOST_CAP_PP);
+        _metaDynamicsByDeck[ck] = {
+          boost:   capped,
+          rawSum:  totalBoost,
+          reasons: reasons.sort((a, b) => b.contrib - a.contrib)
+        };
+      }
+    });
+
+    // Dev-console log — one entry per fresh major. Helps eyeball the
+    // detection without putting noise in the UI. Only logs when a new
+    // major is encountered (so reload + scenario tweaks don't spam).
+    try {
+      if (_lastMajorInfo.id && _metaDynamicsLastLogId !== _lastMajorInfo.id) {
+        _metaDynamicsLastLogId = _lastMajorInfo.id;
+        const surgeSummary = surges
+          .map(s => `${s.name} (+${s.surgePp.toFixed(2)} pp → hype ${s.hype.toFixed(2)})`)
+          .join(', ');
+        const topCounters = Object.entries(_metaDynamicsByDeck)
+          .sort((a, b) => b[1].boost - a[1].boost)
+          .slice(0, 8)
+          .map(([k, v]) => {
+            const name = (_shareList.find(d => normalize(d.name) === k) || {}).name || k;
+            const top = v.reasons[0];
+            return `${name} +${v.boost.toFixed(2)} pp (vs ${top.vs}: ${(top.wr*100).toFixed(0)}% WR)`;
+          })
+          .join('\n  ');
+        console.log(
+          `[Predictor 4.0a] Major ${_lastMajorInfo.shortName || _lastMajorInfo.id}, ` +
+          `${daysSince}d ago, decay ${(decay*100).toFixed(0)}%\n` +
+          `  Surge decks (${surges.length}): ${surgeSummary || 'none'}\n` +
+          `  Top counters:\n  ${topCounters || '(none — no matchup data hit threshold)'}`
+        );
+      }
+    } catch (_e) { /* dev log only — never block prediction */ }
+  }
+
   // ── Predictor 2.0 — runnable on demand ────────────────────
   // Extracted so a Testing Group import can update _tgFieldShares and
   // re-run the prediction without a full data reload. Uses module
@@ -399,6 +541,10 @@ window.MetaCall = (function () {
   // _labsRowsByDeck, _tgFieldShares, _predictorMode.
   function _runPredictor() {
     if (!_shareList) return;
+
+    // Predictor 4.0a — compute meta-dynamics boosts up front so the
+    // per-deck loop below can add them as a small additive bonus.
+    _computeMetaDynamics();
 
     // Use raw ladderShare (immutable) for normalisation — onlineShare
     // gets overwritten by the predicted value at the end of the run, so
@@ -489,6 +635,12 @@ window.MetaCall = (function () {
       const t8ConvAvg = (convStats3 && convStats3.n > 0) ? convStats3.sum / convStats3.n : 0;
       const labsT8Boost = t8ConvAvg > 0 ? _clip(t8ConvAvg / 0.25, 0.5, 2.0) : 1.0;
 
+      // Predictor 4.0a — counter-meta surge boost (additive, capped pp).
+      // Sits ON TOP of the weighted predictor signals; doesn't shift
+      // them. 0 for surge decks themselves (they're already in
+      // weekly_trend) and any deck with no qualifying counters.
+      const metaDynBoostPp = (_metaDynamicsByDeck[k] && _metaDynamicsByDeck[k].boost) || 0;
+
       let predicted;
       if (_predictorMode === 'B') {
         // Mode B (Predictor 3.0): labs majors authoritative + conv-rate
@@ -500,13 +652,15 @@ window.MetaCall = (function () {
         //   0.15 ladder
         //   0.15 post-major-trend
         //   0.10 weekly-trend
+        //   + meta-dynamics counter-boost (4.0a, capped pp, additive)
         const labsRow = _labsRowsByDeck[k];
         const labsPct = labsRow ? (labsRow.share / labsTotalShare) * 100 : 0;
         predicted = 0.40 * labsPct * labsT8Boost
                   + 0.20 * broughtPct
                   + 0.15 * ladderPct
                   + 0.15 * postMajorSignal
-                  + 0.10 * weeklySignal;
+                  + 0.10 * weeklySignal
+                  + metaDynBoostPp;
       } else if (tgLoaded) {
         // Mode A + Testing Group: TG quantities reflect the user's
         // expert prep insight from their group, so weight it heavily.

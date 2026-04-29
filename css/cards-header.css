@@ -78,22 +78,25 @@
 }
 
 /* Generic header icon button — used by Battle Journal, My Decks,
-   Wishlist (and any future header shortcut). One uniform pill so the
-   header reads as a coherent toolbar instead of a row of mismatched
-   blobs. Hover lifts the button and tints the SVG; per-button accents
-   below add a recognizable colour without breaking the shared shape. */
+   Wishlist (and any future header shortcut). Now a rounded-rect with
+   icon ON TOP and a small text label BELOW so the button is
+   self-explanatory. Earlier 40×40 icon-only circles read as
+   decoration; users couldn't tell what each button was without
+   hovering for the tooltip. */
 .header-icon-btn {
     position: relative;
     background: rgba(255, 255, 255, 0.06);
     border: 1px solid rgba(255, 255, 255, 0.10);
     cursor: pointer;
-    padding: 0;
+    padding: 4px 8px 5px;
     display: inline-flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
+    gap: 2px;
+    min-width: 56px;
+    height: 52px;
+    border-radius: 11px;
     color: #f4f7fb;
     transition: background 0.18s ease, border-color 0.18s ease,
                 color 0.18s ease, transform 0.18s ease;
@@ -108,22 +111,34 @@
     outline: 2px solid rgba(255, 255, 255, 0.65);
     outline-offset: 2px;
 }
+/* SVG fallback (legacy header buttons). Image variant for the new
+   PNG icons sits at .header-icon-img below. Both share footprint so
+   the toolbar reads as a uniform row. */
 .header-icon-svg {
-    width: 22px;
-    height: 22px;
+    width: 26px;
+    height: 26px;
     pointer-events: none;
     color: inherit;
 }
-/* Raster-image variant of .header-icon-svg — same footprint so the
-   row stays uniform when buttons mix SVG strokes (older icons) and
-   PNG art (Note/Box/Wishlist). object-fit:contain guards against any
-   non-square sources. */
 .header-icon-img {
-    width: 22px;
-    height: 22px;
+    width: 28px;
+    height: 28px;
     object-fit: contain;
     pointer-events: none;
     display: block;
+}
+/* Caption below the icon — small but readable so the user can
+   identify each button at a glance. Uppercase + slight letter-
+   spacing makes it look like a button affordance, not a paragraph. */
+.header-icon-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    line-height: 1;
+    color: inherit;
+    pointer-events: none;
+    white-space: nowrap;
+    text-transform: none;
 }
 
 /* Per-button accent colour — borrowed only on hover so the row stays

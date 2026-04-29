@@ -2129,9 +2129,40 @@
 
 /* ── Buttons in the panel-title row: text + icon variant ── */
 .mc-group-toggle-btn .mc-btn-icon,
-.mc-share-btn .mc-btn-icon {
+.mc-share-btn .mc-btn-icon,
+.mc-collapse-all-btn .mc-btn-icon {
     margin-right: 4px;
 }
+
+/* Global "Collapse all / Expand all" — sits between the badges and
+   the Group/Share buttons. Same visual weight as Group toggle so it
+   reads as a peer table-control. */
+.mc-collapse-all-btn {
+    margin-left: auto;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #5b6a82;
+    background: #f1f4f9;
+    border: 1px solid #d6dee9;
+    border-radius: 8px;
+    padding: 6px 10px;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+.mc-collapse-all-btn:hover {
+    background: #e5ebf3;
+    border-color: #b9c6d8;
+    color: #2c3e50;
+}
+.mc-collapse-all-btn:focus-visible {
+    outline: 2px solid #9b59b6;
+    outline-offset: 2px;
+}
+/* When the global button is present, the existing margin-left:auto on
+   .mc-group-toggle-btn would push it right of the global one. We want
+   them adjacent — so suppress the auto margin when the collapse-all
+   button precedes it. */
+.mc-collapse-all-btn ~ .mc-group-toggle-btn { margin-left: 6px; }
 
 /* ==============================================================
    Mobile (≤600px) — Field Composition adjustments
@@ -2151,19 +2182,26 @@
         font-size: 1.05rem;
     }
     .metacall-panel-title .mc-badge { font-size: 0.72rem; }
-    /* Group-toggle + Share buttons collapse to icon-only — they
-       were taking the entire header row on phones. Push Share to
-       the right so it lines up with the badges. */
+    /* Group-toggle + Share + Collapse-all buttons collapse to
+       icon-only — they were taking the entire header row on phones.
+       Push Share to the right so it lines up with the badges. */
     .mc-group-toggle-btn,
-    .mc-share-btn {
+    .mc-share-btn,
+    .mc-collapse-all-btn {
         padding: 6px 9px;
         font-size: 0.8rem;
     }
     .mc-group-toggle-btn .mc-btn-text,
-    .mc-share-btn .mc-btn-text { display: none; }
+    .mc-share-btn .mc-btn-text,
+    .mc-collapse-all-btn .mc-btn-text { display: none; }
     .mc-group-toggle-btn .mc-btn-icon,
-    .mc-share-btn .mc-btn-icon { margin: 0; font-size: 1rem; }
+    .mc-share-btn .mc-btn-icon,
+    .mc-collapse-all-btn .mc-btn-icon { margin: 0; font-size: 1rem; }
     .mc-share-btn { margin-left: auto; }
+    /* On mobile the collapse-all button no longer needs margin-left:
+       auto since the share button takes that role. Pull it next to
+       the group toggle so the icon-only buttons cluster together. */
+    .mc-collapse-all-btn { margin-left: 0; }
 
     /* Field-info chip — stays full width on mobile so it doesn't
        collide with anything to its right. */

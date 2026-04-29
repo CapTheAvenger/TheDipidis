@@ -69,13 +69,20 @@ window.MetaCall = (function () {
   } catch (_) { /* private mode — fall back to default */ }
   let _customDecks      = [];    // [{name, share}] — user-added decks expected at the tourney
   let _currentScenarioName = ''; // name of the currently loaded saved scenario
-  // Per-row "details expanded" state — keyed by normalized deck name
-  // (so it survives re-renders that rebuild the table after the user
-  // edits a personal-estimate value). Default state is collapsed: a
-  // deck row is just name + icons + tiny ▾ toggle, ~52px tall. Click
-  // the toggle to drop the intel block (online %, top-8 conv, trend,
-  // last-major chip, personal data) below the row.
-  const _expandedDetailRows = new Set();
+  // Detail-row state model — keyed by normalized deck name so it
+  // survives re-renders triggered by editing a personal-estimate.
+  //
+  //   _detailGlobalMode  : 'expanded' (default) | 'collapsed'
+  //   _detailOverrides   : Set of deck keys that DEVIATE from the
+  //                        global mode (so a single "Expand/Collapse
+  //                        all" click can wipe per-row state cleanly
+  //                        without losing track of intentional flips)
+  //
+  // Effective expansion for deck k:
+  //     def = (_detailGlobalMode === 'expanded')
+  //     expanded = _detailOverrides.has(k) ? !def : def
+  let _detailGlobalMode = 'expanded';
+  const _detailOverrides = new Set();
   // Brand shown in share-image footer.
   const BRAND_FOOTER = 'thedipidis.app';
 
@@ -1478,7 +1485,7 @@ window.MetaCall = (function () {
     const onlineDisplay = isCustom ? '—' : deck.onlineShare.toFixed(2) + '%';
     const intelHtml = (isJunk || isCustom) ? '' : _renderDeckBadge(deck.name);
     const k = normalize(deck.name);
-    const expanded = _expandedDetailRows.has(k);
+    const expanded = _isDetailExpanded(k);
     const toggleHtml = intelHtml
       ? `<button type="button" class="mc-row-toggle${expanded ? ' is-expanded' : ''}"
                 aria-expanded="${expanded ? 'true' : 'false'}"
@@ -1509,6 +1516,13 @@ window.MetaCall = (function () {
         </tr>`
       : '';
     return mainRow + detailRow;
+  }
+
+  // Effective expanded-state for a deck row, given the global mode +
+  // per-row overrides. See _detailGlobalMode comment for the model.
+  function _isDetailExpanded(k) {
+    const def = _detailGlobalMode === 'expanded';
+    return _detailOverrides.has(k) ? !def : def;
   }
 
   // Classify the AVG. ENC. lambda into a 3-tier traffic-light scale so
@@ -1565,7 +1579,7 @@ window.MetaCall = (function () {
                             oninput="MetaCall._onPersonalShare('${escJs(deck.name)}', this.value)">`;
           const variantIntel = _renderDeckBadge(deck.name);
           const dk = normalize(deck.name);
-          const variantExpanded = _expandedDetailRows.has(dk);
+          const variantExpanded = _isDetailExpanded(dk);
           const variantToggle = variantIntel
             ? `<button type="button" class="mc-row-toggle${variantExpanded ? ' is-expanded' : ''}"
                        aria-expanded="${variantExpanded ? 'true' : 'false'}"
@@ -1615,12 +1629,23 @@ window.MetaCall = (function () {
     const groupBtnIcon  = _groupByMain ? '📊' : '🔗';
     const groupBtnTextOnly = groupBtnFullLabel.replace(/^[^\wÀ-ſ]+\s*/, '').trim();
 
+    // Global "Collapse / Expand all" — flips the default state for
+    // every detail row. Label reflects what clicking will DO, not
+    // the current state.
+    const allCollapsed = _detailGlobalMode === 'collapsed';
+    const allBtnLabel  = allCollapsed ? t('mc.expandAll') : t('mc.collapseAll');
+    const allBtnIcon   = allCollapsed ? '▾' : '▴';
+
     return `
 <div class="metacall-panel">
   <div class="metacall-panel-title">
     <span class="mc-panel-title-text">${t('mc.panelField')}</span>
     <span class="mc-badge">Top ${TOP_N}</span>
     <span class="mc-badge" id="mc-players-badge">${_settings.totalPlayers.toLocaleString()} ${t('mc.labelPlayers')}</span>
+    <button class="mc-collapse-all-btn" onclick="MetaCall._toggleAllDetails()" title="${esc(allBtnLabel)}" aria-label="${esc(allBtnLabel)}">
+      <span class="mc-btn-icon">${allBtnIcon}</span>
+      <span class="mc-btn-text">${esc(allBtnLabel)}</span>
+    </button>
     <button class="mc-group-toggle-btn" onclick="MetaCall._toggleGroupField()" title="${esc(groupBtnFullLabel)}" aria-label="${esc(groupBtnFullLabel)}">
       <span class="mc-btn-icon">${groupBtnIcon}</span>
       <span class="mc-btn-text">${esc(groupBtnTextOnly)}</span>
@@ -2905,12 +2930,12 @@ window.MetaCall = (function () {
     if (arrow) arrow.textContent = opening ? '▼' : '▶';
   }
 
-  // Toggle the per-deck detail row in the Field panel. State is held in
-  // _expandedDetailRows so a re-render (triggered by editing a personal-
-  // estimate value) preserves which rows are expanded. Pure DOM walk
-  // — finds the detail row as the next sibling of the button's main
-  // row — so the click is instant and doesn't blow away keyboard focus
-  // elsewhere on the page.
+  // Toggle the per-deck detail row. Flips this row's deviation from
+  // the global mode — so clicking ▾ on an open row marks it as
+  // "deviates from default" if default is expanded, and clears the
+  // override if it was already deviating. Pure DOM walk — finds the
+  // detail row as the next sibling of the button's main row — so the
+  // click is instant and doesn't blow away focus elsewhere.
   function _toggleDetail(btn) {
     if (!btn) return;
     const k = btn.getAttribute('data-deck-key') || '';
@@ -2923,9 +2948,21 @@ window.MetaCall = (function () {
     btn.classList.toggle('is-expanded', opening);
     btn.setAttribute('aria-expanded', opening ? 'true' : 'false');
     if (k) {
-      if (opening) _expandedDetailRows.add(k);
-      else _expandedDetailRows.delete(k);
+      // XOR-toggle the deviation. Adds to the set if not present
+      // (row now differs from the global default), removes if it
+      // was already deviating (row matches the default again).
+      if (_detailOverrides.has(k)) _detailOverrides.delete(k);
+      else _detailOverrides.add(k);
     }
+  }
+
+  // Flip the global "everything expanded by default" mode and clear
+  // any per-row deviations. Re-renders the field panel so the new
+  // default sweeps through every row at once.
+  function _toggleAllDetails() {
+    _detailGlobalMode = _detailGlobalMode === 'expanded' ? 'collapsed' : 'expanded';
+    _detailOverrides.clear();
+    refreshResults();
   }
 
   // Toggle flat ↔ grouped field view — preserve scroll so user sees the
@@ -3294,6 +3331,7 @@ window.MetaCall = (function () {
     _toggleGroup,
     _toggleGroupField,
     _toggleDetail,
+    _toggleAllDetails,
     _addCustomDeck,
     _removeCustomDeck,
     _onCustomDeckName,

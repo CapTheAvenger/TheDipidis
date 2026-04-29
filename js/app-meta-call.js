@@ -69,6 +69,13 @@ window.MetaCall = (function () {
   } catch (_) { /* private mode — fall back to default */ }
   let _customDecks      = [];    // [{name, share}] — user-added decks expected at the tourney
   let _currentScenarioName = ''; // name of the currently loaded saved scenario
+  // Per-row "details expanded" state — keyed by normalized deck name
+  // (so it survives re-renders that rebuild the table after the user
+  // edits a personal-estimate value). Default state is collapsed: a
+  // deck row is just name + icons + tiny ▾ toggle, ~52px tall. Click
+  // the toggle to drop the intel block (online %, top-8 conv, trend,
+  // last-major chip, personal data) below the row.
+  const _expandedDetailRows = new Set();
   // Brand shown in share-image footer.
   const BRAND_FOOTER = 'thedipidis.app';
 
@@ -1461,30 +1468,59 @@ window.MetaCall = (function () {
     const hasPersonal = deck.personalShare !== undefined;
     const barW        = Math.round((deck.finalShare / Math.max(maxShare, 0.01)) * 100);
     const rowClass    = isJunk ? 'mc-row-junk' : (isCustom ? 'mc-row-custom' : '');
-    // Junk and custom decks don't have editable "personal estimate" in the field
-    // (junk is computed, custom is set in the custom-decks panel)
+    const encTier     = _avgEncTier(lambda);
     const personalCell = (isJunk || isCustom)
-      ? '<span style="color:#aaa">—</span>'
-      : `<input type="number" min="0" max="100" step="0.1" placeholder="—"
+      ? '<span class="mc-cell-dash">—</span>'
+      : `<input type="number" min="0" max="100" step="0.1" placeholder="${esc(t('mc.estimatePh'))}"
                 value="${hasPersonal ? deck.personalShare : ''}"
-                class="mc-personal-input" data-deck="${esc(deck.name)}"
-                oninput="MetaCall._onPersonalShare('${escJs(deck.name)}', this.value)"
-                style="width:68px;padding:3px 5px;border:1px solid #d0dae5;border-radius:5px;font-size:0.84rem;text-align:center;">`;
+                class="mc-personal-input${hasPersonal ? ' has-value' : ''}" data-deck="${esc(deck.name)}"
+                oninput="MetaCall._onPersonalShare('${escJs(deck.name)}', this.value)">`;
     const onlineDisplay = isCustom ? '—' : deck.onlineShare.toFixed(2) + '%';
-    const badge = (isJunk || isCustom) ? '' : _renderDeckBadge(deck.name);
-    return `<tr class="${rowClass}">
-      <td><span class="mc-deck-name">${label}</span>${badge}</td>
-      <td><span class="mc-share-online">${onlineDisplay}</span></td>
-      <td>${personalCell}</td>
-      <td><span class="mc-share-final${hasPersonal ? ' has-personal' : ''}">${deck.finalShare.toFixed(2)}%</span></td>
-      <td><span class="mc-players-count">${deck.count.toLocaleString()}</span></td>
-      <td>
-        <div class="mc-encounters-bar">
+    const intelHtml = (isJunk || isCustom) ? '' : _renderDeckBadge(deck.name);
+    const k = normalize(deck.name);
+    const expanded = _expandedDetailRows.has(k);
+    const toggleHtml = intelHtml
+      ? `<button type="button" class="mc-row-toggle${expanded ? ' is-expanded' : ''}"
+                aria-expanded="${expanded ? 'true' : 'false'}"
+                aria-label="${esc(t('mc.toggleDetailsAria'))}"
+                title="${esc(t('mc.toggleDetailsAria'))}"
+                data-deck-key="${esc(k)}"
+                onclick="MetaCall._toggleDetail(this)">▾</button>`
+      : '';
+    const mainRow = `<tr class="mc-row-main ${rowClass}">
+      <td class="mc-cell-deck">
+        <span class="mc-deck-name">${label}</span>
+        ${toggleHtml}
+      </td>
+      <td class="mc-cell-online"><span class="mc-share-online">${onlineDisplay}</span></td>
+      <td class="mc-cell-est">${personalCell}</td>
+      <td class="mc-cell-final"><span class="mc-share-final${hasPersonal ? ' has-personal' : ''}">${deck.finalShare.toFixed(2)}%</span></td>
+      <td class="mc-cell-players"><span class="mc-players-count">${deck.count.toLocaleString()}</span></td>
+      <td class="mc-cell-enc">
+        <div class="mc-encounters-bar mc-enc-${encTier}">
           <div class="mc-bar-bg"><div class="mc-bar-fill" style="width:${barW}%"></div></div>
           <span class="mc-encounters-label">∅ ${lambda.toFixed(2)}</span>
         </div>
       </td>
     </tr>`;
+    const detailRow = intelHtml
+      ? `<tr class="mc-row-detail${expanded ? '' : ' is-collapsed'}" data-deck-key="${esc(k)}">
+          <td colspan="6">${intelHtml}</td>
+        </tr>`
+      : '';
+    return mainRow + detailRow;
+  }
+
+  // Classify the AVG. ENC. lambda into a 3-tier traffic-light scale so
+  // the bar colour conveys "is this deck rare / normal / very common
+  // for the chosen field size?" at a glance.
+  //   ≤ 0.8  → green   (you'll likely face this 0–1 times in 8 rounds)
+  //   ≤ 1.2  → yellow  (about once)
+  //   > 1.2  → red     (multiple expected encounters)
+  function _avgEncTier(lambda) {
+    if (lambda <= 0.8) return 'low';
+    if (lambda <= 1.2) return 'mid';
+    return 'high';
   }
 
   function renderFieldPanel(field) {
@@ -1499,19 +1535,20 @@ window.MetaCall = (function () {
         const gid    = `mcg-${gi}`;
         const lambda = _settings.rounds * group.totalShare / 100;
         const barW   = Math.round((group.totalShare / maxShare) * 100);
+        const groupEncTier = _avgEncTier(lambda);
         const header = `
-<tr class="mc-group-header" onclick="MetaCall._toggleGroup('${gid}')">
-  <td>
+<tr class="mc-row-main mc-group-header" onclick="MetaCall._toggleGroup('${gid}')">
+  <td class="mc-cell-deck">
     <span class="mc-group-arrow" id="mc-gt-${gid}">▶</span>
     <span class="mc-deck-name">${_mcIconHtml(group.main)}${esc(_familyDisplayName(group.main))}</span>
     <span class="mc-group-count">${group.variants.length} ${t('mc.variants')}</span>
   </td>
-  <td><span class="mc-share-online">${group.totalOnline.toFixed(2)}%</span></td>
-  <td><span style="color:#aaa">—</span></td>
-  <td><span class="mc-share-final">${group.totalShare.toFixed(2)}%</span></td>
-  <td><span class="mc-players-count">${group.totalCount.toLocaleString()}</span></td>
-  <td>
-    <div class="mc-encounters-bar">
+  <td class="mc-cell-online"><span class="mc-share-online">${group.totalOnline.toFixed(2)}%</span></td>
+  <td class="mc-cell-est"><span class="mc-cell-dash">—</span></td>
+  <td class="mc-cell-final"><span class="mc-share-final">${group.totalShare.toFixed(2)}%</span></td>
+  <td class="mc-cell-players"><span class="mc-players-count">${group.totalCount.toLocaleString()}</span></td>
+  <td class="mc-cell-enc">
+    <div class="mc-encounters-bar mc-enc-${groupEncTier}">
       <div class="mc-bar-bg"><div class="mc-bar-fill" style="width:${barW}%"></div></div>
       <span class="mc-encounters-label">∅ ${lambda.toFixed(2)}</span>
     </div>
@@ -1521,24 +1558,47 @@ window.MetaCall = (function () {
           const hasP   = deck.personalShare !== undefined;
           const dLam   = _settings.rounds * deck.finalShare / 100;
           const dBarW  = Math.round((deck.finalShare / maxShare) * 100);
-          const pCell  = `<input type="number" min="0" max="100" step="0.1" placeholder="—"
+          const dEncTier = _avgEncTier(dLam);
+          const pCell  = `<input type="number" min="0" max="100" step="0.1" placeholder="${esc(t('mc.estimatePh'))}"
                             value="${hasP ? deck.personalShare : ''}"
-                            class="mc-personal-input" data-deck="${esc(deck.name)}"
-                            oninput="MetaCall._onPersonalShare('${escJs(deck.name)}', this.value)"
-                            style="width:68px;padding:3px 5px;border:1px solid #d0dae5;border-radius:5px;font-size:0.84rem;text-align:center;">`;
-          return `<tr class="mc-group-detail mc-group-hidden" data-group="${gid}">
-            <td style="padding-left:26px"><span class="mc-deck-name mc-variant-name">${_mcIconHtml(deck.name)}${esc(deck.name)}</span></td>
-            <td><span class="mc-share-online">${deck.onlineShare.toFixed(2)}%</span></td>
-            <td>${pCell}</td>
-            <td><span class="mc-share-final${hasP ? ' has-personal' : ''}">${deck.finalShare.toFixed(2)}%</span></td>
-            <td><span class="mc-players-count">${deck.count.toLocaleString()}</span></td>
-            <td>
-              <div class="mc-encounters-bar">
+                            class="mc-personal-input${hasP ? ' has-value' : ''}" data-deck="${esc(deck.name)}"
+                            oninput="MetaCall._onPersonalShare('${escJs(deck.name)}', this.value)">`;
+          const variantIntel = _renderDeckBadge(deck.name);
+          const dk = normalize(deck.name);
+          const variantExpanded = _expandedDetailRows.has(dk);
+          const variantToggle = variantIntel
+            ? `<button type="button" class="mc-row-toggle${variantExpanded ? ' is-expanded' : ''}"
+                       aria-expanded="${variantExpanded ? 'true' : 'false'}"
+                       aria-label="${esc(t('mc.toggleDetailsAria'))}"
+                       title="${esc(t('mc.toggleDetailsAria'))}"
+                       data-deck-key="${esc(dk)}"
+                       onclick="event.stopPropagation();MetaCall._toggleDetail(this)">▾</button>`
+            : '';
+          const variantMain = `<tr class="mc-row-main mc-group-detail mc-group-hidden" data-group="${gid}">
+            <td class="mc-cell-deck mc-cell-deck-variant">
+              <span class="mc-deck-name mc-variant-name">${_mcIconHtml(deck.name)}${esc(deck.name)}</span>
+              ${variantToggle}
+            </td>
+            <td class="mc-cell-online"><span class="mc-share-online">${deck.onlineShare.toFixed(2)}%</span></td>
+            <td class="mc-cell-est">${pCell}</td>
+            <td class="mc-cell-final"><span class="mc-share-final${hasP ? ' has-personal' : ''}">${deck.finalShare.toFixed(2)}%</span></td>
+            <td class="mc-cell-players"><span class="mc-players-count">${deck.count.toLocaleString()}</span></td>
+            <td class="mc-cell-enc">
+              <div class="mc-encounters-bar mc-enc-${dEncTier}">
                 <div class="mc-bar-bg"><div class="mc-bar-fill" style="width:${dBarW}%"></div></div>
                 <span class="mc-encounters-label">∅ ${dLam.toFixed(2)}</span>
               </div>
             </td>
           </tr>`;
+          // Detail row for the variant — hidden both by group-collapse
+          // (mc-group-hidden, parent state) AND by per-row collapse
+          // (is-collapsed, this row's own state).
+          const variantDetail = variantIntel
+            ? `<tr class="mc-row-detail mc-group-detail mc-group-hidden${variantExpanded ? '' : ' is-collapsed'}" data-group="${gid}" data-deck-key="${esc(dk)}">
+                 <td colspan="6">${variantIntel}</td>
+               </tr>`
+            : '';
+          return variantMain + variantDetail;
         }).join('');
         return header + details;
       }).join('');
@@ -1547,22 +1607,33 @@ window.MetaCall = (function () {
       rows = field.map(deck => _renderFlatDeckRow(deck, maxShare)).join('');
     }
 
+    // The "Group variants by family" toggle is a power-user feature.
+    // On mobile, keep only the icon (🔗 / 📊) — the verbose label
+    // would otherwise hog the row and push other controls off-screen.
+    // The .mc-btn-text span is hidden via CSS at <600px.
+    const groupBtnFullLabel = _groupByMain ? t('mc.flatView') : t('mc.groupByPokemon');
+    const groupBtnIcon  = _groupByMain ? '📊' : '🔗';
+    const groupBtnTextOnly = groupBtnFullLabel.replace(/^[^\wÀ-ſ]+\s*/, '').trim();
+
     return `
 <div class="metacall-panel">
   <div class="metacall-panel-title">
-    ${t('mc.panelField')}
+    <span class="mc-panel-title-text">${t('mc.panelField')}</span>
     <span class="mc-badge">Top ${TOP_N}</span>
     <span class="mc-badge" id="mc-players-badge">${_settings.totalPlayers.toLocaleString()} ${t('mc.labelPlayers')}</span>
-    <button class="mc-group-toggle-btn" onclick="MetaCall._toggleGroupField()">
-      ${_groupByMain ? t('mc.flatView') : t('mc.groupByPokemon')}
+    <button class="mc-group-toggle-btn" onclick="MetaCall._toggleGroupField()" title="${esc(groupBtnFullLabel)}" aria-label="${esc(groupBtnFullLabel)}">
+      <span class="mc-btn-icon">${groupBtnIcon}</span>
+      <span class="mc-btn-text">${esc(groupBtnTextOnly)}</span>
     </button>
-    <button class="mc-share-btn" onclick="MetaCall.exportFieldShareImage()" title="${esc(t('mc.shareField'))}">
-      📤 ${t('mc.share')}
+    <button class="mc-share-btn" onclick="MetaCall.exportFieldShareImage()" title="${esc(t('mc.shareField'))}" aria-label="${esc(t('mc.shareField'))}">
+      <span class="mc-btn-icon">📤</span>
+      <span class="mc-btn-text">${t('mc.share')}</span>
     </button>
   </div>
-  <p style="font-size:0.8rem;color:#888;margin:-8px 0 12px">
-    ${t('mc.personalShareExpl')}
-  </p>
+  <div class="mc-field-info" role="note">
+    <span class="mc-field-info-icon" aria-hidden="true">ℹ️</span>
+    <span class="mc-field-info-text">${t('mc.personalShareExpl')}</span>
+  </div>
   <div class="metacall-table-wrap">
     <table class="metacall-table">
       <colgroup>
@@ -1575,12 +1646,12 @@ window.MetaCall = (function () {
       </colgroup>
       <thead>
         <tr>
-          <th>${t('mc.headerDeck')}</th>
-          <th>${t('mc.headerOnline')}</th>
-          <th>${t('mc.headerPersonal')}</th>
-          <th>${t('mc.headerFinal')}</th>
-          <th>${t('mc.headerPlayers')}</th>
-          <th>${t('mc.headerAvgEnc')} (${_settings.rounds} R.)</th>
+          <th class="mc-th-deck">${t('mc.headerDeck')}</th>
+          <th class="mc-th-online" title="${esc(t('mc.headerOnlineTooltip'))}">${t('mc.headerOnline')}</th>
+          <th class="mc-th-est" title="${esc(t('mc.headerPersonalTooltip'))}">${t('mc.headerPersonal')}</th>
+          <th class="mc-th-final" title="${esc(t('mc.headerFinalTooltip'))}">${t('mc.headerFinal')}</th>
+          <th class="mc-th-players">${t('mc.headerPlayers')}</th>
+          <th class="mc-th-enc" title="${esc(t('mc.headerAvgEncTooltip').replace('{n}', _settings.rounds))}">${t('mc.headerAvgEnc')} (${_settings.rounds} R.)</th>
         </tr>
       </thead>
       <tbody>${rows}</tbody>
@@ -2012,12 +2083,13 @@ window.MetaCall = (function () {
     </div>`;
   }
 
-  // Per-deck text-first intel block rendered under the deck name in the
-  // field panel. Replaces the old icon-chip badge with a plain "Label:
-  // Value" list so beginners don't need to decode emojis. Each row is
-  // explicitly labelled and each number says exactly what it represents
-  // ("Online-Share heute", "Top-8-Conversion (Limitless online)", …).
-  // Last-major share + win-rate are shown when labs data is available.
+  // Per-deck text-first intel block — used in the EXPANDED detail row
+  // (see `_renderDetailRow`). Renders a 3-col stat grid for the public
+  // data points (Online %, Top-8 conv, Trend), a single inline chip
+  // for last-major Day-1/Day-2 numbers, and a personal-data row for
+  // any user data (TG WR, journal stats, TG share). Returns '' when
+  // the deck has no intel at all so the caller can decide whether to
+  // even emit a detail row.
   function _renderDeckBadge(deckName) {
     if (!_shareList) return '';
     const k = normalize(deckName);
@@ -2046,125 +2118,116 @@ window.MetaCall = (function () {
     const trendCls   = trendPct > 0.05 ? ' mc-intel-trend-pos' : (trendPct < -0.05 ? ' mc-intel-trend-neg' : '');
     const fmt = (n, dp) => n.toFixed(dp).replace('.', ',');
 
-    // Public-data rows — always present if the deck is in the share list.
-    const rows = [];
-    rows.push(_intelRow(t('mc.intelOnlineShareToday'), `${fmt(ladderPct, 1)} %`));
+    // ── Public-data stat tiles (3-col grid) ──
+    const tiles = [];
+    tiles.push(_intelStatTile(t('mc.intelOnlineShareToday'), `${fmt(ladderPct, 1)} %`));
     if (broughtPct > 0) {
-      rows.push(_intelRow(
+      tiles.push(_intelStatTile(
         t('mc.intelTop8Conv'),
         `${fmt(broughtPct, 1)} %`,
         `${fmt(convFactor, 1)}× ${t('mc.intelTop8AvgSuffix')}`
       ));
     }
     if (Math.abs(trendPct) > 0.05 || _baselineSnapshotDate) {
-      rows.push(_intelRow(
+      tiles.push(_intelStatTile(
         t('mc.intelTrend7d'),
-        `<span class="mc-intel-value-emph${trendCls}">${trendArrow} ${trendSign}${fmt(trendPct, 1)} %</span>`
+        `<span class="mc-intel-tile-value-emph${trendCls}">${trendArrow} ${trendSign}${fmt(trendPct, 1)} %</span>`
       ));
     }
 
-    // Last-major block — only when labs data + this deck appeared at the
-    // most recent major. Tells the user "this is what actually happened
-    // last weekend" — the most concrete data point we can offer.
-    //
-    // Layout has two modes:
-    //   Detailed (Day-1+Day-2 scraping): header + Tag-1 / Tag-2 / Conv
-    //                                    rows, grouped in a soft-blue card.
-    //   Legacy   (CSV pre-dates the per-day scraper): single row with
-    //                                    overall share + WR (old format).
+    // ── Last-major chip — replaces the old big bordered "Last Major"
+    // box. Single inline line: "Prag · D1 5,2% (WR 46%) · D2 5,5% (WR
+    // 37%) · Konv 19,7%". Visually subordinate to the stat tiles so
+    // the user reads "current state first, history second".
+    let majorChipHtml = '';
     if (_lastMajorInfo && _lastMajorByDeck[k]) {
       const lm      = _lastMajorByDeck[k];
       const dateStr = _formatShortDate(_lastMajorInfo.date);
       const where   = _lastMajorInfo.shortName || t('mc.intelMajorFallback');
-      const labelTxt = `${t('mc.intelLastMajor')} (${where}${dateStr ? ', ' + dateStr : ''})`;
+      const headerLabel = `${t('mc.intelLastMajor')} (${where}${dateStr ? ', ' + dateStr : ''})`;
       const hasDaySplit = (lm.day1Players > 0) || (lm.day1Share > 0) ||
                           (lm.day2Players > 0) || (lm.day2Share > 0);
       if (hasDaySplit) {
-        rows.push(_intelMajorBlock(labelTxt, lm));
+        majorChipHtml = _intelMajorChip(where, lm);
       } else {
-        const wr = lm.winPct > 0 ? `WR ${fmt(lm.winPct, 0)} %` : '';
-        rows.push(_intelRow(labelTxt, `${fmt(lm.share, 1)} %`, wr, 'mc-intel-row-major'));
+        const wr = lm.winPct > 0 ? ` (WR ${fmt(lm.winPct, 0)} %)` : '';
+        majorChipHtml = `<div class="mc-intel-major-chip mc-intel-major-chip-legacy" title="${esc(headerLabel)}">
+          <span class="mc-intel-major-chip-place">${esc(where)}</span>
+          <span class="mc-intel-major-chip-sep">·</span>
+          <span class="mc-intel-major-chip-val">${fmt(lm.share, 1)} %${wr}</span>
+        </div>`;
       }
     }
 
-    // Personal data rows — only render when the user has data. Same
-    // information as the old icon chips, but with explicit text labels.
+    // ── Personal data tiles — only render when the user has data.
+    const personals = [];
     const tgVal = _findByNormalized(_winRateOverrides, deckName);
     if (tgVal !== undefined && tgVal !== '' && !isNaN(parseFloat(tgVal))) {
-      rows.push(_intelRow(t('mc.intelTgWr'), `${fmt(parseFloat(tgVal), 0)} %`, '', 'mc-intel-row-personal'));
+      personals.push(_intelStatTile(t('mc.intelTgWr'), `${fmt(parseFloat(tgVal), 0)} %`, '', 'mc-intel-tile-personal'));
     }
     const jStats = _findByNormalized(_journalStats, deckName);
     if (jStats && jStats.total > 0) {
-      rows.push(_intelRow(
+      personals.push(_intelStatTile(
         t('mc.intelJournal'),
         `${jStats.wins}–${jStats.losses}–${jStats.ties}`,
         `${jStats.winRate} %`,
-        'mc-intel-row-personal'
+        'mc-intel-tile-personal'
       ));
     }
     const rawTgShare = _findByNormalized(_tgFieldShares, deckName) || 0;
     const tgShareTotal = Object.values(_tgFieldShares).reduce((s, v) => s + v, 0);
     if (rawTgShare > 0 && tgShareTotal > 0) {
-      rows.push(_intelRow(
+      personals.push(_intelStatTile(
         t('mc.intelTgShare'),
         `${fmt((rawTgShare / tgShareTotal) * 100, 1)} %`,
         '',
-        'mc-intel-row-personal'
+        'mc-intel-tile-personal'
       ));
     }
 
-    return `<div class="mc-deck-intel">${rows.join('')}</div>`;
+    if (tiles.length === 0 && !majorChipHtml && personals.length === 0) return '';
+    return `<div class="mc-deck-intel">
+      ${tiles.length ? `<div class="mc-intel-tile-grid">${tiles.join('')}</div>` : ''}
+      ${majorChipHtml}
+      ${personals.length ? `<div class="mc-intel-tile-grid mc-intel-tile-grid-personal">${personals.join('')}</div>` : ''}
+    </div>`;
   }
 
-  // Helper: render a single label/value/extra row for the intel block.
-  function _intelRow(label, value, extra, extraCls) {
-    const cls = 'mc-intel-row' + (extraCls ? ' ' + extraCls : '');
-    const extraHtml = extra ? `<span class="mc-intel-extra">${esc(extra)}</span>` : '';
+  // Helper: render a single stat tile (label + big value + optional
+  // small extra). Used for the public-data and personal-data grids
+  // inside the expanded detail row.
+  function _intelStatTile(label, value, extra, extraCls) {
+    const cls = 'mc-intel-tile' + (extraCls ? ' ' + extraCls : '');
+    const extraHtml = extra ? `<span class="mc-intel-tile-extra">${esc(extra)}</span>` : '';
     return `<div class="${cls}">
-      <span class="mc-intel-label">${esc(label)}</span>
-      <span class="mc-intel-value">${value}</span>
+      <span class="mc-intel-tile-label">${esc(label)}</span>
+      <span class="mc-intel-tile-value">${value}</span>
       ${extraHtml}
     </div>`;
   }
 
-  // Helper: render the Last-Major block with Tag-1 / Tag-2 / Conversion
-  // sub-rows. Visual: one bordered card (matching mc-intel-row-major) with
-  // a header line and 2-3 sub-rows inside. Sub-rows that have no data
-  // (e.g. Day-2 = 0 because the deck didn't make Day 2) are still shown
-  // with an em-dash so the user sees that the deck dropped.
-  function _intelMajorBlock(headerLabel, lm) {
+  // Helper: render the Last-Major info as a single inline chip line.
+  // Replaces the old bordered card. Format:
+  //   📍 Prag · D1 5,2% (WR 46%) · D2 5,5% (WR 37%) · Konv 19,7%
+  function _intelMajorChip(where, lm) {
     const fmt = (n, dp) => n.toFixed(dp).replace('.', ',');
-    const made   = lm.day2Players > 0;
-    const conv   = (lm.dayConv && lm.dayConv > 0)
+    const made = lm.day2Players > 0;
+    const conv = (lm.dayConv && lm.dayConv > 0)
       ? lm.dayConv
       : (lm.day1Players > 0 ? lm.day2Players / lm.day1Players : 0);
-    const labelTag1 = t('mc.intelMajorDay1');
-    const labelTag2 = t('mc.intelMajorDay2');
-    const labelConv = t('mc.intelMajorDayConv');
-
     const day1Val = lm.day1Share > 0 ? `${fmt(lm.day1Share, 1)} %` : '—';
-    const day1Wr  = lm.day1WinPct > 0 ? `WR ${fmt(lm.day1WinPct, 0)} %` : '';
+    const day1Wr  = lm.day1WinPct > 0 ? ` (WR ${fmt(lm.day1WinPct, 0)} %)` : '';
     const day2Val = made ? `${fmt(lm.day2Share, 1)} %` : '—';
-    const day2Wr  = (made && lm.day2WinPct > 0) ? `WR ${fmt(lm.day2WinPct, 0)} %` : '';
+    const day2Wr  = (made && lm.day2WinPct > 0) ? ` (WR ${fmt(lm.day2WinPct, 0)} %)` : '';
     const convVal = conv > 0 ? `${fmt(conv * 100, 1)} %` : '—';
-
-    // Compact 3-pill layout (Day 1 / Day 2 / Conv) instead of stacked rows.
-    // Cuts the field card's vertical footprint roughly in half so the
-    // value-only columns next to it don't drown in whitespace.
-    const pill = (label, value, extra) => `
-      <div class="mc-intel-major-pill">
-        <span class="mc-intel-major-pill-label">${esc(label)}</span>
-        <span class="mc-intel-major-pill-value">${value}</span>
-        ${extra ? `<span class="mc-intel-major-pill-extra">${esc(extra)}</span>` : ''}
-      </div>`;
-
-    return `<div class="mc-intel-major-block">
-      <div class="mc-intel-major-header">${esc(headerLabel)}</div>
-      <div class="mc-intel-major-pills">
-        ${pill(labelTag1, day1Val, day1Wr)}
-        ${pill(labelTag2, day2Val, day2Wr)}
-        ${pill(labelConv, convVal)}
-      </div>
+    return `<div class="mc-intel-major-chip" title="${esc(t('mc.intelLastMajor'))}">
+      <span class="mc-intel-major-chip-place">📍 ${esc(where)}</span>
+      <span class="mc-intel-major-chip-sep">·</span>
+      <span class="mc-intel-major-chip-seg"><span class="mc-intel-major-chip-k">${esc(t('mc.intelMajorDay1'))}</span> ${day1Val}${day1Wr}</span>
+      <span class="mc-intel-major-chip-sep">·</span>
+      <span class="mc-intel-major-chip-seg"><span class="mc-intel-major-chip-k">${esc(t('mc.intelMajorDay2'))}</span> ${day2Val}${day2Wr}</span>
+      <span class="mc-intel-major-chip-sep">·</span>
+      <span class="mc-intel-major-chip-seg"><span class="mc-intel-major-chip-k">Konv.</span> ${convVal}</span>
     </div>`;
   }
 
@@ -2842,6 +2905,29 @@ window.MetaCall = (function () {
     if (arrow) arrow.textContent = opening ? '▼' : '▶';
   }
 
+  // Toggle the per-deck detail row in the Field panel. State is held in
+  // _expandedDetailRows so a re-render (triggered by editing a personal-
+  // estimate value) preserves which rows are expanded. Pure DOM walk
+  // — finds the detail row as the next sibling of the button's main
+  // row — so the click is instant and doesn't blow away keyboard focus
+  // elsewhere on the page.
+  function _toggleDetail(btn) {
+    if (!btn) return;
+    const k = btn.getAttribute('data-deck-key') || '';
+    const mainRow = btn.closest('tr');
+    if (!mainRow) return;
+    const detail = mainRow.nextElementSibling;
+    if (!detail || !detail.classList.contains('mc-row-detail')) return;
+    const opening = detail.classList.contains('is-collapsed');
+    detail.classList.toggle('is-collapsed', !opening);
+    btn.classList.toggle('is-expanded', opening);
+    btn.setAttribute('aria-expanded', opening ? 'true' : 'false');
+    if (k) {
+      if (opening) _expandedDetailRows.add(k);
+      else _expandedDetailRows.delete(k);
+    }
+  }
+
   // Toggle flat ↔ grouped field view — preserve scroll so user sees the
   // change. Choice persists in localStorage so the next visit picks up
   // where the user left off (separate from per-scenario storage).
@@ -3207,6 +3293,7 @@ window.MetaCall = (function () {
     _toggleOverrides,
     _toggleGroup,
     _toggleGroupField,
+    _toggleDetail,
     _addCustomDeck,
     _removeCustomDeck,
     _onCustomDeckName,

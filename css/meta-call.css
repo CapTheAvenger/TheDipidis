@@ -99,12 +99,16 @@
 /* Column widths: DECK gets the lion's share (rich intel block);
    the four numeric columns are uniform; the ø-encounter column
    takes a bit more for the bar visual. */
-.metacall-table colgroup col.col-deck     { width: 38%; }
-.metacall-table colgroup col.col-online   { width: 10%; }
-.metacall-table colgroup col.col-est      { width: 10%; }
-.metacall-table colgroup col.col-final    { width: 10%; }
-.metacall-table colgroup col.col-players  { width: 10%; }
-.metacall-table colgroup col.col-enc      { width: 22%; }
+/* Column widths — narrower DECK column because the heavy intel block
+   (Online%, Trend, Last-Major) now lives in a separate expandable
+   detail row spanning the full table width. The numeric columns get
+   a bit more room so 11.78% no longer feels squeezed. */
+.metacall-table colgroup col.col-deck     { width: 28%; }
+.metacall-table colgroup col.col-online   { width: 11%; }
+.metacall-table colgroup col.col-est      { width: 13%; }
+.metacall-table colgroup col.col-final    { width: 11%; }
+.metacall-table colgroup col.col-players  { width: 9%;  }
+.metacall-table colgroup col.col-enc      { width: 28%; }
 /* Top-align value cells so they sit next to the deck name rather than
    centring inside the tall intel block. */
 .metacall-table td { vertical-align: top; }
@@ -1859,4 +1863,391 @@
 @media (max-width: 600px) {
     .mc-tips-grid { grid-template-columns: 1fr; gap: 8px; }
     .mc-tip-card { padding: 9px 10px; }
+}
+
+/* ==============================================================
+   Field Composition v2 — compact main row + expandable detail row
+   ==============================================================
+   Big-picture changes vs v1:
+
+   1. Each deck is two <tr>s now: a compact "main" row (deck name +
+      numbers + bar) and a hidden "detail" row that drops the rich
+      intel underneath. Toggle ▾ in the deck cell expands it. This
+      kills the height-asymmetry problem where the deck cell was
+      ~250px tall and the numeric cells centred on whitespace.
+   2. Column-coded numeric values: ONLINE % stays blue, MY ESTIMATE
+      goes lavender (interactive), FINAL % bumps to bold green so
+      "the result" reads as the result.
+   3. AVG ENC bar now uses a 3-tier traffic-light scale with a
+      header tooltip explaining what the number means.
+   4. The Last-Major block is no longer a chunky bordered card —
+      it's an inline single-line chip living inside the detail row.
+   5. The grey "My Estimate is optional" hint became an ℹ️ chip so
+      it stops getting ignored.
+   ============================================================== */
+
+/* Main row — compact 52-ish px tall (deck name + icons + chevron).
+   Vertical-align middle so the value cells line up with the name. */
+.metacall-table tbody tr.mc-row-main td {
+    vertical-align: middle;
+    padding: 9px 10px;
+}
+.metacall-table tbody tr.mc-row-main .mc-deck-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+.mc-cell-deck {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+}
+/* The deck cell is a flex container; the name needs to be allowed
+   to shrink/ellipsis so the chevron stays visible on tight widths. */
+.mc-cell-deck .mc-deck-name {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+.mc-cell-deck-variant { padding-left: 26px; }
+
+/* ── Row toggle (chevron button) ── */
+.mc-row-toggle {
+    flex: 0 0 auto;
+    width: 22px;
+    height: 22px;
+    border: 1px solid #d6dee9;
+    background: #f4f7fc;
+    color: #6b7c93;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 11px;
+    line-height: 1;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.18s, background 0.15s, border-color 0.15s;
+}
+.mc-row-toggle:hover {
+    background: #e7eef9;
+    border-color: #b9c6d8;
+    color: #2c3e50;
+}
+.mc-row-toggle.is-expanded {
+    transform: rotate(180deg);
+    background: #ece4f5;
+    border-color: #c5b3df;
+    color: #6c3a9b;
+}
+.mc-row-toggle:focus-visible {
+    outline: 2px solid #9b59b6;
+    outline-offset: 2px;
+}
+
+/* ── Detail row (collapsed by default) ── */
+.metacall-table tbody tr.mc-row-detail td {
+    background: #fafbfd;
+    border-bottom: 1px solid #f0f3f7;
+    padding: 12px 14px;
+}
+.metacall-table tbody tr.mc-row-detail.is-collapsed { display: none; }
+.metacall-table tbody tr.mc-row-detail .mc-deck-intel {
+    margin-top: 0;
+    gap: 10px;
+}
+
+/* ── Stat-tile grid inside the detail row ── */
+.mc-intel-tile-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 8px;
+}
+.mc-intel-tile-grid-personal {
+    margin-top: 6px;
+}
+.mc-intel-tile {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    padding: 7px 10px;
+    background: #fff;
+    border: 1px solid #e5ebf3;
+    border-radius: 7px;
+    min-width: 0;
+}
+.mc-intel-tile-label {
+    color: #6b7c93;
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.mc-intel-tile-value {
+    color: #1a2533;
+    font-size: 0.96rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.2;
+    white-space: nowrap;
+}
+.mc-intel-tile-extra {
+    color: #7d8ca5;
+    font-size: 0.74rem;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.2;
+    white-space: nowrap;
+}
+.mc-intel-tile-value-emph { font-weight: 800; }
+.mc-intel-tile-personal {
+    background: #fffaf0;
+    border-color: #f5e3c4;
+}
+.mc-intel-tile-personal .mc-intel-tile-label { color: #9a6b1f; }
+.mc-intel-tile-personal .mc-intel-tile-value { color: #7c5615; }
+
+/* ── Last-Major chip (inline single-line) ── */
+.mc-intel-major-chip {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 6px;
+    padding: 6px 10px;
+    background: #f6fbff;
+    border: 1px solid #d8e9f9;
+    border-radius: 6px;
+    font-size: 0.82rem;
+    color: #1f4f7a;
+    font-variant-numeric: tabular-nums;
+}
+.mc-intel-major-chip-place {
+    font-weight: 700;
+    color: #0d4b87;
+    white-space: nowrap;
+}
+.mc-intel-major-chip-sep { color: #b6d3eb; user-select: none; }
+.mc-intel-major-chip-seg { white-space: nowrap; }
+.mc-intel-major-chip-k {
+    color: #6b7c93;
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    margin-right: 2px;
+}
+
+/* ── Column-coded numeric values ── */
+.mc-cell-online .mc-share-online {
+    color: #2980b9;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+.mc-cell-est .mc-personal-input {
+    width: 78px;
+    padding: 7px 9px;
+    border: 1.5px solid #c5b3df;
+    border-radius: 7px;
+    background: #faf6ff;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-align: center;
+    color: #6c3a9b;
+    transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+    font-variant-numeric: tabular-nums;
+}
+.mc-cell-est .mc-personal-input::placeholder {
+    color: #b094c8;
+    font-weight: 500;
+}
+.mc-cell-est .mc-personal-input:hover { border-color: #9b59b6; }
+.mc-cell-est .mc-personal-input:focus {
+    outline: none;
+    border-color: #9b59b6;
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(155, 89, 182, 0.18);
+}
+.mc-cell-est .mc-personal-input.has-value {
+    background: #f3eafa;
+    border-color: #9b59b6;
+}
+.mc-cell-final .mc-share-final {
+    color: #1e8449;
+    font-weight: 800;
+    font-size: 1rem;
+    font-variant-numeric: tabular-nums;
+}
+.mc-cell-final .mc-share-final.has-personal {
+    color: #6c3a9b;
+}
+.mc-cell-dash { color: #c0c8d4; font-weight: 500; }
+.mc-cell-players .mc-players-count {
+    color: #6b7c93;
+    font-variant-numeric: tabular-nums;
+}
+
+/* ── Header colour hints — match the value-column colours so the
+   user can match column header to body cell at a glance. ── */
+.mc-th-online   { color: #2980b9; }
+.mc-th-est      { color: #6c3a9b; }
+.mc-th-final    { color: #1e8449; }
+
+/* ── AVG ENC traffic-light scale ── */
+.mc-encounters-bar.mc-enc-low  .mc-bar-fill { background: #2ecc71; }
+.mc-encounters-bar.mc-enc-mid  .mc-bar-fill { background: #f1c40f; }
+.mc-encounters-bar.mc-enc-high .mc-bar-fill { background: #e74c3c; }
+.mc-encounters-bar.mc-enc-low  .mc-encounters-label { color: #1e8449; }
+.mc-encounters-bar.mc-enc-mid  .mc-encounters-label { color: #b7770a; }
+.mc-encounters-bar.mc-enc-high .mc-encounters-label { color: #c0392b; }
+
+/* Help cursor on column headers that carry a tooltip — no native
+   cue otherwise so the user might not discover the explanations. */
+.metacall-table th[title] { cursor: help; }
+
+/* ── Field-info chip (replaces the old grey "My Estimate is
+   optional" hint paragraph) ── */
+.mc-field-info {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 12px;
+    margin: -4px 0 14px;
+    background: #f3eafa;
+    border: 1px solid #d9c5ed;
+    border-radius: 8px;
+    font-size: 0.84rem;
+    color: #5a3678;
+    line-height: 1.35;
+    max-width: 100%;
+}
+.mc-field-info-icon { font-size: 0.95rem; flex: 0 0 auto; }
+.mc-field-info-text { flex: 1 1 auto; }
+
+/* ── Buttons in the panel-title row: text + icon variant ── */
+.mc-group-toggle-btn .mc-btn-icon,
+.mc-share-btn .mc-btn-icon {
+    margin-right: 4px;
+}
+
+/* ==============================================================
+   Mobile (≤600px) — Field Composition adjustments
+   ============================================================== */
+@media (max-width: 600px) {
+    /* Header: title takes full width, badges + buttons line up
+       below as a single wrapping row. Stops "Field Composition"
+       from breaking into two lines next to the buttons. */
+    .metacall-panel-title {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 6px 8px;
+    }
+    .metacall-panel-title .mc-panel-title-text {
+        flex-basis: 100%;
+        font-size: 1.05rem;
+    }
+    .metacall-panel-title .mc-badge { font-size: 0.72rem; }
+    /* Group-toggle + Share buttons collapse to icon-only — they
+       were taking the entire header row on phones. Push Share to
+       the right so it lines up with the badges. */
+    .mc-group-toggle-btn,
+    .mc-share-btn {
+        padding: 6px 9px;
+        font-size: 0.8rem;
+    }
+    .mc-group-toggle-btn .mc-btn-text,
+    .mc-share-btn .mc-btn-text { display: none; }
+    .mc-group-toggle-btn .mc-btn-icon,
+    .mc-share-btn .mc-btn-icon { margin: 0; font-size: 1rem; }
+    .mc-share-btn { margin-left: auto; }
+
+    /* Field-info chip — stays full width on mobile so it doesn't
+       collide with anything to its right. */
+    .mc-field-info {
+        display: flex;
+        margin-top: 0;
+    }
+
+    /* Detail row uses the existing card styling but spans the
+       whole grid (i.e. the colspan=6 td fills the card). The
+       container row already has the card chrome; we just need to
+       neutralise the table-card grid layout for this special row. */
+    .metacall-table tbody tr.mc-row-detail {
+        display: block;
+        background: #f4f7fc;
+        border: 1px solid #dde4ee;
+        margin-top: -4px;
+        margin-bottom: 8px;
+        padding: 10px 12px;
+        border-radius: 0 0 10px 10px;
+    }
+    .metacall-table tbody tr.mc-row-detail.is-collapsed { display: none; }
+    .metacall-table tbody tr.mc-row-detail td {
+        display: block;
+        padding: 0;
+        background: transparent;
+    }
+    .metacall-table tbody tr.mc-row-detail .mc-intel-tile-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 6px;
+    }
+
+    /* Pull the row above the detail row into a flush-top card so
+       the two read as a single unit when expanded. */
+    .metacall-table tbody tr.mc-row-main {
+        border-radius: 10px;
+    }
+
+    /* Override the legacy flex-direction:column on td:nth-child(1)
+       (used when intel was nested inside the deck cell). With intel
+       out of the cell, deck-name + toggle should sit side-by-side. */
+    .metacall-table tbody tr.mc-row-main td.mc-cell-deck {
+        flex-direction: row;
+        align-items: center;
+    }
+
+    /* Toggle button — bigger touch target on mobile (~28px). */
+    .mc-row-toggle {
+        width: 28px;
+        height: 28px;
+        font-size: 13px;
+    }
+
+    /* Estimate input on mobile — keep it lavender but narrower so
+       the card-grid doesn't overflow. */
+    .metacall-table tbody td.mc-cell-est .mc-personal-input {
+        width: 64px !important;
+        min-height: 36px;
+        padding: 6px 7px !important;
+        font-size: 0.86rem !important;
+    }
+
+    /* Major chip wraps to 2 lines on narrow screens but the line
+       break should fall after a "·" separator, not mid-segment. */
+    .mc-intel-major-chip { font-size: 0.78rem; padding: 7px 9px; }
+}
+
+/* ==============================================================
+   Stamp out legacy mobile selectors that still target the old
+   single-row layout. The mobile card grid was indexing td:nth-
+   child(N) — which now sometimes hits the colspan-6 detail row.
+   Reset for .mc-row-detail so it doesn't inherit grid-area rules.
+   ============================================================== */
+@media (max-width: 600px) {
+    .metacall-table tbody tr.mc-row-detail td:nth-child(1),
+    .metacall-table tbody tr.mc-row-detail td:nth-child(2),
+    .metacall-table tbody tr.mc-row-detail td:nth-child(3),
+    .metacall-table tbody tr.mc-row-detail td:nth-child(4),
+    .metacall-table tbody tr.mc-row-detail td:nth-child(5),
+    .metacall-table tbody tr.mc-row-detail td:nth-child(6) {
+        grid-area: auto;
+        display: block;
+        font-size: 0.84rem;
+    }
+    .metacall-table tbody tr.mc-row-detail td:nth-child(5) { display: block; }
+    .metacall-table tbody tr.mc-row-detail td::before { content: none; }
 }

@@ -102,7 +102,7 @@
         "from_date": "2026-04-24",
         "tournament_types": ["regional", "international", "worlds"],
         "delay": 1.5,
-        "overwrite": false,
+        "overwrite": true,
         "_comment": "from_date: YYYY-MM-DD. tournament_types: regional/international/special/worlds. overwrite: true replaces CSV instead of appending."
     },
 

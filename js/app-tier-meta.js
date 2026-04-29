@@ -671,7 +671,10 @@
                     const archetypeEscaped = escapeJsStr(archetypeName);
                     
                     html += `
-                        <div class="deck-banner-card" onclick="navigateToAnalysisWithDeck('${archetypeEscaped}')">
+                        <div class="deck-banner-card" role="button" tabindex="0"
+                             onclick="navigateToAnalysisWithDeck('${archetypeEscaped}')"
+                             onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();navigateToAnalysisWithDeck('${archetypeEscaped}');}"
+                             title="Click to open Deck Analysis">
                             ${imageUrl ? `<div class="deck-banner-bg" style="background-image: url('${imageUrl}')"></div>` : ''}
                             <div class="deck-banner-content">
                                 <div class="deck-banner-name">${archetypeName}</div>

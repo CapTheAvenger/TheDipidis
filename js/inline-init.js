@@ -32,7 +32,20 @@ function toggleMainMenu() {
 }
 
 function switchTabAndUpdateMenu(tabId) {
-    if (typeof switchTab === 'function') switchTab(tabId);
+    if (typeof switchTab === 'function') {
+        switchTab(tabId);
+    }
+
+    // Defensive backup: if switchTab somehow didn't activate the target
+    // tab (e.g. older bundle, race during init), force-show the target
+    // and hide siblings so the menu click never silently no-ops on a
+    // visually wrong tab. Verified target-vs-sibling so we don't re-toggle
+    // a correctly-active tab.
+    const target = document.getElementById(tabId);
+    if (target && target.classList.contains('tab-content') && !target.classList.contains('active')) {
+        document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+        target.classList.add('active');
+    }
 
     document.querySelectorAll('.menu-item[data-tab-id]').forEach(btn => btn.classList.remove('active'));
     const activeBtn = document.getElementById('menu-btn-' + tabId);
@@ -104,6 +117,9 @@ document.addEventListener('languageChanged', function() {
         'proxy':             'proxy',
         'playtester':        'sandbox',
         'sandbox':           'sandbox',
+        'calculator':        'calculator',
+        'probability':       'calculator',
+        'wahrscheinlichkeit':'calculator',
         'profile':           'profile',
         'metacall':          'profile',    // Meta Call lives inside Profile tab
         'meta-call':         'profile',

@@ -1143,6 +1143,8 @@ const translations = {
     // ── Tab 4: Current Meta Deck Analysis ────────────────────
     'cm.analysisHeading':       'Current Meta Deck Analysis',
     'cm.analyzeAndBuild':       'Analyze and Build Decks from Current Meta',
+    'cm.emptyTitle':            'Pick a deck archetype to start the analysis',
+    'cm.emptyHint':              'The dropdown above lists the current top decks. Once you select one, you\'ll see card distribution, win rates and matchups.',
     'cm.formatFilter':          'Tournament Format Filter:',
     'cm.filterAll':             'All',
     'cm.filterLive':            'Limitless Decks',
@@ -2456,6 +2458,8 @@ const translations = {
     // ── Tab 4: Current Meta Deck Analysis ────────────────────
     'cm.analysisHeading':       'Aktuelle Meta Deck-Analyse',
     'cm.analyzeAndBuild':       'Decks aus der aktuellen Meta analysieren & bauen',
+    'cm.emptyTitle':            'Wähle ein Deck-Archetype, um die Analyse zu starten',
+    'cm.emptyHint':              'Im Dropdown oben findest du die aktuellen Top-Decks. Sobald du eines auswählst, siehst du Karten-Verteilung, Win-Rates und Matchups.',
     'cm.formatFilter':          'Turnierformat-Filter:',
     'cm.filterAll':             'Alle',
     'cm.filterLive':            'Limitless Decks',

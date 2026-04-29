@@ -5278,16 +5278,28 @@ details[open] > .tier-trending-summary::after {
     box-shadow: 0 4px 15px rgba(0,0,0,0.1);
     position: relative;
     cursor: pointer;
-    transition: transform 0.2s, box-shadow 0.2s;
+    transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
     display: flex;
     flex-direction: column;
     min-height: 120px;
     border: 1px solid #eee;
 }
 
+/* Make the entire card a clickable surface, not just the title text.
+   Children inherit pointer events but never carry their own click
+   handler — so a click anywhere on the card bubbles up to the card's
+   onclick handler. The bg layer is decorative-only. */
+.deck-banner-card * { cursor: inherit; }
+.deck-banner-bg { pointer-events: none; }
+
 .deck-banner-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    box-shadow: 0 10px 28px rgba(52, 152, 219, 0.22);
+    border-color: #3498db;
+}
+.deck-banner-card:focus-visible {
+    outline: 3px solid #3498db;
+    outline-offset: 2px;
 }
 
 /* Der Bild-Hintergrund (Halb transparent, rechts abgeschnitten) */
@@ -8305,6 +8317,72 @@ html:not([lang="de"]):not([lang="en"]) .lang-de { display: none !important; }
 .deck-btn-delete { background: rgba(231, 76, 60, 0.9); }
 .deck-btn-delete:hover { background: #c0392b; }
 
+/* ─── Deck-action overflow menu (⋯) ─────────────────────────────
+   3 primary actions stay visible (IRL / PTCGL / Print Decklist);
+   the 6 secondary ones live in a popover behind ⋯ to keep the row
+   scannable. */
+.deck-btn-overflow {
+    background: rgba(255,255,255,0.18);
+    color: #fff;
+    font-size: 1.05em;
+    line-height: 1;
+    padding: 6px 10px;
+}
+.deck-btn-overflow:hover {
+    background: rgba(255,255,255,0.32);
+}
+.deck-overflow-wrap {
+    position: relative;
+    display: inline-flex;
+}
+.deck-overflow-menu {
+    position: absolute;
+    top: calc(100% + 4px);
+    right: 0;
+    z-index: 30;
+    min-width: 200px;
+    background: #fff;
+    border: 1px solid #e0e6ed;
+    border-radius: 8px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.14);
+    padding: 4px;
+    display: none;
+    flex-direction: column;
+    gap: 2px;
+}
+.deck-overflow-menu.deck-overflow-menu--open {
+    display: flex;
+}
+.deck-overflow-item {
+    background: transparent;
+    border: none;
+    color: #1f2937;
+    padding: 8px 12px;
+    font-size: 0.9rem;
+    text-align: left;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: background 0.12s;
+    white-space: nowrap;
+}
+.deck-overflow-item:hover {
+    background: #f3f4f6;
+}
+.deck-overflow-item--danger {
+    color: #b91c1c;
+}
+.deck-overflow-item--danger:hover {
+    background: #fef2f2;
+}
+.deck-overflow-sep {
+    border: none;
+    border-top: 1px solid #e5e7eb;
+    margin: 4px 6px;
+}
+
 /* ==============================================================
    UI IMPROVEMENTS v3 – Desktop Improvements
    ============================================================== */
@@ -9477,3 +9555,41 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
         padding: 5px 10px;
     }
 }
+
+/* ── Current Meta Deck Analysis — empty-state guidance ──────────
+   Shown when no deck is selected so the user has a clear starting
+   point instead of staring at an empty page below the dropdown. */
+.ca-empty-state {
+    margin: 28px auto;
+    padding: 40px 24px;
+    max-width: 640px;
+    text-align: center;
+    background: #f8fafc;
+    border: 2px dashed #cbd5e1;
+    border-radius: 14px;
+}
+.ca-empty-icon {
+    font-size: 2.6rem;
+    color: #3498db;
+    line-height: 1;
+    margin-bottom: 8px;
+    animation: ca-empty-bounce 1.6s ease-in-out infinite;
+}
+@keyframes ca-empty-bounce {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-6px); }
+}
+.ca-empty-title {
+    margin: 0 0 8px 0;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #1f2937;
+}
+.ca-empty-hint {
+    margin: 0;
+    font-size: 0.92rem;
+    color: #6b7280;
+    line-height: 1.5;
+}
+.ca-empty-state.display-none { display: none; }
+

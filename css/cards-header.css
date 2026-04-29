@@ -121,6 +121,61 @@
 .header-mydecks-btn:hover  { color: #69d8ff; }   /* cyan — decks */
 .header-wishlist-btn:hover { color: #ff6b8a; }   /* pink — wishlist */
 
+/* Custom hover/focus tooltip — far more discoverable than the browser's
+   native ~2s `title` delay. Reads the same `title` attribute so a single
+   source of truth still drives both keyboard-accessibility and the
+   visible label. Opens below the icon, instantly on hover/focus. */
+.header-icon-btn[title]:hover::after,
+.header-icon-btn[title]:focus-visible::after,
+.header-dex-btn[title]:hover::after,
+.header-dex-btn[title]:focus-visible::after,
+.profile-btn-iconbtn[title]:hover::after,
+.profile-btn-iconbtn[title]:focus-visible::after {
+    content: attr(title);
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: #1f2937;
+    color: #fff;
+    font-size: 0.74rem;
+    font-weight: 600;
+    padding: 4px 9px;
+    border-radius: 6px;
+    white-space: nowrap;
+    pointer-events: none;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.25);
+    z-index: 1000;
+    animation: header-tooltip-fade 0.18s ease-out;
+}
+.header-icon-btn[title]:hover::before,
+.header-icon-btn[title]:focus-visible::before,
+.header-dex-btn[title]:hover::before,
+.header-dex-btn[title]:focus-visible::before,
+.profile-btn-iconbtn[title]:hover::before,
+.profile-btn-iconbtn[title]:focus-visible::before {
+    content: '';
+    position: absolute;
+    top: calc(100% + 1px);
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-bottom: 5px solid #1f2937;
+    pointer-events: none;
+    z-index: 1000;
+}
+.header-dex-btn,
+.profile-btn-iconbtn {
+    position: relative; /* ensure tooltip pseudo-elements anchor correctly */
+}
+@keyframes header-tooltip-fade {
+    from { opacity: 0; transform: translateX(-50%) translateY(-2px); }
+    to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
 /* Notification badge for the journal button — small pill anchored to the
    top-right corner instead of inline next to a label. */
 .header-icon-badge {

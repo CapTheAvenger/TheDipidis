@@ -434,11 +434,22 @@
         
         // Load deck data with format filtering
         async function loadCurrentMetaDeckData(archetype) {
+            // First user interaction with this tab — hide the empty-state guidance
+            // shown by default. The empty state stays in the DOM so it can flash
+            // back if the deck-select is reset to "" (handled below at the
+            // empty-archetype guard).
+            const emptyState = document.getElementById('currentAnalysisEmptyState');
+            if (emptyState) emptyState.classList.add('display-none');
+            if (!archetype) {
+                if (emptyState) emptyState.classList.remove('display-none');
+                return;
+            }
+
             // CRITICAL: Use different data sources based on filter to ensure correct numbers:
             // - 'play' (Major Tournament Decks): tournament_cards_data_cards.csv (Top 256 only, ~31 cards for Alakazam)
             // - 'live' (Limitless Decks): current_meta_card_data.csv with Meta Live rows (~47 cards)
             // - 'all': current_meta_card_data.csv with all rows (~85 cards)
-            
+
             let data = null;
             let needsAggregation = false;
             

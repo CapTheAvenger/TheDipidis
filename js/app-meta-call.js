@@ -1582,18 +1582,47 @@ window.MetaCall = (function () {
       candidates.push(c.name);
     });
 
+    // Top-N favourable matchups vs the predicted field for a candidate.
+    // "Contribution" weighs WR by the opponent's predicted share, so a
+    // 65 % WR vs a 10 %-of-field deck outranks an 80 % WR vs a 1 %-of-
+    // field niche pick. Used to populate the click-to-expand reason
+    // row under each Day-2 recommendation.
+    function _topMatchupsVsField(deckName, field, n) {
+      const out = [];
+      const myK = normalize(deckName);
+      field.forEach(opp => {
+        if (opp.name === '_junk') return;
+        if (normalize(opp.name) === myK) return;
+        const m = getBaseMatchup(deckName, opp.name);
+        const wr = m.pWin || 0;
+        const share = opp.finalShare || opp.onlineShare || 0;
+        const contribution = wr * share;
+        out.push({ opponent: opp.name, wr, share, contribution });
+      });
+      return out
+        .filter(r => r.share >= 0.5)  // skip tiny share decks for a cleaner reason
+        .sort((a, b) => b.contribution - a.contribution)
+        .slice(0, n);
+    }
+
     const evaluated = candidates.map(name => {
       const r = calcDay2(field, name);
+      const topMatchups = _topMatchupsVsField(name, field, 3);
       return {
         name,
         day2Prob: r.day2Prob,
         expWin: r.expWin,
-        avgWR: (r.expWin / _settings.rounds) * 100
+        avgWR: (r.expWin / _settings.rounds) * 100,
+        topMatchups
       };
     }).sort((a, b) => (b.day2Prob - a.day2Prob) || (b.avgWR - a.avgWR));
 
     // Day-2 list — threshold then bounds.
-    const DAY2_THRESHOLD = 0.25;
+    // Threshold lowered to 0.20 so a concentrated meta (one mega-family
+    // dominating the field, like Dragapult-family at 34 % post-Prag)
+    // still surfaces the natural set of Day-2-capable counters instead
+    // of artificially stopping at 25 % and padding from there.
+    const DAY2_THRESHOLD = 0.20;
     const DAY2_MIN = 5;
     const DAY2_MAX = 10;
     let day2 = evaluated.filter(e => e.day2Prob >= DAY2_THRESHOLD);
@@ -2276,15 +2305,48 @@ window.MetaCall = (function () {
       const day2Pct = (r.day2Prob * 100).toFixed(1).replace('.', ',');
       const wrPct   = r.avgWR.toFixed(1).replace('.', ',');
       const safeNameJs = escJs(r.name);
+      const reasonId = 'mc-rec-reason-' + normalize(r.name).replace(/[^a-z0-9]/g, '');
+      // Reason row HTML — top-3 favourable matchups + the Day-2-odds
+      // breakdown. Hidden by default; toggled by the chevron button.
+      const matchupRows = (r.topMatchups || []).map(mu => {
+        const wrPctStr = (mu.wr * 100).toFixed(0);
+        const shareStr = mu.share.toFixed(1).replace('.', ',');
+        return `<li>
+          <span class="mc-rec-reason-vs">${t('mc.reasonVs')} ${esc(mu.opponent)}</span>
+          <span class="mc-rec-reason-wr">${wrPctStr} % ${t('mc.reasonWr')}</span>
+          <span class="mc-rec-reason-share">${t('mc.reasonShare').replace('{n}', shareStr)}</span>
+        </li>`;
+      }).join('');
+      const reasonHtml = matchupRows
+        ? `<div class="mc-rec-reason-block">
+            <div class="mc-rec-reason-title">${esc(t('mc.reasonTopMatchups'))}</div>
+            <ul class="mc-rec-reason-list">${matchupRows}</ul>
+            <div class="mc-rec-reason-breakdown">${
+              t('mc.reasonBreakdown')
+                .replace('{wins}', r.expWin.toFixed(1).replace('.', ','))
+                .replace('{rounds}', String(_settings.rounds))
+                .replace('{day2}', day2Pct)
+            }</div>
+            <button class="mc-rec-reason-jump" type="button"
+                    onclick="event.stopPropagation(); MetaCall._jumpToDeckAnalysis('${safeNameJs}')">
+              ${esc(t('mc.reasonOpenAnalysis'))} →
+            </button>
+          </div>`
+        : `<div class="mc-rec-reason-block mc-rec-reason-empty">${esc(t('mc.reasonNone'))}</div>`;
       return `<tr class="mc-rec-row${isMine ? ' mc-rec-mine' : ''}"
-            onclick="MetaCall._jumpToDeckAnalysis('${safeNameJs}')"
-            title="${esc(t('mc.recJumpHint'))}"
-            tabindex="0">
+            onclick="MetaCall._toggleRecReason('${reasonId}', this)"
+            title="${esc(t('mc.recReasonHint'))}"
+            tabindex="0"
+            data-reason-id="${reasonId}">
         <td class="mc-rec-rank">${i + 1}</td>
         <td class="mc-rec-name"><span class="mc-rec-name-inner">${icon}<span class="mc-rec-name-text">${esc(r.name)}</span>${isMine ? `<span class="mc-rec-mine-tag">${esc(t('mc.recYourDeck'))}</span>` : ''}</span></td>
         <td class="mc-rec-day2"><strong>${day2Pct}%</strong></td>
         <td class="mc-rec-wr">${wrPct}%</td>
         <td class="mc-rec-wins">∅ ${r.expWin.toFixed(1)}</td>
+        <td class="mc-rec-toggle"><span class="mc-rec-chevron" aria-hidden="true">▼</span></td>
+      </tr>
+      <tr class="mc-rec-reason-row" id="${reasonId}" hidden>
+        <td colspan="6">${reasonHtml}</td>
       </tr>`;
     };
 
@@ -2326,6 +2388,7 @@ window.MetaCall = (function () {
           <th>${t('mc.recDay2')}</th>
           <th>${t('mc.recAvgWr')}</th>
           <th>${t('mc.recExpWins')}</th>
+          <th class="mc-rec-toggle-th" aria-label="Why?"></th>
         </tr></thead>
         <tbody>${day2Rows}</tbody>
       </table>` : '';
@@ -3643,6 +3706,25 @@ window.MetaCall = (function () {
     }
   }
 
+  // Toggle the click-to-expand reason row for a recommendation.
+  // Triggered from the row's onclick — keeps the user on Meta Call so
+  // they can read why a deck is being suggested without context-switch.
+  // The dedicated "Open in Deck Analysis →" button inside the expanded
+  // panel calls _jumpToDeckAnalysis when the user wants to dive in.
+  function _toggleRecReason(reasonId, rowEl) {
+    if (!reasonId) return;
+    const reasonRow = document.getElementById(reasonId);
+    if (!reasonRow) return;
+    const isHidden = reasonRow.hasAttribute('hidden');
+    if (isHidden) {
+      reasonRow.removeAttribute('hidden');
+      if (rowEl) rowEl.classList.add('mc-rec-row-expanded');
+    } else {
+      reasonRow.setAttribute('hidden', '');
+      if (rowEl) rowEl.classList.remove('mc-rec-row-expanded');
+    }
+  }
+
   return {
     init,
     preload: loadData,
@@ -3667,6 +3749,7 @@ window.MetaCall = (function () {
     _onCustomDeckShare,
     _testingGroupLoad,
     _jumpToDeckAnalysis,
+    _toggleRecReason,
     _saveScenario,
     _onScenarioSelect,
     _deleteScenario,

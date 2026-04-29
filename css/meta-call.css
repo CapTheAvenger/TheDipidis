@@ -1525,8 +1525,12 @@
     transition: background 0.12s, transform 0.08s;
 }
 .mc-rec-row:hover .mc-rec-name-text {
-    text-decoration: underline;
-    color: #2980b9;
+    /* No underline — clicking the row toggles the reason panel, not
+       a navigation. Visual cue moved to a subtle bg-shift instead. */
+    color: #1a2533;
+}
+.mc-rec-row:hover {
+    background: #f7f9fc;
 }
 .mc-rec-row:active {
     transform: translateX(1px);
@@ -1534,6 +1538,114 @@
 .mc-rec-row:focus-visible {
     outline: 2px solid rgba(46,204,113,0.55);
     outline-offset: -2px;
+}
+.mc-rec-row-expanded {
+    background: #f3f9f4;
+}
+.mc-rec-row-expanded .mc-rec-chevron {
+    transform: rotate(180deg);
+}
+.mc-rec-toggle {
+    width: 32px;
+    text-align: center;
+    color: #6b7c93;
+    user-select: none;
+}
+.mc-rec-chevron {
+    display: inline-block;
+    transition: transform 0.18s ease;
+    font-size: 0.85em;
+}
+.mc-rec-toggle-th { width: 32px; }
+
+/* Click-to-expand reason row sits directly below its parent .mc-rec-row.
+   Hidden by default (via [hidden] attribute); the toggle handler removes
+   the attribute. The inner .mc-rec-reason-block carries the styling so
+   we can keep the <td colspan="6"> as a transparent host. */
+.mc-rec-reason-row td {
+    padding: 0 !important;
+    background: #f8fbf9;
+    border-bottom: 1px solid #e0e6ed;
+}
+.mc-rec-reason-block {
+    padding: 12px 16px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 0.86rem;
+}
+.mc-rec-reason-block.mc-rec-reason-empty {
+    color: #6b7c93;
+    font-style: italic;
+}
+.mc-rec-reason-title {
+    font-weight: 700;
+    color: #1a2533;
+    font-size: 0.84rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+.mc-rec-reason-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.mc-rec-reason-list li {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 12px;
+    padding: 4px 8px;
+    background: #fff;
+    border: 1px solid #e0e6ed;
+    border-radius: 6px;
+}
+.mc-rec-reason-vs {
+    flex: 1 1 60%;
+    color: #1a2533;
+    font-weight: 500;
+}
+.mc-rec-reason-wr {
+    flex: 0 0 auto;
+    color: #1f8049;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+.mc-rec-reason-share {
+    flex: 0 0 auto;
+    color: #6b7c93;
+    font-size: 0.78rem;
+    font-variant-numeric: tabular-nums;
+}
+.mc-rec-reason-breakdown {
+    color: #4a5b73;
+    font-size: 0.85rem;
+    line-height: 1.4;
+    padding-top: 4px;
+}
+.mc-rec-reason-jump {
+    align-self: flex-start;
+    appearance: none;
+    background: #2980b9;
+    border: none;
+    color: #fff;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.82rem;
+    font-weight: 600;
+    margin-top: 4px;
+    transition: background 0.15s;
+}
+.mc-rec-reason-jump:hover { background: #1f6391; }
+
+@media (max-width: 600px) {
+    .mc-rec-reason-block { padding: 10px 12px 12px; font-size: 0.82rem; }
+    .mc-rec-reason-list li { padding: 4px 6px; }
+    .mc-rec-toggle { width: 28px; }
 }
 
 /* Data sources toggle panel — sits between Tournament Settings and

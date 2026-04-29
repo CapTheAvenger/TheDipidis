@@ -64,6 +64,32 @@ window.MetaCall = (function () {
   let _metaDynamicsByDeck = {}; // normalize(deck) -> { boost: pp, reasons: [...] }
   let _metaDynamicsLastLogId = null; // tournament id we last printed the dev log for
 
+  // ── Predictor 4.2 — Ladder-Bias-Damper ─────────────────────
+  // Casual decks (Alakazam, Starmie, Grimmsnarl …) over-index on the
+  // online ladder relative to in-person majors. Pre-Prague backtest
+  // had them over-predicted by 1.7-3.1 pp each. Damp the LADDER term
+  // by each deck's own Top-8 conversion factor so a casual deck's
+  // ladder weight collapses while a competitive deck's stays intact.
+  // The factor uses the same field-mean baseline as Predictor 3.0's
+  // labsT8Boost; bounds tighter (0.75..1.25) because we only want
+  // to nudge the ladder term, not steamroll it.
+  const PREDICTOR_4_2_LADDER_DAMP_LO = 0.75;
+  const PREDICTOR_4_2_LADDER_DAMP_HI = 1.25;
+
+  // ── Predictor 4.4 — Variant-Family-Aware Labs Anchor ───────
+  // The labs term anchors on a single tournament's share per variant.
+  // When that one major over-emphasised one variant (Querétaro had
+  // Dragapult Dusknoir at 17 % while the rest of the family was
+  // small), the predictor over-anchored on that exact variant for
+  // weeks. 4.4 fixes that by aggregating labs share at the FAMILY
+  // level (Dragapult-family = sum of all Dragapult variants) and
+  // redistributing it back to variants by their CURRENT online share-
+  // of-family. Result: the model knows "Dragapult-family is 30 %
+  // of the field" and lets today's online ladder decide which sub-
+  // variant carries that share.
+  let _familyLabsTotal   = {}; // family -> aggregated labs share (raw, pre-norm)
+  let _familyOnlineTotal = {}; // family -> aggregated online ladder count
+
   let _settings = {
     totalPlayers  : 1300,
     rounds        : 8,
@@ -561,6 +587,23 @@ window.MetaCall = (function () {
     // per-deck loop below can add them as a small additive bonus.
     _computeMetaDynamics();
 
+    // Predictor 4.4 — pre-aggregate labs share + online ladder per
+    // family so the per-deck loop can redistribute the labs term by
+    // current online share-of-family instead of locking onto whichever
+    // variant happened to dominate the most recent major.
+    _familyLabsTotal = {};
+    _familyOnlineTotal = {};
+    _shareList.forEach(d => {
+      const k = normalize(d.name);
+      const family = extractMainPokemon(d.name);
+      if (!family || family === '_junk') return;
+      _familyOnlineTotal[family] = (_familyOnlineTotal[family] || 0) + (d.ladderShare || 0);
+      const labsRow = _labsRowsByDeck && _labsRowsByDeck[k];
+      if (labsRow && labsRow.share > 0) {
+        _familyLabsTotal[family] = (_familyLabsTotal[family] || 0) + labsRow.share;
+      }
+    });
+
     // Use raw ladderShare (immutable) for normalisation — onlineShare
     // gets overwritten by the predicted value at the end of the run, so
     // re-running would compound if we read from it.
@@ -656,23 +699,53 @@ window.MetaCall = (function () {
       // weekly_trend) and any deck with no qualifying counters.
       const metaDynBoostPp = (_metaDynamicsByDeck[k] && _metaDynamicsByDeck[k].boost) || 0;
 
+      // Predictor 4.2 — Ladder-Bias-Damper. Casual decks have high
+      // ladder share but underperform competitively; competitive decks
+      // are the opposite. Damp the LADDER term by each deck's own
+      // top-8 conversion factor. Bounds tight (0.75..1.25) so this
+      // is a nudge, not a steamroll. Convolution-aware: when the
+      // deck has no conv data yet (top8Conv == 0) the damper is
+      // exactly 1.0× (no effect), which preserves Predictor 3.0
+      // behaviour for fresh decks.
+      const ladderDamp = top8Conv > 0
+        ? _clip(top8Conv / meanConv, PREDICTOR_4_2_LADDER_DAMP_LO, PREDICTOR_4_2_LADDER_DAMP_HI)
+        : 1.0;
+      const ladderPctDamped = ladderPct * ladderDamp;
+
+      // Predictor 4.4 — Variant-Family-Aware Labs Anchor. Replace the
+      // raw variant labs share with: (family labs total) × (this
+      // variant's share-of-family from current online ladder). Falls
+      // back to the raw variant share when the family aggregate is
+      // missing (e.g. solo deck, or family had zero online presence).
+      const family = extractMainPokemon(d.name);
+      const labsRow = _labsRowsByDeck[k];
+      const rawVariantLabsPct = labsRow ? (labsRow.share / labsTotalShare) * 100 : 0;
+      let labsPct;
+      const famLabs   = _familyLabsTotal[family] || 0;
+      const famOnline = _familyOnlineTotal[family] || 0;
+      if (famLabs > 0 && famOnline > 0 && (d.ladderShare || 0) > 0) {
+        const familyLabsPct = (famLabs / labsTotalShare) * 100;
+        const variantWeight = d.ladderShare / famOnline;
+        labsPct = familyLabsPct * variantWeight;
+      } else {
+        labsPct = rawVariantLabsPct;
+      }
+
       let predicted;
       if (_predictorMode === 'B') {
-        // Mode B (Predictor 3.0): labs majors authoritative + conv-rate
-        // weighted, plus post-major and weekly trend signals from the
-        // online ladder. CL toggles ignored (labs already capture the
-        // highest-leverage data).
-        //   0.40 labs × t8_conv_boost
+        // Mode B (Predictor 3.0 + 4.2 + 4.4): labs majors authoritative
+        // + conv-rate weighted, plus post-major and weekly trend signals
+        // from the online ladder. Ladder term damped by 4.2; labs term
+        // family-aware via 4.4. CL toggles ignored.
+        //   0.40 labs (4.4-redistributed) × t8_conv_boost
         //   0.20 brought
-        //   0.15 ladder
+        //   0.15 ladder (4.2-damped)
         //   0.15 post-major-trend
         //   0.10 weekly-trend
         //   + meta-dynamics counter-boost (4.0a, capped pp, additive)
-        const labsRow = _labsRowsByDeck[k];
-        const labsPct = labsRow ? (labsRow.share / labsTotalShare) * 100 : 0;
         predicted = 0.40 * labsPct * labsT8Boost
                   + 0.20 * broughtPct
-                  + 0.15 * ladderPct
+                  + 0.15 * ladderPctDamped
                   + 0.15 * postMajorSignal
                   + 0.10 * weeklySignal
                   + metaDynBoostPp;
@@ -683,7 +756,7 @@ window.MetaCall = (function () {
         // CL toggles ignored here (TG already replaces 40% of formula).
         //   0.40 TG | 0.20 ladder | 0.20 brought | 0.10 top8 | 0.10 trend
         predicted = 0.40 * tgPct
-                  + 0.20 * ladderPct
+                  + 0.20 * ladderPctDamped
                   + 0.20 * broughtPct
                   + 0.10 * top8Boost
                   + 0.10 * trendPct;
@@ -691,7 +764,7 @@ window.MetaCall = (function () {
         // Mode A + both CL sources.
         //   0.20 ladder | 0.40 brought | 0.10 top8 | 0.10 trend
         //   + 0.12 cl_current + 0.08 cl_past
-        predicted = 0.20 * ladderPct
+        predicted = 0.20 * ladderPctDamped
                   + 0.40 * broughtPct
                   + 0.10 * top8Boost
                   + 0.10 * trendPct
@@ -699,25 +772,25 @@ window.MetaCall = (function () {
                   + 0.08 * clPastPct;
       } else if (clCurrentActive) {
         //   0.20 ladder | 0.45 brought | 0.10 top8 | 0.10 trend | 0.15 cl_current
-        predicted = 0.20 * ladderPct
+        predicted = 0.20 * ladderPctDamped
                   + 0.45 * broughtPct
                   + 0.10 * top8Boost
                   + 0.10 * trendPct
                   + 0.15 * clCurPct;
       } else if (clPastActive) {
         //   0.20 ladder | 0.45 brought | 0.10 top8 | 0.10 trend | 0.15 cl_past
-        predicted = 0.20 * ladderPct
+        predicted = 0.20 * ladderPctDamped
                   + 0.45 * broughtPct
                   + 0.10 * top8Boost
                   + 0.10 * trendPct
                   + 0.15 * clPastPct;
       } else {
-        // Mode A baseline 3.0 (no TG data, no CL toggles, no labs).
-        //   0.40 ladder | 0.30 brought | 0.20 top8_conv_boost | 0.10 weekly_trend
+        // Mode A baseline 3.0 + 4.2 (no TG, no CL, no labs).
+        //   0.40 ladder (4.2-damped) | 0.30 brought | 0.20 top8_boost | 0.10 weekly_trend
         // weeklySignal already incorporates the share-vs-week-ago dynamic;
         // when no week-ago snapshot exists it falls back to (ladder - trendPct)
         // so the formula degrades gracefully on first install.
-        predicted = 0.40 * ladderPct
+        predicted = 0.40 * ladderPctDamped
                   + 0.30 * broughtPct
                   + 0.20 * top8Boost
                   + 0.10 * weeklySignal;

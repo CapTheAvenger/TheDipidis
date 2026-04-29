@@ -78,15 +78,50 @@ def _parse_date(raw: str) -> Optional[datetime]:
     if not raw:
         return None
     # Strip range suffix: "–5" or "-5"
-    cleaned = re.sub(r'[\u2013\u2014\-]\d+', '', raw).strip()
+    # Repair mojibake first so the en-dash matches the range pattern.
+    cleaned_input = _fix_mojibake(raw)
+    # Strip the second half of a date range. Two flavours occur in the
+    # wild on Limitless:
+    #   "April 25\u201326, 2026"            (same month \u2014 strip "\u201326")
+    #   "February 27\u2013March 1, 2026"    (cross-month \u2014 strip "\u2013March 1")
+    # The combined regex tolerates an optional month-name word between
+    # the dash and the trailing digits.
+    cleaned = re.sub(r'[\u2013\u2014\-]\s*[A-Za-z]*\s*\d+', '', cleaned_input).strip()
     cleaned = ' '.join(cleaned.split())
     for fmt in ('%B %d, %Y', '%b %d, %Y', '%B %d %Y', '%b %d %Y'):
         try:
             return datetime.strptime(cleaned, fmt)
         except ValueError:
             continue
-    logger.debug("Could not parse date: %r", raw)
+    logger.debug("Could not parse date: %r (cleaned: %r)", raw, cleaned)
     return None
+
+
+def _fix_mojibake(s: str) -> str:
+    """Repair Latin-1-decoded-as-UTF-8 mojibake. No-op when already clean UTF-8.
+
+    Used both for tournament names AND the inline date strings on the labs
+    index page \u2014 they come over the wire as UTF-8 but BeautifulSoup feeds
+    them back as Latin-1-misdecoded chars when the upstream HTML headers
+    omit a charset (which is the labs index's behaviour as of 2026-04).
+    """
+    if not s:
+        return s
+    try:
+        return s.encode('latin1').decode('utf-8')
+    except (UnicodeDecodeError, UnicodeEncodeError):
+        return s
+
+
+# Month-name pattern used to locate the date NavigableString anywhere
+# inside a tournament link. Tolerates both full ("April") and 3-letter
+# ("Apr") forms; case-insensitive.
+_DATE_TEXT_RE = re.compile(
+    r'\b(?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|'
+    r'Jul(?:y)?|Aug(?:ust)?|Sep(?:t(?:ember)?)?|Oct(?:ober)?|Nov(?:ember)?|'
+    r'Dec(?:ember)?)\s+\d',
+    re.I,
+)
 
 
 # ── Tournament list ───────────────────────────────────────────────────────────
@@ -122,8 +157,13 @@ def scrape_tournament_list(
         tournament_id = m.group(1)
 
         # ── Name ──────────────────────────────────────────────────────────────
+        # _fix_mojibake repairs UTF-8 served-as-Latin-1 corruption (e.g.
+        # "QuerÃ©taro" → "Querétaro", "GdaÅsk" → "Gdańsk") on the index
+        # page so the names downstream don't carry the mojibake all the
+        # way into the field-card UI.
         name_el = link.find(attrs={'class': re.compile(r'font-bold')})
-        name = name_el.get_text(strip=True) if name_el else f'Tournament {tournament_id}'
+        raw_name = name_el.get_text(strip=True) if name_el else f'Tournament {tournament_id}'
+        name = _fix_mojibake(raw_name)
 
         # ── Type logo (larger image) ──────────────────────────────────────────
         tournament_type = 'regional'
@@ -141,29 +181,43 @@ def scrape_tournament_list(
         if flag_img:
             country = flag_img.get('alt') or flag_img.get('title') or ''
 
-        # ── Date (navigable string sibling after flag image) ──────────────────
+        # ── Date ──────────────────────────────────────────────────────────────
+        # Limitless changed the index HTML in 2026-04: the date now lives
+        # inside an inner div ("flex gap-2 items-center") wrapped in an
+        # outer div ("flex flex-col gap-1") that ALSO has class "flex...gap".
+        # The previous selector grabbed the OUTER wrapper which has no
+        # NavigableString date children — only nested <div>s. Result:
+        # date_text was empty, _parse_date returned None, the date filter
+        # short-circuited (None is falsy), and EVERY tournament leaked
+        # through the filter.
+        #
+        # New strategy: walk all NavigableString descendants of the link
+        # and grab the first one matching a month-name pattern. Resilient
+        # to further HTML restructures as long as the date stays in
+        # human-readable "Month D[, Y]" prose.
+        from bs4 import NavigableString
         date_text = ''
-        # The date lives in the same div as the flag image
-        date_div = link.find('div', attrs={'class': re.compile(r'flex.*gap')})
-        if date_div:
-            # Prefer raw text nodes (NavigableString) which are the date
-            from bs4 import NavigableString
-            for child in date_div.children:
-                if isinstance(child, NavigableString):
-                    txt = str(child).strip()
-                    # Ignore single country codes that leak as text
-                    if txt and not re.match(r'^[A-Z]{2}$', txt):
-                        date_text = txt
-                        break
-            # Fallback: full text minus country code
-            if not date_text:
-                full = date_div.get_text(' ', strip=True)
-                date_text = full.replace(country, '').strip()
+        for el in link.descendants:
+            if isinstance(el, NavigableString):
+                txt = str(el).strip()
+                if txt and _DATE_TEXT_RE.search(txt):
+                    date_text = txt
+                    break
 
         date_obj = _parse_date(date_text)
         date_str = date_obj.strftime('%Y-%m-%d') if date_obj else ''
 
         # ── Filters ───────────────────────────────────────────────────────────
+        # Strict mode when from_date is set: a tournament with no parseable
+        # date is excluded. Earlier this was silently let through, which
+        # combined with a broken date parser meant the scraper hit every
+        # major in the archive instead of just the recent ones. If the
+        # parser breaks again, the user sees zero rows + a warning rather
+        # than a silent multi-hour scrape.
+        if from_date and not date_obj:
+            logger.warning("Skip %s (%s) – no parseable date (raw: %r)",
+                           name, tournament_id, date_text)
+            continue
         if from_date and date_obj and date_obj < from_date:
             logger.debug("Skip %s (%s) – before %s", name, date_str, from_date.date())
             continue
@@ -199,15 +253,9 @@ def scrape_tournament_meta(tournament_id: str) -> Dict[str, str]:
     soup = fetch_page_bs4(url)
     if not soup:
         return {}
-    def _fix_mojibake(s: str) -> str:
-        """Repair Latin-1-decoded-as-UTF-8 mojibake (e.g. 'QuerÃ©taro' → 'Querétaro').
-        No-op when the string is already clean UTF-8."""
-        if not s:
-            return s
-        try:
-            return s.encode('latin1').decode('utf-8')
-        except (UnicodeDecodeError, UnicodeEncodeError):
-            return s
+    # _fix_mojibake is now a module-level helper (see top of file). The
+    # inline duplicate that used to live here was dropped to avoid the
+    # two copies drifting out of sync.
 
     out: Dict[str, str] = {}
     # Title looks like "Decks: Regional Championship Prague – Limitless Labs".

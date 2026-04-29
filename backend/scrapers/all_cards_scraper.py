@@ -73,6 +73,91 @@ def sort_key(card: dict):
     return card_sort_key(card, SET_ORDER)
 
 
+# ── Quarantine for chronically incomplete cards ──────────────────────────────
+# Limitless structurally lacks data for ~386 cards (mostly old promos /
+# energies — KSS, SI, RM, BWP). Without quarantine they get re-scraped
+# every nightly run forever. The quarantine tracks per-card "tries" +
+# last_attempted; cards in quarantine are skipped from the rescrape pool
+# until QUARANTINE_RETRY_DAYS have elapsed (then we retry once in case
+# Limitless added the missing fields meanwhile).
+QUARANTINE_FILE = "permanently_incomplete_cards.json"
+QUARANTINE_RETRY_DAYS = 14
+
+
+def _classify_incompleteness(row: dict):
+    """Return None if the row is complete, otherwise a short reason string.
+
+    Single source of truth — used both at load-time (decide if a card
+    enters the rescrape pool) and post-scrape (decide if a card stays
+    quarantined or gets released).
+    """
+    name_en    = (row.get("name_en") or row.get("name") or "").strip()
+    image_url  = (row.get("image_url") or "").strip()
+    rarity     = (row.get("rarity") or "").strip()
+    intl       = (row.get("international_prints") or "").strip()
+    cm_url     = (row.get("cardmarket_url") or "").strip()
+    energy_type = (row.get("energy_type") or "").strip()
+    type_lower = (row.get("type") or "").strip().lower()
+    set_code   = (row.get("set") or "").strip()
+    set_number = (row.get("number") or "").strip()
+
+    is_basic_energy = type_lower == "basic energy"
+    has_basic = bool(image_url and intl and (rarity or is_basic_energy))
+    if not has_basic:
+        return "missing_basic"
+
+    if intl:
+        p_list = [p.strip() for p in intl.split(",")]
+        if len(p_list) == 1 and p_list[0] == f"{set_code}-{set_number}" and not cm_url:
+            return "no_reprints_no_cardmarket"
+
+    is_pokemon_type = type_lower in (
+        "basic", "stage 1", "stage 2", "vstar", "vmax", "v", "v-union",
+        "mega", "break", "restored", "legend"
+    )
+    is_tag_team = " & " in name_en
+    if is_pokemon_type and not energy_type and not is_tag_team:
+        return "missing_energy_type"
+
+    return None
+
+
+def _load_quarantine() -> dict:
+    qpath = os.path.join(data_dir, QUARANTINE_FILE)
+    if not os.path.isfile(qpath):
+        return {}
+    try:
+        with open(qpath, encoding="utf-8") as f:
+            data = json.load(f)
+        return data if isinstance(data, dict) else {}
+    except Exception as e:
+        logger.warning("Could not load quarantine file %s: %s", qpath, e)
+        return {}
+
+
+def _save_quarantine(state: dict) -> None:
+    qpath = os.path.join(data_dir, QUARANTINE_FILE)
+    try:
+        with open(qpath, "w", encoding="utf-8") as f:
+            json.dump(state, f, indent=2, ensure_ascii=False, sort_keys=True)
+    except Exception as e:
+        logger.warning("Could not save quarantine file %s: %s", qpath, e)
+
+
+def _is_quarantined(key: str, quarantine: dict) -> bool:
+    """True when the card is in quarantine AND last attempt is fresh
+    (< QUARANTINE_RETRY_DAYS old). Older entries get retried once."""
+    entry = quarantine.get(key)
+    if not entry:
+        return False
+    last = entry.get("last_attempted") or entry.get("first_seen") or ""
+    try:
+        last_dt = datetime.fromisoformat(last)
+    except Exception:
+        return False
+    return (datetime.now() - last_dt).days < QUARANTINE_RETRY_DAYS
+
+
 # LOAD EXISTING CSV
 def load_existing_cards(csv_path: str, rescrape_incomplete: bool = True):
     if not os.path.isfile(csv_path):
@@ -81,6 +166,8 @@ def load_existing_cards(csv_path: str, rescrape_incomplete: bool = True):
     complete_cards = []
     incomplete_cards = []
     existing_keys = set()
+    quarantine = _load_quarantine() if rescrape_incomplete else {}
+    quarantined_count = 0
 
     with open(csv_path, "r", encoding="utf-8-sig", newline="") as f:
         reader = csv.DictReader(f)
@@ -119,31 +206,19 @@ def load_existing_cards(csv_path: str, rescrape_incomplete: bool = True):
             card_data["hp"] = hp_val
             card_data["card_text"] = card_text
 
-            type_lower = (row.get("type") or "").strip().lower()
-            # Basic Energy cards have no Rarity on Limitless by design — don't flag them.
-            is_basic_energy = type_lower == "basic energy"
-            has_basic = bool(image_url and intl and (rarity or is_basic_energy))
-            only_self = False
-            if intl:
-                p_list = [p.strip() for p in intl.split(",")]
-                only_self = (len(p_list) == 1 and p_list[0] == f"{set_code}-{set_number}")
-
-            # Also rescrape if energy_type is missing for Pokemon cards.
-            # Tag-Team cards (e.g. "Togepi & Cleffa & Igglybuff-GX") combine
-            # multiple types and don't expose a single energy_type on Limitless.
-            is_pokemon_type = type_lower in (
-                "basic", "stage 1", "stage 2", "vstar", "vmax", "v", "v-union",
-                "mega", "break", "restored", "legend"
-            )
-            is_tag_team = " & " in name_en
-            missing_energy = is_pokemon_type and not energy_type and not is_tag_team
-
-            is_incomplete = not has_basic or (only_self and not cm_url) or missing_energy
+            reason = _classify_incompleteness(row)
+            is_incomplete = reason is not None
 
             if not is_incomplete:
                 complete_cards.append(card_data)
             elif rescrape_incomplete:
-                incomplete_cards.append(card_data)
+                # Skip if this card has been re-scraped recently and stayed
+                # incomplete (Limitless structurally doesn't have the data).
+                if _is_quarantined(key, quarantine):
+                    complete_cards.append(card_data)
+                    quarantined_count += 1
+                else:
+                    incomplete_cards.append(card_data)
             else:
                 complete_cards.append(card_data)
 
@@ -151,6 +226,9 @@ def load_existing_cards(csv_path: str, rescrape_incomplete: bool = True):
         f"Lade {len(complete_cards) + len(incomplete_cards)} Karten aus bestehender CSV "
         f"({len(complete_cards)} vollstaendig, {len(incomplete_cards)} unvollstaendig)"
     )
+    if quarantined_count:
+        logger.info("  -> %s chronisch unvollstaendige Karten in Quarantaene (Retry alle %s Tage).",
+                    quarantined_count, QUARANTINE_RETRY_DAYS)
     if incomplete_cards and rescrape_incomplete:
         logger.info("! %s unvollstaendige Karten werden neu gescraped.", len(incomplete_cards))
 
@@ -588,6 +666,10 @@ def main():
             f"({len(incomplete_cards)} unvollstaendig + {len(en_cards)} neu)"
         )
 
+        # Track which keys were attempted as "rescrape" — used after the
+        # detail scrape to update the quarantine state.
+        attempted_keys = {f"{ic.get('set','')}::{ic.get('number','')}" for ic in incomplete_cards}
+
         if not settings.get("skip_detail_scraping", False):
             logger.info("=" * 60)
             logger.info("PHASE 2: Detail-Seiten scrapen ...")
@@ -595,6 +677,37 @@ def main():
             all_cards = scrape_card_details(settings, all_cards, existing_cards, csv_path, append_mode)
         else:
             logger.info("Detail-Scraping uebersprungen (skip_detail_scraping = True).")
+
+        # Update quarantine for the cards we just attempted.
+        # - Cleared cards (now complete) → drop from quarantine
+        # - Still-incomplete cards → bump tries / last_attempted timestamp
+        if attempted_keys:
+            quarantine = _load_quarantine()
+            now_iso = datetime.now().isoformat()
+            promoted = 0
+            requarantined = 0
+            for card in all_cards:
+                key = f"{card.get('set','')}::{card.get('number','')}"
+                if key not in attempted_keys:
+                    continue
+                reason = _classify_incompleteness(card)
+                if reason is None:
+                    if key in quarantine:
+                        del quarantine[key]
+                        promoted += 1
+                else:
+                    entry = quarantine.get(key, {})
+                    entry["tries"] = int(entry.get("tries", 0)) + 1
+                    entry.setdefault("first_seen", now_iso)
+                    entry["last_attempted"] = now_iso
+                    entry["reason"] = reason
+                    quarantine[key] = entry
+                    requarantined += 1
+            _save_quarantine(quarantine)
+            logger.info(
+                "Quarantaene: %s Karten in Quarantaene aktualisiert/aufgenommen, %s aufgeloest.",
+                requarantined, promoted,
+            )
 
         logger.info("=" * 60)
         logger.info("FINALE: Deduplizieren, Sortieren, Speichern ...")

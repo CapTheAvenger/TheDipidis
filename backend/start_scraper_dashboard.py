@@ -118,10 +118,16 @@ def git_commit_push(description: str) -> None:
         return
     print(f"  Git: Committed - {msg}")
 
-    # 5) git push
-    print("  Git: Pushing to origin/main ...")
-    r = subprocess.run(["git", "push", "origin", "main"], cwd=project_root,
-                        capture_output=True, text=True)
+    # 5) git push — push the current branch, not hard-coded "main"
+    # (the user may run a batch from a feature branch, in which case
+    # pushing "main" would silently no-op and the batch's auto-commit
+    # would never reach the remote).
+    r = subprocess.run(["git", "rev-parse", "--abbrev-ref", "HEAD"],
+                        cwd=project_root, capture_output=True, text=True)
+    current_branch = (r.stdout or "").strip() or "main"
+    print(f"  Git: Pushing to origin/{current_branch} ...")
+    r = subprocess.run(["git", "push", "origin", current_branch],
+                        cwd=project_root, capture_output=True, text=True)
     if r.returncode != 0:
         print(f"  [GIT ERROR] git push: {r.stderr.strip()}")
         return

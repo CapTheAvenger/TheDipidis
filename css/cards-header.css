@@ -114,6 +114,17 @@
     pointer-events: none;
     color: inherit;
 }
+/* Raster-image variant of .header-icon-svg — same footprint so the
+   row stays uniform when buttons mix SVG strokes (older icons) and
+   PNG art (Note/Box/Wishlist). object-fit:contain guards against any
+   non-square sources. */
+.header-icon-img {
+    width: 22px;
+    height: 22px;
+    object-fit: contain;
+    pointer-events: none;
+    display: block;
+}
 
 /* Per-button accent colour — borrowed only on hover so the row stays
    visually calm when nothing is hovered. */

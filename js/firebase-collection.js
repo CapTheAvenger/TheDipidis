@@ -3019,6 +3019,22 @@ function switchProfileTab(tabName) {
   if (tabName === 'testinggroups' && typeof TestingGroups !== 'undefined') {
     TestingGroups.init();
   }
+
+  // Scroll the tab nav into view so the user sees both the activated
+  // pill and the new content immediately. Without this, clicking a
+  // sub-tab while scrolled past the nav looks like nothing happened.
+  // Skip if the nav is already in the visible upper portion of the
+  // viewport — avoids jarring re-scrolls on already-aligned clicks.
+  try {
+    const nav = document.getElementById('profile-tab-nav');
+    if (nav && nav.getBoundingClientRect) {
+      const rect = nav.getBoundingClientRect();
+      const alreadyVisible = rect.top >= 0 && rect.top < (window.innerHeight * 0.4);
+      if (!alreadyVisible) {
+        nav.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+  } catch (_e) { /* non-fatal — scroll is a nice-to-have */ }
 }
 // Filter collection by search term
 function filterCollection() {

@@ -152,10 +152,16 @@
     background: rgba(52, 152, 219, 0.05);
 }
 
+/* Active sub-tab — bolder weight + tinted background so the user
+   has a clear "you are here" anchor when the long sub-tab list
+   wraps to multiple rows. The previous styling (just colour + 3px
+   underline) was too subtle on dense screens. */
 .profile-tab-btn.active {
     color: var(--color-info);
     border-bottom-color: var(--color-info);
-    font-weight: 500;
+    font-weight: 700;
+    background: rgba(52, 152, 219, 0.10);
+    border-radius: 6px 6px 0 0;
 }
 
 /* Profile tab groups — visual sections so the long sub-tab list is

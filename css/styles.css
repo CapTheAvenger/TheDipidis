@@ -137,30 +137,35 @@
             margin: 0 auto;
         }
         
+        /* Section banner — unified across ALL data-driven tabs (Theme A
+           Option 1). Slimmer than the previous 16px padding so the
+           banner doesn't dominate the screen, and the same red Pokémon
+           gradient everywhere so the user instantly recognises a
+           "section header" regardless of which tab they're on. */
         .header {
             text-align: center;
             color: white;
-            margin-bottom: 16px;
-            padding: 16px 20px;
+            margin-bottom: 14px;
+            padding: 10px 18px;
             background: linear-gradient(135deg, var(--pokemon-red) 0%, var(--pokemon-red-dark) 100%);
-            border-bottom: 4px solid var(--pokemon-yellow, #FFCB05);
-            box-shadow: 0 4px 16px rgba(0,0,0,0.15);
-            border-radius: 12px;
+            border-bottom: 3px solid var(--pokemon-yellow, #FFCB05);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+            border-radius: 10px;
         }
-        
+
         .header h1, .header h2 {
-            font-size: clamp(1.2em, 5vw, 1.8em);
-            margin-bottom: 4px;
-            text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+            font-size: clamp(1.05em, 4vw, 1.45em);
+            margin-bottom: 2px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.25);
             border-bottom: none;
             color: white;
             padding-bottom: 0;
             margin-top: 0;
         }
-        
+
         .header p {
-            font-size: 0.95em;
-            opacity: 0.9;
+            font-size: 0.86em;
+            opacity: 0.92;
             margin: 0;
         }
         
@@ -947,19 +952,26 @@
             overflow: hidden;
         }
 
+        /* City League banner unified with .header (Theme A Option 1).
+           Was a purple/blue gradient that visually broke the
+           consistency the rest of the site established. Now uses the
+           same red Pokémon gradient + slimmer padding as every other
+           section banner. */
         .city-league-header {
-            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-end) 100%);
+            background: linear-gradient(135deg, var(--pokemon-red) 0%, var(--pokemon-red-dark) 100%);
             color: white;
-            padding: 16px 20px;
+            padding: 10px 18px;
             text-align: center;
-            border-radius: 12px;
+            border-radius: 10px;
+            border-bottom: 3px solid var(--pokemon-yellow, #FFCB05);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.10);
             margin-bottom: 12px;
         }
 
         .city-league-header h2 {
-            font-size: clamp(1.2em, 5vw, 1.8em);
-            margin-bottom: 4px;
-            text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+            font-size: clamp(1.05em, 4vw, 1.45em);
+            margin-bottom: 2px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.25);
         }
         
         .format-toggle-container {
@@ -7254,46 +7266,37 @@ body.battle-journal-open {
 /* ============================================================ */
 /* CONTEXT HELP MODAL                                            */
 /* ============================================================ */
-/* Help icon: classic ? on a circle. Replaces the earlier
-   professor-oak avatar which read as decoration, not as a help
-   action. Sits inline with the section title at a comfortable
-   click target (28px). */
+/* Help button: keeps the original Prof. Oak avatar (the user prefers
+   it over a generic "?" — fits the Pokémon brand language). Hover/
+   focus states added in Round-3 are kept since they help the icon
+   read as interactive rather than purely decorative. */
 .tab-help-btn {
-    border: 1.5px solid #cbd5e1;
-    background: #fff;
-    color: #475569;
+    border: none;
+    background-color: white;
     cursor: pointer;
     padding: 0;
-    width: 26px;
-    height: 26px;
-    line-height: 1;
-    font-size: 0.95em;
-    font-weight: 800;
+    width: 32px;
+    height: 32px;
+    background-image: url('../images/professor_oak_icon.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
     border-radius: 50%;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-    transition: background 0.18s, color 0.18s, border-color 0.18s, transform 0.18s, box-shadow 0.18s;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    transition: transform 0.2s, box-shadow 0.2s;
     margin-left: 10px;
     vertical-align: middle;
     position: relative;
     overflow: visible;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-}
-.tab-help-btn::before {
-    content: '?';
-    line-height: 1;
 }
 .tab-help-btn:hover {
-    background: #3498db;
-    color: #fff;
-    border-color: #3498db;
-    transform: scale(1.08);
-    box-shadow: 0 3px 8px rgba(52, 152, 219, 0.32);
+    transform: scale(1.1);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    background-color: #f0f0f0;
 }
 .tab-help-btn:active {
     transform: scale(0.95);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 .tab-help-btn:focus-visible {
     outline: 2px solid rgba(52, 152, 219, 0.55);
@@ -9656,40 +9659,38 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
 .ca-empty-state.display-none { display: none; }
 
 
-/* ── Data-freshness chip — sits next to section titles so users
-   always see how fresh the data they’re looking at is, not just
-   in the page footer. Compact, soft palette so it doesn’t compete
-   with the H2. */
+/* Data-freshness chip — minimal, sits inline next to the section
+   title. No icon, no fill, neutral black-on-light so it never
+   competes with the H2. */
 .data-freshness-chip {
     display: inline-flex;
     align-items: center;
-    gap: 4px;
     margin-left: 10px;
-    padding: 3px 10px;
-    background: rgba(46, 204, 113, 0.12);
-    border: 1px solid rgba(46, 204, 113, 0.32);
-    border-radius: 999px;
-    font-size: 0.72em;
-    font-weight: 600;
-    color: #186a3b;
+    padding: 0;
+    background: transparent;
+    border: none;
+    font-size: 0.55em;
+    font-weight: 400;
+    color: #1a2533;
     line-height: 1.4;
     vertical-align: middle;
     white-space: nowrap;
     cursor: help;
 }
 .data-freshness-chip-icon {
-    font-size: 0.95em;
-    line-height: 1;
+    /* Hidden — user wants the chip text-only. Kept in DOM so existing
+       HTML doesn't need to be edited everywhere it's mounted. */
+    display: none;
 }
 .data-freshness-chip .js-data-freshness {
     font-variant-numeric: tabular-nums;
+    margin-left: 3px;
 }
 @media (max-width: 600px) {
     .data-freshness-chip {
         margin-left: 0;
         margin-top: 4px;
-        font-size: 0.68em;
-        padding: 2px 8px;
+        font-size: 0.6em;
     }
 }
 

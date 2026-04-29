@@ -3,13 +3,24 @@
 Update Sets - Scrape Set Release Order from Limitless TCG
 ==========================================================
 Fetches all English sets from Limitless TCG, assigns release-order numbers
-(newest = highest), and writes the result to data/sets.json.
+(newest = highest), captures release dates, and derives the current
+format-window for the Predictor.
 
-Run this once initially, then whenever new sets are released.
+Outputs (in data/):
+  sets.json            — {set_code: order_number}             (back-compat)
+  sets_metadata.json   — {set_code: {order, release_date}}    (NEW)
+  format_window.json   — {current_set, set_release_date,      (NEW)
+                          in_person_legal_date}
+
+Run this once initially, then whenever new sets are released. The
+predictor reads format_window.json to filter labs/major data to the
+current format only and to recency-weight late-format tournaments.
 """
 
+import datetime
 import json
 import os
+import re
 import sys
 import time
 
@@ -30,6 +41,30 @@ except ImportError:
         r = requests.get(url, timeout=timeout)
         r.raise_for_status()
         return r.text
+
+# Project root for cross-module path resolution (config/ + data/).
+_THIS_DIR = os.path.dirname(os.path.abspath(__file__))
+_PROJECT_ROOT = os.path.normpath(os.path.join(_THIS_DIR, '..', '..'))
+_CONFIG_DIR = os.path.join(_PROJECT_ROOT, 'config')
+
+# Days between online release and in-person tournament legality.
+# Confirmed by user — Limitless online accepts new sets immediately on
+# release, in-person majors apply a fixed two-week lag.
+IN_PERSON_LEGAL_LAG_DAYS = 14
+
+# Hardcoded fallback release dates for the current rotation. The live
+# scraper attempts to parse these from limitlesstcg.com; when the site
+# layout changes or the date isn't visible on the cards page, we fall
+# back to this dict. Keep the most recent ~6 sets here so a fresh
+# install still has a working format_window.json.
+FALLBACK_RELEASE_DATES = {
+    'POR': '2026-03-27',  # Perfect Order — current rotation anchor
+    'BLK': '2026-01-17',
+    'WHT': '2026-01-17',
+    'DRI': '2025-11-21',
+    'JTG': '2025-09-26',
+    'PRE': '2025-08-01',
+}
 
 # Hardcoded fallback — used if live scraping fails
 FALLBACK_SET_ORDER = {
@@ -187,6 +222,172 @@ def scrape_live_sets() -> dict:
     return result
 
 
+def scrape_release_dates() -> dict:
+    """
+    Try to parse {set_code: release_date_iso} from limitlesstcg.com/cards.
+
+    The cards index renders one row per set with a release date column;
+    we sniff for "set_code … YYYY-MM-DD" or "set_code … Month DD, YYYY"
+    patterns near each detected set link. Best-effort — returns the
+    subset that parsed cleanly. Missing dates fall back to
+    FALLBACK_RELEASE_DATES.
+    """
+    out = {}
+    try:
+        html = safe_fetch_html("https://limitlesstcg.com/cards", timeout=15)
+        if not html:
+            return out
+        soup = BeautifulSoup(html, 'lxml')
+
+        # Each set typically lives in a <tr> with a code cell + date cell.
+        for row in soup.select('tr'):
+            cells = row.find_all('td')
+            if len(cells) < 2:
+                continue
+            code = ''
+            for cell in cells[:3]:
+                txt = cell.get_text(strip=True).upper()
+                if 2 <= len(txt) <= 6 and txt.replace('-', '').isalnum() and not txt.isdigit():
+                    code = txt
+                    break
+            if not code:
+                continue
+            row_text = row.get_text(' ', strip=True)
+            iso = _extract_iso_date(row_text)
+            if iso:
+                out.setdefault(code, iso)
+
+        # Fallback: scan all anchors that link to a set page and look at
+        # nearby text for a date — covers card-page layouts that use
+        # divs instead of tables.
+        for a in soup.find_all('a', href=True):
+            href = a['href']
+            m = re.search(r'(?:[?&]set=|/sets/)([A-Z0-9-]{2,6})', href, re.IGNORECASE)
+            if not m:
+                continue
+            code = m.group(1).upper()
+            if code in out:
+                continue
+            container = a.find_parent(['li', 'div', 'tr']) or a.parent
+            if not container:
+                continue
+            iso = _extract_iso_date(container.get_text(' ', strip=True))
+            if iso:
+                out[code] = iso
+    except Exception as e:
+        print(f"[Update Sets] Release-date scrape failed: {e}")
+    return out
+
+
+def _extract_iso_date(text: str) -> str:
+    """Pull a YYYY-MM-DD date out of free text. Accepts ISO and a few
+    common English/German formats. Returns '' on no match."""
+    if not text:
+        return ''
+    # ISO: 2026-03-27
+    m = re.search(r'\b(20\d{2})-(\d{2})-(\d{2})\b', text)
+    if m:
+        return f"{m.group(1)}-{m.group(2)}-{m.group(3)}"
+    # English: March 27, 2026 / Mar 27 2026
+    months = {
+        'jan': '01', 'feb': '02', 'mar': '03', 'apr': '04', 'may': '05', 'jun': '06',
+        'jul': '07', 'aug': '08', 'sep': '09', 'oct': '10', 'nov': '11', 'dec': '12',
+    }
+    m = re.search(
+        r'\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\s+(\d{1,2}),?\s+(20\d{2})',
+        text, re.IGNORECASE
+    )
+    if m:
+        return f"{m.group(3)}-{months[m.group(1).lower()[:3]]}-{int(m.group(2)):02d}"
+    return ''
+
+
+def _read_current_set_from_settings() -> str:
+    """Pick the live set code from config/scraper_settings.json. Returns
+    '' on any error so callers can fall back gracefully."""
+    path = os.path.join(_CONFIG_DIR, 'scraper_settings.json')
+    try:
+        with open(path, 'r', encoding='utf-8') as f:
+            cfg = json.load(f)
+        return (cfg.get('current_meta_analysis') or {}).get('set', '') or ''
+    except Exception as e:
+        print(f"[Update Sets] Could not read scraper_settings.json: {e}")
+        return ''
+
+
+def _add_days(iso_date: str, days: int) -> str:
+    """Add `days` calendar days to a YYYY-MM-DD string. Returns '' on
+    parse error so the caller can decide to skip the dependent field."""
+    try:
+        dt = datetime.date.fromisoformat(iso_date)
+        return (dt + datetime.timedelta(days=days)).isoformat()
+    except Exception:
+        return ''
+
+
+def write_sets_metadata(sets_order: dict, release_dates: dict) -> str:
+    """Combine order + release date into sets_metadata.json. Returns
+    the output path for downstream logging."""
+    metadata = {}
+    for code, order in sets_order.items():
+        metadata[code] = {
+            'order':        order,
+            'release_date': release_dates.get(code, FALLBACK_RELEASE_DATES.get(code, '')),
+        }
+    out_path = os.path.join(data_dir, 'sets_metadata.json')
+    with open(out_path, 'w', encoding='utf-8') as f:
+        json.dump(metadata, f, indent=2, sort_keys=True, ensure_ascii=False)
+    return out_path
+
+
+def write_format_window(sets_metadata_path: str) -> str:
+    """Derive data/format_window.json from
+        config/scraper_settings.json.current_meta_analysis.set
+        + data/sets_metadata.json[<set>].release_date
+        + IN_PERSON_LEGAL_LAG_DAYS.
+    Skipped (with a warning) when the current set is unknown or has no
+    release date — the predictor falls back to "no filter" in that case."""
+    current = _read_current_set_from_settings()
+    if not current:
+        print("[Update Sets] ! current_meta_analysis.set is empty — skipping format_window.json")
+        return ''
+
+    try:
+        with open(sets_metadata_path, 'r', encoding='utf-8') as f:
+            metadata = json.load(f)
+    except Exception as e:
+        print(f"[Update Sets] ! Could not read {sets_metadata_path}: {e}")
+        return ''
+
+    entry = metadata.get(current) or {}
+    release_date = entry.get('release_date') or FALLBACK_RELEASE_DATES.get(current, '')
+    if not release_date:
+        print(f"[Update Sets] ! No release_date known for current set '{current}' — skipping format_window.json")
+        return ''
+
+    in_person_legal = _add_days(release_date, IN_PERSON_LEGAL_LAG_DAYS)
+    out = {
+        'current_set':          current,
+        'set_release_date':     release_date,
+        'in_person_legal_date': in_person_legal,
+        'lag_days':             IN_PERSON_LEGAL_LAG_DAYS,
+        '_note': (
+            'Online (Limitless ladder + online tournaments) accept new sets on '
+            'set_release_date. In-person majors are legal in_person_legal_date '
+            '(= release + lag_days). Predictor uses these to filter labs/major '
+            'data to the current format and to recency-weight late-format events.'
+        ),
+    }
+    out_path = os.path.join(data_dir, 'format_window.json')
+    with open(out_path, 'w', encoding='utf-8') as f:
+        json.dump(out, f, indent=2, ensure_ascii=False)
+    print(
+        f"[Update Sets] ✓ format_window.json: {current} "
+        f"online {release_date} → in-person {in_person_legal}"
+    )
+    return out_path
+
+
 def main():
     print("=" * 60)
     print("UPDATE SETS - Fetching set release order from Limitless")
@@ -214,13 +415,28 @@ def main():
         sets_order = merged
         print(f"[Update Sets] Merged live data with fallback ({len(sets_order)} sets total).")
 
+    # Release dates — best-effort scrape, fall back to FALLBACK_RELEASE_DATES.
+    release_dates = scrape_release_dates()
+    if release_dates:
+        print(f"[Update Sets] Scraped {len(release_dates)} release dates from live site.")
+    else:
+        print("[Update Sets] No release dates scraped — using fallback dict.")
+
     os.makedirs(data_dir, exist_ok=True)
-    out_path = os.path.join(data_dir, 'sets.json')
 
-    with open(out_path, 'w', encoding='utf-8') as f:
+    # 1) sets.json (back-compat: flat {code: order})
+    sets_path = os.path.join(data_dir, 'sets.json')
+    with open(sets_path, 'w', encoding='utf-8') as f:
         json.dump(sets_order, f, indent=2, sort_keys=True)
+    print(f"[Update Sets] ✓ Saved {len(sets_order)} sets to: {sets_path}")
 
-    print(f"[Update Sets] ✓ Saved {len(sets_order)} sets to: {out_path}")
+    # 2) sets_metadata.json (NEW: code -> {order, release_date})
+    metadata_path = write_sets_metadata(sets_order, release_dates)
+    print(f"[Update Sets] ✓ Saved metadata to: {metadata_path}")
+
+    # 3) format_window.json (NEW: derived from current set + release date)
+    write_format_window(metadata_path)
+
     print("[Update Sets] Done!")
 
 

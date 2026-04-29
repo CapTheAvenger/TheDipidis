@@ -84,6 +84,8 @@ const translations = {
     // ── Common buttons / actions ─────────────────────────────
     'btn.save':               'Save',
     'btn.copy':               'Copy',
+    'btn.copyDecklist':       '📋 Copy Decklist',
+    'btn.copyDecklistTitle':  'Copy this deck list to your clipboard in PTCGL/Limitless format',
     'btn.close':              'Close',
     'btn.clear':              'Clear',
     'btn.compare':            'Compare',
@@ -1145,6 +1147,7 @@ const translations = {
     'cm.analysisHeading':       'Current Meta Deck Analysis',
     'cm.analyzeAndBuild':       'Analyze and Build Decks from Current Meta',
     'data.updated':             'Data:',
+    'filter.availableRange':    'Available',
     // ── TCG glossary tooltips ──────────────────────────────────
     'glossary.irl':             'IRL = In Real Life (physical paper play)',
     'glossary.ptcgl':           'PTCGL = Pokémon TCG Live (digital play)',
@@ -1405,6 +1408,8 @@ const translations = {
     // ── Common buttons / actions ─────────────────────────────
     'btn.save':               'Speichern',
     'btn.copy':               'Kopieren',
+    'btn.copyDecklist':       '📋 Liste kopieren',
+    'btn.copyDecklistTitle':  'Kopiert die Deckliste im PTCGL/Limitless-Format in die Zwischenablage',
     'btn.close':              'Schließen',
     'btn.clear':              'Leeren',
     'btn.compare':            'Vergleichen',
@@ -2467,6 +2472,7 @@ const translations = {
     'cm.analysisHeading':       'Aktuelle Meta Deck-Analyse',
     'cm.analyzeAndBuild':       'Decks aus der aktuellen Meta analysieren & bauen',
     'data.updated':             'Daten:',
+    'filter.availableRange':    'Verfügbar',
     // ── TCG-Glossar Tooltips ───────────────────────────────────
     'glossary.irl':             'IRL = In Real Life (Tabletop / physisches Spiel mit Karten)',
     'glossary.ptcgl':           'PTCGL = Pokémon TCG Live (digitales Spiel)',

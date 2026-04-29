@@ -969,6 +969,7 @@
                 window.cityLeagueAnalysisData = data;
                 window.cityLeagueArchetypesData = archetypesData;
                 window.cityLeagueComparisonData = comparisonData;
+                _updateCityLeagueDateRangeHints(data);
                 const previousDeckValue = document.getElementById('cityLeagueDeckSelect')?.value || '';
                 populateCityLeagueDeckSelect(data, comparisonData);
                 const deckSelect = document.getElementById('cityLeagueDeckSelect');
@@ -1414,6 +1415,55 @@
                 select.value = '';
             }
             return select.value;
+        }
+
+        // Update the From/To date inputs with min+max attributes derived
+        // from the loaded data, plus a "Available: …" hint below each
+        // input so the user knows what range is on file before picking.
+        // Without this, the empty inputs gave no signal of whether the
+        // dataset is full or whether a date is required.
+        function _updateCityLeagueDateRangeHints(rows) {
+            const fromEl = document.getElementById('cityLeagueDateFrom');
+            const toEl   = document.getElementById('cityLeagueDateTo');
+            if (!fromEl || !toEl || !Array.isArray(rows) || rows.length === 0) return;
+            // Collect ISO-like dates from `tournament_date` or `date` cols.
+            let minISO = null, maxISO = null;
+            for (const r of rows) {
+                const raw = String(r.tournament_date || r.date || '').trim();
+                let iso = '';
+                if (/^\d{4}-\d{2}-\d{2}/.test(raw)) {
+                    iso = raw.slice(0, 10);
+                } else if (typeof parseJapaneseDate === 'function') {
+                    const d = parseJapaneseDate(raw);
+                    if (d) iso = d.toISOString().slice(0, 10);
+                }
+                if (!iso) continue;
+                if (!minISO || iso < minISO) minISO = iso;
+                if (!maxISO || iso > maxISO) maxISO = iso;
+            }
+            if (!minISO || !maxISO) return;
+            fromEl.min = minISO; fromEl.max = maxISO;
+            toEl.min   = minISO; toEl.max   = maxISO;
+            // Render a "Available: …" hint underneath each input. Re-uses
+            // a single element id so we don't accumulate duplicates on
+            // subsequent reloads.
+            const fmt = iso => {
+                const m = iso.match(/^(\d{4})-(\d{2})-(\d{2})/);
+                return m ? `${parseInt(m[3], 10)}.${parseInt(m[2], 10)}.${m[1]}` : iso;
+            };
+            const rangeText = `${fmt(minISO)} – ${fmt(maxISO)}`;
+            const ensureHint = (input, text) => {
+                let hint = input.nextElementSibling;
+                if (!hint || !hint.classList || !hint.classList.contains('cl-date-range-hint')) {
+                    hint = document.createElement('div');
+                    hint.className = 'cl-date-range-hint';
+                    input.insertAdjacentElement('afterend', hint);
+                }
+                hint.textContent = text;
+            };
+            const hintLabel = (typeof t === 'function' ? t('filter.availableRange') : 'Available') + `: ${rangeText}`;
+            ensureHint(fromEl, hintLabel);
+            ensureHint(toEl,   hintLabel);
         }
 
         function resetCityLeagueDateFilter() {

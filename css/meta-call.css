@@ -26,10 +26,13 @@
   background: #fff;
   border: 1px solid #e0e6ed;
   border-radius: 12px;
-  padding: 20px 24px;
+  padding: 18px 16px;
   margin-bottom: 18px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.05);
 }
+/* Panel title is always wrap-friendly so the share / group / collapse
+   buttons drop to a second line gracefully when the viewport is too
+   narrow to fit them inline (instead of pushing controls offscreen). */
 .metacall-panel-title {
   font-size: 1rem;
   font-weight: 700;
@@ -37,7 +40,9 @@
   color: #1a2533;
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 8px;
+  row-gap: 6px;
 }
 .metacall-panel-title .mc-badge {
   font-size: 0.72rem;
@@ -99,16 +104,16 @@
 /* Column widths: DECK gets the lion's share (rich intel block);
    the four numeric columns are uniform; the ø-encounter column
    takes a bit more for the bar visual. */
-/* Column widths — narrower DECK column because the heavy intel block
-   (Online%, Trend, Last-Major) now lives in a separate expandable
-   detail row spanning the full table width. The numeric columns get
-   a bit more room so 11.78% no longer feels squeezed. */
-.metacall-table colgroup col.col-deck     { width: 28%; }
-.metacall-table colgroup col.col-online   { width: 11%; }
-.metacall-table colgroup col.col-est      { width: 13%; }
-.metacall-table colgroup col.col-final    { width: 11%; }
-.metacall-table colgroup col.col-players  { width: 9%;  }
-.metacall-table colgroup col.col-enc      { width: 28%; }
+/* Column widths — slightly wider DECK column so two-word names like
+   "Dragapult Dusknoir" can wrap to a second line at full size
+   instead of getting truncated. The numeric columns are tight but
+   sufficient because table-layout:fixed prevents content overflow. */
+.metacall-table colgroup col.col-deck     { width: 30%; }
+.metacall-table colgroup col.col-online   { width: 10%; }
+.metacall-table colgroup col.col-est      { width: 11%; }
+.metacall-table colgroup col.col-final    { width: 10%; }
+.metacall-table colgroup col.col-players  { width: 8%;  }
+.metacall-table colgroup col.col-enc      { width: 31%; }
 /* Top-align value cells so they sit next to the deck name rather than
    centring inside the tall intel block. */
 .metacall-table td { vertical-align: top; }
@@ -2275,4 +2280,271 @@
     }
     .metacall-table tbody tr.mc-row-detail td:nth-child(5) { display: block; }
     .metacall-table tbody tr.mc-row-detail td::before { content: none; }
+}
+
+/* ============================================================
+   FIELD COMPOSITION REDESIGN — final pass
+   Applies the 16-item polish list (unified header, contained-card
+   table, pill estimate input, slimmer encounter bar, etc.) on top
+   of the v2 dual-row structure. Sits at the end of the file so it
+   wins specificity ties against the earlier rules.
+   ============================================================ */
+
+/* 1. Unified header — DECK column matches the dark band of the
+   numeric headers so the row reads as one continuous toolbar. */
+.metacall-table thead tr th:first-child {
+    background: #1a2540;
+    color: rgba(255, 255, 255, 0.78);
+    border-right: 1px solid rgba(255, 255, 255, 0.10);
+}
+.metacall-table thead tr th {
+    background: #1a2540;
+    color: rgba(255, 255, 255, 0.78);
+    border-bottom: none;
+}
+/* Re-tint the previously light coloured-by-concept header labels so
+   they're still legible on the dark band, but keep the colour cue. */
+.metacall-table thead .mc-th-online   { color: #79b6e0; }
+.metacall-table thead .mc-th-est      { color: #c5a8e8; }
+.metacall-table thead .mc-th-final    { color: #6cd49a; }
+
+/* 2. Table sits inside a contained card with a soft border + shadow
+   so it visually anchors as a single object instead of bleeding
+   into the panel. */
+.metacall-table-wrap {
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid #dde3ec;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+    overflow-x: auto;
+}
+
+/* 3. Header font — tighter and a touch smaller so the tall band
+   doesn't dominate. */
+.metacall-table thead th {
+    font-size: 0.72rem;
+    letter-spacing: 0.06em;
+    padding: 11px 12px;
+    white-space: nowrap;
+}
+
+/* 4. Compact main row */
+.metacall-table tbody tr.mc-row-main td {
+    padding: 8px 12px;
+    border-bottom: 1px solid #edf0f5;
+}
+
+/* 5–8. Per-column sizing/colour refinements (overrides v2 values) */
+.mc-cell-online .mc-share-online {
+    font-size: 1rem;
+    color: #2980b9;
+}
+.mc-cell-est .mc-personal-input {
+    width: 72px;
+    padding: 5px 8px;
+    border-radius: 20px;     /* pill shape — clearly an input, never decoration */
+    font-size: 0.88rem;
+    background: #f8f4ff;
+    border: 1.5px solid #c8a8e8;
+    color: #7b2d9b;
+}
+.mc-cell-est .mc-personal-input::placeholder {
+    color: #c9a8e0;
+    font-size: 0.82rem;
+}
+.mc-cell-final .mc-share-final {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: #1e8449;
+}
+.mc-cell-players .mc-players-count {
+    color: #4a5568;
+    font-weight: 600;
+    font-size: 0.92rem;
+}
+
+/* 9. Row hover */
+.metacall-table tbody tr.mc-row-main:hover td {
+    background: #f0f6ff;
+    transition: background 0.12s;
+}
+
+/* 10. Row toggle — square chevron, less attention-grabbing than the
+   v2 circular pill so it doesn't compete with the deck name. */
+.mc-row-toggle {
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+    background: #f0f3f8;
+    border: 1px solid #d5dce8;
+    color: #7b8fa8;
+    font-size: 10px;
+}
+.mc-row-toggle:hover {
+    background: #e8eef8;
+    color: #3a5a8c;
+    border-color: #c0ccdf;
+}
+.mc-row-toggle.is-expanded {
+    background: #ede8f7;
+    border-color: #b89ad4;
+    color: #6b3a9c;
+    transform: rotate(180deg);
+}
+
+/* 11. Detail row — slightly bluer background + thicker bottom rule
+   so the open/closed state reads at a glance. */
+.metacall-table tbody tr.mc-row-detail td {
+    background: #f5f8fc;
+    padding: 10px 14px 12px;
+    border-bottom: 2px solid #e8ecf3;
+}
+
+/* 12. Tile grid — smaller gaps + cleaner tile chrome */
+.mc-intel-tile-grid { gap: 6px; }
+.mc-intel-tile {
+    padding: 6px 9px;
+    background: #ffffff;
+    border-color: #e2e8f0;
+}
+.mc-intel-tile-label { font-size: 0.68rem; color: #8fa3bb; }
+.mc-intel-tile-value { font-size: 0.92rem; }
+
+/* 13. Major chip cleaner */
+.mc-intel-major-chip {
+    font-size: 0.8rem;
+    padding: 5px 10px;
+    background: #f0f7ff;
+    border-color: #c5daf0;
+    border-radius: 6px;
+    margin-top: 6px;
+}
+
+/* 14. Info banner — slim left-border style (replaces the lavender
+   pill from v2 so the banner reads as a "note" not a "callout"). */
+.mc-field-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: transparent;
+    border: none;
+    border-left: 3px solid #85c1e9;
+    border-radius: 0;
+    padding: 4px 10px;
+    margin: 0 0 12px;
+    font-size: 0.81rem;
+    color: #5b8db8;
+    max-width: 100%;
+}
+
+/* 15. Encounter bar — slimmer (6px) so the ø number can carry the
+   weight rather than the bar itself. */
+.mc-encounters-bar .mc-bar-bg { height: 6px; background: #e8eef8; }
+.mc-encounters-bar .mc-bar-fill { height: 6px; }
+.mc-encounters-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #4a5a6a;
+    min-width: 28px;
+    text-align: right;
+    white-space: nowrap;
+}
+
+/* ============================================================
+   Panel-title button overflow — < 900px
+   ============================================================
+   Below 900px, hide the Group / Share / Collapse-all button labels
+   so the panel title fits cleanly without flowing onto a second
+   line for typical title lengths. The buttons stay clickable as
+   icon-only chips. (The < 600px rules earlier in the file already
+   apply, this just extends the icon-only range upward.) */
+@media (max-width: 900px) {
+    .mc-group-toggle-btn .mc-btn-text,
+    .mc-share-btn .mc-btn-text,
+    .mc-collapse-all-btn .mc-btn-text { display: none; }
+    .mc-group-toggle-btn,
+    .mc-share-btn,
+    .mc-collapse-all-btn { padding: 6px 9px; }
+    .mc-group-toggle-btn .mc-btn-icon,
+    .mc-share-btn .mc-btn-icon,
+    .mc-collapse-all-btn .mc-btn-icon { margin: 0; font-size: 1rem; }
+}
+
+/* ============================================================
+   Long deck name wrap (full-size desktop)
+   ============================================================
+   With the DECK column at 30%, two-word names ("Dragapult
+   Dusknoir") still occasionally bump the chevron. Allow the deck
+   name to wrap to a second line instead of truncating with an
+   ellipsis the user can't expand. */
+.metacall-table tbody tr.mc-row-main .mc-deck-name {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: unset;
+    line-height: 1.3;
+    max-width: 100%;
+}
+
+/* ============================================================
+   Mobile accordion for detail content (≤ 600px)
+   ============================================================
+   On phones the expanded detail row was a long stack: 3 stat tiles,
+   the major chip, sometimes 1–3 personal tiles. Even with detail
+   rows opening by default the screen got swamped. Solution: wrap
+   the intel in a collapsible container per detail row, with a
+   "Details ▾" toggle button that expands/collapses inside the
+   row. Desktop keeps the v2 always-open layout. */
+.mc-mobile-detail-toggle { display: none; }   /* hidden by default; mobile shows it */
+
+@media (max-width: 600px) {
+    .mc-mobile-detail-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: #5b8db8;
+        background: #f0f6ff;
+        border: 1px solid #c5daf0;
+        border-radius: 6px;
+        padding: 6px 12px;
+        cursor: pointer;
+        width: 100%;
+        margin-bottom: 6px;
+    }
+    .mc-mobile-detail-toggle:active { transform: scale(0.98); }
+    .mc-mobile-detail-toggle-arrow {
+        display: inline-block;
+        transition: transform 0.18s ease;
+    }
+    .mc-deck-intel-wrap.is-open .mc-mobile-detail-toggle-arrow {
+        transform: rotate(180deg);
+    }
+    /* Body of the detail card hidden until toggle opens it. */
+    .mc-deck-intel-wrap .mc-deck-intel { display: none; }
+    .mc-deck-intel-wrap.is-open .mc-deck-intel { display: flex; }
+
+    /* 2-up tile grid (vs 3-up on desktop) — fits comfortably on
+       phones without forcing a 1-col stack. */
+    .mc-intel-tile-grid {
+        grid-template-columns: 1fr 1fr !important;
+        gap: 5px !important;
+    }
+    .mc-intel-major-chip {
+        font-size: 0.75rem !important;
+        padding: 4px 8px !important;
+        flex-wrap: wrap !important;
+        gap: 3px 8px !important;
+    }
+    .metacall-table tbody tr.mc-row-detail td {
+        padding: 8px 10px !important;
+    }
+}
+
+@media (min-width: 601px) {
+    /* Desktop / tablet — toggle button never visible, intel always
+       expanded inside its wrapper. */
+    .mc-mobile-detail-toggle { display: none !important; }
+    .mc-deck-intel-wrap .mc-deck-intel { display: flex !important; }
 }

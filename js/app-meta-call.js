@@ -2455,10 +2455,21 @@ window.MetaCall = (function () {
     }
 
     if (tiles.length === 0 && !majorChipHtml && personals.length === 0) return '';
-    return `<div class="mc-deck-intel">
-      ${tiles.length ? `<div class="mc-intel-tile-grid">${tiles.join('')}</div>` : ''}
-      ${majorChipHtml}
-      ${personals.length ? `<div class="mc-intel-tile-grid mc-intel-tile-grid-personal">${personals.join('')}</div>` : ''}
+    // Wrap the intel in a per-row container so phone screens can hide
+    // the body behind a "Details ▾" toggle (CSS-only). Desktop keeps
+    // the wrapper but renders the intel always-visible. The toggle's
+    // onclick uses `this.closest()` so it walks up to the wrapper
+    // regardless of where the rendered button ends up.
+    return `<div class="mc-deck-intel-wrap">
+      <button type="button" class="mc-mobile-detail-toggle"
+              onclick="this.closest('.mc-deck-intel-wrap').classList.toggle('is-open')">
+        Details <span class="mc-mobile-detail-toggle-arrow" aria-hidden="true">▾</span>
+      </button>
+      <div class="mc-deck-intel">
+        ${tiles.length ? `<div class="mc-intel-tile-grid">${tiles.join('')}</div>` : ''}
+        ${majorChipHtml}
+        ${personals.length ? `<div class="mc-intel-tile-grid mc-intel-tile-grid-personal">${personals.join('')}</div>` : ''}
+      </div>
     </div>`;
   }
 

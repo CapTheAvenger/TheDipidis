@@ -187,6 +187,69 @@ def scrape_tournament_list(
 
 # ── Deck data for one tournament ──────────────────────────────────────────────
 
+def scrape_tournament_meta(tournament_id: str) -> Dict[str, str]:
+    """Fetch the tournament's display name + date from its labs page.
+
+    Used in --tournament-id mode where the caller has only the numeric ID
+    and not the metadata that scrape_tournament_list() collects from the
+    main page. Falls back gracefully (empty strings) when fields can't
+    be parsed — the caller's defaults (e.g. "Tournament 0062") then stay.
+    """
+    url = f"{BASE_URL}/{tournament_id}/decks"
+    soup = fetch_page_bs4(url)
+    if not soup:
+        return {}
+    def _fix_mojibake(s: str) -> str:
+        """Repair Latin-1-decoded-as-UTF-8 mojibake (e.g. 'QuerÃ©taro' → 'Querétaro').
+        No-op when the string is already clean UTF-8."""
+        if not s:
+            return s
+        try:
+            return s.encode('latin1').decode('utf-8')
+        except (UnicodeDecodeError, UnicodeEncodeError):
+            return s
+
+    out: Dict[str, str] = {}
+    # Title looks like "Decks: Regional Championship Prague – Limitless Labs".
+    # Split on "Limitless" so we don't depend on the dash character (which
+    # is sometimes mojibake'd to â\x80\x93 by upstream encoding mishaps).
+    title_el = soup.find('title')
+    if title_el:
+        title = title_el.get_text(strip=True)
+        if 'Limitless' in title:
+            head = title.rsplit('Limitless', 1)[0]
+            # Strip trailing dashes, mojibake bytes, whitespace.
+            # Trailing dash representations: real en/em dash, ASCII dash,
+            # and the mojibake'd UTF-8 bytes (â\x80\x93 or â\x80\x94).
+            # Repeating rstrip handles "Prague â\x80\x93 " ending with
+            # whitespace + bytes after the strip.
+            head = head.rstrip(' \t–—-â\x80\x93\x94')
+            head = re.sub(r'\s*[âÂ\x80-\x9f]+\s*$', '', head).strip()
+            m = re.match(r'(?:Decks|Standings|Pairings|Metagame):\s*(.+)', head)
+            cleaned = (m.group(1).strip() if m else head)
+            cleaned = _fix_mojibake(cleaned)
+            if cleaned:
+                out['tournament_name'] = cleaned
+    # H1 wins when present — usually the cleanest representation.
+    h1 = soup.find('h1')
+    if h1:
+        h1_text = h1.get_text(strip=True)
+        if h1_text:
+            out['tournament_name'] = _fix_mojibake(h1_text)
+    # The header strip after the H1 carries the date + player count, e.g.
+    # "April 25–26, 2026 • 1370 players". Extract the date portion.
+    body_text = soup.get_text(' ', strip=True)[:1500]
+    date_match = re.search(
+        r'((?:January|February|March|April|May|June|July|August|September|October|November|December)\s+\d+(?:[–—\-]\d+)?,\s*\d{4})',
+        body_text
+    )
+    if date_match:
+        date_obj = _parse_date(date_match.group(1))
+        if date_obj:
+            out['tournament_date'] = date_obj.strftime('%Y-%m-%d')
+    return out
+
+
 def scrape_tournament_decks(tournament_id: str) -> Tuple[List[Dict], int]:
     """
     Scrape the /decks page for a single tournament, then merge in
@@ -715,14 +778,22 @@ def main() -> None:
 
     # ── Build tournament list ──────────────────────────────────────────────
     if args.tournament_id:
-        # Single-tournament mode – skip the main page
+        # Single-tournament mode – skip the main page, but still fetch the
+        # tournament's own page so we get the real name + date instead of
+        # a placeholder "Tournament 0062" string flowing into the field
+        # cards downstream.
+        tid = args.tournament_id.zfill(4)
+        meta = scrape_tournament_meta(tid)
         tournaments = [{
-            'tournament_id'  : args.tournament_id.zfill(4),
-            'tournament_name': f'Tournament {args.tournament_id}',
-            'tournament_date': '',
+            'tournament_id'  : tid,
+            'tournament_name': meta.get('tournament_name') or f'Tournament {args.tournament_id}',
+            'tournament_date': meta.get('tournament_date') or '',
             'tournament_type': 'unknown',
             'country'        : '',
         }]
+        logger.info("Single-tournament mode: %s (%s)",
+                    tournaments[0]['tournament_name'],
+                    tournaments[0]['tournament_date'] or 'date n/a')
     else:
         tournaments = scrape_tournament_list(
             from_date=from_date,

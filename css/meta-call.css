@@ -94,7 +94,20 @@
   width: 100%;
   border-collapse: collapse;
   font-size: 0.88rem;
+  table-layout: fixed;
 }
+/* Column widths: DECK gets the lion's share (rich intel block);
+   the four numeric columns are uniform; the ø-encounter column
+   takes a bit more for the bar visual. */
+.metacall-table colgroup col.col-deck     { width: 38%; }
+.metacall-table colgroup col.col-online   { width: 10%; }
+.metacall-table colgroup col.col-est      { width: 10%; }
+.metacall-table colgroup col.col-final    { width: 10%; }
+.metacall-table colgroup col.col-players  { width: 10%; }
+.metacall-table colgroup col.col-enc      { width: 22%; }
+/* Top-align value cells so they sit next to the deck name rather than
+   centring inside the tall intel block. */
+.metacall-table td { vertical-align: top; }
 .metacall-table th {
   text-align: left;
   padding: 8px 10px;
@@ -1661,6 +1674,49 @@
     border-bottom: 1px dashed #cfe2f5;
     padding-bottom: 4px;
 }
+/* Compact 3-pill layout for Day 1 / Day 2 / Conv inside the major block.
+   Pills are inline-block so they wrap naturally on narrow screens. */
+.mc-intel-major-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+.mc-intel-major-pill {
+    flex: 1 1 0;
+    min-width: 80px;
+    background: #fff;
+    border: 1px solid #cfe2f5;
+    border-radius: 6px;
+    padding: 4px 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1px;
+}
+.mc-intel-major-pill-label {
+    color: #4a5b73;
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    line-height: 1.1;
+}
+.mc-intel-major-pill-value {
+    color: #0d4b87;
+    font-weight: 700;
+    font-size: 0.92rem;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.1;
+}
+.mc-intel-major-pill-extra {
+    color: #5b87b5;
+    font-weight: 500;
+    font-size: 0.72rem;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.1;
+}
+/* Legacy .mc-intel-major-row classes — kept for any cached HTML or
+   alternate render paths that haven't been refactored to pills yet. */
 .mc-intel-major-row {
     display: flex;
     flex-wrap: wrap;
@@ -1680,7 +1736,6 @@
 }
 .mc-intel-major-value {
     flex: 0 0 auto;
-    /* margin-left: auto removed — same fix as .mc-intel-value above. */
     color: #0d4b87;
     font-weight: 700;
     font-variant-numeric: tabular-nums;

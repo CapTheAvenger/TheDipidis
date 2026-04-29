@@ -1565,6 +1565,14 @@ window.MetaCall = (function () {
   </p>
   <div class="metacall-table-wrap">
     <table class="metacall-table">
+      <colgroup>
+        <col class="col-deck">
+        <col class="col-online">
+        <col class="col-est">
+        <col class="col-final">
+        <col class="col-players">
+        <col class="col-enc">
+      </colgroup>
       <thead>
         <tr>
           <th>${t('mc.headerDeck')}</th>
@@ -2134,24 +2142,29 @@ window.MetaCall = (function () {
     const labelTag2 = t('mc.intelMajorDay2');
     const labelConv = t('mc.intelMajorDayConv');
 
-    const fmtRow = (label, value, extra) => `
-      <div class="mc-intel-major-row">
-        <span class="mc-intel-major-label">${esc(label)}</span>
-        <span class="mc-intel-major-value">${value}</span>
-        ${extra ? `<span class="mc-intel-major-extra">${esc(extra)}</span>` : ''}
-      </div>`;
-
     const day1Val = lm.day1Share > 0 ? `${fmt(lm.day1Share, 1)} %` : '—';
     const day1Wr  = lm.day1WinPct > 0 ? `WR ${fmt(lm.day1WinPct, 0)} %` : '';
     const day2Val = made ? `${fmt(lm.day2Share, 1)} %` : '—';
     const day2Wr  = (made && lm.day2WinPct > 0) ? `WR ${fmt(lm.day2WinPct, 0)} %` : '';
     const convVal = conv > 0 ? `${fmt(conv * 100, 1)} %` : '—';
 
+    // Compact 3-pill layout (Day 1 / Day 2 / Conv) instead of stacked rows.
+    // Cuts the field card's vertical footprint roughly in half so the
+    // value-only columns next to it don't drown in whitespace.
+    const pill = (label, value, extra) => `
+      <div class="mc-intel-major-pill">
+        <span class="mc-intel-major-pill-label">${esc(label)}</span>
+        <span class="mc-intel-major-pill-value">${value}</span>
+        ${extra ? `<span class="mc-intel-major-pill-extra">${esc(extra)}</span>` : ''}
+      </div>`;
+
     return `<div class="mc-intel-major-block">
       <div class="mc-intel-major-header">${esc(headerLabel)}</div>
-      ${fmtRow(labelTag1, day1Val, day1Wr)}
-      ${fmtRow(labelTag2, day2Val, day2Wr)}
-      ${fmtRow(labelConv, convVal)}
+      <div class="mc-intel-major-pills">
+        ${pill(labelTag1, day1Val, day1Wr)}
+        ${pill(labelTag2, day2Val, day2Wr)}
+        ${pill(labelConv, convVal)}
+      </div>
     </div>`;
   }
 

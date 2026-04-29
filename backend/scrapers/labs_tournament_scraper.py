@@ -476,72 +476,99 @@ def scrape_tournament_conversion(tournament_id: str) -> Dict[str, Dict[str, floa
     return out
 
 
+# Pre-compiled regex for the embedded deck-data JSON blob. The Day-1/Day-2
+# pages render the OVERALL share in the visible table (so HTML-table
+# parsing was wrong); the day-specific share + record live in a Vue/Nuxt
+# data-blob inside the page where each deck appears as:
+#   {"identifier":"...","name":"...","players":N,"day2s":M,"wins":...,
+#    "losses":...,"ties":...,"records":"{\"1\":{...},\"2\":{...}}"}
+# `players` is the Day-1 player count, `day2s` is the Day-2 player count.
+# We match the records-block by spelling out its full nested shape so the
+# inner braces don't trip a non-greedy `.*?` (which would stop at the first
+# `}` and lose the per-day W-L-T entirely).
+# Outer fields use single-level escaping (\"foo\":\"bar\"), but the
+# `records` field is itself a JSON-string-inside-JSON-string, so its
+# inner quotes are doubly escaped as \\\". Both levels are matched
+# explicitly here so we never silently fall back to mangled data.
+_DAY_BLOB_PATTERN = re.compile(
+    r'\\"identifier\\":\\"(?P<id>.+?)\\".*?'
+    r'\\"players\\":(?P<day1_players>\d+),'
+    r'\\"day2s\\":(?P<day2_players>\d+),'
+    r'\\"wins\\":\d+,'
+    r'\\"losses\\":\d+,'
+    r'\\"ties\\":\d+,'
+    r'\\"records\\":\\"\{'
+    r'\\\\\\"1\\\\\\":\{\\\\\\"wins\\\\\\":(?P<d1_w>\d+),\\\\\\"losses\\\\\\":(?P<d1_l>\d+),\\\\\\"ties\\\\\\":(?P<d1_t>\d+)\},'
+    r'\\\\\\"2\\\\\\":\{\\\\\\"wins\\\\\\":(?P<d2_w>\d+),\\\\\\"losses\\\\\\":(?P<d2_l>\d+),\\\\\\"ties\\\\\\":(?P<d2_t>\d+)\}'
+    r'\}\\"',
+    re.DOTALL,
+)
+
+
 def scrape_tournament_day(tournament_id: str, day: str) -> Dict[str, Dict[str, float]]:
     """
     Fetch labs.limitlesstcg.com/{id}/decks?{day1|day2} and return
     { deck_slug: { 'player_count', 'share_pct', 'wins', 'losses',
                    'ties', 'win_pct' } }.
 
-    Same column layout as the default deck table — `day` ∈ {'day1','day2'}.
-    Returns empty dict when the page is missing (small tournaments without
-    a Day-2 cut won't have a Day-2 view).
+    `day` ∈ {'day1','day2'}. We parse the embedded JSON data-blob, NOT
+    the rendered HTML table — the table only carries OVERALL stats and
+    led PR #32 to write share_pct == day1_share_pct == day2_share_pct
+    for every row. The blob has the real per-day player counts and records.
+
+    Returns empty dict when the page is missing or the blob isn't found
+    (small tournaments without a Day-2 cut won't have any Day-2 entries).
     """
     if day not in ('day1', 'day2'):
         return {}
     url = f"{BASE_URL}/{tournament_id}/decks?{day}"
     logger.info("    Fetching %s: %s", day, url)
-    soup = fetch_page_bs4(url)
-    if not soup:
+    # Need the raw HTML to access the embedded JSON blob — fetch_page_bs4
+    # parses to lxml/bs4 and we'd lose the script-context anyway.
+    from card_scraper_shared import safe_fetch_html
+    html = safe_fetch_html(url)
+    if not html:
         logger.warning("    %s page fetch failed for %s — skipping", day, tournament_id)
         return {}
 
-    table = soup.find('table', attrs={'class': re.compile(r'data-table')})
-    if not table:
-        logger.info("    No %s table for %s — likely no day-2 cut at this event", day, tournament_id)
+    matches = list(_DAY_BLOB_PATTERN.finditer(html))
+    if not matches:
+        logger.info("    No %s data blob for %s — small event, no day-2 cut, or page format changed", day, tournament_id)
+        return {}
+
+    # Compute totals for share normalisation. Tournaments without a Day-2
+    # cut return all 0s for day2s — we then return an empty dict so the
+    # caller knows there's nothing to merge.
+    total_day1 = sum(int(m['day1_players']) for m in matches)
+    total_day2 = sum(int(m['day2_players']) for m in matches)
+    total = total_day1 if day == 'day1' else total_day2
+    if total <= 0:
+        logger.info("    %s: total players = 0 (event has no %s data)", day, day)
         return {}
 
     out: Dict[str, Dict[str, float]] = {}
-    for row in table.select('tbody tr'):
-        cells = row.find_all('td')
-        if len(cells) < 5:
+    for m in matches:
+        slug = m['id']
+        if day == 'day1':
+            player_count = int(m['day1_players'])
+            wins   = int(m['d1_w'])
+            losses = int(m['d1_l'])
+            ties   = int(m['d1_t'])
+        else:
+            player_count = int(m['day2_players'])
+            wins   = int(m['d2_w'])
+            losses = int(m['d2_l'])
+            ties   = int(m['d2_t'])
+        if player_count <= 0:
             continue
 
-        # Cell 1: Player count
-        try:
-            player_count = int(cells[1].get_text(strip=True))
-        except ValueError:
-            continue
-
-        # Cell 2: Deck slug (anchor href)
-        deck_link = cells[2].find('a')
-        if not deck_link:
-            continue
-        slug = deck_link.get('href', '').rsplit('/', 1)[-1]
-        if not slug:
-            continue
-
-        # Cell 3: Share %
-        share_text = cells[3].get_text(strip=True).replace('%', '').strip()
-        try:
-            share_pct = round(float(share_text), 4)
-        except ValueError:
-            share_pct = 0.0
-
-        # Cell 4: W-L-T record
-        record_text = cells[4].get_text(strip=True)
-        wins = losses = ties = 0
-        rm = re.match(r'(\d+)\s*-\s*(\d+)\s*-\s*(\d+)', record_text)
-        if rm:
-            wins, losses, ties = int(rm.group(1)), int(rm.group(2)), int(rm.group(3))
-
-        # Cell 5: Win %
-        win_pct = 0.0
-        if len(cells) > 5:
-            wp_text = cells[5].get_text(strip=True).replace('%', '').strip()
-            try:
-                win_pct = round(float(wp_text), 4)
-            except ValueError:
-                pass
+        games   = wins + losses + ties
+        # Limitless reports "Win %" as match-point percentage, not raw
+        # win-rate: (wins×3 + ties) / (games×3). E.g. 24-41-6 = 36.62%
+        # rather than 24/71 = 33.80%. Match the upstream formula so
+        # Day-1/Day-2 numbers line up with what users see on labs.
+        win_pct = round((wins * 3 + ties) / (games * 3) * 100, 4) if games > 0 else 0.0
+        share_pct = round(player_count / total * 100, 4)
 
         out[slug] = {
             'player_count': player_count,
@@ -552,7 +579,7 @@ def scrape_tournament_day(tournament_id: str, day: str) -> Dict[str, Dict[str, f
             'win_pct'     : win_pct,
         }
 
-    logger.info("    %s: %d decks parsed", day, len(out))
+    logger.info("    %s: %d decks parsed (JSON blob, total %d players)", day, len(out), total)
     return out
 
 

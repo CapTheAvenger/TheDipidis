@@ -55,24 +55,32 @@
 .cards-filter-actions {
     margin-top: 8px;
     display: flex;
-    gap: 8px;
+    gap: 10px;
     align-items: center;
     flex-wrap: wrap;
 }
+/* Reset = secondary destructive action — outline-style so it doesn't
+   visually shout louder than the primary controls. */
 .btn-reset-filters {
-    padding: 8px 18px;
-    background: #e74c3c;
-    color: white;
-    border: none;
+    padding: 7px 14px;
+    background: #fff;
+    color: #c0392b;
+    border: 1.5px solid #f0c4be;
     border-radius: 6px;
     cursor: pointer;
     font-weight: 600;
     font-size: 13px;
+    transition: background 0.15s, border-color 0.15s;
+}
+.btn-reset-filters:hover {
+    background: #fff5f3;
+    border-color: #e74c3c;
 }
 .cards-filter-sort label,
 .cards-filter-view-mode label {
     font-weight: 600;
     color: #555;
+    font-size: 12px;
 }
 .cards-filter-sort select {
     padding: 7px 12px;
@@ -83,35 +91,51 @@
     cursor: pointer;
     background: white;
 }
+/* Print-view toggle as a segmented control (no gap between halves)
+   so the user reads it as ONE switch with two states, not two
+   separate buttons that happen to be near each other. */
 .cards-filter-view-mode {
-    display: flex;
-    align-items: center;
-    gap: 6px;
+    display: inline-flex;
+    align-items: stretch;
+    border: 1.5px solid #c8b3da;
+    border-radius: 7px;
+    overflow: hidden;
+    background: #f8f5fc;
 }
 .cards-filter-view-mode button {
-    padding: 6px 12px;
-    border: 2px solid #9b59b6;
+    padding: 6px 14px;
+    border: none;
     background: transparent;
-    color: #9b59b6;
-    border-radius: 6px;
+    color: #7d4ba0;
     cursor: pointer;
     font-weight: 600;
     font-size: 12px;
-    transition: all 0.2s;
+    transition: background 0.15s, color 0.15s;
+    border-right: 1.5px solid #c8b3da;
+}
+.cards-filter-view-mode button:last-child {
+    border-right: none;
+}
+.cards-filter-view-mode button:hover:not(.active) {
+    background: rgba(155, 89, 182, 0.08);
 }
 .cards-filter-view-mode button.active {
     background: #9b59b6;
-    color: white;
+    color: #fff;
 }
+/* Results info — ambient/secondary; pushed to the right so it never
+   competes with the active controls on the left. */
 .cards-filter-results-info {
-    padding: 6px 12px;
-    background: #ecf0f1;
+    margin-left: auto;
+    padding: 5px 11px;
+    background: transparent;
+    border: 1px dashed #cfd6e0;
     border-radius: 6px;
     text-align: center;
-    font-weight: 600;
+    font-weight: 500;
     font-size: 12px;
     white-space: nowrap;
-    color: #555;
+    color: #6b7c93;
 }
 
 #cards .cards-filter-section {

@@ -861,7 +861,7 @@ const translations = {
     'bj.themeLight':            'Light',
     'bj.tournamentName':         'Tournament Name',
     'bj.tournamentNamePlaceholder': 'e.g. City League Hamburg...',
-    'bj.continueTournament':    'Continue:',
+    'bj.continueTournament':    '↩︎ Continue last tournament:',
     'bj.allTournaments':        'All Tournaments',
     'bj.allResults':            'All Results',
     'bj.histMatches':           'Matches',
@@ -1144,6 +1144,12 @@ const translations = {
     // ── Tab 4: Current Meta Deck Analysis ────────────────────
     'cm.analysisHeading':       'Current Meta Deck Analysis',
     'cm.analyzeAndBuild':       'Analyze and Build Decks from Current Meta',
+    'data.updated':             'Data:',
+    // ── TCG glossary tooltips ──────────────────────────────────
+    'glossary.irl':             'IRL = In Real Life (physical paper play)',
+    'glossary.ptcgl':           'PTCGL = Pokémon TCG Live (digital play)',
+    'glossary.bo1':             'Best of 1 — single match',
+    'glossary.bo3':             'Best of 3 — first to two wins',
     'cm.emptyTitle':            'Pick a deck archetype to start the analysis',
     'cm.emptyHint':              'The dropdown above lists the current top decks. Once you select one, you\'ll see card distribution, win rates and matchups.',
     'cm.formatFilter':          'Tournament Format Filter:',
@@ -2177,7 +2183,7 @@ const translations = {
     'bj.themeLight':            'Hell',
     'bj.tournamentName':         'Turniername',
     'bj.tournamentNamePlaceholder': 'z.B. City League Hamburg...',
-    'bj.continueTournament':    'Weiter:',
+    'bj.continueTournament':    '↩︎ Letztes Turnier fortsetzen:',
     'bj.allTournaments':        'Alle Turniere',
     'bj.allResults':            'Alle Ergebnisse',
     'bj.histMatches':           'Matches',
@@ -2460,6 +2466,12 @@ const translations = {
     // ── Tab 4: Current Meta Deck Analysis ────────────────────
     'cm.analysisHeading':       'Aktuelle Meta Deck-Analyse',
     'cm.analyzeAndBuild':       'Decks aus der aktuellen Meta analysieren & bauen',
+    'data.updated':             'Daten:',
+    // ── TCG-Glossar Tooltips ───────────────────────────────────
+    'glossary.irl':             'IRL = In Real Life (Tabletop / physisches Spiel mit Karten)',
+    'glossary.ptcgl':           'PTCGL = Pokémon TCG Live (digitales Spiel)',
+    'glossary.bo1':             'Best of 1 — eine Partie',
+    'glossary.bo3':             'Best of 3 — erstes zu zwei Siegen',
     'cm.emptyTitle':            'Wähle ein Deck-Archetype, um die Analyse zu starten',
     'cm.emptyHint':              'Im Dropdown oben findest du die aktuellen Top-Decks. Sobald du eines auswählst, siehst du Karten-Verteilung, Win-Rates und Matchups.',
     'cm.formatFilter':          'Turnierformat-Filter:',

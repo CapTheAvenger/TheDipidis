@@ -20,6 +20,12 @@
                 if (lastUpdateEl) {
                     lastUpdateEl.textContent = lastUpdate;
                 }
+                // Mirror the date into all section-header freshness chips
+                // so the user always sees how fresh the data they're
+                // looking at is, not just in the footer.
+                document.querySelectorAll('.js-data-freshness').forEach(el => {
+                    el.textContent = lastUpdate;
+                });
                 
                 // Initialize City League format dropdowns
                 const savedFormat = 'M4';

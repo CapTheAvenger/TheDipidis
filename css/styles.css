@@ -7239,51 +7239,50 @@ body.battle-journal-open {
 /* ============================================================ */
 /* CONTEXT HELP MODAL                                            */
 /* ============================================================ */
+/* Help icon: classic ? on a circle. Replaces the earlier
+   professor-oak avatar which read as decoration, not as a help
+   action. Sits inline with the section title at a comfortable
+   click target (28px). */
 .tab-help-btn {
-    border: none;
-    background-color: white;
+    border: 1.5px solid #cbd5e1;
+    background: #fff;
+    color: #475569;
     cursor: pointer;
     padding: 0;
-    width: 32px;
-    height: 32px;
-    background-image: url('../images/professor_oak_icon.png');
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-position: center;
+    width: 26px;
+    height: 26px;
+    line-height: 1;
+    font-size: 0.95em;
+    font-weight: 800;
     border-radius: 50%;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    transition: background 0.18s, color 0.18s, border-color 0.18s, transform 0.18s, box-shadow 0.18s;
     margin-left: 10px;
     vertical-align: middle;
     position: relative;
     overflow: visible;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
-.tab-help-btn::after {
-    content: attr(title);
-    position: absolute;
-    /* Sits ABOVE the icon — earlier `bottom: -14px` placed the label
-       below the button, which intersected the red underline of the
-       parent .tier-section / panel header. Putting it above the icon
-       keeps the word fully clear of the line, with the icon still
-       vertically centred against the title text. */
-    top: -14px;
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: 9px;
-    font-weight: 700;
-    color: #fff;
-    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
-    white-space: nowrap;
-    pointer-events: none;
+.tab-help-btn::before {
+    content: '?';
+    line-height: 1;
 }
 .tab-help-btn:hover {
-    transform: scale(1.1);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-    background-color: #f0f0f0;
+    background: #3498db;
+    color: #fff;
+    border-color: #3498db;
+    transform: scale(1.08);
+    box-shadow: 0 3px 8px rgba(52, 152, 219, 0.32);
 }
 .tab-help-btn:active {
     transform: scale(0.95);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+}
+.tab-help-btn:focus-visible {
+    outline: 2px solid rgba(52, 152, 219, 0.55);
+    outline-offset: 2px;
 }
 
 #helpModal {
@@ -9624,4 +9623,42 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
     line-height: 1.5;
 }
 .ca-empty-state.display-none { display: none; }
+
+
+/* ── Data-freshness chip — sits next to section titles so users
+   always see how fresh the data they’re looking at is, not just
+   in the page footer. Compact, soft palette so it doesn’t compete
+   with the H2. */
+.data-freshness-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-left: 10px;
+    padding: 3px 10px;
+    background: rgba(46, 204, 113, 0.12);
+    border: 1px solid rgba(46, 204, 113, 0.32);
+    border-radius: 999px;
+    font-size: 0.72em;
+    font-weight: 600;
+    color: #186a3b;
+    line-height: 1.4;
+    vertical-align: middle;
+    white-space: nowrap;
+    cursor: help;
+}
+.data-freshness-chip-icon {
+    font-size: 0.95em;
+    line-height: 1;
+}
+.data-freshness-chip .js-data-freshness {
+    font-variant-numeric: tabular-nums;
+}
+@media (max-width: 600px) {
+    .data-freshness-chip {
+        margin-left: 0;
+        margin-top: 4px;
+        font-size: 0.68em;
+        padding: 2px 8px;
+    }
+}
 

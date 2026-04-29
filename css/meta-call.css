@@ -1579,19 +1579,6 @@
     font-size: 0.76rem;
     color: #6b7280;
 }
-.mc-source-locked .mc-sources-row {
-    opacity: 0.6;
-    pointer-events: none;
-}
-.mc-source-lock-note {
-    margin-top: 10px;
-    padding: 8px 10px;
-    background: #fff7ed;
-    border: 1px solid #fed7aa;
-    border-radius: 8px;
-    font-size: 0.82rem;
-    color: #9a3412;
-}
 @media (max-width: 700px) {
     .mc-sources-row { grid-template-columns: 1fr; }
 }

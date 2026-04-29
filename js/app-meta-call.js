@@ -43,6 +43,12 @@ window.MetaCall = (function () {
     excludeBricks : false,
   };
 
+  // Whether the user has explicitly typed into the Players input.
+  // Calculations always use _settings.totalPlayers (default 1300), but
+  // the input itself shows blank until touched so the user is invited
+  // to type their own field size instead of accepting an arbitrary
+  // pre-filled number.
+  let _playersInputTouched = false;
   let _personalShares   = {};  // deckName -> % estimate (manual "MY ESTIMATE" column)
   let _tgFieldShares    = {};  // deckName (canonical) -> TG-reported share % — folds INTO the predictor's ONLINE % column, NOT into _personalShares
   let _winRateOverrides = {};  // deckName -> 0-100 (manual user overrides only)
@@ -1398,7 +1404,9 @@ window.MetaCall = (function () {
   <div class="metacall-settings-grid">
     <div class="metacall-field-group">
       <label>${t('mc.labelPlayers')}</label>
-      <input type="number" id="mc-players" min="8" max="9999" value="${s.totalPlayers}"
+      <input type="number" id="mc-players" min="8" max="9999"
+             value="${_playersInputTouched ? s.totalPlayers : ''}"
+             placeholder="${s.totalPlayers}"
              oninput="MetaCall._onSetting('totalPlayers', +this.value)">
     </div>
     <div class="metacall-field-group">
@@ -1415,31 +1423,27 @@ window.MetaCall = (function () {
 </div>`;
   }
 
-  // Source-mix panel — opt-in toggles for City League data. Disabled when
-  // Mode B (labs majors authoritative) or a Testing Group is loaded.
+  // Source-mix panel — opt-in toggles for City League data. Always
+  // enabled so the user can mix CL into the predictor and play with
+  // the numbers, even when labs majors / Testing Group data are
+  // already driving the field. Earlier the toggles were locked in
+  // Mode B / when a TG was loaded — that prevented the user from
+  // experimenting with what CL data adds on top.
   function renderSourcesPanel() {
-    const tgLoaded = Object.values(_tgFieldShares).reduce((s, v) => s + v, 0) > 0;
-    const modeBOverride = _predictorMode === 'B';
-    const tgOverride    = !modeBOverride && tgLoaded;
-    const lockReason = modeBOverride
-      ? 'Labs majors data is loaded — City League toggles inactive while in Mode B.'
-      : tgOverride
-        ? 'Testing Group is loaded — City League toggles inactive while TG drives the field.'
-        : '';
-
     const hasCurrent = Object.keys(_clCurrentByDeck).length > 0;
     const hasPast    = Object.keys(_clPastByDeck).length > 0;
     if (!hasCurrent && !hasPast) return ''; // no CL data at all → hide panel
 
-    const lockedClass = lockReason ? ' mc-source-locked' : '';
-    const lockTitle = lockReason ? ` title="${esc(lockReason)}"` : '';
+    // Disable only when the dataset itself is empty — never because
+    // of mode/TG. The predictor honours `_useClCurrent`/`_useClPast`
+    // regardless of mode, so flipping the toggle has a real effect.
     const cbAttrs = (active, hasData) =>
-      `${active ? 'checked' : ''}${(!hasData || lockReason) ? ' disabled' : ''}`;
+      `${active ? 'checked' : ''}${!hasData ? ' disabled' : ''}`;
     const curCount  = Object.keys(_clCurrentByDeck).length;
     const pastCount = Object.keys(_clPastByDeck).length;
 
     return `
-<div class="metacall-panel${lockedClass}"${lockTitle}>
+<div class="metacall-panel">
   <div class="metacall-panel-title">
     Data Sources
     <span class="mc-badge">Optional</span>
@@ -1462,7 +1466,6 @@ window.MetaCall = (function () {
       </span>
     </label>
   </div>
-  ${lockReason ? `<div class="mc-source-lock-note">${esc(lockReason)}</div>` : ''}
 </div>`;
   }
 
@@ -1928,7 +1931,12 @@ window.MetaCall = (function () {
     <h2>${t('mc.title')}</h2>
     <p class="color-grey">${t('mc.subtitle')}</p>
   </div>
-  ${renderPredictorBanner()}
+  ${'' /* Predictor banner suppressed — the verbose technical breakdown
+       ("Based on N major-tournament rows + online-tournament + ladder
+       data. + Online-Entwicklung seit DD.MM.") confused users more
+       than it helped. The function and its trend/CL/accuracy chips
+       are kept in the code in case a slimmer chip-style replacement
+       is added later. */}
   ${renderScenariosBar()}
   ${renderSettingsPanel()}
   ${renderSourcesPanel()}
@@ -2731,6 +2739,7 @@ window.MetaCall = (function () {
   function _onSetting(key, val) {
     if (isNaN(val) || val <= 0) return;
     _settings[key] = val;
+    if (key === 'totalPlayers') _playersInputTouched = true;
     refreshResults();
   }
 

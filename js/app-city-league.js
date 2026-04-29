@@ -240,6 +240,7 @@
                     });
 
                 const archetypesData = parseCSV(archetypesText);
+                _captureKnownCityLeagueTournamentIds(archetypesData);
                 const comparisonData = comparisonText ? parseCSV(comparisonText) : null;
                 const placementStatsMap = buildCityLeaguePlacementStatsMap(archetypesData);
 
@@ -958,6 +959,7 @@
                 data = analysisText ? await fetchAndParseCSV(analysisUrl) : null;
             }
             const archetypesData = archetypesText ? await fetchAndParseCSV(archetypesUrl) : null;
+            _captureKnownCityLeagueTournamentIds(archetypesData);
             const comparisonData = comparisonText ? await fetchAndParseCSV(comparisonUrl) : deriveCityLeagueComparisonData(archetypesData || []);
 
             devLog('Loaded data:', data ? `${data.length} rows` : 'null');
@@ -1628,9 +1630,58 @@
             if (!month) return '';
             return `${year}-${month}-${day}`;
         }
-        
+
+        // ─────────────────────────────────────────────────────────────────────
+        // Bug 2026-04: the analysis CSV is week-aggregated and frequently
+        // includes tournament_ids that are NOT yet present in the archetypes
+        // CSV (the archetypes file is built from a separate scrape that lags
+        // by ~1 week). The card-stat display then computed M (numerator)
+        // from analysis rows and B (denominator) from archetypes-only deck
+        // counts — producing nonsense like 670/645 (= 100,1 %) for popular
+        // archetypes.
+        //
+        // Fix: capture the set of known tournament_ids when the archetypes
+        // CSV is parsed, and filter analysis rows down to that set in both
+        // aggregation paths so M and B share the same data basis.
+        // _filterCardRowsToKnownTournaments is a no-op if the set hasn't
+        // been captured yet (e.g. on the first render before archetypes
+        // finished parsing), preserving prior behaviour as a safety net.
+        // ─────────────────────────────────────────────────────────────────────
+        function _captureKnownCityLeagueTournamentIds(archetypesData) {
+            if (!Array.isArray(archetypesData)) return;
+            const ids = new Set();
+            archetypesData.forEach(row => {
+                if (!row) return;
+                const tid = row.tournament_id;
+                if (tid !== undefined && tid !== null && tid !== '') {
+                    ids.add(String(tid));
+                }
+            });
+            window.knownCityLeagueTournamentIds = ids;
+            devLog(`Captured ${ids.size} known City-League tournament IDs from archetypes CSV`);
+        }
+        function _filterCardRowsToKnownTournaments(rows) {
+            const known = window.knownCityLeagueTournamentIds;
+            if (!known || known.size === 0) return rows; // not ready yet → no-op
+            const filtered = rows.filter(row => {
+                const tid = row && row.tournament_id;
+                // Rows without a tournament_id stay (already-aggregated CSVs
+                // emit such rows; dropping them would break legacy data).
+                if (tid === undefined || tid === null || tid === '') return true;
+                return known.has(String(tid));
+            });
+            const dropped = rows.length - filtered.length;
+            if (dropped > 0) {
+                devLog(`Dropped ${dropped}/${rows.length} analysis rows from tournaments not yet in archetypes CSV`);
+            }
+            return filtered;
+        }
+
         // Recalculate card statistics based on filtered tournament data
         function recalculateCardStatsForFilteredData(filteredCards, archetype) {
+            // Drop rows whose tournament hasn't landed in archetypes yet so M
+            // and B (denominator from archetypes) share the same data basis.
+            filteredCards = _filterCardRowsToKnownTournaments(filteredCards);
             // Count unique tournaments/decks in filtered data
             const uniqueTournamentIds = new Set();
             filteredCards.forEach(card => {
@@ -1701,6 +1752,9 @@
         
         // Aggregate card statistics from filtered tournament data
         function aggregateCardStatsByDate(filteredCards) {
+            // Drop rows whose tournament hasn't landed in archetypes yet —
+            // see _captureKnownCityLeagueTournamentIds for the why.
+            filteredCards = _filterCardRowsToKnownTournaments(filteredCards);
             // Group by card_name
             const cardMap = new Map();
 

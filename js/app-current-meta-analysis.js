@@ -376,20 +376,23 @@
             currentMetaFormatFilter = format;
             devLog('[Current Meta] Format filter set to:', format);
             
-            // Update button styles with null-checks
+            // Update button styles via classList toggle (className= would
+            // wipe the .current-meta-format-btn class that owns the filter
+            // pill styling — bug from earlier where active vs inactive
+            // looked nearly identical because the format-btn class was
+            // gone). Toggle .active so .current-meta-format-btn.active
+            // CSS takes effect.
             ['All', 'Live', 'Play'].forEach(f => {
                 const btn = document.getElementById(`currentMetaFilter${f}`);
-                if (btn) {
-                    if (f.toLowerCase() === format) {
-                        btn.className = 'btn btn-primary';
-                    } else {
-                        btn.className = 'btn btn-secondary';
-                    }
-                    btn.disabled = false;
-                    btn.title = '';
-                    btn.classList.add('btn-active', 'pointer');
-                    btn.classList.remove('btn-inactive');
-                }
+                if (!btn) return;
+                const isActive = f.toLowerCase() === format;
+                btn.classList.add('current-meta-format-btn');
+                btn.classList.toggle('active', isActive);
+                btn.classList.remove('btn-secondary'); // legacy class — drop
+                btn.classList.toggle('btn-primary', isActive);
+                btn.setAttribute('aria-pressed', String(isActive));
+                btn.disabled = false;
+                btn.title = '';
             });
             
             // Update status text

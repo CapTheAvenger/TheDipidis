@@ -285,6 +285,21 @@
     font-family: Consolas, monospace;
     font-size: 13px;
     min-width: 0;
+    color: #1f2937;
+    background: #fff;
+}
+/* Make the placeholder visibly distinct from real content. Without this
+   the example text "4 Buddy-Buddy Poffin SVI 186" reads as if the
+   textarea is pre-filled with actual cards (mono font, dark colour). */
+.proxy-decklist-input::placeholder {
+    color: #9ca3af;
+    font-style: italic;
+    opacity: 1;
+}
+.proxy-decklist-input:focus {
+    border-color: #3498db;
+    outline: 2px solid rgba(52, 152, 219, 0.18);
+    outline-offset: 0;
 }
 .proxy-panel-btn-row {
     display: flex;
@@ -979,21 +994,39 @@
     gap: 15px;
     align-items: center;
 }
+/* Tournament-format filter: active button must visually dominate the
+   row so the user always knows which dataset they're looking at.
+   Inactive = soft pill on grey, no shadow; Active = filled blue with
+   white text + subtle blue glow + slight scale lift. */
 .current-meta-format-btn {
-    padding: 12px 20px;
+    padding: 11px 20px;
     font-size: 0.95em;
     border-radius: 8px;
-    font-weight: 700;
-    border: 2px solid #ddd;
-    background: #f8f9fa;
-    color: #2c3e50;
+    font-weight: 600;
+    border: 2px solid #d6dde6;
+    background: #f3f5f8;
+    color: #6b7280;
     cursor: pointer;
-    transition: background 0.2s, border 0.2s, color 0.2s;
+    transition: background 0.18s, border-color 0.18s, color 0.18s,
+                box-shadow 0.18s, transform 0.18s;
+    box-shadow: none;
 }
-.current-meta-format-btn.active, .current-meta-format-btn:focus {
+.current-meta-format-btn:hover:not(.active) {
+    background: #e8edf4;
+    border-color: #b9c2cf;
+    color: #2c3e50;
+}
+.current-meta-format-btn.active {
     background: #3B4CCA;
     color: #fff;
-    border-color: #3B4CCA;
+    border-color: #2a3aa3;
+    font-weight: 700;
+    box-shadow: 0 4px 14px rgba(59, 76, 202, 0.32);
+    transform: translateY(-1px);
+}
+.current-meta-format-btn:focus-visible {
+    outline: 3px solid rgba(59, 76, 202, 0.45);
+    outline-offset: 2px;
 }
 .current-meta-filter-status {
     margin-left: 15px;

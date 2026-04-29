@@ -184,14 +184,21 @@
     background: rgba(0, 0, 0, 0.08);
 }
 .profile-tab-group-label {
-    font-size: 10px;
+    /* Promoted from a 10px grey afterthought to a properly readable
+       category header so new users can scan the four sub-nav groups
+       (Cards & Collection / Decks / Play & Analysis / Account) at a
+       glance. Keeps tabular-uppercase for the section-header feel. */
+    font-size: 12px;
     font-weight: 800;
     text-transform: uppercase;
-    letter-spacing: 0.7px;
-    color: #95a5a6;
-    padding: 0 24px;
+    letter-spacing: 0.9px;
+    color: #475569;
+    padding: 6px 14px 4px;
+    margin-bottom: 2px;
     line-height: 1.2;
     user-select: none;
+    border-bottom: 2px solid currentColor;
+    align-self: flex-start;
 }
 .profile-tab-group-buttons {
     display: flex;

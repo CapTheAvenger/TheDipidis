@@ -996,36 +996,39 @@
                 </tr>`;
             };
 
-            let moversHtml = '';
-            if (improvers.length > 0 || decliners.length > 0) {
-                moversHtml = `
+            // Always render BOTH blocks side-by-side, even when one or both
+            // are empty. Showing only "Festival Lead +1.0%" as the single
+            // improver looked like a rendering error. A friendly empty
+            // state makes the sparse-data case explicit.
+            const emptyMoversNotice = `
+                <div class="tier-movers-empty">
+                    <span class="tier-movers-empty-icon">📋</span>
+                    <span>Zu wenig Bewegung diese Woche (≥ 0,4 pp Veränderung).</span>
+                </div>`;
+            const renderMoverBlock = (title, list, sign) => `
+                <div class="tier-movers-block tier-movers-${sign === 'up' ? 'improvers' : 'decliners'}">
+                    <h3>${title}</h3>
+                    ${list.length > 0
+                      ? `<table class="tier-movers-table">
+                            <thead><tr><th>Deck</th><th>Share</th><th>Prev</th><th>Δ</th></tr></thead>
+                            <tbody>${list.map(m => renderMoverRow(m, sign)).join('')}</tbody>
+                         </table>`
+                      : emptyMoversNotice}
+                </div>`;
+            let moversHtml = `
                 <div class="tier-movers-row">
-                    ${improvers.length > 0 ? `
-                    <div class="tier-movers-block tier-movers-improvers">
-                        <h3>📈 Performance Improvers</h3>
-                        <table class="tier-movers-table">
-                            <thead><tr>
-                                <th>Deck</th>
-                                <th>Share</th>
-                                <th>Prev</th>
-                                <th>Δ</th>
-                            </tr></thead>
-                            <tbody>${improvers.map(m => renderMoverRow(m, 'up')).join('')}</tbody>
-                        </table>
-                    </div>` : ''}
-                    ${decliners.length > 0 ? `
-                    <div class="tier-movers-block tier-movers-decliners">
-                        <h3>📉 Performance Decliners</h3>
-                        <table class="tier-movers-table">
-                            <thead><tr>
-                                <th>Deck</th>
-                                <th>Share</th>
-                                <th>Prev</th>
-                                <th>Δ</th>
-                            </tr></thead>
-                            <tbody>${decliners.map(m => renderMoverRow(m, 'down')).join('')}</tbody>
-                        </table>
-                    </div>` : ''}
+                    ${renderMoverBlock('📈 Performance Improvers', improvers, 'up')}
+                    ${renderMoverBlock('📉 Performance Decliners', decliners, 'down')}
+                </div>`;
+            // If BOTH sides are empty, replace the whole row with one
+            // clean note so we don't render two empty boxes.
+            if (improvers.length === 0 && decliners.length === 0) {
+                moversHtml = `
+                <div class="tier-movers-row tier-movers-row--empty">
+                    <div class="tier-movers-block tier-movers-block--full-empty">
+                        <span class="tier-movers-empty-icon">📋</span>
+                        <span>Diese Woche keine signifikanten Share-Bewegungen (≥ 0,4 pp). Schau morgen wieder vorbei.</span>
+                    </div>
                 </div>`;
             }
 

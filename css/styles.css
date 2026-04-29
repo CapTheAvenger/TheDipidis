@@ -9175,6 +9175,38 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
 .tier-mover-delta.tier-mover-up   { color: #16a34a; }
 .tier-mover-delta.tier-mover-down { color: #dc2626; }
 
+/* Sparse-data fallback for the Improvers / Decliners blocks. Shown
+   when one or both sides have nothing meaningful to report this week,
+   so the sections never render as one stray-row tables that look
+   like rendering bugs. */
+.tier-movers-empty {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 4px;
+    color: #6b7280;
+    font-size: 0.82rem;
+    font-style: italic;
+}
+.tier-movers-empty-icon {
+    font-size: 1.1em;
+    flex: 0 0 auto;
+}
+.tier-movers-block--full-empty {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 18px 14px;
+    background: #f9fafb;
+    border: 1px dashed #d1d5db;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    color: #6b7280;
+    font-size: 0.88rem;
+}
+
 /* Overall vs Top-8 dual-table panel — sits above the tier sections.
    Stacks vertically on mobile so each table gets full width. */
 .cm-vs-top8-row {

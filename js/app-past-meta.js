@@ -15,6 +15,62 @@
         let pastMetaRarityMode = 'min'; // 'min', 'max', 'all'
         let pastMetaShowGridView = true; // Default: Grid View
 
+        // ── Set-code → readable-name lookup ─────────────────────
+        // The Past-Meta dropdown lists format eras as "SVI-ASC" /
+        // "BRS-PRE" etc. — those are the boundary set codes of each
+        // tournament-format block. New users have no chance with the
+        // bare codes, so we expand them to "Scarlet & Violet → Ascended
+        // Heroes". Add new sets as they enter rotation; the lookup falls
+        // back to the bare code if the set isn't in the dict yet, so
+        // there's never a missing-data crash.
+        const _PAST_META_SET_NAMES = {
+            // Scarlet & Violet era
+            'SVI': 'Scarlet & Violet',
+            'PAL': 'Paldea Evolved',
+            'OBF': 'Obsidian Flames',
+            'MEW': '151',
+            'PAR': 'Paradox Rift',
+            'PAF': 'Paldean Fates',
+            'TEF': 'Temporal Forces',
+            'TWM': 'Twilight Masquerade',
+            'SFA': 'Shrouded Fable',
+            'SCR': 'Stellar Crown',
+            'SSP': 'Surging Sparks',
+            'PRE': 'Prismatic Evolutions',
+            'JTG': 'Journey Together',
+            'DRI': 'Destined Rivals',
+            'BLK': 'Black Bolt',
+            'WHT': 'White Flare',
+            'MEG': 'Mega Evolution',
+            'MEE': 'Mega Evolution Energies',
+            'MEP': 'Mega Evolution Promos',
+            'PFL': 'Phantasmal Flames',
+            'POR': 'Perfect Order',
+            'ASC': 'Ascended Heroes',
+            // SwSh era — last few blocks people still ask about
+            'BRS': 'Brilliant Stars',
+            'ASR': 'Astral Radiance',
+            'PGO': 'Pokémon GO',
+            'LOR': 'Lost Origin',
+            'SIT': 'Silver Tempest',
+            'CRZ': 'Crown Zenith',
+            'BST': 'Battle Styles',
+            'CRE': 'Chilling Reign',
+            'EVS': 'Evolving Skies',
+            'FST': 'Fusion Strike',
+        };
+
+        function expandPastMetaCode(code) {
+            // "SVI-ASC" → "Scarlet & Violet → Ascended Heroes"
+            // "POR"     → "Perfect Order"
+            // Unknown   → returns the code unchanged.
+            if (!code || typeof code !== 'string') return code || '';
+            const parts = code.split('-').map(p => p.trim()).filter(Boolean);
+            if (!parts.length) return code;
+            const expanded = parts.map(p => _PAST_META_SET_NAMES[p.toUpperCase()] || p);
+            return expanded.join(' → ');
+        }
+
         function sanitizePastMetaArchetypeName(value) {
             const raw = String(value || '').trim();
             if (!raw) return 'Unknown Deck';
@@ -225,7 +281,15 @@
                 sortedKeys.forEach(key => {
                     const option = document.createElement('option');
                     option.value = key;
-                    option.textContent = key;
+                    // Show the readable block name (e.g. "Scarlet & Violet →
+                    // Ascended Heroes") with the bare code as a small suffix
+                    // so power-users still see the format key. Tooltip carries
+                    // the code on its own for screen-reader / hover-clarity.
+                    const expanded = expandPastMetaCode(key);
+                    option.textContent = (expanded && expanded !== key)
+                        ? `${expanded} (${key})`
+                        : key;
+                    option.title = `Format code: ${key}`;
                     formatSelect.appendChild(option);
                 });
                 // Default to newest format for fast initial load (~17MB instead of ~100MB)

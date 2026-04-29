@@ -1099,8 +1099,9 @@
     white-space: nowrap;
 }
 #profile-tab-nav .profile-tab-group-label {
-    font-size: 9px;
-    padding: 0 18px;
+    font-size: 11px;
+    padding: 4px 10px 3px;
+    letter-spacing: 0.6px;
 }
 #profile-tab-nav .profile-tab-group {
     padding-right: 10px;

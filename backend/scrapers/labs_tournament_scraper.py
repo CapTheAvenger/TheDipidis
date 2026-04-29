@@ -47,6 +47,7 @@ from card_scraper_shared import (
     setup_logging,
     load_settings,
     get_data_dir,
+    fix_mojibake,
 )
 
 setup_console_encoding()
@@ -77,9 +78,8 @@ def _parse_date(raw: str) -> Optional[datetime]:
     """Parse date strings like 'April 4–5, 2026', 'April 4, 2026', 'Apr 4 2026'."""
     if not raw:
         return None
-    # Strip range suffix: "–5" or "-5"
     # Repair mojibake first so the en-dash matches the range pattern.
-    cleaned_input = _fix_mojibake(raw)
+    cleaned_input = fix_mojibake(raw)
     # Strip the second half of a date range. Two flavours occur in the
     # wild on Limitless:
     #   "April 25\u201326, 2026"            (same month \u2014 strip "\u201326")
@@ -95,22 +95,6 @@ def _parse_date(raw: str) -> Optional[datetime]:
             continue
     logger.debug("Could not parse date: %r (cleaned: %r)", raw, cleaned)
     return None
-
-
-def _fix_mojibake(s: str) -> str:
-    """Repair Latin-1-decoded-as-UTF-8 mojibake. No-op when already clean UTF-8.
-
-    Used both for tournament names AND the inline date strings on the labs
-    index page \u2014 they come over the wire as UTF-8 but BeautifulSoup feeds
-    them back as Latin-1-misdecoded chars when the upstream HTML headers
-    omit a charset (which is the labs index's behaviour as of 2026-04).
-    """
-    if not s:
-        return s
-    try:
-        return s.encode('latin1').decode('utf-8')
-    except (UnicodeDecodeError, UnicodeEncodeError):
-        return s
 
 
 # Month-name pattern used to locate the date NavigableString anywhere
@@ -163,7 +147,7 @@ def scrape_tournament_list(
         # way into the field-card UI.
         name_el = link.find(attrs={'class': re.compile(r'font-bold')})
         raw_name = name_el.get_text(strip=True) if name_el else f'Tournament {tournament_id}'
-        name = _fix_mojibake(raw_name)
+        name = fix_mojibake(raw_name)
 
         # ── Type logo (larger image) ──────────────────────────────────────────
         tournament_type = 'regional'
@@ -275,7 +259,7 @@ def scrape_tournament_meta(tournament_id: str) -> Dict[str, str]:
             head = re.sub(r'\s*[âÂ\x80-\x9f]+\s*$', '', head).strip()
             m = re.match(r'(?:Decks|Standings|Pairings|Metagame):\s*(.+)', head)
             cleaned = (m.group(1).strip() if m else head)
-            cleaned = _fix_mojibake(cleaned)
+            cleaned = fix_mojibake(cleaned)
             if cleaned:
                 out['tournament_name'] = cleaned
     # H1 wins when present — usually the cleanest representation.
@@ -283,7 +267,7 @@ def scrape_tournament_meta(tournament_id: str) -> Dict[str, str]:
     if h1:
         h1_text = h1.get_text(strip=True)
         if h1_text:
-            out['tournament_name'] = _fix_mojibake(h1_text)
+            out['tournament_name'] = fix_mojibake(h1_text)
     # The header strip after the H1 carries the date + player count, e.g.
     # "April 25–26, 2026 • 1370 players". Extract the date portion.
     body_text = soup.get_text(' ', strip=True)[:1500]

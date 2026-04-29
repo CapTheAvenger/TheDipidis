@@ -39,7 +39,8 @@ from card_scraper_shared import (
     safe_fetch_html,
     slug_to_archetype,
     setup_logging,
-    load_settings
+    load_settings,
+    fix_mojibake,
 )
 
 # Fix Windows console encoding
@@ -357,7 +358,18 @@ def scrape_tournaments(settings: dict, card_db: CardDatabaseLookup) -> list:
         if start_date:
             # Search only in the text near the title, not the whole HTML
             # Limitless labs shows date like "September 13–15, 2024" or "Apr 5, 2026"
-            header_area = t_html[:3000]  # Date info is always near the top
+            # Two-part fix for the "Kein Datum erkannt" loop:
+            # 1) fix_mojibake — Limitless serves /XXXX/standings UTF-8
+            #    that requests decodes as Latin-1 (no charset header).
+            #    The en-dash bytes \xe2\x80\x93 arrive split into three
+            #    single chars 'â\x80\x93' which the [-–] regex class
+            #    cannot match.
+            # 2) [:10000] window (was :3000) — Limitless migrated the
+            #    standings template to SvelteKit; the boot scripts push
+            #    the actual content (incl. the date "April 25–26,
+            #    2026") past byte ~5000. The old 3000-char window
+            #    saw only the SvelteKit scaffolding, not the data.
+            header_area = fix_mojibake(t_html[:10000])
             date_match = re.search(
                 r'(\b(?:January|February|March|April|May|June|July|August|September|October|November|December)\b)\s+(\d{1,2})(?:\s*[-\u2013]\s*(?:\w+\s+)?\d{1,2})?[^,\d]*,?\s*(\d{4})',
                 header_area

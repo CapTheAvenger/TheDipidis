@@ -125,10 +125,36 @@ def get_data_dir() -> str:
     os.makedirs(data_dir, exist_ok=True)
     return data_dir
 
+def fix_mojibake(s: str) -> str:
+    """Repair Latin-1-decoded-as-UTF-8 mojibake. No-op when already clean UTF-8.
+
+    Limitless serves UTF-8 HTML without a charset header on some pages, so
+    Python's `requests` falls back to ISO-8859-1 decoding. The result is
+    "QuerÃ©taro" instead of "Querétaro", "GdaÅsk" instead of "Gdańsk",
+    and the en-dash bytes \\xe2\\x80\\x93 split into three single chars
+    'â\\x80\\x93' that no regex looking for U+2013 will match.
+
+    The encode-as-Latin-1, decode-as-UTF-8 round-trip recovers the
+    original bytes and re-decodes them correctly. Strings that were
+    already clean UTF-8 raise UnicodeEncodeError on the encode step
+    (because they contain non-Latin-1 chars) — caught and returned as-is.
+    """
+    if not s:
+        return s
+    try:
+        return s.encode('latin1').decode('utf-8')
+    except (UnicodeDecodeError, UnicodeEncodeError):
+        return s
+
+
 def load_scraped_ids(tracking_file: str) -> Set[str]:
     if not os.path.exists(tracking_file): return set()
     try:
-        with open(tracking_file, 'r', encoding='utf-8') as f:
+        # utf-8-sig transparently strips a leading BOM if present.
+        # Earlier versions wrote the file with utf-8-sig and the loader
+        # tripped on the BOM ("Unexpected UTF-8 BOM"); using -sig here
+        # is a no-op for plain UTF-8 and tolerates either form.
+        with open(tracking_file, 'r', encoding='utf-8-sig') as f:
             raw_data: Any = json.load(f)
             if isinstance(raw_data, dict):
                 data_map = cast(Mapping[str, Any], raw_data)

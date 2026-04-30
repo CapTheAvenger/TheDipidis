@@ -98,6 +98,7 @@ FORMAT_CODE_BY_SET: Dict[str, str] = {
 }
 
 FORMAT_NAME_TO_CODE: Dict[str, str] = {
+    "temporal forces - perfect order": "TEF-POR",
     "scarlet & violet - ascended heroes": "SVI-ASC",
     "scarlet & violet - phantasmal flames": "SVI-PFL",
     "scarlet & violet - mega evolution": "SVI-MEG",
@@ -118,6 +119,7 @@ FORMAT_NAME_TO_CODE: Dict[str, str] = {
 }
 
 FORMAT_CODE_DISPLAY: Dict[str, str] = {
+    "TEF-POR": "Temporal Forces - Perfect Order",
     "SVI-ASC": "Scarlet & Violet - Ascended Heroes",
     "SVI-PFL": "Scarlet & Violet - Phantasmal Flames",
     "SVI-MEG": "Scarlet & Violet - Mega Evolution",

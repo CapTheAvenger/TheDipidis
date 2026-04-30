@@ -386,13 +386,32 @@ def get_deck_list_links(url: str) -> List[dict]:
 # DECK PARSING & CARD LOOKUP
 # ============================================================================
 
+_DECK_NAME_PRICE_RE = re.compile(r'\s*\d+(?:[.,]\d+)?\s*\$\s*\d+(?:[.,]\d+)?\s*[€$]\s*$')
+
+
+def _clean_deck_name(name: str) -> str:
+    """Strip the price tag Limitless appends to .decklist-title.
+
+    Real-world contamination observed 2026-04: title element renders as
+    'Lucario Hariyama15.56$10.28€' because the dollar/EUR price chips
+    live inside the same .decklist-title node and get_text() concats
+    them. The trailing pattern is unambiguous: <n>.<n>$<n>.<n>€ at the
+    end of the string. Stripping it leaves the clean archetype name.
+    """
+    if not name:
+        return name
+    cleaned = _DECK_NAME_PRICE_RE.sub('', name).strip()
+    return cleaned or name  # never return empty if regex over-matches
+
+
 def extract_single_deck(deck_url: str, card_db: CardDatabaseLookup) -> Tuple[list, str]:
     soup = fetch_page_bs4(deck_url)
     if not soup:
         return [], "Unknown Deck"
 
     title_elem = soup.select_one(".decklist-title")
-    deck_name = title_elem.get_text(strip=True) if title_elem else "Unknown Deck"
+    raw_deck_name = title_elem.get_text(strip=True) if title_elem else "Unknown Deck"
+    deck_name = _clean_deck_name(raw_deck_name)
 
     # Use shared extraction, then enrich with tournament-specific fields
     raw_cards = extract_cards_from_decklist_soup(soup, card_db)

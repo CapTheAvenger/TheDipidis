@@ -1750,11 +1750,21 @@
             return recalculatedCards;
         }
         
-        // Aggregate card statistics from filtered tournament data
-        function aggregateCardStatsByDate(filteredCards) {
-            // Drop rows whose tournament hasn't landed in archetypes yet —
-            // see _captureKnownCityLeagueTournamentIds for the why.
-            filteredCards = _filterCardRowsToKnownTournaments(filteredCards);
+        // Aggregate card statistics from filtered tournament data.
+        //
+        // SHARED FUNCTION: also called by app-current-meta-analysis and
+        // app-past-meta with Limitless / Past Meta tournament rows. Those
+        // callers must NOT trigger the City-League tournament filter —
+        // their tournament_ids (Prague=539, etc.) aren't in the City-
+        // League archetypes Set and would all get dropped.
+        //
+        // Opt-in via options.applyCityLeagueTournamentFilter; defaults to
+        // false so non-City-League callers stay unaffected.
+        function aggregateCardStatsByDate(filteredCards, options) {
+            options = options || {};
+            if (options.applyCityLeagueTournamentFilter) {
+                filteredCards = _filterCardRowsToKnownTournaments(filteredCards);
+            }
             // Group by card_name
             const cardMap = new Map();
 
@@ -2060,9 +2070,12 @@
             window.cityLeagueRawDeckCards = deckCards.slice();
 
             // Always aggregate cards stats (not just when date filter is active)
-            // This ensures deck_count is correctly summed across all tournaments
+            // This ensures deck_count is correctly summed across all tournaments.
+            // Pass applyCityLeagueTournamentFilter so analysis-only-tournaments
+            // (those not yet in archetypes CSV) get dropped — see the
+            // 670/645 bug fix in 3c25bf4.
             if (deckCards.length > 0) {
-                deckCards = aggregateCardStatsByDate(deckCards);
+                deckCards = aggregateCardStatsByDate(deckCards, { applyCityLeagueTournamentFilter: true });
                 devLog('After aggregating by date:', deckCards.length, 'unique cards');
             }
             

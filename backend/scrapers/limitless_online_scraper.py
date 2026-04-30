@@ -138,14 +138,26 @@ def scrape_deck_statistics(
         if sm:
             wins, losses, ties = int(sm.group(1)), int(sm.group(2)), int(sm.group(3))
 
+        # Numeric parse — log a WARNING when it fails so a future
+        # Limitless HTML restructure that breaks the column-index
+        # assumption shows up in the build log instead of silently
+        # producing all-zero metrics downstream.
         try:
             win_rate_numeric = float(win_rate.replace("%", "").strip())
         except ValueError:
+            logger.warning(
+                "Could not parse win_rate=%r for deck %r — falling back to 0.0",
+                win_rate, deck_name,
+            )
             win_rate_numeric = 0.0
 
         try:
             share_numeric = float(share.replace("%", "").strip())
         except ValueError:
+            logger.warning(
+                "Could not parse share=%r for deck %r — falling back to 0.0",
+                share, deck_name,
+            )
             share_numeric = 0.0
 
         decks.append({
@@ -336,30 +348,71 @@ def analyze_matchups_for_top_decks(
 
 
 def save_to_csv(data: List[Dict[str, Any]], output_file: str):
-    """Save scraped data to CSV file."""
+    """Save scraped data to CSV file.
+
+    The Limitless online ladder is a SNAPSHOT, so each run overwrites
+    the file rather than appending. Two safety checks before the
+    overwrite, so a partial / failed scrape can't silently wipe good
+    historical data:
+
+      1. Schema-drift detection: if the file already exists with
+         different fieldnames, log a WARNING. Catches accidental
+         schema changes (added/renamed columns that the frontend
+         loader still expects in the old shape).
+      2. Row-count guard: if the new snapshot has fewer than 50% of
+         the rows the existing file has, log an ERROR but still
+         write — the user gets a loud signal but the run isn't
+         silently rolled back. Tune the threshold via env if needed.
+    """
     if not data:
         print("No data to save.")
         return
-    
+
     output_path = os.path.join(get_data_dir(), output_file)
-    
+
     print(f"\nSaving data to: {output_path}")
-    
-    fieldnames = ['rank', 'deck_name', 'count', 'share', 'share_numeric', 'wins', 'losses', 
+
+    fieldnames = ['rank', 'deck_name', 'count', 'share', 'share_numeric', 'wins', 'losses',
                   'ties', 'win_rate', 'win_rate_numeric']
-    
+
+    # ── Safety checks against silent data wipe ──
+    if os.path.isfile(output_path):
+        try:
+            with open(output_path, 'r', encoding='utf-8-sig') as f:
+                existing_reader = csv.reader(f, delimiter=';')
+                existing_header = next(existing_reader, None) or []
+                existing_row_count = sum(1 for _ in existing_reader)
+            # Schema drift
+            if existing_header and existing_header != fieldnames:
+                missing = [c for c in existing_header if c not in fieldnames]
+                added   = [c for c in fieldnames if c not in existing_header]
+                logger.warning(
+                    "[save_to_csv] Schema drift in %s: old=%s, new=%s (missing=%s, added=%s). "
+                    "Overwriting with new schema — frontend code expecting the old shape will break.",
+                    output_file, existing_header, fieldnames, missing, added,
+                )
+            # Row-count guard
+            if existing_row_count > 0 and len(data) < max(1, existing_row_count // 2):
+                logger.error(
+                    "[save_to_csv] %s: new snapshot has %d rows but existing file had %d. "
+                    "This looks like a partial scrape — overwriting anyway, but check the source!",
+                    output_file, len(data), existing_row_count,
+                )
+        except Exception as e:
+            logger.warning("[save_to_csv] Could not pre-check existing %s: %s", output_file, e)
+
     try:
         with open(output_path, 'w', newline='', encoding='utf-8-sig') as f:
             writer = csv.DictWriter(f, fieldnames=fieldnames, delimiter=';')
             writer.writeheader()
-            
+
             for row in data:
                 # Format numeric values for German Excel and remove unnecessary fields
                 row_formatted = {key: row[key] for key in fieldnames if key in row}
                 row_formatted['share_numeric'] = str(row['share_numeric']).replace('.', ',')
                 row_formatted['win_rate_numeric'] = str(row.get('win_rate_numeric', 0)).replace('.', ',')
                 writer.writerow(row_formatted)
-        
+
         print(f"Successfully saved {len(data)} entries to {output_file}")
     except Exception as e:
         print(f"Error saving to CSV: {e}")

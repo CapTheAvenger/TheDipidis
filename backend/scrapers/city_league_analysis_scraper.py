@@ -31,7 +31,7 @@ from card_scraper_shared import (
     aggregate_card_data, save_to_csv, fetch_page, normalize_archetype_name,
     load_scraped_ids, save_scraped_ids, _get_scraper, resolve_date_range,
     safe_fetch_html, setup_logging, load_settings, parse_tournament_date,
-    extract_cards_from_decklist_soup
+    extract_cards_from_decklist_soup, fix_mojibake
 )
 
 # Phase 3: canonicalize Japanese City League archetype names against the
@@ -111,8 +111,17 @@ def _load_settings() -> dict:
 # parse_tournament_date imported from card_scraper_shared
 
 def to_iso_week_period(date_str: str) -> str:
-    """Converts a tournament date string to ISO week period (YYYY-Www)."""
-    dt = parse_tournament_date(date_str)
+    """Converts a tournament date string to ISO week period (YYYY-Www).
+
+    fix_mojibake repairs the Latin-1-decoded-as-UTF-8 corruption Limitless
+    serves on tournament pages — without it, en-dash bytes \\xe2\\x80\\x93
+    in date ranges like "April 25–26, 2026" arrive as 'â\\x80\\x93' and
+    parse_tournament_date's regex can't strip the range suffix → returns
+    None → tournament gets bucketed into "Unknown-Week" silently.
+    """
+    if not date_str:
+        return "Unknown-Week"
+    dt = parse_tournament_date(fix_mojibake(date_str))
     if not dt:
         return "Unknown-Week"
     iso_year, iso_week, _ = dt.isocalendar()

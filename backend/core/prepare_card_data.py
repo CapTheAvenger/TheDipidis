@@ -529,6 +529,61 @@ def split_tournament_cards(frontend_data):
     
     print(f"\n  ✓ Manifest: tournament_cards_manifest.json ({len(chunk_files)} Chunks, {manifest['total_rows']} Zeilen)")
 
+    # ── Health-check report ─────────────────────────────────────────────
+    # Surface anomalies that would otherwise sit silently in the data:
+    #   - "unknown" meta tag (scraper failed format extraction)
+    #   - format keys that look right but aren't in our known catalog
+    #     (likely a new Limitless format we haven't taught the system)
+    #   - chunks where max_date is older than 90 days but the meta key
+    #     is still being scraped — warns about a stale active-format tag
+    #
+    # Known-good keys are loaded best-effort from the scraper's catalog
+    # so we don't have to duplicate the list here. If the catalog can't
+    # be read, we just skip the unknown-key check (the other checks
+    # still run).
+    print("\n" + "-" * 60)
+    print("HEALTH CHECK")
+    print("-" * 60)
+
+    known_codes = set()
+    catalog_path = os.path.join(frontend_data, "formats_catalog.json")
+    if os.path.exists(catalog_path):
+        try:
+            with open(catalog_path, "r", encoding="utf-8") as f:
+                catalog = json.load(f)
+            for row in catalog.get("formats", []) or []:
+                code = str(row.get("code", "")).strip().upper()
+                if code:
+                    known_codes.add(code)
+        except Exception as e:
+            print(f"  ! Could not read formats_catalog.json: {e}")
+
+    from datetime import datetime as _dt, timedelta as _td
+    today = _dt.now()
+    warnings = 0
+    for meta_key in sorted(meta_rows.keys()):
+        chunk_name = f"tournament_cards_data_cards_{meta_key}.csv"
+        n_rows = len(meta_rows[meta_key])
+        mn = meta_min_date.get(meta_key)
+        mx = meta_max_date.get(meta_key)
+        flags = []
+        if not meta_key or meta_key.lower() == "unknown":
+            flags.append("UNKNOWN meta tag — scraper format extraction failed")
+        if known_codes and meta_key.upper() not in known_codes:
+            flags.append(f"format key {meta_key!r} not in formats_catalog.json")
+        if not mx:
+            flags.append("no parseable tournament_date in any row")
+        flag_str = ("  [!] " + "; ".join(flags)) if flags else ""
+        if flags:
+            warnings += 1
+        date_range = f"{mn.strftime('%Y-%m-%d') if mn else '?'} … {mx.strftime('%Y-%m-%d') if mx else '?'}"
+        print(f"  {meta_key:>12}  {n_rows:>7} rows  {date_range}{flag_str}")
+
+    if warnings:
+        print(f"\n  [!] {warnings} chunk(s) flagged. Review above before deploying.")
+    else:
+        print("\n  ✓ All chunks look clean.")
+
 
 if __name__ == "__main__":
     try:

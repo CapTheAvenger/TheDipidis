@@ -552,6 +552,162 @@ def save_csv_files(data: list, output_file: str, append_mode: bool):
     return overview_f, cards_f
 
 # ============================================================================
+# META RE-VALIDATION (heals retroactive Limitless format renames)
+# ============================================================================
+# Limitless occasionally renames a format mid-stream — e.g. on 2026-04-25
+# the Prague Regional was relabelled SVI-ASC → TEF-POR. Tournaments we
+# already scraped (and skipped via scraped_ids) keep the old tag forever.
+# Result: rows go into the wrong meta-chunk and the frontend's
+# date-aware loader can't find them.
+#
+# This pass runs BEFORE the new-tournament scrape loop. For every
+# tournament in the existing monolith CSV with a tournament_date in the
+# last `max_age_days` window, we hit Limitless once to read the current
+# format= URL parameter. If it differs from the meta column we wrote
+# earlier, every row for that tournament_id is re-tagged in place and
+# the CSV is saved back. prepare_card_data.py then re-splits chunks
+# from the corrected monolith on the next pass.
+#
+# Cost: ~30–60 HTTP requests per dashboard run (1 per recent tournament,
+# rate-limited by `delay_between_requests`). Idempotent — converges to
+# the truth, only writes when something changed.
+
+_TOURNAMENT_DATE_RE = re.compile(r'(\d+)(?:st|nd|rd|th)\s+(\w+)\s+(\d{4})', re.I)
+_MONTHS_FULL = {m.lower(): i + 1 for i, m in enumerate([
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'])}
+
+
+def _parse_english_ordinal_date(s: str):
+    """Parse '25th April 2026' → datetime, or None."""
+    if not s:
+        return None
+    m = _TOURNAMENT_DATE_RE.match(s.strip())
+    if not m:
+        return None
+    mn = m.group(2).lower()
+    if mn not in _MONTHS_FULL:
+        return None
+    try:
+        from datetime import datetime as _dt
+        return _dt(int(m.group(3)), _MONTHS_FULL[mn], int(m.group(1)))
+    except ValueError:
+        return None
+
+
+def _fetch_current_format(tournament_id: str) -> Optional[str]:
+    """Hit the Limitless tournament page and read `?format=XXX` from a
+    decks-link href. Returns the raw format key (e.g. 'TEF-POR') or
+    None if the page can't be loaded or no format link is present.
+
+    NB: we read the href via BeautifulSoup's attribute accessor (which
+    returns the decoded URL "/decks/?time=all&format=TEF-POR") rather
+    than scanning str(soup). When BS4 re-serializes the HTML it escapes
+    `&` to `&amp;` and a regex looking for the bare `[?&]format=` would
+    miss every match.
+    """
+    url = f"https://limitlesstcg.com/tournaments/{tournament_id}"
+    soup = fetch_page_bs4(url)
+    if not soup:
+        return None
+    for a in soup.select('a[href]'):
+        href = a.get('href') or ''
+        m = re.search(r'[?&]format=([^&]+)', href, re.IGNORECASE)
+        if m:
+            return urllib.parse.unquote(m.group(1).strip())
+    return None
+
+
+def revalidate_recent_tournament_meta(monolith_path: str,
+                                       max_age_days: int = 60,
+                                       delay: float = 1.5) -> Tuple[int, int]:
+    """Re-fetch the format tag from Limitless for every tournament in
+    the monolith CSV with a tournament_date in the last `max_age_days`
+    window. Updates the meta column in place when it has changed.
+
+    Returns (checked, updated). Skips silently when the monolith
+    doesn't exist (first scrape run, nothing to revalidate yet).
+    """
+    if not os.path.isfile(monolith_path):
+        logger.info("[revalidate-meta] No monolith yet at %s — skipping.", monolith_path)
+        return 0, 0
+
+    from datetime import datetime as _dt, timedelta as _td
+    cutoff = _dt.now() - _td(days=max_age_days)
+
+    # Pass 1: scan the CSV, build {tournament_id → (current_meta, latest_date)}
+    # for tournaments inside the recency window.
+    candidates: Dict[str, Dict[str, Any]] = {}
+    fieldnames = None
+    with open(monolith_path, "r", encoding="utf-8-sig") as f:
+        reader = csv.DictReader(f, delimiter=";")
+        fieldnames = reader.fieldnames or []
+        for row in reader:
+            tid = str(row.get("tournament_id", "")).strip()
+            if not tid:
+                continue
+            d = _parse_english_ordinal_date(row.get("tournament_date", ""))
+            if not d or d < cutoff:
+                continue
+            entry = candidates.get(tid)
+            if entry is None:
+                candidates[tid] = {"meta": row.get("meta", ""), "date": d, "name": row.get("tournament_name", "")}
+            elif d > entry["date"]:
+                entry["date"] = d
+
+    if not candidates:
+        logger.info("[revalidate-meta] No tournaments within last %d days to revalidate.", max_age_days)
+        return 0, 0
+
+    logger.info("[revalidate-meta] Checking %d tournaments from the last %d days …",
+                len(candidates), max_age_days)
+
+    # Pass 2: hit Limitless for each candidate, build the rewrite map.
+    # (tid → new_meta) only contains entries where the tag actually changed.
+    rewrites: Dict[str, str] = {}
+    for tid, info in sorted(candidates.items()):
+        current_meta = str(info.get("meta") or "").strip()
+        live_format = _fetch_current_format(tid)
+        if live_format is None:
+            logger.warning("[revalidate-meta] %s: no format link on tournament page — keeping %r",
+                           tid, current_meta)
+            time.sleep(delay)
+            continue
+        normalized = normalize_tournament_format(live_format)
+        if normalized and normalized != current_meta:
+            logger.info("[revalidate-meta] %s (%s): %s → %s",
+                        tid, info.get("name", "")[:50], current_meta, normalized)
+            rewrites[tid] = normalized
+        time.sleep(delay)
+
+    if not rewrites:
+        logger.info("[revalidate-meta] All %d tournaments already correctly tagged.", len(candidates))
+        return len(candidates), 0
+
+    # Pass 3: rewrite the CSV with corrected meta values. Stream-rewrite
+    # via a sibling tmp file so we don't risk the 100MB+ file being half-
+    # written if something blows up partway.
+    tmp_path = monolith_path + ".tmp"
+    updated_rows = 0
+    with open(monolith_path, "r", encoding="utf-8-sig") as src, \
+         open(tmp_path, "w", newline="", encoding="utf-8-sig") as dst:
+        reader = csv.DictReader(src, delimiter=";")
+        writer = csv.DictWriter(dst, fieldnames=fieldnames, delimiter=";")
+        writer.writeheader()
+        for row in reader:
+            tid = str(row.get("tournament_id", "")).strip()
+            if tid in rewrites:
+                row["meta"] = rewrites[tid]
+                updated_rows += 1
+            writer.writerow(row)
+    os.replace(tmp_path, monolith_path)
+
+    logger.info("[revalidate-meta] Updated %d tournaments (%d rows) — monolith re-saved.",
+                len(rewrites), updated_rows)
+    return len(candidates), len(rewrites)
+
+
+# ============================================================================
 # MAIN
 # ============================================================================
 def main():
@@ -566,6 +722,15 @@ def main():
     except Exception as e:
         logger.error("Konnte Karten-DB nicht laden: %s", e)
         return
+
+    # ── Heal retroactive Limitless format renames before scraping new
+    #    tournaments. Cheap (one HTTP request per recent tournament,
+    #    rate-limited) and idempotent — converges to truth.
+    revalidate_recent_tournament_meta(
+        monolith_path=os.path.join(get_data_dir(), settings.get("output_file") or "tournament_cards_data_cards.csv"),
+        max_age_days=int(settings.get("revalidate_max_age_days", 60)),
+        delay=float(settings.get("delay_between_requests", 1.5)),
+    )
 
     scraped_ids = load_scraped_tournaments()
     tournaments = get_tournament_links(

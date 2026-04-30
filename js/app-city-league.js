@@ -2077,18 +2077,36 @@
             const totalCardsInDeck = deckCards.reduce((sum, card) => sum + parseInt(card.max_count || 0), 0);
             const uniqueCards = deckCards.length;
             
-            // Get current deck count from date-filtered archetype data first,
-            // so the stat reflects the active date filter.
-            let decksCount = archetypeStats.decksCount
-                || getSelectedCityLeagueDeckCount(archetype)
-                || parseInt(deckCards[0]?.total_decks_in_archetype || 0, 10);
+            // Get the deck count for the cards-display denominator.
+            //
+            // PRECEDENCE: prefer the analysis-aggregated total
+            // (deckCards[0].total_decks_in_archetype) over the archetypes-
+            // CSV count. The two CSVs occasionally disagree because the
+            // analysis pipeline can drop or relabel a per-player decklist
+            // that the archetypes scrape recorded (real-world example:
+            // tournament 4414 placement #3 was archetypes='Mega Lucario
+            // Hariyama' but analysis had zero rows for that combo). If we
+            // used the archetypes count for B, M (analysis-derived
+            // numerator) would never reach 100% even for staple cards
+            // present in every analyzable deck — the user sees
+            // "644/645 (100,0 %)" and reads it as a bug.
+            //
+            // The analysis-aggregated total represents "decks we have
+            // analyzable card data for" — the only honest denominator
+            // for the card-inclusion ratio. The archetypes-CSV count is
+            // kept as a fallback for early renders before analysis loads,
+            // and as a last resort via getCityLeagueDeckCountFallback.
+            const analysisAggregated = parseInt(deckCards[0]?.total_decks_in_archetype || 0, 10);
+            let decksCount = analysisAggregated
+                || archetypeStats.decksCount
+                || getSelectedCityLeagueDeckCount(archetype);
             if (!decksCount || decksCount <= 0) {
                 decksCount = getCityLeagueDeckCountFallback(archetype);
             }
             if (!decksCount || decksCount <= 0) {
                 decksCount = '-';
             }
-            devLog(`Using deck count from aggregated data: ${decksCount} decks`);
+            devLog(`Using deck count for card-stats denominator: ${decksCount} (analysis=${analysisAggregated}, archetypes=${archetypeStats.decksCount})`);
             
             // Calculate average placement from archetypes data
             const avgPlacement = archetypeStats.avgPlacement;

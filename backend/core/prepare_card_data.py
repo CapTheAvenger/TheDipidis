@@ -435,8 +435,36 @@ def split_tournament_cards(frontend_data):
     print("SPLITTING tournament_cards_data_cards.csv by meta")
     print("-" * 60)
 
-    # Read all rows, group by meta
+    # Helper for parsing the "21st November 2025" tournament_date format
+    # used in this CSV (ordinal day + month name + year).
+    import re as _re
+    _MONTHS = {m.lower(): i + 1 for i, m in enumerate([
+        'January', 'February', 'March', 'April', 'May', 'June',
+        'July', 'August', 'September', 'October', 'November', 'December'])}
+    _ORDINAL_RE = _re.compile(r'(\d+)(?:st|nd|rd|th)\s+(\w+)\s+(\d{4})', _re.I)
+
+    def _parse_tournament_date(s):
+        if not s:
+            return None
+        m = _ORDINAL_RE.match(s.strip())
+        if not m:
+            return None
+        mon = m.group(2).lower()
+        if mon not in _MONTHS:
+            return None
+        try:
+            from datetime import datetime as _dt
+            return _dt(int(m.group(3)), _MONTHS[mon], int(m.group(1)))
+        except ValueError:
+            return None
+
+    # Read all rows, group by meta. Track min/max tournament_date per meta
+    # so the manifest can carry chunk_dates — used by the frontend loader
+    # to pick the chunk with the truly latest tournaments instead of the
+    # last meta key in alphabetical order (BRS-PRE … SVI-PFL).
     meta_rows = {}
+    meta_min_date = {}
+    meta_max_date = {}
     fieldnames = None
     with open(source, "r", encoding="utf-8-sig") as f:
         reader = csv.DictReader(f, delimiter=";")
@@ -446,6 +474,12 @@ def split_tournament_cards(frontend_data):
             if not meta:
                 meta = "unknown"
             meta_rows.setdefault(meta, []).append(row)
+            d = _parse_tournament_date(row.get("tournament_date", ""))
+            if d:
+                if meta not in meta_min_date or d < meta_min_date[meta]:
+                    meta_min_date[meta] = d
+                if meta not in meta_max_date or d > meta_max_date[meta]:
+                    meta_max_date[meta] = d
 
     if not fieldnames or not meta_rows:
         print("  Keine Daten zum Splitten gefunden.")
@@ -467,11 +501,25 @@ def split_tournament_cards(frontend_data):
         print(f"  ✓ {chunk_name}  ({len(rows)} Zeilen, {size_mb:.1f} MB)")
         chunk_files.append(chunk_name)
 
-    # Write manifest
+    # Write manifest. chunk_dates is consumed by the frontend loader to
+    # pick "latest" by real recency (max_date) — the meta keys are
+    # alphabetical so simple last-in-array picking lands on SVI-PFL even
+    # when SVI-ASC has fresher tournaments.
+    chunk_dates = {}
+    for meta_key in sorted(meta_rows.keys()):
+        chunk_name = f"tournament_cards_data_cards_{meta_key}.csv"
+        mn = meta_min_date.get(meta_key)
+        mx = meta_max_date.get(meta_key)
+        chunk_dates[chunk_name] = {
+            "min_date": mn.strftime("%Y-%m-%d") if mn else None,
+            "max_date": mx.strftime("%Y-%m-%d") if mx else None,
+        }
+
     manifest = {
         "source": "tournament_cards_data_cards.csv",
         "chunks": chunk_files,
         "meta_keys": sorted(meta_rows.keys()),
+        "chunk_dates": chunk_dates,
         "total_rows": sum(len(v) for v in meta_rows.values()),
         "generated": __import__("datetime").datetime.now().isoformat()
     }

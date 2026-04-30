@@ -1835,8 +1835,26 @@ const BASE_PATH = './data/';
 
                 let chunksToLoad = manifest.chunks;
                 if (latestOnly && chunksToLoad.length > 0) {
-                    chunksToLoad = [chunksToLoad[chunksToLoad.length - 1]];
-                    devLog(`[Tournament CSV] Loading latest chunk only: ${chunksToLoad[0]}`);
+                    // Chunks are split by meta-format key (BRS-PRE, SVI-ASC,
+                    // ...) and the manifest array is alphabetical, NOT
+                    // date-ordered. Picking chunks[length-1] used to land
+                    // on SVI-PFL while the actually-recent tournaments live
+                    // in SVI-ASC (active rotation). Use manifest.chunk_dates
+                    // when present and pick the chunk with the latest
+                    // max_date — the real "latest". Falls back to array
+                    // order for older manifests that don't carry dates yet.
+                    const dates = manifest.chunk_dates || {};
+                    const withDates = chunksToLoad
+                        .map(c => ({ chunk: c, max: dates[c] && dates[c].max_date }))
+                        .filter(x => x.max);
+                    if (withDates.length > 0) {
+                        withDates.sort((a, b) => b.max.localeCompare(a.max));
+                        chunksToLoad = [withDates[0].chunk];
+                        devLog(`[Tournament CSV] Loading latest chunk by date: ${chunksToLoad[0]} (max_date=${withDates[0].max})`);
+                    } else {
+                        chunksToLoad = [chunksToLoad[chunksToLoad.length - 1]];
+                        devLog(`[Tournament CSV] Loading latest chunk (no chunk_dates in manifest): ${chunksToLoad[0]}`);
+                    }
                 } else {
                     devLog(`[Tournament CSV] Loading ${chunksToLoad.length} chunks (${manifest.total_rows} rows)`);
                 }

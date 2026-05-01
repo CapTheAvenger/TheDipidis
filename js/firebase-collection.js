@@ -1434,52 +1434,138 @@ function _fallbackCopyWishlist(text) {
   document.body.removeChild(ta);
 }
 
-// Copy the wishlist in the exact format Cardmarket's "Add Decklist to
-// Wants" field accepts (see help.cardmarket.com/en/how-to-add-a-pkmn-
-// decklist-to-wants):
+// Cardmarket Wants helper.
 //
-//   <count>x <Card Name>
+// Cardmarket's "Add Decklist to Wants" parser only matches by NAME +
+// (for Pokémon) attack/ability text — it has no set-code disambiguation
+// (verified live: "1x Drakloak" returns "no matches", whereas "1x Team
+// Rocket's Petrel" works because there's only one such Trainer).
 //
-// One card per line, no set code / number / price. Cardmarket's parser
-// ignores set info and matches by NAME alone — for cards with multiple
-// printings of the same name the user picks "any version" implicitly,
-// or pastes attack/ability text manually for ex/V/VMAX disambiguation.
+// We don't have attack text in the local DB. Instead we build TWO
+// paths and let the user pick:
 //
-// We deliberately keep it minimal: the regular Copy button still
-// produces the human-readable list with set codes + prices for our
-// own use; this one is paste-into-Cardmarket fodder.
+//   1) Paste-text:  "Nx <Card Name>"  — works for unique-name cards
+//                   (most Trainers / Items / Energy)
+//   2) Direct URLs: each card's print-specific Cardmarket page from
+//                   `cardmarket_url` (already in cards_chunk_*.json)
+//                   — reliable for every card including Pokémon, but
+//                   one tab per card.
+//
+// Both are presented in a modal (#wishlistCardmarketModal) so the
+// user can copy the text AND/OR open the direct links.
 function copyWishlistForCardmarket() {
   if (!window.userWishlist || window.userWishlist.size === 0) {
     showNotification('Wishlist is empty', 'info');
     return;
   }
-  // Aggregate counts by card name. Different printings of the same
-  // card (e.g. Drakloak ASC + Drakloak SVI base) collapse into a
-  // single "Nx Drakloak" line — Cardmarket treats them as the same
-  // wants entry anyway.
-  const countByName = new Map();
+  const allCards = window.allCardsDatabase || [];
+
+  // Build per-(name+set+number) entries with the card's Cardmarket
+  // URL when available. Strip the `?utm_*` referral query so links
+  // stay clean when the user pastes them into Cardmarket.
+  const items = [];
   window.userWishlist.forEach(cardId => {
-    const [cardName] = cardId.split('|');
+    const [cardName, cardSet, cardNumber] = cardId.split('|');
     if (!cardName) return;
+    const card = allCards.find(c => c && c.name === cardName && c.set === cardSet && c.number === cardNumber);
     const count = window.userWishlistCounts ? (window.userWishlistCounts.get(cardId) || 1) : 1;
-    countByName.set(cardName, (countByName.get(cardName) || 0) + count);
+    let url = '';
+    if (card && card.cardmarket_url) url = String(card.cardmarket_url).split('?')[0];
+    items.push({ count, name: cardName, set: cardSet || '', number: cardNumber || '', url });
   });
 
-  const lines = [];
-  countByName.forEach((count, name) => {
-    lines.push(`${count}x ${name}`);
-  });
-  const text = lines.join('\n');
+  // Aggregate paste-text counts by NAME — Cardmarket treats reprints
+  // as one wants-entry, so listing the same name twice would just
+  // add the second line "to your wants list as it already exists".
+  const pasteCounts = new Map();
+  items.forEach(({ count, name }) => pasteCounts.set(name, (pasteCounts.get(name) || 0) + count));
+  const pasteText = Array.from(pasteCounts, ([name, count]) => `${count}x ${name}`).join('\n');
 
-  const onSuccess = () => showNotification(
-    `Copied ${countByName.size} card${countByName.size === 1 ? '' : 's'} for Cardmarket — paste into the Wants list`,
-    'success',
-  );
+  _populateCardmarketWishlistModal({ items, pasteText, totalCount: items.length });
+  const modal = document.getElementById('wishlistCardmarketModal');
+  if (modal) modal.classList.add('show');
+}
+
+function closeCardmarketWishlistModal() {
+  const modal = document.getElementById('wishlistCardmarketModal');
+  if (modal) modal.classList.remove('show');
+}
+
+function _populateCardmarketWishlistModal({ items, pasteText, totalCount }) {
+  const textarea = document.getElementById('cardmarketPasteTextarea');
+  if (textarea) textarea.value = pasteText;
+
+  const hint = document.getElementById('cardmarketPasteHint');
+  if (hint) {
+    hint.textContent = totalCount === 0
+      ? 'Wishlist is empty.'
+      : `${totalCount} card${totalCount === 1 ? '' : 's'} on your wishlist. Trainers / Items / Energy match by name; Pokémon often need attacks added manually after pasting.`;
+  }
+
+  // Direct-link list: one row per print-specific card with the
+  // Cardmarket product URL. Cards without a known Cardmarket URL
+  // (rare reprints) get a disabled row with an explanation.
+  const list = document.getElementById('cardmarketLinkList');
+  if (list) {
+    if (items.length === 0) {
+      list.innerHTML = '<div class="cm-link-empty">Add cards to your wishlist first.</div>';
+    } else {
+      list.innerHTML = items.map(({ count, name, set, number, url }) => {
+        const setLabel = set ? `${set}${number ? ' ' + number : ''}` : '';
+        const safeName = (name || '').replace(/[<>]/g, '');
+        if (url) {
+          return `<a class="cm-link-row" href="${url}" target="_blank" rel="noopener noreferrer">
+            <span class="cm-link-count">${count}x</span>
+            <span class="cm-link-name">${safeName}</span>
+            <span class="cm-link-set">${setLabel}</span>
+            <span class="cm-link-arrow" aria-hidden="true">↗</span>
+          </a>`;
+        }
+        return `<div class="cm-link-row cm-link-row-missing" title="No Cardmarket URL in our database for this print">
+          <span class="cm-link-count">${count}x</span>
+          <span class="cm-link-name">${safeName}</span>
+          <span class="cm-link-set">${setLabel}</span>
+          <span class="cm-link-arrow" aria-hidden="true">—</span>
+        </div>`;
+      }).join('');
+    }
+  }
+}
+
+// Copy the paste-text out of the modal's textarea.
+function copyCardmarketPasteText() {
+  const ta = document.getElementById('cardmarketPasteTextarea');
+  if (!ta || !ta.value) {
+    showNotification('Nothing to copy', 'info');
+    return;
+  }
+  const text = ta.value;
+  const onOk = () => showNotification('Paste-text copied — paste into Cardmarket Wants list', 'success');
   if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
-    navigator.clipboard.writeText(text).then(onSuccess).catch(() => _fallbackCopyWishlist(text));
+    navigator.clipboard.writeText(text).then(onOk).catch(() => _fallbackCopyWishlist(text));
   } else {
     _fallbackCopyWishlist(text);
   }
+}
+
+// Bulk-open every Cardmarket product page in new tabs. Browsers cap
+// programmatic window.open calls to a small handful unless triggered
+// by a user gesture — this function MUST be called from a click
+// handler (which it is, via the modal button).
+function openAllCardmarketLinks() {
+  const list = document.getElementById('cardmarketLinkList');
+  if (!list) return;
+  const anchors = list.querySelectorAll('a.cm-link-row[href]');
+  if (anchors.length === 0) {
+    showNotification('No Cardmarket links available', 'info');
+    return;
+  }
+  if (anchors.length > 12) {
+    const ok = confirm(`Open ${anchors.length} Cardmarket tabs? Some browsers will block this — you may need to click each link individually instead.`);
+    if (!ok) return;
+  }
+  anchors.forEach(a => window.open(a.href, '_blank', 'noopener'));
+  showNotification(`Opened ${anchors.length} Cardmarket tabs`, 'success');
 }
 
 // Update profile UI

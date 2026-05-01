@@ -1944,6 +1944,43 @@
             display: block;
         }
 
+        /* Wishlist → Cardmarket helper modal — link list rows */
+        .cm-link-row {
+            display: grid;
+            grid-template-columns: 36px 1fr auto 18px;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 12px;
+            border-bottom: 1px solid #f0f3f7;
+            color: #1f2d3d;
+            text-decoration: none;
+            font-size: 13px;
+            transition: background 0.12s;
+        }
+        .cm-link-row:last-child { border-bottom: none; }
+        .cm-link-row:hover { background: #f4f9fd; }
+        .cm-link-count { font-weight: 700; color: #00838f; text-align: right; }
+        .cm-link-name { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .cm-link-set {
+            font-size: 11px;
+            color: #6b7c93;
+            font-family: 'Courier New', monospace;
+            white-space: nowrap;
+        }
+        .cm-link-arrow { color: #00838f; font-size: 14px; }
+        .cm-link-row-missing {
+            color: #94a3b8;
+            cursor: not-allowed;
+        }
+        .cm-link-row-missing .cm-link-count,
+        .cm-link-row-missing .cm-link-arrow { color: #94a3b8; }
+        .cm-link-empty {
+            padding: 16px;
+            text-align: center;
+            color: #6b7c93;
+            font-size: 13px;
+        }
+
         .image-view-content {
             background-color: #fff;
             margin: 2% auto;

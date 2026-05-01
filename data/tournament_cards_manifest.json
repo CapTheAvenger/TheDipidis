@@ -13,7 +13,8 @@
     "tournament_cards_data_cards_SVI-DRI.csv",
     "tournament_cards_data_cards_SVI-JTG.csv",
     "tournament_cards_data_cards_SVI-MEG.csv",
-    "tournament_cards_data_cards_SVI-PFL.csv"
+    "tournament_cards_data_cards_SVI-PFL.csv",
+    "tournament_cards_data_cards_TEF-POR.csv"
   ],
   "meta_keys": [
     "BRS-PRE",
@@ -28,7 +29,8 @@
     "SVI-DRI",
     "SVI-JTG",
     "SVI-MEG",
-    "SVI-PFL"
+    "SVI-PFL",
+    "TEF-POR"
   ],
   "chunk_dates": {
     "tournament_cards_data_cards_BRS-PRE.csv": {
@@ -61,7 +63,7 @@
     },
     "tournament_cards_data_cards_SVI-ASC.csv": {
       "min_date": "2024-05-11",
-      "max_date": "2026-04-25"
+      "max_date": "2026-04-04"
     },
     "tournament_cards_data_cards_SVI-BLK.csv": {
       "min_date": "2025-08-15",
@@ -82,8 +84,12 @@
     "tournament_cards_data_cards_SVI-PFL.csv": {
       "min_date": "2025-11-29",
       "max_date": "2026-02-28"
+    },
+    "tournament_cards_data_cards_TEF-POR.csv": {
+      "min_date": "2026-04-25",
+      "max_date": "2026-04-25"
     }
   },
-  "total_rows": 458028,
-  "generated": "2026-04-30T13:21:16.325566"
+  "total_rows": 85085,
+  "generated": "2026-05-01T11:19:46.325085"
 }

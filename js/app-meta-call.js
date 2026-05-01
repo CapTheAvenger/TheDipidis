@@ -1852,8 +1852,14 @@ window.MetaCall = (function () {
   //   regional  → existing Day 2 threshold (don't touch)
   //   challenge → "shot at 1st/2nd place" — needs near-perfect Swiss
   //               (≈ 3*rounds - 2, e.g. 13 pts in 5 rounds = 4-1)
-  //   cup       → top cut threshold — typical cut is one or two
-  //               losses depending on field size and top N
+  //   cup       → safe top-cut threshold. Cut height in Pokémon TCG
+  //               Cups depends on cut size, not field size: smaller
+  //               cuts demand fewer losses.
+  //                 Top 4 → r*3 - 2  (one tie tolerated; e.g. 4R = 3-0-1 = 10 pts, 5R = 4-0-1 = 13 pts)
+  //                 Top 8 → r*3 - 3  (one loss tolerated; e.g. 5R = 4-1 = 12 pts, 6R = 5-1 = 15 pts)
+  //               These are the floors that historically clear the
+  //               cut on resistance — anything lower bubbles too
+  //               often to be a useful "success" target.
   function _defaultTargetPoints(type, rounds, topCutSize) {
     const r = Math.max(1, +rounds || 1);
     if (type === 'challenge') {
@@ -1864,9 +1870,8 @@ window.MetaCall = (function () {
     }
     if (type === 'cup') {
       const tc = +topCutSize || 8;
-      // Top 4 cuts higher than Top 8 (one fewer loss tolerated).
-      const lossTolerance = tc <= 4 ? 1 : 2;
-      return Math.max(3, r * 3 - lossTolerance * 3);
+      const slack = tc <= 4 ? 2 : 3;
+      return Math.max(3, r * 3 - slack);
     }
     // regional fallback — keep whatever the user / preset has.
     return null;
@@ -3580,6 +3585,19 @@ window.MetaCall = (function () {
     if (key === 'topCutSize' && _settings.tournamentType === 'cup') {
       // Re-suggest target points when Top Cut size flips between 4 ↔ 8.
       const target = _defaultTargetPoints('cup', _settings.rounds, val);
+      if (target) {
+        _settings.day2Points = target;
+        _syncSettingsInputsFromState();
+      }
+    }
+    if (key === 'rounds' && _settings.tournamentType !== 'regional') {
+      // Manual rounds override — re-derive target so the points
+      // floor matches the new round count (5R T8 = 12 pts vs
+      // 6R T8 = 15 pts, etc.). User can still type their own
+      // target afterwards; cascade fires only on rounds-change.
+      const target = _defaultTargetPoints(
+        _settings.tournamentType, val, _settings.topCutSize,
+      );
       if (target) {
         _settings.day2Points = target;
         _syncSettingsInputsFromState();

@@ -1,0 +1,152 @@
+name: Weekly Full Update
+
+# Runs the headless-friendly subset of the local "FULL SYSTEM UPDATE"
+# batch (BATCH_FULL in start_scraper_dashboard.py), minus the three
+# Chrome-dependent scrapers — those are scheduled separately when a
+# new set drops:
+#   - all_cards_scraper
+#   - japanese_cards_scraper
+#   - card_price_scraper
+#
+# Schedule: Tuesday 06:00 UTC (= 07:00 CET winter / 08:00 CEST summer)
+# Manual trigger: GitHub UI → Actions → Weekly Full Update → Run workflow
+on:
+  schedule:
+    - cron: '0 6 * * 2'
+  workflow_dispatch:
+
+# GITHUB_TOKEN needs:
+#   - contents: write  → commit + push the scraped CSVs
+#   - actions:  write  → kick off deploy-pages.yml at the end (push events
+#                        from GITHUB_TOKEN don't trigger downstream
+#                        workflows by default, so we dispatch explicitly)
+permissions:
+  contents: write
+  actions:  write
+
+# Don't run multiple weekly updates in parallel — they'd race on the
+# same monolith CSVs and produce conflicting commits.
+concurrency:
+  group: weekly-full-update
+  cancel-in-progress: false
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      # Cardmarket publishes daily JSON dumps on a public S3 bucket.
+      # The cardmarket_id_mapper / cardmarket_price_merger scrapers
+      # expect them at data/{products_singles_6,products_nonsingles_6,price_guide_6}.json.
+      - name: Download Cardmarket JSONs
+        run: |
+          mkdir -p data
+          curl -fsSL --retry 3 -o data/products_singles_6.json    https://downloads.s3.cardmarket.com/productCatalog/productList/products_singles_6.json
+          curl -fsSL --retry 3 -o data/products_nonsingles_6.json https://downloads.s3.cardmarket.com/productCatalog/productList/products_nonsingles_6.json
+          curl -fsSL --retry 3 -o data/price_guide_6.json         https://downloads.s3.cardmarket.com/productCatalog/priceGuide/price_guide_6.json
+          ls -lh data/*_6.json
+
+      # Run scrapers in BATCH_FULL order (minus the Chrome trio).
+      # `set +e` so a single scraper failure doesn't abort the whole
+      # batch — we want partial progress committed at the end so we
+      # don't lose six successful scrapers because one had a network
+      # hiccup. Each failure is surfaced as a workflow warning so the
+      # Actions UI shows it clearly.
+      - name: Run scrapers
+        env:
+          PYTHONPATH: ${{ github.workspace }}/backend/core
+        working-directory: backend
+        run: |
+          set +e
+          rc_summary=()
+          for step in \
+              "core/update_sets.py" \
+              "scrapers/cardmarket_id_mapper.py" \
+              "scrapers/current_meta_analysis_scraper.py" \
+              "scrapers/limitless_online_scraper.py" \
+              "scrapers/city_league_analysis_scraper.py" \
+              "scrapers/city_league_archetype_scraper.py" \
+              "scrapers/tournament_scraper_JH.py" \
+              "scrapers/labs_tournament_scraper.py" \
+              "scrapers/online_tournament_scraper.py" \
+              "scrapers/cardmarket_price_merger.py" \
+              "core/prepare_card_data.py" \
+              "scrapers/archetype_icons_scraper.py" \
+          ; do
+              echo "::group::$step"
+              python "$step"
+              rc=$?
+              if [ "$rc" -ne 0 ]; then
+                  echo "::warning::Scraper $step exited with $rc (continuing batch)"
+                  rc_summary+=("FAIL $step (rc=$rc)")
+              else
+                  rc_summary+=("OK   $step")
+              fi
+              echo "::endgroup::"
+          done
+          echo "── Summary ──"
+          printf '  %s\n' "${rc_summary[@]}"
+
+      - name: Bump version
+        run: |
+          chmod +x bump-version.sh
+          ./bump-version.sh
+
+      - name: Upload scraper logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: scraper-logs
+          path: |
+            backend/data/*.log
+            backend/logs/**/*.log
+          retention-days: 7
+          if-no-files-found: ignore
+
+      - name: Commit + push
+        id: commit
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name  "github-actions[bot]"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No changes to commit — nothing to push."
+            echo "pushed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          ts="$(date -u +'%Y-%m-%d %H:%M UTC')"
+          git commit -m "Auto: weekly full update — ${ts}
+
+          Triggered by .github/workflows/weekly-full-update.yml
+          Run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          git push
+          echo "pushed=true" >> "$GITHUB_OUTPUT"
+
+      # Pushes authenticated with GITHUB_TOKEN don't trigger other
+      # `on: push` workflows (GitHub recursion-prevention). Dispatch
+      # deploy-pages explicitly so the SPA on Pages always reflects the
+      # fresh data right after a weekly run.
+      - name: Trigger GitHub Pages deploy
+        if: steps.commit.outputs.pushed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh workflow run deploy-pages.yml --ref main
+          echo "Dispatched deploy-pages.yml on main."

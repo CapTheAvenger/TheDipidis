@@ -1598,19 +1598,21 @@ function copyCardmarketPasteText() {
 
 // Bulk-open every Cardmarket product page in new tabs.
 //
-// Modern browsers throttle programmatic window.open calls inside a
-// single click handler — Chrome usually allows the first one and
-// silently blocks the rest as "popups". Two tactics here:
+// Why this is hard: modern browsers (especially Chrome) treat any
+// window.open() call after the first one inside a single user
+// gesture as a popup and silently block it. setTimeout staggering
+// doesn't reliably bypass it. Programmatic <a>.click() with
+// target="_blank" is treated more leniently — it's the same kind
+// of call the user does when middle-clicking a link — so we rely
+// on that path here.
 //
-//   1) Open the first synchronously inside the click handler (always
-//      counts as a "user-triggered" navigation).
-//   2) Stagger the rest with setTimeout so each lands in its own
-//      event-loop tick. Some browsers are more lenient toward those.
-//      If popups are still blocked, window.open returns null and we
-//      offer a clipboard fallback so the user can open them manually.
-//
-// The user sees a clear toast at the end describing what actually
-// happened — partial success isn't disguised as full success.
+// Even with .click(), strict popup blocker setups will limit to 1
+// tab per gesture. We detect that by polling for window.length /
+// number of children opened (we can't directly check) — instead,
+// the safer signal is to observe an immediate "blocked" toast from
+// the browser, which we can't intercept. So the heuristic is:
+// fire all clicks, then offer the user a clipboard fallback. They
+// can spot from "only one tab opened" that something's blocked.
 function openAllCardmarketLinks() {
   const list = document.getElementById('cardmarketLinkList');
   if (!list) return;
@@ -1620,56 +1622,60 @@ function openAllCardmarketLinks() {
     return;
   }
 
-  let opened = 0;
-  let blocked = 0;
-  const total = anchors.length;
+  // Use a single anchor element per URL and call .click() on it.
+  // Programmatic clicks on <a target="_blank"> elements live in the
+  // user-gesture context briefly, which some browsers honour as
+  // user-triggered for chained calls.
+  anchors.forEach((a) => {
+    // Build a fresh link element so we own its state — the modal's
+    // anchor is also a real anchor, but cloning lets us forcibly set
+    // rel/target without mutating the displayed list rows.
+    const link = document.createElement('a');
+    link.href = a.href;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  });
 
-  const firstWin = window.open(anchors[0].href, '_blank', 'noopener');
-  if (firstWin && !firstWin.closed) opened++; else blocked++;
-
-  if (total === 1) {
-    if (blocked) _onBulkOpenFinished(opened, blocked, anchors);
-    else showNotification('Opened 1 Cardmarket tab', 'success');
-    return;
-  }
-
-  // Stagger remaining opens. setTimeout pushes each call into a fresh
-  // task — some browsers (Firefox, older Chrome) allow more popups
-  // that way, others (newer Chrome with strict popup blocker on)
-  // still block. We count both outcomes and report at the end.
-  for (let i = 1; i < total; i++) {
+  // Show a guidance toast that tells the user what to expect AND
+  // offers the clipboard fallback when their browser blocks. We
+  // can't reliably detect blocking, so we proactively offer the
+  // fallback every time on count > 1 so the user has an out.
+  if (anchors.length > 1) {
     setTimeout(() => {
-      const w = window.open(anchors[i].href, '_blank', 'noopener');
-      if (w && !w.closed) opened++; else blocked++;
-      if (opened + blocked === total) {
-        _onBulkOpenFinished(opened, blocked, anchors);
+      const msg =
+        `Tried to open ${anchors.length} Cardmarket tabs.\n\n` +
+        `If only the first one opened: your browser blocks programmatic popups by default. ` +
+        `Allow popups for this site (lock icon → Pop-ups → Allow) and click "Open all" again.\n\n` +
+        `Click OK to copy all ${anchors.length} URLs to the clipboard so you can paste them into new tabs manually.`;
+      if (window.confirm(msg)) {
+        copyAllCardmarketUrls();
+      } else {
+        showNotification(`Bulk-open requested for ${anchors.length} cards`, 'info');
       }
-    }, i * 60);
+    }, 250);
+  } else {
+    showNotification('Opened 1 Cardmarket tab', 'success');
   }
 }
 
-function _onBulkOpenFinished(opened, blocked, anchors) {
-  if (blocked === 0) {
-    showNotification(`Opened ${opened} Cardmarket tabs`, 'success');
+// Copy all Cardmarket URLs from the modal's link list — used as the
+// reliable fallback when the popup blocker fights us.
+function copyAllCardmarketUrls() {
+  const list = document.getElementById('cardmarketLinkList');
+  if (!list) return;
+  const urls = Array.from(list.querySelectorAll('a.cm-link-row[href]')).map(a => a.href).join('\n');
+  if (!urls) {
+    showNotification('No URLs to copy', 'info');
     return;
   }
-  // Popup blocker fired. Offer a clipboard fallback so the user can
-  // paste the URLs into a fresh tab one by one — annoying but
-  // unblocked.
-  const msg =
-    `Opened ${opened} of ${anchors.length} tabs — your browser blocked the rest as popups.\n\n` +
-    `Fix: lock icon in the address bar → Site settings → Pop-ups → Allow, then click "Open all" again.\n\n` +
-    `Or click OK to copy all ${anchors.length} URLs to the clipboard so you can paste them into new tabs manually.`;
-  if (window.confirm(msg)) {
-    const urls = anchors.map(a => a.href).join('\n');
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(urls).then(
-        () => showNotification(`Copied ${anchors.length} URLs — paste each into the address bar`, 'success'),
-        () => _fallbackCopyWishlist(urls),
-      );
-    } else {
-      _fallbackCopyWishlist(urls);
-    }
+  const onOk = () => showNotification('All URLs copied — paste each into the address bar', 'success');
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(urls).then(onOk).catch(() => _fallbackCopyWishlist(urls));
+  } else {
+    _fallbackCopyWishlist(urls);
   }
 }
 

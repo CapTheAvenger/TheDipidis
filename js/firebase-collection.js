@@ -1434,6 +1434,54 @@ function _fallbackCopyWishlist(text) {
   document.body.removeChild(ta);
 }
 
+// Copy the wishlist in the exact format Cardmarket's "Add Decklist to
+// Wants" field accepts (see help.cardmarket.com/en/how-to-add-a-pkmn-
+// decklist-to-wants):
+//
+//   <count>x <Card Name>
+//
+// One card per line, no set code / number / price. Cardmarket's parser
+// ignores set info and matches by NAME alone — for cards with multiple
+// printings of the same name the user picks "any version" implicitly,
+// or pastes attack/ability text manually for ex/V/VMAX disambiguation.
+//
+// We deliberately keep it minimal: the regular Copy button still
+// produces the human-readable list with set codes + prices for our
+// own use; this one is paste-into-Cardmarket fodder.
+function copyWishlistForCardmarket() {
+  if (!window.userWishlist || window.userWishlist.size === 0) {
+    showNotification('Wishlist is empty', 'info');
+    return;
+  }
+  // Aggregate counts by card name. Different printings of the same
+  // card (e.g. Drakloak ASC + Drakloak SVI base) collapse into a
+  // single "Nx Drakloak" line — Cardmarket treats them as the same
+  // wants entry anyway.
+  const countByName = new Map();
+  window.userWishlist.forEach(cardId => {
+    const [cardName] = cardId.split('|');
+    if (!cardName) return;
+    const count = window.userWishlistCounts ? (window.userWishlistCounts.get(cardId) || 1) : 1;
+    countByName.set(cardName, (countByName.get(cardName) || 0) + count);
+  });
+
+  const lines = [];
+  countByName.forEach((count, name) => {
+    lines.push(`${count}x ${name}`);
+  });
+  const text = lines.join('\n');
+
+  const onSuccess = () => showNotification(
+    `Copied ${countByName.size} card${countByName.size === 1 ? '' : 's'} for Cardmarket — paste into the Wants list`,
+    'success',
+  );
+  if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+    navigator.clipboard.writeText(text).then(onSuccess).catch(() => _fallbackCopyWishlist(text));
+  } else {
+    _fallbackCopyWishlist(text);
+  }
+}
+
 // Update profile UI
 function updateProfileUI(profile) {
   // Update profile name

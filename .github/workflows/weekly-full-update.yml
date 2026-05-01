@@ -24,12 +24,12 @@ permissions:
   contents: write
   actions:  write
 
-# Opt all JavaScript-based actions (checkout, setup-python, …) into
-# Node 24 ahead of GitHub's June-2026 default flip. Suppresses the
-# "Node.js 20 actions are deprecated" annotation and avoids any
-# surprise migration when the runner image switches.
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
+# actions/checkout@v6 and actions/setup-python@v6 declare Node 24
+# natively — no FORCE_JAVASCRIPT_ACTIONS_TO_NODE24 hack needed.
+# (Earlier the workflow used v4 / v5 + the env-var override, which
+# still triggered a deprecation annotation because the action.yml
+# files in those tags hard-code 'node20'. The v6 lines below are
+# the proper fix.)
 
 # Don't run multiple weekly updates in parallel — they'd race on the
 # same monolith CSVs and produce conflicting commits.
@@ -44,7 +44,7 @@ jobs:
 
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 1
 
@@ -52,7 +52,7 @@ jobs:
       # f-string syntax (nested f-strings sharing the outer quote
       # delimiter) which 3.11 rejects with "invalid decimal literal".
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.12'
           cache: pip

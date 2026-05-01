@@ -156,9 +156,18 @@ def _save_quarantine(state: dict) -> None:
         logger.warning("Could not save quarantine file %s: %s", qpath, e)
 
 
-def _is_quarantined(key: str, quarantine: dict) -> bool:
+def _is_quarantined(key: str, quarantine: dict, current_reason: Optional[str] = None) -> bool:
     """True when the card is in quarantine AND last attempt is fresh
-    (< QUARANTINE_RETRY_DAYS old). Older entries get retried once."""
+    (< QUARANTINE_RETRY_DAYS old) AND the failure reason hasn't
+    changed since the last attempt.
+
+    The reason-awareness matters: a card may have been quarantined
+    last week for "missing_energy_type" (which Limitless genuinely
+    can't supply for some printings), then this week trip the
+    "missing_cardmarket_url" check too because we tightened the
+    classifier. Without reason-comparison the card stays parked for
+    the next 14 days and the new gap never gets fixed.
+    """
     entry = quarantine.get(key)
     if not entry:
         return False
@@ -167,7 +176,14 @@ def _is_quarantined(key: str, quarantine: dict) -> bool:
         last_dt = datetime.fromisoformat(last)
     except Exception:
         return False
-    return (datetime.now() - last_dt).days < QUARANTINE_RETRY_DAYS
+    # Old enough → always retry.
+    if (datetime.now() - last_dt).days >= QUARANTINE_RETRY_DAYS:
+        return False
+    # Fresh quarantine, but a NEW reason fired this run → retry.
+    last_reason = entry.get("reason") or ""
+    if current_reason and last_reason and last_reason != current_reason:
+        return False
+    return True
 
 
 # LOAD EXISTING CSV
@@ -224,9 +240,13 @@ def load_existing_cards(csv_path: str, rescrape_incomplete: bool = True):
             if not is_incomplete:
                 complete_cards.append(card_data)
             elif rescrape_incomplete:
-                # Skip if this card has been re-scraped recently and stayed
-                # incomplete (Limitless structurally doesn't have the data).
-                if _is_quarantined(key, quarantine):
+                # Skip if this card has been re-scraped recently AND the
+                # CURRENT failure reason matches the one stored in
+                # quarantine — that's the case where Limitless genuinely
+                # can't supply this field. A different reason means a
+                # newly-tightened classifier or new check found something
+                # else missing, so we retry.
+                if _is_quarantined(key, quarantine, current_reason=reason):
                     complete_cards.append(card_data)
                     quarantined_count += 1
                 else:
@@ -609,7 +629,34 @@ def main():
         start_page  = int(settings.get("start_page", 1))
         rescrape    = bool(settings.get("rescrape_incomplete", True))
 
+        # Emergency switch: nuke the quarantine for this run so EVERY
+        # incomplete card gets retried, regardless of how recently it
+        # was last attempted. Useful right after a classifier change
+        # surfaces new gaps (e.g. the 2026-05 cardmarket_url tightening
+        # that found 78 cards already-quarantined for an older reason).
+        # Triggered via either CLI flag or env-var so it works from the
+        # dashboard's batch runner too.
+        force_rescrape = (
+            "--force-rescrape" in sys.argv
+            or "--ignore-quarantine" in sys.argv
+            or os.environ.get("ALL_CARDS_FORCE_RESCRAPE", "").lower() in ("1", "true", "yes")
+        )
+
         logger.info("Ausgabe-Verzeichnis: %s", os.path.abspath(data_dir))
+        if force_rescrape:
+            logger.info("FORCE-RESCRAPE active — quarantine bypassed for this run.")
+            # Move the existing quarantine aside so load_existing_cards
+            # sees an empty file. Keep a timestamped copy on disk so the
+            # accumulated history isn't lost; the next non-forced run
+            # rebuilds the quarantine from this run's outcomes.
+            qpath = os.path.join(data_dir, QUARANTINE_FILE)
+            if os.path.isfile(qpath):
+                backup = qpath + f".bak-{datetime.now().strftime('%Y%m%d-%H%M%S')}"
+                try:
+                    os.replace(qpath, backup)
+                    logger.info("  → previous quarantine moved aside to %s", backup)
+                except OSError as e:
+                    logger.warning("  → could not move quarantine aside: %s", e)
 
         if append_mode:
             existing_cards, existing_keys, incomplete_cards = load_existing_cards(csv_path, rescrape)

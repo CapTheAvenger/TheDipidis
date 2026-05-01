@@ -737,14 +737,12 @@ window.MetaCall = (function () {
       //       < 1 = underperformer (drops share). Same [0.5, 2.0]
       //       range and same semantics, but anchored at 1.0 instead
       //       of 0.25 because the ratio is naturally normalised.
-      // The fallback was added because the live labs scraper isn't
-      // capturing top8_conv_rate (every row is 0 in the labs CSV) —
-      // without this fallback the labs term gets no amplification
-      // at all and decks like Crustle/Festival Lead (heavy day-2
-      // overperformers at Prag) get their actual quality signal
-      // dropped on the floor. Verified vs. user-flagged decks:
-      // Lucario goes 6.98 → 5.13 % (correct dampening), Crustle
-      // goes 2.25 → 3.91 % (correct boost) post-fix.
+      // The fallback exists because the live labs scraper currently
+      // does not populate top8_conv_rate (rows are 0 in the labs
+      // CSV). Without the fallback, the labs term would lose its
+      // quality amplification entirely, so we use the Day-1 → Day-2
+      // share ratio to preserve a meaningful over/underperformance
+      // signal until top8_conv_rate data becomes available.
       const convStats3 = _labsConvByDeck[k];
       const t8ConvAvg = (convStats3 && convStats3.n > 0) ? convStats3.sum / convStats3.n : 0;
       let labsT8Boost;

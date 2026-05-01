@@ -2565,12 +2565,17 @@ window.MetaCall = (function () {
               : '';
             const day2Pct = (tip.day2Prob * 100).toFixed(1).replace('.', ',');
             const reasonText = _formatTipReasons(tip);
+            // Pill label matches active tournament type so Cup tabs
+            // show "Top 4 / Top 8" and Challenge shows "1.-2.".
+            const pillLabel = _settings.tournamentType === 'cup'
+              ? `Top ${_settings.topCutSize || 8}`
+              : (_settings.tournamentType === 'challenge' ? '1.-2.' : t('mc.recDay2'));
             return `<div class="mc-tip-card" tabindex="0"
                   title="${esc(t('mc.recJumpHint'))}"
                   onclick="MetaCall._jumpToDeckAnalysis('${safeNameJs}')">
               <div class="mc-tip-head">
                 <span class="mc-tip-name">${icon}${esc(tip.name)}</span>
-                <span class="mc-tip-day2">${t('mc.recDay2')}: <strong>${day2Pct}%</strong></span>
+                <span class="mc-tip-day2">${esc(pillLabel)}: <strong>${day2Pct}%</strong></span>
               </div>
               <div class="mc-tip-reason">${esc(reasonText)}</div>
             </div>`;
@@ -3231,10 +3236,16 @@ window.MetaCall = (function () {
       ctx.lineWidth = 1;
       ctx.strokeRect(originX + 4.5, y + 0.5, columnW - 9, CARD_H - 1);
 
-      // Day-2 pill on the right — measure first so the name truncates
+      // Pill on the right — label adapts to active tournament type so
+      // a Cup share image reads "Top 4: 8,2 %" instead of the
+      // misleading "Day-2: 8,2 %". Measure first so the name truncates
       // around it instead of behind it.
       const day2Pct = (tip.day2Prob * 100).toFixed(1);
-      const pillLabel = `${t('mc.recDay2')}: ${day2Pct}%`;
+      const pillLabel = _settings.tournamentType === 'cup'
+        ? `Top ${_settings.topCutSize || 8}: ${day2Pct}%`
+        : (_settings.tournamentType === 'challenge'
+            ? `1.-2.: ${day2Pct}%`
+            : `${t('mc.recDay2')}: ${day2Pct}%`);
       ctx.font = 'bold 13px system-ui, sans-serif';
       const pillTextW = ctx.measureText(pillLabel).width;
       const pillW = pillTextW + 16;

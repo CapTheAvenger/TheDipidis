@@ -1453,12 +1453,28 @@ function _fallbackCopyWishlist(text) {
 //
 // Both are presented in a modal (#wishlistCardmarketModal) so the
 // user can copy the text AND/OR open the direct links.
-function copyWishlistForCardmarket() {
+// One-time fetch of pokemon_card_text.json — built by
+// backend/scrapers/pokemon_card_text_scraper.py. Maps "{set}|{number}"
+// to the space-separated ability+attack names Cardmarket's Wants
+// parser needs after the card name for Pokémon disambiguation.
+// Trainer/Item/Energy entries are absent (or empty) — the parser
+// matches them by name alone, no disambiguation needed.
+let _pokemonCardTextPromise = null;
+function _loadPokemonCardText() {
+  if (_pokemonCardTextPromise) return _pokemonCardTextPromise;
+  _pokemonCardTextPromise = fetch('data/pokemon_card_text.json', { cache: 'no-cache' })
+    .then(r => r.ok ? r.json() : {})
+    .catch(() => ({}));
+  return _pokemonCardTextPromise;
+}
+
+async function copyWishlistForCardmarket() {
   if (!window.userWishlist || window.userWishlist.size === 0) {
     showNotification('Wishlist is empty', 'info');
     return;
   }
   const allCards = window.allCardsDatabase || [];
+  const cardText = await _loadPokemonCardText().catch(() => ({}));
 
   // Build per-(name+set+number) entries with the card's Cardmarket
   // URL when available. Strip the `?utm_*` referral query so links
@@ -1471,17 +1487,43 @@ function copyWishlistForCardmarket() {
     const count = window.userWishlistCounts ? (window.userWishlistCounts.get(cardId) || 1) : 1;
     let url = '';
     if (card && card.cardmarket_url) url = String(card.cardmarket_url).split('?')[0];
-    items.push({ count, name: cardName, set: cardSet || '', number: cardNumber || '', url });
+    const disambiguation = (cardText && cardText[`${cardSet}|${cardNumber}`]) || '';
+    items.push({ count, name: cardName, set: cardSet || '', number: cardNumber || '', url, disambiguation });
   });
 
-  // Aggregate paste-text counts by NAME — Cardmarket treats reprints
-  // as one wants-entry, so listing the same name twice would just
-  // add the second line "to your wants list as it already exists".
+  // Aggregate paste-text counts by (name + disambiguation). Reprints
+  // of the same physical card share a disambiguation string, so
+  // "1x Drakloak Recon Directive Dragon Headbutt" + the SVI-base
+  // Drakloak with the same attacks collapse to one line. Different
+  // Pokémon with the same name but different attacks (e.g. Mew EX
+  // Restart Genome Hacking vs Mew EX Genesect Saga) stay separate
+  // and Cardmarket treats them as two distinct wants-entries.
+  const pasteKey = ({ name, disambiguation }) =>
+    disambiguation ? `${name} ${disambiguation}` : name;
   const pasteCounts = new Map();
-  items.forEach(({ count, name }) => pasteCounts.set(name, (pasteCounts.get(name) || 0) + count));
-  const pasteText = Array.from(pasteCounts, ([name, count]) => `${count}x ${name}`).join('\n');
+  items.forEach(it => {
+    const key = pasteKey(it);
+    pasteCounts.set(key, (pasteCounts.get(key) || 0) + it.count);
+  });
+  const pasteText = Array.from(pasteCounts, ([key, count]) => `${count}x ${key}`).join('\n');
 
-  _populateCardmarketWishlistModal({ items, pasteText, totalCount: items.length });
+  // Surface "no disambiguation data yet" Pokémon to the user — these
+  // will fall back to bare name in the paste-text and may be rejected
+  // by Cardmarket. Treat any wishlist entry where a card with the
+  // same name has multiple printings as "potentially Pokémon needing
+  // attacks" if no disambiguation is available.
+  const missingDisambig = items.filter(it => {
+    if (it.disambiguation) return false;
+    // Heuristic: only flag cards where multiple printings of the same
+    // name exist in the DB AND the type is Pokémon (Basic / Stage 1
+    // / Stage 2 / V / VMAX / etc., not Trainer / Item / Energy).
+    const card = allCards.find(c => c && c.name === it.name && c.set === it.set && c.number === it.number);
+    const type = card ? (card.type || '') : '';
+    const isPokemon = type && !/^(Supporter|Item|Tool|Stadium|Basic Energy|Special Energy|Energy)$/i.test(type);
+    return isPokemon;
+  });
+
+  _populateCardmarketWishlistModal({ items, pasteText, totalCount: items.length, missingDisambig });
   const modal = document.getElementById('wishlistCardmarketModal');
   if (modal) modal.classList.add('show');
 }
@@ -1491,15 +1533,21 @@ function closeCardmarketWishlistModal() {
   if (modal) modal.classList.remove('show');
 }
 
-function _populateCardmarketWishlistModal({ items, pasteText, totalCount }) {
+function _populateCardmarketWishlistModal({ items, pasteText, totalCount, missingDisambig }) {
   const textarea = document.getElementById('cardmarketPasteTextarea');
   if (textarea) textarea.value = pasteText;
 
   const hint = document.getElementById('cardmarketPasteHint');
   if (hint) {
-    hint.textContent = totalCount === 0
-      ? 'Wishlist is empty.'
-      : `${totalCount} card${totalCount === 1 ? '' : 's'} on your wishlist. Trainers / Items / Energy match by name; Pokémon often need attacks added manually after pasting.`;
+    if (totalCount === 0) {
+      hint.textContent = 'Wishlist is empty.';
+    } else if (missingDisambig && missingDisambig.length) {
+      const names = missingDisambig.map(c => c.name).slice(0, 4).join(', ');
+      const more = missingDisambig.length > 4 ? `, +${missingDisambig.length - 4} more` : '';
+      hint.innerHTML = `<strong>${totalCount}</strong> cards. Pokémon attacks attached automatically — but no attack data yet for: <strong>${names}${more}</strong>. Use the direct links below for those, or re-run <code>pokemon_card_text_scraper.py</code>.`;
+    } else {
+      hint.innerHTML = `<strong>${totalCount}</strong> cards. Pokémon attacks attached automatically so the parser disambiguates correctly. Cardmarket still adds at "any version" — for an EXACT print, use the direct links below.`;
+    }
   }
 
   // Direct-link list: one row per print-specific card with the

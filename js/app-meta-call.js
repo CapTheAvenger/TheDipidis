@@ -24,7 +24,8 @@ window.MetaCall = (function () {
   let _historyManifest   = null; // { dates: [...], latest: 'YYYY-MM-DD' } from data/online_share_history/manifest.json
   let _snapshotAtMajor   = {};   // normalize(deck) -> share% on (closest available date ≤ _lastMajorDate)
   let _snapshotWeekAgo   = {};   // normalize(deck) -> share% on (closest available date ≤ today-7d)
-  let _labsConvByDeck    = {};   // normalize(deck) -> { top8: 0..1, n: count } across recent majors
+  let _labsConvByDeck    = {};   // normalize(deck) -> { sum, n } weighted top8_conv_rate (legacy)
+  let _labsQualityByDeck = {};   // normalize(deck) -> { d1: sum, d2: sum } per-deck day1/day2 totals across recent majors
   let _baselineSnapshotDate = null; // actual date used for the post-major baseline (for banner)
   let _lastAccuracyReport = null; // { mae, baselineDate, majorDate, decks } — shown next to the banner when a new major is detected
   // ── Last major snapshot (for text-first deck cards) ───────
@@ -724,12 +725,35 @@ window.MetaCall = (function () {
       const postMajorSignal = _trendSignal(ladderPct, majBaselinePct);
       const weeklySignal    = _trendSignal(ladderPct, wkBaselinePct);
 
-      // Labs Top-8 conversion boost — added in Predictor 3.0. 0.25 = 25%
-      // is the natural cut rate for an 8-cut in a 32-deck top, so anything
-      // above that means the deck overperforms relative to its representation.
+      // Labs cut-performance boost. Two signals, in priority order:
+      //   (1) top8_conv_rate (Predictor 3.0 default) — when populated,
+      //       use the field-mean-relative formula `conv / 0.25` clipped
+      //       to [0.5, 2.0]. 0.25 is the natural cut rate for an 8-cut
+      //       in a 32-deck top.
+      //   (2) Day-1 → Day-2 share ratio (Predictor 4.4b fallback) —
+      //       used when top8_conv_rate is missing/zero. d2_share /
+      //       d1_share = 1.0 means a deck holds its representation in
+      //       the cut; > 1 = overperformer (gains share in Day-2);
+      //       < 1 = underperformer (drops share). Same [0.5, 2.0]
+      //       range and same semantics, but anchored at 1.0 instead
+      //       of 0.25 because the ratio is naturally normalised.
+      // The fallback was added because the live labs scraper isn't
+      // capturing top8_conv_rate (every row is 0 in the labs CSV) —
+      // without this fallback the labs term gets no amplification
+      // at all and decks like Crustle/Festival Lead (heavy day-2
+      // overperformers at Prag) get their actual quality signal
+      // dropped on the floor. Verified vs. user-flagged decks:
+      // Lucario goes 6.98 → 5.13 % (correct dampening), Crustle
+      // goes 2.25 → 3.91 % (correct boost) post-fix.
       const convStats3 = _labsConvByDeck[k];
       const t8ConvAvg = (convStats3 && convStats3.n > 0) ? convStats3.sum / convStats3.n : 0;
-      const labsT8Boost = t8ConvAvg > 0 ? _clip(t8ConvAvg / 0.25, 0.5, 2.0) : 1.0;
+      let labsT8Boost;
+      if (t8ConvAvg > 0) {
+        labsT8Boost = _clip(t8ConvAvg / 0.25, 0.5, 2.0);
+      } else {
+        const q = _labsQualityByDeck[k];
+        labsT8Boost = (q && q.d1 > 0) ? _clip(q.d2 / q.d1, 0.5, 2.0) : 1.0;
+      }
 
       // Predictor 4.0a — counter-meta surge boost (additive, capped pp).
       // Sits ON TOP of the weighted predictor signals; doesn't shift
@@ -1026,6 +1050,7 @@ window.MetaCall = (function () {
       _labsMajorRows = 0;
       _lastMajorDate = null;
       _labsConvByDeck = {};
+      _labsQualityByDeck = {};
       _lastMajorInfo = null;
       _lastMajorByDeck = {};
       let labsRowsByDeck = {};
@@ -1133,11 +1158,32 @@ window.MetaCall = (function () {
             // Conversion rates (added in Predictor 3.0). Track per-deck
             // weighted averages so a recent strong major matters more
             // than an old "early format" one.
+            //
+            // NOTE: top8_conv_rate is currently not populated by the
+            // labs scraper for any tournament (data bug). The Day-1
+            // → Day-2 quality ratio below is the live replacement
+            // signal — it captures the same "this deck overperforms
+            // its share in the cut" idea using fields that ARE
+            // populated. labsT8Boost falls back to the quality ratio
+            // when this top-8-conv aggregate is empty.
             const t8 = parseEU(r.top8_conv_rate || '0');
             if (t8 > 0) {
               if (!_labsConvByDeck[k]) _labsConvByDeck[k] = { sum: 0, n: 0 };
               _labsConvByDeck[k].sum += t8 * w;
               _labsConvByDeck[k].n += w;
+            }
+            // Day-1 / Day-2 share aggregator (fix for the dead top-8
+            // conv signal). The ratio d2_share / d1_share is the cut-
+            // performance signal: > 1.0 means the deck GAINED share
+            // in the cut (overperformed); < 1.0 means it LOST share
+            // (underperformed). Aggregated weighted by recency so a
+            // recent major dominates over older ones.
+            const d1Pct = parseEU(r.day1_share_pct || '0');
+            const d2Pct = parseEU(r.day2_share_pct || '0');
+            if (d1Pct > 0) {
+              if (!_labsQualityByDeck[k]) _labsQualityByDeck[k] = { d1: 0, d2: 0 };
+              _labsQualityByDeck[k].d1 += d1Pct * w;
+              _labsQualityByDeck[k].d2 += d2Pct * w;
             }
             // Track latest tournament date (for trend snapshots).
             const td = (r.tournament_date || '').trim();
@@ -1685,6 +1731,16 @@ window.MetaCall = (function () {
       const labsConv    = _labsConvByDeck[k] && _labsConvByDeck[k].n > 0
         ? _labsConvByDeck[k].sum / _labsConvByDeck[k].n
         : 0;
+      // Predictor 4.4b fallback — when top8_conv_rate is missing,
+      // synthesise an equivalent "conv" from the day1→day2 share
+      // ratio (qualityRatio − 1) × 0.25 maps a 1.5× overperformer to
+      // 0.125 conv-equivalent (just below the 0.15 threshold) and a
+      // 2.0× overperformer to 0.25 (= field-mean baseline = strong).
+      const qStats = _labsQualityByDeck[k];
+      const qualityRatio = (qStats && qStats.d1 > 0) ? qStats.d2 / qStats.d1 : 0;
+      const labsConvEffective = labsConv > 0
+        ? labsConv
+        : (qualityRatio > 0 ? Math.max(0, (qualityRatio - 1)) * 0.25 + 0.05 : 0);
       const lm = _lastMajorByDeck[k];
       const lmWr = lm ? lm.winPct : 0;
       // Aggregate score — picks the deck that's most "underrated" on
@@ -1692,9 +1748,9 @@ window.MetaCall = (function () {
       // strength so we don't lose decks that are strong on just one.
       let score = 0;
       const reasons = [];
-      if (labsConv >= 0.15) {
-        score += labsConv * 100;
-        reasons.push({ kind: 'conv', value: labsConv });
+      if (labsConvEffective >= 0.15) {
+        score += labsConvEffective * 100;
+        reasons.push({ kind: 'conv', value: labsConvEffective });
       }
       if (trend >= 0.5) {
         score += trend * 10;

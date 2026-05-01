@@ -106,10 +106,22 @@ def _classify_incompleteness(row: dict):
     if not has_basic:
         return "missing_basic"
 
-    if intl:
-        p_list = [p.strip() for p in intl.split(",")]
-        if len(p_list) == 1 and p_list[0] == f"{set_code}-{set_number}" and not cm_url:
-            return "no_reprints_no_cardmarket"
+    # Cardmarket-URL gap. Limitless serves a Cardmarket link for
+    # virtually every printable card; a row with image + rarity +
+    # reprint info but no cm_url means the page was scraped before
+    # the EUR link existed yet. Brand-new sets (e.g. POR shortly
+    # after release) are the canonical case — the previous narrower
+    # check ("only cards with no reprints") let cards with a reprint
+    # entry but a still-empty cm_url slip through forever, because
+    # the row looked structurally complete.
+    #
+    # Universal trigger now: any card without cm_url goes back into
+    # the rescrape pool. The quarantine system catches cards
+    # Limitless genuinely never carries a Cardmarket link for, so
+    # we don't loop forever on edge cases (digital-only promos,
+    # withdrawn products, etc.).
+    if not cm_url:
+        return "missing_cardmarket_url"
 
     is_pokemon_type = type_lower in (
         "basic", "stage 1", "stage 2", "vstar", "vmax", "v", "v-union",

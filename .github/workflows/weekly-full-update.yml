@@ -177,8 +177,36 @@ jobs:
 
           Triggered by .github/workflows/weekly-full-update.yml
           Run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-          git push
-          echo "pushed=true" >> "$GITHUB_OUTPUT"
+
+          # Push with retry — the scraper job runs ~45 min, in which
+          # time origin/main can advance (manual pushes from the
+          # maintainer, an earlier scheduled run still committing,
+          # etc.). A naive `git push` would 'rejected (fetch first)'
+          # and the whole hour of scraped data would sit unpushed.
+          #
+          # Strategy: pull --rebase with -X ours so our just-baked
+          # data + version-bump win on conflict (this run's outputs
+          # are by definition the newest snapshot). -X ours only
+          # affects FILES BOTH SIDES MODIFIED — code-only changes
+          # the maintainer pushed are untouched and ride along on
+          # the rebase base. Three attempts, brief sleep between
+          # them, then loud failure with the artifact still safe
+          # in the runner's checkout.
+          for attempt in 1 2 3; do
+            if git push origin HEAD:main; then
+              echo "Push succeeded on attempt $attempt"
+              echo "pushed=true" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            echo "Push rejected on attempt $attempt — pulling with rebase…"
+            if ! git pull --rebase=true -X ours origin main; then
+              echo "::error::Rebase conflict beyond version files — manual resolution needed"
+              git rebase --abort || true
+              exit 1
+            fi
+          done
+          echo "::error::Push failed after 3 attempts — origin/main churns too fast"
+          exit 1
 
       # Pushes authenticated with GITHUB_TOKEN don't trigger other
       # `on: push` workflows (GitHub recursion-prevention). Dispatch

@@ -5,9 +5,14 @@ Cardmarket ID Mapper
 Builds a (set, number) -> idProduct mapping using Cardmarket's official JSON
 exports (no Cardmarket page scraping required):
 
-  data/products_singles.json     - all single-card products
-  data/products_nonsingles.json  - boosters/displays (used to derive set name -> idExpansion)
-  data/price_guide.json          - daily price snapshot (only used here for sanity-check coverage)
+  data/products_singles_6.json     - all single-card products (game id 6 = Pokémon)
+  data/products_nonsingles_6.json  - boosters/displays (used to derive set name -> idExpansion)
+  data/price_guide_6.json          - daily price snapshot (only used here for sanity-check coverage)
+
+The "_6" suffix is what Cardmarket's S3 download links produce
+(/productCatalog/productList/products_singles_6.json etc.); reading
+the raw filenames straight off disk means the user doesn't have to
+rename them after each daily download.
 
 Output: data/cardmarket_id_mapping.csv with columns:
   set, number, cardmarket_product_id, match_method, base_name
@@ -85,9 +90,9 @@ def card_number_sort_key(number: str):
 
 def load_jsons(data_dir: str):
     paths = {
-        'singles': os.path.join(data_dir, 'products_singles.json'),
-        'nonsingles': os.path.join(data_dir, 'products_nonsingles.json'),
-        'price_guide': os.path.join(data_dir, 'price_guide.json'),
+        'singles': os.path.join(data_dir, 'products_singles_6.json'),
+        'nonsingles': os.path.join(data_dir, 'products_nonsingles_6.json'),
+        'price_guide': os.path.join(data_dir, 'price_guide_6.json'),
     }
     for name, p in paths.items():
         if not os.path.isfile(p):

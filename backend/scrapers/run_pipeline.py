@@ -15,7 +15,7 @@ Run order (dependency-aware):
 
   Stage 3 – Enrichment (run after Stage 2, sequential — both touch price_data.csv):
     - card_price_scraper              → Limitless-fallback for unmapped cards
-    - cardmarket_price_merger         → primary price source (reads data/price_guide.json + mapping)
+    - cardmarket_price_merger         → primary price source (reads data/price_guide_6.json + mapping)
     - generate_tooltips               → reads card data from Stage 2
 
 Usage:

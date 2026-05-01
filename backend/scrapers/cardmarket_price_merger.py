@@ -10,7 +10,7 @@ For each card in all_cards_database.csv:
 Inputs:
   data/all_cards_database.csv
   data/cardmarket_id_mapping.csv  (built by cardmarket_id_mapper.py)
-  data/price_guide.json
+  data/price_guide_6.json         (Cardmarket daily download — game id 6 = Pokémon)
   data/price_data.csv             (existing; preserved for non-mapped cards)
 
 Output:
@@ -52,7 +52,7 @@ def main():
     data_dir = get_project_data_dir()
     cards_path = os.path.join(data_dir, 'all_cards_database.csv')
     mapping_path = os.path.join(data_dir, 'cardmarket_id_mapping.csv')
-    guide_path = os.path.join(data_dir, 'price_guide.json')
+    guide_path = os.path.join(data_dir, 'price_guide_6.json')
     out_path = os.path.join(data_dir, 'price_data.csv')
 
     for p in (cards_path, mapping_path, guide_path):

@@ -53,6 +53,52 @@
   color: #3498db;
 }
 
+/* --- Tournament-type tabs (Regional / Local Challenge / Local Cup) --- */
+.mc-tt-tabs {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin: 0 0 14px;
+  padding: 4px;
+  background: #eef2f7;
+  border-radius: 10px;
+}
+.mc-tt-tab {
+  flex: 1 1 auto;
+  min-width: 110px;
+  padding: 8px 12px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: #4a5b73;
+  font-size: 0.86rem;
+  font-weight: 600;
+  border-radius: 7px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.mc-tt-tab:hover {
+  background: #fff;
+  color: #1a2533;
+}
+.mc-tt-tab-active {
+  background: #fff;
+  color: #1f2d3d;
+  border-color: #c5cfde;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+.mc-tt-hint {
+  margin: 8px 0 0;
+  font-size: 0.78rem;
+  color: #6b7c93;
+}
+.mc-tt-swisscalc {
+  margin-left: 8px;
+  color: #2980b9;
+  text-decoration: none;
+  font-weight: 600;
+}
+.mc-tt-swisscalc:hover { text-decoration: underline; }
+
 /* --- Settings Grid --- */
 .metacall-settings-grid {
   display: grid;

@@ -90,15 +90,53 @@ window.MetaCall = (function () {
   let _familyLabsTotal   = {}; // family -> aggregated labs share (raw, pre-norm)
   let _familyOnlineTotal = {}; // family -> aggregated online ladder count
 
+  // Tournament-type presets. Selecting a tab swaps in the appropriate
+  // round / target-points defaults; user-override persists per tab so
+  // hopping between Regional ↔ Local Cup ↔ Local Challenge doesn't
+  // wipe customisation. The predictor itself reads `rounds` +
+  // `day2Points` exactly as before — `day2Points` is repurposed as
+  // the generic "target points to clear" for the active type.
+  const TOURNAMENT_TYPES = ['regional', 'challenge', 'cup'];
+  const TOURNAMENT_SETTINGS_KEY = 'metacall_tournament_settings_v1';
+
   let _settings = {
+    tournamentType: 'regional',
     totalPlayers  : 1300,
     rounds        : 8,
-    day2Points    : 16,
-    junkPct       : 0,        // legacy: minimum-junk floor (UI removed; auto-computed now)
-    junkWinRate   : 55,       // assumed WR vs small-share decks lumped into Junk (slight edge)
+    day2Points    : 16,         // repurposed: "target points to clear"
+    topCutSize    : 8,          // only used when tournamentType === 'cup'
+    junkPct       : 0,          // legacy: minimum-junk floor (UI removed; auto-computed now)
+    junkWinRate   : 55,         // assumed WR vs small-share decks lumped into Junk (slight edge)
     myDeck        : '',
     excludeBricks : false,
   };
+
+  // Per-type overrides — when the user changes Players / Rounds / target
+  // on one tab we keep those numbers around so switching back doesn't
+  // re-suggest the auto-defaults over their carefully-tuned values.
+  let _settingsByType = {
+    regional:  { totalPlayers: 1300, rounds: 8, day2Points: 16 },
+    challenge: { totalPlayers: 24,   rounds: 5, day2Points: 13, topCutSize: 0 },
+    cup:       { totalPlayers: 32,   rounds: 5, day2Points: 12, topCutSize: 8 },
+  };
+
+  // Reload persisted tournament settings if any.
+  try {
+    const raw = localStorage.getItem(TOURNAMENT_SETTINGS_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === 'object') {
+        if (parsed.byType && typeof parsed.byType === 'object') {
+          _settingsByType = { ..._settingsByType, ...parsed.byType };
+        }
+        if (TOURNAMENT_TYPES.includes(parsed.activeType)) {
+          _settings.tournamentType = parsed.activeType;
+        }
+        const active = _settingsByType[_settings.tournamentType] || {};
+        Object.assign(_settings, active);
+      }
+    }
+  } catch (_e) { /* localStorage disabled — fall back to defaults */ }
 
   // Whether the user has explicitly typed into the Players input.
   // Calculations always use _settings.totalPlayers (default 1300), but
@@ -1731,18 +1769,111 @@ window.MetaCall = (function () {
       .replace(/\n/g, '\\n');
   }
 
+  // Suggested Swiss round count by attendance — matches the standard
+  // table the Limitless Swiss Calculator uses
+  // (limitlesstcg.com/tools/swisscalc). Pure heuristic, the user can
+  // always override; we just save them the menial step.
+  function _suggestSwissRounds(players) {
+    const n = Math.max(0, +players || 0);
+    if (n <= 8)   return 3;
+    if (n <= 16)  return 4;
+    if (n <= 32)  return 5;
+    if (n <= 64)  return 6;
+    if (n <= 128) return 7;
+    if (n <= 226) return 8;
+    return 9;
+  }
+
+  // Sensible default points-target per tournament type — what the
+  // user typically needs to clear to hit the predictor's "success"
+  // outcome.
+  //
+  //   regional  → existing Day 2 threshold (don't touch)
+  //   challenge → "shot at 1st/2nd place" — needs near-perfect Swiss
+  //               (≈ 3*rounds - 2, e.g. 13 pts in 5 rounds = 4-1)
+  //   cup       → top cut threshold — typical cut is one or two
+  //               losses depending on field size and top N
+  function _defaultTargetPoints(type, rounds, topCutSize) {
+    const r = Math.max(1, +rounds || 1);
+    if (type === 'challenge') {
+      // 4-1 in 5 rounds = 12 pts is realistic; we suggest 13 (tied
+      // for 4-0-1) as the "1st/2nd ambition" point so the predictor
+      // keeps a healthy bar.
+      return Math.max(3, r * 3 - 2);
+    }
+    if (type === 'cup') {
+      const tc = +topCutSize || 8;
+      // Top 4 cuts higher than Top 8 (one fewer loss tolerated).
+      const lossTolerance = tc <= 4 ? 1 : 2;
+      return Math.max(3, r * 3 - lossTolerance * 3);
+    }
+    // regional fallback — keep whatever the user / preset has.
+    return null;
+  }
+
+  function _typeLabelI18nKey(type) {
+    return ({
+      regional:  'mc.tournamentTypeRegional',
+      challenge: 'mc.tournamentTypeChallenge',
+      cup:       'mc.tournamentTypeCup',
+    })[type] || 'mc.tournamentTypeRegional';
+  }
+
+  // Result-banner title key per active tournament type.
+  function _predictTitleKey() {
+    const type = _settings.tournamentType;
+    if (type === 'cup')       return 'mc.predictTitleTopCut';
+    if (type === 'challenge') return 'mc.predictTitleTopFinish';
+    return 'mc.predictTitleDay2';
+  }
+
   function renderSettingsPanel() {
     const s = _settings;
+    const type = TOURNAMENT_TYPES.includes(s.tournamentType) ? s.tournamentType : 'regional';
+
+    const tabBtn = (key) => {
+      const active = key === type ? ' mc-tt-tab-active' : '';
+      return `<button type="button" class="mc-tt-tab${active}"
+        onclick="MetaCall._setTournamentType('${key}')">${esc(t(_typeLabelI18nKey(key)))}</button>`;
+    };
+
+    // Tab-specific field set. Players + Rounds are always there;
+    // target-points label changes per type; Cup adds Top Cut size;
+    // Local types get a Swiss-calculator helper link.
+    const targetLabelKey = type === 'regional'
+      ? 'mc.labelDay2Points'
+      : (type === 'cup' ? 'mc.labelTargetCutPoints' : 'mc.labelTargetTopPoints');
+    const targetHintKey = type === 'regional'
+      ? 'mc.targetHintRegional'
+      : (type === 'cup' ? 'mc.targetHintCup' : 'mc.targetHintChallenge');
+
+    const swissLink = type === 'regional'
+      ? ''
+      : `<a class="mc-tt-swisscalc" href="https://limitlesstcg.com/tools/swisscalc" target="_blank" rel="noopener">↗ ${esc(t('mc.swissCalcLink'))}</a>`;
+
+    const cupTopCutField = type === 'cup'
+      ? `<div class="metacall-field-group">
+           <label>${t('mc.labelTopCut')}</label>
+           <select id="mc-topcut" onchange="MetaCall._onSetting('topCutSize', +this.value)">
+             <option value="4"${s.topCutSize === 4 ? ' selected' : ''}>${t('mc.topCut4')}</option>
+             <option value="8"${s.topCutSize === 8 ? ' selected' : ''}>${t('mc.topCut8')}</option>
+           </select>
+         </div>`
+      : '';
+
     return `
 <div class="metacall-panel">
   <div class="metacall-panel-title">
     ${t('mc.panelSettings')}
     <span class="mc-badge">${t('mc.badgeCustomizable')}</span>
   </div>
+  <div class="mc-tt-tabs" role="tablist" aria-label="Tournament type">
+    ${TOURNAMENT_TYPES.map(tabBtn).join('')}
+  </div>
   <div class="metacall-settings-grid">
     <div class="metacall-field-group">
       <label>${t('mc.labelPlayers')}</label>
-      <input type="number" id="mc-players" min="8" max="9999"
+      <input type="number" id="mc-players" min="2" max="9999"
              value="${_playersInputTouched ? s.totalPlayers : ''}"
              placeholder="${s.totalPlayers}"
              oninput="MetaCall._onSetting('totalPlayers', +this.value)">
@@ -1753,11 +1884,13 @@ window.MetaCall = (function () {
              oninput="MetaCall._onSetting('rounds', +this.value)">
     </div>
     <div class="metacall-field-group">
-      <label>${t('mc.labelDay2Points')}</label>
+      <label>${t(targetLabelKey)}</label>
       <input type="number" id="mc-day2pts" min="1" max="45" value="${s.day2Points}"
              oninput="MetaCall._onSetting('day2Points', +this.value)">
     </div>
+    ${cupTopCutField}
   </div>
+  <p class="mc-tt-hint">${t(targetHintKey)} ${swissLink}</p>
 </div>`;
   }
 
@@ -2217,7 +2350,7 @@ window.MetaCall = (function () {
     <div class="mc-day2-card">
       <div class="mc-day2-deck-name">${esc(_settings.myDeck)}</div>
       <div class="mc-day2-pct${cls}">${pct}%</div>
-      <div class="mc-day2-label">${t('mc.day2Chance')}</div>
+      <div class="mc-day2-label">${t(_predictTitleKey())}</div>
       <div class="mc-day2-sub">${day2Sub}</div>
       <div class="mc-day2-stats">
         <div class="mc-day2-stat">
@@ -2997,7 +3130,7 @@ window.MetaCall = (function () {
     ctx.fillText(pct + '%', leftCx, cardY + 66);
     ctx.font = 'bold 14px system-ui, sans-serif';
     ctx.fillStyle = 'rgba(255,255,255,0.92)';
-    ctx.fillText(t('mc.day2Chance').toUpperCase(), leftCx, cardY + 108);
+    ctx.fillText(t(_predictTitleKey()).toUpperCase(), leftCx, cardY + 108);
     ctx.font = '13px system-ui, sans-serif';
     ctx.fillStyle = 'rgba(255,255,255,0.78)';
     ctx.fillText(`${_settings.day2Points} ${t('mc.ptsAbbr')} · ${_settings.rounds} ${t('mc.roundsAbbr')}`, leftCx, cardY + 132);
@@ -3122,8 +3255,74 @@ window.MetaCall = (function () {
   function _onSetting(key, val) {
     if (isNaN(val) || val <= 0) return;
     _settings[key] = val;
-    if (key === 'totalPlayers') _playersInputTouched = true;
+    if (key === 'totalPlayers') {
+      _playersInputTouched = true;
+      // For Local types, auto-suggest the Swiss round count whenever
+      // the player count changes — but only if the user hasn't
+      // already manually overridden rounds for this tab. (We detect
+      // override by comparing against the per-type stored value: if
+      // they match the previous suggestion, replace; otherwise keep
+      // the user's number.)
+      if (_settings.tournamentType !== 'regional') {
+        const suggested = _suggestSwissRounds(val);
+        const stored = (_settingsByType[_settings.tournamentType] || {});
+        const wasAutoSuggested = stored.rounds == null
+          || stored.rounds === _suggestSwissRounds(stored.totalPlayers || 0);
+        if (wasAutoSuggested) {
+          _settings.rounds = suggested;
+          // Auto-target also re-derives from the new round count.
+          const target = _defaultTargetPoints(_settings.tournamentType, suggested, _settings.topCutSize);
+          if (target) _settings.day2Points = target;
+        }
+      }
+    }
+    if (key === 'topCutSize' && _settings.tournamentType === 'cup') {
+      // Re-suggest target points when Top Cut size flips between 4 ↔ 8.
+      const target = _defaultTargetPoints('cup', _settings.rounds, val);
+      if (target) _settings.day2Points = target;
+    }
+    _persistTournamentSettingsForActiveType();
     refreshResults();
+  }
+
+  // Active-tab state in localStorage so the chosen tournament-type
+  // (and its per-tab overrides) survives a page reload.
+  function _persistTournamentSettingsForActiveType() {
+    const type = _settings.tournamentType;
+    if (!TOURNAMENT_TYPES.includes(type)) return;
+    _settingsByType[type] = {
+      totalPlayers: _settings.totalPlayers,
+      rounds:       _settings.rounds,
+      day2Points:   _settings.day2Points,
+      topCutSize:   _settings.topCutSize,
+    };
+    try {
+      localStorage.setItem(TOURNAMENT_SETTINGS_KEY, JSON.stringify({
+        activeType: type,
+        byType: _settingsByType,
+      }));
+    } catch (_e) { /* private mode — runtime state still works */ }
+  }
+
+  // Switch tournament type. Pulls the per-type stored values back
+  // into _settings (or auto-derives them if the user hasn't tweaked
+  // that tab yet) and re-renders the whole MetaCall view so the
+  // settings panel + the predictor banner labels reflect the new
+  // mode.
+  function _setTournamentType(type) {
+    if (!TOURNAMENT_TYPES.includes(type)) return;
+    if (_settings.tournamentType === type) return;
+    _settings.tournamentType = type;
+    const stored = _settingsByType[type] || {};
+    if (stored.totalPlayers) _settings.totalPlayers = stored.totalPlayers;
+    if (stored.rounds)       _settings.rounds       = stored.rounds;
+    if (stored.day2Points)   _settings.day2Points   = stored.day2Points;
+    if (typeof stored.topCutSize === 'number') _settings.topCutSize = stored.topCutSize;
+    // Forget input-touched state when switching tabs so the player
+    // input shows the type's default until the user types again.
+    _playersInputTouched = !!stored.totalPlayers;
+    _persistTournamentSettingsForActiveType();
+    renderAll();
   }
 
   // Toggle for the CL data sources panel. Mutates _useClCurrent /
@@ -3733,6 +3932,7 @@ window.MetaCall = (function () {
     // MetaCall calculation expects.
     getDeckNames: () => (_shareList || []).map(d => d.name),
     _onSetting,
+    _setTournamentType,
     _onToggleSource,
     _onMyDeck,
     _onPersonalShare,

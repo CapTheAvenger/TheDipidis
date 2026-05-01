@@ -1544,9 +1544,9 @@ function _populateCardmarketWishlistModal({ items, pasteText, totalCount, missin
     } else if (missingDisambig && missingDisambig.length) {
       const names = missingDisambig.map(c => c.name).slice(0, 4).join(', ');
       const more = missingDisambig.length > 4 ? `, +${missingDisambig.length - 4} more` : '';
-      hint.innerHTML = `<strong>${totalCount}</strong> cards. Pokémon attacks attached automatically — but no attack data yet for: <strong>${names}${more}</strong>. Use the direct links below for those, or re-run <code>pokemon_card_text_scraper.py</code>.`;
+      hint.innerHTML = `Pokémon attacks attached automatically. No attack data yet for: <strong>${names}${more}</strong> — those will fall back to bare names (re-run <code>pokemon_card_text_scraper.py</code> to fill the gap).`;
     } else {
-      hint.innerHTML = `<strong>${totalCount}</strong> cards. Pokémon attacks attached automatically so the parser disambiguates correctly. Cardmarket still adds at "any version" — for an EXACT print, use the direct links below.`;
+      hint.innerHTML = 'Pokémon attacks attached automatically so the parser disambiguates each card. Cardmarket adds them at "any version" — see Section 1 above for exact print.';
     }
   }
 

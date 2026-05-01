@@ -1,30 +1,30 @@
 ﻿deck_name;rank;count;share;winrate
-Dragapult;1;1428;6,8;52,55
-Lucario Hariyama;2;1320;6,29;46,8
-Dragapult Blaziken;3;1195;5,69;52,68
-Alakazam Dudunsparce;4;1188;5,66;51,15
-N's Zoroark;5;1096;5,22;46,51
-Rocket's Mewtwo;6;1071;5,1;50,69
-Dragapult Dusknoir;7;1062;5,06;45,35
+Dragapult;1;1430;6,8;52,54
+Lucario Hariyama;2;1322;6,29;46,8
+Dragapult Blaziken;3;1197;5,69;52,65
+Alakazam Dudunsparce;4;1189;5,66;51,18
+N's Zoroark;5;1097;5,22;46,54
+Rocket's Mewtwo;6;1074;5,11;50,68
+Dragapult Dusknoir;7;1062;5,05;45,35
 Starmie Froslass;8;874;4,16;52,14
-Ogerpon Meganium;9;859;4,09;54,9
-Cynthia's Garchomp;11;699;3,33;51,81
+Ogerpon Meganium;9;860;4,09;54,9
+Cynthia's Garchomp;11;699;3,32;51,81
 Grimmsnarl Froslass;12;692;3,29;51,56
 Festival Lead;13;678;3,23;52,3
-Raging Bolt Ogerpon;14;594;2,83;49,51
-Okidogi Barbaracle;15;545;2,59;55,32
+Raging Bolt Ogerpon;14;595;2,83;49,55
+Okidogi Barbaracle;15;547;2,6;55,33
 Rocket's Honchkrow;16;479;2,28;50,81
 Crustle;17;421;2,0;53,04
 Slowking;18;336;1,6;49,37
 Mega Absol Box;19;334;1,59;47,32
-Greninja;20;323;1,54;49,72
+Greninja;20;324;1,54;49,75
 Mega Venusaur;21;305;1,45;43,67
-Steven's Metagross;22;303;1,44;47,29
+Steven's Metagross;22;304;1,45;47,23
 Clefairy Ogerpon;23;283;1,35;51,85
 Mega Lucario;24;257;1,22;47,67
-Ogerpon Box;25;253;1,2;55,39
-Flareon Noctowl;26;253;1,2;47,29
-Ceruledge;27;202;0,96;44,43
+Flareon Noctowl;25;254;1,21;47,44
+Ogerpon Box;26;253;1,2;55,39
+Ceruledge;27;203;0,97;44,29
 Froslass Munkidori;28;178;0,85;48,49
 Dragapult Dudunsparce;29;168;0,8;52,92
 Diancie Dusknoir;30;155;0,74;47,82
@@ -43,7 +43,7 @@ Mega Starmie;42;75;0,36;44,22
 Yanmega;43;72;0,34;54,17
 Mega Charizard X;44;70;0,33;30,23
 Archaludon;45;68;0,32;53,36
-Toxtricity Box;46;65;0,31;39,41
+Toxtricity Box;46;66;0,31;39,42
 Hydreigon;47;54;0,26;42,25
 Sharpedo Toxtricity;48;48;0,23;37,11
 Marnie's Grimmsnarl;49;47;0,22;49,15
@@ -62,7 +62,7 @@ Iron Thorns Crustle;61;28;0,13;36,73
 Palafin;63;23;0,11;38,38
 Mega Diancie;64;20;0,1;44,78
 Terapagos Noctowl;65;20;0,1;43,48
-Manectric Eelektrik;66;18;0,09;28,57
+Manectric Eelektrik;66;19;0,09;27,94
 Toxtricity;67;17;0,08;40,58
 Archaludon Dudunsparce;68;16;0,08;64,77
 Iono's Bellibolt;69;16;0,08;48,05

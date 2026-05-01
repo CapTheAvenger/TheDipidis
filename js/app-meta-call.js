@@ -3181,6 +3181,137 @@ window.MetaCall = (function () {
     return y - originY;
   }
 
+  // Paint the dark-horse tips block under the recommendations column.
+  // Title strip + hint line + up to 3 stacked cards. Each card mirrors
+  // the on-page .mc-tip-card visual: deck name, "Day 2: X%" pill on
+  // the right, reason line below. Returns the total height used so
+  // callers can size the canvas.
+  function _paintTipsBlock(ctx, originX, originY, columnW, tips) {
+    if (!tips || tips.length === 0) return 0;
+    const padL  = 12;
+    const padR  = 12;
+    const TITLE_H    = 26;
+    const HINT_H     = 22;
+    const CARD_H     = 64;
+    const CARD_GAP   = 8;
+    const TOP_GAP    = 14;
+
+    let y = originY + TOP_GAP;
+
+    // Section title — same orange/amber accent the on-page block uses
+    // so the share-image reads as the same affordance as the UI.
+    ctx.fillStyle = 'rgba(243, 156, 18, 0.12)';
+    ctx.fillRect(originX + 4, y, columnW - 8, TITLE_H);
+    ctx.fillStyle = '#f39c12';
+    ctx.font = 'bold 13px system-ui, sans-serif';
+    ctx.textBaseline = 'middle';
+    ctx.textAlign = 'left';
+    ctx.fillText(t('mc.tipsTitle').toUpperCase(), originX + padL, y + TITLE_H / 2);
+    y += TITLE_H + 4;
+
+    // Hint line (smaller, muted) — "Diese Decks könnten überraschen…"
+    ctx.fillStyle = '#9ab1d4';
+    ctx.font = '12px system-ui, sans-serif';
+    let hint = t('mc.tipsHint');
+    const hintMaxW = columnW - padL - padR;
+    if (ctx.measureText(hint).width > hintMaxW) {
+      while (hint.length > 4 && ctx.measureText(hint + '…').width > hintMaxW) {
+        hint = hint.slice(0, -1);
+      }
+      hint += '…';
+    }
+    ctx.fillText(hint, originX + padL, y + HINT_H / 2);
+    y += HINT_H + 4;
+
+    // Cards — one per tip, stacked.
+    tips.forEach((tip) => {
+      ctx.fillStyle = 'rgba(243, 156, 18, 0.06)';
+      ctx.fillRect(originX + 4, y, columnW - 8, CARD_H);
+      ctx.strokeStyle = 'rgba(243, 156, 18, 0.25)';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(originX + 4.5, y + 0.5, columnW - 9, CARD_H - 1);
+
+      // Day-2 pill on the right — measure first so the name truncates
+      // around it instead of behind it.
+      const day2Pct = (tip.day2Prob * 100).toFixed(1);
+      const pillLabel = `${t('mc.recDay2')}: ${day2Pct}%`;
+      ctx.font = 'bold 13px system-ui, sans-serif';
+      const pillTextW = ctx.measureText(pillLabel).width;
+      const pillW = pillTextW + 16;
+      const pillH = 22;
+      const pillX = originX + columnW - padR - pillW;
+      const pillY = y + 10;
+      ctx.fillStyle = 'rgba(46, 204, 113, 0.18)';
+      ctx.fillRect(pillX, pillY, pillW, pillH);
+      ctx.fillStyle = '#2ecc71';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(pillLabel, pillX + pillW / 2, pillY + pillH / 2);
+
+      // Deck name — truncate to fit available space (column minus pill).
+      ctx.fillStyle = '#e2e8f0';
+      ctx.font = '600 16px system-ui, sans-serif';
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'middle';
+      const nameMaxW = pillX - (originX + padL) - 12;
+      let name = tip.name;
+      if (ctx.measureText(name).width > nameMaxW) {
+        while (name.length > 4 && ctx.measureText(name + '…').width > nameMaxW) {
+          name = name.slice(0, -1);
+        }
+        name += '…';
+      }
+      ctx.fillText(name, originX + padL, y + 10 + 11);
+
+      // Reason line — same _formatTipReasons text the UI shows. Wrap
+      // to 2 lines max if it overflows the card width.
+      const reason = _formatTipReasons(tip);
+      ctx.fillStyle = '#9ab1d4';
+      ctx.font = '12px system-ui, sans-serif';
+      const reasonMaxW = columnW - padL - padR;
+      const reasonLines = _wrapText(ctx, reason, reasonMaxW, 2);
+      let ry = y + 38;
+      reasonLines.forEach((line) => {
+        ctx.fillText(line, originX + padL, ry);
+        ry += 14;
+      });
+
+      y += CARD_H + CARD_GAP;
+    });
+
+    return (y - CARD_GAP) - originY;
+  }
+
+  // Greedy word-wrap to N lines. Final line gets ellipsis if the
+  // remaining text doesn't fit. Used by _paintTipsBlock for the
+  // reason text under each tip card.
+  function _wrapText(ctx, text, maxW, maxLines) {
+    if (!text) return [];
+    const words = String(text).split(/\s+/);
+    const lines = [];
+    let current = '';
+    for (let i = 0; i < words.length; i++) {
+      const candidate = current ? current + ' ' + words[i] : words[i];
+      if (ctx.measureText(candidate).width <= maxW) {
+        current = candidate;
+      } else {
+        if (current) lines.push(current);
+        current = words[i];
+        if (lines.length >= maxLines - 1) {
+          // Final line — fit remaining words then ellipsis if needed.
+          let rest = words.slice(i).join(' ');
+          while (rest.length > 0 && ctx.measureText(rest + '…').width > maxW) {
+            rest = rest.slice(0, -1);
+          }
+          lines.push(rest + (rest.length < words.slice(i).join(' ').length ? '…' : ''));
+          return lines;
+        }
+      }
+    }
+    if (current) lines.push(current);
+    return lines.slice(0, maxLines);
+  }
+
   // ── A) Field Composition Share Image ─────────────────────
   function exportFieldShareImage() {
     if (!_shareList) return;
@@ -3303,6 +3434,7 @@ window.MetaCall = (function () {
     // Cap to top 12 — long lists eat tall images and the tail of
     // the list isn't actionable anyway.
     const recs = (split.day2 || []).slice(0, 12);
+    const tips = (split.geheimtipps || []).slice(0, 3);
 
     if (recs.length === 0) {
       // Nothing to recommend yet (no shareList or pre-predictor) —
@@ -3322,8 +3454,22 @@ window.MetaCall = (function () {
     const HEADER_H = 120;
     const SECTION_H = 48;
     const FOOTER_H = 50;
-    const rowsTall = Math.max(field.length, recs.length);
-    const H = HEADER_H + SECTION_H + rowsTall * ROW_H + 28 + FOOTER_H;
+    // Estimate the tips-block height so we can grow the canvas if
+    // recs + tips ends up taller than the field column. Numbers
+    // mirror the ones inside _paintTipsBlock.
+    const TIPS_TITLE_H  = 26;
+    const TIPS_HINT_H   = 22;
+    const TIPS_CARD_H   = 64;
+    const TIPS_CARD_GAP = 8;
+    const TIPS_TOP_GAP  = 14;
+    const tipsH = tips.length
+      ? TIPS_TOP_GAP + TIPS_TITLE_H + 4 + TIPS_HINT_H + 4 +
+        tips.length * TIPS_CARD_H + (tips.length - 1) * TIPS_CARD_GAP
+      : 0;
+    const fieldColH = field.length * ROW_H;
+    const recsColH  = recs.length * ROW_H + tipsH;
+    const contentH  = Math.max(fieldColH, recsColH);
+    const H = HEADER_H + SECTION_H + contentH + 28 + FOOTER_H;
 
     const canvas = document.createElement('canvas');
     canvas.width = W;
@@ -3353,11 +3499,21 @@ window.MetaCall = (function () {
 
     // Vertical separator between the two columns.
     ctx.fillStyle = 'rgba(255,255,255,0.06)';
-    ctx.fillRect(SIDE_PAD + FIELD_W + COL_GAP / 2, HEADER_H + 8, 1, rowsTall * ROW_H + SECTION_H - 8);
+    ctx.fillRect(SIDE_PAD + FIELD_W + COL_GAP / 2, HEADER_H + 8, 1, contentH + SECTION_H - 8);
 
     const startY = HEADER_H + SECTION_H;
     _paintFieldRows(ctx, SIDE_PAD, startY, FIELD_W, field);
     _paintRecRows(ctx, SIDE_PAD + FIELD_W + COL_GAP, startY, RECS_W, recs);
+    if (tips.length) {
+      // Tips block sits directly under the rec rows in the right column.
+      _paintTipsBlock(
+        ctx,
+        SIDE_PAD + FIELD_W + COL_GAP,
+        startY + recs.length * ROW_H,
+        RECS_W,
+        tips,
+      );
+    }
 
     _paintFooter(ctx, W, H);
     _showSharePreview(

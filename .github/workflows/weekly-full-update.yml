@@ -24,6 +24,13 @@ permissions:
   contents: write
   actions:  write
 
+# Opt all JavaScript-based actions (checkout, setup-python, …) into
+# Node 24 ahead of GitHub's June-2026 default flip. Suppresses the
+# "Node.js 20 actions are deprecated" annotation and avoids any
+# surprise migration when the runner image switches.
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
+
 # Don't run multiple weekly updates in parallel — they'd race on the
 # same monolith CSVs and produce conflicting commits.
 concurrency:
@@ -41,16 +48,50 @@ jobs:
         with:
           fetch-depth: 1
 
+      # Python 3.12+ is required: limitless_online_scraper uses PEP-701
+      # f-string syntax (nested f-strings sharing the outer quote
+      # delimiter) which 3.11 rejects with "invalid decimal literal".
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: '3.12'
           cache: pip
 
       - name: Install Python dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+
+      # Seed backend/core/data/ from the project-root data/ folder.
+      #
+      # Locally, scrapers READ from backend/core/data/ and the
+      # prepare_card_data.py finalizer SYNCS the results back to data/
+      # for the frontend. On the GitHub runner only data/ is checked
+      # out (that's what the frontend ships), so backend/core/data/
+      # starts empty — and the dependency files like
+      # all_cards_database.csv are unreachable, producing
+      # "Karten-Datenbank ist leer!" errors in every scraper that
+      # needs them.
+      #
+      # Copy the scraper-input files we know are needed. This is a
+      # superset of "things scrapers read" — extra files don't hurt.
+      - name: Seed backend/core/data/ from data/
+        run: |
+          mkdir -p backend/core/data
+          for f in \
+              all_cards_database.csv \
+              japanese_cards_database.csv \
+              cardmarket_id_mapping.csv \
+              price_data.csv \
+              sets.json \
+              archetype_icons.json \
+              formats_catalog.json \
+          ; do
+              if [ -f "data/$f" ]; then
+                  cp "data/$f" "backend/core/data/$f"
+                  echo "  seeded: $f"
+              fi
+          done
 
       # Cardmarket publishes daily JSON dumps on a public S3 bucket.
       # The cardmarket_id_mapper / cardmarket_price_merger scrapers

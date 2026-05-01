@@ -1784,6 +1784,13 @@ window.MetaCall = (function () {
     return 9;
   }
 
+  // Suggested Top-Cut size by attendance for Local Cup events:
+  // <=16 players run Top 4, 17+ players run Top 8. Matches the
+  // typical organiser practice in Pokémon TCG Local Cups.
+  function _suggestTopCutSize(players) {
+    return (+players || 0) <= 16 ? 4 : 8;
+  }
+
   // Sensible default points-target per tournament type — what the
   // user typically needs to clear to hit the predictor's "success"
   // outcome.
@@ -3257,32 +3264,56 @@ window.MetaCall = (function () {
     _settings[key] = val;
     if (key === 'totalPlayers') {
       _playersInputTouched = true;
-      // For Local types, auto-suggest the Swiss round count whenever
-      // the player count changes — but only if the user hasn't
-      // already manually overridden rounds for this tab. (We detect
-      // override by comparing against the per-type stored value: if
-      // they match the previous suggestion, replace; otherwise keep
-      // the user's number.)
+      // For Local tabs (Challenge / Cup) every other setting follows
+      // deterministic Swiss tournament rules, so we don't make the
+      // user re-enter them — auto-fill rounds, top-cut size (Cup
+      // only), and target points in lock-step. Manual override is
+      // still possible by editing those inputs afterwards; on the
+      // next player-count change the auto-fill kicks in again.
       if (_settings.tournamentType !== 'regional') {
-        const suggested = _suggestSwissRounds(val);
-        const stored = (_settingsByType[_settings.tournamentType] || {});
-        const wasAutoSuggested = stored.rounds == null
-          || stored.rounds === _suggestSwissRounds(stored.totalPlayers || 0);
-        if (wasAutoSuggested) {
-          _settings.rounds = suggested;
-          // Auto-target also re-derives from the new round count.
-          const target = _defaultTargetPoints(_settings.tournamentType, suggested, _settings.topCutSize);
-          if (target) _settings.day2Points = target;
+        _settings.rounds = _suggestSwissRounds(val);
+        if (_settings.tournamentType === 'cup') {
+          _settings.topCutSize = _suggestTopCutSize(val);
         }
+        const target = _defaultTargetPoints(
+          _settings.tournamentType, _settings.rounds, _settings.topCutSize,
+        );
+        if (target) _settings.day2Points = target;
+        _syncSettingsInputsFromState();
       }
     }
     if (key === 'topCutSize' && _settings.tournamentType === 'cup') {
       // Re-suggest target points when Top Cut size flips between 4 ↔ 8.
       const target = _defaultTargetPoints('cup', _settings.rounds, val);
-      if (target) _settings.day2Points = target;
+      if (target) {
+        _settings.day2Points = target;
+        _syncSettingsInputsFromState();
+      }
     }
     _persistTournamentSettingsForActiveType();
     refreshResults();
+  }
+
+  // refreshResults() rebuilds the field-table + result panels but
+  // not the settings panel — those input elements live across the
+  // re-render. When _onSetting auto-fills sibling fields (rounds,
+  // top-cut, target-pts) the user types into Players, we need to
+  // push the new values back into the input/select DOM so what's
+  // shown matches state. Surgical updates only — full re-render
+  // would steal focus from the input the user is still typing in.
+  function _syncSettingsInputsFromState() {
+    const roundsEl  = document.getElementById('mc-rounds');
+    const targetEl  = document.getElementById('mc-day2pts');
+    const topCutEl  = document.getElementById('mc-topcut');
+    if (roundsEl && document.activeElement !== roundsEl) {
+      roundsEl.value = _settings.rounds;
+    }
+    if (targetEl && document.activeElement !== targetEl) {
+      targetEl.value = _settings.day2Points;
+    }
+    if (topCutEl && _settings.tournamentType === 'cup') {
+      topCutEl.value = String(_settings.topCutSize);
+    }
   }
 
   // Active-tab state in localStorage so the chosen tournament-type

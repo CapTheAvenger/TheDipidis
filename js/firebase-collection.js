@@ -1596,24 +1596,81 @@ function copyCardmarketPasteText() {
   }
 }
 
-// Bulk-open every Cardmarket product page in new tabs. Browsers cap
-// programmatic window.open calls to a small handful unless triggered
-// by a user gesture — this function MUST be called from a click
-// handler (which it is, via the modal button).
+// Bulk-open every Cardmarket product page in new tabs.
+//
+// Modern browsers throttle programmatic window.open calls inside a
+// single click handler — Chrome usually allows the first one and
+// silently blocks the rest as "popups". Two tactics here:
+//
+//   1) Open the first synchronously inside the click handler (always
+//      counts as a "user-triggered" navigation).
+//   2) Stagger the rest with setTimeout so each lands in its own
+//      event-loop tick. Some browsers are more lenient toward those.
+//      If popups are still blocked, window.open returns null and we
+//      offer a clipboard fallback so the user can open them manually.
+//
+// The user sees a clear toast at the end describing what actually
+// happened — partial success isn't disguised as full success.
 function openAllCardmarketLinks() {
   const list = document.getElementById('cardmarketLinkList');
   if (!list) return;
-  const anchors = list.querySelectorAll('a.cm-link-row[href]');
+  const anchors = Array.from(list.querySelectorAll('a.cm-link-row[href]'));
   if (anchors.length === 0) {
     showNotification('No Cardmarket links available', 'info');
     return;
   }
-  if (anchors.length > 12) {
-    const ok = confirm(`Open ${anchors.length} Cardmarket tabs? Some browsers will block this — you may need to click each link individually instead.`);
-    if (!ok) return;
+
+  let opened = 0;
+  let blocked = 0;
+  const total = anchors.length;
+
+  const firstWin = window.open(anchors[0].href, '_blank', 'noopener');
+  if (firstWin && !firstWin.closed) opened++; else blocked++;
+
+  if (total === 1) {
+    if (blocked) _onBulkOpenFinished(opened, blocked, anchors);
+    else showNotification('Opened 1 Cardmarket tab', 'success');
+    return;
   }
-  anchors.forEach(a => window.open(a.href, '_blank', 'noopener'));
-  showNotification(`Opened ${anchors.length} Cardmarket tabs`, 'success');
+
+  // Stagger remaining opens. setTimeout pushes each call into a fresh
+  // task — some browsers (Firefox, older Chrome) allow more popups
+  // that way, others (newer Chrome with strict popup blocker on)
+  // still block. We count both outcomes and report at the end.
+  for (let i = 1; i < total; i++) {
+    setTimeout(() => {
+      const w = window.open(anchors[i].href, '_blank', 'noopener');
+      if (w && !w.closed) opened++; else blocked++;
+      if (opened + blocked === total) {
+        _onBulkOpenFinished(opened, blocked, anchors);
+      }
+    }, i * 60);
+  }
+}
+
+function _onBulkOpenFinished(opened, blocked, anchors) {
+  if (blocked === 0) {
+    showNotification(`Opened ${opened} Cardmarket tabs`, 'success');
+    return;
+  }
+  // Popup blocker fired. Offer a clipboard fallback so the user can
+  // paste the URLs into a fresh tab one by one — annoying but
+  // unblocked.
+  const msg =
+    `Opened ${opened} of ${anchors.length} tabs — your browser blocked the rest as popups.\n\n` +
+    `Fix: lock icon in the address bar → Site settings → Pop-ups → Allow, then click "Open all" again.\n\n` +
+    `Or click OK to copy all ${anchors.length} URLs to the clipboard so you can paste them into new tabs manually.`;
+  if (window.confirm(msg)) {
+    const urls = anchors.map(a => a.href).join('\n');
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(urls).then(
+        () => showNotification(`Copied ${anchors.length} URLs — paste each into the address bar`, 'success'),
+        () => _fallbackCopyWishlist(urls),
+      );
+    } else {
+      _fallbackCopyWishlist(urls);
+    }
+  }
 }
 
 // Update profile UI

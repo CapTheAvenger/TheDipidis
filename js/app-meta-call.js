@@ -2533,11 +2533,23 @@ window.MetaCall = (function () {
         <tbody>${day2Rows}</tbody>
       </table>` : '';
 
+    // Share button mirrors the one on the Field panel — same teal
+    // style, same icon-only rendering on mobile (inherits the
+    // existing .mc-share-btn rules). Calls the side-by-side export
+    // so the produced PNG combines Field Composition + the Day-2
+    // recommendations the user is currently looking at.
+    const shareLabel = t('mc.shareFieldAndRecs') || t('mc.share');
+    const shareBtn = `<button class="mc-share-btn" onclick="MetaCall.exportFieldAndRecsShareImage()" title="${esc(shareLabel)}" aria-label="${esc(shareLabel)}">
+      <span class="mc-btn-icon">📤</span>
+      <span class="mc-btn-text">${esc(t('mc.share'))}</span>
+    </button>`;
+
     return `
 <div class="metacall-panel mc-rec-panel">
   <div class="metacall-panel-title">
     ${t('mc.panelRecommendations')}
     <span class="mc-badge">${t('mc.recBadgeDay2Count').replace('{n}', split.day2.length)}</span>
+    ${shareBtn}
   </div>
   ${day2Section}
   ${tipsHtml}
@@ -2964,6 +2976,152 @@ window.MetaCall = (function () {
     ctx.textAlign = 'left';
   }
 
+  // ── Shared paint helpers used by both Field-only and Field+Recs
+  // share-image variants. Extracted so the two-column layout doesn't
+  // copy-paste the row-rendering loop. Each helper paints into the
+  // given (originX, originY) box of width `columnW` and returns the
+  // height it used, so the caller can size the canvas correctly.
+  function _paintFieldRows(ctx, originX, originY, columnW, field) {
+    const ROW_H = 46;
+    const maxShare = Math.max(...field.map(d => d.finalShare), 0.1);
+    // Layout inside the column: name on the left, bar in the middle,
+    // percentage on the right. Same proportions as the original
+    // single-column image so the look is identical when used alone.
+    const padL  = 12;
+    const padR  = 12;
+    const pctW  = 70;
+    const countW = 56;
+    const barX  = originX + padL + 220;          // name takes ~220px
+    const barW  = columnW - padL - padR - 220 - pctW - countW - 16;
+    const barH  = 10;
+    const pctX  = originX + columnW - padR - countW - 8;
+    const countX = originX + columnW - padR;
+
+    let y = originY;
+    field.forEach((deck, i) => {
+      const isJunk   = deck.name === '_junk';
+      const isCustom = !!deck.isCustom;
+
+      if (i % 2 === 0) {
+        ctx.fillStyle = 'rgba(255,255,255,0.03)';
+        ctx.fillRect(originX + 4, y, columnW - 8, ROW_H);
+      }
+
+      ctx.fillStyle = isJunk ? '#f39c12' : (isCustom ? '#c39bd3' : '#e2e8f0');
+      ctx.font = (isJunk || isCustom) ? 'bold 17px system-ui, sans-serif' : '600 17px system-ui, sans-serif';
+      let label = isJunk ? t('mc.junkDecks') : deck.name;
+      if (isCustom) label += ' ★';
+      const maxLabelW = barX - originX - padL - 12;
+      if (ctx.measureText(label).width > maxLabelW) {
+        while (label.length > 4 && ctx.measureText(label + '…').width > maxLabelW) {
+          label = label.slice(0, -1);
+        }
+        label += '…';
+      }
+      ctx.textBaseline = 'middle';
+      ctx.textAlign = 'left';
+      ctx.fillText(label, originX + padL, y + ROW_H / 2);
+
+      // Bar
+      ctx.fillStyle = 'rgba(255,255,255,0.07)';
+      ctx.fillRect(barX, y + ROW_H / 2 - barH / 2, barW, barH);
+      const pct = Math.max(0, Math.min(1, deck.finalShare / maxShare));
+      const fillGrad = ctx.createLinearGradient(barX, 0, barX + barW, 0);
+      if (isJunk) {
+        fillGrad.addColorStop(0, '#e67e22'); fillGrad.addColorStop(1, '#f39c12');
+      } else if (isCustom) {
+        fillGrad.addColorStop(0, '#8e44ad'); fillGrad.addColorStop(1, '#c39bd3');
+      } else {
+        fillGrad.addColorStop(0, '#27ae60'); fillGrad.addColorStop(1, '#2ecc71');
+      }
+      ctx.fillStyle = fillGrad;
+      ctx.fillRect(barX, y + ROW_H / 2 - barH / 2, barW * pct, barH);
+
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 17px system-ui, sans-serif';
+      ctx.textAlign = 'right';
+      ctx.fillText(deck.finalShare.toFixed(1) + '%', pctX, y + ROW_H / 2);
+
+      ctx.fillStyle = '#9ab1d4';
+      ctx.font = '13px system-ui, sans-serif';
+      ctx.fillText('(' + deck.count.toLocaleString() + ')', countX, y + ROW_H / 2);
+      ctx.textAlign = 'left';
+
+      y += ROW_H;
+    });
+    return y - originY;
+  }
+
+  // Paint the recommendations column (Day-2-rec list, top N).
+  // Mirrors _paintFieldRows visually so the two columns line up.
+  function _paintRecRows(ctx, originX, originY, columnW, recs) {
+    const ROW_H = 46;
+    const padL  = 12;
+    const padR  = 12;
+    const titleKey = _predictTitleKey(); // type-aware label
+    const titleLabel = t(titleKey);
+    const maxProb = Math.max(...recs.map(r => r.day2Prob), 0.001);
+
+    // Column header strip (mini-header inside the recs column).
+    const hdrW = columnW - 24;
+    ctx.fillStyle = 'rgba(155, 89, 182, 0.12)';
+    ctx.fillRect(originX + 12, originY - 28, hdrW, 22);
+    ctx.fillStyle = '#c39bd3';
+    ctx.font = 'bold 11px system-ui, sans-serif';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('#', originX + padL + 4, originY - 17);
+    ctx.fillText(t('mc.recDeck').toUpperCase(), originX + padL + 30, originY - 17);
+    ctx.textAlign = 'right';
+    ctx.fillText(titleLabel.toUpperCase(), originX + columnW - padR - 70, originY - 17);
+    ctx.fillText(t('mc.recAvgWr').toUpperCase(), originX + columnW - padR, originY - 17);
+    ctx.textAlign = 'left';
+
+    let y = originY;
+    recs.forEach((r, i) => {
+      if (i % 2 === 0) {
+        ctx.fillStyle = 'rgba(255,255,255,0.03)';
+        ctx.fillRect(originX + 4, y, columnW - 8, ROW_H);
+      }
+
+      // Rank
+      ctx.fillStyle = '#9ab1d4';
+      ctx.font = 'bold 14px system-ui, sans-serif';
+      ctx.textBaseline = 'middle';
+      ctx.textAlign = 'left';
+      ctx.fillText('#' + (i + 1), originX + padL, y + ROW_H / 2);
+
+      // Deck name (truncate)
+      ctx.fillStyle = '#e2e8f0';
+      ctx.font = '600 16px system-ui, sans-serif';
+      let label = r.name;
+      const maxLabelW = columnW - padL - 30 - padR - 70 - 70 - 16;
+      if (ctx.measureText(label).width > maxLabelW) {
+        while (label.length > 4 && ctx.measureText(label + '…').width > maxLabelW) {
+          label = label.slice(0, -1);
+        }
+        label += '…';
+      }
+      ctx.fillText(label, originX + padL + 30, y + ROW_H / 2);
+
+      // Day-2 / Top-Cut / 1-2 chance — the headline number.
+      const probPct = (r.day2Prob * 100).toFixed(1);
+      ctx.fillStyle = r.day2Prob >= 0.5 ? '#2ecc71' : (r.day2Prob >= 0.3 ? '#f1c40f' : '#e74c3c');
+      ctx.font = 'bold 17px system-ui, sans-serif';
+      ctx.textAlign = 'right';
+      ctx.fillText(probPct + '%', originX + columnW - padR - 70, y + ROW_H / 2);
+
+      // Avg win-rate
+      ctx.fillStyle = '#cbd5e1';
+      ctx.font = '14px system-ui, sans-serif';
+      ctx.fillText(r.avgWR.toFixed(1) + '%', originX + columnW - padR, y + ROW_H / 2);
+      ctx.textAlign = 'left';
+
+      y += ROW_H;
+    });
+    return y - originY;
+  }
+
   // ── A) Field Composition Share Image ─────────────────────
   function exportFieldShareImage() {
     if (!_shareList) return;
@@ -3066,6 +3224,89 @@ window.MetaCall = (function () {
     _showSharePreview(canvas, `metacall-field-${_formatDateFilename()}.png`,
       'Meta Call — Field Composition',
       `Meta share prognosis for ${_settings.totalPlayers.toLocaleString()} players · ${_settings.rounds} rounds`);
+  }
+
+  // ── A2) Field + Recommendations side-by-side share image ──
+  // Same Field-Composition block on the left, Day-2 (or Top-Cut /
+  // 1st-2nd) recommendation list on the right. One image, both
+  // useful pieces of info — share once, both decisions are visible.
+  function exportFieldAndRecsShareImage() {
+    if (!_shareList) return;
+    const rawField = buildField();
+    if (!rawField.length) return;
+
+    const junkEntry = rawField.find(d => d.name === '_junk') || null;
+    const field = rawField.filter(d => d.name !== '_junk')
+                          .sort((a, b) => b.finalShare - a.finalShare);
+    if (junkEntry) field.push(junkEntry);
+
+    const split = calcRecommendationsSplit(rawField);
+    // Cap to top 12 — long lists eat tall images and the tail of
+    // the list isn't actionable anyway.
+    const recs = (split.day2 || []).slice(0, 12);
+
+    if (recs.length === 0) {
+      // Nothing to recommend yet (no shareList or pre-predictor) —
+      // fall back to the regular field-only image so the user
+      // still gets something useful.
+      exportFieldShareImage();
+      return;
+    }
+
+    // Layout: 2-column grid, field on left, recs on right.
+    const W = 1280;
+    const COL_GAP = 24;
+    const SIDE_PAD = 16;
+    const FIELD_W = 720;
+    const RECS_W = W - SIDE_PAD * 2 - FIELD_W - COL_GAP;
+    const ROW_H = 46;
+    const HEADER_H = 120;
+    const SECTION_H = 48;
+    const FOOTER_H = 50;
+    const rowsTall = Math.max(field.length, recs.length);
+    const H = HEADER_H + SECTION_H + rowsTall * ROW_H + 28 + FOOTER_H;
+
+    const canvas = document.createElement('canvas');
+    canvas.width = W;
+    canvas.height = H;
+    const ctx = canvas.getContext('2d');
+
+    _paintBackground(ctx, W, H);
+
+    // Header subtitle adapts to active tournament type — Day 2,
+    // Top Cut, or 1./2. Platz.
+    const titleLine = _settings.tournamentType === 'cup'
+      ? `${_settings.totalPlayers.toLocaleString()} ${t('mc.labelPlayers')} · ${_settings.rounds} ${t('mc.roundsAbbr')} · Top ${_settings.topCutSize}: ${_settings.day2Points} ${t('mc.ptsAbbr')}`
+      : (_settings.tournamentType === 'challenge'
+          ? `${_settings.totalPlayers.toLocaleString()} ${t('mc.labelPlayers')} · ${_settings.rounds} ${t('mc.roundsAbbr')} · 1.-2.: ${_settings.day2Points} ${t('mc.ptsAbbr')}`
+          : `${_settings.totalPlayers.toLocaleString()} ${t('mc.labelPlayers')} · ${_settings.rounds} ${t('mc.roundsAbbr')} · Day 2: ${_settings.day2Points} ${t('mc.ptsAbbr')}`);
+    _paintHeader(ctx, W, 'META CALL', titleLine);
+
+    // Section labels — one per column.
+    const labelY = HEADER_H + 24;
+    ctx.fillStyle = '#3498db';
+    ctx.font = 'bold 13px system-ui, sans-serif';
+    ctx.textBaseline = 'alphabetic';
+    ctx.textAlign = 'left';
+    ctx.fillText(t('mc.panelField').toUpperCase(), SIDE_PAD + 12, labelY);
+    ctx.fillStyle = '#9b59b6';
+    ctx.fillText(t('mc.panelRecommendations').toUpperCase(), SIDE_PAD + FIELD_W + COL_GAP + 12, labelY);
+
+    // Vertical separator between the two columns.
+    ctx.fillStyle = 'rgba(255,255,255,0.06)';
+    ctx.fillRect(SIDE_PAD + FIELD_W + COL_GAP / 2, HEADER_H + 8, 1, rowsTall * ROW_H + SECTION_H - 8);
+
+    const startY = HEADER_H + SECTION_H;
+    _paintFieldRows(ctx, SIDE_PAD, startY, FIELD_W, field);
+    _paintRecRows(ctx, SIDE_PAD + FIELD_W + COL_GAP, startY, RECS_W, recs);
+
+    _paintFooter(ctx, W, H);
+    _showSharePreview(
+      canvas,
+      `metacall-field-and-recs-${_formatDateFilename()}.png`,
+      'Meta Call — Field & Recommendations',
+      `Meta + top picks for ${_settings.totalPlayers.toLocaleString()} players · ${_settings.rounds} rounds`,
+    );
   }
 
   // ── B) Day 2 Share Image (with personal deck) ─────────────
@@ -3986,6 +4227,7 @@ window.MetaCall = (function () {
     _deleteScenario,
     _refreshScenario,
     exportFieldShareImage,
+    exportFieldAndRecsShareImage,
     exportDay2ShareImage,
   };
 })();

@@ -1550,9 +1550,13 @@ function _populateCardmarketWishlistModal({ items, pasteText, totalCount, missin
     }
   }
 
-  // Direct-link list: one row per print-specific card with the
-  // Cardmarket product URL. Cards without a known Cardmarket URL
-  // (rare reprints) get a disabled row with an explanation.
+  // Direct-link list: one row per print-specific card. When we have
+  // a precise Cardmarket product URL (most cards), the row links
+  // straight to that product page. When we don't (e.g. brand-new sets
+  // like POR before all_cards_scraper has caught up), fall back to
+  // Cardmarket's product search keyed on "<name> <set> <number>" —
+  // not a direct hit but lands the user on a results page where they
+  // can pick the right print, instead of a dead disabled row.
   const list = document.getElementById('cardmarketLinkList');
   if (list) {
     if (items.length === 0) {
@@ -1561,23 +1565,26 @@ function _populateCardmarketWishlistModal({ items, pasteText, totalCount, missin
       list.innerHTML = items.map(({ count, name, set, number, url }) => {
         const setLabel = set ? `${set}${number ? ' ' + number : ''}` : '';
         const safeName = (name || '').replace(/[<>]/g, '');
-        if (url) {
-          return `<a class="cm-link-row" href="${url}" target="_blank" rel="noopener noreferrer">
-            <span class="cm-link-count">${count}x</span>
-            <span class="cm-link-name">${safeName}</span>
-            <span class="cm-link-set">${setLabel}</span>
-            <span class="cm-link-arrow" aria-hidden="true">↗</span>
-          </a>`;
-        }
-        return `<div class="cm-link-row cm-link-row-missing" title="No Cardmarket URL in our database for this print">
+        const isFallback = !url;
+        const targetUrl = url || _buildCardmarketSearchUrl(name, set, number);
+        const arrow = isFallback ? '🔍' : '↗';
+        const tooltip = isFallback
+          ? 'No direct product URL stored — opens Cardmarket search for this card. Run all_cards_scraper to get a direct link.'
+          : 'Open the exact-print product page on Cardmarket';
+        return `<a class="cm-link-row${isFallback ? ' cm-link-row-fallback' : ''}" href="${targetUrl}" target="_blank" rel="noopener noreferrer" title="${tooltip}">
           <span class="cm-link-count">${count}x</span>
           <span class="cm-link-name">${safeName}</span>
           <span class="cm-link-set">${setLabel}</span>
-          <span class="cm-link-arrow" aria-hidden="true">—</span>
-        </div>`;
+          <span class="cm-link-arrow" aria-hidden="true">${arrow}</span>
+        </a>`;
       }).join('');
     }
   }
+}
+
+function _buildCardmarketSearchUrl(name, set, number) {
+  const q = [name, set, number].filter(Boolean).join(' ');
+  return `https://www.cardmarket.com/en/Pokemon/Products/Search?searchString=${encodeURIComponent(q)}`;
 }
 
 // Copy the paste-text out of the modal's textarea.
@@ -1596,88 +1603,6 @@ function copyCardmarketPasteText() {
   }
 }
 
-// Bulk-open every Cardmarket product page in new tabs.
-//
-// Why this is hard: modern browsers (especially Chrome) treat any
-// window.open() call after the first one inside a single user
-// gesture as a popup and silently block it. setTimeout staggering
-// doesn't reliably bypass it. Programmatic <a>.click() with
-// target="_blank" is treated more leniently — it's the same kind
-// of call the user does when middle-clicking a link — so we rely
-// on that path here.
-//
-// Even with .click(), strict popup blocker setups will limit to 1
-// tab per gesture. We detect that by polling for window.length /
-// number of children opened (we can't directly check) — instead,
-// the safer signal is to observe an immediate "blocked" toast from
-// the browser, which we can't intercept. So the heuristic is:
-// fire all clicks, then offer the user a clipboard fallback. They
-// can spot from "only one tab opened" that something's blocked.
-function openAllCardmarketLinks() {
-  const list = document.getElementById('cardmarketLinkList');
-  if (!list) return;
-  const anchors = Array.from(list.querySelectorAll('a.cm-link-row[href]'));
-  if (anchors.length === 0) {
-    showNotification('No Cardmarket links available', 'info');
-    return;
-  }
-
-  // Use a single anchor element per URL and call .click() on it.
-  // Programmatic clicks on <a target="_blank"> elements live in the
-  // user-gesture context briefly, which some browsers honour as
-  // user-triggered for chained calls.
-  anchors.forEach((a) => {
-    // Build a fresh link element so we own its state — the modal's
-    // anchor is also a real anchor, but cloning lets us forcibly set
-    // rel/target without mutating the displayed list rows.
-    const link = document.createElement('a');
-    link.href = a.href;
-    link.target = '_blank';
-    link.rel = 'noopener noreferrer';
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-  });
-
-  // Show a guidance toast that tells the user what to expect AND
-  // offers the clipboard fallback when their browser blocks. We
-  // can't reliably detect blocking, so we proactively offer the
-  // fallback every time on count > 1 so the user has an out.
-  if (anchors.length > 1) {
-    setTimeout(() => {
-      const msg =
-        `Tried to open ${anchors.length} Cardmarket tabs.\n\n` +
-        `If only the first one opened: your browser blocks programmatic popups by default. ` +
-        `Allow popups for this site (lock icon → Pop-ups → Allow) and click "Open all" again.\n\n` +
-        `Click OK to copy all ${anchors.length} URLs to the clipboard so you can paste them into new tabs manually.`;
-      if (window.confirm(msg)) {
-        copyAllCardmarketUrls();
-      } else {
-        showNotification(`Bulk-open requested for ${anchors.length} cards`, 'info');
-      }
-    }, 250);
-  } else {
-    showNotification('Opened 1 Cardmarket tab', 'success');
-  }
-}
-
-// Copy all Cardmarket URLs from the modal's link list — used as the
-// reliable fallback when the popup blocker fights us.
-function copyAllCardmarketUrls() {
-  const list = document.getElementById('cardmarketLinkList');
-  if (!list) return;
-  const urls = Array.from(list.querySelectorAll('a.cm-link-row[href]')).map(a => a.href).join('\n');
-  if (!urls) {
-    showNotification('No URLs to copy', 'info');
-    return;
-  }
-  const onOk = () => showNotification('All URLs copied — paste each into the address bar', 'success');
-  if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(urls).then(onOk).catch(() => _fallbackCopyWishlist(urls));
-  } else {
-    _fallbackCopyWishlist(urls);
-  }
-}
 
 // Update profile UI
 function updateProfileUI(profile) {

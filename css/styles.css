@@ -1974,6 +1974,13 @@
         }
         .cm-link-row-missing .cm-link-count,
         .cm-link-row-missing .cm-link-arrow { color: #94a3b8; }
+        /* Fallback row — we don't have a direct product URL but the row
+           still links somewhere useful (Cardmarket search). Tint amber
+           so the user sees "this isn't an exact-print direct link". */
+        .cm-link-row-fallback { background: #fffbeb; }
+        .cm-link-row-fallback:hover { background: #fef3c7; }
+        .cm-link-row-fallback .cm-link-count,
+        .cm-link-row-fallback .cm-link-arrow { color: #b45309; }
         .cm-link-empty {
             padding: 16px;
             text-align: center;

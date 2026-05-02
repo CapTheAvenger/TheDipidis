@@ -3,8 +3,8 @@
     "urlPrefix": "https://r2.limitlesstcg.net/pokemon/gen9/",
     "urlSuffix": ".png",
     "description": "Maps current-meta archetype names to the sequence of Pokémon species/form identifiers that identify them visually. The helper getArchetypeIconUrls() resolves each array entry into a Limitless R2 icon URL. Add new archetypes or fix guesses as they surface; broken URLs are handled gracefully by the img onerror fallback in the UI.",
-    "lastScrapedAt": "2026-05-01T22:52:37",
-    "lastScrapedCount": 123
+    "lastScrapedAt": "2026-05-02T10:42:01",
+    "lastScrapedCount": 124
   },
   "archetypes": {
     "Dragapult": [
@@ -568,6 +568,9 @@
     "Dragapult Dudunsparce": [
       "dragapult",
       "dudunsparce"
+    ],
+    "Cornerstone Mask Ogerpon": [
+      "ogerpon-cornerstone"
     ]
   }
 }

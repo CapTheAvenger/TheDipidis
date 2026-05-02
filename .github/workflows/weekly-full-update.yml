@@ -73,20 +73,33 @@ jobs:
       # "Karten-Datenbank ist leer!" errors in every scraper that
       # needs them.
       #
-      # Copy the scraper-input files we know are needed. This is a
-      # superset of "things scrapers read" — extra files don't hurt.
+      # Seed backend/core/data/ with both the scraper INPUTS and the
+      # prior-run OUTPUTS. Three categories, each load-bearing:
       #
-      # The *_scraped*.json files are state files that track which
-      # tournament IDs each scraper has already processed. Without
-      # them, every Actions run starts from zero, tries to re-scrape
-      # ALL tournaments in the date range, hits Cloudflare rate
-      # limiting, and only manages a partial scrape. Symptom: the
-      # analysis CSV only covers ~50% of the tournaments the
-      # archetypes scraper has placement data for, so "Decks Used"
-      # in the JP deck-analysis tab is always lower than the dropdown
-      # count (e.g. 312/645 for Mega Lucario Hariyama, 2026-05-02).
-      # prepare_card_data.py syncs these back to data/ at the end of
-      # the run so the next run can resume from the latest state.
+      # (a) Input dependencies — card DBs, ID mapping, sets.json etc.
+      #     Without these the scrapers' lookups fail outright.
+      #
+      # (b) State files (*_scraped*.json) — list of tournament IDs each
+      #     incremental scraper has already processed. Without them the
+      #     scraper thinks zero tournaments are scraped → tries to fetch
+      #     all ~624 fresh, hits Cloudflare 429s + the 180-min job
+      #     timeout, and produces a partial CSV.
+      #
+      # (c) Prior output CSVs — append-mode scrapers (city_league_analysis,
+      #     current_meta_analysis, tournament_jh) MERGE new rows into
+      #     existing CSVs at save_to_csv time. If the existing CSV isn't
+      #     present in backend/core/data/, save_to_csv treats it as empty
+      #     and writes only the new rows → after prepare_card_data.py
+      #     syncs that tiny CSV back to data/, the historical rows are
+      #     gone. This actually happened on 2026-05-02 (commit 8972aec)
+      #     when (b) was added without (c): seed file said "all 744 IDs
+      #     already scraped, skip them all" → scraper found 0 new
+      #     tournaments → wrote a 1-row CSV → sync overwrote 152 588
+      #     historical rows. (b) and (c) MUST stay paired; if you change
+      #     either list, mirror it on the other side.
+      #
+      # prepare_card_data.SYNC_PATTERNS is the matching write-back list —
+      # keep the two in lockstep when adding a new scraper output.
       - name: Seed backend/core/data/ from data/
         run: |
           mkdir -p backend/core/data
@@ -101,6 +114,17 @@ jobs:
               city_league_analysis_scraped.json \
               tournament_jh_scraped.json \
               current_meta_scraped_tournaments.json \
+              city_league_analysis.csv \
+              city_league_archetypes.csv \
+              city_league_archetypes_comparison.csv \
+              city_league_archetypes_comparison_M3.csv \
+              city_league_archetypes_deck_stats.csv \
+              current_meta_card_data.csv \
+              tournament_cards_data_cards.csv \
+              tournament_cards_data_overview.csv \
+              labs_tournament_decks.csv \
+              labs_tournaments.json \
+              limitless_online_decks.csv \
           ; do
               if [ -f "data/$f" ]; then
                   cp "data/$f" "backend/core/data/$f"

@@ -76,7 +76,7 @@
         "sources": {
             "city_league": {
                 "enabled": true,
-                "start_date": "13.03.2026",
+                "start_date": "24.01.2026",
                 "end_date": "auto",
                 "max_decklists_per_league": 50,
                 "additional_tournament_ids": [548]
@@ -85,11 +85,11 @@
         "output_file": "city_league_analysis.csv",
         "delay_between_requests": 1.5,
         "append_mode": true,
-        "_comment": "Scrapes City League tournaments and extracts card data by archetype. append_mode=true keeps old tournament dates when adding new data. additional_tournament_ids: Add tournament IDs from main site (e.g., Champions League) - format: [547, 550]"
+        "_comment": "Scrapes City League tournaments and extracts card data by archetype. start_date matches the scraper's local DEFAULT_SETTINGS (24.01.2026) so CI runs cover the same date window as local scrapes — earlier the CI used 13.03.2026 and silently dropped 200+ February tournaments, leading to visible 'Decks Used: 301 of 645' gaps in the Deck Analysis Japan tab. append_mode=true keeps old tournament dates when adding new data. additional_tournament_ids: Add tournament IDs from main site (e.g., Champions League) - format: [547, 550]"
     },
 
     "city_league_archetype": {
-        "start_date": "13.03.2026",
+        "start_date": "24.01.2026",
         "end_date": "auto",
         "delay_between_requests": 1.5,
         "output_file": "city_league_archetypes.csv",

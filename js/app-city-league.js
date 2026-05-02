@@ -2,6 +2,78 @@
 // Part of Hausi's Pokemon TCG Analysis
 
         // =======================================================================
+        // ARCHETYPE NAME RESOLVER — fixes scraper inconsistency between
+        // city_league_archetypes.csv (dropdown source) and
+        // city_league_analysis.csv (cards source).
+        //
+        // The two scrapers can produce different names for the same physical
+        // deck — most commonly a "Mega " prefix, apostrophe variants, or
+        // case differences in trainer-Pokémon-decks ("Cynthia'S Garchomp"
+        // vs "Cynthia's Garchomp"). When we filter cards by the
+        // dropdown-selected archetype, an exact-match filter returns 0
+        // rows even though the data is sitting in the CSV under a slightly
+        // different label.
+        //
+        // _resolveArchetypeNames() takes the dropdown's targets + the set
+        // of archetype names actually present in the cards data, and
+        // returns the matching real names. Falls through three tiers:
+        //   1. Exact match (current behaviour — preserves perf for the
+        //      ~70% of decks where names already align).
+        //   2. Lowercase + normalised apostrophes/whitespace.
+        //   3. Same as (2) but ALSO strips an optional leading "mega ".
+        //
+        // Returns the actual archetype names found in the data, so
+        // downstream filters (`row.archetype === target`) keep working
+        // unchanged with the resolved values.
+        // =======================================================================
+        function _normalizeArchetypeForMatch(name) {
+            return String(name || '')
+                .trim()
+                .toLowerCase()
+                .replace(/['‘’‛`´ʼ]/g, "'")
+                .replace(/\s+/g, ' ');
+        }
+        function _normalizeArchetypeNoMega(name) {
+            return _normalizeArchetypeForMatch(name).replace(/^mega /, '');
+        }
+        function _resolveArchetypeNames(targets, dataArchetypes) {
+            if (!Array.isArray(targets) || targets.length === 0) return [];
+            const dataSet = (dataArchetypes instanceof Set)
+                ? dataArchetypes
+                : new Set(dataArchetypes || []);
+            const exact = targets.filter(t => dataSet.has(t));
+            if (exact.length === targets.length) return exact;
+
+            // Build lookup maps from the data side so we can resolve targets
+            // that don't exact-match. Each map: normalised → real name.
+            const normMap = new Map();
+            const noMegaMap = new Map();
+            dataSet.forEach(real => {
+                const n = _normalizeArchetypeForMatch(real);
+                if (!normMap.has(n)) normMap.set(n, real);
+                const m = _normalizeArchetypeNoMega(real);
+                if (!noMegaMap.has(m)) noMegaMap.set(m, real);
+            });
+
+            const resolved = new Set(exact);
+            targets.forEach(t => {
+                if (resolved.has(t)) return;
+                const n = _normalizeArchetypeForMatch(t);
+                if (normMap.has(n))   { resolved.add(normMap.get(n)); return; }
+                const m = _normalizeArchetypeNoMega(t);
+                if (noMegaMap.has(m)) { resolved.add(noMegaMap.get(m)); return; }
+                // Last-resort: the target as-is, even though it won't match
+                // (preserves the previous "0 results" behaviour without
+                // throwing — devLog surfaces the miss for diagnosis).
+                if (typeof devLog === 'function') {
+                    devLog('[archetype-resolver] no match for:', t, '— normalised:', n);
+                }
+                resolved.add(t);
+            });
+            return Array.from(resolved);
+        }
+
+        // =======================================================================
         // CITY LEAGUE FORMAT SWITCHING (M4 vs M3)
         // =======================================================================
         // 
@@ -2011,10 +2083,21 @@
                 }
             }
             
-            // Filter cards for this archetype or GROUP selection
+            // Filter cards for this archetype or GROUP selection.
+            // Resolve dropdown-side names against the actual archetype labels
+            // present in the cards CSV (handles "Mega Lucario Hariyama" vs
+            // "Lucario Hariyama" mismatches between the two scrapers).
+            const dataArchetypeSet = new Set();
+            data.forEach(row => { if (row.archetype) dataArchetypeSet.add(String(row.archetype).trim()); });
+            const resolvedTargets = _resolveArchetypeNames(selection.targetArchetypes, dataArchetypeSet);
+            const resolvedSet = new Set(resolvedTargets);
             let deckCards = data.filter(row =>
-                selection.targetArchetypes.includes(String(row.archetype || '').trim())
+                resolvedSet.has(String(row.archetype || '').trim())
             );
+            if (deckCards.length === 0 && selection.targetArchetypes.length > 0) {
+                devLog('[archetype-resolver] still 0 cards after fallback — targets:',
+                       selection.targetArchetypes, 'resolved:', resolvedTargets);
+            }
             devLog('Found cards (before date filter):', deckCards.length);
             
             // Apply date filter if active

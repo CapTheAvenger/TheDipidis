@@ -75,6 +75,18 @@ jobs:
       #
       # Copy the scraper-input files we know are needed. This is a
       # superset of "things scrapers read" — extra files don't hurt.
+      #
+      # The *_scraped*.json files are state files that track which
+      # tournament IDs each scraper has already processed. Without
+      # them, every Actions run starts from zero, tries to re-scrape
+      # ALL tournaments in the date range, hits Cloudflare rate
+      # limiting, and only manages a partial scrape. Symptom: the
+      # analysis CSV only covers ~50% of the tournaments the
+      # archetypes scraper has placement data for, so "Decks Used"
+      # in the JP deck-analysis tab is always lower than the dropdown
+      # count (e.g. 312/645 for Mega Lucario Hariyama, 2026-05-02).
+      # prepare_card_data.py syncs these back to data/ at the end of
+      # the run so the next run can resume from the latest state.
       - name: Seed backend/core/data/ from data/
         run: |
           mkdir -p backend/core/data
@@ -86,6 +98,9 @@ jobs:
               sets.json \
               archetype_icons.json \
               formats_catalog.json \
+              city_league_analysis_scraped.json \
+              tournament_jh_scraped.json \
+              current_meta_scraped_tournaments.json \
           ; do
               if [ -f "data/$f" ]; then
                   cp "data/$f" "backend/core/data/$f"

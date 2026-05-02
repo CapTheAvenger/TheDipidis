@@ -372,6 +372,14 @@ SYNC_PATTERNS = [
     # Labs Major Tournaments  →  Meta Call Predictor 2.0 Mode B
     "labs_tournament_decks.csv",
     "labs_tournaments.json",
+    # Scraper state files — list of tournament IDs each scraper has
+    # already processed. Synced back to data/ so the next CI run can
+    # resume incrementally instead of re-scraping every tournament from
+    # scratch each week (Cloudflare rate-limits made the from-scratch
+    # path produce only partial data — see workflow seed step).
+    "city_league_analysis_scraped.json",
+    "tournament_jh_scraped.json",
+    "current_meta_scraped_tournaments.json",
 ]
 
 

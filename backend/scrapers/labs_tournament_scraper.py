@@ -448,22 +448,25 @@ def scrape_tournament_decks(tournament_id: str) -> Tuple[List[Dict], int]:
 # case-insensitively after stripping % signs and whitespace.
 #
 # Some columns hold integer player counts (Day 1 / Day 2), others hold
-# percentages (Top-X conv rate, Day-1 → Day-2 conversion). The mapping
-# value is `(output_key, kind)` where kind is 'pct' (0..1 fraction) or
-# 'int' (raw count).
+# percentages (Day-1 → Day-2 conversion). The mapping value is
+# `(output_key, kind)` where kind is 'pct' (0..1 fraction) or 'int'.
+#
+# As of 2026-04, the live `/decks?conversion` page exposes only:
+#     Deck | Day 1 | Day 2 | Conversion
+# i.e. Day-1 player count, Day-2 player count, and the Day-1 → Day-2
+# conversion rate. There is NO Top-8 / Top-16 / Top-32 conversion
+# column on this page anymore (it may have existed historically — the
+# old mappings were just dead matches and produced 0 for every row).
+#
+# Cut-performance amplification (= "did this deck overperform in the
+# top cut") is therefore handled FRONTEND-SIDE in Predictor 4.4b
+# (see js/app-meta-call.js _labsQualityByDeck) which derives the
+# signal from `day2_share_pct / day1_share_pct`. The CSV column
+# `top8_conv_rate` stays in the schema for backward compat but is
+# expected to be 0 until/unless we add a standings-page scraper that
+# counts each deck's Top-8 placements explicitly.
 _CONV_HEADER_KEYS = {
-    'top 8 conv':   ('top8_conv_rate',     'pct'),
-    'top 8 rate':   ('top8_conv_rate',     'pct'),
-    'top8 conv':    ('top8_conv_rate',     'pct'),
-    'top 16 conv':  ('top16_conv_rate',    'pct'),
-    'top 16 rate':  ('top16_conv_rate',    'pct'),
-    'top16 conv':   ('top16_conv_rate',    'pct'),
-    'top 32 conv':  ('top32_conv_rate',    'pct'),
-    'top 32 rate':  ('top32_conv_rate',    'pct'),
-    'top32 conv':   ('top32_conv_rate',    'pct'),
-    # Day-1 → Day-2 conversion view. The "Conversion" tab on labs
-    # exposes Day 1 / Day 2 player counts and the resulting Day-1→Day-2
-    # rate as their own columns.
+    # Day-1 → Day-2 conversion view (only live conv-relevant columns).
     'day 1':        ('day1_players',       'int'),
     'day1':         ('day1_players',       'int'),
     'day 2':        ('day2_players',       'int'),

@@ -31,7 +31,8 @@ from card_scraper_shared import (
     aggregate_card_data, save_to_csv, fetch_page, normalize_archetype_name,
     load_scraped_ids, save_scraped_ids, _get_scraper, resolve_date_range,
     safe_fetch_html, setup_logging, load_settings, parse_tournament_date,
-    extract_cards_from_decklist_soup, fix_mojibake
+    extract_cards_from_decklist_soup, fix_mojibake,
+    clean_pokemon_name, fix_mega_pokemon_name,
 )
 
 # Phase 3: canonicalize Japanese City League archetype names against the
@@ -196,21 +197,36 @@ def process_tournament_decklists(
     
     rows = [tr for tr in soup.select('table tr') if tr.find('td')]
     for row in rows:
-        # Archetype Name
+        # Archetype Name — must mirror city_league_archetype_scraper exactly,
+        # otherwise the analysis CSV (cards) and archetypes CSV (dropdown)
+        # produce different names for the same deck and the frontend join
+        # silently breaks. Pre-fix: 115 of 395 dropdown entries had no
+        # cards data because of this mismatch.
+        #
+        # Aligned pipeline (matches city_league_archetype_scraper line 200-217):
+        #   1. raw alt slugs from <img class="pokemon">
+        #   2. clean_pokemon_name strips suffixes (-EX, -VSTAR, -V, -GX, ...)
+        #   3. fix_mega_pokemon_name moves a trailing "-mega" to a leading
+        #      "Mega " (so "lucario-mega" → "mega lucario")
+        #   4. canonicalize_by_slugs against the Limitless index (best path)
+        #   5. fall back to normalize_archetype_name(joined cleaned names)
         img_tags = row.select('img.pokemon')
         alt_slugs = [img['alt'] for img in img_tags if img.has_attr('alt')]
 
-        # Prefer the canonical Limitless current-meta name so this deck lines
-        # up with the international meta rows downstream. Only fall back to
-        # the title-cased alt join when the slug signature isn't in the index
-        # — which typically means a new JP archetype that hasn't hit the
-        # international meta yet.
+        cleaned_names = [fix_mega_pokemon_name(clean_pokemon_name(n)) for n in alt_slugs]
+        archetype_raw = ' '.join(cleaned_names)
+
         canonical = None
-        if _matcher is not None and alt_slugs:
-            slug_candidates = [s.strip().lower().replace(' ', '-') for s in alt_slugs]
+        if _matcher is not None and cleaned_names:
+            slug_candidates = [n.strip().lower().replace(' ', '-') for n in cleaned_names]
             canonical = _matcher.canonicalize_by_slugs(slug_candidates)
 
-        deck_name = canonical or (' '.join(s.title() for s in alt_slugs) or "Unknown")
+        if canonical:
+            deck_name = canonical
+        elif archetype_raw:
+            deck_name = normalize_archetype_name(archetype_raw)
+        else:
+            deck_name = "Unknown"
         
         # Link finden
         link_tag = row.select_one('a[href*="/decks/list/"]')

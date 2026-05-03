@@ -2173,48 +2173,65 @@
             const totalCardsInDeck = deckCards.reduce((sum, card) => sum + parseInt(card.max_count || 0), 0);
             const uniqueCards = deckCards.length;
             
-            // Get the deck count for the cards-display denominator.
+            // Two distinct deck counts that USED to be one variable —
+            // splitting them resolves the user complaint that "Decks
+            // Used" (312) doesn't match the dropdown ("645 Decks") on
+            // the JP Deck Analysis tab.
             //
-            // PRECEDENCE: prefer the analysis-aggregated total
-            // (deckCards[0].total_decks_in_archetype) over the archetypes-
-            // CSV count. The two CSVs occasionally disagree because the
-            // analysis pipeline can drop or relabel a per-player decklist
-            // that the archetypes scrape recorded (real-world example:
-            // tournament 4414 placement #3 was archetypes='Mega Lucario
-            // Hariyama' but analysis had zero rows for that combo). If we
-            // used the archetypes count for B, M (analysis-derived
-            // numerator) would never reach 100% even for staple cards
-            // present in every analyzable deck — the user sees
-            // "644/645 (100,0 %)" and reads it as a bug.
+            // displayDecksCount  → what the "Decks Used" stat-card
+            //                      shows. Sourced from archetypes CSV
+            //                      (= dropdown count). Honest answer
+            //                      to "how many decks of this archetype
+            //                      are in the meta within the active
+            //                      date filter": 645 unfiltered, less
+            //                      with a date range applied.
             //
-            // The analysis-aggregated total represents "decks we have
-            // analyzable card data for" — the only honest denominator
-            // for the card-inclusion ratio. The archetypes-CSV count is
-            // kept as a fallback for early renders before analysis loads,
-            // and as a last resort via getCityLeagueDeckCountFallback.
+            // cardStatsDenom     → denominator B in the card-inclusion
+            //                      M/B percentages on each card tile.
+            //                      Sourced from the analysis CSV's
+            //                      total_decks_in_archetype because M
+            //                      (numerator) is also analysis-side
+            //                      — keeping them on the same data
+            //                      basis prevents the 670/645 = 100,1 %
+            //                      bug fixed in 3c25bf4 + e5c00de.
+            //
+            // The two will diverge whenever the analysis pipeline can't
+            // reproduce a decklist the archetypes scrape recorded
+            // (tournament has a Mega Lucario placement but the analysis
+            // scraper hit max_decklists_per_league before getting to
+            // that player, etc.). That gap is fundamental to the
+            // analysis scraper's per-tournament cap and won't close
+            // without a scraper-policy change.
             const analysisAggregated = parseInt(deckCards[0]?.total_decks_in_archetype || 0, 10);
-            let decksCount = analysisAggregated
+            const cardStatsDenom = analysisAggregated
                 || archetypeStats.decksCount
-                || getSelectedCityLeagueDeckCount(archetype);
-            if (!decksCount || decksCount <= 0) {
-                decksCount = getCityLeagueDeckCountFallback(archetype);
+                || getSelectedCityLeagueDeckCount(archetype)
+                || getCityLeagueDeckCountFallback(archetype)
+                || 0;
+            let displayDecksCount = archetypeStats.decksCount
+                || getSelectedCityLeagueDeckCount(archetype)
+                || analysisAggregated
+                || getCityLeagueDeckCountFallback(archetype);
+            if (!displayDecksCount || displayDecksCount <= 0) {
+                displayDecksCount = '-';
             }
-            if (!decksCount || decksCount <= 0) {
-                decksCount = '-';
-            }
-            devLog(`Using deck count for card-stats denominator: ${decksCount} (analysis=${analysisAggregated}, archetypes=${archetypeStats.decksCount})`);
-            
+            devLog(`Deck counts — display=${displayDecksCount}, cardStatsDenom=${cardStatsDenom} (analysis=${analysisAggregated}, archetypes=${archetypeStats.decksCount})`);
+
             // Calculate average placement from archetypes data
             const avgPlacement = archetypeStats.avgPlacement;
-            
-            // Store total decks count globally for use in card displays
-            window.currentCityLeagueTotalDecks = parseInt(decksCount) || 0;
-            devLog(`Stored global deck count: ${window.currentCityLeagueTotalDecks}`);
-            
-            // Update stats
+
+            // The global is read by per-card percentage math (lines
+            // 2639 / 2908) — keep it on the analysis-side total so the
+            // M/B percentages stay capped at 100 %.
+            window.currentCityLeagueTotalDecks = cardStatsDenom;
+            devLog(`Stored global card-stats denom: ${window.currentCityLeagueTotalDecks}`);
+
+            // Update stats — Decks Used shows the dropdown count
+            // (matches what the user picked) instead of the analysis
+            // total (which is implementation-detail of card-stat math).
             updateDeckStatsByIds({
                 cityLeagueStatCards: `${uniqueCards} / ${totalCardsInDeck}`,
-                cityLeagueStatDecksUsed: decksCount,
+                cityLeagueStatDecksUsed: displayDecksCount,
                 cityLeagueStatAvgPlacement: avgPlacement !== '-' ? avgPlacement : '-'
             }, 'cityLeagueStatsSection');
             

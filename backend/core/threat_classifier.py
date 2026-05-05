@@ -105,12 +105,13 @@ THREAT_PATTERNS: Dict[str, List[Tuple[re.Pattern, str]]] = {
 COUNTER_PATTERNS: Dict[str, List[Tuple[re.Pattern, str]]] = {
     "retreat_lock": [
         # Switch / Switch Cart / Escape Rope / Guzma / Mallow & Lana /
-        # Tate & Liza — anything that swaps the Active with a Bench
-        # Pokémon. Restricted via card_type to Supporter/Item/Tool.
+        # Tate & Liza — anything that swaps OUR Active with our Bench.
+        # Restricted via card_type to Supporter/Item/Tool. Cards that
+        # only switch the opponent's active (Pokémon Catcher) DO NOT
+        # break a retreat lock on our side, so we deliberately don't
+        # match those — Guzma still matches because its second clause
+        # also switches OUR active.
         (re.compile(r"switch\s+(?:your\s+)?active\s+pok[ée]mon\s+with\s+(?:1\s+of\s+)?your\s+benched", re.IGNORECASE), "rule.text"),
-        # Guzma-style: "Switch ... your opponent's Active Pokémon ..." —
-        # also gets us out of retreat lock (we re-position)
-        (re.compile(r"switch\s+your\s+opponent'?s\s+active", re.IGNORECASE), "rule.text"),
     ],
     "hand_disruption": [
         # Symmetrical refreshers (Iono itself, Marnie, Judge — playing

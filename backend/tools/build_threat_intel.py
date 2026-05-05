@@ -70,7 +70,24 @@ EFFECTS_JSON = os.path.join(DATA_DIR, "pokemon_card_effects.json")
 META_CARD_CSV = os.path.join(DATA_DIR, "current_meta_card_data.csv")
 ONLINE_DECKS_CSV = os.path.join(DATA_DIR, "limitless_online_decks.csv")
 FORMAT_WINDOW_JSON = os.path.join(DATA_DIR, "format_window.json")
+SETS_JSON = os.path.join(DATA_DIR, "sets.json")
 OUTPUT_JSON = os.path.join(DATA_DIR, "active_threats.json")
+
+# Current Standard rotation anchor — the lowest-numbered set still
+# legal in the format. Matches the existing card_price_scraper
+# `min_set` setting so legality logic stays consistent across the
+# codebase. Bump this with FALLBACK_SET_ORDER when the next rotation
+# drops the bottom set.
+LEGAL_FORMAT_MIN_SET = "TEF"
+
+# Promo / energy sets that are *additionally* legal even though their
+# numeric ordering may sit below the rotation cutoff. Kept as a
+# config knob: SVP/SVE were the carve-outs for the SV-era rotation
+# (their indices are 128/129 < TEF=136), but in the current
+# TEF-onwards rotation they are NOT legal — Iono SVP|124 / similar
+# cards must NOT appear in the counter recommendations. Add MEP /
+# next-era promos here when they become Standard-legal exceptions.
+ALWAYS_LEGAL_SETS: frozenset = frozenset()
 
 # Archetypes contributing less than this fraction of the meta are
 # excluded from the threat aggregation. 0.5 % ≈ noise floor for
@@ -104,6 +121,39 @@ def _parse_share(raw: str) -> float:
         return float(s) / 100.0
     except ValueError:
         return 0.0
+
+
+def load_set_order() -> Dict[str, int]:
+    """Set-code → numeric ordering (higher = newer). Empty dict if
+    sets.json is missing or unreadable."""
+    if not os.path.isfile(SETS_JSON):
+        return {}
+    try:
+        with open(SETS_JSON, "r", encoding="utf-8") as f:
+            order_map = json.load(f)
+    except Exception:
+        return {}
+    if not isinstance(order_map, dict):
+        return {}
+    return {k: int(v) for k, v in order_map.items() if isinstance(v, (int, float))}
+
+
+def load_legal_set_codes(order_map: Dict[str, int]) -> Tuple[set, str]:
+    """Return ``(legal_set_codes, format_label)`` for the current
+    Standard rotation. ``legal_set_codes`` is the set of upper-case set
+    codes whose numeric ordering >= LEGAL_FORMAT_MIN_SET, plus the
+    promo/energy ALWAYS_LEGAL_SETS. Empty set + empty label if sets.json
+    is missing or unreadable — caller falls back to no filtering."""
+    if not order_map:
+        return set(), ""
+    cutoff = order_map.get(LEGAL_FORMAT_MIN_SET)
+    if cutoff is None:
+        return set(), ""
+    legal = {s for s, idx in order_map.items() if idx >= cutoff}
+    legal |= {s for s in ALWAYS_LEGAL_SETS if s in order_map}
+    # Format label like "TEF-POR" using the highest-ordering legal set
+    top_set = max((s for s in legal), key=lambda s: order_map.get(s, 0)) if legal else LEGAL_FORMAT_MIN_SET
+    return legal, f"{LEGAL_FORMAT_MIN_SET}-{top_set}"
 
 
 def load_format_code() -> str:
@@ -163,13 +213,26 @@ def card_id(set_code: str, set_number: str) -> str:
     return f"{(set_code or '').strip().upper()}|{(set_number or '').strip()}"
 
 
+def _set_of(card_id_str: str) -> str:
+    """'MEG|88' → 'MEG'."""
+    return (card_id_str or "").split("|", 1)[0].strip().upper()
+
+
 def build() -> Dict[str, Any]:
     fmt = load_format_code() or "STANDARD"
+    set_order = load_set_order()
+    legal_sets, format_label = load_legal_set_codes(set_order)
     effects = load_effects_db()
     tags = classify_database(effects)
     print(f"[build_threat_intel] {len(tags)} cards classified across "
           f"{sum(1 for t in tags.values() if t['threats'])} threat-tagged + "
           f"{sum(1 for t in tags.values() if t['counters'])} counter-tagged.")
+    if legal_sets:
+        print(f"[build_threat_intel] legality cutoff: {LEGAL_FORMAT_MIN_SET} → "
+              f"{len(legal_sets)} sets legal in format {format_label}")
+    else:
+        print("[build_threat_intel] WARNING: sets.json missing or unreadable — "
+              "skipping legality filter")
 
     meta_share = load_meta_share()
     rows = load_archetype_card_rows()
@@ -182,10 +245,17 @@ def build() -> Dict[str, Any]:
     # cat → archetype_lower → max share_in_archetype across all cat cards
     cat_archetype_max_share: Dict[str, Dict[str, Tuple[float, float]]] = defaultdict(dict)
 
+    threats_dropped_illegal = 0
     for row in rows:
         cid = card_id(row.get("set_code", ""), row.get("set_number", ""))
         tag = tags.get(cid)
         if not tag or not tag.get("threats"):
+            continue
+        # Legality gate — defensive; current_meta CSV should already be
+        # rotation-clean, but a stale row could surface a threat from
+        # a rotated-out set.
+        if legal_sets and _set_of(cid) not in legal_sets:
+            threats_dropped_illegal += 1
             continue
         archetype = (row.get("archetype") or "").strip()
         if not archetype:
@@ -225,22 +295,47 @@ def build() -> Dict[str, Any]:
                 cat_archetype_max_share[cat][archetype_key] = (share_in_archetype, ms)
 
     # ── Counters: pull names + IDs from the classifier output ──
+    # Restrict to format-legal sets only — the user's deck builder won't
+    # accept Iono PAL 185 / Switch Cart ASR 154 / Manaphy BRS 41 once
+    # those sets rotate out, so listing them in the counters JSON would
+    # leak illegal recommendations into the Stage 3 tech audit.
     counters_by_cat: Dict[str, List[Dict[str, str]]] = defaultdict(list)
+    counters_dropped_illegal = 0
     for cid, tag in tags.items():
         for cat in tag.get("counters", []):
             entry = effects.get(cid) or {}
+            if legal_sets and _set_of(cid) not in legal_sets:
+                counters_dropped_illegal += 1
+                continue
             counters_by_cat[cat].append({
                 "card_id": cid,
                 "card_name": (entry.get("name") or "").strip(),
                 "card_type": (entry.get("card_type") or "").strip(),
             })
-    # De-dupe + sort counters by card name for stable output
+    # De-dupe by (card_name) — keep the highest-rotation print of each
+    # counter so the JSON points at the version players actually run.
+    # E.g. Switch has prints in PFL/MEG/MEW/SVI/CRZ/SSH/CES/SLG; we
+    # surface only the newest legal one rather than all variants.
     for cat in list(counters_by_cat.keys()):
-        seen: Dict[Tuple[str, str], Dict[str, str]] = {}
+        by_name: Dict[str, Dict[str, str]] = {}
         for c in counters_by_cat[cat]:
-            key = (c["card_name"], c["card_id"])
-            seen[key] = c
-        counters_by_cat[cat] = sorted(seen.values(), key=lambda x: (x["card_name"], x["card_id"]))
+            key = c["card_name"].lower()
+            if not key:
+                continue
+            existing = by_name.get(key)
+            if existing is None:
+                by_name[key] = c
+            else:
+                # Prefer the higher set ordering (newer print)
+                cur_idx = set_order.get(_set_of(c["card_id"]), -1)
+                ex_idx = set_order.get(_set_of(existing["card_id"]), -1)
+                if cur_idx > ex_idx:
+                    by_name[key] = c
+        counters_by_cat[cat] = sorted(by_name.values(), key=lambda x: x["card_name"])
+
+    if counters_dropped_illegal:
+        print(f"[build_threat_intel] dropped {counters_dropped_illegal} counter "
+              f"prints from rotated-out sets")
 
     # ── Build the final shape, scoring + filtering by CATEGORY_FLOOR ──
     # weighted_meta_share is the fraction of the meta where the player
@@ -272,9 +367,15 @@ def build() -> Dict[str, Any]:
             "cards": cards,
         }
 
+    if threats_dropped_illegal:
+        print(f"[build_threat_intel] dropped {threats_dropped_illegal} threat "
+              f"rows from rotated-out sets (defensive)")
+
     out = {
         "generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z"),
         "format_window": fmt,
+        "format_label": format_label or fmt,
+        "legal_format_min_set": LEGAL_FORMAT_MIN_SET,
         "tuning": {
             "meta_share_floor": META_SHARE_FLOOR,
             "inclusion_floor": INCLUSION_FLOOR,

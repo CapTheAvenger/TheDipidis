@@ -64,11 +64,23 @@ class TestRetreatLockCounter:
         assert "retreat_lock" in tags["counters"]
 
     def test_guzma_supporter_tags_retreat_lock_counter(self):
+        # Guzma matches via the SECOND clause ("switch your Active …")
+        # — the first clause alone (only-opponent switch) doesn't break
+        # a retreat lock and shouldn't count.
         card = _trainer("Guzma", "Supporter", rules=[
             "Switch your opponent's Active Pokémon with 1 of their Benched Pokémon. "
             "Then, switch your Active Pokémon with 1 of your Benched Pokémon."
         ])
         assert "retreat_lock" in classify_card(card)["counters"]
+
+    def test_pokemon_catcher_does_not_count_as_retreat_lock_counter(self):
+        # Pokémon Catcher only switches the OPPONENT'S active —
+        # doesn't help if WE are retreat-locked, since our defending
+        # Pokémon stays in the Active spot.
+        card = _trainer("Pokémon Catcher", "Item", rules=[
+            "Switch your opponent's Active Pokémon with 1 of their Benched Pokémon."
+        ])
+        assert classify_card(card)["counters"] == []
 
     def test_attack_with_switch_text_does_not_count_as_counter(self):
         # Counter gate: only Trainer/Item/Supporter/Tool are eligible.

@@ -109,6 +109,8 @@ jobs:
               cardmarket_id_mapping.csv \
               price_data.csv \
               sets.json \
+              sets_metadata.json \
+              format_window.json \
               archetype_icons.json \
               formats_catalog.json \
               city_league_analysis_scraped.json \

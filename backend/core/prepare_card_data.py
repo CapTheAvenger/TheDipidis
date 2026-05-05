@@ -401,6 +401,13 @@ SYNC_PATTERNS = [
     "city_league_analysis_scraped.json",
     "tournament_jh_scraped.json",
     "current_meta_scraped_tournaments.json",
+    # Set metadata — produced by backend/core/update_sets.py and read
+    # by the frontend (Meta Call format-filter, format-window display,
+    # etc.). Without this in SYNC_PATTERNS, an Actions-side update_sets
+    # run would write to backend/core/data/ and leave data/ stale.
+    "sets.json",
+    "sets_metadata.json",
+    "format_window.json",
 ]
 
 

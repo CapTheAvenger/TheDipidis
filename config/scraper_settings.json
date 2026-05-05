@@ -1,6 +1,5 @@
 {
     "_info": "Zentrale Settings-Datei fuer alle Scraper. Jede Sektion entspricht einem Scraper im Dashboard. Aenderungen hier ueberschreiben die Einzel-Dateien.",
-
     "all_cards_scraper": {
         "start_page": 1,
         "end_page": null,
@@ -14,7 +13,6 @@
         "detail_page_wait_seconds": 2.0,
         "detail_request_delay_seconds": 0.5
     },
-
     "japanese_cards_scraper": {
         "max_pages": 50,
         "list_page_delay_seconds": 2.0,
@@ -22,7 +20,6 @@
         "skip_detail_scraping": false,
         "max_workers": 8
     },
-
     "card_price_scraper": {
         "delay_seconds": 1.5,
         "max_workers": 8,
@@ -33,7 +30,6 @@
         "only_update_sets": [],
         "_comment": "FALLBACK ONLY. Primaere Preisquelle ist der Cardmarket Price Merger ([14]). Filter (in Reihenfolge): (1) min_set: ueberspringe Sets aelter als dieses Set laut sets.json (z.B. 'TEF' = aktuelle Standard-Rotation). Leerstring '' = aus. (2) only_update_sets: optionale Whitelist von Set-Codes; [] = alle. (3) skip_cardmarket_mapped: ueberspringe alle Karten, die bereits in data/cardmarket_id_mapping.csv stehen. Standard-Setup (TEF + skip_cardmarket_mapped) bedeutet: Limitless scraped nur unmapped Karten in Standard-Sets — typisch eine Handvoll Lueckenfueller pro Lauf."
     },
-
     "current_meta_analysis": {
         "sources": {
             "limitless_online": {
@@ -49,7 +45,10 @@
                 "start_date": "10.04.2026",
                 "max_tournaments": 15,
                 "max_decks_per_tournament": 256,
-                "format_filter": ["Standard", "Standard (JP)"]
+                "format_filter": [
+                    "Standard",
+                    "Standard (JP)"
+                ]
             }
         },
         "delay_between_requests": 3.0,
@@ -60,7 +59,6 @@
         "output_file": "current_meta_card_data.csv",
         "_comment": "Combines Limitless Online (Meta Live) and Play! (Meta Play!). append_mode=true keeps old data and only adds new entries."
     },
-
     "limitless_online": {
         "game": "POKEMON",
         "format": "STANDARD",
@@ -71,42 +69,46 @@
         "output_file": "limitless_online_decks.csv",
         "max_workers": 5
     },
-
     "city_league_analysis": {
         "sources": {
             "city_league": {
                 "enabled": true,
-                "start_date": "24.01.2026",
+                "start_date": "13.03.2026",
                 "end_date": "auto",
                 "max_decklists_per_league": 50,
-                "additional_tournament_ids": [548]
+                "additional_tournament_ids": [
+                    548
+                ]
             }
         },
         "output_file": "city_league_analysis.csv",
         "delay_between_requests": 1.5,
         "append_mode": true,
-        "_comment": "Scrapes City League tournaments and extracts card data by archetype. start_date matches the scraper's local DEFAULT_SETTINGS (24.01.2026) so CI runs cover the same date window as local scrapes — earlier the CI used 13.03.2026 and silently dropped 200+ February tournaments, leading to visible 'Decks Used: 301 of 645' gaps in the Deck Analysis Japan tab. append_mode=true keeps old tournament dates when adding new data. additional_tournament_ids: Add tournament IDs from main site (e.g., Champions League) - format: [547, 550]"
+        "_comment": "start_date is auto-synced by backend/core/update_sets.apply_format_window_to_scraper_settings to format_window.jp_release_date (= EN release minus 14-day JP lead). Don't hand-edit the date — set the EN rotation anchor in update_sets.FALLBACK_RELEASE_DATES instead. additional_tournament_ids: append Champions-League / special-event IDs that aren't on the regular City-League listing (e.g. 548)."
     },
-
     "city_league_archetype": {
-        "start_date": "24.01.2026",
+        "start_date": "13.03.2026",
         "end_date": "auto",
         "delay_between_requests": 1.5,
         "output_file": "city_league_archetypes.csv",
         "region": "jp",
         "min_tournament_size": 1,
         "_min_size_comment": "JP City League events typically post 4-16 placements (NOT 32+). The earlier value 32 (added 2026-04-21) silently rejected every new tournament for two weeks — see backend/scrapers/city_league_archetype_scraper.py DEFAULT_SETTINGS comment for the full incident.",
-        "additional_tournament_ids": [548]
+        "additional_tournament_ids": [
+            548
+        ]
     },
-
     "labs_tournament_scraper": {
         "from_date": "2026-04-24",
-        "tournament_types": ["regional", "international", "worlds"],
+        "tournament_types": [
+            "regional",
+            "international",
+            "worlds"
+        ],
         "delay": 1.5,
         "overwrite": true,
         "_comment": "from_date: YYYY-MM-DD. tournament_types: regional/international/special/worlds. overwrite: true replaces CSV instead of appending."
     },
-
     "online_tournament_scraper": {
         "format_filter": "POR",
         "min_players": 100,
@@ -121,7 +123,6 @@
         "output_file": "online_tournament_top8_decks.csv",
         "_comment": "Predictor 2.0 source. format_filter must be the live set code (POR / PFL / etc.). 50/50 time-weighting: recent_days_high_weight days = recent_weight, older = older_weight. Pulls only tournaments >= min_players; output sorted by total_brought_weighted desc."
     },
-
     "tournament_JH": {
         "max_tournaments": 150,
         "delay_between_tournaments": 0,
@@ -140,7 +141,6 @@
         "append_mode": true,
         "_comment": "Scrapes individual deck lists from all tournaments. max_tournaments=150 for complete coverage. delay=0 for speed. WICHTIG: Scraping dauert ca. 0.3-0.5 Minuten pro Turnier."
     },
-
     "proxy": {
         "proxy_host": "geo.iproyal.com",
         "proxy_port": "12321",

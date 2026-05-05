@@ -23,6 +23,7 @@ import os
 import re
 import sys
 import time
+from typing import List
 
 try:
     from bs4 import BeautifulSoup
@@ -51,6 +52,13 @@ _CONFIG_DIR = os.path.join(_PROJECT_ROOT, 'config')
 # Confirmed by user — Limitless online accepts new sets immediately on
 # release, in-person majors apply a fixed two-week lag.
 IN_PERSON_LEGAL_LAG_DAYS = 14
+
+# Days the Japanese set release leads the English release. Empirically:
+# POR-JP dropped 2026-03-13, POR-EN on 2026-03-27 = 14-day lead. The JP
+# rotation cycle has been on this same cadence for the recent metas, so
+# the City League JP scrapers can track jp_release_date = en_release - 14
+# instead of needing a separate /cards/jp scrape.
+JP_LEAD_DAYS = 14
 
 # Hardcoded fallback release dates for the current rotation. The live
 # scraper attempts to parse these from limitlesstcg.com; when the site
@@ -312,15 +320,33 @@ def _extract_iso_date(text: str) -> str:
 
 def _read_current_set_from_settings() -> str:
     """Pick the live set code from config/scraper_settings.json. Returns
-    '' on any error so callers can fall back gracefully."""
+    '' on any error so callers can fall back gracefully.
+
+    Walks the known paths in priority order so legacy schemas keep
+    working: the unified config currently stores the set under
+    limitless_online.set and (redundantly) under
+    current_meta_analysis.sources.limitless_online.format_filter."""
     path = os.path.join(_CONFIG_DIR, 'scraper_settings.json')
     try:
         with open(path, 'r', encoding='utf-8') as f:
             cfg = json.load(f)
-        return (cfg.get('current_meta_analysis') or {}).get('set', '') or ''
     except Exception as e:
         print(f"[Update Sets] Could not read scraper_settings.json: {e}")
         return ''
+
+    # Try canonical paths in order
+    candidates = [
+        cfg.get('limitless_online', {}).get('set'),
+        cfg.get('current_meta_analysis', {})
+            .get('sources', {})
+            .get('limitless_online', {})
+            .get('format_filter'),
+        cfg.get('current_meta_analysis', {}).get('set'),  # legacy
+    ]
+    for c in candidates:
+        if c:
+            return str(c).strip()
+    return ''
 
 
 def _add_days(iso_date: str, days: int) -> str:
@@ -374,16 +400,27 @@ def write_format_window(sets_metadata_path: str) -> str:
         return ''
 
     in_person_legal = _add_days(release_date, IN_PERSON_LEGAL_LAG_DAYS)
+    # Japanese rotation runs ~14 days ahead of EN — POR-JP dropped on
+    # 2026-03-13 vs POR-EN on 2026-03-27. Derive jp_release_date by
+    # subtracting JP_LEAD_DAYS so the City League scrapers (which only
+    # care about JP rotation) auto-track the right window without us
+    # needing a separate /cards/jp scrape pass. If JP and EN ever stop
+    # matching, we can swap this to a real scrape later.
+    jp_release_date = _add_days(release_date, -JP_LEAD_DAYS)
     out = {
         'current_set':          current,
         'set_release_date':     release_date,
+        'jp_release_date':      jp_release_date,
         'in_person_legal_date': in_person_legal,
         'lag_days':             IN_PERSON_LEGAL_LAG_DAYS,
+        'jp_lead_days':         JP_LEAD_DAYS,
         '_note': (
             'Online (Limitless ladder + online tournaments) accept new sets on '
             'set_release_date. In-person majors are legal in_person_legal_date '
-            '(= release + lag_days). Predictor uses these to filter labs/major '
-            'data to the current format and to recency-weight late-format events.'
+            '(= release + lag_days). City League JP scrapers track '
+            'jp_release_date (= release - jp_lead_days). Predictor uses these to '
+            'filter labs/major data to the current format and to recency-weight '
+            'late-format events.'
         ),
     }
     out_path = os.path.join(data_dir, 'format_window.json')
@@ -394,6 +431,110 @@ def write_format_window(sets_metadata_path: str) -> str:
         f"online {release_date} → in-person {in_person_legal}"
     )
     return out_path
+
+
+def _format_de_date(iso: str) -> str:
+    """ISO YYYY-MM-DD → DD.MM.YYYY (the format scraper_settings.json uses)."""
+    if not iso:
+        return ''
+    try:
+        d = datetime.date.fromisoformat(iso)
+        return d.strftime('%d.%m.%Y')
+    except (ValueError, TypeError):
+        return ''
+
+
+def apply_format_window_to_scraper_settings(format_window_path: str,
+                                            settings_path: str) -> bool:
+    """Sync the rotation-driven settings in config/scraper_settings.json from
+    format_window.json so a CI run can refresh dates + set codes without
+    a human edit. Touches:
+
+      - city_league_analysis.sources.city_league.start_date  ← jp_release_date
+      - city_league_archetype.start_date                     ← jp_release_date
+      - limitless_online.set                                 ← current_set (EN)
+      - current_meta_analysis.sources.limitless_online.format_filter  ← current_set
+      - current_meta_analysis.sources.tournaments.start_date ← in_person_legal_date
+
+    Idempotent — only writes if anything changed. Returns True if the
+    file was modified.
+
+    The unified config used to drift from the per-scraper DEFAULT_SETTINGS
+    (last seen on 2026-05-05: city_league_analysis had start_date=24.01.2026
+    while the user's intent was 13.03.2026 = JP set release). That mismatch
+    pulled 200+ February JP tournaments into the Current view alongside
+    M3-era data, producing the 300-tournament overlap with the M3 archive
+    snapshot. Auto-syncing these fields here removes the failure mode."""
+    if not os.path.isfile(format_window_path):
+        print(f"[Update Sets] ! {format_window_path} missing — skipping settings sync")
+        return False
+    if not os.path.isfile(settings_path):
+        print(f"[Update Sets] ! {settings_path} missing — skipping settings sync")
+        return False
+
+    with open(format_window_path, 'r', encoding='utf-8') as f:
+        fw = json.load(f)
+
+    current_set = fw.get('current_set') or ''
+    en_release = fw.get('set_release_date') or ''
+    jp_release = fw.get('jp_release_date') or ''
+    in_person = fw.get('in_person_legal_date') or ''
+
+    if not (current_set and en_release and jp_release and in_person):
+        print(
+            f"[Update Sets] ! format_window.json missing fields "
+            f"(set={current_set!r}, en={en_release!r}, jp={jp_release!r}, ip={in_person!r}) "
+            f"— skipping settings sync"
+        )
+        return False
+
+    jp_de = _format_de_date(jp_release)
+    in_person_de = _format_de_date(in_person)
+
+    with open(settings_path, 'r', encoding='utf-8') as f:
+        settings = json.load(f)
+
+    # Walk the known paths and patch — guard each with .setdefault so a
+    # truncated config file doesn't crash the run.
+    changes: List[str] = []
+
+    cla = settings.setdefault('city_league_analysis', {}).setdefault('sources', {}).setdefault('city_league', {})
+    if cla.get('start_date') != jp_de:
+        changes.append(f"city_league_analysis.sources.city_league.start_date {cla.get('start_date')!r} → {jp_de!r}")
+        cla['start_date'] = jp_de
+
+    cla_arch = settings.setdefault('city_league_archetype', {})
+    if cla_arch.get('start_date') != jp_de:
+        changes.append(f"city_league_archetype.start_date {cla_arch.get('start_date')!r} → {jp_de!r}")
+        cla_arch['start_date'] = jp_de
+
+    lo = settings.setdefault('limitless_online', {})
+    if lo.get('set') != current_set:
+        changes.append(f"limitless_online.set {lo.get('set')!r} → {current_set!r}")
+        lo['set'] = current_set
+
+    cma_lo = settings.setdefault('current_meta_analysis', {}).setdefault('sources', {}).setdefault('limitless_online', {})
+    if cma_lo.get('format_filter') != current_set:
+        changes.append(f"current_meta_analysis.sources.limitless_online.format_filter {cma_lo.get('format_filter')!r} → {current_set!r}")
+        cma_lo['format_filter'] = current_set
+
+    cma_t = settings.setdefault('current_meta_analysis', {}).setdefault('sources', {}).setdefault('tournaments', {})
+    if cma_t.get('start_date') != in_person_de:
+        changes.append(f"current_meta_analysis.sources.tournaments.start_date {cma_t.get('start_date')!r} → {in_person_de!r}")
+        cma_t['start_date'] = in_person_de
+
+    if not changes:
+        print("[Update Sets] ✓ Scraper settings already in sync with format_window.json")
+        return False
+
+    with open(settings_path, 'w', encoding='utf-8') as f:
+        json.dump(settings, f, indent=4, ensure_ascii=False)
+        f.write('\n')
+
+    print(f"[Update Sets] ✓ Patched {settings_path}:")
+    for ch in changes:
+        print(f"    - {ch}")
+    return True
 
 
 def main():
@@ -443,7 +584,18 @@ def main():
     print(f"[Update Sets] ✓ Saved metadata to: {metadata_path}")
 
     # 3) format_window.json (NEW: derived from current set + release date)
-    write_format_window(metadata_path)
+    fw_path = write_format_window(metadata_path)
+
+    # 4) Sync rotation-driven settings in config/scraper_settings.json so
+    #    the City League / Current Meta scrapers track the JP and EN
+    #    release dates automatically — no more manual edits when a set
+    #    rotates. Reads the format_window we just wrote and patches only
+    #    the date / set fields, leaving everything else untouched.
+    if fw_path:
+        # project_root = update_sets.py is at backend/core/update_sets.py
+        project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        settings_path = os.path.join(project_root, 'config', 'scraper_settings.json')
+        apply_format_window_to_scraper_settings(fw_path, settings_path)
 
     print("[Update Sets] Done!")
 

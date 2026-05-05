@@ -89,8 +89,20 @@
          * Strip trailing " ex"/" Ex" from archetype names so that
          * dropdown values (e.g. "Ceruledge Ex") match Limitless data keys ("Ceruledge").
          */
+        // Strip the trailing " Ex" / " ex" decoration plus any trailing
+        // English-set-code suffix that current_meta_analysis_scraper
+        // appends ("Crustle Dri", "Eelektrik Blk", "Slowking Scr") so
+        // the resulting label matches the bare names Limitless uses on
+        // its decks-overview page ("Crustle", "Eelektrik", "Slowking").
+        // Case-preserving — used both for dropdown labels and for h3 /
+        // matchup-variable-name lookups against limitless_online_decks.html.
+        // Keep the set-code list in sync with normalizeArchetypeForMatch
+        // in app-meta-cards.js (and update_sets.FALLBACK_SET_ORDER).
         function stripExSuffix(name) {
-            return String(name || '').replace(/\s+ex$/i, '').trim();
+            return String(name || '')
+                .replace(/\s+(?:asc|pfl|meg|mee|mep|blk|wht|dri|jtg|pre|ssp|scr|sfa|twm|tef|paf|par|mew|obf|pal|svi|sve|svp|por|m3|m4)$/i, '')
+                .replace(/\s+ex$/i, '')
+                .trim();
         }
         
         // Load Current Meta Analysis Data
@@ -571,8 +583,15 @@
                 // Get winrate from deck stats
                 let winrate = '-';
                 const deckStats = window.currentMetaDeckStats || [];
-                const cleanArch = stripExSuffix(archetype);
-                const deckStatEntry = deckStats.find(d => d.deck_name && stripExSuffix(d.deck_name).toLowerCase() === cleanArch.toLowerCase());
+                // Use normalizeArchetypeForMatch (set-code aware) instead
+                // of stripExSuffix here — current_meta_card_data.csv carries
+                // names like "Crustle Dri" and "Eelektrik Blk" that won't
+                // resolve to limitless_online_decks.csv's bare "Crustle" /
+                // "Eelektrik" with just-Ex stripping. Falls back to the
+                // older stripExSuffix path when the helper isn't loaded.
+                const matchKey = (window.normalizeArchetypeForMatch || stripExSuffix);
+                const cleanArch = matchKey(archetype);
+                const deckStatEntry = deckStats.find(d => d.deck_name && matchKey(d.deck_name) === cleanArch);
                 if (deckStatEntry && deckStatEntry.win_rate) {
                     winrate = deckStatEntry.win_rate;
                 }
@@ -586,9 +605,12 @@
                         .filter(d => d.rank && parseInt(d.rank) <= 20)
                         .map(d => d.deck_name);
                     
-                    // Get matchups against top 20
-                    const relevantMatchups = matchupData.filter(m => 
-                        m.deck_name && stripExSuffix(m.deck_name).toLowerCase() === cleanArch.toLowerCase() &&
+                    // Get matchups against top 20 — use the same set-code-
+                    // aware matcher we used for the deck-stat lookup above
+                    // so "Crustle Dri" lines up with matchup-grid rows
+                    // emitted under the bare "Crustle" key.
+                    const relevantMatchups = matchupData.filter(m =>
+                        m.deck_name && matchKey(m.deck_name) === cleanArch &&
                         m.opponent && top20Decks.some(deck => deck && deck.toLowerCase() === m.opponent.toLowerCase())
                     );
                     

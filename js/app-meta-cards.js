@@ -8,9 +8,18 @@
         function normalizeArchetypeForMatch(name) {
             return (name || '').toLowerCase()
                 .replace(/['\u2019\u2018`]s\b/g, '').replace(/['\u2019\u2018`]/g, '')  // Rocket's → Rocket
+                .replace(/^(rocket|hop|steven|cynthia|marnie|lillie|ethan|hau|n|iono|arven|nemona|kieran|kabu|raihan|jacq|geeta|ns)s\b/i, '$1')  // possessive without apostrophe (Rockets → Rocket)
                 .replace(/\bex\b/g, '')          // strip standalone "ex"
-                .replace(/\b(scr|jtg|tef|twm|pfl|dri|meg)\b/g, '') // strip set-code suffixes
+                .replace(/\b(asc|pfl|meg|mee|mep|blk|wht|dri|jtg|pre|ssp|scr|sfa|twm|tef|paf|par|mew|obf|pal|svi|sve|svp|por|m3|m4)\b/g, '') // strip set-code suffixes (full EN rotation)
                 .replace(/\s+/g, ' ').trim();
+        }
+        // Expose globally so other modules can use the same matching key.
+        // Currently used by app-current-meta-analysis.js to align deck
+        // names from current_meta_card_data.csv (which carries set-code
+        // suffixes like "Crustle Dri") to limitless_online_decks.csv
+        // (bare names like "Crustle") for share/WR lookup.
+        if (typeof window !== 'undefined') {
+            window.normalizeArchetypeForMatch = normalizeArchetypeForMatch;
         }
 
         /**

@@ -19,6 +19,7 @@ import sys
 import logging
 import threading
 import concurrent.futures
+from typing import Dict, List, Optional
 from datetime import datetime, timedelta
 
 try:
@@ -38,6 +39,27 @@ from card_scraper_shared import (
 # the original name-based match when the scraper module or data file is
 # unavailable — so a stale/missing archetype_icons.json never breaks the
 # scraper entirely.
+# ── Phase 4: icon-harvest state ────────────────────────────────────────────
+# Every (archetype, slugs) combo we observe during scraping is captured
+# here, then merged into archetype_icons.json after save_to_csv. Backfills
+# JP-only combos that play.limitlesstcg.com's EN decks page never lists
+# (and which the icon-scraper therefore can't see). Module-level dict so
+# threaded workers can write into it safely with the GIL.
+_observed_icons: 'Dict[str, List[str]]' = {}
+
+
+def _record_observed_icons(archetype: str, slugs: 'List[str]') -> None:
+    """First-seen wins — once we have slugs for an archetype name, don't
+    overwrite. Different tournaments may show the same name with slightly
+    different slug orders; the first one is fine because the matcher
+    treats slug lists as sets."""
+    if not archetype or not slugs:
+        return
+    if archetype in _observed_icons:
+        return
+    _observed_icons[archetype] = list(slugs)
+
+
 try:
     from archetype_matcher import ArchetypeMatcher  # type: ignore
     _matcher: 'Optional[ArchetypeMatcher]' = ArchetypeMatcher().load()
@@ -219,6 +241,7 @@ def _scrape_single_tournament(tournament: dict) -> list:
         # back to the historical normalize_archetype_name() flow if the
         # matcher isn't loaded or the signature isn't in the index yet.
         archetype = ''
+        slug_candidates: list[str] = []
         if _matcher is not None and cleaned_names:
             slug_candidates = [n.strip().lower().replace(' ', '-') for n in cleaned_names]
             canonical = _matcher.canonicalize_by_slugs(slug_candidates)
@@ -226,6 +249,17 @@ def _scrape_single_tournament(tournament: dict) -> list:
                 archetype = canonical
         if not archetype:
             archetype = normalize_archetype_name(archetype_raw) if archetype_raw else ''
+
+        # Phase 4: harvest the (archetype → slugs) mapping for any combo
+        # we just saw. archetype_icons_scraper only sees what
+        # play.limitlesstcg.com surfaces on the EN decks page, which
+        # excludes most JP-only City League combos (Aegislash Dragapult,
+        # Alakazam Solrock, Beedrill Dudunsparce, etc.). Without this
+        # harvest, the frontend renders those archetypes without Pokemon
+        # icons because archetype_icons.json has no entry. Capping at 2
+        # slugs matches the frontend renderer's display cap.
+        if archetype and slug_candidates:
+            _record_observed_icons(archetype, slug_candidates[:2])
 
         if placement.isdigit() and archetype:
             results.append({
@@ -239,6 +273,90 @@ def _scrape_single_tournament(tournament: dict) -> list:
                 'archetype': archetype
             })
     return results
+
+
+def _archetype_icons_path() -> str:
+    """Resolve repo-root data/archetype_icons.json — the file the
+    frontend actually reads. Mirrors archetype_icons_scraper._repo_data_dir."""
+    repo_root = os.path.normpath(
+        os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..")
+    )
+    return os.path.join(repo_root, "data", "archetype_icons.json")
+
+
+def merge_observed_icons_into_json() -> Dict[str, int]:
+    """Backfill archetype_icons.json with the (archetype → slugs) tuples
+    we observed during this scrape run.
+
+    Two distinct cases:
+      (a) Archetype is missing from the file entirely (typical for
+          JP-only combos like "Aegislash Dragapult" that
+          play.limitlesstcg.com EN never lists). Add a fresh entry.
+      (b) Archetype exists with EMPTY slug list (manual placeholder
+          for "we know the name but had no Pokemon to point at" —
+          e.g. "Psy Box", "Tera Box"). Fill in the first-seen slugs
+          so the frontend can render an icon instead of a text
+          fallback.
+
+    Existing non-empty entries are NEVER overwritten — if a human
+    curated a different slug list there, we trust it.
+
+    Returns a dict {added, filled, unchanged} for the build log.
+    """
+    if not _observed_icons:
+        return {"added": 0, "filled": 0, "unchanged": 0}
+
+    path = _archetype_icons_path()
+    try:
+        with open(path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+    except FileNotFoundError:
+        data = {"_meta": {}, "archetypes": {}}
+    except Exception as e:
+        logger.warning("Could not read %s: %s — skipping icon merge", path, e)
+        return {"added": 0, "filled": 0, "unchanged": 0}
+
+    archetypes: Dict[str, List[str]] = data.setdefault("archetypes", {})
+    added: List[str] = []
+    filled: List[str] = []
+    unchanged: int = 0
+
+    for name, slugs in _observed_icons.items():
+        if name not in archetypes:
+            archetypes[name] = list(slugs)
+            added.append(name)
+        elif not archetypes[name]:  # explicit empty list = placeholder
+            archetypes[name] = list(slugs)
+            filled.append(name)
+        else:
+            unchanged += 1
+
+    if not added and not filled:
+        logger.info(
+            "[icon-harvest] %s observed combos already in archetype_icons.json — no merge needed",
+            unchanged,
+        )
+        return {"added": 0, "filled": 0, "unchanged": unchanged}
+
+    data.setdefault("_meta", {})["lastHarvestedFrom"] = "city_league_archetype_scraper"
+    data["_meta"]["lastHarvestedAt"] = (
+        __import__("datetime").datetime.now().isoformat(timespec="seconds")
+    )
+    data["archetypes"] = archetypes
+
+    with open(path, 'w', encoding='utf-8') as f:
+        json.dump(data, f, ensure_ascii=False, indent=2, sort_keys=False)
+
+    logger.info(
+        "[icon-harvest] %s → +%s new, ~%s filled (placeholder→slugs), =%s unchanged",
+        path, len(added), len(filled), unchanged,
+    )
+    if added:
+        logger.info("[icon-harvest] Added (sample): %s", added[:5])
+    if filled:
+        logger.info("[icon-harvest] Filled placeholders: %s", filled)
+    return {"added": len(added), "filled": len(filled), "unchanged": unchanged}
+
 
 # ============================================================================
 # STATS & REPORT GENERATION
@@ -554,6 +672,13 @@ def main():
         save_to_csv(new_data, settings['output_file'])
         save_deck_statistics(new_data, settings['output_file'])
         create_comparison_report(old_data, new_data, settings['output_file'])
+
+    # Phase 4: backfill archetype_icons.json with the JP-only combos we
+    # saw this run. Runs even when all_data is empty so we still pick
+    # up zero-slug-placeholder fills (Psy Box, Tera Box, …) the next
+    # time those archetypes show up in a tournament we DID scrape on
+    # an earlier run.
+    merge_observed_icons_into_json()
 
     logger.info("=" * 60)
     logger.info("ERFOLGREICH BEENDET")

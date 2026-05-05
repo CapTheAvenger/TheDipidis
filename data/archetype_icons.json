@@ -4,7 +4,9 @@
     "urlSuffix": ".png",
     "description": "Maps current-meta archetype names to the sequence of Pokémon species/form identifiers that identify them visually. The helper getArchetypeIconUrls() resolves each array entry into a Limitless R2 icon URL. Add new archetypes or fix guesses as they surface; broken URLs are handled gracefully by the img onerror fallback in the UI.",
     "lastScrapedAt": "2026-05-05T10:10:26",
-    "lastScrapedCount": 125
+    "lastScrapedCount": 125,
+    "lastBackfilledAt": "2026-05-05T13:19:27",
+    "lastBackfillCount": 342
   },
   "archetypes": {
     "Dragapult": [
@@ -274,8 +276,12 @@
       "dipplin",
       "thwackey"
     ],
-    "Psy Box": [],
-    "Tera Box": [],
+    "Psy Box": [
+      "mewtwo"
+    ],
+    "Tera Box": [
+      "ogerpon-wellspring"
+    ],
     "Clefairy Box": [
       "clefairy"
     ],
@@ -574,6 +580,1364 @@
     ],
     "Torterra": [
       "torterra"
+    ],
+    "Aegislash Dragapult": [
+      "aegislash",
+      "dragapult"
+    ],
+    "Aegislash Dudunsparce": [
+      "aegislash",
+      "dudunsparce"
+    ],
+    "Aegislash Genesect": [
+      "aegislash",
+      "genesect"
+    ],
+    "Aegislash Metagross": [
+      "aegislash",
+      "metagross"
+    ],
+    "Aegislash Metang": [
+      "aegislash",
+      "metang"
+    ],
+    "Alakazam Dragapult": [
+      "alakazam",
+      "dragapult"
+    ],
+    "Alakazam Dusknoir": [
+      "alakazam",
+      "dusknoir"
+    ],
+    "Alakazam Mega Clefable": [
+      "alakazam",
+      "clefable-mega"
+    ],
+    "Alakazam Solrock": [
+      "alakazam",
+      "solrock"
+    ],
+    "Arboliva Mega Kangaskhan": [
+      "arboliva",
+      "kangaskhan-mega"
+    ],
+    "Arboliva Ogerpon": [
+      "arboliva",
+      "ogerpon"
+    ],
+    "Archaludon Cinderace": [
+      "archaludon",
+      "cinderace"
+    ],
+    "Archaludon Dubwool": [
+      "archaludon",
+      "dubwool"
+    ],
+    "Archaludon Genesect": [
+      "archaludon",
+      "genesect"
+    ],
+    "Archaludon Meowth": [
+      "archaludon",
+      "meowth"
+    ],
+    "Archaludon Zacian-Crowned": [
+      "archaludon",
+      "zacian-crowned"
+    ],
+    "Avalugg": [
+      "avalugg"
+    ],
+    "Azumarill Noctowl": [
+      "azumarill",
+      "noctowl"
+    ],
+    "Barbaracle Okidogi": [
+      "barbaracle",
+      "okidogi"
+    ],
+    "Barbaracle Solrock": [
+      "barbaracle",
+      "solrock"
+    ],
+    "Beedrill Arboliva": [
+      "beedrill",
+      "arboliva"
+    ],
+    "Beedrill Dudunsparce": [
+      "beedrill",
+      "dudunsparce"
+    ],
+    "Bellibolt Kilowattrel": [
+      "bellibolt",
+      "kilowattrel"
+    ],
+    "Blaziken Clefairy": [
+      "blaziken",
+      "clefairy"
+    ],
+    "Blaziken Delphox": [
+      "blaziken",
+      "delphox"
+    ],
+    "Blaziken Dragapult": [
+      "blaziken",
+      "dragapult"
+    ],
+    "Blaziken Latias": [
+      "blaziken",
+      "latias"
+    ],
+    "Blaziken Mega Dragonite": [
+      "blaziken",
+      "dragonite-mega"
+    ],
+    "Blaziken Mega Kangaskhan": [
+      "blaziken",
+      "kangaskhan-mega"
+    ],
+    "Blaziken Mega Latias": [
+      "blaziken",
+      "latias-mega"
+    ],
+    "Blaziken Salamence": [
+      "blaziken",
+      "salamence"
+    ],
+    "Blaziken Zoroark": [
+      "blaziken",
+      "zoroark"
+    ],
+    "Blissey Ogerpon": [
+      "blissey",
+      "ogerpon"
+    ],
+    "Blissey Pikachu": [
+      "blissey",
+      "pikachu"
+    ],
+    "Bronzong Crustle": [
+      "bronzong",
+      "crustle"
+    ],
+    "Bronzong Froslass": [
+      "bronzong",
+      "froslass"
+    ],
+    "Bronzong Jellicent": [
+      "bronzong",
+      "jellicent"
+    ],
+    "Ceruledge Delphox": [
+      "ceruledge",
+      "delphox"
+    ],
+    "Ceruledge Drilbur": [
+      "ceruledge",
+      "drilbur"
+    ],
+    "Ceruledge Lunatone": [
+      "ceruledge",
+      "lunatone"
+    ],
+    "Ceruledge Mega Lopunny": [
+      "ceruledge",
+      "lopunny-mega"
+    ],
+    "Ceruledge Meowth": [
+      "ceruledge",
+      "meowth"
+    ],
+    "Ceruledge Solrock": [
+      "ceruledge",
+      "solrock"
+    ],
+    "Chandelure Crustle": [
+      "chandelure",
+      "crustle"
+    ],
+    "Cinccino Metagross": [
+      "cinccino",
+      "metagross"
+    ],
+    "Cinderace Mega Absol": [
+      "cinderace",
+      "absol-mega"
+    ],
+    "Clefable Dusknoir": [
+      "clefable",
+      "dusknoir"
+    ],
+    "Clefairy Latias": [
+      "clefairy",
+      "latias"
+    ],
+    "Clefairy Mega Kangaskhan": [
+      "clefairy",
+      "kangaskhan-mega"
+    ],
+    "Clefairy Meowth": [
+      "clefairy",
+      "meowth"
+    ],
+    "Cofagrigus Mega Diancie": [
+      "cofagrigus",
+      "diancie-mega"
+    ],
+    "Crustle Dudunsparce": [
+      "crustle",
+      "dudunsparce"
+    ],
+    "Crustle Mega Kangaskhan": [
+      "crustle",
+      "kangaskhan-mega"
+    ],
+    "Crustle Munkidori": [
+      "crustle",
+      "munkidori"
+    ],
+    "Decidueye Vivillon": [
+      "decidueye",
+      "vivillon"
+    ],
+    "Decidueye Yanmega": [
+      "decidueye",
+      "yanmega"
+    ],
+    "Diggersby Munkidori": [
+      "diggersby",
+      "munkidori"
+    ],
+    "Dipplin Rillaboom": [
+      "dipplin",
+      "rillaboom"
+    ],
+    "Dipplin Thwackey": [
+      "dipplin",
+      "thwackey"
+    ],
+    "Dragapult Alakazam": [
+      "dragapult",
+      "alakazam"
+    ],
+    "Dragapult Azumarill": [
+      "dragapult",
+      "azumarill"
+    ],
+    "Dragapult Bronzong": [
+      "dragapult",
+      "bronzong"
+    ],
+    "Dragapult Clefairy": [
+      "dragapult",
+      "clefairy"
+    ],
+    "Dragapult Crobat": [
+      "dragapult",
+      "crobat"
+    ],
+    "Dragapult Crustle": [
+      "dragapult",
+      "crustle"
+    ],
+    "Dragapult Dipplin": [
+      "dragapult",
+      "dipplin"
+    ],
+    "Dragapult Greninja": [
+      "dragapult",
+      "greninja"
+    ],
+    "Dragapult Hydreigon": [
+      "dragapult",
+      "hydreigon"
+    ],
+    "Dragapult Latias": [
+      "dragapult",
+      "latias"
+    ],
+    "Dragapult Mega Froslass": [
+      "dragapult",
+      "froslass-mega"
+    ],
+    "Dragapult Mega Greninja": [
+      "dragapult",
+      "greninja-mega"
+    ],
+    "Dragapult Mega Kangaskhan": [
+      "dragapult",
+      "kangaskhan-mega"
+    ],
+    "Dragapult Mega Lopunny": [
+      "dragapult",
+      "lopunny-mega"
+    ],
+    "Dragapult Mega Starmie": [
+      "dragapult",
+      "starmie-mega"
+    ],
+    "Dragapult Meowth": [
+      "dragapult",
+      "meowth"
+    ],
+    "Dragapult Munkidori": [
+      "dragapult",
+      "munkidori"
+    ],
+    "Dragapult Noctowl": [
+      "dragapult",
+      "noctowl"
+    ],
+    "Dragapult Slowking": [
+      "dragapult",
+      "slowking"
+    ],
+    "Dragapult Typhlosion": [
+      "dragapult",
+      "typhlosion"
+    ],
+    "Dragapult Tyranitar": [
+      "dragapult",
+      "tyranitar"
+    ],
+    "Dragapult Zacian-Crowned": [
+      "dragapult",
+      "zacian-crowned"
+    ],
+    "Drakloak Mega Greninja": [
+      "drakloak",
+      "greninja-mega"
+    ],
+    "Dudunsparce Dusknoir": [
+      "dudunsparce",
+      "dusknoir"
+    ],
+    "Dudunsparce Mega Froslass": [
+      "dudunsparce",
+      "froslass-mega"
+    ],
+    "Dudunsparce Mega Greninja": [
+      "dudunsparce",
+      "greninja-mega"
+    ],
+    "Dudunsparce Mega Lopunny": [
+      "dudunsparce",
+      "lopunny-mega"
+    ],
+    "Dudunsparce Mega Starmie": [
+      "dudunsparce",
+      "starmie-mega"
+    ],
+    "Dusknoir": [
+      "dusknoir"
+    ],
+    "Dusknoir Clefairy": [
+      "dusknoir",
+      "clefairy"
+    ],
+    "Dusknoir Jellicent": [
+      "dusknoir",
+      "jellicent"
+    ],
+    "Dusknoir Mega Diancie": [
+      "dusknoir",
+      "diancie-mega"
+    ],
+    "Dusknoir Noctowl": [
+      "dusknoir",
+      "noctowl"
+    ],
+    "Espeon Ogerpon": [
+      "espeon",
+      "ogerpon"
+    ],
+    "Farigiraf Bronzong": [
+      "farigiraf",
+      "bronzong"
+    ],
+    "Farigiraf Mega Kangaskhan": [
+      "farigiraf",
+      "kangaskhan-mega"
+    ],
+    "Flareon Leafeon": [
+      "flareon",
+      "leafeon"
+    ],
+    "Flareon Sylveon": [
+      "flareon",
+      "sylveon"
+    ],
+    "Flygon Dudunsparce": [
+      "flygon",
+      "dudunsparce"
+    ],
+    "Froslass Solrock": [
+      "froslass",
+      "solrock"
+    ],
+    "Galvantula Latias": [
+      "galvantula",
+      "latias"
+    ],
+    "Galvantula Ogerpon-Wellspring": [
+      "galvantula",
+      "ogerpon-wellspring"
+    ],
+    "Galvantula Pikachu": [
+      "galvantula",
+      "pikachu"
+    ],
+    "Galvantula Raging-Bolt": [
+      "galvantula",
+      "raging-bolt"
+    ],
+    "Garchomp": [
+      "garchomp"
+    ],
+    "Garchomp Roserade": [
+      "garchomp",
+      "roserade"
+    ],
+    "Glaceon Mega Froslass": [
+      "glaceon",
+      "froslass-mega"
+    ],
+    "Gourgeist Alakazam": [
+      "gourgeist",
+      "alakazam"
+    ],
+    "Gourgeist Banette": [
+      "gourgeist",
+      "banette"
+    ],
+    "Gourgeist Bronzong": [
+      "gourgeist",
+      "bronzong"
+    ],
+    "Gourgeist Dudunsparce": [
+      "gourgeist",
+      "dudunsparce"
+    ],
+    "Gourgeist Froslass": [
+      "gourgeist",
+      "froslass"
+    ],
+    "Greninja Dudunsparce": [
+      "greninja",
+      "dudunsparce"
+    ],
+    "Greninja Dusknoir": [
+      "greninja",
+      "dusknoir"
+    ],
+    "Greninja Mega Froslass": [
+      "greninja",
+      "froslass-mega"
+    ],
+    "Greninja Mega Starmie": [
+      "greninja",
+      "starmie-mega"
+    ],
+    "Greninja Meowth": [
+      "greninja",
+      "meowth"
+    ],
+    "Grimmsnarl Dudunsparce": [
+      "grimmsnarl",
+      "dudunsparce"
+    ],
+    "Grimmsnarl Dusknoir": [
+      "grimmsnarl",
+      "dusknoir"
+    ],
+    "Grimmsnarl Mega Froslass": [
+      "grimmsnarl",
+      "froslass-mega"
+    ],
+    "Grimmsnarl Mega Gengar": [
+      "grimmsnarl",
+      "gengar-mega"
+    ],
+    "Grimmsnarl Mega Kangaskhan": [
+      "grimmsnarl",
+      "kangaskhan-mega"
+    ],
+    "Grimmsnarl Munkidori": [
+      "grimmsnarl",
+      "munkidori"
+    ],
+    "Grimmsnarl Pecharunt": [
+      "grimmsnarl",
+      "pecharunt"
+    ],
+    "Gyarados Starmie": [
+      "gyarados",
+      "starmie"
+    ],
+    "Honchkrow": [
+      "honchkrow"
+    ],
+    "Honchkrow Mimikyu": [
+      "honchkrow",
+      "mimikyu"
+    ],
+    "Honchkrow Porygon-Z": [
+      "honchkrow",
+      "porygon-z"
+    ],
+    "Honchkrow Porygon2": [
+      "honchkrow",
+      "porygon2"
+    ],
+    "Hydreigon Blaziken": [
+      "hydreigon",
+      "blaziken"
+    ],
+    "Hydreigon Mega Gengar": [
+      "hydreigon",
+      "gengar-mega"
+    ],
+    "Hydreigon Mega Kangaskhan": [
+      "hydreigon",
+      "kangaskhan-mega"
+    ],
+    "Hydreigon Mega Sharpedo": [
+      "hydreigon",
+      "sharpedo-mega"
+    ],
+    "Hydreigon Noctowl": [
+      "hydreigon",
+      "noctowl"
+    ],
+    "Hydreigon Zoroark": [
+      "hydreigon",
+      "zoroark"
+    ],
+    "Jellicent": [
+      "jellicent"
+    ],
+    "Jellicent Clefairy": [
+      "jellicent",
+      "clefairy"
+    ],
+    "Jellicent Latias": [
+      "jellicent",
+      "latias"
+    ],
+    "Jellicent Mega Froslass": [
+      "jellicent",
+      "froslass-mega"
+    ],
+    "Jellicent Mega Kangaskhan": [
+      "jellicent",
+      "kangaskhan-mega"
+    ],
+    "Magcargo Ho-Oh": [
+      "magcargo",
+      "ho-oh"
+    ],
+    "Mamoswine Alakazam": [
+      "mamoswine",
+      "alakazam"
+    ],
+    "Mamoswine Blaziken": [
+      "mamoswine",
+      "blaziken"
+    ],
+    "Mega Abomasnow Kyogre": [
+      "abomasnow-mega",
+      "kyogre"
+    ],
+    "Mega Absol Mega Kangaskhan": [
+      "absol-mega",
+      "kangaskhan-mega"
+    ],
+    "Mega Charizard-X Delphox": [
+      "charizard-x-mega",
+      "delphox"
+    ],
+    "Mega Charizard-X Dudunsparce": [
+      "charizard-x-mega",
+      "dudunsparce"
+    ],
+    "Mega Charizard-X Mega Charizard-Y": [
+      "charizard-x-mega",
+      "charizard-y-mega"
+    ],
+    "Mega Clefable Aromatisse": [
+      "clefable-mega",
+      "aromatisse"
+    ],
+    "Mega Diancie Clefairy": [
+      "diancie-mega",
+      "clefairy"
+    ],
+    "Mega Diancie Dusknoir": [
+      "diancie-mega",
+      "dusknoir"
+    ],
+    "Mega Diancie Latias": [
+      "diancie-mega",
+      "latias"
+    ],
+    "Mega Diancie Mega Kangaskhan": [
+      "diancie-mega",
+      "kangaskhan-mega"
+    ],
+    "Mega Dragalge Dudunsparce": [
+      "dragalge-mega",
+      "dudunsparce"
+    ],
+    "Mega Dragalge Mega Starmie": [
+      "dragalge-mega",
+      "starmie-mega"
+    ],
+    "Mega Dragonite Blaziken": [
+      "dragonite-mega",
+      "blaziken"
+    ],
+    "Mega Dragonite Blissey": [
+      "dragonite-mega",
+      "blissey"
+    ],
+    "Mega Dragonite Noctowl": [
+      "dragonite-mega",
+      "noctowl"
+    ],
+    "Mega Emboar Cinccino": [
+      "emboar-mega",
+      "cinccino"
+    ],
+    "Mega Feraligatr Dudunsparce": [
+      "feraligatr-mega",
+      "dudunsparce"
+    ],
+    "Mega Floette Azumarill": [
+      "floette-mega",
+      "azumarill"
+    ],
+    "Mega Floette Latias": [
+      "floette-mega",
+      "latias"
+    ],
+    "Mega Froslass Bronzong": [
+      "froslass-mega",
+      "bronzong"
+    ],
+    "Mega Froslass Cinderace": [
+      "froslass-mega",
+      "cinderace"
+    ],
+    "Mega Froslass Dragapult": [
+      "froslass-mega",
+      "dragapult"
+    ],
+    "Mega Froslass Dudunsparce": [
+      "froslass-mega",
+      "dudunsparce"
+    ],
+    "Mega Froslass Dusknoir": [
+      "froslass-mega",
+      "dusknoir"
+    ],
+    "Mega Froslass Glalie": [
+      "froslass-mega",
+      "glalie"
+    ],
+    "Mega Froslass Grimmsnarl": [
+      "froslass-mega",
+      "grimmsnarl"
+    ],
+    "Mega Froslass Mega Starmie": [
+      "froslass-mega",
+      "starmie-mega"
+    ],
+    "Mega Froslass Munkidori": [
+      "froslass-mega",
+      "munkidori"
+    ],
+    "Mega Froslass Ogerpon-Wellspring": [
+      "froslass-mega",
+      "ogerpon-wellspring"
+    ],
+    "Mega Gardevoir": [
+      "gardevoir-mega"
+    ],
+    "Mega Gardevoir Clefairy": [
+      "gardevoir-mega",
+      "clefairy"
+    ],
+    "Mega Gardevoir Jellicent": [
+      "gardevoir-mega",
+      "jellicent"
+    ],
+    "Mega Gardevoir Latias": [
+      "gardevoir-mega",
+      "latias"
+    ],
+    "Mega Gardevoir Noctowl": [
+      "gardevoir-mega",
+      "noctowl"
+    ],
+    "Mega Greninja": [
+      "greninja-mega"
+    ],
+    "Mega Greninja Blaziken": [
+      "greninja-mega",
+      "blaziken"
+    ],
+    "Mega Greninja Dragapult": [
+      "greninja-mega",
+      "dragapult"
+    ],
+    "Mega Greninja Dudunsparce": [
+      "greninja-mega",
+      "dudunsparce"
+    ],
+    "Mega Greninja Dusknoir": [
+      "greninja-mega",
+      "dusknoir"
+    ],
+    "Mega Greninja Mega Dragonite": [
+      "greninja-mega",
+      "dragonite-mega"
+    ],
+    "Mega Greninja Mega Froslass": [
+      "greninja-mega",
+      "froslass-mega"
+    ],
+    "Mega Greninja Mega Kangaskhan": [
+      "greninja-mega",
+      "kangaskhan-mega"
+    ],
+    "Mega Greninja Mega Starmie": [
+      "greninja-mega",
+      "starmie-mega"
+    ],
+    "Mega Greninja Meowth": [
+      "greninja-mega",
+      "meowth"
+    ],
+    "Mega Greninja Munkidori": [
+      "greninja-mega",
+      "munkidori"
+    ],
+    "Mega Greninja Noctowl": [
+      "greninja-mega",
+      "noctowl"
+    ],
+    "Mega Greninja Solrock": [
+      "greninja-mega",
+      "solrock"
+    ],
+    "Mega Greninja Thwackey": [
+      "greninja-mega",
+      "thwackey"
+    ],
+    "Mega Greninja Togekiss": [
+      "greninja-mega",
+      "togekiss"
+    ],
+    "Mega Greninja Zoroark": [
+      "greninja-mega",
+      "zoroark"
+    ],
+    "Mega Kangaskhan Clefairy": [
+      "kangaskhan-mega",
+      "clefairy"
+    ],
+    "Mega Kangaskhan Crustle": [
+      "kangaskhan-mega",
+      "crustle"
+    ],
+    "Mega Kangaskhan Fezandipiti": [
+      "kangaskhan-mega",
+      "fezandipiti"
+    ],
+    "Mega Kangaskhan Latias": [
+      "kangaskhan-mega",
+      "latias"
+    ],
+    "Mega Kangaskhan Mega Absol": [
+      "kangaskhan-mega",
+      "absol-mega"
+    ],
+    "Mega Kangaskhan Mega Audino": [
+      "kangaskhan-mega",
+      "audino-mega"
+    ],
+    "Mega Kangaskhan Mega Lopunny": [
+      "kangaskhan-mega",
+      "lopunny-mega"
+    ],
+    "Mega Kangaskhan Meowth": [
+      "kangaskhan-mega",
+      "meowth"
+    ],
+    "Mega Kangaskhan Noctowl": [
+      "kangaskhan-mega",
+      "noctowl"
+    ],
+    "Mega Kangaskhan Ogerpon": [
+      "kangaskhan-mega",
+      "ogerpon"
+    ],
+    "Mega Kangaskhan Ogerpon-Wellspring": [
+      "kangaskhan-mega",
+      "ogerpon-wellspring"
+    ],
+    "Mega Kangaskhan Raging-Bolt": [
+      "kangaskhan-mega",
+      "raging-bolt"
+    ],
+    "Mega Kangaskhan Slowking": [
+      "kangaskhan-mega",
+      "slowking"
+    ],
+    "Mega Lopunny Dudunsparce": [
+      "lopunny-mega",
+      "dudunsparce"
+    ],
+    "Mega Lucario Crustle": [
+      "lucario-mega",
+      "crustle"
+    ],
+    "Mega Lucario Dudunsparce": [
+      "lucario-mega",
+      "dudunsparce"
+    ],
+    "Mega Lucario Dusknoir": [
+      "lucario-mega",
+      "dusknoir"
+    ],
+    "Mega Lucario Farigiraf": [
+      "lucario-mega",
+      "farigiraf"
+    ],
+    "Mega Lucario Greninja": [
+      "lucario-mega",
+      "greninja"
+    ],
+    "Mega Lucario Hariyama": [
+      "lucario-mega",
+      "hariyama"
+    ],
+    "Mega Lucario Lunatone": [
+      "lucario-mega",
+      "lunatone"
+    ],
+    "Mega Lucario Mega Kangaskhan": [
+      "lucario-mega",
+      "kangaskhan-mega"
+    ],
+    "Mega Lucario Mega Lopunny": [
+      "lucario-mega",
+      "lopunny-mega"
+    ],
+    "Mega Lucario Meowth": [
+      "lucario-mega",
+      "meowth"
+    ],
+    "Mega Lucario Solrock": [
+      "lucario-mega",
+      "solrock"
+    ],
+    "Mega Lucario Togekiss": [
+      "lucario-mega",
+      "togekiss"
+    ],
+    "Mega Meganium Mega Venusaur": [
+      "meganium-mega",
+      "venusaur-mega"
+    ],
+    "Mega Meganium Ogerpon": [
+      "meganium-mega",
+      "ogerpon"
+    ],
+    "Mega Sharpedo Mega Kangaskhan": [
+      "sharpedo-mega",
+      "kangaskhan-mega"
+    ],
+    "Mega Sharpedo Toxtricity": [
+      "sharpedo-mega",
+      "toxtricity"
+    ],
+    "Mega Slowbro Latias": [
+      "slowbro-mega",
+      "latias"
+    ],
+    "Mega Slowbro Mega Diancie": [
+      "slowbro-mega",
+      "diancie-mega"
+    ],
+    "Mega Slowbro Slowking": [
+      "slowbro-mega",
+      "slowking"
+    ],
+    "Mega Starmie Crobat": [
+      "starmie-mega",
+      "crobat"
+    ],
+    "Mega Starmie Drakloak": [
+      "starmie-mega",
+      "drakloak"
+    ],
+    "Mega Starmie Dudunsparce": [
+      "starmie-mega",
+      "dudunsparce"
+    ],
+    "Mega Starmie Dusknoir": [
+      "starmie-mega",
+      "dusknoir"
+    ],
+    "Mega Starmie Mega Froslass": [
+      "starmie-mega",
+      "froslass-mega"
+    ],
+    "Mega Starmie Mega Greninja": [
+      "starmie-mega",
+      "greninja-mega"
+    ],
+    "Mega Starmie Mega Lopunny": [
+      "starmie-mega",
+      "lopunny-mega"
+    ],
+    "Mega Venusaur Mega Meganium": [
+      "venusaur-mega",
+      "meganium-mega"
+    ],
+    "Mega Venusaur Ogerpon": [
+      "venusaur-mega",
+      "ogerpon"
+    ],
+    "Mega Venusaur Yanmega": [
+      "venusaur-mega",
+      "yanmega"
+    ],
+    "Mega Zygarde Mega Audino": [
+      "zygarde-mega",
+      "audino-mega"
+    ],
+    "Meowth Clefairy": [
+      "meowth",
+      "clefairy"
+    ],
+    "Meowth Latias": [
+      "meowth",
+      "latias"
+    ],
+    "Meowth Mega Kangaskhan": [
+      "meowth",
+      "kangaskhan-mega"
+    ],
+    "Meowth Ogerpon": [
+      "meowth",
+      "ogerpon"
+    ],
+    "Meowth Ogerpon-Wellspring": [
+      "meowth",
+      "ogerpon-wellspring"
+    ],
+    "Meowth Pikachu": [
+      "meowth",
+      "pikachu"
+    ],
+    "Metagross": [
+      "metagross"
+    ],
+    "Metagross Cinccino": [
+      "metagross",
+      "cinccino"
+    ],
+    "Metagross Clefairy": [
+      "metagross",
+      "clefairy"
+    ],
+    "Metagross Empoleon": [
+      "metagross",
+      "empoleon"
+    ],
+    "Metagross Genesect": [
+      "metagross",
+      "genesect"
+    ],
+    "Metagross Jellicent": [
+      "metagross",
+      "jellicent"
+    ],
+    "Metagross Latias": [
+      "metagross",
+      "latias"
+    ],
+    "Metagross Mega Skarmory": [
+      "metagross",
+      "skarmory-mega"
+    ],
+    "Metagross Slowking": [
+      "metagross",
+      "slowking"
+    ],
+    "Noctowl Clefairy": [
+      "noctowl",
+      "clefairy"
+    ],
+    "Noctowl Dusknoir": [
+      "noctowl",
+      "dusknoir"
+    ],
+    "Noctowl Flareon": [
+      "noctowl",
+      "flareon"
+    ],
+    "Noctowl Latias": [
+      "noctowl",
+      "latias"
+    ],
+    "Noctowl Mega Lopunny": [
+      "noctowl",
+      "lopunny-mega"
+    ],
+    "Noctowl Ogerpon": [
+      "noctowl",
+      "ogerpon"
+    ],
+    "Noctowl Ogerpon-Wellspring": [
+      "noctowl",
+      "ogerpon-wellspring"
+    ],
+    "Ogerpon Arboliva": [
+      "ogerpon",
+      "arboliva"
+    ],
+    "Ogerpon Chesnaught": [
+      "ogerpon",
+      "chesnaught"
+    ],
+    "Ogerpon Clefairy": [
+      "ogerpon",
+      "clefairy"
+    ],
+    "Ogerpon Hydrapple": [
+      "ogerpon",
+      "hydrapple"
+    ],
+    "Ogerpon Latias": [
+      "ogerpon",
+      "latias"
+    ],
+    "Ogerpon Mega Kangaskhan": [
+      "ogerpon",
+      "kangaskhan-mega"
+    ],
+    "Ogerpon Mega Venusaur": [
+      "ogerpon",
+      "venusaur-mega"
+    ],
+    "Ogerpon Meowth": [
+      "ogerpon",
+      "meowth"
+    ],
+    "Ogerpon Noctowl": [
+      "ogerpon",
+      "noctowl"
+    ],
+    "Ogerpon Ogerpon-Wellspring": [
+      "ogerpon",
+      "ogerpon-wellspring"
+    ],
+    "Ogerpon Raging-Bolt": [
+      "ogerpon",
+      "raging-bolt"
+    ],
+    "Ogerpon Vileplume": [
+      "ogerpon",
+      "vileplume"
+    ],
+    "Ogerpon Yanmega": [
+      "ogerpon",
+      "yanmega"
+    ],
+    "Ogerpon-Wellspring Ogerpon": [
+      "ogerpon-wellspring",
+      "ogerpon"
+    ],
+    "Ogerpon-Wellspring Pikachu": [
+      "ogerpon-wellspring",
+      "pikachu"
+    ],
+    "Okidogi Solrock": [
+      "okidogi",
+      "solrock"
+    ],
+    "Palafin Dudunsparce": [
+      "palafin",
+      "dudunsparce"
+    ],
+    "Palafin Mega Froslass": [
+      "palafin",
+      "froslass-mega"
+    ],
+    "Palafin Mega Greninja": [
+      "palafin",
+      "greninja-mega"
+    ],
+    "Palafin Thwackey": [
+      "palafin",
+      "thwackey"
+    ],
+    "Pikachu Clefairy": [
+      "pikachu",
+      "clefairy"
+    ],
+    "Pikachu Latias": [
+      "pikachu",
+      "latias"
+    ],
+    "Pikachu Ogerpon-Wellspring": [
+      "pikachu",
+      "ogerpon-wellspring"
+    ],
+    "Rillaboom Dipplin": [
+      "rillaboom",
+      "dipplin"
+    ],
+    "Scolipede Fezandipiti": [
+      "scolipede",
+      "fezandipiti"
+    ],
+    "Slowking Alakazam": [
+      "slowking",
+      "alakazam"
+    ],
+    "Slowking Dudunsparce": [
+      "slowking",
+      "dudunsparce"
+    ],
+    "Slowking Latias": [
+      "slowking",
+      "latias"
+    ],
+    "Slowking Mega Kangaskhan": [
+      "slowking",
+      "kangaskhan-mega"
+    ],
+    "Slowking Mega Slowbro": [
+      "slowking",
+      "slowbro-mega"
+    ],
+    "Slowking Meowth": [
+      "slowking",
+      "meowth"
+    ],
+    "Slowking Ogerpon": [
+      "slowking",
+      "ogerpon"
+    ],
+    "Solrock": [
+      "solrock"
+    ],
+    "Solrock Barbaracle": [
+      "solrock",
+      "barbaracle"
+    ],
+    "Solrock Munkidori": [
+      "solrock",
+      "munkidori"
+    ],
+    "Spidops": [
+      "spidops"
+    ],
+    "Spidops Crobat": [
+      "spidops",
+      "crobat"
+    ],
+    "Spidops Mewtwo": [
+      "spidops",
+      "mewtwo"
+    ],
+    "Sylveon Flareon": [
+      "sylveon",
+      "flareon"
+    ],
+    "Thwackey Dipplin": [
+      "thwackey",
+      "dipplin"
+    ],
+    "Thwackey Mega Starmie": [
+      "thwackey",
+      "starmie-mega"
+    ],
+    "Toxtricity Dudunsparce": [
+      "toxtricity",
+      "dudunsparce"
+    ],
+    "Toxtricity Fezandipiti": [
+      "toxtricity",
+      "fezandipiti"
+    ],
+    "Toxtricity Mega Absol": [
+      "toxtricity",
+      "absol-mega"
+    ],
+    "Toxtricity Mega Sharpedo": [
+      "toxtricity",
+      "sharpedo-mega"
+    ],
+    "Toxtricity Munkidori": [
+      "toxtricity",
+      "munkidori"
+    ],
+    "Toxtricity Pecharunt": [
+      "toxtricity",
+      "pecharunt"
+    ],
+    "Trevenant": [
+      "trevenant"
+    ],
+    "Trevenant Clefairy": [
+      "trevenant",
+      "clefairy"
+    ],
+    "Trevenant Drakloak": [
+      "trevenant",
+      "drakloak"
+    ],
+    "Trevenant Dubwool": [
+      "trevenant",
+      "dubwool"
+    ],
+    "Trevenant Dudunsparce": [
+      "trevenant",
+      "dudunsparce"
+    ],
+    "Trevenant Latias": [
+      "trevenant",
+      "latias"
+    ],
+    "Trevenant Zacian-Crowned": [
+      "trevenant",
+      "zacian-crowned"
+    ],
+    "Typhlosion": [
+      "typhlosion"
+    ],
+    "Typhlosion Dragapult": [
+      "typhlosion",
+      "dragapult"
+    ],
+    "Typhlosion Drakloak": [
+      "typhlosion",
+      "drakloak"
+    ],
+    "Typhlosion Dudunsparce": [
+      "typhlosion",
+      "dudunsparce"
+    ],
+    "Typhlosion Mega Charizard-X": [
+      "typhlosion",
+      "charizard-x-mega"
+    ],
+    "Tyranitar Dragapult": [
+      "tyranitar",
+      "dragapult"
+    ],
+    "Ursaluna-Bloodmoon Solrock": [
+      "ursaluna-bloodmoon",
+      "solrock"
+    ],
+    "Vileplume Drakloak": [
+      "vileplume",
+      "drakloak"
+    ],
+    "Vileplume Yanmega": [
+      "vileplume",
+      "yanmega"
+    ],
+    "Yanmega Chesnaught": [
+      "yanmega",
+      "chesnaught"
+    ],
+    "Yanmega Dudunsparce": [
+      "yanmega",
+      "dudunsparce"
+    ],
+    "Yanmega Mega Kangaskhan": [
+      "yanmega",
+      "kangaskhan-mega"
+    ],
+    "Yanmega Meganium": [
+      "yanmega",
+      "meganium"
+    ],
+    "Yanmega Ogerpon": [
+      "yanmega",
+      "ogerpon"
+    ],
+    "Zacian-Crowned": [
+      "zacian-crowned"
+    ],
+    "Zacian-Crowned Latias": [
+      "zacian-crowned",
+      "latias"
+    ],
+    "Zacian-Crowned Meowth": [
+      "zacian-crowned",
+      "meowth"
+    ],
+    "Zoroark": [
+      "zoroark"
+    ],
+    "Zoroark Cinderace": [
+      "zoroark",
+      "cinderace"
+    ],
+    "Zoroark Darmanitan": [
+      "zoroark",
+      "darmanitan"
+    ],
+    "Zoroark Dudunsparce": [
+      "zoroark",
+      "dudunsparce"
+    ],
+    "Zoroark Dusknoir": [
+      "zoroark",
+      "dusknoir"
+    ],
+    "Zoroark Mega Dragalge": [
+      "zoroark",
+      "dragalge-mega"
+    ],
+    "Zoroark Mega Gengar": [
+      "zoroark",
+      "gengar-mega"
+    ],
+    "Zoroark Mega Kangaskhan": [
+      "zoroark",
+      "kangaskhan-mega"
+    ],
+    "Zoroark Mega Lopunny": [
+      "zoroark",
+      "lopunny-mega"
+    ],
+    "Zoroark Munkidori": [
+      "zoroark",
+      "munkidori"
+    ],
+    "Zoroark Pecharunt": [
+      "zoroark",
+      "pecharunt"
+    ],
+    "Alolan Exeggutor": [
+      "alolan",
+      "exeggutor"
+    ],
+    "Mewtwo Spidops": [
+      "mewtwo",
+      "spidops"
+    ],
+    "Zacian-Crowned Snorlax": [
+      "zacian-crowned",
+      "snorlax"
     ]
   }
 }

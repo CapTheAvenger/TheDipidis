@@ -2505,7 +2505,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
         
         function copyDeck(source) {
             devLog('[copyDeck] Called with source:', source);
-            
+
             if (source === 'cityLeague') {
                 copyDeckOverview();
             } else if (source === 'currentMeta') {
@@ -2517,7 +2517,137 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 showToast(t('deck.notAvailable'), 'warning');
             }
         }
-        
+
+        /**
+         * Show the "ⓘ Build Info" modal — explains why each card landed
+         * in the deck after autoCompleteConsistency ran. Reads the
+         * structured report we persist on window.lastConsistencyBuild
+         * (keyed by source) and renders it as a styled list with the
+         * algorithm header + per-card reasoning badges.
+         *
+         * Silently no-ops with a toast hint when no build has run yet
+         * for the requested source — the user just hasn't pressed
+         * "Max Consistency" on this tab in the current session.
+         */
+        function showConsistencyBuildInfo(source) {
+            const all = window.lastConsistencyBuild || {};
+            const report = all[source];
+            if (!report || !Array.isArray(report.cards) || report.cards.length === 0) {
+                showToast(t('buildInfo.noBuildYet') || 'Run "Max Consistency" first to see build reasoning.', 'info');
+                return;
+            }
+
+            const overlay = document.createElement('div');
+            overlay.className = 'modal-overlay';
+            const modal = document.createElement('div');
+            modal.className = 'modal-dialog build-info-modal';
+
+            // Title
+            const title = document.createElement('h3');
+            const archLabel = report.archetype ? ` — ${report.archetype}` : '';
+            title.textContent = (t('buildInfo.title') || 'Why this deck?') + archLabel + ` (${report.deck_size}/60)`;
+            modal.appendChild(title);
+
+            // Algo desc + active layers as pills
+            const algoLine = document.createElement('p');
+            algoLine.className = 'build-info-algo';
+            algoLine.textContent = report.algo_desc || '';
+            modal.appendChild(algoLine);
+
+            const layers = report.layers || {};
+            const pillRow = document.createElement('div');
+            pillRow.className = 'build-info-pills';
+            const addPill = (label, active) => {
+                if (!active) return;
+                const span = document.createElement('span');
+                span.className = 'build-info-pill';
+                span.textContent = label;
+                pillRow.appendChild(span);
+            };
+            addPill('+Meta Boost', layers.meta_boost);
+            addPill('+Recency', layers.recency);
+            if (layers.latest_major_anchor) {
+                addPill('+Latest Major' + (layers.latest_major_date ? ` (${layers.latest_major_date})` : ''), true);
+            }
+            const techCats = Array.isArray(layers.tech_audit_active_categories) ? layers.tech_audit_active_categories : [];
+            if (techCats.length > 0) addPill(`+Tech Audit (${techCats.join(', ')})`, true);
+            if (pillRow.childElementCount > 0) modal.appendChild(pillRow);
+
+            // Card reasoning list — one row per card, badges explain
+            // which layer(s) contributed.
+            const list = document.createElement('div');
+            list.className = 'build-info-cards';
+            const cards = report.cards.slice().sort((a, b) =>
+                (b.consistency_score || 0) - (a.consistency_score || 0) ||
+                a.card_name.localeCompare(b.card_name)
+            );
+            cards.forEach(c => {
+                const row = document.createElement('div');
+                row.className = 'build-info-card-row';
+                const left = document.createElement('div');
+                left.className = 'build-info-card-name';
+                left.textContent = `${c.addCount}× ${c.card_name}`;
+                const mid = document.createElement('div');
+                mid.className = 'build-info-card-badges';
+                const addBadge = (txt, cls) => {
+                    if (!txt) return;
+                    const b = document.createElement('span');
+                    b.className = `build-info-badge ${cls || ''}`.trim();
+                    b.textContent = txt;
+                    mid.appendChild(b);
+                };
+                addBadge(`${c.share_percent}% share`, 'neutral');
+                if (c.meta_share > 0) addBadge(`meta ${Math.round(c.meta_share)}%`, 'meta');
+                const recRatio = parseFloat(c.recency_ratio || 1);
+                if (recRatio && Math.abs(recRatio - 1) > 0.05) {
+                    const arrow = recRatio > 1 ? '↑' : '↓';
+                    addBadge(`${arrow}${Math.round((recRatio - 1) * 100)}%`, recRatio > 1 ? 'rec-up' : 'rec-down');
+                }
+                if (c.latest_major_anchored) addBadge('Major staple', 'major');
+                if (c.latest_major_absent) addBadge('Major-absent', 'major-absent');
+                if (Array.isArray(c.tech_counter_for) && c.tech_counter_for.length > 0) {
+                    addBadge(`counters: ${c.tech_counter_for.join(', ')}`, 'tech');
+                }
+                const right = document.createElement('div');
+                right.className = 'build-info-card-score';
+                right.textContent = `score ${c.consistency_score}`;
+                row.appendChild(left);
+                row.appendChild(mid);
+                row.appendChild(right);
+                list.appendChild(row);
+            });
+            modal.appendChild(list);
+
+            // Notes — short legend so the badges aren't cryptic
+            const notes = document.createElement('p');
+            notes.className = 'build-info-notes';
+            notes.textContent = t('buildInfo.notes') ||
+                'Cards are picked from the archetype\'s actual data. "Major staple" = present in the most recent Major; "counters" = boosted because the deck already runs a counter to a currently-active meta threat. Nothing is auto-injected — only existing cards are re-prioritised.';
+            modal.appendChild(notes);
+
+            // Buttons
+            const btnRow = document.createElement('div');
+            btnRow.className = 'modal-btn-row';
+            const closeBtn = document.createElement('button');
+            closeBtn.textContent = t('btn.close') || 'Close';
+            closeBtn.className = 'modal-btn-ok';
+            closeBtn.onclick = () => overlay.remove();
+            btnRow.appendChild(closeBtn);
+            modal.appendChild(btnRow);
+
+            overlay.onclick = e => { if (e.target === overlay) overlay.remove(); };
+            document.addEventListener('keydown', function escListener(e) {
+                if (e.key === 'Escape') {
+                    overlay.remove();
+                    document.removeEventListener('keydown', escListener);
+                }
+            });
+
+            overlay.appendChild(modal);
+            document.body.appendChild(overlay);
+        }
+
+
         function showSingleCard(imageUrl, cardName, cardData = null) {
             const overlay = document.getElementById('fullCardOverlay') || document.getElementById('singleCardModal');
             const img = overlay?.querySelector('img') || document.getElementById('singleCardImage');
@@ -3699,6 +3829,47 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 summary += line + '\n';
             });
             devLog('[autoCompleteConsistency] Summary:', summary);
+
+            // Persist a structured build report so the deck-toolbar's
+            // "ⓘ Build Info" icon (renderConsistencyBuildInfo below) can
+            // explain the build retrospectively. Keyed by source so each
+            // tab (cityLeague / currentMeta / pastMeta) keeps its own
+            // last-build state.
+            window.lastConsistencyBuild = window.lastConsistencyBuild || {};
+            window.lastConsistencyBuild[source] = {
+                source,
+                archetype: currentArchetype || '',
+                generated_at: new Date().toISOString(),
+                deck_size: currentTotal,
+                algo_desc: algoDesc,
+                layers: {
+                    meta_boost: hasMetaData,
+                    recency: hasRecency,
+                    latest_major_anchor: !!hasLatestMajorAnchor,
+                    latest_major_date: hasLatestMajorAnchor ? (latestMajorDate || '') : '',
+                    // Derived from per-card flags — works whether Stage 3
+                    // (PR #46 tech-audit) is merged or not. When Stage 3
+                    // isn't present, no card carries _techCounterFor and
+                    // the deduped list is empty.
+                    tech_audit_active_categories: Array.from(new Set(
+                        cardsToAdd.flatMap(c => Array.isArray(c._techCounterFor) ? c._techCounterFor : [])
+                    )),
+                },
+                cards: cardsToAdd.map(c => ({
+                    addCount: c.addCount,
+                    card_name: c.card_name,
+                    set_code: c.set_code || '',
+                    set_number: c.set_number || '',
+                    share_percent: Math.round(c.sharePercent || 0),
+                    avg_count: c.avgCountWhenUsed || 0,
+                    consistency_score: Math.round(c.consistencyScore || 0),
+                    meta_share: c._metaShare || 0,
+                    recency_ratio: c._recencyRatio || 1,
+                    latest_major_anchored: !!c._latestMajorAnchored,
+                    latest_major_absent: !!c._latestMajorAbsent,
+                    tech_counter_for: Array.isArray(c._techCounterFor) ? c._techCounterFor.slice() : [],
+                })),
+            };
 
             {
                 cardsToAdd.forEach(card => {

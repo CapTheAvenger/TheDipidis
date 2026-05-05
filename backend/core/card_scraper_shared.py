@@ -369,9 +369,29 @@ def clean_pokemon_name(name: str) -> str:
     return name
 
 def fix_mega_pokemon_name(name: str) -> str:
-    if '-mega' in name.lower():
-        return f"mega {re.sub(r'-mega$', '', name, flags=re.IGNORECASE)}"
-    return name
+    """Move a Limitless mega-form marker into a leading "Mega " prefix.
+
+    Limitless renders Mega forms via the suffix "-mega" on the species
+    slug, optionally with a regional / form variant after it:
+        charizard-mega         → mega charizard
+        charizard-mega-x       → mega charizard-x   (X form)
+        charizard-mega-y       → mega charizard-y
+        absol-mega             → mega absol
+
+    The earlier implementation only stripped a TRAILING `-mega$`, so
+    "charizard-mega-x" got "mega " prepended without the "-mega"
+    segment removed → "mega charizard-mega-x". A later pass through
+    normalize_archetype_name's `(\\w+)-Mega\\b` regex then turned the
+    surviving "-Mega" into a SECOND "Mega " prefix, producing
+    "Mega Mega Charizard-X" in the archetypes CSV. Fix: strip
+    `-mega` whether trailing or followed by another hyphenated form
+    token, exactly once.
+    """
+    lower = name.lower()
+    if '-mega' not in lower:
+        return name
+    stripped = re.sub(r'-mega(?=-|$)', '', name, count=1, flags=re.IGNORECASE)
+    return f"mega {stripped}"
 
 def slug_to_archetype(slug: str) -> str:
     slug = re.sub(r'-+', ' ', slug.strip().replace('_', '-')).strip()
@@ -381,7 +401,18 @@ def slug_to_archetype(slug: str) -> str:
     return re.sub(r'\s+', ' ', ' '.join(smart_title(w) for w in words)).strip()
 
 def normalize_archetype_name(archetype: str) -> str:
+    """Title-case + Mega-prefix normalization for archetype display
+    names. .title() Python-stdlib uppercases the letter immediately
+    after an apostrophe ("Rocket's Mewtwo" → "Rocket'S Mewtwo"), which
+    breaks downstream string equality with the canonical names baked
+    into archetype_icons.json. Post-fix the apostrophe-S so the result
+    matches what the rest of the system speaks.
+    """
     name = archetype.strip().title()
+    # Restore lowercase "'s" after an apostrophe — covers all variants
+    # of single-quote characters Limitless and our parsing pipeline
+    # might emit.
+    name = re.sub(r"(?<=\w)(['‘’‛´])S\b", r"\1s", name)
     name = re.sub(r'^Ns?\s+', '', name, flags=re.IGNORECASE)
     name = re.sub(r'(\w+)-Mega\b', r'Mega \1', name, flags=re.IGNORECASE)
     return name.strip()

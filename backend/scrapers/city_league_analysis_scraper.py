@@ -168,11 +168,19 @@ def _fetch_single_deck(deck_url: str, deck_name: str, tournament_date: str, tour
     try:
         response = scraper.get(deck_url, timeout=timeout)
         response.raise_for_status()
-        
+
         cards = extract_cards_from_deck_html(response.text, card_db)
         if cards:
+            # Don't re-run normalize_archetype_name here — deck_name was
+            # ALREADY canonicalized by process_tournament_decklists (via
+            # ArchetypeMatcher.canonicalize_by_slugs or, fallback,
+            # normalize_archetype_name applied to the slug-joined name).
+            # A second pass corrupts apostrophe-S casing
+            # ("Rocket's Mewtwo" → ".title()" → "Rocket'S Mewtwo") and
+            # breaks the cross-reference with archetypes.csv that the
+            # frontend's Deck-Analysis-Japan tab depends on.
             return {
-                'archetype': normalize_archetype_name(deck_name),
+                'archetype': deck_name,
                 'cards': cards,
                 'source': 'City League',
                 'tournament_id': tournament_id,

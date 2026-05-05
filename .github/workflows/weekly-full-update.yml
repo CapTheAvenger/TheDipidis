@@ -114,6 +114,7 @@ jobs:
               archetype_icons.json \
               formats_catalog.json \
               pokemon_card_text.json \
+              pokemon_card_effects.json \
               city_league_analysis_scraped.json \
               tournament_jh_scraped.json \
               current_meta_scraped_tournaments.json \
@@ -173,6 +174,7 @@ jobs:
               "core/prepare_card_data.py" \
               "scrapers/archetype_icons_scraper.py" \
               "scrapers/pokemon_card_text_scraper.py" \
+              "scrapers/pokemon_card_effects_scraper.py" \
           ; do
               echo "::group::$step"
               python "$step"

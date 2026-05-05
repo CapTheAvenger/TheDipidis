@@ -104,6 +104,48 @@
                 .replace(/\s+ex$/i, '')
                 .trim();
         }
+
+        // ── Possessive-trainer normalisation ─────────────────────────
+        // Mirrors backend/scrapers/current_meta_analysis_scraper._POSSESSIVE_TRAINERS.
+        // Limitless source data is inconsistent — sometimes "Cynthia Garchomp Ex",
+        // sometimes "Cynthia's Garchomp" — and append_mode in the scraper means
+        // both spellings can co-exist in current_meta_card_data.csv after a
+        // historical name change. Without this fix the dropdown shows two
+        // separate entries for the same physical deck (the screenshot the
+        // user reported).
+        //
+        // Keep this dict in sync with the Python side. Lowercased lookup keys
+        // → canonical apostrophe-form output. Adding a new trainer here is
+        // safe: if the head word doesn't match, the function is a no-op.
+        const _POSSESSIVE_TRAINERS_FRONTEND = {
+            rocket: "Rocket's",   rockets: "Rocket's",
+            cynthia: "Cynthia's",
+            marnie: "Marnie's",
+            lillie: "Lillie's",
+            erika:  "Erika's",
+            ethan:  "Ethan's",
+            iono:   "Iono's",
+            misty:  "Misty's",
+            hop:    "Hop's",
+            n:      "N's",        ns: "N's",
+            steven: "Steven's",
+        };
+
+        // Canonicalises an archetype name so equivalent spellings collapse.
+        //   "Cynthia Garchomp Ex"   → "Cynthia's Garchomp"
+        //   "Cynthia's Garchomp"    → "Cynthia's Garchomp"
+        //   "Rockets Mewtwo"        → "Rocket's Mewtwo"
+        //   "Rocket's Mewtwo Por"   → "Rocket's Mewtwo"
+        // No-op for archetype names without a known trainer head word.
+        function canonicalizeArchetype(name) {
+            const stripped = stripExSuffix(name);
+            if (!stripped) return stripped;
+            const parts = stripped.split(/\s+/);
+            const headLower = (parts[0] || '').toLowerCase();
+            const canonicalHead = _POSSESSIVE_TRAINERS_FRONTEND[headLower];
+            if (!canonicalHead) return stripped;
+            return [canonicalHead, ...parts.slice(1)].join(' ').trim();
+        }
         
         // Load Current Meta Analysis Data
         async function loadCurrentMetaAnalysis() {
@@ -211,6 +253,18 @@
                 });
                 devLog('Loaded comparison data for', comparisonMap.size, 'decks');
             }
+
+            // Canonicalise archetype names IN-PLACE before any filtering or
+            // deduplication. Both the dropdown-build map (keyed by row.archetype)
+            // and the per-deck stat filters (`row.archetype === selectedDeck`)
+            // run downstream — they all see the canonical form, so duplicates
+            // like "Cynthia Garchomp Ex" + "Cynthia's Garchomp" collapse into
+            // one entry. Mutating row.archetype here is safe because data is
+            // a fresh array from loadCurrentMetaRowsWithFallback (not shared
+            // with other tabs that might rely on the raw form).
+            data.forEach(row => {
+                if (row && row.archetype) row.archetype = canonicalizeArchetype(row.archetype);
+            });
 
             let filteredData = data;
             if (currentMetaFormatFilter === 'live') {

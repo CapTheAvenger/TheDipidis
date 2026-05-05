@@ -2186,6 +2186,12 @@ function updateDecksUI() {
             <button onclick="event.stopPropagation(); copyDeckAndOpenLimitless(${deckIndex})" class="deck-action-btn deck-btn-print" title="Copy &amp; open Limitless Builder">
               ${getLang()==='de' ? 'Decklist' : 'Print Decklist'}
             </button>
+            <button onclick="event.stopPropagation(); printSavedDeckProxies(${deckIndex})" class="deck-action-btn deck-btn-proxy-all" title="${getLang()==='de' ? 'Alle Karten in den Proxy Printer' : 'Send full deck to Proxy Printer'}">
+              ${getLang()==='de' ? 'Proxy' : 'Print Proxy'}
+            </button>
+            <button onclick="event.stopPropagation(); printSavedDeckMissingProxies(${deckIndex})" class="deck-action-btn deck-btn-proxy-missing" title="${getLang()==='de' ? 'Nur fehlende Karten in den Proxy Printer' : 'Send only missing cards to Proxy Printer'}">
+              ${getLang()==='de' ? 'Fehlende Proxy' : 'Print Missing'}
+            </button>
             <button onclick="event.stopPropagation(); openCompareSavedDeck(${deckIndex})" class="deck-action-btn deck-btn-compare" title="${getLang()==='de' ? 'Vergleichen' : 'Compare'}">
               ${getLang()==='de' ? 'Vergleichen' : 'Compare'}
             </button>
@@ -4400,6 +4406,116 @@ window.showDeckComparison = showDeckComparison;
 window.addCompareNewCardsToProxy = addCompareNewCardsToProxy;
 window.filterMyDecks = filterMyDecks;
 window.saveCurrentDeckToProfile = saveCurrentDeckToProfile;
+
+// ============================================================
+// Saved-deck → Proxy Printer (full deck OR missing-only)
+// ============================================================
+//
+// Two flows from the My Decks action row:
+//   printSavedDeckProxies(idx)        — every card in the deck, full count
+//   printSavedDeckMissingProxies(idx) — only the (deck count - owned count)
+//                                       delta per print, so the user prints
+//                                       exactly the cards they still need.
+//
+// Both share the same plumbing: walk deck.cards, parse the
+// "CardName (SET NUMBER)" deckKey, push into window.proxyQueue via
+// addCardToProxyInternal (so we can suppress the per-card toast and
+// only render once at the end), then jump to the Proxy Printer tab.
+//
+// "Missing" math uses the user's collection counts keyed by
+// "name|set|number" — exact print, same convention as the Wishlist /
+// Collection toggles. If the user owns more copies of any OTHER print
+// of the card, those don't count here — printing for that specific
+// printed slot.
+function _gatherDeckCardsForProxy(deck, missingOnly) {
+    if (!deck || !deck.cards) return [];
+    const counts = (window.userCollectionCounts instanceof Map)
+        ? window.userCollectionCounts
+        : new Map();
+    const items = [];
+    for (const [deckKey, deckCount] of Object.entries(deck.cards)) {
+        const need = parseInt(deckCount || 0, 10);
+        if (need <= 0) continue;
+        // Parse "Card Name (SET NUMBER)" — same format used by every
+        // other deck consumer. Falls back to bare-name when the deck
+        // was saved before exact-print tracking landed.
+        const m = deckKey.match(/^(.+?)\s+\(([A-Z0-9-]+)\s+([A-Z0-9-]+)\)$/i);
+        let name = deckKey, setCode = '', number = '';
+        if (m) { name = m[1]; setCode = m[2]; number = m[3]; }
+
+        let copies = need;
+        if (missingOnly) {
+            const owned = counts.get(`${name}|${setCode}|${number}`) || 0;
+            copies = Math.max(0, need - owned);
+        }
+        if (copies > 0) items.push({ name, setCode, number, copies });
+    }
+    return items;
+}
+
+function printSavedDeckProxies(deckIndex) {
+    const deck = (window.userDecks || [])[deckIndex];
+    if (!deck) return;
+    _printSavedDeckHelper(deck, /*missingOnly*/ false);
+}
+
+function printSavedDeckMissingProxies(deckIndex) {
+    const deck = (window.userDecks || [])[deckIndex];
+    if (!deck) return;
+    _printSavedDeckHelper(deck, /*missingOnly*/ true);
+}
+
+function _printSavedDeckHelper(deck, missingOnly) {
+    const items = _gatherDeckCardsForProxy(deck, missingOnly);
+    const totalCopies = items.reduce((s, it) => s + it.copies, 0);
+
+    // Empty-state messages — distinguish "deck is empty" from
+    // "deck is fully owned, nothing missing to print".
+    if (totalCopies <= 0) {
+        if (typeof showToast === 'function') {
+            const isDe = (typeof getLang === 'function' && getLang() === 'de');
+            const msg = missingOnly
+                ? (isDe ? 'Du besitzt bereits alle Karten dieses Decks 🎉' : 'You already own every card in this deck 🎉')
+                : (isDe ? 'Dieses Deck enthält keine Karten zum Drucken.' : 'This deck has no cards to print.');
+            showToast(msg, missingOnly ? 'success' : 'warning');
+        }
+        return;
+    }
+
+    // Push everything in one batch — suppressRender / suppressToast
+    // / suppressPersist on each call means we render and persist
+    // exactly once at the end.
+    if (typeof addCardToProxyInternal !== 'function') {
+        console.error('[My Decks] Proxy queue helper not loaded yet');
+        return;
+    }
+    items.forEach(it => {
+        addCardToProxyInternal(it.name, it.setCode, it.number, it.copies, {
+            suppressToast: true, suppressRender: true, suppressPersist: true
+        });
+    });
+    if (typeof saveProxyQueue === 'function') saveProxyQueue();
+    if (typeof renderProxyQueue === 'function') renderProxyQueue();
+
+    if (typeof showToast === 'function') {
+        const isDe = (typeof getLang === 'function' && getLang() === 'de');
+        const cardWord = isDe ? 'Karten' : 'cards';
+        const prefix = missingOnly
+            ? (isDe ? 'Fehlende' : 'Missing')
+            : (isDe ? 'Alle' : 'All');
+        showToast(`${prefix} ${totalCopies} ${cardWord} → Proxy Printer`, 'success');
+    }
+
+    // Jump to the Proxy Printer tab so the user sees the queue.
+    if (typeof switchTabAndUpdateMenu === 'function') {
+        switchTabAndUpdateMenu('proxy');
+    } else if (typeof switchTab === 'function') {
+        switchTab('proxy');
+    }
+}
+
+window.printSavedDeckProxies = printSavedDeckProxies;
+window.printSavedDeckMissingProxies = printSavedDeckMissingProxies;
 
 // ============================================================
 // DEX TCG CSV COLLECTION IMPORT

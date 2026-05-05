@@ -8447,6 +8447,18 @@ html:not([lang="de"]):not([lang="en"]) .lang-de { display: none !important; }
 .deck-btn-print { background: rgba(52, 73, 94, 0.9); }
 .deck-btn-print:hover { background: #2c3e50; }
 
+/* "Print Proxy" — full deck → proxy queue. Uses a teal-toward-cyan tint
+   so it sits visually next to the dark Print Decklist button without
+   being mistaken for it. */
+.deck-btn-proxy-all { background: rgba(22, 160, 133, 0.9); }
+.deck-btn-proxy-all:hover { background: #117a65; }
+
+/* "Print Missing" — only the cards the user doesn't yet own. Slightly
+   darker / orange-warm to suggest "todo / shopping list" context, and
+   to clearly differentiate from the full-deck proxy variant above. */
+.deck-btn-proxy-missing { background: rgba(211, 84, 0, 0.9); }
+.deck-btn-proxy-missing:hover { background: #a04000; }
+
 .deck-btn-rename { background: rgba(142, 68, 173, 0.7); }
 .deck-btn-rename:hover { background: #7d3c98; }
 

@@ -415,6 +415,11 @@ SYNC_PATTERNS = [
     # update to backend/core/data/formats_catalog.json and the frontend
     # never sees the new format.
     "formats_catalog.json",
+    # Card-text + threat intel — produced by pokemon_card_effects_scraper
+    # + build_threat_intel.py and read by the consistency builder's
+    # tech-audit step (Stage 3).
+    "pokemon_card_effects.json",
+    "active_threats.json",
 ]
 
 

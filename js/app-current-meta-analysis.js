@@ -105,6 +105,204 @@
                 .trim();
         }
 
+        /**
+         * Merge Meta Live (Online) rows from current_meta_card_data.csv
+         * with the latest Major snapshot from tournament_cards_data_cards.csv,
+         * using additive deck counts.
+         *
+         * Why an explicit additive merge instead of just summing the two
+         * `meta` buckets in current_meta_card_data.csv?
+         *   The Meta Play! rows in that CSV are structurally sparse
+         *   (Limitless deck-list parser drops most cards — only 4 of
+         *   ~33 Prague Cynthia's Garchomp cards survive). Tournament
+         *   data gives the full per-deck list of every captured Major
+         *   tournament, so we use that side instead.
+         *
+         * Inputs
+         *   onlineRows:        Meta Live rows already filtered to the
+         *                      target archetype (post-stale-spelling-dedup).
+         *   tournamentRows:    Raw tournament_cards_data rows (full file).
+         *   archetype:         Canonical archetype name.
+         *
+         * Returns: a fresh array of card rows whose deck_count /
+         *          total_count / total_decks_in_archetype reflect the
+         *          combined Online + Major dataset. Cards present in
+         *          one source but not the other still get listed; the
+         *          missing-side contribution is simply 0.
+         *
+         * Skips silently (returns onlineRows unchanged) when there
+         * isn't enough Major data (<4 placements) — small samples
+         * would just inflate the divisor without adding signal.
+         */
+        function mergeOnlineMajorAdditive(onlineRows, tournamentRows, archetype) {
+            if (!Array.isArray(onlineRows) || !Array.isArray(tournamentRows) || !archetype) {
+                return onlineRows;
+            }
+            if (tournamentRows.length === 0) return onlineRows;
+
+            const stripPriceTag = (s) => String(s || '')
+                .replace(/\d+(?:[.,]\d+)?\$\d+(?:[.,]\d+)?€.*$/u, '')
+                .trim();
+            const archLower = String(archetype || '').trim().toLowerCase();
+
+            const archetypeRows = tournamentRows.filter(r => {
+                const cleaned = stripExSuffix(stripPriceTag(r.archetype || '')).toLowerCase();
+                return cleaned && cleaned === archLower;
+            });
+            if (archetypeRows.length === 0) return onlineRows;
+
+            // Latest tournament_date for this archetype — the ordinal
+            // English format ("25th April 2026") doesn't sort lexically
+            // so we parse explicitly.
+            const dateParser = (typeof parseEnglishTournamentDate === 'function')
+                ? parseEnglishTournamentDate
+                : (s) => { const d = new Date(String(s || '').replace(/(\d+)(st|nd|rd|th)/, '$1')); return isNaN(d.getTime()) ? null : d; };
+            let latestTs = -Infinity;
+            let latestRaw = '';
+            archetypeRows.forEach(r => {
+                const raw = String(r.tournament_date || '').trim();
+                if (!raw) return;
+                const d = dateParser(raw);
+                if (d && d.getTime() > latestTs) {
+                    latestTs = d.getTime();
+                    latestRaw = raw;
+                }
+            });
+            if (!latestRaw) return onlineRows;
+
+            // Aggregate per-card stats from the latest Major's rows.
+            // Each tournament_cards_data row is a single price-tagged
+            // archetype-deck-snapshot; bucket total = sum across the
+            // distinct (price-tagged) archetype strings.
+            const latestRows = archetypeRows.filter(r => String(r.tournament_date || '').trim() === latestRaw);
+            const archTotalsByTag = new Map();
+            const majorAgg = new Map(); // card_name_lower → { … }
+            latestRows.forEach(r => {
+                const tag = String(r.archetype || '').trim();
+                const archTotal = parseInt(r.total_decks_in_archetype || 0, 10) || 0;
+                if (tag && !archTotalsByTag.has(tag)) archTotalsByTag.set(tag, archTotal);
+
+                const cn = String(r.card_name || '').trim().toLowerCase();
+                if (!cn) return;
+                const dc = parseInt(r.deck_inclusion_count || 0, 10) || 0;
+                const tc = parseFloat(String(r.total_count || 0).replace(',', '.')) || 0;
+                const mc = parseInt(r.max_count || 0, 10) || 0;
+                if (!majorAgg.has(cn)) {
+                    majorAgg.set(cn, {
+                        card_name: r.card_name || '',
+                        deck_count: 0, total_count: 0, max_count: 0,
+                        set_code: r.set_code || '',
+                        set_number: r.set_number || '',
+                        rarity: r.rarity || '',
+                        type: r.type || '',
+                        image_url: r.image_url || '',
+                        is_ace_spec: r.is_ace_spec || '',
+                    });
+                }
+                const e = majorAgg.get(cn);
+                e.deck_count += dc;
+                e.total_count += tc;
+                e.max_count = Math.max(e.max_count, mc);
+            });
+            let majorTotalDecks = 0;
+            archTotalsByTag.forEach(v => { majorTotalDecks += v; });
+            if (majorTotalDecks < 4) return onlineRows;
+
+            // Online total: max(total_decks_in_archetype) across Meta Live rows.
+            // Per-source rows all carry the SAME total for one archetype,
+            // so max is correct (not sum, which would double-count prints).
+            let onlineTotal = 0;
+            onlineRows.forEach(card => {
+                const meta = (card.meta || '').trim();
+                if (meta && meta !== 'Meta Live') return;
+                const t = parseInt(card.total_decks_in_archetype || 0, 10) || 0;
+                if (t > onlineTotal) onlineTotal = t;
+            });
+            if (onlineTotal === 0) return onlineRows;
+            const combinedTotal = onlineTotal + majorTotalDecks;
+
+            // Group online rows by lower-case card name (multiple prints
+            // of the same card share their deck_count / total_count once
+            // the row is already stale-dedup'd, but we still aggregate
+            // defensively).
+            const onlineByName = new Map();
+            onlineRows.forEach(card => {
+                const cn = String(card.card_name || '').trim().toLowerCase();
+                if (!cn) return;
+                if (!onlineByName.has(cn)) onlineByName.set(cn, []);
+                onlineByName.get(cn).push(card);
+            });
+
+            const merged = [];
+            const seen = new Set();
+
+            // 1. Process every Online card; add Major contribution when present.
+            onlineByName.forEach((rows, cn) => {
+                let online_dc = 0, online_tc = 0, online_mc = 0;
+                const tmpl = rows[0];
+                rows.forEach(r => {
+                    online_dc += parseInt(r.deck_count || r.deck_inclusion_count || 0, 10) || 0;
+                    online_tc += parseFloat(String(r.total_count || 0).replace(',', '.')) || 0;
+                    online_mc = Math.max(online_mc, parseInt(r.max_count || 0, 10) || 0);
+                });
+                const major = majorAgg.get(cn);
+                const combined_dc = online_dc + (major ? major.deck_count : 0);
+                const combined_tc = online_tc + (major ? major.total_count : 0);
+                const combined_mc = Math.max(online_mc, major ? major.max_count : 0);
+                const pct = combinedTotal > 0 ? (combined_dc / combinedTotal) * 100 : 0;
+                merged.push({
+                    ...tmpl,
+                    deck_count: combined_dc,
+                    deck_inclusion_count: combined_dc,
+                    total_count: combined_tc,
+                    max_count: combined_mc,
+                    total_decks_in_archetype: combinedTotal,
+                    percentage_in_archetype: pct.toFixed(2).replace('.', ','),
+                    average_count: combined_dc > 0 ? (combined_tc / combined_dc).toFixed(2).replace('.', ',') : '0',
+                    average_count_overall: combinedTotal > 0 ? (combined_tc / combinedTotal).toFixed(2).replace('.', ',') : '0',
+                    meta: 'Meta Online+Major',
+                    _online_deck_count: online_dc,
+                    _major_deck_count: major ? major.deck_count : 0,
+                    _online_total: onlineTotal,
+                    _major_total: majorTotalDecks,
+                });
+                seen.add(cn);
+            });
+
+            // 2. Add Major-only cards (in Prague but absent from Online aggregate).
+            majorAgg.forEach((m, cn) => {
+                if (seen.has(cn)) return;
+                const pct = combinedTotal > 0 ? (m.deck_count / combinedTotal) * 100 : 0;
+                merged.push({
+                    archetype,
+                    card_name: m.card_name,
+                    card_identifier: `${m.set_code} ${m.set_number}`.trim(),
+                    deck_count: m.deck_count,
+                    deck_inclusion_count: m.deck_count,
+                    total_count: m.total_count,
+                    max_count: m.max_count,
+                    total_decks_in_archetype: combinedTotal,
+                    percentage_in_archetype: pct.toFixed(2).replace('.', ','),
+                    average_count: m.deck_count > 0 ? (m.total_count / m.deck_count).toFixed(2).replace('.', ',') : '0',
+                    average_count_overall: combinedTotal > 0 ? (m.total_count / combinedTotal).toFixed(2).replace('.', ',') : '0',
+                    set_code: m.set_code,
+                    set_number: m.set_number,
+                    rarity: m.rarity,
+                    type: m.type,
+                    image_url: m.image_url,
+                    is_ace_spec: m.is_ace_spec,
+                    meta: 'Meta Online+Major',
+                    _online_deck_count: 0,
+                    _major_deck_count: m.deck_count,
+                    _online_total: onlineTotal,
+                    _major_total: majorTotalDecks,
+                });
+            });
+
+            devLog(`[Current Meta] Online+Major additive merge: online=${onlineByName.size}, major=${majorAgg.size}, merged=${merged.length} | totalDecks ${onlineTotal}+${majorTotalDecks}=${combinedTotal} | latestMajor=${latestRaw}`);
+            return merged;
+        }
+
         // ── Possessive-trainer normalisation ─────────────────────────
         // Mirrors backend/scrapers/current_meta_analysis_scraper._POSSESSIVE_TRAINERS.
         // Limitless source data is inconsistent — sometimes "Cynthia Garchomp Ex",
@@ -604,7 +802,23 @@
                 clearCurrentMetaDeckView();
                 return;
             }
-            
+
+            // Pre-load tournament_cards_data when the user is on the
+            // 'Online + Major' filter — the additive merge inside the
+            // setTimeout block needs it synchronously, and pre-loading
+            // here keeps the merge logic simple. Cached after first load.
+            if (currentMetaFormatFilter === 'all' && !window.currentMetaTournamentCardsData) {
+                try {
+                    const rawTournament = await loadCSV('tournament_cards_data_cards.csv', { latestChunkOnly: true });
+                    if (rawTournament && rawTournament.length) {
+                        window.currentMetaTournamentCardsDataRaw = rawTournament;
+                        window.currentMetaTournamentCardsData = rawTournament;
+                    }
+                } catch (e) {
+                    devLog('[Current Meta] Could not load tournament data for Online+Major merge:', e);
+                }
+            }
+
             // Show loading indicator for aggregation work
             if (needsAggregation && deckCards.length > 100) {
                 showToast(`Processing ${deckCards.length} card entries... This may take a moment`, 'info');
@@ -641,18 +855,25 @@
 
                 if (needsAggregation && deckCards.length > 0) {
                     deckCards = aggregateCardStatsByDate(deckCards);
+                } else if (currentMetaFormatFilter === 'all' && deckCards.length > 0) {
+                    // 'Online + Major' filter: combine Meta Live (Online) rows
+                    // with the latest Major snapshot from tournament_cards_data
+                    // additively. Online_count + Major_count over Online_total +
+                    // Major_total — the user's mathematically-correct intuition
+                    // that the two slices of the meta should add together.
+                    //
+                    // Why we use tournament_cards_data and not the Meta Play!
+                    // rows in current_meta_card_data.csv: those rows are
+                    // structurally sparse (Limitless deck-list parser drops
+                    // most cards — only 4 of ~33 Cynthia's Garchomp cards
+                    // surfaced for Prague). tournament_cards_data captures the
+                    // full per-deck list so the additive merge can credit
+                    // every card the Major decks actually played.
+                    const tournamentRows = window.currentMetaTournamentCardsData || [];
+                    if (tournamentRows.length > 0) {
+                        deckCards = mergeOnlineMajorAdditive(deckCards, tournamentRows, archetype);
+                    }
                 }
-
-                // NOTE: We deliberately do NOT bucket-aggregate the 'all' filter
-                // by `meta` tag here. The Meta Play! rows in current_meta_card_data.csv
-                // are structurally sparse (4-11 cards per archetype vs. 40+ per
-                // actual deck — the limitless deck-list parser drops most cards),
-                // so summing per-source totals (e.g. 20 Online + 16 Major = 36)
-                // would unfairly drop staples like Boss's Orders from 100% → 56%
-                // because the Major-side row simply isn't present for them. The
-                // consistency builder gets the temporal-anchor it needs from the
-                // rich tournament_cards_data_cards.csv via the latest-Major
-                // anchor in autoCompleteConsistency() instead.
 
                 // Deduplicate only after statistics have been merged across tournaments/prints.
                 deckCards = deduplicateCards(deckCards);

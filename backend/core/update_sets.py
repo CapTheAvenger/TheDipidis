@@ -264,93 +264,101 @@ def scrape_release_dates() -> dict:
         if not html:
             return out
         soup = BeautifulSoup(html, 'lxml')
-
-        # Each set typically lives in a <tr> with a code cell + date cell.
-        for row in soup.select('tr'):
-            cells = row.find_all('td')
-            if len(cells) < 2:
-                continue
-            code = ''
-            for cell in cells[:3]:
-                txt = cell.get_text(strip=True).upper()
-                if 2 <= len(txt) <= 6 and txt.replace('-', '').isalnum() and not txt.isdigit():
-                    code = txt
-                    break
-            if not code:
-                continue
-            row_text = row.get_text(' ', strip=True)
-            iso = _extract_iso_date(row_text)
-            if iso:
-                out.setdefault(code, iso)
-
-        # Fallback: scan all anchors that link to a set page and look at
-        # nearby text for a date — covers card-page layouts that use
-        # divs instead of tables.
-        for a in soup.find_all('a', href=True):
-            href = a['href']
-            m = re.search(r'(?:[?&]set=|/sets/)([A-Z0-9-]{2,6})', href, re.IGNORECASE)
-            if not m:
-                continue
-            code = m.group(1).upper()
-            if code in out:
-                continue
-            container = a.find_parent(['li', 'div', 'tr']) or a.parent
-            if not container:
-                continue
-            iso = _extract_iso_date(container.get_text(' ', strip=True))
-            if iso:
-                out[code] = iso
+        _parse_release_table(soup, out)
     except Exception as e:
         print(f"[Update Sets] Release-date scrape failed: {e}")
     return out
 
 
-def scrape_jp_release_dates() -> dict:
-    """JP twin of scrape_release_dates. Targets limitlesstcg.com/cards/jp,
-    which lists the Japanese set rotation independently from the EN page.
-    Same parsing strategy (table rows + anchor-context fallback) so a
-    Limitless layout change is symmetric between EN and JP runs.
+# Pre-compiled — used by both EN and JP scrapers.
+# /cards/jp/M4 must capture "M4", not the literal "jp" segment, so the
+# alternation matches `/cards/` with an optional `jp/` (or any other
+# region segment) before the actual code. Same trick for /sets/jp/...
+# in case Limitless ever moves to that prefix.
+_CODE_LINK_RE = re.compile(
+    r'(?:/cards/(?:jp/|en/)?|/sets/(?:jp/|en/)?|[?&]set=)([A-Z0-9-]{2,6})(?:[/?#]|$)',
+    re.IGNORECASE,
+)
 
-    Best-effort — returns the subset that parsed cleanly. Empty dict
-    when the page is unreachable; caller falls back to FALLBACK_JP_RELEASE_DATES.
+
+def _parse_release_table(soup, out: dict) -> None:
+    """Shared parser for both /cards (EN) and /cards/jp (JP).
+
+    Limitless's current layout (verified live 2026-05-05) renders one
+    <tr> per set with five cells:
+      cell[0]  Set name + code, e.g. "Perfect Order POR" with an
+               anchor pointing at /cards/POR
+      cell[1]  Release date in compact "DD MMM YY" form, e.g. "27 Mar 26"
+      cell[2]  Card-count + completion percentage
+      cell[3]  USD price, anchor → tcgplayer
+      cell[4]  EUR price, anchor → cardmarket
+
+    Older layouts (and /cards/jp at one point) put both name and code
+    in a single token-sized cell; we keep a fallback path that scans
+    cell text for a 2-6-character all-caps token. Anchor-href is
+    preferred because cell[0] currently combines a multi-word name
+    with the code and a length check on the whole text would skip it.
     """
+    # Pass 1 — table rows with the code-from-anchor + date-from-cell[1] pattern.
+    for row in soup.select('tr'):
+        cells = row.find_all('td')
+        if len(cells) < 2:
+            continue
+        code = ''
+        # Try anchor-href first (works for any code length, even when
+        # the cell text combines name + code).
+        for a in cells[0].find_all('a', href=True):
+            m = _CODE_LINK_RE.search(a['href'])
+            if m:
+                code = m.group(1).upper()
+                break
+        # Fallback: trailing token of cell[0] text — Limitless renders
+        # the code as the last whitespace-separated token of the name
+        # cell (e.g. "Perfect Order POR" → "POR").
+        if not code:
+            tokens = cells[0].get_text(' ', strip=True).split()
+            for tok in reversed(tokens):
+                t = tok.strip().upper()
+                if 2 <= len(t) <= 6 and t.replace('-', '').isalnum() and not t.isdigit():
+                    code = t
+                    break
+        if not code:
+            continue
+        # Date from cell[1] preferentially, fall back to whole-row text
+        # so layouts that put the date in a different column still work.
+        iso = _extract_iso_date(cells[1].get_text(' ', strip=True))
+        if not iso:
+            iso = _extract_iso_date(row.get_text(' ', strip=True))
+        if iso:
+            out.setdefault(code, iso)
+
+    # Pass 2 — anchor sweep. Catches future Limitless layouts that ditch
+    # the <table> wrapper.
+    for a in soup.find_all('a', href=True):
+        m = _CODE_LINK_RE.search(a['href'])
+        if not m:
+            continue
+        code = m.group(1).upper()
+        if code in out:
+            continue
+        container = a.find_parent(['li', 'div', 'tr']) or a.parent
+        if not container:
+            continue
+        iso = _extract_iso_date(container.get_text(' ', strip=True))
+        if iso:
+            out[code] = iso
+
+
+def scrape_jp_release_dates() -> dict:
+    """JP twin of scrape_release_dates — same parser, different URL.
+    Returns {code: iso_date} from limitlesstcg.com/cards/jp."""
     out = {}
     try:
         html = safe_fetch_html("https://limitlesstcg.com/cards/jp", timeout=15)
         if not html:
             return out
         soup = BeautifulSoup(html, 'lxml')
-        for row in soup.select('tr'):
-            cells = row.find_all('td')
-            if len(cells) < 2:
-                continue
-            code = ''
-            for cell in cells[:3]:
-                txt = cell.get_text(strip=True).upper()
-                if 2 <= len(txt) <= 6 and txt.replace('-', '').isalnum() and not txt.isdigit():
-                    code = txt
-                    break
-            if not code:
-                continue
-            row_text = row.get_text(' ', strip=True)
-            iso = _extract_iso_date(row_text)
-            if iso:
-                out.setdefault(code, iso)
-
-        for a in soup.find_all('a', href=True):
-            href = a['href']
-            m = re.search(r'(?:[?&]set=|/sets/)([A-Z0-9-]{2,6})', href, re.IGNORECASE)
-            if not m:
-                continue
-            code = m.group(1).upper()
-            if code in out:
-                continue
-            container = a.find_parent(['li', 'div', 'tr']) or a.parent
-            if not container:
-                continue
-            iso = _extract_iso_date(container.get_text(' ', strip=True))
-            if iso:
-                out[code] = iso
+        _parse_release_table(soup, out)
     except Exception as e:
         print(f"[Update Sets] JP release-date scrape failed: {e}")
     return out
@@ -374,18 +382,41 @@ def _pick_current_set(release_dates: dict) -> str:
 
 def _extract_iso_date(text: str) -> str:
     """Pull a YYYY-MM-DD date out of free text. Accepts ISO and a few
-    common English/German formats. Returns '' on no match."""
+    common English/German formats. Returns '' on no match.
+
+    Limitless's /cards listing emits dates in compact "DD MMM YY"
+    form (e.g. "27 Mar 26") with neither commas nor 4-digit years —
+    that format MUST stay first in the regex chain because the older
+    "Mar 27, 2026" matcher would mis-parse "27 Mar 26" as "Mar 26"
+    (= empty day) when run first.
+    """
     if not text:
         return ''
-    # ISO: 2026-03-27
-    m = re.search(r'\b(20\d{2})-(\d{2})-(\d{2})\b', text)
-    if m:
-        return f"{m.group(1)}-{m.group(2)}-{m.group(3)}"
-    # English: March 27, 2026 / Mar 27 2026
     months = {
         'jan': '01', 'feb': '02', 'mar': '03', 'apr': '04', 'may': '05', 'jun': '06',
         'jul': '07', 'aug': '08', 'sep': '09', 'oct': '10', 'nov': '11', 'dec': '12',
     }
+
+    # Limitless /cards table format: "27 Mar 26" or "27 Mar 2026"
+    # (day first, short month name, 2- or 4-digit year, no commas).
+    m = re.search(
+        r'\b(\d{1,2})\s+(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\s+(\d{2,4})\b',
+        text, re.IGNORECASE
+    )
+    if m:
+        day = int(m.group(1))
+        mon = months[m.group(2).lower()[:3]]
+        year = m.group(3)
+        if len(year) == 2:
+            year = '20' + year  # 2-digit → 20YY
+        return f"{year}-{mon}-{day:02d}"
+
+    # ISO: 2026-03-27
+    m = re.search(r'\b(20\d{2})-(\d{2})-(\d{2})\b', text)
+    if m:
+        return f"{m.group(1)}-{m.group(2)}-{m.group(3)}"
+
+    # English month-first: March 27, 2026 / Mar 27 2026
     m = re.search(
         r'\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\s+(\d{1,2}),?\s+(20\d{2})',
         text, re.IGNORECASE
@@ -436,15 +467,28 @@ def _add_days(iso_date: str, days: int) -> str:
         return ''
 
 
-def write_sets_metadata(sets_order: dict, release_dates: dict) -> str:
+def write_sets_metadata(sets_order: dict, release_dates: dict,
+                        jp_release_dates: dict = None) -> str:
     """Combine order + release date into sets_metadata.json. Returns
-    the output path for downstream logging."""
+    the output path for downstream logging.
+
+    Both EN and JP release dates merge into the same code → date map
+    because EN and JP set codes never collide (POR vs M3 vs M4 etc.),
+    so the lookup chain is: EN-live → JP-live → EN-fallback →
+    JP-fallback. Without JP merged in, JP-only codes (M3 / M4 / MC /
+    MP1) would stay with empty release_date and the chunker downstream
+    would treat them as order=0 and bin them into legacy."""
+    jp_release_dates = jp_release_dates or {}
     metadata = {}
     for code, order in sets_order.items():
-        metadata[code] = {
-            'order':        order,
-            'release_date': release_dates.get(code, FALLBACK_RELEASE_DATES.get(code, '')),
-        }
+        rel = (
+            release_dates.get(code)
+            or jp_release_dates.get(code)
+            or FALLBACK_RELEASE_DATES.get(code)
+            or FALLBACK_JP_RELEASE_DATES.get(code)
+            or ''
+        )
+        metadata[code] = {'order': order, 'release_date': rel}
     out_path = os.path.join(data_dir, 'sets_metadata.json')
     with open(out_path, 'w', encoding='utf-8') as f:
         json.dump(metadata, f, indent=2, sort_keys=True, ensure_ascii=False)
@@ -679,7 +723,7 @@ def main():
     print(f"[Update Sets] ✓ Saved {len(sets_order)} sets to: {sets_path}")
 
     # 2) sets_metadata.json (NEW: code -> {order, release_date})
-    metadata_path = write_sets_metadata(sets_order, release_dates)
+    metadata_path = write_sets_metadata(sets_order, release_dates, jp_release_dates)
     print(f"[Update Sets] ✓ Saved metadata to: {metadata_path}")
 
     # 3) format_window.json (auto-pick latest released set per region)

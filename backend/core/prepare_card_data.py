@@ -408,6 +408,13 @@ SYNC_PATTERNS = [
     "sets.json",
     "sets_metadata.json",
     "format_window.json",
+    # Formats catalog — produced by tournament_scraper_JH.update_formats_catalog
+    # whenever a new format key shows up on Limitless (e.g. TEF-POR
+    # added on the 2026-03-27 rotation). Seeded into the workflow's
+    # input copy AND must sync back, otherwise CI runs would write the
+    # update to backend/core/data/formats_catalog.json and the frontend
+    # never sees the new format.
+    "formats_catalog.json",
 ]
 
 

@@ -99,7 +99,19 @@ def create_merged_database():
     print(f"✓ Preise geladen: {len(prices_dict)} Einträge ({fe_count} frontend, {be_override} backend-override)")
     en_keys = {f"{c.get('set')}_{c.get('number')}" for c in english_cards}
     jp_to_add = [c for c in japanese_cards if f"{c.get('set')}_{c.get('number')}" not in en_keys]
-    
+
+    # Tag JP-only rows so the frontend can render an honest
+    # "Japan-only, no Cardmarket listing" affordance instead of an
+    # empty price field that reads like a scrape failure. Without
+    # this flag, the audit can't tell apart "we have an EN card and
+    # missed its price" (real bug) from "this card never released
+    # in EN — Cardmarket has nothing to list" (working as intended).
+    # The big offenders are JP promo sets (SP, SVP, SMP, M4) where
+    # 100s of cards exist on the Limitless JP scan side but have no
+    # EN/Cardmarket counterpart.
+    for c in jp_to_add:
+        c['jp_only'] = True
+
     merged_cards = english_cards + jp_to_add
     
     match_count = 0
@@ -326,10 +338,19 @@ def split_card_database_chunks(all_cards: list, frontend_data: str):
     # Manifest version = hash of all chunk hashes → changes when any card changes
     version = hashlib.md5(f"{h_std}{h_ext}{h_leg}".encode()).hexdigest()[:12]
 
+    # Count cards AFTER the SUPERSEDED-set filter so the totalCards
+    # field matches what the chunks actually contain. Earlier we
+    # used len(all_cards) which still included M3-preview cards that
+    # got dropped by the loop above, producing a 116-card phantom
+    # diff (manifest claimed 21364, chunks had 21248). The mismatch
+    # was harmless for rendering but caused the cache-key hash to
+    # rotate on runs where the only change was the superseded-drop
+    # count, triggering unnecessary IndexedDB invalidations.
+    chunked_total = len(standard) + len(extended) + len(legacy)
     manifest = {
         "version": version,
         "generated": __import__("datetime").datetime.now().astimezone().isoformat(),
-        "totalCards": len(all_cards),
+        "totalCards": chunked_total,
         "chunks": [
             {"file": "cards_chunk_standard.json", "era": "standard", "count": len(standard), "hash": h_std},
             {"file": "cards_chunk_extended.json", "era": "extended", "count": len(extended), "hash": h_ext},

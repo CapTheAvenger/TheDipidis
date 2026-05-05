@@ -710,6 +710,81 @@ def revalidate_recent_tournament_meta(monolith_path: str,
 # ============================================================================
 # MAIN
 # ============================================================================
+def _reassemble_monolith_from_chunks(monolith_path: str, data_dir: str) -> int:
+    """Re-create the gitignored monolith from the committed per-meta
+    chunk files when it's missing (= we're on a fresh CI runner).
+
+    Why this matters: the monolith is gitignored (111 MB → too big for
+    git), only the per-meta chunks ship in the repo. On every GH Actions
+    run the workspace starts with chunks but no monolith. Without this
+    reassembly:
+      1. tournament_scraper_JH.save_csv_files opens the monolith with
+         mode="w" (since the file doesn't exist) — even with
+         append_mode=True the existence check at line ~542 fails.
+      2. Only the handful of NEW tournaments scraped this run get
+         written. Monolith ends up tiny.
+      3. prepare_card_data.split_tournament_cards reads the tiny
+         monolith and emits tiny chunks (e.g. SVI-PFL went from 73 980
+         → 11 017 rows on the 2026-05-03 weekly run, a ~85 % data
+         loss).
+      4. Those tiny chunks get committed back, overwriting the full
+         historical chunks. Past Meta tab silently degrades each week.
+
+    Reassembly: concat every tournament_cards_data_cards_*.csv chunk
+    that's NOT the monolith itself (excluding the bare filename and
+    any temp/tmp files) into a single CSV with one header. The chunks
+    already share the same column schema — split_tournament_cards
+    wrote them.
+
+    Returns the number of rows reassembled (0 if monolith already
+    existed or no chunks to assemble).
+    """
+    if os.path.isfile(monolith_path):
+        return 0
+
+    monolith_basename = os.path.basename(monolith_path)
+    chunks = []
+    try:
+        for f in sorted(os.listdir(data_dir)):
+            if not f.startswith("tournament_cards_data_cards_"):
+                continue
+            if not f.endswith(".csv"):
+                continue
+            if f == monolith_basename:
+                continue
+            chunks.append(os.path.join(data_dir, f))
+    except OSError:
+        return 0
+
+    if not chunks:
+        logger.info(
+            "[reassemble] No monolith and no chunks at %s — nothing to seed.",
+            data_dir,
+        )
+        return 0
+
+    rows_written = 0
+    fieldnames: List[str] = []
+    with open(monolith_path, "w", newline="", encoding="utf-8-sig") as dst:
+        writer = None
+        for chunk_path in chunks:
+            with open(chunk_path, "r", encoding="utf-8-sig") as src:
+                reader = csv.DictReader(src, delimiter=";")
+                if writer is None:
+                    fieldnames = list(reader.fieldnames or [])
+                    writer = csv.DictWriter(dst, fieldnames=fieldnames, delimiter=";")
+                    writer.writeheader()
+                for row in reader:
+                    writer.writerow(row)
+                    rows_written += 1
+
+    logger.info(
+        "[reassemble] Rebuilt monolith from %d chunks (%d rows) — append-mode preserved.",
+        len(chunks), rows_written,
+    )
+    return rows_written
+
+
 def main():
     logger.info("=" * 60)
     logger.info("TOURNAMENT SCRAPER JH - FAST EDITION")
@@ -723,11 +798,24 @@ def main():
         logger.error("Konnte Karten-DB nicht laden: %s", e)
         return
 
+    monolith_path = os.path.join(
+        get_data_dir(),
+        settings.get("output_file") or "tournament_cards_data_cards.csv",
+    )
+
+    # ── Reassemble the gitignored monolith from committed per-meta
+    #    chunks before anything else looks at it. On CI runners the
+    #    monolith doesn't exist (gitignored, 111 MB), so without this
+    #    seed step the append-mode in save_csv_files would write a
+    #    fresh tiny monolith and prepare_card_data would shrink the
+    #    chunks back accordingly.
+    _reassemble_monolith_from_chunks(monolith_path, get_data_dir())
+
     # ── Heal retroactive Limitless format renames before scraping new
     #    tournaments. Cheap (one HTTP request per recent tournament,
     #    rate-limited) and idempotent — converges to truth.
     revalidate_recent_tournament_meta(
-        monolith_path=os.path.join(get_data_dir(), settings.get("output_file") or "tournament_cards_data_cards.csv"),
+        monolith_path=monolith_path,
         max_age_days=int(settings.get("revalidate_max_age_days", 60)),
         delay=float(settings.get("delay_between_requests", 1.5)),
     )

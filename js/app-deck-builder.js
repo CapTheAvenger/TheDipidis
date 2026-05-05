@@ -3454,6 +3454,75 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 }
             }
 
+            // ── 2b3. Meta Tech Audit (currentMeta only) ──
+            // Reads data/active_threats.json (built by Stage 2) and tags
+            // cards in the user's archetype data that already serve as
+            // counters to currently-active meta threats. The score loop
+            // below boosts those cards instead of injecting new ones —
+            // the user explicitly asked for "boost what's already in
+            // the deck data, don't sinnlos eine Switch reinpacken".
+            //
+            // Boost magnitude (+18 flat) is calibrated so a card sitting
+            // at ~10% archetype share crosses the Stage 2 (≥25) threshold
+            // when it counters an active threat — enough to move it from
+            // "occasional inclusion" to "core slot" if the meta calls for
+            // it, but not enough to override genuine Stage 1 staples.
+            // Counter lookup is by lower-case card NAME, not card_id —
+            // a deck may run an older legal print (Switch MEG 130) while
+            // the JSON only lists the newest legal print (Switch PFL 123).
+            // Same card, same effect, same counter role.
+            const techAuditCounterCats = new Map(); // nameLower → Set(threat-categories)
+            const techAuditActiveThreats = new Map(); // category → {weighted_meta_share, sample_threat_card_names}
+            const TECH_AUDIT_ACTIVE_FLOOR = 0.05; // 5 % of meta — lower bar
+                                                  // than the JSON's own
+                                                  // category_floor (2 %)
+                                                  // to avoid boosting on
+                                                  // very-niche threats.
+            if (source === 'currentMeta') {
+                if (window._activeThreatsCache === undefined) {
+                    try {
+                        const resp = await fetch('data/active_threats.json', { cache: 'no-cache' });
+                        window._activeThreatsCache = resp.ok ? await resp.json() : null;
+                    } catch (e) {
+                        devLog('[Consistency][TechAudit] active_threats.json unavailable:', e);
+                        window._activeThreatsCache = null;
+                    }
+                }
+                const intel = window._activeThreatsCache;
+                if (intel && intel.threats && intel.counters) {
+                    for (const [cat, info] of Object.entries(intel.threats)) {
+                        const wms = parseFloat(info?.weighted_meta_share || 0) || 0;
+                        if (wms < TECH_AUDIT_ACTIVE_FLOOR) continue;
+                        // Track which threat cards drive the category — used
+                        // to build the per-card explanation in the build summary.
+                        const sampleNames = (info.cards || [])
+                            .slice(0, 3)
+                            .map(c => c.card_name)
+                            .filter(Boolean);
+                        techAuditActiveThreats.set(cat, {
+                            weighted_meta_share: wms,
+                            sample_threat_card_names: sampleNames,
+                        });
+                    }
+                    // For every active category, index the counter card
+                    // NAMES (lower-case) so we match every legal print of
+                    // the same card.
+                    techAuditActiveThreats.forEach((_meta, cat) => {
+                        const counters = intel.counters[cat] || [];
+                        counters.forEach(c => {
+                            const nameLower = String(c.card_name || '').trim().toLowerCase();
+                            if (!nameLower) return;
+                            const setOfCats = techAuditCounterCats.get(nameLower) || new Set();
+                            setOfCats.add(cat);
+                            techAuditCounterCats.set(nameLower, setOfCats);
+                        });
+                    });
+                    if (techAuditActiveThreats.size > 0) {
+                        devLog(`[Consistency][TechAudit] active categories: ${Array.from(techAuditActiveThreats.keys()).join(', ')} | counter cards indexed: ${techAuditCounterCats.size}`);
+                    }
+                }
+            }
+
             // ── 2c. Compute final consistencyScore per card ──
             deckCards.forEach(card => {
                 const sharePercent = Math.min(100, Math.max(0, parseFloat((card.percentage_in_archetype || '0').toString().replace(',', '.')) || 0));
@@ -3512,11 +3581,31 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                     card.consistencyScore = Math.min(card.consistencyScore, 24);
                 }
 
-                if (metaBoost > 0 || Math.abs(recencyBoost) > 0.01 || card._latestMajorAnchored || card._latestMajorAbsent) {
+                // Tech audit boost — only fires for cards that ARE in the
+                // archetype's data. We never inject new cards; we just
+                // raise the priority of counters the deck already runs
+                // when an active meta threat would otherwise punish their
+                // absence. Match by lower-case card name so older legal
+                // prints (Switch MEG vs PFL) still get the boost.
+                if (techAuditActiveThreats.size > 0) {
+                    const cats = techAuditCounterCats.get(nameLower);
+                    if (cats && cats.size > 0) {
+                        const before = card.consistencyScore;
+                        // +18 flat is enough to push a borderline-Stage-2
+                        // counter (~10 % archetype share) over the 25
+                        // threshold without overriding Stage 1 staples.
+                        card.consistencyScore = Math.min(120, card.consistencyScore + 18);
+                        card._techCounterFor = Array.from(cats);
+                        devLog(`[Consistency][TechAudit] BOOST ${card.card_name} counters [${card._techCounterFor.join(', ')}]: ${before.toFixed(1)} → ${card.consistencyScore.toFixed(1)}`);
+                    }
+                }
+
+                if (metaBoost > 0 || Math.abs(recencyBoost) > 0.01 || card._latestMajorAnchored || card._latestMajorAbsent || card._techCounterFor) {
                     const anchorTag = card._latestMajorAnchored ? ` [Major:${baselineShare.toFixed(0)}%]`
                                     : card._latestMajorAbsent ? ' [Major:absent]'
                                     : '';
-                    devLog(`[Consistency][Score] ${card.card_name}: share=${baselineShare.toFixed(1)}% × meta=${(1+metaBoost).toFixed(2)} × recency=${(1+recencyBoost).toFixed(2)}${anchorTag} → score=${card.consistencyScore.toFixed(1)}`);
+                    const techTag = card._techCounterFor ? ` [Tech:${card._techCounterFor.join(',')}]` : '';
+                    devLog(`[Consistency][Score] ${card.card_name}: share=${baselineShare.toFixed(1)}% × meta=${(1+metaBoost).toFixed(2)} × recency=${(1+recencyBoost).toFixed(2)}${anchorTag}${techTag} → score=${card.consistencyScore.toFixed(1)}`);
                 }
             });
 
@@ -3684,6 +3773,10 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             if (hasMetaData) algoDesc += ' | +Meta Boost';
             if (hasRecency) algoDesc += ' | +Recency';
             if (hasLatestMajorAnchor) algoDesc += ` | +Latest Major Anchor (${latestMajorDate})`;
+            if (techAuditActiveThreats.size > 0) {
+                const cats = Array.from(techAuditActiveThreats.keys()).join(', ');
+                algoDesc += ` | +Tech Audit (active: ${cats})`;
+            }
 
             let summary = `MAX CONSISTENCY Deck (${currentTotal} ${t('deck.cards')}):\n`;
             summary += `Algorithm: ${algoDesc}\n\n`;
@@ -3695,6 +3788,9 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                     line += ` ${arrow}${((c._recencyRatio - 1) * 100).toFixed(0)}%`;
                 }
                 if (c._latestMajorAnchored) line += ' ✓Major';
+                if (c._techCounterFor && c._techCounterFor.length) {
+                    line += ` ⚔counters:${c._techCounterFor.join(',')}`;
+                }
                 line += ` → ${c.consistencyScore.toFixed(0)})`;
                 summary += line + '\n';
             });

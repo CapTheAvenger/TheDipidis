@@ -83,7 +83,14 @@ logger = setup_logging("archetype_scraper")
 # SETTINGS
 # ============================================================================
 DEFAULT_SETTINGS = {
-    "start_date": "24.01.2026",
+    # Auto-synced by update_sets.apply_format_window_to_scraper_settings
+    # to format_window.jp_release_date on every run. Hardcoded fallback
+    # below = the JP rotation we know is current at the time this code
+    # was written; if format_window.json is missing AND the unified
+    # config doesn't override, we want a sane post-rotation default,
+    # NOT the pre-rotation 24.01.2026 baseline that would re-pull all
+    # M3-era tournaments back into Current.
+    "start_date": "13.03.2026",
     "end_date": "auto",
     "delay_between_requests": 1.5,
     "max_workers": 5,

@@ -1655,16 +1655,11 @@ function updateDecksUI() {
   const decksGrid = document.getElementById('decks-grid');
   if (!decksGrid) return;
 
-  // Remember which decks are currently expanded so we can restore after rebuild
-  const expandedDeckIds = new Set();
-  decksGrid.querySelectorAll('[id^="saved-deck-"]').forEach(el => {
-    if (el.id && !el.id.endsWith('-arrow') && el.style.display !== 'none') {
-      // Map by deck Firestore ID (stable across index changes)
-      const idx = parseInt(el.id.replace('saved-deck-', ''), 10);
-      const deck = (window.userDecks || [])[idx];
-      if (deck && deck.id) expandedDeckIds.add(deck.id);
-    }
-  });
+  // Per user preference (2026-05-05): every render starts with all
+  // decks collapsed. The previous "remember + restore expanded state"
+  // pass made the My Decks list creep open over time as the user
+  // opened decks during a session, then never collapsed again on
+  // re-render — visually noisier than just starting fresh.
 
   // Update deck count
   const decksCount = document.getElementById('profile-decks-count');
@@ -2192,22 +2187,22 @@ function updateDecksUI() {
               ${getLang()==='de' ? 'Decklist' : 'Print Decklist'}
             </button>
             <button onclick="event.stopPropagation(); openCompareSavedDeck(${deckIndex})" class="deck-action-btn deck-btn-compare" title="${getLang()==='de' ? 'Vergleichen' : 'Compare'}">
-              📊 ${getLang()==='de' ? 'Vergleichen' : 'Compare'}
+              ${getLang()==='de' ? 'Vergleichen' : 'Compare'}
             </button>
             <button onclick="event.stopPropagation(); moveDeckToFolder(${deckIndex})" class="deck-action-btn deck-btn-folder" title="${getLang()==='de' ? 'In Ordner verschieben' : 'Move to folder'}">
-              📁 ${getLang()==='de' ? 'Ordner' : 'Folder'}
+              ${getLang()==='de' ? 'Ordner' : 'Folder'}
             </button>
             <button onclick="event.stopPropagation(); exportSavedDeckAsImage(${deckIndex})" class="deck-action-btn deck-btn-export" title="${getLang()==='de' ? 'Als Bild speichern' : 'Save as image'}">
-              🖼️ ${getLang()==='de' ? 'Bild' : 'Image'}
+              ${getLang()==='de' ? 'Bild' : 'Image'}
             </button>
             <button onclick="event.stopPropagation(); renameDeck(${deckIndex})" class="deck-action-btn deck-btn-rename" title="${getLang()==='de' ? 'Umbenennen' : 'Rename'}">
-              ✏️ ${getLang()==='de' ? 'Umbenennen' : 'Rename'}
+              ${getLang()==='de' ? 'Umbenennen' : 'Rename'}
             </button>
             <button onclick="event.stopPropagation(); duplicateDeck(${deckIndex})" class="deck-action-btn deck-btn-duplicate" title="${getLang()==='de' ? 'Duplizieren' : 'Duplicate'}">
-              📑 ${getLang()==='de' ? 'Dupl.' : 'Duplicate'}
+              ${getLang()==='de' ? 'Duplizieren' : 'Duplicate'}
             </button>
             <button onclick="event.stopPropagation(); deleteDeck('${safeDeckDeleteIdJs}')" class="deck-action-btn deck-btn-delete" title="${getLang()==='de' ? 'Löschen' : 'Delete'}">
-              🗑 ${getLang()==='de' ? 'Löschen' : 'Delete'}
+              ${getLang()==='de' ? 'Löschen' : 'Delete'}
             </button>
             <div id="${deckId}-arrow" style="font-size: 1.5em; transition: transform 0.3s; transform: rotate(0deg); margin-left: auto;">▼</div>
           </div>
@@ -2236,14 +2231,8 @@ function updateDecksUI() {
     `;
   }).join('');
   
-  // Restore previously expanded decks
-  if (expandedDeckIds.size > 0) {
-    (window.userDecks || []).forEach((deck, idx) => {
-      if (deck && deck.id && expandedDeckIds.has(deck.id)) {
-        toggleDeckCollapse(`saved-deck-${idx}`);
-      }
-    });
-  }
+  // No restore-expanded pass — see the comment at the top of
+  // updateDecksUI for why every render starts collapsed.
 
   // Render folder navigation if any folders exist
   renderFolderNav();

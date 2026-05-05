@@ -1,8 +1,9 @@
 {
+    "_comment": "Per-scraper override file. The unified config/scraper_settings.json wins via load_settings priority — this file is only consulted if the unified config doesn't have a 'city_league_analysis' section. start_date is auto-synced from format_window.jp_release_date by update_sets.apply_format_window_to_scraper_settings on every weekly run, so don't hand-edit it.",
     "sources": {
         "city_league": {
             "enabled": true,
-            "start_date": "24.01.2026",
+            "start_date": "13.03.2026",
             "end_date": "auto",
             "max_decklists_per_league": 16,
             "max_tournaments": 0,
@@ -15,6 +16,5 @@
     },
     "output_file": "city_league_analysis.csv",
     "append_mode": true,
-    "delay_between_requests": 1.5,
-    "_comment": "Scrapes City League tournaments and extracts card data by archetype."
+    "delay_between_requests": 1.5
 }

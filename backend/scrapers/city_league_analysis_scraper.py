@@ -86,7 +86,12 @@ DEFAULT_SETTINGS = {
     "sources": {
         "city_league": {
             "enabled": True,
-            "start_date": "24.01.2026",
+            # Auto-synced by update_sets.apply_format_window_to_scraper_settings
+            # to format_window.jp_release_date. The hardcoded fallback below
+            # is the current JP-rotation anchor; do NOT roll it back to
+            # 24.01.2026 (that pre-rotation baseline pulls in 300 M3-era
+            # tournaments that are out-of-format for the Current view).
+            "start_date": "13.03.2026",
             "end_date": "auto",
             "max_decklists_per_league": 16,
             "max_tournaments": 0,

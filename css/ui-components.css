@@ -2974,6 +2974,118 @@ img[src*="limitlesstcg"] {
     justify-content: flex-end;
     margin-top: 16px;
 }
+
+/* ── "Why was the deck built this way?" modal ──
+   Reuses .modal-overlay + .modal-dialog. Wider variant so the per-card
+   reasoning rows fit without ellipsis on a 60-card deck. */
+.modal-dialog.build-info-modal {
+    max-width: 720px;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+}
+.build-info-modal h3 {
+    margin-bottom: 8px;
+}
+.build-info-algo {
+    font-family: monospace;
+    font-size: 0.82em;
+    color: #9aa;
+    margin: 0 0 10px;
+}
+.build-info-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 0 0 14px;
+}
+.build-info-pill {
+    background: #2a2f4a;
+    color: #cdd;
+    padding: 3px 9px;
+    border-radius: 999px;
+    font-size: 0.78em;
+    border: 1px solid #3a3f5a;
+}
+.build-info-cards {
+    overflow-y: auto;
+    flex: 1 1 auto;
+    border-top: 1px solid #2a2f4a;
+    border-bottom: 1px solid #2a2f4a;
+    padding: 8px 0;
+    margin: 0 0 12px;
+}
+.build-info-card-row {
+    display: grid;
+    grid-template-columns: minmax(140px, 1.4fr) 2fr auto;
+    gap: 10px;
+    align-items: center;
+    padding: 6px 4px;
+    border-bottom: 1px solid #1f2238;
+    font-size: 0.86em;
+}
+.build-info-card-row:last-child {
+    border-bottom: none;
+}
+.build-info-card-name {
+    color: #fff;
+    font-weight: 500;
+}
+.build-info-card-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+.build-info-card-score {
+    color: #888;
+    font-family: monospace;
+    font-size: 0.82em;
+    text-align: right;
+    white-space: nowrap;
+}
+.build-info-badge {
+    background: #1f2438;
+    color: #99a;
+    padding: 2px 7px;
+    border-radius: 4px;
+    font-size: 0.75em;
+    line-height: 1.4;
+    border: 1px solid #2a2f4a;
+    white-space: nowrap;
+}
+.build-info-badge.meta       { color: #d6a; border-color: #4a2a3f; }
+.build-info-badge.rec-up     { color: #6c6; border-color: #2a4a2a; }
+.build-info-badge.rec-down   { color: #c66; border-color: #4a2a2a; }
+.build-info-badge.major      { color: #6cf; border-color: #2a3a4a; }
+.build-info-badge.major-absent { color: #c66; border-color: #4a2a2a; }
+.build-info-badge.tech       { color: #fc6; border-color: #4a3a1a; }
+.build-info-notes {
+    font-size: 0.78em;
+    color: #788;
+    line-height: 1.5;
+    margin: 0;
+}
+
+/* ── Toolbar button: "Why?" with circled-i icon ── */
+.btn-modern.btn-build-info {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+.btn-modern.btn-build-info .build-info-icon {
+    font-size: 1.05em;
+    line-height: 1;
+}
+.btn-modern.btn-build-info .build-info-label {
+    /* The icon alone reads as info; keep the label compact so the
+       button doesn't dominate the toolbar. Hidden on narrow widths
+       below — see media query. */
+}
+@media (max-width: 600px) {
+    .btn-modern.btn-build-info .build-info-label {
+        display: none;
+    }
+}
 .modal-dialog button {
     padding: 8px 20px;
     border-radius: 8px;

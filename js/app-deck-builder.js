@@ -3128,9 +3128,9 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             return Math.max(1, cityLeagueFallback, inferredDeckCount, ...explicitTotals);
         }
         
-        function autoCompleteConsistency(source, rarityMode) {
+        async function autoCompleteConsistency(source, rarityMode) {
             if (source !== 'cityLeague' && source !== 'currentMeta' && source !== 'pastMeta') return;
-            
+
             // Clear specific rarity preferences before generating
             rarityPreferences = {};
             saveRarityPreferences();
@@ -3346,6 +3346,114 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 devLog(`[Consistency][Recency] Computed recency ratios for ${recencyMap.size} cards`);
             }
 
+            // ── 2b2. Latest-Major Anchor (currentMeta 'all' filter only) ──
+            // The 'all' filter mixes Online and Major data; the per-row dates
+            // recency relies on aren't present, so cards still popular online
+            // but rare at the most recent Major (e.g. Team Rocket's Petrel +
+            // Unfair Stamp at Prague for Cynthia's Garchomp) keep an inflated
+            // score and end up in the build at 2x.
+            //
+            // Anchor the build to what the latest Major actually played: use
+            // the Major's per-card share + avg as the canonical reference,
+            // and demote cards absent from the latest Major below the Stage 2
+            // auto-add threshold. The user explicitly asked for "the latest
+            // data should dominate" — Major is the most curated late-format
+            // signal we have.
+            const latestMajorStats = new Map(); // cardName_lower → { share, avg }
+            let hasLatestMajorAnchor = false;
+            let latestMajorDate = '';
+            const _filter = (typeof currentMetaFormatFilter !== 'undefined' ? currentMetaFormatFilter : 'all');
+            if (source === 'currentMeta' && _filter === 'all') {
+                if (!window.currentMetaTournamentCardsData && typeof loadCSV === 'function') {
+                    try {
+                        const rawTournament = await loadCSV('tournament_cards_data_cards.csv', { latestChunkOnly: true });
+                        if (rawTournament && rawTournament.length) {
+                            window.currentMetaTournamentCardsDataRaw = rawTournament;
+                            window.currentMetaTournamentCardsData = rawTournament;
+                        }
+                    } catch (e) {
+                        devLog('[Consistency][LatestMajorAnchor] Could not load tournament data:', e);
+                    }
+                }
+                const tournamentRows = window.currentMetaTournamentCardsData || [];
+                if (Array.isArray(tournamentRows) && tournamentRows.length > 0 && currentArchetype) {
+                    // tournament_cards_data tags each placement with a price
+                    // suffix (e.g. "Cynthia's Garchomp27.91$22.10€"); strip
+                    // those before matching. Also strip " Ex".
+                    const stripPriceTag = (s) => String(s || '')
+                        .replace(/\d+(?:[.,]\d+)?\$\d+(?:[.,]\d+)?€.*$/u, '')
+                        .trim();
+                    const stripEx = (typeof stripExSuffix === 'function')
+                        ? (s) => stripExSuffix(s || '')
+                        : (s) => String(s || '').replace(/\s+ex$/i, '');
+                    const archLower = stripEx(currentArchetype).toLowerCase();
+                    const archetypeRows = tournamentRows.filter(r => {
+                        const cleaned = stripEx(stripPriceTag(r.archetype || '')).toLowerCase();
+                        return cleaned && cleaned === archLower;
+                    });
+                    if (archetypeRows.length > 0) {
+                        // tournament_date is "25th April 2026" — parse properly
+                        // because lexicographic compare reorders months wrongly.
+                        const dateParser = (typeof parseEnglishTournamentDate === 'function')
+                            ? parseEnglishTournamentDate
+                            : (s) => { const d = new Date(String(s || '').replace(/(\d+)(st|nd|rd|th)/, '$1')); return isNaN(d.getTime()) ? null : d; };
+                        let latestTs = -Infinity;
+                        let latestRaw = '';
+                        archetypeRows.forEach(r => {
+                            const raw = String(r.tournament_date || '').trim();
+                            if (!raw) return;
+                            const d = dateParser(raw);
+                            if (d && d.getTime() > latestTs) {
+                                latestTs = d.getTime();
+                                latestRaw = raw;
+                            }
+                        });
+                        if (latestRaw) {
+                            // Aggregate per-card stats from the latest Major
+                            // rows. Each row of tournament_cards_data is a
+                            // single price-tagged archetype-deck-snapshot at
+                            // the tournament; total_decks_in_archetype is
+                            // 1-2 per snapshot, so the bucket total is the
+                            // sum across distinct (price-tagged) archetypes.
+                            const latestRows = archetypeRows.filter(r => String(r.tournament_date || '').trim() === latestRaw);
+                            const archTotalsByTag = new Map();
+                            const cardAgg = new Map(); // cardName_lower → { deckCount, totalCount }
+                            latestRows.forEach(r => {
+                                const tag = String(r.archetype || '').trim();
+                                const archTotal = parseInt(r.total_decks_in_archetype || 0, 10) || 0;
+                                if (tag && !archTotalsByTag.has(tag)) {
+                                    archTotalsByTag.set(tag, archTotal);
+                                }
+                                const cn = String(r.card_name || '').trim().toLowerCase();
+                                if (!cn) return;
+                                const dc = parseInt(r.deck_inclusion_count || 0, 10) || 0;
+                                const tc = parseFloat(String(r.total_count || 0).replace(',', '.')) || 0;
+                                if (!cardAgg.has(cn)) cardAgg.set(cn, { deckCount: 0, totalCount: 0 });
+                                const e = cardAgg.get(cn);
+                                e.deckCount += dc;
+                                e.totalCount += tc;
+                            });
+                            let majorTotalDecks = 0;
+                            archTotalsByTag.forEach(v => { majorTotalDecks += v; });
+                            // Require at least 4 placements to consider the
+                            // anchor reliable — small-sample noise otherwise.
+                            if (majorTotalDecks >= 4) {
+                                cardAgg.forEach((stats, cn) => {
+                                    const share = (stats.deckCount / majorTotalDecks) * 100;
+                                    const avg = stats.deckCount > 0 ? (stats.totalCount / stats.deckCount) : 0;
+                                    latestMajorStats.set(cn, { share, avg });
+                                });
+                                latestMajorDate = latestRaw;
+                                hasLatestMajorAnchor = true;
+                                devLog(`[Consistency][LatestMajorAnchor] Latest Major: ${latestRaw} | ${majorTotalDecks} decks | ${latestMajorStats.size} cards aggregated`);
+                            } else {
+                                devLog(`[Consistency][LatestMajorAnchor] Latest Major has only ${majorTotalDecks} placements — anchor skipped (need ≥4).`);
+                            }
+                        }
+                    }
+                }
+            }
+
             // ── 2c. Compute final consistencyScore per card ──
             deckCards.forEach(card => {
                 const sharePercent = Math.min(100, Math.max(0, parseFloat((card.percentage_in_archetype || '0').toString().replace(',', '.')) || 0));
@@ -3375,12 +3483,40 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 const recencyBoost = clampedRecency * 0.20; // [-0.10, +0.20]
                 card._recencyRatio = rawRatio;
 
-                // Final consistency score
-                card.consistencyScore = sharePercent * (1 + metaBoost) * (1 + recencyBoost);
+                // Latest-Major anchor (currentMeta 'all' filter): use Major
+                // share + avg as the canonical reference; demote cards absent
+                // from latest Major below the Stage 2 (≥25) auto-add threshold.
+                let baselineShare = sharePercent;
+                let baselineAvg = avgCountWhenUsed;
+                if (hasLatestMajorAnchor) {
+                    const major = latestMajorStats.get(nameLower);
+                    if (major) {
+                        baselineShare = major.share;
+                        baselineAvg = major.avg;
+                        card.sharePercent = baselineShare;
+                        card.avgCountWhenUsed = baselineAvg;
+                        card._latestMajorShare = major.share;
+                        card._latestMajorAvg = major.avg;
+                        card._latestMajorAnchored = true;
+                    } else {
+                        card._latestMajorAbsent = true;
+                    }
+                }
+
+                // Final consistency score (built on baseline share)
+                card.consistencyScore = baselineShare * (1 + metaBoost) * (1 + recencyBoost);
                 card.consistencyScore = Math.min(120, Math.max(0, card.consistencyScore)); // cap at 120 for safety
 
-                if (metaBoost > 0 || Math.abs(recencyBoost) > 0.01) {
-                    devLog(`[Consistency][Score] ${card.card_name}: share=${sharePercent.toFixed(1)}% × meta=${(1+metaBoost).toFixed(2)} × recency=${(1+recencyBoost).toFixed(2)} → score=${card.consistencyScore.toFixed(1)}`);
+                // Hard-cap absent-from-Major cards below auto-add threshold.
+                if (card._latestMajorAbsent) {
+                    card.consistencyScore = Math.min(card.consistencyScore, 24);
+                }
+
+                if (metaBoost > 0 || Math.abs(recencyBoost) > 0.01 || card._latestMajorAnchored || card._latestMajorAbsent) {
+                    const anchorTag = card._latestMajorAnchored ? ` [Major:${baselineShare.toFixed(0)}%]`
+                                    : card._latestMajorAbsent ? ' [Major:absent]'
+                                    : '';
+                    devLog(`[Consistency][Score] ${card.card_name}: share=${baselineShare.toFixed(1)}% × meta=${(1+metaBoost).toFixed(2)} × recency=${(1+recencyBoost).toFixed(2)}${anchorTag} → score=${card.consistencyScore.toFixed(1)}`);
                 }
             });
 
@@ -3547,6 +3683,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             let algoDesc = 'ACE SPEC → Core (≥75) → Extended (≥25) → Energy Fill';
             if (hasMetaData) algoDesc += ' | +Meta Boost';
             if (hasRecency) algoDesc += ' | +Recency';
+            if (hasLatestMajorAnchor) algoDesc += ` | +Latest Major Anchor (${latestMajorDate})`;
 
             let summary = `MAX CONSISTENCY Deck (${currentTotal} ${t('deck.cards')}):\n`;
             summary += `Algorithm: ${algoDesc}\n\n`;
@@ -3557,6 +3694,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                     const arrow = c._recencyRatio > 1 ? '↑' : '↓';
                     line += ` ${arrow}${((c._recencyRatio - 1) * 100).toFixed(0)}%`;
                 }
+                if (c._latestMajorAnchored) line += ' ✓Major';
                 line += ` → ${c.consistencyScore.toFixed(0)})`;
                 summary += line + '\n';
             });

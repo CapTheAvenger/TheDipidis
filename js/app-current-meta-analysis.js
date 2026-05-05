@@ -615,13 +615,44 @@
                 // Tournament cards data stores one row per tournament per card print,
                 // so stats must be aggregated before deduplication (like Past Meta).
                 // Current meta data is already pre-aggregated — skip aggregation for that.
-                
+                //
+                // Stale-spelling dedup: append-mode preserves rows from past
+                // scrape runs even when the canonical archetype name changed
+                // mid-stream (e.g. "Cynthia Garchomp Ex" → "Cynthia's Garchomp").
+                // After canonicalizeArchetype() collapses both spellings, the
+                // same (archetype, card, meta, print) appears multiple times
+                // with overlapping per-source totals — which would inflate
+                // deck_count when subsequently summed downstream. Keep only
+                // the latest row per dedup-key — CSV row order = scrape recency.
+                if (!needsAggregation && deckCards.length > 0) {
+                    const latestRowMap = new Map();
+                    deckCards.forEach(row => {
+                        const key = `${row.archetype}|||${row.card_name || ''}|||${row.meta || ''}|||${row.set_code || ''}|${row.set_number || ''}`;
+                        latestRowMap.set(key, row);
+                    });
+                    if (latestRowMap.size < deckCards.length) {
+                        devLog(`[Current Meta] Stale-spelling dedup: ${deckCards.length} → ${latestRowMap.size} rows`);
+                    }
+                    deckCards = Array.from(latestRowMap.values());
+                }
+
                 // Preserve raw per-tournament rows for Recency scoring in Consistency builder
                 window.currentMetaRawDeckCards = deckCards.slice();
 
                 if (needsAggregation && deckCards.length > 0) {
                     deckCards = aggregateCardStatsByDate(deckCards);
                 }
+
+                // NOTE: We deliberately do NOT bucket-aggregate the 'all' filter
+                // by `meta` tag here. The Meta Play! rows in current_meta_card_data.csv
+                // are structurally sparse (4-11 cards per archetype vs. 40+ per
+                // actual deck — the limitless deck-list parser drops most cards),
+                // so summing per-source totals (e.g. 20 Online + 16 Major = 36)
+                // would unfairly drop staples like Boss's Orders from 100% → 56%
+                // because the Major-side row simply isn't present for them. The
+                // consistency builder gets the temporal-anchor it needs from the
+                // rich tournament_cards_data_cards.csv via the latest-Major
+                // anchor in autoCompleteConsistency() instead.
 
                 // Deduplicate only after statistics have been merged across tournaments/prints.
                 deckCards = deduplicateCards(deckCards);

@@ -1,0 +1,1182 @@
+{
+  "generated_at": "2026-05-05T21:03:35Z",
+  "format_window": "POR",
+  "tuning": {
+    "meta_share_floor": 0.005,
+    "inclusion_floor": 0.25,
+    "category_floor": 0.02
+  },
+  "threats": {
+    "hand_disruption": {
+      "weighted_meta_share": 0.5855,
+      "cards": [
+        {
+          "card_id": "POR|76",
+          "card_name": "Judge",
+          "archetypes": [
+            {
+              "archetype": "Dragapult",
+              "share_in_archetype": 0.45,
+              "meta_share": 0.068
+            },
+            {
+              "archetype": "Lucario Hariyama",
+              "share_in_archetype": 0.95,
+              "meta_share": 0.06
+            },
+            {
+              "archetype": "Dragapult Blaziken",
+              "share_in_archetype": 0.35,
+              "meta_share": 0.057
+            },
+            {
+              "archetype": "N's Zoroark",
+              "share_in_archetype": 0.5,
+              "meta_share": 0.0527
+            },
+            {
+              "archetype": "Dragapult Dusknoir",
+              "share_in_archetype": 0.3,
+              "meta_share": 0.0515
+            },
+            {
+              "archetype": "Ogerpon Meganium",
+              "share_in_archetype": 0.35,
+              "meta_share": 0.0396
+            },
+            {
+              "archetype": "Cynthia's Garchomp",
+              "share_in_archetype": 0.6,
+              "meta_share": 0.0346
+            },
+            {
+              "archetype": "Festival Lead",
+              "share_in_archetype": 0.55,
+              "meta_share": 0.0346
+            },
+            {
+              "archetype": "Grimmsnarl Froslass",
+              "share_in_archetype": 0.4,
+              "meta_share": 0.0323
+            },
+            {
+              "archetype": "Raging Bolt Ogerpon",
+              "share_in_archetype": 0.25,
+              "meta_share": 0.0287
+            },
+            {
+              "archetype": "Okidogi Barbaracle",
+              "share_in_archetype": 0.5263,
+              "meta_share": 0.025
+            },
+            {
+              "archetype": "Mega Absol Box",
+              "share_in_archetype": 0.3,
+              "meta_share": 0.0146
+            },
+            {
+              "archetype": "Mega Venusaur",
+              "share_in_archetype": 0.7,
+              "meta_share": 0.0138
+            },
+            {
+              "archetype": "Steven's Metagross",
+              "share_in_archetype": 0.75,
+              "meta_share": 0.0136
+            },
+            {
+              "archetype": "Dragapult Dudunsparce",
+              "share_in_archetype": 0.45,
+              "meta_share": 0.0126
+            },
+            {
+              "archetype": "Mega Lucario",
+              "share_in_archetype": 0.8,
+              "meta_share": 0.0117
+            },
+            {
+              "archetype": "Flareon Noctowl",
+              "share_in_archetype": 0.3,
+              "meta_share": 0.0114
+            },
+            {
+              "archetype": "Starmie Dusknoir",
+              "share_in_archetype": 0.95,
+              "meta_share": 0.0086
+            },
+            {
+              "archetype": "Froslass Munkidori",
+              "share_in_archetype": 0.5,
+              "meta_share": 0.0078
+            },
+            {
+              "archetype": "Diancie Dusknoir",
+              "share_in_archetype": 0.65,
+              "meta_share": 0.0077
+            },
+            {
+              "archetype": "Hop's Trevenant",
+              "share_in_archetype": 0.5,
+              "meta_share": 0.0077
+            },
+            {
+              "archetype": "Lopunny Dudunsparce",
+              "share_in_archetype": 0.45,
+              "meta_share": 0.0074
+            },
+            {
+              "archetype": "Tera Box",
+              "share_in_archetype": 0.55,
+              "meta_share": 0.0057
+            },
+            {
+              "archetype": "Jellicent Dusknoir",
+              "share_in_archetype": 0.85,
+              "meta_share": 0.005
+            }
+          ]
+        },
+        {
+          "card_id": "TWM|157",
+          "card_name": "Lucian",
+          "archetypes": [
+            {
+              "archetype": "Greninja",
+              "share_in_archetype": 0.25,
+              "meta_share": 0.0148
+            },
+            {
+              "archetype": "Froslass Munkidori",
+              "share_in_archetype": 0.25,
+              "meta_share": 0.0078
+            },
+            {
+              "archetype": "Lopunny Dudunsparce",
+              "share_in_archetype": 0.45,
+              "meta_share": 0.0074
+            }
+          ]
+        },
+        {
+          "card_id": "DRI|170",
+          "card_name": "Team Rocket's Archer",
+          "archetypes": [
+            {
+              "archetype": "Rocket's Mewtwo",
+              "share_in_archetype": 1.0,
+              "meta_share": 0.0493
+            },
+            {
+              "archetype": "Rocket's Honchkrow",
+              "share_in_archetype": 1.0,
+              "meta_share": 0.0223
+            },
+            {
+              "archetype": "Rocket's Spidops",
+              "share_in_archetype": 1.0,
+              "meta_share": 0.0062
+            }
+          ]
+        },
+        {
+          "card_id": "TWM|165",
+          "card_name": "Unfair Stamp",
+          "archetypes": [
+            {
+              "archetype": "Dragapult",
+              "share_in_archetype": 1.0,
+              "meta_share": 0.068
+            },
+            {
+              "archetype": "Lucario Hariyama",
+              "share_in_archetype": 0.35,
+              "meta_share": 0.06
+            },
+            {
+              "archetype": "Dragapult Blaziken",
+              "share_in_archetype": 1.0,
+              "meta_share": 0.057
+            },
+            {
+              "archetype": "N's Zoroark",
+              "share_in_archetype": 0.65,
+              "meta_share": 0.0527
+            },
+            {
+              "archetype": "Dragapult Dusknoir",
+              "share_in_archetype": 0.95,
+              "meta_share": 0.0515
+            },
+            {
+              "archetype": "Ogerpon Meganium",
+              "share_in_archetype": 0.9,
+              "meta_share": 0.0396
+            },
+            {
+              "archetype": "Cynthia's Garchomp",
+              "share_in_archetype": 0.65,
+              "meta_share": 0.0346
+            },
+            {
+              "archetype": "Festival Lead",
+              "share_in_archetype": 0.35,
+              "meta_share": 0.0346
+            },
+            {
+              "archetype": "Grimmsnarl Froslass",
+              "share_in_archetype": 0.7,
+              "meta_share": 0.0323
+            },
+            {
+              "archetype": "Raging Bolt Ogerpon",
+              "share_in_archetype": 0.75,
+              "meta_share": 0.0287
+            },
+            {
+              "archetype": "Mega Absol Box",
+              "share_in_archetype": 0.9,
+              "meta_share": 0.0146
+            },
+            {
+              "archetype": "Mega Venusaur",
+              "share_in_archetype": 0.4,
+              "meta_share": 0.0138
+            },
+            {
+              "archetype": "Clefairy Ogerpon",
+              "share_in_archetype": 1.0,
+              "meta_share": 0.0126
+            },
+            {
+              "archetype": "Ogerpon Box",
+              "share_in_archetype": 0.75,
+              "meta_share": 0.0116
+            },
+            {
+              "archetype": "Froslass Munkidori",
+              "share_in_archetype": 0.3,
+              "meta_share": 0.0078
+            },
+            {
+              "archetype": "Diancie Dusknoir",
+              "share_in_archetype": 0.45,
+              "meta_share": 0.0077
+            },
+            {
+              "archetype": "Hop's Trevenant",
+              "share_in_archetype": 0.35,
+              "meta_share": 0.0077
+            }
+          ]
+        }
+      ]
+    },
+    "ability_lock": {
+      "weighted_meta_share": 0.1072,
+      "cards": [
+        {
+          "card_id": "DRI|180",
+          "card_name": "Team Rocket's Watchtower",
+          "archetypes": [
+            {
+              "archetype": "Dragapult",
+              "share_in_archetype": 0.3,
+              "meta_share": 0.068
+            },
+            {
+              "archetype": "Dragapult Blaziken",
+              "share_in_archetype": 0.5,
+              "meta_share": 0.057
+            },
+            {
+              "archetype": "N's Zoroark",
+              "share_in_archetype": 0.5,
+              "meta_share": 0.0527
+            },
+            {
+              "archetype": "Dragapult Dusknoir",
+              "share_in_archetype": 0.35,
+              "meta_share": 0.0515
+            },
+            {
+              "archetype": "Cynthia's Garchomp",
+              "share_in_archetype": 0.3,
+              "meta_share": 0.0346
+            },
+            {
+              "archetype": "Froslass Munkidori",
+              "share_in_archetype": 0.45,
+              "meta_share": 0.0078
+            }
+          ]
+        }
+      ]
+    },
+    "retreat_lock": {
+      "weighted_meta_share": 0.2571,
+      "cards": [
+        {
+          "card_id": "MEG|1",
+          "card_name": "Bulbasaur",
+          "archetypes": [
+            {
+              "archetype": "Mega Venusaur",
+              "share_in_archetype": 1.0,
+              "meta_share": 0.0138
+            }
+          ]
+        },
+        {
+          "card_id": "PRE|37",
+          "card_name": "Dusknoir",
+          "archetypes": [
+            {
+              "archetype": "Dragapult Dusknoir",
+              "share_in_archetype": 1.0,
+              "meta_share": 0.0515
+            },
+            {
+              "archetype": "Greninja",
+              "share_in_archetype": 1.0,
+              "meta_share": 0.0148
+            },
+            {
+              "archetype": "Starmie Dusknoir",
+              "share_in_archetype": 1.0,
+              "meta_share": 0.0086
+            },
+            {
+              "archetype": "Diancie Dusknoir",
+              "share_in_archetype": 1.0,
+              "meta_share": 0.0077
+            },
+            {
+              "archetype": "Jellicent Dusknoir",
+              "share_in_archetype": 1.0,
+              "meta_share": 0.005
+            }
+          ]
+        },
+        {
+          "card_id": "ASC|96",
+          "card_name": "Hop's Trevenant",
+          "archetypes": [
+            {
+              "archetype": "Hop's Trevenant",
+              "share_in_archetype": 1.0,
+              "meta_share": 0.0077
+            }
+          ]
+        },
+        {
+          "card_id": "JTG|8",
+          "card_name": "Maractus",
+          "archetypes": [
+            {
+              "archetype": "Dragapult",
+              "share_in_archetype": 0.35,
+              "meta_share": 0.068
+            }
+          ]
+        },
+        {
+          "card_id": "TWM|64",
+          "card_name": "Wellspring Mask Ogerpon ex",
+          "archetypes": [
+            {
+              "archetype": "Raging Bolt Ogerpon",
+              "share_in_archetype": 0.5,
+              "meta_share": 0.0287
+            },
+            {
+              "archetype": "Mega Absol Box",
+              "share_in_archetype": 0.45,
+              "meta_share": 0.0146
+            },
+            {
+              "archetype": "Ogerpon Box",
+              "share_in_archetype": 1.0,
+              "meta_share": 0.0116
+            },
+            {
+              "archetype": "Flareon Noctowl",
+              "share_in_archetype": 0.9,
+              "meta_share": 0.0114
+            },
+            {
+              "archetype": "Tera Box",
+              "share_in_archetype": 1.0,
+              "meta_share": 0.0057
+            }
+          ]
+        },
+        {
+          "card_id": "MEG|88",
+          "card_name": "Yveltal",
+          "archetypes": [
+            {
+              "archetype": "N's Zoroark",
+              "share_in_archetype": 0.6,
+              "meta_share": 0.0527
+            },
+            {
+              "archetype": "Starmie Froslass",
+              "share_in_archetype": 0.25,
+              "meta_share": 0.0404
+            },
+            {
+              "archetype": "Grimmsnarl Froslass",
+              "share_in_archetype": 0.85,
+              "meta_share": 0.0323
+            },
+            {
+              "archetype": "Dragapult Dudunsparce",
+              "share_in_archetype": 0.3,
+              "meta_share": 0.0126
+            },
+            {
+              "archetype": "Froslass Munkidori",
+              "share_in_archetype": 0.35,
+              "meta_share": 0.0078
+            }
+          ]
+        }
+      ]
+    },
+    "bench_damage": {
+      "weighted_meta_share": 0.2251,
+      "cards": [
+        {
+          "card_id": "JTG|111",
+          "card_name": "Hop's Zacian ex",
+          "archetypes": [
+            {
+              "archetype": "Hop's Trevenant",
+              "share_in_archetype": 0.9,
+              "meta_share": 0.0077
+            }
+          ]
+        },
+        {
+          "card_id": "DRI|136",
+          "card_name": "Marnie's Grimmsnarl ex",
+          "archetypes": [
+            {
+              "archetype": "Grimmsnarl Froslass",
+              "share_in_archetype": 1.0,
+              "meta_share": 0.0323
+            }
+          ]
+        },
+        {
+          "card_id": "POR|21",
+          "card_name": "Mega Starmie ex",
+          "archetypes": [
+            {
+              "archetype": "Starmie Froslass",
+              "share_in_archetype": 1.0,
+              "meta_share": 0.0404
+            },
+            {
+              "archetype": "Starmie Dusknoir",
+              "share_in_archetype": 1.0,
+              "meta_share": 0.0086
+            },
+            {
+              "archetype": "Froslass Munkidori",
+              "share_in_archetype": 0.6,
+              "meta_share": 0.0078
+            }
+          ]
+        },
+        {
+          "card_id": "JTG|27",
+          "card_name": "N's Darmanitan",
+          "archetypes": [
+            {
+              "archetype": "N's Zoroark",
+              "share_in_archetype": 1.0,
+              "meta_share": 0.0527
+            }
+          ]
+        },
+        {
+          "card_id": "DRI|128",
+          "card_name": "Team Rocket's Sneasel",
+          "archetypes": [
+            {
+              "archetype": "Rocket's Mewtwo",
+              "share_in_archetype": 0.4,
+              "meta_share": 0.0493
+            },
+            {
+              "archetype": "Rocket's Spidops",
+              "share_in_archetype": 0.95,
+              "meta_share": 0.0062
+            }
+          ]
+        },
+        {
+          "card_id": "TWM|110",
+          "card_name": "Ting-Lu",
+          "archetypes": [
+            {
+              "archetype": "Ursaluna Lunatone",
+              "share_in_archetype": 0.85,
+              "meta_share": 0.0063
+            }
+          ]
+        },
+        {
+          "card_id": "TWM|64",
+          "card_name": "Wellspring Mask Ogerpon ex",
+          "archetypes": [
+            {
+              "archetype": "Raging Bolt Ogerpon",
+              "share_in_archetype": 0.5,
+              "meta_share": 0.0287
+            },
+            {
+              "archetype": "Mega Absol Box",
+              "share_in_archetype": 0.45,
+              "meta_share": 0.0146
+            },
+            {
+              "archetype": "Ogerpon Box",
+              "share_in_archetype": 1.0,
+              "meta_share": 0.0116
+            },
+            {
+              "archetype": "Flareon Noctowl",
+              "share_in_archetype": 0.9,
+              "meta_share": 0.0114
+            },
+            {
+              "archetype": "Tera Box",
+              "share_in_archetype": 1.0,
+              "meta_share": 0.0057
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "counters": {
+    "retreat_lock": [
+      {
+        "card_id": "DAA|159",
+        "card_name": "Bird Keeper",
+        "card_type": "Supporter"
+      },
+      {
+        "card_id": "SHF|66",
+        "card_name": "Bird Keeper",
+        "card_type": "Supporter"
+      },
+      {
+        "card_id": "FST|230",
+        "card_name": "Cross Switcher",
+        "card_type": "Item"
+      },
+      {
+        "card_id": "BUS|115",
+        "card_name": "Guzma",
+        "card_type": "Supporter"
+      },
+      {
+        "card_id": "BUS|115a",
+        "card_name": "Guzma",
+        "card_type": "Supporter"
+      },
+      {
+        "card_id": "BUS|143",
+        "card_name": "Guzma",
+        "card_type": "Supporter"
+      },
+      {
+        "card_id": "HIF|SV84",
+        "card_name": "Guzma",
+        "card_type": "Supporter"
+      },
+      {
+        "card_id": "PRE|113",
+        "card_name": "Kieran",
+        "card_type": "Supporter"
+      },
+      {
+        "card_id": "PRE|174",
+        "card_name": "Kieran",
+        "card_type": "Supporter"
+      },
+      {
+        "card_id": "TWM|154",
+        "card_name": "Kieran",
+        "card_type": "Supporter"
+      },
+      {
+        "card_id": "TWM|206",
+        "card_name": "Kieran",
+        "card_type": "Supporter"
+      },
+      {
+        "card_id": "TWM|218",
+        "card_name": "Kieran",
+        "card_type": "Supporter"
+      },
+      {
+        "card_id": "CEC|198",
+        "card_name": "Mallow & Lana",
+        "card_type": "Supporter"
+      },
+      {
+        "card_id": "CEC|231",
+        "card_name": "Mallow & Lana",
+        "card_type": "Supporter"
+      },
+      {
+        "card_id": "GEN|66",
+        "card_name": "Olympia",
+        "card_type": "Supporter"
+      },
+      {
+        "card_id": "BKP|105",
+        "card_name": "Pokémon Catcher",
+        "card_type": "Item"
+      },
+      {
+        "card_id": "CRZ|138",
+        "card_name": "Pokémon Catcher",
+        "card_type": "Item"
+      },
+      {
+        "card_id": "DEX|111",
+        "card_name": "Pokémon Catcher",
+        "card_type": "Item"
+      },
+      {
+        "card_id": "EPO|95",
+        "card_name": "Pokémon Catcher",
+        "card_type": "Item"
+      },
+      {
+        "card_id": "KSS|36",
+        "card_name": "Pokémon Catcher",
+        "card_type": "Item"
+      },
+      {
+        "card_id": "PLB|83",
+        "card_name": "Pokémon Catcher",
+        "card_type": "Item"
+      },
+      {
+        "card_id": "POR|82",
+        "card_name": "Pokémon Catcher",
+        "card_type": "Item"
+      },
+      {
+        "card_id": "SLG|64",
+        "card_name": "Pokémon Catcher",
+        "card_type": "Item"
+      },
+      {
+        "card_id": "SSH|175",
+        "card_name": "Pokémon Catcher",
+        "card_type": "Item"
+      },
+      {
+        "card_id": "SUM|126",
+        "card_name": "Pokémon Catcher",
+        "card_type": "Item"
+      },
+      {
+        "card_id": "SVI|187",
+        "card_name": "Pokémon Catcher",
+        "card_type": "Item"
+      },
+      {
+        "card_id": "PRE|119",
+        "card_name": "Prime Catcher",
+        "card_type": "Item"
+      },
+      {
+        "card_id": "TEF|157",
+        "card_name": "Prime Catcher",
+        "card_type": "Item"
+      },
+      {
+        "card_id": "PLS|129",
+        "card_name": "Scramble Switch",
+        "card_type": "Item"
+      },
+      {
+        "card_id": "SSP|186",
+        "card_name": "Scramble Switch",
+        "card_type": "Item"
+      },
+      {
+        "card_id": "PAR|174",
+        "card_name": "Shauntal",
+        "card_type": "Supporter"
+      },
+      {
+        "card_id": "PAR|243",
+        "card_name": "Shauntal",
+        "card_type": "Supporter"
+      },
+      {
+        "card_id": "ASC|200",
+        "card_name": "Surfer",
+        "card_type": "Supporter"
+      },
+      {
+        "card_id": "ASC|293",
+        "card_name": "Surfer",
+        "card_type": "Supporter"
+      },
+      {
+        "card_id": "SSP|187",
+        "card_name": "Surfer",
+        "card_type": "Supporter"
+      },
+      {
+        "card_id": "SSP|235",
+        "card_name": "Surfer",
+        "card_type": "Supporter"
+      },
+      {
+        "card_id": "BCR|135",
+        "card_name": "Switch",
+        "card_type": "Item"
+      },
+      {
+        "card_id": "BLW|104",
+        "card_name": "Switch",
+        "card_type": "Item"
+      },
+      {
+        "card_id": "BS2|123",
+        "card_name": "Switch",
+        "card_type": "Item"
+      },
+      {
+        "card_id": "BS|95",
+        "card_name": "Switch",
+        "card_type": "Item"
+      },
+      {
+        "card_id": "CES|147",
+        "card_name": "Switch",
+        "card_type": "Item"
+      },
+      {
+        "card_id": "CRZ|144",
+        "card_name": "Switch",
+        "card_type": "Item"
+      },
+      {
+        "card_id": "DF|83",
+        "card_name": "Switch",
+        "card_type": "Item"
+      },
+      {
+        "card_id": "DP|119",
+        "card_name": "Switch",
+        "card_type": "Item"
+      },
+      {
+        "card_id": "DS|102",
+        "card_name": "Switch",
+        "card_type": "Item"
+      },
+      {
+        "card_id": "E1|157",
+        "card_name": "Switch",
+        "card_type": "Item"
+      },
+      {
+        "card_id": "EVO|88",
+        "card_name": "Switch",
+        "card_type": "Item"
+      },
+      {
+        "card_id": "HS|102",
+        "card_name": "Switch",
+        "card_type": "Item"
+      },
+      {
+        "card_id": "KSS|38",
+        "card_name": "Switch",
+        "card_type": "Item"
+      },
+      {
+        "card_id": "MEG|130",
+        "card_name": "Switch",
+        "card_type": "Item"
+      },
+      {
+        "card_id": "MEW|206",
+        "card_name": "Switch",
+        "card_type": "Item"
+      },
+      {
+        "card_id": "PFL|123",
+        "card_name": "Switch",
+        "card_type": "Item"
+      },
+      {
+        "card_id": "PRC|163",
+        "card_name": "Switch",
+        "card_type": "Item"
+      },
+      {
+        "card_id": "RG|102",
+        "card_name": "Switch",
+        "card_type": "Item"
+      },
+      {
+        "card_id": "ROS|91",
+        "card_name": "Switch",
+        "card_type": "Item"
+      },
+      {
+        "card_id": "RS|92",
+        "card_name": "Switch",
+        "card_type": "Item"
+      },
+      {
+        "card_id": "SF|93",
+        "card_name": "Switch",
+        "card_type": "Item"
+      },
+      {
+        "card_id": "SLG|67",
+        "card_name": "Switch",
+        "card_type": "Item"
+      },
+      {
+        "card_id": "SSH|183",
+        "card_name": "Switch",
+        "card_type": "Item"
+      },
+      {
+        "card_id": "SUM|132",
+        "card_name": "Switch",
+        "card_type": "Item"
+      },
+      {
+        "card_id": "SUM|160",
+        "card_name": "Switch",
+        "card_type": "Item"
+      },
+      {
+        "card_id": "SVI|194",
+        "card_name": "Switch",
+        "card_type": "Item"
+      },
+      {
+        "card_id": "SW|128",
+        "card_name": "Switch",
+        "card_type": "Item"
+      },
+      {
+        "card_id": "CES|148",
+        "card_name": "Tate & Liza",
+        "card_type": "Supporter"
+      },
+      {
+        "card_id": "CES|148a",
+        "card_name": "Tate & Liza",
+        "card_type": "Supporter"
+      },
+      {
+        "card_id": "CES|166",
+        "card_name": "Tate & Liza",
+        "card_type": "Supporter"
+      }
+    ],
+    "hand_disruption": [
+      {
+        "card_id": "E3|123",
+        "card_name": "Desert Shaman",
+        "card_type": "Supporter"
+      },
+      {
+        "card_id": "WHT|163",
+        "card_name": "Harlequin",
+        "card_type": "Supporter"
+      },
+      {
+        "card_id": "WHT|83",
+        "card_name": "Harlequin",
+        "card_type": "Supporter"
+      },
+      {
+        "card_id": "SUM|121",
+        "card_name": "Ilima",
+        "card_type": "Supporter"
+      },
+      {
+        "card_id": "SUM|146",
+        "card_name": "Ilima",
+        "card_type": "Supporter"
+      },
+      {
+        "card_id": "PAF|237",
+        "card_name": "Iono",
+        "card_type": "Supporter"
+      },
+      {
+        "card_id": "PAF|80",
+        "card_name": "Iono",
+        "card_type": "Supporter"
+      },
+      {
+        "card_id": "PAL|185",
+        "card_name": "Iono",
+        "card_type": "Supporter"
+      },
+      {
+        "card_id": "PAL|254",
+        "card_name": "Iono",
+        "card_type": "Supporter"
+      },
+      {
+        "card_id": "PAL|269",
+        "card_name": "Iono",
+        "card_type": "Supporter"
+      },
+      {
+        "card_id": "SVP|124",
+        "card_name": "Iono",
+        "card_type": "Supporter"
+      },
+      {
+        "card_id": "BKT|143",
+        "card_name": "Judge",
+        "card_type": "Supporter"
+      },
+      {
+        "card_id": "DRI|167",
+        "card_name": "Judge",
+        "card_type": "Supporter"
+      },
+      {
+        "card_id": "DRI|222",
+        "card_name": "Judge",
+        "card_type": "Supporter"
+      },
+      {
+        "card_id": "FLI|108",
+        "card_name": "Judge",
+        "card_type": "Supporter"
+      },
+      {
+        "card_id": "FST|235",
+        "card_name": "Judge",
+        "card_type": "Supporter"
+      },
+      {
+        "card_id": "LOT|209",
+        "card_name": "Judge",
+        "card_type": "Supporter"
+      },
+      {
+        "card_id": "PAF|228",
+        "card_name": "Judge",
+        "card_type": "Supporter"
+      },
+      {
+        "card_id": "POR|76",
+        "card_name": "Judge",
+        "card_type": "Supporter"
+      },
+      {
+        "card_id": "SIT|TG25",
+        "card_name": "Judge",
+        "card_type": "Supporter"
+      },
+      {
+        "card_id": "SVI|176",
+        "card_name": "Judge",
+        "card_type": "Supporter"
+      },
+      {
+        "card_id": "UL|78",
+        "card_name": "Judge",
+        "card_type": "Supporter"
+      },
+      {
+        "card_id": "TWM|157",
+        "card_name": "Lucian",
+        "card_type": "Supporter"
+      },
+      {
+        "card_id": "TWM|208",
+        "card_name": "Lucian",
+        "card_type": "Supporter"
+      },
+      {
+        "card_id": "CPA|56",
+        "card_name": "Marnie",
+        "card_type": "Supporter"
+      },
+      {
+        "card_id": "SP|120",
+        "card_name": "Marnie",
+        "card_type": "Supporter"
+      },
+      {
+        "card_id": "SP|121",
+        "card_name": "Marnie",
+        "card_type": "Supporter"
+      },
+      {
+        "card_id": "SSH|169",
+        "card_name": "Marnie",
+        "card_type": "Supporter"
+      },
+      {
+        "card_id": "SSH|200",
+        "card_name": "Marnie",
+        "card_type": "Supporter"
+      },
+      {
+        "card_id": "SSH|208",
+        "card_name": "Marnie",
+        "card_type": "Supporter"
+      },
+      {
+        "card_id": "ASR|150",
+        "card_name": "Roxanne",
+        "card_type": "Supporter"
+      },
+      {
+        "card_id": "ASR|188",
+        "card_name": "Roxanne",
+        "card_type": "Supporter"
+      },
+      {
+        "card_id": "ASR|206",
+        "card_name": "Roxanne",
+        "card_type": "Supporter"
+      },
+      {
+        "card_id": "CRZ|GG66",
+        "card_name": "Roxanne",
+        "card_type": "Supporter"
+      },
+      {
+        "card_id": "ASC|201",
+        "card_name": "Team Rocket's Archer",
+        "card_type": "Supporter"
+      },
+      {
+        "card_id": "DRI|170",
+        "card_name": "Team Rocket's Archer",
+        "card_type": "Supporter"
+      },
+      {
+        "card_id": "DRI|223",
+        "card_name": "Team Rocket's Archer",
+        "card_type": "Supporter"
+      },
+      {
+        "card_id": "TWM|165",
+        "card_name": "Unfair Stamp",
+        "card_type": "Item"
+      }
+    ],
+    "bench_damage": [
+      {
+        "card_id": "MT|21",
+        "card_name": "Bastiodon",
+        "card_type": "Evolves from Shieldon"
+      },
+      {
+        "card_id": "P6|1",
+        "card_name": "Bastiodon",
+        "card_type": "Evolves from Shieldon"
+      },
+      {
+        "card_id": "CG|5",
+        "card_name": "Dugtrio",
+        "card_type": "Evolves from Diglett"
+      },
+      {
+        "card_id": "GRI|64",
+        "card_name": "Machoke",
+        "card_type": "Evolves from Machop"
+      },
+      {
+        "card_id": "BRS|41",
+        "card_name": "Manaphy",
+        "card_type": "Basic"
+      },
+      {
+        "card_id": "CRZ|GG6",
+        "card_name": "Manaphy",
+        "card_type": "Basic"
+      },
+      {
+        "card_id": "PL|11",
+        "card_name": "Manectric",
+        "card_type": "Evolves from Electrike"
+      },
+      {
+        "card_id": "SMP|215",
+        "card_name": "Mew",
+        "card_type": "Basic"
+      },
+      {
+        "card_id": "UNB|76",
+        "card_name": "Mew",
+        "card_type": "Basic"
+      },
+      {
+        "card_id": "BKT|97",
+        "card_name": "Mr. Mime",
+        "card_type": "Basic"
+      },
+      {
+        "card_id": "GEN|52",
+        "card_name": "Mr. Mime",
+        "card_type": "Basic"
+      },
+      {
+        "card_id": "PLF|47",
+        "card_name": "Mr. Mime",
+        "card_type": "Basic"
+      },
+      {
+        "card_id": "TEF|24",
+        "card_name": "Rabsca",
+        "card_type": "Evolves from Rellor"
+      },
+      {
+        "card_id": "DRI|10",
+        "card_name": "Shaymin",
+        "card_type": "Basic"
+      },
+      {
+        "card_id": "DRI|185",
+        "card_name": "Shaymin",
+        "card_type": "Basic"
+      },
+      {
+        "card_id": "SLG|57",
+        "card_name": "Shining Arceus",
+        "card_type": "Basic"
+      },
+      {
+        "card_id": "OBF|70",
+        "card_name": "Thundurus",
+        "card_type": "Basic"
+      },
+      {
+        "card_id": "PAF|139",
+        "card_name": "Thundurus",
+        "card_type": "Basic"
+      }
+    ]
+  }
+}

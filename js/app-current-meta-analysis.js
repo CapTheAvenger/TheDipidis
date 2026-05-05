@@ -111,7 +111,22 @@
             // and will be loaded lazily only when a deck is actually opened in Major Tournament mode.
             
             // Load deck stats (winrates)
-            const deckStats = await loadCSV('limitless_online_decks.csv');
+            const deckStatsRaw = await loadCSV('limitless_online_decks.csv');
+            // Drop zombie entries (share=0 — decks that were played in
+            // an earlier window but had no matches in the current
+            // snapshot). The CSV keeps them so comparison.csv can
+            // still show "exited" trends, but the active-meta table
+            // shouldn't clutter its tail with rows that play no role
+            // in the current period.
+            const deckStats = (deckStatsRaw || []).filter(d => {
+                const v = (d.share_numeric != null ? String(d.share_numeric) : (d.share || '0'))
+                    .replace(',', '.').replace('%', '').trim();
+                const n = parseFloat(v);
+                return !isNaN(n) && n > 0;
+            });
+            if (deckStatsRaw && deckStatsRaw.length !== deckStats.length) {
+                devLog(`Filtered ${deckStatsRaw.length - deckStats.length} zombie decks (share=0)`);
+            }
             if (deckStats) {
                 window.currentMetaDeckStats = deckStats;
                 devLog('Loaded deck stats:', deckStats.length, 'decks');

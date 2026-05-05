@@ -178,8 +178,68 @@ def scrape_deck_statistics(
             "game": game,
         })
 
-    logger.info("Found %s deck entries (Other excluded)", len(decks))
-    return decks
+    raw_count = len(decks)
+
+    # Dedupe by deck_name. Limitless occasionally lists the same name
+    # twice (e.g. 2026-05-05 had "Okidogi" at rank 63 with 28 games
+    # AND at rank 112 with 3 games — likely two slightly different
+    # decklists collapsed onto the same display name). Without this
+    # merge the frontend renders two rows for the same deck and the
+    # comparison.csv silently dedupes, producing a row-count mismatch
+    # between decks.csv and comparison.csv.
+    #
+    # Merge strategy: sum count + wins + losses + ties + share, then
+    # recompute win_rate from the summed record. Keep the lowest
+    # original rank (= the higher-traffic listing on Limitless), keep
+    # the deck_url + scraped_date from that primary row.
+    by_name: dict[str, dict] = {}
+    for d in decks:
+        name = d["deck_name"]
+        if name not in by_name:
+            by_name[name] = dict(d)
+            continue
+        primary = by_name[name]
+        # Sum integer-ish fields
+        primary["count"] = str(int(primary["count"] or 0) + int(d["count"] or 0))
+        primary["wins"]   += d["wins"]
+        primary["losses"] += d["losses"]
+        primary["ties"]   += d["ties"]
+        primary["share_numeric"] += d["share_numeric"]
+        primary["share"] = f"{primary['share_numeric']:.2f}%"
+        # Recompute win_rate from merged record (ties count as half win — Limitless convention)
+        decisive = primary["wins"] + primary["losses"]
+        if decisive > 0:
+            wr_pct = (primary["wins"] + 0.5 * primary["ties"]) / (decisive + primary["ties"]) * 100
+            primary["win_rate_numeric"] = round(wr_pct, 2)
+            primary["win_rate"] = f"{wr_pct:.2f}%"
+        # Keep the lowest rank (higher up = more visible / primary listing)
+        try:
+            if int(d["rank"]) < int(primary["rank"]):
+                primary["rank"] = d["rank"]
+                primary["deck_url"] = d["deck_url"]
+        except (ValueError, TypeError):
+            pass
+
+    deduped = list(by_name.values())
+    if len(deduped) < raw_count:
+        logger.info(
+            "Deduped %s duplicate deck-name rows (%s → %s)",
+            raw_count - len(deduped), raw_count, len(deduped),
+        )
+
+    # Renumber ranks sequentially 1..N. Limitless's source occasionally
+    # skips a rank (e.g. 1, 2, …, 9, 11, 12, … with no rank-10 row in
+    # the HTML) which the user reads as a missing-data bug. We've
+    # already preserved the original ordering by sorting by share-desc
+    # at parse time, so a clean 1..N renumber is the right
+    # presentation. The original Limitless rank is no longer carried —
+    # if we ever need it for diagnostics, store as `rank_source`.
+    deduped.sort(key=lambda d: (-d["share_numeric"], -(d["wins"] + d["losses"] + d["ties"])))
+    for i, d in enumerate(deduped, 1):
+        d["rank"] = str(i)
+
+    logger.info("Found %s deck entries (Other excluded, deduped, renumbered)", len(deduped))
+    return deduped
 
 
 def _scrape_single_matchup(

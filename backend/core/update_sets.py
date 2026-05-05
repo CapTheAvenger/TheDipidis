@@ -53,12 +53,22 @@ _CONFIG_DIR = os.path.join(_PROJECT_ROOT, 'config')
 # release, in-person majors apply a fixed two-week lag.
 IN_PERSON_LEGAL_LAG_DAYS = 14
 
-# Days the Japanese set release leads the English release. Empirically:
-# POR-JP dropped 2026-03-13, POR-EN on 2026-03-27 = 14-day lead. The JP
-# rotation cycle has been on this same cadence for the recent metas, so
-# the City League JP scrapers can track jp_release_date = en_release - 14
-# instead of needing a separate /cards/jp scrape.
-JP_LEAD_DAYS = 14
+# Hardcoded fallback release dates for recent JP sets (Limitless
+# /cards/jp listing). Same role as FALLBACK_RELEASE_DATES but for the
+# Japanese rotation — independent from the EN cycle.
+#
+# Why we track these separately: JP and EN run on independent cycles
+# with DIFFERENT set names. The international set "POR" (Perfect
+# Order, EN release 2026-03-27) is the EN counterpart of M3 (Nihil
+# Zero, JP) — by the time POR shipped to EN, JP was already on M4
+# (Ninja Spinner, JP release 2026-03-13). The "JP leads by N days"
+# heuristic we tried earlier is wrong: there's no fixed offset
+# because the sets aren't the same physical product. City League JP
+# data tracks the JP rotation; the EN scrapers track the EN rotation.
+FALLBACK_JP_RELEASE_DATES = {
+    'M4':  '2026-03-13',  # Ninja Spinner — current JP rotation anchor
+    'M3':  '2025-12-26',  # Nihil Zero (POR-EN counterpart)
+}
 
 # Hardcoded fallback release dates for the current rotation. The live
 # scraper attempts to parse these from limitlesstcg.com; when the site
@@ -295,6 +305,73 @@ def scrape_release_dates() -> dict:
     return out
 
 
+def scrape_jp_release_dates() -> dict:
+    """JP twin of scrape_release_dates. Targets limitlesstcg.com/cards/jp,
+    which lists the Japanese set rotation independently from the EN page.
+    Same parsing strategy (table rows + anchor-context fallback) so a
+    Limitless layout change is symmetric between EN and JP runs.
+
+    Best-effort — returns the subset that parsed cleanly. Empty dict
+    when the page is unreachable; caller falls back to FALLBACK_JP_RELEASE_DATES.
+    """
+    out = {}
+    try:
+        html = safe_fetch_html("https://limitlesstcg.com/cards/jp", timeout=15)
+        if not html:
+            return out
+        soup = BeautifulSoup(html, 'lxml')
+        for row in soup.select('tr'):
+            cells = row.find_all('td')
+            if len(cells) < 2:
+                continue
+            code = ''
+            for cell in cells[:3]:
+                txt = cell.get_text(strip=True).upper()
+                if 2 <= len(txt) <= 6 and txt.replace('-', '').isalnum() and not txt.isdigit():
+                    code = txt
+                    break
+            if not code:
+                continue
+            row_text = row.get_text(' ', strip=True)
+            iso = _extract_iso_date(row_text)
+            if iso:
+                out.setdefault(code, iso)
+
+        for a in soup.find_all('a', href=True):
+            href = a['href']
+            m = re.search(r'(?:[?&]set=|/sets/)([A-Z0-9-]{2,6})', href, re.IGNORECASE)
+            if not m:
+                continue
+            code = m.group(1).upper()
+            if code in out:
+                continue
+            container = a.find_parent(['li', 'div', 'tr']) or a.parent
+            if not container:
+                continue
+            iso = _extract_iso_date(container.get_text(' ', strip=True))
+            if iso:
+                out[code] = iso
+    except Exception as e:
+        print(f"[Update Sets] JP release-date scrape failed: {e}")
+    return out
+
+
+def _pick_current_set(release_dates: dict) -> str:
+    """Return the set code with the latest release_date that's <= today.
+    Empty string when no qualifying entry exists.
+
+    Used to auto-detect the active rotation anchor without touching
+    scraper_settings.json — a fully unattended weekly run can refresh
+    `current_set` and `current_set_jp` purely from the live or fallback
+    release-date dict."""
+    today = datetime.date.today().isoformat()
+    candidates = [(code, iso) for code, iso in release_dates.items() if iso and iso <= today]
+    if not candidates:
+        return ''
+    candidates.sort(key=lambda x: x[1], reverse=True)
+    return candidates[0][0]
+
+
 def _extract_iso_date(text: str) -> str:
     """Pull a YYYY-MM-DD date out of free text. Accepts ISO and a few
     common English/German formats. Returns '' on no match."""
@@ -374,61 +451,74 @@ def write_sets_metadata(sets_order: dict, release_dates: dict) -> str:
     return out_path
 
 
-def write_format_window(sets_metadata_path: str) -> str:
-    """Derive data/format_window.json from
-        config/scraper_settings.json.current_meta_analysis.set
-        + data/sets_metadata.json[<set>].release_date
-        + IN_PERSON_LEGAL_LAG_DAYS.
-    Skipped (with a warning) when the current set is unknown or has no
-    release date — the predictor falls back to "no filter" in that case."""
-    current = _read_current_set_from_settings()
-    if not current:
-        print("[Update Sets] ! current_meta_analysis.set is empty — skipping format_window.json")
+def write_format_window(sets_metadata_path: str,
+                        en_release_dates: dict = None,
+                        jp_release_dates: dict = None) -> str:
+    """Derive data/format_window.json from independently auto-detected
+    EN and JP rotation anchors.
+
+    EN and JP run on disjoint cycles with different set codes — POR
+    (EN) and M3 (JP) are equivalent products but ship months apart;
+    M4 (JP, Ninja Spinner) released 2026-03-13 has no EN counterpart
+    yet. So we pick each side's "current set" independently as the
+    most recent set whose release_date is <= today.
+
+    en_release_dates / jp_release_dates: optional pre-fetched dicts
+    (callers in main() pass the live-scrape results); the function
+    falls back to FALLBACK_RELEASE_DATES / FALLBACK_JP_RELEASE_DATES
+    when the dicts are empty / missing entries.
+
+    Skipped (with a warning) only when both sides fail to resolve —
+    the predictor / scrapers fall back to "no filter" in that case."""
+
+    # --- EN side ---
+    en_dates = dict(FALLBACK_RELEASE_DATES)
+    if en_release_dates:
+        en_dates.update(en_release_dates)
+    en_current = _pick_current_set(en_dates)
+    en_release = en_dates.get(en_current, '') if en_current else ''
+
+    # --- JP side ---
+    jp_dates = dict(FALLBACK_JP_RELEASE_DATES)
+    if jp_release_dates:
+        jp_dates.update(jp_release_dates)
+    jp_current = _pick_current_set(jp_dates)
+    jp_release = jp_dates.get(jp_current, '') if jp_current else ''
+
+    if not (en_current and en_release):
+        print("[Update Sets] ! Could not resolve EN current set — skipping format_window.json")
         return ''
 
-    try:
-        with open(sets_metadata_path, 'r', encoding='utf-8') as f:
-            metadata = json.load(f)
-    except Exception as e:
-        print(f"[Update Sets] ! Could not read {sets_metadata_path}: {e}")
-        return ''
+    in_person_legal = _add_days(en_release, IN_PERSON_LEGAL_LAG_DAYS)
 
-    entry = metadata.get(current) or {}
-    release_date = entry.get('release_date') or FALLBACK_RELEASE_DATES.get(current, '')
-    if not release_date:
-        print(f"[Update Sets] ! No release_date known for current set '{current}' — skipping format_window.json")
-        return ''
-
-    in_person_legal = _add_days(release_date, IN_PERSON_LEGAL_LAG_DAYS)
-    # Japanese rotation runs ~14 days ahead of EN — POR-JP dropped on
-    # 2026-03-13 vs POR-EN on 2026-03-27. Derive jp_release_date by
-    # subtracting JP_LEAD_DAYS so the City League scrapers (which only
-    # care about JP rotation) auto-track the right window without us
-    # needing a separate /cards/jp scrape pass. If JP and EN ever stop
-    # matching, we can swap this to a real scrape later.
-    jp_release_date = _add_days(release_date, -JP_LEAD_DAYS)
     out = {
-        'current_set':          current,
-        'set_release_date':     release_date,
-        'jp_release_date':      jp_release_date,
+        'current_set':          en_current,
+        'set_release_date':     en_release,
         'in_person_legal_date': in_person_legal,
         'lag_days':             IN_PERSON_LEGAL_LAG_DAYS,
-        'jp_lead_days':         JP_LEAD_DAYS,
+        'current_set_jp':       jp_current,
+        'jp_release_date':      jp_release,
         '_note': (
-            'Online (Limitless ladder + online tournaments) accept new sets on '
-            'set_release_date. In-person majors are legal in_person_legal_date '
-            '(= release + lag_days). City League JP scrapers track '
-            'jp_release_date (= release - jp_lead_days). Predictor uses these to '
-            'filter labs/major data to the current format and to recency-weight '
-            'late-format events.'
+            'Auto-derived twice per weekly run from limitlesstcg.com/cards '
+            '(EN) and /cards/jp (JP). EN and JP run on independent rotation '
+            'cycles with different set codes — POR (Perfect Order, EN) is '
+            'the international counterpart of M3 (Nihil Zero, JP); by the '
+            'time POR shipped to EN on 2026-03-27, JP was already on M4 '
+            '(Ninja Spinner, 2026-03-13). City League scrapers track '
+            'jp_release_date; the EN-side scrapers track set_release_date '
+            'and (for in-person majors) in_person_legal_date = release + '
+            'lag_days. _pick_current_set() keeps these in sync without a '
+            'human edit when the next set drops.'
         ),
     }
     out_path = os.path.join(data_dir, 'format_window.json')
     with open(out_path, 'w', encoding='utf-8') as f:
         json.dump(out, f, indent=2, ensure_ascii=False)
+
+    jp_summary = f"{jp_current} {jp_release}" if jp_current else "(no JP anchor resolved)"
     print(
-        f"[Update Sets] ✓ format_window.json: {current} "
-        f"online {release_date} → in-person {in_person_legal}"
+        f"[Update Sets] ✓ format_window.json: EN {en_current} {en_release} "
+        f"→ in-person {in_person_legal}  ·  JP {jp_summary}"
     )
     return out_path
 
@@ -567,9 +657,18 @@ def main():
     # Release dates — best-effort scrape, fall back to FALLBACK_RELEASE_DATES.
     release_dates = scrape_release_dates()
     if release_dates:
-        print(f"[Update Sets] Scraped {len(release_dates)} release dates from live site.")
+        print(f"[Update Sets] Scraped {len(release_dates)} EN release dates from live site.")
     else:
-        print("[Update Sets] No release dates scraped — using fallback dict.")
+        print("[Update Sets] No EN release dates scraped — using fallback dict.")
+
+    # JP release dates from /cards/jp — independent rotation, separate
+    # fallback dict. JP and EN run on disjoint cycles so we resolve
+    # them in two passes that share no data.
+    jp_release_dates = scrape_jp_release_dates()
+    if jp_release_dates:
+        print(f"[Update Sets] Scraped {len(jp_release_dates)} JP release dates from live site.")
+    else:
+        print("[Update Sets] No JP release dates scraped — using fallback dict.")
 
     os.makedirs(data_dir, exist_ok=True)
 
@@ -583,8 +682,10 @@ def main():
     metadata_path = write_sets_metadata(sets_order, release_dates)
     print(f"[Update Sets] ✓ Saved metadata to: {metadata_path}")
 
-    # 3) format_window.json (NEW: derived from current set + release date)
-    fw_path = write_format_window(metadata_path)
+    # 3) format_window.json (auto-pick latest released set per region)
+    fw_path = write_format_window(metadata_path,
+                                  en_release_dates=release_dates,
+                                  jp_release_dates=jp_release_dates)
 
     # 4) Sync rotation-driven settings in config/scraper_settings.json so
     #    the City League / Current Meta scrapers track the JP and EN

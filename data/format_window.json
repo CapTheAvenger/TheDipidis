@@ -1,9 +1,9 @@
 {
   "current_set": "POR",
   "set_release_date": "2026-03-27",
-  "jp_release_date": "2026-03-13",
   "in_person_legal_date": "2026-04-10",
   "lag_days": 14,
-  "jp_lead_days": 14,
-  "_note": "Online (Limitless ladder + online tournaments) accept new sets on set_release_date. In-person majors are legal in_person_legal_date (= release + lag_days). City League JP scrapers track jp_release_date (= release - jp_lead_days). Predictor uses these to filter labs/major data to the current format and to recency-weight late-format events."
+  "current_set_jp": "M4",
+  "jp_release_date": "2026-03-13",
+  "_note": "Auto-derived twice per weekly run from limitlesstcg.com/cards (EN) and /cards/jp (JP). EN and JP run on independent rotation cycles with different set codes — POR (Perfect Order, EN) is the international counterpart of M3 (Nihil Zero, JP); by the time POR shipped to EN on 2026-03-27, JP was already on M4 (Ninja Spinner, 2026-03-13). City League scrapers track jp_release_date; the EN-side scrapers track set_release_date and (for in-person majors) in_person_legal_date = release + lag_days. _pick_current_set() keeps these in sync without a human edit when the next set drops."
 }

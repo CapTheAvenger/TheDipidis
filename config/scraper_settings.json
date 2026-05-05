@@ -94,7 +94,8 @@
         "delay_between_requests": 1.5,
         "output_file": "city_league_archetypes.csv",
         "region": "jp",
-        "min_tournament_size": 32,
+        "min_tournament_size": 1,
+        "_min_size_comment": "JP City League events typically post 4-16 placements (NOT 32+). The earlier value 32 (added 2026-04-21) silently rejected every new tournament for two weeks — see backend/scrapers/city_league_archetype_scraper.py DEFAULT_SETTINGS comment for the full incident.",
         "additional_tournament_ids": [548]
     },
 

@@ -67,7 +67,18 @@ DEFAULT_SETTINGS = {
     "max_workers": 5,
     "output_file": "city_league_archetypes.csv",
     "region": "jp",
-    "min_tournament_size": 32,
+    # Skip tournaments with fewer than this many placements posted.
+    # 1 = "include every tournament that has at least one player on
+    # the standings page", which is what we want for the JP City
+    # League where typical events have 4-16 placements (NOT 32+).
+    # The historical CSV (Feb 2026 → Apr 18 2026) was built with NO
+    # min-size filter at all and contains 624 tournaments with
+    # placement counts between 4 and 16. The earlier default of 32
+    # (introduced 2026-04-21) was a copy-paste from a major-event
+    # scraper and silently rejected EVERY post-April-18 City League
+    # event for two weeks — symptom: archetypes CSV frozen at
+    # April 18, current-meta UI showing data 17 days old.
+    "min_tournament_size": 1,
     "additional_tournament_ids": []
 }
 

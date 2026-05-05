@@ -3476,24 +3476,27 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 devLog(`[Consistency][Recency] Computed recency ratios for ${recencyMap.size} cards`);
             }
 
-            // ── 2b2. Latest-Major Anchor (currentMeta 'all' filter only) ──
-            // The 'all' filter mixes Online and Major data; the per-row dates
-            // recency relies on aren't present, so cards still popular online
-            // but rare at the most recent Major (e.g. Team Rocket's Petrel +
-            // Unfair Stamp at Prague for Cynthia's Garchomp) keep an inflated
-            // score and end up in the build at 2x.
+            // ── 2b2. Latest-Major Anchor (currentMeta) ──
+            // The Major-anchor data is loaded for ALL currentMeta filters
+            // (not just 'all') because the ACE SPEC slot picker below
+            // wants to know what tournament-tested decks actually played
+            // even when the user is on the Online-only filter — the ace
+            // spec is a deck-defining 1-of, and the Online aggregate is
+            // noisy enough that a less-popular but tactically-correct
+            // pick (Neo Upper Energy for Cynthia's Garchomp) loses to a
+            // more-popular but less-correct one (Unfair Stamp).
             //
-            // Anchor the build to what the latest Major actually played: use
-            // the Major's per-card share + avg as the canonical reference,
-            // and demote cards absent from the latest Major below the Stage 2
-            // auto-add threshold. The user explicitly asked for "the latest
-            // data should dominate" — Major is the most curated late-format
-            // signal we have.
+            // Score *re-baselining* (using Major share/avg as the score
+            // input for every card) still only fires on filter='all' —
+            // see the gate further down. Without that gate the Online
+            // and Major filter modes would converge.
             const latestMajorStats = new Map(); // cardName_lower → { share, avg }
             let hasLatestMajorAnchor = false;
             let latestMajorDate = '';
+            let latestMajorAgeDays = null;       // days between today and latest Major
+            let latestMajorTotalDecks = 0;       // bucket size of the latest Major
             const _filter = (typeof currentMetaFormatFilter !== 'undefined' ? currentMetaFormatFilter : 'all');
-            if (source === 'currentMeta' && _filter === 'all') {
+            if (source === 'currentMeta') {
                 if (!window.currentMetaTournamentCardsData && typeof loadCSV === 'function') {
                     try {
                         const rawTournament = await loadCSV('tournament_cards_data_cards.csv', { latestChunkOnly: true });
@@ -3571,11 +3574,16 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                                 cardAgg.forEach((stats, cn) => {
                                     const share = (stats.deckCount / majorTotalDecks) * 100;
                                     const avg = stats.deckCount > 0 ? (stats.totalCount / stats.deckCount) : 0;
-                                    latestMajorStats.set(cn, { share, avg });
+                                    latestMajorStats.set(cn, { share, avg, deckCount: stats.deckCount });
                                 });
                                 latestMajorDate = latestRaw;
+                                latestMajorTotalDecks = majorTotalDecks;
+                                if (latestTs > 0 && Number.isFinite(latestTs)) {
+                                    const ageMs = Date.now() - latestTs;
+                                    latestMajorAgeDays = Math.max(0, Math.round(ageMs / 86400000));
+                                }
                                 hasLatestMajorAnchor = true;
-                                devLog(`[Consistency][LatestMajorAnchor] Latest Major: ${latestRaw} | ${majorTotalDecks} decks | ${latestMajorStats.size} cards aggregated`);
+                                devLog(`[Consistency][LatestMajorAnchor] Latest Major: ${latestRaw} (${latestMajorAgeDays}d ago) | ${majorTotalDecks} decks | ${latestMajorStats.size} cards aggregated`);
                             } else {
                                 devLog(`[Consistency][LatestMajorAnchor] Latest Major has only ${majorTotalDecks} placements — anchor skipped (need ≥4).`);
                             }
@@ -3682,12 +3690,16 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 const recencyBoost = clampedRecency * 0.20; // [-0.10, +0.20]
                 card._recencyRatio = rawRatio;
 
-                // Latest-Major anchor (currentMeta 'all' filter): use Major
-                // share + avg as the canonical reference; demote cards absent
-                // from latest Major below the Stage 2 (≥25) auto-add threshold.
+                // Latest-Major anchor — re-baseline ONLY on the 'all'
+                // filter. On 'live' (Online-only), the user is asking
+                // for the Online perspective and we should not silently
+                // override every card's share with Major data. The
+                // Major data is still loaded above so the ACE SPEC
+                // slot picker can use it as a tactical tie-breaker, but
+                // the per-card score base stays Online-derived.
                 let baselineShare = sharePercent;
                 let baselineAvg = avgCountWhenUsed;
-                if (hasLatestMajorAnchor) {
+                if (hasLatestMajorAnchor && _filter === 'all') {
                     const major = latestMajorStats.get(nameLower);
                     if (major) {
                         baselineShare = major.share;
@@ -3804,10 +3816,48 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             // ==========================================
             // 1. ACE SPEC PRIORITY (Lokal)
             // ==========================================
-            // Finde die ECHTE Ace Spec unter den verfügbaren Karten (höchster Score)
-            const aceSpecSlotCard = deckCards
-                .filter(c => isAceSpecCard(c))
-                .sort((a, b) => b.consistencyScore - a.consistencyScore)[0] || null;
+            // Find THE ace spec for the archetype. The ace spec is a 1-of
+            // and very deck-defining (Cynthia's Garchomp dumps 2 energy
+            // for its strong attack → Neo Upper Energy literally pays
+            // for that cost; Unfair Stamp doesn't help energy math at all).
+            //
+            // The signal we use depends on how recent the latest Major is:
+            //   ≤ 14 days → Major share is the canonical reference
+            //               (just-played, players haven't had time to drift).
+            //   14–28 days → blend Major and consistencyScore 50/50
+            //               (decay window — Online aggregate may have
+            //               already shifted post-Major).
+            //   > 28 days → fall back to consistencyScore
+            //               (Major data is stale, trust Online aggregate).
+            //
+            // This replaces the earlier "always prefer Major" tie-break
+            // which was correct for archetypes with a recent Major
+            // appearance but would have wrongly favoured stale Major data
+            // for archetypes that haven't shown up at a Major in months.
+            const _aceSpecMajorWeight = (() => {
+                if (latestMajorAgeDays == null) return 0;
+                if (latestMajorAgeDays <= 14) return 1.0;
+                if (latestMajorAgeDays <= 28) return 1.0 - ((latestMajorAgeDays - 14) / 14) * 0.5; // 1.0 → 0.5 linear
+                return 0;
+            })();
+            const _aceSpecScoreOf = (card) => {
+                const major = (latestMajorStats && latestMajorStats.size > 0)
+                    ? latestMajorStats.get((card.card_name || '').trim().toLowerCase())
+                    : null;
+                const score = card.consistencyScore || 0;
+                if (!major || _aceSpecMajorWeight <= 0) return score;
+                return major.share * _aceSpecMajorWeight + score * (1 - _aceSpecMajorWeight);
+            };
+            const aceSpecCandidates = deckCards.filter(c => isAceSpecCard(c));
+            aceSpecCandidates.sort((a, b) => _aceSpecScoreOf(b) - _aceSpecScoreOf(a));
+            const aceSpecSlotCard = aceSpecCandidates[0] || null;
+            if (aceSpecSlotCard) {
+                devLog(`[Consistency][ACE-SPEC-Picker] Major-recency weight: ${_aceSpecMajorWeight.toFixed(2)} (Major ${latestMajorAgeDays != null ? latestMajorAgeDays + 'd ago' : 'unavailable'})`);
+                aceSpecCandidates.slice(0, 4).forEach(c => {
+                    const m = latestMajorStats?.get((c.card_name || '').trim().toLowerCase());
+                    devLog(`  candidate: ${c.card_name} score=${(c.consistencyScore || 0).toFixed(0)} majorShare=${m ? m.share.toFixed(0) : '—'} → blended=${_aceSpecScoreOf(c).toFixed(1)}`);
+                });
+            }
 
             if (aceSpecSlotCard) {
                 pushCard(aceSpecSlotCard, 1, '[Consistency][ACE-SPEC-Priority]');

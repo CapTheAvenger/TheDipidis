@@ -94,7 +94,9 @@ class TestRetreatLockCounter:
 
 
 class TestHandDisruption:
-    def test_iono_supporter_is_threat_and_counter(self):
+    def test_iono_supporter_is_threat_only(self):
+        # Iono is hand disruption itself — NOT a counter. Per user
+        # feedback: "die nutzt man um Hand disruption auszuführen".
         card = _trainer("Iono", "Supporter", rules=[
             "Each player shuffles their hand and puts it on the bottom of their deck. "
             "If either player put any cards on the bottom of their deck in this way, "
@@ -102,14 +104,38 @@ class TestHandDisruption:
         ])
         tags = classify_card(card)
         assert "hand_disruption" in tags["threats"]
-        assert "hand_disruption" in tags["counters"]
+        assert "hand_disruption" not in tags["counters"]
 
-    def test_judge_supporter_is_threat_and_counter(self):
+    def test_judge_supporter_is_threat_only(self):
+        # Same logic as Iono — symmetric shuffle is offensive, not
+        # defensive, even with the +N draw clause.
         card = _trainer("Judge", "Supporter", rules=[
             "Each player shuffles their hand into their deck and draws 4 cards."
         ])
         tags = classify_card(card)
         assert "hand_disruption" in tags["threats"]
+        assert "hand_disruption" not in tags["counters"]
+
+    def test_unfair_stamp_is_threat_only(self):
+        # Unfair Stamp is the item-form of Marnie — same disruption
+        # tool, not a defensive counter.
+        card = _trainer("Unfair Stamp", "Item", rules=[
+            "You can use this card only if any of your Pokémon were Knocked Out during your "
+            "opponent's last turn. Each player shuffles their hand into their deck. "
+            "Then, you draw 5 cards, and your opponent draws 2 cards."
+        ])
+        tags = classify_card(card)
+        assert "hand_disruption" in tags["threats"]
+        assert "hand_disruption" not in tags["counters"]
+
+    def test_lillies_determination_is_counter_only(self):
+        # One-sided refresh — actually defensive recovery from disruption.
+        card = _trainer("Lillie's Determination", "Supporter", rules=[
+            "Shuffle your hand into your deck. Then, draw 6 cards. If you have exactly 6 "
+            "Prize cards remaining, draw 8 cards instead."
+        ])
+        tags = classify_card(card)
+        assert "hand_disruption" not in tags["threats"]
         assert "hand_disruption" in tags["counters"]
 
 

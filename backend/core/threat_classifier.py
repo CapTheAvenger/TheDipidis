@@ -21,9 +21,16 @@ Categories
                         Guzma / Mallow & Lana / Tate & Liza family).
 
 - ``hand_disruption`` — opponent's card forces you to shuffle / discard
-                        your hand (Iono, Marnie, Roxanne, Judge). Counter:
-                        cards that re-fill the hand (Iono itself, Lillie's
-                        Determination, Judge — symmetrical refreshers).
+                        your hand (Iono, Marnie, Roxanne, Judge, Unfair
+                        Stamp, Lucian). Counter pool is intentionally
+                        narrow: only ONE-SIDED refreshers (Lillie's
+                        Determination "Shuffle YOUR hand into your deck.
+                        Then, draw 6"). Iono/Marnie/Judge etc. are NOT
+                        counters — they ARE the disruption tool, used
+                        offensively. Boosting them when the meta is
+                        full of disruption would just inflate Stamp/Iono
+                        scores and steal the Ace Spec slot from the deck's
+                        actual energy/draw answer (e.g. Neo Upper Energy).
 
 - ``bench_damage``    — opponent's attack does damage to YOUR benched
                         Pokémon (Kleavor VSTAR Axe Break, Larry's
@@ -114,12 +121,16 @@ COUNTER_PATTERNS: Dict[str, List[Tuple[re.Pattern, str]]] = {
         (re.compile(r"switch\s+(?:your\s+)?active\s+pok[ée]mon\s+with\s+(?:1\s+of\s+)?your\s+benched", re.IGNORECASE), "rule.text"),
     ],
     "hand_disruption": [
-        # Symmetrical refreshers (Iono itself, Marnie, Judge — playing
-        # them un-bricks our own hand, even if it disrupts opponent too)
-        (re.compile(r"each\s+player\s+shuffles\s+(?:their\s+)?hand", re.IGNORECASE), "rule.text"),
-        # Targeted refreshers (Lillie's Determination — "shuffle your
-        # hand into your deck and draw N cards")
-        (re.compile(r"shuffle\s+your\s+hand\s+into\s+your\s+deck\s+and\s+draw", re.IGNORECASE), "rule.text"),
+        # ONE-SIDED refresh only — Lillie's Determination ("Shuffle
+        # your hand into your deck. Then, draw 6"). The earlier
+        # symmetric pattern (`each player shuffles their hand`)
+        # mistakenly tagged Iono / Marnie / Judge / Roxanne / Unfair
+        # Stamp / Lucian as counters; those cards ARE hand disruption,
+        # not a counter. Pattern keys on "your hand into your deck"
+        # specifically — Iono uses "their hand and puts it on the
+        # bottom"; Judge uses "their hand into their deck"; only one-
+        # sided supporters write "your hand into your deck".
+        (re.compile(r"shuffle\s+your\s+hand\s+into\s+your\s+deck", re.IGNORECASE), "rule.text"),
     ],
     "bench_damage": [
         # Manaphy / Mr. Mime / Shaymin / Dugtrio — Bench Barrier ability

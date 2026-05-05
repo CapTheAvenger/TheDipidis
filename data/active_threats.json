@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-05-05T21:22:26Z",
+  "generated_at": "2026-05-05T21:57:19Z",
   "format_window": "POR",
   "format_label": "TEF-M4",
   "legal_format_min_set": "TEF",
@@ -564,6 +564,28 @@
     }
   },
   "counters": {
+    "hand_disruption": [
+      {
+        "card_id": "PRE|133",
+        "card_name": "Atticus",
+        "card_type": "Supporter"
+      },
+      {
+        "card_id": "SSP|173",
+        "card_name": "Drasna",
+        "card_type": "Supporter"
+      },
+      {
+        "card_id": "PRE|114",
+        "card_name": "Lacey",
+        "card_type": "Supporter"
+      },
+      {
+        "card_id": "ASC|192",
+        "card_name": "Lillie's Determination",
+        "card_type": "Supporter"
+      }
+    ],
     "retreat_lock": [
       {
         "card_id": "PRE|113",
@@ -588,33 +610,6 @@
       {
         "card_id": "PFL|123",
         "card_name": "Switch",
-        "card_type": "Item"
-      }
-    ],
-    "hand_disruption": [
-      {
-        "card_id": "WHT|163",
-        "card_name": "Harlequin",
-        "card_type": "Supporter"
-      },
-      {
-        "card_id": "POR|76",
-        "card_name": "Judge",
-        "card_type": "Supporter"
-      },
-      {
-        "card_id": "TWM|157",
-        "card_name": "Lucian",
-        "card_type": "Supporter"
-      },
-      {
-        "card_id": "ASC|201",
-        "card_name": "Team Rocket's Archer",
-        "card_type": "Supporter"
-      },
-      {
-        "card_id": "TWM|165",
-        "card_name": "Unfair Stamp",
         "card_type": "Item"
       }
     ],

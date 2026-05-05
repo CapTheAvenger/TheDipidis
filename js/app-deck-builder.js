@@ -3476,24 +3476,25 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 devLog(`[Consistency][Recency] Computed recency ratios for ${recencyMap.size} cards`);
             }
 
-            // ── 2b2. Latest-Major Anchor (currentMeta 'all' filter only) ──
-            // The 'all' filter mixes Online and Major data; the per-row dates
-            // recency relies on aren't present, so cards still popular online
-            // but rare at the most recent Major (e.g. Team Rocket's Petrel +
-            // Unfair Stamp at Prague for Cynthia's Garchomp) keep an inflated
-            // score and end up in the build at 2x.
+            // ── 2b2. Latest-Major Anchor (currentMeta) ──
+            // The Major-anchor data is loaded for ALL currentMeta filters
+            // (not just 'all') because the ACE SPEC slot picker below
+            // wants to know what tournament-tested decks actually played
+            // even when the user is on the Online-only filter — the ace
+            // spec is a deck-defining 1-of, and the Online aggregate is
+            // noisy enough that a less-popular but tactically-correct
+            // pick (Neo Upper Energy for Cynthia's Garchomp) loses to a
+            // more-popular but less-correct one (Unfair Stamp).
             //
-            // Anchor the build to what the latest Major actually played: use
-            // the Major's per-card share + avg as the canonical reference,
-            // and demote cards absent from the latest Major below the Stage 2
-            // auto-add threshold. The user explicitly asked for "the latest
-            // data should dominate" — Major is the most curated late-format
-            // signal we have.
+            // Score *re-baselining* (using Major share/avg as the score
+            // input for every card) still only fires on filter='all' —
+            // see the gate further down. Without that gate the Online
+            // and Major filter modes would converge.
             const latestMajorStats = new Map(); // cardName_lower → { share, avg }
             let hasLatestMajorAnchor = false;
             let latestMajorDate = '';
             const _filter = (typeof currentMetaFormatFilter !== 'undefined' ? currentMetaFormatFilter : 'all');
-            if (source === 'currentMeta' && _filter === 'all') {
+            if (source === 'currentMeta') {
                 if (!window.currentMetaTournamentCardsData && typeof loadCSV === 'function') {
                     try {
                         const rawTournament = await loadCSV('tournament_cards_data_cards.csv', { latestChunkOnly: true });
@@ -3682,12 +3683,16 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 const recencyBoost = clampedRecency * 0.20; // [-0.10, +0.20]
                 card._recencyRatio = rawRatio;
 
-                // Latest-Major anchor (currentMeta 'all' filter): use Major
-                // share + avg as the canonical reference; demote cards absent
-                // from latest Major below the Stage 2 (≥25) auto-add threshold.
+                // Latest-Major anchor — re-baseline ONLY on the 'all'
+                // filter. On 'live' (Online-only), the user is asking
+                // for the Online perspective and we should not silently
+                // override every card's share with Major data. The
+                // Major data is still loaded above so the ACE SPEC
+                // slot picker can use it as a tactical tie-breaker, but
+                // the per-card score base stays Online-derived.
                 let baselineShare = sharePercent;
                 let baselineAvg = avgCountWhenUsed;
-                if (hasLatestMajorAnchor) {
+                if (hasLatestMajorAnchor && _filter === 'all') {
                     const major = latestMajorStats.get(nameLower);
                     if (major) {
                         baselineShare = major.share;
@@ -3804,10 +3809,31 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             // ==========================================
             // 1. ACE SPEC PRIORITY (Lokal)
             // ==========================================
-            // Finde die ECHTE Ace Spec unter den verfügbaren Karten (höchster Score)
-            const aceSpecSlotCard = deckCards
-                .filter(c => isAceSpecCard(c))
-                .sort((a, b) => b.consistencyScore - a.consistencyScore)[0] || null;
+            // Find THE ace spec for the archetype. The ace spec is a 1-of
+            // and very deck-defining (Cynthia's Garchomp dumps 2 energy
+            // for its strong attack → Neo Upper Energy literally pays
+            // for that cost; Unfair Stamp doesn't help energy math at all).
+            // The most reliable signal for which ace spec to run is what
+            // the latest Major's tournament-tested decks actually played
+            // — far more authoritative than the Online aggregate which
+            // mixes experimental Limitless lists.
+            //
+            // Prefer the candidate with the highest Major share whenever
+            // we have anchor data for it; fall back to consistencyScore
+            // when Major data is unavailable (e.g. archetype has no
+            // recent Major appearance).
+            const aceSpecCandidates = deckCards.filter(c => isAceSpecCard(c));
+            aceSpecCandidates.sort((a, b) => {
+                if (latestMajorStats && latestMajorStats.size > 0) {
+                    const aMajor = latestMajorStats.get((a.card_name || '').trim().toLowerCase());
+                    const bMajor = latestMajorStats.get((b.card_name || '').trim().toLowerCase());
+                    if (aMajor && bMajor) return (bMajor.share || 0) - (aMajor.share || 0);
+                    if (aMajor && !bMajor) return -1;            // Major-known wins
+                    if (!aMajor && bMajor) return 1;
+                }
+                return (b.consistencyScore || 0) - (a.consistencyScore || 0);
+            });
+            const aceSpecSlotCard = aceSpecCandidates[0] || null;
 
             if (aceSpecSlotCard) {
                 pushCard(aceSpecSlotCard, 1, '[Consistency][ACE-SPEC-Priority]');

@@ -1988,14 +1988,26 @@ function updateDecksUI() {
             );
           }
           
-          // METHOD 3: Last resort - search by name only (loses exact print info)
+          // METHOD 3: Last resort - search by name only (loses exact print info).
+          // The console warning was spamming on every render because the
+          // standard-chunk-only initial load triggers updateDecksUI before
+          // the extended/legacy chunks have arrived in the background. Cards
+          // from older sets (SVE/SVI/PAF/RCL/...) inevitably miss the
+          // set+number index until those chunks finish, so the warning was
+          // a false positive that fixed itself on the next re-render.
+          // Suppress it during the partial-load window — only warn after
+          // _notifyCardDBReady has fired with the full chunk count.
           if (!cardData && window.allCardsDatabase) {
-            console.warn(`[My Decks] Could not find exact print ${deckKey}, using any print of ${cardName}`);
+            if (window.cardDBFullyLoaded === true) {
+              console.warn(`[My Decks] Could not find exact print ${deckKey}, using any print of ${cardName}`);
+            }
             cardData = findFallbackDeckCardByName(cardName);
           }
         } else {
           // Legacy format without set info - try name lookup
-          console.warn(`[My Decks] Old deck format detected: ${deckKey}`);
+          if (window.cardDBFullyLoaded === true) {
+            console.warn(`[My Decks] Old deck format detected: ${deckKey}`);
+          }
           if (window.allCardsDatabase) {
             cardData = findFallbackDeckCardByName(cardName);
             if (cardData) {
@@ -2004,7 +2016,7 @@ function updateDecksUI() {
             }
           }
         }
-        
+
         if (cardData) {
           deckCards.push({
             ...cardData,
@@ -2017,7 +2029,9 @@ function updateDecksUI() {
             set: setCode || cardData.set,
             number: setNumber || cardData.number
           });
-        } else {
+        } else if (window.cardDBFullyLoaded === true) {
+          // Same suppression — only flag genuinely-unfindable cards
+          // after the full DB has finished loading.
           console.error(`[My Decks] Failed to load card: ${deckKey} - not found in database`);
         }
       }

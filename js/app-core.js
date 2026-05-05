@@ -2090,6 +2090,9 @@ const BASE_PATH = './data/';
                         if (allCached && allCards.length > 0) {
                             _applyCardDatabase(allCards);
                             devLog('[CardDB] Loaded ' + allCards.length + ' cards from IndexedDB cache');
+                            // Cache hit = ALL chunks restored in one shot, so flip the
+                            // full-loaded flag immediately (no background load follows).
+                            window.cardDBFullyLoaded = true;
                             _notifyCardDBReady();
                             return;
                         }
@@ -2125,6 +2128,8 @@ const BASE_PATH = './data/';
                             }
                             cache.setCachedManifest({ ...serverManifest, timestamp: Date.now() });
                             _applyCardDatabase(allCards);
+                            // Sequential-load path resolves all chunks in one go.
+                            window.cardDBFullyLoaded = true;
                             _notifyCardDBReady();
                             return;
                         }
@@ -2160,6 +2165,15 @@ const BASE_PATH = './data/';
                 cache.setCachedManifest({ ...manifest, timestamp: Date.now() });
                 devLog('[CardDB] All chunks loaded: ' + allCards.length + ' cards total');
 
+                // Tell consumers the full DB is now resolvable. Used by
+                // firebase-collection's My Decks renderer to decide whether
+                // a "card not found" lookup is worth a console warning —
+                // before this flag flips, lookups for cards in extended /
+                // legacy chunks are expected to miss and fall back to "any
+                // print", and the warning would be a false positive that
+                // fixes itself on the next re-render.
+                window.cardDBFullyLoaded = true;
+
                 // Re-notify so Cards DB tab can refresh with full data
                 _notifyCardDBReady();
             } catch (e) {
@@ -2185,6 +2199,8 @@ const BASE_PATH = './data/';
                         timestamp: Date.now()
                     });
                 }
+                // Monolith = single file with EVERY card → DB fully resolvable.
+                window.cardDBFullyLoaded = true;
                 _notifyCardDBReady();
                 devLog('[CardDB] Loaded ' + cards.length + ' cards from monolith (fallback)');
             } else {

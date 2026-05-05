@@ -2164,9 +2164,10 @@ function updateDecksUI() {
             </div>
           </div>
           <div class="deck-action-buttons" style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
-            <!-- Primary actions (3): high-frequency, always visible. Secondary
-                 actions live behind the ⋯ overflow toggle below — keeps the
-                 row scanable instead of drowning the user in 9 buttons. -->
+            <!-- All deck actions inline. Per user request: drowning vs.
+                 scanable was a wash — they prefer one click instead of
+                 two. flex-wrap keeps narrow viewports happy when the
+                 row gets too long. -->
             <button onclick="event.stopPropagation(); toggleDeckActive('${safeDeckDeleteIdJs}')" class="deck-action-btn deck-btn-irl${isActive ? ' deck-btn-irl--active' : ''}" title="${isActive ? (getLang()==='de' ? 'Als nicht gebaut markieren' : 'Mark as not built') : (getLang()==='de' ? 'Als IRL gebaut markieren' : 'Mark as IRL built')}">
               IRL ${isActive ? '✓' : ''}
             </button>
@@ -2176,30 +2177,24 @@ function updateDecksUI() {
             <button onclick="event.stopPropagation(); copyDeckAndOpenLimitless(${deckIndex})" class="deck-action-btn deck-btn-print" title="Copy &amp; open Limitless Builder">
               ${getLang()==='de' ? 'Decklist' : 'Print Decklist'}
             </button>
-            <div class="deck-overflow-wrap" style="position: relative;">
-              <button onclick="event.stopPropagation(); toggleDeckOverflow('${deckId}-overflow')" class="deck-action-btn deck-btn-overflow" title="${getLang()==='de' ? 'Weitere Aktionen' : 'More actions'}" aria-haspopup="true" aria-expanded="false">⋯</button>
-              <div id="${deckId}-overflow" class="deck-overflow-menu" role="menu" aria-hidden="true">
-                <button onclick="event.stopPropagation(); openCompareSavedDeck(${deckIndex}); closeDeckOverflow('${deckId}-overflow');" class="deck-overflow-item" role="menuitem">
-                  📊 ${getLang()==='de' ? 'Vergleichen' : 'Compare'}
-                </button>
-                <button onclick="event.stopPropagation(); moveDeckToFolder(${deckIndex}); closeDeckOverflow('${deckId}-overflow');" class="deck-overflow-item" role="menuitem">
-                  📁 ${getLang()==='de' ? 'In Ordner verschieben' : 'Move to folder'}
-                </button>
-                <button onclick="event.stopPropagation(); exportSavedDeckAsImage(${deckIndex}); closeDeckOverflow('${deckId}-overflow');" class="deck-overflow-item" role="menuitem">
-                  🖼️ ${getLang()==='de' ? 'Als Bild speichern' : 'Save as image'}
-                </button>
-                <button onclick="event.stopPropagation(); renameDeck(${deckIndex}); closeDeckOverflow('${deckId}-overflow');" class="deck-overflow-item" role="menuitem">
-                  ✏️ ${getLang()==='de' ? 'Umbenennen' : 'Rename'}
-                </button>
-                <button onclick="event.stopPropagation(); duplicateDeck(${deckIndex}); closeDeckOverflow('${deckId}-overflow');" class="deck-overflow-item" role="menuitem">
-                  📑 ${getLang()==='de' ? 'Duplizieren' : 'Duplicate'}
-                </button>
-                <hr class="deck-overflow-sep">
-                <button onclick="event.stopPropagation(); deleteDeck('${safeDeckDeleteIdJs}'); closeDeckOverflow('${deckId}-overflow');" class="deck-overflow-item deck-overflow-item--danger" role="menuitem">
-                  🗑 ${getLang()==='de' ? 'Löschen' : 'Delete'}
-                </button>
-              </div>
-            </div>
+            <button onclick="event.stopPropagation(); openCompareSavedDeck(${deckIndex})" class="deck-action-btn deck-btn-compare" title="${getLang()==='de' ? 'Vergleichen' : 'Compare'}">
+              📊 ${getLang()==='de' ? 'Vergleichen' : 'Compare'}
+            </button>
+            <button onclick="event.stopPropagation(); moveDeckToFolder(${deckIndex})" class="deck-action-btn deck-btn-folder" title="${getLang()==='de' ? 'In Ordner verschieben' : 'Move to folder'}">
+              📁 ${getLang()==='de' ? 'Ordner' : 'Folder'}
+            </button>
+            <button onclick="event.stopPropagation(); exportSavedDeckAsImage(${deckIndex})" class="deck-action-btn deck-btn-export" title="${getLang()==='de' ? 'Als Bild speichern' : 'Save as image'}">
+              🖼️ ${getLang()==='de' ? 'Bild' : 'Image'}
+            </button>
+            <button onclick="event.stopPropagation(); renameDeck(${deckIndex})" class="deck-action-btn deck-btn-rename" title="${getLang()==='de' ? 'Umbenennen' : 'Rename'}">
+              ✏️ ${getLang()==='de' ? 'Umbenennen' : 'Rename'}
+            </button>
+            <button onclick="event.stopPropagation(); duplicateDeck(${deckIndex})" class="deck-action-btn deck-btn-duplicate" title="${getLang()==='de' ? 'Duplizieren' : 'Duplicate'}">
+              📑 ${getLang()==='de' ? 'Dupl.' : 'Duplicate'}
+            </button>
+            <button onclick="event.stopPropagation(); deleteDeck('${safeDeckDeleteIdJs}')" class="deck-action-btn deck-btn-delete" title="${getLang()==='de' ? 'Löschen' : 'Delete'}">
+              🗑 ${getLang()==='de' ? 'Löschen' : 'Delete'}
+            </button>
             <div id="${deckId}-arrow" style="font-size: 1.5em; transition: transform 0.3s; transform: rotate(0deg); margin-left: auto;">▼</div>
           </div>
         </div>

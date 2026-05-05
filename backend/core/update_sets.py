@@ -66,10 +66,18 @@ FALLBACK_RELEASE_DATES = {
     'PRE': '2025-08-01',
 }
 
-# Hardcoded fallback — used if live scraping fails
+# Hardcoded fallback — used if live scraping fails. KEEP IN SYNC with
+# data/sets.json: any new release that lands here also needs an entry
+# below, or update_sets.py on a CI runner that fails to scrape (Cloudflare,
+# DNS hiccup, table re-skinned) silently writes a sets.json missing the
+# newest sets → prepare_card_data.py's chunker reads order 0 for those
+# sets → cards land in legacy chunk → Deck Builder can't find them.
+# That's how POR/M4 cards disappeared from the standard chunk on the
+# 2026-05-03 auto-runs. Bump these whenever a new English-set rotation
+# happens.
 FALLBACK_SET_ORDER = {
-    # Mega (2025-2026)
-    'ASC': 150, 'PFL': 149, 'MEG': 148, 'MEE': 147, 'MEP': 146,
+    # Mega (2026)
+    'M4': 152, 'POR': 151, 'ASC': 150, 'PFL': 149, 'MEG': 148, 'MEE': 147, 'MEP': 146,
     # Scarlet & Violet (2023-2025)
     'BLK': 145, 'WHT': 144, 'DRI': 143, 'JTG': 142, 'PRE': 141,
     'SSP': 140, 'SCR': 139, 'SFA': 138, 'TWM': 137, 'TEF': 136,

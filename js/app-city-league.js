@@ -1508,8 +1508,14 @@
                 if (/^\d{4}-\d{2}-\d{2}/.test(raw)) {
                     iso = raw.slice(0, 10);
                 } else if (typeof parseJapaneseDate === 'function') {
-                    const d = parseJapaneseDate(raw);
-                    if (d) iso = d.toISOString().slice(0, 10);
+                    // parseJapaneseDate returns an ISO-format STRING
+                    // ("2026-04-29"), not a Date object — calling
+                    // .toISOString() on it threw TypeError once the
+                    // analysis CSV started carrying English ordinal
+                    // dates ("29th April 2026") that fall through to
+                    // this branch. Use the returned string directly.
+                    const isoStr = parseJapaneseDate(raw);
+                    if (isoStr) iso = isoStr.slice(0, 10);
                 }
                 if (!iso) continue;
                 if (!minISO || iso < minISO) minISO = iso;

@@ -43,6 +43,83 @@ from card_scraper_shared import (
     fix_mojibake,
 )
 
+# Phase 4: canonicalize archetype names against the Limitless online
+# bare-name list (= what archetype_icons.json holds, scraped from
+# Limitless's decks page). Mirrors what city_league_analysis_scraper
+# does — without it, slug_to_archetype produces names like "Dragapult
+# Ex", "Crustle Dri", "Rockets Honchkrow" that no longer match the
+# bare names ("Dragapult", "Crustle", "Rocket's Honchkrow") on the
+# share/winrate side, and the Deck Analysis Global tab can't show
+# share or winrate for the affected archetype.
+try:
+    sys.path.append(os.path.join(os.path.dirname(__file__), "..", "core"))
+    from archetype_matcher import ArchetypeMatcher  # type: ignore
+    _matcher = ArchetypeMatcher().load()
+except Exception as _matcher_err:  # pragma: no cover — defensive only
+    _matcher = None
+    # logger isn't set up yet at import time; print is fine for the
+    # one-time CI surface
+    print(
+        f"[current_meta_analysis_scraper] ArchetypeMatcher unavailable ({_matcher_err}) — "
+        "names will not be canonicalised against archetype_icons.json"
+    )
+
+# Possessive-without-apostrophe trainer prefixes that Limitless URL
+# slugs strip ("rockets-honchkrow") and slug_to_archetype can't
+# undo. Restore the apostrophe so the archetype name lines up with
+# the canonical Limitless display ("Rocket's Honchkrow").
+_POSSESSIVE_TRAINERS = {
+    "rocket": "Rocket's", "hop": "Hop's", "steven": "Steven's",
+    "cynthia": "Cynthia's", "marnie": "Marnie's", "lillie": "Lillie's",
+    "ethan": "Ethan's", "hau": "Hau's", "n": "N's",
+    "iono": "Iono's", "arven": "Arven's", "nemona": "Nemona's",
+    "kieran": "Kieran's", "kabu": "Kabu's", "raihan": "Raihan's",
+    "jacq": "Jacq's", "geeta": "Geeta's",
+}
+
+# Trailing English-set-code suffix that current_meta_analysis_scraper
+# would otherwise carry into the archetype name ("Crustle Dri"). Same
+# list the frontend's normalizeArchetypeForMatch uses — keep in sync
+# with update_sets.FALLBACK_SET_ORDER when a new set rotates in.
+_SET_CODE_SUFFIX_RE = re.compile(
+    r"\s+(?:asc|pfl|meg|mee|mep|blk|wht|dri|jtg|pre|ssp|scr|sfa|"
+    r"twm|tef|paf|par|mew|obf|pal|svi|sve|svp|por|m3|m4)$",
+    re.IGNORECASE,
+)
+_TRAILING_EX_RE = re.compile(r"\s+ex$", re.IGNORECASE)
+
+
+def _canonicalize_archetype(raw_name: str) -> str:
+    """Return the bare Limitless-style archetype name.
+
+    Pipeline:
+      1. Title-cased slug ("Crustle Dri")
+      2. Strip set-code suffix → "Crustle"
+      3. Strip trailing " Ex" → "Crustle"  (no-op here, "Dragapult Ex"
+         would collapse to "Dragapult")
+      4. Restore apostrophe on known possessive trainer prefixes
+         ("Rockets Honchkrow" → "Rocket's Honchkrow")
+      5. Try ArchetypeMatcher.canonicalize_by_name as a final pass —
+         if archetype_icons.json knows this archetype under a
+         different but equivalent name, prefer that one.
+    """
+    name = (raw_name or "").strip()
+    if not name:
+        return name
+    name = _SET_CODE_SUFFIX_RE.sub("", name).strip()
+    name = _TRAILING_EX_RE.sub("", name).strip()
+    parts = name.split(" ", 1)
+    head_lower = parts[0].lower()
+    if head_lower in _POSSESSIVE_TRAINERS:
+        rest = parts[1] if len(parts) > 1 else ""
+        name = (_POSSESSIVE_TRAINERS[head_lower] + (" " + rest if rest else "")).strip()
+    if _matcher is not None:
+        canonical = _matcher.canonicalize_by_name(name)
+        if canonical:
+            return canonical
+    return name
+
+
 # Fix Windows console encoding
 setup_console_encoding()
 
@@ -169,7 +246,7 @@ def _fetch_meta_live_decklist(list_url: str, deck_name: str, deck_slug: str, car
             logger.warning("Ungueltige Deckgroesse %d fuer '%s' – uebersprungen.", total, deck_name)
             return None
         return {
-            "archetype": normalize_archetype_name(deck_name),
+            "archetype": _canonicalize_archetype(normalize_archetype_name(deck_name)),
             "deck_slug": deck_slug,
             "cards": cards,
             "source": "limitless_online"
@@ -221,7 +298,7 @@ def scrape_limitless_online(settings: dict, card_db: CardDatabaseLookup) -> list
     all_decks = []
 
     for idx, (slug, url) in enumerate(deck_links, 1):
-        deck_name = slug_to_archetype(slug)
+        deck_name = _canonicalize_archetype(slug_to_archetype(slug))
         logger.info("[%s/%s] %s (Sammle Decklisten...)", idx, len(deck_links), deck_name)
 
         deck_html = safe_fetch_html(url, timeout)
@@ -291,7 +368,7 @@ def _fetch_meta_play_decklist(url: str, archetype: str, card_db: CardDatabaseLoo
     total = sum(c['count'] for c in cards)
     if cards and 59 <= total <= 61:
         return {
-            'archetype': normalize_archetype_name(archetype),
+            'archetype': _canonicalize_archetype(normalize_archetype_name(archetype)),
             'cards': cards,
             'source': 'Tournament'
         }
@@ -408,10 +485,21 @@ def scrape_tournaments(settings: dict, card_db: CardDatabaseLookup) -> list:
 
             arch_link = row.select_one(f'a[href^="/{tid}/decks/"]')
             if arch_link:
-                archetype = slug_to_archetype(arch_link['href'].split('/')[-1])
+                archetype = _canonicalize_archetype(
+                    slug_to_archetype(arch_link['href'].split('/')[-1])
+                )
             else:
+                # Fallback: build name from <img.pokemon alt> attributes,
+                # then run through the canonicalizer so img-derived names
+                # also collapse to the bare Limitless form.
                 imgs = row.select('img.pokemon')
-                archetype = ' '.join(i['alt'].title() for i in imgs if i.has_attr('alt')) or "Unknown"
+                slugs = [i['alt'].lower() for i in imgs if i.has_attr('alt')]
+                # Try slug-signature lookup first (more reliable when we
+                # have multiple icons), fall back to title-cased join.
+                from_signature = _matcher.canonicalize_by_slugs(slugs) if _matcher else None
+                archetype = from_signature or _canonicalize_archetype(
+                    ' '.join(s.title() for s in slugs)
+                ) or "Unknown"
 
             deck_tasks.append((deck_url, archetype))
 

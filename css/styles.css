@@ -1,21 +1,31 @@
 /* --- POKÉMON THEME UPGRADE --- */
 /* Font loaded via <link> in index.html — no @import needed (faster) */
 
+/* ====================================================================
+   DESIGN TOKENS
+   ====================================================================
+   Single source of truth for colors / spacing / radii / typography
+   used across the SPA. Earlier this block had duplicate definitions
+   (e.g. --color-success was set to #27ae60 then overridden by #28a745
+   later in the same block) which made "what colour is success?"
+   ambiguous — last-write-wins per CSS rules but readers couldn't tell.
+   Cleaned + extended with the missing scales (radius, spacing, font).
+
+   Migration policy: NEW CSS uses these tokens. Existing hardcoded
+   values stay as-is — migrating ~25 K lines is its own project.
+   When you rewrite a component, swap raw values for tokens then.
+
+   PALETTE NOTES:
+   - --color-success / --color-danger consolidated from two slightly
+     different greens / reds. Picked the variant most-used in the
+     codebase (#27ae60 / #e74c3c — Pokemon-themed) over the
+     Bootstrap-inherited (#28a745 / #dc3545). Visually nearly
+     identical at button sizes.
+   - --color-info kept at #3498db (codebase mostly uses it that way);
+     the bootstrap-style #17a2b8 is gone.
+   ==================================================================== */
 :root {
-        /* Farben: Primary & Secondary */
-        --color-primary: #3B4CCA;
-        --color-primary-hover: #2a3899;
-        --color-secondary: #2c3e50;
-        /* Farben: Status & UI */
-        --color-info: #3498db;
-        --color-info-hover: #2980b9;
-        --color-success: #27ae60;
-        --color-danger: #e74c3c;
-        --color-warning: #f39c12;
-        /* Typografie */
-        --font-family-base: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        --text-main: #333333;
-    /* Core Pokémon Brand */
+    /* ── Brand: Pokémon ─────────────────────────────────────────── */
     --pokemon-red: #E3350D;
     --pokemon-red-dark: #A82508;
     --pokemon-blue: #3B4CCA;
@@ -23,40 +33,104 @@
     --pokemon-yellow: #FFCB05;
     --pokemon-yellow-dark: #C7A008;
 
-    /* Accent gradient */
+    /* ── Brand: aliases ────────────────────────────────────────── */
+    --color-primary: #3B4CCA;          /* = --pokemon-blue */
+    --color-primary-hover: #2a3899;
+    --color-secondary: #2c3e50;
+
+    /* ── Accent gradient (modals, banners) ─────────────────────── */
     --accent: #667eea;
     --accent-end: #764ba2;
     --accent-hover: #5568d3;
 
-    /* Semantic colors */
-    --color-success: #28a745;
-    --color-danger: #dc3545;
-    --color-warning: #ffc107;
+    /* ── Semantic status ──────────────────────────────────────── */
+    --color-success: #27ae60;
+    --color-success-dark: #1e8449;
+    --color-danger: #e74c3c;
+    --color-danger-dark: #c0392b;
+    --color-warning: #f39c12;
     --color-warning-dark: #e0a800;
-    --color-error: #e74c3c;
-    --color-error-dark: #c0392b;
-    --color-info: #17a2b8;
+    --color-info: #3498db;
+    --color-info-hover: #2980b9;
+    /* legacy aliases still referenced in older files — keep alive */
+    --color-error: var(--color-danger);
+    --color-error-dark: var(--color-danger-dark);
 
-    /* Text */
+    /* ── Text ─────────────────────────────────────────────────── */
+    --text-main: #333333;
     --text-primary: #333;
     --text-dark: #2c3e50;
     --text-muted: #4a4a4a;
     --text-light: #666;
 
-    /* Backgrounds */
+    /* ── Surfaces ─────────────────────────────────────────────── */
     --bg-body: #f0f2f5;
     --bg-light: #f8f9fa;
     --bg-white: #ffffff;
     --bg-muted: #ecf0f1;
 
-    /* Borders */
+    /* ── Borders ──────────────────────────────────────────────── */
     --border-color: #ddd;
     --border-light: #e0e0e0;
     --border-input: #ddd;
 
-    /* Z-index scale — ordered lowest to highest.
-       Playtester JS uses high values (99998-100000) for its own
-       stacking context; do NOT overlap those here. */
+    /* ── Spacing (4 px ramp) ──────────────────────────────────── */
+    --space-2xs: 2px;
+    --space-xs:  4px;
+    --space-sm:  8px;
+    --space-md: 12px;
+    --space-lg: 16px;
+    --space-xl: 24px;
+    --space-2xl: 32px;
+    --space-3xl: 48px;
+
+    /* ── Border radius ─────────────────────────────────────────── */
+    --radius-xs:  3px;
+    --radius-sm:  4px;
+    --radius-md:  8px;
+    --radius-lg: 12px;
+    --radius-xl: 16px;
+    --radius-pill: 999px;
+    --radius-circle: 50%;
+
+    /* ── Typography ───────────────────────────────────────────── */
+    --font-family-base: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --font-family-display: 'Nunito', var(--font-family-base);
+
+    /* Type scale — keep new components on these 6 stops.
+       Existing components use a long-tail of px/em/rem; migrate
+       opportunistically. */
+    --font-2xs:  0.72rem;   /* 11.5 px */
+    --font-xs:   0.82rem;   /* 13   px */
+    --font-sm:   0.92rem;   /* 14.7 px */
+    --font-md:   1rem;      /* 16   px (body) */
+    --font-lg:   1.125rem;  /* 18   px */
+    --font-xl:   1.4rem;    /* 22   px */
+    --font-2xl:  1.8rem;    /* 29   px */
+
+    --font-weight-regular: 400;
+    --font-weight-medium:  600;
+    --font-weight-bold:    700;
+    --font-weight-heavy:   800;
+
+    --line-height-tight: 1.15;
+    --line-height-normal: 1.5;
+    --line-height-relaxed: 1.7;
+
+    /* ── Shadow scale ─────────────────────────────────────────── */
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.10);
+    --shadow-lg: 0 8px 24px rgba(0,0,0,0.14);
+    --shadow-xl: 0 16px 40px rgba(0,0,0,0.18);
+
+    /* ── Motion ───────────────────────────────────────────────── */
+    --transition-fast:  120ms ease;
+    --transition-base:  200ms ease;
+    --transition-slow:  350ms ease;
+
+    /* ── Z-index scale ────────────────────────────────────────── */
+    /* Ordered lowest → highest. Playtester JS uses 99998-100000 for
+       its own stacking context; do NOT overlap those here. */
     --z-base: 1;
     --z-dropdown: 100;
     --z-sticky: 200;
@@ -198,7 +272,11 @@
             border-radius: 2px;
         }
         
-        .tab-btn {
+        /* Main top-level tab strip (.tab-navigation = dark gradient).
+           Scoped so the lighter .cards-tab-navigation .tab-btn styles
+           in cards-tabs.css don't collide with these — same class
+           name historically, two different intended visual contexts. */
+        .tab-navigation .tab-btn {
             padding: 10px 16px;
             border: none;
             background: rgba(255,255,255,0.1);
@@ -221,8 +299,8 @@
             margin-top: 2px;
             line-height: 1;
         }
-        
-        .tab-btn:hover {
+
+        .tab-navigation .tab-btn:hover {
             background: rgba(255,255,255,0.22);
             color: #fff;
             border-color: rgba(255,255,255,0.3);
@@ -650,7 +728,7 @@
             box-shadow: 0 0 0 3px rgba(59, 76, 202, 0.12);
         }
         
-        .tab-btn.active {
+        .tab-navigation .tab-btn.active {
             background: var(--pokemon-yellow, #FFCB05);
             color: #1a1a2e;
             border-color: var(--pokemon-yellow, #FFCB05);

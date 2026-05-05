@@ -1,10 +1,15 @@
+/* Scoped to .cards-tab-navigation so these rules don't collide with
+   the dark-themed .tab-btn that styles.css defines for the main
+   .tab-navigation strip. Both pages have always rendered both rule
+   sets, but whichever stylesheet loaded last won — leading to
+   different sub-tab paddings + colors depending on the route. */
 .cards-tab-navigation {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
     margin-bottom: 20px;
 }
-.tab-btn {
+.cards-tab-navigation .tab-btn {
     background: #f8f9fa;
     border: 2px solid #ddd;
     padding: 10px 18px;
@@ -18,17 +23,17 @@
     align-items: center;
     gap: 5px;
 }
-.tab-btn.active {
+.cards-tab-navigation .tab-btn.active {
     background: #3B4CCA;
     color: #fff;
     border-color: #3B4CCA;
 }
-.tab-btn:hover:not(.active) {
+.cards-tab-navigation .tab-btn:hover:not(.active) {
     background: #e8f4fd;
     color: #3B4CCA;
     border-color: #3B4CCA;
 }
-.tab-btn-icon {
+.cards-tab-navigation .tab-btn-icon {
     width: 16px;
     height: 16px;
     margin-right: 5px;

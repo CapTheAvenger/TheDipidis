@@ -3493,6 +3493,8 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             const latestMajorStats = new Map(); // cardName_lower → { share, avg }
             let hasLatestMajorAnchor = false;
             let latestMajorDate = '';
+            let latestMajorAgeDays = null;       // days between today and latest Major
+            let latestMajorTotalDecks = 0;       // bucket size of the latest Major
             const _filter = (typeof currentMetaFormatFilter !== 'undefined' ? currentMetaFormatFilter : 'all');
             if (source === 'currentMeta') {
                 if (!window.currentMetaTournamentCardsData && typeof loadCSV === 'function') {
@@ -3572,11 +3574,16 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                                 cardAgg.forEach((stats, cn) => {
                                     const share = (stats.deckCount / majorTotalDecks) * 100;
                                     const avg = stats.deckCount > 0 ? (stats.totalCount / stats.deckCount) : 0;
-                                    latestMajorStats.set(cn, { share, avg });
+                                    latestMajorStats.set(cn, { share, avg, deckCount: stats.deckCount });
                                 });
                                 latestMajorDate = latestRaw;
+                                latestMajorTotalDecks = majorTotalDecks;
+                                if (latestTs > 0 && Number.isFinite(latestTs)) {
+                                    const ageMs = Date.now() - latestTs;
+                                    latestMajorAgeDays = Math.max(0, Math.round(ageMs / 86400000));
+                                }
                                 hasLatestMajorAnchor = true;
-                                devLog(`[Consistency][LatestMajorAnchor] Latest Major: ${latestRaw} | ${majorTotalDecks} decks | ${latestMajorStats.size} cards aggregated`);
+                                devLog(`[Consistency][LatestMajorAnchor] Latest Major: ${latestRaw} (${latestMajorAgeDays}d ago) | ${majorTotalDecks} decks | ${latestMajorStats.size} cards aggregated`);
                             } else {
                                 devLog(`[Consistency][LatestMajorAnchor] Latest Major has only ${majorTotalDecks} placements — anchor skipped (need ≥4).`);
                             }
@@ -3813,27 +3820,44 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             // and very deck-defining (Cynthia's Garchomp dumps 2 energy
             // for its strong attack → Neo Upper Energy literally pays
             // for that cost; Unfair Stamp doesn't help energy math at all).
-            // The most reliable signal for which ace spec to run is what
-            // the latest Major's tournament-tested decks actually played
-            // — far more authoritative than the Online aggregate which
-            // mixes experimental Limitless lists.
             //
-            // Prefer the candidate with the highest Major share whenever
-            // we have anchor data for it; fall back to consistencyScore
-            // when Major data is unavailable (e.g. archetype has no
-            // recent Major appearance).
+            // The signal we use depends on how recent the latest Major is:
+            //   ≤ 14 days → Major share is the canonical reference
+            //               (just-played, players haven't had time to drift).
+            //   14–28 days → blend Major and consistencyScore 50/50
+            //               (decay window — Online aggregate may have
+            //               already shifted post-Major).
+            //   > 28 days → fall back to consistencyScore
+            //               (Major data is stale, trust Online aggregate).
+            //
+            // This replaces the earlier "always prefer Major" tie-break
+            // which was correct for archetypes with a recent Major
+            // appearance but would have wrongly favoured stale Major data
+            // for archetypes that haven't shown up at a Major in months.
+            const _aceSpecMajorWeight = (() => {
+                if (latestMajorAgeDays == null) return 0;
+                if (latestMajorAgeDays <= 14) return 1.0;
+                if (latestMajorAgeDays <= 28) return 1.0 - ((latestMajorAgeDays - 14) / 14) * 0.5; // 1.0 → 0.5 linear
+                return 0;
+            })();
+            const _aceSpecScoreOf = (card) => {
+                const major = (latestMajorStats && latestMajorStats.size > 0)
+                    ? latestMajorStats.get((card.card_name || '').trim().toLowerCase())
+                    : null;
+                const score = card.consistencyScore || 0;
+                if (!major || _aceSpecMajorWeight <= 0) return score;
+                return major.share * _aceSpecMajorWeight + score * (1 - _aceSpecMajorWeight);
+            };
             const aceSpecCandidates = deckCards.filter(c => isAceSpecCard(c));
-            aceSpecCandidates.sort((a, b) => {
-                if (latestMajorStats && latestMajorStats.size > 0) {
-                    const aMajor = latestMajorStats.get((a.card_name || '').trim().toLowerCase());
-                    const bMajor = latestMajorStats.get((b.card_name || '').trim().toLowerCase());
-                    if (aMajor && bMajor) return (bMajor.share || 0) - (aMajor.share || 0);
-                    if (aMajor && !bMajor) return -1;            // Major-known wins
-                    if (!aMajor && bMajor) return 1;
-                }
-                return (b.consistencyScore || 0) - (a.consistencyScore || 0);
-            });
+            aceSpecCandidates.sort((a, b) => _aceSpecScoreOf(b) - _aceSpecScoreOf(a));
             const aceSpecSlotCard = aceSpecCandidates[0] || null;
+            if (aceSpecSlotCard) {
+                devLog(`[Consistency][ACE-SPEC-Picker] Major-recency weight: ${_aceSpecMajorWeight.toFixed(2)} (Major ${latestMajorAgeDays != null ? latestMajorAgeDays + 'd ago' : 'unavailable'})`);
+                aceSpecCandidates.slice(0, 4).forEach(c => {
+                    const m = latestMajorStats?.get((c.card_name || '').trim().toLowerCase());
+                    devLog(`  candidate: ${c.card_name} score=${(c.consistencyScore || 0).toFixed(0)} majorShare=${m ? m.share.toFixed(0) : '—'} → blended=${_aceSpecScoreOf(c).toFixed(1)}`);
+                });
+            }
 
             if (aceSpecSlotCard) {
                 pushCard(aceSpecSlotCard, 1, '[Consistency][ACE-SPEC-Priority]');

@@ -89,8 +89,16 @@ TASK_NAMES = {
 }
 
 BATCH_BASE = ["1", "2", "3", "4", "14", "11"]
-BATCH_META = ["5", "6", "7", "8", "9", "10", "13", "14", "11", "12"]
-BATCH_FULL = ["1", "2", "15", "3", "4", "5", "6", "7", "8", "9", "10", "13", "14", "11", "12"]
+# 17 (threat-intel) lives in BATCH_META because it depends on 5+6 (current
+# meta + online decks), which BATCH_META refreshes; 16 (effects) is heavy
+# (~20 k card pages) and only needs to re-run on rotation, so it stays
+# out of META and only runs in BATCH_FULL.
+BATCH_META = ["5", "6", "7", "8", "9", "10", "13", "14", "17", "11", "12"]
+# 16 / 17 / 18 added so local FULL refreshes the same intel files the CI
+# weekly-update produces. Order matters: 16 (card-effects) and 18 (dated
+# online tournaments) must run BEFORE 17 (threat-intel builds active_threats.json
+# from both), and all three run BEFORE 11 (prepare_card_data syncs them).
+BATCH_FULL = ["1", "2", "15", "3", "4", "5", "6", "7", "8", "9", "10", "13", "14", "16", "18", "17", "11", "12"]
 
 def git_commit_push(description: str) -> None:
     """Bump version, stage all changes, commit, and push to origin main."""

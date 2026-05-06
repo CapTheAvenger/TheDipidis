@@ -36,8 +36,14 @@ function load() {
         path.resolve(__dirname, '../../js/app-deck-builder.js'),
         'utf-8'
     );
-    const snippet = extractTopLevel(src, '_aceSpecConditionalAvgs');
-    const sandbox = { console, Math, Number, String, Array, Map, Object };
+    // _aceSpecConditionalAvgs references _recencyWeight when called with
+    // a todayMs argument — extract that too so the recency-weighted
+    // path is exercised end-to-end in tests.
+    const snippet = [
+        extractTopLevel(src, '_recencyWeight'),
+        extractTopLevel(src, '_aceSpecConditionalAvgs'),
+    ].join('\n\n');
+    const sandbox = { console, Math, Number, String, Array, Map, Object, Date };
     vm.createContext(sandbox);
     vm.runInContext(snippet, sandbox);
     return sandbox._aceSpecConditionalAvgs;
@@ -179,6 +185,36 @@ describe('_aceSpecConditionalAvgs', () => {
         const result = aceSpecConditionalAvgs(rows, "Cynthia's Garchomp", 'unfair stamp', stripPrice);
         assert.equal(result.bucketCount, 1);
         assert.equal(result.conditionalAvgs.get('fighting energy').avg, 5.0);
+    });
+
+    it('recency-weights matching buckets when todayMs is supplied', () => {
+        // 3 Unfair Stamp Cynthia decks: an old one (Rocky=2, age 35d),
+        // a mid one (Rocky=3, age 18d), and a recent one (Rocky=4, age
+        // 2d). Without recency: avg = (2+3+4)/3 = 3.0. With recency:
+        // weights ~0.05, 0.53, 1.0 → weighted avg shifts toward 4.
+        const today = new Date('2026-05-06').getTime();
+        const old = new Date('2026-04-01').toISOString().slice(0, 10);   // 35d
+        const mid = new Date('2026-04-18').toISOString().slice(0, 10);   // 18d
+        const recent = new Date('2026-05-04').toISOString().slice(0, 10); // 2d
+        const rows = [
+            { tournament_id: 't_old', tournament_date: old, archetype: 'X', card_name: 'Rocky Energy', average_count: '2' },
+            { tournament_id: 't_old', tournament_date: old, archetype: 'X', card_name: 'Unfair Stamp', average_count: '1' },
+            { tournament_id: 't_mid', tournament_date: mid, archetype: 'X', card_name: 'Rocky Energy', average_count: '3' },
+            { tournament_id: 't_mid', tournament_date: mid, archetype: 'X', card_name: 'Unfair Stamp', average_count: '1' },
+            { tournament_id: 't_new', tournament_date: recent, archetype: 'X', card_name: 'Rocky Energy', average_count: '4' },
+            { tournament_id: 't_new', tournament_date: recent, archetype: 'X', card_name: 'Unfair Stamp', average_count: '1' },
+        ];
+
+        const unweighted = aceSpecConditionalAvgs(rows, 'X', 'unfair stamp', null);
+        const weighted = aceSpecConditionalAvgs(rows, 'X', 'unfair stamp', null, today);
+
+        // Unweighted = (2+3+4)/3 = 3.00
+        assert.equal(unweighted.conditionalAvgs.get('rocky energy').avg, 3.0);
+
+        // Weighted should be > 3.5 (recent weight 1.0 dominates).
+        const weightedAvg = weighted.conditionalAvgs.get('rocky energy').avg;
+        assert.ok(weightedAvg > 3.4 && weightedAvg < 4.0,
+            `recency-weighted avg should be ~3.5+, got ${weightedAvg.toFixed(3)}`);
     });
 
     it('skips rows with non-numeric or zero average_count gracefully', () => {

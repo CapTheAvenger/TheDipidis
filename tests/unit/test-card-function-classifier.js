@@ -46,6 +46,7 @@ function load() {
         tierMatch[0],
         extractTopLevel(src, '_classifyCardFunction'),
         extractTopLevel(src, '_functionTier'),
+        extractTopLevel(src, '_energyProvides'),
     ].join('\n\n');
 
     const sandbox = { console, Math, Number, String, Array, Object, RegExp };
@@ -55,6 +56,7 @@ function load() {
         classify: sandbox._classifyCardFunction,
         tier: sandbox._functionTier,
         TIERS: sandbox._CARD_FUNCTION_TIERS,
+        provides: sandbox._energyProvides,
     };
 }
 
@@ -291,6 +293,42 @@ describe('_functionTier mapping', () => {
         assert.equal(FNS.tier('not-a-real-function'), 'MID');
         assert.equal(FNS.tier(undefined), 'MID');
         assert.equal(FNS.tier(null), 'MID');
+    });
+});
+
+describe('_energyProvides — double-energy multiplier', () => {
+    it('detects Neo Upper Energy as providing 2 energy', () => {
+        // Production text from data/pokemon_card_effects.json (TEF|162):
+        //   "If this card is attached to a Stage 2 Pokémon, this card
+        //    provides every type of Energy but provides only 2 Energy
+        //    at a time."
+        const effects = {
+            rules: [
+                'As long as this card is attached to a Pokémon, it provides [ C ] Energy. If this card is attached to a Stage 2 Pokémon, this card provides every type of Energy but provides only 2 Energy at a time.',
+            ],
+        };
+        assert.equal(FNS.provides({ card_name: 'Neo Upper Energy' }, effects), 2);
+    });
+
+    it('detects Legacy Energy / Double Turbo Energy as 2-energy', () => {
+        const legacy = { rules: ['As long as this card is attached to a Pokémon, it provides 2 [ C ] Energy.'] };
+        const dte = { rules: ['As long as this card is attached to a Pokémon, it provides 2 [ C ] Energy. The attacks of the Pokémon this card is attached to do 20 less damage to your opponent\'s Active Pokémon.'] };
+        assert.equal(FNS.provides({ card_name: 'Legacy Energy' }, legacy), 2);
+        assert.equal(FNS.provides({ card_name: 'Double Turbo Energy' }, dte), 2);
+    });
+
+    it('returns 1 for normal basic / special energies', () => {
+        // Most special energies provide 1 energy of a specific type.
+        const rocky = {
+            rules: ['As long as this card is attached to a Pokémon, it provides [ F ] Energy. The Pokémon this card is attached to takes 30 less damage from attacks (after applying Weakness and Resistance).'],
+        };
+        assert.equal(FNS.provides({ card_name: 'Rocky Fighting Energy' }, rocky), 1);
+    });
+
+    it('returns 1 when no effects record is available', () => {
+        assert.equal(FNS.provides({ card_name: 'Fighting Energy' }, null), 1);
+        assert.equal(FNS.provides({ card_name: 'Fighting Energy' }, undefined), 1);
+        assert.equal(FNS.provides({ card_name: 'Fighting Energy' }, {}), 1);
     });
 });
 

@@ -3532,6 +3532,32 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             window._functionTier = _functionTier;
         }
 
+        // Energy multiplier — how many "Energy attachments" a single
+        // copy of the card provides when attached. Most basic and
+        // special energies provide 1 (multiplier 1). A few "double"
+        // energies provide 2 (multiplier 2):
+        //   - Neo Upper Energy (TEF 162): "provides only 2 Energy at a
+        //     time" when attached to a Stage 2 Pokémon.
+        //   - Legacy Energy (PFL 86): "provides 2 [C] Energy".
+        //   - Double Turbo Energy (BRS 151): "provides 2 [C] Energy"
+        //     (legality-dependent).
+        //
+        // The deck-card-count of energies stays the same (1 card per
+        // copy) — but the doctrine-relevant "effective energy supply"
+        // is 2× for double-energy cards. Energy Floor enforcement
+        // uses the multiplier to compute the right per-card contribution
+        // when checking whether a deck has enough effective energy.
+        function _energyProvides(card, effects) {
+            if (!effects) return 1;
+            const rules = (Array.isArray(effects.rules) ? effects.rules.join(' ') : '').toLowerCase();
+            // "provides 2 Energy" / "provides only 2 Energy" / "provides
+            // 2 [C] Energy" — all match the same intent.
+            if (/provides[^.]*?\b2\s*(?:\[\s*[a-z]\s*\])?\s*energy/.test(rules)) return 2;
+            if (/provides[^.]*?\b3\s*(?:\[\s*[a-z]\s*\])?\s*energy/.test(rules)) return 3;
+            return 1;
+        }
+        if (typeof window !== 'undefined') window._energyProvides = _energyProvides;
+
         // Lazy-loader for pokemon_card_effects.json. Returns an index
         // keyed by `SET|number` (uppercase set, trimmed number) plus a
         // name fallback (lowercased card name → first matching record).
@@ -3781,9 +3807,17 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             const getLegalMax = (helpers && helpers.getLegalMax) || (() => 4);
             const log = (helpers && helpers.log) || (() => {});
 
-            // Sum the conditional avgs of cards classified as energies.
-            // The ACE-SPEC's own conditional bucket entry counts too
-            // (Neo Upper Energy is an energy ACE-SPEC).
+            // Per-card target = round(conditional_avg). Sum those for
+            // the deck's energy-card target. Reason for rounding per
+            // card instead of round(sum): the user-flagged Cynthia +
+            // Unfair Stamp build had recency-weighted Fighting 4.89 +
+            // Rocky 3.55 = 8.44 cards. round(8.44) = 8, but
+            // round(4.89) + round(3.55) = 5 + 4 = 9 — and 5 + 4 is what
+            // recent meta lists actually run. Rounding per card matches
+            // the Floor's stage 1/2 floor+LRM allocation behaviour.
+            //
+            // Skip cards with presence < 3 (small-sample noise).
+            let energyTargetCards = 0;
             let energyTargetRaw = 0;
             for (const entry of entries) {
                 if (!entry || !entry.card) continue;
@@ -3791,6 +3825,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 const cn = String(entry.card.card_name || '').toLowerCase().trim();
                 const stat = conditionalAvgs.get(cn);
                 if (stat && Number.isFinite(stat.avg) && stat.presence >= 3) {
+                    energyTargetCards += Math.max(0, Math.round(stat.avg));
                     energyTargetRaw += stat.avg;
                 }
             }
@@ -3799,7 +3834,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             // incomplete, above 11 means the deck is doctrinally
             // already over-energy (a different audit warning catches
             // it).
-            const target = Math.max(7, Math.min(11, Math.round(energyTargetRaw)));
+            const target = Math.max(7, Math.min(11, energyTargetCards));
             const before = entries
                 .filter(e => isEnergyEntry(e))
                 .reduce((s, e) => s + (e.count || 0), 0);
@@ -4273,18 +4308,21 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
         // it in (we do, with a small-sample guard + shift threshold so
         // the override only fires on signals strong enough to matter).
         // ────────────────────────────────────────────────────────────
-        function _aceSpecConditionalAvgs(rows, archetypeKey, aceSpecLower, archetypeFieldNormalizer) {
+        function _aceSpecConditionalAvgs(rows, archetypeKey, aceSpecLower, archetypeFieldNormalizer, todayMs) {
             const empty = { conditionalAvgs: new Map(), bucketCount: 0 };
             if (!Array.isArray(rows) || !archetypeKey || !aceSpecLower) return empty;
             const archKey = String(archetypeKey).trim().toLowerCase();
             const aceSpec = String(aceSpecLower).trim().toLowerCase();
+            const useRecency = Number.isFinite(todayMs) && todayMs > 0;
 
             // Bucket rows by (tournament_id, archetype). Each bucket
-            // models one deck (the Online Dated source produces ≥1 deck
-            // per bucket; for Cynthia 18/19 Cynthia tournaments have a
-            // single deck, so the per-bucket avg essentially IS the
-            // per-deck count there).
+            // models one deck. Track the bucket's date so we can apply
+            // recency-weighting at aggregation time — without it, an old
+            // 2-Rocky-Energy deck (April 1) and a recent 4-Rocky-Energy
+            // deck (May 5) average to ~3 Rocky, hiding the real meta
+            // shift the recent decks already encoded.
             const buckets = new Map();
+            const bucketDates = new Map();
             for (const r of rows) {
                 if (!r) continue;
                 const archRaw = String(r.archetype || '');
@@ -4298,34 +4336,49 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 const k = `${tid}|${archNorm}`;
                 if (!buckets.has(k)) buckets.set(k, new Map());
                 buckets.get(k).set(cn, avgRaw);
+                if (!bucketDates.has(k)) {
+                    const dateRaw = r.tournament_date || '';
+                    const parsed = dateRaw ? Date.parse(dateRaw) : NaN;
+                    if (Number.isFinite(parsed)) bucketDates.set(k, parsed);
+                }
             }
 
-            // Find buckets that contain the chosen ACE-SPEC.
+            // Find buckets that contain the chosen ACE-SPEC, paired with
+            // their date for recency weighting.
             const matching = [];
-            for (const cards of buckets.values()) {
-                if (cards.has(aceSpec)) matching.push(cards);
+            for (const [k, cards] of buckets.entries()) {
+                if (!cards.has(aceSpec)) continue;
+                matching.push({ cards, dateMs: bucketDates.get(k) });
             }
             if (matching.length === 0) return empty;
 
-            // Per-card avg "when used" — divide by PRESENCE in matching
-            // buckets, NOT by matching bucket count. A card in 5 of 7
-            // matching buckets at avg 4 each has conditional_avg=4 (per
-            // the avgCountWhenUsed semantics: "given this card is in the
-            // deck, how many copies"), not 20/7≈2.86. Presence is also
-            // returned so callers can apply a small-sample guard.
+            // Per-card avg "when used", recency-weighted by tournament age.
+            // sum_w(card) = Σ(avg × weight) over buckets containing card
+            // weight_sum(card) = Σ(weight) over those same buckets
+            // conditional_avg = sum_w / weight_sum
+            // Without todayMs we fall back to uniform weights (legacy
+            // behaviour preserved for tests that exercise the helper
+            // without a clock).
             const sums = new Map();
+            const weights = new Map();
             const presence = new Map();
-            for (const cards of matching) {
+            for (const { cards, dateMs } of matching) {
+                let weight = 1.0;
+                if (useRecency && Number.isFinite(dateMs)) {
+                    const ageDays = Math.max(0, Math.floor((todayMs - dateMs) / 86400000));
+                    weight = _recencyWeight(ageDays);
+                }
                 for (const [cn, avg] of cards) {
-                    sums.set(cn, (sums.get(cn) || 0) + avg);
+                    sums.set(cn, (sums.get(cn) || 0) + avg * weight);
+                    weights.set(cn, (weights.get(cn) || 0) + weight);
                     presence.set(cn, (presence.get(cn) || 0) + 1);
                 }
             }
 
             const conditionalAvgs = new Map();
             for (const [cn, sum] of sums) {
-                const p = presence.get(cn) || 1;
-                conditionalAvgs.set(cn, { avg: sum / p, presence: p });
+                const w = weights.get(cn) || 1;
+                conditionalAvgs.set(cn, { avg: sum / w, presence: presence.get(cn) || 0 });
             }
             return { conditionalAvgs, bucketCount: matching.length };
         }
@@ -5184,6 +5237,15 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                     const effects = _findCardEffects(card, effectsIndex);
                     card._cardFunction = _classifyCardFunction(card, effects || {});
                     card._cardFunctionTier = _functionTier(card._cardFunction);
+                    // Per-card energy multiplier. Most cards = 1; Neo
+                    // Upper / Legacy Energy = 2 (each card provides 2
+                    // energy when attached). Used by Energy Floor when
+                    // computing effective energy supply.
+                    if (card._cardFunction === 'energy') {
+                        card._energyProvides = _energyProvides(card, effects || {});
+                    } else {
+                        card._energyProvides = 0;
+                    }
                 });
                 if (effectsIndex && effectsIndex.size > 0) {
                     const tierCounts = { CORE: 0, MID: 0, TECH: 0 };
@@ -5221,7 +5283,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             if (aceSpecSlotCard && Array.isArray(onlineRowsRaw) && onlineRowsRaw.length > 0) {
                 const aceSpecLower = (aceSpecSlotCard.card_name || '').trim().toLowerCase();
                 _aceSpecCondResult = _aceSpecConditionalAvgs(
-                    onlineRowsRaw, currentArchetype, aceSpecLower, null
+                    onlineRowsRaw, currentArchetype, aceSpecLower, null, todayMs
                 );
                 const condResult = _aceSpecCondResult;
                 if (condResult.bucketCount >= 3) {

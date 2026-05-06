@@ -273,6 +273,35 @@ describe('_enforceEnergyFloor', () => {
         assert.ok(result.target >= 7, `target should be at least 7`);
     });
 
+    it('uses sum-of-rounded targets, not round(sum)', () => {
+        // The user-flagged Cynthia + Unfair Stamp regression: with
+        // recency-weighted conditional avgs, Fighting=4.89 and
+        // Rocky=3.55 (recent meta shifted to 4 Rocky from older 2).
+        // Naive round(sum 8.44) = 8, but per-card rounded
+        // round(4.89) + round(3.55) = 5 + 4 = 9. Recent top decks
+        // ALL run 5 + 4. The Floor must use sum-of-rounded so the
+        // build matches the meta.
+        const cond = condAvgs({
+            'fighting energy': { avg: 4.89, presence: 13 },
+            'rocky fighting energy': { avg: 3.55, presence: 13 },
+        });
+        // Deck currently at 7 (4 + 3) with one TECH demote candidate.
+        const deck = [
+            entry("Black Belt's Training", 'Supporter', 1, { tier: 'TECH', remainder: 0.05, score: 36 }),
+            entry('Some Tech 2', 'Supporter', 1, { tier: 'TECH', remainder: 0.10, score: 40 }),
+            entry('Fighting Energy', 'Basic Energy', 4, { tier: 'MID', remainder: 0.89 }),
+            entry('Rocky Fighting Energy', 'Special Energy', 3, { tier: 'MID', remainder: 0.55 }),
+        ];
+        const result = FNS.floor(deck, cond, defaultHelpers);
+        assert.equal(result.target, 9, "target should be 5 + 4 = 9, not round(8.44) = 8");
+        assert.equal(result.before, 7);
+        assert.equal(result.after, 9, "Floor should bump energies to reach 9");
+        // Both TECH demoted, both energies bumped.
+        const fighting = deck.find(e => e.card.card_name === 'Fighting Energy');
+        const rocky = deck.find(e => e.card.card_name === 'Rocky Fighting Energy');
+        assert.equal(fighting.count + rocky.count, 9);
+    });
+
     it('skips small-presence conditional entries', () => {
         // Card with presence < 3 (only 1 deck ran it) — too thin to
         // include in the energy target.

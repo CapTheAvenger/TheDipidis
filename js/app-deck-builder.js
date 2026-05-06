@@ -3257,7 +3257,33 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
 
             return Math.max(1, cityLeagueFallback, inferredDeckCount, ...explicitTotals);
         }
-        
+
+        // Lazy-load Limitless dated tournament rows (per-tournament breakdown
+        // of the same Online events that current_meta_card_data.csv aggregates
+        // by `meta` bucket). Cached on window after first call.  Used by the
+        // currentMeta recency-scoring path: aggregate rows have no dates, so
+        // the recency block can only produce signal once we feed in this
+        // per-tournament source.
+        async function loadOnlineTournamentDatedRows() {
+            if (Array.isArray(window.onlineTournamentDatedRows)) {
+                return window.onlineTournamentDatedRows;
+            }
+            if (window._onlineTournamentDatedPromise) {
+                return await window._onlineTournamentDatedPromise;
+            }
+            window._onlineTournamentDatedPromise = (async () => {
+                try {
+                    const rows = await loadCSV('online_tournament_dated_cards.csv');
+                    window.onlineTournamentDatedRows = Array.isArray(rows) ? rows : [];
+                } catch (e) {
+                    devLog('[OnlineTournamentDated] Could not load dated CSV:', e);
+                    window.onlineTournamentDatedRows = [];
+                }
+                return window.onlineTournamentDatedRows;
+            })();
+            return await window._onlineTournamentDatedPromise;
+        }
+
         async function autoCompleteConsistency(source, rarityMode) {
             if (source !== 'cityLeague' && source !== 'currentMeta' && source !== 'pastMeta') return;
 
@@ -3417,10 +3443,39 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             // card's total deck appearances happened in the last 14 days.
             // recencyRatio > 1  →  card is trending UP (recent share exceeds overall share)
             // recencyRatio < 1  →  card is trending DOWN
-            const rawRows = source === 'cityLeague'  ? (window.cityLeagueRawDeckCards  || [])
-                          : source === 'currentMeta' ? (window.currentMetaRawDeckCards || [])
-                          : source === 'pastMeta'    ? (window.pastMetaRawDeckCards    || [])
-                          : [];
+            let rawRows = source === 'cityLeague'  ? (window.cityLeagueRawDeckCards  || [])
+                        : source === 'currentMeta' ? (window.currentMetaRawDeckCards || [])
+                        : source === 'pastMeta'    ? (window.pastMetaRawDeckCards    || [])
+                        : [];
+
+            // currentMeta's rawRows come from current_meta_card_data.csv, which
+            // is pre-aggregated by `meta` bucket and carries no per-tournament
+            // dates — so the recency block below silently produces no signal
+            // for currentMeta.  online_tournament_dated_cards.csv fills that
+            // gap with per-tournament rows from the same Limitless events.
+            // Swap (don't append) the matching dated rows in to avoid
+            // double-counting overall_DC.
+            if (source === 'currentMeta' && currentArchetype) {
+                try {
+                    const datedRows = await loadOnlineTournamentDatedRows();
+                    if (datedRows && datedRows.length > 0) {
+                        const matcher = (typeof window.normalizeArchetypeForMatch === 'function')
+                            ? window.normalizeArchetypeForMatch
+                            : (s) => (s || '').toLowerCase().trim();
+                        const targetKey = matcher(currentArchetype);
+                        const matched = datedRows.filter(r => matcher(r.archetype || '') === targetKey);
+                        if (matched.length > 0) {
+                            devLog(`[Consistency][Recency] Loaded ${matched.length} dated rows for "${currentArchetype}" — replacing ${rawRows.length} undated rows`);
+                            rawRows = matched;
+                        } else {
+                            devLog(`[Consistency][Recency] No dated rows match "${currentArchetype}" — recency stays disabled for this archetype`);
+                        }
+                    }
+                } catch (e) {
+                    devLog('[Consistency][Recency] Dated CSV load failed:', e);
+                }
+            }
+
             const recencyMap = new Map(); // cardName → recencyRatio
             if (rawRows.length > 0) {
                 const RECENCY_DAYS = 14;

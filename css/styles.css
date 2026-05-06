@@ -2022,6 +2022,14 @@
             display: block;
         }
 
+        /* shareImageModal opens ON TOP of imageViewModal (Share button
+           inside the deck-grid preview). Both share class
+           .image-view-modal with z-index: 9999, so the later one in DOM
+           order would otherwise win — and imageViewModal happens to come
+           after shareImageModal in index.html, hiding the share preview
+           behind the parent modal. Lift the share modal above its peer. */
+        #shareImageModal { z-index: 10001; }
+
         /* Wishlist → Cardmarket helper modal — link list rows */
         .cm-link-row {
             display: grid;

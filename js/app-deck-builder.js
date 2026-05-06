@@ -2255,20 +2255,42 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
 
             _shareImageBlob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
 
-            // Show preview as <img>
+            if (!_shareImageBlob) {
+                preview.innerHTML = '<p style="color:#e74c3c;">' + (getLang() === 'de' ? 'Bild konnte nicht erstellt werden (Canvas tainted?)' : 'Could not generate image (canvas tainted?)') + '</p>';
+                return;
+            }
+
+            // Show preview as <img>. Don't revoke the object URL inside
+            // onload — once revoked the browser can't re-decode if the
+            // img is detached/reattached or the modal repaints, leaving
+            // a broken-image icon. Track the URL on the modal element
+            // and revoke when the modal closes (or the next preview
+            // overwrites it).
             preview.innerHTML = '';
+            if (_sharePreviewObjectUrl) {
+                URL.revokeObjectURL(_sharePreviewObjectUrl);
+                _sharePreviewObjectUrl = null;
+            }
             const img = document.createElement('img');
-            img.src = URL.createObjectURL(_shareImageBlob);
+            _sharePreviewObjectUrl = URL.createObjectURL(_shareImageBlob);
+            img.src = _sharePreviewObjectUrl;
             img.alt = deckName;
             img.style.cssText = 'max-width:100%; border-radius:8px; box-shadow:0 4px 20px rgba(0,0,0,0.3);';
-            img.onload = () => URL.revokeObjectURL(img.src);
             preview.appendChild(img);
         }
+
+        // Outlives a single openShareImageModal() call so closeShareImageModal
+        // can revoke it after the user's done viewing — see openShareImageModal.
+        let _sharePreviewObjectUrl = null;
 
         function closeShareImageModal() {
             const modal = document.getElementById('shareImageModal');
             modal.classList.remove('show');
             _shareImageBlob = null;
+            if (_sharePreviewObjectUrl) {
+                URL.revokeObjectURL(_sharePreviewObjectUrl);
+                _sharePreviewObjectUrl = null;
+            }
         }
 
         async function shareImageDownload() {
@@ -2319,9 +2341,14 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             exportDeckAsImage(grid, deckName);
         }
 
-        /** Determine a human-readable name for the currently open grid modal deck. */
+        /** Determine a human-readable name for the currently open grid modal deck.
+         *  Tab-active check is the primary path (deck-builder workflow) but
+         *  imageViewModal can also be opened from My Decks via
+         *  exportSavedDeckAsImage, in which case _currentPreviewDeckIndex
+         *  points at the saved deck. As a final fallback, read the
+         *  imageViewModal's <h3> if a caller stamped a deck name there
+         *  directly. */
         function _getActiveGridDeckName() {
-            // Check which tab is active to determine source
             const clTab = document.getElementById('city-league-tab');
             const cmTab = document.getElementById('current-meta-tab');
             const pmTab = document.getElementById('past-meta-tab');
@@ -2334,6 +2361,26 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             }
             if (pmTab && pmTab.classList.contains('active')) {
                 return window.pastMetaCurrentArchetype || 'Past Meta Deck';
+            }
+
+            // Saved-deck path — exportSavedDeckAsImage stashes the index
+            // it just opened on _currentPreviewDeckIndex. Resolve that
+            // back to the user's deck name so the share image header
+            // shows "MyCoolDeck" instead of the generic "Deck" fallback.
+            if (typeof _currentPreviewDeckIndex !== 'undefined' && _currentPreviewDeckIndex >= 0) {
+                const decks = window.userDecks || [];
+                const d = decks[_currentPreviewDeckIndex];
+                if (d) return d.name || d.archetype || 'Saved Deck';
+            }
+
+            // Last resort — pick up whatever the parent imageViewModal's
+            // <h3> already says (callers like generateDeckGrid sometimes
+            // set it to the archetype name even when their tab isn't
+            // .active for whatever reason).
+            const ivmTitle = document.querySelector('#imageViewModal .image-view-header h3');
+            const titleText = (ivmTitle && ivmTitle.textContent || '').trim();
+            if (titleText && titleText !== 'Deck Cards Overview' && titleText !== 'Deck') {
+                return titleText;
             }
             return 'Deck';
         }

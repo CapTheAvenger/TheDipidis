@@ -1964,10 +1964,14 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             // Badge sized so the count is readable at thumbnail size —
             // the previous radius of 18 px (~7 % of card width) became
             // illegible when the export got resized down for chat
-            // sharing. Bump to ~22 % of card width to match what users
-            // expect from Limitless's deck-overview screenshots.
-            const BADGE_R    = 36;
-            const BADGE_FONT = 'bold 32px sans-serif';
+            // sharing.  Bumped twice now (18 → 36 → 44) so the badge has
+            // the same visual weight as Limitless's deck-overview
+            // screenshots — ~36 % of card width once the white stroke
+            // is included, which is the threshold the user accepted as
+            // "kräftig genug".
+            const BADGE_R       = 44;
+            const BADGE_FONT    = 'bold 40px sans-serif';
+            const BADGE_STROKE  = 5;
             // Same scarlet as Limitless's deck-overview badges and the
             // .compact-badge gradient anchor in styles.css.
             const BADGE_FILL = '#e74c3c';
@@ -2138,7 +2142,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                     ctx.fill();
                     ctx.restore();
                     ctx.strokeStyle = '#fff';
-                    ctx.lineWidth = 4;
+                    ctx.lineWidth = BADGE_STROKE;
                     ctx.beginPath();
                     ctx.arc(bx, by, BADGE_R, 0, Math.PI * 2);
                     ctx.stroke();

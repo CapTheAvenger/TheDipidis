@@ -1351,7 +1351,19 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                     const rawName = String(card.card_name || card.name || '').trim().toLowerCase();
                     const directMap = parseInt(dexMap[rawName], 10);
                     if (!isNaN(directMap) && directMap > 0) return directMap;
-                    const baseName = rawName
+                    // Strip trainer-possessive prefixes ("Cynthia's Gible" →
+                    // "gible", "Hop's Trevenant" → "trevenant", etc.) so the
+                    // dex lookup matches the bare Pokémon name in
+                    // window.pokedexNumbers. Without this, every Cynthia
+                    // line falls back to the alphabetical name comparison
+                    // and Garchomp/Gabite/Gible end up out of evolution
+                    // order in the deck display.
+                    const trainerStripped = rawName.replace(/^[a-zäöüß]+'s\s+/, '').trim();
+                    if (trainerStripped !== rawName) {
+                        const stripMap = parseInt(dexMap[trainerStripped], 10);
+                        if (!isNaN(stripMap) && stripMap > 0) return stripMap;
+                    }
+                    const baseName = trainerStripped
                         .replace(/\b(ex|vmax|vstar|v-union|v|gx|radiant|mega)\b/g, '')
                         .replace(/[^a-z0-9\s-]/g, ' ').replace(/\s+/g, ' ').trim();
                     const baseMap = parseInt(dexMap[baseName], 10);
@@ -2648,6 +2660,14 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 if (Array.isArray(c.tech_counter_for) && c.tech_counter_for.length > 0) {
                     addBadge(`counters: ${c.tech_counter_for.join(', ')}`, 'tech');
                 }
+                // ACE-SPEC-conditional avg shift badge — surfaces when the
+                // build re-priced this card because the chosen ACE-SPEC
+                // implies a different count (e.g. Cynthia + Neo Upper →
+                // 4 Fighting; Cynthia + Unfair Stamp → 5 Fighting).
+                if (c.ace_spec_conditional_shift != null && c.ace_spec_conditional_base != null) {
+                    const arrow = c.ace_spec_conditional_shift > 0 ? '↑' : '↓';
+                    addBadge(`ACE-cond:${arrow}${c.ace_spec_conditional_base.toFixed(2)}→${c.ace_spec_conditional_avg.toFixed(2)}`, c.ace_spec_conditional_shift > 0 ? 'rec-up' : 'rec-down');
+                }
                 const right = document.createElement('div');
                 right.className = 'build-info-card-score';
                 right.textContent = `score ${c.consistency_score}`;
@@ -3756,6 +3776,84 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             window._parseAnyTournamentDate = _parseAnyTournamentDate;
         }
 
+        // ────────────────────────────────────────────────────────────
+        // ACE-SPEC CO-OCCURRENCE — conditional avgCountWhenUsed per ACE-SPEC.
+        //
+        // Pokémon TCG decks are not a flat distribution: the ACE-SPEC
+        // choice meaningfully shifts the rest of the list. Cynthia's
+        // Garchomp ex is the textbook case — Neo Upper Energy lists run
+        // ~4 Basic Fighting + ~3 Rocky (Neo Upper covers a 1-energy
+        // attack), while Unfair Stamp lists run ~5 Basic + ~3 Rocky
+        // (no energy substitution available, so more raw energies).
+        // The global avgCountWhenUsed (4.55 Fighting across ALL Cynthia
+        // decks) papers over this and biases the build toward the wrong
+        // count for whichever ACE-SPEC was actually picked.
+        //
+        // This helper buckets the dated CSV by (tournament_id, archetype)
+        // — each bucket = one deck — finds the buckets that ran the
+        // chosen ACE-SPEC, and computes a per-card "avg copies when used"
+        // conditional on that ACE-SPEC. Caller decides whether to swap
+        // it in (we do, with a small-sample guard + shift threshold so
+        // the override only fires on signals strong enough to matter).
+        // ────────────────────────────────────────────────────────────
+        function _aceSpecConditionalAvgs(rows, archetypeKey, aceSpecLower, archetypeFieldNormalizer) {
+            const empty = { conditionalAvgs: new Map(), bucketCount: 0 };
+            if (!Array.isArray(rows) || !archetypeKey || !aceSpecLower) return empty;
+            const archKey = String(archetypeKey).trim().toLowerCase();
+            const aceSpec = String(aceSpecLower).trim().toLowerCase();
+
+            // Bucket rows by (tournament_id, archetype). Each bucket
+            // models one deck (the Online Dated source produces ≥1 deck
+            // per bucket; for Cynthia 18/19 Cynthia tournaments have a
+            // single deck, so the per-bucket avg essentially IS the
+            // per-deck count there).
+            const buckets = new Map();
+            for (const r of rows) {
+                if (!r) continue;
+                const archRaw = String(r.archetype || '');
+                const archNorm = archetypeFieldNormalizer ? archetypeFieldNormalizer(archRaw) : archRaw;
+                if (archNorm.trim().toLowerCase() !== archKey) continue;
+                const tid = r.tournament_id || '';
+                const cn = String(r.card_name || '').trim().toLowerCase();
+                if (!tid || !cn) continue;
+                const avgRaw = parseFloat(String(r.average_count || '0').replace(',', '.'));
+                if (!Number.isFinite(avgRaw) || avgRaw <= 0) continue;
+                const k = `${tid}|${archNorm}`;
+                if (!buckets.has(k)) buckets.set(k, new Map());
+                buckets.get(k).set(cn, avgRaw);
+            }
+
+            // Find buckets that contain the chosen ACE-SPEC.
+            const matching = [];
+            for (const cards of buckets.values()) {
+                if (cards.has(aceSpec)) matching.push(cards);
+            }
+            if (matching.length === 0) return empty;
+
+            // Per-card avg "when used" — divide by PRESENCE in matching
+            // buckets, NOT by matching bucket count. A card in 5 of 7
+            // matching buckets at avg 4 each has conditional_avg=4 (per
+            // the avgCountWhenUsed semantics: "given this card is in the
+            // deck, how many copies"), not 20/7≈2.86. Presence is also
+            // returned so callers can apply a small-sample guard.
+            const sums = new Map();
+            const presence = new Map();
+            for (const cards of matching) {
+                for (const [cn, avg] of cards) {
+                    sums.set(cn, (sums.get(cn) || 0) + avg);
+                    presence.set(cn, (presence.get(cn) || 0) + 1);
+                }
+            }
+
+            const conditionalAvgs = new Map();
+            for (const [cn, sum] of sums) {
+                const p = presence.get(cn) || 1;
+                conditionalAvgs.set(cn, { avg: sum / p, presence: p });
+            }
+            return { conditionalAvgs, bucketCount: matching.length };
+        }
+        if (typeof window !== 'undefined') window._aceSpecConditionalAvgs = _aceSpecConditionalAvgs;
+
         async function autoCompleteConsistency(source, rarityMode) {
             if (source !== 'cityLeague' && source !== 'currentMeta' && source !== 'pastMeta') return;
 
@@ -3944,14 +4042,18 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
 
             let majorAgg = null;
             let onlineAgg = null;
+            // Held at function scope so the ACE-SPEC-conditional pass
+            // (after the ACE-SPEC pick) can reuse the same rows the
+            // recency aggregator just consumed — no second load.
+            let onlineRowsRaw = null;
 
             if (currentArchetype) {
                 if (source === 'currentMeta') {
                     // Online dated CSV — lazy-load once, cached on window.
                     try {
-                        const onlineRows = await loadOnlineTournamentDatedRows();
+                        onlineRowsRaw = await loadOnlineTournamentDatedRows();
                         onlineAgg = _aggregateWeightedSource(
-                            onlineRows, currentArchetype, SOURCE_WEIGHT_ONLINE, todayMs, null
+                            onlineRowsRaw, currentArchetype, SOURCE_WEIGHT_ONLINE, todayMs, null
                         );
                     } catch (e) {
                         devLog('[Consistency][Recency] Online dated source failed:', e);
@@ -4564,6 +4666,55 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 devLog('[Consistency][ACE-SPEC-Priority] Keine echte ACE SPEC gefunden.');
             }
 
+            // ACE-SPEC-conditional avgCountWhenUsed override.
+            //
+            // The ACE-SPEC choice is a deck-shaping decision: Cynthia's
+            // Garchomp ex with Neo Upper Energy runs ~4 Basic Fighting
+            // because Neo Upper substitutes one energy per attack;
+            // Cynthia's Garchomp ex with Unfair Stamp instead runs ~5
+            // Basic Fighting because there's no substitution. Same
+            // archetype, different energy counts. Global avgs blur the
+            // two and pick the wrong number for whichever ACE-SPEC the
+            // build actually chose.
+            //
+            // After the ACE-SPEC pick, recompute per-card "avg copies
+            // when used" against the SUBSET of dated decks that ran the
+            // same ACE-SPEC, and swap that conditional value into
+            // card.avgCountWhenUsed before Stage 1/2 floor allocation.
+            // Guards: ≥3 matching buckets (small-sample), card present
+            // in ≥3 of those buckets (per-card noise), and shift ≥0.3
+            // (don't bother for cosmetic ±0.1 differences). Stays a
+            // no-op when those guards aren't met.
+            if (aceSpecSlotCard && Array.isArray(onlineRowsRaw) && onlineRowsRaw.length > 0) {
+                const aceSpecLower = (aceSpecSlotCard.card_name || '').trim().toLowerCase();
+                const condResult = _aceSpecConditionalAvgs(
+                    onlineRowsRaw, currentArchetype, aceSpecLower, null
+                );
+                if (condResult.bucketCount >= 3) {
+                    let overrides = 0;
+                    deckCards.forEach(card => {
+                        const cn = (card.card_name || '').trim().toLowerCase();
+                        const condStat = condResult.conditionalAvgs.get(cn);
+                        if (!condStat || condStat.presence < 3) return;
+                        const baseAvg = card.avgCountWhenUsed || 0;
+                        const cond = condStat.avg;
+                        if (Math.abs(cond - baseAvg) >= 0.3) {
+                            card._aceSpecConditionalAvg = cond;
+                            card._aceSpecConditionalShift = cond - baseAvg;
+                            card._aceSpecConditionalBaseAvg = baseAvg;
+                            card.avgCountWhenUsed = cond;
+                            overrides += 1;
+                            devLog(`[Consistency][ACE-SPEC-Conditional] ${card.card_name}: ${baseAvg.toFixed(2)} → ${cond.toFixed(2)} (presence ${condStat.presence}/${condResult.bucketCount}, ace-spec=${aceSpecSlotCard.card_name})`);
+                        }
+                    });
+                    if (overrides > 0) {
+                        devLog(`[Consistency][ACE-SPEC-Conditional] ${overrides} card(s) re-priced for ACE-SPEC=${aceSpecSlotCard.card_name} (${condResult.bucketCount} matching buckets)`);
+                    }
+                } else {
+                    devLog(`[Consistency][ACE-SPEC-Conditional] Skipped — only ${condResult.bucketCount} matching deck(s) for ACE-SPEC=${aceSpecSlotCard.card_name} (need ≥3)`);
+                }
+            }
+
             // ==========================================
             // 2. STUFE 1 (Core: consistencyScore >= 75)
             // Meta-boosted + trending cards can exceed 100
@@ -4781,6 +4932,18 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                     latest_major_anchored: !!c._latestMajorAnchored,
                     latest_major_absent: !!c._latestMajorAbsent,
                     tech_counter_for: Array.isArray(c._techCounterFor) ? c._techCounterFor.slice() : [],
+                    // ACE-SPEC-conditional avg-count override (badge in modal).
+                    // null when no override was applied; populated with the
+                    // base→conditional shift (e.g. "4.55 → 4.07") otherwise.
+                    ace_spec_conditional_shift: Number.isFinite(c._aceSpecConditionalShift)
+                        ? Math.round(c._aceSpecConditionalShift * 100) / 100
+                        : null,
+                    ace_spec_conditional_base: Number.isFinite(c._aceSpecConditionalBaseAvg)
+                        ? Math.round(c._aceSpecConditionalBaseAvg * 100) / 100
+                        : null,
+                    ace_spec_conditional_avg: Number.isFinite(c._aceSpecConditionalAvg)
+                        ? Math.round(c._aceSpecConditionalAvg * 100) / 100
+                        : null,
                 })),
                 // Doctrine-driven audit: energy economy 7–11, Stadium bump
                 // for colorless engines, Mega-ex prize math, opening-hand

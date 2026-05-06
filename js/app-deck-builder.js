@@ -3716,6 +3716,51 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 }
             }
 
+            // Per-category cap: pick AT MOST ONE counter card per active
+            // threat category, even when the archetype's data carries
+            // multiple. The user flagged Cynthia's Garchomp building with
+            // BOTH Switch (1×) and Surfer (2×) for retreat-lock — three
+            // tech slots for one threat is wasteful, especially when the
+            // surplus eats energies the deck needs to keep attacking
+            // through the lock.
+            //
+            // The chosen counter per category is the one with the highest
+            // archetype share, with ace-spec status as a tie-breaker
+            // (Switch beats Surfer on share for Cynthia's Garchomp; if
+            // ever tied, the non-ace-spec wins so the ace-spec slot
+            // stays free for the deck's actual ace-spec choice).
+            const techAuditChosenCounters = new Set(); // nameLower of card chosen for each cat
+            if (techAuditActiveThreats.size > 0 && techAuditCounterCats.size > 0) {
+                const _shareOf = (c) => {
+                    const raw = (c.percentage_in_archetype || c.share_percent || '0').toString().replace(',', '.');
+                    const v = parseFloat(raw);
+                    return Number.isFinite(v) ? v : 0;
+                };
+                techAuditActiveThreats.forEach((_info, cat) => {
+                    let best = null;
+                    let bestShare = -1;
+                    deckCards.forEach(card => {
+                        const nm = (card.card_name || '').trim().toLowerCase();
+                        const cats = techAuditCounterCats.get(nm);
+                        if (!cats || !cats.has(cat)) return;
+                        const share = _shareOf(card);
+                        // Prefer non-ace-spec on a share tie so the ace-spec
+                        // slot still goes to the deck's primary ace-spec choice.
+                        const isAceSpec = (typeof isAceSpecCard === 'function') ? isAceSpecCard(card) : false;
+                        const tieBreak = isAceSpec ? -0.001 : 0;
+                        const effective = share + tieBreak;
+                        if (effective > bestShare) {
+                            bestShare = effective;
+                            best = nm;
+                        }
+                    });
+                    if (best) {
+                        techAuditChosenCounters.add(best);
+                        devLog(`[Consistency][TechAudit] category=${cat} → chosen counter: ${best} (share ${bestShare.toFixed(1)}%)`);
+                    }
+                });
+            }
+
             // ── 2c. Compute final consistencyScore per card ──
             deckCards.forEach(card => {
                 const sharePercent = Math.min(100, Math.max(0, parseFloat((card.percentage_in_archetype || '0').toString().replace(',', '.')) || 0));
@@ -3776,22 +3821,36 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                     card.consistencyScore = Math.min(card.consistencyScore, 24);
                 }
 
-                // Tech audit boost — only fires for cards that ARE in the
-                // archetype's data. We never inject new cards; we just
-                // raise the priority of counters the deck already runs
-                // when an active meta threat would otherwise punish their
-                // absence. Match by lower-case card name so older legal
-                // prints (Switch MEG vs PFL) still get the boost.
+                // Tech audit — only ONE card per active threat category
+                // earns the boost (see per-category cap above). The
+                // chosen counter gets +18, taking it from a borderline
+                // Stage-2 candidate to a comfortable inclusion. Other
+                // counters listed in the JSON for the same category get
+                // the OPPOSITE treatment: a flat -20 penalty so they
+                // don't ride their natural archetype share into the
+                // build alongside the chosen counter (the user flagged
+                // Cynthia's Garchomp building Switch 1× + Surfer 2× —
+                // three retreat-lock slots is wasteful at the expense of
+                // attacking-energy slots). Match by lower-case card
+                // name so older legal prints (Switch MEG vs PFL) follow
+                // the same rule.
                 if (techAuditActiveThreats.size > 0) {
                     const cats = techAuditCounterCats.get(nameLower);
                     if (cats && cats.size > 0) {
                         const before = card.consistencyScore;
-                        // +18 flat is enough to push a borderline-Stage-2
-                        // counter (~10 % archetype share) over the 25
-                        // threshold without overriding Stage 1 staples.
-                        card.consistencyScore = Math.min(120, card.consistencyScore + 18);
-                        card._techCounterFor = Array.from(cats);
-                        devLog(`[Consistency][TechAudit] BOOST ${card.card_name} counters [${card._techCounterFor.join(', ')}]: ${before.toFixed(1)} → ${card.consistencyScore.toFixed(1)}`);
+                        if (techAuditChosenCounters.has(nameLower)) {
+                            card.consistencyScore = Math.min(120, card.consistencyScore + 18);
+                            card._techCounterFor = Array.from(cats);
+                            devLog(`[Consistency][TechAudit] BOOST ${card.card_name} counters [${card._techCounterFor.join(', ')}]: ${before.toFixed(1)} → ${card.consistencyScore.toFixed(1)}`);
+                        } else {
+                            // Redundant counter — already covered by the
+                            // chosen pick. Penalise so the deck doesn't
+                            // burn slots on a second copy of the same
+                            // tech role.
+                            card.consistencyScore = Math.max(0, card.consistencyScore - 20);
+                            card._techCounterRedundant = Array.from(cats);
+                            devLog(`[Consistency][TechAudit] REDUNDANT ${card.card_name} counters [${card._techCounterRedundant.join(', ')}]: ${before.toFixed(1)} → ${card.consistencyScore.toFixed(1)}`);
+                        }
                     }
                 }
 

@@ -3854,40 +3854,81 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             // surplus eats energies the deck needs to keep attacking
             // through the lock.
             //
-            // The chosen counter per category is the one with the highest
-            // archetype share, with ace-spec status as a tie-breaker
-            // (Switch beats Surfer on share for Cynthia's Garchomp; if
-            // ever tied, the non-ace-spec wins so the ace-spec slot
-            // stays free for the deck's actual ace-spec choice).
-            const techAuditChosenCounters = new Set(); // nameLower of card chosen for each cat
+            // The chosen counter per category was previously the single
+            // highest-share card. User feedback flagged that as too rigid:
+            // when the meta runs the threat in >50% of matches, a single
+            // out is too thin (you'll see retreat lock in 3-4 of a 7-round
+            // bracket and one Switch reliably prized in the wrong game),
+            // but at <30% one is plenty.
+            //
+            // Tier the budget on weighted_meta_share (from active_threats.json):
+            //   < 30 %  →  1 out  (face threat in ~2 of 7 rounds)
+            //   30-60 % →  2 outs (face in ~3-4 rounds)
+            //   ≥ 60 %  →  3 outs (basically every match)
+            //
+            // Greedy-fill counter cards (sorted by archetype share desc)
+            // until the budget is met. Each picked card carries a
+            // _techCounterMaxCount cap that the Stage-1 / Stage-2 push
+            // logic respects, so two counters whose natural addCounts
+            // would sum past the budget get trimmed to fit.
+            //
+            // Tie-break inside a category: non-ace-spec preferred so the
+            // deck's ace-spec slot stays free for its primary ace-spec
+            // choice (Cynthia's Garchomp's Neo Upper Energy, for example).
+            const techAuditChosenCounters = new Set(); // nameLower of card chosen for ANY cat
+            const techAuditCategoryBudget = new Map(); // cat → { target, picked: [{name, alloc}] }
             if (techAuditActiveThreats.size > 0 && techAuditCounterCats.size > 0) {
                 const _shareOf = (c) => {
                     const raw = (c.percentage_in_archetype || c.share_percent || '0').toString().replace(',', '.');
                     const v = parseFloat(raw);
                     return Number.isFinite(v) ? v : 0;
                 };
-                techAuditActiveThreats.forEach((_info, cat) => {
-                    let best = null;
-                    let bestShare = -1;
-                    deckCards.forEach(card => {
+                const _avgOf = (c) => {
+                    if (c._recommendedCount != null && Number.isFinite(c._recommendedCount)) return c._recommendedCount;
+                    if (Number.isFinite(c.avgCountWhenUsed) && c.avgCountWhenUsed > 0) return c.avgCountWhenUsed;
+                    const parsed = parseFloat(String(c.average_count || c.avg_count || '').replace(',', '.'));
+                    return Number.isFinite(parsed) && parsed > 0 ? parsed : 1;
+                };
+                const _outsTarget = (metaShare) => {
+                    if (!Number.isFinite(metaShare) || metaShare < 0.30) return 1;
+                    if (metaShare < 0.60) return 2;
+                    return 3;
+                };
+                techAuditActiveThreats.forEach((info, cat) => {
+                    const target = _outsTarget(info && info.weighted_meta_share);
+                    const candidates = deckCards.filter(card => {
                         const nm = (card.card_name || '').trim().toLowerCase();
                         const cats = techAuditCounterCats.get(nm);
-                        if (!cats || !cats.has(cat)) return;
-                        const share = _shareOf(card);
-                        // Prefer non-ace-spec on a share tie so the ace-spec
-                        // slot still goes to the deck's primary ace-spec choice.
-                        const isAceSpec = (typeof isAceSpecCard === 'function') ? isAceSpecCard(card) : false;
-                        const tieBreak = isAceSpec ? -0.001 : 0;
-                        const effective = share + tieBreak;
-                        if (effective > bestShare) {
-                            bestShare = effective;
-                            best = nm;
-                        }
+                        return cats && cats.has(cat);
                     });
-                    if (best) {
-                        techAuditChosenCounters.add(best);
-                        devLog(`[Consistency][TechAudit] category=${cat} → chosen counter: ${best} (share ${bestShare.toFixed(1)}%)`);
+                    candidates.sort((a, b) => {
+                        const sa = _shareOf(a), sb = _shareOf(b);
+                        if (sa !== sb) return sb - sa;
+                        const aIsAce = (typeof isAceSpecCard === 'function') ? isAceSpecCard(a) : false;
+                        const bIsAce = (typeof isAceSpecCard === 'function') ? isAceSpecCard(b) : false;
+                        return (aIsAce ? 1 : 0) - (bIsAce ? 1 : 0);
+                    });
+                    let remaining = target;
+                    const picked = [];
+                    for (const c of candidates) {
+                        if (remaining <= 0) break;
+                        const naturalCount = Math.max(1, Math.round(_avgOf(c)));
+                        const alloc = Math.min(naturalCount, remaining);
+                        if (alloc <= 0) continue;
+                        const nm = (c.card_name || '').trim().toLowerCase();
+                        // Use the LARGER allowance when one card counters
+                        // multiple categories (e.g. Iono covering both
+                        // hand_disruption AND its symmetric refresh role).
+                        const prevCap = c._techCounterMaxCount;
+                        if (prevCap == null || alloc > prevCap) {
+                            c._techCounterMaxCount = alloc;
+                        }
+                        techAuditChosenCounters.add(nm);
+                        picked.push({ name: nm, alloc });
+                        remaining -= alloc;
                     }
+                    techAuditCategoryBudget.set(cat, { target, picked });
+                    devLog(`[Consistency][TechAudit] category=${cat} weighted_meta_share=${(info?.weighted_meta_share || 0).toFixed(2)} target=${target} picked=${picked.map(p => `${p.name}×${p.alloc}`).join(', ') || '(none)'}`);
                 });
             }
 
@@ -4145,7 +4186,12 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                     addCount = Math.max(1, addCount); // Core Karten MÜSSEN mindestens 1x rein
                     const legalMax = card._legalMax || getLegalMaxCopies(card.card_name, card);
                     if (!isBasicEnergyCardEntry(card)) addCount = Math.min(addCount, legalMax);
-                    pushCard(card, addCount, '[Consistency][Stage1-Core]');
+                    if (card._techCounterMaxCount != null) {
+                        addCount = Math.min(addCount, card._techCounterMaxCount);
+                    }
+                    if (addCount >= 1) {
+                        pushCard(card, addCount, '[Consistency][Stage1-Core]');
+                    }
                 }
             });
 
@@ -4167,6 +4213,9 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 
                 if (card.consistencyScore >= 25) {
                     let addCount = card._recommendedCount != null ? card._recommendedCount : Math.round(card.avgCountWhenUsed);
+                    if (card._techCounterMaxCount != null) {
+                        addCount = Math.min(addCount, card._techCounterMaxCount);
+                    }
                     if (addCount >= 1) {
                         const legalMax = card._legalMax || getLegalMaxCopies(card.card_name, card);
                         if (!isBasicEnergyCardEntry(card)) addCount = Math.min(addCount, legalMax);

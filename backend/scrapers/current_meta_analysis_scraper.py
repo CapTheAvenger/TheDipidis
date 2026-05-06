@@ -42,6 +42,15 @@ from card_scraper_shared import (
     load_settings,
     fix_mojibake,
 )
+# Dated-CSV helpers — produce ``data/online_tournament_dated_cards.csv``
+# alongside the existing aggregate output. Replaces the standalone
+# online_tournament_dated_scraper.py which was crawling the same URLs
+# (see commit history). Frontend's recency-decay reads the same path.
+from limitless_dated import (
+    parse_history_row,
+    aggregate_tournament_archetype,
+    write_dated_csv,
+)
 
 # Phase 4: canonicalize archetype names against the Limitless online
 # bare-name list (= what archetype_icons.json holds, scraped from
@@ -179,13 +188,19 @@ def _load_settings() -> Dict[str, Any]:
 # ============================================================
 # META LIVE (play.limitlesstcg.com)
 # ============================================================
-def _fetch_meta_live_decklist(list_url: str, deck_name: str, deck_slug: str, card_db: CardDatabaseLookup, timeout: int) -> dict:
+def _fetch_meta_live_decklist(list_url: str, deck_name: str, deck_slug: str, card_db: CardDatabaseLookup, timeout: int,
+                              tournament_id: str = "", tournament_date: str = "", tournament_name: str = "") -> dict:
     """
     Extrahiert Deckliste von play.limitlesstcg.com mit 100%iger Set-Genauigkeit.
     Priorität:
     1. href-Link (/cards/twm/128 -> TWM 128)
     2. <span class="set"> oder <span class="card-set">
     3. Fallback auf CardDB
+
+    ``tournament_id``, ``tournament_date``, ``tournament_name`` are
+    captured by the caller while parsing the per-archetype listing
+    page; threading them through here lets us emit the dated-CSV in the
+    same crawl rather than running a second scraper over the same URLs.
     """
     html = safe_fetch_html(list_url, timeout)
     if not html:
@@ -249,7 +264,13 @@ def _fetch_meta_live_decklist(list_url: str, deck_name: str, deck_slug: str, car
             "archetype": _canonicalize_archetype(normalize_archetype_name(deck_name)),
             "deck_slug": deck_slug,
             "cards": cards,
-            "source": "limitless_online"
+            "source": "limitless_online",
+            # Dated-CSV plumbing — empty strings when caller didn't pass
+            # tournament context (kept optional so any test or other call
+            # site that hasn't been updated still returns valid data).
+            "tournament_id": tournament_id,
+            "tournament_date": tournament_date,
+            "tournament_name": tournament_name,
         }
     return None
 
@@ -306,15 +327,40 @@ def scrape_limitless_online(settings: dict, card_db: CardDatabaseLookup) -> list
             continue
 
         dsoup = BeautifulSoup(deck_html, 'lxml')
-        list_hrefs = list(dict.fromkeys([a['href'] for a in dsoup.select('a[href*="/decklist"]')]))[:max_lists_per_deck]
 
-        if not list_hrefs:
+        # Walk per-<tr> instead of grabbing all decklist anchors flat —
+        # parse_history_row() captures (tournament_id, tournament_date,
+        # list_url) together so we can emit dated-CSV rows from this
+        # same crawl. Dedupe on list_url (each row holds two anchors:
+        # player-cell + list-cell, both pointing at the same decklist).
+        history_rows: list = []
+        seen_list_urls: set = set()
+        for tr in dsoup.find_all("tr"):
+            row = parse_history_row(tr)
+            if not row:
+                continue
+            lh = row.get("list_url")
+            if not lh or lh in seen_list_urls:
+                continue
+            seen_list_urls.add(lh)
+            history_rows.append(row)
+            if len(history_rows) >= max_lists_per_deck:
+                break
+
+        if not history_rows:
             continue
 
         with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
             futures = [
-                executor.submit(_fetch_meta_live_decklist, f"https://play.limitlesstcg.com{lh}", deck_name, slug, card_db, timeout)
-                for lh in list_hrefs
+                executor.submit(
+                    _fetch_meta_live_decklist,
+                    f"https://play.limitlesstcg.com{r['list_url']}",
+                    deck_name, slug, card_db, timeout,
+                    r.get("tournament_id", ""),
+                    r.get("tournament_date", ""),
+                    r.get("tournament_name", ""),
+                )
+                for r in history_rows
             ]
             for future in concurrent.futures.as_completed(futures):
                 res = future.result()
@@ -323,6 +369,49 @@ def scrape_limitless_online(settings: dict, card_db: CardDatabaseLookup) -> list
 
     logger.info("Meta Live: %s vollstaendige Decklisten extrahiert.", len(all_decks))
     return all_decks
+
+
+def build_dated_rows_from_meta_live(
+    limitless_decks: list,
+    card_db: CardDatabaseLookup,
+) -> list:
+    """Group Meta-Live decks by ``(tournament_id, archetype)`` and run
+    :func:`aggregate_tournament_archetype` on each bucket. Replaces the
+    standalone ``online_tournament_dated_scraper.py`` — same input
+    crawl, same output schema."""
+    buckets: Dict[tuple, dict] = {}
+    for deck in limitless_decks:
+        tid = (deck.get("tournament_id") or "").strip()
+        if not tid:
+            continue  # archived snapshots without tid context — skip
+        date = (deck.get("tournament_date") or "").strip()
+        if not date:
+            continue  # date missing → recency-decay can't use the row
+        archetype = deck.get("archetype") or ""
+        if not archetype:
+            continue
+        key = (tid, archetype)
+        bucket = buckets.setdefault(key, {
+            "tournament_id": tid,
+            "tournament_name": deck.get("tournament_name") or "",
+            "tournament_date": date,
+            "archetype": archetype,
+            "decks": [],
+        })
+        # Update the human-readable tournament_name if a later deck has
+        # a richer string (some rows leave it blank when the parser hits
+        # an archived row).
+        if deck.get("tournament_name") and not bucket["tournament_name"]:
+            bucket["tournament_name"] = deck["tournament_name"]
+        bucket["decks"].append(deck.get("cards") or [])
+
+    out: list = []
+    for b in buckets.values():
+        out.extend(aggregate_tournament_archetype(
+            b["tournament_id"], b["tournament_name"], b["tournament_date"],
+            b["archetype"], b["decks"], card_db,
+        ))
+    return out
 
 # ============================================================
 # META PLAY! (labs.limitlesstcg.com)
@@ -571,6 +660,18 @@ def main():
 
     append_mode = settings.get('append_mode', False)
     save_to_csv(aggregated_data, settings["output_file"], append_mode=append_mode)
+
+    # Dated CSV — same crawl, second output. Frontend's recency-decay
+    # (_aggregateWeightedSource in app-deck-builder.js) reads this path
+    # via loadOnlineTournamentDatedRows().
+    dated_rows = build_dated_rows_from_meta_live(limitless_decks, card_db)
+    dated_csv_path = os.path.join(get_data_dir(), "online_tournament_dated_cards.csv")
+    write_dated_csv(dated_rows, dated_csv_path)
+    distinct_tids = len({(r["tournament_id"], r["archetype"]) for r in dated_rows})
+    logger.info(
+        "Online Dated CSV: %d Karten-Rows aus %d (Tournament, Archetyp)-Buckets → %s",
+        len(dated_rows), distinct_tids, dated_csv_path,
+    )
 
     logger.info("=" * 60)
     logger.info("SCRAPING KOMPLETT!")

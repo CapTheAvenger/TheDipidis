@@ -34,15 +34,15 @@ def print_menu() -> None:
     print("  --- CARD INTEL (texts / effects for Consistency Builder) ---")
     print("  [16] Card Effects Scraper (attack/ability text from Limitless)")
     print("  [17] Threat-Intel Builder (active_threats.json for tech audit)")
-    print("  [18] Online Tournament Dated Scraper (per-tournament dates + cards)")
+    print("       (Note: per-tournament dated CSV is produced by [5] now)")
     print("  --- FRONTEND ---")
     print("  [11] Prepare Frontend Data (Merge)")
     print("  [12] Archetype Icons (Pokemon-Bilder Mapping)")
     print("-" * 52)
     print("  --- BATCH SHORTCUTS ---")
     print("  [B]  Base Data Update (1, 2, 3, 4, 14, 11)")
-    print("  [M]  Meta Update / Dienstags-Update (5-10, 13, 14, 18, 17, 11, 12)")
-    print("  [F]  Full System Update (1, 2, 15, 3-10, 13, 14, 16, 18, 17, 11, 12)")
+    print("  [M]  Meta Update / Dienstags-Update (5-10, 13, 14, 17, 11, 12)")
+    print("  [F]  Full System Update (1, 2, 15, 3-10, 13, 14, 16, 17, 11, 12)")
     print("  [0]  Exit")
     print("=" * 52)
 
@@ -64,7 +64,10 @@ SCRIPTS = {
     "15": os.path.join("scrapers", "cardmarket_id_mapper.py"),
     "16": os.path.join("scrapers", "pokemon_card_effects_scraper.py"),
     "17": os.path.join("tools",    "build_threat_intel.py"),
-    "18": os.path.join("scrapers", "online_tournament_dated_scraper.py"),
+    # [18] (online_tournament_dated_scraper.py) removed: its output —
+    # data/online_tournament_dated_cards.csv — is now produced as a
+    # second output of [5] current_meta_analysis_scraper.py, since both
+    # scripts crawled the exact same per-archetype /decks/<slug> URLs.
 }
 
 TASK_NAMES = {
@@ -85,22 +88,22 @@ TASK_NAMES = {
     "15": "Cardmarket ID Mapper",
     "16": "Card Effects Scraper (attack/ability text from Limitless)",
     "17": "Threat-Intel Builder (active_threats.json for tech audit)",
-    "18": "Online Tournament Dated Scraper (per-tournament dates + cards)",
 }
 
 BATCH_BASE = ["1", "2", "3", "4", "14", "11"]
 # 17 (threat-intel) depends on 5+6 (current meta + online decks) plus the
 # rotation-stable 16 effects file; both meta inputs are refreshed by
-# BATCH_META so 17 runs there too.  18 (dated online tournaments) feeds
-# the deck-builder's time-decay scoring directly, so it also belongs in
-# the weekly Tuesday update.  16 (effects) is heavy (~20 k card pages)
-# and only needs to re-run on rotation — kept out of META, only in FULL.
-BATCH_META = ["5", "6", "7", "8", "9", "10", "13", "14", "18", "17", "11", "12"]
-# 16 / 17 / 18 included so local FULL refreshes the same intel files the
-# CI weekly-update produces.  Order matters: 16 (effects) must run BEFORE
-# 17 (threat-intel reads pokemon_card_effects.json), and 11 must come
-# last so prepare_card_data picks up everything written above.
-BATCH_FULL = ["1", "2", "15", "3", "4", "5", "6", "7", "8", "9", "10", "13", "14", "16", "18", "17", "11", "12"]
+# BATCH_META so 17 runs there too.  Dated-tournament rows that feed the
+# deck-builder's time-decay scoring are now produced by [5] itself
+# (single crawl, dual output), so they no longer need a dedicated
+# script.  16 (effects) is heavy (~20 k card pages) and only needs to
+# re-run on rotation — kept out of META, only in FULL.
+BATCH_META = ["5", "6", "7", "8", "9", "10", "13", "14", "17", "11", "12"]
+# 16 / 17 included so local FULL refreshes the same intel files the
+# CI weekly-update produces.  Order matters: 16 (effects) must run
+# BEFORE 17 (threat-intel reads pokemon_card_effects.json), and 11
+# must come last so prepare_card_data picks up everything written above.
+BATCH_FULL = ["1", "2", "15", "3", "4", "5", "6", "7", "8", "9", "10", "13", "14", "16", "17", "11", "12"]
 
 def git_commit_push(description: str) -> None:
     """Bump version, stage all changes, commit, and push to origin main."""

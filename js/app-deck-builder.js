@@ -2622,6 +2622,85 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 modal.appendChild(auditWrap);
             }
 
+            // ACE-SPEC pick rationale — explains why this archetype's
+            // ACE-SPEC slot went to the chosen card. Latest-Major share
+            // dominates picks within ~14 days of a Major (decays linear
+            // to 0 by day 28); this section surfaces the actual numbers
+            // so a user staring at "Secret Box at 16% archetype share"
+            // can see that Secret Box won because of its 31.6% Major
+            // share, not its overall popularity.
+            const acePick = report.ace_spec_pick;
+            if (acePick && acePick.chosen && Array.isArray(acePick.candidates) && acePick.candidates.length > 0) {
+                const aceWrap = document.createElement('div');
+                aceWrap.className = 'build-info-ace-pick';
+                const aceTitle = document.createElement('h4');
+                aceTitle.textContent = t('buildInfo.aceSpecTitle') || 'ACE-SPEC pick';
+                aceWrap.appendChild(aceTitle);
+
+                const summary = document.createElement('p');
+                summary.className = 'build-info-ace-summary';
+                const weight = (typeof acePick.major_weight === 'number') ? acePick.major_weight : 0;
+                const ageStr = (acePick.major_age_days != null)
+                    ? `${acePick.major_age_days}d ago`
+                    : (t('buildInfo.aceSpecMajorMissing') || 'no recent Major');
+                if (acePick.has_major_anchor && weight > 0) {
+                    const winner = acePick.candidates[0];
+                    const winnerShare = (winner && winner.major_share != null) ? `${winner.major_share}%` : '—';
+                    const winnerDecks = (winner && winner.major_deck_count > 0 && acePick.major_total_decks > 0)
+                        ? ` (${winner.major_deck_count}/${acePick.major_total_decks} decks)`
+                        : '';
+                    summary.textContent =
+                        (t('buildInfo.aceSpecPickedMajor') || 'Picked')
+                        + ` ${acePick.chosen} — ${winnerShare}`
+                        + (t('buildInfo.aceSpecAtMajor') || ' at the latest Major')
+                        + winnerDecks
+                        + (acePick.major_date ? `, ${acePick.major_date}` : '')
+                        + ` · ${(t('buildInfo.aceSpecBlend') || 'Major weight')} ${Math.round(weight * 100)}% (${ageStr}).`;
+                } else {
+                    summary.textContent =
+                        (t('buildInfo.aceSpecPickedAggregate') || 'Picked')
+                        + ` ${acePick.chosen} — `
+                        + (t('buildInfo.aceSpecPickedAggregateReason') || 'highest cross-tournament archetype share. No recent Major to anchor against.');
+                }
+                aceWrap.appendChild(summary);
+
+                // Candidate table — chosen highlighted, alternatives
+                // listed with their Major share + blended score so the
+                // delta is visible. If no Major data exists, fall back
+                // to consistency-score column only.
+                const table = document.createElement('div');
+                table.className = 'build-info-ace-table';
+                acePick.candidates.forEach((c, i) => {
+                    const row = document.createElement('div');
+                    row.className = 'build-info-ace-row' + (i === 0 ? ' build-info-ace-chosen' : '');
+                    const nameCell = document.createElement('span');
+                    nameCell.className = 'build-info-ace-name';
+                    nameCell.textContent = (i === 0 ? '✓ ' : '· ') + c.card_name;
+                    row.appendChild(nameCell);
+
+                    const statCell = document.createElement('span');
+                    statCell.className = 'build-info-ace-stats';
+                    const parts = [];
+                    if (c.major_share != null) {
+                        const decksFrag = (c.major_deck_count > 0 && acePick.major_total_decks > 0)
+                            ? ` (${c.major_deck_count}/${acePick.major_total_decks})`
+                            : '';
+                        parts.push(`${(t('buildInfo.aceSpecMajor') || 'Major')} ${c.major_share}%${decksFrag}`);
+                    } else if (acePick.has_major_anchor) {
+                        parts.push(`${(t('buildInfo.aceSpecMajor') || 'Major')} —`);
+                    }
+                    parts.push(`${(t('buildInfo.aceSpecConsistency') || 'consistency')} ${c.consistency_score}`);
+                    if (acePick.has_major_anchor && weight > 0 && weight < 1) {
+                        parts.push(`${(t('buildInfo.aceSpecBlended') || 'blended')} ${c.blended_score}`);
+                    }
+                    statCell.textContent = parts.join(' · ');
+                    row.appendChild(statCell);
+                    table.appendChild(row);
+                });
+                aceWrap.appendChild(table);
+                modal.appendChild(aceWrap);
+            }
+
             // Card reasoning list — one row per card, badges explain
             // which layer(s) contributed.
             const list = document.createElement('div');
@@ -5544,11 +5623,37 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             const aceSpecCandidates = deckCards.filter(c => isAceSpecCard(c));
             aceSpecCandidates.sort((a, b) => _aceSpecScoreOf(b) - _aceSpecScoreOf(a));
             const aceSpecSlotCard = aceSpecCandidates[0] || null;
+            // Capture the ACE-SPEC pick reasoning so the "Why?" modal can
+            // explain it. Without this the user sees Secret Box instead of
+            // Maximum Belt and has no way to tell that Secret Box won
+            // because of higher Major share, not because of overall
+            // popularity. Top-4 candidates so we can render the close
+            // alternatives without flooding the modal.
+            let _aceSpecPickReport = null;
             if (aceSpecSlotCard) {
+                _aceSpecPickReport = {
+                    chosen: aceSpecSlotCard.card_name,
+                    major_weight: Math.round(_aceSpecMajorWeight * 100) / 100,
+                    major_age_days: latestMajorAgeDays,
+                    major_date: latestMajorDate || '',
+                    major_total_decks: latestMajorTotalDecks || 0,
+                    has_major_anchor: !!hasLatestMajorAnchor,
+                    candidates: aceSpecCandidates.slice(0, 4).map(c => {
+                        const m = latestMajorStats && latestMajorStats.size > 0
+                            ? latestMajorStats.get((c.card_name || '').trim().toLowerCase())
+                            : null;
+                        return {
+                            card_name: c.card_name,
+                            consistency_score: Math.round(c.consistencyScore || 0),
+                            major_share: m ? Math.round(m.share * 10) / 10 : null,
+                            major_deck_count: m ? (m.deckCount || 0) : 0,
+                            blended_score: Math.round(_aceSpecScoreOf(c) * 10) / 10,
+                        };
+                    }),
+                };
                 devLog(`[Consistency][ACE-SPEC-Picker] Major-recency weight: ${_aceSpecMajorWeight.toFixed(2)} (Major ${latestMajorAgeDays != null ? latestMajorAgeDays + 'd ago' : 'unavailable'})`);
-                aceSpecCandidates.slice(0, 4).forEach(c => {
-                    const m = latestMajorStats?.get((c.card_name || '').trim().toLowerCase());
-                    devLog(`  candidate: ${c.card_name} score=${(c.consistencyScore || 0).toFixed(0)} majorShare=${m ? m.share.toFixed(0) : '—'} → blended=${_aceSpecScoreOf(c).toFixed(1)}`);
+                _aceSpecPickReport.candidates.forEach(c => {
+                    devLog(`  candidate: ${c.card_name} score=${c.consistency_score} majorShare=${c.major_share ?? '—'} → blended=${c.blended_score}`);
                 });
             }
 
@@ -6030,6 +6135,12 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 // probability, ACE-SPEC prize-back-up. Computed once at
                 // build time so the modal can render without recomputing.
                 quality_audit: _buildQualityAudit(consistencyDeck),
+                // ACE-SPEC pick reasoning — chosen card + top alternatives
+                // with their Major-tournament shares + the blend weight
+                // applied at pick time. Lets the Why?-modal explain why
+                // (e.g.) Secret Box won over Maximum Belt despite Maximum
+                // Belt's higher cross-tournament Online aggregate.
+                ace_spec_pick: _aceSpecPickReport,
             };
 
             {

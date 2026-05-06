@@ -3115,6 +3115,57 @@ img[src*="limitlesstcg"] {
     margin-top: 3px;
 }
 
+/* ── ACE-SPEC pick rationale section ─────────────────────── */
+.build-info-ace-pick {
+    margin: 0 0 12px;
+    padding: 10px 12px;
+    border: 1px solid #2f3a55;
+    border-radius: 6px;
+    background: #161e2e;
+}
+.build-info-ace-pick h4 {
+    margin: 0 0 6px;
+    font-size: 0.85em;
+    color: #cdd;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+.build-info-ace-summary {
+    margin: 0 0 8px;
+    color: #ddd;
+    font-size: 0.85em;
+    line-height: 1.4;
+}
+.build-info-ace-table {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+.build-info-ace-row {
+    display: grid;
+    grid-template-columns: minmax(140px, 1fr) auto;
+    gap: 12px;
+    align-items: baseline;
+    padding: 4px 0;
+    font-size: 0.82em;
+    color: #aab;
+    border-top: 1px dashed #1f2438;
+}
+.build-info-ace-row:first-child { border-top: none; }
+.build-info-ace-name { font-weight: 500; }
+.build-info-ace-stats {
+    color: #889;
+    font-size: 0.95em;
+    text-align: right;
+}
+.build-info-ace-chosen .build-info-ace-name {
+    color: #9eb6ff;
+    font-weight: 600;
+}
+.build-info-ace-chosen .build-info-ace-stats {
+    color: #cdd;
+}
+
 /* ── Toolbar button: "Why?" with circled-i icon ── */
 .btn-modern.btn-build-info {
     display: inline-flex;

@@ -177,3 +177,37 @@ class TestParseHistoryRow:
     def test_short_row_returns_none(self):
         row = self._parse("<tr><td>only one cell</td></tr>")
         assert row is None
+
+    def test_modern_limitless_markup(self):
+        # Mid-2026 Limitless changed the per-deck URL pattern from
+        # /decks/<slug>/<id> to /tournament/<tid>/player/<handle>/decklist
+        # AND now puts a player-decklist anchor inside the player cell —
+        # which means the FIRST /tournament/ anchor in document order
+        # belongs to the player, not the tournament name. Without
+        # filtering we'd end up with tournament_name=player-handle and
+        # an empty list_url, both of which broke the live full update.
+        row = self._parse("""
+            <tr>
+              <td>
+                <a href="/tournament/abc123/player/calcal206/decklist">Cal Connor</a>
+              </td>
+              <td>
+                <a href="/tournament/abc123">TOURNAMENT OF DOOM!</a>
+              </td>
+              <td><a class="date" data-time="1777680000000"></a></td>
+              <td>1st of 390</td>
+              <td>10 - 1 - 1</td>
+              <td>
+                <a href="/tournament/abc123/player/calcal206/decklist">List</a>
+              </td>
+            </tr>
+        """)
+        assert row is not None
+        # Tournament name comes from cell 1, NOT cell 0's player-decklist
+        # anchor (whose text is the player handle).
+        assert row["tournament_name"] == "TOURNAMENT OF DOOM!"
+        assert row["tournament_id"] == "abc123"
+        assert row["player"] == "Cal Connor"
+        # New list-URL pattern captured; player handle = dedup key
+        assert row["deck_slug_id"] == "player/calcal206"
+        assert "/tournament/abc123/player/calcal206/decklist" in row["list_url"]

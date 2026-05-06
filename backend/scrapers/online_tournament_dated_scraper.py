@@ -223,12 +223,20 @@ def _parse_history_row(tr) -> Optional[Dict[str, str]]:
     # Player — usually the first cell with text.
     player = (cells[0].get_text(" ", strip=True) if cells[0] else "").strip()
 
-    # Tournament name + ID — anchor pointing at /tournament/<id>
+    # Tournament name + ID — anchor pointing at /tournament/<id>.
+    # Skip anchors with "/player/" in href: those are per-player decklist
+    # links (their text is the player handle, not the tournament name).
+    # Mid-2026 Limitless put a /tournament/<tid>/player/<handle>/decklist
+    # anchor inside the player cell, which is the FIRST /tournament/ anchor
+    # in document order — without this filter we'd record the player name
+    # as the tournament name.
     tournament_name = ""
     tournament_id = ""
     for a in tr.select('a[href*="/tournament/"]'):
-        tournament_name = a.get_text(" ", strip=True)
         href = a.get("href", "")
+        if "/player/" in href:
+            continue
+        tournament_name = a.get_text(" ", strip=True)
         m = re.search(r"/tournament/([^/?]+)", href)
         if m:
             tournament_id = m.group(1)
@@ -277,25 +285,37 @@ def _parse_history_row(tr) -> Optional[Dict[str, str]]:
         elif re.match(r"^\d+\s*-\s*\d+\s*-\s*\d+\s*$", t):
             score = t
 
-    # List link — anchor pointing at deck-list URL with a numeric / slug suffix.
+    # List link — Limitless's per-deck URL changed mid-2026:
+    #   NEW: /tournament/<tid>/player/<handle>/decklist
+    #   OLD: /decks/<archetype-slug>/<list-id>
+    #   OLD: /decklist[s]?/<id>
+    # Try the new pattern first, fall back to legacy so re-scraping
+    # archived snapshots still parses.
     list_url = ""
     deck_slug_id = ""
-    for a in tr.select('a[href*="/decks/"]'):
+    for a in tr.select('a[href*="/decklist"]'):
         href = a.get("href", "")
-        # Match per-deck list paths. Limitless uses both:
-        #   /decks/<slug>/<id>
-        #   /decks/<slug>?...&list=<id>
-        # Also bare /decklist URLs occasionally surface.
-        m = re.search(r"/decks/([^/?]+)/([^/?]+)", href)
+        m = re.search(r"/tournament/([^/?]+)/player/([^/?]+)/decklist", href)
         if m:
-            deck_slug_id = f"{m.group(1)}/{m.group(2)}"
+            # Use the player handle as the dedup key — unique within a
+            # tournament. The full state-key is `tid|deck_slug_id` so
+            # `player/<handle>` is enough to disambiguate.
+            deck_slug_id = f"player/{m.group(2)}"
             list_url = href
             break
-        m = re.search(r"/decklist[s]?/([^/?]+)", href)
-        if m:
-            deck_slug_id = f"decklist/{m.group(1)}"
-            list_url = href
-            break
+    if not list_url:
+        for a in tr.select('a[href*="/decks/"]'):
+            href = a.get("href", "")
+            m = re.search(r"/decks/([^/?]+)/([^/?]+)", href)
+            if m:
+                deck_slug_id = f"{m.group(1)}/{m.group(2)}"
+                list_url = href
+                break
+            m = re.search(r"/decklist[s]?/([^/?]+)", href)
+            if m:
+                deck_slug_id = f"decklist/{m.group(1)}"
+                list_url = href
+                break
 
     if not tournament_id and not deck_slug_id:
         return None
@@ -471,10 +491,23 @@ def aggregate_tournament_archetype(
 
     out: List[Dict[str, Any]] = []
     for (name, sc, sn), agg in per_card_total.items():
-        info = card_db.get_card(name, set_code=sc, set_number=sn) if hasattr(card_db, "get_card") else None
-        rarity = (getattr(info, "rarity", "") or "") if info else ""
-        type_ = (getattr(info, "type", "") or "") if info else ""
-        image_url = (getattr(info, "image_url", "") or "") if info else ""
+        # CardDatabaseLookup.get_card takes (set_code, number) positionally
+        # and returns a dict (or None). The previous call signature passed
+        # `name` as the first positional, which collided with the
+        # `set_code=` kwarg ("got multiple values for argument set_code")
+        # AND used getattr() against a dict, so rarity/type/image_url were
+        # always blank.
+        info: Optional[Dict[str, str]] = None
+        if sc and sn and hasattr(card_db, "get_card"):
+            info = card_db.get_card(sc, sn)
+        if not info and hasattr(card_db, "get_card_info"):
+            # Name fallback when we couldn't extract set/number from the
+            # decklist anchor (rare — happens when Limitless uses a
+            # rarity-less basic-energy link).
+            info = card_db.get_card_info(name)
+        rarity = (info.get("rarity", "") if info else "") or ""
+        type_ = (info.get("type", "") if info else "") or ""
+        image_url = (info.get("image_url", "") if info else "") or ""
         avg = agg["total_count"] / agg["deck_inclusion_count"] if agg["deck_inclusion_count"] else 0
         pct = (agg["deck_inclusion_count"] / total_decks * 100) if total_decks else 0
         out.append({

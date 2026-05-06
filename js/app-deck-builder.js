@@ -3332,22 +3332,99 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
         }
 
         // Aggregate one date-tagged tournament source into per-card weighted
-        // numerator + a shared denominator (Σ archetype_total × weight ×
-        // source_weight across all tournaments where the archetype showed
-        // up). Returns null when the source has no usable rows for this
-        // archetype, so the recency block can fall back to baseline share.
+        // numerator + a shared denominator. Returns null when the source has
+        // no usable rows for this archetype, so the caller can fall back to
+        // baseline share.
         //
-        // archetypeFieldNormalizer is for sources that put extra metadata in
-        // the archetype field (Major has price-tag suffixes like
-        // "Joltik Box39.92$34.66€"); Online + JP rows pass through clean.
-        function _aggregateWeightedSource(rows, archetypeKey, sourceWeight, todayMs, archetypeFieldNormalizer) {
+        // mode='aggregate' (default):
+        //   Each row is already an archetype-aggregate at the tournament —
+        //   total_decks_in_archetype is the real per-tournament total and
+        //   deck_inclusion_count is "of those N decks, how many ran this
+        //   card". Used by online_tournament_dated_cards.csv and the JP
+        //   city_league_analysis rows.
+        //
+        // mode='snapshot':
+        //   Each row's `archetype` field is a unique-per-deck identifier
+        //   (Major source uses a price-tag suffix like
+        //   "Cynthia's Garchomp27.91$22.10€"; same archetype + same
+        //   tournament with different prices = different deck snapshots,
+        //   each carrying total_decks_in_archetype=1). The real
+        //   per-tournament total is the count of distinct (tid, archRaw)
+        //   pairs, and a card's inclusion count is the number of those
+        //   pairs whose row-set contains the card. Without this branch
+        //   every card present in any snapshot collapses to 100 % share
+        //   (the dec-2026 build regression).
+        //
+        // archetypeFieldNormalizer is for stripping snapshot-specific
+        // suffixes (price-tag for Major) before the archetype matcher runs;
+        // Online + JP rows pass through clean.
+        function _aggregateWeightedSource(rows, archetypeKey, sourceWeight, todayMs, archetypeFieldNormalizer, mode) {
             if (!Array.isArray(rows) || rows.length === 0) return null;
             const matcher = (typeof window.normalizeArchetypeForMatch === 'function')
                 ? window.normalizeArchetypeForMatch
                 : (s) => (s || '').toLowerCase().trim();
             const targetKey = matcher(archetypeKey || '');
             if (!targetKey) return null;
+            const aggregationMode = (mode === 'snapshot') ? 'snapshot' : 'aggregate';
 
+            if (aggregationMode === 'snapshot') {
+                // (tid, archRaw) — one entry per distinct deck snapshot.
+                const deckMeta = new Map();        // deckKey → { weight, ageDays, tid }
+                const cardDecks = new Map();       // cardName_lower → Set<deckKey>
+
+                rows.forEach(row => {
+                    const archRaw = row.archetype || '';
+                    const archForMatch = archetypeFieldNormalizer
+                        ? archetypeFieldNormalizer(archRaw)
+                        : archRaw;
+                    if (matcher(archForMatch) !== targetKey) return;
+
+                    const tid = String(row.tournament_id || row.tournament_name || '').trim();
+                    if (!tid) return;
+                    const deckKey = tid + '||' + archRaw;
+
+                    if (!deckMeta.has(deckKey)) {
+                        const d = _parseAnyTournamentDate(row.tournament_date || row.date || '');
+                        if (!d) return;
+                        const ageDays = Math.max(0, (todayMs - d.getTime()) / 86400000);
+                        const weight = _recencyWeight(ageDays) * (sourceWeight || 1.0);
+                        deckMeta.set(deckKey, { weight, ageDays, tid });
+                    }
+
+                    const cardName = (row.card_name || row.full_card_name || '').toString().trim().toLowerCase();
+                    if (!cardName) return;
+                    const inclusion = parseInt(row.deck_inclusion_count || row.deck_count || 0, 10) || 0;
+                    if (inclusion <= 0) return;
+
+                    if (!cardDecks.has(cardName)) cardDecks.set(cardName, new Set());
+                    cardDecks.get(cardName).add(deckKey);
+                });
+
+                if (deckMeta.size === 0) return null;
+                let weightedDenominator = 0;
+                const tournamentSet = new Set();
+                deckMeta.forEach(m => { weightedDenominator += m.weight; tournamentSet.add(m.tid); });
+                if (weightedDenominator <= 0) return null;
+
+                const weightedNumerators = new Map();
+                cardDecks.forEach((deckKeys, cardName) => {
+                    let num = 0;
+                    deckKeys.forEach(deckKey => {
+                        const m = deckMeta.get(deckKey);
+                        if (m) num += m.weight;
+                    });
+                    weightedNumerators.set(cardName, num);
+                });
+
+                return {
+                    weightedNumerators,
+                    weightedDenominator,
+                    tournamentCount: tournamentSet.size,
+                    deckCount: deckMeta.size,
+                };
+            }
+
+            // aggregate mode (default)
             const tournamentMeta = new Map();      // tid → { weight, archetypeTotal, ageDays }
             const cardByTournament = new Map();    // cardName_lower → Map<tid, inclusionSum>
 
@@ -3382,7 +3459,11 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             if (tournamentMeta.size === 0) return null;
 
             let weightedDenominator = 0;
-            tournamentMeta.forEach(meta => { weightedDenominator += meta.archetypeTotal * meta.weight; });
+            let aggregateDeckCount = 0;
+            tournamentMeta.forEach(meta => {
+                weightedDenominator += meta.archetypeTotal * meta.weight;
+                aggregateDeckCount += meta.archetypeTotal;
+            });
             if (weightedDenominator <= 0) return null;
 
             const weightedNumerators = new Map();
@@ -3397,7 +3478,12 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 weightedNumerators.set(cardName, num);
             });
 
-            return { weightedNumerators, weightedDenominator, tournamentCount: tournamentMeta.size };
+            return {
+                weightedNumerators,
+                weightedDenominator,
+                tournamentCount: tournamentMeta.size,
+                deckCount: aggregateDeckCount,
+            };
         }
         if (typeof window !== 'undefined') {
             window._aggregateWeightedSource = _aggregateWeightedSource;
@@ -3620,7 +3706,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                     }
                     const majorRows = window.currentMetaTournamentCardsData || [];
                     majorAgg = _aggregateWeightedSource(
-                        majorRows, currentArchetype, SOURCE_WEIGHT_MAJOR, todayMs, _stripPriceTag
+                        majorRows, currentArchetype, SOURCE_WEIGHT_MAJOR, todayMs, _stripPriceTag, 'snapshot'
                     );
                 } else if (source === 'cityLeague') {
                     // City League JP rows already in window.cityLeagueRawDeckCards
@@ -3640,13 +3726,24 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             }
 
             // Combine numerators across sources; denominator is shared
-            // (sum of weighted archetype-totals from both sources). Result
-            // is a per-card weighted_share in 0–100% space.
+            // (sum of weighted deck-counts from both sources). Result is a
+            // per-card weighted_share in 0–100 % space.
+            //
+            // Small-sample guard: if the combined deck count across both
+            // sources is below MIN_DECKS_FOR_DECAY, weighted_share is too
+            // noisy to trust as a score input — a single outlier deck would
+            // give a niche tech card a huge share. Fall back to baseline by
+            // emitting an empty weightedShareMap.
+            const MIN_DECKS_FOR_DECAY = 5;
+            const majorDecks = majorAgg ? (majorAgg.deckCount || 0) : 0;
+            const onlineDecks = onlineAgg ? (onlineAgg.deckCount || 0) : 0;
+            const totalDecks = majorDecks + onlineDecks;
+
             const weightedShareMap = new Map();
             let combinedDenominator = 0;
             if (majorAgg) combinedDenominator += majorAgg.weightedDenominator;
             if (onlineAgg) combinedDenominator += onlineAgg.weightedDenominator;
-            if (combinedDenominator > 0) {
+            if (combinedDenominator > 0 && totalDecks >= MIN_DECKS_FOR_DECAY) {
                 const combinedNumerator = new Map();
                 [majorAgg, onlineAgg].forEach(agg => {
                     if (!agg) return;
@@ -3659,7 +3756,10 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 });
             }
             const hasTimeDecay = weightedShareMap.size > 0;
-            devLog(`[Consistency][Recency] weighted Major=${majorAgg ? majorAgg.tournamentCount : 0} rows, weighted Online=${onlineAgg ? onlineAgg.tournamentCount : 0} rows, decay window=42d → ${weightedShareMap.size} cards with weighted_share`);
+            const sampleStatus = (totalDecks < MIN_DECKS_FOR_DECAY)
+                ? ` — sample below MIN_DECKS_FOR_DECAY=${MIN_DECKS_FOR_DECAY}, falling back to baseline`
+                : '';
+            devLog(`[Consistency][Recency] Major=${majorDecks} decks (${majorAgg ? majorAgg.tournamentCount : 0} tournaments), Online=${onlineDecks} decks (${onlineAgg ? onlineAgg.tournamentCount : 0} tournaments), decay window=42d → ${weightedShareMap.size} cards with weighted_share${sampleStatus}`);
 
             // ── 2b2. Latest-Major Anchor (currentMeta) ──
             // The Major-anchor data is loaded for ALL currentMeta filters

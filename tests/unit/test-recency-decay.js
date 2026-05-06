@@ -296,4 +296,115 @@ describe('_aggregateWeightedSource', () => {
         assert.ok(result, 'expected the price-tag stripper to expose the archetype');
         assert.equal(result.tournamentCount, 3);
     });
+
+    it('reports deckCount in aggregate mode (Σ archetype_total)', () => {
+        const result = FNS._aggregateWeightedSource(makeRows(), 'Cynthia Garchomp Ex', 1.0, TODAY, null);
+        // T1 archetype_total=4, T2=5, T3=6 → 15 decks
+        assert.equal(result.deckCount, 15);
+    });
+});
+
+describe('_aggregateWeightedSource — snapshot mode (Major source)', () => {
+    // Major source schema: each row's `archetype` field carries a price-tag
+    // suffix that uniquely identifies a deck-snapshot. total_decks_in_archetype
+    // is always 1 (per-snapshot value), so plain aggregate-mode collapses
+    // every snapshot of the same tournament into one bucket and clamps
+    // every card's inclusion to 1, falsely yielding 100 % share for every
+    // card that ever appeared. This was the dec-2026 regression.
+    const TODAY = new Date('2026-05-06T00:00:00Z').getTime();
+    const stripPrice = (s) => String(s || '').replace(/\d+(?:[.,]\d+)?\$\d+(?:[.,]\d+)?€.*$/u, '').trim();
+
+    function majorRows() {
+        // Tournament 463 — 3 distinct Cynthia decks (3 price-tags), 2026-04-04 (32d ago)
+        // Tournament 539 — 5 distinct Cynthia decks (5 price-tags), 2026-04-25 (11d ago)
+        const rows = [];
+        const make = (tid, date, priceTag, cardName, hasIt) => ({
+            tournament_id: tid, tournament_date: date,
+            archetype: 'Cynthia\'s Garchomp' + priceTag,
+            card_name: cardName,
+            deck_inclusion_count: hasIt ? 1 : 0,
+            total_decks_in_archetype: 1,
+        });
+        // Boss's Orders — in every deck (8 of 8)
+        // Switch          — in 5 of 8 decks (in 463: 1/3, in 539: 4/5)
+        // Buzwole         — in 1 of 8 decks (only 1 of the 463 lists)
+        const tag463 = ['28.26$20.49€', '28.34$19.38€', '34.38$19.01€'];
+        const tag539 = ['27.91$22.10€', '29.19$20.92€', '32.68$23.86€', '32.69$23.92€', '33.27$24.75€'];
+        tag463.forEach((tag, i) => {
+            rows.push(make('463', '4th April 2026', tag, 'Boss\'s Orders', true));
+            rows.push(make('463', '4th April 2026', tag, 'Switch',          i === 0));
+            rows.push(make('463', '4th April 2026', tag, 'Buzwole',         i === 0));
+        });
+        tag539.forEach((tag, i) => {
+            rows.push(make('539', '25th April 2026', tag, 'Boss\'s Orders', true));
+            rows.push(make('539', '25th April 2026', tag, 'Switch',          i < 4));
+        });
+        // Other archetype — must be ignored by the matcher
+        rows.push(make('463', '4th April 2026', 'Joltik Box15.99$11.20€', 'Joltik', true));
+        return rows;
+    }
+
+    it('counts distinct (tid, archRaw) pairs as decks (NOT total_decks_in_archetype)', () => {
+        const result = FNS._aggregateWeightedSource(
+            majorRows(), 'Cynthia\'s Garchomp', 1.0, TODAY, stripPrice, 'snapshot'
+        );
+        assert.ok(result, 'expected snapshot-mode result');
+        assert.equal(result.tournamentCount, 2, '2 distinct tournament_ids');
+        assert.equal(result.deckCount, 8, '3 + 5 = 8 distinct deck-snapshots');
+    });
+
+    it('weights an always-played card at 100 %', () => {
+        const result = FNS._aggregateWeightedSource(
+            majorRows(), 'Cynthia\'s Garchomp', 1.0, TODAY, stripPrice, 'snapshot'
+        );
+        const num = result.weightedNumerators.get('boss\'s orders');
+        const share = (num / result.weightedDenominator) * 100;
+        assert.ok(Math.abs(share - 100) < 1e-6, `expected ≈100 %, got ${share}`);
+    });
+
+    it('correctly attributes mid-prevalence to a 5-of-8 card (Switch)', () => {
+        const result = FNS._aggregateWeightedSource(
+            majorRows(), 'Cynthia\'s Garchomp', 1.0, TODAY, stripPrice, 'snapshot'
+        );
+        const switchNum = result.weightedNumerators.get('switch');
+        const switchShare = (switchNum / result.weightedDenominator) * 100;
+        // Without recency: 5/8 = 62.5 %.  T539 (11d, w=0.7714) has 4/5 hit;
+        // T463 (32d, w=0.2429) has 1/3.  Weighted ≈ 71-78 %.
+        assert.ok(switchShare > 50 && switchShare < 90,
+            `expected mid-range (raw=62.5 %), got ${switchShare} %`);
+    });
+
+    it('correctly attributes low-prevalence to a 1-of-8 card (Buzwole) — NOT 100 %', () => {
+        // This is the regression case: aggregate-mode with snapshot-style
+        // input falsely promoted Buzwole to 100 %.  Snapshot-mode must give
+        // a low single-digit share since Buzwole only appeared in 1 of 8
+        // decks total (and that 1 was 32 days old, decay weight 0.2429).
+        const result = FNS._aggregateWeightedSource(
+            majorRows(), 'Cynthia\'s Garchomp', 1.0, TODAY, stripPrice, 'snapshot'
+        );
+        const buzNum = result.weightedNumerators.get('buzwole');
+        const buzShare = (buzNum / result.weightedDenominator) * 100;
+        // Raw = 1/8 = 12.5 %, but the only inclusion is at T463 (decay 0.243).
+        // Numerator = 0.243; denominator = 3·0.243 + 5·0.771 ≈ 4.583.
+        // → buzShare ≈ 5.3 % — well below Stage-2 threshold (25).
+        assert.ok(buzShare < 15, `expected ≪ Stage-2 threshold, got ${buzShare}%`);
+    });
+
+    it('does NOT inflate to 100 % for niche cards (regression guard)', () => {
+        const result = FNS._aggregateWeightedSource(
+            majorRows(), 'Cynthia\'s Garchomp', 1.0, TODAY, stripPrice, 'snapshot'
+        );
+        const buzShare = (result.weightedNumerators.get('buzwole') / result.weightedDenominator) * 100;
+        const switchShare = (result.weightedNumerators.get('switch') / result.weightedDenominator) * 100;
+        assert.ok(Math.abs(buzShare - switchShare) > 30,
+            `niche card and mid-prevalence card must produce different shares ` +
+            `(snapshot bug would equate them at 100 %); buzwole=${buzShare}, switch=${switchShare}`);
+    });
+
+    it('returns null when no rows match the archetype', () => {
+        const result = FNS._aggregateWeightedSource(
+            majorRows(), 'Wugtrio Box', 1.0, TODAY, stripPrice, 'snapshot'
+        );
+        assert.equal(result, null);
+    });
 });

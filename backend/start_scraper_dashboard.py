@@ -40,9 +40,9 @@ def print_menu() -> None:
     print("  [12] Archetype Icons (Pokemon-Bilder Mapping)")
     print("-" * 52)
     print("  --- BATCH SHORTCUTS ---")
-    print("  [B]  Base Data Update (1, 2, 3, 4, 14 + 11)")
-    print("  [M]  Meta Update / Dienstags-Update (5-10, 13, 14, 11, 12)")
-    print("  [F]  Full System Update (1, 2, 15, 3-10, 13, 14, 11, 12)")
+    print("  [B]  Base Data Update (1, 2, 3, 4, 14, 11)")
+    print("  [M]  Meta Update / Dienstags-Update (5-10, 13, 14, 18, 17, 11, 12)")
+    print("  [F]  Full System Update (1, 2, 15, 3-10, 13, 14, 16, 18, 17, 11, 12)")
     print("  [0]  Exit")
     print("=" * 52)
 
@@ -89,15 +89,17 @@ TASK_NAMES = {
 }
 
 BATCH_BASE = ["1", "2", "3", "4", "14", "11"]
-# 17 (threat-intel) lives in BATCH_META because it depends on 5+6 (current
-# meta + online decks), which BATCH_META refreshes; 16 (effects) is heavy
-# (~20 k card pages) and only needs to re-run on rotation, so it stays
-# out of META and only runs in BATCH_FULL.
-BATCH_META = ["5", "6", "7", "8", "9", "10", "13", "14", "17", "11", "12"]
-# 16 / 17 / 18 added so local FULL refreshes the same intel files the CI
-# weekly-update produces. Order matters: 16 (card-effects) and 18 (dated
-# online tournaments) must run BEFORE 17 (threat-intel builds active_threats.json
-# from both), and all three run BEFORE 11 (prepare_card_data syncs them).
+# 17 (threat-intel) depends on 5+6 (current meta + online decks) plus the
+# rotation-stable 16 effects file; both meta inputs are refreshed by
+# BATCH_META so 17 runs there too.  18 (dated online tournaments) feeds
+# the deck-builder's time-decay scoring directly, so it also belongs in
+# the weekly Tuesday update.  16 (effects) is heavy (~20 k card pages)
+# and only needs to re-run on rotation — kept out of META, only in FULL.
+BATCH_META = ["5", "6", "7", "8", "9", "10", "13", "14", "18", "17", "11", "12"]
+# 16 / 17 / 18 included so local FULL refreshes the same intel files the
+# CI weekly-update produces.  Order matters: 16 (effects) must run BEFORE
+# 17 (threat-intel reads pokemon_card_effects.json), and 11 must come
+# last so prepare_card_data picks up everything written above.
 BATCH_FULL = ["1", "2", "15", "3", "4", "5", "6", "7", "8", "9", "10", "13", "14", "16", "18", "17", "11", "12"]
 
 def git_commit_push(description: str) -> None:

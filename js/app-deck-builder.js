@@ -1371,32 +1371,35 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                     return 99999;
                 }
 
-                // For Pokemon: sort by element type, then Pokedex number
+                // For Pokemon: sort by element type → Pokedex number → evolution stage → share%.
+                //
+                // Pokedex MUST come before share% so evolution lines stay together
+                // (Dreepy 885 → Drakloak 886 → Dragapult 887; Dusclops 356 → Dusknoir 477).
+                // Sorting by share% first scrambles the column visually because the
+                // pre-evolutions almost always carry a lower share than the final
+                // form — Dusknoir (100%) would jump above Dusclops (~70%) when in
+                // pokedex order Dusclops comes first. This regressed in commit
+                // 410cebd ("element > share% desc > pokedex"); the share-first order
+                // was the bug, not the intent.
                 if (categoryA === 'Pokemon' && categoryB === 'Pokemon') {
                     const elementA = cardTypeA.charAt(0);
                     const elementB = cardTypeB.charAt(0);
-                    
+
                     const elemOrderA = elementOrder[elementA] || 99;
                     const elemOrderB = elementOrder[elementB] || 99;
-                    
-                    // Different element: sort by element order
+
                     if (elemOrderA !== elemOrderB) {
                         return elemOrderA - elemOrderB;
                     }
-                    
-                    // SAME ELEMENT: Sort by share% descending first
-                    if (percA !== percB) {
-                        return percB - percA;
-                    }
-                    
-                    // Same share: sort by Pokedex number
+
+                    // SAME ELEMENT: Pokedex number FIRST so evolution lines stay grouped.
                     const dexA = _getDexNum(a);
                     const dexB = _getDexNum(b);
                     if (dexA !== dexB) {
                         return dexA - dexB;
                     }
-                    
-                    // Same Pokedex: sort by evolution stage (Basic → Stage1 → Stage2)
+
+                    // Same Pokedex: evolution stage (Basic → Stage1 → Stage2).
                     const evolutionA = cardTypeA.substring(1).replace(/\s+/g, '');
                     const evolutionB = cardTypeB.substring(1).replace(/\s+/g, '');
                     const evolOrderA = evolutionOrder[evolutionA] || 99;
@@ -1404,8 +1407,14 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                     if (evolOrderA !== evolOrderB) {
                         return evolOrderA - evolOrderB;
                     }
-                    
-                    // Fallback: by name
+
+                    // Same dex + same stage (regional forms, alternate prints):
+                    // share% descending picks the more-played variant first.
+                    if (percA !== percB) {
+                        return percB - percA;
+                    }
+
+                    // Final tiebreak: name alphabetical.
                     const nameA = a.card_name || a.name || '';
                     const nameB = b.card_name || b.name || '';
                     return nameA.localeCompare(nameB);

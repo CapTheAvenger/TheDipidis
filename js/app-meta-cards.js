@@ -277,7 +277,18 @@
                         ? fixCardNameEncoding(row.card_name)
                         : row.card_name;
                     const archetype = row.archetype;
-                    const archetypeLower = (archetype || '').toLowerCase();
+                    // Collapse all stale-spelling variants into a single
+                    // bucket key per archetype.  The analysis CSV is
+                    // append-mode, so a rotation that renamed
+                    // "Cynthia Garchomp Ex" → "Cynthia's Garchomp" leaves
+                    // both spellings co-existing in the file. Without
+                    // collapsing, byArchetype carries two entries for the
+                    // same effective archetype, both summing into
+                    // sumOfArchetypeUsagePcts and inflating metaShare to
+                    // ~150 % for staples like Boss's Orders.
+                    const rawArchetypeLower = (archetype || '').toLowerCase();
+                    const archetypeLower = (analysisToCompMap && analysisToCompMap.get(rawArchetypeLower))
+                        || rawArchetypeLower;
                     const percentage = parseFloat((row.percentage_in_archetype || '0').replace(',', '.'));
                     const deckCount = parseFloat(String(row.deck_count || row.deck_inclusion_count || '0').replace(',', '.')) || 0;
                     const totalCount = parseFloat(String(row.total_count || '0').replace(',', '.')) || 0;

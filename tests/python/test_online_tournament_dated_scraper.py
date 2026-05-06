@@ -9,12 +9,17 @@ as a failing test rather than silently empty output.
 """
 from __future__ import annotations
 
+from pathlib import Path
+
 from bs4 import BeautifulSoup
 
 from backend.scrapers.online_tournament_dated_scraper import (
+    _extract_archetype_slugs_from_soup,
     _parse_date,
     _parse_history_row,
 )
+
+FIXTURE_DIR = Path(__file__).parent / "fixtures"
 
 
 class TestParseDate:
@@ -203,11 +208,79 @@ class TestParseHistoryRow:
             </tr>
         """)
         assert row is not None
-        # Tournament name comes from cell 1, NOT cell 0's player-decklist
-        # anchor (whose text is the player handle).
         assert row["tournament_name"] == "TOURNAMENT OF DOOM!"
         assert row["tournament_id"] == "abc123"
         assert row["player"] == "Cal Connor"
-        # New list-URL pattern captured; player handle = dedup key
         assert row["deck_slug_id"] == "player/calcal206"
         assert "/tournament/abc123/player/calcal206/decklist" in row["list_url"]
+
+
+class TestExtractArchetypeSlugs:
+    """Fixture-based regression test for the /decks listing-page parser.
+    The fixture is a real captured snippet of the table from
+    play.limitlesstcg.com/decks (mid-2026 markup) — if Limitless changes
+    the listing structure (e.g. wraps slugs in /decks/PTCG/<slug>) this
+    test will fail loudly instead of letting a Full Update silently
+    process zero archetypes."""
+
+    def test_extracts_six_archetypes_from_fixture(self):
+        html = (FIXTURE_DIR / "limitless_decks_listing_2026_05.html").read_text(encoding="utf-8")
+        soup = BeautifulSoup(html, "lxml")
+        slugs = _extract_archetype_slugs_from_soup(soup)
+
+        # Fixture contains 6 archetype rows + header. Each row has the
+        # archetype-name anchor AND a matchups anchor; the parser must
+        # dedupe on slug and skip the /matchups variants.
+        expected = [
+            "dragapult-ex",
+            "lucario-hariyama",
+            "dragapult-blaziken",
+            "alakazam-dudunsparce",
+            "n-zoroark",
+            "dragapult-dusknoir",
+        ]
+        assert slugs == expected, f"expected {expected}, got {slugs}"
+
+    def test_rejects_matchups_links(self):
+        # Hand-rolled minimal table: same archetype shows up as both a
+        # name-link and a /matchups link. Only the bare slug should be
+        # returned.
+        html = """
+        <table>
+          <tr>
+            <td><a href="/decks/dragapult-ex?format=standard">Dragapult</a></td>
+            <td><a href="/decks/dragapult-ex/matchups?format=standard">52.46%</a></td>
+          </tr>
+        </table>
+        """
+        soup = BeautifulSoup(html, "lxml")
+        assert _extract_archetype_slugs_from_soup(soup) == ["dragapult-ex"]
+
+    def test_returns_empty_on_unrecognized_markup(self):
+        # Limitless changing the table to a `/build/<slug>` URL pattern
+        # (hypothetical) means our parser should return [] rather than
+        # crash, so the caller logs an error and we don't silently keep
+        # a stale list.
+        html = """
+        <table>
+          <tr><td><a href="/build/dragapult-ex">Dragapult</a></td></tr>
+        </table>
+        """
+        soup = BeautifulSoup(html, "lxml")
+        assert _extract_archetype_slugs_from_soup(soup) == []
+
+    def test_preserves_order_of_first_occurrence(self):
+        html = """
+        <table>
+          <tr><td><a href="/decks/lucario-hariyama">L</a></td></tr>
+          <tr><td><a href="/decks/dragapult-ex">D</a></td></tr>
+          <tr><td><a href="/decks/lucario-hariyama">L-dup</a></td></tr>
+          <tr><td><a href="/decks/n-zoroark">Z</a></td></tr>
+        </table>
+        """
+        soup = BeautifulSoup(html, "lxml")
+        assert _extract_archetype_slugs_from_soup(soup) == [
+            "lucario-hariyama", "dragapult-ex", "n-zoroark"
+        ]
+
+

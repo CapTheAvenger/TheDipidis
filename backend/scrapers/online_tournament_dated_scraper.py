@@ -540,13 +540,12 @@ def aggregate_tournament_archetype(
 # ────────────────────────────────────────────────────────────────
 
 
-def list_archetype_slugs(fmt: str, rotation: str, set_code: str,
-                         timeout: int = 20) -> List[str]:
-    url = DECKS_URL_TMPL.format(fmt=fmt, rot=rotation, set_code=set_code)
-    soup = fetch_page_bs4(url, timeout=timeout)
-    if soup is None:
-        logger.error("decks-overview fetch failed: %s", url)
-        return []
+def _extract_archetype_slugs_from_soup(soup) -> List[str]:
+    """Pure parser — extract archetype slugs from a /decks listing page's
+    BeautifulSoup tree. Skip /matchups anchors so a slug isn't double-
+    counted (each row also has a link to the archetype's matchup matrix).
+    Tested against captured fixtures so a Limitless markup change shows up
+    in CI rather than as a silent 0-archetype run."""
     slugs: List[str] = []
     seen: Set[str] = set()
     for a in soup.select('a[href*="/decks/"]'):
@@ -554,11 +553,24 @@ def list_archetype_slugs(fmt: str, rotation: str, set_code: str,
         if "/matchups" in href.lower():
             continue
         m = re.search(r"/decks/([^/?]+)", href)
-        if m:
-            slug = m.group(1)
-            if slug and slug not in seen:
-                seen.add(slug)
-                slugs.append(slug)
+        if not m:
+            continue
+        slug = m.group(1)
+        if slug and slug not in seen:
+            seen.add(slug)
+            slugs.append(slug)
+    return slugs
+
+
+def list_archetype_slugs(fmt: str, rotation: str, set_code: str,
+                         timeout: int = 20) -> List[str]:
+    url = DECKS_URL_TMPL.format(fmt=fmt, rot=rotation, set_code=set_code)
+    soup = fetch_page_bs4(url, timeout=timeout)
+    if soup is None:
+        logger.error("decks-overview fetch failed: %s", url)
+        return []
+    slugs = _extract_archetype_slugs_from_soup(soup)
+    logger.info("Discovered %d archetype slugs at %s", len(slugs), url)
     return slugs
 
 
@@ -603,12 +615,17 @@ def main() -> None:
 
     new_rows: List[Dict[str, Any]] = []
     new_state_entries: Set[str] = set()
+    archetype_stats: Dict[str, Dict[str, int]] = {}  # slug → counts for end-of-run summary
+    run_started = time.monotonic()
 
     for idx, slug in enumerate(slugs, 1):
         archetype = normalize_archetype_name(slug_to_archetype(slug))
+        archetype_stats[slug] = {"history_rows": 0, "tournaments": 0, "card_rows": 0}
         logger.info("[%d/%d] %s (%s)", idx, len(slugs), archetype, slug)
         history = fetch_archetype_history(slug, args.fmt, args.rotation, args.set_code, args.timeout)
+        archetype_stats[slug]["history_rows"] = len(history)
         if not history:
+            logger.warning("  [%s] no history rows — Limitless markup change?", slug)
             continue
 
         # Group rows by tournament so we aggregate per-(tournament, archetype)
@@ -662,6 +679,8 @@ def main() -> None:
                 archetype, decks_cards, card_db,
             )
             new_rows.extend(agg)
+            archetype_stats[slug]["tournaments"] += 1
+            archetype_stats[slug]["card_rows"] += len(agg)
             logger.info("    %s on %s — %d decks → %d card-rows",
                         tournament_name or tid, tournament_date,
                         len(decks_cards), len(agg))
@@ -678,8 +697,36 @@ def main() -> None:
     merged = existing_rows + new_rows
     write_csv(merged)
     save_state(state | new_state_entries)
-    logger.info("DONE: %d existing + %d new = %d rows total | %d new state entries",
-                len(existing_rows), len(new_rows), len(merged), len(new_state_entries))
+    elapsed = time.monotonic() - run_started
+
+    # End-of-run coverage summary so a partial sweep is visible at a
+    # glance — e.g. "120/126 archetypes produced rows" lets you see
+    # immediately if discovery returned 126 but only Dragapult got
+    # processed. Counts treat dry-run differently (no card_rows
+    # accumulate, but tournaments still get listed).
+    archetypes_with_history = sum(1 for s in archetype_stats.values() if s["history_rows"] > 0)
+    archetypes_with_rows = sum(1 for s in archetype_stats.values() if s["card_rows"] > 0)
+    archetypes_empty = [slug for slug, s in archetype_stats.items() if s["history_rows"] == 0]
+
+    logger.info("=" * 60)
+    logger.info("FULL SWEEP COMPLETE — Phase B")
+    logger.info("=" * 60)
+    logger.info("  Elapsed: %d:%02d (%.1fs)", int(elapsed // 60), int(elapsed % 60), elapsed)
+    logger.info("  Archetypes scraped:        %d / %d", archetypes_with_history, len(slugs))
+    logger.info("  Archetypes that wrote rows: %d / %d%s",
+                archetypes_with_rows, len(slugs),
+                " (dry-run mode)" if args.dry_run else "")
+    logger.info("  Existing rows + new rows:  %d + %d = %d total",
+                len(existing_rows), len(new_rows), len(merged))
+    logger.info("  New state entries:         %d", len(new_state_entries))
+    if archetypes_empty:
+        # First 5 by name + count is the right balance — full list is in
+        # the per-slug logs above.
+        sample = ", ".join(archetypes_empty[:5])
+        suffix = "" if len(archetypes_empty) <= 5 else f" (+{len(archetypes_empty) - 5} more)"
+        logger.warning("  %d archetype(s) returned 0 history rows: %s%s",
+                       len(archetypes_empty), sample, suffix)
+    logger.info("=" * 60)
 
 
 if __name__ == "__main__":

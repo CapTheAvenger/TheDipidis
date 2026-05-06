@@ -189,8 +189,17 @@ def run_batch(batch_list: list, batch_name: str) -> None:
     print("\n" + "=" * 52)
     print(f"  STARTE BATCH: {batch_name}")
     print("  Lehne dich zurueck, die Skripte laufen nacheinander.")
+    print(f"  ({len(batch_list)} Skripte werden ausgefuehrt)")
+    # FULL kann ueber 1h dauern — sag das vorher, damit niemand den
+    # Tab schliesst bevor der dated-scraper durch ist und denkt das
+    # Ergebnis sei vollstaendig (frueher Praezedenzfall: nur Dragapult
+    # Ex hatte Rows in der CSV, weil der Run vorher abgebrochen wurde).
+    if batch_name.upper().startswith("FULL"):
+        print("  HINWEIS: Full Update kann 60-120 Minuten dauern.")
+        print("           Lass das Fenster offen bis 'BATCH KOMPLETT'.")
     print("=" * 52)
 
+    batch_started = time.monotonic()
     for key in batch_list:
         script = SCRIPTS[key]
         run_script(script, wait_at_end=False)
@@ -198,8 +207,10 @@ def run_batch(batch_list: list, batch_name: str) -> None:
             print("\n  Warte 3 Sekunden vor dem naechsten Skript ...")
             time.sleep(3)
 
+    elapsed = time.monotonic() - batch_started
     print("\n" + "=" * 52)
     print(f"  BATCH '{batch_name}' KOMPLETT ABGESCHLOSSEN!")
+    print(f"  Dauer: {int(elapsed // 60)} min {int(elapsed % 60)} s")
     print("  Das Frontend ist jetzt auf dem neuesten Stand.")
     print("=" * 52)
     git_commit_push(f"Batch {batch_name}")

@@ -332,6 +332,73 @@ describe('_energyProvides — double-energy multiplier', () => {
     });
 });
 
+describe('regression — production-data audit fixes', () => {
+    // Real text pulled from data/pokemon_card_effects.json. These
+    // were the 5 cards that misclassified when we ran the classifier
+    // against production data, surfacing a "the build can't read
+    // these specific texts" gap. Each test pins the production text
+    // verbatim so future classifier edits can't silently regress.
+
+    it("Hero's Cape (+100 HP) → defense-tool", () => {
+        const [card, effects] = trainerCard("Hero's Cape", 'Tool', [
+            'The Pokémon this card is attached to gets +100 HP.',
+        ]);
+        assert.equal(FNS.classify(card, effects), 'defense-tool');
+        assert.equal(FNS.tier(FNS.classify(card, effects)), 'TECH');
+    });
+
+    it("Cynthia's Power Weight (+70 HP, restricted to Cynthia's Pokémon) → defense-tool", () => {
+        const [card, effects] = trainerCard("Cynthia's Power Weight", 'Tool', [
+            "The Cynthia's Pokémon this card is attached to gets +70 HP.",
+        ]);
+        assert.equal(FNS.classify(card, effects), 'defense-tool');
+    });
+
+    it('Air Balloon (-2 retreat cost) → pivot, MID tier', () => {
+        // Mobility tool — structural movement aid, not match-up tech.
+        // LRM should treat it like Switch / Switch Cart, not Hero's Cape.
+        const [card, effects] = trainerCard('Air Balloon', 'Tool', [
+            'The Retreat Cost of the Pokémon this card is attached to is [ C ] [ C ] less.',
+        ]);
+        assert.equal(FNS.classify(card, effects), 'pivot');
+        assert.equal(FNS.tier(FNS.classify(card, effects)), 'MID');
+    });
+
+    it('Pokégear 3.0 (look at top 7, reveal a Supporter) → search-trainer', () => {
+        // Production text doesn't say "search your deck" — it says
+        // "look at the top 7 cards". The classifier must catch both
+        // wordings.
+        const [card, effects] = trainerCard('Pokégear 3.0', 'Item', [
+            'Look at the top 7 cards of your deck. You may reveal a Supporter card you find there and put it into your hand. Shuffle the other cards back into your deck.',
+        ]);
+        const fn = FNS.classify(card, effects);
+        assert.equal(fn, 'search-trainer');
+        assert.equal(FNS.tier(fn), 'CORE');
+    });
+
+    it('Crispin (search 2 energy + attach 1 to Pokémon) → search-energy', () => {
+        // Production text mentions "Pokémon" in the ATTACH context,
+        // not the search. Old classifier excluded any text containing
+        // "Pokémon" from the energy-search branch; new one scopes the
+        // exclusion to just the search clause.
+        const [card, effects] = trainerCard('Crispin', 'Supporter', [
+            'Search your deck for up to 2 Basic Energy cards of different types, reveal them, and put 1 of them into your hand. Attach the other to 1 of your Pokémon. Then, shuffle your deck.',
+        ]);
+        assert.equal(FNS.classify(card, effects), 'search-energy');
+    });
+
+    it("Wally's Compassion (heal all damage from Mega ex) → healing", () => {
+        // Production text says "Heal all damage" — no number — so the
+        // /heal \d+ damage/ pattern alone misses it. Classifier now
+        // also matches "heal all damage".
+        const [card, effects] = trainerCard("Wally's Compassion", 'Supporter', [
+            'Heal all damage from 1 of your Mega Evolution Pokémon ex. If you healed any damage in this way, put all Energy attached to that Pokémon into your hand.',
+        ]);
+        assert.equal(FNS.classify(card, effects), 'healing');
+        assert.equal(FNS.tier(FNS.classify(card, effects)), 'TECH');
+    });
+});
+
 describe('regression — Black Belt vs Poké Pad', () => {
     it('Black Belt is TECH, Poké Pad is CORE — the user-flagged tier split', () => {
         const [bb, bbE] = trainerCard("Black Belt's Training", 'Supporter', [

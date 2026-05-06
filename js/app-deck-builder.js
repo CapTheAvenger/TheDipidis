@@ -3441,15 +3441,27 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             const text = rulesText;
 
             // Tools. Damage-boost tools (Maximum Belt, Choice Band) are
-            // TECH; defense tools (Hero's Cape, Lillie's Sunny Smile)
-            // are also TECH for our purposes (LRM should still rank
-            // them above damage-only tech, but the consistency build
-            // should prefer search items and core draws first).
+            // TECH. Defense tools (Hero's Cape, Lillie's Sunny Smile,
+            // Cynthia's Power Weight) get +HP / can't be KO'd → TECH
+            // (defense-tool). Mobility tools (Air Balloon — retreat
+            // reduction) are MID — they're structural movement aids,
+            // not match-up sprinkles.
             if (cardType.includes('tool')) {
                 if (/\b\d+\s*more\s*damage\b/.test(text) || /damage to your opponent's active pok/.test(text) || /damage from this pok[eé]mon/.test(text)) {
                     return 'damage-buff';
                 }
-                if (/can't be knocked out|prevent.*knocked|hp.*\+\s*\d+|increase.*hp|reduce.*damage/.test(text)) {
+                // Retreat-cost reduction → mobility tool (Air Balloon,
+                // Float Stone). Treat as 'pivot' so LRM weights it
+                // alongside Switch / Switch Cart instead of as TECH.
+                if (/retreat cost.*(?:less|\bis\b)\s*\[?\s*c\s*\]?\s*\[?\s*c\s*\]?/.test(text) || /no retreat cost/.test(text)) {
+                    return 'pivot';
+                }
+                // Defense tools — both "+N HP" (Hero's Cape, Power
+                // Weight) and "HP +N" wording, plus the OHKO-block
+                // and damage-reduction families.
+                if (/\+\s*\d+\s*hp\b/.test(text) || /\bhp\b[^.]{0,40}\+\s*\d+/.test(text)
+                    || /can't be knocked out/.test(text) || /prevent.*knocked/.test(text)
+                    || /reduce.*damage/.test(text) || /takes\s*\d+\s*less\s*damage/.test(text)) {
                     return 'defense-tool';
                 }
                 return 'tech';
@@ -3462,8 +3474,19 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             // hits the pokemon branch; that's the right tier
             // (broader strategic role).
             if (/search your deck for[^.]*pok[eé]mon/.test(text)) return 'search-pokemon';
-            if (/search your deck for[^.]*energy/.test(text) && !/pok[eé]mon/.test(text)) return 'search-energy';
+            // Energy search: only check the "search ... energy" clause,
+            // not the whole text. Crispin reads "Search your deck for
+            // ... 2 Basic Energy cards ... Attach the other to 1 of
+            // your Pokémon" — the second clause mentions Pokémon for
+            // ATTACH context, not search context. Restrict the
+            // pokemon-exclusion to just the search clause itself.
+            const energySearchMatch = text.match(/search your deck for[^.]*energy[^.]*/);
+            if (energySearchMatch && !/pok[eé]mon/.test(energySearchMatch[0])) return 'search-energy';
+            // Supporter search — "search your deck for ... Supporter",
+            // OR Pokégear-style "look at the top N cards of your deck.
+            // You may reveal a Supporter card".
             if (/search your deck for[^.]*supporter/.test(text)) return 'search-trainer';
+            if (/look at the top \d+ cards.*supporter card/.test(text)) return 'search-trainer';
 
             // Energy recovery (basic energy from discard → attach).
             if (/\b(attach|put|move).*basic.*energy.*(?:discard|to)\b/.test(text)) return 'energy-recovery';
@@ -3474,8 +3497,11 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             if (/switch.*opponent['']s benched/.test(text) || /switch.*opponent['']s active.*with.*opponent['']s/.test(text)) return 'gust';
             if (/switch your active/.test(text)) return 'pivot';
 
-            // Healing.
+            // Healing — both numeric ("heal 30 damage") and the
+            // "heal all damage from..." pattern (Wally's Compassion,
+            // Super Potion).
             if (/\bheal \d+ damage\b/.test(text)) return 'healing';
+            if (/heal all damage/.test(text)) return 'healing';
 
             // Damage buff supporters (Black Belt's Training, Premium
             // Power Pro, Calamitous Wasteland). Must come BEFORE the

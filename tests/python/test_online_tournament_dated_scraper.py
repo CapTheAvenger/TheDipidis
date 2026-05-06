@@ -75,6 +75,64 @@ class TestParseHistoryRow:
         assert row["deck_slug_id"] == "cynthia-garchomp-ex/dl-99"
         assert "/decks/cynthia-garchomp-ex/dl-99" in row["list_url"]
 
+    def test_data_time_converted_to_europe_berlin(self):
+        # Limitless's data-time is a UTC ms-epoch; the visible date is
+        # rendered client-side in the user's local timezone. We convert
+        # to Europe/Berlin (CET/CEST with auto-DST) so the calendar
+        # date we record matches what a German user reads.
+        #
+        # 1774998300000 ms = 2026-03-31 23:05 UTC = 2026-04-01 01:05 CEST
+        # → display reads "01. April 2026" in DE locale, even though
+        # pure-UTC parsing would say "2026-03-31".
+        row = self._parse("""
+            <tr>
+              <td>Sdaomayo</td>
+              <td><a href="/tournament/xyz789">Last Prize Season 2</a></td>
+              <td><a class="date" data-time="1774998300000"></a></td>
+              <td>1st of 178</td>
+              <td>7 - 1 - 0</td>
+              <td><a href="/decks/cynthia-garchomp-ex/dl-77">List</a></td>
+            </tr>
+        """)
+        assert row is not None
+        assert row["tournament_date"] == "2026-04-01"  # what DE user reads
+
+    def test_data_time_pure_utc_midday_unaffected(self):
+        # ms-epoch that's already mid-UTC-day stays the same calendar
+        # date in Europe/Berlin too — the timezone shift only matters
+        # near midnight. 1777680000000 ms = 2026-05-02 00:00 UTC →
+        # 2026-05-02 02:00 CEST, same calendar day on both sides.
+        row = self._parse("""
+            <tr>
+              <td>angeellg098</td>
+              <td><a href="/tournament/abc123">TOURNAMENT OF DOOM!</a></td>
+              <td><a class="date" data-time="1777680000000"></a></td>
+              <td>1st of 374</td>
+              <td>11 - 1 - 0</td>
+              <td><a href="/decks/cynthia-garchomp-ex/dl-99">List</a></td>
+            </tr>
+        """)
+        assert row is not None
+        assert row["tournament_date"] == "2026-05-02"
+
+    def test_text_fallback_when_no_data_time(self):
+        # Pre-rendered visible text without a data-time attribute (= an
+        # archived snapshot or a hand-curated row) still parses via the
+        # text-format fallback. Exercises the legacy path so a future
+        # regression in attribute handling doesn't silently drop these.
+        row = self._parse("""
+            <tr>
+              <td>Vadelot</td>
+              <td><a href="/tournament/asr-153">ASRcristiano #153</a></td>
+              <td>16. April 2026</td>
+              <td>1st of 143</td>
+              <td>10 - 1 - 0</td>
+              <td><a href="/decks/cynthia-garchomp-ex/dl-77">List</a></td>
+            </tr>
+        """)
+        assert row is not None
+        assert row["tournament_date"] == "2026-04-16"
+
     def test_english_ordinal_date(self):
         row = self._parse("""
             <tr>

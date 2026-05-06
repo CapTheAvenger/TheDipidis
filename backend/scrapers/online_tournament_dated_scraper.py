@@ -65,7 +65,23 @@ import re
 import sys
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from datetime import datetime
+from datetime import datetime, timezone
+
+try:
+    from zoneinfo import ZoneInfo  # Python 3.9+
+    # Limitless renders dates in the user's browser timezone. The
+    # primary audience for this app is in Europe (Germany), so we
+    # convert the UTC ms-epoch to Europe/Berlin time and take the
+    # CALENDAR DATE from there. This matches what users see on
+    # Limitless and what they'd compare against. ZoneInfo handles
+    # CET ↔ CEST DST automatically.
+    _DISPLAY_TZ = ZoneInfo("Europe/Berlin")
+except Exception:
+    # Older Python or missing tzdata: fall back to a fixed UTC+1
+    # offset. Off by one hour during DST but never off by a full day
+    # in the way pure UTC parsing was. Better than nothing on a
+    # stripped-down runner.
+    _DISPLAY_TZ = timezone(__import__("datetime").timedelta(hours=1))
 from typing import Any, Dict, List, Optional, Set, Tuple
 import urllib.parse
 
@@ -218,16 +234,38 @@ def _parse_history_row(tr) -> Optional[Dict[str, str]]:
             tournament_id = m.group(1)
         break
 
-    # Date — first cell whose text parses as a date.
+    # Date — Limitless's date column is `<a class="date" data-time="<ms>">`
+    # with the visible text rendered CLIENT-SIDE by JavaScript reading
+    # the data-time. Server-rendered HTML therefore has empty text in
+    # the date cell and a populated data-time attribute. We always
+    # convert data-time → calendar date in Europe/Berlin so the result
+    # matches what a German Limitless user reads on their screen (a
+    # tournament starting at 00:30 CEST has data-time 23:30 UTC the
+    # previous day → display "01. April" in CEST is the right answer,
+    # not "31. März"; pure-UTC parsing was wrong by exactly that case).
+    # Visible text remains a fallback for hand-curated rows or older
+    # archived markup that pre-rendered the date.
     tournament_date_iso = ""
     date_raw = ""
-    for c in cells:
-        txt = c.get_text(" ", strip=True)
-        iso = _parse_date(txt)
-        if iso:
-            tournament_date_iso = iso
-            date_raw = txt
+    for a in tr.select("a[data-time]"):
+        attr = a.get("data-time")
+        try:
+            ms = int(attr)
+            tournament_date_iso = datetime.fromtimestamp(
+                ms / 1000, tz=_DISPLAY_TZ
+            ).strftime("%Y-%m-%d")
+            date_raw = a.get_text(" ", strip=True) or attr
             break
+        except (TypeError, ValueError):
+            continue
+    if not tournament_date_iso:
+        for c in cells:
+            txt = c.get_text(" ", strip=True)
+            iso = _parse_date(txt)
+            if iso:
+                tournament_date_iso = iso
+                date_raw = txt
+                break
 
     # Place / Score — left as raw text so callers can decide to use them.
     place = ""

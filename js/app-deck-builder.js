@@ -4721,7 +4721,17 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                         if (!condStat || condStat.presence < 3) return;
                         const baseAvg = card.avgCountWhenUsed || 0;
                         const cond = condStat.avg;
-                        if (Math.abs(cond - baseAvg) >= 0.3) {
+                        // Threshold lowered 0.30 → 0.15 (user-flagged
+                        // regression in Cynthia's Garchomp + Unfair Stamp):
+                        // production data showed Fighting Energy shift
+                        // 4.55 → 4.83 = +0.28, just under the previous
+                        // 0.30 cutoff. The shift is real and changes the
+                        // LRM remainder from 0.55 to 0.83, which IS the
+                        // signal that bumps Fighting Energy from 4 → 5
+                        // copies in Unfair Stamp builds. With 0.30 the
+                        // build delivered 7 fighting energies; the data
+                        // and doctrine both say 8 (4.83 + 3.17 = 8.00).
+                        if (Math.abs(cond - baseAvg) >= 0.15) {
                             card._aceSpecConditionalAvg = cond;
                             card._aceSpecConditionalShift = cond - baseAvg;
                             card._aceSpecConditionalBaseAvg = baseAvg;

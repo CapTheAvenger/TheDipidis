@@ -3937,6 +3937,154 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
         if (typeof window !== 'undefined') window._enforceEnergyFloor = _enforceEnergyFloor;
 
         // ────────────────────────────────────────────────────────────
+        // ENERGY CEILING — mirror of the Energy Floor that prevents
+        // OVER-allocation when LRM accidentally bumps an energy past
+        // the ACE-SPEC-conditional target. User-flagged regression in
+        // Cynthia's Garchomp + Neo Upper Energy: target was 4 Fighting
+        // + 3 Rocky + 1 Neo Upper = 8 cards, but the build delivered
+        // 4 Fighting + 4 Rocky + 1 Neo Upper = 9 cards. The extra
+        // Rocky came from an LRM bump that should have gone to
+        // Team Rocket's Petrel (rem 0.62) instead, but a downstream
+        // data path made Petrel's effective remainder smaller than
+        // Rocky's (0.20).
+        //
+        // Rather than chasing the data-path bug (which depends on
+        // CSV column mapping and would need careful trace-debugging),
+        // the Ceiling enforces the doctrine-correct outcome
+        // architecturally: if the deck has MORE energies than the
+        // ACE-SPEC-conditional target says, demote the lowest-rem
+        // energy and bump the highest-rem non-energy non-Stage-1
+        // card. Repeats until at target.
+        //
+        // Doctrine corridor (7-11) still applies — Ceiling never
+        // pushes below 7 (over-trimming would risk an energy-starved
+        // build).
+        // ────────────────────────────────────────────────────────────
+        function _enforceEnergyCeiling(entries, conditionalAvgs, helpers) {
+            if (!Array.isArray(entries) || !conditionalAvgs || conditionalAvgs.size === 0) {
+                return { removed: 0, target: 0, before: 0, after: 0 };
+            }
+            const isBasicEnergy = (helpers && helpers.isBasicEnergy) || (() => false);
+            const isEnergyEntry = (helpers && helpers.isEnergyEntry) || (e => isBasicEnergy(e && e.card));
+            const log = (helpers && helpers.log) || (() => {});
+
+            // Compute target = sum-of-rounded for the cards present in
+            // the deck (matches Energy Floor logic).
+            let energyTargetCards = 0;
+            let energyTargetRaw = 0;
+            for (const entry of entries) {
+                if (!entry || !entry.card) continue;
+                if (!isEnergyEntry(entry)) continue;
+                const cn = String(entry.card.card_name || '').toLowerCase().trim();
+                const stat = conditionalAvgs.get(cn);
+                if (stat && Number.isFinite(stat.avg) && stat.presence >= 3) {
+                    energyTargetCards += Math.max(0, Math.round(stat.avg));
+                    energyTargetRaw += stat.avg;
+                }
+            }
+            const target = Math.max(7, Math.min(11, energyTargetCards));
+            const before = entries
+                .filter(e => isEnergyEntry(e))
+                .reduce((s, e) => s + (e.count || 0), 0);
+            if (before <= target) {
+                return { removed: 0, target, before, after: before };
+            }
+            if (energyTargetRaw < 6.5) {
+                // Conditional aggregate too thin to trust — leave
+                // existing allocation alone.
+                return { removed: 0, target, before, after: before };
+            }
+
+            let removed = 0;
+            const maxIter = (before - target) + 2;
+            for (let iter = 0; iter < maxIter; iter++) {
+                const currentEnergies = entries
+                    .filter(e => isEnergyEntry(e))
+                    .reduce((s, e) => s + (e.count || 0), 0);
+                if (currentEnergies <= target) break;
+
+                // Demote the energy entry whose CURRENT count exceeds
+                // its conditional rounded target the most. (Energy
+                // entries that are at-or-below their per-card target
+                // shouldn't be touched.)
+                const energyDemoteCandidates = entries
+                    .filter(e => isEnergyEntry(e))
+                    .filter(e => {
+                        const cn = String(e.card.card_name || '').toLowerCase().trim();
+                        const stat = conditionalAvgs.get(cn);
+                        if (!stat || stat.presence < 3) return e.count > 1; // unknown energy: keep at 1+
+                        const perCardTarget = Math.max(0, Math.round(stat.avg));
+                        return e.count > perCardTarget;
+                    })
+                    .sort((a, b) => {
+                        // Prefer demoting energies that are MOST over
+                        // their per-card target (largest excess first).
+                        const aStat = conditionalAvgs.get(String(a.card.card_name || '').toLowerCase().trim());
+                        const bStat = conditionalAvgs.get(String(b.card.card_name || '').toLowerCase().trim());
+                        const aExcess = (a.count || 0) - (aStat ? Math.round(aStat.avg) : 0);
+                        const bExcess = (b.count || 0) - (bStat ? Math.round(bStat.avg) : 0);
+                        return bExcess - aExcess;
+                    });
+                if (energyDemoteCandidates.length === 0) break;
+
+                // Find a non-energy non-Stage-1 card that could
+                // accept a bump. Prefer high-remainder un-bumped
+                // cards (TECH last via reverse sort).
+                const bumpCandidates = entries
+                    .filter(e => !isEnergyEntry(e))
+                    .filter(e => Number.isFinite(e.card._lrmRemainder) && e.card._lrmRemainder > 0)
+                    .filter(e => (e.card.consistencyScore || 0) >= 25)  // viable cards only
+                    .filter(e => {
+                        const legalMax = e.card._legalMax || (helpers && helpers.getLegalMax ? helpers.getLegalMax(e.card.card_name, e.card) : 4);
+                        return e.count < legalMax;
+                    })
+                    .sort((a, b) => {
+                        // Tier order: CORE first, then MID, then TECH.
+                        const tierOrder = { CORE: 0, MID: 1, TECH: 2 };
+                        const ta = tierOrder[a.card._cardFunctionTier] != null ? tierOrder[a.card._cardFunctionTier] : 1;
+                        const tb = tierOrder[b.card._cardFunctionTier] != null ? tierOrder[b.card._cardFunctionTier] : 1;
+                        if (ta !== tb) return ta - tb;
+                        return (b.card._lrmRemainder || 0) - (a.card._lrmRemainder || 0);
+                    });
+
+                const demote = energyDemoteCandidates[0];
+                if (bumpCandidates.length === 0) {
+                    // No bump target — just trim the energy without a
+                    // replacement. Total deck size will drop; an outer
+                    // safety net should re-fill.
+                    demote.count -= 1;
+                    removed += 1;
+                    log({ type: 'energy_ceiling_trim', demoted: demote.card.card_name, target });
+                    if (demote.count <= 0) {
+                        const idx = entries.indexOf(demote);
+                        if (idx >= 0) entries.splice(idx, 1);
+                    }
+                    continue;
+                }
+                const bump = bumpCandidates[0];
+                demote.count -= 1;
+                bump.count += 1;
+                removed += 1;
+                log({
+                    type: 'energy_ceiling',
+                    demoted: demote.card.card_name,
+                    bumped: bump.card.card_name,
+                    target,
+                });
+                if (demote.count <= 0) {
+                    const idx = entries.indexOf(demote);
+                    if (idx >= 0) entries.splice(idx, 1);
+                }
+            }
+
+            const after = entries
+                .filter(e => isEnergyEntry(e))
+                .reduce((s, e) => s + (e.count || 0), 0);
+            return { removed, target, before, after };
+        }
+        if (typeof window !== 'undefined') window._enforceEnergyCeiling = _enforceEnergyCeiling;
+
+        // ────────────────────────────────────────────────────────────
         // BUILD QUALITY AUDIT — surfaces the principles from the
         // "Most Consistency List" doctrine to the user. Doesn't change
         // the build; produces structured findings (severity, message)
@@ -5545,6 +5693,29 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                     devLog(`[Consistency][EnergyFloor] enforced ${_energyResult.before}→${_energyResult.after}/${_energyResult.target} (added ${_energyResult.added})`);
                 } else if (_energyResult.target > 0) {
                     devLog(`[Consistency][EnergyFloor] OK: ${_energyResult.before}/${_energyResult.target} energies`);
+                }
+
+                // Energy Ceiling — opposite direction from Floor.
+                // Catches cases where LRM accidentally bumped an
+                // energy past the conditional target (Cynthia + Neo
+                // Upper user-flagged: target 8 cards, build delivered
+                // 9). Demotes the most over-allocated energy and
+                // re-routes its slot to the highest-remainder
+                // non-energy card (CORE first).
+                const _ceilingResult = _enforceEnergyCeiling(consistencyDeck, _aceSpecCondResult.conditionalAvgs, {
+                    getLegalMax: getLegalMaxCopies,
+                    isBasicEnergy: isBasicEnergyCardEntry,
+                    isEnergyEntry: (e) => isBasicEnergyCardEntry(e && e.card) || /special energy/i.test(String((e && e.card && e.card.type) || '')),
+                    log: (info) => {
+                        if (info.type === 'energy_ceiling') {
+                            devLog(`[Consistency][EnergyCeiling] target=${info.target} — ${info.demoted} -1 → ${info.bumped} +1`);
+                        } else {
+                            devLog(`[Consistency][EnergyCeiling] trim ${info.demoted} -1 (no bump target)`);
+                        }
+                    },
+                });
+                if (_ceilingResult.removed > 0) {
+                    devLog(`[Consistency][EnergyCeiling] enforced ${_ceilingResult.before}→${_ceilingResult.after}/${_ceilingResult.target} (removed ${_ceilingResult.removed})`);
                 }
             }
 

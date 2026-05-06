@@ -3690,22 +3690,20 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 const recencyBoost = clampedRecency * 0.20; // [-0.10, +0.20]
                 card._recencyRatio = rawRatio;
 
-                // Latest-Major anchor — re-baseline ONLY on the 'all'
-                // filter. On 'live' (Online-only), the user is asking
-                // for the Online perspective and we should not silently
-                // override every card's share with Major data. The
-                // Major data is still loaded above so the ACE SPEC
-                // slot picker can use it as a tactical tie-breaker, but
-                // the per-card score base stays Online-derived.
+                // Latest-Major presence flags — used for explanation
+                // badges in the build-info modal AND for the Stage-2
+                // hard-cap below ("absent from latest Major" → don't
+                // auto-add). We no longer re-baseline the share itself
+                // because mergeOnlineMajorAdditive() in
+                // app-current-meta-analysis.js already produces the
+                // correct combined Online+Major share — re-baselining
+                // here would replace that combined share with pure
+                // Major and undo the additive math.
                 let baselineShare = sharePercent;
                 let baselineAvg = avgCountWhenUsed;
-                if (hasLatestMajorAnchor && _filter === 'all') {
+                if (hasLatestMajorAnchor) {
                     const major = latestMajorStats.get(nameLower);
                     if (major) {
-                        baselineShare = major.share;
-                        baselineAvg = major.avg;
-                        card.sharePercent = baselineShare;
-                        card.avgCountWhenUsed = baselineAvg;
                         card._latestMajorShare = major.share;
                         card._latestMajorAvg = major.avg;
                         card._latestMajorAnchored = true;

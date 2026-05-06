@@ -2595,7 +2595,13 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 const auditWrap = document.createElement('div');
                 auditWrap.className = 'build-info-audit';
                 const auditTitle = document.createElement('h4');
-                auditTitle.textContent = t('buildInfo.auditTitle') || 'Build Quality Audit';
+                // t() returns the literal key when no translation exists,
+                // which is truthy and would defeat the `||` fallback.
+                // Strip the broken-translation case explicitly.
+                const _auditT = t('buildInfo.auditTitle');
+                auditTitle.textContent = (_auditT && _auditT !== 'buildInfo.auditTitle')
+                    ? _auditT
+                    : 'Build Quality Audit';
                 auditWrap.appendChild(auditTitle);
                 audit.findings.forEach(f => {
                     const row = document.createElement('div');
@@ -2628,46 +2634,46 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             // to 0 by day 28); this section surfaces the actual numbers
             // so a user staring at "Secret Box at 16% archetype share"
             // can see that Secret Box won because of its 31.6% Major
-            // share, not its overall popularity.
+            // share, not its overall popularity. Copy is plain English
+            // (no t() — the modal mixes English headers with German
+            // audit body and adding broken translation keys to the
+            // chrome would only make it worse).
             const acePick = report.ace_spec_pick;
             if (acePick && acePick.chosen && Array.isArray(acePick.candidates) && acePick.candidates.length > 0) {
                 const aceWrap = document.createElement('div');
                 aceWrap.className = 'build-info-ace-pick';
                 const aceTitle = document.createElement('h4');
-                aceTitle.textContent = t('buildInfo.aceSpecTitle') || 'ACE-SPEC pick';
+                aceTitle.textContent = `ACE-SPEC pick — why ${acePick.chosen}?`;
                 aceWrap.appendChild(aceTitle);
 
                 const summary = document.createElement('p');
                 summary.className = 'build-info-ace-summary';
                 const weight = (typeof acePick.major_weight === 'number') ? acePick.major_weight : 0;
-                const ageStr = (acePick.major_age_days != null)
-                    ? `${acePick.major_age_days}d ago`
-                    : (t('buildInfo.aceSpecMajorMissing') || 'no recent Major');
                 if (acePick.has_major_anchor && weight > 0) {
                     const winner = acePick.candidates[0];
                     const winnerShare = (winner && winner.major_share != null) ? `${winner.major_share}%` : '—';
                     const winnerDecks = (winner && winner.major_deck_count > 0 && acePick.major_total_decks > 0)
-                        ? ` (${winner.major_deck_count}/${acePick.major_total_decks} decks)`
+                        ? `${winner.major_deck_count} of ${acePick.major_total_decks} decks`
                         : '';
+                    const dateLabel = acePick.major_date || 'the latest Major';
+                    const ageLabel = (acePick.major_age_days != null) ? `${acePick.major_age_days} days ago` : 'recent';
                     summary.textContent =
-                        (t('buildInfo.aceSpecPickedMajor') || 'Picked')
-                        + ` ${acePick.chosen} — ${winnerShare}`
-                        + (t('buildInfo.aceSpecAtMajor') || ' at the latest Major')
-                        + winnerDecks
-                        + (acePick.major_date ? `, ${acePick.major_date}` : '')
-                        + ` · ${(t('buildInfo.aceSpecBlend') || 'Major weight')} ${Math.round(weight * 100)}% (${ageStr}).`;
+                        `At the latest Major (${dateLabel} · ${ageLabel}), ${acePick.chosen} was the most-played ACE-SPEC` +
+                        (winnerDecks ? ` — ${winnerDecks} (${winnerShare}). ` : ` (${winnerShare}). `) +
+                        `Within 14 days of a Major the Major statistics drive the pick; the cross-tournament Online aggregate is weighted at ${Math.round((1 - weight) * 100)}%.`;
                 } else {
                     summary.textContent =
-                        (t('buildInfo.aceSpecPickedAggregate') || 'Picked')
-                        + ` ${acePick.chosen} — `
-                        + (t('buildInfo.aceSpecPickedAggregateReason') || 'highest cross-tournament archetype share. No recent Major to anchor against.');
+                        `No recent Major in scope — ${acePick.chosen} was picked from the highest cross-tournament Online aggregate. ` +
+                        `(Major-anchor weight kicks in once an archetype shows up at a Major within the last 28 days.)`;
                 }
                 aceWrap.appendChild(summary);
 
                 // Candidate table — chosen highlighted, alternatives
-                // listed with their Major share + blended score so the
-                // delta is visible. If no Major data exists, fall back
-                // to consistency-score column only.
+                // listed with their Major share + deck count and the
+                // online consistency score so the delta is visible at
+                // a glance. We deliberately skip the blended-score
+                // column (the section's prose already explains the
+                // blend rule).
                 const table = document.createElement('div');
                 table.className = 'build-info-ace-table';
                 acePick.candidates.forEach((c, i) => {
@@ -2682,18 +2688,15 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                     statCell.className = 'build-info-ace-stats';
                     const parts = [];
                     if (c.major_share != null) {
-                        const decksFrag = (c.major_deck_count > 0 && acePick.major_total_decks > 0)
-                            ? ` (${c.major_deck_count}/${acePick.major_total_decks})`
-                            : '';
-                        parts.push(`${(t('buildInfo.aceSpecMajor') || 'Major')} ${c.major_share}%${decksFrag}`);
+                        const fraction = (c.major_deck_count > 0 && acePick.major_total_decks > 0)
+                            ? `${c.major_deck_count}/${acePick.major_total_decks}`
+                            : '—';
+                        parts.push(`Major ${fraction} (${c.major_share}%)`);
                     } else if (acePick.has_major_anchor) {
-                        parts.push(`${(t('buildInfo.aceSpecMajor') || 'Major')} —`);
+                        parts.push('Major: not played');
                     }
-                    parts.push(`${(t('buildInfo.aceSpecConsistency') || 'consistency')} ${c.consistency_score}`);
-                    if (acePick.has_major_anchor && weight > 0 && weight < 1) {
-                        parts.push(`${(t('buildInfo.aceSpecBlended') || 'blended')} ${c.blended_score}`);
-                    }
-                    statCell.textContent = parts.join(' · ');
+                    parts.push(`online score ${c.consistency_score}`);
+                    statCell.textContent = parts.join('  ·  ');
                     row.appendChild(statCell);
                     table.appendChild(row);
                 });

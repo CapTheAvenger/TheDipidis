@@ -2983,6 +2983,12 @@ img[src*="limitlesstcg"] {
     max-height: 85vh;
     display: flex;
     flex-direction: column;
+    /* Audit + ACE-SPEC + per-card list together overflow 85vh on
+       most laptops. Allow the entire modal to scroll vertically;
+       header, audit, and the close button all live inside this
+       scroll container so the user always reaches the bottom. */
+    overflow-y: auto;
+    overscroll-behavior: contain;
 }
 .build-info-modal h3 {
     margin-bottom: 8px;

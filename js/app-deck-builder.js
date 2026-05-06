@@ -3655,6 +3655,227 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
         if (typeof window !== 'undefined') window._redistributeByLargestRemainder = _redistributeByLargestRemainder;
 
         // ────────────────────────────────────────────────────────────
+        // BIDIRECTIONAL LRM SWAP — runs after the standard add-only LRM
+        // pass. When the deck is at the target size (60) but contains
+        // TECH-tier 1-of cards while CORE-tier cards have un-bumped
+        // remainder, swap a TECH slot for a CORE bump.
+        //
+        // Use case: Stage 2 admits Black Belt's Training (score 36,
+        // TECH) before the threshold lift, taking a slot that LRM
+        // could otherwise have given to Poké Pad (CORE, remainder
+        // 0.70). Add-only LRM can't reach Pad once the deck is full;
+        // the swap pass demotes the TECH card by 1 (often removing it
+        // entirely if count was 1) and bumps the CORE card. Net deck
+        // size unchanged; CORE tier maximised.
+        //
+        // Guards:
+        //   - TECH count must be > 0; if count goes to 0, the entry
+        //     is removed from the deck array.
+        //   - Tech-CHOSEN counters (active-threats audit picked them)
+        //     are exempt — they're not "incidental tech", they're
+        //     budgeted threat coverage.
+        //   - Stage-1 cards (score ≥ 75) protected from demotion
+        //     below 1 — those are the deck's identity cards.
+        //   - Maximum 5 swap iterations to bound runtime.
+        //
+        // Pure helper: takes a deck array (consistencyDeck shape) and
+        // mutates it in place; returns the number of swaps applied.
+        // ────────────────────────────────────────────────────────────
+        function _bidirectionalLrmSwap(entries, helpers) {
+            if (!Array.isArray(entries) || entries.length === 0) return 0;
+            const getLegalMax = (helpers && helpers.getLegalMax) || (() => 4);
+            const isBasicEnergy = (helpers && helpers.isBasicEnergy) || (() => false);
+            const log = (helpers && helpers.log) || (() => {});
+
+            let swaps = 0;
+            const maxIterations = 5;
+
+            for (let iter = 0; iter < maxIterations; iter++) {
+                // TECH demote candidates: TECH-tier, count ≥ 1, NOT a
+                // chosen tech-counter (those are budgeted), NOT
+                // Stage-1 (score < 75 OK to demote, score ≥ 75 are
+                // identity cards). Sort lowest remainder first.
+                const techCandidates = entries
+                    .filter(e => e && e.card)
+                    .filter(e => e.card._cardFunctionTier === 'TECH')
+                    .filter(e => e.count >= 1)
+                    .filter(e => e.card._techCounterMaxCount == null)
+                    .filter(e => (e.card.consistencyScore || 0) < 75)
+                    .sort((a, b) => (a.card._lrmRemainder || 0) - (b.card._lrmRemainder || 0));
+
+                // CORE bump candidates: CORE-tier, has positive remainder,
+                // not at legal max (or basic energy which has no legal cap).
+                const coreCandidates = entries
+                    .filter(e => e && e.card)
+                    .filter(e => e.card._cardFunctionTier === 'CORE')
+                    .filter(e => Number.isFinite(e.card._lrmRemainder) && e.card._lrmRemainder > 0)
+                    .filter(e => {
+                        const legalMax = e.card._legalMax || getLegalMax(e.card.card_name, e.card);
+                        return isBasicEnergy(e.card) || e.count < legalMax;
+                    })
+                    .sort((a, b) => (b.card._lrmRemainder || 0) - (a.card._lrmRemainder || 0));
+
+                if (techCandidates.length === 0 || coreCandidates.length === 0) break;
+
+                const tech = techCandidates[0];
+                const core = coreCandidates[0];
+                const techRem = tech.card._lrmRemainder || 0;
+                const coreRem = core.card._lrmRemainder || 0;
+
+                // Only swap if CORE remainder is meaningfully higher.
+                // 0.05 buffer prevents flip-flopping on near-ties.
+                if (coreRem <= techRem + 0.05) break;
+
+                tech.count -= 1;
+                core.count += 1;
+                swaps += 1;
+                log({
+                    type: 'swap',
+                    tech: tech.card.card_name,
+                    core: core.card.card_name,
+                    techRem,
+                    coreRem,
+                });
+
+                // If TECH demoted to 0 copies, remove from the deck array.
+                if (tech.count <= 0) {
+                    const idx = entries.indexOf(tech);
+                    if (idx >= 0) entries.splice(idx, 1);
+                }
+            }
+            return swaps;
+        }
+        if (typeof window !== 'undefined') window._bidirectionalLrmSwap = _bidirectionalLrmSwap;
+
+        // ────────────────────────────────────────────────────────────
+        // ACE-SPEC-AWARE ENERGY FLOOR — enforces a minimum total energy
+        // count derived from the ACE-SPEC-conditional aggregate.
+        //
+        // The doctrine reference says "modern decks run 7–11 energies"
+        // but the exact target inside that window depends on the
+        // ACE-SPEC. Cynthia's Garchomp + Neo Upper Energy: 7 fighting +
+        // 1 Neo Upper = 8 total (Neo Upper substitutes one energy per
+        // attack so fewer raw energies are needed). Cynthia's Garchomp
+        // + Unfair Stamp: 8 raw fighting (no substitution). Same
+        // archetype, different energy floor.
+        //
+        // After Stage 1 / 2 / LRM / swap, this helper:
+        //   1. Computes target = round(sum of conditional avg energy
+        //      counts in matching ACE-SPEC buckets), capped to the
+        //      doctrine 7–11 corridor.
+        //   2. Counts actual energies in the deck.
+        //   3. If actual < target, demotes the lowest-remainder non-
+        //      energy non-Stage-1 card and adds 1 to the highest-
+        //      remainder energy. Repeats until the floor is met or
+        //      no demotion candidate remains.
+        //
+        // Non-ACE-SPEC builds skip the floor (we only have a robust
+        // target when a conditional bucket exists). Pure helper.
+        // ────────────────────────────────────────────────────────────
+        function _enforceEnergyFloor(entries, conditionalAvgs, helpers) {
+            if (!Array.isArray(entries) || !conditionalAvgs || conditionalAvgs.size === 0) {
+                return { added: 0, target: 0, before: 0, after: 0 };
+            }
+            const isBasicEnergy = (helpers && helpers.isBasicEnergy) || (() => false);
+            const isEnergyEntry = (helpers && helpers.isEnergyEntry) || (e => isBasicEnergy(e && e.card));
+            const getLegalMax = (helpers && helpers.getLegalMax) || (() => 4);
+            const log = (helpers && helpers.log) || (() => {});
+
+            // Sum the conditional avgs of cards classified as energies.
+            // The ACE-SPEC's own conditional bucket entry counts too
+            // (Neo Upper Energy is an energy ACE-SPEC).
+            let energyTargetRaw = 0;
+            for (const entry of entries) {
+                if (!entry || !entry.card) continue;
+                if (!isEnergyEntry(entry)) continue;
+                const cn = String(entry.card.card_name || '').toLowerCase().trim();
+                const stat = conditionalAvgs.get(cn);
+                if (stat && Number.isFinite(stat.avg) && stat.presence >= 3) {
+                    energyTargetRaw += stat.avg;
+                }
+            }
+            // Doctrine corridor: 7–11 modern energies. Don't enforce a
+            // floor outside that window; below 7 means the data is
+            // incomplete, above 11 means the deck is doctrinally
+            // already over-energy (a different audit warning catches
+            // it).
+            const target = Math.max(7, Math.min(11, Math.round(energyTargetRaw)));
+            const before = entries
+                .filter(e => isEnergyEntry(e))
+                .reduce((s, e) => s + (e.count || 0), 0);
+            if (before >= target) {
+                return { added: 0, target, before, after: before };
+            }
+            if (energyTargetRaw < 6.5) {
+                // Conditional aggregate is too thin to trust; skip
+                // (avoid forcing 7 energies into a deck whose data
+                // genuinely supports 5–6).
+                return { added: 0, target, before, after: before };
+            }
+
+            let added = 0;
+            const maxIter = (target - before) + 2;
+            for (let iter = 0; iter < maxIter; iter++) {
+                const currentEnergies = entries
+                    .filter(e => isEnergyEntry(e))
+                    .reduce((s, e) => s + (e.count || 0), 0);
+                if (currentEnergies >= target) break;
+
+                // Pick the highest-remainder energy that's not at legal max.
+                const energyBumps = entries
+                    .filter(e => isEnergyEntry(e))
+                    .filter(e => Number.isFinite(e.card._lrmRemainder) && e.card._lrmRemainder > 0)
+                    .filter(e => {
+                        const legalMax = e.card._legalMax || getLegalMax(e.card.card_name, e.card);
+                        return isBasicEnergy(e.card) || e.count < legalMax;
+                    })
+                    .sort((a, b) => (b.card._lrmRemainder || 0) - (a.card._lrmRemainder || 0));
+                if (energyBumps.length === 0) break;
+
+                // Demote the lowest-priority non-energy non-Stage-1
+                // card. Prefer TECH first (any count); fall back to MID
+                // with count > 1 (don't drop below 1 for non-Stage-1
+                // MID either — those are deck-shape cards).
+                const demoteCandidates = entries
+                    .filter(e => !isEnergyEntry(e))
+                    .filter(e => (e.card.consistencyScore || 0) < 75)
+                    .filter(e => e.card._techCounterMaxCount == null)
+                    .filter(e => e.count >= 1)
+                    .sort((a, b) => {
+                        // TECH first (lower tier order), then by remainder asc.
+                        const tierOrder = { TECH: 0, MID: 1, CORE: 2 };
+                        const ta = tierOrder[a.card._cardFunctionTier] != null ? tierOrder[a.card._cardFunctionTier] : 1;
+                        const tb = tierOrder[b.card._cardFunctionTier] != null ? tierOrder[b.card._cardFunctionTier] : 1;
+                        if (ta !== tb) return ta - tb;
+                        return (a.card._lrmRemainder || 0) - (b.card._lrmRemainder || 0);
+                    });
+                if (demoteCandidates.length === 0) break;
+                const demote = demoteCandidates[0];
+                const bump = energyBumps[0];
+
+                demote.count -= 1;
+                bump.count += 1;
+                added += 1;
+                log({
+                    type: 'energy_floor',
+                    demoted: demote.card.card_name,
+                    bumped: bump.card.card_name,
+                    target,
+                });
+                if (demote.count <= 0) {
+                    const idx = entries.indexOf(demote);
+                    if (idx >= 0) entries.splice(idx, 1);
+                }
+            }
+
+            const after = entries
+                .filter(e => isEnergyEntry(e))
+                .reduce((s, e) => s + (e.count || 0), 0);
+            return { added, target, before, after };
+        }
+        if (typeof window !== 'undefined') window._enforceEnergyFloor = _enforceEnergyFloor;
+
+        // ────────────────────────────────────────────────────────────
         // BUILD QUALITY AUDIT — surfaces the principles from the
         // "Most Consistency List" doctrine to the user. Doesn't change
         // the build; produces structured findings (severity, message)
@@ -4992,11 +5213,17 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             // in ≥3 of those buckets (per-card noise), and shift ≥0.3
             // (don't bother for cosmetic ±0.1 differences). Stays a
             // no-op when those guards aren't met.
+            // Held at function scope so the Energy Floor pass after Stage 4
+            // can reuse the same conditional bucket aggregate the per-card
+            // override below produces — re-running _aceSpecConditionalAvgs
+            // would burn another full pass over the dated CSV for nothing.
+            let _aceSpecCondResult = null;
             if (aceSpecSlotCard && Array.isArray(onlineRowsRaw) && onlineRowsRaw.length > 0) {
                 const aceSpecLower = (aceSpecSlotCard.card_name || '').trim().toLowerCase();
-                const condResult = _aceSpecConditionalAvgs(
+                _aceSpecCondResult = _aceSpecConditionalAvgs(
                     onlineRowsRaw, currentArchetype, aceSpecLower, null
                 );
+                const condResult = _aceSpecCondResult;
                 if (condResult.bucketCount >= 3) {
                     let overrides = 0;
                     deckCards.forEach(card => {
@@ -5171,6 +5398,23 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             }
 
             // ==========================================
+            // 3.6 BIDIRECTIONAL LRM SWAP — even when the deck is at 60,
+            // we may have TECH-tier 1-of cards (Black Belt's Training,
+            // damage-buff supporters) holding slots while CORE cards
+            // (Poké Pad, Riolu) have positive un-bumped remainders.
+            // Swap a TECH demotion for a CORE bump if it improves the
+            // consistency-by-remainder math. Pure improvement: never
+            // changes deck total, only re-routes slots from match-up
+            // tech to structural consistency.
+            // ==========================================
+            const _swaps = _bidirectionalLrmSwap(consistencyDeck, {
+                getLegalMax: getLegalMaxCopies,
+                isBasicEnergy: isBasicEnergyCardEntry,
+                log: (info) => devLog(`[Consistency][LRM-Swap] ${info.tech} -1 → ${info.core} +1 (techRem=${info.techRem.toFixed(2)}, coreRem=${info.coreRem.toFixed(2)})`),
+            });
+            if (_swaps > 0) devLog(`[Consistency][LRM-Swap] ${_swaps} TECH→CORE swap(s) applied`);
+
+            // ==========================================
             // 4. FALLBACK: Basis-Energien auffüllen
             // ==========================================
             if (currentTotal < 60) {
@@ -5187,6 +5431,38 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                     }
                 }
             }
+
+            // ==========================================
+            // 5. ACE-SPEC-AWARE ENERGY FLOOR — final safety net.
+            // The doctrine reference says modern decks run 7–11 energies,
+            // but the EXACT target inside that window depends on the
+            // ACE-SPEC choice (Cynthia + Neo Upper = 8 with Neo Upper
+            // counted; Cynthia + Unfair Stamp = 8 raw fighting). When
+            // Stage 1+2+LRM+swap+fallback ends up below the conditional
+            // target — typically because non-energy cards over-allocated
+            // and squeezed out an energy slot — this pass demotes the
+            // lowest-priority non-energy card (TECH first, then MID with
+            // count > 1, never Stage 1) and adds 1 to the highest-
+            // remainder energy. Repeats until target met or no demotion
+            // candidate remains. No-op when no ACE-SPEC bucket exists.
+            // ==========================================
+            if (_aceSpecCondResult && _aceSpecCondResult.bucketCount >= 3) {
+                const _energyResult = _enforceEnergyFloor(consistencyDeck, _aceSpecCondResult.conditionalAvgs, {
+                    getLegalMax: getLegalMaxCopies,
+                    isBasicEnergy: isBasicEnergyCardEntry,
+                    isEnergyEntry: (e) => isBasicEnergyCardEntry(e && e.card) || /special energy/i.test(String((e && e.card && e.card.type) || '')),
+                    log: (info) => devLog(`[Consistency][EnergyFloor] target=${info.target} — ${info.demoted} -1 → ${info.bumped} +1`),
+                });
+                if (_energyResult.added > 0) {
+                    devLog(`[Consistency][EnergyFloor] enforced ${_energyResult.before}→${_energyResult.after}/${_energyResult.target} (added ${_energyResult.added})`);
+                } else if (_energyResult.target > 0) {
+                    devLog(`[Consistency][EnergyFloor] OK: ${_energyResult.before}/${_energyResult.target} energies`);
+                }
+            }
+
+            // Recompute currentTotal after potential swap/floor mutations
+            // so the post-build summary log matches the actual deck size.
+            currentTotal = consistencyDeck.reduce((s, e) => s + (e.count || 0), 0);
 
             devLog(`[autoCompleteConsistency] Deck complete: ${currentTotal}/60`);
 

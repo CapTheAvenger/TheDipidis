@@ -3584,6 +3584,140 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
         }
         if (typeof window !== 'undefined') window._energyProvides = _energyProvides;
 
+        // ────────────────────────────────────────────────────────────
+        // CARD DEPENDENCY DETECTOR — surfaces hard prerequisites that
+        // a card's ability/attack text expresses. Without these, a
+        // card's value is structurally compromised:
+        //
+        //   needs-tool      — ability fires only "If this Pokémon has
+        //                     a Pokémon Tool attached" (Genesect SFA's
+        //                     ACE Nullifier is the user-flagged case).
+        //                     Including the Pokémon without a Tool
+        //                     leaves the slot stranded.
+        //
+        // Returned as a Set of dependency tags. Empty Set = no hard
+        // prerequisites detected. The post-build resolution pass
+        // (`_resolveCardDependencies`) demotes stranded cards whose
+        // tags can't be satisfied by the rest of the deck.
+        //
+        // The set of tags is intentionally small — only patterns we
+        // CAN detect reliably AND CAN check downstream. Match-state-
+        // dependent texts ("If your opponent has 2 Prize cards
+        // remaining") are out of scope: the builder doesn't model
+        // game state.
+        // ────────────────────────────────────────────────────────────
+        function _detectCardDependencies(card, effects) {
+            const deps = new Set();
+            if (!effects) return deps;
+            const abilitiesText = (Array.isArray(effects.abilities) ? effects.abilities : [])
+                .map(a => `${a.name || ''} ${a.text || ''}`).join(' ').toLowerCase();
+            const attacksText = (Array.isArray(effects.attacks) ? effects.attacks : [])
+                .map(a => `${a.name || ''} ${a.text || ''}`).join(' ').toLowerCase();
+            const rulesText = (Array.isArray(effects.rules) ? effects.rules : []).join(' ').toLowerCase();
+            const text = abilitiesText + ' ' + attacksText + ' ' + rulesText;
+
+            // "If this Pokémon has a Pokémon Tool attached" / "if a
+            // Pokémon Tool is attached to this Pokémon" / "this
+            // Pokémon has a Pokémon Tool attached".
+            // Excludes "tool from this pokémon" (discard tool wording).
+            if (/(if|while)[^.]{0,40}pok[eé]mon tool[^.]{0,40}attach/.test(text)) {
+                deps.add('needs-tool');
+            }
+            if (/has a pok[eé]mon tool attached/.test(text)) {
+                deps.add('needs-tool');
+            }
+
+            return deps;
+        }
+        if (typeof window !== 'undefined') window._detectCardDependencies = _detectCardDependencies;
+
+        // Stranded-card resolution. Iterates the finalized deck and
+        // demotes cards whose `_dependencies` tags aren't satisfied
+        // by the rest of the deck. The freed slot goes to the
+        // highest-remainder eligible bump candidate (mirrors the
+        // Energy Floor's reroute logic). ACE-SPEC and Stage-1
+        // identity cards are protected (same guards as the other
+        // post-allocation passes).
+        function _resolveCardDependencies(entries, helpers) {
+            if (!Array.isArray(entries) || entries.length === 0) {
+                return { resolved: 0 };
+            }
+            const getLegalMax = (helpers && helpers.getLegalMax) || (() => 4);
+            const isBasicEnergy = (helpers && helpers.isBasicEnergy) || (() => false);
+            const log = (helpers && helpers.log) || (() => {});
+
+            // Quick presence checks for each dependency tag.
+            const presenceFns = {
+                'needs-tool': () => entries.some(e => {
+                    const t = String(e && e.card && (e.card.type || e.card.card_type) || '').toLowerCase();
+                    return t.includes('tool');
+                }),
+            };
+
+            let resolved = 0;
+            // Iterate over a snapshot so we can splice without
+            // mutating the active iterator.
+            const snapshot = entries.slice();
+            for (const entry of snapshot) {
+                const card = entry && entry.card;
+                if (!card) continue;
+                if (card._isAceSpec) continue;
+                if ((card.consistencyScore || 0) >= 75) continue;
+                const deps = card._dependencies;
+                if (!deps || (deps.size != null ? deps.size === 0 : Object.keys(deps).length === 0)) continue;
+                const unmet = [];
+                for (const tag of deps) {
+                    const fn = presenceFns[tag];
+                    if (!fn) continue;
+                    if (!fn()) unmet.push(tag);
+                }
+                if (unmet.length === 0) continue;
+
+                // Demote 1 copy. If count drops to 0, remove from deck.
+                entry.count -= 1;
+                resolved += 1;
+                log({ type: 'dep_demote', card: card.card_name, unmet });
+                if (entry.count <= 0) {
+                    const idx = entries.indexOf(entry);
+                    if (idx >= 0) entries.splice(idx, 1);
+                }
+
+                // Re-route the freed slot to the highest-remainder
+                // non-stranded card under its per-card target. CORE
+                // tier first.
+                const bumpCandidates = entries
+                    .filter(e => e && e.card)
+                    .filter(e => !e.card._isAceSpec)
+                    .filter(e => {
+                        const eDeps = e.card._dependencies;
+                        if (!eDeps) return true;
+                        for (const tag of eDeps) {
+                            const fn = presenceFns[tag];
+                            if (fn && !fn()) return false; // also stranded
+                        }
+                        return true;
+                    })
+                    .filter(e => Number.isFinite(e.card._lrmRemainder) && e.card._lrmRemainder > 0)
+                    .filter(e => {
+                        const legalMax = e.card._legalMax || getLegalMax(e.card.card_name, e.card);
+                        return isBasicEnergy(e.card) || e.count < legalMax;
+                    })
+                    .sort((a, b) => {
+                        const tierOrder = { CORE: 0, MID: 1, TECH: 2 };
+                        const ta = tierOrder[a.card._cardFunctionTier] != null ? tierOrder[a.card._cardFunctionTier] : 1;
+                        const tb = tierOrder[b.card._cardFunctionTier] != null ? tierOrder[b.card._cardFunctionTier] : 1;
+                        if (ta !== tb) return ta - tb;
+                        return (b.card._lrmRemainder || 0) - (a.card._lrmRemainder || 0);
+                    });
+                if (bumpCandidates.length > 0) {
+                    bumpCandidates[0].count += 1;
+                    log({ type: 'dep_reroute', from: card.card_name, to: bumpCandidates[0].card.card_name });
+                }
+            }
+            return { resolved };
+        }
+        if (typeof window !== 'undefined') window._resolveCardDependencies = _resolveCardDependencies;
+
         // Lazy-loader for pokemon_card_effects.json. Returns an index
         // keyed by `SET|number` (uppercase set, trimmed number) plus a
         // name fallback (lowercased card name → first matching record).
@@ -5450,6 +5584,9 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                     const effects = _findCardEffects(card, effectsIndex);
                     card._cardFunction = _classifyCardFunction(card, effects || {});
                     card._cardFunctionTier = _functionTier(card._cardFunction);
+                    // Hard prerequisites (e.g. needs-tool for Genesect's
+                    // ACE Nullifier ability). Empty Set when none.
+                    card._dependencies = _detectCardDependencies(card, effects || {});
                     // Per-card energy multiplier. Most cards = 1; Neo
                     // Upper / Legacy Energy = 2 (each card provides 2
                     // energy when attached). Used by Energy Floor when
@@ -5756,6 +5893,32 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 if (_ceilingResult.removed > 0) {
                     devLog(`[Consistency][EnergyCeiling] enforced ${_ceilingResult.before}→${_ceilingResult.after}/${_ceilingResult.target} (removed ${_ceilingResult.removed})`);
                 }
+            }
+
+            // ==========================================
+            // 6. CARD DEPENDENCY RESOLUTION — final pass.
+            // The user-flagged Alakazam Dudunsparce regression had
+            // Genesect SFA in the deck (ability "ACE Nullifier" only
+            // fires WITH a Pokémon Tool attached) but no Tools in the
+            // trainer line. The slot was structurally dead. This pass
+            // demotes any non-Stage-1 non-ACE-SPEC card whose hard
+            // prerequisites (e.g. needs-tool) aren't met by the rest
+            // of the deck, then re-routes the freed slot to the
+            // highest-remainder eligible bump candidate (CORE first).
+            // ==========================================
+            const _depResult = _resolveCardDependencies(consistencyDeck, {
+                getLegalMax: getLegalMaxCopies,
+                isBasicEnergy: isBasicEnergyCardEntry,
+                log: (info) => {
+                    if (info.type === 'dep_demote') {
+                        devLog(`[Consistency][Dependencies] ${info.card} stranded — missing: ${info.unmet.join(', ')}`);
+                    } else if (info.type === 'dep_reroute') {
+                        devLog(`[Consistency][Dependencies] reroute slot from ${info.from} → ${info.to}`);
+                    }
+                },
+            });
+            if (_depResult.resolved > 0) {
+                devLog(`[Consistency][Dependencies] resolved ${_depResult.resolved} stranded card(s)`);
             }
 
             // Recompute currentTotal after potential swap/floor mutations

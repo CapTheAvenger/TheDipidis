@@ -3305,6 +3305,42 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
         }
         if (typeof window !== 'undefined') window._recencyWeight = _recencyWeight;
 
+        // Largest-Remainder Method: distribute remaining slots up to
+        // ``targetTotal`` to cards with the largest fractional remainders
+        // on ``card._lrmRemainder``. Respects legal-max + tech-counter caps.
+        // Mutates ``entries[i].count`` in place; returns # slots added.
+        //
+        // Each entry has shape ``{ card, count }`` (the consistencyDeck
+        // shape used in autoCompleteConsistency). ``card._lrmRemainder``
+        // is the leftover fraction from Math.floor(avgCountWhenUsed) and
+        // is set during the Stage 1/2 floor-allocation pass.
+        function _redistributeByLargestRemainder(entries, currentTotal, targetTotal, helpers) {
+            const getLegalMax = (helpers && helpers.getLegalMax) || (() => 4);
+            const isBasicEnergy = (helpers && helpers.isBasicEnergy) || (() => false);
+            const log = (helpers && helpers.log) || (() => {});
+            if (!Array.isArray(entries) || currentTotal >= targetTotal) return 0;
+
+            const sorted = entries
+                .filter(e => e && e.card && Number.isFinite(e.card._lrmRemainder) && e.card._lrmRemainder > 0)
+                .slice()
+                .sort((a, b) => (b.card._lrmRemainder || 0) - (a.card._lrmRemainder || 0));
+
+            let added = 0;
+            for (const entry of sorted) {
+                if (currentTotal + added >= targetTotal) break;
+                const card = entry.card;
+                const legalMax = card._legalMax || getLegalMax(card.card_name, card);
+                const isBasic = isBasicEnergy(card);
+                if (!isBasic && entry.count >= legalMax) continue;
+                if (card._techCounterMaxCount != null && entry.count >= card._techCounterMaxCount) continue;
+                entry.count += 1;
+                added += 1;
+                log(card, entry);
+            }
+            return added;
+        }
+        if (typeof window !== 'undefined') window._redistributeByLargestRemainder = _redistributeByLargestRemainder;
+
         // Parse any tournament_date format used across sources:
         //   - ISO "YYYY-MM-DD"                  → online_tournament_dated_cards
         //   - English ordinal "25th April 2026" → tournament_cards_data_cards (Major)
@@ -4270,19 +4306,30 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             // ==========================================
             // 2. STUFE 1 (Core: consistencyScore >= 75)
             // Meta-boosted + trending cards can exceed 100
+            //
+            // Allocation uses FLOOR(avgCountWhenUsed) plus a Largest-
+            // Remainder-Method redistribution pass after Stage 2. Per-card
+            // Math.round() under-allocated when several cards had avg
+            // just below the .5 line — e.g. Cynthia's Garchomp's Fighting
+            // Energy 4.44 + Rocky Special Energy 3.43 = 7.87 deck-total
+            // rounded to 4+3=7, never reaching the deck-correct 8 fighting
+            // energies. Floor + remainder is deterministic and matches the
+            // overall deck average.
             // ==========================================
             deckCards.forEach(card => {
                 if (currentTotal >= 60) return;
                 if (isAceSpecCard(card)) return; // Ace Spec haben wir schon
-                
+
                 // Deck-wide Radiant limit
                 if (isRadiantPokemon(card.card_name)) {
                     if (radiantAdded) return;
                     radiantAdded = true;
                 }
-                
+
                 if (card.consistencyScore >= 75) {
-                    let addCount = card._recommendedCount != null ? card._recommendedCount : Math.round(card.avgCountWhenUsed);
+                    const exactAvg = card.avgCountWhenUsed || card._recommendedCount || 0;
+                    let addCount = Math.floor(exactAvg);
+                    card._lrmRemainder = exactAvg - addCount;
                     addCount = Math.max(1, addCount); // Core Karten MÜSSEN mindestens 1x rein
                     const legalMax = card._legalMax || getLegalMaxCopies(card.card_name, card);
                     if (!isBasicEnergyCardEntry(card)) addCount = Math.min(addCount, legalMax);
@@ -4304,15 +4351,18 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 if (currentTotal >= 60) return;
                 if (isAceSpecCard(card)) return;
                 if (consistencyDeck.some(entry => entry.card.card_name === card.card_name)) return; // Schon im Deck?
-                
+
                 // Deck-wide Radiant limit
                 if (isRadiantPokemon(card.card_name)) {
                     if (radiantAdded) return;
                     radiantAdded = true;
                 }
-                
+
                 if (card.consistencyScore >= 25) {
-                    let addCount = card._recommendedCount != null ? card._recommendedCount : Math.round(card.avgCountWhenUsed);
+                    const exactAvg = card.avgCountWhenUsed || card._recommendedCount || 0;
+                    let addCount = Math.floor(exactAvg);
+                    card._lrmRemainder = exactAvg - addCount;
+                    addCount = Math.max(1, addCount); // Stage 2 Karten ebenfalls min. 1x
                     if (card._techCounterMaxCount != null) {
                         addCount = Math.min(addCount, card._techCounterMaxCount);
                     }
@@ -4323,6 +4373,24 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                     }
                 }
             });
+
+            // ==========================================
+            // 3.5 LARGEST-REMAINDER-METHOD REDISTRIBUTION
+            // Stage 1+2 floor each card's avg, leaving the deck under 60
+            // by Σ(remainders). Distribute those slots to cards with the
+            // largest fractional remainders, respecting legal max and
+            // tech-counter caps. Standard fix for proportional-rounding
+            // pathology (4.44+3.43 → 7 instead of 8).
+            // ==========================================
+            if (currentTotal < 60) {
+                const added = _redistributeByLargestRemainder(consistencyDeck, currentTotal, 60, {
+                    getLegalMax: getLegalMaxCopies,
+                    isBasicEnergy: isBasicEnergyCardEntry,
+                    log: (card, entry) => devLog(`[Consistency][LRM] +1x ${card.card_name} (rem=${(card._lrmRemainder || 0).toFixed(2)}, count=${entry.count})`),
+                });
+                currentTotal += added;
+                if (added > 0) devLog(`[Consistency][LRM] Redistributed ${added} slot(s) -- Total: ${currentTotal}/60`);
+            }
 
             // ==========================================
             // 4. FALLBACK: Basis-Energien auffüllen

@@ -3937,6 +3937,33 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                                                   // category_floor (2 %)
                                                   // to avoid boosting on
                                                   // very-niche threats.
+
+            // Core draw engines are NEVER tech-cap-able. They're the
+            // foundation of the deck's draw economy, not tech inclusions
+            // — even if they happen to "counter" a threat as a side
+            // effect (Lillie's Determination shuffles your hand back,
+            // which undoes Iono/Marnie hand-disruption; that doesn't
+            // make Lillie's a 1–2-of tech card, it's still 4× standard).
+            // Excluding them here means they don't show up in the
+            // counter pool, never get a tech-audit cap applied, and
+            // never trigger the "redundant counter" -20 penalty.
+            const CORE_DRAW_ENGINES_LOWER = new Set([
+                "lillie's determination",
+                "professor's research",
+                "iono",
+                "professor sycamore",
+                "professor juniper",
+                "marnie",
+                "judge", // shuffles hand to 4 — also a draw/disruption staple
+                "boss's orders", // gusting; classifier sometimes mis-tags
+                "buddy-buddy poffin", // pokemon search staple
+                "ultra ball",
+                "poké pad",
+                "poke pad",
+                "crispin", // energy search staple
+                "night stretcher", // resource recovery staple
+            ]);
+
             if (source === 'currentMeta') {
                 if (window._activeThreatsCache === undefined) {
                     try {
@@ -3971,6 +3998,10 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                         counters.forEach(c => {
                             const nameLower = String(c.card_name || '').trim().toLowerCase();
                             if (!nameLower) return;
+                            // Core draw engines are exempt — they're the
+                            // deck's foundation, not a tech inclusion. See
+                            // CORE_DRAW_ENGINES_LOWER above for rationale.
+                            if (CORE_DRAW_ENGINES_LOWER.has(nameLower)) return;
                             const setOfCats = techAuditCounterCats.get(nameLower) || new Set();
                             setOfCats.add(cat);
                             techAuditCounterCats.set(nameLower, setOfCats);
@@ -4345,7 +4376,21 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             // ==========================================
             // 3. STUFE 2 (Extended: consistencyScore >= 25)
             // Lower threshold than before (30% share) because meta-relevant
-            // cards with 20% share can now score >=25 via meta boost
+            // cards with 20% share can now score >=25 via meta boost.
+            //
+            // Allocation rule (Stage 2 only): use Math.floor without the
+            // Math.max(1, ...) bump. Cards with avgCountWhenUsed < 1 are
+            // SKIPPED entirely. Rationale: a card that's in <50 % of decks
+            // at <1 average copy (e.g. Larry's Skill, Budew, niche tech
+            // sprinkles) is a deck-specific tech, not part of the
+            // archetype's "median consistency build". Forcing 1× of these
+            // (a) crowds out energies that LRM should bump up via
+            // remainders (the 4,44+3,43→8 fix), and (b) creates the
+            // user-flagged "1× Larry's Skill" anomaly where a card
+            // designed to be played in 2-of slots gets a useless lone
+            // copy. Stage 1 keeps Math.max(1, ...) because score≥75 is
+            // the deck's identity layer — those cards always belong in.
+            // Tech-CHOSEN counters still bypass this gate via their cap.
             // ==========================================
             deckCards.forEach(card => {
                 if (currentTotal >= 60) return;
@@ -4362,8 +4407,17 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                     const exactAvg = card.avgCountWhenUsed || card._recommendedCount || 0;
                     let addCount = Math.floor(exactAvg);
                     card._lrmRemainder = exactAvg - addCount;
-                    addCount = Math.max(1, addCount); // Stage 2 Karten ebenfalls min. 1x
-                    if (card._techCounterMaxCount != null) {
+                    const isChosenCounter = card._techCounterMaxCount != null;
+                    if (addCount < 1) {
+                        // Tech-chosen counters with floor=0 (avg < 1) STILL
+                        // make it in at 1 copy — they're explicitly
+                        // budgeted by the active-threats audit. Everything
+                        // else with avg < 1 is a tech sprinkle and gets
+                        // skipped (LRM may still pick it up by remainder).
+                        if (!isChosenCounter) return;
+                        addCount = 1;
+                    }
+                    if (isChosenCounter) {
                         addCount = Math.min(addCount, card._techCounterMaxCount);
                     }
                     if (addCount >= 1) {

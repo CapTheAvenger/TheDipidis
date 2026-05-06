@@ -3746,13 +3746,16 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 // TECH demote candidates: TECH-tier, count ≥ 1, NOT a
                 // chosen tech-counter (those are budgeted), NOT
                 // Stage-1 (score < 75 OK to demote, score ≥ 75 are
-                // identity cards). Sort lowest remainder first.
+                // identity cards), NOT an ACE-SPEC (single-of by
+                // format rule — demoting would void the deck's
+                // ACE-SPEC pick entirely).
                 const techCandidates = entries
                     .filter(e => e && e.card)
                     .filter(e => e.card._cardFunctionTier === 'TECH')
                     .filter(e => e.count >= 1)
                     .filter(e => e.card._techCounterMaxCount == null)
                     .filter(e => (e.card.consistencyScore || 0) < 75)
+                    .filter(e => !e.card._isAceSpec)
                     .sort((a, b) => (a.card._lrmRemainder || 0) - (b.card._lrmRemainder || 0));
 
                 // CORE bump candidates: CORE-tier, has positive remainder,
@@ -3896,11 +3899,13 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 // Demote the lowest-priority non-energy non-Stage-1
                 // card. Prefer TECH first (any count); fall back to MID
                 // with count > 1 (don't drop below 1 for non-Stage-1
-                // MID either — those are deck-shape cards).
+                // MID either — those are deck-shape cards). ACE-SPEC
+                // cards excluded — single-of by format rule.
                 const demoteCandidates = entries
                     .filter(e => !isEnergyEntry(e))
                     .filter(e => (e.card.consistencyScore || 0) < 75)
                     .filter(e => e.card._techCounterMaxCount == null)
+                    .filter(e => !e.card._isAceSpec)
                     .filter(e => e.count >= 1)
                     .sort((a, b) => {
                         // TECH first (lower tier order), then by remainder asc.
@@ -4006,9 +4011,12 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 // Demote the energy entry whose CURRENT count exceeds
                 // its conditional rounded target the most. (Energy
                 // entries that are at-or-below their per-card target
-                // shouldn't be touched.)
+                // shouldn't be touched.) ACE-SPEC energies (Neo Upper,
+                // Legacy Energy) are excluded — they're single-of by
+                // format rule and shape the deck's energy economy.
                 const energyDemoteCandidates = entries
                     .filter(e => isEnergyEntry(e))
+                    .filter(e => !e.card._isAceSpec)
                     .filter(e => {
                         const cn = String(e.card.card_name || '').toLowerCase().trim();
                         const stat = conditionalAvgs.get(cn);
@@ -5387,6 +5395,13 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             }
 
             if (aceSpecSlotCard) {
+                // Mark as ACE-SPEC so post-allocation passes (bidirectional
+                // swap, Energy Ceiling) NEVER demote it. ACE-SPECs are
+                // single-of by format rule and represent a deck-defining
+                // choice — losing the slot to LRM redistribution would
+                // void the entire ACE-SPEC-conditional avg pass that
+                // shapes the rest of the deck around this pick.
+                aceSpecSlotCard._isAceSpec = true;
                 pushCard(aceSpecSlotCard, 1, '[Consistency][ACE-SPEC-Priority]');
                 devLog(`[Consistency][ACE-SPEC-Priority] Erkannt: ${aceSpecSlotCard.card_name} (Rarity: ${aceSpecSlotCard.rarity || '?'})`);
             } else {

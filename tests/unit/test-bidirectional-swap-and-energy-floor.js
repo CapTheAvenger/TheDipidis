@@ -161,6 +161,23 @@ describe('_bidirectionalLrmSwap', () => {
         assert.equal(swaps, 0, "MID-tier targets (energies) are not swap targets — only CORE is.");
     });
 
+    it("does not demote an ACE-SPEC card (single-of by format rule)", () => {
+        // The N's Zoroark user-flagged regression: Unfair Stamp was
+        // picked as ACE-SPEC, classified as 'disruption' (TECH), and
+        // had consistencyScore < 75. The bidirectional swap then
+        // demoted it to 0 → removed from deck → no ACE-SPEC.
+        // Fix: cards marked _isAceSpec are excluded from swap demote.
+        const deck = [
+            entry('Unfair Stamp', 'Item', 1, { tier: 'TECH', remainder: 0.0, score: 67, cardOverrides: { _isAceSpec: true } }),
+            entry('Some CORE', 'Item', 3, { tier: 'CORE', remainder: 0.80, score: 100 }),
+        ];
+        const swaps = FNS.swap(deck, defaultHelpers);
+        assert.equal(swaps, 0, "ACE-SPEC must not be demoted by swap");
+        const stamp = deck.find(e => e.card.card_name === 'Unfair Stamp');
+        assert.ok(stamp, "Unfair Stamp must remain in deck");
+        assert.equal(stamp.count, 1);
+    });
+
     it('handles multiple swaps in sequence', () => {
         const deck = [
             entry('Tech1', 'Supporter', 1, { tier: 'TECH', remainder: 0.10, score: 40 }),

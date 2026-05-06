@@ -40,6 +40,7 @@ function load() {
     const snippet = [
         extractTopLevel(src, '_bidirectionalLrmSwap'),
         extractTopLevel(src, '_enforceEnergyFloor'),
+        extractTopLevel(src, '_enforceEnergyCeiling'),
     ].join('\n\n');
     const sandbox = { console, Math, Number, String, Array, Object, RegExp };
     vm.createContext(sandbox);
@@ -47,6 +48,7 @@ function load() {
     return {
         swap: sandbox._bidirectionalLrmSwap,
         floor: sandbox._enforceEnergyFloor,
+        ceiling: sandbox._enforceEnergyCeiling,
     };
 }
 
@@ -319,5 +321,126 @@ describe('_enforceEnergyFloor', () => {
         // qualifies; raw target was 4.83 < 6.5 → skip-too-thin guard
         // returns no-op.
         assert.equal(result.added, 0);
+    });
+});
+
+describe('_enforceEnergyCeiling', () => {
+    function condAvgs(map) {
+        const m = new Map();
+        for (const [k, v] of Object.entries(map)) m.set(k, v);
+        return m;
+    }
+
+    it('does nothing when energy count is at or below target', () => {
+        const deck = [
+            entry('Fighting Energy', 'Basic Energy', 4, { tier: 'MID', remainder: 0.13 }),
+            entry('Rocky Fighting Energy', 'Special Energy', 3, { tier: 'MID', remainder: 0.30 }),
+            entry('Neo Upper Energy', 'Special Energy', 1, { tier: 'MID', remainder: 0.0 }),
+            entry('Some Trainer', 'Item', 4, { tier: 'CORE', remainder: 0.0, score: 100 }),
+        ];
+        const cond = condAvgs({
+            'fighting energy': { avg: 4.13, presence: 7 },
+            'rocky fighting energy': { avg: 3.30, presence: 7 },
+            'neo upper energy': { avg: 1.0, presence: 7 },
+        });
+        const result = FNS.ceiling(deck, cond, defaultHelpers);
+        assert.equal(result.target, 8);
+        assert.equal(result.before, 8);
+        assert.equal(result.removed, 0);
+    });
+
+    it("trims an over-allocated energy back to the conditional target", () => {
+        // The Cynthia + Neo Upper user-flagged regression: target was
+        // 4 + 3 + 1 = 8 cards but the build delivered 4 + 4 + 1 = 9.
+        // Ceiling demotes Rocky 4→3 and bumps the highest-remainder
+        // non-energy card.
+        const deck = [
+            entry('Fighting Energy', 'Basic Energy', 4, { tier: 'MID', remainder: 0.13 }),
+            entry('Rocky Fighting Energy', 'Special Energy', 4, { tier: 'MID', remainder: 0.30 }),  // OVER target
+            entry('Neo Upper Energy', 'Special Energy', 1, { tier: 'MID', remainder: 0.0 }),
+            entry("Team Rocket's Petrel", 'Supporter', 1, { tier: 'MID', remainder: 0.62, score: 49 }),
+            entry('Some CORE', 'Item', 3, { tier: 'CORE', remainder: 0.40, score: 100 }),
+        ];
+        const cond = condAvgs({
+            'fighting energy': { avg: 4.13, presence: 7 },
+            'rocky fighting energy': { avg: 3.30, presence: 7 },
+            'neo upper energy': { avg: 1.0, presence: 7 },
+        });
+        const result = FNS.ceiling(deck, cond, defaultHelpers);
+        assert.equal(result.target, 8);
+        assert.equal(result.before, 9);
+        assert.equal(result.after, 8);
+        assert.equal(result.removed, 1);
+        const rocky = deck.find(e => e.card.card_name === 'Rocky Fighting Energy');
+        assert.equal(rocky.count, 3, 'Rocky demoted from 4 to 3');
+        // Highest-remainder non-energy gets the slot. CORE wins
+        // tier-tie-break over MID Petrel.
+        const someCore = deck.find(e => e.card.card_name === 'Some CORE');
+        assert.equal(someCore.count, 4);
+    });
+
+    it('skips the trim when conditional aggregate is too thin (target_raw < 6.5)', () => {
+        const cond = condAvgs({
+            'fighting energy': { avg: 5.0, presence: 7 },
+            'rocky fighting energy': { avg: 1.0, presence: 7 },
+            // sum = 6.0 < 6.5 threshold → no enforcement
+        });
+        const deck = [
+            entry('Fighting Energy', 'Basic Energy', 7, { tier: 'MID', remainder: 0.0 }),
+            entry('Rocky Fighting Energy', 'Special Energy', 2, { tier: 'MID', remainder: 0.0 }),
+        ];
+        const result = FNS.ceiling(deck, cond, defaultHelpers);
+        // target capped to 7-11 corridor, but conditionalRaw < 6.5
+        // means we skip enforcement to avoid acting on noisy data.
+        assert.equal(result.removed, 0);
+    });
+
+    it('skips the trim when raw target is thin (< 6.5)', () => {
+        // Same thin-data guard as the Floor. If the conditional sum
+        // is < 6.5 the data isn't reliable enough to act on; we leave
+        // the existing allocation alone even when it's above the
+        // doctrine corridor cap. Mirrors the Floor's behaviour.
+        const cond = condAvgs({
+            'fighting energy': { avg: 4.5, presence: 7 },
+            'rocky fighting energy': { avg: 0.6, presence: 7 },
+        });
+        const deck = [
+            entry('Fighting Energy', 'Basic Energy', 7, { tier: 'MID', remainder: 0.5 }),
+            entry('Rocky Fighting Energy', 'Special Energy', 1, { tier: 'MID', remainder: 0.6 }),
+        ];
+        const result = FNS.ceiling(deck, cond, defaultHelpers);
+        // Target is computed (capped to 7) but the thin-data guard
+        // prevents trim — we don't reduce a real deck based on
+        // uncertain data.
+        assert.equal(result.target, 7);
+        assert.equal(result.removed, 0);
+        assert.equal(result.after, 8);
+    });
+
+    it("trims a single excess Rocky for the user's reported Cynthia + Neo Upper case", () => {
+        // The exact data shape from the production failure: Neo Upper
+        // conditional Fighting 4.13 + Rocky 3.30 + Neo Upper 1.0 = 8.43
+        // raw target → 4 + 3 + 1 = 8 (sum of rounded). Build delivered
+        // 9 (4F + 4R + 1NU). Ceiling trims the over-allocated Rocky.
+        const cond = condAvgs({
+            'fighting energy': { avg: 4.13, presence: 7 },
+            'rocky fighting energy': { avg: 3.30, presence: 7 },
+            'neo upper energy': { avg: 1.0, presence: 7 },
+        });
+        const deck = [
+            entry('Fighting Energy', 'Basic Energy', 4, { tier: 'MID', remainder: 0.13 }),
+            entry('Rocky Fighting Energy', 'Special Energy', 4, { tier: 'MID', remainder: 0.30 }),
+            entry('Neo Upper Energy', 'Special Energy', 1, { tier: 'MID', remainder: 0.0 }),
+            entry("Team Rocket's Petrel", 'Supporter', 1, { tier: 'MID', remainder: 0.62, score: 49 }),
+        ];
+        const result = FNS.ceiling(deck, cond, defaultHelpers);
+        assert.equal(result.target, 8);
+        assert.equal(result.before, 9);
+        assert.equal(result.after, 8);
+        const rocky = deck.find(e => e.card.card_name === 'Rocky Fighting Energy');
+        assert.equal(rocky.count, 3);
+        // Petrel gets the slot (highest remainder, MID tier).
+        const petrel = deck.find(e => e.card.card_name === "Team Rocket's Petrel");
+        assert.equal(petrel.count, 2);
     });
 });

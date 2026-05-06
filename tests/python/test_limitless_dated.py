@@ -1,23 +1,36 @@
-"""Unit tests for backend.scrapers.online_tournament_dated_scraper.
+"""Unit tests for backend.core.limitless_dated.
 
-The scraper itself depends on network (Limitless) so we can't drive
-the full pipeline in CI. These tests cover the parts that don't —
-date parsing across both German and English formats, and the HTML
-row-parser against synthetic BS4 trees. Together they cover the
-non-network failure surface so a Limitless layout change shows up
-as a failing test rather than silently empty output.
+Originally written for the standalone online_tournament_dated_scraper,
+which has since been merged into current_meta_analysis_scraper to
+avoid duplicating the per-archetype crawl. The pure parsers now live
+in backend.core.limitless_dated and these tests cover them at the same
+level — German + English date parsing, modern Limitless row layout,
+and the listing-page slug extractor.  Network paths and orchestration
+glue are tested separately in test_current_meta_analysis_scraper.py.
 """
 from __future__ import annotations
 
+import sys
 from pathlib import Path
 
 from bs4 import BeautifulSoup
 
-from backend.scrapers.online_tournament_dated_scraper import (
-    _extract_archetype_slugs_from_soup,
-    _parse_date,
-    _parse_history_row,
+# backend.core is on sys.path via the same pattern card_scraper_shared
+# uses (it isn't a regular package).
+_REPO_ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(_REPO_ROOT / "backend" / "core"))
+
+from limitless_dated import (  # noqa: E402 — sys.path tweak above
+    extract_archetype_slugs_from_soup,
+    parse_date,
+    parse_history_row,
 )
+
+# Backwards-compat aliases — assertions were originally written
+# against the underscored names; aliasing keeps every test body intact.
+_parse_date = parse_date
+_parse_history_row = parse_history_row
+_extract_archetype_slugs_from_soup = extract_archetype_slugs_from_soup
 
 FIXTURE_DIR = Path(__file__).parent / "fixtures"
 

@@ -3885,13 +3885,25 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                     .reduce((s, e) => s + (e.count || 0), 0);
                 if (currentEnergies >= target) break;
 
-                // Pick the highest-remainder energy that's not at legal max.
+                // Pick the highest-remainder energy that's not at legal max
+                // AND not yet at its own per-card conditional target. Per-
+                // card cap mirrors the Ceiling: don't push Darkness Energy
+                // to 8 if its conditional target is 7 — that just feeds
+                // the Ceiling's trim → bump-cascade and over-allocates a
+                // non-energy card downstream.
                 const energyBumps = entries
                     .filter(e => isEnergyEntry(e))
                     .filter(e => Number.isFinite(e.card._lrmRemainder) && e.card._lrmRemainder > 0)
                     .filter(e => {
                         const legalMax = e.card._legalMax || getLegalMax(e.card.card_name, e.card);
                         return isBasicEnergy(e.card) || e.count < legalMax;
+                    })
+                    .filter(e => {
+                        const cn = String(e.card.card_name || '').toLowerCase().trim();
+                        const stat = conditionalAvgs.get(cn);
+                        if (!stat || stat.presence < 3) return true;
+                        const perCardTarget = Math.max(1, Math.round(stat.avg));
+                        return e.count < perCardTarget;
                     })
                     .sort((a, b) => (b.card._lrmRemainder || 0) - (a.card._lrmRemainder || 0));
                 if (energyBumps.length === 0) break;
@@ -4037,7 +4049,12 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
 
                 // Find a non-energy non-Stage-1 card that could
                 // accept a bump. Prefer high-remainder un-bumped
-                // cards (TECH last via reverse sort).
+                // cards (TECH last via reverse sort). Per-card cap:
+                // a card at-or-above its own conditional target
+                // (round(avg)) shouldn't be pushed further — N's
+                // Zoroark + Unfair Stamp regression had Ceiling
+                // bumping Ultra Ball 2→3 even though Ultra Ball's
+                // own conditional avg is 1.88 → target 2.
                 const bumpCandidates = entries
                     .filter(e => !isEnergyEntry(e))
                     .filter(e => Number.isFinite(e.card._lrmRemainder) && e.card._lrmRemainder > 0)
@@ -4045,6 +4062,13 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                     .filter(e => {
                         const legalMax = e.card._legalMax || (helpers && helpers.getLegalMax ? helpers.getLegalMax(e.card.card_name, e.card) : 4);
                         return e.count < legalMax;
+                    })
+                    .filter(e => {
+                        const cn = String(e.card.card_name || '').toLowerCase().trim();
+                        const stat = conditionalAvgs.get(cn);
+                        if (!stat || stat.presence < 3) return true; // unknown card — no per-card cap
+                        const perCardTarget = Math.max(1, Math.round(stat.avg));
+                        return e.count < perCardTarget;
                     })
                     .sort((a, b) => {
                         // Tier order: CORE first, then MID, then TECH.

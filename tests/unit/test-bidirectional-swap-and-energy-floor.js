@@ -434,6 +434,36 @@ describe('_enforceEnergyCeiling', () => {
         assert.equal(result.after, 8);
     });
 
+    it("does NOT push a non-energy card past its own per-card target", () => {
+        // N's Zoroark + Unfair Stamp regression: Ultra Ball cond avg
+        // 1.88 → per-card target 2. LRM bumped Ultra Ball 1 → 2 (rem
+        // 0.88 high). Then Ceiling tried to free a slot from over-
+        // allocated Darkness Energy and bumped Ultra Ball 2 → 3 — over
+        // its own per-card target. Fix: bump candidates filter out
+        // entries already at-or-above per-card target.
+        const cond = condAvgs({
+            'darkness energy': { avg: 7.30, presence: 13 },
+            'ultra ball': { avg: 1.88, presence: 12 },  // per-card target = round(1.88) = 2
+            'buddy-buddy poffin': { avg: 3.75, presence: 13 },
+        });
+        const deck = [
+            entry('Darkness Energy', 'Basic Energy', 8, { tier: 'MID', remainder: 0.30 }),
+            entry('Ultra Ball', 'Item', 2, { tier: 'CORE', remainder: 0.88, score: 100 }),  // already at target
+            entry('Buddy-Buddy Poffin', 'Item', 3, { tier: 'CORE', remainder: 0.75, score: 100 }),  // below target 4
+            entry("Lillie's Determination", 'Supporter', 4, { tier: 'CORE', remainder: 0, score: 100 }),
+        ];
+        const result = FNS.ceiling(deck, cond, defaultHelpers);
+        // Energy target = 7. Before = 8. Trim 1 from Darkness.
+        // Bump target: Ultra Ball at-target → SKIPPED. Poffin at 3 with target 4 → bumped to 4.
+        assert.equal(result.target, 7);
+        assert.equal(result.before, 8);
+        assert.equal(result.after, 7);
+        const ultra = deck.find(e => e.card.card_name === 'Ultra Ball');
+        assert.equal(ultra.count, 2, 'Ultra Ball must NOT be pushed past its target');
+        const poffin = deck.find(e => e.card.card_name === 'Buddy-Buddy Poffin');
+        assert.equal(poffin.count, 4, 'Poffin (under target 4) gets the freed slot');
+    });
+
     it("trims a single excess Rocky for the user's reported Cynthia + Neo Upper case", () => {
         // The exact data shape from the production failure: Neo Upper
         // conditional Fighting 4.13 + Rocky 3.30 + Neo Upper 1.0 = 8.43

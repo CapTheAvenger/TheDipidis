@@ -420,6 +420,12 @@ SYNC_PATTERNS = [
     # tech-audit step (Stage 3).
     "pokemon_card_effects.json",
     "active_threats.json",
+    # Date-tagged online tournament data — produced by
+    # online_tournament_dated_scraper.py for time-weighted consistency
+    # decisions. The state JSON is the resume cursor (only new
+    # tournament-deck pairs fetched on next run).
+    "online_tournament_dated_cards.csv",
+    "online_tournament_dated_scraped.json",
 ]
 
 

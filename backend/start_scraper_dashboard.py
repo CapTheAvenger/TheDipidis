@@ -34,6 +34,7 @@ def print_menu() -> None:
     print("  --- CARD INTEL (texts / effects for Consistency Builder) ---")
     print("  [16] Card Effects Scraper (attack/ability text from Limitless)")
     print("  [17] Threat-Intel Builder (active_threats.json for tech audit)")
+    print("  [18] Online Tournament Dated Scraper (per-tournament dates + cards)")
     print("  --- FRONTEND ---")
     print("  [11] Prepare Frontend Data (Merge)")
     print("  [12] Archetype Icons (Pokemon-Bilder Mapping)")
@@ -63,6 +64,7 @@ SCRIPTS = {
     "15": os.path.join("scrapers", "cardmarket_id_mapper.py"),
     "16": os.path.join("scrapers", "pokemon_card_effects_scraper.py"),
     "17": os.path.join("tools",    "build_threat_intel.py"),
+    "18": os.path.join("scrapers", "online_tournament_dated_scraper.py"),
 }
 
 TASK_NAMES = {
@@ -83,6 +85,7 @@ TASK_NAMES = {
     "15": "Cardmarket ID Mapper",
     "16": "Card Effects Scraper (attack/ability text from Limitless)",
     "17": "Threat-Intel Builder (active_threats.json for tech audit)",
+    "18": "Online Tournament Dated Scraper (per-tournament dates + cards)",
 }
 
 BATCH_BASE = ["1", "2", "3", "4", "14", "11"]

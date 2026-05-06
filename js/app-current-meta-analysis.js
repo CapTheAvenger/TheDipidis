@@ -988,29 +988,40 @@
             }
             const tourData = window.currentMetaTournamentCardsData || [];
 
-            // Collect unique tournament entries for this archetype
-            // Use the maximum total_decks_in_archetype across all rows for the same
-            // tournament, because price-variant rows can carry different counts.
+            // Collect unique tournament entries for this archetype.
+            //
+            // tournament_cards_data_cards.csv stores ONE row per
+            // (tournament_id, price-tagged-archetype, card) — each
+            // distinct price tag in the archetype field
+            // (e.g. "Cynthia's Garchomp27.91$22.10€" vs
+            //       "Cynthia's Garchomp33.40$24.89€") is a separate
+            // deck snapshot. The legacy `total_decks_in_archetype`
+            // field is *per-snapshot* (always 1 or 2) and cannot be
+            // used as a deck count — using max() of it produced the
+            // user-flagged "2× Used in Top 256" bug for Cynthia at
+            // Prague where the actual snapshot count was 16. Solution:
+            // count distinct raw archetype labels per tournament.
             const tourMap = new Map();
             tourData.forEach(row => {
                 const rowArchetype = normalizeCurrentMetaTournamentArchetypeName(row.archetype);
                 if (!rowArchetype || rowArchetype.toLowerCase() !== archetype.toLowerCase()) return;
                 const key = row.tournament_name || String(row.tournament_id);
-                const rowCount = parseInt(row.total_decks_in_archetype || 0, 10);
+                // Use the RAW archetype field (with price-tag suffix)
+                // as the snapshot identifier. Fallback to deck_id when
+                // present (older sources that don't price-tag).
+                const snapshotKey = String(row.archetype || row.deck_id || row.tournament_id || '');
                 if (!tourMap.has(key)) {
                     tourMap.set(key, {
                         name: row.tournament_name || key,
                         date: row.tournament_date || '',
-                        count: rowCount
+                        snapshots: new Set(),
                     });
-                } else {
-                    // Keep the highest count seen across all rows for this tournament
-                    const existing = tourMap.get(key);
-                    if (rowCount > existing.count) {
-                        existing.count = rowCount;
-                    }
                 }
+                tourMap.get(key).snapshots.add(snapshotKey);
             });
+            // Materialize the count from snapshot-set size so existing
+            // render code (which expects entry.count) still works.
+            tourMap.forEach(entry => { entry.count = entry.snapshots.size; });
 
             if (tourMap.size === 0) {
                 section.classList.add('d-none');

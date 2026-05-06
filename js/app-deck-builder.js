@@ -2565,7 +2565,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 pillRow.appendChild(span);
             };
             addPill('+Meta Boost', layers.meta_boost);
-            addPill('+Recency', layers.recency);
+            addPill('+Time-Decay (last 7d full weight, decay to 21d)', layers.time_decay);
             if (layers.latest_major_anchor) {
                 addPill('+Latest Major' + (layers.latest_major_date ? ` (${layers.latest_major_date})` : ''), true);
             }
@@ -2598,10 +2598,13 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 };
                 addBadge(`${c.share_percent}% share`, 'neutral');
                 if (c.meta_share > 0) addBadge(`meta ${Math.round(c.meta_share)}%`, 'meta');
-                const recRatio = parseFloat(c.recency_ratio || 1);
-                if (recRatio && Math.abs(recRatio - 1) > 0.05) {
-                    const arrow = recRatio > 1 ? '↑' : '↓';
-                    addBadge(`${arrow}${Math.round((recRatio - 1) * 100)}%`, recRatio > 1 ? 'rec-up' : 'rec-down');
+                // Time-decay shift badge: weighted_share - baseline share.
+                // Only shown when the swing is >5pp so the modal isn't
+                // cluttered by ±2% noise.
+                const shift = parseFloat(c.weighted_share_shift || 0);
+                if (Number.isFinite(shift) && Math.abs(shift) > 5) {
+                    const arrow = shift > 0 ? '↑' : '↓';
+                    addBadge(`recency:${arrow}${Math.abs(Math.round(shift))}%`, shift > 0 ? 'rec-up' : 'rec-down');
                 }
                 if (c.latest_major_anchored) addBadge('Major staple', 'major');
                 if (c.latest_major_absent) addBadge('Major-absent', 'major-absent');
@@ -3284,6 +3287,123 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             return await window._onlineTournamentDatedPromise;
         }
 
+        // Smooth time-decay weight for tournament age (days since today).
+        // Replaces the binary 14-day cutoff.
+        //   0–7d   = 1.0   (last 7 days carry full weight — Regional-Day-0
+        //                   should dominate for one cycle)
+        //   7–21d  = linear 1.0 → 0.4   (Online players adapting their lists)
+        //   21–42d = linear 0.4 → 0.1   (3-week relevance horizon)
+        //   > 42d  = 0.05               (background residue, not 0 so very
+        //                                old archetypes still emit fallback
+        //                                signal instead of producing NaN)
+        function _recencyWeight(ageDays) {
+            if (!Number.isFinite(ageDays) || ageDays < 0) return 1.0;
+            if (ageDays <= 7) return 1.0;
+            if (ageDays <= 21) return 1.0 - ((ageDays - 7) / 14) * 0.6;
+            if (ageDays <= 42) return 0.4 - ((ageDays - 21) / 21) * 0.3;
+            return 0.05;
+        }
+        if (typeof window !== 'undefined') window._recencyWeight = _recencyWeight;
+
+        // Parse any tournament_date format used across sources:
+        //   - ISO "YYYY-MM-DD"                  → online_tournament_dated_cards
+        //   - English ordinal "25th April 2026" → tournament_cards_data_cards (Major)
+        //   - German numeric "02.05.2026"       → city_league_analysis (JP)
+        // Returns Date (UTC) or null.
+        //
+        // Implementation note: all three formats are handled by
+        // parseJapaneseDate (it strips ordinal suffixes, then splits on
+        // [.\s] and looks up English+German month names). Calling
+        // parseEnglishTournamentDate first would mis-parse the German
+        // dot-format because new Date("02.05.2026") interprets it as
+        // MM.DD/YYYY → Feb 5 instead of May 2.
+        function _parseAnyTournamentDate(rawDate) {
+            if (!rawDate) return null;
+            const s = String(rawDate).trim();
+            if (!s) return null;
+            if (typeof parseJapaneseDate === 'function') {
+                const iso = parseJapaneseDate(s);
+                if (iso) {
+                    const d = new Date(iso + 'T00:00:00Z');
+                    return isNaN(d.getTime()) ? null : d;
+                }
+            }
+            return null;
+        }
+
+        // Aggregate one date-tagged tournament source into per-card weighted
+        // numerator + a shared denominator (Σ archetype_total × weight ×
+        // source_weight across all tournaments where the archetype showed
+        // up). Returns null when the source has no usable rows for this
+        // archetype, so the recency block can fall back to baseline share.
+        //
+        // archetypeFieldNormalizer is for sources that put extra metadata in
+        // the archetype field (Major has price-tag suffixes like
+        // "Joltik Box39.92$34.66€"); Online + JP rows pass through clean.
+        function _aggregateWeightedSource(rows, archetypeKey, sourceWeight, todayMs, archetypeFieldNormalizer) {
+            if (!Array.isArray(rows) || rows.length === 0) return null;
+            const matcher = (typeof window.normalizeArchetypeForMatch === 'function')
+                ? window.normalizeArchetypeForMatch
+                : (s) => (s || '').toLowerCase().trim();
+            const targetKey = matcher(archetypeKey || '');
+            if (!targetKey) return null;
+
+            const tournamentMeta = new Map();      // tid → { weight, archetypeTotal, ageDays }
+            const cardByTournament = new Map();    // cardName_lower → Map<tid, inclusionSum>
+
+            rows.forEach(row => {
+                const archRaw = archetypeFieldNormalizer
+                    ? archetypeFieldNormalizer(row.archetype || '')
+                    : (row.archetype || '');
+                if (matcher(archRaw) !== targetKey) return;
+
+                const tid = String(row.tournament_id || row.tournament_name || '').trim();
+                if (!tid) return;
+                const cardName = (row.card_name || row.full_card_name || '').toString().trim().toLowerCase();
+                if (!cardName) return;
+
+                if (!tournamentMeta.has(tid)) {
+                    const d = _parseAnyTournamentDate(row.tournament_date || row.date || '');
+                    if (!d) return;
+                    const ageDays = Math.max(0, (todayMs - d.getTime()) / 86400000);
+                    const archTotal = parseInt(row.total_decks_in_archetype || 0, 10) || 0;
+                    if (archTotal <= 0) return;
+                    const weight = _recencyWeight(ageDays) * (sourceWeight || 1.0);
+                    tournamentMeta.set(tid, { weight, archetypeTotal: archTotal, ageDays });
+                }
+
+                const inclusion = parseInt(row.deck_inclusion_count || row.deck_count || 0, 10) || 0;
+                if (inclusion <= 0) return;
+                if (!cardByTournament.has(cardName)) cardByTournament.set(cardName, new Map());
+                const tidMap = cardByTournament.get(cardName);
+                tidMap.set(tid, (tidMap.get(tid) || 0) + inclusion);
+            });
+
+            if (tournamentMeta.size === 0) return null;
+
+            let weightedDenominator = 0;
+            tournamentMeta.forEach(meta => { weightedDenominator += meta.archetypeTotal * meta.weight; });
+            if (weightedDenominator <= 0) return null;
+
+            const weightedNumerators = new Map();
+            cardByTournament.forEach((tidMap, cardName) => {
+                let num = 0;
+                tidMap.forEach((inclusion, tid) => {
+                    const meta = tournamentMeta.get(tid);
+                    if (!meta) return;
+                    const safeInclusion = Math.min(inclusion, meta.archetypeTotal);
+                    num += safeInclusion * meta.weight;
+                });
+                weightedNumerators.set(cardName, num);
+            });
+
+            return { weightedNumerators, weightedDenominator, tournamentCount: tournamentMeta.size };
+        }
+        if (typeof window !== 'undefined') {
+            window._aggregateWeightedSource = _aggregateWeightedSource;
+            window._parseAnyTournamentDate = _parseAnyTournamentDate;
+        }
+
         async function autoCompleteConsistency(source, rarityMode) {
             if (source !== 'cityLeague' && source !== 'currentMeta' && source !== 'pastMeta') return;
 
@@ -3438,98 +3558,108 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             });
             devLog(`[Consistency][Meta] Loaded ${metaShareMap.size} meta card entries for boost`);
 
-            // ── 2b. Recency Scoring ──
-            // From the raw per-tournament rows, compute what fraction of a
-            // card's total deck appearances happened in the last 14 days.
-            // recencyRatio > 1  →  card is trending UP (recent share exceeds overall share)
-            // recencyRatio < 1  →  card is trending DOWN
-            let rawRows = source === 'cityLeague'  ? (window.cityLeagueRawDeckCards  || [])
-                        : source === 'currentMeta' ? (window.currentMetaRawDeckCards || [])
-                        : source === 'pastMeta'    ? (window.pastMetaRawDeckCards    || [])
-                        : [];
+            // ── 2b. Recency Scoring (smooth time-decay across two sources) ──
+            // Replaces the previous binary 14-day cutoff with a continuous
+            // decay function (see _recencyWeight): 0–7d full weight, 1.0→0.4
+            // through 21d, 0.4→0.1 through 42d, then 0.05 residue.
+            //
+            // Two date-tagged sources feed the decay:
+            //   1. Major  – tournament_cards_data_cards.csv  (source weight 1.5×)
+            //              curated tournament-tested signal that pulls Online
+            //              players onto its lists; we trust it more.
+            //   2. Online – online_tournament_dated_cards.csv (source weight 1.0×)
+            //              broader sample, weekly cadence.
+            //
+            //   weighted_share[card] = Σ (inclusion × weight) /
+            //                          Σ (archetype_total × weight)
+            //
+            // The result REPLACES baseline share in the consistency-score
+            // formula.  Display values in the deck grid still come from
+            // baseline (additive Online+Major from PR #49) — only the
+            // build-time score uses the time-weighted form.
+            //
+            // Edge cases:
+            //   - archetype with no dated rows in either source → fallback
+            //     to baselineShare (no decay applied).
+            //   - both CSVs empty                             → fallback to baselineShare.
+            //   - card present in deckCards but not in either source  → keeps baselineShare.
+            const todayMs = Date.now();
+            const SOURCE_WEIGHT_MAJOR = 1.5;
+            const SOURCE_WEIGHT_ONLINE = 1.0;
+            const _stripPriceTag = (s) => String(s || '')
+                .replace(/\d+(?:[.,]\d+)?\$\d+(?:[.,]\d+)?€.*$/u, '')
+                .trim();
 
-            // currentMeta's rawRows come from current_meta_card_data.csv, which
-            // is pre-aggregated by `meta` bucket and carries no per-tournament
-            // dates — so the recency block below silently produces no signal
-            // for currentMeta.  online_tournament_dated_cards.csv fills that
-            // gap with per-tournament rows from the same Limitless events.
-            // Swap (don't append) the matching dated rows in to avoid
-            // double-counting overall_DC.
-            if (source === 'currentMeta' && currentArchetype) {
-                try {
-                    const datedRows = await loadOnlineTournamentDatedRows();
-                    if (datedRows && datedRows.length > 0) {
-                        const matcher = (typeof window.normalizeArchetypeForMatch === 'function')
-                            ? window.normalizeArchetypeForMatch
-                            : (s) => (s || '').toLowerCase().trim();
-                        const targetKey = matcher(currentArchetype);
-                        const matched = datedRows.filter(r => matcher(r.archetype || '') === targetKey);
-                        if (matched.length > 0) {
-                            devLog(`[Consistency][Recency] Loaded ${matched.length} dated rows for "${currentArchetype}" — replacing ${rawRows.length} undated rows`);
-                            rawRows = matched;
-                        } else {
-                            devLog(`[Consistency][Recency] No dated rows match "${currentArchetype}" — recency stays disabled for this archetype`);
+            let majorAgg = null;
+            let onlineAgg = null;
+
+            if (currentArchetype) {
+                if (source === 'currentMeta') {
+                    // Online dated CSV — lazy-load once, cached on window.
+                    try {
+                        const onlineRows = await loadOnlineTournamentDatedRows();
+                        onlineAgg = _aggregateWeightedSource(
+                            onlineRows, currentArchetype, SOURCE_WEIGHT_ONLINE, todayMs, null
+                        );
+                    } catch (e) {
+                        devLog('[Consistency][Recency] Online dated source failed:', e);
+                    }
+                    // Major source — already lazy-loaded by Latest-Major-Anchor
+                    // when present, otherwise fetch here (the anchor block
+                    // below will reuse the cached copy).
+                    if (!window.currentMetaTournamentCardsData && typeof loadCSV === 'function') {
+                        try {
+                            const rawTournament = await loadCSV('tournament_cards_data_cards.csv', { latestChunkOnly: true });
+                            if (rawTournament && rawTournament.length) {
+                                window.currentMetaTournamentCardsDataRaw = rawTournament;
+                                window.currentMetaTournamentCardsData = rawTournament;
+                            }
+                        } catch (e) {
+                            devLog('[Consistency][Recency] Major source load failed:', e);
                         }
                     }
-                } catch (e) {
-                    devLog('[Consistency][Recency] Dated CSV load failed:', e);
+                    const majorRows = window.currentMetaTournamentCardsData || [];
+                    majorAgg = _aggregateWeightedSource(
+                        majorRows, currentArchetype, SOURCE_WEIGHT_MAJOR, todayMs, _stripPriceTag
+                    );
+                } else if (source === 'cityLeague') {
+                    // City League JP rows already in window.cityLeagueRawDeckCards
+                    // — date-tagged per-tournament. Single-source decay (no Major).
+                    const cityRows = window.cityLeagueRawDeckCards || [];
+                    onlineAgg = _aggregateWeightedSource(
+                        cityRows, currentArchetype, SOURCE_WEIGHT_ONLINE, todayMs, null
+                    );
+                } else if (source === 'pastMeta') {
+                    // pastMeta is intentionally a historical bucket; only
+                    // apply decay if its rawRows happen to carry dates.
+                    const pastRows = window.pastMetaRawDeckCards || [];
+                    onlineAgg = _aggregateWeightedSource(
+                        pastRows, currentArchetype, SOURCE_WEIGHT_ONLINE, todayMs, null
+                    );
                 }
             }
 
-            const recencyMap = new Map(); // cardName → recencyRatio
-            if (rawRows.length > 0) {
-                const RECENCY_DAYS = 14;
-                const today = new Date();
-                const cutoff = new Date(today.getTime() - RECENCY_DAYS * 86400000);
-                const cutoffStr = cutoff.toISOString().slice(0, 10); // "YYYY-MM-DD"
-
-                // Collect deck_count per card: overall & recent
-                const overallMap = new Map();
-                const recentMap  = new Map();
-                let totalTournaments = 0;
-                let recentTournaments = 0;
-                const tournamentDates = new Map();
-
-                rawRows.forEach(row => {
-                    const cardNameRaw = (row.card_name || row.full_card_name || '').toString().trim();
-                    const cardName = cardNameRaw.toLowerCase();
-                    if (!cardName) return;
-
-                    const rawDate = row.tournament_date || row.date || '';
-                    const parsedDate = typeof parseJapaneseDate === 'function' ? parseJapaneseDate(rawDate) : '';
-                    const tid = row.tournament_id || rawDate || 'unknown';
-                    if (!tournamentDates.has(tid) && parsedDate) tournamentDates.set(tid, parsedDate);
-
-                    const dc = parseInt(row.deck_count || row.deck_inclusion_count || 0, 10) || 0;
-                    overallMap.set(cardName, (overallMap.get(cardName) || 0) + dc);
-
-                    if (parsedDate && parsedDate >= cutoffStr) {
-                        recentMap.set(cardName, (recentMap.get(cardName) || 0) + dc);
-                    }
-                });
-
-                // Count tournament time distribution for normalization
-                tournamentDates.forEach(d => {
-                    totalTournaments++;
-                    if (d >= cutoffStr) recentTournaments++;
-                });
-
-                const timeFraction = totalTournaments > 0 ? (recentTournaments / totalTournaments) : 0;
-                devLog(`[Consistency][Recency] ${recentTournaments}/${totalTournaments} tournaments in last ${RECENCY_DAYS} days (${(timeFraction * 100).toFixed(0)}%)`);
-
-                if (timeFraction > 0 && timeFraction < 1) {
-                    overallMap.forEach((overallDC, cardName) => {
-                        if (overallDC <= 0) return;
-                        const recentDC = recentMap.get(cardName) || 0;
-                        // Normalize: what share of appearances is recent vs expected
-                        const recentFraction = recentDC / overallDC;
-                        const expectedFraction = timeFraction;
-                        const ratio = recentFraction / expectedFraction; // >1 = trending up
-                        recencyMap.set(cardName, ratio);
+            // Combine numerators across sources; denominator is shared
+            // (sum of weighted archetype-totals from both sources). Result
+            // is a per-card weighted_share in 0–100% space.
+            const weightedShareMap = new Map();
+            let combinedDenominator = 0;
+            if (majorAgg) combinedDenominator += majorAgg.weightedDenominator;
+            if (onlineAgg) combinedDenominator += onlineAgg.weightedDenominator;
+            if (combinedDenominator > 0) {
+                const combinedNumerator = new Map();
+                [majorAgg, onlineAgg].forEach(agg => {
+                    if (!agg) return;
+                    agg.weightedNumerators.forEach((num, cardName) => {
+                        combinedNumerator.set(cardName, (combinedNumerator.get(cardName) || 0) + num);
                     });
-                }
-                devLog(`[Consistency][Recency] Computed recency ratios for ${recencyMap.size} cards`);
+                });
+                combinedNumerator.forEach((num, cardName) => {
+                    weightedShareMap.set(cardName, (num / combinedDenominator) * 100);
+                });
             }
+            const hasTimeDecay = weightedShareMap.size > 0;
+            devLog(`[Consistency][Recency] weighted Major=${majorAgg ? majorAgg.tournamentCount : 0} rows, weighted Online=${onlineAgg ? onlineAgg.tournamentCount : 0} rows, decay window=42d → ${weightedShareMap.size} cards with weighted_share`);
 
             // ── 2b2. Latest-Major Anchor (currentMeta) ──
             // The Major-anchor data is loaded for ALL currentMeta filters
@@ -3784,11 +3914,19 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 const metaBoost = (metaShare / 100) * 0.15; // max +15%
                 card._metaShare = metaShare;
 
-                // Recency boost: trending cards get up to +20%, declining cards up to -10%
-                const rawRatio = recencyMap.get(nameLower) || 1.0;
-                const clampedRecency = Math.max(-0.5, Math.min(1.0, rawRatio - 1.0)); // [-0.5, +1.0]
-                const recencyBoost = clampedRecency * 0.20; // [-0.10, +0.20]
-                card._recencyRatio = rawRatio;
+                // Time-decay weighted share — recent tournaments dominate
+                // the score input. Cards present in the dated source get
+                // their weighted_share substituted for baselineShare; cards
+                // absent from the dated source keep baselineShare.  The
+                // shift (weighted - baseline) is what the build-info modal
+                // surfaces as the recency badge.
+                const weightedShare = weightedShareMap.has(nameLower)
+                    ? weightedShareMap.get(nameLower)
+                    : null;
+                card._weightedShare = weightedShare;
+                card._weightedShareShift = (weightedShare != null)
+                    ? (weightedShare - sharePercent)
+                    : 0;
 
                 // Latest-Major presence flags — used for explanation
                 // badges in the build-info modal AND for the Stage-2
@@ -3812,8 +3950,14 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                     }
                 }
 
-                // Final consistency score (built on baseline share)
-                card.consistencyScore = baselineShare * (1 + metaBoost) * (1 + recencyBoost);
+                // Final consistency score: weighted_share when available,
+                // baseline otherwise. Drops the previous (1 + recencyBoost)
+                // multiplier — time-decay is now baked into the share input.
+                const scoreShare = (weightedShare != null && weightedShare >= 0)
+                    ? weightedShare
+                    : baselineShare;
+                card._scoreShare = scoreShare;
+                card.consistencyScore = scoreShare * (1 + metaBoost);
                 card.consistencyScore = Math.min(120, Math.max(0, card.consistencyScore)); // cap at 120 for safety
 
                 // Hard-cap absent-from-Major cards below auto-add threshold.
@@ -3854,12 +3998,16 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                     }
                 }
 
-                if (metaBoost > 0 || Math.abs(recencyBoost) > 0.01 || card._latestMajorAnchored || card._latestMajorAbsent || card._techCounterFor) {
+                const shiftAbs = Math.abs(card._weightedShareShift || 0);
+                if (metaBoost > 0 || shiftAbs > 1 || card._latestMajorAnchored || card._latestMajorAbsent || card._techCounterFor) {
                     const anchorTag = card._latestMajorAnchored ? ` [Major:${baselineShare.toFixed(0)}%]`
                                     : card._latestMajorAbsent ? ' [Major:absent]'
                                     : '';
                     const techTag = card._techCounterFor ? ` [Tech:${card._techCounterFor.join(',')}]` : '';
-                    devLog(`[Consistency][Score] ${card.card_name}: share=${baselineShare.toFixed(1)}% × meta=${(1+metaBoost).toFixed(2)} × recency=${(1+recencyBoost).toFixed(2)}${anchorTag}${techTag} → score=${card.consistencyScore.toFixed(1)}`);
+                    const recencyTag = (weightedShare != null)
+                        ? ` weighted=${weightedShare.toFixed(1)}% (Δ${(card._weightedShareShift >= 0 ? '+' : '')}${card._weightedShareShift.toFixed(1)})`
+                        : ' weighted=baseline';
+                    devLog(`[Consistency][Score] ${card.card_name}: baseline=${baselineShare.toFixed(1)}%${recencyTag} × meta=${(1+metaBoost).toFixed(2)}${anchorTag}${techTag} → score=${card.consistencyScore.toFixed(1)}`);
                 }
             });
 
@@ -4060,10 +4208,10 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
 
             // Build confirm summary
             const hasMetaData = metaShareMap.size > 0;
-            const hasRecency = recencyMap.size > 0;
+            // hasTimeDecay was computed in the recency block above.
             let algoDesc = 'ACE SPEC → Core (≥75) → Extended (≥25) → Energy Fill';
             if (hasMetaData) algoDesc += ' | +Meta Boost';
-            if (hasRecency) algoDesc += ' | +Recency';
+            if (hasTimeDecay) algoDesc += ' | +Time-Decay (last 7d full weight, decay to 21d)';
             if (hasLatestMajorAnchor) algoDesc += ` | +Latest Major Anchor (${latestMajorDate})`;
             if (techAuditActiveThreats.size > 0) {
                 const cats = Array.from(techAuditActiveThreats.keys()).join(', ');
@@ -4075,9 +4223,10 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             cardsToAdd.forEach(c => {
                 let line = `${c.addCount}x ${c.card_name} (${c.sharePercent.toFixed(0)}%`;
                 if (c._metaShare > 0) line += ` | meta:${c._metaShare.toFixed(0)}%`;
-                if (c._recencyRatio && Math.abs(c._recencyRatio - 1) > 0.05) {
-                    const arrow = c._recencyRatio > 1 ? '↑' : '↓';
-                    line += ` ${arrow}${((c._recencyRatio - 1) * 100).toFixed(0)}%`;
+                const shift = c._weightedShareShift || 0;
+                if (Math.abs(shift) > 5) {
+                    const arrow = shift > 0 ? '↑' : '↓';
+                    line += ` ${arrow}${Math.abs(Math.round(shift))}%`;
                 }
                 if (c._latestMajorAnchored) line += ' ✓Major';
                 if (c._techCounterFor && c._techCounterFor.length) {
@@ -4102,7 +4251,9 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 algo_desc: algoDesc,
                 layers: {
                     meta_boost: hasMetaData,
-                    recency: hasRecency,
+                    time_decay: hasTimeDecay,
+                    time_decay_major_tournaments: majorAgg ? majorAgg.tournamentCount : 0,
+                    time_decay_online_tournaments: onlineAgg ? onlineAgg.tournamentCount : 0,
                     latest_major_anchor: !!hasLatestMajorAnchor,
                     latest_major_date: hasLatestMajorAnchor ? (latestMajorDate || '') : '',
                     // Derived from per-card flags — works whether Stage 3
@@ -4122,7 +4273,8 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                     avg_count: c.avgCountWhenUsed || 0,
                     consistency_score: Math.round(c.consistencyScore || 0),
                     meta_share: c._metaShare || 0,
-                    recency_ratio: c._recencyRatio || 1,
+                    weighted_share: (c._weightedShare != null) ? Math.round(c._weightedShare) : null,
+                    weighted_share_shift: Math.round(c._weightedShareShift || 0),
                     latest_major_anchored: !!c._latestMajorAnchored,
                     latest_major_absent: !!c._latestMajorAbsent,
                     tech_counter_for: Array.isArray(c._techCounterFor) ? c._techCounterFor.slice() : [],

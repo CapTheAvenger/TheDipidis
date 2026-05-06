@@ -2668,6 +2668,15 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                     const arrow = c.ace_spec_conditional_shift > 0 ? '↑' : '↓';
                     addBadge(`ACE-cond:${arrow}${c.ace_spec_conditional_base.toFixed(2)}→${c.ace_spec_conditional_avg.toFixed(2)}`, c.ace_spec_conditional_shift > 0 ? 'rec-up' : 'rec-down');
                 }
+                // Function-tier badge — surfaces whether the build
+                // treated this card as CORE consistency, MID role, or
+                // TECH (match-up-dependent). Helps the user see at a
+                // glance why a 1× supporter made it in (or didn't).
+                if (c.card_function && c.card_function !== 'unknown') {
+                    const tier = c.card_function_tier || 'MID';
+                    const tierClass = tier === 'CORE' ? 'rec-up' : (tier === 'TECH' ? 'major-absent' : 'neutral');
+                    addBadge(`fn:${c.card_function}`, tierClass);
+                }
                 const right = document.createElement('div');
                 right.className = 'build-info-card-score';
                 right.textContent = `score ${c.consistency_score}`;
@@ -3362,6 +3371,230 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
         }
         if (typeof window !== 'undefined') window._recencyWeight = _recencyWeight;
 
+        // ────────────────────────────────────────────────────────────
+        // CARD FUNCTION CLASSIFIER — turns the raw text rules from
+        // pokemon_card_effects.json into a small set of consistency-
+        // relevant function tags so the builder can tell a 4× search
+        // item ("structurally important", same role every game) apart
+        // from a 1× damage-buff supporter ("tech sprinkle", only useful
+        // in specific match-ups). Without this, Black Belt's Training
+        // ("attacks do 40 more damage to opponent's ex Pokémon") and
+        // Poké Pad ("search your deck for a Pokémon") look identical
+        // to the score-based gate — both are Supporter/Item-level
+        // cards with similar archetype share — and the build can pick
+        // a 1-of tech over a 4th copy of a core search engine.
+        //
+        // Function tiers used downstream:
+        //   CORE  — core-draw, search-pokemon, search-energy,
+        //           search-trainer, draw, pokemon-engine.
+        //           These are the deck's consistency layer; LRM and
+        //           Stage 2 favour them.
+        //   MID   — pivot, gust, energy-recovery, attacker, stadium,
+        //           energy. Default; no priority adjustment.
+        //   TECH  — damage-buff, healing, defense-tool, disruption.
+        //           Match-up-dependent. Stage 2 raises the threshold
+        //           and LRM lowers their effective remainder so a
+        //           consistency-leaning build emerges.
+        //
+        // Pure helper: no DOM, no network. Takes a card object plus an
+        // optional effects record (the value out of
+        // pokemon_card_effects.json keyed by `SET|number`) and returns
+        // one of the function tags above (or 'unknown' when there is
+        // genuinely nothing to go on).
+        // ────────────────────────────────────────────────────────────
+        function _classifyCardFunction(card, effects) {
+            const cardType = String(
+                (card && (card.type || card.card_type))
+                || (effects && effects.card_type)
+                || ''
+            ).toLowerCase();
+
+            // Energy first — covers basic + special; most reliable signal.
+            if (/\b(basic|special)\s*energy\b/.test(cardType)) return 'energy';
+            if (cardType.includes('basis-energie')) return 'energy';
+
+            // Stadium next.
+            if (cardType.includes('stadium')) return 'stadium';
+
+            // Pull effect text from rules (Trainers) or abilities + attacks
+            // (Pokémon). Concatenate so a single regex pass can hit any.
+            const rulesText = (effects && Array.isArray(effects.rules))
+                ? effects.rules.join(' ').toLowerCase() : '';
+            const abilitiesText = (effects && Array.isArray(effects.abilities))
+                ? effects.abilities.map(a => `${a.name || ''} ${a.text || ''}`).join(' ').toLowerCase()
+                : '';
+
+            // Pokémon — classify by ABILITY text (the consistency-relevant
+            // surface). Drakloak ("Recon Directive — look at top 2"),
+            // Dudunsparce ("Run Away Draw"), Fezandipiti ex ("Flip the
+            // Script"), Meowth ex ("Last-Ditch Catch"), Noctowl all
+            // surface here as 'pokemon-engine'. Plain attackers fall
+            // through to 'attacker'.
+            if (cardType.includes('basic') || cardType.includes('stage 1') || cardType.includes('stage 2') || cardType.includes('evolves from')) {
+                if (/\b(draw \d+|draw cards|until you have \d+ cards|search your deck|put.*into your hand|look at the top)\b/.test(abilitiesText)) {
+                    return 'pokemon-engine';
+                }
+                return 'attacker';
+            }
+
+            // Trainer (Item / Supporter / Tool) — read the rules text.
+            const text = rulesText;
+
+            // Tools. Damage-boost tools (Maximum Belt, Choice Band) are
+            // TECH; defense tools (Hero's Cape, Lillie's Sunny Smile)
+            // are also TECH for our purposes (LRM should still rank
+            // them above damage-only tech, but the consistency build
+            // should prefer search items and core draws first).
+            if (cardType.includes('tool')) {
+                if (/\b\d+\s*more\s*damage\b/.test(text) || /damage to your opponent's active pok/.test(text) || /damage from this pok[eé]mon/.test(text)) {
+                    return 'damage-buff';
+                }
+                if (/can't be knocked out|prevent.*knocked|hp.*\+\s*\d+|increase.*hp|reduce.*damage/.test(text)) {
+                    return 'defense-tool';
+                }
+                return 'tech';
+            }
+
+            // Search items / supporters. Order matters: check
+            // "search ... pok[eé]mon" first so the broader branch
+            // doesn't catch energy-only searches. Fighting Gong
+            // ("search a Basic [F] Energy OR a Basic [F] Pokémon")
+            // hits the pokemon branch; that's the right tier
+            // (broader strategic role).
+            if (/search your deck for[^.]*pok[eé]mon/.test(text)) return 'search-pokemon';
+            if (/search your deck for[^.]*energy/.test(text) && !/pok[eé]mon/.test(text)) return 'search-energy';
+            if (/search your deck for[^.]*supporter/.test(text)) return 'search-trainer';
+
+            // Energy recovery (basic energy from discard → attach).
+            if (/\b(attach|put|move).*basic.*energy.*(?:discard|to)\b/.test(text)) return 'energy-recovery';
+            if (/take a (basic )?energy.*from your discard/.test(text)) return 'energy-recovery';
+
+            // Pivot vs Gust — the same "switch" verb but on different
+            // sides of the table.
+            if (/switch.*opponent['']s benched/.test(text) || /switch.*opponent['']s active.*with.*opponent['']s/.test(text)) return 'gust';
+            if (/switch your active/.test(text)) return 'pivot';
+
+            // Healing.
+            if (/\bheal \d+ damage\b/.test(text)) return 'healing';
+
+            // Damage buff supporters (Black Belt's Training, Premium
+            // Power Pro, Calamitous Wasteland). Must come BEFORE the
+            // disruption check — Black Belt's Training mentions "ex
+            // Pokémon" but isn't disruption.
+            if (/\b\d+\s*more\s*damage\b/.test(text) || /attacks.*do additional .*\d+ damage/.test(text) || /\d+ more damage to your opponent's active pok/.test(text)) {
+                return 'damage-buff';
+            }
+
+            // Core draw — the Lillie's Determination / Iono / Roxanne
+            // mould (shuffle hand into deck, then draw N).
+            if (/shuffle your hand.*into your deck.*draw/.test(text)) return 'core-draw';
+
+            // Disruption — opponent hand reset / deck shuffle.
+            if (/each player shuffles? their hand into their deck/.test(text)) return 'disruption';
+            if (/your opponent shuffles? their hand/.test(text)) return 'disruption';
+            if (/(?:put|reveal).*opponent['']s.*deck/.test(text)) return 'disruption';
+
+            // Generic draw (Pokégear-style "search for a Supporter" is
+            // already caught above; this is the residual "draw N").
+            if (/\bdraw \d+ cards?\b/.test(text) || /\bdraw cards until\b/.test(text)) return 'draw';
+
+            return 'unknown';
+        }
+        if (typeof window !== 'undefined') window._classifyCardFunction = _classifyCardFunction;
+
+        // Map card-function tags to a tier (CORE / MID / TECH) the
+        // builder uses for Stage-2 gating + LRM remainder weighting.
+        const _CARD_FUNCTION_TIERS = {
+            'core-draw': 'CORE',
+            'search-pokemon': 'CORE',
+            'search-energy': 'CORE',
+            'search-trainer': 'CORE',
+            'draw': 'CORE',
+            'pokemon-engine': 'CORE',
+            'pivot': 'MID',
+            'gust': 'MID',
+            'energy-recovery': 'MID',
+            'attacker': 'MID',
+            'stadium': 'MID',
+            'energy': 'MID',
+            'damage-buff': 'TECH',
+            'healing': 'TECH',
+            'defense-tool': 'TECH',
+            'disruption': 'TECH',
+            'tech': 'TECH',
+            'unknown': 'MID',
+        };
+        function _functionTier(fn) {
+            return _CARD_FUNCTION_TIERS[fn] || 'MID';
+        }
+        if (typeof window !== 'undefined') {
+            window._CARD_FUNCTION_TIERS = _CARD_FUNCTION_TIERS;
+            window._functionTier = _functionTier;
+        }
+
+        // Lazy-loader for pokemon_card_effects.json. Returns an index
+        // keyed by `SET|number` (uppercase set, trimmed number) plus a
+        // name fallback (lowercased card name → first matching record).
+        // The file is ~10 MB so this loads exactly once per session
+        // and is cached on window. Returns { bySetNumber, byName,
+        // size }; both maps may be empty if the file is unavailable.
+        async function _loadCardEffectsIndex() {
+            if (window._cardEffectsIndex) return window._cardEffectsIndex;
+            if (window._cardEffectsPromise) return await window._cardEffectsPromise;
+            window._cardEffectsPromise = (async () => {
+                const empty = { bySetNumber: new Map(), byName: new Map(), size: 0 };
+                try {
+                    const resp = await fetch('./data/pokemon_card_effects.json');
+                    if (!resp.ok) {
+                        devLog('[CardEffects] HTTP', resp.status, '— effects index unavailable');
+                        window._cardEffectsIndex = empty;
+                        return empty;
+                    }
+                    const raw = await resp.json();
+                    const bySetNumber = new Map();
+                    const byName = new Map();
+                    if (raw && typeof raw === 'object') {
+                        for (const k of Object.keys(raw)) {
+                            const v = raw[k];
+                            if (!v) continue;
+                            const upperKey = String(k).toUpperCase().trim();
+                            bySetNumber.set(upperKey, v);
+                            const nm = String(v.name || '').toLowerCase().trim();
+                            if (nm && !byName.has(nm)) byName.set(nm, v);
+                        }
+                    }
+                    const idx = { bySetNumber, byName, size: bySetNumber.size };
+                    devLog(`[CardEffects] loaded ${idx.size} card-effect records`);
+                    window._cardEffectsIndex = idx;
+                    return idx;
+                } catch (e) {
+                    devLog('[CardEffects] load failed:', e);
+                    window._cardEffectsIndex = empty;
+                    return empty;
+                }
+            })();
+            return await window._cardEffectsPromise;
+        }
+        if (typeof window !== 'undefined') window._loadCardEffectsIndex = _loadCardEffectsIndex;
+
+        // Look up a card's effects record from the index. Tries
+        // SET|number first (most reliable — exactly identifies the
+        // card print), falls back to lowercased card-name (works for
+        // canonical-named cards even when the print is unknown).
+        function _findCardEffects(card, index) {
+            if (!card || !index) return null;
+            const sc = String(card.set_code || '').toUpperCase().trim();
+            const sn = String(card.set_number || card.set_num || '').trim();
+            if (sc && sn) {
+                const k = `${sc}|${sn}`;
+                if (index.bySetNumber.has(k)) return index.bySetNumber.get(k);
+            }
+            const nm = String(card.card_name || card.name || '').toLowerCase().trim();
+            if (nm && index.byName.has(nm)) return index.byName.get(nm);
+            return null;
+        }
+        if (typeof window !== 'undefined') window._findCardEffects = _findCardEffects;
+
         // Largest-Remainder Method: distribute remaining slots up to
         // ``targetTotal`` to cards with the largest fractional remainders
         // on ``card._lrmRemainder``. Respects legal-max + tech-counter caps.
@@ -3377,10 +3610,33 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             const log = (helpers && helpers.log) || (() => {});
             if (!Array.isArray(entries) || currentTotal >= targetTotal) return 0;
 
+            // Function-aware LRM weighting: when the consistency builder
+            // tagged each card with _cardFunctionTier (CORE / MID /
+            // TECH), bias the sort so search items / core draws / pokemon
+            // engines (CORE) win bump-ties over match-up tech (TECH).
+            // Without this, a TECH card with a slightly higher remainder
+            // (e.g. 0.78) can steal a slot from a CORE card with a
+            // slightly lower remainder (e.g. 0.72), even though the CORE
+            // card's role is structurally more important to the deck's
+            // game-plan stability. Multipliers are conservative on
+            // purpose so pure-remainder ordering still dominates when
+            // tiers match — tier just becomes the tie-breaker (and a
+            // 0.15-shift swing for clear cross-tier mismatches).
+            const _tierMultiplier = (tier) => {
+                if (tier === 'CORE') return 1.15;
+                if (tier === 'TECH') return 0.85;
+                return 1.0; // MID / unknown
+            };
+            const _effectiveRemainder = (entry) => {
+                const baseRem = (entry && entry.card && entry.card._lrmRemainder) || 0;
+                const tier = entry && entry.card && entry.card._cardFunctionTier;
+                return baseRem * _tierMultiplier(tier);
+            };
+
             const sorted = entries
                 .filter(e => e && e.card && Number.isFinite(e.card._lrmRemainder) && e.card._lrmRemainder > 0)
                 .slice()
-                .sort((a, b) => (b.card._lrmRemainder || 0) - (a.card._lrmRemainder || 0));
+                .sort((a, b) => _effectiveRemainder(b) - _effectiveRemainder(a));
 
             let added = 0;
             for (const entry of sorted) {
@@ -4689,6 +4945,34 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 devLog('[Consistency][ACE-SPEC-Priority] Keine echte ACE SPEC gefunden.');
             }
 
+            // Card-function classification — turns the raw rules text from
+            // pokemon_card_effects.json into one of CORE / MID / TECH so
+            // downstream Stage 2 + LRM can favour structurally important
+            // cards (search items, core draw, Pokémon engines) over
+            // match-up-dependent tech (damage-buffs, healing tools,
+            // disruption supporters). Without this, Black Belt's Training
+            // and Poké Pad both look identical to the score-based gate
+            // and the build can pick a 1-of tech instead of a 4th search
+            // item. Tagging happens once per deckCards entry; failures
+            // (missing effect record, unknown card type) fall back to
+            // 'unknown' which maps to MID — same priority as before, no
+            // behaviour change for the unclassified path.
+            try {
+                const effectsIndex = await _loadCardEffectsIndex();
+                deckCards.forEach(card => {
+                    const effects = _findCardEffects(card, effectsIndex);
+                    card._cardFunction = _classifyCardFunction(card, effects || {});
+                    card._cardFunctionTier = _functionTier(card._cardFunction);
+                });
+                if (effectsIndex && effectsIndex.size > 0) {
+                    const tierCounts = { CORE: 0, MID: 0, TECH: 0 };
+                    deckCards.forEach(c => { tierCounts[c._cardFunctionTier] = (tierCounts[c._cardFunctionTier] || 0) + 1; });
+                    devLog(`[Consistency][Function] tagged ${deckCards.length} cards: CORE=${tierCounts.CORE}, MID=${tierCounts.MID}, TECH=${tierCounts.TECH}`);
+                }
+            } catch (e) {
+                devLog('[Consistency][Function] tagging failed:', e);
+            }
+
             // ACE-SPEC-conditional avgCountWhenUsed override.
             //
             // The ACE-SPEC choice is a deck-shaping decision: Cynthia's
@@ -4829,7 +5113,21 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                     radiantAdded = true;
                 }
 
-                if (card.consistencyScore >= 40) {
+                // Function-aware Stage-2 gate. TECH-tier cards (damage-
+                // buffs, healing tools, defense tools, opponent-hand
+                // disruption) need a 10-point higher score than the
+                // generic 40 floor — they're match-up-dependent, not
+                // structurally consistency-relevant. This keeps cards
+                // like Black Belt's Training (score 36) and similar
+                // tech sprinkles out even if the data shows them
+                // ticking just over the regular threshold.
+                // Tech-CHOSEN counters bypass the higher gate via
+                // _techCounterMaxCount (the active-threats audit
+                // already explicitly budgeted them for the deck's
+                // actual meta).
+                const _techGate = card._cardFunctionTier === 'TECH' ? 50 : 40;
+                const _isChosenCounter = card._techCounterMaxCount != null;
+                if (_isChosenCounter ? card.consistencyScore >= 25 : card.consistencyScore >= _techGate) {
                     const exactAvg = card.avgCountWhenUsed || card._recommendedCount || 0;
                     let addCount = Math.floor(exactAvg);
                     card._lrmRemainder = exactAvg - addCount;
@@ -4987,6 +5285,8 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                     ace_spec_conditional_avg: Number.isFinite(c._aceSpecConditionalAvg)
                         ? Math.round(c._aceSpecConditionalAvg * 100) / 100
                         : null,
+                    card_function: c._cardFunction || null,
+                    card_function_tier: c._cardFunctionTier || null,
                 })),
                 // Doctrine-driven audit: energy economy 7–11, Stadium bump
                 // for colorless engines, Mega-ex prize math, opening-hand

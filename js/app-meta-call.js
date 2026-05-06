@@ -407,57 +407,348 @@ window.MetaCall = (function () {
   ]);
 
   let _aceSpecVariantsByDeck = {};  // normName → [{aceSpec, count, sharePct}]
+  let _datedCardsRows        = null; // parsed online_tournament_dated_cards.csv, shared between
+                                     // ACE-SPEC + doctrine pillar pipelines
+
+  async function _loadDatedCardsRows() {
+    if (_datedCardsRows) return _datedCardsRows;
+    try {
+      const resp = await fetch('data/online_tournament_dated_cards.csv?t=' + Date.now());
+      if (!resp.ok) { _datedCardsRows = []; return _datedCardsRows; }
+      _datedCardsRows = parseCSV(await resp.text(), ';');
+    } catch (_e) {
+      _datedCardsRows = [];
+    }
+    return _datedCardsRows;
+  }
 
   async function _loadAceSpecVariants() {
     _aceSpecVariantsByDeck = {};
-    try {
-      const resp = await fetch('data/online_tournament_dated_cards.csv?t=' + Date.now());
-      if (!resp.ok) return;
-      const rows = parseCSV(await resp.text(), ';');
-      // Group rows by (tournament_id, archetype) into per-deck buckets.
-      const buckets = new Map();
-      for (const r of rows) {
-        const tid = (r.tournament_id || '').trim();
-        const arch = (r.archetype || '').trim();
-        const cardName = (r.card_name || '').trim().toLowerCase();
-        if (!tid || !arch || !cardName) continue;
-        const key = `${tid}|${arch}`;
-        if (!buckets.has(key)) buckets.set(key, { archetype: arch, cards: new Set() });
-        buckets.get(key).cards.add(cardName);
-      }
-      // For each archetype, count which ACE-SPEC each deck ran.
-      const archStats = {};  // normArch → { aceSpec → count, _total }
-      for (const bucket of buckets.values()) {
-        const norm = normalize(bucket.archetype);
-        if (!archStats[norm]) archStats[norm] = { _total: 0 };
-        archStats[norm]._total += 1;
-        for (const cn of bucket.cards) {
-          if (_ACE_SPEC_NAMES_LOWER.has(cn)) {
-            archStats[norm][cn] = (archStats[norm][cn] || 0) + 1;
-          }
+    const rows = await _loadDatedCardsRows();
+    if (!rows || rows.length === 0) return;
+    // Group rows by (tournament_id, archetype) into per-deck buckets.
+    const buckets = new Map();
+    for (const r of rows) {
+      const tid = (r.tournament_id || '').trim();
+      const arch = (r.archetype || '').trim();
+      const cardName = (r.card_name || '').trim().toLowerCase();
+      if (!tid || !arch || !cardName) continue;
+      const key = `${tid}|${arch}`;
+      if (!buckets.has(key)) buckets.set(key, { archetype: arch, cards: new Set() });
+      buckets.get(key).cards.add(cardName);
+    }
+    // For each archetype, count which ACE-SPEC each deck ran.
+    const archStats = {};
+    for (const bucket of buckets.values()) {
+      const norm = normalize(bucket.archetype);
+      if (!archStats[norm]) archStats[norm] = { _total: 0 };
+      archStats[norm]._total += 1;
+      for (const cn of bucket.cards) {
+        if (_ACE_SPEC_NAMES_LOWER.has(cn)) {
+          archStats[norm][cn] = (archStats[norm][cn] || 0) + 1;
         }
       }
-      // Convert to sorted variant arrays. "_total" is the bucket count
-      // for the archetype; per-ACE-SPEC sharePct is count / total.
-      for (const [norm, counts] of Object.entries(archStats)) {
-        const total = counts._total || 0;
-        delete counts._total;
-        const variants = Object.entries(counts)
-          .map(([aceSpec, count]) => ({
-            aceSpec,
-            count,
-            sharePct: total > 0 ? (count / total) * 100 : 0,
-          }))
-          .sort((a, b) => b.count - a.count);
-        if (variants.length > 0) _aceSpecVariantsByDeck[norm] = variants;
-      }
-    } catch (_e) {
-      /* tolerate — predictor degrades gracefully without variant data */
+    }
+    for (const [norm, counts] of Object.entries(archStats)) {
+      const total = counts._total || 0;
+      delete counts._total;
+      const variants = Object.entries(counts)
+        .map(([aceSpec, count]) => ({
+          aceSpec,
+          count,
+          sharePct: total > 0 ? (count / total) * 100 : 0,
+        }))
+        .sort((a, b) => b.count - a.count);
+      if (variants.length > 0) _aceSpecVariantsByDeck[norm] = variants;
     }
   }
+
+  // ── Predictor 5.0 — Phase 2 / 3 helpers ──────────────────────
+  // Three additional per-deck annotations on top of the recency-
+  // weighted baseline + ACE-SPEC variants from Phase 1:
+  //   • bestMatchups / worstMatchups — share-weighted top 3 each,
+  //     pulled from _matchupMap once it's populated.
+  //   • mainPokemon / mainPokemonHp / hpTier — main-attacker HP
+  //     pulled from pokemon_card_effects.json (10 MB, lazy-loaded
+  //     once and shared with the deck-builder cache via
+  //     window._cardEffectsIndex).
+  //   • doctrineScore / doctrinePillars / doctrineMissing —
+  //     pillar-coverage of typical archetype builds (draw / search /
+  //     gust / energy). 0–100 score + list of missing pillars.
+  // ────────────────────────────────────────────────────────────
+
+  // Post-rotation (2026-04+) supporters that drive the draw engine.
+  // Curated against the current SCR + DRI sets — additions land here
+  // when a new set ships.
+  const _DOCTRINE_DRAW_SUPPORTERS_LOWER = new Set([
+    "iono", "arven", "roxanne", "crispin", "drayton", "judge",
+    "professor's research", "professor turo's scenario",
+    "professor sada's vitality", "thorton", "atticus", "marnie",
+    "n's plan", "n", "n's pp up", "cynthia's roar",
+    "ethan's adventure", "steven's resolve", "kieran",
+    "tulip", "tate & liza", "pokégear 3.0", "pokegear 3.0",
+  ]);
+  // Pokémon-search items that count as the deck's tutor pillar.
+  const _DOCTRINE_SEARCH_ITEMS_LOWER = new Set([
+    "ultra ball", "nest ball", "buddy-buddy poffin", "tera orb",
+    "level ball", "great ball", "premier ball", "evolution incense",
+    "rare candy", "earthen vessel", "trekking shoes", "hyper aroma",
+    "iron bundle", "energy search", "energy switch",
+  ]);
+  // Cards that gust / pull a benched Pokémon active. Iono is
+  // intentionally OMITTED — it disrupts the hand, not the bench,
+  // and conflating the two would mask decks that brick on closer-
+  // game gust outs. Plain "Switch" / "Switch Cart" are also
+  // omitted because they swap YOUR active, not the opponent's.
+  const _DOCTRINE_GUST_CARDS_LOWER = new Set([
+    "boss's orders", "counter catcher", "cyrus's manipulation",
+    "ariana's calling card", "morty's conviction",
+    "calamitous snowy mountain", "switcheroo bait",
+  ]);
+
+  // HP tier thresholds — derived from the user's strategic analysis:
+  //   ≥ 340  = wall (survives most 2-shots; Mega Lucario tier)
+  //   ≥ 320  = tanky (survives common Dragapult/standard 2-shots)
+  //   ≥ 280  = standard (the EX baseline)
+  //   <  280 = fragile (KO'd by a single hit from a ~280 attacker)
+  const _HP_TIER_FRAGILE = 280;
+  const _HP_TIER_TANKY   = 320;
+  const _HP_TIER_WALL    = 340;
+
+  let _archetypeHpMap       = null; // normName → { mainPokemon, hp, tier }
+  let _archetypeDoctrineMap = null; // normName → { score, pillars, missing }
+
+  function _classifyHpTier(hp) {
+    if (!Number.isFinite(hp) || hp <= 0) return null;
+    if (hp >= _HP_TIER_WALL)    return 'wall';
+    if (hp >= _HP_TIER_TANKY)   return 'tanky';
+    if (hp >= _HP_TIER_FRAGILE) return 'standard';
+    return 'fragile';
+  }
+
+  // Lazy-loader for pokemon_card_effects.json. Reuses the deck-
+  // builder's window._cardEffectsIndex when present so the 10 MB
+  // file is fetched at most once per session, regardless of which
+  // panel the user opened first.
+  async function _loadCardEffectsForHp() {
+    if (typeof window !== 'undefined' && window._cardEffectsIndex
+        && window._cardEffectsIndex.byName) {
+      return window._cardEffectsIndex;
+    }
+    try {
+      const resp = await fetch('./data/pokemon_card_effects.json');
+      if (!resp.ok) return null;
+      const raw = await resp.json();
+      const byName = new Map();
+      if (raw && typeof raw === 'object') {
+        for (const v of Object.values(raw)) {
+          if (!v || !v.name) continue;
+          const nm = String(v.name).toLowerCase().trim();
+          if (!byName.has(nm)) byName.set(nm, v);
+        }
+      }
+      const idx = { byName, size: byName.size };
+      if (typeof window !== 'undefined') window._cardEffectsIndex = idx;
+      return idx;
+    } catch (_e) {
+      return null;
+    }
+  }
+
+  // Pure helper — given the card-effects byName map and an
+  // archetype's main-Pokémon name, return the highest-HP card that
+  // matches as a name prefix. Tournament metas converge on the
+  // tankiest version of an evolution line, so max HP is the right
+  // signal. Exposed for unit tests.
+  function _resolveMainPokemonHp(byName, mainPokemon) {
+    if (!byName || !mainPokemon) return null;
+    const lower = String(mainPokemon).toLowerCase().trim();
+    if (!lower) return null;
+    let bestHp = 0;
+    let bestName = null;
+    for (const [nm, v] of byName) {
+      // Match: exact OR card name starts with "<main> ". Avoids
+      // false positives like "Mega Dragapult ex" matching a
+      // search for "Dragapult".
+      if (nm === lower || nm.startsWith(lower + ' ')) {
+        const hp = parseInt(v.hp || '0', 10);
+        if (Number.isFinite(hp) && hp > bestHp) {
+          bestHp = hp;
+          bestName = v.name;
+        }
+      }
+    }
+    if (bestHp <= 0) return null;
+    return { mainPokemon: bestName, hp: bestHp, tier: _classifyHpTier(bestHp) };
+  }
+
+  async function _loadArchetypeHpMap(archetypeNames) {
+    _archetypeHpMap = {};
+    if (!archetypeNames || archetypeNames.length === 0) return _archetypeHpMap;
+    const idx = await _loadCardEffectsForHp();
+    if (!idx || !idx.byName) return _archetypeHpMap;
+    for (const archName of archetypeNames) {
+      const main = extractMainPokemon(archName);
+      if (!main) continue;
+      const r = _resolveMainPokemonHp(idx.byName, main);
+      if (r) _archetypeHpMap[normalize(archName)] = r;
+    }
+    return _archetypeHpMap;
+  }
+
+  // Pure helper — given parsed dated-cards rows, return per-
+  // archetype doctrine quality. Exposed for unit tests.
+  //
+  //   Pillar = present when ≥ 50 % of an archetype's per-tournament
+  //   builds carry a card from the pillar's whitelist (or a
+  //   Basic/Special Energy line for the energy pillar).
+  //
+  //   Score = (# pillars present) / 4 × 100.
+  //   missing = list of pillar names not covered.
+  //
+  // Skips archetypes with < 2 tournament samples — single-sample
+  // doctrine scores are noise.
+  function _computeArchetypeDoctrine(rows) {
+    const out = {};
+    if (!rows || rows.length === 0) return out;
+    // Bucket rows by (tournament_id, archetype). Each bucket = one
+    // build of that archetype at that tournament.
+    const buckets = new Map();
+    for (const r of rows) {
+      const tid = (r.tournament_id || '').trim();
+      const arch = (r.archetype || '').trim();
+      const cardName = (r.card_name || '').trim().toLowerCase();
+      const cardType = (r.type || '').trim().toLowerCase();
+      if (!tid || !arch || !cardName) continue;
+      const norm = normalize(arch);
+      const key = `${tid}|${norm}`;
+      if (!buckets.has(key)) buckets.set(key, { norm, cards: [] });
+      buckets.get(key).cards.push({ name: cardName, type: cardType });
+    }
+
+    const totalByArch = {};
+    const presentByArch = {};
+    for (const bucket of buckets.values()) {
+      const norm = bucket.norm;
+      totalByArch[norm] = (totalByArch[norm] || 0) + 1;
+      if (!presentByArch[norm]) {
+        presentByArch[norm] = { draw: 0, search: 0, gust: 0, energy: 0 };
+      }
+      let hasDraw = false, hasSearch = false, hasGust = false, hasEnergy = false;
+      for (const c of bucket.cards) {
+        if (_DOCTRINE_DRAW_SUPPORTERS_LOWER.has(c.name)) hasDraw = true;
+        if (_DOCTRINE_SEARCH_ITEMS_LOWER.has(c.name))    hasSearch = true;
+        if (_DOCTRINE_GUST_CARDS_LOWER.has(c.name))      hasGust = true;
+        if (c.type.includes('basic energy') || c.type.includes('special energy')) {
+          hasEnergy = true;
+        }
+      }
+      if (hasDraw)   presentByArch[norm].draw   += 1;
+      if (hasSearch) presentByArch[norm].search += 1;
+      if (hasGust)   presentByArch[norm].gust   += 1;
+      if (hasEnergy) presentByArch[norm].energy += 1;
+    }
+
+    for (const [norm, total] of Object.entries(totalByArch)) {
+      if (total < 2) continue; // single-sample noise — skip
+      const p = presentByArch[norm];
+      const pillars = {
+        draw:   (p.draw   / total) >= 0.5,
+        search: (p.search / total) >= 0.5,
+        gust:   (p.gust   / total) >= 0.5,
+        energy: (p.energy / total) >= 0.5,
+      };
+      const present = Object.values(pillars).filter(Boolean).length;
+      const missing = Object.entries(pillars)
+        .filter(([_, v]) => !v)
+        .map(([k]) => k);
+      out[norm] = { score: (present / 4) * 100, pillars, missing };
+    }
+    return out;
+  }
+
+  async function _loadArchetypeDoctrineMap() {
+    const rows = await _loadDatedCardsRows();
+    _archetypeDoctrineMap = _computeArchetypeDoctrine(rows);
+    return _archetypeDoctrineMap;
+  }
+
+  // Pure helper — given the matchup map, the deck's normalized key
+  // and the predicted-share field, return top-3 best (mode='best')
+  // or worst (mode='worst') matchups, share-weighted. Excludes
+  // shares < 0.5 % to keep niche matchups out of the headline
+  // hint. Exposed for unit tests.
+  function _topMatchupsForDeck(matchupMap, deckKey, field, mode) {
+    if (!matchupMap || !matchupMap[deckKey] || !Array.isArray(field)) return [];
+    const candidates = [];
+    for (const opp of field) {
+      if (!opp || !opp.name) continue;
+      if (opp.name === '_junk') continue;
+      const ok = normalize(opp.name);
+      if (ok === deckKey) continue;
+      const m = matchupMap[deckKey][ok];
+      if (!m || typeof m.pWin !== 'number') continue;
+      // Round to 1 decimal — IEEE-754 noise (0.55 → 55.00000000000001)
+      // would otherwise leak into renderers.
+      const wr = Math.round(m.pWin * 1000) / 10;
+      const share = opp.predictedShare || opp.onlineShare || 0;
+      if (share < 0.5) continue;
+      candidates.push({ opponent: opp.name, wr, share });
+    }
+    if (mode === 'best') {
+      return candidates
+        .filter(r => r.wr >= 50)
+        .sort((a, b) => (b.wr - a.wr) || (b.share - a.share))
+        .slice(0, 3);
+    }
+    return candidates
+      .filter(r => r.wr < 50)
+      .sort((a, b) => (a.wr - b.wr) || (b.share - a.share))
+      .slice(0, 3);
+  }
+
+  // Decoration pass — runs after _runPredictor() and after the
+  // matchup CSV is loaded. Attaches Phase 2 + 3 fields onto each
+  // _shareList entry. Top-N only (default 12) keeps render cost
+  // bounded; lower-share decks aren't worth the HP lookup or the
+  // matchup hint.
+  async function _decorateMetaCallEntries(topN = 12) {
+    if (!_shareList || _shareList.length === 0) return;
+    const slice = _shareList.slice(0, topN);
+    const archetypeNames = slice.map(d => d.name).filter(Boolean);
+
+    // Fire HP + doctrine loads in parallel — they touch different
+    // files and don't depend on each other.
+    const [hpMap] = await Promise.all([
+      _loadArchetypeHpMap(archetypeNames),
+      _loadArchetypeDoctrineMap(),
+    ]);
+
+    for (const d of slice) {
+      const k = normalize(d.name);
+      // HP / main attacker.
+      const hp = hpMap[k];
+      d.mainPokemon   = (hp && hp.mainPokemon) || null;
+      d.mainPokemonHp = (hp && Number.isFinite(hp.hp)) ? hp.hp : null;
+      d.hpTier        = (hp && hp.tier) || null;
+      // Doctrine quality.
+      const doc = _archetypeDoctrineMap && _archetypeDoctrineMap[k];
+      d.doctrineScore   = (doc && Number.isFinite(doc.score)) ? doc.score : null;
+      d.doctrinePillars = (doc && doc.pillars) || null;
+      d.doctrineMissing = (doc && doc.missing) || [];
+      // Best / worst matchups.
+      d.bestMatchups  = _topMatchupsForDeck(_matchupMap, k, _shareList, 'best');
+      d.worstMatchups = _topMatchupsForDeck(_matchupMap, k, _shareList, 'worst');
+    }
+  }
+
   if (typeof window !== 'undefined') {
-    window._metaRecencyWeight = _metaRecencyWeight;
+    window._metaRecencyWeight       = _metaRecencyWeight;
     window._computeWeightedBaseline = _computeWeightedBaseline;
+    window._classifyHpTier          = _classifyHpTier;
+    window._resolveMainPokemonHp    = _resolveMainPokemonHp;
+    window._computeArchetypeDoctrine = _computeArchetypeDoctrine;
+    window._topMatchupsForDeck      = _topMatchupsForDeck;
   }
 
   // Load a per-date history snapshot CSV (deck_name; share columns) and
@@ -1506,6 +1797,32 @@ window.MetaCall = (function () {
         }
         _matchupMap[dk][ok] = { pWin, pTie, pLoss };
       });
+
+      // Predictor 5.0 Phase 2 + 3 — decorate top-N entries with
+      // best/worst matchups (now that _matchupMap is populated),
+      // main-attacker HP + tier, and doctrine-quality score. Fires
+      // in the background; subsequent panel renders pick up the
+      // fields. Failures are non-fatal — the predictor still works
+      // without these annotations.
+      try {
+        await _decorateMetaCallEntries();
+        if (_shareList && _shareList.length > 0) {
+          const top3 = _shareList.slice(0, 3);
+          const hpInfo = top3
+            .filter(d => d.mainPokemonHp != null)
+            .map(d => `${d.name}: ${d.mainPokemonHp} HP (${d.hpTier})`)
+            .join(' | ');
+          const docInfo = top3
+            .filter(d => d.doctrineScore != null)
+            .map(d => `${d.name}: ${d.doctrineScore.toFixed(0)}/100${d.doctrineMissing && d.doctrineMissing.length ? ` (missing: ${d.doctrineMissing.join(',')})` : ''}`)
+            .join(' | ');
+          if (hpInfo)  console.info('[MetaCall] phase 2 — main-attacker HP:', hpInfo);
+          if (docInfo) console.info('[MetaCall] phase 3 — doctrine quality:', docInfo);
+        }
+      } catch (e) {
+        console.warn('[MetaCall] phase 2/3 decoration failed (non-fatal):', e);
+      }
+
       return true;
     } catch (e) {
       console.error('[MetaCall] Data load error:', e);

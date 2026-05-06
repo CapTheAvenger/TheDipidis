@@ -310,6 +310,156 @@ window.MetaCall = (function () {
     return pick;
   }
 
+  // ────────────────────────────────────────────────────────────────────
+  // Meta Call Predictor 5.0 — multi-snapshot recency-weighted trend
+  //
+  // The Predictor 3.0/4.x code uses two discrete baseline points (at-major
+  // and week-ago) to compute a single trend factor per deck. With the
+  // online_share_history/ directory containing daily snapshots
+  // (currently 7+ dates), we can replace those two points with a smooth
+  // recency-weighted aggregate across the full window — same decay curve
+  // the consistency builder uses for tournament-level data.
+  //
+  // Two anchors:
+  //   1. _metaRecencyWeight(ageDays) — piecewise linear decay
+  //         0–7d   → 1.0     (recent meta dominates)
+  //         7–21d  → 1.0 → 0.4  (linear)
+  //         21–42d → 0.4 → 0.1  (linear)
+  //         >42d   → 0.05    (legacy)
+  //
+  //   2. Format rotation cutoff — snapshots BEFORE _FORMAT_ROTATION_DATE
+  //      get an additional × 0.10 multiplier. The 2026-04-10 rotation
+  //      removed Iono / Counter Catcher / Professor's Research, which
+  //      fundamentally changed which decks can compete. Pre-rotation
+  //      shares describe a different format and should not drag the
+  //      post-rotation predictor.
+  // ────────────────────────────────────────────────────────────────────
+  const _FORMAT_ROTATION_DATE = '2026-04-10';
+
+  function _metaRecencyWeight(ageDays) {
+    if (!Number.isFinite(ageDays) || ageDays < 0) return 1.0;
+    if (ageDays <= 7) return 1.0;
+    if (ageDays <= 21) return 1.0 - ((ageDays - 7) / 14) * 0.6;
+    if (ageDays <= 42) return 0.4 - ((ageDays - 21) / 21) * 0.3;
+    return 0.05;
+  }
+
+  // Loaded once at predictor init; lives on the module so _runPredictor
+  // can reference it without re-fetching every snapshot.
+  let _allHistorySnapshots = null;
+
+  async function _loadAllHistorySnapshots() {
+    if (!_historyManifest || !Array.isArray(_historyManifest.dates) || _historyManifest.dates.length === 0) {
+      return new Map();
+    }
+    const out = new Map();
+    // Fetch in parallel so the predictor isn't blocked by serial network.
+    const dates = _historyManifest.dates.slice().sort();
+    const results = await Promise.all(dates.map(d => _loadHistorySnapshot(d).then(snap => [d, snap])));
+    for (const [d, snap] of results) {
+      if (snap && Object.keys(snap).length > 0) out.set(d, snap);
+    }
+    return out;
+  }
+
+  // Recency-weighted baseline share% for a single deck across all
+  // available snapshots. Returns null when the deck has no entries in
+  // any snapshot — caller falls back to legacy week-ago baseline.
+  function _computeWeightedBaseline(allSnapshots, todayISO, normName) {
+    if (!allSnapshots || !allSnapshots.size) return null;
+    const todayMs = Date.parse(todayISO + 'T00:00:00Z');
+    if (!Number.isFinite(todayMs)) return null;
+
+    let sumWeightedShare = 0;
+    let sumWeights = 0;
+    for (const [dateISO, snap] of allSnapshots) {
+      const dateMs = Date.parse(dateISO + 'T00:00:00Z');
+      if (!Number.isFinite(dateMs)) continue;
+      const ageDays = Math.max(0, Math.floor((todayMs - dateMs) / 86400000));
+      let weight = _metaRecencyWeight(ageDays);
+      if (dateISO < _FORMAT_ROTATION_DATE) weight *= 0.10;  // post-rotation cutoff
+      if (weight <= 0) continue;
+      const totalShare = Object.values(snap).reduce((s, e) => s + (e.share || 0), 0) || 1;
+      const entry = snap[normName];
+      if (!entry) continue;  // deck wasn't in this day's snapshot
+      const sharePct = (entry.share / totalShare) * 100;
+      sumWeightedShare += sharePct * weight;
+      sumWeights += weight;
+    }
+    if (sumWeights <= 0) return null;
+    return sumWeightedShare / sumWeights;
+  }
+
+  // ACE-SPEC variant breakdown per archetype. Reads the dated CSV
+  // (already produced as a side-effect of current_meta_analysis_scraper),
+  // groups by (tournament_id, archetype) — each = one deck — and counts
+  // which ACE-SPEC each deck ran. Surfaces a "Most-played ACE-SPEC: X
+  // (60% of decks)" annotation per top-N predicted deck.
+  const _ACE_SPEC_NAMES_LOWER = new Set([
+    "prime catcher", "unfair stamp", "master ball", "maximum belt",
+    "hero's cape", "awakening drum", "reboot pod", "survival brace",
+    "grand tree", "neutral center", "sparkling crystal", "dangerous laser",
+    "scoop up cyclone", "computer search", "dowsing machine", "rock guard",
+    "life dew", "victory star", "g booster", "g scope",
+    "rich energy", "legacy energy", "secret box", "hyper aroma",
+    "neo upper energy", "scramble switch", "deluxe bomb", "megaton blower",
+    "amulet of hope", "poké vital a", "poke vital a",
+  ]);
+
+  let _aceSpecVariantsByDeck = {};  // normName → [{aceSpec, count, sharePct}]
+
+  async function _loadAceSpecVariants() {
+    _aceSpecVariantsByDeck = {};
+    try {
+      const resp = await fetch('data/online_tournament_dated_cards.csv?t=' + Date.now());
+      if (!resp.ok) return;
+      const rows = parseCSV(await resp.text(), ';');
+      // Group rows by (tournament_id, archetype) into per-deck buckets.
+      const buckets = new Map();
+      for (const r of rows) {
+        const tid = (r.tournament_id || '').trim();
+        const arch = (r.archetype || '').trim();
+        const cardName = (r.card_name || '').trim().toLowerCase();
+        if (!tid || !arch || !cardName) continue;
+        const key = `${tid}|${arch}`;
+        if (!buckets.has(key)) buckets.set(key, { archetype: arch, cards: new Set() });
+        buckets.get(key).cards.add(cardName);
+      }
+      // For each archetype, count which ACE-SPEC each deck ran.
+      const archStats = {};  // normArch → { aceSpec → count, _total }
+      for (const bucket of buckets.values()) {
+        const norm = normalize(bucket.archetype);
+        if (!archStats[norm]) archStats[norm] = { _total: 0 };
+        archStats[norm]._total += 1;
+        for (const cn of bucket.cards) {
+          if (_ACE_SPEC_NAMES_LOWER.has(cn)) {
+            archStats[norm][cn] = (archStats[norm][cn] || 0) + 1;
+          }
+        }
+      }
+      // Convert to sorted variant arrays. "_total" is the bucket count
+      // for the archetype; per-ACE-SPEC sharePct is count / total.
+      for (const [norm, counts] of Object.entries(archStats)) {
+        const total = counts._total || 0;
+        delete counts._total;
+        const variants = Object.entries(counts)
+          .map(([aceSpec, count]) => ({
+            aceSpec,
+            count,
+            sharePct: total > 0 ? (count / total) * 100 : 0,
+          }))
+          .sort((a, b) => b.count - a.count);
+        if (variants.length > 0) _aceSpecVariantsByDeck[norm] = variants;
+      }
+    } catch (_e) {
+      /* tolerate — predictor degrades gracefully without variant data */
+    }
+  }
+  if (typeof window !== 'undefined') {
+    window._metaRecencyWeight = _metaRecencyWeight;
+    window._computeWeightedBaseline = _computeWeightedBaseline;
+  }
+
   // Load a per-date history snapshot CSV (deck_name; share columns) and
   // return { normalize(deck) -> share% }. Empty when file is missing.
   async function _loadHistorySnapshot(dateISO) {
@@ -723,7 +873,17 @@ window.MetaCall = (function () {
                                      // Fallback: comparison.csv carries last-week's share inline.
                                      : Math.max(0, ladderPct - trendPct);
       const postMajorSignal = _trendSignal(ladderPct, majBaselinePct);
-      const weeklySignal    = _trendSignal(ladderPct, wkBaselinePct);
+
+      // Predictor 5.0: prefer the recency-weighted multi-snapshot baseline
+      // over the single week-ago point. Every available daily snapshot
+      // contributes to the baseline, weighted by tournament age and
+      // de-weighted × 0.10 for pre-rotation dates. Falls back to the
+      // legacy week-ago baseline when the multi-snapshot store is empty
+      // (fresh install / scraper hasn't run yet).
+      const weightedBaselinePct = _computeWeightedBaseline(_allHistorySnapshots, _todayISO(), k);
+      const weeklySignal = (weightedBaselinePct != null)
+        ? _trendSignal(ladderPct, weightedBaselinePct)
+        : _trendSignal(ladderPct, wkBaselinePct);
 
       // Labs cut-performance boost. Two signals, in priority order:
       //   (1) top8_conv_rate (Predictor 3.0 default) — when populated,
@@ -856,6 +1016,15 @@ window.MetaCall = (function () {
                   + 0.10 * weeklySignal;
       }
       d.predictedShareRaw = Math.max(0, predicted);
+
+      // Predictor 5.0 — surface the per-deck ACE-SPEC split for the
+      // top-N output. Empty when the dated CSV doesn't have the
+      // archetype yet (newly-rotated decks, freshly-released sets).
+      const variantsForDeck = _aceSpecVariantsByDeck[k];
+      d.aceSpecVariants = (Array.isArray(variantsForDeck) && variantsForDeck.length > 0)
+        ? variantsForDeck.slice(0, 3)  // top 3 variants is enough for the modal
+        : [];
+      d.weightedBaselinePct = (typeof weightedBaselinePct === 'number') ? weightedBaselinePct : null;
     });
 
     // Concentration boost (^1.50) — mimics the major-tournament
@@ -906,6 +1075,21 @@ window.MetaCall = (function () {
     } catch (_) { /* private mode / quota — log is nice-to-have */ }
     console.info('[MetaCall] predictor run', entry.mode,
       'top5:', top5.map(d => `${d.name}=${d.predicted}%`).join(', '));
+
+    // Predictor 5.0 — verify the new multi-snapshot baseline + variant
+    // pipeline is wired up. Reports how many distinct daily snapshots
+    // contributed to the weighted baseline, and how many archetypes have
+    // ACE-SPEC variant breakdowns available. Both should be > 0 in
+    // production.
+    if (_allHistorySnapshots && _allHistorySnapshots.size > 0) {
+      const variantCount = Object.keys(_aceSpecVariantsByDeck).length;
+      console.info(`[MetaCall] predictor 5.0 — ${_allHistorySnapshots.size} daily snapshots in baseline; ${variantCount} archetypes with ACE-SPEC variant breakdown`);
+      const top3WithVariants = _shareList.slice(0, 3).filter(d => Array.isArray(d.aceSpecVariants) && d.aceSpecVariants.length > 0);
+      if (top3WithVariants.length > 0) {
+        console.info('[MetaCall] top-3 ACE-SPEC variants:',
+          top3WithVariants.map(d => `${d.name}: ${d.aceSpecVariants.map(v => `${v.aceSpec}=${v.sharePct.toFixed(0)}%`).join(', ')}`).join(' | '));
+      }
+    }
   }
 
   // Detect when a new major tournament has appeared (vs the last one we
@@ -1229,6 +1413,13 @@ window.MetaCall = (function () {
       const weekAgoTarget = _isoMinusDays(_todayISO(), 7);
       const weekAgoActual = _resolveHistoryDate(weekAgoTarget);
       _snapshotWeekAgo = await _loadHistorySnapshot(weekAgoActual);
+
+      // Predictor 5.0: load ALL daily snapshots once for the recency-
+      // weighted baseline (replaces the binary at-major / week-ago
+      // baseline) and the ACE-SPEC variant breakdown (per-deck "most-
+      // played ACE-SPEC" annotation).
+      _allHistorySnapshots = await _loadAllHistorySnapshots();
+      await _loadAceSpecVariants();
 
       // City League aggregates (optional). Both files come from the
       // city_league_archetype scraper and contain pre-aggregated shares

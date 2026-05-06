@@ -2573,6 +2573,43 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             if (techCats.length > 0) addPill(`+Tech Audit (${techCats.join(', ')})`, true);
             if (pillRow.childElementCount > 0) modal.appendChild(pillRow);
 
+            // Build Quality Audit — doctrine-level findings (energy
+            // economy, Stadium bump for colorless engines, Mega-ex prize
+            // math, opening-hand hypergeometric, ACE-SPEC prize backup).
+            // Renders before the per-card list because it answers the
+            // "is this build structurally sound?" question first.
+            const audit = report.quality_audit || { findings: [] };
+            if (Array.isArray(audit.findings) && audit.findings.length > 0) {
+                const auditWrap = document.createElement('div');
+                auditWrap.className = 'build-info-audit';
+                const auditTitle = document.createElement('h4');
+                auditTitle.textContent = t('buildInfo.auditTitle') || 'Build Quality Audit';
+                auditWrap.appendChild(auditTitle);
+                audit.findings.forEach(f => {
+                    const row = document.createElement('div');
+                    row.className = `build-info-audit-row build-info-audit-${f.level || 'info'}`;
+                    const icon = document.createElement('span');
+                    icon.className = 'build-info-audit-icon';
+                    icon.textContent = f.level === 'crit' ? '✗' : (f.level === 'warn' ? '⚠' : '✓');
+                    const txt = document.createElement('div');
+                    txt.className = 'build-info-audit-text';
+                    const msg = document.createElement('div');
+                    msg.className = 'build-info-audit-msg';
+                    msg.textContent = f.message || '';
+                    txt.appendChild(msg);
+                    if (f.hint) {
+                        const hint = document.createElement('div');
+                        hint.className = 'build-info-audit-hint';
+                        hint.textContent = f.hint;
+                        txt.appendChild(hint);
+                    }
+                    row.appendChild(icon);
+                    row.appendChild(txt);
+                    auditWrap.appendChild(row);
+                });
+                modal.appendChild(auditWrap);
+            }
+
             // Card reasoning list — one row per card, badges explain
             // which layer(s) contributed.
             const list = document.createElement('div');
@@ -3340,6 +3377,199 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             return added;
         }
         if (typeof window !== 'undefined') window._redistributeByLargestRemainder = _redistributeByLargestRemainder;
+
+        // ────────────────────────────────────────────────────────────
+        // BUILD QUALITY AUDIT — surfaces the principles from the
+        // "Most Consistency List" doctrine to the user. Doesn't change
+        // the build; produces structured findings (severity, message)
+        // that the build-info modal renders so the user can see whether
+        // the produced list lines up with the doctrine on:
+        //
+        //   • Energy economy  (modern norm 7–11 cards; flagged if outside)
+        //   • Stadium bump    (decks running Colorless ability engines —
+        //                     Drakloak, Dudunsparce, Fezandipiti, Meowth ex,
+        //                     Noctowl — must run their own stadium to
+        //                     "bump" Team Rocket's Watchtower; without
+        //                     one their entire draw engine collapses if
+        //                     Watchtower hits the table)
+        //   • Mega-ex prizing (3-prize attackers like Mega Lucario / Zygarde
+        //                     / Starmie / Charizard X make any KO twice as
+        //                     punishing — flag the Hero's Cape ACE-SPEC as
+        //                     a recommended defensive tech)
+        //   • Opening hand    (hypergeometric P(≥1 basic) and P(at least
+        //                     one core attacker) — sub-60% should bump
+        //                     the basic count up)
+        //
+        // Pure helper: takes a finalized deck (consistencyDeck-shape:
+        // [{ card, count }, ...]). Returns { findings: [{level, message,
+        // hint}] }. No DOM, no network, fully testable.
+        // ────────────────────────────────────────────────────────────
+        const _COLORLESS_ABILITY_ENGINES = new Set([
+            "drakloak",        // Recon Directive — top-2 filter draw
+            "dudunsparce",     // Run Away Draw — refresh + cycle
+            "dudunsparce ex",
+            "fezandipiti ex",  // Flip the Script — revenge draw
+            "meowth ex",       // Last-Ditch Catch — supporter tutor
+            "noctowl",         // Item tutor lines
+            "bibarel",         // Industrious Incisors — legacy draw
+        ]);
+        const _MEGA_EX_PATTERN = /^mega\s+.+\s+ex$/i;
+        const _STADIUM_TYPE_PATTERN = /\bstadium\b/i;
+        const _BASIC_POKEMON_PATTERN = /\bbasic\b/i;
+        const _BASIC_ENERGY_PATTERN = /\b(basis-energie|basic energy)\b/i;
+        const _SPECIAL_ENERGY_PATTERN = /\bspecial energy\b/i;
+        const _ENERGY_TYPE_PATTERN = /\benergy\b/i;
+
+        function _binomialChoose(n, k) {
+            // n choose k as an exact integer-valued float; n,k assumed
+            // small enough (≤60) that no overflow happens.
+            if (k < 0 || k > n) return 0;
+            if (k === 0 || k === n) return 1;
+            k = Math.min(k, n - k);
+            let acc = 1;
+            for (let i = 0; i < k; i++) acc = acc * (n - i) / (i + 1);
+            return acc;
+        }
+
+        function _probAtLeastOneInOpening(deckSize, copies, handSize) {
+            // Hypergeometric P(X ≥ 1) = 1 - C(deck-copies, hand) / C(deck, hand).
+            // Returns 0 when copies==0 or copies > deck-hand+0 (>= guaranteed).
+            if (deckSize <= 0 || copies <= 0 || handSize <= 0) return 0;
+            if (copies + handSize > deckSize) return 1;
+            return 1 - _binomialChoose(deckSize - copies, handSize) / _binomialChoose(deckSize, handSize);
+        }
+
+        function _isBasicPokemonEntry(entry) {
+            const c = entry && entry.card;
+            if (!c) return false;
+            const t = String(c.type || c.card_type || '').toLowerCase();
+            // Type field for basic Pokémon usually contains "Basic" without
+            // "Energy" (Basic energies show as "Basis-Energie" / "Basic Energy").
+            if (!_BASIC_POKEMON_PATTERN.test(t)) return false;
+            if (_ENERGY_TYPE_PATTERN.test(t)) return false;
+            return true;
+        }
+
+        function _isEnergyEntry(entry) {
+            const c = entry && entry.card;
+            if (!c) return false;
+            const t = String(c.type || c.card_type || '').toLowerCase();
+            return _BASIC_ENERGY_PATTERN.test(t) || _SPECIAL_ENERGY_PATTERN.test(t);
+        }
+
+        function _isStadiumEntry(entry) {
+            const c = entry && entry.card;
+            if (!c) return false;
+            const t = String(c.type || c.card_type || '').toLowerCase();
+            return _STADIUM_TYPE_PATTERN.test(t);
+        }
+
+        function _buildQualityAudit(consistencyDeck) {
+            const findings = [];
+            if (!Array.isArray(consistencyDeck) || consistencyDeck.length === 0) {
+                return { findings };
+            }
+
+            const deckSize = consistencyDeck.reduce((s, e) => s + (e.count || 0), 0);
+
+            // 1. Energy economy — modern norm 7–11.
+            const totalEnergies = consistencyDeck
+                .filter(_isEnergyEntry)
+                .reduce((s, e) => s + (e.count || 0), 0);
+            if (totalEnergies < 7) {
+                findings.push({
+                    level: 'warn',
+                    key: 'energy_low',
+                    message: `Energie-Economy: ${totalEnergies} (Modern: 7–11)`,
+                    hint: 'Decks unter 7 Energien laufen Gefahr, in mittlerer Spielphase ohne Beschleuniger zu stehen.',
+                });
+            } else if (totalEnergies > 11) {
+                findings.push({
+                    level: 'warn',
+                    key: 'energy_high',
+                    message: `Energie-Economy: ${totalEnergies} (Modern: 7–11)`,
+                    hint: 'Decks über 11 Energien produzieren spät häufige Dead-Draws — eine Energie ist hier weniger wert als ein Such-Item.',
+                });
+            } else {
+                findings.push({
+                    level: 'info',
+                    key: 'energy_ok',
+                    message: `Energie-Economy: ${totalEnergies} (im 7–11 Korridor)`,
+                });
+            }
+
+            // 2. Stadium bump — colorless ability engines need own stadium.
+            const colorlessEngineNames = consistencyDeck
+                .map(e => String(e.card && e.card.card_name || '').trim().toLowerCase())
+                .filter(n => _COLORLESS_ABILITY_ENGINES.has(n));
+            const hasOwnStadium = consistencyDeck.some(_isStadiumEntry);
+            if (colorlessEngineNames.length > 0 && !hasOwnStadium) {
+                findings.push({
+                    level: 'warn',
+                    key: 'stadium_missing',
+                    message: `Farblose Engine ohne Stadium: ${[...new Set(colorlessEngineNames)].join(', ')}`,
+                    hint: "Team Rocket's Watchtower (DRI 180) deaktiviert alle Fähigkeiten farbloser Pokémon. Ohne eigenes Stadium zum „Bumpen“ liegt die Draw-Engine still, sobald der Gegner Watchtower spielt.",
+                });
+            }
+
+            // 3. Mega-ex prize math.
+            const megaEx = consistencyDeck.find(e => _MEGA_EX_PATTERN.test(String(e.card && e.card.card_name || '').trim()));
+            if (megaEx) {
+                const heroCape = consistencyDeck.some(e => /^hero'?s cape$/i.test(String(e.card && e.card.card_name || '').trim()));
+                findings.push({
+                    level: heroCape ? 'info' : 'warn',
+                    key: 'mega_ex_prizing',
+                    message: `Mega-ex Hauptangreifer: ${megaEx.card.card_name} (3 Preiskarten bei KO)`,
+                    hint: heroCape
+                        ? 'Hero\'s Cape ist im Deck — gute Defensive gegen den Drei-Preis-Verlust.'
+                        : 'Hero\'s Cape (ACE SPEC) erhöht HP signifikant und schützt vor One-Hit-KO; in Mega-ex-Decks praktisch alternativlos.',
+                });
+            }
+
+            // 4. Opening-hand probability — hypergeometric P(≥1 basic in 7).
+            // Counts ALL basic Pokémon (any type) in the deck.
+            const totalBasics = consistencyDeck
+                .filter(_isBasicPokemonEntry)
+                .reduce((s, e) => s + (e.count || 0), 0);
+            const pBasic = _probAtLeastOneInOpening(deckSize || 60, totalBasics, 7);
+            const pctBasic = Math.round(pBasic * 100);
+            // Doctrine: 7–11 Basics → ~60–80% Keep-Rate is the modern
+            // optimum. Anything ≥70% is healthy; 50–69% means too many
+            // Mulligans (gives the opponent free cards every game);
+            // <50% is a structural defect.
+            findings.push({
+                level: pctBasic >= 70 ? 'info' : (pctBasic >= 50 ? 'warn' : 'crit'),
+                key: 'opening_basic_prob',
+                message: `P(≥1 Basis-Pokémon in Starthand): ${pctBasic}% (${totalBasics} Basics)`,
+                hint: pctBasic < 70
+                    ? 'Mulligan-Rate über 30% verschenkt Karten an den Gegner — modernes Optimum sind 7–11 Basics für ~70–80% Keep-Rate.'
+                    : undefined,
+            });
+
+            // 5. Single-of irreplaceables → Exchange Ticket recommendation.
+            // ACE-SPECs are inherently 1-of; if Exchange Ticket isn't in the
+            // deck, the build is one bad prize away from collapse.
+            const aceSpecEntry = consistencyDeck.find(e => {
+                const r = String(e.card && e.card.rarity || '').toUpperCase();
+                if (r.includes('ACE SPEC')) return true;
+                if (Array.isArray(e.card && e.card.rules)) {
+                    return e.card.rules.some(rl => String(rl).toUpperCase().includes('ACE SPEC'));
+                }
+                return false;
+            });
+            const hasExchangeTicket = consistencyDeck.some(e => /^exchange ticket$/i.test(String(e.card && e.card.card_name || '').trim()));
+            if (aceSpecEntry && !hasExchangeTicket) {
+                findings.push({
+                    level: 'info',
+                    key: 'exchange_ticket_missing',
+                    message: `Single-of-Risiko: ${aceSpecEntry.card.card_name} (ACE SPEC) kann in den Preisen feststecken`,
+                    hint: 'Exchange Ticket (JTG 156) erlaubt es, alle verbleibenden Preiskarten neu zu ziehen — Standard-Tech in Konsistenz-Listen mit 1-of-Schlüsselkarten.',
+                });
+            }
+
+            return { findings };
+        }
+        if (typeof window !== 'undefined') window._buildQualityAudit = _buildQualityAudit;
 
         // Parse any tournament_date format used across sources:
         //   - ISO "YYYY-MM-DD"                  → online_tournament_dated_cards
@@ -4374,23 +4604,25 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             });
 
             // ==========================================
-            // 3. STUFE 2 (Extended: consistencyScore >= 25)
-            // Lower threshold than before (30% share) because meta-relevant
-            // cards with 20% share can now score >=25 via meta boost.
+            // 3. STUFE 2 (Extended: consistencyScore >= 35)
+            //
+            // Threshold raised from 25 → 35 (PR-after-Prague review): a
+            // weighted_share of ~30 % barely clears 35 with the meta
+            // boost, which lines up with the "Most Consistency List"
+            // doctrine — cards in <30 % of the archetype's decks are
+            // tech sprinkles, not part of the median build. The user
+            // flagged 1× Larry's Skill (19 % weighted) and 1× Budew
+            // (17 %) as out-of-place in a Cynthia's Garchomp build, and
+            // both fall below the new threshold. Tech-chosen counters
+            // (Switch for retreat_lock, etc.) keep their score boost
+            // and bypass this gate when the active-threats audit
+            // explicitly budgets them.
             //
             // Allocation rule (Stage 2 only): use Math.floor without the
             // Math.max(1, ...) bump. Cards with avgCountWhenUsed < 1 are
-            // SKIPPED entirely. Rationale: a card that's in <50 % of decks
-            // at <1 average copy (e.g. Larry's Skill, Budew, niche tech
-            // sprinkles) is a deck-specific tech, not part of the
-            // archetype's "median consistency build". Forcing 1× of these
-            // (a) crowds out energies that LRM should bump up via
-            // remainders (the 4,44+3,43→8 fix), and (b) creates the
-            // user-flagged "1× Larry's Skill" anomaly where a card
-            // designed to be played in 2-of slots gets a useless lone
-            // copy. Stage 1 keeps Math.max(1, ...) because score≥75 is
-            // the deck's identity layer — those cards always belong in.
-            // Tech-CHOSEN counters still bypass this gate via their cap.
+            // SKIPPED unless explicitly chosen as tech counters.
+            // Stage 1 keeps Math.max(1, ...) because score≥75 is the
+            // deck's identity layer — those cards always belong in.
             // ==========================================
             deckCards.forEach(card => {
                 if (currentTotal >= 60) return;
@@ -4403,7 +4635,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                     radiantAdded = true;
                 }
 
-                if (card.consistencyScore >= 25) {
+                if (card.consistencyScore >= 35) {
                     const exactAvg = card.avgCountWhenUsed || card._recommendedCount || 0;
                     let addCount = Math.floor(exactAvg);
                     card._lrmRemainder = exactAvg - addCount;
@@ -4550,6 +4782,11 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                     latest_major_absent: !!c._latestMajorAbsent,
                     tech_counter_for: Array.isArray(c._techCounterFor) ? c._techCounterFor.slice() : [],
                 })),
+                // Doctrine-driven audit: energy economy 7–11, Stadium bump
+                // for colorless engines, Mega-ex prize math, opening-hand
+                // probability, ACE-SPEC prize-back-up. Computed once at
+                // build time so the modal can render without recomputing.
+                quality_audit: _buildQualityAudit(consistencyDeck),
             };
 
             {

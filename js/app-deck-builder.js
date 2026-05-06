@@ -4403,8 +4403,19 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                     candidates.sort((a, b) => {
                         const sa = _shareOf(a), sb = _shareOf(b);
                         if (sa !== sb) return sb - sa;
-                        const aIsAce = (typeof isAceSpecCard === 'function') ? isAceSpecCard(a) : false;
-                        const bIsAce = (typeof isAceSpecCard === 'function') ? isAceSpecCard(b) : false;
+                        // ACE-SPEC deprioritisation: use the GLOBAL
+                        // isAceSpec from app-core.js, NOT the local
+                        // const isAceSpecCard declared further down in
+                        // autoCompleteConsistency. The local const is
+                        // hoisted into the enclosing function scope, so
+                        // referencing it here triggers a Temporal Dead
+                        // Zone error ("Cannot access … before
+                        // initialization") in strict mode — even the
+                        // typeof guard doesn't save you with let/const.
+                        // The global isAceSpec is a function declaration
+                        // (var-hoisted), so typeof is safe.
+                        const aIsAce = (typeof isAceSpec === 'function') ? isAceSpec(a) : false;
+                        const bIsAce = (typeof isAceSpec === 'function') ? isAceSpec(b) : false;
                         return (aIsAce ? 1 : 0) - (bIsAce ? 1 : 0);
                     });
                     let remaining = target;

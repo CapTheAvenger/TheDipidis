@@ -4245,6 +4245,45 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 }
             }
 
+            // ──────────────────────────────────────────────────────────
+            // ACE SPEC checker — hoisted up here so the Tech-Audit
+            // counter-allocation sort below can use it. Before commit
+            // 9XXXXXX it lived in the BUILD-DECK section (line ~4565)
+            // and the tech-audit comparator hit a TDZ ReferenceError
+            // when sort actually fired with ≥2 candidates per category
+            // (the snapshot-mode aggregation surfaced more of those
+            // candidates than the previous binary-cutoff path did).
+            //
+            // Hardcoded name list + rarity/rules check — NO csv
+            // is_ace_spec, NO aceSpecsList.json (legacy paths that
+            // produced false positives on rotation).
+            // ──────────────────────────────────────────────────────────
+            const aceSpecNames = [
+                "Prime Catcher", "Unfair Stamp", "Master Ball", "Maximum Belt",
+                "Hero's Cape", "Awakening Drum", "Reboot Pod", "Survival Brace",
+                "Grand Tree", "Neutral Center", "Sparkling Crystal", "Dangerous Laser",
+                "Scoop Up Cyclone", "Computer Search", "Dowsing Machine", "Rock Guard",
+                "Life Dew", "Victory Star", "G Booster", "G Scope",
+                "Rich Energy", "Legacy Energy", "Secret Box", "Hyper Aroma",
+                "Neo Upper Energy", "Scramble Switch", "Deluxe Bomb", "Megaton Blower",
+                "Amulet of Hope", "Poké Vital A"
+            ];
+            const aceSpecNamesLower = aceSpecNames.map(n => n.toLowerCase());
+
+            const isAceSpecCard = (c) => {
+                if (!c) return false;
+                const name = String(c.card_name || c.name || '').trim().toLowerCase();
+                if (aceSpecNamesLower.includes(name)) return true;
+                const rarity = String(c.rarity || '').trim().toUpperCase();
+                if (rarity.includes('ACE SPEC')) return true;
+                if (Array.isArray(c.rules)) {
+                    for (const rule of c.rules) {
+                        if (String(rule).toUpperCase().includes('ACE SPEC')) return true;
+                    }
+                }
+                return false;
+            };
+
             // ── 2b3. Meta Tech Audit (currentMeta only) ──
             // Reads data/active_threats.json (built by Stage 2) and tags
             // cards in the user's archetype data that already serve as
@@ -4568,37 +4607,10 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             let consistencyDeck = [];
             let currentTotal = 0;
 
-            // ==========================================
-            // KUGELSICHERER ACE SPEC CHECKER
-            // Hardcoded Namensliste + Rarity/Rules-Check
-            // KEIN CSV is_ace_spec, KEIN aceSpecsList.json
-            // ==========================================
-            const aceSpecNames = [
-                "Prime Catcher", "Unfair Stamp", "Master Ball", "Maximum Belt",
-                "Hero's Cape", "Awakening Drum", "Reboot Pod", "Survival Brace",
-                "Grand Tree", "Neutral Center", "Sparkling Crystal", "Dangerous Laser",
-                "Scoop Up Cyclone", "Computer Search", "Dowsing Machine", "Rock Guard",
-                "Life Dew", "Victory Star", "G Booster", "G Scope",
-                "Rich Energy", "Legacy Energy", "Secret Box", "Hyper Aroma",
-                "Neo Upper Energy", "Scramble Switch", "Deluxe Bomb", "Megaton Blower",
-                "Amulet of Hope", "Poké Vital A"
-            ];
-            const aceSpecNamesLower = aceSpecNames.map(n => n.toLowerCase());
-
-            const isAceSpecCard = (c) => {
-                if (!c) return false;
-                const name = String(c.card_name || c.name || '').trim().toLowerCase();
-                if (aceSpecNamesLower.includes(name)) return true;
-                const rarity = String(c.rarity || '').trim().toUpperCase();
-                if (rarity.includes('ACE SPEC')) return true;
-                if (Array.isArray(c.rules)) {
-                    for (const rule of c.rules) {
-                        if (String(rule).toUpperCase().includes('ACE SPEC')) return true;
-                    }
-                }
-                return false;
-            };
-
+            // aceSpecNames / aceSpecNamesLower / isAceSpecCard are
+            // hoisted to before the Tech-Audit block (search for
+            // "ACE SPEC checker — hoisted up here") so that block's
+            // candidate sort can use isAceSpecCard without TDZing.
             const deckHasAceSpec = () => consistencyDeck.some(entry => isAceSpecCard(entry.card));
 
             const isBasicEnergyCardEntry = (c) => {

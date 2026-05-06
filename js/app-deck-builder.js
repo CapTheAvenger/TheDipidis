@@ -1961,7 +1961,16 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             const PAD        = 24;
             const HEADER_H   = 56;
             const FOOTER_H   = 36;
-            const BADGE_R    = 18;
+            // Badge sized so the count is readable at thumbnail size —
+            // the previous radius of 18 px (~7 % of card width) became
+            // illegible when the export got resized down for chat
+            // sharing. Bump to ~22 % of card width to match what users
+            // expect from Limitless's deck-overview screenshots.
+            const BADGE_R    = 36;
+            const BADGE_FONT = 'bold 32px sans-serif';
+            // Same scarlet as Limitless's deck-overview badges and the
+            // .compact-badge gradient anchor in styles.css.
+            const BADGE_FILL = '#e74c3c';
 
             const rows   = Math.ceil(cards.length / COLS);
             const canvasW = PAD * 2 + COLS * CARD_W + (COLS - 1) * GAP;
@@ -2106,22 +2115,35 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                     ctx.textAlign = 'start';
                 }
 
-                // Badge (count)
+                // Badge (count) — drawn for every card including 1-of so
+                // the export tells the same story as the Limitless meta
+                // screenshots: glance at the thumbnail, see how many of
+                // each card the deck runs.  Previously the 1-of badge
+                // was suppressed and counts ≥2 used a tiny purple dot.
                 const cardEl = cards[i];
                 const badge = cardEl.querySelector('.compact-badge, .card-max-count');
                 const badgeText = badge ? badge.textContent.trim() : '';
-                if (badgeText && badgeText !== '1') {
-                    const bx = x + CARD_W - BADGE_R - 4;
-                    const by = y + BADGE_R + 4;
-                    ctx.fillStyle = '#6c3dc5';
+                if (badgeText) {
+                    const bx = x + CARD_W - BADGE_R - 6;
+                    const by = y + BADGE_R + 6;
+                    // Soft drop-shadow so the badge stays readable on
+                    // light card backgrounds (basic energies, item cards).
+                    ctx.save();
+                    ctx.shadowColor = 'rgba(0,0,0,0.45)';
+                    ctx.shadowBlur = 8;
+                    ctx.shadowOffsetY = 2;
+                    ctx.fillStyle = BADGE_FILL;
                     ctx.beginPath();
                     ctx.arc(bx, by, BADGE_R, 0, Math.PI * 2);
                     ctx.fill();
+                    ctx.restore();
                     ctx.strokeStyle = '#fff';
-                    ctx.lineWidth = 2;
+                    ctx.lineWidth = 4;
+                    ctx.beginPath();
+                    ctx.arc(bx, by, BADGE_R, 0, Math.PI * 2);
                     ctx.stroke();
                     ctx.fillStyle = '#fff';
-                    ctx.font = 'bold 16px sans-serif';
+                    ctx.font = BADGE_FONT;
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'middle';
                     ctx.fillText(badgeText, bx, by);

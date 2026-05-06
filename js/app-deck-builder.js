@@ -4442,8 +4442,19 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                     candidates.sort((a, b) => {
                         const sa = _shareOf(a), sb = _shareOf(b);
                         if (sa !== sb) return sb - sa;
-                        const aIsAce = (typeof isAceSpecCard === 'function') ? isAceSpecCard(a) : false;
-                        const bIsAce = (typeof isAceSpecCard === 'function') ? isAceSpecCard(b) : false;
+                        // ACE-SPEC deprioritisation: use the GLOBAL
+                        // isAceSpec from app-core.js, NOT the local
+                        // const isAceSpecCard declared further down in
+                        // autoCompleteConsistency. The local const is
+                        // hoisted into the enclosing function scope, so
+                        // referencing it here triggers a Temporal Dead
+                        // Zone error ("Cannot access … before
+                        // initialization") in strict mode — even the
+                        // typeof guard doesn't save you with let/const.
+                        // The global isAceSpec is a function declaration
+                        // (var-hoisted), so typeof is safe.
+                        const aIsAce = (typeof isAceSpec === 'function') ? isAceSpec(a) : false;
+                        const bIsAce = (typeof isAceSpec === 'function') ? isAceSpec(b) : false;
                         return (aIsAce ? 1 : 0) - (bIsAce ? 1 : 0);
                     });
                     let remaining = target;
@@ -4767,19 +4778,29 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             });
 
             // ==========================================
-            // 3. STUFE 2 (Extended: consistencyScore >= 35)
+            // 3. STUFE 2 (Extended: consistencyScore >= 40)
             //
-            // Threshold raised from 25 → 35 (PR-after-Prague review): a
-            // weighted_share of ~30 % barely clears 35 with the meta
-            // boost, which lines up with the "Most Consistency List"
-            // doctrine — cards in <30 % of the archetype's decks are
-            // tech sprinkles, not part of the median build. The user
-            // flagged 1× Larry's Skill (19 % weighted) and 1× Budew
-            // (17 %) as out-of-place in a Cynthia's Garchomp build, and
-            // both fall below the new threshold. Tech-chosen counters
-            // (Switch for retreat_lock, etc.) keep their score boost
-            // and bypass this gate when the active-threats audit
-            // explicitly budgets them.
+            // Threshold tightened in two passes after user review:
+            //   - Pass 1 (PR #56): 25 → 35  dropped Larry's Skill (32) and
+            //     Budew (26) from Cynthia's Garchomp.
+            //   - Pass 2 (this commit): 35 → 40  drops Black Belt's
+            //     Training (36) from Lucario Hariyama. The user observed
+            //     that a 4th Riolu / 4th Poké Pad (both core consistency
+            //     cards) make a stronger consistency list than a 1×
+            //     situational tech that's only relevant in a hard pivot
+            //     match-up. The freed Stage-2 slot lets LRM re-distribute
+            //     to higher-remainder cards, typically the search-engine
+            //     items the user actually wants more of.
+            //
+            // 40 is also a clean cut-off mathematically: a card needs
+            // weighted_share ≈ 35 % AND meta_boost > 0, OR weighted_share
+            // ≈ 40 % at zero meta share, to clear it. Below that, the
+            // doctrine reference describes the card as a "tech sprinkle"
+            // that's deck-pilot-dependent rather than consistency-core.
+            //
+            // Tech-chosen counters (Switch for retreat_lock, etc.) keep
+            // their +18 boost and clear the gate when the active-threats
+            // audit explicitly budgets them.
             //
             // Allocation rule (Stage 2 only): use Math.floor without the
             // Math.max(1, ...) bump. Cards with avgCountWhenUsed < 1 are
@@ -4798,7 +4819,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                     radiantAdded = true;
                 }
 
-                if (card.consistencyScore >= 35) {
+                if (card.consistencyScore >= 40) {
                     const exactAvg = card.avgCountWhenUsed || card._recommendedCount || 0;
                     let addCount = Math.floor(exactAvg);
                     card._lrmRemainder = exactAvg - addCount;

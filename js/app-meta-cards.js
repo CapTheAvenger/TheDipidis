@@ -484,13 +484,29 @@
                         }
                     });
                     const top10Count = Math.max(1, top10Archetypes.length);
-                    const rawMetaShare = sumOfArchetypeUsagePcts / top10Count;
+                    // FIX: Divisor must be at least as large as the number of
+                    // contributing archetype buckets — otherwise stale-spelling
+                    // duplicates ("Cynthia Garchomp Ex" + "Cynthia's Garchomp"
+                    // both in byArchetype) and fuzzy-matched non-top-10 entries
+                    // produce sums above 100×top10Count, blowing meta_share past
+                    // 100 % before the cap clamps it. Production console showed
+                    // Poké Pad at rawMetaShare=158 %, totalDecksWithCard=21 809
+                    // vs safeTotalDecksInTop10=12 474 — the card's byArchetype
+                    // map had ~16 entries while top10Count was 10. Using the
+                    // larger denominator preserves the "average over Top 10"
+                    // semantics (when no extras) and gracefully caps when extras
+                    // are present.
+                    const archetypeBucketCount = Object.keys(cardData.byArchetype).length;
+                    const metaShareDenominator = Math.max(top10Count, archetypeBucketCount);
+                    const rawMetaShare = sumOfArchetypeUsagePcts / metaShareDenominator;
                     const correctedMetaShare = Math.min(100, Math.max(0, rawMetaShare));
                     if (rawMetaShare > 100.01) {
                         console.warn('[loadMetaCardAnalysis] metaShare capped above 100%', {
                             card: cardData.card_name,
                             rawMetaShare,
                             correctedMetaShare,
+                            archetypeBucketCount,
+                            top10Count,
                             totalDecksWithCard,
                             safeTotalDecksInTop10
                         });

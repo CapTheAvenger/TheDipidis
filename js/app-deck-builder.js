@@ -2677,7 +2677,13 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 const auditWrap = document.createElement('div');
                 auditWrap.className = 'build-info-audit';
                 const auditTitle = document.createElement('h4');
-                auditTitle.textContent = t('buildInfo.auditTitle') || 'Build Quality Audit';
+                // t() returns the literal key when no translation exists,
+                // which is truthy and would defeat the `||` fallback.
+                // Strip the broken-translation case explicitly.
+                const _auditT = t('buildInfo.auditTitle');
+                auditTitle.textContent = (_auditT && _auditT !== 'buildInfo.auditTitle')
+                    ? _auditT
+                    : 'Build Quality Audit';
                 auditWrap.appendChild(auditTitle);
                 audit.findings.forEach(f => {
                     const row = document.createElement('div');
@@ -2710,46 +2716,46 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             // to 0 by day 28); this section surfaces the actual numbers
             // so a user staring at "Secret Box at 16% archetype share"
             // can see that Secret Box won because of its 31.6% Major
-            // share, not its overall popularity.
+            // share, not its overall popularity. Copy is plain English
+            // (no t() — the modal mixes English headers with German
+            // audit body and adding broken translation keys to the
+            // chrome would only make it worse).
             const acePick = report.ace_spec_pick;
             if (acePick && acePick.chosen && Array.isArray(acePick.candidates) && acePick.candidates.length > 0) {
                 const aceWrap = document.createElement('div');
                 aceWrap.className = 'build-info-ace-pick';
                 const aceTitle = document.createElement('h4');
-                aceTitle.textContent = t('buildInfo.aceSpecTitle') || 'ACE-SPEC pick';
+                aceTitle.textContent = `ACE-SPEC pick — why ${acePick.chosen}?`;
                 aceWrap.appendChild(aceTitle);
 
                 const summary = document.createElement('p');
                 summary.className = 'build-info-ace-summary';
                 const weight = (typeof acePick.major_weight === 'number') ? acePick.major_weight : 0;
-                const ageStr = (acePick.major_age_days != null)
-                    ? `${acePick.major_age_days}d ago`
-                    : (t('buildInfo.aceSpecMajorMissing') || 'no recent Major');
                 if (acePick.has_major_anchor && weight > 0) {
                     const winner = acePick.candidates[0];
                     const winnerShare = (winner && winner.major_share != null) ? `${winner.major_share}%` : '—';
                     const winnerDecks = (winner && winner.major_deck_count > 0 && acePick.major_total_decks > 0)
-                        ? ` (${winner.major_deck_count}/${acePick.major_total_decks} decks)`
+                        ? `${winner.major_deck_count} of ${acePick.major_total_decks} decks`
                         : '';
+                    const dateLabel = acePick.major_date || 'the latest Major';
+                    const ageLabel = (acePick.major_age_days != null) ? `${acePick.major_age_days} days ago` : 'recent';
                     summary.textContent =
-                        (t('buildInfo.aceSpecPickedMajor') || 'Picked')
-                        + ` ${acePick.chosen} — ${winnerShare}`
-                        + (t('buildInfo.aceSpecAtMajor') || ' at the latest Major')
-                        + winnerDecks
-                        + (acePick.major_date ? `, ${acePick.major_date}` : '')
-                        + ` · ${(t('buildInfo.aceSpecBlend') || 'Major weight')} ${Math.round(weight * 100)}% (${ageStr}).`;
+                        `At the latest Major (${dateLabel} · ${ageLabel}), ${acePick.chosen} was the most-played ACE-SPEC` +
+                        (winnerDecks ? ` — ${winnerDecks} (${winnerShare}). ` : ` (${winnerShare}). `) +
+                        `Within 14 days of a Major the Major statistics drive the pick; the cross-tournament Online aggregate is weighted at ${Math.round((1 - weight) * 100)}%.`;
                 } else {
                     summary.textContent =
-                        (t('buildInfo.aceSpecPickedAggregate') || 'Picked')
-                        + ` ${acePick.chosen} — `
-                        + (t('buildInfo.aceSpecPickedAggregateReason') || 'highest cross-tournament archetype share. No recent Major to anchor against.');
+                        `No recent Major in scope — ${acePick.chosen} was picked from the highest cross-tournament Online aggregate. ` +
+                        `(Major-anchor weight kicks in once an archetype shows up at a Major within the last 28 days.)`;
                 }
                 aceWrap.appendChild(summary);
 
                 // Candidate table — chosen highlighted, alternatives
-                // listed with their Major share + blended score so the
-                // delta is visible. If no Major data exists, fall back
-                // to consistency-score column only.
+                // listed with their Major share + deck count and the
+                // online consistency score so the delta is visible at
+                // a glance. We deliberately skip the blended-score
+                // column (the section's prose already explains the
+                // blend rule).
                 const table = document.createElement('div');
                 table.className = 'build-info-ace-table';
                 acePick.candidates.forEach((c, i) => {
@@ -2764,18 +2770,15 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                     statCell.className = 'build-info-ace-stats';
                     const parts = [];
                     if (c.major_share != null) {
-                        const decksFrag = (c.major_deck_count > 0 && acePick.major_total_decks > 0)
-                            ? ` (${c.major_deck_count}/${acePick.major_total_decks})`
-                            : '';
-                        parts.push(`${(t('buildInfo.aceSpecMajor') || 'Major')} ${c.major_share}%${decksFrag}`);
+                        const fraction = (c.major_deck_count > 0 && acePick.major_total_decks > 0)
+                            ? `${c.major_deck_count}/${acePick.major_total_decks}`
+                            : '—';
+                        parts.push(`Major ${fraction} (${c.major_share}%)`);
                     } else if (acePick.has_major_anchor) {
-                        parts.push(`${(t('buildInfo.aceSpecMajor') || 'Major')} —`);
+                        parts.push('Major: not played');
                     }
-                    parts.push(`${(t('buildInfo.aceSpecConsistency') || 'consistency')} ${c.consistency_score}`);
-                    if (acePick.has_major_anchor && weight > 0 && weight < 1) {
-                        parts.push(`${(t('buildInfo.aceSpecBlended') || 'blended')} ${c.blended_score}`);
-                    }
-                    statCell.textContent = parts.join(' · ');
+                    parts.push(`online score ${c.consistency_score}`);
+                    statCell.textContent = parts.join('  ·  ');
                     row.appendChild(statCell);
                     table.appendChild(row);
                 });
@@ -5470,6 +5473,23 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                         const cats = techAuditCounterCats.get(nm);
                         return cats && cats.has(cat);
                     });
+                    // Tech-audit floor — skip the category entirely if no
+                    // candidate clears the archetype-share floor. User
+                    // flagged Crustle building 1× Lacey at 5 % archetype
+                    // share for hand_disruption: a 1-of slot only 1-in-20
+                    // builds actually run is statistically marginal, and
+                    // the boost crowded out a useful card (the user
+                    // wanted a 2nd Rocky Energy in the slot). 15 % is
+                    // strict enough to drop Lacey while still keeping
+                    // genuine archetype counters (Cynthia's Surfer at
+                    // 60 %, etc.).
+                    const TECH_AUDIT_MIN_ARCHETYPE_SHARE = 15.0;
+                    const topShare = candidates.reduce((max, c) => Math.max(max, _shareOf(c)), 0);
+                    if (topShare < TECH_AUDIT_MIN_ARCHETYPE_SHARE) {
+                        devLog(`[Consistency][TechAudit] category=${cat} skipped — best counter has only ${topShare.toFixed(1)}% archetype share (floor: ${TECH_AUDIT_MIN_ARCHETYPE_SHARE}%)`);
+                        techAuditCategoryBudget.set(cat, { target, picked: [], skipped_low_share: true });
+                        return;
+                    }
                     candidates.sort((a, b) => {
                         const sa = _shareOf(a), sb = _shareOf(b);
                         if (sa !== sb) return sb - sa;
@@ -5842,6 +5862,22 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                         // build delivered 7 fighting energies; the data
                         // and doctrine both say 8 (4.83 + 3.17 = 8.00).
                         if (Math.abs(cond - baseAvg) >= 0.15) {
+                            // Pokémon DOWN-shift guard — line size is
+                            // strategy-driven (4-3 Stage-1 line stays 4-3
+                            // regardless of the chosen ACE-SPEC). User
+                            // flagged Crustle's Hero's-Cape build pulling
+                            // Dwebble 3.83 → 3.67 — the LRM remainder dropped
+                            // from 0.83 to 0.67 and Dwebble landed at 3 copies
+                            // instead of the structurally-required 4. ACE-
+                            // SPEC-Conditional UP-shifts on Pokémon are
+                            // still applied (an ACE-SPEC that genuinely
+                            // wants a 3rd attacker copy is a legit signal).
+                            const cardTypeStr = String((card.type || card.card_type || '')).trim().toLowerCase();
+                            const isPokemonType = /^(basic|stage 1|stage 2|vmax|vstar|v-union|mega|tera)\b/.test(cardTypeStr);
+                            if (isPokemonType && cond < baseAvg) {
+                                devLog(`[Consistency][ACE-SPEC-Conditional] SKIP down-shift for Pokémon ${card.card_name}: ${baseAvg.toFixed(2)} → ${cond.toFixed(2)} (line-size guard)`);
+                                return;
+                            }
                             card._aceSpecConditionalAvg = cond;
                             card._aceSpecConditionalShift = cond - baseAvg;
                             card._aceSpecConditionalBaseAvg = baseAvg;

@@ -352,9 +352,17 @@ window.MetaCall = (function () {
     if (!_historyManifest || !Array.isArray(_historyManifest.dates) || _historyManifest.dates.length === 0) {
       return new Map();
     }
+    // Honour the global date-window filter set in Card Analysis. When the
+    // user picked "data ≥ YYYY-MM-DD", the predictor's recency baseline
+    // and trend signal must consume only snapshots on or after that date
+    // — otherwise the filter creates a misleading mismatch where Card
+    // Analysis shows post-cutoff data but Meta Call still anchors on
+    // pre-cutoff history.
+    const cutoff = (typeof window !== 'undefined') ? window.currentMetaDateFrom : null;
+    const dates = _historyManifest.dates.slice().sort()
+      .filter(d => !cutoff || d >= cutoff);
+    if (dates.length === 0) return new Map();
     const out = new Map();
-    // Fetch in parallel so the predictor isn't blocked by serial network.
-    const dates = _historyManifest.dates.slice().sort();
     const results = await Promise.all(dates.map(d => _loadHistorySnapshot(d).then(snap => [d, snap])));
     for (const [d, snap] of results) {
       if (snap && Object.keys(snap).length > 0) out.set(d, snap);
@@ -410,14 +418,35 @@ window.MetaCall = (function () {
   let _datedCardsRows        = null; // parsed online_tournament_dated_cards.csv, shared between
                                      // ACE-SPEC + doctrine pillar pipelines
 
+  // Cache holds the FULL parsed CSV; the date-filter is applied per
+  // consumer to keep one fetch per session and let the same raw rows
+  // serve different filter windows without re-fetching.
+  let _datedCardsRowsRaw = null;
   async function _loadDatedCardsRows() {
-    if (_datedCardsRows) return _datedCardsRows;
-    try {
-      const resp = await fetch('data/online_tournament_dated_cards.csv?t=' + Date.now());
-      if (!resp.ok) { _datedCardsRows = []; return _datedCardsRows; }
-      _datedCardsRows = parseCSV(await resp.text(), ';');
-    } catch (_e) {
-      _datedCardsRows = [];
+    if (!_datedCardsRowsRaw) {
+      try {
+        const resp = await fetch('data/online_tournament_dated_cards.csv?t=' + Date.now());
+        if (!resp.ok) { _datedCardsRowsRaw = []; }
+        else { _datedCardsRowsRaw = parseCSV(await resp.text(), ';'); }
+      } catch (_e) {
+        _datedCardsRowsRaw = [];
+      }
+    }
+    const cutoff = (typeof window !== 'undefined') ? window.currentMetaDateFrom : null;
+    if (!cutoff || !/^\d{4}-\d{2}-\d{2}$/.test(cutoff)) {
+      _datedCardsRows = _datedCardsRowsRaw;
+      return _datedCardsRows;
+    }
+    // Filter rows whose tournament_date is on or after the cutoff. Same
+    // helper Card Analysis uses (window.filterRowsByDateFrom) when
+    // available — falls back to a local string compare otherwise.
+    if (typeof window !== 'undefined' && typeof window.filterRowsByDateFrom === 'function') {
+      _datedCardsRows = window.filterRowsByDateFrom(_datedCardsRowsRaw, cutoff);
+    } else {
+      _datedCardsRows = _datedCardsRowsRaw.filter(r => {
+        const raw = (r && r.tournament_date) || '';
+        return raw && raw >= cutoff; // ISO yyyy-mm-dd compares lexicographically
+      });
     }
     return _datedCardsRows;
   }
@@ -2970,11 +2999,21 @@ window.MetaCall = (function () {
     const container = document.getElementById('profile-metacall');
     if (!container || !_shareList) return;
     const field = buildField();
+    // Date-window banner — surfaces the global cutoff set on Card
+    // Analysis so the user knows the predictor is running on a
+    // narrowed dataset, not the full meta history. Hidden when no
+    // cutoff is active (the Predictor 5.0 baseline already covers all
+    // available data at recency-decayed weights).
+    const _dateCutoff = (typeof window !== 'undefined') ? window.currentMetaDateFrom : null;
+    const dateBanner = (_dateCutoff && /^\d{4}-\d{2}-\d{2}$/.test(_dateCutoff))
+      ? `<div class="metacall-date-window">📅 Data window: data ≥ ${_dateCutoff} <span class="metacall-date-window-hint">(set in Card Analysis)</span></div>`
+      : '';
     container.innerHTML = `
 <div class="metacall-wrap">
   <div class="metacall-header">
     <h2>${t('mc.title')}</h2>
     <p class="color-grey">${t('mc.subtitle')}</p>
+    ${dateBanner}
   </div>
   ${'' /* Predictor banner suppressed — the verbose technical breakdown
        ("Based on N major-tournament rows + online-tournament + ladder
@@ -4922,6 +4961,41 @@ window.MetaCall = (function () {
       // Fallback: just open the Current Meta tab without preselect.
       switchTabAndUpdateMenu('current-meta');
     }
+  }
+
+  // Apply the global "data window from" date filter — invoked by Card
+  // Analysis's setCurrentMetaDateFrom whenever the user picks a new
+  // cutoff. Drops Meta Call's derived caches (history snapshots, ACE-SPEC
+  // variants, doctrine map) so the next predictor run consumes the
+  // freshly-filtered data instead of stale full-window aggregates.
+  // Re-runs _runPredictor when the share list is already populated so
+  // the user sees the change immediately without a page navigation.
+  async function _applyDateFilter() {
+    _allHistorySnapshots = null;
+    _aceSpecVariantsByDeck = {};
+    _archetypeDoctrineMap = null;
+    _datedCardsRows = null; // raw stays cached on _datedCardsRowsRaw
+    if (!_shareList || _shareList.length === 0) return;
+    try {
+      _allHistorySnapshots = await _loadAllHistorySnapshots();
+      await _loadAceSpecVariants();
+      await _loadArchetypeDoctrineMap();
+      _runPredictor();
+      // Decoration pass also re-runs to refresh matchups / HP / doctrine
+      // fields on the new top-N.
+      try { await _decorateMetaCallEntries(); } catch (_e) { /* tolerate */ }
+      // Re-render output if the Meta Call panel is in the DOM. renderAll
+      // bails out cleanly when the container isn't mounted (different
+      // tab visible), so this is safe regardless of the active tab.
+      try { renderAll(); } catch (_e) { /* tolerate */ }
+      const cutoff = (typeof window !== 'undefined') ? window.currentMetaDateFrom : null;
+      console.info(`[MetaCall] date filter applied — cutoff ${cutoff || '(none)'}`);
+    } catch (e) {
+      console.warn('[MetaCall] date filter re-run failed (non-fatal):', e);
+    }
+  }
+  if (typeof window !== 'undefined') {
+    window.metaCallApplyDateFilter = _applyDateFilter;
   }
 
   // Toggle the click-to-expand reason row for a recommendation.

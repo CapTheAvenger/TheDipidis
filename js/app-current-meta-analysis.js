@@ -13,14 +13,11 @@
         // Global "data window from" filter — when set, ALL tournament-row
         // pipelines (Card Analysis aggregations + Deck Builder consistency
         // scoring + Major-anchor) reject rows with tournament_date earlier
-        // than this. Persisted to localStorage so the user's window survives
-        // page reload. Read by app-deck-builder.js via window.currentMetaDateFrom.
+        // than this. Resets on page reload (intentional — the filter is a
+        // session-level analytical lens, not a saved preference). Read by
+        // app-deck-builder.js via window.currentMetaDateFrom.
         let currentMetaDateFrom = null; // 'YYYY-MM-DD' | null
-        try {
-            const saved = (typeof localStorage !== 'undefined') ? localStorage.getItem('currentMetaDateFrom') : null;
-            if (saved && /^\d{4}-\d{2}-\d{2}$/.test(saved)) currentMetaDateFrom = saved;
-        } catch (_e) { /* private mode / disabled storage */ }
-        if (typeof window !== 'undefined') window.currentMetaDateFrom = currentMetaDateFrom;
+        if (typeof window !== 'undefined') window.currentMetaDateFrom = null;
         // _currentMetaRenderGen is declared in app-core.js (alongside _cityLeagueRenderGen and _pastMetaRenderGen)
 
         // Parse "14th March 2026" style dates into Date objects
@@ -748,16 +745,12 @@
             const valid = dateStr && /^\d{4}-\d{2}-\d{2}$/.test(dateStr);
             currentMetaDateFrom = valid ? dateStr : null;
             if (typeof window !== 'undefined') window.currentMetaDateFrom = currentMetaDateFrom;
-            try {
-                if (typeof localStorage !== 'undefined') {
-                    if (currentMetaDateFrom) localStorage.setItem('currentMetaDateFrom', currentMetaDateFrom);
-                    else                     localStorage.removeItem('currentMetaDateFrom');
-                }
-            } catch (_e) { /* tolerate */ }
-            // No cache invalidation needed — date filter is applied at
-            // consume-time via filterRowsByDateFrom(), so the 50 MB raw
-            // tournament_cards_data_cards.csv stays cached and only the
-            // post-filter result changes.
+            // Drop the dated-aggregate cache so the next deck-data load
+            // re-runs with the new window. Raw rows stay cached on
+            // window._datedTournamentRowsRaw.
+            if (typeof window !== 'undefined') {
+                window._currentMetaDatedAggregateCache = null;
+            }
             _renderCurrentMetaDateStatus();
             if (typeof devLog === 'function') devLog('[Current Meta] Date window set to:', currentMetaDateFrom || '(cleared)');
 
@@ -810,6 +803,104 @@
         }
         if (typeof window !== 'undefined') window.filterRowsByDateFrom = filterRowsByDateFrom;
 
+        // Re-aggregate per-tournament rows (online_tournament_dated_cards.csv)
+        // by archetype so the result is shape-compatible with
+        // current_meta_card_data.csv (the pre-aggregated source the All /
+        // Limitless views render from). Used when the user sets a data-
+        // window-from date — the pre-aggregate has no per-row dates, so
+        // the only way to make the filter actually affect the All view
+        // is to re-aggregate from a date-tagged source.
+        //
+        // Output rows match the column shape consumed by
+        // loadCurrentMetaDeckData / Card Overview rendering:
+        //   archetype, card_name, card_identifier, total_count, max_count,
+        //   deck_inclusion_count, average_count, total_decks_in_archetype,
+        //   percentage_in_archetype, set_code, set_number, rarity, type,
+        //   image_url, is_ace_spec, meta
+        function _aggregateDatedRowsByArchetype(rows) {
+            const archetypeBuckets = new Map(); // arch → Set<tid|arch>
+            const cardData = new Map();         // arch|card → entry
+            for (const r of rows) {
+                if (!r) continue;
+                const arch = String(r.archetype || '').trim();
+                const card = String(r.card_name || '').trim();
+                const tid  = String(r.tournament_id || '').trim();
+                if (!arch || !card || !tid) continue;
+                const archDecks = archetypeBuckets.get(arch) || new Set();
+                archDecks.add(`${tid}|${arch}`);
+                archetypeBuckets.set(arch, archDecks);
+                const key = `${arch}|${card}`;
+                let entry = cardData.get(key);
+                if (!entry) {
+                    entry = {
+                        archetype: arch,
+                        card_name: card,
+                        card_identifier: r.card_identifier || '',
+                        total_count: 0,
+                        max_count: 0,
+                        deck_inclusion_count: 0,
+                        set_code: r.set_code || '',
+                        set_number: r.set_number || '',
+                        rarity: r.rarity || '',
+                        type: r.type || '',
+                        image_url: r.image_url || '',
+                        is_ace_spec: r.is_ace_spec || '',
+                        meta: 'Meta Live (Dated)',
+                    };
+                    cardData.set(key, entry);
+                }
+                entry.deck_inclusion_count += parseInt(r.deck_inclusion_count || 0, 10) || 0;
+                entry.total_count          += parseFloat(String(r.total_count || 0).replace(',', '.')) || 0;
+                const m = parseInt(r.max_count || 0, 10) || 0;
+                if (m > entry.max_count) entry.max_count = m;
+            }
+            const out = [];
+            for (const entry of cardData.values()) {
+                const totalDecks = (archetypeBuckets.get(entry.archetype) || new Set()).size;
+                const pct = totalDecks > 0 ? (entry.deck_inclusion_count / totalDecks) * 100 : 0;
+                const avg = entry.deck_inclusion_count > 0 ? entry.total_count / entry.deck_inclusion_count : 0;
+                out.push({
+                    ...entry,
+                    total_decks_in_archetype: totalDecks,
+                    percentage_in_archetype: pct.toFixed(1).replace('.', ','),
+                    average_count: avg.toFixed(2).replace('.', ','),
+                    average_count_overall: (totalDecks > 0 ? entry.total_count / totalDecks : 0).toFixed(2).replace('.', ','),
+                });
+            }
+            return out;
+        }
+        if (typeof window !== 'undefined') window._aggregateDatedRowsByArchetype = _aggregateDatedRowsByArchetype;
+
+        // Lazy-load + cache the dated-aggregate. Returns null when the
+        // raw dated CSV is unavailable. Cached at consume-time on
+        // window._currentMetaDatedAggregateCache; invalidated when the
+        // user changes the date filter.
+        async function _getCurrentMetaDatedAggregate() {
+            if (!currentMetaDateFrom) return null;
+            if (typeof window !== 'undefined' && window._currentMetaDatedAggregateCache) {
+                return window._currentMetaDatedAggregateCache;
+            }
+            if (typeof loadCSV !== 'function') return null;
+            let raw = (typeof window !== 'undefined') ? window._datedTournamentRowsRaw : null;
+            if (!raw) {
+                try {
+                    raw = await loadCSV('online_tournament_dated_cards.csv');
+                    if (typeof window !== 'undefined') window._datedTournamentRowsRaw = raw || [];
+                } catch (e) {
+                    if (typeof devLog === 'function') devLog('[Current Meta] Dated rows load failed:', e);
+                    return null;
+                }
+            }
+            if (!Array.isArray(raw) || raw.length === 0) return null;
+            const filtered = filterRowsByDateFrom(raw, currentMetaDateFrom);
+            const agg = _aggregateDatedRowsByArchetype(filtered);
+            if (typeof window !== 'undefined') window._currentMetaDatedAggregateCache = agg;
+            if (typeof devLog === 'function') {
+                devLog(`[Current Meta] Dated aggregate: ${filtered.length} rows → ${agg.length} (cutoff ${currentMetaDateFrom})`);
+            }
+            return agg;
+        }
+
         // Load deck data with format filtering
         async function loadCurrentMetaDeckData(archetype) {
             // First user interaction with this tab — hide the empty-state guidance
@@ -853,12 +944,25 @@
                 needsAggregation = true;
             } else {
                 // Use current meta (Limitless) data with optional format filtering.
-                // The Limitless aggregate has no per-row tournament_date, so the
-                // date window only applies in 'play' mode (Major rows are
-                // per-tournament). When a date window is set, we silently keep
-                // the Limitless aggregate as-is — the Major-anchor in the deck
-                // builder picks up the cutoff separately.
-                data = window.currentMetaAnalysisData;
+                // When a data-window date is active, swap to the dated-
+                // aggregate path: the pre-aggregated current_meta_card_data.csv
+                // has no per-row dates, so the only way to make the filter
+                // actually narrow the All / Limitless view is to re-aggregate
+                // online_tournament_dated_cards.csv at runtime.
+                if (currentMetaDateFrom) {
+                    const dated = await _getCurrentMetaDatedAggregate();
+                    if (dated && dated.length > 0) {
+                        data = dated;
+                        if (typeof devLog === 'function') {
+                            devLog(`[Current Meta][DateWindow] Limitless view → dated aggregate (${dated.length} rows, cutoff ${currentMetaDateFrom})`);
+                        }
+                    } else {
+                        // Fallback: dated source unavailable, keep aggregate.
+                        data = window.currentMetaAnalysisData;
+                    }
+                } else {
+                    data = window.currentMetaAnalysisData;
+                }
                 needsAggregation = false;
             }
             

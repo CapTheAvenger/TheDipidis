@@ -1024,17 +1024,34 @@
     flex-wrap: wrap;
 }
 .current-meta-date-input {
-    padding: 6px 10px;
-    border: 1px solid #444;
-    border-radius: 6px;
-    background: #16213e;
-    color: #fff;
+    padding: 8px 12px;
+    border: 1.5px solid #d0d7e2;
+    border-radius: 8px;
+    background: #fff;
+    color: #1a2332;
     font-size: 0.95em;
     font-family: inherit;
+    min-width: 160px;
+}
+.current-meta-date-input:hover {
+    border-color: #8a9cb6;
+}
+.current-meta-date-input:focus {
+    outline: none;
+    border-color: #4f6d9c;
+    box-shadow: 0 0 0 3px rgba(79, 109, 156, 0.15);
 }
 .current-meta-date-clear {
-    padding: 4px 12px;
-    font-size: 0.85em;
+    padding: 6px 14px;
+    font-size: 0.9em;
+    background: #4caf50;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+.current-meta-date-clear:hover {
+    background: #43a047;
 }
 /* Tournament-format filter: active button must visually dominate the
    row so the user always knows which dataset they're looking at.

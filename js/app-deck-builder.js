@@ -1369,8 +1369,19 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                     if (!isNaN(direct) && direct > 0) return direct;
                     const dexMap = window.pokedexNumbers || {};
                     const rawName = String(card.card_name || card.name || '').trim().toLowerCase();
-                    const directMap = parseInt(dexMap[rawName], 10);
-                    if (!isNaN(directMap) && directMap > 0) return directMap;
+                    return _getDexNumFromName(rawName, dexMap);
+                }
+
+                // Lookup-only variant — same multi-stage fallback as
+                // _getDexNum (direct → trainer-prefix-strip → form-prefix-
+                // strip → ex/vmax/... suffix-strip → first-word-strip)
+                // but takes a name string instead of a card object.
+                // Used by _getFamilyBaseDex when walking up the
+                // evolution chain.
+                function _getDexNumFromName(rawName, dexMap) {
+                    dexMap = dexMap || window.pokedexNumbers || {};
+                    const direct = parseInt(dexMap[rawName], 10);
+                    if (!isNaN(direct) && direct > 0) return direct;
                     // Strip trainer-possessive prefixes ("Cynthia's Gible" →
                     // "gible", "Hop's Trevenant" → "trevenant", etc.).
                     const trainerStripped = rawName.replace(/^[a-zäöüß]+'s\s+/, '').trim();
@@ -1394,24 +1405,52 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                         .replace(/[^a-z0-9\s-]/g, ' ').replace(/\s+/g, ' ').trim();
                     const baseMap = parseInt(dexMap[baseName], 10);
                     if (!isNaN(baseMap) && baseMap > 0) return baseMap;
-                    // Form-prefix fallback: when the full name doesn't
-                    // resolve, drop the first word and try again. Catches
-                    // form variants ("Bloodmoon Ursaluna" → "ursaluna",
-                    // "Alolan Marowak" → "marowak", "Origin Dialga" →
-                    // "dialga") without hardcoding a form-prefix list.
-                    // Compound-species names that DO resolve directly
-                    // (e.g. "Iron Thorns" → 995 via baseMap) never reach
-                    // this branch, so first-word-strip can't break them.
+                    // Final fallback for unknown form prefixes not in the
+                    // explicit list — drop the first word and try again.
+                    // Compound species (Iron Thorns, Raging Bolt) resolve
+                    // directly via baseMap above and never reach this branch.
                     const words = baseName.split(/\s+/).filter(Boolean);
                     if (words.length >= 2) {
-                        const formStripped = words.slice(1).join(' ');
-                        const formMap = parseInt(dexMap[formStripped], 10);
+                        const stripped = words.slice(1).join(' ');
+                        const formMap = parseInt(dexMap[stripped], 10);
                         if (!isNaN(formMap) && formMap > 0) return formMap;
                     }
                     return 99999;
                 }
 
-                // For Pokemon: sort by element type → Pokedex number → evolution stage → share%.
+                // Family-line grouping — walks up the evolution chain via
+                // pokemon_card_effects.json's "Evolves from X" card_type
+                // text and returns the dex of the BASE species. With this,
+                // Dusknoir (#477) sorts alongside Dusclops (#356) and
+                // Duskull (#355) under the family base dex 355 instead of
+                // landing 122 numbers later in strict pokédex order. User
+                // flagged: "duskull, dusclops und Dusknoir stehen immer
+                // noch nicht nebeneinander" — TCG convention is to group
+                // evolution lines together, not split them by Gen.
+                //
+                // Falls back to plain _getDexNum when card-effects isn't
+                // loaded yet (e.g. the index is lazy-loaded during
+                // autoCompleteConsistency; on a fresh page load before any
+                // build, sort runs without it). Walk depth capped at 4 to
+                // protect against malformed cycles.
+                function _getFamilyBaseDex(card) {
+                    const idx = (typeof window !== 'undefined') && window._cardEffectsIndex;
+                    if (!idx || !idx.byName || idx.byName.size === 0) return _getDexNum(card);
+                    let currentName = String(card.card_name || card.name || '').toLowerCase().trim();
+                    const dexMap = window.pokedexNumbers || {};
+                    for (let depth = 0; depth < 4; depth++) {
+                        const eff = idx.byName.get(currentName);
+                        if (!eff) break;
+                        const cardType = String(eff.card_type || '').toLowerCase().trim();
+                        const m = /^evolves from\s+(.+)$/.exec(cardType);
+                        if (!m) break;
+                        currentName = m[1].trim();
+                    }
+                    return _getDexNumFromName(currentName, dexMap);
+                }
+
+                // For Pokemon: sort by element type → family-base Pokedex →
+                // evolution stage → share%.
                 //
                 // Pokedex MUST come before share% so evolution lines stay together
                 // (Dreepy 885 → Drakloak 886 → Dragapult 887; Dusclops 356 → Dusknoir 477).
@@ -1421,6 +1460,11 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 // pokedex order Dusclops comes first. This regressed in commit
                 // 410cebd ("element > share% desc > pokedex"); the share-first order
                 // was the bug, not the intent.
+                //
+                // Family-base lookup (via card-effects "Evolves from X" walk)
+                // additionally groups Dusknoir (#477) under its base species
+                // Duskull (#355) so the whole Duskull → Dusclops → Dusknoir
+                // line stays adjacent instead of split by Gen.
                 if (categoryA === 'Pokemon' && categoryB === 'Pokemon') {
                     const elementA = cardTypeA.charAt(0);
                     const elementB = cardTypeB.charAt(0);
@@ -1432,9 +1476,11 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                         return elemOrderA - elemOrderB;
                     }
 
-                    // SAME ELEMENT: Pokedex number FIRST so evolution lines stay grouped.
-                    const dexA = _getDexNum(a);
-                    const dexB = _getDexNum(b);
+                    // SAME ELEMENT: family-base Pokedex FIRST so evolution
+                    // lines stay grouped (and late-Gen evolutions like
+                    // Dusknoir #477 sort with Duskull #355).
+                    const dexA = _getFamilyBaseDex(a);
+                    const dexB = _getFamilyBaseDex(b);
                     if (dexA !== dexB) {
                         return dexA - dexB;
                     }

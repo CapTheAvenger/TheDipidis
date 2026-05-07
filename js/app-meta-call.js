@@ -26,6 +26,11 @@ window.MetaCall = (function () {
   let _snapshotWeekAgo   = {};   // normalize(deck) -> share% on (closest available date ≤ today-7d)
   let _labsConvByDeck    = {};   // normalize(deck) -> { sum, n } weighted top8_conv_rate (legacy)
   let _labsQualityByDeck = {};   // normalize(deck) -> { d1: sum, d2: sum } per-deck day1/day2 totals across recent majors
+  // Original (pre-filter) ladder + brought shares — populated the first
+  // time _applyDateFilter overrides them, restored when the user clears
+  // the date filter so a "Clear" doesn't require a full reload.
+  let _origLadderShareByDeck  = null; // Map<normName, share>
+  let _origBroughtShareByDeck = null; // Map<normName, share>
   let _labsDay2ConvByDeck = {};  // normalize(deck) -> { sum, n } weighted day1_to_day2_conv. Quality signal that
                                  // captures "this deck punches above its share at majors" — user-flagged via the
                                  // LA-Regionals strategy doc (Grimmsnarl/Froslass at ~53.7 % Day-2 win-rate from
@@ -1868,6 +1873,16 @@ window.MetaCall = (function () {
       _checkAccuracyAgainstNewMajor(labsRowsByDeck);
 
       _runPredictor();
+
+      // If the user has a date window set BEFORE first visiting the
+      // Meta Call tab (e.g. picked it on Card Analysis already), apply
+      // the override now so the very first render reflects the cutoff.
+      // _applyDateFilter is a no-op when window.currentMetaDateFrom is
+      // null or invalid — safe to always call.
+      const _initialCutoff = (typeof window !== 'undefined') ? window.currentMetaDateFrom : null;
+      if (_initialCutoff && /^\d{4}-\d{2}-\d{2}$/.test(_initialCutoff)) {
+        try { await _applyDateFilter(); } catch (_e) { /* tolerate */ }
+      }
 
       const matchResp = await fetch('data/limitless_online_decks_matchups.csv?t=' + Date.now());
       if (!matchResp.ok) throw new Error('matchup CSV not found');
@@ -5058,25 +5073,101 @@ window.MetaCall = (function () {
   // freshly-filtered data instead of stale full-window aggregates.
   // Re-runs _runPredictor when the share list is already populated so
   // the user sees the change immediately without a page navigation.
+  // Re-derive per-archetype share% from the filtered dated tournament
+  // rows. The original ladder share comes from
+  // limitless_online_decks_comparison.csv which is a CURRENT cumulative
+  // snapshot with no per-row dates — it can't honour a date window. To
+  // make the date filter actually move the predictor's headline
+  // numbers, we reconstruct ladder share + brought share from
+  // online_tournament_dated_cards.csv (per-tournament rows) when the
+  // filter is active. The bucket key (tournament_id, archetype) is one
+  // deck appearance; share = bucket count / total buckets in the
+  // window. Returns Map<archetype-normalized, bucketCount>.
+  function _bucketCountsFromDatedRows(rows) {
+    const counts = new Map();
+    const seen = new Set();
+    for (const r of rows || []) {
+      const a = (r && r.archetype || '').trim();
+      const t = (r && r.tournament_id || '').trim();
+      if (!a || !t) continue;
+      const key = `${t}|${a}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      const norm = normalize(a);
+      counts.set(norm, (counts.get(norm) || 0) + 1);
+    }
+    return counts;
+  }
+
   async function _applyDateFilter() {
     _allHistorySnapshots = null;
     _aceSpecVariantsByDeck = {};
     _archetypeDoctrineMap = null;
     _datedCardsRows = null; // raw stays cached on _datedCardsRowsRaw
     if (!_shareList || _shareList.length === 0) return;
+    const cutoff = (typeof window !== 'undefined') ? window.currentMetaDateFrom : null;
     try {
+      // Lazy-load history snapshots (filter applied inside loader).
       _allHistorySnapshots = await _loadAllHistorySnapshots();
       await _loadAceSpecVariants();
       await _loadArchetypeDoctrineMap();
+
+      // Substantive override — recompute ladder share + brought share
+      // from filtered dated rows. Without this, the predictor stays
+      // anchored to the cumulative (all-time) snapshot and the date
+      // window has only a tiny effect via the recency baseline term.
+      // User flagged: 27.04 vs 05.05 cutoffs gave Dragapult 17.45 vs
+      // 17.46 % — a 0.01 pp move that's effectively a no-op.
+      if (cutoff && /^\d{4}-\d{2}-\d{2}$/.test(cutoff)) {
+        // Cache pre-filter values on first override so a later "Clear"
+        // can restore them without a full reload.
+        if (!_origLadderShareByDeck) {
+          _origLadderShareByDeck = new Map();
+          for (const d of _shareList) {
+            _origLadderShareByDeck.set(normalize(d.name), d.ladderShare);
+          }
+        }
+        if (!_origBroughtShareByDeck && _tournamentStats) {
+          _origBroughtShareByDeck = new Map();
+          for (const k of Object.keys(_tournamentStats)) {
+            _origBroughtShareByDeck.set(k, _tournamentStats[k].broughtShare);
+          }
+        }
+        const counts = _bucketCountsFromDatedRows(_datedCardsRows || []);
+        const totalBuckets = Array.from(counts.values()).reduce((s, n) => s + n, 0);
+        if (totalBuckets > 0) {
+          for (const d of _shareList) {
+            const k = normalize(d.name);
+            const c = counts.get(k) || 0;
+            d.ladderShare = (c / totalBuckets) * 100;
+          }
+          if (_tournamentStats) {
+            for (const k of Object.keys(_tournamentStats)) {
+              const c = counts.get(k) || 0;
+              _tournamentStats[k].broughtShare = (c / totalBuckets) * 100;
+            }
+          }
+          console.info(`[MetaCall] date filter — recomputed ladder + brought from ${totalBuckets} dated buckets (cutoff ${cutoff})`);
+        }
+      } else if (_origLadderShareByDeck) {
+        // Cutoff cleared — restore original values.
+        for (const d of _shareList) {
+          const orig = _origLadderShareByDeck.get(normalize(d.name));
+          if (typeof orig === 'number') d.ladderShare = orig;
+        }
+        if (_origBroughtShareByDeck && _tournamentStats) {
+          for (const [k, v] of _origBroughtShareByDeck) {
+            if (_tournamentStats[k]) _tournamentStats[k].broughtShare = v;
+          }
+        }
+        _origLadderShareByDeck = null;
+        _origBroughtShareByDeck = null;
+        console.info('[MetaCall] date filter cleared — restored original ladder + brought shares');
+      }
+
       _runPredictor();
-      // Decoration pass also re-runs to refresh matchups / HP / doctrine
-      // fields on the new top-N.
       try { await _decorateMetaCallEntries(); } catch (_e) { /* tolerate */ }
-      // Re-render output if the Meta Call panel is in the DOM. renderAll
-      // bails out cleanly when the container isn't mounted (different
-      // tab visible), so this is safe regardless of the active tab.
       try { renderAll(); } catch (_e) { /* tolerate */ }
-      const cutoff = (typeof window !== 'undefined') ? window.currentMetaDateFrom : null;
       console.info(`[MetaCall] date filter applied — cutoff ${cutoff || '(none)'}`);
     } catch (e) {
       console.warn('[MetaCall] date filter re-run failed (non-fatal):', e);

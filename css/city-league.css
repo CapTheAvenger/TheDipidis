@@ -1016,6 +1016,26 @@
     gap: 15px;
     align-items: center;
 }
+.current-meta-date-group {
+    margin-bottom: 20px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+.current-meta-date-input {
+    padding: 6px 10px;
+    border: 1px solid #444;
+    border-radius: 6px;
+    background: #16213e;
+    color: #fff;
+    font-size: 0.95em;
+    font-family: inherit;
+}
+.current-meta-date-clear {
+    padding: 4px 12px;
+    font-size: 0.85em;
+}
 /* Tournament-format filter: active button must visually dominate the
    row so the user always knows which dataset they're looking at.
    Inactive = soft pill on grey, no shadow; Active = filled blue with

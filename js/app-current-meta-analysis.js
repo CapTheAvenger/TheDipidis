@@ -9,6 +9,18 @@
         let currentMetaRarityMode = 'min'; // 'min', 'max', 'all'
         let currentMetaGlobalRarityPreference = 'min';
         let currentMetaTournamentStartDate = null; // Date object from settings start_date
+
+        // Global "data window from" filter — when set, ALL tournament-row
+        // pipelines (Card Analysis aggregations + Deck Builder consistency
+        // scoring + Major-anchor) reject rows with tournament_date earlier
+        // than this. Persisted to localStorage so the user's window survives
+        // page reload. Read by app-deck-builder.js via window.currentMetaDateFrom.
+        let currentMetaDateFrom = null; // 'YYYY-MM-DD' | null
+        try {
+            const saved = (typeof localStorage !== 'undefined') ? localStorage.getItem('currentMetaDateFrom') : null;
+            if (saved && /^\d{4}-\d{2}-\d{2}$/.test(saved)) currentMetaDateFrom = saved;
+        } catch (_e) { /* private mode / disabled storage */ }
+        if (typeof window !== 'undefined') window.currentMetaDateFrom = currentMetaDateFrom;
         // _currentMetaRenderGen is declared in app-core.js (alongside _cityLeagueRenderGen and _pastMetaRenderGen)
 
         // Parse "14th March 2026" style dates into Date objects
@@ -713,7 +725,91 @@
                 console.warn('No deck selected - filter saved for when deck is selected');
             }
         }
-        
+
+        // Data-window date filter — surfaced via the date picker next to
+        // the format filter. Setting a date narrows ALL tournament-row
+        // pipelines (Card Analysis aggregations + Deck Builder consistency
+        // scoring + Major-anchor) to rows with tournament_date >= dateStr.
+        // Clearing returns to the full data window.
+        function _renderCurrentMetaDateStatus() {
+            const statusEl = document.getElementById('currentMetaDateStatus');
+            const inputEl = document.getElementById('currentMetaDateFrom');
+            const clearBtn = document.getElementById('currentMetaDateClear');
+            if (inputEl) inputEl.value = currentMetaDateFrom || '';
+            if (statusEl) {
+                statusEl.textContent = currentMetaDateFrom
+                    ? `Active window: data ≥ ${currentMetaDateFrom}`
+                    : '';
+            }
+            if (clearBtn) clearBtn.style.display = currentMetaDateFrom ? '' : 'none';
+        }
+
+        async function setCurrentMetaDateFrom(dateStr) {
+            const valid = dateStr && /^\d{4}-\d{2}-\d{2}$/.test(dateStr);
+            currentMetaDateFrom = valid ? dateStr : null;
+            if (typeof window !== 'undefined') window.currentMetaDateFrom = currentMetaDateFrom;
+            try {
+                if (typeof localStorage !== 'undefined') {
+                    if (currentMetaDateFrom) localStorage.setItem('currentMetaDateFrom', currentMetaDateFrom);
+                    else                     localStorage.removeItem('currentMetaDateFrom');
+                }
+            } catch (_e) { /* tolerate */ }
+            // No cache invalidation needed — date filter is applied at
+            // consume-time via filterRowsByDateFrom(), so the 50 MB raw
+            // tournament_cards_data_cards.csv stays cached and only the
+            // post-filter result changes.
+            _renderCurrentMetaDateStatus();
+            if (typeof devLog === 'function') devLog('[Current Meta] Date window set to:', currentMetaDateFrom || '(cleared)');
+
+            // Re-render the current archetype so the user sees the filter
+            // take effect immediately.
+            const sel = document.getElementById('currentMetaDeckSelect');
+            if (sel && sel.value) {
+                await loadCurrentMetaDeckData(sel.value);
+            }
+        }
+
+        async function clearCurrentMetaDateFrom() {
+            await setCurrentMetaDateFrom('');
+        }
+
+        if (typeof window !== 'undefined') {
+            window.setCurrentMetaDateFrom = setCurrentMetaDateFrom;
+            window.clearCurrentMetaDateFrom = clearCurrentMetaDateFrom;
+            // Restore status display on load (input value is auto-restored
+            // from the persisted state; the badge needs a manual paint).
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', _renderCurrentMetaDateStatus);
+            } else {
+                _renderCurrentMetaDateStatus();
+            }
+        }
+
+        // Pure helper — given an array of rows with a `tournament_date`
+        // field (any format _parseAnyTournamentDate handles) and a
+        // YYYY-MM-DD cutoff, return only rows on or after the cutoff.
+        // Returns the original array unchanged when cutoff is empty/invalid
+        // so callers can wrap unconditionally without a no-op branch.
+        function filterRowsByDateFrom(rows, cutoffISO) {
+            if (!Array.isArray(rows) || rows.length === 0) return rows;
+            if (!cutoffISO || !/^\d{4}-\d{2}-\d{2}$/.test(cutoffISO)) return rows;
+            const cutoffMs = Date.parse(cutoffISO + 'T00:00:00Z');
+            if (!Number.isFinite(cutoffMs)) return rows;
+            const parser = (typeof _parseAnyTournamentDate === 'function')
+                ? _parseAnyTournamentDate
+                : (typeof window !== 'undefined' && typeof window._parseAnyTournamentDate === 'function')
+                    ? window._parseAnyTournamentDate
+                    : ((s) => { const d = new Date(String(s || '')); return isNaN(d.getTime()) ? null : d; });
+            return rows.filter(r => {
+                const raw = r && (r.tournament_date || r.date || '');
+                if (!raw) return false;
+                const d = parser(raw);
+                if (!d) return false;
+                return d.getTime() >= cutoffMs;
+            });
+        }
+        if (typeof window !== 'undefined') window.filterRowsByDateFrom = filterRowsByDateFrom;
+
         // Load deck data with format filtering
         async function loadCurrentMetaDeckData(archetype) {
             // First user interaction with this tab — hide the empty-state guidance
@@ -744,9 +840,24 @@
                     window.currentMetaTournamentCardsData = filterTournamentRowsByMetaDate(rawTournament);
                 }
                 data = window.currentMetaTournamentCardsData;
+                // Apply user-selected data-window cutoff on top of the
+                // meta-period filter — narrows the Card Analysis tables
+                // to rows on or after the chosen date.
+                if (currentMetaDateFrom && Array.isArray(data) && data.length > 0) {
+                    const beforeN = data.length;
+                    data = filterRowsByDateFrom(data, currentMetaDateFrom);
+                    if (typeof devLog === 'function') {
+                        devLog(`[Current Meta][DateWindow] Major rows ${beforeN} → ${data.length} (cutoff ${currentMetaDateFrom})`);
+                    }
+                }
                 needsAggregation = true;
             } else {
-                // Use current meta (Limitless) data with optional format filtering
+                // Use current meta (Limitless) data with optional format filtering.
+                // The Limitless aggregate has no per-row tournament_date, so the
+                // date window only applies in 'play' mode (Major rows are
+                // per-tournament). When a date window is set, we silently keep
+                // the Limitless aggregate as-is — the Major-anchor in the deck
+                // builder picks up the cutoff separately.
                 data = window.currentMetaAnalysisData;
                 needsAggregation = false;
             }

@@ -5093,8 +5093,17 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             if (currentArchetype) {
                 if (source === 'currentMeta') {
                     // Online dated CSV — lazy-load once, cached on window.
+                    // Apply the user's "data window from" date filter so
+                    // every downstream pass (recency scoring, ACE-cond,
+                    // Major-blend) sees the same date-windowed row set.
                     try {
                         onlineRowsRaw = await loadOnlineTournamentDatedRows();
+                        const _windowFrom = (typeof window !== 'undefined') ? window.currentMetaDateFrom : null;
+                        if (_windowFrom && typeof window !== 'undefined' && typeof window.filterRowsByDateFrom === 'function') {
+                            const beforeN = onlineRowsRaw.length;
+                            onlineRowsRaw = window.filterRowsByDateFrom(onlineRowsRaw, _windowFrom);
+                            devLog(`[Consistency][DateWindow] Online rows ${beforeN} → ${onlineRowsRaw.length} (cutoff ${_windowFrom})`);
+                        }
                         onlineAgg = _aggregateWeightedSource(
                             onlineRowsRaw, currentArchetype, SOURCE_WEIGHT_ONLINE, todayMs, null
                         );
@@ -5204,7 +5213,18 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                         devLog('[Consistency][LatestMajorAnchor] Could not load tournament data:', e);
                     }
                 }
-                const tournamentRows = window.currentMetaTournamentCardsData || [];
+                let tournamentRows = window.currentMetaTournamentCardsData || [];
+                // Apply the user's "data window from" date filter — when
+                // set, the Major-anchor only considers rows on or after
+                // the cutoff. With a fresh cutoff this lets the user say
+                // "anchor on the last Regional only", "exclude the SCR
+                // pre-release wave", etc.
+                const _majorWindowFrom = (typeof window !== 'undefined') ? window.currentMetaDateFrom : null;
+                if (_majorWindowFrom && typeof window !== 'undefined' && typeof window.filterRowsByDateFrom === 'function') {
+                    const beforeN = tournamentRows.length;
+                    tournamentRows = window.filterRowsByDateFrom(tournamentRows, _majorWindowFrom);
+                    devLog(`[Consistency][DateWindow] Major rows ${beforeN} → ${tournamentRows.length} (cutoff ${_majorWindowFrom})`);
+                }
                 if (Array.isArray(tournamentRows) && tournamentRows.length > 0 && currentArchetype) {
                     // tournament_cards_data tags each placement with a price
                     // suffix (e.g. "Cynthia's Garchomp27.91$22.10€"); strip

@@ -3804,6 +3804,88 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
         }
         if (typeof window !== 'undefined') window._detectCardDependencies = _detectCardDependencies;
 
+        // ──────────────────────────────────────────────────────────
+        // Co-occurrence detection
+        //
+        // Builds a per-card synergy map from the per-tournament rows of
+        // a single archetype. Two cards "synergy-bind" each other when
+        // they appear together in ≥ minProb of the archetype's decks
+        // (default 90 %) with sample size ≥ minSample (default 5).
+        //
+        // User-flagged Mega Starmie regression: builder picked Neo
+        // Upper Energy + 3 Dreepy + 3 Drakloak + 2 Munkidori but no
+        // Dragapult ex. In Mega-Starmie tournament data Neo Upper /
+        // Dreepy / Drakloak / Munkidori all co-occur with Dragapult ex
+        // ≈ 100 %. Without Dragapult ex the entire sub-line is dead.
+        //
+        // Returns:
+        //   Map<cardLower, {
+        //     partners: [{ card, prob, sample }, ...],  // ≥ minProb
+        //     presence: int                              // decks with this card
+        //   }>
+        // ──────────────────────────────────────────────────────────
+        function _computeCardCoOccurrence(rows, archetypeKey, options) {
+            const minProb   = (options && options.minProb)   != null ? options.minProb   : 0.90;
+            const minSample = (options && options.minSample) != null ? options.minSample : 5;
+            const minDecks  = (options && options.minDecks)  != null ? options.minDecks  : 10;
+            const out = new Map();
+            if (!Array.isArray(rows) || rows.length === 0) return out;
+            if (!archetypeKey) return out;
+            const archLower = String(archetypeKey).trim().toLowerCase();
+
+            // Bucket rows by (tournament_id, archetype) → Set<cardLower>.
+            const buckets = new Map();
+            for (const r of rows) {
+                if (!r) continue;
+                const arch = String(r.archetype || '').trim().toLowerCase();
+                if (arch !== archLower) continue;
+                const tid = String(r.tournament_id || '').trim();
+                const card = String(r.card_name || '').trim().toLowerCase();
+                if (!tid || !card) continue;
+                const key = `${tid}|${arch}`;
+                let bucket = buckets.get(key);
+                if (!bucket) { bucket = new Set(); buckets.set(key, bucket); }
+                bucket.add(card);
+            }
+            const totalDecks = buckets.size;
+            // Sample-size guard — small archetypes are noisy. Single-deck
+            // co-occurrence can't be distinguished from coincidence.
+            if (totalDecks < minDecks) return out;
+
+            // Per-card presence count + per-pair count.
+            const presence = new Map(); // card → count
+            const pairCounts = new Map(); // card → Map<partner, count>
+            for (const bucket of buckets.values()) {
+                const cards = Array.from(bucket);
+                for (const a of cards) {
+                    presence.set(a, (presence.get(a) || 0) + 1);
+                    let inner = pairCounts.get(a);
+                    if (!inner) { inner = new Map(); pairCounts.set(a, inner); }
+                    for (const b of cards) {
+                        if (a === b) continue;
+                        inner.set(b, (inner.get(b) || 0) + 1);
+                    }
+                }
+            }
+
+            for (const [card, count] of presence) {
+                if (count < minSample) continue;
+                const partners = [];
+                const inner = pairCounts.get(card);
+                if (inner) {
+                    for (const [partner, both] of inner) {
+                        const p = both / count;
+                        if (p >= minProb) partners.push({ card: partner, prob: p, sample: count });
+                    }
+                }
+                if (partners.length === 0) continue;
+                partners.sort((a, b) => b.prob - a.prob);
+                out.set(card, { partners, presence: count });
+            }
+            return out;
+        }
+        if (typeof window !== 'undefined') window._computeCardCoOccurrence = _computeCardCoOccurrence;
+
         // Stranded-card resolution. Iterates the finalized deck and
         // demotes cards whose `_dependencies` tags aren't satisfied
         // by the rest of the deck. The freed slot goes to the
@@ -3890,6 +3972,110 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             return { resolved };
         }
         if (typeof window !== 'undefined') window._resolveCardDependencies = _resolveCardDependencies;
+
+        // ──────────────────────────────────────────────────────────
+        // Synergy-based card resolution
+        //
+        // Demotes non-CORE / non-ACE-SPEC cards whose high-co-occurrence
+        // partners are absent from the built deck. User-flagged Mega
+        // Starmie regression: 3 Dreepy + 3 Drakloak + 2 Munkidori + 1
+        // Neo Upper Energy made the cut without any Dragapult ex —
+        // structurally dead in the actual deck. Co-occurrence data
+        // says these all appear in ≈ 100 % of decks alongside Dragapult
+        // ex; without the partner the slots are wasted.
+        //
+        // Same demote-and-reroute pattern as _resolveCardDependencies.
+        // Stage-1 / CORE / ACE-SPEC cards are protected so a deck's
+        // identity line never gets demoted by synergy analysis alone.
+        // ──────────────────────────────────────────────────────────
+        function _resolveCardSynergyMissing(entries, cooccurrenceMap, helpers) {
+            if (!Array.isArray(entries) || entries.length === 0) return { resolved: 0 };
+            if (!cooccurrenceMap || cooccurrenceMap.size === 0) return { resolved: 0 };
+            const getLegalMax  = (helpers && helpers.getLegalMax)  || (() => 4);
+            const isBasicEnergy = (helpers && helpers.isBasicEnergy) || (() => false);
+            const log          = (helpers && helpers.log)          || (() => {});
+
+            // Index deck cards by lowercased name with their counts so the
+            // partner-presence check is O(1).
+            const deckIndex = new Map();
+            for (const e of entries) {
+                if (!e || !e.card) continue;
+                const nm = String(e.card.card_name || '').trim().toLowerCase();
+                if (nm) deckIndex.set(nm, e);
+            }
+
+            let resolved = 0;
+            const snapshot = entries.slice();
+            for (const entry of snapshot) {
+                const card = entry && entry.card;
+                if (!card) continue;
+                if (card._isAceSpec) continue;
+                if ((card.consistencyScore || 0) >= 75) continue;
+                const nm = String(card.card_name || '').trim().toLowerCase();
+                const synergy = cooccurrenceMap.get(nm);
+                if (!synergy || !Array.isArray(synergy.partners) || synergy.partners.length === 0) continue;
+
+                // Conservative scope: this pass targets TIGHT pairings only
+                // (Genesect SFA → Pokémon Tool, Neo Upper Energy →
+                // Cynthia's Garchomp ex, etc.). Cards with many partners
+                // (≥ 4) belong to broad clusters where finding one
+                // present partner doesn't really validate the cluster's
+                // keystone — that's better handled by the ACE-SPEC
+                // synergy pre-filter (which knows about the keystone
+                // role) and by future sub-archetype detection.
+                const TIGHT_PAIRING_MAX_PARTNERS = 3;
+                if (synergy.partners.length > TIGHT_PAIRING_MAX_PARTNERS) continue;
+
+                // For tight pairings: card is satisfied when AT LEAST ONE
+                // partner is in the deck. With ≤ 3 partners, ANY of them
+                // missing is meaningful.
+                const satisfied = synergy.partners.some(p => deckIndex.has(p.card));
+                if (satisfied) continue;
+
+                // Demote one copy. If count drops to 0, splice out.
+                entry.count -= 1;
+                resolved += 1;
+                const missing = synergy.partners.slice(0, 3).map(p => p.card);
+                log({ type: 'synergy_demote', card: card.card_name, missing });
+                if (entry.count <= 0) {
+                    const idx = entries.indexOf(entry);
+                    if (idx >= 0) entries.splice(idx, 1);
+                    deckIndex.delete(nm);
+                }
+
+                // Re-route the freed slot to the highest-remainder
+                // non-stranded card under its per-card target. CORE first,
+                // then MID, then TECH. Skip cards with their own unmet
+                // synergy (would just create another stranded card).
+                const bumpCandidates = entries
+                    .filter(e => e && e.card)
+                    .filter(e => !e.card._isAceSpec)
+                    .filter(e => {
+                        const otherNm = String(e.card.card_name || '').trim().toLowerCase();
+                        const otherSyn = cooccurrenceMap.get(otherNm);
+                        if (!otherSyn || !otherSyn.partners) return true;
+                        return otherSyn.partners.some(p => deckIndex.has(p.card));
+                    })
+                    .filter(e => Number.isFinite(e.card._lrmRemainder) && e.card._lrmRemainder > 0)
+                    .filter(e => {
+                        const legalMax = e.card._legalMax || getLegalMax(e.card.card_name, e.card);
+                        return isBasicEnergy(e.card) || e.count < legalMax;
+                    })
+                    .sort((a, b) => {
+                        const tierOrder = { CORE: 0, MID: 1, TECH: 2 };
+                        const ta = tierOrder[a.card._cardFunctionTier] != null ? tierOrder[a.card._cardFunctionTier] : 1;
+                        const tb = tierOrder[b.card._cardFunctionTier] != null ? tierOrder[b.card._cardFunctionTier] : 1;
+                        if (ta !== tb) return ta - tb;
+                        return (b.card._lrmRemainder || 0) - (a.card._lrmRemainder || 0);
+                    });
+                if (bumpCandidates.length > 0) {
+                    bumpCandidates[0].count += 1;
+                    log({ type: 'synergy_reroute', from: card.card_name, to: bumpCandidates[0].card.card_name });
+                }
+            }
+            return { resolved };
+        }
+        if (typeof window !== 'undefined') window._resolveCardSynergyMissing = _resolveCardSynergyMissing;
 
         // Lazy-loader for pokemon_card_effects.json. Returns an index
         // keyed by `SET|number` (uppercase set, trimmed number) plus a
@@ -5751,8 +5937,56 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 if (!major || _aceSpecMajorWeight <= 0) return score;
                 return major.share * _aceSpecMajorWeight + score * (1 - _aceSpecMajorWeight);
             };
+            // Co-occurrence map for the current archetype — drives the
+            // ACE-SPEC synergy filter below + the post-allocation
+            // synergy-demotion pass. Computed once per build from the
+            // already-loaded onlineRowsRaw so we don't fetch the CSV
+            // twice. Empty when archetype has < 10 deck samples (noise
+            // floor; see _computeCardCoOccurrence).
+            const _cooccurrenceMap = (Array.isArray(onlineRowsRaw) && onlineRowsRaw.length > 0)
+                ? _computeCardCoOccurrence(onlineRowsRaw, currentArchetype)
+                : new Map();
+
             const aceSpecCandidates = deckCards.filter(c => isAceSpecCard(c));
-            aceSpecCandidates.sort((a, b) => _aceSpecScoreOf(b) - _aceSpecScoreOf(a));
+
+            // Synergy-aware ACE-SPEC pre-filter — user-flagged Mega
+            // Starmie regression: builder picked Neo Upper Energy as
+            // ACE-SPEC despite no Dragapult ex in deckCards above the
+            // auto-add threshold. Co-occurrence data says Neo Upper
+            // appears in ≈ 100 % of Mega-Starmie decks alongside
+            // Dragapult ex; without the partner the ACE-SPEC slot is
+            // wasted. Filter out candidates whose required partners
+            // can't realistically make the deck (consistencyScore <
+            // 50 = below the score gate that admits Extended cards).
+            // Falls back to the unfiltered list when the filter would
+            // empty the candidate pool.
+            const _aceSpecCandidatesFiltered = aceSpecCandidates.filter(c => {
+                const nm = String(c.card_name || '').trim().toLowerCase();
+                const synergy = _cooccurrenceMap.get(nm);
+                if (!synergy || !synergy.partners || synergy.partners.length === 0) return true;
+                // At least ONE partner must be present in deckCards with
+                // score ≥ 50 (likely to make the build).
+                return synergy.partners.some(p => {
+                    const partnerCard = deckCards.find(d => String(d.card_name || '').trim().toLowerCase() === p.card);
+                    return partnerCard && (partnerCard.consistencyScore || 0) >= 50;
+                });
+            });
+            const _aceSpecPool = _aceSpecCandidatesFiltered.length > 0
+                ? _aceSpecCandidatesFiltered
+                : aceSpecCandidates;
+            if (_aceSpecCandidatesFiltered.length < aceSpecCandidates.length) {
+                const dropped = aceSpecCandidates
+                    .filter(c => !_aceSpecCandidatesFiltered.includes(c))
+                    .map(c => c.card_name);
+                devLog(`[Consistency][ACE-SPEC-Synergy] Skipped ${dropped.length} candidate(s) with missing partners: ${dropped.join(', ')}`);
+            }
+
+            _aceSpecPool.sort((a, b) => _aceSpecScoreOf(b) - _aceSpecScoreOf(a));
+            // Replace the candidate list in-place so the rest of the
+            // build (report capture, conditional re-pricing) sees the
+            // synergy-filtered pool.
+            aceSpecCandidates.length = 0;
+            for (const c of _aceSpecPool) aceSpecCandidates.push(c);
             const aceSpecSlotCard = aceSpecCandidates[0] || null;
             // Capture the ACE-SPEC pick reasoning so the "Why?" modal can
             // explain it. Without this the user sees Secret Box instead of
@@ -6243,6 +6477,30 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             });
             if (_depResult.resolved > 0) {
                 devLog(`[Consistency][Dependencies] resolved ${_depResult.resolved} stranded card(s)`);
+            }
+
+            // Synergy demotion — second post-allocation pass that uses
+            // the co-occurrence map (built earlier from onlineRowsRaw)
+            // to demote non-CORE / non-ACE-SPEC cards whose required
+            // partners didn't make the build. Catches the Mega-Starmie
+            // case where Dreepy / Drakloak / Munkidori made the cut
+            // without any Dragapult ex (≈ 100 % co-occurrence partner
+            // missing → entire sub-line dead in actual play).
+            if (_cooccurrenceMap && _cooccurrenceMap.size > 0) {
+                const _synResult = _resolveCardSynergyMissing(consistencyDeck, _cooccurrenceMap, {
+                    getLegalMax: getLegalMaxCopies,
+                    isBasicEnergy: isBasicEnergyCardEntry,
+                    log: (info) => {
+                        if (info.type === 'synergy_demote') {
+                            devLog(`[Consistency][Synergy] ${info.card} stranded — missing partners: ${info.missing.join(', ')}`);
+                        } else if (info.type === 'synergy_reroute') {
+                            devLog(`[Consistency][Synergy] reroute slot from ${info.from} → ${info.to}`);
+                        }
+                    },
+                });
+                if (_synResult.resolved > 0) {
+                    devLog(`[Consistency][Synergy] resolved ${_synResult.resolved} synergy-stranded card(s)`);
+                }
             }
 
             // Recompute currentTotal after potential swap/floor mutations

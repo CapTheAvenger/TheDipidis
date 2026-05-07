@@ -1343,7 +1343,27 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 const percA = parseFloat((a.percentage_in_archetype || '0').toString().replace(',', '.')) || 0;
                 const percB = parseFloat((b.percentage_in_archetype || '0').toString().replace(',', '.')) || 0;
                 
-                // Helper: resolve Pokedex number from card data or global map
+                // Helper: resolve Pokedex number from card data or global map.
+                //
+                // Card-name shapes we need to handle:
+                //   "Garchomp ex"                 → garchomp
+                //   "Cynthia's Garchomp ex"       → garchomp (trainer-possessive)
+                //   "Hop's Trevenant"             → trevenant
+                //   "Bloodmoon Ursaluna ex"       → ursaluna (form prefix)
+                //   "Hisuian Zoroark"             → zoroark (regional)
+                //   "Hisui Goomy"                 → goomy
+                //   "Paldean Tauros"              → tauros
+                //   "Galarian Slowking"           → slowking
+                //   "Alolan Vulpix"               → vulpix
+                //   "Origin Forme Dialga"         → dialga
+                //   "Dusk Mane Necrozma"          → necrozma
+                //   "Dawn Wings Necrozma"         → necrozma
+                //   "Iron Hands ex"               → iron hands  (no prefix to strip)
+                //
+                // pokemon_dex_numbers.json keys cards by bare base name only,
+                // so the regional/form prefixes MUST come off before the
+                // lookup or the card falls to 99999 and lands in the wrong
+                // pokedex position.
                 function _getDexNum(card) {
                     const direct = parseInt(card.pokedex_number || card.pokedex || card.dex_number, 10);
                     if (!isNaN(direct) && direct > 0) return direct;
@@ -1352,18 +1372,24 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                     const directMap = parseInt(dexMap[rawName], 10);
                     if (!isNaN(directMap) && directMap > 0) return directMap;
                     // Strip trainer-possessive prefixes ("Cynthia's Gible" →
-                    // "gible", "Hop's Trevenant" → "trevenant", etc.) so the
-                    // dex lookup matches the bare Pokémon name in
-                    // window.pokedexNumbers. Without this, every Cynthia
-                    // line falls back to the alphabetical name comparison
-                    // and Garchomp/Gabite/Gible end up out of evolution
-                    // order in the deck display.
+                    // "gible", "Hop's Trevenant" → "trevenant", etc.).
                     const trainerStripped = rawName.replace(/^[a-zäöüß]+'s\s+/, '').trim();
                     if (trainerStripped !== rawName) {
                         const stripMap = parseInt(dexMap[trainerStripped], 10);
                         if (!isNaN(stripMap) && stripMap > 0) return stripMap;
                     }
-                    const baseName = trainerStripped
+                    // Strip form / regional prefixes that the dex map doesn't
+                    // index ("Bloodmoon Ursaluna ex" → "ursaluna ex"). The
+                    // ex / vmax / etc. suffix strip below then drops the
+                    // tail and leaves the bare base name.
+                    const formStripped = trainerStripped
+                        .replace(/^(?:bloodmoon|origin\s+forme|origin|dusk\s+mane|dawn\s+wings|crowned\s+sword|crowned\s+shield|crowned|hisuian|hisui|paldean|paldea|galarian|galar|alolan|alola)\s+/, '')
+                        .trim();
+                    if (formStripped !== trainerStripped) {
+                        const formMap = parseInt(dexMap[formStripped], 10);
+                        if (!isNaN(formMap) && formMap > 0) return formMap;
+                    }
+                    const baseName = formStripped
                         .replace(/\b(ex|vmax|vstar|v-union|v|gx|radiant|mega)\b/g, '')
                         .replace(/[^a-z0-9\s-]/g, ' ').replace(/\s+/g, ' ').trim();
                     const baseMap = parseInt(dexMap[baseName], 10);

@@ -5391,6 +5391,23 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                         const cats = techAuditCounterCats.get(nm);
                         return cats && cats.has(cat);
                     });
+                    // Tech-audit floor — skip the category entirely if no
+                    // candidate clears the archetype-share floor. User
+                    // flagged Crustle building 1× Lacey at 5 % archetype
+                    // share for hand_disruption: a 1-of slot only 1-in-20
+                    // builds actually run is statistically marginal, and
+                    // the boost crowded out a useful card (the user
+                    // wanted a 2nd Rocky Energy in the slot). 15 % is
+                    // strict enough to drop Lacey while still keeping
+                    // genuine archetype counters (Cynthia's Surfer at
+                    // 60 %, etc.).
+                    const TECH_AUDIT_MIN_ARCHETYPE_SHARE = 15.0;
+                    const topShare = candidates.reduce((max, c) => Math.max(max, _shareOf(c)), 0);
+                    if (topShare < TECH_AUDIT_MIN_ARCHETYPE_SHARE) {
+                        devLog(`[Consistency][TechAudit] category=${cat} skipped — best counter has only ${topShare.toFixed(1)}% archetype share (floor: ${TECH_AUDIT_MIN_ARCHETYPE_SHARE}%)`);
+                        techAuditCategoryBudget.set(cat, { target, picked: [], skipped_low_share: true });
+                        return;
+                    }
                     candidates.sort((a, b) => {
                         const sa = _shareOf(a), sb = _shareOf(b);
                         if (sa !== sb) return sb - sa;
@@ -5763,6 +5780,22 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                         // build delivered 7 fighting energies; the data
                         // and doctrine both say 8 (4.83 + 3.17 = 8.00).
                         if (Math.abs(cond - baseAvg) >= 0.15) {
+                            // Pokémon DOWN-shift guard — line size is
+                            // strategy-driven (4-3 Stage-1 line stays 4-3
+                            // regardless of the chosen ACE-SPEC). User
+                            // flagged Crustle's Hero's-Cape build pulling
+                            // Dwebble 3.83 → 3.67 — the LRM remainder dropped
+                            // from 0.83 to 0.67 and Dwebble landed at 3 copies
+                            // instead of the structurally-required 4. ACE-
+                            // SPEC-Conditional UP-shifts on Pokémon are
+                            // still applied (an ACE-SPEC that genuinely
+                            // wants a 3rd attacker copy is a legit signal).
+                            const cardTypeStr = String((card.type || card.card_type || '')).trim().toLowerCase();
+                            const isPokemonType = /^(basic|stage 1|stage 2|vmax|vstar|v-union|mega|tera)\b/.test(cardTypeStr);
+                            if (isPokemonType && cond < baseAvg) {
+                                devLog(`[Consistency][ACE-SPEC-Conditional] SKIP down-shift for Pokémon ${card.card_name}: ${baseAvg.toFixed(2)} → ${cond.toFixed(2)} (line-size guard)`);
+                                return;
+                            }
                             card._aceSpecConditionalAvg = cond;
                             card._aceSpecConditionalShift = cond - baseAvg;
                             card._aceSpecConditionalBaseAvg = baseAvg;

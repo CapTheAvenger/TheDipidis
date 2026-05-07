@@ -1349,15 +1349,18 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                     if (!isNaN(direct) && direct > 0) return direct;
                     const dexMap = window.pokedexNumbers || {};
                     const rawName = String(card.card_name || card.name || '').trim().toLowerCase();
-                    const directMap = parseInt(dexMap[rawName], 10);
-                    if (!isNaN(directMap) && directMap > 0) return directMap;
-                    // Strip trainer-possessive prefixes ("Cynthia's Gible" →
-                    // "gible", "Hop's Trevenant" → "trevenant", etc.) so the
-                    // dex lookup matches the bare Pokémon name in
-                    // window.pokedexNumbers. Without this, every Cynthia
-                    // line falls back to the alphabetical name comparison
-                    // and Garchomp/Gabite/Gible end up out of evolution
-                    // order in the deck display.
+                    return _getDexNumFromName(rawName, dexMap);
+                }
+
+                // Lookup-only variant — same multi-stage fallback as
+                // _getDexNum (direct → trainer-prefix-strip → ex/vmax/...
+                // suffix-strip → form-prefix-strip) but takes a name
+                // string instead of a card object. Used by
+                // _getFamilyBaseDex when walking up the evolution chain.
+                function _getDexNumFromName(rawName, dexMap) {
+                    dexMap = dexMap || window.pokedexNumbers || {};
+                    const direct = parseInt(dexMap[rawName], 10);
+                    if (!isNaN(direct) && direct > 0) return direct;
                     const trainerStripped = rawName.replace(/^[a-zäöüß]+'s\s+/, '').trim();
                     if (trainerStripped !== rawName) {
                         const stripMap = parseInt(dexMap[trainerStripped], 10);
@@ -1368,14 +1371,6 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                         .replace(/[^a-z0-9\s-]/g, ' ').replace(/\s+/g, ' ').trim();
                     const baseMap = parseInt(dexMap[baseName], 10);
                     if (!isNaN(baseMap) && baseMap > 0) return baseMap;
-                    // Form-prefix fallback: when the full name doesn't
-                    // resolve, drop the first word and try again. Catches
-                    // form variants ("Bloodmoon Ursaluna" → "ursaluna",
-                    // "Alolan Marowak" → "marowak", "Origin Dialga" →
-                    // "dialga") without hardcoding a form-prefix list.
-                    // Compound-species names that DO resolve directly
-                    // (e.g. "Iron Thorns" → 995 via baseMap) never reach
-                    // this branch, so first-word-strip can't break them.
                     const words = baseName.split(/\s+/).filter(Boolean);
                     if (words.length >= 2) {
                         const formStripped = words.slice(1).join(' ');
@@ -1383,6 +1378,37 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                         if (!isNaN(formMap) && formMap > 0) return formMap;
                     }
                     return 99999;
+                }
+
+                // Family-line grouping — walks up the evolution chain via
+                // pokemon_card_effects.json's "Evolves from X" card_type
+                // text and returns the dex of the BASE species. With this,
+                // Dusknoir (#477) sorts alongside Dusclops (#356) and
+                // Duskull (#355) under the family base dex 355 instead of
+                // landing 122 numbers later in strict pokédex order. User
+                // flagged: "duskull, dusclops und Dusknoir stehen immer
+                // noch nicht nebeneinander" — TCG convention is to group
+                // evolution lines together, not split them by Gen.
+                //
+                // Falls back to plain _getDexNum when card-effects isn't
+                // loaded yet (e.g. the index is lazy-loaded during
+                // autoCompleteConsistency; on a fresh page load before any
+                // build, sort runs without it). Walk depth capped at 4 to
+                // protect against malformed cycles.
+                function _getFamilyBaseDex(card) {
+                    const idx = (typeof window !== 'undefined') && window._cardEffectsIndex;
+                    if (!idx || !idx.byName || idx.byName.size === 0) return _getDexNum(card);
+                    let currentName = String(card.card_name || card.name || '').toLowerCase().trim();
+                    const dexMap = window.pokedexNumbers || {};
+                    for (let depth = 0; depth < 4; depth++) {
+                        const eff = idx.byName.get(currentName);
+                        if (!eff) break;
+                        const cardType = String(eff.card_type || '').toLowerCase().trim();
+                        const m = /^evolves from\s+(.+)$/.exec(cardType);
+                        if (!m) break;
+                        currentName = m[1].trim();
+                    }
+                    return _getDexNumFromName(currentName, dexMap);
                 }
 
                 // For Pokemon: sort by element type, then Pokedex number
@@ -1402,10 +1428,15 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                     if (percA !== percB) {
                         return percB - percA;
                     }
-                    
-                    // Same share: sort by Pokedex number
-                    const dexA = _getDexNum(a);
-                    const dexB = _getDexNum(b);
+
+                    // Same share: sort by Pokédex FAMILY base. Walks up
+                    // the evolution chain so Dusknoir (#477) sorts with
+                    // Dusclops/Duskull (#355–356) under the family base
+                    // dex instead of landing 122 numbers later between
+                    // Latias and Budew. Plain _getDexNum is the fallback
+                    // when card-effects isn't loaded yet.
+                    const dexA = _getFamilyBaseDex(a);
+                    const dexB = _getFamilyBaseDex(b);
                     if (dexA !== dexB) {
                         return dexA - dexB;
                     }

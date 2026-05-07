@@ -2742,11 +2742,12 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                     summary.textContent =
                         `At the latest Major (${dateLabel} · ${ageLabel}), ${acePick.chosen} was the most-played ACE-SPEC` +
                         (winnerDecks ? ` — ${winnerDecks} (${winnerShare}). ` : ` (${winnerShare}). `) +
-                        `Within 14 days of a Major the Major statistics drive the pick; the cross-tournament Online aggregate is weighted at ${Math.round((1 - weight) * 100)}%.`;
+                        `Within 14 days of a Major the picker weights it at ${Math.round(weight * 100)}% — fresh tournament results outweigh older cross-tournament Online data because they reflect what the meta is settling on right now. The Online archetype share (cross-tournament aggregate) is shown next to each candidate so you can sanity-check the gap.`;
                 } else {
                     summary.textContent =
                         `No recent Major in scope — ${acePick.chosen} was picked from the highest cross-tournament Online aggregate. ` +
-                        `(Major-anchor weight kicks in once an archetype shows up at a Major within the last 28 days.)`;
+                        `(Major-anchor weight kicks in once an archetype shows up at a Major within the last 28 days, ` +
+                        `at which point Major data overtakes Online aggregate because it's a more recent snapshot of the meta.)`;
                 }
                 aceWrap.appendChild(summary);
 
@@ -2777,7 +2778,15 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                     } else if (acePick.has_major_anchor) {
                         parts.push('Major: not played');
                     }
-                    parts.push(`online score ${c.consistency_score}`);
+                    // Online archetype share + score side by side. The
+                    // share% lets users compare to the Major fraction
+                    // (e.g. "Major 31.6% but only Online 16%" makes the
+                    // Major-vs-Online gap visible without reading the
+                    // per-card row below).
+                    const onlinePieces = [];
+                    if (c.archetype_share != null) onlinePieces.push(`${c.archetype_share}% share`);
+                    onlinePieces.push(`score ${c.consistency_score}`);
+                    parts.push(`Online ${onlinePieces.join(', ')}`);
                     statCell.textContent = parts.join('  ·  ');
                     row.appendChild(statCell);
                     table.appendChild(row);
@@ -5744,9 +5753,21 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                         const m = latestMajorStats && latestMajorStats.size > 0
                             ? latestMajorStats.get((c.card_name || '').trim().toLowerCase())
                             : null;
+                        // Cross-tournament archetype share — the same
+                        // figure shown in the per-card score row's
+                        // "16% share" badge. Surfacing it next to the
+                        // online consistency score lets users see at a
+                        // glance how often the card actually shows up
+                        // in builds of this archetype, separate from
+                        // its score (which folds in meta boost +
+                        // recency + Major anchor).
+                        const archShareRaw = parseFloat(
+                            String(c.percentage_in_archetype || c.sharePercent || '0').replace(',', '.')
+                        );
                         return {
                             card_name: c.card_name,
                             consistency_score: Math.round(c.consistencyScore || 0),
+                            archetype_share: Number.isFinite(archShareRaw) ? Math.round(archShareRaw) : null,
                             major_share: m ? Math.round(m.share * 10) / 10 : null,
                             major_deck_count: m ? (m.deckCount || 0) : 0,
                             blended_score: Math.round(_aceSpecScoreOf(c) * 10) / 10,

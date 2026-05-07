@@ -599,9 +599,19 @@ function updateCollectionTypeLoadingIndicator() {
   }
 }
 
+// Regional / form prefixes that pokemon_dex_numbers.json doesn't index
+// ("Bloodmoon Ursaluna ex" → bare "ursaluna" = #901; without the strip
+// the card falls to MAX_SAFE_INTEGER and lands at the wrong sort
+// position). Keep this string in sync with the matching strip in
+// app-deck-builder.js _getDexNum and the inline _getDexNum further down
+// in this file.
+const POKEMON_FORM_PREFIX_RE = /^(?:bloodmoon|origin\s+forme|origin|dusk\s+mane|dawn\s+wings|crowned\s+sword|crowned\s+shield|crowned|hisuian|hisui|paldean|paldea|galarian|galar|alolan|alola)\s+/;
+
 function normalizePokemonNameForDexLookup(name) {
   return String(name || '')
     .toLowerCase()
+    .replace(/^[a-zäöüß]+'s\s+/, '')          // trainer possessive: "Cynthia's Garchomp" → "garchomp"
+    .replace(POKEMON_FORM_PREFIX_RE, '')      // form prefix: "Bloodmoon Ursaluna" → "ursaluna"
     .replace(/\b(ex|vmax|vstar|v-union|v|gx|radiant|mega)\b/g, '')
     .replace(/[^a-z0-9\s-]/g, ' ')
     .replace(/\s+/g, ' ')
@@ -774,8 +784,12 @@ function getCardPokedexNumber(card) {
   const directMap = parseInt(dexMap[rawLower], 10);
   if (!isNaN(directMap) && directMap > 0) return directMap;
 
-  // Strip common TCG suffixes for better lookup in National Dex map.
+  // Strip trainer possessive + form prefix + common TCG suffixes so the
+  // National Dex lookup matches the bare base-Pokémon name. See
+  // POKEMON_FORM_PREFIX_RE comment for the prefix list.
   const baseName = rawLower
+    .replace(/^[a-zäöüß]+'s\s+/, '')
+    .replace(POKEMON_FORM_PREFIX_RE, '')
     .replace(/\b(ex|vmax|vstar|v-union|v|gx|radiant|mega)\b/g, '')
     .replace(/[^a-z0-9\s-]/g, ' ')
     .replace(/\s+/g, ' ')
@@ -3005,7 +3019,9 @@ function sortCardsByTypeSimple(cards) {
     'Energy': 7
   };
 
-  // Resolve Pokedex number from card data or global map
+  // Resolve Pokedex number from card data or global map. Strips
+  // trainer-possessive + form prefix + TCG suffix in that order — see
+  // POKEMON_FORM_PREFIX_RE for the prefix list.
   function _getDexNum(card) {
     const direct = parseInt(card.pokedex_number || card.pokedex || card.dex_number, 10);
     if (!isNaN(direct) && direct > 0) return direct;
@@ -3014,6 +3030,8 @@ function sortCardsByTypeSimple(cards) {
     const directMap = parseInt(dexMap[rawName], 10);
     if (!isNaN(directMap) && directMap > 0) return directMap;
     const baseName = rawName
+      .replace(/^[a-zäöüß]+'s\s+/, '')
+      .replace(POKEMON_FORM_PREFIX_RE, '')
       .replace(/\b(ex|vmax|vstar|v-union|v|gx|radiant|mega)\b/g, '')
       .replace(/[^a-z0-9\s-]/g, ' ').replace(/\s+/g, ' ').trim();
     const baseMap = parseInt(dexMap[baseName], 10);

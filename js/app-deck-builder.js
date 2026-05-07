@@ -1343,7 +1343,27 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 const percA = parseFloat((a.percentage_in_archetype || '0').toString().replace(',', '.')) || 0;
                 const percB = parseFloat((b.percentage_in_archetype || '0').toString().replace(',', '.')) || 0;
                 
-                // Helper: resolve Pokedex number from card data or global map
+                // Helper: resolve Pokedex number from card data or global map.
+                //
+                // Card-name shapes we need to handle:
+                //   "Garchomp ex"                 → garchomp
+                //   "Cynthia's Garchomp ex"       → garchomp (trainer-possessive)
+                //   "Hop's Trevenant"             → trevenant
+                //   "Bloodmoon Ursaluna ex"       → ursaluna (form prefix)
+                //   "Hisuian Zoroark"             → zoroark (regional)
+                //   "Hisui Goomy"                 → goomy
+                //   "Paldean Tauros"              → tauros
+                //   "Galarian Slowking"           → slowking
+                //   "Alolan Vulpix"               → vulpix
+                //   "Origin Forme Dialga"         → dialga
+                //   "Dusk Mane Necrozma"          → necrozma
+                //   "Dawn Wings Necrozma"         → necrozma
+                //   "Iron Hands ex"               → iron hands  (no prefix to strip)
+                //
+                // pokemon_dex_numbers.json keys cards by bare base name only,
+                // so the regional/form prefixes MUST come off before the
+                // lookup or the card falls to 99999 and lands in the wrong
+                // pokedex position.
                 function _getDexNum(card) {
                     const direct = parseInt(card.pokedex_number || card.pokedex || card.dex_number, 10);
                     if (!isNaN(direct) && direct > 0) return direct;
@@ -1353,28 +1373,46 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 }
 
                 // Lookup-only variant — same multi-stage fallback as
-                // _getDexNum (direct → trainer-prefix-strip → ex/vmax/...
-                // suffix-strip → form-prefix-strip) but takes a name
-                // string instead of a card object. Used by
-                // _getFamilyBaseDex when walking up the evolution chain.
+                // _getDexNum (direct → trainer-prefix-strip → form-prefix-
+                // strip → ex/vmax/... suffix-strip → first-word-strip)
+                // but takes a name string instead of a card object.
+                // Used by _getFamilyBaseDex when walking up the
+                // evolution chain.
                 function _getDexNumFromName(rawName, dexMap) {
                     dexMap = dexMap || window.pokedexNumbers || {};
                     const direct = parseInt(dexMap[rawName], 10);
                     if (!isNaN(direct) && direct > 0) return direct;
+                    // Strip trainer-possessive prefixes ("Cynthia's Gible" →
+                    // "gible", "Hop's Trevenant" → "trevenant", etc.).
                     const trainerStripped = rawName.replace(/^[a-zäöüß]+'s\s+/, '').trim();
                     if (trainerStripped !== rawName) {
                         const stripMap = parseInt(dexMap[trainerStripped], 10);
                         if (!isNaN(stripMap) && stripMap > 0) return stripMap;
                     }
-                    const baseName = trainerStripped
+                    // Strip form / regional prefixes that the dex map doesn't
+                    // index ("Bloodmoon Ursaluna ex" → "ursaluna ex"). The
+                    // ex / vmax / etc. suffix strip below then drops the
+                    // tail and leaves the bare base name.
+                    const formStripped = trainerStripped
+                        .replace(/^(?:bloodmoon|origin\s+forme|origin|dusk\s+mane|dawn\s+wings|crowned\s+sword|crowned\s+shield|crowned|hisuian|hisui|paldean|paldea|galarian|galar|alolan|alola)\s+/, '')
+                        .trim();
+                    if (formStripped !== trainerStripped) {
+                        const formMap = parseInt(dexMap[formStripped], 10);
+                        if (!isNaN(formMap) && formMap > 0) return formMap;
+                    }
+                    const baseName = formStripped
                         .replace(/\b(ex|vmax|vstar|v-union|v|gx|radiant|mega)\b/g, '')
                         .replace(/[^a-z0-9\s-]/g, ' ').replace(/\s+/g, ' ').trim();
                     const baseMap = parseInt(dexMap[baseName], 10);
                     if (!isNaN(baseMap) && baseMap > 0) return baseMap;
+                    // Final fallback for unknown form prefixes not in the
+                    // explicit list — drop the first word and try again.
+                    // Compound species (Iron Thorns, Raging Bolt) resolve
+                    // directly via baseMap above and never reach this branch.
                     const words = baseName.split(/\s+/).filter(Boolean);
                     if (words.length >= 2) {
-                        const formStripped = words.slice(1).join(' ');
-                        const formMap = parseInt(dexMap[formStripped], 10);
+                        const stripped = words.slice(1).join(' ');
+                        const formMap = parseInt(dexMap[stripped], 10);
                         if (!isNaN(formMap) && formMap > 0) return formMap;
                     }
                     return 99999;
@@ -1411,37 +1449,43 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                     return _getDexNumFromName(currentName, dexMap);
                 }
 
-                // For Pokemon: sort by element type, then Pokedex number
+                // For Pokemon: sort by element type → family-base Pokedex →
+                // evolution stage → share%.
+                //
+                // Pokedex MUST come before share% so evolution lines stay together
+                // (Dreepy 885 → Drakloak 886 → Dragapult 887; Dusclops 356 → Dusknoir 477).
+                // Sorting by share% first scrambles the column visually because the
+                // pre-evolutions almost always carry a lower share than the final
+                // form — Dusknoir (100%) would jump above Dusclops (~70%) when in
+                // pokedex order Dusclops comes first. This regressed in commit
+                // 410cebd ("element > share% desc > pokedex"); the share-first order
+                // was the bug, not the intent.
+                //
+                // Family-base lookup (via card-effects "Evolves from X" walk)
+                // additionally groups Dusknoir (#477) under its base species
+                // Duskull (#355) so the whole Duskull → Dusclops → Dusknoir
+                // line stays adjacent instead of split by Gen.
                 if (categoryA === 'Pokemon' && categoryB === 'Pokemon') {
                     const elementA = cardTypeA.charAt(0);
                     const elementB = cardTypeB.charAt(0);
-                    
+
                     const elemOrderA = elementOrder[elementA] || 99;
                     const elemOrderB = elementOrder[elementB] || 99;
-                    
-                    // Different element: sort by element order
+
                     if (elemOrderA !== elemOrderB) {
                         return elemOrderA - elemOrderB;
                     }
-                    
-                    // SAME ELEMENT: Sort by share% descending first
-                    if (percA !== percB) {
-                        return percB - percA;
-                    }
 
-                    // Same share: sort by Pokédex FAMILY base. Walks up
-                    // the evolution chain so Dusknoir (#477) sorts with
-                    // Dusclops/Duskull (#355–356) under the family base
-                    // dex instead of landing 122 numbers later between
-                    // Latias and Budew. Plain _getDexNum is the fallback
-                    // when card-effects isn't loaded yet.
+                    // SAME ELEMENT: family-base Pokedex FIRST so evolution
+                    // lines stay grouped (and late-Gen evolutions like
+                    // Dusknoir #477 sort with Duskull #355).
                     const dexA = _getFamilyBaseDex(a);
                     const dexB = _getFamilyBaseDex(b);
                     if (dexA !== dexB) {
                         return dexA - dexB;
                     }
-                    
-                    // Same Pokedex: sort by evolution stage (Basic → Stage1 → Stage2)
+
+                    // Same Pokedex: evolution stage (Basic → Stage1 → Stage2).
                     const evolutionA = cardTypeA.substring(1).replace(/\s+/g, '');
                     const evolutionB = cardTypeB.substring(1).replace(/\s+/g, '');
                     const evolOrderA = evolutionOrder[evolutionA] || 99;
@@ -1449,8 +1493,14 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                     if (evolOrderA !== evolOrderB) {
                         return evolOrderA - evolOrderB;
                     }
-                    
-                    // Fallback: by name
+
+                    // Same dex + same stage (regional forms, alternate prints):
+                    // share% descending picks the more-played variant first.
+                    if (percA !== percB) {
+                        return percB - percA;
+                    }
+
+                    // Final tiebreak: name alphabetical.
                     const nameA = a.card_name || a.name || '';
                     const nameB = b.card_name || b.name || '';
                     return nameA.localeCompare(nameB);
@@ -1997,7 +2047,20 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             const PAD        = 24;
             const HEADER_H   = 56;
             const FOOTER_H   = 36;
-            const BADGE_R    = 18;
+            // Badge sized so the count is readable at thumbnail size —
+            // the previous radius of 18 px (~7 % of card width) became
+            // illegible when the export got resized down for chat
+            // sharing.  Bumped twice now (18 → 36 → 44) so the badge has
+            // the same visual weight as Limitless's deck-overview
+            // screenshots — ~36 % of card width once the white stroke
+            // is included, which is the threshold the user accepted as
+            // "kräftig genug".
+            const BADGE_R       = 44;
+            const BADGE_FONT    = 'bold 40px sans-serif';
+            const BADGE_STROKE  = 5;
+            // Same scarlet as Limitless's deck-overview badges and the
+            // .compact-badge gradient anchor in styles.css.
+            const BADGE_FILL = '#e74c3c';
 
             const rows   = Math.ceil(cards.length / COLS);
             const canvasW = PAD * 2 + COLS * CARD_W + (COLS - 1) * GAP;
@@ -2142,22 +2205,35 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                     ctx.textAlign = 'start';
                 }
 
-                // Badge (count)
+                // Badge (count) — drawn for every card including 1-of so
+                // the export tells the same story as the Limitless meta
+                // screenshots: glance at the thumbnail, see how many of
+                // each card the deck runs.  Previously the 1-of badge
+                // was suppressed and counts ≥2 used a tiny purple dot.
                 const cardEl = cards[i];
                 const badge = cardEl.querySelector('.compact-badge, .card-max-count');
                 const badgeText = badge ? badge.textContent.trim() : '';
-                if (badgeText && badgeText !== '1') {
-                    const bx = x + CARD_W - BADGE_R - 4;
-                    const by = y + BADGE_R + 4;
-                    ctx.fillStyle = '#6c3dc5';
+                if (badgeText) {
+                    const bx = x + CARD_W - BADGE_R - 6;
+                    const by = y + BADGE_R + 6;
+                    // Soft drop-shadow so the badge stays readable on
+                    // light card backgrounds (basic energies, item cards).
+                    ctx.save();
+                    ctx.shadowColor = 'rgba(0,0,0,0.45)';
+                    ctx.shadowBlur = 8;
+                    ctx.shadowOffsetY = 2;
+                    ctx.fillStyle = BADGE_FILL;
                     ctx.beginPath();
                     ctx.arc(bx, by, BADGE_R, 0, Math.PI * 2);
                     ctx.fill();
+                    ctx.restore();
                     ctx.strokeStyle = '#fff';
-                    ctx.lineWidth = 2;
+                    ctx.lineWidth = BADGE_STROKE;
+                    ctx.beginPath();
+                    ctx.arc(bx, by, BADGE_R, 0, Math.PI * 2);
                     ctx.stroke();
                     ctx.fillStyle = '#fff';
-                    ctx.font = 'bold 16px sans-serif';
+                    ctx.font = BADGE_FONT;
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'middle';
                     ctx.fillText(badgeText, bx, by);
@@ -2300,20 +2376,42 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
 
             _shareImageBlob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
 
-            // Show preview as <img>
+            if (!_shareImageBlob) {
+                preview.innerHTML = '<p style="color:#e74c3c;">' + (getLang() === 'de' ? 'Bild konnte nicht erstellt werden (Canvas tainted?)' : 'Could not generate image (canvas tainted?)') + '</p>';
+                return;
+            }
+
+            // Show preview as <img>. Don't revoke the object URL inside
+            // onload — once revoked the browser can't re-decode if the
+            // img is detached/reattached or the modal repaints, leaving
+            // a broken-image icon. Track the URL on the modal element
+            // and revoke when the modal closes (or the next preview
+            // overwrites it).
             preview.innerHTML = '';
+            if (_sharePreviewObjectUrl) {
+                URL.revokeObjectURL(_sharePreviewObjectUrl);
+                _sharePreviewObjectUrl = null;
+            }
             const img = document.createElement('img');
-            img.src = URL.createObjectURL(_shareImageBlob);
+            _sharePreviewObjectUrl = URL.createObjectURL(_shareImageBlob);
+            img.src = _sharePreviewObjectUrl;
             img.alt = deckName;
             img.style.cssText = 'max-width:100%; border-radius:8px; box-shadow:0 4px 20px rgba(0,0,0,0.3);';
-            img.onload = () => URL.revokeObjectURL(img.src);
             preview.appendChild(img);
         }
+
+        // Outlives a single openShareImageModal() call so closeShareImageModal
+        // can revoke it after the user's done viewing — see openShareImageModal.
+        let _sharePreviewObjectUrl = null;
 
         function closeShareImageModal() {
             const modal = document.getElementById('shareImageModal');
             modal.classList.remove('show');
             _shareImageBlob = null;
+            if (_sharePreviewObjectUrl) {
+                URL.revokeObjectURL(_sharePreviewObjectUrl);
+                _sharePreviewObjectUrl = null;
+            }
         }
 
         async function shareImageDownload() {
@@ -2364,9 +2462,14 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             exportDeckAsImage(grid, deckName);
         }
 
-        /** Determine a human-readable name for the currently open grid modal deck. */
+        /** Determine a human-readable name for the currently open grid modal deck.
+         *  Tab-active check is the primary path (deck-builder workflow) but
+         *  imageViewModal can also be opened from My Decks via
+         *  exportSavedDeckAsImage, in which case _currentPreviewDeckIndex
+         *  points at the saved deck. As a final fallback, read the
+         *  imageViewModal's <h3> if a caller stamped a deck name there
+         *  directly. */
         function _getActiveGridDeckName() {
-            // Check which tab is active to determine source
             const clTab = document.getElementById('city-league-tab');
             const cmTab = document.getElementById('current-meta-tab');
             const pmTab = document.getElementById('past-meta-tab');
@@ -2379,6 +2482,26 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             }
             if (pmTab && pmTab.classList.contains('active')) {
                 return window.pastMetaCurrentArchetype || 'Past Meta Deck';
+            }
+
+            // Saved-deck path — exportSavedDeckAsImage stashes the index
+            // it just opened on _currentPreviewDeckIndex. Resolve that
+            // back to the user's deck name so the share image header
+            // shows "MyCoolDeck" instead of the generic "Deck" fallback.
+            if (typeof _currentPreviewDeckIndex !== 'undefined' && _currentPreviewDeckIndex >= 0) {
+                const decks = window.userDecks || [];
+                const d = decks[_currentPreviewDeckIndex];
+                if (d) return d.name || d.archetype || 'Saved Deck';
+            }
+
+            // Last resort — pick up whatever the parent imageViewModal's
+            // <h3> already says (callers like generateDeckGrid sometimes
+            // set it to the archetype name even when their tab isn't
+            // .active for whatever reason).
+            const ivmTitle = document.querySelector('#imageViewModal .image-view-header h3');
+            const titleText = (ivmTitle && ivmTitle.textContent || '').trim();
+            if (titleText && titleText !== 'Deck Cards Overview' && titleText !== 'Deck') {
+                return titleText;
             }
             return 'Deck';
         }

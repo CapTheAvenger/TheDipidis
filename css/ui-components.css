@@ -3014,8 +3014,11 @@ img[src*="limitlesstcg"] {
     border: 1px solid #3a3f5a;
 }
 .build-info-cards {
-    overflow-y: auto;
-    flex: 1 1 auto;
+    /* Per-card list flows inline with the rest of the modal so there
+       is exactly ONE scroll container (the modal itself).  Earlier
+       versions had overflow-y: auto + flex: 1 1 auto here, which
+       created a nested scroll region that hid the bottom of the list
+       behind a fixed footer area. */
     border-top: 1px solid #2a2f4a;
     border-bottom: 1px solid #2a2f4a;
     padding: 8px 0;

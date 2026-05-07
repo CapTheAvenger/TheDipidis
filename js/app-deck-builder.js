@@ -1368,6 +1368,20 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                         .replace(/[^a-z0-9\s-]/g, ' ').replace(/\s+/g, ' ').trim();
                     const baseMap = parseInt(dexMap[baseName], 10);
                     if (!isNaN(baseMap) && baseMap > 0) return baseMap;
+                    // Form-prefix fallback: when the full name doesn't
+                    // resolve, drop the first word and try again. Catches
+                    // form variants ("Bloodmoon Ursaluna" → "ursaluna",
+                    // "Alolan Marowak" → "marowak", "Origin Dialga" →
+                    // "dialga") without hardcoding a form-prefix list.
+                    // Compound-species names that DO resolve directly
+                    // (e.g. "Iron Thorns" → 995 via baseMap) never reach
+                    // this branch, so first-word-strip can't break them.
+                    const words = baseName.split(/\s+/).filter(Boolean);
+                    if (words.length >= 2) {
+                        const formStripped = words.slice(1).join(' ');
+                        const formMap = parseInt(dexMap[formStripped], 10);
+                        if (!isNaN(formMap) && formMap > 0) return formMap;
+                    }
                     return 99999;
                 }
 
@@ -3725,22 +3739,33 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
         // ──────────────────────────────────────────────────────────
         // Co-occurrence detection
         //
-        // Builds a per-card synergy map from the per-tournament rows of
-        // a single archetype. Two cards "synergy-bind" each other when
-        // they appear together in ≥ minProb of the archetype's decks
-        // (default 90 %) with sample size ≥ minSample (default 5).
+        // Builds a per-card synergy map from per-tournament rows. Two
+        // cards "synergy-bind" each other when they appear together in
+        // ≥ minProb of decks (default 90 %) with sample size ≥ minSample
+        // (default 5).
         //
-        // User-flagged Mega Starmie regression: builder picked Neo
-        // Upper Energy + 3 Dreepy + 3 Drakloak + 2 Munkidori but no
-        // Dragapult ex. In Mega-Starmie tournament data Neo Upper /
-        // Dreepy / Drakloak / Munkidori all co-occur with Dragapult ex
-        // ≈ 100 %. Without Dragapult ex the entire sub-line is dead.
+        // When archetypeKey is null/falsy, aggregates ACROSS ALL
+        // archetypes — meta-wide synergies (e.g. Neo Upper Energy ↔
+        // Dragapult ex regardless of which deck plays them). When set,
+        // restricts to the named archetype.
+        //
+        // User-flagged Mega Starmie regression: Major data classifies
+        // the same physical decks as "Starmie Dusknoir" / "Starmie
+        // Froslass" — the per-archetype slice for "Mega Starmie" is
+        // empty, so per-archetype co-occurrence misses obvious
+        // pairings. Cross-archetype aggregation fixes that.
         //
         // Returns:
         //   Map<cardLower, {
-        //     partners: [{ card, prob, sample }, ...],  // ≥ minProb
-        //     presence: int                              // decks with this card
+        //     partners: [{ card, prob, sample, isAnchor }, ...],
+        //     presence: int
         //   }>
+        // The `isAnchor` flag flags partner cards likely to be
+        // archetype-defining win-conditions — Pokémon ex / VMAX /
+        // VSTAR / V-Union. The synergy filter only counts anchor
+        // partners as "satisfying" requirements (Dreepy alone in the
+        // deck doesn't validate Neo Upper Energy when its actual
+        // payoff Pokémon, Dragapult ex, is missing).
         // ──────────────────────────────────────────────────────────
         function _computeCardCoOccurrence(rows, archetypeKey, options) {
             const minProb   = (options && options.minProb)   != null ? options.minProb   : 0.90;
@@ -3748,15 +3773,22 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             const minDecks  = (options && options.minDecks)  != null ? options.minDecks  : 10;
             const out = new Map();
             if (!Array.isArray(rows) || rows.length === 0) return out;
-            if (!archetypeKey) return out;
-            const archLower = String(archetypeKey).trim().toLowerCase();
+            const archLower = archetypeKey ? String(archetypeKey).trim().toLowerCase() : null;
+            // Anchor pattern: card name ends in (or contains) the ex /
+            // V / VMAX / VSTAR / V-Union suffix. Plain Mega lines (e.g.
+            // "Mega Lucario ex") are caught by the " ex" branch.
+            const _isAnchorName = (n) => {
+                const s = String(n || '').toLowerCase();
+                return / ex$/.test(s) || /\bvmax\b/.test(s) || /\bvstar\b/.test(s)
+                    || /\bv-union\b/.test(s) || /\sv$/.test(s);
+            };
 
             // Bucket rows by (tournament_id, archetype) → Set<cardLower>.
             const buckets = new Map();
             for (const r of rows) {
                 if (!r) continue;
                 const arch = String(r.archetype || '').trim().toLowerCase();
-                if (arch !== archLower) continue;
+                if (archLower && arch !== archLower) continue;
                 const tid = String(r.tournament_id || '').trim();
                 const card = String(r.card_name || '').trim().toLowerCase();
                 if (!tid || !card) continue;
@@ -3793,7 +3825,14 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 if (inner) {
                     for (const [partner, both] of inner) {
                         const p = both / count;
-                        if (p >= minProb) partners.push({ card: partner, prob: p, sample: count });
+                        if (p >= minProb) {
+                            partners.push({
+                                card: partner,
+                                prob: p,
+                                sample: count,
+                                isAnchor: _isAnchorName(partner),
+                            });
+                        }
                     }
                 }
                 if (partners.length === 0) continue;
@@ -5855,36 +5894,78 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 if (!major || _aceSpecMajorWeight <= 0) return score;
                 return major.share * _aceSpecMajorWeight + score * (1 - _aceSpecMajorWeight);
             };
-            // Co-occurrence map for the current archetype — drives the
-            // ACE-SPEC synergy filter below + the post-allocation
-            // synergy-demotion pass. Computed once per build from the
-            // already-loaded onlineRowsRaw so we don't fetch the CSV
-            // twice. Empty when archetype has < 10 deck samples (noise
-            // floor; see _computeCardCoOccurrence).
-            const _cooccurrenceMap = (Array.isArray(onlineRowsRaw) && onlineRowsRaw.length > 0)
-                ? _computeCardCoOccurrence(onlineRowsRaw, currentArchetype)
+            // Co-occurrence map — meta-wide (NOT per-archetype). Major
+            // data classifies the same physical decks under different
+            // archetype names (e.g. "Mega Starmie" online aggregates as
+            // "Starmie Dusknoir" / "Starmie Froslass" at major events),
+            // so a per-archetype slice misses obvious cross-archetype
+            // synergies. The cross-archetype view captures the real
+            // pattern: Neo Upper Energy → Dragapult ex co-occurs in
+            // 96 % of Major decks regardless of which deck slug the
+            // scrape used.
+            //
+            // Combines two sources:
+            //   • onlineRowsRaw (online_tournament_dated_cards.csv) —
+            //     dated per-tournament rows, archetype unmodified.
+            //   • window.currentMetaTournamentCardsData
+            //     (tournament_cards_data_cards.csv) — Major rows with
+            //     price-tag-suffixed archetype names; stripped so each
+            //     price variant counts as one deck under the canonical
+            //     name.
+            const _cooccurrenceRows = [];
+            if (Array.isArray(onlineRowsRaw)) {
+                for (const r of onlineRowsRaw) _cooccurrenceRows.push(r);
+            }
+            if (typeof window !== 'undefined' && Array.isArray(window.currentMetaTournamentCardsData)) {
+                const _stripPriceTag = (s) => String(s || '')
+                    .replace(/\d+(?:[.,]\d+)?\$\d+(?:[.,]\d+)?€.*$/u, '')
+                    .trim();
+                for (const r of window.currentMetaTournamentCardsData) {
+                    if (!r) continue;
+                    _cooccurrenceRows.push({
+                        tournament_id: r.tournament_id,
+                        archetype: _stripPriceTag(r.archetype || ''),
+                        card_name: r.card_name,
+                    });
+                }
+            }
+            // archetypeKey = null → meta-wide aggregation.
+            const _cooccurrenceMap = _cooccurrenceRows.length > 0
+                ? _computeCardCoOccurrence(_cooccurrenceRows, null)
                 : new Map();
+            if (_cooccurrenceMap.size > 0) {
+                devLog(`[Consistency][Synergy] cross-archetype co-occurrence map: ${_cooccurrenceMap.size} cards with synergy partners (${_cooccurrenceRows.length} rows)`);
+            }
 
             const aceSpecCandidates = deckCards.filter(c => isAceSpecCard(c));
 
             // Synergy-aware ACE-SPEC pre-filter — user-flagged Mega
             // Starmie regression: builder picked Neo Upper Energy as
             // ACE-SPEC despite no Dragapult ex in deckCards above the
-            // auto-add threshold. Co-occurrence data says Neo Upper
-            // appears in ≈ 100 % of Mega-Starmie decks alongside
-            // Dragapult ex; without the partner the ACE-SPEC slot is
-            // wasted. Filter out candidates whose required partners
-            // can't realistically make the deck (consistencyScore <
-            // 50 = below the score gate that admits Extended cards).
-            // Falls back to the unfiltered list when the filter would
-            // empty the candidate pool.
+            // auto-add threshold. Cross-archetype Major data shows Neo
+            // Upper Energy → Dragapult ex at 96 % co-occurrence; without
+            // the payoff Pokémon ex the ACE-SPEC slot is wasted.
+            //
+            // Filter rule: only ANCHOR partners count (Pokémon ex /
+            // VMAX / VSTAR / V-Union — name-pattern detected). Non-
+            // anchor partners (Trainer staples like Iono / Boss's
+            // Orders, or Basic precursors like Dreepy) ride along with
+            // EVERY archetype and would always satisfy the filter,
+            // masking the missing payoff. Anchor-only check forces the
+            // filter to ask the right question: is the actual win
+            // condition this card synergises with present?
+            //
+            // Threshold: anchor partner must be in deckCards with
+            // consistencyScore ≥ 50 (Extended-tier — likely to make
+            // the build).  Falls back to the unfiltered list when the
+            // filter would empty the candidate pool.
             const _aceSpecCandidatesFiltered = aceSpecCandidates.filter(c => {
                 const nm = String(c.card_name || '').trim().toLowerCase();
                 const synergy = _cooccurrenceMap.get(nm);
                 if (!synergy || !synergy.partners || synergy.partners.length === 0) return true;
-                // At least ONE partner must be present in deckCards with
-                // score ≥ 50 (likely to make the build).
-                return synergy.partners.some(p => {
+                const anchorPartners = synergy.partners.filter(p => p.isAnchor);
+                if (anchorPartners.length === 0) return true; // no anchor in synergy → no claim
+                return anchorPartners.some(p => {
                     const partnerCard = deckCards.find(d => String(d.card_name || '').trim().toLowerCase() === p.card);
                     return partnerCard && (partnerCard.consistencyScore || 0) >= 50;
                 });

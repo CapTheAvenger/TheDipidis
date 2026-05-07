@@ -157,7 +157,50 @@ describe('_computeCardCoOccurrence', () => {
     it('returns empty map on empty / null input', () => {
         assert.equal(FNS.compute([],   'Mega Starmie').size, 0);
         assert.equal(FNS.compute(null, 'Mega Starmie').size, 0);
-        assert.equal(FNS.compute([{ archetype: 'X', card_name: 'Y', tournament_id: 't1' }], '').size, 0);
+    });
+
+    it('aggregates cross-archetype when archetypeKey is null (meta-wide synergies)', () => {
+        // 12 decks across THREE different archetypes, all carrying
+        // Neo Upper Energy + Dragapult ex. Per-archetype slices have
+        // ≤ 6 decks each (below minDecks=10) — only meta-wide
+        // aggregation surfaces the synergy.
+        const rows = [];
+        const archetypes = ['Dragapult Pure', 'Dragapult Dusknoir', 'Dragapult Charizard', 'Mega Starmie'];
+        for (let i = 0; i < 12; i++) {
+            const a = archetypes[i % archetypes.length];
+            rows.push({ tournament_id: `t${i}`, archetype: a, card_name: 'Neo Upper Energy' });
+            rows.push({ tournament_id: `t${i}`, archetype: a, card_name: 'Dragapult ex' });
+        }
+        // Per-archetype: each only has 3 decks → empty
+        const perArch = FNS.compute(rows, 'Dragapult Pure');
+        assert.equal(perArch.size, 0, 'per-archetype slice below noise floor');
+        // Cross-archetype: 12 buckets total → above floor
+        const crossArch = FNS.compute(rows, null);
+        const synergy = crossArch.get('neo upper energy');
+        assert.ok(synergy, 'cross-archetype must surface Neo Upper synergy');
+        const dragPartner = synergy.partners.find(p => p.card === 'dragapult ex');
+        assert.ok(dragPartner, 'Dragapult ex must be a partner');
+        assert.equal(dragPartner.prob, 1.0);
+    });
+
+    it('flags Pokémon-ex / VMAX / VSTAR partners as anchors', () => {
+        const rows = [];
+        for (let i = 0; i < 12; i++) {
+            const t = `t${i}`;
+            rows.push({ tournament_id: t, archetype: 'X', card_name: 'Neo Upper Energy' });
+            rows.push({ tournament_id: t, archetype: 'X', card_name: 'Dragapult ex' });   // anchor
+            rows.push({ tournament_id: t, archetype: 'X', card_name: 'Charizard VMAX' });  // anchor
+            rows.push({ tournament_id: t, archetype: 'X', card_name: 'Iono' });            // not anchor
+            rows.push({ tournament_id: t, archetype: 'X', card_name: 'Dreepy' });          // not anchor (not ex)
+        }
+        const m = FNS.compute(rows, null);
+        const synergy = m.get('neo upper energy');
+        assert.ok(synergy);
+        const flagBy = (cardName) => synergy.partners.find(p => p.card === cardName);
+        assert.equal(flagBy('dragapult ex').isAnchor,    true);
+        assert.equal(flagBy('charizard vmax').isAnchor,  true);
+        assert.equal(flagBy('iono').isAnchor,            false);
+        assert.equal(flagBy('dreepy').isAnchor,          false);
     });
 
     it('detects multi-partner clusters', () => {

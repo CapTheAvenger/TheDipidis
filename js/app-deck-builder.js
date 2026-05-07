@@ -5752,6 +5752,58 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 devLog('[Consistency][Function] tagging failed:', e);
             }
 
+            // ──────────────────────────────────────────────────────────
+            // Major-Avg Blending — when the latest Major is recent
+            // enough to drive the ACE-SPEC pick, it should also drive
+            // per-card counts. The previous logic locked the ACE-SPEC
+            // choice to the Major (100 % weight at ≤ 14 d) but kept
+            // every other count on the Online-aggregate avg, which is
+            // older and pre-rotation-blended. User-flagged Crustle:
+            //   - Prague Poké Pad avg = 1.27 (11/20 decks)
+            //   - Online Pad avg = 1.64, ACE-cond shifts UP to 2.16
+            //   → builder picked 2 copies; Major says 1.
+            //   - Prague Mega Kangaskhan ex avg = 2.38 (13/20)
+            //   - Online avg = 2.58, ACE-cond ↑2.86 → builder picked 3
+            //   → Major says 2.
+            //
+            // The blend uses the SAME weight curve as the ACE-SPEC
+            // picker (100 % at ≤ 14 d, 1.0 → 0.5 linear to day 28,
+            // then 0). Small-sample guard (≥ 3 Major decks) avoids
+            // letting one outlier deck distort a card's avg.
+            //
+            // Cards that get a Major-blended avg also short-circuit
+            // the ACE-cond override below — Major data is ALREADY
+            // conditional on the chosen ACE-SPEC (when Hero's Cape
+            // was 20/20 at Prague, the Major Pad avg of 1.27 IS the
+            // Hero's-Cape-conditional avg). Re-applying the
+            // pre-Major ACE-cond shift on top would just walk the
+            // count back to the older signal.
+            const _MAJOR_BLEND_MIN_DECKS = 3;
+            const _MAJOR_BLEND_MIN_DELTA = 0.15;
+            let _majorAvgOverrides = 0;
+            if (_aceSpecMajorWeight > 0 && latestMajorStats && latestMajorStats.size > 0) {
+                deckCards.forEach(card => {
+                    const nm = (card.card_name || '').trim().toLowerCase();
+                    const major = latestMajorStats.get(nm);
+                    if (!major) return;
+                    if ((major.deckCount || 0) < _MAJOR_BLEND_MIN_DECKS) return;
+                    const onlineAvg = card.avgCountWhenUsed || 0;
+                    const majorAvg = major.avg || 0;
+                    if (onlineAvg <= 0 || majorAvg <= 0) return;
+                    const blended = majorAvg * _aceSpecMajorWeight + onlineAvg * (1 - _aceSpecMajorWeight);
+                    if (Math.abs(blended - onlineAvg) < _MAJOR_BLEND_MIN_DELTA) return;
+                    card._majorAvg = majorAvg;
+                    card._onlineAvg = onlineAvg;
+                    card._majorBlendedAvg = blended;
+                    card.avgCountWhenUsed = blended;
+                    _majorAvgOverrides += 1;
+                    devLog(`[Consistency][MajorAvgBlend] ${card.card_name}: online ${onlineAvg.toFixed(2)} → blended ${blended.toFixed(2)} (Major ${majorAvg.toFixed(2)} × ${_aceSpecMajorWeight.toFixed(2)} weight, ${major.deckCount} decks)`);
+                });
+                if (_majorAvgOverrides > 0) {
+                    devLog(`[Consistency][MajorAvgBlend] applied to ${_majorAvgOverrides} card(s)`);
+                }
+            }
+
             // ACE-SPEC-conditional avgCountWhenUsed override.
             //
             // The ACE-SPEC choice is a deck-shaping decision: Cynthia's
@@ -5786,6 +5838,14 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                     let overrides = 0;
                     deckCards.forEach(card => {
                         const cn = (card.card_name || '').trim().toLowerCase();
+                        // Major-blend short-circuit — when the card's
+                        // count is already driven by recent Major data,
+                        // the older ACE-cond aggregate is stale. Major
+                        // data is already conditional on the chosen
+                        // ACE-SPEC, so re-applying the pre-Major shift
+                        // would just walk the count back to outdated
+                        // signal (Pad: 1.27 Major → 2.16 ACE-cond).
+                        if (card._majorBlendedAvg != null && _aceSpecMajorWeight >= 0.5) return;
                         const condStat = condResult.conditionalAvgs.get(cn);
                         if (!condStat || condStat.presence < 3) return;
                         const baseAvg = card.avgCountWhenUsed || 0;

@@ -2339,11 +2339,18 @@ window.MetaCall = (function () {
       // ratio (qualityRatio − 1) × 0.25 maps a 1.5× overperformer to
       // 0.125 conv-equivalent (just below the 0.15 threshold) and a
       // 2.0× overperformer to 0.25 (= field-mean baseline = strong).
+      // Hard-cap at 0.40 (40 %) so a freak qualityRatio of 5× doesn't
+      // blow up to a nonsense 113 % "conversion" in the tip-reason
+      // tooltip — Top-8 conversion is bounded by 1.0 mathematically
+      // (a deck can't have > 100 % of its players make Top 8) and
+      // 40 % is already an extreme upper bound for any real archetype.
       const qStats = _labsQualityByDeck[k];
       const qualityRatio = (qStats && qStats.d1 > 0) ? qStats.d2 / qStats.d1 : 0;
-      const labsConvEffective = labsConv > 0
-        ? labsConv
-        : (qualityRatio > 0 ? Math.max(0, (qualityRatio - 1)) * 0.25 + 0.05 : 0);
+      const _labsConvCapped = Math.min(1.0, labsConv);
+      const _syntheticConv  = qualityRatio > 0
+        ? Math.min(0.40, Math.max(0, (qualityRatio - 1)) * 0.25 + 0.05)
+        : 0;
+      const labsConvEffective = _labsConvCapped > 0 ? _labsConvCapped : _syntheticConv;
       const lm = _lastMajorByDeck[k];
       const lmWr = lm ? lm.winPct : 0;
       // Aggregate score — picks the deck that's most "underrated" on
@@ -3067,15 +3074,28 @@ window.MetaCall = (function () {
     const container = document.getElementById('profile-metacall');
     if (!container || !_shareList) return;
     const field = buildField();
-    // Date-window banner — surfaces the global cutoff set on Card
-    // Analysis so the user knows the predictor is running on a
-    // narrowed dataset, not the full meta history. Hidden when no
-    // cutoff is active (the Predictor 5.0 baseline already covers all
-    // available data at recency-decayed weights).
+    // Date-window control — duplicates the picker in Card Analysis so
+    // users on the Meta Call tab can narrow the predictor's input
+    // window without context-switching. Both inputs read/write the
+    // same window.currentMetaDateFrom state via the global
+    // setCurrentMetaDateFrom (defined in app-current-meta-analysis.js)
+    // so changes here also re-paint the Card Analysis tables.
     const _dateCutoff = (typeof window !== 'undefined') ? window.currentMetaDateFrom : null;
-    const dateBanner = (_dateCutoff && /^\d{4}-\d{2}-\d{2}$/.test(_dateCutoff))
-      ? `<div class="metacall-date-window">📅 Data window: data ≥ ${_dateCutoff} <span class="metacall-date-window-hint">(set in Card Analysis)</span></div>`
-      : '';
+    const _dateValue = (_dateCutoff && /^\d{4}-\d{2}-\d{2}$/.test(_dateCutoff)) ? _dateCutoff : '';
+    const _activeWindowText = _dateValue
+      ? `Active window: data ≥ ${_dateValue}`
+      : 'No date filter — using full meta history';
+    const dateBanner = `
+      <div class="metacall-date-window">
+        <label class="metacall-date-label" for="metacallDateFrom">📅 Data window from:</label>
+        <input type="date" id="metacallDateFrom" class="metacall-date-input"
+               value="${_dateValue}"
+               onchange="if (typeof setCurrentMetaDateFrom === 'function') setCurrentMetaDateFrom(this.value)">
+        <button type="button" class="metacall-date-clear"
+                onclick="if (typeof clearCurrentMetaDateFrom === 'function') clearCurrentMetaDateFrom()"
+                ${_dateValue ? '' : 'style="display:none"'}>Clear</button>
+        <span class="metacall-date-window-hint">${_activeWindowText}</span>
+      </div>`;
     container.innerHTML = `
 <div class="metacall-wrap">
   <div class="metacall-header">

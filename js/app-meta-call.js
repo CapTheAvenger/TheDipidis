@@ -26,6 +26,12 @@ window.MetaCall = (function () {
   let _snapshotWeekAgo   = {};   // normalize(deck) -> share% on (closest available date ≤ today-7d)
   let _labsConvByDeck    = {};   // normalize(deck) -> { sum, n } weighted top8_conv_rate (legacy)
   let _labsQualityByDeck = {};   // normalize(deck) -> { d1: sum, d2: sum } per-deck day1/day2 totals across recent majors
+  let _labsDay2ConvByDeck = {};  // normalize(deck) -> { sum, n } weighted day1_to_day2_conv. Quality signal that
+                                 // captures "this deck punches above its share at majors" — user-flagged via the
+                                 // LA-Regionals strategy doc (Grimmsnarl/Froslass at ~53.7 % Day-2 win-rate from
+                                 // a mid-share field). Direct conversion rate is more robust than the d2/d1 share
+                                 // ratio in _labsQualityByDeck because it's normalised by the deck's own Day-1
+                                 // base size, so it doesn't reward decks that Just had more Day-1 players.
   let _baselineSnapshotDate = null; // actual date used for the post-major baseline (for banner)
   let _lastAccuracyReport = null; // { mae, baselineDate, majorDate, decks } — shown next to the banner when a new major is detected
   // ── Last major snapshot (for text-first deck cards) ───────
@@ -352,9 +358,17 @@ window.MetaCall = (function () {
     if (!_historyManifest || !Array.isArray(_historyManifest.dates) || _historyManifest.dates.length === 0) {
       return new Map();
     }
+    // Honour the global date-window filter set in Card Analysis. When the
+    // user picked "data ≥ YYYY-MM-DD", the predictor's recency baseline
+    // and trend signal must consume only snapshots on or after that date
+    // — otherwise the filter creates a misleading mismatch where Card
+    // Analysis shows post-cutoff data but Meta Call still anchors on
+    // pre-cutoff history.
+    const cutoff = (typeof window !== 'undefined') ? window.currentMetaDateFrom : null;
+    const dates = _historyManifest.dates.slice().sort()
+      .filter(d => !cutoff || d >= cutoff);
+    if (dates.length === 0) return new Map();
     const out = new Map();
-    // Fetch in parallel so the predictor isn't blocked by serial network.
-    const dates = _historyManifest.dates.slice().sort();
     const results = await Promise.all(dates.map(d => _loadHistorySnapshot(d).then(snap => [d, snap])));
     for (const [d, snap] of results) {
       if (snap && Object.keys(snap).length > 0) out.set(d, snap);
@@ -410,14 +424,35 @@ window.MetaCall = (function () {
   let _datedCardsRows        = null; // parsed online_tournament_dated_cards.csv, shared between
                                      // ACE-SPEC + doctrine pillar pipelines
 
+  // Cache holds the FULL parsed CSV; the date-filter is applied per
+  // consumer to keep one fetch per session and let the same raw rows
+  // serve different filter windows without re-fetching.
+  let _datedCardsRowsRaw = null;
   async function _loadDatedCardsRows() {
-    if (_datedCardsRows) return _datedCardsRows;
-    try {
-      const resp = await fetch('data/online_tournament_dated_cards.csv?t=' + Date.now());
-      if (!resp.ok) { _datedCardsRows = []; return _datedCardsRows; }
-      _datedCardsRows = parseCSV(await resp.text(), ';');
-    } catch (_e) {
-      _datedCardsRows = [];
+    if (!_datedCardsRowsRaw) {
+      try {
+        const resp = await fetch('data/online_tournament_dated_cards.csv?t=' + Date.now());
+        if (!resp.ok) { _datedCardsRowsRaw = []; }
+        else { _datedCardsRowsRaw = parseCSV(await resp.text(), ';'); }
+      } catch (_e) {
+        _datedCardsRowsRaw = [];
+      }
+    }
+    const cutoff = (typeof window !== 'undefined') ? window.currentMetaDateFrom : null;
+    if (!cutoff || !/^\d{4}-\d{2}-\d{2}$/.test(cutoff)) {
+      _datedCardsRows = _datedCardsRowsRaw;
+      return _datedCardsRows;
+    }
+    // Filter rows whose tournament_date is on or after the cutoff. Same
+    // helper Card Analysis uses (window.filterRowsByDateFrom) when
+    // available — falls back to a local string compare otherwise.
+    if (typeof window !== 'undefined' && typeof window.filterRowsByDateFrom === 'function') {
+      _datedCardsRows = window.filterRowsByDateFrom(_datedCardsRowsRaw, cutoff);
+    } else {
+      _datedCardsRows = _datedCardsRowsRaw.filter(r => {
+        const raw = (r && r.tournament_date) || '';
+        return raw && raw >= cutoff; // ISO yyyy-mm-dd compares lexicographically
+      });
     }
     return _datedCardsRows;
   }
@@ -1133,6 +1168,17 @@ window.MetaCall = (function () {
       return currentSharePct * _clip(1 + factor * MOMENTUM_WEIGHT, 0.7, 1.3);
     }
 
+    // Field-mean Day-2 conversion — the typical "fraction of Day 1
+    // players that make Day 2" across the meta. Used as the reference
+    // point for the per-deck Day-2 boost below: a deck that converts
+    // ABOVE the mean gets a small multiplicative boost; below-mean
+    // converters are slightly damped. Skipped entirely when the labs
+    // data is missing (early format or no recent majors).
+    const _day2ConvSamples = Object.values(_labsDay2ConvByDeck).filter(q => q && q.n > 0);
+    const _meanDay2Conv = _day2ConvSamples.length > 0
+      ? _day2ConvSamples.reduce((s, q) => s + q.sum / q.n, 0) / _day2ConvSamples.length
+      : 0;
+
     _shareList.forEach(d => {
       const k = normalize(d.name);
       const ladderPct  = (d.ladderShare / totalLadder) * 100;
@@ -1144,6 +1190,25 @@ window.MetaCall = (function () {
         : 1.0;
       const top8Boost  = broughtPct * convFactor;
       const trendPct   = d.trend || 0;
+
+      // Predictor 5.1 — Day-2 conversion quality boost. User flagged via
+      // the LA-Regionals strategy doc that mid-share decks like
+      // Marnie's Grimmsnarl / Froslass ran ≈ 53.7 % Day-2 win-rate at
+      // Seattle: structurally strong picks the share-only signal misses.
+      // _meanDay2Conv is the field reference; a deck's day1_to_day2_conv
+      // RATIO to the mean drives a multiplicative factor in [0.85, 1.20].
+      // Bounds tight (no steamroll) and the boost only fires when the
+      // archetype has enough sample (≥ 3 weighted tournaments) so a
+      // single outlier major can't move the predictor.
+      const _day2Q = _labsDay2ConvByDeck[k];
+      const _deckDay2Conv = (_day2Q && _day2Q.n > 0) ? _day2Q.sum / _day2Q.n : 0;
+      let day2Boost = 1.0;
+      if (_meanDay2Conv > 0 && _deckDay2Conv > 0 && _day2Q && _day2Q.n >= 3) {
+        day2Boost = _clip(_deckDay2Conv / _meanDay2Conv, 0.85, 1.20);
+      }
+      d.day2ConvAvg = _deckDay2Conv > 0 ? Math.round(_deckDay2Conv * 1000) / 10 : null; // % with 1 decimal
+      d.day2ConvFieldMean = _meanDay2Conv > 0 ? Math.round(_meanDay2Conv * 1000) / 10 : null;
+      d.day2Boost = Math.round(day2Boost * 100) / 100;
 
       // TG share for this deck (canonical lookup, normalised %).
       const rawTgShare = _findByNormalized(_tgFieldShares, d.name) || 0;
@@ -1306,6 +1371,12 @@ window.MetaCall = (function () {
                   + 0.20 * top8Boost
                   + 0.10 * weeklySignal;
       }
+      // Predictor 5.1 — apply the Day-2 conversion quality multiplier.
+      // Fires across all modes (A / B / mixed) so the signal lifts
+      // structurally-strong decks regardless of which data source
+      // dominates the base formula. day2Boost = 1.0 when no labs data
+      // is available, so this is a no-op early in the format.
+      predicted *= day2Boost;
       d.predictedShareRaw = Math.max(0, predicted);
 
       // Predictor 5.0 — surface the per-deck ACE-SPEC split for the
@@ -1380,6 +1451,19 @@ window.MetaCall = (function () {
         console.info('[MetaCall] top-3 ACE-SPEC variants:',
           top3WithVariants.map(d => `${d.name}: ${d.aceSpecVariants.map(v => `${v.aceSpec}=${v.sharePct.toFixed(0)}%`).join(', ')}`).join(' | '));
       }
+    }
+    // Predictor 5.1 — Day-2 conversion boost summary. Surfaces the
+    // top boosters (decks above field-mean conv) and laggards so a
+    // user reviewing the prediction can sanity-check that
+    // structurally strong but mid-share decks (Marnie's Grimmsnarl,
+    // Gardevoir mirror) get their lift.
+    const day2Field = _shareList.filter(d => Number.isFinite(d.day2Boost));
+    if (day2Field.length > 0) {
+      const boosters = day2Field.filter(d => d.day2Boost > 1.05).slice(0, 3);
+      const laggards = day2Field.filter(d => d.day2Boost < 0.95).slice(0, 3);
+      const fmt = (d) => `${d.name} ×${d.day2Boost.toFixed(2)} (Day-2 ${d.day2ConvAvg ?? '—'}% vs mean ${d.day2ConvFieldMean ?? '—'}%)`;
+      if (boosters.length > 0) console.info('[MetaCall] predictor 5.1 — Day-2 boosters:', boosters.map(fmt).join(' | '));
+      if (laggards.length > 0) console.info('[MetaCall] predictor 5.1 — Day-2 laggards:', laggards.map(fmt).join(' | '));
     }
   }
 
@@ -1524,6 +1608,7 @@ window.MetaCall = (function () {
       _lastMajorDate = null;
       _labsConvByDeck = {};
       _labsQualityByDeck = {};
+      _labsDay2ConvByDeck = {};
       _lastMajorInfo = null;
       _lastMajorByDeck = {};
       let labsRowsByDeck = {};
@@ -1657,6 +1742,18 @@ window.MetaCall = (function () {
               if (!_labsQualityByDeck[k]) _labsQualityByDeck[k] = { d1: 0, d2: 0 };
               _labsQualityByDeck[k].d1 += d1Pct * w;
               _labsQualityByDeck[k].d2 += d2Pct * w;
+            }
+            // Direct Day-1 → Day-2 conversion rate. Recency-weighted
+            // average across recent majors. Used by the predictor as
+            // a "deck quality" multiplier independent of the share-
+            // ratio above. Skip rows where day1_players is too small
+            // for the conversion to be statistically meaningful.
+            const dayConv = parseEU(r.day1_to_day2_conv || '0');
+            const day1Players = parseInt(r.day1_players || '0', 10) || 0;
+            if (dayConv > 0 && day1Players >= 10) {
+              if (!_labsDay2ConvByDeck[k]) _labsDay2ConvByDeck[k] = { sum: 0, n: 0 };
+              _labsDay2ConvByDeck[k].sum += dayConv * w;
+              _labsDay2ConvByDeck[k].n += w;
             }
             // Track latest tournament date (for trend snapshots).
             const td = (r.tournament_date || '').trim();
@@ -2970,11 +3067,21 @@ window.MetaCall = (function () {
     const container = document.getElementById('profile-metacall');
     if (!container || !_shareList) return;
     const field = buildField();
+    // Date-window banner — surfaces the global cutoff set on Card
+    // Analysis so the user knows the predictor is running on a
+    // narrowed dataset, not the full meta history. Hidden when no
+    // cutoff is active (the Predictor 5.0 baseline already covers all
+    // available data at recency-decayed weights).
+    const _dateCutoff = (typeof window !== 'undefined') ? window.currentMetaDateFrom : null;
+    const dateBanner = (_dateCutoff && /^\d{4}-\d{2}-\d{2}$/.test(_dateCutoff))
+      ? `<div class="metacall-date-window">📅 Data window: data ≥ ${_dateCutoff} <span class="metacall-date-window-hint">(set in Card Analysis)</span></div>`
+      : '';
     container.innerHTML = `
 <div class="metacall-wrap">
   <div class="metacall-header">
     <h2>${t('mc.title')}</h2>
     <p class="color-grey">${t('mc.subtitle')}</p>
+    ${dateBanner}
   </div>
   ${'' /* Predictor banner suppressed — the verbose technical breakdown
        ("Based on N major-tournament rows + online-tournament + ladder
@@ -4922,6 +5029,41 @@ window.MetaCall = (function () {
       // Fallback: just open the Current Meta tab without preselect.
       switchTabAndUpdateMenu('current-meta');
     }
+  }
+
+  // Apply the global "data window from" date filter — invoked by Card
+  // Analysis's setCurrentMetaDateFrom whenever the user picks a new
+  // cutoff. Drops Meta Call's derived caches (history snapshots, ACE-SPEC
+  // variants, doctrine map) so the next predictor run consumes the
+  // freshly-filtered data instead of stale full-window aggregates.
+  // Re-runs _runPredictor when the share list is already populated so
+  // the user sees the change immediately without a page navigation.
+  async function _applyDateFilter() {
+    _allHistorySnapshots = null;
+    _aceSpecVariantsByDeck = {};
+    _archetypeDoctrineMap = null;
+    _datedCardsRows = null; // raw stays cached on _datedCardsRowsRaw
+    if (!_shareList || _shareList.length === 0) return;
+    try {
+      _allHistorySnapshots = await _loadAllHistorySnapshots();
+      await _loadAceSpecVariants();
+      await _loadArchetypeDoctrineMap();
+      _runPredictor();
+      // Decoration pass also re-runs to refresh matchups / HP / doctrine
+      // fields on the new top-N.
+      try { await _decorateMetaCallEntries(); } catch (_e) { /* tolerate */ }
+      // Re-render output if the Meta Call panel is in the DOM. renderAll
+      // bails out cleanly when the container isn't mounted (different
+      // tab visible), so this is safe regardless of the active tab.
+      try { renderAll(); } catch (_e) { /* tolerate */ }
+      const cutoff = (typeof window !== 'undefined') ? window.currentMetaDateFrom : null;
+      console.info(`[MetaCall] date filter applied — cutoff ${cutoff || '(none)'}`);
+    } catch (e) {
+      console.warn('[MetaCall] date filter re-run failed (non-fatal):', e);
+    }
+  }
+  if (typeof window !== 'undefined') {
+    window.metaCallApplyDateFilter = _applyDateFilter;
   }
 
   // Toggle the click-to-expand reason row for a recommendation.

@@ -760,6 +760,17 @@
             if (sel && sel.value) {
                 await loadCurrentMetaDeckData(sel.value);
             }
+            // Re-run Meta Call's predictor with the new filter so the
+            // Day-2 / Geheimtipps lists reflect the same data window the
+            // user sees here. Fires only when Meta Call has already been
+            // initialised (no-op on a fresh page load before the user
+            // visits the Meta Call tab — the next loadData() pass picks
+            // up the cutoff via window.currentMetaDateFrom anyway).
+            if (typeof window !== 'undefined' && typeof window.metaCallApplyDateFilter === 'function') {
+                try { await window.metaCallApplyDateFilter(); } catch (e) {
+                    if (typeof devLog === 'function') devLog('[Current Meta] Meta Call refresh failed:', e);
+                }
+            }
         }
 
         async function clearCurrentMetaDateFrom() {

@@ -168,6 +168,14 @@ window.MetaCall = (function () {
   const PREDICTOR_LOG_KEY      = 'metacall_predictor_log_v1';
   const LAST_KNOWN_MAJOR_KEY   = 'metacall_last_known_major_v1';
   const PREDICTOR_LOG_MAX      = 100;
+  // Backtest log — every time _checkAccuracyAgainstNewMajor finds a
+  // new major, the per-deck predicted-vs-actual report is appended
+  // here. Aggregated across runs, this surfaces systematic biases
+  // (e.g. "Dragapult is consistently underestimated by X pp across
+  // the last 6 majors") that single-major reports can't catch.
+  // Capped at last 12 majors (~1 year of data on a Regional cadence).
+  const ACCURACY_LOG_KEY       = 'metacall_accuracy_log_v1';
+  const ACCURACY_LOG_MAX       = 12;
   // Persisted toggle state — see _toggleGroupField. Survives page reload
   // so the user doesn't have to flip "Familie zusammenfassen" every time
   // they open Meta Call.
@@ -359,17 +367,37 @@ window.MetaCall = (function () {
   // can reference it without re-fetching every snapshot.
   let _allHistorySnapshots = null;
 
+  // Effective date cutoff for the predictor's tournament-row pipelines.
+  // Returns the user's explicit window.currentMetaDateFrom when set,
+  // otherwise an auto-default of "28 days ago from today". The auto-
+  // default keeps the cumulative aggregates (limitless online + dated
+  // CSV) from being diluted by old, off-meta tournaments — user-flagged
+  // via the LA Regionals gap (Dragapult predicted 17 % vs actual 31.9 %
+  // because cumulative inputs included pre-rotation / pre-consolidation
+  // data that was no longer representative).
+  //
+  // When the user picks an explicit date, that wins. Hitting Clear
+  // resets to the auto-default (NOT to "no filter"). To get the
+  // historical "all-time cumulative" view back, the user can pick a
+  // very old date (e.g. 2024-01-01).
+  const _AUTO_WINDOW_DAYS = 28;
+  function _effectiveDateCutoff() {
+    const explicit = (typeof window !== 'undefined') ? window.currentMetaDateFrom : null;
+    if (explicit && /^\d{4}-\d{2}-\d{2}$/.test(explicit)) return explicit;
+    try { return _isoMinusDays(_todayISO(), _AUTO_WINDOW_DAYS); }
+    catch (_e) { return null; }
+  }
+
   async function _loadAllHistorySnapshots() {
     if (!_historyManifest || !Array.isArray(_historyManifest.dates) || _historyManifest.dates.length === 0) {
       return new Map();
     }
-    // Honour the global date-window filter set in Card Analysis. When the
-    // user picked "data ≥ YYYY-MM-DD", the predictor's recency baseline
-    // and trend signal must consume only snapshots on or after that date
-    // — otherwise the filter creates a misleading mismatch where Card
-    // Analysis shows post-cutoff data but Meta Call still anchors on
-    // pre-cutoff history.
-    const cutoff = (typeof window !== 'undefined') ? window.currentMetaDateFrom : null;
+    // Honour the effective date cutoff (explicit user filter, or the
+    // auto-28-day default when none is set). Drops history snapshots
+    // earlier than the cutoff so the recency baseline + trend signals
+    // see only meta-current data. Auto-default kicks in when no
+    // explicit window.currentMetaDateFrom is set.
+    const cutoff = _effectiveDateCutoff();
     const dates = _historyManifest.dates.slice().sort()
       .filter(d => !cutoff || d >= cutoff);
     if (dates.length === 0) return new Map();
@@ -443,7 +471,7 @@ window.MetaCall = (function () {
         _datedCardsRowsRaw = [];
       }
     }
-    const cutoff = (typeof window !== 'undefined') ? window.currentMetaDateFrom : null;
+    const cutoff = _effectiveDateCutoff();
     if (!cutoff || !/^\d{4}-\d{2}-\d{2}$/.test(cutoff)) {
       _datedCardsRows = _datedCardsRowsRaw;
       return _datedCardsRows;
@@ -1457,6 +1485,21 @@ window.MetaCall = (function () {
           top3WithVariants.map(d => `${d.name}: ${d.aceSpecVariants.map(v => `${v.aceSpec}=${v.sharePct.toFixed(0)}%`).join(', ')}`).join(' | '));
       }
     }
+    // Backtest summary — historical predicted-vs-actual bias per
+    // archetype across the rolling ACCURACY_LOG_MAX major-tournament
+    // history. Surfaces patterns like "Dragapult is consistently
+    // underestimated by 12 pp across the last 4 majors" that a single-
+    // major MAE can't catch. User-flagged via the LA-Regionals gap
+    // (predicted 17 % vs actual 31.9 %).
+    try {
+      const summary = _historicalAccuracySummary();
+      if (summary.perDeck.length > 0 && summary.history.length >= 2) {
+        const top = summary.perDeck.slice(0, 5);
+        const fmt = d => `${d.name} bias=${d.bias > 0 ? '+' : ''}${d.bias}pp (mae ${d.mae}, n=${d.samples})`;
+        console.info(`[MetaCall] backtest — ${summary.history.length} majors logged, per-deck systematic bias:`, top.map(fmt).join(' | '));
+      }
+    } catch (_e) { /* tolerate */ }
+
     // Predictor 5.1 — Day-2 conversion boost summary. Surfaces the
     // top boosters (decks above field-mean conv) and laggards so a
     // user reviewing the prediction can sanity-check that
@@ -1531,6 +1574,66 @@ window.MetaCall = (function () {
     };
     console.info('[MetaCall] new-major accuracy check — MAE=%s pp across %d top decks (baseline %s vs major %s)',
       mae, n, _lastAccuracyReport.baselineDate, _lastMajorDate, perDeck);
+
+    // Persist this report into the rolling accuracy history so the
+    // backtest helper can surface systematic per-archetype biases
+    // across multiple majors. Append at end, cap at ACCURACY_LOG_MAX.
+    try {
+      const rawLog = localStorage.getItem(ACCURACY_LOG_KEY);
+      let history = rawLog ? JSON.parse(rawLog) : [];
+      if (!Array.isArray(history)) history = [];
+      // De-dup: skip if we already logged this major.
+      if (!history.some(h => h.majorDate === _lastMajorDate)) {
+        history.push(_lastAccuracyReport);
+        if (history.length > ACCURACY_LOG_MAX) history = history.slice(-ACCURACY_LOG_MAX);
+        localStorage.setItem(ACCURACY_LOG_KEY, JSON.stringify(history));
+      }
+    } catch (_e) { /* private mode / disabled storage — tolerate */ }
+  }
+
+  // Aggregated per-archetype bias across the persisted accuracy log.
+  // For each deck appearing in ≥ 2 historical major reports, computes:
+  //   bias = mean(actual − predicted)  (pp; positive = under-predicted,
+  //                                     negative = over-predicted)
+  //   mae  = mean(abs(actual − predicted))
+  // Surfaced as a console.info on each predictor run + accessible via
+  // window.metaCallAccuracyHistory() for an ad-hoc inspection.
+  function _historicalAccuracySummary() {
+    let history = [];
+    try {
+      const raw = localStorage.getItem(ACCURACY_LOG_KEY);
+      history = raw ? JSON.parse(raw) : [];
+      if (!Array.isArray(history)) history = [];
+    } catch (_e) { history = []; }
+    const perDeck = new Map();
+    for (const report of history) {
+      if (!Array.isArray(report.decks)) continue;
+      for (const d of report.decks) {
+        if (!d || !d.name) continue;
+        const k = normalize(d.name);
+        let entry = perDeck.get(k);
+        if (!entry) { entry = { name: d.name, samples: 0, sumDiff: 0, sumAbs: 0 }; perDeck.set(k, entry); }
+        const diff = (d.actual || 0) - (d.predicted || 0);
+        entry.samples += 1;
+        entry.sumDiff += diff;
+        entry.sumAbs  += Math.abs(diff);
+      }
+    }
+    const out = [];
+    for (const e of perDeck.values()) {
+      if (e.samples < 2) continue; // single-major sample is noise
+      out.push({
+        name: e.name,
+        samples: e.samples,
+        bias: Number((e.sumDiff / e.samples).toFixed(2)),
+        mae:  Number((e.sumAbs  / e.samples).toFixed(2)),
+      });
+    }
+    out.sort((a, b) => Math.abs(b.bias) - Math.abs(a.bias));
+    return { history, perDeck: out };
+  }
+  if (typeof window !== 'undefined') {
+    window.metaCallAccuracyHistory = _historicalAccuracySummary;
   }
 
   // ── Data Loading ───────────────────────────────────────────
@@ -1874,15 +1977,14 @@ window.MetaCall = (function () {
 
       _runPredictor();
 
-      // If the user has a date window set BEFORE first visiting the
-      // Meta Call tab (e.g. picked it on Card Analysis already), apply
-      // the override now so the very first render reflects the cutoff.
-      // _applyDateFilter is a no-op when window.currentMetaDateFrom is
-      // null or invalid — safe to always call.
-      const _initialCutoff = (typeof window !== 'undefined') ? window.currentMetaDateFrom : null;
-      if (_initialCutoff && /^\d{4}-\d{2}-\d{2}$/.test(_initialCutoff)) {
-        try { await _applyDateFilter(); } catch (_e) { /* tolerate */ }
-      }
+      // Always run _applyDateFilter() once after the initial predictor
+      // pass — this either honours the user's explicit cutoff (set on
+      // Card Analysis before the tab was first opened) OR applies the
+      // auto-28-day default. Without this, fresh page loads would
+      // show the cumulative-aggregate predictor for one render before
+      // the auto-window kicks in. Idempotent + safe: when no cutoff
+      // is effective, the override is a no-op.
+      try { await _applyDateFilter(); } catch (_e) { /* tolerate */ }
 
       const matchResp = await fetch('data/limitless_online_decks_matchups.csv?t=' + Date.now());
       if (!matchResp.ok) throw new Error('matchup CSV not found');
@@ -3097,9 +3199,13 @@ window.MetaCall = (function () {
     // so changes here also re-paint the Card Analysis tables.
     const _dateCutoff = (typeof window !== 'undefined') ? window.currentMetaDateFrom : null;
     const _dateValue = (_dateCutoff && /^\d{4}-\d{2}-\d{2}$/.test(_dateCutoff)) ? _dateCutoff : '';
+    const _autoCutoff = (!_dateValue && typeof _effectiveDateCutoff === 'function')
+      ? _effectiveDateCutoff() : null;
     const _activeWindowText = _dateValue
       ? `Active window: data ≥ ${_dateValue}`
-      : 'No date filter — using full meta history';
+      : (_autoCutoff
+          ? `Auto: last 28 days (≥ ${_autoCutoff}) — pick a date to override`
+          : 'No date filter — using full meta history');
     const dateBanner = `
       <div class="metacall-date-window">
         <label class="metacall-date-label" for="metacallDateFrom">📅 Data window from:</label>
@@ -5105,7 +5211,12 @@ window.MetaCall = (function () {
     _archetypeDoctrineMap = null;
     _datedCardsRows = null; // raw stays cached on _datedCardsRowsRaw
     if (!_shareList || _shareList.length === 0) return;
-    const cutoff = (typeof window !== 'undefined') ? window.currentMetaDateFrom : null;
+    // Use the EFFECTIVE cutoff (explicit user pick OR auto-28-day default)
+    // so the override fires even when the user hasn't picked a date — a
+    // user-flagged LA Regionals gap (Dragapult predicted 17 % vs actual
+    // 31.9 %) showed that cumulative aggregates dilute current-meta
+    // share. The auto-default keeps the predictor on a recent window.
+    const cutoff = _effectiveDateCutoff();
     try {
       // Lazy-load history snapshots (filter applied inside loader).
       _allHistorySnapshots = await _loadAllHistorySnapshots();

@@ -128,6 +128,7 @@ jobs:
               current_meta_card_data.csv \
               tournament_cards_data_cards.csv \
               tournament_cards_data_overview.csv \
+              tournament_cards_manifest.json \
               labs_tournament_decks.csv \
               labs_tournaments.json \
               limitless_online_decks.csv \
@@ -135,6 +136,19 @@ jobs:
               if [ -f "data/$f" ]; then
                   cp "data/$f" "backend/core/data/$f"
                   echo "  seeded: $f"
+              fi
+          done
+          # Per-meta tournament chunks (Prague-data-loss fix). Without
+          # these, _reassemble_monolith_from_chunks() finds an empty
+          # backend/core/data/ on every CI run, the monolith stays tiny,
+          # and prepare_card_data.py writes new chunks containing ONLY
+          # the freshly-scraped tournament — silently dropping every
+          # tournament that wasn't re-scraped this run. May 12 lost
+          # Prague's 5783 rows from the TEF-POR chunk this way.
+          for chunk in data/tournament_cards_data_cards_*.csv; do
+              if [ -f "$chunk" ]; then
+                  cp "$chunk" "backend/core/data/$(basename "$chunk")"
+                  echo "  seeded chunk: $(basename "$chunk")"
               fi
           done
 

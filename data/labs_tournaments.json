@@ -1,13 +1,5 @@
 [
   {
-    "tournament_id": "0063",
-    "tournament_name": "Regional Championship Los Angeles",
-    "tournament_date": "2026-05-08",
-    "tournament_type": "regional",
-    "country": "US",
-    "total_players": 1844
-  },
-  {
     "tournament_id": "0062",
     "tournament_name": "Regional Championship Prague",
     "tournament_date": "2026-04-25",
@@ -18,9 +10,9 @@
   {
     "tournament_id": "0063",
     "tournament_name": "Regional Championship Los Angeles",
-    "tournament_date": "2026-05-10",
+    "tournament_date": "2026-05-08",
     "tournament_type": "regional",
     "country": "US",
-    "total_players": 1849
+    "total_players": 1844
   }
 ]

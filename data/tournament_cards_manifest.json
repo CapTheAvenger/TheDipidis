@@ -8,10 +8,10 @@
   ],
   "chunk_dates": {
     "tournament_cards_data_cards_TEF-POR.csv": {
-      "min_date": "2026-05-09",
+      "min_date": "2026-04-25",
       "max_date": "2026-05-09"
     }
   },
-  "total_rows": 1183,
-  "generated": "2026-05-12T07:04:29.781351"
+  "total_rows": 6966,
+  "generated": "2026-05-12T14:52:02.256211"
 }

@@ -1,0 +1,201 @@
+{
+  "_meta": {
+    "generated_at": "2026-05-12T12:43:39.667929Z",
+    "icons_total": 522,
+    "labs_total": 79,
+    "labs_significant": 32,
+    "online_total": 125,
+    "display_cutoff_rank": 20,
+    "min_labs_d1": 10
+  },
+  "missing_in_icons": [],
+  "coverage_gaps": [],
+  "suspected_synonyms": [
+    [
+      "Alolan Exeggutor",
+      "Alolan Exeggutor ex"
+    ],
+    [
+      "Gholdengo",
+      "Gholdengo ex"
+    ],
+    [
+      "Iron Hands",
+      "Iron Hands ex"
+    ],
+    [
+      "Mega Abomasnow",
+      "Mega Abomasnow ex"
+    ],
+    [
+      "Mega Charizard X",
+      "Mega Charizard X ex"
+    ],
+    [
+      "Mega Dragonite",
+      "Mega Dragonite ex"
+    ],
+    [
+      "Mega Froslass",
+      "Mega Froslass ex"
+    ],
+    [
+      "Mega Lucario",
+      "Mega Lucario ex"
+    ],
+    [
+      "Mega Pidgeot ex",
+      "Mega Pidgeot"
+    ],
+    [
+      "Mega Rayquaza",
+      "Mega Rayquaza ex"
+    ],
+    [
+      "Mega Starmie",
+      "Mega Starmie ex"
+    ],
+    [
+      "Mega Venusaur",
+      "Mega Venusaur ex"
+    ],
+    [
+      "Mega Zygarde",
+      "Mega Zygarde ex"
+    ],
+    [
+      "Miraidon ex",
+      "Miraidon"
+    ],
+    [
+      "Raging Bolt",
+      "Raging Bolt ex"
+    ],
+    [
+      "Terapagos ex",
+      "Terapagos"
+    ]
+  ],
+  "naming_mismatch": [
+    {
+      "deck_name": "Dragapult",
+      "deck_slug": "dragapult-ex",
+      "implies": "Dragapult ex"
+    },
+    {
+      "deck_name": "Rocket's Mewtwo",
+      "deck_slug": "rocket-mewtwo-ex",
+      "implies": "Rocket's Mewtwo ex"
+    },
+    {
+      "deck_name": "Cynthia's Garchomp",
+      "deck_slug": "cynthia-garchomp-ex",
+      "implies": "Cynthia's Garchomp ex"
+    },
+    {
+      "deck_name": "Mega Venusaur",
+      "deck_slug": "mega-venusaur-ex",
+      "implies": "Mega Venusaur ex"
+    },
+    {
+      "deck_name": "Greninja",
+      "deck_slug": "greninja-ex",
+      "implies": "Greninja ex"
+    },
+    {
+      "deck_name": "Ceruledge",
+      "deck_slug": "ceruledge-ex",
+      "implies": "Ceruledge ex"
+    },
+    {
+      "deck_name": "Mega Lucario",
+      "deck_slug": "mega-lucario-ex",
+      "implies": "Mega Lucario ex"
+    },
+    {
+      "deck_name": "Yanmega",
+      "deck_slug": "yanmega-ex",
+      "implies": "Yanmega ex"
+    },
+    {
+      "deck_name": "Decidueye",
+      "deck_slug": "decidueye-ex",
+      "implies": "Decidueye ex"
+    },
+    {
+      "deck_name": "Mega Charizard X",
+      "deck_slug": "mega-charizard-x-ex",
+      "implies": "Mega Charizard X ex"
+    },
+    {
+      "deck_name": "Archaludon",
+      "deck_slug": "archaludon-ex",
+      "implies": "Archaludon ex"
+    },
+    {
+      "deck_name": "Mega Froslass",
+      "deck_slug": "mega-froslass-ex",
+      "implies": "Mega Froslass ex"
+    },
+    {
+      "deck_name": "Mega Kangaskhan",
+      "deck_slug": "mega-kangaskhan-ex",
+      "implies": "Mega Kangaskhan ex"
+    },
+    {
+      "deck_name": "Mega Starmie",
+      "deck_slug": "mega-starmie-ex",
+      "implies": "Mega Starmie ex"
+    },
+    {
+      "deck_name": "Flareon",
+      "deck_slug": "flareon-ex",
+      "implies": "Flareon ex"
+    },
+    {
+      "deck_name": "Hydreigon",
+      "deck_slug": "hydreigon-ex",
+      "implies": "Hydreigon ex"
+    },
+    {
+      "deck_name": "Mega Abomasnow",
+      "deck_slug": "mega-abomasnow-ex",
+      "implies": "Mega Abomasnow ex"
+    },
+    {
+      "deck_name": "Mega Camerupt",
+      "deck_slug": "mega-camerupt-ex",
+      "implies": "Mega Camerupt ex"
+    },
+    {
+      "deck_name": "Mega Dragonite",
+      "deck_slug": "mega-dragonite-ex",
+      "implies": "Mega Dragonite ex"
+    },
+    {
+      "deck_name": "Mega Lopunny",
+      "deck_slug": "mega-lopunny-ex",
+      "implies": "Mega Lopunny ex"
+    },
+    {
+      "deck_name": "Palafin",
+      "deck_slug": "palafin-ex",
+      "implies": "Palafin ex"
+    },
+    {
+      "deck_name": "Marnie's Grimmsnarl",
+      "deck_slug": "marnie-grimmsnarl-ex",
+      "implies": "Marnie's Grimmsnarl ex"
+    },
+    {
+      "deck_name": "Mega Diancie",
+      "deck_slug": "mega-diancie-ex",
+      "implies": "Mega Diancie ex"
+    },
+    {
+      "deck_name": "Mega Sharpedo",
+      "deck_slug": "mega-sharpedo-ex",
+      "implies": "Mega Sharpedo ex"
+    }
+  ]
+}

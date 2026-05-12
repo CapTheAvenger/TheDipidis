@@ -6,6 +6,7 @@ window.MetaCall = (function () {
 
   // ── Internal State ─────────────────────────────────────────
   let _matchupMap = null;  // normalize(deck) -> normalize(opp) -> {pWin, pTie, pLoss}
+  let _deckWRAdjustment = {}; // normalize(deck) -> pp delta (labs WR − online cumulative WR). Predictor 5.3 — corrects the matchup simulator for the gap between online-ladder WR (elite-pilot inflated) and major-tournament WR (typical pilot). See _computeMatchupAdjustments() and applied in getBaseMatchup().
   let _shareList  = null;  // [{name, onlineShare}] sorted desc — onlineShare is the
                             // PREDICTED share once Predictor 2.0 has run; the raw ladder
                             // share is kept on each entry as `ladderShare` for the badge.
@@ -1278,6 +1279,28 @@ window.MetaCall = (function () {
         const trust = _day2Q.n >= 3 ? 1.00 : (_day2Q.n === 2 ? 0.80 : 0.50);
         const tempered = 1.0 + (rawBoost - 1.0) * trust;
         day2Boost = _clip(tempered, 0.80, 1.40);
+
+        // Predictor 5.3 — Pilot-Skill-Proxy. A high conv ratio from a
+        // tiny pilot pool can mean "this deck genuinely works" OR
+        // "two elite pilots got lucky." We can't distinguish from
+        // data alone, so damp the boost when last-major D1 < 20.
+        // pilotPool counts max D1 across the deck's recent labs samples;
+        // damp factor falls from 1.0 at pool ≥ 20 to 0.5 at pool ≤ 5,
+        // applied as a multiplier on the boost-delta-from-1.0 so a
+        // 1.40 boost on a 5-pilot deck becomes (1 + 0.40 × 0.5) = 1.20.
+        // Skips when no last-major data exists (early format).
+        const lm = _lastMajorByDeck[k];
+        const pilotPool = lm && typeof lm.day1Players === 'number' ? lm.day1Players : 0;
+        if (pilotPool > 0 && pilotPool < 20) {
+          const pilotDamp = _clip(pilotPool / 20, 0.5, 1.0);
+          const before = day2Boost;
+          day2Boost = 1.0 + (day2Boost - 1.0) * pilotDamp;
+          d.pilotSkillDamped = {
+            pilotPool,
+            before: Math.round(before * 100) / 100,
+            after:  Math.round(day2Boost * 100) / 100,
+          };
+        }
       }
       d.day2ConvAvg = _deckDay2Conv > 0 ? Math.round(_deckDay2Conv * 1000) / 10 : null; // % with 1 decimal
       d.day2ConvFieldMean = _meanDay2Conv > 0 ? Math.round(_meanDay2Conv * 1000) / 10 : null;
@@ -1637,6 +1660,14 @@ window.MetaCall = (function () {
       console.info('[MetaCall] predictor 5.2 — Concentration-Exp softened for:',
         softExp.slice(0, 5).map(d => `${d.name} (^${d.concentrationExp.toFixed(2)})`).join(', '));
     }
+    const pilotDamped = _shareList.filter(d => d.pilotSkillDamped);
+    if (pilotDamped.length) {
+      console.info('[MetaCall] predictor 5.3 — Pilot-Skill-Damper applied to:',
+        pilotDamped.slice(0, 5).map(d => {
+          const p = d.pilotSkillDamped;
+          return `${d.name} (pool ${p.pilotPool}, ${p.before}× → ${p.after}×)`;
+        }).join(', '));
+    }
   }
 
   // Detect when a new major tournament has appeared (vs the last one we
@@ -1784,10 +1815,16 @@ window.MetaCall = (function () {
       _shareList = shareRows
         .filter(r => r.deck_name && (r.new_share || r.old_share))
         .map(r => ({
-          name        : r.deck_name,
-          onlineShare : parseEU(r.new_share || r.old_share || '0'),
-          ladderShare : parseEU(r.new_share || r.old_share || '0'),
-          trend       : parseEU(r.share_change || '0'),
+          name          : r.deck_name,
+          onlineShare   : parseEU(r.new_share || r.old_share || '0'),
+          ladderShare   : parseEU(r.new_share || r.old_share || '0'),
+          trend         : parseEU(r.share_change || '0'),
+          // Capture cumulative online WR (Predictor 5.3 — per-variant
+          // matchup overrides). The matchup CSV reflects online play
+          // which over-rewards elite-pilot decks (Crustle 67% online vs
+          // Dragapult, 43.3% at LA). _deckWRAdjustment below uses the
+          // delta between this and labs WR to correct the simulator.
+          onlineWinPct  : parseEU(r.new_winrate || r.old_winrate || '0'),
         }))
         .filter(d => d.onlineShare > 0)
         .sort((a, b) => b.onlineShare - a.onlineShare);
@@ -2151,6 +2188,16 @@ window.MetaCall = (function () {
         _matchupMap[dk][ok] = { pWin, pTie, pLoss };
       });
 
+      // Predictor 5.3 — Per-Variant Matchup Adjustments. The online
+      // matchup CSV reflects ladder play, which over-rewards elite-
+      // pilot niche decks: Crustle 67 % vs Dragapult online → 43 %
+      // win-pct at LA (-8 pp deck-wide). Compute a per-deck delta =
+      // last-major WR − cumulative online WR, then in getBaseMatchup
+      // shift pWin by (adj[A] − adj[B]) / 100 so the simulator
+      // reflects the tournament-pilot reality. Sample-size and
+      // magnitude guards keep the correction conservative.
+      _computeMatchupAdjustments();
+
       // Predictor 5.0 Phase 2 + 3 — decorate top-N entries with
       // best/worst matchups (now that _matchupMap is populated),
       // main-attacker HP + tier, and doctrine-quality score. Fires
@@ -2188,6 +2235,46 @@ window.MetaCall = (function () {
   // Group / Battle Journal blending. Used by the recommendations
   // engine (where personal overrides only apply to the USER'S deck,
   // not to candidate alternatives).
+  // Compute per-deck WR adjustments — the gap between most-recent
+  // labs WR and cumulative online WR. Predictor 5.3 deferred item:
+  // online matchup data over-rewards elite-pilot decks (Crustle 67 %
+  // online vs Dragapult, 43.3 % at LA). The per-deck delta is added
+  // symmetrically in getBaseMatchup so the simulator reflects what
+  // tournament pilots actually do, not what online enthusiasts do.
+  //
+  // Guards:
+  //   - Need at least 20 D1 players at the most recent major (small
+  //     samples produce noisy deltas).
+  //   - Need a non-zero online WR (otherwise the delta is undefined).
+  //   - Adjustment clamped to [-12, +12] pp so a freak outlier major
+  //     can't swing the simulator wildly.
+  function _computeMatchupAdjustments() {
+    _deckWRAdjustment = {};
+    if (!_shareList) return;
+    let count = 0;
+    _shareList.forEach(d => {
+      const k = normalize(d.name);
+      const lm = _lastMajorByDeck[k];
+      if (!lm || !(lm.day1Players >= 20) || !(lm.winPct > 0)) return;
+      const onlineWr = d.onlineWinPct || 0;
+      if (onlineWr <= 0) return;
+      const delta = _clip(lm.winPct - onlineWr, -12, 12);
+      // Skip negligible deltas to keep the map small and the apply
+      // path cheap.
+      if (Math.abs(delta) < 1.0) return;
+      _deckWRAdjustment[k] = delta;
+      count++;
+    });
+    if (count > 0) {
+      const top = Object.entries(_deckWRAdjustment)
+        .sort((a, b) => Math.abs(b[1]) - Math.abs(a[1]))
+        .slice(0, 5)
+        .map(([k, v]) => `${k} ${v > 0 ? '+' : ''}${v.toFixed(1)}pp`);
+      console.info('[MetaCall] predictor 5.3 — Matchup WR adjustments computed for',
+        count, 'decks. Largest:', top.join(', '));
+    }
+  }
+
   function getBaseMatchup(deckA, deckB) {
     if (deckB === '_junk') {
       const wr = _settings.junkWinRate / 100;
@@ -2197,9 +2284,23 @@ window.MetaCall = (function () {
     const b = normalize(deckB);
     const hit = _matchupMap?.[a]?.[b];
     const rev = !hit ? _matchupMap?.[b]?.[a] : null;
-    return hit ? hit
+    const base = hit ? hit
       : rev ? { pWin: rev.pLoss, pTie: rev.pTie, pLoss: rev.pWin }
       : { pWin: 0.50, pTie: 0.02, pLoss: 0.48 };
+    // Predictor 5.3 — apply per-deck WR adjustments. adj is in pp,
+    // pWin is 0..1, so divide by 100 to convert. The delta is split
+    // between deckA "gets better" and deckB "gets worse"; we apply
+    // half as a shift to pWin to keep ties roughly invariant. Clamp
+    // to [0.05, 0.95] so the simulator never sees a degenerate
+    // matchup (zero or certain).
+    const adjA = _deckWRAdjustment[a] || 0;
+    const adjB = _deckWRAdjustment[b] || 0;
+    if (adjA === 0 && adjB === 0) return base;
+    const shift = (adjA - adjB) / 100;
+    const pWin = _clip(base.pWin + shift, 0.05, 0.95);
+    const pTie = base.pTie;
+    const pLoss = Math.max(0, 1 - pWin - pTie);
+    return { pWin, pTie, pLoss };
   }
 
   // Personal-blended matchup — folds in Testing Group win-rate overrides

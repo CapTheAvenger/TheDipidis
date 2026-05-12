@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-05-12T07:04:31Z",
+  "generated_at": "2026-05-12T11:38:08Z",
   "format_window": "POR",
   "format_label": "TEF-M4",
   "legal_format_min_set": "TEF",
@@ -9,122 +9,6 @@
     "category_floor": 0.02
   },
   "threats": {
-    "retreat_lock": {
-      "weighted_meta_share": 0.2382,
-      "cards": [
-        {
-          "card_id": "MEG|1",
-          "card_name": "Bulbasaur",
-          "archetypes": [
-            {
-              "archetype": "Mega Venusaur",
-              "share_in_archetype": 1.0,
-              "meta_share": 0.0127
-            }
-          ]
-        },
-        {
-          "card_id": "PRE|37",
-          "card_name": "Dusknoir",
-          "archetypes": [
-            {
-              "archetype": "Dragapult Dusknoir",
-              "share_in_archetype": 1.0,
-              "meta_share": 0.0536
-            },
-            {
-              "archetype": "Greninja",
-              "share_in_archetype": 1.0,
-              "meta_share": 0.0143
-            },
-            {
-              "archetype": "Starmie Dusknoir",
-              "share_in_archetype": 1.0,
-              "meta_share": 0.0103
-            },
-            {
-              "archetype": "Diancie Dusknoir",
-              "share_in_archetype": 1.0,
-              "meta_share": 0.0077
-            }
-          ]
-        },
-        {
-          "card_id": "ASC|96",
-          "card_name": "Hop's Trevenant",
-          "archetypes": [
-            {
-              "archetype": "Hop's Trevenant",
-              "share_in_archetype": 1.0,
-              "meta_share": 0.0083
-            }
-          ]
-        },
-        {
-          "card_id": "JTG|8",
-          "card_name": "Maractus",
-          "archetypes": [
-            {
-              "archetype": "Dragapult",
-              "share_in_archetype": 0.4,
-              "meta_share": 0.068
-            }
-          ]
-        },
-        {
-          "card_id": "TWM|64",
-          "card_name": "Wellspring Mask Ogerpon ex",
-          "archetypes": [
-            {
-              "archetype": "Raging Bolt Ogerpon",
-              "share_in_archetype": 0.45,
-              "meta_share": 0.029
-            },
-            {
-              "archetype": "Mega Absol Box",
-              "share_in_archetype": 0.4,
-              "meta_share": 0.0131
-            },
-            {
-              "archetype": "Ogerpon Box",
-              "share_in_archetype": 1.0,
-              "meta_share": 0.0112
-            },
-            {
-              "archetype": "Flareon Noctowl",
-              "share_in_archetype": 0.9,
-              "meta_share": 0.0105
-            },
-            {
-              "archetype": "Tera Box",
-              "share_in_archetype": 1.0,
-              "meta_share": 0.0053
-            }
-          ]
-        },
-        {
-          "card_id": "MEG|88",
-          "card_name": "Yveltal",
-          "archetypes": [
-            {
-              "archetype": "N's Zoroark",
-              "share_in_archetype": 0.55,
-              "meta_share": 0.0524
-            },
-            {
-              "archetype": "Grimmsnarl Froslass",
-              "share_in_archetype": 0.9,
-              "meta_share": 0.0317
-            },
-            {
-              "archetype": "Froslass Munkidori",
-              "share_in_archetype": 0.35,
-              "meta_share": 0.0071
-            }
-          ]
-        }
-      ]
-    },
     "hand_disruption": {
       "weighted_meta_share": 0.5911,
       "cards": [
@@ -441,6 +325,122 @@
               "archetype": "Ethan's Typhlosion",
               "share_in_archetype": 0.45,
               "meta_share": 0.0056
+            }
+          ]
+        }
+      ]
+    },
+    "retreat_lock": {
+      "weighted_meta_share": 0.2382,
+      "cards": [
+        {
+          "card_id": "MEG|1",
+          "card_name": "Bulbasaur",
+          "archetypes": [
+            {
+              "archetype": "Mega Venusaur",
+              "share_in_archetype": 1.0,
+              "meta_share": 0.0127
+            }
+          ]
+        },
+        {
+          "card_id": "PRE|37",
+          "card_name": "Dusknoir",
+          "archetypes": [
+            {
+              "archetype": "Dragapult Dusknoir",
+              "share_in_archetype": 1.0,
+              "meta_share": 0.0536
+            },
+            {
+              "archetype": "Greninja",
+              "share_in_archetype": 1.0,
+              "meta_share": 0.0143
+            },
+            {
+              "archetype": "Starmie Dusknoir",
+              "share_in_archetype": 1.0,
+              "meta_share": 0.0103
+            },
+            {
+              "archetype": "Diancie Dusknoir",
+              "share_in_archetype": 1.0,
+              "meta_share": 0.0077
+            }
+          ]
+        },
+        {
+          "card_id": "ASC|96",
+          "card_name": "Hop's Trevenant",
+          "archetypes": [
+            {
+              "archetype": "Hop's Trevenant",
+              "share_in_archetype": 1.0,
+              "meta_share": 0.0083
+            }
+          ]
+        },
+        {
+          "card_id": "JTG|8",
+          "card_name": "Maractus",
+          "archetypes": [
+            {
+              "archetype": "Dragapult",
+              "share_in_archetype": 0.4,
+              "meta_share": 0.068
+            }
+          ]
+        },
+        {
+          "card_id": "TWM|64",
+          "card_name": "Wellspring Mask Ogerpon ex",
+          "archetypes": [
+            {
+              "archetype": "Raging Bolt Ogerpon",
+              "share_in_archetype": 0.45,
+              "meta_share": 0.029
+            },
+            {
+              "archetype": "Mega Absol Box",
+              "share_in_archetype": 0.4,
+              "meta_share": 0.0131
+            },
+            {
+              "archetype": "Ogerpon Box",
+              "share_in_archetype": 1.0,
+              "meta_share": 0.0112
+            },
+            {
+              "archetype": "Flareon Noctowl",
+              "share_in_archetype": 0.9,
+              "meta_share": 0.0105
+            },
+            {
+              "archetype": "Tera Box",
+              "share_in_archetype": 1.0,
+              "meta_share": 0.0053
+            }
+          ]
+        },
+        {
+          "card_id": "MEG|88",
+          "card_name": "Yveltal",
+          "archetypes": [
+            {
+              "archetype": "N's Zoroark",
+              "share_in_archetype": 0.55,
+              "meta_share": 0.0524
+            },
+            {
+              "archetype": "Grimmsnarl Froslass",
+              "share_in_archetype": 0.9,
+              "meta_share": 0.0317
+            },
+            {
+              "archetype": "Froslass Munkidori",
+              "share_in_archetype": 0.35,
+              "meta_share": 0.0071
             }
           ]
         }

@@ -2765,7 +2765,7 @@ CIN,86,311933,unique,Cinccino
 CIN,87,311934,unique,Bunnelby
 CIN,88,311935,unique,Diggersby
 CIN,89,311936,unique,Type: Null
-CIN,91,311938,ordered(2↔3),Counter Catcher
+CIN,91,311938,ordered(2↔4),Counter Catcher
 CIN,92,311939,unique,Dashing Pouch
 CIN,93,311940,unique,Devoured Field
 CIN,94,311941,unique,Fighting Memory
@@ -2778,7 +2778,7 @@ CIN,100,311947,ordered(2↔2),Counter Energy
 CIN,109,311956,ordered(2↔3),Gladion
 CIN,110,311957,ordered(2↔2),Lusamine
 CIN,111,311958,unique,Olivia
-CIN,120,311967,ordered(2↔3),Counter Catcher
+CIN,120,311967,ordered(2↔4),Counter Catcher
 CIN,121,311968,unique,Wishful Baton
 CIN,122,311969,ordered(2↔2),Counter Energy
 CIN,123,311970,unique,Warp Energy
@@ -13183,7 +13183,7 @@ SP,24,453458,ordered(2↔2),Coalossal
 SP,25,453463,unique,Garbodor
 SP,26,461669,unique,Mantine
 SP,27,461674,unique,Noctowl
-SP,28,453308,ordered(2↔3),Duraludon
+SP,28,453308,ordered(2↔4),Duraludon
 SP,29,453313,unique,Rayquaza
 SP,30,477159,ordered(1↔2),Copperajah V
 SP,31,461679,ordered(3↔4),Morpeko
@@ -13215,7 +13215,7 @@ SP,56,510185,unique,Morpeko V
 SP,57,510190,ordered(1↔2),Grimmsnarl V
 SP,58,516314,unique,Alcremie
 SP,59,516319,ordered(1↔2),Galarian Obstagoon
-SP,60,516324,ordered(2↔3),Duraludon
+SP,60,516324,ordered(2↔4),Duraludon
 SP,61,496545,ordered(6↔8),Pikachu V
 SP,62,576730,ordered(2↔3),Pikachu VMAX
 SP,63,540616,ordered(6↔8),Pikachu V
@@ -15544,8 +15544,8 @@ TWM,91,769265,unique,Sandygast
 TWM,92,769266,unique,Palossand
 TWM,93,769267,ordered(2↔2),Enamorus
 TWM,94,769268,ordered(2↔2),Scream Tail ex
-TWM,95,769269,ordered(1↔2),Munkidori
-TWM,96,769270,ordered(1↔2),Fezandipiti
+TWM,95,769269,ordered(1↔3),Munkidori
+TWM,96,769270,ordered(1↔3),Fezandipiti
 TWM,97,769271,unique,Sandshrew
 TWM,98,769272,unique,Sandslash
 TWM,99,769273,ordered(2↔2),Hisuian Growlithe
@@ -15560,7 +15560,7 @@ TWM,107,769281,unique,Hawlucha
 TWM,108,769282,unique,Glimmet
 TWM,109,769283,unique,Glimmora
 TWM,110,769284,unique,Ting-Lu
-TWM,111,769285,ordered(1↔2),Okidogi
+TWM,111,769285,ordered(1↔3),Okidogi
 TWM,112,769286,ordered(3↔3),Cornerstone Mask Ogerpon ex
 TWM,113,769287,unique,Poochyena
 TWM,114,769288,unique,Mightyena

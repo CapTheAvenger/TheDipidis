@@ -168,6 +168,14 @@ window.MetaCall = (function () {
   const PREDICTOR_LOG_KEY      = 'metacall_predictor_log_v1';
   const LAST_KNOWN_MAJOR_KEY   = 'metacall_last_known_major_v1';
   const PREDICTOR_LOG_MAX      = 100;
+  // Backtest log — every time _checkAccuracyAgainstNewMajor finds a
+  // new major, the per-deck predicted-vs-actual report is appended
+  // here. Aggregated across runs, this surfaces systematic biases
+  // (e.g. "Dragapult is consistently underestimated by X pp across
+  // the last 6 majors") that single-major reports can't catch.
+  // Capped at last 12 majors (~1 year of data on a Regional cadence).
+  const ACCURACY_LOG_KEY       = 'metacall_accuracy_log_v1';
+  const ACCURACY_LOG_MAX       = 12;
   // Persisted toggle state — see _toggleGroupField. Survives page reload
   // so the user doesn't have to flip "Familie zusammenfassen" every time
   // they open Meta Call.
@@ -359,17 +367,37 @@ window.MetaCall = (function () {
   // can reference it without re-fetching every snapshot.
   let _allHistorySnapshots = null;
 
+  // Effective date cutoff for the predictor's tournament-row pipelines.
+  // Returns the user's explicit window.currentMetaDateFrom when set,
+  // otherwise an auto-default of "28 days ago from today". The auto-
+  // default keeps the cumulative aggregates (limitless online + dated
+  // CSV) from being diluted by old, off-meta tournaments — user-flagged
+  // via the LA Regionals gap (Dragapult predicted 17 % vs actual 31.9 %
+  // because cumulative inputs included pre-rotation / pre-consolidation
+  // data that was no longer representative).
+  //
+  // When the user picks an explicit date, that wins. Hitting Clear
+  // resets to the auto-default (NOT to "no filter"). To get the
+  // historical "all-time cumulative" view back, the user can pick a
+  // very old date (e.g. 2024-01-01).
+  const _AUTO_WINDOW_DAYS = 28;
+  function _effectiveDateCutoff() {
+    const explicit = (typeof window !== 'undefined') ? window.currentMetaDateFrom : null;
+    if (explicit && /^\d{4}-\d{2}-\d{2}$/.test(explicit)) return explicit;
+    try { return _isoMinusDays(_todayISO(), _AUTO_WINDOW_DAYS); }
+    catch (_e) { return null; }
+  }
+
   async function _loadAllHistorySnapshots() {
     if (!_historyManifest || !Array.isArray(_historyManifest.dates) || _historyManifest.dates.length === 0) {
       return new Map();
     }
-    // Honour the global date-window filter set in Card Analysis. When the
-    // user picked "data ≥ YYYY-MM-DD", the predictor's recency baseline
-    // and trend signal must consume only snapshots on or after that date
-    // — otherwise the filter creates a misleading mismatch where Card
-    // Analysis shows post-cutoff data but Meta Call still anchors on
-    // pre-cutoff history.
-    const cutoff = (typeof window !== 'undefined') ? window.currentMetaDateFrom : null;
+    // Honour the effective date cutoff (explicit user filter, or the
+    // auto-28-day default when none is set). Drops history snapshots
+    // earlier than the cutoff so the recency baseline + trend signals
+    // see only meta-current data. Auto-default kicks in when no
+    // explicit window.currentMetaDateFrom is set.
+    const cutoff = _effectiveDateCutoff();
     const dates = _historyManifest.dates.slice().sort()
       .filter(d => !cutoff || d >= cutoff);
     if (dates.length === 0) return new Map();
@@ -443,7 +471,7 @@ window.MetaCall = (function () {
         _datedCardsRowsRaw = [];
       }
     }
-    const cutoff = (typeof window !== 'undefined') ? window.currentMetaDateFrom : null;
+    const cutoff = _effectiveDateCutoff();
     if (!cutoff || !/^\d{4}-\d{2}-\d{2}$/.test(cutoff)) {
       _datedCardsRows = _datedCardsRowsRaw;
       return _datedCardsRows;
@@ -825,6 +853,34 @@ window.MetaCall = (function () {
 
   function _clip(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
 
+  // Rank-weighted mean for per-tournament conversion samples (Predictor
+  // 5.2 Fix #C). Newest tournament gets weight 1.0, second newest 0.55,
+  // third 0.30, fourth 0.17, etc. Stronger recency curve than the
+  // linear date-distance weighting used elsewhere — captures the fact
+  // that Prag → LA conversion drift is huge (Crustle 46.5 % → 13.3 %,
+  // Festival Lead 41.3 % → 14.5 %) and equal-weighting two majors of
+  // that magnitude misrepresents the current meta. Returns 0 when no
+  // samples; falls back to plain sum/n when samples array is missing.
+  function _rankWeightedConv(deckEntry) {
+    if (!deckEntry) return 0;
+    if (!Array.isArray(deckEntry.samples) || deckEntry.samples.length === 0) {
+      return deckEntry.n > 0 ? deckEntry.sum / deckEntry.n : 0;
+    }
+    // Sort newest → oldest. Empty dates sink to bottom of list.
+    const sorted = deckEntry.samples.slice().sort((a, b) => {
+      if (!a.date) return 1;
+      if (!b.date) return -1;
+      return b.date.localeCompare(a.date);
+    });
+    let weightedSum = 0, weightTotal = 0;
+    sorted.forEach((s, i) => {
+      const w = Math.pow(0.55, i);
+      weightedSum += s.conv * w;
+      weightTotal += w;
+    });
+    return weightTotal > 0 ? weightedSum / weightTotal : 0;
+  }
+
   // Short display name for a major tournament. Strips common Limitless
   // prefixes so the field cards can fit "Prague" / "IC London" etc.
   // Falls back to the full name when no known prefix matches.
@@ -1181,7 +1237,7 @@ window.MetaCall = (function () {
     // data is missing (early format or no recent majors).
     const _day2ConvSamples = Object.values(_labsDay2ConvByDeck).filter(q => q && q.n > 0);
     const _meanDay2Conv = _day2ConvSamples.length > 0
-      ? _day2ConvSamples.reduce((s, q) => s + q.sum / q.n, 0) / _day2ConvSamples.length
+      ? _day2ConvSamples.reduce((s, q) => s + _rankWeightedConv(q), 0) / _day2ConvSamples.length
       : 0;
 
     _shareList.forEach(d => {
@@ -1206,10 +1262,22 @@ window.MetaCall = (function () {
       // archetype has enough sample (≥ 3 weighted tournaments) so a
       // single outlier major can't move the predictor.
       const _day2Q = _labsDay2ConvByDeck[k];
-      const _deckDay2Conv = (_day2Q && _day2Q.n > 0) ? _day2Q.sum / _day2Q.n : 0;
+      // Predictor 5.2 Fix #C — rank-weighted recency. Falls back to
+      // legacy sum/n when no per-tournament samples are stored.
+      const _deckDay2Conv = (_day2Q && _day2Q.n > 0) ? _rankWeightedConv(_day2Q) : 0;
       let day2Boost = 1.0;
-      if (_meanDay2Conv > 0 && _deckDay2Conv > 0 && _day2Q && _day2Q.n >= 3) {
-        day2Boost = _clip(_deckDay2Conv / _meanDay2Conv, 0.85, 1.20);
+      // Predictor 5.2 — bounds widened from [0.85, 1.20] to [0.80, 1.40]
+      // and sample threshold dropped from n≥3 to n≥1, with sample-size
+      // damping. LA showed strong-conv variants (Dragapult Dusknoir
+      // 32.9 %, Dudunsparce 30.3 %) get clipped by the narrow band;
+      // the new range catches the real signal. Single-major samples
+      // get extra damping (0.50 trust) so a noise spike doesn't move
+      // the predictor by itself.
+      if (_meanDay2Conv > 0 && _deckDay2Conv > 0 && _day2Q && _day2Q.n >= 1) {
+        const rawBoost = _deckDay2Conv / _meanDay2Conv;
+        const trust = _day2Q.n >= 3 ? 1.00 : (_day2Q.n === 2 ? 0.80 : 0.50);
+        const tempered = 1.0 + (rawBoost - 1.0) * trust;
+        day2Boost = _clip(tempered, 0.80, 1.40);
       }
       d.day2ConvAvg = _deckDay2Conv > 0 ? Math.round(_deckDay2Conv * 1000) / 10 : null; // % with 1 decimal
       d.day2ConvFieldMean = _meanDay2Conv > 0 ? Math.round(_meanDay2Conv * 1000) / 10 : null;
@@ -1382,6 +1450,21 @@ window.MetaCall = (function () {
       // dominates the base formula. day2Boost = 1.0 when no labs data
       // is available, so this is a no-op early in the format.
       predicted *= day2Boost;
+
+      // Online-Hype-Damper (Predictor 5.2) — when a deck's current
+      // ladder share runs ahead of its most-recent brought-share at a
+      // major by ≥ 25 %, treat the gap as online hype rather than
+      // real adoption and damp the prediction. At LA, this would have
+      // pulled Pure Dragapult (online 17.5 % vs Prag brought 13.75 %,
+      // ratio 1.27) and Crustle (online 4.1 % vs Prag brought 3.15 %,
+      // ratio 1.30) ≈ 25 % lower — closer to actuals (10.3 % / 0.8 %).
+      // Skipped when no recent major data exists (fresh format).
+      const HYPE_DAMPER_RATIO_MIN  = 1.25;
+      const HYPE_DAMPER_FACTOR     = 0.75;
+      if (broughtPct > 0 && ladderPct > broughtPct * HYPE_DAMPER_RATIO_MIN) {
+        d.hypeDamperApplied = true;
+        predicted *= HYPE_DAMPER_FACTOR;
+      }
       d.predictedShareRaw = Math.max(0, predicted);
 
       // Predictor 5.0 — surface the per-deck ACE-SPEC split for the
@@ -1394,12 +1477,61 @@ window.MetaCall = (function () {
       d.weightedBaselinePct = (typeof weightedBaselinePct === 'number') ? weightedBaselinePct : null;
     });
 
-    // Concentration boost (^1.50) — mimics the major-tournament
-    // bandwagon ratio of ~1.875× on top picks.
-    const CONCENTRATION_EXP = 1.50;
+    // Concentration boost — Predictor 5.2: dynamic exponent.
+    // The flat ^1.50 amplifies the family-leader too hard: at LA the
+    // dominant deck (Pure Dragapult, raw ~6.7 %) blew up to 17.45 %
+    // predicted vs 10.28 % actual (+7.2 pp), while sub-variants
+    // (Dudunsparce) underestimated by -2.9 pp. Softening the exponent
+    // for high-input-share decks redistributes within-family weight
+    // toward the underweighted variants without changing low-share
+    // behaviour. exp(0..5%) = 1.50, exp(5..10%) decays linearly to
+    // 1.10, exp(10%+) = 1.10. Sub-3% decks keep full bandwagon boost.
+    const CONCENTRATION_EXP_BASE = 1.50;
+    const CONCENTRATION_EXP_MIN  = 1.10;
+    const CONCENTRATION_SOFT_LO  = 5.0;   // below this: full boost
+    const CONCENTRATION_SOFT_HI  = 10.0;  // at/above: minimum boost
     _shareList.forEach(d => {
-      d.predictedShareRaw = Math.pow(d.predictedShareRaw, CONCENTRATION_EXP);
+      const raw = d.predictedShareRaw || 0;
+      let exp = CONCENTRATION_EXP_BASE;
+      if (raw > CONCENTRATION_SOFT_LO) {
+        const t = Math.min(1, (raw - CONCENTRATION_SOFT_LO) /
+                              (CONCENTRATION_SOFT_HI - CONCENTRATION_SOFT_LO));
+        exp = CONCENTRATION_EXP_BASE - (CONCENTRATION_EXP_BASE - CONCENTRATION_EXP_MIN) * t;
+      }
+      d.concentrationExp   = Math.round(exp * 100) / 100;
+      d.predictedShareRaw  = Math.pow(raw, exp);
     });
+
+    // Quality-Floor (Predictor 5.2) — Coverage fix for high-conv
+    // underdogs. LA showed Lopunny Dudunsparce (Prag 3 D1 / 33.3 %
+    // conv) jump to 53 D1 / 18.9 % conv. Decks that VASTLY out-
+    // perform field-mean at the last major signal real strength,
+    // not statistical noise, even at tiny brought-share — but the
+    // predictor wrote them off entirely because their ladder/labs
+    // signals stayed sub-noise. Floor scales with the conv ratio
+    // and caps at 2 % so a freak outlier can't hijack the field.
+    const QUALITY_FLOOR_RATIO_MIN  = 1.5;   // ≥ 1.5× field-mean conv
+    const QUALITY_FLOOR_MAX_PCT    = 2.0;   // hard cap on the floor
+    const QUALITY_FLOOR_MIN_N      = 1;     // works from 1 major of data
+    if (_meanDay2Conv > 0) {
+      _shareList.forEach(d => {
+        const k = normalize(d.name);
+        const q = _labsDay2ConvByDeck[k];
+        if (!q || q.n < QUALITY_FLOOR_MIN_N) return;
+        const deckConv = _rankWeightedConv(q);
+        const ratio    = deckConv / _meanDay2Conv;
+        if (ratio < QUALITY_FLOOR_RATIO_MIN) return;
+        // Floor pct rises linearly from 0.5 % at ratio 1.5 to 2.0 % at
+        // ratio 3.0; clipped at the max. Boosted in the same ^exp space
+        // so it competes with concentration-boosted shares on equal terms.
+        const floorPct = Math.min(QUALITY_FLOOR_MAX_PCT, (ratio - 1.0));
+        const floorRaw = Math.pow(floorPct, d.concentrationExp || 1.50);
+        if (d.predictedShareRaw < floorRaw) {
+          d.qualityFloorApplied = floorPct;
+          d.predictedShareRaw   = floorRaw;
+        }
+      });
+    }
 
     // Renormalise predicted shares to sum 100% so the field-composition
     // budget logic works unchanged.
@@ -1457,6 +1589,21 @@ window.MetaCall = (function () {
           top3WithVariants.map(d => `${d.name}: ${d.aceSpecVariants.map(v => `${v.aceSpec}=${v.sharePct.toFixed(0)}%`).join(', ')}`).join(' | '));
       }
     }
+    // Backtest summary — historical predicted-vs-actual bias per
+    // archetype across the rolling ACCURACY_LOG_MAX major-tournament
+    // history. Surfaces patterns like "Dragapult is consistently
+    // underestimated by 12 pp across the last 4 majors" that a single-
+    // major MAE can't catch. User-flagged via the LA-Regionals gap
+    // (predicted 17 % vs actual 31.9 %).
+    try {
+      const summary = _historicalAccuracySummary();
+      if (summary.perDeck.length > 0 && summary.history.length >= 2) {
+        const top = summary.perDeck.slice(0, 5);
+        const fmt = d => `${d.name} bias=${d.bias > 0 ? '+' : ''}${d.bias}pp (mae ${d.mae}, n=${d.samples})`;
+        console.info(`[MetaCall] backtest — ${summary.history.length} majors logged, per-deck systematic bias:`, top.map(fmt).join(' | '));
+      }
+    } catch (_e) { /* tolerate */ }
+
     // Predictor 5.1 — Day-2 conversion boost summary. Surfaces the
     // top boosters (decks above field-mean conv) and laggards so a
     // user reviewing the prediction can sanity-check that
@@ -1469,6 +1616,26 @@ window.MetaCall = (function () {
       const fmt = (d) => `${d.name} ×${d.day2Boost.toFixed(2)} (Day-2 ${d.day2ConvAvg ?? '—'}% vs mean ${d.day2ConvFieldMean ?? '—'}%)`;
       if (boosters.length > 0) console.info('[MetaCall] predictor 5.1 — Day-2 boosters:', boosters.map(fmt).join(' | '));
       if (laggards.length > 0) console.info('[MetaCall] predictor 5.1 — Day-2 laggards:', laggards.map(fmt).join(' | '));
+    }
+
+    // Predictor 5.2 — telemetry for Concentration / Quality-Floor /
+    // Hype-Damper application. Surfaces which decks were touched by
+    // each new mechanism so the user can verify the fixes are firing
+    // on the right targets in their current dataset.
+    const damped = _shareList.filter(d => d.hypeDamperApplied);
+    const floored = _shareList.filter(d => typeof d.qualityFloorApplied === 'number');
+    const softExp = _shareList.filter(d => typeof d.concentrationExp === 'number' && d.concentrationExp < 1.49);
+    if (damped.length) {
+      console.info('[MetaCall] predictor 5.2 — Hype-Damper fired on:',
+        damped.slice(0, 5).map(d => `${d.name} (×0.75)`).join(', '));
+    }
+    if (floored.length) {
+      console.info('[MetaCall] predictor 5.2 — Quality-Floor applied to:',
+        floored.slice(0, 5).map(d => `${d.name} (floor ${d.qualityFloorApplied.toFixed(2)}%)`).join(', '));
+    }
+    if (softExp.length) {
+      console.info('[MetaCall] predictor 5.2 — Concentration-Exp softened for:',
+        softExp.slice(0, 5).map(d => `${d.name} (^${d.concentrationExp.toFixed(2)})`).join(', '));
     }
   }
 
@@ -1531,6 +1698,66 @@ window.MetaCall = (function () {
     };
     console.info('[MetaCall] new-major accuracy check — MAE=%s pp across %d top decks (baseline %s vs major %s)',
       mae, n, _lastAccuracyReport.baselineDate, _lastMajorDate, perDeck);
+
+    // Persist this report into the rolling accuracy history so the
+    // backtest helper can surface systematic per-archetype biases
+    // across multiple majors. Append at end, cap at ACCURACY_LOG_MAX.
+    try {
+      const rawLog = localStorage.getItem(ACCURACY_LOG_KEY);
+      let history = rawLog ? JSON.parse(rawLog) : [];
+      if (!Array.isArray(history)) history = [];
+      // De-dup: skip if we already logged this major.
+      if (!history.some(h => h.majorDate === _lastMajorDate)) {
+        history.push(_lastAccuracyReport);
+        if (history.length > ACCURACY_LOG_MAX) history = history.slice(-ACCURACY_LOG_MAX);
+        localStorage.setItem(ACCURACY_LOG_KEY, JSON.stringify(history));
+      }
+    } catch (_e) { /* private mode / disabled storage — tolerate */ }
+  }
+
+  // Aggregated per-archetype bias across the persisted accuracy log.
+  // For each deck appearing in ≥ 2 historical major reports, computes:
+  //   bias = mean(actual − predicted)  (pp; positive = under-predicted,
+  //                                     negative = over-predicted)
+  //   mae  = mean(abs(actual − predicted))
+  // Surfaced as a console.info on each predictor run + accessible via
+  // window.metaCallAccuracyHistory() for an ad-hoc inspection.
+  function _historicalAccuracySummary() {
+    let history = [];
+    try {
+      const raw = localStorage.getItem(ACCURACY_LOG_KEY);
+      history = raw ? JSON.parse(raw) : [];
+      if (!Array.isArray(history)) history = [];
+    } catch (_e) { history = []; }
+    const perDeck = new Map();
+    for (const report of history) {
+      if (!Array.isArray(report.decks)) continue;
+      for (const d of report.decks) {
+        if (!d || !d.name) continue;
+        const k = normalize(d.name);
+        let entry = perDeck.get(k);
+        if (!entry) { entry = { name: d.name, samples: 0, sumDiff: 0, sumAbs: 0 }; perDeck.set(k, entry); }
+        const diff = (d.actual || 0) - (d.predicted || 0);
+        entry.samples += 1;
+        entry.sumDiff += diff;
+        entry.sumAbs  += Math.abs(diff);
+      }
+    }
+    const out = [];
+    for (const e of perDeck.values()) {
+      if (e.samples < 2) continue; // single-major sample is noise
+      out.push({
+        name: e.name,
+        samples: e.samples,
+        bias: Number((e.sumDiff / e.samples).toFixed(2)),
+        mae:  Number((e.sumAbs  / e.samples).toFixed(2)),
+      });
+    }
+    out.sort((a, b) => Math.abs(b.bias) - Math.abs(a.bias));
+    return { history, perDeck: out };
+  }
+  if (typeof window !== 'undefined') {
+    window.metaCallAccuracyHistory = _historicalAccuracySummary;
   }
 
   // ── Data Loading ───────────────────────────────────────────
@@ -1756,9 +1983,24 @@ window.MetaCall = (function () {
             const dayConv = parseEU(r.day1_to_day2_conv || '0');
             const day1Players = parseInt(r.day1_players || '0', 10) || 0;
             if (dayConv > 0 && day1Players >= 10) {
-              if (!_labsDay2ConvByDeck[k]) _labsDay2ConvByDeck[k] = { sum: 0, n: 0 };
+              if (!_labsDay2ConvByDeck[k]) {
+                _labsDay2ConvByDeck[k] = { sum: 0, n: 0, samples: [] };
+              } else if (!_labsDay2ConvByDeck[k].samples) {
+                // Backward-compat: older callers may have inited
+                // without samples; ensure the array exists.
+                _labsDay2ConvByDeck[k].samples = [];
+              }
               _labsDay2ConvByDeck[k].sum += dayConv * w;
               _labsDay2ConvByDeck[k].n += w;
+              // Per-tournament samples — used for rank-weighted recency
+              // aggregation (Predictor 5.2 Fix #C). Date matters for
+              // ranking; weight `w` preserved for blended scoring.
+              _labsDay2ConvByDeck[k].samples.push({
+                date:   _rowISO(r) || '',
+                conv:   dayConv,
+                weight: w,
+                tid:    (r.tournament_id || '').trim(),
+              });
             }
             // Track latest tournament date (for trend snapshots).
             const td = (r.tournament_date || '').trim();
@@ -1874,15 +2116,14 @@ window.MetaCall = (function () {
 
       _runPredictor();
 
-      // If the user has a date window set BEFORE first visiting the
-      // Meta Call tab (e.g. picked it on Card Analysis already), apply
-      // the override now so the very first render reflects the cutoff.
-      // _applyDateFilter is a no-op when window.currentMetaDateFrom is
-      // null or invalid — safe to always call.
-      const _initialCutoff = (typeof window !== 'undefined') ? window.currentMetaDateFrom : null;
-      if (_initialCutoff && /^\d{4}-\d{2}-\d{2}$/.test(_initialCutoff)) {
-        try { await _applyDateFilter(); } catch (_e) { /* tolerate */ }
-      }
+      // Always run _applyDateFilter() once after the initial predictor
+      // pass — this either honours the user's explicit cutoff (set on
+      // Card Analysis before the tab was first opened) OR applies the
+      // auto-28-day default. Without this, fresh page loads would
+      // show the cumulative-aggregate predictor for one render before
+      // the auto-window kicks in. Idempotent + safe: when no cutoff
+      // is effective, the override is a no-op.
+      try { await _applyDateFilter(); } catch (_e) { /* tolerate */ }
 
       const matchResp = await fetch('data/limitless_online_decks_matchups.csv?t=' + Date.now());
       if (!matchResp.ok) throw new Error('matchup CSV not found');
@@ -2310,14 +2551,47 @@ window.MetaCall = (function () {
     const evaluated = candidates.map(name => {
       const r = calcDay2(field, name);
       const topMatchups = _topMatchupsVsField(name, field, 3);
+      // Predictor 5.2 Fix #A — blend empirical labs Day-2 conv into
+      // the matchup-simulated day2Prob. At LA the simulated top-5
+      // were all niche WR picks (Ogerpon Box / Crustle / Clefairy
+      // Ogerpon) that underperformed their predictions by ~7 pp,
+      // while Dragapult-Family — actual top D2-conv at LA (26.4 %)
+      // — wasn't in the list. The matchup matrix flat-lines variants
+      // of the same family; empirical labs conv distinguishes them
+      // (Dusknoir 32.9 %, Dudunsparce 30.3 %, Pure 25.3 %). 70/30 blend
+      // keeps simulation as primary signal but lets labs conv break
+      // ties and surface variant specialists.
+      const k = normalize(name);
+      const q = _labsDay2ConvByDeck[k];
+      let blendedDay2 = r.day2Prob;
+      let empConv = null;
+      if (q && q.n >= 1) {
+        empConv = _rankWeightedConv(q);
+        // Single-major sample gets a smaller blend weight (15 %) since
+        // it's higher variance than a 2+-major mean (30 %).
+        const blendW = q.n >= 2 ? 0.30 : 0.15;
+        blendedDay2 = r.day2Prob * (1 - blendW) + empConv * blendW;
+      }
       return {
         name,
-        day2Prob: r.day2Prob,
+        day2Prob: blendedDay2,
+        simDay2Prob: r.day2Prob,
+        empConv,
         expWin: r.expWin,
         avgWR: (r.expWin / _settings.rounds) * 100,
         topMatchups
       };
-    }).sort((a, b) => (b.day2Prob - a.day2Prob) || (b.avgWR - a.avgWR));
+    }).sort((a, b) => {
+      // Primary: blended day2Prob. Tie-breaker (< 0.02): empirical
+      // labs Day-2 conversion — when two candidates have near-equal
+      // simulation odds, the one with stronger field-tested cut rate
+      // wins. Falls through to avgWR as the final tiebreaker.
+      if (Math.abs(a.day2Prob - b.day2Prob) > 0.02) return b.day2Prob - a.day2Prob;
+      const ac = a.empConv != null ? a.empConv : 0;
+      const bc = b.empConv != null ? b.empConv : 0;
+      if (Math.abs(ac - bc) > 0.05) return bc - ac;
+      return b.avgWR - a.avgWR;
+    });
 
     // Day-2 list — threshold then bounds.
     // Threshold lowered to 0.20 so a concentrated meta (one mega-family
@@ -3097,9 +3371,13 @@ window.MetaCall = (function () {
     // so changes here also re-paint the Card Analysis tables.
     const _dateCutoff = (typeof window !== 'undefined') ? window.currentMetaDateFrom : null;
     const _dateValue = (_dateCutoff && /^\d{4}-\d{2}-\d{2}$/.test(_dateCutoff)) ? _dateCutoff : '';
+    const _autoCutoff = (!_dateValue && typeof _effectiveDateCutoff === 'function')
+      ? _effectiveDateCutoff() : null;
     const _activeWindowText = _dateValue
       ? `Active window: data ≥ ${_dateValue}`
-      : 'No date filter — using full meta history';
+      : (_autoCutoff
+          ? `Auto: last 28 days (≥ ${_autoCutoff}) — pick a date to override`
+          : 'No date filter — using full meta history');
     const dateBanner = `
       <div class="metacall-date-window">
         <label class="metacall-date-label" for="metacallDateFrom">📅 Data window from:</label>
@@ -5105,7 +5383,12 @@ window.MetaCall = (function () {
     _archetypeDoctrineMap = null;
     _datedCardsRows = null; // raw stays cached on _datedCardsRowsRaw
     if (!_shareList || _shareList.length === 0) return;
-    const cutoff = (typeof window !== 'undefined') ? window.currentMetaDateFrom : null;
+    // Use the EFFECTIVE cutoff (explicit user pick OR auto-28-day default)
+    // so the override fires even when the user hasn't picked a date — a
+    // user-flagged LA Regionals gap (Dragapult predicted 17 % vs actual
+    // 31.9 %) showed that cumulative aggregates dilute current-meta
+    // share. The auto-default keeps the predictor on a recent window.
+    const cutoff = _effectiveDateCutoff();
     try {
       // Lazy-load history snapshots (filter applied inside loader).
       _allHistorySnapshots = await _loadAllHistorySnapshots();

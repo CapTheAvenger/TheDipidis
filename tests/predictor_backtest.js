@@ -179,6 +179,43 @@ function main() {
   });
   console.log('  (Dynamic exp redistributes weight from family-leader to underweighted variants)');
 
+  // Predictor 5.3 — Per-Variant Matchup Adjustment simulation. Reads
+  // online cumulative WR + LA labs WR from the data files and shows
+  // what the adjustment would be for the key decks the user flagged.
+  console.log('\nPer-variant matchup WR adjustment (LA labs WR − online cumulative WR):');
+  const onlineWR = {};
+  try {
+    const onlineText = fs.readFileSync(path.join(__dirname, '..', 'data', 'limitless_online_decks.csv'), 'utf8');
+    onlineText.split(/\r?\n/).slice(1).forEach(line => {
+      const parts = line.split(';');
+      if (parts.length < 10) return;
+      const name = parts[1];
+      const wr = parseFloat((parts[9] || '0').replace(',', '.'));
+      if (name && wr) onlineWR[name] = wr;
+    });
+  } catch (e) { /* skip if missing */ }
+  const LA_WR = {
+    'Dragapult': 50.72, 'Dragapult Dusknoir': 54.53, 'Dragapult Blaziken': 44.82,
+    'Dragapult Dudunsparce': 54.25, 'Crustle': 43.30, 'Festival Lead': 48.41,
+    'Ogerpon Box': 52.63, 'Raging Bolt Ogerpon': 50.18, "Rocket's Mewtwo": 46.79,
+    'Alakazam Dudunsparce': 47.83, 'Lucario Hariyama': 42.24, 'Ogerpon Meganium': 46.44,
+  };
+  console.log('Deck                        Online WR    LA WR    Adj (pp)');
+  console.log('-'.repeat(65));
+  let adjMax = 0, adjCount = 0;
+  Object.entries(LA_WR).forEach(([name, laWr]) => {
+    const onWr = onlineWR[name];
+    if (!onWr) return;
+    const delta = laWr - onWr;
+    const clamped = Math.max(-12, Math.min(12, delta));
+    if (Math.abs(clamped) >= 1.0) adjCount++;
+    adjMax = Math.max(adjMax, Math.abs(clamped));
+    const flag = Math.abs(clamped) >= 5 ? ' ⚠ significant' : '';
+    console.log(`${name.padEnd(28)} ${onWr.toFixed(2).padStart(8)}% ${laWr.toFixed(2).padStart(8)}%  ${clamped > 0 ? '+' : ''}${clamped.toFixed(1).padStart(5)}pp${flag}`);
+  });
+  console.log(`\n${adjCount} decks would receive a meaningful (|adj|≥1pp) correction; max |adj|: ${adjMax.toFixed(1)}pp`);
+  console.log('  Effect: in matchup A-vs-B, pWin shifts by (adj[A] − adj[B]) / 100.');
+
   // Regression gate: hard thresholds. Adjust if the predictor tuning
   // changes intentionally.
   const FAIL_RANK_MAE_PP = 12.0;
@@ -186,7 +223,12 @@ function main() {
     console.error(`FAIL: rank-weighted recency drift exceeds ${FAIL_RANK_MAE_PP}pp`);
     process.exit(1);
   }
-  console.log('\nOK — predictor 5.2 backtest passes.');
+  const FAIL_NO_ADJUSTMENTS = 5; // expect at least 5 corrections from LA labs data
+  if (adjCount < FAIL_NO_ADJUSTMENTS) {
+    console.error(`FAIL: only ${adjCount} matchup-WR-adjustment candidates found (expected ≥${FAIL_NO_ADJUSTMENTS}). Online data may be stale.`);
+    process.exit(1);
+  }
+  console.log('\nOK — predictor 5.3 backtest passes.');
 }
 
 main();

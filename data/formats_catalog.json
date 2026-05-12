@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-04-27 20:08:18",
+  "last_updated": "2026-05-12 07:02:24",
   "formats": [
     {
       "code": "BRS-PRE",
@@ -69,6 +69,11 @@
     {
       "code": "SVI-PFL",
       "name": "Scarlet & Violet - Phantasmal Flames",
+      "source": "known"
+    },
+    {
+      "code": "TEF-POR",
+      "name": "Temporal Forces - Perfect Order",
       "source": "known"
     }
   ]

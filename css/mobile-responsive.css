@@ -633,6 +633,7 @@
     .mb-20 { margin-bottom: 15px !important; }
     .mb-15 { margin-bottom: 12px !important; }
     .px-40 { padding-left: 16px !important; padding-right: 16px !important; }
+    .px-30 { padding-left: 12px !important; padding-right: 12px !important; }
     .px-20 { padding-left: 12px !important; padding-right: 12px !important; }
     .py-60 { padding-top: 30px !important; padding-bottom: 30px !important; }
 }
@@ -1256,7 +1257,21 @@
    */
   .cards-section,
   #currentMetaCardsSection {
-    padding: 8px 4px !important;
+    padding: 8px 2px !important;
+  }
+  /* Inner nested containers inside the analysis tabs that add extra
+   * horizontal padding even after the cards-section is trimmed —
+   * forces them flush with the section edge on small phones. */
+  #current-analysis > .container,
+  #city-league-analysis > .container,
+  #past-meta > .container {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+  .cards-header,
+  .current-meta-cards-header {
+    padding-left: 4px !important;
+    padding-right: 4px !important;
   }
   .city-league-card-market-btn {
     font-size: 0.72em !important;

@@ -2766,7 +2766,7 @@
         /* Small Mobile Devices (Most Smartphones) */
         @media (max-width: 480px) {
             body {
-                padding: 5px;
+                padding: 2px;
             }
 
             .container {
@@ -2805,7 +2805,7 @@
             }
 
             .tab-content {
-                padding: 10px;
+                padding: 8px 4px;
                 min-height: 300px;
             }
 

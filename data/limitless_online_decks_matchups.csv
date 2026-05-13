@@ -1,12 +1,12 @@
 ﻿deck_name;opponent;win_rate;record;total_games
-Dragapult;Greninja;63,87;76 - 43 - 4;123
+Dragapult;Greninja;63,33;76 - 44 - 4;124
 Dragapult;Dragapult Dusknoir;61,12;272 - 173 - 12;457
 Dragapult;Rocket's Honchkrow;60,0;129 - 86 - 4;219
-Dragapult;Festival Lead;59,57;193 - 131 - 0;324
+Dragapult;Festival Lead;59,69;194 - 131 - 0;325
 Dragapult;Okidogi Barbaracle;58,44;142 - 101 - 6;249
 Dragapult;Ogerpon Meganium;58,44;239 - 170 - 7;416
 Dragapult;Slowking;56,52;78 - 60 - 2;140
-Dragapult;Lucario Hariyama;55,84;263 - 208 - 7;478
+Dragapult;Lucario Hariyama;55,93;264 - 208 - 7;479
 Dragapult;Starmie Froslass;54,11;191 - 162 - 7;360
 Dragapult;Dragapult Dudunsparce;53,79;78 - 67 - 3;148
 Dragapult;Steven's Metagross;53,49;69 - 60 - 3;132
@@ -16,18 +16,18 @@ Dragapult;Alakazam Dudunsparce;51,14;224 - 214 - 5;443
 Dragapult;Dragapult Blaziken;51,12;251 - 240 - 12;503
 Dragapult;Dragapult;50,0;355 - 355 - 18;728
 Dragapult;Rocket's Mewtwo;49,57;233 - 237 - 9;479
-Dragapult;N's Zoroark;46,88;188 - 213 - 7;408
+Dragapult;N's Zoroark;47,01;189 - 213 - 7;409
 Dragapult;Cynthia's Garchomp;39,08;111 - 173 - 9;293
 Dragapult;Crustle;32,18;56 - 118 - 5;179
 Lucario Hariyama;Crustle;61,81;89 - 55 - 3;147
-Lucario Hariyama;N's Zoroark;61,06;218 - 139 - 5;362
+Lucario Hariyama;N's Zoroark;60,72;218 - 141 - 5;364
 Lucario Hariyama;Dragapult Dusknoir;57,53;210 - 155 - 5;370
 Lucario Hariyama;Starmie Froslass;51,36;151 - 143 - 2;296
 Lucario Hariyama;Dragapult Dudunsparce;51,22;42 - 40 - 5;87
 Lucario Hariyama;Grimmsnarl Froslass;51,15;134 - 128 - 1;263
 Lucario Hariyama;Lucario Hariyama;50,0;231 - 231 - 12;474
 Lucario Hariyama;Raging Bolt Ogerpon;47,87;101 - 110 - 0;211
-Lucario Hariyama;Dragapult;44,16;208 - 263 - 7;478
+Lucario Hariyama;Dragapult;44,07;208 - 264 - 7;479
 Lucario Hariyama;Ogerpon Meganium;43,87;111 - 142 - 7;260
 Lucario Hariyama;Dragapult Blaziken;43,78;169 - 217 - 9;395
 Lucario Hariyama;Rocket's Honchkrow;43,35;88 - 115 - 1;204
@@ -36,7 +36,7 @@ Lucario Hariyama;Okidogi Barbaracle;42,17;70 - 96 - 2;168
 Lucario Hariyama;Alakazam Dudunsparce;41,44;179 - 253 - 5;437
 Lucario Hariyama;Greninja;40,66;37 - 54 - 1;92
 Lucario Hariyama;Rocket's Mewtwo;36,91;134 - 229 - 10;373
-Lucario Hariyama;Festival Lead;36,07;88 - 156 - 1;245
+Lucario Hariyama;Festival Lead;35,92;88 - 157 - 1;246
 Lucario Hariyama;Steven's Metagross;34,12;29 - 56 - 1;86
 Lucario Hariyama;Slowking;30,09;34 - 79 - 0;113
 Dragapult Blaziken;Steven's Metagross;66,23;51 - 26 - 2;79
@@ -104,7 +104,7 @@ N's Zoroark;Dragapult Dudunsparce;60,42;58 - 38 - 5;101
 N's Zoroark;Dragapult Dusknoir;60,25;191 - 126 - 5;322
 N's Zoroark;Slowking;53,54;53 - 46 - 1;100
 N's Zoroark;Starmie Froslass;53,14;144 - 127 - 9;280
-N's Zoroark;Dragapult;53,12;213 - 188 - 7;408
+N's Zoroark;Dragapult;52,99;213 - 189 - 7;409
 N's Zoroark;Dragapult Blaziken;51,6;194 - 182 - 9;385
 N's Zoroark;Rocket's Honchkrow;51,52;68 - 64 - 1;133
 N's Zoroark;N's Zoroark;50,0;158 - 158 - 4;320
@@ -113,7 +113,7 @@ N's Zoroark;Grimmsnarl Froslass;44,92;84 - 103 - 3;190
 N's Zoroark;Raging Bolt Ogerpon;44,69;80 - 99 - 0;179
 N's Zoroark;Greninja;41,0;41 - 59 - 0;100
 N's Zoroark;Okidogi Barbaracle;39,73;58 - 88 - 6;152
-N's Zoroark;Lucario Hariyama;38,94;139 - 218 - 5;362
+N's Zoroark;Lucario Hariyama;39,28;141 - 218 - 5;364
 N's Zoroark;Rocket's Mewtwo;38,14;111 - 180 - 2;293
 N's Zoroark;Cynthia's Garchomp;36,61;82 - 142 - 3;227
 N's Zoroark;Festival Lead;33,48;74 - 147 - 1;222
@@ -183,17 +183,17 @@ Festival Lead;Cynthia's Garchomp;74,49;146 - 50 - 3;199
 Festival Lead;Slowking;71,88;46 - 18 - 2;66
 Festival Lead;N's Zoroark;66,52;147 - 74 - 1;222
 Festival Lead;Rocket's Honchkrow;65,38;68 - 36 - 2;106
-Festival Lead;Lucario Hariyama;63,93;156 - 88 - 1;245
+Festival Lead;Lucario Hariyama;64,08;157 - 88 - 1;246
 Festival Lead;Crustle;59,52;75 - 51 - 1;127
 Festival Lead;Grimmsnarl Froslass;57,14;84 - 63 - 2;149
 Festival Lead;Alakazam Dudunsparce;56,52;143 - 110 - 9;262
+Festival Lead;Raging Bolt Ogerpon;55,1;81 - 66 - 3;150
 Festival Lead;Rocket's Mewtwo;54,98;127 - 104 - 5;236
-Festival Lead;Raging Bolt Ogerpon;54,79;80 - 66 - 3;149
 Festival Lead;Festival Lead;50,0;94 - 94 - 8;196
 Festival Lead;Ogerpon Meganium;49,73;91 - 92 - 2;185
-Festival Lead;Greninja;45,16;28 - 34 - 0;62
+Festival Lead;Greninja;44,44;28 - 35 - 0;63
 Festival Lead;Steven's Metagross;41,67;20 - 28 - 0;48
-Festival Lead;Dragapult;40,43;131 - 193 - 0;324
+Festival Lead;Dragapult;40,31;131 - 194 - 0;325
 Festival Lead;Dragapult Dusknoir;39,11;88 - 137 - 1;226
 Festival Lead;Dragapult Dudunsparce;37,14;39 - 66 - 1;106
 Festival Lead;Dragapult Blaziken;36,79;103 - 177 - 1;281
@@ -249,11 +249,11 @@ Raging Bolt Ogerpon;Steven's Metagross;53,06;26 - 23 - 0;49
 Raging Bolt Ogerpon;Dragapult Dusknoir;52,94;108 - 96 - 2;206
 Raging Bolt Ogerpon;Lucario Hariyama;52,13;110 - 101 - 0;211
 Raging Bolt Ogerpon;Raging Bolt Ogerpon;50,0;60 - 60 - 2;122
-Raging Bolt Ogerpon;Greninja;50,0;31 - 31 - 0;62
 Raging Bolt Ogerpon;Dragapult Blaziken;49,53;106 - 108 - 1;215
+Raging Bolt Ogerpon;Greninja;49,21;31 - 32 - 0;63
 Raging Bolt Ogerpon;Ogerpon Meganium;48,48;64 - 68 - 3;135
 Raging Bolt Ogerpon;Dragapult;47,65;132 - 145 - 6;283
-Raging Bolt Ogerpon;Festival Lead;45,21;66 - 80 - 3;149
+Raging Bolt Ogerpon;Festival Lead;44,9;66 - 81 - 3;150
 Raging Bolt Ogerpon;Slowking;42,55;20 - 27 - 1;48
 Raging Bolt Ogerpon;Alakazam Dudunsparce;33,86;64 - 125 - 2;191
 Raging Bolt Ogerpon;Rocket's Honchkrow;33,72;29 - 57 - 4;90
@@ -363,11 +363,11 @@ Greninja;Slowking;67,86;19 - 9 - 0;28
 Greninja;Lucario Hariyama;59,34;54 - 37 - 1;92
 Greninja;N's Zoroark;59,0;59 - 41 - 0;100
 Greninja;Rocket's Mewtwo;58,62;51 - 36 - 0;87
+Greninja;Festival Lead;55,56;35 - 28 - 0;63
 Greninja;Starmie Froslass;55,17;48 - 39 - 1;88
-Greninja;Festival Lead;54,84;34 - 28 - 0;62
 Greninja;Dragapult Dusknoir;52,27;46 - 42 - 0;88
 Greninja;Cynthia's Garchomp;50,91;28 - 27 - 0;55
-Greninja;Raging Bolt Ogerpon;50,0;31 - 31 - 0;62
+Greninja;Raging Bolt Ogerpon;50,79;32 - 31 - 0;63
 Greninja;Rocket's Honchkrow;50,0;24 - 24 - 0;48
 Greninja;Greninja;50,0;15 - 15 - 4;34
 Greninja;Okidogi Barbaracle;48,94;23 - 24 - 0;47
@@ -377,8 +377,8 @@ Greninja;Alakazam Dudunsparce;41,3;38 - 54 - 1;93
 Greninja;Dragapult Blaziken;39,25;42 - 65 - 0;107
 Greninja;Steven's Metagross;38,71;12 - 19 - 0;31
 Greninja;Crustle;37,84;14 - 23 - 1;38
+Greninja;Dragapult;36,67;44 - 76 - 4;124
 Greninja;Ogerpon Meganium;36,47;31 - 54 - 0;85
-Greninja;Dragapult;36,13;43 - 76 - 4;123
 Steven's Metagross;Lucario Hariyama;65,88;56 - 29 - 1;86
 Steven's Metagross;Greninja;61,29;19 - 12 - 0;31
 Steven's Metagross;Festival Lead;58,33;28 - 20 - 0;48
@@ -431,9 +431,9 @@ Mega Venusaur;Crustle;43,24;16 - 21 - 0;37
 Mega Venusaur;Dragapult Dudunsparce;40,91;9 - 13 - 0;22
 Mega Venusaur;Starmie Froslass;40,85;29 - 42 - 0;71
 Mega Venusaur;Rocket's Honchkrow;40,54;15 - 22 - 0;37
-Mega Venusaur;Lucario Hariyama;40,38;42 - 62 - 1;105
+Mega Venusaur;Lucario Hariyama;40,0;42 - 63 - 1;106
 Mega Venusaur;Dragapult;37,19;45 - 76 - 2;123
-Mega Venusaur;Raging Bolt Ogerpon;33,33;12 - 24 - 1;37
+Mega Venusaur;Raging Bolt Ogerpon;32,43;12 - 25 - 1;38
 Mega Venusaur;Alakazam Dudunsparce;32,22;29 - 61 - 1;91
 Mega Venusaur;Okidogi Barbaracle;31,11;14 - 31 - 1;46
 Mega Venusaur;Greninja;26,09;6 - 17 - 0;23
@@ -944,11 +944,11 @@ Hydreigon;Okidogi Barbaracle;50,0;2 - 2 - 0;4
 Hydreigon;Alakazam Dudunsparce;44,44;8 - 10 - 0;18
 Hydreigon;Dragapult Blaziken;43,75;7 - 9 - 1;17
 Hydreigon;N's Zoroark;43,75;7 - 9 - 0;16
-Hydreigon;Lucario Hariyama;35,71;5 - 9 - 0;14
+Hydreigon;Lucario Hariyama;40,0;6 - 9 - 0;15
 Hydreigon;Crustle;33,33;3 - 6 - 0;9
 Hydreigon;Grimmsnarl Froslass;33,33;2 - 4 - 0;6
 Hydreigon;Rocket's Honchkrow;28,57;2 - 5 - 0;7
-Hydreigon;Raging Bolt Ogerpon;25,0;2 - 6 - 0;8
+Hydreigon;Raging Bolt Ogerpon;22,22;2 - 7 - 0;9
 Hydreigon;Dragapult Dusknoir;20,0;3 - 12 - 0;15
 Hydreigon;Ogerpon Meganium;14,29;1 - 6 - 0;7
 Hydreigon;Dragapult;12,5;2 - 14 - 0;16

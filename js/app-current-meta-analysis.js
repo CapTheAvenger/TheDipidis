@@ -1318,10 +1318,15 @@
             const byBest  = [...enriched].sort((a, b) => b.wr - a.wr || (b.record.length - a.record.length));
             const byWorst = [...enriched].sort((a, b) => a.wr - b.wr || (b.record.length - a.record.length));
 
+            // Decimal separator matches the active language so the EN
+            // view shows "62.5%" and the DE view shows "62,5%".
+            const decimal = (getLang() === 'de') ? ',' : '.';
+            const fmtPct = (v) => v.toFixed(1).replace('.', decimal);
+
             const fmtRow = (m) => `
                 <tr>
                     <td>${m.opponent}</td>
-                    <td>${m.wr.toFixed(1).replace('.', ',')}%</td>
+                    <td>${fmtPct(m.wr)}%</td>
                     <td>${m.record}</td>
                 </tr>`;
 
@@ -1331,12 +1336,12 @@
             bestTable.innerHTML  = bestRows  || '<tr><td colspan="3" style="text-align:center;padding:20px;">' + t('heatmap.noData') + '</td></tr>';
             worstTable.innerHTML = worstRows || '<tr><td colspan="3" style="text-align:center;padding:20px;">' + t('heatmap.noData') + '</td></tr>';
 
-            // Title — best-effort: just the archetype name + average WR.
-            // No rank/Vs-Top20 numbers here since they're not in the
-            // matchups CSV; the HTML path overrides this when available.
+            // Title — best-effort: archetype name + average WR. No rank
+            // or vs-Top20 numbers here since they're not in the matchups
+            // CSV; the HTML extraction path overrides this when available.
             const avgWr = enriched.reduce((s, m) => s + m.wr, 0) / enriched.length;
             if (titleEl) {
-                titleEl.textContent = `${archetype} (Avg WR: ${avgWr.toFixed(1).replace('.', ',')}%, ${enriched.length} matchups)`;
+                titleEl.textContent = `${archetype} (${t('matchup.avgWr')} ${fmtPct(avgWr)}%, ${enriched.length} ${t('matchup.matchups')})`;
             }
 
             matchupsSection.classList.remove('d-none');
@@ -1432,27 +1437,34 @@
             const coveragePct = Math.min(100, (matchedTop12 / top12Share) * 100);
 
             // Verdict — same thresholds as the per-row WR pills below.
+            // i18n strings keep the verdict text aligned EN/DE.
             const wrClass = wrColorClass(weightedWr);
-            const verdictText =
-                weightedWr >= 60 ? 'Stark vorteilhaft vs Feld' :
-                weightedWr >= 53 ? 'Vorteilhaft vs Feld' :
-                weightedWr >= 47 ? 'Ausgeglichen vs Feld' :
-                weightedWr >= 40 ? 'Schwach vs Feld' :
-                                   'Sehr schwach vs Feld';
+            const verdictKey =
+                weightedWr >= 60 ? 'matchup.verdictStrongPos' :
+                weightedWr >= 53 ? 'matchup.verdictPos' :
+                weightedWr >= 47 ? 'matchup.verdictEven' :
+                weightedWr >= 40 ? 'matchup.verdictNeg' :
+                                   'matchup.verdictStrongNeg';
+
+            // EN uses "." as decimal separator, DE uses ",". Other
+            // locale conventions (thousands separator) aren't relevant
+            // here since values stay under 100 %.
+            const decimal = (getLang() === 'de') ? ',' : '.';
+            const fmt = (v, d = 1) => v.toFixed(d).replace('.', decimal);
 
             summaryEl.innerHTML = `
                 <div class="mc-vs-summary-row">
-                    <span class="mc-vs-summary-label">Gewichtete WR vs Feld:</span>
-                    <span class="mc-vs-pill ${wrClass}">${weightedWr.toFixed(1).replace('.', ',')}%</span>
-                    <span class="mc-vs-summary-verdict">${verdictText}</span>
-                    <span class="mc-vs-summary-coverage">Feld-Abdeckung: ${coveragePct.toFixed(0)}% (${paired.length} Gegner)</span>
+                    <span class="mc-vs-summary-label">${t('matchup.weightedWrLabel')}</span>
+                    <span class="mc-vs-pill ${wrClass}">${fmt(weightedWr)}%</span>
+                    <span class="mc-vs-summary-verdict">${t(verdictKey)}</span>
+                    <span class="mc-vs-summary-coverage">${t('matchup.fieldCoverage')} ${coveragePct.toFixed(0)}% (${paired.length} ${t('matchup.opponents')})</span>
                 </div>`;
 
             const fmtRow = (m) => `
                 <tr>
                     <td>${escapeHtml(m.opponent)}</td>
-                    <td class="mc-vs-share">${m.fieldShare.toFixed(2).replace('.', ',')}%</td>
-                    <td class="mc-vs-wr"><span class="mc-vs-pill ${wrColorClass(m.wr)}">${m.wr.toFixed(1).replace('.', ',')}%</span></td>
+                    <td class="mc-vs-share">${fmt(m.fieldShare, 2)}%</td>
+                    <td class="mc-vs-wr"><span class="mc-vs-pill ${wrColorClass(m.wr)}">${fmt(m.wr)}%</span></td>
                 </tr>`;
 
             tbody.innerHTML = paired.map(fmtRow).join('') ||

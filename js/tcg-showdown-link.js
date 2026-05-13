@@ -34,6 +34,20 @@
         return (typeof window.getLang === 'function' && window.getLang() === 'de');
     }
 
+    // Prefer the project-wide i18n helper when present so the messages
+    // stay in sync with the rest of the app. Falls back to the inline
+    // string when the i18n module hasn't loaded yet (defensive — the
+    // module is `defer`-loaded same as this one, so order should be
+    // deterministic, but a fresh user with no localStorage hits this
+    // file before i18n.js initializes its dictionary in some edge cases).
+    function _i18n(key, fallbackEn, fallbackDe) {
+        if (typeof window.t === 'function') {
+            const got = window.t(key);
+            if (got && got !== key) return got;
+        }
+        return _de() ? fallbackDe : fallbackEn;
+    }
+
     // Reuse the Deck-Builder export-string format. Returns the same
     // PTCG-Live-compatible string the Playtester setup used to pass
     // to its parser — Pokémon TCG Live exports are the de-facto
@@ -108,16 +122,15 @@
 
     function _openShowdownAfterCopy(deckString, opts) {
         opts = opts || {};
-        const de = _de();
-        const successMsg = de
-            ? 'Deck kopiert! TCG Showdown öffnet sich – einfach einfügen.'
-            : 'Deck copied! Opening TCG Showdown — paste to import.';
-        const emptyMsg = de
-            ? 'Dein Deck ist leer — nichts zu kopieren.'
-            : 'Your deck is empty — nothing to copy.';
-        const errorMsg = de
-            ? 'Konnte nicht in die Zwischenablage kopieren. Öffne TCG Showdown trotzdem...'
-            : 'Could not copy to clipboard. Opening TCG Showdown anyway...';
+        const successMsg = _i18n('showdown.toastCopied',
+            'Deck copied! Opening TCG Showdown — paste to import.',
+            'Deck kopiert! TCG Showdown öffnet sich — zum Importieren einfügen.');
+        const emptyMsg = _i18n('showdown.toastEmpty',
+            'Your deck is empty — nothing to copy.',
+            'Dein Deck ist leer — nichts zu kopieren.');
+        const errorMsg = _i18n('showdown.toastClipboardFail',
+            'Could not copy to clipboard. Opening TCG Showdown anyway...',
+            'Konnte nicht in die Zwischenablage kopieren. Öffne TCG Showdown trotzdem...');
 
         if (!deckString) {
             _toast(emptyMsg, 'warning');

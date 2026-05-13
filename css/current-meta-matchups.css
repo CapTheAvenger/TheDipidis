@@ -605,11 +605,16 @@
      * table off the right edge of a 430 px viewport. 50/22/28 ratio
      * leaves the opponent column wide enough for most archetype
      * names; the longest few wrap to 2 lines (acceptable on mobile).
+     *
+     * !important on every width here because a previous round had
+     * the desktop `width: 1%` collapse trick still applying somehow
+     * on the actual deployed CSS — user-facing screenshot showed
+     * opponent column dominating. Belt + suspenders.
      */
-    .mc-vs-table { table-layout: fixed; }
-    .mc-vs-th-opp   { width: 50%; }
-    .mc-vs-th-share { width: 22%; white-space: nowrap; }
-    .mc-vs-th-wr    { width: 28%; white-space: nowrap; }
+    .mc-vs-table { table-layout: fixed !important; }
+    .mc-vs-col-opp,  .mc-vs-th-opp   { width: 50% !important; }
+    .mc-vs-col-share, .mc-vs-th-share { width: 22% !important; white-space: nowrap; }
+    .mc-vs-col-wr,   .mc-vs-th-wr    { width: 28% !important; white-space: nowrap; }
     .mc-vs-table td:first-child {
         white-space: normal;
         word-break: break-word;
@@ -650,10 +655,12 @@
     .mc-vs-summary-label { font-size: 0.7em; }
     .mc-vs-table-wrap { border-radius: 6px; }
     /* Even tighter ratio for narrow phones so very long opponent names
-     * still wrap on 2 lines without forcing the table to scroll. */
-    .mc-vs-th-opp   { width: 48%; }
-    .mc-vs-th-share { width: 22%; }
-    .mc-vs-th-wr    { width: 30%; }
+     * still wrap on 2 lines without forcing the table to scroll.
+     * !important on every width — same reason as the 768 px block. */
+    .mc-vs-table { table-layout: fixed !important; }
+    .mc-vs-col-opp,   .mc-vs-th-opp   { width: 48% !important; }
+    .mc-vs-col-share, .mc-vs-th-share { width: 22% !important; }
+    .mc-vs-col-wr,    .mc-vs-th-wr    { width: 30% !important; }
     .mc-vs-table th { padding: 9px 4px; font-size: 0.66em; }
     .mc-vs-table td { padding: 8px 4px; font-size: 0.85em; }
     .mc-vs-table td:first-child { font-size: 0.82em; }

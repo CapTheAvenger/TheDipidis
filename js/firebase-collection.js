@@ -2200,6 +2200,9 @@ function updateDecksUI() {
             <button onclick="event.stopPropagation(); copyDeckAndOpenLimitless(${deckIndex})" class="deck-action-btn deck-btn-print" title="Copy &amp; open Limitless Builder">
               ${getLang()==='de' ? 'Decklist' : 'Print Decklist'}
             </button>
+            <button onclick="event.stopPropagation(); copyDeckAndOpenShowdown(${deckIndex})" class="deck-action-btn deck-btn-showdown" title="${getLang()==='de' ? 'Deck kopieren und TCG Showdown in neuem Tab öffnen' : 'Copy deck and open TCG Showdown in a new tab'}">
+              📋 TCG Showdown ↗
+            </button>
             <button onclick="event.stopPropagation(); printSavedDeckProxies(${deckIndex})" class="deck-action-btn deck-btn-proxy-all" title="${getLang()==='de' ? 'Alle Karten in den Proxy Printer' : 'Send full deck to Proxy Printer'}">
               ${getLang()==='de' ? 'Proxy' : 'Print Proxy'}
             </button>

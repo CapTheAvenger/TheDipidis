@@ -600,6 +600,21 @@
 }
 
 @media (max-width: 768px) {
+    /* Mobile: switch to `table-layout: fixed` so column widths are
+     * deterministic — no more "Dragapult Dudunsparce" overflowing the
+     * table off the right edge of a 430 px viewport. 50/22/28 ratio
+     * leaves the opponent column wide enough for most archetype
+     * names; the longest few wrap to 2 lines (acceptable on mobile).
+     */
+    .mc-vs-table { table-layout: fixed; }
+    .mc-vs-th-opp   { width: 50%; }
+    .mc-vs-th-share { width: 22%; white-space: nowrap; }
+    .mc-vs-th-wr    { width: 28%; white-space: nowrap; }
+    .mc-vs-table td:first-child {
+        white-space: normal;
+        word-break: break-word;
+        line-height: 1.25;
+    }
     .mc-vs-section { padding: 12px 10px; }
     .mc-vs-title {
         font-size: 1.05em;
@@ -612,7 +627,6 @@
     .mc-vs-summary-label { font-size: 0.78em; }
     .mc-vs-table th { padding: 9px 10px; font-size: 0.72em; }
     .mc-vs-table td { padding: 8px 10px; font-size: 0.9em; }
-    .mc-vs-th-share, .mc-vs-th-wr { width: 24%; }
     .mc-vs-pill { min-width: 52px; padding: 3px 10px; font-size: 0.92em; }
     .mc-vs-summary-coverage { margin-left: 0; flex-basis: 100%; }
     .mc-vs-legend { font-size: 0.75em; gap: 6px 10px; padding: 8px 10px; }
@@ -635,8 +649,14 @@
     .mc-vs-summary-row .mc-vs-pill { font-size: 0.95em; padding: 4px 12px; min-width: 64px; }
     .mc-vs-summary-label { font-size: 0.7em; }
     .mc-vs-table-wrap { border-radius: 6px; }
-    .mc-vs-table th { padding: 9px 6px; font-size: 0.68em; }
-    .mc-vs-table td { padding: 8px 6px; font-size: 0.85em; }
+    /* Even tighter ratio for narrow phones so very long opponent names
+     * still wrap on 2 lines without forcing the table to scroll. */
+    .mc-vs-th-opp   { width: 48%; }
+    .mc-vs-th-share { width: 22%; }
+    .mc-vs-th-wr    { width: 30%; }
+    .mc-vs-table th { padding: 9px 4px; font-size: 0.66em; }
+    .mc-vs-table td { padding: 8px 4px; font-size: 0.85em; }
+    .mc-vs-table td:first-child { font-size: 0.82em; }
     .mc-vs-pill { min-width: 48px; padding: 2px 8px; font-size: 0.86em; }
     .mc-vs-legend { padding: 8px 10px; border-radius: 8px; }
 }

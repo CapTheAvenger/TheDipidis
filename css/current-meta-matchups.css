@@ -550,16 +550,17 @@
 }
 
 @media (max-width: 480px) {
-    /* UI Step 2 — Matchups-vs-Meta-Call panel on small phones.
-     * User feedback: panel had the same dead-space issue as the
-     * card grid. Trim padding further so the table reaches edge-
-     * to-edge and the WR pills stay readable. Sticky-ish legend
-     * wraps to 2-3 lines; that's fine, it's reference material. */
-    .mc-vs-section { padding: 10px 6px; margin-bottom: 16px; }
-    .mc-vs-table-wrap { border-radius: 6px; }
-    .mc-vs-table th, .mc-vs-table td { padding: 6px 6px; font-size: 0.86em; }
-    .mc-vs-pill { min-width: 46px; padding: 2px 7px; font-size: 0.88em; }
-    .mc-vs-summary-row { font-size: 0.85em; gap: 5px 8px; }
+    /* UI Step 3 — push the panel right up to the viewport edges.
+     * Combined with the body/tab-content/.px-30 cuts elsewhere this
+     * brings the table within ~6 px of the screen edge on a 430 px
+     * phone (was ~38 px before the multi-PR tightening pass). */
+    .mc-vs-section { padding: 8px 4px !important; margin-bottom: 12px; }
+    .mc-vs-table-wrap { border-radius: 4px; }
+    .mc-vs-table th, .mc-vs-table td { padding: 6px 5px; font-size: 0.84em; }
+    .mc-vs-table th { padding: 8px 5px; }
+    .mc-vs-pill { min-width: 44px; padding: 2px 6px; font-size: 0.86em; }
+    .mc-vs-summary-row { font-size: 0.85em; gap: 4px 8px; }
+    .mc-vs-title { font-size: 1em; margin-bottom: 6px; }
 }
 
 /* ============================================================

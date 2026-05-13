@@ -51,7 +51,7 @@ AOR,59,284240,unique,Sliggoo
 AOR,60,284241,unique,Goodra
 AOR,61,284242,unique,Meowth
 AOR,62,284243,unique,Persian
-AOR,63,284244,unique,Eevee
+AOR,63,284244,ordered(1↔2),Eevee
 AOR,64,284245,unique,Porygon
 AOR,65,284246,unique,Porygon2
 AOR,66,284247,ordered(2↔2),Porygon-Z
@@ -2746,7 +2746,7 @@ CIN,66,311914,unique,Lairon
 CIN,67,311915,unique,Aggron
 CIN,68,311916,ordered(1↔2),Registeel
 CIN,69,311917,unique,Escavalier
-CIN,71,311919,unique,Jigglypuff
+CIN,71,311919,ordered(1↔2),Jigglypuff
 CIN,72,311920,unique,Wigglytuff
 CIN,73,311921,unique,Xerneas
 CIN,75,311922,ordered(1↔2),Jangmo-o
@@ -3677,7 +3677,7 @@ DET,15,370777,unique,Snubbull
 DET,16,370778,unique,Lickitung
 DET,17,370779,unique,Ditto
 DET,18,370780,unique,Slaking
-DEX,1,280329,unique,Bulbasaur
+DEX,1,280329,ordered(1↔2),Bulbasaur
 DEX,2,280330,unique,Ivysaur
 DEX,3,280331,unique,Venusaur
 DEX,4,280332,ordered(1↔5),Scyther
@@ -5872,7 +5872,7 @@ FLF,74,281557,unique,Goodra
 FLF,75,281558,unique,Pidgey
 FLF,76,281559,unique,Pidgeotto
 FLF,77,281560,unique,Pidgeot
-FLF,80,281563,unique,Snorlax
+FLF,80,281563,ordered(1↔2),Snorlax
 FLF,81,281564,unique,Sentret
 FLF,82,281565,unique,Furret
 FLF,83,281566,unique,Miltank
@@ -6746,8 +6746,8 @@ GRI,17,297481,unique,Turtonator
 GRI,19,297483,ordered(2↔2),Alolan Sandshrew
 GRI,19a,366837,ordered(2↔2),Alolan Sandshrew
 GRI,20,297484,unique,Alolan Sandslash
-GRI,21,297485,ordered(2↔5),Alolan Vulpix
-GRI,21a,312206,ordered(2↔5),Alolan Vulpix
+GRI,21,297485,ordered(2↔6),Alolan Vulpix
+GRI,21a,312206,ordered(2↔6),Alolan Vulpix
 GRI,23,297486,unique,Tentacool
 GRI,24,297487,unique,Tentacruel
 GRI,25,297690,unique,Politoed
@@ -8243,7 +8243,7 @@ LTR,13,281164,unique,Dwebble
 LTR,14,281165,unique,Crustle
 LTR,15,281166,unique,Virizion
 LTR,16,281167,unique,Genesect
-LTR,17,281168,unique,Charmander
+LTR,17,281168,ordered(1↔2),Charmander
 LTR,18,281169,unique,Charmeleon
 LTR,19,281170,unique,Charizard
 LTR,20,281171,unique,Vulpix
@@ -11042,7 +11042,7 @@ PLB,8,281029,unique,Accelgor
 PLB,10,281031,unique,Genesect
 PLB,12,281033,unique,Larvesta
 PLB,13,281034,unique,Volcarona
-PLB,14,281035,unique,Squirtle
+PLB,14,281035,ordered(1↔2),Squirtle
 PLB,15,281036,unique,Wartortle
 PLB,16,281037,unique,Blastoise
 PLB,17,281038,unique,Lapras
@@ -11499,7 +11499,7 @@ PRC,15,273546,unique,Shroomish
 PRC,16,273547,unique,Breloom
 PRC,17,273548,unique,Volbeat
 PRC,18,273549,unique,Illumise
-PRC,20,273551,unique,Vulpix
+PRC,20,273551,ordered(1↔2),Vulpix
 PRC,21,273552,unique,Ninetales
 PRC,22,273553,unique,Slugma
 PRC,23,273554,ordered(2↔2),Magcargo
@@ -12139,7 +12139,7 @@ ROS,16,282684,ordered(2↔2),Articuno
 ROS,17,282685,ordered(2↔2),Articuno
 ROS,18,282686,unique,Wingull
 ROS,19,282687,unique,Pelipper
-ROS,20,282688,unique,Pikachu
+ROS,20,282688,ordered(1↔2),Pikachu
 ROS,21,282689,unique,Voltorb
 ROS,22,282690,unique,Electrode
 ROS,23,282691,unique,Zapdos
@@ -12178,7 +12178,7 @@ ROS,63,282731,unique,Reshiram
 ROS,64,282732,unique,Zekrom
 ROS,65,282733,unique,Spearow
 ROS,66,282734,unique,Fearow
-ROS,67,282735,unique,Meowth
+ROS,67,282735,ordered(1↔2),Meowth
 ROS,68,282736,unique,Dunsparce
 ROS,69,282737,unique,Skarmory
 ROS,70,282738,unique,Taillow
@@ -14146,7 +14146,7 @@ SUM,23,295331,unique,Torkoal
 SUM,24,294121,ordered(1↔3),Litten
 SUM,25,295334,unique,Torracat
 SUM,26,295335,ordered(1↔2),Incineroar
-SUM,28,295338,unique,Psyduck
+SUM,28,295338,ordered(1↔2),Psyduck
 SUM,29,295339,unique,Golduck
 SUM,30,295340,unique,Poliwag
 SUM,31,295341,unique,Poliwhirl
@@ -14202,7 +14202,7 @@ SUM,85,295396,unique,Krookodile
 SUM,86,295397,unique,Alolan Diglett
 SUM,87,295398,unique,Alolan Dugtrio
 SUM,88,295399,unique,Skarmory
-SUM,90,295401,unique,Snubbull
+SUM,90,295401,ordered(1↔2),Snubbull
 SUM,91,295402,unique,Granbull
 SUM,92,295403,unique,Cutiefly
 SUM,93,295404,unique,Ribombee
@@ -16436,8 +16436,8 @@ UPR,27,315958,unique,Turtonator
 UPR,28,315959,unique,Alolan Sandshrew
 UPR,29,315960,unique,Alolan Sandslash
 UPR,30,315961,unique,Alolan Vulpix
-UPR,31,315962,ordered(2↔2),Piplup
-UPR,32,315963,ordered(2↔2),Piplup
+UPR,31,315962,ordered(2↔3),Piplup
+UPR,32,315963,ordered(2↔3),Piplup
 UPR,33,315964,unique,Prinplup
 UPR,34,315965,ordered(1↔2),Empoleon
 UPR,35,315966,unique,Buizel

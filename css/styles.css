@@ -8455,6 +8455,13 @@ html:not([lang="de"]):not([lang="en"]) .lang-de { display: none !important; }
 .deck-btn-print { background: rgba(52, 73, 94, 0.9); }
 .deck-btn-print:hover { background: #2c3e50; }
 
+/* TCG Showdown handoff button — sits next to the Limitless Builder
+   button. Purple-violet tint to read as a sibling external-handoff
+   action (clipboard copy + open new tab). Matches tcg-showdown.com's
+   own brand palette without being a 1:1 copy. */
+.deck-btn-showdown { background: rgba(126, 87, 194, 0.9); }
+.deck-btn-showdown:hover { background: #5e35b1; }
+
 /* "Print Proxy" — full deck → proxy queue. Uses a teal-toward-cyan tint
    so it sits visually next to the dark Print Decklist button without
    being mistaken for it. */

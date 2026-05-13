@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-05-13T12:30:39Z",
+  "generated_at": "2026-05-13T13:43:52Z",
   "format_window": "POR",
   "format_label": "TEF-M4",
   "legal_format_min_set": "TEF",
@@ -10,7 +10,7 @@
   },
   "threats": {
     "retreat_lock": {
-      "weighted_meta_share": 0.238,
+      "weighted_meta_share": 0.2381,
       "cards": [
         {
           "card_id": "MEG|1",
@@ -35,7 +35,7 @@
             {
               "archetype": "Greninja",
               "share_in_archetype": 1.0,
-              "meta_share": 0.0142
+              "meta_share": 0.0143
             },
             {
               "archetype": "Starmie Dusknoir",
@@ -78,7 +78,7 @@
             {
               "archetype": "Raging Bolt Ogerpon",
               "share_in_archetype": 0.45,
-              "meta_share": 0.0292
+              "meta_share": 0.0293
             },
             {
               "archetype": "Mega Absol Box",
@@ -126,7 +126,7 @@
       ]
     },
     "hand_disruption": {
-      "weighted_meta_share": 0.5928,
+      "weighted_meta_share": 0.5929,
       "cards": [
         {
           "card_id": "WHT|83",
@@ -191,7 +191,7 @@
             {
               "archetype": "Raging Bolt Ogerpon",
               "share_in_archetype": 0.3,
-              "meta_share": 0.0292
+              "meta_share": 0.0293
             },
             {
               "archetype": "Okidogi Barbaracle",
@@ -267,7 +267,7 @@
             {
               "archetype": "Greninja",
               "share_in_archetype": 0.3,
-              "meta_share": 0.0142
+              "meta_share": 0.0143
             },
             {
               "archetype": "Lopunny Dudunsparce",
@@ -288,7 +288,7 @@
             {
               "archetype": "Rocket's Mewtwo",
               "share_in_archetype": 1.0,
-              "meta_share": 0.048
+              "meta_share": 0.0479
             },
             {
               "archetype": "Rocket's Honchkrow",
@@ -354,7 +354,7 @@
             {
               "archetype": "Raging Bolt Ogerpon",
               "share_in_archetype": 0.75,
-              "meta_share": 0.0292
+              "meta_share": 0.0293
             },
             {
               "archetype": "Dragapult Dudunsparce",
@@ -510,7 +510,7 @@
             {
               "archetype": "Rocket's Mewtwo",
               "share_in_archetype": 0.35,
-              "meta_share": 0.048
+              "meta_share": 0.0479
             },
             {
               "archetype": "Rocket's Spidops",
@@ -537,7 +537,7 @@
             {
               "archetype": "Raging Bolt Ogerpon",
               "share_in_archetype": 0.45,
-              "meta_share": 0.0292
+              "meta_share": 0.0293
             },
             {
               "archetype": "Mega Absol Box",

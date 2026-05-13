@@ -798,9 +798,19 @@ def main():
         logger.error("Konnte Karten-DB nicht laden: %s", e)
         return
 
+    # The monolith path must MATCH the cards_f computation inside
+    # save_csv_files (line ~512), which derives the cards CSV name by
+    # replacing ".csv" → "_cards.csv". Otherwise reassembly writes to
+    # one file while save_csv_files writes to another, and the appended
+    # tournament rows land in a fresh empty monolith — losing 459K rows
+    # of historical chunk data on every CI run (root cause of the
+    # 2026-05-13 weekly-update Prague-+-LA truncation: reassembly
+    # rebuilt the monolith at "tournament_cards_data.csv" while
+    # save_csv_files wrote "tournament_cards_data_cards.csv" fresh).
+    output_file = settings.get("output_file") or "tournament_cards_data.csv"
     monolith_path = os.path.join(
         get_data_dir(),
-        settings.get("output_file") or "tournament_cards_data_cards.csv",
+        output_file.replace(".csv", "_cards.csv"),
     )
 
     # ── Reassemble the gitignored monolith from committed per-meta

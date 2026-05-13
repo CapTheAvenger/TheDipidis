@@ -5587,6 +5587,25 @@ window.MetaCall = (function () {
     // Testing Groups can offer autocomplete that matches the names the
     // MetaCall calculation expects.
     getDeckNames: () => (_shareList || []).map(d => d.name),
+    // Expose the predicted field — name + Final % (Estimate-blended)
+    // or onlineShare fallback. Consumed by Deck Analysis (Global) to
+    // show a "Matchups vs Meta Call" panel so a deck-builder can see
+    // at a glance whether their build is favoured vs the predicted
+    // tournament composition.
+    getPredictedField: () => (_shareList || [])
+      .filter(d => d && d.name && d.name !== '_junk')
+      .map(d => ({
+        name:         d.name,
+        finalShare:   typeof d.finalShare === 'number' ? d.finalShare : (d.onlineShare || 0),
+        onlineShare:  d.onlineShare || 0,
+        ladderShare:  d.ladderShare || 0,
+      }))
+      .sort((a, b) => b.finalShare - a.finalShare),
+    // Expose the matchup-matrix lookup so other tabs can compute
+    // per-opponent WR using the same (Predictor-5.3-corrected) data
+    // the recommendation engine uses. Falls back to 50/50 when no
+    // matchup row exists.
+    getBaseMatchup: (deckA, deckB) => getBaseMatchup(deckA, deckB),
     _onSetting,
     _setTournamentType,
     _onToggleSource,

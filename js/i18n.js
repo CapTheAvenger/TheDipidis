@@ -1208,6 +1208,10 @@ const translations = {
     'matchup.noData':           'No data available',
     'matchup.selectTitle':      'Select & Analyze Opponent Matchup',
     'matchup.searchPlaceholder':'Type to search deck...',
+    'matchup.vsMetaCallTitle':  'Matchups vs Meta Call (Predicted Field)',
+    'matchup.bestVsField':      'Best Matchups in Field',
+    'matchup.worstVsField':     'Worst Matchups in Field',
+    'matchup.fieldShare':       'Field %',
 
     // ── Tab 5: Past Meta ─────────────────────────────────────
     'pm.analysisHeading':       'Past Tournament Deck Analysis',
@@ -2569,6 +2573,10 @@ const translations = {
     'matchup.winRate':          'Winrate',
     'matchup.record':           'Bilanz',
     'matchup.noData':           'Keine Daten verfügbar',
+    'matchup.vsMetaCallTitle':  'Matchups gegen Meta Call (Erwartetes Feld)',
+    'matchup.bestVsField':      'Beste Matchups im Feld',
+    'matchup.worstVsField':     'Schlechteste Matchups im Feld',
+    'matchup.fieldShare':       'Feld %',
     'matchup.selectTitle':      'Gegner-Matchup auswählen & analysieren',
     'matchup.searchPlaceholder':'Deckname eingeben...',
 

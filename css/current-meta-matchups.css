@@ -417,35 +417,56 @@
 .mc-vs-section {
     padding: 18px 22px;
     margin-bottom: 24px;
+    background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
 }
 .mc-vs-title {
-    color: #1f2937;
-    margin: 0 0 10px;
-    font-size: 1.15em;
-    font-weight: 700;
+    color: #0f172a;
+    margin: 0 0 14px;
+    font-size: 1.2em;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    border-left: 4px solid #3b82f6;
+    padding-left: 10px;
+    line-height: 1.2;
 }
 .mc-vs-summary {
-    margin: 0 0 14px;
+    margin: 0 0 16px;
     line-height: 1.5;
 }
 .mc-vs-summary-row {
     display: flex;
     flex-wrap: wrap;
-    gap: 10px 14px;
+    gap: 12px 16px;
     align-items: center;
     font-size: 0.95em;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 12px 14px;
 }
 .mc-vs-summary-label {
     font-weight: 600;
-    color: #1f2937;
+    color: #334155;
+    font-size: 0.92em;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+.mc-vs-summary-row .mc-vs-pill {
+    font-size: 1.05em;
+    padding: 6px 16px;
+    min-width: 80px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
 }
 .mc-vs-summary-verdict {
-    color: #4b5563;
-    font-weight: 500;
+    color: #1f2937;
+    font-weight: 600;
 }
 .mc-vs-summary-coverage {
     color: #6b7280;
-    font-size: 0.88em;
+    font-size: 0.85em;
     margin-left: auto;
 }
 @media (max-width: 768px) {
@@ -453,8 +474,9 @@
 }
 .mc-vs-table-wrap {
     overflow-x: auto;
-    border-radius: 8px;
+    border-radius: 10px;
     background: #fff;
+    border: 1px solid #e5e7eb;
     box-shadow: 0 1px 3px rgba(0,0,0,0.05);
 }
 .mc-vs-table {
@@ -463,36 +485,50 @@
     font-size: 0.95em;
 }
 .mc-vs-table thead tr {
-    background: #f3f4f6;
+    background: linear-gradient(180deg, #f3f4f6 0%, #e5e7eb 100%);
 }
 .mc-vs-table th {
-    padding: 10px 12px;
+    padding: 12px 14px;
     text-align: left;
-    font-weight: 600;
-    color: #374151;
-    border-bottom: 2px solid #e5e7eb;
+    font-weight: 700;
+    color: #1e293b;
+    border-bottom: 2px solid #cbd5e1;
     white-space: nowrap;
+    text-transform: uppercase;
+    font-size: 0.8em;
+    letter-spacing: 0.05em;
 }
 .mc-vs-th-share { text-align: right; width: 22%; }
-.mc-vs-th-wr    { text-align: right; width: 22%; }
+.mc-vs-th-wr    { text-align: center; width: 26%; }
 .mc-vs-table tbody tr {
-    border-bottom: 1px solid #f1f3f5;
+    border-bottom: 1px solid #f1f5f9;
+    transition: background 0.15s ease;
+}
+.mc-vs-table tbody tr:nth-child(even) {
+    background: #fafbfc;
 }
 .mc-vs-table tbody tr:last-child { border-bottom: 0; }
 .mc-vs-table tbody tr:hover {
-    background: #f9fafb;
+    background: #eff6ff;
 }
 .mc-vs-table td {
-    padding: 9px 12px;
+    padding: 11px 14px;
     vertical-align: middle;
+    color: #1e293b;
+}
+.mc-vs-table td:first-child {
+    font-weight: 500;
 }
 .mc-vs-table td.mc-vs-share,
 .mc-vs-table td.mc-vs-wr {
-    text-align: right;
     font-variant-numeric: tabular-nums;
 }
+.mc-vs-table td.mc-vs-share {
+    text-align: right;
+    color: #475569;
+}
 .mc-vs-table td.mc-vs-wr {
-    font-weight: 600;
+    text-align: center;
 }
 .mc-vs-empty {
     text-align: center !important;
@@ -509,22 +545,27 @@
 .wr-strong-neg { background: #991b1b; color: #ffffff; }
 .mc-vs-pill {
     display: inline-block;
-    padding: 3px 10px;
+    padding: 4px 12px;
     border-radius: 999px;
     font-weight: 700;
     font-variant-numeric: tabular-nums;
     min-width: 64px;
     text-align: center;
+    box-shadow: inset 0 -1px 0 rgba(0,0,0,0.06);
 }
 
 .mc-vs-legend {
     display: flex;
     flex-wrap: wrap;
     gap: 8px 14px;
-    margin-top: 12px;
+    margin-top: 14px;
+    padding: 10px 12px;
     font-size: 0.82em;
-    color: #6b7280;
+    color: #4b5563;
     align-items: center;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
 }
 .mc-vs-legend-item {
     display: inline-flex;
@@ -539,13 +580,21 @@
 
 @media (max-width: 768px) {
     .mc-vs-section { padding: 12px 10px; }
-    .mc-vs-title { font-size: 1.05em; margin-bottom: 8px; }
-    .mc-vs-table th, .mc-vs-table td { padding: 7px 8px; font-size: 0.9em; }
+    .mc-vs-title {
+        font-size: 1.05em;
+        margin-bottom: 10px;
+        padding-left: 8px;
+        border-left-width: 3px;
+    }
+    .mc-vs-summary-row { padding: 10px 12px; gap: 8px 12px; font-size: 0.9em; }
+    .mc-vs-summary-row .mc-vs-pill { font-size: 1em; padding: 5px 14px; min-width: 70px; }
+    .mc-vs-summary-label { font-size: 0.78em; }
+    .mc-vs-table th { padding: 9px 10px; font-size: 0.72em; }
+    .mc-vs-table td { padding: 8px 10px; font-size: 0.9em; }
     .mc-vs-th-share, .mc-vs-th-wr { width: 24%; }
-    .mc-vs-pill { min-width: 52px; padding: 2px 8px; font-size: 0.92em; }
-    .mc-vs-summary-row { gap: 6px 10px; font-size: 0.9em; }
+    .mc-vs-pill { min-width: 52px; padding: 3px 10px; font-size: 0.92em; }
     .mc-vs-summary-coverage { margin-left: 0; flex-basis: 100%; }
-    .mc-vs-legend { font-size: 0.75em; gap: 6px 10px; }
+    .mc-vs-legend { font-size: 0.75em; gap: 6px 10px; padding: 8px 10px; }
     .mc-vs-legend .mc-vs-pill { min-width: 48px; font-size: 0.78em; padding: 1px 6px; }
 }
 
@@ -554,13 +603,21 @@
      * Combined with the body/tab-content/.px-30 cuts elsewhere this
      * brings the table within ~6 px of the screen edge on a 430 px
      * phone (was ~38 px before the multi-PR tightening pass). */
-    .mc-vs-section { padding: 8px 4px !important; margin-bottom: 12px; }
-    .mc-vs-table-wrap { border-radius: 4px; }
-    .mc-vs-table th, .mc-vs-table td { padding: 6px 5px; font-size: 0.84em; }
-    .mc-vs-table th { padding: 8px 5px; }
-    .mc-vs-pill { min-width: 44px; padding: 2px 6px; font-size: 0.86em; }
-    .mc-vs-summary-row { font-size: 0.85em; gap: 4px 8px; }
-    .mc-vs-title { font-size: 1em; margin-bottom: 6px; }
+    .mc-vs-section { padding: 8px 4px !important; margin-bottom: 12px; border-radius: 10px; }
+    .mc-vs-title {
+        font-size: 1em;
+        margin-bottom: 8px;
+        padding-left: 6px;
+        border-left-width: 3px;
+    }
+    .mc-vs-summary-row { font-size: 0.85em; gap: 4px 8px; padding: 8px 10px; border-radius: 8px; }
+    .mc-vs-summary-row .mc-vs-pill { font-size: 0.95em; padding: 4px 12px; min-width: 64px; }
+    .mc-vs-summary-label { font-size: 0.7em; }
+    .mc-vs-table-wrap { border-radius: 6px; }
+    .mc-vs-table th { padding: 9px 6px; font-size: 0.68em; }
+    .mc-vs-table td { padding: 8px 6px; font-size: 0.85em; }
+    .mc-vs-pill { min-width: 48px; padding: 2px 8px; font-size: 0.86em; }
+    .mc-vs-legend { padding: 8px 10px; border-radius: 8px; }
 }
 
 /* ============================================================

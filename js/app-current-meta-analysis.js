@@ -1174,7 +1174,13 @@
                 
                 // Render matchups
                 renderCurrentMetaMatchups(archetype);
-                
+
+                // Render "Matchups vs Meta Call" — picks up window.MetaCall
+                // state if available. Silently hides itself when MetaCall
+                // hasn't run yet (user lands on Deck Analysis first).
+                try { renderMatchupsVsMetaCall(archetype); }
+                catch (e) { console.error('[VsMetaCall] render failed:', e); }
+
                 // Render Top 256 tournament breakdown (only visible on Major Tournament filter)
                 renderCurrentMetaTop256(archetype);
                 
@@ -1271,6 +1277,198 @@
             section.classList.remove('d-none');
         }
 
+        // CSV fallback for renderCurrentMetaMatchups. Computes top/bottom
+        // matchups from limitless_online_decks_matchups.csv (loaded into
+        // window.currentMetaMatchupData) so the block works for ANY deck
+        // the user picks in the Archetype dropdown — not just the top
+        // decks present in the preloaded Current-Meta HTML. Returns true
+        // when the fallback wrote rows, false when no matchups data is
+        // available for the archetype.
+        function renderMatchupsFromCSVFallback(archetype, matchupsSection, bestTable, worstTable, titleEl) {
+            const rows = window.currentMetaMatchupData;
+            if (!Array.isArray(rows) || rows.length === 0) return false;
+
+            const target = archetype.trim().toLowerCase();
+            const stripped = stripExSuffix(archetype).trim().toLowerCase();
+            const deckMatchups = rows.filter(r => {
+                const d = String(r.deck_name || '').trim().toLowerCase();
+                return d === target || d === stripped;
+            });
+            if (deckMatchups.length === 0) return false;
+
+            // Parse "62,50" or "62.50" → 62.50; strip "%" suffix.
+            const parseWr = (s) => {
+                const v = parseFloat(String(s || '0').replace(',', '.').replace('%', '').trim());
+                return Number.isFinite(v) ? v : 0;
+            };
+
+            const enriched = deckMatchups
+                .map(r => ({
+                    opponent: r.opponent || '',
+                    wr:       parseWr(r.win_rate),
+                    record:   r.record || '',
+                }))
+                .filter(m => m.opponent && m.wr > 0);
+
+            if (enriched.length === 0) return false;
+
+            // Sort by WR. Best = top 5 desc, Worst = bottom 2 asc (mirrors
+            // the Current Meta HTML's typical 5+2 split). Tie-break by
+            // record length so larger-sample matchups float to the top.
+            const byBest  = [...enriched].sort((a, b) => b.wr - a.wr || (b.record.length - a.record.length));
+            const byWorst = [...enriched].sort((a, b) => a.wr - b.wr || (b.record.length - a.record.length));
+
+            const fmtRow = (m) => `
+                <tr>
+                    <td>${m.opponent}</td>
+                    <td>${m.wr.toFixed(1).replace('.', ',')}%</td>
+                    <td>${m.record}</td>
+                </tr>`;
+
+            const bestRows = byBest.slice(0, 5).map(fmtRow).join('');
+            const worstRows = byWorst.slice(0, 2).map(fmtRow).join('');
+
+            bestTable.innerHTML  = bestRows  || '<tr><td colspan="3" style="text-align:center;padding:20px;">' + t('heatmap.noData') + '</td></tr>';
+            worstTable.innerHTML = worstRows || '<tr><td colspan="3" style="text-align:center;padding:20px;">' + t('heatmap.noData') + '</td></tr>';
+
+            // Title — best-effort: just the archetype name + average WR.
+            // No rank/Vs-Top20 numbers here since they're not in the
+            // matchups CSV; the HTML path overrides this when available.
+            const avgWr = enriched.reduce((s, m) => s + m.wr, 0) / enriched.length;
+            if (titleEl) {
+                titleEl.textContent = `${archetype} (Avg WR: ${avgWr.toFixed(1).replace('.', ',')}%, ${enriched.length} matchups)`;
+            }
+
+            matchupsSection.classList.remove('d-none');
+            matchupsSection.classList.remove('display-none');
+            return true;
+        }
+
+        // Render "Matchups vs Meta Call" panel — shows the selected deck's
+        // expected performance against the Meta Call predicted tournament
+        // field. Pulls the field from window.MetaCall.getPredictedField()
+        // and per-opponent WR from the matchups CSV; computes a share-
+        // weighted average WR + best/worst lists within the predicted
+        // field. Hides the panel when MetaCall hasn't rendered yet (e.g.
+        // user landed on Deck Analysis before opening the Meta Call tab).
+        function renderMatchupsVsMetaCall(archetype) {
+            const section = document.getElementById('currentMetaVsMetaCallSection');
+            const summaryEl = document.getElementById('currentMetaVsMetaCallSummary');
+            const bestTbody = document.getElementById('currentMetaVsMetaCallBest');
+            const worstTbody = document.getElementById('currentMetaVsMetaCallWorst');
+            if (!section || !bestTbody || !worstTbody) return;
+
+            const hideSection = (reason) => {
+                section.classList.add('display-none');
+                if (reason) devLog(`[VsMetaCall] hidden: ${reason}`);
+            };
+
+            if (!archetype) return hideSection('no archetype');
+            if (typeof window.MetaCall === 'undefined' ||
+                typeof window.MetaCall.getPredictedField !== 'function') {
+                return hideSection('MetaCall not loaded');
+            }
+
+            const field = window.MetaCall.getPredictedField() || [];
+            if (field.length === 0) return hideSection('predicted field empty — open Meta Call tab to populate');
+
+            const rows = window.currentMetaMatchupData;
+            if (!Array.isArray(rows) || rows.length === 0) {
+                return hideSection('matchup CSV not loaded');
+            }
+
+            // Build opponent → WR lookup from CSV (1:1 to the matchups CSV,
+            // not from MetaCall's adjusted matrix — keeps the panel about
+            // pure online performance which is what the deck-builder is
+            // calibrating against).
+            const target = archetype.trim().toLowerCase();
+            const stripped = stripExSuffix(archetype).trim().toLowerCase();
+            const parseWr = (s) => {
+                const v = parseFloat(String(s || '0').replace(',', '.').replace('%', '').trim());
+                return Number.isFinite(v) ? v : 0;
+            };
+            const wrByOpp = {};
+            rows.forEach(r => {
+                const d = String(r.deck_name || '').trim().toLowerCase();
+                if (d !== target && d !== stripped) return;
+                const opp = String(r.opponent || '').trim();
+                const wr = parseWr(r.win_rate);
+                if (opp && wr > 0) wrByOpp[opp.toLowerCase()] = { opponent: opp, wr };
+            });
+
+            if (Object.keys(wrByOpp).length === 0) {
+                return hideSection(`no matchup rows for ${archetype}`);
+            }
+
+            // Cap the predicted field at the top 12 by share (the
+            // deck-builder doesn't need a long tail of 0.5%-share decks
+            // — the headline question is "vs the meaningful field").
+            const FIELD_TOP_N = 12;
+            const topField = field.slice(0, FIELD_TOP_N);
+
+            // Pair each field entry with its WR lookup. Skip mirror
+            // matches (same deck vs itself) — the mirror EV is symmetric
+            // by construction.
+            const paired = topField
+                .map(d => {
+                    const k = String(d.name || '').trim().toLowerCase();
+                    if (k === target || k === stripped) return null;
+                    const hit = wrByOpp[k];
+                    if (!hit) return null;
+                    return {
+                        opponent:   hit.opponent,
+                        fieldShare: d.finalShare || 0,
+                        wr:         hit.wr,
+                    };
+                })
+                .filter(Boolean);
+
+            if (paired.length === 0) {
+                return hideSection('no field decks have matchup data');
+            }
+
+            // Share-weighted average WR — the headline number. Normalises
+            // to 100% of the matched-share so a partial-coverage panel
+            // still produces a fair average.
+            const totalShare = paired.reduce((s, p) => s + p.fieldShare, 0) || 1;
+            const weightedWr = paired.reduce((s, p) => s + p.wr * p.fieldShare, 0) / totalShare;
+            const coveragePct = (totalShare / topField.reduce((s, d) => s + (d.finalShare || 0), 0)) * 100 || 0;
+
+            // Verdict styling — green ≥55%, neutral 47-55%, red <47%.
+            const verdict = weightedWr >= 55 ? 'favoured' : weightedWr >= 47 ? 'even' : 'unfavoured';
+            const verdictColor = verdict === 'favoured' ? '#1e8a3a'
+                              : verdict === 'unfavoured' ? '#c63a3a'
+                              : '#6a6e75';
+            const verdictText = verdict === 'favoured' ? 'Favourable vs predicted field'
+                              : verdict === 'unfavoured' ? 'Unfavourable vs predicted field'
+                              : 'Even vs predicted field';
+
+            summaryEl.innerHTML = `
+                <div style="display:flex;flex-wrap:wrap;gap:14px;align-items:center;font-size:0.95em;margin:8px 0 14px;">
+                    <span style="font-weight:600;">Weighted WR vs field:</span>
+                    <span style="font-size:1.4em;font-weight:700;color:${verdictColor};">${weightedWr.toFixed(1).replace('.', ',')}%</span>
+                    <span style="color:${verdictColor};font-weight:500;">${verdictText}</span>
+                    <span style="color:#6a6e75;margin-left:auto;font-size:0.9em;">Field coverage: ${coveragePct.toFixed(0)}% (${paired.length}/${topField.length} top-field decks)</span>
+                </div>`;
+
+            const byBest  = [...paired].sort((a, b) => b.wr - a.wr);
+            const byWorst = [...paired].sort((a, b) => a.wr - b.wr);
+
+            const fmtRow = (m) => `
+                <tr>
+                    <td>${m.opponent}</td>
+                    <td>${m.fieldShare.toFixed(2).replace('.', ',')}%</td>
+                    <td>${m.wr.toFixed(1).replace('.', ',')}%</td>
+                </tr>`;
+
+            bestTbody.innerHTML  = byBest.slice(0, 5).map(fmtRow).join('') ||
+                '<tr><td colspan="3" style="text-align:center;padding:20px;">' + t('heatmap.noData') + '</td></tr>';
+            worstTbody.innerHTML = byWorst.slice(0, 3).map(fmtRow).join('') ||
+                '<tr><td colspan="3" style="text-align:center;padding:20px;">' + t('heatmap.noData') + '</td></tr>';
+
+            section.classList.remove('display-none');
+        }
+
         // Render best/worst matchups for Current Meta - extract directly from loaded HTML (1:1 copy)
         function renderCurrentMetaMatchups(archetype) {
             const deckStats = window.currentMetaDeckStats || [];
@@ -1304,7 +1502,17 @@
             }
             
             if (!matchingSection) {
-                console.error(`? No HTML matchup section found for: ${archetype}`);
+                // CSV fallback — the preloaded Current-Meta HTML only contains
+                // the top decks, so picking a low-share archetype (e.g.
+                // Archaludon Dudunsparce at rank 57) leaves the matchups
+                // block hidden even though the data exists in
+                // limitless_online_decks_matchups.csv. Build the block
+                // directly from window.currentMetaMatchupData here.
+                if (renderMatchupsFromCSVFallback(archetype, matchupsSection, bestTable, worstTable, titleEl)) {
+                    devLog(`Rendered matchups via CSV fallback for: ${archetype}`);
+                    return;
+                }
+                console.error(`No HTML matchup section + CSV fallback failed for: ${archetype}`);
                 matchupsSection.classList.add('d-none');
                 return;
             }

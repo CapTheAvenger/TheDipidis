@@ -1354,9 +1354,8 @@
         function renderMatchupsVsMetaCall(archetype) {
             const section = document.getElementById('currentMetaVsMetaCallSection');
             const summaryEl = document.getElementById('currentMetaVsMetaCallSummary');
-            const bestTbody = document.getElementById('currentMetaVsMetaCallBest');
-            const worstTbody = document.getElementById('currentMetaVsMetaCallWorst');
-            if (!section || !bestTbody || !worstTbody) return;
+            const tbody = document.getElementById('currentMetaVsMetaCallBody');
+            if (!section || !tbody) return;
 
             const hideSection = (reason) => {
                 section.classList.add('display-none');
@@ -1400,16 +1399,10 @@
                 return hideSection(`no matchup rows for ${archetype}`);
             }
 
-            // Cap the predicted field at the top 12 by share (the
-            // deck-builder doesn't need a long tail of 0.5%-share decks
-            // — the headline question is "vs the meaningful field").
-            const FIELD_TOP_N = 12;
-            const topField = field.slice(0, FIELD_TOP_N);
-
-            // Pair each field entry with its WR lookup. Skip mirror
-            // matches (same deck vs itself) — the mirror EV is symmetric
-            // by construction.
-            const paired = topField
+            // Pair every field deck with its WR lookup. No top-N cap —
+            // the user explicitly wants the complete table sorted by
+            // share. Skip mirror matches (same deck vs itself).
+            const paired = field
                 .map(d => {
                     const k = String(d.name || '').trim().toLowerCase();
                     if (k === target || k === stripped) return null;
@@ -1421,52 +1414,66 @@
                         wr:         hit.wr,
                     };
                 })
-                .filter(Boolean);
+                .filter(Boolean)
+                .sort((a, b) => b.fieldShare - a.fieldShare);
 
             if (paired.length === 0) {
                 return hideSection('no field decks have matchup data');
             }
 
-            // Share-weighted average WR — the headline number. Normalises
-            // to 100% of the matched-share so a partial-coverage panel
-            // still produces a fair average.
+            // Share-weighted average WR — the headline number. Coverage
+            // is computed against the full top-12 field so the user sees
+            // how much of the meaningful meta the panel actually reflects.
             const totalShare = paired.reduce((s, p) => s + p.fieldShare, 0) || 1;
             const weightedWr = paired.reduce((s, p) => s + p.wr * p.fieldShare, 0) / totalShare;
-            const coveragePct = (totalShare / topField.reduce((s, d) => s + (d.finalShare || 0), 0)) * 100 || 0;
+            const FIELD_REF_TOP_N = 12;
+            const top12Share = field.slice(0, FIELD_REF_TOP_N).reduce((s, d) => s + (d.finalShare || 0), 0) || 1;
+            const matchedTop12 = paired.filter(p => p.fieldShare > 0).reduce((s, p) => s + p.fieldShare, 0);
+            const coveragePct = Math.min(100, (matchedTop12 / top12Share) * 100);
 
-            // Verdict styling — green ≥55%, neutral 47-55%, red <47%.
-            const verdict = weightedWr >= 55 ? 'favoured' : weightedWr >= 47 ? 'even' : 'unfavoured';
-            const verdictColor = verdict === 'favoured' ? '#1e8a3a'
-                              : verdict === 'unfavoured' ? '#c63a3a'
-                              : '#6a6e75';
-            const verdictText = verdict === 'favoured' ? 'Favourable vs predicted field'
-                              : verdict === 'unfavoured' ? 'Unfavourable vs predicted field'
-                              : 'Even vs predicted field';
+            // Verdict — same thresholds as the per-row WR pills below.
+            const wrClass = wrColorClass(weightedWr);
+            const verdictText =
+                weightedWr >= 60 ? 'Stark vorteilhaft vs Feld' :
+                weightedWr >= 53 ? 'Vorteilhaft vs Feld' :
+                weightedWr >= 47 ? 'Ausgeglichen vs Feld' :
+                weightedWr >= 40 ? 'Schwach vs Feld' :
+                                   'Sehr schwach vs Feld';
 
             summaryEl.innerHTML = `
-                <div style="display:flex;flex-wrap:wrap;gap:14px;align-items:center;font-size:0.95em;margin:8px 0 14px;">
-                    <span style="font-weight:600;">Weighted WR vs field:</span>
-                    <span style="font-size:1.4em;font-weight:700;color:${verdictColor};">${weightedWr.toFixed(1).replace('.', ',')}%</span>
-                    <span style="color:${verdictColor};font-weight:500;">${verdictText}</span>
-                    <span style="color:#6a6e75;margin-left:auto;font-size:0.9em;">Field coverage: ${coveragePct.toFixed(0)}% (${paired.length}/${topField.length} top-field decks)</span>
+                <div class="mc-vs-summary-row">
+                    <span class="mc-vs-summary-label">Gewichtete WR vs Feld:</span>
+                    <span class="mc-vs-pill ${wrClass}">${weightedWr.toFixed(1).replace('.', ',')}%</span>
+                    <span class="mc-vs-summary-verdict">${verdictText}</span>
+                    <span class="mc-vs-summary-coverage">Feld-Abdeckung: ${coveragePct.toFixed(0)}% (${paired.length} Gegner)</span>
                 </div>`;
-
-            const byBest  = [...paired].sort((a, b) => b.wr - a.wr);
-            const byWorst = [...paired].sort((a, b) => a.wr - b.wr);
 
             const fmtRow = (m) => `
                 <tr>
-                    <td>${m.opponent}</td>
-                    <td>${m.fieldShare.toFixed(2).replace('.', ',')}%</td>
-                    <td>${m.wr.toFixed(1).replace('.', ',')}%</td>
+                    <td>${escapeHtml(m.opponent)}</td>
+                    <td class="mc-vs-share">${m.fieldShare.toFixed(2).replace('.', ',')}%</td>
+                    <td class="mc-vs-wr"><span class="mc-vs-pill ${wrColorClass(m.wr)}">${m.wr.toFixed(1).replace('.', ',')}%</span></td>
                 </tr>`;
 
-            bestTbody.innerHTML  = byBest.slice(0, 5).map(fmtRow).join('') ||
-                '<tr><td colspan="3" style="text-align:center;padding:20px;">' + t('heatmap.noData') + '</td></tr>';
-            worstTbody.innerHTML = byWorst.slice(0, 3).map(fmtRow).join('') ||
-                '<tr><td colspan="3" style="text-align:center;padding:20px;">' + t('heatmap.noData') + '</td></tr>';
+            tbody.innerHTML = paired.map(fmtRow).join('') ||
+                '<tr><td colspan="3" class="mc-vs-empty">' + t('heatmap.noData') + '</td></tr>';
 
             section.classList.remove('display-none');
+        }
+
+        // WR → CSS class for the color-coded pill. Thresholds match the
+        // legend strip rendered below the table.
+        function wrColorClass(wr) {
+            if (wr >= 60) return 'wr-strong-pos';
+            if (wr >= 53) return 'wr-pos';
+            if (wr >= 47) return 'wr-neutral';
+            if (wr >= 40) return 'wr-neg';
+            return 'wr-strong-neg';
+        }
+        function escapeHtml(s) {
+            return String(s).replace(/[&<>"']/g, c => ({
+                '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+            }[c]));
         }
 
         // Render best/worst matchups for Current Meta - extract directly from loaded HTML (1:1 copy)

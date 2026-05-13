@@ -1235,6 +1235,36 @@
     max-width: 18px !important;
     flex-shrink: 0 !important;
   }
+
+  /* UI Step 2 — Card Overview tightening on small phones.
+   *
+   * User feedback: "viel leeren Raum an den Seiten und der Preis ist
+   * nicht vernünftig sichtbar". The cards-section had 16/20 px padding
+   * stacked under tab-content 10 px + body 5 px = ~70 px of horizontal
+   * dead-space on a 430 px screen, leaving the 3-card row crowded
+   * enough that the market button truncated "0,22€" → ",22€".
+   *
+   * Three changes:
+   *   1. Drop the cards-section padding to 4 px so the grid gets its
+   *      width back (≈ 30 px reclaimed per row).
+   *   2. Let the market button's content fit by raising font-size to
+   *      0.7em and disabling overflow clipping. The price is the only
+   *      cell with > 2 chars on this row — the L and P glyphs stay
+   *      compact.
+   *   3. Give the market button a slightly larger min-width so very
+   *      narrow screens (≤ 360 px) still surface the full price.
+   */
+  .cards-section,
+  #currentMetaCardsSection {
+    padding: 8px 4px !important;
+  }
+  .city-league-card-market-btn {
+    font-size: 0.72em !important;
+    padding: 0 4px !important;
+    overflow: visible !important;
+    white-space: nowrap !important;
+    min-width: 58px !important;
+  }
 }
 
 /* 4. CITY LEAGUE STATS GRID: Fix cut-off "AVERAGE PLACEMENT" label

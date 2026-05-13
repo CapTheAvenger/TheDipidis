@@ -538,9 +538,28 @@
 }
 
 @media (max-width: 768px) {
-    .mc-vs-section { padding: 14px; }
-    .mc-vs-table th, .mc-vs-table td { padding: 8px 10px; font-size: 0.92em; }
-    .mc-vs-pill { min-width: 56px; padding: 2px 8px; }
+    .mc-vs-section { padding: 12px 10px; }
+    .mc-vs-title { font-size: 1.05em; margin-bottom: 8px; }
+    .mc-vs-table th, .mc-vs-table td { padding: 7px 8px; font-size: 0.9em; }
+    .mc-vs-th-share, .mc-vs-th-wr { width: 24%; }
+    .mc-vs-pill { min-width: 52px; padding: 2px 8px; font-size: 0.92em; }
+    .mc-vs-summary-row { gap: 6px 10px; font-size: 0.9em; }
+    .mc-vs-summary-coverage { margin-left: 0; flex-basis: 100%; }
+    .mc-vs-legend { font-size: 0.75em; gap: 6px 10px; }
+    .mc-vs-legend .mc-vs-pill { min-width: 48px; font-size: 0.78em; padding: 1px 6px; }
+}
+
+@media (max-width: 480px) {
+    /* UI Step 2 — Matchups-vs-Meta-Call panel on small phones.
+     * User feedback: panel had the same dead-space issue as the
+     * card grid. Trim padding further so the table reaches edge-
+     * to-edge and the WR pills stay readable. Sticky-ish legend
+     * wraps to 2-3 lines; that's fine, it's reference material. */
+    .mc-vs-section { padding: 10px 6px; margin-bottom: 16px; }
+    .mc-vs-table-wrap { border-radius: 6px; }
+    .mc-vs-table th, .mc-vs-table td { padding: 6px 6px; font-size: 0.86em; }
+    .mc-vs-pill { min-width: 46px; padding: 2px 7px; font-size: 0.88em; }
+    .mc-vs-summary-row { font-size: 0.85em; gap: 5px 8px; }
 }
 
 /* ============================================================

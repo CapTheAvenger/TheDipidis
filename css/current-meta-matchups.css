@@ -483,6 +483,10 @@
     width: 100%;
     border-collapse: collapse;
     font-size: 0.95em;
+    /* `table-layout: auto` (default) + `width: 1%` trick on the numeric
+     * columns shrinks them to their content width. Opponent column
+     * takes the rest, but no longer balloons to fill artificial 52 %
+     * when the share/wr columns were declared at 22 % / 26 %. */
 }
 .mc-vs-table thead tr {
     background: linear-gradient(180deg, #f3f4f6 0%, #e5e7eb 100%);
@@ -498,8 +502,20 @@
     font-size: 0.8em;
     letter-spacing: 0.05em;
 }
-.mc-vs-th-share { text-align: right; width: 22%; }
-.mc-vs-th-wr    { text-align: center; width: 26%; }
+.mc-vs-th-opp   { width: auto; }
+.mc-vs-th-share {
+    width: 1%;
+    white-space: nowrap;
+    text-align: right;
+    padding-left: 18px;
+}
+.mc-vs-th-wr    {
+    width: 1%;
+    white-space: nowrap;
+    text-align: center;
+    padding-left: 14px;
+    padding-right: 14px;
+}
 .mc-vs-table tbody tr {
     border-bottom: 1px solid #f1f5f9;
     transition: background 0.15s ease;
@@ -522,13 +538,18 @@
 .mc-vs-table td.mc-vs-share,
 .mc-vs-table td.mc-vs-wr {
     font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    width: 1%;          /* matches the TH width:1% trick — content-width */
 }
 .mc-vs-table td.mc-vs-share {
     text-align: right;
     color: #475569;
+    padding-left: 18px;
 }
 .mc-vs-table td.mc-vs-wr {
     text-align: center;
+    padding-left: 14px;
+    padding-right: 14px;
 }
 .mc-vs-empty {
     text-align: center !important;

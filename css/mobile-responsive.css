@@ -1259,6 +1259,13 @@
   #currentMetaCardsSection {
     padding: 8px 2px !important;
   }
+  /* `.deck-visual` was the last horizontal-padding source the user
+   * flagged in PR #88 round 3 — wraps the card-grid with 16 px on
+   * each side. Drop to 2 px on small phones so the 3-card row goes
+   * effectively edge-to-edge inside cards-section. */
+  .deck-visual {
+    padding: 6px 2px !important;
+  }
   /* Inner nested containers inside the analysis tabs that add extra
    * horizontal padding even after the cards-section is trimmed —
    * forces them flush with the section edge on small phones. */

@@ -539,11 +539,43 @@ def split_tournament_cards(frontend_data):
 
     # Write per-meta chunk files
     chunk_files = []
+    skipped_writes = []
     for meta_key in sorted(meta_rows.keys()):
         rows = meta_rows[meta_key]
         chunk_name = f"tournament_cards_data_cards_{meta_key}.csv"
         chunk_path = os.path.join(frontend_data, chunk_name)
-        
+
+        # Truncation guard. If the monolith reassembly silently missed
+        # historical chunks (the May 13 2026 auto-run lost LA's 1183
+        # rows + every other format chunk this way), the new per-meta
+        # group will be much smaller than the existing chunk. Overwriting
+        # would permanently lose the historical data. Skip the overwrite
+        # when the new chunk would shrink by ≥ 50 % on a chunk that
+        # already has > 100 rows — log loud, let the operator investigate.
+        existing_row_count = 0
+        if os.path.isfile(chunk_path):
+            try:
+                with open(chunk_path, "r", encoding="utf-8-sig", newline="") as ef:
+                    # Subtract 1 for header. Fast: count lines only.
+                    existing_row_count = max(0, sum(1 for _ in ef) - 1)
+            except OSError:
+                existing_row_count = 0
+        if existing_row_count > 100 and len(rows) < existing_row_count * 0.5:
+            warn = (
+                f"⚠ Refusing to truncate {chunk_name}: monolith has {len(rows)} "
+                f"rows but existing chunk has {existing_row_count}. "
+                f"Reassembly likely failed (chunks not seeded into "
+                f"backend/core/data/?). Chunk left unchanged."
+            )
+            print(warn)
+            skipped_writes.append({
+                "chunk": chunk_name,
+                "monolith_rows": len(rows),
+                "existing_rows": existing_row_count,
+            })
+            chunk_files.append(chunk_name)  # still list in manifest — file exists
+            continue
+
         with open(chunk_path, "w", newline="", encoding="utf-8-sig") as f:
             writer = csv.DictWriter(f, fieldnames=fieldnames, delimiter=";")
             writer.writeheader()
@@ -553,15 +585,57 @@ def split_tournament_cards(frontend_data):
         print(f"  ✓ {chunk_name}  ({len(rows)} Zeilen, {size_mb:.1f} MB)")
         chunk_files.append(chunk_name)
 
+    # ALSO preserve chunks that exist on disk but weren't in this run's
+    # monolith at all (zero rows for that meta_key). Without this the
+    # manifest would forget e.g. SVI-PFL.csv just because Prague (TEF-POR)
+    # was the only tournament re-scraped. The chunks themselves are never
+    # touched in this branch — we just acknowledge them in the manifest.
+    try:
+        for fname in sorted(os.listdir(frontend_data)):
+            if not fname.startswith("tournament_cards_data_cards_"):
+                continue
+            if not fname.endswith(".csv"):
+                continue
+            if fname == "tournament_cards_data_cards.csv":
+                continue
+            if fname not in chunk_files:
+                chunk_files.append(fname)
+                meta_from_name = fname.replace("tournament_cards_data_cards_", "").replace(".csv", "")
+                if meta_from_name not in meta_rows:
+                    meta_rows[meta_from_name] = []  # tracked for manifest below
+                print(f"  ↪ {fname}  (preserved — not in this run's monolith)")
+    except OSError:
+        pass
+
     # Write manifest. chunk_dates is consumed by the frontend loader to
     # pick "latest" by real recency (max_date) — the meta keys are
     # alphabetical so simple last-in-array picking lands on SVI-PFL even
     # when SVI-ASC has fresher tournaments.
     chunk_dates = {}
+    total_rows_manifest = 0
     for meta_key in sorted(meta_rows.keys()):
         chunk_name = f"tournament_cards_data_cards_{meta_key}.csv"
         mn = meta_min_date.get(meta_key)
         mx = meta_max_date.get(meta_key)
+        # If this meta wasn't in the monolith (preserved chunk), read
+        # min/max dates directly from the existing chunk file so the
+        # manifest stays accurate.
+        if mn is None or mx is None:
+            chunk_path = os.path.join(frontend_data, chunk_name)
+            if os.path.isfile(chunk_path):
+                try:
+                    with open(chunk_path, "r", encoding="utf-8-sig", newline="") as ef:
+                        reader = csv.DictReader(ef, delimiter=";")
+                        for row in reader:
+                            d = _parse_tournament_date(row.get("tournament_date", ""))
+                            if d:
+                                if mn is None or d < mn: mn = d
+                                if mx is None or d > mx: mx = d
+                            total_rows_manifest += 1
+                except OSError:
+                    pass
+        else:
+            total_rows_manifest += len(meta_rows.get(meta_key, []))
         chunk_dates[chunk_name] = {
             "min_date": mn.strftime("%Y-%m-%d") if mn else None,
             "max_date": mx.strftime("%Y-%m-%d") if mx else None,
@@ -572,9 +646,11 @@ def split_tournament_cards(frontend_data):
         "chunks": chunk_files,
         "meta_keys": sorted(meta_rows.keys()),
         "chunk_dates": chunk_dates,
-        "total_rows": sum(len(v) for v in meta_rows.values()),
+        "total_rows": total_rows_manifest,
         "generated": __import__("datetime").datetime.now().isoformat()
     }
+    if skipped_writes:
+        manifest["truncation_guard_triggered"] = skipped_writes
     manifest_path = os.path.join(frontend_data, "tournament_cards_manifest.json")
     with open(manifest_path, "w", encoding="utf-8") as f:
         json.dump(manifest, f, ensure_ascii=False, indent=2)

@@ -295,7 +295,13 @@
             // 2. Add Major-only cards (in Prague but absent from Online aggregate).
             majorAgg.forEach((m, cn) => {
                 if (seen.has(cn)) return;
-                const pct = combinedTotal > 0 ? (m.deck_count / combinedTotal) * 100 : 0;
+                // Defensive cap — same as the Online+Major branch above.
+                // Without it, Major-only cards whose deck_count exceeds the
+                // Online-derived combinedTotal render as e.g. 117 % share
+                // in the archetype overview (Poké Pad on N's Zoroark was
+                // the user-flagged repro).
+                const rawPct = combinedTotal > 0 ? (m.deck_count / combinedTotal) * 100 : 0;
+                const pct = Math.min(100, Math.max(0, rawPct));
                 merged.push({
                     archetype,
                     card_name: m.card_name,
@@ -2436,7 +2442,10 @@
                     const finalAvgOverall = Math.min(legalMaxCopies, avgCountOverallValue);
                     const maxCount = finalMaxCount;
 
-                    const percentage = Math.max(0, resolvedPercentage).toFixed(1).replace('.', ',');
+                    // Defensive 100 % cap mirrors the data-merge cap so a
+                    // stray row with deck_count > total_decks_in_archetype
+                    // can never render as e.g. 117 % on the card overview.
+                    const percentage = Math.min(100, Math.max(0, resolvedPercentage)).toFixed(1).replace('.', ',');
                     const avgCountOverall = Math.max(0, finalAvgOverall).toFixed(2).replace('.', ',');
                     const avgCountInUsedDecks = Math.max(0, finalAvgUsed).toFixed(2).replace('.', ',');
                     const decksWithCardDisplay = Math.round(Math.max(0, decksWithCard));
@@ -2743,7 +2752,7 @@
                         ? avgCountOverallRaw
                         : (totalDecksInArchetype > 0 ? (totalCount / totalDecksInArchetype) : 0);
 
-                    const percentage = Math.max(0, resolvedPercentage).toFixed(1).replace('.', ',');
+                    const percentage = Math.min(100, Math.max(0, resolvedPercentage)).toFixed(1).replace('.', ',');
                     const avgCount = Math.max(0, avgCountUsedValue).toFixed(2).replace('.', ',');
                     const avgCountOverall = Math.max(0, avgCountOverallValue).toFixed(2).replace('.', ',');
                     const decksWithCardDisplay = Math.round(Math.max(0, decksWithCard));

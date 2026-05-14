@@ -4525,6 +4525,60 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
         if (typeof window !== 'undefined') window._redistributeByLargestRemainder = _redistributeByLargestRemainder;
 
         // ────────────────────────────────────────────────────────────
+        // REVERSE-LRM TRIM — paired with _redistributeByLargestRemainder
+        // for the round-based generator. When Stage 1+2 round each
+        // card's avg, the sum can land ABOVE 60 (cards rounded UP).
+        // Trim slots from cards with the smallest / most-negative
+        // remainder first, biased so CORE-tier cards keep their slots
+        // and TECH-tier cards eat the cut. Pinned cards exempt — the
+        // user explicitly requested them. Each card stays at >= 1 so
+        // we never silently remove a deck entry.
+        //
+        // Mirror of _redistributeByLargestRemainder: same entries
+        // shape ({card, count}), same tier-multiplier weighting. The
+        // multiplier is INVERTED for trim — CORE (1.15) gets a bigger
+        // remainder magnitude, pushing it later in the ascending sort
+        // (i.e. less likely to be picked first for trimming).
+        // ────────────────────────────────────────────────────────────
+        function _trimByReverseLrm(entries, currentTotal, targetTotal, helpers) {
+            const log = (helpers && helpers.log) || (() => {});
+            if (!Array.isArray(entries) || currentTotal <= targetTotal) return 0;
+
+            const _tierMultiplier = (tier) => {
+                if (tier === 'CORE') return 1.15;
+                if (tier === 'TECH') return 0.85;
+                return 1.0;
+            };
+            const _effectiveRemainder = (entry) => {
+                const baseRem = (entry && entry.card && entry.card._lrmRemainder) || 0;
+                const tier = entry && entry.card && entry.card._cardFunctionTier;
+                return baseRem * _tierMultiplier(tier);
+            };
+
+            // Ascending: most-negative remainder first (these are the
+            // cards we over-allocated by rounding up the most).
+            const sorted = entries
+                .filter(e => {
+                    if (!e || !e.card) return false;
+                    if (e.card._isPinned) return false;
+                    if (!(e.count > 1)) return false; // keep at least 1 copy
+                    return Number.isFinite(e.card._lrmRemainder);
+                })
+                .slice()
+                .sort((a, b) => _effectiveRemainder(a) - _effectiveRemainder(b));
+
+            let trimmed = 0;
+            for (const entry of sorted) {
+                if (currentTotal - trimmed <= targetTotal) break;
+                entry.count -= 1;
+                trimmed += 1;
+                log(entry.card, entry);
+            }
+            return trimmed;
+        }
+        if (typeof window !== 'undefined') window._trimByReverseLrm = _trimByReverseLrm;
+
+        // ────────────────────────────────────────────────────────────
         // BIDIRECTIONAL LRM SWAP — runs after the standard add-only LRM
         // pass. When the deck is at the target size (60) but contains
         // TECH-tier 1-of cards while CORE-tier cards have un-bumped
@@ -6713,8 +6767,14 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                     card._isPinned = true;
                     if (isRadiantPokemon(card.card_name)) radiantAdded = true;
                     const exactAvg = card.avgCountWhenUsed || card._recommendedCount || 2;
-                    let addCount = Math.max(1, Math.floor(exactAvg));
-                    card._lrmRemainder = exactAvg - Math.floor(exactAvg);
+                    let addCount = Math.max(1, Math.round(exactAvg));
+                    // Signed remainder so the LRM redistribution pass can
+                    // trim cards that round() pushed up (avg − round() can
+                    // be negative) and bump cards rounded down. Replaces
+                    // the prior floor-only model that under-allocated
+                    // staples like Poké Pad (avg 2.8 → 2) and Lillie's
+                    // Determination (avg 3.9 → 3).
+                    card._lrmRemainder = exactAvg - addCount;
                     const legalMax = card._legalMax || getLegalMaxCopies(card.card_name, card);
                     if (!isBasicEnergyCardEntry(card)) addCount = Math.min(addCount, legalMax);
                     pushCard(card, addCount, '[Consistency][Stage0-Pinned]');
@@ -6756,7 +6816,11 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
 
                 if (card.consistencyScore >= 75) {
                     const exactAvg = card.avgCountWhenUsed || card._recommendedCount || 0;
-                    let addCount = Math.floor(exactAvg);
+                    // Round (not floor) so Stage 1 lands on the avg-the-
+                    // user-sees. The signed _lrmRemainder downstream lets
+                    // the reverse-LRM pass shave overshoots when the
+                    // round-up total exceeds 60.
+                    let addCount = Math.round(exactAvg);
                     card._lrmRemainder = exactAvg - addCount;
                     addCount = Math.max(1, addCount); // Core Karten MÜSSEN mindestens 1x rein
                     const legalMax = card._legalMax || getLegalMaxCopies(card.card_name, card);
@@ -6829,7 +6893,8 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 const _isChosenCounter = card._techCounterMaxCount != null;
                 if (_isChosenCounter ? card.consistencyScore >= 25 : card.consistencyScore >= _techGate) {
                     const exactAvg = card.avgCountWhenUsed || card._recommendedCount || 0;
-                    let addCount = Math.floor(exactAvg);
+                    // Round to match Stage 1 — see the rationale above.
+                    let addCount = Math.round(exactAvg);
                     card._lrmRemainder = exactAvg - addCount;
                     const isChosenCounter = card._techCounterMaxCount != null;
                     if (addCount < 1) {
@@ -6854,11 +6919,13 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
 
             // ==========================================
             // 3.5 LARGEST-REMAINDER-METHOD REDISTRIBUTION
-            // Stage 1+2 floor each card's avg, leaving the deck under 60
-            // by Σ(remainders). Distribute those slots to cards with the
-            // largest fractional remainders, respecting legal max and
-            // tech-counter caps. Standard fix for proportional-rounding
-            // pathology (4.44+3.43 → 7 instead of 8).
+            // Stage 1+2 round each card's avg. The signed remainder
+            // (avg − round(avg)) is positive when the card was rounded
+            // down (deserves a +1 bump) and negative when rounded up
+            // (overshoot, trim candidate). The forward LRM bumps when
+            // the deck is below 60; the reverse LRM (3.5b) trims when
+            // above. Together they bring the deck to exactly 60 while
+            // honouring avg as closely as possible.
             // ==========================================
             if (currentTotal < 60) {
                 const added = _redistributeByLargestRemainder(consistencyDeck, currentTotal, 60, {
@@ -6868,6 +6935,12 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 });
                 currentTotal += added;
                 if (added > 0) devLog(`[Consistency][LRM] Redistributed ${added} slot(s) -- Total: ${currentTotal}/60`);
+            } else if (currentTotal > 60) {
+                const trimmed = _trimByReverseLrm(consistencyDeck, currentTotal, 60, {
+                    log: (card, entry) => devLog(`[Consistency][LRM-Reverse] -1x ${card.card_name} (rem=${(card._lrmRemainder || 0).toFixed(2)}, count→${entry.count})`),
+                });
+                currentTotal -= trimmed;
+                if (trimmed > 0) devLog(`[Consistency][LRM-Reverse] Trimmed ${trimmed} slot(s) -- Total: ${currentTotal}/60`);
             }
 
             // ==========================================

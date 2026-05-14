@@ -2675,7 +2675,7 @@
                     ? avgCountInUsedRaw
                     : (decksWithCard > 0 ? (totalCount / decksWithCard) : 0);
 
-                const percentage = Math.max(0, resolvedPercentage).toFixed(1).replace('.', ',');
+                const percentage = Math.min(100, Math.max(0, resolvedPercentage)).toFixed(1).replace('.', ',');
                 const avgCountOverall = Math.max(0, avgCountOverallValue).toFixed(2).replace('.', ',');
                 const avgCountInUsedDecks = Math.max(0, avgCountInUsedValue).toFixed(2).replace('.', ',');
                 const decksWithCardDisplay = Math.round(Math.max(0, decksWithCard));
@@ -2950,7 +2950,7 @@
                 const finalAvgOverall = Math.min(legalMaxCopies, avgCountOverallValue);
                 const maxCount = finalMaxCount;
 
-                const percentage = Math.max(0, resolvedPercentage).toFixed(1).replace('.', ',');
+                const percentage = Math.min(100, Math.max(0, resolvedPercentage)).toFixed(1).replace('.', ',');
                 const avgCountOverall = Math.max(0, finalAvgOverall).toFixed(2).replace('.', ',');  // Average over all decks
                 const avgCountInUsedDecks = Math.max(0, finalAvgUsed).toFixed(2).replace('.', ',');  // Average in decks that use this card
                 const decksWithCardDisplay = Math.round(Math.max(0, decksWithCard));

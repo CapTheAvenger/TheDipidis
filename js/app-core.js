@@ -1288,7 +1288,13 @@ const BASE_PATH = './data/';
             if (titleText) {
                 document.title = titleText + ' – Pokémon TCG Hub';
                 const badge = document.getElementById('current-tab-title');
-                if (badge) badge.textContent = titleText;
+                if (badge) {
+                    badge.textContent = titleText;
+                    // Hub overview has no single "current section" — hide the
+                    // pill there so it doesn't mislead (see inline-init.js
+                    // companion change for the menu-driven path).
+                    badge.style.display = tabName === 'meta-analysis-hub' ? 'none' : '';
+                }
             }
         }
 

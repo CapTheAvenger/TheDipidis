@@ -5408,8 +5408,18 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
         }
         if (typeof window !== 'undefined') window._aceSpecConditionalAvgs = _aceSpecConditionalAvgs;
 
-        async function autoCompleteConsistency(source, rarityMode) {
+        async function autoCompleteConsistency(source, rarityMode, options) {
             if (source !== 'cityLeague' && source !== 'currentMeta' && source !== 'pastMeta') return;
+
+            // Anti-Tech build mode — caller hands a single target
+            // archetype name + aggression preset; the TechAudit pass
+            // below switches from "weighted meta field" to "this one
+            // opponent" when these are set. Passed in instead of read
+            // from window state so unit tests / future callers can
+            // drive the algo without UI plumbing.
+            const _opts = options || {};
+            const _antiTechTarget = (_opts.antiTechTarget || '').toString().trim() || null;
+            const _antiTechAggression = (_opts.antiTechAggression || 'standard').toString();
 
             // Clear specific rarity preferences before generating
             rarityPreferences = {};
@@ -5921,19 +5931,71 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 }
                 const intel = window._activeThreatsCache;
                 if (intel && intel.threats && intel.counters) {
+                    // Anti-Tech mode — restrict the "active category"
+                    // set to threats this ONE target archetype actually
+                    // runs. share_in_archetype gates noise: a 0.05-
+                    // share threat in the opponent's list is too
+                    // marginal to plan against.
+                    const _antiTechShareFloor = _antiTechAggression === 'heavy' ? 0.10
+                                            : _antiTechAggression === 'mild'  ? 0.25
+                                            : 0.15;
+                    const _antiTechTargetLower = (_antiTechTarget || '').toLowerCase();
+                    const _antiTechMatchedAny = { v: false };
+
                     for (const [cat, info] of Object.entries(intel.threats)) {
-                        const wms = parseFloat(info?.weighted_meta_share || 0) || 0;
-                        if (wms < TECH_AUDIT_ACTIVE_FLOOR) continue;
-                        // Track which threat cards drive the category — used
-                        // to build the per-card explanation in the build summary.
+                        let activeShare = 0; // effective weight used for slot budgeting
                         const sampleNames = (info.cards || [])
                             .slice(0, 3)
                             .map(c => c.card_name)
                             .filter(Boolean);
+
+                        if (_antiTechTarget) {
+                            // Pick the largest share_in_archetype among
+                            // threat cards the target archetype runs.
+                            // Treat that as the effective meta share so
+                            // _outsTarget can still scale slots by it
+                            // below, just relative to ONE deck.
+                            let maxShare = 0;
+                            (info.cards || []).forEach(threatCard => {
+                                (threatCard.archetypes || []).forEach(a => {
+                                    if (String(a.archetype || '').toLowerCase() !== _antiTechTargetLower) return;
+                                    const s = parseFloat(a.share_in_archetype || 0) || 0;
+                                    if (s > maxShare) maxShare = s;
+                                });
+                            });
+                            if (maxShare < _antiTechShareFloor) continue;
+                            activeShare = maxShare;
+                            _antiTechMatchedAny.v = true;
+                        } else {
+                            const wms = parseFloat(info?.weighted_meta_share || 0) || 0;
+                            if (wms < TECH_AUDIT_ACTIVE_FLOOR) continue;
+                            activeShare = wms;
+                        }
+
                         techAuditActiveThreats.set(cat, {
-                            weighted_meta_share: wms,
+                            weighted_meta_share: activeShare,
                             sample_threat_card_names: sampleNames,
+                            anti_tech_mode: !!_antiTechTarget,
+                            anti_tech_aggression: _antiTechTarget ? _antiTechAggression : null,
                         });
+                    }
+                    if (_antiTechTarget && !_antiTechMatchedAny.v) {
+                        devLog(`[Consistency][TechAudit][AntiTech] no threat categories matched target="${_antiTechTarget}" — falling back to weighted-meta TechAudit`);
+                        // Repopulate with the standard weighted-meta
+                        // logic so the deck still gets tech coverage.
+                        // The user will see a toast at the end.
+                        for (const [cat, info] of Object.entries(intel.threats)) {
+                            const wms = parseFloat(info?.weighted_meta_share || 0) || 0;
+                            if (wms < TECH_AUDIT_ACTIVE_FLOOR) continue;
+                            const sampleNames = (info.cards || [])
+                                .slice(0, 3)
+                                .map(c => c.card_name)
+                                .filter(Boolean);
+                            techAuditActiveThreats.set(cat, {
+                                weighted_meta_share: wms,
+                                sample_threat_card_names: sampleNames,
+                            });
+                        }
                     }
                     // For every active category, index the counter card
                     // NAMES (lower-case) so we match every legal print of
@@ -6006,8 +6068,18 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                     if (metaShare < 0.60) return 2;
                     return 3;
                 };
+                // Aggression presets — heavy lifts both slot count and
+                // lowers the archetype-share floor so the algorithm can
+                // reach for niche counters; standard adds a single slot
+                // per category; mild matches the default weighted-meta
+                // behaviour so users have an opt-out path.
+                const _antiTechSlotBonus = !_antiTechTarget ? 0
+                    : _antiTechAggression === 'heavy' ? 2
+                    : _antiTechAggression === 'mild' ? 0
+                    : 1;
                 techAuditActiveThreats.forEach((info, cat) => {
-                    const target = _outsTarget(info && info.weighted_meta_share);
+                    const baseTarget = _outsTarget(info && info.weighted_meta_share);
+                    const target = Math.min(4, baseTarget + _antiTechSlotBonus);
                     const candidates = deckCards.filter(card => {
                         const nm = (card.card_name || '').trim().toLowerCase();
                         const cats = techAuditCounterCats.get(nm);
@@ -6022,8 +6094,9 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                     // wanted a 2nd Rocky Energy in the slot). 15 % is
                     // strict enough to drop Lacey while still keeping
                     // genuine archetype counters (Cynthia's Surfer at
-                    // 60 %, etc.).
-                    const TECH_AUDIT_MIN_ARCHETYPE_SHARE = 15.0;
+                    // 60 %, etc.). Anti-Tech Heavy drops the floor to
+                    // 5 % so niche-but-targeted counters can land.
+                    const TECH_AUDIT_MIN_ARCHETYPE_SHARE = (_antiTechTarget && _antiTechAggression === 'heavy') ? 5.0 : 15.0;
                     const topShare = candidates.reduce((max, c) => Math.max(max, _shareOf(c)), 0);
                     if (topShare < TECH_AUDIT_MIN_ARCHETYPE_SHARE) {
                         devLog(`[Consistency][TechAudit] category=${cat} skipped — best counter has only ${topShare.toFixed(1)}% archetype share (floor: ${TECH_AUDIT_MIN_ARCHETYPE_SHARE}%)`);
@@ -7172,10 +7245,24 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 scheduleDeckDisplayUpdate(source);
 
                 if (normalizedTotal >= 60) {
+                    let successMsg = t('deck.consistencySuccess');
+                    if (_antiTechTarget) {
+                        const pickedCats = Array.from(techAuditCategoryBudget.entries())
+                            .filter(([, b]) => b.picked && b.picked.length > 0)
+                            .map(([cat]) => cat);
+                        if (pickedCats.length > 0) {
+                            successMsg = (t('antiTech.successWithCats') || 'Anti-tech build vs {target} ready. Counters loaded for: {cats}.')
+                                .replace('{target}', _antiTechTarget)
+                                .replace('{cats}', pickedCats.join(', '));
+                        } else {
+                            successMsg = (t('antiTech.successNoCats') || 'Anti-tech build vs {target} ready, but no qualifying counter cards were available — baseline TechAudit applied instead.')
+                                .replace('{target}', _antiTechTarget);
+                        }
+                    }
                     if (typeof showDeckShareToast === 'function') {
-                        showDeckShareToast(t('deck.consistencySuccess'));
+                        showDeckShareToast(successMsg);
                     } else {
-                        showToast(t('deck.consistencySuccess'), 'success');
+                        showToast(successMsg, 'success');
                     }
                 }
             }

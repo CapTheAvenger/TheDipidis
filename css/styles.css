@@ -631,16 +631,6 @@
             box-shadow: 0 2px 8px rgba(0,0,0,0.04);
         }
 
-        /* Generate Low Rarity deck button */
-        .btn-gen-low {
-            background: linear-gradient(135deg, var(--color-success) 0%, #20c997 100%);
-        }
-
-        /* Generate Max Rarity deck button */
-        .btn-gen-max {
-            background: linear-gradient(135deg, var(--color-danger) 0%, #fd7e14 100%);
-        }
-
         /* Save deck to profile button */
         .btn-save-deck {
             background: linear-gradient(135deg, var(--color-success) 0%, #20c997 100%);

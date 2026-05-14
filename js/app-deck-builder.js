@@ -3288,16 +3288,20 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             window.__overflowSafetyBound = true;
         }
 
-        // One-shot bulk upgrade: walk the active deck and replace each
-        // card's print with the highest-rarity print available for that
-        // card name in the global card database. Used by the "Upgrade to
-        // Max Rarity" button in the deck-builder action row — replaces
-        // the old Low / Max regenerate buttons that nobody used.
+        // One-shot bulk rarity swap: walks the active deck and replaces
+        // each card's print with the highest- OR lowest-rarity print
+        // available in the global card database. Drives the "↑ Max
+        // Rarity" / "↓ Low Rarity" toggle in the deck-builder action
+        // row — replaces the old Low / Max regenerate buttons that
+        // nobody used. Counts and the deck-order array are preserved:
+        // if a deck has 2× Poké Pad (SVI 042) + 2× Poké Pad (PAF 187),
+        // they collapse to 4× Poké Pad on whichever print wins.
         //
-        // Counts and the deck-order array are preserved: if a deck has
-        // 2× Poké Pad (SVI 042) + 2× Poké Pad (PAF 187), they collapse
-        // to 4× Poké Pad on whichever print has the highest rarity rank.
-        function upgradeDeckToMaxRarity(source) {
+        // `direction` is either 'max' (highest-rank print) or 'min'
+        // (lowest-rank print). The two public wrappers below preserve
+        // the legacy one-way entrypoints used elsewhere.
+        function _swapDeckRarity(source, direction) {
+            const dir = direction === 'min' ? 'min' : 'max';
             let deck, orderKey, saveFn;
             if (source === 'cityLeague') {
                 deck = window.cityLeagueDeck;
@@ -3312,15 +3316,15 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 orderKey = 'pastMetaDeckOrder';
                 saveFn = typeof savePastMetaDeck === 'function' ? savePastMetaDeck : null;
             } else {
-                return;
+                return 0;
             }
             if (!deck || Object.keys(deck).filter(k => deck[k] > 0).length === 0) {
                 if (typeof showToast === 'function') showToast(t('deck.noCardsToAdd'), 'warning');
-                return;
+                return 0;
             }
             if (!window.allCardsDatabase || !window.allCardsDatabase.length) {
                 if (typeof showToast === 'function') showToast(t('cards.notLoadedYet') || 'Card database not loaded yet...', 'warning');
-                return;
+                return 0;
             }
 
             const rank = typeof getRarityRank === 'function' ? getRarityRank : (() => 0);
@@ -3331,7 +3335,6 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             const newOrder = [];
             let swaps = 0;
 
-            // Walk in order so the visual layout stays stable.
             const seenInOrder = new Set();
             const pushKey = (key, count) => {
                 if (!key || count <= 0) return;
@@ -3343,8 +3346,6 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             };
 
             const keys = order.length ? order : Object.keys(deck);
-            // Process keys in deck-order; also catch any keys missing
-            // from `order` (defensive — should be rare).
             const allKeys = new Set(keys);
             Object.keys(deck).forEach(k => allKeys.add(k));
 
@@ -3367,7 +3368,10 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
 
                 let best = prints[0];
                 for (let i = 1; i < prints.length; i++) {
-                    if (rank(prints[i].rarity) > rank(best.rarity)) best = prints[i];
+                    const better = dir === 'max'
+                        ? (rank(prints[i].rarity) > rank(best.rarity))
+                        : (rank(prints[i].rarity) < rank(best.rarity));
+                    if (better) best = prints[i];
                 }
                 const bestSet = String(best.set || '').toUpperCase();
                 const bestNum = String(best.number || '').toUpperCase();
@@ -3380,7 +3384,6 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 swaps++;
             });
 
-            // Persist the rebuilt deck + order, then re-render.
             if (source === 'cityLeague') window.cityLeagueDeck = newDeck;
             else if (source === 'currentMeta') window.currentMetaDeck = newDeck;
             else if (source === 'pastMeta') window.pastMetaDeck = newDeck;
@@ -3391,22 +3394,80 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
 
             if (typeof showToast === 'function') {
                 if (swaps === 0) {
-                    showToast(t('deck.upgradeRarityNone') || 'All cards already at highest rarity.', 'info');
+                    const noneKey = dir === 'max' ? 'deck.upgradeRarityNone' : 'deck.downgradeRarityNone';
+                    const noneFallback = dir === 'max' ? 'All cards already at highest rarity.' : 'All cards already at lowest rarity.';
+                    const tpl = t(noneKey);
+                    showToast(tpl && tpl !== noneKey ? tpl : noneFallback, 'info');
                 } else {
                     // Separate singular / plural keys so each language can
                     // pluralise naturally (EN: card → cards, DE: Karte →
                     // Karten) without a one-letter suffix hack.
-                    const key = swaps === 1 ? 'deck.upgradeRarity1' : 'deck.upgradeRarityN';
-                    const fallback = swaps === 1
-                        ? '1 card upgraded to max rarity.'
-                        : '{n} cards upgraded to max rarity.';
+                    const base = dir === 'max' ? 'deck.upgradeRarity' : 'deck.downgradeRarity';
+                    const key = base + (swaps === 1 ? '1' : 'N');
+                    const fallback = dir === 'max'
+                        ? (swaps === 1 ? '1 card upgraded to max rarity.' : '{n} cards upgraded to max rarity.')
+                        : (swaps === 1 ? '1 card reverted to low rarity.' : '{n} cards reverted to low rarity.');
                     const tpl = t(key);
                     const msg = (tpl && tpl !== key ? tpl : fallback).replace('{n}', swaps);
                     showToast(msg, 'success');
                 }
             }
+            return swaps;
         }
+
+        function upgradeDeckToMaxRarity(source) { return _swapDeckRarity(source, 'max'); }
+        function downgradeDeckToLowRarity(source) { return _swapDeckRarity(source, 'min'); }
+
+        // Stateful toggle for the "↑ Max Rarity" / "↓ Low Rarity"
+        // button in the deck-builder action row. Reads `data-mode`
+        // off the button to know which direction the NEXT click
+        // should swap, flips it post-swap, and re-labels via the
+        // i18n keys above. data-mode="max" means the next click
+        // upgrades; data-mode="min" means the next click downgrades.
+        // A fresh deck always starts at low rarity, so HTML sets
+        // data-mode="max" initially.
+        function toggleDeckRarity(source, buttonEl) {
+            const direction = (buttonEl && buttonEl.dataset && buttonEl.dataset.mode === 'min') ? 'min' : 'max';
+            _swapDeckRarity(source, direction);
+            if (buttonEl) {
+                const next = direction === 'max' ? 'min' : 'max';
+                buttonEl.dataset.mode = next;
+                const labelKey = next === 'max' ? 'deck.upgradeRarity' : 'deck.downgradeRarity';
+                const titleKey = next === 'max' ? 'deck.upgradeRarityTitle' : 'deck.downgradeRarityTitle';
+                const labelFallback = next === 'max' ? '↑ Max Rarity' : '↓ Low Rarity';
+                const titleFallback = next === 'max'
+                    ? 'Swap every card in the current deck to its highest-rarity print'
+                    : 'Swap every card in the current deck back to its lowest-rarity print';
+                const labelTpl = t(labelKey);
+                const titleTpl = t(titleKey);
+                buttonEl.textContent = labelTpl && labelTpl !== labelKey ? labelTpl : labelFallback;
+                buttonEl.setAttribute('title', titleTpl && titleTpl !== titleKey ? titleTpl : titleFallback);
+                buttonEl.setAttribute('data-i18n', labelKey);
+                buttonEl.setAttribute('data-i18n-title', titleKey);
+            }
+        }
+
+        // Reset a deck-rarity toggle button back to its "next click
+        // upgrades" baseline. Called after Auto-Generate so the label
+        // tracks the freshly-built (low-rarity) deck.
+        function resetDeckRarityToggle(source) {
+            try {
+                const btn = document.querySelector('button[data-rarity-toggle="' + source + '"]');
+                if (!btn) return;
+                btn.dataset.mode = 'max';
+                const labelTpl = t('deck.upgradeRarity');
+                const titleTpl = t('deck.upgradeRarityTitle');
+                btn.textContent = labelTpl && labelTpl !== 'deck.upgradeRarity' ? labelTpl : '↑ Max Rarity';
+                btn.setAttribute('title', titleTpl && titleTpl !== 'deck.upgradeRarityTitle' ? titleTpl : 'Swap every card in the current deck to its highest-rarity print');
+                btn.setAttribute('data-i18n', 'deck.upgradeRarity');
+                btn.setAttribute('data-i18n-title', 'deck.upgradeRarityTitle');
+            } catch (_e) { /* swallow — toggle is cosmetic */ }
+        }
+
         window.upgradeDeckToMaxRarity = upgradeDeckToMaxRarity;
+        window.downgradeDeckToLowRarity = downgradeDeckToLowRarity;
+        window.toggleDeckRarity = toggleDeckRarity;
+        window.resetDeckRarityToggle = resetDeckRarityToggle;
 
         function autoComplete(source, rarityMode) {
             if (source !== 'cityLeague' && source !== 'currentMeta' && source !== 'pastMeta') return;
@@ -3757,9 +3818,10 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 
                 // PERFORMANCE: Update display ONCE at the end (not 60 times!)
                 scheduleDeckDisplayUpdate(source);
+                if (typeof resetDeckRarityToggle === 'function') resetDeckRarityToggle(source);
             }
         }
-        
+
         /**
          * Auto-Complete with Max Consistency Algorithm
          * Based on Justin Basil's Professional Deck Building Guide:
@@ -7316,6 +7378,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 } catch (e) { devLog('[autoCompleteConsistency] vanilla snapshot failed:', e); }
 
                 scheduleDeckDisplayUpdate(source);
+                if (typeof resetDeckRarityToggle === 'function') resetDeckRarityToggle(source);
 
                 if (normalizedTotal >= 60) {
                     let successMsg = t('deck.consistencySuccess');

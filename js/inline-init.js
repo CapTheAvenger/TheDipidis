@@ -49,13 +49,18 @@ function switchTabAndUpdateMenu(tabId) {
 
     document.querySelectorAll('.menu-item[data-tab-id]').forEach(btn => btn.classList.remove('active'));
     const activeBtn = document.getElementById('menu-btn-' + tabId);
+    const badge = document.getElementById('current-tab-title');
     if (activeBtn) {
         activeBtn.classList.add('active');
         const labelEl = activeBtn.querySelector('.menu-item-label');
         const text = labelEl ? labelEl.textContent.trim() : activeBtn.innerText.trim();
-        const badge = document.getElementById('current-tab-title');
         if (badge) badge.innerText = text;
     }
+    // Hide the section badge on the Meta & Deck Analysis Hub overview —
+    // the tile grid IS the navigation here, so a "CITY LEAGUE META" pill
+    // next to "Pokémon TCG Hub" misled users into thinking they were
+    // already inside that sub-tab.
+    if (badge) badge.style.display = tabId === 'meta-analysis-hub' ? 'none' : '';
 
     syncMenuClustersForTab(tabId);
 
@@ -96,6 +101,20 @@ document.addEventListener('languageChanged', function() {
     const badge = document.getElementById('current-tab-title');
     const labelEl = activeBtn ? activeBtn.querySelector('.menu-item-label') : null;
     if (activeBtn && badge) badge.innerText = labelEl ? labelEl.textContent.trim() : activeBtn.innerText.trim();
+    // Keep the badge hidden whenever the hub overview is the active tab —
+    // even after a language switch reruns the badge update.
+    const hubActive = !!document.querySelector('#meta-analysis-hub.tab-content.active');
+    if (badge) badge.style.display = hubActive ? 'none' : '';
+});
+
+// Initial page-load state: the hub is the default landing tab via the
+// `active` class baked into index.html, so neither switchTab nor
+// switchTabAndUpdateMenu runs at boot — the badge would otherwise sit
+// at its HTML default "City League Meta" and mislead the user.
+document.addEventListener('DOMContentLoaded', function () {
+    const badge = document.getElementById('current-tab-title');
+    const hubActive = !!document.querySelector('#meta-analysis-hub.tab-content.active');
+    if (badge && hubActive) badge.style.display = 'none';
 });
 
 // ── Deep-linking via URL hash ────────────────────────────────

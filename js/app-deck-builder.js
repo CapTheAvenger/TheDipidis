@@ -841,6 +841,14 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
 
             // Refresh overview badges and opening hand stats on the next frame.
             scheduleDeckDependentRefresh(source);
+
+            // Refresh the Meta-Call-weighted "Your Build vs Vanilla"
+            // panel whenever the current-meta deck mutates so the
+            // tech-counter bonus reflects the latest card list.
+            if (source === 'currentMeta' && typeof window.refreshUserVsVanillaPanel === 'function') {
+                try { window.refreshUserVsVanillaPanel(); }
+                catch (e) { /* swallow — panel is best-effort */ }
+            }
         }
         
         function renderMyDeckGrid(source) {

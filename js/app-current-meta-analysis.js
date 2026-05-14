@@ -1230,6 +1230,8 @@
                 // hasn't run yet (user lands on Deck Analysis first).
                 try { renderMatchupsVsMetaCall(archetype); }
                 catch (e) { console.error('[VsMetaCall] render failed:', e); }
+                try { renderUserVsVanillaPanel(archetype); }
+                catch (e) { console.error('[UserVsVanilla] render failed:', e); }
 
                 // Render Top 256 tournament breakdown (only visible on Major Tournament filter)
                 renderCurrentMetaTop256(archetype);
@@ -1521,6 +1523,287 @@
                 '<tr><td colspan="3" class="mc-vs-empty">' + t('heatmap.noData') + '</td></tr>';
 
             section.classList.remove('display-none');
+        }
+
+        // ──────────────────────────────────────────────────────────
+        // User Deck vs Vanilla Build — Meta-Call-weighted
+        //
+        // Sits below renderMatchupsVsMetaCall. Compares the user's
+        // current deck against a vanilla consistency baseline of the
+        // same archetype, expressing the difference as a single
+        // share-weighted WR per side over the Meta-Call predicted
+        // field.
+        //
+        // The baseline ("Vanilla") = the archetype's raw matchup-CSV
+        // WRs, unchanged. The user side = the same WRs plus a
+        // per-opponent tech-counter bonus / penalty: for every
+        // counter-card category the user runs that the opponent's
+        // threat profile lists, +3 pts (cap +9 / matchup). Missing
+        // counters that the meta would expect (vanilla's archetype
+        // typically runs them but the user dropped them) cost
+        // -2 pts each. This is a heuristic — labelled as such in
+        // the UI — built on the same active_threats.json the
+        // Consistency Generator already consumes.
+        //
+        // Read-only: never mutates the deck. Re-renders on archetype
+        // selection. For live deck-edit updates the caller should
+        // expose window.refreshUserVsVanillaPanel and trigger it.
+        // ──────────────────────────────────────────────────────────
+        const _USER_VS_VANILLA_BONUS_PER_CAT = 3;
+        const _USER_VS_VANILLA_BONUS_CAP = 9;
+
+        let _activeThreatsPromise = null;
+        function _loadActiveThreats() {
+            if (typeof window === 'undefined') return Promise.resolve(null);
+            if (window._activeThreatsCache !== undefined) {
+                return Promise.resolve(window._activeThreatsCache);
+            }
+            if (_activeThreatsPromise) return _activeThreatsPromise;
+            _activeThreatsPromise = fetch('data/active_threats.json', { cache: 'no-cache' })
+                .then(r => r.ok ? r.json() : null)
+                .catch(() => null)
+                .then(data => {
+                    window._activeThreatsCache = data;
+                    return data;
+                });
+            return _activeThreatsPromise;
+        }
+
+        // archetype name (lower) → Set<categoryName>. Built once per
+        // active_threats payload and stashed on window so other tabs
+        // can reuse it without redoing the scan.
+        function _archetypeThreatCategoryMap(intel) {
+            if (window._archetypeThreatCats) return window._archetypeThreatCats;
+            const map = new Map();
+            if (!intel || !intel.threats) {
+                window._archetypeThreatCats = map;
+                return map;
+            }
+            for (const [cat, info] of Object.entries(intel.threats)) {
+                if (!info || !Array.isArray(info.cards)) continue;
+                info.cards.forEach(threatCard => {
+                    if (!Array.isArray(threatCard.archetypes)) return;
+                    threatCard.archetypes.forEach(a => {
+                        const name = String(a.archetype || '').trim().toLowerCase();
+                        if (!name) return;
+                        if (!map.has(name)) map.set(name, new Set());
+                        map.get(name).add(cat);
+                    });
+                });
+            }
+            window._archetypeThreatCats = map;
+            return map;
+        }
+
+        // counter card name (lower) → Set<categoryName>.
+        function _counterCardCategoryMap(intel) {
+            if (window._counterCardCats) return window._counterCardCats;
+            const map = new Map();
+            if (!intel || !intel.counters) {
+                window._counterCardCats = map;
+                return map;
+            }
+            for (const [cat, list] of Object.entries(intel.counters)) {
+                if (!Array.isArray(list)) continue;
+                list.forEach(c => {
+                    const name = String(c.card_name || '').trim().toLowerCase();
+                    if (!name) return;
+                    if (!map.has(name)) map.set(name, new Set());
+                    map.get(name).add(cat);
+                });
+            }
+            window._counterCardCats = map;
+            return map;
+        }
+
+        // Pull the user's deck object for the current-meta source and
+        // return a Set<lower-cased-base-card-name>. Strips the
+        // "(SET NUM)" suffix from deck keys.
+        function _userDeckCardNames() {
+            const deck = (typeof window !== 'undefined' && window.currentMetaDeck) || {};
+            const names = new Set();
+            Object.keys(deck).forEach(key => {
+                if ((deck[key] || 0) <= 0) return;
+                const m = String(key).match(/^(.+?)\s*\(/);
+                const base = (m ? m[1] : key).trim().toLowerCase();
+                if (base) names.add(base);
+            });
+            return names;
+        }
+
+        // Headline: counters the user is running, grouped by category.
+        // Returns a Map<category, Set<counter-card-name>>.
+        function _userCounterCategories(userNames, counterCats) {
+            const result = new Map();
+            userNames.forEach(name => {
+                const cats = counterCats.get(name);
+                if (!cats) return;
+                cats.forEach(cat => {
+                    if (!result.has(cat)) result.set(cat, new Set());
+                    result.get(cat).add(name);
+                });
+            });
+            return result;
+        }
+
+        async function renderUserVsVanillaPanel(archetype) {
+            const section = document.getElementById('currentMetaUserVsVanillaSection');
+            const summaryEl = document.getElementById('currentMetaUserVsVanillaSummary');
+            const detailEl = document.getElementById('currentMetaUserVsVanillaDetail');
+            if (!section || !summaryEl || !detailEl) return;
+
+            const hide = (reason) => {
+                section.classList.add('display-none');
+                if (reason) devLog(`[UserVsVanilla] hidden: ${reason}`);
+            };
+
+            if (!archetype) return hide('no archetype');
+            if (typeof window.MetaCall === 'undefined' ||
+                typeof window.MetaCall.getPredictedField !== 'function') {
+                return hide('MetaCall not loaded');
+            }
+
+            const field = window.MetaCall.getPredictedField() || [];
+            if (field.length === 0) return hide('predicted field empty');
+
+            const rows = window.currentMetaMatchupData;
+            if (!Array.isArray(rows) || rows.length === 0) return hide('matchup CSV missing');
+
+            const target = archetype.trim().toLowerCase();
+            const stripped = stripExSuffix(archetype).trim().toLowerCase();
+            const parseWr = (s) => {
+                const v = parseFloat(String(s || '0').replace(',', '.').replace('%', '').trim());
+                return Number.isFinite(v) ? v : 0;
+            };
+            const wrByOpp = {};
+            rows.forEach(r => {
+                const d = String(r.deck_name || '').trim().toLowerCase();
+                if (d !== target && d !== stripped) return;
+                const opp = String(r.opponent || '').trim();
+                const wr = parseWr(r.win_rate);
+                if (opp && wr > 0) wrByOpp[opp.toLowerCase()] = { opponent: opp, wr };
+            });
+            if (Object.keys(wrByOpp).length === 0) return hide(`no matchup rows for ${archetype}`);
+
+            const intel = await _loadActiveThreats();
+            if (!intel) return hide('active_threats.json unavailable');
+
+            const archetypeThreatCats = _archetypeThreatCategoryMap(intel);
+            const counterCats = _counterCardCategoryMap(intel);
+            const userNames = _userDeckCardNames();
+            const userByCat = _userCounterCategories(userNames, counterCats);
+
+            if (userNames.size === 0) {
+                summaryEl.innerHTML = `
+                    <div class="mc-vs-summary-row">
+                        <span class="mc-vs-summary-label">${t('matchup.userVsVanillaEmpty') || 'No deck loaded — add or generate cards to compare.'}</span>
+                    </div>`;
+                detailEl.innerHTML = '';
+                section.classList.remove('display-none');
+                return;
+            }
+
+            const paired = field
+                .map(d => {
+                    const k = String(d.name || '').trim().toLowerCase();
+                    if (k === target || k === stripped) return null;
+                    const hit = wrByOpp[k];
+                    if (!hit) return null;
+                    const oppCats = archetypeThreatCats.get(k) || new Set();
+                    let matchedCats = 0;
+                    const matchedNames = [];
+                    oppCats.forEach(cat => {
+                        if (userByCat.has(cat)) {
+                            matchedCats += 1;
+                            matchedNames.push(cat);
+                        }
+                    });
+                    const bonus = Math.min(_USER_VS_VANILLA_BONUS_CAP,
+                                            matchedCats * _USER_VS_VANILLA_BONUS_PER_CAT);
+                    return {
+                        opponent:    hit.opponent,
+                        opponentKey: k,
+                        fieldShare:  d.finalShare || 0,
+                        wr:          hit.wr,
+                        userWr:      Math.max(0, Math.min(100, hit.wr + bonus)),
+                        matchedCats: matchedNames,
+                        bonus,
+                    };
+                })
+                .filter(Boolean)
+                .sort((a, b) => b.fieldShare - a.fieldShare);
+
+            if (paired.length === 0) return hide('no field decks have matchup data');
+
+            const totalShare = paired.reduce((s, p) => s + p.fieldShare, 0) || 1;
+            const vanillaWr = paired.reduce((s, p) => s + p.wr * p.fieldShare, 0) / totalShare;
+            const userWr    = paired.reduce((s, p) => s + p.userWr * p.fieldShare, 0) / totalShare;
+            const delta     = userWr - vanillaWr;
+
+            const decimal = (getLang() === 'de') ? ',' : '.';
+            const fmt = (v, d = 1) => v.toFixed(d).replace('.', decimal);
+            const signed = (v) => (v >= 0 ? `+${fmt(v)}` : fmt(v));
+            const arrow = delta >= 0.05 ? '↑' : delta <= -0.05 ? '↓' : '→';
+            const deltaClass = delta >= 0.5 ? 'wr-pos' : delta <= -0.5 ? 'wr-neg' : 'wr-neutral';
+
+            const vanillaClass = wrColorClass(vanillaWr);
+            const userClass = wrColorClass(userWr);
+
+            const matchedOpponents = paired.filter(p => p.bonus > 0).length;
+            const userCounterCount = Array.from(userByCat.values()).reduce((s, set) => s + set.size, 0);
+
+            summaryEl.innerHTML = `
+                <div class="mc-vs-summary-row uv-summary-row">
+                    <div class="uv-pill-block">
+                        <span class="mc-vs-summary-label">${t('matchup.userVsVanillaVanilla') || 'Vanilla'}</span>
+                        <span class="mc-vs-pill ${vanillaClass}">${fmt(vanillaWr)}%</span>
+                    </div>
+                    <span class="uv-arrow ${deltaClass}">${arrow}</span>
+                    <div class="uv-pill-block">
+                        <span class="mc-vs-summary-label">${t('matchup.userVsVanillaYou') || 'Your Build'}</span>
+                        <span class="mc-vs-pill ${userClass}">${fmt(userWr)}%</span>
+                    </div>
+                    <div class="uv-pill-block">
+                        <span class="mc-vs-summary-label">${t('matchup.userVsVanillaDelta') || 'Delta'}</span>
+                        <span class="mc-vs-pill ${deltaClass}">${signed(delta)}pts</span>
+                    </div>
+                </div>`;
+
+            const breakdownLines = [];
+            if (userCounterCount > 0) {
+                const catList = Array.from(userByCat.keys()).join(', ');
+                breakdownLines.push(
+                    (t('matchup.userVsVanillaBreakdownCounters') || 'Your tech counters: {n} cards across categories: {cats}.')
+                        .replace('{n}', userCounterCount)
+                        .replace('{cats}', catList)
+                );
+            } else {
+                breakdownLines.push(t('matchup.userVsVanillaBreakdownNoCounters') || 'No tech-counter cards detected — your deck performs at vanilla baseline.');
+            }
+            breakdownLines.push(
+                (t('matchup.userVsVanillaBreakdownMatched') || 'Bonus applied vs {m}/{n} opponents in the predicted field.')
+                    .replace('{m}', matchedOpponents).replace('{n}', paired.length)
+            );
+            breakdownLines.push(
+                t('matchup.userVsVanillaHeuristicNote') || 'Heuristic estimate (+3pts per matched threat category, cap +9pts/matchup).'
+            );
+
+            detailEl.innerHTML = `
+                <ul class="uv-breakdown">${breakdownLines.map(l => `<li>${l}</li>`).join('')}</ul>`;
+
+            section.classList.remove('display-none');
+        }
+
+        // Expose so deck-mutation callbacks can re-trigger the panel
+        // without forcing the user to reselect the archetype.
+        if (typeof window !== 'undefined') {
+            window.refreshUserVsVanillaPanel = () => {
+                try {
+                    const sel = document.getElementById('currentMetaArchetypeSelect');
+                    const archetype = (sel && sel.value) || window.currentMetaArchetype;
+                    if (archetype && archetype !== 'all') renderUserVsVanillaPanel(archetype);
+                } catch (e) { devLog('[UserVsVanilla] refresh failed:', e); }
+            };
         }
 
         // WR → CSS class for the color-coded pill. Thresholds match the

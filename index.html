@@ -1173,6 +1173,23 @@
                         </div>
                     </div>
 
+                    <!--
+                      User Deck vs Vanilla Build — sits right below
+                      "Matchups vs Meta Call". Compares the user's
+                      current deck against a vanilla consistency-only
+                      baseline of the same archetype, weighted by the
+                      Meta Call field. Tech-counter inclusions push
+                      the user's WR up; missing core slots push it
+                      down. Populated by renderUserVsVanillaPanel().
+                    -->
+                    <div id="currentMetaUserVsVanillaSection" class="display-none mb-40 bg-light px-30 br-8 mc-vs-section">
+                        <h3 class="mc-vs-title">
+                            <span data-i18n="matchup.userVsVanillaTitle">Your Build vs Vanilla (Meta-Call-weighted)</span>
+                        </h3>
+                        <div id="currentMetaUserVsVanillaSummary" class="mc-vs-summary"></div>
+                        <div id="currentMetaUserVsVanillaDetail" class="mc-vs-detail"></div>
+                    </div>
+
                     <!-- Deck Builder -->
                     <div class="deck-builder d-none" id="currentMetaDeckBuilderSection">
                         <h2 data-i18n="cl.deckBuilder">Deck Builder</h2>

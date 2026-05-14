@@ -1868,7 +1868,8 @@ img[src*="limitlesstcg"] {
     filter: none;
     box-shadow: 0 0 0 1px rgba(250, 204, 21, 0.6) inset;
 }
-.deck-card.is-pinned {
+.deck-card.is-pinned,
+.card-item.card-is-pinned {
     box-shadow: 0 0 0 2px #facc15, 0 0 8px rgba(250, 204, 21, 0.55);
     border-radius: 6px;
 }

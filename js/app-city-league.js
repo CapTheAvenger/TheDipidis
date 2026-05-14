@@ -2038,6 +2038,7 @@
                     deck: deck,
                     order: window.cityLeagueDeckOrder || [],
                     archetype: window.currentCityLeagueArchetype || null,
+                    pinned: typeof window.pinnedCardsToArray === 'function' ? window.pinnedCardsToArray('cityLeague') : [],
                     timestamp: new Date().toISOString()
                 };
 

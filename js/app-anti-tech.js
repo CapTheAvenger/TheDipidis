@@ -388,11 +388,13 @@
     }
 
     function openAntiTechModal(source) {
-        if (source !== 'currentMeta') {
-            // MVP locks scope to currentMeta. The button only renders
-            // on that tab, but guard in case other code paths try it.
+        // All three deck-builder sources are supported. The TechAudit
+        // pipeline that backs the build is source-agnostic — it only
+        // reads `antiTechTarget` + `antiTechAggression` and feeds them
+        // into autoCompleteConsistency, which already routes by source.
+        if (source !== 'cityLeague' && source !== 'currentMeta' && source !== 'pastMeta') {
             if (typeof showToast === 'function') {
-                showToast(_t('antiTech.unsupportedSource', 'Build vs is only available on the Current Meta tab.'), 'info');
+                showToast(_t('antiTech.unsupportedSource', 'Build vs is not supported on this view.'), 'info');
             }
             return;
         }

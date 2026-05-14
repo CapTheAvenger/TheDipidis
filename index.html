@@ -95,6 +95,7 @@
     <link rel="stylesheet" href="css/meta-card-analysis.css?v=202605141332" type="text/css" media="print" onload="this.media='all'">
     <link rel="stylesheet" href="css/current-meta-matchups.css?v=202605141332" type="text/css" media="print" onload="this.media='all'">
     <link rel="stylesheet" href="css/anti-tech.css?v=202605141332" type="text/css" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="css/tech-slots.css?v=202605141332" type="text/css" media="print" onload="this.media='all'">
     <link rel="stylesheet" href="css/city-league-display-toggles.css?v=202605141332" type="text/css" media="print" onload="this.media='all'">
     <link rel="stylesheet" href="css/de-overview-tabs.css?v=202605141332" type="text/css" media="print" onload="this.media='all'">
     <link rel="stylesheet" href="css/profile-howto-info.css?v=202605141332" type="text/css" media="print" onload="this.media='all'">
@@ -704,6 +705,28 @@
                                     <button class="btn-modern tertiary-danger city-league-clear-btn deck-builder-clear-btn" onclick="clearDeck('cityLeague')" data-i18n="btn.clear">Clear</button>
                                 </div>
                             </div>
+                            <div class="tech-slots-row" data-source="cityLeague">
+                                <div class="tech-slots-header">
+                                    <span class="tech-slots-label" data-i18n="techSlots.label">Tech Cards</span>
+                                    <span class="tech-slots-hint" data-i18n="techSlots.hint">(forced into next Generate)</span>
+                                    <span class="tech-slots-count" id="cityLeagueTechSlotsCount">0/10</span>
+                                    <div class="tech-slots-header-actions">
+                                        <button class="btn-modern btn-tiny" onclick="openAntiTechModal('cityLeague')" data-i18n="antiTech.buildVsBtn" data-i18n-title="antiTech.buildVsBtnTitle" title="Build vs a specific deck — auto-fills tech slots">Build vs ...</button>
+                                        <button class="btn-modern btn-tiny btn-secondary" onclick="clearTechSlots('cityLeague')" data-i18n="techSlots.clearBtn">Clear</button>
+                                    </div>
+                                </div>
+                                <div class="tech-slots-grid" id="cityLeagueTechSlotsGrid"></div>
+                                <div class="tech-slot-picker d-none" id="cityLeagueTechSlotPicker">
+                                    <input class="tech-slot-picker-input" id="cityLeagueTechSlotInput" type="text"
+                                        placeholder="Search a card to add as tech..."
+                                        data-i18n-placeholder="techSlots.searchPlaceholder"
+                                        oninput="techSlotSearch(this, 'cityLeague')"
+                                        onblur="setTimeout(()=>hideTechSlotPicker('cityLeague'), 200)"
+                                        onkeydown="if(event.key==='Escape'){hideTechSlotPicker('cityLeague')}"
+                                        autocomplete="off">
+                                    <div class="tech-slot-picker-dropdown" id="cityLeagueTechSlotDropdown"></div>
+                                </div>
+                            </div>
                             <div id="cityLeagueHandStats" class="city-league-hand-stats"></div>
                             <div id="cityLeagueMyDeckVisual" class="section-panel city-league-mydeck-visual d-none">
                                 <div class="city-league-mydeck-header">
@@ -780,6 +803,13 @@
                                         <button class="btn btn-primary" onclick="loadMetaCardAnalysis('cityLeague')" data-i18n="btn.loadMetaAnalysis">Load Meta Analysis</button>
                                     </div>
                                 </div>
+                            </div>
+                            <div class="tech-vs-normal-section d-none" id="cityLeagueTechVsNormalSection">
+                                <div class="tech-vs-normal-header">
+                                    <h3 class="tech-vs-normal-title" data-i18n="techVsNormal.title">Tech vs Normal</h3>
+                                    <span class="tech-vs-normal-subtitle" data-i18n="techVsNormal.subtitle">Compares the latest Normal build to the latest Tech build for this source.</span>
+                                </div>
+                                <div class="tech-vs-normal-body" id="cityLeagueTechVsNormalBody"></div>
                             </div>
                         </div>
                     </div>
@@ -1225,6 +1255,27 @@
                                 <button class="btn-modern tertiary-danger deck-builder-clear-btn" onclick="clearDeck('currentMeta')" id="currentMetaClearDeckBtn" data-i18n="cl.clear">Clear</button>
                             </div>
                         </div>
+                        <div class="tech-slots-row" data-source="currentMeta">
+                            <div class="tech-slots-header">
+                                <span class="tech-slots-label" data-i18n="techSlots.label">Tech Cards</span>
+                                <span class="tech-slots-hint" data-i18n="techSlots.hint">(forced into next Generate)</span>
+                                <span class="tech-slots-count" id="currentMetaTechSlotsCount">0/10</span>
+                                <div class="tech-slots-header-actions">
+                                    <button class="btn-modern btn-tiny btn-secondary" onclick="clearTechSlots('currentMeta')" data-i18n="techSlots.clearBtn">Clear</button>
+                                </div>
+                            </div>
+                            <div class="tech-slots-grid" id="currentMetaTechSlotsGrid"></div>
+                            <div class="tech-slot-picker d-none" id="currentMetaTechSlotPicker">
+                                <input class="tech-slot-picker-input" id="currentMetaTechSlotInput" type="text"
+                                    placeholder="Search a card to add as tech..."
+                                    data-i18n-placeholder="techSlots.searchPlaceholder"
+                                    oninput="techSlotSearch(this, 'currentMeta')"
+                                    onblur="setTimeout(()=>hideTechSlotPicker('currentMeta'), 200)"
+                                    onkeydown="if(event.key==='Escape'){hideTechSlotPicker('currentMeta')}"
+                                    autocomplete="off">
+                                <div class="tech-slot-picker-dropdown" id="currentMetaTechSlotDropdown"></div>
+                            </div>
+                        </div>
                         <div id="currentMetaHandStats" class="current-meta-hand-stats-block"></div>
 
                         <!-- My Deck Overview -->
@@ -1304,10 +1355,17 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="tech-vs-normal-section d-none" id="currentMetaTechVsNormalSection">
+                            <div class="tech-vs-normal-header">
+                                <h3 class="tech-vs-normal-title" data-i18n="techVsNormal.title">Tech vs Normal</h3>
+                                <span class="tech-vs-normal-subtitle" data-i18n="techVsNormal.subtitle">Compares the latest Normal build to the latest Tech build for this source.</span>
+                            </div>
+                            <div class="tech-vs-normal-body" id="currentMetaTechVsNormalBody"></div>
+                        </div>
                     </div>
                 </div>
             </div>
-            
+
             <!-- Tab 5: Past Meta -->
             <div id="past-meta" class="tab-content">
                 <div class="container">
@@ -1443,7 +1501,30 @@
                                 <button class="btn-modern tertiary-danger deck-builder-clear-btn" onclick="clearDeck('pastMeta')" id="pastMetaClearDeckBtn" data-i18n="cl.clear">Clear</button>
                             </div>
                         </div>
-                        
+
+                        <div class="tech-slots-row" data-source="pastMeta">
+                            <div class="tech-slots-header">
+                                <span class="tech-slots-label" data-i18n="techSlots.label">Tech Cards</span>
+                                <span class="tech-slots-hint" data-i18n="techSlots.hint">(forced into next Generate)</span>
+                                <span class="tech-slots-count" id="pastMetaTechSlotsCount">0/10</span>
+                                <div class="tech-slots-header-actions">
+                                    <button class="btn-modern btn-tiny" onclick="openAntiTechModal('pastMeta')" data-i18n="antiTech.buildVsBtn" data-i18n-title="antiTech.buildVsBtnTitle" title="Build vs a specific deck — auto-fills tech slots">Build vs ...</button>
+                                    <button class="btn-modern btn-tiny btn-secondary" onclick="clearTechSlots('pastMeta')" data-i18n="techSlots.clearBtn">Clear</button>
+                                </div>
+                            </div>
+                            <div class="tech-slots-grid" id="pastMetaTechSlotsGrid"></div>
+                            <div class="tech-slot-picker d-none" id="pastMetaTechSlotPicker">
+                                <input class="tech-slot-picker-input" id="pastMetaTechSlotInput" type="text"
+                                    placeholder="Search a card to add as tech..."
+                                    data-i18n-placeholder="techSlots.searchPlaceholder"
+                                    oninput="techSlotSearch(this, 'pastMeta')"
+                                    onblur="setTimeout(()=>hideTechSlotPicker('pastMeta'), 200)"
+                                    onkeydown="if(event.key==='Escape'){hideTechSlotPicker('pastMeta')}"
+                                    autocomplete="off">
+                                <div class="tech-slot-picker-dropdown" id="pastMetaTechSlotDropdown"></div>
+                            </div>
+                        </div>
+
                         <div id="pastMetaHandStats" class="past-meta-hand-stats-block"></div>
                         <!-- My Deck Overview -->
                         <div id="pastMetaMyDeckVisual" class="section-panel d-none">
@@ -1479,11 +1560,18 @@
                                 </div>
                             </div>
                         </div>
-                        
+                        <div class="tech-vs-normal-section d-none" id="pastMetaTechVsNormalSection">
+                            <div class="tech-vs-normal-header">
+                                <h3 class="tech-vs-normal-title" data-i18n="techVsNormal.title">Tech vs Normal</h3>
+                                <span class="tech-vs-normal-subtitle" data-i18n="techVsNormal.subtitle">Compares the latest Normal build to the latest Tech build for this source.</span>
+                            </div>
+                            <div class="tech-vs-normal-body" id="pastMetaTechVsNormalBody"></div>
+                        </div>
+
                     </div>
                 </div>
             </div>
-            
+
             <!-- Tab 6: Cards -->
             <div id="cards" class="tab-content">
                 <div class="header">

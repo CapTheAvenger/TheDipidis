@@ -114,6 +114,382 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             const list = Array.isArray(arr) ? arr : [];
             window.pinnedCards[source] = new Set(list.map(_pinKey).filter(Boolean));
         };
+
+        // Tech-Slot state — separate bucket from pinnedCards so the UX
+        // can show the user "your 10 chosen tech cards" without polluting
+        // the regular pin list (heart icons in the deck grid). At build
+        // time they fold into the same Stage-0 pin pipeline so the
+        // algorithm sees one merged set of forced inclusions.
+        //
+        // Max 10 per source. Stored as ordered Array (not Set) so the
+        // UI can render the slot tiles in the order the user picked
+        // them. Persisted alongside the deck via the save/load wrappers.
+        const TECH_SLOTS_MAX = 10;
+        window.TECH_SLOTS_MAX = TECH_SLOTS_MAX;
+        window.techSlots = {
+            cityLeague: [],
+            currentMeta: [],
+            pastMeta: [],
+        };
+
+        function getTechSlotNames(source) {
+            const bucket = (window.techSlots || {})[source];
+            return Array.isArray(bucket) ? bucket.slice() : [];
+        }
+        window.getTechSlotNames = getTechSlotNames;
+
+        function _hasTechSlot(source, cardName) {
+            const bucket = (window.techSlots || {})[source];
+            if (!Array.isArray(bucket)) return false;
+            const key = _pinKey(cardName);
+            return bucket.some(n => _pinKey(n) === key);
+        }
+        window.hasTechSlot = _hasTechSlot;
+
+        function addTechSlot(source, cardName) {
+            if (source !== 'cityLeague' && source !== 'currentMeta' && source !== 'pastMeta') return false;
+            const bucket = window.techSlots[source];
+            if (!Array.isArray(bucket)) return false;
+            const trimmed = String(cardName || '').trim();
+            if (!trimmed) return false;
+            if (bucket.length >= TECH_SLOTS_MAX) {
+                if (typeof showToast === 'function') {
+                    const tpl = t('techSlots.full') || 'Tech slots full (max {n}).';
+                    showToast(tpl.replace('{n}', TECH_SLOTS_MAX), 'warning', 2500);
+                }
+                return false;
+            }
+            if (_hasTechSlot(source, trimmed)) {
+                if (typeof showToast === 'function') {
+                    const tpl = t('techSlots.duplicate') || '"{n}" is already in your tech slots.';
+                    showToast(tpl.replace('{n}', trimmed), 'info', 2000);
+                }
+                return false;
+            }
+            bucket.push(trimmed);
+            try {
+                if (source === 'cityLeague' && typeof saveCityLeagueDeck === 'function') saveCityLeagueDeck();
+                else if (source === 'currentMeta' && typeof saveCurrentMetaDeck === 'function') saveCurrentMetaDeck();
+                else if (source === 'pastMeta' && typeof savePastMetaDeck === 'function') savePastMetaDeck();
+            } catch (_) { /* swallow */ }
+            if (typeof renderTechSlotsUI === 'function') renderTechSlotsUI(source);
+            return true;
+        }
+        window.addTechSlot = addTechSlot;
+
+        function removeTechSlot(source, cardName) {
+            if (source !== 'cityLeague' && source !== 'currentMeta' && source !== 'pastMeta') return false;
+            const bucket = window.techSlots[source];
+            if (!Array.isArray(bucket)) return false;
+            const key = _pinKey(cardName);
+            const idx = bucket.findIndex(n => _pinKey(n) === key);
+            if (idx < 0) return false;
+            bucket.splice(idx, 1);
+            try {
+                if (source === 'cityLeague' && typeof saveCityLeagueDeck === 'function') saveCityLeagueDeck();
+                else if (source === 'currentMeta' && typeof saveCurrentMetaDeck === 'function') saveCurrentMetaDeck();
+                else if (source === 'pastMeta' && typeof savePastMetaDeck === 'function') savePastMetaDeck();
+            } catch (_) { /* swallow */ }
+            if (typeof renderTechSlotsUI === 'function') renderTechSlotsUI(source);
+            return true;
+        }
+        window.removeTechSlot = removeTechSlot;
+
+        function clearTechSlots(source) {
+            if (source !== 'cityLeague' && source !== 'currentMeta' && source !== 'pastMeta') return;
+            window.techSlots[source] = [];
+            try {
+                if (source === 'cityLeague' && typeof saveCityLeagueDeck === 'function') saveCityLeagueDeck();
+                else if (source === 'currentMeta' && typeof saveCurrentMetaDeck === 'function') saveCurrentMetaDeck();
+                else if (source === 'pastMeta' && typeof savePastMetaDeck === 'function') savePastMetaDeck();
+            } catch (_) { /* swallow */ }
+            if (typeof renderTechSlotsUI === 'function') renderTechSlotsUI(source);
+            if (typeof showToast === 'function') {
+                showToast(t('techSlots.cleared') || 'Tech slots cleared.', 'info', 1800);
+            }
+        }
+        window.clearTechSlots = clearTechSlots;
+
+        window.techSlotsToArray = function(source) {
+            const bucket = (window.techSlots || {})[source];
+            return Array.isArray(bucket) ? bucket.slice() : [];
+        };
+        window.techSlotsFromArray = function(source, arr) {
+            if (!window.techSlots) return;
+            const list = Array.isArray(arr) ? arr.slice(0, TECH_SLOTS_MAX) : [];
+            window.techSlots[source] = list.filter(n => typeof n === 'string' && n.trim().length > 0);
+        };
+
+        // ────────────────────────────────────────────────────────────
+        // TECH-SLOT UI — renders 10 tiles (filled or empty) plus a
+        // typeahead picker. Re-rendered whenever the slots change.
+        // The picker reuses the deckBuilderShowAutocomplete pattern:
+        // input.length >= 2 triggers a dropdown of card-DB suggestions.
+        // ────────────────────────────────────────────────────────────
+        function _tsEscapeHtml(s) {
+            return String(s == null ? '' : s)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+        function _tsEscapeJs(s) {
+            return String(s == null ? '' : s).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+        }
+
+        function renderTechSlotsUI(source) {
+            if (source !== 'cityLeague' && source !== 'currentMeta' && source !== 'pastMeta') return;
+            const grid = document.getElementById(source + 'TechSlotsGrid');
+            const countEl = document.getElementById(source + 'TechSlotsCount');
+            if (!grid) return;
+            const names = getTechSlotNames(source);
+            grid.innerHTML = '';
+            for (let i = 0; i < TECH_SLOTS_MAX; i++) {
+                const tile = document.createElement('div');
+                const name = names[i];
+                if (name) {
+                    tile.className = 'tech-slot-tile tech-slot-filled';
+                    const safeName = _tsEscapeHtml(name);
+                    const jsName = _tsEscapeJs(name);
+                    tile.innerHTML =
+                        '<span class="tech-slot-name" title="' + safeName + '">' + safeName + '</span>' +
+                        '<button class="tech-slot-remove" type="button" ' +
+                        'onclick="removeTechSlot(\'' + source + '\', \'' + jsName + '\')" ' +
+                        'aria-label="Remove tech card" title="Remove">×</button>';
+                } else {
+                    tile.className = 'tech-slot-tile tech-slot-empty';
+                    tile.setAttribute('role', 'button');
+                    tile.setAttribute('tabindex', '0');
+                    tile.innerHTML = '<span class="tech-slot-plus">+</span>';
+                    tile.addEventListener('click', () => showTechSlotPicker(source));
+                    tile.addEventListener('keydown', (e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            showTechSlotPicker(source);
+                        }
+                    });
+                }
+                grid.appendChild(tile);
+            }
+            if (countEl) countEl.textContent = names.length + '/' + TECH_SLOTS_MAX;
+        }
+        window.renderTechSlotsUI = renderTechSlotsUI;
+
+        function showTechSlotPicker(source) {
+            if (getTechSlotNames(source).length >= TECH_SLOTS_MAX) {
+                if (typeof showToast === 'function') {
+                    const tpl = t('techSlots.full') || 'Tech slots full (max {n}).';
+                    showToast(tpl.replace('{n}', TECH_SLOTS_MAX), 'warning', 2500);
+                }
+                return;
+            }
+            const picker = document.getElementById(source + 'TechSlotPicker');
+            const input = document.getElementById(source + 'TechSlotInput');
+            const dropdown = document.getElementById(source + 'TechSlotDropdown');
+            if (!picker || !input) return;
+            picker.classList.remove('d-none');
+            input.value = '';
+            if (dropdown) dropdown.innerHTML = '';
+            try { input.focus(); } catch (_) { /* swallow */ }
+        }
+        window.showTechSlotPicker = showTechSlotPicker;
+
+        function hideTechSlotPicker(source) {
+            const picker = document.getElementById(source + 'TechSlotPicker');
+            if (picker) picker.classList.add('d-none');
+        }
+        window.hideTechSlotPicker = hideTechSlotPicker;
+
+        function techSlotSearch(inputEl, source) {
+            const dropdown = document.getElementById(source + 'TechSlotDropdown');
+            if (!dropdown) return;
+            const searchTerm = String(inputEl.value || '').trim().toLowerCase();
+            const cardsDb = window.allCardsDatabase || window.allCardsData || [];
+            if (cardsDb.length === 0 || searchTerm.length < 2) {
+                dropdown.innerHTML = '';
+                return;
+            }
+            const matches = [];
+            const seen = new Set();
+            for (const card of cardsDb) {
+                if (!card.name || seen.has(card.name)) continue;
+                if (_hasTechSlot(source, card.name)) continue;
+                const nameEn = (card.name || '').toLowerCase();
+                const nameDe = (card.name_de || card.german_name || '').toLowerCase();
+                if (nameEn.includes(searchTerm) || nameDe.includes(searchTerm)) {
+                    matches.push(card);
+                    seen.add(card.name);
+                    if (matches.length >= 12) break;
+                }
+            }
+            if (matches.length === 0) {
+                dropdown.innerHTML = '<div class="tech-slot-suggestion tech-slot-suggestion-empty">' +
+                    _tsEscapeHtml(t('techSlots.noMatches') || 'No matches.') + '</div>';
+                return;
+            }
+            dropdown.innerHTML = matches.map(c => {
+                const safeName = _tsEscapeHtml(c.name);
+                const jsName = _tsEscapeJs(c.name);
+                const meta = [(c.set || ''), (c.number || '')].filter(Boolean).join(' ');
+                // mousedown (not click) so the suggestion fires BEFORE the
+                // input's blur tears the picker down.
+                return '<div class="tech-slot-suggestion" ' +
+                    'onmousedown="event.preventDefault(); addTechSlot(\'' + source + '\', \'' + jsName + '\'); hideTechSlotPicker(\'' + source + '\');">' +
+                    '<span class="tech-slot-suggestion-name">' + safeName + '</span>' +
+                    '<span class="tech-slot-suggestion-meta">' + _tsEscapeHtml(meta) + '</span>' +
+                    '</div>';
+            }).join('');
+        }
+        window.techSlotSearch = techSlotSearch;
+
+        // Auto-render on init for any source whose UI is already in DOM.
+        // Initial state is just 10 empty tiles — no slots picked yet.
+        setTimeout(function() {
+            ['cityLeague', 'currentMeta', 'pastMeta'].forEach(src => {
+                try { renderTechSlotsUI(src); } catch (_) { /* swallow */ }
+                try { renderTechVsNormalPanel(src); } catch (_) { /* swallow */ }
+            });
+        }, 50);
+
+        // ────────────────────────────────────────────────────────────
+        // TECH-VS-NORMAL COMPARE PANEL — page-bottom diff between the
+        // last Vanilla build (lastVanillaDeck[source]) and the last
+        // Tech build (lastTechDeck[source]). Hidden unless BOTH
+        // snapshots exist for the source. Shows card-level diff
+        // (added / removed / count changed) + total consistency-score
+        // delta from the algorithm. Only renders the diff for the
+        // source whose tab the user is currently looking at; the JS
+        // is cheap enough that we re-render all 3 on every call.
+        // ────────────────────────────────────────────────────────────
+        function _humanTimeAgo(ts) {
+            if (!ts || !Number.isFinite(ts)) return '';
+            const secs = Math.max(0, Math.round((Date.now() - ts) / 1000));
+            if (secs < 60) return secs + 's ago';
+            const mins = Math.round(secs / 60);
+            if (mins < 60) return mins + 'm ago';
+            const hrs = Math.round(mins / 60);
+            if (hrs < 24) return hrs + 'h ago';
+            const days = Math.round(hrs / 24);
+            return days + 'd ago';
+        }
+
+        function _tvnDiff(vanilla, tech) {
+            // Both baselines are { cardName: count, __key: ... }. Filter
+            // out the __keys then bucket cards into added / removed /
+            // count-changed lists vs the vanilla baseline.
+            const vMap = new Map();
+            Object.entries(vanilla || {}).forEach(([k, v]) => {
+                if (k.startsWith('__')) return;
+                vMap.set(k, Number(v) || 0);
+            });
+            const tMap = new Map();
+            Object.entries(tech || {}).forEach(([k, v]) => {
+                if (k.startsWith('__')) return;
+                tMap.set(k, Number(v) || 0);
+            });
+            const added = [], removed = [], changed = [];
+            tMap.forEach((tc, name) => {
+                const vc = vMap.get(name) || 0;
+                if (vc === 0) added.push({ name, count: tc });
+                else if (tc !== vc) changed.push({ name, vc, tc, delta: tc - vc });
+            });
+            vMap.forEach((vc, name) => {
+                if (!tMap.has(name)) removed.push({ name, count: vc });
+            });
+            added.sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
+            removed.sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
+            changed.sort((a, b) => Math.abs(b.delta) - Math.abs(a.delta) || a.name.localeCompare(b.name));
+            return { added, removed, changed };
+        }
+
+        function renderTechVsNormalPanel(source) {
+            if (source !== 'cityLeague' && source !== 'currentMeta' && source !== 'pastMeta') return;
+            const section = document.getElementById(source + 'TechVsNormalSection');
+            const body = document.getElementById(source + 'TechVsNormalBody');
+            if (!section || !body) return;
+
+            const vanilla = (window.lastVanillaDeck || {})[source];
+            const tech = (window.lastTechDeck || {})[source];
+
+            if (!vanilla || !tech) {
+                section.classList.add('d-none');
+                body.innerHTML = '';
+                return;
+            }
+            section.classList.remove('d-none');
+
+            const diff = _tvnDiff(vanilla, tech);
+            const vScore = Number(vanilla.__totalConsistencyScore) || 0;
+            const tScore = Number(tech.__totalConsistencyScore) || 0;
+            const dScore = tScore - vScore;
+            const dScoreText = (dScore >= 0 ? '+' : '') + dScore.toFixed(0);
+            const dScoreClass = dScore >= 0 ? 'tvn-delta-positive' : 'tvn-delta-negative';
+
+            const vAgo = _humanTimeAgo(vanilla.__capturedAt);
+            const tAgo = _humanTimeAgo(tech.__capturedAt);
+            const target = tech.__antiTechTarget ? _tsEscapeHtml(tech.__antiTechTarget) : '';
+            const techHeadingTpl = target
+                ? ((t('techVsNormal.techHeadingVs') || 'Tech Build vs {target}').replace('{target}', target))
+                : (t('techVsNormal.techHeading') || 'Tech Build');
+
+            const noChangesMsg = t('techVsNormal.noChanges') || 'No card differences between the two builds.';
+            const addedLabel = t('techVsNormal.added') || 'Added for Tech';
+            const removedLabel = t('techVsNormal.removed') || 'Cut for Tech';
+            const changedLabel = t('techVsNormal.changed') || 'Count changes';
+            const scoreLabel = t('techVsNormal.score') || 'Total consistency score';
+            const deltaLabel = t('techVsNormal.delta') || 'Δ vs Normal';
+            const normalHeadingLabel = t('techVsNormal.normalHeading') || 'Normal Build';
+
+            const renderList = (items, fmt) => items.length === 0
+                ? '<li class="tvn-diff-empty">—</li>'
+                : items.map(fmt).join('');
+
+            const hasDiff = diff.added.length || diff.removed.length || diff.changed.length;
+
+            body.innerHTML = `
+                <div class="tech-vs-normal-snapshots">
+                    <div class="tvn-snapshot tvn-vanilla">
+                        <h4 class="tvn-snapshot-title">${_tsEscapeHtml(normalHeadingLabel)}</h4>
+                        <span class="tvn-snapshot-meta">${_tsEscapeHtml(vAgo)}</span>
+                        <span class="tvn-snapshot-score">${_tsEscapeHtml(scoreLabel)}: <strong>${vScore.toFixed(0)}</strong></span>
+                    </div>
+                    <div class="tvn-snapshot tvn-tech">
+                        <h4 class="tvn-snapshot-title">${techHeadingTpl}</h4>
+                        <span class="tvn-snapshot-meta">${_tsEscapeHtml(tAgo)}</span>
+                        <span class="tvn-snapshot-score">${_tsEscapeHtml(scoreLabel)}: <strong>${tScore.toFixed(0)}</strong> <span class="tvn-delta ${dScoreClass}">${_tsEscapeHtml(deltaLabel)} ${dScoreText}</span></span>
+                    </div>
+                </div>
+                ${hasDiff ? `
+                <div class="tech-vs-normal-diff">
+                    <div class="tvn-diff-col tvn-col-added">
+                        <h5 class="tvn-diff-heading">${_tsEscapeHtml(addedLabel)} <span class="tvn-diff-count">(${diff.added.length})</span></h5>
+                        <ul class="tvn-diff-list">${renderList(diff.added, x => `<li><span class="tvn-card-count">${x.count}×</span> ${_tsEscapeHtml(x.name)}</li>`)}</ul>
+                    </div>
+                    <div class="tvn-diff-col tvn-col-removed">
+                        <h5 class="tvn-diff-heading">${_tsEscapeHtml(removedLabel)} <span class="tvn-diff-count">(${diff.removed.length})</span></h5>
+                        <ul class="tvn-diff-list">${renderList(diff.removed, x => `<li><span class="tvn-card-count">${x.count}×</span> ${_tsEscapeHtml(x.name)}</li>`)}</ul>
+                    </div>
+                    <div class="tvn-diff-col tvn-col-changed">
+                        <h5 class="tvn-diff-heading">${_tsEscapeHtml(changedLabel)} <span class="tvn-diff-count">(${diff.changed.length})</span></h5>
+                        <ul class="tvn-diff-list">${renderList(diff.changed, x => `<li>${_tsEscapeHtml(x.name)}: <span class="tvn-card-count">${x.vc}→${x.tc}</span> <span class="tvn-delta ${x.delta >= 0 ? 'tvn-delta-positive' : 'tvn-delta-negative'}">${x.delta >= 0 ? '+' : ''}${x.delta}</span></li>`)}</ul>
+                    </div>
+                </div>` : `<div class="tech-vs-normal-empty">${_tsEscapeHtml(noChangesMsg)}</div>`}
+            `;
+        }
+        window.renderTechVsNormalPanel = renderTechVsNormalPanel;
+
+        function refreshTechVsNormalPanel(source) {
+            if (source) {
+                try { renderTechVsNormalPanel(source); } catch (_) { /* swallow */ }
+                return;
+            }
+            ['cityLeague', 'currentMeta', 'pastMeta'].forEach(src => {
+                try { renderTechVsNormalPanel(src); } catch (_) { /* swallow */ }
+            });
+        }
+        window.refreshTechVsNormalPanel = refreshTechVsNormalPanel;
+
         devLog('[Init] Starting with empty deck (localStorage cleared on page load)');
         // Check for a shared deck in the URL – runs after clearing so it wins
         setTimeout(function() { if (typeof importDeckFromUrl === 'function') importDeckFromUrl(); }, 100);
@@ -6808,9 +7184,26 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             const _pinnedSet = (typeof getPinnedCardNames === 'function')
                 ? getPinnedCardNames(source)
                 : new Set();
+            // Tech-Slots fold into the same Stage-0 pipeline as user
+            // pins. The user picked these cards explicitly via the
+            // tech-slot UI (or via the Build-vs auto-fill), so the
+            // builder treats them as forced inclusions just like pins.
+            // The two sets stay separate at the UI level so the
+            // builder can show them differently, but merge here so the
+            // algorithm only needs one code path.
+            const _techSlotNames = (typeof getTechSlotNames === 'function')
+                ? getTechSlotNames(source)
+                : [];
+            _techSlotNames.forEach(nm => {
+                const key = (typeof normalizeCardName === 'function')
+                    ? normalizeCardName(nm || '')
+                    : String(nm || '').toLowerCase().trim();
+                if (key) _pinnedSet.add(key);
+            });
             window.__lastBuildPinDiagnostics = {
                 source,
                 pinned: Array.from(_pinnedSet),
+                techSlots: _techSlotNames.slice(),
                 injected: [],
                 missing: [],
             };
@@ -7347,12 +7740,14 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                     savePastMetaDeck();
                 }
 
-                // Snapshot the freshly generated deck as the "Vanilla
-                // baseline" for the UserVsVanilla compare panel. The
-                // panel will diff the user's later edits against this
-                // map. Stored per source so the user can switch tabs
-                // without losing the baseline. Stripped of (SET NUM)
-                // suffixes so print swaps don't pollute the diff.
+                // Snapshot the freshly generated deck. Vanilla builds
+                // (no anti-tech target, no tech slots filled) write to
+                // `lastVanillaDeck`. Tech builds (anti-tech target set
+                // OR tech-slots filled) ALSO write to `lastTechDeck` so
+                // the Tech-vs-Normal compare panel at the page bottom
+                // can diff the two snapshots. The vanilla bucket isn't
+                // overwritten by tech builds — that would erase the
+                // baseline the user just built against.
                 try {
                     const generatedDeck =
                         source === 'cityLeague' ? window.cityLeagueDeck :
@@ -7369,16 +7764,85 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                         });
                         baseline.__archetype = currentArchetype || null;
                         baseline.__capturedAt = Date.now();
-                        if (!window.lastVanillaDeck) window.lastVanillaDeck = {};
-                        window.lastVanillaDeck[source] = baseline;
+                        // Per-card consistency score isn't on the deck
+                        // map itself, but we have the latest scored
+                        // pool in `consistencyDeck` from the build pass
+                        // above. Sum its consistencyScore × count for a
+                        // total-deck score the compare panel can show.
+                        try {
+                            const _scoreLookup = new Map();
+                            if (Array.isArray(consistencyDeck)) {
+                                consistencyDeck.forEach(entry => {
+                                    if (!entry || !entry.card) return;
+                                    const nm = String(entry.card.card_name || '').trim();
+                                    if (!nm) return;
+                                    _scoreLookup.set(nm.toLowerCase(), Number(entry.card.consistencyScore) || 0);
+                                });
+                            }
+                            let totalScore = 0;
+                            Object.entries(baseline).forEach(([nm, count]) => {
+                                if (nm.startsWith('__')) return;
+                                const s = _scoreLookup.get(String(nm).toLowerCase()) || 0;
+                                totalScore += s * (Number(count) || 0);
+                            });
+                            baseline.__totalConsistencyScore = totalScore;
+                        } catch (_) { /* swallow — score is optional */ }
+
+                        const _wasTechBuild = !!_antiTechTarget || (_techSlotNames && _techSlotNames.length > 0);
+                        baseline.__wasTechBuild = _wasTechBuild;
+                        baseline.__antiTechTarget = _antiTechTarget || null;
+
+                        if (_wasTechBuild) {
+                            if (!window.lastTechDeck) window.lastTechDeck = {};
+                            window.lastTechDeck[source] = baseline;
+                        } else {
+                            if (!window.lastVanillaDeck) window.lastVanillaDeck = {};
+                            window.lastVanillaDeck[source] = baseline;
+                        }
+
                         if (source === 'currentMeta' && typeof window.refreshUserVsVanillaPanel === 'function') {
                             window.refreshUserVsVanillaPanel();
+                        }
+                        if (typeof window.refreshTechVsNormalPanel === 'function') {
+                            window.refreshTechVsNormalPanel(source);
                         }
                     }
                 } catch (e) { devLog('[autoCompleteConsistency] vanilla snapshot failed:', e); }
 
                 scheduleDeckDisplayUpdate(source);
                 if (typeof resetDeckRarityToggle === 'function') resetDeckRarityToggle(source);
+
+                // Build-vs auto-fill: when the user opened the anti-tech
+                // modal and picked a target, surface the TechAudit picks
+                // in the Tech-Slot UI so they can see + tweak. We rebuild
+                // techSlots[source] from the picked counters across all
+                // active threat categories. Caps at TECH_SLOTS_MAX so a
+                // heavy aggression with many threats doesn't overflow.
+                if (_antiTechTarget && typeof techAuditCategoryBudget !== 'undefined' && techAuditCategoryBudget && techAuditCategoryBudget.forEach) {
+                    try {
+                        const _names = [];
+                        const _seen = new Set();
+                        techAuditCategoryBudget.forEach((budget) => {
+                            if (!budget || !Array.isArray(budget.picked)) return;
+                            budget.picked.forEach(p => {
+                                const nm = p && p.name ? String(p.name).trim() : '';
+                                if (!nm || _seen.has(nm.toLowerCase())) return;
+                                _seen.add(nm.toLowerCase());
+                                _names.push(nm);
+                            });
+                        });
+                        if (_names.length > 0 && typeof window.techSlotsFromArray === 'function') {
+                            const cap = (typeof TECH_SLOTS_MAX === 'number' ? TECH_SLOTS_MAX : 10);
+                            window.techSlotsFromArray(source, _names.slice(0, cap));
+                            if (typeof renderTechSlotsUI === 'function') renderTechSlotsUI(source);
+                            try {
+                                if (source === 'cityLeague' && typeof saveCityLeagueDeck === 'function') saveCityLeagueDeck();
+                                else if (source === 'currentMeta' && typeof saveCurrentMetaDeck === 'function') saveCurrentMetaDeck();
+                                else if (source === 'pastMeta' && typeof savePastMetaDeck === 'function') savePastMetaDeck();
+                            } catch (_) { /* swallow */ }
+                        }
+                    } catch (e) { devLog('[autoCompleteConsistency] tech-slot autofill failed:', e); }
+                }
 
                 if (normalizedTotal >= 60) {
                     let successMsg = t('deck.consistencySuccess');

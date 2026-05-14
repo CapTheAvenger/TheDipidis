@@ -3015,13 +3015,24 @@
                     };"></div></div>`
                     : '';
 
+                const isPinned = (typeof isPinnedCard === 'function') && isPinnedCard('cityLeague', cardName);
+                const pinnedClass = isPinned ? ' card-is-pinned' : '';
+                const pinTitle = isPinned
+                    ? (t('deck.pinTitleUnpin') || 'Unpin')
+                    : (t('deck.pinTitlePin') || 'Pin');
+                const pinIcon = isPinned ? '📌' : '📍';
+                const pinBadgeHtml = isPinned
+                    ? `<div class="deck-card-pin-badge" title="${pinTitle}">📌</div>`
+                    : '';
+
                 cardHtmls.push({ pct: usagePct, isAceSpec: isAceSpecCard, html: `
-                    <div class="card-item city-league-card-item" data-card-name="${cardName.toLowerCase()}" data-card-name-de="${germanCardNameEscaped}" data-card-set="${setCode.toLowerCase()}" data-card-number="${setNumber.toLowerCase()}" data-card-type="${filterCategory}">
+                    <div class="card-item city-league-card-item${pinnedClass}" data-card-name="${cardName.toLowerCase()}" data-card-name-de="${germanCardNameEscaped}" data-card-set="${setCode.toLowerCase()}" data-card-number="${setNumber.toLowerCase()}" data-card-type="${filterCategory}">
                         <div class="card-image-container city-league-card-image-container">
                             <img src="${imageUrl}" alt="${cardName}" loading="lazy" referrerpolicy="no-referrer" class="city-league-card-image" onerror="handleCardImageError(this, '${setCode}', '${setNumber}')" onclick="if (typeof event !== 'undefined' && event) event.stopPropagation(); showSingleCard(this.src, '${cardNameEscaped} (${setCode} ${setNumber})');">
                             ${usageBarHtml}
                             <!-- Red badge: Max Count (top-right) -->
                             <div class="city-league-card-badge city-league-card-badge-max">${finalMaxCount}</div>
+                            ${pinBadgeHtml}
                             ${typeof getWishlistBadgeHtml === 'function' ? getWishlistBadgeHtml(cardName, setCode, setNumber) : ''}
                             <!-- Green badge: Deck Count (top-left) - only show if > 0 -->
                             ${deckCount > 0 ? `<div class="city-league-card-badge city-league-card-badge-deck">${deckCount}</div>` : ''}
@@ -3039,6 +3050,7 @@
                                     <div class="city-league-card-action-row">
                                         <button class="city-league-card-action-btn city-league-card-remove-btn" onclick="event.stopPropagation(); removeCardFromDeck('cityLeague', '${cardNameEscaped}')" title="${t('cl.removeFromDeck')}">-</button>
                                         <button class="city-league-card-action-btn city-league-card-rarity-btn" onclick="event.stopPropagation(); openRaritySwitcher('${cardNameEscaped}', '${cardNameEscaped} (${setCode} ${setNumber})')" title="${t('cl.switchPrint')}">★</button>
+                                        <button class="city-league-card-action-btn city-league-card-pin-btn${isPinned ? ' is-active' : ''}" onclick="event.stopPropagation(); togglePinCard('cityLeague', '${cardNameEscaped}')" title="${pinTitle}">${pinIcon}</button>
                                         <button class="city-league-card-action-btn city-league-card-add-btn" onclick="event.stopPropagation(); addCardToDeck('cityLeague', '${cardNameEscaped}', '${setCode}', '${setNumber}')" title="${t('cl.addToDeckTooltip')}">+</button>
                                     </div>
                                     <div class="city-league-card-action-row">

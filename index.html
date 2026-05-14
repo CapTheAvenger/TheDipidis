@@ -490,30 +490,53 @@
                 <div class="header-flex-user">
                     <button id="langToggleBtn" onclick="switchLanguage(getLang() === 'en' ? 'de' : 'en')" class="lang-toggle-btn" title="Switch language" data-i18n-title="header.switchLanguageTitle">DE</button>
                     <button id="battleJournalFab" class="header-icon-btn header-journal-btn" type="button" onclick="openBattleJournalSheet()" title="Battle Journal" aria-label="Battle Journal" data-i18n-title="bj.openShort" data-i18n-aria="bj.openShort">
-                        <img loading="lazy" src="images/Note.png" alt="" class="header-icon-img" aria-hidden="true">
+                        <svg class="header-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                            <path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v17a1 1 0 0 1-1 1H6.5A2.5 2.5 0 0 1 4 18.5v-14z"></path>
+                            <path d="M4 18.5A2.5 2.5 0 0 1 6.5 16H20"></path>
+                            <path d="M8 7h7M8 11h7"></path>
+                        </svg>
                         <span class="header-icon-label" data-i18n="bj.openShort">Journal</span>
                         <span id="battleJournalFabBadge" class="header-icon-badge display-none">0</span>
                     </button>
                     <button class="header-icon-btn header-mydecks-btn" onclick="openProfileSection('decks')" title="My Decks" aria-label="My Decks" data-i18n-title="header.myDecks" data-i18n-aria="header.myDecks">
-                        <img loading="lazy" src="images/Box.png" alt="" class="header-icon-img" aria-hidden="true">
+                        <svg class="header-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                            <rect x="7" y="3" width="12" height="16" rx="2"></rect>
+                            <path d="M4 7v12a2 2 0 0 0 2 2h10"></path>
+                        </svg>
                         <span class="header-icon-label" data-i18n="header.myDecks">My Decks</span>
                     </button>
                     <button class="header-icon-btn header-wishlist-btn" onclick="openProfileSection('wishlist')" title="Wishlist" aria-label="Wishlist" data-i18n-title="header.wishlist" data-i18n-aria="header.wishlist">
-                        <img loading="lazy" src="images/wishlist.png" alt="" class="header-icon-img" aria-hidden="true">
+                        <svg class="header-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78z"></path>
+                        </svg>
                         <span class="header-icon-label" data-i18n="header.wishlist">Wishlist</span>
                     </button>
-                    <button class="header-dex-btn" onclick="switchTab('cards')" title="Card Database" aria-label="Card Database" data-i18n-title="header.cardDatabase">
-                        <img loading="lazy" src="images/Pokedex-PNG-Isolated-Pic.png" alt="Card Database" class="header-dex-icon">
+                    <button class="header-icon-btn header-cards-btn" onclick="switchTab('cards')" title="Card Database" aria-label="Card Database" data-i18n-title="header.cardDatabase" data-i18n-aria="header.cardDatabase">
+                        <svg class="header-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                            <rect x="3" y="3" width="7" height="9" rx="1.5"></rect>
+                            <rect x="14" y="3" width="7" height="5" rx="1.5"></rect>
+                            <rect x="14" y="12" width="7" height="9" rx="1.5"></rect>
+                            <rect x="3" y="16" width="7" height="5" rx="1.5"></rect>
+                        </svg>
+                        <span class="header-icon-label" data-i18n="header.cardDatabase">Cards</span>
                     </button>
                     <div id="user-menu">
-                        <button id="signin-btn" class="user-btn signin-btn" onclick="showAuthModal('signin')">
-                            <img loading="lazy" src="images/pokeball-icon.png" alt="Sign In" class="user-btn-icon">
-                            <span data-i18n="header.signIn">Sign In</span>
+                        <button id="signin-btn" class="header-icon-btn header-signin-btn" onclick="showAuthModal('signin')" title="Sign In" aria-label="Sign In" data-i18n-title="header.signIn" data-i18n-aria="header.signIn">
+                            <svg class="header-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                                <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+                                <polyline points="10 17 15 12 10 7"></polyline>
+                                <line x1="15" y1="12" x2="3" y2="12"></line>
+                            </svg>
+                            <span class="header-icon-label" data-i18n="header.signIn">Sign In</span>
                         </button>
                         <div id="user-info" class="user-info user-info-hidden">
-                            <button class="user-btn profile-btn profile-btn-iconbtn" onclick="switchTabAndUpdateMenu('profile')" title="My Profile" aria-label="My Profile" data-i18n-title="header.myProfile" data-i18n-aria="header.myProfile">
-                                <img loading="lazy" src="images/pokeball-icon.png" alt="" class="user-btn-icon">
-                                <span id="user-email-display" class="visually-hidden" data-i18n="header.myProfile">My Profile</span>
+                            <button class="header-icon-btn header-profile-btn" onclick="switchTabAndUpdateMenu('profile')" title="My Profile" aria-label="My Profile" data-i18n-title="header.myProfile" data-i18n-aria="header.myProfile">
+                                <svg class="header-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                    <circle cx="12" cy="7" r="4"></circle>
+                                </svg>
+                                <span class="header-icon-label" data-i18n="header.myProfile">Profile</span>
+                                <span id="user-email-display" class="visually-hidden"></span>
                             </button>
                         </div>
                     </div>

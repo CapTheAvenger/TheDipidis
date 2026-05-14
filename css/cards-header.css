@@ -99,6 +99,18 @@
     color: inherit;
     flex: 0 0 auto;
 }
+/* PNG variant — used by buttons that benefit from the recognisable
+   Pokémon-universe artwork (Pokédex, Pokéball). Slightly larger
+   footprint than the SVG strokes so the photographic detail still
+   reads cleanly at this size. */
+.header-icon-img {
+    width: 26px;
+    height: 26px;
+    object-fit: contain;
+    pointer-events: none;
+    display: block;
+    flex: 0 0 auto;
+}
 .header-icon-label {
     font-size: 10.5px;
     font-weight: 700;
@@ -108,6 +120,9 @@
     pointer-events: none;
     white-space: nowrap;
     text-transform: none;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 /* Per-button accent on hover — keeps the resting row visually calm
@@ -229,6 +244,10 @@
     .header-icon-svg {
         width: 20px;
         height: 20px;
+    }
+    .header-icon-img {
+        width: 24px;
+        height: 24px;
     }
     .header-icon-label {
         font-size: 10px;

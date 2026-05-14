@@ -328,6 +328,65 @@
   outline: none;
   border-color: #3498db;
 }
+
+/* Searchable deck picker — `<input list>` + `<datalist>` combo.
+   Sits where the plain <select> used to live and inherits the same
+   visual treatment, plus a magnifier glyph + a faint caret-down so
+   it still reads as "this opens a list". The input itself filters
+   the dropdown by what the user types, killing the long-scroll
+   problem on phones. */
+.mc-deck-search-wrap {
+  position: relative;
+  flex: 1 1 220px;
+  min-width: 200px;
+  max-width: 360px;
+}
+.mc-deck-search-input {
+  width: 100%;
+  padding: 9px 32px 9px 34px;
+  border: 1px solid #d0dae5;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  background: #f7f9fc;
+  color: #1a2533;
+  font-family: inherit;
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: text;
+}
+.mc-deck-search-input:focus {
+  outline: none;
+  border-color: #3498db;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.15);
+}
+.mc-deck-search-input::placeholder {
+  color: #8b9bb0;
+  font-weight: 500;
+}
+.mc-deck-search-wrap::before {
+  content: "🔍";
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.92rem;
+  pointer-events: none;
+  opacity: 0.65;
+}
+.mc-deck-search-wrap::after {
+  content: "";
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  width: 8px;
+  height: 8px;
+  border-right: 2px solid #7f8c98;
+  border-bottom: 2px solid #7f8c98;
+  transform: translateY(-70%) rotate(45deg);
+  pointer-events: none;
+  opacity: 0.55;
+}
 .mc-override-toggle {
   font-size: 0.82rem;
   color: #3498db;

@@ -3267,18 +3267,26 @@ window.MetaCall = (function () {
 
   function renderMyDeckPanel() {
     const decks   = (_shareList || []).map(d => d.name);
-    const options = decks.map(n =>
-      `<option value="${esc(n)}" ${n === _settings.myDeck ? 'selected' : ''}>${esc(n)}</option>`
-    ).join('');
+    const options = decks.map(n => `<option value="${esc(n)}"></option>`).join('');
+    const currentDeck = _settings.myDeck || '';
 
     return `
 <div class="metacall-panel">
   <div class="metacall-panel-title">${t('mc.panelMyDeck')}</div>
   <div class="mc-deck-select-row">
-    <select id="mc-my-deck" onchange="MetaCall._onMyDeck(this.value)">
-      <option value="">${t('mc.selectDeckPlaceholder')}</option>
-      ${options}
-    </select>
+    <div class="mc-deck-search-wrap">
+      <input type="text" id="mc-my-deck"
+             class="mc-deck-search-input"
+             list="mc-my-deck-options"
+             placeholder="${esc(t('mc.selectDeckPlaceholder'))}"
+             value="${esc(currentDeck)}"
+             autocomplete="off"
+             spellcheck="false"
+             aria-label="${esc(t('mc.panelMyDeck'))}"
+             oninput="MetaCall._onMyDeckInput(this.value)"
+             onchange="MetaCall._onMyDeckCommit(this)">
+      <datalist id="mc-my-deck-options">${options}</datalist>
+    </div>
     <button class="mc-override-toggle" onclick="MetaCall._toggleOverrides()" id="mc-override-btn">
       ${t('mc.adjustWinRates')}
     </button>
@@ -4894,6 +4902,44 @@ window.MetaCall = (function () {
     requestAnimationFrame(() => requestAnimationFrame(() => window.scrollTo(0, sy)));
   }
 
+  // Filter / select handler for the searchable My-Deck input. The
+  // <input list> + <datalist> combo lets users type to filter the
+  // archetype list instead of scrolling through a long <select>.
+  // We only commit a selection (and trigger the expensive renderAll
+  // path inside _onMyDeck) when the typed text matches a real deck
+  // name exactly — otherwise mid-keystroke re-renders would steal
+  // focus and erase what the user is typing.
+  function _onMyDeckInput(val) {
+    const trimmed = (val || '').trim();
+    if (!trimmed) {
+      if (_settings.myDeck) _onMyDeck('');
+      return;
+    }
+    const list = _shareList || [];
+    const match = list.find(d => d.name === trimmed)
+               || list.find(d => d.name.toLowerCase() === trimmed.toLowerCase());
+    if (match && match.name !== _settings.myDeck) {
+      _onMyDeck(match.name);
+    }
+  }
+
+  // Companion to _onMyDeckInput — fires on blur / datalist-pick
+  // (the `change` event). If the user typed something that doesn't
+  // match any deck and then walked away, snap the input back to the
+  // currently selected deck so the field doesn't sit with stale
+  // partial text that looks like a failed selection.
+  function _onMyDeckCommit(input) {
+    if (!input) return;
+    const trimmed = (input.value || '').trim();
+    if (!trimmed) return; // empty is already handled by _onMyDeckInput
+    const list = _shareList || [];
+    const match = list.find(d => d.name === trimmed)
+               || list.find(d => d.name.toLowerCase() === trimmed.toLowerCase());
+    if (!match) {
+      input.value = _settings.myDeck || '';
+    }
+  }
+
   function _onBrickFilter(val) {
     _settings.excludeBricks = (val === 'exclude');
     // Reload journal stats with new filter
@@ -5610,6 +5656,8 @@ window.MetaCall = (function () {
     _setTournamentType,
     _onToggleSource,
     _onMyDeck,
+    _onMyDeckInput,
+    _onMyDeckCommit,
     _onPersonalShare,
     _onWrOverride,
     _onBrickFilter,

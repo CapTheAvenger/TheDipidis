@@ -75,6 +75,7 @@
         if (suggestions) suggestions.innerHTML = '';
         _highlightQuickPick();
         _updateGenerateButtonState();
+        _renderPreview();
     }
 
     function _populateQuickPicks() {
@@ -127,7 +128,16 @@
         });
     }
 
+    function _bindAggressionInputs() {
+        document.querySelectorAll('input[name="antiTechAggression"]').forEach(el => {
+            if (el.__antiTechBound) return;
+            el.__antiTechBound = true;
+            el.addEventListener('change', () => _renderPreview());
+        });
+    }
+
     function _bindInputs() {
+        _bindAggressionInputs();
         const input = document.getElementById('antiTechCustomInput');
         if (input && !input.__antiTechBound) {
             input.__antiTechBound = true;
@@ -137,6 +147,7 @@
                     _selection = null;
                     _highlightQuickPick();
                     _updateGenerateButtonState();
+                    _renderPreview();
                 }
             });
             input.addEventListener('keydown', (e) => {
@@ -161,6 +172,219 @@
     function _readAggression() {
         const checked = document.querySelector('input[name="antiTechAggression"]:checked');
         return (checked && checked.value) || 'standard';
+    }
+
+    // ── Preview computation ─────────────────────────────────────────
+    // Shows: base WR vs target (from matchup CSV) → tech-adjusted WR
+    // (base + +3pts per matched threat category, cap +9). Mirrors the
+    // heuristic from #103 plus the slot logic the generator uses, so
+    // the user sees roughly what the build is about to deliver.
+
+    const _BONUS_PER_CAT  = 3;
+    const _BONUS_CAP      = 9;
+
+    function _wrClass(wr) {
+        if (!Number.isFinite(wr)) return 'wr-neutral';
+        if (wr >= 60) return 'wr-strong-pos';
+        if (wr >= 53) return 'wr-pos';
+        if (wr >= 47) return 'wr-neutral';
+        if (wr >= 40) return 'wr-neg';
+        return 'wr-strong-neg';
+    }
+
+    function _stripEx(name) {
+        return String(name || '').replace(/\s+ex\b/i, '').trim();
+    }
+
+    function _ensureActiveThreats() {
+        if (typeof window === 'undefined') return Promise.resolve(null);
+        if (window._activeThreatsCache !== undefined) return Promise.resolve(window._activeThreatsCache);
+        return fetch('data/active_threats.json', { cache: 'no-cache' })
+            .then(r => r.ok ? r.json() : null)
+            .catch(() => null)
+            .then(data => {
+                window._activeThreatsCache = data;
+                return data;
+            });
+    }
+
+    function _baseWrFromCsv(userArchetype, targetArchetype) {
+        const rows = window.currentMetaMatchupData;
+        if (!Array.isArray(rows) || rows.length === 0) return null;
+        const userLower = String(userArchetype || '').trim().toLowerCase();
+        const userStripped = _stripEx(userArchetype).toLowerCase();
+        const tgtLower = String(targetArchetype || '').trim().toLowerCase();
+        const tgtStripped = _stripEx(targetArchetype).toLowerCase();
+        for (const r of rows) {
+            const d = String(r.deck_name || '').trim().toLowerCase();
+            if (d !== userLower && d !== userStripped) continue;
+            const opp = String(r.opponent || '').trim().toLowerCase();
+            if (opp === tgtLower || opp === tgtStripped) {
+                const v = parseFloat(String(r.win_rate || '0').replace(',', '.').replace('%', '').trim());
+                if (Number.isFinite(v) && v > 0) return v;
+            }
+        }
+        return null;
+    }
+
+    // Mirror the share floors the generator uses in app-deck-builder.
+    function _shareFloorFor(aggression) {
+        if (aggression === 'heavy') return 0.10;
+        if (aggression === 'mild')  return 0.25;
+        return 0.15;
+    }
+    function _archetypeShareFloorPct(aggression) {
+        // Generator's TECH_AUDIT_MIN_ARCHETYPE_SHARE in app-deck-builder.
+        return aggression === 'heavy' ? 5.0 : 15.0;
+    }
+
+    // For the picked target, return the set of categories that:
+    //   1. The TARGET deck actually runs at the active share floor.
+    //   2. The USER deck's available-cards pool has a qualifying
+    //      counter for (matches archetype-share floor too).
+    // That's the same intersection the generator computes — without
+    // it, base-WR + bonus would over-report categories the algo
+    // wouldn't actually fill.
+    function _computeMatchedCategories(intel, targetArchetype, aggression) {
+        if (!intel || !intel.threats || !intel.counters) return new Set();
+        const tgtLower = String(targetArchetype || '').trim().toLowerCase();
+        const tgtStripped = _stripEx(targetArchetype).toLowerCase();
+        const shareFloor = _shareFloorFor(aggression);
+        const archShareFloorPct = _archetypeShareFloorPct(aggression);
+
+        // 1) Categories the target qualifies for.
+        const targetCats = new Set();
+        for (const [cat, info] of Object.entries(intel.threats)) {
+            const cards = info && info.cards;
+            if (!Array.isArray(cards)) continue;
+            let max = 0;
+            cards.forEach(c => {
+                (c.archetypes || []).forEach(a => {
+                    const an = String(a.archetype || '').toLowerCase();
+                    if (an !== tgtLower && an !== tgtStripped) return;
+                    const s = parseFloat(a.share_in_archetype || 0) || 0;
+                    if (s > max) max = s;
+                });
+            });
+            if (max >= shareFloor) targetCats.add(cat);
+        }
+        if (targetCats.size === 0) return targetCats;
+
+        // 2) Of those, which categories does the user's available-cards
+        //    pool have a qualifying counter for? We use the same
+        //    available-cards list the generator consumes
+        //    (window.currentCurrentMetaDeckCards) and the same
+        //    archetype-share floor.
+        const available = window.currentCurrentMetaDeckCards || [];
+        if (!Array.isArray(available) || available.length === 0) {
+            // Without a card pool we can't validate; assume target cats
+            // are all reachable so the preview at least shows a bonus.
+            // The actual generate may show fewer matches.
+            return targetCats;
+        }
+        const availByName = new Map();
+        available.forEach(card => {
+            const nm = String(card.card_name || '').trim().toLowerCase();
+            if (!nm) return;
+            const sharePctRaw = (card.percentage_in_archetype || card.share_percent || '0').toString().replace(',', '.');
+            const sharePct = parseFloat(sharePctRaw);
+            const prev = availByName.get(nm) || 0;
+            availByName.set(nm, Number.isFinite(sharePct) && sharePct > prev ? sharePct : prev);
+        });
+
+        const matched = new Set();
+        targetCats.forEach(cat => {
+            const counterCards = intel.counters[cat] || [];
+            const hasCounter = counterCards.some(c => {
+                const nm = String(c.card_name || '').trim().toLowerCase();
+                if (!nm) return false;
+                const userShare = availByName.get(nm);
+                return userShare != null && userShare >= archShareFloorPct;
+            });
+            if (hasCounter) matched.add(cat);
+        });
+        return matched;
+    }
+
+    async function _renderPreview() {
+        const wrap = document.getElementById('antiTechPreview');
+        const body = document.getElementById('antiTechPreviewBody');
+        if (!wrap || !body) return;
+        if (!_selection) {
+            wrap.classList.add('display-none');
+            body.innerHTML = '';
+            return;
+        }
+
+        // Wait until intel is loaded before rendering anything — the
+        // empty flash is uglier than a 200 ms delay.
+        const intel = await _ensureActiveThreats();
+        // The user might have switched targets while we were awaiting;
+        // bail if so to avoid clobbering a fresher render.
+        if (!_selection) return;
+
+        const userArchetype = (typeof window !== 'undefined' && window.currentMetaArchetype) || null;
+        const aggression = _readAggression();
+
+        if (!userArchetype) {
+            body.innerHTML = `<div class="anti-tech-preview-empty">${
+                _t('antiTech.previewNoArchetype', 'Select an archetype in the deck-builder first to see a WR preview.')
+            }</div>`;
+            wrap.classList.remove('display-none');
+            return;
+        }
+
+        const baseWr = _baseWrFromCsv(userArchetype, _selection);
+        const matchedCats = _computeMatchedCategories(intel, _selection, aggression);
+        const bonus = Math.min(_BONUS_CAP, matchedCats.size * _BONUS_PER_CAT);
+
+        if (baseWr == null) {
+            body.innerHTML = `<div class="anti-tech-preview-empty">${
+                (_t('antiTech.previewNoMatchup', 'No matchup data for {user} vs {target} — bonus only.')
+                    .replace('{user}', userArchetype)
+                    .replace('{target}', _selection))
+            }</div>`;
+            wrap.classList.remove('display-none');
+            return;
+        }
+
+        const adjustedWr = Math.max(0, Math.min(100, baseWr + bonus));
+        const delta = adjustedWr - baseWr;
+        const baseCls = _wrClass(baseWr);
+        const adjCls = _wrClass(adjustedWr);
+        const deltaCls = bonus > 0 ? 'wr-pos' : 'wr-neutral';
+        const fmt = (v) => v.toFixed(1).replace('.', ((typeof getLang === 'function' && getLang() === 'de') ? ',' : '.'));
+        const arrow = bonus > 0 ? '↑' : '→';
+
+        const headerTpl = _t('antiTech.previewHeader', 'vs {target}').replace('{target}', _selection);
+        const catLine = matchedCats.size > 0
+            ? (_t('antiTech.previewCatsHit', 'Counter coverage: {cats}')
+                .replace('{cats}', Array.from(matchedCats).join(', ')))
+            : _t('antiTech.previewNoCats', 'No qualifying counter categories at this aggression — bonus = 0.');
+
+        body.innerHTML = `
+            <div class="anti-tech-preview-header">${headerTpl}</div>
+            <div class="anti-tech-preview-pills">
+                <div class="anti-tech-preview-pill-block">
+                    <span class="anti-tech-preview-pill-label">${_t('antiTech.previewBaseLabel', 'Base')}</span>
+                    <span class="mc-vs-pill ${baseCls}">${fmt(baseWr)}%</span>
+                </div>
+                <span class="uv-arrow ${deltaCls}">${arrow}</span>
+                <div class="anti-tech-preview-pill-block">
+                    <span class="anti-tech-preview-pill-label">${_t('antiTech.previewAdjustedLabel', 'With techs')}</span>
+                    <span class="mc-vs-pill ${adjCls}">${fmt(adjustedWr)}%</span>
+                </div>
+                <div class="anti-tech-preview-pill-block">
+                    <span class="anti-tech-preview-pill-label">${_t('antiTech.previewDeltaLabel', 'Delta')}</span>
+                    <span class="mc-vs-pill ${deltaCls}">${bonus > 0 ? '+' : ''}${fmt(delta)}pts</span>
+                </div>
+            </div>
+            <div class="anti-tech-preview-cats">${catLine}</div>
+            <div class="anti-tech-preview-note">${
+                _t('antiTech.previewHeuristicNote', 'Heuristic estimate — same +3pts/cat, cap +9 model as the Deck-Analysis panel.')
+            }</div>`;
+
+        wrap.classList.remove('display-none');
     }
 
     function openAntiTechModal(source) {
@@ -188,11 +412,17 @@
         // Default to Standard so first-time users get a sensible build.
         const standard = document.querySelector('input[name="antiTechAggression"][value="standard"]');
         if (standard) standard.checked = true;
+        // Hide stale preview from previous session — _renderPreview
+        // will re-show it once a target is picked.
+        const previewWrap = document.getElementById('antiTechPreview');
+        if (previewWrap) previewWrap.classList.add('display-none');
     }
 
     function closeAntiTechModal() {
         const modal = document.getElementById('antiTechModal');
         if (modal) modal.classList.add('display-none');
+        const previewWrap = document.getElementById('antiTechPreview');
+        if (previewWrap) previewWrap.classList.add('display-none');
         _source = null;
         _selection = null;
     }

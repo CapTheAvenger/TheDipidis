@@ -41,6 +41,79 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
         window.pastMetaDeck = {};
         window.pastMetaDeckOrder = [];
         window.pastMetaCurrentArchetype = null;
+        // Pinned cards — per source, set of normalized card names that the
+        // user wants in every regenerated deck regardless of the
+        // consistency-score gates. Count + best print are still chosen by
+        // the algorithm (see Stage 0 in autoCompleteConsistency). State is
+        // kept here as Sets and mirrored to localStorage by the
+        // save*Deck() functions so pins survive Consistency-Generate
+        // runs but get wiped on full page reload, same lifecycle as the
+        // deck itself.
+        window.pinnedCards = {
+            cityLeague: new Set(),
+            currentMeta: new Set(),
+            pastMeta: new Set(),
+        };
+
+        function _pinKey(name) {
+            if (typeof normalizeCardName === 'function') return normalizeCardName(name || '');
+            return String(name || '').toLowerCase().trim();
+        }
+
+        function isPinnedCard(source, cardName) {
+            const bucket = (window.pinnedCards || {})[source];
+            if (!bucket || !bucket.has) return false;
+            return bucket.has(_pinKey(cardName));
+        }
+        window.isPinnedCard = isPinnedCard;
+
+        function getPinnedCardNames(source) {
+            const bucket = (window.pinnedCards || {})[source];
+            if (!bucket) return new Set();
+            return new Set(bucket);
+        }
+        window.getPinnedCardNames = getPinnedCardNames;
+
+        function togglePinCard(source, cardName) {
+            if (source !== 'cityLeague' && source !== 'currentMeta' && source !== 'pastMeta') return;
+            const bucket = window.pinnedCards[source];
+            if (!bucket) return;
+            const key = _pinKey(cardName);
+            if (!key) return;
+            const nowPinned = !bucket.has(key);
+            if (nowPinned) bucket.add(key);
+            else bucket.delete(key);
+            // Persist alongside the deck so the pin survives regen.
+            try {
+                if (source === 'cityLeague' && typeof saveCityLeagueDeck === 'function') saveCityLeagueDeck();
+                else if (source === 'currentMeta' && typeof saveCurrentMetaDeck === 'function') saveCurrentMetaDeck();
+                else if (source === 'pastMeta' && typeof savePastMetaDeck === 'function') savePastMetaDeck();
+            } catch (_) { /* swallow — UI redraw still happens */ }
+            if (typeof updateDeckDisplay === 'function') updateDeckDisplay(source);
+            if (typeof showToast === 'function') {
+                if (nowPinned) {
+                    const tpl = t('deck.pinAdded') || 'Pinned "{n}" — will stay through Consistency Generate.';
+                    showToast(tpl.replace('{n}', cardName), 'success', 2500);
+                } else {
+                    const tpl = t('deck.pinRemoved') || 'Unpinned "{n}".';
+                    showToast(tpl.replace('{n}', cardName), 'info', 2000);
+                }
+            }
+        }
+        window.togglePinCard = togglePinCard;
+
+        // localStorage round-trip helpers — called from save/load*Deck
+        // wrappers in app-current-meta.js / app-city-league.js. Stored as
+        // a plain Array so JSON.stringify works.
+        window.pinnedCardsToArray = function(source) {
+            const bucket = (window.pinnedCards || {})[source];
+            return bucket ? Array.from(bucket) : [];
+        };
+        window.pinnedCardsFromArray = function(source, arr) {
+            if (!window.pinnedCards) return;
+            const list = Array.isArray(arr) ? arr : [];
+            window.pinnedCards[source] = new Set(list.map(_pinKey).filter(Boolean));
+        };
         devLog('[Init] Starting with empty deck (localStorage cleared on page load)');
         // Check for a shared deck in the URL – runs after clearing so it wins
         setTimeout(function() { if (typeof importDeckFromUrl === 'function') importDeckFromUrl(); }, 100);
@@ -1117,17 +1190,28 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 const isOwned = window.userCollection && window.userCollection.has(cardId);
                 const ownedBadge = isOwned ? '<div style="position: absolute; top: 5px; left: 5px; background: #4CAF50; color: white; width: 25px; height: 25px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.5); z-index: 4;">✓</div>' : '';
                 
+                const pinned = (typeof isPinnedCard === 'function') && isPinnedCard(source, safeCardName);
+                const pinnedClass = pinned ? ' is-pinned' : '';
+                const pinTitle = pinned
+                    ? (t('deck.pinTitleUnpin') || 'Unpin — let the algorithm decide again')
+                    : (t('deck.pinTitlePin') || 'Pin — keep this card on next Consistency Generate');
+                const pinIcon = pinned ? '📌' : '📍';
+                const pinBadge = pinned
+                    ? `<div class="deck-card-pin-badge" title="${pinTitle}">📌</div>`
+                    : '';
                 html += `
-                    <div class="deck-card pos-rel" title="${safeCardName} (${count}x) - ${percentage}%">
+                    <div class="deck-card pos-rel${pinnedClass}" title="${safeCardName} (${count}x) - ${percentage}%">
                         <img src="${imageUrl}" alt="${safeCardName}" loading="lazy" class="card-img-std cursor-zoom" onerror="handleCardImageError(this, '${setCode}', '${setNumber}')" onclick="showSingleCard(this.src, '${cardNameEscaped} (${setCode} ${setNumber})')">
                         ${ownedBadge}
                         ${typeof getWishlistBadgeHtml === 'function' ? getWishlistBadgeHtml(safeCardName, setCode, setNumber) : ''}
+                        ${pinBadge}
                         <div class="card-max-count">${count}</div>
                         <div class="deck-card-overlay">${overlayText}</div>
                         <div class="deck-card-actions">
-                            <div class="deck-card-action-row">
+                            <div class="deck-card-action-row" style="grid-template-columns: 1fr 1fr 1fr 1fr;">
                                 <button onclick="removeCardFromDeck('${source}', '${deckKeyEscaped}')" class="city-league-card-action-btn city-league-card-remove-btn" title="Remove from deck">-</button>
                                 <button onclick="openRaritySwitcher('${cardNameEscaped}', '${deckKeyEscaped}')" class="city-league-card-action-btn city-league-card-rarity-btn" title="Switch rarity/print">★</button>
+                                <button onclick="togglePinCard('${source}', '${cardNameEscaped}')" class="city-league-card-action-btn city-league-card-pin-btn${pinned ? ' is-active' : ''}" title="${pinTitle}">${pinIcon}</button>
                                 <button onclick="addCardToDeck('${source}', '${cardNameEscaped}', '${setCode}', '${setNumber}')" class="city-league-card-action-btn city-league-card-add-btn" title="Add to deck">+</button>
                             </div>
                             <div class="deck-card-action-row" style="grid-template-columns: 1fr 1fr 2fr;">
@@ -4148,6 +4232,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 const card = entry && entry.card;
                 if (!card) continue;
                 if (card._isAceSpec) continue;
+                if (card._isPinned) continue;
                 if ((card.consistencyScore || 0) >= 75) continue;
                 const deps = card._dependencies;
                 if (!deps || (deps.size != null ? deps.size === 0 : Object.keys(deps).length === 0)) continue;
@@ -4173,7 +4258,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 // tier first.
                 const bumpCandidates = entries
                     .filter(e => e && e.card)
-                    .filter(e => !e.card._isAceSpec)
+                    .filter(e => !e.card._isAceSpec && !e.card._isPinned)
                     .filter(e => {
                         const eDeps = e.card._dependencies;
                         if (!eDeps) return true;
@@ -4241,6 +4326,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 const card = entry && entry.card;
                 if (!card) continue;
                 if (card._isAceSpec) continue;
+                if (card._isPinned) continue;
                 if ((card.consistencyScore || 0) >= 75) continue;
                 const nm = String(card.card_name || '').trim().toLowerCase();
                 const synergy = cooccurrenceMap.get(nm);
@@ -4280,7 +4366,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 // synergy (would just create another stranded card).
                 const bumpCandidates = entries
                     .filter(e => e && e.card)
-                    .filter(e => !e.card._isAceSpec)
+                    .filter(e => !e.card._isAceSpec && !e.card._isPinned)
                     .filter(e => {
                         const otherNm = String(e.card.card_name || '').trim().toLowerCase();
                         const otherSyn = cooccurrenceMap.get(otherNm);
@@ -4479,7 +4565,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                     .filter(e => e.count >= 1)
                     .filter(e => e.card._techCounterMaxCount == null)
                     .filter(e => (e.card.consistencyScore || 0) < 75)
-                    .filter(e => !e.card._isAceSpec)
+                    .filter(e => !e.card._isAceSpec && !e.card._isPinned)
                     .sort((a, b) => (a.card._lrmRemainder || 0) - (b.card._lrmRemainder || 0));
 
                 // CORE bump candidates: CORE-tier, has positive remainder,
@@ -4641,7 +4727,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                     .filter(e => !isEnergyEntry(e))
                     .filter(e => (e.card.consistencyScore || 0) < 75)
                     .filter(e => e.card._techCounterMaxCount == null)
-                    .filter(e => !e.card._isAceSpec)
+                    .filter(e => !e.card._isAceSpec && !e.card._isPinned)
                     .filter(e => e.count >= 1)
                     .sort((a, b) => {
                         // TECH first (lower tier order), then by remainder asc.
@@ -4752,7 +4838,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 // format rule and shape the deck's energy economy.
                 const energyDemoteCandidates = entries
                     .filter(e => isEnergyEntry(e))
-                    .filter(e => !e.card._isAceSpec)
+                    .filter(e => !e.card._isAceSpec && !e.card._isPinned)
                     .filter(e => {
                         const cn = String(e.card.card_name || '').toLowerCase().trim();
                         const stat = conditionalAvgs.get(cn);
@@ -6503,6 +6589,67 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             }
 
             // ==========================================
+            // 1.5 STUFE 0 (User-Pinned cards)
+            //
+            // The user has explicitly demanded that these cards be in
+            // every regenerated build. Pin identity is the normalized
+            // card NAME — the algorithm still picks the print and
+            // computes the count via the same FLOOR(avg) rule as Stage
+            // 1, then marks the card with `_isPinned` so downstream
+            // demotion / swap / LRM passes leave it alone (mirrors the
+            // ACE-SPEC protection pattern).
+            //
+            // If a pin matches a card the algorithm wouldn't otherwise
+            // pick (score below all gates), it still goes in — that's
+            // the whole point of pinning. Counts fall back to 2 when
+            // avgCountWhenUsed is missing (off-meta tech), preserving
+            // the user's intent without over-committing slots.
+            //
+            // The Setup-Consistency audit below this pass flags pins
+            // that knock the deck's CORE-tier slot count too low.
+            // ==========================================
+            const _pinnedSet = (typeof getPinnedCardNames === 'function')
+                ? getPinnedCardNames(source)
+                : new Set();
+            window.__lastBuildPinDiagnostics = {
+                source,
+                pinned: Array.from(_pinnedSet),
+                injected: [],
+                missing: [],
+            };
+            if (_pinnedSet.size > 0) {
+                const _normName = typeof normalizeCardName === 'function'
+                    ? normalizeCardName
+                    : (s => String(s || '').toLowerCase().trim());
+                const _seenPinNames = new Set();
+                deckCards.forEach(card => {
+                    if (currentTotal >= 60) return;
+                    if (isAceSpecCard(card)) return;
+                    const nm = _normName(card.card_name);
+                    if (!_pinnedSet.has(nm)) return;
+                    if (_seenPinNames.has(nm)) return; // dedupe across variant rows
+                    _seenPinNames.add(nm);
+                    card._isPinned = true;
+                    if (isRadiantPokemon(card.card_name)) radiantAdded = true;
+                    const exactAvg = card.avgCountWhenUsed || card._recommendedCount || 2;
+                    let addCount = Math.max(1, Math.floor(exactAvg));
+                    card._lrmRemainder = exactAvg - Math.floor(exactAvg);
+                    const legalMax = card._legalMax || getLegalMaxCopies(card.card_name, card);
+                    if (!isBasicEnergyCardEntry(card)) addCount = Math.min(addCount, legalMax);
+                    pushCard(card, addCount, '[Consistency][Stage0-Pinned]');
+                    window.__lastBuildPinDiagnostics.injected.push({ name: card.card_name, count: addCount });
+                });
+                // Pins the user requested that aren't in the
+                // archetype's card pool: collect their names so the
+                // Setup-Consistency warning can surface them later.
+                _pinnedSet.forEach(nm => {
+                    if (!_seenPinNames.has(nm)) {
+                        window.__lastBuildPinDiagnostics.missing.push(nm);
+                    }
+                });
+            }
+
+            // ==========================================
             // 2. STUFE 1 (Core: consistencyScore >= 75)
             // Meta-boosted + trending cards can exceed 100
             //
@@ -6518,6 +6665,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             deckCards.forEach(card => {
                 if (currentTotal >= 60) return;
                 if (isAceSpecCard(card)) return; // Ace Spec haben wir schon
+                if (card._isPinned) return;      // Stage 0 schon erledigt
 
                 // Deck-wide Radiant limit
                 if (isRadiantPokemon(card.card_name)) {
@@ -6575,6 +6723,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             deckCards.forEach(card => {
                 if (currentTotal >= 60) return;
                 if (isAceSpecCard(card)) return;
+                if (card._isPinned) return; // Stage 0 schon erledigt
                 if (consistencyDeck.some(entry => entry.card.card_name === card.card_name)) return; // Schon im Deck?
 
                 // Deck-wide Radiant limit
@@ -6792,6 +6941,62 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 if (b.consistencyScore !== a.consistencyScore) return b.consistencyScore - a.consistencyScore;
                 return a.card_name.localeCompare(b.card_name);
             });
+
+            // ──────────────────────────────────────────────────────────
+            // Setup-Consistency audit (Pin side-effect detection)
+            //
+            // Count slots tagged CORE by _classifyCardFunction — the
+            // structural search / draw / engine cards that build the
+            // board on T1-T2. Threshold of 12 reflects observed healthy
+            // archetypes: 4 ball-search items + 4-5 draw supporters +
+            // 3-4 engine-pokemon copies typically clears it. Below 12,
+            // the deck struggles to set up reliably.
+            //
+            // We only WARN when:
+            //   (a) score is below threshold AND
+            //   (b) pins were injected this run.
+            // Without pins the low score is just the archetype's nature,
+            // not user error — no toast spam. With pins, the toast tells
+            // the user which pin(s) likely crowded out the engine.
+            //
+            // Off-meta pins (cards the user pinned that aren't in the
+            // archetype's card pool) are surfaced even when CORE is
+            // healthy — those pins were silently dropped this run, so
+            // the user needs to know.
+            // ──────────────────────────────────────────────────────────
+            try {
+                const SETUP_THRESHOLD = 12;
+                const coreSlots = cardsToAdd
+                    .filter(c => c._cardFunctionTier === 'CORE')
+                    .reduce((sum, c) => sum + (c.addCount || 0), 0);
+                const diag = window.__lastBuildPinDiagnostics || { injected: [], missing: [] };
+                const pinsInjected = (diag.injected || []).length;
+                const pinsMissing = (diag.missing || []).length;
+                window.__lastBuildSetupScore = { coreSlots, threshold: SETUP_THRESHOLD, source };
+                devLog(`[Consistency][SetupAudit] CORE slots = ${coreSlots} / threshold ${SETUP_THRESHOLD} · pins injected = ${pinsInjected} · pins missing from data = ${pinsMissing}`);
+
+                if (typeof showToast === 'function') {
+                    if (pinsMissing > 0) {
+                        // Off-meta pins → tell the user directly, full
+                        // names so they can decide whether to re-add manually.
+                        const namesList = (diag.missing || []).slice(0, 3).join(', ');
+                        const tpl = t('deck.pinMissingWarn')
+                            || 'Pinned card(s) not in archetype data: {names}. Re-add manually if you want them.';
+                        showToast(tpl.replace('{names}', namesList), 'warning', 5500);
+                    }
+                    if (coreSlots < SETUP_THRESHOLD && pinsInjected > 0) {
+                        const tpl = t('deck.pinSetupWarn')
+                            || 'Setup consistency low ({core}/{thr} core slots). Pins may have crowded out search/draw — try unpinning a tech card.';
+                        showToast(
+                            tpl.replace('{core}', coreSlots).replace('{thr}', SETUP_THRESHOLD),
+                            'warning',
+                            6500
+                        );
+                    }
+                }
+            } catch (e) {
+                devLog('[Consistency][SetupAudit] failed:', e);
+            }
 
             // Build confirm summary
             const hasMetaData = metaShareMap.size > 0;

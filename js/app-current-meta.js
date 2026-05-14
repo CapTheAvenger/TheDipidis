@@ -428,7 +428,10 @@
                     // Pre-select archetype in dropdown if it exists (but don't display deck yet)
                     devLog('Saved archetype found:', data.archetype, '(waiting for user to select archetype)');
                 }
-                
+                if (Array.isArray(data.pinned) && typeof window.pinnedCardsFromArray === 'function') {
+                    window.pinnedCardsFromArray('currentMeta', data.pinned);
+                }
+
                 // DON'T automatically display deck - wait for archetype selection
                 devLog('Current Meta Deck loaded but not displayed (waiting for archetype selection)');
             } catch (e) {
@@ -452,9 +455,10 @@
                     deck: deck,
                     order: window.currentMetaDeckOrder || [],
                     archetype: window.currentMetaArchetype || null,
+                    pinned: typeof window.pinnedCardsToArray === 'function' ? window.pinnedCardsToArray('currentMeta') : [],
                     timestamp: new Date().toISOString()
                 };
-                
+
                 localStorage.setItem('currentMetaDeck', JSON.stringify(data));
                 devLog('Current Meta deck saved to localStorage:', deckSize, 'cards');
             } catch (e) {
@@ -470,6 +474,9 @@
                     window.pastMetaDeck = parsed.deck || {};
                     window.pastMetaDeckOrder = parsed.order || [];
                     window.pastMetaCurrentArchetype = parsed.archetype || null;
+                    if (Array.isArray(parsed.pinned) && typeof window.pinnedCardsFromArray === 'function') {
+                        window.pinnedCardsFromArray('pastMeta', parsed.pinned);
+                    }
                     devLog('Loaded Past Meta deck from localStorage:', Object.keys(window.pastMetaDeck).length, 'cards');
                     return true;
                 }
@@ -498,9 +505,10 @@
                     deck: deck,
                     order: window.pastMetaDeckOrder || [],
                     archetype: window.pastMetaCurrentArchetype || null,
+                    pinned: typeof window.pinnedCardsToArray === 'function' ? window.pinnedCardsToArray('pastMeta') : [],
                     timestamp: new Date().toISOString()
                 };
-                
+
                 localStorage.setItem('pastMetaDeck', JSON.stringify(data));
                 devLog('Past Meta deck saved to localStorage:', deckSize, 'cards');
             } catch (e) {

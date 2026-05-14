@@ -773,8 +773,15 @@
   padding: 1px 7px;
   border-radius: 10px;
 }
+/* Variant rows belonging to a collapsed family group. Use a high-
+   specificity selector + !important because the mobile card layout
+   (≤600px) overrides `tr.mc-row-detail` to `display: block` with
+   higher specificity — that was leaking the per-variant "Details ▾"
+   toggle buttons through, stacking 5 of them under a collapsed
+   family header. This rule must win unconditionally. */
+.metacall-table tbody tr.mc-group-detail.mc-group-hidden,
 .mc-group-detail.mc-group-hidden {
-  display: none;
+  display: none !important;
 }
 .mc-group-detail td {
   background: #fafbfd;

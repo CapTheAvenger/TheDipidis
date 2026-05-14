@@ -49,89 +49,58 @@
 .header-flex-user {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
+    flex-wrap: wrap;
 }
-.header-dex-btn {
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 44px;
-    min-width: 44px;
-    border-radius: 50%;
-    transition: transform 0.2s, filter 0.2s;
-}
-.header-dex-btn:hover {
-    transform: scale(1.12);
-    filter: brightness(1.15) drop-shadow(0 2px 6px rgba(255,203,5,0.5));
-}
-.header-dex-btn:active {
-    transform: scale(0.95);
-}
-.header-dex-icon {
-    width: 38px;
-    height: 38px;
-    object-fit: contain;
-}
+#user-menu { display: inline-flex; }
 
-/* Generic header icon button — used by Battle Journal, My Decks,
-   Wishlist (and any future header shortcut). Now a rounded-rect with
-   icon ON TOP and a small text label BELOW so the button is
-   self-explanatory. Earlier 40×40 icon-only circles read as
-   decoration; users couldn't tell what each button was without
-   hovering for the tooltip. */
+/* ── Header action buttons ──────────────────────────────────────
+   One unified style for every quick-access button in the top bar:
+   Journal, My Decks, Wishlist, Cards, and Sign In / Profile. Each
+   is a rounded rectangle with an inline-SVG icon on top and a short
+   text label below. The previous mix of PNG icons + image-only
+   round buttons read as inconsistent on phones — this normalises
+   the whole row so it parses as a single toolbar. */
 .header-icon-btn {
     position: relative;
-    background: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.10);
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.14);
     cursor: pointer;
-    padding: 4px 8px 5px;
+    padding: 7px 10px 6px;
     display: inline-flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 2px;
-    min-width: 56px;
-    height: 52px;
-    border-radius: 11px;
+    gap: 4px;
+    min-width: 64px;
+    height: 56px;
+    border-radius: 12px;
     color: #f4f7fb;
+    font-family: inherit;
     transition: background 0.18s ease, border-color 0.18s ease,
-                color 0.18s ease, transform 0.18s ease;
+                color 0.18s ease, transform 0.18s ease,
+                box-shadow 0.18s ease;
 }
 .header-icon-btn:hover {
-    background: rgba(255, 255, 255, 0.14);
-    border-color: rgba(255, 255, 255, 0.25);
+    background: rgba(255, 255, 255, 0.16);
+    border-color: rgba(255, 255, 255, 0.32);
     transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.18);
 }
 .header-icon-btn:active { transform: translateY(0) scale(0.96); }
 .header-icon-btn:focus-visible {
-    outline: 2px solid rgba(255, 255, 255, 0.65);
+    outline: 2px solid rgba(255, 203, 5, 0.85);
     outline-offset: 2px;
 }
-/* SVG fallback (legacy header buttons). Image variant for the new
-   PNG icons sits at .header-icon-img below. Both share footprint so
-   the toolbar reads as a uniform row. */
 .header-icon-svg {
-    width: 26px;
-    height: 26px;
+    width: 22px;
+    height: 22px;
     pointer-events: none;
     color: inherit;
+    flex: 0 0 auto;
 }
-.header-icon-img {
-    width: 28px;
-    height: 28px;
-    object-fit: contain;
-    pointer-events: none;
-    display: block;
-}
-/* Caption below the icon — small but readable so the user can
-   identify each button at a glance. Uppercase + slight letter-
-   spacing makes it look like a button affordance, not a paragraph. */
 .header-icon-label {
-    font-size: 10px;
+    font-size: 10.5px;
     font-weight: 700;
     letter-spacing: 0.02em;
     line-height: 1;
@@ -141,65 +110,24 @@
     text-transform: none;
 }
 
-/* Per-button accent colour — borrowed only on hover so the row stays
-   visually calm when nothing is hovered. */
+/* Per-button accent on hover — keeps the resting row visually calm
+   while giving each shortcut a recognisable colour cue. */
 .header-journal-btn:hover  { color: #ffb168; }   /* warm orange — journal */
 .header-mydecks-btn:hover  { color: #69d8ff; }   /* cyan — decks */
 .header-wishlist-btn:hover { color: #ff6b8a; }   /* pink — wishlist */
+.header-cards-btn:hover    { color: #ffcb05; }   /* Pokémon yellow — cards */
+.header-signin-btn:hover,
+.header-profile-btn:hover  { color: #b6c8ff; }   /* soft blue — account */
 
-/* Custom hover/focus tooltip — far more discoverable than the browser's
-   native ~2s `title` delay. Reads the same `title` attribute so a single
-   source of truth still drives both keyboard-accessibility and the
-   visible label. Opens below the icon, instantly on hover/focus. */
-.header-icon-btn[title]:hover::after,
-.header-icon-btn[title]:focus-visible::after,
-.header-dex-btn[title]:hover::after,
-.header-dex-btn[title]:focus-visible::after,
-.profile-btn-iconbtn[title]:hover::after,
-.profile-btn-iconbtn[title]:focus-visible::after {
-    content: attr(title);
-    position: absolute;
-    top: calc(100% + 6px);
-    left: 50%;
-    transform: translateX(-50%);
-    background: #1f2937;
-    color: #fff;
-    font-size: 0.74rem;
-    font-weight: 600;
-    padding: 4px 9px;
-    border-radius: 6px;
-    white-space: nowrap;
-    pointer-events: none;
-    box-shadow: 0 4px 14px rgba(0,0,0,0.25);
-    z-index: 1000;
-    animation: header-tooltip-fade 0.18s ease-out;
+/* Account state — visually distinguish "you're signed in" without
+   making the button look out of place in the row. */
+.header-profile-btn {
+    background: rgba(59, 76, 202, 0.32);
+    border-color: rgba(255, 255, 255, 0.24);
 }
-.header-icon-btn[title]:hover::before,
-.header-icon-btn[title]:focus-visible::before,
-.header-dex-btn[title]:hover::before,
-.header-dex-btn[title]:focus-visible::before,
-.profile-btn-iconbtn[title]:hover::before,
-.profile-btn-iconbtn[title]:focus-visible::before {
-    content: '';
-    position: absolute;
-    top: calc(100% + 1px);
-    left: 50%;
-    transform: translateX(-50%);
-    width: 0;
-    height: 0;
-    border-left: 5px solid transparent;
-    border-right: 5px solid transparent;
-    border-bottom: 5px solid #1f2937;
-    pointer-events: none;
-    z-index: 1000;
-}
-.header-dex-btn,
-.profile-btn-iconbtn {
-    position: relative; /* ensure tooltip pseudo-elements anchor correctly */
-}
-@keyframes header-tooltip-fade {
-    from { opacity: 0; transform: translateX(-50%) translateY(-2px); }
-    to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+.header-profile-btn:hover {
+    background: rgba(59, 76, 202, 0.50);
+    border-color: rgba(255, 203, 5, 0.55);
 }
 
 /* Notification badge for the journal button — small pill anchored to the
@@ -222,9 +150,9 @@
     pointer-events: none;
 }
 
-/* Profile button in icon-only mode: hide the email/text node visually
-   while keeping it in the DOM for screen readers. */
-.profile-btn-iconbtn .visually-hidden,
+/* Screen-reader-only text — kept in the DOM but invisible. Used for
+   the user email tucked inside the Profile button so accessibility
+   tooling can read it without forcing the visible label to morph. */
 .visually-hidden {
     position: absolute !important;
     width: 1px; height: 1px;
@@ -234,90 +162,36 @@
     white-space: nowrap;
     border: 0;
 }
-/* Profile button in icon-only mode: same minimal treatment as the
-   Pokédex button — pure image, no frame, just hover-lift. Overrides
-   the .user-btn / .profile-btn pill background + 2px border so the
-   pokeball reads as a standalone clickable image. */
-.profile-btn-iconbtn {
-    background: none !important;
-    border: none !important;
-    padding: 0 !important;
-    min-height: 44px;
-    min-width: 44px;
-    border-radius: 50%;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    transition: transform 0.2s, filter 0.2s;
-}
-.profile-btn-iconbtn:hover {
-    background: none !important;
-    border-color: transparent !important;
-    transform: scale(1.12);
-    filter: brightness(1.15) drop-shadow(0 2px 6px rgba(255, 203, 5, 0.5));
-}
-.profile-btn-iconbtn:active { transform: scale(0.95); }
-.profile-btn-iconbtn .user-btn-icon {
-    width: 38px;
-    height: 38px;
-    margin: 0;
-}
+
+/* Language toggle — sized to match .header-icon-btn so the toolbar
+   reads as a single row. EN/DE label is short enough to live inside
+   a compact 44px square without an extra icon. */
 .lang-toggle-btn {
-    background: rgba(255,255,255,0.12);
-    border: 2px solid rgba(255,255,255,0.25);
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.14);
     color: #fff;
-    padding: 6px 14px;
-    border-radius: 20px;
-    font-weight: bold;
+    padding: 0 12px;
+    border-radius: 12px;
+    font-weight: 800;
     cursor: pointer;
-    font-size: 14px;
-    transition: all 0.2s;
-    min-height: 44px;
+    font-size: 13px;
+    letter-spacing: 0.04em;
+    transition: background 0.18s ease, border-color 0.18s ease,
+                color 0.18s ease, transform 0.18s ease;
+    height: 56px;
+    min-width: 48px;
 }
 .lang-toggle-btn:hover {
-    background: rgba(255,255,255,0.22);
+    background: rgba(255, 255, 255, 0.16);
     border-color: var(--pokemon-yellow, #FFCB05);
     color: var(--pokemon-yellow, #FFCB05);
+    transform: translateY(-1px);
 }
-.user-btn {
-    background: rgba(255,255,255,0.12);
-    border: 2px solid rgba(255,255,255,0.25);
-    color: #fff;
-    padding: 8px 16px;
-    border-radius: 20px;
-    font-weight: bold;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    transition: all 0.2s;
-}
-.user-btn:hover {
-    background: rgba(255,255,255,0.22);
-    border-color: var(--pokemon-yellow, #FFCB05);
-}
-.user-btn-icon {
-    width: 18px;
-    height: 18px;
-    margin-right: 6px;
-    vertical-align: middle;
-    filter: none;
-}
+.lang-toggle-btn:active { transform: translateY(0) scale(0.96); }
+
 .user-info {
     display: flex;
     align-items: center;
-}
-.profile-btn {
-    background: rgba(59,76,202,0.3);
-    color: #fff;
-    border: 2px solid var(--pokemon-blue, #3B4CCA);
-    min-height: 44px;
-}
-.profile-btn:hover {
-    background: var(--pokemon-blue, #3B4CCA);
-}
-.signin-btn {
-    background: rgba(255,255,255,0.1);
 }
 .signin-btn-hidden { display: none; }
 .user-info-hidden { display: none; }
@@ -325,9 +199,51 @@
 /* ── Responsive ──────────────────────────────────────────────── */
 @media (max-width: 768px) {
     .cards-header {
-        padding: 14px 16px;
+        padding: 14px 14px;
+        border-radius: 14px;
+        margin-bottom: 16px;
+    }
+    .cards-header .header-flex-row {
+        gap: 12px;
     }
     .cards-header .header-title {
-        font-size: 1.3em;
+        font-size: 1.18em;
+        gap: 8px;
     }
+    .cards-header .header-subtitle {
+        font-size: 0.78em;
+    }
+    .header-flex-user {
+        width: 100%;
+        gap: 6px;
+        justify-content: space-between;
+    }
+    .header-icon-btn {
+        min-width: 0;
+        flex: 1 1 0;
+        height: 54px;
+        padding: 6px 4px 5px;
+        gap: 4px;
+        border-radius: 11px;
+    }
+    .header-icon-svg {
+        width: 20px;
+        height: 20px;
+    }
+    .header-icon-label {
+        font-size: 10px;
+    }
+    .lang-toggle-btn {
+        height: 54px;
+        min-width: 44px;
+        padding: 0 10px;
+        font-size: 12px;
+        flex: 0 0 auto;
+    }
+}
+@media (max-width: 380px) {
+    /* Very small phones: drop the label font another notch so 5 buttons
+       + lang toggle still fit in one row without overflowing. */
+    .header-icon-label { font-size: 9.5px; }
+    .header-icon-btn   { padding: 6px 2px 5px; }
 }

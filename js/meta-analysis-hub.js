@@ -1,17 +1,23 @@
 // Meta & Deck Analysis Hub
-// Provides a unified entry point for the 5 meta/deck-analysis sub-tabs.
-// - Mode 1 (Entry State): 5 tiles, shown when the hub tab is opened from the top nav.
+// Provides a unified entry point for the meta/deck-analysis sub-tabs.
+// - Mode 1 (Entry State): tile grid, shown when the hub tab is opened from the top nav.
 // - Mode 2 (Active State): selected sub-tab with persistent sub-nav at the top.
 
 (function () {
     'use strict';
 
+    // Meta Call lives inside the Profile top-level tab as a sub-section,
+    // not as a standalone top-level tab. The `profileSubTab` field tells
+    // enterSubTab() to first switch to Profile, then activate the
+    // profile sub-tab via switchProfileTab(). All other tiles still
+    // map 1:1 to a top-level tab via switchTab().
     const SUB_TABS = [
         { id: 'city-league',          tileKey: 'cityLeague' },
         { id: 'city-league-analysis', tileKey: 'cityLeagueAnalysis' },
         { id: 'current-meta',         tileKey: 'currentMeta' },
         { id: 'current-analysis',     tileKey: 'currentMetaAnalysis' },
-        { id: 'past-meta',            tileKey: 'pastMeta' }
+        { id: 'past-meta',            tileKey: 'pastMeta' },
+        { id: 'meta-call',            tileKey: 'metaCall', topTab: 'profile', profileSubTab: 'metacall' }
     ];
 
     const SUB_NAV_HOST_ID = 'metaHubSubNavHost';
@@ -52,6 +58,11 @@
                 'Historische Major-Turnier-Daten (Regionals, IC, Worlds)',
                 'Ergebnisse vergangener Standard-Formate',
                 'Lerne aus der Geschichte für zukünftige Meta-Calls'
+            ],
+            metaCall: [
+                'Vorhersage der Meta-Verteilung für dein nächstes Turnier',
+                'Eigene Schätzungen mit Online-Daten kombinieren',
+                'Erwartete Begegnungen pro Runde inkl. Matchup-Übersicht'
             ]
         };
         const key = `metaHub.tile.${tileKey}.bullets`;
@@ -134,9 +145,21 @@
         `;
     }
 
+    // Resolve the DOM container that should host the sub-nav for a given
+    // sub-tab. For top-level tabs that's the tab element itself; for the
+    // Meta Call entry, which lives inside the Profile sub-tab, it's the
+    // profile-metacall container.
+    function _hostElementFor(subTabId) {
+        const def = SUB_TABS.find(s => s.id === subTabId);
+        if (def && def.profileSubTab) {
+            return document.getElementById('profile-' + def.profileSubTab);
+        }
+        return document.getElementById(subTabId);
+    }
+
     function injectSubNav(subTabId) {
         clearAllSubNavHosts();
-        const tabEl = document.getElementById(subTabId);
+        const tabEl = _hostElementFor(subTabId);
         if (!tabEl) return;
         const host = ensureSubNavHost(tabEl);
         if (!host) return;
@@ -160,7 +183,23 @@
     }
 
     function enterSubTab(subTabId) {
-        if (!SUB_TABS.some(s => s.id === subTabId)) return;
+        const def = SUB_TABS.find(s => s.id === subTabId);
+        if (!def) return;
+        if (def.profileSubTab) {
+            // Meta Call route: switch to Profile top-level tab, then
+            // activate the profile sub-tab, then inject our sub-nav at
+            // the top of the profile-metacall container.
+            const topTab = def.topTab || 'profile';
+            if (typeof window.switchTab === 'function') {
+                window.switchTab(topTab);
+            }
+            if (typeof window.switchProfileTab === 'function') {
+                window.switchProfileTab(def.profileSubTab);
+            }
+            injectSubNav(subTabId);
+            setSideMenuActive(topTab);
+            return;
+        }
         if (typeof window.switchTab === 'function') {
             window.switchTab(subTabId);
         }
@@ -198,9 +237,13 @@
 
     function refreshLanguage() {
         // Re-render tiles & any active sub-nav after a language switch.
+        // For top-level sub-tabs, the host IS the .tab-content with
+        // class 'active' when visible. For Meta Call, the host is
+        // #profile-metacall which also carries 'active' when shown via
+        // switchProfileTab. Either way, .active is the reliable marker.
         renderTiles();
         const activeSub = SUB_TABS.find(s => {
-            const el = document.getElementById(s.id);
+            const el = _hostElementFor(s.id);
             return el && el.classList.contains('active');
         });
         if (activeSub) injectSubNav(activeSub.id);

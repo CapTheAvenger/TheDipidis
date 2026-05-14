@@ -143,11 +143,26 @@ body {
     font-size: 14px;
 }
 
+/* Current-section badge next to the site title. Tones the previous
+   bright yellow-on-blue pill down so it sits comfortably alongside
+   the title instead of fighting it. The colour now mirrors the
+   header's accent line (Pokémon yellow) on a subtle translucent
+   chip — still readable at a glance, no longer the loudest element
+   on the page. */
 .current-tab-badge {
-    font-size: 0.5em; background: var(--pokemon-blue); color: var(--pokemon-yellow); padding: 5px 12px;
-    border-radius: 20px; font-weight: 900; letter-spacing: 0.5px;
-    box-shadow: 0 2px 5px rgba(59,76,202,0.4); text-transform: uppercase;
-    border: 2px solid #fff; white-space: nowrap; vertical-align: middle; margin-left: 12px;
+    font-size: 0.46em;
+    background: rgba(255, 203, 5, 0.14);
+    color: var(--pokemon-yellow, #FFCB05);
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    border: 1px solid rgba(255, 203, 5, 0.45);
+    white-space: nowrap;
+    vertical-align: middle;
+    margin-left: 10px;
+    line-height: 1.4;
 }
 
 /* Hide old navigation bar */

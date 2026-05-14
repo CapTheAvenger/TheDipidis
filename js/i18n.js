@@ -80,6 +80,12 @@ const translations = {
         'Results from previous Standard formats',
         'Learn from history to sharpen future meta calls'
     ],
+    'metaHub.tile.metaCall.title':              'Meta Call',
+    'metaHub.tile.metaCall.bullets':            [
+        'Predict the meta share for your next tournament',
+        'Blend your own estimates with the online data',
+        'Expected encounters per round, with matchup overview'
+    ],
 
     // ── Common buttons / actions ─────────────────────────────
     'btn.save':               'Save',
@@ -1471,6 +1477,12 @@ const translations = {
         'Historische Major-Turnier-Daten (Regionals, IC, Worlds)',
         'Ergebnisse vergangener Standard-Formate',
         'Lerne aus der Geschichte für zukünftige Meta-Calls'
+    ],
+    'metaHub.tile.metaCall.title':              'Meta Call',
+    'metaHub.tile.metaCall.bullets':            [
+        'Vorhersage der Meta-Verteilung für dein nächstes Turnier',
+        'Eigene Schätzungen mit Online-Daten kombinieren',
+        'Erwartete Begegnungen pro Runde inkl. Matchup-Übersicht'
     ],
 
     // ── Common buttons / actions ─────────────────────────────

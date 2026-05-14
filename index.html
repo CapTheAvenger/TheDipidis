@@ -94,6 +94,7 @@
     <link rel="stylesheet" href="css/city-league.css?v=202605141332" type="text/css" media="print" onload="this.media='all'">
     <link rel="stylesheet" href="css/meta-card-analysis.css?v=202605141332" type="text/css" media="print" onload="this.media='all'">
     <link rel="stylesheet" href="css/current-meta-matchups.css?v=202605141332" type="text/css" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="css/anti-tech.css?v=202605141332" type="text/css" media="print" onload="this.media='all'">
     <link rel="stylesheet" href="css/city-league-display-toggles.css?v=202605141332" type="text/css" media="print" onload="this.media='all'">
     <link rel="stylesheet" href="css/de-overview-tabs.css?v=202605141332" type="text/css" media="print" onload="this.media='all'">
     <link rel="stylesheet" href="css/profile-howto-info.css?v=202605141332" type="text/css" media="print" onload="this.media='all'">
@@ -1198,6 +1199,7 @@
                             <div class="current-meta-action-group deck-builder-primary-actions">
                                 <span class="action-group-label" data-i18n="cl.generate">Generate</span>
                                 <button class="btn-modern primary deck-builder-main-cta" onclick="autoCompleteConsistency('currentMeta', 'min')" title="Uses tournament data for optimal card counts" data-i18n="cl.genConsistency" data-i18n-title="cl.genConsistencyTitle">Consistency Generate</button>
+                                <button class="btn-modern" onclick="openAntiTechModal('currentMeta')" data-i18n="antiTech.buildVsBtn" data-i18n-title="antiTech.buildVsBtnTitle" title="Generate a tech-heavy deck aimed at a specific opponent">Build vs ...</button>
                                 <button class="btn-modern" onclick="upgradeDeckToMaxRarity('currentMeta')" title="Swap every card in the current deck to its highest-rarity print" data-i18n="deck.upgradeRarity" data-i18n-title="deck.upgradeRarityTitle">↑ Max Rarity</button>
                             </div>
                             <div class="action-divider"></div>
@@ -3721,6 +3723,55 @@
         </div>
     </div>
 
+    <!-- Anti-Tech Build-vs-Deck Modal -->
+    <div id="antiTechModal" class="rarity-switcher-modal ui-modal-backdrop z-10000 display-none" role="dialog" aria-modal="true" aria-labelledby="antiTechModalTitle" onclick="if(event.target === this) closeAntiTechModal()">
+        <div class="rarity-switcher-modal-content ui-modal-panel anti-tech-modal-panel">
+            <span class="rarity-switcher-close ui-modal-close" onclick="closeAntiTechModal()" role="button" aria-label="Close"></span>
+            <h2 id="antiTechModalTitle" data-i18n="antiTech.modalTitle">Build vs Specific Deck</h2>
+            <p class="anti-tech-modal-intro" data-i18n="antiTech.modalIntro">Pick the deck you want to beat. The generator will load tech counters against that single opponent instead of the weighted meta field.</p>
+
+            <div class="anti-tech-section">
+                <h4 class="anti-tech-section-label" data-i18n="antiTech.quickPicksLabel">Quick picks (Meta-Call field)</h4>
+                <div id="antiTechQuickPicks" class="anti-tech-quick-picks">
+                    <!-- Populated dynamically by populateAntiTechModal() -->
+                </div>
+            </div>
+
+            <div class="anti-tech-section">
+                <h4 class="anti-tech-section-label" data-i18n="antiTech.autocompleteLabel">Or type any archetype</h4>
+                <input id="antiTechCustomInput" type="text" class="anti-tech-input" autocomplete="off"
+                       placeholder="Start typing a deck name..." aria-label="Anti-tech target deck">
+                <div id="antiTechSuggestions" class="anti-tech-suggestions"></div>
+            </div>
+
+            <div class="anti-tech-section">
+                <h4 class="anti-tech-section-label" data-i18n="antiTech.aggressionLabel">Aggression</h4>
+                <div class="anti-tech-aggression">
+                    <label class="anti-tech-aggression-option">
+                        <input type="radio" name="antiTechAggression" value="mild">
+                        <span class="anti-tech-aggression-name" data-i18n="antiTech.mildName">Mild</span>
+                        <span class="anti-tech-aggression-desc" data-i18n="antiTech.mildDesc">Baseline tech slots. Consistency stays intact.</span>
+                    </label>
+                    <label class="anti-tech-aggression-option">
+                        <input type="radio" name="antiTechAggression" value="standard" checked>
+                        <span class="anti-tech-aggression-name" data-i18n="antiTech.standardName">Standard</span>
+                        <span class="anti-tech-aggression-desc" data-i18n="antiTech.standardDesc">+1 slot per threat category. Recommended.</span>
+                    </label>
+                    <label class="anti-tech-aggression-option">
+                        <input type="radio" name="antiTechAggression" value="heavy">
+                        <span class="anti-tech-aggression-name" data-i18n="antiTech.heavyName">Heavy</span>
+                        <span class="anti-tech-aggression-desc" data-i18n="antiTech.heavyDesc">+2 slots, lower share floor. Trades consistency for coverage.</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="anti-tech-actions">
+                <button class="btn btn-secondary" onclick="closeAntiTechModal()" data-i18n="antiTech.cancelBtn">Cancel</button>
+                <button id="antiTechGenerateBtn" class="btn btn-primary" onclick="confirmAntiTechBuild()" disabled data-i18n="antiTech.generateBtn">Generate</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Deck Compare Modal -->
     <div id="deckCompareModal" class="rarity-switcher-modal ui-modal-backdrop z-10000" role="dialog" aria-modal="true" aria-label="Deck Compare" onclick="if(event.target === this) closeDeckCompare()">
         <div class="rarity-switcher-modal-content ui-modal-panel ui-modal-xl max-w-1400 w-95 max-h-90vh overflow-y-auto mobile-modal-panel">
@@ -4499,6 +4550,7 @@
     <script src="js/app-tier-meta.js?v=202605141332" defer></script>
     <script src="js/app-city-league.js?v=202605141332" defer></script>
     <script src="js/app-deck-builder.js?v=202605141332" defer></script>
+    <script src="js/app-anti-tech.js?v=202605141332" defer></script>
     <script src="js/app-meta-cards.js?v=202605141332" defer></script>
     <script src="js/app-current-meta.js?v=202605141332" defer></script>
     <script src="js/app-past-meta.js?v=202605141332" defer></script>

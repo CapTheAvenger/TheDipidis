@@ -2584,33 +2584,52 @@ window.MetaCall = (function () {
 
   // Dynamic recommendations split — Day-2-fähig list + Geheimtipps.
   //
-  //  Day-2-fähig: every candidate with day2Prob ≥ 0.25 ("competitive
-  //               threshold" — at least a 1-in-4 chance to make Day 2),
-  //               bounded to [5..10] so the list always reads cleanly.
-  //               If the meta is shallow, top up to 5 with the next
-  //               best decks; if it's deep, cap at 10.
+  //  Day-2-fähig: every candidate from the narrow top-30 pool with
+  //               day2Prob ≥ 0.20 ("competitive threshold" — at least
+  //               a 1-in-5 chance to make Day 2), bounded to [5..10]
+  //               so the list always reads cleanly. If the meta is
+  //               shallow, top up to 5 with the next best decks; if
+  //               it's deep, cap at 10.
   //
-  //  Geheimtipps: 3 off-radar picks below the Day-2 line. Filter to
-  //               candidates with online share < 3 % (genuinely under
-  //               the radar) that show at least one strong signal:
-  //               labs T8-conv ≥ 0.15, weekly trend ≥ +0.5 %, last-
-  //               major win-pct ≥ 50 %, OR own day2Prob ≥ 0.20. Each
-  //               pick comes with a text reason explaining the signal.
+  //  Geheimtipps: 3 off-radar picks below the Day-2 line. Evaluates a
+  //               WIDE pool (top-100 of _shareList) so genuinely long-
+  //               tail decks — the kind that sit at < 1 % online share
+  //               but rate strongly at the last major — can surface
+  //               here. Filter: online share < 3 % (genuinely under
+  //               the radar) AND at least one strong signal — labs
+  //               T8-conv ≥ 0.15, weekly trend ≥ +0.5 %, last-major
+  //               win-pct ≥ 50 %, or own day2Prob ≥ 0.20. Each pick
+  //               ships with a text reason explaining the signal.
   function calcRecommendationsSplit(field) {
     if (!_shareList || !field || field.length === 0) {
       return { day2: [], geheimtipps: [] };
     }
-    // Wide candidate pool — same as calcRecommendations but bigger so we
-    // have enough room to surface off-radar decks for Geheimtipps.
-    const RECO_POOL_SIZE = 30;
+    // Two-tier candidate pool:
+    //   - DAY2_POOL_SIZE (30): "established" decks — feed the Day-2-fähig
+    //     list. Same top-30 by online share as before.
+    //   - TIP_POOL_SIZE (100): wide long-tail pool — feed the Geheimtipps
+    //     evaluation so genuinely off-radar decks (e.g. Archaludon
+    //     Dudunsparce sitting at ~0.5 % global share but strong labs
+    //     Day-2 conv) can reach the scorer. Without this, anything below
+    //     rank 30 silently fell into "Others" and was never considered,
+    //     even though the Geheimtipps section is explicitly designed for
+    //     online-share < 3 % picks.
+    //   - MIN_TIP_SHARE: skip microscopic 0.0x % entries that are
+    //     statistical noise, not real meta candidates.
+    const DAY2_POOL_SIZE = 30;
+    const TIP_POOL_SIZE  = 100;
+    const MIN_TIP_SHARE  = 0.10;
     const seen = new Set();
     const candidates = [];
-    _shareList.slice(0, RECO_POOL_SIZE).forEach(d => {
-      const k = normalize(d.name);
-      if (!k || seen.has(k)) return;
-      seen.add(k);
-      candidates.push(d.name);
-    });
+    _shareList
+      .filter(d => (d.onlineShare || 0) >= MIN_TIP_SHARE)
+      .slice(0, TIP_POOL_SIZE)
+      .forEach(d => {
+        const k = normalize(d.name);
+        if (!k || seen.has(k)) return;
+        seen.add(k);
+        candidates.push(d.name);
+      });
     if (_settings.myDeck) {
       const myK = normalize(_settings.myDeck);
       if (myK && !seen.has(myK)) {
@@ -2624,6 +2643,17 @@ window.MetaCall = (function () {
       if (!k || seen.has(k)) return;
       seen.add(k);
       candidates.push(c.name);
+    });
+
+    // Which candidates are eligible for the Day-2-fähig list (i.e. the
+    // narrow "established" subset)? Top-30 by online share, plus the
+    // user's own deck + any custom decks they added.
+    const day2Eligible = new Set(
+      _shareList.slice(0, DAY2_POOL_SIZE).map(d => normalize(d.name))
+    );
+    if (_settings.myDeck) day2Eligible.add(normalize(_settings.myDeck));
+    (_customDecks || []).forEach(c => {
+      if (c && c.name) day2Eligible.add(normalize(c.name));
     });
 
     // Top-N favourable matchups vs the predicted field for a candidate.
@@ -2699,11 +2729,14 @@ window.MetaCall = (function () {
     // dominating the field, like Dragapult-family at 34 % post-Prag)
     // still surfaces the natural set of Day-2-capable counters instead
     // of artificially stopping at 25 % and padding from there.
+    // Restricted to `day2Eligible` (top-30 + user decks) so the long-
+    // tail decks we only loaded for the Geheimtipps tier can't leak in.
     const DAY2_THRESHOLD = 0.20;
     const DAY2_MIN = 5;
     const DAY2_MAX = 10;
-    let day2 = evaluated.filter(e => e.day2Prob >= DAY2_THRESHOLD);
-    if (day2.length < DAY2_MIN) day2 = evaluated.slice(0, DAY2_MIN);
+    const day2Eval = evaluated.filter(e => day2Eligible.has(normalize(e.name)));
+    let day2 = day2Eval.filter(e => e.day2Prob >= DAY2_THRESHOLD);
+    if (day2.length < DAY2_MIN) day2 = day2Eval.slice(0, DAY2_MIN);
     if (day2.length > DAY2_MAX) day2 = day2.slice(0, DAY2_MAX);
     const day2Names = new Set(day2.map(d => normalize(d.name)));
 

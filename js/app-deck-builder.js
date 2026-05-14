@@ -7139,6 +7139,36 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                     savePastMetaDeck();
                 }
 
+                // Snapshot the freshly generated deck as the "Vanilla
+                // baseline" for the UserVsVanilla compare panel. The
+                // panel will diff the user's later edits against this
+                // map. Stored per source so the user can switch tabs
+                // without losing the baseline. Stripped of (SET NUM)
+                // suffixes so print swaps don't pollute the diff.
+                try {
+                    const generatedDeck =
+                        source === 'cityLeague' ? window.cityLeagueDeck :
+                        source === 'currentMeta' ? window.currentMetaDeck :
+                        window.pastMetaDeck;
+                    if (generatedDeck) {
+                        const baseline = {};
+                        Object.entries(generatedDeck).forEach(([key, count]) => {
+                            if ((count || 0) <= 0) return;
+                            const m = String(key).match(/^(.+?)\s*\(/);
+                            const baseName = (m ? m[1] : key).trim();
+                            if (!baseName) return;
+                            baseline[baseName] = (baseline[baseName] || 0) + count;
+                        });
+                        baseline.__archetype = currentArchetype || null;
+                        baseline.__capturedAt = Date.now();
+                        if (!window.lastVanillaDeck) window.lastVanillaDeck = {};
+                        window.lastVanillaDeck[source] = baseline;
+                        if (source === 'currentMeta' && typeof window.refreshUserVsVanillaPanel === 'function') {
+                            window.refreshUserVsVanillaPanel();
+                        }
+                    }
+                } catch (e) { devLog('[autoCompleteConsistency] vanilla snapshot failed:', e); }
+
                 scheduleDeckDisplayUpdate(source);
 
                 if (normalizedTotal >= 60) {

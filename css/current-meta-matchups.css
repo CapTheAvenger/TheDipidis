@@ -472,6 +472,61 @@
 @media (max-width: 768px) {
     .mc-vs-summary-coverage { margin-left: 0; }
 }
+
+/* User-vs-Vanilla compare panel — laid out as three pill blocks */
+/* (Vanilla, Your Build, Delta) with an arrow between the first two. */
+.uv-summary-row {
+    align-items: center;
+    gap: 16px;
+}
+.uv-pill-block {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+}
+.uv-arrow {
+    font-size: 1.5em;
+    font-weight: 700;
+    padding: 0 4px;
+}
+.uv-arrow.wr-pos    { color: #15803d; }
+.uv-arrow.wr-neg    { color: #b91c1c; }
+.uv-arrow.wr-neutral { color: #6b7280; }
+.mc-vs-detail {
+    margin-top: 8px;
+}
+.uv-breakdown {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    font-size: 0.85em;
+    color: #4b5563;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.uv-breakdown li {
+    padding: 4px 8px;
+    background: rgba(255, 255, 255, 0.6);
+    border-radius: 4px;
+    border-left: 2px solid #d1d5db;
+}
+.uv-breakdown li:last-child {
+    color: #6b7280;
+    font-style: italic;
+    border-left-color: #fbbf24;
+}
+@media (max-width: 768px) {
+    .uv-summary-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .uv-arrow {
+        transform: rotate(90deg);
+        align-self: center;
+    }
+}
 .mc-vs-table-wrap {
     overflow-x: auto;
     border-radius: 10px;

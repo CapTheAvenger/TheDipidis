@@ -1699,6 +1699,7 @@
                         <span class="mc-vs-summary-label">${t('matchup.userVsVanillaEmpty') || 'No deck loaded — add or generate cards to compare.'}</span>
                     </div>`;
                 detailEl.innerHTML = '';
+                _renderCardDiffSection(archetype);
                 section.classList.remove('display-none');
                 return;
             }
@@ -1791,7 +1792,117 @@
             detailEl.innerHTML = `
                 <ul class="uv-breakdown">${breakdownLines.map(l => `<li>${l}</li>`).join('')}</ul>`;
 
+            _renderCardDiffSection(archetype);
+
             section.classList.remove('display-none');
+        }
+
+        // Card-by-card diff between the user's current deck and the
+        // baseline Vanilla snapshot captured the last time
+        // autoCompleteConsistency ran. Renders into
+        // #currentMetaUserVsVanillaCardDiff. Falls back to an empty
+        // state when no Vanilla snapshot exists for this source yet.
+        function _renderCardDiffSection(archetype) {
+            const container = document.getElementById('currentMetaUserVsVanillaCardDiff');
+            if (!container) return;
+
+            const baseline = (window.lastVanillaDeck && window.lastVanillaDeck.currentMeta) || null;
+            if (!baseline) {
+                container.innerHTML = `
+                    <div class="uv-card-diff-empty">
+                        ${t('matchup.userVsVanillaDiffNoBaseline') || 'Run Consistency Generate to capture a Vanilla baseline — the card-level diff appears here once you start editing.'}
+                    </div>`;
+                return;
+            }
+
+            // Per-card counts in user's deck, keyed by base card name
+            // (set/print stripped). Aggregates across multiple prints
+            // of the same card.
+            const userByName = new Map();
+            const deck = (typeof window !== 'undefined' && window.currentMetaDeck) || {};
+            Object.entries(deck).forEach(([key, count]) => {
+                if ((count || 0) <= 0) return;
+                const m = String(key).match(/^(.+?)\s*\(/);
+                const base = (m ? m[1] : key).trim();
+                if (!base) return;
+                userByName.set(base, (userByName.get(base) || 0) + count);
+            });
+
+            // Build the diff set by union of card names from both
+            // sides. Skip the internal __ keys captured alongside the
+            // snapshot (e.g. __archetype, __capturedAt).
+            const allNames = new Set();
+            Object.keys(baseline).forEach(k => { if (!k.startsWith('__')) allNames.add(k); });
+            userByName.forEach((_v, k) => allNames.add(k));
+
+            const diffs = [];
+            allNames.forEach(name => {
+                const userCount = userByName.get(name) || 0;
+                const vanillaCount = baseline[name] || 0;
+                const delta = userCount - vanillaCount;
+                if (delta === 0) return;
+                diffs.push({ name, userCount, vanillaCount, delta });
+            });
+
+            // Banner showing whether the snapshot matches the
+            // currently-selected archetype. If the user generated for
+            // archetype A and then switches to archetype B, the diff
+            // is meaningless — flag it instead of silently misleading.
+            const baselineArch = baseline.__archetype || null;
+            const archMismatch = baselineArch &&
+                                  baselineArch.trim().toLowerCase() !== archetype.trim().toLowerCase();
+            const mismatchBanner = archMismatch
+                ? `<div class="uv-card-diff-mismatch">${
+                    (t('matchup.userVsVanillaDiffMismatch') || 'Vanilla baseline was captured for "{src}" — run Consistency Generate for "{tgt}" to refresh.')
+                        .replace('{src}', baselineArch).replace('{tgt}', archetype)
+                }</div>`
+                : '';
+
+            if (diffs.length === 0) {
+                container.innerHTML = `
+                    ${mismatchBanner}
+                    <div class="uv-card-diff-empty">
+                        ${t('matchup.userVsVanillaDiffMatch') || 'Your deck matches the Vanilla baseline card-for-card.'}
+                    </div>`;
+                return;
+            }
+
+            diffs.sort((a, b) => Math.abs(b.delta) - Math.abs(a.delta) || a.name.localeCompare(b.name));
+
+            const added = diffs.filter(d => d.delta > 0);
+            const removed = diffs.filter(d => d.delta < 0);
+
+            const renderEntry = (d) => {
+                const cls = d.delta > 0 ? 'uv-diff-add' : 'uv-diff-rem';
+                const sign = d.delta > 0 ? '+' : '';
+                return `<li class="${cls}">
+                    <span class="uv-diff-delta">${sign}${d.delta}</span>
+                    <span class="uv-diff-name">${escapeHtml(d.name)}</span>
+                    <span class="uv-diff-counts">${d.userCount} / ${d.vanillaCount}</span>
+                </li>`;
+            };
+
+            const heading = t('matchup.userVsVanillaDiffHeading') || 'Card diff vs Vanilla';
+            const subHeading = t('matchup.userVsVanillaDiffSub') || 'user / vanilla';
+            const addedLabel = t('matchup.userVsVanillaDiffAdded') || 'Added vs Vanilla';
+            const removedLabel = t('matchup.userVsVanillaDiffRemoved') || 'Cut vs Vanilla';
+
+            container.innerHTML = `
+                ${mismatchBanner}
+                <div class="uv-card-diff-header">
+                    <h4 class="uv-card-diff-title">${heading}</h4>
+                    <span class="uv-card-diff-sub">${subHeading}</span>
+                </div>
+                <div class="uv-card-diff-grid">
+                    ${added.length > 0 ? `<div class="uv-card-diff-col">
+                        <div class="uv-card-diff-col-label uv-diff-add-label">${addedLabel} (${added.length})</div>
+                        <ul class="uv-card-diff-list">${added.map(renderEntry).join('')}</ul>
+                    </div>` : ''}
+                    ${removed.length > 0 ? `<div class="uv-card-diff-col">
+                        <div class="uv-card-diff-col-label uv-diff-rem-label">${removedLabel} (${removed.length})</div>
+                        <ul class="uv-card-diff-list">${removed.map(renderEntry).join('')}</ul>
+                    </div>` : ''}
+                </div>`;
         }
 
         // Expose so deck-mutation callbacks can re-trigger the panel

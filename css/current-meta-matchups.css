@@ -527,6 +527,115 @@
         align-self: center;
     }
 }
+
+/* Card-by-card diff vs the captured Vanilla baseline */
+.uv-card-diff {
+    margin-top: 16px;
+}
+.uv-card-diff-empty {
+    padding: 10px 12px;
+    background: rgba(255, 255, 255, 0.7);
+    border-radius: 6px;
+    border-left: 3px solid #d1d5db;
+    color: #6b7280;
+    font-size: 0.9em;
+    font-style: italic;
+}
+.uv-card-diff-mismatch {
+    padding: 8px 12px;
+    background: #fef3c7;
+    border-radius: 6px;
+    border-left: 3px solid #f59e0b;
+    color: #92400e;
+    font-size: 0.85em;
+    margin-bottom: 10px;
+}
+.uv-card-diff-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+.uv-card-diff-title {
+    margin: 0;
+    font-size: 1em;
+    font-weight: 700;
+    color: #1f2937;
+}
+.uv-card-diff-sub {
+    font-size: 0.8em;
+    color: #6b7280;
+    font-family: ui-monospace, SFMono-Regular, monospace;
+}
+.uv-card-diff-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+.uv-card-diff-col-label {
+    font-size: 0.85em;
+    font-weight: 600;
+    padding: 4px 8px;
+    border-radius: 4px;
+    margin-bottom: 6px;
+}
+.uv-diff-add-label {
+    background: rgba(34, 197, 94, 0.12);
+    color: #15803d;
+    border-left: 3px solid #22c55e;
+}
+.uv-diff-rem-label {
+    background: rgba(239, 68, 68, 0.12);
+    color: #b91c1c;
+    border-left: 3px solid #ef4444;
+}
+.uv-card-diff-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+.uv-card-diff-list li {
+    display: grid;
+    grid-template-columns: 36px 1fr auto;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.85em;
+    background: rgba(255, 255, 255, 0.6);
+}
+.uv-card-diff-list li.uv-diff-add {
+    border-left: 2px solid #22c55e;
+}
+.uv-card-diff-list li.uv-diff-rem {
+    border-left: 2px solid #ef4444;
+}
+.uv-diff-delta {
+    font-weight: 700;
+    font-family: ui-monospace, SFMono-Regular, monospace;
+    text-align: center;
+}
+.uv-diff-add .uv-diff-delta { color: #15803d; }
+.uv-diff-rem .uv-diff-delta { color: #b91c1c; }
+.uv-diff-name {
+    color: #1f2937;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.uv-diff-counts {
+    color: #6b7280;
+    font-family: ui-monospace, SFMono-Regular, monospace;
+    font-size: 0.9em;
+}
+@media (max-width: 768px) {
+    .uv-card-diff-grid {
+        grid-template-columns: 1fr;
+    }
+}
 .mc-vs-table-wrap {
     overflow-x: auto;
     border-radius: 10px;

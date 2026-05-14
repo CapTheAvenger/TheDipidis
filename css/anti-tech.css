@@ -178,6 +178,58 @@
     line-height: 1.35;
 }
 
+/* Preview block — shows base WR vs target → adjusted WR pre-Generate */
+.anti-tech-preview {
+    padding: 12px 14px;
+    background: #eff6ff;
+    border-radius: 8px;
+    border-left: 3px solid #3b82f6;
+}
+.anti-tech-preview-header {
+    font-size: 0.9em;
+    font-weight: 700;
+    color: #1e40af;
+    margin-bottom: 8px;
+}
+.anti-tech-preview-pills {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+}
+.anti-tech-preview-pill-block {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 3px;
+}
+.anti-tech-preview-pill-label {
+    font-size: 0.75em;
+    text-transform: uppercase;
+    color: #6b7280;
+    letter-spacing: 0.04em;
+    font-weight: 600;
+}
+.anti-tech-preview-cats {
+    font-size: 0.82em;
+    color: #1f2937;
+    padding: 6px 10px;
+    background: rgba(255, 255, 255, 0.7);
+    border-radius: 4px;
+    margin-bottom: 6px;
+}
+.anti-tech-preview-note {
+    font-size: 0.75em;
+    color: #6b7280;
+    font-style: italic;
+}
+.anti-tech-preview-empty {
+    font-size: 0.85em;
+    color: #6b7280;
+    font-style: italic;
+}
+
 .anti-tech-actions {
     display: flex;
     justify-content: flex-end;

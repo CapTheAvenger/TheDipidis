@@ -247,18 +247,32 @@
 
             // 1. Process every Online card; add Major contribution when present.
             onlineByName.forEach((rows, cn) => {
+                // Per the comment above on the grouping: multi-print rows
+                // of the same card share their deck_count / total_count
+                // once the upstream stale-dedup has run, so summing them
+                // multiplies the metric by the print count. That's the
+                // root of the "117 % PFL" display bug. Take max() (any
+                // single value works when they're equal; max is safe
+                // when they're not). total_count uses max() too because
+                // each row already reflects the aggregated total — not
+                // per-print fragments.
                 let online_dc = 0, online_tc = 0, online_mc = 0;
                 const tmpl = rows[0];
                 rows.forEach(r => {
-                    online_dc += parseInt(r.deck_count || r.deck_inclusion_count || 0, 10) || 0;
-                    online_tc += parseFloat(String(r.total_count || 0).replace(',', '.')) || 0;
+                    const dc = parseInt(r.deck_count || r.deck_inclusion_count || 0, 10) || 0;
+                    const tc = parseFloat(String(r.total_count || 0).replace(',', '.')) || 0;
+                    if (dc > online_dc) online_dc = dc;
+                    if (tc > online_tc) online_tc = tc;
                     online_mc = Math.max(online_mc, parseInt(r.max_count || 0, 10) || 0);
                 });
                 const major = majorAgg.get(cn);
                 const combined_dc = online_dc + (major ? major.deck_count : 0);
                 const combined_tc = online_tc + (major ? major.total_count : 0);
                 const combined_mc = Math.max(online_mc, major ? major.max_count : 0);
-                const pct = combinedTotal > 0 ? (combined_dc / combinedTotal) * 100 : 0;
+                // Defensive cap — combined_dc shouldn't exceed combinedTotal
+                // now that prints are collapsed, but pin it anyway.
+                const rawPct = combinedTotal > 0 ? (combined_dc / combinedTotal) * 100 : 0;
+                const pct = Math.min(100, Math.max(0, rawPct));
                 merged.push({
                     ...tmpl,
                     deck_count: combined_dc,
@@ -830,7 +844,17 @@
         //   image_url, is_ace_spec, meta
         function _aggregateDatedRowsByArchetype(rows) {
             const archetypeBuckets = new Map(); // arch → Set<tid|arch>
-            const cardData = new Map();         // arch|card → entry
+            // Two-stage aggregation: first collapse multi-print rows
+            // within each (tournament, archetype, card_name) — different
+            // set prints of the same card share their deck base in this
+            // CSV (each print row's deck_inclusion_count reflects the
+            // same set of source decks). Summing across prints would
+            // multiply the unique-deck count by the print count, which
+            // is exactly what produced "Poké Pad 117 % PFL" (4 prints
+            // × ~29 %). max() approximates the deck-union correctly,
+            // while total_count is still summed because different prints
+            // legitimately contribute different copies to a single deck.
+            const perTournamentCard = new Map(); // tid|arch|card → entry
             for (const r of rows) {
                 if (!r) continue;
                 const arch = String(r.archetype || '').trim();
@@ -840,35 +864,61 @@
                 const archDecks = archetypeBuckets.get(arch) || new Set();
                 archDecks.add(`${tid}|${arch}`);
                 archetypeBuckets.set(arch, archDecks);
-                const key = `${arch}|${card}`;
+                const tcKey = `${tid}|${arch}|${card}`;
+                let tc = perTournamentCard.get(tcKey);
+                if (!tc) {
+                    tc = {
+                        archetype: arch,
+                        card_name: card,
+                        deck_inclusion_count: 0,
+                        total_count: 0,
+                        max_count: 0,
+                        _tmpl: r,
+                    };
+                    perTournamentCard.set(tcKey, tc);
+                }
+                const dc = parseInt(r.deck_inclusion_count || 0, 10) || 0;
+                if (dc > tc.deck_inclusion_count) tc.deck_inclusion_count = dc;
+                tc.total_count += parseFloat(String(r.total_count || 0).replace(',', '.')) || 0;
+                const m = parseInt(r.max_count || 0, 10) || 0;
+                if (m > tc.max_count) tc.max_count = m;
+            }
+            // Second stage: sum the per-tournament-max values across all
+            // tournaments inside one (archetype, card_name) bucket.
+            const cardData = new Map();         // arch|card → entry
+            for (const tc of perTournamentCard.values()) {
+                const key = `${tc.archetype}|${tc.card_name}`;
                 let entry = cardData.get(key);
                 if (!entry) {
                     entry = {
-                        archetype: arch,
-                        card_name: card,
-                        card_identifier: r.card_identifier || '',
+                        archetype: tc.archetype,
+                        card_name: tc.card_name,
+                        card_identifier: tc._tmpl.card_identifier || '',
                         total_count: 0,
                         max_count: 0,
                         deck_inclusion_count: 0,
-                        set_code: r.set_code || '',
-                        set_number: r.set_number || '',
-                        rarity: r.rarity || '',
-                        type: r.type || '',
-                        image_url: r.image_url || '',
-                        is_ace_spec: r.is_ace_spec || '',
+                        set_code: tc._tmpl.set_code || '',
+                        set_number: tc._tmpl.set_number || '',
+                        rarity: tc._tmpl.rarity || '',
+                        type: tc._tmpl.type || '',
+                        image_url: tc._tmpl.image_url || '',
+                        is_ace_spec: tc._tmpl.is_ace_spec || '',
                         meta: 'Meta Live (Dated)',
                     };
                     cardData.set(key, entry);
                 }
-                entry.deck_inclusion_count += parseInt(r.deck_inclusion_count || 0, 10) || 0;
-                entry.total_count          += parseFloat(String(r.total_count || 0).replace(',', '.')) || 0;
-                const m = parseInt(r.max_count || 0, 10) || 0;
-                if (m > entry.max_count) entry.max_count = m;
+                entry.deck_inclusion_count += tc.deck_inclusion_count;
+                entry.total_count          += tc.total_count;
+                if (tc.max_count > entry.max_count) entry.max_count = tc.max_count;
             }
             const out = [];
             for (const entry of cardData.values()) {
                 const totalDecks = (archetypeBuckets.get(entry.archetype) || new Set()).size;
-                const pct = totalDecks > 0 ? (entry.deck_inclusion_count / totalDecks) * 100 : 0;
+                // Defensive cap: should be ≤ 100 now that prints are
+                // collapsed correctly, but pin it just in case the data
+                // shape changes upstream.
+                const rawPct = totalDecks > 0 ? (entry.deck_inclusion_count / totalDecks) * 100 : 0;
+                const pct = Math.min(100, Math.max(0, rawPct));
                 const avg = entry.deck_inclusion_count > 0 ? entry.total_count / entry.deck_inclusion_count : 0;
                 out.push({
                     ...entry,

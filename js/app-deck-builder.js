@@ -3195,7 +3195,127 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             }, 2000);
             window.__overflowSafetyBound = true;
         }
-        
+
+        // One-shot bulk upgrade: walk the active deck and replace each
+        // card's print with the highest-rarity print available for that
+        // card name in the global card database. Used by the "Upgrade to
+        // Max Rarity" button in the deck-builder action row — replaces
+        // the old Low / Max regenerate buttons that nobody used.
+        //
+        // Counts and the deck-order array are preserved: if a deck has
+        // 2× Poké Pad (SVI 042) + 2× Poké Pad (PAF 187), they collapse
+        // to 4× Poké Pad on whichever print has the highest rarity rank.
+        function upgradeDeckToMaxRarity(source) {
+            let deck, orderKey, saveFn;
+            if (source === 'cityLeague') {
+                deck = window.cityLeagueDeck;
+                orderKey = 'cityLeagueDeckOrder';
+                saveFn = typeof saveCityLeagueDeck === 'function' ? saveCityLeagueDeck : null;
+            } else if (source === 'currentMeta') {
+                deck = window.currentMetaDeck;
+                orderKey = 'currentMetaDeckOrder';
+                saveFn = typeof saveCurrentMetaDeck === 'function' ? saveCurrentMetaDeck : null;
+            } else if (source === 'pastMeta') {
+                deck = window.pastMetaDeck;
+                orderKey = 'pastMetaDeckOrder';
+                saveFn = typeof savePastMetaDeck === 'function' ? savePastMetaDeck : null;
+            } else {
+                return;
+            }
+            if (!deck || Object.keys(deck).filter(k => deck[k] > 0).length === 0) {
+                if (typeof showToast === 'function') showToast(t('deck.noCardsToAdd'), 'warning');
+                return;
+            }
+            if (!window.allCardsDatabase || !window.allCardsDatabase.length) {
+                if (typeof showToast === 'function') showToast(t('cards.notLoadedYet') || 'Card database not loaded yet...', 'warning');
+                return;
+            }
+
+            const rank = typeof getRarityRank === 'function' ? getRarityRank : (() => 0);
+            const norm = typeof normalizeCardName === 'function' ? normalizeCardName : (s => String(s || '').toLowerCase().trim());
+
+            const newDeck = {};
+            const order = Array.isArray(window[orderKey]) ? window[orderKey].slice() : Object.keys(deck);
+            const newOrder = [];
+            let swaps = 0;
+
+            // Walk in order so the visual layout stays stable.
+            const seenInOrder = new Set();
+            const pushKey = (key, count) => {
+                if (!key || count <= 0) return;
+                newDeck[key] = (newDeck[key] || 0) + count;
+                if (!seenInOrder.has(key)) {
+                    newOrder.push(key);
+                    seenInOrder.add(key);
+                }
+            };
+
+            const keys = order.length ? order : Object.keys(deck);
+            // Process keys in deck-order; also catch any keys missing
+            // from `order` (defensive — should be rare).
+            const allKeys = new Set(keys);
+            Object.keys(deck).forEach(k => allKeys.add(k));
+
+            allKeys.forEach(key => {
+                const count = deck[key] || 0;
+                if (count <= 0) return;
+                const m = String(key).match(/^(.+?)\s*\(([A-Z0-9-]+)\s+([A-Z0-9-]+)\)$/);
+                if (!m) { pushKey(key, count); return; }
+                const cardName = m[1];
+                const currentSet = m[2];
+                const currentNumber = m[3];
+                const wantedName = norm(cardName);
+
+                const prints = (window.allCardsDatabase || []).filter(c => {
+                    if (!c || !c.type || !String(c.type).trim()) return false;
+                    if (!c.set || !c.number) return false;
+                    return norm(c.name || '') === wantedName || norm(c.name_en || '') === wantedName;
+                });
+                if (!prints.length) { pushKey(key, count); return; }
+
+                let best = prints[0];
+                for (let i = 1; i < prints.length; i++) {
+                    if (rank(prints[i].rarity) > rank(best.rarity)) best = prints[i];
+                }
+                const bestSet = String(best.set || '').toUpperCase();
+                const bestNum = String(best.number || '').toUpperCase();
+                if (bestSet === String(currentSet).toUpperCase() && bestNum === String(currentNumber).toUpperCase()) {
+                    pushKey(key, count);
+                    return;
+                }
+                const newKey = `${cardName} (${bestSet} ${bestNum})`;
+                pushKey(newKey, count);
+                swaps++;
+            });
+
+            // Persist the rebuilt deck + order, then re-render.
+            if (source === 'cityLeague') window.cityLeagueDeck = newDeck;
+            else if (source === 'currentMeta') window.currentMetaDeck = newDeck;
+            else if (source === 'pastMeta') window.pastMetaDeck = newDeck;
+            window[orderKey] = newOrder;
+
+            if (saveFn) { try { saveFn(); } catch (_e) { /* swallow — re-render still happens */ } }
+            if (typeof updateDeckDisplay === 'function') updateDeckDisplay(source);
+
+            if (typeof showToast === 'function') {
+                if (swaps === 0) {
+                    showToast(t('deck.upgradeRarityNone') || 'All cards already at highest rarity.', 'info');
+                } else {
+                    // Separate singular / plural keys so each language can
+                    // pluralise naturally (EN: card → cards, DE: Karte →
+                    // Karten) without a one-letter suffix hack.
+                    const key = swaps === 1 ? 'deck.upgradeRarity1' : 'deck.upgradeRarityN';
+                    const fallback = swaps === 1
+                        ? '1 card upgraded to max rarity.'
+                        : '{n} cards upgraded to max rarity.';
+                    const tpl = t(key);
+                    const msg = (tpl && tpl !== key ? tpl : fallback).replace('{n}', swaps);
+                    showToast(msg, 'success');
+                }
+            }
+        }
+        window.upgradeDeckToMaxRarity = upgradeDeckToMaxRarity;
+
         function autoComplete(source, rarityMode) {
             if (source !== 'cityLeague' && source !== 'currentMeta' && source !== 'pastMeta') return;
             

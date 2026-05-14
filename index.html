@@ -678,8 +678,7 @@
                                 <div class="city-league-action-group deck-builder-primary-actions">
                                     <span class="action-group-label" data-i18n="deck.generateLabel">Generate</span>
                                     <button class="btn-modern primary deck-builder-main-cta" onclick="autoCompleteConsistency('cityLeague', 'min')" title="Uses tournament data for optimal card counts" data-i18n="btn.consistency" data-i18n-title="deck.genConsistencyTitle">Consistency Generate</button>
-                                    <button class="btn-modern" onclick="autoComplete('cityLeague', 'min')" title="Fill deck with lowest rarity cards" data-i18n="deck.genLow" data-i18n-title="deck.genLowTitle">Low</button>
-                                    <button class="btn-modern" onclick="autoComplete('cityLeague', 'max')" title="Fill deck with highest rarity cards" data-i18n="deck.genMax" data-i18n-title="deck.genMaxTitle">Max</button>
+                                    <button class="btn-modern" onclick="upgradeDeckToMaxRarity('cityLeague')" title="Swap every card in the current deck to its highest-rarity print" data-i18n="deck.upgradeRarity" data-i18n-title="deck.upgradeRarityTitle">↑ Max Rarity</button>
                                 </div>
                                 <div class="action-divider"></div>
                                 <div class="city-league-action-group deck-builder-metrics-inline d-none" id="cityLeagueDeckSummary">
@@ -1181,8 +1180,7 @@
                             <div class="current-meta-action-group deck-builder-primary-actions">
                                 <span class="action-group-label" data-i18n="cl.generate">Generate</span>
                                 <button class="btn-modern primary deck-builder-main-cta" onclick="autoCompleteConsistency('currentMeta', 'min')" title="Uses tournament data for optimal card counts" data-i18n="cl.genConsistency" data-i18n-title="cl.genConsistencyTitle">Consistency Generate</button>
-                                <button class="btn-modern" onclick="autoComplete('currentMeta', 'min')" title="Fill deck with lowest rarity cards" data-i18n="cl.genLow" data-i18n-title="cl.genLowTitle">Low</button>
-                                <button class="btn-modern" onclick="autoComplete('currentMeta', 'max')" title="Fill deck with highest rarity cards" data-i18n="cl.genMax" data-i18n-title="cl.genMaxTitle">Max</button>
+                                <button class="btn-modern" onclick="upgradeDeckToMaxRarity('currentMeta')" title="Swap every card in the current deck to its highest-rarity print" data-i18n="deck.upgradeRarity" data-i18n-title="deck.upgradeRarityTitle">↑ Max Rarity</button>
                             </div>
                             <div class="action-divider"></div>
                             <div class="current-meta-action-group deck-builder-metrics-inline d-none" id="currentMetaDeckSummary">
@@ -1400,8 +1398,7 @@
                             <div class="past-meta-action-group deck-builder-primary-actions">
                                 <span class="action-group-label" data-i18n="cl.generate">Generate</span>
                                 <button class="btn-modern primary deck-builder-main-cta" onclick="autoCompleteConsistency('pastMeta', 'min')" title="Uses tournament data for optimal card counts" data-i18n="cl.genConsistency" data-i18n-title="cl.genConsistencyTitle">Consistency Generate</button>
-                                <button class="btn-modern" onclick="autoComplete('pastMeta', 'min')" title="Fill deck with lowest rarity cards" data-i18n="cl.genLow" data-i18n-title="cl.genLowTitle">Low</button>
-                                <button class="btn-modern" onclick="autoComplete('pastMeta', 'max')" title="Fill deck with highest rarity cards" data-i18n="cl.genMax" data-i18n-title="cl.genMaxTitle">Max</button>
+                                <button class="btn-modern" onclick="upgradeDeckToMaxRarity('pastMeta')" title="Swap every card in the current deck to its highest-rarity print" data-i18n="deck.upgradeRarity" data-i18n-title="deck.upgradeRarityTitle">↑ Max Rarity</button>
                             </div>
                             <div class="action-divider"></div>
                             <div class="past-meta-action-group deck-builder-metrics-inline d-none" id="pastMetaDeckSummary">

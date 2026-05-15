@@ -33,7 +33,7 @@
     {
       "attacker": "attack.bench_damage",
       "defender": "ability.bench_protection",
-      "result": "neutral",
+      "result": "defender_wins",
       "confidence": "high",
       "matchup_value": -3,
       "narrative_en": "{defender_name} prevents {attacker_name}'s bench-snipe damage — the bench-pressure plan is shut off.",

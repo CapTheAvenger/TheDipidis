@@ -1743,6 +1743,35 @@
             if (paired.length === 0) return hide('no field decks have matchup data');
 
             const totalShare = paired.reduce((s, p) => s + p.fieldShare, 0) || 1;
+
+            // Run the card-text capability engine BEFORE the WR
+            // aggregation so detected tech-wins (e.g. Spiky Hopper
+            // bypasses Crustle's ex-immunity) flow into the per-
+            // opponent userWr value and the aggregate "Your Build"
+            // pill. Returns Map<opponentName, {matchups, winsBonus}>.
+            // Bonus is the sum of matchup_value over unique
+            // attacker→defender interaction tags where result is
+            // 'attacker_wins', capped per opponent to prevent any
+            // single matchup from swinging WR by more than 15 pts.
+            const capabilityData = await _computeCapabilityBonuses(paired);
+            if (capabilityData && capabilityData.size > 0) {
+                paired.forEach(p => {
+                    const d = capabilityData.get(p.opponent);
+                    if (!d || d.winsBonus <= 0) return;
+                    const before = p.userWr;
+                    p.userWr = Math.max(0, Math.min(100, p.userWr + d.winsBonus));
+                    p.bonus  = (p.bonus || 0) + d.winsBonus;
+                    p._capabilityWinsBonus = d.winsBonus;
+                    p._capabilityMatchups  = d.matchups;
+                    if (typeof console !== 'undefined') {
+                        console.log('[CapabilityDetector] WR boost',
+                            p.opponent, '|', before.toFixed(1) + '%',
+                            '+', d.winsBonus, 'pts →',
+                            p.userWr.toFixed(1) + '%');
+                    }
+                });
+            }
+
             const vanillaWr = paired.reduce((s, p) => s + p.wr * p.fieldShare, 0) / totalShare;
             const userWr    = paired.reduce((s, p) => s + p.userWr * p.fieldShare, 0) / totalShare;
             const delta     = userWr - vanillaWr;
@@ -1844,16 +1873,15 @@
                     `<tr><td colspan="5" class="mc-vs-empty">${t('heatmap.noData') || 'No data available'}</td></tr>`;
             }
 
-            // Card-text-driven tech detector. Reads the user's deck +
-            // each opponent's archetype card pool, runs the capability
-            // engine, and renders explicit attacker/defender matchups
-            // when an offensive tag in the user's deck matches a
-            // defensive tag on an opposing card. Independent of the
-            // active_threats.json counter library — this catches
-            // archetype-internal techs (like Mega Lopunny ex Spiky
-            // Hopper bypassing Crustle's Sturdy) that the narrow
-            // counter taxonomy doesn't cover.
-            _renderCapabilityTechDetector(paired).catch(err => console.error('[CapabilityDetector] runtime error:', err));
+            // Card-text capability detector — render using the data
+            // already computed before the WR aggregation. The detector
+            // section sits ABOVE the per-opponent table (see
+            // index.html). Only `attacker_wins` interactions are
+            // displayed; `defender_wins` (e.g. opponent's Shaymin
+            // blocks user's bench-snipe) and `neutral` interactions
+            // are filtered out so the section reads as "your techs
+            // against the field", not "the field's techs against you".
+            _renderCapabilityTechSection(capabilityData);
 
             _renderCardDiffSection(archetype);
 
@@ -1915,27 +1943,35 @@
             return map;
         }
 
-        async function _renderCapabilityTechDetector(pairedOpponents) {
-            const container = document.getElementById('currentMetaUserVsVanillaDetectedTech');
-            // Use console.log directly: devLog is gated by DEV_MODE=false in
-            // production so the diagnostic trail would be invisible exactly
-            // when we need it. The tag prefix keeps these greppable.
+        // Per-opponent capability matchup cap. A single matchup can't
+        // swing WR by more than this many points regardless of how
+        // many strong tech interactions fire. Two unique tech wins
+        // (e.g. ex-immunity bypass + KO-prevention bypass) can stack
+        // up to the cap; a third doesn't push further.
+        const _CAPABILITY_BONUS_CAP = 15;
+
+        // Computes detected matchups + WR bonuses for each opponent
+        // in the predicted field. Pure data — no DOM writes. The
+        // caller folds winsBonus into paired[].userWr before
+        // rendering the summary/table, then passes the data into
+        // _renderCapabilityTechSection for the narrative list. Logs
+        // are unconditional console.log calls (devLog is silenced in
+        // production) so the trail is visible during diagnostics.
+        async function _computeCapabilityBonuses(pairedOpponents) {
             const log = (...a) => console.log('[CapabilityDetector]', ...a);
-            if (!container) { log('container div missing — skipping'); return; }
             if (typeof window.CardCapabilityEngine === 'undefined') {
                 log('window.CardCapabilityEngine undefined — script not loaded?');
-                container.innerHTML = '';
-                return;
+                return null;
             }
             const userDeckCards = _userDeckCardKeys();
             log('user deck cards parsed:', userDeckCards.length, userDeckCards.slice(0, 4));
-            if (userDeckCards.length === 0) { container.innerHTML = ''; return; }
+            if (userDeckCards.length === 0) return null;
 
             const cardEffectsIndex = (typeof window._loadCardEffectsIndex === 'function')
                 ? await window._loadCardEffectsIndex()
                 : (window._cardEffectsIndex || null);
             log('cardEffectsIndex size:', cardEffectsIndex && cardEffectsIndex.size);
-            if (!cardEffectsIndex || !cardEffectsIndex.size) { container.innerHTML = ''; return; }
+            if (!cardEffectsIndex || !cardEffectsIndex.size) return null;
 
             const archetypeCardMap = _buildArchetypeCardMap();
             log('archetypeCardMap keys:', archetypeCardMap.size, 'sample:', Array.from(archetypeCardMap.keys()).slice(0, 5));
@@ -1954,52 +1990,93 @@
             log('field archetypes matched:', fieldArchetypes.size, '/ misses:', lookupMisses);
 
             const lang = (typeof getLang === 'function') ? getLang() : 'en';
-            const detected = await window.CardCapabilityEngine.detectMatchups({
-                userDeckCards,
-                archetypeCardMap: fieldArchetypes,
-                cardEffectsIndex,
-                lang,
-            });
+            let detected;
+            try {
+                detected = await window.CardCapabilityEngine.detectMatchups({
+                    userDeckCards,
+                    archetypeCardMap: fieldArchetypes,
+                    cardEffectsIndex,
+                    lang,
+                });
+            } catch (err) {
+                console.error('[CapabilityDetector] runtime error:', err);
+                return null;
+            }
             log('detected matchups for opponents:', detected ? detected.size : 0);
+            if (!detected || detected.size === 0) return new Map();
 
-            const confidenceLabel = (c) => {
-                if (c === 'high')   return t('matchup.techConfidenceHigh')   || 'high confidence';
-                if (c === 'medium') return t('matchup.techConfidenceMedium') || 'medium confidence';
-                return t('matchup.techConfidenceLow') || 'low confidence';
-            };
+            // Build the per-opponent display-and-bonus tuples. Only
+            // attacker_wins interactions count — defender_wins are
+            // opponent counters against the user (e.g. Shaymin
+            // shutting down our bench-snipe attack), neutral
+            // interactions are ambiguous outcomes. Both are filtered
+            // out so this section reads cleanly as "your techs
+            // against the field". For the WR bonus, the same
+            // interaction tag fired by multiple attacker cards
+            // counts once (having two ignores_effects attackers
+            // isn't double the win, just more redundant access).
+            const out = new Map();
+            for (const [oppName, matchups] of detected.entries()) {
+                const wins = matchups.filter(m => m.result === 'attacker_wins');
+                if (wins.length === 0) continue;
+                const seenInteractions = new Set();
+                let totalBonus = 0;
+                for (const m of wins) {
+                    if (seenInteractions.has(m.interactionTag)) continue;
+                    seenInteractions.add(m.interactionTag);
+                    totalBonus += (m.matchupValue || 0);
+                }
+                const capped = Math.min(totalBonus, _CAPABILITY_BONUS_CAP);
+                out.set(oppName, {
+                    matchups: wins,
+                    winsBonus: capped,
+                    winsBonusRaw: totalBonus,
+                });
+            }
+            log('attacker_wins matchups after filter:', out.size, 'opponents');
+            return out;
+        }
+
+        // Renders the "Detected tech matchups" narrative list using
+        // pre-computed capability data from _computeCapabilityBonuses.
+        // Pure DOM — no engine calls, no data computation.
+        function _renderCapabilityTechSection(capabilityData) {
+            const container = document.getElementById('currentMetaUserVsVanillaDetectedTech');
+            if (!container) return;
             const header = t('matchup.detectedTechHeader') || 'Detected tech matchups (card-text-driven)';
             const note = t('matchup.detectedTechNote') || 'Foundation v0.1 — heuristic regex extraction over pokemon_card_effects.json. Pattern library is intentionally narrow and grows over time (see data/card_capability_taxonomy.json).';
-
-            if (!detected || detected.size === 0) {
-                // Render an explicit empty-state so the user can confirm the
-                // engine ran (vs. silently hiding the section, which made
-                // the previous diagnostic round impossible to interpret).
+            if (!capabilityData || capabilityData.size === 0) {
                 container.innerHTML = `
                     <div class="uv-tech-section uv-tech-empty">
                         <h4 class="uv-tech-title">${escapeHtml(header)}</h4>
                         <p class="uv-tech-line uv-tech-low">${escapeHtml(t('matchup.detectedTechNone') || 'No card-text interactions detected for the current deck against the predicted field.')}</p>
                         <p class="uv-tech-note">${escapeHtml(note)}</p>
                     </div>`;
-                log('rendered empty-state section');
                 return;
             }
-
+            const confidenceLabel = (c) => {
+                if (c === 'high')   return t('matchup.techConfidenceHigh')   || 'high confidence';
+                if (c === 'medium') return t('matchup.techConfidenceMedium') || 'medium confidence';
+                return t('matchup.techConfidenceLow') || 'low confidence';
+            };
             const items = [];
-            for (const [oppName, matchups] of detected.entries()) {
-                items.push(`<li class="uv-tech-opp"><strong>vs ${escapeHtml(oppName)}</strong><ul class="uv-tech-list">${
-                    matchups.map(m =>
+            for (const [oppName, data] of capabilityData.entries()) {
+                const bonusBadge = data.winsBonus > 0
+                    ? ` <span class="uv-tech-bonus">+${data.winsBonus}pts</span>`
+                    : '';
+                items.push(`<li class="uv-tech-opp"><strong>vs ${escapeHtml(oppName)}</strong>${bonusBadge}<ul class="uv-tech-list">${
+                    data.matchups.map(m =>
                         `<li class="uv-tech-line uv-tech-${m.confidence}">${escapeHtml(m.narrative)} <span class="uv-tech-meta">(${escapeHtml(confidenceLabel(m.confidence))})</span></li>`
                     ).join('')
                 }</ul></li>`);
             }
-
             container.innerHTML = `
                 <div class="uv-tech-section">
-                    <h4 class="uv-tech-title">${escapeHtml(header)} <span class="uv-tech-count">(${detected.size})</span></h4>
+                    <h4 class="uv-tech-title">${escapeHtml(header)} <span class="uv-tech-count">(${capabilityData.size})</span></h4>
                     <ul class="uv-tech-opp-list">${items.join('')}</ul>
                     <p class="uv-tech-note">${escapeHtml(note)}</p>
                 </div>`;
-            log('rendered section with', detected.size, 'opponent groups; innerHTML length:', container.innerHTML.length);
+            console.log('[CapabilityDetector] rendered section:', capabilityData.size, 'opponent groups');
         }
 
         // Card-by-card diff between the user's current deck and the

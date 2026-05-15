@@ -554,6 +554,18 @@
     font-weight: 600;
     font-size: 0.85em;
 }
+.uv-tech-bonus {
+    display: inline-block;
+    margin-left: 6px;
+    padding: 1px 8px;
+    background: #166534;
+    color: #ffffff;
+    border-radius: 999px;
+    font-size: 0.78em;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    vertical-align: middle;
+}
 .uv-tech-title {
     margin: 0 0 8px 0;
     font-size: 0.95em;

@@ -4159,24 +4159,53 @@
         }
 
         function getRarityRank(rarity) {
-            // Higher number = rarer/more valuable
+            // Higher number = rarer / more visually-premium print.
+            //
+            // User-reported bug (2026-05): "Max Rarity" toggle in the
+            // deck builder was picking SVP promos for every card
+            // because Promo was ranked 14 (highest). Promos are
+            // typically participation-pack cards — visually plain
+            // and cheap — so promoting them to the top inverted the
+            // toggle's UX intent ("shiniest print").
+            //
+            // Plus several rarities present in the data weren't in
+            // the map at all and silently defaulted to 0:
+            //   Art Rare, Rainbow Rare, Special Art Rare,
+            //   Triple Rare, Character Holo Rare/Super Rare,
+            //   Shiny Ultra Rare, Amazing Rare
+            // Now covered with sensible ranks.
+            //
+            // Ranking philosophy: cheap regular-print stuff at the
+            // bottom, full-art / alt-art in the middle, gold /
+            // rainbow / textured chase cards at the top.
             const rarityHierarchy = {
-                'Common': 1,
-                'Uncommon': 2,
-                'Rare': 3,
-                'Holo Rare': 4,
-                'Rare Holo': 4,
-                'Radiant Rare': 5,
-                'Art Rare': 6,
-                'Illustration Rare': 6,
-                'Double Rare': 7,
-                'Ultra Rare': 8,
-                'Shiny Rare': 9,
-                'Special Illustration Rare': 10,
-                'Hyper Rare': 11,
-                'Secret Rare': 12,
-                'Secret Rare Gold': 13,
-                'Promo': 14  // Promo highest priority for MEP cards
+                // Tier 1 — cheap / utility prints
+                'Promo':                    1,   // demoted from 14
+                'Common':                   2,
+                'Uncommon':                 3,
+                'Rare':                     4,
+                'Holo Rare':                5,
+                'Rare Holo':                5,   // alias
+                'Character Holo Rare':      6,
+                // Tier 2 — mid (modern ex/V baseline + radiants)
+                'Radiant Rare':             7,
+                'Amazing Rare':             7,
+                'Double Rare':              8,
+                'Triple Rare':              9,
+                // Tier 3 — alt-art / full-art
+                'Art Rare':                10,
+                'Illustration Rare':       10,   // alias
+                'Ultra Rare':              11,
+                'Shiny Rare':              12,
+                'Character Super Rare':    13,
+                // Tier 4 — chase prints (most visually premium)
+                'Special Art Rare':        14,
+                'Special Illustration Rare':14,  // alias
+                'Shiny Ultra Rare':        15,
+                'Rainbow Rare':            16,
+                'Hyper Rare':              17,
+                'Secret Rare':             18,
+                'Secret Rare Gold':        19,
             };
             return rarityHierarchy[rarity] || 0;
         }

@@ -1853,7 +1853,7 @@
             // archetype-internal techs (like Mega Lopunny ex Spiky
             // Hopper bypassing Crustle's Sturdy) that the narrow
             // counter taxonomy doesn't cover.
-            _renderCapabilityTechDetector(paired).catch(err => devLog('[UserVsVanilla] capability detector error:', err && err.message));
+            _renderCapabilityTechDetector(paired).catch(err => console.error('[CapabilityDetector] runtime error:', err));
 
             _renderCardDiffSection(archetype);
 

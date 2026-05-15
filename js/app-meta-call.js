@@ -599,24 +599,37 @@ window.MetaCall = (function () {
   // builder's window._cardEffectsIndex when present so the 10 MB
   // file is fetched at most once per session, regardless of which
   // panel the user opened first.
+  //
+  // Builds BOTH bySetNumber and byName maps even though MetaCall
+  // itself only needs byName. Other consumers (capability detector
+  // in app-current-meta-analysis, deck-builder's effect lookups)
+  // need bySetNumber to identify the exact print. When MetaCall
+  // wins the race and is the first to cache the index, those
+  // consumers silently failed before — bySetNumber was undefined
+  // and `.get()` threw TypeError inside a swallowed try/catch.
   async function _loadCardEffectsForHp() {
     if (typeof window !== 'undefined' && window._cardEffectsIndex
-        && window._cardEffectsIndex.byName) {
+        && window._cardEffectsIndex.byName
+        && window._cardEffectsIndex.bySetNumber) {
       return window._cardEffectsIndex;
     }
     try {
       const resp = await fetch('./data/pokemon_card_effects.json');
       if (!resp.ok) return null;
       const raw = await resp.json();
+      const bySetNumber = new Map();
       const byName = new Map();
       if (raw && typeof raw === 'object') {
-        for (const v of Object.values(raw)) {
-          if (!v || !v.name) continue;
-          const nm = String(v.name).toLowerCase().trim();
-          if (!byName.has(nm)) byName.set(nm, v);
+        for (const k of Object.keys(raw)) {
+          const v = raw[k];
+          if (!v) continue;
+          const upperKey = String(k).toUpperCase().trim();
+          bySetNumber.set(upperKey, v);
+          const nm = String(v.name || '').toLowerCase().trim();
+          if (nm && !byName.has(nm)) byName.set(nm, v);
         }
       }
-      const idx = { byName, size: byName.size };
+      const idx = { bySetNumber, byName, size: bySetNumber.size };
       if (typeof window !== 'undefined') window._cardEffectsIndex = idx;
       return idx;
     } catch (_e) {

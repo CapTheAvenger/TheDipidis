@@ -1,0 +1,57 @@
+{
+  "_doc": "Capability taxonomy for the card-text-driven tech-matchup detector. Each capability tag describes an effect a card has based on its rules text. Extracted by patterns in card_capability_patterns.json and matched against opposing-side tags by card_capability_interactions.json.",
+  "version": "0.1",
+  "generated_at": "2026-05-15",
+  "tags": {
+    "attack.ignores_effects": {
+      "side": "offensive",
+      "scope": "attack",
+      "desc": "Attack damage is not affected by any effects on the defending Pokemon. Bypasses damage-reduction abilities, KO-prevention abilities, EX-immunity, and bench-protection on the active. Example: Mega Lopunny ex (PFL 84) Spiky Hopper."
+    },
+    "attack.bench_damage": {
+      "side": "offensive",
+      "scope": "attack",
+      "desc": "Attack deals damage to one or more Benched Pokemon. Bypasses front-line bulk and pressures multi-prize backline targets. Example: Drayton (DRI 21) Dynamic Lightning, Charizard ex Burning Darkness."
+    },
+    "attack.weakness_bypass": {
+      "side": "offensive",
+      "scope": "attack",
+      "desc": "Attack damage is dealt regardless of Weakness — neutralises type-disadvantaged matchups where the opponent would otherwise be a hard counter."
+    },
+    "ability.ko_prevention": {
+      "side": "defensive",
+      "scope": "ability",
+      "desc": "Survives a lethal attack with 1+ HP remaining when at full HP. Example: Crustle (BLK 130) Sturdy: 'If this Pokemon has full HP and would be Knocked Out by damage from an attack, it is not Knocked Out, and its remaining HP becomes 10.'"
+    },
+    "ability.ex_immunity": {
+      "side": "defensive",
+      "scope": "ability",
+      "desc": "Takes zero damage from Pokemon ex / Pokemon-EX attacks. Hard-walls every ex-attacker unless bypassed. Example: Cornerstone Mask Ogerpon variants."
+    },
+    "ability.bench_protection": {
+      "side": "defensive",
+      "scope": "ability",
+      "desc": "Prevents damage done to Benched Pokemon. Examples: Manaphy (Wave Veil), Mr. Mime, Jirachi-style protection."
+    },
+    "ability.damage_reduction": {
+      "side": "defensive",
+      "scope": "ability",
+      "desc": "Reduces incoming damage by a fixed amount (e.g. '-30 damage from attacks'). Eats away at attacker math but doesn't fully prevent KO."
+    },
+    "ability.bench_search": {
+      "side": "utility",
+      "scope": "ability",
+      "desc": "Searches the deck for a specific category of Pokemon and benches them, accelerating board setup."
+    },
+    "ability.gust_effect": {
+      "side": "utility",
+      "scope": "ability_or_attack",
+      "desc": "Switches one of the opponent's Benched Pokemon to the Active Spot. Critical for picking off support pieces or punishing setup Pokemon."
+    },
+    "disruption.hand_reset": {
+      "side": "disruption",
+      "scope": "supporter",
+      "desc": "Forces the opponent to shuffle their hand and draw a different (usually smaller) number of cards. Examples: Iono, N, Roxanne."
+    }
+  }
+}

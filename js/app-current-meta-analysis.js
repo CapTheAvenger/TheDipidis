@@ -1799,6 +1799,14 @@
                     });
             } else {
                 breakdownLines.push(t('matchup.userVsVanillaBreakdownNoCounters') || 'No tech-counter cards detected — your deck performs at vanilla baseline.');
+                // Explain the limitation. The counter library in
+                // active_threats.json is intentionally narrow (only
+                // cards that defend against specific threat categories
+                // — hand_disruption, retreat_lock, bench_damage,
+                // ability_lock). Archetype-internal tools like Scoop
+                // Up Cyclone or Binding Mochi are not tracked here
+                // even though they're tactically meaningful.
+                breakdownLines.push(t('matchup.userVsVanillaBreakdownLibraryNote') || 'Note: the counter library only tracks cards explicitly listed in data/active_threats.json. Archetype-internal tools (e.g. ACE SPECs, generic Pokemon Tools, in-archetype draw supporters) are not counted unless added to that list.');
             }
             breakdownLines.push(
                 (t('matchup.userVsVanillaBreakdownMatched') || 'Bonus applied vs {m}/{n} opponents in the predicted field.')
@@ -1811,9 +1819,156 @@
             detailEl.innerHTML = `
                 <ul class="uv-breakdown">${breakdownLines.map(l => `<li>${l}</li>`).join('')}</ul>`;
 
+            // Per-opponent vanilla vs build comparison. The aggregated
+            // pills above hide WHICH opponents the bonus fired on —
+            // this table surfaces that explicitly so the user can sanity
+            // check whether the tech adjustment maps to the matchups
+            // they actually expect.
+            const oppBody = document.getElementById('currentMetaUserVsVanillaOpponentBody');
+            if (oppBody) {
+                const fmtDelta = (b) => {
+                    if (b === 0) return '<span class="uv-delta-none">—</span>';
+                    const cls = b > 0 ? 'wr-pos' : 'wr-neg';
+                    const sign = b > 0 ? '+' : '';
+                    return `<span class="mc-vs-pill ${cls}">${sign}${fmt(b)}pts</span>`;
+                };
+                const oppRow = (p) => `
+                    <tr>
+                        <td>${escapeHtml(p.opponent)}</td>
+                        <td class="mc-vs-share">${fmt(p.fieldShare, 2)}%</td>
+                        <td class="mc-vs-wr"><span class="mc-vs-pill ${wrColorClass(p.wr)}">${fmt(p.wr)}%</span></td>
+                        <td class="mc-vs-wr"><span class="mc-vs-pill ${wrColorClass(p.userWr)}">${fmt(p.userWr)}%</span></td>
+                        <td class="mc-vs-wr">${fmtDelta(p.bonus)}</td>
+                    </tr>`;
+                oppBody.innerHTML = paired.map(oppRow).join('') ||
+                    `<tr><td colspan="5" class="mc-vs-empty">${t('heatmap.noData') || 'No data available'}</td></tr>`;
+            }
+
+            // Card-text-driven tech detector. Reads the user's deck +
+            // each opponent's archetype card pool, runs the capability
+            // engine, and renders explicit attacker/defender matchups
+            // when an offensive tag in the user's deck matches a
+            // defensive tag on an opposing card. Independent of the
+            // active_threats.json counter library — this catches
+            // archetype-internal techs (like Mega Lopunny ex Spiky
+            // Hopper bypassing Crustle's Sturdy) that the narrow
+            // counter taxonomy doesn't cover.
+            _renderCapabilityTechDetector(paired).catch(err => devLog('[UserVsVanilla] capability detector error:', err && err.message));
+
             _renderCardDiffSection(archetype);
 
             section.classList.remove('display-none');
+        }
+
+        // Builds the user-deck-card-key list (SET|number + name) from
+        // window.currentMetaDeck. Keys in the deck look like
+        // "Mega Lopunny ex (PFL 84)" — extract the set+number from
+        // the parenthesised suffix so we can hit pokemon_card_effects
+        // by its primary SET|number index instead of relying on the
+        // name fallback (which collides for cards with multiple prints
+        // and reprints).
+        function _userDeckCardKeys() {
+            const deck = (typeof window !== 'undefined' && window.currentMetaDeck) || {};
+            const out = [];
+            const reSetNum = /\(([A-Z0-9]+)\s+([A-Za-z0-9]+)\)\s*$/;
+            for (const rawKey of Object.keys(deck)) {
+                if ((deck[rawKey] || 0) <= 0) continue;
+                const m = rawKey.match(reSetNum);
+                const name = (rawKey.replace(reSetNum, '').trim());
+                out.push({
+                    key:  m ? `${m[1]}|${m[2]}` : null,
+                    name: name,
+                });
+            }
+            return out;
+        }
+
+        // Maps each archetype name (lower-cased) to the cards that
+        // archetype runs in current_meta_card_data. Source rows look
+        // like { archetype, card_name, set_code, set_number, ... } —
+        // we keep cards with deck_inclusion_count > 0 (i.e. at least
+        // one deck in the archetype actually plays it). Cached on
+        // window so re-renders don't rebuild the map.
+        function _buildArchetypeCardMap() {
+            if (window._archetypeCardMap) return window._archetypeCardMap;
+            const rows = window.currentMetaAnalysisData || [];
+            const map = new Map();
+            for (const r of rows) {
+                if (!r) continue;
+                const arch = String(r.archetype || '').trim().toLowerCase();
+                if (!arch) continue;
+                const set = String(r.set_code || '').toUpperCase().trim();
+                const num = String(r.set_number || '').trim();
+                if (!set || !num) continue;
+                const key = `${set}|${num}`;
+                const name = String(r.card_name || '').trim();
+                if (!map.has(arch)) map.set(arch, []);
+                map.get(arch).push({ key, name });
+            }
+            window._archetypeCardMap = map;
+            return map;
+        }
+
+        async function _renderCapabilityTechDetector(pairedOpponents) {
+            const container = document.getElementById('currentMetaUserVsVanillaDetectedTech');
+            if (!container || typeof window.CardCapabilityEngine === 'undefined') return;
+            const userDeckCards = _userDeckCardKeys();
+            if (userDeckCards.length === 0) { container.innerHTML = ''; return; }
+
+            // The effects index lives in app-deck-builder. Loading is
+            // idempotent and the result is cached on window — safe to
+            // await even if a previous render already triggered it.
+            const cardEffectsIndex = (typeof window._loadCardEffectsIndex === 'function')
+                ? await window._loadCardEffectsIndex()
+                : (window._cardEffectsIndex || null);
+            if (!cardEffectsIndex) { container.innerHTML = ''; return; }
+
+            const archetypeCardMap = _buildArchetypeCardMap();
+            // Restrict to opponents actually present in the predicted
+            // field — no point computing matchups for archetypes the
+            // user won't face. Keys are lower-cased to match the map.
+            const fieldArchetypes = new Map();
+            for (const p of pairedOpponents) {
+                const k = (p.opponentKey || p.opponent || '').toLowerCase();
+                const cards = archetypeCardMap.get(k);
+                if (cards && cards.length) fieldArchetypes.set(p.opponent, cards);
+            }
+
+            const lang = (typeof getLang === 'function') ? getLang() : 'en';
+            const detected = await window.CardCapabilityEngine.detectMatchups({
+                userDeckCards,
+                archetypeCardMap: fieldArchetypes,
+                cardEffectsIndex,
+                lang,
+            });
+
+            if (!detected || detected.size === 0) {
+                container.innerHTML = '';
+                return;
+            }
+
+            const confidenceLabel = (c) => {
+                if (c === 'high')   return t('matchup.techConfidenceHigh')   || 'high confidence';
+                if (c === 'medium') return t('matchup.techConfidenceMedium') || 'medium confidence';
+                return t('matchup.techConfidenceLow') || 'low confidence';
+            };
+            const items = [];
+            for (const [oppName, matchups] of detected.entries()) {
+                items.push(`<li class="uv-tech-opp"><strong>vs ${escapeHtml(oppName)}</strong><ul class="uv-tech-list">${
+                    matchups.map(m =>
+                        `<li class="uv-tech-line uv-tech-${m.confidence}">${escapeHtml(m.narrative)} <span class="uv-tech-meta">(${escapeHtml(confidenceLabel(m.confidence))})</span></li>`
+                    ).join('')
+                }</ul></li>`);
+            }
+
+            const header = t('matchup.detectedTechHeader') || 'Detected tech matchups (card-text-driven)';
+            const note = t('matchup.detectedTechNote') || 'Foundation v0.1 — heuristic regex extraction over pokemon_card_effects.json. Pattern library is intentionally narrow and grows over time (see data/card_capability_taxonomy.json).';
+            container.innerHTML = `
+                <div class="uv-tech-section">
+                    <h4 class="uv-tech-title">${escapeHtml(header)}</h4>
+                    <ul class="uv-tech-opp-list">${items.join('')}</ul>
+                    <p class="uv-tech-note">${escapeHtml(note)}</p>
+                </div>`;
         }
 
         // Card-by-card diff between the user's current deck and the

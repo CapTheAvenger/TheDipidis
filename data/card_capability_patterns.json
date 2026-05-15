@@ -1,0 +1,101 @@
+{
+  "_doc": "Regex patterns that extract capability tags from card rules text. Each pattern targets a specific text field (attack.text, ability.text, etc.) on records from pokemon_card_effects.json. Confidence levels: 'high' = wording is unambiguous and directly mappable; 'medium' = wording usually means the tag but has edge cases; 'low' = best-guess based on partial phrasing.",
+  "version": "0.1",
+  "generated_at": "2026-05-15",
+  "patterns": [
+    {
+      "tag": "attack.ignores_effects",
+      "confidence": "high",
+      "scope": "attack.text",
+      "regex": "damage\\s+isn'?t\\s+affected\\s+by\\s+any\\s+effects",
+      "flags": "i",
+      "examples": ["Mega Lopunny ex Spiky Hopper: 'This attack's damage isn't affected by any effects on your opponent's Active Pokemon.'"]
+    },
+    {
+      "tag": "attack.ignores_effects",
+      "confidence": "medium",
+      "scope": "attack.text",
+      "regex": "(?:ignor(?:es?|ing)|not\\s+affected\\s+by)\\s+(?:any\\s+)?effects?\\s+on\\s+(?:your\\s+opponent'?s\\s+)?(?:active\\s+)?poké?mon",
+      "flags": "i"
+    },
+    {
+      "tag": "attack.bench_damage",
+      "confidence": "high",
+      "scope": "attack.text",
+      "regex": "damage\\s+to\\s+(?:1|one|\\d+|each)\\s+of\\s+your\\s+opponent'?s\\s+benched\\s+poké?mon",
+      "flags": "i",
+      "examples": ["Drayton Dynamic Lightning: 'This attack does 60 damage to 1 of your opponent's Benched Pokemon.'"]
+    },
+    {
+      "tag": "attack.bench_damage",
+      "confidence": "medium",
+      "scope": "attack.text",
+      "regex": "damage\\s+to\\s+each\\s+of\\s+your\\s+opponent'?s\\s+(?:benched\\s+)?poké?mon",
+      "flags": "i"
+    },
+    {
+      "tag": "attack.weakness_bypass",
+      "confidence": "high",
+      "scope": "attack.text",
+      "regex": "don'?t\\s+apply\\s+weakness|regardless\\s+of\\s+weakness|ignor(?:es?|ing)\\s+weakness",
+      "flags": "i"
+    },
+    {
+      "tag": "ability.ko_prevention",
+      "confidence": "high",
+      "scope": "ability.text",
+      "regex": "full\\s+hp\\s+and\\s+would\\s+be\\s+knocked\\s+out\\s+by\\s+damage[\\s\\S]{0,80}(?:not\\s+knocked\\s+out|isn'?t\\s+knocked\\s+out|is\\s+not\\s+knocked\\s+out)",
+      "flags": "i",
+      "examples": ["Crustle Sturdy: 'If this Pokemon has full HP and would be Knocked Out by damage from an attack, it is not Knocked Out, and its remaining HP becomes 10.'"]
+    },
+    {
+      "tag": "ability.ex_immunity",
+      "confidence": "high",
+      "scope": "ability.text",
+      "regex": "(?:no\\s+damage|take(?:s)?\\s+no\\s+damage|prevent[s]?\\s+all\\s+damage)[^.]{0,80}(?:from\\s+attacks\\s+from\\s+)?poké?mon\\s+ex",
+      "flags": "i"
+    },
+    {
+      "tag": "ability.ex_immunity",
+      "confidence": "medium",
+      "scope": "ability.text",
+      "regex": "attacks?\\s+from\\s+poké?mon\\s+ex[^.]{0,40}(?:do(?:es)?\\s+no\\s+damage|no\\s+damage)",
+      "flags": "i"
+    },
+    {
+      "tag": "ability.bench_protection",
+      "confidence": "high",
+      "scope": "ability.text",
+      "regex": "prevent\\s+all\\s+damage\\s+done\\s+to\\s+your\\s+benched\\s+poké?mon",
+      "flags": "i"
+    },
+    {
+      "tag": "ability.bench_protection",
+      "confidence": "medium",
+      "scope": "ability.text",
+      "regex": "your\\s+benched\\s+poké?mon\\s+take\\s+no\\s+damage",
+      "flags": "i"
+    },
+    {
+      "tag": "ability.damage_reduction",
+      "confidence": "high",
+      "scope": "ability.text",
+      "regex": "(?:attacks?\\s+do(?:es)?|damage\\s+from\\s+attacks?\\s+is\\s+reduced|reduce(?:d|s)?\\s+by)\\s+-?\\d{1,3}\\s+(?:less\\s+)?damage",
+      "flags": "i"
+    },
+    {
+      "tag": "ability.gust_effect",
+      "confidence": "medium",
+      "scope": "ability.text",
+      "regex": "switch[^.]{0,40}(?:active\\s+poké?mon\\s+with|1\\s+of\\s+(?:their|your\\s+opponent'?s)\\s+benched)",
+      "flags": "i"
+    },
+    {
+      "tag": "disruption.hand_reset",
+      "confidence": "high",
+      "scope": "card_text",
+      "regex": "each\\s+player\\s+shuffles[^.]{0,40}hand[^.]{0,60}draw\\s+(?:a\\s+number|\\d+|that\\s+many)",
+      "flags": "i"
+    }
+  ]
+}

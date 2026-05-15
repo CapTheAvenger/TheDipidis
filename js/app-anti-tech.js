@@ -315,6 +315,11 @@
                     if (!entry) {
                         entry = {
                             name,
+                            // Track card_id so the suggestion list can
+                            // render a thumbnail. First match wins —
+                            // each counter card normally has one
+                            // canonical print listed in the JSON.
+                            cardId: String(c.card_id || '').trim(),
                             threatCategories: new Set(),
                             targets: new Set(),
                             counterScore: 0,
@@ -336,6 +341,20 @@
             if (b.counterScore !== a.counterScore) return b.counterScore - a.counterScore;
             return a.name.localeCompare(b.name);
         });
+    }
+
+    // Build Limitless CDN URL from a SET|number card_id.
+    // - Numeric numbers get zero-padded to 3 digits (PFL|84 → PFL_084)
+    // - Non-numeric prints (TG12, SV23, etc.) stay as-is
+    function _cardImageUrl(cardId) {
+        if (!cardId) return null;
+        const parts = String(cardId).split('|');
+        if (parts.length !== 2) return null;
+        const set = parts[0].toUpperCase().trim();
+        const num = parts[1].trim();
+        if (!set || !num) return null;
+        const padded = /^\d+$/.test(num) ? num.padStart(3, '0') : num;
+        return `https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/${set}/${set}_${padded}_R_EN_LG.png`;
     }
 
     function _renderTechSuggestions() {
@@ -361,8 +380,16 @@
             const targetsTxt = Array.from(c.targets).join(', ');
             const catsTxt = Array.from(c.threatCategories).join(' · ');
             const isOn = _selectedCards.has(c.name.toLowerCase());
+            // Thumbnail with on-tap full-card zoom. Wrapped in its own
+            // span so the tap doesn't toggle the checkbox label.
+            const imgUrl = _cardImageUrl(c.cardId);
+            const safeImgUrl = imgUrl ? imgUrl.replace(/"/g, '&quot;') : '';
+            const thumb = imgUrl
+                ? `<span class="anti-tech-card-thumb-wrap" data-card-img="${safeImgUrl}" data-card-name="${safe}" role="button" aria-label="Zoom card ${safe}" tabindex="0"><img class="anti-tech-card-thumb" src="${safeImgUrl}" alt="${safe}" loading="lazy"></span>`
+                : `<span class="anti-tech-card-thumb-wrap anti-tech-card-thumb-fallback" aria-hidden="true">?</span>`;
             return `<label class="anti-tech-card-item${isOn ? ' is-selected' : ''}">
                 <input type="checkbox" class="anti-tech-card-check" data-card="${safe}" ${isOn ? 'checked' : ''}>
+                ${thumb}
                 <span class="anti-tech-card-body">
                     <span class="anti-tech-card-name">${c.name}</span>
                     <span class="anti-tech-card-meta">
@@ -374,6 +401,21 @@
         }).join('');
         list.querySelectorAll('.anti-tech-card-check').forEach(box => {
             box.addEventListener('change', () => _toggleSuggestedCard(box.dataset.card, box.checked));
+        });
+        // Tap on the thumbnail opens the full-resolution single-card
+        // modal so the user can read the card text without leaving the
+        // wizard. Stop propagation so the surrounding <label> doesn't
+        // toggle the checkbox when the user is just trying to inspect.
+        list.querySelectorAll('.anti-tech-card-thumb-wrap[data-card-img]').forEach(el => {
+            el.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const img = el.dataset.cardImg;
+                const name = el.dataset.cardName || '';
+                if (img && typeof window.showSingleCard === 'function') {
+                    window.showSingleCard(img, name);
+                }
+            });
         });
     }
 

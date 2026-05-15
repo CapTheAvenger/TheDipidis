@@ -121,15 +121,14 @@ COUNTER_PATTERNS: Dict[str, List[Tuple[re.Pattern, str]]] = {
         (re.compile(r"switch\s+(?:your\s+)?active\s+pok[ée]mon\s+with\s+(?:1\s+of\s+)?your\s+benched", re.IGNORECASE), "rule.text"),
     ],
     "hand_disruption": [
-        # ONE-SIDED refresh only — Lillie's Determination ("Shuffle
-        # your hand into your deck. Then, draw 6"). The earlier
-        # symmetric pattern (`each player shuffles their hand`)
-        # mistakenly tagged Iono / Marnie / Judge / Roxanne / Unfair
-        # Stamp / Lucian as counters; those cards ARE hand disruption,
-        # not a counter. Pattern keys on "your hand into your deck"
-        # specifically — Iono uses "their hand and puts it on the
-        # bottom"; Judge uses "their hand into their deck"; only one-
-        # sided supporters write "your hand into your deck".
+        # ONE-SIDED refresh supporters — Atticus, Drasna, Lacey,
+        # Lillie's Determination, etc. all share the same wording
+        # ("Shuffle your hand into your deck. Then, draw N").
+        # Pattern can't distinguish situational tech recovery from
+        # staple draw engines by text alone — name-based blocklist
+        # in build_threat_intel.py filters out staples like
+        # Lillie's Determination that are in every meta deck
+        # regardless of whether the opponent runs hand disruption.
         (re.compile(r"shuffle\s+your\s+hand\s+into\s+your\s+deck", re.IGNORECASE), "rule.text"),
     ],
     "bench_damage": [

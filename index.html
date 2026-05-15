@@ -1432,7 +1432,10 @@
                                         <button type="button" id="techLabAddBeatenByBtn" class="btn btn-secondary tech-lab-section-add" disabled data-i18n="techLab.addMissingBtn">+ Add missing</button>
                                     </div>
                                     <p class="tech-lab-direction-hint" data-i18n="techLab.beatenByHint">Meta cards whose card-text wins against the picked target. Tech these when planning to play AGAINST it.</p>
+                                    <div id="techLabBeatenBySummary" class="tech-lab-summary"></div>
+                                    <h5 class="tech-lab-subgroup-title" data-i18n="techLab.cardTextBypassersTitle">Card-text bypassers</h5>
                                     <ul id="techLabBeatenByList" class="tech-lab-results" aria-live="polite"></ul>
+                                    <div id="techLabBeatenByNonEx" class="tech-lab-nonex-wrap"></div>
                                 </section>
 
                                 <!-- Section B: cards the picked target BEATS -->
@@ -1445,6 +1448,8 @@
                                         <button type="button" id="techLabAddBeatsBtn" class="btn btn-secondary tech-lab-section-add" disabled data-i18n="techLab.addMissingBtn">+ Add missing</button>
                                     </div>
                                     <p class="tech-lab-direction-hint" data-i18n="techLab.beatsHint">Meta cards the picked target counters via its own card text. Tech the picked target when planning to play it INTO these matchups.</p>
+                                    <div id="techLabBeatsSummary" class="tech-lab-summary"></div>
+                                    <h5 class="tech-lab-subgroup-title" data-i18n="techLab.specificMatchupsTitle">Specific meta matchups</h5>
                                     <ul id="techLabBeatsList" class="tech-lab-results" aria-live="polite"></ul>
                                 </section>
                             </div>

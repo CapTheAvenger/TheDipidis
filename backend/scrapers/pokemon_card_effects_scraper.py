@@ -83,13 +83,27 @@ OUTPUT_JSON = os.path.join(DATA_DIR, 'pokemon_card_effects.json')
 
 CARD_URL_TMPL = 'https://limitlesstcg.com/cards/{set}/{number}'
 
-# Energy-symbol → single-letter key (matches PTCGL deck export). The
-# Limitless DOM tags each cost symbol as <span class="ptcg-symbol ptcg-X">.
+# Energy-symbol → single-letter key (matches PTCGL deck export).
+#
+# Limitless used to render each cost symbol as a SEPARATE span with
+# a CSS class — e.g. <span class="ptcg-symbol ptcg-W"></span>×3 for
+# WWW. They re-rendered the page sometime before mid-2026: now the
+# letters live as plain TEXT CONTENT inside one span:
+#     <span class="ptcg-symbol">WWC</span>
+# The old per-class lookup silently returned [] for every attack
+# (verified against data/pokemon_card_effects.json — 0 of 27k+
+# attacks had cost populated even though `name`, `damage`, `text`
+# all parsed fine). User confirmed the new DOM format by inspecting
+# Chien-Pao SSP|56 Icicle Loop → <span class="ptcg-symbol">WWC</span>.
+#
+# Keep the old ptcg-X class map for backwards-compat in case
+# Limitless ever reverts. _extract_cost tries both paths.
 _ENERGY_LETTERS = {
     'ptcg-G': 'G', 'ptcg-R': 'R', 'ptcg-W': 'W', 'ptcg-L': 'L',
     'ptcg-P': 'P', 'ptcg-F': 'F', 'ptcg-D': 'D', 'ptcg-M': 'M',
     'ptcg-Y': 'Y', 'ptcg-N': 'N', 'ptcg-C': 'C',  # Y = Fairy (legacy), N = Dragon
 }
+_VALID_ENERGY_LETTERS = {'G', 'R', 'W', 'L', 'P', 'F', 'D', 'M', 'Y', 'N', 'C'}
 
 # Card subtypes that are NOT Pokémon. Limitless writes these in the
 # `type` column of all_cards_database.csv. The scraper still fetches
@@ -115,14 +129,30 @@ def _split_attack_info(text: str) -> Tuple[str, str]:
 
 def _extract_cost(info_el) -> List[str]:
     """Read the energy-cost symbols from a .card-text-attack-info element
-    in the order they appear."""
+    in the order they appear.
+
+    Handles both Limitless DOM formats:
+      - Modern: <span class="ptcg-symbol">WWC</span>   (one span, letters as text)
+      - Legacy: <span class="ptcg-symbol ptcg-W"></span> per symbol
+
+    Letters parsed: G R W L P F D M Y N C (Y=Fairy legacy, N=Dragon).
+    """
     cost: List[str] = []
     for sym in info_el.select('.ptcg-symbol'):
-        cls = sym.get('class') or []
-        for c in cls:
-            if c in _ENERGY_LETTERS:
-                cost.append(_ENERGY_LETTERS[c])
-                break
+        # Modern path — letters in text content
+        text = (sym.get_text() or '').strip()
+        if text:
+            for ch in text:
+                up = ch.upper()
+                if up in _VALID_ENERGY_LETTERS:
+                    cost.append(up)
+        else:
+            # Legacy path — per-symbol class
+            cls = sym.get('class') or []
+            for c in cls:
+                if c in _ENERGY_LETTERS:
+                    cost.append(_ENERGY_LETTERS[c])
+                    break
     return cost
 
 

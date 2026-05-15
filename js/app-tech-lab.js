@@ -612,8 +612,7 @@
         const cardType = String(rec.card_type || '').toLowerCase();
         if (!cardType.startsWith('basic')) return false;
         for (const a of (rec.attacks || [])) {
-            const cost = Array.isArray(a.cost) ? a.cost.length : 0;
-            if (cost > 2) continue;
+            const cost = Array.isArray(a.cost) ? a.cost : [];
             const dmgStr = String(a.damage || '').trim();
             if (!dmgStr) continue;
             const baseMatch = dmgStr.match(/^(\d+)/);
@@ -622,8 +621,31 @@
             if (!Number.isFinite(base)) continue;
             const text = String(a.text || '').toLowerCase();
             const isCoinFlip = /\bflip\s+(?:a\s+|\d+\s+)?coins?\b/.test(text);
+
+            // Coin-flip damage is unreliable regardless of base —
+            // skip on any attack type.
+            if (isCoinFlip) continue;
+
+            // PREFERRED PATH: use the actual energy cost when the
+            // scraper populated it. The backend scraper was returning
+            // empty cost arrays for every attack due to a DOM-format
+            // change at Limitless (now <span class="ptcg-symbol">WWC
+            // </span> as text content instead of per-symbol classes).
+            // Once the scraper-fix in pokemon_card_effects_scraper.py
+            // makes its way through the next auto-update, every attack
+            // will have a real cost array and this branch takes over
+            // from the damage-as-proxy fallback below.
+            if (cost.length > 0) {
+                if (cost.length > 2) continue;          // 3+ energy = too slow
+                if (base > 0) return true;              // ≤2 energy + any damage = fast attacker
+                continue;
+            }
+
+            // FALLBACK: damage-as-energy-cost proxy. Used when cost
+            // data is missing (currently every record). Same rules
+            // as before: 60-100 static, 50-80 conditional, ≥20×
+            // scaling.
             if (/[×x]/i.test(dmgStr)) {
-                if (isCoinFlip) continue;
                 if (base >= 20) return true;
                 continue;
             }

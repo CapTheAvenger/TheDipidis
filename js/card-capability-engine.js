@@ -167,12 +167,16 @@
     function _lookupCardRecord(cardEffectsIndex, cardKey, cardName) {
         // Try SET|number key first, then case-insensitive name match.
         // cardEffectsIndex shape: { bySetNumber: Map, byName: Map }
+        // Note: app-meta-call's _loadCardEffectsForHp builds a partial
+        // index with only byName (no bySetNumber). When MetaCall ran
+        // first this session, window._cardEffectsIndex points at that
+        // partial shape — fall back to byName instead of throwing.
         if (!cardEffectsIndex) return null;
-        if (cardKey) {
+        if (cardKey && cardEffectsIndex.bySetNumber) {
             const rec = cardEffectsIndex.bySetNumber.get(String(cardKey).toUpperCase().trim());
             if (rec) return rec;
         }
-        if (cardName) {
+        if (cardName && cardEffectsIndex.byName) {
             const rec = cardEffectsIndex.byName.get(String(cardName).toLowerCase().trim());
             if (rec) return rec;
         }

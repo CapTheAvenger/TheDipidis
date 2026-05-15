@@ -298,6 +298,39 @@ def split_card_database_chunks(all_cards: list, frontend_data: str):
     """
     set_order = load_set_order()
 
+    # Backfill energy_type from data/energy_type_map.json if the
+    # incoming cards lost the field somewhere upstream. The chunks
+    # used to be regenerated weekly without energy_type because the
+    # source CSV doesn't carry it; the frontend Element Type filter
+    # then returned zero results for Fighting / Fire / etc. because
+    # every chunked card had `energy_type === undefined`. Patching
+    # here keeps the field on every Pokémon print across auto-updates
+    # without needing to re-scrape Limitless every run.
+    energy_map_path = os.path.join(frontend_data, "energy_type_map.json")
+    energy_map = {}
+    if os.path.exists(energy_map_path):
+        try:
+            with open(energy_map_path, "r", encoding="utf-8") as f:
+                energy_map = json.load(f) or {}
+        except Exception as e:
+            print(f"  warn: failed to read energy_type_map.json — {e}")
+    if energy_map:
+        patched = 0
+        for c in all_cards:
+            if c.get("energy_type"):
+                continue
+            s = (c.get("set") or "").upper().strip()
+            n = str(c.get("number") or "").strip()
+            if not s or not n:
+                continue
+            key = f"{s}::{n}"
+            v = energy_map.get(key)
+            if v:
+                c["energy_type"] = v
+                patched += 1
+        if patched:
+            print(f"  backfilled energy_type on {patched} cards from energy_type_map.json")
+
     standard, extended, legacy = [], [], []
     dropped_superseded = 0
 

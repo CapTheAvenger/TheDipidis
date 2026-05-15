@@ -898,11 +898,51 @@
             }
         }
 
+        // Lazy-loader for data/energy_type_map.json (~400 KB, ~17k
+        // entries keyed by "SET::NUMBER" → "Grass" / "Fire" / etc.).
+        // The chunked card-data files have historically lost the
+        // energy_type field on auto-update — `cards_chunk_standard.json`
+        // and friends are regenerated weekly without it, so picking
+        // Fighting under Element Type filtered out every card. This
+        // map is a tertiary fallback: when card.energy_type is missing
+        // we look the print up here. File is small enough to load
+        // once and cache forever per session.
+        async function _ensureEnergyTypeMap() {
+            if (window._energyTypeMap) return window._energyTypeMap;
+            if (window._energyTypeMapPromise) return await window._energyTypeMapPromise;
+            window._energyTypeMapPromise = fetch('./data/energy_type_map.json', { cache: 'force-cache' })
+                .then(r => r.ok ? r.json() : null)
+                .catch(() => null)
+                .then(map => {
+                    window._energyTypeMap = map || {};
+                    return window._energyTypeMap;
+                });
+            return window._energyTypeMapPromise;
+        }
+
+        // Kick off the load early so the map is ready by the time
+        // the user starts clicking element-type checkboxes.
+        if (typeof window !== 'undefined') {
+            _ensureEnergyTypeMap().catch(() => null);
+        }
+
         // Get TCG element type for a card (Fire, Water, Grass, etc.)
         function getCardElementType(card) {
             if (!card) return null;
             // Primary: use energy_type from card data (scraped from Limitless ptcg-symbol)
             if (card.energy_type) return card.energy_type;
+            // Secondary: energy_type_map.json keyed by "SET::NUMBER".
+            // Carries energy_type for every Pokémon print even when the
+            // chunked card data has dropped the field. Loaded async on
+            // page init; will be the empty object until the fetch
+            // resolves, in which case we fall through to the pokedex-
+            // map path below.
+            const map = (typeof window !== 'undefined') ? window._energyTypeMap : null;
+            if (map && card.set && card.number != null) {
+                const key = `${String(card.set).toUpperCase()}::${String(card.number)}`;
+                const v = map[key];
+                if (v) return v;
+            }
             // Fallback: PokeAPI type map by pokedex number
             if (window.pokemonTypeMap) {
                 const dex = card.pokedex_number;

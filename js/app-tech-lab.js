@@ -86,9 +86,23 @@
         }
     }
 
+    // Overrides are stored per direction so the user can curate
+    // each section independently. Direction keys are 'beatenBy'
+    // (cards that beat the target) and 'beats' (cards the target
+    // beats). Migrates the legacy flat shape on first read.
     function _getTargetOverrides(targetKey) {
         const all = _readOverrides();
-        return all[targetKey] || { hidden: [], added: [] };
+        let raw = all[targetKey];
+        if (!raw) raw = {};
+        // Migrate legacy flat { hidden, added } → { beatenBy: {...} }
+        if (Array.isArray(raw.hidden) || Array.isArray(raw.added)) {
+            raw = { beatenBy: { hidden: raw.hidden || [], added: raw.added || [] } };
+            all[targetKey] = raw;
+            _writeOverrides(all);
+        }
+        if (!raw.beatenBy) raw.beatenBy = { hidden: [], added: [] };
+        if (!raw.beats)    raw.beats    = { hidden: [], added: [] };
+        return raw;
     }
 
     function _setTargetOverrides(targetKey, value) {
@@ -97,35 +111,34 @@
         _writeOverrides(all);
     }
 
-    function _hideTech(targetKey, cardName) {
+    function _hideTech(targetKey, direction, cardName) {
         const ov = _getTargetOverrides(targetKey);
+        const bucket = ov[direction];
+        if (!bucket) return;
         const key = String(cardName || '').toLowerCase();
-        if (!ov.hidden.some(n => n.toLowerCase() === key)) {
-            ov.hidden.push(cardName);
+        if (!bucket.hidden.some(n => n.toLowerCase() === key)) {
+            bucket.hidden.push(cardName);
             _setTargetOverrides(targetKey, ov);
         }
     }
 
-    function _unhideTech(targetKey, cardName) {
+    function _addMissingTech(targetKey, direction, name, cardId, note) {
         const ov = _getTargetOverrides(targetKey);
-        const key = String(cardName || '').toLowerCase();
-        ov.hidden = ov.hidden.filter(n => n.toLowerCase() !== key);
-        _setTargetOverrides(targetKey, ov);
-    }
-
-    function _addMissingTech(targetKey, name, cardId, note) {
-        const ov = _getTargetOverrides(targetKey);
+        const bucket = ov[direction];
+        if (!bucket) return;
         const key = String(name || '').toLowerCase();
-        if (!ov.added.some(e => String(e.name || '').toLowerCase() === key)) {
-            ov.added.push({ name, cardId: cardId || null, note: note || '' });
+        if (!bucket.added.some(e => String(e.name || '').toLowerCase() === key)) {
+            bucket.added.push({ name, cardId: cardId || null, note: note || '' });
             _setTargetOverrides(targetKey, ov);
         }
     }
 
-    function _removeAddedTech(targetKey, cardName) {
+    function _removeAddedTech(targetKey, direction, cardName) {
         const ov = _getTargetOverrides(targetKey);
+        const bucket = ov[direction];
+        if (!bucket) return;
         const key = String(cardName || '').toLowerCase();
-        ov.added = ov.added.filter(e => String(e.name || '').toLowerCase() !== key);
+        bucket.added = bucket.added.filter(e => String(e.name || '').toLowerCase() !== key);
         _setTargetOverrides(targetKey, ov);
     }
 
@@ -159,6 +172,10 @@
 
     // ── ENGINE WRAPPER ───────────────────────────────────────────────
 
+    // Direction A: cards in the meta that BEAT the picked card.
+    // The picked card is the defender. detectMatchups with the target
+    // as defender + every meta card as potential attacker returns
+    // exactly this.
     async function _findTechsForCard(targetKey, targetName) {
         if (typeof window.CardCapabilityEngine === 'undefined') {
             _devLog('CardCapabilityEngine missing');
@@ -216,68 +233,136 @@
         }
         // Skip the target card itself — "this card is a tech against
         // itself" is technically a mirror-tech but clutters the list.
-        // User can still see mirror-techs via the engine's own table.
         byCard.delete(targetName.toLowerCase());
 
         return Array.from(byCard.values()).sort((a, b) => a.name.localeCompare(b.name));
     }
 
-    // ── RENDER ───────────────────────────────────────────────────────
+    // Direction B: cards in the meta that the picked card BEATS.
+    // Invert detectMatchups: the picked card is the attacker, every
+    // meta card is a candidate defender. For each meta card the
+    // picked card has a winning interaction against, the meta card
+    // ends up in the result. This is "what the target is good for".
+    //
+    // detectMatchups can't be used as-is because it iterates the
+    // archetypeCardMap (defender side) and would need every meta
+    // card as a separate "archetype" entry — ~700 archetypes worth.
+    // Simpler: extract the target's attacker tags + the meta cards'
+    // defender tags directly and intersect via the interaction matrix.
+    async function _findThingsThisCardBeats(targetKey, targetName) {
+        const engine = window.CardCapabilityEngine;
+        if (typeof engine === 'undefined') return [];
+        if (typeof window._loadCardEffectsIndex !== 'function') return [];
+        const cardEffectsIndex = await window._loadCardEffectsIndex();
+        if (!cardEffectsIndex || !cardEffectsIndex.size) return [];
+        await engine.load();
 
-    function _renderEmpty(message) {
-        const list = document.getElementById('techLabResults');
-        if (!list) return;
-        list.innerHTML = `<div class="tech-lab-empty">${_escapeHtml(message)}</div>`;
-        const addBtn = document.getElementById('techLabAddMissingBtn');
-        if (addBtn) addBtn.disabled = !_target;
-        const resetBtn = document.getElementById('techLabResetBtn');
-        if (resetBtn) resetBtn.disabled = !_target;
+        if (_allMetaCards.length === 0) _rebuildMetaCards();
+        if (_allMetaCards.length === 0) return [];
+
+        // Target's own tags. We treat BOTH attacker and defender tags
+        // as "the target's offensive surface" — defenders also "win"
+        // when they nullify an opposing attacker (`defender_wins`
+        // interaction), so a card like Shaymin (only has bench-
+        // protection ability, no attack tag) still has things it
+        // beats.
+        const targetRec = cardEffectsIndex.bySetNumber
+            && cardEffectsIndex.bySetNumber.get(String(targetKey).toUpperCase().trim());
+        if (!targetRec) return [];
+        const targetTags = engine.extractTags(targetRec, targetKey);
+        const targetAttackerTags = new Set(targetTags.filter(t => t.tag.startsWith('attack.')).map(t => t.tag));
+        const targetDefenderTags = new Set(targetTags.filter(t => t.tag.startsWith('ability.')).map(t => t.tag));
+
+        // Load the interaction matrix directly. The engine doesn't
+        // expose its compiled rules but the JSON is the same shape.
+        let interactionsData;
+        try {
+            const resp = await fetch('./data/card_capability_interactions.json', { cache: 'no-cache' });
+            interactionsData = resp.ok ? await resp.json() : null;
+        } catch (_) { interactionsData = null; }
+        const interactions = (interactionsData && interactionsData.interactions) || [];
+        if (interactions.length === 0) return [];
+
+        // Build the "what tags does the target win against" set.
+        //   target attacker tag wins → look up defender tags it beats
+        //   target defender tag wins → look up attacker tags it blocks
+        const wonOverDefenderTags = new Set();   // tags the target's attacks bypass
+        const wonOverAttackerTags = new Set();   // tags the target's defenses block
+        const tagNarrativeByPair = new Map();    // "attTag|defTag" → narrative template
+        const tagConfidenceByPair = new Map();
+        for (const ix of interactions) {
+            const result = ix.result || 'attacker_wins';
+            // Target as attacker, interaction is attacker_wins
+            if (result === 'attacker_wins' && targetAttackerTags.has(ix.attacker)) {
+                wonOverDefenderTags.add(ix.defender);
+                tagNarrativeByPair.set(`A|${ix.defender}`, ix);
+            }
+            // Target as defender, interaction is defender_wins
+            if (result === 'defender_wins' && targetDefenderTags.has(ix.defender)) {
+                wonOverAttackerTags.add(ix.attacker);
+                tagNarrativeByPair.set(`D|${ix.attacker}`, ix);
+            }
+        }
+        if (wonOverDefenderTags.size === 0 && wonOverAttackerTags.size === 0) return [];
+
+        // Scan meta haystack for cards carrying the won-over tags.
+        const lang = (typeof getLang === 'function') ? getLang() : 'en';
+        const byCard = new Map();
+        for (const c of _allMetaCards) {
+            if (c.key === targetKey) continue;  // skip self
+            const rec = cardEffectsIndex.bySetNumber.get(String(c.key).toUpperCase().trim());
+            if (!rec) continue;
+            const tags = engine.extractTags(rec, c.key);
+            for (const t of tags) {
+                let ix = null;
+                let role = null;  // 'A' = target attacks them; 'D' = target defends against them
+                if (wonOverDefenderTags.has(t.tag) && t.tag.startsWith('ability.')) {
+                    ix = tagNarrativeByPair.get(`A|${t.tag}`);
+                    role = 'A';
+                } else if (wonOverAttackerTags.has(t.tag) && t.tag.startsWith('attack.')) {
+                    ix = tagNarrativeByPair.get(`D|${t.tag}`);
+                    role = 'D';
+                }
+                if (!ix) continue;
+                const key = rec.name.toLowerCase();
+                if (byCard.has(key)) continue;
+                // Build the narrative with target as the actor.
+                const tpl = (lang === 'de' ? (ix.narrative_de || ix.narrative_en) : ix.narrative_en) || '';
+                const targetSource = (role === 'A')
+                    ? (Array.from(targetTags).find(tt => tt.tag === ix.attacker) || {}).source
+                    : (Array.from(targetTags).find(tt => tt.tag === ix.defender) || {}).source;
+                const opponentSource = t.source;
+                const narrative = tpl
+                    .replace('{attacker_name}', role === 'A' ? targetName : rec.name)
+                    .replace('{attacker_source}', (role === 'A' ? targetSource : opponentSource)?.name || '')
+                    .replace('{defender_name}', role === 'A' ? rec.name : targetName)
+                    .replace('{defender_ability}', (role === 'A' ? opponentSource : targetSource)?.name || '');
+                byCard.set(key, {
+                    name: rec.name,
+                    cardId: c.key,
+                    narrative,
+                    confidence: ix.confidence || 'medium',
+                    attackSource: opponentSource && opponentSource.name,
+                    role,
+                });
+            }
+        }
+        return Array.from(byCard.values()).sort((a, b) => a.name.localeCompare(b.name));
     }
 
-    async function _renderTechsFor(target) {
-        _target = target;
-        const headerEl = document.getElementById('techLabTargetLabel');
-        const thumbEl  = document.getElementById('techLabTargetThumb');
-        if (headerEl) headerEl.textContent = target.name;
-        if (thumbEl) {
-            const img = _cardImageUrl(target.key);
-            thumbEl.innerHTML = img
-                ? `<img src="${_escapeHtml(img)}" alt="${_escapeHtml(target.name)}" loading="lazy">`
-                : '';
-        }
-        const list = document.getElementById('techLabResults');
-        if (list) list.innerHTML = `<div class="tech-lab-loading">${_escapeHtml(_t('techLab.loading', 'Searching meta for techs against this card…'))}</div>`;
+    // ── RENDER ───────────────────────────────────────────────────────
 
-        // Engine pass
-        let engineTechs = [];
-        try {
-            engineTechs = await _findTechsForCard(target.key, target.name);
-        } catch (e) {
-            _devLog('lookup failed:', e && e.message);
-        }
-
-        // Apply overrides
-        const ov = _getTargetOverrides(target.key);
-        const hiddenSet = new Set(ov.hidden.map(n => n.toLowerCase()));
-        const baseList = engineTechs.filter(e => !hiddenSet.has(e.name.toLowerCase()));
-        const addedList = (ov.added || []).map(a => ({
-            name: a.name,
-            cardId: a.cardId || null,
-            narrative: a.note || _t('techLab.userAdded', 'Added by you'),
-            confidence: 'user',
-            attackSource: null,
-            hidden: false,
-            isUserAdded: true,
-        }));
-        _techs = [...baseList, ...addedList];
-
-        if (_techs.length === 0) {
-            _renderEmpty(_t('techLab.noTechs', 'No techs detected by the engine. Click "+ Add missing tech" if you know a card the engine missed.'));
+    // Render a single section (beatenBy or beats). Returns the
+    // list of techs after overrides applied. The DOM list element
+    // is identified by listElId; the section's empty-state text
+    // by emptyText.
+    function _renderTechList(listEl, techs, direction, emptyText) {
+        if (!listEl) return;
+        if (techs.length === 0) {
+            listEl.innerHTML = `<li class="tech-lab-empty">${_escapeHtml(emptyText)}</li>`;
             return;
         }
-
-        if (!list) return;
-        list.innerHTML = _techs.map(tech => {
+        listEl.innerHTML = techs.map(tech => {
             const safeName = _escapeHtml(tech.name);
             const imgUrl  = tech.cardId ? _cardImageUrl(tech.cardId) : null;
             const safeImg = imgUrl ? _escapeHtml(imgUrl) : '';
@@ -291,8 +376,8 @@
                 ? `<button class="tech-lab-card-thumb" data-card-img="${safeImg}" data-card-name="${safeName}" aria-label="Zoom ${safeName}"><img src="${safeImg}" alt="${safeName}" loading="lazy"></button>`
                 : `<span class="tech-lab-card-thumb tech-lab-thumb-fallback" aria-hidden="true">?</span>`;
             const action = tech.isUserAdded
-                ? `<button class="tech-lab-action tech-lab-action-remove" data-card="${safeName}" title="${_escapeHtml(_t('techLab.removeAdded', 'Remove this user-added tech'))}">${_escapeHtml(_t('techLab.removeAddedBtn', 'Remove'))}</button>`
-                : `<button class="tech-lab-action tech-lab-action-reject" data-card="${safeName}" title="${_escapeHtml(_t('techLab.markWrong', 'Mark this card as not a tech (hides it for this target)'))}">${_escapeHtml(_t('techLab.markWrongBtn', '✗ Not a tech'))}</button>`;
+                ? `<button class="tech-lab-action tech-lab-action-remove" data-card="${safeName}" data-dir="${direction}" title="${_escapeHtml(_t('techLab.removeAdded', 'Remove this user-added tech'))}">${_escapeHtml(_t('techLab.removeAddedBtn', 'Remove'))}</button>`
+                : `<button class="tech-lab-action tech-lab-action-reject" data-card="${safeName}" data-dir="${direction}" title="${_escapeHtml(_t('techLab.markWrong', 'Mark this card as not a tech (hides it for this target)'))}">${_escapeHtml(_t('techLab.markWrongBtn', '✗ Not a tech'))}</button>`;
             return `<li class="tech-lab-card tech-lab-card-${confCls}${tech.isUserAdded ? ' tech-lab-card-user' : ''}">
                 ${thumb}
                 <div class="tech-lab-card-body">
@@ -306,9 +391,25 @@
                 ${action}
             </li>`;
         }).join('');
+    }
 
-        // Wire interactions
-        list.querySelectorAll('.tech-lab-card-thumb[data-card-img]').forEach(btn => {
+    function _applyOverridesToTechs(engineTechs, directionOverrides) {
+        const hiddenSet = new Set((directionOverrides.hidden || []).map(n => n.toLowerCase()));
+        const filtered = engineTechs.filter(e => !hiddenSet.has(e.name.toLowerCase()));
+        const added = (directionOverrides.added || []).map(a => ({
+            name: a.name,
+            cardId: a.cardId || null,
+            narrative: a.note || _t('techLab.userAdded', 'Added by you'),
+            confidence: 'user',
+            attackSource: null,
+            isUserAdded: true,
+        }));
+        return [...filtered, ...added];
+    }
+
+    function _wireCardListInteractions(listEl) {
+        if (!listEl) return;
+        listEl.querySelectorAll('.tech-lab-card-thumb[data-card-img]').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
@@ -319,23 +420,73 @@
                 }
             });
         });
-        list.querySelectorAll('.tech-lab-action-reject').forEach(btn => {
+        listEl.querySelectorAll('.tech-lab-action-reject').forEach(btn => {
             btn.addEventListener('click', () => {
-                _hideTech(_target.key, btn.dataset.card);
+                _hideTech(_target.key, btn.dataset.dir, btn.dataset.card);
                 _renderTechsFor(_target);
             });
         });
-        list.querySelectorAll('.tech-lab-action-remove').forEach(btn => {
+        listEl.querySelectorAll('.tech-lab-action-remove').forEach(btn => {
             btn.addEventListener('click', () => {
-                _removeAddedTech(_target.key, btn.dataset.card);
+                _removeAddedTech(_target.key, btn.dataset.dir, btn.dataset.card);
                 _renderTechsFor(_target);
             });
         });
+    }
 
-        const addBtn = document.getElementById('techLabAddMissingBtn');
-        if (addBtn) addBtn.disabled = false;
-        const resetBtn = document.getElementById('techLabResetBtn');
-        if (resetBtn) resetBtn.disabled = false;
+    async function _renderTechsFor(target) {
+        _target = target;
+        const headerEl = document.getElementById('techLabTargetLabel');
+        const thumbEl  = document.getElementById('techLabTargetThumb');
+        if (headerEl) headerEl.textContent = target.name;
+        if (thumbEl) {
+            const img = _cardImageUrl(target.key);
+            thumbEl.innerHTML = img
+                ? `<img src="${_escapeHtml(img)}" alt="${_escapeHtml(target.name)}" loading="lazy">`
+                : '';
+        }
+        const beatenByList = document.getElementById('techLabBeatenByList');
+        const beatsList    = document.getElementById('techLabBeatsList');
+        const loadingHtml = `<li class="tech-lab-loading">${_escapeHtml(_t('techLab.loading', 'Searching meta…'))}</li>`;
+        if (beatenByList) beatenByList.innerHTML = loadingHtml;
+        if (beatsList)    beatsList.innerHTML    = loadingHtml;
+
+        // Reveal the result sections (hidden by default until a target
+        // is picked so the empty state doesn't look broken).
+        const resultsWrap = document.getElementById('techLabResultsWrap');
+        if (resultsWrap) resultsWrap.classList.remove('display-none');
+        const startHint = document.getElementById('techLabStartHint');
+        if (startHint) startHint.classList.add('display-none');
+
+        // Run both engine passes in parallel.
+        let engineBeatenBy = [];
+        let engineBeats    = [];
+        try {
+            [engineBeatenBy, engineBeats] = await Promise.all([
+                _findTechsForCard(target.key, target.name),
+                _findThingsThisCardBeats(target.key, target.name),
+            ]);
+        } catch (e) {
+            _devLog('lookup failed:', e && e.message);
+        }
+
+        const ov = _getTargetOverrides(target.key);
+        const beatenByTechs = _applyOverridesToTechs(engineBeatenBy, ov.beatenBy);
+        const beatsTechs    = _applyOverridesToTechs(engineBeats,    ov.beats);
+
+        _renderTechList(beatenByList, beatenByTechs, 'beatenBy',
+            _t('techLab.noBeatenBy', 'No card-text counter detected. Click "+ Add missing" if you know one the engine missed.'));
+        _renderTechList(beatsList, beatsTechs, 'beats',
+            _t('techLab.noBeats', 'No meta cards this card beats via card-text interactions. Click "+ Add missing" to register one.'));
+        _wireCardListInteractions(beatenByList);
+        _wireCardListInteractions(beatsList);
+
+        const addBeatenByBtn = document.getElementById('techLabAddBeatenByBtn');
+        const addBeatsBtn    = document.getElementById('techLabAddBeatsBtn');
+        const resetBtn       = document.getElementById('techLabResetBtn');
+        if (addBeatenByBtn) addBeatenByBtn.disabled = false;
+        if (addBeatsBtn)    addBeatsBtn.disabled    = false;
+        if (resetBtn)       resetBtn.disabled       = false;
     }
 
     // ── TARGET PICKER ────────────────────────────────────────────────
@@ -402,20 +553,35 @@
 
     // ── ADD-MISSING-TECH MODAL ───────────────────────────────────────
 
-    function openAddMissing() {
+    let _addDirection = 'beatenBy';
+
+    function openAddMissing(direction) {
         if (!_target) return;
-        const overlay = document.getElementById('techLabAddOverlay');
-        const input   = document.getElementById('techLabAddSearch');
+        _addDirection = (direction === 'beats') ? 'beats' : 'beatenBy';
+        const overlay  = document.getElementById('techLabAddOverlay');
+        const input    = document.getElementById('techLabAddSearch');
         const dropdown = document.getElementById('techLabAddDropdown');
+        const title    = document.getElementById('techLabAddTitle');
+        const intro    = document.getElementById('techLabAddIntro');
         if (!overlay || !input || !dropdown) return;
         overlay.classList.remove('display-none');
         overlay.classList.add('show');
+        if (title) {
+            title.textContent = (_addDirection === 'beats')
+                ? _t('techLab.addModalTitleBeats', 'Add a meta card this card is good against')
+                : _t('techLab.addModalTitle', 'Add a tech the engine missed');
+        }
+        if (intro) {
+            intro.textContent = (_addDirection === 'beats')
+                ? _t('techLab.addModalIntroBeats', 'Pick a meta card that the selected target counters. It will appear in the "good against" list and persist across sessions.')
+                : _t('techLab.addModalIntro', 'Search the current meta for the card you want to register as a tech against the selected target. It will show up in the list immediately and persist across sessions.');
+        }
         input.value = '';
         dropdown.innerHTML = '';
         setTimeout(() => input.focus(), 30);
         input.oninput = (e) => {
             _renderPickerResults('techLabAddSearch', 'techLabAddDropdown', e.target.value, (pick) => {
-                _addMissingTech(_target.key, pick.name, pick.key, '');
+                _addMissingTech(_target.key, _addDirection, pick.name, pick.key, '');
                 closeAddMissing();
                 _renderTechsFor(_target);
             });
@@ -446,8 +612,10 @@
         if (_ready) return;
         _ready = true;
         _wireTargetPicker();
-        const addBtn = document.getElementById('techLabAddMissingBtn');
-        if (addBtn) addBtn.addEventListener('click', openAddMissing);
+        const addBeatenBy = document.getElementById('techLabAddBeatenByBtn');
+        if (addBeatenBy) addBeatenBy.addEventListener('click', () => openAddMissing('beatenBy'));
+        const addBeats = document.getElementById('techLabAddBeatsBtn');
+        if (addBeats) addBeats.addEventListener('click', () => openAddMissing('beats'));
         const resetBtn = document.getElementById('techLabResetBtn');
         if (resetBtn) resetBtn.addEventListener('click', _onResetClick);
         const closeBtn = document.getElementById('techLabAddCloseBtn');

@@ -1416,13 +1416,38 @@
                             </div>
 
                             <div class="tech-lab-toolbar">
-                                <button type="button" id="techLabAddMissingBtn" class="btn btn-secondary tech-lab-toolbar-btn" disabled data-i18n="techLab.addMissingBtn">+ Add missing tech</button>
                                 <button type="button" id="techLabResetBtn" class="btn btn-tertiary tech-lab-toolbar-btn" disabled data-i18n="techLab.resetBtn">Reset overrides</button>
                             </div>
 
-                            <ul id="techLabResults" class="tech-lab-results" aria-live="polite">
-                                <div class="tech-lab-empty" data-i18n="techLab.startHint">Pick a target card above to see suggested techs.</div>
-                            </ul>
+                            <div id="techLabStartHint" class="tech-lab-empty tech-lab-start-hint" data-i18n="techLab.startHint">Pick a target card above to see what counters it AND what it counters.</div>
+
+                            <div id="techLabResultsWrap" class="tech-lab-results-wrap display-none">
+                                <!-- Section A: cards that BEAT the picked target -->
+                                <section class="tech-lab-direction tech-lab-direction-beatenby" aria-labelledby="techLabBeatenByHeading">
+                                    <div class="tech-lab-direction-header">
+                                        <h4 id="techLabBeatenByHeading" class="tech-lab-direction-title">
+                                            <span class="tech-lab-direction-icon" aria-hidden="true">🛡</span>
+                                            <span data-i18n="techLab.beatenByTitle">Beaten by — cards that defeat this</span>
+                                        </h4>
+                                        <button type="button" id="techLabAddBeatenByBtn" class="btn btn-secondary tech-lab-section-add" disabled data-i18n="techLab.addMissingBtn">+ Add missing</button>
+                                    </div>
+                                    <p class="tech-lab-direction-hint" data-i18n="techLab.beatenByHint">Meta cards whose card-text wins against the picked target. Tech these when planning to play AGAINST it.</p>
+                                    <ul id="techLabBeatenByList" class="tech-lab-results" aria-live="polite"></ul>
+                                </section>
+
+                                <!-- Section B: cards the picked target BEATS -->
+                                <section class="tech-lab-direction tech-lab-direction-beats" aria-labelledby="techLabBeatsHeading">
+                                    <div class="tech-lab-direction-header">
+                                        <h4 id="techLabBeatsHeading" class="tech-lab-direction-title">
+                                            <span class="tech-lab-direction-icon" aria-hidden="true">⚔</span>
+                                            <span data-i18n="techLab.beatsTitle">Good against — cards this one defeats</span>
+                                        </h4>
+                                        <button type="button" id="techLabAddBeatsBtn" class="btn btn-secondary tech-lab-section-add" disabled data-i18n="techLab.addMissingBtn">+ Add missing</button>
+                                    </div>
+                                    <p class="tech-lab-direction-hint" data-i18n="techLab.beatsHint">Meta cards the picked target counters via its own card text. Tech the picked target when planning to play it INTO these matchups.</p>
+                                    <ul id="techLabBeatsList" class="tech-lab-results" aria-live="polite"></ul>
+                                </section>
+                            </div>
 
                             <p class="tech-lab-note" data-i18n="techLab.dataNote">Suggestions come from the card-text capability engine (data/card_capability_*.json) restricted to cards that appear in the current-meta data. Local edits live in localStorage under <code>techLab.overrides.v1</code> and never leave your browser — community-wide overrides will come in a follow-up release.</p>
                         </section>
@@ -1432,7 +1457,7 @@
                             <div class="rarity-switcher-modal-content ui-modal-panel tech-lab-add-panel">
                                 <span id="techLabAddCloseBtn" class="rarity-switcher-close ui-modal-close" role="button" aria-label="Close"></span>
                                 <h2 id="techLabAddTitle" data-i18n="techLab.addModalTitle">Add a tech the engine missed</h2>
-                                <p data-i18n="techLab.addModalIntro">Search the current meta for the card you want to register as a tech against the selected target. It'll show up in the list immediately and persist across sessions.</p>
+                                <p id="techLabAddIntro" data-i18n="techLab.addModalIntro">Search the current meta for the card you want to register as a tech against the selected target. It'll show up in the list immediately and persist across sessions.</p>
                                 <div class="tech-lab-search-wrap">
                                     <input type="text" id="techLabAddSearch" class="tech-lab-search-input" autocomplete="off"
                                            placeholder="Card name…"

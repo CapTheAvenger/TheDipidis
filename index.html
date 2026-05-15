@@ -95,6 +95,7 @@
     <link rel="stylesheet" href="css/meta-card-analysis.css?v=202605151320" type="text/css" media="print" onload="this.media='all'">
     <link rel="stylesheet" href="css/current-meta-matchups.css?v=202605151320" type="text/css" media="print" onload="this.media='all'">
     <link rel="stylesheet" href="css/anti-tech.css?v=202605151320" type="text/css" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="css/tech-lab.css?v=202605151320" type="text/css" media="print" onload="this.media='all'">
     <link rel="stylesheet" href="css/tech-slots.css?v=202605151320" type="text/css" media="print" onload="this.media='all'">
     <link rel="stylesheet" href="css/city-league-display-toggles.css?v=202605151320" type="text/css" media="print" onload="this.media='all'">
     <link rel="stylesheet" href="css/de-overview-tabs.css?v=202605151320" type="text/css" media="print" onload="this.media='all'">
@@ -1385,6 +1386,60 @@
                                 <span class="tech-vs-normal-subtitle" data-i18n="techVsNormal.subtitle">Compares the latest Normal build to the latest Tech build for this source.</span>
                             </div>
                             <div class="tech-vs-normal-body" id="currentMetaTechVsNormalBody"></div>
+                        </div>
+
+                        <!-- Tech Lab — interactive tech explorer per single meta card. -->
+                        <section class="tech-lab-section" id="techLabSection" aria-labelledby="techLabHeading">
+                            <header class="tech-lab-header">
+                                <h3 id="techLabHeading" class="tech-lab-heading" data-i18n="techLab.heading">Tech Lab — find techs for any meta card</h3>
+                                <p class="tech-lab-subtitle" data-i18n="techLab.subtitle">Pick any card from the current meta. The capability engine surfaces every meta card that has a winning card-text interaction against it. Mark wrong suggestions to hide them or add ones the engine missed — your edits persist locally and are visible the next time you open this view.</p>
+                            </header>
+
+                            <div class="tech-lab-picker">
+                                <div class="tech-lab-target-wrap">
+                                    <label class="tech-lab-target-label" for="techLabTargetSearch" data-i18n="techLab.targetLabel">Target card</label>
+                                    <div class="tech-lab-search-wrap">
+                                        <input type="text" id="techLabTargetSearch" class="tech-lab-search-input"
+                                               autocomplete="off"
+                                               placeholder="Start typing a card name…"
+                                               data-i18n-placeholder="techLab.targetPlaceholder">
+                                        <ul id="techLabTargetDropdown" class="tech-lab-picker-dropdown" role="listbox"></ul>
+                                    </div>
+                                </div>
+                                <div class="tech-lab-target-preview">
+                                    <div id="techLabTargetThumb" class="tech-lab-target-thumb" aria-hidden="true"></div>
+                                    <div class="tech-lab-target-info">
+                                        <span class="tech-lab-target-info-label" data-i18n="techLab.selectedLabel">Selected:</span>
+                                        <span id="techLabTargetLabel" class="tech-lab-target-info-name" data-i18n="techLab.noneSelected">none</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="tech-lab-toolbar">
+                                <button type="button" id="techLabAddMissingBtn" class="btn btn-secondary tech-lab-toolbar-btn" disabled data-i18n="techLab.addMissingBtn">+ Add missing tech</button>
+                                <button type="button" id="techLabResetBtn" class="btn btn-tertiary tech-lab-toolbar-btn" disabled data-i18n="techLab.resetBtn">Reset overrides</button>
+                            </div>
+
+                            <ul id="techLabResults" class="tech-lab-results" aria-live="polite">
+                                <div class="tech-lab-empty" data-i18n="techLab.startHint">Pick a target card above to see suggested techs.</div>
+                            </ul>
+
+                            <p class="tech-lab-note" data-i18n="techLab.dataNote">Suggestions come from the card-text capability engine (data/card_capability_*.json) restricted to cards that appear in the current-meta data. Local edits live in localStorage under <code>techLab.overrides.v1</code> and never leave your browser — community-wide overrides will come in a follow-up release.</p>
+                        </section>
+
+                        <!-- Tech Lab — "Add missing tech" modal -->
+                        <div id="techLabAddOverlay" class="rarity-switcher-modal ui-modal-backdrop z-10000 display-none" role="dialog" aria-modal="true" aria-labelledby="techLabAddTitle">
+                            <div class="rarity-switcher-modal-content ui-modal-panel tech-lab-add-panel">
+                                <span id="techLabAddCloseBtn" class="rarity-switcher-close ui-modal-close" role="button" aria-label="Close"></span>
+                                <h2 id="techLabAddTitle" data-i18n="techLab.addModalTitle">Add a tech the engine missed</h2>
+                                <p data-i18n="techLab.addModalIntro">Search the current meta for the card you want to register as a tech against the selected target. It'll show up in the list immediately and persist across sessions.</p>
+                                <div class="tech-lab-search-wrap">
+                                    <input type="text" id="techLabAddSearch" class="tech-lab-search-input" autocomplete="off"
+                                           placeholder="Card name…"
+                                           data-i18n-placeholder="techLab.addPlaceholder">
+                                    <ul id="techLabAddDropdown" class="tech-lab-picker-dropdown" role="listbox"></ul>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -4710,6 +4765,7 @@
     <script src="js/app-city-league.js?v=202605151320" defer></script>
     <script src="js/app-deck-builder.js?v=202605151320" defer></script>
     <script src="js/card-capability-engine.js?v=202605151320" defer></script>
+    <script src="js/app-tech-lab.js?v=202605151320" defer></script>
     <script src="js/app-anti-tech.js?v=202605151320" defer></script>
     <script src="js/app-meta-cards.js?v=202605151320" defer></script>
     <script src="js/app-current-meta.js?v=202605151320" defer></script>

@@ -1,0 +1,386 @@
+/* Tech Lab — interactive tech-card explorer at the bottom of the
+ * Deck Analysis (Global) tab. Inherits modal-system classes
+ * (.rarity-switcher-modal, .ui-modal-backdrop, etc.) for the
+ * "Add missing tech" overlay.
+ */
+
+.tech-lab-section {
+    margin: 24px 0 32px;
+    padding: 22px 24px;
+    background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+
+.tech-lab-header {
+    margin-bottom: 16px;
+}
+.tech-lab-heading {
+    margin: 0 0 6px;
+    font-size: 1.25em;
+    font-weight: 800;
+    color: #0f172a;
+    letter-spacing: -0.01em;
+    border-left: 4px solid #6366f1;
+    padding-left: 12px;
+    line-height: 1.25;
+}
+.tech-lab-subtitle {
+    margin: 0;
+    color: #475569;
+    font-size: 0.92em;
+    line-height: 1.5;
+    padding-left: 16px;
+}
+
+/* ── Target picker row ──────────────────────────────────────── */
+
+.tech-lab-picker {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 220px;
+    gap: 16px;
+    align-items: stretch;
+    margin: 18px 0 14px;
+}
+@media (max-width: 700px) {
+    .tech-lab-picker {
+        grid-template-columns: 1fr;
+    }
+}
+
+.tech-lab-target-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.tech-lab-target-label {
+    font-size: 0.82em;
+    font-weight: 600;
+    color: #334155;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+.tech-lab-search-wrap {
+    position: relative;
+}
+.tech-lab-search-input {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 0.95em;
+    background: #ffffff;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.tech-lab-search-input:focus {
+    outline: none;
+    border-color: #6366f1;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.18);
+}
+.tech-lab-picker-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    margin: 4px 0 0;
+    padding: 4px 0;
+    list-style: none;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+    max-height: 340px;
+    overflow-y: auto;
+    z-index: 30;
+}
+.tech-lab-picker-dropdown:empty {
+    display: none;
+}
+.tech-lab-picker-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 12px;
+    cursor: pointer;
+    transition: background 0.12s ease;
+}
+.tech-lab-picker-item:hover {
+    background: #eef2ff;
+}
+.tech-lab-picker-thumb {
+    width: 38px;
+    height: 52px;
+    object-fit: cover;
+    object-position: top center;
+    border-radius: 4px;
+    background: #f3f4f6;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+    flex-shrink: 0;
+}
+.tech-lab-picker-name {
+    flex: 1 1 auto;
+    font-weight: 600;
+    color: #1e293b;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.tech-lab-picker-key {
+    flex: 0 0 auto;
+    font-family: ui-monospace, SFMono-Regular, monospace;
+    font-size: 0.78em;
+    color: #94a3b8;
+}
+.tech-lab-picker-empty {
+    padding: 12px 14px;
+    color: #94a3b8;
+    font-size: 0.88em;
+    font-style: italic;
+    text-align: center;
+}
+
+.tech-lab-target-preview {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 12px;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+}
+.tech-lab-target-thumb {
+    width: 56px;
+    height: 78px;
+    border-radius: 6px;
+    overflow: hidden;
+    background: #f3f4f6;
+    flex-shrink: 0;
+}
+.tech-lab-target-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top center;
+}
+.tech-lab-target-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+.tech-lab-target-info-label {
+    font-size: 0.75em;
+    font-weight: 600;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+.tech-lab-target-info-name {
+    font-weight: 700;
+    color: #1e293b;
+    word-break: break-word;
+    line-height: 1.2;
+}
+
+/* ── Toolbar (add / reset) ──────────────────────────────────── */
+
+.tech-lab-toolbar {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin: 8px 0 14px;
+}
+.tech-lab-toolbar-btn {
+    font-size: 0.9em;
+    padding: 7px 14px;
+}
+.tech-lab-toolbar-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* ── Result list ────────────────────────────────────────────── */
+
+.tech-lab-results {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 12px;
+}
+.tech-lab-empty,
+.tech-lab-loading {
+    grid-column: 1 / -1;
+    padding: 22px 16px;
+    color: #6b7280;
+    font-size: 0.92em;
+    font-style: italic;
+    text-align: center;
+    background: #ffffff;
+    border: 1px dashed #cbd5e1;
+    border-radius: 8px;
+}
+.tech-lab-card {
+    display: flex;
+    gap: 12px;
+    padding: 10px 12px;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+    transition: box-shadow 0.15s ease, border-color 0.15s ease;
+}
+.tech-lab-card:hover {
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+}
+.tech-lab-card-high   { border-left: 4px solid #166534; }
+.tech-lab-card-medium { border-left: 4px solid #d97706; }
+.tech-lab-card-low    { border-left: 4px solid #94a3b8; }
+.tech-lab-card-user   { border-left: 4px solid #6366f1; background: #eef2ff; }
+
+.tech-lab-card-thumb {
+    flex: 0 0 auto;
+    width: 56px;
+    height: 78px;
+    border-radius: 5px;
+    overflow: hidden;
+    background: #f3f4f6;
+    cursor: zoom-in;
+    border: none;
+    padding: 0;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+    transition: transform 0.12s ease;
+}
+.tech-lab-card-thumb:hover,
+.tech-lab-card-thumb:focus-visible {
+    transform: scale(1.06);
+    outline: none;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.18);
+}
+.tech-lab-card-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top center;
+}
+.tech-lab-thumb-fallback {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: default;
+    color: #94a3b8;
+    font-size: 1.6em;
+    font-weight: 700;
+}
+
+.tech-lab-card-body {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+.tech-lab-card-name {
+    font-weight: 700;
+    color: #1e293b;
+    font-size: 0.96em;
+    line-height: 1.2;
+}
+.tech-lab-card-narrative {
+    font-size: 0.85em;
+    color: #475569;
+    line-height: 1.35;
+}
+.tech-lab-card-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 10px;
+    margin-top: 2px;
+    font-size: 0.78em;
+}
+.tech-lab-card-conf {
+    padding: 1px 8px;
+    border-radius: 999px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-size: 0.82em;
+}
+.tech-lab-conf-high   { background: #dcfce7; color: #065f46; }
+.tech-lab-conf-medium { background: #fef3c7; color: #92400e; }
+.tech-lab-conf-low    { background: #e5e7eb; color: #475569; }
+.tech-lab-conf-user   { background: #e0e7ff; color: #4338ca; }
+.tech-lab-card-source {
+    color: #64748b;
+    font-style: italic;
+}
+
+.tech-lab-action {
+    flex: 0 0 auto;
+    align-self: flex-start;
+    background: rgba(0,0,0,0.04);
+    border: 1px solid transparent;
+    color: #6b7280;
+    font-size: 0.78em;
+    font-weight: 600;
+    padding: 5px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.12s ease, color 0.12s ease, border-color 0.12s ease;
+}
+.tech-lab-action:hover {
+    background: #fee2e2;
+    color: #991b1b;
+    border-color: #fecaca;
+}
+.tech-lab-action-remove:hover {
+    background: #e0e7ff;
+    color: #4338ca;
+    border-color: #c7d2fe;
+}
+
+.tech-lab-note {
+    margin: 14px 0 0;
+    font-size: 0.8em;
+    color: #6b7280;
+    font-style: italic;
+    line-height: 1.45;
+    padding: 8px 12px;
+    background: #f8fafc;
+    border-left: 3px solid #cbd5e1;
+    border-radius: 6px;
+}
+.tech-lab-note code {
+    background: #e5e7eb;
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-size: 0.92em;
+    font-family: ui-monospace, SFMono-Regular, monospace;
+}
+
+/* ── Add-missing-tech modal ──────────────────────────────────── */
+
+.tech-lab-add-panel {
+    max-width: 520px;
+    width: 92%;
+    padding: 22px 24px;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+    max-height: 80vh;
+    overflow-y: auto;
+}
+.tech-lab-add-panel h2 {
+    margin: 0 0 8px;
+    color: #0f172a;
+    font-size: 1.15em;
+}
+.tech-lab-add-panel p {
+    margin: 0 0 14px;
+    color: #475569;
+    font-size: 0.9em;
+    line-height: 1.45;
+}

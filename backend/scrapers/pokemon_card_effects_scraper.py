@@ -277,6 +277,54 @@ def extract_card_effects(soup, fallback_type: str = '') -> Dict[str, Any]:
     return out
 
 
+def _record_is_fresh(rec: Dict[str, Any]) -> bool:
+    """Heuristic: a previously-scraped record is "fresh" enough to
+    skip on incremental re-runs only if its attack data carries the
+    fields the current scraper version is expected to fill.
+
+    Specifically: when the Limitless cost-symbol DOM format changed
+    (per-class spans → text-content letters, fixed in this file's
+    `_extract_cost`), the old scraper silently wrote `cost: []` for
+    every attack on every Pokémon card. The incremental skip then
+    locked in those broken records — even after the parser fix.
+
+    A record is STALE (and should be re-fetched) when:
+      - it has ≥1 attack AND
+      - every attack has `damage` populated (so it's not a
+        legitimately cost-less utility card like Trainer/Item) AND
+      - every attack has `cost == []` or missing.
+
+    Records without attacks (Items/Supporters/Stadiums/Energies),
+    or records where at least one attack already carries a non-empty
+    cost array, are considered fresh.
+    """
+    if not isinstance(rec, dict): return True
+    attacks = rec.get('attacks') or []
+    if not attacks:
+        # Trainer / Item / Energy / Stadium — no attacks expected, OK.
+        return True
+    any_with_cost = False
+    any_with_damage = False
+    for a in attacks:
+        if isinstance(a, dict):
+            cost = a.get('cost')
+            if isinstance(cost, list) and len(cost) > 0:
+                any_with_cost = True
+            if a.get('damage'):
+                any_with_damage = True
+    if any_with_cost:
+        return True
+    if not any_with_damage:
+        # All attacks have neither cost nor damage — likely just
+        # text-only effect attacks (e.g. "Hypnosis" with no damage).
+        # Don't force re-scrape on those — pattern doesn't indicate
+        # the broken-parser regression.
+        return True
+    # Has attacks WITH damage but ALL cost arrays empty — that's
+    # the smoking-gun pattern from the old broken scrape.
+    return False
+
+
 def load_existing_output() -> Dict[str, Dict[str, Any]]:
     if not os.path.isfile(OUTPUT_JSON):
         return {}
@@ -356,7 +404,7 @@ def main() -> None:
             if not set_code or not number:
                 continue
             key = f'{set_code}|{number}'
-            if key in existing and existing[key]:
+            if key in existing and existing[key] and _record_is_fresh(existing[key]):
                 continue
             todo.append({
                 'set': set_code,

@@ -250,6 +250,18 @@
                                 defenderCard:   oppRec.name,
                                 defenderSource: ot.source,
                                 confidence:     combinedConf,
+                                // result is the source of truth for matchup
+                                // direction: 'attacker_wins' means the user's
+                                // attacker bypasses/beats the opponent's
+                                // defender (e.g. Spiky Hopper bypasses
+                                // Sturdy). 'defender_wins' means the
+                                // opponent's defender shuts down the user's
+                                // attacker (e.g. Shaymin blocks bench-snipe).
+                                // 'neutral' means the interaction lands but
+                                // doesn't fully resolve the matchup. Caller
+                                // filters by this field — only attacker_wins
+                                // shows up as "your techs against the field".
+                                result:         ix.result || 'attacker_wins',
                                 matchupValue:   ix.matchup_value || 0,
                                 interactionTag: `${ix.attacker}→${ix.defender}`,
                                 narrative:      _narrative(ix, lang,

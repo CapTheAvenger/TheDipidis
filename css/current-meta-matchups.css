@@ -716,11 +716,25 @@
     width: 100%;
     border-collapse: collapse;
     font-size: 0.95em;
-    /* `table-layout: auto` (default) + `width: 1%` trick on the numeric
-     * columns shrinks them to their content width. Opponent column
-     * takes the rest, but no longer balloons to fill artificial 52 %
-     * when the share/wr columns were declared at 22 % / 26 %. */
+    /* Fixed layout = colgroup widths are authoritative. Previous
+     * `table-layout: auto` + `width: 1%` trick on numeric columns
+     * failed in user reports where the opponent column ballooned
+     * past the wrap container and pushed share/wr columns off
+     * the right edge (horizontal scrollbar visible, values
+     * truncated to a single character). With table-layout: fixed
+     * the browser uses colgroup widths verbatim — no two-pass
+     * width computation, no content-driven overflow. */
+    table-layout: fixed;
 }
+/* Colgroup widths — concrete pixel values for numeric columns,
+ * auto (= remainder) for the opponent column. Both tables share
+ * the same width budget; .uv-opp-table adds three more numeric
+ * cols and overrides via the rule further down. */
+.mc-vs-col-opp   { width: auto; }
+.mc-vs-col-share { width: 96px; }
+.mc-vs-col-wr    { width: 110px; }
+.mc-vs-table.uv-opp-table .mc-vs-col-share { width: 78px; }
+.mc-vs-table.uv-opp-table .mc-vs-col-wr    { width: 86px; }
 .mc-vs-table thead tr {
     background: linear-gradient(180deg, #f3f4f6 0%, #e5e7eb 100%);
 }
@@ -746,8 +760,14 @@
     width: 1%;
     white-space: nowrap;
     text-align: center;
-    padding-left: 14px;
-    padding-right: 14px;
+    padding-left: 8px;
+    padding-right: 8px;
+}
+.mc-vs-table.uv-opp-table .mc-vs-th-wr,
+.mc-vs-table.uv-opp-table .mc-vs-th-share {
+    padding-left: 4px;
+    padding-right: 4px;
+    font-size: 0.72em;
 }
 .mc-vs-table tbody tr {
     border-bottom: 1px solid #f1f5f9;
@@ -767,6 +787,13 @@
 }
 .mc-vs-table td:first-child {
     font-weight: 500;
+    /* table-layout: fixed clips overflow by default. Allow long
+     * archetype names to wrap onto a second line instead of being
+     * cut off mid-word. `overflow-wrap: anywhere` is the modern
+     * equivalent of word-break: break-word but with better
+     * line-breaking heuristics around spaces. */
+    overflow-wrap: anywhere;
+    word-break: break-word;
 }
 .mc-vs-table td.mc-vs-share,
 .mc-vs-table td.mc-vs-wr {
@@ -781,8 +808,18 @@
 }
 .mc-vs-table td.mc-vs-wr {
     text-align: center;
-    padding-left: 14px;
-    padding-right: 14px;
+    padding-left: 8px;
+    padding-right: 8px;
+}
+.mc-vs-table.uv-opp-table td.mc-vs-wr,
+.mc-vs-table.uv-opp-table td.mc-vs-share {
+    padding-left: 4px;
+    padding-right: 4px;
+}
+.mc-vs-table.uv-opp-table .mc-vs-pill {
+    min-width: 56px;
+    padding: 3px 8px;
+    font-size: 0.92em;
 }
 .mc-vs-empty {
     text-align: center !important;

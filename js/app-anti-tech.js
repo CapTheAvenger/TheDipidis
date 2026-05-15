@@ -265,11 +265,137 @@
 
     // ── STEP 2: TECH CARD SELECTION ──────────────────────────────────
 
-    // For each target archetype, scan active_threats.json to find
-    // which threat categories the target actually runs (at the
-    // aggression-gated share floor), then pull counter cards from
-    // those categories. Aggregates per-card across targets — a card
-    // that counters multiple targets shows that list explicitly.
+    // Build archetype → cards map from window.currentMetaAnalysisData.
+    // Mirrors the helper in app-current-meta-analysis.js so the
+    // anti-tech modal can run standalone (before the user-vs-vanilla
+    // panel has been opened in this session). Cached on window with
+    // a row-count tag so it rebuilds when new analysis data arrives.
+    function _buildArchetypeCardMapLocal() {
+        const rows = (typeof window !== 'undefined' && window.currentMetaAnalysisData) || [];
+        const cacheTag = `rows=${rows.length}`;
+        if (window._archetypeCardMap && window._archetypeCardMapTag === cacheTag) {
+            return window._archetypeCardMap;
+        }
+        const map = new Map();
+        for (const r of rows) {
+            if (!r) continue;
+            const arch = String(r.archetype || '').trim().toLowerCase();
+            if (!arch) continue;
+            const set = String(r.set_code || '').toUpperCase().trim();
+            const num = String(r.set_number || '').trim();
+            if (!set || !num) continue;
+            const key = `${set}|${num}`;
+            const name = String(r.card_name || '').trim();
+            if (!map.has(arch)) map.set(arch, []);
+            map.get(arch).push({ key, name });
+        }
+        window._archetypeCardMap = map;
+        window._archetypeCardMapTag = cacheTag;
+        return map;
+    }
+
+    // Run the capability engine inverted: pass ALL unique meta cards
+    // as the "user deck" (haystack of potential attackers) and the
+    // target archetypes as the defender side. Returns the same shape
+    // as the active_threats path so both sources fold into one list.
+    //
+    // This is what surfaces Mega Lopunny ex (PFL|84) as a tech vs
+    // Crustle (DRI|12) — its Spiky Hopper attack has the
+    // `attack.ignores_effects` tag which bypasses Crustle's
+    // `ability.ex_immunity` (Mysterious Rock Inn). active_threats.json
+    // doesn't classify Lopunny because the bypass isn't one of the
+    // four narrow threat categories (hand_disruption, retreat_lock,
+    // ability_lock, bench_damage) — but the card-text engine catches
+    // it via the taxonomy + interaction matrix in data/card_capability_*.
+    async function _computeCapabilityTechSuggestions() {
+        if (typeof window.CardCapabilityEngine === 'undefined') {
+            _devLog('CardCapabilityEngine missing — skipping capability path');
+            return [];
+        }
+        if (typeof window._loadCardEffectsIndex !== 'function') return [];
+        const cardEffectsIndex = await window._loadCardEffectsIndex();
+        if (!cardEffectsIndex || !cardEffectsIndex.size) return [];
+        const archetypeCardMap = _buildArchetypeCardMapLocal();
+        if (archetypeCardMap.size === 0) {
+            _devLog('archetypeCardMap empty — currentMetaAnalysisData not loaded yet');
+            return [];
+        }
+
+        // Restrict the defender side to the user's selected targets
+        const targetArchetypes = new Map();
+        for (const targetKey of _targets) {
+            const cards = archetypeCardMap.get(targetKey);
+            if (cards && cards.length) {
+                targetArchetypes.set(_targetDisplay.get(targetKey) || targetKey, cards);
+            }
+        }
+        if (targetArchetypes.size === 0) return [];
+
+        // Build the haystack: every unique card that appears in some
+        // current-meta deck. Dedupe by SET|number so the engine
+        // doesn't waste work re-extracting tags for the same print.
+        const seen = new Set();
+        const allMetaCards = [];
+        for (const [, cards] of archetypeCardMap.entries()) {
+            for (const c of cards) {
+                if (seen.has(c.key)) continue;
+                seen.add(c.key);
+                allMetaCards.push(c);
+            }
+        }
+
+        const lang = (typeof getLang === 'function') ? getLang() : 'en';
+        let detected;
+        try {
+            detected = await window.CardCapabilityEngine.detectMatchups({
+                userDeckCards: allMetaCards,
+                archetypeCardMap: targetArchetypes,
+                cardEffectsIndex,
+                lang,
+            });
+        } catch (e) {
+            _devLog('capability detectMatchups failed:', e && e.message);
+            return [];
+        }
+        if (!detected || detected.size === 0) return [];
+
+        // Roll up the per-opponent matchups into per-attacker-card
+        // aggregations so the same physical card surfaces ONCE in the
+        // picker even if it wins against multiple targets.
+        const byCard = new Map();
+        const cardIdByName = new Map();
+        for (const c of allMetaCards) {
+            const k = c.name.toLowerCase();
+            if (!cardIdByName.has(k)) cardIdByName.set(k, c.key);
+        }
+        for (const [targetName, matchups] of detected.entries()) {
+            for (const m of matchups) {
+                if (m.result !== 'attacker_wins') continue;
+                const key = m.attackerCard.toLowerCase();
+                let entry = byCard.get(key);
+                if (!entry) {
+                    entry = {
+                        name: m.attackerCard,
+                        cardId: cardIdByName.get(key) || null,
+                        threatCategories: new Set(),
+                        targets: new Set(),
+                        counterScore: 0,
+                        source: 'capability',
+                    };
+                    byCard.set(key, entry);
+                }
+                // Use the interaction's defender tag as a human-
+                // readable category label. attack.ignores_effects →
+                // ability.ex_immunity becomes "card-text: ex_immunity"
+                const defTag = String(m.interactionTag || '').split('→')[1] || '';
+                const label = defTag ? `card-text: ${defTag.replace(/^ability\./, '').replace(/_/g, ' ')}` : 'card-text tech';
+                entry.threatCategories.add(label);
+                entry.targets.add(targetName);
+            }
+        }
+        return Array.from(byCard.values());
+    }
+
     async function _computeSuggestedCards() {
         const intel = await _ensureActiveThreats();
         if (!intel || !intel.threats || !intel.counters) return [];
@@ -315,6 +441,11 @@
                     if (!entry) {
                         entry = {
                             name,
+                            // Track card_id so the suggestion list can
+                            // render a thumbnail. First match wins —
+                            // each counter card normally has one
+                            // canonical print listed in the JSON.
+                            cardId: String(c.card_id || '').trim(),
                             threatCategories: new Set(),
                             targets: new Set(),
                             counterScore: 0,
@@ -329,6 +460,30 @@
             }
         }
 
+        // Merge in card-text capability tech suggestions. Same
+        // entry shape as the active_threats path so the renderer
+        // doesn't care which source produced a row. If a card
+        // appears in both sources, the active_threats classification
+        // wins (already in byCard) and the capability targets/cats
+        // get folded in as additional context.
+        let capabilitySuggestions = [];
+        try {
+            capabilitySuggestions = await _computeCapabilityTechSuggestions();
+        } catch (e) {
+            _devLog('capability suggestion error:', e && e.message);
+        }
+        for (const cap of capabilitySuggestions) {
+            const key = cap.name.toLowerCase();
+            const existing = byCard.get(key);
+            if (existing) {
+                cap.threatCategories.forEach(c => existing.threatCategories.add(c));
+                cap.targets.forEach(t => existing.targets.add(t));
+                if (!existing.cardId && cap.cardId) existing.cardId = cap.cardId;
+            } else {
+                byCard.set(key, cap);
+            }
+        }
+
         // Sort: cards that counter MORE targets first, then by
         // counter score, then alphabetical.
         return Array.from(byCard.values()).sort((a, b) => {
@@ -336,6 +491,20 @@
             if (b.counterScore !== a.counterScore) return b.counterScore - a.counterScore;
             return a.name.localeCompare(b.name);
         });
+    }
+
+    // Build Limitless CDN URL from a SET|number card_id.
+    // - Numeric numbers get zero-padded to 3 digits (PFL|84 → PFL_084)
+    // - Non-numeric prints (TG12, SV23, etc.) stay as-is
+    function _cardImageUrl(cardId) {
+        if (!cardId) return null;
+        const parts = String(cardId).split('|');
+        if (parts.length !== 2) return null;
+        const set = parts[0].toUpperCase().trim();
+        const num = parts[1].trim();
+        if (!set || !num) return null;
+        const padded = /^\d+$/.test(num) ? num.padStart(3, '0') : num;
+        return `https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/${set}/${set}_${padded}_R_EN_LG.png`;
     }
 
     function _renderTechSuggestions() {
@@ -361,8 +530,16 @@
             const targetsTxt = Array.from(c.targets).join(', ');
             const catsTxt = Array.from(c.threatCategories).join(' · ');
             const isOn = _selectedCards.has(c.name.toLowerCase());
+            // Thumbnail with on-tap full-card zoom. Wrapped in its own
+            // span so the tap doesn't toggle the checkbox label.
+            const imgUrl = _cardImageUrl(c.cardId);
+            const safeImgUrl = imgUrl ? imgUrl.replace(/"/g, '&quot;') : '';
+            const thumb = imgUrl
+                ? `<span class="anti-tech-card-thumb-wrap" data-card-img="${safeImgUrl}" data-card-name="${safe}" role="button" aria-label="Zoom card ${safe}" tabindex="0"><img class="anti-tech-card-thumb" src="${safeImgUrl}" alt="${safe}" loading="lazy"></span>`
+                : `<span class="anti-tech-card-thumb-wrap anti-tech-card-thumb-fallback" aria-hidden="true">?</span>`;
             return `<label class="anti-tech-card-item${isOn ? ' is-selected' : ''}">
                 <input type="checkbox" class="anti-tech-card-check" data-card="${safe}" ${isOn ? 'checked' : ''}>
+                ${thumb}
                 <span class="anti-tech-card-body">
                     <span class="anti-tech-card-name">${c.name}</span>
                     <span class="anti-tech-card-meta">
@@ -374,6 +551,21 @@
         }).join('');
         list.querySelectorAll('.anti-tech-card-check').forEach(box => {
             box.addEventListener('change', () => _toggleSuggestedCard(box.dataset.card, box.checked));
+        });
+        // Tap on the thumbnail opens the full-resolution single-card
+        // modal so the user can read the card text without leaving the
+        // wizard. Stop propagation so the surrounding <label> doesn't
+        // toggle the checkbox when the user is just trying to inspect.
+        list.querySelectorAll('.anti-tech-card-thumb-wrap[data-card-img]').forEach(el => {
+            el.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const img = el.dataset.cardImg;
+                const name = el.dataset.cardName || '';
+                if (img && typeof window.showSingleCard === 'function') {
+                    window.showSingleCard(img, name);
+                }
+            });
         });
     }
 

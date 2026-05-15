@@ -400,6 +400,40 @@
     accent-color: #6366f1;
     transform: scale(1.15);
 }
+.anti-tech-card-thumb-wrap {
+    flex: 0 0 auto;
+    display: block;
+    width: 52px;
+    height: 72px;
+    border-radius: 5px;
+    overflow: hidden;
+    background: #f3f4f6;
+    cursor: zoom-in;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+.anti-tech-card-thumb-wrap:hover,
+.anti-tech-card-thumb-wrap:focus-visible {
+    transform: scale(1.06);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.18);
+    outline: none;
+}
+.anti-tech-card-thumb {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top center;
+    display: block;
+}
+.anti-tech-card-thumb-fallback {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #9ca3af;
+    font-size: 1.6em;
+    font-weight: 700;
+    cursor: default;
+}
 .anti-tech-card-body {
     display: flex;
     flex-direction: column;

@@ -56,7 +56,7 @@ import os
 import sys
 from collections import defaultdict
 from datetime import datetime, timezone
-from typing import Any, Dict, List, Mapping, Tuple
+from typing import Any, Dict, List, Mapping, Set, Tuple
 
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 BACKEND_DIR = os.path.dirname(THIS_DIR)
@@ -88,6 +88,25 @@ LEGAL_FORMAT_MIN_SET = "TEF"
 # cards must NOT appear in the counter recommendations. Add MEP /
 # next-era promos here when they become Standard-legal exceptions.
 ALWAYS_LEGAL_SETS: frozenset = frozenset()
+
+# Per-category counter blocklist. Cards whose text matches a counter
+# pattern but are STAPLES (in every meta deck regardless of opponent),
+# so listing them as "tech vs X" is misleading — they're not a tech
+# choice. User feedback flagged Lillie's Determination repeatedly:
+# every N's / Dragapult / Festival Lead deck plays 3-4 copies as the
+# baseline draw engine, not as a hand-disruption counter. The text
+# pattern (`shuffle your hand into your deck`) can't distinguish this
+# from a situational recovery card like Atticus or Drasna.
+#
+# Keyed by canonical card name (case-insensitive) rather than card_id
+# so reprints across sets get caught by the same entry. Add entries
+# here when a counter classification feels wrong because the card is
+# a universal staple, not a tech inclusion.
+COUNTER_BLOCKLIST_BY_NAME: Dict[str, Set[str]] = {
+    "hand_disruption": {
+        "lillie's determination",
+    },
+}
 
 # Archetypes contributing less than this fraction of the meta are
 # excluded from the threat aggregation. 0.5 % ≈ noise floor for
@@ -301,15 +320,24 @@ def build() -> Dict[str, Any]:
     # leak illegal recommendations into the Stage 3 tech audit.
     counters_by_cat: Dict[str, List[Dict[str, str]]] = defaultdict(list)
     counters_dropped_illegal = 0
+    counters_dropped_blocklist = 0
     for cid, tag in tags.items():
         for cat in tag.get("counters", []):
             entry = effects.get(cid) or {}
             if legal_sets and _set_of(cid) not in legal_sets:
                 counters_dropped_illegal += 1
                 continue
+            card_name = (entry.get("name") or "").strip()
+            # Skip cards on the per-category staple blocklist. Pattern
+            # matched correctly (shared wording with real counters)
+            # but the card is a universal staple, not a tech choice.
+            blocklist = COUNTER_BLOCKLIST_BY_NAME.get(cat, set())
+            if blocklist and card_name.lower() in blocklist:
+                counters_dropped_blocklist += 1
+                continue
             counters_by_cat[cat].append({
                 "card_id": cid,
-                "card_name": (entry.get("name") or "").strip(),
+                "card_name": card_name,
                 "card_type": (entry.get("card_type") or "").strip(),
             })
     # De-dupe by (card_name) — keep the highest-rotation print of each
@@ -336,6 +364,9 @@ def build() -> Dict[str, Any]:
     if counters_dropped_illegal:
         print(f"[build_threat_intel] dropped {counters_dropped_illegal} counter "
               f"prints from rotated-out sets")
+    if counters_dropped_blocklist:
+        print(f"[build_threat_intel] dropped {counters_dropped_blocklist} counter "
+              f"prints via COUNTER_BLOCKLIST_BY_NAME (staple cards)")
 
     # ── Build the final shape, scoring + filtering by CATEGORY_FLOOR ──
     # weighted_meta_share is the fraction of the meta where the player

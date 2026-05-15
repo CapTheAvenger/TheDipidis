@@ -89,7 +89,12 @@
         }
         wrap.innerHTML = field.map(d => {
             const name = String(d.name || '').trim();
-            const sharePct = (d.finalShare || 0) * 100;
+            // finalShare is already in percent units (e.g. 9.948 means
+            // 9.948% share). MetaCall renderers use it directly with
+            // .toFixed(2) + '%' — see app-meta-call.js:3092. The earlier
+            // version of this code multiplied by 100, producing the
+            // "994.8%" rendering reported by the user.
+            const sharePct = (d.finalShare || 0);
             const isOn = _targets.has(name.toLowerCase());
             return `<button type="button"
                             class="anti-tech-quick-pick${isOn ? ' is-active' : ''}"

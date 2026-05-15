@@ -386,6 +386,7 @@
         _selectedCards = new Set();
 
         modal.classList.remove('display-none');
+        modal.classList.add('show');
         _showStep(1);
 
         const input = document.getElementById('antiTechCustomInput');
@@ -405,7 +406,10 @@
     function closeAntiTechModal() {
         _devLog('closeAntiTechModal');
         const modal = document.getElementById('antiTechModal');
-        if (modal) modal.classList.add('display-none');
+        if (modal) {
+            modal.classList.remove('show');
+            modal.classList.add('display-none');
+        }
         _source = null;
         _targets = new Set();
         _targetDisplay = new Map();

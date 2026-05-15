@@ -484,61 +484,54 @@
             }
         }
 
-        // Archetype-aware filter — user feedback:
-        // > "Die Vorschläge sollten als erstes aus dem Pool des
-        //    gewählten archetypes gewählt werden [...] sollten die
-        //    Vorschläge auch zum archetype passen. Siehe benötigte
-        //    Energien für Attacken und genutzte Energien im
-        //    archetype und so."
+        // Archetype-aware filter — STRICT pool-only mode.
         //
-        // Filter applied AFTER both sources merge. Keeps cards that
-        // are either:
-        //   (a) already in the user's archetype's existing card pool
-        //       (proven to fit — overrides the energy-compat check
-        //       for special mechanics like N's Zoroark Night Joker
-        //       copying N's Zekrom's Lightning attack with Dark energy)
-        //   (b) Colorless attackers (universally usable in any deck)
-        //   (c) energy-type matches the deck's energy types as
-        //       inferred from the Basic Energy cards in the
-        //       archetype's pool
+        // User feedback after the looser energy-compat heuristic let
+        // through cards that don't actually fit the deck:
+        // > "Was sind das denn für Vorschläge für n's zoroark?
+        //    Guck dir mal die Karten in zoroark an die gespielt
+        //    werden [...] Wo soll denn da das dudunsparce ex
+        //    herkommen oder Iron crown"
         //
-        // For everything else (Cornerstone Mask Ogerpon ex needs
-        // Fighting in a Dark-only deck, etc.) the picker hides them.
-        // User can still see them all in the Tech Lab — this filter
-        // is just for the build-vs flow where the cards land in
-        // tech-slots.
+        // Dudunsparce ex (Colorless) and Iron Crown ex (Psychic)
+        // both passed the previous filter because the user's deck
+        // includes Psychic energy and Colorless cards were
+        // universally allowed. But neither card actually appears in
+        // ANY N's Zoroark deck list in the meta CSV — they're from
+        // unrelated archetypes (Dudunsparce solo, Future Box).
+        //
+        // New rule: a suggestion passes ONLY if the card is in the
+        // user's archetype's existing card pool (matched by name,
+        // case-insensitive). Pool membership is derived from
+        // current_meta_card_data.csv — every print of every card
+        // that any meta deck of this archetype is known to run.
+        //
+        // For broader exploration the user can go to Tech Lab, or
+        // manually + Add missing in step 2. Build-vs stays
+        // opinionated and only surfaces proven-fit cards.
         const userArch = _getCurrentArchetype();
         if (userArch) {
             const archCards = _archetypeCardsFromMap(userArch);
             const archPoolNames = new Set(archCards.map(c => c.name.toLowerCase()));
-            const deckEnergies = _getArchetypeEnergyTypes(userArch);
-            let cardEffectsIndexLocal = null;
-            try {
-                if (typeof window._loadCardEffectsIndex === 'function') {
-                    cardEffectsIndexLocal = await window._loadCardEffectsIndex();
+            // Defense: when no pool data is available for the active
+            // source (e.g. user is on cityLeague but currentMeta data
+            // isn't loaded), skip the filter so the picker still
+            // surfaces candidates rather than going empty. The user
+            // can manually + Add missing the ones that fit their
+            // deck.
+            if (archPoolNames.size === 0) {
+                _devLog('archetype pool empty for', userArch, '— skipping filter');
+            } else {
+                const before = byCard.size;
+                for (const [key, entry] of Array.from(byCard.entries())) {
+                    if (!archPoolNames.has(entry.name.toLowerCase())) {
+                        byCard.delete(key);
+                    }
                 }
-            } catch (_) { cardEffectsIndexLocal = null; }
-            const cardEnergyType = (cardId) => {
-                if (!cardEffectsIndexLocal || !cardEffectsIndexLocal.bySetNumber || !cardId) return null;
-                const rec = cardEffectsIndexLocal.bySetNumber.get(String(cardId).toUpperCase().trim());
-                return rec ? String(rec.energy_type || '').trim() : null;
-            };
-            const passes = (entry) => {
-                if (archPoolNames.has(entry.name.toLowerCase())) return true; // already in pool
-                const et = cardEnergyType(entry.cardId);
-                if (!et) return true;                       // unknown — don't filter
-                if (et === 'Colorless') return true;        // works in any deck
-                if (deckEnergies.has(et)) return true;      // matches deck's energies
-                return false;
-            };
-            const before = byCard.size;
-            for (const [key, entry] of Array.from(byCard.entries())) {
-                if (!passes(entry)) byCard.delete(key);
+                _devLog('archetype pool-only filter', `${userArch}`,
+                    'pool size=', archPoolNames.size,
+                    `${before} → ${byCard.size}`);
             }
-            _devLog('archetype filter', `${userArch}`,
-                'energies=', Array.from(deckEnergies),
-                'pool size=', archPoolNames.size,
-                `${before} → ${byCard.size}`);
         }
 
         // Sort: cards that counter MORE targets first, then by

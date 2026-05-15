@@ -1219,6 +1219,29 @@
                         </h3>
                         <div id="currentMetaUserVsVanillaSummary" class="mc-vs-summary"></div>
                         <div id="currentMetaUserVsVanillaDetail" class="mc-vs-detail"></div>
+                        <div class="mc-vs-table-wrap" aria-label="Per-opponent vanilla vs build comparison">
+                            <table class="mc-vs-table uv-opp-table">
+                                <colgroup>
+                                    <col class="mc-vs-col-opp">
+                                    <col class="mc-vs-col-share">
+                                    <col class="mc-vs-col-wr">
+                                    <col class="mc-vs-col-wr">
+                                    <col class="mc-vs-col-wr">
+                                </colgroup>
+                                <thead>
+                                    <tr>
+                                        <th class="mc-vs-th-opp" data-i18n="matchup.opponent">Opponent</th>
+                                        <th class="mc-vs-th-share" data-i18n="matchup.fieldShare">Field %</th>
+                                        <th class="mc-vs-th-wr" data-i18n="matchup.userVsVanillaVanilla">Vanilla</th>
+                                        <th class="mc-vs-th-wr" data-i18n="matchup.userVsVanillaYou">Your Build</th>
+                                        <th class="mc-vs-th-wr" data-i18n="matchup.userVsVanillaDelta">Delta</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="currentMetaUserVsVanillaOpponentBody">
+                                    <tr><td colspan="5" class="mc-vs-empty" data-i18n="matchup.noData">No data available</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
                         <div id="currentMetaUserVsVanillaCardDiff" class="uv-card-diff"></div>
                     </div>
 

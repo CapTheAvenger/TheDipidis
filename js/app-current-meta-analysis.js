@@ -1799,6 +1799,14 @@
                     });
             } else {
                 breakdownLines.push(t('matchup.userVsVanillaBreakdownNoCounters') || 'No tech-counter cards detected — your deck performs at vanilla baseline.');
+                // Explain the limitation. The counter library in
+                // active_threats.json is intentionally narrow (only
+                // cards that defend against specific threat categories
+                // — hand_disruption, retreat_lock, bench_damage,
+                // ability_lock). Archetype-internal tools like Scoop
+                // Up Cyclone or Binding Mochi are not tracked here
+                // even though they're tactically meaningful.
+                breakdownLines.push(t('matchup.userVsVanillaBreakdownLibraryNote') || 'Note: the counter library only tracks cards explicitly listed in data/active_threats.json. Archetype-internal tools (e.g. ACE SPECs, generic Pokemon Tools, in-archetype draw supporters) are not counted unless added to that list.');
             }
             breakdownLines.push(
                 (t('matchup.userVsVanillaBreakdownMatched') || 'Bonus applied vs {m}/{n} opponents in the predicted field.')
@@ -1810,6 +1818,31 @@
 
             detailEl.innerHTML = `
                 <ul class="uv-breakdown">${breakdownLines.map(l => `<li>${l}</li>`).join('')}</ul>`;
+
+            // Per-opponent vanilla vs build comparison. The aggregated
+            // pills above hide WHICH opponents the bonus fired on —
+            // this table surfaces that explicitly so the user can sanity
+            // check whether the tech adjustment maps to the matchups
+            // they actually expect.
+            const oppBody = document.getElementById('currentMetaUserVsVanillaOpponentBody');
+            if (oppBody) {
+                const fmtDelta = (b) => {
+                    if (b === 0) return '<span class="uv-delta-none">—</span>';
+                    const cls = b > 0 ? 'wr-pos' : 'wr-neg';
+                    const sign = b > 0 ? '+' : '';
+                    return `<span class="mc-vs-pill ${cls}">${sign}${fmt(b)}pts</span>`;
+                };
+                const oppRow = (p) => `
+                    <tr>
+                        <td>${escapeHtml(p.opponent)}</td>
+                        <td class="mc-vs-share">${fmt(p.fieldShare, 2)}%</td>
+                        <td class="mc-vs-wr"><span class="mc-vs-pill ${wrColorClass(p.wr)}">${fmt(p.wr)}%</span></td>
+                        <td class="mc-vs-wr"><span class="mc-vs-pill ${wrColorClass(p.userWr)}">${fmt(p.userWr)}%</span></td>
+                        <td class="mc-vs-wr">${fmtDelta(p.bonus)}</td>
+                    </tr>`;
+                oppBody.innerHTML = paired.map(oppRow).join('') ||
+                    `<tr><td colspan="5" class="mc-vs-empty">${t('heatmap.noData') || 'No data available'}</td></tr>`;
+            }
 
             _renderCardDiffSection(archetype);
 

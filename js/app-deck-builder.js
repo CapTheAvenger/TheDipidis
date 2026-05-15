@@ -55,6 +55,74 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             pastMeta: new Set(),
         };
 
+        // Mirror of pinnedCards for the opposite intent: cards the user
+        // never wants in the next regenerated deck. Mutually exclusive
+        // with pins — toggling exclude clears any matching pin and vice
+        // versa. Excluded cards are filtered out of the candidate pool
+        // at the top of autoCompleteConsistency so neither the algorithm
+        // nor Stage 0 can re-introduce them.
+        window.excludedCards = {
+            cityLeague: new Set(),
+            currentMeta: new Set(),
+            pastMeta: new Set(),
+        };
+
+        function isExcludedCard(source, cardName) {
+            const bucket = (window.excludedCards || {})[source];
+            if (!bucket || !bucket.has) return false;
+            return bucket.has(_pinKey(cardName));
+        }
+        window.isExcludedCard = isExcludedCard;
+
+        function getExcludedCardNames(source) {
+            const bucket = (window.excludedCards || {})[source];
+            if (!bucket) return new Set();
+            return new Set(bucket);
+        }
+        window.getExcludedCardNames = getExcludedCardNames;
+
+        function toggleExcludeCard(source, cardName) {
+            if (source !== 'cityLeague' && source !== 'currentMeta' && source !== 'pastMeta') return;
+            const excludeBucket = window.excludedCards[source];
+            const pinBucket     = window.pinnedCards[source];
+            if (!excludeBucket || !pinBucket) return;
+            const key = _pinKey(cardName);
+            if (!key) return;
+            const nowExcluded = !excludeBucket.has(key);
+            if (nowExcluded) {
+                excludeBucket.add(key);
+                pinBucket.delete(key); // mutual exclusivity: can't both pin and exclude
+            } else {
+                excludeBucket.delete(key);
+            }
+            try {
+                if (source === 'cityLeague' && typeof saveCityLeagueDeck === 'function') saveCityLeagueDeck();
+                else if (source === 'currentMeta' && typeof saveCurrentMetaDeck === 'function') saveCurrentMetaDeck();
+                else if (source === 'pastMeta' && typeof savePastMetaDeck === 'function') savePastMetaDeck();
+            } catch (_) { /* swallow — UI redraw still happens */ }
+            if (typeof updateDeckDisplay === 'function') updateDeckDisplay(source);
+            if (typeof showToast === 'function') {
+                if (nowExcluded) {
+                    const tpl = t('deck.excludeAdded') || 'Excluded "{n}" — will not be added on next Consistency Generate.';
+                    showToast(tpl.replace('{n}', cardName), 'info', 2500);
+                } else {
+                    const tpl = t('deck.excludeRemoved') || 'Un-excluded "{n}".';
+                    showToast(tpl.replace('{n}', cardName), 'info', 2000);
+                }
+            }
+        }
+        window.toggleExcludeCard = toggleExcludeCard;
+
+        window.excludedCardsToArray = function(source) {
+            const bucket = (window.excludedCards || {})[source];
+            return bucket ? Array.from(bucket) : [];
+        };
+        window.excludedCardsFromArray = function(source, arr) {
+            if (!window.excludedCards) return;
+            const list = Array.isArray(arr) ? arr : [];
+            window.excludedCards[source] = new Set(list.map(_pinKey).filter(Boolean));
+        };
+
         function _pinKey(name) {
             if (typeof normalizeCardName === 'function') return normalizeCardName(name || '');
             return String(name || '').toLowerCase().trim();
@@ -81,8 +149,15 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             const key = _pinKey(cardName);
             if (!key) return;
             const nowPinned = !bucket.has(key);
-            if (nowPinned) bucket.add(key);
-            else bucket.delete(key);
+            if (nowPinned) {
+                bucket.add(key);
+                // Mutual exclusivity with the exclude list — pinning a
+                // previously-excluded card automatically un-excludes it.
+                const excludeBucket = (window.excludedCards || {})[source];
+                if (excludeBucket && excludeBucket.has(key)) excludeBucket.delete(key);
+            } else {
+                bucket.delete(key);
+            }
             // Persist alongside the deck so the pin survives regen.
             try {
                 if (source === 'cityLeague' && typeof saveCityLeagueDeck === 'function') saveCityLeagueDeck();
@@ -1575,27 +1650,38 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 const ownedBadge = isOwned ? '<div style="position: absolute; top: 5px; left: 5px; background: #4CAF50; color: white; width: 25px; height: 25px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.5); z-index: 4;">✓</div>' : '';
                 
                 const pinned = (typeof isPinnedCard === 'function') && isPinnedCard(source, safeCardName);
+                const excluded = (typeof isExcludedCard === 'function') && isExcludedCard(source, safeCardName);
                 const pinnedClass = pinned ? ' is-pinned' : '';
+                const excludedClass = excluded ? ' is-excluded' : '';
                 const pinTitle = pinned
                     ? (t('deck.pinTitleUnpin') || 'Unpin — let the algorithm decide again')
                     : (t('deck.pinTitlePin') || 'Pin — keep this card on next Consistency Generate');
                 const pinIcon = pinned ? '📌' : '📍';
+                const excludeTitle = excluded
+                    ? (t('deck.excludeTitleUnexclude') || 'Un-exclude — let the algorithm consider this card again')
+                    : (t('deck.excludeTitleExclude') || 'Exclude — keep this card out of the next Consistency Generate');
+                const excludeIcon = excluded ? '⛔' : '🚫';
                 const pinBadge = pinned
                     ? `<div class="deck-card-pin-badge" title="${pinTitle}">📌</div>`
                     : '';
+                const excludeBadge = excluded
+                    ? `<div class="deck-card-exclude-badge" title="${excludeTitle}">⛔</div>`
+                    : '';
                 html += `
-                    <div class="deck-card pos-rel${pinnedClass}" title="${safeCardName} (${count}x) - ${percentage}%">
+                    <div class="deck-card pos-rel${pinnedClass}${excludedClass}" title="${safeCardName} (${count}x) - ${percentage}%">
                         <img src="${imageUrl}" alt="${safeCardName}" loading="lazy" class="card-img-std cursor-zoom" onerror="handleCardImageError(this, '${setCode}', '${setNumber}')" onclick="showSingleCard(this.src, '${cardNameEscaped} (${setCode} ${setNumber})')">
                         ${ownedBadge}
                         ${typeof getWishlistBadgeHtml === 'function' ? getWishlistBadgeHtml(safeCardName, setCode, setNumber) : ''}
                         ${pinBadge}
+                        ${excludeBadge}
                         <div class="card-max-count">${count}</div>
                         <div class="deck-card-overlay">${overlayText}</div>
                         <div class="deck-card-actions">
-                            <div class="deck-card-action-row" style="grid-template-columns: 1fr 1fr 1fr 1fr;">
+                            <div class="deck-card-action-row" style="grid-template-columns: 1fr 1fr 1fr 1fr 1fr;">
                                 <button onclick="removeCardFromDeck('${source}', '${deckKeyEscaped}')" class="city-league-card-action-btn city-league-card-remove-btn" title="Remove from deck">-</button>
                                 <button onclick="openRaritySwitcher('${cardNameEscaped}', '${deckKeyEscaped}')" class="city-league-card-action-btn city-league-card-rarity-btn" title="Switch rarity/print">★</button>
                                 <button onclick="togglePinCard('${source}', '${cardNameEscaped}')" class="city-league-card-action-btn city-league-card-pin-btn${pinned ? ' is-active' : ''}" title="${pinTitle}">${pinIcon}</button>
+                                <button onclick="toggleExcludeCard('${source}', '${cardNameEscaped}')" class="city-league-card-action-btn city-league-card-exclude-btn${excluded ? ' is-active' : ''}" title="${excludeTitle}">${excludeIcon}</button>
                                 <button onclick="addCardToDeck('${source}', '${cardNameEscaped}', '${setCode}', '${setNumber}')" class="city-league-card-action-btn city-league-card-add-btn" title="Add to deck">+</button>
                             </div>
                             <div class="deck-card-action-row" style="grid-template-columns: 1fr 1fr 2fr;">
@@ -6045,6 +6131,24 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             }
             deckCards = mergedDeckCards;
             devLog('[autoCompleteConsistency] After Combined Variants merge:', deckCards.length, 'unique cards');
+
+            // User-excluded cards are stripped from the candidate pool
+            // before any allocation pass runs. Stage 0 (pins, tech-slots,
+            // Ace-Spec) and Stages 1-3 (core/staple/utility) see them as
+            // if they didn't exist in the archetype, so neither the
+            // forced-include path nor the score-based picks can put them
+            // back into the deck. Empty filter = no excluded cards.
+            const _excludedSet = (typeof getExcludedCardNames === 'function')
+                ? getExcludedCardNames(source)
+                : new Set();
+            if (_excludedSet.size > 0) {
+                const _normName = typeof normalizeCardName === 'function'
+                    ? normalizeCardName
+                    : (s => String(s || '').toLowerCase().trim());
+                const beforeLen = deckCards.length;
+                deckCards = deckCards.filter(card => !_excludedSet.has(_normName(card.card_name)));
+                devLog('[autoCompleteConsistency] Excluded cards filter:', beforeLen, '→', deckCards.length, '(removed', beforeLen - deckCards.length, 'excluded)');
+            }
             
             // ==========================================
             // 2. COMPUTE PER-CARD STATISTICS + META BOOST + RECENCY

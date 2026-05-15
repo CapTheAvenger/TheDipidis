@@ -1891,6 +1891,54 @@ img[src*="limitlesstcg"] {
     z-index: 3;
     pointer-events: none;
 }
+/* Exclude controls — visual mirror of the pin system above. Pin is
+ * "force-include in next regen"; exclude is "force-exclude in next
+ * regen". The two are mutually exclusive (toggleExcludeCard wipes
+ * any matching pin and vice versa). Excluded cards keep their tile
+ * visible so the user can un-exclude later, but visually grayed out
+ * so it's obvious the algorithm won't put them back. */
+.city-league-card-exclude-btn {
+    background: rgba(255, 255, 255, 0.12);
+    color: #fff;
+    font-size: 11px;
+    filter: grayscale(1) opacity(0.7);
+}
+.city-league-card-exclude-btn:hover {
+    filter: none;
+}
+.city-league-card-exclude-btn.is-active {
+    background: linear-gradient(135deg, #ef4444 0%, #991b1b 100%);
+    color: #ffffff;
+    filter: none;
+    box-shadow: 0 0 0 1px rgba(239, 68, 68, 0.6) inset;
+}
+.deck-card.is-excluded,
+.card-item.card-is-excluded {
+    box-shadow: 0 0 0 2px #ef4444, 0 0 8px rgba(239, 68, 68, 0.5);
+    border-radius: 6px;
+}
+.deck-card.is-excluded .card-img-std,
+.deck-card.is-excluded .deck-card-overlay {
+    filter: grayscale(1) opacity(0.45);
+}
+.deck-card-exclude-badge {
+    position: absolute;
+    top: 4px;
+    left: 30px;
+    background: linear-gradient(135deg, #ef4444 0%, #991b1b 100%);
+    color: #ffffff;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    line-height: 1;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+    z-index: 3;
+    pointer-events: none;
+}
 .city-league-card-limitless-btn {
     background: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%);
     color: white;

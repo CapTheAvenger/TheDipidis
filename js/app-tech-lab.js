@@ -571,23 +571,42 @@
     }
 
     // Viability heuristic for the "non-EX implicit-immunes" bucket.
-    // The user explicitly excluded utility Pokemon like Eevee and
-    // coin-flip gimmick attackers like Hoothoot — they want REAL
-    // attackers that can stand in for an ex on Crustle's matchup.
     //
-    // Criteria — must meet ALL:
+    // Important data caveat — the scraped pokemon_card_effects.json
+    // has EMPTY cost arrays for every attack (the scraper didn't
+    // collect energy symbols). So we can't filter by actual cost.
+    //
+    // User feedback: "wie ich da 3 Energien ranbekommen soll? Bei
+    // Team Rocket Arktos geht es wegen der rocket Energie aber
+    // ansonsten sind 3 Energien viel zu viel". We need to estimate
+    // cost from damage instead.
+    //
+    // Damage as energy-cost proxy (rule of thumb in TCG):
+    //   30-60 damage → 1 energy
+    //   60-100 damage → 2 energies
+    //   100-130 damage → 3 energies
+    //   130+ damage → 3-4+ energies (or ex/v card)
+    //
+    // For a non-EX Basic to be a "fast tech" we want 1-2 energy
+    // attackers — i.e. damage in the 60-100 static range, or
+    // scaling multipliers that ramp into bigger numbers later.
+    //
+    // Filter — must meet ALL:
     //   1. card_type starts with "Basic"
-    //   2. has ≥1 attack with cost.length ≤ 2 (cost data unreliable
-    //      so this is permissive — most empty arrays pass) AND
+    //   2. attack text doesn't mention a coin flip (unreliable damage)
     //   3. attack damage qualifies via ONE of:
-    //      a. static damage ≥ 60 (Snorlax 140, Genesect 100, etc.)
-    //      b. "+" conditional bonus where base ≥ 50 (80+, 100+)
-    //      c. "×" multiplier where base ≥ 20 (Passimian 20× per
-    //         Basic, Fezandipiti 30× per energy) AND the attack
-    //         text doesn't mention coin flips — coin-dependent
-    //         multipliers (Hoothoot 10× per 3-coin heads, Spoink,
-    //         Cottonee, etc.) are unreliable damage and don't
-    //         belong as "stable non-ex attacker" suggestions
+    //      a. static damage 60-100  (likely 1-2 energy)
+    //      b. "+" bonus, base 50-80 (likely 2 energy with conditional)
+    //      c. "×" multiplier, base ≥ 20  (Passimian-style scaling
+    //         attacks are usually 2-energy attackers)
+    //
+    // This intentionally rejects high-damage Basics like
+    // Chien-Pao 120, Tapu Bulu 220, Zapdos 190, Hop's Snorlax 140
+    // — they all need 3+ energy and aren't viable as "instant
+    // tech swap" attackers without dedicated energy acceleration.
+    // Special cases (Team Rocket's Articuno with Rocket Energy
+    // acceleration) come in via the lower damage attacks that
+    // their archetype uses.
     function _isViableNonExAttacker(rec) {
         if (!rec) return false;
         const cardType = String(rec.card_type || '').toLowerCase();
@@ -604,15 +623,15 @@
             const text = String(a.text || '').toLowerCase();
             const isCoinFlip = /\bflip\s+(?:a\s+|\d+\s+)?coins?\b/.test(text);
             if (/[×x]/i.test(dmgStr)) {
-                if (isCoinFlip) continue;          // unreliable damage
+                if (isCoinFlip) continue;
                 if (base >= 20) return true;
                 continue;
             }
             if (/\+/.test(dmgStr)) {
-                if (base >= 50) return true;
+                if (base >= 50 && base <= 80) return true;
                 continue;
             }
-            if (base >= 60) return true;
+            if (base >= 60 && base <= 100) return true;
         }
         return false;
     }

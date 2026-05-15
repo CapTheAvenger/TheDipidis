@@ -1,0 +1,389 @@
+/* ============================================================
+ * Tech-Slot UI — sits between the Deck Builder action bar and
+ * the deck-grid / hand-stats blocks. Up to 10 user-picked tech
+ * cards that get force-pinned into the next Consistency Generate.
+ * ============================================================ */
+
+.tech-slots-row {
+    margin: 12px 0 16px;
+    padding: 12px 14px;
+    border: 1px solid #d6d9e0;
+    border-radius: 10px;
+    background: linear-gradient(180deg, #fafbfc 0%, #f3f5f8 100%);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+}
+
+.tech-slots-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+}
+
+.tech-slots-label {
+    font-weight: 700;
+    font-size: 0.95em;
+    color: #2d3748;
+}
+
+.tech-slots-hint {
+    color: #718096;
+    font-size: 0.82em;
+    font-style: italic;
+}
+
+.tech-slots-count {
+    margin-left: auto;
+    font-variant-numeric: tabular-nums;
+    color: #4a5568;
+    font-size: 0.85em;
+    padding: 3px 8px;
+    border-radius: 12px;
+    background: rgba(102, 126, 234, 0.12);
+    font-weight: 600;
+}
+
+.tech-slots-header-actions {
+    display: flex;
+    gap: 6px;
+}
+
+.btn-tiny {
+    padding: 3px 9px !important;
+    font-size: 0.78em !important;
+    line-height: 1.4 !important;
+}
+
+.tech-slots-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 8px;
+}
+
+.tech-slot-tile {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    padding: 6px 10px;
+    border-radius: 8px;
+    background: #fff;
+    border: 1px dashed #cbd5e0;
+    font-size: 0.85em;
+    color: #4a5568;
+    transition: border-color 120ms ease, background 120ms ease;
+}
+
+.tech-slot-tile.tech-slot-empty {
+    cursor: pointer;
+    border-style: dashed;
+}
+
+.tech-slot-tile.tech-slot-empty:hover,
+.tech-slot-tile.tech-slot-empty:focus-visible {
+    border-color: #667eea;
+    background: #eef2ff;
+    color: #4c51bf;
+    outline: none;
+}
+
+.tech-slot-tile.tech-slot-filled {
+    border-style: solid;
+    border-color: #667eea;
+    background: linear-gradient(135deg, #eef2ff 0%, #e6fffa 100%);
+    color: #2d3748;
+    font-weight: 600;
+    padding-right: 30px;
+}
+
+.tech-slot-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
+    text-align: center;
+}
+
+.tech-slot-remove {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 22px;
+    height: 22px;
+    border: none;
+    background: rgba(229, 62, 62, 0.1);
+    color: #c53030;
+    border-radius: 50%;
+    cursor: pointer;
+    line-height: 1;
+    font-size: 1.05em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 100ms ease;
+}
+
+.tech-slot-remove:hover {
+    background: rgba(229, 62, 62, 0.25);
+}
+
+.tech-slot-plus {
+    font-size: 1.4em;
+    color: #a0aec0;
+    line-height: 1;
+}
+
+.tech-slot-picker {
+    position: relative;
+    margin-top: 10px;
+}
+
+.tech-slot-picker.d-none { display: none !important; }
+
+.tech-slot-picker-input {
+    width: 100%;
+    padding: 8px 12px;
+    font-size: 0.92em;
+    border: 1px solid #cbd5e0;
+    border-radius: 8px;
+    outline: none;
+    transition: border-color 120ms ease;
+}
+
+.tech-slot-picker-input:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+}
+
+.tech-slot-picker-dropdown {
+    margin-top: 6px;
+    max-height: 280px;
+    overflow-y: auto;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+}
+
+.tech-slot-picker-dropdown:empty { display: none; }
+
+.tech-slot-suggestion {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    cursor: pointer;
+    border-bottom: 1px solid #f1f5f9;
+    transition: background 100ms ease;
+}
+
+.tech-slot-suggestion:last-child { border-bottom: none; }
+
+.tech-slot-suggestion:hover {
+    background: #eef2ff;
+}
+
+.tech-slot-suggestion-name {
+    font-weight: 600;
+    color: #2d3748;
+}
+
+.tech-slot-suggestion-meta {
+    font-size: 0.8em;
+    color: #718096;
+    font-variant-numeric: tabular-nums;
+}
+
+.tech-slot-suggestion-empty {
+    text-align: center;
+    color: #a0aec0;
+    font-style: italic;
+    cursor: default;
+}
+
+.tech-slot-suggestion-empty:hover { background: transparent; }
+
+/* ============================================================
+ * Tech-vs-Normal Compare Panel — sits at the bottom of each
+ * deck-builder section. Hidden unless both Vanilla and Tech
+ * baselines exist for the current source.
+ * ============================================================ */
+
+.tech-vs-normal-section {
+    margin-top: 28px;
+    padding: 18px 20px 22px;
+    border: 1px solid #d6d9e0;
+    border-radius: 12px;
+    background: linear-gradient(180deg, #fafbfc 0%, #f3f5f8 100%);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+
+.tech-vs-normal-section.d-none { display: none !important; }
+
+.tech-vs-normal-header {
+    margin-bottom: 14px;
+}
+
+.tech-vs-normal-title {
+    margin: 0 0 4px;
+    font-size: 1.15em;
+    color: #2d3748;
+}
+
+.tech-vs-normal-subtitle {
+    color: #718096;
+    font-size: 0.85em;
+}
+
+.tech-vs-normal-snapshots {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 18px;
+}
+
+.tvn-snapshot {
+    padding: 12px 14px;
+    border-radius: 10px;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.tvn-snapshot.tvn-vanilla {
+    border-left: 4px solid #4299e1;
+}
+
+.tvn-snapshot.tvn-tech {
+    border-left: 4px solid #ed8936;
+}
+
+.tvn-snapshot-title {
+    margin: 0;
+    font-size: 0.98em;
+    color: #2d3748;
+}
+
+.tvn-snapshot-meta {
+    color: #a0aec0;
+    font-size: 0.78em;
+}
+
+.tvn-snapshot-score {
+    color: #4a5568;
+    font-size: 0.88em;
+    margin-top: 2px;
+}
+
+.tvn-snapshot-score strong {
+    color: #2d3748;
+    font-variant-numeric: tabular-nums;
+}
+
+.tvn-delta {
+    margin-left: 6px;
+    padding: 1px 6px;
+    border-radius: 10px;
+    font-size: 0.8em;
+    font-weight: 600;
+}
+
+.tvn-delta-positive {
+    background: rgba(72, 187, 120, 0.16);
+    color: #2f855a;
+}
+
+.tvn-delta-negative {
+    background: rgba(245, 101, 101, 0.16);
+    color: #c53030;
+}
+
+.tech-vs-normal-diff {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+}
+
+.tvn-diff-col {
+    padding: 12px 14px;
+    border-radius: 10px;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+}
+
+.tvn-col-added { border-top: 3px solid #48bb78; }
+.tvn-col-removed { border-top: 3px solid #f56565; }
+.tvn-col-changed { border-top: 3px solid #ed8936; }
+
+.tvn-diff-heading {
+    margin: 0 0 8px;
+    font-size: 0.88em;
+    color: #4a5568;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.tvn-diff-count {
+    color: #a0aec0;
+    font-size: 0.85em;
+    font-variant-numeric: tabular-nums;
+}
+
+.tvn-diff-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    font-size: 0.86em;
+    color: #2d3748;
+}
+
+.tvn-diff-list li {
+    padding: 4px 0;
+    border-bottom: 1px solid #f1f5f9;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.tvn-diff-list li:last-child { border-bottom: none; }
+
+.tvn-diff-empty {
+    color: #a0aec0;
+    font-style: italic;
+    text-align: center;
+    border-bottom: none !important;
+    padding: 8px 0 !important;
+}
+
+.tvn-card-count {
+    font-variant-numeric: tabular-nums;
+    color: #4a5568;
+    font-weight: 600;
+    min-width: 26px;
+}
+
+.tech-vs-normal-empty {
+    padding: 14px;
+    text-align: center;
+    color: #718096;
+    background: #fff;
+    border: 1px dashed #cbd5e0;
+    border-radius: 10px;
+}
+
+@media (max-width: 720px) {
+    .tech-vs-normal-snapshots {
+        grid-template-columns: 1fr;
+    }
+    .tech-vs-normal-diff {
+        grid-template-columns: 1fr;
+    }
+    .tech-slots-grid {
+        grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+    }
+}

@@ -1887,11 +1887,16 @@
         // archetype runs in current_meta_card_data. Source rows look
         // like { archetype, card_name, set_code, set_number, ... } —
         // we keep cards with deck_inclusion_count > 0 (i.e. at least
-        // one deck in the archetype actually plays it). Cached on
-        // window so re-renders don't rebuild the map.
+        // one deck in the archetype actually plays it). Cache key
+        // tracks the source row count so the map is rebuilt whenever
+        // currentMetaAnalysisData changes (e.g. tab loaded data after
+        // the panel rendered once with an empty dataset).
         function _buildArchetypeCardMap() {
-            if (window._archetypeCardMap) return window._archetypeCardMap;
             const rows = window.currentMetaAnalysisData || [];
+            const cacheTag = `rows=${rows.length}`;
+            if (window._archetypeCardMap && window._archetypeCardMapTag === cacheTag) {
+                return window._archetypeCardMap;
+            }
             const map = new Map();
             for (const r of rows) {
                 if (!r) continue;
@@ -1906,33 +1911,44 @@
                 map.get(arch).push({ key, name });
             }
             window._archetypeCardMap = map;
+            window._archetypeCardMapTag = cacheTag;
             return map;
         }
 
         async function _renderCapabilityTechDetector(pairedOpponents) {
             const container = document.getElementById('currentMetaUserVsVanillaDetectedTech');
-            if (!container || typeof window.CardCapabilityEngine === 'undefined') return;
+            const log = (...a) => { if (typeof devLog === 'function') devLog('[CapabilityDetector]', ...a); };
+            if (!container) { log('container div missing — skipping'); return; }
+            if (typeof window.CardCapabilityEngine === 'undefined') {
+                log('window.CardCapabilityEngine undefined — script not loaded?');
+                container.innerHTML = '';
+                return;
+            }
             const userDeckCards = _userDeckCardKeys();
+            log('user deck cards parsed:', userDeckCards.length, userDeckCards.slice(0, 4));
             if (userDeckCards.length === 0) { container.innerHTML = ''; return; }
 
-            // The effects index lives in app-deck-builder. Loading is
-            // idempotent and the result is cached on window — safe to
-            // await even if a previous render already triggered it.
             const cardEffectsIndex = (typeof window._loadCardEffectsIndex === 'function')
                 ? await window._loadCardEffectsIndex()
                 : (window._cardEffectsIndex || null);
-            if (!cardEffectsIndex) { container.innerHTML = ''; return; }
+            log('cardEffectsIndex size:', cardEffectsIndex && cardEffectsIndex.size);
+            if (!cardEffectsIndex || !cardEffectsIndex.size) { container.innerHTML = ''; return; }
 
             const archetypeCardMap = _buildArchetypeCardMap();
-            // Restrict to opponents actually present in the predicted
-            // field — no point computing matchups for archetypes the
-            // user won't face. Keys are lower-cased to match the map.
+            log('archetypeCardMap keys:', archetypeCardMap.size, 'sample:', Array.from(archetypeCardMap.keys()).slice(0, 5));
+
             const fieldArchetypes = new Map();
+            const lookupMisses = [];
             for (const p of pairedOpponents) {
                 const k = (p.opponentKey || p.opponent || '').toLowerCase();
                 const cards = archetypeCardMap.get(k);
-                if (cards && cards.length) fieldArchetypes.set(p.opponent, cards);
+                if (cards && cards.length) {
+                    fieldArchetypes.set(p.opponent, cards);
+                } else {
+                    lookupMisses.push(k);
+                }
             }
+            log('field archetypes matched:', fieldArchetypes.size, '/ misses:', lookupMisses);
 
             const lang = (typeof getLang === 'function') ? getLang() : 'en';
             const detected = await window.CardCapabilityEngine.detectMatchups({
@@ -1941,6 +1957,7 @@
                 cardEffectsIndex,
                 lang,
             });
+            log('detected matchups for opponents:', detected ? detected.size : 0);
 
             if (!detected || detected.size === 0) {
                 container.innerHTML = '';

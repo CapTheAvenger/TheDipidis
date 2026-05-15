@@ -2092,32 +2092,49 @@
                             <ol class="deck-building-guide-quickstart-list">
                                 <li><strong>Select a Deck</strong> from the dropdown</li>
                                 <li><strong>View Cards</strong> in the Card Overview with usage statistics</li>
-                                <li><strong>Auto-Generate:</strong> Click "Auto Generate (Max Consistency)" for a tournament-tested 60-card deck</li>
+                                <li><strong>Auto-Generate:</strong> Click "Consistency Generate" for a tournament-tested 60-card deck (Math.round on per-card avg-when-used + Largest-Remainder + Reverse-LRM)</li>
+                                <li><strong>Tech-Slots (NEW):</strong> Use the row above the deck grid to lock in up to 10 must-have cards before generating — they get force-pinned into the build</li>
+                                <li><strong>Build vs ... (NEW):</strong> Pick a target archetype + aggression; the algorithm auto-fills the Tech-Slots with the best counter-cards from TechAudit</li>
+                                <li><strong>↑ Max Rarity / ↓ Low Rarity toggle (NEW):</strong> One-click flip of the entire built deck between low and max rarity prints</li>
+                                <li><strong>Tech vs Normal panel (NEW):</strong> After building both a Normal and a Tech deck, scroll to the page bottom for the card-diff + score-delta</li>
                                 <li><strong>Manual Building:</strong> Left-click a card to add 1 copy, right-click to add 4</li>
                                 <li><strong>Meta Analysis:</strong> Load "Meta Card Analysis" to see the most played cards across the Top 10 archetypes</li>
                                 <li><strong>Copy Deck:</strong> Click "Copy Deck" for Pokémon TCG Live format</li>
                             </ol>
                             
-                            <h3 class="deck-building-guide-section deck-building-guide-section-margin">Max Consistency Algorithm (v18)</h3>
+                            <h3 class="deck-building-guide-section deck-building-guide-section-margin">Max Consistency Algorithm (v19)</h3>
                             <div class="deck-building-guide-algo-block">
-                                <p>The auto-generate algorithm was completely rewritten in v18 for better accuracy:</p>
+                                <p>The auto-generate algorithm was rewritten in v18 and updated in v19 for better intuition matching:</p>
                                 <ul class="deck-building-guide-list">
                                     <li><strong>5% meta-share cutoff:</strong> Cards appearing in &lt;5% of decks are ignored (no false positives)</li>
-                                    <li><strong>Smart rounding:</strong> Uses <em>avgCountWhenUsed</em> (average among decks that actually include the card, not all decks) — so e.g. 3.07% ? rounds to 3, not 4</li>
-                                    <li><strong>Combined Variants (NEW):</strong> Cards from different sets (e.g. Riolu MEG 76 = Riolu ASC 112) are automatically combined — usage% reflects the true card popularity regardless of which print was used</li>
+                                    <li><strong>Math.round on avg-when-used (v19):</strong> Stage 0/1/2 now round per-card avg-when-used instead of floor — so a 2.8-avg staple lands at 3, a 3.9-avg staple lands at 4, matching what the UI shows. The signed remainder (avg − round) drives the redistribution pass.</li>
+                                    <li><strong>Largest-Remainder + Reverse-LRM (v19):</strong> If the rounded build sums to less than 60, low-remainder cards get a +1 bump; if it sums to more than 60, the Reverse-LRM trims cards with the most-negative remainder first. CORE-tier cards are protected via the tier multiplier. Builder always lands exactly on 60.</li>
+                                    <li><strong>Combined Variants:</strong> Cards from different sets (e.g. Riolu MEG 76 = Riolu ASC 112) are automatically combined — usage% reflects the true card popularity regardless of which print was used. Card-share is capped at 100% to handle Major-only merge edge-cases.</li>
                                     <li><strong>Rare Candy guarantee:</strong> Stage 2 evolution lines always include Rare Candy</li>
                                     <li><strong>Ace Spec slot:</strong> 1 Ace Spec added automatically based on data</li>
                                     <li><strong>Fallback fill:</strong> Remaining slots filled with highest-priority cards to always reach 60</li>
                                 </ul>
                             </div>
-                            
-                            <h3 class="deck-building-guide-section deck-building-guide-section-margin">Rarity Display Modes</h3>
+
+                            <h3 class="deck-building-guide-section deck-building-guide-section-margin">Tech Building Tools (NEW)</h3>
+                            <div class="deck-building-guide-algo-block">
+                                <p>Three coordinated features sit above and below the Deck Builder grid:</p>
+                                <ul class="deck-building-guide-list">
+                                    <li><strong>Tech-Slots (max 10):</strong> The row directly above the deck grid holds up to 10 user-picked cards. Click an empty tile to open a typeahead search; pick a card to lock it in. Each slot folds into the Stage-0 pin pipeline of the next Consistency Generate — the algorithm decides count 1–4 from avg-when-used. Persists in localStorage across reloads.</li>
+                                    <li><strong>Build vs ... (anti-tech):</strong> Button in the Tech-Slots header (or next to Generate on Current Meta). Pick a target archetype and aggression preset (Mild / Standard / Heavy). The TechAudit pipeline scans active threat categories (Hand Disruption, Ability Lock, Retreat Lock, Bench Damage, etc.) and auto-fills your Tech-Slots with the best counter-cards. You can see the picks afterwards and tweak before re-generating.</li>
+                                    <li><strong>Tech vs Normal Compare Panel:</strong> Appears at the very bottom of the Deck Builder section once you have both a Normal build and a Tech build for the same source. Three columns: <strong>Added for Tech</strong>, <strong>Cut for Tech</strong>, <strong>Count changes</strong>. Plus per-snapshot total consistency-score with a Δ-vs-Normal badge. Normal builds and Tech builds are stored in separate buckets so the comparison reference never gets overwritten.</li>
+                                    <li><strong>Available on all 3 sources:</strong> City League, Current Meta, and Past Meta deck builders all have the full set of Tech tools.</li>
+                                </ul>
+                            </div>
+
+                            <h3 class="deck-building-guide-section deck-building-guide-section-margin">Rarity Display Modes &amp; Toggle</h3>
                             <div class="deck-building-guide-rarity-block">
                                 <p class="deck-building-guide-rarity-desc"><strong>Low Rarity:</strong> Cheapest print of each card (budget-friendly builds)</p>
                                 <p class="deck-building-guide-rarity-desc"><strong>Max Rarity:</strong> Highest rarity version (full art, secret rare, etc.)</p>
                                 <p class="deck-building-guide-rarity-desc"><strong>All Prints:</strong> All available versions side by side</p>
+                                <p class="deck-building-guide-rarity-desc"><strong>↑ Max Rarity / ↓ Low Rarity toggle (NEW):</strong> One-click button in the action bar swaps every card in the built deck between low-rarity and max-rarity prints. The button label flips after each click. Resets to "↑ Max Rarity" on every fresh Consistency Generate. Replaces the old (unused) Generate-Low / Generate-Max buttons.</p>
                             </div>
-                            
+
                             <h3 class="deck-building-guide-section deck-building-guide-section-margin">Rarity Switcher</h3>
                             <p class="deck-building-guide-rarity-switcher-desc">Every card in Card Overview, Deck Builder grid, and My Decks has a <strong>yellow button</strong>. Click it to open a modal showing all available prints of that card — regular, reverse holo, full art, trainer gallery, promo, etc.</p>
                             <ul class="deck-building-guide-rarity-switcher-list">

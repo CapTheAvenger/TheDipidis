@@ -431,6 +431,9 @@
                 if (Array.isArray(data.pinned) && typeof window.pinnedCardsFromArray === 'function') {
                     window.pinnedCardsFromArray('currentMeta', data.pinned);
                 }
+                if (Array.isArray(data.excluded) && typeof window.excludedCardsFromArray === 'function') {
+                    window.excludedCardsFromArray('currentMeta', data.excluded);
+                }
                 if (Array.isArray(data.techSlots) && typeof window.techSlotsFromArray === 'function') {
                     window.techSlotsFromArray('currentMeta', data.techSlots);
                 }
@@ -459,6 +462,7 @@
                     order: window.currentMetaDeckOrder || [],
                     archetype: window.currentMetaArchetype || null,
                     pinned: typeof window.pinnedCardsToArray === 'function' ? window.pinnedCardsToArray('currentMeta') : [],
+                    excluded: typeof window.excludedCardsToArray === 'function' ? window.excludedCardsToArray('currentMeta') : [],
                     techSlots: typeof window.techSlotsToArray === 'function' ? window.techSlotsToArray('currentMeta') : [],
                     timestamp: new Date().toISOString()
                 };
@@ -480,6 +484,9 @@
                     window.pastMetaCurrentArchetype = parsed.archetype || null;
                     if (Array.isArray(parsed.pinned) && typeof window.pinnedCardsFromArray === 'function') {
                         window.pinnedCardsFromArray('pastMeta', parsed.pinned);
+                    }
+                    if (Array.isArray(parsed.excluded) && typeof window.excludedCardsFromArray === 'function') {
+                        window.excludedCardsFromArray('pastMeta', parsed.excluded);
                     }
                     if (Array.isArray(parsed.techSlots) && typeof window.techSlotsFromArray === 'function') {
                         window.techSlotsFromArray('pastMeta', parsed.techSlots);
@@ -513,6 +520,7 @@
                     order: window.pastMetaDeckOrder || [],
                     archetype: window.pastMetaCurrentArchetype || null,
                     pinned: typeof window.pinnedCardsToArray === 'function' ? window.pinnedCardsToArray('pastMeta') : [],
+                    excluded: typeof window.excludedCardsToArray === 'function' ? window.excludedCardsToArray('pastMeta') : [],
                     techSlots: typeof window.techSlotsToArray === 'function' ? window.techSlotsToArray('pastMeta') : [],
                     timestamp: new Date().toISOString()
                 };

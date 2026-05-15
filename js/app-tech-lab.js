@@ -498,27 +498,67 @@
             : '';
     }
 
+    // Viability heuristic for the "non-EX implicit-immunes" bucket.
+    // The user explicitly excluded utility Pokemon like Eevee — they
+    // want REAL attackers that can stand in for an ex on Crustle's
+    // matchup. Criteria:
+    //   - card_type starts with "Basic" (no evolution → fast setup)
+    //   - has at least one attack with ≤2 energy cost that either:
+    //     - deals ≥60 static damage, or
+    //     - has a "+" / "×" suffix (scaling / conditional bonus
+    //       attacks like Passimian's "20×" Coordinated Throwing can
+    //       reach 120+ in late game)
+    // Skips Pokemon whose only attacks are sub-50 utility taps so
+    // the bucket stays useful as a "real damage option" list.
+    function _isViableNonExAttacker(rec) {
+        if (!rec) return false;
+        const cardType = String(rec.card_type || '').toLowerCase();
+        // "Basic" or "Basic Pokemon" — anything that starts with Basic
+        if (!cardType.startsWith('basic')) return false;
+        for (const a of (rec.attacks || [])) {
+            const cost = Array.isArray(a.cost) ? a.cost.length : 0;
+            if (cost > 2) continue;
+            const dmgStr = String(a.damage || '').trim();
+            if (!dmgStr) continue;
+            // Scaling / conditional damage qualifies regardless of base
+            if (/[×x]/i.test(dmgStr)) return true;
+            if (/\+/.test(dmgStr)) return true;
+            const m = dmgStr.match(/\d+/);
+            if (!m) continue;
+            const dmg = parseInt(m[0], 10);
+            if (dmg >= 60) return true;
+        }
+        return false;
+    }
+
     // For tags with affects_subset === "ex_attackers" (e.g. Crustle's
-    // Mysterious Rock Inn), surface all non-EX meta Pokemon that
-    // appear in some current deck. The user explicitly asked for this
-    // since non-EX attackers ignore the ability inherently — they
-    // belong in the "Beaten by" list even though the engine doesn't
-    // detect them via card-text patterns.
-    function _renderNonExBucket(wrapEl, tags) {
+    // Mysterious Rock Inn), surface viable non-EX meta attackers —
+    // Basic Pokemon with low-cost / high-damage attacks. User
+    // explicitly excluded utility cards like Eevee / Scatterbug.
+    async function _renderNonExBucket(wrapEl, tags) {
         if (!wrapEl) return;
         if (!tags || tags.length === 0) { wrapEl.innerHTML = ''; return; }
-        // Resolve which tags trigger the ex-attacker filter
         const taxonomy = _taxonomy || { tags: {} };
         const triggers = tags.filter(t => {
             const meta = (taxonomy.tags || {})[t.tag];
             return meta && meta.affects_subset === 'ex_attackers';
         });
         if (triggers.length === 0) { wrapEl.innerHTML = ''; return; }
-        // Build the candidate set: meta cards that are NOT named "... ex"
-        // and are NOT the target itself. Limit to a handful by deck-
-        // inclusion frequency so we don't render 400 thumbnails.
+
+        // Need the card-effects index to read attack costs and damage
+        // — that's how the viability filter knows Passimian belongs in
+        // the bucket but Eevee/Scatterbug don't.
+        let cardEffectsIndex = null;
+        if (typeof window._loadCardEffectsIndex === 'function') {
+            try { cardEffectsIndex = await window._loadCardEffectsIndex(); }
+            catch (_) { cardEffectsIndex = null; }
+        }
+        if (!cardEffectsIndex || !cardEffectsIndex.bySetNumber) {
+            wrapEl.innerHTML = ''; return;
+        }
+
         const rows = (typeof window !== 'undefined' && window.currentMetaAnalysisData) || [];
-        const byCard = new Map(); // name → {key, name, inclusion}
+        const byCard = new Map();
         for (const r of rows) {
             if (!r) continue;
             const name = String(r.card_name || '').trim();
@@ -526,25 +566,19 @@
             const set  = String(r.set_code || '').toUpperCase().trim();
             const num  = String(r.set_number || '').trim();
             if (!set || !num) continue;
-            const type = String(r.type || '').trim();
-            // Only Pokemon — items/supporters/energy can't "attack"
-            // around an ability the way the user means.
-            if (!/basic|stage|pok[eé]mon|breakthrough|baby|ultra beast/i.test(type) && !/pok[eé]mon/i.test(type)) {
-                if (!/basic|stage/i.test(type)) continue;
-            }
-            const inclusion = parseFloat(String(r.deck_inclusion_count || 0).replace(',', '.')) || 0;
             const key = `${set}|${num}`;
+            const rec = cardEffectsIndex.bySetNumber.get(key);
+            if (!_isViableNonExAttacker(rec)) continue;
+            const inclusion = parseFloat(String(r.deck_inclusion_count || 0).replace(',', '.')) || 0;
             const existing = byCard.get(name.toLowerCase());
             if (!existing || inclusion > existing.inclusion) {
                 byCard.set(name.toLowerCase(), { key, name, inclusion });
             }
         }
-        // Sort by deck-inclusion descending, cap at 18 tiles so the
-        // grid doesn't explode.
         const sorted = Array.from(byCard.values())
             .filter(c => c.name.toLowerCase() !== (_target && _target.name.toLowerCase()))
             .sort((a, b) => b.inclusion - a.inclusion)
-            .slice(0, 18);
+            .slice(0, 24);
         if (sorted.length === 0) { wrapEl.innerHTML = ''; return; }
 
         const lang = (typeof getLang === 'function') ? getLang() : 'en';
@@ -648,7 +682,7 @@
 
         // Non-EX bucket — only renders when one of the target's
         // defender tags has affects_subset === 'ex_attackers'.
-        _renderNonExBucket(beatenByNonEx, targetTags.defender);
+        await _renderNonExBucket(beatenByNonEx, targetTags.defender);
 
         const addBeatenByBtn = document.getElementById('techLabAddBeatenByBtn');
         const addBeatsBtn    = document.getElementById('techLabAddBeatsBtn');

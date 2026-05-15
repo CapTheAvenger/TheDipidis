@@ -3821,9 +3821,20 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 const currentNumber = m[3];
                 const wantedName = norm(cardName);
 
+                // Name-only match collapses 16 different Yveltal prints (different attacks) into one pool; international_prints lists true reprints across sets.
+                const sourceCard = (window.allCardsDatabase || []).find(c =>
+                    c && c.set && String(c.set).toUpperCase() === String(currentSet).toUpperCase() &&
+                    String(c.number).toUpperCase() === String(currentNumber).toUpperCase()
+                );
+                const intlRaw = (sourceCard && sourceCard.international_prints) || '';
+                const intlSet = new Set(String(intlRaw).split(',').map(s => s.trim()).filter(Boolean).map(s => s.toUpperCase()));
+                intlSet.add(`${String(currentSet).toUpperCase()}-${String(currentNumber).toUpperCase()}`);
+
                 const prints = (window.allCardsDatabase || []).filter(c => {
                     if (!c || !c.type || !String(c.type).trim()) return false;
                     if (!c.set || !c.number) return false;
+                    const id = `${String(c.set).toUpperCase()}-${String(c.number).toUpperCase()}`;
+                    if (!intlSet.has(id)) return false;
                     return norm(c.name || '') === wantedName || norm(c.name_en || '') === wantedName;
                 });
                 if (!prints.length) { pushKey(key, count); return; }

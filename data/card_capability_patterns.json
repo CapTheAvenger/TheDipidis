@@ -7,9 +7,12 @@
       "tag": "attack.ignores_effects",
       "confidence": "high",
       "scope": "attack.text",
-      "regex": "damage\\s+isn'?t\\s+affected\\s+by\\s+any\\s+effects",
+      "regex": "damage\\s+isn'?t\\s+affected\\s+by[^.]{0,80}any\\s+effects",
       "flags": "i",
-      "examples": ["Mega Lopunny ex Spiky Hopper: 'This attack's damage isn't affected by any effects on your opponent's Active Pokemon.'"]
+      "examples": [
+        "Mega Lopunny ex Spiky Hopper: 'This attack's damage isn't affected by any effects on your opponent's Active Pokemon.'",
+        "Cornerstone Mask Ogerpon ex Demolish: 'This attack's damage isn't affected by Weakness or Resistance, or by any effects on your opponent's Active Pokemon.'"
+      ]
     },
     {
       "tag": "attack.ignores_effects",

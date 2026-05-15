@@ -1,57 +1,87 @@
 {
-  "_doc": "Capability taxonomy for the card-text-driven tech-matchup detector. Each capability tag describes an effect a card has based on its rules text. Extracted by patterns in card_capability_patterns.json and matched against opposing-side tags by card_capability_interactions.json.",
-  "version": "0.1",
+  "_doc": "Capability taxonomy for the card-text-driven tech-matchup detector. Each capability tag describes an effect a card has based on its rules text. Extracted by patterns in card_capability_patterns.json and matched against opposing-side tags by card_capability_interactions.json. The summary_en/de templates feed the Tech Lab UI as plain-language explanations of the underlying rule when this card is the picked target. affects_subset narrows down which attackers/defenders the tag interacts with (e.g. ex_immunity only blocks Pokemon ex attackers).",
+  "version": "0.2",
   "generated_at": "2026-05-15",
   "tags": {
     "attack.ignores_effects": {
       "side": "offensive",
       "scope": "attack",
-      "desc": "Attack damage is not affected by any effects on the defending Pokemon. Bypasses damage-reduction abilities, KO-prevention abilities, EX-immunity, and bench-protection on the active. Example: Mega Lopunny ex (PFL 84) Spiky Hopper."
+      "desc": "Attack damage is not affected by any effects on the defending Pokemon. Bypasses damage-reduction abilities, KO-prevention abilities, EX-immunity, and bench-protection on the active. Example: Mega Lopunny ex (PFL 84) Spiky Hopper.",
+      "summary_en": "Attacks ignore every effect on the defending Pokemon — damage lands regardless of KO-prevention, ex-immunity, or damage-reduction abilities.",
+      "summary_de": "Angriffe ignorieren jeden Effekt auf dem verteidigenden Pokemon — Schaden landet ungeachtet von KO-Schutz, ex-Immunität oder Schadensreduktion.",
+      "affects_subset": null
     },
     "attack.bench_damage": {
       "side": "offensive",
       "scope": "attack",
-      "desc": "Attack deals damage to one or more Benched Pokemon. Bypasses front-line bulk and pressures multi-prize backline targets. Example: Drayton (DRI 21) Dynamic Lightning, Charizard ex Burning Darkness."
+      "desc": "Attack deals damage to one or more Benched Pokemon. Bypasses front-line bulk and pressures multi-prize backline targets. Example: Drayton (DRI 21) Dynamic Lightning, Charizard ex Burning Darkness.",
+      "summary_en": "Deals damage to the opponent's Benched Pokemon — pressures setup pieces and multi-prize targets behind the active.",
+      "summary_de": "Schaden auf der Bank des Gegners — setzt Setup-Stücke und Multi-Prize-Ziele hinter dem aktiven Pokemon unter Druck.",
+      "affects_subset": null
     },
     "attack.weakness_bypass": {
       "side": "offensive",
       "scope": "attack",
-      "desc": "Attack damage is dealt regardless of Weakness — neutralises type-disadvantaged matchups where the opponent would otherwise be a hard counter."
+      "desc": "Attack damage is dealt regardless of Weakness — neutralises type-disadvantaged matchups where the opponent would otherwise be a hard counter.",
+      "summary_en": "Damage is dealt regardless of Weakness — type-disadvantaged matchups are neutralised.",
+      "summary_de": "Schaden wird unabhängig von Weakness gemacht — Typ-Nachteile werden neutralisiert.",
+      "affects_subset": null
     },
     "ability.ko_prevention": {
       "side": "defensive",
       "scope": "ability",
-      "desc": "Survives a lethal attack with 1+ HP remaining when at full HP. Example: Crustle (BLK 130) Sturdy: 'If this Pokemon has full HP and would be Knocked Out by damage from an attack, it is not Knocked Out, and its remaining HP becomes 10.'"
+      "desc": "Survives a lethal attack with 1+ HP remaining when at full HP. Example: Crustle (BLK 130) Sturdy.",
+      "summary_en": "Survives the first lethal hit with 1+ HP remaining (when at full HP). Bypassed by attacks that ignore effects on the defending Pokemon.",
+      "summary_de": "Überlebt den ersten tödlichen Treffer mit 1+ HP (wenn auf voller HP). Wird umgangen von Angriffen die Effekte auf dem verteidigenden Pokemon ignorieren.",
+      "affects_subset": null
     },
     "ability.ex_immunity": {
       "side": "defensive",
       "scope": "ability",
-      "desc": "Takes zero damage from Pokemon ex / Pokemon-EX attacks. Hard-walls every ex-attacker unless bypassed. Example: Cornerstone Mask Ogerpon variants."
+      "desc": "Takes zero damage from Pokemon ex / Pokemon-EX attacks. Hard-walls every ex-attacker unless bypassed.",
+      "summary_en": "Takes zero damage from Pokemon ex attacks. Non-ex Pokemon attack normally — the ability does not apply to their damage.",
+      "summary_de": "Bekommt 0 Schaden von Pokemon-ex Angriffen. Nicht-ex Pokemon greifen normal an — die Fähigkeit gilt nicht für deren Schaden.",
+      "affects_subset": "ex_attackers"
     },
     "ability.bench_protection": {
       "side": "defensive",
       "scope": "ability",
-      "desc": "Prevents damage done to Benched Pokemon. Examples: Manaphy (Wave Veil), Mr. Mime, Jirachi-style protection."
+      "desc": "Prevents damage done to Benched Pokemon. Examples: Manaphy (Wave Veil), Mr. Mime, Jirachi-style protection.",
+      "summary_en": "Prevents damage done to the Benched Pokemon by attacks. Front-line damage still lands as usual.",
+      "summary_de": "Verhindert Schaden auf den Bank-Pokemon durch Angriffe. Schaden auf das aktive Pokemon landet weiter normal.",
+      "affects_subset": "bench_damage_attackers"
     },
     "ability.damage_reduction": {
       "side": "defensive",
       "scope": "ability",
-      "desc": "Reduces incoming damage by a fixed amount (e.g. '-30 damage from attacks'). Eats away at attacker math but doesn't fully prevent KO."
+      "desc": "Reduces incoming damage by a fixed amount (e.g. '-30 damage from attacks'). Eats away at attacker math but doesn't fully prevent KO.",
+      "summary_en": "Reduces incoming damage by a flat amount — attacks still land but lose a fixed chunk of damage.",
+      "summary_de": "Reduziert eingehenden Schaden um einen festen Betrag — Angriffe landen weiter, aber mit weniger Schaden.",
+      "affects_subset": null
     },
     "ability.bench_search": {
       "side": "utility",
       "scope": "ability",
-      "desc": "Searches the deck for a specific category of Pokemon and benches them, accelerating board setup."
+      "desc": "Searches the deck for a specific category of Pokemon and benches them, accelerating board setup.",
+      "summary_en": "Searches the deck for a specific Pokemon and puts it on the Bench — board-acceleration utility.",
+      "summary_de": "Sucht das Deck nach einem bestimmten Pokemon und legt es auf die Bank — Board-Beschleunigung.",
+      "affects_subset": null
     },
     "ability.gust_effect": {
       "side": "utility",
       "scope": "ability_or_attack",
-      "desc": "Switches one of the opponent's Benched Pokemon to the Active Spot. Critical for picking off support pieces or punishing setup Pokemon."
+      "desc": "Switches one of the opponent's Benched Pokemon to the Active Spot.",
+      "summary_en": "Drags one of the opponent's Benched Pokemon into the Active Spot — picks off support pieces or sets up KOs.",
+      "summary_de": "Holt eines der Bank-Pokemon des Gegners aktiv — pickt Support ab oder bereitet KOs vor.",
+      "affects_subset": null
     },
     "disruption.hand_reset": {
       "side": "disruption",
       "scope": "supporter",
-      "desc": "Forces the opponent to shuffle their hand and draw a different (usually smaller) number of cards. Examples: Iono, N, Roxanne."
+      "desc": "Forces the opponent to shuffle their hand and draw a different (usually smaller) number of cards. Examples: Iono, N, Roxanne.",
+      "summary_en": "Forces the opponent to shuffle their hand and draw a different number of cards — disrupts setup turns.",
+      "summary_de": "Zwingt den Gegner Hand zu shufflen und eine andere Kartenzahl zu ziehen — stört Setup-Züge.",
+      "affects_subset": null
     }
   }
 }

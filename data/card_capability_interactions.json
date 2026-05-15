@@ -1,0 +1,52 @@
+{
+  "_doc": "Pairwise interactions between attacker-side and defender-side capability tags. When a card in the user's deck carries an attacker tag and a card in the opposing archetype carries the matching defender tag, the engine flags this as a detected tech-counter matchup. matchup_value is a tentative WR-bonus heuristic (percentage points) for that specific opponent, capped per opponent by the engine.",
+  "version": "0.1",
+  "generated_at": "2026-05-15",
+  "interactions": [
+    {
+      "attacker": "attack.ignores_effects",
+      "defender": "ability.ko_prevention",
+      "result": "attacker_wins",
+      "confidence": "high",
+      "matchup_value": 8,
+      "narrative_en": "{attacker_name} bypasses {defender_name}'s {defender_ability} — effect-immune damage ignores Sturdy-style KO prevention.",
+      "narrative_de": "{attacker_name} ignoriert {defender_name}s {defender_ability} — effekt-immuner Schaden umgeht Sturdy-artigen KO-Schutz."
+    },
+    {
+      "attacker": "attack.ignores_effects",
+      "defender": "ability.ex_immunity",
+      "result": "attacker_wins",
+      "confidence": "high",
+      "matchup_value": 10,
+      "narrative_en": "{attacker_name} attacks through {defender_name}'s ex-immunity — effects on the defending Pokemon do not apply to this attack's damage.",
+      "narrative_de": "{attacker_name} schlägt durch {defender_name}s ex-Immunität — Effekte auf dem verteidigenden Pokemon werden für diesen Angriff ignoriert."
+    },
+    {
+      "attacker": "attack.ignores_effects",
+      "defender": "ability.damage_reduction",
+      "result": "attacker_wins",
+      "confidence": "high",
+      "matchup_value": 5,
+      "narrative_en": "{attacker_name} ignores {defender_name}'s damage-reduction ability — full damage lands.",
+      "narrative_de": "{attacker_name} ignoriert {defender_name}s Schadensreduktion — voller Schaden landet."
+    },
+    {
+      "attacker": "attack.bench_damage",
+      "defender": "ability.bench_protection",
+      "result": "neutral",
+      "confidence": "high",
+      "matchup_value": -3,
+      "narrative_en": "{defender_name} prevents {attacker_name}'s bench-snipe damage — the bench-pressure plan is shut off.",
+      "narrative_de": "{defender_name} blockt den Bench-Snipe von {attacker_name} — der Bench-Druckplan wird ausgehebelt."
+    },
+    {
+      "attacker": "attack.weakness_bypass",
+      "defender": "ability.ko_prevention",
+      "result": "neutral",
+      "confidence": "medium",
+      "matchup_value": 2,
+      "narrative_en": "{attacker_name}'s damage hits cleanly but {defender_name} still survives the first hit via {defender_ability}.",
+      "narrative_de": "{attacker_name}-Schaden trifft sauber, aber {defender_name} überlebt den ersten Treffer durch {defender_ability}."
+    }
+  ]
+}

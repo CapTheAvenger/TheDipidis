@@ -77,6 +77,47 @@
 
     // ── STEP 1: TARGET SELECTION ─────────────────────────────────────
 
+    // WR color classification — same thresholds the matchup table uses,
+    // so the pill colors in the Build-vs picker visually match the
+    // "Matchups vs Meta Call" view the user already knows.
+    function _wrClass(wr) {
+        if (wr == null || !Number.isFinite(wr)) return 'wr-neutral';
+        if (wr >= 60) return 'wr-strong-pos';
+        if (wr >= 53) return 'wr-pos';
+        if (wr >= 47) return 'wr-neutral';
+        if (wr >= 40) return 'wr-neg';
+        return 'wr-strong-neg';
+    }
+
+    function _stripEx(name) {
+        return String(name || '').replace(/\s+ex\b/i, '').trim();
+    }
+
+    // Build Map<opponentNameLower → wr> from currentMetaMatchupData
+    // rows scoped to the user's currently-loaded archetype. The matchup
+    // CSV is row-per-(deck, opponent) so a single pass groups what we
+    // need. Returns an empty map when no archetype is loaded or the
+    // matchup data isn't available yet.
+    function _wrByOpponentForUser() {
+        const map = new Map();
+        const rows = (typeof window !== 'undefined') ? window.currentMetaMatchupData : null;
+        const userArch = (typeof window !== 'undefined' && window.currentMetaArchetype) || null;
+        if (!Array.isArray(rows) || !userArch) return map;
+        const userLower    = userArch.trim().toLowerCase();
+        const userStripped = _stripEx(userArch).toLowerCase();
+        for (const r of rows) {
+            const d = String(r.deck_name || '').trim().toLowerCase();
+            if (d !== userLower && d !== userStripped) continue;
+            const opp = String(r.opponent || '').trim();
+            if (!opp) continue;
+            const wr = parseFloat(String(r.win_rate || '0').replace(',', '.').replace('%', '').trim());
+            if (Number.isFinite(wr) && wr > 0 && !map.has(opp.toLowerCase())) {
+                map.set(opp.toLowerCase(), wr);
+            }
+        }
+        return map;
+    }
+
     function _populateQuickPicks() {
         const wrap = document.getElementById('antiTechQuickPicks');
         if (!wrap) return;
@@ -87,20 +128,27 @@
             }</div>`;
             return;
         }
+        // Pull WR for each opponent from the matchup CSV so the user
+        // sees immediately which decks they lose to (= tech priority)
+        // alongside how often the deck appears in the predicted field.
+        // Without this the picker shows only popularity, which is
+        // exactly what the user reported as confusing in the v0 release.
+        const wrByOpp = _wrByOpponentForUser();
         wrap.innerHTML = field.map(d => {
             const name = String(d.name || '').trim();
-            // finalShare is already in percent units (e.g. 9.948 means
-            // 9.948% share). MetaCall renderers use it directly with
-            // .toFixed(2) + '%' — see app-meta-call.js:3092. The earlier
-            // version of this code multiplied by 100, producing the
-            // "994.8%" rendering reported by the user.
             const sharePct = (d.finalShare || 0);
+            const wr = wrByOpp.get(name.toLowerCase());
+            const wrText = (wr != null) ? wr.toFixed(1) + '%' : '—';
+            const wrCls  = _wrClass(wr);
             const isOn = _targets.has(name.toLowerCase());
             return `<button type="button"
                             class="anti-tech-quick-pick${isOn ? ' is-active' : ''}"
                             data-target="${name.replace(/"/g, '&quot;')}">
                 <span class="anti-tech-quick-pick-name">${name}</span>
-                <span class="anti-tech-quick-pick-share">${sharePct.toFixed(1)}%</span>
+                <span class="anti-tech-quick-pick-meta">
+                    <span class="anti-tech-quick-pick-share" title="${_t('antiTech.fieldShareTooltip', 'Share of the predicted field')}">${sharePct.toFixed(1)}%</span>
+                    <span class="mc-vs-pill ${wrCls} anti-tech-quick-pick-wr" title="${_t('antiTech.wrTooltip', 'Your current win rate against this deck — red means tech priority')}">${wrText}</span>
+                </span>
             </button>`;
         }).join('');
         wrap.querySelectorAll('.anti-tech-quick-pick').forEach(btn => {

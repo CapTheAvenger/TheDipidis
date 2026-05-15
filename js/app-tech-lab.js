@@ -186,6 +186,46 @@
         _devLog('haystack rebuilt:', out.length, 'unique meta cards');
     }
 
+    // Ensures `window.currentMetaAnalysisData` is loaded before the
+    // Tech Lab engine runs. The Tech Lab is reachable WITHOUT first
+    // opening the Current Meta deck analysis (PR #130 moved it out
+    // of the deck-builder wrapper) so the auto-trigger that
+    // normally fires on tab-open might not have run yet. Without
+    // this guard, the haystack is empty → engine produces zero
+    // techs → user sees "No card-text counter detected" on every
+    // target. Idempotent — early-returns when data is already there.
+    let _ensureMetaDataPromise = null;
+    async function _ensureMetaDataLoaded() {
+        if (Array.isArray(window.currentMetaAnalysisData) && window.currentMetaAnalysisData.length > 0) {
+            return;
+        }
+        if (_ensureMetaDataPromise) return _ensureMetaDataPromise;
+        _ensureMetaDataPromise = (async () => {
+            _devLog('currentMetaAnalysisData missing — lazy-loading');
+            try {
+                if (typeof window.loadCurrentMetaRowsWithFallback !== 'function'
+                    && typeof loadCurrentMetaRowsWithFallback === 'function') {
+                    window.loadCurrentMetaRowsWithFallback = loadCurrentMetaRowsWithFallback;
+                }
+                if (typeof window.loadCurrentMetaRowsWithFallback === 'function') {
+                    const data = await window.loadCurrentMetaRowsWithFallback();
+                    if (Array.isArray(data) && data.length > 0) {
+                        window.currentMetaAnalysisData = data;
+                        _devLog('lazy-loaded', data.length, 'rows');
+                        _rebuildMetaCards();
+                    } else {
+                        _devLog('loader returned empty');
+                    }
+                } else {
+                    _devLog('loadCurrentMetaRowsWithFallback unavailable on window');
+                }
+            } catch (e) {
+                _devLog('lazy-load failed:', e && e.message);
+            }
+        })();
+        return _ensureMetaDataPromise;
+    }
+
     // ── ENGINE WRAPPER ───────────────────────────────────────────────
 
     // Direction A: cards in the meta that BEAT the picked card.
@@ -202,7 +242,14 @@
         if (!cardEffectsIndex || !cardEffectsIndex.size) return [];
 
         if (_allMetaCards.length === 0) _rebuildMetaCards();
-        if (_allMetaCards.length === 0) return [];
+        if (_allMetaCards.length === 0) {
+            await _ensureMetaDataLoaded();
+            _rebuildMetaCards();
+        }
+        if (_allMetaCards.length === 0) {
+            _devLog('haystack still empty after lazy-load — bailing');
+            return [];
+        }
 
         // Single-card "archetype" for the defender side.
         const targetArchetypes = new Map();
@@ -274,7 +321,14 @@
         await engine.load();
 
         if (_allMetaCards.length === 0) _rebuildMetaCards();
-        if (_allMetaCards.length === 0) return [];
+        if (_allMetaCards.length === 0) {
+            await _ensureMetaDataLoaded();
+            _rebuildMetaCards();
+        }
+        if (_allMetaCards.length === 0) {
+            _devLog('haystack still empty after lazy-load — bailing');
+            return [];
+        }
 
         // Target's own tags. We treat BOTH attacker and defender tags
         // as "the target's offensive surface" — defenders also "win"
@@ -694,12 +748,23 @@
 
     // ── TARGET PICKER ────────────────────────────────────────────────
 
-    function _renderPickerResults(inputId, listId, query, onPick) {
+    async function _renderPickerResults(inputId, listId, query, onPick) {
         const list = document.getElementById(listId);
         if (!list) return;
         const q = String(query || '').trim().toLowerCase();
         if (!q || q.length < 1) { list.innerHTML = ''; return; }
         if (_allMetaCards.length === 0) _rebuildMetaCards();
+        // Lazy-load currentMetaAnalysisData so the picker works even
+        // when the user lands on Tech Lab without first opening the
+        // Current Meta analysis. Without this the dropdown is empty
+        // for fresh sessions.
+        if (_allMetaCards.length === 0) {
+            list.innerHTML = `<div class="tech-lab-picker-empty">${
+                _escapeHtml(_t('techLab.loading', 'Loading meta data…'))
+            }</div>`;
+            await _ensureMetaDataLoaded();
+            _rebuildMetaCards();
+        }
         const matches = _allMetaCards
             .filter(c => c.name.toLowerCase().includes(q))
             .slice(0, 15);
@@ -814,6 +879,9 @@
     function init() {
         if (_ready) return;
         _ready = true;
+        // Fire-and-forget pre-warm so the picker / engine don't pay
+        // the lazy-load cost on the user's first interaction.
+        _ensureMetaDataLoaded().catch(e => _devLog('pre-warm load failed:', e && e.message));
         _wireTargetPicker();
         const addBeatenBy = document.getElementById('techLabAddBeatenByBtn');
         if (addBeatenBy) addBeatenBy.addEventListener('click', () => openAddMissing('beatenBy'));

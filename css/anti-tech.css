@@ -248,3 +248,155 @@
         padding: 18px;
     }
 }
+
+/* ─────────────────────────────────────────────────────────────────
+ * 2-step "Build vs" wizard (multi-target selection + tech card
+ * picker). Inherits the base modal panel styling above.
+ * ──────────────────────────────────────────────────────────────── */
+
+.anti-tech-step.display-none { display: none; }
+
+/* Step 1 — selected target chips above the quick-pick grid */
+.anti-tech-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    min-height: 32px;
+    margin: 8px 0 12px;
+    padding: 6px 10px;
+    background: #f8fafc;
+    border: 1px dashed #cbd5e1;
+    border-radius: 8px;
+    align-items: center;
+}
+.anti-tech-chips-empty {
+    color: #94a3b8;
+    font-size: 0.85em;
+    font-style: italic;
+}
+.anti-tech-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 4px 3px 10px;
+    background: #6366f1;
+    color: #ffffff;
+    border-radius: 14px;
+    font-size: 0.85em;
+    font-weight: 600;
+}
+.anti-tech-chip-x {
+    background: rgba(255, 255, 255, 0.18);
+    color: #ffffff;
+    border: none;
+    width: 18px;
+    height: 18px;
+    line-height: 16px;
+    padding: 0;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 700;
+    transition: background 0.15s ease;
+}
+.anti-tech-chip-x:hover {
+    background: rgba(255, 255, 255, 0.35);
+}
+
+/* Quick-pick multi-select — active state now means "added to
+ * the target set". Mirrors the chip color. */
+.anti-tech-quick-pick.is-active {
+    background: #6366f1;
+    color: #ffffff;
+    border-color: #4338ca;
+}
+.anti-tech-quick-pick.is-active .anti-tech-quick-pick-share {
+    color: rgba(255, 255, 255, 0.85);
+}
+
+/* Step 2 — header strip showing the chosen targets */
+.anti-tech-step2-summary {
+    margin: 8px 0 14px;
+    padding: 8px 12px;
+    background: #eef2ff;
+    border-left: 3px solid #6366f1;
+    border-radius: 6px;
+    font-size: 0.9em;
+    color: #1e293b;
+}
+.anti-tech-step2-summary-label {
+    font-weight: 600;
+    color: #4338ca;
+    margin-right: 6px;
+}
+
+/* Tech card suggestion list — each item is a checkbox row with
+ * the card name, the targets it counters, and the threat
+ * categories it covers. */
+.anti-tech-card-list {
+    max-height: 360px;
+    overflow-y: auto;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    background: #ffffff;
+}
+.anti-tech-card-empty,
+.anti-tech-card-loading {
+    padding: 18px 14px;
+    color: #6b7280;
+    font-size: 0.9em;
+    font-style: italic;
+    text-align: center;
+}
+.anti-tech-card-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 12px;
+    border-bottom: 1px solid #f1f5f9;
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+.anti-tech-card-item:last-child {
+    border-bottom: none;
+}
+.anti-tech-card-item:hover {
+    background: #f8fafc;
+}
+.anti-tech-card-item.is-selected {
+    background: #eef2ff;
+}
+.anti-tech-card-check {
+    margin-top: 4px;
+    flex: 0 0 auto;
+    accent-color: #6366f1;
+    transform: scale(1.15);
+}
+.anti-tech-card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    flex: 1 1 auto;
+    min-width: 0;
+}
+.anti-tech-card-name {
+    font-weight: 600;
+    color: #1e293b;
+    font-size: 0.96em;
+}
+.anti-tech-card-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 12px;
+    font-size: 0.82em;
+    color: #64748b;
+}
+.anti-tech-card-targets {
+    color: #166534;
+    font-weight: 500;
+}
+.anti-tech-card-cats {
+    color: #6366f1;
+    font-variant: small-caps;
+    letter-spacing: 0.02em;
+}

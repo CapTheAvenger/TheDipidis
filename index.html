@@ -3856,52 +3856,73 @@
     <div id="antiTechModal" class="rarity-switcher-modal ui-modal-backdrop z-10000 display-none" role="dialog" aria-modal="true" aria-labelledby="antiTechModalTitle" onclick="if(event.target === this) closeAntiTechModal()">
         <div class="rarity-switcher-modal-content ui-modal-panel anti-tech-modal-panel">
             <span class="rarity-switcher-close ui-modal-close" onclick="closeAntiTechModal()" role="button" aria-label="Close"></span>
-            <h2 id="antiTechModalTitle" data-i18n="antiTech.modalTitle">Build vs Specific Deck</h2>
-            <p class="anti-tech-modal-intro" data-i18n="antiTech.modalIntro">Pick the deck you want to beat. The generator will load tech counters against that single opponent instead of the weighted meta field.</p>
 
-            <div class="anti-tech-section">
-                <h4 class="anti-tech-section-label" data-i18n="antiTech.quickPicksLabel">Quick picks (Meta-Call field)</h4>
-                <div id="antiTechQuickPicks" class="anti-tech-quick-picks">
-                    <!-- Populated dynamically by populateAntiTechModal() -->
+            <!-- Step 1: target deck selection (multi-select) -->
+            <div id="antiTechStep1Wrap" class="anti-tech-step">
+                <h2 id="antiTechModalTitle" data-i18n="antiTech.modalTitle">Build vs Specific Decks</h2>
+                <p class="anti-tech-modal-intro" data-i18n="antiTech.modalIntroMulti">Pick the decks you want to tech against. Suggested counter cards will be shown for the combined selection.</p>
+
+                <div id="antiTechSelectedChips" class="anti-tech-chips"></div>
+
+                <div class="anti-tech-section">
+                    <h4 class="anti-tech-section-label" data-i18n="antiTech.quickPicksLabel">Quick picks (Meta-Call field)</h4>
+                    <div id="antiTechQuickPicks" class="anti-tech-quick-picks">
+                        <!-- Populated dynamically -->
+                    </div>
+                </div>
+
+                <div class="anti-tech-section">
+                    <h4 class="anti-tech-section-label" data-i18n="antiTech.autocompleteLabel">Or type any archetype</h4>
+                    <input id="antiTechCustomInput" type="text" class="anti-tech-input" autocomplete="off"
+                           placeholder="Start typing a deck name..." aria-label="Anti-tech target deck">
+                    <div id="antiTechSuggestions" class="anti-tech-suggestions"></div>
+                </div>
+
+                <div class="anti-tech-section">
+                    <h4 class="anti-tech-section-label" data-i18n="antiTech.aggressionLabel">Aggression</h4>
+                    <div class="anti-tech-aggression">
+                        <label class="anti-tech-aggression-option">
+                            <input type="radio" name="antiTechAggression" value="mild">
+                            <span class="anti-tech-aggression-name" data-i18n="antiTech.mildName">Mild</span>
+                            <span class="anti-tech-aggression-desc" data-i18n="antiTech.mildDesc">Baseline tech slots. Consistency stays intact.</span>
+                        </label>
+                        <label class="anti-tech-aggression-option">
+                            <input type="radio" name="antiTechAggression" value="standard" checked>
+                            <span class="anti-tech-aggression-name" data-i18n="antiTech.standardName">Standard</span>
+                            <span class="anti-tech-aggression-desc" data-i18n="antiTech.standardDesc">+1 slot per threat category. Recommended.</span>
+                        </label>
+                        <label class="anti-tech-aggression-option">
+                            <input type="radio" name="antiTechAggression" value="heavy">
+                            <span class="anti-tech-aggression-name" data-i18n="antiTech.heavyName">Heavy</span>
+                            <span class="anti-tech-aggression-desc" data-i18n="antiTech.heavyDesc">+2 slots, lower share floor. Trades consistency for coverage.</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="anti-tech-actions">
+                    <button class="btn btn-secondary" onclick="closeAntiTechModal()" data-i18n="antiTech.cancelBtn">Cancel</button>
+                    <button id="antiTechContinueBtn" class="btn btn-primary" onclick="advanceAntiTechModal()" disabled data-i18n="antiTech.continueBtn">Continue → Pick Tech Cards</button>
                 </div>
             </div>
 
-            <div class="anti-tech-section">
-                <h4 class="anti-tech-section-label" data-i18n="antiTech.autocompleteLabel">Or type any archetype</h4>
-                <input id="antiTechCustomInput" type="text" class="anti-tech-input" autocomplete="off"
-                       placeholder="Start typing a deck name..." aria-label="Anti-tech target deck">
-                <div id="antiTechSuggestions" class="anti-tech-suggestions"></div>
-            </div>
+            <!-- Step 2: tech card selection (multi-select checkboxes) -->
+            <div id="antiTechStep2Wrap" class="anti-tech-step display-none">
+                <h2 data-i18n="antiTech.step2Title">Suggested Tech Cards</h2>
+                <p class="anti-tech-modal-intro" data-i18n="antiTech.step2Intro">Pick which cards to lock into your tech slots. Selected cards will be force-included on the next Consistency Generate.</p>
 
-            <div class="anti-tech-section">
-                <h4 class="anti-tech-section-label" data-i18n="antiTech.aggressionLabel">Aggression</h4>
-                <div class="anti-tech-aggression">
-                    <label class="anti-tech-aggression-option">
-                        <input type="radio" name="antiTechAggression" value="mild">
-                        <span class="anti-tech-aggression-name" data-i18n="antiTech.mildName">Mild</span>
-                        <span class="anti-tech-aggression-desc" data-i18n="antiTech.mildDesc">Baseline tech slots. Consistency stays intact.</span>
-                    </label>
-                    <label class="anti-tech-aggression-option">
-                        <input type="radio" name="antiTechAggression" value="standard" checked>
-                        <span class="anti-tech-aggression-name" data-i18n="antiTech.standardName">Standard</span>
-                        <span class="anti-tech-aggression-desc" data-i18n="antiTech.standardDesc">+1 slot per threat category. Recommended.</span>
-                    </label>
-                    <label class="anti-tech-aggression-option">
-                        <input type="radio" name="antiTechAggression" value="heavy">
-                        <span class="anti-tech-aggression-name" data-i18n="antiTech.heavyName">Heavy</span>
-                        <span class="anti-tech-aggression-desc" data-i18n="antiTech.heavyDesc">+2 slots, lower share floor. Trades consistency for coverage.</span>
-                    </label>
+                <div class="anti-tech-step2-summary">
+                    <span class="anti-tech-step2-summary-label" data-i18n="antiTech.step2TargetsLabel">Teching against:</span>
+                    <span id="antiTechStep2Targets"></span>
                 </div>
-            </div>
 
-            <div id="antiTechPreview" class="anti-tech-section anti-tech-preview display-none">
-                <h4 class="anti-tech-section-label" data-i18n="antiTech.previewLabel">Preview</h4>
-                <div id="antiTechPreviewBody" class="anti-tech-preview-body"></div>
-            </div>
+                <div id="antiTechCardList" class="anti-tech-card-list">
+                    <!-- Populated when step 1 confirms -->
+                </div>
 
-            <div class="anti-tech-actions">
-                <button class="btn btn-secondary" onclick="closeAntiTechModal()" data-i18n="antiTech.cancelBtn">Cancel</button>
-                <button id="antiTechGenerateBtn" class="btn btn-primary" onclick="confirmAntiTechBuild()" disabled data-i18n="antiTech.generateBtn">Generate</button>
+                <div class="anti-tech-actions">
+                    <button class="btn btn-secondary" onclick="backToAntiTechStep1()" data-i18n="antiTech.backBtn">← Back</button>
+                    <button id="antiTechBuildBtn" class="btn btn-primary" onclick="confirmAntiTechBuild()" disabled data-i18n="antiTech.buildBtn">Build with 0 cards</button>
+                </div>
             </div>
         </div>
     </div>

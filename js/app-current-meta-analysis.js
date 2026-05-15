@@ -1962,16 +1962,28 @@
             });
             log('detected matchups for opponents:', detected ? detected.size : 0);
 
-            if (!detected || detected.size === 0) {
-                container.innerHTML = '';
-                return;
-            }
-
             const confidenceLabel = (c) => {
                 if (c === 'high')   return t('matchup.techConfidenceHigh')   || 'high confidence';
                 if (c === 'medium') return t('matchup.techConfidenceMedium') || 'medium confidence';
                 return t('matchup.techConfidenceLow') || 'low confidence';
             };
+            const header = t('matchup.detectedTechHeader') || 'Detected tech matchups (card-text-driven)';
+            const note = t('matchup.detectedTechNote') || 'Foundation v0.1 — heuristic regex extraction over pokemon_card_effects.json. Pattern library is intentionally narrow and grows over time (see data/card_capability_taxonomy.json).';
+
+            if (!detected || detected.size === 0) {
+                // Render an explicit empty-state so the user can confirm the
+                // engine ran (vs. silently hiding the section, which made
+                // the previous diagnostic round impossible to interpret).
+                container.innerHTML = `
+                    <div class="uv-tech-section uv-tech-empty">
+                        <h4 class="uv-tech-title">${escapeHtml(header)}</h4>
+                        <p class="uv-tech-line uv-tech-low">${escapeHtml(t('matchup.detectedTechNone') || 'No card-text interactions detected for the current deck against the predicted field.')}</p>
+                        <p class="uv-tech-note">${escapeHtml(note)}</p>
+                    </div>`;
+                log('rendered empty-state section');
+                return;
+            }
+
             const items = [];
             for (const [oppName, matchups] of detected.entries()) {
                 items.push(`<li class="uv-tech-opp"><strong>vs ${escapeHtml(oppName)}</strong><ul class="uv-tech-list">${
@@ -1981,14 +1993,13 @@
                 }</ul></li>`);
             }
 
-            const header = t('matchup.detectedTechHeader') || 'Detected tech matchups (card-text-driven)';
-            const note = t('matchup.detectedTechNote') || 'Foundation v0.1 — heuristic regex extraction over pokemon_card_effects.json. Pattern library is intentionally narrow and grows over time (see data/card_capability_taxonomy.json).';
             container.innerHTML = `
                 <div class="uv-tech-section">
-                    <h4 class="uv-tech-title">${escapeHtml(header)}</h4>
+                    <h4 class="uv-tech-title">${escapeHtml(header)} <span class="uv-tech-count">(${detected.size})</span></h4>
                     <ul class="uv-tech-opp-list">${items.join('')}</ul>
                     <p class="uv-tech-note">${escapeHtml(note)}</p>
                 </div>`;
+            log('rendered section with', detected.size, 'opponent groups; innerHTML length:', container.innerHTML.length);
         }
 
         // Card-by-card diff between the user's current deck and the

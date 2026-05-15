@@ -533,15 +533,26 @@
     margin-top: 16px;
 }
 
-/* Card-text-driven tech matchup detector (capability engine) */
+/* Card-text-driven tech matchup detector (capability engine).
+ * Section now sits ABOVE the per-opponent comparison table so the
+ * user sees engine output without scrolling past 19 table rows. */
 .uv-detected-tech {
-    margin-top: 16px;
+    margin: 16px 0 18px;
 }
 .uv-tech-section {
-    padding: 12px 14px;
-    background: rgba(255, 255, 255, 0.75);
-    border-radius: 8px;
-    border-left: 3px solid #6366f1;
+    padding: 14px 16px;
+    background: #ffffff;
+    border-radius: 10px;
+    border-left: 4px solid #6366f1;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+.uv-tech-empty {
+    border-left-color: #94a3b8;
+}
+.uv-tech-count {
+    color: #6366f1;
+    font-weight: 600;
+    font-size: 0.85em;
 }
 .uv-tech-title {
     margin: 0 0 8px 0;

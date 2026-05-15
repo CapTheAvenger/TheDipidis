@@ -1778,12 +1778,25 @@
 
             const breakdownLines = [];
             if (userCounterCount > 0) {
-                const catList = Array.from(userByCat.keys()).join(', ');
-                breakdownLines.push(
-                    (t('matchup.userVsVanillaBreakdownCounters') || 'Your tech counters: {n} cards across categories: {cats}.')
-                        .replace('{n}', userCounterCount)
-                        .replace('{cats}', catList)
-                );
+                // Per-category detail so the user can audit which exact
+                // cards the active_threats.json classification credited
+                // — important when a card looks miscategorised (e.g.
+                // Lillie's Determination labeled as a hand_disruption
+                // counter while the player treats it as pure setup).
+                const lineTpl = t('matchup.userVsVanillaBreakdownCategoryLine') || '{cat}: {cards}';
+                const cardEsc = (s) => escapeHtml(String(s || ''));
+                const headerLine = t('matchup.userVsVanillaBreakdownCountersDetail') || 'Tech cards detected in your build by category:';
+                breakdownLines.push(`<strong>${escapeHtml(headerLine)}</strong>`);
+                Array.from(userByCat.entries())
+                    .sort((a, b) => a[0].localeCompare(b[0]))
+                    .forEach(([cat, nameSet]) => {
+                        const names = Array.from(nameSet).sort().map(cardEsc).join(', ');
+                        breakdownLines.push(
+                            lineTpl
+                                .replace('{cat}', `<em>${escapeHtml(cat)}</em>`)
+                                .replace('{cards}', names)
+                        );
+                    });
             } else {
                 breakdownLines.push(t('matchup.userVsVanillaBreakdownNoCounters') || 'No tech-counter cards detected — your deck performs at vanilla baseline.');
             }

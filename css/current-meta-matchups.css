@@ -848,12 +848,25 @@
         align-items: center;
         gap: 0;
     }
+    /* User-vs-Vanilla per-opponent comparison table has 5 columns
+     * (Opponent / Field % / Vanilla / Your Build / Delta). The
+     * generic 3-column mobile grid above squashes columns 4-5 into
+     * an implicit second row, producing the "FIBLAOKEDE" header
+     * jam and "value-pill jammed-together" rendering reported on
+     * narrow desktops. Override with a dedicated 5-column grid. */
+    .mc-vs-table.uv-opp-table tr {
+        grid-template-columns: minmax(0, 1fr) 56px 64px 64px 64px !important;
+    }
     .mc-vs-table th,
     .mc-vs-table td {
         display: block !important;
         padding: 9px 10px !important;
         border: none !important;
         width: auto !important;
+    }
+    .mc-vs-table.uv-opp-table th,
+    .mc-vs-table.uv-opp-table td {
+        padding: 8px 6px !important;
     }
     .mc-vs-table thead tr {
         border-bottom: 2px solid #cbd5e1 !important;

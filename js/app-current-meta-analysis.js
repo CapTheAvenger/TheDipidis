@@ -1917,7 +1917,10 @@
 
         async function _renderCapabilityTechDetector(pairedOpponents) {
             const container = document.getElementById('currentMetaUserVsVanillaDetectedTech');
-            const log = (...a) => { if (typeof devLog === 'function') devLog('[CapabilityDetector]', ...a); };
+            // Use console.log directly: devLog is gated by DEV_MODE=false in
+            // production so the diagnostic trail would be invisible exactly
+            // when we need it. The tag prefix keeps these greppable.
+            const log = (...a) => console.log('[CapabilityDetector]', ...a);
             if (!container) { log('container div missing — skipping'); return; }
             if (typeof window.CardCapabilityEngine === 'undefined') {
                 log('window.CardCapabilityEngine undefined — script not loaded?');

@@ -484,6 +484,63 @@
             }
         }
 
+        // Archetype-aware filter — user feedback:
+        // > "Die Vorschläge sollten als erstes aus dem Pool des
+        //    gewählten archetypes gewählt werden [...] sollten die
+        //    Vorschläge auch zum archetype passen. Siehe benötigte
+        //    Energien für Attacken und genutzte Energien im
+        //    archetype und so."
+        //
+        // Filter applied AFTER both sources merge. Keeps cards that
+        // are either:
+        //   (a) already in the user's archetype's existing card pool
+        //       (proven to fit — overrides the energy-compat check
+        //       for special mechanics like N's Zoroark Night Joker
+        //       copying N's Zekrom's Lightning attack with Dark energy)
+        //   (b) Colorless attackers (universally usable in any deck)
+        //   (c) energy-type matches the deck's energy types as
+        //       inferred from the Basic Energy cards in the
+        //       archetype's pool
+        //
+        // For everything else (Cornerstone Mask Ogerpon ex needs
+        // Fighting in a Dark-only deck, etc.) the picker hides them.
+        // User can still see them all in the Tech Lab — this filter
+        // is just for the build-vs flow where the cards land in
+        // tech-slots.
+        const userArch = _getCurrentArchetype();
+        if (userArch) {
+            const archCards = _archetypeCardsFromMap(userArch);
+            const archPoolNames = new Set(archCards.map(c => c.name.toLowerCase()));
+            const deckEnergies = _getArchetypeEnergyTypes(userArch);
+            let cardEffectsIndexLocal = null;
+            try {
+                if (typeof window._loadCardEffectsIndex === 'function') {
+                    cardEffectsIndexLocal = await window._loadCardEffectsIndex();
+                }
+            } catch (_) { cardEffectsIndexLocal = null; }
+            const cardEnergyType = (cardId) => {
+                if (!cardEffectsIndexLocal || !cardEffectsIndexLocal.bySetNumber || !cardId) return null;
+                const rec = cardEffectsIndexLocal.bySetNumber.get(String(cardId).toUpperCase().trim());
+                return rec ? String(rec.energy_type || '').trim() : null;
+            };
+            const passes = (entry) => {
+                if (archPoolNames.has(entry.name.toLowerCase())) return true; // already in pool
+                const et = cardEnergyType(entry.cardId);
+                if (!et) return true;                       // unknown — don't filter
+                if (et === 'Colorless') return true;        // works in any deck
+                if (deckEnergies.has(et)) return true;      // matches deck's energies
+                return false;
+            };
+            const before = byCard.size;
+            for (const [key, entry] of Array.from(byCard.entries())) {
+                if (!passes(entry)) byCard.delete(key);
+            }
+            _devLog('archetype filter', `${userArch}`,
+                'energies=', Array.from(deckEnergies),
+                'pool size=', archPoolNames.size,
+                `${before} → ${byCard.size}`);
+        }
+
         // Sort: cards that counter MORE targets first, then by
         // counter score, then alphabetical.
         return Array.from(byCard.values()).sort((a, b) => {
@@ -491,6 +548,49 @@
             if (b.counterScore !== a.counterScore) return b.counterScore - a.counterScore;
             return a.name.localeCompare(b.name);
         });
+    }
+
+    // Look up the user's currently-loaded archetype for the active
+    // deck-builder source. The three sources keep their archetype
+    // in different globals — current-meta is the common case but
+    // build-vs is also reachable from city-league and past-meta.
+    function _getCurrentArchetype() {
+        if (typeof window === 'undefined') return null;
+        if (_source === 'currentMeta') return window.currentMetaArchetype || null;
+        if (_source === 'cityLeague') return window.currentCityLeagueArchetype || null;
+        if (_source === 'pastMeta')   return window.pastMetaCurrentArchetype || null;
+        return null;
+    }
+
+    // Helper — get the cards array for an archetype name from the
+    // archetypeCardMap, case-insensitive.
+    function _archetypeCardsFromMap(archName) {
+        const map = (typeof window !== 'undefined' && window._archetypeCardMap)
+            ? window._archetypeCardMap
+            : _buildArchetypeCardMapLocal();
+        return map.get(String(archName || '').toLowerCase()) || [];
+    }
+
+    // Infer the deck's energy types from the Basic Energy cards
+    // present in the archetype's pool. Energy card names follow the
+    // pattern "<Color> Energy" — e.g. "Darkness Energy",
+    // "Fire Energy". Extract the color prefix. Special Energy cards
+    // (Legacy, Reverse, Counter, etc.) are ignored — they're
+    // typically universal so don't narrow the energy set.
+    function _getArchetypeEnergyTypes(archName) {
+        const rows = (typeof window !== 'undefined' && window.currentMetaAnalysisData) || [];
+        const archLower = String(archName || '').toLowerCase();
+        const out = new Set();
+        for (const r of rows) {
+            if (!r) continue;
+            if (String(r.archetype || '').trim().toLowerCase() !== archLower) continue;
+            const type = String(r.type || '').trim();
+            if (type !== 'Basic Energy') continue;
+            const name = String(r.card_name || '').trim();
+            const m = name.match(/^(\w+)\s+Energy$/i);
+            if (m) out.add(m[1].charAt(0).toUpperCase() + m[1].slice(1).toLowerCase());
+        }
+        return out;
     }
 
     // Build Limitless CDN URL from a SET|number card_id.
@@ -694,26 +794,88 @@
         _showStep(1);
     }
 
+    // Walk the "Evolves from X" chain on a card record and return
+    // the basic Pokemon's name. For a Mega Pokemon "Evolves from
+    // Buneary" returns "Buneary". For a Stage 2 "Evolves from
+    // Hisuian Decidueye" (Stage 1) it recurses: looks up Hisuian
+    // Decidueye, sees "Evolves from Hisuian Dartrix" (Stage 1),
+    // recurses again, gets to "Basic" → returns the basic name.
+    // Returns null if the chain can't be walked.
+    function _walkEvolutionChainToBasic(rec, cardEffectsIndex, depth) {
+        if (!rec || depth > 4) return null;
+        const ct = String(rec.card_type || '').trim();
+        if (/^basic\b/i.test(ct)) return rec.name;
+        const m = ct.match(/^Evolves\s+from\s+(.+)$/i);
+        if (!m) return null;
+        const prevName = m[1].trim().toLowerCase();
+        if (!cardEffectsIndex || !cardEffectsIndex.byName) return prevName;
+        const prevRec = cardEffectsIndex.byName.get(prevName);
+        if (!prevRec) return prevName; // basic name as best-effort
+        return _walkEvolutionChainToBasic(prevRec, cardEffectsIndex, depth + 1);
+    }
+
+    // For each selected attacker, find its evolution-chain basic and
+    // include it in the techSlots payload too. Otherwise a user who
+    // picks "Mega Lopunny ex" gets a Lopunny pinned but no Buneary
+    // to evolve from — the build is unplayable. The basic gets a
+    // "[auto-included for X]" trace in the devLog so the user can
+    // tell where it came from.
+    async function _expandSelectionWithBasics(selectedSuggestions) {
+        if (typeof window._loadCardEffectsIndex !== 'function') return selectedSuggestions.map(s => s.name);
+        let cardEffectsIndex = null;
+        try { cardEffectsIndex = await window._loadCardEffectsIndex(); }
+        catch (_) { cardEffectsIndex = null; }
+        if (!cardEffectsIndex) return selectedSuggestions.map(s => s.name);
+        const out = [];
+        const seenLower = new Set();
+        const pushUnique = (name) => {
+            const k = String(name || '').toLowerCase();
+            if (!k || seenLower.has(k)) return;
+            seenLower.add(k);
+            out.push(name);
+        };
+        for (const s of selectedSuggestions) {
+            pushUnique(s.name);
+            const rec = s.cardId && cardEffectsIndex.bySetNumber
+                ? cardEffectsIndex.bySetNumber.get(String(s.cardId).toUpperCase().trim())
+                : null;
+            if (!rec) continue;
+            const basic = _walkEvolutionChainToBasic(rec, cardEffectsIndex, 0);
+            if (basic && basic.toLowerCase() !== s.name.toLowerCase()) {
+                pushUnique(basic);
+                _devLog('auto-included basic', basic, 'for', s.name);
+            }
+        }
+        return out;
+    }
+
     async function confirmAntiTechBuild() {
         _devLog('confirmAntiTechBuild — selected:', _selectedCards.size, 'cards');
         if (_selectedCards.size === 0) return;
         const source = _source || 'currentMeta';
-        const selectedNames = _suggestedCards
-            .filter(c => _selectedCards.has(c.name.toLowerCase()))
-            .map(c => c.name);
+        const selectedSuggestions = _suggestedCards
+            .filter(c => _selectedCards.has(c.name.toLowerCase()));
         const aggression = _readAggression();
         closeAntiTechModal();
+
+        // Auto-include the basic for any selected Stage 1/2/Mega card
+        // so the deck actually has the evolution line to play. User:
+        // "wenn ich Mega lopunny auswähle dann muss natürlich auch
+        // das passende Basic dazu ausgewählt werden ansonsten
+        // funktioniert es ja nicht."
+        const expandedNames = await _expandSelectionWithBasics(selectedSuggestions);
+        _devLog('expanded names', expandedNames);
 
         // Write the selected cards into techSlots BEFORE running the
         // generator. techSlots fold into Stage 0 of autoComplete-
         // Consistency so these cards are force-included no matter
         // what the consistency-score gate says.
         if (typeof window.techSlotsFromArray === 'function') {
-            window.techSlotsFromArray(source, selectedNames.slice(0, TECH_SLOTS_HARD_CAP));
+            window.techSlotsFromArray(source, expandedNames.slice(0, TECH_SLOTS_HARD_CAP));
             if (typeof renderTechSlotsUI === 'function') renderTechSlotsUI(source);
             if (typeof showToast === 'function') {
                 const tpl = _t('antiTech.toastInjected', 'Loaded {n} tech card(s) into your slots — generating build now.');
-                showToast(tpl.replace('{n}', selectedNames.length), 'info', 2500);
+                showToast(tpl.replace('{n}', expandedNames.length), 'info', 2500);
             }
         } else {
             _devLog('techSlotsFromArray missing — cannot inject techs');

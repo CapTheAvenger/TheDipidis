@@ -1387,9 +1387,16 @@
                             </div>
                             <div class="tech-vs-normal-body" id="currentMetaTechVsNormalBody"></div>
                         </div>
+                    </div>
+                </div>
 
-                        <!-- Tech Lab — interactive tech explorer per single meta card. -->
-                        <section class="tech-lab-section" id="techLabSection" aria-labelledby="techLabHeading">
+                <!-- Tech Lab + Add-missing modal — ALWAYS VISIBLE, lives outside
+                     `#currentMetaDeckBuilderSection` so users can browse card-text
+                     interactions without first picking a deck-archetype. The deck-
+                     builder above starts with `d-none` until an archetype is loaded;
+                     Tech Lab is intentionally a sibling of that wrapper. -->
+                <div class="container">
+                        <section class="tech-lab-section tech-lab-standalone" id="techLabSection" aria-labelledby="techLabHeading">
                             <header class="tech-lab-header">
                                 <h3 id="techLabHeading" class="tech-lab-heading" data-i18n="techLab.heading">Tech Lab — find techs for any meta card</h3>
                                 <p class="tech-lab-subtitle" data-i18n="techLab.subtitle">Pick any card from the current meta. The capability engine surfaces every meta card that has a winning card-text interaction against it. Mark wrong suggestions to hide them or add ones the engine missed — your edits persist locally and are visible the next time you open this view.</p>
@@ -1471,7 +1478,6 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
                 </div>
             </div>
 

@@ -118,6 +118,10 @@
         }
         if (!raw.beatenBy) raw.beatenBy = { hidden: [], added: [] };
         if (!raw.beats)    raw.beats    = { hidden: [], added: [] };
+        // Non-EX bucket (auto-derived "ability does not apply"
+        // suggestions) — user can mark individual entries as not
+        // a tech and they get hidden in subsequent renders.
+        if (!raw.nonEx)    raw.nonEx    = { hidden: [] };
         return raw;
     }
 
@@ -448,15 +452,19 @@
             const thumb = imgUrl
                 ? `<button class="tech-lab-grid-thumb" data-card-img="${safeImg}" data-card-name="${safeName}" aria-label="Zoom ${safeName}"><img src="${safeImg}" alt="${safeName}" loading="lazy"></button>`
                 : `<span class="tech-lab-grid-thumb tech-lab-thumb-fallback" aria-hidden="true">?</span>`;
+            // Reject / remove action moved BELOW the card with
+            // clear text — the previous overlay-X confused users
+            // ("the X is too big and unclear" — feedback after
+            // PR #128). Full-width pill button under the tile.
             const action = tech.isUserAdded
-                ? `<button class="tech-lab-grid-x tech-lab-action-remove" data-card="${safeName}" data-dir="${direction}" title="${_escapeHtml(_t('techLab.removeAdded', 'Remove this user-added tech'))}" aria-label="Remove">×</button>`
-                : `<button class="tech-lab-grid-x tech-lab-action-reject" data-card="${safeName}" data-dir="${direction}" title="${_escapeHtml(_t('techLab.markWrong', 'Mark as not a tech'))}" aria-label="Not a tech">×</button>`;
+                ? `<button class="tech-lab-card-action tech-lab-card-action-remove" data-card="${safeName}" data-dir="${direction}">${_escapeHtml(_t('techLab.removeAddedBtn', 'Remove'))}</button>`
+                : `<button class="tech-lab-card-action tech-lab-card-action-reject" data-card="${safeName}" data-dir="${direction}">${_escapeHtml(_t('techLab.notTechBtn', '✗ Not a tech'))}</button>`;
             return `<li class="tech-lab-grid-tile tech-lab-grid-${confCls}${tech.isUserAdded ? ' tech-lab-grid-user' : ''}" title="${safeNarr}">
-                ${action}
                 ${thumb}
                 <div class="tech-lab-grid-name">${safeName}</div>
                 ${tech.attackSource ? `<div class="tech-lab-grid-source">${_escapeHtml(tech.attackSource)}</div>` : ''}
                 <span class="tech-lab-grid-conf tech-lab-conf-${confCls}">${_escapeHtml(confLabel)}</span>
+                ${action}
             </li>`;
         }).join('');
     }
@@ -483,7 +491,10 @@
 
     function _wireCardListInteractions(listEl) {
         if (!listEl) return;
-        listEl.querySelectorAll('.tech-lab-card-thumb[data-card-img]').forEach(btn => {
+        // Cover both the old overlay button class (.tech-lab-card-thumb
+        // — used elsewhere) and the grid thumbnails. data-card-img
+        // is the discriminator.
+        listEl.querySelectorAll('[data-card-img]').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
@@ -494,14 +505,21 @@
                 }
             });
         });
-        listEl.querySelectorAll('.tech-lab-action-reject').forEach(btn => {
+        // New button-below-tile classes (replacing the corner-X).
+        // Direction "nonEx" routes through the same _hideTech helper
+        // — added a nonEx bucket to _getTargetOverrides earlier so
+        // the override list survives across sessions like beatenBy
+        // and beats already do.
+        listEl.querySelectorAll('.tech-lab-card-action-reject').forEach(btn => {
             btn.addEventListener('click', () => {
+                if (!_target) return;
                 _hideTech(_target.key, btn.dataset.dir, btn.dataset.card);
                 _renderTechsFor(_target);
             });
         });
-        listEl.querySelectorAll('.tech-lab-action-remove').forEach(btn => {
+        listEl.querySelectorAll('.tech-lab-card-action-remove').forEach(btn => {
             btn.addEventListener('click', () => {
+                if (!_target) return;
                 _removeAddedTech(_target.key, btn.dataset.dir, btn.dataset.card);
                 _renderTechsFor(_target);
             });
@@ -553,34 +571,67 @@
     }
 
     // Viability heuristic for the "non-EX implicit-immunes" bucket.
-    // The user explicitly excluded utility Pokemon like Eevee — they
-    // want REAL attackers that can stand in for an ex on Crustle's
-    // matchup. Criteria:
-    //   - card_type starts with "Basic" (no evolution → fast setup)
-    //   - has at least one attack with ≤2 energy cost that either:
-    //     - deals ≥60 static damage, or
-    //     - has a "+" / "×" suffix (scaling / conditional bonus
-    //       attacks like Passimian's "20×" Coordinated Throwing can
-    //       reach 120+ in late game)
-    // Skips Pokemon whose only attacks are sub-50 utility taps so
-    // the bucket stays useful as a "real damage option" list.
+    //
+    // Important data caveat — the scraped pokemon_card_effects.json
+    // has EMPTY cost arrays for every attack (the scraper didn't
+    // collect energy symbols). So we can't filter by actual cost.
+    //
+    // User feedback: "wie ich da 3 Energien ranbekommen soll? Bei
+    // Team Rocket Arktos geht es wegen der rocket Energie aber
+    // ansonsten sind 3 Energien viel zu viel". We need to estimate
+    // cost from damage instead.
+    //
+    // Damage as energy-cost proxy (rule of thumb in TCG):
+    //   30-60 damage → 1 energy
+    //   60-100 damage → 2 energies
+    //   100-130 damage → 3 energies
+    //   130+ damage → 3-4+ energies (or ex/v card)
+    //
+    // For a non-EX Basic to be a "fast tech" we want 1-2 energy
+    // attackers — i.e. damage in the 60-100 static range, or
+    // scaling multipliers that ramp into bigger numbers later.
+    //
+    // Filter — must meet ALL:
+    //   1. card_type starts with "Basic"
+    //   2. attack text doesn't mention a coin flip (unreliable damage)
+    //   3. attack damage qualifies via ONE of:
+    //      a. static damage 60-100  (likely 1-2 energy)
+    //      b. "+" bonus, base 50-80 (likely 2 energy with conditional)
+    //      c. "×" multiplier, base ≥ 20  (Passimian-style scaling
+    //         attacks are usually 2-energy attackers)
+    //
+    // This intentionally rejects high-damage Basics like
+    // Chien-Pao 120, Tapu Bulu 220, Zapdos 190, Hop's Snorlax 140
+    // — they all need 3+ energy and aren't viable as "instant
+    // tech swap" attackers without dedicated energy acceleration.
+    // Special cases (Team Rocket's Articuno with Rocket Energy
+    // acceleration) come in via the lower damage attacks that
+    // their archetype uses.
     function _isViableNonExAttacker(rec) {
         if (!rec) return false;
         const cardType = String(rec.card_type || '').toLowerCase();
-        // "Basic" or "Basic Pokemon" — anything that starts with Basic
         if (!cardType.startsWith('basic')) return false;
         for (const a of (rec.attacks || [])) {
             const cost = Array.isArray(a.cost) ? a.cost.length : 0;
             if (cost > 2) continue;
             const dmgStr = String(a.damage || '').trim();
             if (!dmgStr) continue;
-            // Scaling / conditional damage qualifies regardless of base
-            if (/[×x]/i.test(dmgStr)) return true;
-            if (/\+/.test(dmgStr)) return true;
-            const m = dmgStr.match(/\d+/);
-            if (!m) continue;
-            const dmg = parseInt(m[0], 10);
-            if (dmg >= 60) return true;
+            const baseMatch = dmgStr.match(/^(\d+)/);
+            if (!baseMatch) continue;
+            const base = parseInt(baseMatch[1], 10);
+            if (!Number.isFinite(base)) continue;
+            const text = String(a.text || '').toLowerCase();
+            const isCoinFlip = /\bflip\s+(?:a\s+|\d+\s+)?coins?\b/.test(text);
+            if (/[×x]/i.test(dmgStr)) {
+                if (isCoinFlip) continue;
+                if (base >= 20) return true;
+                continue;
+            }
+            if (/\+/.test(dmgStr)) {
+                if (base >= 50 && base <= 80) return true;
+                continue;
+            }
+            if (base >= 60 && base <= 100) return true;
         }
         return false;
     }
@@ -629,8 +680,14 @@
                 byCard.set(name.toLowerCase(), { key, name, inclusion });
             }
         }
+        // Apply per-target non-EX hide overrides — user can mark
+        // specific entries as "not a tech" via the button below
+        // each tile and they stay hidden across sessions.
+        const ov = _target ? _getTargetOverrides(_target.key) : { nonEx: { hidden: [] } };
+        const nonExHidden = new Set((ov.nonEx && ov.nonEx.hidden || []).map(n => String(n).toLowerCase()));
         const sorted = Array.from(byCard.values())
             .filter(c => c.name.toLowerCase() !== (_target && _target.name.toLowerCase()))
+            .filter(c => !nonExHidden.has(c.name.toLowerCase()))
             .sort((a, b) => b.inclusion - a.inclusion)
             .slice(0, 24);
         if (sorted.length === 0) { wrapEl.innerHTML = ''; return; }
@@ -652,6 +709,7 @@
             return `<li class="tech-lab-grid-tile tech-lab-grid-nonex">
                 ${thumb}
                 <div class="tech-lab-grid-name">${safeName}</div>
+                <button class="tech-lab-card-action tech-lab-card-action-reject" data-card="${safeName}" data-dir="nonEx">${_escapeHtml(_t('techLab.notTechBtn', '✗ Not a tech'))}</button>
             </li>`;
         }).join('');
         wrapEl.innerHTML = `
@@ -660,7 +718,9 @@
                 <p class="tech-lab-nonex-hint">${_escapeHtml(hint.replace('{n}', sorted.length))}</p>
             </div>
             <ul class="tech-lab-results tech-lab-grid-nonex-list">${tiles}</ul>`;
-        // Wire thumbnail zoom
+        // Wire thumbnail zoom + reject ("✗ Not a tech") on Non-EX
+        // tiles. The reject persists the entry into the per-target
+        // override store (nonEx.hidden) and re-renders the bucket.
         wrapEl.querySelectorAll('.tech-lab-grid-thumb[data-card-img]').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.preventDefault();
@@ -670,6 +730,15 @@
                 if (img && typeof window.showSingleCard === 'function') {
                     window.showSingleCard(img, name);
                 }
+            });
+        });
+        wrapEl.querySelectorAll('.tech-lab-card-action-reject').forEach(btn => {
+            btn.addEventListener('click', () => {
+                if (!_target) return;
+                _hideTech(_target.key, 'nonEx', btn.dataset.card);
+                // Re-render the non-EX section in place; the rest of
+                // the page doesn't need to redraw.
+                _renderNonExBucket(wrapEl, tags);
             });
         });
     }

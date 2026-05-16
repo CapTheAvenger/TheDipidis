@@ -809,6 +809,48 @@
             }
         }
 
+        // Vanilla vs Deep Dive: split the Current Meta Analysis tab into a
+        // beginner-friendly mode (only Card Overview + Deck Builder visible)
+        // and a Deep Dive that surfaces every advanced section. Persists per
+        // user via localStorage. Default is 'vanilla' so first-time visitors
+        // see the simpler view.
+        const CM_VIEW_MODE_KEY = 'currentMeta.viewMode';
+
+        function setCurrentMetaViewMode(mode) {
+            const next = mode === 'deepDive' ? 'deepDive' : 'vanilla';
+            const container = document.getElementById('current-analysis');
+            if (container) container.setAttribute('data-cm-view', next);
+            const vanillaBtn = document.getElementById('cmViewModeVanillaBtn');
+            const deepBtn    = document.getElementById('cmViewModeDeepDiveBtn');
+            if (vanillaBtn) {
+                vanillaBtn.classList.toggle('is-active', next === 'vanilla');
+                vanillaBtn.setAttribute('aria-selected', String(next === 'vanilla'));
+            }
+            if (deepBtn) {
+                deepBtn.classList.toggle('is-active', next === 'deepDive');
+                deepBtn.setAttribute('aria-selected', String(next === 'deepDive'));
+            }
+            try { localStorage.setItem(CM_VIEW_MODE_KEY, next); } catch (_) { /* private mode */ }
+        }
+
+        function _initCurrentMetaViewMode() {
+            let stored = 'vanilla';
+            try {
+                const v = localStorage.getItem(CM_VIEW_MODE_KEY);
+                if (v === 'deepDive' || v === 'vanilla') stored = v;
+            } catch (_) { /* private mode → keep default */ }
+            setCurrentMetaViewMode(stored);
+        }
+
+        if (typeof window !== 'undefined') {
+            window.setCurrentMetaViewMode = setCurrentMetaViewMode;
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', _initCurrentMetaViewMode);
+            } else {
+                _initCurrentMetaViewMode();
+            }
+        }
+
         // Pure helper — given an array of rows with a `tournament_date`
         // field (any format _parseAnyTournamentDate handles) and a
         // YYYY-MM-DD cutoff, return only rows on or after the cutoff.

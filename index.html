@@ -1000,7 +1000,20 @@
                         <h2><span data-i18n="cm.analysisHeading">Current Meta Deck Analysis</span> <button class="tab-help-btn" onclick="openTabHelp('current-analysis')" title="Help" aria-label="Help for Current Meta Deck Analysis" data-i18n-title="btn.helpTitle"></button></h2>
                         <p data-i18n="cm.analyzeAndBuild">Analyze and Build Decks from Current Meta</p>
                     </div>
-                    
+
+                    <div class="cm-view-mode-toggle" role="tablist" aria-label="Analysis depth">
+                        <button type="button" role="tab" id="cmViewModeVanillaBtn"
+                                class="cm-view-mode-btn is-active"
+                                aria-selected="true"
+                                onclick="setCurrentMetaViewMode('vanilla')"
+                                data-i18n="cm.viewModeVanilla">Quick overview</button>
+                        <button type="button" role="tab" id="cmViewModeDeepDiveBtn"
+                                class="cm-view-mode-btn"
+                                aria-selected="false"
+                                onclick="setCurrentMetaViewMode('deepDive')"
+                                data-i18n="cm.viewModeDeepDive">Deep Dive</button>
+                    </div>
+
                     <div class="controls">
                         <div class="control-group current-meta-format-group">
                             <label class="current-meta-format-label" data-i18n="cm.formatFilter">Tournament Format Filter:</label>
@@ -1044,7 +1057,7 @@
                         <p class="ca-empty-hint" data-i18n="cm.emptyHint">Im Dropdown oben findest du die aktuellen Top-Decks. Sobald du eines auswählst, siehst du Karten-Verteilung, Win-Rates und Matchups.</p>
                     </div>
 
-                    <div class="stats-section d-none" id="currentMetaStatsSection">
+                    <div class="stats-section d-none cm-deep-dive-only" id="currentMetaStatsSection">
                         <h2 class="current-meta-stats-title" data-i18n="cl.deckStats">Deck Statistics</h2>
                         <div class="current-meta-stats-grid">
                             <div class="current-meta-stat-card">
@@ -1067,7 +1080,7 @@
                     </div>
                     
                     <!-- Best/Worst Matchups Section -->
-                    <div id="currentMetaMatchupsSection" class="display-none mb-40 bg-light px-30 br-8">
+                    <div id="currentMetaMatchupsSection" class="display-none mb-40 bg-light px-30 br-8 cm-deep-dive-only">
                         <h3 id="currentMetaMatchupsTitle" class="current-meta-matchups-title" data-i18n="matchup.title">Deck Matchups</h3>
                         <div class="current-meta-matchups-grid-container">
                             <div>
@@ -1214,7 +1227,7 @@
                       the user's WR up; missing core slots push it
                       down. Populated by renderUserVsVanillaPanel().
                     -->
-                    <div id="currentMetaUserVsVanillaSection" class="display-none mb-40 bg-light px-30 br-8 mc-vs-section">
+                    <div id="currentMetaUserVsVanillaSection" class="display-none mb-40 bg-light px-30 br-8 mc-vs-section cm-deep-dive-only">
                         <h3 class="mc-vs-title">
                             <span data-i18n="matchup.userVsVanillaTitle">Your Build vs Vanilla (Meta-Call-weighted)</span>
                         </h3>
@@ -1396,7 +1409,7 @@
                      builder above starts with `d-none` until an archetype is loaded;
                      Tech Lab is intentionally a sibling of that wrapper. -->
                 <div class="container">
-                        <section class="tech-lab-section tech-lab-standalone" id="techLabSection" aria-labelledby="techLabHeading">
+                        <section class="tech-lab-section tech-lab-standalone cm-deep-dive-only" id="techLabSection" aria-labelledby="techLabHeading">
                             <header class="tech-lab-header">
                                 <h3 id="techLabHeading" class="tech-lab-heading" data-i18n="techLab.heading">Tech Lab — find techs for any meta card</h3>
                                 <p class="tech-lab-subtitle" data-i18n="techLab.subtitle">Pick any card from the current meta. The capability engine surfaces every meta card that has a winning card-text interaction against it. Mark wrong suggestions to hide them or add ones the engine missed — your edits persist locally and are visible the next time you open this view.</p>

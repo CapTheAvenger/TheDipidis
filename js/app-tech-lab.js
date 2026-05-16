@@ -271,8 +271,6 @@
             _devLog('detectMatchups failed:', e && e.message);
             return [];
         }
-        if (!detected || detected.size === 0) return [];
-
         // Roll up to per-attacker-card entries.
         const byCard = new Map();
         const cardIdByName = new Map();
@@ -280,24 +278,84 @@
             const k = c.name.toLowerCase();
             if (!cardIdByName.has(k)) cardIdByName.set(k, c.key);
         }
-        for (const matchups of detected.values()) {
-            for (const m of matchups) {
-                if (m.result !== 'attacker_wins') continue;
-                const key = m.attackerCard.toLowerCase();
-                let entry = byCard.get(key);
-                if (!entry) {
-                    entry = {
+        if (detected && detected.size > 0) {
+            for (const matchups of detected.values()) {
+                for (const m of matchups) {
+                    if (m.result !== 'attacker_wins') continue;
+                    const key = m.attackerCard.toLowerCase();
+                    if (byCard.has(key)) continue;
+                    byCard.set(key, {
                         name:       m.attackerCard,
                         cardId:     cardIdByName.get(key) || null,
                         narrative:  m.narrative,
                         confidence: m.confidence,
                         attackSource: m.attackerSource && m.attackerSource.name,
                         hidden:     false,
-                    };
-                    byCard.set(key, entry);
+                    });
                 }
             }
         }
+
+        // Pass 2: defensive counters. Meta cards whose defender tag
+        // shuts off one of the target's attacker tags (e.g. Battle Cage's
+        // bench-protection blocks Dragapult ex Phantom Dive). detectMatchups
+        // has a fixed direction so we resolve this branch directly via the
+        // interaction matrix.
+        const engine = window.CardCapabilityEngine;
+        const targetRec = cardEffectsIndex.bySetNumber
+            && cardEffectsIndex.bySetNumber.get(String(targetKey).toUpperCase().trim());
+        if (targetRec) {
+            const targetTags = engine.extractTags(targetRec, targetKey);
+            const targetAttackerTags = new Set(
+                targetTags.filter(t => t.tag.startsWith('attack.')).map(t => t.tag)
+            );
+            if (targetAttackerTags.size > 0) {
+                let interactionsData = null;
+                try {
+                    const resp = await fetch('./data/card_capability_interactions.json', { cache: 'no-cache' });
+                    interactionsData = resp.ok ? await resp.json() : null;
+                } catch (_) { /* network/parse failure → skip pass 2 */ }
+                const interactions = (interactionsData && interactionsData.interactions) || [];
+                const blockingByDefenderTag = new Map();   // defenderTag → interaction
+                for (const ix of interactions) {
+                    if ((ix.result || 'attacker_wins') !== 'defender_wins') continue;
+                    if (!targetAttackerTags.has(ix.attacker)) continue;
+                    blockingByDefenderTag.set(ix.defender, ix);
+                }
+                if (blockingByDefenderTag.size > 0) {
+                    const lang = (typeof getLang === 'function') ? getLang() : 'en';
+                    for (const c of _allMetaCards) {
+                        if (c.key === targetKey) continue;
+                        const rec = cardEffectsIndex.bySetNumber.get(String(c.key).toUpperCase().trim());
+                        if (!rec) continue;
+                        const key = rec.name.toLowerCase();
+                        if (byCard.has(key)) continue;
+                        const tags = engine.extractTags(rec, c.key);
+                        for (const t of tags) {
+                            const ix = blockingByDefenderTag.get(t.tag);
+                            if (!ix) continue;
+                            const tpl = (lang === 'de' ? (ix.narrative_de || ix.narrative_en) : ix.narrative_en) || '';
+                            const attackerSrc = (targetTags.find(tt => tt.tag === ix.attacker) || {}).source || {};
+                            const narrative = tpl
+                                .replace('{attacker_name}', targetName)
+                                .replace('{attacker_source}', attackerSrc.name || '')
+                                .replace('{defender_name}', rec.name)
+                                .replace('{defender_ability}', t.source && t.source.name || rec.name);
+                            byCard.set(key, {
+                                name:       rec.name,
+                                cardId:     c.key,
+                                narrative,
+                                confidence: t.confidence,
+                                attackSource: t.source && t.source.name,
+                                hidden:     false,
+                            });
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
         // Skip the target card itself — "this card is a tech against
         // itself" is technically a mirror-tech but clutters the list.
         byCard.delete(targetName.toLowerCase());

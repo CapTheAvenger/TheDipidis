@@ -7040,7 +7040,33 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             // synergy-filtered pool.
             aceSpecCandidates.length = 0;
             for (const c of _aceSpecPool) aceSpecCandidates.push(c);
-            const aceSpecSlotCard = aceSpecCandidates[0] || null;
+
+            // PIN OVERRIDE for ACE-SPEC slot. Stage 0 below skips Ace
+            // Specs (`if (isAceSpecCard(card)) return;`) so a user pin on
+            // an Ace Spec card would otherwise be silently ignored — the
+            // scoring algorithm would still pick whichever Ace Spec has
+            // the highest consistency score (e.g. Max Belt at Ø 1.00),
+            // dropping the pinned card (e.g. Scoop Up Cyclone). When the
+            // user has pinned exactly one Ace Spec that's actually in
+            // the candidate pool, honour that pin instead of the score.
+            // Multiple pinned Ace Specs falls back to score-order — the
+            // format rule "one Ace Spec per deck" means we can only
+            // forcibly add one anyway.
+            const _aceSpecPinBucket = (window.pinnedCards || {})[source];
+            const _aceSpecPinNorm = (s) => (typeof normalizeCardName === 'function')
+                ? normalizeCardName(s || '')
+                : String(s || '').toLowerCase().trim();
+            let _pinForcedAceSpec = null;
+            if (_aceSpecPinBucket && _aceSpecPinBucket.size > 0) {
+                _pinForcedAceSpec = aceSpecCandidates.find(c => _aceSpecPinBucket.has(_aceSpecPinNorm(c.card_name))) || null;
+            }
+            if (_pinForcedAceSpec) {
+                devLog(`[Consistency][ACE-SPEC-PinOverride] Forced by user pin: ${_pinForcedAceSpec.card_name}`);
+            }
+            const aceSpecSlotCard = _pinForcedAceSpec || aceSpecCandidates[0] || null;
+            // Expose the pin-forced Ace Spec name so Stage 0's missing-
+            // pin diagnostic doesn't flag it as "pinned but not added".
+            window.__pinForcedAceSpecName = _pinForcedAceSpec ? _aceSpecPinNorm(_pinForcedAceSpec.card_name) : null;
             // Capture the ACE-SPEC pick reasoning so the "Why?" modal can
             // explain it. Without this the user sees Secret Box instead of
             // Maximum Belt and has no way to tell that Secret Box won
@@ -7358,7 +7384,15 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 });
                 // Pins the user requested that aren't in the
                 // archetype's card pool: collect their names so the
-                // Setup-Consistency warning can surface them later.
+                // Setup-Consistency warning can surface them later. The
+                // pin-forced Ace Spec (handled separately above) doesn't
+                // count as missing — Stage 0 deliberately skips Ace Specs
+                // so its `_seenPinNames` will never have it, but the
+                // Ace-Spec slot picker did honour the pin.
+                if (window.__pinForcedAceSpecName) {
+                    _seenPinNames.add(window.__pinForcedAceSpecName);
+                    window.__lastBuildPinDiagnostics.injected.push({ name: window.__pinForcedAceSpecName, count: 1, slot: 'ace-spec' });
+                }
                 _pinnedSet.forEach(nm => {
                     if (!_seenPinNames.has(nm)) {
                         window.__lastBuildPinDiagnostics.missing.push(nm);

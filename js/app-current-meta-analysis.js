@@ -576,6 +576,17 @@
                 const avgCount = dwCombined > 0 ? (tcCombined / dwCombined) : 0;
                 merged.push({
                     ...rep,
+                    // Set both `deck_count` and `deck_inclusion_count` to the
+                    // combined value. Card-tile rendering reads
+                    // `card.deck_count || card.deck_inclusion_count` so if
+                    // only the latter is updated the spread of `rep` leaks
+                    // the primary archetype's pre-fusion deck_count through
+                    // (user-reported: fusion showed "21/52 (100,0%)" — the
+                    // 21 came from rep.deck_count after Ursaluna's
+                    // per-archetype Major-merge, the 52 was the correct
+                    // combined total_decks, and the 100% was the correct
+                    // fused percentage; only the numerator was stale).
+                    deck_count: dwCombined,
                     deck_inclusion_count: dwCombined,
                     total_count: tcCombined,
                     max_count: maxCombined,

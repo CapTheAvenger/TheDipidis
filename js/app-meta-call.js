@@ -187,7 +187,7 @@ window.MetaCall = (function () {
   let _journalRateKeys  = [];  // opponents with 3+ journal games (for badge display)
   let _journalStats     = {};  // opponent -> {wins, losses, ties, total, winRate}
 
-  const TOP_N = 20;              // show top N decks; everything else rolls into Junk
+  const TOP_N = 25;              // show top N decks; everything else rolls into Junk
   const MAX_CUSTOM = 10;         // max custom decks the user can add
   const SCENARIOS_STORAGE_KEY = 'metacall_scenarios_v1';
   const PREDICTOR_LOG_KEY      = 'metacall_predictor_log_v1';
@@ -2701,15 +2701,17 @@ window.MetaCall = (function () {
   // The "winner" of the predicted meta — which deck a player should
   // bring to maximise their tournament-win chance.
   //
-  // Candidate pool: top 20 decks from the predicted share list (matches
-  // the field's TOP_N=20). High-WR counter-meta picks like Crustle or
+  // Candidate pool: top 25 decks from the predicted share list (matches
+  // the field's TOP_N=25). High-WR counter-meta picks like Crustle or
   // Festival Lead that sit just outside the top of the share list often
   // have the BEST Day-2 odds against the actual top decks — keeping the
-  // pool at 20 ensures they're evaluated.
+  // pool at 25 ensures they're evaluated. (Bumped from 20 to 25 after
+  // Utrecht 2026 surfaced Lucario/Hariyama and Lopunny/Froslass at
+  // ~4 % field each — both invisible at the old 20-deck horizon.)
   function calcRecommendations(field, topN = 5) {
     if (!_shareList || !field || field.length === 0) return [];
 
-    const RECO_POOL_SIZE = 20;
+    const RECO_POOL_SIZE = 25;
     const seen = new Set();
     const candidates = [];
 

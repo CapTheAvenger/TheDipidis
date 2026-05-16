@@ -39,6 +39,17 @@
     },
     {
       "tag": "attack.bench_damage",
+      "confidence": "high",
+      "scope": "attack.text",
+      "regex": "choose\\s+\\d+\\s+of\\s+your\\s+opponent'?s\\s+poké?mon\\s+\\d+\\s+times",
+      "flags": "i",
+      "examples": [
+        "Arboliva ex Oil Salvo: 'Choose 1 of your opponent's Pokémon 6 times. ... For each time you chose a Pokémon, do 20 damage to it.' (Pokemon Rulings Compendium #2160 confirms Shaymin Flower Curtain blocks the bench portion.)",
+        "Zeraora VSTAR Lightning Storm Star: 'Choose 1 of your opponent's Pokémon 4 times. ...'"
+      ]
+    },
+    {
+      "tag": "attack.bench_damage",
       "confidence": "medium",
       "scope": "attack.text",
       "regex": "damage\\s+to\\s+each\\s+of\\s+your\\s+opponent'?s\\s+(?:benched\\s+)?poké?mon",

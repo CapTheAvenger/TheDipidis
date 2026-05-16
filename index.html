@@ -1185,7 +1185,7 @@
                       Populated by renderMatchupsVsMetaCall() in
                       app-current-meta-analysis.js.
                     -->
-                    <div id="currentMetaVsMetaCallSection" class="display-none mb-40 bg-light px-30 br-8 mc-vs-section">
+                    <div id="currentMetaVsMetaCallSection" class="display-none mb-40 bg-light px-30 br-8 mc-vs-section cm-deep-dive-only">
                         <h3 id="currentMetaVsMetaCallTitle" class="mc-vs-title">
                             <span data-i18n="matchup.vsMetaCallTitle">Matchups vs Meta Call (Predicted Field)</span>
                         </h3>
@@ -1267,7 +1267,7 @@
                             <div class="current-meta-action-group deck-builder-primary-actions">
                                 <span class="action-group-label" data-i18n="cl.generate">Generate</span>
                                 <button class="btn-modern primary deck-builder-main-cta" onclick="autoCompleteConsistency('currentMeta', 'min')" title="Uses tournament data for optimal card counts" data-i18n="cl.genConsistency" data-i18n-title="cl.genConsistencyTitle">Consistency Generate</button>
-                                <button class="btn-modern" onclick="openAntiTechModal('currentMeta')" data-i18n="antiTech.buildVsBtn" data-i18n-title="antiTech.buildVsBtnTitle" title="Generate a tech-heavy deck aimed at a specific opponent">Build vs ...</button>
+                                <button class="btn-modern cm-deep-dive-only" onclick="openAntiTechModal('currentMeta')" data-i18n="antiTech.buildVsBtn" data-i18n-title="antiTech.buildVsBtnTitle" title="Generate a tech-heavy deck aimed at a specific opponent">Build vs ...</button>
                                 <button class="btn-modern" onclick="toggleDeckRarity('currentMeta', this)" data-rarity-toggle="currentMeta" data-mode="max" title="Swap every card in the current deck to its highest-rarity print" data-i18n="deck.upgradeRarity" data-i18n-title="deck.upgradeRarityTitle">↑ Max Rarity</button>
                             </div>
                             <div class="action-divider"></div>
@@ -1293,7 +1293,7 @@
                                 <button class="btn-modern tertiary-danger deck-builder-clear-btn" onclick="clearDeck('currentMeta')" id="currentMetaClearDeckBtn" data-i18n="cl.clear">Clear</button>
                             </div>
                         </div>
-                        <div class="tech-slots-row" data-source="currentMeta">
+                        <div class="tech-slots-row cm-deep-dive-only" data-source="currentMeta">
                             <div class="tech-slots-header">
                                 <span class="tech-slots-label" data-i18n="techSlots.label">Tech Cards</span>
                                 <span class="tech-slots-hint" data-i18n="techSlots.hint">(forced into next Generate)</span>
@@ -1353,7 +1353,7 @@
                         
                         
                         <!-- Meta Card Analysis (Cross-Archetype) -->
-                        <div class="meta-card-analysis-block">
+                        <div class="meta-card-analysis-block cm-deep-dive-only">
                             <div class="meta-card-analysis-container">
                                 <div class="meta-card-analysis-header-row">
                                     <h3 class="meta-card-analysis-title" data-i18n="section.metaCards">Meta Card Analysis (Top 10 Archetypes)</h3>
@@ -1393,7 +1393,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="tech-vs-normal-section d-none" id="currentMetaTechVsNormalSection">
+                        <div class="tech-vs-normal-section d-none cm-deep-dive-only" id="currentMetaTechVsNormalSection">
                             <div class="tech-vs-normal-header">
                                 <h3 class="tech-vs-normal-title" data-i18n="techVsNormal.title">Tech vs Normal</h3>
                                 <span class="tech-vs-normal-subtitle" data-i18n="techVsNormal.subtitle">Compares the latest Normal build to the latest Tech build for this source.</span>

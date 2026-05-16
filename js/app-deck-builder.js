@@ -1648,40 +1648,18 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 const cardId = `${safeCardName}|${setCode}|${setNumber}`;
                 const isOwned = window.userCollection && window.userCollection.has(cardId);
                 const ownedBadge = isOwned ? '<div style="position: absolute; top: 5px; left: 5px; background: #4CAF50; color: white; width: 25px; height: 25px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.5); z-index: 4;">✓</div>' : '';
-                
-                const pinned = (typeof isPinnedCard === 'function') && isPinnedCard(source, safeCardName);
-                const excluded = (typeof isExcludedCard === 'function') && isExcludedCard(source, safeCardName);
-                const pinnedClass = pinned ? ' is-pinned' : '';
-                const excludedClass = excluded ? ' is-excluded' : '';
-                const pinTitle = pinned
-                    ? (t('deck.pinTitleUnpin') || 'Unpin — let the algorithm decide again')
-                    : (t('deck.pinTitlePin') || 'Pin — keep this card on next Consistency Generate');
-                const pinIcon = pinned ? '📌' : '📍';
-                const excludeTitle = excluded
-                    ? (t('deck.excludeTitleUnexclude') || 'Un-exclude — let the algorithm consider this card again')
-                    : (t('deck.excludeTitleExclude') || 'Exclude — keep this card out of the next Consistency Generate');
-                const excludeIcon = excluded ? '⛔' : '🚫';
-                const pinBadge = pinned
-                    ? `<div class="deck-card-pin-badge" title="${pinTitle}">📌</div>`
-                    : '';
-                const excludeBadge = excluded
-                    ? `<div class="deck-card-exclude-badge" title="${excludeTitle}">⛔</div>`
-                    : '';
+
                 html += `
-                    <div class="deck-card pos-rel${pinnedClass}${excludedClass}" title="${safeCardName} (${count}x) - ${percentage}%">
+                    <div class="deck-card pos-rel" title="${safeCardName} (${count}x) - ${percentage}%">
                         <img src="${imageUrl}" alt="${safeCardName}" loading="lazy" class="card-img-std cursor-zoom" onerror="handleCardImageError(this, '${setCode}', '${setNumber}')" onclick="showSingleCard(this.src, '${cardNameEscaped} (${setCode} ${setNumber})')">
                         ${ownedBadge}
                         ${typeof getWishlistBadgeHtml === 'function' ? getWishlistBadgeHtml(safeCardName, setCode, setNumber) : ''}
-                        ${pinBadge}
-                        ${excludeBadge}
                         <div class="card-max-count">${count}</div>
                         <div class="deck-card-overlay">${overlayText}</div>
                         <div class="deck-card-actions">
-                            <div class="deck-card-action-row" style="grid-template-columns: 1fr 1fr 1fr 1fr 1fr;">
+                            <div class="deck-card-action-row" style="grid-template-columns: 1fr 1fr 1fr;">
                                 <button onclick="removeCardFromDeck('${source}', '${deckKeyEscaped}')" class="city-league-card-action-btn city-league-card-remove-btn" title="Remove from deck">-</button>
                                 <button onclick="openRaritySwitcher('${cardNameEscaped}', '${deckKeyEscaped}')" class="city-league-card-action-btn city-league-card-rarity-btn" title="Switch rarity/print">★</button>
-                                <button onclick="togglePinCard('${source}', '${cardNameEscaped}')" class="city-league-card-action-btn city-league-card-pin-btn${pinned ? ' is-active' : ''}" title="${pinTitle}">${pinIcon}</button>
-                                <button onclick="toggleExcludeCard('${source}', '${cardNameEscaped}')" class="city-league-card-action-btn city-league-card-exclude-btn${excluded ? ' is-active' : ''}" title="${excludeTitle}">${excludeIcon}</button>
                                 <button onclick="addCardToDeck('${source}', '${cardNameEscaped}', '${setCode}', '${setNumber}')" class="city-league-card-action-btn city-league-card-add-btn" title="Add to deck">+</button>
                             </div>
                             <div class="deck-card-action-row" style="grid-template-columns: 1fr 1fr 2fr;">
@@ -3839,12 +3817,27 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 });
                 if (!prints.length) { pushKey(key, count); return; }
 
+                // Tiebreak ties on rarity rank (e.g. two Special Art Rare prints) by Cardmarket eur_price — Max picks pricier, Lo picks cheaper.
+                const priceVal = (c) => {
+                    const raw = c && c.eur_price;
+                    if (!raw) return null;
+                    const n = parseFloat(String(raw).replace(/[^0-9,.\-]/g, '').replace(',', '.'));
+                    return isFinite(n) && n > 0 ? n : null;
+                };
                 let best = prints[0];
                 for (let i = 1; i < prints.length; i++) {
-                    const better = dir === 'max'
-                        ? (rank(prints[i].rarity) > rank(best.rarity))
-                        : (rank(prints[i].rarity) < rank(best.rarity));
-                    if (better) best = prints[i];
+                    const cand = prints[i];
+                    const cr = rank(cand.rarity), br = rank(best.rarity);
+                    const rankBetter = dir === 'max' ? (cr > br) : (cr < br);
+                    if (rankBetter) { best = cand; continue; }
+                    if (cr === br) {
+                        const cp = priceVal(cand), bp = priceVal(best);
+                        if (cp != null && bp != null) {
+                            if (dir === 'max' ? cp > bp : cp < bp) best = cand;
+                        } else if (cp != null && bp == null && dir === 'max') {
+                            best = cand;
+                        }
+                    }
                 }
                 const bestSet = String(best.set || '').toUpperCase();
                 const bestNum = String(best.number || '').toUpperCase();

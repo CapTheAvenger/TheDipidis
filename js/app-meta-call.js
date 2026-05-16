@@ -122,10 +122,41 @@ window.MetaCall = (function () {
   // than the online ladder suggests. 4.6 reduces the family's
   // predicted share proportional to its excess concentration —
   // shifting share INTO the counters via renormalisation.
+  //
+  // 2026-05-16 tune: original PER_PP=0.10 + CAP=3.0 only moved
+  // Dragapult-family from 31.3 % predicted → ~30 % predicted vs
+  // ~25 % expected actual at Utrecht (two consecutive 30 %-Dragapult
+  // regionals trigger player counter-adaption that the online
+  // ladder doesn't yet reflect). Bumped to PER_PP=0.30 + CAP=6.0
+  // so at 31.3 % family, suppression = min(6.0, 11.3 × 0.30) =
+  // 3.39 pp → predicted family ~28 %, then renormalisation pulls
+  // it closer to ~26 % as counters absorb the freed share.
   const PREDICTOR_46_FAMILY_FLOOR_PCT  = 20;    // family must hold ≥ this share to start suppression
-  const PREDICTOR_46_SUPPRESS_PER_PP   = 0.10;  // suppress 0.10 pp of family share per pp of excess
-  const PREDICTOR_46_SUPPRESS_CAP_PP   = 3.0;   // hard cap on total family suppression
+  const PREDICTOR_46_SUPPRESS_PER_PP   = 0.30;  // suppress 0.30 pp of family share per pp of excess
+  const PREDICTOR_46_SUPPRESS_CAP_PP   = 6.0;   // hard cap on total family suppression
   let _fieldSuppressionLastLogId = null;
+
+  // ── Predictor 4.7 — Counter-Adoption Boost ─────────────────
+  // 4.5 only fires when online matchup WR ≥ 50 % vs the dominant
+  // family. But the labs ground-truth shows decks like Alakazam
+  // Dudunsparce (5.10 % at LA, 6.07 % at Prague) and Festival
+  // Lead (5.97 % at LA) get brought heavily despite their online
+  // matchup vs every Dragapult variant sitting at 37-49 %. The
+  // signal is BEHAVIOURAL ADAPTION — players bring these decks
+  // because (a) their offline pilot pool or tech choices outperform
+  // the online sample, or (b) the deck is strong vs the rest of
+  // the field even if it loses to Dragapult head-to-head.
+  //
+  // The adaption signal: `brought_share > ladder_share` means the
+  // deck was brought MORE than the online ladder predicted —
+  // a direct measure of "players are picking this OVER what online
+  // play suggests." Only fires when there IS a dominant family to
+  // counter (otherwise it's not an adaption signal, just noise).
+  const PREDICTOR_47_DOMINANT_FAMILY_PCT = 25;   // dominant family must hold ≥ this for adaption signal to fire
+  const PREDICTOR_47_DELTA_MIN_PP        = 0.5;  // brought - ladder must exceed this to be a signal
+  const PREDICTOR_47_BOOST_PER_PP        = 0.50; // 50 % of (brought - ladder) gets added as a pp boost
+  const PREDICTOR_47_BOOST_CAP_PP        = 1.5;  // hard cap per deck
+  let _adoptionBoostLastLogId = null;
 
   // ── Predictor 5.5 — Online-Presence Floor ──────────────────
   // Guarantee a minimum predicted share for decks with verified
@@ -1445,6 +1476,81 @@ window.MetaCall = (function () {
     } catch (_e) { /* dev log only */ }
   }
 
+  // ── Predictor 4.7 — Counter-Adoption Boost ─────────────────
+  // Boost decks where the labs brought-share exceeds the online
+  // ladder share — direct signal that players are picking the
+  // deck over what online play suggests, typically as a counter
+  // to a dominant online family. Runs AFTER 4.5/4.6 so it
+  // captures decks 4.5 missed (matchup WR < 50 %) but which the
+  // tournament-floor data clearly shows as adopted counters.
+  function _computeCounterAdoptionBoost() {
+    if (!_shareList || _shareList.length === 0) return;
+    if (!_tournamentStats) return;
+
+    // Need a dominant family for the adaption signal to make
+    // sense — at low concentration, brought > ladder is just
+    // noise, not counter-meta behaviour.
+    const totalLadder = _shareList.reduce((s, d) => s + (d.ladderShare || 0), 0) || 1;
+    const familyLadder = new Map();
+    _shareList.forEach(d => {
+      const family = extractMainPokemon(d.name);
+      if (!family) return;
+      familyLadder.set(family, (familyLadder.get(family) || 0) + (d.ladderShare || 0));
+    });
+    let maxFamilyPct = 0;
+    let dominantFamily = null;
+    familyLadder.forEach((share, family) => {
+      const pct = (share / totalLadder) * 100;
+      if (pct > maxFamilyPct) { maxFamilyPct = pct; dominantFamily = family; }
+    });
+    if (maxFamilyPct < PREDICTOR_47_DOMINANT_FAMILY_PCT) return;
+
+    const totalRaw = _shareList.reduce((s, d) => s + (d.predictedShareRaw || 0), 0) || 1;
+    const applied = [];
+
+    _shareList.forEach(d => {
+      // Skip members of the dominant family — they're being
+      // suppressed by 4.6, not boosted.
+      if (extractMainPokemon(d.name) === dominantFamily) return;
+
+      const k = normalize(d.name);
+      const stats = _tournamentStats[k];
+      if (!stats || !stats.broughtShare) return;
+
+      const broughtPct = stats.broughtShare;
+      const ladderPct  = (d.ladderShare / totalLadder) * 100;
+      const deltaPp    = broughtPct - ladderPct;
+      if (deltaPp < PREDICTOR_47_DELTA_MIN_PP) return;
+
+      const boostPp = Math.min(PREDICTOR_47_BOOST_CAP_PP, deltaPp * PREDICTOR_47_BOOST_PER_PP);
+      if (boostPp <= 0) return;
+
+      // Convert pp to raw share units in the same scale.
+      const boostRawShare = (boostPp / 100) * totalRaw;
+      d.predictedShareRaw     = (d.predictedShareRaw || 0) + boostRawShare;
+      d.adoptionBoostPp       = boostPp;
+      d.adoptionBoostBrought  = broughtPct;
+      d.adoptionBoostLadder   = ladderPct;
+      applied.push({ name: d.name, boostPp, broughtPct, ladderPct, deltaPp });
+    });
+
+    try {
+      const majorId = _lastMajorInfo && _lastMajorInfo.id;
+      if (majorId && _adoptionBoostLastLogId !== majorId) {
+        _adoptionBoostLastLogId = majorId;
+        if (applied.length === 0) {
+          console.log(`[Predictor 4.7] Counter-adoption boost: no decks qualified vs ${dominantFamily} (${maxFamilyPct.toFixed(1)} %)`);
+        } else {
+          const lines = applied
+            .sort((a, b) => b.boostPp - a.boostPp)
+            .map(a => `${a.name}: +${a.boostPp.toFixed(2)} pp (brought ${a.broughtPct.toFixed(2)} % vs ladder ${a.ladderPct.toFixed(2)} %, Δ ${a.deltaPp.toFixed(2)})`)
+            .join('\n  ');
+          console.log(`[Predictor 4.7] Counter-adoption boost vs ${dominantFamily} (${maxFamilyPct.toFixed(1)} %):\n  ${lines}`);
+        }
+      }
+    } catch (_e) { /* dev log only */ }
+  }
+
   // ── Predictor 5.5 — Online-Presence Floor ──────────────────
   // Guarantee a minimum predicted share for decks with verified
   // multi-source presence. Lucario Hariyama was getting crushed
@@ -2012,6 +2118,14 @@ window.MetaCall = (function () {
     // boosting counters, the renormalisation step naturally shifts
     // share from the dominant family INTO the counters.
     _computeFieldSuppression();
+
+    // Predictor 4.7 — Counter-Adoption Boost. Catches decks 4.5
+    // missed (matchup WR < 50 %) but which the labs brought-share
+    // shows are being adopted as counters anyway. Runs after 4.6
+    // so the boost lands on post-suppression raw values; renorm
+    // step then redistributes the freed share from the dominant
+    // family into these adopted counters.
+    _computeCounterAdoptionBoost();
 
     // Predictor 5.5 — Online-Presence Floor. Final safety floor for
     // decks with verified online + labs presence that the dampers

@@ -31,6 +31,25 @@
     },
     {
       "tag": "attack.bench_damage",
+      "confidence": "high",
+      "scope": "attack.text",
+      "regex": "damage\\s+counters?\\s+(?:on|to)\\s+your\\s+opponent'?s\\s+benched\\s+poké?mon",
+      "flags": "i",
+      "examples": ["Dragapult ex Phantom Dive: 'Put 6 damage counters on your opponent's Benched Pokemon in any way you like.'"]
+    },
+    {
+      "tag": "attack.bench_damage",
+      "confidence": "high",
+      "scope": "attack.text",
+      "regex": "choose\\s+\\d+\\s+of\\s+your\\s+opponent'?s\\s+poké?mon\\s+\\d+\\s+times",
+      "flags": "i",
+      "examples": [
+        "Arboliva ex Oil Salvo: 'Choose 1 of your opponent's Pokémon 6 times. ... For each time you chose a Pokémon, do 20 damage to it.' (Pokemon Rulings Compendium #2160 confirms Shaymin Flower Curtain blocks the bench portion.)",
+        "Zeraora VSTAR Lightning Storm Star: 'Choose 1 of your opponent's Pokémon 4 times. ...'"
+      ]
+    },
+    {
+      "tag": "attack.bench_damage",
       "confidence": "medium",
       "scope": "attack.text",
       "regex": "damage\\s+to\\s+each\\s+of\\s+your\\s+opponent'?s\\s+(?:benched\\s+)?poké?mon",
@@ -78,6 +97,14 @@
       "scope": "ability.text",
       "regex": "your\\s+benched\\s+poké?mon\\s+take\\s+no\\s+damage",
       "flags": "i"
+    },
+    {
+      "tag": "ability.bench_protection",
+      "confidence": "high",
+      "scope": "card_text",
+      "regex": "prevent\\s+all\\s+damage\\s+counters?\\s+from\\s+being\\s+placed\\s+on[^.]{0,60}benched\\s+poké?mon",
+      "flags": "i",
+      "examples": ["Battle Cage (PFL 85, Stadium): 'Prevent all damage counters from being placed on Benched Pokemon ... by effects of attacks and Abilities from the opponent's Pokemon.'"]
     },
     {
       "tag": "ability.damage_reduction",

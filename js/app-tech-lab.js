@@ -174,6 +174,10 @@
         const rows = (typeof window !== 'undefined' && window.currentMetaAnalysisData) || [];
         const seen = new Set();
         const out = [];
+        // Index of allCardsDatabase by SET|NUM for German-name lookup.
+        // The meta CSV only has `card_name` (English/locale-mixed); the
+        // German name lives on allCardsDatabase.name_de.
+        const dbIndex = (typeof window !== 'undefined' && window.cardIndexBySetNumber) || null;
         for (const r of rows) {
             if (!r) continue;
             const set = String(r.set_code || '').toUpperCase().trim();
@@ -183,7 +187,12 @@
             const key = `${set}|${num}`;
             if (seen.has(key)) continue;
             seen.add(key);
-            out.push({ key, name });
+            let nameDe = '';
+            if (dbIndex) {
+                const dbCard = dbIndex.get(key) || dbIndex.get(`${set}-${num}`);
+                if (dbCard) nameDe = String(dbCard.name_de || '').trim();
+            }
+            out.push({ key, name, name_de: nameDe });
         }
         _allMetaCards = out;
         _allMetaCardSet = seen;
@@ -879,8 +888,16 @@
             await _ensureMetaDataLoaded();
             _rebuildMetaCards();
         }
+        // Search across English name, German name, and set+number.
+        // Set+number tolerates "ASC 39", "ASC-39", "ASC39", or just "ASC|39".
+        const qNorm = q.replace(/[\s\-|]+/g, '');
         const matches = _allMetaCards
-            .filter(c => c.name.toLowerCase().includes(q))
+            .filter(c => {
+                if (c.name && c.name.toLowerCase().includes(q)) return true;
+                if (c.name_de && c.name_de.toLowerCase().includes(q)) return true;
+                if (c.key && c.key.toLowerCase().replace(/[\s\-|]+/g, '').includes(qNorm)) return true;
+                return false;
+            })
             .slice(0, 15);
         if (matches.length === 0) {
             list.innerHTML = `<div class="tech-lab-picker-empty">${

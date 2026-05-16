@@ -571,42 +571,24 @@
     }
 
     // Viability heuristic for the "non-EX implicit-immunes" bucket.
+    // After 2026-05 full update, ~79% of records have real attack
+    // cost arrays. The preferred path uses cost directly; the
+    // damage-as-proxy fallback only fires for records where the
+    // scraper didn't get cost (legacy SWSH/older sets).
     //
-    // Important data caveat — the scraped pokemon_card_effects.json
-    // has EMPTY cost arrays for every attack (the scraper didn't
-    // collect energy symbols). So we can't filter by actual cost.
-    //
-    // User feedback: "wie ich da 3 Energien ranbekommen soll? Bei
-    // Team Rocket Arktos geht es wegen der rocket Energie aber
-    // ansonsten sind 3 Energien viel zu viel". We need to estimate
-    // cost from damage instead.
-    //
-    // Damage as energy-cost proxy (rule of thumb in TCG):
-    //   30-60 damage → 1 energy
-    //   60-100 damage → 2 energies
-    //   100-130 damage → 3 energies
-    //   130+ damage → 3-4+ energies (or ex/v card)
-    //
-    // For a non-EX Basic to be a "fast tech" we want 1-2 energy
-    // attackers — i.e. damage in the 60-100 static range, or
-    // scaling multipliers that ramp into bigger numbers later.
+    // Damage thresholds apply in BOTH paths — a 20-damage @ 1-energy
+    // attack (Hoothoot Flap, Chien-Pao Strafe) is still not a
+    // credible meta tech even if the cost is low.
     //
     // Filter — must meet ALL:
     //   1. card_type starts with "Basic"
     //   2. attack text doesn't mention a coin flip (unreliable damage)
-    //   3. attack damage qualifies via ONE of:
-    //      a. static damage 60-100  (likely 1-2 energy)
-    //      b. "+" bonus, base 50-80 (likely 2 energy with conditional)
-    //      c. "×" multiplier, base ≥ 20  (Passimian-style scaling
-    //         attacks are usually 2-energy attackers)
-    //
-    // This intentionally rejects high-damage Basics like
-    // Chien-Pao 120, Tapu Bulu 220, Zapdos 190, Hop's Snorlax 140
-    // — they all need 3+ energy and aren't viable as "instant
-    // tech swap" attackers without dedicated energy acceleration.
-    // Special cases (Team Rocket's Articuno with Rocket Energy
-    // acceleration) come in via the lower damage attacks that
-    // their archetype uses.
+    //   3. EITHER (real cost ≤ 2) OR (no cost data, falling back to
+    //      damage-as-proxy where 60-100 static implies 1-2 energy)
+    //   4. damage qualifies via ONE of:
+    //      a. static base ≥ 60
+    //      b. "+" bonus, base ≥ 40 (relaxed in cost path, 50-80 in proxy)
+    //      c. "×" multiplier, base ≥ 20 (scaling attacks ramp up)
     function _isViableNonExAttacker(rec) {
         if (!rec) return false;
         const cardType = String(rec.card_type || '').toLowerCase();
@@ -620,39 +602,22 @@
             const base = parseInt(baseMatch[1], 10);
             if (!Number.isFinite(base)) continue;
             const text = String(a.text || '').toLowerCase();
-            const isCoinFlip = /\bflip\s+(?:a\s+|\d+\s+)?coins?\b/.test(text);
+            if (/\bflip\s+(?:a\s+|\d+\s+)?coins?\b/.test(text)) continue;
 
-            // Coin-flip damage is unreliable regardless of base —
-            // skip on any attack type.
-            if (isCoinFlip) continue;
+            const isMult = /[×x]/i.test(dmgStr);
+            const isPlus = /\+/.test(dmgStr);
 
-            // PREFERRED PATH: use the actual energy cost when the
-            // scraper populated it. The backend scraper was returning
-            // empty cost arrays for every attack due to a DOM-format
-            // change at Limitless (now <span class="ptcg-symbol">WWC
-            // </span> as text content instead of per-symbol classes).
-            // Once the scraper-fix in pokemon_card_effects_scraper.py
-            // makes its way through the next auto-update, every attack
-            // will have a real cost array and this branch takes over
-            // from the damage-as-proxy fallback below.
             if (cost.length > 0) {
-                if (cost.length > 2) continue;          // 3+ energy = too slow
-                if (base > 0) return true;              // ≤2 energy + any damage = fast attacker
+                if (cost.length > 2) continue;
+                if (isMult && base >= 20) return true;
+                if (isPlus && base >= 40) return true;
+                if (base >= 60) return true;
                 continue;
             }
 
-            // FALLBACK: damage-as-energy-cost proxy. Used when cost
-            // data is missing (currently every record). Same rules
-            // as before: 60-100 static, 50-80 conditional, ≥20×
-            // scaling.
-            if (/[×x]/i.test(dmgStr)) {
-                if (base >= 20) return true;
-                continue;
-            }
-            if (/\+/.test(dmgStr)) {
-                if (base >= 50 && base <= 80) return true;
-                continue;
-            }
+            // Proxy fallback (no cost data) — damage range implies energy cost
+            if (isMult) { if (base >= 20) return true; continue; }
+            if (isPlus) { if (base >= 50 && base <= 80) return true; continue; }
             if (base >= 60 && base <= 100) return true;
         }
         return false;

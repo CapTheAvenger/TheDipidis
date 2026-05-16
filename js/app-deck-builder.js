@@ -3817,27 +3817,40 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 });
                 if (!prints.length) { pushKey(key, count); return; }
 
-                // Tiebreak ties on rarity rank (e.g. two Special Art Rare prints) by Cardmarket eur_price — Max picks pricier, Lo picks cheaper.
+                // Pick the print the user actually wants:
+                //   Max  → most expensive (= most premium / collectible) print
+                //   Lo   → cheapest print
+                // Price is the primary signal because the rarity-rank chart
+                // disagrees with the market on cards like N's Zekrom: ASC 155
+                // is "Rare" (rank 4) at 0.19€, but the MEP 31 alt-art "Promo"
+                // (rank 3) goes for ~6€ — clearly the premium print. Rarity
+                // rank is kept as a tiebreaker for prints without price data
+                // and for equal prices (e.g. two SAR prints both at 0€).
                 const priceVal = (c) => {
                     const raw = c && c.eur_price;
                     if (!raw) return null;
                     const n = parseFloat(String(raw).replace(/[^0-9,.\-]/g, '').replace(',', '.'));
                     return isFinite(n) && n > 0 ? n : null;
                 };
+                const isBetter = (cand, current) => {
+                    const cp = priceVal(cand);
+                    const bp = priceVal(current);
+                    if (cp != null && bp != null && cp !== bp) {
+                        return dir === 'max' ? cp > bp : cp < bp;
+                    }
+                    const cr = rank(cand.rarity);
+                    const br = rank(current.rarity);
+                    if (cr !== br) {
+                        return dir === 'max' ? cr > br : cr < br;
+                    }
+                    // Same rank + same/missing price: prefer the one that has
+                    // a price at all (signals it's a real, traded print rather
+                    // than a data-gap entry).
+                    return cp != null && bp == null;
+                };
                 let best = prints[0];
                 for (let i = 1; i < prints.length; i++) {
-                    const cand = prints[i];
-                    const cr = rank(cand.rarity), br = rank(best.rarity);
-                    const rankBetter = dir === 'max' ? (cr > br) : (cr < br);
-                    if (rankBetter) { best = cand; continue; }
-                    if (cr === br) {
-                        const cp = priceVal(cand), bp = priceVal(best);
-                        if (cp != null && bp != null) {
-                            if (dir === 'max' ? cp > bp : cp < bp) best = cand;
-                        } else if (cp != null && bp == null && dir === 'max') {
-                            best = cand;
-                        }
-                    }
+                    if (isBetter(prints[i], best)) best = prints[i];
                 }
                 const bestSet = String(best.set || '').toUpperCase();
                 const bestNum = String(best.number || '').toUpperCase();

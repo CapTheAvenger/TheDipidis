@@ -154,52 +154,65 @@
                 .trim();
             const archLower = String(archetype || '').trim().toLowerCase();
 
-            const archetypeRows = tournamentRows.filter(r => {
+            // Restrict to the current meta date window. The 'play' path
+            // applies this filter when loading currentMetaTournamentCardsData,
+            // but the 'all' path's lazy-load doesn't (line ~1318-1326), so
+            // depending on filter-toggle order the cached value could
+            // include tournaments outside the meta window. Filter here
+            // defensively so the cumulative sum below stays scoped.
+            const metaScoped = (typeof filterTournamentRowsByMetaDate === 'function')
+                ? filterTournamentRowsByMetaDate(tournamentRows)
+                : tournamentRows;
+
+            const archetypeRows = metaScoped.filter(r => {
                 const cleaned = stripExSuffix(stripPriceTag(r.archetype || '')).toLowerCase();
                 return cleaned && cleaned === archLower;
             });
             if (archetypeRows.length === 0) return onlineRows;
 
-            // Latest tournament_date for this archetype — the ordinal
-            // English format ("25th April 2026") doesn't sort lexically
-            // so we parse explicitly.
-            const dateParser = (typeof parseEnglishTournamentDate === 'function')
-                ? parseEnglishTournamentDate
-                : (s) => { const d = new Date(String(s || '').replace(/(\d+)(st|nd|rd|th)/, '$1')); return isNaN(d.getTime()) ? null : d; };
-            let latestTs = -Infinity;
-            let latestRaw = '';
+            // Aggregate per-card stats CUMULATIVELY across every Major
+            // tournament in the meta window. Previous implementation
+            // filtered down to the single latest tournament_date, which
+            // produced surprising results for archetypes with sparse
+            // recent Major presence: Lucario/Hariyama's latest Major had
+            // only 3 decks, the < 4 floor below silently dropped ALL
+            // Major contribution, and the "All" filter then matched
+            // "Limitless Only" exactly even though the archetype-select
+            // dropdown's deck-count column showed 11 Major decks cumulated
+            // across multiple tournaments. The 'play' filter already
+            // sums across tournaments to compute that 11 — this merge
+            // now does the same so "All" actually means
+            // Online_cumulative + Major_cumulative.
+            //
+            // A "bucket" = (tournament_id, price-tagged archetype string).
+            // All card rows inside a bucket share the same
+            // total_decks_in_archetype value, and prints of the same
+            // card inside one bucket share their deck-inclusion (the
+            // deck-list snapshot picked one print per slot). So we
+            // collapse prints WITHIN a bucket (max for deck_count, sum
+            // for total_count), then sum ACROSS buckets for the
+            // cumulative Major total.
+            const bucketCardsByName = new Map();   // bucketKey → Map(card_lower → per-bucket stats)
+            const bucketTotalDecks = new Map();    // bucketKey → total_decks_in_archetype
             archetypeRows.forEach(r => {
-                const raw = String(r.tournament_date || '').trim();
-                if (!raw) return;
-                const d = dateParser(raw);
-                if (d && d.getTime() > latestTs) {
-                    latestTs = d.getTime();
-                    latestRaw = raw;
-                }
-            });
-            if (!latestRaw) return onlineRows;
-
-            // Aggregate per-card stats from the latest Major's rows.
-            // Each tournament_cards_data row is a single price-tagged
-            // archetype-deck-snapshot; bucket total = sum across the
-            // distinct (price-tagged) archetype strings.
-            const latestRows = archetypeRows.filter(r => String(r.tournament_date || '').trim() === latestRaw);
-            const archTotalsByTag = new Map();
-            const majorAgg = new Map(); // card_name_lower → { … }
-            latestRows.forEach(r => {
+                const tournamentKey = String(r.tournament_id || r.tournament_name || '').trim() || '_';
                 const tag = String(r.archetype || '').trim();
+                const bucketKey = `${tournamentKey}|||${tag}`;
                 const archTotal = parseInt(r.total_decks_in_archetype || 0, 10) || 0;
-                if (tag && !archTotalsByTag.has(tag)) archTotalsByTag.set(tag, archTotal);
+                const prevTotal = bucketTotalDecks.get(bucketKey) || 0;
+                if (archTotal > prevTotal) bucketTotalDecks.set(bucketKey, archTotal);
 
                 const cn = String(r.card_name || '').trim().toLowerCase();
                 if (!cn) return;
+                if (!bucketCardsByName.has(bucketKey)) bucketCardsByName.set(bucketKey, new Map());
+                const cardMap = bucketCardsByName.get(bucketKey);
                 const dc = parseInt(r.deck_inclusion_count || 0, 10) || 0;
                 const tc = parseFloat(String(r.total_count || 0).replace(',', '.')) || 0;
                 const mc = parseInt(r.max_count || 0, 10) || 0;
-                if (!majorAgg.has(cn)) {
-                    majorAgg.set(cn, {
+                if (!cardMap.has(cn)) {
+                    cardMap.set(cn, {
                         card_name: r.card_name || '',
-                        deck_count: 0, total_count: 0, max_count: 0,
+                        dc: 0, tc: 0, mc: 0,
                         set_code: r.set_code || '',
                         set_number: r.set_number || '',
                         rarity: r.rarity || '',
@@ -208,14 +221,45 @@
                         is_ace_spec: r.is_ace_spec || '',
                     });
                 }
-                const e = majorAgg.get(cn);
-                e.deck_count += dc;
-                e.total_count += tc;
-                e.max_count = Math.max(e.max_count, mc);
+                const e = cardMap.get(cn);
+                // Within a bucket the multiple print rows of one card
+                // share their deck base — take max() rather than sum to
+                // avoid inflating deck_count by the print-row count.
+                if (dc > e.dc) e.dc = dc;
+                e.tc += tc;
+                if (mc > e.mc) e.mc = mc;
             });
+
             let majorTotalDecks = 0;
-            archTotalsByTag.forEach(v => { majorTotalDecks += v; });
-            if (majorTotalDecks < 4) return onlineRows;
+            bucketTotalDecks.forEach(v => { majorTotalDecks += v; });
+            // Floor kept low — the < 4 floor existed to suppress noise
+            // from a single sparse tournament. Cumulative across the
+            // meta window the floor can be lower; we still guard against
+            // archetypes with literally one fringe Major appearance.
+            if (majorTotalDecks < 2) return onlineRows;
+
+            // Sum per-bucket per-card stats across all buckets.
+            const majorAgg = new Map();
+            bucketCardsByName.forEach(cardMap => {
+                cardMap.forEach((s, cn) => {
+                    if (!majorAgg.has(cn)) {
+                        majorAgg.set(cn, {
+                            card_name: s.card_name,
+                            deck_count: 0, total_count: 0, max_count: 0,
+                            set_code: s.set_code,
+                            set_number: s.set_number,
+                            rarity: s.rarity,
+                            type: s.type,
+                            image_url: s.image_url,
+                            is_ace_spec: s.is_ace_spec,
+                        });
+                    }
+                    const e = majorAgg.get(cn);
+                    e.deck_count += s.dc;
+                    e.total_count += s.tc;
+                    e.max_count = Math.max(e.max_count, s.mc);
+                });
+            });
 
             // Online total: max(total_decks_in_archetype) across Meta Live rows.
             // Per-source rows all carry the SAME total for one archetype,
@@ -328,7 +372,7 @@
                 });
             });
 
-            devLog(`[Current Meta] Online+Major additive merge: online=${onlineByName.size}, major=${majorAgg.size}, merged=${merged.length} | totalDecks ${onlineTotal}+${majorTotalDecks}=${combinedTotal} | latestMajor=${latestRaw}`);
+            devLog(`[Current Meta] Online+Major additive merge: online=${onlineByName.size}, major=${majorAgg.size}, merged=${merged.length} | totalDecks ${onlineTotal}+${majorTotalDecks}=${combinedTotal} | majorBuckets=${bucketTotalDecks.size}`);
             return merged;
         }
 

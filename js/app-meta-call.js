@@ -77,6 +77,30 @@ window.MetaCall = (function () {
   let _metaDynamicsByDeck = {}; // normalize(deck) -> { boost: pp, reasons: [...] }
   let _metaDynamicsLastLogId = null; // tournament id we last printed the dev log for
 
+  // ── Predictor 4.5 — Concentration-Aware Counter Boost ──────
+  // 4.0a above only triggers when a deck "surges since last major" — chronic
+  // dominance (a deck that's been top-1 for weeks without growing) sails
+  // right past it because the share delta is zero. Utrecht regional 16.5.26
+  // exposed this: Dragapult family held ~30 % of the online field, every
+  // known anti-Dragapult deck under-predicted by 2-3 pp (Raging Bolt,
+  // Garchomp, Mega Lucario / Hariyama, Mega Starmie). The players knew
+  // they'd face Dragapult and brought counters; the predictor didn't.
+  //
+  // 4.5 adds a SECOND counter-boost channel that fires on family-level
+  // concentration regardless of growth. When a family holds ≥ 15 % of the
+  // field, every deck with ≥ 55 % WR against any of its variants gets a
+  // boost scaled by (a) how far above the floor the family sits and (b)
+  // how strong the counter's matchup edge is. Stacks additively with
+  // 4.0a so a deck that's BOTH a known counter AND saw a fresh surge
+  // ride still gets full credit for both.
+  const PREDICTOR_45_FAMILY_FLOOR_PCT  = 15;    // family must hold ≥ this share to trigger
+  const PREDICTOR_45_FAMILY_EXCESS_DIV = 10;    // family-excess factor = (familyPct - floor) / this
+  const PREDICTOR_45_WR_FACTOR_SCALE   = 10;    // wr-edge factor = (wr - 0.55) * this
+  const PREDICTOR_45_BASE_CONTRIB_PP   = 0.5;   // pp contribution per "unit" (factors multiplied)
+  const PREDICTOR_45_COUNTER_WR_MIN    = 0.55;  // min WR vs family member to count
+  const PREDICTOR_45_BOOST_CAP_PP      = 2.0;   // hard cap per deck (3× 4.0a's cap)
+  let _concentrationLastLogId = null;
+
   // ── Predictor 4.2 — Ladder-Bias-Damper ─────────────────────
   // Casual decks (Alakazam, Starmie, Grimmsnarl …) over-index on the
   // online ladder relative to in-person majors. Pre-Prague backtest
@@ -1165,6 +1189,133 @@ window.MetaCall = (function () {
     } catch (_e) { /* dev log only — never block prediction */ }
   }
 
+  // ── Predictor 4.5 — Concentration-Aware Counter Boost ──────
+  // See constants block at top of file for motivation. Adds to (does not
+  // replace) the per-deck entries _computeMetaDynamics produced — both
+  // channels can fire on the same deck.
+  function _computeConcentrationCounters() {
+    if (!_matchupMap || !_shareList || _shareList.length === 0) return;
+
+    // Group online share by family (extractMainPokemon collapses
+    // "Dragapult Dudunsparce" + "Dragapult Dusknoir" + "Dragapult
+    // Blaziken" + "Dragapult Froslass" + "Dragapult" → "Dragapult").
+    const familyShare = new Map();   // family → summed ladderShare
+    const familyMembers = new Map(); // family → [{ name, key }, ...]
+    let totalLadder = 0;
+    _shareList.forEach(d => {
+      const share = d.ladderShare || 0;
+      totalLadder += share;
+      const family = extractMainPokemon(d.name);
+      if (!family) return;
+      familyShare.set(family, (familyShare.get(family) || 0) + share);
+      if (!familyMembers.has(family)) familyMembers.set(family, []);
+      familyMembers.get(family).push({ name: d.name, key: normalize(d.name) });
+    });
+    if (totalLadder <= 0) return;
+
+    // Identify families above the concentration floor.
+    const dominantFamilies = [];
+    familyShare.forEach((share, family) => {
+      const pct = (share / totalLadder) * 100;
+      if (pct >= PREDICTOR_45_FAMILY_FLOOR_PCT) {
+        dominantFamilies.push({ family, pct, members: familyMembers.get(family) || [] });
+      }
+    });
+    if (dominantFamilies.length === 0) return;
+    dominantFamilies.sort((a, b) => b.pct - a.pct);
+
+    // For each candidate deck, sum boost across every dominant family it
+    // can punish. A deck never counters itself or its own family
+    // (Dragapult Blaziken doesn't get credit for "beating Dragapult").
+    _shareList.forEach(c => {
+      const ck = normalize(c.name);
+      const myFamily = extractMainPokemon(c.name);
+      let totalBoost = 0;
+      const reasons = [];
+
+      dominantFamilies.forEach(df => {
+        if (df.family === myFamily) return;
+
+        // Best WR across all of the family's variants — use the matchup
+        // we know about. _matchupMap stores (deckA → deckB → pWin); fall
+        // back to (1 - reverse pWin) when only one direction is stored.
+        let bestWr = 0;
+        let bestVs = null;
+        df.members.forEach(m => {
+          const mk = m.key;
+          const direct  = _matchupMap[ck] && _matchupMap[ck][mk];
+          const reverse = _matchupMap[mk] && _matchupMap[mk][ck];
+          let wr;
+          if (direct && typeof direct.pWin === 'number') {
+            wr = direct.pWin;
+          } else if (reverse && typeof reverse.pWin === 'number') {
+            wr = 1 - reverse.pWin;
+          } else {
+            return;
+          }
+          if (wr > bestWr) { bestWr = wr; bestVs = m.name; }
+        });
+        if (bestWr < PREDICTOR_45_COUNTER_WR_MIN) return;
+
+        const familyExcessFactor = (df.pct - PREDICTOR_45_FAMILY_FLOOR_PCT) / PREDICTOR_45_FAMILY_EXCESS_DIV;
+        const wrEdgeFactor       = (bestWr - PREDICTOR_45_COUNTER_WR_MIN) * PREDICTOR_45_WR_FACTOR_SCALE;
+        const contrib            = familyExcessFactor * wrEdgeFactor * PREDICTOR_45_BASE_CONTRIB_PP;
+        if (contrib <= 0) return;
+
+        totalBoost += contrib;
+        reasons.push({
+          type:      'concentration',
+          family:    df.family,
+          familyPct: df.pct,
+          vs:        bestVs,
+          wr:        bestWr,
+          contrib
+        });
+      });
+
+      if (totalBoost <= 0) return;
+      const capped = Math.min(totalBoost, PREDICTOR_45_BOOST_CAP_PP);
+
+      // Merge with anything 4.0a already wrote. Both boosts are pp-
+      // additive to the same downstream `boost` field, so summing here
+      // is what flows through to the per-deck prediction line.
+      const existing = _metaDynamicsByDeck[ck] || { boost: 0, rawSum: 0, reasons: [] };
+      _metaDynamicsByDeck[ck] = {
+        boost:   existing.boost + capped,
+        rawSum:  (existing.rawSum || 0) + totalBoost,
+        reasons: existing.reasons.concat(reasons.sort((a, b) => b.contrib - a.contrib))
+      };
+    });
+
+    // Dev-console log — one entry per fresh major (or whenever 4.0a
+    // would have logged). Same gating mechanism so the two predictors'
+    // logs naturally line up.
+    try {
+      const majorId = _lastMajorInfo && _lastMajorInfo.id;
+      if (majorId && _concentrationLastLogId !== majorId) {
+        _concentrationLastLogId = majorId;
+        const families = dominantFamilies
+          .map(f => `${f.family} ${f.pct.toFixed(1)}%`)
+          .join(', ');
+        const topCounters = Object.entries(_metaDynamicsByDeck)
+          .filter(([_, v]) => v.reasons.some(r => r.type === 'concentration'))
+          .sort((a, b) => b[1].boost - a[1].boost)
+          .slice(0, 8)
+          .map(([k, v]) => {
+            const name = (_shareList.find(d => normalize(d.name) === k) || {}).name || k;
+            const concReasons = v.reasons.filter(r => r.type === 'concentration');
+            const top = concReasons[0];
+            return `${name} +${v.boost.toFixed(2)} pp (vs ${top.family} ${top.familyPct.toFixed(1)}%, ${(top.wr*100).toFixed(0)}% WR)`;
+          })
+          .join('\n  ');
+        console.log(
+          `[Predictor 4.5] Concentration-aware boosts | Dominant families: ${families || '(none above ' + PREDICTOR_45_FAMILY_FLOOR_PCT + '%)'}\n` +
+          `  Top counters:\n  ${topCounters || '(none — no matchup data hit threshold)'}`
+        );
+      }
+    } catch (_e) { /* dev log only — never block prediction */ }
+  }
+
   // ── Predictor 2.0 — runnable on demand ────────────────────
   // Extracted so a Testing Group import can update _tgFieldShares and
   // re-run the prediction without a full data reload. Uses module
@@ -1176,6 +1327,12 @@ window.MetaCall = (function () {
     // Predictor 4.0a — compute meta-dynamics boosts up front so the
     // per-deck loop below can add them as a small additive bonus.
     _computeMetaDynamics();
+
+    // Predictor 4.5 — concentration-aware counter boost. Stacks
+    // additively with 4.0a; a deck that's both a fresh-surge counter
+    // AND a chronic-top-deck counter gets both boosts (subject to
+    // each channel's own cap).
+    _computeConcentrationCounters();
 
     // Predictor 4.4 — pre-aggregate labs share + online ladder per
     // family so the per-deck loop can redistribute the labs term by
@@ -1378,10 +1535,13 @@ window.MetaCall = (function () {
         labsT8Boost = (q && q.d1 > 0) ? _clip(q.d2 / q.d1, 0.5, 2.0) : 1.0;
       }
 
-      // Predictor 4.0a — counter-meta surge boost (additive, capped pp).
+      // Predictors 4.0a + 4.5 — counter-meta boost (additive, capped pp).
       // Sits ON TOP of the weighted predictor signals; doesn't shift
-      // them. 0 for surge decks themselves (they're already in
-      // weekly_trend) and any deck with no qualifying counters.
+      // them. 4.0a fires for fresh post-major surges, 4.5 fires for
+      // chronic family-level concentration (Dragapult-style "always
+      // ~30 % of the field"). Both channels write to the same `boost`
+      // field so a deck that counters both kinds of threat gets the
+      // sum (each subject to its own per-channel cap).
       const metaDynBoostPp = (_metaDynamicsByDeck[k] && _metaDynamicsByDeck[k].boost) || 0;
 
       // Predictor 4.2 — Ladder-Bias-Damper. Casual decks have high

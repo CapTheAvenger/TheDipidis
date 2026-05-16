@@ -512,8 +512,26 @@
         // pipeline so downstream code (deduplicateCards, stat panels,
         // Deck Builder) keeps working without further changes.
         function _fuseArchetypeRows(rowsA, rowsB) {
-            const totalA = parseInt((rowsA[0] && rowsA[0].total_decks_in_archetype) || 0, 10) || 0;
-            const totalB = parseInt((rowsB[0] && rowsB[0].total_decks_in_archetype) || 0, 10) || 0;
+            // Take MAX across rows rather than rows[0]. current_meta_card_data.csv
+            // is append-only — older scrape runs leave stale rows with smaller
+            // total_decks_in_archetype values behind, and rows[0] could land on
+            // any of them depending on how the source array was assembled.
+            // Repro: Ursaluna/Lunatone had 79 rows at total=20 plus 16 stale
+            // rows at total=12 plus 1 Meta-Play row at total=1. rows[0] picked
+            // the total=12 stale row, fusion read 12+20=32 instead of 20+20=40.
+            // max() is correct because the latest scrape has the largest deck
+            // pool (archetypes grow over time; even pruning keeps the rolling
+            // window's max representative).
+            const maxTotal = (rows) => {
+                let m = 0;
+                for (const r of (rows || [])) {
+                    const t = parseInt(r.total_decks_in_archetype || 0, 10) || 0;
+                    if (t > m) m = t;
+                }
+                return m;
+            };
+            const totalA = maxTotal(rowsA);
+            const totalB = maxTotal(rowsB);
             const totalCombined = totalA + totalB;
             if (totalCombined === 0) return [];
 
@@ -1345,15 +1363,18 @@
                 secondaryRows = secondaryRows.filter(row => row.meta === 'Meta Live');
             }
 
+            // Combining primary + secondary is deferred to the setTimeout
+            // block below. Order matters for the 'All' filter: each
+            // archetype needs its own mergeOnlineMajorAdditive pass against
+            // tournament_cards_data BEFORE we collapse the two pools into
+            // one virtual archetype — otherwise the fusion totals miss the
+            // Major slice entirely (user-reported: 20 Limitless + 1 Major
+            // Ursaluna × 20 Limitless + 11 Major Lucario should fuse to a
+            // 21+31=52-deck pool, but skipping the per-archetype Major
+            // merge gave us 20+20=40 at best, or 12+20=32 with stale rows).
             let deckCards;
-            if (fusionActive && secondaryRows.length > 0) {
-                deckCards = _fuseArchetypeRows(primaryRows, secondaryRows);
-                devLog(`[Current Meta][Fusion] ${archetype} (${primaryRows.length} rows) × ${secondaryArchRaw} (${secondaryRows.length} rows) → ${deckCards.length} merged cards`);
-            } else {
-                deckCards = primaryRows;
-            }
 
-            if (deckCards.length === 0) {
+            if (primaryRows.length === 0 && (!fusionActive || secondaryRows.length === 0)) {
                 showToast(`No data found for ${archetype} with filter "${currentMetaFormatFilter}"!`, 'warning');
                 clearCurrentMetaDeckView();
                 return;
@@ -1376,10 +1397,11 @@
             }
 
             // Show loading indicator for aggregation work
-            if (needsAggregation && deckCards.length > 100) {
-                showToast(`Processing ${deckCards.length} card entries... This may take a moment`, 'info');
+            const _earlyTotalRowEstimate = primaryRows.length + secondaryRows.length;
+            if (needsAggregation && _earlyTotalRowEstimate > 100) {
+                showToast(`Processing ${_earlyTotalRowEstimate} card entries... This may take a moment`, 'info');
             }
-            
+
             // Use setTimeout to allow UI to update and prevent complete freezing
             setTimeout(() => {
                 // Tournament cards data stores one row per tournament per card print,
@@ -1394,41 +1416,73 @@
                 // with overlapping per-source totals — which would inflate
                 // deck_count when subsequently summed downstream. Keep only
                 // the latest row per dedup-key — CSV row order = scrape recency.
-                if (!needsAggregation && deckCards.length > 0) {
+                // Applied to primary AND secondary archetype buckets so the
+                // fusion path doesn't pick up stale rows downstream.
+                const _staleSpellingDedup = (rows) => {
+                    if (!rows || rows.length === 0) return rows;
                     const latestRowMap = new Map();
-                    deckCards.forEach(row => {
+                    rows.forEach(row => {
                         const key = `${row.archetype}|||${row.card_name || ''}|||${row.meta || ''}|||${row.set_code || ''}|${row.set_number || ''}`;
                         latestRowMap.set(key, row);
                     });
-                    if (latestRowMap.size < deckCards.length) {
-                        devLog(`[Current Meta] Stale-spelling dedup: ${deckCards.length} → ${latestRowMap.size} rows`);
+                    if (latestRowMap.size < rows.length) {
+                        devLog(`[Current Meta] Stale-spelling dedup: ${rows.length} → ${latestRowMap.size} rows`);
                     }
-                    deckCards = Array.from(latestRowMap.values());
+                    return Array.from(latestRowMap.values());
+                };
+                if (!needsAggregation) {
+                    primaryRows = _staleSpellingDedup(primaryRows);
+                    if (fusionActive) secondaryRows = _staleSpellingDedup(secondaryRows);
                 }
 
-                // Preserve raw per-tournament rows for Recency scoring in Consistency builder
-                window.currentMetaRawDeckCards = deckCards.slice();
+                // Preserve raw per-tournament rows for Recency scoring in
+                // Consistency builder. For fusion, we hand it the union so
+                // the scorer sees every original row across both archetypes.
+                window.currentMetaRawDeckCards = fusionActive
+                    ? primaryRows.concat(secondaryRows)
+                    : primaryRows.slice();
 
-                if (needsAggregation && deckCards.length > 0 && !fusionActive) {
-                    deckCards = aggregateCardStatsByDate(deckCards);
-                } else if (currentMetaFormatFilter === 'all' && deckCards.length > 0 && !fusionActive) {
+                // Per-archetype enrichment BEFORE fusion combines pools. The
+                // 'play' path's date-weighted aggregation and the 'all' path's
+                // Online+Major additive merge both need the source archetype
+                // name to scope their tournament-row lookups, so they only
+                // work when applied per archetype rather than to the merged
+                // pool. After this pass each archetype's rows already reflect
+                // its full Limitless + Major pool; _fuseArchetypeRows then
+                // simply pools the two combined sets.
+                if (needsAggregation && !fusionActive) {
+                    // 'play' filter currently only supports the single-archetype
+                    // path — the fusion case bypasses date-weighted aggregation
+                    // (documented limitation in PR #145).
+                    if (primaryRows.length > 0) primaryRows = aggregateCardStatsByDate(primaryRows);
+                } else if (currentMetaFormatFilter === 'all') {
                     // 'Online + Major' filter: combine Meta Live (Online) rows
-                    // with the latest Major snapshot from tournament_cards_data
+                    // with the cumulative Major snapshot from tournament_cards_data
                     // additively. Online_count + Major_count over Online_total +
-                    // Major_total — the user's mathematically-correct intuition
-                    // that the two slices of the meta should add together.
-                    //
-                    // Why we use tournament_cards_data and not the Meta Play!
-                    // rows in current_meta_card_data.csv: those rows are
-                    // structurally sparse (Limitless deck-list parser drops
-                    // most cards — only 4 of ~33 Cynthia's Garchomp cards
-                    // surfaced for Prague). tournament_cards_data captures the
-                    // full per-deck list so the additive merge can credit
-                    // every card the Major decks actually played.
+                    // Major_total. tournament_cards_data is the proper Major
+                    // source because the Meta Play! rows in
+                    // current_meta_card_data.csv are structurally sparse
+                    // (Limitless deck-list parser drops most cards). For fusion
+                    // we run this merge twice — once per archetype — so each
+                    // pool reflects its own Limitless + Major spread before
+                    // they pool together.
                     const tournamentRows = window.currentMetaTournamentCardsData || [];
                     if (tournamentRows.length > 0) {
-                        deckCards = mergeOnlineMajorAdditive(deckCards, tournamentRows, archetype);
+                        if (primaryRows.length > 0) {
+                            primaryRows = mergeOnlineMajorAdditive(primaryRows, tournamentRows, archetype);
+                        }
+                        if (fusionActive && secondaryRows.length > 0) {
+                            secondaryRows = mergeOnlineMajorAdditive(secondaryRows, tournamentRows, secondaryArchRaw);
+                        }
                     }
+                }
+
+                // Combine archetypes (or pass through when single-archetype).
+                if (fusionActive && secondaryRows.length > 0) {
+                    deckCards = _fuseArchetypeRows(primaryRows, secondaryRows);
+                    devLog(`[Current Meta][Fusion] ${archetype} (${primaryRows.length} rows) × ${secondaryArchRaw} (${secondaryRows.length} rows) → ${deckCards.length} merged cards`);
+                } else {
+                    deckCards = primaryRows;
                 }
 
                 // Deduplicate only after statistics have been merged across tournaments/prints.

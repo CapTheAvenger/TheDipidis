@@ -232,11 +232,15 @@
 
             let majorTotalDecks = 0;
             bucketTotalDecks.forEach(v => { majorTotalDecks += v; });
-            // Floor kept low — the < 4 floor existed to suppress noise
-            // from a single sparse tournament. Cumulative across the
-            // meta window the floor can be lower; we still guard against
-            // archetypes with literally one fringe Major appearance.
-            if (majorTotalDecks < 2) return onlineRows;
+            // Floor at < 1 (i.e. require at least one Major deck). User
+            // report: Ursaluna/Lunatone has only 1 Major deck cumulatively
+            // in the meta window, and the previous < 2 floor swallowed
+            // the merge so "All" matched "Limitless Only" exactly. 1 Major
+            // deck is still mathematically valid additive evidence — the
+            // earlier <4 floor in the latest-tournament-only version
+            // existed to suppress sparse-tournament noise, which doesn't
+            // apply once we sum across the whole meta window.
+            if (majorTotalDecks < 1) return onlineRows;
 
             // Sum per-bucket per-card stats across all buckets.
             const majorAgg = new Map();

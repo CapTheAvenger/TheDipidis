@@ -128,16 +128,31 @@ window.MetaCall = (function () {
   let _fieldSuppressionLastLogId = null;
 
   // ── Predictor 5.5 — Online-Presence Floor ──────────────────
-  // Quality-damping in 4.2 + concentration boost in 5.2 can
-  // collectively crush a deck with high online share but low
-  // online top-8 conversion (Lucario Hariyama: 5.52 % share,
-  // 2.59 % top8 conv → predictor lands < 1.5 % despite the deck
-  // being top-3 online and showing 4 % at Utrecht). High-share
-  // online + labs presence is strong evidence the deck IS in
-  // the meta; this floor prevents the dampers from making it
-  // invisible.
+  // Guarantee a minimum predicted share for decks with verified
+  // multi-source presence. Lucario Hariyama was getting crushed
+  // to < 1.5 % predicted despite 5.52 % online share (rank 3) +
+  // 3.5 % at LA + 6 % at Prague (real-world brought rate),
+  // because its low top8 conv (2.59 %) hit every damper in the
+  // chain.
+  //
+  // Two-source floor — whichever is higher:
+  //   • Online floor:  60 % × online_share   (ladder signal)
+  //   • Labs   floor:  85 % × weighted_avg_labs_share_pct
+  //                    (real-world tournament brought-rate)
+  //
+  // Labs share is recency-weighted, so a recent strong major
+  // dominates over an old early-format one. For Lucario:
+  //   • LA (2026-05-08, w=0.905)  share_pct = 3.25
+  //   • Prague (2026-04-25, w=0.75) share_pct = 5.56
+  //   • weighted_avg = (3.25 × 0.905 + 5.56 × 0.75) / 1.655 ≈ 4.46
+  //   • labs floor    = 4.46 × 0.85 ≈ 3.79 %
+  //   • online floor  = 5.52 × 0.60 ≈ 3.31 %
+  //   • final floor   = max(3.79, 3.31) = 3.79 %
   const PREDICTOR_55_PRESENCE_FLOOR_MIN  = 3.0;  // online share must be ≥ this to qualify
-  const PREDICTOR_55_PRESENCE_FLOOR_PCT  = 0.60; // floor at this fraction of online share
+  const PREDICTOR_55_PRESENCE_FLOOR_PCT  = 0.60; // online-based floor multiplier
+  const PREDICTOR_55_LABS_FLOOR_PCT      = 0.85; // labs-based floor multiplier
+  const PREDICTOR_55_LABS_FLOOR_MIN_N    = 0.5;  // need ≥ this weighted labs count
+  const PREDICTOR_55_LABS_FLOOR_MIN_PCT  = 1.5;  // labs share_pct must be ≥ this to anchor
   const PREDICTOR_55_REQUIRE_LABS_N      = 1;    // need ≥ N labs samples to apply (filters
                                                   // pure-online noise decks)
 
@@ -1447,23 +1462,72 @@ window.MetaCall = (function () {
     const totalLadder = _shareList.reduce((s, d) => s + (d.ladderShare || 0), 0) || 1;
     const totalRaw    = _shareList.reduce((s, d) => s + (d.predictedShareRaw || 0), 0) || 1;
 
+    const applied = [];
     _shareList.forEach(d => {
       const onlinePct = (d.ladderShare / totalLadder) * 100;
-      if (onlinePct < PREDICTOR_55_PRESENCE_FLOOR_MIN) return;
-      const k = normalize(d.name);
-      const q = _labsDay2ConvByDeck && _labsDay2ConvByDeck[k];
-      if (!q || (q.n || 0) < PREDICTOR_55_REQUIRE_LABS_N) return;
+      const k         = normalize(d.name);
+      const q         = _labsDay2ConvByDeck && _labsDay2ConvByDeck[k];
+      const labsRow   = _labsRowsByDeck && _labsRowsByDeck[k];
 
-      const floorPct      = onlinePct * PREDICTOR_55_PRESENCE_FLOOR_PCT;
+      // Compute candidate floors from both signals.
+      let onlineFloorPct = 0;
+      if (onlinePct >= PREDICTOR_55_PRESENCE_FLOOR_MIN &&
+          q && (q.n || 0) >= PREDICTOR_55_REQUIRE_LABS_N) {
+        onlineFloorPct = onlinePct * PREDICTOR_55_PRESENCE_FLOOR_PCT;
+      }
+
+      let labsFloorPct = 0;
+      let labsAvgPct   = 0;
+      if (labsRow && (labsRow.n || 0) >= PREDICTOR_55_LABS_FLOOR_MIN_N) {
+        // Recency-weighted average labs share_pct across recent majors.
+        // share is the weighted sum, n is the summed weight.
+        labsAvgPct = labsRow.share / labsRow.n;
+        if (labsAvgPct >= PREDICTOR_55_LABS_FLOOR_MIN_PCT) {
+          labsFloorPct = labsAvgPct * PREDICTOR_55_LABS_FLOOR_PCT;
+        }
+      }
+
+      const floorPct = Math.max(onlineFloorPct, labsFloorPct);
+      if (floorPct <= 0) return;
+
       // Convert floor pct to raw share units in the same scale.
       const floorRawShare = (floorPct / 100) * totalRaw;
       if ((d.predictedShareRaw || 0) < floorRawShare) {
         d.onlinePresenceFloorApplied = true;
         d.predictedShareRawPreFloor  = d.predictedShareRaw;
         d.predictedShareRaw          = floorRawShare;
+        d.presenceFloorSource        = labsFloorPct > onlineFloorPct ? 'labs' : 'online';
+        d.presenceFloorPct           = floorPct;
+        applied.push({
+          name: d.name, floorPct, source: d.presenceFloorSource,
+          onlinePct, labsAvgPct, onlineFloorPct, labsFloorPct,
+        });
       }
     });
+
+    // Dev-console log — one entry per fresh major listing which decks
+    // got floored. Critical for debugging when an expected deck (e.g.
+    // Lucario Hariyama) doesn't appear: console will show whether the
+    // floor fired and at what value, or — if absent — that the deck
+    // failed one of the gates (online < 3 %, no labs sample, or labs
+    // avg < 1.5 %).
+    try {
+      const majorId = _lastMajorInfo && _lastMajorInfo.id;
+      if (majorId && _presenceFloorLastLogId !== majorId) {
+        _presenceFloorLastLogId = majorId;
+        if (applied.length === 0) {
+          console.log('[Predictor 5.5] Online-presence floor: no decks floored');
+        } else {
+          const lines = applied
+            .sort((a, b) => b.floorPct - a.floorPct)
+            .map(a => `${a.name} → ${a.floorPct.toFixed(2)}% (${a.source}: online×0.6=${a.onlineFloorPct.toFixed(2)}, labs×0.85=${a.labsFloorPct.toFixed(2)})`)
+            .join('\n  ');
+          console.log(`[Predictor 5.5] Online-presence floor applied:\n  ${lines}`);
+        }
+      }
+    } catch (_e) { /* dev log only */ }
   }
+  let _presenceFloorLastLogId = null;
 
   // ── Diagnostic: Counter Coverage vs Dominant Family ────────
   // Surfaces decks that should have a matchup row vs the

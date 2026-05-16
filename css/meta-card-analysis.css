@@ -371,3 +371,16 @@
 #current-analysis[data-cm-view="vanilla"] .cm-deep-dive-only {
     display: none !important;
 }
+
+/* Cooking-mode fusion: when the user picks a second archetype to fuse
+   with the primary, the deck-specific stats panels become meaningless
+   (winrate of a hypothetical merged deck has no real data behind it).
+   Hide them so only Card Overview + Deck Builder remain. Generic
+   cross-archetype widgets (Tech Lab, top-meta cards) stay visible. */
+#current-analysis[data-cm-fusion="active"] #currentMetaStatsSection,
+#current-analysis[data-cm-fusion="active"] #currentMetaMatchupsSection,
+#current-analysis[data-cm-fusion="active"] #currentMetaVsMetaCallSection,
+#current-analysis[data-cm-fusion="active"] #currentMetaUserVsVanillaSection,
+#current-analysis[data-cm-fusion="active"] #currentMetaTechVsNormalSection {
+    display: none !important;
+}

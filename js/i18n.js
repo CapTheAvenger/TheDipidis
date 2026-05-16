@@ -1236,6 +1236,10 @@ const translations = {
     'cm.analyzeAndBuild':       'Analyze and Build Decks from Current Meta',
     'cm.viewModeVanilla':       'Quick overview',
     'cm.viewModeDeepDive':      'Cooking',
+    'cm.fuseWithLabel':         '+ Fuse with archetype (Cooking):',
+    'cm.fuseNone':              '-- None (single deck) --',
+    'cm.fusionActiveBadge':     'Fusion active: {a} × {b}',
+    'cm.fusionSamePicked':      'Fusion partner can\'t be the same archetype as the primary.',
     'data.updated':             'Data:',
     'filter.availableRange':    'Available',
     // ── TCG glossary tooltips ──────────────────────────────────
@@ -2788,6 +2792,10 @@ const translations = {
     'cm.analyzeAndBuild':       'Decks aus der aktuellen Meta analysieren & bauen',
     'cm.viewModeVanilla':       'Schnellüberblick',
     'cm.viewModeDeepDive':      'Cooking',
+    'cm.fuseWithLabel':         '+ Mit Archetyp fusionieren (Cooking):',
+    'cm.fuseNone':              '-- Kein zweites Deck --',
+    'cm.fusionActiveBadge':     'Fusion aktiv: {a} × {b}',
+    'cm.fusionSamePicked':      'Fusion-Partner darf nicht derselbe Archetyp wie das Hauptdeck sein.',
     'data.updated':             'Daten:',
     'filter.availableRange':    'Verfügbar',
     // ── TCG-Glossar Tooltips ───────────────────────────────────

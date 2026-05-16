@@ -453,6 +453,74 @@
           }
         }
         
+        // Fuse two archetypes' pre-aggregated rows into a single virtual
+        // archetype for the Card Overview. Weighting is "pool both" — the
+        // combined denominator is decksA + decksB, the combined numerator
+        // is decks_with_card_A + decks_with_card_B. Each card collapses
+        // across prints within an archetype first (so a 4× Boss's Orders
+        // entry split across two prints in archetype A doesn't double-
+        // count) and then across archetypes. Pure function — returns new
+        // row objects shape-compatible with the rest of the rendering
+        // pipeline so downstream code (deduplicateCards, stat panels,
+        // Deck Builder) keeps working without further changes.
+        function _fuseArchetypeRows(rowsA, rowsB) {
+            const totalA = parseInt((rowsA[0] && rowsA[0].total_decks_in_archetype) || 0, 10) || 0;
+            const totalB = parseInt((rowsB[0] && rowsB[0].total_decks_in_archetype) || 0, 10) || 0;
+            const totalCombined = totalA + totalB;
+            if (totalCombined === 0) return [];
+
+            const normName = (s) => String(s || '').toLowerCase().trim();
+            const intP = (v) => parseInt(v || 0, 10) || 0;
+
+            const collapseWithinArchetype = (rows) => {
+                const byCard = new Map();
+                rows.forEach(row => {
+                    const key = normName(row.card_name);
+                    if (!key) return;
+                    if (!byCard.has(key)) {
+                        byCard.set(key, { ...row });
+                        return;
+                    }
+                    const e = byCard.get(key);
+                    e.deck_inclusion_count = intP(e.deck_inclusion_count) + intP(row.deck_inclusion_count);
+                    e.total_count = intP(e.total_count) + intP(row.total_count);
+                    e.max_count = Math.max(intP(e.max_count), intP(row.max_count));
+                });
+                return byCard;
+            };
+
+            const aMap = collapseWithinArchetype(rowsA);
+            const bMap = collapseWithinArchetype(rowsB);
+            const allKeys = new Set([...aMap.keys(), ...bMap.keys()]);
+            const merged = [];
+
+            allKeys.forEach(key => {
+                const a = aMap.get(key);
+                const b = bMap.get(key);
+                const rep = a || b;
+                const dwA = a ? intP(a.deck_inclusion_count) : 0;
+                const dwB = b ? intP(b.deck_inclusion_count) : 0;
+                const dwCombined = dwA + dwB;
+                const tcCombined = (a ? intP(a.total_count) : 0) + (b ? intP(b.total_count) : 0);
+                const maxCombined = Math.max(
+                    a ? intP(a.max_count) : 0,
+                    b ? intP(b.max_count) : 0
+                );
+                const pct = totalCombined > 0 ? Math.min(100, dwCombined / totalCombined * 100) : 0;
+                const avgCount = dwCombined > 0 ? (tcCombined / dwCombined) : 0;
+                merged.push({
+                    ...rep,
+                    deck_inclusion_count: dwCombined,
+                    total_count: tcCombined,
+                    max_count: maxCombined,
+                    average_count: avgCount.toFixed(2),
+                    total_decks_in_archetype: totalCombined,
+                    percentage_in_archetype: pct.toFixed(2).replace('.', ',')
+                });
+            });
+            return merged;
+        }
+
         // Populate deck select dropdown
         async function populateCurrentMetaDeckSelect(data) {
             const comparisonData = await loadCSV('limitless_online_decks_comparison.csv');
@@ -677,6 +745,78 @@
 
             // Convert native <select> to custom searchable dropdown
             if (typeof initSearchableSelect === 'function') initSearchableSelect(select);
+
+            // Mirror the same option groups into the Cooking-mode fusion
+            // select so users can pair the primary archetype with a second
+            // one and see a combined Card Overview. Kept in sync every
+            // time the primary list is rebuilt (filter changes etc.).
+            const fusionSelect = document.getElementById('currentMetaDeckSelectSecondary');
+            if (fusionSelect) {
+                if (window.currentMetaArchetypeSecondary === undefined) {
+                    try {
+                        const stored = localStorage.getItem('currentMeta.archetypeSecondary');
+                        if (stored) window.currentMetaArchetypeSecondary = stored;
+                    } catch (_) { /* private mode */ }
+                }
+                const savedSecondary = String(window.currentMetaArchetypeSecondary || '').trim();
+                fusionSelect.innerHTML = `<option value="">${typeof t === 'function' ? t('cm.fuseNone') : '-- None (single deck) --'}</option>`;
+                if (top10.length > 0) {
+                    const og = document.createElement('optgroup');
+                    og.label = 'Top 10 Meta Decks';
+                    top10.forEach(deck => {
+                        const o = document.createElement('option');
+                        o.value = deck.name;
+                        o.textContent = stripExSuffix(deck.name);
+                        og.appendChild(o);
+                    });
+                    fusionSelect.appendChild(og);
+                }
+                if (rest.length > 0) {
+                    const og = document.createElement('optgroup');
+                    og.label = 'All Other Decks';
+                    rest.forEach(deck => {
+                        const o = document.createElement('option');
+                        o.value = deck.name;
+                        o.textContent = stripExSuffix(deck.name);
+                        og.appendChild(o);
+                    });
+                    fusionSelect.appendChild(og);
+                }
+                if (savedSecondary) {
+                    const match = Array.from(fusionSelect.options).find(o => o.value && o.value.toLowerCase() === savedSecondary.toLowerCase());
+                    if (match) fusionSelect.value = match.value;
+                }
+                fusionSelect.onchange = function() {
+                    const primary = String(window.currentMetaArchetype || '').trim();
+                    const secondary = String(this.value || '').trim();
+                    if (secondary && primary && secondary.toLowerCase() === primary.toLowerCase()) {
+                        showToast(t('cm.fusionSamePicked') || 'Fusion partner can\'t be the same archetype as the primary.', 'warning');
+                        this.value = '';
+                        window.currentMetaArchetypeSecondary = '';
+                    } else {
+                        window.currentMetaArchetypeSecondary = secondary;
+                    }
+                    try { localStorage.setItem('currentMeta.archetypeSecondary', window.currentMetaArchetypeSecondary || ''); } catch (_) { /* private mode */ }
+                    _applyCurrentMetaFusionStateClass();
+                    if (primary) loadCurrentMetaDeckData(primary);
+                };
+                if (typeof initSearchableSelect === 'function') initSearchableSelect(fusionSelect);
+                _applyCurrentMetaFusionStateClass();
+            }
+        }
+
+        // Toggle a CSS hook on #current-analysis when a fusion partner is set
+        // so the existing deep-dive sections that don't make sense for a
+        // hypothetical merged deck (stats / matchups / User-vs-Vanilla /
+        // Tech vs Normal / Meta Card Analysis) hide automatically.
+        function _applyCurrentMetaFusionStateClass() {
+            const container = document.getElementById('current-analysis');
+            if (!container) return;
+            const active = !!(window.currentMetaArchetypeSecondary && String(window.currentMetaArchetypeSecondary).trim());
+            container.setAttribute('data-cm-fusion', active ? 'active' : 'inactive');
+        }
+        if (typeof window !== 'undefined') {
+            window._applyCurrentMetaFusionStateClass = _applyCurrentMetaFusionStateClass;
         }
         
         // Format filter functions
@@ -819,6 +959,7 @@
         function setCurrentMetaViewMode(mode) {
             const next = mode === 'deepDive' ? 'deepDive' : 'vanilla';
             const container = document.getElementById('current-analysis');
+            const prev = container ? container.getAttribute('data-cm-view') : null;
             if (container) container.setAttribute('data-cm-view', next);
             const vanillaBtn = document.getElementById('cmViewModeVanillaBtn');
             const deepBtn    = document.getElementById('cmViewModeDeepDiveBtn');
@@ -831,6 +972,18 @@
                 deepBtn.setAttribute('aria-selected', String(next === 'deepDive'));
             }
             try { localStorage.setItem(CM_VIEW_MODE_KEY, next); } catch (_) { /* private mode */ }
+
+            // Re-render the Card Overview when toggling crosses the fusion
+            // visibility line — vanilla suppresses fusion (see fusionActive
+            // gate in loadCurrentMetaDeckData), so the on-screen cards
+            // change between the two modes if a fusion partner is set.
+            if (prev && prev !== next) {
+                const secondary = String(window.currentMetaArchetypeSecondary || '').trim();
+                const primary = String(window.currentMetaArchetype || '').trim();
+                if (secondary && primary && typeof loadCurrentMetaDeckData === 'function') {
+                    loadCurrentMetaDeckData(primary);
+                }
+            }
         }
 
         function _initCurrentMetaViewMode() {
@@ -1099,28 +1252,59 @@
                 }
             }
             
-            // Filter by archetype
+            // Filter by archetype. When a Cooking-mode fusion partner is
+            // set, partition the rows into primary / secondary buckets so
+            // _fuseArchetypeRows can pool them into one virtual archetype
+            // downstream. Same-archetype-twice was already blocked at the
+            // onchange handler, but we double-check here so a stale state
+            // can't crash the merge. Also gated on Cooking view-mode: a
+            // saved fusion from a previous session shouldn't silently
+            // alter the Quick-Overview card list when the user can't see
+            // the partner dropdown to disable it.
+            const secondaryArchRaw = String(window.currentMetaArchetypeSecondary || '').trim();
+            const cmViewMode = (document.getElementById('current-analysis') || {}).getAttribute
+                ? document.getElementById('current-analysis').getAttribute('data-cm-view')
+                : null;
+            const isCookingMode = cmViewMode === 'deepDive';
+            const fusionActive = isCookingMode && !!secondaryArchRaw && secondaryArchRaw.toLowerCase() !== archetype.toLowerCase();
             const normalizedTarget = normalizeCurrentMetaArchetypeKey(archetype);
-            let deckCards = data.filter(row => {
+            const normalizedFusion = fusionActive ? normalizeCurrentMetaArchetypeKey(secondaryArchRaw) : null;
+
+            const matchesArch = (rowArchetype, targetRaw, targetNorm) => {
+                if (!rowArchetype) return false;
+                if (rowArchetype.toLowerCase() === targetRaw.toLowerCase()) return true;
+                const normalizedRow = normalizeCurrentMetaArchetypeKey(rowArchetype);
+                return normalizedRow && normalizedRow === targetNorm;
+            };
+
+            let primaryRows = [];
+            let secondaryRows = [];
+            data.forEach(row => {
                 const rowArchetype = currentMetaFormatFilter === 'play'
                     ? normalizeCurrentMetaTournamentArchetypeName(row.archetype)
                     : String(row.archetype || '').trim();
-
-                if (!rowArchetype) return false;
-                const exactMatch = rowArchetype.toLowerCase() === archetype.toLowerCase();
-                if (exactMatch) return true;
-
-                const normalizedRow = normalizeCurrentMetaArchetypeKey(rowArchetype);
-                return normalizedRow && normalizedRow === normalizedTarget;
+                if (matchesArch(rowArchetype, archetype, normalizedTarget)) {
+                    primaryRows.push(row);
+                } else if (fusionActive && matchesArch(rowArchetype, secondaryArchRaw, normalizedFusion)) {
+                    secondaryRows.push(row);
+                }
             });
-            
+
             // Apply format filter only when using current_meta data with 'live' or 'all'
             // (tournament_cards_data is already filtered to Top 256, should NOT be filtered further by meta)
             if (currentMetaFormatFilter === 'live' && !needsAggregation) {
-                deckCards = deckCards.filter(row => row.meta === 'Meta Live');
+                primaryRows = primaryRows.filter(row => row.meta === 'Meta Live');
+                secondaryRows = secondaryRows.filter(row => row.meta === 'Meta Live');
             }
 
-            
+            let deckCards;
+            if (fusionActive && secondaryRows.length > 0) {
+                deckCards = _fuseArchetypeRows(primaryRows, secondaryRows);
+                devLog(`[Current Meta][Fusion] ${archetype} (${primaryRows.length} rows) × ${secondaryArchRaw} (${secondaryRows.length} rows) → ${deckCards.length} merged cards`);
+            } else {
+                deckCards = primaryRows;
+            }
+
             if (deckCards.length === 0) {
                 showToast(`No data found for ${archetype} with filter "${currentMetaFormatFilter}"!`, 'warning');
                 clearCurrentMetaDeckView();
@@ -1177,9 +1361,9 @@
                 // Preserve raw per-tournament rows for Recency scoring in Consistency builder
                 window.currentMetaRawDeckCards = deckCards.slice();
 
-                if (needsAggregation && deckCards.length > 0) {
+                if (needsAggregation && deckCards.length > 0 && !fusionActive) {
                     deckCards = aggregateCardStatsByDate(deckCards);
-                } else if (currentMetaFormatFilter === 'all' && deckCards.length > 0) {
+                } else if (currentMetaFormatFilter === 'all' && deckCards.length > 0 && !fusionActive) {
                     // 'Online + Major' filter: combine Meta Live (Online) rows
                     // with the latest Major snapshot from tournament_cards_data
                     // additively. Online_count + Major_count over Online_total +

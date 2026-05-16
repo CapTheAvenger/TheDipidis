@@ -1,5 +1,21 @@
 [
   {
+    "tournament_id": "0065",
+    "tournament_name": "Regional Championship Campinas",
+    "tournament_date": "2026-05-16",
+    "tournament_type": "regional",
+    "country": "BR",
+    "total_players": 0
+  },
+  {
+    "tournament_id": "0064",
+    "tournament_name": "Regional Championship Utrecht",
+    "tournament_date": "2026-05-16",
+    "tournament_type": "regional",
+    "country": "NL",
+    "total_players": 0
+  },
+  {
     "tournament_id": "0063",
     "tournament_name": "Regional Championship Los Angeles",
     "tournament_date": "2026-05-08",

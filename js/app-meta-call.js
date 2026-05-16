@@ -95,11 +95,51 @@ window.MetaCall = (function () {
   // ride still gets full credit for both.
   const PREDICTOR_45_FAMILY_FLOOR_PCT  = 15;    // family must hold ≥ this share to trigger
   const PREDICTOR_45_FAMILY_EXCESS_DIV = 10;    // family-excess factor = (familyPct - floor) / this
-  const PREDICTOR_45_WR_FACTOR_SCALE   = 10;    // wr-edge factor = (wr - 0.55) * this
-  const PREDICTOR_45_BASE_CONTRIB_PP   = 0.5;   // pp contribution per "unit" (factors multiplied)
-  const PREDICTOR_45_COUNTER_WR_MIN    = 0.55;  // min WR vs family member to count
-  const PREDICTOR_45_BOOST_CAP_PP      = 2.0;   // hard cap per deck (3× 4.0a's cap)
+  const PREDICTOR_45_WR_FACTOR_SCALE   = 10;    // wr-edge factor = (wr - threshold) * this
+  const PREDICTOR_45_BASE_CONTRIB_PP   = 0.7;   // pp contribution per "unit" (factors multiplied)
+  const PREDICTOR_45_COUNTER_WR_MIN    = 0.50;  // min WR vs family member to count
+                                                // Lowered from 0.55: Limitless online matchup data
+                                                // shows Lucario Hariyama / Raging Bolt / Cynthia's
+                                                // Garchomp vs Dragapult sitting in the 38-57 % band
+                                                // — players still bring them offline because the
+                                                // tiny edge × dominant-family-prevalence × better
+                                                // tournament-floor preparation is worth it. 50 %
+                                                // accepts the slight-edge counters; the magnitude
+                                                // still scales with the WR-edge so 50.1 % WR gives
+                                                // a near-zero boost while 60 %+ scales up cleanly.
+  const PREDICTOR_45_BOOST_CAP_PP      = 3.5;   // hard cap per deck (raised from 2.0 — Utrecht
+                                                // showed counter-decks under-predicted by 2-3 pp
+                                                // each; 2.0 pp cap couldn't close the gap)
   let _concentrationLastLogId = null;
+
+  // ── Predictor 4.6 — Counter-Field Suppression ──────────────
+  // 4.5 boosts counter decks but doesn't TOUCH the concentrated
+  // family itself. Result: at 30 % Dragapult-family, the family
+  // stays at 30 % even as counters get boosted, so the field
+  // composition over-predicts the dominant family. When the
+  // tournament-floor reality is that players hedge AGAINST the
+  // dominant deck, the dominant deck's actual share is lower
+  // than the online ladder suggests. 4.6 reduces the family's
+  // predicted share proportional to its excess concentration —
+  // shifting share INTO the counters via renormalisation.
+  const PREDICTOR_46_FAMILY_FLOOR_PCT  = 20;    // family must hold ≥ this share to start suppression
+  const PREDICTOR_46_SUPPRESS_PER_PP   = 0.10;  // suppress 0.10 pp of family share per pp of excess
+  const PREDICTOR_46_SUPPRESS_CAP_PP   = 3.0;   // hard cap on total family suppression
+  let _fieldSuppressionLastLogId = null;
+
+  // ── Predictor 5.5 — Online-Presence Floor ──────────────────
+  // Quality-damping in 4.2 + concentration boost in 5.2 can
+  // collectively crush a deck with high online share but low
+  // online top-8 conversion (Lucario Hariyama: 5.52 % share,
+  // 2.59 % top8 conv → predictor lands < 1.5 % despite the deck
+  // being top-3 online and showing 4 % at Utrecht). High-share
+  // online + labs presence is strong evidence the deck IS in
+  // the meta; this floor prevents the dampers from making it
+  // invisible.
+  const PREDICTOR_55_PRESENCE_FLOOR_MIN  = 3.0;  // online share must be ≥ this to qualify
+  const PREDICTOR_55_PRESENCE_FLOOR_PCT  = 0.60; // floor at this fraction of online share
+  const PREDICTOR_55_REQUIRE_LABS_N      = 1;    // need ≥ N labs samples to apply (filters
+                                                  // pure-online noise decks)
 
   // ── Predictor 4.2 — Ladder-Bias-Damper ─────────────────────
   // Casual decks (Alakazam, Starmie, Grimmsnarl …) over-index on the
@@ -1316,6 +1356,178 @@ window.MetaCall = (function () {
     } catch (_e) { /* dev log only — never block prediction */ }
   }
 
+  // ── Predictor 4.6 — Counter-Field Suppression ──────────────
+  // Reduce the dominant family's predicted share when its
+  // concentration exceeds 20 %. Operates on `predictedShareRaw`
+  // AFTER the main predictor loop has run, so it shifts share
+  // away from the family at the same stage 4.5 boosts counters.
+  // Suppression total = min(SUPPRESS_CAP_PP, (familyPct - 20) ×
+  // SUPPRESS_PER_PP), distributed across family members
+  // proportional to each member's share within the family.
+  //
+  // Combined with the 5.2 concentration boost: 5.2 amplifies
+  // raw → 4.6 then subtracts the post-amplification value. Net
+  // effect at 30 % Dragapult family: ~1.0 pp suppression off the
+  // family total, redistributed via renormalisation into the
+  // boosted counter decks.
+  function _computeFieldSuppression() {
+    if (!_shareList || _shareList.length === 0) return;
+
+    // Aggregate post-amplification predicted share per family.
+    const familyTotal = new Map();    // family → summed predictedShareRaw
+    const familyMembers = new Map();  // family → [{deck, family, share}, ...]
+    let grandTotal = 0;
+    _shareList.forEach(d => {
+      const share = d.predictedShareRaw || 0;
+      grandTotal += share;
+      const family = extractMainPokemon(d.name);
+      if (!family) return;
+      familyTotal.set(family, (familyTotal.get(family) || 0) + share);
+      if (!familyMembers.has(family)) familyMembers.set(family, []);
+      familyMembers.get(family).push({ deck: d, share });
+    });
+    if (grandTotal <= 0) return;
+
+    const dominant = [];
+    familyTotal.forEach((share, family) => {
+      const pct = (share / grandTotal) * 100;
+      if (pct >= PREDICTOR_46_FAMILY_FLOOR_PCT) {
+        dominant.push({ family, pct, share, members: familyMembers.get(family) || [] });
+      }
+    });
+    if (dominant.length === 0) return;
+
+    dominant.forEach(df => {
+      const excessPct  = df.pct - PREDICTOR_46_FAMILY_FLOOR_PCT;
+      const suppressPp = Math.min(PREDICTOR_46_SUPPRESS_CAP_PP, excessPct * PREDICTOR_46_SUPPRESS_PER_PP);
+      if (suppressPp <= 0) return;
+
+      // Convert pp to raw share units using the same grandTotal denominator.
+      const suppressShareUnits = (suppressPp / 100) * grandTotal;
+
+      // Distribute proportionally — bigger variants of the family lose more.
+      df.members.forEach(m => {
+        if (df.share <= 0) return;
+        const weight = m.share / df.share;
+        const reduction = suppressShareUnits * weight;
+        m.deck.predictedShareRaw = Math.max(0, (m.deck.predictedShareRaw || 0) - reduction);
+        m.deck.fieldSuppressionPp = (m.deck.fieldSuppressionPp || 0) + (suppressPp * weight);
+      });
+    });
+
+    // Dev-console log — one entry per fresh major.
+    try {
+      const majorId = _lastMajorInfo && _lastMajorInfo.id;
+      if (majorId && _fieldSuppressionLastLogId !== majorId) {
+        _fieldSuppressionLastLogId = majorId;
+        const lines = dominant.map(df => {
+          const excessPct  = df.pct - PREDICTOR_46_FAMILY_FLOOR_PCT;
+          const suppressPp = Math.min(PREDICTOR_46_SUPPRESS_CAP_PP, excessPct * PREDICTOR_46_SUPPRESS_PER_PP);
+          return `${df.family} ${df.pct.toFixed(1)}% → -${suppressPp.toFixed(2)} pp`;
+        }).join(', ');
+        console.log(`[Predictor 4.6] Field suppression | ${lines}`);
+      }
+    } catch (_e) { /* dev log only */ }
+  }
+
+  // ── Predictor 5.5 — Online-Presence Floor ──────────────────
+  // Guarantee a minimum predicted share for decks with verified
+  // multi-source presence. Lucario Hariyama was getting crushed
+  // to < 1.5 % predicted despite 5.52 % online share + labs
+  // presence at LA (60 brought) and Prague (76 brought), because
+  // its low top8 conv (2.59 %) hit every damper in the chain.
+  // The floor only fires when BOTH conditions hold:
+  //   1. Online share ≥ 3 % (real ladder presence)
+  //   2. ≥ 1 labs sample (somebody actually brought it to a
+  //      tournament — guards against pure-online noise decks)
+  // Floor = 60 % of online share (allows the dampers to still
+  // do their job, just bounded).
+  function _computeOnlinePresenceFloor() {
+    if (!_shareList || _shareList.length === 0) return;
+    const totalLadder = _shareList.reduce((s, d) => s + (d.ladderShare || 0), 0) || 1;
+    const totalRaw    = _shareList.reduce((s, d) => s + (d.predictedShareRaw || 0), 0) || 1;
+
+    _shareList.forEach(d => {
+      const onlinePct = (d.ladderShare / totalLadder) * 100;
+      if (onlinePct < PREDICTOR_55_PRESENCE_FLOOR_MIN) return;
+      const k = normalize(d.name);
+      const q = _labsDay2ConvByDeck && _labsDay2ConvByDeck[k];
+      if (!q || (q.n || 0) < PREDICTOR_55_REQUIRE_LABS_N) return;
+
+      const floorPct      = onlinePct * PREDICTOR_55_PRESENCE_FLOOR_PCT;
+      // Convert floor pct to raw share units in the same scale.
+      const floorRawShare = (floorPct / 100) * totalRaw;
+      if ((d.predictedShareRaw || 0) < floorRawShare) {
+        d.onlinePresenceFloorApplied = true;
+        d.predictedShareRawPreFloor  = d.predictedShareRaw;
+        d.predictedShareRaw          = floorRawShare;
+      }
+    });
+  }
+
+  // ── Diagnostic: Counter Coverage vs Dominant Family ────────
+  // Surfaces decks that should have a matchup row vs the
+  // dominant family but don't, or whose WR falls below the 4.5
+  // threshold (so the boost won't fire). One-shot console log
+  // per major id so manual auditing is quick.
+  function _logCounterCoverageGaps() {
+    if (!_matchupMap || !_shareList || _shareList.length === 0) return;
+    const familyShare = new Map();
+    const familyMembers = new Map();
+    let totalLadder = 0;
+    _shareList.forEach(d => {
+      totalLadder += (d.ladderShare || 0);
+      const family = extractMainPokemon(d.name);
+      if (!family) return;
+      familyShare.set(family, (familyShare.get(family) || 0) + (d.ladderShare || 0));
+      if (!familyMembers.has(family)) familyMembers.set(family, []);
+      familyMembers.get(family).push({ name: d.name, key: normalize(d.name) });
+    });
+    if (totalLadder <= 0) return;
+    let dominant = null;
+    familyShare.forEach((share, family) => {
+      const pct = (share / totalLadder) * 100;
+      if (pct >= PREDICTOR_45_FAMILY_FLOOR_PCT && (!dominant || pct > dominant.pct)) {
+        dominant = { family, pct, members: familyMembers.get(family) || [] };
+      }
+    });
+    if (!dominant) return;
+    try {
+      const majorId = _lastMajorInfo && _lastMajorInfo.id;
+      if (!majorId || _matchupCoverageLastLogId === majorId) return;
+      _matchupCoverageLastLogId = majorId;
+      const gaps = [];
+      _shareList.forEach(c => {
+        if (extractMainPokemon(c.name) === dominant.family) return;
+        const ck = normalize(c.name);
+        let bestWr = null;
+        let coverage = 0;
+        dominant.members.forEach(m => {
+          const direct  = _matchupMap[ck] && _matchupMap[ck][m.key];
+          const reverse = _matchupMap[m.key] && _matchupMap[m.key][ck];
+          let wr;
+          if (direct  && typeof direct.pWin === 'number')  wr = direct.pWin;
+          else if (reverse && typeof reverse.pWin === 'number') wr = 1 - reverse.pWin;
+          else return;
+          coverage++;
+          if (bestWr == null || wr > bestWr) bestWr = wr;
+        });
+        if (coverage === 0) {
+          gaps.push(`${c.name}: NO matchup data vs ${dominant.family}`);
+        } else if (bestWr != null && bestWr < PREDICTOR_45_COUNTER_WR_MIN) {
+          gaps.push(`${c.name}: best WR ${(bestWr * 100).toFixed(1)} % vs ${dominant.family} (below ${(PREDICTOR_45_COUNTER_WR_MIN * 100).toFixed(0)} % — 4.5 won't fire)`);
+        }
+      });
+      if (gaps.length > 0) {
+        console.log(
+          `[Matchup-Audit] Counter-coverage gaps vs ${dominant.family} (${dominant.pct.toFixed(1)} %):\n  ` +
+          gaps.slice(0, 15).join('\n  ')
+        );
+      }
+    } catch (_e) { /* dev only */ }
+  }
+  let _matchupCoverageLastLogId = null;
+
   // ── Predictor 2.0 — runnable on demand ────────────────────
   // Extracted so a Testing Group import can update _tgFieldShares and
   // re-run the prediction without a full data reload. Uses module
@@ -1728,6 +1940,25 @@ window.MetaCall = (function () {
         }
       });
     }
+
+    // Predictor 4.6 — Counter-Field Suppression. Reduce dominant
+    // family's predicted share (operates on post-amplification raw).
+    // Order matters: runs AFTER 5.2 concentration boost so we trim
+    // the amplified value, not the pre-boost one. Combined with 4.5
+    // boosting counters, the renormalisation step naturally shifts
+    // share from the dominant family INTO the counters.
+    _computeFieldSuppression();
+
+    // Predictor 5.5 — Online-Presence Floor. Final safety floor for
+    // decks with verified online + labs presence that the dampers
+    // crushed too hard (Lucario Hariyama: 5.52 % online, 1.5 %
+    // predicted pre-floor). Runs last so it can override the
+    // suppression for any deck that's both a counter target and
+    // an actually-popular online deck (rare but possible).
+    _computeOnlinePresenceFloor();
+
+    // Diagnostic — surfaces matchup-coverage gaps once per major.
+    _logCounterCoverageGaps();
 
     // Renormalise predicted shares to sum 100% so the field-composition
     // budget logic works unchanged.

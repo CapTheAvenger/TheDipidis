@@ -1462,6 +1462,7 @@ window.MetaCall = (function () {
     const totalLadder = _shareList.reduce((s, d) => s + (d.ladderShare || 0), 0) || 1;
     const totalRaw    = _shareList.reduce((s, d) => s + (d.predictedShareRaw || 0), 0) || 1;
 
+    const applied = [];
     _shareList.forEach(d => {
       const onlinePct = (d.ladderShare / totalLadder) * 100;
       const k         = normalize(d.name);
@@ -1476,10 +1477,11 @@ window.MetaCall = (function () {
       }
 
       let labsFloorPct = 0;
+      let labsAvgPct   = 0;
       if (labsRow && (labsRow.n || 0) >= PREDICTOR_55_LABS_FLOOR_MIN_N) {
         // Recency-weighted average labs share_pct across recent majors.
         // share is the weighted sum, n is the summed weight.
-        const labsAvgPct = labsRow.share / labsRow.n;
+        labsAvgPct = labsRow.share / labsRow.n;
         if (labsAvgPct >= PREDICTOR_55_LABS_FLOOR_MIN_PCT) {
           labsFloorPct = labsAvgPct * PREDICTOR_55_LABS_FLOOR_PCT;
         }
@@ -1496,9 +1498,36 @@ window.MetaCall = (function () {
         d.predictedShareRaw          = floorRawShare;
         d.presenceFloorSource        = labsFloorPct > onlineFloorPct ? 'labs' : 'online';
         d.presenceFloorPct           = floorPct;
+        applied.push({
+          name: d.name, floorPct, source: d.presenceFloorSource,
+          onlinePct, labsAvgPct, onlineFloorPct, labsFloorPct,
+        });
       }
     });
+
+    // Dev-console log — one entry per fresh major listing which decks
+    // got floored. Critical for debugging when an expected deck (e.g.
+    // Lucario Hariyama) doesn't appear: console will show whether the
+    // floor fired and at what value, or — if absent — that the deck
+    // failed one of the gates (online < 3 %, no labs sample, or labs
+    // avg < 1.5 %).
+    try {
+      const majorId = _lastMajorInfo && _lastMajorInfo.id;
+      if (majorId && _presenceFloorLastLogId !== majorId) {
+        _presenceFloorLastLogId = majorId;
+        if (applied.length === 0) {
+          console.log('[Predictor 5.5] Online-presence floor: no decks floored');
+        } else {
+          const lines = applied
+            .sort((a, b) => b.floorPct - a.floorPct)
+            .map(a => `${a.name} → ${a.floorPct.toFixed(2)}% (${a.source}: online×0.6=${a.onlineFloorPct.toFixed(2)}, labs×0.85=${a.labsFloorPct.toFixed(2)})`)
+            .join('\n  ');
+          console.log(`[Predictor 5.5] Online-presence floor applied:\n  ${lines}`);
+        }
+      }
+    } catch (_e) { /* dev log only */ }
   }
+  let _presenceFloorLastLogId = null;
 
   // ── Diagnostic: Counter Coverage vs Dominant Family ────────
   // Surfaces decks that should have a matchup row vs the

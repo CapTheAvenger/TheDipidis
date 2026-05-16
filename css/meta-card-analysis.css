@@ -327,3 +327,47 @@
         padding: 5px 7px !important;
     }
 }
+
+/* ── Current Meta Analysis: Vanilla vs Deep Dive view-mode toggle ──
+   When the user lands on the tab they see only Card Overview + Deck
+   Builder (vanilla mode). Switching to Deep Dive surfaces all the
+   advanced sections (stats, matchups, User vs Vanilla, Tech Lab). */
+.cm-view-mode-toggle {
+    display: flex;
+    gap: 8px;
+    margin: 0 0 20px;
+    padding: 4px;
+    background: rgba(0, 0, 0, 0.04);
+    border-radius: 10px;
+    width: fit-content;
+}
+
+.cm-view-mode-btn {
+    background: transparent;
+    border: none;
+    padding: 8px 18px;
+    font-size: 0.95em;
+    font-weight: 600;
+    color: var(--text-muted, #666);
+    cursor: pointer;
+    border-radius: 8px;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.cm-view-mode-btn:hover {
+    color: var(--text-primary, #222);
+}
+
+.cm-view-mode-btn.is-active {
+    background: var(--accent-color, #3a86ff);
+    color: #fff;
+}
+
+/* Vanilla mode: hide everything tagged as deep-dive-only.
+   `!important` is needed to override the inline-show toggles
+   (`d-none` / `display-none`) that other JS uses to reveal these
+   sections when a deck is loaded — without it, vanilla mode would
+   re-show them as soon as the user picked a deck. */
+#current-analysis[data-cm-view="vanilla"] .cm-deep-dive-only {
+    display: none !important;
+}

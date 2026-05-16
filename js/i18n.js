@@ -1234,6 +1234,8 @@ const translations = {
     // ── Tab 4: Current Meta Deck Analysis ────────────────────
     'cm.analysisHeading':       'Current Meta Deck Analysis',
     'cm.analyzeAndBuild':       'Analyze and Build Decks from Current Meta',
+    'cm.viewModeVanilla':       'Quick overview',
+    'cm.viewModeDeepDive':      'Deep Dive',
     'data.updated':             'Data:',
     'filter.availableRange':    'Available',
     // ── TCG glossary tooltips ──────────────────────────────────
@@ -2784,6 +2786,8 @@ const translations = {
     // ── Tab 4: Current Meta Deck Analysis ────────────────────
     'cm.analysisHeading':       'Aktuelle Meta Deck-Analyse',
     'cm.analyzeAndBuild':       'Decks aus der aktuellen Meta analysieren & bauen',
+    'cm.viewModeVanilla':       'Schnellüberblick',
+    'cm.viewModeDeepDive':      'Deep Dive',
     'data.updated':             'Daten:',
     'filter.availableRange':    'Verfügbar',
     // ── TCG-Glossar Tooltips ───────────────────────────────────

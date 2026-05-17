@@ -1570,6 +1570,17 @@ window.MetaCall = (function () {
 
     const applied = [];
     _shareList.forEach(d => {
+      // Skip decks that 4.6 explicitly suppressed — those are
+      // INTENTIONALLY lower than their online share suggests
+      // (player counter-adaption hypothesis). Without this skip,
+      // the floor at 60 % × online_share immediately undoes the
+      // suppression (e.g. pure Dragapult: 4.6 cuts to ~6 %, then
+      // 5.5 raises floor to 10.2 % = 60 % × 17 % online). 5.5's
+      // job is to prevent the QUALITY DAMPERS from over-crushing
+      // counters like Lucario, not to second-guess 4.6's
+      // adaption signal.
+      if ((d.fieldSuppressionPp || 0) > 0) return;
+
       const onlinePct = (d.ladderShare / totalLadder) * 100;
       const k         = normalize(d.name);
       const q         = _labsDay2ConvByDeck && _labsDay2ConvByDeck[k];

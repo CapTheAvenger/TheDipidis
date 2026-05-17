@@ -1027,10 +1027,10 @@
 
         // Vanilla vs Deep Dive: split the Current Meta Analysis tab into a
         // beginner-friendly mode (only Card Overview + Deck Builder visible)
-        // and a Deep Dive that surfaces every advanced section. Persists per
-        // user via localStorage. Default is 'vanilla' so first-time visitors
-        // see the simpler view.
-        const CM_VIEW_MODE_KEY = 'currentMeta.viewMode';
+        // and a Deep Dive that surfaces every advanced section.
+        // Session-scoped: every page reload resets to 'vanilla' so the
+        // user always lands on the simpler Overview by default. Toggling
+        // mid-session is kept in the DOM attribute only.
 
         function setCurrentMetaViewMode(mode) {
             const next = mode === 'deepDive' ? 'deepDive' : 'vanilla';
@@ -1047,7 +1047,6 @@
                 deepBtn.classList.toggle('is-active', next === 'deepDive');
                 deepBtn.setAttribute('aria-selected', String(next === 'deepDive'));
             }
-            try { localStorage.setItem(CM_VIEW_MODE_KEY, next); } catch (_) { /* private mode */ }
 
             // Re-render the Card Overview when toggling crosses the fusion
             // visibility line — vanilla suppresses fusion (see fusionActive
@@ -1063,12 +1062,11 @@
         }
 
         function _initCurrentMetaViewMode() {
-            let stored = 'vanilla';
-            try {
-                const v = localStorage.getItem(CM_VIEW_MODE_KEY);
-                if (v === 'deepDive' || v === 'vanilla') stored = v;
-            } catch (_) { /* private mode → keep default */ }
-            setCurrentMetaViewMode(stored);
+            // Always start in vanilla (Overview) on a fresh page load —
+            // matches the primary-archetype + fusion-partner reset
+            // behaviour so the Deck Analysis (Global) tab is fully
+            // session-scoped.
+            setCurrentMetaViewMode('vanilla');
         }
 
         if (typeof window !== 'undefined') {

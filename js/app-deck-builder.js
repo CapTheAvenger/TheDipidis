@@ -3817,35 +3817,63 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 });
                 if (!prints.length) { pushKey(key, count); return; }
 
-                // Pick the print the user actually wants:
-                //   Max  → most expensive (= most premium / collectible) print
-                //   Lo   → cheapest print
-                // Price is the primary signal because the rarity-rank chart
-                // disagrees with the market on cards like N's Zekrom: ASC 155
-                // is "Rare" (rank 4) at 0.19€, but the MEP 31 alt-art "Promo"
-                // (rank 3) goes for ~6€ — clearly the premium print. Rarity
-                // rank is kept as a tiebreaker for prints without price data
-                // and for equal prices (e.g. two SAR prints both at 0€).
+                // Pick the print the user actually wants. Three-tier
+                // comparator so the result is deterministic and matches
+                // the button label literally:
+                //   1. Rarity rank — Max picks the highest rank, Low
+                //      the lowest. This is THE signal the user
+                //      requested with the button name. Earlier versions
+                //      used price as the primary key, which sent Max
+                //      to expensive-but-low-rank Promos (N's Zekrom
+                //      MEP 31 Promo at 6€ beating ASC 155 Rare even
+                //      though rank 3 < rank 4) and sent Low to ancient
+                //      cheap Commons instead of the most-recent low-
+                //      rarity reprint.
+                //   2. Set release date — among same-rank prints, Max
+                //      AND Low both prefer the newer set so the
+                //      printed card looks current at the table. This
+                //      is the fix for "low rarity should be the latest
+                //      print": Poké Pad PFL 042 (2026-01) wins over
+                //      PAR 042 (2023-11) when both are Common.
+                //   3. Price — final tiebreaker among prints in the
+                //      same set with identical rank. Max picks the
+                //      pricier (likely reverse-holo / special), Low
+                //      picks the cheapest.
                 const priceVal = (c) => {
                     const raw = c && c.eur_price;
                     if (!raw) return null;
                     const n = parseFloat(String(raw).replace(/[^0-9,.\-]/g, '').replace(',', '.'));
                     return isFinite(n) && n > 0 ? n : null;
                 };
+                const releaseTs = (c) => {
+                    const code = String(c && c.set || '').toUpperCase();
+                    const map = (typeof window !== 'undefined' && window.SET_RELEASE_DATES) || {};
+                    const iso = map[code] || map.DEFAULT || '2000-01-01';
+                    const t  = Date.parse(iso);
+                    return isFinite(t) ? t : 0;
+                };
                 const isBetter = (cand, current) => {
-                    const cp = priceVal(cand);
-                    const bp = priceVal(current);
-                    if (cp != null && bp != null && cp !== bp) {
-                        return dir === 'max' ? cp > bp : cp < bp;
-                    }
+                    // 1. Rarity rank — direction-aware.
                     const cr = rank(cand.rarity);
                     const br = rank(current.rarity);
                     if (cr !== br) {
                         return dir === 'max' ? cr > br : cr < br;
                     }
-                    // Same rank + same/missing price: prefer the one that has
-                    // a price at all (signals it's a real, traded print rather
-                    // than a data-gap entry).
+                    // 2. Set release date — newer wins regardless of
+                    //    direction; both Max and Low want a current print.
+                    const ct = releaseTs(cand);
+                    const bt = releaseTs(current);
+                    if (ct !== bt) return ct > bt;
+
+                    // 3. Price — direction-aware.
+                    const cp = priceVal(cand);
+                    const bp = priceVal(current);
+                    if (cp != null && bp != null && cp !== bp) {
+                        return dir === 'max' ? cp > bp : cp < bp;
+                    }
+                    // Same set + same rank + same/missing price: prefer
+                    // the one that has a price at all (signals a real,
+                    // traded print rather than a data-gap entry).
                     return cp != null && bp == null;
                 };
                 let best = prints[0];

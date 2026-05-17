@@ -829,12 +829,12 @@
             // time the primary list is rebuilt (filter changes etc.).
             const fusionSelect = document.getElementById('currentMetaDeckSelectSecondary');
             if (fusionSelect) {
-                if (window.currentMetaArchetypeSecondary === undefined) {
-                    try {
-                        const stored = localStorage.getItem('currentMeta.archetypeSecondary');
-                        if (stored) window.currentMetaArchetypeSecondary = stored;
-                    } catch (_) { /* private mode */ }
-                }
+                // Fuse selection is session-scoped (matches the primary
+                // archetype dropdown, which also resets on reload). We
+                // keep the choice in `window.currentMetaArchetypeSecondary`
+                // for within-session navigation between primaries, but
+                // don't persist to localStorage — a new page load starts
+                // with no fusion partner picked.
                 const savedSecondary = String(window.currentMetaArchetypeSecondary || '').trim();
                 fusionSelect.innerHTML = `<option value="">${typeof t === 'function' ? t('cm.fuseNone') : '-- None (single deck) --'}</option>`;
                 if (top10.length > 0) {
@@ -873,7 +873,6 @@
                     } else {
                         window.currentMetaArchetypeSecondary = secondary;
                     }
-                    try { localStorage.setItem('currentMeta.archetypeSecondary', window.currentMetaArchetypeSecondary || ''); } catch (_) { /* private mode */ }
                     _applyCurrentMetaFusionStateClass();
                     if (primary) loadCurrentMetaDeckData(primary);
                 };

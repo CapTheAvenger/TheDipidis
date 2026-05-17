@@ -3820,15 +3820,16 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 // Pick the print the user actually wants. Three-tier
                 // comparator so the result is deterministic and matches
                 // the button label literally:
-                //   1. Rarity rank — Max picks the highest rank, Low
-                //      the lowest. This is THE signal the user
-                //      requested with the button name. Earlier versions
-                //      used price as the primary key, which sent Max
-                //      to expensive-but-low-rank Promos (N's Zekrom
-                //      MEP 31 Promo at 6€ beating ASC 155 Rare even
-                //      though rank 3 < rank 4) and sent Low to ancient
-                //      cheap Commons instead of the most-recent low-
-                //      rarity reprint.
+                //   1. Effective rarity — Max picks the highest, Low
+                //      the lowest. The default getRarityRank chart
+                //      places Promo (3) below plain Rare (4), but in
+                //      practice Promos out of dedicated promo sets
+                //      (MEP, SVP, SP, SMP, …) are stamped-foil reprints
+                //      and are the premium collectible version of the
+                //      card. Lunatone case: ASC 105 Rare + MEG 74 Rare
+                //      + MEP 4 Promo — Max should pick MEP 4. We bump
+                //      the rank of those Promos above Rare so the
+                //      collector hierarchy lines up.
                 //   2. Set release date — among same-rank prints, Max
                 //      AND Low both prefer the newer set so the
                 //      printed card looks current at the table. This
@@ -3839,6 +3840,23 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 //      same set with identical rank. Max picks the
                 //      pricier (likely reverse-holo / special), Low
                 //      picks the cheapest.
+                const PROMO_SET_CODES = new Set([
+                    'MEP', 'SVP', 'SP', 'SMP', 'XYP', 'BWP', 'HSP', 'DPP', 'NP', 'WP',
+                ]);
+                // Promo Premium tier — sits between Triple Rare (9)
+                // and Art Rare (10) so it beats plain Rare (4) and
+                // every common/uncommon, but stays below the modern
+                // alt-art tier where the truly premium prints live.
+                const PROMO_PREMIUM_RANK = 10;
+                const effectiveRank = (c) => {
+                    const base   = rank(c && c.rarity);
+                    const code   = String(c && c.set || '').toUpperCase();
+                    const isPromo = String(c && c.rarity || '').toLowerCase() === 'promo';
+                    if (isPromo && PROMO_SET_CODES.has(code)) {
+                        return Math.max(base, PROMO_PREMIUM_RANK);
+                    }
+                    return base;
+                };
                 const priceVal = (c) => {
                     const raw = c && c.eur_price;
                     if (!raw) return null;
@@ -3853,9 +3871,9 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                     return isFinite(t) ? t : 0;
                 };
                 const isBetter = (cand, current) => {
-                    // 1. Rarity rank — direction-aware.
-                    const cr = rank(cand.rarity);
-                    const br = rank(current.rarity);
+                    // 1. Effective rarity rank — direction-aware.
+                    const cr = effectiveRank(cand);
+                    const br = effectiveRank(current);
                     if (cr !== br) {
                         return dir === 'max' ? cr > br : cr < br;
                     }

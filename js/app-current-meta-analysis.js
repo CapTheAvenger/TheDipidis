@@ -3164,10 +3164,10 @@
                                     <div class="card-action-buttons city-league-card-action-buttons">
                                         <div class="city-league-card-action-row">
                                             <button class="city-league-card-action-btn city-league-card-remove-btn" onclick="event.stopPropagation(); removeCardFromDeck('currentMeta', '${cardNameEscaped}')" title="${t('cl.removeFromDeck')}">-</button>
+                                            <button class="city-league-card-action-btn city-league-card-add-btn" onclick="event.stopPropagation(); addCardToDeck('currentMeta', '${cardNameEscaped}', '${setCode}', '${setNumber}')" title="${t('cl.addToDeckTooltip')}">+</button>
                                             <button class="city-league-card-action-btn city-league-card-rarity-btn" onclick="event.stopPropagation(); openRaritySwitcher('${cardNameEscaped}', '${cardNameEscaped} (${setCode} ${setNumber})')" title="${t('cl.switchPrint')}">★</button>
                                             <button class="city-league-card-action-btn city-league-card-pin-btn cm-deep-dive-only${isPinned ? ' is-active' : ''}" onclick="event.stopPropagation(); togglePinCard('currentMeta', '${cardNameEscaped}')" title="${pinTitle}">${pinIcon}</button>
                                             <button class="city-league-card-action-btn city-league-card-exclude-btn cm-deep-dive-only${isExcluded ? ' is-active' : ''}" onclick="event.stopPropagation(); toggleExcludeCard('currentMeta', '${cardNameEscaped}')" title="${excludeTitle}">${excludeIcon}</button>
-                                            <button class="city-league-card-action-btn city-league-card-add-btn" onclick="event.stopPropagation(); addCardToDeck('currentMeta', '${cardNameEscaped}', '${setCode}', '${setNumber}')" title="${t('cl.addToDeckTooltip')}">+</button>
                                         </div>
                                         <div class="city-league-card-action-row">
                                             ${setCode && setNumber ? `<button class="city-league-card-action-btn city-league-card-limitless-btn" onclick="event.stopPropagation(); openLimitlessCard('${setCode}', '${setNumber}')" title="${t('cl.openLimitless')}">L</button>` : '<span></span>'}

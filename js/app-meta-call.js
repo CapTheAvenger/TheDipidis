@@ -20,6 +20,21 @@ window.MetaCall = (function () {
   let _useClCurrent    = false; // user toggle: include Current City League in predictor
   let _useClPast       = false; // user toggle: include Past City League in predictor
 
+  // Meta Call Mode — user-pickable behavioural lens for counter-meta.
+  //   'standard' (default) — online ladder is treated as the truth.
+  //     The 4.6 family-suppression and 4.7 counter-adoption-boost
+  //     stages early-return as no-ops. Matches the majority of recent
+  //     majors (LA 31.9 %, Prague 29.4 %, Campinas 32.9 % all had
+  //     Dragapult-family near or above online level).
+  //   'counter' — players actively counter the dominant family.
+  //     4.6 and 4.7 fire at full strength. Fits events where the
+  //     player base has visibly hedged against the top deck after
+  //     consecutive regionals dominated by it (Utrecht 25.1 %).
+  //
+  // Session-scoped: a fresh page load always starts in 'standard'.
+  let _metaCallMode = 'standard';
+  let _metaCallModeLastLogId = null;
+
   // ── Predictor 3.0 — history-aware trend signals ───────────
   let _lastMajorDate     = null; // 'YYYY-MM-DD' — most recent labs tournament_date
   let _historyManifest   = null; // { dates: [...], latest: 'YYYY-MM-DD' } from data/online_share_history/manifest.json
@@ -1418,6 +1433,9 @@ window.MetaCall = (function () {
   // boosted counter decks.
   function _computeFieldSuppression() {
     if (!_shareList || _shareList.length === 0) return;
+    // Gated by the Meta Call mode toggle. Standard mode treats the
+    // online ladder as truth — counter-suppression off.
+    if (_metaCallMode !== 'counter') return;
 
     // Aggregate post-amplification predicted share per family.
     const familyTotal = new Map();    // family → summed predictedShareRaw
@@ -1486,6 +1504,9 @@ window.MetaCall = (function () {
   function _computeCounterAdoptionBoost() {
     if (!_shareList || _shareList.length === 0) return;
     if (!_tournamentStats) return;
+    // Gated by the Meta Call mode toggle. Standard mode treats the
+    // online ladder as truth — adoption boost off too.
+    if (_metaCallMode !== 'counter') return;
 
     // Need a dominant family for the adaption signal to make
     // sense — at low concentration, brought > ladder is just
@@ -2128,6 +2149,19 @@ window.MetaCall = (function () {
     // the amplified value, not the pre-boost one. Combined with 4.5
     // boosting counters, the renormalisation step naturally shifts
     // share from the dominant family INTO the counters.
+    //
+    // Gated by _metaCallMode: 'standard' (default) skips 4.6 + 4.7
+    // entirely. 'counter' runs both at the strength tuned for the
+    // Utrecht counter-meta case.
+    try {
+      const majorId = _lastMajorInfo && _lastMajorInfo.id;
+      if (majorId && _metaCallModeLastLogId !== majorId) {
+        _metaCallModeLastLogId = majorId;
+        console.log(`[Meta Call Mode] ${_metaCallMode === 'counter'
+          ? 'counter — 4.6 family suppression + 4.7 adoption boost ACTIVE'
+          : 'standard — online ladder respected, 4.6 + 4.7 OFF'}`);
+      }
+    } catch (_e) { /* dev log only */ }
     _computeFieldSuppression();
 
     // Predictor 4.7 — Counter-Adoption Boost. Catches decks 4.5
@@ -3594,6 +3628,34 @@ window.MetaCall = (function () {
   // enabled so the user can mix CL into the predictor and play with
   // the numbers, even when labs majors / Testing Group data are
   // already driving the field. Earlier the toggles were locked in
+  // Meta Call mode panel — pill toggle between 'standard' (online
+  // ladder = truth, default) and 'counter' (4.6 family-suppression +
+  // 4.7 adoption boost active). Default is standard because 3 of 4
+  // recent majors (LA, Prague, Campinas) trended bandwagon-style;
+  // counter-mode is opt-in for events where the player base visibly
+  // hedges against the dominant deck (Utrecht-style).
+  function renderMetaCallModePanel() {
+    const mode = _metaCallMode === 'counter' ? 'counter' : 'standard';
+    const pill = (key, labelKey) => {
+      const active = key === mode ? ' mc-tt-tab-active' : '';
+      return `<button type="button" class="mc-tt-tab${active}"
+        onclick="MetaCall._setMetaCallMode('${key}')">${esc(t(labelKey))}</button>`;
+    };
+    const hintKey = mode === 'counter' ? 'mc.modeCounterHint' : 'mc.modeStandardHint';
+    return `
+<div class="metacall-panel">
+  <div class="metacall-panel-title">
+    ${t('mc.panelMode')}
+    <span class="mc-badge">${t('mc.badgeCustomizable')}</span>
+  </div>
+  <div class="mc-tt-tabs" role="tablist" aria-label="Meta Call mode">
+    ${pill('standard', 'mc.modeStandard')}
+    ${pill('counter',  'mc.modeCounter')}
+  </div>
+  <p class="mc-tt-hint">${t(hintKey)}</p>
+</div>`;
+  }
+
   // Mode B / when a TG was loaded — that prevented the user from
   // experimenting with what CL data adds on top.
   function renderSourcesPanel() {
@@ -4141,6 +4203,7 @@ window.MetaCall = (function () {
        is added later. */}
   ${renderScenariosBar()}
   ${renderSettingsPanel()}
+  ${renderMetaCallModePanel()}
   ${renderSourcesPanel()}
   ${renderFieldPanel(field)}
   ${renderCustomDecksPanel()}
@@ -5512,6 +5575,17 @@ window.MetaCall = (function () {
     renderAll();
   }
 
+  // Switch the Meta Call mode (standard / counter). Re-runs the
+  // predictor so the field-composition list immediately reflects
+  // whether 4.6 / 4.7 are firing.
+  function _setMetaCallMode(mode) {
+    const next = mode === 'counter' ? 'counter' : 'standard';
+    if (_metaCallMode === next) return;
+    _metaCallMode = next;
+    _runPredictor();
+    renderAll();
+  }
+
   function _onMyDeck(val) {
     _settings.myDeck = val;
     _winRateOverrides = {};
@@ -6282,6 +6356,7 @@ window.MetaCall = (function () {
     getBaseMatchup: (deckA, deckB) => getBaseMatchup(deckA, deckB),
     _onSetting,
     _setTournamentType,
+    _setMetaCallMode,
     _onToggleSource,
     _onMyDeck,
     _onMyDeckInput,

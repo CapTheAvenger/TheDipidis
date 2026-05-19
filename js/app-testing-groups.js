@@ -105,7 +105,7 @@ window.TestingGroups = (function () {
   async function _loadBootstrap() {
     if (_bootstrapData) return _bootstrapData;
     try {
-      const resp = await fetch('data/testing_group_bootstrap.json?t=' + Date.now());
+      const resp = await fetch(dataUrl('data/testing_group_bootstrap.json'));
       if (!resp.ok) throw new Error('bootstrap fetch failed');
       _bootstrapData = await resp.json();
     } catch (err) {

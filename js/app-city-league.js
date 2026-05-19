@@ -114,8 +114,7 @@
             if (window.m3ArchetypeData) return; // Already loaded
             
             try {
-                const timestamp = new Date().getTime();
-                const response = await fetch(`${BASE_PATH}city_league_archetypes_comparison_M3.csv?t=${timestamp}`);
+                const response = await fetch(dataUrl(`${BASE_PATH}city_league_archetypes_comparison_M3.csv`));
                 if (response.ok) {
                     const text = await response.text();
                     const m3Data = parseCSV(text);
@@ -236,7 +235,6 @@
         async function loadCityLeagueData() {
             const content = document.getElementById('cityLeagueContent');
             try {
-                const timestamp = new Date().getTime();
                 const isMobileRuntime = !!(window.matchMedia && window.matchMedia('(max-width: 768px)').matches);
                 
                 // Dynamic file paths based on current format
@@ -253,20 +251,20 @@
                 // FCP-Optimierung: Lade nur kleine Dateien sofort (~880 KB statt 36 MB).
                 // Die grosse Analysis-CSV wird im Hintergrund nachgeladen.
                 const fetchPromises = [
-                    fetch(`${imagesUrl}?t=${timestamp}`)
+                    fetch(dataUrl(imagesUrl))
                         .then(response => response.ok ? response.json() : null)
                         .catch(error => {
                             console.warn(`Could not load images JSON (${imagesUrl}):`, error);
                             return null;
                         }),
-                    fetch(`${archetypesUrl}?t=${timestamp}`)
+                    fetch(dataUrl(archetypesUrl))
                         .then(response => response.ok ? response.text() : null)
                         .catch(error => {
                             console.error(`Could not load archetypes data (${archetypesUrl}):`, error);
                             return null;
                         }),
                     hasComparisonFile
-                        ? fetch(`${comparisonUrl}?t=${timestamp}`)
+                        ? fetch(dataUrl(comparisonUrl))
                             .then(response => response.ok ? response.text() : null)
                             .catch(error => {
                                 console.warn(`Comparison file could not be loaded (${comparisonUrl}):`, error);
@@ -279,7 +277,7 @@
                 // (mobile included — see switchCityLeagueFormat note).
                 if (window.currentCityLeagueFormat === 'M4') {
                     fetchPromises.push(
-                        fetch(`${BASE_PATH}city_league_archetypes_M3.csv?t=${timestamp}`)
+                        fetch(dataUrl(`${BASE_PATH}city_league_archetypes_M3.csv`))
                             .then(response => response.ok ? response.text() : null)
                             .catch(() => null)
                     );
@@ -298,7 +296,7 @@
                 }
 
                 // Hintergrund-Laden der grossen Analysis-CSV (non-blocking fuer FCP)
-                window._cityLeagueAnalysisPromise = fetch(`${analysisUrl}?t=${timestamp}`)
+                window._cityLeagueAnalysisPromise = fetch(dataUrl(analysisUrl))
                     .then(r => r.ok ? r.text() : null)
                     .then(text => text ? parseCSV(text) : [])
                     .then(data => {
@@ -982,7 +980,6 @@
             
             const format = window.currentCityLeagueFormat || 'M4';
             const formatSuffix = format === 'M3' ? '_M3' : '';
-            const timestamp = new Date().getTime();
             const analysisUrl = `${BASE_PATH}city_league_analysis${formatSuffix}.csv`;
             const archetypesUrl = `${BASE_PATH}city_league_archetypes${formatSuffix}.csv`;
             const comparisonUrl = `${BASE_PATH}city_league_archetypes_comparison${formatSuffix}.csv`;
@@ -1004,21 +1001,21 @@
             const [analysisText, archetypesText, comparisonText] = await Promise.all([
                 // Nur fetchen wenn Background-Load noch nicht fertig
                 !data
-                    ? fetch(`${analysisUrl}?t=${timestamp}`)
+                    ? fetch(dataUrl(analysisUrl))
                         .then(response => response.ok ? response.text() : null)
                         .catch(error => {
                             console.error(`Error loading analysis CSV (${analysisUrl}):`, error);
                             return null;
                         })
                     : Promise.resolve('__SKIP__'),
-                fetch(`${archetypesUrl}?t=${timestamp}`)
+                fetch(dataUrl(archetypesUrl))
                     .then(response => response.ok ? response.text() : null)
                     .catch(error => {
                         console.error(`Error loading archetypes CSV (${archetypesUrl}):`, error);
                         return null;
                     }),
                 hasComparisonFile
-                    ? fetch(`${comparisonUrl}?t=${timestamp}`)
+                    ? fetch(dataUrl(comparisonUrl))
                         .then(response => response.ok ? response.text() : null)
                         .catch(error => {
                             console.warn(`Ignoring missing comparison CSV (${comparisonUrl}):`, error);

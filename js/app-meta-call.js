@@ -431,7 +431,7 @@ window.MetaCall = (function () {
   async function _loadClShares(path) {
     const out = {};
     try {
-      const resp = await fetch(path + '?t=' + Date.now());
+      const resp = await fetch(dataUrl(path));
       if (!resp.ok) return out;
       const rows = parseCSV(await resp.text(), ';');
       rows.forEach(r => {
@@ -448,7 +448,7 @@ window.MetaCall = (function () {
   // so the limitless scraper writes a manifest of available date files.
   async function _loadHistoryManifest() {
     try {
-      const resp = await fetch('data/online_share_history/manifest.json?t=' + Date.now());
+      const resp = await fetch(dataUrl('data/online_share_history/manifest.json'));
       if (!resp.ok) return null;
       const data = await resp.json();
       if (data && Array.isArray(data.dates)) return data;
@@ -606,7 +606,7 @@ window.MetaCall = (function () {
   async function _loadDatedCardsRows() {
     if (!_datedCardsRowsRaw) {
       try {
-        const resp = await fetch('data/online_tournament_dated_cards.csv?t=' + Date.now());
+        const resp = await fetch(dataUrl('data/online_tournament_dated_cards.csv'));
         if (!resp.ok) { _datedCardsRowsRaw = []; }
         else { _datedCardsRowsRaw = parseCSV(await resp.text(), ';'); }
       } catch (_e) {
@@ -980,7 +980,7 @@ window.MetaCall = (function () {
     if (!dateISO) return {};
     const out = {};
     try {
-      const resp = await fetch(`data/online_share_history/${dateISO}.csv?t=` + Date.now());
+      const resp = await fetch(dataUrl(`data/online_share_history/${dateISO}.csv`));
       if (!resp.ok) return out;
       const rows = parseCSV(await resp.text(), ';');
       rows.forEach(r => {
@@ -2463,7 +2463,7 @@ window.MetaCall = (function () {
   async function loadData() {
     if (_matchupMap && _shareList) return true;
     try {
-      const shareResp = await fetch('data/limitless_online_decks_comparison.csv?t=' + Date.now());
+      const shareResp = await fetch(dataUrl('data/limitless_online_decks_comparison.csv'));
       if (!shareResp.ok) throw new Error('share CSV not found');
       const shareRows = parseCSV(await shareResp.text(), ';');
 
@@ -2502,7 +2502,7 @@ window.MetaCall = (function () {
       // simply fall back to the ladder share.
       _tournamentStats = {};
       try {
-        const tournResp = await fetch('data/online_tournament_top8_decks.csv?t=' + Date.now());
+        const tournResp = await fetch(dataUrl('data/online_tournament_top8_decks.csv'));
         if (tournResp.ok) {
           const tournRows = parseCSV(await tournResp.text(), ';');
           const broughtSum = tournRows.reduce(
@@ -2530,7 +2530,7 @@ window.MetaCall = (function () {
       // current_meta_analysis.set setting.
       _formatWindow = null;
       try {
-        const fwResp = await fetch('data/format_window.json?t=' + Date.now());
+        const fwResp = await fetch(dataUrl('data/format_window.json'));
         if (fwResp.ok) {
           const fw = await fwResp.json();
           if (fw && /^\d{4}-\d{2}-\d{2}$/.test(fw.in_person_legal_date || '')) {
@@ -2550,7 +2550,7 @@ window.MetaCall = (function () {
       _lastMajorByDeck = {};
       let labsRowsByDeck = {};
       try {
-        const labsResp = await fetch('data/labs_tournament_decks.csv?t=' + Date.now());
+        const labsResp = await fetch(dataUrl('data/labs_tournament_decks.csv'));
         if (labsResp.ok) {
           // Labs CSV is comma-delimited with quoted fields (e.g. the
           // `pokemon` column wraps values like "dragapult, dusknoir").
@@ -2830,7 +2830,7 @@ window.MetaCall = (function () {
       // is effective, the override is a no-op.
       try { await _applyDateFilter(); } catch (_e) { /* tolerate */ }
 
-      const matchResp = await fetch('data/limitless_online_decks_matchups.csv?t=' + Date.now());
+      const matchResp = await fetch(dataUrl('data/limitless_online_decks_matchups.csv'));
       if (!matchResp.ok) throw new Error('matchup CSV not found');
       const matchRows = parseCSV(await matchResp.text(), ';');
 

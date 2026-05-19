@@ -1977,7 +1977,7 @@ const BASE_PATH = './data/';
         async function loadPokedexNumbers() {
             try {
                 const ts = new Date().getTime();
-                const resp = await fetch(`./data/pokemon_dex_numbers.json?t=${ts}`);
+                const resp = await fetch(dataUrl('./data/pokemon_dex_numbers.json'));
                 if (resp.ok) {
                     pokedexNumbers = await resp.json();
                     window.pokedexNumbers = pokedexNumbers;
@@ -1990,7 +1990,7 @@ const BASE_PATH = './data/';
 
         async function loadSetOrderMap() {
             try {
-                const resp = await fetch(`./data/sets.json?t=${Date.now()}`);
+                const resp = await fetch(dataUrl('./data/sets.json'));
                 if (resp.ok) {
                     const json = await resp.json();
                     if (json && typeof json === 'object') {
@@ -2088,7 +2088,7 @@ const BASE_PATH = './data/';
         }
 
         async function _fetchManifest(url) {
-            const resp = await fetch(url + '?t=' + Date.now());
+            const resp = await fetch(dataUrl(url));
             if (!resp.ok) return null;
             return resp.json();
         }
@@ -2125,7 +2125,7 @@ const BASE_PATH = './data/';
 
         async function _loadMonolithCardDatabase() {
             const timestamp = new Date().getTime();
-            const response = await fetch(`./data/all_cards_merged.json?t=${timestamp}`);
+            const response = await fetch(dataUrl('./data/all_cards_merged.json'));
             if (response.ok) {
                 const jsonData = await response.json();
                 const cards = (jsonData.cards || jsonData);
@@ -2201,7 +2201,7 @@ const BASE_PATH = './data/';
         async function loadAceSpecsList() {
             try {
                 const timestamp = new Date().getTime();
-                const response = await fetch(`./data/ace_specs.json?t=${timestamp}`);
+                const response = await fetch(dataUrl('./data/ace_specs.json'));
                 if (response.ok) {
                     const jsonData = await response.json();
                     aceSpecsList = (jsonData.ace_specs || []).map(name => name.toLowerCase().trim());
@@ -2217,10 +2217,10 @@ const BASE_PATH = './data/';
         async function loadSetMapping() {
             try {
                 const timestamp = new Date().getTime();
-                const response = await fetch(`./pokemon_sets_mapping.csv?t=${timestamp}`);
+                const response = await fetch(dataUrl('./pokemon_sets_mapping.csv'));
                 if (!response.ok) return;
                 const text = await response.text();
-                const rows = await fetchAndParseCSV(`./pokemon_sets_mapping.csv?t=${timestamp}`, ',');
+                const rows = await fetchAndParseCSV(dataUrl('./pokemon_sets_mapping.csv'), ',');
                 englishSetCodes = new Set(rows.map(row => row.set_code).filter(Boolean));
                 window.englishSetCodes = englishSetCodes;
             } catch (error) {

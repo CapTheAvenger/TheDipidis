@@ -385,7 +385,6 @@
             if (!content || !cityLeagueData || cityLeagueData.length === 0) return;
             
             // Load card data for images
-            const timestamp = new Date().getTime();
             let cardDataByArchetype = {};
             
             // Wenn imageMap vorhanden (vorberechnete Archetype→Image-URL-Map, ~30 KB),
@@ -394,7 +393,7 @@
                 try {
                     const cardsData = prefetchedAnalysisData || await (async () => {
                         const formatSuffix = window.currentCityLeagueFormat === 'M3' ? '_M3' : '';
-                        const cardsResponse = await fetch(`${BASE_PATH}city_league_analysis${formatSuffix}.csv?t=${timestamp}`);
+                        const cardsResponse = await fetch(dataUrl(`${BASE_PATH}city_league_analysis${formatSuffix}.csv`));
                         if (!cardsResponse.ok) return [];
                         const cardsText = await cardsResponse.text();
                         return parseCSV(cardsText);
@@ -718,10 +717,9 @@
             // Load CSV data
             let metaData = [];
             let cardDataByArchetype = {};
-            const timestamp = Date.now();
-            
+
             try {
-                metaData = await fetchAndParseCSV(`${BASE_PATH}limitless_online_decks_comparison.csv?t=${timestamp}`);
+                metaData = await fetchAndParseCSV(dataUrl(`${BASE_PATH}limitless_online_decks_comparison.csv`));
                 
                 // Load card data for images
                 const cardsData = await loadCurrentMetaRowsWithFallback({ forceRefresh: true });
@@ -923,9 +921,9 @@
             // ============================================================
             let overallTop8Html = '';
             try {
-                const t8resp = await fetch(`${BASE_PATH}online_tournament_top8_decks.csv?t=${timestamp}`);
+                const t8resp = await fetch(dataUrl(`${BASE_PATH}online_tournament_top8_decks.csv`));
                 if (t8resp.ok) {
-                    const t8rows = await fetchAndParseCSV(`${BASE_PATH}online_tournament_top8_decks.csv?t=${timestamp}`);
+                    const t8rows = await fetchAndParseCSV(dataUrl(`${BASE_PATH}online_tournament_top8_decks.csv`));
                     const totalBrought = t8rows.reduce((s, r) => s + parseFloat((r.total_brought_weighted || '0').replace(',', '.')), 0) || 1;
                     const enriched = t8rows.map(r => {
                         const brought = parseFloat((r.total_brought_weighted || '0').replace(',', '.'));

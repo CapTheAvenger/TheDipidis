@@ -117,7 +117,6 @@
             
             try {
                 // ? FIX: Use comparison data for correct Top 10, then analysis data for cards
-                const timestamp = new Date().getTime();
                 const cityLeagueFormat = source === 'cityLeague'
                     ? getActiveCityLeagueFormat()
                     : (window.currentCityLeagueFormat || 'M4');
@@ -137,7 +136,7 @@
                 const loadCityLeagueComparisonFallback = async () => {
                     // Fallback for format-specific missing/unreachable comparison files: derive from archetype rows.
                     const archetypesFallbackFile = `city_league_archetypes${cityLeagueSuffix}.csv`;
-                    const archResp = await fetch(`${BASE_PATH}${archetypesFallbackFile}?t=${timestamp}`);
+                    const archResp = await fetch(dataUrl(`${BASE_PATH}${archetypesFallbackFile}`));
                     if (!archResp.ok) throw new Error('Failed to load comparison and fallback archetypes data');
                     const archText = await archResp.text();
                     comparisonData = deriveCityLeagueComparisonData(parseCSV(archText));
@@ -145,7 +144,7 @@
                 };
 
                 try {
-                    const comparisonResponse = await fetch(`${BASE_PATH}${comparisonFile}?t=${timestamp}`);
+                    const comparisonResponse = await fetch(dataUrl(`${BASE_PATH}${comparisonFile}`));
                     if (comparisonResponse.ok) {
                         const comparisonText = await comparisonResponse.text();
                         comparisonData = parseCSV(comparisonText);
@@ -168,7 +167,7 @@
                     const looksLikeM4Comparison = Array.isArray(comparisonData) && comparisonData.length > 0 && comparisonData.length < 200;
                     if (looksLikeM4Comparison) {
                         console.warn('[loadMetaCardAnalysis] Guard triggered: comparison data shape looks like M4 while M3 is selected. Forcing explicit M3 comparison file.');
-                        const forcedComparisonResponse = await fetch(`${BASE_PATH}city_league_archetypes_comparison_M3.csv?t=${timestamp}&forceM3=1`);
+                        const forcedComparisonResponse = await fetch(dataUrl(`${BASE_PATH}city_league_archetypes_comparison_M3.csv?forceM3=1`));
                         if (forcedComparisonResponse.ok) {
                             const forcedComparisonText = await forcedComparisonResponse.text();
                             comparisonData = parseCSV(forcedComparisonText);
@@ -199,7 +198,7 @@
                 if (source === 'currentMeta') {
                     allAnalysisData = await loadCurrentMetaRowsWithFallback({ forceRefresh: true });
                 } else {
-                    const analysisResponse = await fetch(`${BASE_PATH}${analysisFile}?t=${timestamp}`);
+                    const analysisResponse = await fetch(dataUrl(`${BASE_PATH}${analysisFile}`));
                     if (!analysisResponse.ok) throw new Error('Failed to load analysis data');
                     const analysisText = await analysisResponse.text();
                     allAnalysisData = parseCSV(analysisText);
@@ -210,7 +209,7 @@
                     const looksLikeM4Analysis = Array.isArray(allAnalysisData) && allAnalysisData.length > 0 && allAnalysisData.length < 50000;
                     if (looksLikeM4Analysis) {
                         console.warn('[loadMetaCardAnalysis] Guard triggered: analysis data shape looks like M4 while M3 is selected. Forcing explicit M3 analysis file.');
-                        const forcedAnalysisResponse = await fetch(`${BASE_PATH}city_league_analysis_M3.csv?t=${timestamp}&forceM3=1`);
+                        const forcedAnalysisResponse = await fetch(dataUrl(`${BASE_PATH}city_league_analysis_M3.csv?forceM3=1`));
                         if (forcedAnalysisResponse.ok) {
                             const forcedAnalysisText = await forcedAnalysisResponse.text();
                             allAnalysisData = parseCSV(forcedAnalysisText);
@@ -1229,7 +1228,7 @@
             
             try {
                 // Load the full HTML file
-                const response = await fetch(BASE_PATH + 'limitless_online_decks_comparison.html?t=' + Date.now());
+                const response = await fetch(dataUrl(BASE_PATH + 'limitless_online_decks_comparison.html'));
                 if (!response.ok) throw new Error('HTML not found');
                 
                 const html = await response.text();
@@ -1595,8 +1594,8 @@
                 let currentFormat = 'TEF-POR'; // Default fallback
                 try {
                     const settingsPaths = [
-                        './config/current_meta_analysis_settings.json?t=' + Date.now(),
-                        './current_meta_analysis_settings.json?t=' + Date.now()
+                        dataUrl('./config/current_meta_analysis_settings.json'),
+                        dataUrl('./current_meta_analysis_settings.json')
                     ];
                     for (const settingsPath of settingsPaths) {
                         const settingsResponse = await fetch(settingsPath);
@@ -1625,7 +1624,7 @@
                 // Load Limitless meta statistics from JSON file
                 let metaStats = { tournaments: 0, players: 0, matches: 0 };
                 try {
-                    const metaResponse = await fetch(BASE_PATH + 'limitless_meta_stats.json?t=' + Date.now());
+                    const metaResponse = await fetch(dataUrl(BASE_PATH + 'limitless_meta_stats.json'));
                     if (metaResponse.ok) {
                         const statsData = await metaResponse.json();
                         metaStats = {

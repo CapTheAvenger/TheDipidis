@@ -242,8 +242,7 @@
             // Load dynamic set order map for proper meta sorting (newest -> oldest)
             let pastMetaSetOrderMap = {};
             try {
-                const ts = Date.now();
-                const setOrderResponse = await fetch(`./data/sets.json?t=${ts}`);
+                const setOrderResponse = await fetch(dataUrl('./data/sets.json'));
                 if (setOrderResponse.ok) {
                     const json = await setOrderResponse.json();
                     if (json && typeof json === 'object') {
@@ -260,7 +259,7 @@
             // Phase 2: Load manifest for lazy per-format chunk loading
             let pastMetaManifest = null;
             try {
-                const manifestResp = await fetch(BASE_PATH + 'tournament_cards_manifest.json?t=' + Date.now());
+                const manifestResp = await fetch(dataUrl(BASE_PATH + 'tournament_cards_manifest.json'));
                 if (manifestResp.ok) pastMetaManifest = await manifestResp.json();
             } catch (e) { /* ignore */ }
             window._pastMetaManifest = pastMetaManifest;

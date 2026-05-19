@@ -39,8 +39,8 @@
         // Load tournament start date from settings (called once during init)
         async function loadCurrentMetaTournamentStartDate() {
             const paths = [
-                './config/current_meta_analysis_settings.json?t=' + Date.now(),
-                './current_meta_analysis_settings.json?t=' + Date.now()
+                dataUrl('./config/current_meta_analysis_settings.json'),
+                dataUrl('./current_meta_analysis_settings.json')
             ];
             for (const p of paths) {
                 try {

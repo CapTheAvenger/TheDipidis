@@ -1238,4 +1238,25 @@ function showTableSkeleton(containerOrId, opts) {
         }
 
         // ============================================================================
+        // Data-fetch cache-bust helper (phase-a-3)
+        // ============================================================================
+        //
+        // Replaces the older ?t=${Date.now()} pattern that defeated both the
+        // Service-Worker SWR cache and the HTTP / GH-Pages CDN cache by making
+        // every fetch URL unique. APP_VERSION is stable inside one deploy and
+        // rotated by the build pipeline on every release, so:
+        //   - HTTP cache + GH-Pages CDN can hit within a deploy (~10min TTL)
+        //   - SW SWR keeps working (it strips query params for cache lookup)
+        //   - A fresh deploy rotates APP_VERSION → first fetch after deploy
+        //     is a miss → users always pick up new data the next page-load
+        //
+        // Usage: fetch(dataUrl('./data/sets.json'))
+        function dataUrl(path) {
+            const v = (typeof window !== 'undefined' && window.APP_VERSION) || 'dev';
+            const sep = path.indexOf('?') >= 0 ? '&' : '?';
+            return path + sep + 'v=' + v;
+        }
+        window.dataUrl = dataUrl;
+
+        // ============================================================================
         // META DECK TIER LIST SYSTEM (PokemonMeta.com Style)

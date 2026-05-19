@@ -81,7 +81,7 @@
 
         // Check server for a newer manifest
         try {
-            var resp = await fetch(manifestUrl + '?t=' + Date.now());
+            var resp = await fetch(window.dataUrl ? window.dataUrl(manifestUrl) : manifestUrl);
             if (!resp.ok) {
                 // Network error — use stale cache
                 return { fresh: true, serverManifest: null, cachedManifest: cached };
@@ -100,7 +100,7 @@
      * Returns parsed cards array.
      */
     async function fetchAndCacheChunk(baseUrl, chunkFile) {
-        var resp = await fetch(baseUrl + chunkFile + '?t=' + Date.now());
+        var resp = await fetch(window.dataUrl ? window.dataUrl(baseUrl + chunkFile) : (baseUrl + chunkFile));
         if (!resp.ok) throw new Error('Failed to fetch ' + chunkFile + ': ' + resp.status);
         var json = await resp.json();
         var cards = json.cards || json;

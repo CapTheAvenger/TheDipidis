@@ -201,11 +201,20 @@ window.MetaCall = (function () {
   //   • labs floor    = 4.46 × 0.85 ≈ 3.79 %
   //   • online floor  = 5.52 × 0.60 ≈ 3.31 %
   //   • final floor   = max(3.79, 3.31) = 3.79 %
-  const PREDICTOR_55_PRESENCE_FLOOR_MIN  = 3.0;  // online share must be ≥ this to qualify
+  // 2026-05-19 retune: PRESENCE_FLOOR_MIN lowered 3.0 → 2.0 and
+  // LABS_FLOOR_MIN_PCT lowered 1.5 → 1.0. Backtest showed mid-share
+  // decks falling out of top-25 entirely: Grimmsnarl Froslass
+  // (online 2.93, real 1.47) and Okidogi Barbaracle (online 2.29,
+  // real 1.37) were both ungated by the 3.0 % online minimum, so
+  // the floor never fired and the deeper dampers crushed them to
+  // sub-junk levels. With the lowered gates a 2-3 % online deck
+  // with at least one labs sample gets a 1.2-1.8 % floor — enough
+  // to keep it visible in the top-25 list.
+  const PREDICTOR_55_PRESENCE_FLOOR_MIN  = 2.0;  // was 3.0 — catch mid-share decks (2-3 % online)
   const PREDICTOR_55_PRESENCE_FLOOR_PCT  = 0.60; // online-based floor multiplier
   const PREDICTOR_55_LABS_FLOOR_PCT      = 0.85; // labs-based floor multiplier
   const PREDICTOR_55_LABS_FLOOR_MIN_N    = 0.5;  // need ≥ this weighted labs count
-  const PREDICTOR_55_LABS_FLOOR_MIN_PCT  = 1.5;  // labs share_pct must be ≥ this to anchor
+  const PREDICTOR_55_LABS_FLOOR_MIN_PCT  = 1.0;  // was 1.5 — admit smaller labs samples as anchors
   const PREDICTOR_55_REQUIRE_LABS_N      = 1;    // need ≥ N labs samples to apply (filters
                                                   // pure-online noise decks)
 
@@ -1931,15 +1940,22 @@ window.MetaCall = (function () {
       // Labs cut-performance boost. Two signals, in priority order:
       //   (1) top8_conv_rate (Predictor 3.0 default) — when populated,
       //       use the field-mean-relative formula `conv / 0.25` clipped
-      //       to [0.5, 2.0]. 0.25 is the natural cut rate for an 8-cut
+      //       to [0.5, 1.5]. 0.25 is the natural cut rate for an 8-cut
       //       in a 32-deck top.
       //   (2) Day-1 → Day-2 share ratio (Predictor 4.4b fallback) —
       //       used when top8_conv_rate is missing/zero. d2_share /
       //       d1_share = 1.0 means a deck holds its representation in
       //       the cut; > 1 = overperformer (gains share in Day-2);
-      //       < 1 = underperformer (drops share). Same [0.5, 2.0]
+      //       < 1 = underperformer (drops share). Same [0.5, 1.5]
       //       range and same semantics, but anchored at 1.0 instead
       //       of 0.25 because the ratio is naturally normalised.
+      // 2026-05-19 retune: upper bound tightened from 2.0 to 1.5.
+      // Combined with 5.1 day2Boost (cap 1.4×) the old 2.0× cap
+      // compounded into 2.8× peak amplification, blowing up low-
+      // brought-share + high-quality decks (Festival Lead +1.21,
+      // Lopunny Dudunsparce +1.27, Hydrapple Ogerpon +1.39,
+      // Archaludon Dudunsparce +1.05). 1.5× keeps the over/under-
+      // performance signal but caps the compounding at 2.1× peak.
       // The fallback exists because the live labs scraper currently
       // does not populate top8_conv_rate (rows are 0 in the labs
       // CSV). Without the fallback, the labs term would lose its
@@ -1950,10 +1966,10 @@ window.MetaCall = (function () {
       const t8ConvAvg = (convStats3 && convStats3.n > 0) ? convStats3.sum / convStats3.n : 0;
       let labsT8Boost;
       if (t8ConvAvg > 0) {
-        labsT8Boost = _clip(t8ConvAvg / 0.25, 0.5, 2.0);
+        labsT8Boost = _clip(t8ConvAvg / 0.25, 0.5, 1.5);
       } else {
         const q = _labsQualityByDeck[k];
-        labsT8Boost = (q && q.d1 > 0) ? _clip(q.d2 / q.d1, 0.5, 2.0) : 1.0;
+        labsT8Boost = (q && q.d1 > 0) ? _clip(q.d2 / q.d1, 0.5, 1.5) : 1.0;
       }
 
       // Predictors 4.0a + 4.5 — counter-meta boost (additive, capped pp).

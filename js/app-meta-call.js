@@ -108,10 +108,17 @@ window.MetaCall = (function () {
   // how strong the counter's matchup edge is. Stacks additively with
   // 4.0a so a deck that's BOTH a known counter AND saw a fresh surge
   // ride still gets full credit for both.
-  const PREDICTOR_45_FAMILY_FLOOR_PCT  = 15;    // family must hold ≥ this share to trigger
+  // 2026-05-19 retune: standard-mode backtest showed the top-8
+  // counter-decks (Mewtwo, N's Zoroark, Alakazam Dudunsparce,
+  // Cynthia's Garchomp, Mega Lucario, Raging Bolt, …) systematically
+  // under-predicted by 0.5-1.5 pp each — aggregate -4.7 pp. Two
+  // levers: lower the family floor so mid-concentration cases (a
+  // 17-18 % family) start producing meaningful boosts, and raise the
+  // base contrib so the boost actually scales to the gap.
+  const PREDICTOR_45_FAMILY_FLOOR_PCT  = 12;    // was 15 — catch mid-concentration families
   const PREDICTOR_45_FAMILY_EXCESS_DIV = 10;    // family-excess factor = (familyPct - floor) / this
   const PREDICTOR_45_WR_FACTOR_SCALE   = 10;    // wr-edge factor = (wr - threshold) * this
-  const PREDICTOR_45_BASE_CONTRIB_PP   = 0.7;   // pp contribution per "unit" (factors multiplied)
+  const PREDICTOR_45_BASE_CONTRIB_PP   = 1.0;   // was 0.7 — counters under-predicted by ~1 pp each
   const PREDICTOR_45_COUNTER_WR_MIN    = 0.50;  // min WR vs family member to count
                                                 // Lowered from 0.55: Limitless online matchup data
                                                 // shows Lucario Hariyama / Raging Bolt / Cynthia's
@@ -2094,12 +2101,25 @@ window.MetaCall = (function () {
     // (Dudunsparce) underestimated by -2.9 pp. Softening the exponent
     // for high-input-share decks redistributes within-family weight
     // toward the underweighted variants without changing low-share
-    // behaviour. exp(0..5%) = 1.50, exp(5..10%) decays linearly to
-    // 1.10, exp(10%+) = 1.10. Sub-3% decks keep full bandwagon boost.
+    // behaviour.
+    //
+    // 2026-05-19 retune: the original [5.0..10.0] → [1.50..1.10]
+    // ramp inverted within-family ordering. Backtest showed Pure
+    // Dragapult (raw ~11, exp 1.10 → 11^1.10 = 13.9) losing
+    // relative share to Dragapult Dudunsparce (raw ~4, exp 1.50 →
+    // 4^1.50 = 8.0) after renormalisation, even though brought-avg
+    // = 10.49 % (Pure) vs 5.71 % (Dudunsparce). Pure Drag ended up
+    // -2.79 pp under; Dudunsparce +1.89 pp over.
+    //
+    // Fix: start softening later and never push the exponent below
+    // ^1.30. Mid-share variants (Pure Drag at 11 %) keep most of the
+    // bandwagon boost, while only true outliers (≥ 14 %) get the
+    // minimum-^1.30 dampening. exp(0..8%) = 1.50, exp(8..14%) decays
+    // linearly to 1.30, exp(14%+) = 1.30.
     const CONCENTRATION_EXP_BASE = 1.50;
-    const CONCENTRATION_EXP_MIN  = 1.10;
-    const CONCENTRATION_SOFT_LO  = 5.0;   // below this: full boost
-    const CONCENTRATION_SOFT_HI  = 10.0;  // at/above: minimum boost
+    const CONCENTRATION_EXP_MIN  = 1.30;  // was 1.10 — under-cut Pure variants
+    const CONCENTRATION_SOFT_LO  = 8.0;   // was 5.0 — soften only above mid-share
+    const CONCENTRATION_SOFT_HI  = 14.0;  // was 10.0 — full dampening only at extreme concentrations
     _shareList.forEach(d => {
       const raw = d.predictedShareRaw || 0;
       let exp = CONCENTRATION_EXP_BASE;

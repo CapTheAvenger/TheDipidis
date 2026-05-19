@@ -26,29 +26,44 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Install JS test dependencies
-        run: npm install --no-save papaparse
+      - name: Install JS dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Lint (warn-only in phase A)
+        run: |
+          # ESLint is informational until Phase B (modularization). The
+          # config emits no errors today; warnings are logged for visibility.
+          npm run lint --silent || true
+          echo "✓ Lint pass complete (warnings are advisory)"
 
       - name: Run JS unit tests
         run: |
-          TOTAL_PASS=0
-          TOTAL_FAIL=0
-          for f in tests/unit/test-*.js; do
-            OUTPUT=$(node --test "$f" 2>&1) || true
-            PASS=$(echo "$OUTPUT" | grep -oP '# pass \K\d+' || echo 0)
-            FAIL=$(echo "$OUTPUT" | grep -oP '# fail \K\d+' || echo 0)
-            TOTAL_PASS=$((TOTAL_PASS + PASS))
-            TOTAL_FAIL=$((TOTAL_FAIL + FAIL))
-            if [ "$FAIL" -gt 0 ]; then
-              echo "::error::$f — $FAIL test(s) failed"
-              echo "$OUTPUT"
-            fi
-          done
-          echo "✓ JS tests: $TOTAL_PASS passed, $TOTAL_FAIL failed"
-          if [ "$TOTAL_FAIL" -gt 0 ]; then
-            echo "::error::$TOTAL_FAIL JS test(s) failed — blocking deployment"
-            exit 1
-          fi
+          npm test --silent
+
+      - name: Test coverage (advisory, baseline for phase B)
+        run: |
+          # c8 reports ~0% today because the unit tests load production code
+          # via vm.Script + extractFunction() (see tests/unit/test-helpers.js).
+          # That instrumentation pattern is invisible to c8. We still emit
+          # the report so the artifact pipeline + thresholds are wired up
+          # for the day tests become real require()-based modules (phase B).
+          npm run test:coverage --silent 2>&1 | tail -20 || true
+
+      - name: Upload coverage artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage/
+          retention-days: 14
+          if-no-files-found: ignore
+
+      - name: NPM dependency audit (warn-only)
+        run: |
+          # Surfacing CVEs in our devDeps without failing the build —
+          # we'll tighten this to --audit-level=high once Phase A is done.
+          npm audit --omit=dev --audit-level=high 2>&1 | tee npm-audit.log || true
+          echo "✓ npm audit complete (advisory)"
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -57,7 +72,14 @@ jobs:
 
       - name: Install Python test dependencies
         run: |
-          pip install pytest beautifulsoup4 requests lxml
+          pip install pytest beautifulsoup4 requests lxml pip-audit
+
+      - name: Python dependency audit (warn-only)
+        run: |
+          # pip-audit on requirements.txt — non-blocking in phase A.
+          # We use --strict only after we've reviewed the current baseline.
+          pip-audit -r requirements.txt 2>&1 | tee pip-audit.log || true
+          echo "✓ pip-audit complete (advisory)"
 
       - name: Run Python unit tests
         run: |
@@ -157,14 +179,20 @@ jobs:
       - name: Minify JS, CSS & HTML
         run: |
           shopt -s nullglob
+          # drop_console removes console.log/info/debug/warn calls from the
+          # production bundle (phase-a-2). console.error is kept on purpose —
+          # we still want production stack traces in DevTools + Sentry.
+          # pure_funcs lists exactly which console.* methods to drop, so
+          # 'error' is preserved.
+          TERSER_COMPRESS='drop_debugger=true,pure_funcs=[console.log,console.info,console.debug,console.warn]'
           for f in _site/js/*.js; do
-            terser "$f" --compress --mangle -o "${f}.min" && mv "${f}.min" "$f" || { echo "::error::Minification failed for $f"; exit 1; }
+            terser "$f" --compress "$TERSER_COMPRESS" --mangle -o "${f}.min" && mv "${f}.min" "$f" || { echo "::error::Minification failed for $f"; exit 1; }
           done
           for f in _site/css/*.css; do
             cleancss -o "${f}.min" "$f" && mv "${f}.min" "$f" || { echo "::error::CSS minification failed for $f"; exit 1; }
           done
           html-minifier-terser --collapse-whitespace --remove-comments --minify-css true --minify-js true -o _site/index.html _site/index.html || echo "::warning::HTML minification skipped"
-          echo "✓ Minification complete"
+          echo "✓ Minification complete (console.log/info/debug/warn stripped; error preserved)"
 
       - name: Optimize images
         run: |

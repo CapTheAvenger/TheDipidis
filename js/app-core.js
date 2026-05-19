@@ -343,14 +343,8 @@ const BASE_PATH = './data/';
             return normalizeProxyCardNumber(card?.number || card?.set_number || '');
         }
 
-        const DEFERRED_PLAYTESTER_SCRIPTS = [
-            'js/playtester.js?v=20260320-v68',
-            'js/playtester-mobile.js?v=20260320-v2',
-            'js/playtester-patch.js?v=3fc0227',
-            'js/firebase-multiplayer.js?v=20260315-v1'
-        ];
-        let deferredPlaytesterScriptsPromise = null;
-
+        // Playtester sandbox was retired in favour of tcg-showdown.com.
+        // See js/tcg-showdown-link.js for the external handoff.
         function createCardSkeletonMarkup(count = 10) {
             return Array.from({ length: count }, () => `
                 <div class="card-skeleton" aria-hidden="true">
@@ -391,79 +385,21 @@ const BASE_PATH = './data/';
             if (grid._skeletonTimer) { clearTimeout(grid._skeletonTimer); grid._skeletonTimer = null; }
         }
 
-        function loadDeferredScript(src) {
-            return new Promise((resolve, reject) => {
-                const existing = document.querySelector(`script[src="${src}"]`);
-                if (existing) {
-                    if (existing.dataset.loaded === 'true') {
-                        resolve();
-                        return;
-                    }
-                    existing.addEventListener('load', () => resolve(), { once: true });
-                    existing.addEventListener('error', () => reject(new Error(`Failed to load ${src}`)), { once: true });
-                    return;
-                }
-
-                const script = document.createElement('script');
-                script.src = src;
-                script.async = false;
-                script.dataset.deferredPlaytester = 'true';
-                script.addEventListener('load', () => {
-                    script.dataset.loaded = 'true';
-                    resolve();
-                }, { once: true });
-                script.addEventListener('error', () => reject(new Error(`Failed to load ${src}`)), { once: true });
-                document.body.appendChild(script);
-            });
-        }
-
-        async function ensurePlaytesterScriptsLoaded(options = {}) {
-            const { notify = false } = options;
-
-            if (window.__playtesterScriptsReady === true) {
-                return;
+        // Stubs for legacy in-app playtester entry points. They now redirect
+        // to the external TCG Showdown handoff so any lingering UI button or
+        // deeplink degrades gracefully instead of throwing ReferenceError.
+        function _redirectToShowdown() {
+            if (typeof window.openShowdownExternal === 'function') {
+                window.openShowdownExternal();
+            } else if (typeof showNotification === 'function') {
+                showNotification('Playtester moved to tcg-showdown.com', 'info', 2400);
             }
-
-            if (!deferredPlaytesterScriptsPromise) {
-                if (notify && typeof showNotification === 'function') {
-                    showNotification(t('notify.playtesterLoading'), 'info', 1800);
-                }
-
-                deferredPlaytesterScriptsPromise = (async () => {
-                    for (const src of DEFERRED_PLAYTESTER_SCRIPTS) {
-                        await loadDeferredScript(src);
-                    }
-                    window.__playtesterScriptsReady = true;
-                })().catch(error => {
-                    deferredPlaytesterScriptsPromise = null;
-                    throw error;
-                });
-            }
-
-            return deferredPlaytesterScriptsPromise;
         }
-
-        window.ensurePlaytesterScriptsLoaded = ensurePlaytesterScriptsLoaded;
-
         ['openPlaytester', 'openPlaytesterSetup', 'startPlaytesterWithMirror', 'startPlaytesterWithOpponent', 'startStandalonePlaytester', 'parseSandboxDeckToExactPrints', 'openMultiplayerFromSandbox'].forEach(functionName => {
             if (typeof window[functionName] === 'function') return;
-
-            const deferredWrapper = async function(...args) {
-                try {
-                    await ensurePlaytesterScriptsLoaded({ notify: true });
-                    if (typeof window[functionName] === 'function' && window[functionName] !== deferredWrapper) {
-                        return window[functionName](...args);
-                    }
-                } catch (error) {
-                    console.error(`[Playtester] Could not load ${functionName}:`, error);
-                    if (typeof showNotification === 'function') {
-                        showNotification(t('notify.playtesterError'), 'error');
-                    }
-                }
-            };
-
-            window[functionName] = deferredWrapper;
+            window[functionName] = _redirectToShowdown;
         });
+        window.ensurePlaytesterScriptsLoaded = function() { return Promise.resolve(); };
 
         function buildProxyManualSearchIndex() {
             const cards = Array.isArray(window.allCardsDatabase) ? window.allCardsDatabase : [];

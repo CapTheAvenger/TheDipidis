@@ -4568,7 +4568,7 @@ function dexImportParseCSV(csvText) {
       'lostorigin': 'LOR', 'lostorigintrainergallery': 'LOR',
       'silvertempest': 'SIR', 'silvertempesttrainergallery': 'SIR',
       'celebrations': 'CEL', 'celebrationsclassiccollection': 'CEL',
-      'fusionstrike': 'FST', 'celebrations': 'CEL',
+      'fusionstrike': 'FST',
       'evolvingskies': 'EVS', 'chillingreign': 'CRE',
       'battlestyles': 'BST', 'shiningfates': 'SHF',
       'vividvoltage': 'VIV', 'championspath': 'CPA',

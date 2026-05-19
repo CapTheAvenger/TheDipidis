@@ -1,0 +1,25 @@
+# Generated / large data
+data/
+test-results/
+test-artifacts/
+tests/artifacts/
+_site/
+node_modules/
+
+# Build outputs
+*.min.js
+*.min.css
+
+# Credentials (CI-generated)
+js/firebase-credentials.js
+
+# Lock files
+package-lock.json
+
+# HTML — we don't want Prettier to rewrite the 4977-LOC index.html in Phase A
+*.html
+
+# Auto-generated reports left in the tree
+visual-*.json
+*-report.json
+runtime-verify-results.txt

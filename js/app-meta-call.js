@@ -33,7 +33,7 @@ window.MetaCall = (function () {
   //
   // Session-scoped: a fresh page load always starts in 'standard'.
   let _metaCallMode = 'standard';
-  let _metaCallModeLastLogId = null;
+  let _metaCallModeLastLogKey = null;  // tracked per (majorId + mode) so toggling within the same major re-logs
 
   // ── Predictor 3.0 — history-aware trend signals ───────────
   let _lastMajorDate     = null; // 'YYYY-MM-DD' — most recent labs tournament_date
@@ -2155,8 +2155,12 @@ window.MetaCall = (function () {
     // Utrecht counter-meta case.
     try {
       const majorId = _lastMajorInfo && _lastMajorInfo.id;
-      if (majorId && _metaCallModeLastLogId !== majorId) {
-        _metaCallModeLastLogId = majorId;
+      // Key by (major + mode) so toggling the mode within the same
+      // major still emits a fresh log line — useful for debugging the
+      // delta between Standard and Counter on the same field.
+      const logKey = majorId ? `${majorId}:${_metaCallMode}` : '';
+      if (logKey && _metaCallModeLastLogKey !== logKey) {
+        _metaCallModeLastLogKey = logKey;
         console.log(`[Meta Call Mode] ${_metaCallMode === 'counter'
           ? 'counter — 4.6 family suppression + 4.7 adoption boost ACTIVE'
           : 'standard — online ladder respected, 4.6 + 4.7 OFF'}`);
@@ -2207,6 +2211,7 @@ window.MetaCall = (function () {
     const entry = {
       timestamp     : new Date().toISOString(),
       mode          : _predictorMode,
+      metaCallMode  : _metaCallMode,   // 'standard' (default) or 'counter' — gates 4.6 + 4.7
       lastMajorDate : _lastMajorDate || '',
       baselineDate  : _baselineSnapshotDate || '',
       topDecks      : top5,
@@ -6046,6 +6051,7 @@ window.MetaCall = (function () {
     const histEntry = {
       updatedAt     : new Date().toISOString(),
       predictorMode : _predictorMode,
+      metaCallMode  : _metaCallMode,
       lastMajorDate : _lastMajorDate || '',
       baselineDate  : _baselineSnapshotDate || '',
       topDecks      : top,

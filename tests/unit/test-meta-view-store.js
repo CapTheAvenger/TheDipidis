@@ -164,41 +164,42 @@ describe('controller: switchFormat preserves selection when archetype available'
     });
 });
 
-describe('feature-flag: isMetaViewV2Enabled', () => {
+describe('feature-flag: isMetaViewV2Enabled (URL-only)', () => {
     beforeEach(() => {
         global.window.location = { href: 'http://localhost/' };
         global.window.localStorage.removeItem('IA_V2');
     });
 
-    it('default false (no URL param, no localStorage)', async () => {
+    it('default false (no URL param)', async () => {
         const { isMetaViewV2Enabled } = await import('../../js/modules/meta-view/feature-flag.js');
         assert.equal(isMetaViewV2Enabled(), false);
     });
 
-    it('true when localStorage IA_V2 = "1"', async () => {
-        global.window.localStorage.setItem('IA_V2', '1');
-        const { isMetaViewV2Enabled } = await import('../../js/modules/meta-view/feature-flag.js');
-        assert.equal(isMetaViewV2Enabled(), true);
-    });
-
-    it('?ia=v2 URL param overrides localStorage=off', async () => {
+    it('?ia=v2 URL param enables', async () => {
         global.window.location = { href: 'http://localhost/?ia=v2' };
         const { isMetaViewV2Enabled } = await import('../../js/modules/meta-view/feature-flag.js');
         assert.equal(isMetaViewV2Enabled(), true);
     });
 
-    it('?ia=v1 URL param overrides localStorage=on', async () => {
-        global.window.localStorage.setItem('IA_V2', '1');
+    it('?ia=v1 URL param disables (explicit kill-switch)', async () => {
         global.window.location = { href: 'http://localhost/?ia=v1' };
         const { isMetaViewV2Enabled } = await import('../../js/modules/meta-view/feature-flag.js');
         assert.equal(isMetaViewV2Enabled(), false);
     });
 
-    it('setMetaViewV2(true / false) persists to localStorage', async () => {
-        const { setMetaViewV2 } = await import('../../js/modules/meta-view/feature-flag.js');
+    it('localStorage IA_V2 alone does NOT enable (URL-only since 2026-05-20)', async () => {
+        global.window.localStorage.setItem('IA_V2', '1');
+        const { isMetaViewV2Enabled } = await import('../../js/modules/meta-view/feature-flag.js');
+        assert.equal(isMetaViewV2Enabled(), false);
+    });
+
+    it('setMetaViewV2 is a no-op (legacy compat — does not mutate URL)', async () => {
+        const { setMetaViewV2, isMetaViewV2Enabled } = await import('../../js/modules/meta-view/feature-flag.js');
+        const before = isMetaViewV2Enabled();
         setMetaViewV2(true);
-        assert.equal(global.window.localStorage.getItem('IA_V2'), '1');
         setMetaViewV2(false);
-        assert.equal(global.window.localStorage.getItem('IA_V2'), null);
+        const after = isMetaViewV2Enabled();
+        // The setter is a no-op: enable-state cannot change without a URL update.
+        assert.equal(before, after);
     });
 });

@@ -1,3 +1,4 @@
+// @ts-check
 // app-tier-meta.js — extracted from app.js
 // Part of Hausi's Pokemon TCG Analysis
 
@@ -134,7 +135,7 @@
                 dt.setUTCDate(dt.getUTCDate() + 4 - isoDay);
                 const isoYear = dt.getUTCFullYear();
                 const yearStart = new Date(Date.UTC(isoYear, 0, 1));
-                const weekNo = Math.ceil((((dt - yearStart) / 86400000) + 1) / 7);
+                const weekNo = Math.ceil((((dt.getTime() - yearStart.getTime()) / 86400000) + 1) / 7);
                 return `${isoYear}-W${String(weekNo).padStart(2, '0')}`;
             };
 
@@ -610,7 +611,7 @@
                             ? parseFloat(String(m3Deck.average_placement || m3Deck.avg_placement || 0).replace(',', '.'))
                             : null;
 
-                        const normalizedCurrentS = parseFloat(currentShareValue || 0);
+                        const normalizedCurrentS = parseFloat(String(currentShareValue || 0));
                         const normalizedPreviousS = m3Deck
                             ? parseFloat((m3Deck.share || m3Deck.percentage_in_archetype || 0).toString().replace(',', '.'))
                             : null;
@@ -1328,8 +1329,9 @@ window.filterTierDeckCards = function (term) {
     const t = String(term || '').toLowerCase().trim().replace(/\s+/g, '');
     const cards = document.querySelectorAll('.deck-banner-card[data-deck-name]');
     cards.forEach(card => {
-        const name = (card.getAttribute('data-deck-name') || '').replace(/\s+/g, '');
+        const cardEl = /** @type {HTMLElement} */ (card);
+        const name = (cardEl.getAttribute('data-deck-name') || '').replace(/\s+/g, '');
         const match = !t || name.includes(t);
-        card.style.display = match ? '' : 'none';
+        cardEl.style.display = match ? '' : 'none';
     });
 };

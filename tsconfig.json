@@ -49,7 +49,8 @@
     "js/pokemon-loading-screen.js",
     "js/firebase-globals.js",
     "js/app-current-meta.js",
-    "js/custom-binder.js"
+    "js/custom-binder.js",
+    "js/app-tier-meta.js"
   ],
   "exclude": [
     "node_modules",

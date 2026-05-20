@@ -286,7 +286,75 @@ interface Window {
     cityLeagueAnalysisDataCurrent?: any;
     cityLeagueAnalysisDataPast?: any;
     cityLeagueAnalysisM3Data?: any;
+
+    // App-anti-tech / Tech-lab feature
+    TechLab?: any;
+    openAntiTechModal?: (...args: any[]) => any;
+    closeAntiTechModal?: (...args: any[]) => any;
+    advanceAntiTechModal?: (...args: any[]) => any;
+    backToAntiTechStep1?: (...args: any[]) => any;
+    confirmAntiTechBuild?: (...args: any[]) => any;
+    _activeThreatsCache?: any;
+    _archetypeCardMap?: any;
+    _archetypeCardMapTag?: string;
+    _cardArchetypeNormalizedMap?: any;
+    _loadCardEffectsIndex?: any;
+
+    // App-past-meta feature
+    pastMetaLoaded?: boolean;
+    pastMetaRawDeckCards?: any[];
+    _pastMetaLoadedChunks?: any;
+    _pastMetaManifest?: any;
+    _pastMetaSetOrderMap?: any;
+    _pastMetaTournamentsByDate?: any;
+    _pastMetaRenderGen?: number;
+
+    // Meta-matchup data
+    currentMetaMatchupData?: any;
+    m3BaselineData?: any;
+
+    // Tier-meta + filter helpers
+    filterTierDeckCards?: (...args: any[]) => any;
+    showSingleCard?: (cardId?: string) => any;
+
+    // Cards / Card-DB cross-module helpers
+    cardsBySetNumberMap?: any;
+    globalRarityPreference?: any;
+    isPinnedCard?: (...args: any[]) => boolean;
+    isAceSpec?: (...args: any[]) => boolean;
 }
+
+// Free-global helpers referenced from medium-sized feature modules.
+// Most live in app-core / app-deck-builder / app-cards-db. Loose `any`
+// types until those source modules are typed.
+declare function loadCurrentMetaRowsWithFallback(opts?: any): Promise<any[]>;
+declare function aggregateCardStatsByDate(...args: any[]): any;
+declare function applyShareFilterWithAceSpecBoost(...args: any[]): any;
+declare function autoCompleteConsistency(...args: any[]): any;
+declare function cardsBySetNumberMap(...args: any[]): any;
+declare const cityLeagueData: any;
+declare function deduplicateCards(rows: any[]): any[];
+declare function fetchAndParseCSV(url: string, delimiter?: string): Promise<any[]>;
+declare function fixCardNameEncoding(s: string): string;
+declare function fixMojibake(s: string): string;
+declare function getBestCardImage(...args: any[]): any;
+declare function getCanonicalCardRecord(...args: any[]): any;
+declare function getCardByNameFromIndex(...args: any[]): any;
+declare function getCardType(card: any): string;
+declare function getDisplayCardName(card: any): string;
+declare function getEmptyStateBoxHtml(opts?: any): string;
+declare function getInternationalPrintsForCard(...args: any[]): any[];
+declare function getNameWarningHtml(...args: any[]): string;
+declare function getOtherInternationalPrintOwnedCount(...args: any[]): number;
+declare function getPreferredVersionForCard(...args: any[]): any;
+declare function getWishlistBadgeHtml(...args: any[]): string;
+declare function initSearchableSelect(...args: any[]): any;
+declare function isAceSpec(...args: any[]): boolean;
+declare function isPinnedCard(...args: any[]): boolean;
+declare function mapSetCodeToMetaFormat(code: string): string;
+declare function normalizeCardName(name: string): string;
+declare function parseCSV(text: string, delimiter?: string): any[];
+declare function parseJapaneseDate(s: string): string;
 
 declare function devLog(...args: any[]): void;
 declare function t(key: string, fallback?: string): string;

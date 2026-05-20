@@ -82,7 +82,7 @@ const BUNDLE_ORDER = [
     'firebase-collection.js',
     // tcg-showdown-link.js: removed in L2.12 — now an ES module under
     // js/modules/tcg-showdown-link.js.
-    'card-data-cache.js',
+    // card-data-cache.js: removed in L2.15 — ES module.
     // deck-analysis-shared.js: removed in L2.14 — ES module.
     'app-core.js',
     'app-price.js',

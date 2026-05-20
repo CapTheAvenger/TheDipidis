@@ -30,7 +30,7 @@
   "include": [
     "types/**/*.d.ts",
     "js/error-tracking.js",
-    "js/card-data-cache.js",
+    "js/modules/card-data-cache.js",
     "js/modules/index.js",
     "js/modules/app-calculator.js",
     "js/modules/card-key.js",

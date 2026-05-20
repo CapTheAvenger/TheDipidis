@@ -55,7 +55,6 @@ const SHELL_ASSETS = [
   './js/lazy-loader.js',
   './js/combo-worker.js',
   './js/deck-analysis-shared.js',
-  './js/card-data-cache.js',
   './js/error-tracking.js',
   './images/pokeball-icon.png',
   './images/escape-rope.png'

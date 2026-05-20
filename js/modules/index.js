@@ -79,3 +79,6 @@ export {
 
 // L2.14 — auth modal open / close helpers.
 export { showAuthModal, closeAuthModal } from './auth-ui-helpers.js';
+
+// L2.15 — card data IndexedDB cache. Exposes the cardDataCache namespace.
+export { cardDataCache } from './card-data-cache.js';

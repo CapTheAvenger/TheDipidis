@@ -34,6 +34,8 @@
     "js/modules/index.js",
     "js/modules/app-calculator.js",
     "js/modules/card-key.js",
+    "js/modules/stores/store.js",
+    "js/modules/stores/user-store.js",
     "js/app-price.js",
     "js/deck-analysis-shared.js",
     "js/auth-ui-helpers.js",

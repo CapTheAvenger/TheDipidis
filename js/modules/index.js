@@ -26,3 +26,9 @@ export {
     hasPrintInfo,
     printId,
 } from './card-key.js';
+
+// L2.10 — store primitive + pilot user-store (Wave-1 "Stores" foundation).
+// Importing user-store.js also runs its side effect (window.userStore = …),
+// so legacy non-module callers can use the store without a manual import.
+export { createStore } from './stores/store.js';
+export { userStore } from './stores/user-store.js';

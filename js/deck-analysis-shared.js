@@ -1,3 +1,6 @@
+// @ts-check
+// (Wave-1 L2.1 pilot file — tiny 53-LOC shared util, ideal for showing what a
+//  fully-typed module looks like in JSDoc form.)
 // deck-analysis-shared.js
 // Shared helpers for Deck Analysis tabs (City League, Current Meta, Past Meta)
 

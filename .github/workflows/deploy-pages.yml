@@ -54,6 +54,16 @@ jobs:
           npm run lint --silent || true
           echo "✓ Lint pass complete (warnings are advisory)"
 
+      - name: TypeScript typecheck (wave-1 L2.1 pilot files)
+        run: |
+          # tsc --noEmit on the wave-1-L2.1 pilot files (see tsconfig.json
+          # 'include'). The codebase is still .js — this is JSDoc-driven
+          # type-checking, no compilation, no runtime change. As more
+          # modules opt in via '// @ts-check' they get added to tsconfig
+          # and start failing the build on type errors.
+          npm run typecheck --silent
+          echo "✓ Typecheck pass complete"
+
       - name: Run JS unit tests
         run: |
           npm test --silent

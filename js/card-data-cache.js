@@ -1,3 +1,6 @@
+// @ts-check
+// (Wave-1 L2.1 pilot file — JSDoc type-checking is on. localforage + window.dataUrl
+//  are referenced but typed as `any` since they live on the global scope today.)
 // card-data-cache.js — IndexedDB cache for large card data files
 // Uses localForage (async IndexedDB wrapper) to avoid re-downloading
 // 12+ MB card data on every page load.

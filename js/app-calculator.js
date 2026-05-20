@@ -1,3 +1,6 @@
+// @ts-check
+// (Wave-1 L2.1 pilot file — small IIFE-wrapped module, good first-target for
+//  typed development since it's self-contained and only reads DOM + computes.)
 // js/app-calculator.js
 
 (function () {
@@ -29,7 +32,7 @@
     }
 
     function getInputNumber(id, fallback) {
-        const el = document.getElementById(id);
+        const el = /** @type {HTMLInputElement | null} */ (document.getElementById(id));
         if (!el) return fallback;
         const parsed = parseInt(el.value, 10);
         return Number.isNaN(parsed) ? fallback : parsed;
@@ -51,7 +54,7 @@
         // Verbleibende Karten im Deck nach Hand und Preisen
         const remaining = Math.max(deckSize - drawn - 6, 0);
         const remainingEl = document.getElementById('calc-remaining-deck');
-        if (remainingEl) remainingEl.textContent = remaining;
+        if (remainingEl) remainingEl.textContent = String(remaining);
 
         // 1. Wahrscheinlichkeit mindestens 1 beim Ziehen (z.B. Starthand)
         const drawProb = probabilityAtLeastOne(deckSize, copies, drawn);

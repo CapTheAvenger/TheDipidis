@@ -1,0 +1,48 @@
+{
+  "_comment": "Wave-1 Layer-2.1 baseline tsconfig. We do NOT compile any TypeScript yet — the codebase is still .js. This config gives us tsc --noEmit JSDoc type-checking on files that opt in via '// @ts-check', so we catch typos / wrong arity / undefined vars / wrong-type calls without changing the runtime shape of any file. Once Layer 2.2+ converts files to real .ts (or .mts), this same config picks them up.",
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "lib": ["ES2020", "DOM", "DOM.Iterable", "WebWorker.ImportScripts"],
+
+    "allowJs": true,
+    "checkJs": false,
+
+    "noEmit": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "isolatedModules": false,
+
+    "strict": false,
+    "noImplicitAny": false,
+    "strictNullChecks": false,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "useDefineForClassFields": true,
+
+    "types": []
+  },
+
+  "_includeNote": "Only the wave-1-L2.1 pilot files are listed below + the ambient types/*.d.ts. Every other .js file is currently ignored — they'll be added as they get checked-and-typed in subsequent layers.",
+  "include": [
+    "types/**/*.d.ts",
+    "js/error-tracking.js",
+    "js/card-data-cache.js",
+    "js/app-calculator.js",
+    "js/app-price.js",
+    "js/deck-analysis-shared.js"
+  ],
+  "exclude": [
+    "node_modules",
+    "_site",
+    "_dist",
+    "coverage",
+    "data",
+    "tests/artifacts",
+    "tests/e2e/__snapshots__"
+  ]
+}

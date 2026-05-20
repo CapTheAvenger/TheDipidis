@@ -1,3 +1,6 @@
+// @ts-check
+// (Wave-1 L2.1 pilot file — opt-in to JSDoc-driven type-checking via tsc --noEmit.
+//  Errors land in `npm run typecheck` but never block runtime.)
 /**
  * Lightweight Frontend Error Tracking
  * ====================================

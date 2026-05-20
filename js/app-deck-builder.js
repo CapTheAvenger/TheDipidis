@@ -1394,14 +1394,14 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 
                 // If still not found, extract card name from "CardName (SET NUM)" format
                 if (!cardData) {
-                    const baseNameMatch = deckKey.match(/^(.+?)\s*\(/);
-                    if (baseNameMatch) {
-                        const baseName = baseNameMatch[1];
-                        const setMatch = deckKey.match(/\(([A-Z0-9]+)\s+([A-Z0-9]+)\)$/);
-                        
+                    const parsed = parseCardKey(deckKey);
+                    if (parsed) {
+                        const baseName = parsed.name;
+                        const setMatch = parsed;
+
                         if (setMatch) {
-                            const setCode = setMatch[1];
-                            const setNumber = setMatch[2];
+                            const setCode = setMatch.setCode;
+                            const setNumber = setMatch.number;
                             
                             // Fast lookup using index instead of find()
                             const key = `${setCode}-${setNumber}`;
@@ -1438,13 +1438,12 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 
                 if (!cardData) continue;
 
-                const baseNameMatch = deckKey.match(/^(.+?)\s*\(/);
-                const baseName = baseNameMatch ? baseNameMatch[1] : (cardData.card_name || deckKey);
+                const parsed = parseCardKey(deckKey);
+                const baseName = parsed ? parsed.name : (cardData.card_name || deckKey);
                 const normalizedBaseName = normalizeCardName(baseName);
 
-                const setMatch = deckKey.match(/\(([A-Z0-9]+)\s+([A-Z0-9]+)\)$/);
-                const originalSet = setMatch ? setMatch[1] : cardData.set_code;
-                const originalNumber = setMatch ? setMatch[2] : cardData.set_number;
+                const originalSet = parsed ? parsed.setCode : cardData.set_code;
+                const originalNumber = parsed ? parsed.number : cardData.set_number;
 
                 const cardSetForStats = String(cardData.set_code || cardData.set || originalSet || '').toUpperCase().trim();
                 const cardNumberForStatsRaw = String(cardData.set_number || cardData.number || originalNumber || '').trim();
@@ -2457,15 +2456,13 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             for (const [deckKey, count] of Object.entries(deck)) {
                 if (count <= 0) continue;
                 
-                // Extract card name from deckKey (handle "CardName (SET NUM)" format)
-                const baseNameMatch = deckKey.match(/^(.+?)\s*\(/);
-                const cardName = baseNameMatch ? baseNameMatch[1] : deckKey;
-
-                // Extract explicit set/number from deck key so we honour
-                // the print the user picked in the Rarity Switcher.
-                const setMatch = deckKey.match(/\(([A-Z0-9-]+)\s+([A-Z0-9-]+)\)$/);
-                const explicitSet = setMatch ? setMatch[1] : '';
-                const explicitNumber = setMatch ? setMatch[2] : '';
+                // Canonical helper: returns name + set + number, or null for
+                // bare-name keys. Honours the print the user picked in the
+                // Rarity Switcher.
+                const parsed = parseCardKey(deckKey);
+                const cardName = parsed ? parsed.name : deckKey;
+                const explicitSet = parsed ? parsed.setCode : '';
+                const explicitNumber = parsed ? parsed.number : '';
                 
                 let cardData = cardDataMap.get(cardName) || cardDataMap.get(deckKey);
                 
@@ -3065,10 +3062,10 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 Object.entries(cards)
                     .filter(([, count]) => count > 0)
                     .map(([deckKey, count]) => {
-                        const baseMatch = deckKey.match(/^(.+?)\s*\(([A-Z0-9-]+)\s+([A-Z0-9-]+)\)$/);
-                        const cardName = baseMatch ? baseMatch[1] : deckKey;
-                        const setCode  = baseMatch ? baseMatch[2] : '';
-                        const setNumber = baseMatch ? baseMatch[3] : '';
+                        const baseMatch = parseCardKey(deckKey);
+                        const cardName = baseMatch ? baseMatch.name : deckKey;
+                        const setCode  = baseMatch ? baseMatch.setCode : '';
+                        const setNumber = baseMatch ? baseMatch.number : '';
 
                         let imageUrl = '';
                         if (setCode && setNumber) {
@@ -3159,10 +3156,10 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 Object.entries(cards)
                     .filter(([, count]) => count > 0)
                     .map(([deckKey, count]) => {
-                        const baseMatch = deckKey.match(/^(.+?)\s*\(([A-Z0-9-]+)\s+([A-Z0-9-]+)\)$/);
-                        const cardName = baseMatch ? baseMatch[1] : deckKey;
-                        const setCode  = baseMatch ? baseMatch[2] : '';
-                        const setNumber = baseMatch ? baseMatch[3] : '';
+                        const baseMatch = parseCardKey(deckKey);
+                        const cardName = baseMatch ? baseMatch.name : deckKey;
+                        const setCode  = baseMatch ? baseMatch.setCode : '';
+                        const setNumber = baseMatch ? baseMatch.number : '';
                         let imageUrl = '';
                         if (setCode && setNumber) {
                             imageUrl = getUnifiedCardImage(setCode, setNumber);

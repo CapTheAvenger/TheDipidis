@@ -76,6 +76,25 @@ jobs:
           retention-days: 14
           if-no-files-found: ignore
 
+      - name: Build wave-1 bundle (artifact-only, not yet shipped)
+        run: |
+          # Wave-1 Layer-1: concatenate ~34 defer-loaded js/*.js scripts
+          # into a single _dist/app.bundle.js with source map. The bundle
+          # is NOT yet referenced from index.html — this step just
+          # produces it so we can validate the artefact in CI before the
+          # later HTML cut-over swaps the 34 <script> tags for one.
+          npm run build:bundle
+          ls -la _dist/
+
+      - name: Upload wave-1 bundle artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: wave-1-bundle
+          path: _dist/
+          retention-days: 14
+          if-no-files-found: error
+
       - name: NPM dependency audit (warn-only)
         run: |
           # Surfacing CVEs in our devDeps without failing the build —

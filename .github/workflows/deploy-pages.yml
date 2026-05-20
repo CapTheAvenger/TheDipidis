@@ -70,12 +70,20 @@ jobs:
 
       - name: Test coverage (advisory, baseline for phase B)
         run: |
-          # c8 reports ~0% today because the unit tests load production code
-          # via vm.Script + extractFunction() (see tests/unit/test-helpers.js).
-          # That instrumentation pattern is invisible to c8. We still emit
-          # the report so the artifact pipeline + thresholds are wired up
-          # for the day tests become real require()-based modules (phase B).
+          # c8 reports ~0% on the LEGACY codebase because the unit tests
+          # load production code via vm.Script + extractFunction() (see
+          # tests/unit/test-helpers.js). That instrumentation pattern is
+          # invisible to c8. Advisory-only.
           npm run test:coverage --silent 2>&1 | tail -20 || true
+
+      - name: Module coverage gate (js/modules/**)
+        run: |
+          # ES-module call-sites under js/modules/ ARE counted by c8
+          # (tests use dynamic import(), not vm.Script). Enforce a
+          # minimum bar so every NEW module ships with tests.
+          # Thresholds: lines 85%, functions 80%, branches 80%.
+          npm run test:coverage:modules --silent 2>&1 | tail -25
+          echo "✓ Module coverage gate passed"
 
       - name: Upload coverage artifact
         if: always()

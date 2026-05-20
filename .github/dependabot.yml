@@ -1,0 +1,55 @@
+# Dependabot configuration — automatic dependency-update PRs.
+#
+# Scope:
+#   - npm devDependencies (esbuild, eslint, playwright, prettier, c8, ...)
+#   - GitHub Actions (the `uses:` references in .github/workflows/*.yml)
+#
+# Frequency: weekly so we stay close to upstream patches without burying
+# the PR list. Groups are used so all minor/patch updates land in ONE PR
+# per ecosystem per week.
+#
+# Production runtime deps (Firebase compat, Chart, PapaParse, localforage,
+# mobile-drag-drop) load from CDN URLs in index.html, not from npm — those
+# bumps still happen by hand (and through the SRI script regeneration).
+
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "npm"
+    commit-message:
+      prefix: "deps"
+      include: "scope"
+    groups:
+      dev-minor-patch:
+        applies-to: "version-updates"
+        update-types:
+          - "minor"
+          - "patch"
+      dev-security:
+        applies-to: "security-updates"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 3
+    labels:
+      - "dependencies"
+      - "github-actions"
+    commit-message:
+      prefix: "ci"
+      include: "scope"
+    groups:
+      actions-minor-patch:
+        applies-to: "version-updates"
+        update-types:
+          - "minor"
+          - "patch"

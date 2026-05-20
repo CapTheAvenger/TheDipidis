@@ -88,13 +88,37 @@ jobs:
 
       - name: Build wave-1 bundle (artifact-only, not yet shipped)
         run: |
-          # Wave-1 Layer-1: concatenate ~34 defer-loaded js/*.js scripts
-          # into a single _dist/app.bundle.js with source map. The bundle
-          # is NOT yet referenced from index.html — this step just
-          # produces it so we can validate the artefact in CI before the
-          # later HTML cut-over swaps the 34 <script> tags for one.
+          # Wave-1 Layer-1: concatenate ~30 defer-loaded js/*.js scripts
+          # into a single _dist/app.bundle.js with source map, plus the
+          # esbuild modules bundle (Wave-1 L2.3). Output validated by
+          # the bundle-size budget step below.
           npm run build:bundle
           ls -la _dist/
+
+      - name: Bundle-size budget check
+        run: |
+          # Bundle-size regression guard. Numbers are conservative ceilings
+          # against current sizes (legacy ~2515 KB, modules ~7 KB as of
+          # Wave-1 L2.8); raise them when a deliberate enlargement lands.
+          MAX_LEGACY_KB=2750
+          MAX_MODULES_KB=200
+          LEGACY_BYTES=$(stat -c "%s" _dist/app.bundle.js)
+          MODULES_BYTES=$(stat -c "%s" _dist/app.modules.bundle.js)
+          LEGACY_KB=$((LEGACY_BYTES / 1024))
+          MODULES_KB=$((MODULES_BYTES / 1024))
+          echo "  legacy bundle : ${LEGACY_KB} KB (budget ${MAX_LEGACY_KB} KB)"
+          echo "  modules bundle: ${MODULES_KB} KB (budget ${MAX_MODULES_KB} KB)"
+          FAILED=0
+          if [ "$LEGACY_KB" -gt "$MAX_LEGACY_KB" ]; then
+            echo "::error::legacy bundle ${LEGACY_KB} KB exceeds budget ${MAX_LEGACY_KB} KB — investigate or raise budget"
+            FAILED=1
+          fi
+          if [ "$MODULES_KB" -gt "$MAX_MODULES_KB" ]; then
+            echo "::error::modules bundle ${MODULES_KB} KB exceeds budget ${MAX_MODULES_KB} KB — investigate or raise budget"
+            FAILED=1
+          fi
+          [ "$FAILED" -eq 0 ] || exit 1
+          echo "✓ Both bundles within budget"
 
       - name: Upload wave-1 bundle artifact
         if: always()

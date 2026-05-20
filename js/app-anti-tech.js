@@ -111,7 +111,7 @@
             if (d !== userLower && d !== userStripped) continue;
             const opp = String(r.opponent || '').trim();
             if (!opp) continue;
-            const wr = parseFloat(String(r.win_rate || '0').replace(',', '.').replace('%', '').trim());
+            const wr = parsePercent(r.win_rate);
             if (Number.isFinite(wr) && wr > 0 && !map.has(opp.toLowerCase())) {
                 map.set(opp.toLowerCase(), wr);
             }

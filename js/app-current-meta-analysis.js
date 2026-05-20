@@ -1691,10 +1691,7 @@
             if (deckMatchups.length === 0) return false;
 
             // Parse "62,50" or "62.50" → 62.50; strip "%" suffix.
-            const parseWr = (s) => {
-                const v = parseFloat(String(s || '0').replace(',', '.').replace('%', '').trim());
-                return Number.isFinite(v) ? v : 0;
-            };
+            const parseWr = parsePercent;
 
             const enriched = deckMatchups
                 .map(r => ({
@@ -1781,10 +1778,7 @@
             // calibrating against).
             const target = archetype.trim().toLowerCase();
             const stripped = stripExSuffix(archetype).trim().toLowerCase();
-            const parseWr = (s) => {
-                const v = parseFloat(String(s || '0').replace(',', '.').replace('%', '').trim());
-                return Number.isFinite(v) ? v : 0;
-            };
+            const parseWr = parsePercent;
             const wrByOpp = {};
             rows.forEach(r => {
                 const d = String(r.deck_name || '').trim().toLowerCase();
@@ -2013,10 +2007,7 @@
 
             const target = archetype.trim().toLowerCase();
             const stripped = stripExSuffix(archetype).trim().toLowerCase();
-            const parseWr = (s) => {
-                const v = parseFloat(String(s || '0').replace(',', '.').replace('%', '').trim());
-                return Number.isFinite(v) ? v : 0;
-            };
+            const parseWr = parsePercent;
             const wrByOpp = {};
             rows.forEach(r => {
                 const d = String(r.deck_name || '').trim().toLowerCase();

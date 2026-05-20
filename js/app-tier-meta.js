@@ -78,10 +78,7 @@
         function getTrendIndicator(history) {
             if (!Array.isArray(history) || history.length < 2) return '';
 
-            const parseShare = (value) => {
-                const parsed = parseFloat(String(value ?? 0).replace(',', '.'));
-                return Number.isFinite(parsed) ? parsed : NaN;
-            };
+            const parseShare = parsePercentOrNaN;
 
             // Compare strictly the last two available time points.
             const validPoints = history.filter(point => Number.isFinite(parseShare(point?.share)));

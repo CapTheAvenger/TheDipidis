@@ -37,6 +37,7 @@
     "js/modules/stores/store.js",
     "js/modules/stores/user-store.js",
     "js/modules/metrics.js",
+    "js/modules/firebase/init.js",
     "js/app-price.js",
     "js/deck-analysis-shared.js",
     "js/auth-ui-helpers.js",

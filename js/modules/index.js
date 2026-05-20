@@ -43,3 +43,10 @@ export {
     formatPercent,
     weightedAverageWinRate,
 } from './metrics.js';
+
+// Wave-1 Firebase modular SDK lazy-loader. Importing here runs the side
+// effect that exposes `window.getFirebaseModular()` for legacy non-module
+// callers; new ES-module call-sites use `import { getFirebase } from
+// './firebase/init.js'`. No Firebase modular JS is downloaded until the
+// first caller actually invokes getFirebase().
+export { getFirebase } from './firebase/init.js';

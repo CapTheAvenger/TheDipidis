@@ -14,6 +14,24 @@ concurrency:
   group: pages
   cancel-in-progress: false
 
+# Third-party action inventory (audit baseline, wave-0 HF-9):
+#   actions/checkout@v4          — supply-chain critical (has GITHUB_TOKEN access)
+#   actions/setup-node@v4
+#   actions/setup-python@v5
+#   actions/upload-artifact@v4
+#   actions/configure-pages@v5
+#   actions/upload-pages-artifact@v3
+#   actions/deploy-pages@v4      — supply-chain critical (signs Pages deploy)
+#
+# TODO (wave-1 / phase-B): SHA-pin every uses: line with the commit hash
+# of the current tagged release, e.g.
+#   uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+# and let Renovate or Dependabot keep them current. This protects against
+# the tj-actions/changed-files compromise pattern (CVE-2025-30066) where
+# the attacker rewrote the v45 tag to point at malicious code.
+# Reason this isn't done in wave-0: requires GitHub-API access to fetch
+# the SHA for each tagged release, which the audit sandbox doesn't allow.
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -175,6 +193,33 @@ jobs:
           mkdir -p _site/config
           cp config/current_meta_analysis_settings.json _site/config/ 2>/dev/null || true
           cp _config.yml _site/ 2>/dev/null || true
+
+      - name: Strip dev-only CSP hosts (wave-0 HF-7)
+        run: |
+          # Remove http://localhost:8001 from the Production CSP. It's the
+          # local price-proxy used by developers; in production it just
+          # gives any same-origin XSS payload another exfil channel, and
+          # lets any third-party page that a user has open trigger the
+          # proxy with the user's IP (B-24).
+          sed -i -E 's| http://localhost:8001||g' _site/index.html
+          # Verify it's gone
+          if grep -q 'localhost:8001' _site/index.html; then
+            echo "::error::localhost:8001 still present in _site/index.html"
+            exit 1
+          fi
+          echo "✓ Dev-only CSP hosts stripped from production index.html"
+
+      - name: Inject SRI hashes for CDN scripts (wave-0 HF-6)
+        run: |
+          # Fetches every CDN script referenced in index.html, computes its
+          # SHA-384, and writes integrity="sha384-..." crossorigin="anonymous"
+          # into the <script>/<link> tags. Protects against jsDelivr / cdnjs
+          # account compromise (Check Point reported jsDelivr abuse for
+          # phishing in 2024). Runs in the deploy-time tree (_site/) so any
+          # CDN hash drift fails the build instead of shipping silently.
+          chmod +x scripts/generate-sri.sh
+          ./scripts/generate-sri.sh _site/index.html
+          echo "✓ SRI hashes injected into _site/index.html"
 
       - name: Minify JS, CSS & HTML
         run: |

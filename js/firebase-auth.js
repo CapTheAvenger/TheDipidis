@@ -6,6 +6,16 @@ if (!window.__firebaseRuntimeInitialized) {
  * ==================================
  */
 
+// Explicit persistence (wave-0 HF-10).
+//
+// Default is LOCAL (= survives browser restart) which is also what we want
+// for UX, but setting it explicitly makes the choice reviewable and gives
+// us a single line to flip if we ever want session-only or no-persist.
+// Setting it early — before any signIn / signUp call — ensures it applies
+// to the very first credential acquisition.
+firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+  .catch(function(err) { console.warn('[Auth] setPersistence failed:', err); });
+
 // Handle redirect result on page load (for browsers where signInWithPopup fails
 // and we fell back to signInWithRedirect, e.g. ROG Ally / embedded browsers)
 (function handleRedirectResult() {
@@ -30,7 +40,15 @@ async function signUp(email, password) {
   try {
     const userCredential = await firebase.auth().createUserWithEmailAndPassword(email, password);
     if (typeof devLog === 'function') devLog('✓ User created:', userCredential.user.email);
-    showNotification(getLang()==='de' ? 'Account erfolgreich erstellt!' : 'Account created successfully!', 'success');
+    // Send verification email (wave-0 HF-10). We don't gate Firestore writes
+    // on emailVerified for now (too aggressive for the current user base),
+    // but having a verified address on file means future flows like password
+    // reset and security alerts actually reach the user. Fire-and-forget —
+    // failure here shouldn't block account creation.
+    userCredential.user.sendEmailVerification().catch(function(err) {
+      console.warn('[Auth] sendEmailVerification failed:', err && err.code);
+    });
+    showNotification(getLang()==='de' ? 'Account erstellt! Bitte E-Mail bestätigen.' : 'Account created! Please verify your email.', 'success');
     return userCredential.user;
   } catch (error) {
     console.error('Sign up error:', error);

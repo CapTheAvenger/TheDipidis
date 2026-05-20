@@ -1,3 +1,4 @@
+// @ts-check
 // =============================================================
 // STARTHAND SIMULATOR (Draw Tester)
 // =============================================================
@@ -120,7 +121,7 @@ function _renderSimulatorHand() {
 
     const remaining = _simulatorDeck.length - _simulatorHand.length;
     const el = document.getElementById('simulatorDeckCount');
-    if (el) el.innerText = remaining;
+    if (el) el.innerText = String(remaining);
 }
 
 // -------------------------------------------------------
@@ -136,7 +137,7 @@ function _getUniqueDeckCardNames() {
 function _populateComboDropdowns() {
     const cardNames = _getUniqueDeckCardNames();
     for (let i = 1; i <= 4; i++) {
-        const select = document.getElementById(`comboTarget${i}`);
+        const select = /** @type {HTMLSelectElement | null} */ (document.getElementById(`comboTarget${i}`));
         if (!select) continue;
 
         const currentValue = select.value;
@@ -159,7 +160,8 @@ function _populateComboDropdowns() {
 function onComboDropdownChange() {
     const selected = [];
     for (let i = 1; i <= 4; i++) {
-        const value = document.getElementById(`comboTarget${i}`)?.value || '';
+        const sel = /** @type {HTMLSelectElement | null} */ (document.getElementById(`comboTarget${i}`));
+        const value = sel?.value || '';
         if (value && !selected.includes(value)) selected.push(value);
     }
 
@@ -195,7 +197,7 @@ function _renderComboTargets() {
 function clearComboTargets() {
     _comboTargets = [];
     for (let i = 1; i <= 4; i++) {
-        const select = document.getElementById(`comboTarget${i}`);
+        const select = /** @type {HTMLSelectElement | null} */ (document.getElementById(`comboTarget${i}`));
         if (select) select.value = '';
     }
     _renderComboTargets();

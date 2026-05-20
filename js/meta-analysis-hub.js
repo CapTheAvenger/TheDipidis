@@ -1,3 +1,4 @@
+// @ts-check
 // Meta & Deck Analysis Hub
 // Provides a unified entry point for the meta/deck-analysis sub-tabs.
 // - Mode 1 (Entry State): tile grid, shown when the hub tab is opened from the top nav.

@@ -1,3 +1,4 @@
+// @ts-check
 /*
  * TCG Showdown deck-handoff helper.
  *

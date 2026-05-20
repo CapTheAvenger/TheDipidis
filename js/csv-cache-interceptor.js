@@ -1,3 +1,4 @@
+// @ts-check
 /**
  * CSV Cache Interceptor + Smart Data Proxy
  *
@@ -34,7 +35,15 @@
   // ─── PATCH: fetch() für CSV + JSON ──────────────────────────────────────────
   const _origFetch = window.fetch;
   window.fetch = function (input, init) {
-    const url      = typeof input === 'string' ? input : (input && input.url ? input.url : '');
+    // input is RequestInfo | URL. Request has .url; URL has .href; string is itself.
+    let url = '';
+    if (typeof input === 'string') {
+      url = input;
+    } else if (input instanceof URL) {
+      url = input.href;
+    } else if (input && typeof (/** @type {any} */ (input)).url === 'string') {
+      url = /** @type {any} */ (input).url;
+    }
     const basename = getBasename(url);
     const cacheKey = URL_TO_CACHE_KEY[basename];
 
@@ -87,8 +96,11 @@
   function buildSmartProxy(data) {
     return new Proxy(data, {
       get(target, prop) {
+        // Proxy traps see string|symbol keys; ARRAY_METHODS is a string list,
+        // so coerce symbols to a non-matching string to keep the type narrow.
+        const propStr = typeof prop === 'string' ? prop : String(prop);
         // Für array-Iterationsmethoden: nutze den Archetype-Index
-        if (ARRAY_METHODS.includes(prop)) {
+        if (ARRAY_METHODS.includes(propStr)) {
           const arch = window.currentCityLeagueArchetype;
           const idx  = window._analysisIndex;
 

@@ -34,7 +34,15 @@
     "js/card-data-cache.js",
     "js/app-calculator.js",
     "js/app-price.js",
-    "js/deck-analysis-shared.js"
+    "js/deck-analysis-shared.js",
+    "js/auth-ui-helpers.js",
+    "js/firebase-config.js",
+    "js/app-init.js",
+    "js/tcg-showdown-link.js",
+    "js/archetype-icons.js",
+    "js/draw-simulator.js",
+    "js/meta-analysis-hub.js",
+    "js/csv-cache-interceptor.js"
   ],
   "exclude": [
     "node_modules",

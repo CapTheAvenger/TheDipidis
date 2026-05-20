@@ -143,7 +143,60 @@ interface Window {
 
     // Dev-only logging
     devLog?: (...args: any[]) => void;
+
+    // i18n
+    getLang?: () => string;
+    switchLanguage?: (lang: string) => void;
+
+    // Profile / Meta-Analysis Hub
+    switchProfileTab?: (tabId: string) => void;
+    MetaAnalysisHub?: any;
+
+    // App-init / app-core boot status flags
+    cityLeagueLoaded?: boolean;
+    __appResourcesSettled?: boolean;
+    __pendingAuthUser?: any;
+    _analysisIndex?: any;
+    _analysisIndexBuilt?: boolean;
+    dipidisDataCache?: any;
+
+    // Loaders called from app-init.js
+    loadAllCardsDatabase?: () => Promise<any>;
+    loadAceSpecsList?: () => Promise<any>;
+    loadCityLeagueData?: () => Promise<any>;
+    loadPokedexNumbers?: () => Promise<any>;
+    loadSetMapping?: () => Promise<any>;
+    loadRarityPreferences?: () => Promise<any>;
+    loadSetOrderMap?: () => Promise<any>;
+    hideAppLoadingOverlay?: () => void;
+    runAppLoadingWatchdog?: () => void;
+
+    // Cards helper
+    getCardTypeCategory?: (card: any) => string;
+
+    // Showdown handoff (tcg-showdown-link.js)
+    openShowdownExternal?: () => void;
+    openInShowdownFromBuilder?: (source: string) => void;
+    copyDeckAndOpenShowdown?: (source: string) => void;
+
+    // Draw simulator
+    _toggleComboTarget?: (cardName: string) => void;
 }
+
+declare function getLang(): string;
+declare function switchLanguage(lang: string): void;
+declare function onUserSignedIn(user: any): void;
+declare function onUserSignedOut(): void;
+declare function loadAllCardsDatabase(): Promise<any>;
+declare function loadAceSpecsList(): Promise<any>;
+declare function loadCityLeagueData(): Promise<any>;
+declare function loadPokedexNumbers(): Promise<any>;
+declare function loadSetMapping(): Promise<any>;
+declare function loadRarityPreferences(): Promise<any>;
+declare function loadSetOrderMap(): Promise<any>;
+declare function hideAppLoadingOverlay(): void;
+declare function runAppLoadingWatchdog(): void;
+declare function _toggleComboTarget(name: string): void;
 
 declare function devLog(...args: any[]): void;
 declare function t(key: string, fallback?: string): string;

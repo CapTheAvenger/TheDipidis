@@ -1,3 +1,4 @@
+// @ts-check
 /*
  * ArchetypeIcons — resolves meta archetype names to Limitless R2 icon URLs.
  *
@@ -22,7 +23,7 @@
   // still hit the browser cache, but a new session (= new script load
   // after deploy) fetches fresh data.
   const CACHE_TOKEN = (typeof document !== 'undefined' && document.currentScript)
-    ? (document.currentScript.src.match(/[?&]v=([^&]+)/) || [null, 'dev'])[1]
+    ? ((/** @type {HTMLScriptElement} */ (document.currentScript)).src.match(/[?&]v=([^&]+)/) || [null, 'dev'])[1]
     : 'dev';
 
   let _data = null;

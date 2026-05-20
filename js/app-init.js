@@ -1,3 +1,4 @@
+// @ts-check
 // app-init.js — extracted from app.js
 // Part of Hausi's Pokemon TCG Analysis
 
@@ -29,8 +30,8 @@
                 
                 // Initialize City League format dropdowns
                 const savedFormat = 'M4';
-                const formatDropdown = document.getElementById('cityLeagueFormatSelect');
-                const analysisFormatDropdown = document.getElementById('cityLeagueFormatSelectAnalysis');
+                const formatDropdown = /** @type {HTMLSelectElement | null} */ (document.getElementById('cityLeagueFormatSelect'));
+                const analysisFormatDropdown = /** @type {HTMLSelectElement | null} */ (document.getElementById('cityLeagueFormatSelectAnalysis'));
                 if (formatDropdown) {
                     formatDropdown.value = savedFormat;
                 }

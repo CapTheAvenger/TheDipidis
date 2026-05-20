@@ -56,7 +56,7 @@
     "js/app-current-meta.js",
     "js/custom-binder.js",
     "js/app-tier-meta.js",
-    "js/dom-helpers.js",
+    "js/modules/dom-helpers.js",
     "js/lazy-loader.js",
     "js/app-anti-tech.js",
     "js/app-tech-lab.js",

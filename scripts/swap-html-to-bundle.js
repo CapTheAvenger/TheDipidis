@@ -30,7 +30,7 @@ const fs = require('fs');
 const path = require('path');
 
 const BUNDLE_ORDER = [
-    'dom-helpers.js',
+    // dom-helpers.js: removed in L2.13 — now an ES module.
     'app-utils.js',
     'i18n.js',
     'firebase-config.js',

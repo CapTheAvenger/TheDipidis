@@ -63,3 +63,7 @@ export {
     copyDeckAndOpenShowdown,
     openShowdownExternal,
 } from './tcg-showdown-link.js';
+
+// L2.13 — DOM type-narrowing helpers (legacy IIFE → ES module).
+// The `dom` namespace stays on window for legacy use.
+export { dom } from './dom-helpers.js';

@@ -283,20 +283,21 @@
                             const totalGames = parseInt(cellData.total_games) || (parsedWins + parsedLosses + parsedDraws);
                             let bgColor, textColor;
                             
+                            let tdClass;
                             if (winRate >= 55.0) {
                                 const intensity = Math.min((winRate - 55) / 20, 1);
                                 bgColor = `rgba(76, 175, 80, ${0.3 + intensity * 0.4})`;
                                 textColor = winRate >= 65 ? 'white' : '#27ae60';
-                                var tdClass = 'heatmap-td heatmap-td-fav';
+                                tdClass = 'heatmap-td heatmap-td-fav';
                             } else if (winRate <= 45.0) {
                                 const intensity = Math.min((45 - winRate) / 20, 1);
                                 bgColor = `rgba(244, 67, 54, ${0.3 + intensity * 0.4})`;
                                 textColor = winRate <= 35 ? 'white' : '#e74c3c';
-                                var tdClass = 'heatmap-td heatmap-td-unfav';
+                                tdClass = 'heatmap-td heatmap-td-unfav';
                             } else {
                                 bgColor = 'rgba(241, 196, 15, 0.2)';
                                 textColor = '#7f8c8d';
-                                var tdClass = 'heatmap-td heatmap-td-even';
+                                tdClass = 'heatmap-td heatmap-td-even';
                             }
                             const tooltip = `${parsedWins}W - ${parsedLosses}L (${totalGames} ${t('heatmap.games')})`;
                             const safeRow = escapeJsStr(rowDeck);

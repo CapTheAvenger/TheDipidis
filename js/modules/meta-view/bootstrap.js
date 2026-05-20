@@ -20,6 +20,19 @@
 import { metaViewStore } from './store.js';
 import { isMetaViewV2Enabled } from './feature-flag.js';
 
+/**
+ * Maps `metaViewStore.activeFormat` → legacy tab element id.
+ * The legacy tabs stay in the DOM (still own all of their existing
+ * rendering + filters); step-3 reparents them into #meta-view-list so
+ * they live INSIDE the consolidated tab and the segmented-control can
+ * show/hide them by format.
+ */
+const FORMAT_TO_LEGACY_TAB = {
+    'current': 'current-meta',
+    'city-league': 'city-league',
+    'past': 'past-meta',
+};
+
 function applyBodyClass() {
     const enabled = isMetaViewV2Enabled();
     document.body.classList.toggle('ia-v2', enabled);
@@ -47,10 +60,61 @@ function applyStoreStateToDom() {
     const detailEl = document.getElementById('meta-view-detail');
     if (listEl) listEl.classList.toggle('display-none', s.view !== 'list');
     if (detailEl) detailEl.classList.toggle('display-none', s.view !== 'detail');
+
+    // Step 3: show ONLY the reparented legacy tab matching activeFormat.
+    // Legacy tabs are present as children of #meta-view-list with class
+    // .meta-view-format-content + data-format. Bootstrap reparented them
+    // out of their original `<div class="tab-content">` positions so the
+    // legacy switchTab() leaves them alone.
+    const formatNodes = document.querySelectorAll('.meta-view-format-content');
+    formatNodes.forEach((node) => {
+        const el = /** @type {HTMLElement} */ (node);
+        const isActive = el.dataset.format === s.activeFormat;
+        el.classList.toggle('display-none', !isActive);
+    });
+}
+
+/**
+ * One-time reparent of the three legacy main meta tabs into the new
+ * consolidated #meta-view-list panel. After this runs the legacy
+ * <div id="current-meta"> etc. are children of #meta-view-list with
+ * class `meta-view-format-content` + `data-format="current"`. The
+ * legacy switchTab() will no longer find them as `.tab-content`
+ * siblings — which is what we want in v2 (the segmented control
+ * controls their visibility instead).
+ *
+ * Idempotent: re-running is a no-op (the data-format attribute
+ * signals "already moved").
+ */
+function reparentLegacyTabsIntoMetaView() {
+    const listEl = document.getElementById('meta-view-list');
+    if (!listEl) return;
+
+    Object.entries(FORMAT_TO_LEGACY_TAB).forEach(([format, legacyId]) => {
+        const node = document.getElementById(legacyId);
+        if (!node) {
+            console.warn('[meta-view] legacy tab #' + legacyId + ' missing — skipped');
+            return;
+        }
+        if (node.dataset.format === format) return; // already moved
+        // Strip tab-content classes so legacy switchTab() ignores it.
+        node.classList.remove('tab-content', 'active');
+        node.classList.add('meta-view-format-content');
+        node.dataset.format = format;
+        // Replace the placeholder on first move.
+        const placeholder = listEl.querySelector('.meta-view-placeholder');
+        if (placeholder) placeholder.remove();
+        listEl.appendChild(node);
+    });
 }
 
 function init() {
     applyBodyClass();
+    // Only reparent legacy tabs into the consolidated view when v2 is
+    // active. v1 mode leaves them in place untouched.
+    if (isMetaViewV2Enabled()) {
+        reparentLegacyTabsIntoMetaView();
+    }
     applyStoreStateToDom();
     // Re-render whenever the store changes.
     metaViewStore.subscribe(() => applyStoreStateToDom());

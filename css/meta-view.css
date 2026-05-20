@@ -118,6 +118,19 @@ body.ia-v1 .ia-v2-only {
   font-style: italic;
 }
 
+/* Step 3: reparented legacy tabs sit inside #meta-view-list with
+ * class .meta-view-format-content + data-format. The bootstrap toggles
+ * .display-none on inactive ones; this rule ensures the visible one
+ * stays a block element (legacy CSS would have hidden it via
+ * `.tab-content { display: none }` but the class was stripped on
+ * reparent). */
+.meta-view-format-content {
+  display: block;
+}
+.meta-view-format-content.display-none {
+  display: none;
+}
+
 .meta-view-back-btn {
   display: inline-flex;
   align-items: center;

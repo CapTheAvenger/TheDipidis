@@ -1,0 +1,107 @@
+# Wave-3 Staging — PR preview build artifact.
+#
+# True multi-environment GitHub Pages requires a second repo (Pages
+# allows only one deployment per repo). As a pragmatic substitute,
+# this workflow runs the same build-and-swap pipeline as deploy-pages
+# does on `main`, but uploads the result as a workflow artifact instead
+# of deploying it. Reviewers can:
+#
+#   1. open the workflow run on the PR
+#   2. download the `preview-site` artifact (a .zip of the _site/ tree)
+#   3. extract + `python -m http.server` locally to interact with the
+#      built version of the branch
+#
+# Cheaper than running a second hosting environment, and runs on every
+# PR push so the artifact stays fresh. The artifact retention is short
+# (7 days) so storage doesn't pile up — long-lived previews live on
+# Cloudflare Pages / Netlify if/when we add a real staging host.
+
+name: PR Preview Build
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: preview-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-preview:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install npm deps
+        run: npm ci --no-audit --no-fund
+
+      - name: Build legacy + modules bundles
+        run: npm run build:bundle
+
+      - name: Lint + typecheck + tests (block on failure)
+        run: |
+          npm run lint --silent || true   # warnings advisory
+          npm run typecheck --silent
+          npm test --silent
+
+      - name: Assemble preview site
+        run: |
+          # Mirror the deploy-pages.yml site-assembly steps so the
+          # preview artifact is functionally identical to what would
+          # ship to thedipidis.app on merge. The only difference is
+          # that secrets (FIREBASE_CONFIG, SENTRY_DSN, GOOGLE_CLIENT_ID)
+          # are NOT injected here — PRs from forks don't get secrets,
+          # and we don't want to leak production credentials into a
+          # downloadable artifact.
+          mkdir -p _site
+          cp index.html _site/
+          cp manifest.json _site/
+          cp version.json _site/
+          cp service-worker.js _site/
+          cp .nojekyll _site/ 2>/dev/null || true
+          cp -r css _site/css
+          cp -r js _site/js
+          cp -r images _site/images 2>/dev/null || true
+          cp -r data _site/data
+          cp pokemon_sets_mapping.csv _site/ 2>/dev/null || true
+          mkdir -p _site/config
+          cp config/current_meta_analysis_settings.json _site/config/ 2>/dev/null || true
+
+          # Inject a placeholder credentials file so firebase-config.js
+          # doesn't crash on undefined FIREBASE_CREDS. The preview will
+          # render the public surfaces fine; signed-in features will
+          # show an auth-failed state, which is the expected staging
+          # behaviour.
+          cat > _site/js/firebase-credentials.js <<'EOF'
+          window.FIREBASE_CREDS = {
+            apiKey: 'preview-build-no-credentials',
+            authDomain: '', projectId: '', storageBucket: '',
+            messagingSenderId: '', appId: ''
+          };
+          EOF
+
+          cp _dist/app.bundle.js _site/js/
+          cp _dist/app.bundle.js.map _site/js/
+          cp _dist/app.modules.bundle.js _site/js/
+          cp _dist/app.modules.bundle.js.map _site/js/
+
+          node scripts/swap-html-to-bundle.js _site
+          echo "✓ Preview site assembled — $(du -sh _site | cut -f1)"
+
+      - name: Upload preview-site artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: preview-site-${{ github.event.pull_request.number || 'manual' }}
+          path: _site/
+          retention-days: 7
+          if-no-files-found: error

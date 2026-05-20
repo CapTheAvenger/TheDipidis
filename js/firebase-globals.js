@@ -535,6 +535,26 @@ function patchUserDecksLocal(operation, payload) {
 }
 window.patchUserDecksLocal = patchUserDecksLocal;
 
+/**
+ * Wave-1 stores: sync the current legacy window.user* state into the
+ * userStore. Idempotent — the store's shallow-equal check skips no-op
+ * notifies, so callers can fire this after any mutation without worry.
+ * Used by firebase-collection.js after each add / remove of a card to
+ * collection / wishlist.
+ */
+function _syncUserStoreFromGlobals() {
+  /** @type {any} */ const w = window;
+  if (!w.userStore) return;
+  w.userStore.setCollectionCounts(
+    Object.fromEntries(w.userCollectionCounts || new Map())
+  );
+  w.userStore.setWishlist(
+    Array.from(w.userWishlist || new Set()),
+    Object.fromEntries(w.userWishlistCounts || new Map())
+  );
+}
+/** @type {any} */ (window)._syncUserStoreFromGlobals = _syncUserStoreFromGlobals;
+
 function clearUserData() {
   window.userProfile          = null;
   window.userCollection       = new Set();

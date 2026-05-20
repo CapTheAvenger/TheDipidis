@@ -131,9 +131,10 @@ async function addToCollection(cardId) {
     window.userCollection.add(cardId);
     if (!window.userCollectionCounts) window.userCollectionCounts = new Map();
     window.userCollectionCounts.set(cardId, newCount);
+    if (typeof window._syncUserStoreFromGlobals === 'function') window._syncUserStoreFromGlobals();
     updateCardUI(cardId);
     showNotification(`Added to collection (${newCount}/4)`, 'success');
-    
+
     // Auto-decrement wishlist: if the card is on the wishlist, reduce by 1
     if (window.userWishlist && window.userWishlist.has(cardId)) {
       await removeFromWishlist(cardId);
@@ -184,6 +185,7 @@ async function removeFromCollection(cardId) {
 
       if (window.userCollectionCounts) window.userCollectionCounts.set(cardId, newCount);
     }
+    if (typeof window._syncUserStoreFromGlobals === 'function') window._syncUserStoreFromGlobals();
 
     updateCardUI(cardId);
     showNotification(newCount > 0 ? `Collection: ${newCount}/4 copies` : 'Removed from collection', 'success');
@@ -230,6 +232,7 @@ async function addToWishlistWithCount(cardId, count) {
     window.userWishlist.add(cardId);
     if (!window.userWishlistCounts) window.userWishlistCounts = new Map();
     window.userWishlistCounts.set(cardId, qty);
+    if (typeof window._syncUserStoreFromGlobals === 'function') window._syncUserStoreFromGlobals();
     showNotification(`Added to wishlist (${qty}x)`, 'success');
     if (typeof filterWishlist === 'function') filterWishlist();
     else updateWishlistUI();
@@ -270,6 +273,7 @@ async function addToWishlist(cardId) {
     window.userWishlist.add(cardId);
     if (!window.userWishlistCounts) window.userWishlistCounts = new Map();
     window.userWishlistCounts.set(cardId, newCount);
+    if (typeof window._syncUserStoreFromGlobals === 'function') window._syncUserStoreFromGlobals();
     showNotification(`Added to wishlist (${newCount}x)`, 'success');
 
     // Update wishlist display — preserve any active search/set filter.
@@ -308,6 +312,7 @@ async function removeFromWishlist(cardId) {
       });
       if (window.userWishlistCounts) window.userWishlistCounts.set(cardId, newCount);
     }
+    if (typeof window._syncUserStoreFromGlobals === 'function') window._syncUserStoreFromGlobals();
     showNotification(newCount > 0 ? `Wishlist: ${newCount}x` : 'Removed from wishlist', 'success');
 
     // Update wishlist display — preserve any active search/set filter.

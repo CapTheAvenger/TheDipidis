@@ -35,6 +35,7 @@ const SHELL_ASSETS = [
   './js/inline-init.js',
   './js/app-utils.js',
   './js/i18n.js',
+  './js/i18n-de.js',
   './js/app-core.js',
   './js/app-price.js',
   './js/app-tier-meta.js',

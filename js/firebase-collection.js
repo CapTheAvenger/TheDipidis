@@ -74,12 +74,22 @@ document.addEventListener('click', function(e) {
   });
 });
 
+// Hardened for use inside HTML attributes (e.g. onclick="fn('${escapeJsSingleQuoted(x)}')").
+// Without escaping " < > & a malicious value like  foo" onclick="alert(1)" x="  could
+// break the attribute boundary; with this set, any breakout char becomes an HTML
+// entity that the browser decodes back to a literal AFTER the attribute is parsed
+// — so the JS literal inside the onclick still sees the intended characters, but
+// the surrounding HTML stays well-formed. Fixes B-29 / B-30 from the security audit.
 function escapeJsSingleQuoted(value) {
   return String(value)
     .replace(/\\/g, '\\\\')
     .replace(/'/g, "\\'")
     .replace(/\r/g, '\\r')
-    .replace(/\n/g, '\\n');
+    .replace(/\n/g, '\\n')
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
 }
 
 // Shared helper: lookup card by set+number via the global cardIndexBySetNumber Map
@@ -412,21 +422,41 @@ async function saveCurrentDeckToProfile(source) {
 }
 
 // Save display name
+//
+// Hardens B-2 (stored XSS via displayName): max length 40 + whitelist character
+// set (letters, numbers, space, basic punctuation). Anything outside that set
+// is rejected client-side; the matching Firestore rule (see firestore.rules)
+// enforces the same constraint server-side so a determined attacker who bypasses
+// the form cannot persist a payload either. Renderers still use textContent /
+// escapeHtml because defense-in-depth is cheap.
+const DISPLAY_NAME_MAX_LEN = 40;
+const DISPLAY_NAME_RX = /^[A-Za-z0-9 _\-.,'!?]+$/;
+
 async function saveDisplayName() {
   const user = auth.currentUser;
   if (!user) {
     showNotification('Please sign in to update your profile', 'error');
     return;
   }
-  
+
   const nameInput = document.getElementById('settings-display-name');
   const displayName = nameInput.value.trim();
-  
+
   if (!displayName) {
     showNotification('Please enter a name', 'error');
     return;
   }
-  
+
+  if (displayName.length > DISPLAY_NAME_MAX_LEN) {
+    showNotification(`Name too long (max ${DISPLAY_NAME_MAX_LEN} characters)`, 'error');
+    return;
+  }
+
+  if (!DISPLAY_NAME_RX.test(displayName)) {
+    showNotification('Name contains characters that are not allowed (only letters, numbers, spaces and basic punctuation)', 'error');
+    return;
+  }
+
   try {
     // Use set with merge to create document if it doesn't exist
     await db.collection('users').doc(user.uid).set({
@@ -1234,7 +1264,8 @@ function updateWishlistUI(searchFilter = '', setFilter = '') {
       if (!isNaN(price) && price > 0) totalValue += price * wantedCount;
 
       // Cardmarket link
-      const rawCmUrl = card.cardmarket_url || '';
+      // Sanitize: only http(s) URLs survive — javascript:/data:/vbscript: become ''.
+      const rawCmUrl = safeExternalUrl(card.cardmarket_url || '');
       const cmUrl = rawCmUrl ? rawCmUrl.split('?')[0] + '?sellerCountry=7&language=1,3' : '';
       const safeCmUrl = escapeHtml(cmUrl);
 
@@ -1500,7 +1531,10 @@ async function copyWishlistForCardmarket() {
     const card = allCards.find(c => c && c.name === cardName && c.set === cardSet && c.number === cardNumber);
     const count = window.userWishlistCounts ? (window.userWishlistCounts.get(cardId) || 1) : 1;
     let url = '';
-    if (card && card.cardmarket_url) url = String(card.cardmarket_url).split('?')[0];
+    if (card) {
+        const safeCm = safeExternalUrl(card.cardmarket_url || '');
+        if (safeCm) url = safeCm.split('?')[0];
+    }
     const disambiguation = (cardText && cardText[`${cardSet}|${cardNumber}`]) || '';
     items.push({ count, name: cardName, set: cardSet || '', number: cardNumber || '', url, disambiguation });
   });
@@ -2108,7 +2142,8 @@ function updateDecksUI() {
         const priceDisplay = eurPrice || '0,00 €';
         const safePriceDisplayHtml = escapeHtml(priceDisplay);
         const priceBackground = eurPrice ? 'linear-gradient(135deg, #ff6b35 0%, #ff8c42 100%)' : 'linear-gradient(135deg, #777 0%, #999 100%)';
-        const cardmarketUrl = card.cardmarket_url || '';
+        // Sanitize before embedding into HTML/JS — javascript: URLs become '' here.
+        const cardmarketUrl = safeExternalUrl(card.cardmarket_url || '');
         const safeCardmarketUrlJs = escapeJsSingleQuoted(cardmarketUrl);
         const safeCardIdJs = escapeJsSingleQuoted(cardId);
         const safeDeckKeyJs = escapeJsSingleQuoted(card.deck_key || `${cardName} (${setCode} ${setNumber})`);
@@ -5202,7 +5237,8 @@ function updateTradelistUI(searchFilter = '', setFilter = '') {
       const priceDisplay = (!isNaN(price) && price > 0) ? `${price.toFixed(2).replace('.', ',')} \u20ac` : 'N/A';
       if (!isNaN(price) && price > 0) totalValue += price * tradeCount;
 
-      const rawCmUrl = card.cardmarket_url || '';
+      // Sanitize: only http(s) URLs survive — javascript:/data:/vbscript: become ''.
+      const rawCmUrl = safeExternalUrl(card.cardmarket_url || '');
       const cmUrl = rawCmUrl ? rawCmUrl.split('?')[0] + '?sellerCountry=7&language=1,3' : '';
       const safeCmUrl = escapeHtml(cmUrl);
 

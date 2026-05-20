@@ -2719,7 +2719,8 @@
             const proxySetNumber = card.number || '';
             const displayType = escapeHtml(card.type || 'Unknown');
             const displayRarity = escapeHtml(card.rarity || 'Unknown');
-            const rawCardMarketUrl = card.cardmarket_url || '';
+            // Sanitize external URL — only http(s) allowed; rejects javascript:/data:/etc.
+            const rawCardMarketUrl = safeExternalUrl(card.cardmarket_url || '');
             const displayCardMarketUrl = rawCardMarketUrl ? rawCardMarketUrl.split('?')[0] + '?sellerCountry=7&language=1,3' : '#';
             
             // Create unique card ID: name|set|number (tracks SPECIFIC print, not just card name)
@@ -4120,14 +4121,16 @@
         }
 
         function openCardmarket(cardmarketUrl, cardName) {
-            if (!cardmarketUrl || cardmarketUrl.trim() === '') {
+            // Sanitize before opening — rejects javascript:/data: URLs from scraped data.
+            const safe = safeExternalUrl(cardmarketUrl);
+            if (!safe) {
                 showToast(`Cardmarket link not available for ${cardName}`, 'warning');
                 return;
             }
-            
+
             // Strip Limitless tracking params, add German seller + EN/DE language filter
-            const cleanUrl = cardmarketUrl.split('?')[0];
-            window.open(cleanUrl + '?sellerCountry=7&language=1,3', '_blank');
+            const cleanUrl = safe.split('?')[0];
+            window.open(cleanUrl + '?sellerCountry=7&language=1,3', '_blank', 'noopener,noreferrer');
         }
 
         function openLimitlessCard(setCode, setNumber) {

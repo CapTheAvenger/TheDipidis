@@ -1259,4 +1259,30 @@ function showTableSkeleton(containerOrId, opts) {
         window.dataUrl = dataUrl;
 
         // ============================================================================
+        // External URL sanitizer (wave-0 HF-2)
+        // ============================================================================
+        //
+        // Defends against javascript: / data: / vbscript: URLs slipping into <a href>
+        // or window.open() through scraped data (B-1, B-32). The cardmarket pipeline
+        // (and any future external URL source) MUST go through this before being
+        // rendered or opened — never trust upstream JSON to be http/https.
+        //
+        // Returns '' for anything that isn't an http(s) URL — callers should handle
+        // empty by either hiding the link or showing a fallback. We do NOT throw,
+        // because a bad single row shouldn't break a list render.
+        function safeExternalUrl(raw) {
+            if (typeof raw !== 'string' || raw.length === 0) return '';
+            const trimmed = raw.trim();
+            if (!trimmed) return '';
+            // Reject control characters and tab-injection inside the scheme
+            if (/[\x00-\x1f\x7f]/.test(trimmed)) return '';
+            const lower = trimmed.toLowerCase();
+            if (lower.startsWith('https://') || lower.startsWith('http://')) {
+                return trimmed;
+            }
+            return '';
+        }
+        window.safeExternalUrl = safeExternalUrl;
+
+        // ============================================================================
         // META DECK TIER LIST SYSTEM (PokemonMeta.com Style)

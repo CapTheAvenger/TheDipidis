@@ -25,6 +25,18 @@
     <link rel="apple-touch-icon" href="images/pokeball-icon.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- Wave-2 perf: preconnect to the CDNs we actually use at boot so
+         the TLS handshake overlaps with HTML parse. Each line saves
+         ~100-300ms on cold loads (DNS + TCP + TLS). crossorigin matters
+         when the resource will be fetched with credentials-mode 'omit'
+         (the default for cross-origin <script> / <link>). -->
+    <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
+    <link rel="preconnect" href="https://identitytoolkit.googleapis.com" crossorigin>
+    <link rel="dns-prefetch" href="https://accounts.google.com">
+    <link rel="dns-prefetch" href="https://apis.google.com">
     <!-- Non-blocking font load: media="print" swapped to "all" after download -->
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
     <noscript><link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet"></noscript>

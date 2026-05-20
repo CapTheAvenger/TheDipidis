@@ -134,8 +134,80 @@
     //   2) remove its <script> tag from index.html
     //   3) add installLazyStub('myFn', 'js/my-file.js', 'My Feature') here.
 
-    // L2.5 pilot: draw-simulator (~68 KB). Triggered only by the "Test
+    // L2.5 pilot: draw-simulator (~10 KB). Triggered only by the "Test
     // Draw" buttons in deck-builder / city-league / current-meta / past-meta.
     // openDrawSimulator() is the single public entry point.
     installLazyStub('openDrawSimulator', 'js/draw-simulator.js', 'Test Draw');
+
+    // L2.7: battle-journal (~120 KB). Triggered by the journal FAB,
+    // "Log Match" / "Sync Now" buttons, and the profile-tab journal-history
+    // filter dropdowns. firebase-globals.js calls flushBattleJournalOutbox
+    // from the auth-state callback after user-login; that resolves to the
+    // stub here at runtime since the stub IS a function (lazy-load fires
+    // on first call).
+    installLazyStub('openBattleJournalSheet', 'js/battle-journal.js', 'Battle Journal');
+    installLazyStub('flushBattleJournalOutbox', 'js/battle-journal.js', 'Battle Journal');
+    installLazyStub('renderJournalHistory', 'js/battle-journal.js', 'Battle Journal');
+    installLazyStub('getBattleJournalWinRates', 'js/battle-journal.js', 'Battle Journal');
+
+    // L2.7: meta-binder + custom-binder (~110 KB + ~30 KB). They share
+    // `window._mbShared` (set by meta-binder, used by custom-binder), so they
+    // MUST load together. Triggering either binder fetches both files; the
+    // lazy-loader's idempotent cache ensures each is only fetched once.
+    function lazyBinder(globalFnName) {
+        // Both files in parallel; the cached loadScript() promises means a
+        // re-call from the second stub doesn't double-fetch.
+        const url = asVersioned('js/meta-binder.js');
+        const url2 = asVersioned('js/custom-binder.js');
+        /** @type {any} */ const w = window;
+        const stub = function (/** @type {any[]} */ ...args) {
+            Promise.all([loadScript(url), loadScript(url2)])
+                .then(function () {
+                    const real = w[globalFnName];
+                    if (typeof real === 'function' && real !== stub) {
+                        try { real.apply(null, args); }
+                        catch (err) { console.error('[lazy] ' + globalFnName + ' threw:', err); }
+                    } else {
+                        console.warn('[lazy] binder loaded but did not register ' + globalFnName);
+                    }
+                })
+                .catch(function (err) {
+                    console.error('[lazy]', err);
+                    if (typeof w.showToast === 'function') {
+                        w.showToast('Failed to load Binder — please try again.', 'error');
+                    }
+                });
+        };
+        w[globalFnName] = stub;
+    }
+    // meta-binder exports
+    lazyBinder('buildMetaBinder');
+    lazyBinder('loadSavedMetaBinder');
+    lazyBinder('refreshMetaBinderOwnership');
+    lazyBinder('metaBinderAddMissingToWishlist');
+    lazyBinder('metaBinderSendMissingToProxy');
+    lazyBinder('metaBinderProxyNewCards');
+    lazyBinder('setMetaBinderFilter');
+    lazyBinder('setMetaBinderPrintView');
+    lazyBinder('applyComplexMetaFilter');
+    lazyBinder('openMetaBinderDroppedModal');
+    lazyBinder('closeMetaBinderDroppedModal');
+    lazyBinder('sortMetaBinder');
+    // custom-binder exports
+    lazyBinder('buildCustomBinder');
+    lazyBinder('refreshCustomBinderOwnership');
+    lazyBinder('cbAddArchetype');
+    lazyBinder('cbToggleArchetype');
+    lazyBinder('cbRemoveArchetype');
+    lazyBinder('cbToggleArchetypeDropdown');
+    lazyBinder('cbToggleMainPokemonGroup');
+    lazyBinder('cbFilterArchetypeList');
+    lazyBinder('cbSetFilter');
+    lazyBinder('cbSetPrintView');
+    lazyBinder('cbApplyFilter');
+    lazyBinder('cbAddMissingToWishlist');
+    lazyBinder('cbSendMissingToProxy');
+    lazyBinder('cbSaveCurrentAsPreset');
+    lazyBinder('cbLoadPreset');
+    lazyBinder('cbDeletePreset');
 })();

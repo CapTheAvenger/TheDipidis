@@ -4839,9 +4839,9 @@
     <script src="js/app-meta-call.js?v=202605192030" defer></script>
     <script src="js/meta-analysis-hub.js?v=202605192030" defer></script>
     <script src="js/app-testing-groups.js?v=202605192030" defer></script>
-    <script src="js/battle-journal.js?v=202605192030" defer></script>
-    <script src="js/meta-binder.js?v=202605192030" defer></script>
-    <script src="js/custom-binder.js?v=202605192030" defer></script>
+    <!-- battle-journal.js, meta-binder.js, custom-binder.js: removed from
+         initial load in L2.7 — lazy-loaded by js/lazy-loader.js on first
+         use. They remain in service-worker SHELL_ASSETS for offline pre-cache. -->
     <!-- draw-simulator.js removed from initial load in L2.5; lazy-loaded
          on first "Test Draw" click via js/lazy-loader.js. -->
     <script src="js/lazy-loader.js?v=202605192030" defer></script>

@@ -60,9 +60,8 @@ const BUNDLE_ORDER = [
     'app-meta-call.js',
     'meta-analysis-hub.js',
     'app-testing-groups.js',
-    'battle-journal.js',
-    'meta-binder.js',
-    'custom-binder.js',
+    // battle-journal.js, meta-binder.js, custom-binder.js: removed in L2.7
+    //   — lazy-loaded on first invocation.
     // draw-simulator.js: removed in L2.5 — lazy-loaded by js/lazy-loader.js.
     // app-calculator.js removed in L2.4 — now an ES module bundled separately.
     'lazy-loader.js',

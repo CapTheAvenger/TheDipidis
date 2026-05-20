@@ -101,9 +101,9 @@ const BUNDLE_ORDER = [
     'app-meta-call.js',
     'meta-analysis-hub.js',
     'app-testing-groups.js',
-    'battle-journal.js',
-    'meta-binder.js',
-    'custom-binder.js',
+    // battle-journal.js: removed from main bundle in L2.7 — now lazy-loaded.
+    // meta-binder.js + custom-binder.js: removed from main bundle in L2.7 —
+    // now lazy-loaded as a coupled pair (they share window._mbShared).
     // draw-simulator.js: removed from main bundle in L2.5 — now lazy-loaded
     // on first 'Test Draw' click via js/lazy-loader.js (~68 KB defer).
     // combo-worker.js: skipped — runs as Web Worker, separate context.

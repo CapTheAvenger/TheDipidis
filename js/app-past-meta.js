@@ -1070,10 +1070,10 @@
                     if (Object.keys(currentDeck).length > 0 && setCode && setNumber) {
                         // Match by set code + set number
                         for (const deckKey in currentDeck) {
-                            const match = deckKey.match(/\(([A-Z0-9]+)\s+([A-Z0-9]+)\)$/);
+                            const match = parseCardKey(deckKey);
                             if (match) {
-                                const deckSetCode = match[1];
-                                const deckSetNumber = match[2];
+                                const deckSetCode = match.setCode;
+                                const deckSetNumber = match.number;
                                 
                                 if (deckSetCode === setCode && deckSetNumber === setNumber) {
                                     deckCount = currentDeck[deckKey] || 0;

@@ -2643,10 +2643,10 @@
                 let deckCount = 0;
                 if (setCode && setNumber) {
                     for (const deckKey in currentDeck) {
-                        const match = deckKey.match(/\(([A-Z0-9]+)\s+([A-Z0-9]+)\)$/);
+                        const match = parseCardKey(deckKey);
                         if (match) {
-                            const deckSetCode = match[1];
-                            const deckSetNumber = match[2];
+                            const deckSetCode = match.setCode;
+                            const deckSetNumber = match.number;
                             if (deckSetCode === setCode && deckSetNumber === setNumber) {
                                 deckCount = currentDeck[deckKey] || 0;
                                 break;
@@ -2909,11 +2909,11 @@
                 if (Object.keys(currentDeck).length > 0 && setCode && setNumber) {
                     // Loop through all deck entries and match by set/number only
                     for (const deckKey in currentDeck) {
-                        // Extract set and number from deckKey format: "CardName (SET NUM)"
-                        const match = deckKey.match(/\(([A-Z0-9]+)\s+([A-Z0-9]+)\)$/);
+                        // Extract set and number via the canonical helper.
+                        const match = parseCardKey(deckKey);
                         if (match) {
-                            const deckSetCode = match[1];
-                            const deckSetNumber = match[2];
+                            const deckSetCode = match.setCode;
+                            const deckSetNumber = match.number;
                             
                             // Match by set code and number ONLY (ignore card name)
                             if (deckSetCode === setCode && deckSetNumber === setNumber) {
@@ -3375,12 +3375,11 @@
                 for (const [deckKey, count] of Object.entries(deck)) {
                     if (count <= 0) continue;
                     
-                    // Extract base name and original set info
-                    const baseNameMatch = deckKey.match(/^(.+?)\s*\(/);
-                    const baseName = baseNameMatch ? baseNameMatch[1] : deckKey;
-                    const setMatch = deckKey.match(/\(([A-Z0-9]+)\s+([A-Z0-9]+)\)$/);
-                    const originalSet = setMatch ? setMatch[1] : null;
-                    const originalNumber = setMatch ? setMatch[2] : null;
+                    // Extract base name + original set info via the canonical helper.
+                    const parsed = parseCardKey(deckKey);
+                    const baseName = parsed ? parsed.name : deckKey;
+                    const originalSet = parsed ? parsed.setCode : null;
+                    const originalNumber = parsed ? parsed.number : null;
                     
                     let cardData = cardDataByName[baseName];
                     if (!cardData) continue;

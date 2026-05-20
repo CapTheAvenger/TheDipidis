@@ -3015,9 +3015,9 @@
                     let deckCount = 0;
                     if (Object.keys(currentDeck).length > 0 && setCode && setNumber) {
                         for (const deckKey in currentDeck) {
-                            const match = deckKey.match(/\(([A-Z0-9]+)\s+([A-Z0-9]+)\)$/);
+                            const match = parseCardKey(deckKey);
                             if (match) {
-                                if (match[1] === setCode && match[2] === setNumber) {
+                                if (match.setCode === setCode && match.number === setNumber) {
                                     deckCount = currentDeck[deckKey] || 0;
                                     break;
                                 }
@@ -3342,8 +3342,8 @@
                     let deckCount = 0;
                     if (setCode && setNumber) {
                         for (const deckKey in currentDeck) {
-                            const match = deckKey.match(/\(([A-Z0-9]+)\s+([A-Z0-9]+)\)$/);
-                            if (match && match[1] === setCode && match[2] === setNumber) {
+                            const match = parseCardKey(deckKey);
+                            if (match && match.setCode === setCode && match.number === setNumber) {
                                 deckCount = currentDeck[deckKey] || 0;
                                 break;
                             }
@@ -3535,11 +3535,10 @@
                 for (const [deckKey, count] of Object.entries(deck)) {
                     if (count <= 0) continue;
                     
-                    const baseNameMatch = deckKey.match(/^(.+?)\s*\(/);
-                    const baseName = baseNameMatch ? baseNameMatch[1] : deckKey;
-                    const setMatch = deckKey.match(/\(([A-Z0-9]+)\s+([A-Z0-9]+)\)$/);
-                    const originalSet = setMatch ? setMatch[1] : null;
-                    const originalNumber = setMatch ? setMatch[2] : null;
+                    const parsed = parseCardKey(deckKey);
+                    const baseName = parsed ? parsed.name : deckKey;
+                    const originalSet = parsed ? parsed.setCode : null;
+                    const originalNumber = parsed ? parsed.number : null;
                     
                     let cardData = cardDataByName[baseName];
                     if (!cardData) continue;

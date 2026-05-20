@@ -64,6 +64,7 @@
     "js/modules/meta-view/controller.js",
     "js/modules/meta-view/feature-flag.js",
     "js/modules/meta-view/bootstrap.js",
+    "js/modules/meta-view/url-router.js",
     "js/app-past-meta.js",
     "js/combo-worker.js",
     "js/i18n.js",

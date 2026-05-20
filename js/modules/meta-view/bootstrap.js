@@ -19,6 +19,7 @@
 
 import { metaViewStore } from './store.js';
 import { isMetaViewV2Enabled } from './feature-flag.js';
+import { initUrlRouter } from './url-router.js';
 
 /**
  * Maps `metaViewStore.activeFormat` → legacy tab element id (LIST view).
@@ -219,6 +220,7 @@ function init() {
         reparentLegacyTabsIntoMetaView();
         reparentAnalysisTabsIntoMetaView();
         interceptSwitchTab();
+        initUrlRouter();
     }
     applyStoreStateToDom();
     // Re-render whenever the store changes.

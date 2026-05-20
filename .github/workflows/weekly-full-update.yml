@@ -169,7 +169,22 @@ jobs:
       # don't lose six successful scrapers because one had a network
       # hiccup. Each failure is surfaced as a workflow warning so the
       # Actions UI shows it clearly.
-      - name: Run scrapers
+      # Two-phase split (wave-0 HF-17, Prague-bug prevention).
+      #
+      # The previous shape ran every scraper under `set +e` and treated
+      # failures as warnings — by design, so a single Cloudflare 429 in
+      # limitless_online didn't lose six other successful scrapes. But
+      # core/prepare_card_data.py is NOT a scraper — it's the finalizer
+      # that builds the monolith CSVs the frontend ships. If it fails
+      # silently in the same loop, the commit-and-push that follows
+      # uploads stale data; that's exactly how the 2026-05-12 Prague
+      # row-loss happened.
+      #
+      # Phase A: every actual scraper, best-effort (set +e) as before.
+      # Phase B: prepare_card_data.py and threat-intel build, fail-hard
+      #          (set -e). If those break, the workflow aborts BEFORE
+      #          the version-bump + commit + push step.
+      - name: Run scrapers (best-effort)
         env:
           PYTHONPATH: ${{ github.workspace }}/backend/core
         working-directory: backend
@@ -187,11 +202,9 @@ jobs:
               "scrapers/labs_tournament_scraper.py" \
               "scrapers/online_tournament_scraper.py" \
               "scrapers/cardmarket_price_merger.py" \
-              "core/prepare_card_data.py" \
               "scrapers/archetype_icons_scraper.py" \
               "scrapers/pokemon_card_text_scraper.py" \
               "scrapers/pokemon_card_effects_scraper.py" \
-              "tools/build_threat_intel.py" \
           ; do
               echo "::group::$step"
               python "$step"
@@ -204,8 +217,27 @@ jobs:
               fi
               echo "::endgroup::"
           done
-          echo "── Summary ──"
+          echo "── Summary (scrapers) ──"
           printf '  %s\n' "${rc_summary[@]}"
+
+      - name: Finalize frontend data (fail-hard)
+        env:
+          PYTHONPATH: ${{ github.workspace }}/backend/core
+        working-directory: backend
+        run: |
+          # set -e here is the whole point: if prepare_card_data fails, the
+          # frontend chunks aren't rebuilt and the subsequent commit-and-push
+          # would ship stale or partial data. Aborting now is the safe move.
+          set -e
+          for step in \
+              "core/prepare_card_data.py" \
+              "tools/build_threat_intel.py" \
+          ; do
+              echo "::group::$step"
+              python "$step"
+              echo "::endgroup::"
+          done
+          echo "✓ Finalizer + threat-intel succeeded — safe to commit."
 
       - name: Bump version
         run: |

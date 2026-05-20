@@ -229,9 +229,25 @@ jobs:
           # we still want production stack traces in DevTools + Sentry.
           # pure_funcs lists exactly which console.* methods to drop, so
           # 'error' is preserved.
+          #
+          # --source-map (wave-0 HF-18) emits foo.js.map alongside foo.js so
+          # Sentry can map minified frames back to source. The maps are
+          # deployed publicly with the bundle — they don't leak more than
+          # the original JS would.  Phase-B will add `sentry-cli sourcemaps
+          # upload` here so Sentry serves them directly and we can mark them
+          # private; for now we ship them alongside the bundle so the
+          # error-tracking.js envelope (which already carries the release
+          # tag as of HF-18) has something to resolve against.
           TERSER_COMPRESS='drop_debugger=true,pure_funcs=[console.log,console.info,console.debug,console.warn]'
           for f in _site/js/*.js; do
-            terser "$f" --compress "$TERSER_COMPRESS" --mangle -o "${f}.min" && mv "${f}.min" "$f" || { echo "::error::Minification failed for $f"; exit 1; }
+            terser "$f" \
+              --compress "$TERSER_COMPRESS" \
+              --mangle \
+              --source-map "url='$(basename "$f").map'" \
+              -o "${f}.min" \
+              && mv "${f}.min" "$f" \
+              && mv "${f}.min.map" "${f}.map" 2>/dev/null \
+              || { echo "::error::Minification failed for $f"; exit 1; }
           done
           for f in _site/css/*.css; do
             cleancss -o "${f}.min" "$f" && mv "${f}.min" "$f" || { echo "::error::CSS minification failed for $f"; exit 1; }

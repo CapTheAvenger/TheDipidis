@@ -1157,12 +1157,18 @@
                                 <div class="current-meta-stat-value" id="currentMetaStatMatchup">-</div>
                             </div>
                         </div>
-                        <div id="currentMetaTop256Section" class="d-none current-meta-top256-section">
-                            <div class="current-meta-top256-title">Used in Top 256</div>
-                            <div id="currentMetaTop256List" class="current-meta-top256-list"></div>
-                        </div>
                     </div>
-                    
+
+                    <!-- Top 256 tournament breakdown — visible in BOTH "Quick
+                         overview" and "Cooking" view modes (intentionally NOT
+                         scoped to .cm-deep-dive-only). Populated by
+                         renderCurrentMetaTop256() when the Major Tournament
+                         Decks filter is active. -->
+                    <div id="currentMetaTop256Section" class="d-none current-meta-top256-section">
+                        <div class="current-meta-top256-title">Used in Top 256</div>
+                        <div id="currentMetaTop256List" class="current-meta-top256-list"></div>
+                    </div>
+
                     <!-- Best/Worst Matchups Section -->
                     <div id="currentMetaMatchupsSection" class="display-none mb-40 bg-light px-30 br-8 cm-deep-dive-only">
                         <h3 id="currentMetaMatchupsTitle" class="current-meta-matchups-title" data-i18n="matchup.title">Deck Matchups</h3>

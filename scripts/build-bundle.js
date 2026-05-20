@@ -89,7 +89,7 @@ const BUNDLE_ORDER = [
     'app-tier-meta.js',
     'app-city-league.js',
     'app-deck-builder.js',
-    'card-capability-engine.js',
+    // card-capability-engine.js: removed in L2.16 — ES module.
     'app-tech-lab.js',
     'app-anti-tech.js',
     'app-meta-cards.js',
@@ -102,7 +102,7 @@ const BUNDLE_ORDER = [
     // archetype-icons.js: removed in L2.11 — now an ES module under
     // js/modules/archetype-icons.js (bundled via scripts/build-modules.js).
     'app-meta-call.js',
-    'meta-analysis-hub.js',
+    // meta-analysis-hub.js: removed in L2.16 — ES module.
     'app-testing-groups.js',
     // battle-journal.js: removed from main bundle in L2.7 — now lazy-loaded.
     // meta-binder.js + custom-binder.js: removed from main bundle in L2.7 —

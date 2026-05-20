@@ -82,3 +82,8 @@ export { showAuthModal, closeAuthModal } from './auth-ui-helpers.js';
 
 // L2.15 — card data IndexedDB cache. Exposes the cardDataCache namespace.
 export { cardDataCache } from './card-data-cache.js';
+
+// L2.16 — Meta-Analysis Hub (tile-based sub-tab launcher) +
+//   Card-Capability Engine (effect-tag extraction).
+export { MetaAnalysisHub } from './meta-analysis-hub.js';
+export { CardCapabilityEngine } from './card-capability-engine.js';

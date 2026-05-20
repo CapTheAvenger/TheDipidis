@@ -1,3 +1,4 @@
+// @ts-check
 // ─────────────────────────────────────────────────────────────────────
 // Tech Lab — interactive tech-card explorer at the bottom of the
 // Deck Analysis (Global) tab. The user picks any single meta card
@@ -861,9 +862,9 @@
         // defender tags has affects_subset === 'ex_attackers'.
         await _renderNonExBucket(beatenByNonEx, targetTags.defender);
 
-        const addBeatenByBtn = document.getElementById('techLabAddBeatenByBtn');
-        const addBeatsBtn    = document.getElementById('techLabAddBeatsBtn');
-        const resetBtn       = document.getElementById('techLabResetBtn');
+        const addBeatenByBtn = /** @type {HTMLButtonElement | null} */ (document.getElementById('techLabAddBeatenByBtn'));
+        const addBeatsBtn    = /** @type {HTMLButtonElement | null} */ (document.getElementById('techLabAddBeatsBtn'));
+        const resetBtn       = /** @type {HTMLButtonElement | null} */ (document.getElementById('techLabResetBtn'));
         if (addBeatenByBtn) addBeatenByBtn.disabled = false;
         if (addBeatsBtn)    addBeatsBtn.disabled    = false;
         if (resetBtn)       resetBtn.disabled       = false;
@@ -916,7 +917,8 @@
                 <span class="tech-lab-picker-key">${safeKey}</span>
             </li>`;
         }).join('');
-        list.querySelectorAll('.tech-lab-picker-item').forEach(item => {
+        list.querySelectorAll('.tech-lab-picker-item').forEach(itemEl => {
+            const item = /** @type {HTMLElement} */ (itemEl);
             item.addEventListener('click', () => {
                 onPick({ key: item.dataset.key, name: item.dataset.name });
             });
@@ -924,11 +926,12 @@
     }
 
     function _wireTargetPicker() {
-        const input = document.getElementById('techLabTargetSearch');
+        const input = /** @type {HTMLInputElement | null} */ (document.getElementById('techLabTargetSearch'));
         const dropdown = document.getElementById('techLabTargetDropdown');
         if (!input || !dropdown) return;
         input.addEventListener('input', (e) => {
-            _renderPickerResults('techLabTargetSearch', 'techLabTargetDropdown', e.target.value, (pick) => {
+            const v = /** @type {HTMLInputElement} */ (e.target).value;
+            _renderPickerResults('techLabTargetSearch', 'techLabTargetDropdown', v, (pick) => {
                 input.value = pick.name;
                 dropdown.innerHTML = '';
                 _renderTechsFor(pick);
@@ -944,7 +947,8 @@
             }
         });
         document.addEventListener('click', (e) => {
-            if (!input.parentElement.contains(e.target)) {
+            const t = /** @type {Node | null} */ (e.target);
+            if (input.parentElement && t && !input.parentElement.contains(t)) {
                 dropdown.innerHTML = '';
             }
         });
@@ -958,7 +962,7 @@
         if (!_target) return;
         _addDirection = (direction === 'beats') ? 'beats' : 'beatenBy';
         const overlay  = document.getElementById('techLabAddOverlay');
-        const input    = document.getElementById('techLabAddSearch');
+        const input    = /** @type {HTMLInputElement | null} */ (document.getElementById('techLabAddSearch'));
         const dropdown = document.getElementById('techLabAddDropdown');
         const title    = document.getElementById('techLabAddTitle');
         const intro    = document.getElementById('techLabAddIntro');
@@ -975,11 +979,13 @@
                 ? _t('techLab.addModalIntroBeats', 'Pick a meta card that the selected target counters. It will appear in the "good against" list and persist across sessions.')
                 : _t('techLab.addModalIntro', 'Search the current meta for the card you want to register as a tech against the selected target. It will show up in the list immediately and persist across sessions.');
         }
+        if (!input || !dropdown) return;
         input.value = '';
         dropdown.innerHTML = '';
         setTimeout(() => input.focus(), 30);
         input.oninput = (e) => {
-            _renderPickerResults('techLabAddSearch', 'techLabAddDropdown', e.target.value, (pick) => {
+            const v = /** @type {HTMLInputElement} */ (e.target).value;
+            _renderPickerResults('techLabAddSearch', 'techLabAddDropdown', v, (pick) => {
                 _addMissingTech(_target.key, _addDirection, pick.name, pick.key, '');
                 closeAddMissing();
                 _renderTechsFor(_target);

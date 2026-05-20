@@ -1,3 +1,4 @@
+// @ts-check
 // ─────────────────────────────────────────────────────────────────────
 // Anti-Tech "Build vs Specific Decks" modal — 2-step wizard.
 //
@@ -59,7 +60,7 @@
     }
 
     function _readAggression() {
-        const checked = document.querySelector('input[name="antiTechAggression"]:checked');
+        const checked = /** @type {HTMLInputElement | null} */ (document.querySelector('input[name="antiTechAggression"]:checked'));
         return (checked && checked.value) || 'standard';
     }
 
@@ -151,7 +152,8 @@
                 </span>
             </button>`;
         }).join('');
-        wrap.querySelectorAll('.anti-tech-quick-pick').forEach(btn => {
+        wrap.querySelectorAll('.anti-tech-quick-pick').forEach(btnEl => {
+            const btn = /** @type {HTMLElement} */ (btnEl);
             btn.addEventListener('click', () => _toggleTarget(btn.dataset.target));
         });
     }
@@ -178,10 +180,11 @@
             const safe = String(name).replace(/"/g, '&quot;');
             return `<button type="button" class="anti-tech-suggestion" data-target="${safe}">${name}</button>`;
         }).join('');
-        suggestionsEl.querySelectorAll('.anti-tech-suggestion').forEach(btn => {
+        suggestionsEl.querySelectorAll('.anti-tech-suggestion').forEach(btnEl => {
+            const btn = /** @type {HTMLElement} */ (btnEl);
             btn.addEventListener('click', () => {
                 _toggleTarget(btn.dataset.target);
-                const input = document.getElementById('antiTechCustomInput');
+                const input = /** @type {HTMLInputElement | null} */ (document.getElementById('antiTechCustomInput'));
                 if (input) { input.value = ''; suggestionsEl.innerHTML = ''; }
             });
         });
@@ -220,7 +223,8 @@
                 <button type="button" class="anti-tech-chip-x" data-target="${safe}" aria-label="Remove">×</button>
             </span>`;
         }).join('');
-        wrap.querySelectorAll('.anti-tech-chip-x').forEach(btn => {
+        wrap.querySelectorAll('.anti-tech-chip-x').forEach(btnEl => {
+            const btn = /** @type {HTMLElement} */ (btnEl);
             btn.addEventListener('click', (e) => {
                 e.stopPropagation();
                 _toggleTarget(btn.dataset.target);
@@ -229,7 +233,7 @@
     }
 
     function _updateContinueButton() {
-        const btn = document.getElementById('antiTechContinueBtn');
+        const btn = /** @type {HTMLButtonElement | null} */ (document.getElementById('antiTechContinueBtn'));
         if (!btn) return;
         btn.disabled = _targets.size === 0;
         const tpl = _t('antiTech.continueBtnCount', 'Continue → Pick Tech Cards ({n})');
@@ -239,10 +243,10 @@
     }
 
     function _bindInputs() {
-        const input = document.getElementById('antiTechCustomInput');
+        const input = /** @type {(HTMLInputElement & { __antiTechBound?: boolean }) | null} */ (document.getElementById('antiTechCustomInput'));
         if (input && !input.__antiTechBound) {
             input.__antiTechBound = true;
-            input.addEventListener('input', (e) => _renderSuggestions(e.target.value));
+            input.addEventListener('input', (e) => _renderSuggestions(/** @type {HTMLInputElement} */ (e.target).value));
             input.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter') {
                     e.preventDefault();
@@ -642,14 +646,16 @@
                 </span>
             </label>`;
         }).join('');
-        list.querySelectorAll('.anti-tech-card-check').forEach(box => {
+        list.querySelectorAll('.anti-tech-card-check').forEach(boxEl => {
+            const box = /** @type {HTMLInputElement} */ (boxEl);
             box.addEventListener('change', () => _toggleSuggestedCard(box.dataset.card, box.checked));
         });
         // Tap on the thumbnail opens the full-resolution single-card
         // modal so the user can read the card text without leaving the
         // wizard. Stop propagation so the surrounding <label> doesn't
         // toggle the checkbox when the user is just trying to inspect.
-        list.querySelectorAll('.anti-tech-card-thumb-wrap[data-card-img]').forEach(el => {
+        list.querySelectorAll('.anti-tech-card-thumb-wrap[data-card-img]').forEach(elNode => {
+            const el = /** @type {HTMLElement} */ (elNode);
             el.addEventListener('click', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
@@ -678,7 +684,7 @@
         }
         // Update is-selected class without re-rendering the whole list.
         document.querySelectorAll('.anti-tech-card-item').forEach(el => {
-            const cb = el.querySelector('.anti-tech-card-check');
+            const cb = /** @type {HTMLInputElement | null} */ (el.querySelector('.anti-tech-card-check'));
             if (!cb) return;
             el.classList.toggle('is-selected', cb.checked);
         });
@@ -686,7 +692,7 @@
     }
 
     function _updateBuildButton() {
-        const btn = document.getElementById('antiTechBuildBtn');
+        const btn = /** @type {HTMLButtonElement | null} */ (document.getElementById('antiTechBuildBtn'));
         if (!btn) return;
         btn.disabled = _selectedCards.size === 0;
         const tpl = _t('antiTech.buildBtnCount', 'Build with {n} cards');
@@ -727,11 +733,11 @@
         modal.classList.add('show');
         _showStep(1);
 
-        const input = document.getElementById('antiTechCustomInput');
+        const input = /** @type {HTMLInputElement | null} */ (document.getElementById('antiTechCustomInput'));
         if (input) input.value = '';
         const suggestions = document.getElementById('antiTechSuggestions');
         if (suggestions) suggestions.innerHTML = '';
-        const standard = document.querySelector('input[name="antiTechAggression"][value="standard"]');
+        const standard = /** @type {HTMLInputElement | null} */ (document.querySelector('input[name="antiTechAggression"][value="standard"]'));
         if (standard) standard.checked = true;
 
         _populateQuickPicks();

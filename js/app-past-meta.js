@@ -1,3 +1,4 @@
+// @ts-check
 // app-past-meta.js — extracted from app.js
 // Part of Hausi's Pokemon TCG Analysis
 
@@ -266,7 +267,7 @@
             window._pastMetaLoadedChunks = new Set();
 
             // Populate Format Filter from manifest meta_keys (no full data load yet)
-            const formatSelect = document.getElementById('pastMetaFormatFilter');
+            const formatSelect = /** @type {HTMLSelectElement | null} */ (document.getElementById('pastMetaFormatFilter'));
             resetSelectWithPlaceholder(formatSelect, '-- All Formats --', 'all');
             let defaultFormat = 'all';
 
@@ -335,7 +336,7 @@
             }
             
             // Populate Tournament Filter (will be updated dynamically)
-            const tournamentSelect = document.getElementById('pastMetaTournamentFilter');
+            const tournamentSelect = /** @type {HTMLSelectElement | null} */ (document.getElementById('pastMetaTournamentFilter'));
             
             // Setup event listeners - Format filter triggers lazy chunk load + update
             formatSelect.addEventListener('change', async () => {
@@ -568,8 +569,8 @@
         }
         
         function updatePastMetaTournamentFilter() {
-            const formatFilter = document.getElementById('pastMetaFormatFilter').value;
-            const tournamentSelect = document.getElementById('pastMetaTournamentFilter');
+            const formatFilter = (dom.select('pastMetaFormatFilter')?.value || '');
+            const tournamentSelect = /** @type {HTMLSelectElement | null} */ (document.getElementById('pastMetaTournamentFilter'));
             const previousSelection = tournamentSelect ? tournamentSelect.value : 'all';
             
             // Filter decks by selected format to get relevant tournaments
@@ -612,9 +613,9 @@
         }
         
         function updatePastMetaDeckList() {
-            const formatFilter = document.getElementById('pastMetaFormatFilter').value;
-            const tournamentFilter = document.getElementById('pastMetaTournamentFilter').value;
-            const deckSelect = document.getElementById('pastMetaDeckSelect');
+            const formatFilter = (dom.select('pastMetaFormatFilter')?.value || '');
+            const tournamentFilter = (dom.select('pastMetaTournamentFilter')?.value || '');
+            const deckSelect = /** @type {HTMLSelectElement | null} */ (document.getElementById('pastMetaDeckSelect'));
             const previousSelection = deckSelect ? deckSelect.value : '';
             
             // Filter decks
@@ -685,7 +686,7 @@
         }
         
         function onPastMetaDeckSelect() {
-            const selectedArchetype = document.getElementById('pastMetaDeckSelect').value;
+            const selectedArchetype = (dom.select('pastMetaDeckSelect')?.value || '');
             
             if (!selectedArchetype) {
                 // Hide stats and cards
@@ -708,8 +709,8 @@
         async function _loadPastMetaDeckCards(selectedArchetype) {
           try {
             
-            const formatFilter = document.getElementById('pastMetaFormatFilter').value;
-            const tournamentFilter = document.getElementById('pastMetaTournamentFilter').value;
+            const formatFilter = (dom.select('pastMetaFormatFilter')?.value || '');
+            const tournamentFilter = (dom.select('pastMetaTournamentFilter')?.value || '');
             
             // Find all decks with matching archetype (respecting current filters)
             const matchingDecks = pastMetaDecks.filter(deck => {
@@ -826,7 +827,7 @@
                 return;
             }
             
-            const filterValue = document.getElementById('pastMetaFilterSelect').value;
+            const filterValue = (dom.select('pastMetaFilterSelect')?.value || '');
 
             // Apply share-threshold where share data exists, and include top Ace Specs by filter level.
             pastMetaFilteredCards = applyShareFilterWithAceSpecBoost(pastMetaCurrentCards, filterValue);
@@ -841,7 +842,7 @@
                 resetDeckOverviewCounts('pastMetaCardCount', 'pastMetaCardCountSummary', '0 Cards', '/ 0 Total');
                 const gridContainer = document.getElementById('pastMetaDeckGrid');
                 if (gridContainer) {
-                    const selectedArchetype = String(document.getElementById('pastMetaDeckSelect')?.value || '').trim();
+                    const selectedArchetype = String(dom.select('pastMetaDeckSelect')?.value || '').trim();
                     if (!selectedArchetype) {
                         renderNoDeckSelectedState('pastMetaDeckGrid', 'Bitte waehle ein Deck aus dem Dropdown, um die Karten zu laden');
                     } else {
@@ -851,7 +852,7 @@
                 return;
             }
             
-            const searchTerm = document.getElementById('pastMetaOverviewSearch').value.toLowerCase();
+            const searchTerm = (dom.input('pastMetaOverviewSearch')?.value || '').toLowerCase();
             
             // Apply search filter
             let cardsToShow = pastMetaFilteredCards.filter(card => {
@@ -1185,7 +1186,7 @@
         }
         
         function filterPastMetaOverviewCards() {
-            const searchInput = document.getElementById('pastMetaOverviewSearch');
+            const searchInput = /** @type {HTMLInputElement | null} */ (document.getElementById('pastMetaOverviewSearch'));
             if (!searchInput) return;
             
             const searchTerm = searchInput.value.toLowerCase().trim();

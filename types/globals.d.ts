@@ -308,6 +308,7 @@ interface Window {
     _pastMetaSetOrderMap?: any;
     _pastMetaTournamentsByDate?: any;
     _pastMetaRenderGen?: number;
+    pastMetaOverviewCardTypeFilter?: string;
 
     // Meta-matchup data
     currentMetaMatchupData?: any;
@@ -315,7 +316,7 @@ interface Window {
 
     // Tier-meta + filter helpers
     filterTierDeckCards?: (...args: any[]) => any;
-    showSingleCard?: (cardId?: string) => any;
+    showSingleCard?: (...args: any[]) => any;
 
     // Cards / Card-DB cross-module helpers
     cardsBySetNumberMap?: any;
@@ -340,8 +341,8 @@ declare function fixMojibake(s: string): string;
 declare function getBestCardImage(...args: any[]): any;
 declare function getCanonicalCardRecord(...args: any[]): any;
 declare function getCardByNameFromIndex(...args: any[]): any;
-declare function getCardType(card: any): string;
-declare function getDisplayCardName(card: any): string;
+declare function getCardType(cardOrName: any, setCode?: string, setNumber?: string): string;
+declare function getDisplayCardName(cardOrName: any, setCode?: string, setNumber?: string): string;
 declare function getEmptyStateBoxHtml(opts?: any): string;
 declare function getInternationalPrintsForCard(...args: any[]): any[];
 declare function getNameWarningHtml(...args: any[]): string;
@@ -355,6 +356,31 @@ declare function mapSetCodeToMetaFormat(code: string): string;
 declare function normalizeCardName(name: string): string;
 declare function parseCSV(text: string, delimiter?: string): any[];
 declare function parseJapaneseDate(s: string): string;
+declare function showTableSkeleton(...args: any[]): void;
+declare function resetDeckOverviewCounts(...args: any[]): void;
+declare function renderNoDeckSelectedState(...args: any[]): void;
+declare function sortCardsByType(...args: any[]): any[];
+declare let globalRarityPreference: string;
+declare let _pastMetaRenderGen: number;
+declare let pastMetaOverviewCardTypeFilter: string;
+declare function renderTechSlotsUI(...args: any[]): void;
+
+// dom-helpers.js — typed DOM-element getters (Wave-1 L2.2d).
+declare const dom: {
+    el(id: string): HTMLElement | null;
+    input(id: string): HTMLInputElement | null;
+    select(id: string): HTMLSelectElement | null;
+    textarea(id: string): HTMLTextAreaElement | null;
+    button(id: string): HTMLButtonElement | null;
+    queryAs<T extends HTMLElement>(root: ParentNode, selector: string, Ctor?: new () => T): T | null;
+    queryInput(root: ParentNode, selector: string): HTMLInputElement | null;
+    querySelect(root: ParentNode, selector: string): HTMLSelectElement | null;
+    asHTML(e: Element): HTMLElement;
+};
+
+interface Window {
+    dom?: typeof dom;
+}
 
 declare function devLog(...args: any[]): void;
 declare function t(key: string, fallback?: string): string;

@@ -67,6 +67,9 @@ const OUT_MAP = path.join(OUT_DIR, 'app.bundle.js.map');
 // absent. Order within the bundle preserves dependency order: utils → i18n →
 // firebase glue → data-cache helpers → core → feature modules → late helpers.)
 const BUNDLE_ORDER = [
+    // dom-helpers.js first — exposes window.dom early so subsequent files
+    // can pick it up without explicit ordering. Stateless module.
+    'dom-helpers.js',
     'app-utils.js',
     'i18n.js',
     // firebase-credentials.js is CI-injected; bundle assumes the var

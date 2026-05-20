@@ -825,9 +825,9 @@ const BASE_PATH = './data/';
                         const copies = parseProxyCount(count, 0);
                         if (copies <= 0) return;
 
-                        const match = deckKey.match(/^(.+?)\s+\(([A-Z0-9]+)\s+([A-Z0-9]+)\)$/);
+                        const match = parseCardKey(deckKey);
                         if (match) {
-                            addCardToProxyInternal(match[1], match[2], match[3], copies, { suppressToast: true, suppressRender: true, suppressPersist: true });
+                            addCardToProxyInternal(match.name, match.setCode, match.number, copies, { suppressToast: true, suppressRender: true, suppressPersist: true });
                         } else {
                             addCardToProxyInternal(deckKey, '', '', copies, { suppressToast: true, suppressRender: true, suppressPersist: true });
                         }

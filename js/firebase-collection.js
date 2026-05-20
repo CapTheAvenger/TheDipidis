@@ -2817,15 +2817,15 @@ function copyMyDeck(deckIndex) {
     if (!count || count <= 0) continue;
 
     // Parse "CardName (SET NUMBER)" or just "CardName"
-    const setMatch = deckKey.match(/^(.+?)\s+\(([A-Z0-9]+)\s+([A-Z0-9]+)\)$/);
+    const setMatch = parseCardKey(deckKey);
     let cardName = deckKey;
     let setCode = '';
     let setNumber = '';
 
     if (setMatch) {
-      cardName = setMatch[1];
-      setCode = setMatch[2];
-      setNumber = setMatch[3];
+      cardName = setMatch.name;
+      setCode = setMatch.setCode;
+      setNumber = setMatch.number;
     } else {
       // Fallback: look up set info from database
       const cardData = window.allCardsDatabase && window.allCardsDatabase.find(c => c.name === cardName);
@@ -2888,10 +2888,10 @@ function copyDeckAndOpenLimitless(deckIndex) {
 
   for (const [deckKey, count] of Object.entries(deck.cards)) {
     if (!count || count <= 0) continue;
-    const setMatch = deckKey.match(/^(.+?)\s+\(([A-Z0-9]+)\s+([A-Z0-9]+)\)$/);
+    const setMatch = parseCardKey(deckKey);
     let cardName = deckKey, setCode = '', setNumber = '';
     if (setMatch) {
-      cardName = setMatch[1]; setCode = setMatch[2]; setNumber = setMatch[3];
+      cardName = setMatch.name; setCode = setMatch.setCode; setNumber = setMatch.number;
     } else {
       const cardData = window.allCardsDatabase && window.allCardsDatabase.find(c => c.name === cardName);
       if (cardData) { setCode = cardData.set || ''; setNumber = cardData.number || ''; }
@@ -4417,9 +4417,9 @@ function _gatherDeckCardsForProxy(deck, missingOnly) {
         // Parse "Card Name (SET NUMBER)" — same format used by every
         // other deck consumer. Falls back to bare-name when the deck
         // was saved before exact-print tracking landed.
-        const m = deckKey.match(/^(.+?)\s+\(([A-Z0-9-]+)\s+([A-Z0-9-]+)\)$/i);
+        const m = parseCardKey(deckKey);
         let name = deckKey, setCode = '', number = '';
-        if (m) { name = m[1]; setCode = m[2]; number = m[3]; }
+        if (m) { name = m.name; setCode = m.setCode; number = m.number; }
 
         let copies = need;
         if (missingOnly) {

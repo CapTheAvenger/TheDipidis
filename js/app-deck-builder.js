@@ -1234,10 +1234,10 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 for (const [deckKey, count] of Object.entries(deck)) {
                     if (!count || count <= 0) continue;
                     let cardData = null;
-                    const setMatch = deckKey.match(/^(.+?)\s+\(([A-Z0-9-]+)\s+([A-Z0-9-]+)\)$/);
+                    const setMatch = parseCardKey(deckKey);
                     if (setMatch) {
-                        const key = `${setMatch[2]}-${setMatch[3]}`;
-                        cardData = getIndexedCardBySetNumber(setMatch[2], setMatch[3]);
+                        const key = `${setMatch.setCode}-${setMatch.number}`;
+                        cardData = getIndexedCardBySetNumber(setMatch.setCode, setMatch.number);
                         if (!cardData && cardsBySetNumberMap) cardData = cardsBySetNumberMap[key] || null;
                     } else {
                         cardData = (cardIndexMap && cardIndexMap.get(deckKey)) || null;

@@ -168,6 +168,12 @@ jobs:
       - name: Install npm tools
         run: npm install -g terser clean-css-cli html-minifier-terser
 
+      - name: Install local devDependencies
+        # Needed for the build step below: scripts/build-modules.js requires
+        # esbuild from node_modules. (The legacy concat-bundler had no deps,
+        # so this job never needed a local install before L2.3.)
+        run: npm ci --no-audit --no-fund
+
       - name: Validate JS syntax
         run: |
           shopt -s nullglob

@@ -104,10 +104,15 @@ const BUNDLE_ORDER = [
     'battle-journal.js',
     'meta-binder.js',
     'custom-binder.js',
-    'draw-simulator.js',
+    // draw-simulator.js: removed from main bundle in L2.5 — now lazy-loaded
+    // on first 'Test Draw' click via js/lazy-loader.js (~68 KB defer).
     // combo-worker.js: skipped — runs as Web Worker, separate context.
     // app-calculator.js: removed in L2.4 — now an ES module under
     // js/modules/app-calculator.js, bundled by scripts/build-modules.js.
+
+    // lazy-loader.js MUST be last: it registers stubs on window that
+    // depend on the rest of the bundle (e.g. showToast for error UI).
+    'lazy-loader.js',
 ];
 
 // ----------------------------------------------------------------------------

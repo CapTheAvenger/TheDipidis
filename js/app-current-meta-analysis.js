@@ -1614,40 +1614,45 @@
             }
             const tourData = window.currentMetaTournamentCardsData || [];
 
-            // Collect unique tournament entries for this archetype.
+            // Count decks per tournament for this archetype.
             //
-            // tournament_cards_data_cards.csv stores ONE row per
-            // (tournament_id, price-tagged-archetype, card) — each
-            // distinct price tag in the archetype field
-            // (e.g. "Cynthia's Garchomp27.91$22.10€" vs
-            //       "Cynthia's Garchomp33.40$24.89€") is a separate
-            // deck snapshot. The legacy `total_decks_in_archetype`
-            // field is *per-snapshot* (always 1 or 2) and cannot be
-            // used as a deck count — using max() of it produced the
-            // user-flagged "2× Used in Top 256" bug for Cynthia at
-            // Prague where the actual snapshot count was 16. Solution:
-            // count distinct raw archetype labels per tournament.
+            // The CSV stores ONE row per (tournament_id, archetype-variant,
+            // card). `total_decks_in_archetype` (the count of decks for that
+            // variant in that tournament's top-256 cut) is CONSTANT across
+            // every row sharing the same (variant, tournament). The current
+            // scraper output emits ONE archetype-variant per archetype per
+            // tournament (no price-tag suffixes), so total_decks_in_archetype
+            // is already the correct deck-count for the archetype.
+            //
+            // Historical note: legacy scraper output (pre-2025) split each
+            // archetype into N price-tagged variants (e.g. "Cynthia's
+            // Garchomp27.91$" vs "Cynthia's Garchomp33.40$"), each with its
+            // own total_decks_in_archetype value. To stay correct against
+            // that historical shape, we SUM total_decks_in_archetype across
+            // variants per tournament, picking the value from one row per
+            // variant. New format = 1 variant per tournament = sum = the
+            // single value (right). Old format = N variants summed (also
+            // right). Both shapes produce the correct deck count.
             const tourMap = new Map();
+            const seenVariant = new Set();
             tourData.forEach(row => {
                 const rowArchetype = normalizeCurrentMetaTournamentArchetypeName(row.archetype);
                 if (!rowArchetype || rowArchetype.toLowerCase() !== archetype.toLowerCase()) return;
                 const key = row.tournament_name || String(row.tournament_id);
-                // Use the RAW archetype field (with price-tag suffix)
-                // as the snapshot identifier. Fallback to deck_id when
-                // present (older sources that don't price-tag).
-                const snapshotKey = String(row.archetype || row.deck_id || row.tournament_id || '');
+                const variantKey = String(row.archetype || row.deck_id || '') + '|' + String(row.tournament_id || '');
+                if (seenVariant.has(variantKey)) return; // already counted this variant
+                seenVariant.add(variantKey);
+
                 if (!tourMap.has(key)) {
                     tourMap.set(key, {
                         name: row.tournament_name || key,
                         date: row.tournament_date || '',
-                        snapshots: new Set(),
+                        count: 0,
                     });
                 }
-                tourMap.get(key).snapshots.add(snapshotKey);
+                const deckCount = parseInt(row.total_decks_in_archetype, 10) || 0;
+                tourMap.get(key).count += deckCount;
             });
-            // Materialize the count from snapshot-set size so existing
-            // render code (which expects entry.count) still works.
-            tourMap.forEach(entry => { entry.count = entry.snapshots.size; });
 
             if (tourMap.size === 0) {
                 section.classList.add('d-none');

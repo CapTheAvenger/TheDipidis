@@ -1896,14 +1896,17 @@ const BASE_PATH = './data/';
         }
         
 
-        // Async CSV fetch and parse using PapaParse with Web Worker
+        // Async CSV fetch and parse using PapaParse with Web Worker (B-12 hotfix)
+        // worker:true parses off the main thread — for the 40 MB city-league CSV
+        // this removes an ~800-1500 ms main-thread freeze that was killing INP
+        // and blocking the City League tab from becoming interactive.
         async function fetchAndParseCSV(url, delimiter = ';') {
             return new Promise((resolve, reject) => {
                 Papa.parse(url, {
                     download: true,
                     header: true,
                     delimiter: delimiter,
-                    worker: false,
+                    worker: true,
                     skipEmptyLines: true,
                     complete: function(results) {
                         // Optionally fix encoding for card_name/full_card_name

@@ -340,6 +340,12 @@ async function toggleWishlist(cardId) {
 async function saveCurrentDeckToProfile(source) {
   const user = auth.currentUser;
   if (!user) {
+    // B-48 hotfix: remember the source so the save retries automatically
+    // after successful sign-in. Previously the user clicked Save, the auth
+    // modal popped up, they signed in, the modal closed — and their deck
+    // was NOT saved because this function had already returned. They had
+    // to spot the Save button and click it again.
+    window._pendingDeckSaveSource = source;
     showNotification('Please sign in to save decks', 'error');
     showAuthModal('signin');
     return;
@@ -408,13 +414,13 @@ async function saveCurrentDeckToProfile(source) {
     };
     
     // Save to Firestore
-    await db.collection('users').doc(user.uid)
+    const newDocRef = await db.collection('users').doc(user.uid)
       .collection('decks').add(deckData);
-    
+
     showNotification(`Deck "${trimmedName}" saved successfully!`, 'success');
-    
-    // Reload user decks
-    await loadUserDecks(user.uid);
+
+    // Local patch instead of full refetch (B-3) — avoids N extra reads/click.
+    patchUserDecksLocal('add', { ...deckData, id: newDocRef.id, createdAtMs: Date.now() });
   } catch (error) {
     console.error('Error saving deck:', error);
     showNotification('Error saving deck', 'error');
@@ -500,6 +506,8 @@ async function saveDeck(deckData) {
         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
       });
       showNotification('Deck updated!', 'success');
+      // Local patch instead of full refetch (B-3).
+      patchUserDecksLocal('update', { ...deckData });
     } else {
       // Create new deck
       const newDeck = {
@@ -510,10 +518,9 @@ async function saveDeck(deckData) {
       const docRef = await deckRef.add(newDeck);
       deckData.id = docRef.id;
       showNotification('Deck saved!', 'success');
+      // Local patch instead of full refetch (B-3).
+      patchUserDecksLocal('add', { ...deckData, createdAtMs: Date.now() });
     }
-    
-    // Reload decks
-    await loadUserDecks(user.uid);
   } catch (error) {
     console.error('Error saving deck:', error);
     showNotification('Error saving deck', 'error');
@@ -530,9 +537,10 @@ async function deleteDeck(deckId) {
   try {
     await db.collection('users').doc(user.uid)
       .collection('decks').doc(deckId).delete();
-    
+
     showNotification('Deck deleted', 'success');
-    await loadUserDecks(user.uid);
+    // Local patch instead of full refetch (B-3).
+    patchUserDecksLocal('delete', deckId);
   } catch (error) {
     console.error('Error deleting deck:', error);
     showNotification('Error deleting deck', 'error');
@@ -4352,9 +4360,10 @@ async function duplicateDeck(deckIndex) {
     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
   };
   try {
-    await db.collection('users').doc(user.uid).collection('decks').add(newDeck);
+    const dupRef = await db.collection('users').doc(user.uid).collection('decks').add(newDeck);
     showToast(getLang() === 'de' ? `Deck dupliziert als "${newDeck.name}"` : `Deck duplicated as "${newDeck.name}"`, 'success');
-    await loadUserDecks(user.uid);
+    // Local patch instead of full refetch (B-3).
+    patchUserDecksLocal('add', { ...newDeck, id: dupRef.id, createdAtMs: Date.now() });
   } catch (err) {
     console.error('Error duplicating deck:', err);
     showToast(getLang() === 'de' ? 'Fehler beim Duplizieren' : 'Error duplicating deck', 'error');

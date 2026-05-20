@@ -295,10 +295,11 @@
                     return;
                 }
 
-                // Hintergrund-Laden der grossen Analysis-CSV (non-blocking fuer FCP)
-                window._cityLeagueAnalysisPromise = fetch(dataUrl(analysisUrl))
-                    .then(r => r.ok ? r.text() : null)
-                    .then(text => text ? parseCSV(text) : [])
+                // Hintergrund-Laden der grossen Analysis-CSV (non-blocking fuer FCP).
+                // B-12 hotfix: use fetchAndParseCSV which now runs Papa.parse with
+                // worker:true — moves the ~800-1500 ms parse off the main thread
+                // so the City League tab stays interactive during load.
+                window._cityLeagueAnalysisPromise = fetchAndParseCSV(dataUrl(analysisUrl))
                     .then(data => {
                         window.cityLeagueAnalysisData = data;
                         devLog('Background: analysis data loaded,', data.length, 'rows');

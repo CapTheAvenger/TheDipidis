@@ -68,6 +68,18 @@ function onUserSignedIn(user) {
   } else if (typeof renderBattleJournalSummary === 'function') {
     renderBattleJournalSummary();
   }
+
+  // B-48 hotfix: if the user clicked "Save Deck" before signing in,
+  // saveCurrentDeckToProfile stored the source. Retry it now that they're
+  // authenticated, so the user doesn't have to find the Save button again
+  // after the auth modal closes.
+  if (window._pendingDeckSaveSource && typeof saveCurrentDeckToProfile === 'function') {
+    const pendingSource = window._pendingDeckSaveSource;
+    window._pendingDeckSaveSource = null;
+    // Small defer so loadUserDecks has had a tick to mutate window.userDecks,
+    // avoiding a duplicate-name overwrite warning on the same deck.
+    setTimeout(() => { saveCurrentDeckToProfile(pendingSource); }, 50);
+  }
 }
 
 function onUserSignedOut() {
@@ -420,17 +432,70 @@ async function loadUserDecks(userId) {
     const snapshot = await window.db.collection('users').doc(userId).collection('decks').get();
     window.userDecks = [];
     snapshot.forEach(doc => window.userDecks.push({ id: doc.id, ...doc.data({ serverTimestamps: 'estimate' }) }));
-    // Sort newest first: prefer createdAt (Firestore Timestamp), fallback to createdAtMs
-    window.userDecks.sort((a, b) => {
-      const tsA = a.createdAt && a.createdAt.toMillis ? a.createdAt.toMillis() : (a.createdAtMs || 0);
-      const tsB = b.createdAt && b.createdAt.toMillis ? b.createdAt.toMillis() : (b.createdAtMs || 0);
-      return tsB - tsA;
-    });
+    _sortUserDecksInPlace();
     if (typeof updateDecksUI === 'function') updateDecksUI();
   } catch (error) {
     console.error('Error loading decks:', error);
   }
 }
+
+// Same sort order as loadUserDecks — extracted so patchUserDecksLocal reuses it.
+function _sortUserDecksInPlace() {
+  if (!Array.isArray(window.userDecks)) return;
+  window.userDecks.sort((a, b) => {
+    const tsA = a.createdAt && a.createdAt.toMillis ? a.createdAt.toMillis() : (a.createdAtMs || 0);
+    const tsB = b.createdAt && b.createdAt.toMillis ? b.createdAt.toMillis() : (b.createdAtMs || 0);
+    return tsB - tsA;
+  });
+}
+
+// Local-only patch of window.userDecks (B-3 hotfix).
+//
+// Replaces the previous "await loadUserDecks(user.uid)" pattern which did a
+// full collection.get() round-trip after every save/delete/duplicate — that
+// was N reads per click, where N is the user's deck count. Power users with
+// 60+ decks burned ~30% of the daily Firestore Free Tier quota in a single
+// save-rename-save session.
+//
+// Operations:
+//   add    — payload is the deck object including {id, name, cards, ...}
+//   update — payload is the deck object (id used to find & replace)
+//   delete — payload is the deck id (string)
+//
+// The local representation diverges from server temporarily on the
+// updatedAt / createdAt Timestamp fields (we don't have the server-resolved
+// value until next read), but every other field is identical. Calling code
+// MUST pass a sane local createdAtMs for new decks so the sort stays stable.
+function patchUserDecksLocal(operation, payload) {
+  if (!Array.isArray(window.userDecks)) window.userDecks = [];
+  switch (operation) {
+    case 'add': {
+      if (!payload || !payload.id) return;
+      const localCreatedAtMs = payload.createdAtMs || Date.now();
+      window.userDecks.push({ ...payload, createdAtMs: localCreatedAtMs });
+      break;
+    }
+    case 'update': {
+      if (!payload || !payload.id) return;
+      const idx = window.userDecks.findIndex(d => d.id === payload.id);
+      if (idx >= 0) {
+        window.userDecks[idx] = { ...window.userDecks[idx], ...payload };
+      }
+      break;
+    }
+    case 'delete': {
+      const id = typeof payload === 'string' ? payload : (payload && payload.id);
+      if (!id) return;
+      window.userDecks = window.userDecks.filter(d => d.id !== id);
+      break;
+    }
+    default:
+      return;
+  }
+  _sortUserDecksInPlace();
+  if (typeof updateDecksUI === 'function') updateDecksUI();
+}
+window.patchUserDecksLocal = patchUserDecksLocal;
 
 function clearUserData() {
   window.userProfile          = null;
@@ -441,6 +506,8 @@ function clearUserData() {
   window.userWishlistMaxPrices = new Map();
   window.userDecks            = [];
   window.deckFolders          = [];
+  // Drop any pending B-48 retry — user signed out, don't auto-save next login.
+  window._pendingDeckSaveSource = null;
 }
 
 function syncAuthUiFromPendingOrCurrentState() {

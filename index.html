@@ -120,6 +120,10 @@
     <link rel="stylesheet" href="css/ux-step2.css?v=202605192030" type="text/css" media="print" onload="this.media='all'">
     <link rel="stylesheet" href="css/ux-step3.css?v=202605192030" type="text/css" media="print" onload="this.media='all'">
     <link rel="stylesheet" href="css/ux-step4.css?v=202605192030" type="text/css" media="print" onload="this.media='all'">
+    <!-- Wave-2 IA-Refactor (5 Meta-Tabs → 1). Loaded eagerly because the
+         segmented-control + ia-v1/v2 visibility rules need to be ready
+         before the bootstrap fires on DOMContentLoaded. -->
+    <link rel="stylesheet" href="css/meta-view.css?v=202605192030" type="text/css">
     <!-- Mobile Responsive Optimization — SCHRITT 1 (Layout Umbrüche) -->
     <link rel="stylesheet" href="css/mobile-responsive.css?v=202605192030" type="text/css">
     <!-- Escape Rope Close Buttons -->
@@ -448,19 +452,28 @@
                                 </span>
                             </button>
                             <div id="menu-submenu-meta" class="menu-submenu open" role="group" aria-label="Meta and Tier Lists">
-                                <button id="menu-btn-city-league" class="menu-item menu-subitem active" data-tab-id="city-league" onclick="switchTabAndUpdateMenu('city-league')" data-i18n="menu.cityLeague" role="menuitem">
+                                <!-- Wave-2 IA-Refactor: consolidated meta tab.
+                                     Hidden by default, shown when isMetaViewV2Enabled()
+                                     is true (toggled by js/modules/meta-view bootstrap
+                                     on DOMContentLoaded). When v2 is active the five
+                                     legacy meta sub-items below get the .ia-v1-only
+                                     class which hides them via CSS. -->
+                                <button id="menu-btn-meta-view" class="menu-item menu-subitem ia-v2-only display-none" data-tab-id="meta-view" onclick="switchTabAndUpdateMenu('meta-view')" data-i18n="menu.metaView" role="menuitem">
+                                    <span class="menu-item-label">Meta Analysis</span>
+                                </button>
+                                <button id="menu-btn-city-league" class="menu-item menu-subitem active ia-v1-only" data-tab-id="city-league" onclick="switchTabAndUpdateMenu('city-league')" data-i18n="menu.cityLeague" role="menuitem">
                                     <span class="menu-item-label">City League Meta</span>
                                 </button>
-                                <button id="menu-btn-city-league-analysis" class="menu-item menu-subitem" data-tab-id="city-league-analysis" onclick="switchTabAndUpdateMenu('city-league-analysis')" data-i18n="menu.cityLeagueAnalysis" role="menuitem">
+                                <button id="menu-btn-city-league-analysis" class="menu-item menu-subitem ia-v1-only" data-tab-id="city-league-analysis" onclick="switchTabAndUpdateMenu('city-league-analysis')" data-i18n="menu.cityLeagueAnalysis" role="menuitem">
                                     <span class="menu-item-label">Deck Analysis (Japan)</span>
                                 </button>
-                                <button id="menu-btn-current-meta" class="menu-item menu-subitem" data-tab-id="current-meta" onclick="switchTabAndUpdateMenu('current-meta')" data-i18n="menu.currentMeta" role="menuitem">
+                                <button id="menu-btn-current-meta" class="menu-item menu-subitem ia-v1-only" data-tab-id="current-meta" onclick="switchTabAndUpdateMenu('current-meta')" data-i18n="menu.currentMeta" role="menuitem">
                                     <span class="menu-item-label">Current Meta (Global)</span>
                                 </button>
-                                <button id="menu-btn-current-analysis" class="menu-item menu-subitem" data-tab-id="current-analysis" onclick="switchTabAndUpdateMenu('current-analysis')" data-i18n="menu.currentMetaAnalysis" role="menuitem">
+                                <button id="menu-btn-current-analysis" class="menu-item menu-subitem ia-v1-only" data-tab-id="current-analysis" onclick="switchTabAndUpdateMenu('current-analysis')" data-i18n="menu.currentMetaAnalysis" role="menuitem">
                                     <span class="menu-item-label">Deck Analysis (Global)</span>
                                 </button>
-                                <button id="menu-btn-past-meta" class="menu-item menu-subitem" data-tab-id="past-meta" onclick="switchTabAndUpdateMenu('past-meta')" data-i18n="menu.pastMeta" role="menuitem">
+                                <button id="menu-btn-past-meta" class="menu-item menu-subitem ia-v1-only" data-tab-id="past-meta" onclick="switchTabAndUpdateMenu('past-meta')" data-i18n="menu.pastMeta" role="menuitem">
                                     <span class="menu-item-label">Past Meta</span>
                                 </button>
                             </div>
@@ -569,6 +582,59 @@
                         <p class="meta-hub-subtitle" data-i18n="metaHub.subtitle">Choose a category to start.</p>
                     </div>
                     <div class="meta-hub-tile-grid" id="metaHubTileGrid"></div>
+                </div>
+            </div>
+
+            <!-- Wave-2 IA-Refactor: consolidated Meta Analysis tab (5 → 1).
+                 Activated only when isMetaViewV2Enabled() returns true (URL
+                 ?ia=v2 or localStorage IA_V2=1). Until then it's just an
+                 inert <div class="tab-content"> (no .active, never shown by
+                 the legacy switchTab()). When v2 is on, the bootstrap in
+                 js/modules/meta-view/bootstrap.js wires the segmented
+                 control + list/detail panels. Step 2 (this commit) ships
+                 the scaffold; step 3 renders the deck list; step 4 the
+                 detail drilldown. -->
+            <div id="meta-view" class="tab-content">
+                <div class="meta-view-header">
+                    <h2 class="meta-view-title">
+                        <span data-i18n="metaView.title">Meta Analysis</span>
+                        <button class="tab-help-btn" onclick="openTabHelp('meta-view')" title="Help" aria-label="Help for Meta Analysis" data-i18n-title="btn.helpTitle"></button>
+                    </h2>
+                    <!-- Segmented control: format switcher. Three options
+                         mirror the three legacy meta-tabs. Clicks fire
+                         metaViewSwitchFormat(format), which routes through
+                         the controller's selection-preservation logic. -->
+                    <div class="meta-view-segmented" role="tablist" aria-label="Meta format">
+                        <button type="button" class="meta-view-seg-btn meta-view-seg-active" data-format="current"
+                                role="tab" aria-selected="true" aria-controls="meta-view-list"
+                                onclick="metaViewSwitchFormat('current')" data-i18n="metaView.formatCurrent">Current Meta</button>
+                        <button type="button" class="meta-view-seg-btn" data-format="city-league"
+                                role="tab" aria-selected="false" aria-controls="meta-view-list"
+                                onclick="metaViewSwitchFormat('city-league')" data-i18n="metaView.formatCityLeague">City League</button>
+                        <button type="button" class="meta-view-seg-btn" data-format="past"
+                                role="tab" aria-selected="false" aria-controls="meta-view-list"
+                                onclick="metaViewSwitchFormat('past')" data-i18n="metaView.formatPast">Past Meta</button>
+                    </div>
+                </div>
+                <!-- List view: deck table for the active format. Filled in
+                     step 3 by delegating to the legacy renderers
+                     (renderCityLeagueTable / renderCurrentMetaTable etc.)
+                     and reparenting their output here. -->
+                <div id="meta-view-list" class="meta-view-list" role="tabpanel" aria-labelledby="meta-view">
+                    <div class="meta-view-placeholder" data-i18n="metaView.scaffoldPlaceholder">
+                        Meta Analysis (Wave-2 IA-Refactor) — scaffold ready.
+                        Deck-list rendering arrives in step 3.
+                    </div>
+                </div>
+                <!-- Detail view: drilldown for a selected deck. Hidden
+                     by default; revealed by metaViewSelectDeck() (which
+                     toggles a .meta-view-show-detail class on the tab
+                     root). Step 4 wires the legacy analysis renderers. -->
+                <div id="meta-view-detail" class="meta-view-detail display-none" role="tabpanel">
+                    <button type="button" class="meta-view-back-btn" onclick="metaViewBackToList()" data-i18n="metaView.back">
+                        ← <span data-i18n="metaView.backLabel">Back to deck list</span>
+                    </button>
+                    <div id="meta-view-detail-content"></div>
                 </div>
             </div>
 

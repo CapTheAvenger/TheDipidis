@@ -1,0 +1,142 @@
+/* meta-view.css — Wave-2 IA-Refactor consolidated Meta Analysis tab.
+ *
+ * Loaded only when the feature flag is active (body.ia-v2). The rules
+ * are scoped to .meta-view-* classes so they don't leak into the legacy
+ * city-league / current-meta / past-meta CSS during the cutover window.
+ *
+ * Mobile-first by default: the segmented control stretches to full row
+ * width on small viewports. ≥768px it sits inline with the heading.
+ */
+
+/* ============================================================ *
+ *  v1 / v2 menu-item visibility (driven by bootstrap.js's body class)
+ * ============================================================ */
+
+body.ia-v2 .ia-v1-only,
+body.ia-v1 .ia-v2-only {
+  display: none !important;
+}
+
+/* ============================================================ *
+ *  Tab content scaffold
+ * ============================================================ */
+
+#meta-view {
+  padding: 16px;
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.meta-view-header {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+@media (min-width: 768px) {
+  .meta-view-header {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.meta-view-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ============================================================ *
+ *  Segmented control (format switcher)
+ * ============================================================ */
+
+.meta-view-segmented {
+  display: inline-flex;
+  background: var(--surface-2, #f1f3f5);
+  border-radius: 10px;
+  padding: 4px;
+  width: 100%;
+  gap: 2px;
+}
+
+@media (min-width: 768px) {
+  .meta-view-segmented {
+    width: auto;
+  }
+}
+
+.meta-view-seg-btn {
+  flex: 1 1 auto;
+  padding: 8px 16px;
+  border: none;
+  background: transparent;
+  border-radius: 7px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-muted, #6c757d);
+  cursor: pointer;
+  transition: background-color 120ms ease, color 120ms ease, box-shadow 120ms ease;
+  white-space: nowrap;
+}
+
+.meta-view-seg-btn:hover {
+  color: var(--text-default, #212529);
+}
+
+.meta-view-seg-btn:focus-visible {
+  outline: 2px solid var(--accent, #4dabf7);
+  outline-offset: 2px;
+}
+
+.meta-view-seg-btn.meta-view-seg-active {
+  background: var(--surface-1, #ffffff);
+  color: var(--text-default, #212529);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+/* ============================================================ *
+ *  List / Detail panels
+ * ============================================================ */
+
+.meta-view-list,
+.meta-view-detail {
+  background: var(--surface-1, #ffffff);
+  border-radius: 12px;
+  padding: 16px;
+  min-height: 200px;
+}
+
+.meta-view-placeholder {
+  padding: 32px 16px;
+  text-align: center;
+  color: var(--text-muted, #6c757d);
+  font-style: italic;
+}
+
+.meta-view-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  border: 1px solid var(--border, #dee2e6);
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  margin-bottom: 16px;
+  color: var(--text-default, #212529);
+}
+
+.meta-view-back-btn:hover {
+  background: var(--surface-2, #f1f3f5);
+}
+
+.meta-view-back-btn:focus-visible {
+  outline: 2px solid var(--accent, #4dabf7);
+  outline-offset: 2px;
+}

@@ -111,3 +111,7 @@ export { TechLab } from './app-tech-lab.js';
 export { metaViewStore, isValidFormat } from './meta-view/store.js';
 export { switchFormat, selectDeck, backToList, setSearchFilter } from './meta-view/controller.js';
 export { isMetaViewV2Enabled, setMetaViewV2 } from './meta-view/feature-flag.js';
+// Side-effect-only import: registers a DOMContentLoaded listener that
+// applies body.ia-v2 / .ia-v1 + binds the segmented-control's active-
+// state to the store.
+import './meta-view/bootstrap.js';

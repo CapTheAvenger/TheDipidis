@@ -62,7 +62,8 @@
     "js/app-tech-lab.js",
     "js/app-past-meta.js",
     "js/combo-worker.js",
-    "js/i18n.js"
+    "js/i18n.js",
+    "js/app-testing-groups.js"
   ],
   "exclude": [
     "node_modules",

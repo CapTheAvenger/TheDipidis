@@ -106,6 +106,7 @@ interface Window {
     // Module namespaces / external integrations
     ArchetypeIcons?: any;
     MetaCall?: any;
+    TestingGroups?: any;
 
     // Common utility functions exposed by the legacy modules
     t?: (key: string, fallback?: string) => string;

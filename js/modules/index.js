@@ -102,3 +102,12 @@ export {
 // the TechLab namespace plus loadCurrentMetaRowsWithFallback used by
 // other meta-tab files.
 export { TechLab } from './app-tech-lab.js';
+
+// Wave-2 IA-Refactor — consolidated meta-analysis view (5 tabs → 1).
+// Importing here runs the side effects (window.metaViewStore /
+// metaViewSwitchFormat / metaViewSelectDeck / metaViewBackToList /
+// setMetaViewV2 / isMetaViewV2Enabled) so legacy HTML inline handlers
+// can call them without needing real ES-module imports.
+export { metaViewStore, isValidFormat } from './meta-view/store.js';
+export { switchFormat, selectDeck, backToList, setSearchFilter } from './meta-view/controller.js';
+export { isMetaViewV2Enabled, setMetaViewV2 } from './meta-view/feature-flag.js';

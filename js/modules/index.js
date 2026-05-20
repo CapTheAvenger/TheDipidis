@@ -87,3 +87,13 @@ export { cardDataCache } from './card-data-cache.js';
 //   Card-Capability Engine (effect-tag extraction).
 export { MetaAnalysisHub } from './meta-analysis-hub.js';
 export { CardCapabilityEngine } from './card-capability-engine.js';
+
+// L2.17 — Anti-Tech "Build vs Specific Decks" modal (913 LOC).
+// Five entry points called by HTML inline onclick handlers.
+export {
+    openAntiTechModal,
+    closeAntiTechModal,
+    advanceAntiTechModal,
+    backToAntiTechStep1,
+    confirmAntiTechBuild,
+} from './app-anti-tech.js';

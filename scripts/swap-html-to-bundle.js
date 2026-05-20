@@ -48,7 +48,7 @@ const BUNDLE_ORDER = [
     'app-deck-builder.js',
     // card-capability-engine.js: removed in L2.16 — ES module.
     'app-tech-lab.js',
-    'app-anti-tech.js',
+    // app-anti-tech.js: removed in L2.17 — ES module.
     'app-meta-cards.js',
     'app-current-meta.js',
     'app-past-meta.js',

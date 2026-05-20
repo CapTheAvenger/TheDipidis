@@ -58,7 +58,7 @@
     "js/app-tier-meta.js",
     "js/modules/dom-helpers.js",
     "js/lazy-loader.js",
-    "js/app-anti-tech.js",
+    "js/modules/app-anti-tech.js",
     "js/app-tech-lab.js",
     "js/app-past-meta.js",
     "js/combo-worker.js",

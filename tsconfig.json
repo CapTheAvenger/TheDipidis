@@ -44,7 +44,7 @@
     "js/firebase-config.js",
     "js/app-init.js",
     "js/tcg-showdown-link.js",
-    "js/archetype-icons.js",
+    "js/modules/archetype-icons.js",
     "js/draw-simulator.js",
     "js/meta-analysis-hub.js",
     "js/csv-cache-interceptor.js",

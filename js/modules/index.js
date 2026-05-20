@@ -50,3 +50,8 @@ export {
 // './firebase/init.js'`. No Firebase modular JS is downloaded until the
 // first caller actually invokes getFirebase().
 export { getFirebase } from './firebase/init.js';
+
+// L2.11 — archetype icons (legacy IIFE → ES module). The footer of the
+// modules bundle mirrors the export onto window.ArchetypeIcons so the
+// 30+ existing `window.ArchetypeIcons.X` call-sites keep working.
+export { ArchetypeIcons } from './archetype-icons.js';

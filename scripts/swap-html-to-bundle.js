@@ -56,7 +56,7 @@ const BUNDLE_ORDER = [
     'app-init.js',
     'app-current-meta-analysis.js',
     'app-features.js',
-    'archetype-icons.js',
+    // archetype-icons.js: removed in L2.11 — now an ES module.
     'app-meta-call.js',
     'meta-analysis-hub.js',
     'app-testing-groups.js',

@@ -1901,8 +1901,19 @@ const BASE_PATH = './data/';
         // this removes an ~800-1500 ms main-thread freeze that was killing INP
         // and blocking the City League tab from becoming interactive.
         async function fetchAndParseCSV(url, delimiter = ';') {
+            // Resolve to an ABSOLUTE URL. PapaParse with worker:true spawns
+            // a Web Worker from a Blob URL; the worker's base URL is the
+            // blob itself (not the page), so a relative URL like
+            // './data/foo.csv' would be resolved against
+            // 'blob:https://thedipidis.app/<uuid>' — which XMLHttpRequest.open
+            // rejects with "Invalid URL". Using window.location.href as the
+            // base normalises every caller's relative path to an absolute
+            // https:// URL the worker can fetch.
+            const absoluteUrl = (typeof window !== 'undefined' && window.location)
+                ? new URL(url, window.location.href).href
+                : url;
             return new Promise((resolve, reject) => {
-                Papa.parse(url, {
+                Papa.parse(absoluteUrl, {
                     download: true,
                     header: true,
                     delimiter: delimiter,

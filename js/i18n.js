@@ -34,6 +34,7 @@ const translations = {
     'menu.playtester':        'Playtester',
     'menu.profile':           'My Profile',
     'menu.howToUse':          'How to Use',
+    'menu.metaView':          'Meta Analysis',
 
     // ── Tab labels ───────────────────────────────────────────
     'tab.metaAnalysis':       'Meta & Deck Analysis',
@@ -47,6 +48,15 @@ const translations = {
     'tab.playtester':         'Playtester',
     'tab.profile':            'Profile',
     'tab.howToUse':           'How to Use',
+
+    // ── Meta View (Wave-2 IA-Refactor consolidated tab) ──────
+    'metaView.title':         'Meta Analysis',
+    'metaView.formatCurrent': 'Current Meta',
+    'metaView.formatCityLeague': 'City League',
+    'metaView.formatPast':    'Past Meta',
+    'metaView.back':          '← Back',
+    'metaView.backLabel':     'Back to deck list',
+    'metaView.scaffoldPlaceholder': 'Loading deck data…',
 
     // ── Meta & Deck Analysis Hub ─────────────────────────────
     'metaHub.title':                            'Meta & Deck Analysis',

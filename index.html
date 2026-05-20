@@ -423,7 +423,7 @@
     }
     </style>
 </head>
-<body>
+<body class="ia-v1">
     <!-- Pokémon Loading Screen + CSV Cache – MUSS als erstes laden -->
     <script src="js/pokemon-loading-screen.js"></script>
     <script src="js/csv-cache-interceptor.js"></script>
@@ -453,12 +453,13 @@
                             </button>
                             <div id="menu-submenu-meta" class="menu-submenu open" role="group" aria-label="Meta and Tier Lists">
                                 <!-- Wave-2 IA-Refactor: consolidated meta tab.
-                                     Hidden by default, shown when isMetaViewV2Enabled()
-                                     is true (toggled by js/modules/meta-view bootstrap
-                                     on DOMContentLoaded). When v2 is active the five
-                                     legacy meta sub-items below get the .ia-v1-only
-                                     class which hides them via CSS. -->
-                                <button id="menu-btn-meta-view" class="menu-item menu-subitem ia-v2-only display-none" data-tab-id="meta-view" onclick="switchTabAndUpdateMenu('meta-view')" data-i18n="menu.metaView" role="menuitem">
+                                     Visibility driven by body.ia-v1 / body.ia-v2 (the
+                                     bootstrap in js/modules/meta-view applies one of
+                                     these on DOMContentLoaded). meta-view.css hides
+                                     .ia-v2-only when v1 is active and .ia-v1-only when
+                                     v2 is. The 5 legacy meta sub-items below get the
+                                     opposite class. -->
+                                <button id="menu-btn-meta-view" class="menu-item menu-subitem ia-v2-only" data-tab-id="meta-view" onclick="switchTabAndUpdateMenu('meta-view')" data-i18n="menu.metaView" role="menuitem">
                                     <span class="menu-item-label">Meta Analysis</span>
                                 </button>
                                 <button id="menu-btn-city-league" class="menu-item menu-subitem active ia-v1-only" data-tab-id="city-league" onclick="switchTabAndUpdateMenu('city-league')" data-i18n="menu.cityLeague" role="menuitem">
@@ -574,8 +575,14 @@
                 <button class="tab-btn" onclick="switchTab('tutorial')" data-i18n="tab.howToUse">How to Use</button>
             </nav>
             
-            <!-- Meta & Deck Analysis Hub: Entry State (5 category tiles) -->
-            <div id="meta-analysis-hub" class="tab-content active">
+            <!-- Meta & Deck Analysis Hub: Entry State (5 category tiles).
+                 v1 only — the v2 consolidated #meta-view tab below replaces
+                 it. The .ia-v1-only class causes meta-view.css to hide this
+                 div whenever body.ia-v2 is active; bootstrap also intercepts
+                 switchTab('meta-analysis-hub') in v2 and redirects it to
+                 #meta-view so explicit navigation can't end up on a hidden
+                 tab. -->
+            <div id="meta-analysis-hub" class="tab-content active ia-v1-only">
                 <div class="meta-hub-container">
                     <div class="meta-hub-header">
                         <h2 data-i18n="metaHub.title">Meta &amp; Deck Analysis</h2>

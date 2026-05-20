@@ -40,6 +40,7 @@
     'menu.playtester':        'Playtester',
     'menu.profile':           'Mein Profil',
     'menu.howToUse':          'Anleitung',
+    'menu.metaView':          'Meta-Analyse',
 
     // ── Tab labels ───────────────────────────────────────────
     'tab.metaAnalysis':       'Meta & Deck-Analyse',
@@ -53,6 +54,15 @@
     'tab.playtester':         'Playtester',
     'tab.profile':            'Profil',
     'tab.howToUse':           'Anleitung',
+
+    // ── Meta View (Wave-2 IA-Refactor consolidated tab) ──────
+    'metaView.title':         'Meta-Analyse',
+    'metaView.formatCurrent': 'Aktuelles Meta',
+    'metaView.formatCityLeague': 'City League',
+    'metaView.formatPast':    'Vergangenes Meta',
+    'metaView.back':          '← Zurück',
+    'metaView.backLabel':     'Zurück zur Deckliste',
+    'metaView.scaffoldPlaceholder': 'Lade Deck-Daten…',
 
     // ── Meta & Deck Analysis Hub ─────────────────────────────
     'metaHub.title':                            'Meta & Deck-Analyse',

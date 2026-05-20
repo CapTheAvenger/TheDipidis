@@ -124,6 +124,14 @@ document.addEventListener('DOMContentLoaded', function () {
 // should land directly on that tab. Also supports friendlier aliases
 // in both languages so we can share URLs that read naturally.
 (function setupHashDeepLink() {
+    // Aliases that point to a legacy meta tab. In v2 mode these route
+    // through the consolidated #meta-view + setFormat instead of trying
+    // to activate a tab that's been reparented out of .tab-content.
+    const META_ALIASES = {
+        'city-league': 'city-league',
+        'current-meta': 'current',
+        'past-meta': 'past',
+    };
     const HASH_ALIASES = {
         'tutorial':          'tutorial',
         'how-to-use':        'tutorial',
@@ -150,6 +158,33 @@ document.addEventListener('DOMContentLoaded', function () {
     function applyHash() {
         const raw = (window.location.hash || '').replace(/^#/, '').toLowerCase().trim();
         if (!raw) return;
+
+        // The meta-view URL router (#meta?format=…&deck=…) owns its own
+        // hash; let it handle that one rather than re-parsing here.
+        if (raw.startsWith('meta?') || raw === 'meta') return;
+
+        // In v2, the legacy meta-tab aliases (#current-meta etc.) become
+        // shortcuts that pivot the consolidated tab to the matching
+        // format and land on the list view. The v2 store's URL router
+        // will then rewrite the hash to #meta?format=… so the user can
+        // share the canonical link.
+        /** @type {any} */ const w = window;
+        const v2On = typeof w.isMetaViewV2Enabled === 'function' && w.isMetaViewV2Enabled();
+        if (v2On && META_ALIASES[raw]) {
+            const format = META_ALIASES[raw];
+            const store = /** @type {any} */ (window).metaViewStore;
+            if (store && typeof store.setFormat === 'function') {
+                store.setFormat(format);
+                store.backToList();
+            }
+            if (typeof switchTabAndUpdateMenu === 'function') {
+                switchTabAndUpdateMenu('meta-view');
+            } else if (typeof switchTab === 'function') {
+                switchTab('meta-view');
+            }
+            return;
+        }
+
         const tabId = HASH_ALIASES[raw];
         if (!tabId) return;
         if (typeof switchTabAndUpdateMenu === 'function') {

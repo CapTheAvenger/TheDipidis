@@ -162,20 +162,35 @@ function reparentAnalysisTabsIntoMetaView() {
 }
 
 /**
- * Wrap window.switchTab so that legacy `switchTab('current-analysis')` /
- * `switchTab('city-league-analysis')` calls (triggered when the user
- * clicks a deck row in the list) route through the consolidated UI
- * instead of jumping to a separate tab.
+ * Wrap window.switchTab so legacy meta-tab IDs route through the
+ * consolidated UI instead of jumping to a separate (now-reparented) tab.
  *
- * - switchTab('current-analysis')      → metaViewStore.selectDeck +
- *                                         switchTab('meta-view')
- * - switchTab('city-league-analysis')  → same
- * - other tab ids                       → unchanged behaviour
+ * In v2 the legacy DOM nodes have been moved out of their tab-content
+ * sibling position into #meta-view-list / #meta-view-detail-content, so
+ * orig.switchTab(legacyId) can no longer activate them. We map each
+ * legacy id to the right consolidated transition:
+ *
+ *   list tabs   ('current-meta' | 'city-league' | 'past-meta')
+ *     → setFormat(<format>) + switchTab('meta-view')      (list view)
+ *
+ *   analysis    ('current-analysis' | 'city-league-analysis')
+ *     → setFormat + selectDeck + switchTab('meta-view')   (detail view)
+ *
+ *   hub         ('meta-analysis-hub')
+ *     → switchTab('meta-view')                            (default list)
+ *
+ *   other ids   → unchanged behaviour
  *
  * The wrap runs ONCE on bootstrap when v2 is active. Idempotent — a
  * second call is a no-op (we track the wrap via a sentinel symbol).
  */
 const _WRAP_FLAG = '__metaViewSwitchTabWrapped';
+
+const LEGACY_LIST_TAB_TO_FORMAT = {
+    'current-meta': 'current',
+    'city-league': 'city-league',
+    'past-meta': 'past',
+};
 
 function interceptSwitchTab() {
     /** @type {any} */ const w = window;
@@ -187,23 +202,28 @@ function interceptSwitchTab() {
     }
     w.switchTab = function (/** @type {string} */ tabId) {
         if (isMetaViewV2Enabled()) {
-            const fmt = /** @type {any} */ (ANALYSIS_TAB_TO_FORMAT)[tabId];
-            if (fmt) {
-                // Set the active format (preserves selection if matched)
-                // then mark the view as detail; bootstrap's store sub
-                // shows the right analysis content.
-                metaViewStore.setFormat(fmt);
-                // Use the currently-tracked archetype from the legacy
-                // selectors if the caller didn't pass one explicitly.
-                // The legacy code stores the picked deck name in
-                // window.currentMetaDeckName / cityLeagueDeckName-ish
-                // globals; metric-test for whichever exists.
+            // Hub redirect — clicking the (now-hidden) hub or any caller
+            // that tries to land there ends up on the consolidated tab.
+            if (tabId === 'meta-analysis-hub') {
+                return orig.call(w, 'meta-view');
+            }
+            // Analysis tab → setFormat + open detail (legacy code paths
+            // pass a previously-set archetype on window.*).
+            const detailFmt = /** @type {any} */ (ANALYSIS_TAB_TO_FORMAT)[tabId];
+            if (detailFmt) {
+                metaViewStore.setFormat(detailFmt);
                 const archetype =
                     /** @type {any} */ (w).currentMetaArchetype ||
                     /** @type {any} */ (w).currentCityLeagueArchetype ||
                     '';
-                metaViewStore.selectDeck({ archetype, format: fmt });
-                // Make sure the consolidated tab itself is visible.
+                metaViewStore.selectDeck({ archetype, format: detailFmt });
+                return orig.call(w, 'meta-view');
+            }
+            // Legacy LIST tab → switch format, stay in list view.
+            const listFmt = /** @type {any} */ (LEGACY_LIST_TAB_TO_FORMAT)[tabId];
+            if (listFmt) {
+                metaViewStore.setFormat(listFmt);
+                metaViewStore.backToList();
                 return orig.call(w, 'meta-view');
             }
         }

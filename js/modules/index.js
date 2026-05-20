@@ -6,7 +6,7 @@
 // then a footer copies every export onto `window` so the legacy concat bundle
 // — which still hosts the bulk of the code — can call them globally.
 
-export const APP_MODULES_BUNDLE_VERSION = '2.4.0';
+export const APP_MODULES_BUNDLE_VERSION = '2.9.0';
 
 // L2.4 — first real module: the deck-probability calculator. Re-exporting
 // `updateCalculations` here makes it land on `window.updateCalculations` via
@@ -14,3 +14,15 @@ export const APP_MODULES_BUNDLE_VERSION = '2.4.0';
 // manually. Importing the module also runs its top-level side effects
 // (DOMContentLoaded listener registration).
 export { updateCalculations } from './app-calculator.js';
+
+// L2.9 — canonical card-key utility (Wave-2 Card-PK foundation).
+// Re-exporting puts parseCardKey / formatCardKey / getCardName / printId /
+// hasPrintInfo on the global `window` so legacy callers can use them via
+// bare identifiers; future ES-module call-sites can `import` directly.
+export {
+    parseCardKey,
+    formatCardKey,
+    getCardName,
+    hasPrintInfo,
+    printId,
+} from './card-key.js';

@@ -1,4 +1,5 @@
 const { spawn } = require('child_process');
+const fs = require('fs');
 const http = require('http');
 const { chromium } = require('playwright');
 
@@ -47,7 +48,17 @@ async function startServerIfNeeded() {
 }
 
 async function runRuntimeVerification() {
-	const browser = await chromium.launch({ headless: true, channel: 'msedge' });
+	// Default to whatever browser Playwright installed (chromium on Ubuntu CI,
+	// where the workflow runs `npx playwright install --with-deps chromium`).
+	// We previously hard-coded { channel: 'msedge' } which works on Win/Mac
+	// maintainer machines but fails on CI with "Executable doesn't exist at
+	// .../microsoft-edge" — that was the visual-nonmeta failure on the Wave-0
+	// deploy. Local devs that prefer Edge can set PW_CHANNEL=msedge.
+	const launchOpts = { headless: true };
+	if (process.env.PW_CHANNEL) {
+		launchOpts.channel = process.env.PW_CHANNEL;
+	}
+	const browser = await chromium.launch(launchOpts);
 	const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
 
 	const checks = [];
@@ -77,21 +88,45 @@ async function runRuntimeVerification() {
 function printSummary(checks) {
 	let passed = 0;
 	let failed = 0;
+	const lines = [];
 
 	checks.forEach((check) => {
 		if (check.ok) {
 			passed += 1;
-			console.log(`[PASS] ${check.name}`);
+			const ln = `[PASS] ${check.name}`;
+			console.log(ln);
+			lines.push(ln);
 		} else {
 			failed += 1;
-			console.log(`[FAIL] ${check.name} :: ${check.error}`);
+			const ln = `[FAIL] ${check.name} :: ${check.error}`;
+			console.log(ln);
+			lines.push(ln);
 		}
 	});
 
-	console.log('\n===== SUMMARY =====');
-	console.log(`Total checks: ${checks.length}`);
-	console.log(`Passed: ${passed}`);
-	console.log(`Failed: ${failed}`);
+	const footer = [
+		'',
+		'===== SUMMARY =====',
+		`Total checks: ${checks.length}`,
+		`Passed: ${passed}`,
+		`Failed: ${failed}`,
+	];
+	footer.forEach((ln) => console.log(ln));
+
+	// Persist the report files that the CI artifact-upload step expects.
+	// Without these the upload-artifact step emits a warning every run.
+	try {
+		fs.writeFileSync('visual-nonmeta-summary.txt', lines.concat(footer).join('\n') + '\n');
+		fs.writeFileSync('visual-nonmeta-report.json', JSON.stringify({
+			generatedAt: new Date().toISOString(),
+			total: checks.length,
+			passed,
+			failed,
+			checks,
+		}, null, 2) + '\n');
+	} catch (err) {
+		console.warn('[WARN] Could not write report files:', err && err.message ? err.message : err);
+	}
 
 	return failed === 0 ? 0 : 1;
 }

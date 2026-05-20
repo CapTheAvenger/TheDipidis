@@ -124,10 +124,12 @@ body.ia-v1 .ia-v2-only {
  * stays a block element (legacy CSS would have hidden it via
  * `.tab-content { display: none }` but the class was stripped on
  * reparent). */
-.meta-view-format-content {
+.meta-view-format-content,
+.meta-view-detail-content {
   display: block;
 }
-.meta-view-format-content.display-none {
+.meta-view-format-content.display-none,
+.meta-view-detail-content.display-none {
   display: none;
 }
 

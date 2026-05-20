@@ -21,7 +21,7 @@ import { metaViewStore } from './store.js';
 import { isMetaViewV2Enabled } from './feature-flag.js';
 
 /**
- * Maps `metaViewStore.activeFormat` → legacy tab element id.
+ * Maps `metaViewStore.activeFormat` → legacy tab element id (LIST view).
  * The legacy tabs stay in the DOM (still own all of their existing
  * rendering + filters); step-3 reparents them into #meta-view-list so
  * they live INSIDE the consolidated tab and the segmented-control can
@@ -31,6 +31,23 @@ const FORMAT_TO_LEGACY_TAB = {
     'current': 'current-meta',
     'city-league': 'city-league',
     'past': 'past-meta',
+};
+
+/**
+ * Maps `metaViewStore.activeFormat` → legacy analysis tab id (DETAIL view).
+ * `past` is intentionally absent — past-meta keeps its drilldown inside
+ * the past-meta list panel itself (no separate analysis tab in the
+ * legacy app). For `current` / `city-league` we reparent the *-analysis
+ * tab into #meta-view-detail-content and intercept switchTab() so the
+ * legacy code's drilldown attempts route through the consolidated view.
+ */
+const FORMAT_TO_ANALYSIS_TAB = {
+    'current': 'current-analysis',
+    'city-league': 'city-league-analysis',
+};
+const ANALYSIS_TAB_TO_FORMAT = {
+    'current-analysis': 'current',
+    'city-league-analysis': 'city-league',
 };
 
 function applyBodyClass() {
@@ -61,15 +78,21 @@ function applyStoreStateToDom() {
     if (listEl) listEl.classList.toggle('display-none', s.view !== 'list');
     if (detailEl) detailEl.classList.toggle('display-none', s.view !== 'detail');
 
-    // Step 3: show ONLY the reparented legacy tab matching activeFormat.
-    // Legacy tabs are present as children of #meta-view-list with class
-    // .meta-view-format-content + data-format. Bootstrap reparented them
-    // out of their original `<div class="tab-content">` positions so the
-    // legacy switchTab() leaves them alone.
+    // Step 3: show ONLY the reparented legacy LIST tab matching activeFormat.
     const formatNodes = document.querySelectorAll('.meta-view-format-content');
     formatNodes.forEach((node) => {
         const el = /** @type {HTMLElement} */ (node);
         const isActive = el.dataset.format === s.activeFormat;
+        el.classList.toggle('display-none', !isActive);
+    });
+
+    // Step 4: show ONLY the reparented analysis tab matching activeFormat
+    // when the detail view is open. (Past-meta has no separate analysis
+    // tab so this only applies to current + city-league.)
+    const detailNodes = document.querySelectorAll('.meta-view-detail-content');
+    detailNodes.forEach((node) => {
+        const el = /** @type {HTMLElement} */ (node);
+        const isActive = el.dataset.detailFor === s.activeFormat;
         el.classList.toggle('display-none', !isActive);
     });
 }
@@ -108,12 +131,94 @@ function reparentLegacyTabsIntoMetaView() {
     });
 }
 
+/**
+ * Step 4: reparent the two LEGACY analysis tabs (#current-analysis,
+ * #city-league-analysis) into #meta-view-detail-content. Past-meta
+ * keeps its drilldown in-place (no separate analysis tab in legacy).
+ *
+ * After this runs the analysis tabs live in the detail panel and are
+ * shown/hidden by the store's activeFormat. Legacy switchTab calls
+ * targeting these IDs get intercepted by interceptSwitchTab() and
+ * routed through metaViewStore.selectDeck() so the consolidated UI
+ * stays in sync with deck-row clicks.
+ */
+function reparentAnalysisTabsIntoMetaView() {
+    const detailContent = document.getElementById('meta-view-detail-content');
+    if (!detailContent) return;
+
+    Object.entries(FORMAT_TO_ANALYSIS_TAB).forEach(([format, legacyId]) => {
+        const node = document.getElementById(legacyId);
+        if (!node) {
+            console.warn('[meta-view] analysis tab #' + legacyId + ' missing — skipped');
+            return;
+        }
+        if (node.dataset.detailFor === format) return; // already moved
+        node.classList.remove('tab-content', 'active');
+        node.classList.add('meta-view-detail-content');
+        node.dataset.detailFor = format;
+        detailContent.appendChild(node);
+    });
+}
+
+/**
+ * Wrap window.switchTab so that legacy `switchTab('current-analysis')` /
+ * `switchTab('city-league-analysis')` calls (triggered when the user
+ * clicks a deck row in the list) route through the consolidated UI
+ * instead of jumping to a separate tab.
+ *
+ * - switchTab('current-analysis')      → metaViewStore.selectDeck +
+ *                                         switchTab('meta-view')
+ * - switchTab('city-league-analysis')  → same
+ * - other tab ids                       → unchanged behaviour
+ *
+ * The wrap runs ONCE on bootstrap when v2 is active. Idempotent — a
+ * second call is a no-op (we track the wrap via a sentinel symbol).
+ */
+const _WRAP_FLAG = '__metaViewSwitchTabWrapped';
+
+function interceptSwitchTab() {
+    /** @type {any} */ const w = window;
+    if (w[_WRAP_FLAG]) return;
+    const orig = w.switchTab;
+    if (typeof orig !== 'function') {
+        console.warn('[meta-view] window.switchTab not defined yet — skipping intercept');
+        return;
+    }
+    w.switchTab = function (/** @type {string} */ tabId) {
+        if (isMetaViewV2Enabled()) {
+            const fmt = /** @type {any} */ (ANALYSIS_TAB_TO_FORMAT)[tabId];
+            if (fmt) {
+                // Set the active format (preserves selection if matched)
+                // then mark the view as detail; bootstrap's store sub
+                // shows the right analysis content.
+                metaViewStore.setFormat(fmt);
+                // Use the currently-tracked archetype from the legacy
+                // selectors if the caller didn't pass one explicitly.
+                // The legacy code stores the picked deck name in
+                // window.currentMetaDeckName / cityLeagueDeckName-ish
+                // globals; metric-test for whichever exists.
+                const archetype =
+                    /** @type {any} */ (w).currentMetaArchetype ||
+                    /** @type {any} */ (w).currentCityLeagueArchetype ||
+                    '';
+                metaViewStore.selectDeck({ archetype, format: fmt });
+                // Make sure the consolidated tab itself is visible.
+                return orig.call(w, 'meta-view');
+            }
+        }
+        return orig.apply(w, /** @type {any} */ (arguments));
+    };
+    w[_WRAP_FLAG] = true;
+}
+
 function init() {
     applyBodyClass();
     // Only reparent legacy tabs into the consolidated view when v2 is
     // active. v1 mode leaves them in place untouched.
     if (isMetaViewV2Enabled()) {
         reparentLegacyTabsIntoMetaView();
+        reparentAnalysisTabsIntoMetaView();
+        interceptSwitchTab();
     }
     applyStoreStateToDom();
     // Re-render whenever the store changes.

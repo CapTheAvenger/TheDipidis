@@ -55,3 +55,11 @@ export { getFirebase } from './firebase/init.js';
 // modules bundle mirrors the export onto window.ArchetypeIcons so the
 // 30+ existing `window.ArchetypeIcons.X` call-sites keep working.
 export { ArchetypeIcons } from './archetype-icons.js';
+
+// L2.12 — TCG Showdown deck-handoff (legacy IIFE → ES module).
+// Three top-level functions used by HTML inline onclick handlers.
+export {
+    openInShowdownFromBuilder,
+    copyDeckAndOpenShowdown,
+    openShowdownExternal,
+} from './tcg-showdown-link.js';

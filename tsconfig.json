@@ -43,7 +43,7 @@
     "js/auth-ui-helpers.js",
     "js/firebase-config.js",
     "js/app-init.js",
-    "js/tcg-showdown-link.js",
+    "js/modules/tcg-showdown-link.js",
     "js/modules/archetype-icons.js",
     "js/draw-simulator.js",
     "js/meta-analysis-hub.js",

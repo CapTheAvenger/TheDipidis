@@ -28,8 +28,18 @@ function initFirebaseRuntime() {
   }
 
   // Auth state observer — handlers are defined in firebase-globals.js.
-  const _fbDev = typeof DEV_MODE !== 'undefined' ? DEV_MODE : false;
+  // NOTE: we do NOT read DEV_MODE here at sync-call time. In the bundled
+  // build, this file runs BEFORE app-core.js (where `const DEV_MODE` is
+  // declared), so a `typeof DEV_MODE` check at this point throws a TDZ
+  // ReferenceError ("Cannot access 'DEV_MODE' before initialization").
+  // The pre-bundle <script defer> setup used to give each file its own
+  // script scope, hiding DEV_MODE from this file (typeof returned
+  // 'undefined' silently), but the L1.4 concat-bundle puts everything in
+  // one script-global scope where TDZ applies. The onAuthStateChanged
+  // callback below runs asynchronously after the whole bundle has loaded,
+  // so the typeof check there is safe.
   firebase.auth().onAuthStateChanged(function(user) {
+    const _fbDev = (typeof DEV_MODE !== 'undefined') ? DEV_MODE : false;
     if (user) {
       console.info('[Auth] Firebase state: signed in', user.email || user.uid || 'unknown-user');
       if (_fbDev) console.log('✓ User signed in:', user.email);

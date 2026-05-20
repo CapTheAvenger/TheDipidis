@@ -61,6 +61,21 @@ function onUserSignedIn(user) {
   window.userTradelistMinPrices = new Map();
   window.userDecks            = [];
 
+  // Wave-1 stores: fan out the auth snapshot to userStore so new
+  // ES-module subscribers see the signed-in state. Legacy window.*
+  // mutations above continue unchanged.
+  if (/** @type {any} */ (window).userStore) {
+    /** @type {any} */ (window).userStore.setAuth({
+      uid: user.uid,
+      email: user.email || null,
+      displayName: user.displayName || null,
+    });
+    /** @type {any} */ (window).userStore.setDecks([]);
+    /** @type {any} */ (window).userStore.setCollectionCounts({});
+    /** @type {any} */ (window).userStore.setWishlist([], {});
+    /** @type {any} */ (window).userStore.setLoaded(false);
+  }
+
   loadUserData(user.uid);
   loadUserDecks(user.uid);
 
@@ -326,6 +341,12 @@ async function loadUserData(userId) {
           window.userCollectionCounts.set(cardId, 1);
         }
       });
+      // Wave-1 stores: fan out to userStore so subscribers see the load.
+      if (/** @type {any} */ (window).userStore) {
+        /** @type {any} */ (window).userStore.setCollectionCounts(
+          Object.fromEntries(window.userCollectionCounts)
+        );
+      }
 
       // ── Migrate broken "intl:SET-NUM|SET-NUM" card IDs to "Name|SET|NUMBER" ──
       // (Meta Binder + button used internal familyKey instead of proper cardId)
@@ -355,6 +376,13 @@ async function loadUserData(userId) {
           window.userWishlistCounts.set(cardId, 1);
         }
       });
+      // Wave-1 stores: fan out the wishlist+counts to subscribers.
+      if (/** @type {any} */ (window).userStore) {
+        /** @type {any} */ (window).userStore.setWishlist(
+          Array.from(window.userWishlist),
+          Object.fromEntries(window.userWishlistCounts)
+        );
+      }
       // Wishlist max prices (budget per card)
       const wMaxPrices = data.wishlistMaxPrices || {};
       window.userWishlistMaxPrices = new Map();
@@ -435,6 +463,11 @@ async function loadUserDecks(userId) {
     snapshot.forEach(doc => window.userDecks.push({ id: doc.id, ...doc.data({ serverTimestamps: 'estimate' }) }));
     _sortUserDecksInPlace();
     if (typeof updateDecksUI === 'function') updateDecksUI();
+    // Wave-1 stores: fan out decks + flag the load as complete.
+    if (/** @type {any} */ (window).userStore) {
+      /** @type {any} */ (window).userStore.setDecks(window.userDecks);
+      /** @type {any} */ (window).userStore.setLoaded(true);
+    }
   } catch (error) {
     console.error('Error loading decks:', error);
   }
@@ -495,6 +528,10 @@ function patchUserDecksLocal(operation, payload) {
   }
   _sortUserDecksInPlace();
   if (typeof updateDecksUI === 'function') updateDecksUI();
+  // Wave-1 stores: fan out the mutated decks list.
+  if (/** @type {any} */ (window).userStore) {
+    /** @type {any} */ (window).userStore.setDecks(window.userDecks);
+  }
 }
 window.patchUserDecksLocal = patchUserDecksLocal;
 
@@ -509,6 +546,10 @@ function clearUserData() {
   window.deckFolders          = [];
   // Drop any pending B-48 retry — user signed out, don't auto-save next login.
   window._pendingDeckSaveSource = null;
+  // Wave-1 stores: notify userStore subscribers of the sign-out.
+  if (/** @type {any} */ (window).userStore) {
+    /** @type {any} */ (window).userStore.reset();
+  }
 }
 
 function syncAuthUiFromPendingOrCurrentState() {

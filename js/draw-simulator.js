@@ -30,11 +30,11 @@ function openDrawSimulator(source) {
         let cardName = deckKey;
         let imageUrl = 'images/card-back.png';
 
-        // Parse "CardName (SET NUM)" format
-        const setMatch = deckKey.match(/^(.+?)\s+\(([A-Z0-9-]+)\s+([A-Z0-9-]+)\)$/);
+        // Parse "CardName (SET NUM)" via the canonical helper (modules bundle).
+        const setMatch = parseCardKey(deckKey);
         if (setMatch) {
-            cardName = setMatch[1];
-            const cardData = _simFindCard(setMatch[2], setMatch[3]);
+            cardName = setMatch.name;
+            const cardData = _simFindCard(setMatch.setCode, setMatch.number);
             if (cardData && cardData.image_url) imageUrl = cardData.image_url;
         } else {
             // Legacy name-only key

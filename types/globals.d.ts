@@ -387,6 +387,15 @@ declare function t(key: string, fallback?: string): string;
 declare function showToast(msg: string, kind?: string, durationMs?: number): void;
 declare function showNotification(msg: string, kind?: string, durationMs?: number): void;
 declare function escapeHtml(s: any): string;
+
+// Wave-2 Card-PK helpers (js/modules/card-key.js, re-exported via the
+// modules bundle). Declared here so legacy typed call-sites can use the
+// bare identifiers without window-casts.
+declare function parseCardKey(key: string): { name: string; setCode: string; number: string } | null;
+declare function formatCardKey(name: string, setCode?: string, number?: string): string;
+declare function getCardName(key: string): string;
+declare function hasPrintInfo(key: string): boolean;
+declare function printId(keyOrParsed: string | { setCode: string; number: string }): string | null;
 declare function escapeHtmlAttr(s: any): string;
 declare function escapeJsStr(s: any): string;
 declare function dataUrl(path: string): string;

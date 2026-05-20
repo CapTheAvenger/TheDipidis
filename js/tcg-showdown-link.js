@@ -63,8 +63,8 @@
         const lines = [];
         for (const [deckKey, count] of Object.entries(deckObj)) {
             if (!count || count <= 0) continue;
-            const m = deckKey.match(/^(.+?)\s+\(([A-Z0-9-]+)\s+([A-Z0-9-]+)\)$/);
-            lines.push(m ? `${count} ${m[1]} ${m[2]} ${m[3]}` : `${count} ${deckKey}`);
+            const m = parseCardKey(deckKey);
+            lines.push(m ? `${count} ${m.name} ${m.setCode} ${m.number}` : `${count} ${deckKey}`);
         }
         return lines.join('\n');
     }
@@ -83,10 +83,10 @@
 
         for (const [deckKey, count] of Object.entries(deck.cards)) {
             if (!count || count <= 0) continue;
-            const setMatch = deckKey.match(/^(.+?)\s+\(([A-Z0-9]+)\s+([A-Z0-9]+)\)$/);
+            const setMatch = parseCardKey(deckKey);
             let cardName = deckKey, setCode = '', setNumber = '';
             if (setMatch) {
-                cardName = setMatch[1]; setCode = setMatch[2]; setNumber = setMatch[3];
+                cardName = setMatch.name; setCode = setMatch.setCode; setNumber = setMatch.number;
             } else {
                 const cardData = window.allCardsDatabase
                     && window.allCardsDatabase.find(c => c.name === cardName);

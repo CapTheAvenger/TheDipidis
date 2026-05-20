@@ -32,3 +32,14 @@ export {
 // so legacy non-module callers can use the store without a manual import.
 export { createStore } from './stores/store.js';
 export { userStore } from './stores/user-store.js';
+
+// Wave-2 — canonical share / win-rate metrics. Re-exporting puts
+// parsePercent / parsePercentOrNaN / formatPercent / weightedAverageWinRate
+// on the global window for legacy bare-identifier use; new ES-module
+// call-sites can `import` directly.
+export {
+    parsePercent,
+    parsePercentOrNaN,
+    formatPercent,
+    weightedAverageWinRate,
+} from './metrics.js';

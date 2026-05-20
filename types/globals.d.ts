@@ -396,6 +396,12 @@ declare function formatCardKey(name: string, setCode?: string, number?: string):
 declare function getCardName(key: string): string;
 declare function hasPrintInfo(key: string): boolean;
 declare function printId(keyOrParsed: string | { setCode: string; number: string }): string | null;
+
+// Wave-2 canonical share / win-rate (js/modules/metrics.js).
+declare function parsePercent(value: unknown): number;
+declare function parsePercentOrNaN(value: unknown): number;
+declare function formatPercent(value: number, opts?: { digits?: number; sign?: boolean; fallback?: string }): string;
+declare function weightedAverageWinRate(rows: Array<{ wr: number; games: number }>): number;
 declare function escapeHtmlAttr(s: any): string;
 declare function escapeJsStr(s: any): string;
 declare function dataUrl(path: string): string;

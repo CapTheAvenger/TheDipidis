@@ -213,6 +213,35 @@ jobs:
           cp config/current_meta_analysis_settings.json _site/config/ 2>/dev/null || true
           cp _config.yml _site/ 2>/dev/null || true
 
+      - name: Build production bundle + swap HTML to single <script> (wave-1 L1.4)
+        run: |
+          # 1) Build the bundle from the (already-patched, SENTRY-DSN-injected)
+          #    source tree. Source files include firebase-config.js etc.
+          npm run build:bundle
+
+          # 2) Copy bundle + source-map into _site/js/ so the deployed HTML
+          #    can reference js/app.bundle.js relative to the site root. The
+          #    minify step that follows will minify it like any other JS file.
+          cp _dist/app.bundle.js _site/js/
+          cp _dist/app.bundle.js.map _site/js/
+
+          # 3) Swap 34 individual <script> tags in _site/index.html for one
+          #    bundle <script>, AND rewrite _site/service-worker.js SHELL_ASSETS
+          #    to pre-cache the bundle instead of 34 files. The swap script
+          #    inserts the bundle tag at the LAST removed position so it runs
+          #    after firebase-credentials.js + the 3 CDN libs (Chart/Papa/
+          #    localforage) that some bundled code depends on.
+          node scripts/swap-html-to-bundle.js _site
+
+          # 4) Quick post-swap sanity: verify no <script src="js/app-*.js"
+          #    survived (they should ALL have been folded into the bundle).
+          if grep -E '<script\s+src="js/(app-utils|i18n|firebase-config|firebase-globals|app-core|app-meta-call|firebase-collection)\.js' _site/index.html >/dev/null; then
+            echo "::error::Bundle swap left individual <script> tags behind in _site/index.html"
+            grep -n '<script\s+src="js/' _site/index.html
+            exit 1
+          fi
+          echo "✓ Wave-1 bundle deployed: js/app.bundle.js replaces 34 individual <script> tags"
+
       - name: Strip dev-only CSP hosts (wave-0 HF-7)
         run: |
           # Remove http://localhost:8001 from the Production CSP. It's the

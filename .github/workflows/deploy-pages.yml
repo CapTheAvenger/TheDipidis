@@ -137,12 +137,22 @@ jobs:
           retention-days: 14
           if-no-files-found: error
 
-      - name: NPM dependency audit (warn-only)
+      - name: NPM dependency audit (production deps, high+ blocks)
         run: |
-          # Surfacing CVEs in our devDeps without failing the build —
-          # we'll tighten this to --audit-level=high once Phase A is done.
-          npm audit --omit=dev --audit-level=high 2>&1 | tee npm-audit.log || true
-          echo "✓ npm audit complete (advisory)"
+          # Production npm deps: ZERO known high/critical CVEs allowed.
+          # Today the project has 0 production runtime npm deps (everything
+          # in package.json is devDependencies — CDN scripts handle runtime
+          # libs), so this gate is currently always-green; it's the trip-
+          # wire for when production deps start being added.
+          npm audit --omit=dev --audit-level=high 2>&1 | tee npm-audit-prod.log
+          echo "✓ npm audit (production) passed"
+
+      - name: NPM devDeps audit (high+ advisory log)
+        run: |
+          # Dev-side CVEs (eslint, prettier, c8, playwright) are reported
+          # but don't fail the build — they don't ship to users.
+          npm audit --audit-level=high 2>&1 | tee npm-audit-dev.log || true
+          echo "✓ npm audit (devDeps) advisory captured"
 
       - name: Setup Python
         uses: actions/setup-python@v5

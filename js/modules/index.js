@@ -67,3 +67,15 @@ export {
 // L2.13 — DOM type-narrowing helpers (legacy IIFE → ES module).
 // The `dom` namespace stays on window for legacy use.
 export { dom } from './dom-helpers.js';
+
+// L2.14 — small shared helpers for Deck-Analysis tabs.
+export {
+    updateDeckStatsByIds,
+    showDeckSections,
+    hideDeckSections,
+    resetDeckOverviewCounts,
+    renderNoDeckSelectedState,
+} from './deck-analysis-shared.js';
+
+// L2.14 — auth modal open / close helpers.
+export { showAuthModal, closeAuthModal } from './auth-ui-helpers.js';

@@ -78,12 +78,12 @@ const BUNDLE_ORDER = [
     'firebase-config.js',
     'firebase-globals.js',
     'firebase-auth.js',
-    'auth-ui-helpers.js',
+    // auth-ui-helpers.js: removed in L2.14 — ES module.
     'firebase-collection.js',
     // tcg-showdown-link.js: removed in L2.12 — now an ES module under
     // js/modules/tcg-showdown-link.js.
     'card-data-cache.js',
-    'deck-analysis-shared.js',
+    // deck-analysis-shared.js: removed in L2.14 — ES module.
     'app-core.js',
     'app-price.js',
     'app-tier-meta.js',

@@ -1,3 +1,4 @@
+// @ts-check
 /* ═══════════════════════════════════════════════════════════════
    i18n.js – Internationalization (Deutsch / English)
    ═══════════════════════════════════════════════════════════════ */
@@ -1690,11 +1691,13 @@ function updateTranslationsInDOM() {
   });
   document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
     const key = el.getAttribute('data-i18n-placeholder');
-    if (key) el.placeholder = t(key);
+    if (key && (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement)) {
+      el.placeholder = t(key);
+    }
   });
   document.querySelectorAll('[data-i18n-title]').forEach(el => {
     const key = el.getAttribute('data-i18n-title');
-    if (key) el.title = t(key);
+    if (key && el instanceof HTMLElement) el.title = t(key);
   });
   document.querySelectorAll('[data-i18n-aria]').forEach(el => {
     const key = el.getAttribute('data-i18n-aria');

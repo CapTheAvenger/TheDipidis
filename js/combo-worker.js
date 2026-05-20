@@ -1,3 +1,5 @@
+// @ts-check
+/// <reference lib="webworker" />
 // Web Worker for Monte Carlo combo probability calculation
 // Runs 10,000 iterations off the main thread to prevent UI freezing
 

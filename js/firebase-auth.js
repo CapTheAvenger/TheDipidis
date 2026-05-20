@@ -1,3 +1,4 @@
+// @ts-check
 if (!window.__firebaseRuntimeInitialized) {
   throw new Error('Firebase not initialized! Ensure firebase-config.js is loaded first.');
 }
@@ -256,8 +257,8 @@ function setupAuthForms() {
   if (signInForm) {
     signInForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const email = document.getElementById('signin-email').value;
-      const password = document.getElementById('signin-password').value;
+      const email = /** @type {HTMLInputElement} */ (document.getElementById('signin-email')).value;
+      const password = /** @type {HTMLInputElement} */ (document.getElementById('signin-password')).value;
       await signIn(email, password);
     });
   }
@@ -267,9 +268,9 @@ function setupAuthForms() {
   if (signUpForm) {
     signUpForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const email = document.getElementById('signup-email').value;
-      const password = document.getElementById('signup-password').value;
-      const confirmPassword = document.getElementById('signup-password-confirm').value;
+      const email = /** @type {HTMLInputElement} */ (document.getElementById('signup-email')).value;
+      const password = /** @type {HTMLInputElement} */ (document.getElementById('signup-password')).value;
+      const confirmPassword = /** @type {HTMLInputElement} */ (document.getElementById('signup-password-confirm')).value;
       
       if (password !== confirmPassword) {
         showNotification(getLang()==='de' ? 'Passwörter stimmen nicht überein' : 'Passwords do not match', 'error');
@@ -281,7 +282,7 @@ function setupAuthForms() {
   }
   
   // Google Sign In
-  const googleBtn = document.getElementById('google-signin-btn');
+  const googleBtn = /** @type {HTMLButtonElement | null} */ (document.getElementById('google-signin-btn'));
   if (googleBtn) {
     // Always keep button clickable so users receive an explicit toast/log instead of silent no-op.
     googleBtn.disabled = false;

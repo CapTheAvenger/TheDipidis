@@ -1,3 +1,4 @@
+// @ts-check
 // Card-Capability Engine
 //
 // Extracts capability tags from card rules text (abilities + attacks),

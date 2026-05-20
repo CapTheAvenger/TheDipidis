@@ -1,3 +1,4 @@
+// @ts-check
 /**
  * Inline Init - Extracted from index.html inline <script> blocks
  * to allow removing 'unsafe-inline' from Content-Security-Policy.
@@ -89,7 +90,8 @@ document.addEventListener('click', function(e) {
     const menu    = document.getElementById('mainMenuDropdown');
     const trigger = document.getElementById('mainMenuTrigger');
     if (menu && trigger && menu.classList.contains('show')) {
-        if (!menu.contains(e.target) && !trigger.contains(e.target)) {
+        const target = /** @type {Node | null} */ (e.target);
+        if (!menu.contains(target) && !trigger.contains(target)) {
             menu.classList.remove('show');
             trigger.classList.remove('open');
         }
@@ -100,7 +102,7 @@ document.addEventListener('languageChanged', function() {
     const activeBtn = document.querySelector('.menu-item.active[data-tab-id]');
     const badge = document.getElementById('current-tab-title');
     const labelEl = activeBtn ? activeBtn.querySelector('.menu-item-label') : null;
-    if (activeBtn && badge) badge.innerText = labelEl ? labelEl.textContent.trim() : activeBtn.innerText.trim();
+    if (activeBtn && badge) badge.innerText = labelEl ? (labelEl.textContent || '').trim() : /** @type {HTMLElement} */ (activeBtn).innerText.trim();
     // Keep the badge hidden whenever the hub overview is the active tab —
     // even after a language switch reruns the badge update.
     const hubActive = !!document.querySelector('#meta-analysis-hub.tab-content.active');

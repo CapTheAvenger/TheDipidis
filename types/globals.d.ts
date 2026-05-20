@@ -198,6 +198,96 @@ declare function hideAppLoadingOverlay(): void;
 declare function runAppLoadingWatchdog(): void;
 declare function _toggleComboTarget(name: string): void;
 
+// ============================================================================
+// More legacy globals surfaced by the L2.2b file batch — all `any` typed for
+// now; tighten as the corresponding source file gets converted.
+// ============================================================================
+
+declare const google: any;
+
+declare function loadCSV(filename: string, options?: any): Promise<any[]>;
+declare function loadCurrentMeta(...args: any[]): any;
+declare function loadCurrentMetaAnalysis(...args: any[]): any;
+declare function loadMetaCardAnalysis(...args: any[]): any;
+declare function saveCurrentDeckToProfile(source: string): any;
+declare function showInputModal(...args: any[]): any;
+declare function switchTab(tabId: string): void;
+declare function switchProfileTab(tabId: string): void;
+declare function updateCollectionUI(): void;
+declare function updateDecksUI(): void;
+declare function updateProfileUI(data?: any): void;
+declare function updateTradelistUI(): void;
+declare function updateWishlistUI(): void;
+declare function addCardToProxy(...args: any[]): any;
+declare function renderProxyQueue(): void;
+declare function addToWishlist(...args: any[]): any;
+declare function flushBattleJournalOutbox(force?: boolean): any;
+declare function renderBattleJournalSummary(): any;
+declare function leaveMultiplayerGame(): any;
+declare function getErrorMessage(code: string): string;
+declare function loadUserData(uid: string): any;
+declare function loadUserDecks(uid: string): any;
+declare function clearUserData(): void;
+
+interface Window {
+    // Card-capability engine
+    CardCapabilityEngine?: any;
+
+    // Heatmap state
+    heatmapExpanded?: boolean;
+    heatmapSearchX?: string;
+    heatmapSearchY?: string;
+
+    // App-current-meta legacy state
+    _matchupRegistry?: any;
+    currentMetaArchetypes?: any;
+    metaArchetypes?: any;
+    currentMetaData?: any;
+    currentMetaLoaded?: boolean;
+    currentMetaAnalysisLoaded?: boolean;
+    currentAnalysisLoaded?: boolean;
+
+    // Tech-slots + pinned + excluded helpers (from app-deck-builder)
+    pinnedCardsFromArray?: (source: any, arr: string[]) => void;
+    pinnedCardsToArray?: (source: any) => string[];
+    excludedCardsFromArray?: (source: any, arr: string[]) => void;
+    excludedCardsToArray?: (source: any) => string[];
+    techSlotsFromArray?: (source: any, arr: any[]) => void;
+    techSlotsToArray?: (source: any) => any[];
+
+    // Custom-binder module
+    buildCustomBinder?: () => void;
+    cbAddArchetype?: (...args: any[]) => any;
+    cbAddMissingToWishlist?: (...args: any[]) => any;
+    cbApplyFilter?: (...args: any[]) => any;
+    cbDeletePreset?: (...args: any[]) => any;
+    cbFilterArchetypeList?: (...args: any[]) => any;
+    cbLoadPreset?: (...args: any[]) => any;
+    cbRemoveArchetype?: (...args: any[]) => any;
+    cbSaveCurrentAsPreset?: (...args: any[]) => any;
+    cbSendMissingToProxy?: (...args: any[]) => any;
+    cbSetFilter?: (...args: any[]) => any;
+    cbSetPrintView?: (...args: any[]) => any;
+    cbToggleArchetype?: (...args: any[]) => any;
+    cbToggleArchetypeDropdown?: (...args: any[]) => any;
+    cbToggleMainPokemonGroup?: (...args: any[]) => any;
+    _cbArchetypeGroups?: any;
+    _cbDelta?: any;
+    _cbDroppedCards?: any;
+    refreshCustomBinderOwnership?: () => any;
+
+    // Meta-binder module (referenced from custom-binder)
+    _mbShared?: any;
+    _metaBinderArchetypeGroups?: any;
+    _metaBinderCurrentMetaExactMap?: any;
+    _metaBinderCurrentMetaLabel?: string;
+
+    // City-league analysis data slots
+    cityLeagueAnalysisDataCurrent?: any;
+    cityLeagueAnalysisDataPast?: any;
+    cityLeagueAnalysisM3Data?: any;
+}
+
 declare function devLog(...args: any[]): void;
 declare function t(key: string, fallback?: string): string;
 declare function showToast(msg: string, kind?: string, durationMs?: number): void;

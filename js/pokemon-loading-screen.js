@@ -1,3 +1,4 @@
+// @ts-check
 /**
  * Pokémon TCG Hub - Loading Screen mit IndexedDB CSV-Caching
  * Zeigt eine Pokémon-Ladeanimation und cached alle CSV-Daten in IndexedDB
@@ -236,13 +237,13 @@
     return new Promise((resolve, reject) => {
       const req = indexedDB.open(CACHE_DB_NAME, CACHE_DB_VER);
       req.onupgradeneeded = e => {
-        const db = e.target.result;
+        const db = /** @type {IDBOpenDBRequest} */ (e.target).result;
         if (!db.objectStoreNames.contains(CACHE_STORE)) {
           db.createObjectStore(CACHE_STORE, { keyPath: 'key' });
         }
       };
-      req.onsuccess = e => resolve(e.target.result);
-      req.onerror   = e => reject(e.target.error);
+      req.onsuccess = e => resolve(/** @type {IDBOpenDBRequest} */ (e.target).result);
+      req.onerror   = e => reject(/** @type {IDBOpenDBRequest} */ (e.target).error);
     });
   }
 

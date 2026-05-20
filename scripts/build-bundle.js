@@ -105,8 +105,9 @@ const BUNDLE_ORDER = [
     'meta-binder.js',
     'custom-binder.js',
     'draw-simulator.js',
-    // combo-worker.js: skipped — runs as Web Worker, separate context
-    'app-calculator.js',
+    // combo-worker.js: skipped — runs as Web Worker, separate context.
+    // app-calculator.js: removed in L2.4 — now an ES module under
+    // js/modules/app-calculator.js, bundled by scripts/build-modules.js.
 ];
 
 // ----------------------------------------------------------------------------

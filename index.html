@@ -4792,10 +4792,10 @@
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js" defer></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js" defer></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js" defer></script>
-    <!-- Wave-1 L2.3: hybrid bundle entry-point for opt-in ES modules.
+    <!-- Wave-1 L2.3+: hybrid bundle entry-point for opt-in ES modules.
          Loaded BEFORE the legacy concat bundle / individual scripts so its
-         exports are already on `window` when legacy code runs. Empty stub
-         at L2.3; first real module conversion (app-calculator) lands in L2.4. -->
+         exports are already on `window` when legacy code runs. Currently
+         hosts: app-calculator (L2.4). -->
     <script src="_dist/app.modules.bundle.js?v=202605192030" defer></script>
     <!-- Utilities first (provides escapeHtml globally) -->
     <script src="js/dom-helpers.js?v=202605192030" defer></script>
@@ -4844,7 +4844,6 @@
     <script src="js/custom-binder.js?v=202605192030" defer></script>
     <script src="js/draw-simulator.js?v=202605192030" defer></script>
     <script src="js/combo-worker.js?v=202605192030" defer></script>
-    <script src="js/app-calculator.js?v=202605192030" defer></script>
 
     <!-- Draw Simulator Modal -->
     <div id="drawSimulatorModal" onclick="if(event.target===this)closeDrawSimulator()" role="dialog" aria-modal="true" aria-label="Starting hand simulator">

@@ -52,7 +52,6 @@ const SHELL_ASSETS = [
   './js/custom-binder.js',
   './js/draw-simulator.js',
   './js/combo-worker.js',
-  './js/app-calculator.js',
   './js/deck-analysis-shared.js',
   './js/card-data-cache.js',
   './js/error-tracking.js',

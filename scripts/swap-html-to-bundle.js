@@ -64,7 +64,7 @@ const BUNDLE_ORDER = [
     'meta-binder.js',
     'custom-binder.js',
     'draw-simulator.js',
-    'app-calculator.js',
+    // app-calculator.js removed in L2.4 — now an ES module bundled separately.
 ];
 
 function die(msg) {

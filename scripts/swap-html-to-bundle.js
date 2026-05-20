@@ -47,7 +47,7 @@ const BUNDLE_ORDER = [
     'app-city-league.js',
     'app-deck-builder.js',
     // card-capability-engine.js: removed in L2.16 — ES module.
-    'app-tech-lab.js',
+    // app-tech-lab.js: removed in L2.18 — ES module.
     // app-anti-tech.js: removed in L2.17 — ES module.
     'app-meta-cards.js',
     'app-current-meta.js',

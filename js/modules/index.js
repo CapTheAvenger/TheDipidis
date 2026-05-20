@@ -97,3 +97,8 @@ export {
     backToAntiTechStep1,
     confirmAntiTechBuild,
 } from './app-anti-tech.js';
+
+// L2.18 — Tech Lab interactive tech-card explorer (1067 LOC). Exposes
+// the TechLab namespace plus loadCurrentMetaRowsWithFallback used by
+// other meta-tab files.
+export { TechLab } from './app-tech-lab.js';

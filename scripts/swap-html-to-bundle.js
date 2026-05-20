@@ -78,6 +78,18 @@ function swapHtml(siteDir) {
 
     let html = fs.readFileSync(htmlPath, 'utf8');
 
+    // L2.3: rewrite the modules-bundle path from `_dist/app.modules.bundle.js`
+    // (source-tree / dev) to `js/app.modules.bundle.js` (production layout
+    // after deploy copies the file into _site/js/).
+    const modulesRx = /(<script\s+src=")_dist\/(app\.modules\.bundle\.js)([^"]*"\s+defer><\/script>)/g;
+    if (modulesRx.test(html)) {
+        modulesRx.lastIndex = 0;
+        html = html.replace(modulesRx, '$1js/$2$3');
+        console.log('✓ index.html: rewrote modules bundle path → js/app.modules.bundle.js');
+    } else {
+        console.warn('  (no _dist/app.modules.bundle.js tag found in index.html — skipping rewrite)');
+    }
+
     // CRITICAL: insert the bundle tag at the position of the LAST removed
     // file, not the first. Reason: the bundle includes firebase-config.js,
     // which reads window.FIREBASE_CREDS — but firebase-credentials.js is
@@ -165,12 +177,16 @@ function swapServiceWorker(siteDir) {
     });
 
     if (firstIndex >= 0) {
-        const bundleLine = `  './js/app.bundle.js',\n`;
-        sw = sw.slice(0, firstIndex) + bundleLine + sw.slice(firstIndex);
+        // Two bundle entries: modules bundle first (so the SW pre-caches it
+        // before the legacy concat), then the legacy bundle.
+        const bundleLines =
+            `  './js/app.modules.bundle.js',\n` +
+            `  './js/app.bundle.js',\n`;
+        sw = sw.slice(0, firstIndex) + bundleLines + sw.slice(firstIndex);
     }
 
     fs.writeFileSync(swPath, sw, 'utf8');
-    console.log(`✓ service-worker.js: removed ${removed} per-file SHELL_ASSETS entries, inserted 1 bundle entry`);
+    console.log(`✓ service-worker.js: removed ${removed} per-file SHELL_ASSETS entries, inserted 2 bundle entries (modules + legacy)`);
 }
 
 function main() {

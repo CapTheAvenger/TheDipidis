@@ -229,11 +229,17 @@ jobs:
           #    source tree. Source files include firebase-config.js etc.
           npm run build:bundle
 
-          # 2) Copy bundle + source-map into _site/js/ so the deployed HTML
-          #    can reference js/app.bundle.js relative to the site root. The
-          #    minify step that follows will minify it like any other JS file.
+          # 2) Copy both bundles + source maps into _site/js/ so the deployed
+          #    HTML can reference js/app.bundle.js and js/app.modules.bundle.js
+          #    relative to the site root. The minify step that follows will
+          #    minify them like any other JS file.
           cp _dist/app.bundle.js _site/js/
           cp _dist/app.bundle.js.map _site/js/
+          # L2.3 hybrid: esbuild-built modules bundle for opt-in ES modules.
+          # Always exists (build:bundle builds both), even if today only the
+          # bootstrap stub is inside.
+          cp _dist/app.modules.bundle.js _site/js/
+          cp _dist/app.modules.bundle.js.map _site/js/
 
           # 3) Swap 34 individual <script> tags in _site/index.html for one
           #    bundle <script>, AND rewrite _site/service-worker.js SHELL_ASSETS

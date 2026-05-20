@@ -101,6 +101,35 @@ module.exports = [
     },
   },
 
+  // Wave-1 L2.3+: opt-in ES modules under js/modules/ — uses import/export.
+  // Overrides the broader js/**/*.js block above (last-match wins in flat config).
+  {
+    files: ['js/modules/**/*.js'],
+    languageOptions: {
+      ecmaVersion: 2022,
+      sourceType: 'module',
+      globals: {
+        ...globals.browser,
+        ...globals.serviceworker,
+        ...PROJECT_GLOBALS,
+      },
+    },
+    rules: {
+      // Same baseline as the legacy block, just with module parsing on.
+      'no-cond-assign': ['error', 'except-parens'],
+      'no-debugger': 'error',
+      'no-dupe-args': 'error',
+      'no-dupe-keys': 'error',
+      'no-duplicate-case': 'error',
+      'no-undef': 'error', // modules CAN catch this — no cross-file globals
+      'no-unused-vars': ['warn', {
+        args: 'none',
+        ignoreRestSiblings: true,
+        varsIgnorePattern: '^_',
+      }],
+    },
+  },
+
   // Node-side test code
   {
     files: ['tests/unit/**/*.js', 'tests/e2e/**/*.js', 'tests/*.js'],

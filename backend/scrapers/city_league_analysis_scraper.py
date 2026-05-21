@@ -205,9 +205,11 @@ def process_tournament_decklists(
     card_db: CardDatabaseLookup
 ) -> list:
     tournament_date = tournament_info.get('date') or tournament_info.get('date_str', '')
+    tournament_id_log = str(tournament_info.get('tournament_id') or tournament_info.get('id') or '?')
     soup = BeautifulSoup(tournament_html, 'lxml')
     deck_tasks = []
-    
+    placements_without_link = []  # (placement, archetype) tuples for warning
+
     rows = [tr for tr in soup.select('table tr') if tr.find('td')]
     for row in rows:
         # Archetype Name — must mirror city_league_archetype_scraper exactly,
@@ -252,11 +254,32 @@ def process_tournament_decklists(
             href = link_tag['href']
             deck_url = href if href.startswith('http') else f"https://limitlesstcg.com{href}"
             deck_tasks.append((deck_url, deck_name))
-            
+        else:
+            cells = row.find_all('td')
+            placement = cells[0].get_text(strip=True) if cells else '?'
+            placements_without_link.append((placement, deck_name))
+
+    total_placements = len(rows)
+    decklists_found = len(deck_tasks)
+    if placements_without_link:
+        missing = len(placements_without_link)
+        sample = ', '.join(f'P{p}={a}' for p, a in placements_without_link[:5])
+        suffix = f' (sample: {sample}{"..." if missing > 5 else ""})'
+        logger.warning(
+            "T%s: %d/%d decklists scraped — %d placements have NO decklist link%s",
+            tournament_id_log, decklists_found, total_placements, missing, suffix
+        )
+
     deck_tasks = deck_tasks[:max_decklists]
     if not deck_tasks:
         return []
-        
+
+    if total_placements > max_decklists:
+        logger.warning(
+            "T%s: cap reached — %d placements with link, only first %d will be fetched (max_decklists_per_league)",
+            tournament_id_log, decklists_found, max_decklists
+        )
+
     logger.info("   Starte Download von %s Decks (Multithreading)...", len(deck_tasks))
     
     decks = []

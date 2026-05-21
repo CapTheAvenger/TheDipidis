@@ -2431,3 +2431,28 @@
     word-break: break-word !important;
   }
 }
+
+/* Status line under the date-range pickers — error and active-filter
+   messages live here. Hidden when empty so the layout doesn't reserve
+   space for a phantom row. */
+.city-league-status {
+    font-size: 0.85rem;
+    margin: 4px 0 8px;
+    padding: 0;
+    line-height: 1.4;
+    min-height: 0;
+}
+.city-league-status:empty {
+    display: none;
+}
+.city-league-status.color-red-light {
+    color: #c0392b !important;
+    background: #fdecea;
+    padding: 8px 12px;
+    border-radius: 6px;
+    border-left: 3px solid #c0392b;
+}
+.city-league-status.city-league-status-active {
+    color: #2c3e50;
+    font-style: italic;
+}

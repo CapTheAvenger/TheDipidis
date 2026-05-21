@@ -3,7 +3,7 @@
     "urlPrefix": "https://r2.limitlesstcg.net/pokemon/gen9/",
     "urlSuffix": ".png",
     "description": "Maps current-meta archetype names to the sequence of Pokémon species/form identifiers that identify them visually. The helper getArchetypeIconUrls() resolves each array entry into a Limitless R2 icon URL. Add new archetypes or fix guesses as they surface; broken URLs are handled gracefully by the img onerror fallback in the UI.",
-    "lastScrapedAt": "2026-05-21T01:16:39",
+    "lastScrapedAt": "2026-05-21T15:17:10",
     "lastScrapedCount": 128,
     "lastBackfilledAt": "2026-05-05T13:19:27",
     "lastBackfillCount": 342,
@@ -1774,6 +1774,38 @@
     "Dragapult Zoroark": [
       "dragapult",
       "zoroark"
+    ],
+    "Lucario Hariyama": [
+      "lucario-mega",
+      "hariyama"
+    ],
+    "Okidogi Barbaracle": [
+      "okidogi",
+      "barbaracle"
+    ],
+    "Lopunny Dudunsparce": [
+      "lopunny-mega",
+      "dudunsparce"
+    ],
+    "Starmie Dusknoir": [
+      "starmie-mega",
+      "dusknoir"
+    ],
+    "Flareon Noctowl": [
+      "flareon",
+      "noctowl"
+    ],
+    "Diancie Dusknoir": [
+      "diancie-mega",
+      "dusknoir"
+    ],
+    "Sharpedo Toxtricity": [
+      "sharpedo-mega",
+      "toxtricity"
+    ],
+    "Froslass Dudunsparce": [
+      "froslass-mega",
+      "dudunsparce"
     ]
   }
 }

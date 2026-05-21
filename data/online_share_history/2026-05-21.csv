@@ -1,53 +1,53 @@
 ﻿deck_name;rank;count;share;winrate
-Dragapult;1;2308;7,11;52,29
-Dragapult Dusknoir;2;1854;5,71;46,07
-Lucario Hariyama;3;1750;5,39;47,21
-Dragapult Blaziken;4;1723;5,31;52,59
-Alakazam Dudunsparce;5;1657;5,1;51,59
-N's Zoroark;6;1640;5,05;46,63
-Rocket's Mewtwo;7;1495;4,6;49,88
-Starmie Froslass;8;1257;3,87;51,82
-Ogerpon Meganium;9;1167;3,59;53,63
-Festival Lead;10;1158;3,57;52,06
-Cynthia's Garchomp;11;1116;3,44;51,56
-Raging Bolt Ogerpon;12;1024;3,15;51,19
-Grimmsnarl Froslass;13;946;2,91;51,68
-Okidogi Barbaracle;14;738;2,27;54,49
-Rocket's Honchkrow;15;734;2,26;51,67
-Crustle;16;665;2,05;51,02
-Dragapult Dudunsparce;17;612;1,88;50,83
-Lopunny Dudunsparce;18;557;1,72;51,43
-Slowking;19;539;1,66;48,3
-Greninja;20;479;1,47;48,49
-Steven's Metagross;21;412;1,27;47,12
-Mega Venusaur;22;407;1,25;44,09
-Hydrapple Ogerpon;23;382;1,18;53,07
+Dragapult;1;2317;7,11;52,28
+Dragapult Dusknoir;2;1860;5,71;46,03
+Lucario Hariyama;3;1757;5,4;47,18
+Dragapult Blaziken;4;1724;5,29;52,59
+Alakazam Dudunsparce;5;1661;5,1;51,63
+N's Zoroark;6;1642;5,04;46,6
+Rocket's Mewtwo;7;1497;4,6;49,88
+Starmie Froslass;8;1258;3,86;51,82
+Ogerpon Meganium;9;1168;3,59;53,62
+Festival Lead;10;1159;3,56;52,05
+Cynthia's Garchomp;11;1121;3,44;51,63
+Raging Bolt Ogerpon;12;1028;3,16;51,32
+Grimmsnarl Froslass;13;947;2,91;51,67
+Okidogi Barbaracle;14;740;2,27;54,48
+Rocket's Honchkrow;15;737;2,26;51,69
+Crustle;16;665;2,04;51,02
+Dragapult Dudunsparce;17;615;1,89;50,77
+Lopunny Dudunsparce;18;558;1,71;51,43
+Slowking;19;541;1,66;48,35
+Greninja;20;483;1,48;48,5
+Steven's Metagross;21;415;1,27;47,03
+Mega Venusaur;22;410;1,26;44,22
+Hydrapple Ogerpon;23;384;1,18;53,0
 Mega Absol Box;24;381;1,17;47,02
-Starmie Dusknoir;25;366;1,13;50,0
+Starmie Dusknoir;25;372;1,14;50,0
 Clefairy Ogerpon;26;364;1,12;50,29
-Ogerpon Box;27;357;1,1;54,25
-Mega Lucario;28;342;1,05;47,08
-Flareon Noctowl;29;307;0,95;46,7
+Ogerpon Box;27;359;1,1;54,2
+Mega Lucario;28;344;1,06;47,04
+Flareon Noctowl;29;308;0,95;46,75
 Ceruledge;30;282;0,87;43,8
-Hop's Trevenant;31;268;0,83;48,71
-Diancie Dusknoir;32;253;0,78;45,19
-Ursaluna Lunatone;33;217;0,67;44,99
+Hop's Trevenant;31;269;0,83;48,55
+Diancie Dusknoir;32;254;0,78;45,06
+Ursaluna Lunatone;33;220;0,68;45,02
 Froslass Munkidori;34;205;0,63;47,09
-Ethan's Typhlosion;35;197;0,61;40,87
+Ethan's Typhlosion;35;198;0,61;40,84
 Rocket's Spidops;36;172;0,53;54,15
 Tera Box;37;171;0,53;46,95
-Mega Froslass;38;147;0,45;49,2
+Mega Froslass;38;148;0,45;49,06
 Decidueye;39;145;0,45;43,1
 Mega Starmie;40;137;0,42;44,44
 Jellicent Dusknoir;41;130;0,4;44,93
-Yanmega;42;117;0,36;54,96
+Yanmega;42;118;0,36;54,91
 Archaludon;43;105;0,32;51,07
 Mega Charizard X;44;104;0,32;28,16
-Kangaskhan Bouffalant;45;96;0,3;50,81
-Toxtricity Box;46;97;0,3;43,75
+Toxtricity Box;45;97;0,3;43,75
+Kangaskhan Bouffalant;46;96;0,29;50,81
 Hop's Zacian;47;79;0,24;48,34
 Marnie's Grimmsnarl;48;79;0,24;43,7
-Hydreigon;49;78;0,24;42,62
+Hydreigon;49;79;0,24;43,27
 Sharpedo Toxtricity;50;73;0,22;40,55
 Mega Abomasnow;51;61;0,19;39,05
 Joltik Box;52;59;0,18;49,81
@@ -73,8 +73,8 @@ Toxtricity;71;25;0,08;39,8
 Azumarill;72;23;0,07;44,0
 Lillie's Clefairy;73;21;0,06;51,02
 Mega Kangaskhan;74;18;0,06;59,18
-Heatran Metang;75;18;0,06;38,57
-Mega Camerupt;76;19;0,06;32,84
+Mega Camerupt;75;20;0,06;32,86
+Heatran Metang;76;18;0,06;38,57
 Mamoswine;77;18;0,06;18,75
 Blaziken Zoroark;78;16;0,05;58,82
 Alolan Exeggutor ex;79;17;0,05;44,16
@@ -115,14 +115,14 @@ Scovillain;113;4;0,01;23,08
 Farigiraf Milotic;114;4;0,01;66,67
 Cinderace;115;4;0,01;41,67
 Scizor;116;4;0,01;16,67
-Future Box;117;2;0,01;54,55
-Flygon;118;3;0,01;40,0
-Cornerstone Mask Ogerpon;119;4;0,01;0,0
-Dragapult Zoroark;120;2;0,01;22,22
-Torterra;121;2;0,01;62,5
-Luxray;122;2;0,01;37,5
-Froslass Dudunsparce;123;1;0,0;42,86
+Froslass Dudunsparce;117;2;0,01;50,0
+Future Box;118;2;0,01;54,55
+Flygon;119;3;0,01;40,0
+Cornerstone Mask Ogerpon;120;4;0,01;0,0
+Dragapult Zoroark;121;2;0,01;22,22
+Torterra;122;2;0,01;62,5
+Luxray;123;2;0,01;37,5
 Raging Bolt;124;1;0,0;25,0
 Seaking Festival Lead;125;1;0,0;0,0
-Gengar;126;1;0,0;0,0
-Gholdengo Lunatone;127;1;0,0;0,0
+Gholdengo Lunatone;126;1;0,0;0,0
+Gengar;127;1;0,0;0,0

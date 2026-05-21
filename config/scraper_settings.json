@@ -75,9 +75,9 @@
                 "enabled": true,
                 "start_date": "13.03.2026",
                 "end_date": "auto",
-                "max_decklists_per_league": 50,
+                "max_decklists_per_league": 150,
                 "additional_tournament_ids": [
-                    548
+                    548,549
                 ]
             }
         },
@@ -95,7 +95,7 @@
         "min_tournament_size": 1,
         "_min_size_comment": "JP City League events typically post 4-16 placements (NOT 32+). The earlier value 32 (added 2026-04-21) silently rejected every new tournament for two weeks — see backend/scrapers/city_league_archetype_scraper.py DEFAULT_SETTINGS comment for the full incident.",
         "additional_tournament_ids": [
-            548
+            548,549
         ]
     },
     "labs_tournament_scraper": {

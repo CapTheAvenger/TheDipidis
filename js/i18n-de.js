@@ -36,6 +36,9 @@
     'menu.profile':           'Mein Profil',
     'menu.howToUse':          'Anleitung',
     'menu.metaView':          'Meta-Analyse',
+    'menu.metaCall':          'Meta Call',
+    'menu.battleJournal':     'Kampfjournal',
+    'menu.testingGroups':     'Testgruppen',
 
     // ── Tab labels ───────────────────────────────────────────
     'tab.metaAnalysis':       'Meta & Deck-Analyse',

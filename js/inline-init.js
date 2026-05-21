@@ -16,12 +16,18 @@ function toggleMenuCluster(clusterId) {
 }
 
 function syncMenuClustersForTab(tabId) {
-    // The Meta & Tier Lists cluster expands when the consolidated meta
-    // tab is active. Legacy meta tab IDs (current-meta, city-league,
+    // The "Meta & Tools" cluster expands when any of its sub-items is
+    // active. Legacy meta tab IDs (current-meta, city-league,
     // past-meta, *-analysis) still arrive here from the bootstrap's
     // switchTab interception, which calls switchTab('meta-view') under
     // the hood — so this set keeps a fallback for those code paths.
-    const metaTabs = new Set(['meta-view', 'city-league', 'city-league-analysis', 'current-meta', 'current-analysis', 'past-meta']);
+    // Battle Journal / Meta Call / Testing Groups are the three tabs
+    // that got promoted out of Profile in the IA-refactor follow-up.
+    const metaTabs = new Set([
+        'meta-view', 'city-league', 'city-league-analysis',
+        'current-meta', 'current-analysis', 'past-meta',
+        'meta-call', 'battle-journal', 'testing-groups',
+    ]);
     const metaSubmenu = document.getElementById('menu-submenu-meta');
     const metaGroup = document.getElementById('menu-group-meta');
 
@@ -137,9 +143,15 @@ document.addEventListener('languageChanged', function() {
         'probability':       'calculator',
         'wahrscheinlichkeit':'calculator',
         'profile':           'profile',
-        'metacall':          'profile',    // Meta Call lives inside Profile tab
-        'meta-call':         'profile',
-        'journal':           'profile',    // Battle Journal too
+        // Promoted to top-level tabs in the IA-refactor follow-up.
+        // Old hashes (#metacall, #journal, #meta-call) still land
+        // users on the same content — now without the Profile detour.
+        'metacall':          'meta-call',
+        'meta-call':         'meta-call',
+        'journal':           'battle-journal',
+        'battle-journal':    'battle-journal',
+        'testinggroups':     'testing-groups',
+        'testing-groups':    'testing-groups',
     };
 
     function applyHash() {

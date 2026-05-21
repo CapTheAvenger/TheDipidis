@@ -3161,21 +3161,6 @@ function switchProfileTab(tabName) {
     activeBtn.classList.add('active');
   }
 
-  // Auto-load journal history when switching to journal tab
-  if (tabName === 'journal' && typeof openJournalHistoryTab === 'function') {
-    openJournalHistoryTab();
-  }
-
-  // Auto-init Meta Call
-  if (tabName === 'metacall' && typeof MetaCall !== 'undefined') {
-    MetaCall.init();
-  }
-
-  // Auto-init Testing Groups
-  if (tabName === 'testinggroups' && typeof TestingGroups !== 'undefined') {
-    TestingGroups.init();
-  }
-
   // Scroll the tab nav into view so the user sees both the activated
   // pill and the new content immediately. Without this, clicking a
   // sub-tab while scrolled past the nav looks like nothing happened.

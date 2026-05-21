@@ -1195,6 +1195,15 @@ const BASE_PATH = './data/';
                         renderProxyQueue();
                         initializeProxyManualSearchInput();
                         break;
+                    case 'battle-journal':
+                        if (typeof openJournalHistoryTab === 'function') openJournalHistoryTab();
+                        break;
+                    case 'meta-call':
+                        if (typeof MetaCall !== 'undefined' && MetaCall && typeof MetaCall.init === 'function') MetaCall.init();
+                        break;
+                    case 'testing-groups':
+                        if (typeof TestingGroups !== 'undefined' && TestingGroups && typeof TestingGroups.init === 'function') TestingGroups.init();
+                        break;
                 }
             }
 

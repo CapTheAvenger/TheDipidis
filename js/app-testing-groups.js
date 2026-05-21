@@ -786,8 +786,7 @@ window.TestingGroups = (function () {
         const data = groupSnap.data() || {};
         if ((data.memberUids || []).includes(u.uid)) {
           await loadMyGroups();
-          if (typeof switchTabAndUpdateMenu === 'function') switchTabAndUpdateMenu('profile');
-          if (typeof switchProfileTab === 'function') switchProfileTab('testinggroups');
+          if (typeof switchTabAndUpdateMenu === 'function') switchTabAndUpdateMenu('testing-groups');
           await openGroup(groupId);
           return;
         }
@@ -1013,10 +1012,10 @@ window.TestingGroups = (function () {
       console.warn('[TestingGroups] MetaCall preload failed, trying anyway', err);
     }
     const result = window.MetaCall._testingGroupLoad(g.data);
-    // Jump to the MetaCall tab so the user sees the imported data
+    // Jump to the Meta Call tab so the user sees the imported data
     // immediately instead of having to navigate there manually.
-    if (typeof switchProfileTab === 'function') {
-      switchProfileTab('metacall');
+    if (typeof switchTabAndUpdateMenu === 'function') {
+      switchTabAndUpdateMenu('meta-call');
     }
     const summary = (result && typeof result === 'object')
       ? t('tg.loadedIntoMetaCallSummary')
@@ -1074,7 +1073,7 @@ window.TestingGroups = (function () {
   }
 
   function renderAll() {
-    const container = document.getElementById('profile-testinggroups');
+    const container = document.getElementById('testing-groups');
     if (!container) return;
     if (!_currentUser()) {
       container.innerHTML = `<div class="tg-empty">${_esc(t('tg.signInRequired'))}</div>`;
@@ -1089,7 +1088,7 @@ window.TestingGroups = (function () {
   }
 
   function _renderGroupList() {
-    const container = document.getElementById('profile-testinggroups');
+    const container = document.getElementById('testing-groups');
     if (!container) return;
     const list = _myGroups.map(g => `
       <div class="tg-list-item">
@@ -1134,7 +1133,7 @@ window.TestingGroups = (function () {
   }
 
   function _renderGroupDetail() {
-    const container = document.getElementById('profile-testinggroups');
+    const container = document.getElementById('testing-groups');
     const g = _currentGroup;
     if (!container || !g) return;
 

@@ -4200,7 +4200,7 @@ window.MetaCall = (function () {
 
   // ── Full Render ────────────────────────────────────────────
   function renderAll() {
-    const container = document.getElementById('profile-metacall');
+    const container = document.getElementById('meta-call');
     if (!container || !_shareList) return;
     const field = buildField();
     // Date-window control — duplicates the picker in Card Analysis so
@@ -4633,7 +4633,7 @@ window.MetaCall = (function () {
   }
 
   function refreshResults() {
-    const container = document.getElementById('profile-metacall');
+    const container = document.getElementById('meta-call');
     if (!container || !_shareList) return;
     const field = buildField();
     const fieldTbody = container.querySelector('.metacall-table tbody');
@@ -6195,7 +6195,7 @@ window.MetaCall = (function () {
 
   // ── Public Init ────────────────────────────────────────────
   async function init() {
-    const container = document.getElementById('profile-metacall');
+    const container = document.getElementById('meta-call');
     if (!container) return;
     if (_shareList && _matchupMap) { renderAll(); return; }
 

@@ -30,6 +30,9 @@ const translations = {
     'menu.profile':           'My Profile',
     'menu.howToUse':          'How to Use',
     'menu.metaView':          'Meta Analysis',
+    'menu.metaCall':          'Meta Call',
+    'menu.battleJournal':     'Battle Journal',
+    'menu.testingGroups':     'Testing Groups',
 
     // ── Tab labels ───────────────────────────────────────────
     'tab.metaAnalysis':       'Meta & Deck Analysis',

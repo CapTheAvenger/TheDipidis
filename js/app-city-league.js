@@ -1567,7 +1567,49 @@
             const dateToEl = document.getElementById('cityLeagueDateTo');
             const dateFrom = dateFromEl ? dateFromEl.value : '';
             const dateTo = dateToEl ? dateToEl.value : '';
-            
+
+            // iOS Safari ignores HTML5 min/max on <input type="date"> — the
+            // picker shows out-of-range days as selectable. Re-validate in JS
+            // against the bounds we wrote in _updateCityLeagueDateRangeHints
+            // so users get an explicit error instead of a silently truncated
+            // result set (picker said "available 14.3–6.5" but allowed
+            // 19.05 → filter applied to the 5.5–6.5 intersection and showed
+            // 25 decks with no indication the upper half of the range was
+            // out of bounds).
+            const minBound = (dateFromEl && dateFromEl.min) || '';
+            const maxBound = (dateFromEl && dateFromEl.max) || '';
+            const fmtDate = iso => {
+                const m = iso.match(/^(\d{4})-(\d{2})-(\d{2})/);
+                return m ? `${parseInt(m[3], 10)}.${parseInt(m[2], 10)}.${m[1]}` : iso;
+            };
+            const errors = [];
+            if (dateFrom && minBound && dateFrom < minBound) {
+                errors.push(`From-Datum ${fmtDate(dateFrom)} liegt vor dem ersten verfügbaren Turnier (${fmtDate(minBound)}).`);
+            }
+            if (dateFrom && maxBound && dateFrom > maxBound) {
+                errors.push(`From-Datum ${fmtDate(dateFrom)} liegt nach dem letzten verfügbaren Turnier (${fmtDate(maxBound)}).`);
+            }
+            if (dateTo && minBound && dateTo < minBound) {
+                errors.push(`To-Datum ${fmtDate(dateTo)} liegt vor dem ersten verfügbaren Turnier (${fmtDate(minBound)}).`);
+            }
+            if (dateTo && maxBound && dateTo > maxBound) {
+                errors.push(`To-Datum ${fmtDate(dateTo)} liegt nach dem letzten verfügbaren Turnier (${fmtDate(maxBound)}).`);
+            }
+            if (dateFrom && dateTo && dateFrom > dateTo) {
+                errors.push(`From-Datum (${fmtDate(dateFrom)}) liegt nach dem To-Datum (${fmtDate(dateTo)}).`);
+            }
+            const statusEl = document.getElementById('cityLeagueDateFilterStatus');
+            if (errors.length > 0) {
+                if (statusEl) {
+                    statusEl.textContent = errors.join(' ') + ' Filter wurde nicht angewendet.';
+                    statusEl.className = 'city-league-status color-red-light';
+                }
+                // Leave the previous valid filter state (if any) untouched —
+                // don't silently widen the dataset on the user just because
+                // they typo'd a new date.
+                return;
+            }
+
             // Set filter active if at least one date is set
             if (dateFrom || dateTo) {
                 window.cityLeagueDateFilterActive = true;
@@ -1577,9 +1619,9 @@
                 // If both dates are cleared, disable filter
                 window.cityLeagueDateFilterActive = false;
             }
-            
+
             updateCityLeagueDateFilterStatus();
-            
+
             const selectedArchetype = refreshCityLeagueDeckSelect();
             if (selectedArchetype) {
                 loadCityLeagueDeckData(selectedArchetype);

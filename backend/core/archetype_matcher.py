@@ -56,10 +56,38 @@ def normalize_slug(slug: str) -> str:
     return (slug or "").strip().lower().replace(" ", "-")
 
 
+import re as _re
+_MEGA_RE = _re.compile(r'^(.+?)-mega(-.+)?$|^mega-(.+)$')
+
+
+def _canonicalize_mega(slug: str) -> str:
+    """Collapse "lucario-mega" and "mega-lucario" into the same form.
+
+    Limitless serves Mega-form Pokemon as the SUFFIX slug "lucario-mega",
+    but the City League scraper pipeline (fix_mega_pokemon_name) rewrites
+    them to the PREFIX form "mega lucario" → slug "mega-lucario" before
+    the matcher sees them. Without this canonicalization, the JSON-side
+    signature (suffix form) and the scraper-side signature (prefix form)
+    don't collide — the matcher misses every Mega lookup → fallback to
+    normalize_archetype_name introduces orphan name variants that the
+    frontend can't join against archetype_icons.json. Both forms now
+    collapse to "mega-X" with an optional form-suffix preserved
+    (e.g. "charizard-mega-x" → "mega-charizard-x")."""
+    m = _MEGA_RE.match(slug)
+    if not m:
+        return slug
+    if m.group(3):
+        return f'mega-{m.group(3)}'
+    base, form = m.group(1), m.group(2) or ''
+    return f'mega-{base}{form}'
+
+
 def signature(slugs: List[str]) -> Tuple[str, ...]:
     """Stable cross-source key for a set of Pokemon slugs.
-    Sorted so argument order doesn't matter; tuple so it's hashable."""
-    return tuple(sorted(normalize_slug(s) for s in slugs if s))
+    Sorted so argument order doesn't matter; tuple so it's hashable.
+    Mega-form slugs collapse via _canonicalize_mega so suffix and prefix
+    notations match."""
+    return tuple(sorted(_canonicalize_mega(normalize_slug(s)) for s in slugs if s))
 
 
 # ── Index build ──────────────────────────────────────────────────────────────

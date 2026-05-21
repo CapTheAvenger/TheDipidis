@@ -3083,14 +3083,24 @@
                     ? `<div class="deck-card-pin-badge" title="${pinTitle}">📌</div>`
                     : '';
 
+                const isExcluded = (typeof isExcludedCard === 'function') && isExcludedCard('cityLeague', cardName);
+                const excludedClass = isExcluded ? ' card-is-excluded' : '';
+                const excludeTitle = isExcluded
+                    ? (t('deck.excludeTitleUnexclude') || 'Un-exclude — let the algorithm consider this card again')
+                    : (t('deck.excludeTitleExclude') || 'Exclude — keep this card out of the next Consistency Generate');
+                const excludeBadgeHtml = isExcluded
+                    ? `<div class="deck-card-exclude-badge" title="${excludeTitle}">⛔</div>`
+                    : '';
+
                 cardHtmls.push({ pct: usagePct, isAceSpec: isAceSpecCard, html: `
-                    <div class="card-item city-league-card-item${pinnedClass}" data-card-name="${cardName.toLowerCase()}" data-card-name-de="${germanCardNameEscaped}" data-card-set="${setCode.toLowerCase()}" data-card-number="${setNumber.toLowerCase()}" data-card-type="${filterCategory}">
+                    <div class="card-item city-league-card-item${pinnedClass}${excludedClass}" data-card-name="${cardName.toLowerCase()}" data-card-name-de="${germanCardNameEscaped}" data-card-set="${setCode.toLowerCase()}" data-card-number="${setNumber.toLowerCase()}" data-card-type="${filterCategory}">
                         <div class="card-image-container city-league-card-image-container">
                             <img src="${imageUrl}" alt="${cardName}" loading="lazy" referrerpolicy="no-referrer" class="city-league-card-image" onerror="handleCardImageError(this, '${setCode}', '${setNumber}')" onclick="if (typeof event !== 'undefined' && event) event.stopPropagation(); showSingleCard(this.src, '${cardNameEscaped} (${setCode} ${setNumber})');">
                             ${usageBarHtml}
                             <!-- Red badge: Max Count (top-right) -->
                             <div class="city-league-card-badge city-league-card-badge-max">${finalMaxCount}</div>
                             ${pinBadgeHtml}
+                            ${excludeBadgeHtml}
                             ${typeof getWishlistBadgeHtml === 'function' ? getWishlistBadgeHtml(cardName, setCode, setNumber) : ''}
                             <!-- Green badge: Deck Count (top-left) - only show if > 0 -->
                             ${deckCount > 0 ? `<div class="city-league-card-badge city-league-card-badge-deck">${deckCount}</div>` : ''}
@@ -3103,13 +3113,16 @@
                                     ${resolvedPercentage > 0 ? `<div class="city-league-card-avg-mobile">Ø ${avgCountInUsedDecks}x (${avgCountOverall}x)</div>` : ''}
                                     <div class="city-league-card-deck-stats-mobile">${decksWithCardDisplay}/${totalDecksDisplay} (${percentage}%)</div>
                                 </div>
-                                <!-- Card Actions: Row 1 = - ★ + | Row 2 = L + Cardmarket -->
+                                <!-- Card Actions: Row 1 = - + ★ | Row 2 = INCL + EXCL | Row 3 = L + P + Cardmarket -->
                                 <div class="card-action-buttons city-league-card-action-buttons">
                                     <div class="city-league-card-action-row">
                                         <button class="city-league-card-action-btn city-league-card-remove-btn" onclick="event.stopPropagation(); removeCardFromDeck('cityLeague', '${cardNameEscaped}')" title="${t('cl.removeFromDeck')}">-</button>
-                                        <button class="city-league-card-action-btn city-league-card-rarity-btn" onclick="event.stopPropagation(); openRaritySwitcher('${cardNameEscaped}', '${cardNameEscaped} (${setCode} ${setNumber})')" title="${t('cl.switchPrint')}">★</button>
-                                        <button class="city-league-card-action-btn city-league-card-pin-btn${isPinned ? ' is-active' : ''}" onclick="event.stopPropagation(); togglePinCard('cityLeague', '${cardNameEscaped}')" title="${pinTitle}">${pinIcon}</button>
                                         <button class="city-league-card-action-btn city-league-card-add-btn" onclick="event.stopPropagation(); addCardToDeck('cityLeague', '${cardNameEscaped}', '${setCode}', '${setNumber}')" title="${t('cl.addToDeckTooltip')}">+</button>
+                                        <button class="city-league-card-action-btn city-league-card-rarity-btn" onclick="event.stopPropagation(); openRaritySwitcher('${cardNameEscaped}', '${cardNameEscaped} (${setCode} ${setNumber})')" title="${t('cl.switchPrint')}">★</button>
+                                    </div>
+                                    <div class="city-league-card-action-row city-league-card-action-row-incl-excl">
+                                        <button class="city-league-card-action-btn city-league-card-pin-btn${isPinned ? ' is-active' : ''}" onclick="event.stopPropagation(); togglePinCard('cityLeague', '${cardNameEscaped}')" title="${pinTitle}">INCL</button>
+                                        <button class="city-league-card-action-btn city-league-card-exclude-btn${isExcluded ? ' is-active' : ''}" onclick="event.stopPropagation(); toggleExcludeCard('cityLeague', '${cardNameEscaped}')" title="${excludeTitle}">EXCL</button>
                                     </div>
                                     <div class="city-league-card-action-row">
                                         ${setCode && setNumber ? `<button class="city-league-card-action-btn city-league-card-limitless-btn" onclick="event.stopPropagation(); openLimitlessCard('${setCode}', '${setNumber}')" title="${t('cl.openLimitless')}">L</button>` : '<span></span>'}

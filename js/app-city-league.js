@@ -2210,19 +2210,35 @@
             // analysis scraper's per-tournament cap and won't close
             // without a scraper-policy change.
             const analysisAggregated = parseInt(deckCards[0]?.total_decks_in_archetype || 0, 10);
-            const cardStatsDenom = analysisAggregated
-                || archetypeStats.decksCount
-                || getSelectedCityLeagueDeckCount(archetype)
-                || getCityLeagueDeckCountFallback(archetype)
-                || 0;
-            let displayDecksCount = archetypeStats.decksCount
-                || getSelectedCityLeagueDeckCount(archetype)
-                || analysisAggregated
-                || getCityLeagueDeckCountFallback(archetype);
-            if (!displayDecksCount || displayDecksCount <= 0) {
-                displayDecksCount = '-';
+            // Date-filter scope is authoritative: if the user narrowed to a
+            // window with zero matches, both tiles must read 0 (or "-") —
+            // falling back to the unfiltered dropdown label here showed the
+            // user "463 decks" alongside "0 / 0 cards" for a date range with
+            // no tournaments. The wider-scope fallbacks below are only safe
+            // when no filter is active.
+            const isDateFilterActive = !!window.cityLeagueDateFilterActive;
+            const cardStatsDenom = isDateFilterActive
+                ? (archetypeStats.decksCount || analysisAggregated || 0)
+                : (analysisAggregated
+                    || archetypeStats.decksCount
+                    || getSelectedCityLeagueDeckCount(archetype)
+                    || getCityLeagueDeckCountFallback(archetype)
+                    || 0);
+            let displayDecksCount;
+            if (isDateFilterActive) {
+                displayDecksCount = archetypeStats.decksCount > 0
+                    ? archetypeStats.decksCount
+                    : '-';
+            } else {
+                displayDecksCount = archetypeStats.decksCount
+                    || getSelectedCityLeagueDeckCount(archetype)
+                    || analysisAggregated
+                    || getCityLeagueDeckCountFallback(archetype);
+                if (!displayDecksCount || displayDecksCount <= 0) {
+                    displayDecksCount = '-';
+                }
             }
-            devLog(`Deck counts — display=${displayDecksCount}, cardStatsDenom=${cardStatsDenom} (analysis=${analysisAggregated}, archetypes=${archetypeStats.decksCount})`);
+            devLog(`Deck counts — display=${displayDecksCount}, cardStatsDenom=${cardStatsDenom} (analysis=${analysisAggregated}, archetypes=${archetypeStats.decksCount}, dateFilter=${isDateFilterActive})`);
 
             // Calculate average placement from archetypes data
             const avgPlacement = archetypeStats.avgPlacement;

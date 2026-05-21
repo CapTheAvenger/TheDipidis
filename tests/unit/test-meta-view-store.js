@@ -164,33 +164,40 @@ describe('controller: switchFormat preserves selection when archetype available'
     });
 });
 
-describe('feature-flag: isMetaViewV2Enabled (URL-only)', () => {
+describe('feature-flag: isMetaViewV2Enabled (URL-only, default-ON since Phase B)', () => {
     beforeEach(() => {
         global.window.location = { href: 'http://localhost/' };
         global.window.localStorage.removeItem('IA_V2');
     });
 
-    it('default false (no URL param)', async () => {
-        const { isMetaViewV2Enabled } = await import('../../js/modules/meta-view/feature-flag.js');
-        assert.equal(isMetaViewV2Enabled(), false);
-    });
-
-    it('?ia=v2 URL param enables', async () => {
-        global.window.location = { href: 'http://localhost/?ia=v2' };
+    it('default true (no URL param — v2 is the default since Phase B)', async () => {
         const { isMetaViewV2Enabled } = await import('../../js/modules/meta-view/feature-flag.js');
         assert.equal(isMetaViewV2Enabled(), true);
     });
 
-    it('?ia=v1 URL param disables (explicit kill-switch)', async () => {
+    it('?ia=v1 URL param disables (kill-switch / bug-report escape hatch)', async () => {
         global.window.location = { href: 'http://localhost/?ia=v1' };
         const { isMetaViewV2Enabled } = await import('../../js/modules/meta-view/feature-flag.js');
         assert.equal(isMetaViewV2Enabled(), false);
     });
 
-    it('localStorage IA_V2 alone does NOT enable (URL-only since 2026-05-20)', async () => {
+    it('?ia=v2 URL param enables (idempotent — same as default, kept for old bookmarks)', async () => {
+        global.window.location = { href: 'http://localhost/?ia=v2' };
+        const { isMetaViewV2Enabled } = await import('../../js/modules/meta-view/feature-flag.js');
+        assert.equal(isMetaViewV2Enabled(), true);
+    });
+
+    it('?ia=garbage falls back to default (= true)', async () => {
+        global.window.location = { href: 'http://localhost/?ia=anything' };
+        const { isMetaViewV2Enabled } = await import('../../js/modules/meta-view/feature-flag.js');
+        assert.equal(isMetaViewV2Enabled(), true);
+    });
+
+    it('localStorage IA_V2 has no effect (URL-only since 2026-05-20)', async () => {
         global.window.localStorage.setItem('IA_V2', '1');
         const { isMetaViewV2Enabled } = await import('../../js/modules/meta-view/feature-flag.js');
-        assert.equal(isMetaViewV2Enabled(), false);
+        // Default is true regardless of localStorage.
+        assert.equal(isMetaViewV2Enabled(), true);
     });
 
     it('setMetaViewV2 is a no-op (legacy compat — does not mutate URL)', async () => {

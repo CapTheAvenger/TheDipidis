@@ -593,14 +593,13 @@
             </div>
 
             <!-- Wave-2 IA-Refactor: consolidated Meta Analysis tab (5 → 1).
-                 Activated only when isMetaViewV2Enabled() returns true (URL
-                 ?ia=v2 or localStorage IA_V2=1). Until then it's just an
-                 inert <div class="tab-content"> (no .active, never shown by
-                 the legacy switchTab()). When v2 is on, the bootstrap in
-                 js/modules/meta-view/bootstrap.js wires the segmented
-                 control + list/detail panels. Step 2 (this commit) ships
-                 the scaffold; step 3 renders the deck list; step 4 the
-                 detail drilldown. -->
+                 Phase B (since 2026-05-21): this is the DEFAULT meta UI.
+                 ?ia=v1 forces legacy as a kill-switch for bug reports.
+                 The bootstrap in js/modules/meta-view/bootstrap.js wires
+                 the segmented control + list/detail panels and reparents
+                 the legacy meta tabs (#current-meta, #city-league,
+                 #past-meta, *-analysis) into the list/detail containers
+                 below. Phase C will delete the legacy tabs from source. -->
             <div id="meta-view" class="tab-content">
                 <div class="meta-view-header">
                     <h2 class="meta-view-title">

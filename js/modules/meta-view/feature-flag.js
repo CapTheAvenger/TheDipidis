@@ -1,32 +1,26 @@
 // @ts-check
 /**
- * meta-view/feature-flag.js — opt-in toggle for the Wave-2 IA-Refactor.
+ * meta-view/feature-flag.js — toggle for the Wave-2 IA-Refactor.
  *
- * During the development cutover, the new consolidated "Meta Analysis"
- * tab (the 5-→-1 merge) ships ALONGSIDE the existing 5 separate tabs
- * behind this flag. The legacy UI stays default while the new one is
- * being verified.
+ * Phase B (2026-05-21): v2 is the default. ?ia=v1 is the kill-switch.
  *
- * How to enable v2
- * ----------------
- *   URL query param only:  https://thedipidis.app/?ia=v2
+ *   - no URL param   → v2 (default)
+ *   - ?ia=v1         → legacy UI (escape hatch for bug reports)
+ *   - ?ia=v2         → v2 (explicit; same as default — kept so old
+ *                       bookmarks/share-links don't break)
  *
- * Pre-2026-05-20: localStorage was also accepted as a persistence
- * mechanism. Removed because the IA reparenting is invasive (legacy
- * tabs get moved into the consolidated container, their `tab-content`
- * class stripped). Once a user enables v2, they couldn't easily go
- * back to v1 in the same browser without clearing localStorage. Making
- * the flag URL-only means closing+reopening the tab returns the user
- * to the safe default — no permanent state on disk.
+ * Phase history
+ * -------------
+ *   - Phase A (pre-2026-05-21): default-OFF, opt-in via ?ia=v2
+ *   - Phase B (now)            : default-ON, ?ia=v1 escape hatch
+ *   - Phase C (planned)        : legacy UI deleted, this flag removed
  *
- * Setting ?ia=v1 explicitly forces legacy UI (idempotent no-op since
- * legacy IS the default; kept as a kill-switch for bug reports).
- *
- * Lifecycle (planned)
- * -------------------
- *   - Phase A (now)        : flag default-OFF; URL-param-only opt-in
- *   - Phase B (when stable): flag default-ON; ?ia=v1 escape hatch
- *   - Phase C (cleanup)    : legacy UI deleted from the source tree
+ * Why URL-only (no localStorage)?
+ *   The IA reparenting is invasive — legacy tabs get moved into the
+ *   consolidated container and lose their `tab-content` class.
+ *   Persisting the flag on disk would trap users who flipped it via
+ *   devtools. URL-only means closing+reopening returns to the safe
+ *   default (which is now v2).
  */
 
 const QUERY_KEY = 'ia';
@@ -36,10 +30,11 @@ export function isMetaViewV2Enabled() {
     try {
         const url = new URL(window.location.href);
         const q = url.searchParams.get(QUERY_KEY);
-        return q === 'v2';
+        // Default-ON. Only the explicit kill-switch ?ia=v1 forces legacy.
+        return q !== 'v1';
     } catch (_) {
-        // URL parse failed (file:// + jsdom oddities) — default to v1.
-        return false;
+        // URL parse failed (file:// + jsdom oddities) — default to v2.
+        return true;
     }
 }
 
@@ -57,8 +52,7 @@ export function setMetaViewV2(/** @type {boolean} */ _enabled) {
 /** @type {any} */ (window).setMetaViewV2 = setMetaViewV2;
 
 // Also actively CLEAR any stale localStorage left over from earlier
-// testing — guarantees no user gets stuck in v2 mode by accident.
+// testing — guarantees no user gets stuck via accidental state.
 try {
     window.localStorage.removeItem('IA_V2');
 } catch (_) { /* localStorage disabled — silent */ }
-

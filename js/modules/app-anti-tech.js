@@ -26,12 +26,12 @@
 
 // Module state. Both Sets are recreated on openAntiTechModal so
 // stale picks from a previous session never leak in.
-let _source         = null;
-let _step           = 1;
-let _targets        = new Set();   // lower-cased archetype names
-let _targetDisplay  = new Map();   // lower-cased → original case
-let _suggestedCards = [];          // [{name, threatCategories, targets, counterScore}]
-let _selectedCards  = new Set();   // lower-cased card names
+let _source = null;
+let _step = 1;
+let _targets = new Set(); // lower-cased archetype names
+let _targetDisplay = new Map(); // lower-cased → original case
+let _suggestedCards = []; // [{name, threatCategories, targets, counterScore}]
+let _selectedCards = new Set(); // lower-cased card names
 
 function _t(key, fallback) {
     return (typeof t === 'function' ? t(key) : null) || fallback;
@@ -46,7 +46,9 @@ const TECH_SLOTS_HARD_CAP = 10;
 
 function _normKey(s) {
     if (typeof normalizeCardName === 'function') return normalizeCardName(s || '');
-    return String(s || '').toLowerCase().trim();
+    return String(s || '')
+        .toLowerCase()
+        .trim();
 }
 
 function _getMetaCallField() {
@@ -62,17 +64,20 @@ function _getAllDeckNames() {
 }
 
 function _readAggression() {
-    const checked = /** @type {HTMLInputElement | null} */ (document.querySelector('input[name="antiTechAggression"]:checked'));
+    const checked = /** @type {HTMLInputElement | null} */ (
+        document.querySelector('input[name="antiTechAggression"]:checked')
+    );
     return (checked && checked.value) || 'standard';
 }
 
 function _ensureActiveThreats() {
     if (typeof window === 'undefined') return Promise.resolve(null);
-    if (window._activeThreatsCache !== undefined) return Promise.resolve(window._activeThreatsCache);
+    if (window._activeThreatsCache !== undefined)
+        return Promise.resolve(window._activeThreatsCache);
     return fetch('data/active_threats.json', { cache: 'no-cache' })
-        .then(r => r.ok ? r.json() : null)
+        .then((r) => (r.ok ? r.json() : null))
         .catch(() => null)
-        .then(data => {
+        .then((data) => {
             window._activeThreatsCache = data;
             return data;
         });
@@ -93,7 +98,9 @@ function _wrClass(wr) {
 }
 
 function _stripEx(name) {
-    return String(name || '').replace(/\s+ex\b/i, '').trim();
+    return String(name || '')
+        .replace(/\s+ex\b/i, '')
+        .trim();
 }
 
 // Build Map<opponentNameLower → wr> from currentMetaMatchupData
@@ -103,13 +110,15 @@ function _stripEx(name) {
 // matchup data isn't available yet.
 function _wrByOpponentForUser() {
     const map = new Map();
-    const rows = (typeof window !== 'undefined') ? window.currentMetaMatchupData : null;
+    const rows = typeof window !== 'undefined' ? window.currentMetaMatchupData : null;
     const userArch = (typeof window !== 'undefined' && window.currentMetaArchetype) || null;
     if (!Array.isArray(rows) || !userArch) return map;
-    const userLower    = userArch.trim().toLowerCase();
+    const userLower = userArch.trim().toLowerCase();
     const userStripped = _stripEx(userArch).toLowerCase();
     for (const r of rows) {
-        const d = String(r.deck_name || '').trim().toLowerCase();
+        const d = String(r.deck_name || '')
+            .trim()
+            .toLowerCase();
         if (d !== userLower && d !== userStripped) continue;
         const opp = String(r.opponent || '').trim();
         if (!opp) continue;
@@ -126,9 +135,10 @@ function _populateQuickPicks() {
     if (!wrap) return;
     const field = _getMetaCallField().slice(0, QUICK_PICK_LIMIT);
     if (field.length === 0) {
-        wrap.innerHTML = `<div class="anti-tech-quick-picks-empty">${
-            _t('antiTech.quickPicksEmpty', 'Meta Call field unavailable — open the Meta Call tab once to populate quick picks, then come back.')
-        }</div>`;
+        wrap.innerHTML = `<div class="anti-tech-quick-picks-empty">${_t(
+            'antiTech.quickPicksEmpty',
+            'Meta Call field unavailable — open the Meta Call tab once to populate quick picks, then come back.'
+        )}</div>`;
         return;
     }
     // Pull WR for each opponent from the matchup CSV so the user
@@ -137,14 +147,15 @@ function _populateQuickPicks() {
     // Without this the picker shows only popularity, which is
     // exactly what the user reported as confusing in the v0 release.
     const wrByOpp = _wrByOpponentForUser();
-    wrap.innerHTML = field.map(d => {
-        const name = String(d.name || '').trim();
-        const sharePct = (d.finalShare || 0);
-        const wr = wrByOpp.get(name.toLowerCase());
-        const wrText = (wr != null) ? wr.toFixed(1) + '%' : '—';
-        const wrCls  = _wrClass(wr);
-        const isOn = _targets.has(name.toLowerCase());
-        return `<button type="button"
+    wrap.innerHTML = field
+        .map((d) => {
+            const name = String(d.name || '').trim();
+            const sharePct = d.finalShare || 0;
+            const wr = wrByOpp.get(name.toLowerCase());
+            const wrText = wr != null ? wr.toFixed(1) + '%' : '—';
+            const wrCls = _wrClass(wr);
+            const isOn = _targets.has(name.toLowerCase());
+            return `<button type="button"
                         class="anti-tech-quick-pick${isOn ? ' is-active' : ''}"
                         data-target="${name.replace(/"/g, '&quot;')}">
             <span class="anti-tech-quick-pick-name">${name}</span>
@@ -153,8 +164,9 @@ function _populateQuickPicks() {
                 <span class="mc-vs-pill ${wrCls} anti-tech-quick-pick-wr" title="${_t('antiTech.wrTooltip', 'Your current win rate against this deck — red means tech priority')}">${wrText}</span>
             </span>
         </button>`;
-    }).join('');
-    wrap.querySelectorAll('.anti-tech-quick-pick').forEach(btnEl => {
+        })
+        .join('');
+    wrap.querySelectorAll('.anti-tech-quick-pick').forEach((btnEl) => {
         const btn = /** @type {HTMLElement} */ (btnEl);
         btn.addEventListener('click', () => _toggleTarget(btn.dataset.target));
     });
@@ -163,31 +175,44 @@ function _populateQuickPicks() {
 function _renderSuggestions(query) {
     const suggestionsEl = document.getElementById('antiTechSuggestions');
     if (!suggestionsEl) return;
-    const q = String(query || '').trim().toLowerCase();
+    const q = String(query || '')
+        .trim()
+        .toLowerCase();
     if (!q) {
         suggestionsEl.innerHTML = '';
         return;
     }
     const names = _getAllDeckNames();
     const matches = names
-        .filter(n => n && String(n).toLowerCase().includes(q) && !_targets.has(String(n).toLowerCase()))
+        .filter(
+            (n) =>
+                n && String(n).toLowerCase().includes(q) && !_targets.has(String(n).toLowerCase())
+        )
         .slice(0, 10);
     if (matches.length === 0) {
-        suggestionsEl.innerHTML = `<div class="anti-tech-suggestion-empty">${
-            _t('antiTech.autocompleteEmpty', 'No archetype matches that query.')
-        }</div>`;
+        suggestionsEl.innerHTML = `<div class="anti-tech-suggestion-empty">${_t(
+            'antiTech.autocompleteEmpty',
+            'No archetype matches that query.'
+        )}</div>`;
         return;
     }
-    suggestionsEl.innerHTML = matches.map(name => {
-        const safe = String(name).replace(/"/g, '&quot;');
-        return `<button type="button" class="anti-tech-suggestion" data-target="${safe}">${name}</button>`;
-    }).join('');
-    suggestionsEl.querySelectorAll('.anti-tech-suggestion').forEach(btnEl => {
+    suggestionsEl.innerHTML = matches
+        .map((name) => {
+            const safe = String(name).replace(/"/g, '&quot;');
+            return `<button type="button" class="anti-tech-suggestion" data-target="${safe}">${name}</button>`;
+        })
+        .join('');
+    suggestionsEl.querySelectorAll('.anti-tech-suggestion').forEach((btnEl) => {
         const btn = /** @type {HTMLElement} */ (btnEl);
         btn.addEventListener('click', () => {
             _toggleTarget(btn.dataset.target);
-            const input = /** @type {HTMLInputElement | null} */ (document.getElementById('antiTechCustomInput'));
-            if (input) { input.value = ''; suggestionsEl.innerHTML = ''; }
+            const input = /** @type {HTMLInputElement | null} */ (
+                document.getElementById('antiTechCustomInput')
+            );
+            if (input) {
+                input.value = '';
+                suggestionsEl.innerHTML = '';
+            }
         });
     });
 }
@@ -212,20 +237,23 @@ function _renderChips() {
     const wrap = document.getElementById('antiTechSelectedChips');
     if (!wrap) return;
     if (_targets.size === 0) {
-        wrap.innerHTML = `<div class="anti-tech-chips-empty">${
-            _t('antiTech.chipsEmpty', 'No targets picked yet. Tap a quick pick below or type a deck name.')
-        }</div>`;
+        wrap.innerHTML = `<div class="anti-tech-chips-empty">${_t(
+            'antiTech.chipsEmpty',
+            'No targets picked yet. Tap a quick pick below or type a deck name.'
+        )}</div>`;
         return;
     }
-    wrap.innerHTML = Array.from(_targets).map(k => {
-        const display = _targetDisplay.get(k) || k;
-        const safe = display.replace(/"/g, '&quot;');
-        return `<span class="anti-tech-chip" data-target="${safe}">
+    wrap.innerHTML = Array.from(_targets)
+        .map((k) => {
+            const display = _targetDisplay.get(k) || k;
+            const safe = display.replace(/"/g, '&quot;');
+            return `<span class="anti-tech-chip" data-target="${safe}">
             <span class="anti-tech-chip-label">${display}</span>
             <button type="button" class="anti-tech-chip-x" data-target="${safe}" aria-label="Remove">×</button>
         </span>`;
-    }).join('');
-    wrap.querySelectorAll('.anti-tech-chip-x').forEach(btnEl => {
+        })
+        .join('');
+    wrap.querySelectorAll('.anti-tech-chip-x').forEach((btnEl) => {
         const btn = /** @type {HTMLElement} */ (btnEl);
         btn.addEventListener('click', (e) => {
             e.stopPropagation();
@@ -235,26 +263,33 @@ function _renderChips() {
 }
 
 function _updateContinueButton() {
-    const btn = /** @type {HTMLButtonElement | null} */ (document.getElementById('antiTechContinueBtn'));
+    const btn = /** @type {HTMLButtonElement | null} */ (
+        document.getElementById('antiTechContinueBtn')
+    );
     if (!btn) return;
     btn.disabled = _targets.size === 0;
     const tpl = _t('antiTech.continueBtnCount', 'Continue → Pick Tech Cards ({n})');
-    btn.textContent = _targets.size > 0
-        ? tpl.replace('{n}', _targets.size)
-        : (_t('antiTech.continueBtn', 'Continue → Pick Tech Cards'));
+    btn.textContent =
+        _targets.size > 0
+            ? tpl.replace('{n}', _targets.size)
+            : _t('antiTech.continueBtn', 'Continue → Pick Tech Cards');
 }
 
 function _bindInputs() {
-    const input = /** @type {(HTMLInputElement & { __antiTechBound?: boolean }) | null} */ (document.getElementById('antiTechCustomInput'));
+    const input = /** @type {(HTMLInputElement & { __antiTechBound?: boolean }) | null} */ (
+        document.getElementById('antiTechCustomInput')
+    );
     if (input && !input.__antiTechBound) {
         input.__antiTechBound = true;
-        input.addEventListener('input', (e) => _renderSuggestions(/** @type {HTMLInputElement} */ (e.target).value));
+        input.addEventListener('input', (e) =>
+            _renderSuggestions(/** @type {HTMLInputElement} */ (e.target).value)
+        );
         input.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {
                 e.preventDefault();
                 const q = (input.value || '').trim().toLowerCase();
                 const names = _getAllDeckNames();
-                const exact = names.find(n => String(n).toLowerCase() === q);
+                const exact = names.find((n) => String(n).toLowerCase() === q);
                 if (exact) {
                     _toggleTarget(exact);
                     input.value = '';
@@ -285,9 +320,13 @@ function _buildArchetypeCardMapLocal() {
     const map = new Map();
     for (const r of rows) {
         if (!r) continue;
-        const arch = String(r.archetype || '').trim().toLowerCase();
+        const arch = String(r.archetype || '')
+            .trim()
+            .toLowerCase();
         if (!arch) continue;
-        const set = String(r.set_code || '').toUpperCase().trim();
+        const set = String(r.set_code || '')
+            .toUpperCase()
+            .trim();
         const num = String(r.set_number || '').trim();
         if (!set || !num) continue;
         const key = `${set}|${num}`;
@@ -350,7 +389,7 @@ async function _computeCapabilityTechSuggestions() {
         }
     }
 
-    const lang = (typeof getLang === 'function') ? getLang() : 'en';
+    const lang = typeof getLang === 'function' ? getLang() : 'en';
     let detected;
     try {
         detected = await window.CardCapabilityEngine.detectMatchups({
@@ -394,7 +433,9 @@ async function _computeCapabilityTechSuggestions() {
             // readable category label. attack.ignores_effects →
             // ability.ex_immunity becomes "card-text: ex_immunity"
             const defTag = String(m.interactionTag || '').split('→')[1] || '';
-            const label = defTag ? `card-text: ${defTag.replace(/^ability\./, '').replace(/_/g, ' ')}` : 'card-text tech';
+            const label = defTag
+                ? `card-text: ${defTag.replace(/^ability\./, '').replace(/_/g, ' ')}`
+                : 'card-text tech';
             entry.threatCategories.add(label);
             entry.targets.add(targetName);
         }
@@ -406,9 +447,7 @@ async function _computeSuggestedCards() {
     const intel = await _ensureActiveThreats();
     if (!intel || !intel.threats || !intel.counters) return [];
     const aggression = _readAggression();
-    const shareFloor = aggression === 'heavy' ? 0.10
-                     : aggression === 'mild'  ? 0.25
-                     : 0.15;
+    const shareFloor = aggression === 'heavy' ? 0.1 : aggression === 'mild' ? 0.25 : 0.15;
 
     const byCard = new Map(); // nameLower → {name, threatCategories, targets, counterScore}
 
@@ -421,11 +460,14 @@ async function _computeSuggestedCards() {
             // Is this threat category present in the target deck
             // at the aggression-gated archetype-share floor?
             let usesCat = false;
-            for (const threatCard of (info.cards || [])) {
-                for (const arch of (threatCard.archetypes || [])) {
+            for (const threatCard of info.cards || []) {
+                for (const arch of threatCard.archetypes || []) {
                     if (String(arch.archetype || '').toLowerCase() !== targetLower) continue;
                     const share = parseFloat(arch.share_in_archetype || 0) || 0;
-                    if (share >= shareFloor) { usesCat = true; break; }
+                    if (share >= shareFloor) {
+                        usesCat = true;
+                        break;
+                    }
                 }
                 if (usesCat) break;
             }
@@ -436,9 +478,8 @@ async function _computeSuggestedCards() {
             // (NOT an object with a .cards member like threats
             // does) — `intel.counters.hand_disruption` is
             // directly [{card_id, card_name, card_type}, ...].
-            const counters = (intel.counters && Array.isArray(intel.counters[cat]))
-                ? intel.counters[cat]
-                : [];
+            const counters =
+                intel.counters && Array.isArray(intel.counters[cat]) ? intel.counters[cat] : [];
             for (const c of counters) {
                 const name = String(c.card_name || '').trim();
                 if (!name) continue;
@@ -482,8 +523,8 @@ async function _computeSuggestedCards() {
         const key = cap.name.toLowerCase();
         const existing = byCard.get(key);
         if (existing) {
-            cap.threatCategories.forEach(c => existing.threatCategories.add(c));
-            cap.targets.forEach(t => existing.targets.add(t));
+            cap.threatCategories.forEach((c) => existing.threatCategories.add(c));
+            cap.targets.forEach((t) => existing.targets.add(t));
             if (!existing.cardId && cap.cardId) existing.cardId = cap.cardId;
         } else {
             byCard.set(key, cap);
@@ -518,7 +559,7 @@ async function _computeSuggestedCards() {
     const userArch = _getCurrentArchetype();
     if (userArch) {
         const archCards = _archetypeCardsFromMap(userArch);
-        const archPoolNames = new Set(archCards.map(c => c.name.toLowerCase()));
+        const archPoolNames = new Set(archCards.map((c) => c.name.toLowerCase()));
         // Defense: when no pool data is available for the active
         // source (e.g. user is on cityLeague but currentMeta data
         // isn't loaded), skip the filter so the picker still
@@ -534,9 +575,13 @@ async function _computeSuggestedCards() {
                     byCard.delete(key);
                 }
             }
-            _devLog('archetype pool-only filter', `${userArch}`,
-                'pool size=', archPoolNames.size,
-                `${before} → ${byCard.size}`);
+            _devLog(
+                'archetype pool-only filter',
+                `${userArch}`,
+                'pool size=',
+                archPoolNames.size,
+                `${before} → ${byCard.size}`
+            );
         }
     }
 
@@ -557,16 +602,17 @@ function _getCurrentArchetype() {
     if (typeof window === 'undefined') return null;
     if (_source === 'currentMeta') return window.currentMetaArchetype || null;
     if (_source === 'cityLeague') return window.currentCityLeagueArchetype || null;
-    if (_source === 'pastMeta')   return window.pastMetaCurrentArchetype || null;
+    if (_source === 'pastMeta') return window.pastMetaCurrentArchetype || null;
     return null;
 }
 
 // Helper — get the cards array for an archetype name from the
 // archetypeCardMap, case-insensitive.
 function _archetypeCardsFromMap(archName) {
-    const map = (typeof window !== 'undefined' && window._archetypeCardMap)
-        ? window._archetypeCardMap
-        : _buildArchetypeCardMapLocal();
+    const map =
+        typeof window !== 'undefined' && window._archetypeCardMap
+            ? window._archetypeCardMap
+            : _buildArchetypeCardMapLocal();
     return map.get(String(archName || '').toLowerCase()) || [];
 }
 
@@ -582,7 +628,12 @@ function _getArchetypeEnergyTypes(archName) {
     const out = new Set();
     for (const r of rows) {
         if (!r) continue;
-        if (String(r.archetype || '').trim().toLowerCase() !== archLower) continue;
+        if (
+            String(r.archetype || '')
+                .trim()
+                .toLowerCase() !== archLower
+        )
+            continue;
         const type = String(r.type || '').trim();
         if (type !== 'Basic Energy') continue;
         const name = String(r.card_name || '').trim();
@@ -613,30 +664,32 @@ function _renderTechSuggestions() {
 
     if (targetsEl) {
         targetsEl.textContent = Array.from(_targets)
-            .map(k => _targetDisplay.get(k) || k)
+            .map((k) => _targetDisplay.get(k) || k)
             .join(', ');
     }
 
     if (_suggestedCards.length === 0) {
-        list.innerHTML = `<div class="anti-tech-card-empty">${
-            _t('antiTech.cardsEmpty', 'No counter cards found for the selected targets in active_threats.json. Try a different aggression preset or add a more meta-relevant target.')
-        }</div>`;
+        list.innerHTML = `<div class="anti-tech-card-empty">${_t(
+            'antiTech.cardsEmpty',
+            'No counter cards found for the selected targets in active_threats.json. Try a different aggression preset or add a more meta-relevant target.'
+        )}</div>`;
         return;
     }
 
-    list.innerHTML = _suggestedCards.map(c => {
-        const safe = c.name.replace(/"/g, '&quot;');
-        const targetsTxt = Array.from(c.targets).join(', ');
-        const catsTxt = Array.from(c.threatCategories).join(' · ');
-        const isOn = _selectedCards.has(c.name.toLowerCase());
-        // Thumbnail with on-tap full-card zoom. Wrapped in its own
-        // span so the tap doesn't toggle the checkbox label.
-        const imgUrl = _cardImageUrl(c.cardId);
-        const safeImgUrl = imgUrl ? imgUrl.replace(/"/g, '&quot;') : '';
-        const thumb = imgUrl
-            ? `<span class="anti-tech-card-thumb-wrap" data-card-img="${safeImgUrl}" data-card-name="${safe}" role="button" aria-label="Zoom card ${safe}" tabindex="0"><img class="anti-tech-card-thumb" src="${safeImgUrl}" alt="${safe}" loading="lazy"></span>`
-            : `<span class="anti-tech-card-thumb-wrap anti-tech-card-thumb-fallback" aria-hidden="true">?</span>`;
-        return `<label class="anti-tech-card-item${isOn ? ' is-selected' : ''}">
+    list.innerHTML = _suggestedCards
+        .map((c) => {
+            const safe = c.name.replace(/"/g, '&quot;');
+            const targetsTxt = Array.from(c.targets).join(', ');
+            const catsTxt = Array.from(c.threatCategories).join(' · ');
+            const isOn = _selectedCards.has(c.name.toLowerCase());
+            // Thumbnail with on-tap full-card zoom. Wrapped in its own
+            // span so the tap doesn't toggle the checkbox label.
+            const imgUrl = _cardImageUrl(c.cardId);
+            const safeImgUrl = imgUrl ? imgUrl.replace(/"/g, '&quot;') : '';
+            const thumb = imgUrl
+                ? `<span class="anti-tech-card-thumb-wrap" data-card-img="${safeImgUrl}" data-card-name="${safe}" role="button" aria-label="Zoom card ${safe}" tabindex="0"><img class="anti-tech-card-thumb" src="${safeImgUrl}" alt="${safe}" loading="lazy"></span>`
+                : `<span class="anti-tech-card-thumb-wrap anti-tech-card-thumb-fallback" aria-hidden="true">?</span>`;
+            return `<label class="anti-tech-card-item${isOn ? ' is-selected' : ''}">
             <input type="checkbox" class="anti-tech-card-check" data-card="${safe}" ${isOn ? 'checked' : ''}>
             ${thumb}
             <span class="anti-tech-card-body">
@@ -647,8 +700,9 @@ function _renderTechSuggestions() {
                 </span>
             </span>
         </label>`;
-    }).join('');
-    list.querySelectorAll('.anti-tech-card-check').forEach(boxEl => {
+        })
+        .join('');
+    list.querySelectorAll('.anti-tech-card-check').forEach((boxEl) => {
         const box = /** @type {HTMLInputElement} */ (boxEl);
         box.addEventListener('change', () => _toggleSuggestedCard(box.dataset.card, box.checked));
     });
@@ -656,7 +710,7 @@ function _renderTechSuggestions() {
     // modal so the user can read the card text without leaving the
     // wizard. Stop propagation so the surrounding <label> doesn't
     // toggle the checkbox when the user is just trying to inspect.
-    list.querySelectorAll('.anti-tech-card-thumb-wrap[data-card-img]').forEach(elNode => {
+    list.querySelectorAll('.anti-tech-card-thumb-wrap[data-card-img]').forEach((elNode) => {
         const el = /** @type {HTMLElement} */ (elNode);
         el.addEventListener('click', (e) => {
             e.preventDefault();
@@ -675,8 +729,12 @@ function _toggleSuggestedCard(cardName, checked) {
     if (checked) {
         if (_selectedCards.size >= TECH_SLOTS_HARD_CAP) {
             _selectedCards.delete(key);
-            const tpl = _t('antiTech.cardsCap', 'Tech slots are capped at {n}. Uncheck one before adding another.');
-            if (typeof showToast === 'function') showToast(tpl.replace('{n}', TECH_SLOTS_HARD_CAP), 'warning', 2500);
+            const tpl = _t(
+                'antiTech.cardsCap',
+                'Tech slots are capped at {n}. Uncheck one before adding another.'
+            );
+            if (typeof showToast === 'function')
+                showToast(tpl.replace('{n}', TECH_SLOTS_HARD_CAP), 'warning', 2500);
             _renderTechSuggestions();
             return;
         }
@@ -685,8 +743,10 @@ function _toggleSuggestedCard(cardName, checked) {
         _selectedCards.delete(key);
     }
     // Update is-selected class without re-rendering the whole list.
-    document.querySelectorAll('.anti-tech-card-item').forEach(el => {
-        const cb = /** @type {HTMLInputElement | null} */ (el.querySelector('.anti-tech-card-check'));
+    document.querySelectorAll('.anti-tech-card-item').forEach((el) => {
+        const cb = /** @type {HTMLInputElement | null} */ (
+            el.querySelector('.anti-tech-card-check')
+        );
         if (!cb) return;
         el.classList.toggle('is-selected', cb.checked);
     });
@@ -694,7 +754,9 @@ function _toggleSuggestedCard(cardName, checked) {
 }
 
 function _updateBuildButton() {
-    const btn = /** @type {HTMLButtonElement | null} */ (document.getElementById('antiTechBuildBtn'));
+    const btn = /** @type {HTMLButtonElement | null} */ (
+        document.getElementById('antiTechBuildBtn')
+    );
     if (!btn) return;
     btn.disabled = _selectedCards.size === 0;
     const tpl = _t('antiTech.buildBtnCount', 'Build with {n} cards');
@@ -716,7 +778,10 @@ function openAntiTechModal(source) {
     if (source !== 'cityLeague' && source !== 'currentMeta' && source !== 'pastMeta') {
         _devLog('unsupported source — bailing');
         if (typeof showToast === 'function') {
-            showToast(_t('antiTech.unsupportedSource', 'Build vs is not supported on this view.'), 'info');
+            showToast(
+                _t('antiTech.unsupportedSource', 'Build vs is not supported on this view.'),
+                'info'
+            );
         }
         return;
     }
@@ -735,11 +800,15 @@ function openAntiTechModal(source) {
     modal.classList.add('show');
     _showStep(1);
 
-    const input = /** @type {HTMLInputElement | null} */ (document.getElementById('antiTechCustomInput'));
+    const input = /** @type {HTMLInputElement | null} */ (
+        document.getElementById('antiTechCustomInput')
+    );
     if (input) input.value = '';
     const suggestions = document.getElementById('antiTechSuggestions');
     if (suggestions) suggestions.innerHTML = '';
-    const standard = /** @type {HTMLInputElement | null} */ (document.querySelector('input[name="antiTechAggression"][value="standard"]'));
+    const standard = /** @type {HTMLInputElement | null} */ (
+        document.querySelector('input[name="antiTechAggression"][value="standard"]')
+    );
     if (standard) standard.checked = true;
 
     _populateQuickPicks();
@@ -769,9 +838,10 @@ async function advanceAntiTechModal() {
     _showStep(2);
     const list = document.getElementById('antiTechCardList');
     if (list) {
-        list.innerHTML = `<div class="anti-tech-card-loading">${
-            _t('antiTech.cardsLoading', 'Loading suggested counters…')
-        }</div>`;
+        list.innerHTML = `<div class="anti-tech-card-loading">${_t(
+            'antiTech.cardsLoading',
+            'Loading suggested counters…'
+        )}</div>`;
     }
     try {
         _suggestedCards = await _computeSuggestedCards();
@@ -785,7 +855,7 @@ async function advanceAntiTechModal() {
     // every card. They can toggle from there.
     _selectedCards = new Set();
     const preselect = _suggestedCards.slice(0, Math.min(3, _suggestedCards.length));
-    preselect.forEach(c => _selectedCards.add(c.name.toLowerCase()));
+    preselect.forEach((c) => _selectedCards.add(c.name.toLowerCase()));
     _renderTechSuggestions();
     _updateBuildButton();
 }
@@ -822,11 +892,15 @@ function _walkEvolutionChainToBasic(rec, cardEffectsIndex, depth) {
 // "[auto-included for X]" trace in the devLog so the user can
 // tell where it came from.
 async function _expandSelectionWithBasics(selectedSuggestions) {
-    if (typeof window._loadCardEffectsIndex !== 'function') return selectedSuggestions.map(s => s.name);
+    if (typeof window._loadCardEffectsIndex !== 'function')
+        return selectedSuggestions.map((s) => s.name);
     let cardEffectsIndex = null;
-    try { cardEffectsIndex = await window._loadCardEffectsIndex(); }
-    catch (_) { cardEffectsIndex = null; }
-    if (!cardEffectsIndex) return selectedSuggestions.map(s => s.name);
+    try {
+        cardEffectsIndex = await window._loadCardEffectsIndex();
+    } catch (_) {
+        cardEffectsIndex = null;
+    }
+    if (!cardEffectsIndex) return selectedSuggestions.map((s) => s.name);
     const out = [];
     const seenLower = new Set();
     const pushUnique = (name) => {
@@ -837,9 +911,10 @@ async function _expandSelectionWithBasics(selectedSuggestions) {
     };
     for (const s of selectedSuggestions) {
         pushUnique(s.name);
-        const rec = s.cardId && cardEffectsIndex.bySetNumber
-            ? cardEffectsIndex.bySetNumber.get(String(s.cardId).toUpperCase().trim())
-            : null;
+        const rec =
+            s.cardId && cardEffectsIndex.bySetNumber
+                ? cardEffectsIndex.bySetNumber.get(String(s.cardId).toUpperCase().trim())
+                : null;
         if (!rec) continue;
         const basic = _walkEvolutionChainToBasic(rec, cardEffectsIndex, 0);
         if (basic && basic.toLowerCase() !== s.name.toLowerCase()) {
@@ -854,8 +929,9 @@ async function confirmAntiTechBuild() {
     _devLog('confirmAntiTechBuild — selected:', _selectedCards.size, 'cards');
     if (_selectedCards.size === 0) return;
     const source = _source || 'currentMeta';
-    const selectedSuggestions = _suggestedCards
-        .filter(c => _selectedCards.has(c.name.toLowerCase()));
+    const selectedSuggestions = _suggestedCards.filter((c) =>
+        _selectedCards.has(c.name.toLowerCase())
+    );
     const aggression = _readAggression();
     closeAntiTechModal();
 
@@ -875,7 +951,10 @@ async function confirmAntiTechBuild() {
         window.techSlotsFromArray(source, expandedNames.slice(0, TECH_SLOTS_HARD_CAP));
         if (typeof renderTechSlotsUI === 'function') renderTechSlotsUI(source);
         if (typeof showToast === 'function') {
-            const tpl = _t('antiTech.toastInjected', 'Loaded {n} tech card(s) into your slots — generating build now.');
+            const tpl = _t(
+                'antiTech.toastInjected',
+                'Loaded {n} tech card(s) into your slots — generating build now.'
+            );
             showToast(tpl.replace('{n}', expandedNames.length), 'info', 2500);
         }
     } else {
@@ -907,4 +986,10 @@ document.addEventListener('keydown', (e) => {
     if (modal && !modal.classList.contains('display-none')) closeAntiTechModal();
 });
 
-export { openAntiTechModal, closeAntiTechModal, advanceAntiTechModal, backToAntiTechStep1, confirmAntiTechBuild };
+export {
+    openAntiTechModal,
+    closeAntiTechModal,
+    advanceAntiTechModal,
+    backToAntiTechStep1,
+    confirmAntiTechBuild,
+};

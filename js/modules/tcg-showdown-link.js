@@ -36,7 +36,7 @@ function _toast(msg, kind) {
 }
 
 function _de() {
-    return (typeof window.getLang === 'function' && window.getLang() === 'de');
+    return typeof window.getLang === 'function' && window.getLang() === 'de';
 }
 
 // Prefer the project-wide i18n helper when present so the messages
@@ -59,10 +59,14 @@ function _i18n(key, fallbackEn, fallbackDe) {
 // interchange format that Limitless / Showdown / Pokémon-Zone
 // all accept.
 function _buildDeckListFromBuilder(source) {
-    const deckObj = source === 'cityLeague'  ? (window.cityLeagueDeck  || {})
-                  : source === 'currentMeta' ? (window.currentMetaDeck || {})
-                  : source === 'pastMeta'    ? (window.pastMetaDeck    || {})
-                  : null;
+    const deckObj =
+        source === 'cityLeague'
+            ? window.cityLeagueDeck || {}
+            : source === 'currentMeta'
+              ? window.currentMetaDeck || {}
+              : source === 'pastMeta'
+                ? window.pastMetaDeck || {}
+                : null;
     if (!deckObj) return '';
     const lines = [];
     for (const [deckKey, count] of Object.entries(deckObj)) {
@@ -88,24 +92,34 @@ function _buildDeckListFromSaved(deckIndex) {
     for (const [deckKey, count] of Object.entries(deck.cards)) {
         if (!count || count <= 0) continue;
         const setMatch = parseCardKey(deckKey);
-        let cardName = deckKey, setCode = '', setNumber = '';
+        let cardName = deckKey,
+            setCode = '',
+            setNumber = '';
         if (setMatch) {
-            cardName = setMatch.name; setCode = setMatch.setCode; setNumber = setMatch.number;
+            cardName = setMatch.name;
+            setCode = setMatch.setCode;
+            setNumber = setMatch.number;
         } else {
-            const cardData = window.allCardsDatabase
-                && window.allCardsDatabase.find(c => c.name === cardName);
-            if (cardData) { setCode = cardData.set || ''; setNumber = cardData.number || ''; }
+            const cardData =
+                window.allCardsDatabase && window.allCardsDatabase.find((c) => c.name === cardName);
+            if (cardData) {
+                setCode = cardData.set || '';
+                setNumber = cardData.number || '';
+            }
         }
-        const line = setCode && setNumber
-            ? `${count} ${cardName} ${setCode} ${setNumber}`
-            : `${count} ${cardName}`;
+        const line =
+            setCode && setNumber
+                ? `${count} ${cardName} ${setCode} ${setNumber}`
+                : `${count} ${cardName}`;
 
         let category = 'trainer';
-        const cardData = window.allCardsDatabase && (
-            (setCode && setNumber)
-                ? window.allCardsDatabase.find(c => c.name === cardName && c.set === setCode && c.number === setNumber)
-                : window.allCardsDatabase.find(c => c.name === cardName)
-        );
+        const cardData =
+            window.allCardsDatabase &&
+            (setCode && setNumber
+                ? window.allCardsDatabase.find(
+                      (c) => c.name === cardName && c.set === setCode && c.number === setNumber
+                  )
+                : window.allCardsDatabase.find((c) => c.name === cardName));
         if (cardData && typeof window.getCardTypeCategory === 'function') {
             const cat = window.getCardTypeCategory(cardData.type || '');
             if (cat === 'Pokemon') category = 'pokemon';
@@ -113,29 +127,35 @@ function _buildDeckListFromSaved(deckIndex) {
         } else if (/Energy$/.test(cardName)) {
             category = 'energy';
         }
-        if      (category === 'pokemon') pokemon.push(line);
-        else if (category === 'energy')  energy.push(line);
-        else                             trainer.push(line);
+        if (category === 'pokemon') pokemon.push(line);
+        else if (category === 'energy') energy.push(line);
+        else trainer.push(line);
     }
 
     let output = '';
     if (pokemon.length > 0) output += `Pokémon: ${pokemon.length}\n${pokemon.join('\n')}\n\n`;
     if (trainer.length > 0) output += `Trainer: ${trainer.length}\n${trainer.join('\n')}\n\n`;
-    if (energy.length  > 0) output += `Energy: ${energy.length}\n${energy.join('\n')}`;
+    if (energy.length > 0) output += `Energy: ${energy.length}\n${energy.join('\n')}`;
     return output.trim();
 }
 
 function _openShowdownAfterCopy(deckString, opts) {
     opts = opts || {};
-    const successMsg = _i18n('showdown.toastCopied',
+    const successMsg = _i18n(
+        'showdown.toastCopied',
         'Deck copied! Opening TCG Showdown — paste to import.',
-        'Deck kopiert! TCG Showdown öffnet sich — zum Importieren einfügen.');
-    const emptyMsg = _i18n('showdown.toastEmpty',
+        'Deck kopiert! TCG Showdown öffnet sich — zum Importieren einfügen.'
+    );
+    const emptyMsg = _i18n(
+        'showdown.toastEmpty',
         'Your deck is empty — nothing to copy.',
-        'Dein Deck ist leer — nichts zu kopieren.');
-    const errorMsg = _i18n('showdown.toastClipboardFail',
+        'Dein Deck ist leer — nichts zu kopieren.'
+    );
+    const errorMsg = _i18n(
+        'showdown.toastClipboardFail',
         'Could not copy to clipboard. Opening TCG Showdown anyway...',
-        'Konnte nicht in die Zwischenablage kopieren. Öffne TCG Showdown trotzdem...');
+        'Konnte nicht in die Zwischenablage kopieren. Öffne TCG Showdown trotzdem...'
+    );
 
     if (!deckString) {
         _toast(emptyMsg, 'warning');
@@ -145,13 +165,16 @@ function _openShowdownAfterCopy(deckString, opts) {
     const openSite = () => window.open(SHOWDOWN_URL, '_blank', 'noopener,noreferrer');
 
     if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(deckString).then(() => {
-            _toast(successMsg, 'success');
-            openSite();
-        }).catch(() => {
-            _toast(errorMsg, 'warning');
-            openSite();
-        });
+        navigator.clipboard
+            .writeText(deckString)
+            .then(() => {
+                _toast(successMsg, 'success');
+                openSite();
+            })
+            .catch(() => {
+                _toast(errorMsg, 'warning');
+                openSite();
+            });
     } else {
         // Fallback for very old browsers — copy via hidden textarea.
         try {

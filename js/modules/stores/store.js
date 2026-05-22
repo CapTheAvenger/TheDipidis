@@ -78,13 +78,18 @@ export function createStore(initial) {
 
     function notify(prev) {
         for (const fn of listeners) {
-            try { fn(state, prev); }
-            catch (err) { console.error('[store] listener threw:', err); }
+            try {
+                fn(state, prev);
+            } catch (err) {
+                console.error('[store] listener threw:', err);
+            }
         }
     }
 
     return {
-        get() { return state; },
+        get() {
+            return state;
+        },
 
         /** No-op when shallow-equal to current state. */
         set(next) {

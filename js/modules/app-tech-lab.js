@@ -37,11 +37,11 @@
 const OVERRIDES_KEY = 'techLab.overrides.v1';
 
 // Module state
-let _target = null;          // { key: "DRI|12", name: "Crustle" }
-let _techs  = [];            // array of {name, cardId, narrative, confidence, source, hidden}
-let _allMetaCards = [];      // [{key, name}] cached haystack
+let _target = null; // { key: "DRI|12", name: "Crustle" }
+let _techs = []; // array of {name, cardId, narrative, confidence, source, hidden}
+let _allMetaCards = []; // [{key, name}] cached haystack
 let _allMetaCardSet = new Set(); // cardKey set for "in current meta?" checks
-let _taxonomy = null;        // cached taxonomy JSON (loaded once)
+let _taxonomy = null; // cached taxonomy JSON (loaded once)
 let _ready = false;
 
 function _isExCardName(name) {
@@ -69,9 +69,17 @@ function _devLog(...args) {
 
 function _escapeHtml(s) {
     if (typeof escapeHtml === 'function') return escapeHtml(s);
-    return String(s || '').replace(/[&<>"']/g, c => ({
-        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
-    })[c]);
+    return String(s || '').replace(
+        /[&<>"']/g,
+        (c) =>
+            ({
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#39;',
+            })[c]
+    );
 }
 
 function _cardImageUrl(cardId) {
@@ -90,7 +98,7 @@ function _cardImageUrl(cardId) {
 function _readOverrides() {
     try {
         const raw = localStorage.getItem(OVERRIDES_KEY);
-        return raw ? (JSON.parse(raw) || {}) : {};
+        return raw ? JSON.parse(raw) || {} : {};
     } catch (_) {
         return {};
     }
@@ -119,11 +127,11 @@ function _getTargetOverrides(targetKey) {
         _writeOverrides(all);
     }
     if (!raw.beatenBy) raw.beatenBy = { hidden: [], added: [] };
-    if (!raw.beats)    raw.beats    = { hidden: [], added: [] };
+    if (!raw.beats) raw.beats = { hidden: [], added: [] };
     // Non-EX bucket (auto-derived "ability does not apply"
     // suggestions) — user can mark individual entries as not
     // a tech and they get hidden in subsequent renders.
-    if (!raw.nonEx)    raw.nonEx    = { hidden: [] };
+    if (!raw.nonEx) raw.nonEx = { hidden: [] };
     return raw;
 }
 
@@ -138,7 +146,7 @@ function _hideTech(targetKey, direction, cardName) {
     const bucket = ov[direction];
     if (!bucket) return;
     const key = String(cardName || '').toLowerCase();
-    if (!bucket.hidden.some(n => n.toLowerCase() === key)) {
+    if (!bucket.hidden.some((n) => n.toLowerCase() === key)) {
         bucket.hidden.push(cardName);
         _setTargetOverrides(targetKey, ov);
     }
@@ -149,7 +157,7 @@ function _addMissingTech(targetKey, direction, name, cardId, note) {
     const bucket = ov[direction];
     if (!bucket) return;
     const key = String(name || '').toLowerCase();
-    if (!bucket.added.some(e => String(e.name || '').toLowerCase() === key)) {
+    if (!bucket.added.some((e) => String(e.name || '').toLowerCase() === key)) {
         bucket.added.push({ name, cardId: cardId || null, note: note || '' });
         _setTargetOverrides(targetKey, ov);
     }
@@ -160,7 +168,7 @@ function _removeAddedTech(targetKey, direction, cardName) {
     const bucket = ov[direction];
     if (!bucket) return;
     const key = String(cardName || '').toLowerCase();
-    bucket.added = bucket.added.filter(e => String(e.name || '').toLowerCase() !== key);
+    bucket.added = bucket.added.filter((e) => String(e.name || '').toLowerCase() !== key);
     _setTargetOverrides(targetKey, ov);
 }
 
@@ -182,7 +190,9 @@ function _rebuildMetaCards() {
     const dbIndex = (typeof window !== 'undefined' && window.cardIndexBySetNumber) || null;
     for (const r of rows) {
         if (!r) continue;
-        const set = String(r.set_code || '').toUpperCase().trim();
+        const set = String(r.set_code || '')
+            .toUpperCase()
+            .trim();
         const num = String(r.set_number || '').trim();
         const name = String(r.card_name || '').trim();
         if (!set || !num || !name) continue;
@@ -211,15 +221,20 @@ function _rebuildMetaCards() {
 // target. Idempotent — early-returns when data is already there.
 let _ensureMetaDataPromise = null;
 async function _ensureMetaDataLoaded() {
-    if (Array.isArray(window.currentMetaAnalysisData) && window.currentMetaAnalysisData.length > 0) {
+    if (
+        Array.isArray(window.currentMetaAnalysisData) &&
+        window.currentMetaAnalysisData.length > 0
+    ) {
         return;
     }
     if (_ensureMetaDataPromise) return _ensureMetaDataPromise;
     _ensureMetaDataPromise = (async () => {
         _devLog('currentMetaAnalysisData missing — lazy-loading');
         try {
-            if (typeof window.loadCurrentMetaRowsWithFallback !== 'function'
-                && typeof loadCurrentMetaRowsWithFallback === 'function') {
+            if (
+                typeof window.loadCurrentMetaRowsWithFallback !== 'function' &&
+                typeof loadCurrentMetaRowsWithFallback === 'function'
+            ) {
                 window.loadCurrentMetaRowsWithFallback = loadCurrentMetaRowsWithFallback;
             }
             if (typeof window.loadCurrentMetaRowsWithFallback === 'function') {
@@ -276,7 +291,7 @@ async function _findTechsForCard(targetKey, targetName) {
             userDeckCards: _allMetaCards,
             archetypeCardMap: targetArchetypes,
             cardEffectsIndex,
-            lang: (typeof getLang === 'function') ? getLang() : 'en',
+            lang: typeof getLang === 'function' ? getLang() : 'en',
         });
     } catch (e) {
         _devLog('detectMatchups failed:', e && e.message);
@@ -296,12 +311,12 @@ async function _findTechsForCard(targetKey, targetName) {
                 const key = m.attackerCard.toLowerCase();
                 if (byCard.has(key)) continue;
                 byCard.set(key, {
-                    name:       m.attackerCard,
-                    cardId:     cardIdByName.get(key) || null,
-                    narrative:  m.narrative,
+                    name: m.attackerCard,
+                    cardId: cardIdByName.get(key) || null,
+                    narrative: m.narrative,
                     confidence: m.confidence,
                     attackSource: m.attackerSource && m.attackerSource.name,
-                    hidden:     false,
+                    hidden: false,
                 });
             }
         }
@@ -313,31 +328,38 @@ async function _findTechsForCard(targetKey, targetName) {
     // has a fixed direction so we resolve this branch directly via the
     // interaction matrix.
     const engine = window.CardCapabilityEngine;
-    const targetRec = cardEffectsIndex.bySetNumber
-        && cardEffectsIndex.bySetNumber.get(String(targetKey).toUpperCase().trim());
+    const targetRec =
+        cardEffectsIndex.bySetNumber &&
+        cardEffectsIndex.bySetNumber.get(String(targetKey).toUpperCase().trim());
     if (targetRec) {
         const targetTags = engine.extractTags(targetRec, targetKey);
         const targetAttackerTags = new Set(
-            targetTags.filter(t => t.tag.startsWith('attack.')).map(t => t.tag)
+            targetTags.filter((t) => t.tag.startsWith('attack.')).map((t) => t.tag)
         );
         if (targetAttackerTags.size > 0) {
             let interactionsData = null;
             try {
-                const resp = await fetch('./data/card_capability_interactions.json', { cache: 'no-cache' });
+                const resp = await fetch('./data/card_capability_interactions.json', {
+                    cache: 'no-cache',
+                });
                 interactionsData = resp.ok ? await resp.json() : null;
-            } catch (_) { /* network/parse failure → skip pass 2 */ }
+            } catch (_) {
+                /* network/parse failure → skip pass 2 */
+            }
             const interactions = (interactionsData && interactionsData.interactions) || [];
-            const blockingByDefenderTag = new Map();   // defenderTag → interaction
+            const blockingByDefenderTag = new Map(); // defenderTag → interaction
             for (const ix of interactions) {
                 if ((ix.result || 'attacker_wins') !== 'defender_wins') continue;
                 if (!targetAttackerTags.has(ix.attacker)) continue;
                 blockingByDefenderTag.set(ix.defender, ix);
             }
             if (blockingByDefenderTag.size > 0) {
-                const lang = (typeof getLang === 'function') ? getLang() : 'en';
+                const lang = typeof getLang === 'function' ? getLang() : 'en';
                 for (const c of _allMetaCards) {
                     if (c.key === targetKey) continue;
-                    const rec = cardEffectsIndex.bySetNumber.get(String(c.key).toUpperCase().trim());
+                    const rec = cardEffectsIndex.bySetNumber.get(
+                        String(c.key).toUpperCase().trim()
+                    );
                     if (!rec) continue;
                     const key = rec.name.toLowerCase();
                     if (byCard.has(key)) continue;
@@ -345,20 +367,24 @@ async function _findTechsForCard(targetKey, targetName) {
                     for (const t of tags) {
                         const ix = blockingByDefenderTag.get(t.tag);
                         if (!ix) continue;
-                        const tpl = (lang === 'de' ? (ix.narrative_de || ix.narrative_en) : ix.narrative_en) || '';
-                        const attackerSrc = (targetTags.find(tt => tt.tag === ix.attacker) || {}).source || {};
+                        const tpl =
+                            (lang === 'de'
+                                ? ix.narrative_de || ix.narrative_en
+                                : ix.narrative_en) || '';
+                        const attackerSrc =
+                            (targetTags.find((tt) => tt.tag === ix.attacker) || {}).source || {};
                         const narrative = tpl
                             .replace('{attacker_name}', targetName)
                             .replace('{attacker_source}', attackerSrc.name || '')
                             .replace('{defender_name}', rec.name)
-                            .replace('{defender_ability}', t.source && t.source.name || rec.name);
+                            .replace('{defender_ability}', (t.source && t.source.name) || rec.name);
                         byCard.set(key, {
-                            name:       rec.name,
-                            cardId:     c.key,
+                            name: rec.name,
+                            cardId: c.key,
                             narrative,
                             confidence: t.confidence,
                             attackSource: t.source && t.source.name,
-                            hidden:     false,
+                            hidden: false,
                         });
                         break;
                     }
@@ -409,12 +435,17 @@ async function _findThingsThisCardBeats(targetKey, targetName) {
     // interaction), so a card like Shaymin (only has bench-
     // protection ability, no attack tag) still has things it
     // beats.
-    const targetRec = cardEffectsIndex.bySetNumber
-        && cardEffectsIndex.bySetNumber.get(String(targetKey).toUpperCase().trim());
+    const targetRec =
+        cardEffectsIndex.bySetNumber &&
+        cardEffectsIndex.bySetNumber.get(String(targetKey).toUpperCase().trim());
     if (!targetRec) return [];
     const targetTags = engine.extractTags(targetRec, targetKey);
-    const targetAttackerTags = new Set(targetTags.filter(t => t.tag.startsWith('attack.')).map(t => t.tag));
-    const targetDefenderTags = new Set(targetTags.filter(t => t.tag.startsWith('ability.')).map(t => t.tag));
+    const targetAttackerTags = new Set(
+        targetTags.filter((t) => t.tag.startsWith('attack.')).map((t) => t.tag)
+    );
+    const targetDefenderTags = new Set(
+        targetTags.filter((t) => t.tag.startsWith('ability.')).map((t) => t.tag)
+    );
 
     // Load the interaction matrix directly. The engine doesn't
     // expose its compiled rules but the JSON is the same shape.
@@ -422,16 +453,18 @@ async function _findThingsThisCardBeats(targetKey, targetName) {
     try {
         const resp = await fetch('./data/card_capability_interactions.json', { cache: 'no-cache' });
         interactionsData = resp.ok ? await resp.json() : null;
-    } catch (_) { interactionsData = null; }
+    } catch (_) {
+        interactionsData = null;
+    }
     const interactions = (interactionsData && interactionsData.interactions) || [];
     if (interactions.length === 0) return [];
 
     // Build the "what tags does the target win against" set.
     //   target attacker tag wins → look up defender tags it beats
     //   target defender tag wins → look up attacker tags it blocks
-    const wonOverDefenderTags = new Set();   // tags the target's attacks bypass
-    const wonOverAttackerTags = new Set();   // tags the target's defenses block
-    const tagNarrativeByPair = new Map();    // "attTag|defTag" → narrative template
+    const wonOverDefenderTags = new Set(); // tags the target's attacks bypass
+    const wonOverAttackerTags = new Set(); // tags the target's defenses block
+    const tagNarrativeByPair = new Map(); // "attTag|defTag" → narrative template
     const tagConfidenceByPair = new Map();
     for (const ix of interactions) {
         const result = ix.result || 'attacker_wins';
@@ -449,16 +482,16 @@ async function _findThingsThisCardBeats(targetKey, targetName) {
     if (wonOverDefenderTags.size === 0 && wonOverAttackerTags.size === 0) return [];
 
     // Scan meta haystack for cards carrying the won-over tags.
-    const lang = (typeof getLang === 'function') ? getLang() : 'en';
+    const lang = typeof getLang === 'function' ? getLang() : 'en';
     const byCard = new Map();
     for (const c of _allMetaCards) {
-        if (c.key === targetKey) continue;  // skip self
+        if (c.key === targetKey) continue; // skip self
         const rec = cardEffectsIndex.bySetNumber.get(String(c.key).toUpperCase().trim());
         if (!rec) continue;
         const tags = engine.extractTags(rec, c.key);
         for (const t of tags) {
             let ix = null;
-            let role = null;  // 'A' = target attacks them; 'D' = target defends against them
+            let role = null; // 'A' = target attacks them; 'D' = target defends against them
             if (wonOverDefenderTags.has(t.tag) && t.tag.startsWith('ability.')) {
                 ix = tagNarrativeByPair.get(`A|${t.tag}`);
                 role = 'A';
@@ -470,16 +503,24 @@ async function _findThingsThisCardBeats(targetKey, targetName) {
             const key = rec.name.toLowerCase();
             if (byCard.has(key)) continue;
             // Build the narrative with target as the actor.
-            const tpl = (lang === 'de' ? (ix.narrative_de || ix.narrative_en) : ix.narrative_en) || '';
-            const targetSource = (role === 'A')
-                ? (Array.from(targetTags).find(tt => tt.tag === ix.attacker) || {}).source
-                : (Array.from(targetTags).find(tt => tt.tag === ix.defender) || {}).source;
+            const tpl =
+                (lang === 'de' ? ix.narrative_de || ix.narrative_en : ix.narrative_en) || '';
+            const targetSource =
+                role === 'A'
+                    ? (Array.from(targetTags).find((tt) => tt.tag === ix.attacker) || {}).source
+                    : (Array.from(targetTags).find((tt) => tt.tag === ix.defender) || {}).source;
             const opponentSource = t.source;
             const narrative = tpl
                 .replace('{attacker_name}', role === 'A' ? targetName : rec.name)
-                .replace('{attacker_source}', (role === 'A' ? targetSource : opponentSource)?.name || '')
+                .replace(
+                    '{attacker_source}',
+                    (role === 'A' ? targetSource : opponentSource)?.name || ''
+                )
                 .replace('{defender_name}', role === 'A' ? rec.name : targetName)
-                .replace('{defender_ability}', (role === 'A' ? opponentSource : targetSource)?.name || '');
+                .replace(
+                    '{defender_ability}',
+                    (role === 'A' ? opponentSource : targetSource)?.name || ''
+                );
             byCard.set(key, {
                 name: rec.name,
                 cardId: c.key,
@@ -507,35 +548,41 @@ function _renderTechGrid(listEl, techs, direction, emptyText) {
         listEl.innerHTML = `<li class="tech-lab-empty">${_escapeHtml(emptyText)}</li>`;
         return;
     }
-    listEl.innerHTML = techs.map(tech => {
-        const safeName = _escapeHtml(tech.name);
-        const imgUrl  = tech.cardId ? _cardImageUrl(tech.cardId) : null;
-        const safeImg = imgUrl ? _escapeHtml(imgUrl) : '';
-        const confCls = tech.isUserAdded ? 'user'
-                      : tech.confidence === 'high' ? 'high'
-                      : tech.confidence === 'medium' ? 'medium' : 'low';
-        const confLabel = tech.isUserAdded
-            ? _t('techLab.confUser', 'user-added')
-            : (tech.confidence || 'unknown');
-        const safeNarr = _escapeHtml(tech.narrative || '');
-        const thumb = imgUrl
-            ? `<button class="tech-lab-grid-thumb" data-card-img="${safeImg}" data-card-name="${safeName}" aria-label="Zoom ${safeName}"><img src="${safeImg}" alt="${safeName}" loading="lazy"></button>`
-            : `<span class="tech-lab-grid-thumb tech-lab-thumb-fallback" aria-hidden="true">?</span>`;
-        // Reject / remove action moved BELOW the card with
-        // clear text — the previous overlay-X confused users
-        // ("the X is too big and unclear" — feedback after
-        // PR #128). Full-width pill button under the tile.
-        const action = tech.isUserAdded
-            ? `<button class="tech-lab-card-action tech-lab-card-action-remove" data-card="${safeName}" data-dir="${direction}">${_escapeHtml(_t('techLab.removeAddedBtn', 'Remove'))}</button>`
-            : `<button class="tech-lab-card-action tech-lab-card-action-reject" data-card="${safeName}" data-dir="${direction}">${_escapeHtml(_t('techLab.notTechBtn', '✗ Not a tech'))}</button>`;
-        return `<li class="tech-lab-grid-tile tech-lab-grid-${confCls}${tech.isUserAdded ? ' tech-lab-grid-user' : ''}" title="${safeNarr}">
+    listEl.innerHTML = techs
+        .map((tech) => {
+            const safeName = _escapeHtml(tech.name);
+            const imgUrl = tech.cardId ? _cardImageUrl(tech.cardId) : null;
+            const safeImg = imgUrl ? _escapeHtml(imgUrl) : '';
+            const confCls = tech.isUserAdded
+                ? 'user'
+                : tech.confidence === 'high'
+                  ? 'high'
+                  : tech.confidence === 'medium'
+                    ? 'medium'
+                    : 'low';
+            const confLabel = tech.isUserAdded
+                ? _t('techLab.confUser', 'user-added')
+                : tech.confidence || 'unknown';
+            const safeNarr = _escapeHtml(tech.narrative || '');
+            const thumb = imgUrl
+                ? `<button class="tech-lab-grid-thumb" data-card-img="${safeImg}" data-card-name="${safeName}" aria-label="Zoom ${safeName}"><img src="${safeImg}" alt="${safeName}" loading="lazy"></button>`
+                : `<span class="tech-lab-grid-thumb tech-lab-thumb-fallback" aria-hidden="true">?</span>`;
+            // Reject / remove action moved BELOW the card with
+            // clear text — the previous overlay-X confused users
+            // ("the X is too big and unclear" — feedback after
+            // PR #128). Full-width pill button under the tile.
+            const action = tech.isUserAdded
+                ? `<button class="tech-lab-card-action tech-lab-card-action-remove" data-card="${safeName}" data-dir="${direction}">${_escapeHtml(_t('techLab.removeAddedBtn', 'Remove'))}</button>`
+                : `<button class="tech-lab-card-action tech-lab-card-action-reject" data-card="${safeName}" data-dir="${direction}">${_escapeHtml(_t('techLab.notTechBtn', '✗ Not a tech'))}</button>`;
+            return `<li class="tech-lab-grid-tile tech-lab-grid-${confCls}${tech.isUserAdded ? ' tech-lab-grid-user' : ''}" title="${safeNarr}">
             ${thumb}
             <div class="tech-lab-grid-name">${safeName}</div>
             ${tech.attackSource ? `<div class="tech-lab-grid-source">${_escapeHtml(tech.attackSource)}</div>` : ''}
             <span class="tech-lab-grid-conf tech-lab-conf-${confCls}">${_escapeHtml(confLabel)}</span>
             ${action}
         </li>`;
-    }).join('');
+        })
+        .join('');
 }
 
 // Legacy single-list renderer kept as a thin wrapper so internal
@@ -545,9 +592,9 @@ function _renderTechList(listEl, techs, direction, emptyText) {
 }
 
 function _applyOverridesToTechs(engineTechs, directionOverrides) {
-    const hiddenSet = new Set((directionOverrides.hidden || []).map(n => n.toLowerCase()));
-    const filtered = engineTechs.filter(e => !hiddenSet.has(e.name.toLowerCase()));
-    const added = (directionOverrides.added || []).map(a => ({
+    const hiddenSet = new Set((directionOverrides.hidden || []).map((n) => n.toLowerCase()));
+    const filtered = engineTechs.filter((e) => !hiddenSet.has(e.name.toLowerCase()));
+    const added = (directionOverrides.added || []).map((a) => ({
         name: a.name,
         cardId: a.cardId || null,
         narrative: a.note || _t('techLab.userAdded', 'Added by you'),
@@ -563,11 +610,11 @@ function _wireCardListInteractions(listEl) {
     // Cover both the old overlay button class (.tech-lab-card-thumb
     // — used elsewhere) and the grid thumbnails. data-card-img
     // is the discriminator.
-    listEl.querySelectorAll('[data-card-img]').forEach(btn => {
+    listEl.querySelectorAll('[data-card-img]').forEach((btn) => {
         btn.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
-            const img  = btn.dataset.cardImg;
+            const img = btn.dataset.cardImg;
             const name = btn.dataset.cardName || '';
             if (img && typeof window.showSingleCard === 'function') {
                 window.showSingleCard(img, name);
@@ -579,14 +626,14 @@ function _wireCardListInteractions(listEl) {
     // — added a nonEx bucket to _getTargetOverrides earlier so
     // the override list survives across sessions like beatenBy
     // and beats already do.
-    listEl.querySelectorAll('.tech-lab-card-action-reject').forEach(btn => {
+    listEl.querySelectorAll('.tech-lab-card-action-reject').forEach((btn) => {
         btn.addEventListener('click', () => {
             if (!_target) return;
             _hideTech(_target.key, btn.dataset.dir, btn.dataset.card);
             _renderTechsFor(_target);
         });
     });
-    listEl.querySelectorAll('.tech-lab-card-action-remove').forEach(btn => {
+    listEl.querySelectorAll('.tech-lab-card-action-remove').forEach((btn) => {
         btn.addEventListener('click', () => {
             if (!_target) return;
             _removeAddedTech(_target.key, btn.dataset.dir, btn.dataset.card);
@@ -609,8 +656,8 @@ async function _getTargetTags(targetKey) {
     await engine.load();
     const tags = engine.extractTags(rec, targetKey);
     return {
-        attacker: tags.filter(t => t.tag.startsWith('attack.')),
-        defender: tags.filter(t => t.tag.startsWith('ability.')),
+        attacker: tags.filter((t) => t.tag.startsWith('attack.')),
+        defender: tags.filter((t) => t.tag.startsWith('ability.')),
     };
 }
 
@@ -620,9 +667,12 @@ async function _getTargetTags(targetKey) {
 // empty-state handles that case.
 async function _renderSummary(bannerEl, tags) {
     if (!bannerEl) return;
-    if (!tags || tags.length === 0) { bannerEl.innerHTML = ''; return; }
+    if (!tags || tags.length === 0) {
+        bannerEl.innerHTML = '';
+        return;
+    }
     const taxonomy = await _loadTaxonomy();
-    const lang = (typeof getLang === 'function') ? getLang() : 'en';
+    const lang = typeof getLang === 'function' ? getLang() : 'en';
     const summaries = [];
     const seen = new Set();
     for (const t of tags) {
@@ -632,7 +682,9 @@ async function _renderSummary(bannerEl, tags) {
         if (!meta) continue;
         const text = (lang === 'de' ? meta.summary_de : meta.summary_en) || meta.summary_en || '';
         if (!text) continue;
-        summaries.push(`<li class="tech-lab-summary-line"><span class="tech-lab-summary-tag">${_escapeHtml(t.tag)}</span><span class="tech-lab-summary-text">${_escapeHtml(text)}</span></li>`);
+        summaries.push(
+            `<li class="tech-lab-summary-line"><span class="tech-lab-summary-tag">${_escapeHtml(t.tag)}</span><span class="tech-lab-summary-text">${_escapeHtml(text)}</span></li>`
+        );
     }
     bannerEl.innerHTML = summaries.length
         ? `<ul class="tech-lab-summary-list">${summaries.join('')}</ul>`
@@ -662,7 +714,7 @@ function _isViableNonExAttacker(rec) {
     if (!rec) return false;
     const cardType = String(rec.card_type || '').toLowerCase();
     if (!cardType.startsWith('basic')) return false;
-    for (const a of (rec.attacks || [])) {
+    for (const a of rec.attacks || []) {
         const cost = Array.isArray(a.cost) ? a.cost : [];
         const dmgStr = String(a.damage || '').trim();
         if (!dmgStr) continue;
@@ -685,8 +737,14 @@ function _isViableNonExAttacker(rec) {
         }
 
         // Proxy fallback (no cost data) — damage range implies energy cost
-        if (isMult) { if (base >= 20) return true; continue; }
-        if (isPlus) { if (base >= 50 && base <= 80) return true; continue; }
+        if (isMult) {
+            if (base >= 20) return true;
+            continue;
+        }
+        if (isPlus) {
+            if (base >= 50 && base <= 80) return true;
+            continue;
+        }
         if (base >= 60 && base <= 100) return true;
     }
     return false;
@@ -698,24 +756,34 @@ function _isViableNonExAttacker(rec) {
 // explicitly excluded utility cards like Eevee / Scatterbug.
 async function _renderNonExBucket(wrapEl, tags) {
     if (!wrapEl) return;
-    if (!tags || tags.length === 0) { wrapEl.innerHTML = ''; return; }
+    if (!tags || tags.length === 0) {
+        wrapEl.innerHTML = '';
+        return;
+    }
     const taxonomy = _taxonomy || { tags: {} };
-    const triggers = tags.filter(t => {
+    const triggers = tags.filter((t) => {
         const meta = (taxonomy.tags || {})[t.tag];
         return meta && meta.affects_subset === 'ex_attackers';
     });
-    if (triggers.length === 0) { wrapEl.innerHTML = ''; return; }
+    if (triggers.length === 0) {
+        wrapEl.innerHTML = '';
+        return;
+    }
 
     // Need the card-effects index to read attack costs and damage
     // — that's how the viability filter knows Passimian belongs in
     // the bucket but Eevee/Scatterbug don't.
     let cardEffectsIndex = null;
     if (typeof window._loadCardEffectsIndex === 'function') {
-        try { cardEffectsIndex = await window._loadCardEffectsIndex(); }
-        catch (_) { cardEffectsIndex = null; }
+        try {
+            cardEffectsIndex = await window._loadCardEffectsIndex();
+        } catch (_) {
+            cardEffectsIndex = null;
+        }
     }
     if (!cardEffectsIndex || !cardEffectsIndex.bySetNumber) {
-        wrapEl.innerHTML = ''; return;
+        wrapEl.innerHTML = '';
+        return;
     }
 
     const rows = (typeof window !== 'undefined' && window.currentMetaAnalysisData) || [];
@@ -724,8 +792,10 @@ async function _renderNonExBucket(wrapEl, tags) {
         if (!r) continue;
         const name = String(r.card_name || '').trim();
         if (!name || _isExCardName(name)) continue;
-        const set  = String(r.set_code || '').toUpperCase().trim();
-        const num  = String(r.set_number || '').trim();
+        const set = String(r.set_code || '')
+            .toUpperCase()
+            .trim();
+        const num = String(r.set_number || '').trim();
         if (!set || !num) continue;
         const key = `${set}|${num}`;
         const rec = cardEffectsIndex.bySetNumber.get(key);
@@ -740,34 +810,49 @@ async function _renderNonExBucket(wrapEl, tags) {
     // specific entries as "not a tech" via the button below
     // each tile and they stay hidden across sessions.
     const ov = _target ? _getTargetOverrides(_target.key) : { nonEx: { hidden: [] } };
-    const nonExHidden = new Set((ov.nonEx && ov.nonEx.hidden || []).map(n => String(n).toLowerCase()));
+    const nonExHidden = new Set(
+        ((ov.nonEx && ov.nonEx.hidden) || []).map((n) => String(n).toLowerCase())
+    );
     const sorted = Array.from(byCard.values())
-        .filter(c => c.name.toLowerCase() !== (_target && _target.name.toLowerCase()))
-        .filter(c => !nonExHidden.has(c.name.toLowerCase()))
+        .filter((c) => c.name.toLowerCase() !== (_target && _target.name.toLowerCase()))
+        .filter((c) => !nonExHidden.has(c.name.toLowerCase()))
         .sort((a, b) => b.inclusion - a.inclusion)
         .slice(0, 24);
-    if (sorted.length === 0) { wrapEl.innerHTML = ''; return; }
+    if (sorted.length === 0) {
+        wrapEl.innerHTML = '';
+        return;
+    }
 
-    const lang = (typeof getLang === 'function') ? getLang() : 'en';
-    const heading = (lang === 'de')
-        ? _t('techLab.nonExHeading', 'Nicht-EX Angreifer (ignorieren die Fähigkeit)')
-        : _t('techLab.nonExHeading', 'Non-EX attackers (ability does not apply)');
-    const hint = (lang === 'de')
-        ? _t('techLab.nonExHint', 'Diese Pokemon greifen normal an — die Fähigkeit blockt nur Pokemon-ex. Top {n} aus dem aktuellen Meta nach Deck-Inklusion.')
-        : _t('techLab.nonExHint', 'These Pokemon attack normally — the ability only blocks Pokemon ex. Top {n} from the current meta by deck inclusion.');
-    const tiles = sorted.map(c => {
-        const img = _cardImageUrl(c.key);
-        const safeName = _escapeHtml(c.name);
-        const safeImg = img ? _escapeHtml(img) : '';
-        const thumb = img
-            ? `<button class="tech-lab-grid-thumb" data-card-img="${safeImg}" data-card-name="${safeName}" aria-label="Zoom ${safeName}"><img src="${safeImg}" alt="${safeName}" loading="lazy"></button>`
-            : `<span class="tech-lab-grid-thumb tech-lab-thumb-fallback">?</span>`;
-        return `<li class="tech-lab-grid-tile tech-lab-grid-nonex">
+    const lang = typeof getLang === 'function' ? getLang() : 'en';
+    const heading =
+        lang === 'de'
+            ? _t('techLab.nonExHeading', 'Nicht-EX Angreifer (ignorieren die Fähigkeit)')
+            : _t('techLab.nonExHeading', 'Non-EX attackers (ability does not apply)');
+    const hint =
+        lang === 'de'
+            ? _t(
+                  'techLab.nonExHint',
+                  'Diese Pokemon greifen normal an — die Fähigkeit blockt nur Pokemon-ex. Top {n} aus dem aktuellen Meta nach Deck-Inklusion.'
+              )
+            : _t(
+                  'techLab.nonExHint',
+                  'These Pokemon attack normally — the ability only blocks Pokemon ex. Top {n} from the current meta by deck inclusion.'
+              );
+    const tiles = sorted
+        .map((c) => {
+            const img = _cardImageUrl(c.key);
+            const safeName = _escapeHtml(c.name);
+            const safeImg = img ? _escapeHtml(img) : '';
+            const thumb = img
+                ? `<button class="tech-lab-grid-thumb" data-card-img="${safeImg}" data-card-name="${safeName}" aria-label="Zoom ${safeName}"><img src="${safeImg}" alt="${safeName}" loading="lazy"></button>`
+                : `<span class="tech-lab-grid-thumb tech-lab-thumb-fallback">?</span>`;
+            return `<li class="tech-lab-grid-tile tech-lab-grid-nonex">
             ${thumb}
             <div class="tech-lab-grid-name">${safeName}</div>
             <button class="tech-lab-card-action tech-lab-card-action-reject" data-card="${safeName}" data-dir="nonEx">${_escapeHtml(_t('techLab.notTechBtn', '✗ Not a tech'))}</button>
         </li>`;
-    }).join('');
+        })
+        .join('');
     wrapEl.innerHTML = `
         <div class="tech-lab-nonex-header">
             <h5 class="tech-lab-nonex-title">${_escapeHtml(heading)}</h5>
@@ -777,18 +862,18 @@ async function _renderNonExBucket(wrapEl, tags) {
     // Wire thumbnail zoom + reject ("✗ Not a tech") on Non-EX
     // tiles. The reject persists the entry into the per-target
     // override store (nonEx.hidden) and re-renders the bucket.
-    wrapEl.querySelectorAll('.tech-lab-grid-thumb[data-card-img]').forEach(btn => {
+    wrapEl.querySelectorAll('.tech-lab-grid-thumb[data-card-img]').forEach((btn) => {
         btn.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
-            const img  = btn.dataset.cardImg;
+            const img = btn.dataset.cardImg;
             const name = btn.dataset.cardName || '';
             if (img && typeof window.showSingleCard === 'function') {
                 window.showSingleCard(img, name);
             }
         });
     });
-    wrapEl.querySelectorAll('.tech-lab-card-action-reject').forEach(btn => {
+    wrapEl.querySelectorAll('.tech-lab-card-action-reject').forEach((btn) => {
         btn.addEventListener('click', () => {
             if (!_target) return;
             _hideTech(_target.key, 'nonEx', btn.dataset.card);
@@ -802,7 +887,7 @@ async function _renderNonExBucket(wrapEl, tags) {
 async function _renderTechsFor(target) {
     _target = target;
     const headerEl = document.getElementById('techLabTargetLabel');
-    const thumbEl  = document.getElementById('techLabTargetThumb');
+    const thumbEl = document.getElementById('techLabTargetThumb');
     if (headerEl) headerEl.textContent = target.name;
     if (thumbEl) {
         const img = _cardImageUrl(target.key);
@@ -811,16 +896,16 @@ async function _renderTechsFor(target) {
             : '';
     }
     const beatenByList = document.getElementById('techLabBeatenByList');
-    const beatsList    = document.getElementById('techLabBeatsList');
+    const beatsList = document.getElementById('techLabBeatsList');
     const beatenBySummary = document.getElementById('techLabBeatenBySummary');
-    const beatsSummary    = document.getElementById('techLabBeatsSummary');
-    const beatenByNonEx   = document.getElementById('techLabBeatenByNonEx');
+    const beatsSummary = document.getElementById('techLabBeatsSummary');
+    const beatenByNonEx = document.getElementById('techLabBeatenByNonEx');
     const loadingHtml = `<li class="tech-lab-loading">${_escapeHtml(_t('techLab.loading', 'Searching meta…'))}</li>`;
     if (beatenByList) beatenByList.innerHTML = loadingHtml;
-    if (beatsList)    beatsList.innerHTML    = loadingHtml;
+    if (beatsList) beatsList.innerHTML = loadingHtml;
     if (beatenBySummary) beatenBySummary.innerHTML = '';
-    if (beatsSummary)    beatsSummary.innerHTML    = '';
-    if (beatenByNonEx)   beatenByNonEx.innerHTML   = '';
+    if (beatsSummary) beatsSummary.innerHTML = '';
+    if (beatenByNonEx) beatenByNonEx.innerHTML = '';
 
     const resultsWrap = document.getElementById('techLabResultsWrap');
     if (resultsWrap) resultsWrap.classList.remove('display-none');
@@ -830,8 +915,8 @@ async function _renderTechsFor(target) {
     // Three parallel reads: engine direction A, engine direction
     // B, and the target's own tags (for summaries + non-EX bucket).
     let engineBeatenBy = [];
-    let engineBeats    = [];
-    let targetTags     = { attacker: [], defender: [] };
+    let engineBeats = [];
+    let targetTags = { attacker: [], defender: [] };
     try {
         [engineBeatenBy, engineBeats, targetTags] = await Promise.all([
             _findTechsForCard(target.key, target.name),
@@ -844,18 +929,32 @@ async function _renderTechsFor(target) {
 
     const ov = _getTargetOverrides(target.key);
     const beatenByTechs = _applyOverridesToTechs(engineBeatenBy, ov.beatenBy);
-    const beatsTechs    = _applyOverridesToTechs(engineBeats,    ov.beats);
+    const beatsTechs = _applyOverridesToTechs(engineBeats, ov.beats);
 
     // Summaries — direction A explains what BLOCKS the target
     // (the target's defender tags); direction B explains what
     // the target ATTACKS THROUGH (the target's attacker tags).
     await _renderSummary(beatenBySummary, targetTags.defender);
-    await _renderSummary(beatsSummary,    targetTags.attacker);
+    await _renderSummary(beatsSummary, targetTags.attacker);
 
-    _renderTechList(beatenByList, beatenByTechs, 'beatenBy',
-        _t('techLab.noBeatenBy', 'No card-text counter detected. Click "+ Add missing" if you know one the engine missed.'));
-    _renderTechList(beatsList, beatsTechs, 'beats',
-        _t('techLab.noBeats', 'No meta cards this card beats via card-text interactions. Click "+ Add missing" to register one.'));
+    _renderTechList(
+        beatenByList,
+        beatenByTechs,
+        'beatenBy',
+        _t(
+            'techLab.noBeatenBy',
+            'No card-text counter detected. Click "+ Add missing" if you know one the engine missed.'
+        )
+    );
+    _renderTechList(
+        beatsList,
+        beatsTechs,
+        'beats',
+        _t(
+            'techLab.noBeats',
+            'No meta cards this card beats via card-text interactions. Click "+ Add missing" to register one.'
+        )
+    );
     _wireCardListInteractions(beatenByList);
     _wireCardListInteractions(beatsList);
 
@@ -863,12 +962,18 @@ async function _renderTechsFor(target) {
     // defender tags has affects_subset === 'ex_attackers'.
     await _renderNonExBucket(beatenByNonEx, targetTags.defender);
 
-    const addBeatenByBtn = /** @type {HTMLButtonElement | null} */ (document.getElementById('techLabAddBeatenByBtn'));
-    const addBeatsBtn    = /** @type {HTMLButtonElement | null} */ (document.getElementById('techLabAddBeatsBtn'));
-    const resetBtn       = /** @type {HTMLButtonElement | null} */ (document.getElementById('techLabResetBtn'));
+    const addBeatenByBtn = /** @type {HTMLButtonElement | null} */ (
+        document.getElementById('techLabAddBeatenByBtn')
+    );
+    const addBeatsBtn = /** @type {HTMLButtonElement | null} */ (
+        document.getElementById('techLabAddBeatsBtn')
+    );
+    const resetBtn = /** @type {HTMLButtonElement | null} */ (
+        document.getElementById('techLabResetBtn')
+    );
     if (addBeatenByBtn) addBeatenByBtn.disabled = false;
-    if (addBeatsBtn)    addBeatsBtn.disabled    = false;
-    if (resetBtn)       resetBtn.disabled       = false;
+    if (addBeatsBtn) addBeatsBtn.disabled = false;
+    if (resetBtn) resetBtn.disabled = false;
 }
 
 // ── TARGET PICKER ────────────────────────────────────────────────
@@ -876,17 +981,22 @@ async function _renderTechsFor(target) {
 async function _renderPickerResults(inputId, listId, query, onPick) {
     const list = document.getElementById(listId);
     if (!list) return;
-    const q = String(query || '').trim().toLowerCase();
-    if (!q || q.length < 1) { list.innerHTML = ''; return; }
+    const q = String(query || '')
+        .trim()
+        .toLowerCase();
+    if (!q || q.length < 1) {
+        list.innerHTML = '';
+        return;
+    }
     if (_allMetaCards.length === 0) _rebuildMetaCards();
     // Lazy-load currentMetaAnalysisData so the picker works even
     // when the user lands on Tech Lab without first opening the
     // Current Meta analysis. Without this the dropdown is empty
     // for fresh sessions.
     if (_allMetaCards.length === 0) {
-        list.innerHTML = `<div class="tech-lab-picker-empty">${
-            _escapeHtml(_t('techLab.loading', 'Loading meta data…'))
-        }</div>`;
+        list.innerHTML = `<div class="tech-lab-picker-empty">${_escapeHtml(
+            _t('techLab.loading', 'Loading meta data…')
+        )}</div>`;
         await _ensureMetaDataLoaded();
         _rebuildMetaCards();
     }
@@ -894,31 +1004,40 @@ async function _renderPickerResults(inputId, listId, query, onPick) {
     // Set+number tolerates "ASC 39", "ASC-39", "ASC39", or just "ASC|39".
     const qNorm = q.replace(/[\s\-|]+/g, '');
     const matches = _allMetaCards
-        .filter(c => {
+        .filter((c) => {
             if (c.name && c.name.toLowerCase().includes(q)) return true;
             if (c.name_de && c.name_de.toLowerCase().includes(q)) return true;
-            if (c.key && c.key.toLowerCase().replace(/[\s\-|]+/g, '').includes(qNorm)) return true;
+            if (
+                c.key &&
+                c.key
+                    .toLowerCase()
+                    .replace(/[\s\-|]+/g, '')
+                    .includes(qNorm)
+            )
+                return true;
             return false;
         })
         .slice(0, 15);
     if (matches.length === 0) {
-        list.innerHTML = `<div class="tech-lab-picker-empty">${
-            _escapeHtml(_t('techLab.pickerEmpty', 'No meta card matches that query.'))
-        }</div>`;
+        list.innerHTML = `<div class="tech-lab-picker-empty">${_escapeHtml(
+            _t('techLab.pickerEmpty', 'No meta card matches that query.')
+        )}</div>`;
         return;
     }
-    list.innerHTML = matches.map(c => {
-        const img = _cardImageUrl(c.key);
-        const safeImg = img ? _escapeHtml(img) : '';
-        const safeName = _escapeHtml(c.name);
-        const safeKey = _escapeHtml(c.key);
-        return `<li class="tech-lab-picker-item" data-key="${safeKey}" data-name="${safeName}">
+    list.innerHTML = matches
+        .map((c) => {
+            const img = _cardImageUrl(c.key);
+            const safeImg = img ? _escapeHtml(img) : '';
+            const safeName = _escapeHtml(c.name);
+            const safeKey = _escapeHtml(c.key);
+            return `<li class="tech-lab-picker-item" data-key="${safeKey}" data-name="${safeName}">
             ${img ? `<img class="tech-lab-picker-thumb" src="${safeImg}" alt="${safeName}" loading="lazy">` : '<span class="tech-lab-picker-thumb tech-lab-thumb-fallback">?</span>'}
             <span class="tech-lab-picker-name">${safeName}</span>
             <span class="tech-lab-picker-key">${safeKey}</span>
         </li>`;
-    }).join('');
-    list.querySelectorAll('.tech-lab-picker-item').forEach(itemEl => {
+        })
+        .join('');
+    list.querySelectorAll('.tech-lab-picker-item').forEach((itemEl) => {
         const item = /** @type {HTMLElement} */ (itemEl);
         item.addEventListener('click', () => {
             onPick({ key: item.dataset.key, name: item.dataset.name });
@@ -927,7 +1046,9 @@ async function _renderPickerResults(inputId, listId, query, onPick) {
 }
 
 function _wireTargetPicker() {
-    const input = /** @type {HTMLInputElement | null} */ (document.getElementById('techLabTargetSearch'));
+    const input = /** @type {HTMLInputElement | null} */ (
+        document.getElementById('techLabTargetSearch')
+    );
     const dropdown = document.getElementById('techLabTargetDropdown');
     if (!input || !dropdown) return;
     input.addEventListener('input', (e) => {
@@ -940,11 +1061,16 @@ function _wireTargetPicker() {
     });
     input.addEventListener('focus', () => {
         if (input.value) {
-            _renderPickerResults('techLabTargetSearch', 'techLabTargetDropdown', input.value, (pick) => {
-                input.value = pick.name;
-                dropdown.innerHTML = '';
-                _renderTechsFor(pick);
-            });
+            _renderPickerResults(
+                'techLabTargetSearch',
+                'techLabTargetDropdown',
+                input.value,
+                (pick) => {
+                    input.value = pick.name;
+                    dropdown.innerHTML = '';
+                    _renderTechsFor(pick);
+                }
+            );
         }
     });
     document.addEventListener('click', (e) => {
@@ -961,24 +1087,34 @@ let _addDirection = 'beatenBy';
 
 function openAddMissing(direction) {
     if (!_target) return;
-    _addDirection = (direction === 'beats') ? 'beats' : 'beatenBy';
-    const overlay  = document.getElementById('techLabAddOverlay');
-    const input    = /** @type {HTMLInputElement | null} */ (document.getElementById('techLabAddSearch'));
+    _addDirection = direction === 'beats' ? 'beats' : 'beatenBy';
+    const overlay = document.getElementById('techLabAddOverlay');
+    const input = /** @type {HTMLInputElement | null} */ (
+        document.getElementById('techLabAddSearch')
+    );
     const dropdown = document.getElementById('techLabAddDropdown');
-    const title    = document.getElementById('techLabAddTitle');
-    const intro    = document.getElementById('techLabAddIntro');
+    const title = document.getElementById('techLabAddTitle');
+    const intro = document.getElementById('techLabAddIntro');
     if (!overlay || !input || !dropdown) return;
     overlay.classList.remove('display-none');
     overlay.classList.add('show');
     if (title) {
-        title.textContent = (_addDirection === 'beats')
-            ? _t('techLab.addModalTitleBeats', 'Add a meta card this card is good against')
-            : _t('techLab.addModalTitle', 'Add a tech the engine missed');
+        title.textContent =
+            _addDirection === 'beats'
+                ? _t('techLab.addModalTitleBeats', 'Add a meta card this card is good against')
+                : _t('techLab.addModalTitle', 'Add a tech the engine missed');
     }
     if (intro) {
-        intro.textContent = (_addDirection === 'beats')
-            ? _t('techLab.addModalIntroBeats', 'Pick a meta card that the selected target counters. It will appear in the "good against" list and persist across sessions.')
-            : _t('techLab.addModalIntro', 'Search the current meta for the card you want to register as a tech against the selected target. It will show up in the list immediately and persist across sessions.');
+        intro.textContent =
+            _addDirection === 'beats'
+                ? _t(
+                      'techLab.addModalIntroBeats',
+                      'Pick a meta card that the selected target counters. It will appear in the "good against" list and persist across sessions.'
+                  )
+                : _t(
+                      'techLab.addModalIntro',
+                      'Search the current meta for the card you want to register as a tech against the selected target. It will show up in the list immediately and persist across sessions.'
+                  );
     }
     if (!input || !dropdown) return;
     input.value = '';
@@ -1006,7 +1142,10 @@ function closeAddMissing() {
 
 function _onResetClick() {
     if (!_target) return;
-    const msg = _t('techLab.resetConfirm', 'Reset all overrides (hidden + user-added) for this target?');
+    const msg = _t(
+        'techLab.resetConfirm',
+        'Reset all overrides (hidden + user-added) for this target?'
+    );
     if (typeof window !== 'undefined' && !window.confirm(msg)) return;
     _resetTargetOverrides(_target.key);
     _renderTechsFor(_target);
@@ -1019,7 +1158,7 @@ function init() {
     _ready = true;
     // Fire-and-forget pre-warm so the picker / engine don't pay
     // the lazy-load cost on the user's first interaction.
-    _ensureMetaDataLoaded().catch(e => _devLog('pre-warm load failed:', e && e.message));
+    _ensureMetaDataLoaded().catch((e) => _devLog('pre-warm load failed:', e && e.message));
     _wireTargetPicker();
     const addBeatenBy = document.getElementById('techLabAddBeatenByBtn');
     if (addBeatenBy) addBeatenBy.addEventListener('click', () => openAddMissing('beatenBy'));

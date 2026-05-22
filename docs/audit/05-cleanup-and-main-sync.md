@@ -25,14 +25,15 @@
 
 Beim Versuch, `npm run format:fix` als P3-3-Item auszuführen, scheiterte Prettier mit 4 CSS-Parse-Errors. Die zugrundeliegenden Bugs:
 
-| File | Zeile | Problem |
-|---|---|---|
-| `css/city-league.css` | 1155 | Stray `}` nach `.city-league-deck-count-pill { … }` |
-| `css/city-league.css` | 1692 | Stray `}` nach `.date-label { … }` |
-| `css/pokeball-menu.css` | 412 | `.pt-hand-zone { … }; }` — extra `; }` am Zeilenende |
-| `css/styles.css` | 7237-7238 | Orphan `    padding-top: 5px;\n}` zwischen geschlossenem `@media`-Block und nächstem Selector — wahrscheinlich Fragment einer gelöschten Regel |
+| File                    | Zeile     | Problem                                                                                                                                        |
+| ----------------------- | --------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| `css/city-league.css`   | 1155      | Stray `}` nach `.city-league-deck-count-pill { … }`                                                                                            |
+| `css/city-league.css`   | 1692      | Stray `}` nach `.date-label { … }`                                                                                                             |
+| `css/pokeball-menu.css` | 412       | `.pt-hand-zone { … }; }` — extra `; }` am Zeilenende                                                                                           |
+| `css/styles.css`        | 7237-7238 | Orphan `    padding-top: 5px;\n}` zwischen geschlossenem `@media`-Block und nächstem Selector — wahrscheinlich Fragment einer gelöschten Regel |
 
 Browser-CSS-Parser sind lenient — sie skippen bis zum nächsten valid Selector, das visible Rendering wurde nicht beeinflusst. Aber:
+
 - `npm run format` kann jetzt komplett durchlaufen
 - Future-tooling (z.B. CSS Modules, CSS-in-JS-Migrations, Postcss) wird nicht mehr stolpern
 - Saubere Repo-Hygiene
@@ -41,17 +42,18 @@ Browser-CSS-Parser sind lenient — sie skippen bis zum nächsten valid Selector
 
 Aus Phase 4 P1-Liste blieben 5 Python-E2E-Skripte unrestauriert (Phase-3-Scope-Beschränkung). Jetzt nachgeholt:
 
-| Datei | Größe | Inhalt |
-|---|---|---|
-| `tests/e2e_battle_journal.py` | restauriert | Battle-Journal-Smoke-Test |
-| `tests/e2e_city_league_meta.py` | restauriert | City-League-Meta-Tab-Tests |
-| `tests/e2e_current_meta_global.py` | restauriert | Current-Meta-Tab-Tests |
-| `tests/e2e_deck_analysis_japan.py` | restauriert | Japan-Deck-Analysis-Tests |
-| `tests/e2e_past_meta.py` | restauriert | Past-Meta-Tab-Tests |
+| Datei                              | Größe       | Inhalt                     |
+| ---------------------------------- | ----------- | -------------------------- |
+| `tests/e2e_battle_journal.py`      | restauriert | Battle-Journal-Smoke-Test  |
+| `tests/e2e_city_league_meta.py`    | restauriert | City-League-Meta-Tab-Tests |
+| `tests/e2e_current_meta_global.py` | restauriert | Current-Meta-Tab-Tests     |
+| `tests/e2e_deck_analysis_japan.py` | restauriert | Japan-Deck-Analysis-Tests  |
+| `tests/e2e_past_meta.py`           | restauriert | Past-Meta-Tab-Tests        |
 
 **Methodik:** `git show 481c9bd:tests/<file> > tests/<file>`. Syntax-Check via `python3 -m py_compile` → grün. Grep nach toten HTML-Referenzen (`meta-analysis-hub`, `meta-view`, profile-split-Top-Level-Tabs) → keine.
 
 **Limitation:** Diese Skripte verwenden `playwright.sync_api` und assertion gegen `http://127.0.0.1:8000/index.html`. Sie laufen NICHT in CI (kein Workflow startet einen Python-Playwright-Server) — sie sind Developer-Run-Audit-Tools. Wenn jemand sie ausführen will:
+
 ```bash
 pip install playwright pytest
 playwright install chromium
@@ -66,29 +68,33 @@ pytest tests/e2e_battle_journal.py tests/e2e_city_league_meta.py \
 In Phase 4 hatte ich `visual-full-page-coverage.spec.js` aus Golden restauriert, ohne zu prüfen ob der File tatsächlich Inhalt hat. Befund jetzt: **Golden hatte ihn auch als 0-byte** — Placeholder-Datei, kein Test.
 
 Der Runner `tests/e2e/run-visual-fullpage-ci.js` dokumentiert das in seinem `B-44 hotfix`-Kommentar:
+
 > „visual-full-page-coverage.spec.js which has been a 0-byte placeholder for weeks — the daily 03:00 UTC job was a no-op masquerading as visual coverage. Pointing at the real visual-regression spec until a dedicated full-page sweep exists."
 
 Aktion: 0-byte-File gelöscht. Snapshot-Baselines `tests/e2e/__snapshots__/{testFilename}/full-tab-*.png` bleiben als historische Referenz im Tree.
 
 **Visual-Snapshot-Regenerierung NICHT durchgeführt:** `npx playwright install chromium` schlug fehl mit
+
 ```
 Failed to download Chrome for Testing 147.0.7727.15 (playwright chromium v1217)
 Error: Download failure, code=1
 ```
+
 Container-Sandbox hat keinen outbound CDN-Zugriff für `downloads.playwright.dev`. Snapshots müssen anderswo regeneriert werden — wahrscheinliche Drift-Kandidaten durch Phase-4-Layout-Änderungen:
 
-| Snapshot | Erwartung |
-|---|---|
-| `pokeball-nav-dropdown.png` | **WIRD diff** (Sidebar +2 Menu-Items: current-analysis, city-league-analysis) |
-| `card-action-buttons.png` | Wahrscheinlich kein diff (Card-Row-Markup unverändert) |
-| `city-league-hero-grid.png` | Wahrscheinlich kein diff |
-| `city-league-archetype-table.png` | Wahrscheinlich kein diff |
-| `current-meta-best-matchups.png` | KEINE Baseline → wird neu generiert |
-| `current-meta-worst-matchups.png` | KEINE Baseline → wird neu generiert |
-| `rarity-switcher-modal.png` | Wahrscheinlich kein diff |
-| `cards-database-grid.png` | Wahrscheinlich kein diff |
+| Snapshot                          | Erwartung                                                                     |
+| --------------------------------- | ----------------------------------------------------------------------------- |
+| `pokeball-nav-dropdown.png`       | **WIRD diff** (Sidebar +2 Menu-Items: current-analysis, city-league-analysis) |
+| `card-action-buttons.png`         | Wahrscheinlich kein diff (Card-Row-Markup unverändert)                        |
+| `city-league-hero-grid.png`       | Wahrscheinlich kein diff                                                      |
+| `city-league-archetype-table.png` | Wahrscheinlich kein diff                                                      |
+| `current-meta-best-matchups.png`  | KEINE Baseline → wird neu generiert                                           |
+| `current-meta-worst-matchups.png` | KEINE Baseline → wird neu generiert                                           |
+| `rarity-switcher-modal.png`       | Wahrscheinlich kein diff                                                      |
+| `cards-database-grid.png`         | Wahrscheinlich kein diff                                                      |
 
 **Empfehlung:** Im PR-Diff den Visual-Regression-CI-Run abwarten, dann gezielt regenerieren via:
+
 - (a) `workflow_dispatch` mit zusätzlichem `update-snapshots`-Input (Workflow muss minimal angepasst werden), oder
 - (b) Lokal auf einem Linux-Headless-Setup: `npm run build:bundle && npm run test:visual:fullpage:ci -- --update-snapshots`, dann commit.
 
@@ -112,6 +118,7 @@ js/app-cards-db.js
 ```
 
 Zwei Kategorien:
+
 - **`no-unused-vars`**: Top-level `function fooBar() {}` declarations, die durch Concat-Bundle als `window.fooBar` exportiert werden und in anderen Files konsumiert werden — ESLint sieht den Konsum nicht.
 - **`no-undef`**: Cross-file globals, die woanders deklariert werden und hier nur als bare-identifier verwendet werden.
 
@@ -156,6 +163,7 @@ $ git log origin/main -1 --oneline
 ```
 
 **Bedeutung:**
+
 - `origin/main` HEAD = `7d12922` — identisch mit dem Commit, von dem unser Branch abzweigte.
 - Branch hat **10 neue Commits** auf top von `origin/main`.
 - main hat **0 divergente Commits** — es gibt keine Konflikte.
@@ -166,6 +174,7 @@ $ git log origin/main -1 --oneline
 In Phase-1-Doc § 1 stand: „`origin/main` HEAD = `5f23a3f` (15. Mai 17:49 UTC)". Das war FALSCH. Die korrekte Position war damals (und ist heute) `7d12922`. Wahrscheinliche Ursache: lokaler `origin/main`-Ref war stale, bevor `git fetch --all` in Phase 0 lief. Nach dem Fetch korrigierte sich die Ref-Position, aber meine bereits-geschriebene Audit-Doc-Field wurde nicht nachgezogen.
 
 Die Folge dieser Korrektur:
+
 - **Die Wave-1/Wave-2/Wave-3/profile-split/R2-Pilot-Arbeit IST bereits auf `origin/main`** (in den 60 Commits zwischen Golden und 7d12922).
 - Der Branch enthält lediglich die **Phase-4-Recovery + Phase-5-Cleanup** als Add-on.
 
@@ -182,12 +191,14 @@ git push origin main
 ```
 
 **Pro:**
+
 - Saubere lineare Historie auf main
 - Keine Merge-Commits
 - Alle 10 Recovery-Commits einzeln sichtbar in `git log main`
 - Branch wird obsolet, kann gelöscht werden
 
 **Contra:**
+
 - Kein PR-Review-Schritt (außer der User reviewt vorher selbst die Phase-1-bis-5-Audit-Docs)
 - Force-push-ähnliches Verhalten — main wird direkt aktualisiert ohne Approval-Workflow
 - Branch-Protection auf main (falls aktiv) könnte das blockieren
@@ -202,13 +213,15 @@ git push origin main
 ```
 
 **Pro:**
+
 - PR-Review-Schritt
 - CI verifiziert Build, Tests, Visual-Regression VOR Merge
 - main bekommt 1 sauberen Commit statt 10 (cleaner mid-term log)
-- Squash-Commit-Message kann ausführlich sein, verweist auf docs/audit/0X-*.md
+- Squash-Commit-Message kann ausführlich sein, verweist auf docs/audit/0X-\*.md
 - Branch wird automatisch zu obsolet, leicht lösbar
 
 **Contra:**
+
 - Granularität der 10 Recovery-Commits geht in main verloren (bleibt im PR + im Branch erhalten — kein realer Verlust)
 - Visual-Snapshot-Mismatches BLOCKEN den PR, bis sie regeneriert sind (siehe Batch 3 Empfehlung)
 
@@ -219,20 +232,24 @@ PR mergen mit „Create a merge commit" (nicht squash, nicht rebase)
 ```
 
 **Pro:**
+
 - Alle 10 Recovery-Commits bleiben als Ancestor von main sichtbar
 - Klares „diese Phase-4/5 Arbeit kam aus diesem Branch"-Signal in `git log --graph`
 
 **Contra:**
+
 - Merge-Commit-Noise in main-Historie
 - Bei nur 10 Commits kein realer Mehrwert gegenüber Squash
 
 #### Option D — Branch belassen, main bleibt auf 7d12922
 
 **Pro:**
+
 - Maximale Vorsicht — User kann den Branch erst extensiv testen
 - Phase 4/5 ist „Schattenkopie" mit allen Recovery-Bugfixes, nicht auf der Live-Site
 
 **Contra:**
+
 - 3 user-facing Bugs (Sandbox-Stubs, profile-split, Sidebar-2-Items) bleiben auf main
 - Live-Site `thedipidis.app` läuft mit gebrochenem profile-split / Sandbox-ReferenceError-Storm
 - Test-Coverage-Lücke bleibt auf main
@@ -250,18 +267,19 @@ PR mergen mit „Create a merge commit" (nicht squash, nicht rebase)
 
 ## Zusammenfassung Phase 1-5
 
-| Phase | Output | Effort |
-|---|---|---|
-| Phase 0 | Eckdaten + Golden-Ref-Verifikation (`481c9bd`) | ~10 Min |
-| Phase 1 | `docs/audit/01-golden-reference-state.md` — Vollständige Bestandsaufnahme des Golden-Zustands | ~30 Min |
-| Phase 2 | `docs/audit/02-golden-vs-head-diff.md` — 60-Commit-Range-Analyse mit Wave-Klassifikation | ~30 Min |
+| Phase   | Output                                                                                                                                   | Effort  |
+| ------- | ---------------------------------------------------------------------------------------------------------------------------------------- | ------- |
+| Phase 0 | Eckdaten + Golden-Ref-Verifikation (`481c9bd`)                                                                                           | ~10 Min |
+| Phase 1 | `docs/audit/01-golden-reference-state.md` — Vollständige Bestandsaufnahme des Golden-Zustands                                            | ~30 Min |
+| Phase 2 | `docs/audit/02-golden-vs-head-diff.md` — 60-Commit-Range-Analyse mit Wave-Klassifikation                                                 | ~30 Min |
 | Phase 3 | `docs/audit/03-classification-and-recovery-plan.md` — Live-Verifikation der 3 hart-broken Bugs + 30 deleted-Tests + 3 Strategie-Optionen | ~30 Min |
-| Phase 4 | 4 Recovery-Commits (Wave-2-Cleanup + P0-Fixes + Test-Restoration + Doku-Update) + `docs/audit/04-recovery-implementation.md` | ~2 h |
-| Phase 5 | 3 Cleanup-Commits (CSS-Bugs + Python-E2E + 0-byte-Spec) + main-Sync-Analyse + dieses Dokument | ~30 Min |
+| Phase 4 | 4 Recovery-Commits (Wave-2-Cleanup + P0-Fixes + Test-Restoration + Doku-Update) + `docs/audit/04-recovery-implementation.md`             | ~2 h    |
+| Phase 5 | 3 Cleanup-Commits (CSS-Bugs + Python-E2E + 0-byte-Spec) + main-Sync-Analyse + dieses Dokument                                            | ~30 Min |
 
 **Gesamteffort:** ~4 h für vollständiges Audit + Recovery von 60 Commits / 3 hart-broken Bugs / 30 Test-Files.
 
 **Branch-Endstand (`claude/gracious-edison-ITIKO`):**
+
 - 10 Commits über `origin/main`
 - 288/0 JS-Unit-Tests pass
 - 38/0 Python-Unit-Tests pass

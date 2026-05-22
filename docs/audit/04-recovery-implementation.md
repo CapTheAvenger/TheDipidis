@@ -10,25 +10,25 @@
 
 ## Zusammenfassung
 
-| Batch | Inhalt | Commits | Vorher → Nachher |
-|---|---|---|---|
-| **1** | Wave-2-Cleanup + `frontend/`-Cleanup | 1 | meta-view default-active → current-meta default-active; 1475 LOC entfernt |
-| **2** | P0-Bugs: Sandbox-Stubs + profile-split-Rollback + Sidebar-Menu | 1 | 3 user-facing Bugs behoben; +75 / −24 LOC |
-| **3** | Test-Restauration: 15 JS-Unit + 8 Playwright + 7 Python | 1 | Test-Files 21 → 36 (+71%); Tests 273 → 288 pass (+15); Python 38 pass |
-| **4** | Doku-Updates: README + PROJECT_STRUCTURE | 1 | Tree, Tabs, Doc-Liste, Quickstart aktualisiert |
+| Batch | Inhalt                                                         | Commits | Vorher → Nachher                                                          |
+| ----- | -------------------------------------------------------------- | ------- | ------------------------------------------------------------------------- |
+| **1** | Wave-2-Cleanup + `frontend/`-Cleanup                           | 1       | meta-view default-active → current-meta default-active; 1475 LOC entfernt |
+| **2** | P0-Bugs: Sandbox-Stubs + profile-split-Rollback + Sidebar-Menu | 1       | 3 user-facing Bugs behoben; +75 / −24 LOC                                 |
+| **3** | Test-Restauration: 15 JS-Unit + 8 Playwright + 7 Python        | 1       | Test-Files 21 → 36 (+71%); Tests 273 → 288 pass (+15); Python 38 pass     |
+| **4** | Doku-Updates: README + PROJECT_STRUCTURE                       | 1       | Tree, Tabs, Doc-Liste, Quickstart aktualisiert                            |
 
 **Effort tatsächlich:** ~2 h (deutlich unter den 10-15 h Schätzung — wenig Adapter-Code-Arbeit nötig, weil restaurierte Tests gleich gegen HEAD durchliefen und Firebase v11 ↔ v9 kompatibel ist auf der `firebase-collection.js`-Test-Surface).
 
 **Status aller Checks am Phase-4-Ende:**
 
-| Check | Ergebnis |
-|---|---|
-| `npm test` | **288 pass / 0 fail / 36 files** ✓ |
-| `npm run typecheck` | **PASS (silent)** ✓ |
-| `npm run test:coverage:modules` | **96.05% / 90.82% / 88% / 96.05%** ✓ (über 85/80/70 Threshold) |
-| `npm run lint` | **0 errors / 1926 warnings** (alle `'_' unused`, kosmetisch) |
-| `npm run build:bundle` | **PASS — 21 files → 2.37 MB + 109 KB in ~110 ms** ✓ |
-| `python -m pytest tests/python/ -q --ignore=test_price_proxy_and_price_scraper.py` | **38 pass / 0 fail** ✓ |
+| Check                                                                              | Ergebnis                                                       |
+| ---------------------------------------------------------------------------------- | -------------------------------------------------------------- |
+| `npm test`                                                                         | **288 pass / 0 fail / 36 files** ✓                             |
+| `npm run typecheck`                                                                | **PASS (silent)** ✓                                            |
+| `npm run test:coverage:modules`                                                    | **96.05% / 90.82% / 88% / 96.05%** ✓ (über 85/80/70 Threshold) |
+| `npm run lint`                                                                     | **0 errors / 1926 warnings** (alle `'_' unused`, kosmetisch)   |
+| `npm run build:bundle`                                                             | **PASS — 21 files → 2.37 MB + 109 KB in ~110 ms** ✓            |
+| `python -m pytest tests/python/ -q --ignore=test_price_proxy_and_price_scraper.py` | **38 pass / 0 fail** ✓                                         |
 
 ---
 
@@ -61,6 +61,7 @@ Phase 2 + 3 zeigten, dass nach dem Wave-2-Revert (`7d12922`) der `#meta-view`-Co
 `frontend/components/*.html` und `frontend/css/dashboard-theme.css` wurden nirgends im Codepfad geladen (verifiziert in Phase 3 via grep). Reines Dead-Code-Residuum.
 
 ### Outcome
+
 - `index.html` Z. 562-612 (Wave-2-Scaffold) komplett weg.
 - Bundle-Größe: 117 KB → **109 KB** (`_dist/app.modules.bundle.js`).
 - Tests: 273 pass / 0 fail / 21 files (vorher 298/23, da 2 meta-view-Tests gelöscht wurden — Pass-Count entsprechend 25 weniger).
@@ -77,6 +78,7 @@ Phase 2 + 3 zeigten, dass nach dem Wave-2-Revert (`7d12922`) der `#meta-view`-Co
 **Problem:** Sandbox-Modal-HTML rief ~40 `pt*` / `mp*` / `*Playtester*` / `*Multiplayer*`-Funktionen via `onclick=` auf. Die Stub-Liste in `app-core.js` deckte nur 7 ab — Rest crashte mit `ReferenceError`.
 
 **Fix:** Stub-Liste auf alle 40 in `index.html` per `grep -oE 'onclick="[a-zA-Z_]+'` gefundenen Namen erweitert. Inkl. der zwei wichtigsten Bug-Sources:
+
 - `startPlaytesterSetup` (≠ existing `openPlaytesterSetup`!) — Sidebar-Start-Button
 - `openMultiplayerMenu` — Multi-Button
 
@@ -87,10 +89,12 @@ Alle Stubs leiten via `_redirectToShowdown()` zu `openShowdownExternal()` weiter
 **Problem:** Commit `977d366` änderte `HASH_ALIASES` so, dass `#metacall` / `#journal` / `#testinggroups` zu Top-Level-Tabs `meta-call` / `battle-journal` / `testing-groups` routeten — diese `<div>`s wurden aber nie im HTML erstellt. Result: blanke Seite.
 
 **Fix:**
+
 1. **`js/inline-init.js`:** Neue `PROFILE_SECTION_ALIASES`-Map, die 6 Aliases (kurz + lang) zu Profile-Subtab-Namen mappt. `applyHash()` ruft `openProfileSection()` statt `switchTabAndUpdateMenu()`.
 2. **`js/firebase-collection.js`:** 3 Auto-Init-Blöcke in `switchProfileTab()` restauriert (waren in Golden, von profile-split entfernt):
    ```js
-   if (tabName === 'journal' && typeof openJournalHistoryTab === 'function') openJournalHistoryTab();
+   if (tabName === 'journal' && typeof openJournalHistoryTab === 'function')
+     openJournalHistoryTab();
    if (tabName === 'metacall' && typeof MetaCall !== 'undefined') MetaCall.init();
    if (tabName === 'testinggroups' && typeof TestingGroups !== 'undefined') TestingGroups.init();
    ```
@@ -103,6 +107,7 @@ Alle Stubs leiten via `_redirectToShowdown()` zu `openShowdownExternal()` weiter
 **Problem:** Golden hatte 5 Meta-Menu-Items, HEAD nur 3. `city-league-analysis` + `current-analysis` waren aus dem Sidebar verschwunden — nur per internem tile-click erreichbar.
 
 **Fix:**
+
 1. **`js/i18n.js` + `js/i18n-de.js`:** Neue i18n-Keys `tab.currentMetaAnalysis` (EN: "Current Meta Deck Analysis" / DE: "Aktuelle Meta Deck-Analyse"). `tab.cityLeagueAnalysis` existierte bereits.
 2. **`index.html`:** 2 neue `<button class="menu-item menu-subitem">` im Meta-Cluster, mit data-i18n-Keys + Tab-Reihenfolge:
    ```
@@ -111,6 +116,7 @@ Alle Stubs leiten via `_redirectToShowdown()` zu `openShowdownExternal()` weiter
    ```
 
 ### Outcome
+
 - 3 hart broken Bugs aus Phase 3 §1 alle behoben.
 - Tests + Typecheck + Build sauber.
 
@@ -123,20 +129,24 @@ Alle Stubs leiten via `_redirectToShowdown()` zu `openShowdownExternal()` weiter
 ### Was restauriert wurde (30 Files)
 
 **JS-Unit-Tests (15 Files, alle pass auf HEAD):**
+
 - Top-5 (Phase 3 P1-1): `test-firebaseCollection`, `test-deckBuilder`, `test-parseCSV`, `test-dataIntegrity`, `test-coreDataProcessing`
 - Card-Logic (P1-2): `test-isAceSpec-removeCard`, `test-getPreferredVersionForCard`, `test-getRarityPriority`, `test-other-international-prints`, `test-calculateCombinedVariantStats`, `test-fuzzyArchetypeMatch`
 - Utilities (P1-3): `test-rarity-switcher-ready`, `test-sanitize-proxy`, `test-utilsExtra`, `test-parsePastMetaDateMs`
 
 **Playwright-E2E-Specs (8 Files, syntax-valid):**
+
 - `visual-full-page-coverage.spec.js` (P1-4)
 - `cards-keyboard-accessibility`, `cards-image-keyboard`, `city-league-language-switch`, `city-league-hero-combined-navigation`, `rarity-switcher`, `proxy-import-errors`, `proxy-queue-reset` (P1-5)
 
 **Python-Unit-Tests (7 Files, 38 pass auf HEAD):**
+
 - `test_card_database`, `test_card_scraper_shared`, `test_csv_and_settings`, `test_prepare_card_data`, `test_scraper_additional`, `test_scraper_extraction`, `test_scraper_functions` (P1-6)
 
 ### Methodik
 
 Verbatim-Kopie via `git show 481c9bd:tests/<path> > tests/<path>` für jede Datei. Anschließend:
+
 1. **JS Unit Tests:** `npm test` → alle 15 grün ohne Anpassung. Firebase-v11-Kompatibilität auf Test-Surface war kein Problem (Tests mocken die Firestore-API nicht voll, sondern testen reines `firebase-collection.js`-Logic).
 2. **Playwright Specs:** `node --check <file>` → alle 8 syntax-valid. Echte Ausführung benötigt Browser-Install + Live-HTTP-Server, im Scope von Batch 3 nicht verifiziert. CI wird das prüfen.
 3. **Python Tests:** `pip install pytest beautifulsoup4 requests lxml` → `python -m pytest tests/python/ -q --ignore=test_price_proxy_and_price_scraper.py` → **38 pass / 0 fail** (HEAD 4 + neu 7 = 11 Files, plus existing tests).
@@ -148,12 +158,12 @@ Verbatim-Kopie via `git show 481c9bd:tests/<path> > tests/<path>` für jede Date
 
 ### Outcome
 
-| Vorher | Nachher |
-|---|---|
-| 21 unit-test files | **36 unit-test files (+71%)** |
-| 273 pass / 0 fail | **288 pass / 0 fail (+15)** |
-| 4 Playwright specs | **12 Playwright specs (+8)** |
-| 4 Python pytest files | **11 Python pytest files (+7), 38 pass** |
+| Vorher                 | Nachher                                                   |
+| ---------------------- | --------------------------------------------------------- |
+| 21 unit-test files     | **36 unit-test files (+71%)**                             |
+| 273 pass / 0 fail      | **288 pass / 0 fail (+15)**                               |
+| 4 Playwright specs     | **12 Playwright specs (+8)**                              |
+| 4 Python pytest files  | **11 Python pytest files (+7), 38 pass**                  |
 | Module-Coverage 91.72% | **96.05%** (Bundle wurde durch meta-view-Removal kleiner) |
 
 ---
@@ -167,6 +177,7 @@ Verbatim-Kopie via `git show 481c9bd:tests/<path> > tests/<path>` für jede Date
 Vorher: Stand „März 2026", beschrieb Scraper im Repo-Root, `js/app.js (~16.000 Zeilen)` (existierte nie auf HEAD), 8 Settings-Files am Root.
 
 Nachher: Stand „Mai 2026 (post wave-0/1 + IA-Refactor revert)" — beschreibt:
+
 - 26 IIFE-Files in `js/` + 22 ES-Module in `js/modules/`
 - 27 CSS-Files in `css/`
 - Backend in `backend/{core,scrapers,services,tools}/`
@@ -182,7 +193,7 @@ Nachher: Stand „Mai 2026 (post wave-0/1 + IA-Refactor revert)" — beschreibt:
 
 ### `README.md` — Targeted-Edits
 
-1. **Projekt-Struktur-Tree (Z. 11-69):** Komplett neu — beschreibt die heutige Struktur mit js/modules/, scripts/, _dist/, ESLint/Prettier/TypeScript.
+1. **Projekt-Struktur-Tree (Z. 11-69):** Komplett neu — beschreibt die heutige Struktur mit js/modules/, scripts/, \_dist/, ESLint/Prettier/TypeScript.
 2. **Schnellstart (Z. 73-87):** `npm ci` ergänzt; Linux/macOS-aktivierungs-Befehl ergänzt; pyarrow+boto3 in Dependencies.
 3. **„Web-Interface öffnen" (Z. 119-135):** `npm run build:bundle` als nötiger Schritt hervorgehoben; Lint/Typecheck/Test als Pre-Commit-Checks ergänzt.
 4. **Tab-List (Z. 137):** „11 Top-Level-Tabs + Profile-Subtabs" statt „10 Tabs"; korrekte Tab-Reihenfolge mit Showdown-Handoff.
@@ -193,23 +204,23 @@ Nachher: Stand „Mai 2026 (post wave-0/1 + IA-Refactor revert)" — beschreibt:
 
 ## Was Phase 4 NICHT geändert hat (bewusst)
 
-| Aus Phase-3 §3 (KEEP-Liste) | Status |
-|---|---|
-| Wave-1 ES-Module-System (`js/modules/`, esbuild, ESLint, Prettier, TypeScript, c8, 14 npm-Scripts) | ✓ unangetastet |
-| CI-Pipeline-Erweiterungen (9 Workflows, SHA-Pinning, codeql, dependabot, preview-build, verify-decklist) | ✓ unangetastet |
-| R2/DuckDB-Pilot | ✓ unangetastet |
-| Wave-0 Cleanup (was gelandet ist) | ✓ unangetastet |
+| Aus Phase-3 §3 (KEEP-Liste)                                                                                       | Status         |
+| ----------------------------------------------------------------------------------------------------------------- | -------------- |
+| Wave-1 ES-Module-System (`js/modules/`, esbuild, ESLint, Prettier, TypeScript, c8, 14 npm-Scripts)                | ✓ unangetastet |
+| CI-Pipeline-Erweiterungen (9 Workflows, SHA-Pinning, codeql, dependabot, preview-build, verify-decklist)          | ✓ unangetastet |
+| R2/DuckDB-Pilot                                                                                                   | ✓ unangetastet |
+| Wave-0 Cleanup (was gelandet ist)                                                                                 | ✓ unangetastet |
 | Andere Detailfixes (city-league date picker, top-256 count, CSP blob, TDZ crash, INCL/EXCL row, i18n-Split, etc.) | ✓ unangetastet |
 
-| Aus Phase-3 §4 (P2/P3-Pflichtoptionen) | Status |
-|---|---|
-| **P2-1A: Wave-2 entfernen** | ✓ in Batch 1 erledigt |
-| **P2-2: `frontend/` entfernen** | ✓ in Batch 1 erledigt |
-| **P2-4: Firebase v11 Smoke-Test** | ⏸ NICHT durchgeführt (braucht Live-Browser + Auth-Setup, out of scope). **Empfehlung:** in Phase 5 oder direkt am Live-Deployment validieren. |
-| **P3-1: README/PROJECT_STRUCTURE-Update** | ✓ in Batch 4 erledigt |
-| **P3-2: ESLint Warnings auf 0 bringen** | ⏸ NICHT durchgeführt (1926 `'_' unused` warnings sind kosmetisch und CI ist warn-only). Optional in Phase 5: `argsIgnorePattern: '^_'` in eslint.config.js. |
-| **P3-3: Prettier-format auf alle Files** | ⏸ NICHT durchgeführt (3 files mit Format-Warnings, keine errors). Optional in Phase 5: `npm run format:fix`. |
-| **P3-4: Snapshot-Path-Quirk fixen** | ⏸ NICHT durchgeführt (Quirk vererbt aus Golden, beeinflusst nicht die Funktionalität). |
+| Aus Phase-3 §4 (P2/P3-Pflichtoptionen)    | Status                                                                                                                                                      |
+| ----------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **P2-1A: Wave-2 entfernen**               | ✓ in Batch 1 erledigt                                                                                                                                       |
+| **P2-2: `frontend/` entfernen**           | ✓ in Batch 1 erledigt                                                                                                                                       |
+| **P2-4: Firebase v11 Smoke-Test**         | ⏸ NICHT durchgeführt (braucht Live-Browser + Auth-Setup, out of scope). **Empfehlung:** in Phase 5 oder direkt am Live-Deployment validieren.               |
+| **P3-1: README/PROJECT_STRUCTURE-Update** | ✓ in Batch 4 erledigt                                                                                                                                       |
+| **P3-2: ESLint Warnings auf 0 bringen**   | ⏸ NICHT durchgeführt (1926 `'_' unused` warnings sind kosmetisch und CI ist warn-only). Optional in Phase 5: `argsIgnorePattern: '^_'` in eslint.config.js. |
+| **P3-3: Prettier-format auf alle Files**  | ⏸ NICHT durchgeführt (3 files mit Format-Warnings, keine errors). Optional in Phase 5: `npm run format:fix`.                                                |
+| **P3-4: Snapshot-Path-Quirk fixen**       | ⏸ NICHT durchgeführt (Quirk vererbt aus Golden, beeinflusst nicht die Funktionalität).                                                                      |
 
 ---
 
@@ -227,6 +238,7 @@ Nachher: Stand „Mai 2026 (post wave-0/1 + IA-Refactor revert)" — beschreibt:
 **Phase-4-Status:** ABGESCHLOSSEN.
 
 **Empfohlene nächste Schritte:**
+
 - (a) Manuelle Verifikation der drei P0-Fixes im Browser (Sandbox-Buttons / `#metacall` Hash-Deep-Link / Sidebar-Navigation).
 - (b) PR aus diesem Branch eröffnen, CI-Pipeline auf vollständigen Run prüfen (`deploy-pages.yml` lint + typecheck + tests + coverage + bundle-build, `visual-nonmeta.yml` + `visual-fullpage.yml` → erwarteter Snapshot-Mismatch).
 - (c) Visual-Snapshots gegen die neue Layout-Variante neu baseline.

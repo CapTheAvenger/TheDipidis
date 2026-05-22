@@ -19,20 +19,21 @@
 
 ## 1. Identifikation des Golden-Commits
 
-| Feld | Wert |
-|---|---|
-| SHA | `481c9bdddf73cd1c62aa3b4095066eac453a9e05` (kurz: `481c9bd`) |
-| Subject | `Merge pull request #163 from CapTheAvenger/claude/metacall-mode-toggle` |
-| Author / Committer | `CapTheAvenger <haushalterj@me.com>` (beide) |
-| Date | **2026-05-19 00:49:47 -0500** (= **05:49:47 UTC** = **07:49 GMT+2**) |
-| Parents | `09265a8` (main vor Merge) + `38f77a4` (Feature-Branch HEAD) |
-| Merge-Diff | 3 Files, +150/-65: `index.html`, `js/app-meta-call.js`, `js/i18n.js` |
-| Auf `origin/main`? | **Nein** — `origin/main` HEAD = `5f23a3f` (15. Mai 17:49 UTC, älter) |
-| Referenziert von Branches | `origin/claude/github-direct-changes-M7vpm`, `origin/claude/metacall-mode-audit-logging` |
-| Ancestor-Beziehung zu `origin/main` | `5f23a3f` ist **Vorfahre** von `481c9bd` (Golden = main+4 PRs) |
-| Worktree | `/tmp/golden/481c9bd/` (lokale Read-Only-Kopie) |
+| Feld                                | Wert                                                                                     |
+| ----------------------------------- | ---------------------------------------------------------------------------------------- |
+| SHA                                 | `481c9bdddf73cd1c62aa3b4095066eac453a9e05` (kurz: `481c9bd`)                             |
+| Subject                             | `Merge pull request #163 from CapTheAvenger/claude/metacall-mode-toggle`                 |
+| Author / Committer                  | `CapTheAvenger <haushalterj@me.com>` (beide)                                             |
+| Date                                | **2026-05-19 00:49:47 -0500** (= **05:49:47 UTC** = **07:49 GMT+2**)                     |
+| Parents                             | `09265a8` (main vor Merge) + `38f77a4` (Feature-Branch HEAD)                             |
+| Merge-Diff                          | 3 Files, +150/-65: `index.html`, `js/app-meta-call.js`, `js/i18n.js`                     |
+| Auf `origin/main`?                  | **Nein** — `origin/main` HEAD = `5f23a3f` (15. Mai 17:49 UTC, älter)                     |
+| Referenziert von Branches           | `origin/claude/github-direct-changes-M7vpm`, `origin/claude/metacall-mode-audit-logging` |
+| Ancestor-Beziehung zu `origin/main` | `5f23a3f` ist **Vorfahre** von `481c9bd` (Golden = main+4 PRs)                           |
+| Worktree                            | `/tmp/golden/481c9bd/` (lokale Read-Only-Kopie)                                          |
 
 **Was zwischen `origin/main`-HEAD und Golden liegt:**
+
 ```
 5f23a3f main    Merge PR #128
 …
@@ -49,22 +50,22 @@
 
 ### Frontend-Runtime-Dependencies (CDN, kein npm-Bundle)
 
-| Dependency | Version | Source | Verwendung |
-|---|---|---|---|
-| Firebase compat (app/auth/firestore) | 9.22.0 | `gstatic.com` | Auth, Firestore, User-State |
-| Chart.js | 4.4.0 | `cdn.jsdelivr.net` | Heatmaps, Tier-Charts, Meta-Call-Viz |
-| PapaParse | 5.4.1 | `cdnjs.cloudflare.com` | CSV-Parsing (City-League etc.) |
-| localforage | 1.10.0 | `cdnjs.cloudflare.com` | IndexedDB-Wrapper für Card-Cache |
-| mobile-drag-drop | 3.0.0-rc.0 | `cdn.jsdelivr.net` | Touch-Polyfill (Playtester, Deck-Builder) |
-| Google Sign-In | accounts.google.com/gsi/client | (load-event, lazy) | Auth |
+| Dependency                           | Version                        | Source                 | Verwendung                                |
+| ------------------------------------ | ------------------------------ | ---------------------- | ----------------------------------------- |
+| Firebase compat (app/auth/firestore) | 9.22.0                         | `gstatic.com`          | Auth, Firestore, User-State               |
+| Chart.js                             | 4.4.0                          | `cdn.jsdelivr.net`     | Heatmaps, Tier-Charts, Meta-Call-Viz      |
+| PapaParse                            | 5.4.1                          | `cdnjs.cloudflare.com` | CSV-Parsing (City-League etc.)            |
+| localforage                          | 1.10.0                         | `cdnjs.cloudflare.com` | IndexedDB-Wrapper für Card-Cache          |
+| mobile-drag-drop                     | 3.0.0-rc.0                     | `cdn.jsdelivr.net`     | Touch-Polyfill (Playtester, Deck-Builder) |
+| Google Sign-In                       | accounts.google.com/gsi/client | (load-event, lazy)     | Auth                                      |
 
 ### Dev-Toolchain (`package.json`)
 
 ```json
 {
   "scripts": {
-    "test:visual:fullpage:ci":  "node tests/e2e/run-visual-fullpage-ci.js",
-    "test:visual:nonmeta:ci":   "node tests/e2e/run-visual-nonmeta-ci.js",
+    "test:visual:fullpage:ci": "node tests/e2e/run-visual-fullpage-ci.js",
+    "test:visual:nonmeta:ci": "node tests/e2e/run-visual-nonmeta-ci.js",
     "test:visual:nonmeta:report": "node tests/e2e/runtime-verify-updates.js"
   },
   "devDependencies": {
@@ -110,10 +111,10 @@
 
 ### 4.1 Inline-Scripts (3 Blöcke)
 
-| Lines | Zweck | Schlüssel-Mechanik |
-|---|---|---|
-| 32–84 | **APP-VERSION-Drift-Check** | Setzt `window.APP_VERSION = '202605190525'`. Fetcht `version.json` no-store → wenn `data.version !== APP_VERSION`: alle Caches purgen, alle ServiceWorker unregistern, hard-reload mit `?_v=`-Param. Anti-Stale-Mechanismus. |
-| 819 | (inline `<script>`, ungelesen) | TBD in Phase 2 |
+| Lines     | Zweck                                                          | Schlüssel-Mechanik                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| --------- | -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 32–84     | **APP-VERSION-Drift-Check**                                    | Setzt `window.APP_VERSION = '202605190525'`. Fetcht `version.json` no-store → wenn `data.version !== APP_VERSION`: alle Caches purgen, alle ServiceWorker unregistern, hard-reload mit `?_v=`-Param. Anti-Stale-Mechanismus.                                                                                                                                                                                                         |
+| 819       | (inline `<script>`, ungelesen)                                 | TBD in Phase 2                                                                                                                                                                                                                                                                                                                                                                                                                       |
 | 4887–4974 | **SW-Registration + Google-SignIn-Lazyload + Filter-Debounce** | (a) Registriert `service-worker.js` mit `updateViaCache:'none'`, polled `reg.update()` alle 60s, lauscht auf `SW_UPDATED`-Message + `controllerchange` → autoreload. (b) Lazy-loaded Google-SignIn-SDK auf `window.load`. (c) Wrappt 6 globale Filter-Funktionen in 300ms-Debounce: `filterOverviewCards`, `filterCurrentMetaOverviewCards`, `filterPastMetaOverviewCards`, `filterMetaCards`, `filterCollection`, `filterWishlist`. |
 
 ### 4.2 Inline-`<style id="mobile-card-overlay-fix">` (Zeilen 125+)
@@ -143,6 +144,7 @@ Line 4816-41  26 App-Module (defer-Reihenfolge)
 ```
 
 **Lazy-geladen via `appendChild`** (NICHT statisch im `index.html` referenziert):
+
 - `playtester.js`, `playtester-mobile.js`, `playtester-patch.js` — geladen in `app-core.js:347-416` beim Öffnen des Playtester-Tabs; gegated durch `window.__playtesterScriptsReady`.
 - `firebase-multiplayer.js` — separat (siehe app-core.js:423).
 
@@ -155,6 +157,7 @@ Line 4816-41  26 App-Module (defer-Reihenfolge)
 `profile-collection` (default active) · `profile-decks` · `profile-wishlist` · `profile-tradelist` · `profile-metabinder` · `profile-custombinder` · `profile-journal` · `profile-deckcompare` · `profile-metacall` · `profile-testinggroups` · `profile-settings`.
 
 **Routing-API:**
+
 - `switchTab(tabId)` — Top-Level-Tab-Wechsel (app-core.js)
 - `switchTabAndUpdateMenu(tabId)` — Tab + Sidebar-Sync (inline-init.js)
 - `openProfileSection(subTab)` — Direkt zu Profile-Subtab (inline-init.js, via Hash)
@@ -162,6 +165,7 @@ Line 4816-41  26 App-Module (defer-Reihenfolge)
 - Hash-Aliases: `#tutorial`, `#city-league`, `#current-meta`, `#proxy`, `#sandbox`, `#calculator`, `#profile`, `#metacall` (inline-init.js:124-169)
 
 **Sidebar-Menü-Struktur:**
+
 - Cluster „Meta & Tier Lists" (5 items): current-meta, current-analysis, city-league, city-league-analysis, past-meta
 - Cluster-Top-Level: cards, proxy, sandbox, profile, calculator, tutorial
 - Header-Quick-Buttons: cards, profile
@@ -172,60 +176,60 @@ Line 4816-41  26 App-Module (defer-Reihenfolge)
 
 ### 5.1 Größenverteilung
 
-| Größenklasse | Module |
-|---|---|
-| **>200 KB** (6) | `app-deck-builder.js` 447K · `app-meta-call.js` 295K · `playtester.js` 290K · `firebase-collection.js` 245K · `app-cards-db.js` 223K · `app-current-meta-analysis.js` 203K · `i18n.js` 203K · `app-city-league.js` 212K |
-| **50–200 KB** (10) | `app-core.js` 149K · `battle-journal.js` 120K · `meta-binder.js` 111K · `app-meta-cards.js` 96K · `app-features.js` 75K · `app-past-meta.js` 72K · `app-testing-groups.js` 70K · `app-tier-meta.js` 68K · `app-utils.js` 63K · `custom-binder.js` 54K · `firebase-multiplayer.js` 54K · `app-tech-lab.js` 52K |
-| **10–50 KB** (10) | `app-anti-tech.js` 42K · `playtester-mobile.js` 33K · `app-current-meta.js` 29K · `firebase-globals.js` 19K · `playtester-patch.js` 14K · `card-capability-engine.js` 13K · `pokemon-loading-screen.js` 13K · `firebase-auth.js` 12K · `meta-analysis-hub.js` 11K · `archetype-icons.js` 9K · `draw-simulator.js` 9K · `tcg-showdown-link.js` 9K |
-| **<10 KB** (9) | `inline-init.js` 7K · `csv-cache-interceptor.js` 7K · `app-price.js` 6K · `error-tracking.js` 5K · `app-calculator.js` 4K · `card-data-cache.js` 4K · `app-init.js` 3K · `deck-analysis-shared.js` 2K · `firebase-config.js` 2K · `combo-worker.js` 1K · `auth-ui-helpers.js` 1K |
+| Größenklasse       | Module                                                                                                                                                                                                                                                                                                                                           |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **>200 KB** (6)    | `app-deck-builder.js` 447K · `app-meta-call.js` 295K · `playtester.js` 290K · `firebase-collection.js` 245K · `app-cards-db.js` 223K · `app-current-meta-analysis.js` 203K · `i18n.js` 203K · `app-city-league.js` 212K                                                                                                                          |
+| **50–200 KB** (10) | `app-core.js` 149K · `battle-journal.js` 120K · `meta-binder.js` 111K · `app-meta-cards.js` 96K · `app-features.js` 75K · `app-past-meta.js` 72K · `app-testing-groups.js` 70K · `app-tier-meta.js` 68K · `app-utils.js` 63K · `custom-binder.js` 54K · `firebase-multiplayer.js` 54K · `app-tech-lab.js` 52K                                    |
+| **10–50 KB** (10)  | `app-anti-tech.js` 42K · `playtester-mobile.js` 33K · `app-current-meta.js` 29K · `firebase-globals.js` 19K · `playtester-patch.js` 14K · `card-capability-engine.js` 13K · `pokemon-loading-screen.js` 13K · `firebase-auth.js` 12K · `meta-analysis-hub.js` 11K · `archetype-icons.js` 9K · `draw-simulator.js` 9K · `tcg-showdown-link.js` 9K |
+| **<10 KB** (9)     | `inline-init.js` 7K · `csv-cache-interceptor.js` 7K · `app-price.js` 6K · `error-tracking.js` 5K · `app-calculator.js` 4K · `card-data-cache.js` 4K · `app-init.js` 3K · `deck-analysis-shared.js` 2K · `firebase-config.js` 2K · `combo-worker.js` 1K · `auth-ui-helpers.js` 1K                                                                 |
 
 ### 5.2 Modul → Tab-Mapping
 
-| Modul | Eigentümer von Tab/Region | Init-Pattern |
-|---|---|---|
-| `app-core.js` | **Orchestrator** (Tab-Switching, Lazy-Load) | `DOMContentLoaded` (line 1208), `window.switchTab` |
-| `inline-init.js` | **Navigation** (Menü, Hash-Deep-Linking) | DOMContentLoaded + hash handler |
-| `app-init.js` | **Startup** (load all data, fire `app:resources-settled`) | DOMContentLoaded async (line 4) |
-| `meta-analysis-hub.js` | `meta-analysis-hub` | IIFE → `window.MetaAnalysisHub.onTabSwitched()` (line 6) |
-| `app-city-league.js` | `city-league` | `loadCityLeagueData()` + DOMContentLoaded (line 3787) |
-| `app-tier-meta.js` | `city-league-analysis` (Tier-Liste) | `loadTierData()` on-demand |
-| `app-current-meta.js` | `current-meta` (Matchup-Heatmap) | `renderMatchupHeatmap()` (line 17) |
-| `app-current-meta-analysis.js` | `current-analysis` | DOMContentLoaded (lines 1022, 1075, 3661) |
-| `app-past-meta.js` | `past-meta` | Script-load scope |
-| `app-cards-db.js` | `cards` | `loadCards()` aus app-init |
-| `app-deck-builder.js` | Deck-Panes in `city-league`, `current-analysis`, `past-meta` | Script-load (lines 5–28) |
-| `app-tech-lab.js` | Tech-Lab-Modal in `current-analysis`, `city-league-analysis` | Global modal handlers |
-| `app-anti-tech.js` | Anti-Tech-Modal | Global modal handlers |
-| `app-meta-cards.js` | Card-Stats-Panels in `current-analysis`, `city-league-analysis` | Module-load |
-| `app-features.js` | `tutorial` | Module-load + DOMContentLoaded |
-| `app-meta-call.js` | `profile-metacall` | IIFE `window.MetaCall` (line 4); `preload()` aus app-init.js:69 |
-| `app-testing-groups.js` | `profile-testinggroups` | IIFE `window.TestingGroups` (line 22); hash-invite (line 1687) |
-| `battle-journal.js` | `profile-journal` | IIFE (line 8), exports at 2336–2340 |
-| `meta-binder.js` | `profile-metabinder` | IIFE (line 6) |
-| `custom-binder.js` | `profile-custombinder` | IIFE (line 6) |
-| `firebase-collection.js` | `profile-collection`, `profile-decks`, `profile-wishlist`, `profile-tradelist` | Document-load init |
-| `playtester.js` | `sandbox` (1P-Mode) | **Lazy** via app-core.js:347 |
-| `playtester-mobile.js` | `sandbox` (Touch-Layer) | Lazy |
-| `playtester-patch.js` | `sandbox` (Bug-Fixes) | Lazy |
-| `firebase-multiplayer.js` | `sandbox` (2P-Mode) | **Lazy** via app-core.js:423 |
-| `app-calculator.js` | `calculator` | DOMContentLoaded |
-| `draw-simulator.js` | `calculator` (Sub-Feature) | Modal-getrieben |
-| `combo-worker.js` | `calculator` (Web Worker) | Worker-Message-Listener |
-| `app-utils.js` | **Shared** | IIFE bulk-exports (line 2) |
-| `i18n.js` | **Shared** (DE/EN-Übersetzung) | DOMContentLoaded (3235), exports 3229-3232 |
-| `app-price.js` | **Shared** (Card-Pricing) | On-demand |
-| `card-data-cache.js` | **Shared** (IndexedDB-Cache) | Lazy |
-| `card-capability-engine.js` | **Shared** (Tech-Lab-Engine) | Module-load |
-| `deck-analysis-shared.js` | **Shared** (Analysis-Helpers) | Module-load |
-| `archetype-icons.js` | **Shared** (Visual Branding) | Module-load |
-| `tcg-showdown-link.js` | **Shared** (External Integration) | Module-load |
-| `firebase-config.js` | **Bootstrap** (Firebase init) | Module-load |
-| `firebase-globals.js` | **Bootstrap** (user state) | Document-ready |
-| `firebase-auth.js` | **Auth** | Document-load + modal events |
-| `auth-ui-helpers.js` | **Auth** (UI) | On modal open |
-| `error-tracking.js` | **Shared** (Sentry, ~2 KB) | IIFE; DSN-Placeholder `__SENTRY_DSN__` |
-| `pokemon-loading-screen.js` | **Shared** (Boot UX) | DOM injection on load |
-| `csv-cache-interceptor.js` | **Shared** (HTTP Cache override) | fetch() override at module-load |
+| Modul                          | Eigentümer von Tab/Region                                                      | Init-Pattern                                                    |
+| ------------------------------ | ------------------------------------------------------------------------------ | --------------------------------------------------------------- |
+| `app-core.js`                  | **Orchestrator** (Tab-Switching, Lazy-Load)                                    | `DOMContentLoaded` (line 1208), `window.switchTab`              |
+| `inline-init.js`               | **Navigation** (Menü, Hash-Deep-Linking)                                       | DOMContentLoaded + hash handler                                 |
+| `app-init.js`                  | **Startup** (load all data, fire `app:resources-settled`)                      | DOMContentLoaded async (line 4)                                 |
+| `meta-analysis-hub.js`         | `meta-analysis-hub`                                                            | IIFE → `window.MetaAnalysisHub.onTabSwitched()` (line 6)        |
+| `app-city-league.js`           | `city-league`                                                                  | `loadCityLeagueData()` + DOMContentLoaded (line 3787)           |
+| `app-tier-meta.js`             | `city-league-analysis` (Tier-Liste)                                            | `loadTierData()` on-demand                                      |
+| `app-current-meta.js`          | `current-meta` (Matchup-Heatmap)                                               | `renderMatchupHeatmap()` (line 17)                              |
+| `app-current-meta-analysis.js` | `current-analysis`                                                             | DOMContentLoaded (lines 1022, 1075, 3661)                       |
+| `app-past-meta.js`             | `past-meta`                                                                    | Script-load scope                                               |
+| `app-cards-db.js`              | `cards`                                                                        | `loadCards()` aus app-init                                      |
+| `app-deck-builder.js`          | Deck-Panes in `city-league`, `current-analysis`, `past-meta`                   | Script-load (lines 5–28)                                        |
+| `app-tech-lab.js`              | Tech-Lab-Modal in `current-analysis`, `city-league-analysis`                   | Global modal handlers                                           |
+| `app-anti-tech.js`             | Anti-Tech-Modal                                                                | Global modal handlers                                           |
+| `app-meta-cards.js`            | Card-Stats-Panels in `current-analysis`, `city-league-analysis`                | Module-load                                                     |
+| `app-features.js`              | `tutorial`                                                                     | Module-load + DOMContentLoaded                                  |
+| `app-meta-call.js`             | `profile-metacall`                                                             | IIFE `window.MetaCall` (line 4); `preload()` aus app-init.js:69 |
+| `app-testing-groups.js`        | `profile-testinggroups`                                                        | IIFE `window.TestingGroups` (line 22); hash-invite (line 1687)  |
+| `battle-journal.js`            | `profile-journal`                                                              | IIFE (line 8), exports at 2336–2340                             |
+| `meta-binder.js`               | `profile-metabinder`                                                           | IIFE (line 6)                                                   |
+| `custom-binder.js`             | `profile-custombinder`                                                         | IIFE (line 6)                                                   |
+| `firebase-collection.js`       | `profile-collection`, `profile-decks`, `profile-wishlist`, `profile-tradelist` | Document-load init                                              |
+| `playtester.js`                | `sandbox` (1P-Mode)                                                            | **Lazy** via app-core.js:347                                    |
+| `playtester-mobile.js`         | `sandbox` (Touch-Layer)                                                        | Lazy                                                            |
+| `playtester-patch.js`          | `sandbox` (Bug-Fixes)                                                          | Lazy                                                            |
+| `firebase-multiplayer.js`      | `sandbox` (2P-Mode)                                                            | **Lazy** via app-core.js:423                                    |
+| `app-calculator.js`            | `calculator`                                                                   | DOMContentLoaded                                                |
+| `draw-simulator.js`            | `calculator` (Sub-Feature)                                                     | Modal-getrieben                                                 |
+| `combo-worker.js`              | `calculator` (Web Worker)                                                      | Worker-Message-Listener                                         |
+| `app-utils.js`                 | **Shared**                                                                     | IIFE bulk-exports (line 2)                                      |
+| `i18n.js`                      | **Shared** (DE/EN-Übersetzung)                                                 | DOMContentLoaded (3235), exports 3229-3232                      |
+| `app-price.js`                 | **Shared** (Card-Pricing)                                                      | On-demand                                                       |
+| `card-data-cache.js`           | **Shared** (IndexedDB-Cache)                                                   | Lazy                                                            |
+| `card-capability-engine.js`    | **Shared** (Tech-Lab-Engine)                                                   | Module-load                                                     |
+| `deck-analysis-shared.js`      | **Shared** (Analysis-Helpers)                                                  | Module-load                                                     |
+| `archetype-icons.js`           | **Shared** (Visual Branding)                                                   | Module-load                                                     |
+| `tcg-showdown-link.js`         | **Shared** (External Integration)                                              | Module-load                                                     |
+| `firebase-config.js`           | **Bootstrap** (Firebase init)                                                  | Module-load                                                     |
+| `firebase-globals.js`          | **Bootstrap** (user state)                                                     | Document-ready                                                  |
+| `firebase-auth.js`             | **Auth**                                                                       | Document-load + modal events                                    |
+| `auth-ui-helpers.js`           | **Auth** (UI)                                                                  | On modal open                                                   |
+| `error-tracking.js`            | **Shared** (Sentry, ~2 KB)                                                     | IIFE; DSN-Placeholder `__SENTRY_DSN__`                          |
+| `pokemon-loading-screen.js`    | **Shared** (Boot UX)                                                           | DOM injection on load                                           |
+| `csv-cache-interceptor.js`     | **Shared** (HTTP Cache override)                                               | fetch() override at module-load                                 |
 
 ### 5.3 Wichtige globale Datenstrukturen
 
@@ -303,6 +307,7 @@ Cross-Tab-Datenflüsse:
 ```
 
 **Offene Forschungsfragen für Phase 2** (vom Agent identifiziert):
+
 - Wie wird der `proxy`-Tab gefüllt? Wahrscheinlich inline-UI in `index.html` + Deck-Builder.
 - Wo ist die Render-Logik für `city-league-analysis` (Top-Level-Tab, nicht nur Tier-Liste)? Vermutlich `app-city-league.js`.
 - `profile-deckcompare` und `profile-settings` — kein dediziertes Modul, vermutlich inline/Shared.
@@ -311,14 +316,15 @@ Cross-Tab-Datenflüsse:
 
 ## 6. CSS-Inventar — 27 Files, 836 KB
 
-| Größenklasse | Files |
-|---|---|
-| **>50 KB** (5) | `styles.css` 273K (Haupt-Theme) · `ui-components.css` 127K (Komponenten) · `meta-call.css` 72K · `mobile-responsive.css` 67K · `city-league.css` 56K |
-| **15–50 KB** (6) | `current-meta-matchups.css` 32K · `pokeball-menu.css` 31K · `testing-groups.css` 25K · `cards-tabs.css` 17K · `tech-lab.css` 15K |
-| **5–15 KB** (10) | `anti-tech.css` 11K · `meta-card-analysis.css` 10K · `cards-header.css` 8K · `tech-slots.css` 8K · `cards-filter-section.css` 6K · `close-buttons.css` 6K · `auth-styles.css` 8K · `ux-step1.css` 6K |
-| **<5 KB** (6) | `archetype-icons.css` 2K · `de-overview-tabs.css` 2K · `playtester-hidden.css` 2K · `ux-step2/3/4.css` 1-3K · `city-league-display-toggles.css` 283B · `profile-howto-info.css` 1.5K · `dashboard-theme.css` 82B (praktisch leer) |
+| Größenklasse     | Files                                                                                                                                                                                                                             |
+| ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **>50 KB** (5)   | `styles.css` 273K (Haupt-Theme) · `ui-components.css` 127K (Komponenten) · `meta-call.css` 72K · `mobile-responsive.css` 67K · `city-league.css` 56K                                                                              |
+| **15–50 KB** (6) | `current-meta-matchups.css` 32K · `pokeball-menu.css` 31K · `testing-groups.css` 25K · `cards-tabs.css` 17K · `tech-lab.css` 15K                                                                                                  |
+| **5–15 KB** (10) | `anti-tech.css` 11K · `meta-card-analysis.css` 10K · `cards-header.css` 8K · `tech-slots.css` 8K · `cards-filter-section.css` 6K · `close-buttons.css` 6K · `auth-styles.css` 8K · `ux-step1.css` 6K                              |
+| **<5 KB** (6)    | `archetype-icons.css` 2K · `de-overview-tabs.css` 2K · `playtester-hidden.css` 2K · `ux-step2/3/4.css` 1-3K · `city-league-display-toggles.css` 283B · `profile-howto-info.css` 1.5K · `dashboard-theme.css` 82B (praktisch leer) |
 
 **Beobachtungen:**
+
 - `styles.css` (273 KB) ist monolithisch — likely Refactor-Kandidat, aber unkritisch.
 - `dashboard-theme.css` ist mit 82 Bytes praktisch leer (Toter Code-Kandidat — `frontend/css/dashboard-theme.css` ist ein zweites File mit gleichem Namen!).
 - 22 von 27 CSS-Files werden async (`media="print"`-Trick) geladen — gutes Performance-Pattern.
@@ -339,12 +345,14 @@ Cross-Tab-Datenflüsse:
 | Images / Static | **Cache-first** |
 
 **Auto-Update-Mechanismus (kritisch wichtig):**
+
 - `install`: pre-cache 46 Shell-Assets via `fetch({cache:'no-store'})`, tolerant gegenüber Einzelfehlern, `self.skipWaiting()`.
 - `activate`: alte Caches löschen → `self.clients.claim()` → `postMessage({type:'SW_UPDATED'})` an alle offenen Tabs.
 - Index inline (line 4887–4910): registriert SW mit `updateViaCache:'none'`, polled `reg.update()` alle 60s, lauscht auf `SW_UPDATED` → `window.location.reload()`, lauscht auf `controllerchange` → reload.
 - Index inline (line 32–84): zusätzlich client-seitiger Drift-Check (`APP_VERSION` vs. `version.json`) → bei Mismatch alle Caches purgen + SW unregistern + hard-reload.
 
 **PWA-Manifest** (`manifest.json`):
+
 ```json
 {
   "name": "Pokemon TCG Analysis",
@@ -353,7 +361,7 @@ Cross-Tab-Datenflüsse:
   "display": "standalone",
   "background_color": "#1a1a2e",
   "theme_color": "#3B4CCA",
-  "icons": [{"src": "images/pokeball-icon.png", "sizes": "192x192", "purpose": "any maskable"}]
+  "icons": [{ "src": "images/pokeball-icon.png", "sizes": "192x192", "purpose": "any maskable" }]
 }
 ```
 
@@ -423,18 +431,18 @@ GitHub Pages → thedipidis.app
 
 ### 8.4 Datenbestand (`data/`, 324 MB, 51 CSV + 47 JSON)
 
-| Top-10 Files | Größe | Inhalt |
-|---|---|---|
-| `city_league_analysis.csv` | 41.5 MB | City-League-Deckdaten (aktuelles Block) |
-| `city_league_analysis_M3.csv` | 31.3 MB | City-League M3 (Vor-Block) |
-| `all_cards_merged.json` | 12.9 MB | Card-DB merged (EN+JP+Preise) |
-| `all_cards_database.json` | 10.9 MB | Card-DB |
-| `online_tournament_dated_cards.csv` | 7.3 MB | Online-Tournament-Cards |
-| `all_cards_merged.csv` | 6.5 MB | CSV-Variante |
-| `cards_chunk_legacy.json` | 6.3 MB | Format-Chunk: Legacy |
-| `all_cards_database.csv` | 5.7 MB | CSV-Variante |
-| `cards_chunk_extended.json` | 2.5 MB | Format-Chunk: Extended |
-| `cards_chunk_standard.json` | 2.1 MB | Format-Chunk: Standard |
+| Top-10 Files                        | Größe   | Inhalt                                  |
+| ----------------------------------- | ------- | --------------------------------------- |
+| `city_league_analysis.csv`          | 41.5 MB | City-League-Deckdaten (aktuelles Block) |
+| `city_league_analysis_M3.csv`       | 31.3 MB | City-League M3 (Vor-Block)              |
+| `all_cards_merged.json`             | 12.9 MB | Card-DB merged (EN+JP+Preise)           |
+| `all_cards_database.json`           | 10.9 MB | Card-DB                                 |
+| `online_tournament_dated_cards.csv` | 7.3 MB  | Online-Tournament-Cards                 |
+| `all_cards_merged.csv`              | 6.5 MB  | CSV-Variante                            |
+| `cards_chunk_legacy.json`           | 6.3 MB  | Format-Chunk: Legacy                    |
+| `all_cards_database.csv`            | 5.7 MB  | CSV-Variante                            |
+| `cards_chunk_extended.json`         | 2.5 MB  | Format-Chunk: Extended                  |
+| `cards_chunk_standard.json`         | 2.1 MB  | Format-Chunk: Standard                  |
 
 **Per-Format-Chunks:** `data/cards_chunk_{standard,extended,legacy}.json` + `cards_manifest.json`.
 **Per-Meta-Tournament-Chunks (gitignored, lokal):** `data/tournament_cards_data_cards_*.csv` (Prague-Data-Loss-Fix).
@@ -446,29 +454,31 @@ GitHub Pages → thedipidis.app
 
 ### 9.1 Workflow-Übersicht
 
-| Workflow | Trigger | Aufgabe | Cron |
-|---|---|---|---|
-| `deploy-pages.yml` | Push to main + Dispatch | Test (JS + Python) → Build (Minify, Cache-Bust, Inject Secrets) → Deploy GH Pages | — |
-| `visual-nonmeta.yml` | PR + Push to main + Dispatch | Playwright Visual-Regression für Non-Meta-Tabs | — |
-| `visual-fullpage.yml` | Cron + Dispatch | Playwright Full-Page Visual-Coverage | `0 3 * * *` (täglich 03:00 UTC) |
-| `weekly-full-update.yml` | Cron + Dispatch | 12 Scraper → Commit/Push CSVs → Dispatch Deploy | `0 6 * * 2` (Dienstag 06:00 UTC) |
-| `generate-tooltips.yml` | Cron + Dispatch | OpenAI-LLM → `data/generated_tooltips.json` | `0 6 * * 0` (Sonntag 06:00 UTC) |
+| Workflow                 | Trigger                      | Aufgabe                                                                           | Cron                             |
+| ------------------------ | ---------------------------- | --------------------------------------------------------------------------------- | -------------------------------- |
+| `deploy-pages.yml`       | Push to main + Dispatch      | Test (JS + Python) → Build (Minify, Cache-Bust, Inject Secrets) → Deploy GH Pages | —                                |
+| `visual-nonmeta.yml`     | PR + Push to main + Dispatch | Playwright Visual-Regression für Non-Meta-Tabs                                    | —                                |
+| `visual-fullpage.yml`    | Cron + Dispatch              | Playwright Full-Page Visual-Coverage                                              | `0 3 * * *` (täglich 03:00 UTC)  |
+| `weekly-full-update.yml` | Cron + Dispatch              | 12 Scraper → Commit/Push CSVs → Dispatch Deploy                                   | `0 6 * * 2` (Dienstag 06:00 UTC) |
+| `generate-tooltips.yml`  | Cron + Dispatch              | OpenAI-LLM → `data/generated_tooltips.json`                                       | `0 6 * * 0` (Sonntag 06:00 UTC)  |
 
 ### 9.2 `deploy-pages.yml` (3 Jobs)
 
 **Job `test`:**
+
 - Node 20 + `npm install --no-save papaparse`
 - JS Unit Tests: `for f in tests/unit/test-*.js; do node --test "$f"; done` → blockt Deployment bei Failure
 - Python 3.12 + `pip install pytest beautifulsoup4 requests lxml`
 - Python Unit Tests: `pytest tests/python/ --ignore=test_price_proxy_and_price_scraper.py`
 
 **Job `build`** (needs: test):
+
 - Syntax-Check via terser für alle `js/*.js`
 - Syntax-Check via `python3 -m py_compile` für 3 kritische Scraper
 - **Inject Firebase-Credentials** aus `secrets.FIREBASE_CONFIG` → `js/firebase-credentials.js`
 - **Inject Google-Client-ID** aus `secrets.GOOGLE_CLIENT_ID` → angehängt an firebase-credentials.js
 - **Inject Sentry-DSN** aus `secrets.SENTRY_DSN` → ersetzt `__SENTRY_DSN__` in `js/error-tracking.js`
-- Kopiert nach `_site/`: index.html, manifest.json, version.json, service-worker.js, .nojekyll, CNAME, css/, js/, images/, data/, pokemon_sets_mapping.csv, config/current_meta_analysis_settings.json, _config.yml
+- Kopiert nach `_site/`: index.html, manifest.json, version.json, service-worker.js, .nojekyll, CNAME, css/, js/, images/, data/, pokemon_sets_mapping.csv, config/current_meta_analysis_settings.json, \_config.yml
 - Minify: terser (JS), cleancss (CSS), html-minifier-terser (HTML)
 - Image-Optimization: optipng
 - **Cache-Bust** mit `${TIMESTAMP}-${COMMIT_HASH}`:
@@ -482,6 +492,7 @@ GitHub Pages → thedipidis.app
 ### 9.3 `weekly-full-update.yml` (Scraper-Run)
 
 **Robustness-Highlights** (aus Kommentaren extrahiert):
+
 - Seedet `backend/core/data/` aus `data/` mit 25+ Input/State/Output-Files (vermeidet Cloudflare-429-Storm bei „all 624 tournaments fresh").
 - Lädt Cardmarket-JSONs (singles, non-singles, price_guide).
 - Führt 15 Scraper sequenziell aus mit `set +e` → Einzelfehler blockiert nicht Batch.
@@ -513,6 +524,7 @@ JS unit tests in GOLDEN 481c9bd:
 ```
 
 **34 Test-Files** (`tests/unit/`):
+
 - Datenstruktur/Integrität: `test-coreDataProcessing`, `test-dataIntegrity`, `test-parseCSV`, `test-parsePastMetaDateMs`
 - Filter-Logik: `test-core-filter-edge-cases`, `test-filterFlows`, `test-filter-property`, `test-current-meta-normalize-property`
 - Deck-Builder: `test-deckBuilder`, `test-deck-property`, `test-bidirectional-swap-and-energy-floor`, `test-largest-remainder`, `test-version-selection-mutation-guards`, `test-getPreferredVersionForCard`, `test-getRarityPriority`
@@ -523,22 +535,23 @@ JS unit tests in GOLDEN 481c9bd:
 
 ### 10.2 Playwright-E2E-Specs (`tests/e2e/`, 12 Files)
 
-| Spec | Coverage |
-|---|---|
-| `cards-database-filters.e2e.spec.js` | Card-DB-Filter |
-| `cards-image-keyboard.e2e.spec.js` | Card-Image-Modal mit Keyboard |
-| `cards-keyboard-accessibility.e2e.spec.js` | A11y im Card-DB |
-| `city-league-exact-navigation.e2e.spec.js` | City-League-Navigation |
-| `city-league-hero-combined-navigation.e2e.spec.js` | City-League-Hero-Grid |
-| `city-league-language-switch.e2e.spec.js` | i18n DE↔EN |
-| `playtester-hand-buttons.e2e.spec.js` | Playtester-Hand-Buttons |
-| `proxy-import-errors.e2e.spec.js` | Proxy-Tab Fehlerhandling |
-| `proxy-queue-reset.e2e.spec.js` | Proxy-Queue-Reset |
-| `rarity-switcher.e2e.spec.js` | Rarity-Switcher-Modal |
-| `visual-full-page-coverage.spec.js` | Visual-Snapshots Full-Page (per Tab) |
-| `visual-regression.spec.js` | Visual-Regression-Sammlung |
+| Spec                                               | Coverage                             |
+| -------------------------------------------------- | ------------------------------------ |
+| `cards-database-filters.e2e.spec.js`               | Card-DB-Filter                       |
+| `cards-image-keyboard.e2e.spec.js`                 | Card-Image-Modal mit Keyboard        |
+| `cards-keyboard-accessibility.e2e.spec.js`         | A11y im Card-DB                      |
+| `city-league-exact-navigation.e2e.spec.js`         | City-League-Navigation               |
+| `city-league-hero-combined-navigation.e2e.spec.js` | City-League-Hero-Grid                |
+| `city-league-language-switch.e2e.spec.js`          | i18n DE↔EN                           |
+| `playtester-hand-buttons.e2e.spec.js`              | Playtester-Hand-Buttons              |
+| `proxy-import-errors.e2e.spec.js`                  | Proxy-Tab Fehlerhandling             |
+| `proxy-queue-reset.e2e.spec.js`                    | Proxy-Queue-Reset                    |
+| `rarity-switcher.e2e.spec.js`                      | Rarity-Switcher-Modal                |
+| `visual-full-page-coverage.spec.js`                | Visual-Snapshots Full-Page (per Tab) |
+| `visual-regression.spec.js`                        | Visual-Regression-Sammlung           |
 
 **Visual-Snapshot-Baselines** (14 in `tests/e2e/__snapshots__/{testFilename}/`):
+
 - Per-Tab: `full-tab-current-meta`, `full-tab-city-league`, `full-tab-city-league-analysis`, `full-tab-current-analysis`, `full-tab-past-meta`, `full-tab-cards`, `full-tab-proxy`, `full-tab-sandbox`, `full-tab-profile`, `full-tab-tutorial`, `full-tab-calculator`
 - Komponenten: `card-action-buttons`, `cards-database-grid`, `city-league-archetype-table`, `city-league-hero-grid`, `pokeball-nav-dropdown`, `rarity-switcher-modal`
 
@@ -550,7 +563,7 @@ JS unit tests in GOLDEN 481c9bd:
 
 **Unit (`tests/python/`):** 12 Files: card_database, card_scraper_shared, csv_and_settings, current_meta_analysis_scraper, limitless_dated, prepare_card_data, price_proxy_and_price_scraper (CI ignored), scraper_additional, scraper_extraction, scraper_functions, threat_classifier.
 
-**E2E (`tests/*.py`):** 11 Scripts (e2e_audit_r5, e2e_battle_journal[_edit][_overhaul], e2e_city_league_meta, e2e_current_meta_global, e2e_deck_analysis_global, e2e_deck_analysis_japan, e2e_i18n_language_purity, e2e_matchup_analysis, e2e_mobile_audit, e2e_past_meta).
+**E2E (`tests/*.py`):** 11 Scripts (e2e_audit_r5, e2e_battle_journal[\_edit][_overhaul], e2e_city_league_meta, e2e_current_meta_global, e2e_deck_analysis_global, e2e_deck_analysis_japan, e2e_i18n_language_purity, e2e_matchup_analysis, e2e_mobile_audit, e2e_past_meta).
 
 **Verify-Scripts:** `verify_audit_r4.py`, `verify_fcp.py`, `verify_limitless.py`, `verify_share_modal.py`.
 
@@ -565,22 +578,22 @@ Python-Tests im Golden **nicht ausgeführt** in dieser Audit-Phase (pytest+lxml+
 
 ## 11. Tote / Verdächtige Bereiche im Golden-Tree
 
-| Bereich | Befund | Quelle |
-|---|---|---|
-| `frontend/` (56 KB) | 6 HTML-Komponenten + 1 CSS — `header.html`, `sidebar.html`, `TabContent_Decks/Market/Analysis/Archetypes.html` werden **nirgends im JS-Code geladen**. `<div id="header-container">` und `<div id="sidebar-container">` in index.html:416-417 bleiben leer. | `grep -rn "header.html\|sidebar.html\|header-container\|TabContent_" index.html js/*.js` ergibt nur die DIV-Definitionen. |
-| `_archive/` (20 MB) | März/April-2026 Cleanups: `_archive/dead-assets-2026-03-31/{images,css,js}`, `_archive/audit-artifacts-2026-04-02/`, `_archive/utils/` (9 alte Python-Fix-Skripte). Steht in `.gitignore` (Zeile 114) — wird aber **trotzdem getrackt** (gitignore wirkt nicht rückwirkend). | `ls _archive/`, `cat .gitignore` |
-| `test-artifacts/` (9.7 MB) | April-2026 Audit-Screenshots: `desktop-check.png`, `mobile-*.png` (16 Files), `mobile-ux-audit/`, `visual-final-20260402-*.{exit,json}`. Steht in `.gitignore` (Zeile 108: `tests/artifacts/` — aber dieser Path ist `test-artifacts/` ohne `s`!). | `ls test-artifacts/` |
-| Lokale Run-Outputs im Repo-Root | `visual-final.{exit,err,json}`, `visual-full.{exit,err,json}`, `visual-nonmeta.{exit,json}`, `visual-nonmeta-run.rc`, `visual-nonmeta-summary.txt`, `visual-regression-latest.json` (57 KB), `visual-regression-verify.{rc,json,stdout.json}`, `visual-regression-update.json`, `runtime-verify-results.txt`, `terminal-check.txt`, `current-meta.exit`, `cards-grid-test-report.json`, `mobile-ux-audit-report.json`. Alle deutlich lokale Maintainer-Outputs, nicht in `.gitignore`. | `ls -la /tmp/golden/481c9bd/` |
-| `audit_single_tab.js` (Root, 0 B) | Leere Datei. | `ls -la` |
-| `prepare_card_data.py` (Root, 0 B) | Leere Datei (Original ist `backend/core/prepare_card_data.py`). | `ls -la` |
-| `tmp_404_probe.py`, `tmp_past_meta_probe.py` | Maintainer-Debug-Skripte, vermutlich `tmp_*`. | `ls -la` |
-| `backend - Verknüpfung.lnk` (1.3 KB) | Windows-Shortcut-Datei. `.gitignore` hat `*.lnk` (Zeile 111) — vor-getrackt. | `ls -la` |
-| `PROJECT_STRUCTURE.md` (2.5 KB) | Stand „März 2026", beschreibt `js/app.js (~16.000 Zeilen)` — **dieses File existiert nicht**. Auch beschreibt es Scraper im Repo-Root statt im `backend/`-Layout. | `head PROJECT_STRUCTURE.md` |
-| `README.md` (16 KB) | Beschreibt ebenfalls noch `js/app.js`, `card_price_scraper.py` im Root etc. — Stand vor Backend-Refactor. | `head README.md` |
-| `dashboard-theme.css` Duplikat | Existiert sowohl in `css/dashboard-theme.css` (82 B, praktisch leer) als auch `frontend/css/dashboard-theme.css`. | `find . -name dashboard-theme.css` |
-| Playwright-Snapshot-Path-Quirk | Verzeichnis heißt literal `tests/e2e/__snapshots__/{testFilename}/` — Template nicht expandiert. | `ls tests/e2e/__snapshots__/` |
-| `playwright.config.js` ≈ `playwright.visual-nonmeta.config.js` | Inhaltlich identisch (nur Type-Kommentar in v2 zusätzlich). | `diff playwright.config.js playwright.visual-nonmeta.config.js` |
-| Doppelte Playtester-Skripts im Tree (3 Files, 337 KB) | `playtester.js` (290 K) + `playtester-mobile.js` (33 K) + `playtester-patch.js` (14 K) — letzteres monkey-patcht das erste. Konsolidierung möglich. | `ls js/playtester*` |
+| Bereich                                                        | Befund                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | Quelle                                                                                                                    |
+| -------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `frontend/` (56 KB)                                            | 6 HTML-Komponenten + 1 CSS — `header.html`, `sidebar.html`, `TabContent_Decks/Market/Analysis/Archetypes.html` werden **nirgends im JS-Code geladen**. `<div id="header-container">` und `<div id="sidebar-container">` in index.html:416-417 bleiben leer.                                                                                                                                                                                                                            | `grep -rn "header.html\|sidebar.html\|header-container\|TabContent_" index.html js/*.js` ergibt nur die DIV-Definitionen. |
+| `_archive/` (20 MB)                                            | März/April-2026 Cleanups: `_archive/dead-assets-2026-03-31/{images,css,js}`, `_archive/audit-artifacts-2026-04-02/`, `_archive/utils/` (9 alte Python-Fix-Skripte). Steht in `.gitignore` (Zeile 114) — wird aber **trotzdem getrackt** (gitignore wirkt nicht rückwirkend).                                                                                                                                                                                                           | `ls _archive/`, `cat .gitignore`                                                                                          |
+| `test-artifacts/` (9.7 MB)                                     | April-2026 Audit-Screenshots: `desktop-check.png`, `mobile-*.png` (16 Files), `mobile-ux-audit/`, `visual-final-20260402-*.{exit,json}`. Steht in `.gitignore` (Zeile 108: `tests/artifacts/` — aber dieser Path ist `test-artifacts/` ohne `s`!).                                                                                                                                                                                                                                     | `ls test-artifacts/`                                                                                                      |
+| Lokale Run-Outputs im Repo-Root                                | `visual-final.{exit,err,json}`, `visual-full.{exit,err,json}`, `visual-nonmeta.{exit,json}`, `visual-nonmeta-run.rc`, `visual-nonmeta-summary.txt`, `visual-regression-latest.json` (57 KB), `visual-regression-verify.{rc,json,stdout.json}`, `visual-regression-update.json`, `runtime-verify-results.txt`, `terminal-check.txt`, `current-meta.exit`, `cards-grid-test-report.json`, `mobile-ux-audit-report.json`. Alle deutlich lokale Maintainer-Outputs, nicht in `.gitignore`. | `ls -la /tmp/golden/481c9bd/`                                                                                             |
+| `audit_single_tab.js` (Root, 0 B)                              | Leere Datei.                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | `ls -la`                                                                                                                  |
+| `prepare_card_data.py` (Root, 0 B)                             | Leere Datei (Original ist `backend/core/prepare_card_data.py`).                                                                                                                                                                                                                                                                                                                                                                                                                        | `ls -la`                                                                                                                  |
+| `tmp_404_probe.py`, `tmp_past_meta_probe.py`                   | Maintainer-Debug-Skripte, vermutlich `tmp_*`.                                                                                                                                                                                                                                                                                                                                                                                                                                          | `ls -la`                                                                                                                  |
+| `backend - Verknüpfung.lnk` (1.3 KB)                           | Windows-Shortcut-Datei. `.gitignore` hat `*.lnk` (Zeile 111) — vor-getrackt.                                                                                                                                                                                                                                                                                                                                                                                                           | `ls -la`                                                                                                                  |
+| `PROJECT_STRUCTURE.md` (2.5 KB)                                | Stand „März 2026", beschreibt `js/app.js (~16.000 Zeilen)` — **dieses File existiert nicht**. Auch beschreibt es Scraper im Repo-Root statt im `backend/`-Layout.                                                                                                                                                                                                                                                                                                                      | `head PROJECT_STRUCTURE.md`                                                                                               |
+| `README.md` (16 KB)                                            | Beschreibt ebenfalls noch `js/app.js`, `card_price_scraper.py` im Root etc. — Stand vor Backend-Refactor.                                                                                                                                                                                                                                                                                                                                                                              | `head README.md`                                                                                                          |
+| `dashboard-theme.css` Duplikat                                 | Existiert sowohl in `css/dashboard-theme.css` (82 B, praktisch leer) als auch `frontend/css/dashboard-theme.css`.                                                                                                                                                                                                                                                                                                                                                                      | `find . -name dashboard-theme.css`                                                                                        |
+| Playwright-Snapshot-Path-Quirk                                 | Verzeichnis heißt literal `tests/e2e/__snapshots__/{testFilename}/` — Template nicht expandiert.                                                                                                                                                                                                                                                                                                                                                                                       | `ls tests/e2e/__snapshots__/`                                                                                             |
+| `playwright.config.js` ≈ `playwright.visual-nonmeta.config.js` | Inhaltlich identisch (nur Type-Kommentar in v2 zusätzlich).                                                                                                                                                                                                                                                                                                                                                                                                                            | `diff playwright.config.js playwright.visual-nonmeta.config.js`                                                           |
+| Doppelte Playtester-Skripts im Tree (3 Files, 337 KB)          | `playtester.js` (290 K) + `playtester-mobile.js` (33 K) + `playtester-patch.js` (14 K) — letzteres monkey-patcht das erste. Konsolidierung möglich.                                                                                                                                                                                                                                                                                                                                    | `ls js/playtester*`                                                                                                       |
 
 **Diese Befunde sind alle „potenzielle Cleanup-Kandidaten" — keine Bugs.** In Phase 3 entscheiden, was davon behalten, was entfernt wird.
 
@@ -618,7 +631,7 @@ Python-Tests im Golden **nicht ausgeführt** in dieser Audit-Phase (pytest+lxml+
 - **`playwright.config.js` und `playwright.visual-nonmeta.config.js` sind quasi-Duplikate** — Vereinfachung möglich.
 - **Monolithische CSS-Datei:** `styles.css` 273 KB. Long-term: aufsplitten.
 - **Monolithische JS-Module:** `app-deck-builder.js` 447 KB, `app-meta-call.js` 295 KB, `playtester.js` 290 KB. Long-term: Submodule-fähig (nicht jetzt).
-- **`current-meta-analysis-settings.json` wird zur CI-Zeit als einziges Config-File aus `config/` mit-deployed** — vermutlich nicht gewollt, dass die anderen 10 Configs *fehlen*; vielleicht beabsichtigt, weil die anderen Backend-only sind.
+- **`current-meta-analysis-settings.json` wird zur CI-Zeit als einziges Config-File aus `config/` mit-deployed** — vermutlich nicht gewollt, dass die anderen 10 Configs _fehlen_; vielleicht beabsichtigt, weil die anderen Backend-only sind.
 - **README zeigt Custom Domain `https://thedipidis.app/`** — diese läuft also auf production. Cache-Bust-Mechanik muss zuverlässig sein (sonst stale Clients).
 
 ---
@@ -627,20 +640,20 @@ Python-Tests im Golden **nicht ausgeführt** in dieser Audit-Phase (pytest+lxml+
 
 Wenn Phase 2 freigegeben wird, sind folgende Achsen zu vergleichen:
 
-| Achse | Was vergleichen | Erwartete Quelle der Differenz |
-|---|---|---|
-| **a) Datei-Existenz** | `find` im Golden vs. HEAD: was ist neu/gelöscht/umbenannt? | Wave-1/Wave-2 IA-Refactor, Profile-Split, neue Wave-0-Module |
-| **b) `index.html`-Tab-Struktur** | 12 tab-content divs Golden vs. HEAD | Wave-2-Refactor hat `meta-view` konsolidiert, am 22. Mai zurück-revertiert |
-| **c) Script-Loading-Reihenfolge** | defer-Liste Golden vs. HEAD | Neue Module wie `bootstrap.js`? |
-| **d) `js/`-Inhalt pro Modul** | `git diff` für jedes Modul aus §5 | Wave-0-Test-Reliability, app-core.js Lazy-Loader-Fix |
-| **e) CSS-Reihenfolge** | Neue CSS-Files (z.B. `meta-view.css`?) | Wave-2-Layout |
-| **f) Tests** | Welche Tests sind neu, welche gelöscht, welche modifiziert? Pass/Fail-Rate auf HEAD | Wave-2-Test-Suites |
-| **g) CI-Workflows** | Welche Workflows wurden geändert? `ci: SHA-pin every third-party action` (Commit 427efbd) | SHA-Pinning aller 8 Workflows |
-| **h) Backend** | Welche Scraper/Tools wurden geändert? | duckdb-pilot Commit 97dba38 |
-| **i) Datenbestand** | Sind alle CSV/JSON-Files heute noch da? Neue Format-Chunks? | Weekly-Update-Commits |
-| **j) Inline-Scripts** | `<script>` an Zeile 32/819/4887 — verändert? | Möglicherweise `bootstrap.js` injection |
-| **k) Service Worker** | CACHE_NAME, Shell-Asset-Liste, Strategien | Cache-Bust-Version-Update |
-| **l) Tote Bereiche** | Sind `frontend/`, `_archive/`, lokale `visual-*` Files heute weg oder noch da? | Wave-0-Cleanup |
+| Achse                             | Was vergleichen                                                                           | Erwartete Quelle der Differenz                                             |
+| --------------------------------- | ----------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| **a) Datei-Existenz**             | `find` im Golden vs. HEAD: was ist neu/gelöscht/umbenannt?                                | Wave-1/Wave-2 IA-Refactor, Profile-Split, neue Wave-0-Module               |
+| **b) `index.html`-Tab-Struktur**  | 12 tab-content divs Golden vs. HEAD                                                       | Wave-2-Refactor hat `meta-view` konsolidiert, am 22. Mai zurück-revertiert |
+| **c) Script-Loading-Reihenfolge** | defer-Liste Golden vs. HEAD                                                               | Neue Module wie `bootstrap.js`?                                            |
+| **d) `js/`-Inhalt pro Modul**     | `git diff` für jedes Modul aus §5                                                         | Wave-0-Test-Reliability, app-core.js Lazy-Loader-Fix                       |
+| **e) CSS-Reihenfolge**            | Neue CSS-Files (z.B. `meta-view.css`?)                                                    | Wave-2-Layout                                                              |
+| **f) Tests**                      | Welche Tests sind neu, welche gelöscht, welche modifiziert? Pass/Fail-Rate auf HEAD       | Wave-2-Test-Suites                                                         |
+| **g) CI-Workflows**               | Welche Workflows wurden geändert? `ci: SHA-pin every third-party action` (Commit 427efbd) | SHA-Pinning aller 8 Workflows                                              |
+| **h) Backend**                    | Welche Scraper/Tools wurden geändert?                                                     | duckdb-pilot Commit 97dba38                                                |
+| **i) Datenbestand**               | Sind alle CSV/JSON-Files heute noch da? Neue Format-Chunks?                               | Weekly-Update-Commits                                                      |
+| **j) Inline-Scripts**             | `<script>` an Zeile 32/819/4887 — verändert?                                              | Möglicherweise `bootstrap.js` injection                                    |
+| **k) Service Worker**             | CACHE_NAME, Shell-Asset-Liste, Strategien                                                 | Cache-Bust-Version-Update                                                  |
+| **l) Tote Bereiche**              | Sind `frontend/`, `_archive/`, lokale `visual-*` Files heute weg oder noch da?            | Wave-0-Cleanup                                                             |
 
 **Hypothese (vor Phase-2-Daten):** Der heutige HEAD `7d12922` ist eine Wave-2-Revert-Aktion auf einen darunter liegenden Wave-1/Wave-2-Stack. Erwartung: viele Files in `js/` und `index.html` weichen ab. Tests-Pass/Fail-Rate auf HEAD muss verifiziert werden.
 

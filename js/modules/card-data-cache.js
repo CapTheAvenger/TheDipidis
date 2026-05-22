@@ -7,9 +7,10 @@
 // 12+ MB card data on every page load.
 
 // Dedicated localForage instance for card data
-var cardStore = (typeof localforage !== 'undefined')
-    ? localforage.createInstance({ name: 'tcg-card-cache', storeName: 'cards' })
-    : null;
+var cardStore =
+    typeof localforage !== 'undefined'
+        ? localforage.createInstance({ name: 'tcg-card-cache', storeName: 'cards' })
+        : null;
 
 var MANIFEST_KEY = 'cards_manifest';
 var CARDS_PREFIX = 'chunk_';
@@ -38,7 +39,9 @@ async function setCachedManifest(manifest) {
     if (!cardStore) return;
     try {
         await cardStore.setItem(MANIFEST_KEY, manifest);
-    } catch (_) { /* noop */ }
+    } catch (_) {
+        /* noop */
+    }
 }
 
 /**
@@ -60,7 +63,9 @@ async function setCachedChunk(chunkFile, cards) {
     if (!cardStore) return;
     try {
         await cardStore.setItem(CARDS_PREFIX + chunkFile, cards);
-    } catch (_) { /* noop */ }
+    } catch (_) {
+        /* noop */
+    }
 }
 
 /**
@@ -89,7 +94,11 @@ async function checkFreshness(manifestUrl) {
         }
         var serverManifest = await resp.json();
         var isSame = serverManifest.version === cached.version;
-        return { fresh: isSame, serverManifest: isSame ? null : serverManifest, cachedManifest: cached };
+        return {
+            fresh: isSame,
+            serverManifest: isSame ? null : serverManifest,
+            cachedManifest: cached,
+        };
     } catch (_) {
         // Offline — use stale cache
         return { fresh: true, serverManifest: null, cachedManifest: cached };
@@ -101,7 +110,9 @@ async function checkFreshness(manifestUrl) {
  * Returns parsed cards array.
  */
 async function fetchAndCacheChunk(baseUrl, chunkFile) {
-    var resp = await fetch(window.dataUrl ? window.dataUrl(baseUrl + chunkFile) : (baseUrl + chunkFile));
+    var resp = await fetch(
+        window.dataUrl ? window.dataUrl(baseUrl + chunkFile) : baseUrl + chunkFile
+    );
     if (!resp.ok) throw new Error('Failed to fetch ' + chunkFile + ': ' + resp.status);
     var json = await resp.json();
     var cards = json.cards || json;
@@ -117,7 +128,9 @@ async function clearCache() {
     if (!cardStore) return;
     try {
         await cardStore.clear();
-    } catch (_) { /* noop */ }
+    } catch (_) {
+        /* noop */
+    }
 }
 
 // Expose public API
@@ -129,5 +142,5 @@ export const cardDataCache = {
     checkFreshness: checkFreshness,
     fetchAndCacheChunk: fetchAndCacheChunk,
     clearCache: clearCache,
-    MAX_AGE_MS: MAX_AGE_MS
+    MAX_AGE_MS: MAX_AGE_MS,
 };

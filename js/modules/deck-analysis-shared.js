@@ -47,6 +47,8 @@ export function renderNoDeckSelectedState(containerId, message) {
     const container = document.getElementById(containerId);
     if (!container) return;
     const text = message || 'Please select a deck from the dropdown to load cards.';
-    container.innerHTML = '<div class="deck-builder-empty-state" role="status" aria-live="polite"><h4 class="deck-builder-empty-title">'
-        + text + '</h4></div>';
+    container.innerHTML =
+        '<div class="deck-builder-empty-state" role="status" aria-live="polite"><h4 class="deck-builder-empty-title">' +
+        text +
+        '</h4></div>';
 }

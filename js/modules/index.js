@@ -83,9 +83,9 @@ export { showAuthModal, closeAuthModal } from './auth-ui-helpers.js';
 // L2.15 — card data IndexedDB cache. Exposes the cardDataCache namespace.
 export { cardDataCache } from './card-data-cache.js';
 
-// L2.16 — Meta-Analysis Hub (tile-based sub-tab launcher) +
-//   Card-Capability Engine (effect-tag extraction).
-export { MetaAnalysisHub } from './meta-analysis-hub.js';
+// L2.16 — Card-Capability Engine (effect-tag extraction).
+// The Meta-Analysis Hub (tile launcher) was deleted in the IA-refactor
+// Phase C — the consolidated #meta-view segmented control replaces it.
 export { CardCapabilityEngine } from './card-capability-engine.js';
 
 // L2.17 — Anti-Tech "Build vs Specific Decks" modal (913 LOC).
@@ -105,13 +105,13 @@ export { TechLab } from './app-tech-lab.js';
 
 // Wave-2 IA-Refactor — consolidated meta-analysis view (5 tabs → 1).
 // Importing here runs the side effects (window.metaViewStore /
-// metaViewSwitchFormat / metaViewSelectDeck / metaViewBackToList /
-// setMetaViewV2 / isMetaViewV2Enabled) so legacy HTML inline handlers
-// can call them without needing real ES-module imports.
+// metaViewSwitchFormat / metaViewSelectDeck / metaViewBackToList) so
+// legacy HTML inline handlers can call them without needing real
+// ES-module imports.
 export { metaViewStore, isValidFormat } from './meta-view/store.js';
 export { switchFormat, selectDeck, backToList, setSearchFilter } from './meta-view/controller.js';
-export { isMetaViewV2Enabled, setMetaViewV2 } from './meta-view/feature-flag.js';
 // Side-effect-only import: registers a DOMContentLoaded listener that
-// applies body.ia-v2 / .ia-v1 + binds the segmented-control's active-
-// state to the store.
+// reparents the legacy meta tabs into the consolidated #meta-view
+// container, intercepts switchTab() for legacy IDs, wires the URL
+// router, and binds the segmented-control to the store.
 import './meta-view/bootstrap.js';

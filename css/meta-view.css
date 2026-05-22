@@ -1,21 +1,12 @@
 /* meta-view.css — Wave-2 IA-Refactor consolidated Meta Analysis tab.
  *
- * Loaded only when the feature flag is active (body.ia-v2). The rules
- * are scoped to .meta-view-* classes so they don't leak into the legacy
- * city-league / current-meta / past-meta CSS during the cutover window.
+ * Rules are scoped to .meta-view-* classes so they don't leak into the
+ * legacy city-league / current-meta / past-meta CSS for the reparented
+ * tab contents.
  *
  * Mobile-first by default: the segmented control stretches to full row
  * width on small viewports. ≥768px it sits inline with the heading.
  */
-
-/* ============================================================ *
- *  v1 / v2 menu-item visibility (driven by bootstrap.js's body class)
- * ============================================================ */
-
-body.ia-v2 .ia-v1-only,
-body.ia-v1 .ia-v2-only {
-  display: none !important;
-}
 
 /* ============================================================ *
  *  Tab content scaffold

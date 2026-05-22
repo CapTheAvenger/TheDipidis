@@ -29,11 +29,6 @@
 
     // ── Sidebar / Main Menu ──────────────────────────────────
     'menu.title':             'Hauptmenü',
-    'menu.cityLeague':        'City League Meta',
-    'menu.cityLeagueAnalysis':'Deck-Analyse (Japan)',
-    'menu.currentMeta':       'Aktuelles Meta (Global)',
-    'menu.currentMetaAnalysis':'Deck-Analyse (Global)',
-    'menu.pastMeta':          'Vergangenes Meta',
     'menu.cardDatabase':      'Kartendatenbank',
     'menu.proxyPrinter':      'Proxy-Drucker',
     'menu.calculator':        'Rechner',
@@ -44,11 +39,7 @@
 
     // ── Tab labels ───────────────────────────────────────────
     'tab.metaAnalysis':       'Meta & Deck-Analyse',
-    'tab.cityLeague':         'City League Meta',
     'tab.cityLeagueAnalysis': 'City League Deck-Analyse',
-    'tab.currentMeta':        'Aktuelles Meta',
-    'tab.currentMetaAnalysis':'Aktuelle Meta Deck-Analyse',
-    'tab.pastMeta':           'Vergangenes Meta',
     'tab.cards':              'Karten',
     'tab.proxyPrinter':       'Proxy-Drucker',
     'tab.playtester':         'Playtester',
@@ -63,47 +54,6 @@
     'metaView.back':          '← Zurück',
     'metaView.backLabel':     'Zurück zur Deckliste',
     'metaView.scaffoldPlaceholder': 'Lade Deck-Daten…',
-
-    // ── Meta & Deck Analysis Hub ─────────────────────────────
-    'metaHub.title':                            'Meta & Deck-Analyse',
-    'metaHub.subtitle':                         'Wähle eine Kategorie, um in die Daten einzutauchen — von Japans wöchentlichem Meta bis zu globalen Online-Turnieren.',
-    'metaHub.backToOverview':                   '← Übersicht',
-    'metaHub.tile.cityLeague.title':            'City League Meta',
-    'metaHub.tile.cityLeague.bullets':          [
-        'Aktuelle Meta-Verteilung aus japanischen Cardshop-Turnieren',
-        'Wöchentliche Trends und Tier-Bewegungen',
-        'Schnellster Frühindikator vor internationalen Major-Turnieren'
-    ],
-    'metaHub.tile.cityLeagueAnalysis.title':    'Deck-Analyse (Japan)',
-    'metaHub.tile.cityLeagueAnalysis.bullets':  [
-        'Tiefenanalyse einzelner Decks aus der City League',
-        'Karten-Verteilung, Standard-Listen und häufige Tech-Picks',
-        'Matchup-Win-Rates aus japanischen Turnieren'
-    ],
-    'metaHub.tile.currentMeta.title':           'Aktuelles Meta (Global)',
-    'metaHub.tile.currentMeta.bullets':         [
-        'Online-Turnier-Auswertung von play.limitlesstcg.com',
-        'Top-8 / Top-16-Conversion pro Deck',
-        'Globale Sicht, näher am EU/US-Wettbewerbsumfeld'
-    ],
-    'metaHub.tile.currentMetaAnalysis.title':   'Deck-Analyse (Global)',
-    'metaHub.tile.currentMetaAnalysis.bullets': [
-        'Tiefenanalyse globaler Online-Decks',
-        'Karten-Listen, Hand-Stats und Win-Rates',
-        'Detail-Sicht für Spieler, die international antreten'
-    ],
-    'metaHub.tile.pastMeta.title':              'Vergangenes Meta',
-    'metaHub.tile.pastMeta.bullets':            [
-        'Historische Major-Turnier-Daten (Regionals, IC, Worlds)',
-        'Ergebnisse vergangener Standard-Formate',
-        'Lerne aus der Geschichte für zukünftige Meta-Calls'
-    ],
-    'metaHub.tile.metaCall.title':              'Meta Call',
-    'metaHub.tile.metaCall.bullets':            [
-        'Vorhersage der Meta-Verteilung für dein nächstes Turnier',
-        'Eigene Schätzungen mit Online-Daten kombinieren',
-        'Erwartete Begegnungen pro Runde inkl. Matchup-Übersicht'
-    ],
 
     // ── Common buttons / actions ─────────────────────────────
     'btn.save':               'Speichern',

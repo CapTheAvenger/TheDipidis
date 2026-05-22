@@ -102,7 +102,8 @@ const BUNDLE_ORDER = [
     // archetype-icons.js: removed in L2.11 — now an ES module under
     // js/modules/archetype-icons.js (bundled via scripts/build-modules.js).
     'app-meta-call.js',
-    // meta-analysis-hub.js: removed in L2.16 — ES module.
+    // meta-analysis-hub.js: deleted entirely in the IA-refactor Phase C
+    //   — the consolidated #meta-view segmented control replaces it.
     'app-testing-groups.js',
     // battle-journal.js: removed from main bundle in L2.7 — now lazy-loaded.
     // meta-binder.js + custom-binder.js: removed from main bundle in L2.7 —

@@ -1198,25 +1198,22 @@ const BASE_PATH = './data/';
                 }
             }
 
-            // Notify the Meta & Deck Analysis Hub so it can manage its sub-nav.
-            if (window.MetaAnalysisHub && typeof window.MetaAnalysisHub.onTabSwitched === 'function') {
-                window.MetaAnalysisHub.onTabSwitched(tabName);
-            }
+            // The consolidated #meta-view tab handles all meta routing,
+            // so the legacy meta IDs (current-meta, city-league,
+            // past-meta, *-analysis) reach this point via the bootstrap
+            // intercept that calls switchTab('meta-view'). Highlight
+            // the meta-view top-nav button for any of those names.
+            const metaSubTabs = ['meta-view', 'city-league', 'city-league-analysis', 'current-meta', 'current-analysis', 'past-meta'];
+            const buttonLookupName = metaSubTabs.includes(tabName) ? 'meta-view' : tabName;
 
-            // The hub tab uses the same top-nav button for all 5 sub-tabs.
-            // When entering a sub-tab, highlight the hub button instead.
-            const hubSubTabs = ['city-league', 'city-league-analysis', 'current-meta', 'current-analysis', 'past-meta'];
-            const buttonLookupName = hubSubTabs.includes(tabName) ? 'meta-analysis-hub' : tabName;
-
-            // Set active button (highlight the parent hub button when on a sub-tab)
             const activeBtn = Array.from(buttons).find(btn =>
                 btn.getAttribute('onclick')?.includes(buttonLookupName)
             );
             if (activeBtn) activeBtn.classList.add('active');
 
-            // Update browser tab title with the actual section name. For hub
-            // sub-tabs, prefer the side-menu label (e.g. "Deck Analysis (Japan)")
-            // so the title reflects the specific area, not the hub.
+            // Update browser tab title with the actual section name.
+            // For legacy meta IDs, prefer the side-menu label so the
+            // title reflects the specific area when one is available.
             const menuLabelEl = document.querySelector(`.menu-item[data-tab-id="${tabName}"] .menu-item-label`);
             const titleText = menuLabelEl
                 ? menuLabelEl.textContent.trim()
@@ -1226,10 +1223,7 @@ const BASE_PATH = './data/';
                 const badge = document.getElementById('current-tab-title');
                 if (badge) {
                     badge.textContent = titleText;
-                    // Hub overview has no single "current section" — hide the
-                    // pill there so it doesn't mislead (see inline-init.js
-                    // companion change for the menu-driven path).
-                    badge.style.display = tabName === 'meta-analysis-hub' ? 'none' : '';
+                    badge.style.display = '';
                 }
             }
         }

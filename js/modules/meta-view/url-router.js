@@ -23,7 +23,6 @@
  */
 
 import { metaViewStore, isValidFormat } from './store.js';
-import { isMetaViewV2Enabled } from './feature-flag.js';
 
 const HASH_PREFIX = '#meta';
 let _inflight = false;
@@ -87,7 +86,6 @@ function applyUrlToStore(/** @type {ReturnType<typeof parseHash>} */ parsed) {
 /** Mirror current store state into the URL (replaceState — silent). */
 function applyStoreToUrl() {
     if (_inflight) return;
-    if (!isMetaViewV2Enabled()) return;
     const state = metaViewStore.get();
     const desired = buildHash(state);
     if (window.location.hash === desired) return;
@@ -102,8 +100,6 @@ function applyStoreToUrl() {
 
 /** Initialise URL ↔ store sync. Called once from bootstrap. */
 export function initUrlRouter() {
-    if (!isMetaViewV2Enabled()) return;
-
     // 1) Initial sync: URL → store (if the URL carries meta state).
     const initial = parseHash(window.location.hash);
     if (initial) applyUrlToStore(initial);

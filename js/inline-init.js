@@ -16,7 +16,12 @@ function toggleMenuCluster(clusterId) {
 }
 
 function syncMenuClustersForTab(tabId) {
-    const metaTabs = new Set(['meta-analysis-hub', 'city-league', 'city-league-analysis', 'current-meta', 'current-analysis', 'past-meta']);
+    // The Meta & Tier Lists cluster expands when the consolidated meta
+    // tab is active. Legacy meta tab IDs (current-meta, city-league,
+    // past-meta, *-analysis) still arrive here from the bootstrap's
+    // switchTab interception, which calls switchTab('meta-view') under
+    // the hood — so this set keeps a fallback for those code paths.
+    const metaTabs = new Set(['meta-view', 'city-league', 'city-league-analysis', 'current-meta', 'current-analysis', 'past-meta']);
     const metaSubmenu = document.getElementById('menu-submenu-meta');
     const metaGroup = document.getElementById('menu-group-meta');
 
@@ -57,11 +62,7 @@ function switchTabAndUpdateMenu(tabId) {
         const text = labelEl ? labelEl.textContent.trim() : activeBtn.innerText.trim();
         if (badge) badge.innerText = text;
     }
-    // Hide the section badge on the Meta & Deck Analysis Hub overview —
-    // the tile grid IS the navigation here, so a "CITY LEAGUE META" pill
-    // next to "Pokémon TCG Hub" misled users into thinking they were
-    // already inside that sub-tab.
-    if (badge) badge.style.display = tabId === 'meta-analysis-hub' ? 'none' : '';
+    if (badge) badge.style.display = '';
 
     syncMenuClustersForTab(tabId);
 
@@ -103,20 +104,6 @@ document.addEventListener('languageChanged', function() {
     const badge = document.getElementById('current-tab-title');
     const labelEl = activeBtn ? activeBtn.querySelector('.menu-item-label') : null;
     if (activeBtn && badge) badge.innerText = labelEl ? (labelEl.textContent || '').trim() : /** @type {HTMLElement} */ (activeBtn).innerText.trim();
-    // Keep the badge hidden whenever the hub overview is the active tab —
-    // even after a language switch reruns the badge update.
-    const hubActive = !!document.querySelector('#meta-analysis-hub.tab-content.active');
-    if (badge) badge.style.display = hubActive ? 'none' : '';
-});
-
-// Initial page-load state: the hub is the default landing tab via the
-// `active` class baked into index.html, so neither switchTab nor
-// switchTabAndUpdateMenu runs at boot — the badge would otherwise sit
-// at its HTML default "City League Meta" and mislead the user.
-document.addEventListener('DOMContentLoaded', function () {
-    const badge = document.getElementById('current-tab-title');
-    const hubActive = !!document.querySelector('#meta-analysis-hub.tab-content.active');
-    if (badge && hubActive) badge.style.display = 'none';
 });
 
 // ── Deep-linking via URL hash ────────────────────────────────
@@ -124,9 +111,9 @@ document.addEventListener('DOMContentLoaded', function () {
 // should land directly on that tab. Also supports friendlier aliases
 // in both languages so we can share URLs that read naturally.
 (function setupHashDeepLink() {
-    // Aliases that point to a legacy meta tab. In v2 mode these route
-    // through the consolidated #meta-view + setFormat instead of trying
-    // to activate a tab that's been reparented out of .tab-content.
+    // Aliases that point to a legacy meta tab. These route through the
+    // consolidated #meta-view + setFormat instead of trying to activate
+    // a tab that's been reparented out of .tab-content.
     const META_ALIASES = {
         'city-league': 'city-league',
         'current-meta': 'current',
@@ -163,14 +150,12 @@ document.addEventListener('DOMContentLoaded', function () {
         // hash; let it handle that one rather than re-parsing here.
         if (raw.startsWith('meta?') || raw === 'meta') return;
 
-        // In v2, the legacy meta-tab aliases (#current-meta etc.) become
-        // shortcuts that pivot the consolidated tab to the matching
-        // format and land on the list view. The v2 store's URL router
-        // will then rewrite the hash to #meta?format=… so the user can
-        // share the canonical link.
-        /** @type {any} */ const w = window;
-        const v2On = typeof w.isMetaViewV2Enabled === 'function' && w.isMetaViewV2Enabled();
-        if (v2On && META_ALIASES[raw]) {
+        // Legacy meta-tab aliases (#current-meta etc.) become shortcuts
+        // that pivot the consolidated tab to the matching format and
+        // land on the list view. The store's URL router will then
+        // rewrite the hash to #meta?format=… so the user can share the
+        // canonical link.
+        if (META_ALIASES[raw]) {
             const format = META_ALIASES[raw];
             const store = /** @type {any} */ (window).metaViewStore;
             if (store && typeof store.setFormat === 'function') {

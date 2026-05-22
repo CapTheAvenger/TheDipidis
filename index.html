@@ -120,9 +120,9 @@
     <link rel="stylesheet" href="css/ux-step2.css?v=202605220304" type="text/css" media="print" onload="this.media='all'">
     <link rel="stylesheet" href="css/ux-step3.css?v=202605220304" type="text/css" media="print" onload="this.media='all'">
     <link rel="stylesheet" href="css/ux-step4.css?v=202605220304" type="text/css" media="print" onload="this.media='all'">
-    <!-- Wave-2 IA-Refactor (5 Meta-Tabs → 1). Loaded eagerly because the
-         segmented-control + ia-v1/v2 visibility rules need to be ready
-         before the bootstrap fires on DOMContentLoaded. -->
+    <!-- Wave-2 IA-Refactor (5 Meta-Tabs → 1). Loaded eagerly so the
+         segmented-control styles are ready before bootstrap fires on
+         DOMContentLoaded. -->
     <link rel="stylesheet" href="css/meta-view.css?v=202605220304" type="text/css">
     <!-- Mobile Responsive Optimization — SCHRITT 1 (Layout Umbrüche) -->
     <link rel="stylesheet" href="css/mobile-responsive.css?v=202605220304" type="text/css">
@@ -423,7 +423,7 @@
     }
     </style>
 </head>
-<body class="ia-v1">
+<body>
     <!-- Pokémon Loading Screen + CSV Cache – MUSS als erstes laden -->
     <script src="js/pokemon-loading-screen.js"></script>
     <script src="js/csv-cache-interceptor.js"></script>
@@ -452,30 +452,8 @@
                                 </span>
                             </button>
                             <div id="menu-submenu-meta" class="menu-submenu open" role="group" aria-label="Meta and Tier Lists">
-                                <!-- Wave-2 IA-Refactor: consolidated meta tab.
-                                     Visibility driven by body.ia-v1 / body.ia-v2 (the
-                                     bootstrap in js/modules/meta-view applies one of
-                                     these on DOMContentLoaded). meta-view.css hides
-                                     .ia-v2-only when v1 is active and .ia-v1-only when
-                                     v2 is. The 5 legacy meta sub-items below get the
-                                     opposite class. -->
-                                <button id="menu-btn-meta-view" class="menu-item menu-subitem ia-v2-only" data-tab-id="meta-view" onclick="switchTabAndUpdateMenu('meta-view')" data-i18n="menu.metaView" role="menuitem">
+                                <button id="menu-btn-meta-view" class="menu-item menu-subitem active" data-tab-id="meta-view" onclick="switchTabAndUpdateMenu('meta-view')" data-i18n="menu.metaView" role="menuitem">
                                     <span class="menu-item-label">Meta Analysis</span>
-                                </button>
-                                <button id="menu-btn-city-league" class="menu-item menu-subitem active ia-v1-only" data-tab-id="city-league" onclick="switchTabAndUpdateMenu('city-league')" data-i18n="menu.cityLeague" role="menuitem">
-                                    <span class="menu-item-label">City League Meta</span>
-                                </button>
-                                <button id="menu-btn-city-league-analysis" class="menu-item menu-subitem ia-v1-only" data-tab-id="city-league-analysis" onclick="switchTabAndUpdateMenu('city-league-analysis')" data-i18n="menu.cityLeagueAnalysis" role="menuitem">
-                                    <span class="menu-item-label">Deck Analysis (Japan)</span>
-                                </button>
-                                <button id="menu-btn-current-meta" class="menu-item menu-subitem ia-v1-only" data-tab-id="current-meta" onclick="switchTabAndUpdateMenu('current-meta')" data-i18n="menu.currentMeta" role="menuitem">
-                                    <span class="menu-item-label">Current Meta (Global)</span>
-                                </button>
-                                <button id="menu-btn-current-analysis" class="menu-item menu-subitem ia-v1-only" data-tab-id="current-analysis" onclick="switchTabAndUpdateMenu('current-analysis')" data-i18n="menu.currentMetaAnalysis" role="menuitem">
-                                    <span class="menu-item-label">Deck Analysis (Global)</span>
-                                </button>
-                                <button id="menu-btn-past-meta" class="menu-item menu-subitem ia-v1-only" data-tab-id="past-meta" onclick="switchTabAndUpdateMenu('past-meta')" data-i18n="menu.pastMeta" role="menuitem">
-                                    <span class="menu-item-label">Past Meta</span>
                                 </button>
                             </div>
 
@@ -510,7 +488,7 @@
                     <div>
                         <h1 class="header-title">
                             <span data-i18n="app.title">Pokémon TCG Hub</span>
-                            <span id="current-tab-title" class="current-tab-badge" data-i18n="tab.cityLeague">City League Meta</span>
+                            <span id="current-tab-title" class="current-tab-badge" data-i18n="metaView.title">Meta Analysis</span>
                         </h1>
                         <p class="header-subtitle" data-i18n="app.subtitle">Your Portal for Meta Analysis &amp; Deck Building</p>
                     </div>
@@ -564,7 +542,7 @@
 
         <main class="tabs-container">
             <nav class="tab-navigation cards-tab-navigation" aria-label="Main navigation">
-                <button class="tab-btn active" onclick="switchTab('meta-analysis-hub')" data-i18n="tab.metaAnalysis">Meta &amp; Deck Analysis</button>
+                <button class="tab-btn active" onclick="switchTab('meta-view')" data-i18n="tab.metaAnalysis">Meta &amp; Deck Analysis</button>
                 <button class="tab-btn" onclick="switchTab('cards')" data-i18n="tab.cards">Cards</button>
                 <button class="tab-btn" onclick="switchTab('proxy')" data-i18n="tab.proxyPrinter">Proxy Printer</button>
                 <button class="tab-btn" onclick="switchTab('sandbox')" data-i18n="tab.playtester">Playtester</button>
@@ -575,32 +553,15 @@
                 <button class="tab-btn" onclick="switchTab('tutorial')" data-i18n="tab.howToUse">How to Use</button>
             </nav>
             
-            <!-- Meta & Deck Analysis Hub: Entry State (5 category tiles).
-                 v1 only — the v2 consolidated #meta-view tab below replaces
-                 it. The .ia-v1-only class causes meta-view.css to hide this
-                 div whenever body.ia-v2 is active; bootstrap also intercepts
-                 switchTab('meta-analysis-hub') in v2 and redirects it to
-                 #meta-view so explicit navigation can't end up on a hidden
-                 tab. -->
-            <div id="meta-analysis-hub" class="tab-content active ia-v1-only">
-                <div class="meta-hub-container">
-                    <div class="meta-hub-header">
-                        <h2 data-i18n="metaHub.title">Meta &amp; Deck Analysis</h2>
-                        <p class="meta-hub-subtitle" data-i18n="metaHub.subtitle">Choose a category to start.</p>
-                    </div>
-                    <div class="meta-hub-tile-grid" id="metaHubTileGrid"></div>
-                </div>
-            </div>
-
             <!-- Wave-2 IA-Refactor: consolidated Meta Analysis tab (5 → 1).
-                 Phase B (since 2026-05-21): this is the DEFAULT meta UI.
-                 ?ia=v1 forces legacy as a kill-switch for bug reports.
-                 The bootstrap in js/modules/meta-view/bootstrap.js wires
-                 the segmented control + list/detail panels and reparents
-                 the legacy meta tabs (#current-meta, #city-league,
-                 #past-meta, *-analysis) into the list/detail containers
-                 below. Phase C will delete the legacy tabs from source. -->
-            <div id="meta-view" class="tab-content">
+                 The only meta UI since Phase C (2026-05-21). The
+                 bootstrap in js/modules/meta-view/bootstrap.js wires the
+                 segmented control + list/detail panels and reparents
+                 the legacy meta tab divs (#current-meta, #city-league,
+                 #past-meta, *-analysis — kept further down in this file
+                 because they own the actual rendering logic) into the
+                 list/detail containers below. -->
+            <div id="meta-view" class="tab-content active">
                 <div class="meta-view-header">
                     <h2 class="meta-view-title">
                         <span data-i18n="metaView.title">Meta Analysis</span>

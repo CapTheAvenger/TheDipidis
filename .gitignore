@@ -141,3 +141,9 @@ data/city_league_manifest_M3.json
 
 # Backend scraper data (synced to data/ via prepare_card_data.py)
 backend/core/data/
+
+# Parquet snapshots for the DuckDB-WASM pilot — built by
+# scripts/build_parquet.py, uploaded to R2 by scripts/upload_to_r2.py.
+# NOT committed: source-of-truth is the CSV in data/; Parquet is a
+# derived artefact that lives on R2 only.
+data/*.parquet

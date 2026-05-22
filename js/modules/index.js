@@ -115,3 +115,10 @@ export { switchFormat, selectDeck, backToList, setSearchFilter } from './meta-vi
 // container, intercepts switchTab() for legacy IDs, wires the URL
 // router, and binds the segmented-control to the store.
 import './meta-view/bootstrap.js';
+
+// DuckDB-WASM pilot — lazy data-query layer over Parquet snapshots
+// hosted on R2. The loader stays inert until ddQuery() is first
+// called; the city-league pilot module wires the visible demo panel
+// inside #city-league when the user opts in with ?duckdb=1.
+export { getDuckDB, ddQuery, getDataBaseUrl, isDuckDbPilotEnabled } from './data/duckdb-loader.js';
+import './data/city-league-pilot.js';

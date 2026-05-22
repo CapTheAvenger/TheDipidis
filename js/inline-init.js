@@ -193,6 +193,41 @@ document.addEventListener('languageChanged', function() {
     window.addEventListener('hashchange', applyHash);
 })();
 
+// ── Initial-page-load data trigger ──────────────────────────
+// PR #168 batch 1 removed js/modules/meta-view/bootstrap.js (whose
+// init() used to call switchTab('current-meta') on DOMContentLoaded)
+// and made <div id="current-meta"> the HTML default-active tab. But
+// data-loading for the active tab only happens inside the switch-case
+// in app-core.js's switchTab(). With no boot-time switchTab() call,
+// the default-landing tab renders but its loader (loadCurrentMeta /
+// loadCityLeagueData / loadPastMeta / …) never fires — the user sees
+// the tab header and empty skeleton cards forever.
+//
+// This is the missing bootstrap step: re-fire switchTab() on the
+// already-active tab once the app is ready. Gated on hash so it
+// doesn't fight the hash deep-link handler above — that branch
+// already runs switchTab(target) for the deep-linked tab.
+//
+// Note: switchTab() removes 'active' from all tabs then re-adds it
+// to the target — that briefly toggles, but since target === already
+// active there's no visible flicker. The win is the loader switch-case
+// firing once.
+(function setupInitialTabLoad() {
+    function triggerInitialTabLoad() {
+        if (window.location.hash) return;  // hash branch already runs switchTab
+        const activeTab = document.querySelector('.tab-content.active');
+        if (!activeTab || !activeTab.id) return;
+        if (typeof switchTab === 'function') {
+            try { switchTab(activeTab.id); } catch (_) { /* swallow */ }
+        }
+    }
+    if (window.__appResourcesSettled) {
+        triggerInitialTabLoad();
+    } else {
+        window.addEventListener('app:ui-ready', triggerInitialTabLoad, { once: true });
+    }
+})();
+
 // Wrap all DOM event logic in DOMContentLoaded for safety
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', function() {

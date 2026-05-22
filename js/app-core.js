@@ -343,8 +343,14 @@ const BASE_PATH = './data/';
             return normalizeProxyCardNumber(card?.number || card?.set_number || '');
         }
 
-        // Playtester sandbox was retired in favour of tcg-showdown.com.
-        // See js/tcg-showdown-link.js for the external handoff.
+        const DEFERRED_PLAYTESTER_SCRIPTS = [
+            'js/playtester.js?v=20260320-v68',
+            'js/playtester-mobile.js?v=20260320-v2',
+            'js/playtester-patch.js?v=3fc0227',
+            'js/firebase-multiplayer.js?v=20260315-v1'
+        ];
+        let deferredPlaytesterScriptsPromise = null;
+
         function createCardSkeletonMarkup(count = 10) {
             return Array.from({ length: count }, () => `
                 <div class="card-skeleton" aria-hidden="true">
@@ -385,47 +391,79 @@ const BASE_PATH = './data/';
             if (grid._skeletonTimer) { clearTimeout(grid._skeletonTimer); grid._skeletonTimer = null; }
         }
 
-        // Stubs for legacy in-app playtester entry points. They now redirect
-        // to the external TCG Showdown handoff so any lingering UI button or
-        // deeplink degrades gracefully instead of throwing ReferenceError.
-        // The HTML still ships the sandbox tab + modal markup; clicking any
-        // of the ~40 pt*/mp*/*Playtester*/*Multiplayer* onclick handlers
-        // from there would otherwise crash with ReferenceError now that
-        // js/playtester*.js and js/firebase-multiplayer.js are gone.
-        function _redirectToShowdown() {
-            if (typeof window.openShowdownExternal === 'function') {
-                window.openShowdownExternal();
-            } else if (typeof showNotification === 'function') {
-                showNotification('Playtester moved to tcg-showdown.com', 'info', 2400);
-            }
+        function loadDeferredScript(src) {
+            return new Promise((resolve, reject) => {
+                const existing = document.querySelector(`script[src="${src}"]`);
+                if (existing) {
+                    if (existing.dataset.loaded === 'true') {
+                        resolve();
+                        return;
+                    }
+                    existing.addEventListener('load', () => resolve(), { once: true });
+                    existing.addEventListener('error', () => reject(new Error(`Failed to load ${src}`)), { once: true });
+                    return;
+                }
+
+                const script = document.createElement('script');
+                script.src = src;
+                script.async = false;
+                script.dataset.deferredPlaytester = 'true';
+                script.addEventListener('load', () => {
+                    script.dataset.loaded = 'true';
+                    resolve();
+                }, { once: true });
+                script.addEventListener('error', () => reject(new Error(`Failed to load ${src}`)), { once: true });
+                document.body.appendChild(script);
+            });
         }
-        [
-            // Modal entry + multiplayer launchers
-            'openPlaytester', 'openPlaytesterSetup', 'closePlaytesterSetup',
-            'startPlaytesterSetup', 'startPlaytesterWithMirror',
-            'startPlaytesterWithOpponent', 'startStandalonePlaytester',
-            'parseSandboxDeckToExactPrints',
-            'openMultiplayerFromSandbox', 'openMultiplayerMenu',
-            'toggleMultiplayerMenu', 'mpCreateGame', 'mpJoinGame',
-            // In-modal interactions. Unreachable now that the entry
-            // launchers redirect, but stubbed defensively against any
-            // legacy code path that bypasses the modal open.
-            'ptStartGame', 'ptUndo', 'ptLog', 'ptShowManual', 'ptToggleLog',
-            'ptFlipBoard', 'ptZoomBoard', 'ptZoomClose',
-            'ptCloseAttackView', 'ptCloseDeckSearch', 'ptCloseDiscardModal',
-            'ptCloseTopCards', 'ptDeckMenu', 'ptDrawCards',
-            'ptHideContextMenu', 'ptLookCards', 'ptMenuAction', 'ptMulligan',
-            'ptOpenAttackView', 'ptOpenDeckSearch', 'ptOpenDiscard',
-            'ptOpenLostZone', 'ptOpenOpponentPanel', 'ptOppSwitchTab',
-            'ptPassTurn', 'ptScrollHand', 'ptSetDiscardSort', 'ptShuffleDeck',
-            'ptShuffleRemainingLookedCardsIntoDeck',
-            'ptToggleBenchSize', 'ptToggleDmgMod', 'ptToggleLock',
-            'ptToggleMarker', 'ptViewCard',
-        ].forEach(functionName => {
+
+        async function ensurePlaytesterScriptsLoaded(options = {}) {
+            const { notify = false } = options;
+
+            if (window.__playtesterScriptsReady === true) {
+                return;
+            }
+
+            if (!deferredPlaytesterScriptsPromise) {
+                if (notify && typeof showNotification === 'function') {
+                    showNotification(t('notify.playtesterLoading'), 'info', 1800);
+                }
+
+                deferredPlaytesterScriptsPromise = (async () => {
+                    for (const src of DEFERRED_PLAYTESTER_SCRIPTS) {
+                        await loadDeferredScript(src);
+                    }
+                    window.__playtesterScriptsReady = true;
+                })().catch(error => {
+                    deferredPlaytesterScriptsPromise = null;
+                    throw error;
+                });
+            }
+
+            return deferredPlaytesterScriptsPromise;
+        }
+
+        window.ensurePlaytesterScriptsLoaded = ensurePlaytesterScriptsLoaded;
+
+        ['openPlaytester', 'openPlaytesterSetup', 'startPlaytesterWithMirror', 'startPlaytesterWithOpponent', 'startStandalonePlaytester', 'parseSandboxDeckToExactPrints', 'openMultiplayerFromSandbox'].forEach(functionName => {
             if (typeof window[functionName] === 'function') return;
-            window[functionName] = _redirectToShowdown;
+
+            const deferredWrapper = async function(...args) {
+                try {
+                    await ensurePlaytesterScriptsLoaded({ notify: true });
+                    if (typeof window[functionName] === 'function' && window[functionName] !== deferredWrapper) {
+                        return window[functionName](...args);
+                    }
+                } catch (error) {
+                    console.error(`[Playtester] Could not load ${functionName}:`, error);
+                    if (typeof showNotification === 'function') {
+                        showNotification(t('notify.playtesterError'), 'error');
+                    }
+                }
+            };
+
+            window[functionName] = deferredWrapper;
         });
-        window.ensurePlaytesterScriptsLoaded = function() { return Promise.resolve(); };
 
         function buildProxyManualSearchIndex() {
             const cards = Array.isArray(window.allCardsDatabase) ? window.allCardsDatabase : [];
@@ -851,9 +889,9 @@ const BASE_PATH = './data/';
                         const copies = parseProxyCount(count, 0);
                         if (copies <= 0) return;
 
-                        const match = parseCardKey(deckKey);
+                        const match = deckKey.match(/^(.+?)\s+\(([A-Z0-9]+)\s+([A-Z0-9]+)\)$/);
                         if (match) {
-                            addCardToProxyInternal(match.name, match.setCode, match.number, copies, { suppressToast: true, suppressRender: true, suppressPersist: true });
+                            addCardToProxyInternal(match[1], match[2], match[3], copies, { suppressToast: true, suppressRender: true, suppressPersist: true });
                         } else {
                             addCardToProxyInternal(deckKey, '', '', copies, { suppressToast: true, suppressRender: true, suppressPersist: true });
                         }
@@ -1183,7 +1221,6 @@ const BASE_PATH = './data/';
                     e.preventDefault();
                 }
             }, { passive: false });
-
         });
         
         // Tab switching
@@ -1225,14 +1262,25 @@ const BASE_PATH = './data/';
                 }
             }
 
+            // Notify the Meta & Deck Analysis Hub so it can manage its sub-nav.
+            if (window.MetaAnalysisHub && typeof window.MetaAnalysisHub.onTabSwitched === 'function') {
+                window.MetaAnalysisHub.onTabSwitched(tabName);
+            }
+
+            // The hub tab uses the same top-nav button for all 5 sub-tabs.
+            // When entering a sub-tab, highlight the hub button instead.
+            const hubSubTabs = ['city-league', 'city-league-analysis', 'current-meta', 'current-analysis', 'past-meta'];
+            const buttonLookupName = hubSubTabs.includes(tabName) ? 'meta-analysis-hub' : tabName;
+
+            // Set active button (highlight the parent hub button when on a sub-tab)
             const activeBtn = Array.from(buttons).find(btn =>
-                btn.getAttribute('onclick')?.includes(tabName)
+                btn.getAttribute('onclick')?.includes(buttonLookupName)
             );
             if (activeBtn) activeBtn.classList.add('active');
 
-            // Update browser tab title with the actual section name.
-            // For legacy meta IDs, prefer the side-menu label so the
-            // title reflects the specific area when one is available.
+            // Update browser tab title with the actual section name. For hub
+            // sub-tabs, prefer the side-menu label (e.g. "Deck Analysis (Japan)")
+            // so the title reflects the specific area, not the hub.
             const menuLabelEl = document.querySelector(`.menu-item[data-tab-id="${tabName}"] .menu-item-label`);
             const titleText = menuLabelEl
                 ? menuLabelEl.textContent.trim()
@@ -1242,7 +1290,10 @@ const BASE_PATH = './data/';
                 const badge = document.getElementById('current-tab-title');
                 if (badge) {
                     badge.textContent = titleText;
-                    badge.style.display = '';
+                    // Hub overview has no single "current section" — hide the
+                    // pill there so it doesn't mislead (see inline-init.js
+                    // companion change for the menu-driven path).
+                    badge.style.display = tabName === 'meta-analysis-hub' ? 'none' : '';
                 }
             }
         }
@@ -1909,28 +1960,14 @@ const BASE_PATH = './data/';
         }
         
 
-        // Async CSV fetch and parse using PapaParse with Web Worker (B-12 hotfix)
-        // worker:true parses off the main thread — for the 40 MB city-league CSV
-        // this removes an ~800-1500 ms main-thread freeze that was killing INP
-        // and blocking the City League tab from becoming interactive.
+        // Async CSV fetch and parse using PapaParse with Web Worker
         async function fetchAndParseCSV(url, delimiter = ';') {
-            // Resolve to an ABSOLUTE URL. PapaParse with worker:true spawns
-            // a Web Worker from a Blob URL; the worker's base URL is the
-            // blob itself (not the page), so a relative URL like
-            // './data/foo.csv' would be resolved against
-            // 'blob:https://thedipidis.app/<uuid>' — which XMLHttpRequest.open
-            // rejects with "Invalid URL". Using window.location.href as the
-            // base normalises every caller's relative path to an absolute
-            // https:// URL the worker can fetch.
-            const absoluteUrl = (typeof window !== 'undefined' && window.location)
-                ? new URL(url, window.location.href).href
-                : url;
             return new Promise((resolve, reject) => {
-                Papa.parse(absoluteUrl, {
+                Papa.parse(url, {
                     download: true,
                     header: true,
                     delimiter: delimiter,
-                    worker: true,
+                    worker: false,
                     skipEmptyLines: true,
                     complete: function(results) {
                         // Optionally fix encoding for card_name/full_card_name
@@ -2004,7 +2041,7 @@ const BASE_PATH = './data/';
         async function loadPokedexNumbers() {
             try {
                 const ts = new Date().getTime();
-                const resp = await fetch(dataUrl('./data/pokemon_dex_numbers.json'));
+                const resp = await fetch(`./data/pokemon_dex_numbers.json?t=${ts}`);
                 if (resp.ok) {
                     pokedexNumbers = await resp.json();
                     window.pokedexNumbers = pokedexNumbers;
@@ -2017,7 +2054,7 @@ const BASE_PATH = './data/';
 
         async function loadSetOrderMap() {
             try {
-                const resp = await fetch(dataUrl('./data/sets.json'));
+                const resp = await fetch(`./data/sets.json?t=${Date.now()}`);
                 if (resp.ok) {
                     const json = await resp.json();
                     if (json && typeof json === 'object') {
@@ -2115,7 +2152,7 @@ const BASE_PATH = './data/';
         }
 
         async function _fetchManifest(url) {
-            const resp = await fetch(dataUrl(url));
+            const resp = await fetch(url + '?t=' + Date.now());
             if (!resp.ok) return null;
             return resp.json();
         }
@@ -2152,7 +2189,7 @@ const BASE_PATH = './data/';
 
         async function _loadMonolithCardDatabase() {
             const timestamp = new Date().getTime();
-            const response = await fetch(dataUrl('./data/all_cards_merged.json'));
+            const response = await fetch(`./data/all_cards_merged.json?t=${timestamp}`);
             if (response.ok) {
                 const jsonData = await response.json();
                 const cards = (jsonData.cards || jsonData);
@@ -2228,7 +2265,7 @@ const BASE_PATH = './data/';
         async function loadAceSpecsList() {
             try {
                 const timestamp = new Date().getTime();
-                const response = await fetch(dataUrl('./data/ace_specs.json'));
+                const response = await fetch(`./data/ace_specs.json?t=${timestamp}`);
                 if (response.ok) {
                     const jsonData = await response.json();
                     aceSpecsList = (jsonData.ace_specs || []).map(name => name.toLowerCase().trim());
@@ -2244,10 +2281,10 @@ const BASE_PATH = './data/';
         async function loadSetMapping() {
             try {
                 const timestamp = new Date().getTime();
-                const response = await fetch(dataUrl('./pokemon_sets_mapping.csv'));
+                const response = await fetch(`./pokemon_sets_mapping.csv?t=${timestamp}`);
                 if (!response.ok) return;
                 const text = await response.text();
-                const rows = await fetchAndParseCSV(dataUrl('./pokemon_sets_mapping.csv'), ',');
+                const rows = await fetchAndParseCSV(`./pokemon_sets_mapping.csv?t=${timestamp}`, ',');
                 englishSetCodes = new Set(rows.map(row => row.set_code).filter(Boolean));
                 window.englishSetCodes = englishSetCodes;
             } catch (error) {

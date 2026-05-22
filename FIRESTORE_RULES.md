@@ -137,12 +137,12 @@ Changes propagate within a minute.
 
 ## What each rule does
 
-| Collection                         | Read               | Write                                             |
-| ---------------------------------- | ------------------ | ------------------------------------------------- |
-| `users/{uid}/**`                   | Owner only         | Owner only                                        |
-| `publicProfiles/{uid}`             | Any signed-in user | Owner only                                        |
-| `testingGroups/{id}`               | Members only       | Owner (full) / Editor (data only) / Viewer (none) |
-| `testingGroups/{id}/activity/{id}` | Members only       | Append-only by any member                         |
+| Collection | Read | Write |
+|---|---|---|
+| `users/{uid}/**` | Owner only | Owner only |
+| `publicProfiles/{uid}` | Any signed-in user | Owner only |
+| `testingGroups/{id}` | Members only | Owner (full) / Editor (data only) / Viewer (none) |
+| `testingGroups/{id}/activity/{id}` | Members only | Append-only by any member |
 
 ## One caveat
 

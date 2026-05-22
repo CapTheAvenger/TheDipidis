@@ -1,6 +1,3 @@
-// @ts-check
-// (Wave-1 L2.1 pilot file — small, isolated, reads window.allCardsDatabase and
-//  computes the price-overview table; good shape for incremental typing.)
 // app-price.js — extracted from app.js
 // Part of Hausi's Pokemon TCG Analysis
 
@@ -16,19 +13,7 @@
             }
             
             try {
-                // Real timeout via AbortController (B-fix from L2.1 typecheck): the
-                // previous code passed { timeout: 2000 } to fetch(), which is NOT
-                // a valid RequestInit option and was silently ignored. If the local
-                // price-proxy was unreachable, the fetch would hang for the browser's
-                // default timeout (often 30+ s) and block the deck-builder UI.
-                const ctrl = new AbortController();
-                const abortTimer = setTimeout(() => ctrl.abort(), 2000);
-                let response;
-                try {
-                    response = await fetch(`${PROXY_URL}/health`, { signal: ctrl.signal });
-                } finally {
-                    clearTimeout(abortTimer);
-                }
+                const response = await fetch(`${PROXY_URL}/health`, { timeout: 2000 });
                 proxyServerAvailable = response.ok;
                 if (proxyServerAvailable) {
                     devLog('[OK] Live price proxy server is running');

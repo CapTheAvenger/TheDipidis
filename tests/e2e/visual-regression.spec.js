@@ -23,15 +23,6 @@ async function openStablePage(page) {
         try {
             localStorage.clear();
             sessionStorage.clear();
-            // Skip the inline-init.js version-check on test pages. The check
-            // fetches version.json, compares with window.APP_VERSION, and
-            // location.reload()s on mismatch — that mid-page reload destroys
-            // the Playwright evaluate-context and tanks the visual tests.
-            // Setting the sentinel BEFORE the version-check script runs makes
-            // it short-circuit (see index.html version-check block). Safe to
-            // do unconditionally because the sentinel is only consulted by
-            // that one script, and is cleared after the next page-load.
-            sessionStorage.setItem('__tcg_version_refresh', '1');
         } catch (_) {
             // ignore storage access issues
         }

@@ -31,5 +31,5 @@ module.exports = {
 		}
 	},
 	use,
-	snapshotPathTemplate: '{testDir}/{testFileDir}/__snapshots__/{testFileName}/{arg}{ext}'
+	snapshotPathTemplate: '{testDir}/{testFileDir}/__snapshots__/{testFilename}/{arg}{ext}'
 };

@@ -1,12 +1,12 @@
 // Service Worker for Pokemon TCG Analysis PWA
-// v202605220417
+// v202605190937
 // Strategies:
 //   HTML / navigation → Network-first  (users always see latest version)
 //   JS / CSS          → Network-first  (always serve fresh; fall back to cache offline)
 //   Images            → Cache-first    (rarely change)
 //   Data files        → Stale-while-revalidate (fast load + background update)
 
-const CACHE_NAME = 'tcg-analysis-v202605220417';
+const CACHE_NAME = 'tcg-analysis-v202605190937';
 
 // Static shell â€” cached on install
 const SHELL_ASSETS = [
@@ -35,7 +35,6 @@ const SHELL_ASSETS = [
   './js/inline-init.js',
   './js/app-utils.js',
   './js/i18n.js',
-  './js/i18n-de.js',
   './js/app-core.js',
   './js/app-price.js',
   './js/app-tier-meta.js',
@@ -52,9 +51,10 @@ const SHELL_ASSETS = [
   './js/meta-binder.js',
   './js/custom-binder.js',
   './js/draw-simulator.js',
-  './js/lazy-loader.js',
   './js/combo-worker.js',
+  './js/app-calculator.js',
   './js/deck-analysis-shared.js',
+  './js/card-data-cache.js',
   './js/error-tracking.js',
   './images/pokeball-icon.png',
   './images/escape-rope.png'

@@ -1,4 +1,3 @@
-// @ts-check
 (function () {
     'use strict';
 
@@ -198,7 +197,7 @@
         }
 
         // Update generate button state
-        const btn = /** @type {HTMLButtonElement | null} */ (document.getElementById('cbGenerateBtn'));
+        const btn = document.getElementById('cbGenerateBtn');
         if (btn) btn.disabled = cbSelectedArchetypes.length === 0;
     }
 
@@ -333,7 +332,7 @@
         const dd = document.getElementById('cbArchetypeDropdown');
         if (!dd || dd.classList.contains('display-none')) return;
 
-        const searchEl = /** @type {HTMLInputElement | null} */ (document.getElementById('cbArchetypeSearch'));
+        const searchEl = document.getElementById('cbArchetypeSearch');
         const query = String(searchEl ? searchEl.value : '').trim().toLowerCase();
         const shared = mb();
 
@@ -530,7 +529,7 @@
         if (_cbSkipNextClose) { _cbSkipNextClose = false; return; }
         const dd = document.getElementById('cbArchetypeDropdown');
         if (!dd || dd.classList.contains('display-none')) return;
-        const picker = /** @type {Element | null} */ (e.target) && /** @type {Element} */ (e.target).closest('.custom-binder-picker');
+        const picker = e.target.closest('.custom-binder-picker');
         if (!picker) dd.classList.add('display-none');
     });
 
@@ -754,8 +753,8 @@
         }
 
         // Enable action buttons
-        const wishlistBtn = /** @type {HTMLButtonElement | null} */ (document.getElementById('cbAddWishlist'));
-        const proxyBtn = /** @type {HTMLButtonElement | null} */ (document.getElementById('cbSendProxy'));
+        const wishlistBtn = document.getElementById('cbAddWishlist');
+        const proxyBtn = document.getElementById('cbSendProxy');
         if (wishlistBtn) wishlistBtn.disabled = missingCopies === 0;
         if (proxyBtn) proxyBtn.disabled = missingCopies === 0;
 
@@ -786,8 +785,7 @@
         cbFilter = filter;
         const filtersEl = document.getElementById('cbFilters');
         if (filtersEl) {
-            filtersEl.querySelectorAll('.meta-binder-filter-btn').forEach(btnEl => {
-                const btn = /** @type {HTMLElement} */ (btnEl);
+            filtersEl.querySelectorAll('.meta-binder-filter-btn').forEach(btn => {
                 btn.classList.toggle('active', btn.dataset.filter === filter);
             });
         }
@@ -814,8 +812,8 @@
         if (!grid) return;
 
         const { cards } = delta;
-        const typeFilterEl = /** @type {HTMLSelectElement | null} */ (document.getElementById('cbFilterType'));
-        const setFilterEl = /** @type {HTMLSelectElement | null} */ (document.getElementById('cbFilterSet'));
+        const typeFilterEl = document.getElementById('cbFilterType');
+        const setFilterEl = document.getElementById('cbFilterSet');
         const typeFilter = typeFilterEl ? String(typeFilterEl.value || 'all') : 'all';
         const setFilter = setFilterEl ? String(setFilterEl.value || 'all').toLowerCase() : 'all';
 
@@ -1044,7 +1042,7 @@
                 else if (d) { m.className = 'meta-binder-count-intl'; m.textContent = c + '/' + a + ' \u2713'; }
                 else { m.className = 'meta-binder-count-missing'; m.textContent = i + '/' + a; }
             }
-            const y = /** @type {HTMLElement | null} */ (e.querySelector('.btn-wishlist[data-card-id]'));
+            const y = e.querySelector('.btn-wishlist[data-card-id]');
             if (y) {
                 const missing = Math.max(0, a - i);
                 y.setAttribute('data-missing', String(missing));

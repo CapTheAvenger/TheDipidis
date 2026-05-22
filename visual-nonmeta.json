@@ -1,0 +1,483 @@
+﻿{
+  "config": {
+    "configFile": "C:\\Users\\haush\\OneDrive\\Desktop\\Hausi┬┤s Pokemon TCG Analysis\\playwright.config.js",
+    "rootDir": "C:/Users/haush/OneDrive/Desktop/Hausi┬┤s Pokemon TCG Analysis/tests/e2e",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "C:/Users/haush/OneDrive/Desktop/Hausi┬┤s Pokemon TCG Analysis/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "",
+        "name": "",
+        "testDir": "C:/Users/haush/OneDrive/Desktop/Hausi┬┤s Pokemon TCG Analysis/tests/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 60000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.59.0",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "cards-keyboard-accessibility.e2e.spec.js",
+      "file": "cards-keyboard-accessibility.e2e.spec.js",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Cards Keyboard Accessibility",
+          "file": "cards-keyboard-accessibility.e2e.spec.js",
+          "line": 3,
+          "column": 6,
+          "specs": [
+            {
+              "title": "supports keyboard autocomplete navigation and keyboard rarity modal open",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 25502,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-02T08:07:07.922Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "7c1462d7afe302ac7cad-da07bf5c71c4c56123f0",
+              "file": "cards-keyboard-accessibility.e2e.spec.js",
+              "line": 4,
+              "column": 5
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "city-league-hero-combined-navigation.e2e.spec.js",
+      "file": "city-league-hero-combined-navigation.e2e.spec.js",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "City League Hero Combined Navigation",
+          "file": "city-league-hero-combined-navigation.e2e.spec.js",
+          "line": 3,
+          "column": 6,
+          "specs": [
+            {
+              "title": "clicking Top Archetype hero selects GROUP combined value in analysis tab",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 17028,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-02T08:07:34.161Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "e12a1234cc84d411d10a-32f9e93ba82544a020d9",
+              "file": "city-league-hero-combined-navigation.e2e.spec.js",
+              "line": 4,
+              "column": 5
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "visual-regression.spec.js",
+      "file": "visual-regression.spec.js",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Card Action Buttons",
+          "file": "visual-regression.spec.js",
+          "line": 35,
+          "column": 6,
+          "specs": [
+            {
+              "title": "card action buttons are equal width in both rows",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 5718,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-02T08:07:51.264Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "614534ba5c1e0a84453e-d099eb28c49e5bd8a1f3",
+              "file": "visual-regression.spec.js",
+              "line": 44,
+              "column": 5
+            },
+            {
+              "title": "card action buttons screenshot matches baseline",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 6193,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-02T08:07:56.997Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "614534ba5c1e0a84453e-a4b1c9cda3c878084fc1",
+              "file": "visual-regression.spec.js",
+              "line": 72,
+              "column": 5
+            }
+          ]
+        },
+        {
+          "title": "Navigation",
+          "file": "visual-regression.spec.js",
+          "line": 82,
+          "column": 6,
+          "specs": [
+            {
+              "title": "pokeball menu dropdown screenshot matches baseline",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 4738,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-02T08:08:03.203Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "614534ba5c1e0a84453e-0358dd6edf279e5dd311",
+              "file": "visual-regression.spec.js",
+              "line": 83,
+              "column": 5
+            }
+          ]
+        },
+        {
+          "title": "City League Tab",
+          "file": "visual-regression.spec.js",
+          "line": 99,
+          "column": 6,
+          "specs": [
+            {
+              "title": "hero archetype grid screenshot matches baseline",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 4543,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-02T08:08:07.949Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "614534ba5c1e0a84453e-cf47bab4c4deb5240d29",
+              "file": "visual-regression.spec.js",
+              "line": 106,
+              "column": 5
+            },
+            {
+              "title": "archetype table screenshot matches baseline",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 4470,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-02T08:08:12.501Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "614534ba5c1e0a84453e-81dc8ddfe976964bdeb0",
+              "file": "visual-regression.spec.js",
+              "line": 112,
+              "column": 5
+            }
+          ]
+        },
+        {
+          "title": "Rarity Switcher Modal",
+          "file": "visual-regression.spec.js",
+          "line": 180,
+          "column": 6,
+          "specs": [
+            {
+              "title": "rarity switcher modal screenshot matches baseline",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 9079,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-02T08:08:16.980Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "614534ba5c1e0a84453e-5a7ddee501aeab6a07c2",
+              "file": "visual-regression.spec.js",
+              "line": 181,
+              "column": 5
+            }
+          ]
+        },
+        {
+          "title": "Cards Database Tab",
+          "file": "visual-regression.spec.js",
+          "line": 204,
+          "column": 6,
+          "specs": [
+            {
+              "title": "cards database grid screenshot matches baseline",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 33074,
+                      "error": {
+                        "message": "TimeoutError: page.waitForSelector: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.card-database-card') to be visible\u001b[22m\n",
+                        "stack": "TimeoutError: page.waitForSelector: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.card-database-card') to be visible\u001b[22m\n\n    at C:\\Users\\haush\\OneDrive\\Desktop\\Hausi┬┤s Pokemon TCG Analysis\\tests\\e2e\\visual-regression.spec.js:211:20",
+                        "location": {
+                          "file": "C:\\Users\\haush\\OneDrive\\Desktop\\Hausi┬┤s Pokemon TCG Analysis\\tests\\e2e\\visual-regression.spec.js",
+                          "column": 20,
+                          "line": 211
+                        },
+                        "snippet": "\u001b[0m \u001b[90m 209 |\u001b[39m         \u001b[36mawait\u001b[39m goToTab(page\u001b[33m,\u001b[39m \u001b[32m'cards'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 210 |\u001b[39m         \u001b[90m// Wait for at least one card to render.\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 211 |\u001b[39m         \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mwaitForSelector(\u001b[32m'.card-database-card'\u001b[39m\u001b[33m,\u001b[39m { timeout\u001b[33m:\u001b[39m \u001b[35m30\u001b[39m_000 })\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m                    \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 212 |\u001b[39m\n \u001b[90m 213 |\u001b[39m         \u001b[36mconst\u001b[39m grid \u001b[33m=\u001b[39m page\u001b[33m.\u001b[39mlocator(\u001b[32m'#cardsGrid'\u001b[39m)\u001b[33m.\u001b[39mfirst()\u001b[33m;\u001b[39m\n \u001b[90m 214 |\u001b[39m         \u001b[36mawait\u001b[39m expect(grid)\u001b[33m.\u001b[39mtoHaveScreenshot(\u001b[32m'cards-database-grid.png'\u001b[39m)\u001b[33m;\u001b[39m\u001b[0m"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "C:\\Users\\haush\\OneDrive\\Desktop\\Hausi┬┤s Pokemon TCG Analysis\\tests\\e2e\\visual-regression.spec.js",
+                            "column": 20,
+                            "line": 211
+                          },
+                          "message": "TimeoutError: page.waitForSelector: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.card-database-card') to be visible\u001b[22m\n\n\n  209 |         await goToTab(page, 'cards');\n  210 |         // Wait for at least one card to render.\n> 211 |         await page.waitForSelector('.card-database-card', { timeout: 30_000 });\n      |                    ^\n  212 |\n  213 |         const grid = page.locator('#cardsGrid').first();\n  214 |         await expect(grid).toHaveScreenshot('cards-database-grid.png');\n    at C:\\Users\\haush\\OneDrive\\Desktop\\Hausi┬┤s Pokemon TCG Analysis\\tests\\e2e\\visual-regression.spec.js:211:20"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-02T08:08:26.070Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "C:\\Users\\haush\\OneDrive\\Desktop\\Hausi┬┤s Pokemon TCG Analysis\\test-results\\visual-regression-Cards-Da-4ffe4-screenshot-matches-baseline\\error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "C:\\Users\\haush\\OneDrive\\Desktop\\Hausi┬┤s Pokemon TCG Analysis\\tests\\e2e\\visual-regression.spec.js",
+                        "column": 20,
+                        "line": 211
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "614534ba5c1e0a84453e-d4faeaed4752fafba7c5",
+              "file": "visual-regression.spec.js",
+              "line": 205,
+              "column": 5
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-04-02T08:07:05.342Z",
+    "duration": 114130.07800000001,
+    "expected": 8,
+    "skipped": 0,
+    "unexpected": 1,
+    "flaky": 0
+  }
+}

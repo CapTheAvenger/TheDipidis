@@ -1,6 +1,3 @@
-// @ts-check
-// (Wave-1 L2.1 pilot file — opt-in to JSDoc-driven type-checking via tsc --noEmit.
-//  Errors land in `npm run typecheck` but never block runtime.)
 /**
  * Lightweight Frontend Error Tracking
  * ====================================
@@ -65,27 +62,6 @@
         } catch (_) { /* silent */ }
     }
 
-    // Pull current Firebase user id at send time (not at envelope-build time
-    // earlier in the page) so an event fired during a long session reports
-    // who was actually signed in when it happened. Wrapped in try/catch
-    // because firebase.auth() may not yet be initialised on very-early
-    // errors.
-    function _currentUserContext() {
-        try {
-            if (typeof firebase !== 'undefined' && firebase.auth) {
-                var u = firebase.auth().currentUser;
-                if (u && u.uid) {
-                    // Only the UID — not email, not displayName — to keep
-                    // Sentry events as PII-light as possible while still
-                    // letting "1 user × 10 errors" vs "10 users × 1 error"
-                    // be distinguishable in the dashboard.
-                    return { id: u.uid };
-                }
-            }
-        } catch (_) { /* ignore */ }
-        return undefined;
-    }
-
     function _buildEnvelope(err) {
         var header = JSON.stringify({ dsn: SENTRY_DSN, sent_at: new Date().toISOString() });
         var itemHeader = JSON.stringify({ type: 'event' });
@@ -96,11 +72,6 @@
             level: 'error',
             logger: 'error-tracking.js',
             environment: location.hostname === 'localhost' ? 'development' : 'production',
-            // release tag (wave-0 HF-18) — Sentry uses this to group errors
-            // by deploy version. Without it every event is "the same release"
-            // and you can't filter "errors since version X".
-            release: (typeof window !== 'undefined' && window.APP_VERSION) ? String(window.APP_VERSION) : undefined,
-            user: _currentUserContext(),
             request: {
                 url: location.href,
                 headers: { 'User-Agent': navigator.userAgent }

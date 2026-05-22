@@ -2719,8 +2719,7 @@
             const proxySetNumber = card.number || '';
             const displayType = escapeHtml(card.type || 'Unknown');
             const displayRarity = escapeHtml(card.rarity || 'Unknown');
-            // Sanitize external URL — only http(s) allowed; rejects javascript:/data:/etc.
-            const rawCardMarketUrl = safeExternalUrl(card.cardmarket_url || '');
+            const rawCardMarketUrl = card.cardmarket_url || '';
             const displayCardMarketUrl = rawCardMarketUrl ? rawCardMarketUrl.split('?')[0] + '?sellerCountry=7&language=1,3' : '#';
             
             // Create unique card ID: name|set|number (tracks SPECIFIC print, not just card name)
@@ -2942,72 +2941,26 @@
             return new Date(releaseDateStr);
         }
 
-        // Memoization cache for calculateDynamicCoverage (B-4 hotfix).
-        // The function is pure given (cardName, filter-state) but was being
-        // invoked ~900k times during a single coverage-sort run, each call
-        // doing 3 querySelectorAll(:checked) + Array.from(Map.keys()) — that
-        // froze the Cards tab for 3-5 seconds on a mid-tier laptop. The
-        // cache key combines the normalized card name with a hash of the
-        // 3 checkbox-arrays; sort() reuses the same filter-state for every
-        // comparison so cache hit-rate during one sort is ~99.99%.
-        let _coverageCache = null;
-        let _coverageCacheFilterKey = '';
-        function _coverageFilterKey() {
-            const m = Array.from(document.querySelectorAll('#mainPokemonList input:checked')).map(cb => cb.value);
-            const a = Array.from(document.querySelectorAll('#archetypeList input:checked')).map(cb => cb.value);
-            const f = Array.from(document.querySelectorAll('#metaFormatOptions input:checked'))
-                .filter(cb => cb.value.startsWith('meta:'))
-                .map(cb => cb.value);
-            return m.sort().join('|') + '##' + a.sort().join('|') + '##' + f.sort().join('|');
-        }
-        function _resetCoverageCache() {
-            _coverageCache = new Map();
-            _coverageCacheFilterKey = _coverageFilterKey();
-        }
-        // Public reset hook so filter-change handlers can invalidate explicitly
-        // (defense-in-depth; the in-function key check below would catch drift too).
-        window._resetCoverageCache = _resetCoverageCache;
-
-        // Public memoized entry — most call sites go through here. The actual
-        // computation lives in _calculateDynamicCoverageRaw below; this wrapper
-        // is the hot path for cards.sort() (~900k calls per sort).
         function calculateDynamicCoverage(cardName) {
             if (!window.cardDeckCoverageMap || !window.archetypeDeckCounts) {
                 return null;
             }
-            const cardNameLower = normalizeCardName(cardName);
-            const currentFilterKey = _coverageFilterKey();
-            if (!_coverageCache || _coverageCacheFilterKey !== currentFilterKey) {
-                _coverageCache = new Map();
-                _coverageCacheFilterKey = currentFilterKey;
-            } else if (_coverageCache.has(cardNameLower)) {
-                return _coverageCache.get(cardNameLower);
-            }
-            const result = _calculateDynamicCoverageRaw(cardName);
-            _coverageCache.set(cardNameLower, result);
-            return result;
-        }
-
-        function _calculateDynamicCoverageRaw(cardName) {
-            if (!window.cardDeckCoverageMap || !window.archetypeDeckCounts) {
-                return null;
-            }
-
+            
             const cardNameLower = normalizeCardName(cardName);
             const cardStats = window.cardDeckCoverageMap.get(cardNameLower);
-
+            
             if (!cardStats) {
                 return null;
             }
-
+            
             // Get card release date for temporal filtering
             const cardReleaseDate = getCardReleaseDate(cardStats);
-
+            
             // Get active filters
             const selectedMainPokemons = Array.from(document.querySelectorAll('#mainPokemonList input:checked')).map(cb => cb.value);
             const selectedArchetypes = Array.from(document.querySelectorAll('#archetypeList input:checked')).map(cb => cb.value);
             const selectedMetaFilters = Array.from(document.querySelectorAll('#metaFormatOptions input:checked')).filter(cb => cb.value.startsWith('meta:')).map(cb => cb.value.replace('meta:', ''));
-
+            
             // Get ALL actually existing archetype keys from the data
             const allExistingArchetypeKeys = Array.from(window.archetypeDeckCounts.keys());
             
@@ -4167,16 +4120,14 @@
         }
 
         function openCardmarket(cardmarketUrl, cardName) {
-            // Sanitize before opening — rejects javascript:/data: URLs from scraped data.
-            const safe = safeExternalUrl(cardmarketUrl);
-            if (!safe) {
+            if (!cardmarketUrl || cardmarketUrl.trim() === '') {
                 showToast(`Cardmarket link not available for ${cardName}`, 'warning');
                 return;
             }
-
+            
             // Strip Limitless tracking params, add German seller + EN/DE language filter
-            const cleanUrl = safe.split('?')[0];
-            window.open(cleanUrl + '?sellerCountry=7&language=1,3', '_blank', 'noopener,noreferrer');
+            const cleanUrl = cardmarketUrl.split('?')[0];
+            window.open(cleanUrl + '?sellerCountry=7&language=1,3', '_blank');
         }
 
         function openLimitlessCard(setCode, setNumber) {

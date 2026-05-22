@@ -1230,28 +1230,21 @@
                 const tT = entries.filter(e => e.result === 'tie').length;
                 const tTotal = entries.length;
                 const tWinRate = tTotal > 0 ? Math.round((tW / tTotal) * 100) : 0;
-                // Use escapeJsSingleQuoted (HTML+JS hardened after HF-5) instead of the
-                // broken `escapeHtml(x).replace(/'/g, "\\'")` chain — escapeHtml turned
-                // ' into &#39; first, then the .replace found nothing to escape; the
-                // browser would decode &#39; back to ' INSIDE the onclick string literal
-                // and a malicious tournamentName like  Worlds'); alert(1); //  would
-                // break out of the JS-string context. Fixes B-28.
-                const safeTournKeyJs = escapeJsSingleQuoted(tournKey);
-                const safeMetaKeyJs = escapeJsSingleQuoted(metaKey);
-                const groupType = entries[0]?.tournamentType || '';
-                const safeGroupTypeJs = escapeJsSingleQuoted(groupType);
-                const safeGroupTypeHtml = escapeHtml(groupType);
+                const safeTournKey = escapeHtml(tournKey).replace(/'/g, "\\'");
+                const groupType = (entries[0]?.tournamentType || '').replace(/'/g, "\\'");
+                const safeMetaKey = escapeHtml(metaKey).replace(/'/g, "\\'");
+                const safeGroupType = escapeHtml(groupType);
 
-                html += `<div class="bj-tournament-block" data-meta="${escapeHtml(metaKey)}" data-tournament-type="${safeGroupTypeHtml}">
+                html += `<div class="bj-tournament-block" data-meta="${escapeHtml(metaKey)}" data-tournament-type="${safeGroupType}">
                     <div class="bj-tournament-header">
                         <div class="bj-tournament-info">
                             <strong class="bj-tournament-name">${escapeHtml(tournLabel)}</strong>
                             <span class="bj-tournament-record">${tW}-${tL}-${tT} (${tWinRate}%)</span>
                         </div>
-                        <button type="button" class="bj-tournament-add-btn" onclick="continueJournalTournament('${safeTournKeyJs}','${safeMetaKeyJs}','${safeGroupTypeJs}')" title="${escapeHtml(battleJournalText('bj.addMatch', 'Add match'))}">+ Match</button>
-                        <button type="button" class="bj-tournament-edit-btn" onclick="openEditTournamentModal('${safeTournKeyJs}')" title="${escapeHtml(battleJournalText('bj.editTournament', 'Edit tournament'))}">Edit</button>
-                        <button type="button" class="bj-tournament-share-btn" onclick="shareTournamentSummary('${safeTournKeyJs}', false)" title="${escapeHtml(battleJournalText('bj.shareTournament', 'Share as image'))}">Share</button>
-                        <button type="button" class="bj-tournament-share-btn bj-tournament-share-details-btn" onclick="shareTournamentSummary('${safeTournKeyJs}', true)" title="${escapeHtml(battleJournalText('bj.shareTournamentDetails', 'Share with brick + notes'))}">Share+</button>
+                        <button type="button" class="bj-tournament-add-btn" onclick="continueJournalTournament('${safeTournKey}','${safeMetaKey}','${safeGroupType}')" title="${escapeHtml(battleJournalText('bj.addMatch', 'Add match'))}">+ Match</button>
+                        <button type="button" class="bj-tournament-edit-btn" onclick="openEditTournamentModal('${safeTournKey}')" title="${escapeHtml(battleJournalText('bj.editTournament', 'Edit tournament'))}">Edit</button>
+                        <button type="button" class="bj-tournament-share-btn" onclick="shareTournamentSummary('${safeTournKey}', false)" title="${escapeHtml(battleJournalText('bj.shareTournament', 'Share as image'))}">Share</button>
+                        <button type="button" class="bj-tournament-share-btn bj-tournament-share-details-btn" onclick="shareTournamentSummary('${safeTournKey}', true)" title="${escapeHtml(battleJournalText('bj.shareTournamentDetails', 'Share with brick + notes'))}">Share+</button>
                     </div>`;
 
                 entries.forEach(entry => {

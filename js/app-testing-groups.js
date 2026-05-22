@@ -1,4 +1,3 @@
-// @ts-check
 // ============================================================
 // Testing Groups — collaborative meta editing
 // ============================================================
@@ -106,7 +105,7 @@ window.TestingGroups = (function () {
   async function _loadBootstrap() {
     if (_bootstrapData) return _bootstrapData;
     try {
-      const resp = await fetch(dataUrl('data/testing_group_bootstrap.json'));
+      const resp = await fetch('data/testing_group_bootstrap.json?t=' + Date.now());
       if (!resp.ok) throw new Error('bootstrap fetch failed');
       _bootstrapData = await resp.json();
     } catch (err) {
@@ -597,6 +596,7 @@ window.TestingGroups = (function () {
         updatedAt: _fsNow(),
       });
       await _logActivity(_currentGroupId, 'deck_added', name, null, name);
+      await _refreshCurrentGroup();
     } catch (err) {
       console.error('[TestingGroups] addDeck failed', err);
       alert(t('tg.errSave'));
@@ -629,6 +629,7 @@ window.TestingGroups = (function () {
         updatedAt: _fsNow(),
       });
       await _logActivity(_currentGroupId, 'deck_removed', deckName, deckName, null);
+      await _refreshCurrentGroup();
     } catch (err) {
       console.error('[TestingGroups] removeDeck failed', err);
       alert(t('tg.errSave'));
@@ -662,6 +663,7 @@ window.TestingGroups = (function () {
         updatedAt: _fsNow(),
       });
       await _logActivity(_currentGroupId, 'member_added', clean, null, role);
+      await _refreshCurrentGroup();
     } catch (err) {
       console.error('[TestingGroups] addMember failed', err);
       alert(t('tg.errSave'));
@@ -680,6 +682,7 @@ window.TestingGroups = (function () {
         updatedAt: _fsNow(),
       });
       await _logActivity(_currentGroupId, 'role_changed', uid, null, newRole);
+      await _refreshCurrentGroup();
     } catch (err) {
       console.error('[TestingGroups] changeRole failed', err);
       alert(t('tg.errSave'));
@@ -704,6 +707,7 @@ window.TestingGroups = (function () {
         updatedAt: _fsNow(),
       });
       await _logActivity(_currentGroupId, 'member_removed', uid, null, null);
+      await _refreshCurrentGroup();
     } catch (err) {
       console.error('[TestingGroups] removeMember failed', err);
       alert(t('tg.errSave'));
@@ -786,7 +790,8 @@ window.TestingGroups = (function () {
         const data = groupSnap.data() || {};
         if ((data.memberUids || []).includes(u.uid)) {
           await loadMyGroups();
-          if (typeof openProfileSection === 'function') openProfileSection('testinggroups');
+          if (typeof switchTabAndUpdateMenu === 'function') switchTabAndUpdateMenu('profile');
+          if (typeof switchProfileTab === 'function') switchProfileTab('testinggroups');
           await openGroup(groupId);
           return;
         }
@@ -1012,11 +1017,10 @@ window.TestingGroups = (function () {
       console.warn('[TestingGroups] MetaCall preload failed, trying anyway', err);
     }
     const result = window.MetaCall._testingGroupLoad(g.data);
-    // Jump to the Meta Call profile sub-tab so the user sees the
-    // imported data immediately instead of having to navigate there
-    // manually.
-    if (typeof openProfileSection === 'function') {
-      openProfileSection('metacall');
+    // Jump to the MetaCall tab so the user sees the imported data
+    // immediately instead of having to navigate there manually.
+    if (typeof switchProfileTab === 'function') {
+      switchProfileTab('metacall');
     }
     const summary = (result && typeof result === 'object')
       ? t('tg.loadedIntoMetaCallSummary')
@@ -1074,7 +1078,7 @@ window.TestingGroups = (function () {
   }
 
   function renderAll() {
-    const container = document.getElementById('testing-groups');
+    const container = document.getElementById('profile-testinggroups');
     if (!container) return;
     if (!_currentUser()) {
       container.innerHTML = `<div class="tg-empty">${_esc(t('tg.signInRequired'))}</div>`;
@@ -1089,7 +1093,7 @@ window.TestingGroups = (function () {
   }
 
   function _renderGroupList() {
-    const container = document.getElementById('testing-groups');
+    const container = document.getElementById('profile-testinggroups');
     if (!container) return;
     const list = _myGroups.map(g => `
       <div class="tg-list-item">
@@ -1126,7 +1130,7 @@ window.TestingGroups = (function () {
   }
 
   function _uiCreate() {
-    const inp = dom.input('tg-new-name');
+    const inp = document.getElementById('tg-new-name');
     const name = inp ? inp.value : '';
     createGroup(name, '').then(id => {
       if (id) openGroup(id);
@@ -1134,7 +1138,7 @@ window.TestingGroups = (function () {
   }
 
   function _renderGroupDetail() {
-    const container = document.getElementById('testing-groups');
+    const container = document.getElementById('profile-testinggroups');
     const g = _currentGroup;
     if (!container || !g) return;
 
@@ -1367,9 +1371,8 @@ window.TestingGroups = (function () {
       const w = bodyTh.getBoundingClientRect().width;
       if (!w) return;
       table.querySelectorAll('tfoot th.tg-row-head').forEach(th => {
-        const el = /** @type {HTMLElement} */ (th);
-        el.style.minWidth = w + 'px';
-        el.style.width = w + 'px';
+        th.style.minWidth = w + 'px';
+        th.style.width = w + 'px';
       });
     };
     // Run now (after innerHTML assignment the DOM is laid out), then
@@ -1378,19 +1381,17 @@ window.TestingGroups = (function () {
     apply();
     requestAnimationFrame(apply);
     table.querySelectorAll('tbody img.tcg-pokemon-icon').forEach(img => {
-      const imgEl = /** @type {HTMLImageElement} */ (img);
-      if (imgEl.complete) return;
-      imgEl.addEventListener('load', apply, { once: true });
-      imgEl.addEventListener('error', apply, { once: true });
+      if (img.complete) return;
+      img.addEventListener('load', apply, { once: true });
+      img.addEventListener('error', apply, { once: true });
     });
     // One resize listener per session — subsequent renders use the same
     // listener since it always reads the CURRENT DOM state.
-    const fn = /** @type {any} */ (_alignFooterRowHeadToBody);
-    if (!fn._resizeBound) {
+    if (!_alignFooterRowHeadToBody._resizeBound) {
       window.addEventListener('resize', () => {
         if (document.querySelector('.tg-matchup-table')) apply();
       });
-      fn._resizeBound = true;
+      _alignFooterRowHeadToBody._resizeBound = true;
     }
   }
 
@@ -1487,7 +1488,7 @@ window.TestingGroups = (function () {
            <button class="tg-btn tg-btn-primary" onclick="TestingGroups._uiAddMember()">+ ${_esc(t('tg.addMember'))}</button>
            <datalist id="tg-member-suggestions">${datalistOpts}</datalist>
          </div>
-         <p class="tg-hint">${_esc(t('tg.addMemberHint'))}${suggestions.length ? ' ' + _esc(t('tg.addMemberAutocompleteHint')).replace('{n}', String(suggestions.length)) : ''}</p>`
+         <p class="tg-hint">${_esc(t('tg.addMemberHint'))}${suggestions.length ? ' ' + _esc(t('tg.addMemberAutocompleteHint')).replace('{n}', suggestions.length) : ''}</p>`
       : '';
 
     return `
@@ -1507,15 +1508,15 @@ window.TestingGroups = (function () {
   }
 
   function _uiAddDeck() {
-    const inp = dom.input('tg-new-deck');
+    const inp = document.getElementById('tg-new-deck');
     if (!inp) return;
     addDeck(inp.value);
     inp.value = '';
   }
 
   function _uiAddMember() {
-    const emailInp = dom.input('tg-new-member-email');
-    const roleSel  = dom.select('tg-new-member-role');
+    const emailInp = document.getElementById('tg-new-member-email');
+    const roleSel  = document.getElementById('tg-new-member-role');
     if (!emailInp) return;
     addMemberByEmail(emailInp.value, roleSel ? roleSel.value : 'editor');
     emailInp.value = '';

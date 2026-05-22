@@ -94,12 +94,12 @@
             // Deck format: "CardName (SET NUMBER)" with exact prints preserved
             const oldDeck = [];
             for (const [deckKey, count] of Object.entries(savedDeck.cards || {})) {
-                // Canonical key format: "CardName (SET NUMBER)" or bare "CardName".
-                const match = parseCardKey(deckKey);
+                // Key format: "CardName (SET NUMBER)" or just "CardName"
+                const match = deckKey.match(/^(.+?)\s+\(([A-Z0-9]+)\s+(\d+)\)$/);
                 if (match) {
-                    const cardName = match.name;
-                    const setCode = match.setCode;
-                    const setNumber = match.number;
+                    const cardName = match[1];
+                    const setCode = match[2];
+                    const setNumber = match[3];
                     oldDeck.push({
                         count: count,
                         name: cardName,
@@ -1140,10 +1140,10 @@
                 let setCode = '';
                 let setNumber = '';
 
-                const setMatch = parseCardKey(deckKey);
+                const setMatch = deckKey.match(/\(([A-Z0-9-]+)\s+([A-Z0-9]+)\)$/);
                 if (setMatch) {
-                    setCode = setMatch.setCode;
-                    setNumber = setMatch.number;
+                    setCode = setMatch[1];
+                    setNumber = setMatch[2];
                 }
 
                 // Fallback: look up from database if no set info in deckKey

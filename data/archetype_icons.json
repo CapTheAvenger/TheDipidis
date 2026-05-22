@@ -3,14 +3,12 @@
     "urlPrefix": "https://r2.limitlesstcg.net/pokemon/gen9/",
     "urlSuffix": ".png",
     "description": "Maps current-meta archetype names to the sequence of Pokémon species/form identifiers that identify them visually. The helper getArchetypeIconUrls() resolves each array entry into a Limitless R2 icon URL. Add new archetypes or fix guesses as they surface; broken URLs are handled gracefully by the img onerror fallback in the UI.",
-    "lastScrapedAt": "2026-05-22T04:16:51",
+    "lastScrapedAt": "2026-05-19T09:37:55",
     "lastScrapedCount": 128,
     "lastBackfilledAt": "2026-05-05T13:19:27",
     "lastBackfillCount": 342,
     "lastHarvestedFrom": "city_league_archetype_scraper",
-    "lastHarvestedAt": "2026-05-12T07:02:10",
-    "last_dedup": "2026-05-21",
-    "dedup_note": "Removed 50 orphan entries (pure ordering/Mega-prefix duplicates)"
+    "lastHarvestedAt": "2026-05-12T07:02:10"
   },
   "archetypes": {
     "Dragapult": [
@@ -27,6 +25,10 @@
     "Dragapult Froslass": [
       "dragapult",
       "froslass"
+    ],
+    "Lucario Hariyama": [
+      "lucario-mega",
+      "hariyama"
     ],
     "Alakazam Dudunsparce": [
       "alakazam",
@@ -68,6 +70,10 @@
     "Cynthia's Garchomp": [
       "garchomp"
     ],
+    "Okidogi Barbaracle": [
+      "okidogi",
+      "barbaracle"
+    ],
     "Raging Bolt Ogerpon": [
       "raging-bolt",
       "ogerpon"
@@ -107,6 +113,10 @@
     "Mega Lucario ex": [
       "lucario-mega"
     ],
+    "Flareon Noctowl": [
+      "flareon",
+      "noctowl"
+    ],
     "Raging Bolt Noctowl": [
       "raging-bolt",
       "noctowl"
@@ -128,6 +138,10 @@
       "jellicent",
       "dusknoir"
     ],
+    "Diancie Dusknoir": [
+      "diancie-mega",
+      "dusknoir"
+    ],
     "Hop's Trevenant": [
       "trevenant"
     ],
@@ -147,6 +161,10 @@
     ],
     "Mega Froslass ex": [
       "froslass-mega"
+    ],
+    "Lopunny Dudunsparce": [
+      "lopunny-mega",
+      "dudunsparce"
     ],
     "Toxtricity Box": [
       "toxtricity",
@@ -178,6 +196,10 @@
     "Zygarde Barbaracle": [
       "zygarde-mega",
       "barbaracle"
+    ],
+    "Sharpedo Toxtricity": [
+      "sharpedo-mega",
+      "toxtricity"
     ],
     "Mega Abomasnow": [
       "abomasnow-mega"
@@ -547,6 +569,10 @@
       "seaking",
       "thwackey"
     ],
+    "Starmie Dusknoir": [
+      "starmie-mega",
+      "dusknoir"
+    ],
     "Dragapult Dudunsparce": [
       "dragapult",
       "dudunsparce"
@@ -596,6 +622,10 @@
     "Arboliva Mega Kangaskhan": [
       "arboliva",
       "kangaskhan-mega"
+    ],
+    "Arboliva Ogerpon": [
+      "arboliva",
+      "ogerpon"
     ],
     "Archaludon Cinderace": [
       "archaludon",
@@ -652,9 +682,17 @@
       "blaziken",
       "delphox"
     ],
+    "Blaziken Dragapult": [
+      "blaziken",
+      "dragapult"
+    ],
     "Blaziken Latias": [
       "blaziken",
       "latias"
+    ],
+    "Blaziken Mega Dragonite": [
+      "blaziken",
+      "dragonite-mega"
     ],
     "Blaziken Mega Kangaskhan": [
       "blaziken",
@@ -720,6 +758,10 @@
       "chandelure",
       "crustle"
     ],
+    "Cinccino Metagross": [
+      "cinccino",
+      "metagross"
+    ],
     "Cinderace Mega Absol": [
       "cinderace",
       "absol-mega"
@@ -731,6 +773,10 @@
     "Clefairy Latias": [
       "clefairy",
       "latias"
+    ],
+    "Clefairy Mega Kangaskhan": [
+      "clefairy",
+      "kangaskhan-mega"
     ],
     "Clefairy Meowth": [
       "clefairy",
@@ -764,9 +810,17 @@
       "diggersby",
       "munkidori"
     ],
+    "Dipplin Rillaboom": [
+      "dipplin",
+      "rillaboom"
+    ],
     "Dipplin Thwackey": [
       "dipplin",
       "thwackey"
+    ],
+    "Dragapult Alakazam": [
+      "dragapult",
+      "alakazam"
     ],
     "Dragapult Azumarill": [
       "dragapult",
@@ -808,6 +862,10 @@
       "dragapult",
       "froslass-mega"
     ],
+    "Dragapult Mega Greninja": [
+      "dragapult",
+      "greninja-mega"
+    ],
     "Dragapult Mega Kangaskhan": [
       "dragapult",
       "kangaskhan-mega"
@@ -836,6 +894,10 @@
       "dragapult",
       "slowking"
     ],
+    "Dragapult Typhlosion": [
+      "dragapult",
+      "typhlosion"
+    ],
     "Dragapult Tyranitar": [
       "dragapult",
       "tyranitar"
@@ -856,9 +918,17 @@
       "dudunsparce",
       "froslass-mega"
     ],
+    "Dudunsparce Mega Greninja": [
+      "dudunsparce",
+      "greninja-mega"
+    ],
     "Dudunsparce Mega Lopunny": [
       "dudunsparce",
       "lopunny-mega"
+    ],
+    "Dudunsparce Mega Starmie": [
+      "dudunsparce",
+      "starmie-mega"
     ],
     "Dusknoir": [
       "dusknoir"
@@ -867,9 +937,17 @@
       "dusknoir",
       "clefairy"
     ],
+    "Dusknoir Jellicent": [
+      "dusknoir",
+      "jellicent"
+    ],
     "Dusknoir Mega Diancie": [
       "dusknoir",
       "diancie-mega"
+    ],
+    "Dusknoir Noctowl": [
+      "dusknoir",
+      "noctowl"
     ],
     "Espeon Ogerpon": [
       "espeon",
@@ -886,6 +964,10 @@
     "Flareon Leafeon": [
       "flareon",
       "leafeon"
+    ],
+    "Flareon Sylveon": [
+      "flareon",
+      "sylveon"
     ],
     "Flygon Dudunsparce": [
       "flygon",
@@ -1092,6 +1174,10 @@
       "diancie-mega",
       "clefairy"
     ],
+    "Mega Diancie Dusknoir": [
+      "diancie-mega",
+      "dusknoir"
+    ],
     "Mega Diancie Latias": [
       "diancie-mega",
       "latias"
@@ -1144,6 +1230,14 @@
       "froslass-mega",
       "cinderace"
     ],
+    "Mega Froslass Dragapult": [
+      "froslass-mega",
+      "dragapult"
+    ],
+    "Mega Froslass Dudunsparce": [
+      "froslass-mega",
+      "dudunsparce"
+    ],
     "Mega Froslass Dusknoir": [
       "froslass-mega",
       "dusknoir"
@@ -1151,6 +1245,14 @@
     "Mega Froslass Glalie": [
       "froslass-mega",
       "glalie"
+    ],
+    "Mega Froslass Grimmsnarl": [
+      "froslass-mega",
+      "grimmsnarl"
+    ],
+    "Mega Froslass Mega Starmie": [
+      "froslass-mega",
+      "starmie-mega"
     ],
     "Mega Froslass Munkidori": [
       "froslass-mega",
@@ -1246,6 +1348,10 @@
       "kangaskhan-mega",
       "clefairy"
     ],
+    "Mega Kangaskhan Crustle": [
+      "kangaskhan-mega",
+      "crustle"
+    ],
     "Mega Kangaskhan Fezandipiti": [
       "kangaskhan-mega",
       "fezandipiti"
@@ -1253,6 +1359,10 @@
     "Mega Kangaskhan Latias": [
       "kangaskhan-mega",
       "latias"
+    ],
+    "Mega Kangaskhan Mega Absol": [
+      "kangaskhan-mega",
+      "absol-mega"
     ],
     "Mega Kangaskhan Mega Audino": [
       "kangaskhan-mega",
@@ -1262,9 +1372,17 @@
       "kangaskhan-mega",
       "lopunny-mega"
     ],
+    "Mega Kangaskhan Meowth": [
+      "kangaskhan-mega",
+      "meowth"
+    ],
     "Mega Kangaskhan Noctowl": [
       "kangaskhan-mega",
       "noctowl"
+    ],
+    "Mega Kangaskhan Ogerpon": [
+      "kangaskhan-mega",
+      "ogerpon"
     ],
     "Mega Kangaskhan Ogerpon-Wellspring": [
       "kangaskhan-mega",
@@ -1273,6 +1391,14 @@
     "Mega Kangaskhan Raging-Bolt": [
       "kangaskhan-mega",
       "raging-bolt"
+    ],
+    "Mega Kangaskhan Slowking": [
+      "kangaskhan-mega",
+      "slowking"
+    ],
+    "Mega Lopunny Dudunsparce": [
+      "lopunny-mega",
+      "dudunsparce"
     ],
     "Mega Lucario Crustle": [
       "lucario-mega",
@@ -1346,6 +1472,10 @@
       "slowbro-mega",
       "diancie-mega"
     ],
+    "Mega Slowbro Slowking": [
+      "slowbro-mega",
+      "slowking"
+    ],
     "Mega Starmie Crobat": [
       "starmie-mega",
       "crobat"
@@ -1366,9 +1496,17 @@
       "starmie-mega",
       "froslass-mega"
     ],
+    "Mega Starmie Mega Greninja": [
+      "starmie-mega",
+      "greninja-mega"
+    ],
     "Mega Starmie Mega Lopunny": [
       "starmie-mega",
       "lopunny-mega"
+    ],
+    "Mega Venusaur Mega Meganium": [
+      "venusaur-mega",
+      "meganium-mega"
     ],
     "Mega Venusaur Ogerpon": [
       "venusaur-mega",
@@ -1382,6 +1520,10 @@
       "zygarde-mega",
       "audino-mega"
     ],
+    "Meowth Clefairy": [
+      "meowth",
+      "clefairy"
+    ],
     "Meowth Latias": [
       "meowth",
       "latias"
@@ -1389,6 +1531,10 @@
     "Meowth Mega Kangaskhan": [
       "meowth",
       "kangaskhan-mega"
+    ],
+    "Meowth Ogerpon": [
+      "meowth",
+      "ogerpon"
     ],
     "Meowth Ogerpon-Wellspring": [
       "meowth",
@@ -1453,6 +1599,10 @@
       "noctowl",
       "lopunny-mega"
     ],
+    "Noctowl Ogerpon": [
+      "noctowl",
+      "ogerpon"
+    ],
     "Noctowl Ogerpon-Wellspring": [
       "noctowl",
       "ogerpon-wellspring"
@@ -1465,6 +1615,14 @@
       "ogerpon",
       "chesnaught"
     ],
+    "Ogerpon Clefairy": [
+      "ogerpon",
+      "clefairy"
+    ],
+    "Ogerpon Hydrapple": [
+      "ogerpon",
+      "hydrapple"
+    ],
     "Ogerpon Latias": [
       "ogerpon",
       "latias"
@@ -1472,6 +1630,10 @@
     "Ogerpon Mega Kangaskhan": [
       "ogerpon",
       "kangaskhan-mega"
+    ],
+    "Ogerpon Mega Venusaur": [
+      "ogerpon",
+      "venusaur-mega"
     ],
     "Ogerpon Meowth": [
       "ogerpon",
@@ -1485,9 +1647,25 @@
       "ogerpon",
       "ogerpon-wellspring"
     ],
+    "Ogerpon Raging-Bolt": [
+      "ogerpon",
+      "raging-bolt"
+    ],
     "Ogerpon Vileplume": [
       "ogerpon",
       "vileplume"
+    ],
+    "Ogerpon Yanmega": [
+      "ogerpon",
+      "yanmega"
+    ],
+    "Ogerpon-Wellspring Ogerpon": [
+      "ogerpon-wellspring",
+      "ogerpon"
+    ],
+    "Ogerpon-Wellspring Pikachu": [
+      "ogerpon-wellspring",
+      "pikachu"
     ],
     "Okidogi Solrock": [
       "okidogi",
@@ -1560,6 +1738,10 @@
     "Solrock": [
       "solrock"
     ],
+    "Solrock Barbaracle": [
+      "solrock",
+      "barbaracle"
+    ],
     "Solrock Munkidori": [
       "solrock",
       "munkidori"
@@ -1579,6 +1761,10 @@
       "sylveon",
       "flareon"
     ],
+    "Thwackey Dipplin": [
+      "thwackey",
+      "dipplin"
+    ],
     "Thwackey Mega Starmie": [
       "thwackey",
       "starmie-mega"
@@ -1594,6 +1780,10 @@
     "Toxtricity Mega Absol": [
       "toxtricity",
       "absol-mega"
+    ],
+    "Toxtricity Mega Sharpedo": [
+      "toxtricity",
+      "sharpedo-mega"
     ],
     "Toxtricity Munkidori": [
       "toxtricity",
@@ -1648,6 +1838,10 @@
     "Typhlosion Mega Charizard-X": [
       "typhlosion",
       "charizard-x-mega"
+    ],
+    "Tyranitar Dragapult": [
+      "tyranitar",
+      "dragapult"
     ],
     "Ursaluna-Bloodmoon Solrock": [
       "ursaluna-bloodmoon",
@@ -1739,6 +1933,10 @@
       "alolan",
       "exeggutor"
     ],
+    "Mewtwo Spidops": [
+      "mewtwo",
+      "spidops"
+    ],
     "Zacian-Crowned Snorlax": [
       "zacian-crowned",
       "snorlax"
@@ -1774,34 +1972,6 @@
     "Dragapult Zoroark": [
       "dragapult",
       "zoroark"
-    ],
-    "Lucario Hariyama": [
-      "lucario-mega",
-      "hariyama"
-    ],
-    "Okidogi Barbaracle": [
-      "okidogi",
-      "barbaracle"
-    ],
-    "Lopunny Dudunsparce": [
-      "lopunny-mega",
-      "dudunsparce"
-    ],
-    "Starmie Dusknoir": [
-      "starmie-mega",
-      "dusknoir"
-    ],
-    "Flareon Noctowl": [
-      "flareon",
-      "noctowl"
-    ],
-    "Diancie Dusknoir": [
-      "diancie-mega",
-      "dusknoir"
-    ],
-    "Sharpedo Toxtricity": [
-      "sharpedo-mega",
-      "toxtricity"
     ],
     "Froslass Dudunsparce": [
       "froslass-mega",

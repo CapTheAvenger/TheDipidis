@@ -44,7 +44,7 @@ jobs:
 
     steps:
       - name: Checkout repo
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
+        uses: actions/checkout@v6
         with:
           fetch-depth: 1
 
@@ -52,7 +52,7 @@ jobs:
       # f-string syntax (nested f-strings sharing the outer quote
       # delimiter) which 3.11 rejects with "invalid decimal literal".
       - name: Set up Python
-        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6
+        uses: actions/setup-python@v6
         with:
           python-version: '3.12'
           cache: pip
@@ -169,22 +169,7 @@ jobs:
       # don't lose six successful scrapers because one had a network
       # hiccup. Each failure is surfaced as a workflow warning so the
       # Actions UI shows it clearly.
-      # Two-phase split (wave-0 HF-17, Prague-bug prevention).
-      #
-      # The previous shape ran every scraper under `set +e` and treated
-      # failures as warnings — by design, so a single Cloudflare 429 in
-      # limitless_online didn't lose six other successful scrapes. But
-      # core/prepare_card_data.py is NOT a scraper — it's the finalizer
-      # that builds the monolith CSVs the frontend ships. If it fails
-      # silently in the same loop, the commit-and-push that follows
-      # uploads stale data; that's exactly how the 2026-05-12 Prague
-      # row-loss happened.
-      #
-      # Phase A: every actual scraper, best-effort (set +e) as before.
-      # Phase B: prepare_card_data.py and threat-intel build, fail-hard
-      #          (set -e). If those break, the workflow aborts BEFORE
-      #          the version-bump + commit + push step.
-      - name: Run scrapers (best-effort)
+      - name: Run scrapers
         env:
           PYTHONPATH: ${{ github.workspace }}/backend/core
         working-directory: backend
@@ -202,9 +187,11 @@ jobs:
               "scrapers/labs_tournament_scraper.py" \
               "scrapers/online_tournament_scraper.py" \
               "scrapers/cardmarket_price_merger.py" \
+              "core/prepare_card_data.py" \
               "scrapers/archetype_icons_scraper.py" \
               "scrapers/pokemon_card_text_scraper.py" \
               "scrapers/pokemon_card_effects_scraper.py" \
+              "tools/build_threat_intel.py" \
           ; do
               echo "::group::$step"
               python "$step"
@@ -217,48 +204,8 @@ jobs:
               fi
               echo "::endgroup::"
           done
-          echo "── Summary (scrapers) ──"
+          echo "── Summary ──"
           printf '  %s\n' "${rc_summary[@]}"
-
-      - name: Finalize frontend data (fail-hard)
-        env:
-          PYTHONPATH: ${{ github.workspace }}/backend/core
-        working-directory: backend
-        run: |
-          # set -e here is the whole point: if prepare_card_data fails, the
-          # frontend chunks aren't rebuilt and the subsequent commit-and-push
-          # would ship stale or partial data. Aborting now is the safe move.
-          set -e
-          for step in \
-              "core/prepare_card_data.py" \
-              "tools/build_threat_intel.py" \
-          ; do
-              echo "::group::$step"
-              python "$step"
-              echo "::endgroup::"
-          done
-          echo "✓ Finalizer + threat-intel succeeded — safe to commit."
-
-      # ---------------------------------------------------------------- #
-      # R2: Build Parquet + Upload (skipped if secrets are not set)       #
-      # Requires: R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY,                 #
-      #           R2_ACCOUNT_ID, R2_BUCKET                                #
-      # ---------------------------------------------------------------- #
-      - name: Build Parquet + Upload to R2
-        if: >-
-          env.R2_ACCESS_KEY_ID != '' &&
-          env.R2_SECRET_ACCESS_KEY != '' &&
-          env.R2_ACCOUNT_ID != '' &&
-          env.R2_BUCKET != ''
-        env:
-          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
-          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
-          R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
-          R2_BUCKET: ${{ secrets.R2_BUCKET }}
-        run: |
-          pip install pyarrow boto3 --quiet
-          python scripts/build_parquet.py
-          python scripts/upload_to_r2.py
 
       - name: Bump version
         run: |
@@ -267,7 +214,7 @@ jobs:
 
       - name: Upload scraper logs on failure
         if: failure()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
+        uses: actions/upload-artifact@v4
         with:
           name: scraper-logs
           path: |

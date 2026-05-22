@@ -1,4 +1,3 @@
-// @ts-check
 /**
  * Inline Init - Extracted from index.html inline <script> blocks
  * to allow removing 'unsafe-inline' from Content-Security-Policy.
@@ -16,12 +15,7 @@ function toggleMenuCluster(clusterId) {
 }
 
 function syncMenuClustersForTab(tabId) {
-    // The "Meta & Tier Lists" cluster expands when any of its
-    // sub-items is active.
-    const metaTabs = new Set([
-        'city-league', 'city-league-analysis',
-        'current-meta', 'current-analysis', 'past-meta',
-    ]);
+    const metaTabs = new Set(['meta-analysis-hub', 'city-league', 'city-league-analysis', 'current-meta', 'current-analysis', 'past-meta']);
     const metaSubmenu = document.getElementById('menu-submenu-meta');
     const metaGroup = document.getElementById('menu-group-meta');
 
@@ -62,7 +56,11 @@ function switchTabAndUpdateMenu(tabId) {
         const text = labelEl ? labelEl.textContent.trim() : activeBtn.innerText.trim();
         if (badge) badge.innerText = text;
     }
-    if (badge) badge.style.display = '';
+    // Hide the section badge on the Meta & Deck Analysis Hub overview —
+    // the tile grid IS the navigation here, so a "CITY LEAGUE META" pill
+    // next to "Pokémon TCG Hub" misled users into thinking they were
+    // already inside that sub-tab.
+    if (badge) badge.style.display = tabId === 'meta-analysis-hub' ? 'none' : '';
 
     syncMenuClustersForTab(tabId);
 
@@ -91,8 +89,7 @@ document.addEventListener('click', function(e) {
     const menu    = document.getElementById('mainMenuDropdown');
     const trigger = document.getElementById('mainMenuTrigger');
     if (menu && trigger && menu.classList.contains('show')) {
-        const target = /** @type {Node | null} */ (e.target);
-        if (!menu.contains(target) && !trigger.contains(target)) {
+        if (!menu.contains(e.target) && !trigger.contains(e.target)) {
             menu.classList.remove('show');
             trigger.classList.remove('open');
         }
@@ -103,7 +100,21 @@ document.addEventListener('languageChanged', function() {
     const activeBtn = document.querySelector('.menu-item.active[data-tab-id]');
     const badge = document.getElementById('current-tab-title');
     const labelEl = activeBtn ? activeBtn.querySelector('.menu-item-label') : null;
-    if (activeBtn && badge) badge.innerText = labelEl ? (labelEl.textContent || '').trim() : /** @type {HTMLElement} */ (activeBtn).innerText.trim();
+    if (activeBtn && badge) badge.innerText = labelEl ? labelEl.textContent.trim() : activeBtn.innerText.trim();
+    // Keep the badge hidden whenever the hub overview is the active tab —
+    // even after a language switch reruns the badge update.
+    const hubActive = !!document.querySelector('#meta-analysis-hub.tab-content.active');
+    if (badge) badge.style.display = hubActive ? 'none' : '';
+});
+
+// Initial page-load state: the hub is the default landing tab via the
+// `active` class baked into index.html, so neither switchTab nor
+// switchTabAndUpdateMenu runs at boot — the badge would otherwise sit
+// at its HTML default "City League Meta" and mislead the user.
+document.addEventListener('DOMContentLoaded', function () {
+    const badge = document.getElementById('current-tab-title');
+    const hubActive = !!document.querySelector('#meta-analysis-hub.tab-content.active');
+    if (badge && hubActive) badge.style.display = 'none';
 });
 
 // ── Deep-linking via URL hash ────────────────────────────────
@@ -111,13 +122,6 @@ document.addEventListener('languageChanged', function() {
 // should land directly on that tab. Also supports friendlier aliases
 // in both languages so we can share URLs that read naturally.
 (function setupHashDeepLink() {
-    // Aliases that point to a legacy meta tab. These route directly to
-    // the tab IDs — no reparenting, no store pivot needed.
-    const META_ALIASES = {
-        'city-league': 'city-league',
-        'current-meta': 'current-meta',
-        'past-meta': 'past-meta',
-    };
     const HASH_ALIASES = {
         'tutorial':          'tutorial',
         'how-to-use':        'tutorial',
@@ -136,43 +140,14 @@ document.addEventListener('languageChanged', function() {
         'probability':       'calculator',
         'wahrscheinlichkeit':'calculator',
         'profile':           'profile',
-    };
-    // Profile sub-section aliases. Route to #profile + the named
-    // sub-tab via openProfileSection() rather than to a top-level
-    // tab — Battle Journal / Meta Call / Testing Groups are
-    // sub-sections of the Profile tab, not standalone tabs.
-    const PROFILE_SECTION_ALIASES = {
-        'metacall':       'metacall',
-        'meta-call':      'metacall',
-        'journal':        'journal',
-        'battle-journal': 'journal',
-        'testinggroups':  'testinggroups',
-        'testing-groups': 'testinggroups',
+        'metacall':          'profile',    // Meta Call lives inside Profile tab
+        'meta-call':         'profile',
+        'journal':           'profile',    // Battle Journal too
     };
 
     function applyHash() {
         const raw = (window.location.hash || '').replace(/^#/, '').toLowerCase().trim();
         if (!raw) return;
-
-        // Profile sub-section deep-links (#metacall, #journal,
-        // #testinggroups and variants).
-        if (PROFILE_SECTION_ALIASES[raw]) {
-            openProfileSection(PROFILE_SECTION_ALIASES[raw]);
-            return;
-        }
-
-        // Legacy meta-tab hash aliases (#current-meta, #city-league,
-        // #past-meta) route directly to the legacy tab.
-        if (META_ALIASES[raw]) {
-            const tabId = META_ALIASES[raw];
-            if (typeof switchTabAndUpdateMenu === 'function') {
-                switchTabAndUpdateMenu(tabId);
-            } else if (typeof switchTab === 'function') {
-                switchTab(tabId);
-            }
-            return;
-        }
-
         const tabId = HASH_ALIASES[raw];
         if (!tabId) return;
         if (typeof switchTabAndUpdateMenu === 'function') {

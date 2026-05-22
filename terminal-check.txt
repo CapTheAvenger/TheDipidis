@@ -1,0 +1,4 @@
+{
+  "error": "Error: page.waitForFunction: Target page, context or browser has been closed",
+  "stack": "page.waitForFunction: Target page, context or browser has been closed\n    at [eval]:1:505"
+}

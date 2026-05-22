@@ -1,0 +1,10 @@
+[PASS] Reload reset + M4 defaults :: {"autosaveDeck":null,"cityLeagueDeck":null,"currentMetaDeck":null,"pastMetaDeck":null,"cityLeagueFormat":null,"averageDisplayMode":null,"currentCityLeagueFormat":"M4","formatSelect":"M4","formatAnalysisSelect":null}
+[PASS] Card DB top actions + Limitless label :: {"topActionCount":3,"minusHasBtnRed":true,"minusLabel":"-","limitlessLabel":"Limitless"}
+[PASS] Meta Binder dropped modal opens with content :: {"modalHiddenClass":false,"count":"1","listItems":1}
+[PASS] Battle Journal datalists + BO3 details :: {"ownInputTag":"INPUT","oppInputTag":"INPUT","ownInputList":"battleJournalOwnDeckList","oppInputList":"battleJournalOpponentList","ownListTag":"DATALIST","oppListTag":"DATALIST","bo3Rows":3,"bo3Visible":true}
+[PASS] Tooltip scripts/UI removed :: {"tooltipScripts":[],"tooltipUiCount":0,"tooltipUiSample":[]}
+
+===== SUMMARY =====
+Total checks: 5
+Passed: 5
+Failed: 0

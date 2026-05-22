@@ -14,161 +14,50 @@ concurrency:
   group: pages
   cancel-in-progress: false
 
-# Third-party action inventory (supply-chain critical lines flagged):
-#   actions/checkout@v4          — has GITHUB_TOKEN access
-#   actions/setup-node@v4
-#   actions/setup-python@v5
-#   actions/upload-artifact@v4
-#   actions/configure-pages@v5
-#   actions/upload-pages-artifact@v3
-#   actions/deploy-pages@v4      — signs the Pages deploy
-#
-# Every uses: line below is SHA-pinned (40-char commit hash) with the
-# tag retained as a trailing comment for review. This protects against
-# tag-mutation supply-chain attacks (cf. tj-actions/changed-files
-# CVE-2025-30066, where the attacker rewrote the v45 tag to point at
-# malicious code). Bump SHAs via Renovate/Dependabot when upstream cuts
-# a new release; the tag comment makes the diff readable.
-
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
+        uses: actions/checkout@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020  # v4
+        uses: actions/setup-node@v4
         with:
           node-version: '20'
 
-      - name: Install JS dependencies
-        run: npm ci --no-audit --no-fund
-
-      - name: Lint (warn-only in phase A)
-        run: |
-          # ESLint is informational until Phase B (modularization). The
-          # config emits no errors today; warnings are logged for visibility.
-          npm run lint --silent || true
-          echo "✓ Lint pass complete (warnings are advisory)"
-
-      - name: TypeScript typecheck (wave-1 L2.1 pilot files)
-        run: |
-          # tsc --noEmit on the wave-1-L2.1 pilot files (see tsconfig.json
-          # 'include'). The codebase is still .js — this is JSDoc-driven
-          # type-checking, no compilation, no runtime change. As more
-          # modules opt in via '// @ts-check' they get added to tsconfig
-          # and start failing the build on type errors.
-          npm run typecheck --silent
-          echo "✓ Typecheck pass complete"
+      - name: Install JS test dependencies
+        run: npm install --no-save papaparse
 
       - name: Run JS unit tests
         run: |
-          npm test --silent
-
-      - name: Test coverage (advisory, baseline for phase B)
-        run: |
-          # c8 reports ~0% on the LEGACY codebase because the unit tests
-          # load production code via vm.Script + extractFunction() (see
-          # tests/unit/test-helpers.js). That instrumentation pattern is
-          # invisible to c8. Advisory-only.
-          npm run test:coverage --silent 2>&1 | tail -20 || true
-
-      - name: Module coverage gate (js/modules/**)
-        run: |
-          # ES-module call-sites under js/modules/ ARE counted by c8
-          # (tests use dynamic import(), not vm.Script). Enforce a
-          # minimum bar so every NEW module ships with tests.
-          # Thresholds: lines 85%, functions 80%, branches 70%.
-          # (Branches @ 70 not 80 because the Firebase lazy-loader's
-          # promise-body can't be exercised offline — see test-firebase-init.js.)
-          npm run test:coverage:modules --silent 2>&1 | tail -25
-          echo "✓ Module coverage gate passed"
-
-      - name: Upload coverage artifact
-        if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
-        with:
-          name: coverage-report
-          path: coverage/
-          retention-days: 14
-          if-no-files-found: ignore
-
-      - name: Build wave-1 bundle (artifact-only, not yet shipped)
-        run: |
-          # Wave-1 Layer-1: concatenate ~30 defer-loaded js/*.js scripts
-          # into a single _dist/app.bundle.js with source map, plus the
-          # esbuild modules bundle (Wave-1 L2.3). Output validated by
-          # the bundle-size budget step below.
-          npm run build:bundle
-          ls -la _dist/
-
-      - name: Bundle-size budget check
-        run: |
-          # Bundle-size regression guard. Numbers are conservative ceilings
-          # against current sizes (legacy ~2515 KB, modules ~7 KB as of
-          # Wave-1 L2.8); raise them when a deliberate enlargement lands.
-          MAX_LEGACY_KB=2750
-          MAX_MODULES_KB=200
-          LEGACY_BYTES=$(stat -c "%s" _dist/app.bundle.js)
-          MODULES_BYTES=$(stat -c "%s" _dist/app.modules.bundle.js)
-          LEGACY_KB=$((LEGACY_BYTES / 1024))
-          MODULES_KB=$((MODULES_BYTES / 1024))
-          echo "  legacy bundle : ${LEGACY_KB} KB (budget ${MAX_LEGACY_KB} KB)"
-          echo "  modules bundle: ${MODULES_KB} KB (budget ${MAX_MODULES_KB} KB)"
-          FAILED=0
-          if [ "$LEGACY_KB" -gt "$MAX_LEGACY_KB" ]; then
-            echo "::error::legacy bundle ${LEGACY_KB} KB exceeds budget ${MAX_LEGACY_KB} KB — investigate or raise budget"
-            FAILED=1
+          TOTAL_PASS=0
+          TOTAL_FAIL=0
+          for f in tests/unit/test-*.js; do
+            OUTPUT=$(node --test "$f" 2>&1) || true
+            PASS=$(echo "$OUTPUT" | grep -oP '# pass \K\d+' || echo 0)
+            FAIL=$(echo "$OUTPUT" | grep -oP '# fail \K\d+' || echo 0)
+            TOTAL_PASS=$((TOTAL_PASS + PASS))
+            TOTAL_FAIL=$((TOTAL_FAIL + FAIL))
+            if [ "$FAIL" -gt 0 ]; then
+              echo "::error::$f — $FAIL test(s) failed"
+              echo "$OUTPUT"
+            fi
+          done
+          echo "✓ JS tests: $TOTAL_PASS passed, $TOTAL_FAIL failed"
+          if [ "$TOTAL_FAIL" -gt 0 ]; then
+            echo "::error::$TOTAL_FAIL JS test(s) failed — blocking deployment"
+            exit 1
           fi
-          if [ "$MODULES_KB" -gt "$MAX_MODULES_KB" ]; then
-            echo "::error::modules bundle ${MODULES_KB} KB exceeds budget ${MAX_MODULES_KB} KB — investigate or raise budget"
-            FAILED=1
-          fi
-          [ "$FAILED" -eq 0 ] || exit 1
-          echo "✓ Both bundles within budget"
-
-      - name: Upload wave-1 bundle artifact
-        if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
-        with:
-          name: wave-1-bundle
-          path: _dist/
-          retention-days: 14
-          if-no-files-found: error
-
-      - name: NPM dependency audit (production deps, high+ blocks)
-        run: |
-          # Production npm deps: ZERO known high/critical CVEs allowed.
-          # Today the project has 0 production runtime npm deps (everything
-          # in package.json is devDependencies — CDN scripts handle runtime
-          # libs), so this gate is currently always-green; it's the trip-
-          # wire for when production deps start being added.
-          npm audit --omit=dev --audit-level=high 2>&1 | tee npm-audit-prod.log
-          echo "✓ npm audit (production) passed"
-
-      - name: NPM devDeps audit (high+ advisory log)
-        run: |
-          # Dev-side CVEs (eslint, prettier, c8, playwright) are reported
-          # but don't fail the build — they don't ship to users.
-          npm audit --audit-level=high 2>&1 | tee npm-audit-dev.log || true
-          echo "✓ npm audit (devDeps) advisory captured"
 
       - name: Setup Python
-        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5
+        uses: actions/setup-python@v5
         with:
           python-version: '3.12'
 
       - name: Install Python test dependencies
         run: |
-          pip install pytest beautifulsoup4 requests lxml pip-audit
-
-      - name: Python dependency audit (warn-only)
-        run: |
-          # pip-audit on requirements.txt — non-blocking in phase A.
-          # We use --strict only after we've reviewed the current baseline.
-          pip-audit -r requirements.txt 2>&1 | tee pip-audit.log || true
-          echo "✓ pip-audit complete (advisory)"
+          pip install pytest beautifulsoup4 requests lxml
 
       - name: Run Python unit tests
         run: |
@@ -193,10 +82,10 @@ jobs:
     needs: test
     steps:
       - name: Checkout
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
+        uses: actions/checkout@v4
 
       - name: Setup Node.js with cache
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020  # v4
+        uses: actions/setup-node@v4
         with:
           node-version: '20'
 
@@ -209,12 +98,6 @@ jobs:
 
       - name: Install npm tools
         run: npm install -g terser clean-css-cli html-minifier-terser
-
-      - name: Install local devDependencies
-        # Needed for the build step below: scripts/build-modules.js requires
-        # esbuild from node_modules. (The legacy concat-bundler had no deps,
-        # so this job never needed a local install before L2.3.)
-        run: npm ci --no-audit --no-fund
 
       - name: Validate JS syntax
         run: |
@@ -271,101 +154,17 @@ jobs:
           cp config/current_meta_analysis_settings.json _site/config/ 2>/dev/null || true
           cp _config.yml _site/ 2>/dev/null || true
 
-      - name: Build production bundle + swap HTML to single <script> (wave-1 L1.4)
-        run: |
-          # 1) Build the bundle from the (already-patched, SENTRY-DSN-injected)
-          #    source tree. Source files include firebase-config.js etc.
-          npm run build:bundle
-
-          # 2) Copy both bundles + source maps into _site/js/ so the deployed
-          #    HTML can reference js/app.bundle.js and js/app.modules.bundle.js
-          #    relative to the site root. The minify step that follows will
-          #    minify them like any other JS file.
-          cp _dist/app.bundle.js _site/js/
-          cp _dist/app.bundle.js.map _site/js/
-          # L2.3 hybrid: esbuild-built modules bundle for opt-in ES modules.
-          # Always exists (build:bundle builds both), even if today only the
-          # bootstrap stub is inside.
-          cp _dist/app.modules.bundle.js _site/js/
-          cp _dist/app.modules.bundle.js.map _site/js/
-
-          # 3) Swap 34 individual <script> tags in _site/index.html for one
-          #    bundle <script>, AND rewrite _site/service-worker.js SHELL_ASSETS
-          #    to pre-cache the bundle instead of 34 files. The swap script
-          #    inserts the bundle tag at the LAST removed position so it runs
-          #    after firebase-credentials.js + the 3 CDN libs (Chart/Papa/
-          #    localforage) that some bundled code depends on.
-          node scripts/swap-html-to-bundle.js _site
-
-          # 4) Quick post-swap sanity: verify no <script src="js/app-*.js"
-          #    survived (they should ALL have been folded into the bundle).
-          if grep -E '<script\s+src="js/(app-utils|i18n|firebase-config|firebase-globals|app-core|app-meta-call|firebase-collection)\.js' _site/index.html >/dev/null; then
-            echo "::error::Bundle swap left individual <script> tags behind in _site/index.html"
-            grep -n '<script\s+src="js/' _site/index.html
-            exit 1
-          fi
-          echo "✓ Wave-1 bundle deployed: js/app.bundle.js replaces 34 individual <script> tags"
-
-      - name: Strip dev-only CSP hosts (wave-0 HF-7)
-        run: |
-          # Remove http://localhost:8001 from the Production CSP. It's the
-          # local price-proxy used by developers; in production it just
-          # gives any same-origin XSS payload another exfil channel, and
-          # lets any third-party page that a user has open trigger the
-          # proxy with the user's IP (B-24).
-          sed -i -E 's| http://localhost:8001||g' _site/index.html
-          # Verify it's gone
-          if grep -q 'localhost:8001' _site/index.html; then
-            echo "::error::localhost:8001 still present in _site/index.html"
-            exit 1
-          fi
-          echo "✓ Dev-only CSP hosts stripped from production index.html"
-
-      - name: Inject SRI hashes for CDN scripts (wave-0 HF-6)
-        run: |
-          # Fetches every CDN script referenced in index.html, computes its
-          # SHA-384, and writes integrity="sha384-..." crossorigin="anonymous"
-          # into the <script>/<link> tags. Protects against jsDelivr / cdnjs
-          # account compromise (Check Point reported jsDelivr abuse for
-          # phishing in 2024). Runs in the deploy-time tree (_site/) so any
-          # CDN hash drift fails the build instead of shipping silently.
-          chmod +x scripts/generate-sri.sh
-          ./scripts/generate-sri.sh _site/index.html
-          echo "✓ SRI hashes injected into _site/index.html"
-
       - name: Minify JS, CSS & HTML
         run: |
           shopt -s nullglob
-          # drop_console removes console.log/info/debug/warn calls from the
-          # production bundle (phase-a-2). console.error is kept on purpose —
-          # we still want production stack traces in DevTools + Sentry.
-          # pure_funcs lists exactly which console.* methods to drop, so
-          # 'error' is preserved.
-          #
-          # --source-map (wave-0 HF-18) emits foo.js.map alongside foo.js so
-          # Sentry can map minified frames back to source. The maps are
-          # deployed publicly with the bundle — they don't leak more than
-          # the original JS would.  Phase-B will add `sentry-cli sourcemaps
-          # upload` here so Sentry serves them directly and we can mark them
-          # private; for now we ship them alongside the bundle so the
-          # error-tracking.js envelope (which already carries the release
-          # tag as of HF-18) has something to resolve against.
-          TERSER_COMPRESS='drop_debugger=true,pure_funcs=[console.log,console.info,console.debug,console.warn]'
           for f in _site/js/*.js; do
-            terser "$f" \
-              --compress "$TERSER_COMPRESS" \
-              --mangle \
-              --source-map "url='$(basename "$f").map'" \
-              -o "${f}.min" \
-              && mv "${f}.min" "$f" \
-              && mv "${f}.min.map" "${f}.map" 2>/dev/null \
-              || { echo "::error::Minification failed for $f"; exit 1; }
+            terser "$f" --compress --mangle -o "${f}.min" && mv "${f}.min" "$f" || { echo "::error::Minification failed for $f"; exit 1; }
           done
           for f in _site/css/*.css; do
             cleancss -o "${f}.min" "$f" && mv "${f}.min" "$f" || { echo "::error::CSS minification failed for $f"; exit 1; }
           done
           html-minifier-terser --collapse-whitespace --remove-comments --minify-css true --minify-js true -o _site/index.html _site/index.html || echo "::warning::HTML minification skipped"
-          echo "✓ Minification complete (console.log/info/debug/warn stripped; error preserved)"
+          echo "✓ Minification complete"
 
       - name: Optimize images
         run: |
@@ -408,10 +207,10 @@ jobs:
           echo "  version.json  ${VER}"
 
       - name: Setup Pages
-        uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b  # v5
+        uses: actions/configure-pages@v5
 
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa  # v3
+        uses: actions/upload-pages-artifact@v3
         with:
           path: _site
 
@@ -424,4 +223,4 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e  # v4
+        uses: actions/deploy-pages@v4

@@ -1,0 +1,20 @@
+﻿Soft-archive run: 2026-03-31T21:26:50
+
+Moved files:
+W1|data/city_league_analysis_scraped.json
+W1|data/city_league_archetypes_comparison.html
+W1|data/current_meta_scraped_tournaments.json
+W1|data/limitless_online_decks.html
+W1|data/limitless_online_decks_comparison_local.html
+W1|data/tournament_jh_scraped.json
+W2|data/all_cards_database.csv
+W2|data/all_cards_database.json
+W2|data/city_league_archetypes_deck_stats.csv
+W2|data/formats_catalog.json
+W2|data/japanese_cards_database.csv
+W2|data/japanese_cards_database.json
+W2|data/price_data.csv
+
+Restore example (PowerShell):
+Move-Item data/_archive/soft-delete-2026-03-31/wave-1-low-risk/* data/
+Move-Item data/_archive/soft-delete-2026-03-31/wave-2-higher-risk/* data/

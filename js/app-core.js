@@ -1157,6 +1157,18 @@ const BASE_PATH = './data/';
                     e.preventDefault();
                 }
             }, { passive: false });
+
+            // Trigger lazy-loading when the user switches segment in the
+            // consolidated meta-view tab (segmented control → setFormat).
+            if (window.metaViewStore) {
+                window.metaViewStore.subscribe(function() {
+                    const _s = window.metaViewStore.get();
+                    if (_s.view !== 'list') return;
+                    if (_s.activeFormat === 'current' && !window.currentMetaLoaded) loadCurrentMeta();
+                    else if (_s.activeFormat === 'city-league' && !window.cityLeagueLoaded) loadCityLeagueData();
+                    else if (_s.activeFormat === 'past' && !window.pastMetaLoaded) loadPastMeta();
+                });
+            }
         });
         
         // Tab switching
@@ -1173,6 +1185,15 @@ const BASE_PATH = './data/';
 
                 // Load data for the tab
                 switch(tabName) {
+                    case 'meta-view': {
+                        // Consolidated meta tab: delegate to whichever format is active.
+                        const _s = window.metaViewStore ? window.metaViewStore.get() : null;
+                        const _fmt = _s ? _s.activeFormat : 'current';
+                        if (_fmt === 'current' && !window.currentMetaLoaded) loadCurrentMeta();
+                        else if (_fmt === 'city-league' && !window.cityLeagueLoaded) loadCityLeagueData();
+                        else if (_fmt === 'past' && !window.pastMetaLoaded) loadPastMeta();
+                        break;
+                    }
                     case 'city-league':
                         if (!window.cityLeagueLoaded) loadCityLeagueData();
                         break;

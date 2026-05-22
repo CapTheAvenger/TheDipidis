@@ -28,6 +28,8 @@ def print_menu() -> None:
     print("  [6]  Limitless Online Scraper (Trends)")
     print("  [7]  City League Analysis (Deep Dive JP)")
     print("  [8]  City League Archetypes (Trends JP)")
+    print("  [7p] City League Analysis PAST (rotated-out meta)")
+    print("  [8p] City League Archetypes PAST (rotated-out meta)")
     print("  [9]  Historical Meta Scraper (JH)")
     print("  [10] Labs Major Tournament Scraper")
     print("  [13] Online Tournament Top-8 Scraper (Predictor 2.0)")
@@ -55,6 +57,8 @@ SCRIPTS = {
     "6": os.path.join("scrapers", "limitless_online_scraper.py"),
     "7": os.path.join("scrapers", "city_league_analysis_scraper.py"),
     "8": os.path.join("scrapers", "city_league_archetype_scraper.py"),
+    "7p": os.path.join("scrapers", "city_league_past_analysis_scraper.py"),
+    "8p": os.path.join("scrapers", "city_league_past_archetype_scraper.py"),
     "9": os.path.join("scrapers", "tournament_scraper_JH.py"),
     "10": os.path.join("scrapers", "labs_tournament_scraper.py"),
     "11": os.path.join("core", "prepare_card_data.py"),
@@ -79,6 +83,8 @@ TASK_NAMES = {
     "6": "Limitless Online Scraper",
     "7": "City League Analysis",
     "8": "City League Archetypes",
+    "7p": "City League Analysis PAST (rotated-out meta)",
+    "8p": "City League Archetypes PAST (rotated-out meta)",
     "9": "Historical Meta Scraper",
     "10": "Labs Major Tournament Scraper",
     "11": "Prepare Frontend Data",
@@ -98,12 +104,12 @@ BATCH_BASE = ["1", "2", "3", "4", "14", "11"]
 # (single crawl, dual output), so they no longer need a dedicated
 # script.  16 (effects) is heavy (~20 k card pages) and only needs to
 # re-run on rotation — kept out of META, only in FULL.
-BATCH_META = ["5", "6", "7", "8", "9", "10", "13", "14", "17", "11", "12"]
+BATCH_META = ["5", "6", "7", "8", "7p", "8p", "9", "10", "13", "14", "17", "11", "12"]
 # 16 / 17 included so local FULL refreshes the same intel files the
 # CI weekly-update produces.  Order matters: 16 (effects) must run
 # BEFORE 17 (threat-intel reads pokemon_card_effects.json), and 11
 # must come last so prepare_card_data picks up everything written above.
-BATCH_FULL = ["1", "2", "15", "3", "4", "5", "6", "7", "8", "9", "10", "13", "14", "16", "17", "11", "12"]
+BATCH_FULL = ["1", "2", "15", "3", "4", "5", "6", "7", "8", "7p", "8p", "9", "10", "13", "14", "16", "17", "11", "12"]
 
 def git_commit_push(description: str) -> None:
     """Bump version, stage all changes, commit, and push to origin main."""

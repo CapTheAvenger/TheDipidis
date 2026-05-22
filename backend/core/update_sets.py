@@ -633,11 +633,83 @@ def apply_format_window_to_scraper_settings(format_window_path: str,
     changes: List[str] = []
 
     cla = settings.setdefault('city_league_analysis', {}).setdefault('sources', {}).setdefault('city_league', {})
+    cla_arch = settings.setdefault('city_league_archetype', {})
+
+    # ── Rotation snapshot ───────────────────────────────────────────
+    # If the existing start_date differs from the new jp_de, the JP
+    # set just rotated. Before we overwrite the start_date below,
+    # snapshot the now-old meta window into
+    #   city_league_analysis_past  +  city_league_archetype_past
+    # so the past-scrapers pick up that window and the user no longer
+    # has to copy the file to *_M3.csv by hand. Additional tournament
+    # IDs (Champions-League / special-event entries that won't show
+    # up on the next meta's listing) move from current to past in the
+    # same step. Idempotent — same-day re-runs find start_dates
+    # already in sync and skip the snapshot block entirely.
+    old_cla_start = cla.get('start_date')
+    old_arch_start = cla_arch.get('start_date')
+    rotation_detected = (
+        bool(old_cla_start) and old_cla_start != jp_de
+    ) or (
+        bool(old_arch_start) and old_arch_start != jp_de
+    )
+    past_end_de = _format_de_date(_add_days(jp_release, -1))
+
+    if rotation_detected and past_end_de:
+        # analysis-past snapshot
+        cla_past = settings.setdefault('city_league_analysis_past', {}).setdefault('sources', {}).setdefault('city_league', {})
+        cla_past['enabled'] = True
+        cla_past['start_date'] = old_cla_start or old_arch_start or ''
+        cla_past['end_date'] = past_end_de
+        cla_past['max_decklists_per_league'] = cla.get('max_decklists_per_league', 50)
+        cla_past['additional_tournament_ids'] = list(cla.get('additional_tournament_ids') or [])
+        cla_past_root = settings['city_league_analysis_past']
+        cla_past_root.setdefault('output_file', 'city_league_analysis_past.csv')
+        cla_past_root.setdefault('delay_between_requests', 1.5)
+        # Past meta is a frozen window — overwrite, don't append, so a
+        # mid-window scraper re-run doesn't accumulate stale duplicates.
+        cla_past_root['append_mode'] = False
+        cla_past_root.setdefault('_comment', 'Auto-populated by update_sets.apply_format_window_to_scraper_settings on JP set rotation. Single output file overwritten on each rotation.')
+        changes.append(
+            f"city_league_analysis_past: rotation snapshot start={cla_past['start_date']!r} "
+            f"end={past_end_de!r} ids={cla_past['additional_tournament_ids']}"
+        )
+
+        # archetype-past snapshot
+        arch_past = settings.setdefault('city_league_archetype_past', {})
+        arch_past['start_date'] = old_arch_start or old_cla_start or ''
+        arch_past['end_date'] = past_end_de
+        arch_past['delay_between_requests'] = cla_arch.get('delay_between_requests', 1.5)
+        arch_past.setdefault('output_file', 'city_league_archetypes_past.csv')
+        arch_past.setdefault('region', 'jp')
+        arch_past['min_tournament_size'] = cla_arch.get('min_tournament_size', 1)
+        arch_past['additional_tournament_ids'] = list(cla_arch.get('additional_tournament_ids') or [])
+        arch_past.setdefault('_comment', 'Auto-populated by update_sets.apply_format_window_to_scraper_settings on JP set rotation.')
+        changes.append(
+            f"city_league_archetype_past: rotation snapshot start={arch_past['start_date']!r} "
+            f"end={past_end_de!r} ids={arch_past['additional_tournament_ids']}"
+        )
+
+        # Clear current's tournament-IDs — they belong to the just-
+        # snapshotted rotated-out meta now.
+        if cla.get('additional_tournament_ids'):
+            changes.append(
+                f"city_league_analysis.sources.city_league.additional_tournament_ids "
+                f"{cla['additional_tournament_ids']} → [] (moved to past)"
+            )
+            cla['additional_tournament_ids'] = []
+        if cla_arch.get('additional_tournament_ids'):
+            changes.append(
+                f"city_league_archetype.additional_tournament_ids "
+                f"{cla_arch['additional_tournament_ids']} → [] (moved to past)"
+            )
+            cla_arch['additional_tournament_ids'] = []
+
+    # ── Current-meta start-date overwrite (existing behaviour) ───────
     if cla.get('start_date') != jp_de:
         changes.append(f"city_league_analysis.sources.city_league.start_date {cla.get('start_date')!r} → {jp_de!r}")
         cla['start_date'] = jp_de
 
-    cla_arch = settings.setdefault('city_league_archetype', {})
     if cla_arch.get('start_date') != jp_de:
         changes.append(f"city_league_archetype.start_date {cla_arch.get('start_date')!r} → {jp_de!r}")
         cla_arch['start_date'] = jp_de

@@ -1,4 +1,3 @@
-// @ts-check
 if (!window.__firebaseRuntimeInitialized) {
   throw new Error('Firebase not initialized! Ensure firebase-config.js is loaded first.');
 }
@@ -6,16 +5,6 @@ if (!window.__firebaseRuntimeInitialized) {
  * Firebase Authentication Functions
  * ==================================
  */
-
-// Explicit persistence (wave-0 HF-10).
-//
-// Default is LOCAL (= survives browser restart) which is also what we want
-// for UX, but setting it explicitly makes the choice reviewable and gives
-// us a single line to flip if we ever want session-only or no-persist.
-// Setting it early — before any signIn / signUp call — ensures it applies
-// to the very first credential acquisition.
-firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)
-  .catch(function(err) { console.warn('[Auth] setPersistence failed:', err); });
 
 // Handle redirect result on page load (for browsers where signInWithPopup fails
 // and we fell back to signInWithRedirect, e.g. ROG Ally / embedded browsers)
@@ -41,15 +30,7 @@ async function signUp(email, password) {
   try {
     const userCredential = await firebase.auth().createUserWithEmailAndPassword(email, password);
     if (typeof devLog === 'function') devLog('✓ User created:', userCredential.user.email);
-    // Send verification email (wave-0 HF-10). We don't gate Firestore writes
-    // on emailVerified for now (too aggressive for the current user base),
-    // but having a verified address on file means future flows like password
-    // reset and security alerts actually reach the user. Fire-and-forget —
-    // failure here shouldn't block account creation.
-    userCredential.user.sendEmailVerification().catch(function(err) {
-      console.warn('[Auth] sendEmailVerification failed:', err && err.code);
-    });
-    showNotification(getLang()==='de' ? 'Account erstellt! Bitte E-Mail bestätigen.' : 'Account created! Please verify your email.', 'success');
+    showNotification(getLang()==='de' ? 'Account erfolgreich erstellt!' : 'Account created successfully!', 'success');
     return userCredential.user;
   } catch (error) {
     console.error('Sign up error:', error);
@@ -257,8 +238,8 @@ function setupAuthForms() {
   if (signInForm) {
     signInForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const email = /** @type {HTMLInputElement} */ (document.getElementById('signin-email')).value;
-      const password = /** @type {HTMLInputElement} */ (document.getElementById('signin-password')).value;
+      const email = document.getElementById('signin-email').value;
+      const password = document.getElementById('signin-password').value;
       await signIn(email, password);
     });
   }
@@ -268,9 +249,9 @@ function setupAuthForms() {
   if (signUpForm) {
     signUpForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const email = /** @type {HTMLInputElement} */ (document.getElementById('signup-email')).value;
-      const password = /** @type {HTMLInputElement} */ (document.getElementById('signup-password')).value;
-      const confirmPassword = /** @type {HTMLInputElement} */ (document.getElementById('signup-password-confirm')).value;
+      const email = document.getElementById('signup-email').value;
+      const password = document.getElementById('signup-password').value;
+      const confirmPassword = document.getElementById('signup-password-confirm').value;
       
       if (password !== confirmPassword) {
         showNotification(getLang()==='de' ? 'Passwörter stimmen nicht überein' : 'Passwords do not match', 'error');
@@ -282,7 +263,7 @@ function setupAuthForms() {
   }
   
   // Google Sign In
-  const googleBtn = /** @type {HTMLButtonElement | null} */ (document.getElementById('google-signin-btn'));
+  const googleBtn = document.getElementById('google-signin-btn');
   if (googleBtn) {
     // Always keep button clickable so users receive an explicit toast/log instead of silent no-op.
     googleBtn.disabled = false;

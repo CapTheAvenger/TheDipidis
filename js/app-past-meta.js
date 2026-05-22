@@ -1,4 +1,3 @@
-// @ts-check
 // app-past-meta.js — extracted from app.js
 // Part of Hausi's Pokemon TCG Analysis
 
@@ -243,7 +242,8 @@
             // Load dynamic set order map for proper meta sorting (newest -> oldest)
             let pastMetaSetOrderMap = {};
             try {
-                const setOrderResponse = await fetch(dataUrl('./data/sets.json'));
+                const ts = Date.now();
+                const setOrderResponse = await fetch(`./data/sets.json?t=${ts}`);
                 if (setOrderResponse.ok) {
                     const json = await setOrderResponse.json();
                     if (json && typeof json === 'object') {
@@ -260,14 +260,14 @@
             // Phase 2: Load manifest for lazy per-format chunk loading
             let pastMetaManifest = null;
             try {
-                const manifestResp = await fetch(dataUrl(BASE_PATH + 'tournament_cards_manifest.json'));
+                const manifestResp = await fetch(BASE_PATH + 'tournament_cards_manifest.json?t=' + Date.now());
                 if (manifestResp.ok) pastMetaManifest = await manifestResp.json();
             } catch (e) { /* ignore */ }
             window._pastMetaManifest = pastMetaManifest;
             window._pastMetaLoadedChunks = new Set();
 
             // Populate Format Filter from manifest meta_keys (no full data load yet)
-            const formatSelect = /** @type {HTMLSelectElement | null} */ (document.getElementById('pastMetaFormatFilter'));
+            const formatSelect = document.getElementById('pastMetaFormatFilter');
             resetSelectWithPlaceholder(formatSelect, '-- All Formats --', 'all');
             let defaultFormat = 'all';
 
@@ -336,7 +336,7 @@
             }
             
             // Populate Tournament Filter (will be updated dynamically)
-            const tournamentSelect = /** @type {HTMLSelectElement | null} */ (document.getElementById('pastMetaTournamentFilter'));
+            const tournamentSelect = document.getElementById('pastMetaTournamentFilter');
             
             // Setup event listeners - Format filter triggers lazy chunk load + update
             formatSelect.addEventListener('change', async () => {
@@ -569,8 +569,8 @@
         }
         
         function updatePastMetaTournamentFilter() {
-            const formatFilter = (dom.select('pastMetaFormatFilter')?.value || '');
-            const tournamentSelect = /** @type {HTMLSelectElement | null} */ (document.getElementById('pastMetaTournamentFilter'));
+            const formatFilter = document.getElementById('pastMetaFormatFilter').value;
+            const tournamentSelect = document.getElementById('pastMetaTournamentFilter');
             const previousSelection = tournamentSelect ? tournamentSelect.value : 'all';
             
             // Filter decks by selected format to get relevant tournaments
@@ -613,9 +613,9 @@
         }
         
         function updatePastMetaDeckList() {
-            const formatFilter = (dom.select('pastMetaFormatFilter')?.value || '');
-            const tournamentFilter = (dom.select('pastMetaTournamentFilter')?.value || '');
-            const deckSelect = /** @type {HTMLSelectElement | null} */ (document.getElementById('pastMetaDeckSelect'));
+            const formatFilter = document.getElementById('pastMetaFormatFilter').value;
+            const tournamentFilter = document.getElementById('pastMetaTournamentFilter').value;
+            const deckSelect = document.getElementById('pastMetaDeckSelect');
             const previousSelection = deckSelect ? deckSelect.value : '';
             
             // Filter decks
@@ -686,7 +686,7 @@
         }
         
         function onPastMetaDeckSelect() {
-            const selectedArchetype = (dom.select('pastMetaDeckSelect')?.value || '');
+            const selectedArchetype = document.getElementById('pastMetaDeckSelect').value;
             
             if (!selectedArchetype) {
                 // Hide stats and cards
@@ -709,8 +709,8 @@
         async function _loadPastMetaDeckCards(selectedArchetype) {
           try {
             
-            const formatFilter = (dom.select('pastMetaFormatFilter')?.value || '');
-            const tournamentFilter = (dom.select('pastMetaTournamentFilter')?.value || '');
+            const formatFilter = document.getElementById('pastMetaFormatFilter').value;
+            const tournamentFilter = document.getElementById('pastMetaTournamentFilter').value;
             
             // Find all decks with matching archetype (respecting current filters)
             const matchingDecks = pastMetaDecks.filter(deck => {
@@ -827,7 +827,7 @@
                 return;
             }
             
-            const filterValue = (dom.select('pastMetaFilterSelect')?.value || '');
+            const filterValue = document.getElementById('pastMetaFilterSelect').value;
 
             // Apply share-threshold where share data exists, and include top Ace Specs by filter level.
             pastMetaFilteredCards = applyShareFilterWithAceSpecBoost(pastMetaCurrentCards, filterValue);
@@ -842,7 +842,7 @@
                 resetDeckOverviewCounts('pastMetaCardCount', 'pastMetaCardCountSummary', '0 Cards', '/ 0 Total');
                 const gridContainer = document.getElementById('pastMetaDeckGrid');
                 if (gridContainer) {
-                    const selectedArchetype = String(dom.select('pastMetaDeckSelect')?.value || '').trim();
+                    const selectedArchetype = String(document.getElementById('pastMetaDeckSelect')?.value || '').trim();
                     if (!selectedArchetype) {
                         renderNoDeckSelectedState('pastMetaDeckGrid', 'Bitte waehle ein Deck aus dem Dropdown, um die Karten zu laden');
                     } else {
@@ -852,7 +852,7 @@
                 return;
             }
             
-            const searchTerm = (dom.input('pastMetaOverviewSearch')?.value || '').toLowerCase();
+            const searchTerm = document.getElementById('pastMetaOverviewSearch').value.toLowerCase();
             
             // Apply search filter
             let cardsToShow = pastMetaFilteredCards.filter(card => {
@@ -1070,10 +1070,10 @@
                     if (Object.keys(currentDeck).length > 0 && setCode && setNumber) {
                         // Match by set code + set number
                         for (const deckKey in currentDeck) {
-                            const match = parseCardKey(deckKey);
+                            const match = deckKey.match(/\(([A-Z0-9]+)\s+([A-Z0-9]+)\)$/);
                             if (match) {
-                                const deckSetCode = match.setCode;
-                                const deckSetNumber = match.number;
+                                const deckSetCode = match[1];
+                                const deckSetNumber = match[2];
                                 
                                 if (deckSetCode === setCode && deckSetNumber === setNumber) {
                                     deckCount = currentDeck[deckKey] || 0;
@@ -1186,7 +1186,7 @@
         }
         
         function filterPastMetaOverviewCards() {
-            const searchInput = /** @type {HTMLInputElement | null} */ (document.getElementById('pastMetaOverviewSearch'));
+            const searchInput = document.getElementById('pastMetaOverviewSearch');
             if (!searchInput) return;
             
             const searchTerm = searchInput.value.toLowerCase().trim();

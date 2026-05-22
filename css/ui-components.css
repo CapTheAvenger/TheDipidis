@@ -1912,45 +1912,6 @@ img[src*="limitlesstcg"] {
     filter: none;
     box-shadow: 0 0 0 1px rgba(239, 68, 68, 0.6) inset;
 }
-/* Algorithm controls row: pin (= INCL) and exclude (= EXCL) get
- * text labels instead of emojis so users don't have to guess which
- * icon means what. The icons (📌/⛔) still drive the badge overlays
- * on the card image; only the buttons themselves are labeled. */
-.city-league-card-action-row-incl-excl .city-league-card-pin-btn,
-.city-league-card-action-row-incl-excl .city-league-card-exclude-btn {
-    font-size: 10px;
-    letter-spacing: 0.5px;
-    filter: none;
-    opacity: 0.9;
-}
-.city-league-card-action-row-incl-excl .city-league-card-pin-btn {
-    background: rgba(250, 204, 21, 0.18);
-    color: #facc15;
-}
-.city-league-card-action-row-incl-excl .city-league-card-exclude-btn {
-    background: rgba(239, 68, 68, 0.18);
-    color: #fca5a5;
-}
-.city-league-card-action-row-incl-excl .city-league-card-pin-btn:hover {
-    background: rgba(250, 204, 21, 0.3);
-    opacity: 1;
-    filter: none;
-}
-.city-league-card-action-row-incl-excl .city-league-card-exclude-btn:hover {
-    background: rgba(239, 68, 68, 0.3);
-    opacity: 1;
-    filter: none;
-}
-.city-league-card-action-row-incl-excl .city-league-card-pin-btn.is-active {
-    background: linear-gradient(135deg, #facc15 0%, #d97706 100%);
-    color: #1f2937;
-    opacity: 1;
-}
-.city-league-card-action-row-incl-excl .city-league-card-exclude-btn.is-active {
-    background: linear-gradient(135deg, #ef4444 0%, #991b1b 100%);
-    color: #ffffff;
-    opacity: 1;
-}
 .deck-card.is-excluded,
 .card-item.card-is-excluded {
     box-shadow: 0 0 0 2px #ef4444, 0 0 8px rgba(239, 68, 68, 0.5);

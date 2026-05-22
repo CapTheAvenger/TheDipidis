@@ -21,7 +21,6 @@ import tempfile
 import importlib
 import logging
 import threading
-import urllib.parse
 from datetime import datetime, timedelta
 from collections import defaultdict
 from typing import List, Dict, Optional, Tuple, Any, Set, Mapping, TypedDict, Union, DefaultDict, cast
@@ -681,14 +680,7 @@ def extract_cards_from_decklist_soup(soup, card_db: CardDatabaseLookup) -> list:
                 # METHOD 1: href link
                 link_elem = card_div.find('a', href=True) or name_elem.find('a', href=True)
                 if link_elem:
-                    # Strip query string + fragment BEFORE splitting (B-39 hotfix).
-                    # The JP city-league listing uses URLs like
-                    #   /cards/M3/61?translate=en
-                    # and the old code's set_number ended up as '61?translate=en',
-                    # which breaks every downstream join against all_cards_database.
-                    # 5329 rows in city_league_analysis*.csv were affected.
-                    href_path = urllib.parse.urlparse(link_elem.get('href', '')).path
-                    parts = href_path.split('/cards/')[-1].split('/')
+                    parts = link_elem.get('href', '').split('/cards/')[-1].split('/')
                     if len(parts) >= 3:
                         set_code, set_number = parts[1].upper(), parts[2]
                     elif len(parts) == 2:

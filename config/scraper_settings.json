@@ -73,12 +73,11 @@
         "sources": {
             "city_league": {
                 "enabled": true,
-                "start_date": "22.05.2026",
+                "start_date": "13.03.2026",
                 "end_date": "auto",
-                "max_decklists_per_league": 150,
+                "max_decklists_per_league": 50,
                 "additional_tournament_ids": [
-                    548,
-                    549
+                    548
                 ]
             }
         },
@@ -88,7 +87,7 @@
         "_comment": "start_date is auto-synced by backend/core/update_sets.apply_format_window_to_scraper_settings to format_window.jp_release_date (= EN release minus 14-day JP lead). Don't hand-edit the date — set the EN rotation anchor in update_sets.FALLBACK_RELEASE_DATES instead. additional_tournament_ids: append Champions-League / special-event IDs that aren't on the regular City-League listing (e.g. 548)."
     },
     "city_league_archetype": {
-        "start_date": "22.05.2026",
+        "start_date": "13.03.2026",
         "end_date": "auto",
         "delay_between_requests": 1.5,
         "output_file": "city_league_archetypes.csv",
@@ -96,8 +95,7 @@
         "min_tournament_size": 1,
         "_min_size_comment": "JP City League events typically post 4-16 placements (NOT 32+). The earlier value 32 (added 2026-04-21) silently rejected every new tournament for two weeks — see backend/scrapers/city_league_archetype_scraper.py DEFAULT_SETTINGS comment for the full incident.",
         "additional_tournament_ids": [
-            548,
-            549
+            548
         ]
     },
     "labs_tournament_scraper": {

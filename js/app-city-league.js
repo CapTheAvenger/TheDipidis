@@ -114,7 +114,8 @@
             if (window.m3ArchetypeData) return; // Already loaded
             
             try {
-                const response = await fetch(dataUrl(`${BASE_PATH}city_league_archetypes_comparison_M3.csv`));
+                const timestamp = new Date().getTime();
+                const response = await fetch(`${BASE_PATH}city_league_archetypes_comparison_M3.csv?t=${timestamp}`);
                 if (response.ok) {
                     const text = await response.text();
                     const m3Data = parseCSV(text);
@@ -235,6 +236,7 @@
         async function loadCityLeagueData() {
             const content = document.getElementById('cityLeagueContent');
             try {
+                const timestamp = new Date().getTime();
                 const isMobileRuntime = !!(window.matchMedia && window.matchMedia('(max-width: 768px)').matches);
                 
                 // Dynamic file paths based on current format
@@ -251,20 +253,20 @@
                 // FCP-Optimierung: Lade nur kleine Dateien sofort (~880 KB statt 36 MB).
                 // Die grosse Analysis-CSV wird im Hintergrund nachgeladen.
                 const fetchPromises = [
-                    fetch(dataUrl(imagesUrl))
+                    fetch(`${imagesUrl}?t=${timestamp}`)
                         .then(response => response.ok ? response.json() : null)
                         .catch(error => {
                             console.warn(`Could not load images JSON (${imagesUrl}):`, error);
                             return null;
                         }),
-                    fetch(dataUrl(archetypesUrl))
+                    fetch(`${archetypesUrl}?t=${timestamp}`)
                         .then(response => response.ok ? response.text() : null)
                         .catch(error => {
                             console.error(`Could not load archetypes data (${archetypesUrl}):`, error);
                             return null;
                         }),
                     hasComparisonFile
-                        ? fetch(dataUrl(comparisonUrl))
+                        ? fetch(`${comparisonUrl}?t=${timestamp}`)
                             .then(response => response.ok ? response.text() : null)
                             .catch(error => {
                                 console.warn(`Comparison file could not be loaded (${comparisonUrl}):`, error);
@@ -277,7 +279,7 @@
                 // (mobile included — see switchCityLeagueFormat note).
                 if (window.currentCityLeagueFormat === 'M4') {
                     fetchPromises.push(
-                        fetch(dataUrl(`${BASE_PATH}city_league_archetypes_M3.csv`))
+                        fetch(`${BASE_PATH}city_league_archetypes_M3.csv?t=${timestamp}`)
                             .then(response => response.ok ? response.text() : null)
                             .catch(() => null)
                     );
@@ -295,11 +297,10 @@
                     return;
                 }
 
-                // Hintergrund-Laden der grossen Analysis-CSV (non-blocking fuer FCP).
-                // B-12 hotfix: use fetchAndParseCSV which now runs Papa.parse with
-                // worker:true — moves the ~800-1500 ms parse off the main thread
-                // so the City League tab stays interactive during load.
-                window._cityLeagueAnalysisPromise = fetchAndParseCSV(dataUrl(analysisUrl))
+                // Hintergrund-Laden der grossen Analysis-CSV (non-blocking fuer FCP)
+                window._cityLeagueAnalysisPromise = fetch(`${analysisUrl}?t=${timestamp}`)
+                    .then(r => r.ok ? r.text() : null)
+                    .then(text => text ? parseCSV(text) : [])
                     .then(data => {
                         window.cityLeagueAnalysisData = data;
                         devLog('Background: analysis data loaded,', data.length, 'rows');
@@ -981,6 +982,7 @@
             
             const format = window.currentCityLeagueFormat || 'M4';
             const formatSuffix = format === 'M3' ? '_M3' : '';
+            const timestamp = new Date().getTime();
             const analysisUrl = `${BASE_PATH}city_league_analysis${formatSuffix}.csv`;
             const archetypesUrl = `${BASE_PATH}city_league_archetypes${formatSuffix}.csv`;
             const comparisonUrl = `${BASE_PATH}city_league_archetypes_comparison${formatSuffix}.csv`;
@@ -1002,21 +1004,21 @@
             const [analysisText, archetypesText, comparisonText] = await Promise.all([
                 // Nur fetchen wenn Background-Load noch nicht fertig
                 !data
-                    ? fetch(dataUrl(analysisUrl))
+                    ? fetch(`${analysisUrl}?t=${timestamp}`)
                         .then(response => response.ok ? response.text() : null)
                         .catch(error => {
                             console.error(`Error loading analysis CSV (${analysisUrl}):`, error);
                             return null;
                         })
                     : Promise.resolve('__SKIP__'),
-                fetch(dataUrl(archetypesUrl))
+                fetch(`${archetypesUrl}?t=${timestamp}`)
                     .then(response => response.ok ? response.text() : null)
                     .catch(error => {
                         console.error(`Error loading archetypes CSV (${archetypesUrl}):`, error);
                         return null;
                     }),
                 hasComparisonFile
-                    ? fetch(dataUrl(comparisonUrl))
+                    ? fetch(`${comparisonUrl}?t=${timestamp}`)
                         .then(response => response.ok ? response.text() : null)
                         .catch(error => {
                             console.warn(`Ignoring missing comparison CSV (${comparisonUrl}):`, error);
@@ -1567,49 +1569,7 @@
             const dateToEl = document.getElementById('cityLeagueDateTo');
             const dateFrom = dateFromEl ? dateFromEl.value : '';
             const dateTo = dateToEl ? dateToEl.value : '';
-
-            // iOS Safari ignores HTML5 min/max on <input type="date"> — the
-            // picker shows out-of-range days as selectable. Re-validate in JS
-            // against the bounds we wrote in _updateCityLeagueDateRangeHints
-            // so users get an explicit error instead of a silently truncated
-            // result set (picker said "available 14.3–6.5" but allowed
-            // 19.05 → filter applied to the 5.5–6.5 intersection and showed
-            // 25 decks with no indication the upper half of the range was
-            // out of bounds).
-            const minBound = (dateFromEl && dateFromEl.min) || '';
-            const maxBound = (dateFromEl && dateFromEl.max) || '';
-            const fmtDate = iso => {
-                const m = iso.match(/^(\d{4})-(\d{2})-(\d{2})/);
-                return m ? `${parseInt(m[3], 10)}.${parseInt(m[2], 10)}.${m[1]}` : iso;
-            };
-            const errors = [];
-            if (dateFrom && minBound && dateFrom < minBound) {
-                errors.push(`From-Datum ${fmtDate(dateFrom)} liegt vor dem ersten verfügbaren Turnier (${fmtDate(minBound)}).`);
-            }
-            if (dateFrom && maxBound && dateFrom > maxBound) {
-                errors.push(`From-Datum ${fmtDate(dateFrom)} liegt nach dem letzten verfügbaren Turnier (${fmtDate(maxBound)}).`);
-            }
-            if (dateTo && minBound && dateTo < minBound) {
-                errors.push(`To-Datum ${fmtDate(dateTo)} liegt vor dem ersten verfügbaren Turnier (${fmtDate(minBound)}).`);
-            }
-            if (dateTo && maxBound && dateTo > maxBound) {
-                errors.push(`To-Datum ${fmtDate(dateTo)} liegt nach dem letzten verfügbaren Turnier (${fmtDate(maxBound)}).`);
-            }
-            if (dateFrom && dateTo && dateFrom > dateTo) {
-                errors.push(`From-Datum (${fmtDate(dateFrom)}) liegt nach dem To-Datum (${fmtDate(dateTo)}).`);
-            }
-            const statusEl = document.getElementById('cityLeagueDateFilterStatus');
-            if (errors.length > 0) {
-                if (statusEl) {
-                    statusEl.textContent = errors.join(' ') + ' Filter wurde nicht angewendet.';
-                    statusEl.className = 'city-league-status color-red-light';
-                }
-                // Leave the previous valid filter state (if any) untouched —
-                // don't silently widen the dataset on the user just because
-                // they typo'd a new date.
-                return;
-            }
-
+            
             // Set filter active if at least one date is set
             if (dateFrom || dateTo) {
                 window.cityLeagueDateFilterActive = true;
@@ -1619,9 +1579,9 @@
                 // If both dates are cleared, disable filter
                 window.cityLeagueDateFilterActive = false;
             }
-
+            
             updateCityLeagueDateFilterStatus();
-
+            
             const selectedArchetype = refreshCityLeagueDeckSelect();
             if (selectedArchetype) {
                 loadCityLeagueDeckData(selectedArchetype);
@@ -2252,35 +2212,19 @@
             // analysis scraper's per-tournament cap and won't close
             // without a scraper-policy change.
             const analysisAggregated = parseInt(deckCards[0]?.total_decks_in_archetype || 0, 10);
-            // Date-filter scope is authoritative: if the user narrowed to a
-            // window with zero matches, both tiles must read 0 (or "-") —
-            // falling back to the unfiltered dropdown label here showed the
-            // user "463 decks" alongside "0 / 0 cards" for a date range with
-            // no tournaments. The wider-scope fallbacks below are only safe
-            // when no filter is active.
-            const isDateFilterActive = !!window.cityLeagueDateFilterActive;
-            const cardStatsDenom = isDateFilterActive
-                ? (archetypeStats.decksCount || analysisAggregated || 0)
-                : (analysisAggregated
-                    || archetypeStats.decksCount
-                    || getSelectedCityLeagueDeckCount(archetype)
-                    || getCityLeagueDeckCountFallback(archetype)
-                    || 0);
-            let displayDecksCount;
-            if (isDateFilterActive) {
-                displayDecksCount = archetypeStats.decksCount > 0
-                    ? archetypeStats.decksCount
-                    : '-';
-            } else {
-                displayDecksCount = archetypeStats.decksCount
-                    || getSelectedCityLeagueDeckCount(archetype)
-                    || analysisAggregated
-                    || getCityLeagueDeckCountFallback(archetype);
-                if (!displayDecksCount || displayDecksCount <= 0) {
-                    displayDecksCount = '-';
-                }
+            const cardStatsDenom = analysisAggregated
+                || archetypeStats.decksCount
+                || getSelectedCityLeagueDeckCount(archetype)
+                || getCityLeagueDeckCountFallback(archetype)
+                || 0;
+            let displayDecksCount = archetypeStats.decksCount
+                || getSelectedCityLeagueDeckCount(archetype)
+                || analysisAggregated
+                || getCityLeagueDeckCountFallback(archetype);
+            if (!displayDecksCount || displayDecksCount <= 0) {
+                displayDecksCount = '-';
             }
-            devLog(`Deck counts — display=${displayDecksCount}, cardStatsDenom=${cardStatsDenom} (analysis=${analysisAggregated}, archetypes=${archetypeStats.decksCount}, dateFilter=${isDateFilterActive})`);
+            devLog(`Deck counts — display=${displayDecksCount}, cardStatsDenom=${cardStatsDenom} (analysis=${analysisAggregated}, archetypes=${archetypeStats.decksCount})`);
 
             // Calculate average placement from archetypes data
             const avgPlacement = archetypeStats.avgPlacement;
@@ -2701,10 +2645,10 @@
                 let deckCount = 0;
                 if (setCode && setNumber) {
                     for (const deckKey in currentDeck) {
-                        const match = parseCardKey(deckKey);
+                        const match = deckKey.match(/\(([A-Z0-9]+)\s+([A-Z0-9]+)\)$/);
                         if (match) {
-                            const deckSetCode = match.setCode;
-                            const deckSetNumber = match.number;
+                            const deckSetCode = match[1];
+                            const deckSetNumber = match[2];
                             if (deckSetCode === setCode && deckSetNumber === setNumber) {
                                 deckCount = currentDeck[deckKey] || 0;
                                 break;
@@ -2967,11 +2911,11 @@
                 if (Object.keys(currentDeck).length > 0 && setCode && setNumber) {
                     // Loop through all deck entries and match by set/number only
                     for (const deckKey in currentDeck) {
-                        // Extract set and number via the canonical helper.
-                        const match = parseCardKey(deckKey);
+                        // Extract set and number from deckKey format: "CardName (SET NUM)"
+                        const match = deckKey.match(/\(([A-Z0-9]+)\s+([A-Z0-9]+)\)$/);
                         if (match) {
-                            const deckSetCode = match.setCode;
-                            const deckSetNumber = match.number;
+                            const deckSetCode = match[1];
+                            const deckSetNumber = match[2];
                             
                             // Match by set code and number ONLY (ignore card name)
                             if (deckSetCode === setCode && deckSetNumber === setNumber) {
@@ -3083,24 +3027,14 @@
                     ? `<div class="deck-card-pin-badge" title="${pinTitle}">📌</div>`
                     : '';
 
-                const isExcluded = (typeof isExcludedCard === 'function') && isExcludedCard('cityLeague', cardName);
-                const excludedClass = isExcluded ? ' card-is-excluded' : '';
-                const excludeTitle = isExcluded
-                    ? (t('deck.excludeTitleUnexclude') || 'Un-exclude — let the algorithm consider this card again')
-                    : (t('deck.excludeTitleExclude') || 'Exclude — keep this card out of the next Consistency Generate');
-                const excludeBadgeHtml = isExcluded
-                    ? `<div class="deck-card-exclude-badge" title="${excludeTitle}">⛔</div>`
-                    : '';
-
                 cardHtmls.push({ pct: usagePct, isAceSpec: isAceSpecCard, html: `
-                    <div class="card-item city-league-card-item${pinnedClass}${excludedClass}" data-card-name="${cardName.toLowerCase()}" data-card-name-de="${germanCardNameEscaped}" data-card-set="${setCode.toLowerCase()}" data-card-number="${setNumber.toLowerCase()}" data-card-type="${filterCategory}">
+                    <div class="card-item city-league-card-item${pinnedClass}" data-card-name="${cardName.toLowerCase()}" data-card-name-de="${germanCardNameEscaped}" data-card-set="${setCode.toLowerCase()}" data-card-number="${setNumber.toLowerCase()}" data-card-type="${filterCategory}">
                         <div class="card-image-container city-league-card-image-container">
                             <img src="${imageUrl}" alt="${cardName}" loading="lazy" referrerpolicy="no-referrer" class="city-league-card-image" onerror="handleCardImageError(this, '${setCode}', '${setNumber}')" onclick="if (typeof event !== 'undefined' && event) event.stopPropagation(); showSingleCard(this.src, '${cardNameEscaped} (${setCode} ${setNumber})');">
                             ${usageBarHtml}
                             <!-- Red badge: Max Count (top-right) -->
                             <div class="city-league-card-badge city-league-card-badge-max">${finalMaxCount}</div>
                             ${pinBadgeHtml}
-                            ${excludeBadgeHtml}
                             ${typeof getWishlistBadgeHtml === 'function' ? getWishlistBadgeHtml(cardName, setCode, setNumber) : ''}
                             <!-- Green badge: Deck Count (top-left) - only show if > 0 -->
                             ${deckCount > 0 ? `<div class="city-league-card-badge city-league-card-badge-deck">${deckCount}</div>` : ''}
@@ -3113,16 +3047,13 @@
                                     ${resolvedPercentage > 0 ? `<div class="city-league-card-avg-mobile">Ø ${avgCountInUsedDecks}x (${avgCountOverall}x)</div>` : ''}
                                     <div class="city-league-card-deck-stats-mobile">${decksWithCardDisplay}/${totalDecksDisplay} (${percentage}%)</div>
                                 </div>
-                                <!-- Card Actions: Row 1 = - + ★ | Row 2 = INCL + EXCL | Row 3 = L + P + Cardmarket -->
+                                <!-- Card Actions: Row 1 = - ★ + | Row 2 = L + Cardmarket -->
                                 <div class="card-action-buttons city-league-card-action-buttons">
                                     <div class="city-league-card-action-row">
                                         <button class="city-league-card-action-btn city-league-card-remove-btn" onclick="event.stopPropagation(); removeCardFromDeck('cityLeague', '${cardNameEscaped}')" title="${t('cl.removeFromDeck')}">-</button>
-                                        <button class="city-league-card-action-btn city-league-card-add-btn" onclick="event.stopPropagation(); addCardToDeck('cityLeague', '${cardNameEscaped}', '${setCode}', '${setNumber}')" title="${t('cl.addToDeckTooltip')}">+</button>
                                         <button class="city-league-card-action-btn city-league-card-rarity-btn" onclick="event.stopPropagation(); openRaritySwitcher('${cardNameEscaped}', '${cardNameEscaped} (${setCode} ${setNumber})')" title="${t('cl.switchPrint')}">★</button>
-                                    </div>
-                                    <div class="city-league-card-action-row city-league-card-action-row-incl-excl">
-                                        <button class="city-league-card-action-btn city-league-card-pin-btn${isPinned ? ' is-active' : ''}" onclick="event.stopPropagation(); togglePinCard('cityLeague', '${cardNameEscaped}')" title="${pinTitle}">INCL</button>
-                                        <button class="city-league-card-action-btn city-league-card-exclude-btn${isExcluded ? ' is-active' : ''}" onclick="event.stopPropagation(); toggleExcludeCard('cityLeague', '${cardNameEscaped}')" title="${excludeTitle}">EXCL</button>
+                                        <button class="city-league-card-action-btn city-league-card-pin-btn${isPinned ? ' is-active' : ''}" onclick="event.stopPropagation(); togglePinCard('cityLeague', '${cardNameEscaped}')" title="${pinTitle}">${pinIcon}</button>
+                                        <button class="city-league-card-action-btn city-league-card-add-btn" onclick="event.stopPropagation(); addCardToDeck('cityLeague', '${cardNameEscaped}', '${setCode}', '${setNumber}')" title="${t('cl.addToDeckTooltip')}">+</button>
                                     </div>
                                     <div class="city-league-card-action-row">
                                         ${setCode && setNumber ? `<button class="city-league-card-action-btn city-league-card-limitless-btn" onclick="event.stopPropagation(); openLimitlessCard('${setCode}', '${setNumber}')" title="${t('cl.openLimitless')}">L</button>` : '<span></span>'}
@@ -3446,11 +3377,12 @@
                 for (const [deckKey, count] of Object.entries(deck)) {
                     if (count <= 0) continue;
                     
-                    // Extract base name + original set info via the canonical helper.
-                    const parsed = parseCardKey(deckKey);
-                    const baseName = parsed ? parsed.name : deckKey;
-                    const originalSet = parsed ? parsed.setCode : null;
-                    const originalNumber = parsed ? parsed.number : null;
+                    // Extract base name and original set info
+                    const baseNameMatch = deckKey.match(/^(.+?)\s*\(/);
+                    const baseName = baseNameMatch ? baseNameMatch[1] : deckKey;
+                    const setMatch = deckKey.match(/\(([A-Z0-9]+)\s+([A-Z0-9]+)\)$/);
+                    const originalSet = setMatch ? setMatch[1] : null;
+                    const originalNumber = setMatch ? setMatch[2] : null;
                     
                     let cardData = cardDataByName[baseName];
                     if (!cardData) continue;

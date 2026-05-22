@@ -39,8 +39,8 @@
         // Load tournament start date from settings (called once during init)
         async function loadCurrentMetaTournamentStartDate() {
             const paths = [
-                dataUrl('./config/current_meta_analysis_settings.json'),
-                dataUrl('./current_meta_analysis_settings.json')
+                './config/current_meta_analysis_settings.json?t=' + Date.now(),
+                './current_meta_analysis_settings.json?t=' + Date.now()
             ];
             for (const p of paths) {
                 try {
@@ -1614,45 +1614,40 @@
             }
             const tourData = window.currentMetaTournamentCardsData || [];
 
-            // Count decks per tournament for this archetype.
+            // Collect unique tournament entries for this archetype.
             //
-            // The CSV stores ONE row per (tournament_id, archetype-variant,
-            // card). `total_decks_in_archetype` (the count of decks for that
-            // variant in that tournament's top-256 cut) is CONSTANT across
-            // every row sharing the same (variant, tournament). The current
-            // scraper output emits ONE archetype-variant per archetype per
-            // tournament (no price-tag suffixes), so total_decks_in_archetype
-            // is already the correct deck-count for the archetype.
-            //
-            // Historical note: legacy scraper output (pre-2025) split each
-            // archetype into N price-tagged variants (e.g. "Cynthia's
-            // Garchomp27.91$" vs "Cynthia's Garchomp33.40$"), each with its
-            // own total_decks_in_archetype value. To stay correct against
-            // that historical shape, we SUM total_decks_in_archetype across
-            // variants per tournament, picking the value from one row per
-            // variant. New format = 1 variant per tournament = sum = the
-            // single value (right). Old format = N variants summed (also
-            // right). Both shapes produce the correct deck count.
+            // tournament_cards_data_cards.csv stores ONE row per
+            // (tournament_id, price-tagged-archetype, card) — each
+            // distinct price tag in the archetype field
+            // (e.g. "Cynthia's Garchomp27.91$22.10€" vs
+            //       "Cynthia's Garchomp33.40$24.89€") is a separate
+            // deck snapshot. The legacy `total_decks_in_archetype`
+            // field is *per-snapshot* (always 1 or 2) and cannot be
+            // used as a deck count — using max() of it produced the
+            // user-flagged "2× Used in Top 256" bug for Cynthia at
+            // Prague where the actual snapshot count was 16. Solution:
+            // count distinct raw archetype labels per tournament.
             const tourMap = new Map();
-            const seenVariant = new Set();
             tourData.forEach(row => {
                 const rowArchetype = normalizeCurrentMetaTournamentArchetypeName(row.archetype);
                 if (!rowArchetype || rowArchetype.toLowerCase() !== archetype.toLowerCase()) return;
                 const key = row.tournament_name || String(row.tournament_id);
-                const variantKey = String(row.archetype || row.deck_id || '') + '|' + String(row.tournament_id || '');
-                if (seenVariant.has(variantKey)) return; // already counted this variant
-                seenVariant.add(variantKey);
-
+                // Use the RAW archetype field (with price-tag suffix)
+                // as the snapshot identifier. Fallback to deck_id when
+                // present (older sources that don't price-tag).
+                const snapshotKey = String(row.archetype || row.deck_id || row.tournament_id || '');
                 if (!tourMap.has(key)) {
                     tourMap.set(key, {
                         name: row.tournament_name || key,
                         date: row.tournament_date || '',
-                        count: 0,
+                        snapshots: new Set(),
                     });
                 }
-                const deckCount = parseInt(row.total_decks_in_archetype, 10) || 0;
-                tourMap.get(key).count += deckCount;
+                tourMap.get(key).snapshots.add(snapshotKey);
             });
+            // Materialize the count from snapshot-set size so existing
+            // render code (which expects entry.count) still works.
+            tourMap.forEach(entry => { entry.count = entry.snapshots.size; });
 
             if (tourMap.size === 0) {
                 section.classList.add('d-none');
@@ -1696,7 +1691,10 @@
             if (deckMatchups.length === 0) return false;
 
             // Parse "62,50" or "62.50" → 62.50; strip "%" suffix.
-            const parseWr = parsePercent;
+            const parseWr = (s) => {
+                const v = parseFloat(String(s || '0').replace(',', '.').replace('%', '').trim());
+                return Number.isFinite(v) ? v : 0;
+            };
 
             const enriched = deckMatchups
                 .map(r => ({
@@ -1783,7 +1781,10 @@
             // calibrating against).
             const target = archetype.trim().toLowerCase();
             const stripped = stripExSuffix(archetype).trim().toLowerCase();
-            const parseWr = parsePercent;
+            const parseWr = (s) => {
+                const v = parseFloat(String(s || '0').replace(',', '.').replace('%', '').trim());
+                return Number.isFinite(v) ? v : 0;
+            };
             const wrByOpp = {};
             rows.forEach(r => {
                 const d = String(r.deck_name || '').trim().toLowerCase();
@@ -2012,7 +2013,10 @@
 
             const target = archetype.trim().toLowerCase();
             const stripped = stripExSuffix(archetype).trim().toLowerCase();
-            const parseWr = parsePercent;
+            const parseWr = (s) => {
+                const v = parseFloat(String(s || '0').replace(',', '.').replace('%', '').trim());
+                return Number.isFinite(v) ? v : 0;
+            };
             const wrByOpp = {};
             rows.forEach(r => {
                 const d = String(r.deck_name || '').trim().toLowerCase();
@@ -3020,9 +3024,9 @@
                     let deckCount = 0;
                     if (Object.keys(currentDeck).length > 0 && setCode && setNumber) {
                         for (const deckKey in currentDeck) {
-                            const match = parseCardKey(deckKey);
+                            const match = deckKey.match(/\(([A-Z0-9]+)\s+([A-Z0-9]+)\)$/);
                             if (match) {
-                                if (match.setCode === setCode && match.number === setNumber) {
+                                if (match[1] === setCode && match[2] === setNumber) {
                                     deckCount = currentDeck[deckKey] || 0;
                                     break;
                                 }
@@ -3160,10 +3164,8 @@
                                             <button class="city-league-card-action-btn city-league-card-remove-btn" onclick="event.stopPropagation(); removeCardFromDeck('currentMeta', '${cardNameEscaped}')" title="${t('cl.removeFromDeck')}">-</button>
                                             <button class="city-league-card-action-btn city-league-card-add-btn" onclick="event.stopPropagation(); addCardToDeck('currentMeta', '${cardNameEscaped}', '${setCode}', '${setNumber}')" title="${t('cl.addToDeckTooltip')}">+</button>
                                             <button class="city-league-card-action-btn city-league-card-rarity-btn" onclick="event.stopPropagation(); openRaritySwitcher('${cardNameEscaped}', '${cardNameEscaped} (${setCode} ${setNumber})')" title="${t('cl.switchPrint')}">★</button>
-                                        </div>
-                                        <div class="city-league-card-action-row city-league-card-action-row-incl-excl">
-                                            <button class="city-league-card-action-btn city-league-card-pin-btn${isPinned ? ' is-active' : ''}" onclick="event.stopPropagation(); togglePinCard('currentMeta', '${cardNameEscaped}')" title="${pinTitle}">INCL</button>
-                                            <button class="city-league-card-action-btn city-league-card-exclude-btn${isExcluded ? ' is-active' : ''}" onclick="event.stopPropagation(); toggleExcludeCard('currentMeta', '${cardNameEscaped}')" title="${excludeTitle}">EXCL</button>
+                                            <button class="city-league-card-action-btn city-league-card-pin-btn cm-deep-dive-only${isPinned ? ' is-active' : ''}" onclick="event.stopPropagation(); togglePinCard('currentMeta', '${cardNameEscaped}')" title="${pinTitle}">${pinIcon}</button>
+                                            <button class="city-league-card-action-btn city-league-card-exclude-btn cm-deep-dive-only${isExcluded ? ' is-active' : ''}" onclick="event.stopPropagation(); toggleExcludeCard('currentMeta', '${cardNameEscaped}')" title="${excludeTitle}">${excludeIcon}</button>
                                         </div>
                                         <div class="city-league-card-action-row">
                                             ${setCode && setNumber ? `<button class="city-league-card-action-btn city-league-card-limitless-btn" onclick="event.stopPropagation(); openLimitlessCard('${setCode}', '${setNumber}')" title="${t('cl.openLimitless')}">L</button>` : '<span></span>'}
@@ -3349,8 +3351,8 @@
                     let deckCount = 0;
                     if (setCode && setNumber) {
                         for (const deckKey in currentDeck) {
-                            const match = parseCardKey(deckKey);
-                            if (match && match.setCode === setCode && match.number === setNumber) {
+                            const match = deckKey.match(/\(([A-Z0-9]+)\s+([A-Z0-9]+)\)$/);
+                            if (match && match[1] === setCode && match[2] === setNumber) {
                                 deckCount = currentDeck[deckKey] || 0;
                                 break;
                             }
@@ -3542,10 +3544,11 @@
                 for (const [deckKey, count] of Object.entries(deck)) {
                     if (count <= 0) continue;
                     
-                    const parsed = parseCardKey(deckKey);
-                    const baseName = parsed ? parsed.name : deckKey;
-                    const originalSet = parsed ? parsed.setCode : null;
-                    const originalNumber = parsed ? parsed.number : null;
+                    const baseNameMatch = deckKey.match(/^(.+?)\s*\(/);
+                    const baseName = baseNameMatch ? baseNameMatch[1] : deckKey;
+                    const setMatch = deckKey.match(/\(([A-Z0-9]+)\s+([A-Z0-9]+)\)$/);
+                    const originalSet = setMatch ? setMatch[1] : null;
+                    const originalNumber = setMatch ? setMatch[2] : null;
                     
                     let cardData = cardDataByName[baseName];
                     if (!cardData) continue;

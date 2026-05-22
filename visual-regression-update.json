@@ -1,0 +1,119 @@
+{
+  "config": {
+    "configFile": "C:\\Users\\haush\\OneDrive\\Desktop\\Hausi´s Pokemon TCG Analysis\\playwright.config.js",
+    "rootDir": "C:/Users/haush/OneDrive/Desktop/Hausi´s Pokemon TCG Analysis/tests/e2e",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "C:/Users/haush/OneDrive/Desktop/Hausi´s Pokemon TCG Analysis/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "",
+        "name": "",
+        "testDir": "C:/Users/haush/OneDrive/Desktop/Hausi´s Pokemon TCG Analysis/tests/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 60000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "changed",
+    "updateSourceMethod": "patch",
+    "version": "1.59.0",
+    "workers": 8,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "visual-regression.spec.js",
+      "file": "visual-regression.spec.js",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Cards Database Tab",
+          "file": "visual-regression.spec.js",
+          "line": 359,
+          "column": 6,
+          "specs": [
+            {
+              "title": "cards database grid screenshot matches baseline",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 20081,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "C:\\Users\\haush\\OneDrive\\Desktop\\Hausi´s Pokemon TCG Analysis\\tests\\e2e\\__snapshots__\\{testFilename}\\cards-database-grid.png is re-generated, writing actual.\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-03T08:41:20.037Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "614534ba5c1e0a84453e-d4faeaed4752fafba7c5",
+              "file": "visual-regression.spec.js",
+              "line": 360,
+              "column": 5
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-04-03T08:41:19.239Z",
+    "duration": 21472.799,
+    "expected": 1,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}

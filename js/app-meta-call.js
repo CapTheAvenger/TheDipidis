@@ -108,17 +108,10 @@ window.MetaCall = (function () {
   // how strong the counter's matchup edge is. Stacks additively with
   // 4.0a so a deck that's BOTH a known counter AND saw a fresh surge
   // ride still gets full credit for both.
-  // 2026-05-19 retune: standard-mode backtest showed the top-8
-  // counter-decks (Mewtwo, N's Zoroark, Alakazam Dudunsparce,
-  // Cynthia's Garchomp, Mega Lucario, Raging Bolt, …) systematically
-  // under-predicted by 0.5-1.5 pp each — aggregate -4.7 pp. Two
-  // levers: lower the family floor so mid-concentration cases (a
-  // 17-18 % family) start producing meaningful boosts, and raise the
-  // base contrib so the boost actually scales to the gap.
-  const PREDICTOR_45_FAMILY_FLOOR_PCT  = 12;    // was 15 — catch mid-concentration families
+  const PREDICTOR_45_FAMILY_FLOOR_PCT  = 15;    // family must hold ≥ this share to trigger
   const PREDICTOR_45_FAMILY_EXCESS_DIV = 10;    // family-excess factor = (familyPct - floor) / this
   const PREDICTOR_45_WR_FACTOR_SCALE   = 10;    // wr-edge factor = (wr - threshold) * this
-  const PREDICTOR_45_BASE_CONTRIB_PP   = 1.0;   // was 0.7 — counters under-predicted by ~1 pp each
+  const PREDICTOR_45_BASE_CONTRIB_PP   = 0.7;   // pp contribution per "unit" (factors multiplied)
   const PREDICTOR_45_COUNTER_WR_MIN    = 0.50;  // min WR vs family member to count
                                                 // Lowered from 0.55: Limitless online matchup data
                                                 // shows Lucario Hariyama / Raging Bolt / Cynthia's
@@ -201,20 +194,11 @@ window.MetaCall = (function () {
   //   • labs floor    = 4.46 × 0.85 ≈ 3.79 %
   //   • online floor  = 5.52 × 0.60 ≈ 3.31 %
   //   • final floor   = max(3.79, 3.31) = 3.79 %
-  // 2026-05-19 retune: PRESENCE_FLOOR_MIN lowered 3.0 → 2.0 and
-  // LABS_FLOOR_MIN_PCT lowered 1.5 → 1.0. Backtest showed mid-share
-  // decks falling out of top-25 entirely: Grimmsnarl Froslass
-  // (online 2.93, real 1.47) and Okidogi Barbaracle (online 2.29,
-  // real 1.37) were both ungated by the 3.0 % online minimum, so
-  // the floor never fired and the deeper dampers crushed them to
-  // sub-junk levels. With the lowered gates a 2-3 % online deck
-  // with at least one labs sample gets a 1.2-1.8 % floor — enough
-  // to keep it visible in the top-25 list.
-  const PREDICTOR_55_PRESENCE_FLOOR_MIN  = 2.0;  // was 3.0 — catch mid-share decks (2-3 % online)
+  const PREDICTOR_55_PRESENCE_FLOOR_MIN  = 3.0;  // online share must be ≥ this to qualify
   const PREDICTOR_55_PRESENCE_FLOOR_PCT  = 0.60; // online-based floor multiplier
   const PREDICTOR_55_LABS_FLOOR_PCT      = 0.85; // labs-based floor multiplier
   const PREDICTOR_55_LABS_FLOOR_MIN_N    = 0.5;  // need ≥ this weighted labs count
-  const PREDICTOR_55_LABS_FLOOR_MIN_PCT  = 1.0;  // was 1.5 — admit smaller labs samples as anchors
+  const PREDICTOR_55_LABS_FLOOR_MIN_PCT  = 1.5;  // labs share_pct must be ≥ this to anchor
   const PREDICTOR_55_REQUIRE_LABS_N      = 1;    // need ≥ N labs samples to apply (filters
                                                   // pure-online noise decks)
 
@@ -431,7 +415,7 @@ window.MetaCall = (function () {
   async function _loadClShares(path) {
     const out = {};
     try {
-      const resp = await fetch(dataUrl(path));
+      const resp = await fetch(path + '?t=' + Date.now());
       if (!resp.ok) return out;
       const rows = parseCSV(await resp.text(), ';');
       rows.forEach(r => {
@@ -448,7 +432,7 @@ window.MetaCall = (function () {
   // so the limitless scraper writes a manifest of available date files.
   async function _loadHistoryManifest() {
     try {
-      const resp = await fetch(dataUrl('data/online_share_history/manifest.json'));
+      const resp = await fetch('data/online_share_history/manifest.json?t=' + Date.now());
       if (!resp.ok) return null;
       const data = await resp.json();
       if (data && Array.isArray(data.dates)) return data;
@@ -606,7 +590,7 @@ window.MetaCall = (function () {
   async function _loadDatedCardsRows() {
     if (!_datedCardsRowsRaw) {
       try {
-        const resp = await fetch(dataUrl('data/online_tournament_dated_cards.csv'));
+        const resp = await fetch('data/online_tournament_dated_cards.csv?t=' + Date.now());
         if (!resp.ok) { _datedCardsRowsRaw = []; }
         else { _datedCardsRowsRaw = parseCSV(await resp.text(), ';'); }
       } catch (_e) {
@@ -980,7 +964,7 @@ window.MetaCall = (function () {
     if (!dateISO) return {};
     const out = {};
     try {
-      const resp = await fetch(dataUrl(`data/online_share_history/${dateISO}.csv`));
+      const resp = await fetch(`data/online_share_history/${dateISO}.csv?t=` + Date.now());
       if (!resp.ok) return out;
       const rows = parseCSV(await resp.text(), ';');
       rows.forEach(r => {
@@ -1940,22 +1924,15 @@ window.MetaCall = (function () {
       // Labs cut-performance boost. Two signals, in priority order:
       //   (1) top8_conv_rate (Predictor 3.0 default) — when populated,
       //       use the field-mean-relative formula `conv / 0.25` clipped
-      //       to [0.5, 1.5]. 0.25 is the natural cut rate for an 8-cut
+      //       to [0.5, 2.0]. 0.25 is the natural cut rate for an 8-cut
       //       in a 32-deck top.
       //   (2) Day-1 → Day-2 share ratio (Predictor 4.4b fallback) —
       //       used when top8_conv_rate is missing/zero. d2_share /
       //       d1_share = 1.0 means a deck holds its representation in
       //       the cut; > 1 = overperformer (gains share in Day-2);
-      //       < 1 = underperformer (drops share). Same [0.5, 1.5]
+      //       < 1 = underperformer (drops share). Same [0.5, 2.0]
       //       range and same semantics, but anchored at 1.0 instead
       //       of 0.25 because the ratio is naturally normalised.
-      // 2026-05-19 retune: upper bound tightened from 2.0 to 1.5.
-      // Combined with 5.1 day2Boost (cap 1.4×) the old 2.0× cap
-      // compounded into 2.8× peak amplification, blowing up low-
-      // brought-share + high-quality decks (Festival Lead +1.21,
-      // Lopunny Dudunsparce +1.27, Hydrapple Ogerpon +1.39,
-      // Archaludon Dudunsparce +1.05). 1.5× keeps the over/under-
-      // performance signal but caps the compounding at 2.1× peak.
       // The fallback exists because the live labs scraper currently
       // does not populate top8_conv_rate (rows are 0 in the labs
       // CSV). Without the fallback, the labs term would lose its
@@ -1966,10 +1943,10 @@ window.MetaCall = (function () {
       const t8ConvAvg = (convStats3 && convStats3.n > 0) ? convStats3.sum / convStats3.n : 0;
       let labsT8Boost;
       if (t8ConvAvg > 0) {
-        labsT8Boost = _clip(t8ConvAvg / 0.25, 0.5, 1.5);
+        labsT8Boost = _clip(t8ConvAvg / 0.25, 0.5, 2.0);
       } else {
         const q = _labsQualityByDeck[k];
-        labsT8Boost = (q && q.d1 > 0) ? _clip(q.d2 / q.d1, 0.5, 1.5) : 1.0;
+        labsT8Boost = (q && q.d1 > 0) ? _clip(q.d2 / q.d1, 0.5, 2.0) : 1.0;
       }
 
       // Predictors 4.0a + 4.5 — counter-meta boost (additive, capped pp).
@@ -2117,25 +2094,12 @@ window.MetaCall = (function () {
     // (Dudunsparce) underestimated by -2.9 pp. Softening the exponent
     // for high-input-share decks redistributes within-family weight
     // toward the underweighted variants without changing low-share
-    // behaviour.
-    //
-    // 2026-05-19 retune: the original [5.0..10.0] → [1.50..1.10]
-    // ramp inverted within-family ordering. Backtest showed Pure
-    // Dragapult (raw ~11, exp 1.10 → 11^1.10 = 13.9) losing
-    // relative share to Dragapult Dudunsparce (raw ~4, exp 1.50 →
-    // 4^1.50 = 8.0) after renormalisation, even though brought-avg
-    // = 10.49 % (Pure) vs 5.71 % (Dudunsparce). Pure Drag ended up
-    // -2.79 pp under; Dudunsparce +1.89 pp over.
-    //
-    // Fix: start softening later and never push the exponent below
-    // ^1.30. Mid-share variants (Pure Drag at 11 %) keep most of the
-    // bandwagon boost, while only true outliers (≥ 14 %) get the
-    // minimum-^1.30 dampening. exp(0..8%) = 1.50, exp(8..14%) decays
-    // linearly to 1.30, exp(14%+) = 1.30.
+    // behaviour. exp(0..5%) = 1.50, exp(5..10%) decays linearly to
+    // 1.10, exp(10%+) = 1.10. Sub-3% decks keep full bandwagon boost.
     const CONCENTRATION_EXP_BASE = 1.50;
-    const CONCENTRATION_EXP_MIN  = 1.30;  // was 1.10 — under-cut Pure variants
-    const CONCENTRATION_SOFT_LO  = 8.0;   // was 5.0 — soften only above mid-share
-    const CONCENTRATION_SOFT_HI  = 14.0;  // was 10.0 — full dampening only at extreme concentrations
+    const CONCENTRATION_EXP_MIN  = 1.10;
+    const CONCENTRATION_SOFT_LO  = 5.0;   // below this: full boost
+    const CONCENTRATION_SOFT_HI  = 10.0;  // at/above: minimum boost
     _shareList.forEach(d => {
       const raw = d.predictedShareRaw || 0;
       let exp = CONCENTRATION_EXP_BASE;
@@ -2463,7 +2427,7 @@ window.MetaCall = (function () {
   async function loadData() {
     if (_matchupMap && _shareList) return true;
     try {
-      const shareResp = await fetch(dataUrl('data/limitless_online_decks_comparison.csv'));
+      const shareResp = await fetch('data/limitless_online_decks_comparison.csv?t=' + Date.now());
       if (!shareResp.ok) throw new Error('share CSV not found');
       const shareRows = parseCSV(await shareResp.text(), ';');
 
@@ -2502,7 +2466,7 @@ window.MetaCall = (function () {
       // simply fall back to the ladder share.
       _tournamentStats = {};
       try {
-        const tournResp = await fetch(dataUrl('data/online_tournament_top8_decks.csv'));
+        const tournResp = await fetch('data/online_tournament_top8_decks.csv?t=' + Date.now());
         if (tournResp.ok) {
           const tournRows = parseCSV(await tournResp.text(), ';');
           const broughtSum = tournRows.reduce(
@@ -2530,7 +2494,7 @@ window.MetaCall = (function () {
       // current_meta_analysis.set setting.
       _formatWindow = null;
       try {
-        const fwResp = await fetch(dataUrl('data/format_window.json'));
+        const fwResp = await fetch('data/format_window.json?t=' + Date.now());
         if (fwResp.ok) {
           const fw = await fwResp.json();
           if (fw && /^\d{4}-\d{2}-\d{2}$/.test(fw.in_person_legal_date || '')) {
@@ -2550,7 +2514,7 @@ window.MetaCall = (function () {
       _lastMajorByDeck = {};
       let labsRowsByDeck = {};
       try {
-        const labsResp = await fetch(dataUrl('data/labs_tournament_decks.csv'));
+        const labsResp = await fetch('data/labs_tournament_decks.csv?t=' + Date.now());
         if (labsResp.ok) {
           // Labs CSV is comma-delimited with quoted fields (e.g. the
           // `pokemon` column wraps values like "dragapult, dusknoir").
@@ -2830,7 +2794,7 @@ window.MetaCall = (function () {
       // is effective, the override is a no-op.
       try { await _applyDateFilter(); } catch (_e) { /* tolerate */ }
 
-      const matchResp = await fetch(dataUrl('data/limitless_online_decks_matchups.csv'));
+      const matchResp = await fetch('data/limitless_online_decks_matchups.csv?t=' + Date.now());
       if (!matchResp.ok) throw new Error('matchup CSV not found');
       const matchRows = parseCSV(await matchResp.text(), ';');
 
@@ -3203,10 +3167,56 @@ window.MetaCall = (function () {
   // pool at 25 ensures they're evaluated. (Bumped from 20 to 25 after
   // Utrecht 2026 surfaced Lucario/Hariyama and Lopunny/Froslass at
   // ~4 % field each — both invisible at the old 20-deck horizon.)
+  function calcRecommendations(field, topN = 5) {
+    if (!_shareList || !field || field.length === 0) return [];
+
+    const RECO_POOL_SIZE = 25;
+    const seen = new Set();
+    const candidates = [];
+
+    // 1) Top-N from the share list (RECO_POOL_SIZE = field's TOP_N).
+    _shareList.slice(0, RECO_POOL_SIZE).forEach(d => {
+      const k = normalize(d.name);
+      if (!k || seen.has(k)) return;
+      seen.add(k);
+      candidates.push(d.name);
+    });
+
+    // 2) The user's currently-selected deck — always include so they
+    //    can see where their pick ranks even if it's outside top-20.
+    if (_settings.myDeck) {
+      const myK = normalize(_settings.myDeck);
+      if (myK && !seen.has(myK)) {
+        seen.add(myK);
+        candidates.push(_settings.myDeck);
+      }
+    }
+
+    // 3) Custom decks the user added to the field — they're intentional
+    //    candidates, evaluate them too.
+    (_customDecks || []).forEach(c => {
+      if (!c || !c.name) return;
+      const k = normalize(c.name);
+      if (!k || seen.has(k)) return;
+      seen.add(k);
+      candidates.push(c.name);
+    });
+
+    const results = candidates.map(name => {
+      const r = calcDay2(field, name);
+      return {
+        name,
+        day2Prob: r.day2Prob,
+        expWin: r.expWin,
+        avgWR: (r.expWin / _settings.rounds) * 100,
+      };
+    });
+    return results
+      .sort((a, b) => (b.day2Prob - a.day2Prob) || (b.avgWR - a.avgWR))
+      .slice(0, topN);
+  }
+
   // Dynamic recommendations split — Day-2-fähig list + Geheimtipps.
-  // (calcRecommendations — the older fixed-topN variant — was removed
-  // after audit-08; calcRecommendationsSplit is the only caller path
-  // used by renderAll / refreshResults.)
   //
   //  Day-2-fähig: every candidate from the narrow top-30 pool with
   //               day2Prob ≥ 0.20 ("competitive threshold" — at least
@@ -4154,7 +4164,7 @@ window.MetaCall = (function () {
 
   // ── Full Render ────────────────────────────────────────────
   function renderAll() {
-    const container = document.getElementById('meta-call');
+    const container = document.getElementById('profile-metacall');
     if (!container || !_shareList) return;
     const field = buildField();
     // Date-window control — duplicates the picker in Card Analysis so
@@ -4190,11 +4200,12 @@ window.MetaCall = (function () {
     <p class="color-grey">${t('mc.subtitle')}</p>
     ${dateBanner}
   </div>
-  ${'' /* Predictor banner removed in audit-08 dead-code pass — it had
-       been suppressed in renderAll since the verbose technical
-       breakdown confused users more than it helped. If a slimmer
-       chip-style replacement is desired later, write it fresh; the
-       old shape is in git history. */}
+  ${'' /* Predictor banner suppressed — the verbose technical breakdown
+       ("Based on N major-tournament rows + online-tournament + ladder
+       data. + Online-Entwicklung seit DD.MM.") confused users more
+       than it helped. The function and its trend/CL/accuracy chips
+       are kept in the code in case a slimmer chip-style replacement
+       is added later. */}
   ${renderScenariosBar()}
   ${renderSettingsPanel()}
   ${renderMetaCallModePanel()}
@@ -4390,10 +4401,41 @@ window.MetaCall = (function () {
     return m ? `${m[3]}.${m[2]}.` : (iso || '');
   }
 
-  // (renderPredictorBanner — the verbose technical accuracy chip — was
-  // removed after audit-08. It had been suppressed in renderAll() since
-  // it confused users. If a slimmer chip-style replacement is desired,
-  // write it fresh; git history has the old shape.)
+  function renderPredictorBanner() {
+    const tgLoaded = Object.values(_tgFieldShares).reduce((s, v) => s + v, 0) > 0;
+    const clTags = [];
+    if (_useClCurrent && Object.keys(_clCurrentByDeck).length > 0) clTags.push('CL Current');
+    if (_useClPast    && Object.keys(_clPastByDeck).length > 0)    clTags.push('CL Past');
+    const clSuffix = (clTags.length && _predictorMode === 'A' && !tgLoaded)
+      ? ` <span class="mc-predictor-banner-cl">+ ${clTags.join(' + ')}</span>`
+      : '';
+
+    // Predictor 3.0: when a post-major baseline snapshot is loaded, append
+    // "+ Online-Entwicklung seit DD.MM." so the user sees that the trend
+    // signal is live. Falls silent when no snapshot exists.
+    const trendSuffix = _baselineSnapshotDate
+      ? ` <span class="mc-predictor-banner-trend">+ Online-Entwicklung seit ${_formatDDMM(_baselineSnapshotDate)}</span>`
+      : '';
+
+    // Predictor 3.0 system-learning chip — shows MAE of the previous
+    // prediction once a fresh major has arrived. Surfaces the accuracy
+    // story so the user can tune trust over time.
+    const accuracySuffix = _lastAccuracyReport
+      ? ` <span class="mc-predictor-banner-accuracy" title="Mean Absolute Error of the prediction made ${_formatDDMM(_lastAccuracyReport.baselineDate)} vs the major on ${_formatDDMM(_lastAccuracyReport.majorDate)}">Letzte Prognose-Accuracy: ø ${String(_lastAccuracyReport.mae).replace('.', ',')} pp Abweichung</span>`
+      : '';
+
+    if (_predictorMode === 'B') {
+      const tournNum = _labsMajorRows;
+      return `<div class="mc-predictor-banner mc-predictor-banner-b">
+        <span class="mc-predictor-banner-icon">📊</span>
+        <span class="mc-predictor-banner-text">${t('mc.bannerModeB').replace('{n}', tournNum)}${trendSuffix}${clSuffix}${accuracySuffix}</span>
+      </div>`;
+    }
+    return `<div class="mc-predictor-banner mc-predictor-banner-a">
+      <span class="mc-predictor-banner-icon">⚡</span>
+      <span class="mc-predictor-banner-text">${t('mc.bannerModeA')}${trendSuffix}${clSuffix}${accuracySuffix}</span>
+    </div>`;
+  }
 
   // Per-deck text-first intel block — used in the EXPANDED detail row
   // (see `_renderDetailRow`). Renders a 3-col stat grid for the public
@@ -4555,7 +4597,7 @@ window.MetaCall = (function () {
   }
 
   function refreshResults() {
-    const container = document.getElementById('meta-call');
+    const container = document.getElementById('profile-metacall');
     if (!container || !_shareList) return;
     const field = buildField();
     const fieldTbody = container.querySelector('.metacall-table tbody');
@@ -4582,9 +4624,9 @@ window.MetaCall = (function () {
       const newPanel = tmp.querySelector('.metacall-panel');
       if (newPanel) resultsWrap.innerHTML = newPanel.innerHTML;
     }
-    // Recommendations panel — re-runs calcRecommendationsSplit with
-    // the updated field. Day-2 numbers shift whenever the field
-    // shifts so this always keeps the recommendation table in sync.
+    // Recommendations panel — re-runs calcRecommendations with the
+    // updated field. Day-2 numbers shift whenever the field shifts so
+    // this always keeps the recommendation table in sync.
     const recPanel = container.querySelector('.mc-rec-panel');
     if (recPanel) {
       const tmp = document.createElement('div');
@@ -6117,7 +6159,7 @@ window.MetaCall = (function () {
 
   // ── Public Init ────────────────────────────────────────────
   async function init() {
-    const container = document.getElementById('meta-call');
+    const container = document.getElementById('profile-metacall');
     if (!container) return;
     if (_shareList && _matchupMap) { renderAll(); return; }
 

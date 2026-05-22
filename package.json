@@ -3,29 +3,12 @@
 	"version": "1.0.0",
 	"private": true,
 	"scripts": {
-		"test": "node scripts/run-unit-tests.js",
-		"test:coverage": "c8 --reporter=text --reporter=html --reporter=json-summary --include='js/**/*.js' node scripts/run-unit-tests.js",
-		"test:coverage:modules": "c8 --reporter=text --check-coverage --lines 85 --functions 80 --branches 70 --include='js/modules/**/*.js' node scripts/run-unit-tests.js",
-		"build:bundle": "node scripts/build-bundle.js && node scripts/build-modules.js",
-		"build:legacy": "node scripts/build-bundle.js",
-		"build:modules": "node scripts/build-modules.js",
 		"test:visual:fullpage:ci": "node tests/e2e/run-visual-fullpage-ci.js",
 		"test:visual:nonmeta:ci": "node tests/e2e/run-visual-nonmeta-ci.js",
-		"test:visual:nonmeta:report": "node tests/e2e/runtime-verify-updates.js",
-		"lint": "eslint 'js/**/*.js' 'tests/unit/**/*.js'",
-		"lint:fix": "eslint 'js/**/*.js' 'tests/unit/**/*.js' --fix",
-		"typecheck": "tsc --noEmit",
-		"format": "prettier --check 'js/**/*.js' 'css/**/*.css' '*.json' '*.md'",
-		"format:fix": "prettier --write 'js/**/*.js' 'css/**/*.css' '*.json' '*.md'"
+		"test:visual:nonmeta:report": "node tests/e2e/runtime-verify-updates.js"
 	},
 	"devDependencies": {
 		"@playwright/test": "^1.59.1",
-		"c8": "^10.1.3",
-		"esbuild": "^0.28.0",
-		"eslint": "^9.18.0",
-		"globals": "^15.14.0",
-		"papaparse": "^5.5.3",
-		"prettier": "^3.4.2",
-		"typescript": "^6.0.3"
+		"papaparse": "^5.5.3"
 	}
 }

@@ -67,41 +67,6 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             pastMeta: new Set(),
         };
 
-        // ─── Source-prefix helpers (Wave-1 dedup) ───────────────────────
-        // The three deck sources — cityLeague / currentMeta / pastMeta —
-        // all share the same save/state-lookup shape. These helpers
-        // replace ~30 LOC of `if (source === 'X') saveX()` and
-        // `if (source === 'X') { deck = window.cityLeagueDeck; … }`
-        // boilerplate scattered across the file. See
-        // docs/audit/07-app-deck-builder.md §4.2 for the full duplication
-        // list.
-        //
-        // persistDeck() keeps the typeof-guard because the save fns live
-        // in sibling scripts that load AFTER app-deck-builder.js (see
-        // index.html defer-script order) — they aren't yet defined when
-        // this file is parsed, only when the call sites actually fire.
-        function persistDeck(source) {
-            if (source === 'cityLeague') {
-                if (typeof saveCityLeagueDeck === 'function') saveCityLeagueDeck();
-            } else if (source === 'currentMeta') {
-                if (typeof saveCurrentMetaDeck === 'function') saveCurrentMetaDeck();
-            } else if (source === 'pastMeta') {
-                if (typeof savePastMetaDeck === 'function') savePastMetaDeck();
-            }
-        }
-        function getDeckRefs(source) {
-            if (source === 'cityLeague') {
-                return { deck: window.cityLeagueDeck, orderKey: 'cityLeagueDeckOrder' };
-            }
-            if (source === 'currentMeta') {
-                return { deck: window.currentMetaDeck, orderKey: 'currentMetaDeckOrder' };
-            }
-            if (source === 'pastMeta') {
-                return { deck: window.pastMetaDeck, orderKey: 'pastMetaDeckOrder' };
-            }
-            return { deck: null, orderKey: null };
-        }
-
         function isExcludedCard(source, cardName) {
             const bucket = (window.excludedCards || {})[source];
             if (!bucket || !bucket.has) return false;
@@ -131,7 +96,9 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 excludeBucket.delete(key);
             }
             try {
-                persistDeck(source);
+                if (source === 'cityLeague' && typeof saveCityLeagueDeck === 'function') saveCityLeagueDeck();
+                else if (source === 'currentMeta' && typeof saveCurrentMetaDeck === 'function') saveCurrentMetaDeck();
+                else if (source === 'pastMeta' && typeof savePastMetaDeck === 'function') savePastMetaDeck();
             } catch (_) { /* swallow — UI redraw still happens */ }
             if (typeof updateDeckDisplay === 'function') updateDeckDisplay(source);
             if (typeof showToast === 'function') {
@@ -193,7 +160,9 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             }
             // Persist alongside the deck so the pin survives regen.
             try {
-                persistDeck(source);
+                if (source === 'cityLeague' && typeof saveCityLeagueDeck === 'function') saveCityLeagueDeck();
+                else if (source === 'currentMeta' && typeof saveCurrentMetaDeck === 'function') saveCurrentMetaDeck();
+                else if (source === 'pastMeta' && typeof savePastMetaDeck === 'function') savePastMetaDeck();
             } catch (_) { /* swallow — UI redraw still happens */ }
             if (typeof updateDeckDisplay === 'function') updateDeckDisplay(source);
             if (typeof showToast === 'function') {
@@ -274,7 +243,9 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             }
             bucket.push(trimmed);
             try {
-                persistDeck(source);
+                if (source === 'cityLeague' && typeof saveCityLeagueDeck === 'function') saveCityLeagueDeck();
+                else if (source === 'currentMeta' && typeof saveCurrentMetaDeck === 'function') saveCurrentMetaDeck();
+                else if (source === 'pastMeta' && typeof savePastMetaDeck === 'function') savePastMetaDeck();
             } catch (_) { /* swallow */ }
             if (typeof renderTechSlotsUI === 'function') renderTechSlotsUI(source);
             return true;
@@ -290,7 +261,9 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             if (idx < 0) return false;
             bucket.splice(idx, 1);
             try {
-                persistDeck(source);
+                if (source === 'cityLeague' && typeof saveCityLeagueDeck === 'function') saveCityLeagueDeck();
+                else if (source === 'currentMeta' && typeof saveCurrentMetaDeck === 'function') saveCurrentMetaDeck();
+                else if (source === 'pastMeta' && typeof savePastMetaDeck === 'function') savePastMetaDeck();
             } catch (_) { /* swallow */ }
             if (typeof renderTechSlotsUI === 'function') renderTechSlotsUI(source);
             return true;
@@ -301,7 +274,9 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             if (source !== 'cityLeague' && source !== 'currentMeta' && source !== 'pastMeta') return;
             window.techSlots[source] = [];
             try {
-                persistDeck(source);
+                if (source === 'cityLeague' && typeof saveCityLeagueDeck === 'function') saveCityLeagueDeck();
+                else if (source === 'currentMeta' && typeof saveCurrentMetaDeck === 'function') saveCurrentMetaDeck();
+                else if (source === 'pastMeta' && typeof savePastMetaDeck === 'function') savePastMetaDeck();
             } catch (_) { /* swallow */ }
             if (typeof renderTechSlotsUI === 'function') renderTechSlotsUI(source);
             if (typeof showToast === 'function') {
@@ -603,9 +578,17 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
         function addCardToDeckBatch(source, cardName, setCode, setNumber) {
             if (source !== 'cityLeague' && source !== 'currentMeta' && source !== 'pastMeta') return false;
             
-            const _refs = getDeckRefs(source);
-            const deck = _refs.deck;
-            const deckOrderKey = _refs.orderKey;
+            let deck, deckOrderKey;
+            if (source === 'cityLeague') {
+                deck = window.cityLeagueDeck;
+                deckOrderKey = 'cityLeagueDeckOrder';
+            } else if (source === 'currentMeta') {
+                deck = window.currentMetaDeck;
+                deckOrderKey = 'currentMetaDeckOrder';
+            } else if (source === 'pastMeta') {
+                deck = window.pastMetaDeck;
+                deckOrderKey = 'pastMetaDeckOrder';
+            }
             
             // Initialize deck order array if not exists
             if (!window[deckOrderKey]) {
@@ -805,9 +788,17 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
         function addCardToDeck(source, cardName, setCode, setNumber) {
             if (source !== 'cityLeague' && source !== 'currentMeta' && source !== 'pastMeta') return;
             
-            const _refs = getDeckRefs(source);
-            const deck = _refs.deck;
-            const deckOrderKey = _refs.orderKey;
+            let deck, deckOrderKey;
+            if (source === 'cityLeague') {
+                deck = window.cityLeagueDeck;
+                deckOrderKey = 'cityLeagueDeckOrder';
+            } else if (source === 'currentMeta') {
+                deck = window.currentMetaDeck;
+                deckOrderKey = 'currentMetaDeckOrder';
+            } else if (source === 'pastMeta') {
+                deck = window.pastMetaDeck;
+                deckOrderKey = 'pastMetaDeckOrder';
+            }
             
             // Initialize deck order array if not exists
             if (!window[deckOrderKey]) {
@@ -931,8 +922,14 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             devLog(`Added card to deck: ${deckKey} -> ${deck[deckKey]}`);
             
             // Save to localStorage
-            persistDeck(source);
-
+            if (source === 'cityLeague') {
+                saveCityLeagueDeck();
+            } else if (source === 'currentMeta') {
+                saveCurrentMetaDeck();
+            } else if (source === 'pastMeta') {
+                savePastMetaDeck();
+            }
+            
             updateDeckDisplay(source);
         }
 
@@ -1023,9 +1020,17 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
         function removeCardFromDeck(source, deckKey) {
             if (source !== 'cityLeague' && source !== 'currentMeta' && source !== 'pastMeta') return;
             
-            const _refs = getDeckRefs(source);
-            const deck = _refs.deck;
-            const deckOrderKey = _refs.orderKey;
+            let deck, deckOrderKey;
+            if (source === 'cityLeague') {
+                deck = window.cityLeagueDeck;
+                deckOrderKey = 'cityLeagueDeckOrder';
+            } else if (source === 'currentMeta') {
+                deck = window.currentMetaDeck;
+                deckOrderKey = 'currentMetaDeckOrder';
+            } else if (source === 'pastMeta') {
+                deck = window.pastMetaDeck;
+                deckOrderKey = 'pastMetaDeckOrder';
+            }
             
             // CRITICAL FIX: Find the actual key in deck
             // If deckKey is just "CardName" but deck has "CardName (SET NUM)", find it
@@ -1056,7 +1061,13 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 }
                 
                 // Save to localStorage
-                persistDeck(source);
+                if (source === 'cityLeague') {
+                    saveCityLeagueDeck();
+                } else if (source === 'currentMeta') {
+                    saveCurrentMetaDeck();
+                } else if (source === 'pastMeta') {
+                    savePastMetaDeck();
+                }
                 
                 updateDeckDisplay(source);
             }
@@ -1167,7 +1178,9 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
 
             const normalized = normalizeDeckEntries(source);
             if (normalized) {
-                persistDeck(source);
+                if (source === 'cityLeague') saveCityLeagueDeck();
+                else if (source === 'currentMeta') saveCurrentMetaDeck();
+                else if (source === 'pastMeta') savePastMetaDeck();
             }
             
             let deck;
@@ -1221,10 +1234,10 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 for (const [deckKey, count] of Object.entries(deck)) {
                     if (!count || count <= 0) continue;
                     let cardData = null;
-                    const setMatch = parseCardKey(deckKey);
+                    const setMatch = deckKey.match(/^(.+?)\s+\(([A-Z0-9-]+)\s+([A-Z0-9-]+)\)$/);
                     if (setMatch) {
-                        const key = `${setMatch.setCode}-${setMatch.number}`;
-                        cardData = getIndexedCardBySetNumber(setMatch.setCode, setMatch.number);
+                        const key = `${setMatch[2]}-${setMatch[3]}`;
+                        cardData = getIndexedCardBySetNumber(setMatch[2], setMatch[3]);
                         if (!cardData && cardsBySetNumberMap) cardData = cardsBySetNumberMap[key] || null;
                     } else {
                         cardData = (cardIndexMap && cardIndexMap.get(deckKey)) || null;
@@ -1381,14 +1394,14 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 
                 // If still not found, extract card name from "CardName (SET NUM)" format
                 if (!cardData) {
-                    const parsed = parseCardKey(deckKey);
-                    if (parsed) {
-                        const baseName = parsed.name;
-                        const setMatch = parsed;
-
+                    const baseNameMatch = deckKey.match(/^(.+?)\s*\(/);
+                    if (baseNameMatch) {
+                        const baseName = baseNameMatch[1];
+                        const setMatch = deckKey.match(/\(([A-Z0-9]+)\s+([A-Z0-9]+)\)$/);
+                        
                         if (setMatch) {
-                            const setCode = setMatch.setCode;
-                            const setNumber = setMatch.number;
+                            const setCode = setMatch[1];
+                            const setNumber = setMatch[2];
                             
                             // Fast lookup using index instead of find()
                             const key = `${setCode}-${setNumber}`;
@@ -1425,12 +1438,13 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 
                 if (!cardData) continue;
 
-                const parsed = parseCardKey(deckKey);
-                const baseName = parsed ? parsed.name : (cardData.card_name || deckKey);
+                const baseNameMatch = deckKey.match(/^(.+?)\s*\(/);
+                const baseName = baseNameMatch ? baseNameMatch[1] : (cardData.card_name || deckKey);
                 const normalizedBaseName = normalizeCardName(baseName);
 
-                const originalSet = parsed ? parsed.setCode : cardData.set_code;
-                const originalNumber = parsed ? parsed.number : cardData.set_number;
+                const setMatch = deckKey.match(/\(([A-Z0-9]+)\s+([A-Z0-9]+)\)$/);
+                const originalSet = setMatch ? setMatch[1] : cardData.set_code;
+                const originalNumber = setMatch ? setMatch[2] : cardData.set_number;
 
                 const cardSetForStats = String(cardData.set_code || cardData.set || originalSet || '').toUpperCase().trim();
                 const cardNumberForStatsRaw = String(cardData.set_number || cardData.number || originalNumber || '').trim();
@@ -2443,13 +2457,15 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             for (const [deckKey, count] of Object.entries(deck)) {
                 if (count <= 0) continue;
                 
-                // Canonical helper: returns name + set + number, or null for
-                // bare-name keys. Honours the print the user picked in the
-                // Rarity Switcher.
-                const parsed = parseCardKey(deckKey);
-                const cardName = parsed ? parsed.name : deckKey;
-                const explicitSet = parsed ? parsed.setCode : '';
-                const explicitNumber = parsed ? parsed.number : '';
+                // Extract card name from deckKey (handle "CardName (SET NUM)" format)
+                const baseNameMatch = deckKey.match(/^(.+?)\s*\(/);
+                const cardName = baseNameMatch ? baseNameMatch[1] : deckKey;
+
+                // Extract explicit set/number from deck key so we honour
+                // the print the user picked in the Rarity Switcher.
+                const setMatch = deckKey.match(/\(([A-Z0-9-]+)\s+([A-Z0-9-]+)\)$/);
+                const explicitSet = setMatch ? setMatch[1] : '';
+                const explicitNumber = setMatch ? setMatch[2] : '';
                 
                 let cardData = cardDataMap.get(cardName) || cardDataMap.get(deckKey);
                 
@@ -3049,10 +3065,10 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 Object.entries(cards)
                     .filter(([, count]) => count > 0)
                     .map(([deckKey, count]) => {
-                        const baseMatch = parseCardKey(deckKey);
-                        const cardName = baseMatch ? baseMatch.name : deckKey;
-                        const setCode  = baseMatch ? baseMatch.setCode : '';
-                        const setNumber = baseMatch ? baseMatch.number : '';
+                        const baseMatch = deckKey.match(/^(.+?)\s*\(([A-Z0-9-]+)\s+([A-Z0-9-]+)\)$/);
+                        const cardName = baseMatch ? baseMatch[1] : deckKey;
+                        const setCode  = baseMatch ? baseMatch[2] : '';
+                        const setNumber = baseMatch ? baseMatch[3] : '';
 
                         let imageUrl = '';
                         if (setCode && setNumber) {
@@ -3143,10 +3159,10 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 Object.entries(cards)
                     .filter(([, count]) => count > 0)
                     .map(([deckKey, count]) => {
-                        const baseMatch = parseCardKey(deckKey);
-                        const cardName = baseMatch ? baseMatch.name : deckKey;
-                        const setCode  = baseMatch ? baseMatch.setCode : '';
-                        const setNumber = baseMatch ? baseMatch.number : '';
+                        const baseMatch = deckKey.match(/^(.+?)\s*\(([A-Z0-9-]+)\s+([A-Z0-9-]+)\)$/);
+                        const cardName = baseMatch ? baseMatch[1] : deckKey;
+                        const setCode  = baseMatch ? baseMatch[2] : '';
+                        const setNumber = baseMatch ? baseMatch[3] : '';
                         let imageUrl = '';
                         if (setCode && setNumber) {
                             imageUrl = getUnifiedCardImage(setCode, setNumber);
@@ -4379,11 +4395,10 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             if (Array.isArray(window.onlineTournamentDatedRows)) {
                 return window.onlineTournamentDatedRows;
             }
-            // Idempotent lazy init — first caller spawns the fetch,
-            // any concurrent caller awaits the same in-flight promise.
-            // Logical-OR-assignment fuses the "have we started?" check
-            // and the assignment into one expression.
-            window._onlineTournamentDatedPromise ||= (async () => {
+            if (window._onlineTournamentDatedPromise) {
+                return await window._onlineTournamentDatedPromise;
+            }
+            window._onlineTournamentDatedPromise = (async () => {
                 try {
                     const rows = await loadCSV('online_tournament_dated_cards.csv');
                     window.onlineTournamentDatedRows = Array.isArray(rows) ? rows : [];

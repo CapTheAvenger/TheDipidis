@@ -74,22 +74,12 @@ document.addEventListener('click', function(e) {
   });
 });
 
-// Hardened for use inside HTML attributes (e.g. onclick="fn('${escapeJsSingleQuoted(x)}')").
-// Without escaping " < > & a malicious value like  foo" onclick="alert(1)" x="  could
-// break the attribute boundary; with this set, any breakout char becomes an HTML
-// entity that the browser decodes back to a literal AFTER the attribute is parsed
-// — so the JS literal inside the onclick still sees the intended characters, but
-// the surrounding HTML stays well-formed. Fixes B-29 / B-30 from the security audit.
 function escapeJsSingleQuoted(value) {
   return String(value)
     .replace(/\\/g, '\\\\')
     .replace(/'/g, "\\'")
     .replace(/\r/g, '\\r')
-    .replace(/\n/g, '\\n')
-    .replace(/&/g, '&amp;')
-    .replace(/"/g, '&quot;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;');
+    .replace(/\n/g, '\\n');
 }
 
 // Shared helper: lookup card by set+number via the global cardIndexBySetNumber Map
@@ -131,10 +121,9 @@ async function addToCollection(cardId) {
     window.userCollection.add(cardId);
     if (!window.userCollectionCounts) window.userCollectionCounts = new Map();
     window.userCollectionCounts.set(cardId, newCount);
-    if (typeof window._syncUserStoreFromGlobals === 'function') window._syncUserStoreFromGlobals();
     updateCardUI(cardId);
     showNotification(`Added to collection (${newCount}/4)`, 'success');
-
+    
     // Auto-decrement wishlist: if the card is on the wishlist, reduce by 1
     if (window.userWishlist && window.userWishlist.has(cardId)) {
       await removeFromWishlist(cardId);
@@ -185,7 +174,6 @@ async function removeFromCollection(cardId) {
 
       if (window.userCollectionCounts) window.userCollectionCounts.set(cardId, newCount);
     }
-    if (typeof window._syncUserStoreFromGlobals === 'function') window._syncUserStoreFromGlobals();
 
     updateCardUI(cardId);
     showNotification(newCount > 0 ? `Collection: ${newCount}/4 copies` : 'Removed from collection', 'success');
@@ -232,7 +220,6 @@ async function addToWishlistWithCount(cardId, count) {
     window.userWishlist.add(cardId);
     if (!window.userWishlistCounts) window.userWishlistCounts = new Map();
     window.userWishlistCounts.set(cardId, qty);
-    if (typeof window._syncUserStoreFromGlobals === 'function') window._syncUserStoreFromGlobals();
     showNotification(`Added to wishlist (${qty}x)`, 'success');
     if (typeof filterWishlist === 'function') filterWishlist();
     else updateWishlistUI();
@@ -273,7 +260,6 @@ async function addToWishlist(cardId) {
     window.userWishlist.add(cardId);
     if (!window.userWishlistCounts) window.userWishlistCounts = new Map();
     window.userWishlistCounts.set(cardId, newCount);
-    if (typeof window._syncUserStoreFromGlobals === 'function') window._syncUserStoreFromGlobals();
     showNotification(`Added to wishlist (${newCount}x)`, 'success');
 
     // Update wishlist display — preserve any active search/set filter.
@@ -312,7 +298,6 @@ async function removeFromWishlist(cardId) {
       });
       if (window.userWishlistCounts) window.userWishlistCounts.set(cardId, newCount);
     }
-    if (typeof window._syncUserStoreFromGlobals === 'function') window._syncUserStoreFromGlobals();
     showNotification(newCount > 0 ? `Wishlist: ${newCount}x` : 'Removed from wishlist', 'success');
 
     // Update wishlist display — preserve any active search/set filter.
@@ -345,12 +330,6 @@ async function toggleWishlist(cardId) {
 async function saveCurrentDeckToProfile(source) {
   const user = auth.currentUser;
   if (!user) {
-    // B-48 hotfix: remember the source so the save retries automatically
-    // after successful sign-in. Previously the user clicked Save, the auth
-    // modal popped up, they signed in, the modal closed — and their deck
-    // was NOT saved because this function had already returned. They had
-    // to spot the Save button and click it again.
-    window._pendingDeckSaveSource = source;
     showNotification('Please sign in to save decks', 'error');
     showAuthModal('signin');
     return;
@@ -419,13 +398,13 @@ async function saveCurrentDeckToProfile(source) {
     };
     
     // Save to Firestore
-    const newDocRef = await db.collection('users').doc(user.uid)
+    await db.collection('users').doc(user.uid)
       .collection('decks').add(deckData);
-
+    
     showNotification(`Deck "${trimmedName}" saved successfully!`, 'success');
-
-    // Local patch instead of full refetch (B-3) — avoids N extra reads/click.
-    patchUserDecksLocal('add', { ...deckData, id: newDocRef.id, createdAtMs: Date.now() });
+    
+    // Reload user decks
+    await loadUserDecks(user.uid);
   } catch (error) {
     console.error('Error saving deck:', error);
     showNotification('Error saving deck', 'error');
@@ -433,41 +412,21 @@ async function saveCurrentDeckToProfile(source) {
 }
 
 // Save display name
-//
-// Hardens B-2 (stored XSS via displayName): max length 40 + whitelist character
-// set (letters, numbers, space, basic punctuation). Anything outside that set
-// is rejected client-side; the matching Firestore rule (see firestore.rules)
-// enforces the same constraint server-side so a determined attacker who bypasses
-// the form cannot persist a payload either. Renderers still use textContent /
-// escapeHtml because defense-in-depth is cheap.
-const DISPLAY_NAME_MAX_LEN = 40;
-const DISPLAY_NAME_RX = /^[A-Za-z0-9 _\-.,'!?]+$/;
-
 async function saveDisplayName() {
   const user = auth.currentUser;
   if (!user) {
     showNotification('Please sign in to update your profile', 'error');
     return;
   }
-
+  
   const nameInput = document.getElementById('settings-display-name');
   const displayName = nameInput.value.trim();
-
+  
   if (!displayName) {
     showNotification('Please enter a name', 'error');
     return;
   }
-
-  if (displayName.length > DISPLAY_NAME_MAX_LEN) {
-    showNotification(`Name too long (max ${DISPLAY_NAME_MAX_LEN} characters)`, 'error');
-    return;
-  }
-
-  if (!DISPLAY_NAME_RX.test(displayName)) {
-    showNotification('Name contains characters that are not allowed (only letters, numbers, spaces and basic punctuation)', 'error');
-    return;
-  }
-
+  
   try {
     // Use set with merge to create document if it doesn't exist
     await db.collection('users').doc(user.uid).set({
@@ -511,8 +470,6 @@ async function saveDeck(deckData) {
         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
       });
       showNotification('Deck updated!', 'success');
-      // Local patch instead of full refetch (B-3).
-      patchUserDecksLocal('update', { ...deckData });
     } else {
       // Create new deck
       const newDeck = {
@@ -523,9 +480,10 @@ async function saveDeck(deckData) {
       const docRef = await deckRef.add(newDeck);
       deckData.id = docRef.id;
       showNotification('Deck saved!', 'success');
-      // Local patch instead of full refetch (B-3).
-      patchUserDecksLocal('add', { ...deckData, createdAtMs: Date.now() });
     }
+    
+    // Reload decks
+    await loadUserDecks(user.uid);
   } catch (error) {
     console.error('Error saving deck:', error);
     showNotification('Error saving deck', 'error');
@@ -542,10 +500,9 @@ async function deleteDeck(deckId) {
   try {
     await db.collection('users').doc(user.uid)
       .collection('decks').doc(deckId).delete();
-
+    
     showNotification('Deck deleted', 'success');
-    // Local patch instead of full refetch (B-3).
-    patchUserDecksLocal('delete', deckId);
+    await loadUserDecks(user.uid);
   } catch (error) {
     console.error('Error deleting deck:', error);
     showNotification('Error deleting deck', 'error');
@@ -1277,8 +1234,7 @@ function updateWishlistUI(searchFilter = '', setFilter = '') {
       if (!isNaN(price) && price > 0) totalValue += price * wantedCount;
 
       // Cardmarket link
-      // Sanitize: only http(s) URLs survive — javascript:/data:/vbscript: become ''.
-      const rawCmUrl = safeExternalUrl(card.cardmarket_url || '');
+      const rawCmUrl = card.cardmarket_url || '';
       const cmUrl = rawCmUrl ? rawCmUrl.split('?')[0] + '?sellerCountry=7&language=1,3' : '';
       const safeCmUrl = escapeHtml(cmUrl);
 
@@ -1544,10 +1500,7 @@ async function copyWishlistForCardmarket() {
     const card = allCards.find(c => c && c.name === cardName && c.set === cardSet && c.number === cardNumber);
     const count = window.userWishlistCounts ? (window.userWishlistCounts.get(cardId) || 1) : 1;
     let url = '';
-    if (card) {
-        const safeCm = safeExternalUrl(card.cardmarket_url || '');
-        if (safeCm) url = safeCm.split('?')[0];
-    }
+    if (card && card.cardmarket_url) url = String(card.cardmarket_url).split('?')[0];
     const disambiguation = (cardText && cardText[`${cardSet}|${cardNumber}`]) || '';
     items.push({ count, name: cardName, set: cardSet || '', number: cardNumber || '', url, disambiguation });
   });
@@ -2155,8 +2108,7 @@ function updateDecksUI() {
         const priceDisplay = eurPrice || '0,00 €';
         const safePriceDisplayHtml = escapeHtml(priceDisplay);
         const priceBackground = eurPrice ? 'linear-gradient(135deg, #ff6b35 0%, #ff8c42 100%)' : 'linear-gradient(135deg, #777 0%, #999 100%)';
-        // Sanitize before embedding into HTML/JS — javascript: URLs become '' here.
-        const cardmarketUrl = safeExternalUrl(card.cardmarket_url || '');
+        const cardmarketUrl = card.cardmarket_url || '';
         const safeCardmarketUrlJs = escapeJsSingleQuoted(cardmarketUrl);
         const safeCardIdJs = escapeJsSingleQuoted(cardId);
         const safeDeckKeyJs = escapeJsSingleQuoted(card.deck_key || `${cardName} (${setCode} ${setNumber})`);
@@ -2793,18 +2745,105 @@ function compareActiveDecks() {
   };
 }
 
-// Legacy "My Decks Playtest" entry points. The in-app playtester has been
-// retired (see js/tcg-showdown-link.js); these stubs redirect existing UI
-// buttons to the external TCG Showdown handoff so nothing throws.
+// Open modal to pick 2 decks for playtest
 function openMyDecksPlaytest() {
-  if (typeof window.openShowdownExternal === 'function') {
-    window.openShowdownExternal();
-  } else if (typeof showNotification === 'function') {
-    showNotification('Playtester moved to tcg-showdown.com', 'info', 2400);
+  const modal = document.getElementById('myDecksPlaytestModal');
+  if (!modal) return;
+  const decks = window.userDecks || [];
+  if (decks.length === 0) {
+    if (typeof showNotification === 'function') {
+      showNotification('No saved decks yet.', 'error');
+    } else {
+      showToast('No saved decks yet!', 'warning');
+    }
+    return;
   }
+  ['myDeckSelectP1', 'myDeckSelectP2'].forEach((selId, idx) => {
+    const sel = document.getElementById(selId);
+    if (!sel) return;
+    sel.innerHTML = decks.map((d, i) => `<option value="${i}">${escapeHtml(d.name || 'Deck ' + (i + 1))}</option>`).join('');
+    if (idx === 1 && decks.length > 1) sel.value = '1';
+  });
+  modal.style.display = 'flex';
 }
-function closeMyDecksPlaytest() {}
-async function startMyDecksPlaytest() { openMyDecksPlaytest(); }
+
+function closeMyDecksPlaytest() {
+  const modal = document.getElementById('myDecksPlaytestModal');
+  if (modal) modal.style.display = 'none';
+}
+
+async function startMyDecksPlaytest() {
+  const p1Idx = parseInt(document.getElementById('myDeckSelectP1').value);
+  const p2Idx = parseInt(document.getElementById('myDeckSelectP2').value);
+  const deck1 = window.userDecks && window.userDecks[p1Idx];
+  const deck2 = window.userDecks && window.userDecks[p2Idx];
+  if (!deck1 || !deck1.cards) {
+    if (typeof showNotification === 'function') {
+      showNotification('Could not load Player 1 deck.', 'error');
+    } else {
+      showToast('Could not load Player 1 deck!', 'error');
+    }
+    return;
+  }
+  if (!deck2 || !deck2.cards) {
+    if (typeof showNotification === 'function') {
+      showNotification('Could not load Player 2 deck.', 'error');
+    } else {
+      showToast('Could not load Player 2 deck!', 'error');
+    }
+    return;
+  }
+
+  if (typeof standaloneDecks === 'undefined' && typeof window.ensurePlaytesterScriptsLoaded === 'function') {
+    try {
+      await window.ensurePlaytesterScriptsLoaded({ notify: true });
+    } catch (error) {
+      console.error('[My Decks Playtest] Failed to load playtester scripts:', error);
+    }
+  }
+
+  if (typeof standaloneDecks === 'undefined') {
+    if (typeof showNotification === 'function') {
+      showNotification('Playtester could not be loaded.', 'error');
+    } else {
+      showToast('Playtester not loaded yet!', 'error');
+    }
+    return;
+  }
+
+  // Regex handles all number formats: 183, TG01, GG01, 001/198, PA-01, etc.
+  const keyRx = /^(.+?)\s+\(([A-Z0-9-]+)\s+([A-Z0-9/a-z-]+)\)$/;
+  const backUrl = typeof CARD_BACK_URL !== 'undefined' ? CARD_BACK_URL : '';
+
+  function buildDeck(deckObj) {
+    const result = [];
+    for (const [deckKey, count] of Object.entries(deckObj)) {
+      if (!count || count <= 0) continue;
+      let cardName = deckKey, imageUrl = backUrl, cardType = '', setCode = '', number = '';
+      const m = deckKey.match(keyRx);
+      if (m) {
+        cardName = m[1]; setCode = m[2]; number = m[3];
+        // Direct exact-print lookup — same as _simFindCard in draw-simulator.js
+        let cd = null;
+        if (window.cardsBySetNumberMap) cd = window.cardsBySetNumberMap[`${setCode}-${number}`] || null;
+        if (!cd && window.allCardsDatabase) cd = window.allCardsDatabase.find(c => c.set === setCode && c.number === number) || null;
+        if (!cd && window.allCardsDatabase) cd = window.allCardsDatabase.find(c => c.name === cardName) || null;
+        if (cd) { imageUrl = cd.image_url || backUrl; cardType = cd.card_type || cd.type || ''; }
+      } else {
+        const cd = window.allCardsDatabase && window.allCardsDatabase.find(c => c.name === cardName);
+        if (cd) { imageUrl = cd.image_url || backUrl; cardType = cd.card_type || cd.type || ''; setCode = cd.set || ''; number = cd.number || ''; }
+      }
+      result.push({ name: cardName, imageUrl, cardType, setCode, number, count });
+    }
+    return result;
+  }
+
+  standaloneDecks.p1 = buildDeck(deck1.cards);
+  standaloneDecks.p2 = buildDeck(deck2.cards);
+
+  closeMyDecksPlaytest();
+  if (typeof startStandalonePlaytester === 'function') startStandalonePlaytester();
+}
 
 // Copy a saved deck to clipboard in Pokémon TCG Live format
 function copyMyDeck(deckIndex) {
@@ -2822,15 +2861,15 @@ function copyMyDeck(deckIndex) {
     if (!count || count <= 0) continue;
 
     // Parse "CardName (SET NUMBER)" or just "CardName"
-    const setMatch = parseCardKey(deckKey);
+    const setMatch = deckKey.match(/^(.+?)\s+\(([A-Z0-9]+)\s+([A-Z0-9]+)\)$/);
     let cardName = deckKey;
     let setCode = '';
     let setNumber = '';
 
     if (setMatch) {
-      cardName = setMatch.name;
-      setCode = setMatch.setCode;
-      setNumber = setMatch.number;
+      cardName = setMatch[1];
+      setCode = setMatch[2];
+      setNumber = setMatch[3];
     } else {
       // Fallback: look up set info from database
       const cardData = window.allCardsDatabase && window.allCardsDatabase.find(c => c.name === cardName);
@@ -2893,10 +2932,10 @@ function copyDeckAndOpenLimitless(deckIndex) {
 
   for (const [deckKey, count] of Object.entries(deck.cards)) {
     if (!count || count <= 0) continue;
-    const setMatch = parseCardKey(deckKey);
+    const setMatch = deckKey.match(/^(.+?)\s+\(([A-Z0-9]+)\s+([A-Z0-9]+)\)$/);
     let cardName = deckKey, setCode = '', setNumber = '';
     if (setMatch) {
-      cardName = setMatch.name; setCode = setMatch.setCode; setNumber = setMatch.number;
+      cardName = setMatch[1]; setCode = setMatch[2]; setNumber = setMatch[3];
     } else {
       const cardData = window.allCardsDatabase && window.allCardsDatabase.find(c => c.name === cardName);
       if (cardData) { setCode = cardData.set || ''; setNumber = cardData.number || ''; }
@@ -4365,10 +4404,9 @@ async function duplicateDeck(deckIndex) {
     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
   };
   try {
-    const dupRef = await db.collection('users').doc(user.uid).collection('decks').add(newDeck);
+    await db.collection('users').doc(user.uid).collection('decks').add(newDeck);
     showToast(getLang() === 'de' ? `Deck dupliziert als "${newDeck.name}"` : `Deck duplicated as "${newDeck.name}"`, 'success');
-    // Local patch instead of full refetch (B-3).
-    patchUserDecksLocal('add', { ...newDeck, id: dupRef.id, createdAtMs: Date.now() });
+    await loadUserDecks(user.uid);
   } catch (err) {
     console.error('Error duplicating deck:', err);
     showToast(getLang() === 'de' ? 'Fehler beim Duplizieren' : 'Error duplicating deck', 'error');
@@ -4422,9 +4460,9 @@ function _gatherDeckCardsForProxy(deck, missingOnly) {
         // Parse "Card Name (SET NUMBER)" — same format used by every
         // other deck consumer. Falls back to bare-name when the deck
         // was saved before exact-print tracking landed.
-        const m = parseCardKey(deckKey);
+        const m = deckKey.match(/^(.+?)\s+\(([A-Z0-9-]+)\s+([A-Z0-9-]+)\)$/i);
         let name = deckKey, setCode = '', number = '';
-        if (m) { name = m.name; setCode = m.setCode; number = m.number; }
+        if (m) { name = m[1]; setCode = m[2]; number = m[3]; }
 
         let copies = need;
         if (missingOnly) {
@@ -4617,7 +4655,7 @@ function dexImportParseCSV(csvText) {
       'lostorigin': 'LOR', 'lostorigintrainergallery': 'LOR',
       'silvertempest': 'SIR', 'silvertempesttrainergallery': 'SIR',
       'celebrations': 'CEL', 'celebrationsclassiccollection': 'CEL',
-      'fusionstrike': 'FST',
+      'fusionstrike': 'FST', 'celebrations': 'CEL',
       'evolvingskies': 'EVS', 'chillingreign': 'CRE',
       'battlestyles': 'BST', 'shiningfates': 'SHF',
       'vividvoltage': 'VIV', 'championspath': 'CPA',
@@ -5251,8 +5289,7 @@ function updateTradelistUI(searchFilter = '', setFilter = '') {
       const priceDisplay = (!isNaN(price) && price > 0) ? `${price.toFixed(2).replace('.', ',')} \u20ac` : 'N/A';
       if (!isNaN(price) && price > 0) totalValue += price * tradeCount;
 
-      // Sanitize: only http(s) URLs survive — javascript:/data:/vbscript: become ''.
-      const rawCmUrl = safeExternalUrl(card.cardmarket_url || '');
+      const rawCmUrl = card.cardmarket_url || '';
       const cmUrl = rawCmUrl ? rawCmUrl.split('?')[0] + '?sellerCountry=7&language=1,3' : '';
       const safeCmUrl = escapeHtml(cmUrl);
 

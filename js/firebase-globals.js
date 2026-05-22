@@ -1,4 +1,3 @@
-// @ts-check
 /**
  * Firebase Globals
  * ================
@@ -61,21 +60,6 @@ function onUserSignedIn(user) {
   window.userTradelistMinPrices = new Map();
   window.userDecks            = [];
 
-  // Wave-1 stores: fan out the auth snapshot to userStore so new
-  // ES-module subscribers see the signed-in state. Legacy window.*
-  // mutations above continue unchanged.
-  if (/** @type {any} */ (window).userStore) {
-    /** @type {any} */ (window).userStore.setAuth({
-      uid: user.uid,
-      email: user.email || null,
-      displayName: user.displayName || null,
-    });
-    /** @type {any} */ (window).userStore.setDecks([]);
-    /** @type {any} */ (window).userStore.setCollectionCounts({});
-    /** @type {any} */ (window).userStore.setWishlist([], {});
-    /** @type {any} */ (window).userStore.setLoaded(false);
-  }
-
   loadUserData(user.uid);
   loadUserDecks(user.uid);
 
@@ -83,18 +67,6 @@ function onUserSignedIn(user) {
     flushBattleJournalOutbox(false);
   } else if (typeof renderBattleJournalSummary === 'function') {
     renderBattleJournalSummary();
-  }
-
-  // B-48 hotfix: if the user clicked "Save Deck" before signing in,
-  // saveCurrentDeckToProfile stored the source. Retry it now that they're
-  // authenticated, so the user doesn't have to find the Save button again
-  // after the auth modal closes.
-  if (window._pendingDeckSaveSource && typeof saveCurrentDeckToProfile === 'function') {
-    const pendingSource = window._pendingDeckSaveSource;
-    window._pendingDeckSaveSource = null;
-    // Small defer so loadUserDecks has had a tick to mutate window.userDecks,
-    // avoiding a duplicate-name overwrite warning on the same deck.
-    setTimeout(() => { saveCurrentDeckToProfile(pendingSource); }, 50);
   }
 }
 
@@ -341,12 +313,6 @@ async function loadUserData(userId) {
           window.userCollectionCounts.set(cardId, 1);
         }
       });
-      // Wave-1 stores: fan out to userStore so subscribers see the load.
-      if (/** @type {any} */ (window).userStore) {
-        /** @type {any} */ (window).userStore.setCollectionCounts(
-          Object.fromEntries(window.userCollectionCounts)
-        );
-      }
 
       // ── Migrate broken "intl:SET-NUM|SET-NUM" card IDs to "Name|SET|NUMBER" ──
       // (Meta Binder + button used internal familyKey instead of proper cardId)
@@ -376,13 +342,6 @@ async function loadUserData(userId) {
           window.userWishlistCounts.set(cardId, 1);
         }
       });
-      // Wave-1 stores: fan out the wishlist+counts to subscribers.
-      if (/** @type {any} */ (window).userStore) {
-        /** @type {any} */ (window).userStore.setWishlist(
-          Array.from(window.userWishlist),
-          Object.fromEntries(window.userWishlistCounts)
-        );
-      }
       // Wishlist max prices (budget per card)
       const wMaxPrices = data.wishlistMaxPrices || {};
       window.userWishlistMaxPrices = new Map();
@@ -461,99 +420,17 @@ async function loadUserDecks(userId) {
     const snapshot = await window.db.collection('users').doc(userId).collection('decks').get();
     window.userDecks = [];
     snapshot.forEach(doc => window.userDecks.push({ id: doc.id, ...doc.data({ serverTimestamps: 'estimate' }) }));
-    _sortUserDecksInPlace();
+    // Sort newest first: prefer createdAt (Firestore Timestamp), fallback to createdAtMs
+    window.userDecks.sort((a, b) => {
+      const tsA = a.createdAt && a.createdAt.toMillis ? a.createdAt.toMillis() : (a.createdAtMs || 0);
+      const tsB = b.createdAt && b.createdAt.toMillis ? b.createdAt.toMillis() : (b.createdAtMs || 0);
+      return tsB - tsA;
+    });
     if (typeof updateDecksUI === 'function') updateDecksUI();
-    // Wave-1 stores: fan out decks + flag the load as complete.
-    if (/** @type {any} */ (window).userStore) {
-      /** @type {any} */ (window).userStore.setDecks(window.userDecks);
-      /** @type {any} */ (window).userStore.setLoaded(true);
-    }
   } catch (error) {
     console.error('Error loading decks:', error);
   }
 }
-
-// Same sort order as loadUserDecks — extracted so patchUserDecksLocal reuses it.
-function _sortUserDecksInPlace() {
-  if (!Array.isArray(window.userDecks)) return;
-  window.userDecks.sort((a, b) => {
-    const tsA = a.createdAt && a.createdAt.toMillis ? a.createdAt.toMillis() : (a.createdAtMs || 0);
-    const tsB = b.createdAt && b.createdAt.toMillis ? b.createdAt.toMillis() : (b.createdAtMs || 0);
-    return tsB - tsA;
-  });
-}
-
-// Local-only patch of window.userDecks (B-3 hotfix).
-//
-// Replaces the previous "await loadUserDecks(user.uid)" pattern which did a
-// full collection.get() round-trip after every save/delete/duplicate — that
-// was N reads per click, where N is the user's deck count. Power users with
-// 60+ decks burned ~30% of the daily Firestore Free Tier quota in a single
-// save-rename-save session.
-//
-// Operations:
-//   add    — payload is the deck object including {id, name, cards, ...}
-//   update — payload is the deck object (id used to find & replace)
-//   delete — payload is the deck id (string)
-//
-// The local representation diverges from server temporarily on the
-// updatedAt / createdAt Timestamp fields (we don't have the server-resolved
-// value until next read), but every other field is identical. Calling code
-// MUST pass a sane local createdAtMs for new decks so the sort stays stable.
-function patchUserDecksLocal(operation, payload) {
-  if (!Array.isArray(window.userDecks)) window.userDecks = [];
-  switch (operation) {
-    case 'add': {
-      if (!payload || !payload.id) return;
-      const localCreatedAtMs = payload.createdAtMs || Date.now();
-      window.userDecks.push({ ...payload, createdAtMs: localCreatedAtMs });
-      break;
-    }
-    case 'update': {
-      if (!payload || !payload.id) return;
-      const idx = window.userDecks.findIndex(d => d.id === payload.id);
-      if (idx >= 0) {
-        window.userDecks[idx] = { ...window.userDecks[idx], ...payload };
-      }
-      break;
-    }
-    case 'delete': {
-      const id = typeof payload === 'string' ? payload : (payload && payload.id);
-      if (!id) return;
-      window.userDecks = window.userDecks.filter(d => d.id !== id);
-      break;
-    }
-    default:
-      return;
-  }
-  _sortUserDecksInPlace();
-  if (typeof updateDecksUI === 'function') updateDecksUI();
-  // Wave-1 stores: fan out the mutated decks list.
-  if (/** @type {any} */ (window).userStore) {
-    /** @type {any} */ (window).userStore.setDecks(window.userDecks);
-  }
-}
-window.patchUserDecksLocal = patchUserDecksLocal;
-
-/**
- * Wave-1 stores: sync the current legacy window.user* state into the
- * userStore. Idempotent — the store's shallow-equal check skips no-op
- * notifies, so callers can fire this after any mutation without worry.
- * Used by firebase-collection.js after each add / remove of a card to
- * collection / wishlist.
- */
-function _syncUserStoreFromGlobals() {
-  /** @type {any} */ const w = window;
-  if (!w.userStore) return;
-  w.userStore.setCollectionCounts(
-    Object.fromEntries(w.userCollectionCounts || new Map())
-  );
-  w.userStore.setWishlist(
-    Array.from(w.userWishlist || new Set()),
-    Object.fromEntries(w.userWishlistCounts || new Map())
-  );
-}
-/** @type {any} */ (window)._syncUserStoreFromGlobals = _syncUserStoreFromGlobals;
 
 function clearUserData() {
   window.userProfile          = null;
@@ -564,12 +441,6 @@ function clearUserData() {
   window.userWishlistMaxPrices = new Map();
   window.userDecks            = [];
   window.deckFolders          = [];
-  // Drop any pending B-48 retry — user signed out, don't auto-save next login.
-  window._pendingDeckSaveSource = null;
-  // Wave-1 stores: notify userStore subscribers of the sign-out.
-  if (/** @type {any} */ (window).userStore) {
-    /** @type {any} */ (window).userStore.reset();
-  }
 }
 
 function syncAuthUiFromPendingOrCurrentState() {

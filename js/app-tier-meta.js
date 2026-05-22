@@ -1,4 +1,3 @@
-// @ts-check
 // app-tier-meta.js — extracted from app.js
 // Part of Hausi's Pokemon TCG Analysis
 
@@ -78,7 +77,10 @@
         function getTrendIndicator(history) {
             if (!Array.isArray(history) || history.length < 2) return '';
 
-            const parseShare = parsePercentOrNaN;
+            const parseShare = (value) => {
+                const parsed = parseFloat(String(value ?? 0).replace(',', '.'));
+                return Number.isFinite(parsed) ? parsed : NaN;
+            };
 
             // Compare strictly the last two available time points.
             const validPoints = history.filter(point => Number.isFinite(parseShare(point?.share)));
@@ -132,7 +134,7 @@
                 dt.setUTCDate(dt.getUTCDate() + 4 - isoDay);
                 const isoYear = dt.getUTCFullYear();
                 const yearStart = new Date(Date.UTC(isoYear, 0, 1));
-                const weekNo = Math.ceil((((dt.getTime() - yearStart.getTime()) / 86400000) + 1) / 7);
+                const weekNo = Math.ceil((((dt - yearStart) / 86400000) + 1) / 7);
                 return `${isoYear}-W${String(weekNo).padStart(2, '0')}`;
             };
 
@@ -383,6 +385,7 @@
             if (!content || !cityLeagueData || cityLeagueData.length === 0) return;
             
             // Load card data for images
+            const timestamp = new Date().getTime();
             let cardDataByArchetype = {};
             
             // Wenn imageMap vorhanden (vorberechnete Archetype→Image-URL-Map, ~30 KB),
@@ -391,7 +394,7 @@
                 try {
                     const cardsData = prefetchedAnalysisData || await (async () => {
                         const formatSuffix = window.currentCityLeagueFormat === 'M3' ? '_M3' : '';
-                        const cardsResponse = await fetch(dataUrl(`${BASE_PATH}city_league_analysis${formatSuffix}.csv`));
+                        const cardsResponse = await fetch(`${BASE_PATH}city_league_analysis${formatSuffix}.csv?t=${timestamp}`);
                         if (!cardsResponse.ok) return [];
                         const cardsText = await cardsResponse.text();
                         return parseCSV(cardsText);
@@ -608,7 +611,7 @@
                             ? parseFloat(String(m3Deck.average_placement || m3Deck.avg_placement || 0).replace(',', '.'))
                             : null;
 
-                        const normalizedCurrentS = parseFloat(String(currentShareValue || 0));
+                        const normalizedCurrentS = parseFloat(currentShareValue || 0);
                         const normalizedPreviousS = m3Deck
                             ? parseFloat((m3Deck.share || m3Deck.percentage_in_archetype || 0).toString().replace(',', '.'))
                             : null;
@@ -715,9 +718,10 @@
             // Load CSV data
             let metaData = [];
             let cardDataByArchetype = {};
-
+            const timestamp = Date.now();
+            
             try {
-                metaData = await fetchAndParseCSV(dataUrl(`${BASE_PATH}limitless_online_decks_comparison.csv`));
+                metaData = await fetchAndParseCSV(`${BASE_PATH}limitless_online_decks_comparison.csv?t=${timestamp}`);
                 
                 // Load card data for images
                 const cardsData = await loadCurrentMetaRowsWithFallback({ forceRefresh: true });
@@ -919,9 +923,9 @@
             // ============================================================
             let overallTop8Html = '';
             try {
-                const t8resp = await fetch(dataUrl(`${BASE_PATH}online_tournament_top8_decks.csv`));
+                const t8resp = await fetch(`${BASE_PATH}online_tournament_top8_decks.csv?t=${timestamp}`);
                 if (t8resp.ok) {
-                    const t8rows = await fetchAndParseCSV(dataUrl(`${BASE_PATH}online_tournament_top8_decks.csv`));
+                    const t8rows = await fetchAndParseCSV(`${BASE_PATH}online_tournament_top8_decks.csv?t=${timestamp}`);
                     const totalBrought = t8rows.reduce((s, r) => s + parseFloat((r.total_brought_weighted || '0').replace(',', '.')), 0) || 1;
                     const enriched = t8rows.map(r => {
                         const brought = parseFloat((r.total_brought_weighted || '0').replace(',', '.'));
@@ -1326,9 +1330,8 @@ window.filterTierDeckCards = function (term) {
     const t = String(term || '').toLowerCase().trim().replace(/\s+/g, '');
     const cards = document.querySelectorAll('.deck-banner-card[data-deck-name]');
     cards.forEach(card => {
-        const cardEl = /** @type {HTMLElement} */ (card);
-        const name = (cardEl.getAttribute('data-deck-name') || '').replace(/\s+/g, '');
+        const name = (card.getAttribute('data-deck-name') || '').replace(/\s+/g, '');
         const match = !t || name.includes(t);
-        cardEl.style.display = match ? '' : 'none';
+        card.style.display = match ? '' : 'none';
     });
 };

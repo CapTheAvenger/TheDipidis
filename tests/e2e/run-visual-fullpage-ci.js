@@ -49,13 +49,9 @@ async function startServerIfNeeded() {
 function runPlaywright() {
 	return new Promise((resolve, reject) => {
 		const playwrightCli = require.resolve('@playwright/test/cli');
-		// B-44 hotfix: was pointed at visual-full-page-coverage.spec.js which
-		// has been a 0-byte placeholder for weeks — the daily 03:00 UTC job
-		// was a no-op masquerading as visual coverage. Pointing at the real
-		// visual-regression spec until a dedicated full-page sweep exists.
 		const args = [
 			'test',
-			'tests/e2e/visual-regression.spec.js',
+			'tests/e2e/visual-full-page-coverage.spec.js',
 			'--config=playwright.config.js',
 			'--pass-with-no-tests',
 			'--reporter=line'

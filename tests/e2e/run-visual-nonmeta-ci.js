@@ -51,12 +51,10 @@ function runPlaywright() {
 	return new Promise((resolve, reject) => {
 		const playwrightCli = require.resolve('@playwright/test/cli');
 
-		// B-44 hotfix: city-league-hero-combined-navigation.e2e.spec.js was
-		// 0 bytes — including it in the CI runner produced no-op runs that
-		// looked like passes. Dropped until the spec is actually authored.
 		const args = [
 			'test',
 			'tests/e2e/visual-regression.spec.js',
+			'tests/e2e/city-league-hero-combined-navigation.e2e.spec.js',
 			'--config=playwright.visual-nonmeta.config.js',
 			'--pass-with-no-tests',
 			'--reporter=line'

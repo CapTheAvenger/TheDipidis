@@ -15,14 +15,14 @@
   'use strict';
 
   const R2_URL = 'https://data.thedipidis.app/city_league_analysis.parquet';
-  const JSDELIVR_BASE = 'https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@latest/dist';
+  const JSDELIVR_BASE = 'https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.29.0/dist';
 
   // Only activate when ?duckdb=1 is present
   const params = new URLSearchParams(window.location.search);
   if (!params.has('duckdb')) return;
 
   let _db = null;
-  let _bootstrapping = false;
+  let _conn = null;
 
   // ------------------------------------------------------------------ //
   // Panel HTML
@@ -31,7 +31,7 @@
     const panel = document.createElement('div');
     panel.id = 'duckdb-pilot-panel';
     panel.style.cssText = [
-      'margin: 24px 0',
+      'margin: 24px 4px',
       'padding: 16px 20px',
       'border: 2px dashed #3b82f6',
       'border-radius: 8px',
@@ -50,7 +50,8 @@
       </div>
       <p style="margin:0 0 12px;color:#374151;">
         Pilot query: Top 10 archetypes by total tournament appearances
-        from the full city-league Parquet (~180 k rows) via DuckDB-WASM.
+        from the full city-league Parquet (~180k rows) via DuckDB-WASM.
+        <br><small style="color:#6b7280;">First click: Bundle-Bootstrap (~12 MB, einmalig) + Query · Zweiter Klick: nur Query &lt;1 s</small>
       </p>
       <button id="duckdb-pilot-run"
         style="background:#2563eb;color:#fff;border:none;padding:8px 18px;
@@ -66,7 +67,7 @@
       <div id="duckdb-pilot-result" style="display:none;margin-top:14px;">
         <div id="duckdb-pilot-meta" style="color:#6b7280;font-size:12px;margin-bottom:8px;"></div>
         <table id="duckdb-pilot-table"
-          style="border-collapse:collapse;width:100%;font-size:12px;">
+          style="border-collapse:collapse;width:100%;font-size:12px;max-width:700px;">
         </table>
       </div>
     `;
@@ -78,18 +79,20 @@
   // ------------------------------------------------------------------ //
   async function bootstrapDuckDB() {
     if (_db) return _db;
-    if (_bootstrapping) throw new Error('Already bootstrapping');
-    _bootstrapping = true;
 
-    // Dynamically import the ES module bundle
-    const mod = await import(`${JSDELIVR_BASE}/duckdb-browser-mvp.module.js`);
-    const duckdb = mod;
+    const duckdb = await import(`${JSDELIVR_BASE}/duckdb-browser-mvp.module.js`);
 
-    const DUCKDB_CONFIG = {
-      locateFile: (f) => `${JSDELIVR_BASE}/${f}`,
-    };
+    const bundle = await duckdb.selectBundle({
+      mvp: {
+        mainModule: `${JSDELIVR_BASE}/duckdb-browser-mvp.wasm`,
+        mainWorker: `${JSDELIVR_BASE}/duckdb-browser-mvp.worker.js`,
+      },
+      eh: {
+        mainModule: `${JSDELIVR_BASE}/duckdb-browser-eh.wasm`,
+        mainWorker: `${JSDELIVR_BASE}/duckdb-browser-eh.worker.js`,
+      },
+    });
 
-    const bundle = await duckdb.selectBundle(DUCKDB_CONFIG);
     const workerUrl = URL.createObjectURL(
       new Blob([`importScripts("${bundle.mainWorker}");`], { type: 'text/javascript' })
     );
@@ -118,22 +121,35 @@
     const t0 = performance.now();
 
     try {
-      status.textContent = _db ? 'Querying…' : 'Bootstrapping DuckDB (~12 MB, once)…';
+      status.textContent = _db ? 'Querying…' : 'Bootstrapping DuckDB (~12 MB, einmalig)…';
 
       const db = await bootstrapDuckDB();
-
-      status.textContent = 'Fetching Parquet from R2…';
       const conn = await db.connect();
 
-      // Register the remote Parquet file
-      await db.registerFileURL('city_league.parquet', R2_URL, 4 /* HTTP */, false);
+      // Register the remote Parquet file via HTTP
+      if (!_conn) {
+        await db.registerFileURL(
+          'city_league.parquet',
+          R2_URL,
+          4 /* HTTPFile */,
+          false
+        );
+      }
 
-      status.textContent = 'Running SQL…';
+      status.textContent = 'Querying Parquet via R2…';
+
+      // Count total rows
+      const countResult = await conn.query(
+        "SELECT COUNT(*) AS n FROM parquet_scan('city_league.parquet')"
+      );
+      const totalRows = Number(countResult.toArray()[0].n);
+
+      // Top 10 archetypes
       const result = await conn.query(`
         SELECT
           archetype_name,
-          COUNT(*) AS appearances,
-          ROUND(AVG(CAST(final_standing AS DOUBLE)), 1) AS avg_standing
+          COUNT(*)                                          AS appearances,
+          ROUND(AVG(CAST(final_standing AS DOUBLE)), 1)    AS avg_standing
         FROM parquet_scan('city_league.parquet')
         WHERE archetype_name IS NOT NULL
           AND archetype_name != ''
@@ -146,22 +162,17 @@
 
       const elapsed = ((performance.now() - t0) / 1000).toFixed(2);
       const rows = result.toArray();
-      const totalRows = await (async () => {
-        const c2 = await db.connect();
-        const r = await c2.query("SELECT COUNT(*) as n FROM parquet_scan('city_league.parquet')");
-        await c2.close();
-        return Number(r.toArray()[0].n);
-      })();
 
       // Render meta
       metaDiv.textContent = `${totalRows.toLocaleString()} total rows · query in ${elapsed}s`;
 
       // Render table
       const cols = ['archetype_name', 'appearances', 'avg_standing'];
+      const headers = ['Archetype', 'Appearances', 'Ø Standing'];
       table.innerHTML = `
         <thead>
           <tr style="background:#dbeafe;">
-            ${cols.map(c => `<th style="padding:6px 10px;text-align:left;border-bottom:2px solid #93c5fd;">${c}</th>`).join('')}
+            ${headers.map(h => `<th style="padding:6px 10px;text-align:left;border-bottom:2px solid #93c5fd;">${h}</th>`).join('')}
           </tr>
         </thead>
         <tbody>
@@ -180,13 +191,13 @@
       const elapsed = ((performance.now() - t0) / 1000).toFixed(2);
       status.textContent = `❌ failed after ${elapsed}s`;
       errorDiv.innerHTML = `
-        <strong>Error:</strong> ${err.message}<br><br>
-        <strong>Diagnosis checklist:</strong><br>
-        • R2 Bucket public? → Cloudflare R2 → Settings → Public access enabled<br>
-        • Custom domain data.thedipidis.app configured in R2?<br>
-        • CORS policy allows GET from thedipidis.app?<br>
-        • Parquet file uploaded? Run workflow → Weekly Full Update first.<br>
-        • GitHub Secrets set? R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_ACCOUNT_ID, R2_BUCKET
+        <strong>Fehler:</strong> ${err.message}<br><br>
+        <strong>Diagnose-Checkliste:</strong><br>
+        &bull; R2 Bucket public? → Cloudflare R2 → Settings → Public access ON<br>
+        &bull; Custom Domain data.thedipidis.app in R2 konfiguriert?<br>
+        &bull; CORS-Policy erlaubt GET von thedipidis.app?<br>
+        &bull; Parquet-Datei hochgeladen? → GitHub Actions → Weekly Full Update → Run workflow<br>
+        &bull; GitHub Secrets gesetzt? R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_ACCOUNT_ID, R2_BUCKET
       `;
       errorDiv.style.display = 'block';
     } finally {
@@ -195,46 +206,34 @@
   }
 
   // ------------------------------------------------------------------ //
-  // Inject panel when City-League tab is visible
+  // Inject panel into #cityLeagueContent
   // ------------------------------------------------------------------ //
   function injectPanel() {
     if (document.getElementById('duckdb-pilot-panel')) return;
 
-    // Find the city-league content container
-    const container =
-      document.querySelector('#city-league-content') ||
-      document.querySelector('[data-tab="city-league"]') ||
-      document.querySelector('.city-league-tab-content') ||
-      document.querySelector('#tab-city-league');
-
+    // The app uses #cityLeagueContent as the main city-league container
+    const container = document.getElementById('cityLeagueContent');
     if (!container) return;
 
     const panel = createPanel();
     container.appendChild(panel);
-
     document.getElementById('duckdb-pilot-run').addEventListener('click', runQuery);
   }
 
   // ------------------------------------------------------------------ //
-  // Watch for tab switches (app uses custom tab routing)
+  // Watch for the container to appear (loaded dynamically on tab switch)
   // ------------------------------------------------------------------ //
-  function watchForCityLeagueTab() {
-    // Try immediately
+  function watchForContainer() {
     injectPanel();
-
-    // Also watch for DOM changes (tab content loaded dynamically)
-    const observer = new MutationObserver(() => injectPanel());
+    const observer = new MutationObserver(injectPanel);
     observer.observe(document.body, { childList: true, subtree: true });
-
-    // Also listen for hashchange / popstate
     window.addEventListener('hashchange', injectPanel);
     window.addEventListener('popstate', injectPanel);
   }
 
-  // Start watching after DOM is ready
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', watchForCityLeagueTab);
+    document.addEventListener('DOMContentLoaded', watchForContainer);
   } else {
-    watchForCityLeagueTab();
+    watchForContainer();
   }
 })();

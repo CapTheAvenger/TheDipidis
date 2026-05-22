@@ -29,6 +29,7 @@
 **Symptom:** URLs wie `https://thedipidis.app/#metacall` oder `#journal` oder `#testinggroups` navigieren in den Nichts. Auch Cross-Links aus `app-testing-groups.js` (z.B. „zu Meta Call wechseln" Button-Click) wirken nicht.
 
 **Evidenz:**
+
 - `js/inline-init.js:144-150` definiert:
   ```js
   const HASH_ALIASES = {
@@ -57,6 +58,7 @@
 **Symptom:** Beim Klick auf irgendeinen Button im Sandbox/Playtester-Modal feuern `ReferenceError: ptXxx is not defined` an die Browser-Konsole. Toast-Notification mit Showdown-Hinweis kommt NICHT, weil die Stub-Funktion gar nicht aufgerufen wird.
 
 **Evidenz:**
+
 - `js/app-core.js:386-406` registriert Redirect-Stubs für genau 7 Function-Names:
   ```js
   ['openPlaytester', 'openPlaytesterSetup', 'startPlaytesterWithMirror',
@@ -81,6 +83,7 @@
 **Symptom:** User kann nicht direkt zu „City League Deck Analysis" oder „Current Meta Deck Analysis" navigieren — nur über Umweg via tile-click auf dem `city-league`- oder `current-meta`-Tab.
 
 **Evidenz:**
+
 - Golden `index.html` Sidebar hatte 5 Meta-Subitems: current-meta / current-analysis / city-league / city-league-analysis / past-meta.
 - HEAD `index.html` Sidebar hat nur 3: current-meta / city-league / past-meta (Z. 455-461).
 - Die `<div id="city-league-analysis">` (Z. 636) und `<div id="current-analysis">` (Z. 1049) existieren noch im HTML als Top-Level-Tabs, sind aber nicht über Sidebar erreichbar.
@@ -96,6 +99,7 @@
 **Symptom:** Nach `<html>`-Render aber vor `DOMContentLoaded` ist `<div id="meta-view" class="tab-content active">` sichtbar. Diese enthält den Text „Meta Analysis (Wave-2 IA-Refactor) — scaffold ready. Deck-list rendering arrives in step 3." Auf langsamen Connections / großen Bundles → **mehrere hundert ms Flash dieses Placeholder-Texts**.
 
 **Evidenz:**
+
 - `index.html:570`: `<div id="meta-view" class="tab-content active">`
 - `index.html:597-600`: Placeholder-Text mit i18n-Key `metaView.scaffoldPlaceholder`.
 - `js/modules/meta-view/bootstrap.js:36-61`: `init()` ruft `switchTab('current-meta')` **erst** wenn `DOMContentLoaded` feuert. Vorher: `meta-view` ist active.
@@ -111,6 +115,7 @@
 **Evidenz (aus Phase 2 §5.2):** Alle 16 gelöschten JS-Unit-Tests + 8 Playwright-Specs + 7 Python-Unit-Tests testen Funktionalität, die im HEAD weiter existiert. Die 6 neuen Unit-Tests (für `card-key`, `metrics`, `store`, `meta-view/*`) decken nur die **neue** ES-Module-Surface ab — sie ersetzen die alten Legacy-Tests nicht.
 
 **Quantifizierung:**
+
 - Vorher: 34 JS-Unit-Test-Files, 236 passes
 - Nachher: 23 JS-Unit-Test-Files, 298 passes
 - Aber: **22 JS-Unit-Test-Files testen Legacy-Code (ohne Coverage-Ersatz)**, davon **16 ersatzlos gelöscht**.
@@ -137,10 +142,12 @@ Siehe §1.4. Konzept-Inkonsistenz: Wave-2 wurde revertiert, aber der Container b
 - `index.html:570-612` — Segmented-Control + List/Detail-Container
 
 **Funktional in HEAD:** Nur das Segmented-Control im `meta-view`-Container ruft `metaViewSwitchFormat()`, das in `bootstrap.js:29-37` überschrieben ist auf `switchTabAndUpdateMenu(legacyTabId)`. Theoretisch noch eine „Nav-Aid", aber:
+
 - Der Container wird beim Page-Load aktiviert, dann sofort ge-switcht — das Segmented-Control wird nie sichtbar in der Praxis.
 - URL-Routing via `#meta?format=...` funktioniert noch — aber kein User-Pfad führt dazu.
 
 **Entscheidung nötig (siehe §5 Optionen):**
+
 - **A) Wave-2 final entfernen:** Lösche `js/modules/meta-view/*`, `css/meta-view.css`, Tests, HTML-Container, Import-Zeile in `modules/index.js`. → Saubere 5-Tab-Architektur wie Golden.
 - **B) Wave-2 zu Ende führen:** Setze `meta-view` als echten Konsolidierungs-Tab fort, integriere Deck-Listen-Rendering, mache Wave-2 die Default-UX. → Mutiger Architektur-Schritt.
 - **C) Status quo akzeptieren:** Belasse Hybrid für später. → Tech-Debt-Acumulation.
@@ -158,6 +165,7 @@ Siehe §1.4. Konzept-Inkonsistenz: Wave-2 wurde revertiert, aber der Container b
 **Was gelöscht wurde (`git log`):** `_archive/audit-artifacts-2026-04-02/` komplett (24 Files), `_archive/dead-assets-2026-03-31/` komplett (3 Files), `_archive/utils/` komplett (10 Files), `data/_archive/soft-delete-2026-03-31/` komplett (12 Files).
 
 **Was übersehen wurde:**
+
 - `frontend/` (Wave-0 hätte das mit einsammeln können)
 - `dashboard-theme.css`-Duplikat in `css/` (82 B leer)
 - Veraltete MD-Docs: `PROJECT_STRUCTURE.md`, `README.md` (siehe §2.5)
@@ -168,6 +176,7 @@ Siehe §1.4. Konzept-Inkonsistenz: Wave-2 wurde revertiert, aber der Container b
 Phase 1 § 11 hatte das bereits identifiziert. HEAD-Stand unverändert.
 
 Beide Dokumente beschreiben:
+
 - Single-File `js/app.js` (~16.000 Zeilen) — existiert nicht
 - Scraper im Repo-Root — sind in `backend/scrapers/`
 - Veraltete Liste der Tabs / Module
@@ -183,6 +192,7 @@ Bei jedem neuen Mitwirkenden ist das ein Verwirrungs-Risiko.
 **Wert:** Endlich eine echte Module-Struktur (`js/modules/` mit 4 Subdirs). esbuild produziert sauber, TypeScript checkt, ESLint läuft, Prettier konfiguriert, Coverage-Threshold (85/80/70) wird eingehalten. **Strategisches Fundament** für alle weiteren Refactorings.
 
 **Konkrete Module (verifiziert lauffähig):**
+
 - `card-key.js` — kanonische Card-Key-Utilities (verbreitet eingesetzt)
 - `metrics.js` — `parsePercent`/`formatPercent`/`weightedAverageWinRate`
 - `stores/store.js` + `user-store.js` — Reactive Store-Primitiv
@@ -212,6 +222,7 @@ Bei jedem neuen Mitwirkenden ist das ein Verwirrungs-Risiko.
 ### 3.4 ✅ R2/DuckDB-Pilot
 
 Vorausschauend für CSV-Wachstum:
+
 - `scripts/build_parquet.py` — CSV → Parquet (kompakter Spaltenformat)
 - `scripts/upload_to_r2.py` — boto3-Upload zu Cloudflare R2
 - `js/modules/data/duckdb-loader.js` + `city-league-pilot.js` — DuckDB-WASM-Query-Layer
@@ -249,47 +260,47 @@ Repo-Größenordnung wurde laut Phase-2 um ~304K Zeilen netto reduziert (Wave-0 
 
 ### P0 — Hart broken, sollte zeitnah behoben werden
 
-| # | Fix | Effort | Risiko |
-|---|---|---|---|
-| **P0-1** | **Sandbox-Stubs in `app-core.js` vervollständigen.** Ergänze in der Stub-Liste: `ptStartGame`, `ptUndo`, `ptLog`, `ptShowManual`, `ptToggleLog`, `ptFlipBoard`, `ptZoomBoard`, `openMultiplayerMenu`, `startPlaytesterSetup` (≠ `openPlaytesterSetup`!), `closePlaytesterSetup`. **Alternative:** Sandbox-Tab + Modal aus `index.html` entfernen (komplett verstecken) — vollständige Konsequenz aus Playtester-Retirement. | 15 Min (Stubs) ODER 1-2 h (HTML-Cleanup) | Niedrig |
-| **P0-2** | **profile-split fertigstellen ODER zurücknehmen.** Variante A (zu Ende führen): Drei Top-Level-`<div id="meta-call|battle-journal|testing-groups" class="tab-content">` in `index.html` anlegen, Inhalt aus den `profile-*`-Subtabs migrieren, Sidebar-Menu-Items hinzufügen. Variante B (zurücknehmen): HASH_ALIASES + metaTabs-Set + `app-testing-groups.js:789/1018` auf `profile-metacall|profile-journal|profile-testinggroups` zurücksetzen, Profile-Detour wieder herstellen. | A: 2-3 h <br> B: 30 Min | A: Mittel <br> B: Niedrig |
-| **P0-3** | **`city-league-analysis` + `current-analysis` zurück ins Sidebar-Menü.** Zwei `<button id="menu-btn-current-analysis"/...-city-league-analysis">` in `index.html` Sidebar einsetzen, im Meta-Cluster nach den jeweiligen Eltern-Tabs. Optional HASH_ALIASES für `#current-analysis`/`#city-league-analysis` ergänzen. | 15 Min | Niedrig |
-| **P0-4** | **`meta-view`-Placeholder-FOUC eliminieren.** Optionen: (a) `class="tab-content active"` → `class="tab-content"` und `current-meta` als default-active setzen. Bootstrap.js init() kann dann den Placeholder-DIV ggf. unangetastet lassen. (b) Wave-2-Container vollständig aus HTML entfernen (gehört zu Wave-2-Cleanup, §4.P2). | 5 Min (a) <br> 30 Min (b) | Niedrig |
+| #        | Fix                                                                                                                                                                                                                                                                                                                                                                                                                         | Effort                                   | Risiko                                                                                                                                                                                                                                                 |
+| -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------- | ---------------------------------------------------------------------- | ----------------------- | ------------------------- |
+| **P0-1** | **Sandbox-Stubs in `app-core.js` vervollständigen.** Ergänze in der Stub-Liste: `ptStartGame`, `ptUndo`, `ptLog`, `ptShowManual`, `ptToggleLog`, `ptFlipBoard`, `ptZoomBoard`, `openMultiplayerMenu`, `startPlaytesterSetup` (≠ `openPlaytesterSetup`!), `closePlaytesterSetup`. **Alternative:** Sandbox-Tab + Modal aus `index.html` entfernen (komplett verstecken) — vollständige Konsequenz aus Playtester-Retirement. | 15 Min (Stubs) ODER 1-2 h (HTML-Cleanup) | Niedrig                                                                                                                                                                                                                                                |
+| **P0-2** | **profile-split fertigstellen ODER zurücknehmen.** Variante A (zu Ende führen): Drei Top-Level-`<div id="meta-call                                                                                                                                                                                                                                                                                                          | battle-journal                           | testing-groups" class="tab-content">`in`index.html`anlegen, Inhalt aus den`profile-\*`-Subtabs migrieren, Sidebar-Menu-Items hinzufügen. Variante B (zurücknehmen): HASH_ALIASES + metaTabs-Set + `app-testing-groups.js:789/1018`auf`profile-metacall | profile-journal | profile-testinggroups` zurücksetzen, Profile-Detour wieder herstellen. | A: 2-3 h <br> B: 30 Min | A: Mittel <br> B: Niedrig |
+| **P0-3** | **`city-league-analysis` + `current-analysis` zurück ins Sidebar-Menü.** Zwei `<button id="menu-btn-current-analysis"/...-city-league-analysis">` in `index.html` Sidebar einsetzen, im Meta-Cluster nach den jeweiligen Eltern-Tabs. Optional HASH_ALIASES für `#current-analysis`/`#city-league-analysis` ergänzen.                                                                                                       | 15 Min                                   | Niedrig                                                                                                                                                                                                                                                |
+| **P0-4** | **`meta-view`-Placeholder-FOUC eliminieren.** Optionen: (a) `class="tab-content active"` → `class="tab-content"` und `current-meta` als default-active setzen. Bootstrap.js init() kann dann den Placeholder-DIV ggf. unangetastet lassen. (b) Wave-2-Container vollständig aus HTML entfernen (gehört zu Wave-2-Cleanup, §4.P2).                                                                                           | 5 Min (a) <br> 30 Min (b)                | Niedrig                                                                                                                                                                                                                                                |
 
 **P0-Subtotal:** ~3-6 h falls beide Variante-A-Pfade, ~1-2 h falls minimal-Recovery.
 
 ### P1 — Signifikanter Coverage-Verlust, dringend empfohlen
 
-| # | Fix | Effort | Risiko |
-|---|---|---|---|
-| **P1-1** | **Zurückholen kritischer JS-Unit-Tests (Top 5):** `test-firebaseCollection.js`, `test-deckBuilder.js`, `test-parseCSV.js`, `test-dataIntegrity.js`, `test-coreDataProcessing.js`. Diese decken die zwei größten Module (`firebase-collection.js` 245 KB + `app-deck-builder.js` 447 KB) plus die zentrale Datenverarbeitungs-Pipeline ab. **Quelle:** `git show 481c9bd:tests/unit/test-X.js > tests/unit/test-X.js` pro File. ggf. Anpassung an HEAD-Änderungen (test-firebaseCollection muss evtl. mit Firebase v11-Mocks neu schreiben). | 1-2 h (copy) <br> +1-2 h (Adapter-Layer-Anpassung) | Niedrig-Mittel |
-| **P1-2** | **Zurückholen Card-Logic-Tests:** `test-isAceSpec-removeCard.js`, `test-getPreferredVersionForCard.js`, `test-getRarityPriority.js`, `test-other-international-prints.js`, `test-calculateCombinedVariantStats.js`, `test-fuzzyArchetypeMatch.js`. Diese sind unabhängig vom Wave-1-Refactor — sollten direkt grün laufen. | 30 Min | Niedrig |
-| **P1-3** | **Zurückholen rest Utility-Tests:** `test-rarity-switcher-ready.js`, `test-sanitize-proxy.js`, `test-utilsExtra.js`, `test-helpers.js`, `test-parsePastMetaDateMs.js`. | 30 Min | Niedrig |
-| **P1-4** | **Zurückholen Visual-Coverage-Spec:** `tests/e2e/visual-full-page-coverage.spec.js`. Visual-Snapshots für alle Tabs schützen das Layout vor unbeabsichtigten Regressions (z.B. wie der `meta-view`-Placeholder oder Sidebar-Menu-Verlust hier!). | 30 Min | Niedrig — Snapshots in `tests/e2e/__snapshots__/` müssen ggf. neu generiert werden |
-| **P1-5** | **Zurückholen anderer Playwright-Specs:** `cards-keyboard-accessibility`, `city-league-language-switch`, `rarity-switcher`, `proxy-import-errors`, `proxy-queue-reset`. Alle testen weiter-existierende Features. | 30 Min - 1 h | Niedrig |
-| **P1-6** | **Zurückholen Python-Unit-Tests:** `test_card_database.py`, `test_csv_and_settings.py`, `test_prepare_card_data.py`, `test_card_scraper_shared.py`, `test_scraper_extraction.py`, `test_scraper_functions.py`, `test_scraper_additional.py`. Diese testen Backend-Code, der unverändert weiter läuft. | 30 Min | Niedrig |
+| #        | Fix                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | Effort                                             | Risiko                                                                             |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| **P1-1** | **Zurückholen kritischer JS-Unit-Tests (Top 5):** `test-firebaseCollection.js`, `test-deckBuilder.js`, `test-parseCSV.js`, `test-dataIntegrity.js`, `test-coreDataProcessing.js`. Diese decken die zwei größten Module (`firebase-collection.js` 245 KB + `app-deck-builder.js` 447 KB) plus die zentrale Datenverarbeitungs-Pipeline ab. **Quelle:** `git show 481c9bd:tests/unit/test-X.js > tests/unit/test-X.js` pro File. ggf. Anpassung an HEAD-Änderungen (test-firebaseCollection muss evtl. mit Firebase v11-Mocks neu schreiben). | 1-2 h (copy) <br> +1-2 h (Adapter-Layer-Anpassung) | Niedrig-Mittel                                                                     |
+| **P1-2** | **Zurückholen Card-Logic-Tests:** `test-isAceSpec-removeCard.js`, `test-getPreferredVersionForCard.js`, `test-getRarityPriority.js`, `test-other-international-prints.js`, `test-calculateCombinedVariantStats.js`, `test-fuzzyArchetypeMatch.js`. Diese sind unabhängig vom Wave-1-Refactor — sollten direkt grün laufen.                                                                                                                                                                                                                  | 30 Min                                             | Niedrig                                                                            |
+| **P1-3** | **Zurückholen rest Utility-Tests:** `test-rarity-switcher-ready.js`, `test-sanitize-proxy.js`, `test-utilsExtra.js`, `test-helpers.js`, `test-parsePastMetaDateMs.js`.                                                                                                                                                                                                                                                                                                                                                                      | 30 Min                                             | Niedrig                                                                            |
+| **P1-4** | **Zurückholen Visual-Coverage-Spec:** `tests/e2e/visual-full-page-coverage.spec.js`. Visual-Snapshots für alle Tabs schützen das Layout vor unbeabsichtigten Regressions (z.B. wie der `meta-view`-Placeholder oder Sidebar-Menu-Verlust hier!).                                                                                                                                                                                                                                                                                            | 30 Min                                             | Niedrig — Snapshots in `tests/e2e/__snapshots__/` müssen ggf. neu generiert werden |
+| **P1-5** | **Zurückholen anderer Playwright-Specs:** `cards-keyboard-accessibility`, `city-league-language-switch`, `rarity-switcher`, `proxy-import-errors`, `proxy-queue-reset`. Alle testen weiter-existierende Features.                                                                                                                                                                                                                                                                                                                           | 30 Min - 1 h                                       | Niedrig                                                                            |
+| **P1-6** | **Zurückholen Python-Unit-Tests:** `test_card_database.py`, `test_csv_and_settings.py`, `test_prepare_card_data.py`, `test_card_scraper_shared.py`, `test_scraper_extraction.py`, `test_scraper_functions.py`, `test_scraper_additional.py`. Diese testen Backend-Code, der unverändert weiter läuft.                                                                                                                                                                                                                                       | 30 Min                                             | Niedrig                                                                            |
 
 **P1-Subtotal:** ~3-5 h.
 
 ### P2 — Konzept-Konsistenz, diskussionsbedürftig
 
-| # | Fix | Effort | Entscheidung nötig |
-|---|---|---|---|
-| **P2-1** | **Wave-2 endgültige Entscheidung** (siehe §5). Variante A (vollständig zurücknehmen): Lösche `js/modules/meta-view/{store,controller,url-router,bootstrap}.js`, `css/meta-view.css`, Tests `test-meta-view-{store,url-router}.js`, Import-Zeile in `modules/index.js`, `<div id="meta-view">` aus index.html. Variante B (fortsetzen): Implement Wave-2 Step 3+4 Deck-Listen-Rendering richtig. | A: 1 h <br> B: 8-16 h | **JA** |
-| **P2-2** | **`frontend/` entfernen.** Lösche `frontend/` komplett aus dem Tree. Lösche die leeren `<div id="header-container">` + `<div id="sidebar-container">` aus `index.html` (Z. 416-417). | 10 Min | Nein |
-| **P2-3** | **`dashboard-theme.css`-Duplikat** beseitigen. (`css/dashboard-theme.css` ist 82 B leer, `frontend/css/dashboard-theme.css` 2.3 KB — beides ungenutzt. Mit P2-2 erledigt.) | inkludiert in P2-2 | Nein |
-| **P2-4** | **Firebase v11 Smoke-Test:** Manuell Auth (Google Sign-In) + Firestore-Write (z.B. Battle-Journal-Eintrag) + Firestore-Read (Wishlist-Load) testen. Falls Issues → Rollback auf v9.22.0 oder targeted Fix. | 30 Min - 2 h | Bei Issue: JA |
+| #        | Fix                                                                                                                                                                                                                                                                                                                                                                                             | Effort                | Entscheidung nötig |
+| -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------- | ------------------ |
+| **P2-1** | **Wave-2 endgültige Entscheidung** (siehe §5). Variante A (vollständig zurücknehmen): Lösche `js/modules/meta-view/{store,controller,url-router,bootstrap}.js`, `css/meta-view.css`, Tests `test-meta-view-{store,url-router}.js`, Import-Zeile in `modules/index.js`, `<div id="meta-view">` aus index.html. Variante B (fortsetzen): Implement Wave-2 Step 3+4 Deck-Listen-Rendering richtig. | A: 1 h <br> B: 8-16 h | **JA**             |
+| **P2-2** | **`frontend/` entfernen.** Lösche `frontend/` komplett aus dem Tree. Lösche die leeren `<div id="header-container">` + `<div id="sidebar-container">` aus `index.html` (Z. 416-417).                                                                                                                                                                                                            | 10 Min                | Nein               |
+| **P2-3** | **`dashboard-theme.css`-Duplikat** beseitigen. (`css/dashboard-theme.css` ist 82 B leer, `frontend/css/dashboard-theme.css` 2.3 KB — beides ungenutzt. Mit P2-2 erledigt.)                                                                                                                                                                                                                      | inkludiert in P2-2    | Nein               |
+| **P2-4** | **Firebase v11 Smoke-Test:** Manuell Auth (Google Sign-In) + Firestore-Write (z.B. Battle-Journal-Eintrag) + Firestore-Read (Wishlist-Load) testen. Falls Issues → Rollback auf v9.22.0 oder targeted Fix.                                                                                                                                                                                      | 30 Min - 2 h          | Bei Issue: JA      |
 
 **P2-Subtotal:** ~2-19 h je nach Wave-2-Entscheidung.
 
 ### P3 — Doku & Cosmetics
 
-| # | Fix | Effort | Risiko |
-|---|---|---|---|
-| **P3-1** | **README.md / PROJECT_STRUCTURE.md aktualisieren** an HEAD-Realität (js/modules/, scripts/, _dist/, neue Tabs, Wave-1-Architecture). | 1 h | Niedrig |
-| **P3-2** | **ESLint Warnings auf 0 bringen** (`'_' unused`). Entweder Vars explizit als `_unused` benennen oder ESLint-Config anpassen (`argsIgnorePattern: '^_'`). | 30 Min - 1 h | Niedrig |
-| **P3-3** | **Prettier-Format auf alle Files anwenden** (`npm run format:fix`). | 5 Min | Niedrig — sollte CI-Test grün lassen |
-| **P3-4** | **`tests/e2e/__snapshots__/{testFilename}/` Path-Quirk fixen** — entweder löschen falls leer, oder Snapshot-Template-Resolution debuggen. | 30 Min | Niedrig |
+| #        | Fix                                                                                                                                                      | Effort       | Risiko                               |
+| -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------ | ------------------------------------ |
+| **P3-1** | **README.md / PROJECT_STRUCTURE.md aktualisieren** an HEAD-Realität (js/modules/, scripts/, \_dist/, neue Tabs, Wave-1-Architecture).                    | 1 h          | Niedrig                              |
+| **P3-2** | **ESLint Warnings auf 0 bringen** (`'_' unused`). Entweder Vars explizit als `_unused` benennen oder ESLint-Config anpassen (`argsIgnorePattern: '^_'`). | 30 Min - 1 h | Niedrig                              |
+| **P3-3** | **Prettier-Format auf alle Files anwenden** (`npm run format:fix`).                                                                                      | 5 Min        | Niedrig — sollte CI-Test grün lassen |
+| **P3-4** | **`tests/e2e/__snapshots__/{testFilename}/` Path-Quirk fixen** — entweder löschen falls leer, oder Snapshot-Template-Resolution debuggen.                | 30 Min       | Niedrig                              |
 
 **P3-Subtotal:** ~2-3 h.
 
@@ -343,23 +354,23 @@ Repo-Größenordnung wurde laut Phase-2 um ~304K Zeilen netto reduziert (Wave-0 
 
 ## 6. Risiko-Matrix der konkreten Fixes
 
-| Fix | Tech-Risiko | UX-Risiko | Test-Risiko | Empfehlung |
-|---|---|---|---|---|
-| P0-1 (Sandbox-Stubs) | Niedrig | Niedrig | Niedrig (Buttons funktionieren wieder via Toast) | ✓ DO |
-| P0-2A (profile-split fertigstellen) | Mittel (HTML-Struktur-Änderung) | Niedrig (Folge der Wave-2-Vision) | Niedrig | Diskutieren |
-| P0-2B (profile-split zurücknehmen) | Niedrig | Niedrig (zurück zu Golden-Layout) | Niedrig | ✓ Default-Pfad |
-| P0-3 (Sidebar wiederherstellen) | Niedrig | ✓ Klare UX-Verbesserung | Niedrig | ✓ DO |
-| P0-4a (meta-view default-Tab-Switch) | Niedrig | ✓ FOUC weg | Niedrig | ✓ DO |
-| P1-1 (Top-5-Tests zurück) | Mittel (Firebase-Mocks) | Niedrig | ✓ Coverage zurück | ✓ DO |
-| P1-2/3 (Card-Logic + Utils Tests) | Niedrig | Niedrig | ✓ Coverage zurück | ✓ DO |
-| P1-4 (Visual-Coverage-Spec) | Niedrig | Niedrig | ✓ Regression-Schutz | ✓ DO |
-| P1-5 (Playwright Specs) | Niedrig | Niedrig | ✓ E2E-Coverage | ✓ DO |
-| P1-6 (Python-Tests) | Niedrig | — | ✓ Backend-Coverage | ✓ DO |
-| P2-1A (Wave-2 entfernen) | Mittel (URL-Routing-Verlust) | Niedrig | Niedrig | Diskutieren |
-| P2-1B (Wave-2 fortsetzen) | Hoch (komplexer Refactor) | Hoch (UX-Wechsel) | Hoch | Nicht jetzt |
-| P2-2 (frontend/-Cleanup) | Niedrig | Niedrig | Niedrig | ✓ DO |
-| P2-4 (Firebase v11 Smoke-Test) | Niedrig (read-only) | — | — | ✓ DO (Bestätigung) |
-| P3-1 (Doku-Update) | Niedrig | Niedrig | Niedrig | ✓ DO |
+| Fix                                  | Tech-Risiko                     | UX-Risiko                         | Test-Risiko                                      | Empfehlung         |
+| ------------------------------------ | ------------------------------- | --------------------------------- | ------------------------------------------------ | ------------------ |
+| P0-1 (Sandbox-Stubs)                 | Niedrig                         | Niedrig                           | Niedrig (Buttons funktionieren wieder via Toast) | ✓ DO               |
+| P0-2A (profile-split fertigstellen)  | Mittel (HTML-Struktur-Änderung) | Niedrig (Folge der Wave-2-Vision) | Niedrig                                          | Diskutieren        |
+| P0-2B (profile-split zurücknehmen)   | Niedrig                         | Niedrig (zurück zu Golden-Layout) | Niedrig                                          | ✓ Default-Pfad     |
+| P0-3 (Sidebar wiederherstellen)      | Niedrig                         | ✓ Klare UX-Verbesserung           | Niedrig                                          | ✓ DO               |
+| P0-4a (meta-view default-Tab-Switch) | Niedrig                         | ✓ FOUC weg                        | Niedrig                                          | ✓ DO               |
+| P1-1 (Top-5-Tests zurück)            | Mittel (Firebase-Mocks)         | Niedrig                           | ✓ Coverage zurück                                | ✓ DO               |
+| P1-2/3 (Card-Logic + Utils Tests)    | Niedrig                         | Niedrig                           | ✓ Coverage zurück                                | ✓ DO               |
+| P1-4 (Visual-Coverage-Spec)          | Niedrig                         | Niedrig                           | ✓ Regression-Schutz                              | ✓ DO               |
+| P1-5 (Playwright Specs)              | Niedrig                         | Niedrig                           | ✓ E2E-Coverage                                   | ✓ DO               |
+| P1-6 (Python-Tests)                  | Niedrig                         | —                                 | ✓ Backend-Coverage                               | ✓ DO               |
+| P2-1A (Wave-2 entfernen)             | Mittel (URL-Routing-Verlust)    | Niedrig                           | Niedrig                                          | Diskutieren        |
+| P2-1B (Wave-2 fortsetzen)            | Hoch (komplexer Refactor)       | Hoch (UX-Wechsel)                 | Hoch                                             | Nicht jetzt        |
+| P2-2 (frontend/-Cleanup)             | Niedrig                         | Niedrig                           | Niedrig                                          | ✓ DO               |
+| P2-4 (Firebase v11 Smoke-Test)       | Niedrig (read-only)             | —                                 | —                                                | ✓ DO (Bestätigung) |
+| P3-1 (Doku-Update)                   | Niedrig                         | Niedrig                           | Niedrig                                          | ✓ DO               |
 
 ---
 
@@ -367,23 +378,23 @@ Repo-Größenordnung wurde laut Phase-2 um ~304K Zeilen netto reduziert (Wave-0 
 
 ### 7.1 Auf HEAD bestätigt (lokal ausgeführt)
 
-| Check | Tool / Command | Result |
-|---|---|---|
-| JS Unit Tests | `node scripts/run-unit-tests.js` | **298 pass / 0 fail, 23 files** |
-| Module Coverage | `npm run test:coverage:modules` | **91.72%/87.15%/84.09%/91.72%** — über Threshold (85/80/70) |
-| TypeScript | `npm run typecheck` | **PASS (kein Output)** |
-| ESLint | `npm run lint` | **0 errors / 1942 warnings (alle `'_' unused`)** |
-| Prettier | `npm run format` | **PASS mit warns auf 3+ Files (kosmetisch)** |
-| Bundle-Build | `npm run build:bundle` | **PASS — 21 files → 2.4 MB legacy bundle + 118 KB module bundle in ~139 ms** |
+| Check           | Tool / Command                   | Result                                                                       |
+| --------------- | -------------------------------- | ---------------------------------------------------------------------------- |
+| JS Unit Tests   | `node scripts/run-unit-tests.js` | **298 pass / 0 fail, 23 files**                                              |
+| Module Coverage | `npm run test:coverage:modules`  | **91.72%/87.15%/84.09%/91.72%** — über Threshold (85/80/70)                  |
+| TypeScript      | `npm run typecheck`              | **PASS (kein Output)**                                                       |
+| ESLint          | `npm run lint`                   | **0 errors / 1942 warnings (alle `'_' unused`)**                             |
+| Prettier        | `npm run format`                 | **PASS mit warns auf 3+ Files (kosmetisch)**                                 |
+| Bundle-Build    | `npm run build:bundle`           | **PASS — 21 files → 2.4 MB legacy bundle + 118 KB module bundle in ~139 ms** |
 
 ### 7.2 Auf HEAD NICHT geprüft (würden Phase-3-Scope sprengen)
 
-| Check | Warum nicht |
-|---|---|
+| Check                       | Warum nicht                                                                                                                                 |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
 | Playwright Visual-Snapshots | Browser-Install (`npx playwright install`) braucht 200+ MB Download, plus Live-Server-Setup nötig. Verifizieren in Phase 4 falls erwünscht. |
-| Python pytest | pytest + lxml + beautifulsoup4 nicht installiert; CI-Job in deploy-pages.yml zeigt: in CI grün am letzten Auto-Update. |
-| Live-Smoke-Test im Browser | Lokaler Web-Server müsste laufen + Firebase-Credentials simuliert werden. Empfohlen in P2-4. |
-| `_dist/`-Bundle-Inhalt | Habe ich gebaut, aber nicht den minified content inspiziert. Bei Bedarf: `head -c 500 _dist/app.bundle.js` für Sanity-Check. |
+| Python pytest               | pytest + lxml + beautifulsoup4 nicht installiert; CI-Job in deploy-pages.yml zeigt: in CI grün am letzten Auto-Update.                      |
+| Live-Smoke-Test im Browser  | Lokaler Web-Server müsste laufen + Firebase-Credentials simuliert werden. Empfohlen in P2-4.                                                |
+| `_dist/`-Bundle-Inhalt      | Habe ich gebaut, aber nicht den minified content inspiziert. Bei Bedarf: `head -c 500 _dist/app.bundle.js` für Sanity-Check.                |
 
 ---
 
@@ -392,6 +403,7 @@ Repo-Größenordnung wurde laut Phase-2 um ~304K Zeilen netto reduziert (Wave-0 
 **Phase 4 würde sein:** Implementierung der gewählten Strategie (Option A / B / C).
 
 **Vorgehensweise:**
+
 1. **Branch-Wahl klären** (siehe Phase 0): Soll Phase 4 auf `claude/gracious-edison-ITIKO` weiterarbeiten oder einen neuen Recovery-Branch eröffnen (z.B. `claude/golden-recovery-phase-4`)?
 2. **Fix-Reihenfolge:** P0 zuerst (binnen 1 Commit-Batch), dann P1 (selektiv pro Test-Kategorie), dann P2 (mit User-Approval pro Schritt).
 3. **Commit-Granularität:** Ein Commit pro logischer Recovery-Einheit, klare Commit-Messages mit Audit-Phase-Referenz.

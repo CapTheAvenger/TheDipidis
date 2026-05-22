@@ -43,11 +43,7 @@ function probabilityAtLeastOne(
     return (1 - hypergeom(deckSize, copiesInDeck, cardsDrawn, 0)) * 100;
 }
 
-function clamp(
-    /** @type {number} */ val,
-    /** @type {number} */ min,
-    /** @type {number} */ max
-) {
+function clamp(/** @type {number} */ val, /** @type {number} */ min, /** @type {number} */ max) {
     return Math.max(min, Math.min(max, val));
 }
 

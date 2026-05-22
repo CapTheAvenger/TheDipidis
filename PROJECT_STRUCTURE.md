@@ -8,12 +8,14 @@ größeren Umstrukturierungen bitte direkt mit aktualisieren.
 ## 1. Root-Dateien
 
 ### Frontend-Eintrittspunkt
+
 - `index.html` — Single-Page-App (4900 LOC, alle Tabs)
 - `service-worker.js` — PWA-Caching (network-first für HTML/JS/CSS,
   stale-while-revalidate für `/data/`)
 - `manifest.json`, `version.json`, `_config.yml`, `.nojekyll`, `CNAME`
 
 ### Build- und Tooling-Konfiguration
+
 - `package.json`, `package-lock.json` — npm-Scripts + devDeps
 - `eslint.config.js`, `.prettierrc.json`, `.prettierignore`
 - `tsconfig.json`, `types/globals.d.ts` — TypeScript checkJs für die
@@ -22,6 +24,7 @@ größeren Umstrukturierungen bitte direkt mit aktualisieren.
 - `requirements.txt` — Python-Backend-Deps
 
 ### Doku
+
 - `README.md`, `PROJECT_STRUCTURE.md`
 - `R2_SETUP.md` — Cloudflare-R2-Pilot-Setup
 - `FIREBASE_SETUP_GUIDE.md`, `FIRESTORE_RULES.md`
@@ -31,6 +34,7 @@ größeren Umstrukturierungen bitte direkt mit aktualisieren.
 - `docs/audit/*.md` — Audit-Phasen 1–4 (golden-vs-HEAD-Vergleich)
 
 ### Bequemlichkeits-Skripte (Windows)
+
 - `START_DASHBOARD.bat`, `PUSH_TO_GITHUB.bat`
 - `bump-version.sh`, `bump-version.ps1`
 - `pokemon_sets_mapping.csv`, `firestore.rules`
@@ -39,11 +43,13 @@ größeren Umstrukturierungen bitte direkt mit aktualisieren.
 ## 2. Verzeichnisse
 
 ### `js/` — Frontend (Legacy-Layer)
+
 26 IIFE-Scripts, eager über `<script defer>` in `index.html` geladen.
 Bündeln cross-file globals (`window.foo = …`); Wave-1 Layer 2 migriert
 diese schrittweise nach `js/modules/`.
 
 Größte Module:
+
 - `app-deck-builder.js` (447 K) — Deck-Builder
 - `app-meta-call.js` (295 K) — Tournament-Predictor
 - `firebase-collection.js` (245 K) — Collection/Wishlist/Decks
@@ -55,11 +61,13 @@ Größte Module:
 - `app-core.js` (149 K) — Tab-Switching + Boot
 
 Lazy-geladen via `js/lazy-loader.js` (Wave-1 L2.5):
+
 - `js/battle-journal.js` (120 K)
 - `js/meta-binder.js` (110 K) + `js/custom-binder.js` (54 K)
 - `js/draw-simulator.js` (10 K)
 
 ### `js/modules/` — Frontend (ES-Module-Layer)
+
 Wave-1 Layer 2: echte ES-Module mit `import`/`export`. Werden von
 `scripts/build-modules.js` zu `_dist/app.modules.bundle.js` gebündelt
 (IIFE-Format mit `globalName:'AppModules'`, Footer kopiert Exports
@@ -76,6 +84,7 @@ nach `window` für Legacy-Aufrufer).
   (gated by `?duckdb=1`)
 
 ### `css/` — Styles (27 Files, ~830 KB)
+
 Größte: `styles.css` (273 K), `ui-components.css` (127 K),
 `meta-call.css` (72 K), `mobile-responsive.css` (67 K),
 `city-league.css` (56 K), `current-meta-matchups.css` (32 K),
@@ -85,6 +94,7 @@ Größte: `styles.css` (273 K), `ui-components.css` (127 K),
 onload="this.media='all'"`-Trick.
 
 ### `backend/` — Python-Backend
+
 - `core/` — Shared Lib + Settings (archetype_matcher, card_scraper_shared,
   limitless_dated, prepare_card_data, threat_classifier, update_sets)
 - `scrapers/` — 19 Scraper für Card-DBs, Tournament-Daten, Cardmarket-Preise
@@ -96,6 +106,7 @@ onload="this.media='all'"`-Trick.
 - `settings.py`, `start_scraper_dashboard.py`
 
 ### `scripts/` — Build- und Pipeline-Skripte
+
 - `build-bundle.js` — Legacy-Concat-Bundle (artifact-only, nicht
   shipped)
 - `build-modules.js` — ES-Module-Bundle (shipped als
@@ -107,8 +118,10 @@ onload="this.media='all'"`-Trick.
 - `upload_to_r2.py` — R2-Pilot: boto3-Upload zu Cloudflare R2
 
 ### `data/` — Frontend-Daten (~324 MB)
+
 Persistente CSV/JSON-Outputs der Scraper. Wird im weekly-full-update-
 Workflow regeneriert. Top-Files:
+
 - `city_league_analysis.csv` (41 MB), `..._M3.csv` (31 MB)
 - `all_cards_merged.json` (13 MB), `all_cards_database.json` (11 MB)
 - `online_tournament_dated_cards.csv` (7 MB)
@@ -117,12 +130,15 @@ Workflow regeneriert. Top-Files:
 - `online_share_history/` — Tagesschnappschüsse
 
 ### `config/` — Scraper-Settings (11 JSON-Dateien)
+
 Master: `scraper_settings.json` (6 KB) + pro Scraper.
 
 ### `images/` — Statische Assets
+
 Pokeball-Icons, Loading-Screens, Escape-Rope-Buttons.
 
 ### `tests/` — Test-Suite
+
 - `tests/unit/test-*.js` — 36 Node-Test-Files (`node --test`):
   Datenverarbeitung, Deck-Builder, Filter, Card-Logik, Meta-Call,
   Firebase-Collection, Utility-Funktionen
@@ -139,6 +155,7 @@ Pokeball-Icons, Loading-Screens, Escape-Rope-Buttons.
 - `tests/verify_*.py` — Verifikations-Skripte
 
 ### `.github/workflows/` — CI-Pipeline (9 Workflows)
+
 - `deploy-pages.yml` — Test → Lint → Typecheck → Coverage-Gate →
   Build → Minify → Cache-Bust → GH-Pages-Deploy
 - `visual-nonmeta.yml` — Visual-Regression auf PR + Push
@@ -153,9 +170,11 @@ Pokeball-Icons, Loading-Screens, Escape-Rope-Buttons.
 Alle Third-Party-Actions sind SHA-pinned (Supply-Chain-Hardening).
 
 ### `utils/` — Aktive Maintenance-Skripte
+
 Kleine Python-Helper für Datenpflege. Siehe `utils/README.md`.
 
 ### `_dist/` — Build-Output (gitignored)
+
 - `app.bundle.js` — Legacy-Concat-Bundle (artifact-only)
 - `app.modules.bundle.js` — ES-Module-Bundle (shipped)
 - `*.map` — Source-Maps
@@ -164,12 +183,14 @@ Wird vom `npm run build:bundle` Skript erzeugt. Im CI durch
 `deploy-pages.yml` automatisch gebaut.
 
 ### `node_modules/` — npm-Deps (gitignored)
+
 Frontend-Runtime-Deps laden weiterhin von CDN (Firebase compat 11.10.0,
 Chart.js 4.4.0, PapaParse 5.4.1, localforage 1.10.0, mobile-drag-drop).
 
 ## 3. Empfohlener Workflow
 
 ### Lokale Entwicklung
+
 ```bash
 # Deps installieren
 npm ci
@@ -184,6 +205,7 @@ python -m http.server 8000
 ```
 
 ### Vor jedem Commit
+
 ```bash
 npm run lint        # ESLint (warn-only)
 npm run typecheck   # tsc --noEmit
@@ -191,6 +213,7 @@ npm test            # Node unit tests
 ```
 
 ### Backend (Scraper)
+
 ```bash
 # Interaktives Dashboard
 python backend/start_scraper_dashboard.py
@@ -201,6 +224,7 @@ PYTHONPATH=backend/core python backend/scrapers/city_league_analysis_scraper.py
 ## 4. Architektur-Notizen
 
 ### Tab-Layout (12 Top-Level-Tabs)
+
 `city-league`, `city-league-analysis`, **`current-meta`** (default
 active), `current-analysis`, `past-meta`, `cards`, `proxy`, `sandbox`,
 `tutorial`, `calculator`, `profile`.
@@ -211,12 +235,14 @@ Profile hat 11 Sub-Tabs (`profile-collection`, `profile-decks`,
 `profile-metacall`, `profile-testinggroups`, `profile-settings`).
 
 ### Playtester
+
 Der in-app Playtester (`js/playtester.js`, `playtester-mobile.js`,
 `playtester-patch.js`, `firebase-multiplayer.js`) wurde retired.
 Sandbox-Buttons leiten via Stubs in `app-core.js` zu
 [tcg-showdown.com](https://tcg-showdown.com/) weiter.
 
 ### Boot-Reihenfolge
+
 1. Inline `<script>` (Z. 32): `APP_VERSION` + Version-Drift-Check
 2. `pokemon-loading-screen.js` + `csv-cache-interceptor.js`
 3. `error-tracking.js`, `inline-init.js`
@@ -229,6 +255,7 @@ Sandbox-Buttons leiten via Stubs in `app-core.js` zu
 10. Inline `<script>` (am Ende): SW-Registration + Filter-Debounce
 
 ### Daten-Pipeline
+
 ```
 Scrapers (write to backend/core/data/)
   ↓ prepare_card_data.py SYNC_PATTERNS

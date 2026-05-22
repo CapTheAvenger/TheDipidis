@@ -19,13 +19,7 @@ export { updateCalculations } from './app-calculator.js';
 // Re-exporting puts parseCardKey / formatCardKey / getCardName / printId /
 // hasPrintInfo on the global `window` so legacy callers can use them via
 // bare identifiers; future ES-module call-sites can `import` directly.
-export {
-    parseCardKey,
-    formatCardKey,
-    getCardName,
-    hasPrintInfo,
-    printId,
-} from './card-key.js';
+export { parseCardKey, formatCardKey, getCardName, hasPrintInfo, printId } from './card-key.js';
 
 // L2.10 — store primitive + pilot user-store (Wave-1 "Stores" foundation).
 // Importing user-store.js also runs its side effect (window.userStore = …),

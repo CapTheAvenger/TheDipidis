@@ -107,12 +107,12 @@ On `github.com/CapTheAvenger/TheDipidis` → **Settings** → **Secrets
 and variables** → **Actions** → **New repository secret**, add **four**
 secrets:
 
-| Name | Value |
-| ---- | ----- |
-| `R2_ACCESS_KEY_ID`     | Access Key ID from Step 4 |
-| `R2_SECRET_ACCESS_KEY` | Secret Access Key from Step 4 |
+| Name                   | Value                                                     |
+| ---------------------- | --------------------------------------------------------- |
+| `R2_ACCESS_KEY_ID`     | Access Key ID from Step 4                                 |
+| `R2_SECRET_ACCESS_KEY` | Secret Access Key from Step 4                             |
 | `R2_ACCOUNT_ID`        | Your Cloudflare account ID (R2 dashboard → right sidebar) |
-| `R2_BUCKET`            | `thedipidis-data` |
+| `R2_BUCKET`            | `thedipidis-data`                                         |
 
 The weekly workflow's "Build Parquet + Upload to R2" step is gated on
 all four being present (`env.R2_ACCESS_KEY_ID != '' && …`). Until then
@@ -134,12 +134,22 @@ Manually trigger the workflow:
    The browser should download the binary Parquet file. Real size for
    the city-league snapshot is ~1.5 MB (27× smaller than the source
    CSV — Snappy compression on this dataset is excellent).
+
 4. Confirm CORS works for HTTP-Range queries. In the browser devtools
    console while on https://thedipidis.app:
    ```js
    (async () => {
-     const r = await fetch('https://pub-<your-hash>.r2.dev/city_league_analysis.parquet', { method: 'HEAD' });
-     console.log('status:', r.status, '| size:', r.headers.get('content-length'), '| ranges:', r.headers.get('accept-ranges'));
+     const r = await fetch('https://pub-<your-hash>.r2.dev/city_league_analysis.parquet', {
+       method: 'HEAD',
+     });
+     console.log(
+       'status:',
+       r.status,
+       '| size:',
+       r.headers.get('content-length'),
+       '| ranges:',
+       r.headers.get('accept-ranges')
+     );
    })();
    ```
    Expected: `status: 200`, the byte size, `ranges: bytes`. CORS error

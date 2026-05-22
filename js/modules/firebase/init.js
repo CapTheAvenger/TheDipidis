@@ -57,16 +57,16 @@ export function getFirebase() {
         /** @type {any} */ const w = window;
         const creds = w.FIREBASE_CREDS;
         if (!creds) {
-            console.warn('[firebase modular] FIREBASE_CREDS missing — initialising with empty config');
+            console.warn(
+                '[firebase modular] FIREBASE_CREDS missing — initialising with empty config'
+            );
         }
 
         // Reuse the compat-initialised app so we don't run two Firebase
         // apps in the same page. getApps() returns the array of named
         // apps; firebase-app-compat.js calls initializeApp() under the
         // default name during its module load.
-        const app = appMod.getApps().length
-            ? appMod.getApp()
-            : appMod.initializeApp(creds || {});
+        const app = appMod.getApps().length ? appMod.getApp() : appMod.initializeApp(creds || {});
 
         return {
             app,

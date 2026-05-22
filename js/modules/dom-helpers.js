@@ -28,7 +28,7 @@
  * @returns {HTMLElement | null}
  */
 function el(id) {
-  return document.getElementById(id);
+    return document.getElementById(id);
 }
 
 /**
@@ -37,8 +37,8 @@ function el(id) {
  * @returns {HTMLInputElement | null}
  */
 function input(id) {
-  const e = document.getElementById(id);
-  return (e instanceof HTMLInputElement) ? e : null;
+    const e = document.getElementById(id);
+    return e instanceof HTMLInputElement ? e : null;
 }
 
 /**
@@ -47,8 +47,8 @@ function input(id) {
  * @returns {HTMLSelectElement | null}
  */
 function select(id) {
-  const e = document.getElementById(id);
-  return (e instanceof HTMLSelectElement) ? e : null;
+    const e = document.getElementById(id);
+    return e instanceof HTMLSelectElement ? e : null;
 }
 
 /**
@@ -57,8 +57,8 @@ function select(id) {
  * @returns {HTMLTextAreaElement | null}
  */
 function textarea(id) {
-  const e = document.getElementById(id);
-  return (e instanceof HTMLTextAreaElement) ? e : null;
+    const e = document.getElementById(id);
+    return e instanceof HTMLTextAreaElement ? e : null;
 }
 
 /**
@@ -67,8 +67,8 @@ function textarea(id) {
  * @returns {HTMLButtonElement | null}
  */
 function button(id) {
-  const e = document.getElementById(id);
-  return (e instanceof HTMLButtonElement) ? e : null;
+    const e = document.getElementById(id);
+    return e instanceof HTMLButtonElement ? e : null;
 }
 
 /**
@@ -81,22 +81,22 @@ function button(id) {
  * @returns {T | null}
  */
 function queryAs(root, selector, Ctor) {
-  const found = root.querySelector(selector);
-  if (!found) return null;
-  if (Ctor && !(found instanceof Ctor)) return null;
-  return /** @type {T} */ (found);
+    const found = root.querySelector(selector);
+    if (!found) return null;
+    if (Ctor && !(found instanceof Ctor)) return null;
+    return /** @type {T} */ (found);
 }
 
 /** Same as queryAs but for <input>. */
 function queryInput(root, selector) {
-  const found = root.querySelector(selector);
-  return (found instanceof HTMLInputElement) ? found : null;
+    const found = root.querySelector(selector);
+    return found instanceof HTMLInputElement ? found : null;
 }
 
 /** Same as queryAs but for <select>. */
 function querySelect(root, selector) {
-  const found = root.querySelector(selector);
-  return (found instanceof HTMLSelectElement) ? found : null;
+    const found = root.querySelector(selector);
+    return found instanceof HTMLSelectElement ? found : null;
 }
 
 /**
@@ -108,9 +108,19 @@ function querySelect(root, selector) {
  * @returns {HTMLElement}
  */
 function asHTML(e) {
-  return /** @type {HTMLElement} */ (e);
+    return /** @type {HTMLElement} */ (e);
 }
 
-export const dom = { el, input, select, textarea, button, queryAs, queryInput, querySelect, asHTML };
+export const dom = {
+    el,
+    input,
+    select,
+    textarea,
+    button,
+    queryAs,
+    queryInput,
+    querySelect,
+    asHTML,
+};
 // Legacy compat: also expose under window.dom for non-module callers.
 /** @type {any} */ (window).dom = dom;

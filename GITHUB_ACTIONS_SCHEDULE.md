@@ -7,11 +7,13 @@ GitHub Actions führt automatisch alle Scraper aus, um die Website stets aktuell
 ## ⏰ Zeitplan (Alle um 2 Uhr MEZ / 3 Uhr MESZ)
 
 ### 🔄 **Wöchentlich: Tournament Data Scrape**
+
 **Datei:** `.github/workflows/weekly-scrape.yml`  
 **Schedule:** Jeden **Dienstag um 01:00 UTC** (= 02:00 MEZ / 03:00 MESZ)  
 **Dauer:** ~30-120 Minuten
 
 **Was wird gescrapt:**
+
 1. ✅ **City League Analysis Scraper** - Japanische City League Daten
 2. ✅ **City League Archetype Scraper** - Deck Archetypes & Statistiken
 3. ✅ **Current Meta Scraper** - Aktuelle Meta-Game Daten
@@ -25,11 +27,13 @@ GitHub Actions führt automatisch alle Scraper aus, um die Website stets aktuell
 ---
 
 ### 💰 **Wöchentlich: Price Update**
+
 **Datei:** `.github/workflows/price-update.yml`  
 **Schedule:** Jeden **Montag um 01:00 UTC** (= 02:00 MEZ / 03:00 MESZ)  
 **Dauer:** ~20-60 Minuten
 
 **Was wird gescrapt:**
+
 1. ✅ **Card Price Scraper** - Cardmarket Preise für alle Karten
 2. ✅ **prepare_card_data.py** - Integriert Preise in Website-Daten
 
@@ -38,11 +42,13 @@ GitHub Actions führt automatisch alle Scraper aus, um die Website stets aktuell
 ---
 
 ### 🗓️ **Monatlich: Card Database Update**
+
 **Datei:** `.github/workflows/monthly-cards-update.yml`  
 **Schedule:** Jeden **1. des Monats um 01:00 UTC** (= 02:00 MEZ / 03:00 MESZ)  
 **Dauer:** ~60-180 Minuten
 
 **Was wird gescrapt:**
+
 1. ✅ **Japanese Cards Scraper** - Neueste 4 japanische Sets (für City League)
 2. ✅ **All Cards Scraper** - Komplette Card Database von Limitless TCG
 3. ✅ **prepare_card_data.py** - Aktualisiert Card Database
@@ -62,18 +68,18 @@ GitHub Actions führt automatisch alle Scraper aus, um die Website stets aktuell
 
 ## 📊 Vollständige Scraper-Liste
 
-| Scraper | GitHub Actions | Häufigkeit | Benötigt Chrome |
-|---------|----------------|------------|-----------------|
-| City League Analysis | ✅ Wöchentlich (Di) | Jede Woche | ❌ |
-| City League Archetype | ✅ Wöchentlich (Di) | Jede Woche | ❌ |
-| Current Meta Analysis | ✅ Wöchentlich (Di) | Jede Woche | ❌ |
-| Limitless Online | ✅ Wöchentlich (Di) | Jede Woche | ❌ |
-| Tournament JH | ✅ Wöchentlich (Di) | Jede Woche | ❌ |
-| Set List Scraper | ✅ Wöchentlich (Di) | Jede Woche | ❌ |
-| Card Price Scraper | ✅ Wöchentlich (Mo) | Jede Woche | ✅ |
-| Japanese Cards | ✅ Monatlich (1.) | Jeden Monat | ✅ |
-| All Cards Database | ✅ Monatlich (1.) | Jeden Monat | ✅ |
-| PokemonProxies | ❌ Manuell | Bei Bedarf | ✅ |
+| Scraper               | GitHub Actions      | Häufigkeit  | Benötigt Chrome |
+| --------------------- | ------------------- | ----------- | --------------- |
+| City League Analysis  | ✅ Wöchentlich (Di) | Jede Woche  | ❌              |
+| City League Archetype | ✅ Wöchentlich (Di) | Jede Woche  | ❌              |
+| Current Meta Analysis | ✅ Wöchentlich (Di) | Jede Woche  | ❌              |
+| Limitless Online      | ✅ Wöchentlich (Di) | Jede Woche  | ❌              |
+| Tournament JH         | ✅ Wöchentlich (Di) | Jede Woche  | ❌              |
+| Set List Scraper      | ✅ Wöchentlich (Di) | Jede Woche  | ❌              |
+| Card Price Scraper    | ✅ Wöchentlich (Mo) | Jede Woche  | ✅              |
+| Japanese Cards        | ✅ Monatlich (1.)   | Jeden Monat | ✅              |
+| All Cards Database    | ✅ Monatlich (1.)   | Jeden Monat | ✅              |
+| PokemonProxies        | ❌ Manuell          | Bei Bedarf  | ✅              |
 
 ---
 
@@ -91,20 +97,24 @@ Alle Workflows können auch **manuell** über GitHub ausgeführt werden:
 ## 🛠️ Technische Details
 
 ### Dependencies
+
 - **Python 3.11**
 - **pip packages** aus `requirements.txt`
 - **Chrome + ChromeDriver** (nur für Price/Card Database Updates)
 
 ### Timeout
+
 - Weekly Scrape: **180 Minuten** (3 Stunden)
 - Price Update: **Standard** (~60 Min)
 - Card Database: **240 Minuten** (4 Stunden)
 
 ### Error Handling
+
 - Alle Steps haben `continue-on-error: true`
 - Bei Fehlern werden Logs als Artifacts hochgeladen (7 Tage Retention)
 
 ### Git Commit
+
 - **Automatisch** nach erfolgreichem Scraping
 - Commit Message: `🤖 Automated [weekly/price/monthly] update - DD.MM.YYYY`
 - Nur wenn Änderungen vorhanden (`git diff --staged --quiet`)
@@ -114,6 +124,7 @@ Alle Workflows können auch **manuell** über GitHub ausgeführt werden:
 ## 📝 Logs & Debugging
 
 Bei Fehlern:
+
 1. Gehe zu **Actions** Tab
 2. Klicke auf den fehlgeschlagenen Workflow-Run
 3. **Download "Logs"** Artifact (enthält Debug-HTML und Log-Dateien)
@@ -125,6 +136,7 @@ Bei Fehlern:
 **Letzte Aktualisierung:** 09.03.2026
 
 **Setup Status:**
+
 - ✅ Wöchentliche Tournament Scrapes (Dienstag 2 Uhr MEZ)
 - ✅ Wöchentliche Price Updates (Montag 2 Uhr MEZ)
 - ✅ Monatliche Card Database Updates (1. des Monats 2 Uhr MEZ)

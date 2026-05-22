@@ -42,14 +42,14 @@ function _compilePatterns(patternFile) {
     // Compile each regex once. A pattern with a bad regex is
     // dropped (and logged) rather than crashing the whole engine.
     const compiled = [];
-    for (const p of (patternFile.patterns || [])) {
+    for (const p of patternFile.patterns || []) {
         try {
             const flags = p.flags || '';
             compiled.push({
-                tag:        p.tag,
+                tag: p.tag,
                 confidence: p.confidence || 'medium',
-                scope:      p.scope,
-                regex:      new RegExp(p.regex, flags),
+                scope: p.scope,
+                regex: new RegExp(p.regex, flags),
             });
         } catch (e) {
             if (typeof console !== 'undefined') {
@@ -72,7 +72,7 @@ async function load() {
             ]);
             _data = {
                 taxonomy,
-                patterns:     _compilePatterns(patterns),
+                patterns: _compilePatterns(patterns),
                 interactions: interactions.interactions || [],
             };
             return _data;
@@ -80,7 +80,7 @@ async function load() {
             if (typeof console !== 'undefined') {
                 console.warn('[CardCapabilityEngine] load failed:', e.message);
             }
-            _data = { taxonomy: {tags:{}}, patterns: [], interactions: [] };
+            _data = { taxonomy: { tags: {} }, patterns: [], interactions: [] };
             return _data;
         }
     })();
@@ -93,19 +93,25 @@ function _textBuckets(rec) {
     // get their respective arrays; card_text patterns get
     // everything concatenated (used for catch-all rules text on
     // supporters/items).
-    const attackTexts  = [];
+    const attackTexts = [];
     const abilityTexts = [];
-    const allText      = [];
+    const allText = [];
     if (Array.isArray(rec.attacks)) {
         for (const a of rec.attacks) {
             const t = String(a.text || '');
-            if (t) { attackTexts.push({ name: a.name, text: t }); allText.push(t); }
+            if (t) {
+                attackTexts.push({ name: a.name, text: t });
+                allText.push(t);
+            }
         }
     }
     if (Array.isArray(rec.abilities)) {
         for (const ab of rec.abilities) {
             const t = String(ab.text || '');
-            if (t) { abilityTexts.push({ name: ab.name, text: t }); allText.push(t); }
+            if (t) {
+                abilityTexts.push({ name: ab.name, text: t });
+                allText.push(t);
+            }
         }
     }
     if (Array.isArray(rec.rules)) {
@@ -130,18 +136,30 @@ function extractTags(rec, setNumberKey) {
         if (scope === 'attack.text') {
             for (const a of buckets.attackTexts) {
                 if (p.regex.test(a.text)) {
-                    hits.push({ tag: p.tag, confidence: p.confidence, source: { type: 'attack', name: a.name } });
+                    hits.push({
+                        tag: p.tag,
+                        confidence: p.confidence,
+                        source: { type: 'attack', name: a.name },
+                    });
                 }
             }
         } else if (scope === 'ability.text') {
             for (const ab of buckets.abilityTexts) {
                 if (p.regex.test(ab.text)) {
-                    hits.push({ tag: p.tag, confidence: p.confidence, source: { type: 'ability', name: ab.name } });
+                    hits.push({
+                        tag: p.tag,
+                        confidence: p.confidence,
+                        source: { type: 'ability', name: ab.name },
+                    });
                 }
             }
         } else if (scope === 'card_text') {
             if (p.regex.test(buckets.allText)) {
-                hits.push({ tag: p.tag, confidence: p.confidence, source: { type: 'card', name: rec.name } });
+                hits.push({
+                    tag: p.tag,
+                    confidence: p.confidence,
+                    source: { type: 'card', name: rec.name },
+                });
             }
         }
     }
@@ -194,10 +212,10 @@ function _collectDeckTags(deckCardKeys, cardEffectsIndex) {
         for (const t of tags) {
             if (!out.has(t.tag)) out.set(t.tag, []);
             out.get(t.tag).push({
-                cardKey:    c.key,
-                cardName:   rec.name,
+                cardKey: c.key,
+                cardName: rec.name,
                 confidence: t.confidence,
-                source:     t.source,
+                source: t.source,
             });
         }
     }
@@ -205,14 +223,15 @@ function _collectDeckTags(deckCardKeys, cardEffectsIndex) {
 }
 
 function _narrative(interaction, lang, attacker, defender) {
-    const tpl = (lang === 'de'
-        ? (interaction.narrative_de || interaction.narrative_en)
-        : interaction.narrative_en) || '';
+    const tpl =
+        (lang === 'de'
+            ? interaction.narrative_de || interaction.narrative_en
+            : interaction.narrative_en) || '';
     return tpl
-        .replace('{attacker_name}',     attacker.cardName)
-        .replace('{attacker_source}',   attacker.source.name)
-        .replace('{defender_name}',     defender.cardName)
-        .replace('{defender_ability}',  defender.source.name);
+        .replace('{attacker_name}', attacker.cardName)
+        .replace('{attacker_source}', attacker.source.name)
+        .replace('{defender_name}', defender.cardName)
+        .replace('{defender_ability}', defender.source.name);
 }
 
 async function detectMatchups(opts) {
@@ -243,13 +262,17 @@ async function detectMatchups(opts) {
                 for (const ot of oppTags) {
                     if (ot.tag !== ix.defender) continue;
                     for (const um of userMatches) {
-                        const combinedConf = _minConfidence(um.confidence, ot.confidence, ix.confidence);
+                        const combinedConf = _minConfidence(
+                            um.confidence,
+                            ot.confidence,
+                            ix.confidence
+                        );
                         detected.push({
-                            attackerCard:   um.cardName,
+                            attackerCard: um.cardName,
                             attackerSource: um.source,
-                            defenderCard:   oppRec.name,
+                            defenderCard: oppRec.name,
                             defenderSource: ot.source,
-                            confidence:     combinedConf,
+                            confidence: combinedConf,
                             // result is the source of truth for matchup
                             // direction: 'attacker_wins' means the user's
                             // attacker bypasses/beats the opponent's
@@ -261,12 +284,15 @@ async function detectMatchups(opts) {
                             // doesn't fully resolve the matchup. Caller
                             // filters by this field — only attacker_wins
                             // shows up as "your techs against the field".
-                            result:         ix.result || 'attacker_wins',
-                            matchupValue:   ix.matchup_value || 0,
+                            result: ix.result || 'attacker_wins',
+                            matchupValue: ix.matchup_value || 0,
                             interactionTag: `${ix.attacker}→${ix.defender}`,
-                            narrative:      _narrative(ix, lang,
-                                { cardName: um.cardName,  source: um.source },
-                                { cardName: oppRec.name,  source: ot.source }),
+                            narrative: _narrative(
+                                ix,
+                                lang,
+                                { cardName: um.cardName, source: um.source },
+                                { cardName: oppRec.name, source: ot.source }
+                            ),
                         });
                     }
                 }

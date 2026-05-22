@@ -67,6 +67,41 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             pastMeta: new Set(),
         };
 
+        // ─── Source-prefix helpers (Wave-1 dedup) ───────────────────────
+        // The three deck sources — cityLeague / currentMeta / pastMeta —
+        // all share the same save/state-lookup shape. These helpers
+        // replace ~30 LOC of `if (source === 'X') saveX()` and
+        // `if (source === 'X') { deck = window.cityLeagueDeck; … }`
+        // boilerplate scattered across the file. See
+        // docs/audit/07-app-deck-builder.md §4.2 for the full duplication
+        // list.
+        //
+        // persistDeck() keeps the typeof-guard because the save fns live
+        // in sibling scripts that load AFTER app-deck-builder.js (see
+        // index.html defer-script order) — they aren't yet defined when
+        // this file is parsed, only when the call sites actually fire.
+        function persistDeck(source) {
+            if (source === 'cityLeague') {
+                if (typeof saveCityLeagueDeck === 'function') saveCityLeagueDeck();
+            } else if (source === 'currentMeta') {
+                if (typeof saveCurrentMetaDeck === 'function') saveCurrentMetaDeck();
+            } else if (source === 'pastMeta') {
+                if (typeof savePastMetaDeck === 'function') savePastMetaDeck();
+            }
+        }
+        function getDeckRefs(source) {
+            if (source === 'cityLeague') {
+                return { deck: window.cityLeagueDeck, orderKey: 'cityLeagueDeckOrder' };
+            }
+            if (source === 'currentMeta') {
+                return { deck: window.currentMetaDeck, orderKey: 'currentMetaDeckOrder' };
+            }
+            if (source === 'pastMeta') {
+                return { deck: window.pastMetaDeck, orderKey: 'pastMetaDeckOrder' };
+            }
+            return { deck: null, orderKey: null };
+        }
+
         function isExcludedCard(source, cardName) {
             const bucket = (window.excludedCards || {})[source];
             if (!bucket || !bucket.has) return false;
@@ -96,9 +131,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 excludeBucket.delete(key);
             }
             try {
-                if (source === 'cityLeague' && typeof saveCityLeagueDeck === 'function') saveCityLeagueDeck();
-                else if (source === 'currentMeta' && typeof saveCurrentMetaDeck === 'function') saveCurrentMetaDeck();
-                else if (source === 'pastMeta' && typeof savePastMetaDeck === 'function') savePastMetaDeck();
+                persistDeck(source);
             } catch (_) { /* swallow — UI redraw still happens */ }
             if (typeof updateDeckDisplay === 'function') updateDeckDisplay(source);
             if (typeof showToast === 'function') {
@@ -160,9 +193,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             }
             // Persist alongside the deck so the pin survives regen.
             try {
-                if (source === 'cityLeague' && typeof saveCityLeagueDeck === 'function') saveCityLeagueDeck();
-                else if (source === 'currentMeta' && typeof saveCurrentMetaDeck === 'function') saveCurrentMetaDeck();
-                else if (source === 'pastMeta' && typeof savePastMetaDeck === 'function') savePastMetaDeck();
+                persistDeck(source);
             } catch (_) { /* swallow — UI redraw still happens */ }
             if (typeof updateDeckDisplay === 'function') updateDeckDisplay(source);
             if (typeof showToast === 'function') {
@@ -243,9 +274,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             }
             bucket.push(trimmed);
             try {
-                if (source === 'cityLeague' && typeof saveCityLeagueDeck === 'function') saveCityLeagueDeck();
-                else if (source === 'currentMeta' && typeof saveCurrentMetaDeck === 'function') saveCurrentMetaDeck();
-                else if (source === 'pastMeta' && typeof savePastMetaDeck === 'function') savePastMetaDeck();
+                persistDeck(source);
             } catch (_) { /* swallow */ }
             if (typeof renderTechSlotsUI === 'function') renderTechSlotsUI(source);
             return true;
@@ -261,9 +290,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             if (idx < 0) return false;
             bucket.splice(idx, 1);
             try {
-                if (source === 'cityLeague' && typeof saveCityLeagueDeck === 'function') saveCityLeagueDeck();
-                else if (source === 'currentMeta' && typeof saveCurrentMetaDeck === 'function') saveCurrentMetaDeck();
-                else if (source === 'pastMeta' && typeof savePastMetaDeck === 'function') savePastMetaDeck();
+                persistDeck(source);
             } catch (_) { /* swallow */ }
             if (typeof renderTechSlotsUI === 'function') renderTechSlotsUI(source);
             return true;
@@ -274,9 +301,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             if (source !== 'cityLeague' && source !== 'currentMeta' && source !== 'pastMeta') return;
             window.techSlots[source] = [];
             try {
-                if (source === 'cityLeague' && typeof saveCityLeagueDeck === 'function') saveCityLeagueDeck();
-                else if (source === 'currentMeta' && typeof saveCurrentMetaDeck === 'function') saveCurrentMetaDeck();
-                else if (source === 'pastMeta' && typeof savePastMetaDeck === 'function') savePastMetaDeck();
+                persistDeck(source);
             } catch (_) { /* swallow */ }
             if (typeof renderTechSlotsUI === 'function') renderTechSlotsUI(source);
             if (typeof showToast === 'function') {
@@ -578,17 +603,9 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
         function addCardToDeckBatch(source, cardName, setCode, setNumber) {
             if (source !== 'cityLeague' && source !== 'currentMeta' && source !== 'pastMeta') return false;
             
-            let deck, deckOrderKey;
-            if (source === 'cityLeague') {
-                deck = window.cityLeagueDeck;
-                deckOrderKey = 'cityLeagueDeckOrder';
-            } else if (source === 'currentMeta') {
-                deck = window.currentMetaDeck;
-                deckOrderKey = 'currentMetaDeckOrder';
-            } else if (source === 'pastMeta') {
-                deck = window.pastMetaDeck;
-                deckOrderKey = 'pastMetaDeckOrder';
-            }
+            const _refs = getDeckRefs(source);
+            const deck = _refs.deck;
+            const deckOrderKey = _refs.orderKey;
             
             // Initialize deck order array if not exists
             if (!window[deckOrderKey]) {
@@ -788,17 +805,9 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
         function addCardToDeck(source, cardName, setCode, setNumber) {
             if (source !== 'cityLeague' && source !== 'currentMeta' && source !== 'pastMeta') return;
             
-            let deck, deckOrderKey;
-            if (source === 'cityLeague') {
-                deck = window.cityLeagueDeck;
-                deckOrderKey = 'cityLeagueDeckOrder';
-            } else if (source === 'currentMeta') {
-                deck = window.currentMetaDeck;
-                deckOrderKey = 'currentMetaDeckOrder';
-            } else if (source === 'pastMeta') {
-                deck = window.pastMetaDeck;
-                deckOrderKey = 'pastMetaDeckOrder';
-            }
+            const _refs = getDeckRefs(source);
+            const deck = _refs.deck;
+            const deckOrderKey = _refs.orderKey;
             
             // Initialize deck order array if not exists
             if (!window[deckOrderKey]) {
@@ -922,14 +931,8 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             devLog(`Added card to deck: ${deckKey} -> ${deck[deckKey]}`);
             
             // Save to localStorage
-            if (source === 'cityLeague') {
-                saveCityLeagueDeck();
-            } else if (source === 'currentMeta') {
-                saveCurrentMetaDeck();
-            } else if (source === 'pastMeta') {
-                savePastMetaDeck();
-            }
-            
+            persistDeck(source);
+
             updateDeckDisplay(source);
         }
 
@@ -1020,17 +1023,9 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
         function removeCardFromDeck(source, deckKey) {
             if (source !== 'cityLeague' && source !== 'currentMeta' && source !== 'pastMeta') return;
             
-            let deck, deckOrderKey;
-            if (source === 'cityLeague') {
-                deck = window.cityLeagueDeck;
-                deckOrderKey = 'cityLeagueDeckOrder';
-            } else if (source === 'currentMeta') {
-                deck = window.currentMetaDeck;
-                deckOrderKey = 'currentMetaDeckOrder';
-            } else if (source === 'pastMeta') {
-                deck = window.pastMetaDeck;
-                deckOrderKey = 'pastMetaDeckOrder';
-            }
+            const _refs = getDeckRefs(source);
+            const deck = _refs.deck;
+            const deckOrderKey = _refs.orderKey;
             
             // CRITICAL FIX: Find the actual key in deck
             // If deckKey is just "CardName" but deck has "CardName (SET NUM)", find it
@@ -1061,13 +1056,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 }
                 
                 // Save to localStorage
-                if (source === 'cityLeague') {
-                    saveCityLeagueDeck();
-                } else if (source === 'currentMeta') {
-                    saveCurrentMetaDeck();
-                } else if (source === 'pastMeta') {
-                    savePastMetaDeck();
-                }
+                persistDeck(source);
                 
                 updateDeckDisplay(source);
             }
@@ -1178,9 +1167,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
 
             const normalized = normalizeDeckEntries(source);
             if (normalized) {
-                if (source === 'cityLeague') saveCityLeagueDeck();
-                else if (source === 'currentMeta') saveCurrentMetaDeck();
-                else if (source === 'pastMeta') savePastMetaDeck();
+                persistDeck(source);
             }
             
             let deck;

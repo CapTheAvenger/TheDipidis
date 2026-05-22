@@ -162,5 +162,38 @@ describe('controller: switchFormat preserves selection when archetype available'
         assert.equal(s.activeFormat, 'past');
         assert.equal(s.selectedDeck, null);
     });
+
+    it('ignores invalid format values', async () => {
+        const { metaViewStore } = await import('../../js/modules/meta-view/store.js');
+        const { switchFormat } = await import('../../js/modules/meta-view/controller.js');
+        metaViewStore.reset();
+        switchFormat(/** @type {any} */ ('not-a-format'));
+        assert.equal(metaViewStore.get().activeFormat, 'current'); // unchanged
+    });
+});
+
+describe('controller: backToList + setSearchFilter', () => {
+    it('backToList returns to list view and keeps selectedDeck', async () => {
+        const { metaViewStore } = await import('../../js/modules/meta-view/store.js');
+        const { backToList, selectDeck } = await import('../../js/modules/meta-view/controller.js');
+        metaViewStore.reset();
+        selectDeck('Pikachu', 'current');
+        assert.equal(metaViewStore.get().view, 'detail');
+        backToList();
+        assert.equal(metaViewStore.get().view, 'list');
+        assert.equal(metaViewStore.get().selectedDeck.archetype, 'Pikachu');
+    });
+
+    it('setSearchFilter updates the search field and trims whitespace', async () => {
+        const { metaViewStore } = await import('../../js/modules/meta-view/store.js');
+        const { setSearchFilter } = await import('../../js/modules/meta-view/controller.js');
+        metaViewStore.reset();
+        setSearchFilter('charizard');
+        assert.equal(metaViewStore.get().filters.search, 'charizard');
+        setSearchFilter('  trimmed  ');
+        assert.equal(metaViewStore.get().filters.search, 'trimmed');
+        setSearchFilter('');
+        assert.equal(metaViewStore.get().filters.search, '');
+    });
 });
 

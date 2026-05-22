@@ -43,6 +43,7 @@
     // ── Tab labels ───────────────────────────────────────────
     'tab.metaAnalysis':       'Meta & Deck-Analyse',
     'tab.cityLeagueAnalysis': 'City League Deck-Analyse',
+    'tab.currentMetaAnalysis':'Aktuelle Meta Deck-Analyse',
     'tab.cards':              'Karten',
     'tab.proxyPrinter':       'Proxy-Drucker',
     'tab.playtester':         'Playtester',

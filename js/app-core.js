@@ -388,6 +388,10 @@ const BASE_PATH = './data/';
         // Stubs for legacy in-app playtester entry points. They now redirect
         // to the external TCG Showdown handoff so any lingering UI button or
         // deeplink degrades gracefully instead of throwing ReferenceError.
+        // The HTML still ships the sandbox tab + modal markup; clicking any
+        // of the ~40 pt*/mp*/*Playtester*/*Multiplayer* onclick handlers
+        // from there would otherwise crash with ReferenceError now that
+        // js/playtester*.js and js/firebase-multiplayer.js are gone.
         function _redirectToShowdown() {
             if (typeof window.openShowdownExternal === 'function') {
                 window.openShowdownExternal();
@@ -395,7 +399,29 @@ const BASE_PATH = './data/';
                 showNotification('Playtester moved to tcg-showdown.com', 'info', 2400);
             }
         }
-        ['openPlaytester', 'openPlaytesterSetup', 'startPlaytesterWithMirror', 'startPlaytesterWithOpponent', 'startStandalonePlaytester', 'parseSandboxDeckToExactPrints', 'openMultiplayerFromSandbox'].forEach(functionName => {
+        [
+            // Modal entry + multiplayer launchers
+            'openPlaytester', 'openPlaytesterSetup', 'closePlaytesterSetup',
+            'startPlaytesterSetup', 'startPlaytesterWithMirror',
+            'startPlaytesterWithOpponent', 'startStandalonePlaytester',
+            'parseSandboxDeckToExactPrints',
+            'openMultiplayerFromSandbox', 'openMultiplayerMenu',
+            'toggleMultiplayerMenu', 'mpCreateGame', 'mpJoinGame',
+            // In-modal interactions. Unreachable now that the entry
+            // launchers redirect, but stubbed defensively against any
+            // legacy code path that bypasses the modal open.
+            'ptStartGame', 'ptUndo', 'ptLog', 'ptShowManual', 'ptToggleLog',
+            'ptFlipBoard', 'ptZoomBoard', 'ptZoomClose',
+            'ptCloseAttackView', 'ptCloseDeckSearch', 'ptCloseDiscardModal',
+            'ptCloseTopCards', 'ptDeckMenu', 'ptDrawCards',
+            'ptHideContextMenu', 'ptLookCards', 'ptMenuAction', 'ptMulligan',
+            'ptOpenAttackView', 'ptOpenDeckSearch', 'ptOpenDiscard',
+            'ptOpenLostZone', 'ptOpenOpponentPanel', 'ptOppSwitchTab',
+            'ptPassTurn', 'ptScrollHand', 'ptSetDiscardSort', 'ptShuffleDeck',
+            'ptShuffleRemainingLookedCardsIntoDeck',
+            'ptToggleBenchSize', 'ptToggleDmgMod', 'ptToggleLock',
+            'ptToggleMarker', 'ptViewCard',
+        ].forEach(functionName => {
             if (typeof window[functionName] === 'function') return;
             window[functionName] = _redirectToShowdown;
         });
@@ -1158,17 +1184,6 @@ const BASE_PATH = './data/';
                 }
             }, { passive: false });
 
-            // Trigger lazy-loading when the user switches segment in the
-            // consolidated meta-view tab (segmented control → setFormat).
-            if (window.metaViewStore) {
-                window.metaViewStore.subscribe(function() {
-                    const _s = window.metaViewStore.get();
-                    if (_s.view !== 'list') return;
-                    if (_s.activeFormat === 'current' && !window.currentMetaLoaded) loadCurrentMeta();
-                    else if (_s.activeFormat === 'city-league' && !window.cityLeagueLoaded) loadCityLeagueData();
-                    else if (_s.activeFormat === 'past' && !window.pastMetaLoaded) loadPastMeta();
-                });
-            }
         });
         
         // Tab switching
@@ -1185,15 +1200,6 @@ const BASE_PATH = './data/';
 
                 // Load data for the tab
                 switch(tabName) {
-                    case 'meta-view': {
-                        // Consolidated meta tab: delegate to whichever format is active.
-                        const _s = window.metaViewStore ? window.metaViewStore.get() : null;
-                        const _fmt = _s ? _s.activeFormat : 'current';
-                        if (_fmt === 'current' && !window.currentMetaLoaded) loadCurrentMeta();
-                        else if (_fmt === 'city-league' && !window.cityLeagueLoaded) loadCityLeagueData();
-                        else if (_fmt === 'past' && !window.pastMetaLoaded) loadPastMeta();
-                        break;
-                    }
                     case 'city-league':
                         if (!window.cityLeagueLoaded) loadCityLeagueData();
                         break;
@@ -1216,28 +1222,11 @@ const BASE_PATH = './data/';
                         renderProxyQueue();
                         initializeProxyManualSearchInput();
                         break;
-                    case 'battle-journal':
-                        if (typeof openJournalHistoryTab === 'function') openJournalHistoryTab();
-                        break;
-                    case 'meta-call':
-                        if (typeof MetaCall !== 'undefined' && MetaCall && typeof MetaCall.init === 'function') MetaCall.init();
-                        break;
-                    case 'testing-groups':
-                        if (typeof TestingGroups !== 'undefined' && TestingGroups && typeof TestingGroups.init === 'function') TestingGroups.init();
-                        break;
                 }
             }
 
-            // The consolidated #meta-view tab handles all meta routing,
-            // so the legacy meta IDs (current-meta, city-league,
-            // past-meta, *-analysis) reach this point via the bootstrap
-            // intercept that calls switchTab('meta-view'). Highlight
-            // the meta-view top-nav button for any of those names.
-            const metaSubTabs = ['meta-view', 'city-league', 'city-league-analysis', 'current-meta', 'current-analysis', 'past-meta'];
-            const buttonLookupName = metaSubTabs.includes(tabName) ? 'meta-view' : tabName;
-
             const activeBtn = Array.from(buttons).find(btn =>
-                btn.getAttribute('onclick')?.includes(buttonLookupName)
+                btn.getAttribute('onclick')?.includes(tabName)
             );
             if (activeBtn) activeBtn.classList.add('active');
 

@@ -786,7 +786,7 @@ window.TestingGroups = (function () {
         const data = groupSnap.data() || {};
         if ((data.memberUids || []).includes(u.uid)) {
           await loadMyGroups();
-          if (typeof switchTabAndUpdateMenu === 'function') switchTabAndUpdateMenu('testing-groups');
+          if (typeof openProfileSection === 'function') openProfileSection('testinggroups');
           await openGroup(groupId);
           return;
         }
@@ -1012,10 +1012,11 @@ window.TestingGroups = (function () {
       console.warn('[TestingGroups] MetaCall preload failed, trying anyway', err);
     }
     const result = window.MetaCall._testingGroupLoad(g.data);
-    // Jump to the Meta Call tab so the user sees the imported data
-    // immediately instead of having to navigate there manually.
-    if (typeof switchTabAndUpdateMenu === 'function') {
-      switchTabAndUpdateMenu('meta-call');
+    // Jump to the Meta Call profile sub-tab so the user sees the
+    // imported data immediately instead of having to navigate there
+    // manually.
+    if (typeof openProfileSection === 'function') {
+      openProfileSection('metacall');
     }
     const summary = (result && typeof result === 'object')
       ? t('tg.loadedIntoMetaCallSummary')

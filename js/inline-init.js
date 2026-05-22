@@ -16,17 +16,11 @@ function toggleMenuCluster(clusterId) {
 }
 
 function syncMenuClustersForTab(tabId) {
-    // The "Meta & Tools" cluster expands when any of its sub-items is
-    // active. Legacy meta tab IDs (current-meta, city-league,
-    // past-meta, *-analysis) still arrive here from the bootstrap's
-    // switchTab interception, which calls switchTab('meta-view') under
-    // the hood — so this set keeps a fallback for those code paths.
-    // Battle Journal / Meta Call / Testing Groups are the three tabs
-    // that got promoted out of Profile in the IA-refactor follow-up.
+    // The "Meta & Tier Lists" cluster expands when any of its
+    // sub-items is active.
     const metaTabs = new Set([
-        'meta-view', 'city-league', 'city-league-analysis',
+        'city-league', 'city-league-analysis',
         'current-meta', 'current-analysis', 'past-meta',
-        'meta-call', 'battle-journal', 'testing-groups',
     ]);
     const metaSubmenu = document.getElementById('menu-submenu-meta');
     const metaGroup = document.getElementById('menu-group-meta');
@@ -142,24 +136,30 @@ document.addEventListener('languageChanged', function() {
         'probability':       'calculator',
         'wahrscheinlichkeit':'calculator',
         'profile':           'profile',
-        // Promoted to top-level tabs in the IA-refactor follow-up.
-        // Old hashes (#metacall, #journal, #meta-call) still land
-        // users on the same content — now without the Profile detour.
-        'metacall':          'meta-call',
-        'meta-call':         'meta-call',
-        'journal':           'battle-journal',
-        'battle-journal':    'battle-journal',
-        'testinggroups':     'testing-groups',
-        'testing-groups':    'testing-groups',
+    };
+    // Profile sub-section aliases. Route to #profile + the named
+    // sub-tab via openProfileSection() rather than to a top-level
+    // tab — Battle Journal / Meta Call / Testing Groups are
+    // sub-sections of the Profile tab, not standalone tabs.
+    const PROFILE_SECTION_ALIASES = {
+        'metacall':       'metacall',
+        'meta-call':      'metacall',
+        'journal':        'journal',
+        'battle-journal': 'journal',
+        'testinggroups':  'testinggroups',
+        'testing-groups': 'testinggroups',
     };
 
     function applyHash() {
         const raw = (window.location.hash || '').replace(/^#/, '').toLowerCase().trim();
         if (!raw) return;
 
-        // The meta-view URL router (#meta?format=…&deck=…) owns its own
-        // hash; let it handle that one rather than re-parsing here.
-        if (raw.startsWith('meta?') || raw === 'meta') return;
+        // Profile sub-section deep-links (#metacall, #journal,
+        // #testinggroups and variants).
+        if (PROFILE_SECTION_ALIASES[raw]) {
+            openProfileSection(PROFILE_SECTION_ALIASES[raw]);
+            return;
+        }
 
         // Legacy meta-tab hash aliases (#current-meta, #city-league,
         // #past-meta) route directly to the legacy tab.

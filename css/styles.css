@@ -7234,8 +7234,6 @@ body.battle-journal-open {
         flex-direction: column;
     }
 }
-    padding-top: 5px;
-}
 
 .top-card-name {
     font-size: 0.72rem;

@@ -1,29 +1,29 @@
 ﻿deck_name;rank;count;share;winrate
-Dragapult;1;2337;7,13;52,32
-Dragapult Dusknoir;2;1875;5,72;46,01
-Lucario Hariyama;3;1764;5,38;47,19
-Dragapult Blaziken;4;1733;5,28;52,62
+Dragapult;1;2338;7,12;52,32
+Dragapult Dusknoir;2;1876;5,71;46,0
+Lucario Hariyama;3;1765;5,38;47,19
+Dragapult Blaziken;4;1735;5,28;52,64
 Alakazam Dudunsparce;5;1667;5,08;51,6
-N's Zoroark;6;1650;5,03;46,62
-Rocket's Mewtwo;7;1508;4,6;49,88
-Starmie Froslass;8;1262;3,85;51,89
-Ogerpon Meganium;9;1170;3,57;53,67
-Festival Lead;10;1171;3,57;52,16
-Cynthia's Garchomp;11;1130;3,45;51,73
-Raging Bolt Ogerpon;12;1039;3,17;51,37
+N's Zoroark;6;1652;5,03;46,62
+Rocket's Mewtwo;7;1508;4,59;49,88
+Starmie Froslass;8;1262;3,84;51,89
+Festival Lead;9;1172;3,57;52,16
+Ogerpon Meganium;10;1170;3,56;53,67
+Cynthia's Garchomp;11;1134;3,45;51,73
+Raging Bolt Ogerpon;12;1041;3,17;51,33
 Grimmsnarl Froslass;13;952;2,9;51,6
-Rocket's Honchkrow;14;747;2,28;51,48
-Okidogi Barbaracle;15;740;2,26;54,52
+Rocket's Honchkrow;14;749;2,28;51,57
+Okidogi Barbaracle;15;740;2,25;54,52
 Crustle;16;670;2,04;51,09
 Dragapult Dudunsparce;17;623;1,9;50,6
-Lopunny Dudunsparce;18;573;1,75;51,44
+Lopunny Dudunsparce;18;574;1,75;51,44
 Slowking;19;547;1,67;48,32
 Greninja;20;487;1,48;48,48
-Steven's Metagross;21;416;1,27;47,01
+Steven's Metagross;21;417;1,27;46,96
 Mega Venusaur;22;410;1,25;44,22
-Hydrapple Ogerpon;23;395;1,2;53,1
+Hydrapple Ogerpon;23;397;1,21;53,09
 Mega Absol Box;24;381;1,16;47,02
-Starmie Dusknoir;25;376;1,15;50,0
+Starmie Dusknoir;25;379;1,15;49,91
 Clefairy Ogerpon;26;365;1,11;50,22
 Ogerpon Box;27;359;1,09;54,22
 Mega Lucario;28;346;1,05;47,16
@@ -32,21 +32,21 @@ Ceruledge;30;284;0,87;43,67
 Hop's Trevenant;31;271;0,83;48,39
 Diancie Dusknoir;32;257;0,78;44,92
 Ursaluna Lunatone;33;220;0,67;45,02
-Froslass Munkidori;34;205;0,63;47,09
-Ethan's Typhlosion;35;201;0,61;40,73
+Froslass Munkidori;34;205;0,62;47,09
+Ethan's Typhlosion;35;202;0,62;40,9
 Rocket's Spidops;36;173;0,53;54,1
 Tera Box;37;171;0,52;46,95
 Mega Froslass;38;149;0,45;49,06
-Decidueye;39;145;0,44;43,1
+Decidueye;39;146;0,44;42,95
 Mega Starmie;40;139;0,42;44,56
 Jellicent Dusknoir;41;130;0,4;44,93
-Yanmega;42;119;0,36;54,84
+Yanmega;42;121;0,37;55,04
 Archaludon;43;105;0,32;51,07
 Mega Charizard X;44;105;0,32;28,83
 Toxtricity Box;45;100;0,3;43,65
 Kangaskhan Bouffalant;46;96;0,29;50,81
-Hydreigon;47;81;0,25;43,13
-Hop's Zacian;48;79;0,24;48,34
+Hydreigon;47;82;0,25;43,21
+Hop's Zacian;48;80;0,24;48,36
 Marnie's Grimmsnarl;49;79;0,24;43,7
 Sharpedo Toxtricity;50;74;0,23;40,88
 Mega Abomasnow;51;61;0,19;39,05
@@ -91,7 +91,7 @@ Misty's Gyarados;89;14;0,04;43,4
 Slaking;90;13;0,04;47,06
 Blissey;91;14;0,04;41,3
 Bloodmoon Ursaluna;92;13;0,04;43,48
-Ethan's Magcargo;93;10;0,03;33,33
+Ethan's Magcargo;93;11;0,03;33,33
 Rocket's Nidoking;94;10;0,03;46,34
 Tyranitar;95;9;0,03;26,47
 Mega Sharpedo;96;7;0,02;34,88

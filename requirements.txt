@@ -15,3 +15,7 @@ flask-cors>=4.0.0,<5
 
 # Optional: For better performance
 urllib3>=2.0.0,<3
+
+# Parquet + R2 upload (used by scripts/build_parquet.py and scripts/upload_to_r2.py)
+pyarrow>=14.0.0,<20
+boto3>=1.28.0,<2

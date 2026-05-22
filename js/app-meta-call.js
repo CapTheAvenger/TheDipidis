@@ -3203,56 +3203,10 @@ window.MetaCall = (function () {
   // pool at 25 ensures they're evaluated. (Bumped from 20 to 25 after
   // Utrecht 2026 surfaced Lucario/Hariyama and Lopunny/Froslass at
   // ~4 % field each — both invisible at the old 20-deck horizon.)
-  function calcRecommendations(field, topN = 5) {
-    if (!_shareList || !field || field.length === 0) return [];
-
-    const RECO_POOL_SIZE = 25;
-    const seen = new Set();
-    const candidates = [];
-
-    // 1) Top-N from the share list (RECO_POOL_SIZE = field's TOP_N).
-    _shareList.slice(0, RECO_POOL_SIZE).forEach(d => {
-      const k = normalize(d.name);
-      if (!k || seen.has(k)) return;
-      seen.add(k);
-      candidates.push(d.name);
-    });
-
-    // 2) The user's currently-selected deck — always include so they
-    //    can see where their pick ranks even if it's outside top-20.
-    if (_settings.myDeck) {
-      const myK = normalize(_settings.myDeck);
-      if (myK && !seen.has(myK)) {
-        seen.add(myK);
-        candidates.push(_settings.myDeck);
-      }
-    }
-
-    // 3) Custom decks the user added to the field — they're intentional
-    //    candidates, evaluate them too.
-    (_customDecks || []).forEach(c => {
-      if (!c || !c.name) return;
-      const k = normalize(c.name);
-      if (!k || seen.has(k)) return;
-      seen.add(k);
-      candidates.push(c.name);
-    });
-
-    const results = candidates.map(name => {
-      const r = calcDay2(field, name);
-      return {
-        name,
-        day2Prob: r.day2Prob,
-        expWin: r.expWin,
-        avgWR: (r.expWin / _settings.rounds) * 100,
-      };
-    });
-    return results
-      .sort((a, b) => (b.day2Prob - a.day2Prob) || (b.avgWR - a.avgWR))
-      .slice(0, topN);
-  }
-
   // Dynamic recommendations split — Day-2-fähig list + Geheimtipps.
+  // (calcRecommendations — the older fixed-topN variant — was removed
+  // after audit-08; calcRecommendationsSplit is the only caller path
+  // used by renderAll / refreshResults.)
   //
   //  Day-2-fähig: every candidate from the narrow top-30 pool with
   //               day2Prob ≥ 0.20 ("competitive threshold" — at least
@@ -4236,12 +4190,11 @@ window.MetaCall = (function () {
     <p class="color-grey">${t('mc.subtitle')}</p>
     ${dateBanner}
   </div>
-  ${'' /* Predictor banner suppressed — the verbose technical breakdown
-       ("Based on N major-tournament rows + online-tournament + ladder
-       data. + Online-Entwicklung seit DD.MM.") confused users more
-       than it helped. The function and its trend/CL/accuracy chips
-       are kept in the code in case a slimmer chip-style replacement
-       is added later. */}
+  ${'' /* Predictor banner removed in audit-08 dead-code pass — it had
+       been suppressed in renderAll since the verbose technical
+       breakdown confused users more than it helped. If a slimmer
+       chip-style replacement is desired later, write it fresh; the
+       old shape is in git history. */}
   ${renderScenariosBar()}
   ${renderSettingsPanel()}
   ${renderMetaCallModePanel()}
@@ -4437,41 +4390,10 @@ window.MetaCall = (function () {
     return m ? `${m[3]}.${m[2]}.` : (iso || '');
   }
 
-  function renderPredictorBanner() {
-    const tgLoaded = Object.values(_tgFieldShares).reduce((s, v) => s + v, 0) > 0;
-    const clTags = [];
-    if (_useClCurrent && Object.keys(_clCurrentByDeck).length > 0) clTags.push('CL Current');
-    if (_useClPast    && Object.keys(_clPastByDeck).length > 0)    clTags.push('CL Past');
-    const clSuffix = (clTags.length && _predictorMode === 'A' && !tgLoaded)
-      ? ` <span class="mc-predictor-banner-cl">+ ${clTags.join(' + ')}</span>`
-      : '';
-
-    // Predictor 3.0: when a post-major baseline snapshot is loaded, append
-    // "+ Online-Entwicklung seit DD.MM." so the user sees that the trend
-    // signal is live. Falls silent when no snapshot exists.
-    const trendSuffix = _baselineSnapshotDate
-      ? ` <span class="mc-predictor-banner-trend">+ Online-Entwicklung seit ${_formatDDMM(_baselineSnapshotDate)}</span>`
-      : '';
-
-    // Predictor 3.0 system-learning chip — shows MAE of the previous
-    // prediction once a fresh major has arrived. Surfaces the accuracy
-    // story so the user can tune trust over time.
-    const accuracySuffix = _lastAccuracyReport
-      ? ` <span class="mc-predictor-banner-accuracy" title="Mean Absolute Error of the prediction made ${_formatDDMM(_lastAccuracyReport.baselineDate)} vs the major on ${_formatDDMM(_lastAccuracyReport.majorDate)}">Letzte Prognose-Accuracy: ø ${String(_lastAccuracyReport.mae).replace('.', ',')} pp Abweichung</span>`
-      : '';
-
-    if (_predictorMode === 'B') {
-      const tournNum = _labsMajorRows;
-      return `<div class="mc-predictor-banner mc-predictor-banner-b">
-        <span class="mc-predictor-banner-icon">📊</span>
-        <span class="mc-predictor-banner-text">${t('mc.bannerModeB').replace('{n}', tournNum)}${trendSuffix}${clSuffix}${accuracySuffix}</span>
-      </div>`;
-    }
-    return `<div class="mc-predictor-banner mc-predictor-banner-a">
-      <span class="mc-predictor-banner-icon">⚡</span>
-      <span class="mc-predictor-banner-text">${t('mc.bannerModeA')}${trendSuffix}${clSuffix}${accuracySuffix}</span>
-    </div>`;
-  }
+  // (renderPredictorBanner — the verbose technical accuracy chip — was
+  // removed after audit-08. It had been suppressed in renderAll() since
+  // it confused users. If a slimmer chip-style replacement is desired,
+  // write it fresh; git history has the old shape.)
 
   // Per-deck text-first intel block — used in the EXPANDED detail row
   // (see `_renderDetailRow`). Renders a 3-col stat grid for the public
@@ -4660,9 +4582,9 @@ window.MetaCall = (function () {
       const newPanel = tmp.querySelector('.metacall-panel');
       if (newPanel) resultsWrap.innerHTML = newPanel.innerHTML;
     }
-    // Recommendations panel — re-runs calcRecommendations with the
-    // updated field. Day-2 numbers shift whenever the field shifts so
-    // this always keeps the recommendation table in sync.
+    // Recommendations panel — re-runs calcRecommendationsSplit with
+    // the updated field. Day-2 numbers shift whenever the field
+    // shifts so this always keeps the recommendation table in sync.
     const recPanel = container.querySelector('.mc-rec-panel');
     if (recPanel) {
       const tmp = document.createElement('div');

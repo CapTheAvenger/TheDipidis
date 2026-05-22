@@ -4379,10 +4379,11 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             if (Array.isArray(window.onlineTournamentDatedRows)) {
                 return window.onlineTournamentDatedRows;
             }
-            if (window._onlineTournamentDatedPromise) {
-                return await window._onlineTournamentDatedPromise;
-            }
-            window._onlineTournamentDatedPromise = (async () => {
+            // Idempotent lazy init — first caller spawns the fetch,
+            // any concurrent caller awaits the same in-flight promise.
+            // Logical-OR-assignment fuses the "have we started?" check
+            // and the assignment into one expression.
+            window._onlineTournamentDatedPromise ||= (async () => {
                 try {
                     const rows = await loadCSV('online_tournament_dated_cards.csv');
                     window.onlineTournamentDatedRows = Array.isArray(rows) ? rows : [];

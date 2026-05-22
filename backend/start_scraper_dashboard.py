@@ -8,6 +8,8 @@ import os
 import sys
 import subprocess
 import time
+import urllib.error
+import urllib.request
 
 def clear_screen() -> None:
     os.system("cls" if os.name == "nt" else "clear")
@@ -23,6 +25,7 @@ def print_menu() -> None:
     print("  [4]  Card Price Scraper (Limitless – Fallback fuer unmapped)")
     print("  [14] Cardmarket Price Merger (taeglich, primaere Preisquelle)")
     print("  [15] Cardmarket ID Mapper (einmalig / bei neuen Sets)")
+    print("  [CM] Cardmarket JSONs jetzt frisch laden (force refresh)")
     print("  --- META & TOURNAMENTS ---")
     print("  [5]  Current Meta Analysis (Play! & Live)")
     print("  [6]  Limitless Online Scraper (Trends)")
@@ -162,7 +165,125 @@ def git_commit_push(description: str) -> None:
         return
     print("  Git: Push erfolgreich!")
 
+# ─────────────────────────────────────────────────────────────────────
+# Cardmarket public-S3 JSON sync
+#
+# The Cardmarket scrapers (cardmarket_id_mapper [15], cardmarket_price_
+# merger [14]) READ these three files from data/ but don't fetch them.
+# In CI they're freshly pulled by a curl step in
+# .github/workflows/weekly-full-update.yml; locally that step doesn't
+# exist, so a manual dashboard run would silently use stale (or
+# missing) JSONs. This helper mirrors the CI step inside the dashboard.
+#
+# Idempotent: files that are present + younger than 24 h are skipped.
+# That keeps repeated dashboard runs from hammering Cardmarket while
+# still guaranteeing a freshly-downloaded snapshot on each truly-new
+# scrape session.
+# ─────────────────────────────────────────────────────────────────────
+CARDMARKET_JSONS = {
+    'products_singles_6.json':    'https://downloads.s3.cardmarket.com/productCatalog/productList/products_singles_6.json',
+    'products_nonsingles_6.json': 'https://downloads.s3.cardmarket.com/productCatalog/productList/products_nonsingles_6.json',
+    'price_guide_6.json':         'https://downloads.s3.cardmarket.com/productCatalog/priceGuide/price_guide_6.json',
+}
+CARDMARKET_STALE_AFTER_SECONDS = 24 * 3600  # 1 day
+
+# Scripts that depend on a fresh data/products_*_6.json + price_guide_6.json
+# state. Listed explicitly (not by substring match) so the contract is
+# obvious to future readers — the pre-fetch only fires for these three:
+#
+#   card_price_scraper.py
+#     [4] Limitless fallback price scraper. Reads
+#     data/cardmarket_id_mapping.csv (produced by [15]) to skip already-
+#     mapped cards. If you run [4] standalone — or [4] before [15] in a
+#     custom batch — the Cardmarket JSONs should still be fresh so the
+#     downstream chain stays consistent.
+#
+#   cardmarket_id_mapper.py
+#     [15] Reads products_singles_6.json + products_nonsingles_6.json
+#     to derive the set-name → idExpansion mapping that lands in
+#     cardmarket_id_mapping.csv. Sanity-checks against price_guide_6.json
+#     for coverage.
+#
+#   cardmarket_price_merger.py
+#     [14] Reads price_guide_6.json as the primary price source and
+#     merges it with the id mapping into the final price data CSV.
+CARDMARKET_DEPENDENT_SCRIPTS = frozenset({
+    'card_price_scraper.py',
+    'cardmarket_id_mapper.py',
+    'cardmarket_price_merger.py',
+})
+
+
+def _data_dir() -> str:
+    """Resolve <project_root>/data/. The dashboard lives in backend/,
+    so the project root is one level up."""
+    backend_dir = os.path.dirname(__file__)
+    return os.path.join(os.path.dirname(backend_dir), 'data')
+
+
+def download_cardmarket_jsons_if_stale(force: bool = False) -> bool:
+    """Pull the three Cardmarket public-S3 JSON dumps into data/ when
+    they're missing or older than CARDMARKET_STALE_AFTER_SECONDS.
+
+    Mirrors the 'Download Cardmarket JSONs' step in
+    .github/workflows/weekly-full-update.yml so a local dashboard run
+    ends up with the same data state as a CI weekly-update. Atomic per
+    file (writes to .tmp then os.replace) so a mid-download interrupt
+    leaves the previous good file in place.
+
+    Returns True iff at least one file was (re)downloaded.
+    """
+    data_dir = _data_dir()
+    os.makedirs(data_dir, exist_ok=True)
+    now = time.time()
+    downloaded_any = False
+
+    for filename, url in CARDMARKET_JSONS.items():
+        target = os.path.join(data_dir, filename)
+        present = os.path.isfile(target)
+        age_secs = (now - os.path.getmtime(target)) if present else float('inf')
+        stale = age_secs > CARDMARKET_STALE_AFTER_SECONDS
+        if present and not stale and not force:
+            print(f"  [skip] {filename} present + fresh (age {age_secs / 3600:.1f}h)")
+            continue
+
+        reason = 'forced' if force else ('missing' if not present else 'stale')
+        print(f"  [pull] {filename}  ({reason})  <- cardmarket.com S3")
+
+        tmp = target + '.tmp'
+        try:
+            with urllib.request.urlopen(url, timeout=60) as resp:
+                with open(tmp, 'wb') as out:
+                    while True:
+                        chunk = resp.read(64 * 1024)
+                        if not chunk:
+                            break
+                        out.write(chunk)
+            os.replace(tmp, target)
+            size_mb = os.path.getsize(target) / (1024 * 1024)
+            print(f"         -> {target}  ({size_mb:.1f} MB)")
+            downloaded_any = True
+        except (urllib.error.URLError, urllib.error.HTTPError, OSError, TimeoutError) as e:
+            print(f"         FAILED ({e}); leaving previous file in place — scraper may use stale data")
+            try:
+                if os.path.isfile(tmp):
+                    os.remove(tmp)
+            except OSError:
+                pass
+
+    return downloaded_any
+
+
 def run_script(script_filename: str, wait_at_end: bool = True) -> None:
+    # Cardmarket-dependent scrapers ([4], [14], [15]) consume the three
+    # public-S3 JSONs in data/ but don't download them. Mirror the CI
+    # weekly-update curl step here so local runs see the same fresh
+    # data state. The 24h-idempotency in the helper means back-to-back
+    # cardmarket-dependent runs in a batch share one download.
+    if os.path.basename(script_filename) in CARDMARKET_DEPENDENT_SCRIPTS:
+        print("\n  [Cardmarket pre-fetch] Ensuring data/products_*_6.json + price_guide_6.json are fresh...")
+        download_cardmarket_jsons_if_stale()
+
     backend_dir = os.path.dirname(__file__)
     script_path = os.path.join(backend_dir, script_filename)
     if not os.path.exists(script_path):
@@ -243,6 +364,10 @@ def main() -> None:
             run_batch(BATCH_META, "META UPDATE")
         elif choice == "f":
             run_batch(BATCH_FULL, "FULL SYSTEM UPDATE")
+        elif choice == "cm":
+            print("\n  [Cardmarket] Manual force-refresh of all 3 public-S3 JSONs:")
+            download_cardmarket_jsons_if_stale(force=True)
+            input("\n  Press Enter to return to menu...")
         else:
             print("\n  Invalid choice. Please try again.")
             time.sleep(1)

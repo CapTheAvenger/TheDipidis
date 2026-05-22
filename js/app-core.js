@@ -388,6 +388,10 @@ const BASE_PATH = './data/';
         // Stubs for legacy in-app playtester entry points. They now redirect
         // to the external TCG Showdown handoff so any lingering UI button or
         // deeplink degrades gracefully instead of throwing ReferenceError.
+        // The HTML still ships the sandbox tab + modal markup; clicking any
+        // of the ~40 pt*/mp*/*Playtester*/*Multiplayer* onclick handlers
+        // from there would otherwise crash with ReferenceError now that
+        // js/playtester*.js and js/firebase-multiplayer.js are gone.
         function _redirectToShowdown() {
             if (typeof window.openShowdownExternal === 'function') {
                 window.openShowdownExternal();
@@ -395,7 +399,29 @@ const BASE_PATH = './data/';
                 showNotification('Playtester moved to tcg-showdown.com', 'info', 2400);
             }
         }
-        ['openPlaytester', 'openPlaytesterSetup', 'startPlaytesterWithMirror', 'startPlaytesterWithOpponent', 'startStandalonePlaytester', 'parseSandboxDeckToExactPrints', 'openMultiplayerFromSandbox'].forEach(functionName => {
+        [
+            // Modal entry + multiplayer launchers
+            'openPlaytester', 'openPlaytesterSetup', 'closePlaytesterSetup',
+            'startPlaytesterSetup', 'startPlaytesterWithMirror',
+            'startPlaytesterWithOpponent', 'startStandalonePlaytester',
+            'parseSandboxDeckToExactPrints',
+            'openMultiplayerFromSandbox', 'openMultiplayerMenu',
+            'toggleMultiplayerMenu', 'mpCreateGame', 'mpJoinGame',
+            // In-modal interactions. Unreachable now that the entry
+            // launchers redirect, but stubbed defensively against any
+            // legacy code path that bypasses the modal open.
+            'ptStartGame', 'ptUndo', 'ptLog', 'ptShowManual', 'ptToggleLog',
+            'ptFlipBoard', 'ptZoomBoard', 'ptZoomClose',
+            'ptCloseAttackView', 'ptCloseDeckSearch', 'ptCloseDiscardModal',
+            'ptCloseTopCards', 'ptDeckMenu', 'ptDrawCards',
+            'ptHideContextMenu', 'ptLookCards', 'ptMenuAction', 'ptMulligan',
+            'ptOpenAttackView', 'ptOpenDeckSearch', 'ptOpenDiscard',
+            'ptOpenLostZone', 'ptOpenOpponentPanel', 'ptOppSwitchTab',
+            'ptPassTurn', 'ptScrollHand', 'ptSetDiscardSort', 'ptShuffleDeck',
+            'ptShuffleRemainingLookedCardsIntoDeck',
+            'ptToggleBenchSize', 'ptToggleDmgMod', 'ptToggleLock',
+            'ptToggleMarker', 'ptViewCard',
+        ].forEach(functionName => {
             if (typeof window[functionName] === 'function') return;
             window[functionName] = _redirectToShowdown;
         });
@@ -1195,15 +1221,6 @@ const BASE_PATH = './data/';
                     case 'proxy':
                         renderProxyQueue();
                         initializeProxyManualSearchInput();
-                        break;
-                    case 'battle-journal':
-                        if (typeof openJournalHistoryTab === 'function') openJournalHistoryTab();
-                        break;
-                    case 'meta-call':
-                        if (typeof MetaCall !== 'undefined' && MetaCall && typeof MetaCall.init === 'function') MetaCall.init();
-                        break;
-                    case 'testing-groups':
-                        if (typeof TestingGroups !== 'undefined' && TestingGroups && typeof TestingGroups.init === 'function') TestingGroups.init();
                         break;
                 }
             }

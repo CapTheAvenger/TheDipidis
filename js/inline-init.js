@@ -136,20 +136,30 @@ document.addEventListener('languageChanged', function() {
         'probability':       'calculator',
         'wahrscheinlichkeit':'calculator',
         'profile':           'profile',
-        // Promoted to top-level tabs in the IA-refactor follow-up.
-        // Old hashes (#metacall, #journal, #meta-call) still land
-        // users on the same content — now without the Profile detour.
-        'metacall':          'meta-call',
-        'meta-call':         'meta-call',
-        'journal':           'battle-journal',
-        'battle-journal':    'battle-journal',
-        'testinggroups':     'testing-groups',
-        'testing-groups':    'testing-groups',
+    };
+    // Profile sub-section aliases. Route to #profile + the named
+    // sub-tab via openProfileSection() rather than to a top-level
+    // tab — Battle Journal / Meta Call / Testing Groups are
+    // sub-sections of the Profile tab, not standalone tabs.
+    const PROFILE_SECTION_ALIASES = {
+        'metacall':       'metacall',
+        'meta-call':      'metacall',
+        'journal':        'journal',
+        'battle-journal': 'journal',
+        'testinggroups':  'testinggroups',
+        'testing-groups': 'testinggroups',
     };
 
     function applyHash() {
         const raw = (window.location.hash || '').replace(/^#/, '').toLowerCase().trim();
         if (!raw) return;
+
+        // Profile sub-section deep-links (#metacall, #journal,
+        // #testinggroups and variants).
+        if (PROFILE_SECTION_ALIASES[raw]) {
+            openProfileSection(PROFILE_SECTION_ALIASES[raw]);
+            return;
+        }
 
         // Legacy meta-tab hash aliases (#current-meta, #city-league,
         // #past-meta) route directly to the legacy tab.

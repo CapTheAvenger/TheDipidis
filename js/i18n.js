@@ -37,6 +37,7 @@ const translations = {
     // ── Tab labels ───────────────────────────────────────────
     'tab.metaAnalysis':       'Meta & Deck Analysis',
     'tab.cityLeagueAnalysis': 'City League Deck Analysis',
+    'tab.currentMetaAnalysis':'Current Meta Deck Analysis',
     'tab.cards':              'Cards',
     'tab.proxyPrinter':       'Proxy Printer',
     'tab.playtester':         'Playtester',

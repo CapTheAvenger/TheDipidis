@@ -118,10 +118,13 @@ jobs:
               active_threats.json \
               online_tournament_dated_cards.csv \
               city_league_analysis_scraped.json \
+              city_league_analysis_past_scraped.json \
               tournament_jh_scraped.json \
               current_meta_scraped_tournaments.json \
               city_league_analysis.csv \
+              city_league_analysis_past.csv \
               city_league_archetypes.csv \
+              city_league_archetypes_past.csv \
               city_league_archetypes_comparison.csv \
               city_league_archetypes_comparison_M3.csv \
               city_league_archetypes_deck_stats.csv \
@@ -183,6 +186,8 @@ jobs:
               "scrapers/limitless_online_scraper.py" \
               "scrapers/city_league_analysis_scraper.py" \
               "scrapers/city_league_archetype_scraper.py" \
+              "scrapers/city_league_past_analysis_scraper.py" \
+              "scrapers/city_league_past_archetype_scraper.py" \
               "scrapers/tournament_scraper_JH.py" \
               "scrapers/labs_tournament_scraper.py" \
               "scrapers/online_tournament_scraper.py" \

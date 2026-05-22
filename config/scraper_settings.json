@@ -98,6 +98,31 @@
             548
         ]
     },
+    "city_league_analysis_past": {
+        "sources": {
+            "city_league": {
+                "enabled": false,
+                "start_date": "",
+                "end_date": "",
+                "max_decklists_per_league": 50,
+                "additional_tournament_ids": []
+            }
+        },
+        "output_file": "city_league_analysis_past.csv",
+        "delay_between_requests": 1.5,
+        "append_mode": false,
+        "_comment": "Past-meta archive snapshot. Auto-populated by backend/core/update_sets.apply_format_window_to_scraper_settings the first time a JP-set rotation is detected (when this scraper_settings.json's current city_league_analysis.start_date no longer matches format_window.jp_release_date). At that moment, the OLD start_date + additional_tournament_ids are moved here, end_date is set to (jp_release - 1 day), and enabled is flipped to true. The past scraper (backend/scrapers/city_league_past_analysis_scraper.py) is a no-op until that happens. Output overwrites city_league_analysis_past.csv on every rotation — past meta is a frozen window, not a growing one."
+    },
+    "city_league_archetype_past": {
+        "start_date": "",
+        "end_date": "",
+        "delay_between_requests": 1.5,
+        "output_file": "city_league_archetypes_past.csv",
+        "region": "jp",
+        "min_tournament_size": 1,
+        "additional_tournament_ids": [],
+        "_comment": "Past-meta archive snapshot. Auto-populated on JP rotation alongside city_league_analysis_past. See that section's _comment for the rotation contract. The past archetype scraper (backend/scrapers/city_league_past_archetype_scraper.py) exits early when start_date is blank."
+    },
     "labs_tournament_scraper": {
         "from_date": "2026-04-24",
         "tournament_types": [

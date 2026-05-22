@@ -16,17 +16,11 @@ function toggleMenuCluster(clusterId) {
 }
 
 function syncMenuClustersForTab(tabId) {
-    // The "Meta & Tools" cluster expands when any of its sub-items is
-    // active. Legacy meta tab IDs (current-meta, city-league,
-    // past-meta, *-analysis) still arrive here from the bootstrap's
-    // switchTab interception, which calls switchTab('meta-view') under
-    // the hood — so this set keeps a fallback for those code paths.
-    // Battle Journal / Meta Call / Testing Groups are the three tabs
-    // that got promoted out of Profile in the IA-refactor follow-up.
+    // The "Meta & Tier Lists" cluster expands when any of its
+    // sub-items is active.
     const metaTabs = new Set([
-        'meta-view', 'city-league', 'city-league-analysis',
+        'city-league', 'city-league-analysis',
         'current-meta', 'current-analysis', 'past-meta',
-        'meta-call', 'battle-journal', 'testing-groups',
     ]);
     const metaSubmenu = document.getElementById('menu-submenu-meta');
     const metaGroup = document.getElementById('menu-group-meta');
@@ -156,10 +150,6 @@ document.addEventListener('languageChanged', function() {
     function applyHash() {
         const raw = (window.location.hash || '').replace(/^#/, '').toLowerCase().trim();
         if (!raw) return;
-
-        // The meta-view URL router (#meta?format=…&deck=…) owns its own
-        // hash; let it handle that one rather than re-parsing here.
-        if (raw.startsWith('meta?') || raw === 'meta') return;
 
         // Legacy meta-tab hash aliases (#current-meta, #city-league,
         // #past-meta) route directly to the legacy tab.

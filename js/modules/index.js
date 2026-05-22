@@ -103,19 +103,6 @@ export {
 // other meta-tab files.
 export { TechLab } from './app-tech-lab.js';
 
-// Wave-2 IA-Refactor — consolidated meta-analysis view (5 tabs → 1).
-// Importing here runs the side effects (window.metaViewStore /
-// metaViewSwitchFormat / metaViewSelectDeck / metaViewBackToList) so
-// legacy HTML inline handlers can call them without needing real
-// ES-module imports.
-export { metaViewStore, isValidFormat } from './meta-view/store.js';
-export { switchFormat, selectDeck, backToList, setSearchFilter } from './meta-view/controller.js';
-// Side-effect-only import: registers a DOMContentLoaded listener that
-// reparents the legacy meta tabs into the consolidated #meta-view
-// container, intercepts switchTab() for legacy IDs, wires the URL
-// router, and binds the segmented-control to the store.
-import './meta-view/bootstrap.js';
-
 // DuckDB-WASM pilot — lazy data-query layer over Parquet snapshots
 // hosted on R2. The loader stays inert until ddQuery() is first
 // called; the city-league pilot module wires the visible demo panel

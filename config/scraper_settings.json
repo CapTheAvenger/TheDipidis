@@ -38,11 +38,11 @@
                 "max_lists_per_deck": 20,
                 "delay_between_lists": 4.0,
                 "delay_between_decks": 8.0,
-                "format_filter": "POR"
+                "format_filter": "CRI"
             },
             "tournaments": {
                 "enabled": true,
-                "start_date": "10.04.2026",
+                "start_date": "05.06.2026",
                 "max_tournaments": 15,
                 "max_decks_per_tournament": 256,
                 "format_filter": [
@@ -63,7 +63,7 @@
         "game": "POKEMON",
         "format": "STANDARD",
         "rotation": "2026",
-        "set": "POR",
+        "set": "CRI",
         "top_decks_for_matchup": 100,
         "delay_between_requests": 1.5,
         "output_file": "limitless_online_decks.csv",
@@ -73,12 +73,10 @@
         "sources": {
             "city_league": {
                 "enabled": true,
-                "start_date": "13.03.2026",
+                "start_date": "22.05.2026",
                 "end_date": "auto",
                 "max_decklists_per_league": 50,
-                "additional_tournament_ids": [
-                    548
-                ]
+                "additional_tournament_ids": []
             }
         },
         "output_file": "city_league_analysis.csv",
@@ -87,25 +85,25 @@
         "_comment": "start_date is auto-synced by backend/core/update_sets.apply_format_window_to_scraper_settings to format_window.jp_release_date (= EN release minus 14-day JP lead). Don't hand-edit the date — set the EN rotation anchor in update_sets.FALLBACK_RELEASE_DATES instead. additional_tournament_ids: append Champions-League / special-event IDs that aren't on the regular City-League listing (e.g. 548)."
     },
     "city_league_archetype": {
-        "start_date": "13.03.2026",
+        "start_date": "22.05.2026",
         "end_date": "auto",
         "delay_between_requests": 1.5,
         "output_file": "city_league_archetypes.csv",
         "region": "jp",
         "min_tournament_size": 1,
         "_min_size_comment": "JP City League events typically post 4-16 placements (NOT 32+). The earlier value 32 (added 2026-04-21) silently rejected every new tournament for two weeks — see backend/scrapers/city_league_archetype_scraper.py DEFAULT_SETTINGS comment for the full incident.",
-        "additional_tournament_ids": [
-            548
-        ]
+        "additional_tournament_ids": []
     },
     "city_league_analysis_past": {
         "sources": {
             "city_league": {
-                "enabled": false,
-                "start_date": "",
-                "end_date": "",
+                "enabled": true,
+                "start_date": "13.03.2026",
+                "end_date": "21.05.2026",
                 "max_decklists_per_league": 50,
-                "additional_tournament_ids": []
+                "additional_tournament_ids": [
+                    548
+                ]
             }
         },
         "output_file": "city_league_analysis_past.csv",
@@ -114,13 +112,15 @@
         "_comment": "Past-meta archive snapshot. Auto-populated by backend/core/update_sets.apply_format_window_to_scraper_settings the first time a JP-set rotation is detected (when this scraper_settings.json's current city_league_analysis.start_date no longer matches format_window.jp_release_date). At that moment, the OLD start_date + additional_tournament_ids are moved here, end_date is set to (jp_release - 1 day), and enabled is flipped to true. The past scraper (backend/scrapers/city_league_past_analysis_scraper.py) is a no-op until that happens. Output overwrites city_league_analysis_past.csv on every rotation — past meta is a frozen window, not a growing one."
     },
     "city_league_archetype_past": {
-        "start_date": "",
-        "end_date": "",
+        "start_date": "13.03.2026",
+        "end_date": "21.05.2026",
         "delay_between_requests": 1.5,
         "output_file": "city_league_archetypes_past.csv",
         "region": "jp",
         "min_tournament_size": 1,
-        "additional_tournament_ids": [],
+        "additional_tournament_ids": [
+            548
+        ],
         "_comment": "Past-meta archive snapshot. Auto-populated on JP rotation alongside city_league_analysis_past. See that section's _comment for the rotation contract. The past archetype scraper (backend/scrapers/city_league_past_archetype_scraper.py) exits early when start_date is blank."
     },
     "labs_tournament_scraper": {

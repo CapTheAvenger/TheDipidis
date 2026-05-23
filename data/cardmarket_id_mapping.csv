@@ -2448,8 +2448,8 @@ CES,3,361250,unique,Victreebel
 CES,4,361251,unique,Scyther
 CES,5,361252,unique,Spinarak
 CES,6,361253,unique,Ariados
-CES,7,361254,ordered(2↔2),Treecko
-CES,8,361255,ordered(2↔2),Treecko
+CES,7,361254,ordered(2↔3),Treecko
+CES,8,361255,ordered(2↔3),Treecko
 CES,9,361256,unique,Grovyle
 CES,10,361257,ordered(2↔2),Sceptile
 CES,10a,370821,ordered(2↔2),Sceptile
@@ -4195,8 +4195,8 @@ DRM,30,363502,unique,Phione
 DRM,31,363503,unique,Wishiwashi
 DRM,32,363504,unique,Trapinch
 DRM,33,363505,unique,Hydreigon
-DRM,34,363506,ordered(2↔2),Dratini
-DRM,35,363507,ordered(2↔2),Dratini
+DRM,34,363506,ordered(2↔3),Dratini
+DRM,35,363507,ordered(2↔3),Dratini
 DRM,36,363508,unique,Dragonair
 DRM,38,363509,unique,Vibrava
 DRM,39,363510,unique,Flygon
@@ -5910,8 +5910,8 @@ FLI,10,355531,unique,Gogoat
 FLI,11,320583,unique,Pheromosa
 FLI,12,355532,unique,Alolan Marowak
 FLI,13,355533,unique,Heatran
-FLI,14,355534,ordered(2↔2),Fennekin
-FLI,15,355535,ordered(2↔2),Fennekin
+FLI,14,355534,ordered(2↔3),Fennekin
+FLI,15,355535,ordered(2↔3),Fennekin
 FLI,16,355536,unique,Braixen
 FLI,17,355537,unique,Delphox
 FLI,18,355538,unique,Litleo
@@ -14179,7 +14179,7 @@ SUM,59,295370,unique,Drowzee
 SUM,60,295371,unique,Hypno
 SUM,62,295373,unique,Mareanie
 SUM,63,295374,unique,Toxapex
-SUM,64,295375,unique,Cosmog
+SUM,64,295375,ordered(1↔2),Cosmog
 SUM,65,295376,unique,Cosmoem
 SUM,67,295378,unique,Makuhita
 SUM,68,295379,unique,Hariyama
@@ -16436,8 +16436,8 @@ UPR,27,315958,unique,Turtonator
 UPR,28,315959,unique,Alolan Sandshrew
 UPR,29,315960,unique,Alolan Sandslash
 UPR,30,315961,unique,Alolan Vulpix
-UPR,31,315962,ordered(2↔3),Piplup
-UPR,32,315963,ordered(2↔3),Piplup
+UPR,31,315962,ordered(2↔4),Piplup
+UPR,32,315963,ordered(2↔4),Piplup
 UPR,33,315964,unique,Prinplup
 UPR,34,315965,ordered(1↔2),Empoleon
 UPR,35,315966,unique,Buizel

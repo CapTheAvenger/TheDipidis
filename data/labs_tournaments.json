@@ -1,5 +1,13 @@
 [
   {
+    "tournament_id": "0066",
+    "tournament_name": "Regional Championship Melbourne",
+    "tournament_date": "2026-05-23",
+    "tournament_type": "regional",
+    "country": "AU",
+    "total_players": 0
+  },
+  {
     "tournament_id": "0065",
     "tournament_name": "Regional Championship Campinas",
     "tournament_date": "2026-05-16",

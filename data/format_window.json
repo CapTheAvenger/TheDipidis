@@ -1,9 +1,9 @@
 {
-  "current_set": "POR",
-  "set_release_date": "2026-03-27",
-  "in_person_legal_date": "2026-04-10",
+  "current_set": "CRI",
+  "set_release_date": "2026-05-22",
+  "in_person_legal_date": "2026-06-05",
   "lag_days": 14,
-  "current_set_jp": "M4",
-  "jp_release_date": "2026-03-13",
+  "current_set_jp": "M5",
+  "jp_release_date": "2026-05-22",
   "_note": "Auto-derived twice per weekly run from limitlesstcg.com/cards (EN) and /cards/jp (JP). EN and JP run on independent rotation cycles with different set codes — POR (Perfect Order, EN) is the international counterpart of M3 (Nihil Zero, JP); by the time POR shipped to EN on 2026-03-27, JP was already on M4 (Ninja Spinner, 2026-03-13). City League scrapers track jp_release_date; the EN-side scrapers track set_release_date and (for in-person majors) in_person_legal_date = release + lag_days. _pick_current_set() keeps these in sync without a human edit when the next set drops."
 }

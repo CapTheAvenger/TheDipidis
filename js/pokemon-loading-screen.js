@@ -16,7 +16,7 @@
   const DATA_FILES = [
     { key: 'city_league_analysis',              url: 'data/city_league_analysis.csv',              type: 'csv' },
     { key: 'city_league_archetypes',            url: 'data/city_league_archetypes.csv',            type: 'csv' },
-    { key: 'city_league_archetypes_M3',         url: 'data/city_league_archetypes_M3.csv',         type: 'csv' },
+    { key: 'city_league_archetypes_past',       url: 'data/city_league_archetypes_past.csv',       type: 'csv' },
     { key: 'city_league_archetypes_comparison', url: 'data/city_league_archetypes_comparison.csv', type: 'csv' },
     { key: 'city_league_images',                url: 'data/city_league_images.json',               type: 'json' },
     { key: 'pokemon_dex_numbers',               url: 'data/pokemon_dex_numbers.json',              type: 'json' },

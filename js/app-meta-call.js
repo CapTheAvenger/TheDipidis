@@ -16,7 +16,7 @@ window.MetaCall = (function () {
   let _labsMajorRows  = 0;   // count of labs CSV rows that informed the mode decision
   let _labsRowsByDeck = {};  // labs share data — kept after loadData so re-runs work
   let _clCurrentByDeck = {}; // normalize(deck) -> share % from city_league_archetypes_comparison.csv (current Pokémon block)
-  let _clPastByDeck    = {}; // normalize(deck) -> share % from city_league_archetypes_comparison_M3.csv (previous block, M3)
+  let _clPastByDeck    = {}; // normalize(deck) -> share % from city_league_archetypes_past_comparison.csv (last-rotation snapshot)
   let _useClCurrent    = false; // user toggle: include Current City League in predictor
   let _useClPast       = false; // user toggle: include Past City League in predictor
 
@@ -2731,7 +2731,7 @@ window.MetaCall = (function () {
       // each file) as the deck's share; the field stays a number even
       // when the comparison row is "NEU" (new arch).
       _clCurrentByDeck = await _loadClShares('data/city_league_archetypes_comparison.csv');
-      _clPastByDeck    = await _loadClShares('data/city_league_archetypes_comparison_M3.csv');
+      _clPastByDeck    = await _loadClShares('data/city_league_archetypes_past_comparison.csv');
 
       _predictorMode = _labsMajorRows > 0 ? 'B' : 'A';
 

@@ -126,17 +126,20 @@
                     window.currentCityLeagueFormat = cityLeagueFormat;
                     localStorage.setItem('cityLeagueFormat', cityLeagueFormat);
                 }
-                const cityLeagueSuffix = (source === 'cityLeague' && cityLeagueFormat === 'M3') ? '_M3' : '';
-                
+                const isPastCl = source === 'cityLeague' && cityLeagueFormat === 'M3';
+                const clComparisonFile = isPastCl ? 'city_league_archetypes_past_comparison.csv' : 'city_league_archetypes_comparison.csv';
+                const clArchetypesFile = isPastCl ? 'city_league_archetypes_past.csv'            : 'city_league_archetypes.csv';
+                const clAnalysisFile   = isPastCl ? 'city_league_analysis_past.csv'              : 'city_league_analysis.csv';
+
                 // Load comparison data (has correct unique deck counts per archetype)
                 const comparisonFile = source === 'cityLeague'
-                    ? `city_league_archetypes_comparison${cityLeagueSuffix}.csv`
+                    ? clComparisonFile
                     : 'limitless_online_decks_comparison.csv';
                 const archetypeField = source === 'cityLeague' ? 'archetype' : 'deck_name'; // City League uses 'archetype', Current Meta uses 'deck_name'
                 let comparisonData = [];
                 const loadCityLeagueComparisonFallback = async () => {
                     // Fallback for format-specific missing/unreachable comparison files: derive from archetype rows.
-                    const archetypesFallbackFile = `city_league_archetypes${cityLeagueSuffix}.csv`;
+                    const archetypesFallbackFile = clArchetypesFile;
                     const archResp = await fetch(`${BASE_PATH}${archetypesFallbackFile}?t=${timestamp}`);
                     if (!archResp.ok) throw new Error('Failed to load comparison and fallback archetypes data');
                     const archText = await archResp.text();
@@ -163,12 +166,12 @@
                     }
                 }
 
-                if (source === 'cityLeague' && cityLeagueFormat === 'M3') {
-                    // Guard: if comparison rows look like current format (M4), force-load explicit M3 file.
+                if (isPastCl) {
+                    // Guard: if comparison rows look like current format (M4), force-load explicit past file.
                     const looksLikeM4Comparison = Array.isArray(comparisonData) && comparisonData.length > 0 && comparisonData.length < 200;
                     if (looksLikeM4Comparison) {
-                        console.warn('[loadMetaCardAnalysis] Guard triggered: comparison data shape looks like M4 while M3 is selected. Forcing explicit M3 comparison file.');
-                        const forcedComparisonResponse = await fetch(`${BASE_PATH}city_league_archetypes_comparison_M3.csv?t=${timestamp}&forceM3=1`);
+                        console.warn('[loadMetaCardAnalysis] Guard triggered: comparison data shape looks like current while past is selected. Forcing explicit past comparison file.');
+                        const forcedComparisonResponse = await fetch(`${BASE_PATH}city_league_archetypes_past_comparison.csv?t=${timestamp}&forcePast=1`);
                         if (forcedComparisonResponse.ok) {
                             const forcedComparisonText = await forcedComparisonResponse.text();
                             comparisonData = parseCSV(forcedComparisonText);
@@ -192,7 +195,7 @@
                 
                 // Load analysis data (has cards per archetype)
                 const analysisFile = source === 'cityLeague'
-                    ? `city_league_analysis${cityLeagueSuffix}.csv`
+                    ? clAnalysisFile
                     : 'current_meta_card_data.csv';
                 let allAnalysisData = [];
 
@@ -205,12 +208,12 @@
                     allAnalysisData = parseCSV(analysisText);
                 }
 
-                if (source === 'cityLeague' && cityLeagueFormat === 'M3') {
-                    // Guard: if analysis rows are suspiciously small for M3 history, force-load explicit M3 file.
+                if (isPastCl) {
+                    // Guard: if analysis rows are suspiciously small for past history, force-load explicit past file.
                     const looksLikeM4Analysis = Array.isArray(allAnalysisData) && allAnalysisData.length > 0 && allAnalysisData.length < 50000;
                     if (looksLikeM4Analysis) {
-                        console.warn('[loadMetaCardAnalysis] Guard triggered: analysis data shape looks like M4 while M3 is selected. Forcing explicit M3 analysis file.');
-                        const forcedAnalysisResponse = await fetch(`${BASE_PATH}city_league_analysis_M3.csv?t=${timestamp}&forceM3=1`);
+                        console.warn('[loadMetaCardAnalysis] Guard triggered: analysis data shape looks like current while past is selected. Forcing explicit past analysis file.');
+                        const forcedAnalysisResponse = await fetch(`${BASE_PATH}city_league_analysis_past.csv?t=${timestamp}&forcePast=1`);
                         if (forcedAnalysisResponse.ok) {
                             const forcedAnalysisText = await forcedAnalysisResponse.text();
                             allAnalysisData = parseCSV(forcedAnalysisText);

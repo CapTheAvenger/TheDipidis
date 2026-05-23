@@ -6049,6 +6049,104 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
         }
         if (typeof window !== 'undefined') window._aceSpecConditionalAvgs = _aceSpecConditionalAvgs;
 
+        // Multi-source variant: merge ACE-conditional aggregates across
+        // Online + Major data with a per-source weight.  Audit Phase 6
+        // PR2 (Fix C) requires Major data to dominate the conditional
+        // avg — the previous single-source version ignored Major
+        // entirely and let a 5-deck Online-Max-Belt subset (where 4 of
+        // 5 happened to run 2× Wally's Compassion) push the
+        // conditional avg to 1.92, overriding the cross-source baseline
+        // of 1.26 even though Major decks consistently played 1.0-1.27
+        // copies.
+        //
+        // ``sources`` shape:
+        //   [{ rows, sourceWeight, archetypeFieldNormalizer? }, ...]
+        // The weight is applied AS A MULTIPLIER on top of the recency
+        // decay, so a Major bucket at age 7 (recency 1.0, source 1.5)
+        // contributes 1.5× as much as an Online bucket at the same
+        // recency. Falls back to single-source behavior when only one
+        // source has data.
+        function _aceSpecConditionalAvgsMulti(sources, archetypeKey, aceSpecLower, todayMs) {
+            const empty = { conditionalAvgs: new Map(), bucketCount: 0 };
+            if (!Array.isArray(sources) || sources.length === 0 || !archetypeKey || !aceSpecLower) return empty;
+            const archKey = String(archetypeKey).trim().toLowerCase();
+            const aceSpec = String(aceSpecLower).trim().toLowerCase();
+            const useRecency = Number.isFinite(todayMs) && todayMs > 0;
+
+            // Per-bucket card-avg map AND per-bucket source-weight (so the
+            // recency-weight loop below applies the right source multiplier).
+            const buckets = new Map();
+            const bucketDates = new Map();
+            const bucketSourceWeight = new Map();
+            for (const src of sources) {
+                if (!src || !Array.isArray(src.rows) || src.rows.length === 0) continue;
+                const sourceWeight = Number.isFinite(src.sourceWeight) && src.sourceWeight > 0
+                    ? src.sourceWeight : 1.0;
+                const normalizer = src.archetypeFieldNormalizer;
+                for (const r of src.rows) {
+                    if (!r) continue;
+                    const archRaw = String(r.archetype || '');
+                    const archNorm = normalizer ? normalizer(archRaw) : archRaw;
+                    if (archNorm.trim().toLowerCase() !== archKey) continue;
+                    const tid = r.tournament_id || '';
+                    const cn = String(r.card_name || '').trim().toLowerCase();
+                    if (!tid || !cn) continue;
+                    const avgRaw = parseFloat(String(r.average_count || '0').replace(',', '.'));
+                    if (!Number.isFinite(avgRaw) || avgRaw <= 0) continue;
+                    // Bucket key namespaced by source-weight so the same
+                    // tournament_id appearing in both sources (unlikely
+                    // but possible if Major + Online share IDs) doesn't
+                    // collapse to one bucket.
+                    const k = `${sourceWeight}|${tid}|${archNorm}`;
+                    if (!buckets.has(k)) buckets.set(k, new Map());
+                    buckets.get(k).set(cn, avgRaw);
+                    if (!bucketDates.has(k)) {
+                        const dateRaw = r.tournament_date || '';
+                        const parsed = dateRaw ? Date.parse(dateRaw) : NaN;
+                        if (Number.isFinite(parsed)) bucketDates.set(k, parsed);
+                    }
+                    bucketSourceWeight.set(k, sourceWeight);
+                }
+            }
+
+            // Find buckets that contain the chosen ACE-SPEC.
+            const matching = [];
+            for (const [k, cards] of buckets.entries()) {
+                if (!cards.has(aceSpec)) continue;
+                matching.push({
+                    cards,
+                    dateMs: bucketDates.get(k),
+                    sourceWeight: bucketSourceWeight.get(k) || 1.0,
+                });
+            }
+            if (matching.length === 0) return empty;
+
+            const sums = new Map();
+            const weights = new Map();
+            const presence = new Map();
+            for (const { cards, dateMs, sourceWeight } of matching) {
+                let recency = 1.0;
+                if (useRecency && Number.isFinite(dateMs)) {
+                    const ageDays = Math.max(0, Math.floor((todayMs - dateMs) / 86400000));
+                    recency = _recencyWeight(ageDays);
+                }
+                const w = recency * sourceWeight;
+                for (const [cn, avg] of cards) {
+                    sums.set(cn, (sums.get(cn) || 0) + avg * w);
+                    weights.set(cn, (weights.get(cn) || 0) + w);
+                    presence.set(cn, (presence.get(cn) || 0) + 1);
+                }
+            }
+
+            const conditionalAvgs = new Map();
+            for (const [cn, sum] of sums) {
+                const w = weights.get(cn) || 1;
+                conditionalAvgs.set(cn, { avg: sum / w, presence: presence.get(cn) || 0 });
+            }
+            return { conditionalAvgs, bucketCount: matching.length };
+        }
+        if (typeof window !== 'undefined') window._aceSpecConditionalAvgsMulti = _aceSpecConditionalAvgsMulti;
+
         async function autoCompleteConsistency(source, rarityMode, options) {
             if (source !== 'cityLeague' && source !== 'currentMeta' && source !== 'pastMeta') return;
 
@@ -7289,11 +7387,36 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             // override below produces — re-running _aceSpecConditionalAvgs
             // would burn another full pass over the dated CSV for nothing.
             let _aceSpecCondResult = null;
-            if (aceSpecSlotCard && Array.isArray(onlineRowsRaw) && onlineRowsRaw.length > 0) {
+            if (aceSpecSlotCard) {
                 const aceSpecLower = (aceSpecSlotCard.card_name || '').trim().toLowerCase();
-                _aceSpecCondResult = _aceSpecConditionalAvgs(
-                    onlineRowsRaw, currentArchetype, aceSpecLower, null, todayMs
-                );
+                // Audit Phase 6 PR2 (Fix C): blend Online + Major into the
+                // ACE-conditional aggregate. Major weight 1.5× Online (=
+                // SOURCE_WEIGHT_MAJOR / SOURCE_WEIGHT_ONLINE, same ratio
+                // as the share-decay block above). User-confirmed reason:
+                // a 5-deck Online-Max-Belt subset of 20 Lucario lists is
+                // not enough evidence on its own to override the
+                // cross-source baseline. Major data shows the same card
+                // at avg 1.0-1.27 across 4 regionals, which should dominate
+                // when only 1/4 of Online happens to play that ACE-SPEC.
+                const _condSources = [];
+                if (Array.isArray(onlineRowsRaw) && onlineRowsRaw.length > 0) {
+                    _condSources.push({
+                        rows: onlineRowsRaw,
+                        sourceWeight: SOURCE_WEIGHT_ONLINE,
+                        archetypeFieldNormalizer: null,
+                    });
+                }
+                const _majorRowsForCond = window.currentMetaTournamentCardsData;
+                if (Array.isArray(_majorRowsForCond) && _majorRowsForCond.length > 0) {
+                    _condSources.push({
+                        rows: _majorRowsForCond,
+                        sourceWeight: SOURCE_WEIGHT_MAJOR,
+                        archetypeFieldNormalizer: _stripPriceTag,
+                    });
+                }
+                _aceSpecCondResult = _condSources.length > 0
+                    ? _aceSpecConditionalAvgsMulti(_condSources, currentArchetype, aceSpecLower, todayMs)
+                    : { conditionalAvgs: new Map(), bucketCount: 0 };
                 const condResult = _aceSpecCondResult;
                 if (condResult.bucketCount >= 3) {
                     let overrides = 0;

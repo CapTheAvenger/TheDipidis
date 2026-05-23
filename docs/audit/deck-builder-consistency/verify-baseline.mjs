@@ -127,23 +127,96 @@ function expect(name, actual, expected, tolerance = 0.001) {
     tests.push({ name, actual, expected, pass });
 }
 
+// ── Multi-source variant (Fix C, PR2) ──────────────────────────────
+function aceSpecConditionalAvgsMulti(sources, archetypeKey, aceSpecLower, todayMs) {
+    const archKey = String(archetypeKey).trim().toLowerCase();
+    const aceSpec = String(aceSpecLower).trim().toLowerCase();
+
+    const buckets = new Map();
+    const bucketDates = new Map();
+    const bucketSourceWeight = new Map();
+    for (const src of sources) {
+        if (!src || !Array.isArray(src.rows) || src.rows.length === 0) continue;
+        const sourceWeight = Number.isFinite(src.sourceWeight) && src.sourceWeight > 0 ? src.sourceWeight : 1.0;
+        const normalizer = src.archetypeFieldNormalizer;
+        for (const r of src.rows) {
+            const archRaw = String(r.archetype || '');
+            const archNorm = normalizer ? normalizer(archRaw) : archRaw;
+            if (archNorm.trim().toLowerCase() !== archKey) continue;
+            const tid = r.tournament_id || '';
+            const cn = String(r.card_name || '').trim().toLowerCase();
+            if (!tid || !cn) continue;
+            const avgRaw = parseFloat(String(r.average_count || '0').replace(',', '.'));
+            if (!Number.isFinite(avgRaw) || avgRaw <= 0) continue;
+            const k = `${sourceWeight}|${tid}|${archNorm}`;
+            if (!buckets.has(k)) buckets.set(k, new Map());
+            buckets.get(k).set(cn, avgRaw);
+            if (!bucketDates.has(k)) {
+                const ms = parseDateMs(r.tournament_date);
+                if (ms) bucketDates.set(k, ms);
+            }
+            bucketSourceWeight.set(k, sourceWeight);
+        }
+    }
+    const matching = [];
+    for (const [k, cards] of buckets.entries()) {
+        if (!cards.has(aceSpec)) continue;
+        matching.push({ cards, dateMs: bucketDates.get(k), sourceWeight: bucketSourceWeight.get(k) || 1.0 });
+    }
+    const sums = new Map();
+    const weights = new Map();
+    const presence = new Map();
+    for (const { cards, dateMs, sourceWeight } of matching) {
+        const ageDays = dateMs ? Math.max(0, Math.floor((todayMs - dateMs) / 86400000)) : null;
+        const recency = recencyWeight(ageDays);
+        const w = recency * sourceWeight;
+        for (const [cn, avg] of cards) {
+            sums.set(cn, (sums.get(cn) || 0) + avg * w);
+            weights.set(cn, (weights.get(cn) || 0) + w);
+            presence.set(cn, (presence.get(cn) || 0) + 1);
+        }
+    }
+    const conditionalAvgs = new Map();
+    for (const [cn, sum] of sums) {
+        const w = weights.get(cn) || 1;
+        conditionalAvgs.set(cn, { avg: sum / w, presence: presence.get(cn) || 0 });
+    }
+    return { conditionalAvgs, bucketCount: matching.length };
+}
+
 // ── Load fixture + data ───────────────────────────────────────────────
 const fixture = JSON.parse(fs.readFileSync(path.join(__dirname, 'fixtures/lucario-baseline.json'), 'utf8'));
 console.log(`▶ Verify baseline for archetype: ${fixture._meta.archetype}`);
 console.log(`▶ Ace-Spec pick: ${fixture._meta.ace_spec_pick}\n`);
 
 const onlineDated = loadCsv('data/online_tournament_dated_cards.csv');
-console.log(`✓ Loaded ${onlineDated.length} rows from online_tournament_dated_cards.csv`);
+const majorDated = loadCsv('data/tournament_cards_data_cards_TEF-POR.csv');
+console.log(`✓ Loaded ${onlineDated.length} online rows + ${majorDated.length} major rows`);
 
-// Replicate the ACE-conditional calc for Maximum Belt as Ace-Spec
 const todayMs = new Date('2026-05-23T00:00:00Z').getTime();
+
+// Single-source (pre-Fix-C behavior)
 const result = aceSpecConditionalAvgs(
     onlineDated,
     fixture._meta.archetype,
     fixture._meta.ace_spec_pick,
     todayMs
 );
-console.log(`✓ ACE-conditional ran: ${result.bucketCount} matching buckets\n`);
+console.log(`✓ Single-source ACE-conditional: ${result.bucketCount} matching buckets`);
+
+// Multi-source (post-Fix-C, with Major + Online blend)
+const SOURCE_WEIGHT_ONLINE = 1.0;
+const SOURCE_WEIGHT_MAJOR = 1.5;
+const resultMulti = aceSpecConditionalAvgsMulti(
+    [
+        { rows: onlineDated, sourceWeight: SOURCE_WEIGHT_ONLINE, archetypeFieldNormalizer: null },
+        { rows: majorDated, sourceWeight: SOURCE_WEIGHT_MAJOR, archetypeFieldNormalizer: stripPriceTag },
+    ],
+    fixture._meta.archetype,
+    fixture._meta.ace_spec_pick,
+    todayMs
+);
+console.log(`✓ Multi-source ACE-conditional: ${resultMulti.bucketCount} matching buckets\n`);
 
 // ── Assertions ────────────────────────────────────────────────────────
 const wally = result.conditionalAvgs.get("wally's compassion");
@@ -185,6 +258,27 @@ const wallyDelta = fixture.current_runtime_state.ui_vs_allocation_delta.wallys_c
 expect(
     "AC5 violation: Wally's display (1.26) != allocation source (1.92)",
     Math.abs(wallyDelta.displayed - wallyDelta.used) > 0.5,
+    true,
+);
+
+// Post-Fix-C: Multi-source ACE-conditional should give an avg closer to the
+// cross-source baseline (~1.26-1.35), NOT the online-subset-only 1.92.
+const wallyMulti = resultMulti.conditionalAvgs.get("wally's compassion");
+expect(
+    "Post-Fix-C: Wally's multi-source avg is < 1.5 (Major dominance)",
+    wallyMulti ? (wallyMulti.avg < 1.5) : false,
+    true,
+);
+expect(
+    "Post-Fix-C: Math.round(Wally multi-source avg) = 1",
+    wallyMulti ? Math.round(wallyMulti.avg) : null,
+    1,
+);
+
+// Multi-source should also include Major buckets (= more matching buckets)
+expect(
+    "Post-Fix-C: matching bucket count > single-source bucket count",
+    resultMulti.bucketCount > result.bucketCount,
     true,
 );
 

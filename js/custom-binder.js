@@ -154,7 +154,7 @@
             const [cmpCurrent, cmpCity, cmpCityPast] = await Promise.all([
                 (typeof loadCSV === 'function' ? loadCSV('limitless_online_decks_comparison.csv').catch(() => []) : []),
                 (typeof loadCSV === 'function' ? loadCSV('city_league_archetypes_comparison.csv').catch(() => []) : []),
-                (typeof loadCSV === 'function' ? loadCSV('city_league_archetypes_comparison_M3.csv').catch(() => []) : [])
+                (typeof loadCSV === 'function' ? loadCSV('city_league_archetypes_past_comparison.csv').catch(() => []) : [])
             ]);
             addFromRows(cmpCurrent, 'current-meta', 'Current Meta');
             addFromRows(cmpCity, 'city-current', 'City League');
@@ -303,7 +303,7 @@
                 const topCity = await shared.getTopCityArchetypes('city_league_archetypes_comparison.csv', cityCurrentRows, 10);
                 if (topCity.length) groups.push({ title: 'Top 10 City League', source: 'city-current', items: topCity.map(n => ({ name: n, source: 'city-current' })) });
 
-                const topCityPast = await shared.getTopCityArchetypes('city_league_archetypes_comparison_M3.csv', cityPastRows, 10);
+                const topCityPast = await shared.getTopCityArchetypes('city_league_archetypes_past_comparison.csv', cityPastRows, 10);
                 if (topCityPast.length) groups.push({ title: 'Top 10 City League Past', source: 'city-past', items: topCityPast.map(n => ({ name: n, source: 'city-past' })) });
             }
         } catch (e) {

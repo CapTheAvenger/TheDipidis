@@ -18,7 +18,7 @@
   const URL_TO_CACHE_KEY = {
     'city_league_analysis.csv':              'city_league_analysis',
     'city_league_archetypes.csv':            'city_league_archetypes',
-    'city_league_archetypes_M3.csv':         'city_league_archetypes_M3',
+    'city_league_archetypes_past.csv':       'city_league_archetypes_past',
     'city_league_archetypes_comparison.csv': 'city_league_archetypes_comparison',
     'city_league_images.json':               'city_league_images',
     'pokemon_dex_numbers.json':              'pokemon_dex_numbers',

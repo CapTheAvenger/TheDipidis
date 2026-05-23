@@ -890,7 +890,7 @@
         const [currentCmp, cityCurrentCmp, cityPastCmp] = await Promise.all([
             loadCSV('limitless_online_decks_comparison.csv').catch(() => []),
             loadCSV('city_league_archetypes_comparison.csv').catch(() => []),
-            loadCSV('city_league_archetypes_comparison_M3.csv').catch(() => [])
+            loadCSV('city_league_archetypes_past_comparison.csv').catch(() => [])
         ]);
 
         const currentMetaMap = new Map();
@@ -2006,7 +2006,7 @@
             try {
                 const [currentRows, pastRows] = await Promise.all([
                     loadCSV('city_league_analysis.csv').catch(() => []),
-                    loadCSV('city_league_analysis_M3.csv').catch(() => [])
+                    loadCSV('city_league_analysis_past.csv').catch(() => [])
                 ]);
                 if (Array.isArray(currentRows) && currentRows.length > 0) {
                     window.cityLeagueAnalysisDataCurrent = currentRows;
@@ -2049,7 +2049,7 @@
             : (Array.isArray(window.cityLeagueAnalysisM3Data) ? window.cityLeagueAnalysisM3Data : []);
 
         const cityCurrentTop10 = await getTopCityArchetypes('city_league_archetypes_comparison.csv', cityCurrentRows, 10);
-        const cityPastTop10 = await getTopCityArchetypes('city_league_archetypes_comparison_M3.csv', cityPastRows, 10);
+        const cityPastTop10 = await getTopCityArchetypes('city_league_archetypes_past_comparison.csv', cityPastRows, 10);
 
         const topGroupDefs = [
             { title: 'Top 20 Current Meta', source: 'current-meta', names: currentTop20 },

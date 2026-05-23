@@ -416,6 +416,14 @@ SYNC_PATTERNS = [
     "city_league_archetypes_comparison.csv",
     "city_league_archetypes_comparison_M3.csv",
     "city_league_archetypes_deck_stats.csv",
+    # Past-meta snapshot — frozen at the last JP-set rotation by
+    # city_league_past_analysis_scraper + city_league_past_archetype_scraper.
+    # Frontend's "Past Meta" view reads these (replaces the legacy
+    # _M3 archive once a real rotation has populated them).
+    "city_league_analysis_past.csv",
+    "city_league_archetypes_past.csv",
+    "city_league_archetypes_past_comparison.csv",
+    "city_league_archetypes_past_deck_stats.csv",
     # Limitless Online  →  Current Meta deck stats
     "limitless_online_decks.csv",
     "limitless_online_decks.html",
@@ -432,6 +440,7 @@ SYNC_PATTERNS = [
     # scratch each week (Cloudflare rate-limits made the from-scratch
     # path produce only partial data — see workflow seed step).
     "city_league_analysis_scraped.json",
+    "city_league_analysis_past_scraped.json",
     "tournament_jh_scraped.json",
     "current_meta_scraped_tournaments.json",
     # Set metadata — produced by backend/core/update_sets.py and read

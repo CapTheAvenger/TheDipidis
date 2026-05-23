@@ -108,8 +108,8 @@
         },
         "output_file": "city_league_analysis_past.csv",
         "delay_between_requests": 1.5,
-        "append_mode": false,
-        "_comment": "Past-meta archive snapshot. Auto-populated by backend/core/update_sets.apply_format_window_to_scraper_settings the first time a JP-set rotation is detected (when this scraper_settings.json's current city_league_analysis.start_date no longer matches format_window.jp_release_date). At that moment, the OLD start_date + additional_tournament_ids are moved here, end_date is set to (jp_release - 1 day), and enabled is flipped to true. The past scraper (backend/scrapers/city_league_past_analysis_scraper.py) is a no-op until that happens. Output overwrites city_league_analysis_past.csv on every rotation — past meta is a frozen window, not a growing one."
+        "append_mode": true,
+        "_comment": "Past-meta archive snapshot. Auto-populated by backend/core/update_sets.apply_format_window_to_scraper_settings the first time a JP-set rotation is detected (when this scraper_settings.json's current city_league_analysis.start_date no longer matches format_window.jp_release_date). At that moment, the OLD start_date + additional_tournament_ids are moved here, end_date is set to (jp_release - 1 day), and enabled is flipped to true. append_mode=true so a mid-rotation re-run (e.g. when ?show=500 missed the earliest days of the window) tops up the existing past.csv instead of overwriting it — rotation itself starts the next snapshot clean via the empty city_league_analysis_past_scraped.json that update_sets resets at rotation time."
     },
     "city_league_archetype_past": {
         "start_date": "13.03.2026",

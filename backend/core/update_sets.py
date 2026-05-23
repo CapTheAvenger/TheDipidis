@@ -666,10 +666,14 @@ def apply_format_window_to_scraper_settings(format_window_path: str,
         cla_past_root = settings['city_league_analysis_past']
         cla_past_root.setdefault('output_file', 'city_league_analysis_past.csv')
         cla_past_root.setdefault('delay_between_requests', 1.5)
-        # Past meta is a frozen window — overwrite, don't append, so a
-        # mid-window scraper re-run doesn't accumulate stale duplicates.
-        cla_past_root['append_mode'] = False
-        cla_past_root.setdefault('_comment', 'Auto-populated by update_sets.apply_format_window_to_scraper_settings on JP set rotation. Single output file overwritten on each rotation.')
+        # Past meta uses append_mode=true so a mid-rotation re-run (e.g.
+        # to top up tournaments that ?show= missed on the first pass)
+        # adds to the existing past.csv instead of overwriting it.
+        # The "clean slate per rotation" guarantee comes from the
+        # explicit truncate of past.csv + reset of scraped.json a few
+        # lines below — not from append_mode=false.
+        cla_past_root['append_mode'] = True
+        cla_past_root.setdefault('_comment', 'Auto-populated by update_sets.apply_format_window_to_scraper_settings on JP set rotation. append_mode=true so mid-window re-runs top up; rotation itself wipes past.csv + scraped.json for a clean snapshot.')
         changes.append(
             f"city_league_analysis_past: rotation snapshot start={cla_past['start_date']!r} "
             f"end={past_end_de!r} ids={cla_past['additional_tournament_ids']}"
@@ -715,12 +719,22 @@ def apply_format_window_to_scraper_settings(format_window_path: str,
         # served as "Current"). Header-only truncate (not delete) so the
         # frontend can still fetch the file and just show 0 decks while
         # the new window is still empty.
+        #
+        # Past-meta files are ALSO truncated here — paired with the
+        # scraped.json reset below — so the new rotation starts the
+        # past snapshot clean. (Without this, past.csv would still
+        # contain the PREVIOUS rotation's past data when the new past-
+        # scraper kicks in with append_mode=true.)
         truncated: List[str] = []
         for fname in (
             'city_league_analysis.csv',
             'city_league_archetypes.csv',
             'city_league_archetypes_comparison.csv',
             'city_league_archetypes_deck_stats.csv',
+            'city_league_analysis_past.csv',
+            'city_league_archetypes_past.csv',
+            'city_league_archetypes_past_comparison.csv',
+            'city_league_archetypes_past_deck_stats.csv',
         ):
             fpath = os.path.join(data_dir, fname)
             if not os.path.isfile(fpath):
@@ -737,9 +751,22 @@ def apply_format_window_to_scraper_settings(format_window_path: str,
                 print(f"[Update Sets] ! could not truncate {fname}: {e}")
         if truncated:
             changes.append(
-                f"current city-league CSVs truncated to header (rotated-out data "
-                f"is now in *_past.csv): {truncated}"
+                f"city-league CSVs truncated to header (rotated-out data "
+                f"is now in past CSVs awaiting fresh scrape): {truncated}"
             )
+
+        # Reset the past-analysis scraped.json so the next past scraper
+        # run rebuilds the full window from scratch instead of skipping
+        # everything as "already done". (Past-archetype scraper has no
+        # such state file — it always processes all listing tournaments.)
+        past_scraped_path = os.path.join(data_dir, 'city_league_analysis_past_scraped.json')
+        try:
+            with open(past_scraped_path, 'w', encoding='utf-8') as f:
+                json.dump({'scraped_tournament_ids': []}, f, indent=2)
+                f.write('\n')
+            changes.append("city_league_analysis_past_scraped.json reset to empty")
+        except OSError as e:
+            print(f"[Update Sets] ! could not reset past scraped.json: {e}")
 
     # ── Current-meta start-date overwrite (existing behaviour) ───────
     if cla.get('start_date') != jp_de:

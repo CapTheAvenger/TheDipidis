@@ -705,6 +705,42 @@ def apply_format_window_to_scraper_settings(format_window_path: str,
             )
             cla_arch['additional_tournament_ids'] = []
 
+        # Reset the current-meta city-league CSVs so the just-rotated-out
+        # rows don't linger in the "Current Meta" view. Without this,
+        # `city_league_analysis.append_mode=true` keeps the M4-era rows
+        # in the file, and — until the new meta produces tournaments —
+        # Current + Past display the same decks (seen 2026-05-23 right
+        # after the JP M5 rotation: 501 tournaments / 7923 decks were
+        # snapshotted to *_past.csv but the same rows were still being
+        # served as "Current"). Header-only truncate (not delete) so the
+        # frontend can still fetch the file and just show 0 decks while
+        # the new window is still empty.
+        truncated: List[str] = []
+        for fname in (
+            'city_league_analysis.csv',
+            'city_league_archetypes.csv',
+            'city_league_archetypes_comparison.csv',
+            'city_league_archetypes_deck_stats.csv',
+        ):
+            fpath = os.path.join(data_dir, fname)
+            if not os.path.isfile(fpath):
+                continue
+            try:
+                with open(fpath, 'r', encoding='utf-8-sig', newline='') as f:
+                    header = f.readline()
+                if not header:
+                    continue
+                with open(fpath, 'w', encoding='utf-8-sig', newline='') as f:
+                    f.write(header)
+                truncated.append(fname)
+            except OSError as e:
+                print(f"[Update Sets] ! could not truncate {fname}: {e}")
+        if truncated:
+            changes.append(
+                f"current city-league CSVs truncated to header (rotated-out data "
+                f"is now in *_past.csv): {truncated}"
+            )
+
     # ── Current-meta start-date overwrite (existing behaviour) ───────
     if cla.get('start_date') != jp_de:
         changes.append(f"city_league_analysis.sources.city_league.start_date {cla.get('start_date')!r} → {jp_de!r}")

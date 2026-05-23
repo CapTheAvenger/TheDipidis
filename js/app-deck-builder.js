@@ -7909,6 +7909,46 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             };
 
             {
+                // ──────────────────────────────────────────────────────
+                // Phase-6 PR1 — Display ≡ Allocation Source (AC5).
+                //
+                // Persist the FINAL avgCountWhenUsed (= the value
+                // Math.round actually used to pick each card's count)
+                // into a side-channel Map keyed by lower-case card name.
+                // The card-tile renderer in app-current-meta-analysis.js
+                // reads this map to show the EFFECTIVE avg (e.g. 1.92
+                // for Wally's when Maximum-Belt-ACE-conditional fired)
+                // instead of the naïve combined Online+Major avg (1.26)
+                // that the data merge baked into `average_count`.
+                //
+                // Without this, the user sees "Ø 1.26x" but the algo
+                // picks 2 copies (= Math.round(1.92)), which looks
+                // mathematically wrong even though it's actually
+                // BETTER data driving the choice.
+                //
+                // Map shape: window.__effectiveAvgMap[source][cardLower]
+                //   = { effective, baseline, overrideReason }
+                window.__effectiveAvgMap = window.__effectiveAvgMap || {};
+                window.__effectiveAvgMap[source] = {};
+                cardsToAdd.forEach(card => {
+                    const key = (card.card_name || '').trim().toLowerCase();
+                    if (!key) return;
+                    const eff = Number.isFinite(card.avgCountWhenUsed) ? card.avgCountWhenUsed : null;
+                    if (eff == null) return;
+                    const baseline = Number.isFinite(card._aceSpecConditionalBaseAvg)
+                        ? card._aceSpecConditionalBaseAvg
+                        : (Number.isFinite(card._onlineAvg) ? card._onlineAvg : null);
+                    let reason = null;
+                    if (Number.isFinite(card._aceSpecConditionalAvg)) reason = 'ACE-SPEC';
+                    else if (Number.isFinite(card._majorBlendedAvg))  reason = 'Major-blend';
+                    window.__effectiveAvgMap[source][key] = {
+                        effective: eff,
+                        baseline: baseline,
+                        overrideReason: reason,
+                    };
+                });
+                devLog(`[Consistency][EffectiveAvg] Persisted ${Object.keys(window.__effectiveAvgMap[source]).length} card avgs for source=${source}`);
+
                 cardsToAdd.forEach(card => {
                     const cardName = fixCardNameEncoding((card.card_name || '').toString().trim());
                     if (!cardName) return;

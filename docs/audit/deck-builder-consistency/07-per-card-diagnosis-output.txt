@@ -1,0 +1,91 @@
+═══════════════════════════════════════════════════════════════════════════
+PER-CARD DIAGNOSIS — Lucario Hariyama + Maximum Belt
+Today = 2026-05-23 | SOURCE_WEIGHT_ONLINE=1, SOURCE_WEIGHT_MAJOR=1.5
+═══════════════════════════════════════════════════════════════════════════
+
+ONLINE buckets — all: 18, with Maximum Belt: 4
+  • 2026-05-07 (16d, w=0.61) — ASRcristiano # 158 - Road to Turin Special
+  • 2026-04-04 (49d, w=0.05) — TOURNAMENT OF DOOM! IT'S A NEW DAY!
+  • 2026-04-21 (32d, w=0.24) — Sunny's Weekly #253 Party Time in Prague!
+  • 2026-04-08 (45d, w=0.05) — Post-Rotation Clash - Last Prize Series
+
+MAJOR buckets — all: 4, with Maximum Belt: 4
+  • 25th April 2026 (28d, w=0.30) — Regional Prague – Limitless
+  • 9th May 2026 (14d, w=0.70) — Regional Los Angeles, CA – Limitless
+  • 16th May 2026 (7d, w=1.00) — Regional Campinas – Limitless
+  • 16th May 2026 (7d, w=1.00) — Regional Utrecht – Limitless
+
+Multi-source ACE-cond buckets: 8 (= Online 4 + Major 4)
+Unconditional baseline buckets: 22
+
+═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+PER-CARD TABLE — sorted by |multi-source ACE-cond − ground-truth| (biggest mismatch first)
+═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+Card                          | Online ACE  | Major ACE   | MULTI ACE   | NoACE base  | GroundTruth | Round | Δ vs GT
+                              |  avg  pres  |  avg  pres  |  avg  pres  |  avg  pres  |  weighted   | (use) | (round)
+-------------------------------------------------------------------------------------------------------------------
+rocky fighting energy          |  2.00    4  |  1.94    4  |  1.95    8  |  1.95   12  |    1.38    |    2  |   0.57  ⚠
+night stretcher                |  2.00    3  |  1.33    4  |  1.38    7  |  1.54   11  |    0.88    |    1  |   0.50  •
+maximum belt                   |  1.00    4  |  1.00    4  |  1.00    8  |  1.00    8  |    0.53    |    1  |   0.47  •
+wally's compassion             |  1.92    4  |  1.17    4  |  1.30    8  |  1.30   19  |    1.06    |    1  |   0.25
+gravity mountain               |  1.79    4  |  1.57    4  |  1.61    8  |  1.52   22  |    1.53    |    2  |   0.08
+riolu                          |  3.85    4  |  3.53    4  |  3.58    8  |  3.43   22  |    3.59    |    4  |  -0.01
+fighting energy                |  9.87    4  |  9.46    4  |  9.53    8  | 10.02   22  |    9.53    |   10  |   0.01
+fighting gong                  |  4.00    4  |  4.00    4  |  4.00    8  |  4.00   22  |     —      |    4  |    —  
+premium power pro              |  4.00    4  |  4.00    4  |  4.00    8  |  4.00   22  |     —      |    4  |    —  
+lillie's determination         |  4.00    4  |  3.97    4  |  3.98    8  |  3.99   22  |     —      |    4  |    —  
+ultra ball                     |  3.85    4  |  3.75    4  |  3.77    8  |  3.79   22  |     —      |    4  |    —  
+poké pad                       |  3.03    4  |  3.23    4  |  3.20    8  |  3.43   22  |     —      |    3  |    —  
+mega lucario ex                |  3.00    4  |  3.03    4  |  3.02    8  |  3.01   22  |     —      |    3  |    —  
+solrock                        |  3.00    4  |  2.68    4  |  2.74    8  |  2.85   22  |     —      |    3  |    —  
+judge                          |  2.00    4  |  2.15    4  |  2.12    8  |  2.11   22  |     —      |    2  |    —  
+makuhita                       |  2.00    4  |  2.00    4  |  2.00    8  |  2.00   22  |     —      |    2  |    —  
+hariyama                       |  2.00    4  |  2.00    4  |  2.00    8  |  2.00   22  |     —      |    2  |    —  
+lunatone                       |  2.00    4  |  2.00    4  |  2.00    8  |  2.10   22  |     —      |    2  |    —  
+dunsparce                      |   —      0  |  2.00    1  |  2.00    1  |  2.00    1  |     —      |    2  |    —  
+dudunsparce                    |   —      0  |  2.00    1  |  2.00    1  |  2.00    1  |     —      |    2  |    —  
+boss's orders                  |  2.00    4  |  1.97    4  |  1.98    8  |  1.99   22  |     —      |    2  |    —  
+carmine                        |  2.00    1  |  1.93    4  |  1.93    5  |  1.97    8  |     —      |    2  |    —  
+air balloon                    |  1.23    4  |  1.64    4  |  1.57    8  |  1.85   22  |     —      |    2  |    —  
+switch                         |  1.69    4  |  1.46    4  |  1.50    8  |  1.45   13  |     —      |    2  |    —  
+pokégear 3.0                   |  2.00    1  |  1.00    1  |  1.14    2  |  1.14    2  |     —      |    1  |    —  
+kieran                         |  2.00    1  |  1.00    2  |  1.09    3  |  1.09    3  |     —      |    1  |    —  
+ciphermaniac's codebreaking    |   —      0  |  1.07    3  |  1.07    3  |  1.06    4  |     —      |    1  |    —  
+meowth ex                      |  1.00    3  |  1.00    4  |  1.00    7  |  1.00   17  |     —      |    1  |    —  
+team rocket's petrel           |  1.00    2  |  1.00    4  |  1.00    6  |  1.00   14  |     —      |    1  |    —  
+black belt's training          |  1.00    1  |  1.00    4  |  1.00    5  |  1.00   12  |     —      |    1  |    —  
+unfair stamp                   |  1.00    1  |  1.00    1  |  1.00    2  |  1.00    9  |     —      |    1  |    —  
+fezandipiti ex                 |  1.00    1  |   —      0  |  1.00    1  |  1.00    1  |     —      |    1  |    —  
+battle cage                    |  1.00    1  |   —      0  |  1.00    1  |  1.00    1  |     —      |    1  |    —  
+team rocket's watchtower       |   —      0  |  1.00    3  |  1.00    3  |  1.00    4  |     —      |    1  |    —  
+scoop up cyclone               |   —      0  |  1.00    4  |  1.00    4  |  1.00    8  |     —      |    1  |    —  
+genesect                       |   —      0  |  1.00    4  |  1.00    4  |  1.00    7  |     —      |    1  |    —  
+secret box                     |   —      0  |  1.00    4  |  1.00    4  |  1.00    6  |     —      |    1  |    —  
+tarragon                       |   —      0  |  1.00    3  |  1.00    3  |  1.00    4  |     —      |    1  |    —  
+mega signal                    |   —      0  |  1.00    2  |  1.00    2  |  1.00    3  |     —      |    1  |    —  
+cornerstone mask ogerpon ex    |   —      0  |  1.00    2  |  1.00    2  |  1.00    2  |     —      |    1  |    —  
+hero's cape                    |   —      0  |  1.00    1  |  1.00    1  |  1.00    1  |     —      |    1  |    —  
+tool scrapper                  |   —      0  |  1.00    1  |  1.00    1  |  1.00    1  |     —      |    1  |    —  
+shaymin                        |   —      0  |  1.00    1  |  1.00    1  |  1.00    1  |     —      |    1  |    —  
+
+═══════════════════════════════════════════════════════════════════════════
+ENERGY-TARGET PREDICTION (Energy Floor + Ceiling logic, line 5316/5457)
+═══════════════════════════════════════════════════════════════════════════
+  rocky fighting energy           avg 1.951  presence 8  → round = 2
+  fighting energy                 avg 9.534  presence 8  → round = 10
+
+  Sum-of-rounded         = 12
+  Sum-of-raw-avg         = 11.485
+  Corridor-clipped [7,11] = 11      ← Energy Floor target
+  Algorithm DELIVERED    = 10 (runtime per fixture)
+  Discrepancy            = 1
+
+═══════════════════════════════════════════════════════════════════════════
+TOP DISCREPANCIES (Math.round(multi) ≠ Math.round(GT))
+═══════════════════════════════════════════════════════════════════════════
+  • rocky fighting energy    multi=1.95 (round 2) vs GT=1.38 (round 1) — Δ 0.57
+
+═══════════════════════════════════════════════════════════════════════════
+GROUND-TRUTH CARDS MISSING FROM THE MULTI-ACE-COND UNIVERSE
+═══════════════════════════════════════════════════════════════════════════
+  (cards listed above will get their value from the unconditional path or be missing entirely)

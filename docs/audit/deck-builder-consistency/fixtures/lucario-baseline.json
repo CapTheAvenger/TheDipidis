@@ -1,0 +1,116 @@
+{
+  "_meta": {
+    "audit_branch": "audit/deck-builder-consistency",
+    "captured_at": "2026-05-23",
+    "archetype": "Lucario Hariyama",
+    "format_filter": "all",
+    "ace_spec_pick": "Maximum Belt",
+    "data_sources": {
+      "online_dated": "data/online_tournament_dated_cards.csv",
+      "major": "data/tournament_cards_data_cards_TEF-POR.csv",
+      "online_aggregate": "data/current_meta_card_data.csv"
+    }
+  },
+
+  "ground_truth_major_tournaments": {
+    "_comment": "User-pulled directly from limitlesstcg.com per-tournament listings. Per-deck averages computed by Limitless = total_count / total_decks.",
+    "Utrecht": {
+      "total_decks": 12,
+      "wallys_compassion_avg": 1.00,
+      "maximum_belt_avg": 0.58,
+      "fighting_energy_avg": 9.75,
+      "rocky_fighting_energy_avg": 1.00,
+      "night_stretcher_avg": 0.83,
+      "riolu_avg": 3.67,
+      "gravity_mountain_avg": 1.50
+    },
+    "Campinas": {
+      "total_decks": 11,
+      "wallys_compassion_avg": 1.27,
+      "maximum_belt_avg": 0.45,
+      "fighting_energy_avg": 9.18,
+      "rocky_fighting_energy_avg": 1.73,
+      "night_stretcher_avg": 1.00,
+      "riolu_avg": 3.45,
+      "gravity_mountain_avg": 1.64
+    },
+    "LA": {
+      "total_decks": 3,
+      "wallys_compassion_avg": 1.00,
+      "maximum_belt_avg": 0.33,
+      "fighting_energy_avg": 9.33,
+      "rocky_fighting_energy_avg": 2.00,
+      "night_stretcher_avg": 0.33,
+      "riolu_avg": 3.33,
+      "gravity_mountain_avg": 1.67
+    },
+    "Prague": {
+      "total_decks": 8,
+      "wallys_compassion_avg": 0.88,
+      "maximum_belt_avg": 0.63,
+      "fighting_energy_avg": 9.75,
+      "rocky_fighting_energy_avg": 1.25,
+      "night_stretcher_avg": 1.00,
+      "riolu_avg": 3.75,
+      "gravity_mountain_avg": 1.38
+    }
+  },
+
+  "current_runtime_state": {
+    "_comment": "Captured via instrumentation-snippet.js on 2026-05-23. Values at bidi-swap entry = state after Stages + LRM but before any swap. count = final cell count in finalDeck.",
+    "wallys_compassion": {
+      "count": 2,
+      "avgCountWhenUsed_at_stage1": 1.9216,
+      "lrm_remainder": -0.0784,
+      "tier": "TECH",
+      "card_function": "healing",
+      "_explanation": "ACE-conditional override from online_tournament_dated_cards.csv: 4 buckets with Maximum Belt, Wally avgs 1.50/1.00/2.00/2.00, recency-weighted 1.9216 → Math.round = 2"
+    },
+    "fighting_energy": {
+      "count": 10,
+      "avgCountWhenUsed_at_bidi_entry": 9.478,
+      "lrm_remainder": 0.478,
+      "_explanation": "Stage 1 allocated 9 via Math.round(9.478) = 9. Fallback-energy block at line 7622+ added +1 to reach 60 → final 10."
+    },
+    "riolu": {
+      "count": 4,
+      "avgCountWhenUsed_at_bidi_entry": 3.847,
+      "lrm_remainder": -0.1530
+    },
+    "gravity_mountain": {
+      "count": 2,
+      "avgCountWhenUsed_at_bidi_entry": 1.795,
+      "lrm_remainder": -0.2052
+    },
+    "displayed_combined_avg_for_wally": 1.26,
+    "displayed_combined_avg_for_fighting_energy": 9.80,
+    "ui_vs_allocation_delta": {
+      "_comment": "How far the displayed Ø is from the value Math.round actually uses.",
+      "wallys_compassion": { "displayed": 1.26, "used": 1.92, "delta": 0.66 },
+      "fighting_energy": { "displayed": 9.80, "used": 9.48, "delta": -0.32 },
+      "riolu": { "displayed": 3.50, "used": 3.85, "delta": 0.35 },
+      "gravity_mountain": { "displayed": 1.54, "used": 1.79, "delta": 0.25 }
+    }
+  },
+
+  "expected_after_fix_E": {
+    "_comment": "Display avg becomes the actually-used avg. Original combined avg moves to hover/click.",
+    "wallys_compassion": { "displayed_primary": 1.92, "displayed_secondary_on_hover": 1.26 },
+    "fighting_energy": { "displayed_primary": 9.48, "displayed_secondary_on_hover": 9.80 },
+    "ui_vs_allocation_delta": "0 for all cards (= AC5 satisfied)"
+  },
+
+  "expected_after_fix_C_F": {
+    "_comment": "_aggregateWeightedSource emits weightedAvg. Major-priority + recency + player-count cascade applied. Default-path cards (not hit by ACE-conditional / Major-blend) get weighted-avg instead of raw combined.",
+    "default_path_card_example": "TBD — pick a card not currently hit by overrides and verify it changes",
+    "ace_conditional_still_works": "Wally's should still land at ~1.92 (override still applies on TOP of weighted-avg base)",
+    "major_card_dominates_online": "A card with strong Major signal + weak Online signal should be primarily driven by Major"
+  },
+
+  "fix_plan_reference": {
+    "spec_doc": "docs/audit/deck-builder-consistency/00-spec.md",
+    "fix_plan_doc": "docs/audit/deck-builder-consistency/05-fix-plan.md",
+    "user_decisions_doc": "docs/audit/deck-builder-consistency/06-user-decisions.md",
+    "branch": "audit/deck-builder-consistency"
+  }
+}

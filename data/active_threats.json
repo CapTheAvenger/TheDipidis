@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-05-23T01:43:29Z",
+  "generated_at": "2026-05-23T02:27:55Z",
   "format_window": "CRI",
   "format_label": "TEF-M4",
   "legal_format_min_set": "TEF",
@@ -10,7 +10,7 @@
   },
   "threats": {
     "hand_disruption": {
-      "weighted_meta_share": 0.5887,
+      "weighted_meta_share": 0.5888,
       "cards": [
         {
           "card_id": "WHT|83",
@@ -85,7 +85,7 @@
             {
               "archetype": "Dragapult Dudunsparce",
               "share_in_archetype": 0.4,
-              "meta_share": 0.019
+              "meta_share": 0.0191
             },
             {
               "archetype": "Lopunny Dudunsparce",
@@ -243,7 +243,7 @@
             {
               "archetype": "Dragapult Dudunsparce",
               "share_in_archetype": 0.35,
-              "meta_share": 0.019
+              "meta_share": 0.0191
             },
             {
               "archetype": "Mega Venusaur",

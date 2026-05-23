@@ -136,48 +136,75 @@ def parse_date(date_str: str) -> datetime:
 # parse_tournament_date imported from card_scraper_shared
 
 def get_tournaments_in_date_range(region: str, start_date: datetime, end_date: datetime) -> list:
-    # show=1000: past-meta windows span ~2-3 months and JP city-league
-    # produces 8-15 tournaments/day at peak (~700+ over a full meta
-    # window). show=500 cut off the earliest week of the window — e.g.
-    # the 2026-05-23 rotation lost 13.03.-18.03. when the same-day
-    # tournament count was high enough to push the cursor past day 6.
-    url = f"https://limitlesstcg.com/tournaments/{region}?show=1000"
-    logger.info("Lade Turnierliste: %s", url)
-
-    soup = fetch_page_bs4(url)
-    if not soup:
-        logger.error("Fehler beim Laden der Turnierliste.")
-        return []
-
+    # Limitless tournament listings cap at 500 rows per page server-side
+    # even when ?show= asks for more (verified empirically on 2026-05-23:
+    # show=500 and show=1000 both returned exactly 500 entries). To cover
+    # a full ~2-3 month meta window that contains 600+ tournaments, walk
+    # the listing one page at a time and stop when we either run out of
+    # rows or pass the start_date.
+    #
+    # ?show=100&page={N} matches the pattern that tournament_scraper_JH
+    # already uses successfully against the same listing endpoint.
+    MAX_PAGES = 15  # 15 * 100 = 1500 tournaments cap — sane safety net.
     tournaments = []
-    rows = [tr for tr in soup.select('table.striped tr') if tr.find('td')]
+    seen_ids = set()
+    for page in range(1, MAX_PAGES + 1):
+        url = f"https://limitlesstcg.com/tournaments/{region}?show=100&page={page}"
+        logger.info("Lade Turnierliste Seite %s: %s", page, url)
+        soup = fetch_page_bs4(url)
+        if not soup:
+            logger.error("Fehler beim Laden der Turnierliste (Seite %s).", page)
+            break
 
-    for row in rows:
-        cells = row.find_all('td')
-        if len(cells) < 4:
-            continue
+        rows = [tr for tr in soup.select('table.striped tr') if tr.find('td')]
+        if not rows:
+            logger.info("Seite %s leer — Pagination beendet.", page)
+            break
 
-        date_text = cells[0].get_text(strip=True)
-        t_date = parse_tournament_date(date_text)
-
-        if t_date and start_date <= t_date <= end_date:
-            link = cells[1].find('a')
-            if not link:
+        page_added = 0
+        page_oldest = None
+        for row in rows:
+            cells = row.find_all('td')
+            if len(cells) < 4:
                 continue
 
-            href = link['href']
-            t_id = href.split('/')[-1]
-            t_url = f"https://limitlesstcg.com{href}" if href.startswith('/') else href
+            date_text = cells[0].get_text(strip=True)
+            t_date = parse_tournament_date(date_text)
+            if t_date and (page_oldest is None or t_date < page_oldest):
+                page_oldest = t_date
 
-            tournaments.append({
-                'tournament_id': t_id,
-                'url': t_url,
-                'date_str': date_text,
-                'prefecture': cells[2].get_text(strip=True),
-                'shop': link.get_text(strip=True)
-            })
+            if t_date and start_date <= t_date <= end_date:
+                link = cells[1].find('a')
+                if not link:
+                    continue
+                href = link['href']
+                t_id = href.split('/')[-1]
+                if t_id in seen_ids:
+                    continue
+                seen_ids.add(t_id)
+                t_url = f"https://limitlesstcg.com{href}" if href.startswith('/') else href
+                tournaments.append({
+                    'tournament_id': t_id,
+                    'url': t_url,
+                    'date_str': date_text,
+                    'prefecture': cells[2].get_text(strip=True),
+                    'shop': link.get_text(strip=True)
+                })
+                page_added += 1
 
-    logger.info("%s Turniere im Zeitraum gefunden.", len(tournaments))
+        logger.info("  Seite %s: +%s Turniere im Fenster, ältestes Datum: %s",
+                    page, page_added,
+                    page_oldest.strftime('%d.%m.%Y') if page_oldest else '?')
+
+        # Stop once the listing has walked past our start_date — older
+        # entries can't contribute anything to the window.
+        if page_oldest is not None and page_oldest < start_date:
+            logger.info("Pagination beendet: Seite %s ist vor start_date %s.",
+                        page, start_date.strftime('%d.%m.%Y'))
+            break
+
+    logger.info("%s Turniere im Zeitraum gefunden (über %s Seiten).",
+                len(tournaments), page)
     return tournaments
 
 def get_tournament_by_id(tournament_id: str) -> dict:

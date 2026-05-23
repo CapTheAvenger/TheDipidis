@@ -3070,12 +3070,33 @@
                     const avgCountOverallValue = Number.isFinite(avgCountOverallRaw) && avgCountOverallRaw > 0
                         ? avgCountOverallRaw
                         : (totalDecksInArchetype > 0 ? (totalCount / totalDecksInArchetype) : 0);
-                    const avgCountInUsedValue = Number.isFinite(avgCountInUsedRaw) && avgCountInUsedRaw > 0
+                    const avgCountInUsedValueRaw = Number.isFinite(avgCountInUsedRaw) && avgCountInUsedRaw > 0
                         ? avgCountInUsedRaw
                         : (decksWithCard > 0 ? (totalCount / decksWithCard) : 0);
 
+                    // Phase-6 PR1 (Fix E / AC5) — if Consistency Generate ran
+                    // and produced an effective avg for this card (e.g. ACE-
+                    // SPEC-conditional override on top of the baseline merge),
+                    // show THAT value as the primary Ø so display matches
+                    // what Math.round actually used to pick the deck count.
+                    // The baseline combined-merge avg becomes a secondary
+                    // info shown next to the primary.
+                    const _effEntry = (window.__effectiveAvgMap && window.__effectiveAvgMap['currentMeta'])
+                        ? window.__effectiveAvgMap['currentMeta'][String(cardName || '').toLowerCase()]
+                        : null;
+                    const avgCountInUsedValue = _effEntry && Number.isFinite(_effEntry.effective)
+                        ? _effEntry.effective
+                        : avgCountInUsedValueRaw;
+                    const _baselineDisplay = _effEntry && Number.isFinite(_effEntry.baseline)
+                        ? _effEntry.baseline
+                        : avgCountInUsedValueRaw;
+                    const _hasOverride = _effEntry
+                        && Number.isFinite(_effEntry.effective)
+                        && Math.abs(_effEntry.effective - _baselineDisplay) >= 0.15;
+
                     const finalAvgUsed = Math.min(legalMaxCopies, avgCountInUsedValue);
                     const finalAvgOverall = Math.min(legalMaxCopies, avgCountOverallValue);
+                    const finalAvgBaseline = Math.min(legalMaxCopies, _baselineDisplay);
                     const maxCount = finalMaxCount;
 
                     // Defensive 100 % cap mirrors the data-merge cap so a
@@ -3084,6 +3105,7 @@
                     const percentage = Math.min(100, Math.max(0, resolvedPercentage)).toFixed(1).replace('.', ',');
                     const avgCountOverall = Math.max(0, finalAvgOverall).toFixed(2).replace('.', ',');
                     const avgCountInUsedDecks = Math.max(0, finalAvgUsed).toFixed(2).replace('.', ',');
+                    const avgCountBaselineDisplay = Math.max(0, finalAvgBaseline).toFixed(2).replace('.', ',');
                     const decksWithCardDisplay = Math.round(Math.max(0, decksWithCard));
                     const totalDecksDisplay = Math.round(Math.max(0, totalDecksInArchetype));
                     
@@ -3180,7 +3202,11 @@
                                     <div class="card-info-text city-league-card-info-text">
                                         <div class="city-league-card-title-mobile">${cardName}${cardNameWarning}</div>
                                         <div class="city-league-card-set-stats-row"><div class="city-league-card-set-mobile">${setCode} ${setNumber}</div>${resolvedPercentage > 0 ? `<div class="city-league-card-stats-mobile">${percentage}%</div>` : ''}</div>
-                                        ${resolvedPercentage > 0 ? `<div class="city-league-card-avg-mobile">Ø ${avgCountInUsedDecks}x (${avgCountOverall}x)</div>` : ''}
+                                        ${resolvedPercentage > 0 ? (
+                                            _hasOverride
+                                                ? `<div class="city-league-card-avg-mobile" title="Algorithm uses Ø ${avgCountInUsedDecks}x for this card (${_effEntry && _effEntry.overrideReason || 'override'}). Baseline cross-meta average: ${avgCountBaselineDisplay}x.">Ø ${avgCountInUsedDecks}x <span style="opacity:0.7;font-size:0.85em;">(base ${avgCountBaselineDisplay}x)</span></div>`
+                                                : `<div class="city-league-card-avg-mobile">Ø ${avgCountInUsedDecks}x (${avgCountOverall}x)</div>`
+                                        ) : ''}
                                         <div class="city-league-card-deck-stats-mobile">${decksWithCardDisplay}/${totalDecksDisplay} (${percentage}%)</div>
                                     </div>
                                     <div class="card-action-buttons city-league-card-action-buttons">

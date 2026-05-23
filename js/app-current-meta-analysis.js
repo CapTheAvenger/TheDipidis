@@ -1614,40 +1614,65 @@
             }
             const tourData = window.currentMetaTournamentCardsData || [];
 
-            // Collect unique tournament entries for this archetype.
+            // Collect deck counts per (tournament, snapshot) for the
+            // selected archetype.
             //
             // tournament_cards_data_cards.csv stores ONE row per
-            // (tournament_id, price-tagged-archetype, card) — each
-            // distinct price tag in the archetype field
-            // (e.g. "Cynthia's Garchomp27.91$22.10€" vs
-            //       "Cynthia's Garchomp33.40$24.89€") is a separate
-            // deck snapshot. The legacy `total_decks_in_archetype`
-            // field is *per-snapshot* (always 1 or 2) and cannot be
-            // used as a deck count — using max() of it produced the
-            // user-flagged "2× Used in Top 256" bug for Cynthia at
-            // Prague where the actual snapshot count was 16. Solution:
-            // count distinct raw archetype labels per tournament.
+            // (tournament_id, archetype-label, card). Two data formats
+            // coexist in the historical CSVs:
+            //
+            //   (A) Single-snapshot format — current scraper output:
+            //       one archetype label per tournament (no price tag),
+            //       `total_decks_in_archetype` repeated on every row
+            //       = the true deck count.
+            //       e.g. Lucario Hariyama @ Campinas 2026-05-16:
+            //            1 distinct label, total_decks_in_archetype=11
+            //            on all 35 card rows → 11 decks.
+            //
+            //   (B) Multi-snapshot format — older scraper output that
+            //       price-tagged each distinct decklist into its own
+            //       archetype label ("Cynthia's Garchomp27.91$22.10€"
+            //       vs "...33.40$24.89€"). Each snapshot's
+            //       total_decks_in_archetype was 1 or 2.
+            //
+            // Correct count for BOTH formats: sum, across distinct
+            // snapshot labels per tournament, of MAX(total_decks_in_
+            // archetype) for that snapshot.
+            //   - (A): 1 snapshot × 11 = 11.
+            //   - (B, 16 distinct snapshots × 1 deck each): 16.
+            //
+            // The previous logic counted distinct snapshot labels
+            // (= 1 in case A, = 16 in case B), which was correct for
+            // B but produced "1×" everywhere for the current single-
+            // snapshot data the user is seeing today.
             const tourMap = new Map();
             tourData.forEach(row => {
                 const rowArchetype = normalizeCurrentMetaTournamentArchetypeName(row.archetype);
                 if (!rowArchetype || rowArchetype.toLowerCase() !== archetype.toLowerCase()) return;
                 const key = row.tournament_name || String(row.tournament_id);
-                // Use the RAW archetype field (with price-tag suffix)
-                // as the snapshot identifier. Fallback to deck_id when
-                // present (older sources that don't price-tag).
                 const snapshotKey = String(row.archetype || row.deck_id || row.tournament_id || '');
                 if (!tourMap.has(key)) {
                     tourMap.set(key, {
                         name: row.tournament_name || key,
                         date: row.tournament_date || '',
-                        snapshots: new Set(),
+                        snapshotDecks: new Map(),  // snapshotKey -> max(total_decks_in_archetype)
                     });
                 }
-                tourMap.get(key).snapshots.add(snapshotKey);
+                const entry = tourMap.get(key);
+                const decks = parseInt(row.total_decks_in_archetype || '0', 10) || 0;
+                const prev = entry.snapshotDecks.get(snapshotKey) || 0;
+                if (decks > prev) entry.snapshotDecks.set(snapshotKey, decks);
             });
-            // Materialize the count from snapshot-set size so existing
+            // Materialize the count from the snapshot-deck map so existing
             // render code (which expects entry.count) still works.
-            tourMap.forEach(entry => { entry.count = entry.snapshots.size; });
+            tourMap.forEach(entry => {
+                entry.count = Array.from(entry.snapshotDecks.values()).reduce((a, b) => a + b, 0);
+                // Defensive fallback: if every row had total_decks_in_
+                // archetype=0 (shouldn't happen, but old CSVs might),
+                // fall back to the legacy distinct-snapshot count so we
+                // still render something useful rather than "0×".
+                if (entry.count === 0) entry.count = entry.snapshotDecks.size;
+            });
 
             if (tourMap.size === 0) {
                 section.classList.add('d-none');

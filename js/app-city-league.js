@@ -984,12 +984,12 @@
             devLog('Loading City League Analysis...');
             
             const format = window.currentCityLeagueFormat || 'M4';
-            const formatSuffix = format === 'M3' ? '_M3' : '';
+            const isPast = format === 'M3';
             const timestamp = new Date().getTime();
-            const analysisUrl = `${BASE_PATH}city_league_analysis${formatSuffix}.csv`;
-            const archetypesUrl = `${BASE_PATH}city_league_archetypes${formatSuffix}.csv`;
-            const comparisonUrl = `${BASE_PATH}city_league_archetypes_comparison${formatSuffix}.csv`;
-            const hasComparisonFile = format !== 'M3';
+            const analysisUrl   = `${BASE_PATH}${isPast ? 'city_league_analysis_past.csv'              : 'city_league_analysis.csv'}`;
+            const archetypesUrl = `${BASE_PATH}${isPast ? 'city_league_archetypes_past.csv'            : 'city_league_archetypes.csv'}`;
+            const comparisonUrl = `${BASE_PATH}${isPast ? 'city_league_archetypes_past_comparison.csv' : 'city_league_archetypes_comparison.csv'}`;
+            const hasComparisonFile = true;
             
             devLog(`Loading City League Analysis for format: ${format}`);
 

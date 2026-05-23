@@ -136,7 +136,12 @@ def parse_date(date_str: str) -> datetime:
 # parse_tournament_date imported from card_scraper_shared
 
 def get_tournaments_in_date_range(region: str, start_date: datetime, end_date: datetime) -> list:
-    url = f"https://limitlesstcg.com/tournaments/{region}?show=500"
+    # show=1000: past-meta windows span ~2-3 months and JP city-league
+    # produces 8-15 tournaments/day at peak (~700+ over a full meta
+    # window). show=500 cut off the earliest week of the window — e.g.
+    # the 2026-05-23 rotation lost 13.03.-18.03. when the same-day
+    # tournament count was high enough to push the cursor past day 6.
+    url = f"https://limitlesstcg.com/tournaments/{region}?show=1000"
     logger.info("Lade Turnierliste: %s", url)
 
     soup = fetch_page_bs4(url)

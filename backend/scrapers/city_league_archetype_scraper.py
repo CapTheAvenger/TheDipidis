@@ -142,7 +142,12 @@ def parse_date(date_str: str) -> datetime:
 # parse_tournament_date imported from card_scraper_shared
 
 def get_tournaments_in_date_range(region: str, start_date: datetime, end_date: datetime) -> list:
-    url = f"https://limitlesstcg.com/tournaments/{region}?show=500"
+    # show=1000: a full meta window (~2-3 months) easily exceeds 500 JP
+    # city-league tournaments. Kept high for the current-meta scraper
+    # too — the scraped.json incremental state filters already-seen
+    # tournaments, so the only downside of a bigger listing is one
+    # extra HTTP fetch.
+    url = f"https://limitlesstcg.com/tournaments/{region}?show=1000"
     logger.info("Lade Turnierliste: %s", url)
 
     soup = fetch_page_bs4(url)

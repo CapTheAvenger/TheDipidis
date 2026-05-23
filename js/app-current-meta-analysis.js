@@ -1595,16 +1595,15 @@
             resetDeckOverviewCounts('currentMetaCardCount', 'currentMetaCardCountSummary', '0 ' + t('cl.cards'), '/ 0 Total');
         }
         
-        // Render "Used in Top 256" breakdown per major tournament for selected archetype
+        // Render "Used in Top 256" breakdown per major tournament for
+        // selected archetype. Visible on every Tournament-Format-Filter
+        // value (All / Limitless / Major) — the major-tournament
+        // breakdown is useful context regardless of the filter the
+        // user picked for the deck-cards aggregation.
         async function renderCurrentMetaTop256(archetype) {
             const section = document.getElementById('currentMetaTop256Section');
             const listEl = document.getElementById('currentMetaTop256List');
             if (!section || !listEl) return;
-
-            if (currentMetaFormatFilter !== 'play') {
-                section.classList.add('d-none');
-                return;
-            }
 
             // Load and cache tournament cards data (filtered by meta date)
             if (!window.currentMetaTournamentCardsData) {

@@ -1507,6 +1507,82 @@ const BASE_PATH = './data/';
         }
 
         /**
+         * Navigate to Past Meta tab with a specific format + deck pre-
+         * selected. Mirrors navigateToCurrentMetaWithDeck but targets
+         * the Past Meta tab and drives its format-filter chain so the
+         * chunk loads, then selects the deck. Called by Meta Call when
+         * the user has source = "Past Meta" and clicks an archetype.
+         *
+         * Two-stage polling because Past Meta has a lazy chunk loader
+         * that fires on the format-filter change event: we set + dispatch
+         * the format change first, then poll the deck dropdown until
+         * the chunk's archetypes have populated it.
+         */
+        window.navigateToPastMetaWithDeck = function(archetypeName, formatKey) {
+            devLog('Navigating to Past Meta with deck:', archetypeName, 'format:', formatKey);
+            switchTab('past-meta');
+
+            const setFormatAndDeck = () => {
+                const fmtSel = document.getElementById('pastMetaFormatFilter');
+                if (!fmtSel || fmtSel.options.length === 0) {
+                    // Format dropdown not populated yet — keep waiting
+                    return false;
+                }
+                // Set format only if it differs (avoid spurious chunk reload)
+                if (formatKey && fmtSel.value !== formatKey) {
+                    fmtSel.value = formatKey;
+                    if (typeof syncSearchableSelectDisplay === 'function') {
+                        try { syncSearchableSelectDisplay(fmtSel); } catch (_e) { /* tolerate */ }
+                    }
+                    fmtSel.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+                return true;
+            };
+
+            // Stage 1 — wait for format dropdown, set it
+            let attempts = 0;
+            const maxAttempts = 80; // 8s total
+            const waitForFormat = () => {
+                attempts++;
+                if (setFormatAndDeck()) {
+                    // Stage 2 — poll for deck options after chunk load
+                    pollForDeck(0);
+                } else if (attempts < maxAttempts) {
+                    setTimeout(waitForFormat, 100);
+                } else {
+                    console.error('[Past Meta Nav] Format dropdown never populated');
+                }
+            };
+
+            const pollForDeck = (deckAttempts) => {
+                const deckSel = document.getElementById('pastMetaDeckSelect');
+                if (deckSel && deckSel.options.length > 1) {
+                    const opt = Array.from(deckSel.options).find(o =>
+                        o.value && o.value.toLowerCase() === String(archetypeName || '').toLowerCase()
+                    );
+                    if (opt) {
+                        deckSel.value = opt.value;
+                        if (typeof syncSearchableSelectDisplay === 'function') {
+                            try { syncSearchableSelectDisplay(deckSel); } catch (_e) { /* tolerate */ }
+                        }
+                        deckSel.dispatchEvent(new Event('change', { bubbles: true }));
+                        devLog('Past Meta deck selected:', opt.value);
+                        return;
+                    }
+                    console.warn('[Past Meta Nav] Deck not found in dropdown:', archetypeName);
+                    return;
+                }
+                if (deckAttempts < 60) {
+                    setTimeout(() => pollForDeck(deckAttempts + 1), 100);
+                } else {
+                    console.error('[Past Meta Nav] Deck dropdown never populated');
+                }
+            };
+
+            setTimeout(waitForFormat, 150);
+        };
+
+        /**
          * Navigate to Current Meta Deck Analysis with a combined archetype (from Hero cards).
          * Selects the representative variant in the dropdown (first match among variants).
          */

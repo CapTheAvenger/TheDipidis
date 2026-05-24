@@ -83,20 +83,31 @@ class TestCurrentMetaRotationReset:
 
         cmd_path = isolated_data_dir / "current_meta_card_data.csv"
         dated_path = isolated_data_dir / "online_tournament_dated_cards.csv"
+        labs_path = isolated_data_dir / "labs_tournament_decks.csv"
         _write_csv_with_rows(cmd_path, "name;count;meta", rows=10)
         _write_csv_with_rows(dated_path, "tournament_id;archetype;card_name", rows=20)
+        # labs_tournament_decks uses comma-delimited schema (different from
+        # the semicolon-delimited current-meta CSVs) — assert truncate is
+        # delimiter-agnostic and preserves the header byte-for-byte.
+        _write_csv_with_rows(labs_path,
+                             "tournament_id,tournament_name,total_players,deck_name",
+                             rows=15)
 
         update_sets.apply_format_window_to_scraper_settings(
             str(fw_path), str(settings_path)
         )
 
-        # Both files should be header-only now
+        # All three files should be header-only now
         cmd_lines = cmd_path.read_text(encoding="utf-8-sig").splitlines()
         dated_lines = dated_path.read_text(encoding="utf-8-sig").splitlines()
+        labs_lines = labs_path.read_text(encoding="utf-8-sig").splitlines()
         assert cmd_lines == ["name;count;meta"], f"cmd not truncated: {cmd_lines}"
         assert dated_lines == ["tournament_id;archetype;card_name"], (
             f"dated not truncated: {dated_lines}"
         )
+        assert labs_lines == [
+            "tournament_id,tournament_name,total_players,deck_name"
+        ], f"labs_tournament_decks not truncated: {labs_lines}"
 
     def test_rotation_resets_scraped_tournaments_json(self, isolated_data_dir, tmp_path):
         # The labs de-dup state file must reset so the new format's
@@ -209,6 +220,47 @@ class TestCurrentMetaRotationReset:
 
         # File stays empty — not crashed, not crashed-and-truncated-to-nothing
         assert cmd_path.read_text(encoding="utf-8-sig") == ""
+
+    def test_rotation_preserves_past_meta_archive_chunks(self, isolated_data_dir, tmp_path):
+        # Per-meta archive chunks (tournament_cards_data_cards_<META>.csv)
+        # are the Past Meta browser's permanent record — they must NOT be
+        # touched by current-meta rotation, even though their schema looks
+        # similar to the live current-meta CSVs. This is the safety net
+        # for the user's instruction "die Datei wo alle Majors drin sind
+        # für Past Meta muss definitv erhalten bleiben."
+        fw_path = tmp_path / "format_window.json"
+        settings_path = tmp_path / "scraper_settings.json"
+        _write_format_window(fw_path, current_set="CRI")
+        _write_settings(settings_path, current_meta_format="PFL")
+
+        # Two archive chunks — one for the format that just closed, one
+        # for an older format. Both must survive.
+        closing_archive = isolated_data_dir / "tournament_cards_data_cards_TEF-POR.csv"
+        older_archive = isolated_data_dir / "tournament_cards_data_cards_BRS-PRE.csv"
+        _write_csv_with_rows(closing_archive, "archetype;card_name;count", rows=50)
+        _write_csv_with_rows(older_archive, "archetype;card_name;count", rows=100)
+        closing_before = closing_archive.read_text(encoding="utf-8-sig")
+        older_before = older_archive.read_text(encoding="utf-8-sig")
+
+        # Also stage a live current-meta file so the rotation block actually
+        # runs (early-exits if nothing to do would mask the test intent).
+        live = isolated_data_dir / "current_meta_card_data.csv"
+        _write_csv_with_rows(live, "archetype;card_name;count", rows=10)
+
+        update_sets.apply_format_window_to_scraper_settings(
+            str(fw_path), str(settings_path)
+        )
+
+        # Archives untouched, live file truncated to header
+        assert closing_archive.read_text(encoding="utf-8-sig") == closing_before, (
+            "Past-Meta archive TEF-POR was modified by current-meta rotation"
+        )
+        assert older_archive.read_text(encoding="utf-8-sig") == older_before, (
+            "Older Past-Meta archive BRS-PRE was modified by current-meta rotation"
+        )
+        assert live.read_text(encoding="utf-8-sig").splitlines() == [
+            "archetype;card_name;count"
+        ], "Live current-meta file should have been truncated"
 
     def test_rotation_logs_old_and_new_set_in_change_message(
         self, isolated_data_dir, tmp_path, capsys

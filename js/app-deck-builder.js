@@ -4861,6 +4861,8 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 if (card._isAceSpec) continue;
                 if (card._isPinned) continue;
                 if (card._isSkeletonLocked) continue;
+                if (card._isEnergyBudgetAllocated) continue;
+                if (card._isStadiumBudgetAllocated) continue;
                 if (card._isPokemonLineLocked) continue;
                 if ((card.consistencyScore || 0) >= 75) continue;
                 const deps = card._dependencies;
@@ -4887,7 +4889,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 // tier first.
                 const bumpCandidates = entries
                     .filter(e => e && e.card)
-                    .filter(e => !e.card._isAceSpec && !e.card._isPinned && !e.card._isSkeletonLocked && !e.card._isPokemonLineLocked)
+                    .filter(e => !e.card._isAceSpec && !e.card._isPinned && !e.card._isSkeletonLocked && !e.card._isEnergyBudgetAllocated && !e.card._isStadiumBudgetAllocated && !e.card._isPokemonLineLocked)
                     .filter(e => {
                         const eDeps = e.card._dependencies;
                         if (!eDeps) return true;
@@ -4957,6 +4959,8 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 if (card._isAceSpec) continue;
                 if (card._isPinned) continue;
                 if (card._isSkeletonLocked) continue;
+                if (card._isEnergyBudgetAllocated) continue;
+                if (card._isStadiumBudgetAllocated) continue;
                 if (card._isPokemonLineLocked) continue;
                 if ((card.consistencyScore || 0) >= 75) continue;
                 const nm = String(card.card_name || '').trim().toLowerCase();
@@ -4997,7 +5001,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 // synergy (would just create another stranded card).
                 const bumpCandidates = entries
                     .filter(e => e && e.card)
-                    .filter(e => !e.card._isAceSpec && !e.card._isPinned && !e.card._isSkeletonLocked && !e.card._isPokemonLineLocked)
+                    .filter(e => !e.card._isAceSpec && !e.card._isPinned && !e.card._isSkeletonLocked && !e.card._isEnergyBudgetAllocated && !e.card._isStadiumBudgetAllocated && !e.card._isPokemonLineLocked)
                     .filter(e => {
                         const otherNm = String(e.card.card_name || '').trim().toLowerCase();
                         const otherSyn = cooccurrenceMap.get(otherNm);
@@ -5128,6 +5132,14 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
 
             const sorted = entries
                 .filter(e => e && e.card && Number.isFinite(e.card._lrmRemainder) && e.card._lrmRemainder > 0)
+                // W3 Phase 6 — defense-in-depth: locks should never be
+                // bumped, even if a lock flag and _lrmRemainder somehow
+                // both end up set (Stage 0 pins do set _lrmRemainder).
+                .filter(e => !e.card._isAceSpec
+                    && !e.card._isSkeletonLocked
+                    && !e.card._isEnergyBudgetAllocated
+                    && !e.card._isStadiumBudgetAllocated
+                    && !e.card._isPokemonLineLocked)
                 .slice()
                 .sort((a, b) => _effectiveRemainder(b) - _effectiveRemainder(a));
 
@@ -5254,7 +5266,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                     .filter(e => e.count >= 1)
                     .filter(e => e.card._techCounterMaxCount == null)
                     .filter(e => (e.card.consistencyScore || 0) < 75)
-                    .filter(e => !e.card._isAceSpec && !e.card._isPinned && !e.card._isSkeletonLocked && !e.card._isPokemonLineLocked)
+                    .filter(e => !e.card._isAceSpec && !e.card._isPinned && !e.card._isSkeletonLocked && !e.card._isEnergyBudgetAllocated && !e.card._isStadiumBudgetAllocated && !e.card._isPokemonLineLocked)
                     .sort((a, b) => (a.card._lrmRemainder || 0) - (b.card._lrmRemainder || 0));
 
                 // CORE bump candidates: CORE-tier, has positive remainder,
@@ -5416,7 +5428,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                     .filter(e => !isEnergyEntry(e))
                     .filter(e => (e.card.consistencyScore || 0) < 75)
                     .filter(e => e.card._techCounterMaxCount == null)
-                    .filter(e => !e.card._isAceSpec && !e.card._isPinned && !e.card._isSkeletonLocked && !e.card._isPokemonLineLocked)
+                    .filter(e => !e.card._isAceSpec && !e.card._isPinned && !e.card._isSkeletonLocked && !e.card._isEnergyBudgetAllocated && !e.card._isStadiumBudgetAllocated && !e.card._isPokemonLineLocked)
                     .filter(e => e.count >= 1)
                     .sort((a, b) => {
                         // TECH first (lower tier order), then by remainder asc.
@@ -5527,7 +5539,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 // format rule and shape the deck's energy economy.
                 const energyDemoteCandidates = entries
                     .filter(e => isEnergyEntry(e))
-                    .filter(e => !e.card._isAceSpec && !e.card._isPinned && !e.card._isSkeletonLocked && !e.card._isPokemonLineLocked)
+                    .filter(e => !e.card._isAceSpec && !e.card._isPinned && !e.card._isSkeletonLocked && !e.card._isEnergyBudgetAllocated && !e.card._isStadiumBudgetAllocated && !e.card._isPokemonLineLocked)
                     .filter(e => {
                         const cn = String(e.card.card_name || '').toLowerCase().trim();
                         const stat = conditionalAvgs.get(cn);

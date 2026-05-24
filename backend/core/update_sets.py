@@ -811,6 +811,19 @@ def apply_format_window_to_scraper_settings(format_window_path: str,
         for fname in (
             'current_meta_card_data.csv',
             'online_tournament_dated_cards.csv',
+            # labs_tournament_decks.csv = live Major Day-2 data feeding
+            # app-meta-call.js. Holds the 4-or-so most recent regionals
+            # (currently Prague/LA/Utrecht/Campinas, all POR-format).
+            # Once a new English set rotates in, those regionals are
+            # still legal in person (until in_person_legal_date) but
+            # they're playing the PREVIOUS format's cards. Clearing this
+            # file means the live Major view shows "no current data"
+            # until new-format regionals happen — preferable to silently
+            # mixing previous-format Major lists into the deck-builder's
+            # current-format suggestions. Per-meta historical archives
+            # (tournament_cards_data_cards_*.csv chunks) are NOT touched
+            # here — those are the Past Meta browser's permanent record.
+            'labs_tournament_decks.csv',
         ):
             fpath = os.path.join(data_dir, fname)
             if not os.path.isfile(fpath):

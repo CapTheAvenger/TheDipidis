@@ -6,6 +6,12 @@ window.MetaCall = (function () {
 
   // ── Internal State ─────────────────────────────────────────
   let _matchupMap = null;  // normalize(deck) -> normalize(opp) -> {pWin, pTie, pLoss}
+  let _majorMatchupMap = null; // W3 — normalize(deck) -> normalize(opp) -> {games, winPct, source: 'major'}.
+                               // Loaded from data/labs_tournament_matchups.csv (scraper-produced).
+                               // Blended 3:1 over _matchupMap when ≥MAJOR_MATCHUP_MIN_GAMES samples exist.
+  const MAJOR_MATCHUP_WEIGHT = 3.0;        // user-requested 3:1 over online
+  const MAJOR_MATCHUP_MIN_GAMES = 10;      // require this many games before trusting the major pair
+  const MAJOR_MATCHUP_TIE_RATE = 0.02;     // labs CSV doesn't carry tie rate; use the same default the online matrix uses
   let _deckWRAdjustment = {}; // normalize(deck) -> pp delta (labs WR − online cumulative WR). Predictor 5.3 — corrects the matchup simulator for the gap between online-ladder WR (elite-pilot inflated) and major-tournament WR (typical pilot). See _computeMatchupAdjustments() and applied in getBaseMatchup().
   let _shareList  = null;  // [{name, onlineShare}] sorted desc — onlineShare is the
                             // PREDICTED share once Predictor 2.0 has run; the raw ladder
@@ -3018,6 +3024,65 @@ window.MetaCall = (function () {
         await _loadPastMetaCatalog();
       } catch (_e) { /* tolerate */ }
 
+      // W3 — Optional Major matchup data. Produced by the labs scraper's
+      // --matchups pass (data/labs_tournament_matchups.csv). When the
+      // file is present, getBaseMatchup() blends Major rows 3:1 over
+      // the online ladder for any opponent-pair with ≥10 games. When
+      // absent, behavior is identical to pre-PR (online-only).
+      _majorMatchupMap = null;
+      try {
+        const mmResp = await fetch('data/labs_tournament_matchups.csv?t=' + Date.now());
+        if (mmResp.ok) {
+          const mmText = await mmResp.text();
+          const mmRows = parseCSVQuoted(mmText, ',');  // CSV is comma-delimited per labs scraper
+          // Aggregate across tournaments: sum games, weighted-avg win%
+          // per (my_deck, opponent_deck). Use only day_filter='overall'
+          // for the blend — Day 1/2 splits stay available for future
+          // recency-weighted variants.
+          const agg = {}; // norm(deck) -> norm(opp) -> { games, weightedSum }
+          let rowsConsumed = 0;
+          for (const r of mmRows) {
+            if ((r.day_filter || 'overall').trim().toLowerCase() !== 'overall') continue;
+            const myName = (r.my_deck_name || '').trim();
+            const opName = (r.opponent_deck_name || '').trim();
+            if (!myName || !opName) continue;
+            const games = parseInt(r.vs_count || '0', 10);
+            const wpRaw = parseFloat(String(r.vs_win_pct || '0').replace(',', '.'));
+            if (!Number.isFinite(games) || games <= 0) continue;
+            if (!Number.isFinite(wpRaw)) continue;
+            const d = normalize(myName);
+            const o = normalize(opName);
+            if (!agg[d]) agg[d] = {};
+            if (!agg[d][o]) agg[d][o] = { games: 0, weightedSum: 0 };
+            agg[d][o].games += games;
+            agg[d][o].weightedSum += games * wpRaw;
+            rowsConsumed += 1;
+          }
+          _majorMatchupMap = {};
+          let pairsKept = 0;
+          for (const d of Object.keys(agg)) {
+            for (const o of Object.keys(agg[d])) {
+              const a = agg[d][o];
+              if (a.games < MAJOR_MATCHUP_MIN_GAMES) continue;
+              const winPct = a.weightedSum / a.games; // 0..100
+              if (!_majorMatchupMap[d]) _majorMatchupMap[d] = {};
+              _majorMatchupMap[d][o] = {
+                games  : a.games,
+                winPct,                      // 0..100
+                source : 'major',
+              };
+              pairsKept += 1;
+            }
+          }
+          console.info(`[MetaCall] Major matchup map: ${rowsConsumed} rows aggregated → ${pairsKept} pairs with ≥${MAJOR_MATCHUP_MIN_GAMES} games (3× weight blend active)`);
+        } else {
+          console.info('[MetaCall] No labs_tournament_matchups.csv — Major matchup blend skipped (online-only matchups)');
+        }
+      } catch (_e) {
+        console.warn('[MetaCall] Major matchup load failed (non-fatal):', _e);
+        _majorMatchupMap = null;
+      }
+
       return true;
     } catch (e) {
       console.error('[MetaCall] Data load error:', e);
@@ -3145,9 +3210,44 @@ window.MetaCall = (function () {
     const b = normalize(deckB);
     const hit = _matchupMap?.[a]?.[b];
     const rev = !hit ? _matchupMap?.[b]?.[a] : null;
-    const base = hit ? hit
+    let base = hit ? hit
       : rev ? { pWin: rev.pLoss, pTie: rev.pTie, pLoss: rev.pWin }
       : { pWin: 0.50, pTie: 0.02, pLoss: 0.48 };
+
+    // W3 — Major matchup blend (3:1 over online). Fires only when the
+    // Major matrix has the pair with ≥MAJOR_MATCHUP_MIN_GAMES sample
+    // size. Major data carries games + winPct (no tie rate per labs
+    // CSV); we keep the tie rate from the online base and rebalance
+    // pLoss = 1 − pWin − pTie. When the pair is only in one direction,
+    // a flipped lookup mirrors the WR for the reverse opponent.
+    if (_majorMatchupMap) {
+      const mHit = _majorMatchupMap[a]?.[b];
+      const mRev = !mHit ? _majorMatchupMap[b]?.[a] : null;
+      let majorWin = null;
+      let majorGames = 0;
+      if (mHit) {
+        majorWin = mHit.winPct / 100;
+        majorGames = mHit.games;
+      } else if (mRev) {
+        majorWin = 1 - (mRev.winPct / 100);
+        majorGames = mRev.games;
+      }
+      if (majorWin != null && majorGames >= MAJOR_MATCHUP_MIN_GAMES) {
+        const onlineWin = base.pWin;
+        // Weighted average: (major × 3 + online × 1) / 4
+        const blendedWin = _clip(
+          (majorWin * MAJOR_MATCHUP_WEIGHT + onlineWin * 1.0) /
+            (MAJOR_MATCHUP_WEIGHT + 1.0),
+          0.05, 0.95,
+        );
+        const pTie = base.pTie || MAJOR_MATCHUP_TIE_RATE;
+        base = {
+          pWin : blendedWin,
+          pTie ,
+          pLoss: Math.max(0, 1 - blendedWin - pTie),
+        };
+      }
+    }
     // Predictor 5.3 — apply per-deck WR adjustments. adj is in pp,
     // pWin is 0..1, so divide by 100 to convert. The delta is split
     // between deckA "gets better" and deckB "gets worse"; we apply

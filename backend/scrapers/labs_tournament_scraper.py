@@ -31,7 +31,7 @@ import os
 import re
 import sys
 import time
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Dict, List, Optional, Tuple
 
 # Resolve project root so the scraper can be run from any working directory
@@ -700,6 +700,231 @@ CSV_FIELDS = [
 ]
 
 
+# ── Per-archetype matchup scraper (W3 Phase 7 — May 2026) ─────────────
+# The screenshots labs.limitlesstcg.com surfaces per-archetype detail
+# pages at /{tournament_id}/decks/{deck_slug} with a per-opponent table
+# (count + win %). User flagged this for the Meta Call upgrade: Major
+# matchup matrix gets 3× weight over the online proxy.
+#
+# Parser is intentionally defensive — selectors fall through multiple
+# patterns because we synthesized the fixture from screenshots without
+# fetching the live HTML (Cloudflare blocks WebFetch from the sandbox
+# environment). The first real-world dry-run is the validation step:
+# if a structural mismatch surfaces, fix forward.
+MATCHUP_DAY_OVERALL = 'overall'
+MATCHUP_DAY_DAY1 = 'day1'
+MATCHUP_DAY_DAY2 = 'day2'
+_MATCHUP_DAYS = (MATCHUP_DAY_OVERALL, MATCHUP_DAY_DAY1, MATCHUP_DAY_DAY2)
+
+MATCHUP_CSV_HEADER = [
+    'tournament_id',
+    'tournament_name',
+    'tournament_date',
+    'tournament_type',
+    'meta',                  # format key (e.g. TEF-POR) for downstream chunking
+    'my_deck_slug',
+    'my_deck_name',
+    'my_deck_player_count',  # total players who brought this deck to the event
+    'my_deck_total_wins',
+    'my_deck_total_losses',
+    'my_deck_total_ties',
+    'my_deck_overall_win_pct',
+    'opponent_deck_slug',
+    'opponent_deck_name',
+    'vs_count',              # games played vs this opponent in the day_filter
+    'vs_win_pct',            # win % vs this opponent in the day_filter
+    'day_filter',            # 'overall' | 'day1' | 'day2'
+    'scraped_at',
+]
+
+
+def _parse_player_summary(soup) -> Dict[str, float]:
+    """Extract the "{N} players: {W} wins - {L} losses - {T} ties ({WR}% WR)"
+    summary line. Defensive — tries several elements and returns zeros on
+    failure rather than raising.
+    """
+    out = {
+        'player_count'  : 0,
+        'total_wins'    : 0,
+        'total_losses'  : 0,
+        'total_ties'    : 0,
+        'overall_win_pct': 0.0,
+    }
+    if not soup:
+        return out
+    # Search the whole page text — the summary is short and unmistakable
+    text_blocks = []
+    for el in soup.find_all(['p', 'div', 'h2', 'h3', 'span']):
+        txt = el.get_text(' ', strip=True)
+        if txt and 'players' in txt.lower() and 'wins' in txt.lower():
+            text_blocks.append(txt)
+    for txt in text_blocks:
+        m = re.search(
+            r'(\d[\d,]*)\s*players?\s*[:\-]\s*(\d[\d,]*)\s*wins?\s*[-–]\s*(\d[\d,]*)\s*losses?\s*[-–]\s*(\d[\d,]*)\s*ties?\s*\(([\d.,]+)\s*%',
+            txt,
+            re.IGNORECASE,
+        )
+        if m:
+            out['player_count'] = _parse_int_count(m.group(1))
+            out['total_wins'] = _parse_int_count(m.group(2))
+            out['total_losses'] = _parse_int_count(m.group(3))
+            out['total_ties'] = _parse_int_count(m.group(4))
+            out['overall_win_pct'] = round(float(m.group(5).replace(',', '.')), 4)
+            return out
+    return out
+
+
+def scrape_archetype_matchups(
+    tournament_id: str,
+    deck_slug: str,
+    day_filter: str = MATCHUP_DAY_OVERALL,
+) -> Dict:
+    """
+    Fetch labs.limitlesstcg.com/{tournament_id}/decks/{deck_slug} (with
+    optional ?day1 / ?day2 query) and parse the per-opponent matchup
+    table.
+
+    Returns a dict:
+      {
+        'summary': { player_count, total_wins, ..., overall_win_pct },
+        'matchups': [
+          { 'opponent_slug', 'opponent_name', 'vs_count', 'vs_win_pct' },
+          ...
+        ],
+        'day_filter': day_filter,
+      }
+
+    Returns empty matchups list on parse failure (caller decides whether
+    to skip the row or treat as zero-sample).
+    """
+    if day_filter not in _MATCHUP_DAYS:
+        day_filter = MATCHUP_DAY_OVERALL
+
+    url = f"{BASE_URL}/{tournament_id}/decks/{deck_slug}"
+    if day_filter != MATCHUP_DAY_OVERALL:
+        url = f"{url}?{day_filter}"
+    logger.info("    Fetching matchups %s", url)
+    soup = fetch_page_bs4(url)
+    if not soup:
+        logger.warning("    Matchup fetch failed for %s", url)
+        return {'summary': _parse_player_summary(None), 'matchups': [], 'day_filter': day_filter}
+
+    summary = _parse_player_summary(soup)
+
+    # Find the matchup table — prefer .data-table (matches the deck-list
+    # scraper's selector) and fall back to any table whose header row
+    # contains "Win %" / "#".
+    table = soup.find('table', attrs={'class': re.compile(r'data-table')})
+    if not table:
+        for cand in soup.find_all('table'):
+            header_txt = cand.get_text(' ', strip=True).lower()
+            if 'win %' in header_txt or 'win%' in header_txt:
+                table = cand
+                break
+    if not table:
+        logger.debug("    No matchup table for %s/%s", tournament_id, deck_slug)
+        return {'summary': summary, 'matchups': [], 'day_filter': day_filter}
+
+    matchups: List[Dict] = []
+    for row in table.select('tbody tr') if table.find('tbody') else table.find_all('tr')[1:]:
+        cells = row.find_all('td')
+        if len(cells) < 3:
+            continue
+        # Deck-name cell: prefer the one with an <a>; opponent slug is the
+        # last segment of href.
+        link = None
+        name_cell_idx = None
+        for idx, c in enumerate(cells):
+            a = c.find('a')
+            if a and a.get('href'):
+                link = a
+                name_cell_idx = idx
+                break
+        if not link or name_cell_idx is None:
+            continue
+        opp_name = link.get_text(strip=True)
+        if not opp_name:
+            continue
+        opp_href = link.get('href', '')
+        opp_slug = opp_href.rsplit('/', 1)[-1].split('?')[0] if opp_href else ''
+
+        # Count + Win% are the two trailing numeric cells after the name
+        # cell. Walk from the right so we don't depend on header order.
+        trailing = cells[name_cell_idx + 1:]
+        count_val = 0
+        win_pct_val = 0.0
+        for c in trailing:
+            txt = c.get_text(strip=True)
+            if '%' in txt and win_pct_val == 0.0:
+                try:
+                    win_pct_val = round(float(txt.replace('%', '').replace(',', '.').strip()), 4)
+                except ValueError:
+                    pass
+            elif txt and count_val == 0 and not '%' in txt:
+                count_val = _parse_int_count(txt)
+        if count_val <= 0 and win_pct_val == 0.0:
+            continue
+        matchups.append({
+            'opponent_slug': opp_slug,
+            'opponent_name': opp_name,
+            'vs_count'     : count_val,
+            'vs_win_pct'   : win_pct_val,
+        })
+
+    return {'summary': summary, 'matchups': matchups, 'day_filter': day_filter}
+
+
+def build_matchup_rows(
+    tournament_meta: Dict,
+    deck_summary: Dict,
+    matchups_result: Dict,
+) -> List[Dict]:
+    """Combine tournament metadata + per-archetype matchup payload into
+    CSV row dicts ready for save. `deck_summary` is the deck-list-derived
+    row (player_count, win_pct, deck_name etc.) so we keep one CSV with
+    everything needed for Meta Call aggregation."""
+    rows: List[Dict] = []
+    summary = matchups_result.get('summary') or {}
+    day_filter = matchups_result.get('day_filter') or MATCHUP_DAY_OVERALL
+    for m in matchups_result.get('matchups', []):
+        rows.append({
+            'tournament_id'         : tournament_meta.get('tournament_id', ''),
+            'tournament_name'       : tournament_meta.get('tournament_name', ''),
+            'tournament_date'       : tournament_meta.get('tournament_date', ''),
+            'tournament_type'       : tournament_meta.get('tournament_type', ''),
+            'meta'                  : tournament_meta.get('meta', ''),
+            'my_deck_slug'          : deck_summary.get('deck_slug', ''),
+            'my_deck_name'          : deck_summary.get('deck_name', ''),
+            'my_deck_player_count'  : summary.get('player_count') or deck_summary.get('player_count', 0),
+            'my_deck_total_wins'    : summary.get('total_wins', 0),
+            'my_deck_total_losses'  : summary.get('total_losses', 0),
+            'my_deck_total_ties'    : summary.get('total_ties', 0),
+            'my_deck_overall_win_pct': summary.get('overall_win_pct') or deck_summary.get('win_pct', 0.0),
+            'opponent_deck_slug'    : m.get('opponent_slug', ''),
+            'opponent_deck_name'    : m.get('opponent_name', ''),
+            'vs_count'              : m.get('vs_count', 0),
+            'vs_win_pct'            : m.get('vs_win_pct', 0.0),
+            'day_filter'            : day_filter,
+            'scraped_at'            : datetime.now(timezone.utc).isoformat(),
+        })
+    return rows
+
+
+def save_matchup_rows(matchup_rows: List[Dict], data_dir: Optional[str] = None) -> str:
+    """Write matchup rows to data/labs_tournament_matchups.csv (append-or-replace
+    semantics — caller decides). Returns the output path."""
+    out_dir = data_dir or _get_data_dir()
+    os.makedirs(out_dir, exist_ok=True)
+    out_path = os.path.join(out_dir, 'labs_tournament_matchups.csv')
+    with open(out_path, 'w', encoding='utf-8', newline='') as f:
+        writer = csv.DictWriter(f, fieldnames=MATCHUP_CSV_HEADER, extrasaction='ignore')
+        writer.writeheader()
+        for row in matchup_rows:
+            writer.writerow(row)
+    logger.info("Wrote %d matchup rows → %s", len(matchup_rows), out_path)
+    return out_path
+
+
 def save_results(tournaments_meta: List[Dict], deck_rows: List[Dict]) -> None:
     data_dir = _get_data_dir()
     os.makedirs(data_dir, exist_ok=True)
@@ -791,6 +1016,23 @@ def main() -> None:
         '--overwrite', action='store_true',
         help='Overwrite output files instead of appending to the CSV',
     )
+    parser.add_argument(
+        '--matchups', action='store_true',
+        help='Second pass — fetch /{tid}/decks/{slug} per archetype and write '
+             'data/labs_tournament_matchups.csv. Slow (one HTTP per deck per '
+             'tournament). Default OFF.',
+    )
+    parser.add_argument(
+        '--matchup-days', nargs='+',
+        choices=list(_MATCHUP_DAYS), default=[MATCHUP_DAY_OVERALL],
+        help='Which day filter(s) to scrape per archetype when --matchups is '
+             'set (default: overall). Adds one HTTP per filter per deck.',
+    )
+    parser.add_argument(
+        '--matchup-meta', metavar='META', default='',
+        help='Format key to tag matchup rows with (e.g. TEF-POR). Useful for '
+             'targeted per-format backfills.',
+    )
     args = parser.parse_args()
 
     # ── Load settings (CLI args take priority over scraper_settings.json) ──
@@ -878,6 +1120,45 @@ def main() -> None:
         "Done. %d tournaments, %d deck entries written.",
         len(tournaments_meta), len(all_deck_rows),
     )
+
+    # ── Optional Phase B: per-archetype matchups ───────────────────────────
+    # User-flagged 2026-05-24: labs exposes per-deck matchup matrices
+    # (count + WR per opponent, with Day-2 filter). We scrape them as a
+    # second pass to keep the main run fast and the matchup CSV optional
+    # (Meta Call degrades gracefully when the file is absent).
+    if args.matchups:
+        matchup_rows: List[Dict] = []
+        total_decks_for_matchups = len(all_deck_rows) * len(args.matchup_days)
+        logger.info(
+            "Matchup pass: scraping %d archetype-day combos (one HTTP each, ~%.1f min @ %ss delay)",
+            total_decks_for_matchups,
+            total_decks_for_matchups * delay / 60,
+            delay,
+        )
+        # Index meta by tournament_id for fast lookup
+        meta_by_tid = {t['tournament_id']: t for t in tournaments_meta}
+        for d_idx, deck_row in enumerate(all_deck_rows):
+            tid = deck_row['tournament_id']
+            slug = deck_row.get('deck_slug', '')
+            if not slug:
+                continue
+            tmeta = dict(meta_by_tid.get(tid, {}))
+            if args.matchup_meta:
+                tmeta['meta'] = args.matchup_meta
+            for day in args.matchup_days:
+                logger.info(
+                    "  [matchup %d/%d] %s · %s · %s",
+                    d_idx + 1, len(all_deck_rows),
+                    tid, slug, day,
+                )
+                try:
+                    result = scrape_archetype_matchups(tid, slug, day_filter=day)
+                    matchup_rows.extend(build_matchup_rows(tmeta, deck_row, result))
+                except Exception as e:  # noqa: BLE001 — log + continue per-deck
+                    logger.warning("    Matchup scrape failed for %s/%s/%s: %s", tid, slug, day, e)
+                time.sleep(delay)
+        save_matchup_rows(matchup_rows)
+        logger.info("Matchup pass done. %d rows.", len(matchup_rows))
 
 
 if __name__ == '__main__':

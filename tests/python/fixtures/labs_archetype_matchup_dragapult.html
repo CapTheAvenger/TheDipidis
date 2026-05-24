@@ -1,0 +1,74 @@
+<!--
+  Synthetic fixture mirroring the structure visible in the user's
+  2026-05-24 screenshots of https://labs.limitlesstcg.com/{tid}/decks/{slug}.
+
+  Source: 4-tournament combined view (Prague + LA + Utrecht + Campinas)
+  showing the Dragapult deck detail with Day-2 filter OFF.
+
+  Confirmed-from-screenshot data:
+    Header: "Dragapult"
+    Subheader: "738 players: 2891 wins - 2447 losses - 1004 ties (50.86% WR)"
+    Matchup rows: Dragapult Dusknoir 456 58.92%, Dragapult Blaziken 429 52.14%, ...
+
+  Inferred (HTML element / class names) — defensive parser must accept
+  multiple selector patterns:
+    Container: any element containing the player-count regex match
+    Table: <table class="data-table"> (matches existing limitless fixture)
+    Rows: <tr> with deck link in cell 2, count cell, win-pct cell
+-->
+<!DOCTYPE html>
+<html>
+<head><title>Dragapult - Limitless</title></head>
+<body>
+<div class="deck-summary">
+  <h1>Dragapult</h1>
+  <p>738 players: 2891 wins - 2447 losses - 1004 ties (50.86% WR)</p>
+</div>
+<div class="day-filter">
+  <button>Day 2 filter OFF</button>
+</div>
+<table class="data-table">
+  <thead>
+    <tr><th></th><th>Deck</th><th>#</th><th>Win %</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><img class="pokemon" src="https://r2.limitlesstcg.net/pokemon/gen9/dragapult.png" alt="Dragapult"/><img class="pokemon" src="https://r2.limitlesstcg.net/pokemon/gen9/dusknoir.png" alt="Dusknoir"/></td>
+      <td><a href="/539/decks/dragapult-dusknoir">Dragapult Dusknoir</a></td>
+      <td>456</td>
+      <td>58.92%</td>
+    </tr>
+    <tr>
+      <td><img class="pokemon" src="https://r2.limitlesstcg.net/pokemon/gen9/dragapult.png" alt="Dragapult"/><img class="pokemon" src="https://r2.limitlesstcg.net/pokemon/gen9/blaziken.png" alt="Blaziken"/></td>
+      <td><a href="/539/decks/dragapult-blaziken">Dragapult Blaziken</a></td>
+      <td>429</td>
+      <td>52.14%</td>
+    </tr>
+    <tr>
+      <td><img class="pokemon" src="https://r2.limitlesstcg.net/pokemon/gen9/raging-bolt.png" alt="Raging Bolt"/><img class="pokemon" src="https://r2.limitlesstcg.net/pokemon/gen9/ogerpon.png" alt="Ogerpon"/></td>
+      <td><a href="/539/decks/raging-bolt-ogerpon">Raging Bolt Ogerpon</a></td>
+      <td>418</td>
+      <td>40.59%</td>
+    </tr>
+    <tr>
+      <td><img class="pokemon" src="https://r2.limitlesstcg.net/pokemon/gen9/dragapult.png" alt="Dragapult"/></td>
+      <td><a href="/539/decks/dragapult">Dragapult</a></td>
+      <td>394</td>
+      <td>47.04%</td>
+    </tr>
+    <tr>
+      <td><img class="pokemon" src="https://r2.limitlesstcg.net/pokemon/gen9/mewtwo.png" alt="Mewtwo"/><img class="pokemon" src="https://r2.limitlesstcg.net/pokemon/gen9/conkeldurr.png" alt="Conkeldurr"/></td>
+      <td><a href="/539/decks/rockets-mewtwo">Rocket's Mewtwo</a></td>
+      <td>379</td>
+      <td>44.77%</td>
+    </tr>
+    <tr>
+      <td><img class="pokemon" src="https://r2.limitlesstcg.net/pokemon/gen9/lucario.png" alt="Lucario"/><img class="pokemon" src="https://r2.limitlesstcg.net/pokemon/gen9/hariyama.png" alt="Hariyama"/></td>
+      <td><a href="/539/decks/lucario-hariyama">Lucario Hariyama</a></td>
+      <td>238</td>
+      <td>55.18%</td>
+    </tr>
+  </tbody>
+</table>
+</body>
+</html>

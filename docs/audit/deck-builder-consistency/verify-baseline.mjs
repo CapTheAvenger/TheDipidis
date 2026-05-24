@@ -328,6 +328,100 @@ expect(
     true,
 );
 
+// ──────────────────────────────────────────────────────────────────────
+// W3 Phase 2 — STRUCTURAL SKELETON-LOCK VERIFICATION
+//
+// Replicate _detectStructuralSkeleton from app-deck-builder.js against
+// the TEF-POR Lucario fixture data. The 4 POR-format regionals all ran
+// Maximum-Belt Lucario lists — for the structural staples (Riolu,
+// Fighting Energy, Ultra Ball, Lillie's Determination) inclusion is
+// 100% with avg ≥ 3.5, so they should all qualify as skeleton.
+// ──────────────────────────────────────────────────────────────────────
+const SKELETON_INCLUSION = 0.90;
+const SKELETON_AVG = 3.5;
+const SKELETON_MIN_BUCKETS = 3;
+function detectStructuralSkeleton(majorRows, archetypeKey, aceSpecLower, todayMs) {
+    const skeleton = new Set();
+    if (!Array.isArray(majorRows) || majorRows.length === 0) return skeleton;
+    const archKey = String(archetypeKey).trim().toLowerCase();
+    const aceSpec = String(aceSpecLower).trim().toLowerCase();
+    const buckets = new Map();
+    for (const r of majorRows) {
+        const archNorm = stripPriceTag(r.archetype || '').toLowerCase().trim();
+        if (archNorm !== archKey) continue;
+        const tid = r.tournament_id || '';
+        const cn = String(r.card_name || '').trim().toLowerCase();
+        if (!tid || !cn) continue;
+        const avg = parseFloat(String(r.average_count || '0').replace(',', '.'));
+        if (!Number.isFinite(avg) || avg <= 0) continue;
+        const k = `${tid}|${archNorm}`;
+        if (!buckets.has(k)) {
+            const ms = parseDateMs(r.tournament_date);
+            buckets.set(k, { cards: new Map(), dateMs: ms });
+        }
+        buckets.get(k).cards.set(cn, avg);
+    }
+    const matching = [...buckets.values()].filter(b => b.cards.has(aceSpec));
+    if (matching.length < SKELETON_MIN_BUCKETS) return skeleton;
+    const stats = new Map();
+    let total = 0;
+    for (const b of matching) {
+        let rec = 1.0;
+        if (Number.isFinite(b.dateMs) && Number.isFinite(todayMs)) {
+            const age = Math.max(0, Math.floor((todayMs - b.dateMs) / 86400000));
+            rec = recencyWeight(age);
+        }
+        total += rec;
+        for (const [cn, avg] of b.cards) {
+            if (cn === aceSpec) continue;
+            if (!stats.has(cn)) stats.set(cn, { p: 0, s: 0 });
+            const s = stats.get(cn);
+            s.p += rec;
+            s.s += avg * rec;
+        }
+    }
+    if (total === 0) return skeleton;
+    for (const [cn, s] of stats) {
+        if (s.p / total >= SKELETON_INCLUSION && s.s / s.p >= SKELETON_AVG) skeleton.add(cn);
+    }
+    return skeleton;
+}
+
+const skeletonSet = detectStructuralSkeleton(
+    majorDated, fixture._meta.archetype, fixture._meta.ace_spec_pick, todayMs
+);
+console.log(`\n✓ Skeleton-lock detection: ${skeletonSet.size} card(s) qualify as structural skeleton`);
+console.log(`  members: ${[...skeletonSet].join(', ')}`);
+
+// Structural staples that should appear in EVERY POR Lucario list at 4-of:
+const expectedSkeletonStaples = ['riolu', 'fighting energy', 'ultra ball', "lillie's determination"];
+for (const card of expectedSkeletonStaples) {
+    expect(
+        `W3-P2: "${card}" is a structural skeleton card (≥90% inc, ≥3.5 avg)`,
+        skeletonSet.has(card),
+        true,
+    );
+}
+
+// Variable-count cards that should NOT be skeleton (avg < 3.5 or
+// inclusion < 90%). Poké Pad at avg 3.28 was the original audit case
+// — flexible count across builds, should NOT be skeleton.
+expect(
+    "W3-P2: Wally's Compassion is NOT skeleton (avg 1.16, far below 3.5)",
+    skeletonSet.has("wally's compassion"),
+    false,
+);
+expect(
+    "W3-P2: Poké Pad is NOT skeleton (avg 3.28 < 3.5 threshold)",
+    skeletonSet.has("poké pad"),
+    false,
+);
+expect(
+    "W3-P2: skeleton size in sane range (3-10 staples for Lucario+MaxBelt)",
+    skeletonSet.size >= 3 && skeletonSet.size <= 10,
+    true,
+);
+
 // ── Report ────────────────────────────────────────────────────────────
 console.log('═══════════════════════════════════════════════════════════');
 console.log('TEST RESULTS');

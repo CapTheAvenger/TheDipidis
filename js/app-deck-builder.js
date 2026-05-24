@@ -4860,6 +4860,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 if (!card) continue;
                 if (card._isAceSpec) continue;
                 if (card._isPinned) continue;
+                if (card._isSkeletonLocked) continue;
                 if ((card.consistencyScore || 0) >= 75) continue;
                 const deps = card._dependencies;
                 if (!deps || (deps.size != null ? deps.size === 0 : Object.keys(deps).length === 0)) continue;
@@ -4885,7 +4886,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 // tier first.
                 const bumpCandidates = entries
                     .filter(e => e && e.card)
-                    .filter(e => !e.card._isAceSpec && !e.card._isPinned)
+                    .filter(e => !e.card._isAceSpec && !e.card._isPinned && !e.card._isSkeletonLocked)
                     .filter(e => {
                         const eDeps = e.card._dependencies;
                         if (!eDeps) return true;
@@ -4954,6 +4955,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 if (!card) continue;
                 if (card._isAceSpec) continue;
                 if (card._isPinned) continue;
+                if (card._isSkeletonLocked) continue;
                 if ((card.consistencyScore || 0) >= 75) continue;
                 const nm = String(card.card_name || '').trim().toLowerCase();
                 const synergy = cooccurrenceMap.get(nm);
@@ -4993,7 +4995,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 // synergy (would just create another stranded card).
                 const bumpCandidates = entries
                     .filter(e => e && e.card)
-                    .filter(e => !e.card._isAceSpec && !e.card._isPinned)
+                    .filter(e => !e.card._isAceSpec && !e.card._isPinned && !e.card._isSkeletonLocked)
                     .filter(e => {
                         const otherNm = String(e.card.card_name || '').trim().toLowerCase();
                         const otherSyn = cooccurrenceMap.get(otherNm);
@@ -5180,6 +5182,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 .filter(e => {
                     if (!e || !e.card) return false;
                     if (e.card._isPinned) return false;
+                    if (e.card._isSkeletonLocked) return false;
                     if (!(e.count > 1)) return false; // keep at least 1 copy
                     return Number.isFinite(e.card._lrmRemainder);
                 })
@@ -5246,7 +5249,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                     .filter(e => e.count >= 1)
                     .filter(e => e.card._techCounterMaxCount == null)
                     .filter(e => (e.card.consistencyScore || 0) < 75)
-                    .filter(e => !e.card._isAceSpec && !e.card._isPinned)
+                    .filter(e => !e.card._isAceSpec && !e.card._isPinned && !e.card._isSkeletonLocked)
                     .sort((a, b) => (a.card._lrmRemainder || 0) - (b.card._lrmRemainder || 0));
 
                 // CORE bump candidates: CORE-tier, has positive remainder,
@@ -5408,7 +5411,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                     .filter(e => !isEnergyEntry(e))
                     .filter(e => (e.card.consistencyScore || 0) < 75)
                     .filter(e => e.card._techCounterMaxCount == null)
-                    .filter(e => !e.card._isAceSpec && !e.card._isPinned)
+                    .filter(e => !e.card._isAceSpec && !e.card._isPinned && !e.card._isSkeletonLocked)
                     .filter(e => e.count >= 1)
                     .sort((a, b) => {
                         // TECH first (lower tier order), then by remainder asc.
@@ -5519,7 +5522,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 // format rule and shape the deck's energy economy.
                 const energyDemoteCandidates = entries
                     .filter(e => isEnergyEntry(e))
-                    .filter(e => !e.card._isAceSpec && !e.card._isPinned)
+                    .filter(e => !e.card._isAceSpec && !e.card._isPinned && !e.card._isSkeletonLocked)
                     .filter(e => {
                         const cn = String(e.card.card_name || '').toLowerCase().trim();
                         const stat = conditionalAvgs.get(cn);
@@ -6205,6 +6208,112 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             return { conditionalAvgs, bucketCount: matching.length };
         }
         if (typeof window !== 'undefined') window._aceSpecConditionalAvgsMulti = _aceSpecConditionalAvgsMulti;
+
+        // ────────────────────────────────────────────────────────────
+        // W3 Phase 2 — STRUCTURAL SKELETON DETECTION
+        //
+        // Computes the "structural skeleton" of an archetype + ACE-SPEC
+        // combination: cards that appear in ≥SKELETON_INCLUSION of all
+        // Major Day-2 buckets with avg-when-used ≥SKELETON_AVG copies.
+        // These are the cards every list runs at near-maximum count
+        // (Riolu, Ultra Ball, Lillie's Determination for Lucario+MaxBelt;
+        // Fighting Energy at 9.5 avg too). Stage 0 pins them at 4-of so
+        // downstream demote / trim / LRM passes can't accidentally drop
+        // them below 4 — same protection pattern as _isAceSpec /
+        // _isPinned, but driven by data instead of user input.
+        //
+        // Major-ONLY by design: Online's small-event tail is too noisy
+        // for a 90% inclusion threshold to mean anything (5-deck Wally
+        // subset of 20 Online Lucario lists isn't representative).
+        // Major-gated: returns empty Set when no current-format Major
+        // chunk exists (no-op for first ~2 weeks after rotation).
+        //
+        // Sample-size guard: needs ≥SKELETON_MIN_BUCKETS matching
+        // buckets before any card qualifies. With 3 buckets the 90%
+        // threshold effectively means "all 3" (since 2/3 = 67%). With
+        // 4 Majors (current EN season) it also means "all 4". The
+        // threshold only loosens once we have ≥10 majors.
+        // ────────────────────────────────────────────────────────────
+        const SKELETON_INCLUSION = 0.90;
+        const SKELETON_AVG = 3.5;
+        const SKELETON_MIN_BUCKETS = 3;
+        function _detectStructuralSkeleton(majorRows, archetypeKey, aceSpecLower, todayMs, archetypeFieldNormalizer) {
+            const skeleton = new Set();
+            if (!Array.isArray(majorRows) || majorRows.length === 0) return skeleton;
+            if (!archetypeKey || !aceSpecLower) return skeleton;
+            const archKey = String(archetypeKey).trim().toLowerCase();
+            const aceSpec = String(aceSpecLower).trim().toLowerCase();
+            const normalizer = typeof archetypeFieldNormalizer === 'function'
+                ? archetypeFieldNormalizer
+                : (s => s);
+
+            // Build per-(tournament_id, archetype) buckets — one bucket
+            // per distinct Major Day-2 deck snapshot.
+            const buckets = new Map();
+            for (const r of majorRows) {
+                if (!r) continue;
+                const archRaw = String(r.archetype || '');
+                const archNorm = normalizer(archRaw);
+                if (archNorm.trim().toLowerCase() !== archKey) continue;
+                const tid = r.tournament_id || '';
+                const cn = String(r.card_name || '').trim().toLowerCase();
+                if (!tid || !cn) continue;
+                const avgRaw = parseFloat(String(r.average_count || '0').replace(',', '.'));
+                if (!Number.isFinite(avgRaw) || avgRaw <= 0) continue;
+                const k = `${tid}|${archNorm}`;
+                if (!buckets.has(k)) {
+                    const dateRaw = r.tournament_date || '';
+                    const parsed = dateRaw ? Date.parse(dateRaw) : NaN;
+                    buckets.set(k, {
+                        cards: new Map(),
+                        dateMs: Number.isFinite(parsed) ? parsed : null,
+                    });
+                }
+                buckets.get(k).cards.set(cn, avgRaw);
+            }
+
+            // Filter to buckets containing the chosen ACE-SPEC — same
+            // bucketing logic as _aceSpecConditionalAvgsMulti so the
+            // skeleton is conditional on the build's ACE-SPEC pick.
+            const matching = [];
+            for (const b of buckets.values()) {
+                if (b.cards.has(aceSpec)) matching.push(b);
+            }
+            if (matching.length < SKELETON_MIN_BUCKETS) return skeleton;
+
+            // Recency-weighted inclusion rate + avg per card. Recency
+            // weighting matches the rest of the pipeline — newer Majors
+            // count more than older ones.
+            const cardStats = new Map();
+            let totalWeight = 0;
+            const useRecency = Number.isFinite(todayMs) && todayMs > 0;
+            for (const b of matching) {
+                let recency = 1.0;
+                if (useRecency && Number.isFinite(b.dateMs)) {
+                    const ageDays = Math.max(0, Math.floor((todayMs - b.dateMs) / 86400000));
+                    recency = _recencyWeight(ageDays);
+                }
+                totalWeight += recency;
+                for (const [cn, avg] of b.cards) {
+                    if (cn === aceSpec) continue; // ACE-SPEC slot picker handles its own card
+                    if (!cardStats.has(cn)) cardStats.set(cn, { presenceWeight: 0, sumAvgWeight: 0 });
+                    const s = cardStats.get(cn);
+                    s.presenceWeight += recency;
+                    s.sumAvgWeight += avg * recency;
+                }
+            }
+            if (totalWeight === 0) return skeleton;
+
+            for (const [cn, s] of cardStats) {
+                const inclusionRate = s.presenceWeight / totalWeight;
+                const avgWhenUsed = s.sumAvgWeight / s.presenceWeight;
+                if (inclusionRate >= SKELETON_INCLUSION && avgWhenUsed >= SKELETON_AVG) {
+                    skeleton.add(cn);
+                }
+            }
+            return skeleton;
+        }
+        if (typeof window !== 'undefined') window._detectStructuralSkeleton = _detectStructuralSkeleton;
 
         async function autoCompleteConsistency(source, rarityMode, options) {
             if (source !== 'cityLeague' && source !== 'currentMeta' && source !== 'pastMeta') return;
@@ -7510,6 +7619,44 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                     ? _aceSpecConditionalAvgsMulti(_condSources, currentArchetype, aceSpecLower, todayMs)
                     : { conditionalAvgs: new Map(), bucketCount: 0 };
                 const condResult = _aceSpecCondResult;
+
+                // W3 Phase 2 — STRUCTURAL SKELETON-LOCK
+                //
+                // Detect Major-validated core cards (≥90% inclusion AND
+                // ≥3.5 avg across this archetype's Major Day-2 buckets
+                // for the chosen ACE-SPEC). These cards get pinned at
+                // 4-of in Stage 0 and downstream Floor/Bidi/Ceiling/LRM
+                // passes treat them as immutable — same protection as
+                // _isAceSpec / _isPinned but driven by tournament data
+                // instead of user input.
+                //
+                // Major-gated: no Major data → empty Set → no-op. So
+                // this stays dormant during the first ~2 weeks after a
+                // set rotation (no current-format Major chunk yet).
+                // Online is intentionally excluded — small-event tail
+                // makes a 90% threshold meaningless. For basic energies
+                // that already average >4 (e.g. Fighting at 9.5), the
+                // 4-of Stage-0 placement acts as a floor; the Energy
+                // Floor pass downstream still bumps to the doctrine
+                // count (the demote-immunity protects against trims,
+                // not against bumps).
+                const _skeletonSet = _hasMajorForCond
+                    ? _detectStructuralSkeleton(
+                        _majorRowsForCond, currentArchetype, aceSpecLower, todayMs, _stripPriceTag
+                    )
+                    : new Set();
+                if (_skeletonSet.size > 0) {
+                    let _skeletonMarked = 0;
+                    deckCards.forEach(card => {
+                        const cn = (card.card_name || '').trim().toLowerCase();
+                        if (!_skeletonSet.has(cn)) return;
+                        if (isAceSpecCard(card)) return; // ACE-SPEC slot picker handles its own card
+                        card._isSkeletonLocked = true;
+                        card._skeletonCount = 4;
+                        _skeletonMarked += 1;
+                    });
+                    devLog(`[Consistency][Skeleton] ${_skeletonMarked}/${_skeletonSet.size} card(s) locked as 4-of skeleton: ${Array.from(_skeletonSet).join(', ')}`);
+                }
                 if (condResult.bucketCount >= 3) {
                     let overrides = 0;
                     deckCards.forEach(card => {
@@ -7662,6 +7809,47 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             }
 
             // ==========================================
+            // 0b. STAGE 0b — SKELETON-LOCK (W3 Phase 2)
+            //
+            // Push the Major-detected structural skeleton at 4-of (or
+            // legal-max, whichever is lower) BEFORE Stage 1's avg-driven
+            // allocation runs. Skeleton cards survived the ≥90%
+            // inclusion AND ≥3.5 avg gates against Major Day-2 data —
+            // they're the deck's structural floor. Stage 1 then fills
+            // around them with the secondary trainers and rounding-
+            // remainder bumps.
+            //
+            // Skipped when:
+            //   - Card is an ACE-SPEC (handled by ACE slot picker)
+            //   - Already placed by user-pin (count would conflict)
+            //   - 60-card cap already reached
+            //
+            // For basic energies (Fighting Energy avg=9.5 in Lucario),
+            // the 4-of here is a FLOOR — Energy Floor downstream bumps
+            // to the doctrine count; the _isSkeletonLocked flag only
+            // prevents demote, not bump.
+            if (_skeletonSet.size > 0) {
+                const _normNameSk = typeof normalizeCardName === 'function'
+                    ? normalizeCardName
+                    : (s => String(s || '').toLowerCase().trim());
+                const _seenSkeleton = new Set();
+                deckCards.forEach(card => {
+                    if (currentTotal >= 60) return;
+                    if (isAceSpecCard(card)) return;
+                    if (!card._isSkeletonLocked) return;
+                    if (card._isPinned) return;  // user pin already placed it
+                    const nm = _normNameSk(card.card_name);
+                    if (_seenSkeleton.has(nm)) return; // dedupe across variant rows
+                    _seenSkeleton.add(nm);
+                    const legalMax = card._legalMax || getLegalMaxCopies(card.card_name, card);
+                    const addCount = isBasicEnergyCardEntry(card)
+                        ? 4
+                        : Math.min(4, legalMax);
+                    pushCard(card, addCount, '[Consistency][Stage0-Skeleton]');
+                });
+            }
+
+            // ==========================================
             // 2. STUFE 1 (Core: consistencyScore >= 75)
             // Meta-boosted + trending cards can exceed 100
             //
@@ -7678,6 +7866,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 if (currentTotal >= 60) return;
                 if (isAceSpecCard(card)) return; // Ace Spec haben wir schon
                 if (card._isPinned) return;      // Stage 0 schon erledigt
+                if (card._isSkeletonLocked) return; // Stage 0b schon erledigt
 
                 // Deck-wide Radiant limit
                 if (isRadiantPokemon(card.card_name)) {
@@ -7740,6 +7929,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 if (currentTotal >= 60) return;
                 if (isAceSpecCard(card)) return;
                 if (card._isPinned) return; // Stage 0 schon erledigt
+                if (card._isSkeletonLocked) return; // Stage 0b schon erledigt
                 if (consistencyDeck.some(entry => entry.card.card_name === card.card_name)) return; // Schon im Deck?
 
                 // Deck-wide Radiant limit

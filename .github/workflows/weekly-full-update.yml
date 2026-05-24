@@ -23,6 +23,10 @@ on:
         description: 'Day filter(s) for matchups (space-separated: overall / day1 / day2)'
         type: string
         default: 'overall'
+      labs_id_range:
+        description: 'Backfill labs IDs (e.g. "1 66" scrapes all historical metas). Empty = use index only.'
+        type: string
+        default: ''
 
 # GITHUB_TOKEN needs:
 #   - contents: write  → commit + push the scraped CSVs
@@ -198,6 +202,16 @@ jobs:
                   echo "  seeded chunk: $(basename "$chunk")"
               fi
           done
+          # Labs per-meta chunks (2026-05-24 split refactor). Without these
+          # the labs scraper's _reassemble_labs_monolith() sees an empty
+          # cache and re-scrapes every historical tournament on every run.
+          for chunk in data/labs_tournament_decks_*.csv \
+                       data/labs_tournament_matchups_*.csv; do
+              if [ -f "$chunk" ]; then
+                  cp "$chunk" "backend/core/data/$(basename "$chunk")"
+                  echo "  seeded labs chunk: $(basename "$chunk")"
+              fi
+          done
 
       # Cardmarket publishes daily JSON dumps on a public S3 bucket.
       # The cardmarket_id_mapper / cardmarket_price_merger scrapers
@@ -265,22 +279,28 @@ jobs:
           PYTHONPATH: ${{ github.workspace }}/backend/core
           # workflow_dispatch inputs default to true / 'overall' on the
           # cron schedule (inputs are unset → fall back to true / 'overall').
-          WITH_MATCHUPS: ${{ github.event.inputs.with_matchups || 'true' }}
-          MATCHUP_DAYS:  ${{ github.event.inputs.matchup_days || 'overall' }}
+          WITH_MATCHUPS:  ${{ github.event.inputs.with_matchups || 'true' }}
+          MATCHUP_DAYS:   ${{ github.event.inputs.matchup_days || 'overall' }}
+          LABS_ID_RANGE:  ${{ github.event.inputs.labs_id_range || '' }}
         working-directory: backend
         run: |
           set +e
           echo "::group::scrapers/labs_tournament_scraper.py"
+          # Build the optional --id-range argv tokens. Word-split intentional.
+          ID_RANGE_ARGS=""
+          if [ -n "$LABS_ID_RANGE" ]; then
+              echo "Backfill mode: walking labs IDs $LABS_ID_RANGE"
+              ID_RANGE_ARGS="--id-range $LABS_ID_RANGE"
+          fi
           if [ "$WITH_MATCHUPS" = "true" ]; then
               echo "Matchup pass: ENABLED (day filters: $MATCHUP_DAYS)"
-              # Word-split intentional so multiple day filters become
-              # separate argv tokens (e.g. "overall day2" → --matchup-days overall day2)
               python scrapers/labs_tournament_scraper.py \
                   --matchups \
-                  --matchup-days $MATCHUP_DAYS
+                  --matchup-days $MATCHUP_DAYS \
+                  $ID_RANGE_ARGS
           else
               echo "Matchup pass: DISABLED — deck-list only"
-              python scrapers/labs_tournament_scraper.py
+              python scrapers/labs_tournament_scraper.py $ID_RANGE_ARGS
           fi
           rc=$?
           if [ "$rc" -ne 0 ]; then
@@ -295,22 +315,33 @@ jobs:
         # prepare_card_data.py's SYNC_PATTERNS step runs IN the loop
         # above, BEFORE the labs scraper. So the labs CSVs that labs
         # writes to backend/core/data/ never get copied to data/ at
-        # sync time. This explicit step picks them up. Used the 2026-05-24
-        # 22:36 UTC run as evidence: scraper wrote 268 deck rows + 6773
-        # matchup rows to backend/core/data/, but neither file appeared
-        # in the commit because the sync had already finished by then.
+        # sync time. This explicit step picks them up — including the
+        # per-meta chunks (labs_tournament_decks_<META>.csv etc.) that
+        # the 2026-05-24 per-meta split refactor introduced.
         run: |
           set +e
           mkdir -p data
+          # Monolith files first
           for f in labs_tournament_decks.csv labs_tournament_matchups.csv labs_tournaments.json; do
               if [ -f "backend/core/data/$f" ]; then
                   cp "backend/core/data/$f" "data/$f"
                   sz=$(stat -c%s "data/$f")
                   echo "  ✓ synced $f ($sz B)"
-              else
-                  echo "  ✗ skip $f (not in backend/core/data/)"
               fi
           done
+          # Per-meta chunks (labs_tournament_decks_TEF-POR.csv,
+          # labs_tournament_matchups_SVI-PFL.csv, etc.) — glob-copy so
+          # newly-introduced metas don't need a workflow update each
+          # rotation cycle.
+          shopt -s nullglob
+          for f in backend/core/data/labs_tournament_decks_*.csv \
+                   backend/core/data/labs_tournament_matchups_*.csv; do
+              base=$(basename "$f")
+              cp "$f" "data/$base"
+              sz=$(stat -c%s "data/$base")
+              echo "  ✓ synced chunk $base ($sz B)"
+          done
+          shopt -u nullglob
           exit 0
 
       - name: Bump version

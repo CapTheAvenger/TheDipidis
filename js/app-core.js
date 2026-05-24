@@ -1841,25 +1841,70 @@ const BASE_PATH = './data/';
 
                 let chunksToLoad = manifest.chunks;
                 if (latestOnly && chunksToLoad.length > 0) {
-                    // Chunks are split by meta-format key (BRS-PRE, SVI-ASC,
-                    // ...) and the manifest array is alphabetical, NOT
-                    // date-ordered. Picking chunks[length-1] used to land
-                    // on SVI-PFL while the actually-recent tournaments live
-                    // in SVI-ASC (active rotation). Use manifest.chunk_dates
-                    // when present and pick the chunk with the latest
-                    // max_date — the real "latest". Falls back to array
-                    // order for older manifests that don't carry dates yet.
-                    const dates = manifest.chunk_dates || {};
-                    const withDates = chunksToLoad
-                        .map(c => ({ chunk: c, max: dates[c] && dates[c].max_date }))
-                        .filter(x => x.max);
-                    if (withDates.length > 0) {
-                        withDates.sort((a, b) => b.max.localeCompare(a.max));
-                        chunksToLoad = [withDates[0].chunk];
-                        devLog(`[Tournament CSV] Loading latest chunk by date: ${chunksToLoad[0]} (max_date=${withDates[0].max})`);
+                    // W3 Phase 1 — format-aware chunk selection.
+                    //
+                    // "Latest" used to mean "chunk with the highest max_date"
+                    // but that's wrong across a format rotation: when the
+                    // English set rotates (e.g. POR → CRI on 2026-05-22),
+                    // the highest-date chunk (TEF-POR with Utrecht/Campinas
+                    // 16.05) still belongs to the rotated-OUT format and
+                    // its card lists no longer represent the current meta.
+                    //
+                    // Prefer format_window.current_set when available:
+                    // match chunks whose meta-key ends with that set code
+                    // (e.g. "TEF-CRI" matches current_set "CRI"). If no
+                    // chunk matches, return EMPTY rather than fall back to
+                    // the date-based selection — "no current-format Major
+                    // data" is the correct answer pre-rotation-data.
+                    let currentSet = '';
+                    try {
+                        const fwResp = await fetch(`${BASE_PATH}format_window.json${cacheBust}`);
+                        if (fwResp.ok) {
+                            const fw = await fwResp.json();
+                            currentSet = String((fw && fw.current_set) || '').trim().toUpperCase();
+                        }
+                    } catch (_e) { /* optional — fall back to date selection */ }
+
+                    if (currentSet) {
+                        // Match chunks like "TEF-CRI", "POR-CRI", or bare "CRI".
+                        const setSuffix = `-${currentSet}`;
+                        const matchedChunks = chunksToLoad.filter(c => {
+                            const m = (c || '').toUpperCase();
+                            return m.endsWith(`${setSuffix}.CSV`) || m.endsWith(`${currentSet}.CSV`);
+                        });
+                        if (matchedChunks.length === 0) {
+                            devLog(`[Tournament CSV] No chunks match current_set=${currentSet} — returning empty (format has no Major data yet)`);
+                            return [];
+                        }
+                        // If multiple chunks match (e.g. archived + current),
+                        // pick the date-latest of them.
+                        const dates = manifest.chunk_dates || {};
+                        const matchedWithDates = matchedChunks
+                            .map(c => ({ chunk: c, max: dates[c] && dates[c].max_date }))
+                            .filter(x => x.max);
+                        if (matchedWithDates.length > 0) {
+                            matchedWithDates.sort((a, b) => b.max.localeCompare(a.max));
+                            chunksToLoad = [matchedWithDates[0].chunk];
+                        } else {
+                            chunksToLoad = [matchedChunks[matchedChunks.length - 1]];
+                        }
+                        devLog(`[Tournament CSV] Loading current-format chunk: ${chunksToLoad[0]} (current_set=${currentSet})`);
                     } else {
-                        chunksToLoad = [chunksToLoad[chunksToLoad.length - 1]];
-                        devLog(`[Tournament CSV] Loading latest chunk (no chunk_dates in manifest): ${chunksToLoad[0]}`);
+                        // No format_window — fall back to date-based selection
+                        // (legacy behavior for repos without the rotation
+                        // metadata).
+                        const dates = manifest.chunk_dates || {};
+                        const withDates = chunksToLoad
+                            .map(c => ({ chunk: c, max: dates[c] && dates[c].max_date }))
+                            .filter(x => x.max);
+                        if (withDates.length > 0) {
+                            withDates.sort((a, b) => b.max.localeCompare(a.max));
+                            chunksToLoad = [withDates[0].chunk];
+                            devLog(`[Tournament CSV] Loading latest chunk by date (no format_window): ${chunksToLoad[0]} (max_date=${withDates[0].max})`);
+                        } else {
+                            chunksToLoad = [chunksToLoad[chunksToLoad.length - 1]];
+                            devLog(`[Tournament CSV] Loading latest chunk (no chunk_dates in manifest): ${chunksToLoad[0]}`);
+                        }
                     }
                 } else {
                     devLog(`[Tournament CSV] Loading ${chunksToLoad.length} chunks (${manifest.total_rows} rows)`);

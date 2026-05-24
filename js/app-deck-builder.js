@@ -5853,7 +5853,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
         // archetypeFieldNormalizer is for stripping snapshot-specific
         // suffixes (price-tag for Major) before the archetype matcher runs;
         // Online + JP rows pass through clean.
-        function _aggregateWeightedSource(rows, archetypeKey, sourceWeight, todayMs, archetypeFieldNormalizer, mode) {
+        function _aggregateWeightedSource(rows, archetypeKey, sourceWeight, todayMs, archetypeFieldNormalizer, mode, attendanceWeightFn) {
             if (!Array.isArray(rows) || rows.length === 0) return null;
             const matcher = (typeof window.normalizeArchetypeForMatch === 'function')
                 ? window.normalizeArchetypeForMatch
@@ -5861,6 +5861,15 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             const targetKey = matcher(archetypeKey || '');
             if (!targetKey) return null;
             const aggregationMode = (mode === 'snapshot') ? 'snapshot' : 'aggregate';
+            // W3 Phase 1 — per-tournament attendance weight multiplier.
+            // Online sources pass `_onlineAttendanceWeight` so events with
+            // ≥ ONLINE_ATTENDANCE_TIER_THRESHOLD players (default 250)
+            // count at 0.8× while smaller events count at 0.2× — keeps
+            // small-event signal for rogue-deck detection without letting
+            // them dominate per-card averages. Major + City League pass
+            // undefined (no per-event attendance modulation; their source
+            // weights already encode quality).
+            const _attWeight = typeof attendanceWeightFn === 'function' ? attendanceWeightFn : null;
 
             if (aggregationMode === 'snapshot') {
                 // (tid, archRaw) — one entry per distinct deck snapshot.
@@ -5882,7 +5891,8 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                         const d = _parseAnyTournamentDate(row.tournament_date || row.date || '');
                         if (!d) return;
                         const ageDays = Math.max(0, (todayMs - d.getTime()) / 86400000);
-                        const weight = _recencyWeight(ageDays) * (sourceWeight || 1.0);
+                        const attMult = _attWeight ? _attWeight(row.total_players) : 1.0;
+                        const weight = _recencyWeight(ageDays) * (sourceWeight || 1.0) * attMult;
                         deckMeta.set(deckKey, { weight, ageDays, tid });
                     }
 
@@ -5940,7 +5950,8 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                     const ageDays = Math.max(0, (todayMs - d.getTime()) / 86400000);
                     const archTotal = parseInt(row.total_decks_in_archetype || 0, 10) || 0;
                     if (archTotal <= 0) return;
-                    const weight = _recencyWeight(ageDays) * (sourceWeight || 1.0);
+                    const attMult = _attWeight ? _attWeight(row.total_players) : 1.0;
+                    const weight = _recencyWeight(ageDays) * (sourceWeight || 1.0) * attMult;
                     tournamentMeta.set(tid, { weight, archetypeTotal: archTotal, ageDays });
                 }
 
@@ -6105,16 +6116,27 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             const aceSpec = String(aceSpecLower).trim().toLowerCase();
             const useRecency = Number.isFinite(todayMs) && todayMs > 0;
 
-            // Per-bucket card-avg map AND per-bucket source-weight (so the
-            // recency-weight loop below applies the right source multiplier).
+            // Per-bucket card-avg map AND per-bucket effective weight
+            // (source-weight × attendance-weight, computed at bucket build
+            // time so the recency loop just multiplies in recency last).
             const buckets = new Map();
             const bucketDates = new Map();
-            const bucketSourceWeight = new Map();
+            const bucketEffectiveWeight = new Map();
             for (const src of sources) {
                 if (!src || !Array.isArray(src.rows) || src.rows.length === 0) continue;
                 const sourceWeight = Number.isFinite(src.sourceWeight) && src.sourceWeight > 0
                     ? src.sourceWeight : 1.0;
                 const normalizer = src.archetypeFieldNormalizer;
+                // W3 Phase 1 — Per-source attendance weighting toggle.
+                // When `applyAttendanceWeight=true`, each bucket's effective
+                // weight gets multiplied by _onlineAttendanceWeight(total_players),
+                // so small Online events (<250 players) contribute at 0.2×
+                // while big events count at 0.8×. Major sources omit this
+                // flag — their source-weight (3.0×) already encodes quality
+                // and all regionals are >1000 players anyway.
+                const applyAttendance = Boolean(src.applyAttendanceWeight)
+                    && typeof window !== 'undefined'
+                    && typeof window._onlineAttendanceWeight === 'function';
                 for (const r of src.rows) {
                     if (!r) continue;
                     const archRaw = String(r.archetype || '');
@@ -6137,7 +6159,12 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                         const parsed = dateRaw ? Date.parse(dateRaw) : NaN;
                         if (Number.isFinite(parsed)) bucketDates.set(k, parsed);
                     }
-                    bucketSourceWeight.set(k, sourceWeight);
+                    if (!bucketEffectiveWeight.has(k)) {
+                        const attMult = applyAttendance
+                            ? window._onlineAttendanceWeight(r.total_players)
+                            : 1.0;
+                        bucketEffectiveWeight.set(k, sourceWeight * attMult);
+                    }
                 }
             }
 
@@ -6148,7 +6175,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 matching.push({
                     cards,
                     dateMs: bucketDates.get(k),
-                    sourceWeight: bucketSourceWeight.get(k) || 1.0,
+                    effectiveWeight: bucketEffectiveWeight.get(k) || 1.0,
                 });
             }
             if (matching.length === 0) return empty;
@@ -6156,13 +6183,13 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             const sums = new Map();
             const weights = new Map();
             const presence = new Map();
-            for (const { cards, dateMs, sourceWeight } of matching) {
+            for (const { cards, dateMs, effectiveWeight } of matching) {
                 let recency = 1.0;
                 if (useRecency && Number.isFinite(dateMs)) {
                     const ageDays = Math.max(0, Math.floor((todayMs - dateMs) / 86400000));
                     recency = _recencyWeight(ageDays);
                 }
-                const w = recency * sourceWeight;
+                const w = recency * effectiveWeight;
                 for (const [cn, avg] of cards) {
                     sums.set(cn, (sums.get(cn) || 0) + avg * w);
                     weights.set(cn, (weights.get(cn) || 0) + w);
@@ -6387,7 +6414,14 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             //   - both CSVs empty                             → fallback to baselineShare.
             //   - card present in deckCards but not in either source  → keeps baselineShare.
             const todayMs = Date.now();
-            const SOURCE_WEIGHT_MAJOR = 1.5;
+            // W3 Phase 1 — Major regional source weight raised from 1.5×
+            // to 3.0× so Day-2 lists from real majors dominate over
+            // Online tournament data (which is much noisier and contains
+            // many small-event lists). Online is unchanged at 1.0× as
+            // baseline; per-event attendance weight (0.8 / 0.2) further
+            // modulates Online buckets in _aceSpecConditionalAvgsMulti
+            // and _aggregateWeightedSource.
+            const SOURCE_WEIGHT_MAJOR = 3.0;
             const SOURCE_WEIGHT_ONLINE = 1.0;
             const _stripPriceTag = (s) => String(s || '')
                 .replace(/\d+(?:[.,]\d+)?\$\d+(?:[.,]\d+)?€.*$/u, '')
@@ -6414,8 +6448,14 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                             onlineRowsRaw = window.filterRowsByDateFrom(onlineRowsRaw, _windowFrom);
                             devLog(`[Consistency][DateWindow] Online rows ${beforeN} → ${onlineRowsRaw.length} (cutoff ${_windowFrom})`);
                         }
+                        // Pass _onlineAttendanceWeight so per-tournament
+                        // weighting (0.8/0.2 based on total_players ≥ 250)
+                        // applies. Major call below intentionally omits
+                        // this — Major rows lack total_players and all
+                        // regionals are large anyway.
                         onlineAgg = _aggregateWeightedSource(
-                            onlineRowsRaw, currentArchetype, SOURCE_WEIGHT_ONLINE, todayMs, null
+                            onlineRowsRaw, currentArchetype, SOURCE_WEIGHT_ONLINE, todayMs, null,
+                            undefined, window._onlineAttendanceWeight
                         );
                     } catch (e) {
                         devLog('[Consistency][Recency] Online dated source failed:', e);
@@ -7436,6 +7476,9 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                         rows: onlineRowsRaw,
                         sourceWeight: SOURCE_WEIGHT_ONLINE,
                         archetypeFieldNormalizer: null,
+                        // W3 Phase 1 — Online buckets get per-event
+                        // attendance weight on top of source weight.
+                        applyAttendanceWeight: true,
                     });
                 }
                 const _majorRowsForCond = window.currentMetaTournamentCardsData;
@@ -7444,6 +7487,8 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                         rows: _majorRowsForCond,
                         sourceWeight: SOURCE_WEIGHT_MAJOR,
                         archetypeFieldNormalizer: _stripPriceTag,
+                        // Major rows have no total_players column; relying
+                        // solely on source-weight (3.0×) is intended.
                     });
                 }
                 _aceSpecCondResult = _condSources.length > 0

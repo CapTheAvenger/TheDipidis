@@ -433,6 +433,7 @@ SYNC_PATTERNS = [
     "limitless_online_decks_matchups.csv",
     # Labs Major Tournaments  →  Meta Call Predictor 2.0 Mode B
     "labs_tournament_decks.csv",
+    "labs_tournament_matchups.csv",  # PR #199 — per-archetype matchup matrix (3:1 weight blend over online)
     "labs_tournaments.json",
     # Scraper state files — list of tournament IDs each scraper has
     # already processed. Synced back to data/ so the next CI run can

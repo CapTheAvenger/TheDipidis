@@ -290,12 +290,28 @@ def _get_scraper() -> Any:
 
 def safe_fetch_html(url: str, timeout: int = 15, retries: int = 2, retry_delay: float = 1.0, quiet: bool = False) -> str:
     """Zentraler HTML Fetcher mit Cloudflare-Bypass und exponentiellem Backoff.
-    quiet=True unterdrückt das finale WARNING-Log (z.B. wenn ein Fallback folgt)."""
+    quiet=True unterdrückt das finale WARNING-Log (z.B. wenn ein Fallback folgt).
+
+    Two-stage strategy:
+      1. cloudscraper with Chrome impersonation (long-standing default)
+      2. curl_cffi with full Chrome120 TLS-fingerprint impersonation
+         as fallback when stage 1 exhausts retries. curl_cffi matches
+         the JA3 hash + TLS extensions of a real Chrome browser, which
+         survives Cloudflare's stricter bot-detection escalations that
+         occasionally trip cloudscraper. Observed 2026-05-24 on
+         labs.limitlesstcg.com — a weekly run produced 0 deck rows
+         despite the deck-list scrape having worked hours earlier the
+         same day. curl_cffi is graceful-optional: if not installed,
+         the function returns "" exactly like before (no behavior change
+         in the happy path).
+    """
     scraper = _get_scraper()
     delay = retry_delay
+    last_status = None
     for attempt in range(1, retries + 2):
         try:
             resp = scraper.get(url, timeout=timeout)
+            last_status = resp.status_code
             # Rate-limit / overload: back off longer before retry
             if resp.status_code in (429, 503):
                 retry_after = int(resp.headers.get('Retry-After', delay * 3))
@@ -316,6 +332,37 @@ def safe_fetch_html(url: str, timeout: int = 15, retries: int = 2, retry_delay: 
                     logger.debug("Fetch failed after %s attempts for %s: %s", retries + 1, url, e)
                 else:
                     logger.warning("Fetch failed after %s attempts for %s: %s", retries + 1, url, e)
+
+    # cloudscraper exhausted retries → try curl_cffi as last-resort bypass.
+    fallback_html = _curl_cffi_fetch(url, timeout=timeout, quiet=quiet)
+    if fallback_html:
+        logger.info("curl_cffi fallback succeeded for %s (cloudscraper got %s)", url, last_status)
+        return fallback_html
+    return ""
+
+
+def _curl_cffi_fetch(url: str, timeout: int = 15, quiet: bool = False) -> str:
+    """Fallback fetcher using curl_cffi with Chrome120 TLS-fingerprint
+    impersonation. Returns "" on failure or when the library is not
+    installed (graceful no-op)."""
+    try:
+        from curl_cffi import requests as cf_requests  # type: ignore
+    except ImportError:
+        return ""
+    try:
+        resp = cf_requests.get(
+            url,
+            impersonate='chrome120',
+            timeout=timeout,
+            allow_redirects=True,
+        )
+        if resp.status_code == 200:
+            return resp.text
+        if not quiet:
+            logger.debug("curl_cffi fallback got HTTP %s for %s", resp.status_code, url)
+    except Exception as e:
+        if not quiet:
+            logger.debug("curl_cffi fallback errored for %s: %s", url, e)
     return ""
 
 def fetch_page_bs4(url: str, timeout: int = 15, retries: int = 2) -> Optional[Any]:

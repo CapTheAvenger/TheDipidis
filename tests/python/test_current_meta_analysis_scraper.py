@@ -40,7 +40,8 @@ class _FakeCardDB:
         return None
 
 
-def _deck(tid: str, archetype: str, date: str, cards: list, name: str = "") -> dict:
+def _deck(tid: str, archetype: str, date: str, cards: list, name: str = "",
+          total_players: int = 0) -> dict:
     """Helper — assemble a single Meta-Live deck dict matching what
     `_fetch_meta_live_decklist` returns after the merge."""
     return {
@@ -51,6 +52,7 @@ def _deck(tid: str, archetype: str, date: str, cards: list, name: str = "") -> d
         "tournament_id": tid,
         "tournament_date": date,
         "tournament_name": name,
+        "total_players": total_players,
     }
 
 
@@ -125,3 +127,50 @@ class TestBuildDatedRowsFromMetaLive:
 
     def test_empty_input_returns_empty_list(self):
         assert build_dated_rows_from_meta_live([], _FakeCardDB()) == []
+
+    def test_total_players_propagated_from_deck_to_row(self):
+        # W3 Phase 0 — every output row carries the tournament's
+        # total_players (parsed upstream from "Nth of TOTAL").
+        decks = [
+            _deck("T1", "X", "2026-04-04", [
+                {"name": "C", "count": 1, "set_code": "S", "set_number": "1"},
+            ], total_players=300),
+        ]
+        rows = build_dated_rows_from_meta_live(decks, _FakeCardDB())
+        assert len(rows) == 1
+        assert rows[0]["total_players"] == 300
+
+    def test_total_players_max_across_decks_in_same_tournament(self):
+        # Multiple decks in the same (tid, archetype) bucket — total_players
+        # should land at the MAX, robust against the occasional 0 from a
+        # row whose place column was malformed.
+        decks = [
+            _deck("T1", "X", "2026-04-04", [
+                {"name": "C", "count": 1, "set_code": "S", "set_number": "1"},
+            ], total_players=0),
+            _deck("T1", "X", "2026-04-04", [
+                {"name": "C", "count": 1, "set_code": "S", "set_number": "1"},
+            ], total_players=200),
+            _deck("T1", "X", "2026-04-04", [
+                {"name": "C", "count": 1, "set_code": "S", "set_number": "1"},
+            ], total_players=200),
+        ]
+        rows = build_dated_rows_from_meta_live(decks, _FakeCardDB())
+        # 1 bucket × 1 card → 1 row, total_players = 200 (max)
+        assert len(rows) == 1
+        assert rows[0]["total_players"] == 200
+
+    def test_total_players_defaults_to_zero_when_missing(self):
+        # Backwards-compat — a deck dict that pre-dates the field still
+        # produces a valid row, total_players = 0 (which the frontend
+        # filter treats as 'unknown, skip').
+        decks = [
+            _deck("T1", "X", "2026-04-04", [
+                {"name": "C", "count": 1, "set_code": "S", "set_number": "1"},
+            ]),
+        ]
+        # Strip the field to simulate a legacy caller
+        del decks[0]["total_players"]
+        rows = build_dated_rows_from_meta_live(decks, _FakeCardDB())
+        assert len(rows) == 1
+        assert rows[0]["total_players"] == 0

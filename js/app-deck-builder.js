@@ -4385,6 +4385,33 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             return Math.max(1, cityLeagueFallback, inferredDeckCount, ...explicitTotals);
         }
 
+        // W3 Phase 0 — Online tournament attendance signal.
+        //
+        // Each row carries `total_players` (parsed upstream from the
+        // "Nth of TOTAL" text in the per-deck history row — free signal,
+        // no extra HTTP fetch). Phase 0 only PLUMBS the field through;
+        // Phase 1 consumes it as a per-bucket attendance weight
+        // (≥ threshold → 0.8, < threshold → 0.2) so small online events
+        // still contribute (rogue-deck detection) but with reduced
+        // influence.
+        //
+        // Threshold is settable via window so tests / dev can override.
+        // Reference: docs/audit/deck-builder-consistency/08-w3-refactor-plan.md
+        if (typeof window.ONLINE_ATTENDANCE_TIER_THRESHOLD === 'undefined') {
+            window.ONLINE_ATTENDANCE_TIER_THRESHOLD = 250;
+        }
+        function _onlineAttendanceWeight(totalPlayers) {
+            const threshold = Number(window.ONLINE_ATTENDANCE_TIER_THRESHOLD) || 250;
+            const tp = parseInt(totalPlayers, 10) || 0;
+            // 0 = unknown (pre-Phase-0 scrapes) → treated as small, the
+            // conservative-low bucket. Once the scraper re-runs and
+            // populates total_players, real values dominate.
+            return tp >= threshold ? 0.8 : 0.2;
+        }
+        if (typeof window !== 'undefined') {
+            window._onlineAttendanceWeight = _onlineAttendanceWeight;
+        }
+
         // Lazy-load Limitless dated tournament rows (per-tournament breakdown
         // of the same Online events that current_meta_card_data.csv aggregates
         // by `meta` bucket). Cached on window after first call.  Used by the
@@ -4401,6 +4428,11 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             window._onlineTournamentDatedPromise = (async () => {
                 try {
                     const rows = await loadCSV('online_tournament_dated_cards.csv');
+                    // Phase 0 — load all rows, no drop-filter. Attendance
+                    // weighting is applied at the per-bucket aggregation
+                    // step in Phase 1 (so small online events still
+                    // contribute to rogue-deck detection at reduced
+                    // weight, instead of being silently excluded).
                     window.onlineTournamentDatedRows = Array.isArray(rows) ? rows : [];
                 } catch (e) {
                     devLog('[OnlineTournamentDated] Could not load dated CSV:', e);

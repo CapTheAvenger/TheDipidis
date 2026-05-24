@@ -1221,6 +1221,8 @@
             if (!raw) {
                 try {
                     raw = await loadCSV('online_tournament_dated_cards.csv');
+                    // W3 Phase 0 — load all rows, no drop-filter.
+                    // Attendance weighting moves to Phase 1.
                     if (typeof window !== 'undefined') window._datedTournamentRowsRaw = raw || [];
                 } catch (e) {
                     if (typeof devLog === 'function') devLog('[Current Meta] Dated rows load failed:', e);

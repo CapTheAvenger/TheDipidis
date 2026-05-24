@@ -783,6 +783,11 @@ def apply_format_window_to_scraper_settings(format_window_path: str,
         lo['set'] = current_set
 
     cma_lo = settings.setdefault('current_meta_analysis', {}).setdefault('sources', {}).setdefault('limitless_online', {})
+    # Capture the previous format BEFORE writing the new one — needed to
+    # decide whether this is a rotation (= old data must be wiped) or
+    # the very first sync (= no rotation, no wipe).
+    old_cma_format = cma_lo.get('format_filter') or ''
+    cma_rotation_detected = bool(old_cma_format) and old_cma_format != current_set
     if cma_lo.get('format_filter') != current_set:
         changes.append(f"current_meta_analysis.sources.limitless_online.format_filter {cma_lo.get('format_filter')!r} → {current_set!r}")
         cma_lo['format_filter'] = current_set
@@ -791,6 +796,55 @@ def apply_format_window_to_scraper_settings(format_window_path: str,
     if cma_t.get('start_date') != in_person_de:
         changes.append(f"current_meta_analysis.sources.tournaments.start_date {cma_t.get('start_date')!r} → {in_person_de!r}")
         cma_t['start_date'] = in_person_de
+
+    # ── Current-meta rotation reset ──────────────────────────────────
+    # When format_filter just changed (e.g. PFL → CRI for the M5 ENG
+    # release), the existing current-meta data files still hold the
+    # rotated-out format's decks. Truncate them to header-only so the
+    # next scraper run produces a clean new-format snapshot instead of
+    # mixing CRI rows with PFL leftovers. No past-snapshot for current-
+    # meta — the cycle is short and the aggregated CSV doesn't preserve
+    # per-tournament history past the next scrape (unlike city-league,
+    # which DOES snapshot past data because its window spans months).
+    if cma_rotation_detected:
+        truncated_cma: List[str] = []
+        for fname in (
+            'current_meta_card_data.csv',
+            'online_tournament_dated_cards.csv',
+        ):
+            fpath = os.path.join(data_dir, fname)
+            if not os.path.isfile(fpath):
+                continue
+            try:
+                with open(fpath, 'r', encoding='utf-8-sig', newline='') as f:
+                    header = f.readline()
+                if not header:
+                    continue
+                with open(fpath, 'w', encoding='utf-8-sig', newline='') as f:
+                    f.write(header)
+                truncated_cma.append(fname)
+            except OSError as e:
+                print(f"[Update Sets] ! could not truncate {fname}: {e}")
+        if truncated_cma:
+            changes.append(
+                f"current-meta CSVs truncated to header (rotated-out "
+                f"{old_cma_format!r} data cleared, fresh {current_set!r} "
+                f"scrape to follow): {truncated_cma}"
+            )
+
+        # Reset the labs.limitlesstcg.com de-dup file so the new format's
+        # tournaments get re-scraped from scratch. The labs path uses
+        # this state file to skip tournaments it has already processed;
+        # carrying old IDs over a rotation would leave the new format
+        # silently un-scraped if any tournament IDs collided.
+        cma_scraped_path = os.path.join(data_dir, 'current_meta_scraped_tournaments.json')
+        try:
+            with open(cma_scraped_path, 'w', encoding='utf-8') as f:
+                json.dump({'scraped_tournament_ids': []}, f, indent=2)
+                f.write('\n')
+            changes.append("current_meta_scraped_tournaments.json reset to empty")
+        except OSError as e:
+            print(f"[Update Sets] ! could not reset current_meta_scraped_tournaments.json: {e}")
 
     if not changes:
         print("[Update Sets] ✓ Scraper settings already in sync with format_window.json")

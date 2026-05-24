@@ -75,6 +75,37 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      - name: Probe labs.* reachability (diagnostic)
+        # 2026-05-24 weekly runs at 13:17 + 16:42 UTC both produced
+        # empty labs_tournament_decks.csv. This step logs whether
+        # cloudscraper AND curl_cffi can each reach labs.limitlesstcg.com
+        # so a maintainer can read the run-log and tell which Tier
+        # failed (and whether escalating to a real-browser fallback is
+        # warranted).
+        run: |
+          set +e
+          python - <<'PYEOF'
+          import sys
+          # cloudscraper probe
+          try:
+              import cloudscraper
+              cs = cloudscraper.create_scraper(browser={'browser':'chrome','platform':'windows','mobile':False})
+              r = cs.get('https://labs.limitlesstcg.com/', timeout=15)
+              print(f'[diag] cloudscraper: HTTP {r.status_code}, {len(r.text)} bytes')
+          except Exception as e:
+              print(f'[diag] cloudscraper: EXCEPTION {type(e).__name__}: {e}')
+          # curl_cffi probe (Tier 3 fallback installed by PR #201)
+          try:
+              from curl_cffi import requests as cf
+              r = cf.get('https://labs.limitlesstcg.com/', impersonate='chrome120', timeout=15)
+              print(f'[diag] curl_cffi (chrome120): HTTP {r.status_code}, {len(r.text)} bytes')
+          except ImportError:
+              print('[diag] curl_cffi NOT INSTALLED (requirements.txt probably cached)')
+          except Exception as e:
+              print(f'[diag] curl_cffi: EXCEPTION {type(e).__name__}: {e}')
+          PYEOF
+          exit 0  # diagnostic, never fail the workflow
+
       # Seed backend/core/data/ from the project-root data/ folder.
       #
       # Locally, scrapers READ from backend/core/data/ and the

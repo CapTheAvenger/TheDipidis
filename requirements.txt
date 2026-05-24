@@ -5,6 +5,7 @@ lxml>=4.9.0,<6
 selenium>=4.15.0,<5
 selenium-stealth>=1.0.6,<2
 cloudscraper>=1.2.71,<2
+curl_cffi>=0.7.0,<1   # Fallback fetcher with Chrome TLS-fingerprint impersonation
 
 # Data processing
 pandas>=2.0.0,<3

@@ -291,6 +291,28 @@ jobs:
           # (matchup CSV is gracefully optional in Meta Call).
           exit 0
 
+      - name: Sync labs output to data/ (post-scraper)
+        # prepare_card_data.py's SYNC_PATTERNS step runs IN the loop
+        # above, BEFORE the labs scraper. So the labs CSVs that labs
+        # writes to backend/core/data/ never get copied to data/ at
+        # sync time. This explicit step picks them up. Used the 2026-05-24
+        # 22:36 UTC run as evidence: scraper wrote 268 deck rows + 6773
+        # matchup rows to backend/core/data/, but neither file appeared
+        # in the commit because the sync had already finished by then.
+        run: |
+          set +e
+          mkdir -p data
+          for f in labs_tournament_decks.csv labs_tournament_matchups.csv labs_tournaments.json; do
+              if [ -f "backend/core/data/$f" ]; then
+                  cp "backend/core/data/$f" "data/$f"
+                  sz=$(stat -c%s "data/$f")
+                  echo "  ✓ synced $f ($sz B)"
+              else
+                  echo "  ✗ skip $f (not in backend/core/data/)"
+              fi
+          done
+          exit 0
+
       - name: Bump version
         run: |
           chmod +x bump-version.sh

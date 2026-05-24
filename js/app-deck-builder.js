@@ -5183,6 +5183,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                     if (!e || !e.card) return false;
                     if (e.card._isPinned) return false;
                     if (e.card._isSkeletonLocked) return false;
+                    if (e.card._isEnergyBudgetAllocated) return false;
                     if (!(e.count > 1)) return false; // keep at least 1 copy
                     return Number.isFinite(e.card._lrmRemainder);
                 })
@@ -6248,7 +6249,12 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 : (s => s);
 
             // Build per-(tournament_id, archetype) buckets — one bucket
-            // per distinct Major Day-2 deck snapshot.
+            // per distinct Major Day-2 deck snapshot. Energy-type rows
+            // (basic + special) are EXCLUDED at the row level — they
+            // go through Phase 3's Energy-Budget allocator (LRM-based
+            // sum-rounded distribution) instead of the 4-of skeleton
+            // pin. Phase 2 handles structural Pokémon and consistent
+            // trainer counts; energies are a different beast.
             const buckets = new Map();
             for (const r of majorRows) {
                 if (!r) continue;
@@ -6258,6 +6264,8 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 const tid = r.tournament_id || '';
                 const cn = String(r.card_name || '').trim().toLowerCase();
                 if (!tid || !cn) continue;
+                const typeRaw = String(r.type || '').toLowerCase().trim();
+                if (/\b(basic|special)\s*energy\b/.test(typeRaw)) continue;
                 const avgRaw = parseFloat(String(r.average_count || '0').replace(',', '.'));
                 if (!Number.isFinite(avgRaw) || avgRaw <= 0) continue;
                 const k = `${tid}|${archNorm}`;
@@ -6314,6 +6322,119 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             return skeleton;
         }
         if (typeof window !== 'undefined') window._detectStructuralSkeleton = _detectStructuralSkeleton;
+
+        // ────────────────────────────────────────────────────────────
+        // W3 Phase 3 — ENERGY-BUDGET (replaces per-energy rounding)
+        //
+        // Allocates basic + special energy counts via TOTAL-budget LRM
+        // distribution instead of per-card Math.round(avg). The old
+        // per-card approach under-allocated when several energies had
+        // avgs just below .5 — the audit's canonical regression was:
+        //
+        //   Fighting 4.44 + Rocky 3.43 = 7.87 total avg
+        //   per-card round: 4 + 3 = 7  ← deck-doctrine corridor minimum
+        //                              ← but the data says 8
+        //   round(sum) + LRM:
+        //     budget = clamp(round(7.87), 7, 11) = 8
+        //     floor:  Fighting 4, Rocky 3 → baseline 7
+        //     fracs:  Fighting 0.44, Rocky 0.43
+        //     +1 to Fighting (largest frac)
+        //     result: Fighting 5 + Rocky 3 = 8  ✓ matches recent meta lists
+        //
+        // For Lucario+MaxBelt (TEF-POR data):
+        //   Fighting 9.50 + Rocky 1.95 = 11.45
+        //   budget = clamp(round(11.45), 7, 11) = 11
+        //   floor: 9 + 1 = 10, remaining = 1
+        //   +1 to Rocky (0.95 > 0.50 frac)
+        //   result: Fighting 9 + Rocky 2 = 11  ✓
+        //
+        // Doctrine corridor [7, 11] still applies — Phase 3 just makes
+        // the rounding inside that window deterministic and
+        // total-correct. Below 7 we cap at 7 (modern minimum); above
+        // 11 we cap at 11 (over-energy audit elsewhere catches that).
+        //
+        // Pre-conditions for Phase 3 to fire:
+        //   - condResult.bucketCount >= 3   (need ACE-SPEC matched buckets)
+        //   - At least one energy card has a conditional avg with
+        //     presence >= 3
+        //   - Sum of qualifying avgs >= 6.5  (= same "data too thin"
+        //     guard that EnergyFloor uses)
+        // When any guard fails, returns null and Stage 1 / EnergyFloor
+        // fall back to per-card rounding (existing behavior).
+        // ────────────────────────────────────────────────────────────
+        const ENERGY_CORRIDOR_MIN = 7;
+        const ENERGY_CORRIDOR_MAX = 11;
+        const ENERGY_DATA_FLOOR = 6.5;
+        function _allocateEnergyBudget(deckCards, conditionalAvgs, isEnergyCardEntry) {
+            if (!Array.isArray(deckCards) || deckCards.length === 0) return null;
+            if (!conditionalAvgs || typeof conditionalAvgs.get !== 'function') return null;
+            const isEnergy = typeof isEnergyCardEntry === 'function'
+                ? isEnergyCardEntry
+                : () => false;
+
+            // Collect candidate energies — basic + special. Dedupe by
+            // card_name so variant prints (different set codes) don't
+            // double-count. Keep the highest-score variant per name
+            // since downstream pushCard expects one entry per logical
+            // card.
+            const byName = new Map();
+            for (const c of deckCards) {
+                if (!c || !isEnergy(c)) continue;
+                const cn = String(c.card_name || '').trim().toLowerCase();
+                if (!cn) continue;
+                const stat = conditionalAvgs.get(cn);
+                if (!stat || !Number.isFinite(stat.avg) || stat.avg <= 0) continue;
+                if (stat.presence < 3) continue;  // small-sample guard
+                const existing = byName.get(cn);
+                if (!existing || (c.consistencyScore || 0) > (existing.card.consistencyScore || 0)) {
+                    byName.set(cn, { card: c, avg: stat.avg, count: 0, frac: 0 });
+                }
+            }
+            const items = Array.from(byName.values());
+            if (items.length === 0) return null;
+
+            const totalAvg = items.reduce((s, it) => s + it.avg, 0);
+            if (totalAvg < ENERGY_DATA_FLOOR) return null;  // data too thin
+
+            // budget = round(totalAvg) clamped to doctrine corridor
+            const budget = Math.max(ENERGY_CORRIDOR_MIN,
+                Math.min(ENERGY_CORRIDOR_MAX, Math.round(totalAvg)));
+
+            // baseline = sum of floor(avg) per item
+            let baseline = 0;
+            for (const it of items) {
+                it.count = Math.floor(it.avg);
+                it.frac = it.avg - it.count;
+                baseline += it.count;
+            }
+            let remaining = budget - baseline;
+
+            // Negative remaining = budget < baseline (e.g. very-high
+            // total like 12 → clamp to 11 < 12 baseline). Trim from
+            // smallest-frac first (least confident in the rounded-up
+            // count).
+            if (remaining < 0) {
+                const sortedAsc = items.slice().sort((a, b) => a.frac - b.frac);
+                for (let i = 0; i < -remaining && i < sortedAsc.length; i++) {
+                    if (sortedAsc[i].count > 0) {
+                        sortedAsc[i].count -= 1;
+                    }
+                }
+            } else if (remaining > 0) {
+                // LRM redistribution: largest fractional remainder first
+                const sortedDesc = items.slice().sort((a, b) => b.frac - a.frac);
+                for (let i = 0; i < remaining && i < sortedDesc.length; i++) {
+                    sortedDesc[i].count += 1;
+                }
+            }
+
+            return {
+                placements: items.map(it => ({ card: it.card, count: it.count })),
+                totalAvg,
+                budget,
+            };
+        }
+        if (typeof window !== 'undefined') window._allocateEnergyBudget = _allocateEnergyBudget;
 
         async function autoCompleteConsistency(source, rarityMode, options) {
             if (source !== 'cityLeague' && source !== 'currentMeta' && source !== 'pastMeta') return;
@@ -7850,6 +7971,65 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             }
 
             // ==========================================
+            // 0c. STAGE 0c — ENERGY-BUDGET (W3 Phase 3)
+            //
+            // Sum-rounded LRM distribution for basic + special energies,
+            // replacing per-card Math.round() rounding that under-
+            // allocated when several energies sat just below .5 (the
+            // Cynthia+UnfairStamp 4.44+3.43=7.87→7 regression). Runs
+            // BEFORE Stage 1 so per-card rounding never touches energy
+            // cards that got a budget allocation.
+            //
+            // Pre-conditions (any failure → fallback to per-card via
+            // Stage 1 / EnergyFloor / EnergyCeiling):
+            //   - aceSpecSlotCard exists (need ACE-SPEC for conditional)
+            //   - condResult.bucketCount >= 3 (matched buckets gate)
+            //   - >=1 energy card has presence >= 3 in those buckets
+            //   - sum of qualifying avgs >= 6.5 (existing thin-data guard)
+            //
+            // Marked cards (`_isEnergyBudgetAllocated = true`) bypass:
+            //   - Stage 1 / Stage 2 per-card rounding (deterministic count
+            //     already placed)
+            //   - LRM trim loop (don't claw back budgeted energies)
+            //   - EnergyFloor bump (already at corridor target)
+            // ==========================================
+            const _isEnergyCardEntry = (c) => {
+                if (!c) return false;
+                if (isBasicEnergyCardEntry(c)) return true;
+                const t = String(c.type || c.card_type || '').toLowerCase().trim();
+                return /\bspecial\s*energy\b/.test(t);
+            };
+            let _energyBudgetResult = null;
+            if (aceSpecSlotCard
+                && _aceSpecCondResult
+                && _aceSpecCondResult.bucketCount >= 3
+                && _aceSpecCondResult.conditionalAvgs.size > 0) {
+                _energyBudgetResult = _allocateEnergyBudget(
+                    deckCards, _aceSpecCondResult.conditionalAvgs, _isEnergyCardEntry
+                );
+                if (_energyBudgetResult && Array.isArray(_energyBudgetResult.placements)) {
+                    const _seenEnergy = new Set();
+                    let _eAlloc = 0;
+                    for (const p of _energyBudgetResult.placements) {
+                        if (currentTotal >= 60) break;
+                        if (!p || !p.card || p.count <= 0) continue;
+                        const nm = String(p.card.card_name || '').trim().toLowerCase();
+                        if (!nm || _seenEnergy.has(nm)) continue;
+                        if (p.card._isPinned) continue;  // user pin already placed
+                        _seenEnergy.add(nm);
+                        p.card._isEnergyBudgetAllocated = true;
+                        const legalMax = p.card._legalMax || getLegalMaxCopies(p.card.card_name, p.card);
+                        const placed = isBasicEnergyCardEntry(p.card)
+                            ? p.count
+                            : Math.min(p.count, legalMax);
+                        pushCard(p.card, placed, '[Consistency][Stage0c-EnergyBudget]');
+                        _eAlloc += placed;
+                    }
+                    devLog(`[Consistency][EnergyBudget] totalAvg=${_energyBudgetResult.totalAvg.toFixed(2)} → budget=${_energyBudgetResult.budget} → placed=${_eAlloc} via LRM`);
+                }
+            }
+
+            // ==========================================
             // 2. STUFE 1 (Core: consistencyScore >= 75)
             // Meta-boosted + trending cards can exceed 100
             //
@@ -7867,6 +8047,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 if (isAceSpecCard(card)) return; // Ace Spec haben wir schon
                 if (card._isPinned) return;      // Stage 0 schon erledigt
                 if (card._isSkeletonLocked) return; // Stage 0b schon erledigt
+                if (card._isEnergyBudgetAllocated) return; // Stage 0c schon erledigt
 
                 // Deck-wide Radiant limit
                 if (isRadiantPokemon(card.card_name)) {
@@ -7930,6 +8111,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 if (isAceSpecCard(card)) return;
                 if (card._isPinned) return; // Stage 0 schon erledigt
                 if (card._isSkeletonLocked) return; // Stage 0b schon erledigt
+                if (card._isEnergyBudgetAllocated) return; // Stage 0c schon erledigt
                 if (consistencyDeck.some(entry => entry.card.card_name === card.card_name)) return; // Schon im Deck?
 
                 // Deck-wide Radiant limit

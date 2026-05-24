@@ -92,6 +92,8 @@ class TestParseHistoryRow:
         assert row["score"] == "11 - 1 - 0"
         assert row["deck_slug_id"] == "cynthia-garchomp-ex/dl-99"
         assert "/decks/cynthia-garchomp-ex/dl-99" in row["list_url"]
+        # W3 Phase 0 — total_players parsed from "Nth of TOTAL" pattern
+        assert row["total_players"] == 374
 
     def test_data_time_converted_to_europe_berlin(self):
         # Limitless's data-time is a UTC ms-epoch; the visible date is
@@ -195,6 +197,47 @@ class TestParseHistoryRow:
     def test_short_row_returns_none(self):
         row = self._parse("<tr><td>only one cell</td></tr>")
         assert row is None
+
+    def test_total_players_extracted_from_various_place_formats(self):
+        # Different ordinal forms, all with player counts in the place text.
+        for place_text, expected in [
+            ("1st of 374", 374),
+            ("12th of 100", 100),
+            ("1ST OF 2140", 2140),  # uppercase ordinal
+            ("3rd of 8", 8),  # small online event
+            ("250th of 250", 250),  # last place
+        ]:
+            row = self._parse(f"""
+                <tr>
+                  <td>player</td>
+                  <td><a href="/tournament/x">T</a></td>
+                  <td>02. Mai 2026</td>
+                  <td>{place_text}</td>
+                  <td>5 - 0 - 0</td>
+                  <td><a href="/decks/foo/bar">L</a></td>
+                </tr>
+            """)
+            assert row is not None, f"failed on place_text={place_text!r}"
+            assert row["total_players"] == expected, (
+                f"place_text={place_text!r}: expected {expected}, got {row['total_players']}"
+            )
+
+    def test_total_players_zero_when_no_place_text(self):
+        # A row with no place column → total_players defaults to 0
+        # so downstream Online-≥N-players filter excludes it (= unknown
+        # attendance is treated conservatively).
+        row = self._parse("""
+            <tr>
+              <td>player</td>
+              <td><a href="/tournament/x">T</a></td>
+              <td>02. Mai 2026</td>
+              <td>---</td>
+              <td>5 - 0 - 0</td>
+              <td><a href="/decks/foo/bar">L</a></td>
+            </tr>
+        """)
+        assert row is not None
+        assert row["total_players"] == 0
 
     def test_modern_limitless_markup(self):
         # Mid-2026 Limitless changed the per-deck URL pattern from

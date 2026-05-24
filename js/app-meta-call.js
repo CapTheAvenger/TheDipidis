@@ -596,6 +596,10 @@ window.MetaCall = (function () {
       } catch (_e) {
         _datedCardsRowsRaw = [];
       }
+      // W3 Phase 0 — load all rows, no drop-filter. Phase 1 applies
+      // attendance weighting at the per-tournament aggregation step
+      // (≥ threshold → 0.8, < threshold → 0.2) so small events still
+      // contribute to rogue-deck detection.
     }
     const cutoff = _effectiveDateCutoff();
     if (!cutoff || !/^\d{4}-\d{2}-\d{2}$/.test(cutoff)) {

@@ -43,6 +43,11 @@ DATED_CSV_FIELDNAMES = [
     "total_decks_in_archetype", "percentage_in_archetype",
     "set_code", "set_name", "set_number", "rarity", "type",
     "image_url", "is_ace_spec",
+    # W3 Phase 0 — Online attendance threshold filter. Populated from
+    # the tournament's /standings player-row count. 0 = unknown (pre-
+    # extension data), downstream code treats 0 as "skip this row" when
+    # the user has the Online ≥ N players filter active.
+    "total_players",
 ]
 DATED_META_LABEL = "Online Dated"
 
@@ -184,10 +189,19 @@ def parse_history_row(tr) -> Optional[Dict[str, str]]:
 
     place = ""
     score = ""
+    total_players = 0
     for c in cells:
         t = c.get_text(" ", strip=True)
-        if re.match(r"^\d+(st|nd|rd|th)\s+of\s+\d+", t, re.IGNORECASE):
+        m = re.match(r"^\d+(?:st|nd|rd|th)\s+of\s+(\d+)", t, re.IGNORECASE)
+        if m:
             place = t
+            # "1st of 374" → tournament's total player count = 374. Same
+            # field downstream Online-≥N-players filter reads. Free signal
+            # — no extra HTTP fetch needed.
+            try:
+                total_players = int(m.group(1))
+            except ValueError:
+                pass
         elif re.match(r"^\d+\s*-\s*\d+\s*-\s*\d+\s*$", t):
             score = t
 
@@ -232,6 +246,7 @@ def parse_history_row(tr) -> Optional[Dict[str, str]]:
         "score": score,
         "deck_slug_id": deck_slug_id,
         "list_url": list_url,
+        "total_players": total_players,
     }
 
 
@@ -265,10 +280,16 @@ def aggregate_tournament_archetype(
     tournament_id: str, tournament_name: str, tournament_date: str,
     archetype: str, decks: List[List[Dict[str, Any]]],
     card_db,
+    total_players: int = 0,
 ) -> List[Dict[str, Any]]:
     """``decks`` is a list of card-lists (one entry per appearance of
     ``archetype`` at this tournament). Returns one row per unique card
-    matching the dated-CSV schema."""
+    matching the dated-CSV schema.
+
+    ``total_players`` is the tournament's full standings size (= number
+    of registered players, NOT just the players who ran this archetype).
+    Defaults to 0 for callers that haven't been threaded yet; downstream
+    Online-≥N-players filter treats 0 as 'unknown, skip'."""
     if not decks:
         return []
     total_decks = len(decks)
@@ -335,6 +356,7 @@ def aggregate_tournament_archetype(
             "type": type_,
             "image_url": image_url,
             "is_ace_spec": "",
+            "total_players": int(total_players or 0),
         })
     return out
 

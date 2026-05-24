@@ -189,7 +189,8 @@ def _load_settings() -> Dict[str, Any]:
 # META LIVE (play.limitlesstcg.com)
 # ============================================================
 def _fetch_meta_live_decklist(list_url: str, deck_name: str, deck_slug: str, card_db: CardDatabaseLookup, timeout: int,
-                              tournament_id: str = "", tournament_date: str = "", tournament_name: str = "") -> dict:
+                              tournament_id: str = "", tournament_date: str = "", tournament_name: str = "",
+                              total_players: int = 0) -> dict:
     """
     Extrahiert Deckliste von play.limitlesstcg.com mit 100%iger Set-Genauigkeit.
     Priorität:
@@ -271,6 +272,7 @@ def _fetch_meta_live_decklist(list_url: str, deck_name: str, deck_slug: str, car
             "tournament_id": tournament_id,
             "tournament_date": tournament_date,
             "tournament_name": tournament_name,
+            "total_players": int(total_players or 0),
         }
     return None
 
@@ -359,6 +361,7 @@ def scrape_limitless_online(settings: dict, card_db: CardDatabaseLookup) -> list
                     r.get("tournament_id", ""),
                     r.get("tournament_date", ""),
                     r.get("tournament_name", ""),
+                    int(r.get("total_players") or 0),
                 )
                 for r in history_rows
             ]
@@ -397,12 +400,20 @@ def build_dated_rows_from_meta_live(
             "tournament_date": date,
             "archetype": archetype,
             "decks": [],
+            "total_players": 0,
         })
         # Update the human-readable tournament_name if a later deck has
         # a richer string (some rows leave it blank when the parser hits
         # an archived row).
         if deck.get("tournament_name") and not bucket["tournament_name"]:
             bucket["tournament_name"] = deck["tournament_name"]
+        # total_players: take MAX across decks in the same tournament —
+        # every deck in this tournament should report the same value
+        # (parsed from "Nth of TOTAL" on each player's history row).
+        # Use max to be robust to occasional 0/missing values.
+        bucket["total_players"] = max(
+            bucket["total_players"], int(deck.get("total_players") or 0)
+        )
         bucket["decks"].append(deck.get("cards") or [])
 
     out: list = []
@@ -410,6 +421,7 @@ def build_dated_rows_from_meta_live(
         out.extend(aggregate_tournament_archetype(
             b["tournament_id"], b["tournament_name"], b["tournament_date"],
             b["archetype"], b["decks"], card_db,
+            total_players=b["total_players"],
         ))
     return out
 

@@ -116,6 +116,57 @@ def _extract_tournament_type(img_src: str) -> str:
     return filename if filename in TOURNAMENT_TYPES else 'other'
 
 
+def _load_cached_tournament_index() -> List[Dict]:
+    """Load labs_tournaments.json — the previously-scraped tournament
+    index. Used as a fallback when the live index page is blocked."""
+    cache_path = os.path.join(_get_data_dir(), 'labs_tournaments.json')
+    if not os.path.isfile(cache_path):
+        return []
+    try:
+        with open(cache_path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        if not isinstance(data, list):
+            return []
+        # Defensive: ensure each row has the keys downstream expects
+        out: List[Dict] = []
+        for row in data:
+            if not isinstance(row, dict):
+                continue
+            tid = str(row.get('tournament_id') or '').strip()
+            if not tid:
+                continue
+            out.append({
+                'tournament_id'  : tid,
+                'tournament_name': row.get('tournament_name', f'Tournament {tid}'),
+                'tournament_date': row.get('tournament_date', ''),
+                'tournament_type': row.get('tournament_type', 'regional'),
+                'country'        : row.get('country', ''),
+            })
+        return out
+    except (json.JSONDecodeError, OSError) as e:
+        logger.warning("Could not load cached tournament index: %s", e)
+        return []
+
+
+def _filter_cached_tournaments(
+    rows: List[Dict],
+    from_date: Optional[datetime],
+    tournament_types: Optional[List[str]],
+) -> List[Dict]:
+    """Re-apply the date/type filters scrape_tournament_list normally
+    enforces — needed when the cached list bypasses them."""
+    out: List[Dict] = []
+    for r in rows:
+        if tournament_types and r.get('tournament_type') not in tournament_types:
+            continue
+        if from_date:
+            d = _parse_date(r.get('tournament_date') or '')
+            if d and d < from_date:
+                continue
+        out.append(r)
+    return out
+
+
 def scrape_tournament_list(
     from_date: Optional[datetime] = None,
     tournament_types: Optional[List[str]] = None,
@@ -123,11 +174,24 @@ def scrape_tournament_list(
     """
     Fetch the main labs page and return a list of tournament dicts.
     Applies date and type filters when provided.
+
+    Cache-fallback (2026-05-24): when the index fetch returns nothing
+    (Cloudflare bot-detect blocking the root page), load the previously
+    persisted labs_tournaments.json so per-tournament pages can still
+    be attempted. This lets the scraper keep refreshing decks for known
+    tournaments even when Limitless temporarily blocks the index page.
     """
     logger.info("Fetching tournament index from %s", BASE_URL)
     soup = fetch_page_bs4(BASE_URL)
     if not soup:
-        logger.error("Failed to fetch tournament list – check connectivity")
+        logger.error("Failed to fetch tournament list — index page blocked")
+        cached = _load_cached_tournament_index()
+        if cached:
+            logger.warning(
+                "Falling back to %d cached tournaments from labs_tournaments.json",
+                len(cached),
+            )
+            return _filter_cached_tournaments(cached, from_date, tournament_types)
         return []
 
     tournaments: List[Dict] = []

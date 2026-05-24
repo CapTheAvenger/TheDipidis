@@ -4861,6 +4861,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 if (card._isAceSpec) continue;
                 if (card._isPinned) continue;
                 if (card._isSkeletonLocked) continue;
+                if (card._isPokemonLineLocked) continue;
                 if ((card.consistencyScore || 0) >= 75) continue;
                 const deps = card._dependencies;
                 if (!deps || (deps.size != null ? deps.size === 0 : Object.keys(deps).length === 0)) continue;
@@ -4886,7 +4887,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 // tier first.
                 const bumpCandidates = entries
                     .filter(e => e && e.card)
-                    .filter(e => !e.card._isAceSpec && !e.card._isPinned && !e.card._isSkeletonLocked)
+                    .filter(e => !e.card._isAceSpec && !e.card._isPinned && !e.card._isSkeletonLocked && !e.card._isPokemonLineLocked)
                     .filter(e => {
                         const eDeps = e.card._dependencies;
                         if (!eDeps) return true;
@@ -4956,6 +4957,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 if (card._isAceSpec) continue;
                 if (card._isPinned) continue;
                 if (card._isSkeletonLocked) continue;
+                if (card._isPokemonLineLocked) continue;
                 if ((card.consistencyScore || 0) >= 75) continue;
                 const nm = String(card.card_name || '').trim().toLowerCase();
                 const synergy = cooccurrenceMap.get(nm);
@@ -4995,7 +4997,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 // synergy (would just create another stranded card).
                 const bumpCandidates = entries
                     .filter(e => e && e.card)
-                    .filter(e => !e.card._isAceSpec && !e.card._isPinned && !e.card._isSkeletonLocked)
+                    .filter(e => !e.card._isAceSpec && !e.card._isPinned && !e.card._isSkeletonLocked && !e.card._isPokemonLineLocked)
                     .filter(e => {
                         const otherNm = String(e.card.card_name || '').trim().toLowerCase();
                         const otherSyn = cooccurrenceMap.get(otherNm);
@@ -5185,6 +5187,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                     if (e.card._isSkeletonLocked) return false;
                     if (e.card._isEnergyBudgetAllocated) return false;
                     if (e.card._isStadiumBudgetAllocated) return false;
+                    if (e.card._isPokemonLineLocked) return false;
                     if (!(e.count > 1)) return false; // keep at least 1 copy
                     return Number.isFinite(e.card._lrmRemainder);
                 })
@@ -5251,7 +5254,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                     .filter(e => e.count >= 1)
                     .filter(e => e.card._techCounterMaxCount == null)
                     .filter(e => (e.card.consistencyScore || 0) < 75)
-                    .filter(e => !e.card._isAceSpec && !e.card._isPinned && !e.card._isSkeletonLocked)
+                    .filter(e => !e.card._isAceSpec && !e.card._isPinned && !e.card._isSkeletonLocked && !e.card._isPokemonLineLocked)
                     .sort((a, b) => (a.card._lrmRemainder || 0) - (b.card._lrmRemainder || 0));
 
                 // CORE bump candidates: CORE-tier, has positive remainder,
@@ -5413,7 +5416,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                     .filter(e => !isEnergyEntry(e))
                     .filter(e => (e.card.consistencyScore || 0) < 75)
                     .filter(e => e.card._techCounterMaxCount == null)
-                    .filter(e => !e.card._isAceSpec && !e.card._isPinned && !e.card._isSkeletonLocked)
+                    .filter(e => !e.card._isAceSpec && !e.card._isPinned && !e.card._isSkeletonLocked && !e.card._isPokemonLineLocked)
                     .filter(e => e.count >= 1)
                     .sort((a, b) => {
                         // TECH first (lower tier order), then by remainder asc.
@@ -5524,7 +5527,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 // format rule and shape the deck's energy economy.
                 const energyDemoteCandidates = entries
                     .filter(e => isEnergyEntry(e))
-                    .filter(e => !e.card._isAceSpec && !e.card._isPinned && !e.card._isSkeletonLocked)
+                    .filter(e => !e.card._isAceSpec && !e.card._isPinned && !e.card._isSkeletonLocked && !e.card._isPokemonLineLocked)
                     .filter(e => {
                         const cn = String(e.card.card_name || '').toLowerCase().trim();
                         const stat = conditionalAvgs.get(cn);
@@ -6522,6 +6525,76 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             return { placements, totalAvg, budget };
         }
         if (typeof window !== 'undefined') window._allocateStadiumBudget = _allocateStadiumBudget;
+
+        // ────────────────────────────────────────────────────────────
+        // W3 Phase 5 — POKEMON-LINE-LOCK
+        //
+        // Locks per-Pokémon counts to round(conditional_avg) for cards
+        // with sufficient bucket presence in the Major Day-2 aggregate.
+        // The "evolution line ratio" emerges naturally: if Riolu avg=4
+        // and Lucario ex avg=3, both get locked to those counts and
+        // downstream LRM trims/Stage-1 bumps can't disturb the 4-3 line.
+        //
+        // Soft vs Phase 2 skeleton:
+        //   - Phase 2 catches structural staples (≥90% inclusion AND
+        //     avg ≥3.5) and pins at 4-of regardless of conditional avg.
+        //   - Phase 5 catches every Pokémon with presence ≥ 3 and
+        //     locks at round(conditional_avg) — even fractional
+        //     evolutions like Mega Lucario ex avg=3.02 → 3 copies.
+        //
+        // Examples — Lucario+MaxBelt (TEF-POR data):
+        //   Riolu          3.55 → 4 copies  (already Phase 2 skeleton)
+        //   Mega Lucario   3.02 → 3 copies  (Phase 5 picks up — below 3.5 skel threshold)
+        //   Solrock        2.71 → 3 copies  (Phase 5)
+        //   Lunatone       2.00 → 2 copies  (Phase 5)
+        //   Makuhita       2.00 → 2 copies  (Phase 5)
+        //   Hariyama       2.00 → 2 copies  (Phase 5)
+        //   Meowth ex      1.00 → 1 copy    (Phase 5)
+        //   → 4-3 Riolu/Mega line + 3-2 Solrock/Lunatone + 2-2 Makuhita/Hariyama
+        //     + 1 Meowth all locked.
+        //
+        // Pre-conditions:
+        //   - Card has type matching POKEMON_TYPE_RE
+        //   - Card has conditional-avg presence >= 3
+        //   - round(avg) >= 1 (skip 0-rounded entries)
+        //   - Card not already placed by Stage 0/0b/0c/0d
+        // ────────────────────────────────────────────────────────────
+        // Negative lookahead on "basic" so "Basic" (Pokémon) matches
+        // but "Basic Energy" / "Basic energy" does not — both share the
+        // same word prefix. Stadium type is also excluded for the same
+        // reason (Stadium-Budget owns those).
+        const POKEMON_TYPE_RE = /^(basic(?!\s+energy)|stage [12]|mega|v[-\s]?union|vstar|vmax|tera)\b/i;
+        const NON_POKEMON_TYPE_RE = /\b(special\s*energy|stadium|supporter|item|tool)\b/i;
+        function _lockPokemonLines(deckCards, conditionalAvgs) {
+            if (!Array.isArray(deckCards) || deckCards.length === 0) return null;
+            if (!conditionalAvgs || typeof conditionalAvgs.get !== 'function') return null;
+
+            // Dedupe by card_name across variant prints. Keep the
+            // highest-score variant per name so pushCard picks a
+            // sensible print.
+            const byName = new Map();
+            for (const c of deckCards) {
+                if (!c) continue;
+                const t = String(c.type || c.card_type || '').trim();
+                if (!POKEMON_TYPE_RE.test(t)) continue;
+                if (NON_POKEMON_TYPE_RE.test(t)) continue;
+                const cn = String(c.card_name || '').trim().toLowerCase();
+                if (!cn) continue;
+                const stat = conditionalAvgs.get(cn);
+                if (!stat || !Number.isFinite(stat.avg) || stat.avg <= 0) continue;
+                if (stat.presence < 3) continue;
+                const count = Math.round(stat.avg);
+                if (count < 1) continue;
+                const existing = byName.get(cn);
+                if (!existing || (c.consistencyScore || 0) > (existing.card.consistencyScore || 0)) {
+                    byName.set(cn, { card: c, avg: stat.avg, count });
+                }
+            }
+            const placements = Array.from(byName.values());
+            if (placements.length === 0) return null;
+            return { placements };
+        }
+        if (typeof window !== 'undefined') window._lockPokemonLines = _lockPokemonLines;
 
         async function autoCompleteConsistency(source, rarityMode, options) {
             if (source !== 'cityLeague' && source !== 'currentMeta' && source !== 'pastMeta') return;
@@ -8164,6 +8237,60 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             }
 
             // ==========================================
+            // 0e. STAGE 0e — POKEMON-LINE-LOCK (W3 Phase 5)
+            //
+            // Per-Pokémon round(conditional_avg) lock for every basic/
+            // stage-1/stage-2/mega/V-family card with presence ≥ 3 in
+            // the Major Day-2 buckets. Skipped when the card was already
+            // placed by:
+            //   - User pin / tech-slot (Stage 0)
+            //   - Skeleton-lock (Stage 0b) — covers the ≥3.5 avg + 90%
+            //     inclusion staples like Riolu
+            //   - Energy or Stadium budgets (Stages 0c/0d) — Pokémon
+            //     never overlap with these but the guard is cheap
+            //
+            // Same condResult.bucketCount >= 3 gate as Phases 3/4 — needs
+            // a Major-sourced ACE-conditional aggregate to be meaningful.
+            // ==========================================
+            let _pokemonLineLockResult = null;
+            if (aceSpecSlotCard
+                && _aceSpecCondResult
+                && _aceSpecCondResult.bucketCount >= 3
+                && _aceSpecCondResult.conditionalAvgs.size > 0) {
+                _pokemonLineLockResult = _lockPokemonLines(deckCards, _aceSpecCondResult.conditionalAvgs);
+                if (_pokemonLineLockResult && Array.isArray(_pokemonLineLockResult.placements)) {
+                    const _seenPoke = new Set();
+                    let _pAlloc = 0;
+                    const _lockedDiag = [];
+                    for (const p of _pokemonLineLockResult.placements) {
+                        if (currentTotal >= 60) break;
+                        if (!p || !p.card || p.count <= 0) continue;
+                        if (isAceSpecCard(p.card)) continue;
+                        if (p.card._isPinned) continue;
+                        if (p.card._isSkeletonLocked) continue;
+                        // (energies/stadiums excluded by type regex already)
+                        const nm = String(p.card.card_name || '').trim().toLowerCase();
+                        if (!nm || _seenPoke.has(nm)) continue;
+                        _seenPoke.add(nm);
+                        // Deck-wide Radiant guard — at most 1 across the deck
+                        if (typeof isRadiantPokemon === 'function' && isRadiantPokemon(p.card.card_name)) {
+                            if (radiantAdded) continue;
+                            radiantAdded = true;
+                        }
+                        p.card._isPokemonLineLocked = true;
+                        const legalMax = p.card._legalMax || getLegalMaxCopies(p.card.card_name, p.card);
+                        const placed = Math.min(p.count, legalMax);
+                        pushCard(p.card, placed, '[Consistency][Stage0e-PokémonLineLock]');
+                        _pAlloc += placed;
+                        _lockedDiag.push(`${nm}×${placed}`);
+                    }
+                    if (_pAlloc > 0) {
+                        devLog(`[Consistency][PokémonLineLock] locked ${_lockedDiag.length} line(s), ${_pAlloc} cards: ${_lockedDiag.join(', ')}`);
+                    }
+                }
+            }
+
+            // ==========================================
             // 2. STUFE 1 (Core: consistencyScore >= 75)
             // Meta-boosted + trending cards can exceed 100
             //
@@ -8183,6 +8310,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 if (card._isSkeletonLocked) return; // Stage 0b schon erledigt
                 if (card._isEnergyBudgetAllocated) return; // Stage 0c schon erledigt
                 if (card._isStadiumBudgetAllocated) return; // Stage 0d schon erledigt
+                if (card._isPokemonLineLocked) return; // Stage 0e schon erledigt
 
                 // Deck-wide Radiant limit
                 if (isRadiantPokemon(card.card_name)) {
@@ -8248,6 +8376,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 if (card._isSkeletonLocked) return; // Stage 0b schon erledigt
                 if (card._isEnergyBudgetAllocated) return; // Stage 0c schon erledigt
                 if (card._isStadiumBudgetAllocated) return; // Stage 0d schon erledigt
+                if (card._isPokemonLineLocked) return; // Stage 0e schon erledigt
                 if (consistencyDeck.some(entry => entry.card.card_name === card.card_name)) return; // Schon im Deck?
 
                 // Deck-wide Radiant limit

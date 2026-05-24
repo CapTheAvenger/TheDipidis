@@ -645,6 +645,115 @@ expect(
     false,
 );
 
+// ──────────────────────────────────────────────────────────────────────
+// W3 Phase 5 — POKÉMON-LINE-LOCK VERIFICATION
+//
+// Replicates _lockPokemonLines against the TEF-POR Lucario+MaxBelt
+// buckets. Every Pokémon (Basic/Stage 1/Stage 2/Mega/V-family) with
+// presence ≥ 3 in matched buckets gets locked to round(avg). The
+// evolution line ratios emerge from per-card rounding — no explicit
+// line grouping needed.
+// ──────────────────────────────────────────────────────────────────────
+const POKEMON_TYPE_RE = /^(basic(?!\s+energy)|stage [12]|mega|v[-\s]?union|vstar|vmax|tera)\b/i;
+
+// Rebuild per-card type-aware bucket aggregate from the raw majorDated
+// rows, since the multi-source `resultMulti` doesn't carry types and
+// the Major chunk does have them.
+const _typeByCard = new Map();
+const _majorBuckets = new Map();
+for (const r of majorDated) {
+    const archNorm = stripPriceTag(r.archetype || '').toLowerCase().trim();
+    if (archNorm !== fixture._meta.archetype.toLowerCase()) continue;
+    const tid = r.tournament_id || '';
+    const cn = String(r.card_name || '').trim().toLowerCase();
+    if (!tid || !cn) continue;
+    const avg = parseFloat(String(r.average_count || '0').replace(',', '.'));
+    if (!Number.isFinite(avg) || avg <= 0) continue;
+    if (!_majorBuckets.has(tid)) _majorBuckets.set(tid, new Map());
+    _majorBuckets.get(tid).set(cn, avg);
+    if (!_typeByCard.has(cn)) _typeByCard.set(cn, String(r.type || '').trim());
+}
+const _majorMatching = [...(_majorBuckets.values())]
+    .filter(b => b.has(fixture._meta.ace_spec_pick.toLowerCase()));
+
+const _majorOnlyCondAvgs = new Map();
+for (const b of _majorMatching) {
+    for (const [cn, avg] of b) {
+        if (cn === fixture._meta.ace_spec_pick.toLowerCase()) continue;
+        if (!_majorOnlyCondAvgs.has(cn)) _majorOnlyCondAvgs.set(cn, { p: 0, s: 0 });
+        const s = _majorOnlyCondAvgs.get(cn);
+        s.p += 1; s.s += avg;
+    }
+}
+const _condForLock = new Map();
+for (const [cn, s] of _majorOnlyCondAvgs) {
+    _condForLock.set(cn, { avg: s.s / s.p, presence: s.p });
+}
+
+function lockPokemonLines(condAvgs, typeMap) {
+    const placements = new Map();
+    for (const [cn, stat] of condAvgs) {
+        const t = typeMap.get(cn) || '';
+        if (!POKEMON_TYPE_RE.test(t)) continue;
+        if (stat.presence < 3) continue;
+        const count = Math.round(stat.avg);
+        if (count < 1) continue;
+        placements.set(cn, { count, avg: stat.avg });
+    }
+    return placements;
+}
+
+const lockedLines = lockPokemonLines(_condForLock, _typeByCard);
+console.log(`\n✓ Pokémon-line-lock: ${lockedLines.size} card(s) locked`);
+for (const [cn, p] of lockedLines) console.log(`  ${p.count}x ${cn} (avg ${p.avg.toFixed(2)})`);
+
+expect(
+    "W3-P5: Riolu locked at 4 (round 3.55)",
+    lockedLines.get('riolu')?.count === 4,
+    true,
+);
+expect(
+    "W3-P5: Mega Lucario ex locked at 3 (round 3.02 — below Phase 2 skeleton threshold)",
+    lockedLines.get('mega lucario ex')?.count === 3,
+    true,
+);
+expect(
+    "W3-P5: Riolu/Mega ratio = 4-3 line",
+    lockedLines.get('riolu')?.count === 4 && lockedLines.get('mega lucario ex')?.count === 3,
+    true,
+);
+expect(
+    "W3-P5: Makuhita/Hariyama ratio = 2-2 line (Stage 1 + Basic, equal counts)",
+    lockedLines.get('makuhita')?.count === 2 && lockedLines.get('hariyama')?.count === 2,
+    true,
+);
+expect(
+    "W3-P5: Solrock/Lunatone ratio = 3-2 line",
+    lockedLines.get('solrock')?.count === 3 && lockedLines.get('lunatone')?.count === 2,
+    true,
+);
+expect(
+    "W3-P5: Fighting Energy NOT locked (Basic Energy ≠ Basic Pokémon — negative lookahead)",
+    lockedLines.has('fighting energy'),
+    false,
+);
+expect(
+    "W3-P5: Gravity Mountain NOT locked (Stadium, routed to Phase 4)",
+    lockedLines.has('gravity mountain'),
+    false,
+);
+expect(
+    "W3-P5: Ultra Ball / Lillie's Determination NOT locked (Item/Supporter)",
+    lockedLines.has('ultra ball') || lockedLines.has("lillie's determination"),
+    false,
+);
+const totalLockedCopies = [...lockedLines.values()].reduce((s, p) => s + p.count, 0);
+expect(
+    `W3-P5: Total locked Pokémon copies (got ${totalLockedCopies}) in sane range [12, 22]`,
+    totalLockedCopies >= 12 && totalLockedCopies <= 22,
+    true,
+);
+
 // ── Report ────────────────────────────────────────────────────────────
 console.log('═══════════════════════════════════════════════════════════');
 console.log('TEST RESULTS');

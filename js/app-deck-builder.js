@@ -5184,6 +5184,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                     if (e.card._isPinned) return false;
                     if (e.card._isSkeletonLocked) return false;
                     if (e.card._isEnergyBudgetAllocated) return false;
+                    if (e.card._isStadiumBudgetAllocated) return false;
                     if (!(e.count > 1)) return false; // keep at least 1 copy
                     return Number.isFinite(e.card._lrmRemainder);
                 })
@@ -6250,11 +6251,10 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
 
             // Build per-(tournament_id, archetype) buckets — one bucket
             // per distinct Major Day-2 deck snapshot. Energy-type rows
-            // (basic + special) are EXCLUDED at the row level — they
-            // go through Phase 3's Energy-Budget allocator (LRM-based
-            // sum-rounded distribution) instead of the 4-of skeleton
-            // pin. Phase 2 handles structural Pokémon and consistent
-            // trainer counts; energies are a different beast.
+            // (basic + special) and Stadium rows are EXCLUDED at the
+            // row level — energies go through Phase 3's Energy-Budget,
+            // stadiums through Phase 4's Stadium-Budget. Phase 2 owns
+            // structural Pokémon and consistent trainer counts only.
             const buckets = new Map();
             for (const r of majorRows) {
                 if (!r) continue;
@@ -6266,6 +6266,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 if (!tid || !cn) continue;
                 const typeRaw = String(r.type || '').toLowerCase().trim();
                 if (/\b(basic|special)\s*energy\b/.test(typeRaw)) continue;
+                if (/\bstadium\b/.test(typeRaw)) continue;
                 const avgRaw = parseFloat(String(r.average_count || '0').replace(',', '.'));
                 if (!Number.isFinite(avgRaw) || avgRaw <= 0) continue;
                 const k = `${tid}|${archNorm}`;
@@ -6435,6 +6436,92 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             };
         }
         if (typeof window !== 'undefined') window._allocateEnergyBudget = _allocateEnergyBudget;
+
+        // ────────────────────────────────────────────────────────────
+        // W3 Phase 4 — STADIUM-BUDGET
+        //
+        // Parallel to Phase 3's Energy-Budget but for Stadium cards,
+        // with corridor [0, 3] instead of [7, 11]. Modern competitive
+        // lists run 0–3 stadium copies total; rounding the SUM (not
+        // per-card) keeps multi-stadium decks honest when each individual
+        // stadium's avg is sub-1.0 but the deck genuinely runs a stadium
+        // line.
+        //
+        // Example — Lucario+MaxBelt (TEF-POR data):
+        //   Gravity Mountain 1.55 + Team Rocket's Watchtower 1.00 = 2.55
+        //   budget = clamp(round(2.55), 0, 3) = 3
+        //   floor: 1 + 1 = 2, remaining = 1
+        //   LRM: Gravity frac 0.55 > Watchtower frac 0.00
+        //   result: Gravity 2 + Watchtower 1 = 3
+        //
+        // Example — single stadium deck:
+        //   Gravity Mountain 1.55 alone → budget = clamp(round(1.55), 0, 3) = 2
+        //   → 2 copies (matches per-card round; budget is a no-op
+        //     simplification when there's only one stadium card).
+        //
+        // No data-floor guard like Phase 3's 6.5 — corridor min is 0
+        // (some decks run no stadium at all). If totalAvg rounds to 0,
+        // we return null so Stage 1 doesn't push 0-count entries.
+        // ────────────────────────────────────────────────────────────
+        const STADIUM_CORRIDOR_MIN = 0;
+        const STADIUM_CORRIDOR_MAX = 3;
+        function _allocateStadiumBudget(deckCards, conditionalAvgs, isStadiumCardEntry) {
+            if (!Array.isArray(deckCards) || deckCards.length === 0) return null;
+            if (!conditionalAvgs || typeof conditionalAvgs.get !== 'function') return null;
+            const isStadium = typeof isStadiumCardEntry === 'function'
+                ? isStadiumCardEntry
+                : () => false;
+
+            const byName = new Map();
+            for (const c of deckCards) {
+                if (!c || !isStadium(c)) continue;
+                const cn = String(c.card_name || '').trim().toLowerCase();
+                if (!cn) continue;
+                const stat = conditionalAvgs.get(cn);
+                if (!stat || !Number.isFinite(stat.avg) || stat.avg <= 0) continue;
+                if (stat.presence < 3) continue;
+                const existing = byName.get(cn);
+                if (!existing || (c.consistencyScore || 0) > (existing.card.consistencyScore || 0)) {
+                    byName.set(cn, { card: c, avg: stat.avg, count: 0, frac: 0 });
+                }
+            }
+            const items = Array.from(byName.values());
+            if (items.length === 0) return null;
+
+            const totalAvg = items.reduce((s, it) => s + it.avg, 0);
+            if (totalAvg <= 0) return null;
+            const budget = Math.max(STADIUM_CORRIDOR_MIN,
+                Math.min(STADIUM_CORRIDOR_MAX, Math.round(totalAvg)));
+            if (budget === 0) return null;  // round(0.4) = 0 → don't push 0-count cards
+
+            let baseline = 0;
+            for (const it of items) {
+                it.count = Math.floor(it.avg);
+                it.frac = it.avg - it.count;
+                baseline += it.count;
+            }
+            let remaining = budget - baseline;
+
+            if (remaining < 0) {
+                const asc = items.slice().sort((a, b) => a.frac - b.frac);
+                for (let i = 0; i < -remaining && i < asc.length; i++) {
+                    if (asc[i].count > 0) asc[i].count -= 1;
+                }
+            } else if (remaining > 0) {
+                const desc = items.slice().sort((a, b) => b.frac - a.frac);
+                for (let i = 0; i < remaining && i < desc.length; i++) {
+                    desc[i].count += 1;
+                }
+            }
+
+            // Strip 0-count placements so the caller doesn't pushCard(card, 0).
+            const placements = items
+                .filter(it => it.count > 0)
+                .map(it => ({ card: it.card, count: it.count }));
+
+            return { placements, totalAvg, budget };
+        }
+        if (typeof window !== 'undefined') window._allocateStadiumBudget = _allocateStadiumBudget;
 
         async function autoCompleteConsistency(source, rarityMode, options) {
             if (source !== 'cityLeague' && source !== 'currentMeta' && source !== 'pastMeta') return;
@@ -8030,6 +8117,53 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             }
 
             // ==========================================
+            // 0d. STAGE 0d — STADIUM-BUDGET (W3 Phase 4)
+            //
+            // Sum-rounded LRM allocation for stadium cards, corridor
+            // [0, 3]. Parallel to Stage 0c's Energy-Budget. Activates
+            // when the multi-source ACE-conditional aggregate has
+            // sufficient bucket coverage (same guards as Phase 3).
+            //
+            // Without budget allocation, decks with two sub-1.0-avg
+            // stadiums (e.g. Gravity Mountain 0.8 + Watchtower 0.6 →
+            // per-card round 1+1=2, but the deck-total avg 1.4 suggests
+            // just 1 stadium). Budget rounds the total to 1, LRM picks
+            // the higher-frac stadium.
+            // ==========================================
+            const _isStadiumCardEntry = (c) => {
+                if (!c) return false;
+                const t = String(c.type || c.card_type || '').toLowerCase().trim();
+                return /\bstadium\b/.test(t);
+            };
+            let _stadiumBudgetResult = null;
+            if (aceSpecSlotCard
+                && _aceSpecCondResult
+                && _aceSpecCondResult.bucketCount >= 3
+                && _aceSpecCondResult.conditionalAvgs.size > 0) {
+                _stadiumBudgetResult = _allocateStadiumBudget(
+                    deckCards, _aceSpecCondResult.conditionalAvgs, _isStadiumCardEntry
+                );
+                if (_stadiumBudgetResult && Array.isArray(_stadiumBudgetResult.placements)) {
+                    const _seenStadium = new Set();
+                    let _sAlloc = 0;
+                    for (const p of _stadiumBudgetResult.placements) {
+                        if (currentTotal >= 60) break;
+                        if (!p || !p.card || p.count <= 0) continue;
+                        const nm = String(p.card.card_name || '').trim().toLowerCase();
+                        if (!nm || _seenStadium.has(nm)) continue;
+                        if (p.card._isPinned) continue;  // user pin already placed
+                        _seenStadium.add(nm);
+                        p.card._isStadiumBudgetAllocated = true;
+                        const legalMax = p.card._legalMax || getLegalMaxCopies(p.card.card_name, p.card);
+                        const placed = Math.min(p.count, legalMax);
+                        pushCard(p.card, placed, '[Consistency][Stage0d-StadiumBudget]');
+                        _sAlloc += placed;
+                    }
+                    devLog(`[Consistency][StadiumBudget] totalAvg=${_stadiumBudgetResult.totalAvg.toFixed(2)} → budget=${_stadiumBudgetResult.budget} → placed=${_sAlloc} via LRM`);
+                }
+            }
+
+            // ==========================================
             // 2. STUFE 1 (Core: consistencyScore >= 75)
             // Meta-boosted + trending cards can exceed 100
             //
@@ -8048,6 +8182,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 if (card._isPinned) return;      // Stage 0 schon erledigt
                 if (card._isSkeletonLocked) return; // Stage 0b schon erledigt
                 if (card._isEnergyBudgetAllocated) return; // Stage 0c schon erledigt
+                if (card._isStadiumBudgetAllocated) return; // Stage 0d schon erledigt
 
                 // Deck-wide Radiant limit
                 if (isRadiantPokemon(card.card_name)) {
@@ -8112,6 +8247,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 if (card._isPinned) return; // Stage 0 schon erledigt
                 if (card._isSkeletonLocked) return; // Stage 0b schon erledigt
                 if (card._isEnergyBudgetAllocated) return; // Stage 0c schon erledigt
+                if (card._isStadiumBudgetAllocated) return; // Stage 0d schon erledigt
                 if (consistencyDeck.some(entry => entry.card.card_name === card.card_name)) return; // Schon im Deck?
 
                 // Deck-wide Radiant limit

@@ -541,6 +541,110 @@ expect(
     true,
 );
 
+// ──────────────────────────────────────────────────────────────────────
+// W3 Phase 4 — STADIUM-BUDGET VERIFICATION
+//
+// Replicates _allocateStadiumBudget against the multi-source ACE-
+// conditional aggregate. For Lucario+MaxBelt the TEF-POR Major data
+// has Gravity Mountain (~1.55 avg, 100% inc) and Team Rocket's
+// Watchtower (~1.0 avg, 100% inc in MaxBelt-filtered buckets). Sum
+// rounds to 3, distributed LRM to 2+1.
+// ──────────────────────────────────────────────────────────────────────
+const STADIUM_MIN = 0, STADIUM_MAX = 3;
+function isStadiumCardEntry(c) {
+    if (!c) return false;
+    const t = String(c.type || c.card_type || '').toLowerCase().trim();
+    return /\bstadium\b/.test(t);
+}
+function allocateStadiumBudget(deckCards, conditionalAvgs) {
+    if (!Array.isArray(deckCards) || !conditionalAvgs) return null;
+    const byName = new Map();
+    for (const c of deckCards) {
+        if (!isStadiumCardEntry(c)) continue;
+        const cn = String(c.card_name || '').trim().toLowerCase();
+        if (!cn) continue;
+        const stat = conditionalAvgs.get(cn);
+        if (!stat || !Number.isFinite(stat.avg) || stat.avg <= 0) continue;
+        if (stat.presence < 3) continue;
+        if (!byName.has(cn)) byName.set(cn, { card: c, avg: stat.avg, count: 0, frac: 0 });
+    }
+    const items = Array.from(byName.values());
+    if (items.length === 0) return null;
+    const totalAvg = items.reduce((s, it) => s + it.avg, 0);
+    if (totalAvg <= 0) return null;
+    const budget = Math.max(STADIUM_MIN, Math.min(STADIUM_MAX, Math.round(totalAvg)));
+    if (budget === 0) return null;
+    let baseline = 0;
+    for (const it of items) { it.count = Math.floor(it.avg); it.frac = it.avg - it.count; baseline += it.count; }
+    let rem = budget - baseline;
+    if (rem < 0) {
+        const asc = items.slice().sort((a, b) => a.frac - b.frac);
+        for (let i = 0; i < -rem && i < asc.length; i++) if (asc[i].count > 0) asc[i].count -= 1;
+    } else if (rem > 0) {
+        const desc = items.slice().sort((a, b) => b.frac - a.frac);
+        for (let i = 0; i < rem && i < desc.length; i++) desc[i].count += 1;
+    }
+    return {
+        placements: items.filter(it => it.count > 0).map(it => ({ name: it.card.card_name.toLowerCase(), count: it.count })),
+        totalAvg, budget,
+    };
+}
+
+// Build synthetic stadium deck-cards by scanning the conditional aggregate.
+// Cards whose name contains "mountain", "watchtower", "tower", "stadium" etc.
+// (rough heuristic) are tagged type='stadium' so the helper picks them up.
+const _stadiumDeckCards = [];
+for (const [cn, stat] of resultMulti.conditionalAvgs) {
+    // Heuristic for the test fixture (TEF-POR has these two named stadiums).
+    // The real runtime uses the type field from the card metadata, not
+    // name-matching — this is just to drive the verify-baseline replica.
+    if (cn === 'gravity mountain' || cn === "team rocket's watchtower") {
+        _stadiumDeckCards.push({ card_name: cn, type: 'stadium', consistencyScore: 70 });
+    }
+}
+const stadiumBudget = allocateStadiumBudget(_stadiumDeckCards, resultMulti.conditionalAvgs);
+console.log(`\n✓ Stadium-budget allocation: ${stadiumBudget ? `${stadiumBudget.placements.length} stadium(s), totalAvg=${stadiumBudget.totalAvg.toFixed(2)} → budget=${stadiumBudget.budget}` : 'null'}`);
+if (stadiumBudget) for (const p of stadiumBudget.placements) console.log(`  ${p.count}x ${p.name}`);
+
+expect(
+    "W3-P4: Stadium-budget allocator returned a result for Lucario fixture",
+    stadiumBudget !== null,
+    true,
+);
+expect(
+    "W3-P4: Budget capped to corridor [0, 3]",
+    stadiumBudget && stadiumBudget.budget >= 0 && stadiumBudget.budget <= 3,
+    true,
+);
+expect(
+    "W3-P4: Lucario stadium budget = 3 (1.55 + 1.0 = 2.55 → round 3)",
+    stadiumBudget && stadiumBudget.budget === 3,
+    true,
+);
+const gravityPlaced = stadiumBudget && stadiumBudget.placements.find(p => p.name === 'gravity mountain');
+expect(
+    "W3-P4: Gravity Mountain placed at 2 (0.55 frac wins LRM)",
+    gravityPlaced && gravityPlaced.count === 2,
+    true,
+);
+const watchtowerPlaced = stadiumBudget && stadiumBudget.placements.find(p => p.name === "team rocket's watchtower");
+expect(
+    "W3-P4: Team Rocket's Watchtower placed at 1",
+    watchtowerPlaced && watchtowerPlaced.count === 1,
+    true,
+);
+const totalStadium = stadiumBudget ? stadiumBudget.placements.reduce((s, p) => s + p.count, 0) : 0;
+expect(
+    "W3-P4: Sum of stadium placements equals budget (3)",
+    totalStadium === 3,
+    true,
+);
+expect(
+    "W3-P4 hand-off: Gravity Mountain NOT in skeleton (stadiums routed to Phase 4 budget)",
+    skeletonSet.has('gravity mountain'),
+    false,
+);
+
 // ── Report ────────────────────────────────────────────────────────────
 console.log('═══════════════════════════════════════════════════════════');
 console.log('TEST RESULTS');

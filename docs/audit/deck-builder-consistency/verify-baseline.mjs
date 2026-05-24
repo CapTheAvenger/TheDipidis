@@ -341,6 +341,9 @@ const SKELETON_INCLUSION = 0.90;
 const SKELETON_AVG = 3.5;
 const SKELETON_MIN_BUCKETS = 3;
 function detectStructuralSkeleton(majorRows, archetypeKey, aceSpecLower, todayMs) {
+    // Mirrors app-deck-builder.js _detectStructuralSkeleton — energies
+    // (basic + special) are excluded so Phase 3's Energy-Budget owns
+    // them; only structural Pokémon and trainers reach skeleton-lock.
     const skeleton = new Set();
     if (!Array.isArray(majorRows) || majorRows.length === 0) return skeleton;
     const archKey = String(archetypeKey).trim().toLowerCase();
@@ -352,6 +355,8 @@ function detectStructuralSkeleton(majorRows, archetypeKey, aceSpecLower, todayMs
         const tid = r.tournament_id || '';
         const cn = String(r.card_name || '').trim().toLowerCase();
         if (!tid || !cn) continue;
+        const typeRaw = String(r.type || '').toLowerCase().trim();
+        if (/\b(basic|special)\s*energy\b/.test(typeRaw)) continue;
         const avg = parseFloat(String(r.average_count || '0').replace(',', '.'));
         if (!Number.isFinite(avg) || avg <= 0) continue;
         const k = `${tid}|${archNorm}`;
@@ -393,8 +398,10 @@ const skeletonSet = detectStructuralSkeleton(
 console.log(`\n✓ Skeleton-lock detection: ${skeletonSet.size} card(s) qualify as structural skeleton`);
 console.log(`  members: ${[...skeletonSet].join(', ')}`);
 
-// Structural staples that should appear in EVERY POR Lucario list at 4-of:
-const expectedSkeletonStaples = ['riolu', 'fighting energy', 'ultra ball', "lillie's determination"];
+// Structural NON-ENERGY staples that should appear in EVERY POR Lucario
+// list at 4-of. Energies (Fighting Energy, Rocky) are intentionally
+// EXCLUDED from skeleton — Phase 3's Energy-Budget owns them.
+const expectedSkeletonStaples = ['riolu', 'ultra ball', "lillie's determination"];
 for (const card of expectedSkeletonStaples) {
     expect(
         `W3-P2: "${card}" is a structural skeleton card (≥90% inc, ≥3.5 avg)`,
@@ -402,6 +409,11 @@ for (const card of expectedSkeletonStaples) {
         true,
     );
 }
+expect(
+    "W3-P3 hand-off: Fighting Energy NOT in skeleton (energies routed to Phase 3 budget)",
+    skeletonSet.has('fighting energy'),
+    false,
+);
 
 // Variable-count cards that should NOT be skeleton (avg < 3.5 or
 // inclusion < 90%). Poké Pad at avg 3.28 was the original audit case
@@ -419,6 +431,113 @@ expect(
 expect(
     "W3-P2: skeleton size in sane range (3-10 staples for Lucario+MaxBelt)",
     skeletonSet.size >= 3 && skeletonSet.size <= 10,
+    true,
+);
+
+// ──────────────────────────────────────────────────────────────────────
+// W3 Phase 3 — ENERGY-BUDGET VERIFICATION
+//
+// Replicates _allocateEnergyBudget against the multi-source ACE-
+// conditional aggregate. For Lucario+MaxBelt the TEF-POR Major data
+// gives Fighting Energy avg ≈ 9.5 and Rocky Special Energy avg ≈ 1.95.
+// Phase 3 should sum-round to 11 budget and distribute via LRM to
+// Fighting 9 + Rocky 2 (Rocky's 0.95 frac beats Fighting's 0.50 frac
+// for the +1 redistribution slot).
+// ──────────────────────────────────────────────────────────────────────
+const ENERGY_CORRIDOR_MIN = 7;
+const ENERGY_CORRIDOR_MAX = 11;
+const ENERGY_DATA_FLOOR = 6.5;
+const BASIC_ENERGY_NAMES = ['grass energy','fire energy','water energy','lightning energy','psychic energy','fighting energy','darkness energy','metal energy'];
+function isEnergyCardEntry(c) {
+    if (!c) return false;
+    const n = String(c.card_name || '').trim().toLowerCase();
+    if (BASIC_ENERGY_NAMES.includes(n)) return true;
+    const t = String(c.type || c.card_type || '').toLowerCase().trim();
+    return /\b(basic|special)\s*energy\b/.test(t);
+}
+function allocateEnergyBudget(deckCards, conditionalAvgs) {
+    if (!Array.isArray(deckCards) || !conditionalAvgs) return null;
+    const byName = new Map();
+    for (const c of deckCards) {
+        if (!isEnergyCardEntry(c)) continue;
+        const cn = String(c.card_name || '').trim().toLowerCase();
+        if (!cn) continue;
+        const stat = conditionalAvgs.get(cn);
+        if (!stat || !Number.isFinite(stat.avg) || stat.avg <= 0) continue;
+        if (stat.presence < 3) continue;
+        if (!byName.has(cn)) byName.set(cn, { card: c, avg: stat.avg, count: 0, frac: 0 });
+    }
+    const items = Array.from(byName.values());
+    if (items.length === 0) return null;
+    const totalAvg = items.reduce((s, it) => s + it.avg, 0);
+    if (totalAvg < ENERGY_DATA_FLOOR) return null;
+    const budget = Math.max(ENERGY_CORRIDOR_MIN, Math.min(ENERGY_CORRIDOR_MAX, Math.round(totalAvg)));
+    let baseline = 0;
+    for (const it of items) { it.count = Math.floor(it.avg); it.frac = it.avg - it.count; baseline += it.count; }
+    let remaining = budget - baseline;
+    if (remaining < 0) {
+        const asc = items.slice().sort((a, b) => a.frac - b.frac);
+        for (let i = 0; i < -remaining && i < asc.length; i++) if (asc[i].count > 0) asc[i].count -= 1;
+    } else if (remaining > 0) {
+        const desc = items.slice().sort((a, b) => b.frac - a.frac);
+        for (let i = 0; i < remaining && i < desc.length; i++) desc[i].count += 1;
+    }
+    return { placements: items.map(it => ({ name: it.card.card_name.toLowerCase(), count: it.count })), totalAvg, budget };
+}
+
+// Build synthetic deckCards from the conditional aggregate so Energy
+// Budget has cards to look up. We tag a fake type='basic energy' for
+// the basic-name list and 'special energy' for Rocky.
+const _energyDeckCards = [];
+for (const [cn, stat] of resultMulti.conditionalAvgs) {
+    const isBasic = BASIC_ENERGY_NAMES.includes(cn);
+    const isSpecial = /\benergy\b/.test(cn) && !isBasic && stat.presence >= 3;
+    if (isBasic || isSpecial) {
+        _energyDeckCards.push({
+            card_name: cn,
+            type: isBasic ? 'basic energy' : 'special energy',
+            consistencyScore: 80,
+        });
+    }
+}
+const energyBudget = allocateEnergyBudget(_energyDeckCards, resultMulti.conditionalAvgs);
+console.log(`\n✓ Energy-budget allocation: ${energyBudget ? `${energyBudget.placements.length} energy card(s), totalAvg=${energyBudget.totalAvg.toFixed(2)} → budget=${energyBudget.budget}` : 'null (no data)'}`);
+if (energyBudget) {
+    for (const p of energyBudget.placements) console.log(`  ${p.count}x ${p.name}`);
+}
+
+const eBudget = energyBudget;
+expect(
+    "W3-P3: Energy-budget allocator returned a result (TEF-POR Lucario has energy data)",
+    eBudget !== null,
+    true,
+);
+expect(
+    "W3-P3: Budget capped to corridor [7, 11]",
+    eBudget && eBudget.budget >= 7 && eBudget.budget <= 11,
+    true,
+);
+expect(
+    "W3-P3: Lucario+MaxBelt budget = 11 (Fighting 9.5 + Rocky 1.95 = 11.45 → round 11)",
+    eBudget && eBudget.budget === 11,
+    true,
+);
+const fightingPlaced = eBudget && eBudget.placements.find(p => p.name === 'fighting energy');
+expect(
+    "W3-P3: Fighting Energy placed at 9 (floor of 9.5)",
+    fightingPlaced && fightingPlaced.count === 9,
+    true,
+);
+const rockyPlaced = eBudget && eBudget.placements.find(p => p.name === 'rocky fighting energy');
+expect(
+    "W3-P3: Rocky Fighting Energy placed at 2 (0.95 frac wins LRM remainder)",
+    rockyPlaced && rockyPlaced.count === 2,
+    true,
+);
+const totalEnergy = eBudget ? eBudget.placements.reduce((s, p) => s + p.count, 0) : 0;
+expect(
+    "W3-P3: Sum of energy placements equals budget (11)",
+    totalEnergy === 11,
     true,
 );
 

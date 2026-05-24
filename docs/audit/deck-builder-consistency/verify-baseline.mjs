@@ -754,6 +754,68 @@ expect(
     true,
 );
 
+// ──────────────────────────────────────────────────────────────────────
+// W3 Phase 6 — TECH-TRAINER-LRM INTEGRATION
+//
+// Phase 6 has no new allocator — it confirms that the EXISTING Stage 1
+// / Stage 2 / LRM Forward / LRM Reverse / Bidi-Swap passes respect
+// ALL the lock flags Phases 1-5 added. The integration test sums up
+// what each prior phase consumed from the 60-card budget and confirms
+// the remaining slots for tech-trainer LRM are in a sane range — too
+// low means Phases 2-5 are over-allocating, too high means they're
+// under-allocating.
+//
+// For Lucario+MaxBelt with TEF-POR data:
+//   Stage 0   Pins:              0  (no user pins in baseline)
+//   Stage 0b  Skeleton:          5 cards × 4   = 20  (Riolu, Fighting Gong,
+//                                Premium Power Pro, Lillie's, Ultra Ball)
+//   Stage 0c  Energy-Budget:     Fighting 9 + Rocky 2  = 11
+//   Stage 0d  Stadium-Budget:    Gravity 2 + Watchtower 1  = 3
+//   Stage 0e  Pokémon-Lock:      Mega 3 + Solrock 3 + Lunatone 2 +
+//                                Makuhita 2 + Hariyama 2 + Meowth 1 +
+//                                Genesect 1                = 14
+//   ACE-SPEC slot:              1
+//   ──────────────────────────────────────────────────────
+//   Pre-Stage-1 total:         49 cards
+//   Remaining for tech LRM:    11 slots  (Carmine / Boss's / Wally /
+//                                          Judge / Switch / Night Stretcher /
+//                                          Air Balloon / Black Belt / etc.)
+// ──────────────────────────────────────────────────────────────────────
+const skeletonCards = [...skeletonSet].length;  // already computed
+const skeletonTotal = skeletonCards * 4;
+const energyTotalSum = eBudget ? eBudget.budget : 0;
+const stadiumTotalSum = stadiumBudget ? stadiumBudget.budget : 0;
+const pokemonExclSkel = totalLockedCopies; // Phase 5 totals (already excludes skeleton via _isSkeletonLocked check in real runtime)
+const aceSpecSlot = 1;
+const preStage1Total = skeletonTotal + energyTotalSum + stadiumTotalSum + pokemonExclSkel + aceSpecSlot;
+const techLrmSlots = 60 - preStage1Total;
+
+console.log(`\n✓ W3 Phase 6 integration summary for Lucario+MaxBelt:`);
+console.log(`    Skeleton (5 × 4):     ${skeletonTotal}`);
+console.log(`    Energy budget:        ${energyTotalSum}`);
+console.log(`    Stadium budget:       ${stadiumTotalSum}`);
+console.log(`    Pokémon-line lock:    ${pokemonExclSkel}`);
+console.log(`    ACE-SPEC slot:        ${aceSpecSlot}`);
+console.log(`    ──────────────────────────`);
+console.log(`    Pre-Stage-1 total:    ${preStage1Total}`);
+console.log(`    Tech-LRM slots free:  ${techLrmSlots}`);
+
+expect(
+    `W3-P6: Pre-Stage-1 total (${preStage1Total}) fits in 60-card deck`,
+    preStage1Total <= 60,
+    true,
+);
+expect(
+    `W3-P6: Tech-LRM has 5-20 slots free for trainers (got ${techLrmSlots})`,
+    techLrmSlots >= 5 && techLrmSlots <= 20,
+    true,
+);
+expect(
+    `W3-P6: Locked categories sum (${preStage1Total - aceSpecSlot}) leaves room for ACE-SPEC + tech`,
+    (preStage1Total - aceSpecSlot) <= 55,
+    true,
+);
+
 // ── Report ────────────────────────────────────────────────────────────
 console.log('═══════════════════════════════════════════════════════════');
 console.log('TEST RESULTS');

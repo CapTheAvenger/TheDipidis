@@ -1,0 +1,158 @@
+"""Tests for Past Meta brought-share aggregation.
+
+These mirror the JS aggregator that Meta Call's new Past Meta source
+runs in the browser. They lock in the share-derivation contract:
+
+- Per archetype: sum total_decks_in_archetype across all distinct
+  tournaments in the format chunk (deduped on (tournament_id, archetype)).
+- Total field size: sum of those per-archetype counts.
+- Per-archetype share %: 100 * count / total.
+
+Test fixture: data/tournament_cards_data_cards_TEF-POR.csv (4 Day-2 majors,
+1297 tracked decks across 44 archetypes).
+"""
+
+import csv
+import os
+import re
+from collections import defaultdict
+
+import pytest
+
+
+REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+TEF_POR = os.path.join(REPO_ROOT, "data", "tournament_cards_data_cards_TEF-POR.csv")
+SVI_PFL = os.path.join(REPO_ROOT, "data", "tournament_cards_data_cards_SVI-PFL.csv")
+
+# Same regex js/app-deck-builder.js and the Meta Call past-meta loader
+# use to strip price-tag suffixes (e.g. "Alakazam Dudunsparce20.09$13.60€"
+# → "Alakazam Dudunsparce"). Some past-meta chunks carry these suffixes
+# from a historical scraper bug; the aggregator must normalize them or
+# the archetype count explodes.
+_PRICE_TAG_RE = re.compile(r"\d+(?:[.,]\d+)?\$\d+(?:[.,]\d+)?€.*$")
+
+
+def _strip_price_tag(name):
+    return _PRICE_TAG_RE.sub("", name or "").strip()
+
+
+def _aggregate_past_meta_shares(csv_path):
+    """Mirror of the JS aggregator. Returns dict[archetype] -> count."""
+    arch_total = defaultdict(int)
+    seen = set()
+    with open(csv_path, encoding="utf-8-sig") as f:
+        reader = csv.DictReader(f, delimiter=";")
+        for r in reader:
+            arch_clean = _strip_price_tag(r["archetype"])
+            if not arch_clean:
+                continue
+            key = (r["tournament_id"], arch_clean)
+            if key in seen:
+                continue
+            seen.add(key)
+            try:
+                cnt = int(r["total_decks_in_archetype"] or 0)
+            except (ValueError, TypeError):
+                continue
+            if cnt <= 0:
+                continue
+            arch_total[arch_clean] += cnt
+    return dict(arch_total)
+
+
+@pytest.fixture(scope="module")
+def tef_por_shares():
+    assert os.path.isfile(TEF_POR), f"TEF-POR fixture missing: {TEF_POR}"
+    return _aggregate_past_meta_shares(TEF_POR)
+
+
+def test_archetype_count(tef_por_shares):
+    """TEF-POR chunk currently lists 44 distinct archetypes with deck counts > 0."""
+    assert len(tef_por_shares) == 44
+
+
+def test_total_field_size(tef_por_shares):
+    """Sum of per-archetype decks = 1297 (Day-2-qualifying decks across 4 events)."""
+    total = sum(tef_por_shares.values())
+    assert total == 1297
+
+
+def test_dragapult_lead_share(tef_por_shares):
+    """Pure Dragapult is the largest single archetype at 14.96%."""
+    total = sum(tef_por_shares.values())
+    drag_count = tef_por_shares.get("Dragapult")
+    assert drag_count == 194
+    pct = 100 * drag_count / total
+    assert abs(pct - 14.96) < 0.05
+
+
+def test_dragapult_family_combined_share(tef_por_shares):
+    """Dragapult variants combined account for ~37% of the field."""
+    total = sum(tef_por_shares.values())
+    family = [
+        "Dragapult",
+        "Dragapult Dusknoir",
+        "Dragapult Dudunsparce",
+        "Dragapult Blaziken",
+    ]
+    family_total = sum(tef_por_shares.get(a, 0) for a in family)
+    pct = 100 * family_total / total
+    # Tolerate ±1pp drift if scraper ever re-classifies a small subset
+    assert 36 <= pct <= 38, f"Dragapult family {pct:.2f}% out of range"
+
+
+def test_top_archetypes_match_known_meta(tef_por_shares):
+    """Top 10 archetypes by share match the known TEF-POR meta shape."""
+    ranked = sorted(tef_por_shares.items(), key=lambda x: -x[1])
+    top10 = [a for a, _ in ranked[:10]]
+    expected_subset = {
+        "Dragapult",
+        "Raging Bolt Ogerpon",
+        "Rocket's Mewtwo",
+        "N's Zoroark",
+        "Festival Lead",
+    }
+    missing = expected_subset - set(top10)
+    assert not missing, f"Expected archetypes missing from top 10: {missing}"
+
+
+def test_shares_sum_to_100(tef_por_shares):
+    """Per-archetype shares must sum to exactly 100% (modulo float epsilon)."""
+    total = sum(tef_por_shares.values())
+    pct_sum = sum(100 * v / total for v in tef_por_shares.values())
+    assert abs(pct_sum - 100.0) < 0.001
+
+
+def test_no_negative_or_zero_counts(tef_por_shares):
+    """Aggregator must drop 0/negative deck-counts (data hygiene)."""
+    for arch, cnt in tef_por_shares.items():
+        assert cnt > 0, f"{arch} has non-positive count {cnt}"
+
+
+def test_strip_price_tag_basic():
+    """Price-tag regex collapses suffix variants down to the bare archetype."""
+    assert _strip_price_tag("Alakazam Dudunsparce20.09$13.60€") == "Alakazam Dudunsparce"
+    assert _strip_price_tag("Charizard Pidgeot43.03$27.11€") == "Charizard Pidgeot"
+    # Clean strings should pass through unchanged
+    assert _strip_price_tag("Lucario Hariyama") == "Lucario Hariyama"
+    assert _strip_price_tag("Dragapult") == "Dragapult"
+
+
+@pytest.mark.skipif(not os.path.isfile(SVI_PFL), reason="SVI-PFL fixture missing")
+def test_svi_pfl_price_tag_collapses_archetype_count():
+    """SVI-PFL chunk has price-tag-polluted archetypes (~2200 distinct strings
+    pre-clean). With the aggregator's strip, count must drop to a realistic
+    meta size (well under 200 archetypes for a single rotation period).
+    Locks the regression where the past-meta loader didn't strip tags."""
+    shares = _aggregate_past_meta_shares(SVI_PFL)
+    n = len(shares)
+    assert n < 150, f"SVI-PFL archetype count {n} too high — price-tag strip broken?"
+    assert n > 20, f"SVI-PFL archetype count {n} too low — over-collapsed?"
+
+
+@pytest.mark.skipif(not os.path.isfile(SVI_PFL), reason="SVI-PFL fixture missing")
+def test_svi_pfl_no_dollar_signs_in_keys():
+    """After strip, no archetype name may contain $ or € (price-tag residue)."""
+    shares = _aggregate_past_meta_shares(SVI_PFL)
+    polluted = [a for a in shares if "$" in a or "€" in a]
+    assert not polluted, f"Price-tag residue in {len(polluted)} archetype(s): {polluted[:3]}"

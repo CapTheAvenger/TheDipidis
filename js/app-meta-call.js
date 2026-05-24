@@ -35,6 +35,18 @@ window.MetaCall = (function () {
   let _metaCallMode = 'standard';
   let _metaCallModeLastLogKey = null;  // tracked per (majorId + mode) so toggling within the same major re-logs
 
+  // ── Meta Source (Current | Past) ─────────────────────────
+  // Session-scoped, defaults to current. When _metaSource === 'past',
+  // _runPredictor() consumes archetype shares aggregated from the
+  // per-format Major chunk file selected by _pastMetaFormatKey instead
+  // of the live online ladder + labs CSVs. Matchup matrix stays the
+  // current-online proxy (we don't have historical matchup-pair data
+  // scraped) — flagged in the UI when source = past.
+  let _metaSource = 'current';     // 'current' | 'past'
+  let _pastMetaFormatKey = null;   // e.g. 'TEF-POR' when _metaSource = 'past'
+  let _pastMetaAvailableFormats = []; // [{ key, label, maxDate }] sorted newest-first
+  let _pastMetaCachedShares = new Map(); // formatKey -> [{name, share}] memo
+
   // ── Predictor 3.0 — history-aware trend signals ───────────
   let _lastMajorDate     = null; // 'YYYY-MM-DD' — most recent labs tournament_date
   let _historyManifest   = null; // { dates: [...], latest: 'YYYY-MM-DD' } from data/online_share_history/manifest.json
@@ -412,6 +424,146 @@ window.MetaCall = (function () {
   // Load a city_league_archetypes_comparison*.csv and return
   // { normalize(deck) -> share% } using the `new_meta_share` column.
   // Missing file = empty object (feature is opt-in, absence is fine).
+  // ── Past Meta source helpers ──────────────────────────────
+  //
+  // Loads tournament_cards_manifest.json + tournament_cards_data_overview.csv
+  // and builds the list of selectable past-meta formats. Run once at
+  // loadData(); cached on `_pastMetaAvailableFormats`. The currently-
+  // active format (suffix-match against format_window.current_set) is
+  // EXCLUDED — that one is the "current meta" which the default source
+  // already covers.
+  async function _loadPastMetaCatalog() {
+    _pastMetaAvailableFormats = [];
+    let manifest = null;
+    try {
+      const resp = await fetch('data/tournament_cards_manifest.json?t=' + Date.now());
+      if (!resp.ok) return;
+      manifest = await resp.json();
+    } catch (_e) { return; }
+    if (!manifest || !Array.isArray(manifest.meta_keys) || manifest.meta_keys.length === 0) return;
+
+    // current_set suffix is hidden — those chunks belong to the active meta
+    let currentSet = '';
+    try {
+      if (_formatWindow && _formatWindow.current_set) {
+        currentSet = String(_formatWindow.current_set).trim().toUpperCase();
+      }
+    } catch (_e) { /* tolerate */ }
+
+    const dates = manifest.chunk_dates || {};
+    for (const key of manifest.meta_keys) {
+      const upper = String(key || '').trim().toUpperCase();
+      if (!upper) continue;
+      // Suffix-match: 'TEF-CRI' or just 'CRI' is the current set's chunk → skip
+      if (currentSet) {
+        if (upper === currentSet || upper.endsWith('-' + currentSet)) continue;
+      }
+      const chunkFile = `tournament_cards_data_cards_${key}.csv`;
+      const dateInfo = dates[chunkFile] || {};
+      _pastMetaAvailableFormats.push({
+        key,
+        label: key,  // Expanded label resolved at render time via expandPastMetaCode
+        maxDate: dateInfo.max_date || '',
+        minDate: dateInfo.min_date || '',
+      });
+    }
+    _pastMetaAvailableFormats.sort((a, b) => (b.maxDate || '').localeCompare(a.maxDate || ''));
+  }
+
+  // Aggregate brought-shares for a single past-meta format. Returns
+  //   { shares: [{name, count, share}], totalDecks, tournamentCount, dateRange }
+  // or null on load failure / empty data.
+  //
+  // Aggregation contract (locked by tests/python/test_past_meta_aggregation.py):
+  //   For each (tournament_id, archetype) pair: count total_decks_in_archetype
+  //   once (chunk has multiple rows per deck — one per card). Sum across the
+  //   format's tournaments to get per-archetype total. Divide by sum of totals
+  //   for the share %.
+  async function _loadPastMetaShares(formatKey) {
+    if (!formatKey) return null;
+    if (_pastMetaCachedShares.has(formatKey)) return _pastMetaCachedShares.get(formatKey);
+
+    let csvText = null;
+    try {
+      const resp = await fetch(`data/tournament_cards_data_cards_${formatKey}.csv?t=` + Date.now());
+      if (!resp.ok) return null;
+      csvText = await resp.text();
+    } catch (_e) { return null; }
+    if (!csvText) return null;
+
+    const rows = parseCSV(csvText, ';');
+    if (rows.length === 0) return null;
+
+    // Some past-meta chunks have a price-tag suffix concatenated onto
+    // the archetype name (e.g. SVI-PFL: "Alakazam Dudunsparce20.09$13.60€"
+    // — different timestamp = different price = explosion of "distinct"
+    // archetype strings). Strip the tag with the same regex the
+    // deck-builder uses (js/app-deck-builder.js:_stripPriceTag).
+    const stripPriceTag = (s) => String(s || '')
+      .replace(/\d+(?:[.,]\d+)?\$\d+(?:[.,]\d+)?€.*$/u, '')
+      .trim();
+
+    const archTotal = new Map();      // archetype -> count
+    const archTournaments = new Map();// archetype -> Set<tid>
+    const allTournaments = new Set();
+    const seen = new Set();
+    const dates = [];
+    for (const r of rows) {
+      const tid = (r.tournament_id || '').trim();
+      const arch = stripPriceTag(r.archetype || '');
+      if (!tid || !arch) continue;
+      allTournaments.add(tid);
+      const key = `${tid}|||${arch}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      const cnt = parseInt(r.total_decks_in_archetype || '0', 10);
+      if (!Number.isFinite(cnt) || cnt <= 0) continue;
+      archTotal.set(arch, (archTotal.get(arch) || 0) + cnt);
+      if (!archTournaments.has(arch)) archTournaments.set(arch, new Set());
+      archTournaments.get(arch).add(tid);
+      if (r.tournament_date) dates.push(r.tournament_date);
+    }
+
+    let totalDecks = 0;
+    for (const v of archTotal.values()) totalDecks += v;
+    if (totalDecks <= 0) return null;
+
+    const shares = [];
+    for (const [name, count] of archTotal) {
+      shares.push({
+        name,
+        count,
+        share: 100 * count / totalDecks,
+        tournamentsSeen: archTournaments.get(name).size,
+      });
+    }
+    shares.sort((a, b) => b.share - a.share);
+
+    const result = {
+      shares,
+      totalDecks,
+      tournamentCount: allTournaments.size,
+      formatKey,
+    };
+    _pastMetaCachedShares.set(formatKey, result);
+    return result;
+  }
+
+  // Map past-meta share aggregate onto the _shareList shape Meta Call's
+  // predictor + renderer expect. trend/onlineWinPct default to 0 (no
+  // week-over-week history or per-deck cumulative WR for past formats).
+  function _pastMetaToShareList(aggregate) {
+    if (!aggregate || !Array.isArray(aggregate.shares)) return [];
+    return aggregate.shares.map(s => ({
+      name        : s.name,
+      onlineShare : s.share,
+      ladderShare : s.share,
+      trend       : 0,
+      onlineWinPct: 0,
+      _pastMetaSeen: s.tournamentsSeen,  // diagnostic only — not used by predictor
+    }));
+  }
+
   async function _loadClShares(path) {
     const out = {};
     try {
@@ -2859,10 +3011,83 @@ window.MetaCall = (function () {
         console.warn('[MetaCall] phase 2/3 decoration failed (non-fatal):', e);
       }
 
+      // Past Meta source catalog — load once so the picker can offer
+      // the list of past formats. Loader is silent on failure (no
+      // manifest = no source picker shown, current-only behavior).
+      try {
+        await _loadPastMetaCatalog();
+      } catch (_e) { /* tolerate */ }
+
       return true;
     } catch (e) {
       console.error('[MetaCall] Data load error:', e);
       return false;
+    }
+  }
+
+  // ── Source switch (Current ↔ Past Meta) ───────────────────
+  //
+  // Single mutation point for `_metaSource` / `_pastMetaFormatKey`.
+  // When switching TO past:
+  //   1. Load the per-format chunk and aggregate brought-shares
+  //   2. Replace _shareList with the past-meta-derived list
+  //   3. Clear trend map (no week-over-week history for past metas)
+  //   4. Re-run the predictor + decorator + renderAll
+  // When switching back TO current:
+  //   1. Drop the cached _shareList and call loadData() to repopulate
+  //   2. Re-run the predictor
+  //
+  // Matchup map (_matchupMap) is reused as-is — we don't have
+  // historical per-meta matchups; the current online matrix is the
+  // best proxy and is flagged in the UI when source = past.
+  async function _setMetaSource(source, formatKey) {
+    const nextSource = source === 'past' ? 'past' : 'current';
+    const nextKey = nextSource === 'past' ? (formatKey || _pastMetaFormatKey) : null;
+    if (nextSource === _metaSource && nextKey === _pastMetaFormatKey) return;
+    _metaSource = nextSource;
+    _pastMetaFormatKey = nextKey;
+
+    if (_metaSource === 'past') {
+      if (!_pastMetaFormatKey) {
+        // No format selected yet — render empty placeholder until user picks
+        _shareList = [];
+        _trendMap = {};
+        try { renderAll(); } catch (_e) { /* tolerate */ }
+        return;
+      }
+      const aggregate = await _loadPastMetaShares(_pastMetaFormatKey);
+      if (!aggregate) {
+        console.warn(`[MetaCall] Past Meta load failed for ${_pastMetaFormatKey}`);
+        _shareList = [];
+        _trendMap = {};
+        try { renderAll(); } catch (_e) { /* tolerate */ }
+        return;
+      }
+      _shareList = _pastMetaToShareList(aggregate);
+      _trendMap = {};                  // no week-over-week for past metas
+      _tournamentStats = {};           // no top8/conv data for past metas
+      _labsRowsByDeck = {};            // no labs quality multiplier for past
+      _labsConvByDeck = {};
+      _labsQualityByDeck = {};
+      _labsDay2ConvByDeck = {};
+      _predictorMode = 'A';            // online-only mode (no labs signal)
+      _runPredictor();
+      try { await _decorateMetaCallEntries(); } catch (_e) { /* tolerate */ }
+      try { renderAll(); } catch (_e) { /* tolerate */ }
+      console.info(`[MetaCall] source = past, format = ${_pastMetaFormatKey} (${aggregate.shares.length} archetypes, ${aggregate.tournamentCount} tournaments)`);
+    } else {
+      // Switching back to current — invalidate caches that loadData fills
+      _shareList = null;
+      _matchupMap = null;             // forces full reload (matchup CSV doesn't change but loadData early-returns if both are present)
+      const ok = await loadData();
+      if (!ok) {
+        console.warn('[MetaCall] reverting to current source failed');
+        return;
+      }
+      _runPredictor();
+      try { await _decorateMetaCallEntries(); } catch (_e) { /* tolerate */ }
+      try { renderAll(); } catch (_e) { /* tolerate */ }
+      console.info('[MetaCall] source = current');
     }
   }
 
@@ -3667,6 +3892,53 @@ window.MetaCall = (function () {
 
   // Mode B / when a TG was loaded — that prevented the user from
   // experimenting with what CL data adds on top.
+  // Source picker (Current Meta | Past Meta + format dropdown).
+  // Hidden entirely when no past-meta chunks are available (manifest
+  // missing or empty after current-set filter).
+  function renderMetaSourcePanel() {
+    if (!Array.isArray(_pastMetaAvailableFormats) || _pastMetaAvailableFormats.length === 0) return '';
+
+    const pill = (key, label) => {
+      const active = key === _metaSource ? ' mc-tt-tab-active' : '';
+      return `<button type="button" class="mc-tt-tab${active}"
+        onclick="MetaCall._setMetaSource('${key}')">${esc(label)}</button>`;
+    };
+
+    const expander = (typeof window !== 'undefined' && typeof window.expandPastMetaCode === 'function')
+      ? window.expandPastMetaCode
+      : (k => k);
+    const dropdownOptions = _pastMetaAvailableFormats.map(f => {
+      const expanded = expander(f.key);
+      const display = expanded && expanded !== f.key ? `${expanded} (${f.key})` : f.key;
+      const sel = (f.key === _pastMetaFormatKey) ? ' selected' : '';
+      return `<option value="${esc(f.key)}"${sel}>${esc(display)}</option>`;
+    }).join('');
+
+    const formatRow = _metaSource === 'past'
+      ? `<div class="mc-source-format-row">
+           <label class="mc-source-format-label">Format:</label>
+           <select class="mc-source-format-select" onchange="MetaCall._setMetaSource('past', this.value)">
+             <option value="">— select format —</option>
+             ${dropdownOptions}
+           </select>
+           <span class="mc-source-hint" title="Matchups use current online data (no historical matchup pairs are scraped per past meta).">ⓘ Matchups = current proxy</span>
+         </div>`
+      : '';
+
+    return `
+<div class="metacall-panel">
+  <div class="metacall-panel-title">
+    Source
+    <span class="mc-badge">Past Meta</span>
+  </div>
+  <div class="mc-tt-tabs" role="tablist" aria-label="Meta source">
+    ${pill('current', 'Current Meta')}
+    ${pill('past', 'Past Meta')}
+  </div>
+  ${formatRow}
+</div>`;
+  }
+
   function renderSourcesPanel() {
     const hasCurrent = Object.keys(_clCurrentByDeck).length > 0;
     const hasPast    = Object.keys(_clPastByDeck).length > 0;
@@ -4212,6 +4484,7 @@ window.MetaCall = (function () {
        is added later. */}
   ${renderScenariosBar()}
   ${renderSettingsPanel()}
+  ${renderMetaSourcePanel()}
   ${renderMetaCallModePanel()}
   ${renderSourcesPanel()}
   ${renderFieldPanel(field)}
@@ -6195,6 +6468,14 @@ window.MetaCall = (function () {
   // the tier cards use), which lives in app-core.js.
   function _jumpToDeckAnalysis(deckName) {
     if (!deckName) return;
+    // Source-aware routing: Past Meta source → Past Meta tab with the
+    // user's chosen format + deck pre-selected; Current Meta → existing
+    // Current Meta Analysis routing.
+    if (_metaSource === 'past' && _pastMetaFormatKey
+        && typeof window.navigateToPastMetaWithDeck === 'function') {
+      window.navigateToPastMetaWithDeck(deckName, _pastMetaFormatKey);
+      return;
+    }
     if (typeof window.navigateToCurrentMetaWithDeck === 'function') {
       window.navigateToCurrentMetaWithDeck(deckName);
     } else if (typeof switchTabAndUpdateMenu === 'function') {
@@ -6385,6 +6666,7 @@ window.MetaCall = (function () {
     _onCustomDeckShare,
     _testingGroupLoad,
     _jumpToDeckAnalysis,
+    _setMetaSource,
     _toggleRecReason,
     _saveScenario,
     _onScenarioSelect,

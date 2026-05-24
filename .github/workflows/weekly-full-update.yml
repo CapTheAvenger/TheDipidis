@@ -14,6 +14,15 @@ on:
   schedule:
     - cron: '0 6 * * 2'
   workflow_dispatch:
+    inputs:
+      with_matchups:
+        description: 'Scrape labs per-archetype matchups (~80 min for overall)'
+        type: boolean
+        default: true
+      matchup_days:
+        description: 'Day filter(s) for matchups (space-separated: overall / day1 / day2)'
+        type: string
+        default: 'overall'
 
 # GITHUB_TOKEN needs:
 #   - contents: write  → commit + push the scraped CSVs
@@ -40,7 +49,11 @@ concurrency:
 jobs:
   scrape:
     runs-on: ubuntu-latest
-    timeout-minutes: 180
+    # Headroom: base scrapers ~30-60 min + matchup pass ~80 min for overall
+    # filter alone (3250+ HTTP requests at 1.5s delay). Day-1 + Day-2
+    # additional filters scale linearly. 300 min keeps a safety margin
+    # over the worst case of overall+day2 (~160 min) for the matchup pass.
+    timeout-minutes: 300
 
     steps:
       - name: Checkout repo
@@ -179,6 +192,11 @@ jobs:
         run: |
           set +e
           rc_summary=()
+          # labs_tournament_scraper is invoked separately below with the
+          # --matchups flag so the per-archetype matchup matrix
+          # (labs_tournament_matchups.csv) gets refreshed alongside the
+          # deck-list summary. Keeping it out of this loop lets us pass
+          # workflow_dispatch inputs and adjust the day-filter list.
           for step in \
               "core/update_sets.py" \
               "scrapers/cardmarket_id_mapper.py" \
@@ -189,7 +207,6 @@ jobs:
               "scrapers/city_league_past_analysis_scraper.py" \
               "scrapers/city_league_past_archetype_scraper.py" \
               "scrapers/tournament_scraper_JH.py" \
-              "scrapers/labs_tournament_scraper.py" \
               "scrapers/online_tournament_scraper.py" \
               "scrapers/cardmarket_price_merger.py" \
               "core/prepare_card_data.py" \
@@ -211,6 +228,37 @@ jobs:
           done
           echo "── Summary ──"
           printf '  %s\n' "${rc_summary[@]}"
+
+      - name: Run labs tournament scraper (deck list + matchups)
+        env:
+          PYTHONPATH: ${{ github.workspace }}/backend/core
+          # workflow_dispatch inputs default to true / 'overall' on the
+          # cron schedule (inputs are unset → fall back to true / 'overall').
+          WITH_MATCHUPS: ${{ github.event.inputs.with_matchups || 'true' }}
+          MATCHUP_DAYS:  ${{ github.event.inputs.matchup_days || 'overall' }}
+        working-directory: backend
+        run: |
+          set +e
+          echo "::group::scrapers/labs_tournament_scraper.py"
+          if [ "$WITH_MATCHUPS" = "true" ]; then
+              echo "Matchup pass: ENABLED (day filters: $MATCHUP_DAYS)"
+              # Word-split intentional so multiple day filters become
+              # separate argv tokens (e.g. "overall day2" → --matchup-days overall day2)
+              python scrapers/labs_tournament_scraper.py \
+                  --matchups \
+                  --matchup-days $MATCHUP_DAYS
+          else
+              echo "Matchup pass: DISABLED — deck-list only"
+              python scrapers/labs_tournament_scraper.py
+          fi
+          rc=$?
+          if [ "$rc" -ne 0 ]; then
+              echo "::warning::labs_tournament_scraper exited with $rc"
+          fi
+          echo "::endgroup::"
+          # Always exit 0 — failures here shouldn't kill the whole pipeline
+          # (matchup CSV is gracefully optional in Meta Call).
+          exit 0
 
       - name: Bump version
         run: |

@@ -1,12 +1,12 @@
 // Service Worker for Pokemon TCG Analysis PWA
-// v202605240342
+// v202605240404
 // Strategies:
 //   HTML / navigation → Network-first  (users always see latest version)
 //   JS / CSS          → Network-first  (always serve fresh; fall back to cache offline)
 //   Images            → Cache-first    (rarely change)
-//   Data files        → Stale-while-revalidate (fast load + background update)
+//   Data files        → Network-first  (fresh scraper output; fall back to cache offline)
 
-const CACHE_NAME = 'tcg-analysis-v202605240342';
+const CACHE_NAME = 'tcg-analysis-v202605240404';
 
 // Static shell â€” cached on install
 const SHELL_ASSETS = [
@@ -153,12 +153,17 @@ self.addEventListener('fetch', function(event) {
     return;
   }
 
-  // â”€â”€ Data files (CSV / JSON under /data/): STALE-WHILE-REVALIDATE â”€â”€
-  // Serve instantly from cache, refresh in background for next visit.
+  // Data files (CSV / JSON under /data/): NETWORK-FIRST
+  // Always try the network so users see the latest scraper output.
+  // Falls back to cache only when offline. Was stale-while-revalidate
+  // until 2026-05-24 — that masked mid-scrape partial chunks (e.g.
+  // TEF-POR.csv with only Prague before LA/Utrecht/Campinas were
+  // appended), forcing users to hard-reload to see updated data.
+  // Network-first trades ~200 ms initial-load latency for freshness.
   if (url.pathname.indexOf('/data/') !== -1) {
     event.respondWith(
-      caches.match(cleanUrl).then(function(cached) {
-        var fetchPromise = fetch(event.request).then(function(response) {
+      fetch(event.request, { cache: 'no-cache' })
+        .then(function(response) {
           if (response && response.ok) {
             var clone = response.clone();
             caches.open(CACHE_NAME).then(function(cache) {
@@ -166,9 +171,10 @@ self.addEventListener('fetch', function(event) {
             });
           }
           return response;
-        }).catch(function() { return cached; });
-        return cached || fetchPromise;
-      })
+        })
+        .catch(function() {
+          return caches.match(cleanUrl);
+        })
     );
     return;
   }

@@ -6436,33 +6436,12 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
 
             if (currentArchetype) {
                 if (source === 'currentMeta') {
-                    // Online dated CSV — lazy-load once, cached on window.
-                    // Apply the user's "data window from" date filter so
-                    // every downstream pass (recency scoring, ACE-cond,
-                    // Major-blend) sees the same date-windowed row set.
-                    try {
-                        onlineRowsRaw = await loadOnlineTournamentDatedRows();
-                        const _windowFrom = (typeof window !== 'undefined') ? window.currentMetaDateFrom : null;
-                        if (_windowFrom && typeof window !== 'undefined' && typeof window.filterRowsByDateFrom === 'function') {
-                            const beforeN = onlineRowsRaw.length;
-                            onlineRowsRaw = window.filterRowsByDateFrom(onlineRowsRaw, _windowFrom);
-                            devLog(`[Consistency][DateWindow] Online rows ${beforeN} → ${onlineRowsRaw.length} (cutoff ${_windowFrom})`);
-                        }
-                        // Pass _onlineAttendanceWeight so per-tournament
-                        // weighting (0.8/0.2 based on total_players ≥ 250)
-                        // applies. Major call below intentionally omits
-                        // this — Major rows lack total_players and all
-                        // regionals are large anyway.
-                        onlineAgg = _aggregateWeightedSource(
-                            onlineRowsRaw, currentArchetype, SOURCE_WEIGHT_ONLINE, todayMs, null,
-                            undefined, window._onlineAttendanceWeight
-                        );
-                    } catch (e) {
-                        devLog('[Consistency][Recency] Online dated source failed:', e);
-                    }
-                    // Major source — already lazy-loaded by Latest-Major-Anchor
-                    // when present, otherwise fetch here (the anchor block
-                    // below will reuse the cached copy).
+                    // Load Major FIRST so we know whether to gate the
+                    // Online attendance weight. In the first ~2 weeks
+                    // after a set rotation, the format-aware chunk loader
+                    // returns [] (no Major chunk for the new set yet),
+                    // and attendance weighting should NOT fire — every
+                    // bucket is precious in a sparse Online-only dataset.
                     if (!window.currentMetaTournamentCardsData && typeof loadCSV === 'function') {
                         try {
                             const rawTournament = await loadCSV('tournament_cards_data_cards.csv', { latestChunkOnly: true });
@@ -6475,6 +6454,41 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                         }
                     }
                     const majorRows = window.currentMetaTournamentCardsData || [];
+                    const _hasMajorData = Array.isArray(majorRows) && majorRows.length > 0;
+
+                    // Online dated CSV — lazy-load once, cached on window.
+                    // Apply the user's "data window from" date filter so
+                    // every downstream pass (recency scoring, ACE-cond,
+                    // Major-blend) sees the same date-windowed row set.
+                    try {
+                        onlineRowsRaw = await loadOnlineTournamentDatedRows();
+                        const _windowFrom = (typeof window !== 'undefined') ? window.currentMetaDateFrom : null;
+                        if (_windowFrom && typeof window !== 'undefined' && typeof window.filterRowsByDateFrom === 'function') {
+                            const beforeN = onlineRowsRaw.length;
+                            onlineRowsRaw = window.filterRowsByDateFrom(onlineRowsRaw, _windowFrom);
+                            devLog(`[Consistency][DateWindow] Online rows ${beforeN} → ${onlineRowsRaw.length} (cutoff ${_windowFrom})`);
+                        }
+                        // Attendance weighting (0.8/0.2 based on
+                        // total_players ≥ 250) is GATED on Major data
+                        // existing for the current format. Without Major
+                        // ground-truth, penalizing small Online events
+                        // at 0.2× over-restricts the only dataset we
+                        // have during the first weeks of a new format —
+                        // user-confirmed 2026-05-24. Once the first
+                        // CRI-format major lands, this flips on
+                        // automatically (no config change needed).
+                        const _attFn = _hasMajorData ? window._onlineAttendanceWeight : undefined;
+                        if (!_hasMajorData) {
+                            devLog('[Consistency][Recency] No current-format Major data — Online attendance weighting OFF (every event counts equally)');
+                        }
+                        onlineAgg = _aggregateWeightedSource(
+                            onlineRowsRaw, currentArchetype, SOURCE_WEIGHT_ONLINE, todayMs, null,
+                            undefined, _attFn
+                        );
+                    } catch (e) {
+                        devLog('[Consistency][Recency] Online dated source failed:', e);
+                    }
+
                     majorAgg = _aggregateWeightedSource(
                         majorRows, currentArchetype, SOURCE_WEIGHT_MAJOR, todayMs, _stripPriceTag, 'snapshot'
                     );
@@ -7471,18 +7485,19 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 // at avg 1.0-1.27 across 4 regionals, which should dominate
                 // when only 1/4 of Online happens to play that ACE-SPEC.
                 const _condSources = [];
+                const _majorRowsForCond = window.currentMetaTournamentCardsData;
+                const _hasMajorForCond = Array.isArray(_majorRowsForCond) && _majorRowsForCond.length > 0;
                 if (Array.isArray(onlineRowsRaw) && onlineRowsRaw.length > 0) {
                     _condSources.push({
                         rows: onlineRowsRaw,
                         sourceWeight: SOURCE_WEIGHT_ONLINE,
                         archetypeFieldNormalizer: null,
-                        // W3 Phase 1 — Online buckets get per-event
-                        // attendance weight on top of source weight.
-                        applyAttendanceWeight: true,
+                        // Attendance weight gated on Major presence — see
+                        // the recency-aggregator block above for rationale.
+                        applyAttendanceWeight: _hasMajorForCond,
                     });
                 }
-                const _majorRowsForCond = window.currentMetaTournamentCardsData;
-                if (Array.isArray(_majorRowsForCond) && _majorRowsForCond.length > 0) {
+                if (_hasMajorForCond) {
                     _condSources.push({
                         rows: _majorRowsForCond,
                         sourceWeight: SOURCE_WEIGHT_MAJOR,

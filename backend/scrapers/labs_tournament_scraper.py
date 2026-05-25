@@ -1356,6 +1356,19 @@ def main() -> None:
     existing_deck_rows = _reassemble_labs_monolith('labs_tournament_decks', CSV_FIELDS)
     existing_matchup_rows = _reassemble_labs_monolith('labs_tournament_matchups', MATCHUP_CSV_HEADER)
     seen_tids = {str(r.get('tournament_id') or '').strip() for r in existing_deck_rows}
+    # tid → total_players from the cached monolith. Used to repopulate
+    # tournaments_meta entries for skipped frozen tournaments so
+    # labs_tournaments.json doesn't shrink to just the freshly-scraped IDs.
+    cached_player_counts: Dict[str, int] = {}
+    for r in existing_deck_rows:
+        tid_key = str(r.get('tournament_id') or '').strip()
+        try:
+            cached_player_counts[tid_key] = max(
+                cached_player_counts.get(tid_key, 0),
+                int(r.get('total_players') or 0),
+            )
+        except (TypeError, ValueError):
+            continue
     logger.info(
         "Per-meta cache: %d tournaments already scraped across all chunks, current_set=%s",
         len(seen_tids), current_meta or '(unknown)',
@@ -1382,6 +1395,15 @@ def main() -> None:
                     idx + 1, len(tournaments), t['tournament_name'], tid, t_meta or '?',
                 )
                 skipped_frozen += 1
+                # Preserve the frozen tournament in the index file so the next
+                # weekly run still sees it as a known tournament (otherwise
+                # labs_tournaments.json shrinks to just the freshly-scraped
+                # ones and the cache-fallback loses every previously-known
+                # tournament). Recover total_players from the cached deck
+                # rows so the index stays accurate.
+                if cached_player_counts.get(tid):
+                    t['total_players'] = cached_player_counts[tid]
+                tournaments_meta.append(t)
                 continue
 
         logger.info("[%d/%d] %s (%s)", idx + 1, len(tournaments), t['tournament_name'], tid)

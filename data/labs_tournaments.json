@@ -82,7 +82,7 @@
   {
     "tournament_id": "0011",
     "tournament_name": "Regional Championship Stuttgart",
-    "tournament_date": "2024-12-01",
+    "tournament_date": "",
     "tournament_type": "regional",
     "country": "",
     "total_players": 1698
@@ -258,7 +258,7 @@
   {
     "tournament_id": "0033",
     "tournament_name": "Special Event Bologna",
-    "tournament_date": "2025-06-01",
+    "tournament_date": "",
     "tournament_type": "regional",
     "country": "",
     "total_players": 1237
@@ -434,7 +434,7 @@
   {
     "tournament_id": "0055",
     "tournament_name": "Regional Championship Seattle",
-    "tournament_date": "2026-03-01",
+    "tournament_date": "",
     "tournament_type": "regional",
     "country": "",
     "total_players": 2224

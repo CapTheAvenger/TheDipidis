@@ -20,6 +20,7 @@ import logging
 import threading
 import concurrent.futures
 from collections import Counter
+from datetime import datetime
 from typing import List, Dict, Optional, Any, Set, Tuple
 
 try:
@@ -507,6 +508,100 @@ def aggregate_tournament_cards(all_decks: list, t_info: dict, card_db: CardDatab
 # ============================================================================
 # CSV OUTPUT
 # ============================================================================
+_US_STATE_CODES = {
+    'al','ak','az','ar','ca','co','ct','de','fl','ga','hi','id','il','in','ia',
+    'ks','ky','la','me','md','ma','mi','mn','ms','mo','mt','ne','nv','nh','nj',
+    'nm','ny','nc','nd','oh','ok','or','pa','ri','sc','sd','tn','tx','ut','vt',
+    'va','wa','wv','wi','wy','dc',
+}
+
+def _normalize_tournament_name_for_match(name: str) -> str:
+    """Match key for cross-referencing limitlesstcg.com tournament names
+    against labs.limitlesstcg.com names. Limitless main-site uses
+    "Regional Houston, TX – Limitless"; labs uses "Regional Championship
+    Houston". Strip dashes, the championship/limitless/event-type
+    boilerplate, and US two-letter state codes so the remaining city
+    tokens line up."""
+    s = (name or "").lower()
+    s = re.sub(r'[–—\-]', ' ', s)
+    s = re.sub(r'\b(championships?|limitless|regional|special event|international|world|stadium|tcg)\b', ' ', s)
+    s = re.sub(r'[^a-z0-9]+', ' ', s)
+    tokens = [tok for tok in s.split() if tok not in _US_STATE_CODES]
+    return ' '.join(tokens)
+
+
+def _parse_iso_date(date_str: str) -> str:
+    """Convert Limitless's "16th May 2026" or already-ISO "2026-05-16"
+    into a stable YYYY-MM-DD key. Falls back to the raw string if the
+    format is unrecognised — the lookup will then just miss for that
+    tournament instead of crashing the whole save."""
+    raw = (date_str or "").strip()
+    if not raw:
+        return ""
+    # Already ISO?
+    if re.match(r'^\d{4}-\d{2}-\d{2}', raw):
+        return raw[:10]
+    cleaned = re.sub(r'(\d+)(st|nd|rd|th)', r'\1', raw, flags=re.IGNORECASE)
+    for fmt in ("%d %B %Y", "%d %b %Y", "%B %d %Y", "%b %d %Y"):
+        try:
+            return datetime.strptime(cleaned, fmt).strftime("%Y-%m-%d")
+        except ValueError:
+            continue
+    return raw
+
+
+_LABS_ID_LOOKUP_CACHE = None
+
+def _build_labs_id_lookup() -> dict:
+    """One-time scan of every labs_tournament_decks_*.csv in the data
+    dir to build a (normalized_name, iso_date) → labs_tournament_id map.
+    Used by save_csv_files to enrich the overview CSV with the matching
+    labs tournament_id so the Meta Call frontend can cross-reference
+    cards-CSV rows against labs-CSV rows without re-resolving names at
+    runtime. Cached — labs CSVs don't change mid-scrape."""
+    global _LABS_ID_LOOKUP_CACHE
+    if _LABS_ID_LOOKUP_CACHE is not None:
+        return _LABS_ID_LOOKUP_CACHE
+
+    lookup = {}
+    data_dir = get_data_dir()
+    try:
+        for fname in os.listdir(data_dir):
+            if not fname.startswith("labs_tournament_decks_") or not fname.endswith(".csv"):
+                continue
+            try:
+                with open(os.path.join(data_dir, fname), newline="", encoding="utf-8") as f:
+                    reader = csv.DictReader(f)
+                    for row in reader:
+                        tid = (row.get("tournament_id") or "").strip()
+                        name = (row.get("tournament_name") or "").strip()
+                        date_str = (row.get("tournament_date") or "").strip()
+                        if not tid or not name:
+                            continue
+                        key = (_normalize_tournament_name_for_match(name), _parse_iso_date(date_str))
+                        if key not in lookup:
+                            lookup[key] = tid
+            except Exception as e:
+                logger.warning(f"[labs-id-lookup] Could not read {fname}: {e}")
+    except FileNotFoundError:
+        logger.warning("[labs-id-lookup] data dir missing; lookup will be empty")
+
+    _LABS_ID_LOOKUP_CACHE = lookup
+    logger.info(f"[labs-id-lookup] indexed {len(lookup)} tournaments")
+    return lookup
+
+
+def _resolve_labs_tournament_id(name: str, date_str: str) -> str:
+    """Look up the labs.limitlesstcg.com tournament_id (4-digit padded)
+    that corresponds to a limitlesstcg.com tournament (3-digit). Returns
+    '' if no match — caller writes empty cell."""
+    if not name:
+        return ""
+    lookup = _build_labs_id_lookup()
+    key = (_normalize_tournament_name_for_match(name), _parse_iso_date(date_str))
+    return lookup.get(key, "")
+
+
 def save_csv_files(data: list, output_file: str, append_mode: bool):
     overview_f = os.path.join(get_data_dir(), output_file.replace(".csv", "_overview.csv"))
     cards_f    = os.path.join(get_data_dir(), output_file.replace(".csv", "_cards.csv"))
@@ -520,7 +615,8 @@ def save_csv_files(data: list, output_file: str, append_mode: bool):
             "format": t.get("format", ""),
             "cards_url": t["cards_url"],
             "total_cards": t.get("total_cards", 0),
-            "status": t["status"]
+            "status": t["status"],
+            "labs_tournament_id": _resolve_labs_tournament_id(t["name"], t.get("date", "")),
         }
         for t in data
     ]

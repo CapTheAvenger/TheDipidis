@@ -1634,12 +1634,15 @@
     text-overflow: ellipsis;
     white-space: nowrap;
 }
-.mc-rec-day2 {
+.mc-rec-day2,
+.mc-rec-score {
     font-variant-numeric: tabular-nums;
     color: #27ae60;
 }
 .mc-rec-wr,
-.mc-rec-wins {
+.mc-rec-wins,
+.mc-rec-day2conv,
+.mc-rec-players {
     font-variant-numeric: tabular-nums;
     color: #6b7c93;
     font-size: 0.88em;
@@ -1664,7 +1667,8 @@
     .mc-rec-table { font-size: 0.84rem; }
     .mc-rec-table th { font-size: 0.66rem; padding: 4px 6px; }
     .mc-rec-table td { padding: 6px 6px; }
-    .mc-rec-wins { display: none; }
+    .mc-rec-wins,
+    .mc-rec-players { display: none; }
 }
 
 /* TG-share chip — distinct teal so user sees it as a folded-in

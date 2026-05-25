@@ -1,0 +1,164 @@
+{
+  "headers": [
+    "#",
+    "Deck",
+    "Day-2",
+    "Avg WR",
+    "Exp. Wins",
+    ""
+  ],
+  "fheaders": [],
+  "frozen_present": false,
+  "rec_rows_count": 5,
+  "first_rows": [
+    [
+      "1",
+      "Crustle",
+      "21,1%",
+      "52,5%",
+      "∅ 4.2",
+      "▼"
+    ],
+    [
+      "2",
+      "Tera Box",
+      "18,7%",
+      "51,1%",
+      "∅ 4.1",
+      "▼"
+    ],
+    [
+      "3",
+      "Dragapult",
+      "20,3%",
+      "50,8%",
+      "∅ 4.1",
+      "▼"
+    ],
+    [
+      "4",
+      "Dragapult Dusknoir",
+      "18,2%",
+      "50,1%",
+      "∅ 4.0",
+      "▼"
+    ],
+    [
+      "5",
+      "Dragapult Dudunsparce",
+      "18,0%",
+      "49,7%",
+      "∅ 4.0",
+      "▼"
+    ]
+  ],
+  "dragapult": [
+    {
+      "cells": [
+        "3",
+        "Dragapult",
+        "20,3%",
+        "50,8%",
+        "∅ 4.1",
+        "▼"
+      ],
+      "html": "<tr class=\"mc-rec-row\" onclick=\"MetaCall._toggleRecReason('mc-rec-reason-dragapult', this)\" title=\"Click to see why this deck is recommended\" tabindex=\"0\" data-reason-id=\"mc-rec-reason-dragapult\">\n        <td class=\"mc-rec-rank\">3</td>\n        <td class=\"mc-rec-name\"><span class=\"mc-rec-name-inner\"><img class=\"tcg-pokemon-icon tcg-pokemon-icon--sm\" src=\"https://r2.limitlesstcg.net/pokemon/gen9/dragapult.png\" alt=\"\" loading=\"lazy\" onerror=\"this.style.display='none'\"><span class=\"mc-rec-name-text\">Dragapult</span></span></td>\n        <td class=\"mc-rec-day2\"><strong>20,3%</strong></td>\n        <td class=\"mc-rec-wr\">50,8%</td>\n        <td class=\"mc-rec-wins\">∅ 4.1</td>\n        <td class=\"mc-rec-toggle\"><span class=\"mc-rec-chevron\" aria-hidden=\"true\">▼</span></td>\n      </tr>"
+    },
+    {
+      "cells": [
+        "4",
+        "Dragapult Dusknoir",
+        "18,2%",
+        "50,1%",
+        "∅ 4.0",
+        "▼"
+      ],
+      "html": "<tr class=\"mc-rec-row\" onclick=\"MetaCall._toggleRecReason('mc-rec-reason-dragapultdusknoir', this)\" title=\"Click to see why this deck is recommended\" tabindex=\"0\" data-reason-id=\"mc-rec-reason-dragapultdusknoir\">\n        <td class=\"mc-rec-rank\">4</td>\n        <td class=\"mc-rec-name\"><span class=\"mc-rec-name-inner\"><span class=\"tcg-pokemon-icon-group tcg-pokemon-icon-group--inline\"><img class=\"tcg-pokemon-icon tcg-pokemon-icon--sm\" src=\"https://r2.limitlesstcg.net/pokemon/gen9/dragapult.png\" alt=\"\" loading=\"lazy\" onerror=\"this.style.display='none'\"><img class=\"tcg-pokemon-icon tcg-pokemon-icon--sm\" src=\"https://r2.limitlesstcg.net/pokemon/gen9/dusknoir.png\" alt=\"\" loading=\"lazy\" onerror=\"this.style.display='none'\"></span><span class=\"mc-rec-name-text\">Dragapult Dusknoir</span></span></td>\n        <td class=\"mc-rec-day2\"><strong>18,2%</strong></td>\n        <td class=\"mc-rec-wr\">50,1%</td>\n        <td class=\"mc-rec-wins\">∅ 4.0</td>\n        <td class=\"mc-rec-toggle\"><span class=\"mc-rec-chevron\" aria-hidden=\"true\">▼</span></td>\n      </tr>"
+    },
+    {
+      "cells": [
+        "5",
+        "Dragapult Dudunsparce",
+        "18,0%",
+        "49,7%",
+        "∅ 4.0",
+        "▼"
+      ],
+      "html": "<tr class=\"mc-rec-row\" onclick=\"MetaCall._toggleRecReason('mc-rec-reason-dragapultdudunsparce', this)\" title=\"Click to see why this deck is recommended\" tabindex=\"0\" data-reason-id=\"mc-rec-reason-dragapultdudunsparce\">\n        <td class=\"mc-rec-rank\">5</td>\n        <td class=\"mc-rec-name\"><span class=\"mc-rec-name-inner\"><span class=\"tcg-pokemon-icon-group tcg-pokemon-icon-group--inline\"><img class=\"tcg-pokemon-icon tcg-pokemon-icon--sm\" src=\"https://r2.limitlesstcg.net/pokemon/gen9/dragapult.png\" alt=\"\" loading=\"lazy\" onerror=\"this.style.display='none'\"><img class=\"tcg-pokemon-icon tcg-pokemon-icon--sm\" src=\"https://r2.limitlesstcg.net/pokemon/gen9/dudunsparce.png\" alt=\"\" loading=\"lazy\" onerror=\"this.style.display='none'\"></span><span class=\"mc-rec-name-text\">Dragapult Dudunsparce</span></span></td>\n        <td class=\"mc-rec-day2\"><strong>18,0%</strong></td>\n        <td class=\"mc-rec-wr\">49,7%</td>\n        <td class=\"mc-rec-wins\">∅ 4.0</td>\n        <td class=\"mc-rec-toggle\"><span class=\"mc-rec-chevron\" aria-hidden=\"true\">▼</span></td>\n      </tr>"
+    }
+  ],
+  "fieldPanelInspection": [
+    {
+      "sel": ".mc-field-row",
+      "count": 0
+    },
+    {
+      "sel": ".mc-deck-row",
+      "count": 0
+    },
+    {
+      "sel": ".mc-group-row",
+      "count": 0
+    },
+    {
+      "sel": "tr[class*=field]",
+      "count": 0
+    },
+    {
+      "sel": "tr[class*=deck-row]",
+      "count": 0
+    },
+    {
+      "sel": ".mc-row",
+      "count": 0
+    },
+    {
+      "sel": ".mc-field-deck-row",
+      "count": 0
+    }
+  ],
+  "dragapult_anywhere": [
+    {
+      "text": "Dragapult ▾ 17.09% 17.09% 222 ∅ 1.37",
+      "classes": "mc-row-main "
+    },
+    {
+      "text": "Dragapult Dusknoir ▾ 11.21% 11.21% 146 ∅ 0.90",
+      "classes": "mc-row-main "
+    },
+    {
+      "text": "Dragapult Dudunsparce ▾ 10.43% 10.43% 136 ∅ 0.83",
+      "classes": "mc-row-main "
+    },
+    {
+      "text": "Dragapult Blaziken ▾ 7.25% 7.25% 94 ∅ 0.58",
+      "classes": "mc-row-main "
+    },
+    {
+      "text": "Top matchups vs. predicted field vs. Dragapult 69 % WR opponent ≈ 17,1 % of field vs. Dragapult Dusknoir 57 % WR opponent ≈ 11,2 % of field vs. Dragapult Blaziken 76 % WR opponent ≈ 7,3 % of field Expected wins 4,2 / 8 rounds → 21,1 % chance to clear the Day-2 cut. Open in Deck Analysis →",
+      "classes": "mc-rec-reason-row"
+    },
+    {
+      "text": "Top matchups vs. predicted field vs. Dragapult 47 % WR opponent ≈ 17,1 % of field vs. Dragapult Dusknoir 53 % WR opponent ≈ 11,2 % of field vs. Dragapult Dudunsparce 56 % WR opponent ≈ 10,4 % of field Expected wins 4,1 / 8 rounds → 18,7 % chance to clear the Day-2 cut. Open in Deck Analysis →",
+      "classes": "mc-rec-reason-row"
+    },
+    {
+      "text": "3 Dragapult 20,3% 50,8% ∅ 4.1 ▼",
+      "classes": "mc-rec-row"
+    },
+    {
+      "text": "Top matchups vs. predicted field vs. Dragapult Dusknoir 55 % WR opponent ≈ 11,2 % of field vs. Dragapult Dudunsparce 49 % WR opponent ≈ 10,4 % of field vs. Raging Bolt Ogerpon 51 % WR opponent ≈ 9,5 % of field Expected wins 4,1 / 8 rounds → 20,3 % chance to clear the Day-2 cut. Open in Deck Analysis",
+      "classes": "mc-rec-reason-row"
+    },
+    {
+      "text": "4 Dragapult Dusknoir 18,2% 50,1% ∅ 4.0 ▼",
+      "classes": "mc-rec-row"
+    },
+    {
+      "text": "Top matchups vs. predicted field vs. Dragapult 40 % WR opponent ≈ 17,1 % of field vs. Dragapult Dudunsparce 48 % WR opponent ≈ 10,4 % of field vs. Festival Lead 71 % WR opponent ≈ 6,8 % of field Expected wins 4,0 / 8 rounds → 18,2 % chance to clear the Day-2 cut. Open in Deck Analysis →",
+      "classes": "mc-rec-reason-row"
+    }
+  ],
+  "banner": "Recommended Decks for this Field 5 Day-2-capable 📤 Share",
+  "group_state_before": null
+}

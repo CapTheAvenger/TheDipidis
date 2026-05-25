@@ -492,10 +492,49 @@ window.MetaCall = (function () {
   //   once (chunk has multiple rows per deck — one per card). Sum across the
   //   format's tournaments to get per-archetype total. Divide by sum of totals
   //   for the share %.
+  // Past-meta field composition. Primary source is the labs CSV
+  // (player-share — every Day-1 player attributed to an archetype, the
+  // metric Limitless itself uses on its past-meta pages and the one
+  // users expect when they read "Share %"). The earlier implementation
+  // read tournament_cards_data_cards (decklist-share, biased toward
+  // top-cut publishers — Crustle showed up at 6.67 % decklist-share
+  // while only 1.96 % of the actual player field), so the predictor
+  // was systematically over-weighting decks that submit lists.
+  //
+  // Fallback: a handful of legacy formats (BRS-TEF, BRS-TWM, BST-PAR)
+  // have no labs chunk; for those we still read the cards CSV but log
+  // a warning so the discrepancy is visible.
   async function _loadPastMetaShares(formatKey) {
     if (!formatKey) return null;
     if (_pastMetaCachedShares.has(formatKey)) return _pastMetaCachedShares.get(formatKey);
 
+    const labsAgg = await _loadPastMetaLabsAggregate(formatKey);
+    if (labsAgg && Array.isArray(labsAgg.archetypes) && labsAgg.archetypes.length > 0 && labsAgg.totalPlayers > 0) {
+      const shares = labsAgg.archetypes
+        .map(a => ({
+          name           : a.name,
+          count          : a.players,
+          share          : 100 * a.players / labsAgg.totalPlayers,
+          tournamentsSeen: a.tournaments,
+        }))
+        .sort((a, b) => b.share - a.share);
+      const result = {
+        shares,
+        totalDecks     : labsAgg.totalPlayers,
+        tournamentCount: labsAgg.tournamentCount,
+        formatKey,
+        source         : 'labs',
+      };
+      _pastMetaCachedShares.set(formatKey, result);
+      return result;
+    }
+
+    // Fallback: no labs aggregate — read decklist-share from cards CSV.
+    console.warn(`[MetaCall] No labs aggregate for ${formatKey}; falling back to decklist-share from tournament_cards_data_cards (biased toward top-cut submissions).`);
+    return _loadPastMetaSharesFromCards(formatKey);
+  }
+
+  async function _loadPastMetaSharesFromCards(formatKey) {
     let csvText = null;
     try {
       const resp = await fetch(`data/tournament_cards_data_cards_${formatKey}.csv?t=` + Date.now());
@@ -507,20 +546,18 @@ window.MetaCall = (function () {
     const rows = parseCSV(csvText, ';');
     if (rows.length === 0) return null;
 
-    // Some past-meta chunks have a price-tag suffix concatenated onto
-    // the archetype name (e.g. SVI-PFL: "Alakazam Dudunsparce20.09$13.60€"
-    // — different timestamp = different price = explosion of "distinct"
-    // archetype strings). Strip the tag with the same regex the
-    // deck-builder uses (js/app-deck-builder.js:_stripPriceTag).
+    // Strip the price-tag suffix the Limitless scraper used to concatenate
+    // onto .decklist-title (e.g. "Crustle16.57$9.53€"). Fixed in the
+    // Python scraper (commit ac6d36c) but the 13 pre-fix CSVs remain
+    // contaminated; keep the strip as defence in depth.
     const stripPriceTag = (s) => String(s || '')
       .replace(/\d+(?:[.,]\d+)?\$\d+(?:[.,]\d+)?€.*$/u, '')
       .trim();
 
-    const archTotal = new Map();      // archetype -> count
-    const archTournaments = new Map();// archetype -> Set<tid>
+    const archTotal = new Map();
+    const archTournaments = new Map();
     const allTournaments = new Set();
     const seen = new Set();
-    const dates = [];
     for (const r of rows) {
       const tid = (r.tournament_id || '').trim();
       const arch = stripPriceTag(r.archetype || '');
@@ -534,7 +571,6 @@ window.MetaCall = (function () {
       archTotal.set(arch, (archTotal.get(arch) || 0) + cnt);
       if (!archTournaments.has(arch)) archTournaments.set(arch, new Set());
       archTournaments.get(arch).add(tid);
-      if (r.tournament_date) dates.push(r.tournament_date);
     }
 
     let totalDecks = 0;
@@ -557,6 +593,7 @@ window.MetaCall = (function () {
       totalDecks,
       tournamentCount: allTournaments.size,
       formatKey,
+      source: 'cards-fallback',
     };
     _pastMetaCachedShares.set(formatKey, result);
     return result;
@@ -618,11 +655,19 @@ window.MetaCall = (function () {
 
     const byDeck = new Map();  // name -> aggregate
     const allTournaments = new Set();
+    // Per-tournament total_players — used to compute the grand-total
+    // denominator for player-share without double-counting (every row
+    // of a tournament repeats the same total_players value).
+    const tournamentTotalPlayers = new Map();
     for (const r of rows) {
       const tid = (r.tournament_id || '').trim();
       const name = (r.deck_name || '').trim();
       if (!tid || !name) continue;
       allTournaments.add(tid);
+      if (!tournamentTotalPlayers.has(tid)) {
+        const tp = parseInt(r.total_players || '0', 10) || 0;
+        if (tp > 0) tournamentTotalPlayers.set(tid, tp);
+      }
 
       const players = parseInt(r.player_count || '0', 10) || 0;
       const wins    = parseFloat(r.wins   || '0') || 0;
@@ -669,7 +714,15 @@ window.MetaCall = (function () {
     }
     archetypes.sort((a, b) => b.score - a.score);
 
-    const result = { metaKey, archetypes, tournamentCount: allTournaments.size };
+    let totalPlayers = 0;
+    for (const v of tournamentTotalPlayers.values()) totalPlayers += v;
+
+    const result = {
+      metaKey,
+      archetypes,
+      tournamentCount: allTournaments.size,
+      totalPlayers,
+    };
     _pastMetaLabsCache.set(metaKey, result);
     return result;
   }
@@ -3259,20 +3312,30 @@ window.MetaCall = (function () {
       // can't leave a 'counter' value sitting in state from the live
       // meta. Frozen view replaces predictor recommendations with the
       // Final-Cumulative ranking, which has no counter-meta dimension.
-      if (_isPastMetaFrozen(_pastMetaFormatKey)) {
+      const frozen = _isPastMetaFrozen(_pastMetaFormatKey);
+      if (frozen) {
         _metaCallMode = 'standard';
-        // Fire-and-forget — the renderer can show a "loading" state if
-        // it arrives before the labs aggregate resolves; the next render
-        // pass will pick it up from cache. We don't await so the share
-        // table paints immediately.
+        // Labs aggregate is already loaded by _loadPastMetaShares (which
+        // now derives shares from labs as primary source). The fire-and-
+        // forget renderAll() below ensures the Final-Cumulative panel
+        // paints once even if shares came from the cards-CSV fallback.
         _loadPastMetaLabsAggregate(_pastMetaFormatKey).then(() => {
           try { renderAll(); } catch (_e) { /* tolerate */ }
         }).catch(() => { /* tolerate */ });
       }
-      _runPredictor();
+      // In frozen past-meta mode the field is closed and there is
+      // nothing to predict — running the predictor would re-shape the
+      // raw historical shares (Stage 4.5 concentration counters,
+      // Stage 5.2 concentration-exp + hype-damper, etc.) and produce
+      // numbers that disagree with the Frozen Final-Cumulative table
+      // shown on the same page. Skip it; _shareList.onlineShare already
+      // holds the raw labs player-share (or cards-CSV fallback).
+      if (!frozen) {
+        _runPredictor();
+      }
       try { await _decorateMetaCallEntries(); } catch (_e) { /* tolerate */ }
       try { renderAll(); } catch (_e) { /* tolerate */ }
-      console.info(`[MetaCall] source = past, format = ${_pastMetaFormatKey} (${aggregate.shares.length} archetypes, ${aggregate.tournamentCount} tournaments)`);
+      console.info(`[MetaCall] source = past, format = ${_pastMetaFormatKey} (${aggregate.shares.length} archetypes, ${aggregate.tournamentCount} tournaments, frozen=${frozen}, source=${aggregate.source || 'labs'})`);
     } else {
       // Switching back to current — invalidate caches that loadData fills
       _shareList = null;
@@ -4729,7 +4792,7 @@ window.MetaCall = (function () {
   ${_inFrozenPastMode() ? '' : renderMetaCallModePanel()}
   ${_inFrozenPastMode() ? '' : renderSourcesPanel()}
   ${_inFrozenPastMode() ? renderFrozenBanner() : ''}
-  ${renderFieldPanel(field)}
+  ${_inFrozenPastMode() ? '' : renderFieldPanel(field)}
   ${_inFrozenPastMode() ? '' : renderCustomDecksPanel()}
   ${_inFrozenPastMode() ? '' : renderMyDeckPanel()}
   ${_inFrozenPastMode() ? '' : renderResultsPanel(field)}
@@ -4963,10 +5026,10 @@ window.MetaCall = (function () {
       return `<tr class="mc-rec-row">
         <td class="mc-rec-rank">${i + 1}</td>
         <td class="mc-rec-name"><span class="mc-rec-name-inner">${icon}<span class="mc-rec-name-text">${esc(a.name)}</span></span></td>
-        <td class="mc-rec-day2"><strong>${scoreStr}</strong></td>
+        <td class="mc-rec-score"><strong>${scoreStr}</strong></td>
         <td class="mc-rec-wr">${winStr}%</td>
-        <td class="mc-rec-wins">${day2Str}%</td>
-        <td class="mc-rec-wins">${a.players.toLocaleString()}</td>
+        <td class="mc-rec-day2conv">${day2Str}%</td>
+        <td class="mc-rec-players">${a.players.toLocaleString()}</td>
       </tr>`;
     }).join('');
 

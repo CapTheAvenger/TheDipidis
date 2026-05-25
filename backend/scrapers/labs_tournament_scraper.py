@@ -150,6 +150,210 @@ def _derive_meta_from_date(date_iso: str) -> str:
     return ''
 
 
+# ── Name-based meta derivation (cards-data crossreference) ────────────────────
+#
+# Background: labs /decks + /standings headers are JS-rendered, so static
+# HTML scraping can't pull the tournament_date for ~60 historical entries.
+# But tournament_cards_data_cards_<META>.csv files already carry
+# (tournament_name, tournament_date, meta) tuples for the same events under
+# a slightly different naming convention. We cross-reference labs' tournament
+# name against those files to derive the meta tag without needing the date
+# from labs.
+#
+# Coverage: 63/66 (95.5%) on the 2026-05-25 backfill. The 3 misses are real
+# edge cases (newer tournaments not yet in cards data, or duplicates beyond
+# what cards has).
+
+# Worlds is named differently on each side: cards has "World Championships
+# YYYY", labs has "World Championship CITY". This maps city → year so the
+# two reconcile.
+_WORLD_HOST_BY_CITY: Dict[str, str] = {
+    'honolulu': '2024',
+    'anaheim' : '2025',
+}
+
+# Labs began assigning IDs in late August 2024 (tid 0001 = Baltimore
+# 2024-09-14). Cards entries before this can't possibly be a labs
+# tournament, so filtering them out prevents older same-name events
+# (e.g. Brisbane 2023) from getting matched to younger labs IDs.
+_LABS_FOUNDING = datetime(2024, 8, 1)
+
+_LABS_NAME_META_CACHE: Optional[Dict[str, Tuple[str, str]]] = None
+
+
+def _parse_tournament_name_key(name: str) -> Optional[Tuple[str, str]]:
+    """Normalize tournament_name → (class, city_key) so labs ('Regional
+    Championship Birmingham') and cards ('Regional Birmingham – Limitless')
+    reconcile to the same key. Returns None for names we can't classify
+    (those rows just stay in _unsorted)."""
+    if not name:
+        return None
+    n = re.sub(r'\s*[–—-]\s*Limitless\s*$', '', name).strip()
+    # EUIC/NAIC/LAIC YYYY[–YR], City  (cards-side international naming)
+    m = re.match(r'^(?:EUIC|NAIC|LAIC)\s+\d{4}(?:[–-]\d{2,4})?,\s*(.+)$', n)
+    if m:
+        return ('international', m.group(1).strip().lower())
+    # International [Championship] City  (labs-side)
+    m = re.match(r'^International(?:\s+Championship)?\s+(.+)$', n)
+    if m:
+        return ('international', m.group(1).strip().lower())
+    # World Championships YYYY  (cards-side)
+    m = re.match(r'^World Championships?\s+(\d{4})$', n)
+    if m:
+        return ('world', m.group(1))
+    # World Championship City  (labs-side) — caller resolves city → year
+    m = re.match(r'^World Championship\s+(.+)$', n)
+    if m:
+        return ('world-by-city', m.group(1).strip().lower())
+    # Special Event City
+    m = re.match(r'^Special Event\s+(.+)$', n)
+    if m:
+        city = m.group(1).strip().lower()
+        if city == 'seville':       # Limitless spelling drift
+            city = 'sevilla'
+        return ('special', city)
+    # Regional [Championship] City[, State]
+    m = re.match(r'^Regional(?:\s+Championship)?\s+(.+)$', n)
+    if m:
+        city = re.sub(r',\s*[A-Z]{2}\s*$', '', m.group(1)).strip().lower()
+        return ('regional', city)
+    return None
+
+
+def _parse_cards_human_date(raw: str) -> Optional[datetime]:
+    """Cards CSV stores dates as '18th January 2025'. Strip ordinals + parse."""
+    if not raw:
+        return None
+    cleaned = re.sub(r'(\d+)(st|nd|rd|th)', r'\1', raw).strip()
+    for fmt in ('%d %B %Y', '%d %b %Y', '%Y-%m-%d'):
+        try:
+            return datetime.strptime(cleaned, fmt)
+        except ValueError:
+            continue
+    return None
+
+
+def _build_labs_name_meta_lookup(labs_tournaments: List[Dict]) -> Dict[str, Tuple[str, str]]:
+    """Build {labs_tid: (meta, iso_date)} by matching labs tournaments
+    against tournament_cards_data_cards_<META>.csv files.
+
+    Disambiguation when several cards entries share the same city
+    (Stuttgart in 3 metas, Birmingham in 2, etc.):
+      • Filter cards entries to those on/after _LABS_FOUNDING — labs can't
+        possibly hold tournaments from before it existed.
+      • Sort the filtered cards entries by date ascending, sort same-named
+        labs tids ascending. Position-match (labs tid #0 → cards entry #0).
+      • Labs tids ARE chronologically ordered (lower = older), so this
+        works as long as cards and labs cover overlapping ranges.
+
+    Labs tournaments without a same-name cards entry stay out of the map
+    and the caller falls back to _unsorted or current_meta."""
+    out: Dict[str, Tuple[str, str]] = {}
+    data_dir = _get_data_dir()
+    if not os.path.isdir(data_dir):
+        return out
+
+    # cards index: key -> sorted [(date_dt, meta, raw_name)]
+    cards_idx: Dict[Tuple[str, str], List[Tuple[datetime, str, str]]] = {}
+    for fname in sorted(os.listdir(data_dir)):
+        if not (fname.startswith('tournament_cards_data_cards_') and fname.endswith('.csv')):
+            continue
+        meta = fname[len('tournament_cards_data_cards_'):-len('.csv')]
+        path = os.path.join(data_dir, fname)
+        try:
+            seen_in_file: Set[str] = set()
+            with open(path, 'r', encoding='utf-8-sig') as f:
+                reader = csv.DictReader(f, delimiter=';')
+                for row in reader:
+                    raw_name = (row.get('tournament_name') or '').strip()
+                    raw_date = (row.get('tournament_date') or '').strip()
+                    if not raw_name or raw_name in seen_in_file:
+                        continue
+                    seen_in_file.add(raw_name)
+                    key = _parse_tournament_name_key(raw_name)
+                    if not key:
+                        continue
+                    d = _parse_cards_human_date(raw_date)
+                    if not d:
+                        continue
+                    cards_idx.setdefault(key, []).append((d, meta, raw_name))
+        except (OSError, csv.Error) as e:
+            logger.warning("Could not read %s for name-meta lookup: %s", path, e)
+            continue
+
+    for k in cards_idx:
+        cards_idx[k].sort(key=lambda x: x[0])
+
+    # labs index: key -> [tid] sorted ascending
+    labs_idx: Dict[Tuple[str, str], List[str]] = {}
+    for t in labs_tournaments:
+        key = _parse_tournament_name_key(t.get('tournament_name') or '')
+        if not key:
+            continue
+        labs_idx.setdefault(key, []).append(str(t.get('tournament_id') or ''))
+    for k in labs_idx:
+        labs_idx[k].sort()
+
+    for t in labs_tournaments:
+        tid = str(t.get('tournament_id') or '')
+        if not tid:
+            continue
+        key = _parse_tournament_name_key(t.get('tournament_name') or '')
+        if not key:
+            continue
+        # World-by-city → look up the world year from city
+        lookup_key = key
+        if key[0] == 'world-by-city':
+            year = _WORLD_HOST_BY_CITY.get(key[1])
+            if not year:
+                continue
+            lookup_key = ('world', year)
+        all_cands = cards_idx.get(lookup_key) or []
+        # Filter to "labs-era" cards entries
+        cands = [c for c in all_cands if c[0] >= _LABS_FOUNDING]
+        if not cands:
+            continue
+        labs_list = labs_idx.get(key) or []
+        try:
+            pos = labs_list.index(tid)
+        except ValueError:
+            continue
+        if pos >= len(cands):
+            continue
+        d, meta, _raw = cands[pos]
+        out[tid] = (meta, d.strftime('%Y-%m-%d'))
+    return out
+
+
+def _derive_meta_for_labs_tournament(
+    tid: str,
+    tournament_name: str,
+    iso_date: str,
+    labs_name_meta_lookup: Dict[str, Tuple[str, str]],
+    current_meta: str,
+) -> Tuple[str, str]:
+    """Combined derivation: ISO date first (most reliable), then name-based
+    cards lookup, then current_meta if at least the date is non-empty.
+    Returns (meta, effective_iso_date) — effective_iso_date is non-empty
+    when the cards lookup supplied a date that labs couldn't extract."""
+    effective_date = (iso_date or '').strip()
+    # 1. Date-based (works when labs gave us a parseable date)
+    m = _derive_meta_from_date(effective_date) if effective_date else ''
+    if m:
+        return (m, effective_date)
+    # 2. Name-based (cards-data crossreference)
+    name_hit = labs_name_meta_lookup.get(str(tid) or '')
+    if name_hit:
+        derived_meta, derived_date = name_hit
+        return (derived_meta, effective_date or derived_date)
+    # 3. Empty date + no name match → leave for _unsorted UNLESS we have a
+    # non-empty date that just doesn't fit any chunk window (brand-new
+    # tournament in current set).
+    if effective_date and current_meta:
+        return (current_meta, effective_date)
+    return ('', effective_date)
+
+
 def _current_meta_key() -> str:
     """Read format_window.json and return the current set code (e.g. 'CRI').
     Caller pairs this with the previous set to derive the full meta key
@@ -1462,6 +1666,21 @@ def main() -> None:
         len(seen_tids), current_meta or '(unknown)',
     )
 
+    # ── Name-based meta lookup (fallback when labs date is empty) ──────────
+    # Builds {labs_tid: (meta, iso_date)} by crossreferencing tournament
+    # names against tournament_cards_data_cards_<META>.csv files. Used as
+    # the second-tier derivation when labs returns an empty date (its
+    # /decks header is partially JS-rendered, so the parser can't always
+    # see it). See _build_labs_name_meta_lookup for the matching strategy.
+    # The lookup is also applied to existing rows during the merge below so
+    # that previously-unsorted rows get re-classified once a new run lands.
+    name_meta_lookup = _build_labs_name_meta_lookup(tournaments)
+    if name_meta_lookup:
+        logger.info(
+            "Name-based meta lookup: matched %d/%d labs tournaments via cards data",
+            len(name_meta_lookup), len(tournaments),
+        )
+
     # ── Scrape each tournament ─────────────────────────────────────────────
     all_deck_rows: List[Dict] = []
     tournaments_meta: List[Dict] = []
@@ -1477,8 +1696,16 @@ def main() -> None:
         # JS-rendered pages, but the chunks still know the real value.
         cached_for_skip = cached_tournament_meta.get(tid) or {}
         effective_date = t.get('tournament_date') or cached_for_skip.get('tournament_date') or ''
+        # Combined derivation: date first, then name-based cards lookup.
+        t_meta, effective_date = _derive_meta_for_labs_tournament(
+            tid, t.get('tournament_name', ''), effective_date,
+            name_meta_lookup, current_meta='',  # don't fall back to current here
+        )
+        # Backfill the labs entry with the derived date so it persists into
+        # labs_tournaments.json + per-row tournament_date columns.
+        if effective_date and not t.get('tournament_date'):
+            t['tournament_date'] = effective_date
         if not args.ignore_cache and tid in seen_tids:
-            t_meta = _derive_meta_from_date(effective_date)
             # current_meta check: a current-meta tournament always re-scrapes
             # (data still updates as more rounds finish). Closed metas freeze.
             is_current = bool(current_meta) and bool(t_meta) and t_meta.endswith(current_meta)
@@ -1495,8 +1722,6 @@ def main() -> None:
                 # known tournament).
                 if cached_player_counts.get(tid):
                     t['total_players'] = cached_player_counts[tid]
-                if effective_date and not t.get('tournament_date'):
-                    t['tournament_date'] = effective_date
                 if cached_for_skip.get('country') and not t.get('country'):
                     t['country'] = cached_for_skip['country']
                 tournaments_meta.append(t)
@@ -1508,26 +1733,20 @@ def main() -> None:
         tournaments_meta.append(t)
         rescraped_tids.add(tid)
 
-        # Derive meta for this tournament (uses ISO date).
-        # When the date IS known but doesn't match any chunk window, treat
-        # the tournament as brand-new in the current set and tag with
-        # current_meta so the bucket exists.
-        # When the date is EMPTY we used to fall back to current_meta too —
-        # but that silently buried date-extraction failures inside the
-        # current-meta chunk (3859 historical labs rows ended up in CRI
-        # during the 2026-05-25 backfill because scrape_tournament_meta
-        # couldn't read their date). Now empty-date rows land in
-        # _unsorted instead, making the failure visible and recoverable.
-        tdate = (t.get('tournament_date') or '').strip()
-        deck_meta = _derive_meta_from_date(tdate)
-        if not deck_meta and tdate and current_meta:
-            deck_meta = current_meta
+        # Derive deck_meta with the same combined logic — but now allow the
+        # current_meta fallback for tournaments whose date IS known but
+        # doesn't fit any chunk window (= brand-new in current set, the
+        # manifest hasn't picked it up yet).
+        deck_meta, row_date = _derive_meta_for_labs_tournament(
+            tid, t.get('tournament_name', ''), effective_date,
+            name_meta_lookup, current_meta=current_meta,
+        )
 
         for deck in decks:
             all_deck_rows.append({
                 'tournament_id'  : tid,
                 'tournament_name': t['tournament_name'],
-                'tournament_date': t['tournament_date'],
+                'tournament_date': row_date or t.get('tournament_date', ''),
                 'tournament_type': t['tournament_type'],
                 'country'        : t['country'],
                 'total_players'  : total_players,
@@ -1547,6 +1766,33 @@ def main() -> None:
     # split contains the full historical archive.
     merged_deck_rows = [r for r in existing_deck_rows if str(r.get('tournament_id') or '').strip() not in rescraped_tids]
     merged_deck_rows.extend(all_deck_rows)
+
+    # Re-classify any existing rows whose meta is empty or "_unsorted".
+    # Rows scraped in earlier runs (when the JS-rendered date wasn't yet
+    # being worked around) live in labs_tournament_decks__unsorted.csv with
+    # meta=''. The name-meta lookup can now rescue most of them — and
+    # populate their tournament_date column from cards data while we're at
+    # it. This is how the 2026-05-25 _unsorted pile of 4072 rows ends up
+    # correctly distributed without a re-scrape.
+    rescued = 0
+    for row in merged_deck_rows:
+        if (row.get('meta') or '').strip():
+            continue
+        tid = str(row.get('tournament_id') or '').strip()
+        if not tid:
+            continue
+        new_meta, new_date = _derive_meta_for_labs_tournament(
+            tid, row.get('tournament_name', ''),
+            row.get('tournament_date') or '',
+            name_meta_lookup, current_meta=current_meta,
+        )
+        if new_meta:
+            row['meta'] = new_meta
+            if new_date and not (row.get('tournament_date') or '').strip():
+                row['tournament_date'] = new_date
+            rescued += 1
+    if rescued:
+        logger.info("Re-classified %d previously-unsorted rows via name lookup", rescued)
 
     # ── Save ───────────────────────────────────────────────────────────────
     if overwrite:

@@ -6,37 +6,5 @@
     "tournament_type": "regional",
     "country": "AU",
     "total_players": 0
-  },
-  {
-    "tournament_id": "0065",
-    "tournament_name": "Regional Championship Campinas",
-    "tournament_date": "2026-05-16",
-    "tournament_type": "regional",
-    "country": "BR",
-    "total_players": 1722
-  },
-  {
-    "tournament_id": "0064",
-    "tournament_name": "Regional Championship Utrecht",
-    "tournament_date": "2026-05-16",
-    "tournament_type": "regional",
-    "country": "NL",
-    "total_players": 2140
-  },
-  {
-    "tournament_id": "0063",
-    "tournament_name": "Regional Championship Los Angeles",
-    "tournament_date": "2026-05-08",
-    "tournament_type": "regional",
-    "country": "US",
-    "total_players": 1844
-  },
-  {
-    "tournament_id": "0062",
-    "tournament_name": "Regional Championship Prague",
-    "tournament_date": "2026-04-25",
-    "tournament_type": "regional",
-    "country": "CZ",
-    "total_players": 1367
   }
 ]

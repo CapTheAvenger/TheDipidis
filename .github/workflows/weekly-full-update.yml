@@ -16,9 +16,9 @@ on:
   workflow_dispatch:
     inputs:
       with_matchups:
-        description: 'Scrape labs per-archetype matchups (~80 min for overall)'
+        description: 'Scrape labs per-archetype matchups (DEFAULT OFF — parser broken as of 2026-05-25, scrapes player standings instead of deck-vs-deck. Re-enable after parser fix lands.)'
         type: boolean
-        default: true
+        default: false
       matchup_days:
         description: 'Day filter(s) for matchups (space-separated: overall / day1 / day2)'
         type: string
@@ -277,9 +277,12 @@ jobs:
       - name: Run labs tournament scraper (deck list + matchups)
         env:
           PYTHONPATH: ${{ github.workspace }}/backend/core
-          # workflow_dispatch inputs default to true / 'overall' on the
-          # cron schedule (inputs are unset → fall back to true / 'overall').
-          WITH_MATCHUPS:  ${{ github.event.inputs.with_matchups || 'true' }}
+          # 2026-05-25 — matchups OFF by default. The parser scraped
+          # player standings instead of deck-vs-deck matchups (the page
+          # at /{tid}/decks/{slug} shows players, not opponent decks).
+          # Re-enable when the parser is rewritten against the correct
+          # URL / HTML structure.
+          WITH_MATCHUPS:  ${{ github.event.inputs.with_matchups || 'false' }}
           MATCHUP_DAYS:   ${{ github.event.inputs.matchup_days || 'overall' }}
           LABS_ID_RANGE:  ${{ github.event.inputs.labs_id_range || '' }}
         working-directory: backend

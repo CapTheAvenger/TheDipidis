@@ -202,6 +202,31 @@ def test_scrape_archetype_matchups_url_format(monkeypatch):
     )
 
 
+def test_scrape_archetype_matchups_day_filter_url(monkeypatch):
+    """Day filter appends a query flag — user-confirmed `&d2` for Day 2
+    (2026-05-25), `&d1` inferred. Overall stays unflagged."""
+    captured = {}
+
+    def fake_fetch(url):
+        captured.setdefault("urls", []).append(url)
+        return None
+
+    monkeypatch.setattr(labs_scraper, "fetch_page_bs4", fake_fetch)
+
+    base = "https://labs.limitlesstcg.com/decks/dragapult-dusknoir?tournaments=56,57,58,59,60,61"
+    tids = ["56", "57", "58", "59", "60", "61"]
+
+    labs_scraper.scrape_archetype_matchups("dragapult-dusknoir", tids, day_filter="overall")
+    labs_scraper.scrape_archetype_matchups("dragapult-dusknoir", tids, day_filter="day1")
+    labs_scraper.scrape_archetype_matchups("dragapult-dusknoir", tids, day_filter="day2")
+
+    assert captured["urls"] == [
+        base,
+        base + "&d1",
+        base + "&d2",
+    ]
+
+
 def test_scrape_archetype_matchups_empty_tid_list(monkeypatch):
     """Empty / all-invalid tids → no fetch, empty result with safe defaults."""
     called = {"fetch": 0}

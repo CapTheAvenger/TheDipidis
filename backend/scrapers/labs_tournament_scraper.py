@@ -1358,10 +1358,11 @@ def scrape_archetype_matchups(
     parser dutifully scraped player names as "opponent_deck_name", which
     is why PR #205 disabled matchups + deleted 6773 garbage rows.
 
-    Day filter: the labs page exposes Day-1 / Day-2 toggles, but the URL
-    is the same for all three views (the page rerenders client-side). For
-    now the scraper only supports MATCHUP_DAY_OVERALL — Day 1/2 would need
-    JS execution or a separate AJAX endpoint we haven't reverse-engineered.
+    Day filter:
+      • 'overall' → no extra query flag
+      • 'day2'    → adds `&d2` (user-confirmed 2026-05-25)
+      • 'day1'    → adds `&d1` (inferred symmetric pattern — verify when
+        the first populated day1 scrape lands)
 
     Returns a dict:
       {
@@ -1402,6 +1403,16 @@ def scrape_archetype_matchups(
         }
 
     url = f"{BASE_URL}/decks/{deck_slug}?tournaments={','.join(tids_sorted)}"
+    # Day-filter query flag — user confirmed `&d2` for Day 2 on 2026-05-25.
+    # `&d1` for Day 1 is inferred from the symmetric pattern (the labs UI
+    # exposes Overall / Day 1 / Day 2 tabs on the meta summary page); if
+    # the assumed flag is wrong, the scraped page will fall back to the
+    # Overall view and rows are still valid — just mis-labeled as day1.
+    # Confirm the d1 pattern when we first see a populated day1 scrape.
+    if day_filter == MATCHUP_DAY_DAY2:
+        url += '&d2'
+    elif day_filter == MATCHUP_DAY_DAY1:
+        url += '&d1'
     logger.info("    Fetching matchups %s", url)
     soup = fetch_page_bs4(url)
     if not soup:
@@ -2003,12 +2014,15 @@ def main() -> None:
         # matches what Meta Call actually needs (per-meta blends).
         matchup_rows: List[Dict] = []
         # Group: meta -> {slug -> deck_name} and meta -> [tids]
+        # Iterate MERGED rows (not just freshly-scraped) so past metas
+        # with cached decks are included. Skip-if-already-scraped logic
+        # below prevents redundant re-scraping for closed metas.
         meta_to_tids: Dict[str, List[str]] = {}
         meta_slug_to_name: Dict[Tuple[str, str], str] = {}
-        for deck_row in all_deck_rows:
+        for deck_row in merged_deck_rows:
             slug = (deck_row.get('deck_slug') or '').strip()
             deck_meta = (deck_row.get('meta') or '').strip()
-            if not slug or not deck_meta:
+            if not slug or not deck_meta or deck_meta == '_unsorted':
                 continue
             tid = str(deck_row.get('tournament_id') or '').strip()
             if tid:
@@ -2019,21 +2033,48 @@ def main() -> None:
                 (deck_meta, slug),
                 (deck_row.get('deck_name') or slug),
             )
-        # CLI --matchup-meta narrows the scrape to a single meta (useful
-        # for one-off backfills of one closed format without re-scraping
-        # everything).
+
+        # Skip-if-already-scraped: don't re-fetch closed-meta matchups
+        # every weekly run. We refresh ONLY the current meta (data
+        # evolves as new rounds + new tournaments land) and any meta
+        # that has no matchup rows yet (= first scrape for that meta).
+        # CLI --matchup-meta forces a specific meta regardless of state
+        # (useful for ad-hoc backfills + day1/day2 fills after a parser
+        # tweak).
+        existing_matchup_metas = {
+            (r.get('meta') or '').strip() for r in existing_matchup_rows
+        }
+        existing_matchup_metas.discard('')
         if args.matchup_meta:
-            meta_to_tids = {k: v for k, v in meta_to_tids.items() if k == args.matchup_meta}
-            meta_slug_to_name = {ks: n for ks, n in meta_slug_to_name.items()
-                                 if ks[0] == args.matchup_meta}
+            metas_to_scrape = {args.matchup_meta} & set(meta_to_tids.keys())
+        else:
+            metas_to_scrape = set()
+            for m in meta_to_tids:
+                # current meta — endswith covers BRS-SSP/SVI-PFL style
+                # composite meta keys whose tail is the current set code.
+                if current_meta and m.endswith(current_meta):
+                    metas_to_scrape.add(m)
+                # first-time fill: meta has decks but no matchups yet
+                elif m not in existing_matchup_metas:
+                    metas_to_scrape.add(m)
+        meta_to_tids = {k: v for k, v in meta_to_tids.items() if k in metas_to_scrape}
+        meta_slug_to_name = {ks: n for ks, n in meta_slug_to_name.items()
+                             if ks[0] in metas_to_scrape}
+        skipped_metas = existing_matchup_metas - metas_to_scrape
+        if skipped_metas:
+            logger.info(
+                "Matchup cache: skipping %d already-scraped metas (%s) — current=%s",
+                len(skipped_metas), ', '.join(sorted(skipped_metas)),
+                current_meta or '(unknown)',
+            )
 
         total_combos = sum(
             len([s for (m, s) in meta_slug_to_name if m == meta]) * len(args.matchup_days)
             for meta in meta_to_tids
         )
         logger.info(
-            "Matchup pass: scraping %d (meta, archetype, day) combos (one HTTP each, ~%.1f min @ %ss delay)",
-            total_combos, total_combos * delay / 60, delay,
+            "Matchup pass: scraping %d (meta, archetype, day) combos across %d metas (one HTTP each, ~%.1f min @ %ss delay)",
+            total_combos, len(meta_to_tids), total_combos * delay / 60, delay,
         )
         combo_idx = 0
         for meta, tids in meta_to_tids.items():

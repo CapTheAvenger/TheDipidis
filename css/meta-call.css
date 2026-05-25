@@ -2855,3 +2855,64 @@
     border-radius: 4px;
     border: 1px solid #e0e0e0;
 }
+
+/* ── Frozen past meta — Fun-Event view ─────────────────────────
+   Soft amber banner that sits between the Source picker and the
+   field-share table when the user opens a closed past meta. Distinct
+   from the warm-amber predictor-banner ("Mode A") so users glancing
+   at the page can tell this isn't a regular predictor run. */
+.metacall-frozen-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  background: linear-gradient(135deg, #fff7e6 0%, #fff1d6 100%);
+  border: 1px solid #f3d68a;
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-bottom: 18px;
+  box-shadow: 0 2px 6px rgba(204, 154, 38, 0.08);
+}
+.metacall-frozen-icon {
+  font-size: 1.5rem;
+  line-height: 1;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.metacall-frozen-text {
+  flex: 1;
+  min-width: 0;
+}
+.metacall-frozen-text strong {
+  font-size: 0.95rem;
+  color: #7a5a18;
+  font-weight: 700;
+}
+.metacall-frozen-meta {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 8px;
+  background: rgba(122, 90, 24, 0.12);
+  color: #7a5a18;
+  border-radius: 12px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+.metacall-frozen-hint {
+  margin: 6px 0 0 0;
+  font-size: 0.86rem;
+  color: #6b5318;
+  line-height: 1.4;
+}
+
+/* Frozen-mode recommendations table — same skeleton as .mc-rec-table
+   but a sixth column for "Players" and no chevron toggle row. */
+.mc-rec-hint-meta {
+  font-size: 0.78rem;
+  color: #8a8a8a;
+  margin-top: -4px;
+}
+.mc-rec-table-frozen th[title] {
+  cursor: help;
+  border-bottom: 1px dotted #c8d1da;
+}

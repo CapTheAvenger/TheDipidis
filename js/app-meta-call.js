@@ -52,6 +52,13 @@ window.MetaCall = (function () {
   let _pastMetaFormatKey = null;   // e.g. 'TEF-POR' when _metaSource = 'past'
   let _pastMetaAvailableFormats = []; // [{ key, label, maxDate }] sorted newest-first
   let _pastMetaCachedShares = new Map(); // formatKey -> [{name, share}] memo
+  // Frozen-meta labs aggregate (Final-Cumulative ranking). Populated
+  // lazily by _loadPastMetaLabsAggregate when the user opens a closed
+  // past meta — that mode swaps out the live predictor for a deterministic
+  // historical ranking driven by labs_tournament_decks_<META>.csv.
+  // null value cached separately from absence to memoize "no labs file
+  // for this format" without re-fetching on every render pass.
+  let _pastMetaLabsCache = new Map(); // formatKey -> { archetypes, tournamentCount } | null
 
   // ── Predictor 3.0 — history-aware trend signals ───────────
   let _lastMajorDate     = null; // 'YYYY-MM-DD' — most recent labs tournament_date
@@ -552,6 +559,118 @@ window.MetaCall = (function () {
       formatKey,
     };
     _pastMetaCachedShares.set(formatKey, result);
+    return result;
+  }
+
+  // True when a past-meta chunk is "closed" — no in-person events left
+  // that can play it, so its share table + WR/Day-2 numbers are final
+  // and the live predictor (trend, meta-dynamics, counter-meta boosts)
+  // adds no value. Rule:
+  //   - in_person_legal_date of current_set has passed → ALL past metas
+  //     are closed (current_set is now the in-person format).
+  //   - in_person_legal_date is still in the future → the newest past
+  //     meta is still hosting in-person events and stays "active";
+  //     everything older than it is closed.
+  // Defensive default when format_window or the catalog is missing:
+  // treat as closed so we never serve a stale predictor on a meta whose
+  // freshness we can't confirm.
+  function _isPastMetaFrozen(metaKey) {
+    if (!metaKey) return false;
+    if (!_formatWindow || !_formatWindow.in_person_legal_date) return true;
+    const today = new Date().toISOString().slice(0, 10);
+    if (today >= _formatWindow.in_person_legal_date) return true;
+    if (!Array.isArray(_pastMetaAvailableFormats) || _pastMetaAvailableFormats.length === 0) return true;
+    const latest = _pastMetaAvailableFormats[0]; // sorted newest-first by maxDate
+    return metaKey !== latest.key;
+  }
+
+  // Aggregate labs_tournament_decks_<META>.csv into per-archetype totals
+  // for the Final-Cumulative ranking shown in frozen-meta mode. Returns
+  //   { archetypes: [{ name, winPct, day2Conv, players, games, score, tournaments }],
+  //     tournamentCount }
+  // or null if the labs chunk is missing/empty. Cached on the module so
+  // toggling between past metas doesn't refetch.
+  //
+  // Score formula: winPct × (1 + day2Conv).
+  //   - winPct in [0, 100]  → headline measure of in-game success
+  //   - day2Conv in [0, 1]  → bonus weight for decks that didn't just
+  //     play well in Swiss but actually punched into Day 2 (the user-
+  //     flagged proxy for "this deck rewarded tournament prep, not just
+  //     ladder mash-up").
+  // 200 is the hard ceiling (100 % WR × 2× day2 multiplier); typical
+  // top entries land around 60-90.
+  async function _loadPastMetaLabsAggregate(metaKey) {
+    if (!metaKey) return null;
+    if (_pastMetaLabsCache.has(metaKey)) return _pastMetaLabsCache.get(metaKey);
+
+    let csvText = null;
+    try {
+      const resp = await fetch(`data/labs_tournament_decks_${metaKey}.csv?t=` + Date.now());
+      if (!resp.ok) { _pastMetaLabsCache.set(metaKey, null); return null; }
+      csvText = await resp.text();
+    } catch (_e) { _pastMetaLabsCache.set(metaKey, null); return null; }
+    if (!csvText) { _pastMetaLabsCache.set(metaKey, null); return null; }
+
+    // labs CSV is comma-delimited with a quoted `pokemon` column → use
+    // the RFC-4180-aware parser, not the naive split-on-sep one.
+    const rows = parseCSVQuoted(csvText, ',');
+    if (rows.length === 0) { _pastMetaLabsCache.set(metaKey, null); return null; }
+
+    const byDeck = new Map();  // name -> aggregate
+    const allTournaments = new Set();
+    for (const r of rows) {
+      const tid = (r.tournament_id || '').trim();
+      const name = (r.deck_name || '').trim();
+      if (!tid || !name) continue;
+      allTournaments.add(tid);
+
+      const players = parseInt(r.player_count || '0', 10) || 0;
+      const wins    = parseFloat(r.wins   || '0') || 0;
+      const losses  = parseFloat(r.losses || '0') || 0;
+      const ties    = parseFloat(r.ties   || '0') || 0;
+      const day1    = parseInt(r.day1_players || '0', 10) || 0;
+      const day2    = parseInt(r.day2_players || '0', 10) || 0;
+
+      if (!byDeck.has(name)) {
+        byDeck.set(name, {
+          players: 0, wins: 0, losses: 0, ties: 0,
+          day1: 0, day2: 0, tournaments: new Set(),
+        });
+      }
+      const e = byDeck.get(name);
+      e.players += players;
+      e.wins    += wins;
+      e.losses  += losses;
+      e.ties    += ties;
+      e.day1    += day1;
+      e.day2    += day2;
+      e.tournaments.add(tid);
+    }
+
+    const archetypes = [];
+    for (const [name, agg] of byDeck) {
+      const games = agg.wins + agg.losses + agg.ties;
+      // Ties count as half a win so the metric matches how players
+      // describe winrate ("I went 6-2-1 → 6.5/9 = 72 %") and stays
+      // consistent with labs's own win_pct definition.
+      const winPct = games > 0 ? (agg.wins + 0.5 * agg.ties) / games * 100 : 0;
+      const day2Conv = agg.day1 > 0 ? agg.day2 / agg.day1 : 0;
+      archetypes.push({
+        name,
+        players: agg.players,
+        winPct,
+        day2Conv,
+        day1: agg.day1,
+        day2: agg.day2,
+        games,
+        score: winPct * (1 + day2Conv),
+        tournaments: agg.tournaments.size,
+      });
+    }
+    archetypes.sort((a, b) => b.score - a.score);
+
+    const result = { metaKey, archetypes, tournamentCount: allTournaments.size };
+    _pastMetaLabsCache.set(metaKey, result);
     return result;
   }
 
@@ -3136,6 +3255,20 @@ window.MetaCall = (function () {
       _labsQualityByDeck = {};
       _labsDay2ConvByDeck = {};
       _predictorMode = 'A';            // online-only mode (no labs signal)
+      // Closed past meta — pin to standard so the hidden mode toggle
+      // can't leave a 'counter' value sitting in state from the live
+      // meta. Frozen view replaces predictor recommendations with the
+      // Final-Cumulative ranking, which has no counter-meta dimension.
+      if (_isPastMetaFrozen(_pastMetaFormatKey)) {
+        _metaCallMode = 'standard';
+        // Fire-and-forget — the renderer can show a "loading" state if
+        // it arrives before the labs aggregate resolves; the next render
+        // pass will pick it up from cache. We don't await so the share
+        // table paints immediately.
+        _loadPastMetaLabsAggregate(_pastMetaFormatKey).then(() => {
+          try { renderAll(); } catch (_e) { /* tolerate */ }
+        }).catch(() => { /* tolerate */ });
+      }
       _runPredictor();
       try { await _decorateMetaCallEntries(); } catch (_e) { /* tolerate */ }
       try { renderAll(); } catch (_e) { /* tolerate */ }
@@ -4014,6 +4147,14 @@ window.MetaCall = (function () {
       return `<option value="${esc(f.key)}"${sel}>${esc(display)}</option>`;
     }).join('');
 
+    // Hint shown next to the format dropdown. In frozen mode the
+    // matchup-proxy warning is irrelevant — the frozen panels don't
+    // use the matchup matrix at all — so we swap it for a brief note
+    // explaining what the user is looking at.
+    const frozen = _inFrozenPastMode();
+    const hintHtml = frozen
+      ? `<span class="mc-source-hint" title="${esc(t('mc.frozenSourceHintTitle'))}">📌 ${esc(t('mc.frozenSourceHint'))}</span>`
+      : `<span class="mc-source-hint" title="Matchups use current online data (no historical matchup pairs are scraped per past meta).">ⓘ Matchups = current proxy</span>`;
     const formatRow = _metaSource === 'past'
       ? `<div class="mc-source-format-row">
            <label class="mc-source-format-label">Format:</label>
@@ -4021,7 +4162,7 @@ window.MetaCall = (function () {
              <option value="">— select format —</option>
              ${dropdownOptions}
            </select>
-           <span class="mc-source-hint" title="Matchups use current online data (no historical matchup pairs are scraped per past meta).">ⓘ Matchups = current proxy</span>
+           ${hintHtml}
          </div>`
       : '';
 
@@ -4585,14 +4726,29 @@ window.MetaCall = (function () {
   ${renderScenariosBar()}
   ${renderSettingsPanel()}
   ${renderMetaSourcePanel()}
-  ${renderMetaCallModePanel()}
-  ${renderSourcesPanel()}
+  ${_inFrozenPastMode() ? '' : renderMetaCallModePanel()}
+  ${_inFrozenPastMode() ? '' : renderSourcesPanel()}
+  ${_inFrozenPastMode() ? renderFrozenBanner() : ''}
   ${renderFieldPanel(field)}
-  ${renderCustomDecksPanel()}
-  ${renderMyDeckPanel()}
-  ${renderResultsPanel(field)}
-  ${renderRecommendationsPanel(field)}
+  ${_inFrozenPastMode() ? '' : renderCustomDecksPanel()}
+  ${_inFrozenPastMode() ? '' : renderMyDeckPanel()}
+  ${_inFrozenPastMode() ? '' : renderResultsPanel(field)}
+  ${_inFrozenPastMode() ? renderFrozenRecommendationsPanel() : renderRecommendationsPanel(field)}
 </div>`;
+  }
+
+  // True when the currently-selected source is a closed past meta. Used
+  // by renderAll to swap the live-predictor panels (Mode toggle, CL
+  // sources, custom decks, My Deck simulation, Results) for the smaller
+  // "Fun-Event" view that just shows the final share table + the
+  // Final-Cumulative ranking. Custom decks / My Deck / Results all
+  // depend on the matchup simulator which isn't meaningful for a closed
+  // historical meta, so hiding them removes the temptation to read
+  // simulator output as real prediction.
+  function _inFrozenPastMode() {
+    return _metaSource === 'past'
+      && !!_pastMetaFormatKey
+      && _isPastMetaFrozen(_pastMetaFormatKey);
   }
 
   // Recommendations panel — top N decks ranked by Day-2 probability
@@ -4727,6 +4883,116 @@ window.MetaCall = (function () {
   </div>
   ${day2Section}
   ${tipsHtml}
+</div>`;
+  }
+
+  // ── Frozen past meta — closed-format Fun-Event view ──────────
+  //
+  // When the user opens a past meta whose in-person window has elapsed,
+  // the live predictor adds no value (no future tournaments to predict
+  // against, no fresh online data shaping the field). renderAll swaps
+  // the predictor panels for this pair of read-only views:
+  //
+  //   - renderFrozenBanner — explains the mode, no controls
+  //   - renderFrozenRecommendationsPanel — Final-Cumulative ranking
+  //     (winPct × (1 + day2Conv)) sourced from the per-meta labs CSV
+  //
+  // Both intentionally avoid the simulator entirely. The user asked for
+  // a "Fun-Event-Modus" — a list of decks that actually performed in
+  // that meta, not a prediction of how they'd do today.
+  function renderFrozenBanner() {
+    const expander = (typeof window !== 'undefined' && typeof window.expandPastMetaCode === 'function')
+      ? window.expandPastMetaCode
+      : (k => k);
+    const expanded = expander(_pastMetaFormatKey);
+    const display = expanded && expanded !== _pastMetaFormatKey
+      ? `${expanded} (${_pastMetaFormatKey})`
+      : (_pastMetaFormatKey || '');
+    return `
+<div class="metacall-frozen-banner">
+  <span class="metacall-frozen-icon">📌</span>
+  <div class="metacall-frozen-text">
+    <strong>${esc(t('mc.frozenBannerTitle'))}</strong>
+    <span class="metacall-frozen-meta">${esc(display)}</span>
+    <p class="metacall-frozen-hint">${esc(t('mc.frozenBannerHint'))}</p>
+  </div>
+</div>`;
+  }
+
+  // Final-Cumulative ranking table. Reads from the labs aggregate cache
+  // that _setMetaSource kicks off when switching INTO a frozen meta;
+  // if the aggregate hasn't resolved yet (first paint), renders a
+  // "loading" placeholder — the .then() in _setMetaSource calls
+  // renderAll again once data lands. If there's no labs file for the
+  // meta (older chunks pre-date the labs scraper), renders an empty
+  // state instead of failing.
+  function renderFrozenRecommendationsPanel() {
+    if (!_pastMetaFormatKey) return '';
+    const cached = _pastMetaLabsCache.get(_pastMetaFormatKey);
+    if (cached === undefined) {
+      // Not loaded yet — show a slim loading state. The .then() in
+      // _setMetaSource triggers a re-render once the labs CSV resolves.
+      return `
+<div class="metacall-panel mc-rec-panel">
+  <div class="metacall-panel-title">${t('mc.frozenRecPanelTitle')}</div>
+  <p class="mc-rec-hint">${esc(t('mc.frozenRecLoading'))}</p>
+</div>`;
+    }
+    if (cached === null || !cached.archetypes || cached.archetypes.length === 0) {
+      return `
+<div class="metacall-panel mc-rec-panel">
+  <div class="metacall-panel-title">${t('mc.frozenRecPanelTitle')}</div>
+  <p class="mc-rec-hint">${esc(t('mc.frozenRecEmpty'))}</p>
+</div>`;
+    }
+
+    // Filter out micro-sample archetypes — anything with <30 total
+    // players across the meta's tournaments is noise (one player going
+    // 6-0 lands at 100 % winPct and would otherwise top the list).
+    const MIN_PLAYERS = 30;
+    const eligible = cached.archetypes.filter(a => a.players >= MIN_PLAYERS);
+    const display  = (eligible.length >= 5 ? eligible : cached.archetypes).slice(0, 10);
+
+    const rows = display.map((a, i) => {
+      const icon = (typeof window.ArchetypeIcons !== 'undefined')
+        ? window.ArchetypeIcons.getIconHtml(a.name, { size: 'sm', layout: 'inline' })
+        : '';
+      const winStr   = a.winPct.toFixed(1).replace('.', ',');
+      const day2Str  = (a.day2Conv * 100).toFixed(1).replace('.', ',');
+      const scoreStr = a.score.toFixed(1).replace('.', ',');
+      return `<tr class="mc-rec-row">
+        <td class="mc-rec-rank">${i + 1}</td>
+        <td class="mc-rec-name"><span class="mc-rec-name-inner">${icon}<span class="mc-rec-name-text">${esc(a.name)}</span></span></td>
+        <td class="mc-rec-day2"><strong>${scoreStr}</strong></td>
+        <td class="mc-rec-wr">${winStr}%</td>
+        <td class="mc-rec-wins">${day2Str}%</td>
+        <td class="mc-rec-wins">${a.players.toLocaleString()}</td>
+      </tr>`;
+    }).join('');
+
+    const tournHint = t('mc.frozenRecTournHint')
+      .replace('{n}', String(cached.tournamentCount))
+      .replace('{archetypes}', String(display.length));
+
+    return `
+<div class="metacall-panel mc-rec-panel">
+  <div class="metacall-panel-title">
+    ${t('mc.frozenRecPanelTitle')}
+    <span class="mc-badge">${esc(t('mc.frozenRecBadge'))}</span>
+  </div>
+  <p class="mc-rec-hint">${esc(t('mc.frozenRecHint'))}</p>
+  <p class="mc-rec-hint mc-rec-hint-meta">${esc(tournHint)}</p>
+  <table class="mc-rec-table mc-rec-table-frozen">
+    <thead><tr>
+      <th>#</th>
+      <th>${t('mc.recDeck')}</th>
+      <th title="${esc(t('mc.frozenColScoreHint'))}">${t('mc.frozenColScore')}</th>
+      <th>${t('mc.frozenColWinPct')}</th>
+      <th>${t('mc.frozenColDay2Conv')}</th>
+      <th>${t('mc.frozenColPlayers')}</th>
+    </tr></thead>
+    <tbody>${rows}</tbody>
+  </table>
 </div>`;
   }
 

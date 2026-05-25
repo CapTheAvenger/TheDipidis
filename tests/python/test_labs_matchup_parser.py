@@ -138,40 +138,105 @@ def test_lucario_hariyama_matchup_data(parsed):
 
 
 def test_build_matchup_rows_produces_full_csv_shape():
-    """End-to-end: deck_summary + matchups_result → CSV-ready rows."""
-    tournament_meta = {
-        "tournament_id": "539",
-        "tournament_name": "Regional Prague",
-        "tournament_date": "2026-04-25",
-        "tournament_type": "regional",
-        "meta": "TEF-POR",
-    }
-    deck_summary = {
-        "deck_slug": "dragapult",
-        "deck_name": "Dragapult",
-        "player_count": 738,
-        "win_pct": 50.86,
-    }
+    """End-to-end: meta + slug + matchups_result → CSV-ready rows.
+
+    Schema shifted with the 2026-05-25 URL fix: matchups are now keyed by
+    (meta, deck_slug) — aggregated across all tournaments_used by the
+    labs combined view — instead of per-(tid, slug). The row carries
+    `tournaments_used` (provenance) + `tournament_count` (convenience)
+    instead of the old per-tournament fields."""
     matchups_result = {
         "summary": {
-            "player_count": 738,
-            "total_wins": 2891,
-            "total_losses": 2447,
-            "total_ties": 1004,
-            "overall_win_pct": 50.86,
+            "player_count": 1598,
+            "total_wins": 5417,
+            "total_losses": 5534,
+            "total_ties": 1802,
+            "overall_win_pct": 47.19,
         },
         "matchups": [
-            {"opponent_slug": "raging-bolt-ogerpon", "opponent_name": "Raging Bolt Ogerpon",
-             "vs_count": 418, "vs_win_pct": 40.59},
+            {"opponent_slug": "ns-zoroark", "opponent_name": "N's Zoroark",
+             "vs_count": 1224, "vs_win_pct": 42.84},
         ],
         "day_filter": "overall",
+        "tournaments_used": ["56", "57", "58", "59", "60", "61"],
     }
-    rows = labs_scraper.build_matchup_rows(tournament_meta, deck_summary, matchups_result)
+    rows = labs_scraper.build_matchup_rows(
+        "SVI-ASC", "dragapult-dusknoir", "Dragapult Dusknoir", matchups_result,
+    )
     assert len(rows) == 1
     r = rows[0]
+    # All CSV header fields except `scraped_at` (which is timestamp-derived)
+    # should be present on the row.
     assert set(r.keys()) >= set(labs_scraper.MATCHUP_CSV_HEADER) - {"scraped_at"}
-    assert r["my_deck_slug"] == "dragapult"
-    assert r["opponent_deck_slug"] == "raging-bolt-ogerpon"
-    assert r["vs_count"] == 418
-    assert r["meta"] == "TEF-POR"
+    assert r["meta"] == "SVI-ASC"
+    assert r["tournaments_used"] == "56,57,58,59,60,61"
+    assert r["tournament_count"] == 6
+    assert r["my_deck_slug"] == "dragapult-dusknoir"
+    assert r["my_deck_name"] == "Dragapult Dusknoir"
+    assert r["my_deck_player_count"] == 1598
+    assert r["opponent_deck_slug"] == "ns-zoroark"
+    assert r["opponent_deck_name"] == "N's Zoroark"
+    assert r["vs_count"] == 1224
+    assert abs(r["vs_win_pct"] - 42.84) < 0.01
     assert r["day_filter"] == "overall"
+
+
+def test_scrape_archetype_matchups_url_format(monkeypatch):
+    """Regression: the URL pattern must be
+    `/decks/{slug}?tournaments={unpadded_tids_csv}` (the combined-view
+    page), NOT the old `/{tid}/decks/{slug}` (which returns players, not
+    matchups — see PR #205). Tids must be unpadded ints, sorted."""
+    captured_url = {}
+
+    def fake_fetch(url):
+        captured_url["url"] = url
+        return None  # short-circuit — we just want the URL build
+
+    monkeypatch.setattr(labs_scraper, "fetch_page_bs4", fake_fetch)
+    labs_scraper.scrape_archetype_matchups(
+        "dragapult-dusknoir", ["0061", "0060", "0059", "0058", "0057", "0056"],
+    )
+    assert captured_url["url"] == (
+        "https://labs.limitlesstcg.com/decks/dragapult-dusknoir"
+        "?tournaments=56,57,58,59,60,61"
+    )
+
+
+def test_scrape_archetype_matchups_day_filter_url(monkeypatch):
+    """Day filter appends a query flag — user-confirmed `&d2` for Day 2
+    (2026-05-25), `&d1` inferred. Overall stays unflagged."""
+    captured = {}
+
+    def fake_fetch(url):
+        captured.setdefault("urls", []).append(url)
+        return None
+
+    monkeypatch.setattr(labs_scraper, "fetch_page_bs4", fake_fetch)
+
+    base = "https://labs.limitlesstcg.com/decks/dragapult-dusknoir?tournaments=56,57,58,59,60,61"
+    tids = ["56", "57", "58", "59", "60", "61"]
+
+    labs_scraper.scrape_archetype_matchups("dragapult-dusknoir", tids, day_filter="overall")
+    labs_scraper.scrape_archetype_matchups("dragapult-dusknoir", tids, day_filter="day1")
+    labs_scraper.scrape_archetype_matchups("dragapult-dusknoir", tids, day_filter="day2")
+
+    assert captured["urls"] == [
+        base,
+        base + "&d1",
+        base + "&d2",
+    ]
+
+
+def test_scrape_archetype_matchups_empty_tid_list(monkeypatch):
+    """Empty / all-invalid tids → no fetch, empty result with safe defaults."""
+    called = {"fetch": 0}
+
+    def fake_fetch(url):
+        called["fetch"] += 1
+        return None
+
+    monkeypatch.setattr(labs_scraper, "fetch_page_bs4", fake_fetch)
+    result = labs_scraper.scrape_archetype_matchups("dragapult-dusknoir", [])
+    assert called["fetch"] == 0
+    assert result["matchups"] == []
+    assert result["tournaments_used"] == []

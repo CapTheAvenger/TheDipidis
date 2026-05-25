@@ -1282,22 +1282,23 @@ MATCHUP_DAY_DAY2 = 'day2'
 _MATCHUP_DAYS = (MATCHUP_DAY_OVERALL, MATCHUP_DAY_DAY1, MATCHUP_DAY_DAY2)
 
 MATCHUP_CSV_HEADER = [
-    'tournament_id',
-    'tournament_name',
-    'tournament_date',
-    'tournament_type',
-    'meta',                  # format key (e.g. TEF-POR) for downstream chunking
+    'meta',                  # format key (e.g. TEF-POR) — the matchup view is
+                             # an aggregate ACROSS all tournaments in this meta
+    'tournaments_used',      # comma-separated tids included in this combined
+                             # view (provenance — lets downstream code recompute
+                             # / regenerate the labs URL)
+    'tournament_count',      # convenience — len(tournaments_used)
     'my_deck_slug',
     'my_deck_name',
-    'my_deck_player_count',  # total players who brought this deck to the event
+    'my_deck_player_count',  # AGGREGATED across all tournaments_used
     'my_deck_total_wins',
     'my_deck_total_losses',
     'my_deck_total_ties',
     'my_deck_overall_win_pct',
     'opponent_deck_slug',
     'opponent_deck_name',
-    'vs_count',              # games played vs this opponent in the day_filter
-    'vs_win_pct',            # win % vs this opponent in the day_filter
+    'vs_count',              # games played vs this opponent (aggregated)
+    'vs_win_pct',            # win % vs this opponent (aggregated)
     'day_filter',            # 'overall' | 'day1' | 'day2'
     'scraped_at',
 ]
@@ -1340,14 +1341,28 @@ def _parse_player_summary(soup) -> Dict[str, float]:
 
 
 def scrape_archetype_matchups(
-    tournament_id: str,
     deck_slug: str,
+    tournament_ids: List[str],
     day_filter: str = MATCHUP_DAY_OVERALL,
 ) -> Dict:
     """
-    Fetch labs.limitlesstcg.com/{tournament_id}/decks/{deck_slug} (with
-    optional ?day1 / ?day2 query) and parse the per-opponent matchup
-    table.
+    Fetch the labs metagame "combined view" for one archetype across a
+    list of tournaments, and parse the per-opponent matchup table.
+
+    URL: https://labs.limitlesstcg.com/decks/{deck_slug}?tournaments={ids}
+      where {ids} is a comma-separated list of UNPADDED tids (61,60,...).
+      The view aggregates players + matchups across all listed tids.
+
+    Until 2026-05-25 this hit /{tid}/decks/{deck_slug} — a per-tournament
+    deck-detail page that shows PLAYERS (not deck-vs-deck matchups). The
+    parser dutifully scraped player names as "opponent_deck_name", which
+    is why PR #205 disabled matchups + deleted 6773 garbage rows.
+
+    Day filter:
+      • 'overall' → no extra query flag
+      • 'day2'    → adds `&d2` (user-confirmed 2026-05-25)
+      • 'day1'    → adds `&d1` (inferred symmetric pattern — verify when
+        the first populated day1 scrape lands)
 
     Returns a dict:
       {
@@ -1357,6 +1372,7 @@ def scrape_archetype_matchups(
           ...
         ],
         'day_filter': day_filter,
+        'tournaments_used': sorted-tids-list,
       }
 
     Returns empty matchups list on parse failure (caller decides whether
@@ -1365,14 +1381,48 @@ def scrape_archetype_matchups(
     if day_filter not in _MATCHUP_DAYS:
         day_filter = MATCHUP_DAY_OVERALL
 
-    url = f"{BASE_URL}/{tournament_id}/decks/{deck_slug}"
-    if day_filter != MATCHUP_DAY_OVERALL:
-        url = f"{url}?{day_filter}"
+    # Labs URL uses UNPADDED integer tids in the query. Strip leading zeros
+    # and sort for stable URLs (caching + dedup).
+    clean_tids: List[str] = []
+    for raw in tournament_ids:
+        s = str(raw or '').strip()
+        if not s:
+            continue
+        try:
+            clean_tids.append(str(int(s)))
+        except ValueError:
+            continue
+    tids_sorted = sorted(set(clean_tids), key=int)
+    if not tids_sorted:
+        logger.warning("    No valid tournament_ids passed for %s", deck_slug)
+        return {
+            'summary': _parse_player_summary(None),
+            'matchups': [],
+            'day_filter': day_filter,
+            'tournaments_used': [],
+        }
+
+    url = f"{BASE_URL}/decks/{deck_slug}?tournaments={','.join(tids_sorted)}"
+    # Day-filter query flag — user confirmed `&d2` for Day 2 on 2026-05-25.
+    # `&d1` for Day 1 is inferred from the symmetric pattern (the labs UI
+    # exposes Overall / Day 1 / Day 2 tabs on the meta summary page); if
+    # the assumed flag is wrong, the scraped page will fall back to the
+    # Overall view and rows are still valid — just mis-labeled as day1.
+    # Confirm the d1 pattern when we first see a populated day1 scrape.
+    if day_filter == MATCHUP_DAY_DAY2:
+        url += '&d2'
+    elif day_filter == MATCHUP_DAY_DAY1:
+        url += '&d1'
     logger.info("    Fetching matchups %s", url)
     soup = fetch_page_bs4(url)
     if not soup:
         logger.warning("    Matchup fetch failed for %s", url)
-        return {'summary': _parse_player_summary(None), 'matchups': [], 'day_filter': day_filter}
+        return {
+            'summary': _parse_player_summary(None),
+            'matchups': [],
+            'day_filter': day_filter,
+            'tournaments_used': tids_sorted,
+        }
 
     summary = _parse_player_summary(soup)
 
@@ -1387,8 +1437,13 @@ def scrape_archetype_matchups(
                 table = cand
                 break
     if not table:
-        logger.debug("    No matchup table for %s/%s", tournament_id, deck_slug)
-        return {'summary': summary, 'matchups': [], 'day_filter': day_filter}
+        logger.debug("    No matchup table for %s (tids=%s)", deck_slug, tids_sorted)
+        return {
+            'summary': summary,
+            'matchups': [],
+            'day_filter': day_filter,
+            'tournaments_used': tids_sorted,
+        }
 
     matchups: List[Dict] = []
     for row in table.select('tbody tr') if table.find('tbody') else table.find_all('tr')[1:]:
@@ -1436,41 +1491,49 @@ def scrape_archetype_matchups(
             'vs_win_pct'   : win_pct_val,
         })
 
-    return {'summary': summary, 'matchups': matchups, 'day_filter': day_filter}
+    return {
+        'summary': summary,
+        'matchups': matchups,
+        'day_filter': day_filter,
+        'tournaments_used': tids_sorted,
+    }
 
 
 def build_matchup_rows(
-    tournament_meta: Dict,
-    deck_summary: Dict,
+    meta: str,
+    deck_slug: str,
+    deck_name: str,
     matchups_result: Dict,
 ) -> List[Dict]:
-    """Combine tournament metadata + per-archetype matchup payload into
-    CSV row dicts ready for save. `deck_summary` is the deck-list-derived
-    row (player_count, win_pct, deck_name etc.) so we keep one CSV with
-    everything needed for Meta Call aggregation."""
+    """Combine meta tag + per-archetype combined-view matchup payload into
+    CSV row dicts ready for save. The summary numbers (player_count, wins,
+    etc.) are AGGREGATED across all tournaments_used by the labs page —
+    we just pass them through.
+    """
     rows: List[Dict] = []
     summary = matchups_result.get('summary') or {}
     day_filter = matchups_result.get('day_filter') or MATCHUP_DAY_OVERALL
+    tids_used: List[str] = list(matchups_result.get('tournaments_used') or [])
+    tids_csv = ','.join(tids_used)
+    scraped_at = datetime.now(timezone.utc).isoformat()
     for m in matchups_result.get('matchups', []):
         rows.append({
-            'tournament_id'         : tournament_meta.get('tournament_id', ''),
-            'tournament_name'       : tournament_meta.get('tournament_name', ''),
-            'tournament_date'       : tournament_meta.get('tournament_date', ''),
-            'tournament_type'       : tournament_meta.get('tournament_type', ''),
-            'meta'                  : tournament_meta.get('meta', ''),
-            'my_deck_slug'          : deck_summary.get('deck_slug', ''),
-            'my_deck_name'          : deck_summary.get('deck_name', ''),
-            'my_deck_player_count'  : summary.get('player_count') or deck_summary.get('player_count', 0),
+            'meta'                  : meta,
+            'tournaments_used'      : tids_csv,
+            'tournament_count'      : len(tids_used),
+            'my_deck_slug'          : deck_slug,
+            'my_deck_name'          : deck_name,
+            'my_deck_player_count'  : summary.get('player_count', 0),
             'my_deck_total_wins'    : summary.get('total_wins', 0),
             'my_deck_total_losses'  : summary.get('total_losses', 0),
             'my_deck_total_ties'    : summary.get('total_ties', 0),
-            'my_deck_overall_win_pct': summary.get('overall_win_pct') or deck_summary.get('win_pct', 0.0),
+            'my_deck_overall_win_pct': summary.get('overall_win_pct', 0.0),
             'opponent_deck_slug'    : m.get('opponent_slug', ''),
             'opponent_deck_name'    : m.get('opponent_name', ''),
             'vs_count'              : m.get('vs_count', 0),
             'vs_win_pct'            : m.get('vs_win_pct', 0.0),
             'day_filter'            : day_filter,
-            'scraped_at'            : datetime.now(timezone.utc).isoformat(),
+            'scraped_at'            : scraped_at,
         })
     return rows
 
@@ -1942,47 +2005,107 @@ def main() -> None:
     # second pass to keep the main run fast and the matchup CSV optional
     # (Meta Call degrades gracefully when the file is absent).
     if args.matchups:
+        # The labs combined-view exposes ONE matchup matrix per
+        # (deck_slug, list_of_tournaments) — i.e. it's aggregated across
+        # tournaments. Grain shift from the old per-(tid, slug) loop:
+        # we now scrape ONE URL per (meta, slug) and the row holds the
+        # aggregated counts. Reduces total HTTP count by ~6x for a meta
+        # with 6 tournaments (e.g. TEF-POR), keeps the CSV smaller, and
+        # matches what Meta Call actually needs (per-meta blends).
         matchup_rows: List[Dict] = []
-        total_decks_for_matchups = len(all_deck_rows) * len(args.matchup_days)
-        logger.info(
-            "Matchup pass: scraping %d archetype-day combos (one HTTP each, ~%.1f min @ %ss delay)",
-            total_decks_for_matchups,
-            total_decks_for_matchups * delay / 60,
-            delay,
-        )
-        # Index meta by tournament_id for fast lookup
-        meta_by_tid = {t['tournament_id']: t for t in tournaments_meta}
-        for d_idx, deck_row in enumerate(all_deck_rows):
-            tid = deck_row['tournament_id']
-            slug = deck_row.get('deck_slug', '')
-            if not slug:
+        # Group: meta -> {slug -> deck_name} and meta -> [tids]
+        # Iterate MERGED rows (not just freshly-scraped) so past metas
+        # with cached decks are included. Skip-if-already-scraped logic
+        # below prevents redundant re-scraping for closed metas.
+        meta_to_tids: Dict[str, List[str]] = {}
+        meta_slug_to_name: Dict[Tuple[str, str], str] = {}
+        for deck_row in merged_deck_rows:
+            slug = (deck_row.get('deck_slug') or '').strip()
+            deck_meta = (deck_row.get('meta') or '').strip()
+            if not slug or not deck_meta or deck_meta == '_unsorted':
                 continue
-            tmeta = dict(meta_by_tid.get(tid, {}))
-            # Per-meta tag derived from tournament_date (chunk dates lookup);
-            # CLI --matchup-meta still wins as an explicit override.
-            derived_meta = _derive_meta_from_date(tmeta.get('tournament_date') or '')
-            if args.matchup_meta:
-                tmeta['meta'] = args.matchup_meta
-            elif derived_meta:
-                tmeta['meta'] = derived_meta
-            for day in args.matchup_days:
-                logger.info(
-                    "  [matchup %d/%d] %s · %s · %s",
-                    d_idx + 1, len(all_deck_rows),
-                    tid, slug, day,
-                )
-                try:
-                    result = scrape_archetype_matchups(tid, slug, day_filter=day)
-                    matchup_rows.extend(build_matchup_rows(tmeta, deck_row, result))
-                except Exception as e:  # noqa: BLE001 — log + continue per-deck
-                    logger.warning("    Matchup scrape failed for %s/%s/%s: %s", tid, slug, day, e)
-                time.sleep(delay)
+            tid = str(deck_row.get('tournament_id') or '').strip()
+            if tid:
+                meta_to_tids.setdefault(deck_meta, [])
+                if tid not in meta_to_tids[deck_meta]:
+                    meta_to_tids[deck_meta].append(tid)
+            meta_slug_to_name.setdefault(
+                (deck_meta, slug),
+                (deck_row.get('deck_name') or slug),
+            )
 
-        # Merge new matchup rows with existing-chunk rows for tournaments
-        # we did NOT re-scrape this run (frozen). Same dedup pattern as decks.
+        # Skip-if-already-scraped: don't re-fetch closed-meta matchups
+        # every weekly run. We refresh ONLY the current meta (data
+        # evolves as new rounds + new tournaments land) and any meta
+        # that has no matchup rows yet (= first scrape for that meta).
+        # CLI --matchup-meta forces a specific meta regardless of state
+        # (useful for ad-hoc backfills + day1/day2 fills after a parser
+        # tweak).
+        existing_matchup_metas = {
+            (r.get('meta') or '').strip() for r in existing_matchup_rows
+        }
+        existing_matchup_metas.discard('')
+        if args.matchup_meta:
+            metas_to_scrape = {args.matchup_meta} & set(meta_to_tids.keys())
+        else:
+            metas_to_scrape = set()
+            for m in meta_to_tids:
+                # current meta — endswith covers BRS-SSP/SVI-PFL style
+                # composite meta keys whose tail is the current set code.
+                if current_meta and m.endswith(current_meta):
+                    metas_to_scrape.add(m)
+                # first-time fill: meta has decks but no matchups yet
+                elif m not in existing_matchup_metas:
+                    metas_to_scrape.add(m)
+        meta_to_tids = {k: v for k, v in meta_to_tids.items() if k in metas_to_scrape}
+        meta_slug_to_name = {ks: n for ks, n in meta_slug_to_name.items()
+                             if ks[0] in metas_to_scrape}
+        skipped_metas = existing_matchup_metas - metas_to_scrape
+        if skipped_metas:
+            logger.info(
+                "Matchup cache: skipping %d already-scraped metas (%s) — current=%s",
+                len(skipped_metas), ', '.join(sorted(skipped_metas)),
+                current_meta or '(unknown)',
+            )
+
+        total_combos = sum(
+            len([s for (m, s) in meta_slug_to_name if m == meta]) * len(args.matchup_days)
+            for meta in meta_to_tids
+        )
+        logger.info(
+            "Matchup pass: scraping %d (meta, archetype, day) combos across %d metas (one HTTP each, ~%.1f min @ %ss delay)",
+            total_combos, len(meta_to_tids), total_combos * delay / 60, delay,
+        )
+        combo_idx = 0
+        for meta, tids in meta_to_tids.items():
+            slugs_for_meta = sorted(s for (m, s) in meta_slug_to_name if m == meta)
+            for slug in slugs_for_meta:
+                deck_name = meta_slug_to_name.get((meta, slug), slug)
+                for day in args.matchup_days:
+                    combo_idx += 1
+                    logger.info(
+                        "  [matchup %d/%d] %s · %s · %s (tids=%d)",
+                        combo_idx, total_combos, meta, slug, day, len(tids),
+                    )
+                    try:
+                        result = scrape_archetype_matchups(slug, tids, day_filter=day)
+                        matchup_rows.extend(build_matchup_rows(meta, slug, deck_name, result))
+                    except Exception as e:  # noqa: BLE001 — log + continue per-deck
+                        logger.warning("    Matchup scrape failed for %s/%s/%s: %s", meta, slug, day, e)
+                    time.sleep(delay)
+
+        # Aggregated matchups are keyed by (meta, slug, day) rather than
+        # tournament_id, so the old per-tid carryover dedup doesn't apply.
+        # Drop the entire existing meta+slug+day tuple before overwriting —
+        # this lets a re-run with a narrower --matchup-meta still preserve
+        # the rest of the file.
+        replaced_keys = {
+            (r['meta'], r['my_deck_slug'], r['day_filter'])
+            for r in matchup_rows
+        }
         merged_matchup_rows = [
             r for r in existing_matchup_rows
-            if str(r.get('tournament_id') or '').strip() not in rescraped_tids
+            if (r.get('meta', ''), r.get('my_deck_slug', ''), r.get('day_filter', '')) not in replaced_keys
         ]
         merged_matchup_rows.extend(matchup_rows)
         save_matchup_rows(merged_matchup_rows)

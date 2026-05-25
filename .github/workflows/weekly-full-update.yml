@@ -261,21 +261,26 @@ jobs:
           echo "── Summary ──"
           printf '  %s\n' "${rc_summary[@]}"
 
-      - name: Run labs tournament scraper (deck list)
+      - name: Run labs tournament scraper (deck list + matchups)
         env:
           PYTHONPATH: ${{ github.workspace }}/backend/core
         working-directory: backend
-        # Matchups are not scraped here — the parser hits the wrong table
-        # (player standings instead of deck-vs-deck). Backfill (--id-range)
-        # is not exposed either: the 0001..0066 backfill is already done
-        # and existing rows get re-classified into per-meta chunks every
-        # run via the name-based cards-data crossref. Add the relevant
-        # workflow_dispatch input back if either capability is needed
-        # ad-hoc.
+        # Matchups re-enabled 2026-05-25 after PR #212 fixed the URL +
+        # schema. New combined-view scrape is ~one HTTP per (meta, slug,
+        # day_filter); skip-if-already-scraped keeps closed metas frozen
+        # so weekly runs only re-fetch current meta + first-time fills.
+        # Default day_filter is `overall` (Day 1 / Day 2 supported but
+        # tripling scrape time isn't worth it until we use them).
+        #
+        # Backfill (--id-range) is not exposed: the 0001..0066 backfill
+        # is already done and existing rows get re-classified into
+        # per-meta chunks every run via the name-based cards-data
+        # crossref. Add a workflow_dispatch input back if either
+        # capability is needed ad-hoc.
         run: |
           set +e
           echo "::group::scrapers/labs_tournament_scraper.py"
-          python scrapers/labs_tournament_scraper.py
+          python scrapers/labs_tournament_scraper.py --matchups
           rc=$?
           if [ "$rc" -ne 0 ]; then
               echo "::warning::labs_tournament_scraper exited with $rc"

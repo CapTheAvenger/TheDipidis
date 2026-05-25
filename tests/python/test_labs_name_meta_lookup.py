@@ -152,6 +152,91 @@ def test_lookup_matches_cached_historical_tids(tmp_path, monkeypatch):
     assert fix_lookup["0062"] == ("TEF-POR", "2026-04-25")
 
 
+def test_lookup_disambiguates_via_chronological_neighbors(tmp_path, monkeypatch):
+    """Regression: labs has 2 same-named tids but cards has only 1
+    post-founding match. Old single-pass algo always picked labs[0] →
+    cards[0], misassigning the older labs tid when its true date didn't
+    match the cards entry's date. The 2-pass algo uses chronological
+    neighbors to pick which labs tid actually fits the cards date.
+
+    Scenario mirrors the real 2026-05-25 San Juan bug:
+      • Labs 0019 (chronologically Feb 2025, sandwiched between
+        Feb-2025 BRS-PRE events at 0018 + 0020).
+      • Labs 0056 (chronologically Mar 2026, between SVI-PFL 0055
+        and SVI-ASC 0057).
+      • Cards has only one San Juan entry: SVI-ASC March 2026.
+    Expected: 0056 → SVI-ASC, 0019 → unmatched."""
+    monkeypatch.setattr(labs, "_get_data_dir", lambda: str(tmp_path))
+
+    # Surrounding tournaments with unambiguous matches (Pass 1 anchors)
+    (tmp_path / "tournament_cards_data_cards_BRS-PRE.csv").write_text(
+        "tournament_id;tournament_name;tournament_date\n"
+        "100;Regional Mérida – Limitless;8th February 2025\n"
+        "101;EUIC 2025, London – Limitless;21st February 2025\n"
+    )
+    (tmp_path / "tournament_cards_data_cards_SVI-PFL.csv").write_text(
+        "tournament_id;tournament_name;tournament_date\n"
+        "200;Regional Seattle – Limitless;28th February 2026\n"
+    )
+    (tmp_path / "tournament_cards_data_cards_SVI-ASC.csv").write_text(
+        "tournament_id;tournament_name;tournament_date\n"
+        "300;Special Event San Juan – Limitless;7th March 2026\n"
+        "301;Regional Curitiba – Limitless;14th March 2026\n"
+    )
+
+    labs_list = [
+        {"tournament_id": "0018", "tournament_name": "Regional Championship Mérida"},
+        {"tournament_id": "0019", "tournament_name": "Special Event San Juan"},
+        {"tournament_id": "0020", "tournament_name": "International Championship London"},
+        {"tournament_id": "0055", "tournament_name": "Regional Championship Seattle"},
+        {"tournament_id": "0056", "tournament_name": "Special Event San Juan"},
+        {"tournament_id": "0057", "tournament_name": "Regional Championship Curitiba"},
+    ]
+    lookup = labs._build_labs_name_meta_lookup(labs_list)
+
+    # Pass-1 anchors resolve normally
+    assert lookup["0018"] == ("BRS-PRE", "2025-02-08")
+    assert lookup["0020"] == ("BRS-PRE", "2025-02-21")
+    assert lookup["0055"] == ("SVI-PFL", "2026-02-28")
+    assert lookup["0057"] == ("SVI-ASC", "2026-03-14")
+    # Pass-2 picks the right San Juan
+    assert lookup["0056"] == ("SVI-ASC", "2026-03-07")
+    # 0019's neighbors (Feb 2025) don't bracket cards' Mar 2026 entry → unmatched
+    assert "0019" not in lookup
+
+
+def test_lookup_no_double_assignment_to_same_cards_entry(tmp_path, monkeypatch):
+    """Pass 1's consumed-index tracking + Pass 2's `taken` filter must
+    prevent two labs tids from claiming the same cards entry."""
+    monkeypatch.setattr(labs, "_get_data_dir", lambda: str(tmp_path))
+    (tmp_path / "tournament_cards_data_cards_BRS-SSP.csv").write_text(
+        "tournament_id;tournament_name;tournament_date\n"
+        "1;Regional Stuttgart – Limitless;30th November 2024\n"
+    )
+    # Two same-named labs tids but only one cards slot. Pass 1 marks both
+    # ambig; Pass 2 picks the closer one and leaves the other unmatched.
+    labs_list = [
+        # Anchor: Nov 2024 neighbor for 0011
+        {"tournament_id": "0010", "tournament_name": "Regional Championship Sacramento"},
+        {"tournament_id": "0011", "tournament_name": "Regional Championship Stuttgart"},
+        {"tournament_id": "0047", "tournament_name": "Regional Championship Stuttgart"},
+    ]
+    (tmp_path / "tournament_cards_data_cards_BRS-SSP.csv").write_text(
+        "tournament_id;tournament_name;tournament_date\n"
+        "1;Regional Stuttgart – Limitless;30th November 2024\n"
+        "2;Regional Sacramento – Limitless;23rd November 2024\n"
+    )
+    lookup = labs._build_labs_name_meta_lookup(labs_list)
+    # 0010 anchors Nov 2024
+    assert lookup["0010"] == ("BRS-SSP", "2024-11-23")
+    # 0011 (Pass 2 with 0010 as neighbor) gets the only Stuttgart
+    assert lookup["0011"] == ("BRS-SSP", "2024-11-30")
+    # 0047 has no anchor "before" closer than 0010-0011; no Pass-1 anchor
+    # "after" either in this minimal scenario, so it doesn't have a date
+    # range to bracket — and the only cards Stuttgart is consumed.
+    assert "0047" not in lookup
+
+
 def test_lookup_resolves_worlds_by_city(tmp_path, monkeypatch):
     """Regression: the world-by-city → world-by-year mapping was iterating
     the dict with swapped variable names (yr,city instead of city,yr) so

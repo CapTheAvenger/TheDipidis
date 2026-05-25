@@ -461,60 +461,100 @@ def scrape_tournament_list(
 
 # ── Deck data for one tournament ──────────────────────────────────────────────
 
-def scrape_tournament_meta(tournament_id: str) -> Dict[str, str]:
-    """Fetch the tournament's display name + date from its labs page.
+def _extract_meta_from_soup(soup, out: Dict[str, str]) -> None:
+    """Pull tournament_name + tournament_date out of a /decks or /standings
+    BeautifulSoup. Mutates `out` in place; only fills missing keys so the
+    first source (usually /decks) wins on duplicates.
 
-    Used in --tournament-id mode where the caller has only the numeric ID
-    and not the metadata that scrape_tournament_list() collects from the
-    main page. Falls back gracefully (empty strings) when fields can't
-    be parsed — the caller's defaults (e.g. "Tournament 0062") then stay.
+    Strategy for the date — three layered fallbacks, each tolerant of
+    Limitless layout variations:
+      1. Walk every NavigableString and try _DATE_TEXT_RE (the same
+         permissive month-name pattern the index parser uses — full or
+         abbreviated month, case-insensitive).
+      2. Search the full body text for "Month Day[, Year]" (handles dates
+         that sit inside elements with sibling text rather than alone).
+      3. Last-ditch: look for an ISO YYYY-MM-DD anywhere in the body
+         (some archive pages embed the start date as a data attribute or
+         JSON blob rendered into the DOM).
     """
-    url = f"{BASE_URL}/{tournament_id}/decks"
-    soup = fetch_page_bs4(url)
-    if not soup:
-        return {}
-    # _fix_mojibake is now a module-level helper (see top of file). The
-    # inline duplicate that used to live here was dropped to avoid the
-    # two copies drifting out of sync.
+    from bs4 import NavigableString
 
-    out: Dict[str, str] = {}
-    # Title looks like "Decks: Regional Championship Prague – Limitless Labs".
-    # Split on "Limitless" so we don't depend on the dash character (which
-    # is sometimes mojibake'd to â\x80\x93 by upstream encoding mishaps).
+    # Title: "Decks: Regional Championship Prague – Limitless Labs"
     title_el = soup.find('title')
     if title_el:
         title = title_el.get_text(strip=True)
         if 'Limitless' in title:
             head = title.rsplit('Limitless', 1)[0]
-            # Strip trailing dashes, mojibake bytes, whitespace.
-            # Trailing dash representations: real en/em dash, ASCII dash,
-            # and the mojibake'd UTF-8 bytes (â\x80\x93 or â\x80\x94).
-            # Repeating rstrip handles "Prague â\x80\x93 " ending with
-            # whitespace + bytes after the strip.
             head = head.rstrip(' \t–—-â\x80\x93\x94')
             head = re.sub(r'\s*[âÂ\x80-\x9f]+\s*$', '', head).strip()
             m = re.match(r'(?:Decks|Standings|Pairings|Metagame):\s*(.+)', head)
             cleaned = (m.group(1).strip() if m else head)
             cleaned = fix_mojibake(cleaned)
-            if cleaned:
+            if cleaned and not out.get('tournament_name'):
                 out['tournament_name'] = cleaned
-    # H1 wins when present — usually the cleanest representation.
     h1 = soup.find('h1')
     if h1:
         h1_text = h1.get_text(strip=True)
         if h1_text:
             out['tournament_name'] = fix_mojibake(h1_text)
-    # The header strip after the H1 carries the date + player count, e.g.
-    # "April 25–26, 2026 • 1370 players". Extract the date portion.
-    body_text = soup.get_text(' ', strip=True)[:1500]
-    date_match = re.search(
-        r'((?:January|February|March|April|May|June|July|August|September|October|November|December)\s+\d+(?:[–—\-]\d+)?,\s*\d{4})',
-        body_text
+
+    if out.get('tournament_date'):
+        return
+
+    # 1. NavigableString walk (most reliable when the date sits in its
+    # own element — the typical "April 25–26, 2026 • 1370 players" header).
+    for el in soup.descendants:
+        if isinstance(el, NavigableString):
+            txt = str(el).strip()
+            if txt and _DATE_TEXT_RE.search(txt):
+                date_obj = _parse_date(txt)
+                if date_obj:
+                    out['tournament_date'] = date_obj.strftime('%Y-%m-%d')
+                    return
+
+    # 2. Full body scan with a broader regex (abbreviated months OK).
+    body_text = soup.get_text(' ', strip=True)
+    body_match = re.search(
+        r'((?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|'
+        r'Jul(?:y)?|Aug(?:ust)?|Sep(?:t(?:ember)?)?|Oct(?:ober)?|Nov(?:ember)?|'
+        r'Dec(?:ember)?)\s+\d{1,2}(?:[–—\-]\d{1,2})?(?:,)?\s*(?:20\d{2})?)',
+        body_text,
+        re.I,
     )
-    if date_match:
-        date_obj = _parse_date(date_match.group(1))
+    if body_match:
+        date_obj = _parse_date(body_match.group(1))
         if date_obj:
             out['tournament_date'] = date_obj.strftime('%Y-%m-%d')
+            return
+
+    # 3. ISO date anywhere in the page (data attributes, JSON-LD, etc.)
+    iso = re.search(r'\b(20\d{2})-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])\b', body_text)
+    if iso:
+        out['tournament_date'] = iso.group(0)
+
+
+def scrape_tournament_meta(tournament_id: str) -> Dict[str, str]:
+    """Fetch the tournament's display name + date from its labs page.
+
+    Used in --tournament-id and --id-range modes where the caller only
+    knows the numeric ID. Tries /decks first; if the date can't be
+    extracted (older archive pages sometimes render a stripped header),
+    falls back to /standings as a second source. Returns {} when both
+    pages 404 — the caller's defaults (e.g. "Tournament 0062") then stay.
+    """
+    out: Dict[str, str] = {}
+
+    soup = fetch_page_bs4(f"{BASE_URL}/{tournament_id}/decks")
+    if soup:
+        _extract_meta_from_soup(soup, out)
+
+    # Some historical tournaments (pre-2025) render /decks with no
+    # parseable date in the header. /standings often still carries it.
+    if 'tournament_date' not in out:
+        soup_st = fetch_page_bs4(f"{BASE_URL}/{tournament_id}/standings")
+        if soup_st:
+            _extract_meta_from_soup(soup_st, out)
+
     return out
 
 
@@ -1412,13 +1452,19 @@ def main() -> None:
         tournaments_meta.append(t)
         rescraped_tids.add(tid)
 
-        # Derive meta for this tournament (uses ISO date, falls back to current)
-        deck_meta = _derive_meta_from_date(t.get('tournament_date') or '')
-        if not deck_meta and current_meta:
-            # Tournament has no chunk-derived meta — likely brand-new in
-            # current set. Tag with placeholder using current set code so
-            # the split bucket exists; will be replaced once the manifest
-            # picks it up.
+        # Derive meta for this tournament (uses ISO date).
+        # When the date IS known but doesn't match any chunk window, treat
+        # the tournament as brand-new in the current set and tag with
+        # current_meta so the bucket exists.
+        # When the date is EMPTY we used to fall back to current_meta too —
+        # but that silently buried date-extraction failures inside the
+        # current-meta chunk (3859 historical labs rows ended up in CRI
+        # during the 2026-05-25 backfill because scrape_tournament_meta
+        # couldn't read their date). Now empty-date rows land in
+        # _unsorted instead, making the failure visible and recoverable.
+        tdate = (t.get('tournament_date') or '').strip()
+        deck_meta = _derive_meta_from_date(tdate)
+        if not deck_meta and tdate and current_meta:
             deck_meta = current_meta
 
         for deck in decks:

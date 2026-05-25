@@ -14,19 +14,6 @@ on:
   schedule:
     - cron: '0 6 * * 2'
   workflow_dispatch:
-    inputs:
-      with_matchups:
-        description: 'Scrape labs per-archetype matchups (DEFAULT OFF — parser broken as of 2026-05-25, scrapes player standings instead of deck-vs-deck. Re-enable after parser fix lands.)'
-        type: boolean
-        default: false
-      matchup_days:
-        description: 'Day filter(s) for matchups (space-separated: overall / day1 / day2)'
-        type: string
-        default: 'overall'
-      labs_id_range:
-        description: 'Backfill labs IDs (e.g. "1 66" scrapes all historical metas). Empty = use index only.'
-        type: string
-        default: ''
 
 # GITHUB_TOKEN needs:
 #   - contents: write  → commit + push the scraped CSVs
@@ -274,37 +261,21 @@ jobs:
           echo "── Summary ──"
           printf '  %s\n' "${rc_summary[@]}"
 
-      - name: Run labs tournament scraper (deck list + matchups)
+      - name: Run labs tournament scraper (deck list)
         env:
           PYTHONPATH: ${{ github.workspace }}/backend/core
-          # 2026-05-25 — matchups OFF by default. The parser scraped
-          # player standings instead of deck-vs-deck matchups (the page
-          # at /{tid}/decks/{slug} shows players, not opponent decks).
-          # Re-enable when the parser is rewritten against the correct
-          # URL / HTML structure.
-          WITH_MATCHUPS:  ${{ github.event.inputs.with_matchups || 'false' }}
-          MATCHUP_DAYS:   ${{ github.event.inputs.matchup_days || 'overall' }}
-          LABS_ID_RANGE:  ${{ github.event.inputs.labs_id_range || '' }}
         working-directory: backend
+        # Matchups are not scraped here — the parser hits the wrong table
+        # (player standings instead of deck-vs-deck). Backfill (--id-range)
+        # is not exposed either: the 0001..0066 backfill is already done
+        # and existing rows get re-classified into per-meta chunks every
+        # run via the name-based cards-data crossref. Add the relevant
+        # workflow_dispatch input back if either capability is needed
+        # ad-hoc.
         run: |
           set +e
           echo "::group::scrapers/labs_tournament_scraper.py"
-          # Build the optional --id-range argv tokens. Word-split intentional.
-          ID_RANGE_ARGS=""
-          if [ -n "$LABS_ID_RANGE" ]; then
-              echo "Backfill mode: walking labs IDs $LABS_ID_RANGE"
-              ID_RANGE_ARGS="--id-range $LABS_ID_RANGE"
-          fi
-          if [ "$WITH_MATCHUPS" = "true" ]; then
-              echo "Matchup pass: ENABLED (day filters: $MATCHUP_DAYS)"
-              python scrapers/labs_tournament_scraper.py \
-                  --matchups \
-                  --matchup-days $MATCHUP_DAYS \
-                  $ID_RANGE_ARGS
-          else
-              echo "Matchup pass: DISABLED — deck-list only"
-              python scrapers/labs_tournament_scraper.py $ID_RANGE_ARGS
-          fi
+          python scrapers/labs_tournament_scraper.py
           rc=$?
           if [ "$rc" -ne 0 ]; then
               echo "::warning::labs_tournament_scraper exited with $rc"

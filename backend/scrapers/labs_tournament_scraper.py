@@ -541,12 +541,19 @@ def scrape_tournament_meta(tournament_id: str) -> Dict[str, str]:
     extracted (older archive pages sometimes render a stripped header),
     falls back to /standings as a second source. Returns {} when both
     pages 404 — the caller's defaults (e.g. "Tournament 0062") then stay.
+
+    When the date can't be extracted from either page, logs a short body
+    excerpt from each so we can see what's actually rendered (vs. the
+    layout the parser expects) and iterate on the regexes.
     """
     out: Dict[str, str] = {}
+    body_samples: List[str] = []  # for diagnostic logging on failure
 
     soup = fetch_page_bs4(f"{BASE_URL}/{tournament_id}/decks")
     if soup:
         _extract_meta_from_soup(soup, out)
+        if 'tournament_date' not in out:
+            body_samples.append('/decks: ' + soup.get_text(' ', strip=True)[:600])
 
     # Some historical tournaments (pre-2025) render /decks with no
     # parseable date in the header. /standings often still carries it.
@@ -554,6 +561,12 @@ def scrape_tournament_meta(tournament_id: str) -> Dict[str, str]:
         soup_st = fetch_page_bs4(f"{BASE_URL}/{tournament_id}/standings")
         if soup_st:
             _extract_meta_from_soup(soup_st, out)
+            if 'tournament_date' not in out:
+                body_samples.append('/standings: ' + soup_st.get_text(' ', strip=True)[:600])
+
+    if 'tournament_date' not in out and body_samples:
+        for sample in body_samples:
+            logger.warning("  [%s] no date in body — sample: %s", tournament_id, sample)
 
     return out
 
@@ -1343,6 +1356,60 @@ def main() -> None:
             logger.error("Invalid from_date %r – use YYYY-MM-DD", raw_from_date)
             sys.exit(1)
 
+    # ── Per-meta cache: rebuild monolith FIRST so ID-walk can prefer cached
+    # meta over a fresh scrape_tournament_meta call (the labs /decks header
+    # is sometimes JS-rendered so date extraction fails — preserving the
+    # cached date avoids losing it on every run). Loaded once and shared
+    # between the ID-walk pre-fill and the SKIP-frozen branch below.
+    current_meta = _current_meta_key()
+    existing_deck_rows = _reassemble_labs_monolith('labs_tournament_decks', CSV_FIELDS)
+    existing_matchup_rows = _reassemble_labs_monolith('labs_tournament_matchups', MATCHUP_CSV_HEADER)
+    seen_tids = {str(r.get('tournament_id') or '').strip() for r in existing_deck_rows}
+    # tid → full meta dict (name, date, type, country, total_players).
+    # First occurrence per tid wins (we only care that we have *some* known-
+    # good values; chunks shouldn't disagree within a tid).
+    cached_tournament_meta: Dict[str, Dict] = {}
+    cached_player_counts: Dict[str, int] = {}
+    for r in existing_deck_rows:
+        tid_key = str(r.get('tournament_id') or '').strip()
+        if not tid_key:
+            continue
+        if tid_key not in cached_tournament_meta:
+            cached_tournament_meta[tid_key] = {
+                'tournament_name': r.get('tournament_name') or '',
+                'tournament_date': r.get('tournament_date') or '',
+                'tournament_type': r.get('tournament_type') or 'regional',
+                'country'        : r.get('country') or '',
+            }
+        try:
+            cached_player_counts[tid_key] = max(
+                cached_player_counts.get(tid_key, 0),
+                int(r.get('total_players') or 0),
+            )
+        except (TypeError, ValueError):
+            continue
+
+    def _meta_from_cache_or_scrape(tid: str, fallback_type: str = 'regional') -> Dict[str, str]:
+        """Use cached meta when we already have a non-empty date; only hit
+        scrape_tournament_meta when the cache can't tell us the date. Saves
+        a network round-trip per known tid AND preserves the cached date
+        when the live parser can't read it from JS-rendered headers."""
+        cached = cached_tournament_meta.get(tid) or {}
+        if cached.get('tournament_date'):
+            return {
+                'tournament_name': cached.get('tournament_name') or f'Tournament {tid}',
+                'tournament_date': cached['tournament_date'],
+                'tournament_type': cached.get('tournament_type') or fallback_type,
+                'country'        : cached.get('country') or '',
+            }
+        scraped = scrape_tournament_meta(tid)
+        return {
+            'tournament_name': scraped.get('tournament_name') or cached.get('tournament_name') or f'Tournament {tid}',
+            'tournament_date': scraped.get('tournament_date') or '',
+            'tournament_type': cached.get('tournament_type') or fallback_type,
+            'country'        : cached.get('country') or '',
+        }
+
     # ── Build tournament list ──────────────────────────────────────────────
     if args.tournament_id:
         # Single-tournament mode – skip the main page, but still fetch the
@@ -1350,13 +1417,13 @@ def main() -> None:
         # a placeholder "Tournament 0062" string flowing into the field
         # cards downstream.
         tid = args.tournament_id.zfill(4)
-        meta = scrape_tournament_meta(tid)
+        meta = _meta_from_cache_or_scrape(tid, fallback_type='unknown')
         tournaments = [{
             'tournament_id'  : tid,
-            'tournament_name': meta.get('tournament_name') or f'Tournament {args.tournament_id}',
-            'tournament_date': meta.get('tournament_date') or '',
-            'tournament_type': 'unknown',
-            'country'        : '',
+            'tournament_name': meta['tournament_name'],
+            'tournament_date': meta['tournament_date'],
+            'tournament_type': meta['tournament_type'],
+            'country'        : meta['country'],
         }]
         logger.info("Single-tournament mode: %s (%s)",
                     tournaments[0]['tournament_name'],
@@ -1369,15 +1436,17 @@ def main() -> None:
         found_ids = discover_tournament_ids_by_walk(from_id, to_id, delay=min(delay, 0.5))
         tournaments = []
         for tid in found_ids:
-            meta_dict = scrape_tournament_meta(tid)
+            meta = _meta_from_cache_or_scrape(tid)
             tournaments.append({
                 'tournament_id'  : tid,
-                'tournament_name': meta_dict.get('tournament_name') or f'Tournament {tid}',
-                'tournament_date': meta_dict.get('tournament_date') or '',
-                'tournament_type': 'regional',
-                'country'        : '',
+                'tournament_name': meta['tournament_name'],
+                'tournament_date': meta['tournament_date'],
+                'tournament_type': meta['tournament_type'],
+                'country'        : meta['country'],
             })
-            time.sleep(delay)
+            # Only delay when we actually hit the network (cache hits are free)
+            if not (cached_tournament_meta.get(tid) or {}).get('tournament_date'):
+                time.sleep(delay)
     else:
         tournaments = scrape_tournament_list(
             from_date=from_date,
@@ -1388,27 +1457,6 @@ def main() -> None:
         logger.warning("No tournaments matched the given filters – nothing to do.")
         return
 
-    # ── Per-meta cache: rebuild monolith from existing chunks, then skip
-    # tournaments whose meta is already frozen (= meta != current_meta AND
-    # tournament_id already scraped). Saves ~80 min per weekly run once the
-    # archive is populated. Overridable with --ignore-cache.
-    current_meta = _current_meta_key()
-    existing_deck_rows = _reassemble_labs_monolith('labs_tournament_decks', CSV_FIELDS)
-    existing_matchup_rows = _reassemble_labs_monolith('labs_tournament_matchups', MATCHUP_CSV_HEADER)
-    seen_tids = {str(r.get('tournament_id') or '').strip() for r in existing_deck_rows}
-    # tid → total_players from the cached monolith. Used to repopulate
-    # tournaments_meta entries for skipped frozen tournaments so
-    # labs_tournaments.json doesn't shrink to just the freshly-scraped IDs.
-    cached_player_counts: Dict[str, int] = {}
-    for r in existing_deck_rows:
-        tid_key = str(r.get('tournament_id') or '').strip()
-        try:
-            cached_player_counts[tid_key] = max(
-                cached_player_counts.get(tid_key, 0),
-                int(r.get('total_players') or 0),
-            )
-        except (TypeError, ValueError):
-            continue
     logger.info(
         "Per-meta cache: %d tournaments already scraped across all chunks, current_set=%s",
         len(seen_tids), current_meta or '(unknown)',
@@ -1423,26 +1471,34 @@ def main() -> None:
 
     for idx, t in enumerate(tournaments):
         tid = t['tournament_id']
-        # Skip closed-meta tournaments that are already cached
+        # Skip closed-meta tournaments that are already cached.
+        # Use the cached date (not just t['tournament_date']) when computing
+        # is_current — the live scrape may have returned an empty date for
+        # JS-rendered pages, but the chunks still know the real value.
+        cached_for_skip = cached_tournament_meta.get(tid) or {}
+        effective_date = t.get('tournament_date') or cached_for_skip.get('tournament_date') or ''
         if not args.ignore_cache and tid in seen_tids:
-            t_meta = _derive_meta_from_date(t.get('tournament_date') or '')
+            t_meta = _derive_meta_from_date(effective_date)
             # current_meta check: a current-meta tournament always re-scrapes
             # (data still updates as more rounds finish). Closed metas freeze.
             is_current = bool(current_meta) and bool(t_meta) and t_meta.endswith(current_meta)
             if not is_current:
                 logger.info(
-                    "[%d/%d] %s (%s) — SKIP (frozen, meta=%s)",
-                    idx + 1, len(tournaments), t['tournament_name'], tid, t_meta or '?',
+                    "[%d/%d] %s (%s) — SKIP (frozen, meta=%s, date=%s)",
+                    idx + 1, len(tournaments), t['tournament_name'], tid,
+                    t_meta or '?', effective_date or 'unknown',
                 )
                 skipped_frozen += 1
-                # Preserve the frozen tournament in the index file so the next
-                # weekly run still sees it as a known tournament (otherwise
-                # labs_tournaments.json shrinks to just the freshly-scraped
-                # ones and the cache-fallback loses every previously-known
-                # tournament). Recover total_players from the cached deck
-                # rows so the index stays accurate.
+                # Preserve cached metadata in the index file so the next
+                # weekly run still sees it (otherwise labs_tournaments.json
+                # shrinks and the cache-fallback loses every previously-
+                # known tournament).
                 if cached_player_counts.get(tid):
                     t['total_players'] = cached_player_counts[tid]
+                if effective_date and not t.get('tournament_date'):
+                    t['tournament_date'] = effective_date
+                if cached_for_skip.get('country') and not t.get('country'):
+                    t['country'] = cached_for_skip['country']
                 tournaments_meta.append(t)
                 continue
 

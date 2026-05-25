@@ -1,0 +1,150 @@
+{
+  "headers": [
+    "#",
+    "Deck",
+    "Score",
+    "Win %",
+    "Day-2 Conv",
+    "Players"
+  ],
+  "frozen_headers": [
+    "#",
+    "Deck",
+    "Score",
+    "Win %",
+    "Day-2 Conv",
+    "Players"
+  ],
+  "frozen_table_present": true,
+  "rec_rows_count": 10,
+  "first_rows": [
+    {
+      "cells": [
+        "1",
+        "Crustle",
+        "76,6",
+        "56,8%",
+        "34,9%",
+        "195"
+      ],
+      "classes": "mc-rec-row"
+    },
+    {
+      "cells": [
+        "2",
+        "Froslass Munkidori",
+        "75,1",
+        "57,0%",
+        "31,6%",
+        "272"
+      ],
+      "classes": "mc-rec-row"
+    },
+    {
+      "cells": [
+        "3",
+        "Grimmsnarl Froslass",
+        "71,7",
+        "55,6%",
+        "28,9%",
+        "660"
+      ],
+      "classes": "mc-rec-row"
+    },
+    {
+      "cells": [
+        "4",
+        "Joltik Box",
+        "65,6",
+        "53,9%",
+        "21,7%",
+        "304"
+      ],
+      "classes": "mc-rec-row"
+    },
+    {
+      "cells": [
+        "5",
+        "Gardevoir",
+        "65,0",
+        "53,0%",
+        "22,6%",
+        "707"
+      ],
+      "classes": "mc-rec-row"
+    },
+    {
+      "cells": [
+        "6",
+        "Gholdengo Lunatone",
+        "62,8",
+        "52,0%",
+        "20,9%",
+        "880"
+      ],
+      "classes": "mc-rec-row"
+    },
+    {
+      "cells": [
+        "7",
+        "Festival Lead",
+        "62,1",
+        "51,7%",
+        "20,2%",
+        "119"
+      ],
+      "classes": "mc-rec-row"
+    },
+    {
+      "cells": [
+        "8",
+        "Kangaskhan Bouffalant",
+        "61,5",
+        "51,3%",
+        "19,8%",
+        "106"
+      ],
+      "classes": "mc-rec-row"
+    },
+    {
+      "cells": [
+        "9",
+        "Mega Absol Box",
+        "59,5",
+        "49,7%",
+        "19,7%",
+        "493"
+      ],
+      "classes": "mc-rec-row"
+    },
+    {
+      "cells": [
+        "10",
+        "Raging Bolt Ogerpon",
+        "59,3",
+        "50,0%",
+        "18,5%",
+        "454"
+      ],
+      "classes": "mc-rec-row"
+    }
+  ],
+  "crustle_rows": [
+    {
+      "cells": [
+        "1",
+        "Crustle",
+        "76,6",
+        "56,8%",
+        "34,9%",
+        "195"
+      ],
+      "html": "<tr class=\"mc-rec-row\">\n        <td class=\"mc-rec-rank\">1</td>\n        <td class=\"mc-rec-name\"><span class=\"mc-rec-name-inner\"><img class=\"tcg-pokemon-icon tcg-pokemon-icon--sm\" src=\"https://r2.limitlesstcg.net/pokemon/gen9/crustle.png\" alt=\"\" loading=\"lazy\" onerror=\"this.style.display='none'\"><span class=\"mc-rec-name-text\">Crustle</span></span></td>\n        <td class=\"mc-rec-day2\"><strong>76,6</strong></td>\n        <td class=\"mc-rec-wr\">56,8%</td>\n        <td class=\"mc-rec-wins\">34,9%</td>\n        <td class=\"mc-rec-wins\">195</td>\n      </tr>"
+    }
+  ],
+  "panel_title": "Fun-Event Recommendations Final-Cumulative Ranking",
+  "panel_tournHint": [
+    "Top decks of this closed meta, ranked by Final-Cumulative score (win % × 1 + Day-2 conversion). Use this as a fun-event guide — these decks actually performed across the format.",
+    "Across 6 major tournaments, showing top 10 archetypes (min 30 players)."
+  ]
+}

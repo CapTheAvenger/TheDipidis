@@ -1,0 +1,100 @@
+{
+  "rec_rows_count": 7,
+  "rec_rows": [
+    {
+      "cells": [
+        "1",
+        "Dragapult Dusknoir",
+        "26,7%",
+        "55,1%",
+        "∅ 4.4",
+        "▼"
+      ],
+      "classes": "mc-rec-row",
+      "reasonId": "mc-rec-reason-dragapultdusknoir"
+    },
+    {
+      "cells": [
+        "2",
+        "Dragapult",
+        "25,5%",
+        "54,4%",
+        "∅ 4.4",
+        "▼"
+      ],
+      "classes": "mc-rec-row",
+      "reasonId": "mc-rec-reason-dragapult"
+    },
+    {
+      "cells": [
+        "3",
+        "Alakazam Dudunsparce",
+        "21,4%",
+        "52,4%",
+        "∅ 4.2",
+        "▼"
+      ],
+      "classes": "mc-rec-row",
+      "reasonId": "mc-rec-reason-alakazamdudunsparce"
+    },
+    {
+      "cells": [
+        "4",
+        "Grimmsnarl Froslass",
+        "21,0%",
+        "52,1%",
+        "∅ 4.2",
+        "▼"
+      ],
+      "classes": "mc-rec-row",
+      "reasonId": "mc-rec-reason-grimmsnarlfroslass"
+    },
+    {
+      "cells": [
+        "5",
+        "Festival Lead",
+        "21,1%",
+        "52,0%",
+        "∅ 4.2",
+        "▼"
+      ],
+      "classes": "mc-rec-row",
+      "reasonId": "mc-rec-reason-festivallead"
+    },
+    {
+      "cells": [
+        "6",
+        "Dragapult Dudunsparce",
+        "20,3%",
+        "51,8%",
+        "∅ 4.1",
+        "▼"
+      ],
+      "classes": "mc-rec-row",
+      "reasonId": "mc-rec-reason-dragapultdudunsparce"
+    },
+    {
+      "cells": [
+        "7",
+        "Ogerpon Meganium",
+        "20,4%",
+        "50,9%",
+        "∅ 4.1",
+        "▼"
+      ],
+      "classes": "mc-rec-row",
+      "reasonId": "mc-rec-reason-ogerponmeganium"
+    }
+  ],
+  "frozen_table_present": false,
+  "frozen_headers": [],
+  "any_rec_headers": [
+    "#",
+    "Deck",
+    "Day-2",
+    "Avg WR",
+    "Exp. Wins",
+    ""
+  ],
+  "banner": null
+}

@@ -1,0 +1,59 @@
+{
+  "api": [
+    "init",
+    "preload",
+    "getDeckNames",
+    "getPredictedField",
+    "getBaseMatchup",
+    "_onSetting",
+    "_setTournamentType",
+    "_setMetaCallMode",
+    "_onToggleSource",
+    "_onMyDeck",
+    "_onMyDeckInput",
+    "_onMyDeckCommit",
+    "_onPersonalShare",
+    "_onWrOverride",
+    "_onBrickFilter",
+    "_toggleOverrides",
+    "_toggleGroup",
+    "_toggleGroupField",
+    "_toggleDetail",
+    "_toggleAllDetails",
+    "_addCustomDeck",
+    "_removeCustomDeck",
+    "_onCustomDeckName",
+    "_onCustomDeckShare",
+    "_testingGroupLoad",
+    "_jumpToDeckAnalysis",
+    "_setMetaSource",
+    "_toggleRecReason",
+    "_saveScenario",
+    "_onScenarioSelect",
+    "_deleteScenario",
+    "_refreshScenario",
+    "exportFieldShareImage",
+    "exportFieldAndRecsShareImage",
+    "exportDay2ShareImage"
+  ],
+  "metaSourceSelect": null,
+  "formatSelect": "unknown selector",
+  "metacallSelects": [
+    {
+      "id": "",
+      "name": "",
+      "options": [
+        ""
+      ]
+    },
+    {
+      "id": "",
+      "name": "",
+      "options": [
+        "all",
+        "exclude"
+      ]
+    }
+  ],
+  "metacallText": " Meta Call Predict the tournament field and calculate your Day 2 chances. 📅 Data window from: Clear Auto: last 28 days (≥ 2026-04-27) — pick a date to override 💾 Scenarios — no scenario — Save… Storage empty — saved scenarios will appear here. (metacall_scenarios_v1: 0B) Tournament Settings Customizable Regional (Day 2)Local ChallengeLocal Cup Players Rounds Day 2 Threshold (pts) Day 2 threshold — points needed in Swiss to advance. Source Past Meta Current Meta Past Meta Meta Call Mode Customizable Standard Counter-Meta Online ladder is treated as truth. Fits events where the player base bandwagons the dominant deck (LA, Prague, Campinas style). Data Sources Optional Current City League no data Past City League (M3) 344 archetypes Field Composition Top 25 1,300 Players ▴ Collapse all 🔗 "
+}

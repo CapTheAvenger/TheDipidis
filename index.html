@@ -1559,7 +1559,18 @@
                             </div>
                         </div>
                     </div>
-                    
+
+                    <!-- Tournament Performance — populated by renderPastMetaPerformance() in
+                         app-past-meta.js when an archetype is selected AND a single format
+                         is active. Hidden when format filter = "all" because the per-meta
+                         labs CSV pipeline is one-format-at-a-time. -->
+                    <div class="stats-section d-none" id="pastMetaPerformanceSection">
+                        <h2 class="past-meta-stats-title" data-i18n="pm.tournamentPerformance">Tournament Performance</h2>
+                        <p class="past-meta-section-hint" id="pastMetaPerformanceHint" data-i18n="pm.tournamentPerformanceHint">Cumulative results for this archetype across the selected format's major tournaments.</p>
+                        <div class="past-meta-stats-grid" id="pastMetaPerformanceCards"></div>
+                        <div class="past-meta-matchup-block" id="pastMetaMatchupBlock"></div>
+                    </div>
+
                     <div class="cards-section d-none" id="pastMetaCardsSection">
                         <div class="cards-header display-block">
                             <div class="cards-header past-meta-cards-header">

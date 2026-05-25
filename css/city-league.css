@@ -2431,3 +2431,86 @@
     word-break: break-word !important;
   }
 }
+
+/* ── Past Meta — Tournament Performance drill-down ─────────────
+   Cumulative WR stat-card row + matchup matrix table that appear
+   under the regular "Deck Statistics" panel when a single format is
+   selected. The stat cards reuse .past-meta-stat-card so they pick up
+   the existing teal-blue gradient + hover lift; the matchup table is
+   a clean read-only sort by games-played-desc. */
+.past-meta-section-hint {
+    color: #6b7280;
+    font-size: 0.86rem;
+    margin: 0 0 12px 0;
+    line-height: 1.45;
+}
+.past-meta-empty-state {
+    padding: 12px 14px;
+    background: #f8fafc;
+    border-radius: 10px;
+    border: 1px dashed #d1d5db;
+    font-style: italic;
+}
+.past-meta-loading-state {
+    padding: 14px 16px;
+    color: #6b7280;
+    font-style: italic;
+    background: #f8fafc;
+    border-radius: 10px;
+}
+.past-meta-stat-mono {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 1.15em;
+    letter-spacing: 0.02em;
+}
+
+.past-meta-matchup-block {
+    margin-top: 8px;
+}
+.past-meta-matchup-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #2c3e50;
+    margin: 18px 0 10px 0;
+}
+.past-meta-matchup-table-wrap {
+    overflow-x: auto;
+    border-radius: 10px;
+    border: 1px solid #e5e7eb;
+    background: #fff;
+}
+.past-meta-matchup-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.92rem;
+}
+.past-meta-matchup-table th,
+.past-meta-matchup-table td {
+    padding: 8px 12px;
+    text-align: left;
+    border-bottom: 1px solid #eef0f3;
+}
+.past-meta-matchup-table thead th {
+    background: #f6f8fb;
+    font-weight: 700;
+    color: #374151;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+.past-meta-matchup-table tbody tr:hover {
+    background: #f9fafb;
+}
+.past-meta-matchup-table .past-meta-mu-games {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    color: #4b5563;
+}
+.past-meta-matchup-table .past-meta-mu-wr {
+    text-align: right;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+.past-meta-matchup-table .past-meta-mu-good { color: #15803d; }
+.past-meta-matchup-table .past-meta-mu-bad  { color: #b91c1c; }
+.past-meta-matchup-table .past-meta-mu-even { color: #6b7280; }

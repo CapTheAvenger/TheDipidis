@@ -691,6 +691,8 @@
             if (!selectedArchetype) {
                 // Hide stats and cards
                 document.getElementById('pastMetaStatsSection').classList.add('d-none');
+                const perfSection = document.getElementById('pastMetaPerformanceSection');
+                if (perfSection) perfSection.classList.add('d-none');
                 document.getElementById('pastMetaDeckTableView').classList.add('d-none');
                 document.getElementById('pastMetaDeckVisual').classList.add('d-none');
                 pastMetaCurrentDeck = null;
@@ -806,13 +808,19 @@
             }
             
             document.getElementById('pastMetaStatFormat').textContent = pastMetaCurrentDeck.format;
-            
+
             // Save to window for deck builder
             window.pastMetaCurrentArchetype = selectedArchetype;
-            
+
             // Apply filters and render
             filterPastMetaCards();
-            
+
+            // Tournament-performance drill-down (cumulative WR + matchup
+            // matrix). Fire-and-forget — first paint shows a loading state,
+            // the labs CSV resolves async and re-renders. No-op when the
+            // format filter is "all" (per-meta labs CSV is one-format-only).
+            renderPastMetaPerformance(selectedArchetype, formatFilter, tournamentFilter);
+
             devLog(`Selected archetype: ${selectedArchetype} (${aggregatedCards.length} unique cards across ${uniqueTournamentCount} tournaments, ${totalDecklists} total decklists)`);
           } catch (err) {
             console.error('[Past Meta] Error loading deck cards:', err);
@@ -1314,5 +1322,265 @@
         }
         
         // (removed duplicate togglePastMetaDeckGridView — full version above)
+
+        // ── Tournament Performance drill-down ─────────────────────
+        // Renders the cumulative WR + matchup matrix block under the
+        // standard "Cards in Deck / Tournament / Format" stats whenever
+        // the user picks an archetype on the Past Meta tab AND a single
+        // format is active. Sources:
+        //   - data/labs_tournament_decks_<META>.csv  → per-tournament
+        //     win/loss/tie + day1/day2; aggregated across the meta for
+        //     the cumulative-WR stat cards.
+        //   - data/labs_tournament_matchups_<META>.csv → per-meta
+        //     aggregated matchup pairs (my_deck × opponent); rendered as
+        //     a sortable table. The CSV is produced by labs_tournament_
+        //     scraper.py when run with --matchups; if it doesn't exist
+        //     yet for this meta, we render a friendly empty state instead
+        //     of failing so the panel still surfaces the cumulative WR.
+        //
+        // Format = "all" is intentionally skipped — the per-meta labs
+        // CSVs are one-format-only and aggregating across all closed
+        // metas would mix incompatible card pools. Tournament filter is
+        // applied if a single tournament is selected (otherwise aggregate
+        // over every tournament in the format chunk).
+        const _pastMetaLabsDecksCache = new Map(); // metaKey -> parsed rows | null
+        const _pastMetaLabsMatchupsCache = new Map(); // metaKey -> parsed rows | null
+
+        function _pmParseCSVQuoted(text, sep) {
+            const splitLine = (line) => {
+                const out = [];
+                let cur = '';
+                let inQ = false;
+                for (let i = 0; i < line.length; i++) {
+                    const c = line[i];
+                    if (c === '"') {
+                        if (inQ && line[i + 1] === '"') { cur += '"'; i++; }
+                        else inQ = !inQ;
+                    } else if (c === sep && !inQ) {
+                        out.push(cur); cur = '';
+                    } else { cur += c; }
+                }
+                out.push(cur);
+                return out;
+            };
+            const lines = text.replace(/\r/g, '').split('\n');
+            if (lines.length < 2) return [];
+            const headers = splitLine(lines[0]).map(h => h.trim().replace(/^﻿/, ''));
+            return lines.slice(1).filter(l => l.trim()).map(l => {
+                const vals = splitLine(l);
+                const obj = {};
+                headers.forEach((h, i) => { obj[h] = (vals[i] || '').trim(); });
+                return obj;
+            });
+        }
+
+        async function _pmLoadLabsCsv(filename, cache) {
+            const key = filename;
+            if (cache.has(key)) return cache.get(key);
+            try {
+                const resp = await fetch(`data/${filename}?t=` + Date.now());
+                if (!resp.ok) { cache.set(key, null); return null; }
+                const text = await resp.text();
+                if (!text) { cache.set(key, null); return null; }
+                const rows = _pmParseCSVQuoted(text, ',');
+                cache.set(key, rows.length > 0 ? rows : null);
+                return cache.get(key);
+            } catch (_e) {
+                cache.set(key, null);
+                return null;
+            }
+        }
+
+        async function renderPastMetaPerformance(archetype, formatKey, tournamentFilter) {
+            const section = document.getElementById('pastMetaPerformanceSection');
+            const cards   = document.getElementById('pastMetaPerformanceCards');
+            const matchup = document.getElementById('pastMetaMatchupBlock');
+            if (!section || !cards || !matchup) return;
+
+            // Multi-format aggregate isn't supported — labs CSVs are
+            // per-meta and combining different rotations would mix decks
+            // that wouldn't even share a card pool. Surface the section
+            // anyway so the user understands why it's blank instead of
+            // silently hiding the entire panel.
+            if (!archetype || formatKey === 'all' || !formatKey) {
+                section.classList.remove('d-none');
+                cards.innerHTML = '';
+                matchup.innerHTML = `<p class="past-meta-section-hint past-meta-empty-state">${(typeof t === 'function' ? t('pm.performanceFormatAllHint') : 'Pick a specific format to see this archetype\'s cumulative tournament performance.')}</p>`;
+                return;
+            }
+
+            section.classList.remove('d-none');
+            cards.innerHTML = `<div class="past-meta-loading-state">${(typeof t === 'function' ? t('pm.performanceLoading') : 'Loading tournament data…')}</div>`;
+            matchup.innerHTML = '';
+
+            const decksRows = await _pmLoadLabsCsv(`labs_tournament_decks_${formatKey}.csv`, _pastMetaLabsDecksCache);
+            if (!decksRows || decksRows.length === 0) {
+                cards.innerHTML = `<p class="past-meta-section-hint past-meta-empty-state">${(typeof t === 'function' ? t('pm.performanceNoData') : 'No labs data available for this format.')}</p>`;
+                return;
+            }
+
+            // Filter to the selected archetype. Match by exact deck_name
+            // (the labs CSV uses the same canonical archetype label as
+            // tournament_cards_data_cards_<META>.csv, sanitized of price
+            // tags). When a single tournament is selected, narrow further.
+            const wantedTid = tournamentFilter && tournamentFilter !== 'all' ? String(tournamentFilter) : null;
+            const deckRows = decksRows.filter(r => {
+                if ((r.deck_name || '').trim() !== archetype) return false;
+                if (wantedTid && (r.tournament_id || '').trim() !== wantedTid) return false;
+                return true;
+            });
+
+            if (deckRows.length === 0) {
+                cards.innerHTML = `<p class="past-meta-section-hint past-meta-empty-state">${(typeof t === 'function' ? t('pm.performanceNoArchetype') : 'No labs rows for this archetype in the selected format.')}</p>`;
+                return;
+            }
+
+            // Aggregate across the matching rows. Ties counted as 0.5 win
+            // so the headline win % matches how players describe records
+            // ("6-2-1 = 6.5/9 = 72 %") and stays consistent with the
+            // labs win_pct definition used elsewhere in the app.
+            let players = 0, wins = 0, losses = 0, ties = 0;
+            let day1 = 0, day2 = 0;
+            const seenTournaments = new Set();
+            for (const r of deckRows) {
+                players += parseInt(r.player_count || '0', 10) || 0;
+                wins    += parseFloat(r.wins   || '0') || 0;
+                losses  += parseFloat(r.losses || '0') || 0;
+                ties    += parseFloat(r.ties   || '0') || 0;
+                day1    += parseInt(r.day1_players || '0', 10) || 0;
+                day2    += parseInt(r.day2_players || '0', 10) || 0;
+                const tid = (r.tournament_id || '').trim();
+                if (tid) seenTournaments.add(tid);
+            }
+            const games = wins + losses + ties;
+            const winPct = games > 0 ? (wins + 0.5 * ties) / games * 100 : 0;
+            const day2Conv = day1 > 0 ? (day2 / day1) * 100 : 0;
+            const fmtPct = (n) => n.toFixed(1).replace('.', ',') + '%';
+            const fmtInt = (n) => Math.round(n).toLocaleString();
+
+            const tournLabel = (typeof t === 'function' ? t('pm.perfStatTournaments') : 'Tournaments');
+            const playersLabel = (typeof t === 'function' ? t('pm.perfStatPlayers') : 'Players');
+            const recordLabel = (typeof t === 'function' ? t('pm.perfStatRecord') : 'Record (W-L-T)');
+            const winPctLabel = (typeof t === 'function' ? t('pm.perfStatWinPct') : 'Cumulative Win %');
+            const day2Label = (typeof t === 'function' ? t('pm.perfStatDay2Conv') : 'Day-2 Conversion');
+
+            cards.innerHTML = `
+                <div class="past-meta-stat-card">
+                    <div class="past-meta-stat-label">${tournLabel}</div>
+                    <div class="past-meta-stat-value">${seenTournaments.size}</div>
+                </div>
+                <div class="past-meta-stat-card">
+                    <div class="past-meta-stat-label">${playersLabel}</div>
+                    <div class="past-meta-stat-value">${fmtInt(players)}</div>
+                </div>
+                <div class="past-meta-stat-card">
+                    <div class="past-meta-stat-label">${recordLabel}</div>
+                    <div class="past-meta-stat-value past-meta-stat-mono">${fmtInt(wins)}-${fmtInt(losses)}-${fmtInt(ties)}</div>
+                </div>
+                <div class="past-meta-stat-card">
+                    <div class="past-meta-stat-label">${winPctLabel}</div>
+                    <div class="past-meta-stat-value">${fmtPct(winPct)}</div>
+                </div>
+                <div class="past-meta-stat-card">
+                    <div class="past-meta-stat-label">${day2Label}</div>
+                    <div class="past-meta-stat-value">${fmtPct(day2Conv)}</div>
+                </div>
+            `;
+
+            // Matchup matrix — render asynchronously so the cumulative
+            // panel paints first. labs_tournament_matchups_<META>.csv is
+            // produced by `labs_tournament_scraper.py --matchups` (slow,
+            // 1 HTTP per deck per tournament) so older meta chunks may
+            // not have it yet. Empty state explains that explicitly.
+            await _renderPastMetaMatchupMatrix(archetype, formatKey, wantedTid, matchup);
+        }
+
+        async function _renderPastMetaMatchupMatrix(archetype, formatKey, tournamentFilter, container) {
+            const titleLabel = (typeof t === 'function' ? t('pm.matchupMatrixTitle') : 'Matchup Matrix');
+            const loadingLabel = (typeof t === 'function' ? t('pm.matchupLoading') : 'Loading matchup data…');
+            container.innerHTML = `
+                <h3 class="past-meta-matchup-title">${titleLabel}</h3>
+                <div class="past-meta-loading-state">${loadingLabel}</div>
+            `;
+
+            const rows = await _pmLoadLabsCsv(`labs_tournament_matchups_${formatKey}.csv`, _pastMetaLabsMatchupsCache);
+            if (!rows || rows.length === 0) {
+                const emptyLabel = (typeof t === 'function' ? t('pm.matchupEmpty') : 'Labs matchup data hasn\'t been scraped for this format yet. Cumulative results above are still complete.');
+                container.innerHTML = `
+                    <h3 class="past-meta-matchup-title">${titleLabel}</h3>
+                    <p class="past-meta-section-hint past-meta-empty-state">${emptyLabel}</p>
+                `;
+                return;
+            }
+
+            // Filter to "my deck = archetype" + optional tournament filter.
+            // The matchup CSV's day_filter column distinguishes overall /
+            // day1 / day2 splits — start with 'overall' to avoid duplicate
+            // rows in the matrix. (Day-1/Day-2 split could be a future
+            // toggle.)
+            const myRows = rows.filter(r => {
+                if ((r.my_deck_name || '').trim() !== archetype) return false;
+                if ((r.day_filter || '').trim() !== 'overall') return false;
+                if (tournamentFilter) {
+                    // tournaments_used is comma-separated; check membership
+                    const used = (r.tournaments_used || '').split(',').map(s => s.trim());
+                    if (!used.includes(String(tournamentFilter))) return false;
+                }
+                return true;
+            });
+
+            if (myRows.length === 0) {
+                const noPairsLabel = (typeof t === 'function' ? t('pm.matchupNoPairs') : 'No matchup pairs recorded for this archetype.');
+                container.innerHTML = `
+                    <h3 class="past-meta-matchup-title">${titleLabel}</h3>
+                    <p class="past-meta-section-hint past-meta-empty-state">${noPairsLabel}</p>
+                `;
+                return;
+            }
+
+            // Sort by games played desc — most relevant opponents on top.
+            // Within tied counts, sort by WR desc so the player sees their
+            // best matchups first.
+            const opps = myRows.map(r => ({
+                name: r.opponent_deck_name || r.opponent_deck_slug || 'Unknown',
+                games: parseInt(r.vs_count || '0', 10) || 0,
+                winPct: parseFloat((r.vs_win_pct || '0').replace(',', '.')) || 0,
+            })).sort((a, b) => (b.games - a.games) || (b.winPct - a.winPct));
+
+            const headerOpp = (typeof t === 'function' ? t('pm.matchupColOpponent') : 'Opponent');
+            const headerGames = (typeof t === 'function' ? t('pm.matchupColGames') : 'Games');
+            const headerWr = (typeof t === 'function' ? t('pm.matchupColWinPct') : 'Win %');
+            const tournHint = (typeof t === 'function' ? t('pm.matchupTournHint') : 'Aggregated across labs tournaments where this archetype appeared.');
+
+            const rowsHtml = opps.map(o => {
+                const wrCls = o.winPct >= 55 ? 'past-meta-mu-good'
+                           : o.winPct <= 45 ? 'past-meta-mu-bad'
+                           : 'past-meta-mu-even';
+                return `<tr>
+                    <td>${(typeof window.escapeHtml === 'function' ? window.escapeHtml(o.name) : o.name)}</td>
+                    <td class="past-meta-mu-games">${o.games}</td>
+                    <td class="past-meta-mu-wr ${wrCls}">${o.winPct.toFixed(1).replace('.', ',')}%</td>
+                </tr>`;
+            }).join('');
+
+            container.innerHTML = `
+                <h3 class="past-meta-matchup-title">${titleLabel}</h3>
+                <p class="past-meta-section-hint">${tournHint}</p>
+                <div class="past-meta-matchup-table-wrap">
+                    <table class="past-meta-matchup-table">
+                        <thead><tr>
+                            <th>${headerOpp}</th>
+                            <th>${headerGames}</th>
+                            <th>${headerWr}</th>
+                        </tr></thead>
+                        <tbody>${rowsHtml}</tbody>
+                    </table>
+                </div>
+            `;
+        }
+
+        // Expose for inline callers / dev tools (matches the convention
+        // used by other Past Meta helpers like filterPastMetaOverviewCards).
+        window.renderPastMetaPerformance = renderPastMetaPerformance;
 
         // Generic function to render deck analysis tables

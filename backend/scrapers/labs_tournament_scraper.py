@@ -31,7 +31,7 @@ import os
 import re
 import sys
 import time
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Optional, Set, Tuple
 
 # Resolve project root so the scraper can be run from any working directory
@@ -237,17 +237,31 @@ def _build_labs_name_meta_lookup(labs_tournaments: List[Dict]) -> Dict[str, Tupl
     """Build {labs_tid: (meta, iso_date)} by matching labs tournaments
     against tournament_cards_data_cards_<META>.csv files.
 
-    Disambiguation when several cards entries share the same city
-    (Stuttgart in 3 metas, Birmingham in 2, etc.):
-      • Filter cards entries to those on/after _LABS_FOUNDING — labs can't
-        possibly hold tournaments from before it existed.
-      • Sort the filtered cards entries by date ascending, sort same-named
-        labs tids ascending. Position-match (labs tid #0 → cards entry #0).
-      • Labs tids ARE chronologically ordered (lower = older), so this
-        works as long as cards and labs cover overlapping ranges.
+    Two-pass matching:
 
-    Labs tournaments without a same-name cards entry stay out of the map
-    and the caller falls back to _unsorted or current_meta."""
+    Pass 1 (unambiguous position match) — for each (class, city) key:
+      • Filter cards entries to on/after _LABS_FOUNDING.
+      • If the number of post-founding cards entries equals the number
+        of same-name labs tids (or labs has just one tid), position-match
+        by chronological order: lower labs tid → older cards entry.
+
+    Pass 2 (chronological-neighbor disambiguation) — for the remaining
+    "ambig" tids where labs_count != cards_count post-founding:
+      • Estimate the labs tid's true date from its closest Pass-1-matched
+        chronological neighbors (lower tid → older, higher tid → newer).
+      • Among the still-available same-name cards entries, pick the one
+        whose date falls within [prev_neighbor_date - 14d,
+        next_neighbor_date + 14d]. 14-day slack handles back-to-back
+        regionals on the same weekend.
+      • If no candidate fits, the tid stays unmatched (→ _unsorted),
+        signalling that cards data is incomplete for this event.
+
+    Why this matters: an earlier single-pass position match silently
+    misassigned 0019 Special Event San Juan (labs Feb 2025) to the only
+    cards entry for that name (SVI-ASC March 2026), pushing 0056 (the
+    actual March-2026 San Juan) out-of-bounds into _unsorted. The 2-pass
+    algorithm gets both right by using the neighbor dates as anchors.
+    """
     out: Dict[str, Tuple[str, str]] = {}
     data_dir = _get_data_dir()
     if not os.path.isdir(data_dir):
@@ -280,20 +294,20 @@ def _build_labs_name_meta_lookup(labs_tournaments: List[Dict]) -> Dict[str, Tupl
         except (OSError, csv.Error) as e:
             logger.warning("Could not read %s for name-meta lookup: %s", path, e)
             continue
-
     for k in cards_idx:
         cards_idx[k].sort(key=lambda x: x[0])
 
-    # labs index: key -> [tid] sorted ascending
-    labs_idx: Dict[Tuple[str, str], List[str]] = {}
-    for t in labs_tournaments:
-        key = _parse_tournament_name_key(t.get('tournament_name') or '')
-        if not key:
-            continue
-        labs_idx.setdefault(key, []).append(str(t.get('tournament_id') or ''))
-    for k in labs_idx:
-        labs_idx[k].sort()
+    def _resolve_lookup_key(parsed_key: Tuple[str, str]) -> Optional[Tuple[str, str]]:
+        """Convert ('world-by-city', city) → ('world', year) via the
+        host-city map; pass other key shapes through unchanged."""
+        if parsed_key[0] == 'world-by-city':
+            year = _WORLD_HOST_BY_CITY.get(parsed_key[1])
+            return ('world', year) if year else None
+        return parsed_key
 
+    # labs index: parsed-key -> [tid] sorted ascending
+    labs_by_key: Dict[Tuple[str, str], List[str]] = {}
+    tid_to_key: Dict[str, Tuple[str, str]] = {}
     for t in labs_tournaments:
         tid = str(t.get('tournament_id') or '')
         if not tid:
@@ -301,27 +315,84 @@ def _build_labs_name_meta_lookup(labs_tournaments: List[Dict]) -> Dict[str, Tupl
         key = _parse_tournament_name_key(t.get('tournament_name') or '')
         if not key:
             continue
-        # World-by-city → look up the world year from city
-        lookup_key = key
-        if key[0] == 'world-by-city':
-            year = _WORLD_HOST_BY_CITY.get(key[1])
-            if not year:
-                continue
-            lookup_key = ('world', year)
+        labs_by_key.setdefault(key, []).append(tid)
+        tid_to_key[tid] = key
+    for k in labs_by_key:
+        labs_by_key[k].sort()
+
+    # Track which cards-entry indices have been consumed per lookup_key so
+    # Pass 2 doesn't re-assign the same cards entry to two different labs.
+    consumed: Dict[Tuple[str, str], Set[int]] = {}
+
+    # ── Pass 1: position-match where labs/cards counts align ──────────
+    ambig_tids: List[str] = []
+    for parsed_key, tids in labs_by_key.items():
+        lookup_key = _resolve_lookup_key(parsed_key)
+        if not lookup_key:
+            continue
         all_cands = cards_idx.get(lookup_key) or []
-        # Filter to "labs-era" cards entries
-        cands = [c for c in all_cands if c[0] >= _LABS_FOUNDING]
-        if not cands:
+        post_founding = [(i, c) for i, c in enumerate(all_cands) if c[0] >= _LABS_FOUNDING]
+        if not post_founding:
             continue
-        labs_list = labs_idx.get(key) or []
-        try:
-            pos = labs_list.index(tid)
-        except ValueError:
+        if len(tids) == len(post_founding) or len(tids) == 1:
+            for pos, tid in enumerate(tids):
+                if pos >= len(post_founding):
+                    continue
+                orig_i, (d, meta, _raw) = post_founding[pos]
+                out[tid] = (meta, d.strftime('%Y-%m-%d'))
+                consumed.setdefault(lookup_key, set()).add(orig_i)
+        else:
+            ambig_tids.extend(tids)
+
+    # ── Pass 2: disambiguate via chronological neighbors ──────────────
+    # Snapshot Pass-1 assignments so newly-disambiguated tids don't
+    # influence each other's neighbor lookups (avoids cascading errors
+    # when several tids share the same ambig group).
+    sorted_pass1 = sorted(out.keys())
+    slack = timedelta(days=14)
+    for tid in ambig_tids:
+        parsed_key = tid_to_key.get(tid)
+        if not parsed_key:
             continue
-        if pos >= len(cands):
+        lookup_key = _resolve_lookup_key(parsed_key)
+        if not lookup_key:
             continue
-        d, meta, _raw = cands[pos]
-        out[tid] = (meta, d.strftime('%Y-%m-%d'))
+        all_cands = cards_idx.get(lookup_key) or []
+        taken = consumed.get(lookup_key) or set()
+        avail = [(i, c) for i, c in enumerate(all_cands)
+                 if i not in taken and c[0] >= _LABS_FOUNDING]
+        if not avail:
+            continue
+        prev_d = next_d = None
+        for st in reversed(sorted_pass1):
+            if st < tid:
+                _meta, dstr = out[st]
+                if dstr:
+                    try:
+                        prev_d = datetime.strptime(dstr, '%Y-%m-%d')
+                        break
+                    except ValueError:
+                        continue
+        for st in sorted_pass1:
+            if st > tid:
+                _meta, dstr = out[st]
+                if dstr:
+                    try:
+                        next_d = datetime.strptime(dstr, '%Y-%m-%d')
+                        break
+                    except ValueError:
+                        continue
+        lo = (prev_d - slack) if prev_d else None
+        hi = (next_d + slack) if next_d else None
+        for orig_i, (d, meta, _raw) in avail:
+            if lo and d < lo:
+                continue
+            if hi and d > hi:
+                continue
+            out[tid] = (meta, d.strftime('%Y-%m-%d'))
+            consumed.setdefault(lookup_key, set()).add(orig_i)
+            break
+        # else: tid stays out of `out` → caller routes it to _unsorted
     return out
 
 
@@ -1783,32 +1854,76 @@ def main() -> None:
     merged_deck_rows = [r for r in existing_deck_rows if str(r.get('tournament_id') or '').strip() not in rescraped_tids]
     merged_deck_rows.extend(all_deck_rows)
 
-    # Re-classify any existing rows whose meta is empty or "_unsorted".
-    # Rows scraped in earlier runs (when the JS-rendered date wasn't yet
-    # being worked around) live in labs_tournament_decks__unsorted.csv with
-    # meta=''. The name-meta lookup can now rescue most of them — and
-    # populate their tournament_date column from cards data while we're at
-    # it. This is how the 2026-05-25 _unsorted pile of 4072 rows ends up
-    # correctly distributed without a re-scrape.
-    rescued = 0
-    for row in merged_deck_rows:
-        if (row.get('meta') or '').strip():
+    # Re-classify existing rows against the name-meta lookup. Two cases:
+    #
+    #   (A) RESCUE — row has empty meta (= sitting in _unsorted) and the
+    #       lookup now matches it. Promote to the matched meta + populate
+    #       tournament_date.
+    #
+    #   (B) CORRECT — row's current (meta, date) was a stale wrong
+    #       assignment from the old single-pass position-match algo.
+    #       Specifically: this tid is NOT in the new lookup, but the
+    #       row's date matches the lookup-derived date of ANOTHER labs
+    #       tid with the same parsed name. That's the fingerprint of the
+    #       old algo's mis-match (e.g. 0019 Special San Juan inherited
+    #       0056's SVI-ASC slot before chronological-neighbor disambig
+    #       was added). Reset meta + date so the next split routes them
+    #       to _unsorted, where they correctly stay until cards data
+    #       fills in the gap.
+    #
+    # Reverse map: parsed name-key → {tid: lookup_iso_date} for tids the
+    # current run's lookup has resolved. Used for stale-detection in (B).
+    name_to_lookup_dates: Dict[Tuple[str, str], Dict[str, str]] = {}
+    for t in known_labs:
+        key = _parse_tournament_name_key(t.get('tournament_name') or '')
+        if not key:
             continue
+        tid_known = str(t.get('tournament_id') or '')
+        hit = name_meta_lookup.get(tid_known)
+        if hit and hit[1]:
+            name_to_lookup_dates.setdefault(key, {})[tid_known] = hit[1]
+
+    rescued = 0
+    corrected = 0
+    for row in merged_deck_rows:
         tid = str(row.get('tournament_id') or '').strip()
         if not tid:
             continue
-        new_meta, new_date = _derive_meta_for_labs_tournament(
-            tid, row.get('tournament_name', ''),
-            row.get('tournament_date') or '',
-            name_meta_lookup, current_meta=current_meta,
-        )
-        if new_meta:
-            row['meta'] = new_meta
-            if new_date and not (row.get('tournament_date') or '').strip():
+        cur_meta = (row.get('meta') or '').strip()
+        cur_date = (row.get('tournament_date') or '').strip()
+
+        lookup_hit = name_meta_lookup.get(tid)
+        if lookup_hit:
+            new_meta, new_date = lookup_hit
+            # (A) RESCUE or refresh
+            if not cur_meta:
+                row['meta'] = new_meta
+                if new_date:
+                    row['tournament_date'] = new_date
+                rescued += 1
+            elif cur_meta != new_meta:
+                row['meta'] = new_meta
+                if new_date:
+                    row['tournament_date'] = new_date
+                corrected += 1
+            elif new_date and cur_date != new_date:
+                # meta agrees, but the row has a stale/missing date
                 row['tournament_date'] = new_date
-            rescued += 1
+        elif cur_meta and cur_date:
+            # (B) CORRECT — lookup has nothing for this tid, but the row
+            # is currently classified. Check if its date came from
+            # another same-name tid's lookup slot.
+            row_key = _parse_tournament_name_key(row.get('tournament_name') or '')
+            siblings = name_to_lookup_dates.get(row_key, {}) if row_key else {}
+            if any(other_tid != tid and other_date == cur_date
+                   for other_tid, other_date in siblings.items()):
+                row['meta'] = ''
+                row['tournament_date'] = ''
+                corrected += 1
     if rescued:
         logger.info("Re-classified %d previously-unsorted rows via name lookup", rescued)
+    if corrected:
+        logger.info("Corrected %d stale row assignments via name lookup", corrected)
 
     # ── Save ───────────────────────────────────────────────────────────────
     if overwrite:

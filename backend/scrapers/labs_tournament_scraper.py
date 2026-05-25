@@ -32,7 +32,7 @@ import re
 import sys
 import time
 from datetime import datetime, timezone
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Set, Tuple
 
 # Resolve project root so the scraper can be run from any working directory
 _SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -70,6 +70,178 @@ def _get_data_dir() -> str:
         return get_data_dir()
     except Exception:
         return os.path.join(_PROJECT_ROOT, "data")
+
+
+# ── Per-meta split helpers (2026-05-24) ──────────────────────────────────────
+#
+# Without these the scraper re-pulls every tournament from labs.* on every
+# weekly run — wasteful for closed metas (their data is frozen). The split
+# mirrors the pattern tournament_cards_data_cards_<META>.csv uses:
+#
+#   data/labs_tournament_decks_<META>.csv      — frozen per closed meta
+#   data/labs_tournament_matchups_<META>.csv   — frozen per closed meta
+#   data/labs_tournament_decks.csv             — monolith for Meta Call (reassembled)
+#   data/labs_tournament_matchups.csv          — monolith for Meta Call (reassembled)
+#
+# At run start: rebuild monoliths from chunks.
+# Skip rule:  tournament with meta != current_meta AND id already in monolith → skip
+# At run end: split monoliths back into per-meta chunks.
+
+_META_DATE_LOOKUP: Optional[List[Tuple[datetime, datetime, str]]] = None
+
+
+def _load_meta_date_lookup() -> List[Tuple[datetime, datetime, str]]:
+    """Build (min_date, max_date, meta_key) tuples from
+    tournament_cards_manifest.json's chunk_dates. Sorted by date-range width
+    ASCENDING — narrower windows take precedence when overlaps exist (the
+    historic SVI-ASC chunk e.g. spans 22 months because tournaments tagged
+    with that format are scattered; the narrower BRS-TWM / BRS-SFA windows
+    within that span are the correct answer for those dates)."""
+    global _META_DATE_LOOKUP
+    if _META_DATE_LOOKUP is not None:
+        return _META_DATE_LOOKUP
+
+    out: List[Tuple[datetime, datetime, str]] = []
+    manifest_path = os.path.join(_get_data_dir(), 'tournament_cards_manifest.json')
+    if not os.path.isfile(manifest_path):
+        # Try project-root fallback (workflow seed step may not have copied it yet)
+        manifest_path = os.path.join(_PROJECT_ROOT, 'data', 'tournament_cards_manifest.json')
+    if not os.path.isfile(manifest_path):
+        _META_DATE_LOOKUP = []
+        return _META_DATE_LOOKUP
+    try:
+        with open(manifest_path, 'r', encoding='utf-8') as f:
+            manifest = json.load(f)
+        chunk_dates = manifest.get('chunk_dates', {})
+        for chunk_name, dates in chunk_dates.items():
+            meta = chunk_name.replace('tournament_cards_data_cards_', '').replace('.csv', '')
+            mn = dates.get('min_date', '')
+            mx = dates.get('max_date', '')
+            if not mn or not mx:
+                continue
+            try:
+                d_min = datetime.strptime(mn, '%Y-%m-%d')
+                d_max = datetime.strptime(mx, '%Y-%m-%d')
+            except ValueError:
+                continue
+            out.append((d_min, d_max, meta))
+    except (json.JSONDecodeError, OSError):
+        out = []
+
+    # Narrower first
+    out.sort(key=lambda r: (r[1] - r[0]).days)
+    _META_DATE_LOOKUP = out
+    return _META_DATE_LOOKUP
+
+
+def _derive_meta_from_date(date_iso: str) -> str:
+    """Map a tournament_date (ISO 'YYYY-MM-DD') to its meta key.
+    Returns '' when no chunk's date-range contains the date — caller can
+    then default to the current_set (from format_window.json) or skip."""
+    if not date_iso:
+        return ''
+    try:
+        d = datetime.strptime(date_iso, '%Y-%m-%d')
+    except ValueError:
+        return ''
+    for d_min, d_max, meta in _load_meta_date_lookup():
+        if d_min <= d <= d_max:
+            return meta
+    return ''
+
+
+def _current_meta_key() -> str:
+    """Read format_window.json and return the current set code (e.g. 'CRI').
+    Caller pairs this with the previous set to derive the full meta key
+    when needed; for now we use it just to determine which tournaments
+    are CURRENT (re-scrape every run) vs CLOSED (skip if already scraped)."""
+    try:
+        fw_path = os.path.join(_get_data_dir(), 'format_window.json')
+        if not os.path.isfile(fw_path):
+            fw_path = os.path.join(_PROJECT_ROOT, 'data', 'format_window.json')
+        if not os.path.isfile(fw_path):
+            return ''
+        with open(fw_path, 'r', encoding='utf-8') as f:
+            fw = json.load(f)
+        return str(fw.get('current_set') or '').strip().upper()
+    except (OSError, json.JSONDecodeError):
+        return ''
+
+
+def _list_labs_chunk_paths(prefix: str) -> List[str]:
+    """Return all data/<prefix>_<META>.csv paths (project-root data/ dir)."""
+    data_dir = _get_data_dir()
+    paths: List[str] = []
+    if not os.path.isdir(data_dir):
+        return paths
+    for fname in sorted(os.listdir(data_dir)):
+        if fname.startswith(f'{prefix}_') and fname.endswith('.csv'):
+            paths.append(os.path.join(data_dir, fname))
+    return paths
+
+
+def _reassemble_labs_monolith(prefix: str, header: List[str]) -> List[Dict]:
+    """Concatenate all per-meta chunk rows into a single list. Used at the
+    start of a run to learn which tournament_ids are already scraped (so
+    we can skip closed-meta re-scrapes)."""
+    rows: List[Dict] = []
+    for chunk_path in _list_labs_chunk_paths(prefix):
+        try:
+            with open(chunk_path, 'r', encoding='utf-8-sig', newline='') as f:
+                reader = csv.DictReader(f)
+                for row in reader:
+                    # Defensive: backfill any missing keys with empty string
+                    norm = {k: row.get(k, '') for k in header}
+                    rows.append(norm)
+        except OSError as e:
+            logger.warning("Could not read %s: %s", chunk_path, e)
+    return rows
+
+
+def _split_labs_by_meta(rows: List[Dict], prefix: str, header: List[str]) -> Dict[str, int]:
+    """Write rows back to per-meta chunks (data/<prefix>_<META>.csv).
+    `meta` column on each row drives the bucket. Rows with empty meta
+    are bucketed under '_unsorted' so they don't get silently dropped."""
+    data_dir = _get_data_dir()
+    os.makedirs(data_dir, exist_ok=True)
+    by_meta: Dict[str, List[Dict]] = {}
+    for row in rows:
+        meta = (row.get('meta') or '').strip() or '_unsorted'
+        by_meta.setdefault(meta, []).append(row)
+    counts: Dict[str, int] = {}
+    for meta, bucket in by_meta.items():
+        out_path = os.path.join(data_dir, f'{prefix}_{meta}.csv')
+        with open(out_path, 'w', encoding='utf-8', newline='') as f:
+            writer = csv.DictWriter(f, fieldnames=header, extrasaction='ignore')
+            writer.writeheader()
+            writer.writerows(bucket)
+        counts[meta] = len(bucket)
+        logger.info("  → %s: %d rows", os.path.basename(out_path), len(bucket))
+    return counts
+
+
+# ── ID-walk discovery (backfill — 2026-05-24) ────────────────────────────────
+#
+# The labs index page only lists the most-recent tournaments. To backfill
+# historical labs IDs (0001..0066) we walk the ID space and probe each
+# /standings page. 200 OK → tournament exists, 404 → skip.
+# Used with the --id-range CLI flag.
+
+def discover_tournament_ids_by_walk(from_id: int, to_id: int, delay: float = 0.5) -> List[str]:
+    """Probe sequential 4-digit IDs and return those that have a /standings
+    page. Used for historical backfill when the labs index doesn't list
+    older tournaments."""
+    found: List[str] = []
+    logger.info("Walking labs tournament IDs %04d..%04d (probing /standings)", from_id, to_id)
+    for n in range(from_id, to_id + 1):
+        tid = str(n).zfill(4)
+        soup = fetch_page_bs4(f"{BASE_URL}/{tid}/standings")
+        if soup:
+            found.append(tid)
+            logger.info("  [%s] exists", tid)
+        time.sleep(delay)
+    logger.info("Walk complete — %d tournaments found in range", len(found))
+    return found
 
 
 # ── Date helpers ──────────────────────────────────────────────────────────────
@@ -750,6 +922,7 @@ def scrape_tournament_day(tournament_id: str, day: str) -> Dict[str, Dict[str, f
 CSV_FIELDS = [
     'tournament_id', 'tournament_name', 'tournament_date',
     'tournament_type', 'country', 'total_players',
+    'meta',  # Per-meta split (2026-05-24) — derived from tournament_date via tournament_cards_manifest's chunk_dates
     'deck_name', 'deck_slug', 'pokemon',
     'player_count', 'share_pct',
     'wins', 'losses', 'ties', 'win_pct',
@@ -1097,6 +1270,19 @@ def main() -> None:
         help='Format key to tag matchup rows with (e.g. TEF-POR). Useful for '
              'targeted per-format backfills.',
     )
+    parser.add_argument(
+        '--id-range', nargs=2, type=int, metavar=('FROM', 'TO'), default=None,
+        help='Backfill historical tournaments by ID-walking labs.* /standings '
+             'pages (e.g. --id-range 1 66 probes 0001..0066). Use this when '
+             'the labs index page only lists recent tournaments and you need '
+             'to seed older metas into the per-meta chunks.',
+    )
+    parser.add_argument(
+        '--ignore-cache', action='store_true',
+        help='Force-rescrape ALL discovered tournaments even if they belong to '
+             'closed metas already present in per-meta chunks. Default skips '
+             'closed-meta tournaments to save HTTP cost on weekly runs.',
+    )
     args = parser.parse_args()
 
     # ── Load settings (CLI args take priority over scraper_settings.json) ──
@@ -1135,6 +1321,23 @@ def main() -> None:
         logger.info("Single-tournament mode: %s (%s)",
                     tournaments[0]['tournament_name'],
                     tournaments[0]['tournament_date'] or 'date n/a')
+    elif args.id_range:
+        # Backfill mode — walk the labs ID space and probe each tournament's
+        # /standings page. Used to seed historical metas (SVI-PFL, SVI-ASC
+        # etc.) that no longer appear on the labs index page.
+        from_id, to_id = args.id_range
+        found_ids = discover_tournament_ids_by_walk(from_id, to_id, delay=min(delay, 0.5))
+        tournaments = []
+        for tid in found_ids:
+            meta_dict = scrape_tournament_meta(tid)
+            tournaments.append({
+                'tournament_id'  : tid,
+                'tournament_name': meta_dict.get('tournament_name') or f'Tournament {tid}',
+                'tournament_date': meta_dict.get('tournament_date') or '',
+                'tournament_type': 'regional',
+                'country'        : '',
+            })
+            time.sleep(delay)
     else:
         tournaments = scrape_tournament_list(
             from_date=from_date,
@@ -1145,18 +1348,56 @@ def main() -> None:
         logger.warning("No tournaments matched the given filters – nothing to do.")
         return
 
+    # ── Per-meta cache: rebuild monolith from existing chunks, then skip
+    # tournaments whose meta is already frozen (= meta != current_meta AND
+    # tournament_id already scraped). Saves ~80 min per weekly run once the
+    # archive is populated. Overridable with --ignore-cache.
+    current_meta = _current_meta_key()
+    existing_deck_rows = _reassemble_labs_monolith('labs_tournament_decks', CSV_FIELDS)
+    existing_matchup_rows = _reassemble_labs_monolith('labs_tournament_matchups', MATCHUP_CSV_HEADER)
+    seen_tids = {str(r.get('tournament_id') or '').strip() for r in existing_deck_rows}
+    logger.info(
+        "Per-meta cache: %d tournaments already scraped across all chunks, current_set=%s",
+        len(seen_tids), current_meta or '(unknown)',
+    )
+
     # ── Scrape each tournament ─────────────────────────────────────────────
     all_deck_rows: List[Dict] = []
     tournaments_meta: List[Dict] = []
     scraped_at = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    skipped_frozen = 0
+    rescraped_tids: Set[str] = set()
 
     for idx, t in enumerate(tournaments):
         tid = t['tournament_id']
-        logger.info("[%d/%d] %s (%s)", idx + 1, len(tournaments), t['tournament_name'], tid)
+        # Skip closed-meta tournaments that are already cached
+        if not args.ignore_cache and tid in seen_tids:
+            t_meta = _derive_meta_from_date(t.get('tournament_date') or '')
+            # current_meta check: a current-meta tournament always re-scrapes
+            # (data still updates as more rounds finish). Closed metas freeze.
+            is_current = bool(current_meta) and bool(t_meta) and t_meta.endswith(current_meta)
+            if not is_current:
+                logger.info(
+                    "[%d/%d] %s (%s) — SKIP (frozen, meta=%s)",
+                    idx + 1, len(tournaments), t['tournament_name'], tid, t_meta or '?',
+                )
+                skipped_frozen += 1
+                continue
 
+        logger.info("[%d/%d] %s (%s)", idx + 1, len(tournaments), t['tournament_name'], tid)
         decks, total_players = scrape_tournament_decks(tid)
         t['total_players'] = total_players
         tournaments_meta.append(t)
+        rescraped_tids.add(tid)
+
+        # Derive meta for this tournament (uses ISO date, falls back to current)
+        deck_meta = _derive_meta_from_date(t.get('tournament_date') or '')
+        if not deck_meta and current_meta:
+            # Tournament has no chunk-derived meta — likely brand-new in
+            # current set. Tag with placeholder using current set code so
+            # the split bucket exists; will be replaced once the manifest
+            # picks it up.
+            deck_meta = current_meta
 
         for deck in decks:
             all_deck_rows.append({
@@ -1166,6 +1407,7 @@ def main() -> None:
                 'tournament_type': t['tournament_type'],
                 'country'        : t['country'],
                 'total_players'  : total_players,
+                'meta'           : deck_meta,
                 'scraped_at'     : scraped_at,
                 **deck,
             })
@@ -1174,11 +1416,19 @@ def main() -> None:
         if idx < len(tournaments) - 1:
             time.sleep(delay)
 
+    if skipped_frozen:
+        logger.info("Frozen-meta cache: skipped %d tournaments (use --ignore-cache to force re-scrape)", skipped_frozen)
+
+    # Merge new rows with existing (un-rescraped) rows so the per-meta
+    # split contains the full historical archive.
+    merged_deck_rows = [r for r in existing_deck_rows if str(r.get('tournament_id') or '').strip() not in rescraped_tids]
+    merged_deck_rows.extend(all_deck_rows)
+
     # ── Save ───────────────────────────────────────────────────────────────
     if overwrite:
-        overwrite_results(tournaments_meta, all_deck_rows)
+        overwrite_results(tournaments_meta, merged_deck_rows)
     else:
-        save_results(tournaments_meta, all_deck_rows)
+        save_results(tournaments_meta, merged_deck_rows)
 
     logger.info(
         "Done. %d tournaments, %d deck entries written.",
@@ -1207,8 +1457,13 @@ def main() -> None:
             if not slug:
                 continue
             tmeta = dict(meta_by_tid.get(tid, {}))
+            # Per-meta tag derived from tournament_date (chunk dates lookup);
+            # CLI --matchup-meta still wins as an explicit override.
+            derived_meta = _derive_meta_from_date(tmeta.get('tournament_date') or '')
             if args.matchup_meta:
                 tmeta['meta'] = args.matchup_meta
+            elif derived_meta:
+                tmeta['meta'] = derived_meta
             for day in args.matchup_days:
                 logger.info(
                     "  [matchup %d/%d] %s · %s · %s",
@@ -1221,8 +1476,29 @@ def main() -> None:
                 except Exception as e:  # noqa: BLE001 — log + continue per-deck
                     logger.warning("    Matchup scrape failed for %s/%s/%s: %s", tid, slug, day, e)
                 time.sleep(delay)
-        save_matchup_rows(matchup_rows)
-        logger.info("Matchup pass done. %d rows.", len(matchup_rows))
+
+        # Merge new matchup rows with existing-chunk rows for tournaments
+        # we did NOT re-scrape this run (frozen). Same dedup pattern as decks.
+        merged_matchup_rows = [
+            r for r in existing_matchup_rows
+            if str(r.get('tournament_id') or '').strip() not in rescraped_tids
+        ]
+        merged_matchup_rows.extend(matchup_rows)
+        save_matchup_rows(merged_matchup_rows)
+        logger.info(
+            "Matchup pass done. %d new rows + %d carried-over from chunks = %d total.",
+            len(matchup_rows), len(merged_matchup_rows) - len(matchup_rows), len(merged_matchup_rows),
+        )
+
+    # ── Per-meta split (2026-05-24) ────────────────────────────────────────
+    # Write the monolithic CSVs out to data/labs_tournament_decks_<META>.csv
+    # and data/labs_tournament_matchups_<META>.csv so the next weekly run
+    # can skip closed-meta tournaments via the cache logic above.
+    logger.info("Per-meta split — decks:")
+    _split_labs_by_meta(merged_deck_rows, 'labs_tournament_decks', CSV_FIELDS)
+    if args.matchups:
+        logger.info("Per-meta split — matchups:")
+        _split_labs_by_meta(merged_matchup_rows, 'labs_tournament_matchups', MATCHUP_CSV_HEADER)
 
 
 if __name__ == '__main__':

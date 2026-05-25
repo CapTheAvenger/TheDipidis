@@ -112,6 +112,46 @@ def test_lookup_with_synthetic_data(tmp_path, monkeypatch):
     assert lookup["0015"] == ("BRS-SSP", "2025-01-18")
 
 
+def test_lookup_matches_cached_historical_tids(tmp_path, monkeypatch):
+    """Regression: the normal weekly run only sees 5 live-index
+    tournaments, but the cached monolith holds 60+ historical tids. The
+    lookup input must include both — otherwise the _unsorted re-classify
+    pass can't match anything (observed in the 2026-05-25 13:46 UTC run:
+    'matched 5/5' instead of 'matched 63/66', 4072 rows stuck unsorted).
+
+    Test mirrors the production flow: build a lookup from a small live
+    list + a larger cached set, verify ALL tids resolve."""
+    monkeypatch.setattr(labs, "_get_data_dir", lambda: str(tmp_path))
+    cards = tmp_path / "tournament_cards_data_cards_BRS-SSP.csv"
+    cards.write_text(
+        "tournament_id;tournament_name;tournament_date\n"
+        "1;Regional Stuttgart – Limitless;30th November 2024\n"
+        "2;Regional Toronto – Limitless;12th December 2024\n"
+    )
+    cards2 = tmp_path / "tournament_cards_data_cards_TEF-POR.csv"
+    cards2.write_text(
+        "tournament_id;tournament_name;tournament_date\n"
+        "10;Regional Prague – Limitless;25th April 2026\n"
+    )
+    live_only = [
+        {"tournament_id": "0062", "tournament_name": "Regional Championship Prague"},
+    ]
+    cached_only = [
+        {"tournament_id": "0011", "tournament_name": "Regional Championship Stuttgart"},
+        {"tournament_id": "0014", "tournament_name": "Regional Championship Toronto"},
+    ]
+    # Buggy behaviour (pre-fix): live_only alone → historical tids miss
+    bug_lookup = labs._build_labs_name_meta_lookup(live_only)
+    assert "0011" not in bug_lookup
+    assert "0014" not in bug_lookup
+    # Fixed behaviour: combined list → all three resolve
+    combined = live_only + cached_only
+    fix_lookup = labs._build_labs_name_meta_lookup(combined)
+    assert fix_lookup["0011"] == ("BRS-SSP", "2024-11-30")
+    assert fix_lookup["0014"] == ("BRS-SSP", "2024-12-12")
+    assert fix_lookup["0062"] == ("TEF-POR", "2026-04-25")
+
+
 def test_lookup_resolves_worlds_by_city(tmp_path, monkeypatch):
     """Regression: the world-by-city → world-by-year mapping was iterating
     the dict with swapped variable names (yr,city instead of city,yr) so

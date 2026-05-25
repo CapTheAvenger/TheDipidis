@@ -1674,11 +1674,27 @@ def main() -> None:
     # see it). See _build_labs_name_meta_lookup for the matching strategy.
     # The lookup is also applied to existing rows during the merge below so
     # that previously-unsorted rows get re-classified once a new run lands.
-    name_meta_lookup = _build_labs_name_meta_lookup(tournaments)
+    #
+    # IMPORTANT: include ALL known tids (= freshly-scraped index + cached
+    # historical entries from existing chunks), not just `tournaments`. The
+    # normal weekly run only sees 5 tournaments via the live index, but the
+    # cached monolith holds 60+ historical tids. Without them in the lookup
+    # input, _build_labs_name_meta_lookup can't match historical rows
+    # → the 4072 _unsorted rows never get re-classified
+    # (regression observed in the 2026-05-25 13:46 UTC run).
+    known_labs: List[Dict] = list(tournaments)
+    seen_in_known = {str(t.get('tournament_id') or '') for t in tournaments}
+    for tid, cached in cached_tournament_meta.items():
+        if tid and tid not in seen_in_known and cached.get('tournament_name'):
+            known_labs.append({
+                'tournament_id'  : tid,
+                'tournament_name': cached.get('tournament_name') or '',
+            })
+    name_meta_lookup = _build_labs_name_meta_lookup(known_labs)
     if name_meta_lookup:
         logger.info(
             "Name-based meta lookup: matched %d/%d labs tournaments via cards data",
-            len(name_meta_lookup), len(tournaments),
+            len(name_meta_lookup), len(known_labs),
         )
 
     # ── Scrape each tournament ─────────────────────────────────────────────

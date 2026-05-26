@@ -9,7 +9,7 @@
 
 /* --- Header --- */
 .metacall-header {
-  margin-bottom: 20px;
+  margin-bottom: 12px;
 }
 .metacall-header h2 {
   margin: 0 0 4px 0;
@@ -74,8 +74,8 @@
   background: #fff;
   border: 1px solid #e0e6ed;
   border-radius: 12px;
-  padding: 18px 16px;
-  margin-bottom: 18px;
+  padding: 14px 16px;
+  margin-bottom: 12px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.05);
 }
 /* Panel title is always wrap-friendly so the share / group / collapse
@@ -84,7 +84,7 @@
 .metacall-panel-title {
   font-size: 1rem;
   font-weight: 700;
-  margin: 0 0 16px 0;
+  margin: 0 0 12px 0;
   color: #1a2533;
   display: flex;
   align-items: center;
@@ -1351,7 +1351,32 @@
     grid-template-columns: 120px 1fr 60px;
   }
   .metacall-panel {
-    padding: 14px 14px;
+    padding: 10px 12px;
+    margin-bottom: 10px;
+  }
+  .metacall-panel-title {
+    margin: 0 0 8px 0;
+    font-size: 0.95rem;
+  }
+  .metacall-header {
+    margin-bottom: 8px;
+  }
+  .metacall-header h2 {
+    font-size: 1.25rem;
+  }
+  .metacall-header p {
+    font-size: 0.85rem;
+  }
+  .mc-tt-hint {
+    margin: 6px 0 0;
+    font-size: 0.74rem;
+    line-height: 1.35;
+  }
+  .mc-tt-hint-type {
+    margin: 6px 0 8px;
+    padding: 6px 10px;
+    font-size: 0.74rem;
+    line-height: 1.35;
   }
   .mc-day2-pct {
     font-size: 2.4rem;

@@ -4482,6 +4482,13 @@ window.MetaCall = (function () {
   function _renderPredictorStatusBanner() {
     const fw = _formatWindow;
     if (!fw && _predictorMode !== 'B' && _labsMajorRows === 0) return '';
+    // Suppress in Mode A — the "Online ladder only / Data window from …"
+    // detail surfaces noise without informing a routine read. The
+    // Source panel + per-deck Online column already convey the live
+    // source. Once major data lands and the predictor flips to Mode B,
+    // the banner becomes substantive (counts the weighted majors) and
+    // is shown again.
+    if (_predictorMode !== 'B') return '';
 
     const mode    = _predictorMode === 'B' ? 'B' : 'A';
     const setCode = (fw && fw.current_set) ? String(fw.current_set).toUpperCase() : '';
@@ -4981,8 +4988,8 @@ window.MetaCall = (function () {
        are kept in the code in case a slimmer chip-style replacement
        is added later. */}
   ${renderScenariosBar()}
+  ${_inFrozenPastMode() ? '' : renderMetaSourcePanel()}
   ${renderSettingsPanel()}
-  ${renderMetaSourcePanel()}
   ${_inFrozenPastMode() ? '' : renderMetaCallModePanel()}
   ${_inFrozenPastMode() ? '' : renderSourcesPanel()}
   ${_inFrozenPastMode() ? renderFrozenBanner() : ''}

@@ -445,42 +445,61 @@ window.MetaCall = (function () {
   // active format (suffix-match against format_window.current_set) is
   // EXCLUDED — that one is the "current meta" which the default source
   // already covers.
+  let _pastMetaCatalogLoading = null;
   async function _loadPastMetaCatalog() {
-    _pastMetaAvailableFormats = [];
-    let manifest = null;
-    try {
-      const resp = await fetch('data/tournament_cards_manifest.json?t=' + Date.now());
-      if (!resp.ok) return;
-      manifest = await resp.json();
-    } catch (_e) { return; }
-    if (!manifest || !Array.isArray(manifest.meta_keys) || manifest.meta_keys.length === 0) return;
-
-    // current_set suffix is hidden — those chunks belong to the active meta
-    let currentSet = '';
-    try {
-      if (_formatWindow && _formatWindow.current_set) {
-        currentSet = String(_formatWindow.current_set).trim().toUpperCase();
+    // Re-entry guard: if a second caller arrives while the first fetch
+    // is in flight, return the same promise so both end up sharing the
+    // single populated list — without it, parallel callers could each
+    // reset the array and push their 14 keys, leaving the dropdown
+    // showing every option twice.
+    if (_pastMetaCatalogLoading) return _pastMetaCatalogLoading;
+    _pastMetaCatalogLoading = (async () => {
+      const next = [];
+      let manifest = null;
+      try {
+        const resp = await fetch('data/tournament_cards_manifest.json?t=' + Date.now());
+        if (!resp.ok) { _pastMetaAvailableFormats = next; return; }
+        manifest = await resp.json();
+      } catch (_e) { _pastMetaAvailableFormats = next; return; }
+      if (!manifest || !Array.isArray(manifest.meta_keys) || manifest.meta_keys.length === 0) {
+        _pastMetaAvailableFormats = next;
+        return;
       }
-    } catch (_e) { /* tolerate */ }
 
-    const dates = manifest.chunk_dates || {};
-    for (const key of manifest.meta_keys) {
-      const upper = String(key || '').trim().toUpperCase();
-      if (!upper) continue;
-      // Suffix-match: 'TEF-CRI' or just 'CRI' is the current set's chunk → skip
-      if (currentSet) {
-        if (upper === currentSet || upper.endsWith('-' + currentSet)) continue;
+      // current_set suffix is hidden — those chunks belong to the active meta
+      let currentSet = '';
+      try {
+        if (_formatWindow && _formatWindow.current_set) {
+          currentSet = String(_formatWindow.current_set).trim().toUpperCase();
+        }
+      } catch (_e) { /* tolerate */ }
+
+      const dates = manifest.chunk_dates || {};
+      const seenKeys = new Set();
+      for (const key of manifest.meta_keys) {
+        const upper = String(key || '').trim().toUpperCase();
+        if (!upper) continue;
+        // Suffix-match: 'TEF-CRI' or just 'CRI' is the current set's chunk → skip
+        if (currentSet) {
+          if (upper === currentSet || upper.endsWith('-' + currentSet)) continue;
+        }
+        // Defence in depth: never push the same key twice even if the
+        // upstream manifest contains duplicates.
+        if (seenKeys.has(upper)) continue;
+        seenKeys.add(upper);
+        const chunkFile = `tournament_cards_data_cards_${key}.csv`;
+        const dateInfo = dates[chunkFile] || {};
+        next.push({
+          key,
+          label: key,  // Expanded label resolved at render time via expandPastMetaCode
+          maxDate: dateInfo.max_date || '',
+          minDate: dateInfo.min_date || '',
+        });
       }
-      const chunkFile = `tournament_cards_data_cards_${key}.csv`;
-      const dateInfo = dates[chunkFile] || {};
-      _pastMetaAvailableFormats.push({
-        key,
-        label: key,  // Expanded label resolved at render time via expandPastMetaCode
-        maxDate: dateInfo.max_date || '',
-        minDate: dateInfo.min_date || '',
-      });
-    }
-    _pastMetaAvailableFormats.sort((a, b) => (b.maxDate || '').localeCompare(a.maxDate || ''));
+      next.sort((a, b) => (b.maxDate || '').localeCompare(a.maxDate || ''));
+      _pastMetaAvailableFormats = next;
+    })().finally(() => { _pastMetaCatalogLoading = null; });
+    return _pastMetaCatalogLoading;
   }
 
   // Aggregate brought-shares for a single past-meta format. Returns
@@ -4796,6 +4815,7 @@ window.MetaCall = (function () {
   ${_inFrozenPastMode() ? '' : renderCustomDecksPanel()}
   ${_inFrozenPastMode() ? '' : renderMyDeckPanel()}
   ${_inFrozenPastMode() ? '' : renderResultsPanel(field)}
+  ${_inFrozenPastMode() ? renderFrozenSharePanel() : ''}
   ${_inFrozenPastMode() ? renderFrozenRecommendationsPanel() : renderRecommendationsPanel(field)}
 </div>`;
   }
@@ -4989,6 +5009,75 @@ window.MetaCall = (function () {
   // renderAll again once data lands. If there's no labs file for the
   // meta (older chunks pre-date the labs scraper), renders an empty
   // state instead of failing.
+  // Final share breakdown for a frozen past meta. Reads straight from
+  // the labs aggregate (player-share — what fraction of every Day-1
+  // entrant brought that deck) so the table matches what users see on
+  // Limitless's past-meta pages. No predictor inflation here, no
+  // group-by-family toggle, no personal-share input — this is a
+  // retrospective record, not a prediction surface.
+  function renderFrozenSharePanel() {
+    if (!_pastMetaFormatKey) return '';
+    const cached = _pastMetaLabsCache.get(_pastMetaFormatKey);
+    if (cached === undefined) {
+      return `
+<div class="metacall-panel mc-frozen-share-panel">
+  <div class="metacall-panel-title">${esc(t('mc.frozenShareTitle'))}</div>
+  <p class="mc-rec-hint">${esc(t('mc.frozenRecLoading'))}</p>
+</div>`;
+    }
+    if (cached === null || !cached.archetypes || cached.archetypes.length === 0 || !cached.totalPlayers) {
+      return '';
+    }
+
+    const total = cached.totalPlayers;
+    const sorted = cached.archetypes
+      .slice()
+      .sort((a, b) => b.players - a.players);
+
+    const maxShare = (sorted[0].players / total) * 100 || 0.1;
+    const rows = sorted.map((a, i) => {
+      const share = (a.players / total) * 100;
+      const shareStr = share.toFixed(2).replace('.', ',');
+      const barW = Math.round((share / maxShare) * 100);
+      const icon = (typeof window.ArchetypeIcons !== 'undefined')
+        ? window.ArchetypeIcons.getIconHtml(a.name, { size: 'sm', layout: 'inline' })
+        : '';
+      return `<tr class="mc-frozen-share-row">
+        <td class="mc-frozen-share-rank">${i + 1}</td>
+        <td class="mc-frozen-share-name"><span class="mc-rec-name-inner">${icon}<span class="mc-rec-name-text">${esc(a.name)}</span></span></td>
+        <td class="mc-frozen-share-pct">
+          <div class="mc-frozen-share-bar"><div class="mc-frozen-share-bar-fill" style="width:${barW}%"></div></div>
+          <span class="mc-frozen-share-pct-val"><strong>${shareStr}%</strong></span>
+        </td>
+        <td class="mc-frozen-share-players">${a.players.toLocaleString()}</td>
+      </tr>`;
+    }).join('');
+
+    const totalsHint = t('mc.frozenShareTotals')
+      .replace('{archetypes}', String(sorted.length))
+      .replace('{players}', total.toLocaleString())
+      .replace('{n}', String(cached.tournamentCount));
+
+    return `
+<div class="metacall-panel mc-frozen-share-panel">
+  <div class="metacall-panel-title">
+    ${esc(t('mc.frozenShareTitle'))}
+    <span class="mc-badge">${esc(t('mc.frozenShareBadge'))}</span>
+  </div>
+  <p class="mc-rec-hint">${esc(t('mc.frozenShareHint'))}</p>
+  <p class="mc-rec-hint mc-rec-hint-meta">${esc(totalsHint)}</p>
+  <table class="mc-frozen-share-table">
+    <thead><tr>
+      <th>#</th>
+      <th>${esc(t('mc.recDeck'))}</th>
+      <th>${esc(t('mc.frozenShareColShare'))}</th>
+      <th>${esc(t('mc.frozenColPlayers'))}</th>
+    </tr></thead>
+    <tbody>${rows}</tbody>
+  </table>
+</div>`;
+  }
+
   function renderFrozenRecommendationsPanel() {
     if (!_pastMetaFormatKey) return '';
     const cached = _pastMetaLabsCache.get(_pastMetaFormatKey);

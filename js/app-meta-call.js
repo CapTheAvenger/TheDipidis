@@ -7242,7 +7242,35 @@ window.MetaCall = (function () {
       // window has only a tiny effect via the recency baseline term.
       // User flagged: 27.04 vs 05.05 cutoffs gave Dragapult 17.45 vs
       // 17.46 % — a 0.01 pp move that's effectively a no-op.
-      if (cutoff && /^\d{4}-\d{2}-\d{2}$/.test(cutoff)) {
+      //
+      // Predictor 5.6 — skip the substantive override in Mode A.
+      // online_tournament_dated_cards.csv is a small per-tournament
+      // ARCHETYPE-COUNT aggregate (~15 k rows, 572 deck-buckets over
+      // the current 4-day CRI window). It's NOT the ladder — it's the
+      // organized-play subset, which has a totally different deck
+      // distribution from what casual ladder players bring:
+      //     Ladder    Dated-Tournament
+      //   Dragapult         8.40 %     2.27 %   (-6.13 pp)
+      //   Mega Greninja     8.23 %     1.57 %   (-6.66 pp)
+      //   Grimmsnarl Frosl  1.65 %     3.32 %   (+1.67 pp)
+      // Overwriting the LADDER with that distribution is a category
+      // error during a fresh rotation — Mega Greninja vanishes and
+      // Grimmsnarl Froslass jumps to predicted #1 with 4.7 %. In
+      // Mode B (real major data exists), the dated-cards stream is
+      // re-anchored against the major shares and the dilution
+      // matters; in Mode A, the limitless ladder snapshot IS the
+      // authoritative current-format signal and must not be
+      // overwritten. Skip the override entirely.
+      const skipLadderOverride = _predictorMode !== 'B';
+      if (skipLadderOverride) {
+        try {
+          console.info(
+            `[Predictor 5.6] Mode A — skipping ladder/brought rewrite ` +
+            `from dated-cards (kept raw limitless ladder share).`
+          );
+        } catch (_e) { /* ignore */ }
+      }
+      if (!skipLadderOverride && cutoff && /^\d{4}-\d{2}-\d{2}$/.test(cutoff)) {
         // Cache pre-filter values on first override so a later "Clear"
         // can restore them without a full reload.
         if (!_origLadderShareByDeck) {

@@ -4224,7 +4224,6 @@ window.MetaCall = (function () {
 <div class="metacall-panel">
   <div class="metacall-panel-title">
     ${t('mc.panelSettings')}
-    <span class="mc-badge">${t('mc.badgeCustomizable')}</span>
   </div>
   <div class="mc-tt-tabs" role="tablist" aria-label="Tournament type">
     ${TOURNAMENT_TYPES.map(tabBtn).join('')}
@@ -4264,6 +4263,24 @@ window.MetaCall = (function () {
   // recent majors (LA, Prague, Campinas) trended bandwagon-style;
   // counter-mode is opt-in for events where the player base visibly
   // hedges against the dominant deck (Utrecht-style).
+  // Combines Source + Meta-Call-Mode + Data Sources into one panel
+  // so the user doesn't burn three card-shaped panels on what are
+  // really three toggles. Each sub-row is one compact line: label on
+  // the left, pill toggles in the middle, hint on the right (or
+  // below on narrow viewports — flexbox handles it).
+  function _renderCombinedConfigPanel() {
+    const source = renderMetaSourcePanel();
+    const mode   = renderMetaCallModePanel();
+    const data   = renderSourcesPanel();
+    if (!source && !mode && !data) return '';
+    return `
+<div class="metacall-panel mc-combo-panel">
+  ${source}
+  ${mode}
+  ${data}
+</div>`;
+  }
+
   function renderMetaCallModePanel() {
     const mode = _metaCallMode === 'counter' ? 'counter' : 'standard';
     const pill = (key, labelKey) => {
@@ -4273,16 +4290,13 @@ window.MetaCall = (function () {
     };
     const hintKey = mode === 'counter' ? 'mc.modeCounterHint' : 'mc.modeStandardHint';
     return `
-<div class="metacall-panel">
-  <div class="metacall-panel-title">
-    ${t('mc.panelMode')}
-    <span class="mc-badge">${t('mc.badgeCustomizable')}</span>
-  </div>
-  <div class="mc-tt-tabs" role="tablist" aria-label="Meta Call mode">
+<div class="mc-combo-row">
+  <span class="mc-combo-label">${t('mc.panelMode')}</span>
+  <div class="mc-tt-tabs mc-tt-tabs-inline" role="tablist" aria-label="Meta Call mode">
     ${pill('standard', 'mc.modeStandard')}
     ${pill('counter',  'mc.modeCounter')}
   </div>
-  <p class="mc-tt-hint">${t(hintKey)}</p>
+  <p class="mc-tt-hint mc-combo-hint">${t(hintKey)}</p>
 </div>`;
   }
 
@@ -4349,15 +4363,13 @@ window.MetaCall = (function () {
       : t('mc.sourceHintCurrent');
 
     return `
-<div class="metacall-panel">
-  <div class="metacall-panel-title">
-    ${t('mc.panelSource')}
-  </div>
-  <div class="mc-tt-tabs" role="tablist" aria-label="Meta source">
+<div class="mc-combo-row">
+  <span class="mc-combo-label">${t('mc.panelSource')}</span>
+  <div class="mc-tt-tabs mc-tt-tabs-inline" role="tablist" aria-label="Meta source">
     ${pill('current', currentLabel)}
     ${pill('past', t('mc.sourcePastMeta'))}
   </div>
-  <p class="mc-tt-hint">${esc(sourceHintText)}</p>
+  <p class="mc-tt-hint mc-combo-hint">${esc(sourceHintText)}</p>
   ${formatRow}
 </div>`;
   }
@@ -4376,12 +4388,8 @@ window.MetaCall = (function () {
     const pastCount = Object.keys(_clPastByDeck).length;
 
     return `
-<div class="metacall-panel">
-  <div class="metacall-panel-title">
-    ${t('mc.panelDataSources')}
-    <span class="mc-badge">${t('mc.badgeOptional')}</span>
-  </div>
-  <p class="mc-tt-hint">${t('mc.dataSourcesHint')}</p>
+<div class="mc-combo-row mc-combo-row-checkboxes">
+  <span class="mc-combo-label">${t('mc.panelDataSources')}</span>
   <div class="mc-sources-row">
     <label class="mc-source-toggle">
       <input type="checkbox" ${cbAttrs(_useClCurrent, hasCurrent)}
@@ -4988,10 +4996,8 @@ window.MetaCall = (function () {
        are kept in the code in case a slimmer chip-style replacement
        is added later. */}
   ${renderScenariosBar()}
-  ${_inFrozenPastMode() ? '' : renderMetaSourcePanel()}
+  ${_inFrozenPastMode() ? '' : _renderCombinedConfigPanel()}
   ${renderSettingsPanel()}
-  ${_inFrozenPastMode() ? '' : renderMetaCallModePanel()}
-  ${_inFrozenPastMode() ? '' : renderSourcesPanel()}
   ${_inFrozenPastMode() ? renderFrozenBanner() : ''}
   ${_inFrozenPastMode() ? '' : _renderPredictorStatusBanner()}
   ${_inFrozenPastMode() ? '' : renderFieldPanel(field)}

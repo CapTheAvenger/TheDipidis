@@ -104,23 +104,23 @@
 /* --- Tournament-type tabs (Regional / Local Challenge / Local Cup) --- */
 .mc-tt-tabs {
   display: flex;
-  gap: 6px;
+  gap: 4px;
   flex-wrap: wrap;
-  margin: 0 0 14px;
-  padding: 4px;
+  margin: 0 0 8px;
+  padding: 3px;
   background: #eef2f7;
-  border-radius: 10px;
+  border-radius: 8px;
 }
 .mc-tt-tab {
   flex: 1 1 auto;
-  min-width: 110px;
-  padding: 8px 12px;
+  min-width: 90px;
+  padding: 5px 10px;
   border: 1px solid transparent;
   background: transparent;
   color: #4a5b73;
-  font-size: 0.86rem;
+  font-size: 0.80rem;
   font-weight: 600;
-  border-radius: 7px;
+  border-radius: 6px;
   cursor: pointer;
   transition: background 0.15s, color 0.15s, border-color 0.15s;
 }
@@ -138,6 +138,52 @@
   margin: 8px 0 0;
   font-size: 0.78rem;
   color: #6b7c93;
+}
+
+/* --- Combined config panel: Source + Mode + Data Sources stacked in
+   one card, each row laid out as [label] [tabs] [hint] so three
+   former panels collapse into the visual weight of one. --- */
+.mc-combo-panel {
+  padding: 8px 14px;
+}
+.mc-combo-row {
+  display: grid;
+  grid-template-columns: 80px minmax(0, 260px) 1fr;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 0;
+  border-top: 1px solid #f0f3f8;
+}
+.mc-combo-row:first-child {
+  border-top: none;
+}
+.mc-combo-label {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #1a2533;
+}
+.mc-tt-tabs-inline {
+  margin: 0;
+}
+.mc-combo-hint {
+  margin: 0;
+  font-size: 0.74rem;
+  color: #6b7c93;
+  line-height: 1.35;
+}
+.mc-combo-row-checkboxes {
+  grid-template-columns: 80px 1fr;
+}
+@media (max-width: 768px) {
+  .mc-combo-row,
+  .mc-combo-row-checkboxes {
+    grid-template-columns: 1fr;
+    gap: 4px;
+    padding: 8px 0;
+  }
+  .mc-combo-label {
+    font-size: 0.78rem;
+  }
 }
 .mc-tt-hint-type {
   margin: 10px 0 14px;

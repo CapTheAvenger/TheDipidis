@@ -179,6 +179,13 @@
 .mc-combo-row-checkboxes {
   flex: 1 1 320px;
 }
+.mc-combo-row-wide {
+  flex: 1 1 100%;
+  flex-wrap: wrap;
+}
+.mc-combo-row-wide .mc-source-format-row {
+  margin-top: 0;
+}
 .mc-combo-label {
   font-size: 0.78rem;
   font-weight: 700;

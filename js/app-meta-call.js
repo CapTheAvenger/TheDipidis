@@ -2496,8 +2496,22 @@ window.MetaCall = (function () {
     const CONCENTRATION_EXP_MIN  = 1.10;
     const CONCENTRATION_SOFT_LO  = 5.0;   // below this: full boost
     const CONCENTRATION_SOFT_HI  = 10.0;  // at/above: minimum boost
+    // Past Meta — skip the concentration boost entirely. The boost
+    // exists to bridge "online ladder under-counts dominant decks
+    // because casual players spread thin" → that gap doesn't exist
+    // in past-meta major data, which IS the ground truth: 738
+    // Dragapult players is 738, not "really 1100 once concentration
+    // is applied". With the boost the family-leader inflates from
+    // its real ~29.8 % share to ~40 % after renormalisation — a
+    // distortion the user spotted instantly.
+    const _skipConcentration = (_metaSource === 'past');
     _shareList.forEach(d => {
       const raw = d.predictedShareRaw || 0;
+      if (_skipConcentration) {
+        d.concentrationExp = 1.00;
+        d.predictedShareRaw = raw;
+        return;
+      }
       let exp = CONCENTRATION_EXP_BASE;
       if (raw > CONCENTRATION_SOFT_LO) {
         const t = Math.min(1, (raw - CONCENTRATION_SOFT_LO) /
@@ -4361,8 +4375,12 @@ window.MetaCall = (function () {
       ? t('mc.sourceHintPast')
       : t('mc.sourceHintCurrent');
 
+    // When Past Meta is active, the row needs the full width — the
+    // Source label + 2 pills + Format dropdown + matchup-proxy hint
+    // are too wide to share one flex line with Mode + Data Sources.
+    const wideClass = _metaSource === 'past' ? ' mc-combo-row-wide' : '';
     return `
-<div class="mc-combo-row" title="${esc(sourceHintText)}">
+<div class="mc-combo-row${wideClass}" title="${esc(sourceHintText)}">
   <span class="mc-combo-label">${t('mc.panelSource')}</span>
   <div class="mc-tt-tabs mc-tt-tabs-inline" role="tablist" aria-label="Meta source">
     ${pill('current', currentLabel)}

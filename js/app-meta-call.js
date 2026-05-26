@@ -2889,21 +2889,50 @@ window.MetaCall = (function () {
           // Predictor 4.1 — Format-Window filter. Drop tournaments that
           // pre-date the in-person legal date for the current format.
           // Keeps everything when no format_window is configured (back-compat).
+          //
+          // Predictor 4.5 — defence-in-depth format-suffix filter. The
+          // date cutoff above is the primary mechanism, but a missing /
+          // stale format_window.json would silently let prior-format
+          // labs data bleed into the current-format prediction (the
+          // exact bug that caused Mega Greninja to vanish from the
+          // CRI-era field — Campinas/Utrecht TEF-POR rows were being
+          // counted with 40 % weight). Now we ALSO check the labs row
+          // `meta` column (e.g. "TEF-POR") against the current set: if
+          // current_set is the trailing segment of meta, keep; else
+          // drop. Both filters compose — a row must pass BOTH date and
+          // format-suffix to be counted.
           const cutoffISO = (_formatWindow && _formatWindow.in_person_legal_date) || '';
-          const labsRows = cutoffISO
+          const currentSetCode = (_formatWindow && _formatWindow.current_set)
+            ? String(_formatWindow.current_set).trim().toUpperCase()
+            : '';
+          const _rowMatchesCurrentFormat = (r) => {
+            if (!currentSetCode) return true; // no format_window → no filter
+            const meta = String(r.meta || '').trim().toUpperCase();
+            if (!meta) return true;           // unknown meta column → keep
+            // Match if meta ENDS WITH the current set (TEF-CRI matches
+            // current_set=CRI; TEF-POR does not).
+            return meta === currentSetCode || meta.endsWith('-' + currentSetCode);
+          };
+          const labsRows = (cutoffISO || currentSetCode)
             ? labsRowsAll.filter(r => {
                 const iso = _rowISO(r);
-                return !iso || iso >= cutoffISO;
+                const dateOK = !cutoffISO || !iso || iso >= cutoffISO;
+                const formatOK = _rowMatchesCurrentFormat(r);
+                return dateOK && formatOK;
               })
             : labsRowsAll;
 
-          if (cutoffISO) {
+          if (cutoffISO || currentSetCode) {
             const dropped = labsRowsAll.length - labsRows.length;
+            try {
+              window.__mcLabsDroppedCount = dropped;
+            } catch (_e) { /* ignore */ }
             if (dropped > 0) {
               try {
                 console.log(
-                  `[Predictor 4.1] Format-window filter: dropped ${dropped} of ${labsRowsAll.length} ` +
-                  `labs rows pre-${cutoffISO} (current set: ${_formatWindow.current_set})`
+                  `[Predictor 4.1+4.5] Format filter (set=${currentSetCode || 'n/a'}, ` +
+                  `cutoff=${cutoffISO || 'n/a'}): dropped ${dropped} of ${labsRowsAll.length} ` +
+                  `labs rows. Keeping ${labsRows.length} matching the current format.`
                 );
               } catch (_e) { /* ignore */ }
             }
@@ -4402,6 +4431,68 @@ window.MetaCall = (function () {
     return 'high';
   }
 
+  // Renders a status banner showing the predictor's data picture —
+  // mode (A = online-only, B = major-anchored), how many labs rows
+  // were dropped by the format-window filter, what the current set is
+  // and when it rotates in-person. Surfaces the "TEF-POR data being
+  // weighed for a CRI-era prediction" failure mode the user spotted.
+  function _renderPredictorStatusBanner() {
+    const fw = _formatWindow;
+    if (!fw && _predictorMode !== 'B' && _labsMajorRows === 0) return '';
+
+    const mode    = _predictorMode === 'B' ? 'B' : 'A';
+    const setCode = (fw && fw.current_set) ? String(fw.current_set).toUpperCase() : '';
+    const expander = (typeof window !== 'undefined' && typeof window.expandPastMetaCode === 'function')
+      ? window.expandPastMetaCode
+      : (k => k);
+    const setName = setCode ? expander(setCode) : '';
+    const legalISO = fw && fw.in_person_legal_date;
+    const todayISO = _todayISO();
+    const daysToLegal = (legalISO && todayISO)
+      ? Math.round((new Date(legalISO) - new Date(todayISO)) / 86400000)
+      : null;
+    const rotationPending = daysToLegal !== null && daysToLegal > 0;
+
+    const labsCount = _labsMajorRows || 0;
+    const labsDropped = (window.__mcLabsDroppedCount | 0);
+
+    // Mode label + class
+    const modeLabel = mode === 'B'
+      ? t('mc.predStatusModeB').replace('{n}', labsCount)
+      : t('mc.predStatusModeA');
+    const modeClass = mode === 'B' ? 'mc-pred-status-mode-b' : 'mc-pred-status-mode-a';
+
+    // Format line — "Current format: TEF-CRI (CRI · Chaos Rising) · rotates in-person in N days"
+    const formatLine = setCode
+      ? (rotationPending
+          ? t('mc.predStatusFormatPending')
+              .replace('{set}', setCode)
+              .replace('{name}', setName)
+              .replace('{days}', daysToLegal)
+              .replace('{date}', legalISO)
+          : t('mc.predStatusFormatActive')
+              .replace('{set}', setCode)
+              .replace('{name}', setName))
+      : '';
+
+    // Filter line — only shown when the format-window filter actually
+    // dropped rows (gives a clear audit trail for why mode A is on).
+    const filterLine = labsDropped > 0
+      ? t('mc.predStatusFilterDropped')
+          .replace('{dropped}', labsDropped)
+          .replace('{total}', labsDropped + labsCount)
+      : '';
+
+    return `
+<div class="mc-predictor-status ${modeClass}">
+  <div class="mc-pred-status-row">
+    <span class="mc-pred-status-mode-badge">${esc(modeLabel)}</span>
+    ${formatLine ? `<span class="mc-pred-status-format">${esc(formatLine)}</span>` : ''}
+  </div>
+  ${filterLine ? `<div class="mc-pred-status-filter">${esc(filterLine)}</div>` : ''}
+</div>`;
+  }
+
   function renderFieldPanel(field) {
     let rows;
     if (_groupByMain) {
@@ -4843,6 +4934,7 @@ window.MetaCall = (function () {
   ${_inFrozenPastMode() ? '' : renderMetaCallModePanel()}
   ${_inFrozenPastMode() ? '' : renderSourcesPanel()}
   ${_inFrozenPastMode() ? renderFrozenBanner() : ''}
+  ${_inFrozenPastMode() ? '' : _renderPredictorStatusBanner()}
   ${_inFrozenPastMode() ? '' : renderFieldPanel(field)}
   ${_inFrozenPastMode() ? '' : renderCustomDecksPanel()}
   ${_inFrozenPastMode() ? '' : renderMyDeckPanel()}

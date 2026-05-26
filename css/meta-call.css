@@ -166,6 +166,48 @@
 .metacall-date-help-icon:hover {
   color: #6b8cb8;
 }
+
+/* Predictor status banner — sits above the Field Composition panel
+ * and surfaces the current predictor mode + which labs rows were
+ * filtered out. Without this the user can't tell when prior-format
+ * major data is silently driving the prediction. */
+.mc-predictor-status {
+  margin: 0 0 12px;
+  padding: 10px 14px;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  line-height: 1.4;
+  border: 1px solid transparent;
+}
+.mc-pred-status-mode-a {
+  background: #fff7e6;
+  border-color: #f0c987;
+  color: #6e4d12;
+}
+.mc-pred-status-mode-b {
+  background: #e6f3eb;
+  border-color: #7bb594;
+  color: #1f5a3b;
+}
+.mc-pred-status-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+.mc-pred-status-mode-badge {
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+.mc-pred-status-format {
+  color: inherit;
+  opacity: 0.85;
+}
+.mc-pred-status-filter {
+  margin-top: 6px;
+  font-size: 0.76rem;
+  opacity: 0.9;
+}
 .mc-tt-swisscalc {
   margin-left: 8px;
   color: #2980b9;

@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-05-26T00:16:11Z",
+  "generated_at": "2026-05-26T07:16:34Z",
   "format_window": "CRI",
   "format_label": "TEF-M4",
   "legal_format_min_set": "TEF",
@@ -10,7 +10,7 @@
   },
   "threats": {
     "hand_disruption": {
-      "weighted_meta_share": 0.4366,
+      "weighted_meta_share": 0.4415,
       "cards": [
         {
           "card_id": "POR|76",
@@ -18,98 +18,99 @@
           "archetypes": [
             {
               "archetype": "Dragapult",
-              "share_in_archetype": 0.55,
-              "meta_share": 0.0787
+              "share_in_archetype": 0.65,
+              "meta_share": 0.0856
             },
             {
               "archetype": "Dragapult Dusknoir",
-              "share_in_archetype": 0.5,
-              "meta_share": 0.0632
+              "share_in_archetype": 0.25,
+              "meta_share": 0.0577
             },
             {
               "archetype": "Lucario Hariyama",
               "share_in_archetype": 0.9474,
-              "meta_share": 0.0331
-            },
-            {
-              "archetype": "Dragapult Blaziken",
-              "share_in_archetype": 0.4,
-              "meta_share": 0.029
+              "meta_share": 0.0377
             },
             {
               "archetype": "Cynthia's Garchomp",
-              "share_in_archetype": 0.3,
-              "meta_share": 0.0243
+              "share_in_archetype": 0.25,
+              "meta_share": 0.0244
+            },
+            {
+              "archetype": "Dragapult Blaziken",
+              "share_in_archetype": 0.35,
+              "meta_share": 0.0234
             },
             {
               "archetype": "Starmie Dusknoir",
-              "share_in_archetype": 0.4211,
-              "meta_share": 0.0238
-            },
-            {
-              "archetype": "Starmie Froslass",
-              "share_in_archetype": 0.35,
-              "meta_share": 0.0228
-            },
-            {
-              "archetype": "Grimmsnarl Froslass",
-              "share_in_archetype": 0.2632,
-              "meta_share": 0.0181
+              "share_in_archetype": 0.4737,
+              "meta_share": 0.0217
             },
             {
               "archetype": "Dragapult Dudunsparce",
-              "share_in_archetype": 0.5,
-              "meta_share": 0.0166
+              "share_in_archetype": 0.4,
+              "meta_share": 0.0214
+            },
+            {
+              "archetype": "Starmie Froslass",
+              "share_in_archetype": 0.4,
+              "meta_share": 0.0173
             },
             {
               "archetype": "Festival Lead",
-              "share_in_archetype": 0.5,
-              "meta_share": 0.0155
+              "share_in_archetype": 0.45,
+              "meta_share": 0.0166
+            },
+            {
+              "archetype": "Grimmsnarl Froslass",
+              "share_in_archetype": 0.3,
+              "meta_share": 0.016
             },
             {
               "archetype": "Greninja",
               "share_in_archetype": 0.35,
-              "meta_share": 0.014
+              "meta_share": 0.0132
+            },
+            {
+              "archetype": "Mega Lucario",
+              "share_in_archetype": 0.3158,
+              "meta_share": 0.0122
             },
             {
               "archetype": "Ogerpon Meganium",
               "share_in_archetype": 0.4,
-              "meta_share": 0.0129
+              "meta_share": 0.0112
             },
             {
-              "archetype": "Mega Lucario",
-              "share_in_archetype": 0.3684,
-              "meta_share": 0.0129
-            },
-            {
-              "archetype": "Ethan's Typhlosion",
-              "share_in_archetype": 0.4,
-              "meta_share": 0.0083
+              "archetype": "Ogerpon Box",
+              "share_in_archetype": 0.25,
+              "meta_share": 0.0085
             },
             {
               "archetype": "Okidogi Barbaracle",
-              "share_in_archetype": 0.375,
-              "meta_share": 0.0083
+              "share_in_archetype": 0.35,
+              "meta_share": 0.0081
             },
             {
-              "archetype": "Mega Starmie",
-              "share_in_archetype": 0.2667,
-              "meta_share": 0.0078
+              "archetype": "Ethan's Typhlosion",
+              "share_in_archetype": 0.2632,
+              "meta_share": 0.0075
             },
             {
               "archetype": "Archaludon Dudunsparce",
-              "share_in_archetype": 0.4167,
-              "meta_share": 0.0062
-            },
+              "share_in_archetype": 0.3,
+              "meta_share": 0.0068
+            }
+          ]
+        },
+        {
+          "card_id": "TWM|157",
+          "card_name": "Lucian",
+          "archetypes": [
             {
-              "archetype": "Steven's Metagross",
-              "share_in_archetype": 0.6667,
-              "meta_share": 0.0052
-            },
-            {
-              "archetype": "Mega Venusaur",
-              "share_in_archetype": 0.5,
-              "meta_share": 0.0052
+              "archetype": "Lopunny Dudunsparce",
+              "share_in_archetype": 0.25,
+              "meta_share": 0.0448
             }
           ]
         },
@@ -119,13 +120,13 @@
           "archetypes": [
             {
               "archetype": "Rocket's Mewtwo",
-              "share_in_archetype": 0.7895,
-              "meta_share": 0.0326
+              "share_in_archetype": 0.9,
+              "meta_share": 0.0312
             },
             {
               "archetype": "Rocket's Honchkrow",
               "share_in_archetype": 1.0,
-              "meta_share": 0.0249
+              "meta_share": 0.0282
             }
           ]
         },
@@ -135,82 +136,102 @@
           "archetypes": [
             {
               "archetype": "Dragapult",
-              "share_in_archetype": 1.0,
-              "meta_share": 0.0787
+              "share_in_archetype": 0.95,
+              "meta_share": 0.0856
             },
             {
               "archetype": "Dragapult Dusknoir",
               "share_in_archetype": 0.85,
-              "meta_share": 0.0632
+              "meta_share": 0.0577
+            },
+            {
+              "archetype": "Hydrapple Ogerpon",
+              "share_in_archetype": 0.95,
+              "meta_share": 0.0414
+            },
+            {
+              "archetype": "N's Zoroark",
+              "share_in_archetype": 0.6,
+              "meta_share": 0.0407
+            },
+            {
+              "archetype": "Raging Bolt Ogerpon",
+              "share_in_archetype": 0.75,
+              "meta_share": 0.0387
+            },
+            {
+              "archetype": "Slowking",
+              "share_in_archetype": 0.3,
+              "meta_share": 0.0384
+            },
+            {
+              "archetype": "Cynthia's Garchomp",
+              "share_in_archetype": 0.25,
+              "meta_share": 0.0244
+            },
+            {
+              "archetype": "Dragapult Blaziken",
+              "share_in_archetype": 0.95,
+              "meta_share": 0.0234
+            },
+            {
+              "archetype": "Dragapult Dudunsparce",
+              "share_in_archetype": 0.75,
+              "meta_share": 0.0214
+            },
+            {
+              "archetype": "Grimmsnarl Froslass",
+              "share_in_archetype": 0.45,
+              "meta_share": 0.016
+            },
+            {
+              "archetype": "Ogerpon Meganium",
+              "share_in_archetype": 0.55,
+              "meta_share": 0.0112
+            },
+            {
+              "archetype": "Ogerpon Box",
+              "share_in_archetype": 0.7,
+              "meta_share": 0.0085
+            }
+          ]
+        }
+      ]
+    },
+    "ability_lock": {
+      "weighted_meta_share": 0.1074,
+      "cards": [
+        {
+          "card_id": "DRI|180",
+          "card_name": "Team Rocket's Watchtower",
+          "archetypes": [
+            {
+              "archetype": "Dragapult",
+              "share_in_archetype": 0.25,
+              "meta_share": 0.0856
+            },
+            {
+              "archetype": "Dragapult Dusknoir",
+              "share_in_archetype": 0.9,
+              "meta_share": 0.0577
             },
             {
               "archetype": "N's Zoroark",
               "share_in_archetype": 0.55,
-              "meta_share": 0.0435
-            },
-            {
-              "archetype": "Hydrapple Ogerpon",
-              "share_in_archetype": 0.9,
-              "meta_share": 0.0425
-            },
-            {
-              "archetype": "Raging Bolt Ogerpon",
-              "share_in_archetype": 0.7,
-              "meta_share": 0.0394
-            },
-            {
-              "archetype": "Slowking",
-              "share_in_archetype": 0.35,
-              "meta_share": 0.0363
+              "meta_share": 0.0407
             },
             {
               "archetype": "Dragapult Blaziken",
-              "share_in_archetype": 0.9,
-              "meta_share": 0.029
-            },
-            {
-              "archetype": "Cynthia's Garchomp",
-              "share_in_archetype": 0.4,
-              "meta_share": 0.0243
-            },
-            {
-              "archetype": "Grimmsnarl Froslass",
-              "share_in_archetype": 0.5263,
-              "meta_share": 0.0181
-            },
-            {
-              "archetype": "Dragapult Dudunsparce",
-              "share_in_archetype": 0.85,
-              "meta_share": 0.0166
-            },
-            {
-              "archetype": "Ogerpon Meganium",
-              "share_in_archetype": 0.6,
-              "meta_share": 0.0129
-            },
-            {
-              "archetype": "Ethan's Typhlosion",
-              "share_in_archetype": 0.2667,
-              "meta_share": 0.0083
+              "share_in_archetype": 0.5,
+              "meta_share": 0.0234
             }
           ]
         }
       ]
     },
     "retreat_lock": {
-      "weighted_meta_share": 0.2015,
+      "weighted_meta_share": 0.1822,
       "cards": [
-        {
-          "card_id": "MEG|1",
-          "card_name": "Bulbasaur",
-          "archetypes": [
-            {
-              "archetype": "Mega Venusaur",
-              "share_in_archetype": 1.0,
-              "meta_share": 0.0052
-            }
-          ]
-        },
         {
           "card_id": "PRE|37",
           "card_name": "Dusknoir",
@@ -218,17 +239,17 @@
             {
               "archetype": "Dragapult Dusknoir",
               "share_in_archetype": 1.0,
-              "meta_share": 0.0632
+              "meta_share": 0.0577
             },
             {
               "archetype": "Starmie Dusknoir",
               "share_in_archetype": 1.0,
-              "meta_share": 0.0238
+              "meta_share": 0.0217
             },
             {
               "archetype": "Greninja",
               "share_in_archetype": 0.85,
-              "meta_share": 0.014
+              "meta_share": 0.0132
             }
           ]
         },
@@ -239,7 +260,7 @@
             {
               "archetype": "Hop's Trevenant",
               "share_in_archetype": 1.0,
-              "meta_share": 0.0078
+              "meta_share": 0.0065
             }
           ]
         },
@@ -249,8 +270,13 @@
           "archetypes": [
             {
               "archetype": "Raging Bolt Ogerpon",
-              "share_in_archetype": 0.9,
-              "meta_share": 0.0394
+              "share_in_archetype": 0.85,
+              "meta_share": 0.0387
+            },
+            {
+              "archetype": "Ogerpon Box",
+              "share_in_archetype": 1.0,
+              "meta_share": 0.0085
             }
           ]
         },
@@ -260,51 +286,20 @@
           "archetypes": [
             {
               "archetype": "N's Zoroark",
-              "share_in_archetype": 0.85,
-              "meta_share": 0.0435
+              "share_in_archetype": 0.7,
+              "meta_share": 0.0407
             },
             {
               "archetype": "Grimmsnarl Froslass",
-              "share_in_archetype": 0.9474,
-              "meta_share": 0.0181
-            }
-          ]
-        }
-      ]
-    },
-    "ability_lock": {
-      "weighted_meta_share": 0.0934,
-      "cards": [
-        {
-          "card_id": "DRI|180",
-          "card_name": "Team Rocket's Watchtower",
-          "archetypes": [
-            {
-              "archetype": "Dragapult Dusknoir",
-              "share_in_archetype": 0.8,
-              "meta_share": 0.0632
-            },
-            {
-              "archetype": "N's Zoroark",
-              "share_in_archetype": 0.45,
-              "meta_share": 0.0435
-            },
-            {
-              "archetype": "Dragapult Blaziken",
-              "share_in_archetype": 0.55,
-              "meta_share": 0.029
-            },
-            {
-              "archetype": "Cynthia's Garchomp",
-              "share_in_archetype": 0.3,
-              "meta_share": 0.0243
+              "share_in_archetype": 0.95,
+              "meta_share": 0.016
             }
           ]
         }
       ]
     },
     "bench_damage": {
-      "weighted_meta_share": 0.1335,
+      "weighted_meta_share": 0.1344,
       "cards": [
         {
           "card_id": "JTG|111",
@@ -312,8 +307,19 @@
           "archetypes": [
             {
               "archetype": "Hop's Trevenant",
-              "share_in_archetype": 0.6667,
-              "meta_share": 0.0078
+              "share_in_archetype": 0.6842,
+              "meta_share": 0.0065
+            }
+          ]
+        },
+        {
+          "card_id": "SSP|119",
+          "card_name": "Hydreigon ex",
+          "archetypes": [
+            {
+              "archetype": "Hydreigon",
+              "share_in_archetype": 1.0,
+              "meta_share": 0.0051
             }
           ]
         },
@@ -324,7 +330,7 @@
             {
               "archetype": "Grimmsnarl Froslass",
               "share_in_archetype": 1.0,
-              "meta_share": 0.0181
+              "meta_share": 0.016
             }
           ]
         },
@@ -335,17 +341,17 @@
             {
               "archetype": "Starmie Dusknoir",
               "share_in_archetype": 1.0,
-              "meta_share": 0.0238
+              "meta_share": 0.0217
             },
             {
               "archetype": "Starmie Froslass",
               "share_in_archetype": 1.0,
-              "meta_share": 0.0228
+              "meta_share": 0.0173
             },
             {
               "archetype": "Mega Starmie",
               "share_in_archetype": 1.0,
-              "meta_share": 0.0078
+              "meta_share": 0.0085
             }
           ]
         },
@@ -355,8 +361,8 @@
           "archetypes": [
             {
               "archetype": "N's Zoroark",
-              "share_in_archetype": 0.35,
-              "meta_share": 0.0435
+              "share_in_archetype": 0.4,
+              "meta_share": 0.0407
             }
           ]
         },
@@ -366,8 +372,8 @@
           "archetypes": [
             {
               "archetype": "Ursaluna Lunatone",
-              "share_in_archetype": 0.7692,
-              "meta_share": 0.0067
+              "share_in_archetype": 0.6875,
+              "meta_share": 0.0054
             }
           ]
         },
@@ -377,8 +383,13 @@
           "archetypes": [
             {
               "archetype": "Raging Bolt Ogerpon",
-              "share_in_archetype": 0.9,
-              "meta_share": 0.0394
+              "share_in_archetype": 0.85,
+              "meta_share": 0.0387
+            },
+            {
+              "archetype": "Ogerpon Box",
+              "share_in_archetype": 1.0,
+              "meta_share": 0.0085
             }
           ]
         }

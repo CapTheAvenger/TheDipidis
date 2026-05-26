@@ -11,6 +11,17 @@ window.MetaCall = (function () {
                                // Blended 3:1 over _matchupMap when ≥MAJOR_MATCHUP_MIN_GAMES samples exist.
   const MAJOR_MATCHUP_WEIGHT = 3.0;        // user-requested 3:1 over online
   const MAJOR_MATCHUP_MIN_GAMES = 10;      // require this many games before trusting the major pair
+  // Past-Meta runs against a FINISHED dataset — no more games will be
+  // added to last year's Phantasmal Flames meta, ever. A 10-game cutoff
+  // that's reasonable for an in-progress format wastes 80 % of the
+  // matchups: at 3 majors there are typically 5-9 games per pair, not
+  // 10+. Past-Meta drops to a 3-game floor so the same WRs the Past-
+  // Meta Module displays directly (e.g. Alakazam Dudunsparce vs
+  // Archaludon Dudunsparce = 25.93 % across 9 games) also drive the
+  // Meta Call simulation, instead of being silently rounded to 50/50.
+  // Below 3 games is genuinely noise (one win/loss flips it 33 pp),
+  // so the floor stays — sparse pairs default to honest 50/50.
+  const MAJOR_MATCHUP_MIN_GAMES_PAST = 3;
   const MAJOR_MATCHUP_TIE_RATE = 0.02;     // labs CSV doesn't carry tie rate; use the same default the online matrix uses
   let _deckWRAdjustment = {}; // normalize(deck) -> pp delta (labs WR − online cumulative WR). Predictor 5.3 — corrects the matchup simulator for the gap between online-ladder WR (elite-pilot inflated) and major-tournament WR (typical pilot). See _computeMatchupAdjustments() and applied in getBaseMatchup().
   let _shareList  = null;  // [{name, onlineShare}] sorted desc — onlineShare is the
@@ -3345,12 +3356,15 @@ window.MetaCall = (function () {
           }
           _majorMatchupMap = {};
           let pairsKept = 0;
+          // Keep pairs at ≥ MAJOR_MATCHUP_MIN_GAMES_PAST so Past Meta
+          // has a usable map; the higher current-meta threshold is
+          // re-applied at query time in getBaseMatchup.
           for (const meta of Object.keys(agg)) {
             _majorMatchupMap[meta] = {};
             for (const d of Object.keys(agg[meta])) {
               for (const o of Object.keys(agg[meta][d])) {
                 const a = agg[meta][d][o];
-                if (a.games < MAJOR_MATCHUP_MIN_GAMES) continue;
+                if (a.games < MAJOR_MATCHUP_MIN_GAMES_PAST) continue;
                 const winPct = a.weightedSum / a.games; // 0..100
                 if (!_majorMatchupMap[meta][d]) _majorMatchupMap[meta][d] = {};
                 _majorMatchupMap[meta][d][o] = {
@@ -3551,7 +3565,7 @@ window.MetaCall = (function () {
           majorGames = mRev.games;
         }
       }
-      if (majorWin != null && majorGames >= MAJOR_MATCHUP_MIN_GAMES) {
+      if (majorWin != null && majorGames >= MAJOR_MATCHUP_MIN_GAMES_PAST) {
         const pWin  = _clip(majorWin, 0.05, 0.95);
         const pTie  = MAJOR_MATCHUP_TIE_RATE;
         return { pWin, pTie, pLoss: Math.max(0, 1 - pWin - pTie) };

@@ -4290,13 +4290,12 @@ window.MetaCall = (function () {
     };
     const hintKey = mode === 'counter' ? 'mc.modeCounterHint' : 'mc.modeStandardHint';
     return `
-<div class="mc-combo-row">
+<div class="mc-combo-row" title="${esc(t(hintKey))}">
   <span class="mc-combo-label">${t('mc.panelMode')}</span>
   <div class="mc-tt-tabs mc-tt-tabs-inline" role="tablist" aria-label="Meta Call mode">
     ${pill('standard', 'mc.modeStandard')}
     ${pill('counter',  'mc.modeCounter')}
   </div>
-  <p class="mc-tt-hint mc-combo-hint">${t(hintKey)}</p>
 </div>`;
   }
 
@@ -4363,13 +4362,12 @@ window.MetaCall = (function () {
       : t('mc.sourceHintCurrent');
 
     return `
-<div class="mc-combo-row">
+<div class="mc-combo-row" title="${esc(sourceHintText)}">
   <span class="mc-combo-label">${t('mc.panelSource')}</span>
   <div class="mc-tt-tabs mc-tt-tabs-inline" role="tablist" aria-label="Meta source">
     ${pill('current', currentLabel)}
     ${pill('past', t('mc.sourcePastMeta'))}
   </div>
-  <p class="mc-tt-hint mc-combo-hint">${esc(sourceHintText)}</p>
   ${formatRow}
 </div>`;
   }
@@ -4987,15 +4985,11 @@ window.MetaCall = (function () {
   <div class="metacall-header">
     <h2>${t('mc.title')}</h2>
     <p class="color-grey">${t('mc.subtitle')}</p>
+  </div>
+  <div class="mc-top-bar">
+    ${renderScenariosBar()}
     ${dateBanner}
   </div>
-  ${'' /* Predictor banner suppressed — the verbose technical breakdown
-       ("Based on N major-tournament rows + online-tournament + ladder
-       data. + Online-Entwicklung seit DD.MM.") confused users more
-       than it helped. The function and its trend/CL/accuracy chips
-       are kept in the code in case a slimmer chip-style replacement
-       is added later. */}
-  ${renderScenariosBar()}
   ${_inFrozenPastMode() ? '' : _renderCombinedConfigPanel()}
   ${renderSettingsPanel()}
   ${_inFrozenPastMode() ? renderFrozenBanner() : ''}
@@ -7091,11 +7085,11 @@ window.MetaCall = (function () {
       if (status.state === 'corrupted') {
         const msg = t('mc.scenarioStorageCorrupted');
         hint = `<div class="mc-scenarios-hint">${esc(msg)} (${SCENARIOS_STORAGE_KEY}: ${status.bytes}B)</div>`;
-      } else {
-        const msg = t('mc.scenarioStorageEmpty');
-        const explainer = t('mc.scenariosExplainer');
-        hint = `<div class="mc-scenarios-hint">${esc(msg)} <span class="mc-scenarios-explainer">${esc(explainer)}</span></div>`;
       }
+      // "Storage empty" case → no inline hint. The dropdown's
+      // own "— no scenario —" placeholder + the Save… button next
+      // to it make the empty state self-evident; the long explainer
+      // was burning a full row on every load.
     }
 
     // Predictions-history block: show the last few snapshots' top-3 so

@@ -3312,46 +3312,60 @@ window.MetaCall = (function () {
         if (mmResp.ok) {
           const mmText = await mmResp.text();
           const mmRows = parseCSVQuoted(mmText, ',');  // CSV is comma-delimited per labs scraper
-          // Aggregate across tournaments: sum games, weighted-avg win%
-          // per (my_deck, opponent_deck). Use only day_filter='overall'
-          // for the blend — Day 1/2 splits stay available for future
-          // recency-weighted variants.
-          const agg = {}; // norm(deck) -> norm(opp) -> { games, weightedSum }
+          // Aggregate per META × pair. The CSV holds rows from multiple
+          // metas (SVI-JTG, TEF-POR, …) and the same archetype name can
+          // exist in both with very different WR — e.g. Archaludon Duduns
+          // vs Dragapult is 16.67 % in SVI-JTG (14 games) but 46.15 % in
+          // TEF-POR (13 games). Aggregating across metas would average
+          // them to 30.9 % and silently inject pre-rotation matchups
+          // into a current-format prediction. Keying by meta keeps the
+          // two cleanly separated; lookup picks the right meta at
+          // query time (see getBaseMatchup).
+          //   _majorMatchupMap[meta][myKey][oppKey] = { games, winPct, source }
+          const agg = {}; // meta -> norm(deck) -> norm(opp) -> { games, weightedSum }
           let rowsConsumed = 0;
           for (const r of mmRows) {
             if ((r.day_filter || 'overall').trim().toLowerCase() !== 'overall') continue;
+            const meta   = (r.meta || '').trim().toUpperCase();
             const myName = (r.my_deck_name || '').trim();
             const opName = (r.opponent_deck_name || '').trim();
-            if (!myName || !opName) continue;
+            if (!meta || !myName || !opName) continue;
             const games = parseInt(r.vs_count || '0', 10);
             const wpRaw = parseFloat(String(r.vs_win_pct || '0').replace(',', '.'));
             if (!Number.isFinite(games) || games <= 0) continue;
             if (!Number.isFinite(wpRaw)) continue;
             const d = normalize(myName);
             const o = normalize(opName);
-            if (!agg[d]) agg[d] = {};
-            if (!agg[d][o]) agg[d][o] = { games: 0, weightedSum: 0 };
-            agg[d][o].games += games;
-            agg[d][o].weightedSum += games * wpRaw;
+            if (!agg[meta]) agg[meta] = {};
+            if (!agg[meta][d]) agg[meta][d] = {};
+            if (!agg[meta][d][o]) agg[meta][d][o] = { games: 0, weightedSum: 0 };
+            agg[meta][d][o].games += games;
+            agg[meta][d][o].weightedSum += games * wpRaw;
             rowsConsumed += 1;
           }
           _majorMatchupMap = {};
           let pairsKept = 0;
-          for (const d of Object.keys(agg)) {
-            for (const o of Object.keys(agg[d])) {
-              const a = agg[d][o];
-              if (a.games < MAJOR_MATCHUP_MIN_GAMES) continue;
-              const winPct = a.weightedSum / a.games; // 0..100
-              if (!_majorMatchupMap[d]) _majorMatchupMap[d] = {};
-              _majorMatchupMap[d][o] = {
-                games  : a.games,
-                winPct,                      // 0..100
-                source : 'major',
-              };
-              pairsKept += 1;
+          for (const meta of Object.keys(agg)) {
+            _majorMatchupMap[meta] = {};
+            for (const d of Object.keys(agg[meta])) {
+              for (const o of Object.keys(agg[meta][d])) {
+                const a = agg[meta][d][o];
+                if (a.games < MAJOR_MATCHUP_MIN_GAMES) continue;
+                const winPct = a.weightedSum / a.games; // 0..100
+                if (!_majorMatchupMap[meta][d]) _majorMatchupMap[meta][d] = {};
+                _majorMatchupMap[meta][d][o] = {
+                  games  : a.games,
+                  winPct,                      // 0..100
+                  source : 'major',
+                };
+                pairsKept += 1;
+              }
             }
           }
-          console.info(`[MetaCall] Major matchup map: ${rowsConsumed} rows aggregated → ${pairsKept} pairs with ≥${MAJOR_MATCHUP_MIN_GAMES} games (3× weight blend active)`);
+          const metaSummary = Object.keys(_majorMatchupMap)
+            .map(m => `${m}=${Object.values(_majorMatchupMap[m]).reduce((s, x) => s + Object.keys(x).length, 0)}`)
+            .join(', ');
+          console.info(`[MetaCall] Major matchup map: ${rowsConsumed} rows → ${pairsKept} pairs per-meta (${metaSummary}); ≥${MAJOR_MATCHUP_MIN_GAMES} games per pair`);
         } else {
           console.info('[MetaCall] No labs_tournament_matchups.csv — Major matchup blend skipped (online-only matchups)');
         }
@@ -3514,18 +3528,21 @@ window.MetaCall = (function () {
     // entirely. The online matrix reflects whatever's currently legal
     // (today: CRI), so blending it 3:1 with TEF-POR major data biases
     // the prediction toward decks/matchups that didn't exist in the
-    // past meta. Use labs_tournament_matchups.csv as the SOLE source;
-    // pairs without ≥MAJOR_MATCHUP_MIN_GAMES sample default to 50/50
-    // (honest "unknown" instead of a fabricated CRI-era guess). The
-    // user spotted this when Archaludon Dudunsparce showed a friendly
+    // past meta. Use labs_tournament_matchups.csv FILTERED to the
+    // selected past format as the SOLE source; pairs without
+    // ≥MAJOR_MATCHUP_MIN_GAMES sample default to 50/50 (honest
+    // "unknown" instead of a fabricated CRI-era guess). The user
+    // spotted this when Archaludon Dudunsparce showed a friendly
     // simulated Day-2 chance in Meta Call but actually went 42-54-27
     // (45 % WR, 13 % Day-2) across the real TEF-POR regionals.
     if (_metaSource === 'past') {
+      const pastMeta = (_pastMetaFormatKey || '').toUpperCase();
+      const metaMap  = pastMeta && _majorMatchupMap ? _majorMatchupMap[pastMeta] : null;
       let majorWin = null;
       let majorGames = 0;
-      if (_majorMatchupMap) {
-        const mHit = _majorMatchupMap[a]?.[b];
-        const mRev = !mHit ? _majorMatchupMap[b]?.[a] : null;
+      if (metaMap) {
+        const mHit = metaMap[a]?.[b];
+        const mRev = !mHit ? metaMap[b]?.[a] : null;
         if (mHit) {
           majorWin = mHit.winPct / 100;
           majorGames = mHit.games;
@@ -3539,9 +3556,9 @@ window.MetaCall = (function () {
         const pTie  = MAJOR_MATCHUP_TIE_RATE;
         return { pWin, pTie, pLoss: Math.max(0, 1 - pWin - pTie) };
       }
-      // No labs sample → honest 50/50. Old behavior was to fall through
-      // to the online matrix, which silently injected current-format
-      // matchups into a past-format prediction.
+      // No labs sample in this meta → honest 50/50. Old behavior was
+      // to fall through to the online matrix, which silently injected
+      // current-format matchups into a past-format prediction.
       return { pWin: 0.50, pTie: MAJOR_MATCHUP_TIE_RATE, pLoss: 0.48 };
     }
 
@@ -3553,13 +3570,19 @@ window.MetaCall = (function () {
 
     // W3 — Major matchup blend (3:1 over online). Fires only when the
     // Major matrix has the pair with ≥MAJOR_MATCHUP_MIN_GAMES sample
-    // size. Major data carries games + winPct (no tie rate per labs
-    // CSV); we keep the tie rate from the online base and rebalance
-    // pLoss = 1 − pWin − pTie. When the pair is only in one direction,
-    // a flipped lookup mirrors the WR for the reverse opponent.
-    if (_majorMatchupMap) {
-      const mHit = _majorMatchupMap[a]?.[b];
-      const mRev = !mHit ? _majorMatchupMap[b]?.[a] : null;
+    // size IN THE CURRENT FORMAT. Looking across all metas would mix
+    // SVI-JTG / TEF-POR / CRI rates for the same archetype name, which
+    // is what broke the Past-Meta branch above. The current format
+    // comes from format_window.current_set; absence (no labs majors
+    // for the live format yet) cleanly skips the blend.
+    const currentMeta = (_formatWindow && _formatWindow.current_set)
+      ? String(_formatWindow.current_set).trim().toUpperCase()
+      : '';
+    const currentMetaMap = (currentMeta && _majorMatchupMap)
+      ? _majorMatchupMap[currentMeta] : null;
+    if (currentMetaMap) {
+      const mHit = currentMetaMap[a]?.[b];
+      const mRev = !mHit ? currentMetaMap[b]?.[a] : null;
       let majorWin = null;
       let majorGames = 0;
       if (mHit) {
@@ -3618,14 +3641,14 @@ window.MetaCall = (function () {
       const pWin = Math.min(0.98, Math.max(0, ov / 100));
       return { pWin, pTie: 0.02, pLoss: Math.max(0, 1 - pWin - 0.02) };
     }
-    // Base meta rate
-    const mk = normalize(myDeck);
-    const ok = normalize(opponent);
-    const hit = _matchupMap?.[mk]?.[ok];
-    const rev = !hit ? _matchupMap?.[ok]?.[mk] : null;
-    const metaBase = hit ? hit
-      : rev ? { pWin: rev.pLoss, pTie: rev.pTie, pLoss: rev.pWin }
-      : { pWin: 0.50, pTie: 0.02, pLoss: 0.48 };
+    // Base meta rate — go through getBaseMatchup() so the Past-Meta
+    // branch (labs-majors-only matchup matrix), the W3 major×online
+    // 3:1 blend, and the Predictor 5.3 WR adjustments all apply
+    // consistently. Previously this function looked _matchupMap up
+    // directly, which silently bypassed every one of those layers
+    // and made the My-Deck Day-2 simulation use the live CRI online
+    // matrix even when the user picked TEF-POR as Past Meta.
+    const metaBase = getBaseMatchup(myDeck, opponent);
 
     // Bayesian blend with journal data (meta treated as 30-game prior)
     // Same normalize-aware lookup — the opponent name in the journal

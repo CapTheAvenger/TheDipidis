@@ -3509,6 +3509,42 @@ window.MetaCall = (function () {
     }
     const a = normalize(deckA);
     const b = normalize(deckB);
+
+    // Past Meta — ignore the live online matchup matrix and adjustments
+    // entirely. The online matrix reflects whatever's currently legal
+    // (today: CRI), so blending it 3:1 with TEF-POR major data biases
+    // the prediction toward decks/matchups that didn't exist in the
+    // past meta. Use labs_tournament_matchups.csv as the SOLE source;
+    // pairs without ≥MAJOR_MATCHUP_MIN_GAMES sample default to 50/50
+    // (honest "unknown" instead of a fabricated CRI-era guess). The
+    // user spotted this when Archaludon Dudunsparce showed a friendly
+    // simulated Day-2 chance in Meta Call but actually went 42-54-27
+    // (45 % WR, 13 % Day-2) across the real TEF-POR regionals.
+    if (_metaSource === 'past') {
+      let majorWin = null;
+      let majorGames = 0;
+      if (_majorMatchupMap) {
+        const mHit = _majorMatchupMap[a]?.[b];
+        const mRev = !mHit ? _majorMatchupMap[b]?.[a] : null;
+        if (mHit) {
+          majorWin = mHit.winPct / 100;
+          majorGames = mHit.games;
+        } else if (mRev) {
+          majorWin = 1 - (mRev.winPct / 100);
+          majorGames = mRev.games;
+        }
+      }
+      if (majorWin != null && majorGames >= MAJOR_MATCHUP_MIN_GAMES) {
+        const pWin  = _clip(majorWin, 0.05, 0.95);
+        const pTie  = MAJOR_MATCHUP_TIE_RATE;
+        return { pWin, pTie, pLoss: Math.max(0, 1 - pWin - pTie) };
+      }
+      // No labs sample → honest 50/50. Old behavior was to fall through
+      // to the online matrix, which silently injected current-format
+      // matchups into a past-format prediction.
+      return { pWin: 0.50, pTie: MAJOR_MATCHUP_TIE_RATE, pLoss: 0.48 };
+    }
+
     const hit = _matchupMap?.[a]?.[b];
     const rev = !hit ? _matchupMap?.[b]?.[a] : null;
     let base = hit ? hit
@@ -4357,7 +4393,7 @@ window.MetaCall = (function () {
     const frozen = _inFrozenPastMode();
     const hintHtml = frozen
       ? `<span class="mc-source-hint" title="${esc(t('mc.frozenSourceHintTitle'))}">📌 ${esc(t('mc.frozenSourceHint'))}</span>`
-      : `<span class="mc-source-hint" title="Matchups use current online data (no historical matchup pairs are scraped per past meta).">ⓘ Matchups = current proxy</span>`;
+      : `<span class="mc-source-hint" title="Matchups use the labs major-tournament matrix for this past format (pairs without ≥10 games default to 50/50). The live online matrix is not blended in — current-format decks don't represent past-format play.">ⓘ Matchups = labs majors</span>`;
     const formatRow = _metaSource === 'past'
       ? `<div class="mc-source-format-row">
            <label class="mc-source-format-label">Format:</label>

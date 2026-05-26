@@ -2319,8 +2319,19 @@ window.MetaCall = (function () {
       // deck has no conv data yet (top8Conv == 0) the damper is
       // exactly 1.0× (no effect), which preserves Predictor 3.0
       // behaviour for fresh decks.
+      //
+      // Predictor 5.4 — in Mode A, the top8Conv values come from
+      // online tournaments only (same data stream as the ladder
+      // share). Damping ladder by conv == damping a signal by itself,
+      // which under-weights new decks that haven't had time to
+      // accumulate online-tournament conv samples yet. Tighten the
+      // bounds to (0.90..1.10) so the damper is only a soft nudge in
+      // Mode A; keep the original (0.75..1.25) range in Mode B where
+      // the conv signal is anchored against major-event data.
+      const _dampLo = _predictorMode === 'B' ? PREDICTOR_4_2_LADDER_DAMP_LO : 0.90;
+      const _dampHi = _predictorMode === 'B' ? PREDICTOR_4_2_LADDER_DAMP_HI : 1.10;
       const ladderDamp = top8Conv > 0
-        ? _clip(top8Conv / meanConv, PREDICTOR_4_2_LADDER_DAMP_LO, PREDICTOR_4_2_LADDER_DAMP_HI)
+        ? _clip(top8Conv / meanConv, _dampLo, _dampHi)
         : 1.0;
       const ladderPctDamped = ladderPct * ladderDamp;
 
@@ -2421,10 +2432,23 @@ window.MetaCall = (function () {
       // pulled Pure Dragapult (online 17.5 % vs Prag brought 13.75 %,
       // ratio 1.27) and Crustle (online 4.1 % vs Prag brought 3.15 %,
       // ratio 1.30) ≈ 25 % lower — closer to actuals (10.3 % / 0.8 %).
-      // Skipped when no recent major data exists (fresh format).
+      //
+      // Predictor 5.4 — Hype-Damper requires a real major-data anchor.
+      // In Mode A (no current-format majors), "brought share" comes
+      // from online tournaments only, which are themselves driven by
+      // the same ladder hype. Comparing ladder against an online-only
+      // brought share is comparing online to online — there's no
+      // counter-signal to validate the "this is hype" claim. The
+      // damper was killing legitimately new decks like Mega Greninja
+      // at the CRI rotation: 8.23 % ladder vs 2.4 % online-brought
+      // (deck was 4 days old) → ratio 3.43 → 25 % cut → ~1.85 %
+      // predicted → dropped out of Top 25 entirely. Skip the damper
+      // in Mode A; reactivate as soon as labs major data lands.
       const HYPE_DAMPER_RATIO_MIN  = 1.25;
       const HYPE_DAMPER_FACTOR     = 0.75;
-      if (broughtPct > 0 && ladderPct > broughtPct * HYPE_DAMPER_RATIO_MIN) {
+      if (_predictorMode === 'B'
+          && broughtPct > 0
+          && ladderPct > broughtPct * HYPE_DAMPER_RATIO_MIN) {
         d.hypeDamperApplied = true;
         predicted *= HYPE_DAMPER_FACTOR;
       }

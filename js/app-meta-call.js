@@ -859,8 +859,27 @@ window.MetaCall = (function () {
   function _effectiveDateCutoff() {
     const explicit = (typeof window !== 'undefined') ? window.currentMetaDateFrom : null;
     if (explicit && /^\d{4}-\d{2}-\d{2}$/.test(explicit)) return explicit;
-    try { return _isoMinusDays(_todayISO(), _AUTO_WINDOW_DAYS); }
-    catch (_e) { return null; }
+    let cutoff = null;
+    try { cutoff = _isoMinusDays(_todayISO(), _AUTO_WINDOW_DAYS); }
+    catch (_e) { cutoff = null; }
+    // Predictor 5.5 — format-rotation guard. The auto-28-day window
+    // is calibrated for stable formats. During the first ~4 weeks of
+    // a new set rotation (set_release_date < today < release+28),
+    // the window reaches back into the previous format's dated rows
+    // and silently overwrites ladderShare / broughtShare with
+    // prior-format buckets. This was the exact mechanism that pushed
+    // Mega Greninja's 8.23 % online share down to ~0.9 % at the CRI
+    // rotation (deck was 4 days old, 28-day bucket count was almost
+    // entirely TEF-POR rows it wasn't in) — and shoved Grimmsnarl
+    // Froslass to predicted #1 from its TEF-POR cumulative count.
+    // Floor the auto cutoff to the current set's release date when
+    // the format_window says rotation is fresh — never reach back
+    // into a previous format on autopilot.
+    const releaseISO = _formatWindow && _formatWindow.set_release_date;
+    if (releaseISO && /^\d{4}-\d{2}-\d{2}$/.test(releaseISO)) {
+      if (!cutoff || releaseISO > cutoff) cutoff = releaseISO;
+    }
+    return cutoff;
   }
 
   async function _loadAllHistorySnapshots() {
@@ -4479,6 +4498,7 @@ window.MetaCall = (function () {
 
     const labsCount = _labsMajorRows || 0;
     const labsDropped = (window.__mcLabsDroppedCount | 0);
+    const effCutoff = (typeof _effectiveDateCutoff === 'function') ? _effectiveDateCutoff() : null;
 
     // Mode label + class
     const modeLabel = mode === 'B'
@@ -4507,12 +4527,20 @@ window.MetaCall = (function () {
           .replace('{total}', labsDropped + labsCount)
       : '';
 
+    // Cutoff line — surface the effective date window. During a fresh
+    // rotation this is the set release date (so prior-format buckets
+    // never leak in); after ~28 days it's the rolling 28-day window.
+    const cutoffLine = effCutoff
+      ? t('mc.predStatusCutoff').replace('{date}', effCutoff)
+      : '';
+
     return `
 <div class="mc-predictor-status ${modeClass}">
   <div class="mc-pred-status-row">
     <span class="mc-pred-status-mode-badge">${esc(modeLabel)}</span>
     ${formatLine ? `<span class="mc-pred-status-format">${esc(formatLine)}</span>` : ''}
   </div>
+  ${cutoffLine ? `<div class="mc-pred-status-filter">${esc(cutoffLine)}</div>` : ''}
   ${filterLine ? `<div class="mc-pred-status-filter">${esc(filterLine)}</div>` : ''}
 </div>`;
   }

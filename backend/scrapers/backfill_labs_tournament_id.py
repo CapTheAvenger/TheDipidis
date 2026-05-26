@@ -22,6 +22,7 @@ Usage:
 
 import argparse
 import csv
+import json
 import os
 import re
 import sys
@@ -32,6 +33,7 @@ from datetime import datetime
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 DATA_DIR = os.path.join(ROOT, "data")
 OVERVIEW_CSV = os.path.join(DATA_DIR, "tournament_cards_data_overview.csv")
+OVERRIDES_JSON = os.path.join(DATA_DIR, "labs_tournament_id_overrides.json")
 
 
 _US_STATE_CODES = {
@@ -88,6 +90,31 @@ def build_lookup():
     return lookup
 
 
+def load_overrides():
+    """Read data/labs_tournament_id_overrides.json — manual cards-tid →
+    labs-tid mappings for tournaments where automatic name-matching
+    fails (Sevilla vs Seville, EUIC vs International Championship,
+    etc.). Returns {cards_tid: labs_tid}. Missing file → empty dict."""
+    if not os.path.exists(OVERRIDES_JSON):
+        return {}
+    try:
+        with open(OVERRIDES_JSON, encoding="utf-8") as f:
+            data = json.load(f)
+    except (OSError, json.JSONDecodeError) as e:
+        print(f"WARN: Could not read {OVERRIDES_JSON}: {e}", file=sys.stderr)
+        return {}
+    overrides = data.get("overrides") or {}
+    out = {}
+    for cards_tid, info in overrides.items():
+        if isinstance(info, dict):
+            labs_tid = (info.get("labs_tournament_id") or "").strip()
+        else:
+            labs_tid = str(info).strip()
+        if labs_tid:
+            out[str(cards_tid).strip()] = labs_tid
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--dry-run", action="store_true", help="Report what would change, write nothing.")
@@ -98,7 +125,9 @@ def main():
         sys.exit(1)
 
     lookup = build_lookup()
+    overrides = load_overrides()
     print(f"Indexed {len(lookup)} (name, date) → labs_tid pairs from labs CSVs")
+    print(f"Loaded {len(overrides)} manual overrides")
 
     # Read overview, ensure utf-8-sig BOM is preserved
     with open(OVERVIEW_CSV, newline="", encoding="utf-8-sig") as f:
@@ -110,12 +139,20 @@ def main():
         fieldnames.append("labs_tournament_id")
 
     matched = 0
+    matched_override = 0
     already = 0
     missing = 0
     for r in rows:
         current = (r.get("labs_tournament_id") or "").strip()
         if current:
             already += 1
+            continue
+        cards_tid = (r.get("tournament_id") or "").strip()
+        # Manual override wins over name-based lookup — it exists
+        # precisely for cases where the name-match fails.
+        if cards_tid in overrides:
+            r["labs_tournament_id"] = overrides[cards_tid]
+            matched_override += 1
             continue
         name = r.get("tournament_name", "")
         date_str = r.get("tournament_date", "")
@@ -130,8 +167,9 @@ def main():
     total = len(rows)
     print(f"Overview rows: {total}")
     print(f"  already had labs_tournament_id: {already}")
-    print(f"  newly matched: {matched}")
-    print(f"  unmatched (left blank): {missing}")
+    print(f"  newly matched (name+date):      {matched}")
+    print(f"  newly matched (manual override): {matched_override}")
+    print(f"  unmatched (left blank):         {missing}")
 
     if args.dry_run:
         print("\nDry-run — no changes written.")

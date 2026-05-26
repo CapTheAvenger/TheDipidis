@@ -551,6 +551,36 @@ def _parse_iso_date(date_str: str) -> str:
 
 
 _LABS_ID_LOOKUP_CACHE = None
+_LABS_ID_OVERRIDES_CACHE = None
+
+
+def _load_labs_id_overrides() -> Dict[str, str]:
+    """data/labs_tournament_id_overrides.json provides manual
+    cards-tid → labs-tid mappings for tournaments where the name-based
+    cross-reference fails (Sevilla vs Seville, EUIC vs International
+    Championship London, etc.). Returns {cards_tid: labs_tid}. Cached."""
+    global _LABS_ID_OVERRIDES_CACHE
+    if _LABS_ID_OVERRIDES_CACHE is not None:
+        return _LABS_ID_OVERRIDES_CACHE
+    path = os.path.join(get_data_dir(), "labs_tournament_id_overrides.json")
+    out: Dict[str, str] = {}
+    if os.path.exists(path):
+        try:
+            with open(path, encoding="utf-8") as f:
+                data = json.load(f)
+            for cards_tid, info in (data.get("overrides") or {}).items():
+                if isinstance(info, dict):
+                    labs_tid = (info.get("labs_tournament_id") or "").strip()
+                else:
+                    labs_tid = str(info).strip()
+                if labs_tid:
+                    out[str(cards_tid).strip()] = labs_tid
+        except Exception as e:
+            logger.warning("[labs-id-overrides] Could not parse %s: %s", path, e)
+    _LABS_ID_OVERRIDES_CACHE = out
+    logger.info("[labs-id-overrides] loaded %d manual mappings", len(out))
+    return out
+
 
 def _build_labs_id_lookup() -> dict:
     """One-time scan of every labs_tournament_decks_*.csv in the data
@@ -591,10 +621,16 @@ def _build_labs_id_lookup() -> dict:
     return lookup
 
 
-def _resolve_labs_tournament_id(name: str, date_str: str) -> str:
+def _resolve_labs_tournament_id(name: str, date_str: str, cards_tid: str = "") -> str:
     """Look up the labs.limitlesstcg.com tournament_id (4-digit padded)
-    that corresponds to a limitlesstcg.com tournament (3-digit). Returns
-    '' if no match — caller writes empty cell."""
+    that corresponds to a limitlesstcg.com tournament (3-digit). Manual
+    overrides in labs_tournament_id_overrides.json win over the name-
+    based match — they exist precisely because the names diverge.
+    Returns '' if no match — caller writes empty cell."""
+    cards_tid = str(cards_tid or "").strip()
+    overrides = _load_labs_id_overrides()
+    if cards_tid and cards_tid in overrides:
+        return overrides[cards_tid]
     if not name:
         return ""
     lookup = _build_labs_id_lookup()
@@ -616,7 +652,7 @@ def save_csv_files(data: list, output_file: str, append_mode: bool):
             "cards_url": t["cards_url"],
             "total_cards": t.get("total_cards", 0),
             "status": t["status"],
-            "labs_tournament_id": _resolve_labs_tournament_id(t["name"], t.get("date", "")),
+            "labs_tournament_id": _resolve_labs_tournament_id(t["name"], t.get("date", ""), t.get("id", "")),
         }
         for t in data
     ]

@@ -1,13 +1,13 @@
 ﻿tournament_id;tournament_name;tournament_date;players;format;cards_url;total_cards;status;labs_tournament_id
 552;Regional Orlando, FL – Limitless;4th April 2026;2745;SVI-ASC;https://limitlesstcg.com/tournaments/552/cards;10386;success;0060
 534;Regional Querétaro – Limitless;4th April 2026;1446;SVI-ASC;https://limitlesstcg.com/tournaments/534/cards;6307;success;0061
-533;Special Event Sevilla – Limitless;28th March 2026;1337;SVI-ASC;https://limitlesstcg.com/tournaments/533/cards;5926;success;
+533;Special Event Sevilla – Limitless;28th March 2026;1337;SVI-ASC;https://limitlesstcg.com/tournaments/533/cards;5926;success;0059
 563;Special Event Cape Town – Limitless;27th March 2026;88;SVI-ASC;https://limitlesstcg.com/tournaments/563/cards;90;success;
 551;Regional Houston, TX – Limitless;21st March 2026;2635;SVI-ASC;https://limitlesstcg.com/tournaments/551/cards;10842;success;0058
 543;Regional Curitiba – Limitless;14th March 2026;1449;SVI-ASC;https://limitlesstcg.com/tournaments/543/cards;6791;success;0057
 560;Special Event San Juan – Limitless;7th March 2026;356;SVI-ASC;https://limitlesstcg.com/tournaments/560/cards;1662;success;0056
 542;Regional Seattle, WA – Limitless;28th February 2026;2231;SVI-PFL;https://limitlesstcg.com/tournaments/542/cards;9804;success;0055
-517;EUIC 2026, London – Limitless;13th February 2026;4010;SVI-PFL;https://limitlesstcg.com/tournaments/517/cards;16985;success;
+517;EUIC 2026, London – Limitless;13th February 2026;4010;SVI-PFL;https://limitlesstcg.com/tournaments/517/cards;16985;success;0054
 553;Regional Sydney – Limitless;7th February 2026;699;SVI-PFL;https://limitlesstcg.com/tournaments/553/cards;3129;success;0052
 532;Regional Santiago – Limitless;7th February 2026;1670;SVI-PFL;https://limitlesstcg.com/tournaments/532/cards;7168;success;0053
 529;Regional Birmingham – Limitless;24th January 2026;2344;SVI-PFL;https://limitlesstcg.com/tournaments/529/cards;10356;success;0049
@@ -15,7 +15,7 @@
 530;Regional Mérida – Limitless;24th January 2026;1690;SVI-PFL;https://limitlesstcg.com/tournaments/530/cards;7049;success;0050
 538;Regional Toronto – Limitless;17th January 2026;2270;SVI-PFL;https://limitlesstcg.com/tournaments/538/cards;9102;success;0048
 528;Regional Stuttgart – Limitless;29th November 2025;2200;SVI-PFL;https://limitlesstcg.com/tournaments/528/cards;9702;success;0047
-516;LAIC 2025–26, São Paulo – Limitless;21st November 2025;2117;SVI-MEG;https://limitlesstcg.com/tournaments/516/cards;8913;success;
+516;LAIC 2025–26, São Paulo – Limitless;21st November 2025;2117;SVI-MEG;https://limitlesstcg.com/tournaments/516/cards;8913;success;0046
 527;Special Event Buenos Aires – Limitless;15th November 2025;350;SVI-MEG;https://limitlesstcg.com/tournaments/527/cards;1475;success;0045
 526;Regional Las Vegas, NV – Limitless;15th November 2025;2919;SVI-MEG;https://limitlesstcg.com/tournaments/526/cards;12097;success;0044
 525;Regional Gdańsk – Limitless;1st November 2025;1675;SVI-MEG;https://limitlesstcg.com/tournaments/525/cards;7797;success;0043
@@ -25,8 +25,8 @@
 521;Regional Pittsburgh, PA – Limitless;20th September 2025;2691;SVI-BLK;https://limitlesstcg.com/tournaments/521/cards;11536;success;0038
 520;Regional Monterrey – Limitless;13th September 2025;1620;SVI-BLK;https://limitlesstcg.com/tournaments/520/cards;7220;success;0037
 519;Regional Frankfurt – Limitless;13th September 2025;2433;SVI-BLK;https://limitlesstcg.com/tournaments/519/cards;11258;success;0036
-500;World Championships 2025 – Limitless;15th August 2025;721;SVI-BLK;https://limitlesstcg.com/tournaments/500/cards;3175;success;
-463;NAIC 2025, New Orleans – Limitless;13th June 2025;3812;SVI-DRI;https://limitlesstcg.com/tournaments/463/cards;9287;success;
+500;World Championships 2025 – Limitless;15th August 2025;721;SVI-BLK;https://limitlesstcg.com/tournaments/500/cards;3175;success;0035
+463;NAIC 2025, New Orleans – Limitless;13th June 2025;3812;SVI-DRI;https://limitlesstcg.com/tournaments/463/cards;9287;success;0034
 501;Special Event Bologna – Limitless;31st May 2025;1239;SVI-JTG;https://limitlesstcg.com/tournaments/501/cards;5162;success;0033
 497;Regional Portland, OR – Limitless;24th May 2025;1688;SVI-JTG;https://limitlesstcg.com/tournaments/497/cards;7243;success;0032
 503;Special Event Durban – Limitless;24th May 2025;91;SVI-JTG;https://limitlesstcg.com/tournaments/503/cards;157;success;
@@ -35,14 +35,14 @@
 475;Regional Santiago – Limitless;17th May 2025;1249;SVI-JTG;https://limitlesstcg.com/tournaments/475/cards;5251;success;0031
 466;Regional Milwaukee, WI – Limitless;3rd May 2025;1657;SVI-JTG;https://limitlesstcg.com/tournaments/466/cards;6733;success;0028
 502;Special Event Johannesburg – Limitless;26th April 2025;85;SVI-JTG;https://limitlesstcg.com/tournaments/502/cards;63;success;
-469;Special Event Sevilla – Limitless;26th April 2025;817;SVI-JTG;https://limitlesstcg.com/tournaments/469/cards;3545;success;
+469;Special Event Sevilla – Limitless;26th April 2025;817;SVI-JTG;https://limitlesstcg.com/tournaments/469/cards;3545;success;0027
 474;Regional Monterrey – Limitless;19th April 2025;1327;SVI-JTG;https://limitlesstcg.com/tournaments/474/cards;5539;success;0026
 489;Regional Atlanta, GA – Limitless;12th April 2025;2684;SVI-JTG;https://limitlesstcg.com/tournaments/489/cards;7175;success;0025
 477;Regional Brisbane – Limitless;29th March 2025;470;BRS-PRE;https://limitlesstcg.com/tournaments/477/cards;2252;success;0024
 468;Regional Stockholm – Limitless;22nd March 2025;815;BRS-PRE;https://limitlesstcg.com/tournaments/468/cards;3704;success;0023
 473;Regional Fortaleza – Limitless;8th March 2025;715;BRS-PRE;https://limitlesstcg.com/tournaments/473/cards;3241;success;0022
 465;Regional Vancouver – Limitless;8th March 2025;1314;BRS-PRE;https://limitlesstcg.com/tournaments/465/cards;6089;success;0021
-462;EUIC 2025, London – Limitless;21st February 2025;3361;BRS-PRE;https://limitlesstcg.com/tournaments/462/cards;8483;success;
+462;EUIC 2025, London – Limitless;21st February 2025;3361;BRS-PRE;https://limitlesstcg.com/tournaments/462/cards;8483;success;0020
 483;Special Event Puerto Rico – Limitless;15th February 2025;299;BRS-PRE;https://limitlesstcg.com/tournaments/483/cards;1412;success;
 472;Regional Mérida – Limitless;8th February 2025;1151;BRS-PRE;https://limitlesstcg.com/tournaments/472/cards;5117;success;0018
 484;Regional San Antonio, TX – Limitless;25th January 2025;2400;BRS-SSP;https://limitlesstcg.com/tournaments/484/cards;5948;success;0017
@@ -53,7 +53,7 @@
 459;Special Event Bogotá – Limitless;7th December 2024;215;BRS-SSP;https://limitlesstcg.com/tournaments/459/cards;1624;success;0012
 458;Regional Stuttgart – Limitless;30th November 2024;1702;BRS-SSP;https://limitlesstcg.com/tournaments/458/cards;7824;success;0011
 457;Regional Sacramento, CA – Limitless;23rd November 2024;1705;BRS-SSP;https://limitlesstcg.com/tournaments/457/cards;8025;success;0010
-461;LAIC 2024–25, São Paulo – Limitless;15th November 2024;1810;BRS-SCR;https://limitlesstcg.com/tournaments/461/cards;4024;success;
+461;LAIC 2024–25, São Paulo – Limitless;15th November 2024;1810;BRS-SCR;https://limitlesstcg.com/tournaments/461/cards;4024;success;0009
 456;Special Event Buenos Aires – Limitless;9th November 2024;275;BRS-SCR;https://limitlesstcg.com/tournaments/456/cards;621;success;0008
 455;Regional Gdańsk – Limitless;2nd November 2024;1372;BRS-SCR;https://limitlesstcg.com/tournaments/455/cards;2782;success;0007
 454;Regional Lille – Limitless;19th October 2024;1311;BRS-SCR;https://limitlesstcg.com/tournaments/454/cards;3082;success;0006

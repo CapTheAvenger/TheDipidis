@@ -1,0 +1,45 @@
+{
+  "comment": "Manual cards-tid → labs-tid overrides for tournaments where automatic name-matching fails. Used by backend/scrapers/tournament_scraper_JH.py (_resolve_labs_tournament_id) for new scrapes and by backend/scrapers/backfill_labs_tournament_id.py for historical overview rows. Cause of mismatch is in 'reason' for each entry. Add new entries when the limitlesstcg.com name diverges from the labs.limitlesstcg.com name in a way the normalize step can't bridge.",
+  "overrides": {
+    "533": {
+      "labs_tournament_id": "0059",
+      "reason": "limitless Spanish 'Sevilla' vs labs English 'Seville' — same event 2026-03-28"
+    },
+    "517": {
+      "labs_tournament_id": "0054",
+      "reason": "EUIC abbreviation vs labs 'International Championship London' — same event 2026-02-13"
+    },
+    "516": {
+      "labs_tournament_id": "0046",
+      "reason": "LAIC abbreviation vs labs 'International Championship São Paulo' — same event 2025-11-21"
+    },
+    "500": {
+      "labs_tournament_id": "0035",
+      "reason": "Worlds 2025 — limitless 'World Championships 2025' vs labs 'World Championship Anaheim'"
+    },
+    "463": {
+      "labs_tournament_id": "0034",
+      "reason": "NAIC 2025 abbreviation vs labs 'International Championship New Orleans' — same event 2025-06-13"
+    },
+    "469": {
+      "labs_tournament_id": "0027",
+      "reason": "limitless 'Sevilla' vs labs 'Seville' — same event 2025-04-26"
+    },
+    "462": {
+      "labs_tournament_id": "0020",
+      "reason": "EUIC 2025 abbreviation vs labs 'International Championship London' — same event 2025-02-21"
+    },
+    "461": {
+      "labs_tournament_id": "0009",
+      "reason": "LAIC 2024-25 abbreviation vs labs 'International Championship São Paulo' — same event 2024-11-15"
+    }
+  },
+  "intentionally_unmapped": {
+    "comment": "Tournaments confirmed to NOT exist in labs.limitlesstcg.com (verified by date + name scan of all labs_tournament_decks_*.csv). Listing them here documents the audit so a future maintainer doesn't re-investigate.",
+    "563": "Special Event Cape Town 2026-03-27 — no labs entry in that month",
+    "503": "Special Event Durban 2025-05-24 — labs has Portland (0032) that day, no Durban event in labs",
+    "502": "Special Event Johannesburg 2025-04-26 — labs has Seville (0027) that day, no Johannesburg",
+    "483": "Special Event Puerto Rico 2025-02-15 — no labs entry that month",
+    "_pre_labs_era": "All cards-tids ≤ ~395 (= tournaments before 2024-09-14) predate labs.limitlesstcg.com's first indexed tournament (0001 = Regional Baltimore 2024-09-14) and are permanently unmappable."
+  }
+}

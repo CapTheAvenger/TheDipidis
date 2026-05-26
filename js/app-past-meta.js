@@ -47,6 +47,9 @@
             'PFL': 'Phantasmal Flames',
             'POR': 'Perfect Order',
             'ASC': 'Ascended Heroes',
+            // CRI/M5 (released 2026-05-22) full name not yet known to
+            // this dictionary — falls through to displaying "CRI"
+            // until the maintainer adds the official name.
             // SwSh era — last few blocks people still ask about
             'BRS': 'Brilliant Stars',
             'ASR': 'Astral Radiance',

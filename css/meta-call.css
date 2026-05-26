@@ -139,6 +139,33 @@
   font-size: 0.78rem;
   color: #6b7c93;
 }
+.mc-tt-hint-type {
+  margin: 10px 0 14px;
+  padding: 8px 12px;
+  background: #f4f7fb;
+  border-left: 3px solid #6b8cb8;
+  border-radius: 4px;
+  font-size: 0.78rem;
+  color: #4a5b73;
+  line-height: 1.45;
+}
+.mc-scenarios-explainer {
+  display: block;
+  margin-top: 3px;
+  font-style: normal;
+  color: #94a3b8;
+  font-size: 0.95em;
+}
+.metacall-date-help-icon {
+  display: inline-block;
+  margin-left: 4px;
+  color: #94a3b8;
+  font-size: 0.85em;
+  cursor: help;
+}
+.metacall-date-help-icon:hover {
+  color: #6b8cb8;
+}
 .mc-tt-swisscalc {
   margin-left: 8px;
   color: #2980b9;

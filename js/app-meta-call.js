@@ -4098,6 +4098,14 @@ window.MetaCall = (function () {
     })[type] || 'mc.tournamentTypeRegional';
   }
 
+  function _typeDescI18nKey(type) {
+    return ({
+      regional:  'mc.tournamentTypeRegionalDesc',
+      challenge: 'mc.tournamentTypeChallengeDesc',
+      cup:       'mc.tournamentTypeCupDesc',
+    })[type] || 'mc.tournamentTypeRegionalDesc';
+  }
+
   // Result-banner title key per active tournament type.
   function _predictTitleKey() {
     const type = _settings.tournamentType;
@@ -4149,6 +4157,7 @@ window.MetaCall = (function () {
   <div class="mc-tt-tabs" role="tablist" aria-label="Tournament type">
     ${TOURNAMENT_TYPES.map(tabBtn).join('')}
   </div>
+  <p class="mc-tt-hint mc-tt-hint-type">${t(_typeDescI18nKey(type))}</p>
   <div class="metacall-settings-grid">
     <div class="metacall-field-group">
       <label>${t('mc.labelPlayers')}</label>
@@ -4213,15 +4222,28 @@ window.MetaCall = (function () {
   function renderMetaSourcePanel() {
     if (!Array.isArray(_pastMetaAvailableFormats) || _pastMetaAvailableFormats.length === 0) return '';
 
+    const expander = (typeof window !== 'undefined' && typeof window.expandPastMetaCode === 'function')
+      ? window.expandPastMetaCode
+      : (k => k);
+
+    // Current-meta pill shows the *live* in-person legal format right
+    // in the label so beginners know which set is the source. e.g.
+    // "Current Meta · Phantasmal Flames" instead of bare "Current
+    // Meta". Falls back to the code (or just the base label) when
+    // format_window isn't loaded yet.
+    const currentSetCode = (_formatWindow && _formatWindow.current_set)
+      ? String(_formatWindow.current_set).trim().toUpperCase()
+      : '';
+    const currentSetName = currentSetCode ? expander(currentSetCode) : '';
+    const currentLabel = currentSetName
+      ? `Current Meta · ${currentSetName}`
+      : 'Current Meta';
+
     const pill = (key, label) => {
       const active = key === _metaSource ? ' mc-tt-tab-active' : '';
       return `<button type="button" class="mc-tt-tab${active}"
         onclick="MetaCall._setMetaSource('${key}')">${esc(label)}</button>`;
     };
-
-    const expander = (typeof window !== 'undefined' && typeof window.expandPastMetaCode === 'function')
-      ? window.expandPastMetaCode
-      : (k => k);
     const dropdownOptions = _pastMetaAvailableFormats.map(f => {
       const expanded = expander(f.key);
       const display = expanded && expanded !== f.key ? `${expanded} (${f.key})` : f.key;
@@ -4248,16 +4270,22 @@ window.MetaCall = (function () {
          </div>`
       : '';
 
+    // Inline hint under the pill row — tells the beginner which tab
+    // does what, instead of leaving them to guess from the label.
+    const sourceHintText = _metaSource === 'past'
+      ? t('mc.sourceHintPast')
+      : t('mc.sourceHintCurrent');
+
     return `
 <div class="metacall-panel">
   <div class="metacall-panel-title">
-    Source
-    <span class="mc-badge">Past Meta</span>
+    ${t('mc.panelSource')}
   </div>
   <div class="mc-tt-tabs" role="tablist" aria-label="Meta source">
-    ${pill('current', 'Current Meta')}
-    ${pill('past', 'Past Meta')}
+    ${pill('current', currentLabel)}
+    ${pill('past', t('mc.sourcePastMeta'))}
   </div>
+  <p class="mc-tt-hint">${esc(sourceHintText)}</p>
   ${formatRow}
 </div>`;
   }
@@ -4278,15 +4306,16 @@ window.MetaCall = (function () {
     return `
 <div class="metacall-panel">
   <div class="metacall-panel-title">
-    Data Sources
-    <span class="mc-badge">Optional</span>
+    ${t('mc.panelDataSources')}
+    <span class="mc-badge">${t('mc.badgeOptional')}</span>
   </div>
+  <p class="mc-tt-hint">${t('mc.dataSourcesHint')}</p>
   <div class="mc-sources-row">
     <label class="mc-source-toggle">
       <input type="checkbox" ${cbAttrs(_useClCurrent, hasCurrent)}
              onchange="MetaCall._onToggleSource('clCurrent', this.checked)">
       <span class="mc-source-label">
-        <strong>Current City League</strong>
+        <strong>${t('mc.sourceCurrentCityLeague')}</strong>
         <span class="mc-source-meta">${hasCurrent ? curCount + ' archetypes' : 'no data'}</span>
       </span>
     </label>
@@ -4294,7 +4323,7 @@ window.MetaCall = (function () {
       <input type="checkbox" ${cbAttrs(_useClPast, hasPast)}
              onchange="MetaCall._onToggleSource('clPast', this.checked)">
       <span class="mc-source-label">
-        <strong>Past City League (M3)</strong>
+        <strong>${t('mc.sourcePastCityLeague')}</strong>
         <span class="mc-source-meta">${hasPast ? pastCount + ' archetypes' : 'no data'}</span>
       </span>
     </label>
@@ -4777,13 +4806,16 @@ window.MetaCall = (function () {
     const _autoCutoff = (!_dateValue && typeof _effectiveDateCutoff === 'function')
       ? _effectiveDateCutoff() : null;
     const _activeWindowText = _dateValue
-      ? `Active window: data ≥ ${_dateValue}`
+      ? t('mc.dateWindowActive').replace('{date}', _dateValue)
       : (_autoCutoff
-          ? `Auto: last 28 days (≥ ${_autoCutoff}) — pick a date to override`
-          : 'No date filter — using full meta history');
+          ? t('mc.dateWindowAuto').replace('{date}', _autoCutoff)
+          : t('mc.dateWindowNone'));
     const dateBanner = `
       <div class="metacall-date-window">
-        <label class="metacall-date-label" for="metacallDateFrom">📅 Data window from:</label>
+        <label class="metacall-date-label" for="metacallDateFrom"
+               title="${esc(t('mc.dateWindowHelp'))}">📅 ${t('mc.dateWindowLabel')}
+          <span class="metacall-date-help-icon" title="${esc(t('mc.dateWindowHelp'))}">ⓘ</span>
+        </label>
         <input type="date" id="metacallDateFrom" class="metacall-date-input"
                value="${_dateValue}"
                onchange="if (typeof setCurrentMetaDateFrom === 'function') setCurrentMetaDateFrom(this.value)">
@@ -6893,13 +6925,20 @@ window.MetaCall = (function () {
 
     // Diagnostic hint: when the dropdown has no entries, tell the user
     // *why* — distinguishes "never saved" from "save data unreadable".
+    // The (storage_key: bytes) tail is only appended on corruption,
+    // where it actually helps debugging — beginners shouldn't see it
+    // on a fresh empty install.
     let hint = '';
     if (names.length === 0) {
       const status = _scenarioStorageStatus();
-      const msg = status.state === 'corrupted'
-        ? t('mc.scenarioStorageCorrupted')
-        : t('mc.scenarioStorageEmpty');
-      hint = `<div class="mc-scenarios-hint">${esc(msg)} (${SCENARIOS_STORAGE_KEY}: ${status.bytes}B)</div>`;
+      if (status.state === 'corrupted') {
+        const msg = t('mc.scenarioStorageCorrupted');
+        hint = `<div class="mc-scenarios-hint">${esc(msg)} (${SCENARIOS_STORAGE_KEY}: ${status.bytes}B)</div>`;
+      } else {
+        const msg = t('mc.scenarioStorageEmpty');
+        const explainer = t('mc.scenariosExplainer');
+        hint = `<div class="mc-scenarios-hint">${esc(msg)} <span class="mc-scenarios-explainer">${esc(explainer)}</span></div>`;
+      }
     }
 
     // Predictions-history block: show the last few snapshots' top-3 so

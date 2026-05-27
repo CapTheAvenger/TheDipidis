@@ -6609,7 +6609,20 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
         if (typeof window !== 'undefined') window._lockPokemonLines = _lockPokemonLines;
 
         async function autoCompleteConsistency(source, rarityMode, options) {
-            if (source !== 'cityLeague' && source !== 'currentMeta' && source !== 'pastMeta') return;
+            // Diagnostic trace — when the user reports "button does nothing"
+            // these console lines pinpoint which step bails. The Surface-Audit
+            // 2026-05-27 found this handler had four distinct silent-return
+            // paths with no user feedback. Logs are info-level so they
+            // surface in normal console + Safari Web Inspector.
+            console.info('[autoCompleteConsistency] CLICK', { source: source, rarityMode: rarityMode });
+
+            if (source !== 'cityLeague' && source !== 'currentMeta' && source !== 'pastMeta') {
+                console.warn('[autoCompleteConsistency] aborted: invalid source', source);
+                if (typeof showToast === 'function') {
+                    showToast('Interner Fehler: ungültige Deck-Quelle "' + source + '"', 'warning');
+                }
+                return;
+            }
 
             // Anti-Tech build mode — caller hands a single target
             // archetype name + aggression preset; the TechAudit pass
@@ -6641,6 +6654,15 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 cards = pastMetaCurrentCards;
             }
 
+            console.info('[autoCompleteConsistency] cards loaded', {
+                source: source,
+                cardsKey: cardsKey || '(pastMetaCurrentCards)',
+                cardsLength: (cards && cards.length) || 0,
+                archetype: source === 'cityLeague' ? window.currentCityLeagueArchetype
+                         : source === 'currentMeta' ? window.currentMetaArchetype
+                         : window.pastMetaCurrentArchetype
+            });
+
             // Differentiate "no archetype selected" from "archetype loaded
             // but card list is empty" so the user knows what to do next.
             if (!cards || cards.length === 0) {
@@ -6664,7 +6686,14 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             
             devLog('[autoCompleteConsistency] Starting CONSISTENCY-based deck generation');
             devLog('[autoCompleteConsistency] Total available cards:', cards.length);
-            
+            console.info('[autoCompleteConsistency] PROCEEDING with', cards.length, 'cards');
+
+            // Catch silent exceptions that would otherwise become unhandled
+            // promise rejections (some browsers swallow these without a
+            // visible error). Wrapping the heavy lifting lets the user see
+            // a toast + a console error so the failure isn't invisible.
+            try {
+
             // Clear existing deck
             devLog('[autoCompleteConsistency] Clearing existing deck...');
             if (source === 'cityLeague') {
@@ -8985,6 +9014,12 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                     } else {
                         showToast(successMsg, 'success');
                     }
+                }
+            }
+            } catch (err) {
+                console.error('[autoCompleteConsistency] FAILED:', err);
+                if (typeof showToast === 'function') {
+                    showToast('Generate fehlgeschlagen: ' + (err && err.message ? err.message : err), 'warning');
                 }
             }
         }

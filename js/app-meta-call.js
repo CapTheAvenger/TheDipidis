@@ -370,6 +370,17 @@ window.MetaCall = (function () {
   const BRAND_FOOTER = 'thedipidis.app';
 
   // ── CSV Helper ─────────────────────────────────────────────
+  // Naive CSV parser for app-meta-call's own consumers. The big PapaParse
+  // pipeline lives in app-core (fetchAndParseCSV) and handles every CSV
+  // the rest of the app downloads \u2014 this module reads its own files
+  // (labs_tournament_*.csv, limitless_online_*.csv, etc.) which are all
+  // well-formed: ASCII headers, no quoted commas, no embedded newlines.
+  // For the one source that needs RFC-4180 quoting (the labs matchups
+  // file), use parseCSVQuoted() below.
+  //
+  // If you ever extend this to parse a CSV produced by an external tool
+  // with quoted fields, switch the call site to parseCSVQuoted or
+  // delegate to the shared PapaParse helper rather than touching this.
   function parseCSV(text, sep) {
     const lines   = text.replace(/\r/g, '').split('\n');
     if (lines.length < 2) return [];

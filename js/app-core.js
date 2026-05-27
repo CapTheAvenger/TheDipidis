@@ -1641,34 +1641,14 @@ const BASE_PATH = './data/';
         };
         
         // CSV loading and parsing
-        function parseCSV(text, delimiter) {
-            const raw = String(text || '');
-            if (!raw.trim()) return [];
-
-            // Auto-detect delimiter when not provided to support legacy call sites.
-            const firstLine = raw.split(/\r?\n/, 1)[0] || '';
-            const inferredDelimiter = delimiter || ((firstLine.match(/;/g) || []).length >= (firstLine.match(/,/g) || []).length ? ';' : ',');
-
-            const results = Papa.parse(raw, {
-                header: true,
-                delimiter: inferredDelimiter,
-                skipEmptyLines: true,
-                dynamicTyping: false
-            });
-
-            const rows = Array.isArray(results.data) ? results.data : [];
-            rows.forEach(row => {
-                if (!row || typeof row !== 'object') return;
-                if (row.card_name && typeof window.fixCardNameEncoding === 'function') {
-                    row.card_name = window.fixCardNameEncoding(row.card_name);
-                }
-                if (row.full_card_name && typeof window.fixCardNameEncoding === 'function') {
-                    row.full_card_name = window.fixCardNameEncoding(row.full_card_name);
-                }
-            });
-
-            return rows;
-        }
+        // NOTE: app-core used to carry its own parseCSV(text, delimiter)
+        // helper here. It was never called from inside app-core — every
+        // consumer routes through fetchAndParseCSV(url) below, which uses
+        // PapaParse's URL-download mode directly. The text-mode helper
+        // was dead code and got removed in the F-015 audit pass. If you
+        // need text-mode CSV parsing in a future feature, prefer adding
+        // it to app-utils.js (loads before app-core) so it can be reused
+        // by other modules instead of being re-implemented inline.
 
         function fixCardNameEncoding(name) {
             if (!name) return name;

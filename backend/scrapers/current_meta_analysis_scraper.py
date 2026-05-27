@@ -313,7 +313,20 @@ def scrape_limitless_online(settings: dict, card_db: CardDatabaseLookup) -> list
 
     max_decks = config.get("max_decks", 60)
     max_lists_per_deck = config.get("max_lists_per_deck", 20)
-    format_filter = config.get("format_filter") or _current_set_code()
+    # Self-heal: format_window.json is the rotation source of truth. If the
+    # settings file's format_filter has drifted (manual edits get forgotten
+    # after each set release), prefer the live current_set and log the
+    # mismatch instead of silently scraping the stale format.
+    configured = str(config.get("format_filter") or '').strip().upper()
+    live = _current_set_code()
+    if configured and live and configured != live:
+        logger.warning(
+            "format_filter=%s in settings does not match format_window.current_set=%s — using %s",
+            configured, live, live,
+        )
+        format_filter = live
+    else:
+        format_filter = configured or live
     timeout = settings.get("request_timeout", 20)
     max_workers = settings.get("max_workers", 5)
 

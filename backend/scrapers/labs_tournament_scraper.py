@@ -426,10 +426,12 @@ def _derive_meta_for_labs_tournament(
 
 
 def _current_meta_key() -> str:
-    """Read format_window.json and return the current set code (e.g. 'CRI').
-    Caller pairs this with the previous set to derive the full meta key
-    when needed; for now we use it just to determine which tournaments
-    are CURRENT (re-scrape every run) vs CLOSED (skip if already scraped)."""
+    """Read format_window.json and return the full OLDEST-NEWEST rotation key
+    (e.g. 'TEF-CRI'). When the date-based lookup finds no chunk for a
+    brand-new tournament in the current set, this becomes the bucket name so
+    the new chunk follows the same OLDEST-NEWEST convention as every other
+    per-meta CSV in data/. Falls back to bare current_set if oldest_legal_set
+    is unset (legacy format_window.json without the new field)."""
     try:
         fw_path = os.path.join(_get_data_dir(), 'format_window.json')
         if not os.path.isfile(fw_path):
@@ -438,7 +440,11 @@ def _current_meta_key() -> str:
             return ''
         with open(fw_path, 'r', encoding='utf-8') as f:
             fw = json.load(f)
-        return str(fw.get('current_set') or '').strip().upper()
+        current = str(fw.get('current_set') or '').strip().upper()
+        oldest = str(fw.get('oldest_legal_set') or '').strip().upper()
+        if oldest and current:
+            return f'{oldest}-{current}'
+        return current
     except (OSError, json.JSONDecodeError):
         return ''
 

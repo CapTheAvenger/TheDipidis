@@ -1690,6 +1690,9 @@ const BASE_PATH = './data/';
                     KNOWN_META_FORMAT_CODES.unshift(live);
                 }
             } catch (_e) { /* silent — keeps the static list intact */ }
+            // Expose for non-module consumers (e.g. Battle Journal dropdown
+            // populator) so they get the same list + live-meta-prepend logic.
+            try { if (typeof window !== 'undefined') window.KNOWN_META_FORMAT_CODES = KNOWN_META_FORMAT_CODES; } catch (_e) { /* silent */ }
         })();
 
         const TOURNAMENT_FORMAT_NAME_TO_CODE = {

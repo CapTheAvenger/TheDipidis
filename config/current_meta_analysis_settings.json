@@ -6,7 +6,7 @@
                                              "max_lists_per_deck":  20,
                                              "delay_between_lists":  4.0,
                                              "delay_between_decks":  8.0,
-                                             "format_filter":  "POR"
+                                             "format_filter":  "CRI"
                                          },
                     "tournaments":  {
                                         "enabled":  true,

@@ -980,9 +980,34 @@
         if (document.visibilityState === 'visible') flushBattleJournalOutbox(false);
     }
 
+    // Populate any <select data-meta-format-options> with the live meta list.
+    // Reads window.KNOWN_META_FORMAT_CODES (set by app-core.js), which prepends
+    // the live format_window snapshot — so the current rotation is always at
+    // the top and no manual HTML edit is needed on a Standard rotation.
+    function populateMetaFormatSelects() {
+        const codes = Array.isArray(window.KNOWN_META_FORMAT_CODES) ? window.KNOWN_META_FORMAT_CODES : [];
+        if (codes.length === 0) return;
+        document.querySelectorAll('select[data-meta-format-options]').forEach(sel => {
+            const preserved = sel.value;
+            // Keep the first placeholder <option value="">; drop everything else.
+            const placeholder = sel.querySelector('option[value=""]');
+            sel.innerHTML = '';
+            if (placeholder) sel.appendChild(placeholder);
+            codes.forEach(code => {
+                const opt = document.createElement('option');
+                opt.value = code;
+                opt.textContent = code;
+                sel.appendChild(opt);
+            });
+            if (preserved) sel.value = preserved;
+        });
+    }
+
     function initBattleJournal() {
         if (window.__battleJournalInitialized) return;
         window.__battleJournalInitialized = true;
+
+        populateMetaFormatSelects();
 
         const els = battleJournalElements();
         if (!els.overlay || !els.form) return;
@@ -1947,6 +1972,7 @@
         const modal = document.getElementById('bjEditTournamentModal');
         if (!modal) return;
 
+        populateMetaFormatSelects();
         document.getElementById('bjEditTournName').value = tournamentName || '';
         document.getElementById('bjEditTournMeta').value = firstEntry.meta || '';
         document.getElementById('bjEditTournType').value = firstEntry.tournamentType || '';

@@ -162,7 +162,7 @@
             return rawSet;
         }).filter(Boolean);
 
-        if (mappedCodes.length === 0) return 'TEF-POR';
+        if (mappedCodes.length === 0) return (typeof window !== 'undefined' && typeof window.getCurrentMetaFormat === 'function' && window.getCurrentMetaFormat()) || 'TEF-POR';
 
         const uniqueCodes = [...new Set(mappedCodes)];
         uniqueCodes.sort((a, b) => {
@@ -174,7 +174,7 @@
             return String(a).localeCompare(String(b));
         });
 
-        return uniqueCodes[0] || 'TEF-POR';
+        return uniqueCodes[0] || (typeof window !== 'undefined' && typeof window.getCurrentMetaFormat === 'function' && window.getCurrentMetaFormat()) || 'TEF-POR';
     }
 
     function getCardsForArchetypeSource(archetype, sourceKey) {
@@ -1054,7 +1054,7 @@
                     name,
                     source: group.source,
                     imageUrl: pickArchetypeBannerImage(name, group.source),
-                    currentMetaFormatLabel: window._metaBinderCurrentMetaLabel || 'TEF-POR',
+                    currentMetaFormatLabel: window._metaBinderCurrentMetaLabel || (typeof window.getCurrentMetaFormat === 'function' && window.getCurrentMetaFormat()) || 'TEF-POR',
                     currentMetaRank: useExactOnly
                         ? (Number.isFinite(exactMeta?.rank) ? exactMeta.rank : null)
                         : (Number.isFinite(exactMeta?.rank) ? exactMeta.rank : (Number.isFinite(currentMeta.rank) ? currentMeta.rank : null)),
@@ -1589,7 +1589,7 @@
                 const safeImage = escapeHtml(item.imageUrl || '');
                 const escapedJsName = escapeArchetypeForJs(item.name || '');
                 const navFn = item.source === 'current-meta' ? 'navigateToCurrentMetaWithDeck' : 'navigateToAnalysisWithDeck';
-                const currentMetaLabel = escapeHtml(item.currentMetaFormatLabel || 'TEF-POR');
+                const currentMetaLabel = escapeHtml(item.currentMetaFormatLabel || (typeof window.getCurrentMetaFormat === 'function' && window.getCurrentMetaFormat()) || 'TEF-POR');
                 const rankText = formatMetaBinderMetric(item.currentMetaRank, 1);
                 const shareText = Number.isFinite(item.currentMetaShare) ? `${item.currentMetaShare.toFixed(1)}%` : '—';
                 const cityCurrentText = formatMetaBinderMetric(item.cityCurrentAvgRank, 1);

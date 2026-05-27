@@ -1672,11 +1672,25 @@ const BASE_PATH = './data/';
             return rows;
         }
 
+        // Historical meta codes — past rotations stay in the list for archival
+        // lookups. The CURRENT meta is appended dynamically below from
+        // window._formatWindow so the list doesn't need a code edit each
+        // rotation. Order matters: front of the array is "most recent".
         const KNOWN_META_FORMAT_CODES = [
             'TEF-POR', 'SVI-ASC', 'SVI-PFL', 'SVI-MEG', 'SVI-BLK', 'SVI-DRI', 'SVI-JTG',
             'BRS-PRE', 'BRS-SSP', 'BRS-SCR', 'BRS-SFA', 'BRS-TWM', 'BRS-TEF',
             'BST-PAR', 'SVI-PAF'
         ];
+        (function appendLiveMeta() {
+            try {
+                const live = (typeof window !== 'undefined' && typeof window.getCurrentMetaFormat === 'function')
+                    ? window.getCurrentMetaFormat()
+                    : '';
+                if (live && !KNOWN_META_FORMAT_CODES.includes(live)) {
+                    KNOWN_META_FORMAT_CODES.unshift(live);
+                }
+            } catch (_e) { /* silent — keeps the static list intact */ }
+        })();
 
         const TOURNAMENT_FORMAT_NAME_TO_CODE = {
             'scarlet & violet - perfect order': 'TEF-POR',
@@ -1694,9 +1708,9 @@ const BASE_PATH = './data/';
             'brilliant stars - shrouded fable': 'BRS-SFA',
             'brilliant stars - twilight masquerade': 'BRS-TWM',
             'brilliant stars - temporal forces': 'BRS-TEF',
-            'battle styles - paradox rift': 'BST-PAR',
-            'meta play!': 'TEF-POR',
-            'meta live': 'TEF-POR'
+            'battle styles - paradox rift': 'BST-PAR'
+            // 'meta play!' / 'meta live' are handled by normalizeTournamentFormatLabel's
+            // early-return so they always resolve to the live format_window snapshot.
         };
 
         function mapSetCodeToMetaFormat(setCode) {
@@ -1731,11 +1745,18 @@ const BASE_PATH = './data/';
             if (explicit[code]) return explicit[code];
             if (code.includes('-')) return legacyToRotationCode[code] || code;
 
+            // Rotation cutoff: anything at-or-newer than the current oldest-legal
+            // set gets that prefix (e.g. CRI → TEF-CRI today, PAF-CRI after the
+            // next rotation). Falls back to literal TEF/SVI for unit tests or
+            // early-init paths where window._formatWindow isn't loaded yet.
+            const oldestLegal = (typeof window !== 'undefined' && window._formatWindow && window._formatWindow.oldest_legal_set)
+                ? String(window._formatWindow.oldest_legal_set).toUpperCase()
+                : 'TEF';
             const sviOrder = setOrderMap.SVI || setOrderMap.SVE || 0;
-            const tefOrder = setOrderMap.TEF || 0;
+            const oldestLegalOrder = setOrderMap[oldestLegal] || 0;
             const codeOrder = setOrderMap[code] || 0;
-            if (tefOrder > 0 && codeOrder > 0 && codeOrder >= tefOrder) {
-                return `TEF-${code}`;
+            if (oldestLegalOrder > 0 && codeOrder > 0 && codeOrder >= oldestLegalOrder) {
+                return `${oldestLegal}-${code}`;
             }
             if (sviOrder > 0 && codeOrder > 0 && codeOrder >= sviOrder) {
                 return `SVI-${code}`;
@@ -1747,8 +1768,21 @@ const BASE_PATH = './data/';
         function normalizeTournamentFormatLabel(rawFormat, fallbackSetCode = '') {
             const raw = String(rawFormat || '').trim();
             if (!raw) return mapSetCodeToMetaFormat(fallbackSetCode);
-            // Map current-meta labels to the newest known format
-            if (raw === 'Meta Live' || raw === 'Meta Play!') return KNOWN_META_FORMAT_CODES[0];
+            // Map current-meta labels to the newest known format.
+            // Prefer the live format_window snapshot so the label stays in
+            // sync with each rotation; fall back to KNOWN_META_FORMAT_CODES[0]
+            // only if the snapshot isn't loaded (early-init edge case).
+            // Case-insensitive so 'meta live' / 'Meta Live' / 'META LIVE' all
+            // resolve to the current rotation (the lowercase entries in
+            // TOURNAMENT_FORMAT_NAME_TO_CODE used to handle this with a stale
+            // literal — this supersedes them).
+            const rawLower = raw.toLowerCase();
+            if (rawLower === 'meta live' || rawLower === 'meta play!') {
+                const live = (typeof window !== 'undefined' && typeof window.getCurrentMetaFormat === 'function')
+                    ? window.getCurrentMetaFormat()
+                    : '';
+                return live || KNOWN_META_FORMAT_CODES[0];
+            }
             const normalizedRawCode = mapSetCodeToMetaFormat(raw);
             if (KNOWN_META_FORMAT_CODES.includes(normalizedRawCode)) return normalizedRawCode;
 

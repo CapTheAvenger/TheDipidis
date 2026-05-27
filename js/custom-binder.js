@@ -669,7 +669,7 @@
                         const safeImage = escapeHtml(item.imageUrl || '');
                         const escapedJsName = shared.escapeArchetypeForJs(item.name || '');
                         const navFn = item.source === 'current-meta' ? 'navigateToCurrentMetaWithDeck' : 'navigateToAnalysisWithDeck';
-                        const currentMetaLabel = escapeHtml(item.currentMetaFormatLabel || 'TEF-POR');
+                        const currentMetaLabel = escapeHtml(item.currentMetaFormatLabel || (typeof window.getCurrentMetaFormat === 'function' && window.getCurrentMetaFormat()) || 'TEF-POR');
                         const rankText = shared.formatMetaBinderMetric(item.currentMetaRank, 1);
                         const shareText = Number.isFinite(item.currentMetaShare) ? `${item.currentMetaShare.toFixed(1)}%` : '—';
                         const cityCurrentText = shared.formatMetaBinderMetric(item.cityCurrentAvgRank, 1);

@@ -1626,8 +1626,12 @@
         // Patch Meta stat card with tournament statistics
         async function patchMetaStats() {
             try {
-                // Load format from settings
-                let currentFormat = 'TEF-POR'; // Default fallback
+                // Load format from settings — fall back to live format_window
+                // snapshot (set by index.html from data/format_window.json) so
+                // the label tracks the rotation without manual edits here.
+                const _liveFormat = (typeof window.getCurrentMetaFormat === 'function' && window.getCurrentMetaFormat()) || 'TEF-POR';
+                const _oldestLegal = (window._formatWindow && window._formatWindow.oldest_legal_set) || 'TEF';
+                let currentFormat = _liveFormat;
                 try {
                     const settingsPaths = [
                         './config/current_meta_analysis_settings.json?t=' + Date.now(),
@@ -1641,14 +1645,13 @@
                         if (formatFilter) {
                             let resolved = formatFilter.toUpperCase();
                             if (!resolved.includes('-')) {
-                                resolved = `TEF-${resolved}`;
+                                resolved = `${_oldestLegal}-${resolved}`;
                             }
                             if (typeof mapSetCodeToMetaFormat === 'function') {
                                 currentFormat = mapSetCodeToMetaFormat(resolved) || resolved;
                             } else {
                                 currentFormat = resolved;
                             }
-                            currentFormat = currentFormat === 'SVI-POR' ? 'TEF-POR' : currentFormat;
                             devLog(`Loaded format from settings: ${currentFormat}`);
                             break;
                         }

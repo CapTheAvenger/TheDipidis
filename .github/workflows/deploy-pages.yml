@@ -199,6 +199,20 @@ jobs:
           #    compared against APP_VERSION. Mismatch triggers the auto-purge.
           printf '{"version":"%s"}' "${VER}" > _site/version.json
 
+          # 5) window._formatWindow snapshot — sync the rotation-defining
+          #    fields from data/format_window.json into the inline script
+          #    so JS modules don't fall back to a stale literal like
+          #    'TEF-POR'. Single source of truth = the JSON file.
+          if [ -f _site/data/format_window.json ]; then
+            CS=$(python3 -c "import json; print(json.load(open('_site/data/format_window.json')).get('current_set',''))" 2>/dev/null || echo "")
+            OLS=$(python3 -c "import json; print(json.load(open('_site/data/format_window.json')).get('oldest_legal_set',''))" 2>/dev/null || echo "")
+            CSJP=$(python3 -c "import json; print(json.load(open('_site/data/format_window.json')).get('current_set_jp',''))" 2>/dev/null || echo "")
+            if [ -n "$CS" ];   then sed -i -E "s/(current_set:[[:space:]]*)['\"][^'\"]*['\"]/\\1'${CS}'/"   _site/index.html; fi
+            if [ -n "$OLS" ];  then sed -i -E "s/(oldest_legal_set:[[:space:]]*)['\"][^'\"]*['\"]/\\1'${OLS}'/" _site/index.html; fi
+            if [ -n "$CSJP" ]; then sed -i -E "s/(current_set_jp:[[:space:]]*)['\"][^'\"]*['\"]/\\1'${CSJP}'/" _site/index.html; fi
+            echo "  _formatWindow  {current_set:${CS}, oldest_legal_set:${OLS}, current_set_jp:${CSJP}}"
+          fi
+
           echo "✓ Cache-busted with version ${VER}"
           echo "  index.html  APP_VERSION = ${VER}"
           echo "  service-worker.js  CACHE_NAME = tcg-analysis-v${VER}"

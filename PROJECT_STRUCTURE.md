@@ -14,8 +14,8 @@ Dieses Dokument beschreibt die aktuelle Struktur des Repositories.
 - current_meta_analysis_scraper.py
 - limitless_online_scraper.py
 - tournament_scraper_JH.py
-- card_price_scraper.py
-- pokemonproxies_scraper.py
+- cardmarket_id_mapper.py
+- cardmarket_price_merger.py
 - prepare_card_data.py
 - update_sets.py
 - card_scraper_shared.py
@@ -31,7 +31,6 @@ Dieses Dokument beschreibt die aktuelle Struktur des Repositories.
 - city_league_analysis_settings.json
 - current_meta_analysis_settings.json
 - limitless_online_settings.json
-- card_price_scraper_settings.json
 - tournament_JH_settings.json
 
 ### Projekt- und Betriebsdokumentation

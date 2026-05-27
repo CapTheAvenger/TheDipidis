@@ -10,7 +10,6 @@ name: Weekly Full Update
 #
 # Still excluded from this batch:
 #   - japanese_cards_scraper  (manual trigger when JP set drops)
-#   - card_price_scraper      (legacy, replaced by cardmarket_price_merger)
 #
 # Schedule: Tuesday 06:00 UTC (= 07:00 CET winter / 08:00 CEST summer)
 # Manual trigger: GitHub UI → Actions → Weekly Full Update → Run workflow

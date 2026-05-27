@@ -13,7 +13,8 @@ TheDipidis/
 ├── 🐍 Python Scraper & Utilities (13 Scripts)
 │   ├── all_cards_scraper.py              # Alle EN Karten (Limitless TCG)
 │   ├── japanese_cards_scraper.py         # Japanische Karten
-│   ├── card_price_scraper.py             # CardMarket Preise (Selenium)
+│   ├── cardmarket_id_mapper.py           # Set+Number → Cardmarket idProduct
+│   ├── cardmarket_price_merger.py        # Cardmarket-Preise nach price_data.csv
 │   ├── city_league_archetype_scraper.py  # City League Archetypen (JP)
 │   ├── city_league_analysis_scraper.py   # City League Deck-Analyse (JP)
 │   ├── current_meta_analysis_scraper.py  # Current Meta Karten
@@ -226,10 +227,10 @@ Doppelklick auf: **`PUSH_TO_GITHUB.bat`**
 - Neueste japanische Sets (vor internationalem Release)
 - Unified mit English Cards über `prepare_card_data.py`
 
-### Card Price Scraper (`card_price_scraper.py`)
-- CardMarket EUR-Preise via Selenium
-- Automatische Produkt-ID Suche
-- Rarity-Version-Auswahl (Low/High)
+### Cardmarket Price Pipeline (`cardmarket_id_mapper.py` + `cardmarket_price_merger.py`)
+- Liest die täglichen Cardmarket JSON-Dumps (`products_singles_6.json`, `products_nonsingles_6.json`, `price_guide_6.json`) statt zu scrapen
+- ID-Mapper baut `(set, number) → idProduct`
+- Price-Merger schreibt EUR-Preise nach `price_data.csv` (`trend` als kanonischer Wert + `low` als Lowest-Listing)
 
 ### City League Scrapers
 - **Archetype Scraper** (`city_league_archetype_scraper.py`): Trends & Meta-Share
@@ -267,7 +268,6 @@ Doppelklick auf: **`PUSH_TO_GITHUB.bat`**
 Alle Settings-Dateien im Root-Verzeichnis (JSON):
 - `all_cards_scraper_settings.json`
 - `japanese_cards_scraper_settings.json`
-- `card_price_scraper_settings.json`
 - `city_league_archetype_settings.json`
 - `city_league_analysis_settings.json`
 - `current_meta_analysis_settings.json`

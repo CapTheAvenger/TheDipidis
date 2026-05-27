@@ -55,7 +55,6 @@ SCRIPTS = {
     "1": os.path.join("core", "update_sets.py"),
     "2": os.path.join("scrapers", "all_cards_scraper.py"),
     "3": os.path.join("scrapers", "japanese_cards_scraper.py"),
-    "4": os.path.join("scrapers", "card_price_scraper.py"),
     "5": os.path.join("scrapers", "current_meta_analysis_scraper.py"),
     "6": os.path.join("scrapers", "limitless_online_scraper.py"),
     "7": os.path.join("scrapers", "city_league_analysis_scraper.py"),
@@ -189,14 +188,7 @@ CARDMARKET_STALE_AFTER_SECONDS = 24 * 3600  # 1 day
 
 # Scripts that depend on a fresh data/products_*_6.json + price_guide_6.json
 # state. Listed explicitly (not by substring match) so the contract is
-# obvious to future readers — the pre-fetch only fires for these three:
-#
-#   card_price_scraper.py
-#     [4] Limitless fallback price scraper. Reads
-#     data/cardmarket_id_mapping.csv (produced by [15]) to skip already-
-#     mapped cards. If you run [4] standalone — or [4] before [15] in a
-#     custom batch — the Cardmarket JSONs should still be fresh so the
-#     downstream chain stays consistent.
+# obvious to future readers — the pre-fetch only fires for these two:
 #
 #   cardmarket_id_mapper.py
 #     [15] Reads products_singles_6.json + products_nonsingles_6.json
@@ -208,7 +200,6 @@ CARDMARKET_STALE_AFTER_SECONDS = 24 * 3600  # 1 day
 #     [14] Reads price_guide_6.json as the primary price source and
 #     merges it with the id mapping into the final price data CSV.
 CARDMARKET_DEPENDENT_SCRIPTS = frozenset({
-    'card_price_scraper.py',
     'cardmarket_id_mapper.py',
     'cardmarket_price_merger.py',
 })

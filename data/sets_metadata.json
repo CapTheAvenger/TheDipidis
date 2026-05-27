@@ -95,6 +95,10 @@
     "order": 118,
     "release_date": "2021-06-18"
   },
+  "CRI": {
+    "order": 154,
+    "release_date": "2026-05-22"
+  },
   "CRZ": {
     "order": 127,
     "release_date": "2023-01-20"
@@ -286,6 +290,10 @@
   "M4": {
     "order": 152,
     "release_date": "2026-03-13"
+  },
+  "M5": {
+    "order": 153,
+    "release_date": "2026-05-22"
   },
   "MA": {
     "order": 23,

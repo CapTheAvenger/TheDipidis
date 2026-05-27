@@ -87,9 +87,9 @@
     },
     "tournament_cards_data_cards_TEF-POR.csv": {
       "min_date": "2026-04-25",
-      "max_date": "2026-05-16"
+      "max_date": "2026-05-23"
     }
   },
-  "total_rows": 455667,
-  "generated": "2026-05-26T07:16:31.274292"
+  "total_rows": 456543,
+  "generated": "2026-05-27T14:44:14.506792"
 }

@@ -81,7 +81,7 @@ LISTING_PATH = "/tournaments/completed"
 STANDINGS_PATH_TPL = "/tournament/{tid}/standings"
 
 DEFAULT_SETTINGS: Dict[str, Any] = {
-    "format_filter": "PFL",
+    "format_filter": "CRI",
     "min_players": 100,
     "max_tournaments": 200,
     "delay_between_requests": 1.5,
@@ -104,6 +104,32 @@ ICON_URL_PATTERN = re.compile(
 # the live site shows in its querystrings.
 def _normalize_format(value: str) -> str:
     return (value or "").strip().lower()
+
+
+# Read format_window.current_set as a runtime fallback for the
+# format_filter default. Hardcoded set codes (PFL, POR, ...) rot
+# every rotation; this reads the same source of truth the predictor
+# uses so the scraper stays current without per-rotation edits.
+def _current_set_code(fallback: str = 'CRI') -> str:
+    candidates = [
+        os.path.join(_PROJECT_ROOT, 'data', 'format_window.json'),
+    ]
+    try:
+        from card_scraper_shared import get_data_dir as _gdd
+        candidates.insert(0, os.path.join(_gdd(), 'format_window.json'))
+    except Exception:
+        pass
+    for p in candidates:
+        if os.path.isfile(p):
+            try:
+                with open(p, 'r', encoding='utf-8') as f:
+                    fw = json.load(f)
+                v = str(fw.get('current_set') or '').strip().upper()
+                if v:
+                    return v
+            except (OSError, json.JSONDecodeError):
+                pass
+    return fallback
 
 
 def _repo_data_dir() -> str:
@@ -180,7 +206,7 @@ def _fetch_listing_page(format_filter: str, page: int) -> List[Dict[str, Any]]:
 def _enumerate_tournaments(settings: Dict[str, Any]) -> List[Dict[str, Any]]:
     """Walk listing pages until we hit the max-tournaments cap, the
     max-pages cap, or run out of qualifying entries."""
-    fmt = settings.get("format_filter", "PFL")
+    fmt = settings.get("format_filter") or _current_set_code()
     min_players = int(settings.get("min_players", 100))
     max_tournaments = int(settings.get("max_tournaments", 200))
     max_pages = int(settings.get("max_listing_pages", 30))
@@ -394,7 +420,7 @@ def aggregate(tournaments: List[Dict[str, Any]],
             "top16_conv_rate": round(top16_rate, 4),
             "avg_winrate_in_top8": round(avg_wr_top8, 2),
             "last_seen_date": last_seen,
-            "source_format": settings.get("format_filter", "PFL").upper(),
+            "source_format": (settings.get("format_filter") or _current_set_code()).upper(),
         })
     out.sort(key=lambda r: r["total_brought_weighted"], reverse=True)
     return out

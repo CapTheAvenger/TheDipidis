@@ -125,7 +125,7 @@
         "_comment": "from_date: YYYY-MM-DD. tournament_types: regional/international/special/worlds. overwrite: true replaces CSV instead of appending."
     },
     "online_tournament_scraper": {
-        "format_filter": "POR",
+        "format_filter": "CRI",
         "min_players": 100,
         "max_tournaments": 200,
         "delay_between_requests": 1.5,

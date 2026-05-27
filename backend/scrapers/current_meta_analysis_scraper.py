@@ -150,6 +150,31 @@ def save_scraped_meta_tournaments(tournament_ids: set) -> None:
     save_scraped_ids(get_scraped_meta_tournaments_file(), tournament_ids, 'scraped_tournament_ids')
 
 # ============================================================================
+# FORMAT-WINDOW HELPER
+# ============================================================================
+# The CI / Auto-Update-Pipeline writes data/format_window.json with the
+# live rotation set code (e.g. 'CRI'). Scrapers that filter by set must
+# read this at runtime — hardcoded defaults rot every rotation. Used
+# as a safety net when the per-scraper settings file is missing or its
+# format_filter has not been updated for the current rotation.
+def _current_set_code(fallback: str = 'CRI') -> str:
+    candidates = [
+        os.path.join(get_data_dir(), 'format_window.json'),
+        os.path.normpath(os.path.join(os.path.dirname(__file__), '..', '..', 'data', 'format_window.json')),
+    ]
+    for p in candidates:
+        if os.path.isfile(p):
+            try:
+                with open(p, 'r', encoding='utf-8') as f:
+                    fw = json.load(f)
+                v = str(fw.get('current_set') or '').strip().upper()
+                if v:
+                    return v
+            except (OSError, json.JSONDecodeError):
+                pass
+    return fallback
+
+# ============================================================================
 # SETTINGS
 # ============================================================================
 DEFAULT_SETTINGS: Dict[str, Any] = {
@@ -158,7 +183,7 @@ DEFAULT_SETTINGS: Dict[str, Any] = {
             "enabled": True,
             "max_decks": 60,
             "max_lists_per_deck": 20,
-            "format_filter": "PFL"
+            "format_filter": "CRI"
         },
         "tournaments": {
             "enabled": True,
@@ -288,7 +313,7 @@ def scrape_limitless_online(settings: dict, card_db: CardDatabaseLookup) -> list
 
     max_decks = config.get("max_decks", 60)
     max_lists_per_deck = config.get("max_lists_per_deck", 20)
-    format_filter = config.get("format_filter", "PFL")
+    format_filter = config.get("format_filter") or _current_set_code()
     timeout = settings.get("request_timeout", 20)
     max_workers = settings.get("max_workers", 5)
 

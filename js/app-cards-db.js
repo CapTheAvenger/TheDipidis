@@ -995,7 +995,7 @@
             
             try {
                 // Load pokemon_sets_mapping.csv to get proper set order (newest first)
-                const response = await fetch('pokemon_sets_mapping.csv');
+                const response = await fetch('data/pokemon_sets_mapping.csv');
                 if (!response.ok) throw new Error(`HTTP ${response.status}`);
                 const csvText = await response.text();
                 const lines = csvText.split('\n').filter(line => line.trim() && !line.startsWith('set_code'));

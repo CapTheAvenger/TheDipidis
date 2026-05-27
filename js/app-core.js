@@ -2402,10 +2402,10 @@ const BASE_PATH = './data/';
         async function loadSetMapping() {
             try {
                 const timestamp = new Date().getTime();
-                const response = await fetch(`./pokemon_sets_mapping.csv?t=${timestamp}`);
+                const response = await fetch(`./data/pokemon_sets_mapping.csv?t=${timestamp}`);
                 if (!response.ok) return;
                 const text = await response.text();
-                const rows = await fetchAndParseCSV(`./pokemon_sets_mapping.csv?t=${timestamp}`, ',');
+                const rows = await fetchAndParseCSV(`./data/pokemon_sets_mapping.csv?t=${timestamp}`, ',');
                 englishSetCodes = new Set(rows.map(row => row.set_code).filter(Boolean));
                 window.englishSetCodes = englishSetCodes;
             } catch (error) {

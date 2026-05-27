@@ -23,7 +23,6 @@ Dieses Dokument beschreibt die aktuelle Struktur des Repositories.
 ### Dashboard / Services
 - start_scraper_dashboard.py
 - START_DASHBOARD.bat
-- price_proxy_server.py
 
 ### Konfiguration
 - all_cards_scraper_settings.json

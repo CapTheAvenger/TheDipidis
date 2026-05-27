@@ -22,7 +22,6 @@ TheDipidis/
 │   ├── update_sets.py                    # Set-Liste & Mapping
 │   ├── prepare_card_data.py              # Merge EN+JP+Preise → merged JSON
 │   ├── card_scraper_shared.py            # Shared Utilities (CardDB etc.)
-│   ├── price_proxy_server.py             # Live-Preis-Proxy (optional)
 │   └── start_scraper_dashboard.py        # Interaktives Dashboard-Menü
 │
 ├── 📊 Data Output (data/)

@@ -62,9 +62,7 @@ jobs:
       - name: Run Python unit tests
         run: |
           set +e
-          python -m pytest tests/python/ -q --tb=short \
-            --ignore=tests/python/test_price_proxy_and_price_scraper.py \
-            2>&1
+          python -m pytest tests/python/ -q --tb=short 2>&1
           PYTEST_EXIT=$?
           set -e
 

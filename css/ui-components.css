@@ -45,15 +45,13 @@ img[src*="limitlesstcg"] {
 
 .searchable-select-dropdown {
     display: none;
-    /* Anchored to .searchable-select (which is position:relative) so the
-       dropdown scrolls together with its trigger. Previously this was
-       `position: fixed` without dynamic top/left calculation, which kept
-       the dropdown stuck to the viewport while the trigger scrolled away
-       (reported 2026-05-27). */
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
+    /* position:fixed so the dropdown sits on top of every overflow:hidden
+       ancestor (control-row, card backgrounds, etc.). Width/top are set
+       by JS in initSearchableSelect.open() against the trigger's
+       getBoundingClientRect — and a scroll listener closes the dropdown
+       to avoid the "stuck to viewport while trigger scrolls away"
+       bug reported 2026-05-27. */
+    position: fixed;
     z-index: 9999;
     background: #fff;
     border: 2px solid #93c5fd;

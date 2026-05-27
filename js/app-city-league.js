@@ -1363,15 +1363,40 @@
                 selectEl.dispatchEvent(new Event('change', { bubbles: true }));
             }
 
+            // Position the dropdown directly under the trigger using
+            // getBoundingClientRect — required because the dropdown is
+            // position:fixed (sits above every overflow:hidden ancestor).
+            // Width and left match the trigger; height stays capped by
+            // the CSS max-height.
+            function positionDropdown() {
+                const rect = display.getBoundingClientRect();
+                dropdown.style.top = rect.bottom + 'px';
+                dropdown.style.left = rect.left + 'px';
+                dropdown.style.width = rect.width + 'px';
+            }
+
+            // Close on scroll — position:fixed dropdowns would otherwise
+            // stay glued to the viewport while the trigger scrolls away.
+            // Standard mobile-UX behaviour; user taps again after scroll.
+            function onScrollClose() {
+                if (!isOpen()) return;
+                close();
+            }
+
             function open() {
+                positionDropdown();
                 dropdown.classList.add('open');
                 search.value = '';
                 buildList('');
                 search.focus({ preventScroll: true });
+                window.addEventListener('scroll', onScrollClose, { passive: true, capture: true });
+                window.addEventListener('resize', onScrollClose, { passive: true });
             }
 
             function close() {
                 dropdown.classList.remove('open');
+                window.removeEventListener('scroll', onScrollClose, { capture: true });
+                window.removeEventListener('resize', onScrollClose);
             }
 
             function isOpen() {

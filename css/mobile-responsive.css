@@ -1064,10 +1064,9 @@
     }
 
     .searchable-select-dropdown.open {
-        /* Now position:absolute relative to .searchable-select — width and
-           left inherit from the desktop rule (top:100%; left:0; right:0).
-           No viewport-anchored overrides here or the dropdown stops
-           scrolling with its trigger again. */
+        /* Width/left are now set by JS at open-time from the trigger's
+           bounding rect — these overrides would fight the JS placement
+           and cause the dropdown to not appear at all on mobile. */
         max-width: none !important;
     }
 

@@ -6640,9 +6640,25 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             } else if (source === 'pastMeta') {
                 cards = pastMetaCurrentCards;
             }
-            
+
+            // Differentiate "no archetype selected" from "archetype loaded
+            // but card list is empty" so the user knows what to do next.
             if (!cards || cards.length === 0) {
-                showToast(t('deck.noCardsToAdd'), 'warning');
+                let _arch;
+                if (source === 'cityLeague') _arch = window.currentCityLeagueArchetype;
+                else if (source === 'currentMeta') _arch = window.currentMetaArchetype;
+                else _arch = window.pastMetaCurrentArchetype;
+                console.warn('[autoCompleteConsistency] aborted: no cards available', {
+                    source: source,
+                    archetype: _arch || null,
+                    cardsLength: (cards && cards.length) || 0,
+                    cardsType: typeof cards
+                });
+                if (!_arch) {
+                    showToast(t('deck.noArchetypeSelected') || 'Bitte wähle erst einen Archetyp aus', 'warning');
+                } else {
+                    showToast(t('deck.noCardsToAdd'), 'warning');
+                }
                 return;
             }
             

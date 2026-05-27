@@ -99,9 +99,12 @@
         function getActiveCityLeagueFormat() {
             const formatFromAnalysisSelect = document.getElementById('cityLeagueFormatSelectAnalysis')?.value;
             const formatFromMainSelect = document.getElementById('cityLeagueFormatSelect')?.value;
-            const raw = formatFromAnalysisSelect || formatFromMainSelect || window.currentCityLeagueFormat || localStorage.getItem('cityLeagueFormat') || 'M4';
-            const normalized = String(raw).trim().toUpperCase();
-            return normalized === 'M3' ? 'M3' : 'M4';
+            const raw = formatFromAnalysisSelect || formatFromMainSelect || window.currentCityLeagueFormat || localStorage.getItem('cityLeagueFormat') || 'current';
+            // Normalise legacy ids on the way out so callers downstream only
+            // ever see 'current' / 'past'.
+            const v = String(raw).trim();
+            if (v === 'M3' || v.toLowerCase() === 'past') return 'past';
+            return 'current';
         }
         
         async function loadMetaCardAnalysis(source) {
@@ -126,7 +129,7 @@
                     window.currentCityLeagueFormat = cityLeagueFormat;
                     localStorage.setItem('cityLeagueFormat', cityLeagueFormat);
                 }
-                const isPastCl = source === 'cityLeague' && cityLeagueFormat === 'M3';
+                const isPastCl = source === 'cityLeague' && cityLeagueFormat === 'past';
                 const clComparisonFile = isPastCl ? 'city_league_archetypes_past_comparison.csv' : 'city_league_archetypes_comparison.csv';
                 const clArchetypesFile = isPastCl ? 'city_league_archetypes_past.csv'            : 'city_league_archetypes.csv';
                 const clAnalysisFile   = isPastCl ? 'city_league_analysis_past.csv'              : 'city_league_analysis.csv';

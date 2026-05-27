@@ -1,6 +1,15 @@
 // ============================================================
 // Meta Call – Tournament Prediction Feature
 // ============================================================
+//
+// Rotation contract (Surface-Audit 2026-05-27):
+// All rotation-specific values in this module are derived at runtime
+// from `_formatWindow` (loaded from data/format_window.json) or from
+// the `meta` column of labs/cards CSVs. There are NO hardcoded set
+// codes or meta keys in any code path; string literals like 'TEF-POR'
+// appear only in `// e.g.` comments as illustrative examples and are
+// safe to leave through future rotations.
+//
 window.MetaCall = (function () {
   'use strict';
 

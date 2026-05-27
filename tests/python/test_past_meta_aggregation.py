@@ -8,8 +8,13 @@ runs in the browser. They lock in the share-derivation contract:
 - Total field size: sum of those per-archetype counts.
 - Per-archetype share %: 100 * count / total.
 
-Test fixture: data/tournament_cards_data_cards_TEF-POR.csv (4 Day-2 majors,
-1297 tracked decks across 44 archetypes).
+Test fixture: data/tournament_cards_data_cards_TEF-POR.csv.
+
+These tests lock the aggregation CONTRACT (algorithm correctness) rather
+than absolute snapshot counts — the TEF-POR chunk grows as the scraper
+backfills more events, so exact-value asserts rot. Each test uses a
+bounded range (or relative property) wide enough to absorb expected
+data growth, narrow enough to flag a regression in the algorithm.
 """
 
 import csv
@@ -67,23 +72,28 @@ def tef_por_shares():
 
 
 def test_archetype_count(tef_por_shares):
-    """TEF-POR chunk currently lists 44 distinct archetypes with deck counts > 0."""
-    assert len(tef_por_shares) == 44
+    """Distinct archetypes in TEF-POR sits in a stable band — too few means
+    the price-tag strip over-collapsed, too many means it under-collapsed."""
+    n = len(tef_por_shares)
+    assert 30 <= n <= 80, f"archetype count {n} outside expected band"
 
 
 def test_total_field_size(tef_por_shares):
-    """Sum of per-archetype decks = 1297 (Day-2-qualifying decks across 4 events)."""
+    """Sum of per-archetype decks for the Day-2-qualifying field. Grows as
+    the scraper backfills more TEF-POR events; the band guards against
+    aggregation bugs (double-count blowups or accidental row drops)."""
     total = sum(tef_por_shares.values())
-    assert total == 1297
+    assert 1200 <= total <= 5000, f"total field {total} outside expected band"
 
 
 def test_dragapult_lead_share(tef_por_shares):
-    """Pure Dragapult is the largest single archetype at 14.96%."""
+    """Pure Dragapult is the largest single archetype of the TEF-POR meta."""
+    ranked = sorted(tef_por_shares.items(), key=lambda x: -x[1])
+    top_arch, top_count = ranked[0]
+    assert top_arch == "Dragapult", f"expected Dragapult #1, got {top_arch}"
     total = sum(tef_por_shares.values())
-    drag_count = tef_por_shares.get("Dragapult")
-    assert drag_count == 194
-    pct = 100 * drag_count / total
-    assert abs(pct - 14.96) < 0.05
+    pct = 100 * top_count / total
+    assert 10.0 <= pct <= 20.0, f"Dragapult share {pct:.2f}% outside expected band"
 
 
 def test_dragapult_family_combined_share(tef_por_shares):

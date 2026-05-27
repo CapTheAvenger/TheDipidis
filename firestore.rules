@@ -15,54 +15,6 @@ service cloud.firestore {
     }
 
     // ══════════════════════════════════════════════════════════════════════
-    // MULTIPLAYER PLAYTESTER GAMES
-    // ══════════════════════════════════════════════════════════════════════
-    
-    match /games/{gameId} {
-      
-      // ✅ CREATE: Jeder eingeloggte User kann ein Spiel erstellen
-      allow create: if request.auth != null 
-        && request.resource.data.host == request.auth.uid
-        && request.resource.data.status == 'waiting'
-        && request.resource.data.keys().hasAll(['host', 'status', 'createdAt'])
-        && request.resource.data.keys().hasOnly(['roomCode', 'host', 'hostName', 'guest', 'guestName', 'state', 'status', 'createdAt', 'lastAction', '_syncVersion', 'lastActionDescription', 'lastActionBy', 'format', 'settings'])
-        && request.resource.data.createdAt == request.time
-        && request.resource.data.size() < 50;
-      
-      // ✅ READ: Nur Host & Guest dürfen das Spiel lesen
-      allow read: if request.auth != null 
-        && (request.auth.uid == resource.data.host 
-            || request.auth.uid == resource.data.guest);
-      
-      // ✅ UPDATE: Nur Host & Guest dürfen updaten
-      allow update: if request.auth != null 
-        && (request.auth.uid == resource.data.host 
-            || request.auth.uid == resource.data.guest
-            // Guest-Join: Nur wenn noch kein Guest & der Schreiber sich selbst einträgt
-            || (resource.data.guest == null 
-                && request.resource.data.guest == request.auth.uid))
-        // Verhindere, dass Host geändert wird
-        && request.resource.data.host == resource.data.host
-        // Guest darf nur von null -> eigene UID gesetzt werden, danach unveränderlich
-        && (request.resource.data.guest == resource.data.guest 
-            || (resource.data.guest == null 
-                && request.resource.data.guest == request.auth.uid))
-        // createdAt darf nicht verändert werden
-        && request.resource.data.createdAt == resource.data.createdAt
-        // Nur erlaubte Felder
-        && request.resource.data.keys().hasOnly(['roomCode', 'host', 'hostName', 'guest', 'guestName', 'state', 'status', 'createdAt', 'lastAction', '_syncVersion', 'lastActionDescription', 'lastActionBy', 'endedAt', 'lastCoinFlip', 'format', 'settings'])
-        // Write-Rate-Limit: min 500ms zwischen Updates + Client muss lastAction setzen
-        && request.resource.data.lastAction == request.time
-        && (!('lastAction' in resource.data) 
-            || request.time > resource.data.lastAction + duration.value(500, 'ms'))
-        && request.resource.data.size() < 50;
-      
-      // ✅ DELETE: Nur Host darf löschen
-      allow delete: if request.auth != null 
-        && request.auth.uid == resource.data.host;
-    }
-    
-    // ══════════════════════════════════════════════════════════════════════
     // USER COLLECTIONS (bereits vorhanden - nicht überschreiben!)
     // ══════════════════════════════════════════════════════════════════════
     

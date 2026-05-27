@@ -79,10 +79,23 @@ async function stabilizeVisualState(page) {
     });
 }
 
-/** Navigate to a named tab and wait until it is active. */
+/** Navigate to a named tab and wait until it is active.
+ *
+ * Note: passing `state: 'visible'` keeps Playwright from waiting on
+ * the page's network-idle state. The City League tab in particular
+ * kicks off loadCityLeagueData() — a parallel fetch chain of multi-MB
+ * CSVs — that easily holds the page in 'loading' state past the
+ * 20 s wait even though the tab-content div already has `.active` set.
+ * Without `state: 'visible'`, Playwright auto-waited for navigation
+ * completion and timed out repeatedly on this exact spot
+ * (see PR #1096 visual-nonmeta failure 2026-05-27).
+ */
 async function goToTab(page, tabId) {
     await page.evaluate((id) => window.switchTab(id), tabId);
-    await page.waitForSelector(`#${tabId}.tab-content.active`, { timeout: 20_000 });
+    await page.waitForSelector(`#${tabId}.tab-content.active`, {
+        state: 'visible',
+        timeout: 20_000,
+    });
 }
 
 // ---------------------------------------------------------------------------

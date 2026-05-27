@@ -1,12 +1,16 @@
 name: Weekly Full Update
 
 # Runs the headless-friendly subset of the local "FULL SYSTEM UPDATE"
-# batch (BATCH_FULL in start_scraper_dashboard.py), minus the three
-# Chrome-dependent scrapers — those are scheduled separately when a
-# new set drops:
-#   - all_cards_scraper
-#   - japanese_cards_scraper
-#   - card_price_scraper
+# batch (BATCH_FULL in start_scraper_dashboard.py). all_cards_scraper
+# was previously kept out of CI because it was once Selenium-based —
+# it now uses cloudscraper + curl_cffi (same stack as the rest of the
+# batch) so it runs here too. Without it, every new set release left
+# the card DB stale (the 2026-05-22 CRI rotation made this user-
+# visible: 0 CRI cards searchable in the Card DB tab for 4 days).
+#
+# Still excluded from this batch:
+#   - japanese_cards_scraper  (manual trigger when JP set drops)
+#   - card_price_scraper      (legacy, replaced by cardmarket_price_merger)
 #
 # Schedule: Tuesday 06:00 UTC (= 07:00 CET winter / 08:00 CEST summer)
 # Manual trigger: GitHub UI → Actions → Weekly Full Update → Run workflow
@@ -211,12 +215,19 @@ jobs:
           curl -fsSL --retry 3 -o data/price_guide_6.json         https://downloads.s3.cardmarket.com/productCatalog/priceGuide/price_guide_6.json
           ls -lh data/*_6.json
 
-      # Run scrapers in BATCH_FULL order (minus the Chrome trio).
+      # Run scrapers in BATCH_FULL order.
       # `set +e` so a single scraper failure doesn't abort the whole
       # batch — we want partial progress committed at the end so we
       # don't lose six successful scrapers because one had a network
       # hiccup. Each failure is surfaced as a workflow warning so the
       # Actions UI shows it clearly.
+      #
+      # Order matters: all_cards_scraper feeds all_cards_database.csv,
+      # which cardmarket_id_mapper, card-effects, card-text, and the
+      # chunker all read. It must run BEFORE the mapper — otherwise
+      # new-set cards have no Cardmarket-ID mapping and no merged
+      # price entry. update_sets.py first so format_window / sets.json
+      # reflect the latest rotation before any consumer reads them.
       - name: Run scrapers
         env:
           PYTHONPATH: ${{ github.workspace }}/backend/core
@@ -231,6 +242,7 @@ jobs:
           # workflow_dispatch inputs and adjust the day-filter list.
           for step in \
               "core/update_sets.py" \
+              "scrapers/all_cards_scraper.py" \
               "scrapers/cardmarket_id_mapper.py" \
               "scrapers/current_meta_analysis_scraper.py" \
               "scrapers/limitless_online_scraper.py" \

@@ -316,3 +316,24 @@ Alternative: nur F-014 + F-023 jetzt (echte Bugs/Cleanup), Rest auf Backlog.
 ---
 
 **STOP nach Phase 7.** Sag mir welche Findings ich heute fixen soll. Falls F-006 oder F-015 dabei sein soll → eigene Mini-Session, weil größerer Aufwand.
+
+---
+
+## Execution-Log
+
+Phase 8 (Fixes) für Cluster D — alle 6 Findings + 3 false-positive-Closes.
+
+| Commit | Finding | Status |
+|---|---|---|
+| `0e6f08a` | F-014 — `format_filter` Default-Strings via `format_window.json` statt hartcodiert `PFL`/`POR` | ✅ |
+| `d7a6f6f` | F-023 — `pokemon_sets_mapping.csv` aus Repo-Root nach `data/` verschoben, 3 Reader updated | ✅ |
+| `2e5924d` | F-016 + F-017 — Maintainer-Comments für `share`/`share_numeric` Konvention + SW SHELL_ASSETS sync. Plus Stale-Comment-Fix in `firebase-collection.js:4629`. | ✅ |
+| `751d2d8` | F-015 — Dead-code `parseCSV` aus `app-core.js` entfernt, `app-meta-call.js`'s eigene Variante mit Scope-Comment. Drift-Risiko geschlossen ohne globalen Refactor. | ✅ |
+| `3a40e7f` | **F-006 🔴** — `loadCurrentMeta()` ersetzt: kein eval-style script-execution mehr. Matchup-Daten aus `limitless_online_decks_matchups.csv` (CSV) statt aus den `<script>`-Blöcken in der 829 KB HTML. HTML-Load bleibt für innerHTML (Stats/Climbers/Tables), nur script-eval-Pfad weg. | ✅ |
+| (kein Code) | F-032, F-033, F-034 — false positives aus Phase 3 (siehe Investigation oben), keine Code-Aktion | ✅ closed |
+
+### Was nicht im Scope dieses Clusters war (bleibt offen)
+
+- **`firebase-multiplayer.js`** — wurde in Cluster C entfernt (`da96bcb`)
+- **`config/scraper_settings.json` `proxy`-Block** mit Credentials — separater Sicherheits-Sweep, im Audit-Backlog vermerkt
+- **F-006 zukünftige Iteration** — wenn das visible UI weg von der statischen HTML migriert (template-rendered Stats/Climbers/Tables im Client), kann auch der HTML-Load entfallen. Heute bleibt das HTML als render-pre-rendered Hilfsfile.

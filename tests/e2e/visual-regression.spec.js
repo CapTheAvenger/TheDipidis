@@ -210,6 +210,20 @@ test.describe('Navigation', () => {
 // ---------------------------------------------------------------------------
 test.describe('City League Tab', () => {
     test.beforeEach(async ({ page }) => {
+        // Both tests in this describe assert against Windows-rendered
+        // pixel baselines. Skip the expensive setup (open page + switch
+        // tab + 60s wait for hero/table/error DOM) on non-Windows CI
+        // runners — the tests themselves are also gated on
+        // RUN_PIXEL_SNAPSHOTS so the setup work would be wasted.
+        //
+        // Without this early-exit, beforeEach was burning the whole
+        // 20s goToTab timeout on Linux CI because loadCityLeagueData
+        // triggers a slow fetch chain that Playwright interprets as
+        // pending navigation. Adding state: 'visible' to waitForSelector
+        // didn't help (that's already the default); the right fix is to
+        // not run the setup at all when the tests will skip anyway.
+        test.skip(!RUN_PIXEL_SNAPSHOTS, 'City League pixel tests run on Windows only');
+
         await openStablePage(page);
         await goToTab(page, 'city-league');
         await page.waitForFunction(() => {

@@ -163,3 +163,24 @@ Sehr sicher (0 Reader). Aber bestätige als sanity-check: war eine dieser Files 
 ---
 
 **STOP nach Phase 7.** Sag mir die zwei Entscheidungen + GO FIX.
+
+---
+
+## Execution-Log
+
+Phase 8 (Fixes) für Cluster E plus die CI-Test-Stabilisierung.
+
+| Commit | Fix | Effekt |
+|---|---|---|
+| `a870ded` | E18 — `price_guide.json` + `products_singles.json` + `products_nonsingles.json` (Legacy-Cardmarket-Files) gelöscht | Repo schrumpft um **27.6 MB**, 0 Reader-Refs vorher bestätigt |
+| `7d4b90c` | **E21b** — Format-Migration: 3007 US-formatierte Preise (`6.15€`) → EU-Format (`6,15€`) | F-019 + F-021 zusammen gefixt. Keine US-Cells mehr in `price_data.csv` |
+| `0417494` | **Test-Stabilisierung** — `goToTab` Helper bekommt `state: 'visible'` so Playwright nicht auf Network-Idle wartet | Adressiert die "Nur Timing"-Flakiness aus dem User-TLDR (visual-nonmeta) |
+
+### Findings-Status nach Cluster E
+
+| ID | Status |
+|---|---|
+| F-018 (Cardmarket-Doppel-Files) | ✅ gelöscht |
+| F-019 (Number-Format) | ✅ migriert (Daten-Commit) |
+| F-021 (alte Preise) | ✅ als selbes Problem wie F-019 erkannt und mit migriert |
+| CI Visual-Non-Meta (pre-existing) | ✅ stabilisiert (`goToTab` Helper) |

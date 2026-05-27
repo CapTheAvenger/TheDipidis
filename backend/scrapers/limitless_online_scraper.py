@@ -40,13 +40,8 @@ DEFAULT_SETTINGS: Dict[str, Any] = {
 }
 
 
-def _current_set_fallback(default: str = 'CRI') -> str:
-    """Read format_window.current_set; fall back to default.
-
-    Same helper pattern as the other scrapers (F-014 audit pass). Used
-    for the 'Meta' card-text in the generated HTML report so a missing
-    settings file or a stale 'set' key doesn't pin the report to a
-    rotation that's two sets behind."""
+def _format_window_get(key: str, default: str) -> str:
+    """Read a string field from format_window.json; fall back to default."""
     import json, os
     candidates = [
         os.path.join(get_data_dir(), 'format_window.json'),
@@ -57,12 +52,32 @@ def _current_set_fallback(default: str = 'CRI') -> str:
             try:
                 with open(p, 'r', encoding='utf-8') as f:
                     fw = json.load(f)
-                v = str(fw.get('current_set') or '').strip().upper()
+                v = str(fw.get(key) or '').strip().upper()
                 if v:
                     return v
             except (OSError, json.JSONDecodeError):
                 pass
     return default
+
+
+def _current_set_fallback(default: str = 'CRI') -> str:
+    """Read format_window.current_set; fall back to default.
+
+    Same helper pattern as the other scrapers (F-014 audit pass). Used
+    for the 'Meta' card-text in the generated HTML report so a missing
+    settings file or a stale 'set' key doesn't pin the report to a
+    rotation that's two sets behind."""
+    return _format_window_get('current_set', default)
+
+
+def _oldest_legal_set_fallback(default: str = 'TEF') -> str:
+    """Read format_window.oldest_legal_set; fall back to default.
+
+    Marks the lower bound of the current Standard rotation. Used to
+    render the format-legality string as OLDEST-NEWEST (e.g. TEF-CRI)
+    instead of the previous hardcoded 'SVI-' prefix, which would silently
+    misrepresent the legal pool after every Standard rotation."""
+    return _format_window_get('oldest_legal_set', default)
 
 
 def clean_deck_name(deck_name: str) -> str:
@@ -1130,7 +1145,7 @@ def create_html_report(comparison_data: List[Dict[str, Any]], output_file: str,
             </div>
             <div class="stat-card">
                 <h3>🎴 Meta</h3>
-                <div class="value" style="font-size: 1.8em; margin: 10px 0;">SVI-{settings.get('set') or _current_set_fallback()}</div>
+                <div class="value" style="font-size: 1.8em; margin: 10px 0;">{_oldest_legal_set_fallback()}-{settings.get('set') or _current_set_fallback()}</div>
                 <p style="font-size: 0.9em;">Current Format Legality</p>
             </div>
         </div>

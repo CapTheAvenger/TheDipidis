@@ -2390,7 +2390,21 @@
                 return `https://pokemonproxies.com/images/${normalizedSet.toLowerCase()}/${rawNumber}.png`;
             }
 
-            // 3. Last fallback: Japanese Limitless URL
+            // 3. EN Limitless CDN fallback for 3-letter EN set codes that
+            //    haven't landed in all_cards_merged yet. Covers the gap
+            //    between a new EN set release (e.g. CRI on 2026-05-22)
+            //    and the weekly all_cards_scraper rebuild. Pattern mirrors
+            //    the canonical DB image_url for POR/JTG/etc.: zero-padded
+            //    number, '_R_EN_LG.png' suffix, '/tpci/' (international).
+            //    Restricted to /^[A-Z]{3}$/ so we don't construct bogus
+            //    URLs for promos (P1-P9), 2-letter legacy sets, or
+            //    M-prefix JP codes (those fall through to step 4).
+            if (/^[A-Z]{3}$/.test(normalizedSet) && !/^M\d+$/.test(normalizedSet)) {
+                const padded = /^\d+$/.test(rawNumber) ? rawNumber.padStart(3, '0') : rawNumber;
+                return `https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/${normalizedSet}/${normalizedSet}_${padded}_R_EN_LG.png`;
+            }
+
+            // 4. Last fallback: Japanese Limitless URL (M5+, unknown codes)
             return getM3JapaneseFallbackUrl(normalizedSet, rawNumber);
         }
 
@@ -2505,6 +2519,14 @@
                     const fallbackSet = normalizedSet === 'M4' ? 'M4' : 'M3';
                     fallbackUrl = getM3JapaneseFallbackUrl(fallbackSet, normalizedNumber);
                 }
+            }
+
+            // For 3-letter EN sets, construct the canonical Limitless-EN URL
+            // as a fallback (covers CRI and any future EN set that lands
+            // before the cards-DB scraper rebuilds).
+            if (!fallbackUrl && /^[A-Z]{3}$/.test(normalizedSet) && !/^M\d+$/.test(normalizedSet) && normalizedNumber) {
+                const padded = /^\d+$/.test(normalizedNumber) ? normalizedNumber.padStart(3, '0') : normalizedNumber;
+                fallbackUrl = `https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/${normalizedSet}/${normalizedSet}_${padded}_R_EN_LG.png`;
             }
 
             if (fallbackUrl) {

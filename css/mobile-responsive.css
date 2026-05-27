@@ -1064,8 +1064,10 @@
     }
 
     .searchable-select-dropdown.open {
-        width: calc(100vw - 24px) !important;
-        left: 12px !important;
+        /* Now position:absolute relative to .searchable-select — width and
+           left inherit from the desktop rule (top:100%; left:0; right:0).
+           No viewport-anchored overrides here or the dropdown stops
+           scrolling with its trigger again. */
         max-width: none !important;
     }
 

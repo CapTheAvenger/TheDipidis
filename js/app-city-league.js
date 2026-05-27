@@ -1363,24 +1363,35 @@
                 selectEl.dispatchEvent(new Event('change', { bubbles: true }));
             }
 
-            // Position the dropdown directly under the trigger using
-            // getBoundingClientRect — required because the dropdown is
-            // position:fixed (sits above every overflow:hidden ancestor).
-            // Width and left match the trigger; height stays capped by
-            // the CSS max-height.
+            // Position the dropdown using getBoundingClientRect — required
+            // because the dropdown is position:fixed (sits above every
+            // overflow:hidden ancestor). Width clamps to a minimum of
+            // 280px so a narrow trigger doesn't cut off the search input
+            // or the archetype names; if the resulting width would push
+            // the dropdown off-screen, slide left until it fits.
             function positionDropdown() {
                 const rect = display.getBoundingClientRect();
+                const vw = window.innerWidth || document.documentElement.clientWidth || 0;
+                const minWidth = 280;
+                const maxWidth = Math.max(minWidth, vw - 12);
+                const desiredWidth = Math.max(rect.width, minWidth);
+                const width = Math.min(desiredWidth, maxWidth);
+                let left = rect.left;
+                if (left + width > vw - 6) left = Math.max(6, vw - width - 6);
+                if (left < 6) left = 6;
                 dropdown.style.top = rect.bottom + 'px';
-                dropdown.style.left = rect.left + 'px';
-                dropdown.style.width = rect.width + 'px';
+                dropdown.style.left = left + 'px';
+                dropdown.style.width = width + 'px';
             }
 
-            // Close on scroll — position:fixed dropdowns would otherwise
-            // stay glued to the viewport while the trigger scrolls away.
-            // Standard mobile-UX behaviour; user taps again after scroll.
-            function onScrollClose() {
+            // Page scroll/resize → re-anchor under the trigger. Crucially
+            // we DO NOT use {capture:true} so this handler doesn't fire
+            // for scroll events inside the dropdown's own option list —
+            // that's why the previous close-on-scroll variant slammed
+            // shut the moment the user touched the dropdown on mobile.
+            function onScrollReposition() {
                 if (!isOpen()) return;
-                close();
+                positionDropdown();
             }
 
             function open() {
@@ -1389,14 +1400,14 @@
                 search.value = '';
                 buildList('');
                 search.focus({ preventScroll: true });
-                window.addEventListener('scroll', onScrollClose, { passive: true, capture: true });
-                window.addEventListener('resize', onScrollClose, { passive: true });
+                window.addEventListener('scroll', onScrollReposition, { passive: true });
+                window.addEventListener('resize', onScrollReposition, { passive: true });
             }
 
             function close() {
                 dropdown.classList.remove('open');
-                window.removeEventListener('scroll', onScrollClose, { capture: true });
-                window.removeEventListener('resize', onScrollClose);
+                window.removeEventListener('scroll', onScrollReposition);
+                window.removeEventListener('resize', onScrollReposition);
             }
 
             function isOpen() {

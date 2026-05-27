@@ -74,10 +74,8 @@ SETS_JSON = os.path.join(DATA_DIR, "sets.json")
 OUTPUT_JSON = os.path.join(DATA_DIR, "active_threats.json")
 
 # Current Standard rotation anchor — the lowest-numbered set still
-# legal in the format. Matches the existing card_price_scraper
-# `min_set` setting so legality logic stays consistent across the
-# codebase. Bump this with FALLBACK_SET_ORDER when the next rotation
-# drops the bottom set.
+# legal in the format. Bump this with FALLBACK_SET_ORDER in
+# update_sets.py when the next rotation drops the bottom set.
 LEGAL_FORMAT_MIN_SET = "TEF"
 
 # Promo / energy sets that are *additionally* legal even though their

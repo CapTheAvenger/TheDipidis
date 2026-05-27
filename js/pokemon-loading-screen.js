@@ -276,6 +276,18 @@
   }
 
   // ─── DATEI LADEN (mit Cache) ───────────────────────────────────────────────
+  // Threshold below which a fetched file is treated as "header-only /
+  // empty" and NOT written into the IndexedDB cache. Default-state
+  // CSVs at the start of a new JP/EN rotation can be just a header
+  // row (city_league_archetypes.csv = 73 B, _comparison.csv = 183 B,
+  // city_league_analysis.csv = 304 B). Caching those would lock the
+  // user into the empty state until either the cache version bumps
+  // or the SW network-first revalidation runs. The threshold is
+  // generous (300 B catches header-only CSVs of all observed sizes)
+  // but small enough that any real data set blows through it on the
+  // first non-empty row.
+  const MIN_USEFUL_BYTES = 300;
+
   async function fetchWithCache(db, fileInfo, version) {
     const cacheKey = fileInfo.key + '_v2';
     try {
@@ -289,7 +301,14 @@
     if (!r.ok) throw new Error('HTTP ' + r.status + ' for ' + fileInfo.url);
     const text = await r.text();
 
-    dbPut(db, { key: cacheKey, version, data: text, ts: Date.now() }).catch(() => {});
+    // Skip writing tiny / header-only payloads to the cache. The data
+    // is still returned to the caller (so the current page-load sees
+    // the empty state correctly), it just doesn't poison the next
+    // boot's cache with an outdated empty snapshot once the scraper
+    // catches up.
+    if (text && text.length >= MIN_USEFUL_BYTES) {
+      dbPut(db, { key: cacheKey, version, data: text, ts: Date.now() }).catch(() => {});
+    }
 
     return { data: text, fromCache: false };
   }

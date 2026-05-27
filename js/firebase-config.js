@@ -26,6 +26,50 @@ function initFirebaseRuntime() {
     });
   }
 
+  // ── Offline persistence ────────────────────────────────────────────────
+  // Enables IndexedDB cache for Firestore. With this active:
+  //   • Reads served from local cache when offline.
+  //   • Writes performed offline are queued in IndexedDB and synced to
+  //     the server automatically when the network returns.
+  //   • Latency-compensated UI: a saveDeck() call returns instantly even
+  //     offline; the doc appears in queries immediately and is reconciled
+  //     with the server later.
+  // Must be called BEFORE any firestore() read/write — this file runs
+  // before firebase-globals.js which is the first consumer. Uses the
+  // multi-tab variant so two browser tabs on the same device can both
+  // access the cache safely.
+  //
+  // window.__firestorePersistenceReady resolves when persistence is
+  // enabled (or rejects with the failure reason) — UI can await it
+  // before showing offline-capable affordances.
+  window.__firestorePersistenceReady = (function() {
+    try {
+      return firebase.firestore().enableMultiTabIndexedDbPersistence()
+        .then(function() {
+          window.__firestorePersistenceEnabled = true;
+          console.info('[Firestore] Offline persistence enabled (multi-tab)');
+          return true;
+        })
+        .catch(function(err) {
+          window.__firestorePersistenceEnabled = false;
+          window.__firestorePersistenceError = (err && err.code) || 'unknown';
+          if (err && err.code === 'failed-precondition') {
+            console.warn('[Firestore] Persistence disabled: another tab without multi-tab persistence is open');
+          } else if (err && err.code === 'unimplemented') {
+            console.warn('[Firestore] Persistence disabled: browser does not support required features (private mode?)');
+          } else {
+            console.warn('[Firestore] Persistence setup failed:', err);
+          }
+          return false;
+        });
+    } catch (e) {
+      window.__firestorePersistenceEnabled = false;
+      window.__firestorePersistenceError = 'init-failed';
+      console.warn('[Firestore] Persistence init threw:', e);
+      return Promise.resolve(false);
+    }
+  })();
+
   // Auth state observer — handlers are defined in firebase-globals.js.
   const _fbDev = typeof DEV_MODE !== 'undefined' ? DEV_MODE : false;
   firebase.auth().onAuthStateChanged(function(user) {

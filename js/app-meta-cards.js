@@ -1228,51 +1228,80 @@
             past: []
         };
 
+        // Helper: build _matchupRegistry from the CSV. The previous flow
+        // executed <script> blocks embedded in the comparison HTML to set
+        // window.matchupData_<deck> globals, then collected those into the
+        // registry. That meant running arbitrary script content from a
+        // data file (eval-style code path) and downloading ~829 KB of
+        // HTML to pull 50 KB worth of matchup data. Source of the
+        // matchup numbers is the same scraper run that produced the HTML —
+        // it also writes the data as a clean CSV alongside it.
+        async function buildMatchupRegistryFromCsv() {
+            try {
+                const resp = await fetch(BASE_PATH + 'limitless_online_decks_matchups.csv?t=' + Date.now());
+                if (!resp.ok) return 0;
+                const text = await resp.text();
+                // PapaParse is globally available (loaded in index.html
+                // before this module). The CSV is `;`-delimited and
+                // header-aware; no quoted fields.
+                const parsed = (typeof Papa !== 'undefined' && Papa.parse)
+                    ? Papa.parse(text, { header: true, delimiter: ';', skipEmptyLines: true })
+                    : { data: [] };
+                const rows = Array.isArray(parsed.data) ? parsed.data : [];
+                if (rows.length === 0) return 0;
+                const registry = window._matchupRegistry = window._matchupRegistry || {};
+                const num = (s) => {
+                    const v = parseFloat(String(s || '').replace(',', '.'));
+                    return Number.isFinite(v) ? v : 0;
+                };
+                let pairs = 0;
+                rows.forEach(r => {
+                    const deck = String(r.deck_name || '').trim();
+                    const opp  = String(r.opponent  || '').trim();
+                    if (!deck || !opp) return;
+                    const wrNum = num(r.win_rate);
+                    if (!registry[deck]) registry[deck] = {};
+                    // Schema matches what the legacy scripts produced:
+                    //   { opponent_deck, win_rate (display string with %),
+                    //     win_rate_numeric (float), record, total_games }
+                    registry[deck][opp] = {
+                        opponent_deck   : opp,
+                        win_rate        : wrNum.toFixed(2) + '%',
+                        win_rate_numeric: wrNum,
+                        record          : String(r.record || ''),
+                        total_games     : parseInt(r.total_games || '0', 10) || 0,
+                    };
+                    pairs++;
+                });
+                return pairs;
+            } catch (e) {
+                console.warn('[loadCurrentMeta] CSV matchup load failed:', e);
+                return 0;
+            }
+        }
+
         // Toggle for Current Meta cards
-        // Load Current Meta - load HTML and patch the table
+        // Load Current Meta - load HTML for display + matchup data from CSV
         async function loadCurrentMeta() {
             const currentMetaContent = document.getElementById('currentMetaContent');
-            
+
             try {
-                // Load the full HTML file
+                // Load matchup-data from CSV (replaces the previous
+                // eval-style <script>-execution-from-HTML approach).
+                const pairs = await buildMatchupRegistryFromCsv();
+                devLog(`Matchup registry: ${pairs} pairs from limitless_online_decks_matchups.csv`);
+
+                // Load the comparison HTML for the visible content
+                // (stats, climbers, matchup tables, comparison table).
+                // We intentionally do NOT execute the embedded <script>
+                // blocks anymore — the data they set is already in the
+                // registry above.
                 const response = await fetch(BASE_PATH + 'limitless_online_decks_comparison.html?t=' + Date.now());
                 if (!response.ok) throw new Error('HTML not found');
-                
+
                 const html = await response.text();
-                
-                // Parse the loaded HTML
                 const parser = new DOMParser();
                 const doc = parser.parseFromString(html, 'text/html');
-                
-                // FIRST: Execute ALL scripts from loaded HTML (matchup data + utility functions)
-                const scripts = doc.querySelectorAll('script');
-                let scriptsExecuted = 0;
-                scripts.forEach(script => {
-                    if (script.textContent && script.textContent.trim()) {
-                        try {
-                            // Create a real script element and append to head for global scope execution
-                            const scriptElement = document.createElement('script');
-                            scriptElement.textContent = script.textContent;
-                            document.head.appendChild(scriptElement);
-                            document.head.removeChild(scriptElement); // Clean up immediately
-                            scriptsExecuted++;
-                        } catch (scriptError) {
-                            console.warn('[WARN] Error executing loaded script:', scriptError);
-                        }
-                    }
-                });
-                devLog(`Loaded ${scriptsExecuted} scripts (matchup data + functions)`);
-                
-                // Verify that matchup data was loaded
-                const matchupVars = Object.keys(window).filter(k => k.startsWith('matchupData_'));
-                devLog(`Available matchup variables: ${matchupVars.length}`);
-                
-                // Populate matchup registry for fast access (avoids repeated window scan)
-                window._matchupRegistry = window._matchupRegistry || {};
-                matchupVars.forEach(varName => {
-                    const deckName = varName.replace('matchupData_', '').replace(/_/g, ' ');
-                    window._matchupRegistry[deckName] = window[varName];
-                });
                 
                 // THEN: Extract the container content
                 const container = doc.querySelector('.container');

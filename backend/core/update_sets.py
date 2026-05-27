@@ -66,7 +66,8 @@ IN_PERSON_LEGAL_LAG_DAYS = 14
 # because the sets aren't the same physical product. City League JP
 # data tracks the JP rotation; the EN scrapers track the EN rotation.
 FALLBACK_JP_RELEASE_DATES = {
-    'M4':  '2026-03-13',  # Ninja Spinner — current JP rotation anchor
+    'M5':  '2026-05-22',  # Mega Symphonia — current JP rotation anchor
+    'M4':  '2026-03-13',  # Ninja Spinner
     'M3':  '2025-12-26',  # Nihil Zero (POR-EN counterpart)
 }
 
@@ -76,7 +77,8 @@ FALLBACK_JP_RELEASE_DATES = {
 # back to this dict. Keep the most recent ~6 sets here so a fresh
 # install still has a working format_window.json.
 FALLBACK_RELEASE_DATES = {
-    'POR': '2026-03-27',  # Perfect Order — current rotation anchor
+    'CRI': '2026-05-22',  # Chaos Rising — current rotation anchor
+    'POR': '2026-03-27',  # Perfect Order
     'BLK': '2026-01-17',
     'WHT': '2026-01-17',
     'DRI': '2025-11-21',
@@ -95,6 +97,7 @@ FALLBACK_RELEASE_DATES = {
 # happens.
 FALLBACK_SET_ORDER = {
     # Mega (2026)
+    'CRI': 154, 'M5': 153,
     'M4': 152, 'POR': 151, 'ASC': 150, 'PFL': 149, 'MEG': 148, 'MEE': 147, 'MEP': 146,
     # Scarlet & Violet (2023-2025)
     'BLK': 145, 'WHT': 144, 'DRI': 143, 'JTG': 142, 'PRE': 141,

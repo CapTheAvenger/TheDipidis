@@ -7920,6 +7920,14 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             // override below produces — re-running _aceSpecConditionalAvgs
             // would burn another full pass over the dated CSV for nothing.
             let _aceSpecCondResult = null;
+            // Structural-skeleton Set is consumed by Stage 0b further down,
+            // OUTSIDE the aceSpecSlotCard block. Must be declared at
+            // function-scope so the lookup at "if (_skeletonSet.size > 0)"
+            // doesn't throw a ReferenceError when no ACE-SPEC card is
+            // present (the inner const used to be block-scoped — caught
+            // by autoCompleteConsistency's diagnostic try/catch on
+            // 2026-05-27).
+            let _skeletonSet = new Set();
             if (aceSpecSlotCard) {
                 const aceSpecLower = (aceSpecSlotCard.card_name || '').trim().toLowerCase();
                 // Audit Phase 6 PR2 (Fix C): blend Online + Major into the
@@ -7978,7 +7986,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 // Floor pass downstream still bumps to the doctrine
                 // count (the demote-immunity protects against trims,
                 // not against bumps).
-                const _skeletonSet = _hasMajorForCond
+                _skeletonSet = _hasMajorForCond
                     ? _detectStructuralSkeleton(
                         _majorRowsForCond, currentArchetype, aceSpecLower, todayMs, _stripPriceTag
                     )

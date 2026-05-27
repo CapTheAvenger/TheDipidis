@@ -82,6 +82,9 @@ node_modules/
 *.key
 *.pem
 js/firebase-credentials.js
+config/proxy_settings.json
+config/*_credentials.json
+config/*_secrets.json
 
 # CardMarket scraper cache (optional - large files)
 # data/cardmarket_cache/

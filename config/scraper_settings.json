@@ -155,11 +155,5 @@
         ],
         "append_mode": true,
         "_comment": "Scrapes individual deck lists from all tournaments. max_tournaments=150 for complete coverage. delay=0 for speed. WICHTIG: Scraping dauert ca. 0.3-0.5 Minuten pro Turnier."
-    },
-    "proxy": {
-        "proxy_host": "geo.iproyal.com",
-        "proxy_port": "12321",
-        "proxy_user": "SUdFKMiObiweTnv4",
-        "proxy_pass": "cMWlX3fJZjRohu7K"
     }
 }

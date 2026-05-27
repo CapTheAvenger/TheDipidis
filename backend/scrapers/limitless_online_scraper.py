@@ -160,6 +160,14 @@ def scrape_deck_statistics(
             )
             share_numeric = 0.0
 
+        # CSV-Spalten-Konvention für share:
+        #   'share'         → raw display text wie auf der Site, z.B. "8.12%"
+        #                     (US-Format mit %-Suffix). NICHT direkt parseable.
+        #   'share_numeric' → float, EU-formatiert beim CSV-Write (8,12).
+        #                     Diese Spalte ist die kanonische Quelle für
+        #                     Reader/Berechnungen — 'share' bleibt nur für
+        #                     UI-Display-Zwecke, wo der originale Limitless-
+        #                     Wortlaut gewünscht ist.
         decks.append({
             "rank": rank,
             "deck_name": deck_name,

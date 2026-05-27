@@ -4626,7 +4626,7 @@ function dexImportParseCSV(csvText) {
 
     // ── Dex set-name → internal (Limitless) set code ──────────────────────────
     // Full set names from Cardmarket/Dex CSV mapped to the codes used in the DB.
-    // Source: pokemon_sets_mapping.csv in the project root.
+    // Source: data/pokemon_sets_mapping.csv.
     function normDexSetName(s) {
       return String(s || '').toLowerCase()
         .replace(/[éèê]/g, 'e').replace(/[^a-z0-9]/g, '');

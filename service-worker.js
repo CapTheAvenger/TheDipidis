@@ -8,7 +8,18 @@
 
 const CACHE_NAME = 'tcg-analysis-v202605260716';
 
-// Static shell â€” cached on install
+// Static shell — cached on install.
+//
+// MAINTAINER NOTE: when adding a new <script src="js/…"> or
+// <link href="css/…"> to index.html, also add it here so the SW
+// caches it for offline use. Missing entries silently fail with a
+// network-error on offline boot.
+//
+// The list currently has to be maintained by hand. A build-step that
+// auto-generates it from index.html would eliminate the manual sync,
+// but the list changes <1×/quarter so the build infra isn't worth it
+// yet. Tracking ticket: F-017 in
+// docs/audit/infrastructure/findings/cluster-D-architecture.md.
 const SHELL_ASSETS = [
   './',
   './index.html',

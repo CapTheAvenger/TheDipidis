@@ -31,13 +31,38 @@ logger = setup_logging("limitless_online_scraper")
 DEFAULT_SETTINGS: Dict[str, Any] = {
     "game": "POKEMON",
     "format": "STANDARD",
-    "rotation": "2025",
-    "set": "PFL",
+    "rotation": "2026",
+    "set": "CRI",
     "top_decks_for_matchup": 10,
     "max_workers": 5,
     "delay_between_requests": 1.5,
     "output_file": "limitless_online_decks.csv",
 }
+
+
+def _current_set_fallback(default: str = 'CRI') -> str:
+    """Read format_window.current_set; fall back to default.
+
+    Same helper pattern as the other scrapers (F-014 audit pass). Used
+    for the 'Meta' card-text in the generated HTML report so a missing
+    settings file or a stale 'set' key doesn't pin the report to a
+    rotation that's two sets behind."""
+    import json, os
+    candidates = [
+        os.path.join(get_data_dir(), 'format_window.json'),
+        os.path.normpath(os.path.join(os.path.dirname(__file__), '..', '..', 'data', 'format_window.json')),
+    ]
+    for p in candidates:
+        if os.path.isfile(p):
+            try:
+                with open(p, 'r', encoding='utf-8') as f:
+                    fw = json.load(f)
+                v = str(fw.get('current_set') or '').strip().upper()
+                if v:
+                    return v
+            except (OSError, json.JSONDecodeError):
+                pass
+    return default
 
 
 def clean_deck_name(deck_name: str) -> str:
@@ -1105,7 +1130,7 @@ def create_html_report(comparison_data: List[Dict[str, Any]], output_file: str,
             </div>
             <div class="stat-card">
                 <h3>🎴 Meta</h3>
-                <div class="value" style="font-size: 1.8em; margin: 10px 0;">SVI-{settings.get('set', 'PFL')}</div>
+                <div class="value" style="font-size: 1.8em; margin: 10px 0;">SVI-{settings.get('set') or _current_set_fallback()}</div>
                 <p style="font-size: 0.9em;">Current Format Legality</p>
             </div>
         </div>

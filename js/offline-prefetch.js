@@ -65,6 +65,25 @@
         return false;
     }
 
+    function isIOS() {
+        return /iPhone|iPad|iPod/.test(navigator.userAgent || '');
+    }
+
+    function isIOSChrome() {
+        // Chrome on iOS sets "CriOS" in UA. It's still WebKit under the
+        // hood, but Apple does NOT let it install proper standalone
+        // PWAs — its "Add to Home Screen" just creates a shortcut that
+        // reopens Chrome with normal browser chrome, no extra storage
+        // quota. Only Safari's Add-to-Home-Screen gives a real PWA.
+        return isIOS() && /CriOS/.test(navigator.userAgent || '');
+    }
+
+    function isIOSOtherBrowser() {
+        // Firefox (FxiOS), Edge (EdgiOS), DuckDuckGo, etc. — same WebKit
+        // restriction as Chrome iOS.
+        return isIOS() && /FxiOS|EdgiOS|DuckDuckGo|YaBrowser|OPiOS/.test(navigator.userAgent || '');
+    }
+
     function ensurePill() {
         if (STATE.pill) return STATE.pill;
         var pill = document.createElement('div');
@@ -105,6 +124,19 @@
     function showHomescreenHint() {
         if (sessionStorage.getItem('__homescreen_hint_dismissed')) return;
         if (document.getElementById('offline-homescreen-hint')) return;
+
+        var title, body;
+        if (isIOSChrome() || isIOSOtherBrowser()) {
+            // Chrome / Firefox / Edge on iOS can't install real PWAs —
+            // their "Add to Home Screen" just makes a shortcut that
+            // reopens the same browser. Send the user to Safari.
+            title = 'Offline funktioniert nur über Safari';
+            body = 'iOS erlaubt nur Safari, eine echte App zum Home-Bildschirm zu installieren. Chrome/Firefox-Shortcuts haben dasselbe Speicher-Limit wie ein Tab (~50 MB). Öffne thedipidis.app in <b>Safari</b>, dann Teilen-Icon → "Zum Home-Bildschirm" → öffne die App von dort.';
+        } else {
+            title = 'Für Offline: Zum Home-Bildschirm';
+            body = 'Im Browser-Tab limitiert iOS den Offline-Speicher auf wenige MB. Tipp Teilen-Icon → "Zum Home-Bildschirm" und öffne die App von dort.';
+        }
+
         var banner = document.createElement('div');
         banner.id = 'offline-homescreen-hint';
         banner.style.cssText = [
@@ -125,8 +157,8 @@
         ].join(';');
         banner.innerHTML =
             '<div style="flex:1">' +
-            '<div style="font-weight:700;margin-bottom:4px">Für Offline: Zum Home-Bildschirm</div>' +
-            '<div style="font-weight:400;opacity:.88;font-size:12px">Im Safari-Tab limitiert iOS den Offline-Speicher auf wenige MB. Tipp Teilen-Icon → "Zum Home-Bildschirm" und öffne die App von dort.</div>' +
+            '<div style="font-weight:700;margin-bottom:4px">' + title + '</div>' +
+            '<div style="font-weight:400;opacity:.88;font-size:12px">' + body + '</div>' +
             '</div>' +
             '<button type="button" aria-label="Hinweis schließen" style="background:transparent;border:0;color:#fff;font-size:20px;line-height:1;padding:0;cursor:pointer;opacity:.7">×</button>';
         banner.querySelector('button').addEventListener('click', function () {
@@ -270,7 +302,7 @@
             // Standalone-only Add-to-Home-Screen hint — desktop browsers
             // and Android Chrome handle quota differently; only iOS
             // Safari needs the user gesture for reliable persistence.
-            if (!isStandalone() && /iPhone|iPad|iPod/.test(navigator.userAgent || '')) {
+            if (!isStandalone() && isIOS()) {
                 showHomescreenHint();
             }
 
@@ -314,7 +346,7 @@
             } else {
                 updatePill('Offline teilweise: ' + (STATE.total - STATE.missing) + '/' + STATE.total + ' Dateien gecacht — iOS hat den Rest evictet (Add to Home Screen)',
                            { warn: true });
-                if (!isStandalone() && /iPhone|iPad|iPod/.test(navigator.userAgent || '')) {
+                if (!isStandalone() && isIOS()) {
                     sessionStorage.removeItem('__homescreen_hint_dismissed');
                     showHomescreenHint();
                 }

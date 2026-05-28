@@ -37,11 +37,18 @@
 
     var STATE = {
         running: false,
+        // Data-files phase
         total: 0,
         done: 0,
         bytes: 0,
         failed: 0,
         missing: 0,
+        // Images phase
+        imageTotal: 0,
+        imageDone: 0,
+        imageFailed: 0,
+        imagePhaseActive: false,
+        // Shared
         pill: null,
         startTime: 0,
         quotaStart: null,
@@ -49,8 +56,10 @@
     };
 
     var CONCURRENCY = 4;
+    var IMAGE_CONCURRENCY = 6;   // card images are small and on a different host
     var BASE_PATH = './data/';
     var MANIFEST_URL = BASE_PATH + 'offline-manifest.json';
+    var IMAGES_MANIFEST_URL = BASE_PATH + 'offline-images-manifest.json';
     var CACHE_NAME_PATTERN = /^tcg-analysis-v/;
 
     function fmtMB(bytes) {
@@ -278,6 +287,115 @@
         return missing;
     }
 
+    // ── Image phase ───────────────────────────────────────────────
+    // Cross-origin card-art URLs from data/offline-images-manifest.json.
+    // We can't use cache.add() here — that does a CORS-credentialed
+    // fetch which the limitlesstcg CDN rejects. Instead we fire a
+    // no-cors fetch() for each URL: the SW (see service-worker.js
+    // IMAGE_CACHE_HOSTS) intercepts and stores the opaque response,
+    // and an <img> on a later offline boot resolves from the cache.
+    //
+    // Concurrency is intentionally higher than the data phase: images
+    // are smaller and sit on a different CDN, so the page's own
+    // bandwidth budget isn't competing with itself.
+
+    async function fetchAndStoreImage(url, cache) {
+        if (!cache) {
+            STATE.imageFailed += 1;
+            return;
+        }
+        try {
+            var existing = await cache.match(url);
+            if (existing) {
+                STATE.imageDone += 1;
+                return;
+            }
+        } catch (_) { /* fall through to refetch */ }
+        try {
+            // mode:'no-cors' is essential — the SW handler also uses it
+            // when storing the response, and consistency matters for
+            // cache lookups. credentials:'omit' avoids cookies which
+            // the CDN doesn't expect anyway.
+            await fetch(url, { mode: 'no-cors', credentials: 'omit', priority: 'low' });
+            STATE.imageDone += 1;
+        } catch (err) {
+            STATE.imageFailed += 1;
+        }
+    }
+
+    async function runImageQueue(urls, cache) {
+        var i = 0;
+        function nextProgress() {
+            updatePill('Bilder-Cache: ' + STATE.imageDone + '/' + STATE.imageTotal +
+                       (STATE.imageFailed > 0 ? ' (' + STATE.imageFailed + ' fehlgeschlagen)' : ''));
+        }
+        async function worker() {
+            while (i < urls.length) {
+                var idx = i++;
+                await fetchAndStoreImage(urls[idx], cache);
+                if (idx % 8 === 0) nextProgress();
+            }
+        }
+        var workers = [];
+        for (var w = 0; w < IMAGE_CONCURRENCY; w++) workers.push(worker());
+        await Promise.all(workers);
+        nextProgress();
+    }
+
+    async function verifyImageCache(urls, cache) {
+        if (!cache) return urls.slice();
+        var missing = [];
+        for (var i = 0; i < urls.length; i++) {
+            var hit = await cache.match(urls[i]);
+            if (!hit) missing.push(urls[i]);
+        }
+        return missing;
+    }
+
+    async function runImagePhase(cache) {
+        try {
+            var resp = await fetch(IMAGES_MANIFEST_URL, { cache: 'no-cache' });
+            if (!resp.ok) {
+                console.info('[OfflinePrefetch] no images manifest (' + resp.status + ') — skipping image phase');
+                return;
+            }
+            var manifest = await resp.json();
+            var urls = (manifest && manifest.urls) || [];
+            if (urls.length === 0) return;
+            STATE.imageTotal = urls.length;
+            STATE.imageDone = 0;
+            STATE.imageFailed = 0;
+            STATE.imagePhaseActive = true;
+            updatePill('Bilder-Cache: 0/' + urls.length + ' (~' + manifest.estimated_total_mb + ' MB)');
+            await runImageQueue(urls, cache);
+            // One verify+retry pass — images that got evicted under
+            // quota pressure get a second chance.
+            var missing = await verifyImageCache(urls, cache);
+            if (missing.length > 0 && missing.length < urls.length / 2) {
+                updatePill('Bilder-Cache: Nachladen ' + missing.length + ' Bilder…');
+                STATE.imageDone = STATE.imageTotal - missing.length;
+                for (var i = 0; i < missing.length; i++) {
+                    await fetchAndStoreImage(missing[i], cache);
+                    if (i % 8 === 0) {
+                        updatePill('Bilder-Cache: ' + STATE.imageDone + '/' + STATE.imageTotal);
+                    }
+                }
+                missing = await verifyImageCache(urls, cache);
+            }
+            console.info('[OfflinePrefetch] image phase complete:', {
+                total: STATE.imageTotal,
+                cached: STATE.imageTotal - missing.length,
+                missing: missing.length,
+                failed: STATE.imageFailed
+            });
+            STATE.imageDone = STATE.imageTotal - missing.length;
+        } catch (err) {
+            console.warn('[OfflinePrefetch] image phase aborted:', err);
+        } finally {
+            STATE.imagePhaseActive = false;
+        }
+    }
+
     async function prefetchAll() {
         if (STATE.running) return;
         if (!navigator.onLine) return;
@@ -337,6 +455,13 @@
                 STATE.missing = missing.length;
             }
 
+            // Image phase — only run when the data phase fully succeeded.
+            // No point caching art if the underlying CSVs are missing,
+            // and we want the user to see the data-phase outcome first.
+            if (STATE.missing === 0) {
+                await runImagePhase(cache);
+            }
+
             STATE.quotaEnd = await snapshotQuota();
             if (STATE.quotaEnd) {
                 console.info('[OfflinePrefetch] storage at end:', STATE.quotaEnd.usageMB + ' / ' + STATE.quotaEnd.quotaMB + ' MB');
@@ -344,8 +469,11 @@
 
             var secs = Math.round((Date.now() - STATE.startTime) / 1000);
             if (STATE.missing === 0) {
-                updatePill('Offline-bereit: ' + STATE.total + ' Dateien (' + fmtMB(STATE.bytes) + ', ' + secs + 's)',
-                           { dismissAfter: 6000 });
+                var imgSummary = STATE.imageTotal > 0
+                    ? ' + ' + STATE.imageDone + '/' + STATE.imageTotal + ' Bilder'
+                    : '';
+                updatePill('Offline-bereit: ' + STATE.total + ' Dateien' + imgSummary +
+                           ' (' + secs + 's)', { dismissAfter: 8000 });
                 // Caching worked end-to-end — kill any leftover hint
                 // banner from an earlier session.
                 dismissHomescreenHint();

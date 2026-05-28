@@ -1,16 +1,24 @@
 #!/usr/bin/env python3
-"""Generate data/offline-manifest.json for the PWA prefetcher.
+"""Generate data/offline-manifest.json + offline-images-manifest.json.
 
 Called from .github/workflows/deploy-pages.yml during the Cache-bust
-step so the manifest's file list + sizes stay accurate every deploy.
+step so the manifests stay accurate every deploy.
 
 Usage:
     python3 scripts/generate-offline-manifest.py <data-dir> <version-stamp>
 
-The manifest lists every .json / .csv / .html file at the top level of
-<data-dir> that the offline prefetcher should warm into the SW cache.
-Excludes _archive/ and per-archetype chunk dirs (those are dev-only,
+The data manifest lists every .json / .csv / .html file at the top
+level of <data-dir> that the offline prefetcher should warm into the
+SW cache.  Excludes _archive/ and per-archetype chunk dirs (dev-only,
 never deployed), plus backup/debug/partial files.
+
+The image manifest lists every card image URL from
+cards_chunk_standard.json — the "Standard-rotation" slice the user
+sees in Card Database, Current Meta, City League, and saved decks
+built from the active rotation. We deliberately skip
+cards_chunk_extended.json / cards_chunk_legacy.json (~16k extra
+images, ~8 GB) because most offline users won't browse those and
+the SW will still lazy-cache anything they do click on while online.
 """
 
 from __future__ import annotations
@@ -20,7 +28,7 @@ import os
 import sys
 
 
-def build_manifest(data_dir: str, version_stamp: str) -> dict:
+def build_data_manifest(data_dir: str, version_stamp: str) -> dict:
     files = []
     for entry in sorted(os.listdir(data_dir)):
         full = os.path.join(data_dir, entry)
@@ -28,7 +36,7 @@ def build_manifest(data_dir: str, version_stamp: str) -> dict:
             continue
         if not (entry.endswith(".json") or entry.endswith(".csv") or entry.endswith(".html")):
             continue
-        if entry == "offline-manifest.json":
+        if entry in ("offline-manifest.json", "offline-images-manifest.json"):
             continue
         if entry.startswith("debug_") or entry.endswith("_local.html"):
             continue
@@ -50,6 +58,56 @@ def build_manifest(data_dir: str, version_stamp: str) -> dict:
     }
 
 
+def build_images_manifest(data_dir: str, version_stamp: str) -> dict:
+    """Collect card image URLs from the Standard-rotation chunk.
+
+    cards_chunk_standard.json drives the Card Database tab's default
+    view; covering it offline gives the user "everything I'd normally
+    see while playing this rotation". We assume ~500 KB per LG-size
+    image — the actual size varies, but the prefetcher is robust to
+    inaccurate per-item sizes.
+    """
+    urls: list[str] = []
+    seen = set()
+    src = os.path.join(data_dir, "cards_chunk_standard.json")
+    if os.path.exists(src):
+        try:
+            with open(src, encoding="utf-8") as f:
+                payload = json.load(f)
+            cards = payload.get("cards") if isinstance(payload, dict) else payload
+            if isinstance(cards, list):
+                for card in cards:
+                    url = card.get("image_url")
+                    if not url or not isinstance(url, str):
+                        continue
+                    if not url.startswith("https://"):
+                        continue
+                    if url in seen:
+                        continue
+                    seen.add(url)
+                    urls.append(url)
+        except Exception as exc:
+            print(f"warn: could not parse {src}: {exc}", file=sys.stderr)
+
+    # Rough per-image estimate (limitless LG scans average ~500 KB)
+    estimated_per_image = 500 * 1024
+    estimated_total = len(urls) * estimated_per_image
+
+    return {
+        "generated_at": version_stamp,
+        "url_count": len(urls),
+        "estimated_per_image_bytes": estimated_per_image,
+        "estimated_total_bytes": estimated_total,
+        "estimated_total_mb": round(estimated_total / 1024 / 1024, 1),
+        "source": "cards_chunk_standard.json (Standard-rotation slice only)",
+        "note": (
+            "Card art URLs the offline prefetcher should warm into the SW image cache. "
+            "Cross-origin opaque responses — see IMAGE_CACHE_HOSTS in service-worker.js."
+        ),
+        "urls": urls,
+    }
+
+
 def main(argv: list[str]) -> int:
     if len(argv) < 2:
         print("usage: generate-offline-manifest.py <data-dir> [version-stamp]", file=sys.stderr)
@@ -59,13 +117,23 @@ def main(argv: list[str]) -> int:
     if not os.path.isdir(data_dir):
         print(f"error: data-dir not found: {data_dir}", file=sys.stderr)
         return 1
-    manifest = build_manifest(data_dir, version_stamp)
-    out_path = os.path.join(data_dir, "offline-manifest.json")
-    with open(out_path, "w", encoding="utf-8") as f:
-        json.dump(manifest, f, indent=2)
+
+    data_manifest = build_data_manifest(data_dir, version_stamp)
+    data_out = os.path.join(data_dir, "offline-manifest.json")
+    with open(data_out, "w", encoding="utf-8") as f:
+        json.dump(data_manifest, f, indent=2)
     print(
-        f"offline-manifest.json: {manifest['file_count']} files, "
-        f"{manifest['total_mb']} MB → {out_path}"
+        f"offline-manifest.json: {data_manifest['file_count']} files, "
+        f"{data_manifest['total_mb']} MB → {data_out}"
+    )
+
+    images_manifest = build_images_manifest(data_dir, version_stamp)
+    images_out = os.path.join(data_dir, "offline-images-manifest.json")
+    with open(images_out, "w", encoding="utf-8") as f:
+        json.dump(images_manifest, f, indent=2)
+    print(
+        f"offline-images-manifest.json: {images_manifest['url_count']} URLs, "
+        f"~{images_manifest['estimated_total_mb']} MB est. → {images_out}"
     )
     return 0
 

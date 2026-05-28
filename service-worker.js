@@ -1,12 +1,12 @@
 // Service Worker for Pokemon TCG Analysis PWA
-// v202605280224
+// v202605280235
 // Strategies:
 //   HTML / navigation → Network-first  (users always see latest version)
 //   JS / CSS          → Network-first  (always serve fresh; fall back to cache offline)
 //   Images            → Cache-first    (rarely change)
 //   Data files        → Network-first  (fresh scraper output; fall back to cache offline)
 
-const CACHE_NAME = 'tcg-analysis-v202605280224';
+const CACHE_NAME = 'tcg-analysis-v202605280235';
 
 // Static shell — cached on install.
 //
@@ -163,29 +163,31 @@ self.addEventListener('fetch', function(event) {
 
   // Cross-origin image hosts (card art): cache-first with opaque
   // response storage. Image tags don't need CORS to render so the
-  // browser will display them just fine.
+  // browser will display them just fine. We explicitly build a new
+  // no-cors Request because passing { mode } in the init of
+  // fetch(Request, init) does NOT override the original mode — it's
+  // tied to the Request object.
   if (url.origin !== location.origin) {
     if (isLazyImageHost(url)) {
       event.respondWith(
         caches.match(event.request).then(function(cached) {
           if (cached) return cached;
-          return fetch(event.request, { mode: 'no-cors' })
+          var noCorsReq = new Request(event.request.url, { mode: 'no-cors', credentials: 'omit' });
+          return fetch(noCorsReq)
             .then(function(response) {
               // Opaque responses have status 0 but are valid for <img>.
-              // We still cache them — the SW will return the same
-              // opaque response on offline reload.
               if (response) {
                 var clone = response.clone();
                 caches.open(CACHE_NAME).then(function(cache) {
-                  cache.put(event.request, clone);
+                  // Key by the original request URL so subsequent fetches
+                  // (made via <img> or via the prefetcher) all hit the
+                  // same cache entry.
+                  cache.put(event.request.url, clone);
                 });
               }
               return response;
             })
             .catch(function() {
-              // Offline + not cached → let the browser show its
-              // broken-image placeholder (which the page UI already
-              // styles as "No Image").
               return new Response('', { status: 504, statusText: 'offline' });
             });
         })

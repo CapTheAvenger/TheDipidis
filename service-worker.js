@@ -1,12 +1,12 @@
 // Service Worker for Pokemon TCG Analysis PWA
-// v202605272356
+// v202605280024
 // Strategies:
 //   HTML / navigation → Network-first  (users always see latest version)
 //   JS / CSS          → Network-first  (always serve fresh; fall back to cache offline)
 //   Images            → Cache-first    (rarely change)
 //   Data files        → Network-first  (fresh scraper output; fall back to cache offline)
 
-const CACHE_NAME = 'tcg-analysis-v202605272356';
+const CACHE_NAME = 'tcg-analysis-v202605280024';
 
 // Static shell — cached on install.
 //
@@ -67,6 +67,18 @@ const SHELL_ASSETS = [
   './js/deck-analysis-shared.js',
   './js/card-data-cache.js',
   './js/error-tracking.js',
+  // Self-hosted vendor libs — must pre-cache so the app boots offline.
+  // Loading these from third-party CDNs (gstatic/jsdelivr/cdnjs) used
+  // to break offline use: when the device had no network the scripts
+  // never loaded → `firebase` was undefined → no auth, no Firestore
+  // cache, user appeared signed out and saw empty tabs (2026-05-28).
+  './js/vendor/firebase-app-compat.js',
+  './js/vendor/firebase-auth-compat.js',
+  './js/vendor/firebase-firestore-compat.js',
+  './js/vendor/chart.umd.min.js',
+  './js/vendor/papaparse.min.js',
+  './js/vendor/localforage.min.js',
+  './js/vendor/mobile-drag-drop.min.js',
   './images/pokeball-icon.png',
   './images/escape-rope.png'
 ];

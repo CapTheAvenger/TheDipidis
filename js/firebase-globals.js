@@ -650,9 +650,12 @@ function _restoreUserDataBackup(userId) {
 
 // Push the entire deck mirror to Firestore in one batched write so any
 // offline edits / additions made on this device land on the server.
-// Idempotent — uses set({ merge: true }) so partial fields are
-// preserved and re-running is safe. Single-device assumption:
-// localStorage is the source of truth; the server is a backup target.
+// Uses set() WITHOUT merge so nested map fields (the deck's `cards`
+// dictionary in particular) fully replace the server's copy — with
+// {merge:true} Firestore would deep-merge `cards`, leaving deleted
+// print keys stuck on the server after the user swapped them out
+// locally (reported 2026-05-29 16:53). Single-device assumption:
+// localStorage is the source of truth, the server is a backup target.
 async function _pushMirrorToServer(userId) {
   if (!userId || !window.db || !firebase || !firebase.firestore) return;
   const mirror = _readDeckBackup(userId);
@@ -672,7 +675,7 @@ async function _pushMirrorToServer(userId) {
       if (payload.updatedAtMs && !payload.updatedAt) {
         payload.updatedAt = firebase.firestore.Timestamp.fromMillis(payload.updatedAtMs);
       }
-      batch.set(deckCol.doc(d.id), payload, { merge: true });
+      batch.set(deckCol.doc(d.id), payload);
     }
     await batch.commit();
     console.info('[pushMirrorToServer] flushed', mirror.decks.length, 'decks to server');

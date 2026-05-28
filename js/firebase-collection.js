@@ -410,8 +410,12 @@ async function saveCurrentDeckToProfile(source) {
   showNotification(`Deck "${trimmedName}" saved successfully!`, 'success');
   if (typeof updateDecksUI === 'function') updateDecksUI();
 
-  // Fire Firestore write fire-and-forget. set({merge:true}) is
-  // idempotent with the periodic _pushMirrorToServer flush.
+  // Fire Firestore write fire-and-forget. set() WITHOUT merge to
+  // ensure the cards map fully replaces what's on the server — a
+  // print-swap inside the deck must drop the old key, and
+  // set({merge:true}) deep-merges nested maps which leaves the old
+  // print stuck on the server. The mirror has the full intended
+  // state already, so a clean replace is safe.
   const firestorePayload = {
     name: trimmedName,
     archetype: archetype || 'Custom',
@@ -423,7 +427,7 @@ async function saveCurrentDeckToProfile(source) {
     createdAtMs: nowMs,
     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
   };
-  deckCol.doc(newId).set(firestorePayload, { merge: true })
+  deckCol.doc(newId).set(firestorePayload)
     .catch(function (err) {
       console.warn('[saveCurrentDeckToProfile] Firestore write deferred / failed:', err && err.message);
     });
@@ -480,6 +484,13 @@ async function saveDisplayName() {
 // vanished on the next reload, and saving a new deck offline never
 // surfaced even after going back online — both symptoms of writes
 // that never reached the persistent layer.
+//
+// IMPORTANT: we use set() WITHOUT merge here. set({merge:true}) does
+// a *deep* merge on nested map fields, so swapping a deck's
+// "Meowth ex (POR 62)" for "Meowth ex (ASR 205)" would leave BOTH
+// keys present on the server (the user's actual reproduction
+// 2026-05-29 16:53). The mirror has the full intended deck state
+// after the in-memory mutations, so a full replace is what we want.
 function saveDeck(deckData) {
   const user = auth.currentUser;
   if (!user) {
@@ -512,17 +523,22 @@ function saveDeck(deckData) {
   showNotification(isNew ? 'Deck saved!' : 'Deck updated!', 'success');
   if (typeof updateDecksUI === 'function') updateDecksUI();
 
-  // Fire Firestore write in the background. set({ merge: true })
-  // works for both create and update, and is idempotent so retrying
-  // (e.g. on the next online event via _pushMirrorToServer) is safe.
-  const payload = Object.assign({}, deckData, {
-    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-  });
-  if (isNew) {
-    payload.createdAt = firebase.firestore.FieldValue.serverTimestamp();
-  }
+  // Build the Firestore payload — full state, ready for a non-merging
+  // .set(). The id lives in the doc path, not in the doc body.
+  const payload = Object.assign({}, deckData);
   delete payload.id;
-  deckCol.doc(deckData.id).set(payload, { merge: true })
+  // Translate the *Ms millisecond timestamps into Firestore Timestamps
+  // so server-side sort + reads stay correct. createdAt is preserved
+  // from the mirror so re-saving an existing deck doesn't reset it.
+  if (payload.createdAtMs && !payload.createdAt) {
+    payload.createdAt = firebase.firestore.Timestamp.fromMillis(payload.createdAtMs);
+  }
+  delete payload.createdAtMs;
+  delete payload.updatedAtMs;
+  payload.updatedAt = firebase.firestore.FieldValue.serverTimestamp();
+
+  // set() WITHOUT merge — full replace. See header comment.
+  deckCol.doc(deckData.id).set(payload)
     .catch(function (err) {
       console.warn('[saveDeck] Firestore write deferred / failed:', err && err.message);
     });

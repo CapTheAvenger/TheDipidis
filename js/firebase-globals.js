@@ -507,6 +507,57 @@ async function createUserProfile(userId) {
   if (typeof updateProfileUI === 'function') updateProfileUI(newProfile);
 }
 
+// localStorage backup for saved decks — belt-and-braces fallback
+// when Firestore's IndexedDB persistence is misbehaving (iOS Safari
+// PWA users see 'init-threw' on enableMultiTabIndexedDbPersistence
+// and even enableIndexedDbPersistence throws synchronously, leaving
+// the SDK with no offline cache at all). With the mirror enabled,
+// every successful online read writes decks to localStorage too;
+// when the user opens offline and Firestore returns empty, we
+// restore from the mirror so saved decks are still visible.
+// localStorage's per-origin quota is ~5 MB which fits hundreds of
+// decks comfortably (each deck ~2-5 KB JSON).
+function _deckBackupKey(userId) {
+  return 'tcg_decks_backup_' + userId;
+}
+function _writeDeckBackup(userId, decks) {
+  if (!userId || !Array.isArray(decks)) return;
+  try {
+    // Firestore Timestamps don't survive JSON.stringify cleanly — replace
+    // with millisecond fields the existing sort path already understands.
+    var serializable = decks.map(function (d) {
+      var copy = Object.assign({}, d);
+      if (d.createdAt && typeof d.createdAt.toMillis === 'function') {
+        copy.createdAtMs = d.createdAt.toMillis();
+        delete copy.createdAt;
+      }
+      if (d.updatedAt && typeof d.updatedAt.toMillis === 'function') {
+        copy.updatedAtMs = d.updatedAt.toMillis();
+        delete copy.updatedAt;
+      }
+      return copy;
+    });
+    localStorage.setItem(_deckBackupKey(userId), JSON.stringify({
+      ts: Date.now(),
+      decks: serializable
+    }));
+  } catch (err) {
+    // QuotaExceededError is the realistic failure mode at this scale.
+    // We swallow it — the in-memory + Firestore state are still correct.
+    console.warn('[deckBackup] write failed:', err && err.message);
+  }
+}
+function _readDeckBackup(userId) {
+  if (!userId) return null;
+  try {
+    var raw = localStorage.getItem(_deckBackupKey(userId));
+    if (!raw) return null;
+    var parsed = JSON.parse(raw);
+    if (!parsed || !Array.isArray(parsed.decks)) return null;
+    return parsed;
+  } catch (_) { return null; }
+}
+
 async function loadUserDecks(userId) {
   // Same persistence-ready guard as loadUserData — without it, an
   // early read can bypass IndexedDB and leave the offline cache
@@ -524,9 +575,37 @@ async function loadUserDecks(userId) {
       const tsB = b.createdAt && b.createdAt.toMillis ? b.createdAt.toMillis() : (b.createdAtMs || 0);
       return tsB - tsA;
     });
+
+    // If we got decks from Firestore (online OR via the IndexedDB
+    // cache when persistence happens to work), keep the localStorage
+    // mirror up to date. If we got zero AND we're offline, restore
+    // from the mirror so the user isn't staring at "No saved Decks".
+    if (window.userDecks.length > 0) {
+      _writeDeckBackup(userId, window.userDecks);
+    } else if (!navigator.onLine) {
+      const backup = _readDeckBackup(userId);
+      if (backup && backup.decks.length > 0) {
+        window.userDecks = backup.decks.slice();
+        console.info('[loadUserDecks] Firestore returned empty offline; restored',
+                     window.userDecks.length, 'decks from localStorage mirror (last sync',
+                     new Date(backup.ts).toISOString() + ')');
+      }
+    }
+
     if (typeof updateDecksUI === 'function') updateDecksUI();
   } catch (error) {
     console.error('Error loading decks:', error);
+    // Final fallback — Firestore .get() itself rejected (e.g. offline
+    // and no cache at all). Surface the mirror if we have one.
+    if (!navigator.onLine) {
+      const backup = _readDeckBackup(userId);
+      if (backup && backup.decks.length > 0) {
+        window.userDecks = backup.decks.slice();
+        console.info('[loadUserDecks] Firestore threw; using localStorage mirror with',
+                     window.userDecks.length, 'decks');
+        if (typeof updateDecksUI === 'function') updateDecksUI();
+      }
+    }
   }
 }
 

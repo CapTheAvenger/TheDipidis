@@ -470,7 +470,7 @@ async function saveDeck(deckData) {
 
   try {
     const deckRef = db.collection('users').doc(user.uid).collection('decks');
-    
+
     if (deckData.id) {
       // Update existing deck
       await deckRef.doc(deckData.id).update({
@@ -489,7 +489,24 @@ async function saveDeck(deckData) {
       deckData.id = docRef.id;
       showNotification('Deck saved!', 'success');
     }
-    
+
+    // Update the localStorage mirror IMMEDIATELY with millisecond
+    // timestamps so the in-memory + mirror state are coherent even
+    // when the Firestore write is still queued offline. Without this
+    // step, loadUserDecks() below would .get() → empty (offline) →
+    // restore from a stale mirror that doesn't contain the deck the
+    // user just saved.
+    const nowMs = Date.now();
+    const idx = (window.userDecks || []).findIndex(d => d.id === deckData.id);
+    const localCopy = Object.assign({}, deckData, {
+      createdAtMs: idx >= 0 ? (window.userDecks[idx].createdAtMs || nowMs) : nowMs,
+      updatedAtMs: nowMs
+    });
+    if (!Array.isArray(window.userDecks)) window.userDecks = [];
+    if (idx >= 0) window.userDecks[idx] = Object.assign({}, window.userDecks[idx], localCopy);
+    else window.userDecks.unshift(localCopy);
+    if (typeof _writeDeckBackup === 'function') _writeDeckBackup(user.uid, window.userDecks);
+
     // Reload decks
     await loadUserDecks(user.uid);
   } catch (error) {
@@ -508,7 +525,15 @@ async function deleteDeck(deckId) {
   try {
     await db.collection('users').doc(user.uid)
       .collection('decks').doc(deckId).delete();
-    
+
+    // Keep the localStorage mirror in lockstep with the in-memory
+    // state — otherwise an offline reload would restore the deleted
+    // deck from the stale mirror.
+    if (Array.isArray(window.userDecks)) {
+      window.userDecks = window.userDecks.filter(d => d.id !== deckId);
+      if (typeof _writeDeckBackup === 'function') _writeDeckBackup(user.uid, window.userDecks);
+    }
+
     showNotification('Deck deleted', 'success');
     await loadUserDecks(user.uid);
   } catch (error) {

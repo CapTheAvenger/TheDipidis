@@ -92,7 +92,7 @@ function initFirebaseRuntime() {
         });
     } catch (e) {
       window.__firestorePersistenceEnabled = false;
-      window.__firestorePersistenceError = 'init-threw';
+      window.__firestorePersistenceError = (e && (e.code || e.name || e.message)) || 'init-threw';
       console.warn('[Firestore] Persistence init threw, trying single-tab:', e);
       try { return applySingleTab(); } catch (_) { return Promise.resolve(false); }
     }

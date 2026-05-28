@@ -459,7 +459,15 @@ async function saveDeck(deckData) {
     showNotification('Please sign in to save decks', 'error');
     return;
   }
-  
+
+  // Wait for IndexedDB persistence so the write lands in BOTH the
+  // server queue AND the local cache. Without this the SDK may
+  // commit to the server but never to IndexedDB — the next offline
+  // boot then has no record of the deck.
+  if (window.__firestorePersistenceReady && typeof window.__firestorePersistenceReady.then === 'function') {
+    try { await window.__firestorePersistenceReady; } catch (_) {}
+  }
+
   try {
     const deckRef = db.collection('users').doc(user.uid).collection('decks');
     

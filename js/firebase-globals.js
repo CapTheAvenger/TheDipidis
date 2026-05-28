@@ -220,6 +220,16 @@ function _scheduleIntlIdMigration(userId) {
 }
 
 async function loadUserData(userId) {
+  // Wait for IndexedDB persistence to be enabled before issuing the
+  // read. Without this, a sign-in that fires before the persistence
+  // Promise resolves can hit the server and complete without ever
+  // populating the local cache — so the next offline load sees an
+  // empty Firestore snapshot even though the user has decks /
+  // collection on the server. The Promise resolves to true / false
+  // either way so we never block forever.
+  if (window.__firestorePersistenceReady && typeof window.__firestorePersistenceReady.then === 'function') {
+    try { await window.__firestorePersistenceReady; } catch (_) {}
+  }
   try {
     const doc = await window.db.collection('users').doc(userId).get();
     if (doc.exists) {
@@ -416,6 +426,12 @@ async function createUserProfile(userId) {
 }
 
 async function loadUserDecks(userId) {
+  // Same persistence-ready guard as loadUserData — without it, an
+  // early read can bypass IndexedDB and leave the offline cache
+  // empty (saved decks invisible after the next cold start).
+  if (window.__firestorePersistenceReady && typeof window.__firestorePersistenceReady.then === 'function') {
+    try { await window.__firestorePersistenceReady; } catch (_) {}
+  }
   try {
     const snapshot = await window.db.collection('users').doc(userId).collection('decks').get();
     window.userDecks = [];

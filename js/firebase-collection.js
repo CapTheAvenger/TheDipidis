@@ -452,94 +452,89 @@ async function saveDisplayName() {
   }
 }
 
-// Save deck to cloud
-async function saveDeck(deckData) {
+// Save deck to cloud. Optimistic: writes the mirror + updates the
+// UI synchronously, fires the Firestore write fire-and-forget.
+//
+// Previously this function awaited deckRef.add() / .update(), which
+// hangs forever when offline + Firestore's IndexedDB persistence is
+// unavailable (the SDK has no write queue to drain). The user reported
+// 2026-05-29: editing a deck offline appeared to work but the changes
+// vanished on the next reload, and saving a new deck offline never
+// surfaced even after going back online — both symptoms of writes
+// that never reached the persistent layer.
+function saveDeck(deckData) {
   const user = auth.currentUser;
   if (!user) {
     showNotification('Please sign in to save decks', 'error');
     return;
   }
 
-  // Wait for IndexedDB persistence so the write lands in BOTH the
-  // server queue AND the local cache. Without this the SDK may
-  // commit to the server but never to IndexedDB — the next offline
-  // boot then has no record of the deck.
-  if (window.__firestorePersistenceReady && typeof window.__firestorePersistenceReady.then === 'function') {
-    try { await window.__firestorePersistenceReady; } catch (_) {}
+  const deckCol = db.collection('users').doc(user.uid).collection('decks');
+  const isNew = !deckData.id;
+
+  // Generate a Firestore-compatible ID locally so we don't have to
+  // await the server. doc() with no args returns a DocumentReference
+  // whose .id is a fresh auto-ID without committing anything.
+  if (isNew) {
+    deckData.id = deckCol.doc().id;
   }
 
-  try {
-    const deckRef = db.collection('users').doc(user.uid).collection('decks');
+  // Update in-memory + mirror IMMEDIATELY — single source of truth.
+  const nowMs = Date.now();
+  const idx = (window.userDecks || []).findIndex(d => d.id === deckData.id);
+  const localCopy = Object.assign({}, deckData, {
+    createdAtMs: idx >= 0 ? (window.userDecks[idx].createdAtMs || nowMs) : nowMs,
+    updatedAtMs: nowMs
+  });
+  if (!Array.isArray(window.userDecks)) window.userDecks = [];
+  if (idx >= 0) window.userDecks[idx] = Object.assign({}, window.userDecks[idx], localCopy);
+  else window.userDecks.unshift(localCopy);
+  if (typeof _writeDeckBackup === 'function') _writeDeckBackup(user.uid, window.userDecks);
 
-    if (deckData.id) {
-      // Update existing deck
-      await deckRef.doc(deckData.id).update({
-        ...deckData,
-        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-      });
-      showNotification('Deck updated!', 'success');
-    } else {
-      // Create new deck
-      const newDeck = {
-        ...deckData,
-        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-      };
-      const docRef = await deckRef.add(newDeck);
-      deckData.id = docRef.id;
-      showNotification('Deck saved!', 'success');
-    }
+  showNotification(isNew ? 'Deck saved!' : 'Deck updated!', 'success');
+  if (typeof updateDecksUI === 'function') updateDecksUI();
 
-    // Update the localStorage mirror IMMEDIATELY with millisecond
-    // timestamps so the in-memory + mirror state are coherent even
-    // when the Firestore write is still queued offline. Without this
-    // step, loadUserDecks() below would .get() → empty (offline) →
-    // restore from a stale mirror that doesn't contain the deck the
-    // user just saved.
-    const nowMs = Date.now();
-    const idx = (window.userDecks || []).findIndex(d => d.id === deckData.id);
-    const localCopy = Object.assign({}, deckData, {
-      createdAtMs: idx >= 0 ? (window.userDecks[idx].createdAtMs || nowMs) : nowMs,
-      updatedAtMs: nowMs
+  // Fire Firestore write in the background. set({ merge: true })
+  // works for both create and update, and is idempotent so retrying
+  // (e.g. on the next online event via _pushMirrorToServer) is safe.
+  const payload = Object.assign({}, deckData, {
+    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+  });
+  if (isNew) {
+    payload.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+  }
+  delete payload.id;
+  deckCol.doc(deckData.id).set(payload, { merge: true })
+    .catch(function (err) {
+      console.warn('[saveDeck] Firestore write deferred / failed:', err && err.message);
     });
-    if (!Array.isArray(window.userDecks)) window.userDecks = [];
-    if (idx >= 0) window.userDecks[idx] = Object.assign({}, window.userDecks[idx], localCopy);
-    else window.userDecks.unshift(localCopy);
-    if (typeof _writeDeckBackup === 'function') _writeDeckBackup(user.uid, window.userDecks);
-
-    // Reload decks
-    await loadUserDecks(user.uid);
-  } catch (error) {
-    console.error('Error saving deck:', error);
-    showNotification('Error saving deck', 'error');
-  }
 }
 
 // Delete deck
-async function deleteDeck(deckId) {
+function deleteDeck(deckId) {
   const user = auth.currentUser;
   if (!user) return;
-  
+
   if (!confirm(t('deck.deleteConfirm'))) return;
-  
-  try {
-    await db.collection('users').doc(user.uid)
-      .collection('decks').doc(deckId).delete();
 
-    // Keep the localStorage mirror in lockstep with the in-memory
-    // state — otherwise an offline reload would restore the deleted
-    // deck from the stale mirror.
-    if (Array.isArray(window.userDecks)) {
-      window.userDecks = window.userDecks.filter(d => d.id !== deckId);
-      if (typeof _writeDeckBackup === 'function') _writeDeckBackup(user.uid, window.userDecks);
-    }
-
-    showNotification('Deck deleted', 'success');
-    await loadUserDecks(user.uid);
-  } catch (error) {
-    console.error('Error deleting deck:', error);
-    showNotification('Error deleting deck', 'error');
+  // Update mirror + in-memory immediately so the UI doesn't show
+  // the deck again on the next reload (it would, otherwise — the
+  // Firestore delete is fire-and-forget and might not have committed
+  // before app close).
+  if (Array.isArray(window.userDecks)) {
+    window.userDecks = window.userDecks.filter(d => d.id !== deckId);
+    if (typeof _writeDeckBackup === 'function') _writeDeckBackup(user.uid, window.userDecks);
   }
+
+  showNotification('Deck deleted', 'success');
+  if (typeof updateDecksUI === 'function') updateDecksUI();
+
+  // Fire Firestore delete in background.
+  db.collection('users').doc(user.uid)
+    .collection('decks').doc(deckId).delete()
+    .catch(function (err) {
+      console.warn('[deleteDeck] Firestore delete deferred / failed:', err && err.message);
+    });
 }
 
 // Load deck from profile for comparison (removed old loadDeckFromProfile function)

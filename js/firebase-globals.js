@@ -82,8 +82,11 @@ async function forceCloudSync() {
       try { await window.__firestorePersistenceReady; } catch (_) {}
     }
     _renderCloudSyncStatus('Lade Profil + Decks vom Server…');
+    // forcePull bypasses the "mirror is authoritative" short-circuit
+    // so this button actually re-fetches from the server, the entire
+    // point of the manual sync action.
     if (typeof loadUserData === 'function') await loadUserData(user.uid);
-    if (typeof loadUserDecks === 'function') await loadUserDecks(user.uid);
+    if (typeof loadUserDecks === 'function') await loadUserDecks(user.uid, { forcePull: true });
     var deckCount = (window.userDecks || []).length;
     _renderCloudSyncStatus('Sync abgeschlossen · ' + deckCount + ' Deck' + (deckCount === 1 ? '' : 's') + ' im Cache');
   } catch (err) {
@@ -96,9 +99,17 @@ async function forceCloudSync() {
 
 // Keep the status fresh on connectivity changes + when persistence
 // finally resolves (callers in firebase-config.js mutate the globals
-// asynchronously).
+// asynchronously). The `online` listener also pushes the mirror to
+// the server so any edits / new decks created while offline back up
+// the moment the network returns.
 if (typeof window !== 'undefined') {
-  window.addEventListener('online', updateCloudSyncStatus);
+  window.addEventListener('online', function () {
+    updateCloudSyncStatus();
+    var user = window.auth && window.auth.currentUser;
+    if (user && typeof _pushMirrorToServer === 'function') {
+      _pushMirrorToServer(user.uid).catch(function () {});
+    }
+  });
   window.addEventListener('offline', updateCloudSyncStatus);
   // Re-render after persistence resolves so the user sees the real mode.
   if (window.__firestorePersistenceReady && typeof window.__firestorePersistenceReady.then === 'function') {
@@ -637,19 +648,68 @@ function _restoreUserDataBackup(userId) {
   }
 }
 
-async function loadUserDecks(userId) {
-  // Paint from mirror FIRST so the UI has decks visible even when
-  // navigator.onLine misreports (flaky on iOS Safari standalone PWA
-  // — flight mode often still reports online for a few seconds).
-  // Firestore will overwrite with fresh data if it succeeds below.
+// Push the entire deck mirror to Firestore in one batched write so any
+// offline edits / additions made on this device land on the server.
+// Idempotent — uses set({ merge: true }) so partial fields are
+// preserved and re-running is safe. Single-device assumption:
+// localStorage is the source of truth; the server is a backup target.
+async function _pushMirrorToServer(userId) {
+  if (!userId || !window.db || !firebase || !firebase.firestore) return;
   const mirror = _readDeckBackup(userId);
-  if (mirror && mirror.decks.length > 0) {
+  if (!mirror || !Array.isArray(mirror.decks) || mirror.decks.length === 0) return;
+  try {
+    const deckCol = window.db.collection('users').doc(userId).collection('decks');
+    const batch = window.db.batch();
+    for (const d of mirror.decks) {
+      if (!d.id) continue;
+      const payload = Object.assign({}, d);
+      delete payload.id;
+      // Replace *Ms with real Firestore Timestamps so the server stores
+      // sortable data, not a meaningless millisecond integer.
+      if (payload.createdAtMs && !payload.createdAt) {
+        payload.createdAt = firebase.firestore.Timestamp.fromMillis(payload.createdAtMs);
+      }
+      if (payload.updatedAtMs && !payload.updatedAt) {
+        payload.updatedAt = firebase.firestore.Timestamp.fromMillis(payload.updatedAtMs);
+      }
+      batch.set(deckCol.doc(d.id), payload, { merge: true });
+    }
+    await batch.commit();
+    console.info('[pushMirrorToServer] flushed', mirror.decks.length, 'decks to server');
+  } catch (err) {
+    console.warn('[pushMirrorToServer] batch.commit failed:', err && err.message);
+  }
+}
+
+async function loadUserDecks(userId, opts) {
+  opts = opts || {};
+  const forcePull = opts.forcePull === true;
+
+  // Paint mirror immediately (sync localStorage read). Mirror is the
+  // source of truth on a single device — we never let a stale server
+  // read clobber local edits that haven't synced yet.
+  const mirror = _readDeckBackup(userId);
+  const haveMirror = mirror && Array.isArray(mirror.decks) && mirror.decks.length > 0;
+  if (haveMirror) {
     window.userDecks = mirror.decks.slice();
     if (typeof updateDecksUI === 'function') updateDecksUI();
   }
 
-  // Wait for IndexedDB persistence to be enabled before issuing the
-  // read. The Promise resolves either way so we never block forever.
+  // If we have a populated mirror and the caller didn't request a
+  // forced server pull (Force Sync button), stop here. The auto-load
+  // flow used to re-fetch on every app start, which lost any
+  // unsynced offline edits the moment Firestore returned its older
+  // server-side state on top of them.
+  if (haveMirror && !forcePull) {
+    // Best-effort: push the mirror to the server in the background so
+    // edits made in earlier offline sessions back up whenever the
+    // device is online. Fire-and-forget — failure doesn't affect UI.
+    _pushMirrorToServer(userId).catch(function () {});
+    return;
+  }
+
+  // First-time sign-in on this device (mirror empty) OR user tapped
+  // Force Sync — pull from server.
   if (window.__firestorePersistenceReady && typeof window.__firestorePersistenceReady.then === 'function') {
     try { await window.__firestorePersistenceReady; } catch (_) {}
   }
@@ -662,30 +722,21 @@ async function loadUserDecks(userId) {
       const tsB = b.createdAt && b.createdAt.toMillis ? b.createdAt.toMillis() : (b.createdAtMs || 0);
       return tsB - tsA;
     });
-
-    // Distinguish "Firestore actually went to the server and confirmed
-    // empty" from "Firestore returned empty because it gave up offline":
-    //   • fromCache === true  → response came from local cache only
-    //   • fromCache === false → response came from server
-    // Without persistence the cache is empty, so an offline read will
-    // typically reject with an error; if it instead returns an empty
-    // fromCache=true snapshot we MUST keep the mirror, not wipe it.
     const fromCache = !!(snapshot.metadata && snapshot.metadata.fromCache);
-
     if (fresh.length > 0) {
       window.userDecks = fresh;
       _writeDeckBackup(userId, window.userDecks);
       if (typeof updateDecksUI === 'function') updateDecksUI();
     } else if (!fromCache) {
-      // Server confirmed empty → user really has no decks. Sync mirror.
+      // Server confirmed empty — only acceptable in the "no mirror"
+      // branch, where we know the user genuinely has no decks here.
       window.userDecks = [];
       _writeDeckBackup(userId, []);
       if (typeof updateDecksUI === 'function') updateDecksUI();
     }
-    // else: empty cache-only response → keep the mirror state we painted.
+    // else: empty cache snapshot, leave whatever we painted.
   } catch (error) {
     console.error('Error loading decks:', error);
-    // Mirror already painted at top of function — nothing to do.
   }
 }
 

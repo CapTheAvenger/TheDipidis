@@ -2297,25 +2297,44 @@ function updateDecksUI() {
 // ============================================================
 // My Decks: Active/Built Toggle
 // ============================================================
-async function toggleDeckActive(deckId) {
+function toggleDeckActive(deckId) {
   const user = auth.currentUser;
   if (!user) return;
   const deck = (window.userDecks || []).find(d => d.id === deckId);
   if (!deck) return;
   const newActive = !deck.active;
-  try {
-    await db.collection('users').doc(user.uid)
-      .collection('decks').doc(deckId)
-      .update({ active: newActive, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
-    deck.active = newActive;
-    showNotification(newActive
-      ? (getLang()==='de' ? 'Deck als IRL gebaut markiert' : 'Deck marked as IRL built')
-      : (getLang()==='de' ? 'Deck-Markierung entfernt' : 'Deck mark removed'), 'success');
-    updateDecksUI();
-  } catch (error) {
-    console.error('Error toggling deck active:', error);
-    showNotification('Error updating deck', 'error');
+  deck.active = newActive;
+  _persistDeckMutation(user, deck, {
+    active: newActive,
+    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+  });
+  showNotification(newActive
+    ? (getLang()==='de' ? 'Deck als IRL gebaut markiert' : 'Deck marked as IRL built')
+    : (getLang()==='de' ? 'Deck-Markierung entfernt' : 'Deck mark removed'), 'success');
+  updateDecksUI();
+}
+
+// Optimistic deck-mutation helper. The previous pattern was:
+//   await db.collection(...).doc(deckId).update(payload)
+//   // then update in-memory + UI
+// which hangs forever when the user is offline + Firestore IndexedDB
+// persistence is broken (no write queue surfaces, the SDK never
+// resolves the Promise). The new pattern flips the order:
+//   1. Mutate window.userDecks in memory.
+//   2. Write the localStorage mirror so the change survives reload.
+//   3. Re-render the UI immediately.
+//   4. Fire the Firestore write WITHOUT awaiting — the SDK queues it
+//      and ships it when network returns; we don't care for UX.
+function _persistDeckMutation(user, deck, firestorePayload) {
+  if (typeof _writeDeckBackup === 'function') {
+    _writeDeckBackup(user.uid, window.userDecks || []);
   }
+  db.collection('users').doc(user.uid)
+    .collection('decks').doc(deck.id)
+    .update(firestorePayload)
+    .catch(function (err) {
+      console.warn('[deck mutation] Firestore write deferred / failed:', err && err.message);
+    });
 }
 
 // ============================================================
@@ -2342,24 +2361,17 @@ async function myDeckChangeCardCount(deckIndex, deckKey, delta) {
 
   deck.totalCards = Object.values(deck.cards).reduce((sum, c) => sum + c, 0);
 
-  try {
-    await db.collection('users').doc(user.uid)
-      .collection('decks').doc(deck.id)
-      .update({
-        cards: deck.cards,
-        totalCards: deck.totalCards,
-        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-      });
-    updateDecksUI();
-    // Re-open the deck after UI rebuild
-    setTimeout(() => {
-      const deckEl = document.getElementById(`saved-deck-${deckIndex}`);
-      if (deckEl && deckEl.style.display === 'none') toggleDeckCollapse(`saved-deck-${deckIndex}`);
-    }, 50);
-  } catch (error) {
-    console.error('Error updating card count:', error);
-    showNotification('Error updating deck', 'error');
-  }
+  _persistDeckMutation(user, deck, {
+    cards: deck.cards,
+    totalCards: deck.totalCards,
+    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+  });
+  updateDecksUI();
+  // Re-open the deck after UI rebuild
+  setTimeout(() => {
+    const deckEl = document.getElementById(`saved-deck-${deckIndex}`);
+    if (deckEl && deckEl.style.display === 'none') toggleDeckCollapse(`saved-deck-${deckIndex}`);
+  }, 50);
 }
 
 // ============================================================
@@ -2374,25 +2386,17 @@ async function myDeckRemoveCard(deckIndex, deckKey) {
   delete deck.cards[deckKey];
   deck.totalCards = Object.values(deck.cards).reduce((sum, c) => sum + c, 0);
 
-  try {
-    await db.collection('users').doc(user.uid)
-      .collection('decks').doc(deck.id)
-      .update({
-        cards: deck.cards,
-        totalCards: deck.totalCards,
-        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-      });
-    showNotification(getLang() === 'de' ? 'Karte entfernt' : 'Card removed', 'success');
-    updateDecksUI();
-    // Re-open the deck after UI rebuild
-    setTimeout(() => {
-      const deckEl = document.getElementById(`saved-deck-${deckIndex}`);
-      if (deckEl && deckEl.style.display === 'none') toggleDeckCollapse(`saved-deck-${deckIndex}`);
-    }, 50);
-  } catch (error) {
-    console.error('Error removing card:', error);
-    showNotification('Error updating deck', 'error');
-  }
+  _persistDeckMutation(user, deck, {
+    cards: deck.cards,
+    totalCards: deck.totalCards,
+    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+  });
+  showNotification(getLang() === 'de' ? 'Karte entfernt' : 'Card removed', 'success');
+  updateDecksUI();
+  setTimeout(() => {
+    const deckEl = document.getElementById(`saved-deck-${deckIndex}`);
+    if (deckEl && deckEl.style.display === 'none') toggleDeckCollapse(`saved-deck-${deckIndex}`);
+  }, 50);
 }
 
 // ============================================================
@@ -2534,15 +2538,13 @@ function toggleTechOptions(deckId) {
   if (arrow) arrow.style.transform = open ? 'rotate(0deg)' : 'rotate(180deg)';
 }
 
-async function _persistTechOptions(deck) {
+function _persistTechOptions(deck) {
   const user = auth.currentUser;
   if (!user || !deck || !deck.id) return;
-  await db.collection('users').doc(user.uid)
-    .collection('decks').doc(deck.id)
-    .update({
-      techOptions: deck.techOptions || {},
-      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-    });
+  _persistDeckMutation(user, deck, {
+    techOptions: deck.techOptions || {},
+    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+  });
 }
 
 function _refreshDeckUiKeepOpen(deckIndex, keepTechOpen) {
@@ -2681,27 +2683,19 @@ function myDeckTechHideAutocomplete(deckId) {
 // ============================================================
 // My Decks: Rename Deck
 // ============================================================
-async function renameDeck(deckIndex) {
+function renameDeck(deckIndex) {
   const deck = window.userDecks[deckIndex];
   if (!deck) return;
   const newName = prompt(getLang() === 'de' ? 'Deck umbenennen:' : 'Rename deck:', deck.name);
   if (!newName || newName.trim() === '' || newName.trim() === deck.name) return;
   const trimmed = newName.trim();
-
-  try {
-    const user = auth.currentUser;
-    if (user) {
-      await db.collection('users').doc(user.uid)
-        .collection('decks').doc(deck.id)
-        .update({ name: trimmed, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
-    }
-  } catch (e) {
-    console.error('renameDeck Firestore error', e);
-    showNotification(getLang() === 'de' ? 'Umbenennen fehlgeschlagen.' : 'Could not save rename.', 'error');
-    return;
-  }
-
+  const user = auth.currentUser;
+  if (!user) return;
   window.userDecks[deckIndex].name = trimmed;
+  _persistDeckMutation(user, deck, {
+    name: trimmed,
+    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+  });
   showNotification(getLang() === 'de' ? 'Deck umbenannt!' : 'Deck renamed!', 'success');
   updateDecksUI();
 }

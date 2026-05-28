@@ -302,6 +302,13 @@ function _scheduleIntlIdMigration(userId) {
 }
 
 async function loadUserData(userId) {
+  // Offline path: paint last-known state from the mirror immediately
+  // so the user sees their collection / wishlist instead of zeros
+  // while we (futilely) try the Firestore read below. Online path:
+  // skip the restore — Firestore will populate fresh data in a moment.
+  if (!navigator.onLine) {
+    _restoreUserDataBackup(userId);
+  }
   // Wait for IndexedDB persistence to be enabled before issuing the
   // read. Without this, a sign-in that fires before the persistence
   // Promise resolves can hit the server and complete without ever
@@ -469,11 +476,24 @@ async function loadUserData(userId) {
         });
       }
       if (typeof updateTradelistUI === 'function') updateTradelistUI();
+
+      // Snapshot the populated in-memory state to the localStorage
+      // mirror so the next offline boot has collection / wishlist /
+      // tradelist / profile data even when Firestore IndexedDB
+      // persistence is unavailable on this device.
+      _writeUserDataBackup(userId);
     } else {
       await createUserProfile(userId);
     }
   } catch (error) {
     console.error('Error loading user data:', error);
+    // Offline-fallback: surface the last good snapshot so the user
+    // doesn't see "0 Cards Owned · 0.00€" when their actual
+    // collection is sitting on the server.
+    if (!navigator.onLine) {
+      var restored = _restoreUserDataBackup(userId);
+      if (restored) return; // Restored — no need for the empty-profile UI below.
+    }
     const user = window.auth.currentUser;
     if (user && typeof updateProfileUI === 'function') {
       updateProfileUI({ displayName: user.displayName || user.email || 'User', createdAt: null });
@@ -520,6 +540,9 @@ async function createUserProfile(userId) {
 function _deckBackupKey(userId) {
   return 'tcg_decks_backup_' + userId;
 }
+function _userDataBackupKey(userId) {
+  return 'tcg_userdata_backup_' + userId;
+}
 function _writeDeckBackup(userId, decks) {
   if (!userId || !Array.isArray(decks)) return;
   try {
@@ -556,6 +579,61 @@ function _readDeckBackup(userId) {
     if (!parsed || !Array.isArray(parsed.decks)) return null;
     return parsed;
   } catch (_) { return null; }
+}
+
+// Collection / wishlist / tradelist mirror — same rationale as the
+// deck mirror, separate key. Snapshots the in-memory shape (Sets +
+// Maps flattened to Array + Object) right after loadUserData so a
+// later offline boot can put it back in place without a Firestore
+// read.
+function _writeUserDataBackup(userId) {
+  if (!userId) return;
+  try {
+    var snapshot = {
+      ts: Date.now(),
+      userCollection: Array.from(window.userCollection || []),
+      userCollectionCounts: window.userCollectionCounts ? Object.fromEntries(window.userCollectionCounts) : {},
+      userWishlist: Array.from(window.userWishlist || []),
+      userWishlistCounts: window.userWishlistCounts ? Object.fromEntries(window.userWishlistCounts) : {},
+      userWishlistMaxPrices: window.userWishlistMaxPrices ? Object.fromEntries(window.userWishlistMaxPrices) : {},
+      userTradelist: Array.from(window.userTradelist || []),
+      userTradelistCounts: window.userTradelistCounts ? Object.fromEntries(window.userTradelistCounts) : {},
+      userTradelistMinPrices: window.userTradelistMinPrices ? Object.fromEntries(window.userTradelistMinPrices) : {},
+      userProfile: window.userProfile || null,
+      deckFolders: window.deckFolders || []
+    };
+    localStorage.setItem(_userDataBackupKey(userId), JSON.stringify(snapshot));
+  } catch (err) {
+    console.warn('[userdataBackup] write failed:', err && err.message);
+  }
+}
+function _restoreUserDataBackup(userId) {
+  if (!userId) return false;
+  try {
+    var raw = localStorage.getItem(_userDataBackupKey(userId));
+    if (!raw) return false;
+    var s = JSON.parse(raw);
+    if (!s) return false;
+    window.userCollection         = new Set(s.userCollection || []);
+    window.userCollectionCounts   = new Map(Object.entries(s.userCollectionCounts || {}));
+    window.userWishlist           = new Set(s.userWishlist || []);
+    window.userWishlistCounts     = new Map(Object.entries(s.userWishlistCounts || {}));
+    window.userWishlistMaxPrices  = new Map(Object.entries(s.userWishlistMaxPrices || {}));
+    window.userTradelist          = new Set(s.userTradelist || []);
+    window.userTradelistCounts    = new Map(Object.entries(s.userTradelistCounts || {}));
+    window.userTradelistMinPrices = new Map(Object.entries(s.userTradelistMinPrices || {}));
+    window.userProfile            = s.userProfile || null;
+    window.deckFolders            = Array.isArray(s.deckFolders) ? s.deckFolders : [];
+    if (typeof updateCollectionUI === 'function') updateCollectionUI();
+    if (typeof updateProfileUI === 'function' && window.userProfile) updateProfileUI(window.userProfile);
+    console.info('[userdataBackup] restored', window.userCollection.size, 'collection +',
+                 window.userWishlist.size, 'wishlist entries from localStorage (last sync',
+                 new Date(s.ts).toISOString() + ')');
+    return true;
+  } catch (err) {
+    console.warn('[userdataBackup] restore failed:', err && err.message);
+    return false;
+  }
 }
 
 async function loadUserDecks(userId) {

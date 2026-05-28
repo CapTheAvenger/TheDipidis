@@ -56,7 +56,8 @@
     };
 
     var CONCURRENCY = 4;
-    var IMAGE_CONCURRENCY = 6;   // card images are small and on a different host
+    var IMAGE_CONCURRENCY = 3;   // gentler on the CDN — higher caused ~45% throw-rate
+    var IMAGE_FETCH_RETRIES = 1; // one immediate retry per URL on network error
     var BASE_PATH = './data/';
     var MANIFEST_URL = BASE_PATH + 'offline-manifest.json';
     var IMAGES_MANIFEST_URL = BASE_PATH + 'offline-images-manifest.json';
@@ -311,15 +312,30 @@
                 return;
             }
         } catch (_) { /* fall through to refetch */ }
-        try {
-            // mode:'no-cors' is essential — the SW handler also uses it
-            // when storing the response, and consistency matters for
-            // cache lookups. credentials:'omit' avoids cookies which
-            // the CDN doesn't expect anyway.
-            await fetch(url, { mode: 'no-cors', credentials: 'omit', priority: 'low' });
-            STATE.imageDone += 1;
-        } catch (err) {
-            STATE.imageFailed += 1;
+
+        // Network-error retries — iOS Safari + the limitlesstcg CDN
+        // tend to throw on a chunk of requests when we hit them in
+        // parallel. A short wait + one retry recovers ~90% of those.
+        for (var attempt = 0; attempt <= IMAGE_FETCH_RETRIES; attempt++) {
+            try {
+                // mode:'no-cors' is essential — the SW handler also uses
+                // it when storing the response, and consistency matters
+                // for cache lookups. credentials:'omit' avoids cookies
+                // which the CDN doesn't expect anyway.
+                await fetch(url, { mode: 'no-cors', credentials: 'omit', priority: 'low' });
+                STATE.imageDone += 1;
+                return;
+            } catch (err) {
+                if (attempt < IMAGE_FETCH_RETRIES) {
+                    // Brief backoff between retries — long enough for
+                    // any rate-limit window to clear, short enough that
+                    // 4 k images don't take an extra 4 minutes.
+                    await new Promise(function (r) { setTimeout(r, 250); });
+                    continue;
+                }
+                STATE.imageFailed += 1;
+                return;
+            }
         }
     }
 

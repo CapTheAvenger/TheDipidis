@@ -381,34 +381,52 @@ async function saveCurrentDeckToProfile(source) {
     if (!overwrite) return;
   }
   
-  try {
-    // Prepare deck data
-    // Note: deck is saved with exact prints in format "CardName (SET NUMBER)", 
-    // preserving the specific print versions selected by the user
-    const deckData = {
-      name: trimmedName,
-      archetype: archetype || 'Custom',
-      cards: deck, // Exact prints: "CardName (SET NUMBER)" format
-      totalCards: totalCards,
-      folder: selectedFolder,
-      source: source,
-      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-      createdAtMs: Date.now(), // client-side fallback if serverTimestamp is pending
-      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-    };
-    
-    // Save to Firestore
-    await db.collection('users').doc(user.uid)
-      .collection('decks').add(deckData);
-    
-    showNotification(`Deck "${trimmedName}" saved successfully!`, 'success');
-    
-    // Reload user decks
-    await loadUserDecks(user.uid);
-  } catch (error) {
-    console.error('Error saving deck:', error);
-    showNotification('Error saving deck', 'error');
-  }
+  // Prepare deck data. Generate a Firestore-compatible ID up-front
+  // via .doc().id so we don't have to await an .add() call — that
+  // pattern hung indefinitely when Firestore's IndexedDB persistence
+  // was unavailable (no write queue to drain), which surfaced as
+  // "saved a new deck offline → never appeared anywhere".
+  const deckCol = db.collection('users').doc(user.uid).collection('decks');
+  const newId = deckCol.doc().id;
+  const nowMs = Date.now();
+  const deckData = {
+    id: newId,
+    name: trimmedName,
+    archetype: archetype || 'Custom',
+    cards: deck, // Exact prints: "CardName (SET NUMBER)" format
+    totalCards: totalCards,
+    folder: selectedFolder,
+    source: source,
+    createdAtMs: nowMs,
+    updatedAtMs: nowMs
+  };
+
+  // Update in-memory + mirror IMMEDIATELY so the new deck shows up
+  // in My Decks even when the network round-trip never completes.
+  if (!Array.isArray(window.userDecks)) window.userDecks = [];
+  window.userDecks.unshift(deckData);
+  if (typeof _writeDeckBackup === 'function') _writeDeckBackup(user.uid, window.userDecks);
+
+  showNotification(`Deck "${trimmedName}" saved successfully!`, 'success');
+  if (typeof updateDecksUI === 'function') updateDecksUI();
+
+  // Fire Firestore write fire-and-forget. set({merge:true}) is
+  // idempotent with the periodic _pushMirrorToServer flush.
+  const firestorePayload = {
+    name: trimmedName,
+    archetype: archetype || 'Custom',
+    cards: deck,
+    totalCards: totalCards,
+    folder: selectedFolder,
+    source: source,
+    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+    createdAtMs: nowMs,
+    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+  };
+  deckCol.doc(newId).set(firestorePayload, { merge: true })
+    .catch(function (err) {
+      console.warn('[saveCurrentDeckToProfile] Firestore write deferred / failed:', err && err.message);
+    });
 }
 
 // Save display name

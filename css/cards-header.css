@@ -286,3 +286,49 @@ html.is-standalone .container {
         padding-top: env(safe-area-inset-top, 0px);
     }
 }
+
+/* ── Cloud-Sync status block (Profile tab) ────────────────────────
+   Small banner that surfaces the Firestore offline-cache state and
+   exposes a manual "force resync" trigger. Sits above the four user
+   stat cards on the Profile tab. */
+.cloud-sync-status {
+    background: #f1f5f9;
+    border: 1px solid #cbd5e1;
+    border-radius: 10px;
+    padding: 10px 14px;
+    margin: 0 0 14px;
+    font: 500 13px/1.4 system-ui, -apple-system, sans-serif;
+    color: #0f172a;
+}
+.cloud-sync-status .cloud-sync-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+.cloud-sync-status .cloud-sync-label {
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    color: #475569;
+}
+.cloud-sync-status .cloud-sync-detail {
+    font-size: 13px;
+    margin-top: 2px;
+}
+.cloud-sync-status .cloud-sync-btn {
+    background: #1d4ed8;
+    color: #fff;
+    border: 0;
+    border-radius: 8px;
+    padding: 8px 14px;
+    font: 600 13px/1 system-ui, -apple-system, sans-serif;
+    cursor: pointer;
+    flex: 0 0 auto;
+}
+.cloud-sync-status .cloud-sync-btn:disabled {
+    background: #94a3b8;
+    cursor: progress;
+}

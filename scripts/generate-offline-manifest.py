@@ -59,35 +59,71 @@ def build_data_manifest(data_dir: str, version_stamp: str) -> dict:
 
 
 def build_images_manifest(data_dir: str, version_stamp: str) -> dict:
-    """Collect card image URLs from the Standard-rotation chunk.
+    """Collect card image URLs from the Standard-rotation chunk +
+    every energy card from extended / legacy chunks.
 
     cards_chunk_standard.json drives the Card Database tab's default
-    view; covering it offline gives the user "everything I'd normally
-    see while playing this rotation". We assume ~500 KB per LG-size
-    image — the actual size varies, but the prefetcher is robust to
-    inaccurate per-item sizes.
+    view. We deliberately skip the bulk of extended/legacy (thousands
+    of niche / old cards, multi-GB) BUT we must still cache energies
+    from those chunks because Basic Energy reprints (Grass / Fire /
+    Water / Psychic / Fighting / Lightning / Darkness / Metal / Fairy)
+    live in older sets that aren't in standard — every competitive
+    deck has 5-15 energy cards, so omitting them leaves visible holes
+    in offline deck views (reported 2026-05-29 08:14).
     """
     urls: list[str] = []
-    seen = set()
-    src = os.path.join(data_dir, "cards_chunk_standard.json")
-    if os.path.exists(src):
+    seen: set[str] = set()
+
+    def collect_from(path: str, predicate=None) -> int:
+        added = 0
+        if not os.path.exists(path):
+            return 0
         try:
-            with open(src, encoding="utf-8") as f:
+            with open(path, encoding="utf-8") as f:
                 payload = json.load(f)
-            cards = payload.get("cards") if isinstance(payload, dict) else payload
-            if isinstance(cards, list):
-                for card in cards:
-                    url = card.get("image_url")
-                    if not url or not isinstance(url, str):
-                        continue
-                    if not url.startswith("https://"):
-                        continue
-                    if url in seen:
-                        continue
-                    seen.add(url)
-                    urls.append(url)
         except Exception as exc:
-            print(f"warn: could not parse {src}: {exc}", file=sys.stderr)
+            print(f"warn: could not parse {path}: {exc}", file=sys.stderr)
+            return 0
+        cards = payload.get("cards") if isinstance(payload, dict) else payload
+        if not isinstance(cards, list):
+            return 0
+        for card in cards:
+            if not isinstance(card, dict):
+                continue
+            if predicate and not predicate(card):
+                continue
+            url = card.get("image_url")
+            if not url or not isinstance(url, str) or not url.startswith("https://"):
+                continue
+            if url in seen:
+                continue
+            seen.add(url)
+            urls.append(url)
+            added += 1
+        return added
+
+    standard_count = collect_from(os.path.join(data_dir, "cards_chunk_standard.json"))
+
+    # Energy cards from the wider chunks. Predicate matches both
+    # "Basic Energy" and "Special Energy" (Trekking Shoes, Jet Energy
+    # etc. are widely played and small in number).
+    def is_energy(c: dict) -> bool:
+        typ = (c.get("type") or "").strip()
+        if typ.startswith("Basic Energy") or typ.startswith("Special Energy"):
+            return True
+        name = (c.get("name_en") or c.get("name") or "").strip()
+        # Catch the nine basic energies plus any name ending in "Energy"
+        # — false positives here only cost a few extra cached images.
+        if name.endswith(" Energy"):
+            return True
+        return False
+
+    extended_count = collect_from(
+        os.path.join(data_dir, "cards_chunk_extended.json"), is_energy
+    )
+    legacy_count = collect_from(
+        os.path.join(data_dir, "cards_chunk_legacy.json"), is_energy
+    )
 
     # Rough per-image estimate (limitless LG scans average ~500 KB)
     estimated_per_image = 500 * 1024
@@ -96,10 +132,15 @@ def build_images_manifest(data_dir: str, version_stamp: str) -> dict:
     return {
         "generated_at": version_stamp,
         "url_count": len(urls),
+        "breakdown": {
+            "standard_chunk": standard_count,
+            "extended_energies": extended_count,
+            "legacy_energies": legacy_count,
+        },
         "estimated_per_image_bytes": estimated_per_image,
         "estimated_total_bytes": estimated_total,
         "estimated_total_mb": round(estimated_total / 1024 / 1024, 1),
-        "source": "cards_chunk_standard.json (Standard-rotation slice only)",
+        "source": "cards_chunk_standard.json + energies from extended/legacy",
         "note": (
             "Card art URLs the offline prefetcher should warm into the SW image cache. "
             "Cross-origin opaque responses — see IMAGE_CACHE_HOSTS in service-worker.js."

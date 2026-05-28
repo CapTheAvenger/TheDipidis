@@ -27,6 +27,88 @@ if (!window.userTradelistMinPrices) window.userTradelistMinPrices = new Map();
 if (!window.deckFolders)          window.deckFolders          = [];
 
 // ---------------------------------------------------------------------------
+// Cloud-sync status helpers
+//
+// Surfaces what's actually happening with Firestore offline persistence
+// so the user can tell whether "0 Saved Decks" means "I have no decks"
+// or "the cache is empty + I'm offline". Updates the small status
+// block at the top of the Profile tab and powers the manual
+// `forceCloudSync()` button.
+
+function _renderCloudSyncStatus(detail) {
+  var el = document.getElementById('cloud-sync-detail');
+  if (el) el.textContent = detail;
+}
+
+function updateCloudSyncStatus() {
+  var online = (typeof navigator !== 'undefined') ? !!navigator.onLine : true;
+  var mode = window.__firestorePersistenceMode || null;
+  var enabled = window.__firestorePersistenceEnabled === true;
+  var error = window.__firestorePersistenceError || null;
+
+  var detail;
+  if (!online && !enabled) {
+    detail = 'Offline · Cache nicht aktiv (' + (error || 'unbekannter Grund') + ')';
+  } else if (!online && enabled) {
+    detail = 'Offline · Cache aktiv (' + mode + ')';
+  } else if (online && enabled) {
+    detail = 'Online · Cache aktiv (' + mode + ')';
+  } else if (online && !enabled) {
+    detail = 'Online · Cache nicht aktiv' + (error ? ' (' + error + ')' : '');
+  } else {
+    detail = 'Initialisiere…';
+  }
+  _renderCloudSyncStatus(detail);
+}
+
+async function forceCloudSync() {
+  var btn = document.getElementById('cloud-sync-refresh-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Synchronisiere…'; }
+  try {
+    if (!navigator.onLine) {
+      _renderCloudSyncStatus('Offline · kein Server-Read möglich');
+      return;
+    }
+    var user = window.auth && window.auth.currentUser;
+    if (!user) {
+      _renderCloudSyncStatus('Nicht angemeldet');
+      return;
+    }
+    // Wait for persistence to be ready BEFORE the read so the fetched
+    // documents actually land in IndexedDB. Without this guard the
+    // user could tap the button before persistence enables and end up
+    // with the same empty cache as before.
+    if (window.__firestorePersistenceReady && typeof window.__firestorePersistenceReady.then === 'function') {
+      try { await window.__firestorePersistenceReady; } catch (_) {}
+    }
+    _renderCloudSyncStatus('Lade Profil + Decks vom Server…');
+    if (typeof loadUserData === 'function') await loadUserData(user.uid);
+    if (typeof loadUserDecks === 'function') await loadUserDecks(user.uid);
+    var deckCount = (window.userDecks || []).length;
+    _renderCloudSyncStatus('Sync abgeschlossen · ' + deckCount + ' Deck' + (deckCount === 1 ? '' : 's') + ' im Cache');
+  } catch (err) {
+    console.error('[forceCloudSync] failed:', err);
+    _renderCloudSyncStatus('Sync-Fehler: ' + (err && err.message ? err.message : err));
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = 'Jetzt synchronisieren'; }
+  }
+}
+
+// Keep the status fresh on connectivity changes + when persistence
+// finally resolves (callers in firebase-config.js mutate the globals
+// asynchronously).
+if (typeof window !== 'undefined') {
+  window.addEventListener('online', updateCloudSyncStatus);
+  window.addEventListener('offline', updateCloudSyncStatus);
+  // Re-render after persistence resolves so the user sees the real mode.
+  if (window.__firestorePersistenceReady && typeof window.__firestorePersistenceReady.then === 'function') {
+    window.__firestorePersistenceReady.then(updateCloudSyncStatus, updateCloudSyncStatus);
+  }
+  // Initial paint on next tick (DOM may not be ready when this file loads).
+  setTimeout(updateCloudSyncStatus, 0);
+}
+
+// ---------------------------------------------------------------------------
 // Auth state handlers
 // ---------------------------------------------------------------------------
 

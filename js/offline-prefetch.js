@@ -168,6 +168,11 @@
         document.body.appendChild(banner);
     }
 
+    function dismissHomescreenHint() {
+        var existing = document.getElementById('offline-homescreen-hint');
+        if (existing) existing.remove();
+    }
+
     async function requestPersistentStorage() {
         try {
             if (navigator.storage && navigator.storage.persist) {
@@ -299,13 +304,11 @@
             STATE.total = files.length;
             updatePill('Offline-Cache wird vorbereitet…');
 
-            // Standalone-only Add-to-Home-Screen hint — desktop browsers
-            // and Android Chrome handle quota differently; only iOS
-            // Safari needs the user gesture for reliable persistence.
-            if (!isStandalone() && isIOS()) {
-                showHomescreenHint();
-            }
-
+            // The hint banner now only appears AFTER the verify pass
+            // if files are actually missing — pre-emptively warning the
+            // user is annoying when caching ends up working anyway
+            // (iOS Safari quotas vary by engagement / version and we
+            // can't predict reliably ahead of time).
             await requestPersistentStorage();
 
             var cache = await findCache();
@@ -343,6 +346,9 @@
             if (STATE.missing === 0) {
                 updatePill('Offline-bereit: ' + STATE.total + ' Dateien (' + fmtMB(STATE.bytes) + ', ' + secs + 's)',
                            { dismissAfter: 6000 });
+                // Caching worked end-to-end — kill any leftover hint
+                // banner from an earlier session.
+                dismissHomescreenHint();
             } else {
                 updatePill('Offline teilweise: ' + (STATE.total - STATE.missing) + '/' + STATE.total + ' Dateien gecacht — iOS hat den Rest evictet (Add to Home Screen)',
                            { warn: true });

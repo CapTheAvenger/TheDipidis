@@ -1,12 +1,12 @@
 // Service Worker for Pokemon TCG Analysis PWA
-// v202605280136
+// v202605280224
 // Strategies:
 //   HTML / navigation → Network-first  (users always see latest version)
 //   JS / CSS          → Network-first  (always serve fresh; fall back to cache offline)
 //   Images            → Cache-first    (rarely change)
 //   Data files        → Network-first  (fresh scraper output; fall back to cache offline)
 
-const CACHE_NAME = 'tcg-analysis-v202605280136';
+const CACHE_NAME = 'tcg-analysis-v202605280224';
 
 // Static shell — cached on install.
 //
@@ -136,13 +136,66 @@ function cleanCacheUrl(url) {
   return new URL(url.pathname, location.origin).href;
 }
 
+// Hosts whose images we lazily cache as the user browses (cache-first).
+// Card art lives on third-party CDNs — caching it lets decks /
+// search results / playtest views still show artwork offline.
+// Opaque responses (no CORS) are acceptable for <img> tags.
+var IMAGE_CACHE_HOSTS = [
+  'limitlesstcg.nyc3.cdn.digitaloceanspaces.com', // EN + JP card scans
+  'r2.limitlesstcg.net',                          // archetype icons
+  'images.pokemontcg.io'                          // generic card backs / official
+];
+
+function isLazyImageHost(url) {
+  if (url.origin === location.origin) return false;
+  if (IMAGE_CACHE_HOSTS.indexOf(url.hostname) === -1) return false;
+  // Be conservative: only intercept actual image extensions so we don't
+  // accidentally cache things like API JSON from these hosts.
+  return /\.(png|jpg|jpeg|webp|gif|svg)(\?|$)/i.test(url.pathname);
+}
+
 // Fetch handler â€” strategy varies by resource type
 self.addEventListener('fetch', function(event) {
   var url = new URL(event.request.url);
 
-  // Skip non-GET and cross-origin requests
+  // Skip non-GET
   if (event.request.method !== 'GET') return;
-  if (url.origin !== location.origin) return;
+
+  // Cross-origin image hosts (card art): cache-first with opaque
+  // response storage. Image tags don't need CORS to render so the
+  // browser will display them just fine.
+  if (url.origin !== location.origin) {
+    if (isLazyImageHost(url)) {
+      event.respondWith(
+        caches.match(event.request).then(function(cached) {
+          if (cached) return cached;
+          return fetch(event.request, { mode: 'no-cors' })
+            .then(function(response) {
+              // Opaque responses have status 0 but are valid for <img>.
+              // We still cache them — the SW will return the same
+              // opaque response on offline reload.
+              if (response) {
+                var clone = response.clone();
+                caches.open(CACHE_NAME).then(function(cache) {
+                  cache.put(event.request, clone);
+                });
+              }
+              return response;
+            })
+            .catch(function() {
+              // Offline + not cached → let the browser show its
+              // broken-image placeholder (which the page UI already
+              // styles as "No Image").
+              return new Response('', { status: 504, statusText: 'offline' });
+            });
+        })
+      );
+      return;
+    }
+    // Other cross-origin requests (Firebase Auth, Firestore, etc.)
+    // pass through untouched.
+    return;
+  }
 
   var cleanUrl = cleanCacheUrl(url);
 

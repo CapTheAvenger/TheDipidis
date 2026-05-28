@@ -34,39 +34,67 @@ function initFirebaseRuntime() {
   //   • Latency-compensated UI: a saveDeck() call returns instantly even
   //     offline; the doc appears in queries immediately and is reconciled
   //     with the server later.
+  //
   // Must be called BEFORE any firestore() read/write — this file runs
-  // before firebase-globals.js which is the first consumer. Uses the
-  // multi-tab variant so two browser tabs on the same device can both
-  // access the cache safely.
+  // before firebase-globals.js which is the first consumer.
+  //
+  // Try multi-tab first (so two open browser tabs can share the cache),
+  // then fall back to single-tab if multi-tab is rejected. iOS Safari
+  // standalone PWAs in particular can fail multi-tab with
+  // failed-precondition because the BroadcastChannel coordination layer
+  // behaves oddly across PWA / Safari-tab pairs. Single-tab still
+  // delivers everything the user needs (decks visible across sessions,
+  // offline writes queued) — we just lose cross-tab coordination,
+  // which is a non-issue in standalone mode.
   //
   // window.__firestorePersistenceReady resolves when persistence is
-  // enabled (or rejects with the failure reason) — UI can await it
-  // before showing offline-capable affordances.
+  // enabled (or false if both attempts failed).
   window.__firestorePersistenceReady = (function() {
-    try {
-      return firebase.firestore().enableMultiTabIndexedDbPersistence()
+    function applySingleTab() {
+      return firebase.firestore().enableIndexedDbPersistence()
         .then(function() {
           window.__firestorePersistenceEnabled = true;
-          console.info('[Firestore] Offline persistence enabled (multi-tab)');
+          window.__firestorePersistenceMode = 'single-tab';
+          console.info('[Firestore] Offline persistence enabled (single-tab fallback)');
           return true;
         })
         .catch(function(err) {
           window.__firestorePersistenceEnabled = false;
           window.__firestorePersistenceError = (err && err.code) || 'unknown';
           if (err && err.code === 'failed-precondition') {
-            console.warn('[Firestore] Persistence disabled: another tab without multi-tab persistence is open');
+            console.warn('[Firestore] Single-tab persistence also failed: another tab already has it open. Decks will be in-memory only this session.');
           } else if (err && err.code === 'unimplemented') {
-            console.warn('[Firestore] Persistence disabled: browser does not support required features (private mode?)');
+            console.warn('[Firestore] Persistence unsupported by this browser (private mode?). Decks will be in-memory only.');
           } else {
-            console.warn('[Firestore] Persistence setup failed:', err);
+            console.warn('[Firestore] Single-tab persistence failed:', err);
           }
+          return false;
+        });
+    }
+    try {
+      return firebase.firestore().enableMultiTabIndexedDbPersistence()
+        .then(function() {
+          window.__firestorePersistenceEnabled = true;
+          window.__firestorePersistenceMode = 'multi-tab';
+          console.info('[Firestore] Offline persistence enabled (multi-tab)');
+          return true;
+        })
+        .catch(function(err) {
+          var code = err && err.code;
+          if (code === 'failed-precondition' || code === 'unimplemented') {
+            console.info('[Firestore] Multi-tab persistence rejected (' + code + '); trying single-tab…');
+            return applySingleTab();
+          }
+          window.__firestorePersistenceEnabled = false;
+          window.__firestorePersistenceError = code || 'unknown';
+          console.warn('[Firestore] Multi-tab persistence failed:', err);
           return false;
         });
     } catch (e) {
       window.__firestorePersistenceEnabled = false;
-      window.__firestorePersistenceError = 'init-failed';
-      console.warn('[Firestore] Persistence init threw:', e);
-      return Promise.resolve(false);
+      window.__firestorePersistenceError = 'init-threw';
+      console.warn('[Firestore] Persistence init threw, trying single-tab:', e);
+      try { return applySingleTab(); } catch (_) { return Promise.resolve(false); }
     }
   })();
 

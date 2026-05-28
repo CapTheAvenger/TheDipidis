@@ -266,3 +266,18 @@
     .header-icon-label { font-size: 9.5px; }
     .header-icon-btn   { padding: 6px 2px 5px; }
 }
+
+/* ── Standalone-PWA safe-area (Dynamic Island / notch) ─────────────
+   When the site is launched from the iOS home-screen via "Add to
+   Home Screen", the OS draws the status bar / Dynamic Island over
+   the top of the viewport. Without an extra top inset the pokeball,
+   title and tab buttons end up underneath it. iOS-Browser-Tab mode
+   doesn't need this (browser chrome already pushes the page down).
+   We also bump body padding so the rule still works for screens
+   that wrap the header inside a scrolling container.
+   ─────────────────────────────────────────────────────────────── */
+@media (display-mode: standalone) {
+    body {
+        padding-top: env(safe-area-inset-top, 0px);
+    }
+}

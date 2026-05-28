@@ -271,13 +271,18 @@
    When the site is launched from the iOS home-screen via "Add to
    Home Screen", the OS draws the status bar / Dynamic Island over
    the top of the viewport. Without an extra top inset the pokeball,
-   title and tab buttons end up underneath it. iOS-Browser-Tab mode
-   doesn't need this (browser chrome already pushes the page down).
-   We also bump body padding so the rule still works for screens
-   that wrap the header inside a scrolling container.
+   title and tab buttons end up underneath it.
+   We rely on the .is-standalone class set by an inline <head> script
+   (see index.html). @media (display-mode: standalone) alone has been
+   inconsistent on iOS Safari home-screen launches, so the JS check
+   acts as the source of truth and the media query is a belt-and-
+   braces fallback for Android / desktop installs.
    ─────────────────────────────────────────────────────────────── */
+html.is-standalone .container {
+    padding-top: env(safe-area-inset-top, 0px);
+}
 @media (display-mode: standalone) {
-    body {
+    .container {
         padding-top: env(safe-area-inset-top, 0px);
     }
 }

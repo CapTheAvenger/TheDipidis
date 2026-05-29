@@ -200,23 +200,37 @@ async function sendDecklist(ctx, sourceKey, deckKey) {
         return ctx.reply(`Keine Daten für ${escapeHtml(deckKey)} / ${escapeHtml(sourceKey)}.`, { parse_mode: 'HTML' });
     }
 
-    const list = formatDecklistAsPTCGL(src);
     const cardCount = src.card_count ?? 0;
     const uniqueCount = src.card_count_unique ?? src.cards?.length ?? 0;
     const sourceLabel = SOURCE_LABELS[sourceKey] || sourceKey;
     const fk = src.format_key ? ` · ${src.format_key}` : '';
-    // pre+code block keeps the list in monospace AND makes the whole
-    // block tappable for one-tap copy in Telegram.
-    const text =
-        `<b>${escapeHtml(deck.name)}</b>\n` +
-        `${escapeHtml(sourceLabel)}${escapeHtml(fk)} · ${cardCount} Karten (${uniqueCount} unique)\n\n` +
-        `<pre>${escapeHtml(list)}</pre>`;
 
-    return ctx.reply(text, {
-        parse_mode: 'HTML',
-        ...Markup.inlineKeyboard([
-            [Markup.button.callback('⬅️ Andere Quelle', `deck:pick:${deckKey}`)],
-            [Markup.button.callback('📋 Deck-Liste', 'deck:back')],
-        ]),
-    });
+    // Header message: deck name + meta. No <pre>, no inline buttons —
+    // its only job is context. Keeping the header OUT of the code
+    // block guarantees that when the user taps the </> copy icon on
+    // the decklist message they get nothing but the cards.
+    await ctx.reply(
+        `<b>${escapeHtml(deck.name)}</b>\n` +
+        `${escapeHtml(sourceLabel)}${escapeHtml(fk)} · ${cardCount} Karten (${uniqueCount} unique)`,
+        { parse_mode: 'HTML' },
+    );
+
+    // Decklist message: only the list, in a `language-ansi` code
+    // block so the in-line ANSI escape sequences around Ace-Spec
+    // entries render as bold magenta on Telegram clients that
+    // support coloured code blocks (most recent iOS / Android
+    // builds). On older clients the escape codes are visible but
+    // the line is still a valid decklist row, so copy-paste into
+    // PTCGL / Showdown still works.
+    const list = formatDecklistAsPTCGL(src, { colorize: true });
+    return ctx.reply(
+        `<pre><code class="language-ansi">${escapeHtml(list)}</code></pre>`,
+        {
+            parse_mode: 'HTML',
+            ...Markup.inlineKeyboard([
+                [Markup.button.callback('⬅️ Andere Quelle', `deck:pick:${deckKey}`)],
+                [Markup.button.callback('📋 Deck-Liste', 'deck:back')],
+            ]),
+        },
+    );
 }

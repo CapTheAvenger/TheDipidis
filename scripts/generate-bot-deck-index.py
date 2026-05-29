@@ -79,6 +79,25 @@ def _slugify(name: str) -> str:
     return s or 'unknown'
 
 
+def _read_ace_spec_names(site_dir: str) -> set[str]:
+    """Set of lowercased Ace-Spec card names from ace_specs.json.
+
+    The CSV's `is_ace_spec` column is "No" for every row right now
+    (scraper hasn't been retagging since the format change); we
+    fall back to this static list to flag entries in the generated
+    decklists. Returns an empty set on any error so the deck data
+    still builds even when the list is missing.
+    """
+    path = os.path.join(site_dir, 'data', 'ace_specs.json')
+    try:
+        with open(path, encoding='utf-8') as f:
+            data = json.load(f)
+        return {str(n).strip().lower() for n in (data.get('ace_specs') or []) if n}
+    except Exception as exc:
+        print(f'warn: ace_specs.json unreadable: {exc}', file=sys.stderr)
+        return set()
+
+
 def _read_format_key(site_dir: str) -> str:
     """oldest_legal_set + '-' + current_set from format_window.json."""
     path = os.path.join(site_dir, 'data', 'format_window.json')
@@ -129,7 +148,7 @@ def _classify_card_type(card_type: str, card_name: str) -> str:
     return 'pokemon'
 
 
-def _build_deck(rows: Iterable[dict]) -> list[dict]:
+def _build_deck(rows: Iterable[dict], ace_spec_names: set[str] | None = None) -> list[dict]:
     """Pick the stock 60-card list for one archetype.
 
     Hill-climbing approach: sort by inclusion desc, round avg_count,
@@ -179,6 +198,12 @@ def _build_deck(rows: Iterable[dict]) -> list[dict]:
             if count <= 0:
                 break
 
+        # CSV column is the primary source, but the scraper has
+        # stopped tagging it lately; fall back to the static
+        # ace_specs.json list keyed on lowercased card name.
+        is_ace_spec = str(r.get('is_ace_spec') or '').strip().lower() in ('yes', 'true', '1')
+        if not is_ace_spec and ace_spec_names and (card_name or '').strip().lower() in ace_spec_names:
+            is_ace_spec = True
         deck.append({
             'name': card_name,
             'set': r.get('set_code') or '',
@@ -186,6 +211,7 @@ def _build_deck(rows: Iterable[dict]) -> list[dict]:
             'count': count,
             'type': card_type,
             'bucket': _classify_card_type(card_type, card_name),
+            'ace_spec': is_ace_spec,
         })
         total += count
         if total >= HARD_DECK_SIZE:
@@ -235,7 +261,7 @@ def _read_share_ranking(site_dir: str) -> dict[str, dict]:
     return out
 
 
-def _build_current_meta(site_dir: str, format_key: str, ranking: dict[str, dict]) -> dict:
+def _build_current_meta(site_dir: str, format_key: str, ranking: dict[str, dict], ace_spec_names: set[str]) -> dict:
     csv_path = os.path.join(site_dir, 'data', 'current_meta_card_data.csv')
     if not os.path.exists(csv_path):
         print(f'warn: {csv_path} missing, skipping current-meta', file=sys.stderr)
@@ -251,7 +277,7 @@ def _build_current_meta(site_dir: str, format_key: str, ranking: dict[str, dict]
 
     out: dict[str, dict] = {}
     for arch, rows in grouped.items():
-        deck = _build_deck(rows)
+        deck = _build_deck(rows, ace_spec_names)
         if not deck:
             continue
         card_count = sum(c['count'] for c in deck)
@@ -282,7 +308,10 @@ def main(argv: list[str]) -> int:
     ranking = _read_share_ranking(site_dir)
     print(f'  share ranking: {len(ranking)} decks')
 
-    current_meta = _build_current_meta(site_dir, format_key, ranking)
+    ace_spec_names = _read_ace_spec_names(site_dir)
+    print(f'  ace specs:     {len(ace_spec_names)} card names tagged')
+
+    current_meta = _build_current_meta(site_dir, format_key, ranking, ace_spec_names)
     print(f'  current-meta:  {len(current_meta)} decks')
 
     # Merge per-source dicts into a single deck-keyed index. Phase 3a

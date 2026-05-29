@@ -62,10 +62,27 @@ export async function fetchDeckIndex({ force = false } = {}) {
  * Format a deck's card list as a copy-paste-ready PTCGL decklist.
  * Header lines are skipped so the user can drop it directly into
  * the in-game importer.
+ *
+ * When `colorize` is true we wrap Ace-Spec lines in ANSI magenta
+ * escape sequences. Telegram's <pre><code class="language-ansi">
+ * block renders these as actual colour on modern clients — on
+ * older/non-supporting clients the escape codes are simply visible
+ * but the line is still parseable as a normal decklist entry, so
+ * users can copy-paste either way.
  */
-export function formatDecklistAsPTCGL(deck) {
+const ESC                 = String.fromCharCode(27);
+const ANSI_ACE_SPEC_OPEN  = ESC + '[1;35m';
+const ANSI_RESET          = ESC + '[0m';
+
+export function formatDecklistAsPTCGL(deck, { colorize = false } = {}) {
     if (!deck || !Array.isArray(deck.cards)) return '';
     return deck.cards
-        .map((c) => `${c.count} ${c.name} ${c.set} ${c.number}`)
+        .map((c) => {
+            const line = `${c.count} ${c.name} ${c.set} ${c.number}`;
+            if (colorize && c.ace_spec) {
+                return `${ANSI_ACE_SPEC_OPEN}${line}${ANSI_RESET}`;
+            }
+            return line;
+        })
         .join('\n');
 }

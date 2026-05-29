@@ -1,0 +1,40 @@
+# Render.com blueprint for the Telegram bot.
+# https://render.com/docs/blueprint-spec
+#
+# Deploy by clicking "New" → "Blueprint" on the Render dashboard and
+# pointing it at this repo. Set the secret env vars (BOT_TOKEN,
+# ALLOWED_USER_IDS) on the resulting service.
+#
+# Free tier notes:
+#   • Spins down after 15 min of inactivity. First request after sleep
+#     takes ~30 s (cold start + bot.launch). For a personal bot this
+#     is acceptable; if you want zero-cold-start, switch plan to
+#     starter ($7/mo) which keeps the dyno warm.
+#   • 750 hrs/mo across all Render Free services — enough for one
+#     bot running 24/7.
+
+services:
+  - type: web
+    name: thedipidis-bot
+    env: node
+    region: frankfurt
+    plan: free
+    rootDir: bot
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: BOT_TOKEN
+        sync: false             # set on dashboard, never in git
+      - key: ALLOWED_USER_IDS
+        sync: false             # comma-separated Telegram user IDs
+      - key: NODE_VERSION
+        value: 22
+      # Puppeteer needs to know where to find Chromium. The
+      # `puppeteer` npm package downloads Chromium during build by
+      # default, which works on Render but inflates the build size.
+      # Comment the next two lines out if Render's build runs out of
+      # space — then add a postinstall step that installs chromium
+      # via apt instead.
+      - key: PUPPETEER_SKIP_DOWNLOAD
+        value: 'false'

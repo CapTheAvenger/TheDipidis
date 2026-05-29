@@ -21,6 +21,7 @@
 import { Markup } from 'telegraf';
 
 import { captureMetaCallImage } from '../screenshot.js';
+import { MENU_LABEL_METACALL } from './start.js';
 
 export function registerMetaCall(bot) {
     bot.command('metacall', (ctx) => handle(ctx));
@@ -30,6 +31,9 @@ export function registerMetaCall(bot) {
         await ctx.answerCbQuery();
         return handle(ctx);
     });
+    // Persistent reply-keyboard taps come in as plain text messages.
+    // Match the exact label set by start.js.
+    bot.hears(MENU_LABEL_METACALL, (ctx) => handle(ctx));
 }
 
 async function handle(ctx) {

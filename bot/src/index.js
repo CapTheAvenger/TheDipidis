@@ -21,7 +21,7 @@ import express from 'express';
 import { Telegraf } from 'telegraf';
 
 import { allowedCount, whitelistMiddleware } from './auth.js';
-import { registerStart } from './commands/start.js';
+import { installBotCommands, registerStart } from './commands/start.js';
 import { registerMetaCall } from './commands/metacall.js';
 import { registerDeck } from './commands/deck.js';
 import { shutdown as shutdownScreenshot } from './screenshot.js';
@@ -52,12 +52,16 @@ registerStart(bot);
 registerMetaCall(bot);
 registerDeck(bot);
 
-// Catch-all so an unknown command doesn't leave the user staring at
-// silence. Lives at the end so it only fires when nothing else
-// matched.
-bot.on('text', (ctx) =>
-    ctx.reply('Unbekannter Befehl. Tippe /menu für die Auswahl.'),
-);
+// Catch-all for truly unrecognised text (anything that isn't a slash
+// command we registered and isn't the persistent keyboard's button
+// label). Lives at the end so it only fires when nothing else
+// matched. We skip messages that begin with "/" — those are commands
+// we don't recognise yet and Telegram clients render them visually
+// distinct already; replying for every typo just adds noise.
+bot.on('text', (ctx) => {
+    if ((ctx.message?.text || '').startsWith('/')) return;
+    return ctx.reply('Tippe auf einen Button unten 👇');
+});
 
 bot.catch((err, ctx) => {
     console.error(
@@ -100,6 +104,11 @@ async function start() {
         await bot.launch();
         console.info('[boot] long-polling started');
     }
+    // Populate the slash-command picker so /metacall, /deck, /menu
+    // are discoverable from the "/" pop-up. setMyCommands is
+    // idempotent — Telegram only stores the new list, no per-user
+    // state — so it's safe to call on every boot.
+    await installBotCommands(bot);
     console.info(`[boot] whitelist: ${allowedCount()} user id(s) allowed`);
 }
 

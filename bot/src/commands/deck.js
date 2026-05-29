@@ -12,12 +12,17 @@
  *      alongside the images.
  */
 
+import { MENU_LABEL_DECK } from './start.js';
+
 export function registerDeck(bot) {
     bot.command('deck', (ctx) => placeholder(ctx));
     bot.action('deck:list', async (ctx) => {
         await ctx.answerCbQuery();
         return placeholder(ctx);
     });
+    // Persistent reply-keyboard taps arrive as plain text — match the
+    // exact button label so they route to the same handler as /deck.
+    bot.hears(MENU_LABEL_DECK, (ctx) => placeholder(ctx));
 }
 
 async function placeholder(ctx) {

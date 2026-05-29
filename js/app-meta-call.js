@@ -4088,8 +4088,11 @@ window.MetaCall = (function () {
     // of artificially stopping at 25 % and padding from there.
     // Restricted to `day2Eligible` (top-30 + user decks) so the long-
     // tail decks we only loaded for the Geheimtipps tier can't leak in.
+    // Min/Max bumped to 10/10 (was 5/10) so frozen Past Meta views and
+    // calm metas with few decks above the threshold still surface a
+    // full list of ranked options instead of stopping at 5.
     const DAY2_THRESHOLD = 0.20;
-    const DAY2_MIN = 5;
+    const DAY2_MIN = 10;
     const DAY2_MAX = 10;
     const day2Eval = evaluated.filter(e => day2Eligible.has(normalize(e.name)));
     let day2 = day2Eval.filter(e => e.day2Prob >= DAY2_THRESHOLD);

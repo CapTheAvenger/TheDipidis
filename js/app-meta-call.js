@@ -284,7 +284,7 @@ window.MetaCall = (function () {
 
   let _settings = {
     tournamentType: 'regional',
-    totalPlayers  : 1300,
+    totalPlayers  : 2000,
     rounds        : 8,
     day2Points    : 16,         // repurposed: "target points to clear"
     topCutSize    : 8,          // only used when tournamentType === 'cup'
@@ -298,7 +298,7 @@ window.MetaCall = (function () {
   // on one tab we keep those numbers around so switching back doesn't
   // re-suggest the auto-defaults over their carefully-tuned values.
   let _settingsByType = {
-    regional:  { totalPlayers: 1300, rounds: 8, day2Points: 16 },
+    regional:  { totalPlayers: 2000, rounds: 8, day2Points: 16 },
     challenge: { totalPlayers: 24,   rounds: 5, day2Points: 13, topCutSize: 0 },
     cup:       { totalPlayers: 32,   rounds: 5, day2Points: 12, topCutSize: 8 },
   };
@@ -322,7 +322,7 @@ window.MetaCall = (function () {
   } catch (_e) { /* localStorage disabled — fall back to defaults */ }
 
   // Whether the user has explicitly typed into the Players input.
-  // Calculations always use _settings.totalPlayers (default 1300), but
+  // Calculations always use _settings.totalPlayers (default 2000), but
   // the input itself shows blank until touched so the user is invited
   // to type their own field size instead of accepting an arbitrary
   // pre-filled number.

@@ -79,6 +79,22 @@ def _slugify(name: str) -> str:
     return s or 'unknown'
 
 
+def _clean_set_number(num: str) -> str:
+    """Drop scraper-tail query strings like '?translate=en' off set numbers.
+
+    The city-league scraper occasionally folds a URL fragment into the
+    set_number field; left in place, that breaks every downstream
+    consumer that uses (set, number) as a key — including the card-art
+    prefetcher and the bot's image lookup.
+    """
+    if not num:
+        return ''
+    s = str(num).strip()
+    if '?' in s:
+        s = s.split('?', 1)[0]
+    return s
+
+
 def _read_ace_spec_names(site_dir: str) -> set[str]:
     """Set of lowercased Ace-Spec card names from ace_specs.json.
 
@@ -206,12 +222,17 @@ def _build_deck(rows: Iterable[dict], ace_spec_names: set[str] | None = None) ->
             is_ace_spec = True
         deck.append({
             'name': card_name,
-            'set': r.get('set_code') or '',
-            'number': r.get('set_number') or '',
+            'set': (r.get('set_code') or '').strip().upper(),
+            'number': _clean_set_number(r.get('set_number')),
             'count': count,
             'type': card_type,
             'bucket': _classify_card_type(card_type, card_name),
             'ace_spec': is_ace_spec,
+            # image_url is the only source of truth that handles the
+            # /tpci vs /tpc + _R_EN_LG vs _R_JP_LG + zero-padded number
+            # variations correctly. The prefetcher uses it directly;
+            # the bot uses (set, number) to look up the saved file.
+            'image_url': (r.get('image_url') or '').strip(),
         })
         total += count
         if total >= HARD_DECK_SIZE:
@@ -352,9 +373,14 @@ def _aggregate_per_archetype_cards(rows: Iterable[dict], scope_key: str) -> list
                 'set_number': r.get('set_number') or '',
                 'type': r.get('type') or '',
                 'is_ace_spec': r.get('is_ace_spec') or 'No',
+                'image_url': r.get('image_url') or '',
                 '_total_count': 0,
                 '_inclusion_count': 0,
             }
+        # The first non-empty image_url wins — later rows from other
+        # tournaments occasionally have it blank.
+        if not slot['image_url'] and r.get('image_url'):
+            slot['image_url'] = r.get('image_url')
         slot['_total_count']     += int(_parse_eu(r.get('total_count')))
         slot['_inclusion_count'] += int(_parse_eu(r.get('deck_inclusion_count')))
 
@@ -378,6 +404,7 @@ def _aggregate_per_archetype_cards(rows: Iterable[dict], scope_key: str) -> list
             'set_number': slot['set_number'],
             'type': slot['type'],
             'is_ace_spec': slot['is_ace_spec'],
+            'image_url': slot['image_url'],
             # EU-locale decimal so _parse_eu downstream sees what it expects.
             'percentage_in_archetype': f'{pct:.2f}'.replace('.', ','),
             'average_count':           f'{avg:.2f}'.replace('.', ','),

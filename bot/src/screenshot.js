@@ -56,8 +56,15 @@ function getBrowser() {
     return _browserPromise;
 }
 
-export async function captureMetaCallImage({ viewport, timeoutMs = 60000 } = {}) {
+export async function captureMetaCallImage({ viewport, timeoutMs = 90000 } = {}) {
+    const log = (msg, extra) =>
+        console.info(`[screenshot] ${msg}`, extra !== undefined ? extra : '');
+    const t0 = Date.now();
+
+    log('launching browser');
     const browser = await getBrowser();
+    log('browser ready', `(+${Date.now() - t0}ms)`);
+
     const page = await browser.newPage();
     try {
         await page.setViewport({
@@ -66,14 +73,30 @@ export async function captureMetaCallImage({ viewport, timeoutMs = 60000 } = {})
             deviceScaleFactor: viewport?.deviceScaleFactor ?? 1,
         });
 
+        // Forward page console + errors to our logs so we can see what
+        // the app says about its own state during the render.
+        page.on('console', (msg) => {
+            const type = msg.type();
+            if (type === 'error' || type === 'warning') {
+                log(`page.${type}: ${msg.text()}`);
+            }
+        });
+        page.on('pageerror', (err) => log('page.error', err.message));
+
+        // `networkidle2` waits for ≤2 active connections for 500 ms.
+        // thedipidis.app's offline-prefetcher keeps a constant trickle
+        // of image fetches in flight (4363 card art URLs!), so the
+        // page essentially never reaches network-idle. `domcontentloaded`
+        // returns as soon as the HTML is parsed; we then wait for the
+        // MetaCall module explicitly.
+        log('navigating', APP_URL);
         await page.goto(APP_URL, {
-            waitUntil: 'networkidle2',
+            waitUntil: 'domcontentloaded',
             timeout: timeoutMs,
         });
+        log('navigation done', `(+${Date.now() - t0}ms)`);
 
-        // Wait until the Meta Call module exports show up. Both are
-        // assigned in the IIFE return at the bottom of app-meta-call.js
-        // so seeing them means the module finished evaluating.
+        log('waiting for window.MetaCall');
         await page.waitForFunction(
             () =>
                 window.MetaCall &&
@@ -81,23 +104,23 @@ export async function captureMetaCallImage({ viewport, timeoutMs = 60000 } = {})
                 typeof window.MetaCall.exportFieldAndRecsShareImage === 'function',
             { timeout: timeoutMs },
         );
+        log('MetaCall module ready', `(+${Date.now() - t0}ms)`);
 
-        // Preload the scraper data the canvas renderer needs.
+        log('calling MetaCall.preload()');
         await page.evaluate(async () => {
             await window.MetaCall.preload();
         });
+        log('preload done', `(+${Date.now() - t0}ms)`);
 
-        // Trigger the share modal. The function paints the canvas
-        // synchronously, then calls _showSharePreview which mounts
-        // `#mc-share-preview-modal .mc-share-preview-img` with the
-        // PNG data URL as its src.
+        log('triggering exportFieldAndRecsShareImage');
         await page.evaluate(() => {
             window.MetaCall.exportFieldAndRecsShareImage();
         });
 
+        log('waiting for share preview img');
         await page.waitForSelector(
             '#mc-share-preview-modal .mc-share-preview-img',
-            { timeout: 15000 },
+            { timeout: 30000 },
         );
 
         const dataUrl = await page.$eval(
@@ -109,10 +132,9 @@ export async function captureMetaCallImage({ viewport, timeoutMs = 60000 } = {})
             throw new Error(`unexpected share image src: ${String(dataUrl).slice(0, 60)}…`);
         }
         const base64 = dataUrl.slice('data:image/png;base64,'.length);
+        log('rendered', `${(base64.length * 0.75 / 1024).toFixed(0)} KB (+${Date.now() - t0}ms total)`);
         return Buffer.from(base64, 'base64');
     } finally {
-        // Always close the page so the browser doesn't accumulate
-        // tabs across requests.
         await page.close().catch(() => {});
     }
 }

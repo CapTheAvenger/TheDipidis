@@ -295,6 +295,190 @@ def _build_current_meta(site_dir: str, format_key: str, ranking: dict[str, dict]
     return out
 
 
+# Minimum number of sample decks (aggregated across tournaments / periods)
+# required before we'll build a stock list for an archetype. Below this
+# the inclusion percentages get statistically meaningless — a single
+# rogue list can drag a niche card above the 30 % floor.
+MIN_ARCHETYPE_SAMPLE_DECKS = 5
+
+
+def _aggregate_per_archetype_cards(rows: Iterable[dict], scope_key: str) -> list[dict]:
+    """Roll per-tournament / per-period card rows into one row per (archetype, card).
+
+    The TEF-POR tournament dump and the M3 city-league dump both store
+    one row per (tournament-or-period, archetype, card). The inclusion
+    stats on each row are scoped to that single tournament/period, so
+    summing them naively would over-count `total_decks_in_archetype`
+    (it's repeated once per card row inside the same group).
+
+    Strategy:
+      • For each (archetype, scope_value) we sample the
+        total_decks_in_archetype field exactly once — those become the
+        denominator for the aggregated inclusion percentage.
+      • Per (archetype, card_identifier) we accumulate total_count and
+        deck_inclusion_count across all scopes.
+      • At the end we recompute percentage_in_archetype and
+        average_count from the aggregated sums and emit rows that look
+        identical to the current-meta CSV — so _build_deck() can
+        consume them without modification.
+
+    `scope_key` picks which column delineates a sample group
+    (tournament_id for the regional dump, period for city-league).
+    """
+    arch_decks_per_scope: dict[tuple[str, str], int] = {}
+    agg: dict[tuple[str, str], dict] = {}
+
+    for r in rows:
+        arch = (r.get('archetype') or '').strip()
+        card_id = (r.get('card_identifier') or '').strip()
+        if not arch or not card_id:
+            continue
+        scope = (r.get(scope_key) or '').strip()
+        # Record this scope's total decks for the archetype once. Inside
+        # one (archetype, scope) group every row carries the same value,
+        # so the last-write-wins assignment lands on a single number.
+        decks_here = int(_parse_eu(r.get('total_decks_in_archetype')))
+        if decks_here > 0:
+            arch_decks_per_scope[(arch, scope)] = decks_here
+
+        key = (arch, card_id)
+        slot = agg.get(key)
+        if slot is None:
+            slot = agg[key] = {
+                'archetype': arch,
+                'card_name': r.get('card_name') or '',
+                'card_identifier': card_id,
+                'set_code': r.get('set_code') or '',
+                'set_number': r.get('set_number') or '',
+                'type': r.get('type') or '',
+                'is_ace_spec': r.get('is_ace_spec') or 'No',
+                '_total_count': 0,
+                '_inclusion_count': 0,
+            }
+        slot['_total_count']     += int(_parse_eu(r.get('total_count')))
+        slot['_inclusion_count'] += int(_parse_eu(r.get('deck_inclusion_count')))
+
+    arch_total_decks: dict[str, int] = defaultdict(int)
+    for (arch, _scope), decks in arch_decks_per_scope.items():
+        arch_total_decks[arch] += decks
+
+    out: list[dict] = []
+    for (arch, _card_id), slot in agg.items():
+        total_decks = arch_total_decks.get(arch, 0)
+        inclusion = slot['_inclusion_count']
+        if total_decks <= 0 or inclusion <= 0:
+            continue
+        pct = inclusion / total_decks * 100
+        avg = slot['_total_count'] / inclusion
+        out.append({
+            'archetype': arch,
+            'card_name': slot['card_name'],
+            'card_identifier': slot['card_identifier'],
+            'set_code': slot['set_code'],
+            'set_number': slot['set_number'],
+            'type': slot['type'],
+            'is_ace_spec': slot['is_ace_spec'],
+            # EU-locale decimal so _parse_eu downstream sees what it expects.
+            'percentage_in_archetype': f'{pct:.2f}'.replace('.', ','),
+            'average_count':           f'{avg:.2f}'.replace('.', ','),
+            'total_decks_in_archetype': str(total_decks),
+        })
+    return out
+
+
+def _build_from_tournament_cards(
+    csv_path: str,
+    format_key: str,
+    ace_spec_names: set[str],
+    scope_key: str,
+) -> dict:
+    """Aggregate a tournament/period card dump and emit per-archetype stock lists."""
+    if not os.path.exists(csv_path):
+        print(f'warn: {csv_path} missing, skipping', file=sys.stderr)
+        return {}
+
+    with open(csv_path, encoding='utf-8-sig') as f:
+        raw_rows = list(csv.DictReader(f, delimiter=';'))
+
+    aggregated = _aggregate_per_archetype_cards(raw_rows, scope_key=scope_key)
+
+    grouped: dict[str, list[dict]] = defaultdict(list)
+    for r in aggregated:
+        arch = r['archetype']
+        if arch.lower() == 'other':
+            continue
+        grouped[arch].append(r)
+
+    out: dict[str, dict] = {}
+    for arch, arch_rows in grouped.items():
+        # Every row inside a group carries the aggregated total — pick
+        # any one. Filter long-tail archetypes that don't have enough
+        # samples to produce a meaningful stock list.
+        sample_decks = int(arch_rows[0].get('total_decks_in_archetype') or '0')
+        if sample_decks < MIN_ARCHETYPE_SAMPLE_DECKS:
+            continue
+        deck = _build_deck(arch_rows, ace_spec_names)
+        if not deck:
+            continue
+        out[arch] = {
+            'format_key': format_key,
+            'card_count': sum(c['count'] for c in deck),
+            'card_count_unique': len(deck),
+            'sample_decks': sample_decks,
+            'cards': deck,
+        }
+    return out
+
+
+# Past-meta format is hard-coded to TEF-POR for now: that's the EN set
+# pair the scraper dumped under tournament_cards_data_cards_TEF-POR.csv,
+# and city_league_analysis_M3.csv is its JP counterpart. When the next
+# rotation lands we'll either rename these files or read the prior
+# format from format_window.json.
+PAST_META_FORMAT_KEY = 'TEF-POR'
+
+
+def _build_past_meta(site_dir: str, ace_spec_names: set[str]) -> dict:
+    return _build_from_tournament_cards(
+        os.path.join(site_dir, 'data', f'tournament_cards_data_cards_{PAST_META_FORMAT_KEY}.csv'),
+        format_key=PAST_META_FORMAT_KEY,
+        ace_spec_names=ace_spec_names,
+        scope_key='tournament_id',
+    )
+
+
+def _build_city_league(site_dir: str, ace_spec_names: set[str]) -> dict:
+    # M3 = JP set code that maps to EN TEF-POR rotation; see
+    # format_window.json _note for the cross-region mapping rationale.
+    return _build_from_tournament_cards(
+        os.path.join(site_dir, 'data', 'city_league_analysis_M3.csv'),
+        format_key=PAST_META_FORMAT_KEY,
+        ace_spec_names=ace_spec_names,
+        scope_key='period',
+    )
+
+
+def _merge_source(decks_by_key: dict[str, dict], arch: str, payload: dict, source_key: str) -> None:
+    """Attach an archetype payload under its source slot in the decks map.
+
+    Past-meta and city-league archetypes that don't have a current-meta
+    counterpart still get an entry — they slot to rank 9999 so the
+    picker pushes them below all ranked decks, but they remain
+    browsable via search / scroll.
+    """
+    key = _slugify(arch)
+    bucket = decks_by_key.get(key)
+    if bucket is None:
+        bucket = decks_by_key[key] = {
+            'key': key,
+            'name': arch,
+            'rank': 9999,
+            'share_pct': None,
+            'sources': {},
+        }
+    bucket['sources'][source_key] = payload
+
+
 def main(argv: list[str]) -> int:
     site_dir = argv[1] if len(argv) > 1 else '_site'
     version_stamp = argv[2] if len(argv) > 2 else ''
@@ -314,25 +498,31 @@ def main(argv: list[str]) -> int:
     current_meta = _build_current_meta(site_dir, format_key, ranking, ace_spec_names)
     print(f'  current-meta:  {len(current_meta)} decks')
 
-    # Merge per-source dicts into a single deck-keyed index. Phase 3a
-    # only has current-meta; past-tef-por and city-league hook in
-    # later (next sessions) so the structure already supports them.
+    past_meta = _build_past_meta(site_dir, ace_spec_names)
+    print(f'  past-tef-por:  {len(past_meta)} decks')
+
+    city_league = _build_city_league(site_dir, ace_spec_names)
+    print(f'  city-league:   {len(city_league)} decks')
+
+    # Merge per-source dicts into a single deck-keyed index. Current
+    # meta seeds the rank field; past-meta and city-league hang their
+    # payloads off the same deck key and only seed entries for
+    # archetypes the current meta doesn't already track.
     decks_by_key: dict[str, dict] = {}
     for arch, payload in current_meta.items():
-        key = _slugify(arch)
-        if key not in decks_by_key:
-            decks_by_key[key] = {
-                'key': key,
-                'name': arch,
-                # Top-level rank pulled from current-meta so the bot can
-                # sort without inspecting every source. Falls back to a
-                # high sentinel for archetypes the share data doesn't
-                # know about, which keeps them at the bottom of the list.
-                'rank': payload.get('rank') or 9999,
-                'share_pct': payload.get('share_pct'),
-                'sources': {},
-            }
-        decks_by_key[key]['sources']['current-meta'] = payload
+        _merge_source(decks_by_key, arch, payload, 'current-meta')
+        # Top-level rank pulled from current-meta so the bot can sort
+        # without inspecting every source. Falls back to a high
+        # sentinel for archetypes the share data doesn't know about,
+        # which keeps them at the bottom of the list.
+        decks_by_key[_slugify(arch)]['rank'] = payload.get('rank') or 9999
+        decks_by_key[_slugify(arch)]['share_pct'] = payload.get('share_pct')
+
+    for arch, payload in past_meta.items():
+        _merge_source(decks_by_key, arch, payload, 'past-tef-por')
+
+    for arch, payload in city_league.items():
+        _merge_source(decks_by_key, arch, payload, 'city-league')
 
     # Sort decks for the bot's picker by current-meta rank (1 = most
     # played). Ties (and unranked archetypes) break alphabetically.
@@ -348,6 +538,16 @@ def main(argv: list[str]) -> int:
                 'label': 'Current Meta',
                 'format_key': format_key,
                 'deck_count': len(current_meta),
+            },
+            'past-tef-por': {
+                'label': 'Past Meta',
+                'format_key': PAST_META_FORMAT_KEY,
+                'deck_count': len(past_meta),
+            },
+            'city-league': {
+                'label': 'City League',
+                'format_key': PAST_META_FORMAT_KEY,
+                'deck_count': len(city_league),
             },
         },
         'decks': ordered,

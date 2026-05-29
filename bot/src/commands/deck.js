@@ -76,6 +76,47 @@ function escapeHtml(s) {
         .replace(/>/g, '&gt;');
 }
 
+// Width budget for the matchup table inside a <pre> block. Phones in
+// portrait render Telegram's monospace font at ~30-32 chars wide; this
+// layout lands at 32 chars so it fits cleanly without a horizontal
+// scroll bar on most clients.
+const MATCHUP_OPP_W = 20;
+function _truncate(s, max) {
+    s = String(s ?? '');
+    return s.length > max ? s.slice(0, max - 1) + '…' : s;
+}
+function _padRight(s, w) {
+    s = String(s ?? '');
+    return s + ' '.repeat(Math.max(0, w - [...s].length));
+}
+function _padLeft(s, w) {
+    s = String(s ?? '');
+    return ' '.repeat(Math.max(0, w - [...s].length)) + s;
+}
+
+function formatMatchupMatrix(matchups) {
+    if (!Array.isArray(matchups) || matchups.length === 0) return null;
+    const lines = [];
+    lines.push(`${_padRight('Gegner', MATCHUP_OPP_W)} ${_padLeft('G', 4)} ${_padLeft('WR', 5)}`);
+    lines.push('─'.repeat(MATCHUP_OPP_W + 1 + 4 + 1 + 5));
+    for (const m of matchups) {
+        const wr = Number.isFinite(m.win_pct) ? m.win_pct : 0;
+        // Use the same colour cut-offs as the website's Matchup Matrix:
+        // ≥55 is a favourable matchup, ≤45 is unfavourable, the rest
+        // sits in the grey band where the bot leaves the line clean.
+        let marker = '';
+        if (wr >= 55) marker = '🟢';
+        else if (wr <= 45) marker = '🔴';
+        const wrText = `${wr.toFixed(1).replace('.', ',')}%`;
+        lines.push(
+            `${_padRight(_truncate(m.opponent, MATCHUP_OPP_W), MATCHUP_OPP_W)} ` +
+            `${_padLeft(m.games, 4)} ` +
+            `${_padLeft(wrText, 5)}${marker ? ' ' + marker : ''}`,
+        );
+    }
+    return lines.join('\n');
+}
+
 function _deckButtonLabel(deck) {
     const rank = deck.rank;
     const prefix = rank && rank < 9999 ? `#${rank} ` : '';
@@ -259,6 +300,19 @@ async function sendDecklist(ctx, sourceKey, deckKey) {
         } catch (err) {
             console.warn('[deck-image] tech composite failed:', err?.message || err);
         }
+    }
+
+    // Matchup Matrix — same labs-tournament data the website's
+    // archetype page shows, rendered as a monospace table inside a
+    // <pre> block. Only attached for sources with labs coverage
+    // (current-meta + past-meta); city-league stays card-only.
+    const matchupTable = formatMatchupMatrix(src.matchups);
+    if (matchupTable) {
+        await ctx.reply(
+            `<b>Matchup-Matrix</b> · ${escapeHtml(src.format_key || sourceLabel)}\n` +
+            `<pre>${escapeHtml(matchupTable)}</pre>`,
+            { parse_mode: 'HTML' },
+        );
     }
 
     // Decklist message: only the list, wrapped in a plain <pre>

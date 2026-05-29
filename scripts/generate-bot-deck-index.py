@@ -46,6 +46,8 @@ HARD_DECK_SIZE          = 60    # PTCG hard cap
 ENERGY_MAX              = 12    # safety cap for basic energy counts after rounding
 MAX_TECH_CARDS          = 10    # how many tech options the bot's second image shows
 TECH_INCLUSION_MIN_PCT  = 5.0   # below this is noise (single rogue list etc.)
+MAX_MATCHUPS            = 15    # how many top opponents the matchup matrix surfaces
+MIN_MATCHUP_GAMES       = 2     # below this is noise (lone result from one tournament)
 
 # Card-type bucket order for the decklist export, matching how players
 # expect to read a list: Pokémon first, then trainers grouped by sub-
@@ -313,6 +315,58 @@ def _build_deck(rows: Iterable[dict], ace_spec_names: set[str] | None = None) ->
     return deck, tech
 
 
+def _read_matchups(site_dir: str, format_key: str) -> dict[str, list[dict]]:
+    """Read labs_tournament_matchups_{FORMAT}.csv → {archetype: [matchups]}.
+
+    Each archetype's matchup list is the day_filter='overall' rows
+    keyed under `my_deck_name`, sorted by sample size (vs_count) desc,
+    capped at MAX_MATCHUPS so the rendered table fits a phone screen
+    in monospace. Win-rate stays as a raw float; the bot decides the
+    🟢/🔴 colour cut-offs at render time.
+
+    Returns an empty dict on any error so the rest of the deck index
+    still builds when the labs file is missing for a rotation we
+    haven't backfilled yet.
+    """
+    path = os.path.join(site_dir, 'data', f'labs_tournament_matchups_{format_key}.csv')
+    out: dict[str, list[dict]] = defaultdict(list)
+    if not os.path.exists(path):
+        print(f'warn: {path} missing — no matchups for {format_key}', file=sys.stderr)
+        return out
+    try:
+        with open(path, encoding='utf-8-sig') as f:
+            for row in csv.DictReader(f):
+                if (row.get('day_filter') or '').strip() != 'overall':
+                    continue
+                my_name = (row.get('my_deck_name') or '').strip()
+                opp_name = (row.get('opponent_deck_name') or '').strip()
+                if not my_name or not opp_name:
+                    continue
+                try:
+                    games = int(row.get('vs_count') or 0)
+                except (ValueError, TypeError):
+                    continue
+                if games < MIN_MATCHUP_GAMES:
+                    continue
+                try:
+                    win_pct = float(row.get('vs_win_pct') or 0)
+                except (ValueError, TypeError):
+                    win_pct = 0.0
+                out[my_name].append({
+                    'opponent': opp_name,
+                    'games': games,
+                    'win_pct': round(win_pct, 1),
+                })
+    except Exception as exc:  # pragma: no cover — diagnostics only
+        print(f'warn: matchup parse failed for {format_key}: {exc}', file=sys.stderr)
+        return defaultdict(list)
+
+    for arch in out:
+        out[arch].sort(key=lambda m: -m['games'])
+        del out[arch][MAX_MATCHUPS:]
+    return out
+
+
 def _read_share_ranking(site_dir: str) -> dict[str, dict]:
     """Read limitless_online_decks_comparison.csv → {archetype_name:
     {rank, share_pct, count, winrate_pct}}.
@@ -348,7 +402,8 @@ def _read_share_ranking(site_dir: str) -> dict[str, dict]:
     return out
 
 
-def _build_current_meta(site_dir: str, format_key: str, ranking: dict[str, dict], ace_spec_names: set[str]) -> dict:
+def _build_current_meta(site_dir: str, format_key: str, ranking: dict[str, dict],
+                         ace_spec_names: set[str], matchups: dict[str, list[dict]]) -> dict:
     csv_path = os.path.join(site_dir, 'data', 'current_meta_card_data.csv')
     if not os.path.exists(csv_path):
         print(f'warn: {csv_path} missing, skipping current-meta', file=sys.stderr)
@@ -379,6 +434,7 @@ def _build_current_meta(site_dir: str, format_key: str, ranking: dict[str, dict]
             'winrate_pct': share_info.get('winrate_pct'),
             'cards': deck,
             'tech_cards': tech,
+            'matchups': matchups.get(arch, []),
         }
     return out
 
@@ -485,6 +541,7 @@ def _build_from_tournament_cards(
     format_key: str,
     ace_spec_names: set[str],
     scope_key: str,
+    matchups: dict[str, list[dict]] | None = None,
 ) -> dict:
     """Aggregate a tournament/period card dump and emit per-archetype stock lists."""
     if not os.path.exists(csv_path):
@@ -521,6 +578,7 @@ def _build_from_tournament_cards(
             'sample_decks': sample_decks,
             'cards': deck,
             'tech_cards': tech,
+            'matchups': (matchups or {}).get(arch, []),
         }
     return out
 
@@ -533,18 +591,21 @@ def _build_from_tournament_cards(
 PAST_META_FORMAT_KEY = 'TEF-POR'
 
 
-def _build_past_meta(site_dir: str, ace_spec_names: set[str]) -> dict:
+def _build_past_meta(site_dir: str, ace_spec_names: set[str], matchups: dict[str, list[dict]]) -> dict:
     return _build_from_tournament_cards(
         os.path.join(site_dir, 'data', f'tournament_cards_data_cards_{PAST_META_FORMAT_KEY}.csv'),
         format_key=PAST_META_FORMAT_KEY,
         ace_spec_names=ace_spec_names,
         scope_key='tournament_id',
+        matchups=matchups,
     )
 
 
 def _build_city_league(site_dir: str, ace_spec_names: set[str]) -> dict:
     # M3 = JP set code that maps to EN TEF-POR rotation; see
     # format_window.json _note for the cross-region mapping rationale.
+    # No labs matchup data for city league — we'd need a JP-side dump
+    # the scrapers don't produce yet, so matchups stay empty here.
     return _build_from_tournament_cards(
         os.path.join(site_dir, 'data', 'city_league_analysis_M3.csv'),
         format_key=PAST_META_FORMAT_KEY,
@@ -590,10 +651,14 @@ def main(argv: list[str]) -> int:
     ace_spec_names = _read_ace_spec_names(site_dir)
     print(f'  ace specs:     {len(ace_spec_names)} card names tagged')
 
-    current_meta = _build_current_meta(site_dir, format_key, ranking, ace_spec_names)
+    current_matchups = _read_matchups(site_dir, format_key)
+    past_matchups    = _read_matchups(site_dir, PAST_META_FORMAT_KEY)
+    print(f'  matchups:      {len(current_matchups)} current / {len(past_matchups)} past archetypes')
+
+    current_meta = _build_current_meta(site_dir, format_key, ranking, ace_spec_names, current_matchups)
     print(f'  current-meta:  {len(current_meta)} decks')
 
-    past_meta = _build_past_meta(site_dir, ace_spec_names)
+    past_meta = _build_past_meta(site_dir, ace_spec_names, past_matchups)
     print(f'  past-tef-por:  {len(past_meta)} decks')
 
     city_league = _build_city_league(site_dir, ace_spec_names)

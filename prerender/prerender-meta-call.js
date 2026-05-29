@@ -136,13 +136,31 @@ async function renderMetaCall(baseUrl) {
             /\/battle-journal(\.[^/]*)?\.js$/,
         ];
         try { await page.setBypassServiceWorker(true); } catch (_) {}
+        // After the initial navigation we abort every further
+        // navigation request at the protocol level — that catches
+        // window.location.reload(), location.assign(), href
+        // assignment, form submits, anchor clicks, and anything else
+        // Chrome would otherwise honour. Cleaner than chasing each
+        // JS-side trigger one by one.
+        let initialNavigationConsumed = false;
         await page.setRequestInterception(true);
         page.on('request', (req) => {
             const type = req.resourceType();
+
             if (type === 'image' || type === 'media' || type === 'font') {
                 req.abort();
                 return;
             }
+
+            if (req.isNavigationRequest() && req.frame() === page.mainFrame()) {
+                if (initialNavigationConsumed) {
+                    console.log(`[blocked-nav] ${req.method()} ${req.url()}`);
+                    req.abort();
+                    return;
+                }
+                initialNavigationConsumed = true;
+            }
+
             if (type === 'script') {
                 const url = req.url();
                 if (BLOCKED_SCRIPT_PATTERNS.some((re) => re.test(url))) {
@@ -151,6 +169,7 @@ async function renderMetaCall(baseUrl) {
                     return;
                 }
             }
+
             req.continue();
         });
 

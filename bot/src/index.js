@@ -24,6 +24,7 @@ import { allowedCount, whitelistMiddleware } from './auth.js';
 import { registerStart } from './commands/start.js';
 import { registerMetaCall } from './commands/metacall.js';
 import { registerDeck } from './commands/deck.js';
+import { shutdown as shutdownScreenshot } from './screenshot.js';
 
 const BOT_TOKEN = process.env.BOT_TOKEN;
 const PORT = parseInt(process.env.PORT || '3000', 10);
@@ -108,10 +109,13 @@ start().catch((err) => {
 });
 
 // Graceful shutdown — Render sends SIGTERM before recycling the dyno.
+// We also need to tear the Puppeteer browser down so its child
+// Chromium process doesn't outlive us as a zombie.
 for (const sig of ['SIGINT', 'SIGTERM']) {
-    process.once(sig, () => {
+    process.once(sig, async () => {
         console.info(`[boot] received ${sig}, shutting down…`);
         bot.stop(sig);
+        await shutdownScreenshot().catch(() => {});
         server.close(() => process.exit(0));
     });
 }

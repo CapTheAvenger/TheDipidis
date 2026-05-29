@@ -9,8 +9,8 @@ decklists.
 | Phase | What | Status |
 |---|---|---|
 | 1 | Bot scaffold, `/start` menu, whitelist, Render deploy | ✅ done |
-| 2 | Puppeteer screenshot pipeline + `/metacall` | ⏳ next |
-| 3 | `/deck` with tech-cards image + decklist text | ⏳ later |
+| 2 | Puppeteer screenshot pipeline + `/metacall` | ✅ done |
+| 3 | `/deck` with tech-cards image + decklist text | ⏳ next |
 
 ## Deploy to Render (one-time)
 

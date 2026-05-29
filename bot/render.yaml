@@ -20,12 +20,14 @@ services:
     region: frankfurt
     plan: free
     rootDir: bot
-    # We pin the Chromium install to a folder INSIDE the repo build
-    # output (`bot/.cache/puppeteer`) so Render's runtime can find
-    # it at the same path the build wrote it to. Render Free has no
-    # persistent disk, so this means a fresh ~280 MB Chromium
-    # download every deploy — acceptable for a bot that redeploys
-    # only on code changes.
+    # The Chromium cache location is pinned by `.puppeteerrc.cjs`
+    # (cacheDirectory = <bot/>/.cache/puppeteer) so install + launch
+    # always agree on the path. The buildCommand triggers the
+    # install explicitly in case npm's postinstall hook is skipped
+    # for any reason (Render's build cache, --production flag, etc.).
+    # Render Free has no persistent disk → fresh ~280 MB Chromium
+    # download every deploy. Slow (3-5 min build) but only on code
+    # changes.
     buildCommand: npm install && npx --yes puppeteer browsers install chrome
     startCommand: npm start
     healthCheckPath: /health
@@ -36,13 +38,3 @@ services:
         sync: false             # comma-separated Telegram user IDs
       - key: NODE_VERSION
         value: 22
-      # Without an explicit cache dir Puppeteer's installer writes
-      # to ~/.cache/puppeteer (= /opt/render/.cache/puppeteer)
-      # while the runtime looks there too — but Render moves the
-      # built artifact and the home-relative cache doesn't always
-      # travel with it. Pinning the dir to a project-relative path
-      # keeps install + lookup pointing at the same place.
-      - key: PUPPETEER_CACHE_DIR
-        value: /opt/render/project/src/bot/.cache/puppeteer
-      - key: PUPPETEER_SKIP_DOWNLOAD
-        value: 'false'

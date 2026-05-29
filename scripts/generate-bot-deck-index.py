@@ -41,9 +41,11 @@ from collections import defaultdict
 from typing import Iterable
 
 
-MIN_INCLUSION_PCT = 30.0     # below this we call the card a tech / brick
-HARD_DECK_SIZE     = 60       # PTCG hard cap
-ENERGY_MAX         = 12       # safety cap for basic energy counts after rounding
+MIN_INCLUSION_PCT       = 30.0  # below this we call the card a tech / brick
+HARD_DECK_SIZE          = 60    # PTCG hard cap
+ENERGY_MAX              = 12    # safety cap for basic energy counts after rounding
+MAX_TECH_CARDS          = 10    # how many tech options the bot's second image shows
+TECH_INCLUSION_MIN_PCT  = 5.0   # below this is noise (single rogue list etc.)
 
 # Card-type bucket order for the decklist export, matching how players
 # expect to read a list: Pokémon first, then trainers grouped by sub-
@@ -164,13 +166,52 @@ def _classify_card_type(card_type: str, card_name: str) -> str:
     return 'pokemon'
 
 
-def _build_deck(rows: Iterable[dict], ace_spec_names: set[str] | None = None) -> list[dict]:
-    """Pick the stock 60-card list for one archetype.
+def _card_from_row(r: dict, count: int, ace_spec_names: set[str] | None) -> dict:
+    """Materialise a row → bot-side card object, shared by deck + tech lists."""
+    card_name = r.get('card_name') or ''
+    card_type = r.get('type') or ''
+    is_ace_spec = str(r.get('is_ace_spec') or '').strip().lower() in ('yes', 'true', '1')
+    if not is_ace_spec and ace_spec_names and card_name.strip().lower() in ace_spec_names:
+        is_ace_spec = True
+    return {
+        'name': card_name,
+        'set': (r.get('set_code') or '').strip().upper(),
+        'number': _clean_set_number(r.get('set_number')),
+        'count': count,
+        'type': card_type,
+        'bucket': _classify_card_type(card_type, card_name),
+        'ace_spec': is_ace_spec,
+        # image_url is the only source of truth that handles the
+        # /tpci vs /tpc + _R_EN_LG vs _R_JP_LG + zero-padded number
+        # variations correctly. The prefetcher uses it directly;
+        # the bot uses (set, number) to look up the saved file.
+        'image_url': (r.get('image_url') or '').strip(),
+        # Usage stats: how many decks include the card and how many
+        # copies they run on average. The bot overlays these onto each
+        # tile so users can see "82 % play 3.4 copies on average" at a
+        # glance.
+        'inclusion_pct': round(_parse_eu(r.get('percentage_in_archetype')), 1),
+        'avg_count':     round(_parse_eu(r.get('average_count')), 2),
+    }
 
-    Hill-climbing approach: sort by inclusion desc, round avg_count,
-    accumulate until we hit 60. If we overshoot, drop trailing
-    low-inclusion cards. If we undershoot, the deck is just thin —
-    we surface it as-is rather than padding with random fillers.
+
+def _build_deck(rows: Iterable[dict], ace_spec_names: set[str] | None = None) -> tuple[list[dict], list[dict]]:
+    """Return (main_deck, tech_cards) for one archetype.
+
+    Main deck:
+      Hill-climbing — sort by inclusion desc, round avg_count, accumulate
+      until we hit 60. Once the inclusion-% floor is crossed we stop
+      adding new cards but we don't give up on the 60-card target:
+      a top-up pass bumps high-inclusion cards toward their 4-of cap
+      (priority = how much the original avg got rounded down) and, if
+      we're still short, pads the trailing basic energy line. That's
+      the standard way a stock list balances to 60 in practice.
+
+    Tech cards:
+      Whatever sits between TECH_INCLUSION_MIN_PCT (5 %) and the main-deck
+      floor (30 %), capped at MAX_TECH_CARDS, sorted by inclusion desc.
+      Counts are still average-rounded so the user sees "this is the
+      typical copy-count when somebody runs it".
     """
     sorted_rows = sorted(
         rows,
@@ -181,25 +222,22 @@ def _build_deck(rows: Iterable[dict], ace_spec_names: set[str] | None = None) ->
     )
 
     deck: list[dict] = []
+    round_loss: dict[int, float] = {}  # index-in-deck → (avg - count); positive = rounded down
     total = 0
+    sub_floor_rows: list[dict] = []
     for r in sorted_rows:
         pct = _parse_eu(r.get('percentage_in_archetype'))
         if pct < MIN_INCLUSION_PCT:
-            break
+            sub_floor_rows.append(r)
+            continue
         avg = _parse_eu(r.get('average_count'))
         count = round(avg)
         if count <= 0:
-            # Promote cards that are nearly always in the deck even if
-            # the rounded count is 0 — better to surface "Boss's Orders 1"
-            # than to silently drop it.
             if pct >= 75:
                 count = max(1, round(avg + 0.49))
             else:
                 continue
 
-        # Cap to 4 unless it's basic energy (special-energy lines like
-        # "Reversal Energy" still hit the 4-cap so they don't blow up
-        # the list if the scraper mis-parses an outlier).
         card_name = r.get('card_name') or ''
         card_type = r.get('type') or ''
         if _is_basic_energy(card_name, card_type):
@@ -208,43 +246,71 @@ def _build_deck(rows: Iterable[dict], ace_spec_names: set[str] | None = None) ->
             count = min(count, 4)
 
         if total + count > HARD_DECK_SIZE:
-            # Truncate the last card so we land exactly at 60. Skips
-            # trailing cards entirely if the truncation would zero them.
             count = HARD_DECK_SIZE - total
             if count <= 0:
-                break
+                continue
 
-        # CSV column is the primary source, but the scraper has
-        # stopped tagging it lately; fall back to the static
-        # ace_specs.json list keyed on lowercased card name.
-        is_ace_spec = str(r.get('is_ace_spec') or '').strip().lower() in ('yes', 'true', '1')
-        if not is_ace_spec and ace_spec_names and (card_name or '').strip().lower() in ace_spec_names:
-            is_ace_spec = True
-        deck.append({
-            'name': card_name,
-            'set': (r.get('set_code') or '').strip().upper(),
-            'number': _clean_set_number(r.get('set_number')),
-            'count': count,
-            'type': card_type,
-            'bucket': _classify_card_type(card_type, card_name),
-            'ace_spec': is_ace_spec,
-            # image_url is the only source of truth that handles the
-            # /tpci vs /tpc + _R_EN_LG vs _R_JP_LG + zero-padded number
-            # variations correctly. The prefetcher uses it directly;
-            # the bot uses (set, number) to look up the saved file.
-            'image_url': (r.get('image_url') or '').strip(),
-        })
+        idx = len(deck)
+        deck.append(_card_from_row(r, count, ace_spec_names))
+        round_loss[idx] = avg - count
         total += count
         if total >= HARD_DECK_SIZE:
             break
 
-    # Re-sort cards into the user's preferred reading order:
-    # Pokémon → Supporter → Item → Tool → Stadium → Special Energy →
-    # Basic Energy. Within each bucket the original
-    # inclusion-percentage order is preserved by using a stable sort
-    # keyed only on the bucket index.
+    # Top-up pass: most stock lists land 1-2 cards shy of 60 because of
+    # the round() truncation. Bump the cards we rounded down the most
+    # first (preserves the "this card is typically a 4-of" intuition),
+    # then bump anything else up to the 4-of cap, and finally pad the
+    # last basic energy line if a deficit somehow survives.
+    if total < HARD_DECK_SIZE:
+        ranked = sorted(range(len(deck)), key=lambda i: round_loss.get(i, 0), reverse=True)
+        deficit = HARD_DECK_SIZE - total
+        for i in ranked:
+            if deficit <= 0:
+                break
+            card = deck[i]
+            cap = ENERGY_MAX if card['bucket'] == 'basic-energy' else 4
+            room = cap - card['count']
+            if room <= 0:
+                continue
+            bump = min(room, deficit)
+            card['count'] += bump
+            deficit -= bump
+        if deficit > 0:
+            # Last resort: drop the deficit into the existing basic-
+            # energy line. Most decks have one, so this is rare.
+            energy = next((c for c in deck if c['bucket'] == 'basic-energy'), None)
+            if energy:
+                energy['count'] += deficit
+                deficit = 0
+        if deficit > 0:
+            # No basic energy line at all — accept the under-60 count
+            # rather than inventing a card. Surface it in the unique
+            # count so the bot can show "59 Karten" honestly.
+            pass
+
+    # Tech cards: anything below the 30 % floor down to the 5 % noise
+    # threshold, top N by inclusion.
+    tech: list[dict] = []
+    for r in sub_floor_rows:
+        pct = _parse_eu(r.get('percentage_in_archetype'))
+        if pct < TECH_INCLUSION_MIN_PCT:
+            continue
+        avg = _parse_eu(r.get('average_count'))
+        count = max(1, round(avg))
+        card_name = r.get('card_name') or ''
+        card_type = r.get('type') or ''
+        if not _is_basic_energy(card_name, card_type):
+            count = min(count, 4)
+        tech.append(_card_from_row(r, count, ace_spec_names))
+        if len(tech) >= MAX_TECH_CARDS:
+            break
+
+    # Re-sort the main deck into the user's preferred reading order;
+    # tech cards stay inclusion-sorted so the most-played option is
+    # first.
     deck.sort(key=lambda c: TYPE_BUCKET_INDEX.get(c.get('bucket'), 99))
-    return deck
+    return deck, tech
 
 
 def _read_share_ranking(site_dir: str) -> dict[str, dict]:
@@ -298,7 +364,7 @@ def _build_current_meta(site_dir: str, format_key: str, ranking: dict[str, dict]
 
     out: dict[str, dict] = {}
     for arch, rows in grouped.items():
-        deck = _build_deck(rows, ace_spec_names)
+        deck, tech = _build_deck(rows, ace_spec_names)
         if not deck:
             continue
         card_count = sum(c['count'] for c in deck)
@@ -312,6 +378,7 @@ def _build_current_meta(site_dir: str, format_key: str, ranking: dict[str, dict]
             'count': share_info.get('count'),
             'winrate_pct': share_info.get('winrate_pct'),
             'cards': deck,
+            'tech_cards': tech,
         }
     return out
 
@@ -444,7 +511,7 @@ def _build_from_tournament_cards(
         sample_decks = int(arch_rows[0].get('total_decks_in_archetype') or '0')
         if sample_decks < MIN_ARCHETYPE_SAMPLE_DECKS:
             continue
-        deck = _build_deck(arch_rows, ace_spec_names)
+        deck, tech = _build_deck(arch_rows, ace_spec_names)
         if not deck:
             continue
         out[arch] = {
@@ -453,6 +520,7 @@ def _build_from_tournament_cards(
             'card_count_unique': len(deck),
             'sample_decks': sample_decks,
             'cards': deck,
+            'tech_cards': tech,
         }
     return out
 

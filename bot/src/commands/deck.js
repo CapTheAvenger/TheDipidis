@@ -21,7 +21,7 @@
 import { Markup } from 'telegraf';
 
 import { fetchDeckIndex, formatDecklistAsPTCGL } from '../data-index.js';
-import { generateDeckImage } from '../deck-image.js';
+import { generateDeckImage, generateTechImage } from '../deck-image.js';
 import { MENU_KEYBOARD, MENU_LABEL_DECK } from './start.js';
 
 const PAGE_SIZE = 8;
@@ -216,16 +216,18 @@ async function sendDecklist(ctx, sourceKey, deckKey) {
         `<b>${escapeHtml(deck.name)}</b>\n` +
         `${escapeHtml(sourceLabel)}${escapeHtml(fk)} · ${cardCount} Karten (${uniqueCount} unique)`;
 
-    // Try to send the composited deck-grid PNG as the header (caption
-    // carries the deck name + stats). If the composite fails — sharp
-    // crash, card art entirely unavailable, network down — we fall back
-    // to a plain text header so the user still gets the decklist below.
+    // Main image carries the stock 60-card grid + stats header. Tech
+    // image (sent separately, kept under the same caption umbrella) is
+    // the 5-30 % inclusion bucket — the cards a player would consider
+    // swapping in for a specific meta call. Keeping them as two photos
+    // means each one stays readable on a phone screen instead of
+    // becoming a 60-tile wall.
     //
-    // The persistent reply keyboard rides along on this first message:
-    // Telegram only re-shows a collapsed reply keyboard when a fresh
-    // message arrives with reply_markup of that type. The text decklist
-    // below has its own inline keyboard, so this is the slot we have.
-    let sentImage = false;
+    // The persistent reply keyboard rides on the MAIN image's caption
+    // so it re-asserts on every full deck view. Tech image goes out
+    // with a plain caption so we don't double-attach the keyboard
+    // (Telegram only needs it once per outbound flow).
+    let sentMainImage = false;
     try {
         const png = await generateDeckImage(deck, src, sourceLabel);
         if (png) {
@@ -233,13 +235,30 @@ async function sendDecklist(ctx, sourceKey, deckKey) {
                 { source: png, filename: `${deck.key || 'deck'}.png` },
                 { caption: captionText, parse_mode: 'HTML', ...MENU_KEYBOARD },
             );
-            sentImage = true;
+            sentMainImage = true;
         }
     } catch (err) {
-        console.warn('[deck-image] generate failed:', err?.message || err);
+        console.warn('[deck-image] main composite failed:', err?.message || err);
     }
-    if (!sentImage) {
+    if (!sentMainImage) {
         await ctx.reply(captionText, { parse_mode: 'HTML', ...MENU_KEYBOARD });
+    }
+
+    if (Array.isArray(src.tech_cards) && src.tech_cards.length > 0) {
+        try {
+            const techPng = await generateTechImage(deck, src, sourceLabel);
+            if (techPng) {
+                const techCaption =
+                    `<b>${escapeHtml(deck.name)} — Tech-Karten</b>\n` +
+                    `${src.tech_cards.length} Optionen (5–30 % Usage)`;
+                await ctx.replyWithPhoto(
+                    { source: techPng, filename: `${deck.key || 'deck'}-tech.png` },
+                    { caption: techCaption, parse_mode: 'HTML' },
+                );
+            }
+        } catch (err) {
+            console.warn('[deck-image] tech composite failed:', err?.message || err);
+        }
     }
 
     // Decklist message: only the list, wrapped in a plain <pre>

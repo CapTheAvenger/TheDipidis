@@ -1,18 +1,21 @@
 /**
- * Composite a deck-grid PNG for the Telegram bot.
+ * Composite deck-grid PNGs for the Telegram bot.
  *
- * Layout: a stats header at the top followed by a 4-column grid of
- * card art tiles, each overlaid with the card's copy-count in the
- * bottom-right corner. The composite happens at request time using
- * sharp, but the per-card art is pre-fetched at deploy time into
+ * Two flavours, same layout primitives:
+ *   • Main image  — header + stock 60-card grid, each tile overlaid
+ *                   with inclusion % (top-left) + count (bottom-right)
+ *   • Tech image  — same layout against the (up to 10) tech-card list
+ *                   that sits between 5–30 % inclusion. Shipped
+ *                   separately so the main image stays focused.
+ *
+ * Per-card art is pre-fetched at deploy time into
  * `thedipidis.app/data/card-art/{SET}_{NUM}.png` so the bot fetches
- * tiles from the same origin as the deck index — no Limitless CDN
- * round trips, no rate-limit risk.
+ * tiles same-origin — no Limitless CDN round trips, no rate-limit risk.
  *
- * Two LRU caches keep latency down across requests:
+ * LRU caches:
  *   • cardCache: per-tile PNG buffers (~25 KB each, capped at 1000)
- *   • deckCache: per-(deck, source) composited PNG buffers
- *     (capped at 32; first hit fills, subsequent hits return instantly)
+ *   • imageCache: per-(deck, source, mode) composited PNG buffers
+ *     (capped at 64; first hit fills, subsequent hits return instantly)
  *
  * Render Free has 512 MB total — these caps land us around 25 MB
  * with comfortable headroom for the rest of the process.
@@ -22,8 +25,6 @@ import sharp from 'sharp';
 
 const SITE_BASE = process.env.SITE_BASE || 'https://thedipidis.app';
 
-// Tile dimensions match the prefetcher's 250×350 PNG output so we
-// composite without any per-tile resize at request time.
 const TILE_W   = 250;
 const TILE_H   = 350;
 const COLS     = 4;
@@ -33,10 +34,10 @@ const HEADER_H = 140;
 
 const BG_R = 20, BG_G = 20, BG_B = 28;
 
-const MAX_DECKS_CACHED = 32;
-const MAX_CARDS_CACHED = 1000;
-const _deckCache = new Map();
-const _cardCache = new Map();
+const MAX_IMAGES_CACHED = 64;
+const MAX_CARDS_CACHED  = 1000;
+const _imageCache = new Map();
+const _cardCache  = new Map();
 
 function _lruBump(cache, key) {
     const v = cache.get(key);
@@ -53,8 +54,6 @@ function _lruInsert(cache, key, val, cap) {
 }
 
 async function _placeholderTile() {
-    // Solid dark-gray tile with a thin border so it visually reads as
-    // "missing card" rather than vanishing into the background.
     return sharp({
         create: {
             width: TILE_W, height: TILE_H, channels: 4,
@@ -89,80 +88,110 @@ function _escapeXml(s) {
         .replace(/"/g, '&quot;');
 }
 
-function _countBadgeSvg(count) {
-    // Bottom-right rounded badge with the count. Sized to comfortably
-    // fit one or two digits at 32 px text; transparent everywhere else.
+function _fmtPct(n) {
+    if (!Number.isFinite(n)) return '';
+    // Drop the decimal for clean numbers; keep one for fractional ones.
+    return Number.isInteger(n) ? `${n}%` : `${n.toFixed(1).replace('.', ',')}%`;
+}
+
+function _fmtAvg(n) {
+    if (!Number.isFinite(n) || n <= 0) return '';
+    return `⌀${n.toFixed(1).replace('.', ',')}`;
+}
+
+function _tileOverlaysSvg(card) {
+    // Top-left badge: "82% ⌀3,4" — inclusion + raw average. Bottom-
+    // right badge: rounded count we actually put in the list. Together
+    // they answer "how often is this card played and how many copies?"
+    // at a glance.
     const w = TILE_W, h = TILE_H;
-    const bx = w - 64, by = h - 64, bw = 52, bh = 52;
+    const inclusion = _fmtPct(card.inclusion_pct);
+    const avg = _fmtAvg(card.avg_count);
+    const topText = [inclusion, avg].filter(Boolean).join(' ');
+
+    const showTop = topText.length > 0;
+    const topBadgeW = Math.max(82, topText.length * 11 + 18);
+    const topBadgeH = 36;
+
+    const countBx = w - 64, countBy = h - 64, countBw = 52, countBh = 52;
+
     return Buffer.from(
         `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}">
-            <rect x="${bx}" y="${by}" width="${bw}" height="${bh}" rx="10" ry="10" fill="rgba(0,0,0,0.78)" stroke="rgba(255,255,255,0.5)" stroke-width="1.5"/>
-            <text x="${bx + bw / 2}" y="${by + 38}" font-family="DejaVu Sans, Liberation Sans, Arial, sans-serif" font-size="34" font-weight="700" fill="#ffffff" text-anchor="middle">${count}</text>
+            ${showTop ? `
+            <rect x="8" y="8" width="${topBadgeW}" height="${topBadgeH}" rx="8" ry="8"
+                  fill="rgba(0,0,0,0.78)" stroke="rgba(255,255,255,0.5)" stroke-width="1.5"/>
+            <text x="${8 + topBadgeW / 2}" y="33"
+                  font-family="DejaVu Sans, Liberation Sans, Arial, sans-serif"
+                  font-size="20" font-weight="700" fill="#ffffff" text-anchor="middle">${_escapeXml(topText)}</text>
+            ` : ''}
+            <rect x="${countBx}" y="${countBy}" width="${countBw}" height="${countBh}" rx="10" ry="10"
+                  fill="rgba(0,0,0,0.78)" stroke="rgba(255,255,255,0.5)" stroke-width="1.5"/>
+            <text x="${countBx + countBw / 2}" y="${countBy + 38}"
+                  font-family="DejaVu Sans, Liberation Sans, Arial, sans-serif"
+                  font-size="34" font-weight="700" fill="#ffffff" text-anchor="middle">${card.count}</text>
         </svg>`,
     );
 }
 
-function _headerSvg(width, deck, source, sourceLabel) {
-    // Two-line header: name on top, contextual stats below. Sources
-    // beyond current-meta don't carry rank/share/winrate so we adapt
-    // the right side to whatever is actually present in the payload.
-    const name = _escapeXml(deck.name);
-    const formatPart = source?.format_key ? ` · ${_escapeXml(source.format_key)}` : '';
-
-    const stats = [];
-    if (typeof source?.card_count === 'number') {
-        const uniq = source.card_count_unique ?? (source.cards?.length ?? 0);
-        stats.push(`${source.card_count} Karten (${uniq} unique)`);
-    }
-    if (Number.isFinite(deck?.rank) && deck.rank < 9999 && sourceLabel === 'Current Meta') {
-        stats.push(`#${deck.rank}`);
-    }
-    if (typeof deck?.share_pct === 'number' && sourceLabel === 'Current Meta') {
-        stats.push(`${deck.share_pct.toFixed(1).replace('.', ',')}% Share`);
-    }
-    if (typeof source?.winrate_pct === 'number' && sourceLabel === 'Current Meta') {
-        stats.push(`${source.winrate_pct.toFixed(1).replace('.', ',')}% WR`);
-    }
-    if (typeof source?.sample_decks === 'number' && sourceLabel !== 'Current Meta') {
-        stats.push(`${source.sample_decks} Sample-Decks`);
-    }
-    const subLine = `${_escapeXml(sourceLabel)}${formatPart} · ${stats.join(' · ')}`;
-
+function _headerSvg(width, titleText, subLine) {
     return Buffer.from(
         `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${HEADER_H}">
             <rect width="100%" height="100%" fill="rgb(${BG_R},${BG_G},${BG_B})"/>
-            <text x="${PAD}" y="60" font-family="DejaVu Sans, Liberation Sans, Arial, sans-serif" font-size="44" font-weight="800" fill="#ffffff">${name}</text>
+            <text x="${PAD}" y="60" font-family="DejaVu Sans, Liberation Sans, Arial, sans-serif" font-size="44" font-weight="800" fill="#ffffff">${_escapeXml(titleText)}</text>
             <text x="${PAD}" y="105" font-family="DejaVu Sans, Liberation Sans, Arial, sans-serif" font-size="22" font-weight="400" fill="#bbbbcc">${_escapeXml(subLine)}</text>
         </svg>`,
     );
 }
 
-export async function generateDeckImage(deck, source, sourceLabel) {
-    const cards = Array.isArray(source?.cards) ? source.cards : [];
-    if (!deck || cards.length === 0) return null;
+function _mainHeaderLines(deck, source, sourceLabel) {
+    const title = deck.name;
+    const formatPart = source?.format_key ? ` · ${source.format_key}` : '';
+    const bits = [];
+    if (typeof source?.card_count === 'number') {
+        const uniq = source.card_count_unique ?? (source.cards?.length ?? 0);
+        bits.push(`${source.card_count} Karten (${uniq} unique)`);
+    }
+    if (Number.isFinite(deck?.rank) && deck.rank < 9999 && sourceLabel === 'Current Meta') {
+        bits.push(`#${deck.rank}`);
+    }
+    if (typeof deck?.share_pct === 'number' && sourceLabel === 'Current Meta') {
+        bits.push(`${deck.share_pct.toFixed(1).replace('.', ',')}% Share`);
+    }
+    if (typeof source?.winrate_pct === 'number' && sourceLabel === 'Current Meta') {
+        bits.push(`${source.winrate_pct.toFixed(1).replace('.', ',')}% WR`);
+    }
+    if (typeof source?.sample_decks === 'number' && sourceLabel !== 'Current Meta') {
+        bits.push(`${source.sample_decks} Sample-Decks`);
+    }
+    return { title, sub: `${sourceLabel}${formatPart} · ${bits.join(' · ')}` };
+}
 
-    const cacheKey = `${deck.key || deck.name}:${source.format_key || ''}:${sourceLabel}`;
-    if (_deckCache.has(cacheKey)) return _lruBump(_deckCache, cacheKey);
+function _techHeaderLines(deck, source, sourceLabel, techCount) {
+    const formatPart = source?.format_key ? ` · ${source.format_key}` : '';
+    return {
+        title: `${deck.name} — Tech-Karten`,
+        sub: `${sourceLabel}${formatPart} · ${techCount} Optionen · 5–30 % Usage`,
+    };
+}
+
+async function _compose(cards, headerLines) {
+    if (!Array.isArray(cards) || cards.length === 0) return null;
 
     const rows = Math.ceil(cards.length / COLS);
     const width  = COLS * TILE_W + (COLS - 1) * GAP + 2 * PAD;
     const gridH  = rows * TILE_H + (rows - 1) * GAP;
     const height = HEADER_H + gridH + 2 * PAD;
 
-    // Fetch all card tiles in parallel; first request per card is a
-    // network hop, repeats are in-memory.
     const tileBuffers = await Promise.all(
         cards.map((c) => _fetchCardArt((c.set || '').toUpperCase(), c.number || '')),
     );
-
-    // Pre-composite each tile with its count badge — saves us from
-    // doing it inside the main composite call (sharp can't nest
+    // Pre-composite each tile with its overlays — sharp can't nest
     // composites in a single op, so we materialise each badged tile
-    // first, then place it on the canvas).
+    // first, then place it on the canvas.
     const badgedTiles = await Promise.all(
         tileBuffers.map((buf, i) =>
             sharp(buf)
-                .composite([{ input: _countBadgeSvg(cards[i].count) }])
+                .composite([{ input: _tileOverlaysSvg(cards[i]) }])
                 .png()
                 .toBuffer(),
         ),
@@ -178,9 +207,9 @@ export async function generateDeckImage(deck, source, sourceLabel) {
             left:  PAD + col * (TILE_W + GAP),
         });
     }
-    ops.push({ input: _headerSvg(width, deck, source, sourceLabel), top: 0, left: 0 });
+    ops.push({ input: _headerSvg(width, headerLines.title, headerLines.sub), top: 0, left: 0 });
 
-    const finalBuf = await sharp({
+    return sharp({
         create: {
             width, height, channels: 4,
             background: { r: BG_R, g: BG_G, b: BG_B, alpha: 1 },
@@ -189,7 +218,24 @@ export async function generateDeckImage(deck, source, sourceLabel) {
         .composite(ops)
         .png({ compressionLevel: 8 })
         .toBuffer();
+}
 
-    _lruInsert(_deckCache, cacheKey, finalBuf, MAX_DECKS_CACHED);
-    return finalBuf;
+export async function generateDeckImage(deck, source, sourceLabel) {
+    if (!deck || !Array.isArray(source?.cards) || source.cards.length === 0) return null;
+    const cacheKey = `main:${deck.key || deck.name}:${source.format_key || ''}:${sourceLabel}`;
+    if (_imageCache.has(cacheKey)) return _lruBump(_imageCache, cacheKey);
+    const buf = await _compose(source.cards, _mainHeaderLines(deck, source, sourceLabel));
+    if (buf) _lruInsert(_imageCache, cacheKey, buf, MAX_IMAGES_CACHED);
+    return buf;
+}
+
+export async function generateTechImage(deck, source, sourceLabel) {
+    if (!deck) return null;
+    const tech = Array.isArray(source?.tech_cards) ? source.tech_cards : [];
+    if (tech.length === 0) return null;
+    const cacheKey = `tech:${deck.key || deck.name}:${source.format_key || ''}:${sourceLabel}`;
+    if (_imageCache.has(cacheKey)) return _lruBump(_imageCache, cacheKey);
+    const buf = await _compose(tech, _techHeaderLines(deck, source, sourceLabel, tech.length));
+    if (buf) _lruInsert(_imageCache, cacheKey, buf, MAX_IMAGES_CACHED);
+    return buf;
 }

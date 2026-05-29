@@ -37,13 +37,11 @@ export function registerMetaCall(bot) {
 }
 
 async function handle(ctx) {
-    // Telegram limits messages so we send a "working on it" first.
-    // editMessage lets us replace it with the image when ready instead
-    // of leaving the status hanging in the chat.
-    const status = await ctx.reply(
-        '📊 Meta Call wird gerendert… (kann beim ersten Mal nach längerer Pause bis zu 40 s dauern)',
-    );
-
+    // The PNG is pre-rendered at deploy time and lives on GitHub
+    // Pages — fetching it is fast enough (~1 s) that we skip the
+    // "wird gerendert…" interstitial entirely. If the fetch ever
+    // does take a while we can add it back as an editMessageText
+    // flow, but optimizing for the common case keeps the chat clean.
     const started = Date.now();
     try {
         const png = await captureMetaCallImage();
@@ -52,29 +50,14 @@ async function handle(ctx) {
         await ctx.replyWithPhoto(
             { source: png },
             {
-                caption: `Meta Call — gerendert in ${elapsed}s`,
+                caption: `Meta Call · ${elapsed}s`,
                 ...Markup.inlineKeyboard([
-                    [Markup.button.callback('🔄 Neu rendern', 'metacall:list')],
-                    [Markup.button.callback('⬅️ Menü', 'menu:open')],
+                    [Markup.button.callback('🔄 Neu laden', 'metacall:list')],
                 ]),
             },
         );
-
-        // Clean up the status message — we replaced it with the photo.
-        await ctx.deleteMessage(status.message_id).catch(() => {});
     } catch (err) {
-        console.error('[metacall] render failed:', err);
-        await ctx.telegram
-            .editMessageText(
-                status.chat.id,
-                status.message_id,
-                undefined,
-                `❌ Render fehlgeschlagen: ${err.message || err}`,
-            )
-            .catch(() => {
-                // Edit failed (maybe the original message is too old) —
-                // just send a fresh error reply so the user sees something.
-                ctx.reply(`❌ Render fehlgeschlagen: ${err.message || err}`);
-            });
+        console.error('[metacall] fetch failed:', err);
+        await ctx.reply(`❌ Meta Call konnte nicht geladen werden: ${err.message || err}`);
     }
 }

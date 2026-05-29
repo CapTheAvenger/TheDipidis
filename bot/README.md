@@ -9,8 +9,13 @@ decklists.
 | Phase | What | Status |
 |---|---|---|
 | 1 | Bot scaffold, `/start` menu, whitelist, Render deploy | ✅ done |
-| 2 | Puppeteer screenshot pipeline + `/metacall` | ✅ done |
+| 2 | Pre-rendered Meta Call snapshot (`/metacall`) | ✅ done |
 | 3 | `/deck` with tech-cards image + decklist text | ⏳ next |
+
+Phase 2 moved from "live Puppeteer per request" to **pre-render at deploy** —
+see `prerender/prerender-meta-call.js` in the repo root. The bot now just
+fetches `https://thedipidis.app/data/meta-call-snapshot.png`. Sub-second
+responses, no Chromium on Render, no OOM risk.
 
 ## Deploy to Render (one-time)
 

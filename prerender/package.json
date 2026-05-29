@@ -1,0 +1,16 @@
+{
+  "name": "thedipidis-prerender",
+  "version": "0.1.0",
+  "description": "CI-only renderer for the Meta Call dashboard PNG. Runs against the built _site/ at deploy time so the Telegram bot just fetches a static image instead of driving a live browser per request.",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "render": "node prerender-meta-call.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "puppeteer": "^23.11.1"
+  }
+}

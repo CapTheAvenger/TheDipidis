@@ -227,6 +227,26 @@ jobs:
           echo "  service-worker.js  CACHE_NAME = tcg-analysis-v${VER}"
           echo "  version.json  ${VER}"
 
+      - name: Set up Node for prerender
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Pre-render Meta Call snapshot for the Telegram bot
+        # Renders the dashboard PNG into _site/data/meta-call-snapshot.png
+        # so https://thedipidis.app/data/meta-call-snapshot.png serves it
+        # after deploy. The bot fetches that static URL — ~1 s response
+        # instead of 40 s of live Puppeteer per request.
+        # The Ubuntu runner ships with google-chrome-stable installed,
+        # so we point Puppeteer at it and skip the 280 MB download.
+        working-directory: prerender
+        env:
+          PUPPETEER_SKIP_DOWNLOAD: 'true'
+          PUPPETEER_EXECUTABLE_PATH: /usr/bin/google-chrome-stable
+        run: |
+          npm ci --no-audit --no-fund --omit=optional
+          node prerender-meta-call.js ../_site
+
       - name: Setup Pages
         uses: actions/configure-pages@v5
 

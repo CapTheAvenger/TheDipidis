@@ -20,15 +20,11 @@ services:
     region: frankfurt
     plan: free
     rootDir: bot
-    # The Chromium cache location is pinned by `.puppeteerrc.cjs`
-    # (cacheDirectory = <bot/>/.cache/puppeteer) so install + launch
-    # always agree on the path. The buildCommand triggers the
-    # install explicitly in case npm's postinstall hook is skipped
-    # for any reason (Render's build cache, --production flag, etc.).
-    # Render Free has no persistent disk → fresh ~280 MB Chromium
-    # download every deploy. Slow (3-5 min build) but only on code
-    # changes.
-    buildCommand: npm install && npx --yes puppeteer browsers install chrome
+    # No Puppeteer at runtime anymore — Meta Call rendering moved
+    # to the GitHub Pages deploy (see prerender/). The bot just
+    # fetches https://thedipidis.app/data/meta-call-snapshot.png.
+    # Build is now Express + Telegraf only — under 30 s.
+    buildCommand: npm install
     startCommand: npm start
     healthCheckPath: /health
     envVars:

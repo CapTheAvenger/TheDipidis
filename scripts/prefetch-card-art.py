@@ -24,11 +24,13 @@ keeps re-runs (and future CI cache restore) fast.
 from __future__ import annotations
 
 import concurrent.futures as cf
+import csv
 import io
 import json
 import os
 import sys
 import time
+from collections import defaultdict
 
 import requests
 from PIL import Image
@@ -37,7 +39,7 @@ TILE_W = 250
 TILE_H = 350
 
 FETCH_TIMEOUT_S = 20
-HTTP_USER_AGENT = 'thedipidis-bot-prefetch/0.2 (+https://thedipidis.app)'
+HTTP_USER_AGENT = 'thedipidis-bot-prefetch/0.3 (+https://thedipidis.app)'
 MAX_PARALLEL = 8
 
 # Fallback template — used only when the deck index didn't carry an
@@ -46,6 +48,14 @@ MAX_PARALLEL = 8
 EN_FALLBACK_TEMPLATE = (
     'https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/{set}/{set}_{num:0>3}_R_EN_LG.png'
 )
+
+
+def _en_url_for(set_code: str, number: str) -> str:
+    try:
+        padded = f'{int(number):03d}'
+    except (ValueError, TypeError):
+        padded = number
+    return EN_FALLBACK_TEMPLATE.format(set=set_code, num=padded)
 
 
 def _clean_number(num: str) -> str:
@@ -57,8 +67,51 @@ def _clean_number(num: str) -> str:
     return s
 
 
-def _collect_cards(index_path: str) -> list[dict]:
-    """Return a list of unique cards keyed by (set, number) with their image URL."""
+def _read_alt_print_urls(site_dir: str) -> dict[tuple[str, str], list[str]]:
+    """Build (set, num) → [alt EN URLs] from all_cards_database.csv.
+
+    Limitless occasionally has the primary print URL we recorded
+    return a 404 — usually because the file just isn't on the CDN for
+    that specific print variant. The `international_prints` column
+    lists every print of the same card across sets (e.g. "WHT-143,
+    WHT-62"), so when the primary fails we can fall back to whichever
+    alternative print actually has artwork on the CDN. Saved file
+    still uses the primary (set, num) as its key, so the bot's lookup
+    doesn't have to know any of this.
+    """
+    path = os.path.join(site_dir, 'data', 'all_cards_database.csv')
+    alt: dict[tuple[str, str], list[str]] = defaultdict(list)
+    if not os.path.exists(path):
+        return alt
+    try:
+        with open(path, encoding='utf-8') as f:
+            for row in csv.DictReader(f):
+                set_code = (row.get('set') or '').strip().upper()
+                num = (row.get('number') or '').strip()
+                if not set_code or not num:
+                    continue
+                # international_prints is a quote-wrapped comma list:
+                # "WHT-143,WHT-62"  →  [(WHT,143), (WHT,62)]
+                intl = (row.get('international_prints') or '').strip().strip('"')
+                for code in intl.split(','):
+                    code = code.strip()
+                    if '-' not in code:
+                        continue
+                    alt_set, alt_num = code.split('-', 1)
+                    alt_set = alt_set.strip().upper()
+                    alt_num = alt_num.strip()
+                    if not alt_set or not alt_num:
+                        continue
+                    if (alt_set, alt_num) == (set_code, num):
+                        continue  # self-reference
+                    alt[(set_code, num)].append(_en_url_for(alt_set, alt_num))
+    except Exception as exc:  # pragma: no cover
+        print(f'warn: alt-print map failed: {exc}', file=sys.stderr)
+    return alt
+
+
+def _collect_cards(index_path: str, alt_urls: dict[tuple[str, str], list[str]]) -> list[dict]:
+    """Return a list of unique cards keyed by (set, number) with a fallback URL chain."""
     with open(index_path, encoding='utf-8') as f:
         idx = json.load(f)
     seen: dict[tuple[str, str], str] = {}
@@ -75,31 +128,46 @@ def _collect_cards(index_path: str) -> list[dict]:
                 url = (card.get('image_url') or '').strip()
                 if key not in seen or (not seen[key] and url):
                     seen[key] = url
-    return [
-        {'set': s, 'number': n, 'url': u or EN_FALLBACK_TEMPLATE.format(set=s, num=n)}
-        for (s, n), u in seen.items()
-    ]
+
+    out = []
+    for (s, n), u in seen.items():
+        primary = u or _en_url_for(s, n)
+        alts = alt_urls.get((s, n), [])
+        # Build the fallback chain — primary first, then international
+        # prints in whatever order the database gave us. Dedupe so a
+        # repeated primary doesn't waste a retry.
+        chain = [primary] + [a for a in alts if a != primary]
+        out.append({'set': s, 'number': n, 'urls': chain})
+    return out
 
 
 def _fetch_one(card: dict, out_dir: str) -> tuple[str, str, bool, str]:
-    set_code, number, url = card['set'], card['number'], card['url']
+    set_code, number = card['set'], card['number']
     out_path = os.path.join(out_dir, f'{set_code}_{number}.png')
     if os.path.exists(out_path) and os.path.getsize(out_path) > 0:
         return (set_code, number, True, 'cached')
-    try:
-        resp = requests.get(
-            url,
-            timeout=FETCH_TIMEOUT_S,
-            headers={'User-Agent': HTTP_USER_AGENT},
-        )
-        if resp.status_code != 200:
-            return (set_code, number, False, f'HTTP {resp.status_code}')
-        img = Image.open(io.BytesIO(resp.content)).convert('RGBA')
-        img = img.resize((TILE_W, TILE_H), Image.LANCZOS)
-        img.save(out_path, format='PNG', optimize=True)
-        return (set_code, number, True, f'{os.path.getsize(out_path) // 1024} KB')
-    except Exception as exc:
-        return (set_code, number, False, f'err: {exc}')
+
+    last_err = 'no urls'
+    for url in card.get('urls') or []:
+        try:
+            resp = requests.get(
+                url,
+                timeout=FETCH_TIMEOUT_S,
+                headers={'User-Agent': HTTP_USER_AGENT},
+            )
+            if resp.status_code != 200:
+                last_err = f'HTTP {resp.status_code}'
+                continue
+            img = Image.open(io.BytesIO(resp.content)).convert('RGBA')
+            img = img.resize((TILE_W, TILE_H), Image.LANCZOS)
+            img.save(out_path, format='PNG', optimize=True)
+            size_kb = os.path.getsize(out_path) // 1024
+            via = '' if url == card['urls'][0] else f' (alt #{card["urls"].index(url)})'
+            return (set_code, number, True, f'{size_kb} KB{via}')
+        except Exception as exc:
+            last_err = f'err: {exc}'
+            continue
+    return (set_code, number, False, last_err)
 
 
 def main(argv: list[str]) -> int:
@@ -111,8 +179,11 @@ def main(argv: list[str]) -> int:
         return 1
     os.makedirs(out_dir, exist_ok=True)
 
-    cards = _collect_cards(index_path)
-    print(f'unique cards to ensure: {len(cards)}')
+    alt_urls = _read_alt_print_urls(site_dir)
+    print(f'alt-print map: {len(alt_urls)} cards with at least one alternative')
+    cards = _collect_cards(index_path, alt_urls)
+    with_alts = sum(1 for c in cards if len(c['urls']) > 1)
+    print(f'unique cards to ensure: {len(cards)} (of which {with_alts} carry alt URLs)')
 
     t0 = time.time()
     ok = 0

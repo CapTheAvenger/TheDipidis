@@ -77,10 +77,10 @@ function escapeHtml(s) {
 }
 
 // Width budget for the matchup table inside a <pre> block. Phones in
-// portrait render Telegram's monospace font at ~30-32 chars wide; this
-// layout lands at 32 chars so it fits cleanly without a horizontal
-// scroll bar on most clients.
-const MATCHUP_OPP_W = 20;
+// portrait render Telegram's monospace font at ~30 chars wide; this
+// layout (opponent + winrate + marker) lands at ~30 chars so it fits
+// cleanly without a horizontal scroll bar on most clients.
+const MATCHUP_OPP_W = 22;
 function _truncate(s, max) {
     s = String(s ?? '');
     return s.length > max ? s.slice(0, max - 1) + '…' : s;
@@ -97,8 +97,8 @@ function _padLeft(s, w) {
 function formatMatchupMatrix(matchups) {
     if (!Array.isArray(matchups) || matchups.length === 0) return null;
     const lines = [];
-    lines.push(`${_padRight('Gegner', MATCHUP_OPP_W)} ${_padLeft('G', 4)} ${_padLeft('WR', 5)}`);
-    lines.push('─'.repeat(MATCHUP_OPP_W + 1 + 4 + 1 + 5));
+    lines.push(`${_padRight('Gegner', MATCHUP_OPP_W)} ${_padLeft('WR', 5)}`);
+    lines.push('─'.repeat(MATCHUP_OPP_W + 1 + 5));
     for (const m of matchups) {
         const wr = Number.isFinite(m.win_pct) ? m.win_pct : 0;
         // Use the same colour cut-offs as the website's Matchup Matrix:
@@ -110,7 +110,6 @@ function formatMatchupMatrix(matchups) {
         const wrText = `${wr.toFixed(1).replace('.', ',')}%`;
         lines.push(
             `${_padRight(_truncate(m.opponent, MATCHUP_OPP_W), MATCHUP_OPP_W)} ` +
-            `${_padLeft(m.games, 4)} ` +
             `${_padLeft(wrText, 5)}${marker ? ' ' + marker : ''}`,
         );
     }

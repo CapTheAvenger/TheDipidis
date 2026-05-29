@@ -256,8 +256,10 @@ def _build_deck(rows: Iterable[dict], ace_spec_names: set[str] | None = None) ->
         deck.append(_card_from_row(r, count, ace_spec_names))
         round_loss[idx] = avg - count
         total += count
-        if total >= HARD_DECK_SIZE:
-            break
+        # Don't break out of the loop when main fills up: rows after
+        # this point can still include sub-floor (< 30 %) candidates we
+        # need for the tech-card list. The `count <= 0` skip a few
+        # lines up handles the actual cap.
 
     # Top-up pass: most stock lists land 1-2 cards shy of 60 because of
     # the round() truncation. Bump the cards we rounded down the most

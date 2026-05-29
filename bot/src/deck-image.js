@@ -94,35 +94,33 @@ function _fmtPct(n) {
     return Number.isInteger(n) ? `${n}%` : `${n.toFixed(1).replace('.', ',')}%`;
 }
 
-function _fmtAvg(n) {
-    if (!Number.isFinite(n) || n <= 0) return '';
-    return `⌀${n.toFixed(1).replace('.', ',')}`;
-}
-
 function _tileOverlaysSvg(card) {
-    // Top-left badge: "82% ⌀3,4" — inclusion + raw average. Bottom-
-    // right badge: rounded count we actually put in the list. Together
-    // they answer "how often is this card played and how many copies?"
-    // at a glance.
+    // Top-left badge stacks inclusion-% on top of the average count;
+    // bottom-right badge stays as the rounded copy-count we put in the
+    // list. Same dimensions, same rounded corners — visually paired so
+    // the two stats read as a matching corner-set rather than two
+    // mismatched stickers.
     const w = TILE_W, h = TILE_H;
     const inclusion = _fmtPct(card.inclusion_pct);
-    const avg = _fmtAvg(card.avg_count);
-    const topText = [inclusion, avg].filter(Boolean).join(' ');
+    const avgRaw = (Number.isFinite(card.avg_count) && card.avg_count > 0)
+        ? card.avg_count.toFixed(1).replace('.', ',')
+        : '';
+    const showTop = Boolean(inclusion || avgRaw);
 
-    const showTop = topText.length > 0;
-    const topBadgeW = Math.max(82, topText.length * 11 + 18);
-    const topBadgeH = 36;
-
+    const tbX = 8, tbY = 8, tbW = 64, tbH = 52;
     const countBx = w - 64, countBy = h - 64, countBw = 52, countBh = 52;
 
     return Buffer.from(
         `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}">
             ${showTop ? `
-            <rect x="8" y="8" width="${topBadgeW}" height="${topBadgeH}" rx="8" ry="8"
+            <rect x="${tbX}" y="${tbY}" width="${tbW}" height="${tbH}" rx="10" ry="10"
                   fill="rgba(0,0,0,0.78)" stroke="rgba(255,255,255,0.5)" stroke-width="1.5"/>
-            <text x="${8 + topBadgeW / 2}" y="33"
+            ${inclusion ? `<text x="${tbX + tbW / 2}" y="${tbY + 22}"
                   font-family="DejaVu Sans, Liberation Sans, Arial, sans-serif"
-                  font-size="20" font-weight="700" fill="#ffffff" text-anchor="middle">${_escapeXml(topText)}</text>
+                  font-size="18" font-weight="700" fill="#ffffff" text-anchor="middle">${_escapeXml(inclusion)}</text>` : ''}
+            ${avgRaw ? `<text x="${tbX + tbW / 2}" y="${tbY + 44}"
+                  font-family="DejaVu Sans, Liberation Sans, Arial, sans-serif"
+                  font-size="14" font-weight="400" fill="#c8c8d6" text-anchor="middle">⌀ ${_escapeXml(avgRaw)}</text>` : ''}
             ` : ''}
             <rect x="${countBx}" y="${countBy}" width="${countBw}" height="${countBh}" rx="10" ry="10"
                   fill="rgba(0,0,0,0.78)" stroke="rgba(255,255,255,0.5)" stroke-width="1.5"/>

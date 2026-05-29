@@ -227,6 +227,13 @@ jobs:
           #    Cheaper than driving Puppeteer per-deck on Render Free.
           python3 scripts/generate-bot-deck-index.py _site "${VER}"
 
+          # 8) data/card-art/*.png — pre-fetched + resized card tiles
+          #    that the bot's deck-image composite reads at request
+          #    time. Doing this here keeps the bot off the Limitless
+          #    CDN entirely (no rate-limit risk, same-origin caching).
+          pip install --quiet Pillow requests
+          python3 scripts/prefetch-card-art.py _site
+
           echo "✓ Cache-busted with version ${VER}"
           echo "  index.html  APP_VERSION = ${VER}"
           echo "  service-worker.js  CACHE_NAME = tcg-analysis-v${VER}"

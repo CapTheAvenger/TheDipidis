@@ -21,6 +21,7 @@
 import { Markup } from 'telegraf';
 
 import { fetchDeckIndex, formatDecklistAsPTCGL } from '../data-index.js';
+import { generateDeckImage } from '../deck-image.js';
 import { MENU_KEYBOARD, MENU_LABEL_DECK } from './start.js';
 
 const PAGE_SIZE = 8;
@@ -211,23 +212,35 @@ async function sendDecklist(ctx, sourceKey, deckKey) {
     const uniqueCount = src.card_count_unique ?? src.cards?.length ?? 0;
     const sourceLabel = SOURCE_LABELS[sourceKey] || sourceKey;
     const fk = (src.format_key && SOURCE_FORMAT_VISIBLE.has(sourceKey)) ? ` · ${src.format_key}` : '';
-
-    // Header message: deck name + meta. No <pre>, no inline buttons —
-    // its only job is context. Keeping the header OUT of the code
-    // block guarantees that when the user taps the </> copy icon on
-    // the decklist message they get nothing but the cards.
-    //
-    // We attach the persistent reply keyboard here as a side effect:
-    // Telegram only re-shows a collapsed reply keyboard when a fresh
-    // message arrives with reply_markup of that type, so every
-    // "completed action" message gets a chance to bring the menu
-    // back. Since the header message has no inline keyboard of its
-    // own, this is a free slot for the reply keyboard.
-    await ctx.reply(
+    const captionText =
         `<b>${escapeHtml(deck.name)}</b>\n` +
-        `${escapeHtml(sourceLabel)}${escapeHtml(fk)} · ${cardCount} Karten (${uniqueCount} unique)`,
-        { parse_mode: 'HTML', ...MENU_KEYBOARD },
-    );
+        `${escapeHtml(sourceLabel)}${escapeHtml(fk)} · ${cardCount} Karten (${uniqueCount} unique)`;
+
+    // Try to send the composited deck-grid PNG as the header (caption
+    // carries the deck name + stats). If the composite fails — sharp
+    // crash, card art entirely unavailable, network down — we fall back
+    // to a plain text header so the user still gets the decklist below.
+    //
+    // The persistent reply keyboard rides along on this first message:
+    // Telegram only re-shows a collapsed reply keyboard when a fresh
+    // message arrives with reply_markup of that type. The text decklist
+    // below has its own inline keyboard, so this is the slot we have.
+    let sentImage = false;
+    try {
+        const png = await generateDeckImage(deck, src, sourceLabel);
+        if (png) {
+            await ctx.replyWithPhoto(
+                { source: png, filename: `${deck.key || 'deck'}.png` },
+                { caption: captionText, parse_mode: 'HTML', ...MENU_KEYBOARD },
+            );
+            sentImage = true;
+        }
+    } catch (err) {
+        console.warn('[deck-image] generate failed:', err?.message || err);
+    }
+    if (!sentImage) {
+        await ctx.reply(captionText, { parse_mode: 'HTML', ...MENU_KEYBOARD });
+    }
 
     // Decklist message: only the list, wrapped in a plain <pre>
     // code block so monospace alignment holds. Ace-Spec lines are

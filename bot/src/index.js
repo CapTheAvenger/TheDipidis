@@ -27,7 +27,14 @@ import { registerDeck } from './commands/deck.js';
 
 const BOT_TOKEN = process.env.BOT_TOKEN;
 const PORT = parseInt(process.env.PORT || '3000', 10);
-const WEBHOOK_URL = process.env.WEBHOOK_URL || '';
+// Render injects RENDER_EXTERNAL_URL automatically with the public
+// HTTPS URL of the web service. We fall back to it when WEBHOOK_URL
+// isn't set explicitly — without this auto-detection the bot would
+// poll-only on Render Free, which doesn't work because the dyno
+// sleeps after 15 min idle and polling can't wake it back up. With
+// webhook mode, Telegram pushes the update to our URL, the inbound
+// HTTP request wakes Render, the bot processes the update.
+const WEBHOOK_URL = process.env.WEBHOOK_URL || process.env.RENDER_EXTERNAL_URL || '';
 
 if (!BOT_TOKEN) {
     console.error('[boot] BOT_TOKEN env var is required. Get one from @BotFather.');

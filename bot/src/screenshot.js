@@ -74,14 +74,31 @@ export async function captureMetaCallImage({ viewport, timeoutMs = 90000 } = {})
         });
 
         // Forward page console + errors to our logs so we can see what
-        // the app says about its own state during the render.
-        page.on('console', (msg) => {
+        // the app says about its own state during the render. We
+        // serialize each arg via JSHandle.jsonValue() to avoid the
+        // unhelpful `JSHandle@error` placeholder that page.console
+        // returns by default when an Error object is logged.
+        page.on('console', async (msg) => {
             const type = msg.type();
-            if (type === 'error' || type === 'warning') {
+            if (type !== 'error' && type !== 'warning') return;
+            try {
+                const parts = await Promise.all(
+                    msg.args().map(async (h) => {
+                        try {
+                            const v = await h.jsonValue();
+                            if (v && typeof v === 'object' && v.message) return v.message;
+                            return typeof v === 'string' ? v : JSON.stringify(v);
+                        } catch {
+                            return h.toString();
+                        }
+                    }),
+                );
+                log(`page.${type}: ${parts.join(' ')}`);
+            } catch {
                 log(`page.${type}: ${msg.text()}`);
             }
         });
-        page.on('pageerror', (err) => log('page.error', err.message));
+        page.on('pageerror', (err) => log('page.uncaught', err.message));
 
         // `networkidle2` waits for ≤2 active connections for 500 ms.
         // thedipidis.app's offline-prefetcher keeps a constant trickle
@@ -95,6 +112,32 @@ export async function captureMetaCallImage({ viewport, timeoutMs = 90000 } = {})
             timeout: timeoutMs,
         });
         log('navigation done', `(+${Date.now() - t0}ms)`);
+
+        // Block the app's auto-reload paths BEFORE we start evaluating
+        // heavy stuff. The PWA registers a Service Worker that posts
+        // {type:'SW_UPDATED'} on activation; the page listener calls
+        // window.location.reload() when it receives that message,
+        // which kills our Puppeteer execution context mid-eval
+        // ("ProtocolError: Execution context was destroyed").
+        // We can't easily prevent the SW from registering, but we can
+        // override every reload path the app uses. controllerchange
+        // listener also calls reload — same override covers it.
+        await page.evaluate(() => {
+            const noopReload = () => {
+                /* swallowed — bot doesn't want a page reload */
+            };
+            try {
+                window.location.reload = noopReload;
+            } catch (_) {}
+            try {
+                Object.defineProperty(window.location, 'reload', {
+                    value: noopReload,
+                    writable: false,
+                    configurable: true,
+                });
+            } catch (_) {}
+        });
+        log('reload guard installed');
 
         log('waiting for window.MetaCall');
         await page.waitForFunction(

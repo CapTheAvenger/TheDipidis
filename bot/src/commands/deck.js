@@ -21,7 +21,7 @@
 import { Markup } from 'telegraf';
 
 import { fetchDeckIndex, formatDecklistAsPTCGL } from '../data-index.js';
-import { MENU_LABEL_DECK } from './start.js';
+import { MENU_KEYBOARD, MENU_LABEL_DECK } from './start.js';
 
 const PAGE_SIZE = 8;
 
@@ -209,10 +209,17 @@ async function sendDecklist(ctx, sourceKey, deckKey) {
     // its only job is context. Keeping the header OUT of the code
     // block guarantees that when the user taps the </> copy icon on
     // the decklist message they get nothing but the cards.
+    //
+    // We attach the persistent reply keyboard here as a side effect:
+    // Telegram only re-shows a collapsed reply keyboard when a fresh
+    // message arrives with reply_markup of that type, so every
+    // "completed action" message gets a chance to bring the menu
+    // back. Since the header message has no inline keyboard of its
+    // own, this is a free slot for the reply keyboard.
     await ctx.reply(
         `<b>${escapeHtml(deck.name)}</b>\n` +
         `${escapeHtml(sourceLabel)}${escapeHtml(fk)} · ${cardCount} Karten (${uniqueCount} unique)`,
-        { parse_mode: 'HTML' },
+        { parse_mode: 'HTML', ...MENU_KEYBOARD },
     );
 
     // Decklist message: only the list, in a `language-ansi` code

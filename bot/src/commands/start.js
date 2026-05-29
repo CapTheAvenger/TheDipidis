@@ -20,7 +20,7 @@ import { Markup } from 'telegraf';
 export const MENU_LABEL_METACALL = '📊 Meta Call';
 export const MENU_LABEL_DECK = '🃏 Deck Builder';
 
-const MENU_KEYBOARD = Markup.keyboard([
+export const MENU_KEYBOARD = Markup.keyboard([
     [MENU_LABEL_METACALL],
     [MENU_LABEL_DECK],
 ])

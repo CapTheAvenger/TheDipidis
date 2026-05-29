@@ -72,10 +72,14 @@ function startStaticServer() {
         // Block parent-directory traversal — important whenever you
         // bolt a static server onto a build process.
         if (!filePath.startsWith(SITE_DIR)) {
+            console.warn(`[server] 403 ${urlPath}`);
             res.writeHead(403).end();
             return;
         }
         if (!fs.existsSync(filePath) || fs.statSync(filePath).isDirectory()) {
+            // Surface 404s so a missing data file shows up next to the
+            // page errors instead of bottling up in unrelated stack traces.
+            console.warn(`[server] 404 ${urlPath}`);
             res.writeHead(404).end();
             return;
         }
@@ -117,6 +121,41 @@ async function renderMetaCall(baseUrl) {
                 req.abort();
             } else {
                 req.continue();
+            }
+        });
+
+        // Defuse the in-page version check before any app script runs.
+        //
+        // index.html ships an inline IIFE that fetches version.json,
+        // compares against window.APP_VERSION, and on mismatch sets
+        // `window.location.href = pathname + '?_v=' + new_version`.
+        // That navigation tears down our execution context mid-preload
+        // ("Execution context was destroyed, most likely because of a
+        // navigation" in CI / runtime). The IIFE itself has an escape
+        // hatch: if `sessionStorage['__tcg_version_refresh']` is set
+        // it skips. We plant that key before any page script runs.
+        //
+        // Belt-and-braces: also no-op the three Location methods so
+        // anything else that tries to navigate via reload / assign /
+        // replace fails silently. Direct assignment to
+        // `window.location.href` is harder to block — the version
+        // check uses exactly that — but with the sessionStorage gate
+        // closed the check never reaches that line.
+        await page.evaluateOnNewDocument(() => {
+            try { sessionStorage.setItem('__tcg_version_refresh', '1'); } catch (_) {}
+            const noop = () => {};
+            try {
+                Location.prototype.reload = noop;
+                Location.prototype.assign = noop;
+                Location.prototype.replace = noop;
+            } catch (_) {}
+        });
+
+        // Surface navigations so a future regression here doesn't
+        // hide behind a misleading "context destroyed".
+        page.on('framenavigated', (frame) => {
+            if (frame === page.mainFrame()) {
+                console.log(`[page.navigated] ${frame.url()}`);
             }
         });
 

@@ -20,10 +20,11 @@
 import express from 'express';
 import { Telegraf } from 'telegraf';
 
-import { allowedCount, whitelistMiddleware } from './auth.js';
+import { allowedCount, isAdmin, isAllowed } from './auth.js';
 import { installBotCommands, registerStart } from './commands/start.js';
 import { registerMetaCall } from './commands/metacall.js';
 import { registerDeck, handleDeckSearch } from './commands/deck.js';
+import { handleAccessRequest, registerAccess } from './commands/access.js';
 import { shutdown as shutdownScreenshot } from './screenshot.js';
 
 const BOT_TOKEN = process.env.BOT_TOKEN;
@@ -45,10 +46,27 @@ if (!BOT_TOKEN) {
 const bot = new Telegraf(BOT_TOKEN);
 
 // Whitelist runs before anything else so denied users never touch
-// the command handlers below.
-bot.use(whitelistMiddleware);
+// the command handlers below. An outsider's `/start` is the one
+// exception: it routes into the self-service access-request flow
+// (commands/access.js) so admins can approve from chat instead of
+// editing the env var by hand. Everything else from non-whitelisted
+// users stays a silent ignore so the bot doesn't even announce its
+// presence to strangers.
+bot.use((ctx, next) => {
+    if (isAdmin(ctx) || isAllowed(ctx)) return next();
+    const from = ctx?.from || {};
+    console.warn(`[auth] denied update from id=${from.id} username=${from.username || '(none)'}`);
+    const text = ctx.message?.text || '';
+    if (text === '/start' || text.startsWith('/start ')) {
+        return handleAccessRequest(ctx).catch((err) =>
+            console.warn('[access] request crashed:', err?.message || err),
+        );
+    }
+    return Promise.resolve();
+});
 
 registerStart(bot);
+registerAccess(bot);
 registerMetaCall(bot);
 registerDeck(bot);
 

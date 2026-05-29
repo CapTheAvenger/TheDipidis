@@ -1,46 +1,71 @@
 /**
  * Whitelist-based access control for the bot.
  *
- * ALLOWED_USER_IDS env var holds a comma-separated list of numeric
- * Telegram user IDs. We strictly check `from.id` on every incoming
- * update; non-matching users get a silent ignore so a public bot
- * link doesn't accidentally leak data to strangers.
+ * Two env vars drive who can do what:
+ *   • ALLOWED_USER_IDS — comma-separated Telegram numeric IDs that
+ *     can use the bot.
+ *   • ADMIN_USER_IDS   — comma-separated Telegram numeric IDs that
+ *     can approve / deny access requests. Admins are implicitly
+ *     allowed too (no need to list them in both).
+ *
+ * Runtime grants live in an in-memory Set populated when an admin
+ * taps "Freigeben" on an access-request DM (see commands/access.js).
+ * They survive for the dyno's lifetime — Render Free spins down
+ * after 15 min idle and wipes memory, so admins get a copy-paste
+ * string after every grant for permanent persistence via the
+ * ALLOWED_USER_IDS env var.
  *
  * Telegram user IDs are stable numeric values you can get by
  * messaging @userinfobot or by reading the bot's logs after a
- * /start attempt.
+ * /start attempt — which now triggers the request flow automatically.
  */
 
-const allowed = new Set(
-    String(process.env.ALLOWED_USER_IDS || '')
-        .split(',')
-        .map((s) => s.trim())
-        .filter(Boolean),
-);
+function _parseIds(raw) {
+    return new Set(
+        String(raw || '')
+            .split(',')
+            .map((s) => s.trim())
+            .filter(Boolean),
+    );
+}
+
+const _envAllowed = _parseIds(process.env.ALLOWED_USER_IDS);
+const _adminIds   = _parseIds(process.env.ADMIN_USER_IDS);
+// Admins are implicitly allowed — saves the operator from having
+// to repeat their ID in both env vars.
+for (const id of _adminIds) _envAllowed.add(id);
+
+const _runtimeAllowed = new Set();
 
 export function isAllowed(ctx) {
     const id = ctx?.from?.id;
     if (id == null) return false;
-    return allowed.has(String(id));
+    const s = String(id);
+    return _envAllowed.has(s) || _runtimeAllowed.has(s);
+}
+
+export function isAdmin(ctx) {
+    const id = ctx?.from?.id;
+    if (id == null) return false;
+    return _adminIds.has(String(id));
+}
+
+export function listAdmins() {
+    return [..._adminIds];
+}
+
+export function grantAccess(userId) {
+    _runtimeAllowed.add(String(userId));
+}
+
+export function revokeAccess(userId) {
+    _runtimeAllowed.delete(String(userId));
+}
+
+export function getAllAllowed() {
+    return new Set([..._envAllowed, ..._runtimeAllowed]);
 }
 
 export function allowedCount() {
-    return allowed.size;
-}
-
-/**
- * Drop-in middleware that short-circuits the update for any
- * non-whitelisted sender. Also logs the would-be sender's ID so
- * the operator can copy it into the env var if they want to grant
- * access.
- */
-export function whitelistMiddleware(ctx, next) {
-    if (isAllowed(ctx)) return next();
-    const from = ctx?.from || {};
-    console.warn(
-        `[auth] denied update from id=${from.id} username=${from.username || '(none)'}`,
-    );
-    // Silent ignore — no reply, no engagement. A non-whitelisted user
-    // shouldn't even learn the bot is alive.
-    return Promise.resolve();
+    return getAllAllowed().size;
 }

@@ -3,7 +3,7 @@
 #
 # Deploy by clicking "New" → "Blueprint" on the Render dashboard and
 # pointing it at this repo. Set the secret env vars (BOT_TOKEN,
-# ALLOWED_USER_IDS) on the resulting service.
+# ALLOWED_USER_IDS, ADMIN_USER_IDS) on the resulting service.
 #
 # Free tier notes:
 #   • Spins down after 15 min of inactivity. First request after sleep
@@ -32,5 +32,7 @@ services:
         sync: false             # set on dashboard, never in git
       - key: ALLOWED_USER_IDS
         sync: false             # comma-separated Telegram user IDs
+      - key: ADMIN_USER_IDS
+        sync: false             # admin IDs — can approve /start requests in chat
       - key: NODE_VERSION
         value: 22

@@ -31,6 +31,13 @@ const SOURCE_LABELS = {
     'city-league':  'City League',
 };
 
+// Sources whose label benefits from the format-key suffix. Current
+// Meta + Past Meta carry the EN set rotation as user-meaningful
+// context ("TEF-CRI", "TEF-POR"). City League data is JP-rotation
+// (M3 mapped to EN TEF-POR) and the set code is just noise on the
+// picker — the label alone is enough.
+const SOURCE_FORMAT_VISIBLE = new Set(['current-meta', 'past-tef-por']);
+
 export function registerDeck(bot) {
     bot.command('deck', (ctx) => showDeckList(ctx, 0));
     bot.action('deck:list', async (ctx) => {
@@ -178,7 +185,7 @@ async function showSourcePicker(ctx, deckKey) {
     const rows = sources.map((srcKey) => {
         const src = deck.sources[srcKey];
         const label = SOURCE_LABELS[srcKey] || srcKey;
-        const fk = src?.format_key ? ` · ${src.format_key}` : '';
+        const fk = (src?.format_key && SOURCE_FORMAT_VISIBLE.has(srcKey)) ? ` · ${src.format_key}` : '';
         return [Markup.button.callback(`📦 ${label}${fk}`, `deck:src:${srcKey}:${deckKey}`)];
     });
     rows.push([Markup.button.callback('⬅️ Andere Decks', 'deck:back')]);
@@ -203,7 +210,7 @@ async function sendDecklist(ctx, sourceKey, deckKey) {
     const cardCount = src.card_count ?? 0;
     const uniqueCount = src.card_count_unique ?? src.cards?.length ?? 0;
     const sourceLabel = SOURCE_LABELS[sourceKey] || sourceKey;
-    const fk = src.format_key ? ` · ${src.format_key}` : '';
+    const fk = (src.format_key && SOURCE_FORMAT_VISIBLE.has(sourceKey)) ? ` · ${src.format_key}` : '';
 
     // Header message: deck name + meta. No <pre>, no inline buttons —
     // its only job is context. Keeping the header OUT of the code

@@ -239,12 +239,15 @@ jobs:
         # instead of 40 s of live Puppeteer per request.
         # The Ubuntu runner ships with google-chrome-stable installed,
         # so we point Puppeteer at it and skip the 280 MB download.
+        # `npm install` (not `npm ci`) — `npm ci` requires a checked-in
+        # package-lock.json and we deliberately don't commit one for
+        # this single-script tool.
         working-directory: prerender
         env:
           PUPPETEER_SKIP_DOWNLOAD: 'true'
           PUPPETEER_EXECUTABLE_PATH: /usr/bin/google-chrome-stable
         run: |
-          npm ci --no-audit --no-fund --omit=optional
+          npm install --no-audit --no-fund --omit=optional
           node prerender-meta-call.js ../_site
 
       - name: Setup Pages

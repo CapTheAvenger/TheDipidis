@@ -33,6 +33,17 @@ export async function captureMetaCallImage() {
             signal: controller.signal,
             headers: { 'User-Agent': 'thedipidis-bot/0.1' },
         });
+        if (response.status === 404) {
+            // The PNG hasn't been written yet — most likely the
+            // current GitHub Pages deploy didn't run (or hasn't
+            // finished) the prerender step. Surface that distinctly
+            // so the user knows to retry rather than chasing a real
+            // outage.
+            throw new Error(
+                'Snapshot ist noch nicht im Deploy. ' +
+                'Wenn gerade Daten gescrapt wurden, läuft der GitHub-Pages-Build noch — bitte in 2-3 Minuten nochmal probieren.',
+            );
+        }
         if (!response.ok) {
             throw new Error(`Snapshot fetch failed: HTTP ${response.status} ${response.statusText}`);
         }

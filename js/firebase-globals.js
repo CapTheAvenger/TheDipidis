@@ -88,7 +88,23 @@ async function forceCloudSync() {
     if (typeof loadUserData === 'function') await loadUserData(user.uid);
     if (typeof loadUserDecks === 'function') await loadUserDecks(user.uid, { forcePull: true });
     var deckCount = (window.userDecks || []).length;
-    _renderCloudSyncStatus('Sync abgeschlossen · ' + deckCount + ' Deck' + (deckCount === 1 ? '' : 's') + ' im Cache');
+
+    // Second phase: refresh the tournament data bundle so the user
+    // gets fresh scraper output on the same tap. The prefetcher's
+    // bottom-right pill takes over the per-file progress; we just
+    // surface "started" / "done" in the Cloud-Sync banner.
+    if (window.__offlinePrefetch && typeof window.__offlinePrefetch.run === 'function') {
+      _renderCloudSyncStatus('Sync abgeschlossen · ' + deckCount + ' Deck' + (deckCount === 1 ? '' : 's') + ' · Tournament-Daten werden aktualisiert…');
+      // Fire-and-forget — the prefetcher manages its own pill UI and
+      // the user can navigate away while it runs in the background.
+      window.__offlinePrefetch.run({ refresh: true })
+        .then(function () {
+          _renderCloudSyncStatus('Sync abgeschlossen · ' + deckCount + ' Deck' + (deckCount === 1 ? '' : 's') + ' · Tournament-Daten aktuell');
+        })
+        .catch(function () { /* prefetcher pill already shows errors */ });
+    } else {
+      _renderCloudSyncStatus('Sync abgeschlossen · ' + deckCount + ' Deck' + (deckCount === 1 ? '' : 's') + ' im Cache');
+    }
   } catch (err) {
     console.error('[forceCloudSync] failed:', err);
     _renderCloudSyncStatus('Sync-Fehler: ' + (err && err.message ? err.message : err));

@@ -230,13 +230,19 @@
         } catch (_) { return false; }
     }
 
-    async function fetchAndStore(file, cache) {
+    async function fetchAndStore(file, cache, force) {
         var url = BASE_PATH + file.path;
         if (!cache) {
             STATE.failed += 1;
             return { url: url, status: 'no-cache' };
         }
-        if (await fileAlreadyCached(cache, url)) {
+        // force=true skips the cached-already shortcut so a manual
+        // "refresh data" tap actually re-fetches everything. Without
+        // it the prefetcher's normal "is this URL in cache?" check
+        // would no-op for any file already on disk — exactly the
+        // wrong behaviour when the user is trying to pull fresh
+        // tournament data from the server.
+        if (!force && await fileAlreadyCached(cache, url)) {
             STATE.done += 1;
             STATE.bytes += file.size || 0;
             return { url: url, status: 'already-cached' };
@@ -260,7 +266,7 @@
         }
     }
 
-    async function runQueue(files, cache) {
+    async function runQueue(files, cache, force) {
         var i = 0;
         var workers = [];
         function nextProgress() {
@@ -269,7 +275,7 @@
         async function worker() {
             while (i < files.length) {
                 var idx = i++;
-                await fetchAndStore(files[idx], cache);
+                await fetchAndStore(files[idx], cache, force);
                 nextProgress();
             }
         }
@@ -412,7 +418,13 @@
         }
     }
 
-    async function prefetchAll() {
+    async function prefetchAll(opts) {
+        opts = opts || {};
+        // refresh=true makes the data phase re-fetch files even if
+        // they're already in the SW cache. Used by the manual
+        // "Jetzt synchronisieren" path so the user can pull fresh
+        // tournament data without reloading the whole app.
+        var refresh = opts.refresh === true;
         if (STATE.running) return;
         if (!navigator.onLine) return;
         STATE.running = true;
@@ -452,7 +464,7 @@
                 return;
             }
 
-            await runQueue(files, cache);
+            await runQueue(files, cache, refresh);
 
             // Verify pass — iOS Safari sometimes accepts cache.add() but
             // evicts entries seconds later under quota pressure. Re-check

@@ -113,15 +113,45 @@ async function renderMetaCall(baseUrl) {
         // Same bypass + interception trick we'd use at runtime, kept
         // here even though localhost is comfy: no SW reload, no
         // 4 363 image-prefetch requests, no font fetches.
+        //
+        // Plus we now block the scripts whose side-effects compete with
+        // the render and previously seemed to take the renderer down:
+        //   • offline-prefetch.js — cache.add()'s the entire 285 MB
+        //     data bundle through the Cache API. In a headless tab
+        //     with no persistent storage that quickly hits quota and
+        //     the renderer process dies, taking the execution
+        //     context with it. We don't need offline behaviour for
+        //     a one-shot render.
+        //   • firebase-*-compat.js — initializes Auth + Firestore and
+        //     opens long-poll connections we don't use. Failed
+        //     network attempts surface as empty `page.error` blobs.
+        //   • error-tracking.js — wires Sentry; pointless overhead
+        //     here and a possible source of spurious errors.
+        //   • battle-journal.js — also touches Firebase.
+        const BLOCKED_SCRIPT_PATTERNS = [
+            /\/offline-prefetch(\.[^/]*)?\.js$/,
+            /\/firebase-(app|auth|firestore|globals|config|collection|credentials|auth-ui-helpers)(\.[^/]*)?\.js$/,
+            /\/auth-ui-helpers(\.[^/]*)?\.js$/,
+            /\/error-tracking(\.[^/]*)?\.js$/,
+            /\/battle-journal(\.[^/]*)?\.js$/,
+        ];
         try { await page.setBypassServiceWorker(true); } catch (_) {}
         await page.setRequestInterception(true);
         page.on('request', (req) => {
             const type = req.resourceType();
             if (type === 'image' || type === 'media' || type === 'font') {
                 req.abort();
-            } else {
-                req.continue();
+                return;
             }
+            if (type === 'script') {
+                const url = req.url();
+                if (BLOCKED_SCRIPT_PATTERNS.some((re) => re.test(url))) {
+                    console.log(`[blocked-script] ${url.replace(/^https?:\/\/[^/]+/, '')}`);
+                    req.abort();
+                    return;
+                }
+            }
+            req.continue();
         });
 
         // Defuse the in-page version check before any app script runs.
@@ -161,10 +191,13 @@ async function renderMetaCall(baseUrl) {
 
         // Surface page errors with their message text instead of
         // the JSHandle@error placeholder Puppeteer hands us by
-        // default.
+        // default. Falls back to msg.text() when arg serialization
+        // returns empty (e.g. for some resource-load errors that
+        // Chrome reports without console-style args).
         page.on('console', async (msg) => {
             const type = msg.type();
             if (type !== 'error' && type !== 'warning') return;
+            let serialized = '';
             try {
                 const parts = await Promise.all(
                     msg.args().map(async (h) => {
@@ -177,10 +210,12 @@ async function renderMetaCall(baseUrl) {
                         }
                     }),
                 );
-                console.log(`[page.${type}] ${parts.join(' ')}`);
-            } catch {
-                console.log(`[page.${type}] ${msg.text()}`);
-            }
+                serialized = parts.filter(Boolean).join(' ');
+            } catch { /* fall through */ }
+            const text = serialized || msg.text() || '<no message>';
+            const loc = msg.location ? msg.location() : null;
+            const where = loc?.url ? ` (${loc.url.replace(/^https?:\/\/[^/]+/, '')}${loc.lineNumber != null ? `:${loc.lineNumber}` : ''})` : '';
+            console.log(`[page.${type}]${where} ${text}`);
         });
         page.on('pageerror', (err) => console.log('[page.uncaught]', err.message));
 

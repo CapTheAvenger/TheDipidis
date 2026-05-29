@@ -73,6 +73,36 @@ export async function captureMetaCallImage({ viewport, timeoutMs = 90000 } = {})
             deviceScaleFactor: viewport?.deviceScaleFactor ?? 1,
         });
 
+        // Bypass the page's Service Worker. The PWA installs one
+        // automatically and fires SW_UPDATED on activation, which
+        // its index.html listener turns into a window.location.reload()
+        // — that nukes our execution context mid-preload. Bypassing
+        // means the SW never gets a chance to control this page; all
+        // requests go straight to network like a private-window
+        // first visit. Also dodges the controllerchange reload path
+        // and any quirky cache responses the SW might inject.
+        try {
+            await page.setBypassServiceWorker(true);
+        } catch (_) {
+            // Older Puppeteer? fall through to manual unregister later.
+        }
+
+        // Block heavy resources we don't need. The canvas renderer
+        // paints text + bars to a <canvas> — no card art, no fonts,
+        // no media required. Skipping these cuts the page's network
+        // footprint by ~99 % (we no longer fight the offline image
+        // prefetcher's 4 363-URL stampede) and keeps Render Free's
+        // 512 MB RAM ceiling comfortable.
+        await page.setRequestInterception(true);
+        page.on('request', (req) => {
+            const type = req.resourceType();
+            if (type === 'image' || type === 'media' || type === 'font') {
+                req.abort();
+                return;
+            }
+            req.continue();
+        });
+
         // Forward page console + errors to our logs so we can see what
         // the app says about its own state during the render. We
         // serialize each arg via JSHandle.jsonValue() to avoid the

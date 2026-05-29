@@ -68,6 +68,12 @@ function escapeHtml(s) {
         .replace(/>/g, '&gt;');
 }
 
+function _deckButtonLabel(deck) {
+    const rank = deck.rank;
+    const prefix = rank && rank < 9999 ? `#${rank} ` : '';
+    return `${prefix}${deck.name}`;
+}
+
 async function showDeckList(ctx, page) {
     const index = await fetchDeckIndex();
     const allKeys = Object.keys(index.decks || {});
@@ -83,10 +89,11 @@ async function showDeckList(ctx, page) {
     const start = safePage * PAGE_SIZE;
     const slice = allKeys.slice(start, start + PAGE_SIZE);
 
-    // Two-column grid of deck buttons — wider than one-per-row but
-    // names truncate on small phones, so we keep it at 1 to be safe.
+    // Keys are already sorted by rank in the JSON so the slice
+    // preserves rank order — we just label each button with the rank
+    // prefix so the sort is visible on phone screens.
     const deckRows = slice.map((k) => [
-        Markup.button.callback(index.decks[k].name, `deck:pick:${k}`),
+        Markup.button.callback(_deckButtonLabel(index.decks[k]), `deck:pick:${k}`),
     ]);
 
     // Nav row: ← prev / page indicator / next →. We only show the
@@ -99,12 +106,61 @@ async function showDeckList(ctx, page) {
     const keyboard = Markup.inlineKeyboard([...deckRows, nav]);
 
     return ctx.reply(
-        `<b>Welches Deck?</b> (${allKeys.length} insgesamt)`,
+        `<b>Welches Deck?</b> (${allKeys.length} insgesamt)\n` +
+        `<i>Tipp: Tippe einen Deck-Namen oder Teil davon ein, um zu suchen.</i>`,
         {
             parse_mode: 'HTML',
             ...keyboard,
         },
     );
+}
+
+/**
+ * Free-text search handler. Called from index.js's catch-all text
+ * middleware when the user's message isn't a slash-command and
+ * doesn't match one of the reply-keyboard labels. Substring match,
+ * case-insensitive — fuzzy enough for "drag" → Dragapult* without
+ * dragging in a Fuse.js dependency.
+ *
+ * Returns true if the search produced a meaningful reply, false if
+ * the catch-all should fall back to its generic "tap a button"
+ * message (e.g. empty query, no matches, index unreachable).
+ */
+export async function handleDeckSearch(ctx) {
+    const raw = (ctx.message?.text || '').trim();
+    if (raw.length < 2) return false;
+
+    const index = await fetchDeckIndex();
+    const decks = Object.values(index.decks || {});
+    if (decks.length === 0) return false;
+
+    const needle = raw.toLowerCase();
+    const matches = decks
+        .filter((d) => (d.name || '').toLowerCase().includes(needle))
+        // Already-rank-sorted from the JSON; this preserves it.
+        .slice(0, 12);
+
+    if (matches.length === 0) {
+        await ctx.reply(
+            `Keine Treffer für "<b>${escapeHtml(raw)}</b>".\n` +
+            `Versuch's mit einem kürzeren Suchbegriff oder tippe unten auf <b>${escapeHtml(MENU_LABEL_DECK)}</b>.`,
+            { parse_mode: 'HTML' },
+        );
+        return true;
+    }
+
+    const rows = matches.map((d) => [
+        Markup.button.callback(_deckButtonLabel(d), `deck:pick:${d.key}`),
+    ]);
+
+    await ctx.reply(
+        `<b>${matches.length} Treffer für "${escapeHtml(raw)}":</b>`,
+        {
+            parse_mode: 'HTML',
+            ...Markup.inlineKeyboard(rows),
+        },
+    );
+    return true;
 }
 
 async function showSourcePicker(ctx, deckKey) {

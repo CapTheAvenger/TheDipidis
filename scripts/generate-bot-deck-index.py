@@ -45,6 +45,21 @@ MIN_INCLUSION_PCT = 30.0     # below this we call the card a tech / brick
 HARD_DECK_SIZE     = 60       # PTCG hard cap
 ENERGY_MAX         = 12       # safety cap for basic energy counts after rounding
 
+# Card-type bucket order for the decklist export, matching how players
+# expect to read a list: Pokémon first, then trainers grouped by sub-
+# type, then energies. Within each bucket cards keep their inclusion-
+# percentage order (most-included first).
+TYPE_BUCKETS = [
+    'pokemon',
+    'supporter',
+    'item',
+    'tool',
+    'stadium',
+    'special-energy',
+    'basic-energy',
+]
+TYPE_BUCKET_INDEX = {b: i for i, b in enumerate(TYPE_BUCKETS)}
+
 
 def _parse_eu(value: str) -> float:
     """Parse the EU-locale numeric strings the scraper writes (',' decimal)."""
@@ -84,6 +99,34 @@ def _is_basic_energy(card_name: str, card_type: str) -> bool:
     if (card_type or '').strip().startswith('Basic Energy'):
         return True
     return bool(re.match(r'^(Grass|Fire|Water|Lightning|Psychic|Fighting|Darkness|Metal|Fairy|Dragon) Energy\b', (card_name or '').strip()))
+
+
+def _classify_card_type(card_type: str, card_name: str) -> str:
+    """Map the CSV's free-form `type` value into one of our 7 buckets.
+
+    The CSV uses Pokémon TCG canonical labels — "Basic" / "Stage 1" /
+    "Stage 2" for Pokémon evolution stages, "Item" / "Supporter" /
+    "Tool" / "Stadium" for trainers, "Basic Energy" / "Special Energy"
+    for energies — so straight string-matching gets us there.
+    """
+    t = (card_type or '').strip()
+    if 'Basic Energy' in t:
+        return 'basic-energy'
+    if 'Special Energy' in t:
+        return 'special-energy'
+    if t == 'Supporter':
+        return 'supporter'
+    if t == 'Tool' or 'Pokémon Tool' in t or 'Pokemon Tool' in t:
+        return 'tool'
+    if t == 'Stadium':
+        return 'stadium'
+    if t == 'Item':
+        return 'item'
+    # Pokémon stages (Basic / Stage 1 / Stage 2 / etc.) plus the empty
+    # string default — Pokémon is the safe fallback because anything
+    # we don't recognise tends to be a Pokémon variant the scraper
+    # added (BREAK, V-UNION, etc.).
+    return 'pokemon'
 
 
 def _build_deck(rows: Iterable[dict]) -> list[dict]:
@@ -142,15 +185,57 @@ def _build_deck(rows: Iterable[dict]) -> list[dict]:
             'number': r.get('set_number') or '',
             'count': count,
             'type': card_type,
+            'bucket': _classify_card_type(card_type, card_name),
         })
         total += count
         if total >= HARD_DECK_SIZE:
             break
 
+    # Re-sort cards into the user's preferred reading order:
+    # Pokémon → Supporter → Item → Tool → Stadium → Special Energy →
+    # Basic Energy. Within each bucket the original
+    # inclusion-percentage order is preserved by using a stable sort
+    # keyed only on the bucket index.
+    deck.sort(key=lambda c: TYPE_BUCKET_INDEX.get(c.get('bucket'), 99))
     return deck
 
 
-def _build_current_meta(site_dir: str, format_key: str) -> dict:
+def _read_share_ranking(site_dir: str) -> dict[str, dict]:
+    """Read limitless_online_decks_comparison.csv → {archetype_name:
+    {rank, share_pct, count, winrate_pct}}.
+
+    Source of truth for ordering the bot's deck picker — same numbers
+    the Current Meta tab on thedipidis.app shows in its "rank 1 …"
+    column. Falls back to empty if the file is missing; archetypes
+    without a rank then sort to the bottom.
+    """
+    path = os.path.join(site_dir, 'data', 'limitless_online_decks_comparison.csv')
+    out: dict[str, dict] = {}
+    if not os.path.exists(path):
+        return out
+    try:
+        with open(path, encoding='utf-8-sig') as f:
+            for row in csv.DictReader(f, delimiter=';'):
+                name = (row.get('deck_name') or '').strip()
+                if not name:
+                    continue
+                rank_raw = row.get('new_rank') or row.get('old_rank') or ''
+                try:
+                    rank = int(rank_raw)
+                except (ValueError, TypeError):
+                    continue
+                out[name] = {
+                    'rank': rank,
+                    'share_pct': _parse_eu(row.get('new_share') or row.get('old_share')),
+                    'count': int(row.get('new_count') or row.get('old_count') or 0),
+                    'winrate_pct': _parse_eu(row.get('new_winrate') or row.get('old_winrate')),
+                }
+    except Exception as exc:  # pragma: no cover
+        print(f'warn: share-ranking parse failed: {exc}', file=sys.stderr)
+    return out
+
+
+def _build_current_meta(site_dir: str, format_key: str, ranking: dict[str, dict]) -> dict:
     csv_path = os.path.join(site_dir, 'data', 'current_meta_card_data.csv')
     if not os.path.exists(csv_path):
         print(f'warn: {csv_path} missing, skipping current-meta', file=sys.stderr)
@@ -170,10 +255,15 @@ def _build_current_meta(site_dir: str, format_key: str) -> dict:
         if not deck:
             continue
         card_count = sum(c['count'] for c in deck)
+        share_info = ranking.get(arch) or {}
         out[arch] = {
             'format_key': format_key,
             'card_count': card_count,
             'card_count_unique': len(deck),
+            'rank': share_info.get('rank'),
+            'share_pct': share_info.get('share_pct'),
+            'count': share_info.get('count'),
+            'winrate_pct': share_info.get('winrate_pct'),
             'cards': deck,
         }
     return out
@@ -189,8 +279,11 @@ def main(argv: list[str]) -> int:
     format_key = _read_format_key(site_dir)
     print(f'Current rotation key: {format_key}')
 
-    current_meta = _build_current_meta(site_dir, format_key)
-    print(f'  current-meta: {len(current_meta)} decks')
+    ranking = _read_share_ranking(site_dir)
+    print(f'  share ranking: {len(ranking)} decks')
+
+    current_meta = _build_current_meta(site_dir, format_key, ranking)
+    print(f'  current-meta:  {len(current_meta)} decks')
 
     # Merge per-source dicts into a single deck-keyed index. Phase 3a
     # only has current-meta; past-tef-por and city-league hook in
@@ -199,12 +292,25 @@ def main(argv: list[str]) -> int:
     for arch, payload in current_meta.items():
         key = _slugify(arch)
         if key not in decks_by_key:
-            decks_by_key[key] = {'key': key, 'name': arch, 'sources': {}}
+            decks_by_key[key] = {
+                'key': key,
+                'name': arch,
+                # Top-level rank pulled from current-meta so the bot can
+                # sort without inspecting every source. Falls back to a
+                # high sentinel for archetypes the share data doesn't
+                # know about, which keeps them at the bottom of the list.
+                'rank': payload.get('rank') or 9999,
+                'share_pct': payload.get('share_pct'),
+                'sources': {},
+            }
         decks_by_key[key]['sources']['current-meta'] = payload
 
-    # Sort decks for the bot's picker — alphabetical for now, the bot
-    # may resort by share or popularity later.
-    ordered = dict(sorted(decks_by_key.items(), key=lambda kv: kv[1]['name'].lower()))
+    # Sort decks for the bot's picker by current-meta rank (1 = most
+    # played). Ties (and unranked archetypes) break alphabetically.
+    ordered = dict(sorted(
+        decks_by_key.items(),
+        key=lambda kv: (kv[1].get('rank') or 9999, kv[1]['name'].lower()),
+    ))
 
     out = {
         'generated_at': version_stamp,

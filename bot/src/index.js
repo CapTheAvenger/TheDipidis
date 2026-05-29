@@ -23,7 +23,7 @@ import { Telegraf } from 'telegraf';
 import { allowedCount, whitelistMiddleware } from './auth.js';
 import { installBotCommands, registerStart } from './commands/start.js';
 import { registerMetaCall } from './commands/metacall.js';
-import { registerDeck } from './commands/deck.js';
+import { registerDeck, handleDeckSearch } from './commands/deck.js';
 import { shutdown as shutdownScreenshot } from './screenshot.js';
 
 const BOT_TOKEN = process.env.BOT_TOKEN;
@@ -58,9 +58,20 @@ registerDeck(bot);
 // matched. We skip messages that begin with "/" — those are commands
 // we don't recognise yet and Telegram clients render them visually
 // distinct already; replying for every typo just adds noise.
-bot.on('text', (ctx) => {
-    if ((ctx.message?.text || '').startsWith('/')) return;
-    return ctx.reply('Tippe auf einen Button unten 👇');
+//
+// Otherwise we try a free-text deck search first — anything resembling
+// a deck name surfaces a tappable result list. Only if that produces
+// nothing useful (empty index, too-short query, no matches) do we
+// fall back to the generic "tap a button" nudge.
+bot.on('text', async (ctx) => {
+    const text = ctx.message?.text || '';
+    if (text.startsWith('/')) return;
+    const handled = await handleDeckSearch(ctx).catch((err) => {
+        console.warn('[deck-search] crashed:', err);
+        return false;
+    });
+    if (handled) return;
+    return ctx.reply('Tippe auf einen Button unten 👇 oder gib einen Deck-Namen ein.');
 });
 
 bot.catch((err, ctx) => {

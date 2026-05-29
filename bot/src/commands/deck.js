@@ -222,16 +222,15 @@ async function sendDecklist(ctx, sourceKey, deckKey) {
         { parse_mode: 'HTML', ...MENU_KEYBOARD },
     );
 
-    // Decklist message: only the list, in a `language-ansi` code
-    // block so the in-line ANSI escape sequences around Ace-Spec
-    // entries render as bold magenta on Telegram clients that
-    // support coloured code blocks (most recent iOS / Android
-    // builds). On older clients the escape codes are visible but
-    // the line is still a valid decklist row, so copy-paste into
-    // PTCGL / Showdown still works.
-    const list = formatDecklistAsPTCGL(src, { colorize: true });
+    // Decklist message: only the list, wrapped in a plain <pre>
+    // code block so monospace alignment holds. Ace-Spec lines are
+    // re-encoded in Unicode mathematical-bold characters by the
+    // formatter — that's how we get visible emphasis past Telegram's
+    // strip-formatting-inside-pre behaviour (HTML <b> tags and ANSI
+    // escapes both get eaten there).
+    const list = formatDecklistAsPTCGL(src, { emphasizeAceSpec: true });
     return ctx.reply(
-        `<pre><code class="language-ansi">${escapeHtml(list)}</code></pre>`,
+        `<pre>${escapeHtml(list)}</pre>`,
         {
             parse_mode: 'HTML',
             ...Markup.inlineKeyboard([

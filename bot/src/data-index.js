@@ -60,28 +60,49 @@ export async function fetchDeckIndex({ force = false } = {}) {
 
 /**
  * Format a deck's card list as a copy-paste-ready PTCGL decklist.
- * Header lines are skipped so the user can drop it directly into
- * the in-game importer.
  *
- * When `colorize` is true we wrap Ace-Spec lines in ANSI magenta
- * escape sequences. Telegram's <pre><code class="language-ansi">
- * block renders these as actual colour on modern clients — on
- * older/non-supporting clients the escape codes are simply visible
- * but the line is still parseable as a normal decklist entry, so
- * users can copy-paste either way.
+ * When `emphasizeAceSpec` is true, Ace-Spec lines get re-encoded
+ * with Unicode mathematical-bold codepoints (U+1D400 block). The
+ * reason for this contortion: Telegram's <pre><code> block strips
+ * all nested formatting tags — <b>, <i>, etc. all disappear inside
+ * a code block, and the ANSI escape route we tried first doesn't
+ * render on iOS. Mathematical-bold characters survive the strip
+ * because they're literal codepoints, not formatting, and they
+ * display visually bold on every Telegram client.
+ *
+ * Tradeoff: Ace-Spec lines won't be importable into PTCGL via the
+ * copy-paste flow because the card name is now in a different
+ * Unicode range. That's a known cost — Ace Specs are 1-2 cards per
+ * deck and users typically pay extra attention to them anyway. The
+ * regular cards (vast majority of the list) copy-paste cleanly.
  */
-const ESC                 = String.fromCharCode(27);
-const ANSI_ACE_SPEC_OPEN  = ESC + '[1;35m';
-const ANSI_RESET          = ESC + '[0m';
+const _BOLD_UPPER_A = 0x1D400;  // 𝐀
+const _BOLD_LOWER_A = 0x1D41A;  // 𝐚
+const _BOLD_ZERO    = 0x1D7CE;  // 𝟎
 
-export function formatDecklistAsPTCGL(deck, { colorize = false } = {}) {
+function _toUnicodeBold(s) {
+    let out = '';
+    for (const ch of s) {
+        const code = ch.codePointAt(0);
+        if (code >= 0x41 && code <= 0x5A) {
+            out += String.fromCodePoint(_BOLD_UPPER_A + code - 0x41);
+        } else if (code >= 0x61 && code <= 0x7A) {
+            out += String.fromCodePoint(_BOLD_LOWER_A + code - 0x61);
+        } else if (code >= 0x30 && code <= 0x39) {
+            out += String.fromCodePoint(_BOLD_ZERO + code - 0x30);
+        } else {
+            out += ch;
+        }
+    }
+    return out;
+}
+
+export function formatDecklistAsPTCGL(deck, { emphasizeAceSpec = false } = {}) {
     if (!deck || !Array.isArray(deck.cards)) return '';
     return deck.cards
         .map((c) => {
             const line = `${c.count} ${c.name} ${c.set} ${c.number}`;
-            if (colorize && c.ace_spec) {
-                return `${ANSI_ACE_SPEC_OPEN}${line}${ANSI_RESET}`;
-            }
+            if (emphasizeAceSpec && c.ace_spec) return _toUnicodeBold(line);
             return line;
         })
         .join('\n');

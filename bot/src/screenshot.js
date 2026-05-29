@@ -1,29 +1,71 @@
 /**
- * Bot-side fetcher for the pre-rendered Meta Call PNG.
+ * Bot-side fetcher for the pre-rendered Meta Call PNGs.
  *
- * The image is rendered once per deploy in CI (see
- * prerender/prerender-meta-call.js) and lives at a stable
- * URL on GitHub Pages. The bot just fetches it — no Puppeteer,
- * no Chromium, no 40 s warm-up. Render Free's 512 MB is now
- * irrelevant: this process is just Node + Telegraf + Express.
+ * Two variants are rendered at deploy time
+ * (see prerender/prerender-meta-call.js):
+ *   • meta-call-snapshot-current.png  — current rotation
+ *   • meta-call-snapshot-past.png     — the most-recent finished
+ *                                       rotation (frozen labs data)
  *
- * Cache-buster: we append a daily-rounded `?v=` so Telegram
- * (and any CDN between us and GitHub Pages) treats every fresh
- * deploy as a new image instead of serving a stale cached
- * download. Within the same day we want repeat requests to hit
- * any cache the network has built up — the snapshot doesn't
- * change between deploys anyway.
+ * Plus a tiny meta-call-info.json next to them with the format keys
+ * (e.g. "TEF-CRI", "TEF-POR") so the bot can label its inline
+ * keyboard without having to parse format_window.json itself.
+ *
+ * Per-day cache buster on the URL — the snapshots only change on
+ * deploy, and Telegram aggressively caches photos by URL.
  */
 
-const SNAPSHOT_URL =
-    process.env.SNAPSHOT_URL ||
-    'https://thedipidis.app/data/meta-call-snapshot.png';
+const SITE_BASE =
+    process.env.SITE_BASE || 'https://thedipidis.app';
 
 const FETCH_TIMEOUT_MS = 15_000;
+const INFO_FALLBACK = {
+    current: { key: 'TEF-CRI', file: 'meta-call-snapshot-current.png' },
+    past:    { key: 'TEF-POR', file: 'meta-call-snapshot-past.png' },
+};
 
-export async function captureMetaCallImage() {
-    const cacheBuster = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
-    const url = `${SNAPSHOT_URL}?v=${cacheBuster}`;
+let _infoCache = null;
+let _infoCachedAt = 0;
+const INFO_TTL_MS = 5 * 60 * 1000;
+
+/**
+ * Fetch the info JSON with a short TTL — calling code can read this
+ * cheaply on every command. Falls back to a hardcoded shape if the
+ * file isn't available (e.g. an old deploy that didn't run the
+ * prerender step).
+ */
+export async function getMetaCallInfo() {
+    const now = Date.now();
+    if (_infoCache && now - _infoCachedAt < INFO_TTL_MS) return _infoCache;
+    const url = `${SITE_BASE}/data/meta-call-info.json?v=${new Date().toISOString().slice(0, 10)}`;
+    try {
+        const controller = new AbortController();
+        const t = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+        const resp = await fetch(url, {
+            cache: 'no-store',
+            signal: controller.signal,
+            headers: { 'User-Agent': 'thedipidis-bot/0.2' },
+        });
+        clearTimeout(t);
+        if (resp.ok) {
+            _infoCache = await resp.json();
+            _infoCachedAt = now;
+            return _infoCache;
+        }
+    } catch (err) {
+        console.warn('[metacall info] fetch failed, using fallback:', err.message);
+    }
+    return INFO_FALLBACK;
+}
+
+export async function captureMetaCallImage(variant = 'current') {
+    if (variant !== 'current' && variant !== 'past') {
+        throw new Error(`unknown variant: ${variant}`);
+    }
+    const info = await getMetaCallInfo();
+    const entry = info[variant] || INFO_FALLBACK[variant];
+    const cacheBuster = new Date().toISOString().slice(0, 10);
+    const url = `${SITE_BASE}/data/${entry.file}?v=${cacheBuster}`;
 
     const controller = new AbortController();
     const t = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
@@ -31,14 +73,9 @@ export async function captureMetaCallImage() {
         const response = await fetch(url, {
             cache: 'no-store',
             signal: controller.signal,
-            headers: { 'User-Agent': 'thedipidis-bot/0.1' },
+            headers: { 'User-Agent': 'thedipidis-bot/0.2' },
         });
         if (response.status === 404) {
-            // The PNG hasn't been written yet — most likely the
-            // current GitHub Pages deploy didn't run (or hasn't
-            // finished) the prerender step. Surface that distinctly
-            // so the user knows to retry rather than chasing a real
-            // outage.
             throw new Error(
                 'Snapshot ist noch nicht im Deploy. ' +
                 'Wenn gerade Daten gescrapt wurden, läuft der GitHub-Pages-Build noch — bitte in 2-3 Minuten nochmal probieren.',
@@ -51,7 +88,7 @@ export async function captureMetaCallImage() {
         if (buf.length < 200) {
             throw new Error(`Snapshot too small (${buf.length} bytes) — probably an error page`);
         }
-        return buf;
+        return { buffer: buf, key: entry.key };
     } finally {
         clearTimeout(t);
     }
@@ -59,6 +96,5 @@ export async function captureMetaCallImage() {
 
 /**
  * No-op kept so index.js's SIGTERM handler keeps the same shape.
- * The bot no longer owns a Chromium browser process to tear down.
  */
 export async function shutdown() {}

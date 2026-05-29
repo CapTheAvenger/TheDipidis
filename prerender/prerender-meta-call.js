@@ -46,8 +46,16 @@ const __dirname = path.dirname(__filename);
 
 const SITE_DIR = path.resolve(__dirname, process.argv[2] || '../_site');
 const PORT = parseInt(process.env.PRERENDER_PORT || '5544', 10);
-const OUT_RELATIVE = 'data/meta-call-snapshot.png';
 const PAGE_TIMEOUT_MS = 60_000;
+
+// Past-meta format key. Hardcoded because the previous rotation's
+// newest set isn't recorded anywhere the site reads at runtime —
+// only the CURRENT current_set / oldest_legal_set sit in
+// format_window.json. When the rotation moves on (CRI rotates out
+// and a new current set drops), update this to the previous
+// current_set's TEF- key. Today: POR was the current_set before
+// CRI, so past = TEF-POR.
+const PAST_FORMAT_KEY = process.env.PAST_FORMAT_KEY || 'TEF-POR';
 
 const MIME = {
     '.html': 'text/html; charset=utf-8',
@@ -95,7 +103,7 @@ function startStaticServer() {
     });
 }
 
-async function renderMetaCall(baseUrl) {
+async function renderMetaCall(baseUrl, currentFormatKey) {
     const browser = await puppeteer.launch({
         headless: true,
         args: [
@@ -105,6 +113,9 @@ async function renderMetaCall(baseUrl) {
             '--disable-gpu',
         ],
     });
+
+    /** @type {Array<{ kind: 'current'|'past', key: string, png: Buffer }>} */
+    const renders = [];
 
     try {
         const page = await browser.newPage();
@@ -242,33 +253,6 @@ async function renderMetaCall(baseUrl) {
             req.continue();
         });
 
-        // Defuse the in-page version check before any app script runs.
-        //
-        // index.html ships an inline IIFE that fetches version.json,
-        // compares against window.APP_VERSION, and on mismatch sets
-        // `window.location.href = pathname + '?_v=' + new_version`.
-        // That navigation tears down our execution context mid-preload
-        // ("Execution context was destroyed, most likely because of a
-        // navigation" in CI / runtime). The IIFE itself has an escape
-        // hatch: if `sessionStorage['__tcg_version_refresh']` is set
-        // it skips. We plant that key before any page script runs.
-        //
-        // Belt-and-braces: also no-op the three Location methods so
-        // anything else that tries to navigate via reload / assign /
-        // replace fails silently. Direct assignment to
-        // `window.location.href` is harder to block — the version
-        // check uses exactly that — but with the sessionStorage gate
-        // closed the check never reaches that line.
-        await page.evaluateOnNewDocument(() => {
-            try { sessionStorage.setItem('__tcg_version_refresh', '1'); } catch (_) {}
-            const noop = () => {};
-            try {
-                Location.prototype.reload = noop;
-                Location.prototype.assign = noop;
-                Location.prototype.replace = noop;
-            } catch (_) {}
-        });
-
         // Surface navigations so a future regression here doesn't
         // hide behind a misleading "context destroyed".
         page.on('framenavigated', (frame) => {
@@ -334,27 +318,79 @@ async function renderMetaCall(baseUrl) {
             await window.MetaCall.preload();
         });
 
-        console.log('Rendering canvas…');
-        await page.evaluate(() => {
-            window.MetaCall.exportFieldAndRecsShareImage();
+        // Helper: trigger MetaCall.exportFieldAndRecsShareImage(),
+        // wait for the share-preview modal's <img> to appear, grab
+        // the base64 data URL, then remove the modal so the NEXT
+        // export call mounts a fresh one (the export function does
+        // `old?.remove()` itself — but our waitForSelector keys off
+        // the same id, so reusing the modal would short-circuit the
+        // wait and return the previous render).
+        async function renderCurrentState() {
+            await page.evaluate(() => {
+                const old = document.getElementById('mc-share-preview-modal');
+                if (old) old.remove();
+                window.MetaCall.exportFieldAndRecsShareImage();
+            });
+            await page.waitForSelector(
+                '#mc-share-preview-modal .mc-share-preview-img',
+                { timeout: 30_000 },
+            );
+            const dataUrl = await page.$eval(
+                '#mc-share-preview-modal .mc-share-preview-img',
+                (img) => img.src,
+            );
+            if (!dataUrl?.startsWith('data:image/png;base64,')) {
+                throw new Error(`unexpected share-image src: ${String(dataUrl).slice(0, 80)}…`);
+            }
+            return Buffer.from(dataUrl.slice('data:image/png;base64,'.length), 'base64');
+        }
+
+        console.log('Rendering current meta…');
+        renders.push({
+            kind: 'current',
+            key: currentFormatKey,
+            png: await renderCurrentState(),
         });
 
-        await page.waitForSelector(
-            '#mc-share-preview-modal .mc-share-preview-img',
-            { timeout: 30_000 },
-        );
+        // Switch the in-page MetaCall state to past mode for the
+        // requested format key, wait for its async load chain to
+        // settle, then render again. _setMetaSource is awaitable —
+        // it resolves after _shareList + _matchupMap have been
+        // populated for the past meta — so the next exportField
+        // call paints the right data.
+        console.log(`Switching to past meta ${PAST_FORMAT_KEY}…`);
+        await page.evaluate(async (key) => {
+            await window.MetaCall._setMetaSource('past', key);
+        }, PAST_FORMAT_KEY);
 
-        const dataUrl = await page.$eval(
-            '#mc-share-preview-modal .mc-share-preview-img',
-            (img) => img.src,
-        );
-        if (!dataUrl?.startsWith('data:image/png;base64,')) {
-            throw new Error(`unexpected share-image src: ${String(dataUrl).slice(0, 80)}…`);
-        }
-        return Buffer.from(dataUrl.slice('data:image/png;base64,'.length), 'base64');
+        console.log('Rendering past meta…');
+        renders.push({
+            kind: 'past',
+            key: PAST_FORMAT_KEY,
+            png: await renderCurrentState(),
+        });
+
+        return renders;
     } finally {
         await browser.close();
     }
+}
+
+function readCurrentFormatKey() {
+    // Derive the current rotation's format key from format_window.json,
+    // which the scraper updates on every run. Falls back to a literal
+    // if the file is missing or malformed so a broken scraper doesn't
+    // take the prerender step down.
+    try {
+        const raw = fs.readFileSync(path.join(SITE_DIR, 'data', 'format_window.json'), 'utf8');
+        const parsed = JSON.parse(raw);
+        const oldest = parsed.oldest_legal_set;
+        const current = parsed.current_set;
+        if (oldest && current) return `${oldest}-${current}`;
+    } catch (err) {
+        console.warn('[prerender] format_window.json unreadable, defaulting key:', err.message);
+    }
+    return 'TEF-CRI';
 }
 
 async function main() {
@@ -362,15 +398,37 @@ async function main() {
         throw new Error(`Site directory not found: ${SITE_DIR}`);
     }
 
+    const currentFormatKey = readCurrentFormatKey();
+    console.log(`Current rotation key: ${currentFormatKey}`);
+    console.log(`Past meta key:        ${PAST_FORMAT_KEY}`);
+
     const server = await startStaticServer();
     console.log(`Serving ${SITE_DIR} at http://localhost:${PORT}`);
 
     try {
-        const png = await renderMetaCall(`http://localhost:${PORT}/`);
-        const outPath = path.join(SITE_DIR, OUT_RELATIVE);
-        fs.mkdirSync(path.dirname(outPath), { recursive: true });
-        fs.writeFileSync(outPath, png);
-        console.log(`✓ Wrote ${outPath} (${(png.length / 1024).toFixed(1)} KB)`);
+        const renders = await renderMetaCall(`http://localhost:${PORT}/`, currentFormatKey);
+        const dataDir = path.join(SITE_DIR, 'data');
+        fs.mkdirSync(dataDir, { recursive: true });
+
+        for (const r of renders) {
+            const outPath = path.join(dataDir, `meta-call-snapshot-${r.kind}.png`);
+            fs.writeFileSync(outPath, r.png);
+            console.log(`✓ ${r.kind.padEnd(7)} ${r.key} → ${path.relative(SITE_DIR, outPath)} (${(r.png.length / 1024).toFixed(1)} KB)`);
+        }
+
+        // Bot reads this to know what to put on its inline-keyboard
+        // labels without having to fetch + parse format_window.json
+        // separately. Updated atomically next to the PNGs so the bot
+        // never sees a label that doesn't match the image it's about
+        // to fetch.
+        const infoPath = path.join(dataDir, 'meta-call-info.json');
+        const info = {
+            generated_at: new Date().toISOString(),
+            current: { kind: 'current', key: currentFormatKey, file: 'meta-call-snapshot-current.png' },
+            past:    { kind: 'past',    key: PAST_FORMAT_KEY,  file: 'meta-call-snapshot-past.png' },
+        };
+        fs.writeFileSync(infoPath, JSON.stringify(info, null, 2) + '\n');
+        console.log(`✓ wrote ${path.relative(SITE_DIR, infoPath)}`);
     } finally {
         await new Promise((r) => server.close(r));
     }

@@ -41,11 +41,10 @@ from collections import defaultdict
 from typing import Iterable
 
 
-MIN_INCLUSION_PCT       = 30.0  # below this we call the card a tech / brick
+MIN_INCLUSION_PCT       = 30.0  # below this a card stays off the stock 60-card list
 HARD_DECK_SIZE          = 60    # PTCG hard cap
 ENERGY_MAX              = 12    # safety cap for basic energy counts after rounding
-MAX_TECH_CARDS          = 10    # how many tech options the bot's second image shows
-TECH_INCLUSION_MIN_PCT  = 5.0   # below this is noise (single rogue list etc.)
+MAX_TECH_CARDS          = 10    # how many "next-in-line" alternatives the second image shows
 MAX_MATCHUPS            = 15    # how many top opponents the matchup matrix surfaces
 MIN_MATCHUP_GAMES       = 2     # below this is noise (lone result from one tournament)
 
@@ -97,6 +96,37 @@ def _clean_set_number(num: str) -> str:
     if '?' in s:
         s = s.split('?', 1)[0]
     return s
+
+
+# Limitless CDN puts EN prints under /tpci/{SET}/{SET}_{NUM:03d}_R_EN_LG.png
+# and JP prints under /tpc/{SET}/{SET}_{NUM}_R_JP_LG.png. The scrapers
+# occasionally tag a card with the JP URL even when the set code is
+# clearly an EN three-letter set — happens around new-set rollouts
+# where the EN print exists but the per-card metadata hasn't caught up.
+# We rebuild the EN URL ourselves for those cases so the bot's deck
+# images don't surface Japanese variants of cards that have an
+# international print.
+_JP_URL_RE = re.compile(r'(_JP_LG|/tpc/)')
+_JP_SET_RE = re.compile(r'^(M\d|MP)')
+
+
+def _normalize_image_url(image_url: str, set_code: str, set_number: str) -> str:
+    if not image_url:
+        return ''
+    if not _JP_URL_RE.search(image_url):
+        return image_url
+    if not set_code or _JP_SET_RE.match(set_code):
+        return image_url  # genuinely JP-only set (M3, MP1, ...)
+    if not set_number:
+        return image_url
+    try:
+        padded = f'{int(set_number):03d}'
+    except (ValueError, TypeError):
+        padded = set_number
+    return (
+        f'https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/'
+        f'tpci/{set_code}/{set_code}_{padded}_R_EN_LG.png'
+    )
 
 
 def _read_ace_spec_names(site_dir: str) -> set[str]:
@@ -172,13 +202,15 @@ def _card_from_row(r: dict, count: int, ace_spec_names: set[str] | None) -> dict
     """Materialise a row → bot-side card object, shared by deck + tech lists."""
     card_name = r.get('card_name') or ''
     card_type = r.get('type') or ''
+    set_code = (r.get('set_code') or '').strip().upper()
+    set_number = _clean_set_number(r.get('set_number'))
     is_ace_spec = str(r.get('is_ace_spec') or '').strip().lower() in ('yes', 'true', '1')
     if not is_ace_spec and ace_spec_names and card_name.strip().lower() in ace_spec_names:
         is_ace_spec = True
     return {
         'name': card_name,
-        'set': (r.get('set_code') or '').strip().upper(),
-        'number': _clean_set_number(r.get('set_number')),
+        'set': set_code,
+        'number': set_number,
         'count': count,
         'type': card_type,
         'bucket': _classify_card_type(card_type, card_name),
@@ -187,7 +219,12 @@ def _card_from_row(r: dict, count: int, ace_spec_names: set[str] | None) -> dict
         # /tpci vs /tpc + _R_EN_LG vs _R_JP_LG + zero-padded number
         # variations correctly. The prefetcher uses it directly;
         # the bot uses (set, number) to look up the saved file.
-        'image_url': (r.get('image_url') or '').strip(),
+        # Mis-tagged JP URLs on EN-set cards are remapped to the EN
+        # equivalent so the bot doesn't surface JP variants of cards
+        # with an international print.
+        'image_url': _normalize_image_url(
+            (r.get('image_url') or '').strip(), set_code, set_number,
+        ),
         # Usage stats: how many decks include the card and how many
         # copies they run on average. The bot overlays these onto each
         # tile so users can see "82 % play 3.4 copies on average" at a
@@ -226,11 +263,11 @@ def _build_deck(rows: Iterable[dict], ace_spec_names: set[str] | None = None) ->
     deck: list[dict] = []
     round_loss: dict[int, float] = {}  # index-in-deck → (avg - count); positive = rounded down
     total = 0
-    sub_floor_rows: list[dict] = []
+    not_added_rows: list[dict] = []  # everything that didn't make the stock 60
     for r in sorted_rows:
         pct = _parse_eu(r.get('percentage_in_archetype'))
         if pct < MIN_INCLUSION_PCT:
-            sub_floor_rows.append(r)
+            not_added_rows.append(r)
             continue
         avg = _parse_eu(r.get('average_count'))
         count = round(avg)
@@ -238,6 +275,7 @@ def _build_deck(rows: Iterable[dict], ace_spec_names: set[str] | None = None) ->
             if pct >= 75:
                 count = max(1, round(avg + 0.49))
             else:
+                not_added_rows.append(r)
                 continue
 
         card_name = r.get('card_name') or ''
@@ -250,6 +288,7 @@ def _build_deck(rows: Iterable[dict], ace_spec_names: set[str] | None = None) ->
         if total + count > HARD_DECK_SIZE:
             count = HARD_DECK_SIZE - total
             if count <= 0:
+                not_added_rows.append(r)
                 continue
 
         idx = len(deck)
@@ -257,9 +296,8 @@ def _build_deck(rows: Iterable[dict], ace_spec_names: set[str] | None = None) ->
         round_loss[idx] = avg - count
         total += count
         # Don't break out of the loop when main fills up: rows after
-        # this point can still include sub-floor (< 30 %) candidates we
-        # need for the tech-card list. The `count <= 0` skip a few
-        # lines up handles the actual cap.
+        # this point can still feed the "next in line" tech list. The
+        # `count <= 0` skip above handles the actual cap.
 
     # Top-up pass: most stock lists land 1-2 cards shy of 60 because of
     # the round() truncation. Bump the cards we rounded down the most
@@ -293,13 +331,16 @@ def _build_deck(rows: Iterable[dict], ace_spec_names: set[str] | None = None) ->
             # count so the bot can show "59 Karten" honestly.
             pass
 
-    # Tech cards: anything below the 30 % floor down to the 5 % noise
-    # threshold, top N by inclusion.
+    # Tech cards = the top N cards (by inclusion %) that DIDN'T make
+    # the stock 60. Reframes the second image as "what would I add
+    # next / what are the live alternatives" instead of "what are
+    # the rarely-played techs" — which is what the user actually
+    # wants to see when scouting a meta-call. Ace-spec alternatives
+    # fall out naturally because non-stock Ace Specs still rank by
+    # inclusion among "tried it" lists.
+    not_added_rows.sort(key=lambda r: -_parse_eu(r.get('percentage_in_archetype')))
     tech: list[dict] = []
-    for r in sub_floor_rows:
-        pct = _parse_eu(r.get('percentage_in_archetype'))
-        if pct < TECH_INCLUSION_MIN_PCT:
-            continue
+    for r in not_added_rows:
         avg = _parse_eu(r.get('average_count'))
         count = max(1, round(avg))
         card_name = r.get('card_name') or ''

@@ -289,8 +289,8 @@ async function sendDecklist(ctx, sourceKey, deckKey) {
             const techPng = await generateTechImage(deck, src, sourceLabel);
             if (techPng) {
                 const techCaption =
-                    `<b>${escapeHtml(deck.name)} — Tech-Karten</b>\n` +
-                    `${src.tech_cards.length} Optionen (5–30 % Usage)`;
+                    `<b>${escapeHtml(deck.name)} — Alternativen</b>\n` +
+                    `${src.tech_cards.length} Karten · sortiert nach Usage`;
                 await ctx.replyWithPhoto(
                     { source: techPng, filename: `${deck.key || 'deck'}-tech.png` },
                     { caption: techCaption, parse_mode: 'HTML' },

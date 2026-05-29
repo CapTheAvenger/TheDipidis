@@ -95,11 +95,11 @@ function _fmtPct(n) {
 }
 
 function _tileOverlaysSvg(card) {
-    // Top-left badge stacks inclusion-% on top of the average count;
-    // bottom-right badge stays as the rounded copy-count we put in the
-    // list. Same dimensions, same rounded corners — visually paired so
-    // the two stats read as a matching corner-set rather than two
-    // mismatched stickers.
+    // Top-right badge: inclusion-% on top + average count below.
+    // Bottom-right badge: rounded copy-count we put in the list.
+    // Stacked on the same edge so both stats are read in one glance,
+    // with the inclusion sized big enough to be legible without
+    // pinch-zoom (user feedback after the first cut).
     const w = TILE_W, h = TILE_H;
     const inclusion = _fmtPct(card.inclusion_pct);
     const avgRaw = (Number.isFinite(card.avg_count) && card.avg_count > 0)
@@ -107,26 +107,27 @@ function _tileOverlaysSvg(card) {
         : '';
     const showTop = Boolean(inclusion || avgRaw);
 
-    const tbX = 8, tbY = 8, tbW = 64, tbH = 52;
+    const tbW = 86, tbH = 66;
+    const tbX = w - tbW - 8, tbY = 8;
     const countBx = w - 64, countBy = h - 64, countBw = 52, countBh = 52;
 
     return Buffer.from(
         `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}">
             ${showTop ? `
-            <rect x="${tbX}" y="${tbY}" width="${tbW}" height="${tbH}" rx="10" ry="10"
-                  fill="rgba(0,0,0,0.78)" stroke="rgba(255,255,255,0.5)" stroke-width="1.5"/>
-            ${inclusion ? `<text x="${tbX + tbW / 2}" y="${tbY + 22}"
+            <rect x="${tbX}" y="${tbY}" width="${tbW}" height="${tbH}" rx="11" ry="11"
+                  fill="rgba(0,0,0,0.80)" stroke="rgba(255,255,255,0.55)" stroke-width="1.5"/>
+            ${inclusion ? `<text x="${tbX + tbW / 2}" y="${tbY + 30}"
                   font-family="DejaVu Sans, Liberation Sans, Arial, sans-serif"
-                  font-size="18" font-weight="700" fill="#ffffff" text-anchor="middle">${_escapeXml(inclusion)}</text>` : ''}
-            ${avgRaw ? `<text x="${tbX + tbW / 2}" y="${tbY + 44}"
+                  font-size="24" font-weight="800" fill="#ffffff" text-anchor="middle">${_escapeXml(inclusion)}</text>` : ''}
+            ${avgRaw ? `<text x="${tbX + tbW / 2}" y="${tbY + 56}"
                   font-family="DejaVu Sans, Liberation Sans, Arial, sans-serif"
-                  font-size="14" font-weight="400" fill="#c8c8d6" text-anchor="middle">⌀ ${_escapeXml(avgRaw)}</text>` : ''}
+                  font-size="18" font-weight="500" fill="#d8d8e4" text-anchor="middle">⌀ ${_escapeXml(avgRaw)}</text>` : ''}
             ` : ''}
             <rect x="${countBx}" y="${countBy}" width="${countBw}" height="${countBh}" rx="10" ry="10"
-                  fill="rgba(0,0,0,0.78)" stroke="rgba(255,255,255,0.5)" stroke-width="1.5"/>
+                  fill="rgba(0,0,0,0.80)" stroke="rgba(255,255,255,0.55)" stroke-width="1.5"/>
             <text x="${countBx + countBw / 2}" y="${countBy + 38}"
                   font-family="DejaVu Sans, Liberation Sans, Arial, sans-serif"
-                  font-size="34" font-weight="700" fill="#ffffff" text-anchor="middle">${card.count}</text>
+                  font-size="34" font-weight="800" fill="#ffffff" text-anchor="middle">${card.count}</text>
         </svg>`,
     );
 }
@@ -167,8 +168,8 @@ function _mainHeaderLines(deck, source, sourceLabel) {
 function _techHeaderLines(deck, source, sourceLabel, techCount) {
     const formatPart = source?.format_key ? ` · ${source.format_key}` : '';
     return {
-        title: `${deck.name} — Tech-Karten`,
-        sub: `${sourceLabel}${formatPart} · ${techCount} Optionen · 5–30 % Usage`,
+        title: `${deck.name} — Alternativen`,
+        sub: `${sourceLabel}${formatPart} · ${techCount} Karten · nächste Wahl nach Usage`,
     };
 }
 

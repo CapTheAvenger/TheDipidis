@@ -1,33 +1,166 @@
 /**
- * /deck — placeholder for Phase 2/3.
+ * /deck — three-step picker.
  *
- * Final shape (to land in Phase 3):
- *   1. Inline keyboard with the user's saved decks (pulled from
- *      thedipidis.app Firestore via service-account credentials)
- *      plus current-meta archetypes from the static data files.
- *   2. On pick: screenshot of the deck builder view + a second
- *      image with up to 10 tech-card suggestions from
- *      app-tech-lab's logic.
- *   3. Sends the 60-card decklist as a copy-friendly text block
- *      alongside the images.
+ *   1. List all decks the bot has data for (paginated; 8 per page).
+ *   2. User taps a deck → list the sources that have data for it
+ *      (e.g. Current Meta · TEF-CRI). Past Meta + City League slot
+ *      in here once the next phases land.
+ *   3. User taps a source → bot sends the decklist as a copy-paste
+ *      PTCGL block.
+ *
+ * Callback-data wire format (Telegram caps payload at 64 bytes —
+ * deck keys are slugs so they fit, but we keep room by using short
+ * prefixes):
+ *
+ *   deck:page:<n>            → jump to page n (0-indexed)
+ *   deck:pick:<key>          → user picked a deck → show sources
+ *   deck:src:<key>:<source>  → user picked a source → send decklist
+ *   deck:back                → return to deck picker
  */
 
+import { Markup } from 'telegraf';
+
+import { fetchDeckIndex, formatDecklistAsPTCGL } from '../data-index.js';
 import { MENU_LABEL_DECK } from './start.js';
 
+const PAGE_SIZE = 8;
+
+const SOURCE_LABELS = {
+    'current-meta': 'Current Meta',
+    'past-tef-por': 'Past Meta',
+    'city-league':  'City League',
+};
+
 export function registerDeck(bot) {
-    bot.command('deck', (ctx) => placeholder(ctx));
+    bot.command('deck', (ctx) => showDeckList(ctx, 0));
     bot.action('deck:list', async (ctx) => {
         await ctx.answerCbQuery();
-        return placeholder(ctx);
+        return showDeckList(ctx, 0);
     });
-    // Persistent reply-keyboard taps arrive as plain text — match the
-    // exact button label so they route to the same handler as /deck.
-    bot.hears(MENU_LABEL_DECK, (ctx) => placeholder(ctx));
+    bot.hears(MENU_LABEL_DECK, (ctx) => showDeckList(ctx, 0));
+
+    bot.action(/^deck:page:(\d+)$/, async (ctx) => {
+        await ctx.answerCbQuery();
+        const page = parseInt(ctx.match[1], 10) || 0;
+        return showDeckList(ctx, page);
+    });
+
+    bot.action(/^deck:pick:(.+)$/, async (ctx) => {
+        await ctx.answerCbQuery();
+        return showSourcePicker(ctx, ctx.match[1]);
+    });
+
+    bot.action(/^deck:src:([^:]+):(.+)$/, async (ctx) => {
+        await ctx.answerCbQuery();
+        return sendDecklist(ctx, ctx.match[1], ctx.match[2]);
+    });
+
+    bot.action('deck:back', async (ctx) => {
+        await ctx.answerCbQuery();
+        return showDeckList(ctx, 0);
+    });
 }
 
-async function placeholder(ctx) {
+function escapeHtml(s) {
+    return String(s ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+}
+
+async function showDeckList(ctx, page) {
+    const index = await fetchDeckIndex();
+    const allKeys = Object.keys(index.decks || {});
+
+    if (allKeys.length === 0) {
+        return ctx.reply(
+            '🚧 Noch keine Deck-Daten verfügbar. Bitte später nochmal — der Pages-Build muss erst durchlaufen.',
+        );
+    }
+
+    const totalPages = Math.max(1, Math.ceil(allKeys.length / PAGE_SIZE));
+    const safePage = Math.max(0, Math.min(page, totalPages - 1));
+    const start = safePage * PAGE_SIZE;
+    const slice = allKeys.slice(start, start + PAGE_SIZE);
+
+    // Two-column grid of deck buttons — wider than one-per-row but
+    // names truncate on small phones, so we keep it at 1 to be safe.
+    const deckRows = slice.map((k) => [
+        Markup.button.callback(index.decks[k].name, `deck:pick:${k}`),
+    ]);
+
+    // Nav row: ← prev / page indicator / next →. We only show the
+    // arrows when there's somewhere to go.
+    const nav = [];
+    if (safePage > 0) nav.push(Markup.button.callback('←', `deck:page:${safePage - 1}`));
+    nav.push(Markup.button.callback(`${safePage + 1}/${totalPages}`, 'deck:list'));
+    if (safePage < totalPages - 1) nav.push(Markup.button.callback('→', `deck:page:${safePage + 1}`));
+
+    const keyboard = Markup.inlineKeyboard([...deckRows, nav]);
+
     return ctx.reply(
-        '🚧 Deck Builder kommt in Phase 3.\n' +
-            'Geplant: Auswahl-Liste der Decks → Bild mit Nutzungs-Stats + Tech-Cards → Decklist als kopierbarer Text.',
+        `<b>Welches Deck?</b> (${allKeys.length} insgesamt)`,
+        {
+            parse_mode: 'HTML',
+            ...keyboard,
+        },
     );
+}
+
+async function showSourcePicker(ctx, deckKey) {
+    const index = await fetchDeckIndex();
+    const deck = index.decks?.[deckKey];
+    if (!deck) {
+        return ctx.reply(`Deck "${escapeHtml(deckKey)}" nicht im Index.`, { parse_mode: 'HTML' });
+    }
+
+    const sources = Object.keys(deck.sources || {});
+    if (sources.length === 0) {
+        return ctx.reply(`Keine Quellen für ${escapeHtml(deck.name)}.`, { parse_mode: 'HTML' });
+    }
+
+    const rows = sources.map((srcKey) => {
+        const src = deck.sources[srcKey];
+        const label = SOURCE_LABELS[srcKey] || srcKey;
+        const fk = src?.format_key ? ` · ${src.format_key}` : '';
+        return [Markup.button.callback(`📦 ${label}${fk}`, `deck:src:${srcKey}:${deckKey}`)];
+    });
+    rows.push([Markup.button.callback('⬅️ Andere Decks', 'deck:back')]);
+
+    return ctx.reply(
+        `<b>${escapeHtml(deck.name)}</b>\nQuelle wählen:`,
+        {
+            parse_mode: 'HTML',
+            ...Markup.inlineKeyboard(rows),
+        },
+    );
+}
+
+async function sendDecklist(ctx, sourceKey, deckKey) {
+    const index = await fetchDeckIndex();
+    const deck = index.decks?.[deckKey];
+    const src = deck?.sources?.[sourceKey];
+    if (!deck || !src) {
+        return ctx.reply(`Keine Daten für ${escapeHtml(deckKey)} / ${escapeHtml(sourceKey)}.`, { parse_mode: 'HTML' });
+    }
+
+    const list = formatDecklistAsPTCGL(src);
+    const cardCount = src.card_count ?? 0;
+    const uniqueCount = src.card_count_unique ?? src.cards?.length ?? 0;
+    const sourceLabel = SOURCE_LABELS[sourceKey] || sourceKey;
+    const fk = src.format_key ? ` · ${src.format_key}` : '';
+    // pre+code block keeps the list in monospace AND makes the whole
+    // block tappable for one-tap copy in Telegram.
+    const text =
+        `<b>${escapeHtml(deck.name)}</b>\n` +
+        `${escapeHtml(sourceLabel)}${escapeHtml(fk)} · ${cardCount} Karten (${uniqueCount} unique)\n\n` +
+        `<pre>${escapeHtml(list)}</pre>`;
+
+    return ctx.reply(text, {
+        parse_mode: 'HTML',
+        ...Markup.inlineKeyboard([
+            [Markup.button.callback('⬅️ Andere Quelle', `deck:pick:${deckKey}`)],
+            [Markup.button.callback('📋 Deck-Liste', 'deck:back')],
+        ]),
+    });
 }

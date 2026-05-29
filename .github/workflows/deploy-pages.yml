@@ -222,6 +222,11 @@ jobs:
           #    the `run: |` block).
           python3 scripts/generate-offline-manifest.py _site/data "${VER}"
 
+          # 7) data/bot-deck-index.json — per-archetype stock decklists
+          #    consumed by the Telegram bot's Deck Builder flow.
+          #    Cheaper than driving Puppeteer per-deck on Render Free.
+          python3 scripts/generate-bot-deck-index.py _site "${VER}"
+
           echo "✓ Cache-busted with version ${VER}"
           echo "  index.html  APP_VERSION = ${VER}"
           echo "  service-worker.js  CACHE_NAME = tcg-analysis-v${VER}"

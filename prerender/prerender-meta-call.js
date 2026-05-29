@@ -135,6 +135,66 @@ async function renderMetaCall(baseUrl) {
             /\/error-tracking(\.[^/]*)?\.js$/,
             /\/battle-journal(\.[^/]*)?\.js$/,
         ];
+        // Defuse multiple ways the page can navigate / reload before
+        // we get a chance to render. Layered so each defense covers a
+        // different trigger:
+        //
+        //   1. Disable the version-check IIFE in index.html by setting
+        //      its sessionStorage escape-hatch key.
+        //   2. Reject Service-Worker registration so the SW never
+        //      installs → never activates → never fires
+        //      `controllerchange` → the listener in index.html never
+        //      calls window.location.reload(). (We already pass
+        //      setBypassServiceWorker(true) but that only stops the
+        //      SW from controlling requests; it still installs.)
+        //   3. Replace Location.prototype.{reload,assign,replace}
+        //      with no-ops in case any other code path calls them
+        //      directly.
+        //
+        // page.setRequestInterception() also aborts post-initial
+        // navigation requests as a final net, but those teardown
+        // events fire late enough that the context is sometimes
+        // already gone — so we want the JS-side defenses to win first.
+        await page.evaluateOnNewDocument(() => {
+            try { sessionStorage.setItem('__tcg_version_refresh', '1'); } catch (_) {}
+
+            try {
+                if (navigator.serviceWorker) {
+                    // Reject every register() call. Cast to a Promise
+                    // rejection so the calling code's .catch handlers
+                    // (if any) see a real failure.
+                    Object.defineProperty(navigator.serviceWorker, 'register', {
+                        value: () => Promise.reject(new Error('SW registration disabled for prerender')),
+                        writable: false,
+                        configurable: false,
+                    });
+                }
+            } catch (_) {}
+
+            const blockedReload = () => {
+                // Visible in CI logs so we can tell which defense
+                // caught a trigger.
+                try { console.warn('[prerender] Location.reload/assign/replace blocked'); } catch (_) {}
+            };
+            try {
+                Object.defineProperty(Location.prototype, 'reload', {
+                    value: blockedReload,
+                    writable: false,
+                    configurable: false,
+                });
+                Object.defineProperty(Location.prototype, 'assign', {
+                    value: blockedReload,
+                    writable: false,
+                    configurable: false,
+                });
+                Object.defineProperty(Location.prototype, 'replace', {
+                    value: blockedReload,
+                    writable: false,
+                    configurable: false,
+                });
+            } catch (_) {}
+        });
+
         try { await page.setBypassServiceWorker(true); } catch (_) {}
         // After the initial navigation we abort every further
         // navigation request at the protocol level — that catches
@@ -159,6 +219,15 @@ async function renderMetaCall(baseUrl) {
                     return;
                 }
                 initialNavigationConsumed = true;
+            }
+
+            // The SW worker script itself — abort the fetch so even
+            // if our register() override is somehow bypassed, the
+            // browser has nothing to install.
+            if (req.url().endsWith('/service-worker.js')) {
+                console.log('[blocked-sw] service-worker.js fetch aborted');
+                req.abort();
+                return;
             }
 
             if (type === 'script') {

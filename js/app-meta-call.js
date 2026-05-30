@@ -6280,6 +6280,30 @@ window.MetaCall = (function () {
       return;
     }
 
+    // Degenerate-spread guard. Past Meta renders fall through to this
+    // path with a candidate set whose matchups all default to 50/50
+    // when _majorMatchupMap[pastMeta] doesn't cover the archetypes in
+    // _shareList — predictor then produces near-identical day2Prob
+    // values for every rec, the column is filled with "17.8 % / 50.5 %"
+    // ten times in a row, and the only differentiation is mirror
+    // penalty (non-mirror candidates rank above mirror ones). The
+    // resulting image is actively misleading: it suggests off-meta
+    // niche picks beat the dominant archetypes. Better to drop the
+    // column entirely and show the field-only image — same fallback
+    // we already use when there are no recs at all.
+    if (recs.length > 1) {
+      const probs = recs.map(r => r.day2Prob || 0);
+      const spread = Math.max(...probs) - Math.min(...probs);
+      if (spread < 0.005) {  // < 0.5 pp spread = no meaningful ranking
+        console.warn(
+          `[MetaCall] Recommendations spread is ${(spread * 100).toFixed(2)} pp — ` +
+          'matchup data missing for this view, falling back to field-only image.',
+        );
+        exportFieldShareImage();
+        return;
+      }
+    }
+
     // Layout: 2-column grid, field on left, recs on right.
     const W = 1280;
     const COL_GAP = 24;

@@ -50,12 +50,29 @@ function initFirebaseRuntime() {
   // window.__firestorePersistenceReady resolves when persistence is
   // enabled (or false if both attempts failed).
   window.__firestorePersistenceReady = (function() {
+    // Feature-detect the persistence APIs instead of try/calling and
+    // catching TypeError. Newer Firestore SDKs (≥ v11) removed
+    // enableMultiTabIndexedDbPersistence — the old try/catch hid the
+    // TypeError but the user-facing 'Cache nicht aktiv (TypeError)'
+    // banner outed it anyway (F-10 from the visual sweep).
+    var fs = firebase.firestore();
+
     function applySingleTab() {
-      return firebase.firestore().enableIndexedDbPersistence()
+      if (typeof fs.enableIndexedDbPersistence !== 'function') {
+        window.__firestorePersistenceEnabled = false;
+        window.__firestorePersistenceError = 'api-removed';
+        console.info(
+          '[Firestore] Offline persistence APIs not available in this SDK; ' +
+          'decks will be in-memory for this session. Modern Firestore SDKs ' +
+          'configure persistence via initializeFirestore({localCache: ...}).'
+        );
+        return Promise.resolve(false);
+      }
+      return fs.enableIndexedDbPersistence()
         .then(function() {
           window.__firestorePersistenceEnabled = true;
           window.__firestorePersistenceMode = 'single-tab';
-          console.info('[Firestore] Offline persistence enabled (single-tab fallback)');
+          console.info('[Firestore] Offline persistence enabled (single-tab)');
           return true;
         })
         .catch(function(err) {
@@ -71,31 +88,32 @@ function initFirebaseRuntime() {
           return false;
         });
     }
-    try {
-      return firebase.firestore().enableMultiTabIndexedDbPersistence()
-        .then(function() {
-          window.__firestorePersistenceEnabled = true;
-          window.__firestorePersistenceMode = 'multi-tab';
-          console.info('[Firestore] Offline persistence enabled (multi-tab)');
-          return true;
-        })
-        .catch(function(err) {
-          var code = err && err.code;
-          if (code === 'failed-precondition' || code === 'unimplemented') {
-            console.info('[Firestore] Multi-tab persistence rejected (' + code + '); trying single-tab…');
-            return applySingleTab();
-          }
-          window.__firestorePersistenceEnabled = false;
-          window.__firestorePersistenceError = code || 'unknown';
-          console.warn('[Firestore] Multi-tab persistence failed:', err);
-          return false;
-        });
-    } catch (e) {
-      window.__firestorePersistenceEnabled = false;
-      window.__firestorePersistenceError = (e && (e.code || e.name || e.message)) || 'init-threw';
-      console.warn('[Firestore] Persistence init threw, trying single-tab:', e);
-      try { return applySingleTab(); } catch (_) { return Promise.resolve(false); }
+
+    if (typeof fs.enableMultiTabIndexedDbPersistence !== 'function') {
+      // Skip the multi-tab attempt entirely — it would throw a TypeError
+      // that surfaces in the user-facing CLOUD-SYNC banner as
+      // 'TypeError'. Single-tab path also gracefully degrades when
+      // its method is missing.
+      return applySingleTab();
     }
+    return fs.enableMultiTabIndexedDbPersistence()
+      .then(function() {
+        window.__firestorePersistenceEnabled = true;
+        window.__firestorePersistenceMode = 'multi-tab';
+        console.info('[Firestore] Offline persistence enabled (multi-tab)');
+        return true;
+      })
+      .catch(function(err) {
+        var code = err && err.code;
+        if (code === 'failed-precondition' || code === 'unimplemented') {
+          console.info('[Firestore] Multi-tab persistence rejected (' + code + '); trying single-tab…');
+          return applySingleTab();
+        }
+        window.__firestorePersistenceEnabled = false;
+        window.__firestorePersistenceError = code || 'unknown';
+        console.warn('[Firestore] Multi-tab persistence failed:', err);
+        return false;
+      });
   })();
 
   // Auth state observer — handlers are defined in firebase-globals.js.

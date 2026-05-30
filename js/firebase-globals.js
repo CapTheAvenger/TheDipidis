@@ -40,21 +40,34 @@ function _renderCloudSyncStatus(detail) {
   if (el) el.textContent = detail;
 }
 
+// Friendly German error labels for known persistence-failure codes.
+// Without this map the banner just shows the raw code (e.g.
+// 'failed-precondition', 'TypeError', 'api-removed') which doesn't
+// tell a non-developer anything actionable.
+var _PERSIST_ERR_LABELS = {
+  'failed-precondition': 'anderer Tab nutzt den Cache',
+  'unimplemented':       'Browser unterstützt keinen Offline-Cache',
+  'api-removed':         'SDK-Version ohne Offline-Cache',
+  'init-threw':          'Cache-Init fehlgeschlagen',
+  'unknown':             'unbekannter Grund',
+};
+
 function updateCloudSyncStatus() {
   var online = (typeof navigator !== 'undefined') ? !!navigator.onLine : true;
   var mode = window.__firestorePersistenceMode || null;
   var enabled = window.__firestorePersistenceEnabled === true;
   var error = window.__firestorePersistenceError || null;
+  var errLabel = error ? (_PERSIST_ERR_LABELS[error] || error) : null;
 
   var detail;
   if (!online && !enabled) {
-    detail = 'Offline · Cache nicht aktiv (' + (error || 'unbekannter Grund') + ')';
+    detail = 'Offline · Cache nicht aktiv (' + (errLabel || 'unbekannter Grund') + ')';
   } else if (!online && enabled) {
     detail = 'Offline · Cache aktiv (' + mode + ')';
   } else if (online && enabled) {
     detail = 'Online · Cache aktiv (' + mode + ')';
   } else if (online && !enabled) {
-    detail = 'Online · Cache nicht aktiv' + (error ? ' (' + error + ')' : '');
+    detail = 'Online · Cache nicht aktiv' + (errLabel ? ' (' + errLabel + ')' : '');
   } else {
     detail = 'Initialisiere…';
   }

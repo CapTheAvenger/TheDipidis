@@ -22,6 +22,7 @@ import { Markup } from 'telegraf';
 
 import { fetchDeckIndex, formatDecklistAsPTCGL } from '../data-index.js';
 import { generateDeckImage, generateTechImage } from '../deck-image.js';
+import { startChatActionHeartbeat } from '../utils/loading.js';
 import { MENU_KEYBOARD, MENU_LABEL_DECK } from './start.js';
 
 const PAGE_SIZE = 8;
@@ -84,12 +85,17 @@ export function registerDeck(bot) {
     });
 
     bot.action(/^deck:pick:(.+)$/, async (ctx) => {
-        await ctx.answerCbQuery();
+        await ctx.answerCbQuery('Lade…');
         return showSourcePicker(ctx, ctx.match[1]);
     });
 
     bot.action(/^deck:src:([^:]+):(.+)$/, async (ctx) => {
-        await ctx.answerCbQuery();
+        // Surface "I heard you" right at the tap. The decklist flow
+        // below sends multiple messages (deck image + tech image +
+        // matchup + decklist), and each replyWithPhoto manages its
+        // own upload_photo indicator — but the user-facing toast
+        // bridges the gap before any of that fires.
+        await ctx.answerCbQuery('🔄 Erstelle Deck-Bild…');
         return sendDecklist(ctx, ctx.match[1], ctx.match[2]);
     });
 
@@ -271,6 +277,20 @@ async function showSourcePicker(ctx, deckKey) {
 }
 
 async function sendDecklist(ctx, sourceKey, deckKey) {
+    // Keep "Bot is sending a photo…" visible at the top of the chat
+    // for the entire deck-list assembly: main image (slow), tech
+    // image (slow), matchup table (instant), decklist (instant).
+    // Without this the user sees a 5–10s silent gap between the
+    // toast fading and the first photo arriving.
+    const stopHeartbeat = startChatActionHeartbeat(ctx, 'upload_photo');
+    try {
+        return await _sendDecklistInner(ctx, sourceKey, deckKey);
+    } finally {
+        stopHeartbeat();
+    }
+}
+
+async function _sendDecklistInner(ctx, sourceKey, deckKey) {
     const index = await fetchDeckIndex();
     const deck = index.decks?.[deckKey];
     const src = deck?.sources?.[sourceKey];

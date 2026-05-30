@@ -17,6 +17,7 @@
 import { Markup } from 'telegraf';
 
 import { captureMetaCallImage, getMetaCallInfo } from '../screenshot.js';
+import { withLoading } from '../utils/loading.js';
 import { MENU_LABEL_METACALL } from './start.js';
 
 // Same env override pattern as commands/deck.js — lets us point at a
@@ -38,11 +39,15 @@ export function registerMetaCall(bot) {
     bot.hears(MENU_LABEL_METACALL, (ctx) => showVariantMenu(ctx));
 
     bot.action('metacall:current', async (ctx) => {
-        await ctx.answerCbQuery();
+        // Toast right at the tap site — shows even before the chat-
+        // action heartbeat kicks in. answerCbQuery can only fire once
+        // per callback, so we pack the loading text in here instead of
+        // calling it twice.
+        await ctx.answerCbQuery('🔄 Lade Meta Call…');
         return sendVariant(ctx, 'current');
     });
     bot.action('metacall:past', async (ctx) => {
-        await ctx.answerCbQuery();
+        await ctx.answerCbQuery('🔄 Lade Meta Call…');
         return sendVariant(ctx, 'past');
     });
 }
@@ -65,10 +70,21 @@ async function showVariantMenu(ctx) {
 
 async function sendVariant(ctx, variant) {
     const started = Date.now();
+    const variantLabel = variant === 'current' ? 'Current' : 'Past';
     try {
-        const { buffer, key } = await captureMetaCallImage(variant);
+        // Heartbeat 'upload_photo' so the chat-header shows
+        // "sending a photo…" the whole time we're fetching the PNG.
+        // Banner only fires after 1.5s — covers the case where the
+        // toast has already faded and the PNG is still rendering.
+        const { buffer, key } = await withLoading(
+            ctx,
+            {
+                chatAction: 'upload_photo',
+                statusText: `🔄 Lade Meta Call (${variantLabel})… kann ein paar Sekunden dauern`,
+            },
+            () => captureMetaCallImage(variant),
+        );
         const elapsed = ((Date.now() - started) / 1000).toFixed(1);
-        const variantLabel = variant === 'current' ? 'Current' : 'Past';
         const rows = [
             [Markup.button.url('🌐 Auf Website öffnen', METACALL_DEEP_LINK)],
             [Markup.button.callback('🔄 Neu laden', `metacall:${variant}`)],

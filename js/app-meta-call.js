@@ -3488,7 +3488,20 @@ window.MetaCall = (function () {
       }
       try { await _decorateMetaCallEntries(); } catch (_e) { /* tolerate */ }
       try { renderAll(); } catch (_e) { /* tolerate */ }
-      console.info(`[MetaCall] source = past, format = ${_pastMetaFormatKey} (${aggregate.shares.length} archetypes, ${aggregate.tournamentCount} tournaments, frozen=${frozen}, source=${aggregate.source || 'labs'})`);
+      // Diagnostic: surface whether _majorMatchupMap has data for this
+      // past format. When it's empty, getBaseMatchup falls back to
+      // 50/50 for every (deck, opp) pair → recs collapse to identical
+      // values and the degenerate-spread guard in
+      // exportFieldAndRecsShareImage hides the column. Logging here so
+      // we can see if/when the lookup is broken vs just sparse.
+      const pastMetaUpper = (_pastMetaFormatKey || '').toUpperCase();
+      const metaMapForPast = pastMetaUpper && _majorMatchupMap
+        ? _majorMatchupMap[pastMetaUpper]
+        : null;
+      const metaMapSize = metaMapForPast
+        ? Object.values(metaMapForPast).reduce((s, x) => s + Object.keys(x).length, 0)
+        : 0;
+      console.info(`[MetaCall] source = past, format = ${_pastMetaFormatKey} (${aggregate.shares.length} archetypes, ${aggregate.tournamentCount} tournaments, frozen=${frozen}, source=${aggregate.source || 'labs'}, majorMatchupPairs=${metaMapSize})`);
     } else {
       // Switching back to current — invalidate caches that loadData fills
       _shareList = null;

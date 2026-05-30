@@ -8,6 +8,7 @@ Then syncs all scraper output (tournaments, meta, city league) to the
 frontend ``data/`` folder so the dashboard serves current data.
 """
 
+import hashlib
 import json
 import csv
 import os
@@ -16,6 +17,20 @@ import shutil
 import sys
 from typing import List, Dict
 from card_scraper_shared import get_data_dir, get_app_path, setup_console_encoding, load_set_order, card_sort_key
+
+
+def _file_md5(path: str, chunk_size: int = 1 << 20) -> str:
+    """Streaming md5 — chunked so we don't read 50 MB CSVs into memory.
+    Used by sync_scraper_data_to_frontend to decide whether the
+    destination file already matches the source byte-for-byte."""
+    h = hashlib.md5()
+    with open(path, 'rb') as f:
+        while True:
+            chunk = f.read(chunk_size)
+            if not chunk:
+                break
+            h.update(chunk)
+    return h.hexdigest()
 
 setup_console_encoding()
 
@@ -530,13 +545,18 @@ def sync_scraper_data_to_frontend():
         if not os.path.isfile(src):
             continue
 
-        # Only copy if source is newer or size differs
+        # Skip only when source and destination are content-identical.
+        # The previous mtime+size check could declare "already current"
+        # when a scrape wrote garbage that happened to match dst's size
+        # — a real bug class that surfaced in the data integrity sweep.
+        # Size comparison stays as the fast-path filter (different size
+        # → definitely different); md5 only runs when size matches, so
+        # the cost is bounded.
         if os.path.isfile(dst):
-            src_stat = os.stat(src)
-            dst_stat = os.stat(dst)
-            if src_stat.st_mtime <= dst_stat.st_mtime and src_stat.st_size == dst_stat.st_size:
-                skipped += 1
-                continue
+            if os.path.getsize(src) == os.path.getsize(dst):
+                if _file_md5(src) == _file_md5(dst):
+                    skipped += 1
+                    continue
 
         shutil.copy2(src, dst)
         size_mb = os.path.getsize(dst) / (1024 * 1024)

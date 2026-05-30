@@ -48,6 +48,19 @@ MAX_TECH_CARDS          = 10    # how many "next-in-line" alternatives the secon
 MAX_MATCHUPS            = 15    # how many top opponents the matchup matrix surfaces
 MIN_MATCHUP_GAMES       = 2     # below this is noise (lone result from one tournament)
 
+# Blend tunables — kept in sync with Meta Call's matchup map
+# (js/app-meta-call.js:21,22). The bot's current-meta matchup matrix
+# blends Limitless online (base) with the labs major-tournament matrix
+# (filtered to the active rotation) the same way Meta Call's
+# getBaseMatchup does, so the numbers stay consistent across the
+# bot, the website's deck-analysis surfaces, and the Meta Call
+# predictor's internal matchup map.
+#
+# MAJOR_MATCHUP_WEIGHT = 3.0  → 3:1 Labs:Online = 75 % Labs / 25 % Online
+# Bump to 4.0 for the 80 / 20 split documented in the original spec.
+MAJOR_MATCHUP_WEIGHT    = 3.0
+MAJOR_MATCHUP_MIN_GAMES = 10    # min combined labs sample per pair before the blend fires
+
 # Card-type bucket order for the decklist export, matching how players
 # expect to read a list: Pokémon first, then trainers grouped by sub-
 # type, then energies. Within each bucket cards keep their inclusion-
@@ -356,6 +369,120 @@ def _build_deck(rows: Iterable[dict], ace_spec_names: set[str] | None = None) ->
     # first.
     deck.sort(key=lambda c: TYPE_BUCKET_INDEX.get(c.get('bucket'), 99))
     return deck, tech
+
+
+def _read_major_matchups(site_dir: str, format_key: str) -> dict[str, dict[str, dict]]:
+    """Aggregate the master labs CSV (all metas) into a per-pair WR map
+    for ONE rotation.
+
+    The master file is data/labs_tournament_matchups.csv — same file
+    Meta Call reads (js/app-meta-call.js:3342). Each row carries a
+    `meta` column (e.g. 'TEF-CRI'); rows from other rotations are
+    skipped so the Lucario-vs-Dragapult rate from a SVI-JTG event
+    doesn't bleed into the current format.
+
+    Returns: {deck_name: {opponent_name: {'games': N, 'win_pct': X}}}
+    where win_pct is the games-weighted mean across all rows that match
+    (meta, my_deck_name, opponent_deck_name). The same shape is used
+    later by the blend step's reverse lookup.
+    """
+    path = os.path.join(site_dir, 'data', 'labs_tournament_matchups.csv')
+    if not os.path.exists(path):
+        print(f'warn: {path} missing — no major-tournament blend', file=sys.stderr)
+        return {}
+    target_meta = format_key.strip().upper()
+    agg: dict[str, dict[str, dict]] = {}
+    rows_consumed = 0
+    try:
+        with open(path, encoding='utf-8-sig') as f:
+            for row in csv.DictReader(f):
+                if (row.get('day_filter') or 'overall').strip().lower() != 'overall':
+                    continue
+                meta = (row.get('meta') or '').strip().upper()
+                if meta != target_meta:
+                    continue
+                deck = (row.get('my_deck_name') or '').strip()
+                opp  = (row.get('opponent_deck_name') or '').strip()
+                if not deck or not opp:
+                    continue
+                try:
+                    games = int(row.get('vs_count') or 0)
+                except (ValueError, TypeError):
+                    continue
+                if games <= 0:
+                    continue
+                try:
+                    wp = float(str(row.get('vs_win_pct') or '0').replace(',', '.'))
+                except (ValueError, TypeError):
+                    continue
+                bucket = agg.setdefault(deck, {}).setdefault(opp, {'games': 0, 'weighted_sum': 0.0})
+                bucket['games'] += games
+                bucket['weighted_sum'] += games * wp
+                rows_consumed += 1
+    except Exception as exc:  # pragma: no cover — diagnostics only
+        print(f'warn: major matchup parse failed: {exc}', file=sys.stderr)
+        return {}
+
+    out: dict[str, dict[str, dict]] = {}
+    pair_count = 0
+    for deck in agg:
+        out[deck] = {}
+        for opp in agg[deck]:
+            a = agg[deck][opp]
+            out[deck][opp] = {
+                'games': a['games'],
+                'win_pct': a['weighted_sum'] / a['games'],
+            }
+            pair_count += 1
+    print(f'  labs blend:    {rows_consumed} rows ({pair_count} pairs) for meta={target_meta}')
+    return out
+
+
+def _blend_matchups_with_majors(
+    limitless_mu: dict[str, list[dict]],
+    major_mu:     dict[str, dict[str, dict]],
+) -> dict[str, list[dict]]:
+    """Mutate-in-place blend of Limitless online matchups with the labs
+    major matchups, mirroring Meta Call's getBaseMatchup logic.
+
+    For each (deck, opponent) entry we already have from Limitless:
+      • Look up the same pair in the major map (forward + reverse).
+      • When the pair carries ≥MAJOR_MATCHUP_MIN_GAMES samples in labs,
+        replace the win_pct with the weighted average
+        (major × W + online × 1) / (W + 1), W = MAJOR_MATCHUP_WEIGHT.
+      • Bump the displayed sample size to online + labs games so the
+        sort order surfaces the most-evidenced matchups first.
+
+    Pairs that exist only in labs (not in Limitless) are intentionally
+    skipped: the Limitless universe defines which opponents are even
+    listed, matching the website's panel which iterates Limitless rows.
+    """
+    blended_pairs = 0
+    for deck, rows in limitless_mu.items():
+        deck_majors = major_mu.get(deck, {})
+        for entry in rows:
+            opp = entry['opponent']
+            major = deck_majors.get(opp)
+            if not major or major['games'] < MAJOR_MATCHUP_MIN_GAMES:
+                # Reverse lookup — if labs has only opponent-vs-deck,
+                # invert it (their win % becomes our loss %).
+                rev = major_mu.get(opp, {}).get(deck)
+                if rev and rev['games'] >= MAJOR_MATCHUP_MIN_GAMES:
+                    major = {'games': rev['games'], 'win_pct': 100.0 - rev['win_pct']}
+                else:
+                    major = None
+            if not major:
+                continue
+            online_wr = entry['win_pct']
+            blended = (
+                major['win_pct'] * MAJOR_MATCHUP_WEIGHT + online_wr
+            ) / (MAJOR_MATCHUP_WEIGHT + 1.0)
+            entry['win_pct'] = round(blended, 1)
+            entry['games']   = entry['games'] + major['games']
+            entry['blended'] = True
+            blended_pairs += 1
+    print(f'  labs blend:    {blended_pairs} matchup pairs blended ({MAJOR_MATCHUP_WEIGHT:.0f}:1 labs:online, min {MAJOR_MATCHUP_MIN_GAMES} labs games)')
+    return limitless_mu
 
 
 def _read_limitless_matchups(site_dir: str) -> dict[str, list[dict]]:
@@ -749,17 +876,20 @@ def main(argv: list[str]) -> int:
     ace_spec_names = _read_ace_spec_names(site_dir)
     print(f'  ace specs:     {len(ace_spec_names)} card names tagged')
 
-    # Current-meta pulls from the Limitless Online aggregate CSV —
-    # same source the website's "Matchups vs Meta Call" panel and Meta
-    # Call's own base matchup map read. Per-format labs splits
-    # (labs_tournament_matchups_TEF-CRI.csv etc.) are intentionally
-    # NOT used here: those reflect a single live event each, and would
-    # disagree with every other surface the user touches.
-    # Past-meta stays on the labs per-format split because the
-    # website's past-meta tab also reads labs_tournament_*_<META>.csv.
+    # Current-meta matchups follow Meta Call's getBaseMatchup logic
+    # exactly: Limitless online is the base layer (one row per pair),
+    # the master labs CSV filtered to the active rotation blends in
+    # 3:1 (75 % labs / 25 % online) for any pair with ≥10 labs games.
+    # The same constants drive Meta Call (MAJOR_MATCHUP_WEIGHT /
+    # MAJOR_MATCHUP_MIN_GAMES in js/app-meta-call.js), so the bot's
+    # numbers stay in lock-step with the predictor's internal map.
+    # Past-meta stays on the per-format labs split — the website's
+    # past-meta tab uses the same per-format files.
     current_matchups = _read_limitless_matchups(site_dir)
+    major_matchups   = _read_major_matchups(site_dir, format_key)
+    current_matchups = _blend_matchups_with_majors(current_matchups, major_matchups)
     past_matchups    = _read_matchups(site_dir, PAST_META_FORMAT_KEY)
-    print(f'  matchups:      {len(current_matchups)} current (limitless) / {len(past_matchups)} past (labs)')
+    print(f'  matchups:      {len(current_matchups)} current (limitless+labs blend) / {len(past_matchups)} past (labs)')
 
     current_meta = _build_current_meta(site_dir, format_key, ranking, ace_spec_names, current_matchups)
     print(f'  current-meta:  {len(current_meta)} decks')

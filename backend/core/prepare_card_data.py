@@ -19,6 +19,25 @@ from typing import List, Dict
 from card_scraper_shared import get_data_dir, get_app_path, setup_console_encoding, load_set_order, card_sort_key
 
 
+def _uf_find(parent: list, x: int) -> int:
+    """Path-compressed union-find lookup. parent[i] is the index of
+    i's parent; following the chain until parent[x] == x yields the
+    root. Compresses each visited node's parent to the root as it
+    goes so subsequent lookups are O(1)."""
+    while parent[x] != x:
+        parent[x] = parent[parent[x]]
+        x = parent[x]
+    return x
+
+
+def _uf_union(parent: list, a: int, b: int) -> None:
+    """Merge the components of a and b. No-op when they already share
+    a root."""
+    ra, rb = _uf_find(parent, a), _uf_find(parent, b)
+    if ra != rb:
+        parent[ra] = rb
+
+
 def _file_md5(path: str, chunk_size: int = 1 << 20) -> str:
     """Streaming md5 — chunked so we don't read 50 MB CSVs into memory.
     Used by sync_scraper_data_to_frontend to decide whether the
@@ -225,33 +244,27 @@ def create_merged_database():
                 ids.add(own_id)
             card_sets.append(ids)
 
-        # Build transitive closure groups via union-find
+        # Build transitive closure groups via union-find. The parent
+        # array gets reused for the whole iteration; find/union take
+        # it as an explicit parameter rather than closing over the
+        # loop-scoped name (ruff B023). Functional difference is nil
+        # — the closures only ran inside one iteration anyway — but
+        # the parameter form makes the contract obvious.
         parent = list(range(len(group)))
-
-        def find(x):
-            while parent[x] != x:
-                parent[x] = parent[parent[x]]
-                x = parent[x]
-            return x
-
-        def union(a, b):
-            ra, rb = find(a), find(b)
-            if ra != rb:
-                parent[ra] = rb
 
         for i in range(len(group)):
             for j in range(i + 1, len(group)):
                 if card_sets[i] & card_sets[j]:  # overlapping sets
-                    union(i, j)
+                    _uf_union(parent, i, j)
 
         # Merge int-prints within each group
         groups = defaultdict(set)
         for i in range(len(group)):
-            groups[find(i)].update(card_sets[i])
+            groups[_uf_find(parent, i)].update(card_sets[i])
 
         # Write back unified prints
         for i, card in enumerate(group):
-            merged_ip = ','.join(sorted(groups[find(i)]))
+            merged_ip = ','.join(sorted(groups[_uf_find(parent, i)]))
             old_ip = (card.get('international_prints') or '').strip()
             if merged_ip != old_ip:
                 card['international_prints'] = merged_ip

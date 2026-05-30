@@ -210,10 +210,6 @@
       "size": 147591
     },
     {
-      "path": "labs_tournament_decks_TEF-CRI.csv",
-      "size": 14273
-    },
-    {
       "path": "labs_tournament_decks_TEF-POR.csv",
       "size": 74887
     },
@@ -270,12 +266,8 @@
       "size": 832874
     },
     {
-      "path": "labs_tournament_matchups_TEF-CRI.csv",
-      "size": 181597
-    },
-    {
       "path": "labs_tournament_matchups_TEF-POR.csv",
-      "size": 460864
+      "size": 642211
     },
     {
       "path": "labs_tournaments.json",

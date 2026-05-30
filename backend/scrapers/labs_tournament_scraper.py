@@ -396,6 +396,57 @@ def _build_labs_name_meta_lookup(labs_tournaments: List[Dict]) -> Dict[str, Tupl
     return out
 
 
+def _load_in_person_legal_date() -> str:
+    """ISO date string from format_window.json — the day from which the
+    current EN set is tournament-legal in person. Empty when the field
+    is missing (older format_window.json files without the lag
+    column). Cached on first call."""
+    global _IN_PERSON_LEGAL_DATE
+    try:
+        return _IN_PERSON_LEGAL_DATE  # type: ignore[name-defined]
+    except NameError:
+        pass
+    legal = ''
+    try:
+        fw_path = os.path.join(_get_data_dir(), 'format_window.json')
+        if not os.path.isfile(fw_path):
+            fw_path = os.path.join(_PROJECT_ROOT, 'data', 'format_window.json')
+        if os.path.isfile(fw_path):
+            with open(fw_path, 'r', encoding='utf-8') as f:
+                fw = json.load(f)
+            legal = str(fw.get('in_person_legal_date') or '').strip()
+    except (OSError, json.JSONDecodeError):
+        legal = ''
+    globals()['_IN_PERSON_LEGAL_DATE'] = legal
+    return legal
+
+
+def _previous_meta_for_date(date_iso: str) -> str:
+    """The youngest meta whose chunk min_date is on-or-before `date_iso`.
+    Used as the lag-window fallback so a tournament held BEFORE the
+    current set becomes in-person legal lands in the previous bucket
+    (e.g. Melbourne 2026-05-23 → TEF-POR), not in the just-released
+    current bucket. Returns '' when no eligible chunk exists.
+
+    Note we look at min_date (start of a set's tournament window), not
+    max_date — the manifest's max_date for an active set keeps drifting
+    as more tournaments are added, so a fresh in-window tournament can
+    fall past max_date during the same scrape that created the bucket.
+    min_date is stable.
+    """
+    if not date_iso:
+        return ''
+    try:
+        d = datetime.strptime(date_iso, '%Y-%m-%d')
+    except ValueError:
+        return ''
+    eligible = [(d_min, meta) for (d_min, _d_max, meta) in _load_meta_date_lookup() if d_min <= d]
+    if not eligible:
+        return ''
+    eligible.sort(key=lambda x: x[0], reverse=True)  # youngest min_date first
+    return eligible[0][1]
+
+
 def _derive_meta_for_labs_tournament(
     tid: str,
     tournament_name: str,
@@ -420,7 +471,24 @@ def _derive_meta_for_labs_tournament(
     # 3. Empty date + no name match → leave for _unsorted UNLESS we have a
     # non-empty date that just doesn't fit any chunk window (brand-new
     # tournament in current set).
+    #
+    # CRITICAL: the new set isn't tournament-legal until
+    # in_person_legal_date (release + lag_days). A tournament held in
+    # the lag window belongs to the previous set's bucket. Without this
+    # guard, fresh post-release/pre-legal tournaments get mislabeled
+    # under the new set — e.g. Melbourne 2026-05-23 landed under
+    # TEF-CRI even though CRI wasn't in-person legal until 2026-06-05
+    # (see format_window.json's in_person_legal_date).
     if effective_date and current_meta:
+        in_person_legal = _load_in_person_legal_date()
+        if in_person_legal and effective_date < in_person_legal:
+            prev_meta = _previous_meta_for_date(effective_date)
+            if prev_meta:
+                return (prev_meta, effective_date)
+            # No previous chunk known either — punt to _unsorted rather
+            # than guess. Better surfaces in operator review than a
+            # silent mislabel.
+            return ('', effective_date)
         return (current_meta, effective_date)
     return ('', effective_date)
 

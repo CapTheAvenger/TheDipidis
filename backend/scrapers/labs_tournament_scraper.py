@@ -1991,6 +1991,62 @@ def main() -> None:
     merged_deck_rows = [r for r in existing_deck_rows if str(r.get('tournament_id') or '').strip() not in rescraped_tids]
     merged_deck_rows.extend(all_deck_rows)
 
+    # ── Meta-tag consistency check ──────────────────────────────────────
+    # After a merge, no tournament_id should carry two different meta
+    # tags across its rows. When it does, an earlier scrape mislabelled
+    # the tournament (Melbourne 2026-05-23 landed under TEF-CRI for
+    # weeks because the lag-window fallback ignored in_person_legal_date)
+    # and the current run is now stacking new rows in the correct
+    # bucket alongside the stale wrong-meta rows. Drop the stale meta
+    # in favour of whatever the freshly-scraped rows for the same tid
+    # have, and log loudly so the operator notices.
+    rows_by_tid: Dict[str, List[Dict]] = {}
+    for r in merged_deck_rows:
+        tid = str(r.get('tournament_id') or '').strip()
+        if not tid:
+            continue
+        rows_by_tid.setdefault(tid, []).append(r)
+    rescraped_set = set(rescraped_tids) if not isinstance(rescraped_tids, set) else rescraped_tids
+    fixed_clashes = 0
+    for tid, rows in rows_by_tid.items():
+        metas = {(r.get('meta') or '').strip() for r in rows if r.get('meta')}
+        if len(metas) <= 1:
+            continue
+        # Prefer the meta carried by freshly-scraped rows. When the
+        # tid wasn't rescraped this run we still have a divergence;
+        # pick the meta with the highest row count as a tie-breaker
+        # (the freshest scrape almost always brings the largest cohort).
+        if tid in rescraped_set:
+            fresh_metas = {
+                (r.get('meta') or '').strip()
+                for r in rows if r in all_deck_rows and r.get('meta')
+            }
+            winner = next(iter(fresh_metas)) if len(fresh_metas) == 1 else None
+        else:
+            winner = None
+        if not winner:
+            counts: Dict[str, int] = {}
+            for r in rows:
+                m = (r.get('meta') or '').strip()
+                if m:
+                    counts[m] = counts.get(m, 0) + 1
+            winner = max(counts, key=counts.get)
+        loser_metas = metas - {winner}
+        logger.warning(
+            "Meta clash on tid=%s — rows carry metas %s; consolidating onto %r "
+            "(rescrape=%s). This usually means an earlier run mislabelled the "
+            "tournament; check labs_tournament_id_overrides.json + the cards-data "
+            "name lookup for this tid.",
+            tid, sorted(metas), winner, tid in rescraped_set,
+        )
+        for r in rows:
+            row_meta = (r.get('meta') or '').strip()
+            if row_meta and row_meta in loser_metas:
+                r['meta'] = winner
+                fixed_clashes += 1
+    if fixed_clashes:
+        logger.warning("Resolved %d row(s) with stale meta tags during merge", fixed_clashes)
+
     # Re-classify existing rows against the name-meta lookup. Two cases:
     #
     #   (A) RESCUE — row has empty meta (= sitting in _unsorted) and the

@@ -1,5 +1,13 @@
 [
   {
+    "tournament_id": "0068",
+    "tournament_name": "Regional Championship Indianapolis",
+    "tournament_date": "2026-05-29",
+    "tournament_type": "regional",
+    "country": "US",
+    "total_players": 0
+  },
+  {
     "tournament_id": "0066",
     "tournament_name": "Regional Championship Melbourne",
     "tournament_date": "2026-05-23",

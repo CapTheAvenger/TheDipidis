@@ -5962,6 +5962,15 @@ window.MetaCall = (function () {
       ctx.font = (isJunk || isCustom) ? 'bold 17px system-ui, sans-serif' : '600 17px system-ui, sans-serif';
       let label = isJunk ? t('mc.junkDecks') : deck.name;
       if (isCustom) label += ' ★';
+      // When this row is a family aggregate (combined view), append
+      // the variant count so the reader sees that 'Dragapult'
+      // bundles N separate per-variant entries from the underlying
+      // share list. Single-variant rows (variantCount = 1 or absent)
+      // stay unmarked — '(1)' next to every per-variant name in the
+      // single view would just be noise.
+      if (!isJunk && !isCustom && deck.variantCount && deck.variantCount > 1) {
+        label += ' (' + deck.variantCount + ')';
+      }
       const maxLabelW = barX - originX - padL - 12;
       if (ctx.measureText(label).width > maxLabelW) {
         while (label.length > 4 && ctx.measureText(label + '…').width > maxLabelW) {
@@ -6046,6 +6055,12 @@ window.MetaCall = (function () {
       ctx.fillStyle = '#e2e8f0';
       ctx.font = '600 16px system-ui, sans-serif';
       let label = r.name;
+      // Mirror the field column's variant-count suffix on combined-
+      // view aggregates so 'Dragapult (5)' reads the same in both
+      // halves of the share image.
+      if (r.variantCount && r.variantCount > 1) {
+        label += ' (' + r.variantCount + ')';
+      }
       const maxLabelW = columnW - padL - 30 - padR - 70 - 70 - 16;
       if (ctx.measureText(label).width > maxLabelW) {
         while (label.length > 4 && ctx.measureText(label + '…').width > maxLabelW) {

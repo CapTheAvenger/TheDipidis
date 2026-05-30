@@ -86,17 +86,12 @@ NAME_ACTION_MAP = {
     "Switch":                    {"action": "switch-active",  "description": "Switch your Active Pokémon with a Bench Pokémon"},
     "Switch Cart":               {"action": "switch-active",  "description": "Switch your Active Pokémon with a Bench Pokémon; heal 30"},
     "Escape Rope":               {"action": "switch-active",  "description": "Both players switch active Pokémon"},
-    "Ciphermaniac's Codebreaking": {"action": "ciphermaniac", "description": "Search deck for 2 cards, put on top"},
     "Energy Search":             {"action": "deck-search",    "description": "Search deck for a Basic Energy card"},
     "Rare Candy":                {"action": "deck-search",    "description": "Evolve a Basic to Stage 2, skipping Stage 1"},
     "Level Ball":                {"action": "deck-search",    "description": "Search deck for Pokémon with 90 HP or less"},
     "Quick Ball":                {"action": "deck-search",    "description": "Discard a card, search deck for Basic Pokémon"},
     "Evolution Incense":         {"action": "deck-search",    "description": "Search deck for Evolution Pokémon"},
     "Air Balloon":               {"action": "deck-search",    "description": "Tool: free retreat for Pokémon with 2 energy retreat cost"},
-    "Crispin":                   {"action": "deck-search",    "description": "Search for up to 2 Basic Energy of different types"},
-
-    # Pokégear variants
-    "Pokégear 3.0":              {"action": "look-top-supporter", "actionParam": 7},
 }
 
 # ---------------------------------------------------------------------------

@@ -763,28 +763,6 @@
                                     <button class="btn-modern tertiary-danger city-league-clear-btn deck-builder-clear-btn" onclick="clearDeck('cityLeague')" data-i18n="btn.clear">Clear</button>
                                 </div>
                             </div>
-                            <div class="tech-slots-row" data-source="cityLeague">
-                                <div class="tech-slots-header">
-                                    <span class="tech-slots-label" data-i18n="techSlots.label">Tech Cards</span>
-                                    <span class="tech-slots-hint" data-i18n="techSlots.hint">(forced into next Generate)</span>
-                                    <span class="tech-slots-count" id="cityLeagueTechSlotsCount">0/10</span>
-                                    <div class="tech-slots-header-actions">
-                                        <button class="btn-modern btn-tiny" onclick="openAntiTechModal('cityLeague')" data-i18n="antiTech.buildVsBtn" data-i18n-title="antiTech.buildVsBtnTitle" title="Build vs a specific deck — auto-fills tech slots">Build vs ...</button>
-                                        <button class="btn-modern btn-tiny btn-secondary" onclick="clearTechSlots('cityLeague')" data-i18n="techSlots.clearBtn">Clear</button>
-                                    </div>
-                                </div>
-                                <div class="tech-slots-grid" id="cityLeagueTechSlotsGrid"></div>
-                                <div class="tech-slot-picker d-none" id="cityLeagueTechSlotPicker">
-                                    <input class="tech-slot-picker-input" id="cityLeagueTechSlotInput" type="text"
-                                        placeholder="Search a card to add as tech..."
-                                        data-i18n-placeholder="techSlots.searchPlaceholder"
-                                        oninput="techSlotSearch(this, 'cityLeague')"
-                                        onblur="setTimeout(()=>hideTechSlotPicker('cityLeague'), 200)"
-                                        onkeydown="if(event.key==='Escape'){hideTechSlotPicker('cityLeague')}"
-                                        autocomplete="off">
-                                    <div class="tech-slot-picker-dropdown" id="cityLeagueTechSlotDropdown"></div>
-                                </div>
-                            </div>
                             <div id="cityLeagueHandStats" class="city-league-hand-stats"></div>
                             <div id="cityLeagueMyDeckVisual" class="section-panel city-league-mydeck-visual d-none">
                                 <div class="city-league-mydeck-header">

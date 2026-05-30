@@ -215,7 +215,92 @@
             return String(name || '').toLowerCase()
                 .replace(/[''`]s\b/g, '')   // strip possessive 's (Rocket's → Rocket)
                 .replace(/[''`]/g, '')        // strip remaining apostrophes
+                .replace(/-/g, ' ')           // hyphens → spaces (Raging-Bolt → Raging Bolt)
                 .replace(/\s+/g, ' ').trim();
+        }
+
+        // Reused across many tile renders. Cache the per-imageMap
+        // normalised-key lookup so we don't rebuild it on every card.
+        let _imageMapNormCache = null;
+        let _imageMapNormCacheRef = null;
+        function _buildImageMapNormCache(imageMap) {
+            if (_imageMapNormCacheRef === imageMap && _imageMapNormCache) {
+                return _imageMapNormCache;
+            }
+            const cache = {};
+            Object.keys(imageMap || {}).forEach(k => {
+                const norm = _normArchName(k);
+                if (norm && !cache[norm]) cache[norm] = imageMap[k];
+            });
+            _imageMapNormCache = cache;
+            _imageMapNormCacheRef = imageMap;
+            return cache;
+        }
+
+        /**
+         * Resolve an image URL for an archetype tile, falling back through
+         * progressively looser matches when the archetype name in the data
+         * differs from the key the image map was generated under. This
+         * happens when:
+         *   - The crawl normalises punctuation differently (Raging-Bolt
+         *     Ogerpon ↔ Raging Bolt Ogerpon).
+         *   - A new family prefix appears (Rocket's Mewtwo) before the
+         *     image map has been regenerated, so the map only has the
+         *     prefix-less form.
+         *   - The hero card aggregates several variants but the
+         *     representative variant happens to lack an entry.
+         *
+         * Without this fallback, the affected tiles render as grey boxes
+         * even though a perfectly-good image for a sibling variant or the
+         * normalised form is available right next door in the map.
+         *
+         * fallbackVariants is optional and only relevant for hero cards
+         * (a family-grouped tile can borrow any of its variants' images).
+         */
+        function getImageUrlFuzzy(name, imageMap, fallbackVariants) {
+            if (!imageMap || !name) return '';
+            if (imageMap[name]) return imageMap[name];
+
+            const cache = _buildImageMapNormCache(imageMap);
+            const normName = _normArchName(name);
+            if (normName && cache[normName]) return cache[normName];
+
+            // Last-word / last-two-words probe: lets "Rocket's Mewtwo"
+            // resolve to "Spidops Mewtwo" (Mewtwo is the visual identity).
+            const words = normName.split(' ').filter(Boolean);
+            if (words.length >= 2) {
+                const tail2 = words.slice(-2).join(' ');
+                if (cache[tail2]) return cache[tail2];
+                const tail1 = words.slice(-1).join(' ');
+                if (cache[tail1]) return cache[tail1];
+
+                // Word-overlap scan over the normalised keys. Threshold ≥1
+                // means we only return a hit when the archetype shares at
+                // least one Pokemon name with an existing key — never a
+                // random card from the map.
+                let bestKey = null;
+                let bestOverlap = 0;
+                Object.keys(cache).forEach(k => {
+                    const kWords = k.split(' ').filter(Boolean);
+                    const overlap = words.filter(w => kWords.includes(w)).length;
+                    if (overlap > bestOverlap) {
+                        bestOverlap = overlap;
+                        bestKey = k;
+                    }
+                });
+                if (bestKey && bestOverlap >= 1) return cache[bestKey];
+            }
+
+            if (Array.isArray(fallbackVariants)) {
+                for (const v of fallbackVariants) {
+                    if (!v || v === name) continue;
+                    if (imageMap[v]) return imageMap[v];
+                    const nv = _normArchName(v);
+                    if (nv && cache[nv]) return cache[nv];
+                }
+            }
+
+            return '';
         }
 
         function fuzzyArchetypeLookup(archetypeName, cardDataByArchetype) {
@@ -517,7 +602,7 @@
                 topHeroArchetypes.forEach((item, index) => {
                     const representativeCards = cardDataByArchetype[item.representativeVariant] || [];
                     const imageUrl = imageMap
-                        ? (imageMap[item.representativeVariant] || '')
+                        ? getImageUrlFuzzy(item.representativeVariant, imageMap, item.variants)
                         : getArchetypeImage(item.representativeVariant, representativeCards);
                     const combinedMainEscaped = escapeJsStr(item.key || item.label || item.representativeVariant || '');
                     const combinedVariantsJsonEscaped = escapeJsStr(encodeURIComponent(JSON.stringify(item.variants || [])));
@@ -594,7 +679,7 @@
                     // Get archetype image
                     const archetypeCards = fuzzyArchetypeLookup(archetypeName, cardDataByArchetype);
                     const imageUrl = imageMap
-                        ? (imageMap[archetypeName] || '')
+                        ? getImageUrlFuzzy(archetypeName, imageMap)
                         : getArchetypeImage(archetypeName, archetypeCards);
                     
                     const currentRank = currentRankValue > 0 ? currentRankValue.toFixed(1) : '0.0';

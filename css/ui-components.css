@@ -1704,43 +1704,41 @@ img[src*="limitlesstcg"] {
     transform: scale(1.2);
 }
 
-/* "Owned other international prints" badge — subtle pill so it
- * reads as a 'you have this in another language' affordance,
- * not a fire alarm. Previous version stacked a yellow→amber
- * gradient + 2px orange border + drop-shadow + outer glow which
- * blew it up into the biggest element on the card. */
+/* "Owned other international prints" badge — single small circle
+ * sized to match .city-league-card-badge (max/deck), so the row of
+ * markers on the card image reads as one consistent badge family
+ * instead of one yellow pill that dwarfs every other indicator. */
 .city-league-other-print-sparkle {
     position: absolute;
     right: 4px;
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    line-height: 1;
-    z-index: 6;
-    cursor: help;
-    background: #fff7d6;
-    border: 1px solid #e0a800;
-    border-radius: 12px;
-    padding: 1px 6px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.18);
-}
-.city-league-other-print-sparkle-icon {
-    font-size: 12px;
-    font-weight: 800;
-    color: #8a5a00;
-}
-.city-league-other-print-sparkle-count {
-    display: inline-flex;
+    display: flex;
     align-items: center;
     justify-content: center;
-    min-width: 16px;
-    height: 16px;
-    padding: 0 4px;
-    border-radius: 8px;
-    background: #6b4500;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    z-index: 2;
+    cursor: help;
+    background: #f59e0b;
     color: #fff;
-    font-size: 10px;
-    font-weight: 700;
+    font-weight: 800;
+    font-size: 0.65em;
+    border: 1.5px solid rgba(255, 255, 255, 0.5);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+}
+.city-league-other-print-sparkle-icon {
+    display: none;
+}
+.city-league-other-print-sparkle-count {
+    background: transparent;
+    color: inherit;
+    font-size: inherit;
+    font-weight: inherit;
+    padding: 0;
+    min-width: 0;
+    height: auto;
+    border-radius: 0;
+    line-height: 1;
 }
 
 .city-league-card-info-bottom {

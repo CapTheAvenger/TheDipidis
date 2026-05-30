@@ -1914,7 +1914,7 @@
   .meta-card-analysis-grid .card-info-text > div:nth-child(2),
   #cityLeagueMetaGrid .card-info-text > div:nth-child(2),
   #currentMetaMetaGrid .card-info-text > div:nth-child(2) {
-    font-size: 0.85em !important;
+    font-size: 0.9em !important;
     color: rgba(30, 30, 50, 0.6) !important;
     line-height: 1.15 !important;
   }
@@ -1929,11 +1929,12 @@
     gap: 4px !important;
     flex-wrap: nowrap !important;
     overflow: hidden !important;
-    /* Without this the row's children stayed on the base 0.6em
-     * mobile size while siblings ('Ø …', deck-stats line) jumped
-     * to 0.85em / 0.9em — the set + percentage line ended up
-     * roughly two-thirds the height of every other stat line. */
-    font-size: 0.85em !important;
+    /* 0.9em matches the deck-stats line (4th child) and the avg
+     * line below, so every line in the info panel reads at the same
+     * height. Previously the set + percentage row sat at 0.85em
+     * while the count line was 0.9em, making the set code look
+     * subtly smaller than the rest of the stat stack. */
+    font-size: 0.9em !important;
   }
 
   /* Children inherit the new font-size from .set-stats-row, but
@@ -1959,7 +1960,7 @@
   .meta-card-analysis-grid .city-league-card-avg-mobile,
   #cityLeagueMetaGrid .city-league-card-avg-mobile,
   #currentMetaMetaGrid .city-league-card-avg-mobile {
-    font-size: 0.85em !important;
+    font-size: 0.9em !important;
     color: #b8860b !important;
     line-height: 1.15 !important;
   }

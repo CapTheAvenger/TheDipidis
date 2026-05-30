@@ -654,11 +654,13 @@
                         <div class="section-grid-container date-range-container">
                             <div>
                                 <label for="cityLeagueDateFrom" class="form-label-block" data-i18n="filter.from">From:</label>
-                                <input type="date" id="cityLeagueDateFrom" onchange="applyCityLeagueDateFilter()" class="control-input">
+                                <input type="date" id="cityLeagueDateFrom" onchange="applyCityLeagueDateFilter()" class="control-input" title="Format: DD.MM.YYYY">
+                                <small class="date-format-hint" data-i18n="filter.dateFormatHint">DD.MM.YYYY</small>
                             </div>
                             <div>
                                 <label for="cityLeagueDateTo" class="form-label-block" data-i18n="filter.to">To:</label>
-                                <input type="date" id="cityLeagueDateTo" onchange="applyCityLeagueDateFilter()" class="control-input">
+                                <input type="date" id="cityLeagueDateTo" onchange="applyCityLeagueDateFilter()" class="control-input" title="Format: DD.MM.YYYY">
+                                <small class="date-format-hint" data-i18n="filter.dateFormatHint">DD.MM.YYYY</small>
                             </div>
                         </div>
                         <div class="control-row">
@@ -1081,7 +1083,8 @@
                         </div>
                         <div class="control-group current-meta-date-group">
                             <label class="current-meta-format-label" for="currentMetaDateFrom">Data window from:</label>
-                            <input type="date" id="currentMetaDateFrom" class="current-meta-date-input" onchange="setCurrentMetaDateFrom(this.value)">
+                            <input type="date" id="currentMetaDateFrom" class="current-meta-date-input" onchange="setCurrentMetaDateFrom(this.value)" title="Format: DD.MM.YYYY">
+                            <small class="date-format-hint date-format-hint-inline" data-i18n="filter.dateFormatHint">DD.MM.YYYY</small>
                             <button onclick="clearCurrentMetaDateFrom()" id="currentMetaDateClear" class="btn btn-secondary current-meta-date-clear">Clear</button>
                             <span id="currentMetaDateStatus" class="current-meta-filter-status"></span>
                         </div>

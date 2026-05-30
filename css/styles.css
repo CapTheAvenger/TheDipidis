@@ -9869,3 +9869,22 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
     line-height: 1.3;
 }
 
+
+/* F-22 from visual sweep: native <input type="date"> picks the
+ * format from the OS locale, so users on a German system see
+ * 'tt.mm.jjjj' placeholder while the SPA's lang attribute is 'en'.
+ * Adding a small static hint underneath the input keeps the
+ * expected format visible regardless of browser locale, without
+ * the cost of building a custom date picker. */
+.date-format-hint {
+    display: block;
+    margin-top: 2px;
+    font-size: 0.72rem;
+    color: var(--text-muted, #6b7280);
+    letter-spacing: 0.02em;
+}
+.date-format-hint-inline {
+    display: inline-block;
+    margin-left: 8px;
+    margin-top: 0;
+}

@@ -4135,7 +4135,11 @@ img[src*="limitlesstcg"] {
    ==================================== */
 .calc-layout { max-width: 620px; margin: 0 auto; }
 .calc-params { background: var(--bg-white, #fff); border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,.08); }
-.calc-params h3 { margin: 0 0 16px; font-size: 1.1rem; color: var(--pokemon-blue, #1a5276); }
+/* F-13 partial fix: Parameters heading was Pokemon-blue while every
+ * other section heading on the site uses the dark-navy text colour.
+ * Switched to --text-dark for visual consistency with #current-meta,
+ * #cards, #profile etc. */
+.calc-params h3 { margin: 0 0 16px; font-size: 1.1rem; color: var(--text-dark, #2c3e50); }
 .calc-field { margin-bottom: 14px; }
 .calc-field label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 4px; color: var(--text-dark, #333); }
 .calc-input { width: 100%; padding: 10px 12px; font-size: 1rem; border: 2px solid #dde3ea; border-radius: 8px; background: var(--bg-light, #f8fafc); transition: border-color .2s; }

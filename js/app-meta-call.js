@@ -5209,7 +5209,7 @@ window.MetaCall = (function () {
             <ul class="mc-rec-reason-list">${matchupRows}</ul>
             <div class="mc-rec-reason-breakdown">${
               t('mc.reasonBreakdown')
-                .replace('{wins}', r.expWin.toFixed(1).replace('.', ','))
+                .replace('{wins}', r.expWin.toFixed(2).replace('.', ','))
                 .replace('{rounds}', String(_settings.rounds))
                 .replace('{day2}', day2Pct)
             }</div>
@@ -5228,7 +5228,7 @@ window.MetaCall = (function () {
         <td class="mc-rec-name"><span class="mc-rec-name-inner">${icon}<span class="mc-rec-name-text">${esc(r.name)}</span>${isMine ? `<span class="mc-rec-mine-tag">${esc(t('mc.recYourDeck'))}</span>` : ''}</span></td>
         <td class="mc-rec-day2"><strong>${day2Pct}%</strong></td>
         <td class="mc-rec-wr">${wrPct}%</td>
-        <td class="mc-rec-wins">∅ ${r.expWin.toFixed(1)}</td>
+        <td class="mc-rec-wins">∅ ${r.expWin.toFixed(2)}</td>
         <td class="mc-rec-toggle"><span class="mc-rec-chevron" aria-hidden="true">▼</span></td>
       </tr>
       <tr class="mc-rec-reason-row" id="${reasonId}" hidden>

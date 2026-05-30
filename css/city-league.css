@@ -2539,16 +2539,21 @@
  * the markup) once a fresh season is underway.
  */
 .cl-season-notice {
-    background: linear-gradient(135deg, #fff7e6 0%, #fff1d6 100%);
-    border-left: 4px solid #f39c12;
+    /* F-18 from visual sweep: previous gradient (#fff7e6 → #fff1d6)
+     * was barely distinguishable from the white page background.
+     * Bumped to a more saturated amber so the banner reads as a
+     * proper notice without screaming. */
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    border: 1px solid #f59e0b;
+    border-left: 4px solid #d97706;
     border-radius: 6px;
     padding: 10px 16px;
     margin: 12px 0 16px;
-    color: #5c3a00;
+    color: #4a2d00;
     font-size: 0.95em;
     line-height: 1.4;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    box-shadow: 0 1px 3px rgba(217, 119, 6, 0.12);
 }
 .cl-season-notice strong {
-    color: #b8600c;
+    color: #9a4d00;
 }

@@ -344,7 +344,12 @@
     }
     
     .profile-tab-btn {
+        /* F-19 from visual sweep: profile sub-tabs were ~30px tall
+         * on mobile, below the 44px touch-target minimum.
+         * min-height + tighter vertical padding keeps the row
+         * visually similar to before but reachable on touch. */
         padding: 10px 16px;
         font-size: 14px;
+        min-height: 44px;
     }
 }

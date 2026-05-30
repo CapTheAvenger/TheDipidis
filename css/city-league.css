@@ -2514,3 +2514,28 @@
 .past-meta-matchup-table .past-meta-mu-good { color: #15803d; }
 .past-meta-matchup-table .past-meta-mu-bad  { color: #b91c1c; }
 .past-meta-matchup-table .past-meta-mu-even { color: #6b7280; }
+
+/* Season-closed notice ─────────────────────────────────────────────
+ * Shown at the top of both City League tabs while the current
+ * season is on its end-of-year break. The data underneath is the
+ * last available snapshot — useful to browse, but no fresh data
+ * will land until the season resumes. The banner makes that gap
+ * obvious so users don't read stale numbers as live.
+ *
+ * Hide by adding the .display-none utility class (or by stripping
+ * the markup) once a fresh season is underway.
+ */
+.cl-season-notice {
+    background: linear-gradient(135deg, #fff7e6 0%, #fff1d6 100%);
+    border-left: 4px solid #f39c12;
+    border-radius: 6px;
+    padding: 10px 16px;
+    margin: 12px 0 16px;
+    color: #5c3a00;
+    font-size: 0.95em;
+    line-height: 1.4;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+.cl-season-notice strong {
+    color: #b8600c;
+}

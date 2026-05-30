@@ -1296,6 +1296,8 @@ const translations = {
 
     // ── Tab 1: City League Meta ──────────────────────────────
     'cl.cityLeagueDev':         'City League Development',
+    'cl.seasonClosedTitle':     '📅 Season pause:',
+    'cl.seasonClosed':          'The current City League season has concluded. New events resume in September.',
 
     // ── Tab 3: Current Meta ──────────────────────────────────
     'cm.limitlessHeading':      'Limitless Online Comparison',
@@ -2921,6 +2923,8 @@ const translations = {
 
     // ── Tab 1: City League Meta ──────────────────────────────
     'cl.cityLeagueDev':         'City League Entwicklung',
+    'cl.seasonClosedTitle':     '📅 Saison-Pause:',
+    'cl.seasonClosed':          'Die aktuelle City-League-Saison ist beendet. Neue Events starten im September.',
 
     // ── Tab 3: Current Meta ──────────────────────────────────
     'cm.limitlessHeading':      'Limitless Online Vergleich',

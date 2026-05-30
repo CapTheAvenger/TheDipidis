@@ -785,8 +785,6 @@ def split_tournament_cards(frontend_data):
         except Exception as e:
             print(f"  ! Could not read formats_catalog.json: {e}")
 
-    from datetime import datetime as _dt, timedelta as _td
-    today = _dt.now()
     warnings = 0
     for meta_key in sorted(meta_rows.keys()):
         chunk_name = f"tournament_cards_data_cards_{meta_key}.csv"

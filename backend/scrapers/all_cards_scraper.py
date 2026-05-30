@@ -99,8 +99,6 @@ def _classify_incompleteness(row: dict):
     cm_url     = (row.get("cardmarket_url") or "").strip()
     energy_type = (row.get("energy_type") or "").strip()
     type_lower = (row.get("type") or "").strip().lower()
-    set_code   = (row.get("set") or "").strip()
-    set_number = (row.get("number") or "").strip()
 
     is_basic_energy = type_lower == "basic energy"
     has_basic = bool(image_url and intl and (rarity or is_basic_energy))

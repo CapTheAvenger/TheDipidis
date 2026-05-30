@@ -260,13 +260,20 @@ def scrape_deck_statistics(
             wr_pct = (primary["wins"] + 0.5 * primary["ties"]) / (decisive + primary["ties"]) * 100
             primary["win_rate_numeric"] = round(wr_pct, 2)
             primary["win_rate"] = f"{wr_pct:.2f}%"
-        # Keep the lowest rank (higher up = more visible / primary listing)
+        # Keep the lowest rank (higher up = more visible / primary listing).
+        # Both rank fields come from the parsed HTML — a non-integer here
+        # means the scraper's column parser drifted (Limitless changed
+        # their markup). Log it so we notice instead of silently keeping
+        # whichever rank arbitrarily won the comparison.
         try:
             if int(d["rank"]) < int(primary["rank"]):
                 primary["rank"] = d["rank"]
                 primary["deck_url"] = d["deck_url"]
-        except (ValueError, TypeError):
-            pass
+        except (ValueError, TypeError) as err:
+            logger.debug(
+                "Rank comparison failed for %s: %s (rank=%r, primary_rank=%r)",
+                primary.get("deck_name", "?"), err, d.get("rank"), primary.get("rank"),
+            )
 
     deduped = list(by_name.values())
     if len(deduped) < raw_count:

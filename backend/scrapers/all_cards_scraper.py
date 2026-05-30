@@ -544,8 +544,8 @@ def _fetch_single_card(card: dict) -> dict:
         info_el = attack_el.select_one(".card-text-attack-info")
         effect_el = attack_el.select_one(".card-text-attack-effect")
         if info_el:
-            # Extract cost symbols + name + damage
-            symbols = [s.get_text(strip=True) for s in info_el.select(".ptcg-symbol")]
+            # get_text() folds the .ptcg-symbol nodes inline already,
+            # so we don't need a separate symbol extraction pass.
             full_text = info_el.get_text(" ", strip=True)
             card_text_parts.append(full_text)
         if effect_el:

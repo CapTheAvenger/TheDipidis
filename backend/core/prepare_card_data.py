@@ -279,6 +279,23 @@ EXTENDED_MIN_ORDER = 113   # SSH and newer
 # Promo sets span multiple eras; assign them to standard for fast first-load.
 PROMO_ERA_SETS = {"SVP", "MEP", "SP", "HSP", "SMP", "SV", "SWSHP"}
 
+
+def _is_new_set_unknown_to_set_order(set_code: str, set_order: dict) -> bool:
+    """A set we encountered but sets.json doesn't know about. Happens
+    when update_sets.py crashed before refreshing sets.json — a brand
+    new rotation hits all_cards_database.csv before its order entry
+    lands. Without a special-case we'd classify it as order=0 (=
+    legacy) and the new cards would silently vanish from the
+    Standard chunk that the deck builder reads."""
+    code = (set_code or '').strip().upper()
+    if not code:
+        return False
+    if code in set_order or any(k.upper() == code for k in set_order.keys()):
+        return False
+    if code in PROMO_ERA_SETS or code in SUPERSEDED_SETS:
+        return False
+    return True
+
 # Sets that are superseded by a later release and should be excluded from the
 # card database entirely. Preview sets that got a proper release under a
 # different name (often with slightly different card names — e.g. "Rock
@@ -333,6 +350,7 @@ def split_card_database_chunks(all_cards: list, frontend_data: str):
 
     standard, extended, legacy = [], [], []
     dropped_superseded = 0
+    unknown_sets_promoted = set()
 
     for card in all_cards:
         set_code = (card.get("set") or "").strip()
@@ -344,6 +362,18 @@ def split_card_database_chunks(all_cards: list, frontend_data: str):
 
         order = set_order.get(set_code, set_order.get(set_code.upper(), 0))
 
+        # New-set safety net: a set with order==0 + not in sets.json is
+        # almost always a fresh rotation set whose order entry hasn't
+        # been written yet (update_sets.py is supposed to populate it
+        # but can silently skip on Cloudflare blocks). Route it to
+        # Standard rather than letting order=0 default it into Legacy,
+        # where the deck builder would never load it. We log every
+        # unknown set we promote so the operator can confirm.
+        if order == 0 and _is_new_set_unknown_to_set_order(set_code, set_order):
+            unknown_sets_promoted.add(set_code.upper())
+            standard.append(card)
+            continue
+
         if set_code.upper() in PROMO_ERA_SETS or order >= STANDARD_MIN_ORDER:
             standard.append(card)
         elif order >= EXTENDED_MIN_ORDER:
@@ -353,6 +383,12 @@ def split_card_database_chunks(all_cards: list, frontend_data: str):
 
     if dropped_superseded:
         print(f"  dropped {dropped_superseded} cards from superseded sets: {sorted(SUPERSEDED_SETS)}")
+    if unknown_sets_promoted:
+        print(
+            f"  WARN: promoted {len(unknown_sets_promoted)} unknown set(s) to Standard "
+            f"(no order in sets.json yet): {sorted(unknown_sets_promoted)}. "
+            f"Re-run update_sets.py to refresh sets.json + sets_metadata.json."
+        )
 
     import hashlib
 

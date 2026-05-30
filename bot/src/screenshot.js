@@ -38,15 +38,14 @@ export async function getMetaCallInfo() {
     const now = Date.now();
     if (_infoCache && now - _infoCachedAt < INFO_TTL_MS) return _infoCache;
     const url = `${SITE_BASE}/data/meta-call-info.json?v=${new Date().toISOString().slice(0, 10)}`;
+    const controller = new AbortController();
+    const t = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
     try {
-        const controller = new AbortController();
-        const t = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
         const resp = await fetch(url, {
             cache: 'no-store',
             signal: controller.signal,
             headers: { 'User-Agent': 'thedipidis-bot/0.2' },
         });
-        clearTimeout(t);
         if (resp.ok) {
             _infoCache = await resp.json();
             _infoCachedAt = now;
@@ -54,6 +53,11 @@ export async function getMetaCallInfo() {
         }
     } catch (err) {
         console.warn('[metacall info] fetch failed, using fallback:', err.message);
+    } finally {
+        // Always clear the abort timer — when fetch rejected (network
+        // error before timeout fired) we'd otherwise leave a pending
+        // setTimeout that aborts something else later.
+        clearTimeout(t);
     }
     return INFO_FALLBACK;
 }

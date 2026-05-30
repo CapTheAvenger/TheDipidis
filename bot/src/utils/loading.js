@@ -70,12 +70,28 @@ export async function withLoading(ctx, opts, work) {
 
     const stopHeartbeat = startChatActionHeartbeat(ctx, chatAction);
 
+    // workDone flips to true in the finally below. The banner callback
+    // checks it before calling ctx.reply so a fast-completing work()
+    // can't leave an orphan "🔄 …" message in the chat — the timer
+    // might have fired between clearTimeout being unable to cancel
+    // it (already in the macrotask queue) and our cleanup running.
     let banner = null;
     let bannerTimer = null;
+    let workDone = false;
     if (statusText) {
         bannerTimer = setTimeout(async () => {
+            if (workDone) return;
             try {
-                banner = await ctx.reply(statusText);
+                const sent = await ctx.reply(statusText);
+                // workDone may have flipped while ctx.reply was in
+                // flight — in that case the cleanup below already
+                // ran and missed this message because banner was
+                // still null. Delete it here so the chat stays tidy.
+                if (workDone) {
+                    ctx.deleteMessage(sent.message_id).catch(() => {});
+                } else {
+                    banner = sent;
+                }
             } catch (err) {
                 // Banner failure is non-fatal — the heartbeat is still
                 // doing its job. Log so we notice if it's a pattern.
@@ -87,6 +103,7 @@ export async function withLoading(ctx, opts, work) {
     try {
         return await work();
     } finally {
+        workDone = true;
         stopHeartbeat();
         if (bannerTimer) clearTimeout(bannerTimer);
         if (banner) {

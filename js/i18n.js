@@ -1579,7 +1579,7 @@ const translations = {
 
     // ── Tutorial heading ─────────────────────────────────────
     'tutorial.heading':         'How to Use This Website',
-    'tutorial.subtitle':        'Complete guide to Pokémon TCG analysis, deck building, and playtesting — v45 (March 2026)',
+    'tutorial.subtitle':        'Complete guide to Pokémon TCG analysis, deck building, and playtesting — v46 (May 2026)',
 
     // ── Misc shared ──────────────────────────────────────────
     'misc.loading':             'Loading...',
@@ -3206,7 +3206,7 @@ const translations = {
 
     // ── Tutorial ─────────────────────────────────────────────
     'tutorial.heading':         'So funktioniert diese Website',
-    'tutorial.subtitle':        'Vollständige Anleitung für Pokémon TCG-Analyse, Deckbau und Playtesting — v45 (März 2026)',
+    'tutorial.subtitle':        'Vollständige Anleitung für Pokémon TCG-Analyse, Deckbau und Playtesting — v46 (Mai 2026)',
 
     // ── Sonstiges ────────────────────────────────────────────
     'misc.loading':             'Laden...',

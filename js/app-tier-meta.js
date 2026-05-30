@@ -985,8 +985,20 @@
                     delta: (d.share || 0) - d.old_share,
                     winrate: d.winrate || 0,
                 }));
-            const improvers = [...movers].sort((a, b) => b.delta - a.delta).slice(0, 5);
-            const decliners = [...movers].sort((a, b) => a.delta - b.delta).slice(0, 5);
+            // Split by sign FIRST, sort within each side. Without the
+            // sign filter, a single mover with delta > 0 ended up in
+            // both lists (improvers got the top-5-by-desc which
+            // included it as +1.0, decliners got the top-5-by-asc
+            // which also included it because there were < 5 candidates
+            // on the negative side). Visible regression: N's Zoroark
+            // shown as +1.0 % in Improvers AND -1.0 % in Decliners
+            // with identical Share/Prev numbers.
+            const improvers = movers.filter(m => m.delta > 0)
+                                    .sort((a, b) => b.delta - a.delta)
+                                    .slice(0, 5);
+            const decliners = movers.filter(m => m.delta < 0)
+                                    .sort((a, b) => a.delta - b.delta)
+                                    .slice(0, 5);
 
             const renderMoverRow = (m, sign) => {
                 const sharePct = m.share.toFixed(1) + '%';

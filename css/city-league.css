@@ -2557,3 +2557,13 @@
 .cl-season-notice strong {
     color: #9a4d00;
 }
+.cl-season-notice small {
+    /* F-06 hint line: tells users why the form below still works
+     * even though the season is on pause. Subdued vs the main
+     * message but still legible. */
+    display: inline-block;
+    margin-top: 4px;
+    font-size: 0.85em;
+    color: #6b4500;
+    opacity: 0.85;
+}

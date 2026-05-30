@@ -244,8 +244,7 @@ def scrape_live_sets() -> dict:
 
     # Assign order numbers: site shows newest first → first in list = highest number
     result = {}
-    total = len(unique)
-    for i, code in enumerate(reversed(unique)):  # reversed → oldest=1, newest=total
+    for i, code in enumerate(reversed(unique)):  # reversed → oldest=1, newest=len(unique)
         result[code] = i + 1
 
     return result

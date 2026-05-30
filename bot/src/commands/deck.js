@@ -39,6 +39,31 @@ const SOURCE_LABELS = {
 // picker — the label alone is enough.
 const SOURCE_FORMAT_VISIBLE = new Set(['current-meta', 'past-tef-por']);
 
+// Maps the bot's source-key (= which JSON bucket the data lives in)
+// to the website tab the deep-link should land on. js/inline-init.js's
+// HASH_ALIASES knows these three tab IDs already; we just append
+// query-style params (?deck=…&format=…) and the handler over there
+// routes accordingly.
+const SOURCE_WEBSITE_TAB = {
+    'current-meta': 'current-meta',
+    'past-tef-por': 'past-meta',
+    'city-league':  'city-league',
+};
+const WEBSITE_BASE_URL = (process.env.WEBSITE_BASE_URL || 'https://thedipidis.app').replace(/\/+$/, '');
+
+function buildDeepLink(sourceKey, deck, src) {
+    const tab = SOURCE_WEBSITE_TAB[sourceKey];
+    if (!tab || !deck?.name) return null;
+    const qs = new URLSearchParams({ deck: deck.name });
+    // Past Meta on the website needs the format key too — the page
+    // gates archetype availability behind a format dropdown, and the
+    // dedicated nav helper only fires when both pieces are present.
+    if (sourceKey === 'past-tef-por' && src?.format_key) {
+        qs.set('format', src.format_key);
+    }
+    return `${WEBSITE_BASE_URL}/#${tab}?${qs.toString()}`;
+}
+
 export function registerDeck(bot) {
     bot.command('deck', (ctx) => showDeckList(ctx, 0));
     bot.action('deck:list', async (ctx) => {
@@ -321,14 +346,23 @@ async function sendDecklist(ctx, sourceKey, deckKey) {
     // strip-formatting-inside-pre behaviour (HTML <b> tags and ANSI
     // escapes both get eaten there).
     const list = formatDecklistAsPTCGL(src, { emphasizeAceSpec: true });
+    const deepLink = buildDeepLink(sourceKey, deck, src);
+    const navRows = [
+        [Markup.button.callback('⬅️ Andere Quelle', `deck:pick:${deckKey}`)],
+        [Markup.button.callback('📋 Deck-Liste', 'deck:back')],
+    ];
+    if (deepLink) {
+        // URL buttons live above the callback rows so the user's eye
+        // hits "open on site" first — the navigation-back actions are
+        // a fallback, not the primary CTA after we just handed them a
+        // fully-formed decklist.
+        navRows.unshift([Markup.button.url('🌐 Auf Website öffnen', deepLink)]);
+    }
     return ctx.reply(
         `<pre>${escapeHtml(list)}</pre>`,
         {
             parse_mode: 'HTML',
-            ...Markup.inlineKeyboard([
-                [Markup.button.callback('⬅️ Andere Quelle', `deck:pick:${deckKey}`)],
-                [Markup.button.callback('📋 Deck-Liste', 'deck:back')],
-            ]),
+            ...Markup.inlineKeyboard(navRows),
         },
     );
 }

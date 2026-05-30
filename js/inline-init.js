@@ -146,10 +146,48 @@ document.addEventListener('DOMContentLoaded', function () {
     };
 
     function applyHash() {
-        const raw = (window.location.hash || '').replace(/^#/, '').toLowerCase().trim();
-        if (!raw) return;
-        const tabId = HASH_ALIASES[raw];
+        const rawFull = (window.location.hash || '').replace(/^#/, '').trim();
+        if (!rawFull) return;
+
+        // Hash can carry query-style params for pre-filtering, e.g.
+        //   #current-meta?deck=Dragapult%20Dusknoir
+        //   #past-meta?deck=Dragapult%20Dusknoir&format=TEF-POR
+        //   #city-league?deck=Charizard%20ex
+        // The Telegram bot uses this to land the user directly on the
+        // archetype they just looked at in chat. Tab alias is matched
+        // case-insensitive; param values keep their original casing
+        // because the deck-select option values are case-sensitive
+        // strings (the lookup itself is case-insensitive though).
+        const qIdx = rawFull.indexOf('?');
+        const rawTab = (qIdx >= 0 ? rawFull.slice(0, qIdx) : rawFull).toLowerCase();
+        const tabId = HASH_ALIASES[rawTab];
         if (!tabId) return;
+        const params = qIdx >= 0
+            ? new URLSearchParams(rawFull.slice(qIdx + 1))
+            : null;
+        const deck = params?.get('deck')?.trim();
+        const format = params?.get('format')?.trim();
+
+        // Past Meta has its own dedicated nav helper (set format first,
+        // then poll the deck dropdown after the chunk loads). Reuse it
+        // when both pieces are present — the manual fallback below
+        // can't drive the format-change chunk reload reliably.
+        if (tabId === 'past-meta' && deck && typeof window.navigateToPastMetaWithDeck === 'function') {
+            try { window.navigateToPastMetaWithDeck(deck, format || ''); return; } catch (_e) { /* fall through */ }
+        }
+
+        // Pre-seed the pending-selection globals BEFORE switchTab fires
+        // so the tab's populate*DeckSelect handler picks them up on its
+        // first pass (same hook jumpToCardAnalysis uses internally).
+        if (deck) {
+            if (tabId === 'current-meta') {
+                window.pendingCurrentMetaDeckSelection = deck;
+                window.currentMetaArchetype = deck;
+            } else if (tabId === 'city-league') {
+                window.pendingCityLeagueDeckSelection = deck;
+            }
+        }
+
         if (typeof switchTabAndUpdateMenu === 'function') {
             switchTabAndUpdateMenu(tabId);
         } else if (typeof switchTab === 'function') {

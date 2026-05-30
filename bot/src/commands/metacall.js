@@ -19,6 +19,14 @@ import { Markup } from 'telegraf';
 import { captureMetaCallImage, getMetaCallInfo } from '../screenshot.js';
 import { MENU_LABEL_METACALL } from './start.js';
 
+// Same env override pattern as commands/deck.js — lets us point at a
+// staging Pages URL when testing without redeploying the bot.
+const WEBSITE_BASE_URL = (process.env.WEBSITE_BASE_URL || 'https://thedipidis.app').replace(/\/+$/, '');
+const VARIANT_WEBSITE_TAB = {
+    current: 'current-meta',
+    past:    'past-meta',
+};
+
 export function registerMetaCall(bot) {
     bot.command('metacall', (ctx) => showVariantMenu(ctx));
     bot.action('metacall:list', async (ctx) => {
@@ -59,14 +67,18 @@ async function sendVariant(ctx, variant) {
         const { buffer, key } = await captureMetaCallImage(variant);
         const elapsed = ((Date.now() - started) / 1000).toFixed(1);
         const variantLabel = variant === 'current' ? 'Current' : 'Past';
+        const tab = VARIANT_WEBSITE_TAB[variant];
+        const rows = [];
+        if (tab) {
+            rows.push([Markup.button.url('🌐 Auf Website öffnen', `${WEBSITE_BASE_URL}/#${tab}`)]);
+        }
+        rows.push([Markup.button.callback('🔄 Neu laden', `metacall:${variant}`)]);
+        rows.push([Markup.button.callback('⬅️ Andere Variante', 'metacall:list')]);
         await ctx.replyWithPhoto(
             { source: buffer },
             {
                 caption: `Meta Call · ${variantLabel} · ${key} · ${elapsed}s`,
-                ...Markup.inlineKeyboard([
-                    [Markup.button.callback('🔄 Neu laden', `metacall:${variant}`)],
-                    [Markup.button.callback('⬅️ Andere Variante', 'metacall:list')],
-                ]),
+                ...Markup.inlineKeyboard(rows),
             },
         );
     } catch (err) {

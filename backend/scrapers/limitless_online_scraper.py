@@ -921,11 +921,7 @@ def create_html_report(comparison_data: List[Dict[str, Any]], output_file: str,
     
     entered_top10 = new_top10_names - old_top10_names
     left_top10 = old_top10_names - new_top10_names
-    
-    # New decks
-    new_decks = [d for d in comparison_data if d['status'] == 'NEU']
-    disappeared_decks = [d for d in comparison_data if d['status'] == 'VERSCHWUNDEN']
-    
+
     # Biggest rank climbers and fallers (only within Top 30)
     rank_climbers = [d for d in comparison_data if d['rank_change'] > 0 and isinstance(d['new_rank'], int) and d['new_rank'] <= 30]
     rank_climbers.sort(key=lambda x: x['rank_change'], reverse=True)

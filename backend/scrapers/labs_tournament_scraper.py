@@ -487,7 +487,16 @@ def _derive_meta_for_labs_tournament(
                 return (prev_meta, effective_date)
             # No previous chunk known either — punt to _unsorted rather
             # than guess. Better surfaces in operator review than a
-            # silent mislabel.
+            # silent mislabel. Log it so the operator notices the
+            # punt instead of finding orphan rows in __unsorted weeks
+            # later.
+            logger.warning(
+                "Tournament tid=%s name=%r date=%s sits in the in-person lag "
+                "window (current set %r becomes legal %s) but no previous "
+                "rotation chunk covers it either. Routing to _unsorted; "
+                "manual classification needed.",
+                tid, tournament_name, effective_date, current_meta, in_person_legal,
+            )
             return ('', effective_date)
         return (current_meta, effective_date)
     return ('', effective_date)

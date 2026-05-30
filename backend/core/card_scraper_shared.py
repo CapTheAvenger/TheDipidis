@@ -465,13 +465,17 @@ def normalize_archetype_name(archetype: str) -> str:
     return name.strip()
 
 def resolve_date_range(start_date: str, end_date: str) -> Tuple[datetime, datetime]:
+    # Narrow exception types so genuine bugs (e.g. a renamed argument
+    # passed in by a caller) surface as crashes instead of silently
+    # collapsing to the 30-day default. strptime only ever raises
+    # ValueError for parse failures and TypeError when handed a non-str.
     try: start_dt = datetime.strptime(start_date, "%d.%m.%Y")
-    except Exception: start_dt = datetime.now() - timedelta(days=30)
+    except (ValueError, TypeError): start_dt = datetime.now() - timedelta(days=30)
 
     if end_date == "auto": end_dt = datetime.now() - timedelta(days=2)
     else:
         try: end_dt = datetime.strptime(end_date, "%d.%m.%Y")
-        except Exception: end_dt = datetime.now() - timedelta(days=2)
+        except (ValueError, TypeError): end_dt = datetime.now() - timedelta(days=2)
     return start_dt, end_dt
 
 def parse_tournament_date(date_str: str) -> Optional[datetime]:

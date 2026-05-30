@@ -195,6 +195,11 @@
         
         // Load City League data from CSV (with cache-busting)
         let cityLeagueData = [];
+        // Guard against an infinite loop when the past-rotation
+        // snapshot is also empty. Set inside the auto-fallback in
+        // loadCityLeagueData() and never reset — once we've tried
+        // the fallback in a session, we don't try it again.
+        let _cityLeagueAutoPastFallbackApplied = false;
         function deriveCityLeagueComparisonData(archetypesData) {
             if (!archetypesData || archetypesData.length === 0) return [];
 
@@ -371,6 +376,27 @@
                 }
 
                 if (!archetypesData.length) {
+                    // Season-pause fallback: when the current-rotation
+                    // archetypes CSV is empty (Pause-Banner is showing
+                    // for a reason — no new tournaments produced data
+                    // this week) but a past-rotation snapshot is on
+                    // disk, transparently switch to it instead of
+                    // hard-failing. The banner already tells the user
+                    // they're looking at the last snapshot, so the
+                    // "show me City League data" intent still works.
+                    if (format === 'current' && !_cityLeagueAutoPastFallbackApplied) {
+                        console.info('City League current-rotation CSV is empty (season pause); falling back to past-rotation snapshot');
+                        _cityLeagueAutoPastFallbackApplied = true;
+                        window.currentCityLeagueFormat = 'past';
+                        // Sync the dropdowns visually so the user can see
+                        // we switched. Both selectors exist if the user
+                        // is on the analysis tab too.
+                        const formatSelect = document.getElementById('cityLeagueFormatSelect');
+                        if (formatSelect) formatSelect.value = 'past';
+                        const formatSelectAnalysis = document.getElementById('cityLeagueFormatSelectAnalysis');
+                        if (formatSelectAnalysis) formatSelectAnalysis.value = 'past';
+                        return loadCityLeagueData();
+                    }
                     console.error('Leere Hauptdaten fuer Format:', format);
                     content.innerHTML = '<div class="error">Error loading City League Meta data</div>';
                     return;

@@ -48,14 +48,49 @@ const SITE_DIR = path.resolve(__dirname, process.argv[2] || '../_site');
 const PORT = parseInt(process.env.PRERENDER_PORT || '5544', 10);
 const PAGE_TIMEOUT_MS = 60_000;
 
-// Past-meta format key. Hardcoded because the previous rotation's
-// newest set isn't recorded anywhere the site reads at runtime —
-// only the CURRENT current_set / oldest_legal_set sit in
-// format_window.json. When the rotation moves on (CRI rotates out
-// and a new current set drops), update this to the previous
-// current_set's TEF- key. Today: POR was the current_set before
-// CRI, so past = TEF-POR.
-const PAST_FORMAT_KEY = process.env.PAST_FORMAT_KEY || 'TEF-POR';
+// Past-meta format key. Derived from tournament_cards_manifest.json
+// at build time — the most-recently-closed rotation key (the chunk
+// with the newest max_date that ends BEFORE the current set's
+// release) is what we want here. Hardcoding broke every rotation
+// because nobody remembered to update the constant; the manifest
+// already has the answer.
+//
+// Env var PAST_FORMAT_KEY still takes precedence so the workflow
+// can pin a specific past key during testing without editing code.
+function derivePastFormatKey() {
+    const override = (process.env.PAST_FORMAT_KEY || '').trim();
+    if (override) return override;
+    const manifestPath = path.join(SITE_DIR, 'data', 'tournament_cards_manifest.json');
+    if (!fs.existsSync(manifestPath)) {
+        throw new Error(`tournament_cards_manifest.json missing at ${manifestPath} — cannot derive past format key`);
+    }
+    const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf-8'));
+    const chunks = manifest.chunk_dates || {};
+    const fwPath = path.join(SITE_DIR, 'data', 'format_window.json');
+    const fw = fs.existsSync(fwPath) ? JSON.parse(fs.readFileSync(fwPath, 'utf-8')) : {};
+    const currentSet = String(fw.current_set || '').trim().toUpperCase();
+    // Pick the newest rotation key whose NEWEST half isn't the
+    // current set — that's the rotation that was active right before
+    // the current one. We use the chunk's max_date as the recency
+    // signal (not min_date), since rotation boundaries can drift via
+    // late tournaments held in the lag window (Melbourne 2026-05-23
+    // landed in TEF-POR even though CRI had already released).
+    const candidates = [];
+    for (const [chunkName, dates] of Object.entries(chunks)) {
+        const meta = chunkName.replace('tournament_cards_data_cards_', '').replace('.csv', '');
+        if (!meta.includes('-')) continue;
+        const [, newestSet] = meta.split('-', 2);
+        if (currentSet && newestSet.toUpperCase() === currentSet) continue;
+        candidates.push({ meta, max_date: dates.max_date || '' });
+    }
+    if (candidates.length === 0) {
+        throw new Error('no past-rotation candidate in chunk_dates — manifest may be empty or only carry the current rotation');
+    }
+    candidates.sort((a, b) => (b.max_date || '').localeCompare(a.max_date || ''));
+    return candidates[0].meta;
+}
+const PAST_FORMAT_KEY = derivePastFormatKey();
+console.log(`[prerender] PAST_FORMAT_KEY = ${PAST_FORMAT_KEY}`);
 
 const MIME = {
     '.html': 'text/html; charset=utf-8',

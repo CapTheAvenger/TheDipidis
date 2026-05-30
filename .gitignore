@@ -127,5 +127,10 @@ data/city_league_cards_M3/
 data/city_league_manifest.json
 data/city_league_manifest_M3.json
 
+# Bot deck index — built into _site/data/ by deploy-pages.yml during
+# the Pages build. Local generate runs against the data/ tree write
+# the artifact in-place; this keeps that out of source control.
+data/bot-deck-index.json
+
 # Backend scraper data (synced to data/ via prepare_card_data.py)
 backend/core/data/

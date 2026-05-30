@@ -145,6 +145,16 @@ document.addEventListener('DOMContentLoaded', function () {
         'journal':           'profile',    // Battle Journal too
     };
 
+    // For hash aliases that target Profile, we also want to auto-switch
+    // to the right sub-tab (Meta Call / Battle Journal). switchProfileTab
+    // is the same function the in-page buttons use, so behaviour stays
+    // identical regardless of how the user arrived.
+    const PROFILE_SUBTAB_FOR_HASH = {
+        'metacall':  'metacall',
+        'meta-call': 'metacall',
+        'journal':   'journal',
+    };
+
     function applyHash() {
         const rawFull = (window.location.hash || '').replace(/^#/, '').trim();
         if (!rawFull) return;
@@ -192,6 +202,16 @@ document.addEventListener('DOMContentLoaded', function () {
             switchTabAndUpdateMenu(tabId);
         } else if (typeof switchTab === 'function') {
             switchTab(tabId);
+        }
+
+        // Profile is a fan-out tab with its own sub-tab system. Aliases
+        // like #metacall and #journal need that extra hop or the user
+        // lands on whichever profile sub-tab was last open (Collection
+        // by default). switchProfileTab itself bails on no-op cases,
+        // so calling it unconditionally for known aliases is safe.
+        const profileSub = PROFILE_SUBTAB_FOR_HASH[rawTab];
+        if (tabId === 'profile' && profileSub && typeof window.switchProfileTab === 'function') {
+            try { window.switchProfileTab(profileSub); } catch (_e) { /* tolerate */ }
         }
     }
 

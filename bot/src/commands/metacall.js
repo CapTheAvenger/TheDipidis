@@ -22,10 +22,12 @@ import { MENU_LABEL_METACALL } from './start.js';
 // Same env override pattern as commands/deck.js — lets us point at a
 // staging Pages URL when testing without redeploying the bot.
 const WEBSITE_BASE_URL = (process.env.WEBSITE_BASE_URL || 'https://thedipidis.app').replace(/\/+$/, '');
-const VARIANT_WEBSITE_TAB = {
-    current: 'current-meta',
-    past:    'past-meta',
-};
+// The Meta Call dashboard on the website is a sub-tab of Profile, so
+// both bot variants (current / past PNG) link to the same #metacall
+// alias — the site only renders the live current-rotation dashboard
+// there. The past PNG is a bot-exclusive snapshot; on the site you'd
+// browse #past-meta for archived archetype analysis instead.
+const METACALL_DEEP_LINK = `${WEBSITE_BASE_URL}/#metacall`;
 
 export function registerMetaCall(bot) {
     bot.command('metacall', (ctx) => showVariantMenu(ctx));
@@ -67,13 +69,11 @@ async function sendVariant(ctx, variant) {
         const { buffer, key } = await captureMetaCallImage(variant);
         const elapsed = ((Date.now() - started) / 1000).toFixed(1);
         const variantLabel = variant === 'current' ? 'Current' : 'Past';
-        const tab = VARIANT_WEBSITE_TAB[variant];
-        const rows = [];
-        if (tab) {
-            rows.push([Markup.button.url('🌐 Auf Website öffnen', `${WEBSITE_BASE_URL}/#${tab}`)]);
-        }
-        rows.push([Markup.button.callback('🔄 Neu laden', `metacall:${variant}`)]);
-        rows.push([Markup.button.callback('⬅️ Andere Variante', 'metacall:list')]);
+        const rows = [
+            [Markup.button.url('🌐 Auf Website öffnen', METACALL_DEEP_LINK)],
+            [Markup.button.callback('🔄 Neu laden', `metacall:${variant}`)],
+            [Markup.button.callback('⬅️ Andere Variante', 'metacall:list')],
+        ];
         await ctx.replyWithPhoto(
             { source: buffer },
             {

@@ -40,14 +40,19 @@ const SOURCE_LABELS = {
 const SOURCE_FORMAT_VISIBLE = new Set(['current-meta', 'past-tef-por']);
 
 // Maps the bot's source-key (= which JSON bucket the data lives in)
-// to the website tab the deep-link should land on. js/inline-init.js's
-// HASH_ALIASES knows these three tab IDs already; we just append
-// query-style params (?deck=…&format=…) and the handler over there
-// routes accordingly.
+// to the website tab the deep-link should land on. We point at the
+// *-analysis tabs, not the meta-overview tabs — those are the ones
+// that actually host the archetype dropdown + decklist view (a.k.a.
+// "Deck Analysis Global"). Sending a user from a decklist message
+// straight to a meta overview would just dump them on a chart with
+// no obvious next click.
+// js/inline-init.js's HASH_ALIASES recognises these tab IDs already;
+// we append query-style params (?deck=…&format=…) and the handler
+// over there routes accordingly.
 const SOURCE_WEBSITE_TAB = {
-    'current-meta': 'current-meta',
-    'past-tef-por': 'past-meta',
-    'city-league':  'city-league',
+    'current-meta': 'current-analysis',
+    'past-tef-por': 'past-meta',           // past-meta hosts its own dropdown — no sibling -analysis tab
+    'city-league':  'city-league-analysis',
 };
 const WEBSITE_BASE_URL = (process.env.WEBSITE_BASE_URL || 'https://thedipidis.app').replace(/\/+$/, '');
 

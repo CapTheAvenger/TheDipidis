@@ -123,26 +123,29 @@ document.addEventListener('DOMContentLoaded', function () {
 // in both languages so we can share URLs that read naturally.
 (function setupHashDeepLink() {
     const HASH_ALIASES = {
-        'tutorial':          'tutorial',
-        'how-to-use':        'tutorial',
-        'howto':             'tutorial',
-        'help':              'tutorial',
-        'hilfe':             'tutorial',
-        'anleitung':         'tutorial',
-        'city-league':       'city-league',
-        'current-meta':      'current-meta',
-        'past-meta':         'past-meta',
-        'cards':             'cards',
-        'proxy':             'proxy',
-        'playtester':        'sandbox',
-        'sandbox':           'sandbox',
-        'calculator':        'calculator',
-        'probability':       'calculator',
-        'wahrscheinlichkeit':'calculator',
-        'profile':           'profile',
-        'metacall':          'profile',    // Meta Call lives inside Profile tab
-        'meta-call':         'profile',
-        'journal':           'profile',    // Battle Journal too
+        'tutorial':              'tutorial',
+        'how-to-use':            'tutorial',
+        'howto':                 'tutorial',
+        'help':                  'tutorial',
+        'hilfe':                 'tutorial',
+        'anleitung':             'tutorial',
+        'city-league':           'city-league',
+        'city-league-analysis':  'city-league-analysis',
+        'current-meta':          'current-meta',
+        'current-analysis':      'current-analysis',
+        'deck-analysis':         'current-analysis', // friendly alias for the bot's "Auf Website öffnen" CTA
+        'past-meta':             'past-meta',
+        'cards':                 'cards',
+        'proxy':                 'proxy',
+        'playtester':            'sandbox',
+        'sandbox':               'sandbox',
+        'calculator':            'calculator',
+        'probability':           'calculator',
+        'wahrscheinlichkeit':    'calculator',
+        'profile':               'profile',
+        'metacall':              'profile',    // Meta Call lives inside Profile tab
+        'meta-call':             'profile',
+        'journal':               'profile',    // Battle Journal too
     };
 
     // For hash aliases that target Profile, we also want to auto-switch
@@ -189,11 +192,13 @@ document.addEventListener('DOMContentLoaded', function () {
         // Pre-seed the pending-selection globals BEFORE switchTab fires
         // so the tab's populate*DeckSelect handler picks them up on its
         // first pass (same hook jumpToCardAnalysis uses internally).
+        // The dropdown lives on the *-analysis tab — accept the overview
+        // tab IDs too so links from older callers keep working.
         if (deck) {
-            if (tabId === 'current-meta') {
+            if (tabId === 'current-analysis' || tabId === 'current-meta') {
                 window.pendingCurrentMetaDeckSelection = deck;
                 window.currentMetaArchetype = deck;
-            } else if (tabId === 'city-league') {
+            } else if (tabId === 'city-league-analysis' || tabId === 'city-league') {
                 window.pendingCityLeagueDeckSelection = deck;
             }
         }

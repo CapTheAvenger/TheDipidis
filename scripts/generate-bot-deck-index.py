@@ -38,6 +38,7 @@ import os
 import re
 import sys
 from collections import defaultdict
+from datetime import datetime
 from typing import Iterable
 
 
@@ -161,19 +162,85 @@ def _read_ace_spec_names(site_dir: str) -> set[str]:
         return set()
 
 
+def _derive_oldest_legal_from_manifest(site_dir: str, current_set: str) -> str:
+    """Fallback when format_window.json doesn't carry oldest_legal_set
+    (legacy snapshots before that field was added). Read the chunk_dates
+    manifest, find the most recent rotation key whose chunk window
+    starts on-or-before the current_set's release, and take its
+    OLDEST half ('TEF' out of 'TEF-POR'). Empty string when the
+    manifest can't help — caller decides whether to error.
+    """
+    path = os.path.join(site_dir, 'data', 'tournament_cards_manifest.json')
+    try:
+        with open(path, encoding='utf-8') as f:
+            manifest = json.load(f)
+    except (OSError, json.JSONDecodeError):
+        return ''
+    # chunk_dates keys are 'tournament_cards_data_cards_<META>.csv';
+    # extract just the <META> part and pick the most recent one whose
+    # rotation ENDS with the previous set (= the one current_set rotated
+    # in on top of).
+    candidates = []
+    for chunk_name, dates in (manifest.get('chunk_dates') or {}).items():
+        meta = chunk_name.replace('tournament_cards_data_cards_', '').replace('.csv', '')
+        try:
+            max_date = datetime.strptime(dates.get('max_date', ''), '%Y-%m-%d')
+        except ValueError:
+            continue
+        if '-' in meta:
+            candidates.append((max_date, meta))
+    if not candidates:
+        return ''
+    candidates.sort(reverse=True)  # newest max_date first
+    # Newest chunk is the just-closed rotation; its OLDEST half becomes
+    # the new rotation's oldest_legal_set after a set drops.
+    newest_rotation = candidates[0][1]      # e.g. 'TEF-POR'
+    return newest_rotation.split('-', 1)[0]  # 'TEF'
+
+
 def _read_format_key(site_dir: str) -> str:
-    """oldest_legal_set + '-' + current_set from format_window.json."""
+    """oldest_legal_set + '-' + current_set from format_window.json.
+
+    Hardcoded 'TEF-CRI' fallback removed — that would silently misroute
+    every downstream lookup once the next set rotates in and someone
+    forgets to update the constant. When oldest_legal_set is missing
+    from format_window.json we derive it from the chunk_dates manifest
+    instead (the newest closed rotation's oldest half). When both
+    paths fail we exit non-zero so the operator notices.
+    """
     path = os.path.join(site_dir, 'data', 'format_window.json')
     try:
         with open(path, encoding='utf-8') as f:
             data = json.load(f)
-        oldest = data.get('oldest_legal_set')
-        current = data.get('current_set')
-        if oldest and current:
-            return f'{oldest}-{current}'
-    except Exception as exc:  # pragma: no cover — diagnostics only
-        print(f'warn: format_window.json unreadable: {exc}', file=sys.stderr)
-    return 'TEF-CRI'
+    except (OSError, json.JSONDecodeError) as exc:
+        print(f'error: format_window.json unreadable: {exc}', file=sys.stderr)
+        sys.exit(1)
+    current = (data.get('current_set') or '').strip().upper()
+    if not current:
+        print(
+            'error: format_window.json missing current_set — '
+            'update_sets.py needs to run first. Refusing to guess a rotation.',
+            file=sys.stderr,
+        )
+        sys.exit(1)
+    oldest = (data.get('oldest_legal_set') or '').strip().upper()
+    if not oldest:
+        oldest = _derive_oldest_legal_from_manifest(site_dir, current)
+        if oldest:
+            print(
+                f'note: format_window.json had no oldest_legal_set; derived '
+                f'{oldest!r} from tournament_cards_manifest.json',
+                file=sys.stderr,
+            )
+    if not oldest:
+        print(
+            'error: oldest_legal_set is missing from format_window.json '
+            'and could not be derived from the chunk_dates manifest. '
+            'Refusing to guess a rotation key.',
+            file=sys.stderr,
+        )
+        sys.exit(1)
+    return f'{oldest}-{current}'
 
 
 def _is_basic_energy(card_name: str, card_type: str) -> bool:

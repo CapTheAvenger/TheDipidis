@@ -70,6 +70,11 @@ function loadNormalizeCurrentMetaFallbackRows() {
         parseInt,
         parseFloat,
         isNaN,
+        // normalizeTournamentFormatLabel reads this module-level Set
+        // to dedupe its "unmapped tournament format" warning. The
+        // extractor pulls just the function bodies, not the surrounding
+        // module-scope const, so seed it explicitly here.
+        _seenUnknownFormatLabels: new Set(),
         setOrderMap: {
             SVI: 1,
             SVE: 2,

@@ -1786,8 +1786,6 @@ function updateDecksUI() {
     `;
     return;
   }
-  
-  console.log('[updateDecksUI] Building deck list with', window.userDecks.length, 'decks');
 
   function normalizeMyDeckSetCode(value) {
     return String(value || '')
@@ -2106,16 +2104,6 @@ function updateDecksUI() {
           console.error(`[My Decks] Failed to load card: ${deckKey} - not found in database`);
         }
       }
-      
-      // Debug: Log card types to find Energy sorting issue
-      console.log('[My Decks] Card types in deck:');
-      deckCards.forEach(card => {
-        const cardType = card.type || card.card_type || '';
-        const category = getCardTypeCategory(cardType);
-        if (category === 'Energy' || cardType.toLowerCase().includes('energy')) {
-          console.log(`  ${card.name}: type="${cardType}" → category="${category}"`);
-        }
-      });
       
       // Sort cards by type (same as Deck Builder)
       const sortedCards = sortCardsByTypeSimple(deckCards);

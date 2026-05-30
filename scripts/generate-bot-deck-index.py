@@ -358,6 +358,61 @@ def _build_deck(rows: Iterable[dict], ace_spec_names: set[str] | None = None) ->
     return deck, tech
 
 
+def _read_limitless_matchups(site_dir: str) -> dict[str, list[dict]]:
+    """Read limitless_online_decks_matchups.csv → {archetype: [matchups]}.
+
+    This is the *current-meta* matchup source — same CSV the website's
+    "Matchups vs Meta Call" panel (js/app-current-meta-analysis.js)
+    reads, and the same one Meta Call uses as its base matchup map
+    (js/app-meta-call.js). Pointing the bot at it keeps numbers
+    consistent across all three surfaces: Limitless profile, website
+    panel, Telegram matchup matrix.
+
+    Schema (semicolon-delimited, EU decimal):
+        deck_name;opponent;win_rate;record;total_games
+
+    win_rate is a percentage string like "49,3"; record is "W - L - T";
+    total_games is the int sample size. We trust total_games over the
+    parsed-record sum because it matches Limitless's own display.
+    """
+    path = os.path.join(site_dir, 'data', 'limitless_online_decks_matchups.csv')
+    out: dict[str, list[dict]] = defaultdict(list)
+    if not os.path.exists(path):
+        print(f'warn: {path} missing — no current-meta matchups', file=sys.stderr)
+        return out
+    try:
+        with open(path, encoding='utf-8-sig') as f:
+            for row in csv.DictReader(f, delimiter=';'):
+                deck = (row.get('deck_name') or '').strip()
+                opp  = (row.get('opponent') or '').strip()
+                if not deck or not opp:
+                    continue
+                try:
+                    games = int((row.get('total_games') or '0').strip())
+                except (ValueError, TypeError):
+                    continue
+                if games < MIN_MATCHUP_GAMES:
+                    continue
+                wr_raw = (row.get('win_rate') or '0').replace(',', '.').replace('%', '').strip()
+                try:
+                    win_pct = float(wr_raw)
+                except (ValueError, TypeError):
+                    win_pct = 0.0
+                out[deck].append({
+                    'opponent': opp,
+                    'games': games,
+                    'win_pct': round(win_pct, 1),
+                })
+    except Exception as exc:  # pragma: no cover — diagnostics only
+        print(f'warn: limitless matchup parse failed: {exc}', file=sys.stderr)
+        return defaultdict(list)
+
+    for arch in out:
+        out[arch].sort(key=lambda m: -m['games'])
+        del out[arch][MAX_MATCHUPS:]
+    return out
+
+
 def _read_matchups(site_dir: str, format_key: str) -> dict[str, list[dict]]:
     """Read labs_tournament_matchups_{FORMAT}.csv → {archetype: [matchups]}.
 
@@ -694,9 +749,17 @@ def main(argv: list[str]) -> int:
     ace_spec_names = _read_ace_spec_names(site_dir)
     print(f'  ace specs:     {len(ace_spec_names)} card names tagged')
 
-    current_matchups = _read_matchups(site_dir, format_key)
+    # Current-meta pulls from the Limitless Online aggregate CSV —
+    # same source the website's "Matchups vs Meta Call" panel and Meta
+    # Call's own base matchup map read. Per-format labs splits
+    # (labs_tournament_matchups_TEF-CRI.csv etc.) are intentionally
+    # NOT used here: those reflect a single live event each, and would
+    # disagree with every other surface the user touches.
+    # Past-meta stays on the labs per-format split because the
+    # website's past-meta tab also reads labs_tournament_*_<META>.csv.
+    current_matchups = _read_limitless_matchups(site_dir)
     past_matchups    = _read_matchups(site_dir, PAST_META_FORMAT_KEY)
-    print(f'  matchups:      {len(current_matchups)} current / {len(past_matchups)} past archetypes')
+    print(f'  matchups:      {len(current_matchups)} current (limitless) / {len(past_matchups)} past (labs)')
 
     current_meta = _build_current_meta(site_dir, format_key, ranking, ace_spec_names, current_matchups)
     print(f'  current-meta:  {len(current_meta)} decks')

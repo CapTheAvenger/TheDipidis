@@ -1,14 +1,17 @@
 {
-	"name": "pokemon-tcg-analysis",
-	"version": "1.0.0",
-	"private": true,
-	"scripts": {
-		"test:visual:fullpage:ci": "node tests/e2e/run-visual-fullpage-ci.js",
-		"test:visual:nonmeta:ci": "node tests/e2e/run-visual-nonmeta-ci.js",
-		"test:visual:nonmeta:report": "node tests/e2e/runtime-verify-updates.js"
-	},
-	"devDependencies": {
-		"@playwright/test": "^1.59.1",
-		"papaparse": "^5.5.3"
-	}
+  "name": "pokemon-tcg-analysis",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "test:visual:fullpage:ci": "node tests/e2e/run-visual-fullpage-ci.js",
+    "test:visual:nonmeta:ci": "node tests/e2e/run-visual-nonmeta-ci.js",
+    "test:visual:nonmeta:report": "node tests/e2e/runtime-verify-updates.js",
+    "test:all": "python3 -m pytest tests/python/ -q && bash scripts/run-js-unit-tests.sh",
+    "test:py": "python3 -m pytest tests/python/ -q",
+    "test:unit": "bash scripts/run-js-unit-tests.sh"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.59.1",
+    "papaparse": "^5.5.3"
+  }
 }

@@ -1704,39 +1704,43 @@ img[src*="limitlesstcg"] {
     transform: scale(1.2);
 }
 
+/* "Owned other international prints" badge — subtle pill so it
+ * reads as a 'you have this in another language' affordance,
+ * not a fire alarm. Previous version stacked a yellow→amber
+ * gradient + 2px orange border + drop-shadow + outer glow which
+ * blew it up into the biggest element on the card. */
 .city-league-other-print-sparkle {
     position: absolute;
     right: 4px;
     display: inline-flex;
     align-items: center;
-    gap: 5px;
+    gap: 4px;
     line-height: 1;
     z-index: 6;
     cursor: help;
-    background: linear-gradient(135deg,#ffeb3b 0%,#ffd54f 100%);
-    border: 2px solid #ff9800;
-    border-radius: 14px;
-    padding: 2px 6px;
-    box-shadow: 0 3px 10px rgba(0,0,0,0.45),0 0 8px rgba(255,193,7,0.9);
+    background: #fff7d6;
+    border: 1px solid #e0a800;
+    border-radius: 12px;
+    padding: 1px 6px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.18);
 }
 .city-league-other-print-sparkle-icon {
-    font-size: 16px;
-    font-weight: 900;
-    filter: drop-shadow(0 0 3px rgba(255,87,34,0.9));
+    font-size: 12px;
+    font-weight: 800;
+    color: #8a5a00;
 }
 .city-league-other-print-sparkle-count {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-width: 17px;
-    height: 17px;
+    min-width: 16px;
+    height: 16px;
     padding: 0 4px;
-    border-radius: 10px;
-    background: #4a148c;
+    border-radius: 8px;
+    background: #6b4500;
     color: #fff;
-    font-size: 11px;
-    font-weight: 800;
-    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.3);
+    font-size: 10px;
+    font-weight: 700;
 }
 
 .city-league-card-info-bottom {

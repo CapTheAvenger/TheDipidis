@@ -788,7 +788,8 @@
                 }
             };
 
-            // Apply pending navigation selection (from jumpToCardAnalysis)
+            // Apply pending navigation selection (from jumpToCardAnalysis
+            // or a deep-link like #current-analysis?deck=Dragapult).
             const pendingMeta = String(window.pendingCurrentMetaDeckSelection || '').trim();
             if (pendingMeta) {
                 const matchingOption = Array.from(select.options).find(option =>
@@ -796,6 +797,13 @@
                 );
                 if (matchingOption) {
                     select.value = matchingOption.value;
+                    // The custom searchable dropdown displays the label in
+                    // its own surface element — without syncing it, deep-
+                    // links would load data but the dropdown still showed
+                    // '-- Select a Deck --' (F-09 from the visual sweep).
+                    if (typeof syncSearchableSelectDisplay === 'function') {
+                        try { syncSearchableSelectDisplay(select); } catch (_e) { /* tolerate */ }
+                    }
                     window.pendingCurrentMetaDeckSelection = null;
                     window.currentMetaArchetype = matchingOption.value;
                     loadCurrentMetaDeckData(matchingOption.value);

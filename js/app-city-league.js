@@ -1231,6 +1231,12 @@
                 );
                 if (matchingOption) {
                     select.value = matchingOption.value;
+                    // Sync the custom searchable dropdown's display label
+                    // — same gap that bit #current-analysis deep-links
+                    // (F-09 from the visual sweep).
+                    if (typeof syncSearchableSelectDisplay === 'function') {
+                        try { syncSearchableSelectDisplay(select); } catch (_e) { /* tolerate */ }
+                    }
                     window.pendingCityLeagueDeckSelection = null;
                     loadCityLeagueDeckData(matchingOption.value);
                     devLog('[OK] Applied pending City League deck selection:', matchingOption.value);

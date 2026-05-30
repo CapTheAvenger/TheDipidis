@@ -166,13 +166,18 @@ jobs:
               city_league_archetypes_comparison.csv \
               city_league_archetypes_comparison_M3.csv \
               city_league_archetypes_deck_stats.csv \
+              city_league_archetypes_past_comparison.csv \
+              city_league_archetypes_past_deck_stats.csv \
               current_meta_card_data.csv \
               tournament_cards_data_cards.csv \
               tournament_cards_data_overview.csv \
               tournament_cards_manifest.json \
               labs_tournament_decks.csv \
+              labs_tournament_matchups.csv \
               labs_tournaments.json \
               limitless_online_decks.csv \
+              limitless_online_decks_comparison.csv \
+              limitless_online_decks_matchups.csv \
           ; do
               if [ -f "data/$f" ]; then
                   cp "data/$f" "backend/core/data/$f"

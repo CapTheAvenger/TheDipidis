@@ -1136,6 +1136,9 @@
                                 <div class="deck-banner-name">${archetypeName}</div>
                                 <div class="deck-banner-stats">
                                     <span class="stat-badge">${share.toFixed(1)}% · ${winRate.toFixed(1)}% WR</span>
+                                    ${parseInt(deck.new_count || 0) > 0
+                                      ? `<span class="stat-badge stat-sample-size" title="Anzahl Decks in dieser Auswertung">n=${parseInt(deck.new_count)}</span>`
+                                      : ''}
                                     ${inlineTrend}
                                     ${trendHtml}
                                 </div>

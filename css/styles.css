@@ -5494,6 +5494,16 @@ details[open] > .tier-trending-summary::after {
     color: #666;
 }
 
+/* F-11 from visual sweep: sample-size badge (n=...) on Tier-Cards
+ * so users can see whether a 53 % WR comes from 12 or 488 decks.
+ * Muted variant of the default .stat-badge so it doesn't compete
+ * with the share/winrate headline number. */
+.stat-badge.stat-sample-size {
+    background: rgba(108, 117, 125, 0.12);
+    color: #4b5563;
+    font-weight: 500;
+}
+
 .stat-badge {
     display: inline-flex;
     align-items: center;

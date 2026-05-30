@@ -18,6 +18,7 @@ import logging
 import concurrent.futures
 import re
 from datetime import datetime
+from typing import Optional
 from urllib.parse import urljoin
 from bs4 import BeautifulSoup
 

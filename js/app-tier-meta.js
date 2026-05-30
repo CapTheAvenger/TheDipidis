@@ -1120,13 +1120,16 @@
                     // Inline trend chip — ▲ +0.3% vs prev / ▼ -0.7% / → flat.
                     // Previous value explicit so users immediately see the
                     // delta without mental math (TrainerHill pattern).
+                    // F-20 from visual sweep: tooltip now spells out the
+                    // 7-day window so '-0.1 %' isn't read as 'since
+                    // yesterday' or 'since last quarter'.
                     let inlineTrend = '';
                     if (oldShare > 0 && Math.abs(shareChange) >= 0.05) {
                         const arrow = shareChange > 0 ? '▲' : '▼';
                         const cls   = shareChange > 0 ? 'tier-trend-up' : 'tier-trend-down';
-                        inlineTrend = `<span class="tier-trend-chip ${cls}" title="prev: ${oldShare.toFixed(1)}%">${arrow}&nbsp;${oldShare.toFixed(1)}%</span>`;
+                        inlineTrend = `<span class="tier-trend-chip ${cls}" title="Trend over the last 7 days (previous snapshot: ${oldShare.toFixed(1)}%)">${arrow}&nbsp;${oldShare.toFixed(1)}%</span>`;
                     } else if (oldShare > 0) {
-                        inlineTrend = `<span class="tier-trend-chip tier-trend-flat" title="prev: ${oldShare.toFixed(1)}%">→&nbsp;${oldShare.toFixed(1)}%</span>`;
+                        inlineTrend = `<span class="tier-trend-chip tier-trend-flat" title="Trend over the last 7 days (previous snapshot: ${oldShare.toFixed(1)}%)">→&nbsp;${oldShare.toFixed(1)}%</span>`;
                     }
 
                     html += `

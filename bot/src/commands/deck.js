@@ -334,7 +334,12 @@ async function _sendDecklistInner(ctx, sourceKey, deckKey) {
         await ctx.reply(captionText, { parse_mode: 'HTML', ...MENU_KEYBOARD });
     }
 
-    if (Array.isArray(src.tech_cards) && src.tech_cards.length > 0) {
+    // Tech / alternatives image only makes sense alongside the main
+    // 60-card grid — a standalone "Alternatives" panel with no stock
+    // list to compare against just confuses the user. Skip the tech
+    // block when the main image failed to keep the message flow
+    // coherent (matchup matrix + decklist follow below either way).
+    if (sentMainImage && Array.isArray(src.tech_cards) && src.tech_cards.length > 0) {
         try {
             const techPng = await generateTechImage(deck, src, sourceLabel);
             if (techPng) {

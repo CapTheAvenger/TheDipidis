@@ -360,12 +360,12 @@ async function renderMetaCall(baseUrl, currentFormatKey) {
         // `old?.remove()` itself — but our waitForSelector keys off
         // the same id, so reusing the modal would short-circuit the
         // wait and return the previous render).
-        async function renderCurrentState() {
-            await page.evaluate(() => {
+        async function renderCurrentState(viewMode = 'single') {
+            await page.evaluate((mode) => {
                 const old = document.getElementById('mc-share-preview-modal');
                 if (old) old.remove();
-                window.MetaCall.exportFieldAndRecsShareImage();
-            });
+                window.MetaCall.exportFieldAndRecsShareImage(mode);
+            }, viewMode);
             await page.waitForSelector(
                 '#mc-share-preview-modal .mc-share-preview-img',
                 { timeout: 30_000 },
@@ -380,11 +380,19 @@ async function renderMetaCall(baseUrl, currentFormatKey) {
             return Buffer.from(dataUrl.slice('data:image/png;base64,'.length), 'base64');
         }
 
-        console.log('Rendering current meta…');
+        console.log('Rendering current meta (per-variant)…');
         renders.push({
             kind: 'current',
+            view: 'single',
             key: currentFormatKey,
-            png: await renderCurrentState(),
+            png: await renderCurrentState('single'),
+        });
+        console.log('Rendering current meta (combined / family-grouped)…');
+        renders.push({
+            kind: 'current',
+            view: 'combined',
+            key: currentFormatKey,
+            png: await renderCurrentState('combined'),
         });
 
         // Switch the in-page MetaCall state to past mode for the
@@ -420,11 +428,19 @@ async function renderMetaCall(baseUrl, currentFormatKey) {
             );
         }
 
-        console.log('Rendering past meta…');
+        console.log('Rendering past meta (per-variant)…');
         renders.push({
             kind: 'past',
+            view: 'single',
             key: PAST_FORMAT_KEY,
-            png: await renderCurrentState(),
+            png: await renderCurrentState('single'),
+        });
+        console.log('Rendering past meta (combined / family-grouped)…');
+        renders.push({
+            kind: 'past',
+            view: 'combined',
+            key: PAST_FORMAT_KEY,
+            png: await renderCurrentState('combined'),
         });
 
         return renders;
@@ -468,21 +484,44 @@ async function main() {
         fs.mkdirSync(dataDir, { recursive: true });
 
         for (const r of renders) {
-            const outPath = path.join(dataDir, `meta-call-snapshot-${r.kind}.png`);
+            // View suffix in the file name keeps the URL stable when
+            // we add new view modes later (e.g. by-format).
+            const viewSuffix = r.view ? `-${r.view}` : '';
+            const outPath = path.join(dataDir, `meta-call-snapshot-${r.kind}${viewSuffix}.png`);
             fs.writeFileSync(outPath, r.png);
-            console.log(`✓ ${r.kind.padEnd(7)} ${r.key} → ${path.relative(SITE_DIR, outPath)} (${(r.png.length / 1024).toFixed(1)} KB)`);
+            console.log(`✓ ${r.kind.padEnd(7)} ${(r.view || 'single').padEnd(8)} ${r.key} → ${path.relative(SITE_DIR, outPath)} (${(r.png.length / 1024).toFixed(1)} KB)`);
         }
 
         // Bot reads this to know what to put on its inline-keyboard
         // labels without having to fetch + parse format_window.json
         // separately. Updated atomically next to the PNGs so the bot
         // never sees a label that doesn't match the image it's about
-        // to fetch.
+        // to fetch. The legacy `current.file` / `past.file` fields
+        // keep older deploys serving the single-view PNG; the new
+        // per-view dicts under .views are what the current bot reads.
         const infoPath = path.join(dataDir, 'meta-call-info.json');
         const info = {
             generated_at: new Date().toISOString(),
-            current: { kind: 'current', key: currentFormatKey, file: 'meta-call-snapshot-current.png' },
-            past:    { kind: 'past',    key: PAST_FORMAT_KEY,  file: 'meta-call-snapshot-past.png' },
+            current: {
+                kind: 'current',
+                key: currentFormatKey,
+                // Legacy field: still points at the single-view PNG so
+                // any pre-multi-view bot deploy keeps working.
+                file: 'meta-call-snapshot-current-single.png',
+                views: {
+                    single:   { file: 'meta-call-snapshot-current-single.png',   label: 'Per Variant' },
+                    combined: { file: 'meta-call-snapshot-current-combined.png', label: 'Combined'    },
+                },
+            },
+            past: {
+                kind: 'past',
+                key: PAST_FORMAT_KEY,
+                file: 'meta-call-snapshot-past-single.png',
+                views: {
+                    single:   { file: 'meta-call-snapshot-past-single.png',   label: 'Per Variant' },
+                    combined: { file: 'meta-call-snapshot-past-combined.png', label: 'Combined'    },
+                },
+            },
         };
         fs.writeFileSync(infoPath, JSON.stringify(info, null, 2) + '\n');
         console.log(`✓ wrote ${path.relative(SITE_DIR, infoPath)}`);

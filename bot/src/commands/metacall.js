@@ -72,29 +72,45 @@ async function sendVariant(ctx, variant) {
     const started = Date.now();
     const variantLabel = variant === 'current' ? 'Current' : 'Past';
     try {
-        // Heartbeat 'upload_photo' so the chat-header shows
-        // "sending a photo…" the whole time we're fetching the PNG.
-        // Banner only fires after 1.5s — covers the case where the
-        // toast has already faded and the PNG is still rendering.
-        const { buffer, key } = await withLoading(
+        // Per-variant Telegram thread carries TWO PNGs: the per-archetype
+        // breakdown (single) plus the family-grouped overview (combined)
+        // that mirrors how official tournament reporting aggregates
+        // Dragapult / Dragapult Dusknoir / Dragapult Blaziken into one
+        // 'Dragapult' row. The user asked for both side-by-side so the
+        // strategic skim and the deep-dive arrive at once.
+        const { buffer: singleBuf, key, viewLabel: singleLabel } = await withLoading(
             ctx,
             {
                 chatAction: 'upload_photo',
                 statusText: `🔄 Lade Meta Call (${variantLabel})… kann ein paar Sekunden dauern`,
             },
-            () => captureMetaCallImage(variant),
+            () => captureMetaCallImage(variant, 'single'),
         );
-        const elapsed = ((Date.now() - started) / 1000).toFixed(1);
-        const rows = [
-            [Markup.button.url('🌐 Auf Website öffnen', METACALL_DEEP_LINK)],
-            [Markup.button.callback('🔄 Neu laden', `metacall:${variant}`)],
-            [Markup.button.callback('⬅️ Andere Variante', 'metacall:list')],
-        ];
+        const elapsedSingle = ((Date.now() - started) / 1000).toFixed(1);
+
+        // First message gets the inline-keyboard so the user can re-load
+        // or jump to the website without scrolling past the combined
+        // image. The combined image follows with just a caption so the
+        // two buttons don't appear twice in the same thread.
         await ctx.replyWithPhoto(
-            { source: buffer },
+            { source: singleBuf },
             {
-                caption: `Meta Call · ${variantLabel} · ${key} · ${elapsed}s`,
-                ...Markup.inlineKeyboard(rows),
+                caption: `Meta Call · ${variantLabel} · ${key} · ${singleLabel || 'Per Variant'} · ${elapsedSingle}s`,
+                ...Markup.inlineKeyboard([
+                    [Markup.button.url('🌐 Auf Website öffnen', METACALL_DEEP_LINK)],
+                    [Markup.button.callback('🔄 Neu laden', `metacall:${variant}`)],
+                    [Markup.button.callback('⬅️ Andere Variante', 'metacall:list')],
+                ]),
+            },
+        );
+
+        const combinedStart = Date.now();
+        const { buffer: combinedBuf, viewLabel: combinedLabel } = await captureMetaCallImage(variant, 'combined');
+        const elapsedCombined = ((Date.now() - combinedStart) / 1000).toFixed(1);
+        await ctx.replyWithPhoto(
+            { source: combinedBuf },
+            {
+                caption: `Meta Call · ${variantLabel} · ${key} · ${combinedLabel || 'Combined'} · ${elapsedCombined}s`,
             },
         );
     } catch (err) {

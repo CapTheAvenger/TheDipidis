@@ -19,9 +19,27 @@ const SITE_BASE =
     process.env.SITE_BASE || 'https://thedipidis.app';
 
 const FETCH_TIMEOUT_MS = 15_000;
+// Two view modes per variant: 'single' (per-archetype, the legacy view)
+// and 'combined' (family-grouped, matches how official tournaments report).
+// Fallback paths mirror what prerender writes so an unparseable
+// meta-call-info.json still serves something useful.
 const INFO_FALLBACK = {
-    current: { key: 'TEF-CRI', file: 'meta-call-snapshot-current.png' },
-    past:    { key: 'TEF-POR', file: 'meta-call-snapshot-past.png' },
+    current: {
+        key: 'TEF-CRI',
+        file: 'meta-call-snapshot-current-single.png',
+        views: {
+            single:   { file: 'meta-call-snapshot-current-single.png',   label: 'Per Variant' },
+            combined: { file: 'meta-call-snapshot-current-combined.png', label: 'Combined'    },
+        },
+    },
+    past: {
+        key: 'TEF-POR',
+        file: 'meta-call-snapshot-past-single.png',
+        views: {
+            single:   { file: 'meta-call-snapshot-past-single.png',   label: 'Per Variant' },
+            combined: { file: 'meta-call-snapshot-past-combined.png', label: 'Combined'    },
+        },
+    },
 };
 
 let _infoCache = null;
@@ -62,14 +80,22 @@ export async function getMetaCallInfo() {
     return INFO_FALLBACK;
 }
 
-export async function captureMetaCallImage(variant = 'current') {
+export async function captureMetaCallImage(variant = 'current', view = 'single') {
     if (variant !== 'current' && variant !== 'past') {
         throw new Error(`unknown variant: ${variant}`);
     }
+    if (view !== 'single' && view !== 'combined') {
+        throw new Error(`unknown view: ${view}`);
+    }
     const info = await getMetaCallInfo();
     const entry = info[variant] || INFO_FALLBACK[variant];
+    // Prefer the view-specific file when the info JSON carries the
+    // newer .views map; fall back to entry.file for backwards
+    // compatibility with older deploys that only render the single view.
+    const viewEntry = entry.views?.[view] || INFO_FALLBACK[variant].views[view];
+    const fileName = viewEntry?.file || entry.file;
     const cacheBuster = new Date().toISOString().slice(0, 10);
-    const url = `${SITE_BASE}/data/${entry.file}?v=${cacheBuster}`;
+    const url = `${SITE_BASE}/data/${fileName}?v=${cacheBuster}`;
 
     const controller = new AbortController();
     const t = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
@@ -92,7 +118,7 @@ export async function captureMetaCallImage(variant = 'current') {
         if (buf.length < 200) {
             throw new Error(`Snapshot too small (${buf.length} bytes) — probably an error page`);
         }
-        return { buffer: buf, key: entry.key };
+        return { buffer: buf, key: entry.key, view, viewLabel: viewEntry?.label || view };
     } finally {
         clearTimeout(t);
     }

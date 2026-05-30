@@ -1,6 +1,6 @@
 {
   "name": "thedipidis-bot",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Telegram bot for thedipidis.app \u2014 fetches pre-rendered Meta Call snapshots + deck builder views",
   "private": true,
   "type": "module",

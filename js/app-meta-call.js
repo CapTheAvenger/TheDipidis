@@ -6318,21 +6318,130 @@ window.MetaCall = (function () {
   // Same Field-Composition block on the left, Day-2 (or Top-Cut /
   // 1st-2nd) recommendation list on the right. One image, both
   // useful pieces of info — share once, both decisions are visible.
-  function exportFieldAndRecsShareImage() {
+  // Aggregate a field list by family (Dragapult, Dragapult Dusknoir,
+  // Dragapult Blaziken → "Dragapult" with summed shares). Used by the
+  // combined-view share image so Telegram readers see the same
+  // family-grouped composition that limitlesstcg / official tournament
+  // pages display. Per-variant rendering goes through the un-aggregated
+  // path; this helper is only invoked when viewMode === 'combined'.
+  //
+  // Returns a field-shaped array sorted by finalShare desc, with the
+  // junk entry pushed last to mirror what exportFieldAndRecsShareImage
+  // expects downstream.
+  function _aggregateFieldByFamily(field) {
+    if (!Array.isArray(field) || field.length === 0) return [];
+    const byFamily = new Map();
+    let junkAcc = null;
+    for (const d of field) {
+      if (!d || !d.name) continue;
+      if (d.name === '_junk') {
+        // Junk passes through as-is — there's no family to fold it into.
+        junkAcc = { ...d };
+        continue;
+      }
+      const family = extractMainPokemon(d.name) || d.name;
+      const existing = byFamily.get(family);
+      if (!existing) {
+        byFamily.set(family, {
+          name: family,
+          finalShare: d.finalShare || 0,
+          onlineShare: d.onlineShare || 0,
+          count: d.count || 0,
+          variantCount: 1,
+          // Keep the heaviest variant's name so downstream tooltips can
+          // identify which deck dominates the family aggregate.
+          representativeVariant: d.name,
+          representativeShare: d.finalShare || 0,
+        });
+      } else {
+        existing.finalShare += d.finalShare || 0;
+        existing.onlineShare += d.onlineShare || 0;
+        existing.count += d.count || 0;
+        existing.variantCount += 1;
+        if ((d.finalShare || 0) > existing.representativeShare) {
+          existing.representativeVariant = d.name;
+          existing.representativeShare = d.finalShare || 0;
+        }
+      }
+    }
+    const out = Array.from(byFamily.values())
+      .sort((a, b) => b.finalShare - a.finalShare);
+    if (junkAcc) out.push(junkAcc);
+    return out;
+  }
+
+  // Aggregate recommendations the same way. Each rec keeps the
+  // representative variant's day2Prob / avgWR (which is what the
+  // matchup math actually computed against the per-variant matchup
+  // map) — collapsing those into a family weighted-average would
+  // muddy the very signal the column is supposed to surface. The
+  // family rollup is purely cosmetic on the recs side: the row's
+  // name reads 'Dragapult' instead of 'Dragapult Dusknoir', with
+  // the variant exposed in the title attribute.
+  function _aggregateRecsByFamily(recs) {
+    if (!Array.isArray(recs) || recs.length === 0) return [];
+    const byFamily = new Map();
+    for (const r of recs) {
+      if (!r || !r.name) continue;
+      const family = extractMainPokemon(r.name) || r.name;
+      const existing = byFamily.get(family);
+      if (!existing) {
+        byFamily.set(family, {
+          ...r,
+          name: family,
+          representativeVariant: r.name,
+          variantCount: 1,
+        });
+      } else if ((r.day2Prob || 0) > (existing.day2Prob || 0)) {
+        // Keep the better-performing variant as the family's "headline"
+        // pick — that's what an aspirational reader cares about. The
+        // weaker variants fall off the visible list but stay reachable
+        // via the per-variant view.
+        byFamily.set(family, {
+          ...r,
+          name: family,
+          representativeVariant: r.name,
+          variantCount: existing.variantCount + 1,
+        });
+      } else {
+        existing.variantCount += 1;
+      }
+    }
+    return Array.from(byFamily.values())
+      .sort((a, b) => (b.day2Prob || 0) - (a.day2Prob || 0));
+  }
+
+  function exportFieldAndRecsShareImage(viewMode) {
+    const mode = viewMode === 'combined' ? 'combined' : 'single';
     if (!_shareList) return;
     const rawField = buildField();
     if (!rawField.length) return;
 
-    const junkEntry = rawField.find(d => d.name === '_junk') || null;
-    const field = rawField.filter(d => d.name !== '_junk')
-                          .sort((a, b) => b.finalShare - a.finalShare);
-    if (junkEntry) field.push(junkEntry);
+    let field;
+    if (mode === 'combined') {
+      // Combined: fold variants of the same family into a single row.
+      // We aggregate AFTER buildField so personal estimates / junk
+      // floor / custom decks all flow through the normal pipeline
+      // first; the rollup just reshapes the display layer.
+      field = _aggregateFieldByFamily(rawField);
+    } else {
+      const junkEntry = rawField.find(d => d.name === '_junk') || null;
+      field = rawField.filter(d => d.name !== '_junk')
+                     .sort((a, b) => b.finalShare - a.finalShare);
+      if (junkEntry) field.push(junkEntry);
+    }
 
     const split = calcRecommendationsSplit(rawField);
     // Cap to top 12 — long lists eat tall images and the tail of
     // the list isn't actionable anyway.
-    const recs = (split.day2 || []).slice(0, 12);
-    const tips = (split.geheimtipps || []).slice(0, 3);
+    let recs = (split.day2 || []).slice(0, 12);
+    let tips = (split.geheimtipps || []).slice(0, 3);
+    if (mode === 'combined') {
+      // Fold variant rows into family rows for visual consistency
+      // with the (now family-grouped) field column.
+      recs = _aggregateRecsByFamily(recs).slice(0, 12);
+      tips = _aggregateRecsByFamily(tips).slice(0, 3);
+    }
 
     if (recs.length === 0) {
       // Nothing to recommend yet (no shareList or pre-predictor) —
@@ -6402,11 +6511,16 @@ window.MetaCall = (function () {
 
     // Header subtitle adapts to active tournament type — Day 2,
     // Top Cut, or 1./2. Platz.
-    const titleLine = _settings.tournamentType === 'cup'
+    const baseTitleLine = _settings.tournamentType === 'cup'
       ? `${_settings.totalPlayers.toLocaleString()} ${t('mc.labelPlayers')} · ${_settings.rounds} ${t('mc.roundsAbbr')} · Top ${_settings.topCutSize}: ${_settings.day2Points} ${t('mc.ptsAbbr')}`
       : (_settings.tournamentType === 'challenge'
           ? `${_settings.totalPlayers.toLocaleString()} ${t('mc.labelPlayers')} · ${_settings.rounds} ${t('mc.roundsAbbr')} · 1.-2.: ${_settings.day2Points} ${t('mc.ptsAbbr')}`
           : `${_settings.totalPlayers.toLocaleString()} ${t('mc.labelPlayers')} · ${_settings.rounds} ${t('mc.roundsAbbr')} · Day 2: ${_settings.day2Points} ${t('mc.ptsAbbr')}`);
+    // View-mode suffix so the reader can tell single (per-variant) from
+    // combined (family-grouped) at a glance — matters when both PNGs
+    // arrive in the same Telegram thread.
+    const viewLabel = mode === 'combined' ? ' · Combined' : ' · Per Variant';
+    const titleLine = baseTitleLine + viewLabel;
     _paintHeader(ctx, W, 'META CALL', titleLine);
 
     // Section labels — one per column.

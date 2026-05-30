@@ -766,13 +766,7 @@
 
                 // 3. Guarantee baseline known formats are available when data exists but misses labels.
                 KNOWN_META_FORMAT_CODES.forEach(formatCode => uniqueFormats.add(formatCode));
-                
-                // Map Meta Play! and Meta Live to SVI-ASC (don't show them separately)
-                const formatMapping = {
-                    'Meta Play!': 'SVI-ASC',
-                    'Meta Live': 'SVI-ASC'
-                };
-                
+
                 // Sort newest -> oldest by the latest set code in the format label.
                 const getFormatSortTimestamp = (formatCode) => {
                     const code = String(formatCode || '').trim().toUpperCase();
@@ -797,15 +791,10 @@
                     }))
                 };
                 
-                // Store mapping globally for filtering (reverse mapping too)
-                window.metaFormatMapping = formatMapping;
-                
                 devLog(`[Cards Tab] Loaded ${sortedFormats.length} total unique formats:`, sortedFormats);
-                devLog(`[Cards Tab] Format mappings applied:`, formatMapping);
             } catch (error) {
                 console.error('[Cards Tab] Error loading formats:', error);
                 window.cardFormatsData = { formats: [] };
-                window.metaFormatMapping = {};
             }
         }
         

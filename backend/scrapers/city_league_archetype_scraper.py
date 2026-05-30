@@ -459,7 +459,7 @@ def create_comparison_report(old_data: list, new_data: list, output_file: str):
             stats[arch]['count'] += 1
             stats[arch]['placements'].append(place)
             stats[arch]['total_placement'] += place
-        for arch, d in stats.items():
+        for d in stats.values():
             d['avg_placement'] = d['total_placement'] / d['count'] if d['count'] > 0 else 0
             d['best_placement'] = min(d['placements']) if d['placements'] else 0
             d['meta_share'] = (d['count'] / total_decks * 100) if total_decks > 0 else 0  # NEU: Meta-Share

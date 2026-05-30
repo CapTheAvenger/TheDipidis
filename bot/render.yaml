@@ -27,6 +27,11 @@ services:
     buildCommand: npm install
     startCommand: npm start
     healthCheckPath: /health
+    # Auto-deploy on every push to main. Required so renamed/removed
+    # dependencies (the Puppeteer rip-out being the prime example)
+    # actually leave the dyno's node_modules. Without this, a stale
+    # cached build can serve old code months after a refactor.
+    autoDeploy: true
     envVars:
       - key: BOT_TOKEN
         sync: false             # set on dashboard, never in git

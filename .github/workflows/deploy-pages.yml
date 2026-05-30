@@ -262,6 +262,23 @@ jobs:
           npm install --no-audit --no-fund --omit=optional
           node prerender-meta-call.js ../_site
 
+      - name: Run cross-surface consistency tests against the built artifacts
+        # The bot-deck-index.json only exists after generate-bot-deck-index.py
+        # ran a few steps above, so cross-surface tests have to run here
+        # (the earlier pytest step in the test job runs against the
+        # un-built data/ tree and skips these). Failure here aborts the
+        # deploy via the workflow's job-level failure: better to keep
+        # the previously deployed Pages live than push inconsistent
+        # data to the CDN.
+        env:
+          # The cross-surface tests look up bot-deck-index.json under
+          # DATA_DIR which defaults to data/. Override so the suite
+          # finds the freshly-built artifact in _site/data/ instead.
+          DATA_DIR: ${{ github.workspace }}/_site/data
+        run: |
+          pip install --quiet pytest
+          python -m pytest tests/python/test_cross_surface_consistency.py -v --tb=short
+
       - name: Setup Pages
         uses: actions/configure-pages@v5
 

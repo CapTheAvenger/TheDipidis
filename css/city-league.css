@@ -248,18 +248,31 @@
     flex: 1 1 180px;
     min-height: 42px;
 }
-.proxy-add-cl-btn {}
-.proxy-add-cm-btn {}
-.proxy-add-pm-btn {}
+/* Proxy tab button hierarchy. F-12 from visual sweep: all five
+ * action buttons rendered identically (white, outlined) so the
+ * destructive 'Clear Queue' looked the same as the primary 'Print
+ * Queue' and the secondary 'Add ... Deck' buttons. The previous
+ * .btn-modern reset was winning over these per-button declarations.
+ * !important wins the cascade without restructuring the whole .btn
+ * stack. */
+.proxy-add-cl-btn,
+.proxy-add-cm-btn,
+.proxy-add-pm-btn {}  /* Secondary: keep the .btn-modern default */
 .proxy-print-queue-btn {
-    background: #27ae60;
-    border-color: #1e8449;
-    color: white;
+    background: #27ae60 !important;
+    border-color: #1e8449 !important;
+    color: #fff !important;
+}
+.proxy-print-queue-btn:hover {
+    background: #1e8449 !important;
 }
 .proxy-clear-queue-btn {
-    background: #6c757d;
-    border-color: #495057;
-    color: white;
+    background: #e74c3c !important;
+    border-color: #c0392b !important;
+    color: #fff !important;
+}
+.proxy-clear-queue-btn:hover {
+    background: #c0392b !important;
 }
 .proxy-queue-list {
     display: grid;

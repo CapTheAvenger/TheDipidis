@@ -5183,6 +5183,22 @@ window.MetaCall = (function () {
     if (!split.day2.length && !split.geheimtipps.length) return '';
     const myDeckNorm = normalize(_settings.myDeck || '');
 
+    // Build a normalized → finalShare lookup so the rec row can
+    // surface a "Counter-Pick" chip when a recommendation has very
+    // low field presence (F-05 from visual sweep: Crustle as #1 at
+    // 1.38 % field share looked like a bug to the user; it isn't,
+    // it's the predictor surfacing a niche deck with strong matchups
+    // — but the UI had nothing telling them that). Threshold mirrors
+    // the geheimtipps cutoff so the labelling stays consistent across
+    // the two surfaces.
+    const fieldShareByName = {};
+    field.forEach(d => {
+      if (d && d.name && typeof d.finalShare === 'number') {
+        fieldShareByName[normalize(d.name)] = d.finalShare;
+      }
+    });
+    const COUNTER_PICK_MAX_SHARE = 3.0;
+
     const renderRow = (r, i) => {
       const isMine = myDeckNorm && normalize(r.name) === myDeckNorm;
       const icon = (typeof window.ArchetypeIcons !== 'undefined')
@@ -5190,6 +5206,11 @@ window.MetaCall = (function () {
         : '';
       const day2Pct = (r.day2Prob * 100).toFixed(1).replace('.', ',');
       const wrPct   = r.avgWR.toFixed(1).replace('.', ',');
+      const fieldShare = fieldShareByName[normalize(r.name)] || 0;
+      const isCounterPick = fieldShare > 0 && fieldShare < COUNTER_PICK_MAX_SHARE;
+      const counterPickTag = isCounterPick
+        ? `<span class="mc-rec-counterpick-tag" title="${esc(t('mc.recCounterPickTooltip'))}">${esc(t('mc.recCounterPickLabel'))}</span>`
+        : '';
       const safeNameJs = escJs(r.name);
       const reasonId = 'mc-rec-reason-' + normalize(r.name).replace(/[^a-z0-9]/g, '');
       // Reason row HTML — top-3 favourable matchups + the Day-2-odds
@@ -5225,7 +5246,7 @@ window.MetaCall = (function () {
             tabindex="0"
             data-reason-id="${reasonId}">
         <td class="mc-rec-rank">${i + 1}</td>
-        <td class="mc-rec-name"><span class="mc-rec-name-inner">${icon}<span class="mc-rec-name-text">${esc(r.name)}</span>${isMine ? `<span class="mc-rec-mine-tag">${esc(t('mc.recYourDeck'))}</span>` : ''}</span></td>
+        <td class="mc-rec-name"><span class="mc-rec-name-inner">${icon}<span class="mc-rec-name-text">${esc(r.name)}</span>${isMine ? `<span class="mc-rec-mine-tag">${esc(t('mc.recYourDeck'))}</span>` : ''}${counterPickTag}</span></td>
         <td class="mc-rec-day2"><strong>${day2Pct}%</strong></td>
         <td class="mc-rec-wr">${wrPct}%</td>
         <td class="mc-rec-wins">∅ ${r.expWin.toFixed(2)}</td>

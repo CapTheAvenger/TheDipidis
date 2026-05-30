@@ -1903,6 +1903,24 @@
     letter-spacing: 0.05em;
 }
 
+/* F-05 from visual sweep: niche picks with low field share but
+ * strong matchups bubble up to #1 / #2 of the recs (Crustle at
+ * 1.38 % field share). Without context that looks like a bug. The
+ * counter-pick tag tells the user 'this is the predictor doing its
+ * job, but expect higher variance than for a mainstream pick.' */
+.mc-rec-counterpick-tag {
+    margin-left: 8px;
+    font-size: 0.66rem;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 999px;
+    background: rgba(243, 156, 18, 0.18);
+    color: #9a5b00;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    cursor: help;
+}
+
 @media (max-width: 700px) {
     .mc-rec-panel { padding: 14px 14px; }
     .mc-rec-table { font-size: 0.84rem; }

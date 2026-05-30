@@ -498,6 +498,44 @@ def write_sets_metadata(sets_order: dict, release_dates: dict,
     return out_path
 
 
+def _derive_oldest_legal_set(data_dir: str, current_set: str) -> str:
+    """OLDEST half of the most-recently-closed rotation key.
+
+    Walks tournament_cards_manifest.json's chunk_dates, drops the
+    rotation whose NEWEST half is the current_set (= the just-rotated-
+    in window), picks the rotation with the freshest max_date among
+    the rest, and returns its OLDEST half. Returns '' when the
+    manifest can't help — caller logs and proceeds with an empty
+    field rather than guessing a rotation.
+
+    Example: chunk_dates contains 'TEF-POR' and 'TEF-CRI'. current_set
+    is 'CRI'. TEF-CRI gets skipped (newest half matches current), we
+    pick TEF-POR, and return 'TEF'.
+    """
+    manifest_path = os.path.join(data_dir, 'tournament_cards_manifest.json')
+    if not os.path.isfile(manifest_path):
+        return ''
+    try:
+        with open(manifest_path, 'r', encoding='utf-8') as f:
+            manifest = json.load(f)
+    except (OSError, json.JSONDecodeError):
+        return ''
+    cur = (current_set or '').strip().upper()
+    candidates = []
+    for chunk_name, dates in (manifest.get('chunk_dates') or {}).items():
+        meta = chunk_name.replace('tournament_cards_data_cards_', '').replace('.csv', '')
+        if '-' not in meta:
+            continue
+        oldest_half, newest_half = meta.split('-', 1)
+        if cur and newest_half.upper() == cur:
+            continue
+        candidates.append((dates.get('max_date') or '', oldest_half.upper()))
+    if not candidates:
+        return ''
+    candidates.sort(reverse=True)  # newest max_date first
+    return candidates[0][1]
+
+
 def write_format_window(sets_metadata_path: str,
                         en_release_dates: dict = None,
                         jp_release_dates: dict = None) -> str:
@@ -538,8 +576,18 @@ def write_format_window(sets_metadata_path: str,
 
     in_person_legal = _add_days(en_release, IN_PERSON_LEGAL_LAG_DAYS)
 
+    # oldest_legal_set: the OLDEST half of the current rotation key,
+    # e.g. 'TEF' out of 'TEF-CRI'. Downstream readers (the bot index
+    # generator and the labs scraper) build OLDEST-NEWEST chunk
+    # filenames from this — without it they have to guess, and the
+    # guess used to be a hardcoded 'TEF' that would silently rot.
+    # Derived from tournament_cards_manifest.json's chunk_dates: take
+    # the newest rotation key whose NEWEST half differs from en_current.
+    oldest_legal = _derive_oldest_legal_set(data_dir, en_current)
+
     out = {
         'current_set':          en_current,
+        'oldest_legal_set':     oldest_legal,
         'set_release_date':     en_release,
         'in_person_legal_date': in_person_legal,
         'lag_days':             IN_PERSON_LEGAL_LAG_DAYS,

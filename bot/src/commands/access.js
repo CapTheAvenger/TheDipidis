@@ -19,11 +19,18 @@ import { Markup } from 'telegraf';
 
 import {
     getAllAllowed,
-    grantAccess,
     isAdmin,
     listAdmins,
     revokeAccess,
+    tryGrantAccess,
 } from '../auth.js';
+
+// In-memory record of access requests that have already been
+// finalised this dyno lifetime. Lets parallel admin taps converge
+// on a single "already handled" message instead of double-spamming
+// the requester. Cleared by a dyno restart, same as _runtimeAllowed
+// itself — acceptable because the underlying grant is what matters.
+const _handledRequests = new Set();
 
 function _escapeHtml(s) {
     return String(s ?? '')
@@ -88,7 +95,18 @@ export function registerAccess(bot) {
             return;
         }
         const userId = ctx.match[1];
-        grantAccess(userId);
+        // tryGrantAccess returns false when the user was already on
+        // the allow list — second admin tapped after the first one's
+        // grant landed. Acknowledge the tap with a hint instead of
+        // re-running the full grant flow (would re-DM the requester
+        // and spam another whitelist string at every admin chat).
+        const firstGrant = tryGrantAccess(userId);
+        if (!firstGrant || _handledRequests.has(userId)) {
+            await ctx.answerCbQuery('Schon freigegeben');
+            await ctx.editMessageReplyMarkup({ inline_keyboard: [] }).catch(() => {});
+            return;
+        }
+        _handledRequests.add(userId);
         await ctx.answerCbQuery('Freigegeben');
         // Strip the buttons off the original request so other admins
         // (or repeat taps) don't double-handle it.
@@ -118,6 +136,15 @@ export function registerAccess(bot) {
             return;
         }
         const userId = ctx.match[1];
+        // Same first-handler-wins lock as the grant path so the second
+        // admin sees "schon erledigt" instead of triggering a second
+        // "abgelehnt" ack in admin chat.
+        if (_handledRequests.has(userId)) {
+            await ctx.answerCbQuery('Schon bearbeitet');
+            await ctx.editMessageReplyMarkup({ inline_keyboard: [] }).catch(() => {});
+            return;
+        }
+        _handledRequests.add(userId);
         await ctx.answerCbQuery('Abgelehnt');
         await ctx.editMessageReplyMarkup({ inline_keyboard: [] }).catch(() => {});
         await ctx.reply(`❌ User <code>${userId}</code> abgelehnt.`, { parse_mode: 'HTML' });

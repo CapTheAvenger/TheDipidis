@@ -58,6 +58,19 @@ export function grantAccess(userId) {
     _runtimeAllowed.add(String(userId));
 }
 
+/**
+ * Atomic "grant if not already granted". Returns true when the call
+ * actually added the id, false when it was already allowed (env or
+ * runtime). Lets callers distinguish first-grant from a duplicate
+ * tap without a separate has/add race.
+ */
+export function tryGrantAccess(userId) {
+    const s = String(userId);
+    if (_envAllowed.has(s) || _runtimeAllowed.has(s)) return false;
+    _runtimeAllowed.add(s);
+    return true;
+}
+
 export function revokeAccess(userId) {
     _runtimeAllowed.delete(String(userId));
 }

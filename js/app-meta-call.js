@@ -2865,8 +2865,35 @@ window.MetaCall = (function () {
   }
 
   // ── Data Loading ───────────────────────────────────────────
+  // In-flight guard: when two callers race (e.g. app-init.js's
+  // setTimeout(preload, 1500) background fire + a prerender's explicit
+  // await preload()), they would BOTH enter loadData, the second one
+  // would see _matchupMap + _shareList set partway through the first's
+  // execution and early-return — but _majorMatchupMap is populated
+  // LATE in the body, so the second caller's continuation runs
+  // against a half-loaded state. Symptom: past-mode renders had
+  // _majorMatchupMap[pastMeta] = undefined, every getBaseMatchup
+  // returned the 50/50 fallback, and the recommendations column
+  // collapsed to identical day2Prob across all 10 entries.
+  // Sharing the promise serialises the two callers without forcing a
+  // re-fetch on the second one.
+  let _loadDataPromise = null;
+  let _loadDataComplete = false;
   async function loadData() {
-    if (_matchupMap && _shareList) return true;
+    if (_loadDataComplete) return true;
+    if (_loadDataPromise) return _loadDataPromise;
+    _loadDataPromise = _loadDataImpl().then((ok) => {
+      if (ok) _loadDataComplete = true;
+      return ok;
+    }).finally(() => { _loadDataPromise = null; });
+    return _loadDataPromise;
+  }
+
+  async function _loadDataImpl() {
+    // No early-return on partial state here — the outer loadData() owns
+    // the "is it fully loaded" decision via _loadDataComplete. Leaving
+    // the old `if (_matchupMap && _shareList) return true;` shortcut
+    // would re-introduce the race we just fixed.
     try {
       const shareResp = await fetch('data/limitless_online_decks_comparison.csv?t=' + Date.now());
       if (!shareResp.ok) throw new Error('share CSV not found');
@@ -3505,7 +3532,8 @@ window.MetaCall = (function () {
     } else {
       // Switching back to current — invalidate caches that loadData fills
       _shareList = null;
-      _matchupMap = null;             // forces full reload (matchup CSV doesn't change but loadData early-returns if both are present)
+      _matchupMap = null;
+      _loadDataComplete = false;      // force the in-flight-guarded loadData to actually re-run
       const ok = await loadData();
       if (!ok) {
         console.warn('[MetaCall] reverting to current source failed');

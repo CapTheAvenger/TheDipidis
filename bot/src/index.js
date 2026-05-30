@@ -102,10 +102,24 @@ bot.on('text', async (ctx) => {
 });
 
 bot.catch((err, ctx) => {
+    // Last-resort handler: when a command/action handler throws and
+    // doesn't catch its own error, this fires. We log the full
+    // stack for ops and send the user a short ack so the chat
+    // doesn't go silent — without this they'd think the bot
+    // crashed and have to guess whether their tap registered.
     console.error(
         `[bot] handler error for update id=${ctx.update?.update_id}:`,
         err,
     );
+    // Best-effort reply; ignore failures here because we're already
+    // in an error path — a second reply failure isn't worth bubbling
+    // up. Inline-callback errors are answered separately so the
+    // tapped button doesn't stay in its loading-pulse state forever.
+    if (ctx?.callbackQuery) {
+        ctx.answerCbQuery('⚠️ Fehler — bitte nochmal versuchen').catch(() => {});
+    } else if (ctx?.reply) {
+        ctx.reply('⚠️ Da ist was schiefgelaufen — bitte gleich nochmal versuchen.').catch(() => {});
+    }
 });
 
 // HTTP side — Render polls / and /health to decide if the service

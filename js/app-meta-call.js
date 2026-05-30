@@ -7590,5 +7590,22 @@ window.MetaCall = (function () {
     exportFieldShareImage,
     exportFieldAndRecsShareImage,
     exportDay2ShareImage,
+    // Diagnostic getters — used by the prerender step to verify that
+    // _majorMatchupMap actually has data for the past format before
+    // rendering the past PNG. Without them the prerender would have
+    // to peek at module-local state via a hack; cleaner to expose a
+    // tiny read-only API.
+    _diag: {
+      pastFormatKey: () => _pastMetaFormatKey || null,
+      pastMatchupPairs: () => {
+        const meta = (_pastMetaFormatKey || '').toUpperCase();
+        if (!meta || !_majorMatchupMap || !_majorMatchupMap[meta]) return 0;
+        let n = 0;
+        for (const d of Object.values(_majorMatchupMap[meta])) {
+          n += Object.keys(d).length;
+        }
+        return n;
+      },
+    },
   };
 })();

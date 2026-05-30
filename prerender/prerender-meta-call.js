@@ -398,6 +398,28 @@ async function renderMetaCall(baseUrl, currentFormatKey) {
             await window.MetaCall._setMetaSource('past', key);
         }, PAST_FORMAT_KEY);
 
+        // Verify the matchup map actually has data for this past
+        // format. Without this guard a missing/incomplete map silently
+        // produced a past PNG where every recommendation showed the
+        // 50/50 default — discovered post-deploy, embarrassingly.
+        // Refuses to render rather than ship a misleading image.
+        const pastMatchupPairs = await page.evaluate(() => {
+            return window.MetaCall && window.MetaCall._diag
+                ? window.MetaCall._diag.pastMatchupPairs()
+                : 0;
+        });
+        console.log(`Past meta matchup pairs available: ${pastMatchupPairs}`);
+        if (pastMatchupPairs === 0) {
+            throw new Error(
+                `Past meta ${PAST_FORMAT_KEY} has no matchup pairs loaded — `
+                + 'the resulting PNG would show identical 50/50 placeholder '
+                + 'recommendations. Refusing to render. Check that '
+                + 'data/labs_tournament_matchups.csv contains rows for '
+                + PAST_FORMAT_KEY + ' and that loadData() completed before '
+                + 'the past-source switch.',
+            );
+        }
+
         console.log('Rendering past meta…');
         renders.push({
             kind: 'past',

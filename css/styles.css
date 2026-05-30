@@ -5504,6 +5504,17 @@ details[open] > .tier-trending-summary::after {
     font-weight: 500;
 }
 
+/* F-08 from visual sweep: when a Hero/Tier card aggregates multiple
+ * variants (Dragapult-family = Dragapult + Dragapult Dusknoir + …),
+ * surface the variant count so the user understands why the
+ * Tier-Card share doesn't match the Full Comparison Table's per-
+ * variant rows. */
+.stat-badge .stat-badge-suffix {
+    margin-left: 4px;
+    opacity: 0.75;
+    font-weight: 500;
+}
+
 .stat-badge {
     display: inline-flex;
     align-items: center;

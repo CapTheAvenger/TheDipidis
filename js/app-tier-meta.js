@@ -849,7 +849,7 @@
                                 </div>
                                 <div class="tier-hero-meta">${variantCount} ${variantLabel}</div>
                                 <div class="tier-hero-stats">
-                                    <span class="stat-badge">Share: ${shareText}%</span>
+                                    <span class="stat-badge" title="${variantCount > 1 ? `Sum across ${variantCount} variants — individual cards in the comparison table below` : `Single variant`}">Share: ${shareText}%${variantCount > 1 ? ` <small class="stat-badge-suffix">(${variantCount}×)</small>` : ''}</span>
                                     <span class="stat-badge" title="Weighted average winrate">WR: ${winrateText}%</span>
                                 </div>
                             </div>

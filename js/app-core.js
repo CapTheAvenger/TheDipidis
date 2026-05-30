@@ -1695,6 +1695,14 @@ const BASE_PATH = './data/';
             try { if (typeof window !== 'undefined') window.KNOWN_META_FORMAT_CODES = KNOWN_META_FORMAT_CODES; } catch (_e) { /* silent */ }
         })();
 
+        // MAINTAIN-ME-ON-ROTATION: when a new EN set drops on Limitless,
+        // tournaments scraped after the rotation arrive with a label
+        // like "scarlet & violet - <new set name>". Add the new entry
+        // here so normalizeTournamentFormatLabel can resolve it to the
+        // OLDEST-NEWEST code (e.g. 'TEF-CRI'). The console.warn below
+        // surfaces drift as soon as an unmapped label is observed —
+        // grep the browser console for "[normalizeTournamentFormatLabel]"
+        // after the first scrape of a new rotation.
         const TOURNAMENT_FORMAT_NAME_TO_CODE = {
             'scarlet & violet - perfect order': 'TEF-POR',
             'scarlet & violet - ascended heroes': 'SVI-ASC',
@@ -1715,6 +1723,9 @@ const BASE_PATH = './data/';
             // 'meta play!' / 'meta live' are handled by normalizeTournamentFormatLabel's
             // early-return so they always resolve to the live format_window snapshot.
         };
+        // De-duplicate the "unknown format" warning so a single
+        // unrecognised label doesn't spam the console on every render.
+        const _seenUnknownFormatLabels = new Set();
 
         function mapSetCodeToMetaFormat(setCode) {
             const code = String(setCode || '').trim().toUpperCase();
@@ -1800,6 +1811,18 @@ const BASE_PATH = './data/';
                 }
             }
 
+            // Made it past every mapping branch — the label isn't one we
+            // recognise. Most likely a new rotation arrived and
+            // TOURNAMENT_FORMAT_NAME_TO_CODE needs the new entry.
+            // Warn once per distinct label so the operator notices
+            // without console spam.
+            if (!_seenUnknownFormatLabels.has(normalized)) {
+                _seenUnknownFormatLabels.add(normalized);
+                console.warn(
+                    `[normalizeTournamentFormatLabel] unmapped tournament format ${JSON.stringify(raw)} — `
+                    + 'add it to TOURNAMENT_FORMAT_NAME_TO_CODE in js/app-core.js so dropdowns and filters resolve it.',
+                );
+            }
             return mapSetCodeToMetaFormat(fallbackSetCode) || raw;
         }
 

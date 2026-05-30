@@ -194,6 +194,16 @@ body {
     text-transform: uppercase; letter-spacing: 0.5px;
 }
 .action-divider { width: 2px; height: 24px; background: linear-gradient(180deg, transparent, #d0d5e0, transparent); margin: 0 5px; flex-shrink: 0; }
+
+/* F-17 from visual sweep: the deck-builder toolbar had two
+ * action-divider strokes hugging a metrics group that's d-none
+ * when no deck is loaded (or in Quick Overview mode). With the
+ * metrics group hidden, the two dividers sat directly next to
+ * each other and read as two empty placeholder buttons. Hide a
+ * divider when its immediate sibling is d-none — :has() lets us
+ * do this without touching the existing HTML structure. */
+.action-bar .action-divider:has(+ .d-none),
+.action-bar .d-none + .action-divider { display: none; }
 .btn-modern {
     background: #fff; border: 1px solid #d0d5e0; color: var(--text-dark);
     font-weight: 700; padding: 7px 13px; border-radius: 8px;

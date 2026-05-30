@@ -98,7 +98,3 @@ export async function captureMetaCallImage(variant = 'current') {
     }
 }
 
-/**
- * No-op kept so index.js's SIGTERM handler keeps the same shape.
- */
-export async function shutdown() {}

@@ -25,7 +25,6 @@ import { installBotCommands, registerStart } from './commands/start.js';
 import { registerMetaCall } from './commands/metacall.js';
 import { registerDeck, handleDeckSearch } from './commands/deck.js';
 import { handleAccessRequest, registerAccess } from './commands/access.js';
-import { shutdown as shutdownScreenshot } from './screenshot.js';
 
 const BOT_TOKEN = process.env.BOT_TOKEN;
 const PORT = parseInt(process.env.PORT || '3000', 10);
@@ -84,10 +83,20 @@ registerDeck(bot);
 bot.on('text', async (ctx) => {
     const text = ctx.message?.text || '';
     if (text.startsWith('/')) return;
-    const handled = await handleDeckSearch(ctx).catch((err) => {
+    let handled;
+    try {
+        handled = await handleDeckSearch(ctx);
+    } catch (err) {
+        // Distinguish a crash from a legitimate "no match" — the
+        // generic "tap a button" nudge is the wrong message when the
+        // search itself broke. Tell the user the search hiccuped so
+        // they know to retry instead of giving up on the bot.
         console.warn('[deck-search] crashed:', err);
-        return false;
-    });
+        await ctx.reply(
+            '⚠️ Deck-Suche aktuell nicht verfügbar — bitte gleich nochmal versuchen oder einen Button unten antippen.',
+        ).catch(() => {});
+        return;
+    }
     if (handled) return;
     return ctx.reply('Tippe auf einen Button unten 👇 oder gib einen Deck-Namen ein.');
 });
@@ -147,13 +156,12 @@ start().catch((err) => {
 });
 
 // Graceful shutdown — Render sends SIGTERM before recycling the dyno.
-// We also need to tear the Puppeteer browser down so its child
-// Chromium process doesn't outlive us as a zombie.
+// We stop the bot's polling/webhook loop and close the HTTP server
+// before exiting so the dyno doesn't leave half-finished requests.
 for (const sig of ['SIGINT', 'SIGTERM']) {
     process.once(sig, async () => {
         console.info(`[boot] received ${sig}, shutting down…`);
         bot.stop(sig);
-        await shutdownScreenshot().catch(() => {});
         server.close(() => process.exit(0));
     });
 }

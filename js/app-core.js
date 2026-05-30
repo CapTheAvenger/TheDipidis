@@ -1641,14 +1641,53 @@ const BASE_PATH = './data/';
         };
         
         // CSV loading and parsing
-        // NOTE: app-core used to carry its own parseCSV(text, delimiter)
-        // helper here. It was never called from inside app-core — every
-        // consumer routes through fetchAndParseCSV(url) below, which uses
-        // PapaParse's URL-download mode directly. The text-mode helper
-        // was dead code and got removed in the F-015 audit pass. If you
-        // need text-mode CSV parsing in a future feature, prefer adding
-        // it to app-utils.js (loads before app-core) so it can be reused
-        // by other modules instead of being re-implemented inline.
+        // Shared text-mode CSV parser. Both window.parseCSV (for
+        // non-module consumers like app-city-league.js) and a local
+        // alias for callers inside this module. The previous audit
+        // pass (commit 751d2d8) removed this thinking it was dead
+        // code — it isn't: app-city-league.js calls parseCSV() five
+        // times for the M3/comparison/archetypes CSV loads, and those
+        // calls all blow up with 'parseCSV is not defined' the moment
+        // the City League tab opens. Restored + exposed on window so
+        // every non-module consumer reaches it the same way, with a
+        // clear comment that future maintainers can search for.
+        //
+        // Auto-detects ';' vs ',' from the first line so a caller
+        // who knows the format can pass the delimiter explicitly,
+        // and a caller who doesn't still gets the right answer.
+        // Used by: js/app-city-league.js (city league archetype CSVs,
+        // all semicolon-delimited).
+        function parseCSV(text, delimiter) {
+            const raw = String(text || '');
+            if (!raw.trim()) return [];
+            const firstLine = raw.split(/\r?\n/, 1)[0] || '';
+            const inferredDelimiter = delimiter
+                || ((firstLine.match(/;/g) || []).length >= (firstLine.match(/,/g) || []).length ? ';' : ',');
+            if (typeof Papa === 'undefined' || !Papa.parse) {
+                // PapaParse not loaded — fall back to a naive split so
+                // we don't crash. Same edge case the old app-meta-call
+                // parseCSV handles; mirror its behaviour.
+                const lines = raw.replace(/\r/g, '').split('\n');
+                if (lines.length < 2) return [];
+                const headers = lines[0]
+                    .split(inferredDelimiter)
+                    .map(h => h.trim().replace(/^﻿/, ''));
+                return lines.slice(1).filter(l => l.trim()).map(l => {
+                    const vals = l.split(inferredDelimiter);
+                    const obj = {};
+                    headers.forEach((h, i) => { obj[h] = (vals[i] || '').trim(); });
+                    return obj;
+                });
+            }
+            const results = Papa.parse(raw, {
+                header: true,
+                delimiter: inferredDelimiter,
+                skipEmptyLines: true,
+                dynamicTyping: false,
+            });
+            return Array.isArray(results.data) ? results.data : [];
+        }
+        if (typeof window !== 'undefined') window.parseCSV = parseCSV;
 
         function fixCardNameEncoding(name) {
             if (!name) return name;

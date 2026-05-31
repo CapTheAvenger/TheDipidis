@@ -9438,61 +9438,70 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
     margin: 0 0 8px;
     color: #1f2937;
 }
+/* The Overall / Top-8 tables live inside #currentMetaContent .section
+ * which carries its own theme (gradient header, 10/12 padding, etc.).
+ * That parent has higher specificity (1,1,1) than a plain class
+ * selector, so without !important here every cell-level layout rule
+ * we set silently lost the cascade — that's how the # column ended up
+ * 25-30% wide while DECK got crushed and SHARE drifted off-center. */
 .cm-vs-top8-table {
-    width: 100%;
-    border-collapse: separate;
-    border-spacing: 0;
-    font-size: 0.85rem;
-    border: 1px solid #d7e2f0;
-    border-radius: 10px;
-    overflow: hidden;
-    background: #ffffff;
-    table-layout: fixed;
+    width: 100% !important;
+    border-collapse: separate !important;
+    border-spacing: 0 !important;
+    font-size: 0.85rem !important;
+    border: 1px solid #d7e2f0 !important;
+    border-radius: 10px !important;
+    overflow: hidden !important;
+    background: #ffffff !important;
+    table-layout: fixed !important;
 }
-/* Column widths: # is single/double digit only so it gets a narrow
- * fixed slice, value column is short percentages (e.g. "9.5%") and
- * also stays narrow. Deck column takes everything else so long names
- * like "Alakazam Dudunsparce" don't wrap. table-layout: fixed makes
- * th widths apply to the whole column. */
-.cm-vs-top8-table th:nth-child(1) { width: 14%; }
-.cm-vs-top8-table th:nth-child(2) { width: 60%; }
-.cm-vs-top8-table th:nth-child(3) { width: 26%; }
-/* All three header cells share the same dark-blue gradient + white
- * text so the # / DECK / SHARE row reads as one continuous header
- * band. Previously only DECK and SHARE picked up the generic
- * #currentMetaContent .section table th gradient — the # cell stayed
- * default-white and the header looked broken on the left edge. */
+/* Column widths: # is single/double digit (max "12"), value column
+ * carries short percentages ("9.5%", "12.1%"). Deck column takes
+ * everything else so long names like "Alakazam Dudunsparce" don't
+ * wrap. !important survives the #currentMetaContent .section table
+ * cascade. */
+.cm-vs-top8-table col,
+.cm-vs-top8-table th:nth-child(1),
+.cm-vs-top8-table td:nth-child(1) { width: 12% !important; }
+.cm-vs-top8-table th:nth-child(2),
+.cm-vs-top8-table td:nth-child(2) { width: 60% !important; }
+.cm-vs-top8-table th:nth-child(3),
+.cm-vs-top8-table td:nth-child(3) { width: 28% !important; }
 .cm-vs-top8-table th {
-    background: linear-gradient(120deg, #15396b 0%, #2a5f9d 100%);
-    color: #ffffff;
-    text-align: center;
-    font-size: 0.78rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    padding: 10px 6px;
-    vertical-align: middle;
+    background: linear-gradient(120deg, #15396b 0%, #2a5f9d 100%) !important;
+    color: #ffffff !important;
+    text-align: center !important;
+    font-size: 0.78rem !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.04em !important;
+    padding: 10px 4px !important;
+    vertical-align: middle !important;
 }
-/* Deck column is the only text column — keep left-aligned so names
- * read top-down naturally. # and value columns center so the header
- * and the numbers below it line up vertically. */
-.cm-vs-top8-table th:nth-child(2) { text-align: left; padding-left: 12px; }
+/* Deck column is the only text column — left-aligned so names read
+ * top-down. # and value columns center under their headers. */
+.cm-vs-top8-table th:nth-child(2) { text-align: left !important; padding-left: 10px !important; }
 .cm-vs-top8-table td {
-    padding: 8px 6px;
-    border-bottom: 1px solid #eef2f7;
-    vertical-align: middle;
+    padding: 8px 4px !important;
+    border-bottom: 1px solid #eef2f7 !important;
+    vertical-align: middle !important;
+    text-align: center !important;
+}
+.cm-vs-top8-table td:nth-child(2) {
+    text-align: left !important;
+    padding-left: 10px !important;
 }
 .cm-vs-top8-table tbody tr:nth-child(even) td {
-    background: #f6f9ff;
+    background: #f6f9ff !important;
 }
 .cm-vs-top8-table th:not(:last-child),
 .cm-vs-top8-table td:not(:last-child) {
-    border-right: 1px solid #e4ebf6;
+    border-right: 1px solid #e4ebf6 !important;
 }
-.cm-vs-top8-table tr:last-child td { border-bottom: none; }
-.cm-vt-rank  { color: #6b7280; font-weight: 700; text-align: center; }
-.cm-vt-name  { color: #1f2937; font-weight: 600; text-align: left; padding-left: 12px; }
-.cm-vt-value { color: #1f2937; font-weight: 700; font-variant-numeric: tabular-nums; text-align: center; }
+.cm-vs-top8-table tr:last-child td { border-bottom: none !important; }
+.cm-vt-rank  { color: #6b7280 !important; font-weight: 700 !important; }
+.cm-vt-name  { color: #1f2937 !important; font-weight: 600 !important; }
+.cm-vt-value { color: #1f2937 !important; font-weight: 700 !important; font-variant-numeric: tabular-nums !important; }
 
 /* Sample-size n= label on heatmap cells — small subscript under WR. */
 .heatmap-td-n {

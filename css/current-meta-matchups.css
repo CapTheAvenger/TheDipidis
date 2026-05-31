@@ -71,6 +71,19 @@
 .current-meta-matchups-table tbody td:nth-child(3) {
     text-align: center !important;
     font-variant-numeric: tabular-nums !important;
+    font-weight: 700 !important;
+    font-size: 1em !important;
+    color: #1f2937;
+}
+/* The Python output renders the WR cell inside a <strong> while the
+ * Record cell stays plain text. That visual weight mismatch (bold WR
+ * vs regular Record) made the two adjacent columns look like
+ * different font sizes — strip the strong by neutralising it inside
+ * the matchup tables so the body-cell weight + size above is the
+ * single source of truth. */
+.current-meta-matchups-table tbody td strong {
+    font-weight: inherit;
+    font-size: inherit;
 }
 /* Vertical column separators between every column. */
 .current-meta-matchups-table th:not(:last-child),

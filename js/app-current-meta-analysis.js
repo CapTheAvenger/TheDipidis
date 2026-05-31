@@ -2673,24 +2673,34 @@
             const bestTbody = bestMatchupsTable.querySelector('tbody');
             const worstTbody = worstMatchupsTable.querySelector('tbody');
             
+            // Strip the "(N games)" suffix from the Record cell so the
+            // column reads as a clean W-L-T tuple. The Python scraper
+            // emits "<td>54 - 22 - 0 (76 games)</td>" — the (76 games)
+            // part is redundant (sum of W+L+T) and crowds the narrow
+            // mobile column. Match the literal " (N games)" tail with
+            // a regex on the row's outerHTML so we don't have to walk
+            // the DOM per row.
+            const _stripGamesSuffix = (html) =>
+                html.replace(/\s*\(\d+\s*games\)/gi, '');
+
             if (bestTbody) {
                 // Copy all <tr> rows except the header row
                 const bestRows = Array.from(bestMatchupsTable.querySelectorAll('tr')).slice(1); // Skip header
                 let bestHtml = '';
                 bestRows.forEach(row => {
-                    bestHtml += row.outerHTML;
+                    bestHtml += _stripGamesSuffix(row.outerHTML);
                 });
                 bestTable.innerHTML = bestHtml || '<tr><td colspan="3" style="text-align: center; padding: 20px;">' + t('heatmap.noData') + '</td></tr>';
             } else {
                 bestTable.innerHTML = '<tr><td colspan="3" style="text-align: center; padding: 20px;">' + t('heatmap.noData') + '</td></tr>';
             }
-            
+
             if (worstTbody) {
                 // Copy all <tr> rows except the header row
                 const worstRows = Array.from(worstMatchupsTable.querySelectorAll('tr')).slice(1); // Skip header
                 let worstHtml = '';
                 worstRows.forEach(row => {
-                    worstHtml += row.outerHTML;
+                    worstHtml += _stripGamesSuffix(row.outerHTML);
                 });
                 worstTable.innerHTML = worstHtml || '<tr><td colspan="3" style="text-align: center; padding: 20px;">' + t('heatmap.noData') + '</td></tr>';
             } else {

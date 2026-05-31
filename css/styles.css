@@ -3351,8 +3351,17 @@
                 margin-bottom: 1px !important;
             }
             
+            /* All four stat lines below the card name read at the same
+             * size. Was 0.7em — but the set-stats-row's children
+             * (set-mobile, stats-mobile) carry an explicit 0.6em rule
+             * from mobile-responsive.css that outranks inheritance,
+             * which left the set + percentage line at 0.6em while
+             * avg and deck-stats inherited 0.7em from here. Dropping
+             * this baseline to 0.6em puts every stat line in the panel
+             * at the same height — the per-class overrides for the
+             * set-stats-row children already match. */
             .card-item .card-info-text > div {
-                font-size: 0.7em !important;
+                font-size: 0.6em !important;
                 margin-bottom: 0 !important;
                 line-height: 1.2 !important;
                 white-space: nowrap !important;
@@ -3379,21 +3388,6 @@
                 gap: 4px !important;
                 flex-wrap: nowrap !important;
                 overflow: hidden !important;
-            }
-
-            /* All four stat lines (set+%, avg, count) at the same size so
-             * the info panel reads as one block. styles.css used to set
-             * .card-info-text > div to 0.7em while the inline CSS pushed
-             * the set-stats-row children to 0.6em and avg to 0.6em — the
-             * set + percentage line read visibly smaller than the count
-             * line in the same panel. Forcing all of them to 0.7em with
-             * .card-item-specificity overrides both. */
-            .card-item .city-league-card-set-stats-row .city-league-card-set-mobile,
-            .card-item .city-league-card-set-stats-row .city-league-card-stats-mobile,
-            .card-item .city-league-card-avg-mobile,
-            .card-item .city-league-card-deck-stats-mobile {
-                font-size: 0.7em !important;
-                line-height: 1.2 !important;
             }
 
             .card-item .city-league-card-set-stats-row .city-league-card-set-mobile {

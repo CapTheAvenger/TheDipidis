@@ -195,6 +195,41 @@
         
         // Load City League data from CSV (with cache-busting)
         let cityLeagueData = [];
+
+        // Single source of truth for the "current-is-empty, fall back
+        // to past" path. Sets the runtime format, syncs both dropdowns,
+        // AND persists to localStorage so the next page load starts
+        // straight at 'past' instead of flashing the error message
+        // again while we recompute the fallback. The session-storage
+        // key tracks that the fallback came from auto-detection (not
+        // a user click) so we can still show the user "Current Meta"
+        // as the resumed default once the season reopens — handled
+        // out-of-band by the scraper writing fresh data; we just
+        // notice the CSV is non-empty on the next load and stop
+        // fallback-ing.
+        function _applyCityLeaguePastFallback() {
+            window.currentCityLeagueFormat = 'past';
+            try { localStorage.setItem('cityLeagueFormat', 'past'); } catch (_) { /* private mode */ }
+            // Disable the "Current Meta" option in both dropdowns so a
+            // second-click can't bounce the user back into the empty-
+            // state error path. The season-pause banner above the
+            // dropdown already explains why current is unavailable.
+            // Re-enables itself naturally on the next page load once
+            // the scraper writes a non-empty current CSV — fallback
+            // never runs, this code never runs, options stay enabled.
+            const _disableCurrent = (sel) => {
+                if (!sel) return;
+                sel.value = 'past';
+                const currentOpt = sel.querySelector('option[value="current"]');
+                if (currentOpt) {
+                    currentOpt.disabled = true;
+                    currentOpt.title = 'Season pause — current data unavailable';
+                }
+            };
+            _disableCurrent(document.getElementById('cityLeagueFormatSelect'));
+            _disableCurrent(document.getElementById('cityLeagueFormatSelectAnalysis'));
+        }
+
         function deriveCityLeagueComparisonData(archetypesData) {
             if (!archetypesData || archetypesData.length === 0) return [];
 
@@ -330,11 +365,7 @@
                     // past-rotation snapshot instead of hard-failing.
                     if (format === 'current' && _fallbackDepth < 1) {
                         console.info('City League current-rotation CSV unavailable; falling back to past-rotation snapshot');
-                        window.currentCityLeagueFormat = 'past';
-                        const formatSelect = document.getElementById('cityLeagueFormatSelect');
-                        if (formatSelect) formatSelect.value = 'past';
-                        const formatSelectAnalysis = document.getElementById('cityLeagueFormatSelectAnalysis');
-                        if (formatSelectAnalysis) formatSelectAnalysis.value = 'past';
+                        _applyCityLeaguePastFallback();
                         return loadCityLeagueData(_fallbackDepth + 1);
                     }
                     console.error('Hauptdaten fehlen fuer Format:', format);
@@ -405,14 +436,7 @@
                     // "show me City League data" intent still works.
                     if (format === 'current' && _fallbackDepth < 1) {
                         console.info('City League current-rotation CSV is empty (season pause); falling back to past-rotation snapshot');
-                        window.currentCityLeagueFormat = 'past';
-                        // Sync the dropdowns visually so the user can see
-                        // we switched. Both selectors exist if the user
-                        // is on the analysis tab too.
-                        const formatSelect = document.getElementById('cityLeagueFormatSelect');
-                        if (formatSelect) formatSelect.value = 'past';
-                        const formatSelectAnalysis = document.getElementById('cityLeagueFormatSelectAnalysis');
-                        if (formatSelectAnalysis) formatSelectAnalysis.value = 'past';
+                        _applyCityLeaguePastFallback();
                         return loadCityLeagueData(_fallbackDepth + 1);
                     }
                     console.error('Leere Hauptdaten fuer Format:', format);

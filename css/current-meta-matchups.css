@@ -507,12 +507,33 @@
     padding: 10px 12px;
     font-weight: 700;
     font-size: 0.88em;
+    text-align: center;
+}
+#currentMetaContent .matchups-grid-container table th:first-child {
+    text-align: left;
 }
 #currentMetaContent .matchups-grid-container table td {
     padding: 8px 12px;
     font-size: 0.88em;
     vertical-align: middle;
     border-bottom: 1px solid #f0f2f5;
+    text-align: center;
+}
+#currentMetaContent .matchups-grid-container table td:first-child {
+    text-align: left;
+}
+#currentMetaContent .matchups-grid-container table tbody td strong {
+    font-weight: inherit;
+}
+#currentMetaContent .matchups-grid-container table tbody td:nth-child(2),
+#currentMetaContent .matchups-grid-container table tbody td:nth-child(3) {
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+/* Vertical column separators between every column for visual clarity. */
+#currentMetaContent .matchups-grid-container table th:not(:last-child),
+#currentMetaContent .matchups-grid-container table td:not(:last-child) {
+    border-right: 1px solid rgba(0, 0, 0, 0.06);
 }
 #currentMetaContent .matchups-grid-container table tbody tr:nth-child(even) {
     background: rgba(0,0,0,0.02);
@@ -1226,22 +1247,36 @@
         padding: 6px 6px !important;
         font-size: 0.78em !important;
     }
-    /* Per-column alignment: name left (with wrap), WR centred,
-       Record right-anchored so the digits cling to the row edge
-       instead of leaving a chunk of whitespace on the right. */
+    /* Per-column alignment: name left (with wrap), WR + Record both
+       centered so each numeric column reads centered under its
+       header. Record used to be right-anchored — looked tidy in
+       isolation but mismatched the WR column right next to it and
+       the rest of the app's table contract (text left, numbers
+       centered). */
     #currentMetaContent .matchups-grid-container .meta-matchup-table td:first-child,
     #currentMetaContent .matchups-grid-container .meta-matchup-table th:first-child {
         white-space: normal !important;
         text-align: left !important;
     }
     #currentMetaContent .matchups-grid-container .meta-matchup-table td:nth-child(2),
-    #currentMetaContent .matchups-grid-container .meta-matchup-table th:nth-child(2) {
-        text-align: center !important;
-    }
+    #currentMetaContent .matchups-grid-container .meta-matchup-table th:nth-child(2),
     #currentMetaContent .matchups-grid-container .meta-matchup-table td:nth-child(3),
     #currentMetaContent .matchups-grid-container .meta-matchup-table th:nth-child(3) {
-        text-align: right !important;
-        padding-right: 10px !important;
+        text-align: center !important;
+        padding-right: 6px !important;
+    }
+    /* Unify body cell font-weight: the Python output wraps WR in
+     * <strong> while Record stays plain — that looked like different
+     * font sizes side by side. Make both body numeric cells 700 and
+     * neutralise the <strong> so the size + weight is consistent. */
+    #currentMetaContent .matchups-grid-container .meta-matchup-table tbody td:nth-child(2),
+    #currentMetaContent .matchups-grid-container .meta-matchup-table tbody td:nth-child(3) {
+        font-weight: 700 !important;
+        font-variant-numeric: tabular-nums !important;
+    }
+    #currentMetaContent .matchups-grid-container .meta-matchup-table tbody td strong {
+        font-weight: inherit;
+        font-size: inherit;
     }
 
     #currentMetaContent .section > h2 {

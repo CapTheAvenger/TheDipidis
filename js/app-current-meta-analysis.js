@@ -2413,15 +2413,15 @@
         function _renderCapabilityTechSection(capabilityData) {
             const container = document.getElementById('currentMetaUserVsVanillaDetectedTech');
             if (!container) return;
-            const header = t('matchup.detectedTechHeader') || 'Detected tech matchups (card-text-driven)';
-            const note = t('matchup.detectedTechNote') || 'Foundation v0.1 — heuristic regex extraction over pokemon_card_effects.json. Pattern library is intentionally narrow and grows over time (see data/card_capability_taxonomy.json).';
+            const header = t('matchup.detectedTechHeader') || 'Detected tech interactions';
+            // Empty state: hide the section entirely so the user isn't
+            // confronted with a header + "none" message that adds no
+            // value when the deck simply has no card-text interactions
+            // against the predicted field. Was a dev-facing note about
+            // the matcher's foundation / regex library — pure noise for
+            // anyone who isn't building the engine.
             if (!capabilityData || capabilityData.size === 0) {
-                container.innerHTML = `
-                    <div class="uv-tech-section uv-tech-empty">
-                        <h4 class="uv-tech-title">${escapeHtml(header)}</h4>
-                        <p class="uv-tech-line uv-tech-low">${escapeHtml(t('matchup.detectedTechNone') || 'No card-text interactions detected for the current deck against the predicted field.')}</p>
-                        <p class="uv-tech-note">${escapeHtml(note)}</p>
-                    </div>`;
+                container.innerHTML = '';
                 return;
             }
             const confidenceLabel = (c) => {
@@ -2444,7 +2444,6 @@
                 <div class="uv-tech-section">
                     <h4 class="uv-tech-title">${escapeHtml(header)} <span class="uv-tech-count">(${capabilityData.size})</span></h4>
                     <ul class="uv-tech-opp-list">${items.join('')}</ul>
-                    <p class="uv-tech-note">${escapeHtml(note)}</p>
                 </div>`;
             console.log('[CapabilityDetector] rendered section:', capabilityData.size, 'opponent groups');
         }

@@ -888,6 +888,14 @@
             await _ensureMetaDataLoaded();
             _rebuildMetaCards();
         }
+        // If the meta cards were built before window.cardIndexBySetNumber
+        // was populated, every entry's name_de is empty and German-name
+        // search silently fails. Rebuild once the index becomes available
+        // so "Quetsch..." actually surfaces Crushing Hammer.
+        const dbIndexNow = (typeof window !== 'undefined' && window.cardIndexBySetNumber) || null;
+        if (dbIndexNow && _allMetaCards.length > 0 && !_allMetaCards.some(c => c.name_de)) {
+            _rebuildMetaCards();
+        }
         // Search across English name, German name, and set+number.
         // Set+number tolerates "ASC 39", "ASC-39", "ASC39", or just "ASC|39".
         const qNorm = q.replace(/[\s\-|]+/g, '');

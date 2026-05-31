@@ -1030,11 +1030,15 @@
                     const overallTop = [...enriched].sort((a, b) => b.broughtPct - a.broughtPct).slice(0, 12);
                     const top8Top    = [...enriched].sort((a, b) => b.top8 - a.top8 || b.top8ConvPct - a.top8ConvPct).slice(0, 12);
 
+                    // escapeHtml (not escapeJsStr) — these names go straight
+                    // into innerHTML, so apostrophes in "N's Zoroark" or
+                    // "Cynthia's Garchomp" must turn into &#39; and not
+                    // a backslash-escaped \' the way escapeJsStr emits.
                     const renderRow = (d, i, valueLabel, valueText) => `
                         <tr>
                             <td class="cm-vt-rank">${i + 1}</td>
-                            <td class="cm-vt-name">${escapeJsStr(d.name)}</td>
-                            <td class="cm-vt-value" title="${valueLabel}">${valueText}</td>
+                            <td class="cm-vt-name">${escapeHtml(d.name)}</td>
+                            <td class="cm-vt-value" title="${escapeHtml(valueLabel)}">${valueText}</td>
                         </tr>`;
                     overallTop8Html = `
                         <div class="cm-vs-top8-row">
@@ -1091,7 +1095,7 @@
                 const delta    = (sign === 'up' ? '+' : '') + m.delta.toFixed(1) + '%';
                 const cls      = sign === 'up' ? 'tier-mover-up' : 'tier-mover-down';
                 return `<tr>
-                    <td class="tier-mover-name">${escapeJsStr(m.archetype)}</td>
+                    <td class="tier-mover-name">${escapeHtml(m.archetype)}</td>
                     <td class="tier-mover-share">${sharePct}</td>
                     <td class="tier-mover-prev">${oldPct}</td>
                     <td class="tier-mover-delta ${cls}">${delta}</td>

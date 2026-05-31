@@ -18,8 +18,8 @@
     width: 25%;
 }
 .current-meta-matchups-table.best-matchups th[data-i18n="matchup.record"] {
-    text-align: right;
-    padding: 12px 15px;
+    text-align: center;
+    padding: 12px 8px;
     width: 25%;
 }
 .current-meta-matchups-table.best-matchups td[colspan="3"] {
@@ -42,13 +42,41 @@
     width: 25%;
 }
 .current-meta-matchups-table.worst-matchups th[data-i18n="matchup.record"] {
-    text-align: right;
-    padding: 12px 15px;
+    text-align: center;
+    padding: 12px 8px;
     width: 25%;
 }
 .current-meta-matchups-table.worst-matchups td[colspan="3"] {
     text-align: center;
     padding: 20px;
+}
+
+/* Body cells: opponent left, WR + Record centered so header/data align.
+ * The matchups markup comes from the Python scraper's pre-rendered HTML
+ * — it doesn't ship td-level alignment classes, so the cascade here is
+ * the only place to enforce the column-by-column text-align contract. */
+.current-meta-matchups-table.best-matchups td,
+.current-meta-matchups-table.worst-matchups td {
+    vertical-align: middle;
+    padding: 10px 8px;
+}
+.current-meta-matchups-table.best-matchups tbody td:nth-child(1),
+.current-meta-matchups-table.worst-matchups tbody td:nth-child(1) {
+    text-align: left;
+}
+.current-meta-matchups-table.best-matchups tbody td:nth-child(2),
+.current-meta-matchups-table.worst-matchups tbody td:nth-child(2),
+.current-meta-matchups-table.best-matchups tbody td:nth-child(3),
+.current-meta-matchups-table.worst-matchups tbody td:nth-child(3) {
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+}
+/* Vertical column separators so the three columns visually align */
+.current-meta-matchups-table.best-matchups th:not(:last-child),
+.current-meta-matchups-table.best-matchups td:not(:last-child),
+.current-meta-matchups-table.worst-matchups th:not(:last-child),
+.current-meta-matchups-table.worst-matchups td:not(:last-child) {
+    border-right: 1px solid rgba(0, 0, 0, 0.06);
 }
 
 .current-meta-matchups-best-title {
@@ -204,15 +232,32 @@
     background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
     color: white;
     padding: 10px 12px;
-    text-align: left;
     font-weight: 700;
     font-size: 0.9em;
+    text-align: center;
+    vertical-align: middle;
+}
+/* Deck column header stays left so deck names align under it */
+#currentMetaContent .section table th:first-child {
+    text-align: left;
 }
 #currentMetaContent .section table td {
     padding: 9px 12px;
     border-bottom: 1px solid #f0f2f5;
     font-size: 0.9em;
     vertical-align: middle;
+    text-align: center;
+}
+#currentMetaContent .section table td:first-child {
+    text-align: left;
+}
+/* Vertical column separators between every column */
+#currentMetaContent .section table th:not(:last-child),
+#currentMetaContent .section table td:not(:last-child) {
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+}
+#currentMetaContent .section table td:not(:last-child) {
+    border-right-color: rgba(0, 0, 0, 0.06);
 }
 #currentMetaContent .section table tbody tr:nth-child(even) {
     background: rgba(59, 76, 202, 0.03);

@@ -2257,32 +2257,67 @@
    --------------------------------------------------------- */
 @media (max-width: 768px) {
   /* Lock the column layout so the archetype name has a guaranteed
-     ~55% of the row and never gets pushed into the count column. */
+     percentage and never gets pushed into the count column. Numeric
+     columns get enough width so two-part values like "120 (+120)" and
+     "9,78 (+9.78)" fit on one line at 0.6em without spilling into the
+     next. We branch on column count via :has() so the 3-column tables
+     (Improvers / Decliners / Full Comparison) and the 4-column table
+     (Archetype Combined: Main / Variants / Count / Ø Rank) both get
+     a sensible layout instead of clipping the 4th column off-screen. */
   .city-league-info-table {
     table-layout: fixed !important;
   }
-  .city-league-info-table-header-archetype,
-  .city-league-info-table-cell-archetype {
-    width: 62% !important;
+  /* 3-column tables: archetype gets the lion's share */
+  .city-league-info-table:not(:has(th:nth-child(4))) .city-league-info-table-header-archetype,
+  .city-league-info-table:not(:has(th:nth-child(4))) .city-league-info-table-cell-archetype {
+    width: 52% !important;
   }
-  .city-league-info-table th:nth-child(2),
-  .city-league-info-table td:nth-child(2) {
-    width: 16% !important;   /* Count — short numbers + (+/-N) */
+  .city-league-info-table:not(:has(th:nth-child(4))) th:nth-child(2),
+  .city-league-info-table:not(:has(th:nth-child(4))) td:nth-child(2) {
+    width: 24% !important;
   }
-  .city-league-info-table th:nth-child(3),
-  .city-league-info-table td:nth-child(3) {
-    width: 22% !important;   /* Ø Rank — paired with Δ in parens */
+  .city-league-info-table:not(:has(th:nth-child(4))) th:nth-child(3),
+  .city-league-info-table:not(:has(th:nth-child(4))) td:nth-child(3) {
+    width: 24% !important;
+  }
+  /* 4-column tables (Combined Top 20): tighter archetype + a narrow
+     Variants column + two numeric columns sharing the rest. */
+  .city-league-info-table:has(th:nth-child(4)) .city-league-info-table-header-archetype,
+  .city-league-info-table:has(th:nth-child(4)) .city-league-info-table-cell-archetype {
+    width: 40% !important;
+  }
+  .city-league-info-table:has(th:nth-child(4)) th:nth-child(2),
+  .city-league-info-table:has(th:nth-child(4)) td:nth-child(2) {
+    width: 16% !important;
+  }
+  .city-league-info-table:has(th:nth-child(4)) th:nth-child(3),
+  .city-league-info-table:has(th:nth-child(4)) td:nth-child(3) {
+    width: 22% !important;
+  }
+  .city-league-info-table:has(th:nth-child(4)) th:nth-child(4),
+  .city-league-info-table:has(th:nth-child(4)) td:nth-child(4) {
+    width: 22% !important;
   }
   .city-league-info-table-cell {
     padding: 6px 4px !important;
     font-size: 0.6em !important;
     line-height: 1.25 !important;
+    /* Numeric cells need explicit nowrap on the wrapper too — the
+       inner change-span has nowrap but the cell itself was allowing
+       the (+NNN) delta to break onto a second line which read as a
+       collision with the row below. */
+    overflow: hidden !important;
+  }
+  .city-league-info-table-cell-center {
+    white-space: nowrap !important;
+    text-overflow: ellipsis !important;
   }
   .city-league-info-table-cell-archetype {
     /* Wrap if a name is unusually long instead of pushing into the
        next column. Most names fit on one line at this font size. */
     white-space: normal !important;
     word-break: break-word !important;
+    overflow: visible !important;
   }
   .city-league-info-table-cell-archetype .archetype-jump-link {
     font-size: 0.95em !important;
@@ -2291,11 +2326,11 @@
   .city-league-info-table-count-change {
     font-size: 0.85em !important;
     margin-left: 2px !important;
-    white-space: nowrap;
+    white-space: nowrap !important;
   }
   .city-league-info-table-placement {
     font-size: 0.95em !important;
-    white-space: nowrap;
+    white-space: nowrap !important;
   }
   .city-league-info-table-header {
     font-size: 0.65em !important;

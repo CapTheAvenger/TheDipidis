@@ -9440,35 +9440,50 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
 }
 .cm-vs-top8-table {
     width: 100%;
-    border-collapse: collapse;
+    border-collapse: separate;
+    border-spacing: 0;
     font-size: 0.85rem;
+    border: 1px solid #d7e2f0;
+    border-radius: 10px;
+    overflow: hidden;
+    background: #ffffff;
 }
+/* All three header cells share the same dark-blue gradient + white
+ * text so the # / DECK / SHARE row reads as one continuous header
+ * band. Previously only DECK and SHARE picked up the generic
+ * #currentMetaContent .section table th gradient — the # cell stayed
+ * default-white and the header looked broken on the left edge. */
 .cm-vs-top8-table th {
+    background: linear-gradient(120deg, #15396b 0%, #2a5f9d 100%);
+    color: #ffffff;
     text-align: center;
-    font-size: 0.72rem;
+    font-size: 0.78rem;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.04em;
-    color: #6b7280;
-    padding: 4px 6px;
-    border-bottom: 1px solid rgba(0,0,0,0.10);
+    padding: 10px 8px;
+    vertical-align: middle;
 }
 /* Deck column is the only text column — keep left-aligned so names
  * read top-down naturally. # and value columns center so the header
  * and the numbers below it line up vertically. */
 .cm-vs-top8-table th:nth-child(2) { text-align: left; }
 .cm-vs-top8-table td {
-    padding: 6px 6px;
-    border-bottom: 1px solid rgba(0,0,0,0.06);
+    padding: 8px 8px;
+    border-bottom: 1px solid #eef2f7;
+    vertical-align: middle;
+}
+.cm-vs-top8-table tbody tr:nth-child(even) td {
+    background: #f6f9ff;
 }
 .cm-vs-top8-table th:not(:last-child),
 .cm-vs-top8-table td:not(:last-child) {
-    border-right: 1px solid rgba(0, 0, 0, 0.06);
+    border-right: 1px solid #e4ebf6;
 }
 .cm-vs-top8-table tr:last-child td { border-bottom: none; }
-.cm-vt-rank  { width: 24px; color: #9ca3af; font-weight: 700; text-align: center; }
+.cm-vt-rank  { width: 36px; color: #6b7280; font-weight: 700; text-align: center; }
 .cm-vt-name  { color: #1f2937; font-weight: 600; text-align: left; }
-.cm-vt-value { color: #374151; font-variant-numeric: tabular-nums; text-align: center; }
+.cm-vt-value { color: #1f2937; font-weight: 700; font-variant-numeric: tabular-nums; text-align: center; }
 
 /* Sample-size n= label on heatmap cells — small subscript under WR. */
 .heatmap-td-n {

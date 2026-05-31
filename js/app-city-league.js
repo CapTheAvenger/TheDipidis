@@ -195,11 +195,6 @@
         
         // Load City League data from CSV (with cache-busting)
         let cityLeagueData = [];
-        // Guard against an infinite loop when the past-rotation
-        // snapshot is also empty. Set inside the auto-fallback in
-        // loadCityLeagueData() and never reset — once we've tried
-        // the fallback in a session, we don't try it again.
-        let _cityLeagueAutoPastFallbackApplied = false;
         function deriveCityLeagueComparisonData(archetypesData) {
             if (!archetypesData || archetypesData.length === 0) return [];
 
@@ -252,7 +247,17 @@
                 .sort((a, b) => parseInt(b.new_count || 0, 10) - parseInt(a.new_count || 0, 10));
         }
 
-        async function loadCityLeagueData() {
+        // _autoFallbackDepth tracks how many times this call has
+        // already auto-fallen-back from current → past in the same
+        // recursion chain. 0 on the first user-triggered call; 1
+        // after a season-pause fallback. Capped at 1 so we never
+        // spin forever if the past snapshot is also empty. Using a
+        // parameter instead of a module-level sentinel means a fresh
+        // user-triggered call (e.g. dropdown switch to "Current")
+        // always gets to try the fallback once, instead of being
+        // permanently blocked by a flag set on the page's first load.
+        async function loadCityLeagueData(_autoFallbackDepth) {
+            const _fallbackDepth = _autoFallbackDepth || 0;
             const content = document.getElementById('cityLeagueContent');
             try {
                 const timestamp = new Date().getTime();
@@ -323,15 +328,14 @@
                     // entirely (404, empty, or briefly stale during a
                     // GitHub Pages CDN propagation window), try the
                     // past-rotation snapshot instead of hard-failing.
-                    if (format === 'current' && !_cityLeagueAutoPastFallbackApplied) {
+                    if (format === 'current' && _fallbackDepth < 1) {
                         console.info('City League current-rotation CSV unavailable; falling back to past-rotation snapshot');
-                        _cityLeagueAutoPastFallbackApplied = true;
                         window.currentCityLeagueFormat = 'past';
                         const formatSelect = document.getElementById('cityLeagueFormatSelect');
                         if (formatSelect) formatSelect.value = 'past';
                         const formatSelectAnalysis = document.getElementById('cityLeagueFormatSelectAnalysis');
                         if (formatSelectAnalysis) formatSelectAnalysis.value = 'past';
-                        return loadCityLeagueData();
+                        return loadCityLeagueData(_fallbackDepth + 1);
                     }
                     console.error('Hauptdaten fehlen fuer Format:', format);
                     content.innerHTML = '<div class="error">Error loading City League Meta data</div>';
@@ -399,9 +403,8 @@
                     // hard-failing. The banner already tells the user
                     // they're looking at the last snapshot, so the
                     // "show me City League data" intent still works.
-                    if (format === 'current' && !_cityLeagueAutoPastFallbackApplied) {
+                    if (format === 'current' && _fallbackDepth < 1) {
                         console.info('City League current-rotation CSV is empty (season pause); falling back to past-rotation snapshot');
-                        _cityLeagueAutoPastFallbackApplied = true;
                         window.currentCityLeagueFormat = 'past';
                         // Sync the dropdowns visually so the user can see
                         // we switched. Both selectors exist if the user
@@ -410,7 +413,7 @@
                         if (formatSelect) formatSelect.value = 'past';
                         const formatSelectAnalysis = document.getElementById('cityLeagueFormatSelectAnalysis');
                         if (formatSelectAnalysis) formatSelectAnalysis.value = 'past';
-                        return loadCityLeagueData();
+                        return loadCityLeagueData(_fallbackDepth + 1);
                     }
                     console.error('Leere Hauptdaten fuer Format:', format);
                     content.innerHTML = '<div class="error">Error loading City League Meta data</div>';
@@ -510,7 +513,19 @@
                 window.cityLeagueLoaded = true;
             } catch (error) {
                 console.error('Error loading City League data:', error);
-                content.innerHTML = '<div class="error">Error loading City League Meta data</div>';
+                // Only show the error message if no usable content was
+                // rendered yet — otherwise a late-stage throw (e.g. a
+                // non-critical post-render hook) would nuke a perfectly
+                // good past-rotation fallback render. We check for the
+                // signature elements the tier-list / table renders emit;
+                // their presence means content.innerHTML was written
+                // successfully at some point before the throw.
+                const renderedSomething = content && content.querySelector(
+                    '.deck-banner-card, .tier-section, .tier-hero-card, .city-league-table-wrap, .meta-share-section'
+                );
+                if (content && !renderedSomething) {
+                    content.innerHTML = '<div class="error">Error loading City League Meta data</div>';
+                }
             }
         }
         

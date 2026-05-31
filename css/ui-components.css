@@ -2643,6 +2643,52 @@ img[src*="limitlesstcg"] {
         padding: 0 3px;
     }
 }
+
+/* ── Avg + set line size parity ─────────────────────────────────────────
+ * The per-tab scoped rules above tune .city-league-card-stats-mobile and
+ * .city-league-card-deck-stats-mobile per breakpoint, but they never
+ * included .city-league-card-avg-mobile — so the avg line stayed at the
+ * generic mobile default (~0.6em) or the desktop 0.7em while the
+ * siblings shrank to 0.46–0.49em, depending on the device width. The
+ * result was a four-line info stack where the avg row stood out as the
+ * only "big" line. .city-league-card-set-mobile has the same problem at
+ * the 768px breakpoint (.set-mobile is in the smaller ID-scoped rules
+ * but missing from the 768px ones). Forces avg and set to inherit the
+ * same per-breakpoint size as the siblings so the four-line block reads
+ * as one consistent unit in every deck-analysis tab. */
+@media (max-width: 768px) {
+    #city-league-analysis .city-league-card-set-mobile,
+    #city-league-analysis .city-league-card-avg-mobile,
+    #current-analysis .city-league-card-set-mobile,
+    #current-analysis .city-league-card-avg-mobile,
+    #past-meta .city-league-card-set-mobile,
+    #past-meta .city-league-card-avg-mobile {
+        font-size: 0.49em !important;
+        line-height: 1.15 !important;
+        margin-bottom: 0 !important;
+    }
+}
+@media (max-width: 412px) and (min-width: 391px) {
+    #city-league-analysis .city-league-card-set-mobile,
+    #city-league-analysis .city-league-card-avg-mobile,
+    #current-analysis .city-league-card-set-mobile,
+    #current-analysis .city-league-card-avg-mobile,
+    #past-meta .city-league-card-set-mobile,
+    #past-meta .city-league-card-avg-mobile {
+        font-size: 0.47em !important;
+    }
+}
+@media (max-width: 390px) {
+    #city-league-analysis .city-league-card-set-mobile,
+    #city-league-analysis .city-league-card-avg-mobile,
+    #current-analysis .city-league-card-set-mobile,
+    #current-analysis .city-league-card-avg-mobile,
+    #past-meta .city-league-card-set-mobile,
+    #past-meta .city-league-card-avg-mobile {
+        font-size: 0.46em !important;
+        line-height: 1.1 !important;
+    }
+}
 /* Card table row list container */
 .city-league-card-table-list {
     display: flex;

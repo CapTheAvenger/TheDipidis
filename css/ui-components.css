@@ -1707,38 +1707,61 @@ img[src*="limitlesstcg"] {
 /* "Owned other international prints" badge — single small circle
  * sized to match .city-league-card-badge (max/deck), so the row of
  * markers on the card image reads as one consistent badge family
- * instead of one yellow pill that dwarfs every other indicator. */
+ * instead of one yellow pill that dwarfs every other indicator.
+ *
+ * Position: stacked below the .city-league-card-badge-max (top:4px)
+ * and the .wishlist-heart-badge (top:28px) on the right edge. Mobile
+ * shrinks the upstream badges to 16px (see mobile-responsive.css)
+ * and the heart to top:22px, so we drop the sparkle's top in the
+ * mobile media-query below as well to keep the same stacking order. */
 .city-league-other-print-sparkle {
-    position: absolute;
-    right: 4px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    z-index: 2;
+    position: absolute !important;
+    top: 52px !important;
+    right: 4px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 20px !important;
+    height: 20px !important;
+    border-radius: 50% !important;
+    z-index: 4 !important;
     cursor: help;
-    background: #f59e0b;
-    color: #fff;
-    font-weight: 800;
-    font-size: 0.65em;
-    border: 1.5px solid rgba(255, 255, 255, 0.5);
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+    background: #f59e0b !important;
+    color: #fff !important;
+    font-weight: 800 !important;
+    font-size: 0.6em !important;
+    border: 1.5px solid rgba(255, 255, 255, 0.5) !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25) !important;
+    padding: 0 !important;
+    line-height: 1 !important;
 }
 .city-league-other-print-sparkle-icon {
-    display: none;
+    display: none !important;
 }
 .city-league-other-print-sparkle-count {
-    background: transparent;
-    color: inherit;
-    font-size: inherit;
-    font-weight: inherit;
-    padding: 0;
-    min-width: 0;
-    height: auto;
-    border-radius: 0;
-    line-height: 1;
+    background: transparent !important;
+    color: inherit !important;
+    font-size: inherit !important;
+    font-weight: inherit !important;
+    padding: 0 !important;
+    min-width: 0 !important;
+    height: auto !important;
+    border-radius: 0 !important;
+    line-height: 1 !important;
+}
+
+/* Mobile: shrink to match the 16px badge size used in the
+ * inline mobile rules in index.html, and stack below the
+ * 16px wishlist heart (top: 22px). */
+@media (max-width: 768px) {
+    .city-league-other-print-sparkle {
+        top: 40px !important;
+        right: 3px !important;
+        width: 16px !important;
+        height: 16px !important;
+        font-size: 0.55em !important;
+        border-width: 1px !important;
+    }
 }
 
 .city-league-card-info-bottom {

@@ -318,6 +318,21 @@
                 const m3DataRaw = results.length > 3 ? results[3] : null;
 
                 if (!archetypesText) {
+                    // Same Season-pause fallback as the post-parse check
+                    // below — if the current-rotation file is missing
+                    // entirely (404, empty, or briefly stale during a
+                    // GitHub Pages CDN propagation window), try the
+                    // past-rotation snapshot instead of hard-failing.
+                    if (format === 'current' && !_cityLeagueAutoPastFallbackApplied) {
+                        console.info('City League current-rotation CSV unavailable; falling back to past-rotation snapshot');
+                        _cityLeagueAutoPastFallbackApplied = true;
+                        window.currentCityLeagueFormat = 'past';
+                        const formatSelect = document.getElementById('cityLeagueFormatSelect');
+                        if (formatSelect) formatSelect.value = 'past';
+                        const formatSelectAnalysis = document.getElementById('cityLeagueFormatSelectAnalysis');
+                        if (formatSelectAnalysis) formatSelectAnalysis.value = 'past';
+                        return loadCityLeagueData();
+                    }
                     console.error('Hauptdaten fehlen fuer Format:', format);
                     content.innerHTML = '<div class="error">Error loading City League Meta data</div>';
                     return;

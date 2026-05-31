@@ -107,9 +107,17 @@
         // matchup-variable-name lookups against limitless_online_decks.html.
         // Keep the set-code list in sync with normalizeArchetypeForMatch
         // in app-meta-cards.js (and update_sets.FALLBACK_SET_ORDER).
+        //
+        // Set codes are appended by the scraper when a deck name needs
+        // disambiguation per format ("Beedrill CRI" = the Beedrill list
+        // that emerged after Crimson Invasion was legal). Stripping
+        // these for display turns "Beedrill Ex CRI" → "Beedrill" so the
+        // dropdown and tier cards read clean. Each new EN set / JP set
+        // that ships needs adding here — missing entries leak the raw
+        // set suffix into the UI (the CRI miss is what triggered this).
         function stripExSuffix(name) {
             return String(name || '')
-                .replace(/\s+(?:asc|pfl|meg|mee|mep|blk|wht|dri|jtg|pre|ssp|scr|sfa|twm|tef|paf|par|mew|obf|pal|svi|sve|svp|por|m3|m4)$/i, '')
+                .replace(/\s+(?:asc|blk|cri|dri|jtg|m3|m4|m5|meg|mee|mep|mew|obf|paf|pal|par|pfl|por|pre|scr|sfa|ssp|svi|sve|svp|tef|twm|wht)$/i, '')
                 .replace(/\s+ex$/i, '')
                 .trim();
         }

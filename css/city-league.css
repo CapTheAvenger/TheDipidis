@@ -2486,41 +2486,75 @@
     color: #2c3e50;
     margin: 18px 0 10px 0;
 }
+/* Matchup Matrix table — mirrors the rest of the app's table contract:
+ * dark-blue gradient header, white uppercase text, text column left,
+ * numeric columns centered, vertical column separators, fixed widths
+ * so a single row of headers and numbers reads as one aligned grid.
+ * The original styling had every header left-aligned with a near-white
+ * background while the body cells were right-aligned, so the GAMES
+ * and WIN % numbers floated mid-cell while their headers sat far left. */
 .past-meta-matchup-table-wrap {
     overflow-x: auto;
     border-radius: 10px;
-    border: 1px solid #e5e7eb;
+    border: 1px solid #d7e2f0;
     background: #fff;
 }
 .past-meta-matchup-table {
     width: 100%;
-    border-collapse: collapse;
+    border-collapse: separate;
+    border-spacing: 0;
     font-size: 0.92rem;
+    table-layout: fixed;
 }
+.past-meta-matchup-table th:nth-child(1),
+.past-meta-matchup-table td:nth-child(1) { width: 50%; }
+.past-meta-matchup-table th:nth-child(2),
+.past-meta-matchup-table td:nth-child(2) { width: 22%; }
+.past-meta-matchup-table th:nth-child(3),
+.past-meta-matchup-table td:nth-child(3) { width: 28%; }
 .past-meta-matchup-table th,
 .past-meta-matchup-table td {
-    padding: 8px 12px;
-    text-align: left;
+    padding: 10px 10px;
     border-bottom: 1px solid #eef0f3;
+    vertical-align: middle;
+}
+.past-meta-matchup-table th:not(:last-child),
+.past-meta-matchup-table td:not(:last-child) {
+    border-right: 1px solid #e4ebf6;
 }
 .past-meta-matchup-table thead th {
-    background: #f6f8fb;
+    background: linear-gradient(120deg, #15396b 0%, #2a5f9d 100%);
     font-weight: 700;
-    color: #374151;
-    font-size: 0.8rem;
+    color: #ffffff;
+    font-size: 0.78rem;
     text-transform: uppercase;
     letter-spacing: 0.04em;
+    text-align: center;
 }
-.past-meta-matchup-table tbody tr:hover {
-    background: #f9fafb;
+/* Opponent column header sits over text, so left-align matches the
+ * body text alignment below. */
+.past-meta-matchup-table thead th:nth-child(1) {
+    text-align: left;
 }
+.past-meta-matchup-table tbody td:nth-child(1) {
+    text-align: left;
+    color: #1f2937;
+    font-weight: 600;
+}
+.past-meta-matchup-table tbody tr:nth-child(even) td {
+    background: #f6f9ff;
+}
+.past-meta-matchup-table tbody tr:hover td {
+    background: #e9f2ff;
+}
+.past-meta-matchup-table tr:last-child td { border-bottom: none; }
 .past-meta-matchup-table .past-meta-mu-games {
-    text-align: right;
+    text-align: center;
     font-variant-numeric: tabular-nums;
     color: #4b5563;
 }
 .past-meta-matchup-table .past-meta-mu-wr {
-    text-align: right;
+    text-align: center;
     font-weight: 700;
     font-variant-numeric: tabular-nums;
 }

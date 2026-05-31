@@ -524,10 +524,12 @@
 }
 #currentMetaContent .matchups-grid-container table tbody td strong {
     font-weight: inherit;
+    font-size: inherit !important;
 }
 #currentMetaContent .matchups-grid-container table tbody td:nth-child(2),
 #currentMetaContent .matchups-grid-container table tbody td:nth-child(3) {
     font-weight: 700;
+    font-size: 0.88em !important;
     font-variant-numeric: tabular-nums;
 }
 /* Vertical column separators between every column for visual clarity. */
@@ -1272,11 +1274,19 @@
     #currentMetaContent .matchups-grid-container .meta-matchup-table tbody td:nth-child(2),
     #currentMetaContent .matchups-grid-container .meta-matchup-table tbody td:nth-child(3) {
         font-weight: 700 !important;
+        font-size: 0.78em !important;
         font-variant-numeric: tabular-nums !important;
     }
+    /* The Python output puts <strong>WR%</strong> in the WR cell.
+     * Without an explicit font-size override on <strong>, the WR
+     * value rendered noticeably larger than the Record value on
+     * mobile because <strong> picked up the default 1em while the
+     * Record text inherited the cell's 0.78em. Force <strong> to
+     * inherit both weight and size so the two numeric columns finally
+     * read at the same height. */
     #currentMetaContent .matchups-grid-container .meta-matchup-table tbody td strong {
-        font-weight: inherit;
-        font-size: inherit;
+        font-weight: inherit !important;
+        font-size: inherit !important;
     }
 
     #currentMetaContent .section > h2 {

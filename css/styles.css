@@ -9447,7 +9447,16 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
     border-radius: 10px;
     overflow: hidden;
     background: #ffffff;
+    table-layout: fixed;
 }
+/* Column widths: # is single/double digit only so it gets a narrow
+ * fixed slice, value column is short percentages (e.g. "9.5%") and
+ * also stays narrow. Deck column takes everything else so long names
+ * like "Alakazam Dudunsparce" don't wrap. table-layout: fixed makes
+ * th widths apply to the whole column. */
+.cm-vs-top8-table th:nth-child(1) { width: 14%; }
+.cm-vs-top8-table th:nth-child(2) { width: 60%; }
+.cm-vs-top8-table th:nth-child(3) { width: 26%; }
 /* All three header cells share the same dark-blue gradient + white
  * text so the # / DECK / SHARE row reads as one continuous header
  * band. Previously only DECK and SHARE picked up the generic
@@ -9461,15 +9470,15 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.04em;
-    padding: 10px 8px;
+    padding: 10px 6px;
     vertical-align: middle;
 }
 /* Deck column is the only text column — keep left-aligned so names
  * read top-down naturally. # and value columns center so the header
  * and the numbers below it line up vertically. */
-.cm-vs-top8-table th:nth-child(2) { text-align: left; }
+.cm-vs-top8-table th:nth-child(2) { text-align: left; padding-left: 12px; }
 .cm-vs-top8-table td {
-    padding: 8px 8px;
+    padding: 8px 6px;
     border-bottom: 1px solid #eef2f7;
     vertical-align: middle;
 }
@@ -9481,8 +9490,8 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
     border-right: 1px solid #e4ebf6;
 }
 .cm-vs-top8-table tr:last-child td { border-bottom: none; }
-.cm-vt-rank  { width: 36px; color: #6b7280; font-weight: 700; text-align: center; }
-.cm-vt-name  { color: #1f2937; font-weight: 600; text-align: left; }
+.cm-vt-rank  { color: #6b7280; font-weight: 700; text-align: center; }
+.cm-vt-name  { color: #1f2937; font-weight: 600; text-align: left; padding-left: 12px; }
 .cm-vt-value { color: #1f2937; font-weight: 700; font-variant-numeric: tabular-nums; text-align: center; }
 
 /* Sample-size n= label on heatmap cells — small subscript under WR. */

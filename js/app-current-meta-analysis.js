@@ -3224,13 +3224,18 @@
                                             <button class="city-league-card-action-btn city-league-card-remove-btn" onclick="event.stopPropagation(); removeCardFromDeck('currentMeta', '${cardNameEscaped}')" title="${t('cl.removeFromDeck')}">-</button>
                                             <button class="city-league-card-action-btn city-league-card-add-btn" onclick="event.stopPropagation(); addCardToDeck('currentMeta', '${cardNameEscaped}', '${setCode}', '${setNumber}')" title="${t('cl.addToDeckTooltip')}">+</button>
                                             <button class="city-league-card-action-btn city-league-card-rarity-btn" onclick="event.stopPropagation(); openRaritySwitcher('${cardNameEscaped}', '${cardNameEscaped} (${setCode} ${setNumber})')" title="${t('cl.switchPrint')}">★</button>
-                                            <button class="city-league-card-action-btn city-league-card-pin-btn cm-deep-dive-only${isPinned ? ' is-active' : ''}" onclick="event.stopPropagation(); togglePinCard('currentMeta', '${cardNameEscaped}')" title="${pinTitle}">${pinIcon}</button>
-                                            <button class="city-league-card-action-btn city-league-card-exclude-btn cm-deep-dive-only${isExcluded ? ' is-active' : ''}" onclick="event.stopPropagation(); toggleExcludeCard('currentMeta', '${cardNameEscaped}')" title="${excludeTitle}">${excludeIcon}</button>
                                         </div>
                                         <div class="city-league-card-action-row">
                                             ${setCode && setNumber ? `<button class="city-league-card-action-btn city-league-card-limitless-btn" onclick="event.stopPropagation(); openLimitlessCard('${setCode}', '${setNumber}')" title="${t('cl.openLimitless')}">L</button>` : '<span></span>'}
                                             <button class="city-league-card-action-btn city-league-card-proxy-btn" onclick="event.stopPropagation(); addCardToProxy('${cardNameEscaped}', '${setCode}', '${setNumber}', 1)" title="${t('cl.proxyTooltip')}">P</button>
                                             <button class="city-league-card-action-btn city-league-card-market-btn" onclick="event.stopPropagation(); openCardmarket('${cardmarketUrlEscaped}', '${cardNameEscaped}')" data-market-bg="${priceBackground}" data-market-cursor="${eurPrice ? 'pointer' : 'not-allowed'}" title="${eurPrice ? t('cl.buyCardmarket') + ' ' + eurPrice : t('cl.priceNA')}">${priceDisplay}</button>
+                                        </div>
+                                        <!-- Cooking-mode-only row: pin (force into next build) + exclude
+                                             (keep out of next build). Hidden in vanilla via .cm-deep-dive-only
+                                             so the standard view stays at two action rows. -->
+                                        <div class="city-league-card-action-row cm-deep-dive-only">
+                                            <button class="city-league-card-action-btn city-league-card-pin-btn${isPinned ? ' is-active' : ''}" onclick="event.stopPropagation(); togglePinCard('currentMeta', '${cardNameEscaped}')" title="${pinTitle}">${pinIcon}</button>
+                                            <button class="city-league-card-action-btn city-league-card-exclude-btn${isExcluded ? ' is-active' : ''}" onclick="event.stopPropagation(); toggleExcludeCard('currentMeta', '${cardNameEscaped}')" title="${excludeTitle}">${excludeIcon}</button>
                                         </div>
                                     </div>
                                 </div>

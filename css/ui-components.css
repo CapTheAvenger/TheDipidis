@@ -2859,6 +2859,14 @@ img[src*="limitlesstcg"] {
 .city-league-info-table-header-archetype {
     text-align: left;
 }
+/* Vertical column separators so the header → data alignment reads at a
+ * glance. Header dividers stay a hair darker than body dividers because
+ * the header is dark-blue and a faint white edge keeps the row visually
+ * coherent without breaking it up. Skip the last column in both tracks
+ * so the table edge doesn't get an extra line. */
+.city-league-info-table-header:not(:last-child) {
+    border-right: 1px solid rgba(255, 255, 255, 0.18);
+}
 .city-league-info-table-row {
     border-bottom: 1px solid #e4ebf6;
     transition: background-color 0.2s ease;
@@ -2877,6 +2885,9 @@ img[src*="limitlesstcg"] {
     font-size: 0.95em;
     vertical-align: middle;
     color: #1f2d3d;
+}
+.city-league-info-table-cell:not(:last-child) {
+    border-right: 1px solid var(--cl-table-border);
 }
 .city-league-info-table-cell-archetype {
     text-align: left;

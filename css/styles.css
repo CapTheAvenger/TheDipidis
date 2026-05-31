@@ -9354,7 +9354,7 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
     font-size: 0.85rem;
 }
 .tier-movers-table th {
-    text-align: left;
+    text-align: center;
     font-size: 0.72rem;
     font-weight: 700;
     text-transform: uppercase;
@@ -9363,9 +9363,21 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
     padding: 4px 6px;
     border-bottom: 1px solid rgba(0,0,0,0.10);
 }
+/* Deck column is the only text column — keep it left-aligned for
+ * readability; numeric columns center under their headers. */
+.tier-movers-table th:first-child { text-align: left; }
 .tier-movers-table td {
     padding: 6px 6px;
     border-bottom: 1px solid rgba(0,0,0,0.06);
+    text-align: center;
+}
+.tier-movers-table td:first-child { text-align: left; }
+/* Vertical column separators so the data rows visibly line up under
+ * their headers — without these the four columns blend into each
+ * other on narrow screens. */
+.tier-movers-table th:not(:last-child),
+.tier-movers-table td:not(:last-child) {
+    border-right: 1px solid rgba(0, 0, 0, 0.06);
 }
 .tier-movers-table tr:last-child td { border-bottom: none; }
 .tier-mover-name  { color: #1f2937; font-weight: 600; }
@@ -9432,7 +9444,7 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
     font-size: 0.85rem;
 }
 .cm-vs-top8-table th {
-    text-align: left;
+    text-align: center;
     font-size: 0.72rem;
     font-weight: 700;
     text-transform: uppercase;
@@ -9441,14 +9453,22 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
     padding: 4px 6px;
     border-bottom: 1px solid rgba(0,0,0,0.10);
 }
+/* Deck column is the only text column — keep left-aligned so names
+ * read top-down naturally. # and value columns center so the header
+ * and the numbers below it line up vertically. */
+.cm-vs-top8-table th:nth-child(2) { text-align: left; }
 .cm-vs-top8-table td {
     padding: 6px 6px;
     border-bottom: 1px solid rgba(0,0,0,0.06);
 }
+.cm-vs-top8-table th:not(:last-child),
+.cm-vs-top8-table td:not(:last-child) {
+    border-right: 1px solid rgba(0, 0, 0, 0.06);
+}
 .cm-vs-top8-table tr:last-child td { border-bottom: none; }
-.cm-vt-rank  { width: 24px; color: #9ca3af; font-weight: 700; }
-.cm-vt-name  { color: #1f2937; font-weight: 600; }
-.cm-vt-value { color: #374151; font-variant-numeric: tabular-nums; text-align: right; }
+.cm-vt-rank  { width: 24px; color: #9ca3af; font-weight: 700; text-align: center; }
+.cm-vt-name  { color: #1f2937; font-weight: 600; text-align: left; }
+.cm-vt-value { color: #374151; font-variant-numeric: tabular-nums; text-align: center; }
 
 /* Sample-size n= label on heatmap cells — small subscript under WR. */
 .heatmap-td-n {
@@ -9788,6 +9808,148 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
     .meta-hub-subnav-back {
         font-size: 0.82rem;
         padding: 5px 10px;
+    }
+}
+
+/* ── Homepage card legend ───────────────────────────────────────
+   A static example card with every badge / button / stat-line
+   visible, plus a numbered legend explaining what each one means.
+   Sits below the tile grid so new users have a key for the
+   visual vocabulary the rest of the app uses. */
+.meta-hub-legend {
+    margin: 32px auto 0;
+    max-width: 1100px;
+    padding: 24px;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border-radius: 16px;
+    border: 1px solid #e2e8f0;
+}
+.meta-hub-legend-title {
+    margin: 0 0 18px;
+    font-size: 1.25rem;
+    color: #1e293b;
+    text-align: center;
+}
+.meta-hub-legend-grid {
+    display: grid;
+    grid-template-columns: minmax(180px, 240px) 1fr;
+    gap: 28px;
+    align-items: start;
+}
+.meta-hub-legend-card-wrap {
+    /* Pin the mock card at a fixed size so the badges land where
+       they would on a real ~200px-wide tile. */
+    width: 200px;
+    margin: 0 auto;
+    position: sticky;
+    top: 12px;
+}
+.meta-hub-legend-card {
+    /* Override .city-league-card-item:hover transform so the mock
+       sits still — it's a static reference, not an action target. */
+    cursor: default !important;
+}
+.meta-hub-legend-card:hover {
+    transform: none !important;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.10) !important;
+}
+.meta-hub-legend-card-art {
+    aspect-ratio: 245 / 342;
+    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 50%, #d97706 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255, 255, 255, 0.85);
+    font-weight: 700;
+    text-align: center;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    font-size: 0.7rem;
+}
+.meta-hub-legend-card-art-label {
+    line-height: 1.3;
+}
+/* Marker ring around each highlighted element on the mock card so
+   the eye can hop from list-entry → card region instantly. */
+.meta-hub-legend-marker {
+    outline: 2px dashed #ef4444;
+    outline-offset: 1px;
+}
+.meta-hub-legend-marker[data-legend-key="B"] { outline-color: #22c55e; }
+.meta-hub-legend-marker[data-legend-key="C"] { outline-color: #ec4899; }
+.meta-hub-legend-marker[data-legend-key="D"] { outline-color: #f59e0b; }
+.meta-hub-legend-marker[data-legend-key="I"],
+.meta-hub-legend-marker[data-legend-key="J"],
+.meta-hub-legend-marker[data-legend-key="K"] { outline-color: #2563eb; }
+.meta-hub-legend-line {
+    outline: 1px dashed rgba(100, 116, 139, 0.5);
+    outline-offset: 1px;
+}
+.meta-hub-legend-list {
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 10px;
+}
+.meta-hub-legend-item {
+    display: grid;
+    grid-template-columns: 32px 1fr;
+    gap: 12px;
+    align-items: start;
+    padding: 8px 12px;
+    background: #ffffff;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+}
+.meta-hub-legend-item dt {
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.meta-hub-legend-item dd {
+    margin: 0;
+    font-size: 0.88rem;
+    line-height: 1.45;
+    color: #334155;
+}
+.meta-hub-legend-item dd strong {
+    color: #1e293b;
+    font-weight: 700;
+}
+.meta-hub-legend-key {
+    display: inline-flex;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    align-items: center;
+    justify-content: center;
+    background: #475569;
+    color: #ffffff;
+    font-size: 0.78rem;
+    font-weight: 800;
+}
+.meta-hub-legend-key-red    { background: #ef4444; }
+.meta-hub-legend-key-green  { background: #22c55e; }
+.meta-hub-legend-key-pink   { background: #ec4899; }
+.meta-hub-legend-key-amber  { background: #f59e0b; }
+.meta-hub-legend-key-action { background: #2563eb; }
+
+@media (max-width: 700px) {
+    .meta-hub-legend {
+        padding: 18px 14px;
+        margin-top: 24px;
+    }
+    .meta-hub-legend-grid {
+        grid-template-columns: 1fr;
+        gap: 18px;
+    }
+    .meta-hub-legend-card-wrap {
+        position: static;
+        width: 170px;
+    }
+    .meta-hub-legend-item dd {
+        font-size: 0.84rem;
     }
 }
 

@@ -87,6 +87,7 @@ const translations = {
         'Blend your own estimates with the online data',
         'Expected encounters per round, with matchup overview'
     ],
+    'legend.title':                             'What do the symbols mean?',
 
     // ── Common buttons / actions ─────────────────────────────
     'btn.save':               'Save',
@@ -1717,6 +1718,7 @@ const translations = {
         'Eigene Schätzungen mit Online-Daten kombinieren',
         'Erwartete Begegnungen pro Runde inkl. Matchup-Übersicht'
     ],
+    'legend.title':                             'Was bedeuten die Symbole?',
 
     // ── Common buttons / actions ─────────────────────────────
     'btn.save':               'Speichern',

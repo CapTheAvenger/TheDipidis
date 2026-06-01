@@ -3697,13 +3697,26 @@ window.MetaCall = (function () {
               if (!_labsDay2WrByDeck[k]) {
                 _labsDay2WrByDeck[k] = { sum: 0, n: 0, samples: [] };
               }
-              _labsDay2WrByDeck[k].sum += day2Wr * w;
-              _labsDay2WrByDeck[k].n += w;
+              // Sample-size-weighted aggregation. The Hydrapple-at-
+              // Indy reco post-mortem flagged this: Prague had 1 Day-2
+              // player at 26.67 % d2WR (already filtered by the >= 5
+              // gate), LA had 4 (also filtered), so legitimate kept
+              // samples (Campinas 9 / 58 %, Utrecht 14 / 51 %, Melbourne
+              // 8 / 52 %) averaged to ~54 %. Weighting by day2_players
+              // makes the 14-player Utrecht sample worth more than the
+              // 8-player Melbourne, which matches statistical intuition
+              // (more games = lower variance, deserves more weight).
+              // Combined with the recency weight `w`, the final weight
+              // is `w × day2Players`.
+              const sampleWeight = w * day2Players;
+              _labsDay2WrByDeck[k].sum += day2Wr * sampleWeight;
+              _labsDay2WrByDeck[k].n += sampleWeight;
               _labsDay2WrByDeck[k].samples.push({
-                date:   _rowISO(r) || '',
-                d2wr:   day2Wr,
-                weight: w,
-                tid:    (r.tournament_id || '').trim(),
+                date:        _rowISO(r) || '',
+                d2wr:        day2Wr,
+                day2Players,
+                weight:      sampleWeight,
+                tid:         (r.tournament_id || '').trim(),
               });
             }
             // Track latest tournament date (for trend snapshots).
@@ -4962,7 +4975,46 @@ window.MetaCall = (function () {
       // empirical-conversion number, not just one of them.
       const d2WrPct = _d2WrAggregate(k);
       const d2WrMult = _d2WrMultiplier(d2WrPct);
-      const adjustedDay2 = blendedDay2 * d2WrMult;
+      let adjustedDay2 = blendedDay2 * d2WrMult;
+
+      // Predictor 4.6 inheritance for the reco engine (Hydrapple Indy
+      // reco gap). The share-side predictor (in _runPredictor) already
+      // boosts a deck's predicted META share when it won a recent
+      // regional at low usage — but the reco-side day2Prob never saw
+      // that signal, so a fresh Campinas-winner sat behind aggregate
+      // metrics. User-flagged 2026-06: a deck that just won a major
+      // at < 4 % usage IS the kind of pick that climbs into Top-Cut
+      // at the next event (that's what "Underdog-Champion" means);
+      // applying the freshness-decayed boost as a multiplicative lift
+      // on day2Prob mirrors the share side.
+      //
+      // Bonus uses the SAME freshness curve as the share-side P4.6
+      // (full < 14d, linear decay to 0 at 28d) but the multiplier is
+      // a smaller [1.0, 1.5] range so a fresh champion isn't lifted
+      // ABOVE Basic-Box-shape decks that have aggregate metrics
+      // backing them.
+      const champ = _underdogChampionByDeck[k];
+      let p46RecoMult = 1.0;
+      if (champ && champ.date) {
+        const todayISO = _todayISO();
+        const ageDays = Math.max(0,
+          Math.round((new Date(todayISO) - new Date(champ.date)) / 86400000));
+        let fresh = 0;
+        if (ageDays <= PREDICTOR_4_6_FULL_DECAY_DAYS) {
+          fresh = 1.0;
+        } else if (ageDays < PREDICTOR_4_6_ZERO_DECAY_DAYS) {
+          fresh = 1.0 - (ageDays - PREDICTOR_4_6_FULL_DECAY_DAYS) /
+                  (PREDICTOR_4_6_ZERO_DECAY_DAYS - PREDICTOR_4_6_FULL_DECAY_DAYS);
+        }
+        const underdogStrength = Math.max(0,
+          (PREDICTOR_4_6_MAX_SHARE_PCT - champ.share) / PREDICTOR_4_6_MAX_SHARE_PCT);
+        // Multiplier range [1.00, 1.50] — a max-strength fresh win
+        // boosts day2Prob by 50 %, decays linearly with age + dilutes
+        // with how-close-to-the-4-%-ceiling the deck was at win time.
+        p46RecoMult = 1.0 + 0.50 * fresh * underdogStrength;
+      }
+      adjustedDay2 *= p46RecoMult;
+
       return {
         name,
         day2Prob: adjustedDay2,
@@ -4971,6 +5023,8 @@ window.MetaCall = (function () {
         empConv,
         d2WrPct,
         d2WrMult,
+        p46RecoMult,
+        underdogChampion: champ || null,
         expWin: r.expWin,
         avgWR: (r.expWin / _settings.rounds) * 100,
         topMatchups

@@ -89,6 +89,27 @@ const translations = {
     ],
     'legend.title':                             'What do the symbols mean?',
 
+    // ── Toolbar / metric tooltips ─────────────────────────────
+    // Shared across the Deck Builder header on every tab (city-league,
+    // current-meta, past-meta). Keep wording identical so the same
+    // metric reads the same regardless of which tab the user is in.
+    'tip.openMenu':                             'Open menu',
+    'tip.dateFormat':                           'Format: DD.MM.YYYY',
+    'tip.cardsInDeck':                          'Cards in deck',
+    'tip.uniqueCards':                          'Unique cards',
+    'tip.estimatedPrice':                       'Estimated price (Cardmarket trend)',
+    'tip.loadSavedBinder':                      'Load last generated Meta Binder',
+    'tip.saveAsImage':                          'Save as image',
+    'tip.techSearchPlaceholder':                'Search a card to add as tech…',
+    'tip.cardNamePlaceholder':                  'Card name…',
+    'tip.startTypingCard':                      'Start typing a card name…',
+    'share.deckCompareTitle':                   'Deck Compare',
+    'share.generatingImage':                    'Generating image…',
+    'share.noComparison':                       'No comparison to share',
+    'share.screenshotFailed':                   'Screenshot failed',
+    'share.pasteBothDecks':                     'Please paste both decklists',
+    'share.couldNotParse':                      'Could not parse decklist(s)',
+
     // ── Common buttons / actions ─────────────────────────────
     'btn.save':               'Save',
     'btn.copy':               'Copy',
@@ -1720,6 +1741,24 @@ const translations = {
     ],
     'legend.title':                             'Was bedeuten die Symbole?',
 
+    // ── Toolbar / metric tooltips ─────────────────────────────
+    'tip.openMenu':                             'Menü öffnen',
+    'tip.dateFormat':                           'Format: TT.MM.JJJJ',
+    'tip.cardsInDeck':                          'Karten im Deck',
+    'tip.uniqueCards':                          'Unterschiedliche Karten',
+    'tip.estimatedPrice':                       'Geschätzter Preis (Cardmarket-Trend)',
+    'tip.loadSavedBinder':                      'Letzten gespeicherten Meta-Binder laden',
+    'tip.saveAsImage':                          'Als Bild speichern',
+    'tip.techSearchPlaceholder':                'Karte suchen, um sie als Tech hinzuzufügen…',
+    'tip.cardNamePlaceholder':                  'Kartenname…',
+    'tip.startTypingCard':                      'Kartenname eintippen…',
+    'share.deckCompareTitle':                   'Deck-Vergleich',
+    'share.generatingImage':                    'Bild wird erstellt…',
+    'share.noComparison':                       'Kein Vergleich vorhanden',
+    'share.screenshotFailed':                   'Screenshot fehlgeschlagen',
+    'share.pasteBothDecks':                     'Bitte beide Decklisten einfügen',
+    'share.couldNotParse':                      'Konnte Deckliste(n) nicht erkennen',
+
     // ── Common buttons / actions ─────────────────────────────
     'btn.save':               'Speichern',
     'btn.copy':               'Kopieren',
@@ -1773,7 +1812,7 @@ const translations = {
     'cardType.stadium':       'Stadion',
     'cardType.energy':        'Energie',
     'cardType.specialEnergy': 'Spezial-Energie',
-    'cardType.aceSpec':       'ASS-KLASSE',
+    'cardType.aceSpec':       'Ace Spec',
 
     // ── Auth / login ─────────────────────────────────────────
     'auth.signIn':            'Anmelden',
@@ -2090,7 +2129,7 @@ const translations = {
     'cl.typeStadium':           'Stadion',
     'cl.typeEnergy':            'Energie',
     'cl.typeSpecEnergy':        'Spezial-Energie',
-    'cl.typeAceSpec':           'ASS-KLASSE',
+    'cl.typeAceSpec':           'Ace Spec',
     'mb.filterTypeAll':         'Alle Typen',
     'mb.filterSetAll':          'Alle Sets',
     'cl.typePokemonGrass':      'Pokémon: Pflanze',
@@ -2856,7 +2895,7 @@ const translations = {
     'filter.typeStadium':       'Stadion',
     'filter.typeEnergy':        'Energie',
     'filter.typeSpecEnergy':    'Spez. Energie',
-    'filter.typeAceSpec':       'ASS-KLASSE',
+    'filter.typeAceSpec':       'Ace Spec',
     'filter.lowRarity':         'Niedrige Seltenheit',
     'filter.maxRarity':         'Max. Seltenheit',
     'filter.allPrints':         'Alle Drucke',

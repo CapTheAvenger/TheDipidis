@@ -413,7 +413,7 @@
         async function openCompareScreenshotModal() {
             const cards = window.lastDeckComparisonCards;
             if (!cards || !cards.length) {
-                showToast(getLang() === 'de' ? 'Kein Vergleich vorhanden' : 'No comparison to share', 'warning');
+                showToast(t('share.noComparison') || 'No comparison to share', 'warning');
                 return;
             }
 
@@ -425,8 +425,8 @@
             // Force modal above deck-compare overlay (z-10000)
             modal.style.zIndex = '11000';
 
-            titleEl.textContent = 'Deck Compare';
-            preview.innerHTML = '<p style="color:#888; font-size:1.1em;">' + (getLang() === 'de' ? 'Bild wird erstellt...' : 'Generating image…') + '</p>';
+            titleEl.textContent = t('share.deckCompareTitle') || 'Deck Compare';
+            preview.innerHTML = '<p style="color:#888; font-size:1.1em;">' + (t('share.generatingImage') || 'Generating image…') + '</p>';
             window._shareImageBlob = null;
             window._shareImageTitle = 'Deck_Compare';
 
@@ -449,7 +449,7 @@
                 window._shareImageBlob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
             } catch (e) {
                 console.error('Compare screenshot failed:', e);
-                preview.innerHTML = '<p style="color:#e74c3c;">' + (getLang() === 'de' ? 'Screenshot fehlgeschlagen' : 'Screenshot failed') + '</p>';
+                preview.innerHTML = '<p style="color:#e74c3c;">' + (t('share.screenshotFailed') || 'Screenshot failed') + '</p>';
             }
         }
 
@@ -647,7 +647,7 @@
             const resultDiv = document.getElementById('profileCompareResult');
 
             if (!textA || !textB) {
-                showToast(getLang() === 'de' ? 'Bitte beide Decklisten einfügen' : 'Please paste both decklists', 'warning');
+                showToast(t('share.pasteBothDecks') || 'Please paste both decklists', 'warning');
                 return;
             }
 
@@ -655,7 +655,7 @@
             const deckB = parseDeckList(textB);
 
             if (deckA.length === 0 || deckB.length === 0) {
-                showToast(getLang() === 'de' ? 'Konnte Deckliste(n) nicht erkennen' : 'Could not parse decklist(s)', 'error');
+                showToast(t('share.couldNotParse') || 'Could not parse decklist(s)', 'error');
                 return;
             }
 

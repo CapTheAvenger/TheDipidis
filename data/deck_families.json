@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "description": "Explicit deck-name → family override map for Meta Call rollups. _aggregateFieldByFamily groups variants by extractMainPokemon (first-word heuristic). That works for cleanly-named families like Dragapult (every Dragapult build starts with the word 'Dragapult'), but mis-groups others — 'Ogerpon Meganium', 'Ogerpon Meganium Arboliva', 'Ogerpon Meganium Hydrapple', AND 'Ogerpon Noivern' all extract to the single 'Ogerpon' bucket even though Noivern is a different archetype. This file overrides the heuristic per deck-name: anything not listed here falls back to extractMainPokemon. Add entries when Labs introduces a new variant naming convention that the heuristic gets wrong. `key` becomes the family identifier (variants sharing a key get rolled up together); `display` is what the UI renders for the family label.",
+  "families": [
+    {
+      "key": "Ogerpon Meganium",
+      "display": "Ogerpon Meganium",
+      "members": [
+        "Ogerpon Meganium",
+        "Ogerpon Meganium Arboliva",
+        "Ogerpon Meganium Hydrapple"
+      ]
+    },
+    {
+      "key": "Ogerpon Noivern",
+      "display": "Ogerpon Noivern",
+      "members": [
+        "Ogerpon Noivern"
+      ]
+    },
+    {
+      "key": "Ogerpon (other)",
+      "display": "Ogerpon (other)",
+      "members": [
+        "Ogerpon",
+        "Ogerpon Box"
+      ]
+    },
+    {
+      "key": "Lillie's Clefairy",
+      "display": "Lillie's Clefairy ex",
+      "members": [
+        "Lillie's Clefairy",
+        "Lillie's Clefairy Ogerpon",
+        "Clefairy Ogerpon"
+      ]
+    }
+  ]
+}

@@ -1567,6 +1567,63 @@ window.MetaCall = (function () {
     return _FAMILY_DISPLAY_NAMES[main] || main;
   }
 
+  // ── Family override map ──────────────────────────────────────────
+  // Loaded once from data/deck_families.json. Overrides the
+  // first-word heuristic of extractMainPokemon for cases where it
+  // mis-groups (Ogerpon Meganium variants getting vacuumed up with
+  // Ogerpon Noivern under the broad "Ogerpon" bucket). When a deck
+  // name appears in this map, its family-key and display name come
+  // from the override; otherwise fall through to the heuristic.
+  // See data/deck_families.json for the schema + rationale.
+  let _deckFamilyOverrideByName  = null;   // Map<deckName, familyKey>
+  let _familyDisplayOverride     = null;   // Map<familyKey, displayName>
+
+  async function _loadDeckFamilyOverride() {
+    if (_deckFamilyOverrideByName !== null) return;
+    _deckFamilyOverrideByName = new Map();
+    _familyDisplayOverride    = new Map();
+    try {
+      const resp = await fetch('data/deck_families.json?t=' + Date.now());
+      if (!resp.ok) return;
+      const json = await resp.json();
+      if (!json || !Array.isArray(json.families)) return;
+      for (const fam of json.families) {
+        if (!fam || !fam.key || !Array.isArray(fam.members)) continue;
+        if (fam.display) _familyDisplayOverride.set(fam.key, fam.display);
+        for (const m of fam.members) {
+          if (typeof m === 'string' && m.trim()) {
+            _deckFamilyOverrideByName.set(m.trim(), fam.key);
+          }
+        }
+      }
+    } catch (_e) {
+      // Optional source — failing to load just means we keep the
+      // pure-heuristic behavior. Don't spam the console.
+    }
+  }
+
+  // Public lookup used by _aggregateFieldByFamily and
+  // _aggregateRecsByFamily. Override map wins; otherwise fall
+  // through to extractMainPokemon. Display name lookup is a
+  // separate helper because the existing _FAMILY_DISPLAY_NAMES is
+  // keyed by extractMainPokemon's output, while overrides bring
+  // their own display layer.
+  function _familyKeyForDeck(name) {
+    if (!name) return name;
+    if (_deckFamilyOverrideByName && _deckFamilyOverrideByName.has(name)) {
+      return _deckFamilyOverrideByName.get(name);
+    }
+    return extractMainPokemon(name) || name;
+  }
+
+  function _familyDisplayForKey(key) {
+    if (!key) return key;
+    if (_familyDisplayOverride && _familyDisplayOverride.has(key)) {
+      return _familyDisplayOverride.get(key);
+    }
+    return _familyDisplayName(key);
+  }
+
   function extractMainPokemon(name) {
     if (!name || name === '_junk') return name;
     let s = String(name).trim();
@@ -3343,6 +3400,10 @@ window.MetaCall = (function () {
       // the trend term at the deck's current ladder share (no boost or
       // damping). Predictor 3.0 falls through to vanilla 2.0 behavior
       // when neither snapshot resolves.
+      // Family-override map for the variant rollup. Cheap, optional —
+      // loads once per session and is reused across reloads via SW.
+      await _loadDeckFamilyOverride();
+
       _historyManifest = await _loadHistoryManifest();
       _baselineSnapshotDate = _resolveHistoryDate(_lastMajorDate);
       _snapshotAtMajor = await _loadHistorySnapshot(_baselineSnapshotDate);
@@ -3986,11 +4047,14 @@ window.MetaCall = (function () {
     return field;
   }
 
-  // Group field entries by main pokemon
+  // Group field entries by main pokemon. Uses _familyKeyForDeck so
+  // the override map (data/deck_families.json) wins over the
+  // extractMainPokemon heuristic — keeps the variant rollup
+  // consistent with _aggregateFieldByFamily.
   function buildGroups(field) {
     const groups = {}, order = [];
     field.forEach(deck => {
-      const main = extractMainPokemon(deck.name);
+      const main = _familyKeyForDeck(deck.name);
       if (!groups[main]) { groups[main] = []; order.push(main); }
       groups[main].push(deck);
     });
@@ -4891,7 +4955,7 @@ window.MetaCall = (function () {
 <tr class="mc-row-main mc-group-header" onclick="MetaCall._toggleGroup('${gid}')">
   <td class="mc-cell-deck">
     <span class="mc-group-arrow" id="mc-gt-${gid}">▶</span>
-    <span class="mc-deck-name">${_mcIconHtml(group.main)}${esc(_familyDisplayName(group.main))}</span>
+    <span class="mc-deck-name">${_mcIconHtml(group.main)}${esc(_familyDisplayForKey(group.main))}</span>
     <span class="mc-group-count">${group.variants.length} ${t('mc.variants')}</span>
   </td>
   <td class="mc-cell-online"><span class="mc-share-online">${group.totalOnline.toFixed(2)}%</span></td>
@@ -6528,11 +6592,13 @@ window.MetaCall = (function () {
         junkAcc = { ...d };
         continue;
       }
-      const family = extractMainPokemon(d.name) || d.name;
+      const family = _familyKeyForDeck(d.name);
+      const display = _familyDisplayForKey(family);
       const existing = byFamily.get(family);
       if (!existing) {
         byFamily.set(family, {
-          name: family,
+          name: display,
+          familyKey: family,
           finalShare: d.finalShare || 0,
           onlineShare: d.onlineShare || 0,
           count: d.count || 0,
@@ -6572,12 +6638,14 @@ window.MetaCall = (function () {
     const byFamily = new Map();
     for (const r of recs) {
       if (!r || !r.name) continue;
-      const family = extractMainPokemon(r.name) || r.name;
+      const family = _familyKeyForDeck(r.name);
+      const display = _familyDisplayForKey(family);
       const existing = byFamily.get(family);
       if (!existing) {
         byFamily.set(family, {
           ...r,
-          name: family,
+          name: display,
+          familyKey: family,
           representativeVariant: r.name,
           variantCount: 1,
         });
@@ -6588,7 +6656,8 @@ window.MetaCall = (function () {
         // via the per-variant view.
         byFamily.set(family, {
           ...r,
-          name: family,
+          name: display,
+          familyKey: family,
           representativeVariant: r.name,
           variantCount: existing.variantCount + 1,
         });

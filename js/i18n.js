@@ -721,6 +721,8 @@ const translations = {
     'mc.tipReasonWr':           '{wr} % win rate at {where} on just {share} online share',
     'mc.tipReasonTrend':        'Online share rising +{trend} pp this week (currently {share})',
     'mc.tipReasonDay2':         'Solid {day2} % Day-2 odds despite only {share} online share',
+    'mc.tipReasonUnderdog':     '🏆 Won {event} at just {share} % usage ({ageDays} d ago) — underdog champion pattern',
+    'mc.tipReasonGrowth':       'Gained {growth} pp from Day 1 to Day 2 (currently {share})',
     'mc.panelSettings':         'Tournament Settings',
     'mc.panelMode':             'Meta Call Mode',
     'mc.modeStandard':          'Standard',
@@ -2368,6 +2370,8 @@ const translations = {
     // ── Geheimtipps ──────────────────────────────────────────
     'mc.tipsTitle':             'Geheimtipps – könnten überraschen',
     'mc.tipsHint':              'Decks außerhalb des Radars (Online-Share < 3 %) mit mindestens einem starken Signal.',
+    'mc.tipReasonUnderdog':     '🏆 Hat {event} bei nur {share} % Share gewonnen (vor {ageDays} T) — Underdog-Champion-Muster',
+    'mc.tipReasonGrowth':       'Hat {growth} pp von Day 1 auf Day 2 zugelegt (aktuell {share})',
     'mc.tipReasonConv':         'Starke {conv} % Top-8-Conversion bei nur {share} Online-Share',
     'mc.tipReasonWr':           '{wr} % Winrate bei {where} bei nur {share} Online-Share',
     'mc.tipReasonTrend':        'Online-Share zieht an: +{trend} pp diese Woche (aktuell {share})',

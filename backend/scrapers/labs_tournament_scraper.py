@@ -1029,6 +1029,14 @@ def scrape_tournament_decks(tournament_id: str) -> Tuple[List[Dict], int]:
             'day2_ties'         : 0,
             'day2_win_pct'      : 0.0,
             'day1_to_day2_conv' : 0.0,
+            # Top-cut placement counts — populated from /standings below.
+            # `top1_count` is the strongest predictor of next-event share
+            # bumps when paired with a low `share_pct` (cf. Campinas
+            # 2026: Ogerpon Meganium won at 2.6 % usage → Indianapolis
+            # ~7.9 %). See Predictor 4.6 in app-meta-call.js.
+            'top1_count'        : 0,
+            'top4_count'        : 0,
+            'top8_count'        : 0,
         })
 
     # ── Merge in conversion-rate data ────────────────────────────────────
@@ -1083,6 +1091,19 @@ def scrape_tournament_decks(tournament_id: str) -> Tuple[List[Dict], int]:
             continue  # already captured from the conversion tab
         if deck['day1_players'] > 0 and deck['day2_players'] >= 0:
             deck['day1_to_day2_conv'] = round(deck['day2_players'] / deck['day1_players'], 4)
+
+    # ── Merge in Top-1 / Top-4 / Top-8 finish counts from /standings ─────
+    # Used by Predictor 4.6 (Underdog-Champion-Boost) to forecast the
+    # share spike that follows a low-play-rate regional win.
+    standings = scrape_tournament_standings(tournament_id)
+    if standings:
+        merged = 0
+        for deck in decks:
+            slug = deck['deck_slug']
+            if slug in standings:
+                deck.update(standings[slug])
+                merged += 1
+        logger.info("  → top-cut counts merged for %d/%d decks", merged, len(decks))
 
     logger.info("  → %d decks, %d total players", len(decks), total_players)
     return decks, total_players
@@ -1250,6 +1271,102 @@ _DAY_BLOB_PATTERN = re.compile(
 )
 
 
+# ── Standings page parser — Top-1 / Top-4 / Top-8 counts per deck ────────────
+#
+# The /standings page lists every Day-2 finisher in placement order with
+# a column linking to the deck profile (same slug we use on /decks). We
+# walk the first N rows (N = 8 by default), bucket by deck_slug, and
+# count Top-1 / Top-4 / Top-8 finishes per deck. Output drops into
+# `scrape_tournament_decks` as three extra columns per row.
+#
+# Why parse this here instead of deriving from the deck-page rollup:
+# the /decks rollup tells you the deck's *aggregate* win rate, not who
+# actually won. The Underdog-Champion-Boost predictor (Predictor 4.6 in
+# app-meta-call.js) specifically needs "did this deck WIN the event at
+# low play rate" — which is only knowable from /standings. Campinas
+# 2026 → Indianapolis surge was the textbook case.
+#
+# Defensive parser: discovers the "Place" column by header text so a
+# layout shuffle on the labs side doesn't silently mis-attribute wins
+# to the wrong deck.
+
+def scrape_tournament_standings(tournament_id: str, top_n: int = 8) -> Dict[str, Dict[str, int]]:
+    """
+    Fetch labs.limitlesstcg.com/{id}/standings and return
+    { deck_slug: { 'top1_count': int, 'top4_count': int, 'top8_count': int } }
+    for the top-N finishers (default 8).
+
+    Returns empty dict on fetch / parse failure. Caller treats missing
+    keys as 0 across all three counts.
+    """
+    url = f"{BASE_URL}/{tournament_id}/standings"
+    logger.info("    Fetching standings: %s", url)
+    soup = fetch_page_bs4(url)
+    if not soup:
+        logger.warning("    Standings fetch failed for %s — skipping top-cut signal", tournament_id)
+        return {}
+
+    table = soup.find('table', attrs={'class': re.compile(r'data-table')})
+    if not table:
+        logger.warning("    No standings data-table found for %s", tournament_id)
+        return {}
+
+    # Find the Place / # column by header text. Labs has used both
+    # variants over time; default to col 0 if neither matches.
+    headers_raw = [th.get_text(strip=True).lower() for th in table.select('thead th')]
+    place_col = None
+    for i, h in enumerate(headers_raw):
+        h_clean = h.strip(' #')
+        if h_clean in ('place', 'rank', 'pos', 'position') or h == '#':
+            place_col = i
+            break
+    if place_col is None:
+        place_col = 0
+
+    out: Dict[str, Dict[str, int]] = {}
+    rows_scanned = 0
+    for row in table.select('tbody tr'):
+        cells = row.find_all('td')
+        if len(cells) <= place_col:
+            continue
+        place_text = cells[place_col].get_text(strip=True)
+        place_match = re.match(r'\d+', place_text)
+        if not place_match:
+            continue
+        place = int(place_match.group())
+        if place > top_n:
+            # Standings table is rendered in placement order, so once
+            # we've passed top-N we can stop — saves time on big events.
+            break
+        rows_scanned += 1
+
+        # Locate the deck-profile link to extract slug. Labs uses
+        # /<tid>/decks/<slug> for the deck cell.
+        slug = ''
+        for c in cells:
+            a = c.find('a', href=re.compile(r'/decks?/'))
+            if a:
+                href = a['href']
+                candidate = href.rsplit('/', 1)[-1]
+                # Skip back-links to the deck index ('decks' / '').
+                if candidate and candidate not in ('decks', 'standings'):
+                    slug = candidate
+                    break
+        if not slug:
+            continue
+
+        bucket = out.setdefault(slug, {'top1_count': 0, 'top4_count': 0, 'top8_count': 0})
+        if place == 1:
+            bucket['top1_count'] += 1
+        if place <= 4:
+            bucket['top4_count'] += 1
+        if place <= 8:
+            bucket['top8_count'] += 1
+
+    logger.info("    → standings: %d top-%d rows scanned, %d distinct decks", rows_scanned, top_n, len(out))
+    return out
+
+
 def scrape_tournament_day(tournament_id: str, day: str) -> Dict[str, Dict[str, float]]:
     """
     Fetch labs.limitlesstcg.com/{id}/decks?{day1|day2} and return
@@ -1344,6 +1461,9 @@ CSV_FIELDS = [
     'day1_players', 'day1_share_pct', 'day1_wins', 'day1_losses', 'day1_ties', 'day1_win_pct',
     'day2_players', 'day2_share_pct', 'day2_wins', 'day2_losses', 'day2_ties', 'day2_win_pct',
     'day1_to_day2_conv',
+    # Top-cut placement counts (added 2026-06). Existing rows backfill
+    # to 0 on schema-drift rewrite; frontend treats missing as 0.
+    'top1_count', 'top4_count', 'top8_count',
     'scraped_at',
 ]
 

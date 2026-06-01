@@ -190,6 +190,17 @@ window.MetaCall = (function () {
   // can boost decks the cut actively pulls IN, not just the ones the
   // cut doesn't shed.
   let _labsShareGrowthByDeck = {}; // normalize(deck) -> { sum, n } weighted (day2_share_pct - day1_share_pct)
+  let _labsDay2WrByDeck      = {}; // normalize(deck) -> { sum, n, samples[] } weighted day2_win_pct
+                                   // 2026-06 Indy-reco-calibration: user analysis showed that
+                                   // empirical Day-2 conversion alone is "variance" unless the
+                                   // deck also WINS in cut. d2WR (= avg win-pct AFTER making
+                                   // Day 2) is the single best aggregate signal that
+                                   // distinguishes the user's best Indy picks (Basic Box
+                                   // 55.5 %, Dragapult Dudunsparce 51.5 %) from the misses
+                                   // (Festival Lead 47.5 %, Lopunny declining 80 → 38). The
+                                   // recommendations engine uses this to dampen day2Prob for
+                                   // decks that historically lose in cut and lift it for
+                                   // decks that historically grind through.
   const PREDICTOR_5_4_MIN_GROWTH_PP     = 0.5;    // ignore noise under +0.5 pp Δ
   const PREDICTOR_5_4_BOOST_PER_PP      = 0.4;    // +0.4 PP added share per +1 PP Δ
                                                    // Reduced 0.6 → 0.4 in the 2026-06 Indy calibration: the
@@ -3357,6 +3368,7 @@ window.MetaCall = (function () {
       _labsConvByDeck = {};
       _labsQualityByDeck = {};
       _labsDay2ConvByDeck = {};
+      _labsDay2WrByDeck = {};
       _labsShareGrowthByDeck = {};
       _underdogChampionByDeck = {};
       _lastMajorInfo = null;
@@ -3671,6 +3683,25 @@ window.MetaCall = (function () {
               _labsDay2ConvByDeck[k].samples.push({
                 date:   _rowISO(r) || '',
                 conv:   dayConv,
+                weight: w,
+                tid:    (r.tournament_id || '').trim(),
+              });
+            }
+            // d2WR — Day-2 win rate aggregate. Feeds the reco engine's
+            // d2WR multiplier. Skip rows where day2_players is too
+            // small to give a meaningful WR (< 5 players = 4 games at
+            // most, way too noisy).
+            const day2Wr = parseEU(r.day2_win_pct || '0');
+            const day2Players = parseInt(r.day2_players || '0', 10) || 0;
+            if (day2Wr > 0 && day2Players >= 5) {
+              if (!_labsDay2WrByDeck[k]) {
+                _labsDay2WrByDeck[k] = { sum: 0, n: 0, samples: [] };
+              }
+              _labsDay2WrByDeck[k].sum += day2Wr * w;
+              _labsDay2WrByDeck[k].n += w;
+              _labsDay2WrByDeck[k].samples.push({
+                date:   _rowISO(r) || '',
+                d2wr:   day2Wr,
                 weight: w,
                 tid:    (r.tournament_id || '').trim(),
               });
@@ -4172,6 +4203,7 @@ window.MetaCall = (function () {
       _labsConvByDeck = {};
       _labsQualityByDeck = {};
       _labsDay2ConvByDeck = {};
+      _labsDay2WrByDeck = {};
       _labsShareGrowthByDeck = {};
       _underdogChampionByDeck = {};
       _predictorMode = 'A';            // online-only mode (no labs signal)
@@ -4831,6 +4863,39 @@ window.MetaCall = (function () {
         .slice(0, n);
     }
 
+    // Recency-weighted aggregate of Day-2 win rate. Used by the d2WR
+    // multiplier below. Built per-deck on every reco evaluation;
+    // cheap relative to the matchup simulation that dominates this
+    // function's runtime.
+    function _d2WrAggregate(k) {
+      const q = _labsDay2WrByDeck[k];
+      if (!q || q.n <= 0) return null;
+      return q.sum / q.n;   // 0..100
+    }
+    // d2WR multiplier — gently scales day2Prob by the deck's
+    // historical Day-2 win rate. User-flagged 2026-06 (Indy reco
+    // post-mortem): empirical Day-2 *conversion* alone is variance
+    // when not backed by WR. d2WR = the share of GAMES a deck wins
+    // AFTER making cut. Centered at 50 % (multiplier = 1.0), linear
+    // ramp ±10 pp, capped at [0.4, 1.6] so a single weak / strong
+    // sample can't dominate.
+    //
+    //   d2WR  35 %  →  0.40   heavy damp ("deck consistently loses cut")
+    //   d2WR  45 %  →  0.50
+    //   d2WR  50 %  →  1.00   neutral
+    //   d2WR  55 %  →  1.50
+    //   d2WR  65 %+ →  1.60   capped
+    //
+    // Indy reco validation (Festival Lead: avg d2WR 47.5 % → ×0.75;
+    // Basic Box: 55.5 % → ×1.55) — the multiplier moves Basic Box
+    // and Dragapult-Dudunsparce ahead of Festival Lead in the
+    // ranking, matching the user's after-the-fact assessment.
+    function _d2WrMultiplier(d2WrPct) {
+      if (d2WrPct == null) return 1.0;
+      const raw = 1.0 + (d2WrPct - 50) / 10;
+      return Math.max(0.4, Math.min(1.6, raw));
+    }
+
     const evaluated = candidates.map(name => {
       const r = calcDay2(field, name);
       const topMatchups = _topMatchupsVsField(name, field, 3);
@@ -4855,11 +4920,20 @@ window.MetaCall = (function () {
         const blendW = q.n >= 2 ? 0.30 : 0.15;
         blendedDay2 = r.day2Prob * (1 - blendW) + empConv * blendW;
       }
+      // d2WR multiplier — applies AFTER the conv blend so the
+      // "wins-in-cut" signal modulates the merged simulation +
+      // empirical-conversion number, not just one of them.
+      const d2WrPct = _d2WrAggregate(k);
+      const d2WrMult = _d2WrMultiplier(d2WrPct);
+      const adjustedDay2 = blendedDay2 * d2WrMult;
       return {
         name,
-        day2Prob: blendedDay2,
+        day2Prob: adjustedDay2,
         simDay2Prob: r.day2Prob,
+        blendedDay2Prob: blendedDay2,
         empConv,
+        d2WrPct,
+        d2WrMult,
         expWin: r.expWin,
         avgWR: (r.expWin / _settings.rounds) * 100,
         topMatchups
@@ -6002,8 +6076,27 @@ window.MetaCall = (function () {
           <span class="mc-rec-reason-share">${t('mc.reasonShare').replace('{n}', shareStr)}</span>
         </li>`;
       }).join('');
+      // d2WR diagnostic — when available, surface the deck's
+      // recency-weighted Day-2 win rate alongside the matchup
+      // breakdown. Color-coded so a < 50 % d2WR is clearly a red
+      // flag even if the row sits high on simulated day2Prob.
+      // User-flagged 2026-06 Indy reco post-mortem: distinguishes
+      // Basic Box-shape (55 % d2WR, wins cut) from Festival Lead
+      // shape (47 % d2WR, makes cut but loses early).
+      const d2WrHtml = (r.d2WrPct != null)
+        ? `<div class="mc-rec-d2wr ${r.d2WrPct >= 52 ? 'mc-rec-d2wr-good'
+              : r.d2WrPct >= 49 ? 'mc-rec-d2wr-mid'
+              : 'mc-rec-d2wr-weak'}"
+             title="${esc(t('mc.d2WrTooltip'))}">
+            <span class="mc-rec-d2wr-label">${esc(t('mc.d2WrLabel'))}:</span>
+            <span class="mc-rec-d2wr-value">${r.d2WrPct.toFixed(1).replace('.', ',')} %</span>
+            <span class="mc-rec-d2wr-mult">×${r.d2WrMult.toFixed(2).replace('.', ',')}</span>
+          </div>`
+        : '';
+
       const reasonHtml = matchupRows
         ? `<div class="mc-rec-reason-block">
+            ${d2WrHtml}
             <div class="mc-rec-reason-title">${esc(t('mc.reasonTopMatchups'))}</div>
             <ul class="mc-rec-reason-list">${matchupRows}</ul>
             <div class="mc-rec-reason-breakdown">${

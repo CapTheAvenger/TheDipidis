@@ -1756,6 +1756,30 @@ def save_matchup_rows(matchup_rows: List[Dict], data_dir: Optional[str] = None) 
     return out_path
 
 
+def _dedupe_deck_rows(rows: List[Dict]) -> List[Dict]:
+    """Drop rows that share (tournament_id, deck_slug). Keeps the LAST
+    seen — assumes the latest write reflects the latest scrape.
+
+    Root-cause is when a tournament gets discovered through two paths
+    in one run (e.g. the labs index and the ID-walk both return it),
+    `deck_rows` ends up with the same (tid, slug) pair twice and the
+    append-write doubles every row. Surfaced 2026-05-27 in Melbourne
+    (TID 0066): 124 rows / 62 unique. Both Predictor 4.6 and 5.4 read
+    recency-weighted aggregates from this file so doubling skews their
+    inputs proportionally.
+    """
+    seen: Dict[Tuple[str, str], int] = {}
+    out: List[Dict] = []
+    for r in rows:
+        key = (str(r.get('tournament_id') or ''), str(r.get('deck_slug') or ''))
+        if key in seen:
+            out[seen[key]] = r  # overwrite earlier copy
+        else:
+            seen[key] = len(out)
+            out.append(r)
+    return out
+
+
 def save_results(tournaments_meta: List[Dict], deck_rows: List[Dict]) -> None:
     data_dir = _get_data_dir()
     os.makedirs(data_dir, exist_ok=True)
@@ -1782,22 +1806,34 @@ def save_results(tournaments_meta: List[Dict], deck_rows: List[Dict]) -> None:
                 existing_rows = list(reader)
 
     if existing_rows:
-        # Schema-upgrade rewrite: existing + new in one shot.
+        # Schema-upgrade rewrite: existing + new in one shot. Dedupe
+        # across the combined set so re-scraped tournaments don't
+        # produce two rows per (tid, slug).
+        combined = _dedupe_deck_rows(existing_rows + list(deck_rows))
         with open(csv_path, 'w', newline='', encoding='utf-8') as f:
             writer = csv.DictWriter(f, fieldnames=CSV_FIELDS, extrasaction='ignore')
             writer.writeheader()
-            writer.writerows(existing_rows)
-            writer.writerows(deck_rows)
-        logger.info("Saved deck data → %s  (rewrote %d rows + %d new)",
-                    csv_path, len(existing_rows), len(deck_rows))
+            writer.writerows(combined)
+        logger.info("Saved deck data → %s  (rewrote %d rows; %d after dedupe)",
+                    csv_path, len(existing_rows) + len(deck_rows), len(combined))
     else:
-        write_header = not os.path.exists(csv_path)
-        with open(csv_path, 'a', newline='', encoding='utf-8') as f:
+        # Pure append path: still dedupe new rows against themselves
+        # AND against on-disk content. The latter catches the case
+        # where the same tournament gets discovered twice in one run
+        # via two code paths (cf. Melbourne 2026-05-27 incident).
+        on_disk: List[Dict] = []
+        if os.path.exists(csv_path):
+            with open(csv_path, 'r', newline='', encoding='utf-8') as f:
+                on_disk = list(csv.DictReader(f))
+        combined = _dedupe_deck_rows(on_disk + list(deck_rows))
+        write_header = True  # always include header in the full rewrite
+        with open(csv_path, 'w', newline='', encoding='utf-8') as f:
             writer = csv.DictWriter(f, fieldnames=CSV_FIELDS, extrasaction='ignore')
             if write_header:
                 writer.writeheader()
-            writer.writerows(deck_rows)
-        logger.info("Saved deck data → %s  (%d new rows)", csv_path, len(deck_rows))
+            writer.writerows(combined)
+        logger.info("Saved deck data → %s  (%d total after dedupe; %d new)",
+                    csv_path, len(combined), len(deck_rows))
 
 
 def overwrite_results(tournaments_meta: List[Dict], deck_rows: List[Dict]) -> None:
@@ -1810,11 +1846,13 @@ def overwrite_results(tournaments_meta: List[Dict], deck_rows: List[Dict]) -> No
     logger.info("Overwrote tournament index → %s", json_path)
 
     csv_path = os.path.join(data_dir, 'labs_tournament_decks.csv')
+    deduped = _dedupe_deck_rows(deck_rows)
     with open(csv_path, 'w', newline='', encoding='utf-8') as f:
         writer = csv.DictWriter(f, fieldnames=CSV_FIELDS, extrasaction='ignore')
         writer.writeheader()
-        writer.writerows(deck_rows)
-    logger.info("Overwrote deck data → %s  (%d rows)", csv_path, len(deck_rows))
+        writer.writerows(deduped)
+    logger.info("Overwrote deck data → %s  (%d rows; %d after dedupe)",
+                csv_path, len(deck_rows), len(deduped))
 
 
 # ── CLI ───────────────────────────────────────────────────────────────────────
@@ -2377,6 +2415,11 @@ def main() -> None:
     # Write the monolithic CSVs out to data/labs_tournament_decks_<META>.csv
     # and data/labs_tournament_matchups_<META>.csv so the next weekly run
     # can skip closed-meta tournaments via the cache logic above.
+    # Dedupe before splitting — same rationale as save_results: if a
+    # tournament was discovered through two code paths in one run, both
+    # the monolith and the per-meta chunks would otherwise carry the
+    # duplicate (Melbourne 2026-05-27 incident).
+    merged_deck_rows = _dedupe_deck_rows(merged_deck_rows)
     logger.info("Per-meta split — decks:")
     _split_labs_by_meta(merged_deck_rows, 'labs_tournament_decks', CSV_FIELDS)
     if args.matchups:

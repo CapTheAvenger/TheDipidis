@@ -286,15 +286,16 @@ jobs:
         # day_filter); skip-if-already-scraped keeps closed metas frozen
         # so weekly runs only re-fetch current meta + first-time fills.
         #
-        # --matchup-days overall day2 enabled 2026-06: the engine now
-        # uses the Day-2 matrix as the high-quality input when a pair
-        # has ≥5 Day-2 games (Meta Call getBaseMatchup → Day-2
-        # preference path), so we need both filters in the weekly run.
-        # Cost: ~2× matchup HTTP count for the current meta only —
-        # past metas are skipped by the skip-if-already-scraped logic.
-        # To backfill Day-2 for a closed meta, run locally:
+        # --matchup-days overall day1 day2 enabled 2026-06: the engine
+        # blends three labs sources per pair (Day-2 45 % / Day-1 35 % /
+        # Online 20 %) when computing matchup WR. Overall stays
+        # populated as a fallback anchor for pairs where neither Day-1
+        # nor Day-2 has enough samples. Cost: ~3× matchup HTTP count
+        # for the current meta only — past metas are skipped by the
+        # skip-if-already-scraped logic. To backfill Day-1 / Day-2 for
+        # a closed meta, run locally:
         #   python labs_tournament_scraper.py --matchups \
-        #          --matchup-meta SVI-JTG --matchup-days day2
+        #          --matchup-meta SVI-JTG --matchup-days day1 day2
         #
         # Backfill (--id-range) is not exposed: the 0001..0066 backfill
         # is already done and existing rows get re-classified into
@@ -304,7 +305,7 @@ jobs:
         run: |
           set +e
           echo "::group::scrapers/labs_tournament_scraper.py"
-          python scrapers/labs_tournament_scraper.py --matchups --matchup-days overall day2
+          python scrapers/labs_tournament_scraper.py --matchups --matchup-days overall day1 day2
           rc=$?
           if [ "$rc" -ne 0 ]; then
               echo "::warning::labs_tournament_scraper exited with $rc"

@@ -1,223 +1,277 @@
 /**
- * Unit tests for the Major-vs-Online matchup blend in Meta Call's
- * `getBaseMatchup`. Two changes under test:
+ * Unit tests for the 3-source matchup blend in Meta Call's
+ * `getBaseMatchup`. User-flagged 2026-06: matchup predictions
+ * combine three labs/online sources rather than switching between
+ * them. Weights are quality-based (not games-weighted):
  *
- *   1) Blend factor rebalanced to 65 / 35 (Major / Online), down from
- *      75 / 25 (= 3.0 ratio). User-requested 2026-06 after the labs
- *      matchup matrix grew to >3000 games per top archetype — the
- *      trust gain from the Major source has stopped saturating, and
- *      online ladder is still elite-pilot biased, so 65 / 35 is the
- *      "typical-pilot reality" we want the simulator to reflect.
+ *     Day-2     45 %   cut-quality play, smallest noise
+ *     Day-1     35 %   full Swiss field
+ *     Online    20 %   live, broad coverage, elite-pilot biased
  *
- *   2) Day-2 preference: when a pair has ≥MIN_GAMES_DAY2 Day-2 games,
- *      the Day-2 WR REPLACES the Overall WR as the Major-side input
- *      before the 65 / 35 online blend. Day-2 reflects cut-quality
- *      play (better pilots, less off-meta noise) so it's closer to
- *      truth. Falls through to Overall when Day-2 sample is too small.
+ * Partial coverage is handled by renormalisation. Missing sources
+ * have their weight redistributed proportionally across what's
+ * present — no hard cliffs at the sample-size floors, no "switching"
+ * between sources.
+ *
+ * When NEITHER Day-1 nor Day-2 has enough samples for a pair
+ * (early-meta gap, niche archetype), Overall steps in as a single
+ * Major anchor at weight = Day-1 + Day-2 = 0.80. Online stays at
+ * 0.20 so the relative Major-Online split holds across both code
+ * paths.
  *
  * These tests mirror the production constants and formulas in
- * isolation — they don't exercise the full data-loading pipeline,
- * just the blend math. If a maintainer changes the constants in
- * app-meta-call.js, the mirrors here go out of sync and the
- * "constants stay realistic" suite fails loudly.
+ * isolation. If a maintainer changes the constants in app-meta-call.js,
+ * the mirrors here go out of sync and the "constants stay realistic"
+ * suite fails loudly.
  */
 
 const { describe, it } = require('node:test');
 const assert = require('node:assert/strict');
 
-// Production-mirrored constants. Keep these in lockstep with the
-// declarations at the top of js/app-meta-call.js.
-const MAJOR_BLEND_FACTOR  = 0.65;   // Major share of the blend
-const ONLINE_BLEND_FACTOR = 0.35;
-const MIN_GAMES_OVERALL   = 10;
-const MIN_GAMES_DAY2      = 5;
+// Production-mirrored constants — keep in lockstep with
+// js/app-meta-call.js (search "MATCHUP_BLEND_WEIGHT_").
+const W_DAY2    = 0.45;
+const W_DAY1    = 0.35;
+const W_ONLINE  = 0.20;
+const W_OVERALL_FALLBACK = W_DAY1 + W_DAY2;  // 0.80
 
-// Reference blend: returns 0..1 pWin OR null if no Major signal is
-// valid for the pair.
-function blendMatchup({ onlineWin, day2WR, day2Games, overallWR, overallGames }) {
-    let majorWin = null;
+const MIN_GAMES_OVERALL = 10;
+const MIN_GAMES_DAY1    = 5;
+const MIN_GAMES_DAY2    = 5;
+
+// Reference blend. Inputs are nullable per source; output reports
+// the final pWin, whether the blend fired, and the normalised
+// weight + games per active source. Mirrors the production
+// `getBaseMatchup` 3-source pipeline.
+function blendMatchup({
+    onlineWin,
+    day2WR, day2Games,
+    day1WR, day1Games,
+    overallWR, overallGames,
+}) {
+    const sources = [];
     if (day2WR != null && day2Games >= MIN_GAMES_DAY2) {
-        majorWin = day2WR;
-    } else if (overallWR != null && overallGames >= MIN_GAMES_OVERALL) {
-        majorWin = overallWR;
+        sources.push({ kind: 'day2', win: day2WR, weight: W_DAY2, games: day2Games });
     }
-    if (majorWin == null) return { pWin: onlineWin, blended: false, source: 'online' };
-    const pWin = majorWin * MAJOR_BLEND_FACTOR + onlineWin * ONLINE_BLEND_FACTOR;
-    const source = (day2WR != null && day2Games >= MIN_GAMES_DAY2) ? 'day2' : 'overall';
-    return { pWin, blended: true, source };
+    if (day1WR != null && day1Games >= MIN_GAMES_DAY1) {
+        sources.push({ kind: 'day1', win: day1WR, weight: W_DAY1, games: day1Games });
+    }
+    if (sources.length === 0) {
+        if (overallWR != null && overallGames >= MIN_GAMES_OVERALL) {
+            sources.push({ kind: 'overall', win: overallWR, weight: W_OVERALL_FALLBACK, games: overallGames });
+        }
+    }
+    if (sources.length === 0) {
+        return { pWin: onlineWin, blended: false, sources: [{ kind: 'online', weight: 1.0, games: null }] };
+    }
+    sources.push({ kind: 'online', win: onlineWin, weight: W_ONLINE, games: null });
+    const total = sources.reduce((s, x) => s + x.weight, 0);
+    const pWin = sources.reduce((s, x) => s + x.win * (x.weight / total), 0);
+    return {
+        pWin,
+        blended: true,
+        sources: sources.map(s => ({ kind: s.kind, weight: s.weight / total, games: s.games })),
+    };
 }
 
-describe('Major-vs-Online matchup blend — 65 / 35 ratio', () => {
-    it('blends Overall 60 % WR with online 40 % WR to 53 %', () => {
-        // 0.60 × 0.65 + 0.40 × 0.35 = 0.39 + 0.14 = 0.53
-        const r = blendMatchup({
-            onlineWin: 0.40,
-            overallWR: 0.60,
-            overallGames: 100,
-        });
-        assert.ok(Math.abs(r.pWin - 0.53) < 1e-9,
-            `expected 0.53, got ${r.pWin}`);
-        assert.strictEqual(r.source, 'overall');
-    });
+// ── Full coverage: all three sources present ───────────────────
 
-    it('Major 50 % + Online 50 % blends to 50 % (identity case)', () => {
-        // When both sources agree, the blend is a no-op.
+describe('3-source matchup blend — full coverage (Day-2 + Day-1 + Online)', () => {
+    it('All three at 50 % → blend stays at 50 % (identity)', () => {
         const r = blendMatchup({
             onlineWin: 0.50,
-            overallWR: 0.50,
-            overallGames: 50,
+            day2WR: 0.50, day2Games: 8,
+            day1WR: 0.50, day1Games: 24,
         });
         assert.ok(Math.abs(r.pWin - 0.50) < 1e-9);
     });
 
-    it('Major 0 % WR pulls a 50 % online to 17.5 %', () => {
-        // 0 × 0.65 + 0.50 × 0.35 = 0.175. Confirms Major dominates.
+    it('Day-2 70 %, Day-1 60 %, Online 50 % → 0.45×0.70 + 0.35×0.60 + 0.20×0.50 = 0.625', () => {
         const r = blendMatchup({
             onlineWin: 0.50,
-            overallWR: 0.00,
-            overallGames: 30,
+            day2WR: 0.70, day2Games: 8,
+            day1WR: 0.60, day1Games: 24,
         });
-        assert.ok(Math.abs(r.pWin - 0.175) < 1e-9,
-            `expected 0.175, got ${r.pWin}`);
+        const expected = 0.45 * 0.70 + 0.35 * 0.60 + 0.20 * 0.50;
+        assert.ok(Math.abs(r.pWin - expected) < 1e-9,
+            `expected ${expected}, got ${r.pWin}`);
     });
 
-    it('Major 100 % WR pulls a 50 % online to 82.5 %', () => {
-        // 1.0 × 0.65 + 0.50 × 0.35 = 0.825. Symmetric to the 0 % case.
+    it('Day-2 dominates the blend more than Day-1 does', () => {
+        // Move Day-2 WR by 10 pp → effect on the blend should be larger
+        // than moving Day-1 by the same 10 pp.
+        const a = blendMatchup({
+            onlineWin: 0.50,
+            day2WR: 0.60, day2Games: 10,
+            day1WR: 0.50, day1Games: 30,
+        }).pWin;
+        const b = blendMatchup({
+            onlineWin: 0.50,
+            day2WR: 0.50, day2Games: 10,
+            day1WR: 0.60, day1Games: 30,
+        }).pWin;
+        // a (Day-2 +10pp) should be closer to 0.55 than b (Day-1 +10pp).
+        assert.ok((a - 0.50) > (b - 0.50),
+            `Day-2 should weigh more than Day-1; got Day-2 effect ${a - 0.50} vs Day-1 effect ${b - 0.50}`);
+    });
+
+    it('Sources list carries the correct normalised weights when complete', () => {
         const r = blendMatchup({
             onlineWin: 0.50,
-            overallWR: 1.00,
-            overallGames: 30,
+            day2WR: 0.60, day2Games: 8,
+            day1WR: 0.55, day1Games: 24,
         });
-        assert.ok(Math.abs(r.pWin - 0.825) < 1e-9);
-    });
-
-    it('Below MIN_GAMES_OVERALL Overall is ignored — falls back to online', () => {
-        // 9 games < 10 threshold. Major signal must be rejected and
-        // online win pct passes through unchanged.
-        const r = blendMatchup({
-            onlineWin: 0.45,
-            overallWR: 0.80,
-            overallGames: 9,
-        });
-        assert.strictEqual(r.blended, false);
-        assert.strictEqual(r.pWin, 0.45);
-        assert.strictEqual(r.source, 'online');
-    });
-
-    it('Old 75 / 25 ratio would produce a different number — guard against regression', () => {
-        // Same inputs as test 1 but using the OLD ratio:
-        //   0.60 × 0.75 + 0.40 × 0.25 = 0.45 + 0.10 = 0.55
-        // New result is 0.53 — distinguishable, so a silent revert of
-        // MAJOR_MATCHUP_BLEND_FACTOR to 0.75 would surface here.
-        const r = blendMatchup({
-            onlineWin: 0.40,
-            overallWR: 0.60,
-            overallGames: 100,
-        });
-        const old75_25 = 0.60 * 0.75 + 0.40 * 0.25;
-        assert.notStrictEqual(r.pWin, old75_25);
-        assert.ok(r.pWin < old75_25,
-            'New 65/35 blend should weight online more than old 75/25');
+        const byKind = Object.fromEntries(r.sources.map(s => [s.kind, s.weight]));
+        // Total weights = 0.45 + 0.35 + 0.20 = 1.0 → renorm is identity.
+        assert.ok(Math.abs(byKind.day2   - 0.45) < 1e-9);
+        assert.ok(Math.abs(byKind.day1   - 0.35) < 1e-9);
+        assert.ok(Math.abs(byKind.online - 0.20) < 1e-9);
     });
 });
 
-describe('Major matchup blend — Day-2 preference', () => {
-    it('Day-2 WR replaces Overall when sample ≥ MIN_GAMES_DAY2', () => {
-        // Overall says 55 % WR, Day-2 says 70 % WR (8 games — above 5).
-        // Day-2 wins the source-selection; blend uses 70 % × 0.65 + 50 % × 0.35.
+// ── Partial coverage: renormalisation kicks in ─────────────────
+
+describe('3-source matchup blend — partial coverage / renormalisation', () => {
+    it('Day-2 only (no Day-1): weights renormalise to 0.692 Day-2 / 0.308 Online', () => {
         const r = blendMatchup({
-            onlineWin: 0.50,
-            overallWR: 0.55,
-            overallGames: 50,
-            day2WR: 0.70,
-            day2Games: 8,
+            onlineWin: 0.40,
+            day2WR: 0.70, day2Games: 7,
         });
-        const expected = 0.70 * 0.65 + 0.50 * 0.35; // = 0.63
+        // 0.45 + 0.20 = 0.65 total; renorm Day-2 = 0.45/0.65 = 0.6923
+        const expected = 0.70 * (0.45 / 0.65) + 0.40 * (0.20 / 0.65);
         assert.ok(Math.abs(r.pWin - expected) < 1e-9,
             `expected ${expected}, got ${r.pWin}`);
-        assert.strictEqual(r.source, 'day2');
+        const byKind = Object.fromEntries(r.sources.map(s => [s.kind, s.weight]));
+        assert.ok(Math.abs(byKind.day2   - (0.45 / 0.65)) < 1e-9);
+        assert.ok(Math.abs(byKind.online - (0.20 / 0.65)) < 1e-9);
     });
 
-    it('Day-2 below MIN_GAMES_DAY2 falls back to Overall', () => {
-        // 4 games < 5 floor — Day-2 ignored. Should land at the
-        // Overall × 0.65 + Online × 0.35 figure.
+    it('Day-1 only (no Day-2): weights renormalise to 0.636 Day-1 / 0.364 Online', () => {
+        const r = blendMatchup({
+            onlineWin: 0.40,
+            day1WR: 0.60, day1Games: 30,
+        });
+        // 0.35 + 0.20 = 0.55 total
+        const expected = 0.60 * (0.35 / 0.55) + 0.40 * (0.20 / 0.55);
+        assert.ok(Math.abs(r.pWin - expected) < 1e-9);
+    });
+
+    it('Below MIN_GAMES_DAY2 → Day-2 dropped from the blend', () => {
+        // 4 < 5 → Day-2 ignored. Day-1 + Online remain.
+        const r = blendMatchup({
+            onlineWin: 0.40,
+            day2WR: 0.95, day2Games: 4,
+            day1WR: 0.50, day1Games: 30,
+        });
+        const expected = 0.50 * (0.35 / 0.55) + 0.40 * (0.20 / 0.55);
+        assert.ok(Math.abs(r.pWin - expected) < 1e-9,
+            `Day-2 with 4 games must be dropped; expected ${expected}, got ${r.pWin}`);
+    });
+
+    it('Both Day-1 and Day-2 below floor → falls back to Overall as anchor', () => {
         const r = blendMatchup({
             onlineWin: 0.50,
-            overallWR: 0.55,
-            overallGames: 50,
-            day2WR: 0.70,
-            day2Games: 4,
+            day2WR: 0.90, day2Games: 3,   // < 5
+            day1WR: 0.90, day1Games: 4,   // < 5
+            overallWR: 0.60, overallGames: 80,
         });
-        const expected = 0.55 * 0.65 + 0.50 * 0.35; // = 0.5325
-        assert.ok(Math.abs(r.pWin - expected) < 1e-9);
-        assert.strictEqual(r.source, 'overall');
+        // Overall 0.80 + Online 0.20 (no renorm since they already sum to 1)
+        const expected = 0.60 * 0.80 + 0.50 * 0.20;
+        assert.ok(Math.abs(r.pWin - expected) < 1e-9,
+            `Overall fallback expected ${expected}, got ${r.pWin}`);
+        assert.strictEqual(r.sources[0].kind, 'overall');
     });
 
-    it('No Day-2 data, no Overall data → fall through to online', () => {
+    it('Neither day-split NOR Overall qualifies → falls through to online-only', () => {
         const r = blendMatchup({
             onlineWin: 0.42,
+            overallWR: 0.95, overallGames: 9,   // < 10
         });
         assert.strictEqual(r.blended, false);
         assert.strictEqual(r.pWin, 0.42);
-        assert.strictEqual(r.source, 'online');
+        assert.strictEqual(r.sources[0].kind, 'online');
+        assert.strictEqual(r.sources[0].weight, 1.0);
     });
 
-    it('Day-2 alone (no Overall) is sufficient when sample meets floor', () => {
-        // Predictor must NOT require Overall to be present too — a
-        // pair that's only seen in Day-2 (e.g. a niche tech matchup
-        // that only emerged in cut) should still drive the blend.
-        const r = blendMatchup({
-            onlineWin: 0.40,
-            day2WR: 0.65,
-            day2Games: 6,
-        });
-        const expected = 0.65 * 0.65 + 0.40 * 0.35; // = 0.5625
-        assert.ok(Math.abs(r.pWin - expected) < 1e-9);
-        assert.strictEqual(r.source, 'day2');
-    });
-
-    it('Overall on the edge (= MIN_GAMES_OVERALL) is accepted, not rejected', () => {
-        // Exactly 10 games should clear the floor (not strictly greater).
-        const r = blendMatchup({
-            onlineWin: 0.50,
-            overallWR: 0.60,
-            overallGames: MIN_GAMES_OVERALL,
-        });
-        assert.strictEqual(r.blended, true);
-        assert.strictEqual(r.source, 'overall');
-    });
-
-    it('Day-2 on the edge (= MIN_GAMES_DAY2) wins over Overall', () => {
-        // Edge case: Day-2 just qualifies, Overall is also valid.
-        // Day-2 must win — it's the higher-quality signal.
-        const r = blendMatchup({
-            onlineWin: 0.50,
-            overallWR: 0.60,
-            overallGames: 100,
-            day2WR: 0.40,
-            day2Games: MIN_GAMES_DAY2,
-        });
-        assert.strictEqual(r.source, 'day2');
+    it('No labs data at all → online passes through', () => {
+        const r = blendMatchup({ onlineWin: 0.55 });
+        assert.strictEqual(r.blended, false);
+        assert.strictEqual(r.pWin, 0.55);
     });
 });
 
-describe('Major matchup blend — sanity / constants', () => {
-    it('Major + Online factors sum to 1.0', () => {
-        assert.ok(Math.abs((MAJOR_BLEND_FACTOR + ONLINE_BLEND_FACTOR) - 1.0) < 1e-9);
+// ── Edge cases ─────────────────────────────────────────────────
+
+describe('3-source matchup blend — edge cases', () => {
+    it('Sample exactly = MIN_GAMES_DAY2 still qualifies (not strictly greater)', () => {
+        const r = blendMatchup({
+            onlineWin: 0.50,
+            day2WR: 0.70, day2Games: MIN_GAMES_DAY2,
+        });
+        assert.strictEqual(r.blended, true);
+        assert.ok(r.sources.some(s => s.kind === 'day2'));
     });
 
-    it('Major weighs more than Online but not by an extreme margin', () => {
-        // Sanity-bound the constants: Major should lead, but not so
-        // much that Online becomes decorative. The user's 65 / 35
-        // sits in the middle of [0.55, 0.75] — both bounds are
-        // assertions about realistic data-source priors.
-        assert.ok(MAJOR_BLEND_FACTOR > 0.55);
-        assert.ok(MAJOR_BLEND_FACTOR < 0.75);
+    it('Day-2 at 0 % WR + Online at 50 % → blend pulls toward Day-2 by its share', () => {
+        // 0 × 0.692 + 0.50 × 0.308 = 0.154 (when only Day-2 is present)
+        const r = blendMatchup({
+            onlineWin: 0.50,
+            day2WR: 0.0, day2Games: 10,
+        });
+        const expected = 0.0 + 0.50 * (0.20 / 0.65);
+        assert.ok(Math.abs(r.pWin - expected) < 1e-9);
     });
 
-    it('Day-2 game floor is lower than Overall floor (smaller samples are normal)', () => {
-        // Day-2 has fewer rounds → smaller per-pair samples. Floor
-        // must be lower to actually let Day-2 fire on real data.
+    it('Day-2 at 100 % WR + Online at 50 % → blend pulls toward Day-2 (symmetric to 0 %)', () => {
+        const r = blendMatchup({
+            onlineWin: 0.50,
+            day2WR: 1.0, day2Games: 10,
+        });
+        const expected = 1.0 * (0.45 / 0.65) + 0.50 * (0.20 / 0.65);
+        assert.ok(Math.abs(r.pWin - expected) < 1e-9);
+    });
+
+    it('Old 65/35 (two-source) ratio would produce a different number — regression guard', () => {
+        // Same inputs as full-coverage test 2, but using the OLD
+        // 65/35 (Major aggregated D2+D1 weighted, then 65/35 with online):
+        //   old major = (0.45×0.70 + 0.35×0.60) / 0.80 = 0.65625
+        //   old blend = 0.65 × 0.65625 + 0.35 × 0.50 = 0.6015625
+        // New blend (this test):
+        //   0.45×0.70 + 0.35×0.60 + 0.20×0.50 = 0.625
+        // The two are distinguishable → catches a silent revert.
+        const r = blendMatchup({
+            onlineWin: 0.50,
+            day2WR: 0.70, day2Games: 8,
+            day1WR: 0.60, day1Games: 24,
+        });
+        const old = 0.65 * ((0.45 * 0.70 + 0.35 * 0.60) / 0.80) + 0.35 * 0.50;
+        assert.notStrictEqual(Math.round(r.pWin * 1e6) / 1e6, Math.round(old * 1e6) / 1e6);
+    });
+});
+
+// ── Constants sanity ───────────────────────────────────────────
+
+describe('3-source matchup blend — constants stay realistic', () => {
+    it('Weights sum to 1.0', () => {
+        assert.ok(Math.abs((W_DAY2 + W_DAY1 + W_ONLINE) - 1.0) < 1e-9);
+    });
+
+    it('Overall fallback weight equals Day-1 + Day-2', () => {
+        assert.ok(Math.abs(W_OVERALL_FALLBACK - (W_DAY1 + W_DAY2)) < 1e-9);
+    });
+
+    it('Day-2 weighs more than Day-1, Day-1 weighs more than Online', () => {
+        assert.ok(W_DAY2 > W_DAY1, 'Day-2 must weigh more (higher quality signal)');
+        assert.ok(W_DAY1 > W_ONLINE, 'Day-1 must weigh more than Online');
+    });
+
+    it('Day-2 + Day-1 (Major) is 80 % of the total — Online is the 20 % minority', () => {
+        assert.ok(Math.abs((W_DAY2 + W_DAY1) - 0.80) < 1e-9);
+        assert.strictEqual(W_ONLINE, 0.20);
+    });
+
+    it('Sample floors: Day-2/Day-1 lower than Overall (smaller per-pair samples are normal)', () => {
         assert.ok(MIN_GAMES_DAY2 < MIN_GAMES_OVERALL);
+        assert.ok(MIN_GAMES_DAY1 < MIN_GAMES_OVERALL);
     });
 });

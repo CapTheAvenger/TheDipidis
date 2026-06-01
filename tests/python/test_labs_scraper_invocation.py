@@ -42,12 +42,16 @@ def test_dashboard_task_10_passes_matchups_with_day2():
     assert "--matchups" in args, "Task 10 must pass --matchups"
     assert "--matchup-days" in args, "Task 10 must pass --matchup-days"
     # Argparse's nargs='+' accepts values as separate tokens following
-    # the flag. Both 'overall' and 'day2' must appear in the trailing
-    # value list to drive the Day-2 preference path in Meta Call.
+    # the flag. All three filters must appear so the Meta Call 3-source
+    # blend (Day-2 45 % / Day-1 35 % / Online 20 %) has populated
+    # inputs; 'overall' stays in the list as the fallback anchor for
+    # pairs where neither Day-1 nor Day-2 has enough samples.
     days_idx = args.index("--matchup-days")
     day_values = args[days_idx + 1:]
-    assert "overall" in day_values, "Task 10 must include 'overall' in --matchup-days"
-    assert "day2" in day_values, "Task 10 must include 'day2' in --matchup-days"
+    for required in ("overall", "day1", "day2"):
+        assert required in day_values, (
+            f"Task 10 must include {required!r} in --matchup-days (3-source blend)"
+        )
 
 
 def test_weekly_workflow_invokes_scraper_with_day2():
@@ -70,16 +74,19 @@ def test_weekly_workflow_invokes_scraper_with_day2():
         "If you reorganised the workflow, update this test."
     )
 
-    # At least one invocation must carry both flags. The workflow may
-    # eventually grow multiple lines (e.g. a separate backfill step) —
-    # we want the primary run to be the one with Day-2 enabled.
+    # At least one invocation must carry all three day-filters. The
+    # workflow may eventually grow multiple lines (e.g. a separate
+    # backfill step) — we want the primary run to populate all three
+    # sources of the Meta Call 3-source blend.
     has_full_invocation = any(
-        "--matchups" in line and re.search(r"--matchup-days\b.*\bday2\b", line)
+        "--matchups" in line
+        and re.search(r"--matchup-days\b.*\bday1\b", line)
+        and re.search(r"--matchup-days\b.*\bday2\b", line)
         for line in scraper_lines
     )
     assert has_full_invocation, (
         "weekly-full-update.yml must invoke labs_tournament_scraper.py with "
-        "`--matchups --matchup-days overall day2`. Found these lines:\n  " +
+        "`--matchups --matchup-days overall day1 day2`. Found these lines:\n  " +
         "\n  ".join(scraper_lines)
     )
 

@@ -83,12 +83,13 @@ TASK_CLI_ARGS = {
     # [10] Labs Major Tournament Scraper — match the weekly workflow's
     # invocation so local dashboard runs surface the same matchup data
     # the weekly job produces. --matchups pulls the per-archetype
-    # matrix; --matchup-days overall day2 feeds Meta Call's Day-2
-    # preference path (getBaseMatchup picks Day-2 over Overall when a
-    # pair has ≥5 Day-2 games). Skip-if-already-scraped logic in the
-    # scraper keeps closed metas frozen, so only the current meta gets
-    # both filters re-fetched on every run.
-    "10": ["--matchups", "--matchup-days", "overall", "day2"],
+    # matrix; --matchup-days overall day1 day2 populates all three
+    # sources the Meta Call 3-source blend reads (Day-2 45 %, Day-1
+    # 35 %, Online 20 %; Overall is the fallback anchor when neither
+    # Day-1 nor Day-2 has enough samples for a pair). Skip-if-already-
+    # scraped logic in the scraper keeps closed metas frozen, so only
+    # the current meta gets all three filters re-fetched on every run.
+    "10": ["--matchups", "--matchup-days", "overall", "day1", "day2"],
 }
 
 TASK_NAMES = {

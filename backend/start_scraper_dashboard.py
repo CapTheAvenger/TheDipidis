@@ -76,6 +76,21 @@ SCRIPTS = {
     # scripts crawled the exact same per-archetype /decks/<slug> URLs.
 }
 
+# CLI args appended per task. Keys map to the same task IDs as SCRIPTS;
+# missing keys mean "run with no args". Kept narrow on purpose — every
+# entry here is a deliberate departure from the script's own default.
+TASK_CLI_ARGS = {
+    # [10] Labs Major Tournament Scraper — match the weekly workflow's
+    # invocation so local dashboard runs surface the same matchup data
+    # the weekly job produces. --matchups pulls the per-archetype
+    # matrix; --matchup-days overall day2 feeds Meta Call's Day-2
+    # preference path (getBaseMatchup picks Day-2 over Overall when a
+    # pair has ≥5 Day-2 games). Skip-if-already-scraped logic in the
+    # scraper keeps closed metas frozen, so only the current meta gets
+    # both filters re-fetched on every run.
+    "10": ["--matchups", "--matchup-days", "overall", "day2"],
+}
+
 TASK_NAMES = {
     "1": "Update Sets",
     "2": "All Cards Scraper",
@@ -265,7 +280,8 @@ def download_cardmarket_jsons_if_stale(force: bool = False) -> bool:
     return downloaded_any
 
 
-def run_script(script_filename: str, wait_at_end: bool = True) -> None:
+def run_script(script_filename: str, wait_at_end: bool = True,
+               extra_args: list = None) -> None:
     # Cardmarket-dependent scrapers ([4], [14], [15]) consume the three
     # public-S3 JSONs in data/ but don't download them. Mirror the CI
     # weekly-update curl step here so local runs see the same fresh
@@ -300,8 +316,13 @@ def run_script(script_filename: str, wait_at_end: bool = True) -> None:
     existing = env.get("PYTHONPATH", "")
     env["PYTHONPATH"] = core_dir + (os.pathsep + existing if existing else "")
 
-    print(f"\n  Launching {script_filename} ...\n")
-    subprocess.run([python_exe, script_path], env=env, check=False)
+    cmd = [python_exe, script_path]
+    if extra_args:
+        cmd.extend(extra_args)
+        print(f"\n  Launching {script_filename} {' '.join(extra_args)} ...\n")
+    else:
+        print(f"\n  Launching {script_filename} ...\n")
+    subprocess.run(cmd, env=env, check=False)
     print(f"\n  {script_filename} finished.")
     if wait_at_end:
         input("\n  Press Enter to return to menu...")
@@ -323,7 +344,7 @@ def run_batch(batch_list: list, batch_name: str) -> None:
     batch_started = time.monotonic()
     for key in batch_list:
         script = SCRIPTS[key]
-        run_script(script, wait_at_end=False)
+        run_script(script, wait_at_end=False, extra_args=TASK_CLI_ARGS.get(key))
         if key != batch_list[-1]:
             print("\n  Warte 3 Sekunden vor dem naechsten Skript ...")
             time.sleep(3)
@@ -347,7 +368,7 @@ def main() -> None:
             print("\n  Goodbye!\n")
             break
         elif choice in SCRIPTS:
-            run_script(SCRIPTS[choice])
+            run_script(SCRIPTS[choice], extra_args=TASK_CLI_ARGS.get(choice))
             git_commit_push(TASK_NAMES.get(choice, f"Task {choice}"))
         elif choice == "b":
             run_batch(BATCH_BASE, "BASE DATA UPDATE")

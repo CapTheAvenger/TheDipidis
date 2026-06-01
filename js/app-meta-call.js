@@ -200,15 +200,21 @@ window.MetaCall = (function () {
   const PHASE_B_MIN_TOURNAMENTS = 2;        // require ≥2 majors to count as "established"
   const PHASE_B_MIN_SHARE_PCT   = 2.0;      // each at ≥2 % share
   // Tuned 2026-06 against Indy actuals via tools/calibrate_sweep_indy.py.
-  // Earlier values (0.50/0.30/0.20 + 0.70 blend) over-predicted decks
-  // that PEAKED in last regional then faded (Dragapult Dudunsparce
-  // 8.94 % Campinas → 2.03 % Indy). The new weights are heavily
-  // recency-biased AND the blend is light (30 % major / 70 % online)
-  // so the anchor only nudges the prediction toward fresh-major data
-  // instead of pulling it all the way to the average. Net MAE on the
-  // Indy 19-deck top tier: 1.81 pp vs naive online 1.83 pp.
-  const PHASE_B_MAJOR_WEIGHTS   = [0.70, 0.20, 0.10];
-  const PHASE_B_BLEND_MAJOR     = 0.30;
+  // The anchor uses the MEDIAN of the deck's last 3 majors (robust to
+  // single-tournament peaks like Dragapult Dudunsparce 8.94 % at
+  // Campinas) blended 20 % into the online ladder. Earlier variants
+  // tried weighted averages with recency bias; the median consistently
+  // delivered the lowest MAE on the calibration harness (1.76 pp vs
+  // 1.81 pp recency-weighted vs 1.83 pp naive-online baseline).
+  //
+  // Why blend so light (20 % major / 80 % online)? Majors are infrequent
+  // (5-6 per format), and meta shifts happen between events. An anchor
+  // dragging more than ~20 % toward the major average over-predicts
+  // decks that faded between regionals. 20 % is enough to lift
+  // genuinely under-online-priced decks (Raging Bolt 3.64 → ~4.2)
+  // without inflating fading ones.
+  const PHASE_B_LOOKBACK_MAJORS = 3;        // how many recent majors enter the median
+  const PHASE_B_BLEND_MAJOR     = 0.20;     // 20 % major-nudge / 80 % online
   const PHASE_A_C_DAMP_FACTOR   = 0.40;     // multiply online_share by this when the deck never broke top-15
   const PHASE_A_C_TOP_N         = 15;       // "top-15" threshold for the damper gate
 
@@ -2422,31 +2428,39 @@ window.MetaCall = (function () {
       ? _day2ConvSamples.reduce((s, q) => s + _rankWeightedConv(q), 0) / _day2ConvSamples.length
       : 0;
 
-    // Phase β — Major-First-Anchor helper. Returns the recency-weighted
-    // major-share average for a deck IF the deck qualifies as
-    // "in-person established" (≥ PHASE_B_MIN_TOURNAMENTS labs majors at
-    // ≥ PHASE_B_MIN_SHARE_PCT share each). Otherwise returns null and
-    // the caller falls back to the unmodified online_share anchor.
+    // Phase β — Major-First-Anchor helper. Returns the MEDIAN share
+    // across the deck's PHASE_B_LOOKBACK_MAJORS most-recent labs majors
+    // IF the deck qualifies as "in-person established" (≥
+    // PHASE_B_MIN_TOURNAMENTS majors at ≥ PHASE_B_MIN_SHARE_PCT each).
+    // Otherwise returns null and the caller falls back to the unmodified
+    // online_share anchor.
     //
-    // The weight vector (0.50 / 0.30 / 0.20 by default) is biased
-    // towards the most-recent regional — the Campinas-2026 case
-    // showed that a single fresh major win moves the next event's
-    // share more than four older mid-rank finishes.
-    function _recencyWeightedMajorShare(k) {
+    // Why median, not weighted average: an earlier iteration weighted
+    // [0.70 / 0.20 / 0.10] toward the most recent regional. That gave
+    // some good calls (Raging Bolt) but consistently over-predicted
+    // decks that PEAKED in one regional then faded (Dragapult
+    // Dudunsparce 8.94 % Campinas → 2.03 % Indy). The median ignores
+    // single-tournament peaks AND single-tournament dips, producing a
+    // more stable "where this deck typically lands" signal. The
+    // calibration sweep (tools/calibrate_sweep_indy.py) lowered MAE
+    // from 1.81 pp (recency-weighted) to 1.76 pp (median) against the
+    // Indy ground truth.
+    function _medianMajorShare(k) {
       const list = _majorSharesByDeck[k];
       if (!Array.isArray(list) || list.length === 0) return null;
       const eligible = list.filter(x => x.share >= PHASE_B_MIN_SHARE_PCT);
       if (eligible.length < PHASE_B_MIN_TOURNAMENTS) return null;
-      const top = list.slice(0, PHASE_B_MAJOR_WEIGHTS.length);
-      let sum = 0;
-      let wTotal = 0;
-      for (let i = 0; i < top.length; i++) {
-        const wt = PHASE_B_MAJOR_WEIGHTS[i] || 0;
-        sum += top[i].share * wt;
-        wTotal += wt;
-      }
-      return wTotal > 0 ? sum / wTotal : null;
+      const shares = list.slice(0, PHASE_B_LOOKBACK_MAJORS)
+                         .map(x => x.share)
+                         .sort((a, b) => a - b);
+      if (shares.length === 0) return null;
+      const n = shares.length;
+      return n % 2
+        ? shares[Math.floor(n / 2)]
+        : (shares[n / 2 - 1] + shares[n / 2]) / 2;
     }
+    // Back-compat alias used by older diagnostics + tests.
+    const _recencyWeightedMajorShare = _medianMajorShare;
 
     _shareList.forEach(d => {
       const k = normalize(d.name);
@@ -2459,13 +2473,14 @@ window.MetaCall = (function () {
       // shape Tier-1/2 share at the next event far better than the
       // online ladder does (Raging Bolt Ogerpon: ladder 3.64 %,
       // last-3-major-avg 6.48 %, Indy actual 7.36 %).
-      const majorAvg = _recencyWeightedMajorShare(k);
-      const ladderPct = (majorAvg != null && majorAvg > 0)
-        ? (majorAvg * PHASE_B_BLEND_MAJOR + rawLadderPct * (1 - PHASE_B_BLEND_MAJOR))
+      const majorMedian = _medianMajorShare(k);
+      const ladderPct = (majorMedian != null && majorMedian > 0)
+        ? (majorMedian * PHASE_B_BLEND_MAJOR + rawLadderPct * (1 - PHASE_B_BLEND_MAJOR))
         : rawLadderPct;
       // Diagnostic for the per-deck tooltip / debug overlay.
-      d._phaseBMajorAvg = (majorAvg != null && majorAvg > 0) ? majorAvg : null;
-      d._phaseBLadderRaw = rawLadderPct;
+      d._phaseBMajorMedian = (majorMedian != null && majorMedian > 0) ? majorMedian : null;
+      d._phaseBMajorAvg    = d._phaseBMajorMedian;   // back-compat alias
+      d._phaseBLadderRaw   = rawLadderPct;
       const stats      = _tournamentStats ? _tournamentStats[k] : null;
       const broughtPct = stats ? stats.broughtShare : 0;
       const top8Conv   = stats ? stats.top8Conv : 0;

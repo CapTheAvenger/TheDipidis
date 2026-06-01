@@ -43,8 +43,8 @@ const PHASE_A_C_DAMP_FACTOR    = 0.40;
 const PHASE_A_C_TOP_N          = 15;
 const PHASE_B_MIN_TOURNAMENTS  = 2;
 const PHASE_B_MIN_SHARE_PCT    = 2.0;
-const PHASE_B_MAJOR_WEIGHTS    = [0.70, 0.20, 0.10];
-const PHASE_B_BLEND_MAJOR      = 0.30;
+const PHASE_B_LOOKBACK_MAJORS  = 3;     // 2026-06: switched from weighted to MEDIAN
+const PHASE_B_BLEND_MAJOR      = 0.20;  // 2026-06: lowered from 0.30
 const PREDICTOR_5_4_BOOST_PER_PP = 0.4;
 const PREDICTOR_5_4_BOOST_PP_MAX = 1.0;
 
@@ -60,25 +60,29 @@ function phaseACDamper(deck, top15Set) {
     return deck.onlineShare * PHASE_A_C_DAMP_FACTOR;
 }
 
-function recencyWeightedMajor(majorHistory) {
+function medianMajor(majorHistory) {
+    // Median over the deck's PHASE_B_LOOKBACK_MAJORS most-recent labs
+    // majors, after the eligibility gate (≥ 2 majors at ≥ 2 % share).
+    // Robust to single-tournament peaks that the earlier recency-
+    // weighted variant over-anchored on (Dragapult Dudunsparce 8.94 %
+    // at Campinas dragged the weighted avg to 4.30 %, the median ignores
+    // that peak and lands on 6.07 %).
     if (!majorHistory || majorHistory.length === 0) return null;
     const eligible = majorHistory.filter(m => m.share >= PHASE_B_MIN_SHARE_PCT);
     if (eligible.length < PHASE_B_MIN_TOURNAMENTS) return null;
     const sorted = [...majorHistory].sort((a, b) => (b.date || '').localeCompare(a.date || ''));
-    const top = sorted.slice(0, PHASE_B_MAJOR_WEIGHTS.length);
-    let sum = 0, wTotal = 0;
-    for (let i = 0; i < top.length; i++) {
-        const wt = PHASE_B_MAJOR_WEIGHTS[i];
-        sum += top[i].share * wt;
-        wTotal += wt;
-    }
-    return wTotal > 0 ? sum / wTotal : null;
+    const shares = sorted.slice(0, PHASE_B_LOOKBACK_MAJORS)
+                         .map(h => h.share)
+                         .sort((a, b) => a - b);
+    if (shares.length === 0) return null;
+    const n = shares.length;
+    return n % 2 ? shares[Math.floor(n / 2)] : (shares[n / 2 - 1] + shares[n / 2]) / 2;
 }
 
 function phaseBBase(deck, majorHistory) {
-    const avg = recencyWeightedMajor(majorHistory);
-    if (avg == null || avg <= 0) return deck.onlineShare;
-    return avg * PHASE_B_BLEND_MAJOR + deck.onlineShare * (1 - PHASE_B_BLEND_MAJOR);
+    const med = medianMajor(majorHistory);
+    if (med == null || med <= 0) return deck.onlineShare;
+    return med * PHASE_B_BLEND_MAJOR + deck.onlineShare * (1 - PHASE_B_BLEND_MAJOR);
 }
 
 function predictor5_4_boost(avgGrowthPP) {
@@ -139,9 +143,9 @@ describe('Phase α C — In-Person-Absent-Damper', () => {
 // ── Phase β — Major-First-Anchor ───────────────────────────────
 
 describe('Phase β — Major-First-Anchor', () => {
-    it('established deck: 30 % major + 70 % online blend', () => {
-        // Raging Bolt Ogerpon shape — online 3.64 %, recency-weighted
-        // major avg ~5.84 %.
+    it('established deck: 20 % major-median + 80 % online blend', () => {
+        // Raging Bolt Ogerpon shape — online 3.64 %, majors at
+        // 5.43 / 6.35 / 7.67. Median = 6.35.
         const deck = { name: 'Raging Bolt Ogerpon', onlineShare: 3.64 };
         const history = [
             { date: '2026-05-23', share: 5.43 },
@@ -149,12 +153,10 @@ describe('Phase β — Major-First-Anchor', () => {
             { date: '2026-05-16', share: 7.67 },
         ];
         const base = phaseBBase(deck, history);
-        // 0.70×5.43 + 0.20×6.35 + 0.10×7.67 = 5.838
-        // 0.30×5.838 + 0.70×3.64 = 4.299
-        assert.ok(Math.abs(base - 4.299) < 0.01, `expected 4.299, got ${base}`);
-        // Should be HIGHER than naive online but lower than full major avg
+        // 0.20 × 6.35 + 0.80 × 3.64 = 1.27 + 2.912 = 4.182
+        assert.ok(Math.abs(base - 4.182) < 0.01, `expected 4.182, got ${base}`);
         assert.ok(base > deck.onlineShare, 'anchor must lift the base above online');
-        assert.ok(base < 5.838, 'anchor must NOT pull all the way to major avg');
+        assert.ok(base < 6.35, 'anchor must NOT pull all the way to the median');
     });
 
     it('Decks with < 2 majors at ≥ 2 % share fall back to online (no anchor)', () => {
@@ -173,44 +175,56 @@ describe('Phase β — Major-First-Anchor', () => {
         assert.strictEqual(phaseBBase(deck, null), 0.5);
     });
 
-    it('Weights sum to 1 and are recency-biased', () => {
-        const sum = PHASE_B_MAJOR_WEIGHTS.reduce((s, w) => s + w, 0);
-        assert.ok(Math.abs(sum - 1.0) < 1e-9);
-        // Recency-bias invariant: each weight ≥ the next.
-        for (let i = 1; i < PHASE_B_MAJOR_WEIGHTS.length; i++) {
-            assert.ok(PHASE_B_MAJOR_WEIGHTS[i] <= PHASE_B_MAJOR_WEIGHTS[i - 1],
-                'weights must be monotonically non-increasing');
-        }
-    });
-
-    it('Recency-weighted avg uses the NEWEST major as the heaviest input', () => {
+    it('Median is invariant to outliers (test the robustness property)', () => {
+        // Three majors with one extreme peak — median should ignore it.
         const history = [
-            { date: '2026-05-23', share: 10.0 }, // newest
-            { date: '2026-05-09', share: 2.0  },
-            { date: '2026-04-25', share: 2.0  },
+            { date: '2026-05-23', share: 5.0 },
+            { date: '2026-05-09', share: 4.5 },
+            { date: '2026-04-25', share: 15.0 },  // peak outlier
         ];
-        const avg = recencyWeightedMajor(history);
-        // 0.70×10 + 0.20×2 + 0.10×2 = 7.0 + 0.4 + 0.2 = 7.6
-        assert.ok(Math.abs(avg - 7.6) < 1e-9);
+        assert.strictEqual(medianMajor(history), 5.0);
+        // A weighted average would have been pulled up by the peak —
+        // median doesn't. That's the entire point of the 2026-06 switch.
     });
 
-    it('When fewer than 3 majors exist, weights renormalise to the available ones', () => {
-        // Two majors at ≥2 % share — second-last weight (0.20) won't be used.
+    it('Median of 3 majors picks the middle value', () => {
+        const history = [
+            { date: '2026-05-23', share: 10.0 },
+            { date: '2026-05-09', share: 2.0  },
+            { date: '2026-04-25', share: 5.0  },
+        ];
+        assert.strictEqual(medianMajor(history), 5.0);
+    });
+
+    it('Median of 2 majors averages them', () => {
         const history = [
             { date: '2026-05-23', share: 6.0 },
             { date: '2026-05-09', share: 4.0 },
         ];
-        const avg = recencyWeightedMajor(history);
-        // (0.70×6 + 0.20×4) / (0.70 + 0.20) = (4.2 + 0.8) / 0.9 = 5.555
-        assert.ok(Math.abs(avg - 5.555) < 0.01, `expected ~5.555, got ${avg}`);
+        assert.strictEqual(medianMajor(history), 5.0);
     });
 
-    it('Declining deck: anchor still nudges UP (this is the trade-off)', () => {
-        // Dragapult Dudunsparce shape: peaked at Campinas, declining.
-        // The current Phase β doesn't trend-detect — it just averages.
-        // We accept this trade-off for now (calibration sweep showed
-        // 0.30 blend keeps MAE marginally below naive baseline overall).
-        // This test documents the known limitation.
+    it('Lookback caps at PHASE_B_LOOKBACK_MAJORS — older majors ignored', () => {
+        // 5 majors, lookback is 3 → only the newest 3 enter the median.
+        const history = [
+            { date: '2026-05-23', share: 3.0 },   // newest
+            { date: '2026-05-09', share: 4.0 },
+            { date: '2026-04-25', share: 5.0 },   // would-be-median if all 5 used
+            { date: '2026-04-10', share: 9.0 },
+            { date: '2026-03-25', share: 9.0 },
+        ];
+        // Newest 3: [3.0, 4.0, 5.0] → median 4.0
+        assert.strictEqual(medianMajor(history), 4.0);
+    });
+
+    it('Declining deck: median resists the peak-driven over-prediction', () => {
+        // Dragapult Dudunsparce shape: 3.13 / 6.07 / 8.94 (newest first).
+        // The recency-weighted variant predicted 4.30 → anchor pushed
+        // prediction above 4 → wrong (actual 2.03). The median = 6.07
+        // ALSO over-predicts, but the lower 0.20 blend dampens the
+        // damage: 0.20×6.07 + 0.80×2.03 = 1.21 + 1.62 = 2.84 (was 2.71
+        // under the prior 0.30×weighted-avg = 2.71). Very close to
+        // online, slight nudge up.
         const deck = { name: 'Dragapult Dudunsparce', onlineShare: 2.03 };
         const history = [
             { date: '2026-05-23', share: 3.13 },
@@ -218,14 +232,11 @@ describe('Phase β — Major-First-Anchor', () => {
             { date: '2026-05-16', share: 8.94 },
         ];
         const base = phaseBBase(deck, history);
-        // 0.70×3.13 + 0.20×6.07 + 0.10×8.94 = 2.19 + 1.21 + 0.89 = 4.30
-        // 0.30×4.30 + 0.70×2.03 = 2.71
-        // Anchor adds +0.68 pp above online (2.03 → 2.71) — small enough
-        // that the decline doesn't get over-extrapolated.
-        assert.ok(base > deck.onlineShare,
-            'anchor still moves up even when declining (known limitation)');
-        assert.ok(base < 4.30,
-            'but the 30 % blend keeps the nudge small relative to the average');
+        assert.ok(Math.abs(base - 2.838) < 0.02, `expected ~2.838, got ${base}`);
+        // Should be within 1 pp of online — the dampened anchor barely
+        // moves the prediction for fading decks.
+        assert.ok(base - deck.onlineShare < 1.0,
+            'declining deck must not be pushed > 1 pp above online');
     });
 });
 

@@ -68,8 +68,9 @@ PA_C_DAMP_FACTOR       = 0.40    # online_share × this for in-person-absent dec
 PA_C_TOP_N             = 15
 PB_MIN_TOURNAMENTS     = 2
 PB_MIN_SHARE_PCT       = 2.0
-PB_MAJOR_WEIGHTS       = [0.70, 0.20, 0.10]   # tuned by tools/calibrate_sweep_indy.py
-PB_BLEND_MAJOR         = 0.30    # 30 % major-nudge / 70 % online for established decks
+PB_LOOKBACK_MAJORS     = 3        # 2026-06: switched from weighted to MEDIAN
+PB_MAJOR_WEIGHTS       = [0.70, 0.20, 0.10]   # legacy — kept for sweep variants
+PB_BLEND_MAJOR         = 0.20    # 20 % major-nudge / 80 % online for established decks
 
 # Concentration exponent (Stage 5.2): softens to 1.10 at >=10% share,
 # stays at 1.50 below 5%.
@@ -214,18 +215,22 @@ def concentration_exp(share: float) -> float:
 
 
 def recency_weighted_major(name: str, major_history: Dict[str, List[Dict]]):
-    """Phase β anchor — returns the weighted average over the last
-    3 majors when the deck qualifies, else None."""
+    """Phase β anchor — MEDIAN over the last PB_LOOKBACK_MAJORS majors
+    when the deck qualifies, else None. Robust to single-tournament
+    peaks (Dragapult Dudunsparce 8.94 % at Campinas) skewing the
+    average — the calibration sweep showed median consistently
+    outperformed weighted averages on Indy actuals."""
     hist = major_history.get(name) or []
     if not hist:
         return None
     eligible = [h for h in hist if h["share"] >= PB_MIN_SHARE_PCT]
     if len(eligible) < PB_MIN_TOURNAMENTS:
         return None
-    top = hist[: len(PB_MAJOR_WEIGHTS)]
-    s = sum(h["share"] * w for h, w in zip(top, PB_MAJOR_WEIGHTS))
-    w = sum(PB_MAJOR_WEIGHTS[: len(top)])
-    return s / w if w > 0 else None
+    shares = sorted(h["share"] for h in hist[:PB_LOOKBACK_MAJORS])
+    if not shares:
+        return None
+    n = len(shares)
+    return shares[n // 2] if n % 2 else (shares[n // 2 - 1] + shares[n // 2]) / 2
 
 
 def predict(online: Dict[str, float], labs: Dict[str, Dict]) -> Dict[str, Dict]:

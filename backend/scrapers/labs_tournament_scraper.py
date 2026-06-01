@@ -526,6 +526,39 @@ def _current_meta_key() -> str:
         return ''
 
 
+def _active_in_person_meta_key() -> str:
+    """The meta key that is actively producing in-person tournament data
+    right now. Differs from `_current_meta_key()` only during the
+    in-person lag window — between the day a new set becomes online-
+    legal and the day it becomes in-person-legal. In that window:
+
+      • `current_meta` = the just-released set (e.g. 'TEF-CRI')
+      • `active_in_person_meta` = the PREVIOUS rotation (e.g. 'TEF-POR'),
+        because that's still what every Regional / Special Event is
+        playing.
+
+    Once `in_person_legal_date` arrives, the two values converge.
+
+    Why this matters: the skip-if-already-scraped logic uses
+    `current_meta` to decide which already-on-disk tournaments to
+    re-fetch each weekly run. Without this helper, the 14-day lag
+    window FREEZES every previous-rotation tournament (no top-cut
+    backfill, no Day-1 / Day-2 matchup matrix update) while ALSO
+    finding no new tournaments under the new rotation key (no tids
+    exist yet). The labs CSV stops growing for 2 weeks. This helper
+    fixes that gap by treating the previous rotation as "current"
+    until the in-person date flips."""
+    current = _current_meta_key()
+    legal = _load_in_person_legal_date()
+    if legal:
+        today = datetime.utcnow().strftime('%Y-%m-%d')
+        if today < legal:
+            prev = _previous_meta_for_date(today)
+            if prev:
+                return prev
+    return current
+
+
 def _list_labs_chunk_paths(prefix: str) -> List[str]:
     """Return all data/<prefix>_<META>.csv paths (project-root data/ dir)."""
     data_dir = _get_data_dir()
@@ -1946,6 +1979,20 @@ def main() -> None:
     # cached date avoids losing it on every run). Loaded once and shared
     # between the ID-walk pre-fill and the SKIP-frozen branch below.
     current_meta = _current_meta_key()
+    # Active in-person meta: same as current_meta outside the lag window;
+    # during the lag window (CRI online-legal but not yet in-person-legal)
+    # this is the previous rotation (TEF-POR) — the meta that's still
+    # producing real tournament data. Used by the re-fetch + matchup
+    # skip gates below so previous-rotation rows don't freeze for the
+    # entire lag period.
+    active_meta = _active_in_person_meta_key()
+    if active_meta != current_meta:
+        logger.info(
+            "Lag-window detected: current_meta=%s but active in-person meta=%s "
+            "(today < in_person_legal_date). Treating %s as the rescrape "
+            "target for skip gates.",
+            current_meta, active_meta, active_meta,
+        )
     existing_deck_rows = _reassemble_labs_monolith('labs_tournament_decks', CSV_FIELDS)
     existing_matchup_rows = _reassemble_labs_monolith('labs_tournament_matchups', MATCHUP_CSV_HEADER)
     seen_tids = {str(r.get('tournament_id') or '').strip() for r in existing_deck_rows}
@@ -2102,9 +2149,11 @@ def main() -> None:
         if effective_date and not t.get('tournament_date'):
             t['tournament_date'] = effective_date
         if not args.ignore_cache and tid in seen_tids:
-            # current_meta check: a current-meta tournament always re-scrapes
+            # active_meta check: an active-meta tournament always re-scrapes
             # (data still updates as more rounds finish). Closed metas freeze.
-            is_current = bool(current_meta) and bool(t_meta) and t_meta.endswith(current_meta)
+            # During the in-person lag window, active_meta = previous rotation
+            # so its tournaments don't freeze prematurely.
+            is_current = bool(active_meta) and bool(t_meta) and t_meta.endswith(active_meta)
             if not is_current:
                 logger.info(
                     "[%d/%d] %s (%s) — SKIP (frozen, meta=%s, date=%s)",
@@ -2352,9 +2401,12 @@ def main() -> None:
         else:
             metas_to_scrape = set()
             for m in meta_to_tids:
-                # current meta — endswith covers BRS-SSP/SVI-PFL style
+                # active meta — endswith covers BRS-SSP/SVI-PFL style
                 # composite meta keys whose tail is the current set code.
-                if current_meta and m.endswith(current_meta):
+                # During the in-person lag window, active_meta = previous
+                # rotation so its matchups keep refreshing instead of
+                # freezing for the 14-day gap.
+                if active_meta and m.endswith(active_meta):
                     metas_to_scrape.add(m)
                 # first-time fill: meta has decks but no matchups yet
                 elif m not in existing_matchup_metas:
@@ -2365,8 +2417,9 @@ def main() -> None:
         skipped_metas = existing_matchup_metas - metas_to_scrape
         if skipped_metas:
             logger.info(
-                "Matchup cache: skipping %d already-scraped metas (%s) — current=%s",
+                "Matchup cache: skipping %d already-scraped metas (%s) — active=%s (current=%s)",
                 len(skipped_metas), ', '.join(sorted(skipped_metas)),
+                active_meta or '(unknown)',
                 current_meta or '(unknown)',
             )
 

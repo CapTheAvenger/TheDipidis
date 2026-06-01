@@ -158,6 +158,28 @@ window.MetaCall = (function () {
   const PREDICTOR_4_6_ZERO_DECAY_DAYS   = 28;     // zero boost past 28 days
   const PREDICTOR_4_6_BOOST_PP_MAX      = 2.5;    // hard cap on extra PP
 
+  // ── Predictor 4.7 — Online-Tournament-Win Signal ────────────────
+  // Companion to Predictor 4.6 (Underdog-Champion-Boost, regional
+  // wins). The Indianapolis post-mortem cited online wins as leading
+  // indicators in their own right: Ogerpon Meganium Hydrapple won
+  // "1st of 341 at Championships of Doom VIII, 1st of 194 at N's
+  // Castle Showdown, 1st of 70 at Oceania Open" — all before its
+  // regional spike at Indianapolis. A fresh place-1 finish in a
+  // ≥150-player online tournament for the SAME archetype is a
+  // weaker but real signal that the deck is in the meta's attention
+  // funnel. We boost smaller than P4.6 (cap 1.0 pp vs 2.5 pp) since
+  // online events are higher-variance + smaller samples per pilot.
+  //
+  // Fires only when the win's format matches the active in-person
+  // rotation — during the lag window CRI online wins do NOT boost
+  // TEF-POR predictions (they're a different format).
+  let _onlineWinsByDeck = {};       // normalize(deck) -> { date, players, format, tournamentId }
+  const PREDICTOR_4_7_MAX_SHARE_PCT     = 5.0;    // "underrated online" cutoff
+  const PREDICTOR_4_7_MIN_PLAYERS       = 150;    // online tournament size floor
+  const PREDICTOR_4_7_FULL_DECAY_DAYS   = 7;      // tighter window — online events are more frequent
+  const PREDICTOR_4_7_ZERO_DECAY_DAYS   = 21;     // signal gone past 3 weeks
+  const PREDICTOR_4_7_BOOST_PP_MAX      = 1.0;    // smaller cap than P4.6
+
   // ── Predictor 5.4 — Day-2 share-growth (Δ-share) ────────────────
   // Conversion ratio (`day1_to_day2_conv`) and aggregate WR already
   // boost decks that overperform their Day-1 base, but neither tracks
@@ -197,6 +219,12 @@ window.MetaCall = (function () {
   let _activeFormatLabsDecks   = new Set(); // norm(name) — appears in active-meta labs CSV
   let _activeFormatTop15Decks  = new Set(); // norm(name) — broke top-15 in any active-meta tournament
   let _majorSharesByDeck       = {};        // norm(name) -> [{ date, tid, share, day1, day2 }, ...] DESC by date
+  let _activeInPersonSetCode   = '';        // e.g. "POR" during the lag window when current_set="CRI" but
+                                            // in-person events still play TEF-POR. Derived once per
+                                            // loadData() from labs_tournament_decks.csv's newest meta column.
+                                            // Used by Predictor 4.7 (Online-Tournament-Win Signal) to filter
+                                            // winners CSV rows to the rotation that's actually producing
+                                            // in-person results.
   const PHASE_B_MIN_TOURNAMENTS = 2;        // require ≥2 majors to count as "established"
   const PHASE_B_MIN_SHARE_PCT   = 2.0;      // each at ≥2 % share
   // Tuned 2026-06 against Indy actuals via tools/calibrate_sweep_indy.py.
@@ -2813,6 +2841,46 @@ window.MetaCall = (function () {
         }
       }
 
+      // Predictor 4.7 — Online-Tournament-Win Signal.
+      // Companion to P4.6 but for online tournament place-1 finishes.
+      // Smaller cap (1.0 pp vs 2.5), tighter freshness window (7/21 vs
+      // 14/28), wider underrated ceiling (5 % vs 4 %) — online events
+      // are more frequent and lower stakes per pilot than regionals.
+      const onlineWin = _onlineWinsByDeck[k];
+      d.onlineWin = null;
+      const currentOnlineShare = d.onlineShare || 0;
+      if (onlineWin && currentOnlineShare < PREDICTOR_4_7_MAX_SHARE_PCT) {
+        const todayISO = _todayISO();
+        const ageDays = Math.max(
+          0,
+          Math.round((new Date(todayISO) - new Date(onlineWin.date)) / 86400000)
+        );
+        let freshness = 0;
+        if (ageDays <= PREDICTOR_4_7_FULL_DECAY_DAYS) {
+          freshness = 1.0;
+        } else if (ageDays < PREDICTOR_4_7_ZERO_DECAY_DAYS) {
+          freshness = 1.0 - (ageDays - PREDICTOR_4_7_FULL_DECAY_DAYS) /
+                      (PREDICTOR_4_7_ZERO_DECAY_DAYS - PREDICTOR_4_7_FULL_DECAY_DAYS);
+        }
+        const underrated = Math.max(
+          0,
+          (PREDICTOR_4_7_MAX_SHARE_PCT - currentOnlineShare) / PREDICTOR_4_7_MAX_SHARE_PCT
+        );
+        // Bigger tournaments produce stronger signal — scale by
+        // sqrt(players/MIN_PLAYERS) capped at 2x. 150-player event
+        // = 1.0×, 600-player event = 2.0× the base strength.
+        const sizeMult = Math.min(2.0, Math.sqrt((onlineWin.players || 0) / PREDICTOR_4_7_MIN_PLAYERS));
+        const bonus = PREDICTOR_4_7_BOOST_PP_MAX * freshness * underrated * sizeMult * 0.5;
+        if (bonus > 0.01) {
+          d.onlineWin = {
+            ageDays,
+            players: onlineWin.players,
+            boostPP: Math.round(bonus * 100) / 100,
+          };
+          predicted += bonus;
+        }
+      }
+
       d.predictedShareRaw = Math.max(0, predicted);
 
       // Predictor 5.0 — surface the per-deck ACE-SPEC split for the
@@ -3296,6 +3364,8 @@ window.MetaCall = (function () {
       _activeFormatLabsDecks  = new Set();
       _activeFormatTop15Decks = new Set();
       _majorSharesByDeck      = {};
+      _activeInPersonSetCode  = '';
+      _onlineWinsByDeck       = {};
       let labsRowsByDeck = {};
       try {
         const labsResp = await fetch('data/labs_tournament_decks.csv?t=' + Date.now());
@@ -3336,18 +3406,70 @@ window.MetaCall = (function () {
           const currentSetCode = (_formatWindow && _formatWindow.current_set)
             ? String(_formatWindow.current_set).trim().toUpperCase()
             : '';
+
+          // ── Lag-window bug fix (2026-06) ─────────────────────────
+          // During the in-person lag window (today < in_person_legal_date),
+          // `current_set` is already the NEXT rotation (e.g. CRI) but
+          // every in-person tournament still uses the PREVIOUS rotation
+          // (TEF-POR). The pre-fix filter required `meta` to end with
+          // current_set AND date >= in_person_legal_date — both
+          // conditions failed for legitimate TEF-POR rows, silently
+          // dropping every labs row and disabling Phase α/β + every
+          // predictor that consumes labs data. The bug shipped 2026-06
+          // when CRI went online-legal but in-person events stayed on
+          // TEF-POR.
+          //
+          // Fix: derive an `activeSetCode` that names the rotation
+          // currently producing in-person tournament data. We pick the
+          // newest tournament_date row in `labsRowsAll` and take its
+          // meta-suffix. This is purely data-driven (no format_window
+          // schema change), and converges to current_set once new
+          // tournaments arrive (CRI events post-2026-06-05).
+          let activeSetCode = currentSetCode;
+          let activeMetaKey = '';
+          let activeNewestDate = '';
+          for (const r of labsRowsAll) {
+            const iso = _rowISO(r);
+            const meta = String(r.meta || '').trim().toUpperCase();
+            if (!iso || !meta || meta === '_UNSORTED') continue;
+            if (iso > activeNewestDate) {
+              activeNewestDate = iso;
+              activeMetaKey = meta;
+            }
+          }
+          if (activeMetaKey) {
+            const m = activeMetaKey.match(/-([A-Z0-9]+)$/);
+            activeSetCode = m ? m[1] : activeMetaKey;
+          }
+          // Expose to outer scope for Predictor 4.7 (Online winners
+          // filter) which needs to know the active in-person rotation.
+          _activeInPersonSetCode = activeSetCode;
+          // Lag-window detected: log it so the operator can confirm
+          // the predictor is using the right rotation.
+          if (activeSetCode !== currentSetCode) {
+            console.info(
+              '[MetaCall] Lag-window detected — current_set=%s but active in-person set=%s ' +
+              '(newest labs row %s, meta=%s). Using %s for the labs filter.',
+              currentSetCode, activeSetCode, activeNewestDate, activeMetaKey, activeSetCode,
+            );
+          }
+          // Date cutoff: during the lag window the new in_person_legal_date
+          // would drop every previous-rotation row, so suppress it.
+          // Otherwise keep the original guard (filters out previous-format
+          // pollution after the rotation flips).
+          const lagWindowActive = activeSetCode !== currentSetCode;
+          const effectiveCutoffISO = lagWindowActive ? '' : cutoffISO;
+
           const _rowMatchesCurrentFormat = (r) => {
-            if (!currentSetCode) return true; // no format_window → no filter
+            if (!activeSetCode) return true; // no format_window → no filter
             const meta = String(r.meta || '').trim().toUpperCase();
             if (!meta) return true;           // unknown meta column → keep
-            // Match if meta ENDS WITH the current set (TEF-CRI matches
-            // current_set=CRI; TEF-POR does not).
-            return meta === currentSetCode || meta.endsWith('-' + currentSetCode);
+            return meta === activeSetCode || meta.endsWith('-' + activeSetCode);
           };
-          const labsRows = (cutoffISO || currentSetCode)
+          const labsRows = (effectiveCutoffISO || activeSetCode)
             ? labsRowsAll.filter(r => {
                 const iso = _rowISO(r);
-                const dateOK = !cutoffISO || !iso || iso >= cutoffISO;
+                const dateOK = !effectiveCutoffISO || !iso || iso >= effectiveCutoffISO;
                 const formatOK = _rowMatchesCurrentFormat(r);
                 return dateOK && formatOK;
               })
@@ -3361,9 +3483,10 @@ window.MetaCall = (function () {
             if (dropped > 0) {
               try {
                 console.log(
-                  `[Predictor 4.1+4.5] Format filter (set=${currentSetCode || 'n/a'}, ` +
-                  `cutoff=${cutoffISO || 'n/a'}): dropped ${dropped} of ${labsRowsAll.length} ` +
-                  `labs rows. Keeping ${labsRows.length} matching the current format.`
+                  `[Predictor 4.1+4.5] Format filter (active-set=${activeSetCode || 'n/a'}, ` +
+                  `cutoff=${effectiveCutoffISO || 'n/a'}${lagWindowActive ? ' [lag-window]' : ''}): ` +
+                  `dropped ${dropped} of ${labsRowsAll.length} labs rows. ` +
+                  `Keeping ${labsRows.length} matching the active in-person format.`
                 );
               } catch (_e) { /* ignore */ }
             }
@@ -3946,6 +4069,55 @@ window.MetaCall = (function () {
         _majorMatchupMap = null;
         _majorMatchupMapDay1 = null;
         _majorMatchupMapDay2 = null;
+      }
+
+      // Predictor 4.7 — Online-Tournament-Win Signal. Optional CSV
+      // produced by the online_tournament_scraper's winners pass.
+      // When absent, the predictor cleanly degrades to "no online-win
+      // boost" — exactly how P4.6 behaves when there are no labs
+      // top-1 finishes yet.
+      _onlineWinsByDeck = {};
+      try {
+        const winsResp = await fetch('data/online_tournament_winners.csv?t=' + Date.now());
+        if (winsResp.ok) {
+          const winsRows = parseCSVQuoted(await winsResp.text(), ',');
+          for (const r of winsRows) {
+            const name = (r.winner_archetype || '').trim();
+            if (!name) continue;
+            const date    = (r.tournament_date || '').trim();
+            if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) continue;
+            const players = parseInt(r.player_count || '0', 10) || 0;
+            const fmt     = (r.format || '').trim().toUpperCase();
+            // Format filter: only wins matching the active in-person
+            // rotation contribute. During the lag window CRI online
+            // wins are NOT signal for a TEF-POR in-person event.
+            if (fmt && _activeInPersonSetCode && fmt !== _activeInPersonSetCode) continue;
+            // Tournament-size floor — small events are too noisy.
+            if (players < PREDICTOR_4_7_MIN_PLAYERS) continue;
+            const k = normalize(name);
+            const prev = _onlineWinsByDeck[k];
+            // Keep most-recent win.
+            if (!prev || date > prev.date) {
+              _onlineWinsByDeck[k] = {
+                date, players, format: fmt,
+                tournamentId: (r.tournament_id || '').trim(),
+              };
+            }
+          }
+          if (Object.keys(_onlineWinsByDeck).length > 0) {
+            console.info(
+              '[MetaCall] Predictor 4.7 — Online-Tournament-Win map: %d decks (format=%s, ≥%d players, freshness %d/%d days, cap +%s pp)',
+              Object.keys(_onlineWinsByDeck).length,
+              _activeInPersonSetCode || '?',
+              PREDICTOR_4_7_MIN_PLAYERS,
+              PREDICTOR_4_7_FULL_DECAY_DAYS, PREDICTOR_4_7_ZERO_DECAY_DAYS,
+              PREDICTOR_4_7_BOOST_PP_MAX,
+            );
+          }
+        }
+      } catch (_e) {
+        // Optional file — keep the engine running.
+        _onlineWinsByDeck = {};
       }
 
       return true;

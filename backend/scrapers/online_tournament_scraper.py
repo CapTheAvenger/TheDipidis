@@ -348,10 +348,20 @@ def _tournament_weight(date: Optional[datetime], settings: Dict[str, Any]) -> fl
 
 
 def aggregate(tournaments: List[Dict[str, Any]],
-              settings: Dict[str, Any]) -> List[Dict[str, Any]]:
-    """Walk the tournament rows, return per-archetype aggregate stats."""
+              settings: Dict[str, Any]
+              ) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
+    """Walk the tournament rows, return (per-archetype aggregate stats,
+    per-tournament winners). The winners list feeds Predictor 4.7 in
+    Meta Call (Online-Tournament-Win Signal): a fresh place-1 finish
+    in a ≥150-player online tournament is a leading indicator of
+    share growth for that archetype at the next in-person event.
+    Indianapolis post-mortem cited this exact signal for Ogerpon
+    Meganium Hydrapple ("1st of 341 at Championships of Doom VIII").
+    """
     delay = float(settings.get("delay_between_requests", 1.5))
+    fmt_label = (settings.get("format_filter") or "").upper().strip()
     stats: Dict[str, Dict[str, Any]] = {}
+    winners: List[Dict[str, Any]] = []
 
     for i, t in enumerate(tournaments, 1):
         weight = _tournament_weight(t.get("date"), settings)
@@ -394,6 +404,19 @@ def aggregate(tournaments: List[Dict[str, Any]],
                 cur = entry["last_seen_date"]
                 if cur is None or tdate > cur:
                     entry["last_seen_date"] = tdate
+            # Predictor 4.7 capture — per-tournament winner row.
+            # One row per (tournament, place=1) — multi-pilot ties at
+            # place 1 (rare but possible) yield multiple rows; the
+            # frontend de-dupes by (date, deck) when reading.
+            if place == 1:
+                winners.append({
+                    "tournament_id":    t["id"],
+                    "tournament_date":  date_iso[:10] if date_iso else "",
+                    "format":           fmt_label,
+                    "player_count":     t.get("players", 0),
+                    "winner_archetype": arch,
+                    "winner_winrate":   r.get("winrate") if isinstance(r.get("winrate"), (int, float)) else "",
+                })
         time.sleep(delay)
 
     # Finalise into list with conv-rates + last-seen string.
@@ -423,7 +446,11 @@ def aggregate(tournaments: List[Dict[str, Any]],
             "source_format": (settings.get("format_filter") or _current_set_code()).upper(),
         })
     out.sort(key=lambda r: r["total_brought_weighted"], reverse=True)
-    return out
+    # Sort winners chronologically descending so the engine consumer can
+    # short-circuit on the freshness cap (last 21 days) without scanning
+    # the full backlog.
+    winners.sort(key=lambda w: (w.get("tournament_date") or ""), reverse=True)
+    return out, winners
 
 
 def write_csv(rows: List[Dict[str, Any]], path: str) -> None:
@@ -486,14 +513,53 @@ def main() -> int:
                         t["players"])
         return 0
 
-    rows = aggregate(tournaments, settings)
+    rows, winners = aggregate(tournaments, settings)
     out_path = os.path.join(_repo_data_dir(), settings.get("output_file", "online_tournament_top8_decks.csv"))
     write_csv(rows, out_path)
+
+    # Predictor 4.7 — write per-tournament winners to a separate CSV
+    # that Meta Call reads at boot. Always overwritten on each run so a
+    # tournament whose result was corrected upstream propagates to the
+    # engine on the next reload. Format-scoped: separate runs per
+    # format produce separate files that the frontend merges.
+    winners_path = os.path.join(
+        _repo_data_dir(),
+        settings.get("winners_output_file", "online_tournament_winners.csv"),
+    )
+    winners_header = [
+        "tournament_id", "tournament_date", "format",
+        "player_count", "winner_archetype", "winner_winrate",
+    ]
+    # Merge-write: keep entries from OTHER formats already on disk so a
+    # single-format run doesn't wipe the multi-format history.
+    existing_winners: List[Dict[str, Any]] = []
+    fmt_label = (settings.get("format_filter") or "").upper().strip()
+    if os.path.exists(winners_path):
+        try:
+            with open(winners_path, "r", newline="", encoding="utf-8") as f:
+                for row in csv.DictReader(f):
+                    if (row.get("format") or "").upper() != fmt_label:
+                        existing_winners.append(row)
+        except (OSError, csv.Error) as exc:
+            logger.warning("Could not read existing winners CSV (%s) — overwriting", exc)
+    merged = existing_winners + winners
+    with open(winners_path, "w", newline="", encoding="utf-8") as f:
+        w = csv.DictWriter(f, fieldnames=winners_header, extrasaction="ignore")
+        w.writeheader()
+        for row in merged:
+            w.writerow(row)
+    logger.info(
+        "Wrote %d winner rows (this run: %d, other formats preserved: %d) → %s",
+        len(merged), len(winners), len(existing_winners), winners_path,
+    )
+
     print(json.dumps({
         "tournaments_scraped": len(tournaments),
         "archetypes_seen": len(rows),
+        "winners_captured": len(winners),
         "top_3": [r["deck_name"] for r in rows[:3]],
         "output": out_path,
+        "winners_output": winners_path,
     }, indent=2))
     return 0
 

@@ -6485,6 +6485,20 @@ window.MetaCall = (function () {
       ? ` <span class="mc-predictor-banner-cl">+ ${clTags.join(' + ')}</span>`
       : '';
 
+    // Diagnostic state chip (2026-06): surfaces the exact mode + data
+    // source the engine is running in so a "this looks wrong" report
+    // can be cross-checked without F12 console access. Shows:
+    //   • Source — current / past
+    //   • Past format key, if past
+    //   • Whether labs state survived into past-meta mode
+    //   • Active-rotation suffix (POR during lag, CRI after)
+    const sourceTag = _metaSource === 'past'
+      ? ` <span class="mc-predictor-banner-source" style="font-weight:600;color:#6b21a8;">Past Meta · ${_pastMetaFormatKey || '?'}</span>`
+      : ` <span class="mc-predictor-banner-source" style="font-weight:600;color:#065f46;">Current Meta</span>`;
+    const activeTag = _activeInPersonSetCode
+      ? ` <span class="mc-predictor-banner-active" style="opacity:0.75;">active rotation: ${_activeInPersonSetCode}</span>`
+      : '';
+
     // Predictor 3.0: when a post-major baseline snapshot is loaded, append
     // "+ Online-Entwicklung seit DD.MM." so the user sees that the trend
     // signal is live. Falls silent when no snapshot exists.
@@ -6503,12 +6517,12 @@ window.MetaCall = (function () {
       const tournNum = _labsMajorRows;
       return `<div class="mc-predictor-banner mc-predictor-banner-b">
         <span class="mc-predictor-banner-icon">📊</span>
-        <span class="mc-predictor-banner-text">${t('mc.bannerModeB').replace('{n}', tournNum)}${trendSuffix}${clSuffix}${accuracySuffix}</span>
+        <span class="mc-predictor-banner-text">${t('mc.bannerModeB').replace('{n}', tournNum)}${sourceTag}${activeTag}${trendSuffix}${clSuffix}${accuracySuffix}</span>
       </div>`;
     }
     return `<div class="mc-predictor-banner mc-predictor-banner-a">
       <span class="mc-predictor-banner-icon">⚡</span>
-      <span class="mc-predictor-banner-text">${t('mc.bannerModeA')}${trendSuffix}${clSuffix}${accuracySuffix}</span>
+      <span class="mc-predictor-banner-text">${t('mc.bannerModeA')}${sourceTag}${activeTag}${trendSuffix}${clSuffix}${accuracySuffix}</span>
     </div>`;
   }
 

@@ -13,6 +13,22 @@
 window.MetaCall = (function () {
   'use strict';
 
+  // Build-version stamp — surfaced at module bootstrap so a stale
+  // PWA cache can be diagnosed by reading this single console line.
+  // Should match the ?v= query param on the index.html script tag
+  // and the CACHE_NAME suffix in service-worker.js. If the user
+  // reports "feature X isn't working", check whether this number is
+  // older than the expected deploy version before debugging further.
+  const _BUILD_VERSION = 'v202606020005';
+  try {
+    console.info(
+      '%c[MetaCall] Engine boot · build %s · ' + new Date().toISOString(),
+      'color: #6b21a8; font-weight: bold',
+      _BUILD_VERSION,
+    );
+  } catch (_e) { /* console may be muted */ }
+
+
   // ── Internal State ─────────────────────────────────────────
   let _matchupMap = null;  // normalize(deck) -> normalize(opp) -> {pWin, pTie, pLoss}
                            // Online-source matchup matrix. Loaded from
@@ -7240,8 +7256,11 @@ window.MetaCall = (function () {
     const ctx = canvas.getContext('2d');
 
     _paintBackground(ctx, W, H);
+    const _srcLabel = _metaSource === 'past'
+      ? ` · Past Meta: ${_pastMetaFormatKey || '?'}`
+      : ` · Current Meta${_activeInPersonSetCode ? ' (' + _activeInPersonSetCode + ')' : ''}`;
     _paintHeader(ctx, W, 'META CALL',
-      `${_settings.totalPlayers.toLocaleString()} ${t('mc.labelPlayers')} · ${_settings.rounds} ${t('mc.roundsAbbr')} · Day 2: ${_settings.day2Points} ${t('mc.ptsAbbr')}`);
+      `${_settings.totalPlayers.toLocaleString()} ${t('mc.labelPlayers')} · ${_settings.rounds} ${t('mc.roundsAbbr')} · Day 2: ${_settings.day2Points} ${t('mc.ptsAbbr')}${_srcLabel}`);
 
     // Section label
     ctx.fillStyle = '#3498db';
@@ -7529,7 +7548,14 @@ window.MetaCall = (function () {
     // combined (family-grouped) at a glance — matters when both PNGs
     // arrive in the same Telegram thread.
     const viewLabel = mode === 'combined' ? ' · Combined' : ' · Per Variant';
-    const titleLine = baseTitleLine + viewLabel;
+    // Engine-state tag in the title bar so a screenshot self-documents
+    // which data source produced these numbers (Indy reco post-mortem:
+    // the user couldn't tell whether a "wrong-looking" share image was
+    // generated in Current Meta vs Past Meta vs a TG snapshot).
+    const sourceLabel = _metaSource === 'past'
+      ? ` · Past Meta: ${_pastMetaFormatKey || '?'}`
+      : ` · Current Meta${_activeInPersonSetCode ? ' (' + _activeInPersonSetCode + ')' : ''}`;
+    const titleLine = baseTitleLine + viewLabel + sourceLabel;
     _paintHeader(ctx, W, 'META CALL', titleLine);
 
     // Section labels — one per column.
@@ -7602,8 +7628,11 @@ window.MetaCall = (function () {
     const ctx = canvas.getContext('2d');
 
     _paintBackground(ctx, W, H);
+    const _srcLabel2 = _metaSource === 'past'
+      ? ` · Past Meta: ${_pastMetaFormatKey || '?'}`
+      : ` · Current Meta${_activeInPersonSetCode ? ' (' + _activeInPersonSetCode + ')' : ''}`;
     _paintHeader(ctx, W, 'META CALL',
-      `${_settings.myDeck} · ${_settings.totalPlayers.toLocaleString()} ${t('mc.labelPlayers')} · ${_settings.rounds} ${t('mc.roundsAbbr')}`);
+      `${_settings.myDeck} · ${_settings.totalPlayers.toLocaleString()} ${t('mc.labelPlayers')} · ${_settings.rounds} ${t('mc.roundsAbbr')}${_srcLabel2}`);
 
     // Day 2 / Day 1 WR twin card
     const cardY = HEADER_H + 10;

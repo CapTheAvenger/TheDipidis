@@ -4198,15 +4198,52 @@ window.MetaCall = (function () {
       }
       _shareList = _pastMetaToShareList(aggregate);
       _trendMap = {};                  // no week-over-week for past metas
-      _tournamentStats = {};           // no top8/conv data for past metas
-      _labsRowsByDeck = {};            // no labs quality multiplier for past
-      _labsConvByDeck = {};
-      _labsQualityByDeck = {};
-      _labsDay2ConvByDeck = {};
-      _labsDay2WrByDeck = {};
-      _labsShareGrowthByDeck = {};
-      _underdogChampionByDeck = {};
-      _predictorMode = 'A';            // online-only mode (no labs signal)
+
+      // Detect whether the Past Meta format the user selected matches
+      // the rotation the labs CSV currently covers (= the active
+      // in-person meta during the lag window, or current_set after
+      // it ends). When they match, the engine KEEPS the labs-derived
+      // predictor state so the user can use Past Meta as a calibration
+      // surface — testing what the engine would have predicted on the
+      // morning of a recent regional. When they DON'T match (e.g.
+      // viewing SVI-JTG past meta while labs holds TEF-POR rows),
+      // wipe labs state so we don't accidentally apply rotation-N data
+      // to a rotation-N-2 prediction. User-flagged 2026-06: the Indy
+      // calibration is only useful if Past Meta = TEF-POR sees the
+      // Phase α/β + Predictor 4.6/4.7 + d2WR machinery fire.
+      const labsRotationSuffix = _activeInPersonSetCode || '';
+      const formatMatchesLabs = labsRotationSuffix &&
+        String(_pastMetaFormatKey || '').toUpperCase().endsWith(labsRotationSuffix);
+
+      _tournamentStats = {};            // no top8/conv data for past metas
+      if (!formatMatchesLabs) {
+        // Cross-rotation past meta — strip labs state to avoid cross-
+        // contamination. Same behaviour as before the 2026-06 fix.
+        _labsRowsByDeck = {};
+        _labsConvByDeck = {};
+        _labsQualityByDeck = {};
+        _labsDay2ConvByDeck = {};
+        _labsDay2WrByDeck = {};
+        _labsShareGrowthByDeck = {};
+        _underdogChampionByDeck = {};
+        _onlineWinsByDeck = {};
+        _predictorMode = 'A';           // online-only mode (no labs signal)
+        console.info(
+          '[MetaCall] Past Meta %s ≠ labs rotation %s — wiping labs state.',
+          _pastMetaFormatKey, labsRotationSuffix || '(unknown)',
+        );
+      } else {
+        // Format match — keep labs state so the Phase α / β anchors,
+        // Predictor 4.6 (Underdog-Champion), 4.7 (Online-Win), 5.4
+        // (Day-2 growth), and the d2WR multiplier all fire against
+        // the appropriate labs majors. Mode stays at whatever the
+        // current_meta load decided (typically 'B' when ≥1 major has
+        // landed for the rotation).
+        console.info(
+          '[MetaCall] Past Meta %s matches labs rotation %s — keeping labs state for predictor parity with Current Meta.',
+          _pastMetaFormatKey, labsRotationSuffix,
+        );
+      }
       // Closed past meta — pin to standard so the hidden mode toggle
       // can't leave a 'counter' value sitting in state from the live
       // meta. Frozen view replaces predictor recommendations with the

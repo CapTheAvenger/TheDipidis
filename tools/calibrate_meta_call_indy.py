@@ -60,8 +60,16 @@ P46_BOOST_PP_MAX       = 2.5
 
 # Predictor 5.4 — Day-2 share-growth boost
 P54_MIN_GROWTH_PP      = 0.5
-P54_BOOST_PER_PP       = 0.6
-P54_BOOST_PP_MAX       = 1.5
+P54_BOOST_PER_PP       = 0.4    # 2026-06: lowered from 0.6
+P54_BOOST_PP_MAX       = 1.0    # 2026-06: lowered from 1.5
+
+# Phase α / β (2026-06 Indy calibration)
+PA_C_DAMP_FACTOR       = 0.40    # online_share × this for in-person-absent decks
+PA_C_TOP_N             = 15
+PB_MIN_TOURNAMENTS     = 2
+PB_MIN_SHARE_PCT       = 2.0
+PB_MAJOR_WEIGHTS       = [0.70, 0.20, 0.10]   # tuned by tools/calibrate_sweep_indy.py
+PB_BLEND_MAJOR         = 0.30    # 30 % major-nudge / 70 % online for established decks
 
 # Concentration exponent (Stage 5.2): softens to 1.10 at >=10% share,
 # stays at 1.50 below 5%.
@@ -102,23 +110,25 @@ def load_online_snapshot() -> Dict[str, float]:
 
 
 def load_labs_signals() -> Dict[str, Dict]:
-    """For each deck (by name), gather:
-      - latest underdog-win candidate (for Predictor 4.6)
-      - recency-naive avg day2_share - day1_share (for Predictor 5.4)
-    Keeping the aggregation simple here — the engine uses recency-
-    weighted averages; the difference for a 6-tournament window is in
-    the second decimal. For calibration purposes this is fine.
+    """For each deck (by name), gather all the signals the engine reads
+    from labs_tournament_decks.csv:
+      - underdog win (Predictor 4.6)
+      - day1→day2 Δ-share samples (Predictor 5.4)
+      - active-format presence + top-15 set (Phase α A + C)
+      - per-deck (date, tid, share) history for Phase β recency-
+        weighted major average
     """
     path = os.path.join(REPO, "data", "labs_tournament_decks.csv")
     underdog: Dict[str, Dict] = {}
     growth: Dict[str, List[float]] = defaultdict(list)
+    active_decks: set = set()
+    per_tid: Dict[str, List[Tuple[str, float]]] = defaultdict(list)
+    major_history: Dict[str, List[Dict]] = defaultdict(list)
     with open(path, encoding="utf-8") as f:
         for r in csv.DictReader(f):
             name = (r.get("deck_name") or "").strip()
             if not name:
                 continue
-            # Limit to current rotation (TEF-POR) so we only see live
-            # tournament weight, not last-year's CRA-pre data.
             if (r.get("meta") or "").strip() != "TEF-POR":
                 continue
             share   = parse_eu(r.get("share_pct"))
@@ -126,14 +136,20 @@ def load_labs_signals() -> Dict[str, Dict]:
             top1    = int(r.get("top1_count") or 0)
             d1      = parse_eu(r.get("day1_share_pct"))
             d2      = parse_eu(r.get("day2_share_pct"))
+            tid     = (r.get("tournament_id") or "").strip()
+            date_s  = (r.get("tournament_date") or "").strip()
 
-            # Predictor 4.6 — keep the most-recent underdog win that
-            # passes all three gates.
+            active_decks.add(name)
+            if tid:
+                per_tid[tid].append((name, share))
+            if date_s:
+                major_history[name].append({"date": date_s, "tid": tid, "share": share})
+
             if (top1 >= 1 and share < P46_MAX_SHARE_PCT
                     and players >= P46_MIN_PLAYERS):
                 try:
-                    event_date = datetime.strptime(r["tournament_date"], "%Y-%m-%d").date()
-                except (KeyError, ValueError):
+                    event_date = datetime.strptime(date_s, "%Y-%m-%d").date()
+                except ValueError:
                     event_date = None
                 if event_date:
                     prev = underdog.get(name)
@@ -144,10 +160,27 @@ def load_labs_signals() -> Dict[str, Dict]:
                             "share": share,
                             "players": players,
                         }
-            # Predictor 5.4 — collect Δ-share samples
             if d1 > 0 and d2 > 0:
                 growth[name].append(d2 - d1)
-    return {"underdog": underdog, "growth": growth}
+
+    # Top-15 set across all tournaments (Phase α C gate)
+    top15: set = set()
+    for tid, lst in per_tid.items():
+        lst.sort(key=lambda x: -x[1])
+        for name, _ in lst[:PA_C_TOP_N]:
+            top15.add(name)
+
+    # Sort major history newest-first (Phase β consumes top 3)
+    for name, lst in major_history.items():
+        lst.sort(key=lambda x: x["date"], reverse=True)
+
+    return {
+        "underdog":      underdog,
+        "growth":        growth,
+        "active_decks":  active_decks,
+        "top15":         top15,
+        "major_history": major_history,
+    }
 
 
 def predictor_4_6_boost(underdog: Dict, today: date) -> float:
@@ -180,32 +213,81 @@ def concentration_exp(share: float) -> float:
     return CONC_EXP_BASE - (CONC_EXP_BASE - CONC_EXP_MIN) * t
 
 
+def recency_weighted_major(name: str, major_history: Dict[str, List[Dict]]):
+    """Phase β anchor — returns the weighted average over the last
+    3 majors when the deck qualifies, else None."""
+    hist = major_history.get(name) or []
+    if not hist:
+        return None
+    eligible = [h for h in hist if h["share"] >= PB_MIN_SHARE_PCT]
+    if len(eligible) < PB_MIN_TOURNAMENTS:
+        return None
+    top = hist[: len(PB_MAJOR_WEIGHTS)]
+    s = sum(h["share"] * w for h, w in zip(top, PB_MAJOR_WEIGHTS))
+    w = sum(PB_MAJOR_WEIGHTS[: len(top)])
+    return s / w if w > 0 else None
+
+
 def predict(online: Dict[str, float], labs: Dict[str, Dict]) -> Dict[str, Dict]:
-    """Run the deterministic predictor pipeline (Stage 5.x). Returns
-    per-deck dict with the breakdown."""
+    """Run the deterministic predictor pipeline (Stage 5.x + Phase α / β).
+    Returns per-deck dict with the breakdown.
+    """
+    active_decks   = labs["active_decks"]
+    top15          = labs["top15"]
+    major_history  = labs["major_history"]
+
     raw = {}
     for name, share in online.items():
-        base = share
+        # Phase α A — CRI-Format-Filter: drop decks with zero active-
+        # meta labs presence. (Only fires when we have a meaningful
+        # active-meta dataset; if active_decks is empty we'd otherwise
+        # drop everything, so skip the filter in that case.)
+        if active_decks and name not in active_decks:
+            raw[name] = {"format_absent": True, "predicted_share": 0.0,
+                         "online": share, "p46_boost": 0, "p54_boost": 0,
+                         "p46_event": "", "p46_date": "",
+                         "majorAvg": None, "ladderRaw": share}
+            continue
+        # Phase α C — In-Person-Absent-Damper.
+        damp = 1.0
+        if active_decks and name not in top15:
+            damp = PA_C_DAMP_FACTOR
+        online_eff = share * damp
+
+        # Phase β — Major-First-Anchor.
+        major_avg = recency_weighted_major(name, major_history)
+        if major_avg is not None and major_avg > 0:
+            base = major_avg * PB_BLEND_MAJOR + online_eff * (1 - PB_BLEND_MAJOR)
+        else:
+            base = online_eff
+
         u = labs["underdog"].get(name)
         p46 = predictor_4_6_boost(u, TODAY) if u else 0.0
         p54 = predictor_5_4_boost(labs["growth"].get(name, []))
         boosted = base + p46 + p54
         exp = concentration_exp(boosted)
         raw[name] = {
-            "online":      base,
-            "p46_boost":   p46,
-            "p54_boost":   p54,
-            "p46_event":   u["event"] if u else "",
-            "p46_date":    u["date"].isoformat() if u else "",
-            "boosted":     boosted,
-            "conc_exp":    exp,
-            "raw_amp":     boosted ** exp,
+            "online":    share,
+            "ladderRaw": share,
+            "online_eff": online_eff,
+            "damped":    damp != 1.0,
+            "majorAvg":  major_avg,
+            "base":      base,
+            "p46_boost": p46,
+            "p54_boost": p54,
+            "p46_event": u["event"] if u else "",
+            "p46_date":  u["date"].isoformat() if u else "",
+            "boosted":   boosted,
+            "conc_exp":  exp,
+            "raw_amp":   boosted ** exp,
+            "format_absent": False,
         }
     # Normalise: top decks share 100 - JUNK_FLOOR_PCT among them.
-    total = sum(r["raw_amp"] for r in raw.values())
+    eligible = [r for r in raw.values() if not r["format_absent"]]
+    total = sum(r["raw_amp"] for r in eligible)
     target = 100.0 - JUNK_FLOOR_PCT
     factor = (target / total) if total > 0 else 1.0
-    for r in raw.values():
+    for r in eligible:
         r["predicted_share"] = r["raw_amp"] * factor
     return raw
 

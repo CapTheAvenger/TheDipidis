@@ -58,10 +58,13 @@ function underdogBoostPP({ ageDays, shareAtWin }) {
 }
 
 // ── Predictor 5.4 — reference formula ───────────────────────────
+// Constants lowered 2026-06 after the Indianapolis calibration showed
+// 0.6/1.5 was over-boosting online-hype decks (Festival Lead, Slowking)
+// that didn't translate in-person. Per-pp 0.6 → 0.4, cap 1.5 → 1.0.
 const P54 = {
     MIN_GROWTH_PP:   0.5,
-    BOOST_PER_PP:    0.6,
-    BOOST_PP_MAX:    1.5,
+    BOOST_PER_PP:    0.4,
+    BOOST_PP_MAX:    1.0,
 };
 
 function growthBoostPP(avgGrowthPP) {
@@ -150,10 +153,11 @@ describe('Predictor 4.6 — Underdog-Champion-Boost', () => {
 // ── Predictor 5.4 tests ─────────────────────────────────────────
 
 describe('Predictor 5.4 — Day-2 share-growth boost', () => {
-    it('Lillie\'s Clefairy-shaped +1.5 pp growth gives 0.9 pp boost', () => {
+    it('Lillie\'s Clefairy-shaped +1.5 pp growth gives 0.6 pp boost (post-2026-06 tuning)', () => {
         // 1.5 × 0.6 = 0.9 pp. Below the 1.5 pp cap.
         const boost = growthBoostPP(1.5);
-        assert.ok(Math.abs(boost - 0.9) < 1e-9, `expected 0.9, got ${boost}`);
+        // 2026-06 update: 1.5 × 0.4 = 0.6 (was 0.9 under the old 0.6 multiplier).
+        assert.ok(Math.abs(boost - 0.6) < 1e-9, `expected 0.6, got ${boost}`);
     });
 
     it('Sub-threshold growth (+0.3 pp) contributes zero', () => {
@@ -162,9 +166,10 @@ describe('Predictor 5.4 — Day-2 share-growth boost', () => {
         assert.strictEqual(growthBoostPP(0.499), 0);
     });
 
-    it('Growth at threshold contributes full 0.5 × 0.6 = 0.3 pp', () => {
+    it('Growth at threshold contributes full 0.5 × 0.4 = 0.2 pp', () => {
         const boost = growthBoostPP(P54.MIN_GROWTH_PP);
-        assert.ok(Math.abs(boost - 0.3) < 1e-9, `expected 0.3, got ${boost}`);
+        // 2026-06 update: 0.5 × 0.4 = 0.2 (was 0.3 under the old 0.6 multiplier).
+        assert.ok(Math.abs(boost - 0.2) < 1e-9, `expected 0.2, got ${boost}`);
     });
 
     it('Extreme growth (+5 pp) saturates at BOOST_PP_MAX', () => {

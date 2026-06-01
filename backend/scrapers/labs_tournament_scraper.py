@@ -1895,7 +1895,12 @@ def main() -> None:
         '--matchup-days', nargs='+',
         choices=list(_MATCHUP_DAYS), default=[MATCHUP_DAY_OVERALL],
         help='Which day filter(s) to scrape per archetype when --matchups is '
-             'set (default: overall). Adds one HTTP per filter per deck.',
+             'set (default: overall). Adds one HTTP per filter per deck. '
+             'Day-2 data feeds the Meta Call "Day-2 preference" path: '
+             'when a pair has >=5 Day-2 games, the Day-2 WR replaces the '
+             'Overall WR as the Major-side input before the 65/35 online '
+             'blend in getBaseMatchup. Recommended invocation for a fresh '
+             'meta is `--matchup-days overall day2`.',
     )
     parser.add_argument(
         '--matchup-meta', metavar='META', default='',

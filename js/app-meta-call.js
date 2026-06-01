@@ -15,11 +15,31 @@ window.MetaCall = (function () {
 
   // ── Internal State ─────────────────────────────────────────
   let _matchupMap = null;  // normalize(deck) -> normalize(opp) -> {pWin, pTie, pLoss}
-  let _majorMatchupMap = null; // W3 — normalize(deck) -> normalize(opp) -> {games, winPct, source: 'major'}.
+  let _majorMatchupMap = null; // user-flagged 2026-06 — normalize(deck) -> normalize(opp) -> {games, winPct, source: 'major'}.
                                // Loaded from data/labs_tournament_matchups.csv (scraper-produced).
-                               // Blended 3:1 over _matchupMap when ≥MAJOR_MATCHUP_MIN_GAMES samples exist.
-  const MAJOR_MATCHUP_WEIGHT = 3.0;        // user-requested 3:1 over online
+                               // Blended 65 / 35 over _matchupMap when ≥MAJOR_MATCHUP_MIN_GAMES samples exist.
+  let _majorMatchupMapDay2 = null; // Same shape as _majorMatchupMap, but only the day_filter='day2'
+                                   // rows. Day-2 games are between cut-qualifying players → higher-
+                                   // quality signal but smaller samples. When a pair has at least
+                                   // MAJOR_MATCHUP_MIN_GAMES_DAY2 Day-2 games, that WR REPLACES the
+                                   // overall WR as the "major" input before the 65/35 online blend.
+                                   // Falls through to overall + online when day-2 sample is too small.
+  // Blend ratio for the Major-vs-Online matchup composition. User
+  // requested 65 % Major / 35 % Online (2026-06): closer to the
+  // typical-pilot reality than the previous 75 / 25, because online
+  // ladder is elite-pilot-biased AND because Major data now covers
+  // every regional in the rotation (~3000+ game sample per top
+  // archetype) so the trust gain from Major has stopped saturating.
+  const MAJOR_MATCHUP_BLEND_FACTOR = 0.65;  // 0..1 — share of the blend that comes from Major
+  const ONLINE_MATCHUP_BLEND_FACTOR = 1.0 - MAJOR_MATCHUP_BLEND_FACTOR;
+  // Back-compat alias kept for diagnostics. Equivalent ratio form:
+  // 0.65 / 0.35 ≈ 1.857.
+  const MAJOR_MATCHUP_WEIGHT = MAJOR_MATCHUP_BLEND_FACTOR / ONLINE_MATCHUP_BLEND_FACTOR;
   const MAJOR_MATCHUP_MIN_GAMES = 10;      // require this many games before trusting the major pair
+  const MAJOR_MATCHUP_MIN_GAMES_DAY2 = 5;  // Day-2 sample is naturally smaller — accept a lower
+                                            // floor before letting it override Overall. 5 games gives
+                                            // a 22 pp 95 % CI on a 50 % deck — wide but already a
+                                            // stronger signal than online noise.
   // Past-Meta runs against a FINISHED dataset — no more games will be
   // added to last year's Phantasmal Flames meta, ever. A 10-game cutoff
   // that's reasonable for an in-progress format wastes 80 % of the
@@ -1320,21 +1340,44 @@ window.MetaCall = (function () {
   // shares < 0.5 % to keep niche matchups out of the headline
   // hint. Exposed for unit tests.
   function _topMatchupsForDeck(matchupMap, deckKey, field, mode) {
-    if (!matchupMap || !matchupMap[deckKey] || !Array.isArray(field)) return [];
+    if (!Array.isArray(field)) return [];
+    // Source-priority: getBaseMatchup applies the 65 / 35 Major-Online
+    // blend AND prefers Day-2 over Overall when sample size allows.
+    // Earlier versions of this helper read directly from _matchupMap
+    // (online-only) — which meant Top / Worst surfaced different
+    // matchup numbers than the simulator and the field table used
+    // for the same pair. Calling getBaseMatchup unifies them. We
+    // fall back to the raw map only when getBaseMatchup isn't yet
+    // reachable (e.g. during tests that stub the module).
+    const useBlended = typeof getBaseMatchup === 'function';
     const candidates = [];
     for (const opp of field) {
       if (!opp || !opp.name) continue;
       if (opp.name === '_junk') continue;
       const ok = normalize(opp.name);
       if (ok === deckKey) continue;
-      const m = matchupMap[deckKey][ok];
-      if (!m || typeof m.pWin !== 'number') continue;
+      let pWin;
+      let source = 'online';
+      let games  = 0;
+      if (useBlended) {
+        const blended = getBaseMatchup(deckKey, ok);
+        if (!blended || typeof blended.pWin !== 'number') continue;
+        pWin = blended.pWin;
+        if (blended._majorSource) {
+          source = 'major-' + blended._majorSource;
+          games  = blended._majorGames || 0;
+        }
+      } else {
+        const m = matchupMap?.[deckKey]?.[ok];
+        if (!m || typeof m.pWin !== 'number') continue;
+        pWin = m.pWin;
+      }
       // Round to 1 decimal — IEEE-754 noise (0.55 → 55.00000000000001)
       // would otherwise leak into renderers.
-      const wr = Math.round(m.pWin * 1000) / 10;
+      const wr = Math.round(pWin * 1000) / 10;
       const share = opp.predictedShare || opp.onlineShare || 0;
       if (share < 0.5) continue;
-      candidates.push({ opponent: opp.name, wr, share });
+      candidates.push({ opponent: opp.name, wr, share, source, games });
     }
     if (mode === 'best') {
       return candidates
@@ -3561,6 +3604,7 @@ window.MetaCall = (function () {
       // the online ladder for any opponent-pair with ≥10 games. When
       // absent, behavior is identical to pre-PR (online-only).
       _majorMatchupMap = null;
+      _majorMatchupMapDay2 = null;
       try {
         const mmResp = await fetch('data/labs_tournament_matchups.csv?t=' + Date.now());
         if (mmResp.ok) {
@@ -3575,11 +3619,16 @@ window.MetaCall = (function () {
           // into a current-format prediction. Keying by meta keeps the
           // two cleanly separated; lookup picks the right meta at
           // query time (see getBaseMatchup).
-          //   _majorMatchupMap[meta][myKey][oppKey] = { games, winPct, source }
-          const agg = {}; // meta -> norm(deck) -> norm(opp) -> { games, weightedSum }
-          let rowsConsumed = 0;
+          //   _majorMatchupMap[meta][myKey][oppKey]      = overall WR
+          //   _majorMatchupMapDay2[meta][myKey][oppKey]  = Day-2 WR
+          // Both maps share the same aggregation logic; the only
+          // difference is which day_filter rows feed which map.
+          const aggOverall = {}; // meta -> norm(deck) -> norm(opp) -> { games, weightedSum }
+          const aggDay2    = {};
+          let rowsConsumedOverall = 0;
+          let rowsConsumedDay2    = 0;
           for (const r of mmRows) {
-            if ((r.day_filter || 'overall').trim().toLowerCase() !== 'overall') continue;
+            const dayFilter = (r.day_filter || 'overall').trim().toLowerCase();
             const meta   = (r.meta || '').trim().toUpperCase();
             const myName = (r.my_deck_name || '').trim();
             const opName = (r.opponent_deck_name || '').trim();
@@ -3590,45 +3639,73 @@ window.MetaCall = (function () {
             if (!Number.isFinite(wpRaw)) continue;
             const d = normalize(myName);
             const o = normalize(opName);
-            if (!agg[meta]) agg[meta] = {};
-            if (!agg[meta][d]) agg[meta][d] = {};
-            if (!agg[meta][d][o]) agg[meta][d][o] = { games: 0, weightedSum: 0 };
-            agg[meta][d][o].games += games;
-            agg[meta][d][o].weightedSum += games * wpRaw;
-            rowsConsumed += 1;
+            let bucket;
+            if (dayFilter === 'overall') {
+              bucket = aggOverall;
+              rowsConsumedOverall += 1;
+            } else if (dayFilter === 'day2') {
+              bucket = aggDay2;
+              rowsConsumedDay2 += 1;
+            } else {
+              continue; // ignore 'day1' for now — not consumed downstream
+            }
+            if (!bucket[meta]) bucket[meta] = {};
+            if (!bucket[meta][d]) bucket[meta][d] = {};
+            if (!bucket[meta][d][o]) bucket[meta][d][o] = { games: 0, weightedSum: 0 };
+            bucket[meta][d][o].games += games;
+            bucket[meta][d][o].weightedSum += games * wpRaw;
           }
-          _majorMatchupMap = {};
-          let pairsKept = 0;
-          // Keep pairs at ≥ MAJOR_MATCHUP_MIN_GAMES_PAST so Past Meta
-          // has a usable map; the higher current-meta threshold is
-          // re-applied at query time in getBaseMatchup.
-          for (const meta of Object.keys(agg)) {
-            _majorMatchupMap[meta] = {};
-            for (const d of Object.keys(agg[meta])) {
-              for (const o of Object.keys(agg[meta][d])) {
-                const a = agg[meta][d][o];
-                if (a.games < MAJOR_MATCHUP_MIN_GAMES_PAST) continue;
-                const winPct = a.weightedSum / a.games; // 0..100
-                if (!_majorMatchupMap[meta][d]) _majorMatchupMap[meta][d] = {};
-                _majorMatchupMap[meta][d][o] = {
-                  games  : a.games,
-                  winPct,                      // 0..100
-                  source : 'major',
-                };
-                pairsKept += 1;
+          const _collapseAgg = (agg, minGames) => {
+            const out = {};
+            let pairs = 0;
+            for (const meta of Object.keys(agg)) {
+              out[meta] = {};
+              for (const d of Object.keys(agg[meta])) {
+                for (const o of Object.keys(agg[meta][d])) {
+                  const a = agg[meta][d][o];
+                  if (a.games < minGames) continue;
+                  const winPct = a.weightedSum / a.games; // 0..100
+                  if (!out[meta][d]) out[meta][d] = {};
+                  out[meta][d][o] = {
+                    games  : a.games,
+                    winPct,
+                    source : 'major',
+                  };
+                  pairs += 1;
+                }
               }
             }
-          }
+            return { map: out, pairs };
+          };
+          // Keep Overall at ≥ MAJOR_MATCHUP_MIN_GAMES_PAST so Past Meta
+          // has a usable map; the higher current-meta threshold is
+          // re-applied at query time in getBaseMatchup.
+          const overall = _collapseAgg(aggOverall, MAJOR_MATCHUP_MIN_GAMES_PAST);
+          _majorMatchupMap = overall.map;
+          // Day-2 uses the lower MAJOR_MATCHUP_MIN_GAMES_DAY2 floor
+          // because cut samples are inherently smaller (~10-20 % of
+          // Day-1 player counts → 3-15 games per pair is typical).
+          const day2 = _collapseAgg(aggDay2, MAJOR_MATCHUP_MIN_GAMES_DAY2);
+          _majorMatchupMapDay2 = day2.map;
           const metaSummary = Object.keys(_majorMatchupMap)
             .map(m => `${m}=${Object.values(_majorMatchupMap[m]).reduce((s, x) => s + Object.keys(x).length, 0)}`)
             .join(', ');
-          console.info(`[MetaCall] Major matchup map: ${rowsConsumed} rows → ${pairsKept} pairs per-meta (${metaSummary}); ≥${MAJOR_MATCHUP_MIN_GAMES} games per pair`);
+          const day2Summary = Object.keys(_majorMatchupMapDay2)
+            .map(m => `${m}=${Object.values(_majorMatchupMapDay2[m]).reduce((s, x) => s + Object.keys(x).length, 0)}`)
+            .filter(s => !s.endsWith('=0'))
+            .join(', ');
+          console.info(
+            `[MetaCall] Major matchup map — Overall: ${rowsConsumedOverall} rows → ${overall.pairs} pairs (${metaSummary || 'none'}); ` +
+            `Day-2: ${rowsConsumedDay2} rows → ${day2.pairs} pairs (${day2Summary || 'none'}); ` +
+            `blend 65/35 over online; min ${MAJOR_MATCHUP_MIN_GAMES} games (Overall) / ${MAJOR_MATCHUP_MIN_GAMES_DAY2} (Day-2)`
+          );
         } else {
           console.info('[MetaCall] No labs_tournament_matchups.csv — Major matchup blend skipped (online-only matchups)');
         }
       } catch (_e) {
         console.warn('[MetaCall] Major matchup load failed (non-fatal):', _e);
         _majorMatchupMap = null;
+        _majorMatchupMapDay2 = null;
       }
 
       return true;
@@ -3841,36 +3918,62 @@ window.MetaCall = (function () {
       : rev ? { pWin: rev.pLoss, pTie: rev.pTie, pLoss: rev.pWin }
       : { pWin: 0.50, pTie: 0.02, pLoss: 0.48 };
 
-    // W3 — Major matchup blend (3:1 over online). Fires only when the
-    // Major matrix has the pair with ≥MAJOR_MATCHUP_MIN_GAMES sample
-    // size IN THE CURRENT FORMAT. Looking across all metas would mix
+    // Major matchup blend (65 / 35 over online — user-requested 2026-06).
+    // Fires only when the Major matrix has the pair with ≥MAJOR_MATCHUP_MIN_GAMES
+    // sample size IN THE CURRENT FORMAT. Looking across all metas would mix
     // SVI-JTG / TEF-POR / CRI rates for the same archetype name, which
     // is what broke the Past-Meta branch above. The current format
     // comes from format_window.current_set; absence (no labs majors
     // for the live format yet) cleanly skips the blend.
+    //
+    // Day-2 preference: when the same pair has ≥MAJOR_MATCHUP_MIN_GAMES_DAY2
+    // Day-2 games, use the Day-2 WR as the "major" input instead of Overall.
+    // Day-2 reflects cut-quality play (better pilots, less variance from
+    // off-meta noise) so it's the closer-to-truth signal when the sample
+    // size justifies it. Falls through to Overall when Day-2 is too small.
     const currentMeta = (_formatWindow && _formatWindow.current_set)
       ? String(_formatWindow.current_set).trim().toUpperCase()
       : '';
-    const currentMetaMap = (currentMeta && _majorMatchupMap)
-      ? _majorMatchupMap[currentMeta] : null;
-    if (currentMetaMap) {
-      const mHit = currentMetaMap[a]?.[b];
-      const mRev = !mHit ? currentMetaMap[b]?.[a] : null;
+    const _lookupPair = (map, key1, key2) => {
+      if (!map) return null;
+      const direct = map[key1]?.[key2];
+      if (direct) {
+        return { winPct: direct.winPct, games: direct.games, reversed: false };
+      }
+      const reverse = map[key2]?.[key1];
+      if (reverse) {
+        return { winPct: 100 - reverse.winPct, games: reverse.games, reversed: true };
+      }
+      return null;
+    };
+    const overallMap = (currentMeta && _majorMatchupMap) ? _majorMatchupMap[currentMeta] : null;
+    const day2Map    = (currentMeta && _majorMatchupMapDay2) ? _majorMatchupMapDay2[currentMeta] : null;
+    if (overallMap || day2Map) {
       let majorWin = null;
       let majorGames = 0;
-      if (mHit) {
-        majorWin = mHit.winPct / 100;
-        majorGames = mHit.games;
-      } else if (mRev) {
-        majorWin = 1 - (mRev.winPct / 100);
-        majorGames = mRev.games;
+      let majorSource = '';
+      const day2Hit    = _lookupPair(day2Map, a, b);
+      const overallHit = _lookupPair(overallMap, a, b);
+      // Day-2 wins when it has enough samples — it's the higher-signal
+      // source. Overall is the fallback for pairs with sparse Day-2
+      // coverage, which is most of them outside the top archetypes.
+      if (day2Hit && day2Hit.games >= MAJOR_MATCHUP_MIN_GAMES_DAY2) {
+        majorWin    = day2Hit.winPct / 100;
+        majorGames  = day2Hit.games;
+        majorSource = 'day2';
+      } else if (overallHit && overallHit.games >= MAJOR_MATCHUP_MIN_GAMES) {
+        majorWin    = overallHit.winPct / 100;
+        majorGames  = overallHit.games;
+        majorSource = 'overall';
       }
-      if (majorWin != null && majorGames >= MAJOR_MATCHUP_MIN_GAMES) {
+      if (majorWin != null) {
         const onlineWin = base.pWin;
-        // Weighted average: (major × 3 + online × 1) / 4
+        // 65 / 35 weighted average. Equivalent to
+        // (major × 1.857 + online × 1.0) / 2.857, just expressed as
+        // factors that sum to 1 for readability.
         const blendedWin = _clip(
-          (majorWin * MAJOR_MATCHUP_WEIGHT + onlineWin * 1.0) /
-            (MAJOR_MATCHUP_WEIGHT + 1.0),
+          majorWin * MAJOR_MATCHUP_BLEND_FACTOR +
+            onlineWin * ONLINE_MATCHUP_BLEND_FACTOR,
           0.05, 0.95,
         );
         const pTie = base.pTie || MAJOR_MATCHUP_TIE_RATE;
@@ -3878,6 +3981,10 @@ window.MetaCall = (function () {
           pWin : blendedWin,
           pTie ,
           pLoss: Math.max(0, 1 - blendedWin - pTie),
+          // Diagnostic — read by the matchup tooltip / debug overlay
+          // to surface which Major source drove the blend.
+          _majorSource: majorSource,
+          _majorGames:  majorGames,
         };
       }
     }

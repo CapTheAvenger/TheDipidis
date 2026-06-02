@@ -92,36 +92,56 @@ async function openPage(browser, urlPath) {
     const context = await browser.newContext({
         viewport: VIEWPORT,
         deviceScaleFactor: DPR,
-        // Pin language to EN so screenshots are consistent across
-        // contributors who may have de set as their default.
         locale: 'en-US',
+        // Service workers in headless mode cache the previous version
+        // and then trigger skipWaiting() → reload() mid-render, which
+        // destroys the JS execution context exactly when we're trying
+        // to drive the page (capture02MetaCall reproducibly fails on
+        // it). Turning the SW off entirely for the screenshot run
+        // skips the cache + reload dance.
+        serviceWorkers: 'block',
     });
-    // Disable animations + transitions so screenshots are stable.
+    // Pin language + clear any persistent state from prior shots before
+    // the page loads. localStorage edits inside addInitScript fire at
+    // each new document, so the language is locked from the first
+    // synchronous tick.
     await context.addInitScript(() => {
         try {
-            localStorage.setItem('app_lang', 'en');
             localStorage.clear();
             localStorage.setItem('app_lang', 'en');
         } catch (_) { /* ignore */ }
     });
     const page = await context.newPage();
     page.on('console', (msg) => {
-        // Surface page errors so a failed screenshot has a paper trail.
         const type = msg.type();
         if (type === 'error') console.error(`[page] ${msg.text()}`);
+    });
+    // Defensive: if anything causes a navigation during a shoot, the
+    // next evaluate() throws "Execution context destroyed". Catch and
+    // log so the failure mode is visible instead of cascading.
+    page.on('framenavigated', (frame) => {
+        if (frame === page.mainFrame()) {
+            // Don't spam — only log the post-initial-load navigations.
+            const url = frame.url();
+            if (url && !url.endsWith(urlPath)) {
+                console.warn(`[page] mid-shot navigation: ${url}`);
+            }
+        }
     });
     await page.goto(`http://127.0.0.1:${PORT}${urlPath}`, {
         waitUntil: 'domcontentloaded',
         timeout: 60_000,
     });
-    // Wait for the app's switchTab to be defined (means index.html's
-    // inline boot ran).
     await page.waitForFunction(
         () => typeof window.switchTab === 'function',
         null,
         { timeout: 30_000 },
     );
-    // Inject the animation killer.
+    // Wait for network to quiesce so the boot-time CSV fetches finish
+    // before we start driving tabs. Tolerate up to 8 s of idle wait.
+    try {
+        await page.waitForLoadState('networkidle', { timeout: 8_000 });
+    } catch (_) { /* tolerate — some background prefetches never idle */ }
     await page.addStyleTag({
         content: `
             *, *::before, *::after {

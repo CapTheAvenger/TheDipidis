@@ -205,6 +205,18 @@ const BASE_PATH = './data/';
             'testing-groups': {
                 title: '\ud83d\udc65 Testing Groups',
                 html: '<p>Create or join a small group of testers and share match results, decklists, and meta calls in one place.</p><ul><li><strong>Create a group:</strong> Sets a join link you can share with team-mates. Each member sees the group dashboard.</li><li><strong>Shared journal:</strong> Match logs from every member roll up into one trend chart so the group can see what\u2019s working.</li><li><strong>Shared Meta Call:</strong> Override the group prediction together \u2014 last edit wins, edit history visible.</li><li><strong>Privacy:</strong> Group data is scoped to members only; nothing leaks to the global views.</li></ul>'
+            },
+            'custom-binder': {
+                title: '\ud83d\udcd2 Custom Binder',
+                html: '<p>Generates a printable A4 binder layout for archetypes you pick yourself \u2014 same engine as Meta Binder but with full control over the deck list.</p><ul><li><strong>Archetype picker:</strong> Search and tick the archetypes you want included. Add as many as you need.</li><li><strong>Same printout:</strong> 9-pocket grid optimised for 6.3\u202fcm \u00d7 8.8\u202fcm sleeves with Cardmarket pricing per slot.</li><li><strong>Save / load:</strong> Each custom selection can be named and reloaded with one click.</li><li><strong>Use case:</strong> Travel binder for a specific event, league prep, or testing a narrow set of decks.</li></ul>'
+            },
+            'wishlist': {
+                title: '\u2764\ufe0f Wishlist',
+                html: '<p>Mark the cards you still need so you can find them quickly while browsing or trading.</p><ul><li><strong>Add cards:</strong> Tap the \u2661 heart on any card in the Card Database, Deck Builder, or analysis views.</li><li><strong>Search + filter:</strong> Narrow by set, type, rarity, or text \u2014 same filters as Card Database.</li><li><strong>Cardmarket links:</strong> Every wishlist row has a \u20ac button that opens a Cardmarket search for that exact card.</li><li><strong>Cloud sync:</strong> Linked to your profile \u2014 device switches stay in sync.</li><li><strong>Collection cross-check:</strong> Cards you already own get an indicator so you don\u2019t buy duplicates.</li></ul>'
+            },
+            'draw-simulator': {
+                title: '\ud83c\udfb4 Draw Simulator',
+                html: '<p>Simulate opening hands, prize cards, and turn 1 / turn 2 setup against any deck list.</p><ul><li><strong>Paste or load:</strong> Paste a Limitless / PTCGL deck list or load one of your saved decks.</li><li><strong>Opening hand draws:</strong> Shuffles, draws 7, then any number of additional cards you choose.</li><li><strong>Prize lock check:</strong> Shows which cards from the deck landed in prizes so you can stress-test thin lines.</li><li><strong>Mulligan tracking:</strong> Counts how many no-basic openings you would have had over N runs.</li><li><strong>Combo probability:</strong> Pair with the Calculator tab to compute the exact odds of seeing the cards you just simulated.</li></ul>'
             }
         };
 
@@ -276,6 +288,18 @@ const BASE_PATH = './data/';
             'testing-groups': {
                 title: '\ud83d\udc65 Testing Groups',
                 html: '<p>Erstelle oder tritt einer kleinen Gruppe von Testern bei und teilt Match-Ergebnisse, Decklisten und Meta-Calls an einem Ort.</p><ul><li><strong>Gruppe erstellen:</strong> Setzt einen Join-Link den du mit Team-Mitgliedern teilen kannst. Jedes Mitglied sieht das Gruppen-Dashboard.</li><li><strong>Geteiltes Journal:</strong> Match-Logs aller Mitglieder rollen in einen Trend-Chart auf, damit die Gruppe sieht was funktioniert.</li><li><strong>Geteilter Meta Call:</strong> Override die Gruppen-Vorhersage gemeinsam \u2014 letzter Edit gewinnt, Edit-Historie sichtbar.</li><li><strong>Privacy:</strong> Gruppendaten sind auf Mitglieder beschr\u00e4nkt; nichts leakt in die globalen Ansichten.</li></ul>'
+            },
+            'custom-binder': {
+                title: '\ud83d\udcd2 Custom Binder',
+                html: '<p>Erzeugt ein druckbares A4-Binder-Layout f\u00fcr selbst gew\u00e4hlte Archetypen \u2014 gleiche Engine wie der Meta Binder, aber du bestimmst die Decks.</p><ul><li><strong>Archetyp-Picker:</strong> Suche und hake die Archetypen an, die du dabeihaben willst. Beliebig viele.</li><li><strong>Gleicher Ausdruck:</strong> 9-Pocket-Grid optimiert f\u00fcr 6,3 \u00d7 8,8 cm Sleeves mit Cardmarket-Preis pro Slot.</li><li><strong>Speichern / Laden:</strong> Jede Custom-Auswahl kann benannt und mit einem Klick wieder geladen werden.</li><li><strong>Anwendungsfall:</strong> Reise-Binder f\u00fcr ein bestimmtes Event, Liga-Vorbereitung oder Testen einer schmalen Auswahl an Decks.</li></ul>'
+            },
+            'wishlist': {
+                title: '\u2764\ufe0f Wunschliste',
+                html: '<p>Markiere die Karten, die dir noch fehlen, damit du sie beim Browsen oder Tauschen schnell findest.</p><ul><li><strong>Karten hinzuf\u00fcgen:</strong> Tippe auf das \u2661-Herz an jeder Karte in der Kartendatenbank, im Deck Builder oder in den Analyse-Ansichten.</li><li><strong>Suche + Filter:</strong> Eingrenzen nach Set, Typ, Seltenheit oder Text \u2014 dieselben Filter wie in der Kartendatenbank.</li><li><strong>Cardmarket-Links:</strong> Jede Zeile hat einen \u20ac-Button, der eine Cardmarket-Suche f\u00fcr genau diese Karte \u00f6ffnet.</li><li><strong>Cloud-Sync:</strong> Mit deinem Profil verkn\u00fcpft \u2014 Ger\u00e4tewechsel bleiben synchron.</li><li><strong>Sammlungs-Abgleich:</strong> Karten die du bereits besitzt bekommen einen Indikator, damit du keine Duplikate kaufst.</li></ul>'
+            },
+            'draw-simulator': {
+                title: '\ud83c\udfb4 Draw-Simulator',
+                html: '<p>Simuliere Starth\u00e4nde, Preiskarten und das Setup f\u00fcr Zug 1 / Zug 2 gegen eine beliebige Deckliste.</p><ul><li><strong>Einf\u00fcgen oder laden:</strong> Limitless- / PTCGL-Deckliste einf\u00fcgen oder ein gespeichertes Deck laden.</li><li><strong>Starthand-Draws:</strong> Mischt, zieht 7 Karten und beliebig viele zus\u00e4tzliche, die du w\u00e4hlst.</li><li><strong>Prize-Lock-Check:</strong> Zeigt welche Karten aus dem Deck in den Preisen gelandet sind \u2014 perfekt um d\u00fcnne Linien zu stresstesten.</li><li><strong>Mulligan-Tracking:</strong> Z\u00e4hlt wie viele No-Basic-Hands du \u00fcber N Runs gehabt h\u00e4ttest.</li><li><strong>Kombo-Wahrscheinlichkeit:</strong> Zusammen mit dem Calculator-Tab kannst du die exakten Odds berechnen, die Karten zu sehen, die du gerade simuliert hast.</li></ul>'
             }
         };
 

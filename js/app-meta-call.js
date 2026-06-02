@@ -19,7 +19,7 @@ window.MetaCall = (function () {
   // and the CACHE_NAME suffix in service-worker.js. If the user
   // reports "feature X isn't working", check whether this number is
   // older than the expected deploy version before debugging further.
-  const _BUILD_VERSION = 'v202606020220';
+  const _BUILD_VERSION = 'v202606020330';
   try {
     console.info(
       '%c[MetaCall] Engine boot · build %s · ' + new Date().toISOString(),
@@ -837,12 +837,15 @@ window.MetaCall = (function () {
   // freshness we can't confirm.
   function _isPastMetaFrozen(metaKey) {
     if (!metaKey) return false;
-    if (!_formatWindow || !_formatWindow.in_person_legal_date) return true;
-    const today = new Date().toISOString().slice(0, 10);
-    if (today >= _formatWindow.in_person_legal_date) return true;
-    if (!Array.isArray(_pastMetaAvailableFormats) || _pastMetaAvailableFormats.length === 0) return true;
-    const latest = _pastMetaAvailableFormats[0]; // sorted newest-first by maxDate
-    return metaKey !== latest.key;
+    // 2026-06 — User-flagged: Past Meta should ALWAYS be retrospective.
+    // The earlier "latest format during lag window = live" branch made
+    // Past Meta TEF-POR run the live predictor against TEF-POR labs,
+    // which then re-shaped the historical shares (Dragapult family
+    // 29 % actual → 20 % predicted, Raging Bolt 6.1 % → 4.3 %, etc.)
+    // The user expects to see WHAT HAPPENED in TEF-POR, not a re-run
+    // prediction. Switch to always-frozen — labs aggregate goes
+    // straight to the field table without predictor reshaping.
+    return true;
   }
 
   // Aggregate labs_tournament_decks_<META>.csv into per-archetype totals
@@ -3850,6 +3853,48 @@ window.MetaCall = (function () {
       _clCurrentByDeck = await _loadClShares('data/city_league_archetypes_comparison.csv');
       _clPastByDeck    = await _loadClShares('data/city_league_archetypes_past_comparison.csv');
 
+      // ── Current-meta lag-window guard (2026-06) ────────────────
+      // When CRI is online-legal but TEF-POR is still the in-person
+      // rotation, the labs aggregate represents TEF-POR play, NOT
+      // CRI. Anchoring CRI predictions to TEF-POR labs surfaces
+      // misleading "Melbourne (TEF-POR)" references next to CRI
+      // decks like Festival Lead / Raging Bolt Ogerpon — decks that
+      // were strong in TEF-POR but won't carry forward at the same
+      // share once CRI hits in-person.
+      //
+      // Rule: when source=current AND active in-person rotation ≠
+      // current_set, drop all rotation-specific labs aggregates and
+      // force Mode A (online ladder only). Keep the cross-rotation
+      // signals (4.6 Underdog-Champion regional winners + 4.7 Online
+      // wins) — those are deck-level "this deck just proved itself"
+      // signals that DO carry across rotations.
+      const _currentSetCodeUpper = (_formatWindow && _formatWindow.current_set)
+        ? String(_formatWindow.current_set).trim().toUpperCase()
+        : '';
+      const _currentMetaLagWindow = _metaSource === 'current'
+        && _activeInPersonSetCode
+        && _currentSetCodeUpper
+        && _activeInPersonSetCode !== _currentSetCodeUpper;
+      if (_currentMetaLagWindow) {
+        labsRowsByDeck = {};
+        _labsRowsByDeck = {};
+        _labsConvByDeck = {};
+        _labsQualityByDeck = {};
+        _labsDay2ConvByDeck = {};
+        _labsDay2WrByDeck = {};
+        _labsShareGrowthByDeck = {};
+        _activeFormatLabsDecks = new Set();
+        _activeFormatTop15Decks = new Set();
+        _majorSharesByDeck = {};
+        _tournamentStats = {};
+        _labsMajorRows = 0;
+        console.info(
+          '[MetaCall] Lag-window guard — dropped TEF-POR (%s) labs aggregates for CRI (%s) ' +
+          'current-meta predictions. Mode A (online ladder only). Kept underdog-champion + online-win signals.',
+          _activeInPersonSetCode, _currentSetCodeUpper,
+        );
+      }
+
       _predictorMode = _labsMajorRows > 0 ? 'B' : 'A';
 
       // ── Predictor 3.0 — compute predicted share per deck ──
@@ -6595,6 +6640,19 @@ window.MetaCall = (function () {
     const activeTag = _activeInPersonSetCode
       ? ` <span class="mc-predictor-banner-active" style="opacity:0.75;">active rotation: ${_activeInPersonSetCode}</span>`
       : '';
+    // Lag-window chip (2026-06). When current_set is online-legal but
+    // the in-person rotation is the previous format, surface that the
+    // engine has dropped the cross-format labs aggregate and is
+    // running online-only for the current-meta view.
+    const _currentSetUpper = (_formatWindow && _formatWindow.current_set)
+      ? String(_formatWindow.current_set).trim().toUpperCase()
+      : '';
+    const _lagWindowChip = (_metaSource === 'current'
+        && _activeInPersonSetCode
+        && _currentSetUpper
+        && _activeInPersonSetCode !== _currentSetUpper)
+      ? ` <span class="mc-predictor-banner-lagwindow" style="opacity:0.85;color:#b45309;" title="${_currentSetUpper} is online-legal but every in-person regional still plays ${_activeInPersonSetCode}. The labs aggregate represents ${_activeInPersonSetCode} play, so it's been dropped from the ${_currentSetUpper} prediction — online ladder is the only signal until the first ${_currentSetUpper} regional lands.">lag window: ${_currentSetUpper} online-only · ${_activeInPersonSetCode} labs ignored</span>`
+      : '';
     // Stale-cache canary (2026-06). Surfaces the newest scraped_at
     // timestamp we saw across the loaded labs CSV. If this displays
     // a date the user knows is older than the latest scraper run,
@@ -6632,12 +6690,12 @@ window.MetaCall = (function () {
       const tournNum = _labsMajorRows;
       return `<div class="mc-predictor-banner mc-predictor-banner-b">
         <span class="mc-predictor-banner-icon">📊</span>
-        <span class="mc-predictor-banner-text">${t('mc.bannerModeB').replace('{n}', tournNum)}${sourceTag}${activeTag}${staleTag}${trendSuffix}${clSuffix}${accuracySuffix}</span>
+        <span class="mc-predictor-banner-text">${t('mc.bannerModeB').replace('{n}', tournNum)}${sourceTag}${activeTag}${_lagWindowChip}${staleTag}${trendSuffix}${clSuffix}${accuracySuffix}</span>
       </div>`;
     }
     return `<div class="mc-predictor-banner mc-predictor-banner-a">
       <span class="mc-predictor-banner-icon">⚡</span>
-      <span class="mc-predictor-banner-text">${t('mc.bannerModeA')}${sourceTag}${activeTag}${staleTag}${trendSuffix}${clSuffix}${accuracySuffix}</span>
+      <span class="mc-predictor-banner-text">${t('mc.bannerModeA')}${sourceTag}${activeTag}${_lagWindowChip}${staleTag}${trendSuffix}${clSuffix}${accuracySuffix}</span>
     </div>`;
   }
 

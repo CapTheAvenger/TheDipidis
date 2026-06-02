@@ -1,0 +1,283 @@
+<!doctype html>
+<!--
+  Telegram-style chat mock for the 06-telegram-bot tutorial screenshot.
+  Renders a static page that looks like an iOS Telegram chat with the
+  @TheDipidisBot, including the persistent keyboard the bot installs
+  and a sample Meta Call PNG reply.
+
+  Captured by prerender/screenshot-tutorial.js at 720×1280 portrait;
+  do not adjust dimensions without re-running the script.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Telegram mock — TheDipidisBot</title>
+<style>
+  :root {
+    --bg:           #0f1620;
+    --header:       #17212b;
+    --bubble-bot:   #182533;
+    --bubble-user:  #2b5278;
+    --text:         #e7eef5;
+    --text-dim:     #8aa0b8;
+    --accent:       #5288c1;
+  }
+  * { box-sizing: border-box; -webkit-font-smoothing: antialiased; }
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    width: 720px; height: 1280px;
+    overflow: hidden;
+  }
+  .chat {
+    display: flex; flex-direction: column;
+    width: 100%; height: 100%;
+    background: linear-gradient(180deg, rgba(82, 136, 193, 0.05) 0%, transparent 30%), var(--bg);
+  }
+  .status-bar {
+    height: 56px;
+    padding: 0 24px;
+    display: flex; align-items: center; justify-content: space-between;
+    background: rgba(0,0,0,0.2);
+    font-size: 20px; font-weight: 600;
+  }
+  .status-icons {
+    display: flex; gap: 12px; font-size: 18px; align-items: center;
+  }
+  .battery {
+    border: 2px solid currentColor; border-radius: 3px;
+    width: 28px; height: 14px; position: relative;
+    display: inline-flex; align-items: center;
+  }
+  .battery::after {
+    content: ''; position: absolute; right: -4px; top: 3px;
+    width: 2px; height: 6px; background: currentColor; border-radius: 1px;
+  }
+  .battery::before {
+    content: ''; position: absolute; left: 1px; top: 1px; bottom: 1px;
+    width: 60%; background: #4ade80; border-radius: 1px;
+  }
+  .nav {
+    height: 64px;
+    padding: 0 16px;
+    display: flex; align-items: center; gap: 12px;
+    background: var(--header);
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+  .nav .back { font-size: 28px; color: var(--accent); width: 32px; }
+  .nav .avatar {
+    width: 40px; height: 40px; border-radius: 50%;
+    background: linear-gradient(135deg, #f59e0b, #ef4444);
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-weight: 700; font-size: 18px;
+  }
+  .nav .meta { flex: 1; }
+  .nav .title { font-size: 18px; font-weight: 600; }
+  .nav .sub   { font-size: 13px; color: var(--text-dim); }
+  .nav .menu  { font-size: 22px; color: var(--text-dim); width: 28px; }
+  .messages {
+    flex: 1;
+    padding: 16px 14px 12px;
+    display: flex; flex-direction: column; gap: 12px;
+    overflow: hidden;
+  }
+  .day-tag {
+    align-self: center;
+    background: rgba(0,0,0,0.35);
+    color: var(--text-dim);
+    padding: 4px 12px; border-radius: 12px;
+    font-size: 12px; font-weight: 500;
+  }
+  .row { display: flex; align-items: flex-end; gap: 8px; max-width: 80%; }
+  .row.bot   { align-self: flex-start; }
+  .row.user  { align-self: flex-end; flex-direction: row-reverse; }
+  .bubble {
+    padding: 10px 14px;
+    border-radius: 18px;
+    font-size: 15px; line-height: 1.4;
+    max-width: 100%;
+    word-wrap: break-word;
+    position: relative;
+  }
+  .row.bot .bubble {
+    background: var(--bubble-bot);
+    border-bottom-left-radius: 6px;
+  }
+  .row.user .bubble {
+    background: var(--bubble-user);
+    border-bottom-right-radius: 6px;
+  }
+  .row .time {
+    font-size: 11px; color: var(--text-dim);
+    margin: 0 4px 2px;
+  }
+  .row.user .time { color: rgba(255,255,255,0.7); }
+  .read-tick { display: inline-block; margin-left: 4px; color: #4fc3f7; }
+  .cmd { color: var(--accent); }
+  .img-bubble {
+    padding: 4px;
+    border-radius: 14px;
+    background: var(--bubble-bot);
+    max-width: 86%;
+  }
+  .img-bubble img {
+    display: block;
+    width: 100%; height: 360px;
+    object-fit: cover;
+    border-radius: 12px;
+  }
+  .img-caption {
+    padding: 6px 10px 4px;
+    font-size: 14px;
+  }
+  .img-caption .time {
+    font-size: 11px; color: var(--text-dim);
+    float: right;
+  }
+  .keyboard {
+    background: #1a2734;
+    padding: 8px 8px 14px;
+    border-top: 1px solid rgba(255,255,255,0.04);
+  }
+  .keyboard .row-keys {
+    display: flex; gap: 6px; margin-bottom: 6px;
+  }
+  .keyboard .key {
+    flex: 1;
+    background: #2c3e50;
+    color: var(--text);
+    border-radius: 10px;
+    padding: 12px 10px;
+    text-align: center;
+    font-size: 14px; font-weight: 500;
+  }
+  .composer {
+    padding: 6px 10px 10px;
+    background: #1a2734;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .composer .attach {
+    width: 28px; color: var(--text-dim); font-size: 22px; text-align: center;
+  }
+  .composer .input {
+    flex: 1; background: #243447; border-radius: 18px;
+    padding: 9px 14px; color: var(--text-dim); font-size: 14px;
+  }
+  .composer .send {
+    width: 28px; color: var(--accent); font-size: 22px; text-align: center;
+  }
+</style>
+</head>
+<body>
+<div class="chat">
+
+  <div class="status-bar">
+    <span>9:41</span>
+    <div class="status-icons">
+      <span>📶</span><span>📡</span><span class="battery"></span>
+    </div>
+  </div>
+
+  <div class="nav">
+    <span class="back">‹</span>
+    <div class="avatar">T</div>
+    <div class="meta">
+      <div class="title">TheDipidisBot</div>
+      <div class="sub">bot</div>
+    </div>
+    <span class="menu">⋮</span>
+  </div>
+
+  <div class="messages">
+    <div class="day-tag">Today</div>
+
+    <div class="row user">
+      <div class="bubble"><span class="cmd">/metacall</span></div>
+      <div class="time">09:38 <span class="read-tick">✓✓</span></div>
+    </div>
+
+    <div class="row bot">
+      <div class="bubble">
+        📊 Pulling the latest Meta Call snapshot…
+      </div>
+      <div class="time">09:38</div>
+    </div>
+
+    <div class="row bot">
+      <div class="img-bubble">
+        <!-- Inline SVG mock of the Meta Call dashboard so the screenshot
+             stays self-contained even if the live PNG isn't built yet. -->
+        <svg viewBox="0 0 360 240" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:360px;border-radius:12px;display:block">
+          <defs>
+            <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#1f2937"/>
+              <stop offset="1" stop-color="#0f172a"/>
+            </linearGradient>
+          </defs>
+          <rect width="360" height="240" fill="url(#bg)"/>
+          <text x="20" y="28" fill="#fff" font-family="system-ui" font-size="16" font-weight="700">META CALL</text>
+          <text x="20" y="44" fill="#9ab1d4" font-family="system-ui" font-size="9">2.000 Players · 8 rounds · Past Meta: TEF-POR</text>
+          <text x="20" y="68" fill="#c39bd3" font-family="system-ui" font-size="9" font-weight="700">FIELD COMPOSITION</text>
+          <g font-family="system-ui" font-size="10" fill="#e2e8f0">
+            <text x="20" y="86">Dragapult</text>
+            <rect x="120" y="79" width="180" height="8" rx="2" fill="#27ae60"/>
+            <text x="310" y="86" fill="#fff" font-weight="700" text-anchor="end">29.0%</text>
+            <text x="20" y="104">Hydrapple</text>
+            <rect x="120" y="97" width="68" height="8" rx="2" fill="#27ae60" opacity="0.65"/>
+            <text x="310" y="104" fill="#fff" font-weight="700" text-anchor="end">7.4%</text>
+            <text x="20" y="122">Raging Bolt</text>
+            <rect x="120" y="115" width="58" height="8" rx="2" fill="#27ae60" opacity="0.55"/>
+            <text x="310" y="122" fill="#fff" font-weight="700" text-anchor="end">6.2%</text>
+            <text x="20" y="140">N's Zoroark</text>
+            <rect x="120" y="133" width="44" height="8" rx="2" fill="#27ae60" opacity="0.42"/>
+            <text x="310" y="140" fill="#fff" font-weight="700" text-anchor="end">4.6%</text>
+            <text x="20" y="158">Rocket's Mewtwo</text>
+            <rect x="120" y="151" width="40" height="8" rx="2" fill="#27ae60" opacity="0.38"/>
+            <text x="310" y="158" fill="#fff" font-weight="700" text-anchor="end">4.0%</text>
+          </g>
+          <text x="20" y="188" fill="#c39bd3" font-family="system-ui" font-size="9" font-weight="700">RECOMMENDED DECKS</text>
+          <g font-family="system-ui" font-size="10" fill="#e2e8f0">
+            <text x="20" y="206">#1 Basic Box</text>
+            <text x="200" y="206" fill="#27ae60" font-weight="700">Day-2 22.7%</text>
+            <text x="20" y="222">#2 Hydrapple</text>
+            <text x="200" y="222" fill="#27ae60" font-weight="700">Day-2 22.0%</text>
+          </g>
+        </svg>
+        <div class="img-caption">
+          Meta Call · Past Meta TEF-POR
+          <span class="time">09:38</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="row bot">
+      <div class="bubble">
+        Tap a button below for the per-variant view, family rollup, or the recommended-deck PNG.
+      </div>
+      <div class="time">09:38</div>
+    </div>
+  </div>
+
+  <div class="keyboard">
+    <div class="row-keys">
+      <div class="key">📊 Meta Call</div>
+      <div class="key">🃏 My Decks</div>
+    </div>
+    <div class="row-keys">
+      <div class="key">🔍 Find Deck</div>
+      <div class="key">ℹ️ Help</div>
+    </div>
+  </div>
+
+  <div class="composer">
+    <span class="attach">＋</span>
+    <div class="input">Message</div>
+    <span class="send">➤</span>
+  </div>
+
+</div>
+</body>
+</html>

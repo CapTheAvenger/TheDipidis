@@ -55,7 +55,10 @@ jobs:
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email 'github-actions[bot]@users.noreply.github.com'
-          git add images/tutorials/*.png
+          # Recurse into per-feature subdirs added by the multi-shot
+          # script. `git add` of a directory picks up nested PNGs that
+          # the old `images/tutorials/*.png` glob missed.
+          git add images/tutorials/
           if git diff --cached --quiet; then
             echo "No screenshot changes to commit."
           else

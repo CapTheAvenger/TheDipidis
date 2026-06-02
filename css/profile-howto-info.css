@@ -44,6 +44,352 @@
     line-height: 1.7;
 }
 
+/* ─────────────────────────────────────────────────────────────
+ * Feature banners — the marketing-style "PowerPoint-y" Tutorial
+ *
+ * Three layouts that the tutorial alternates between so the page
+ * has visual rhythm:
+ *   .banner-layout-mosaic       — 2×2 image grid + content right
+ *   .banner-layout-hero         — one big image + content
+ *   .banner-layout-asymmetric   — one tall hero + 2 stacked thumbs
+ *
+ * All three share .feature-banner base styles (frame, headline
+ * typography, bullet styling). The layout class only controls the
+ * grid template for the image side.
+ * ─────────────────────────────────────────────────────────────── */
+
+.feature-banner {
+    display: grid;
+    gap: 28px;
+    padding: 28px 28px 30px;
+    margin: 0 0 24px;
+    border-radius: 18px;
+    background: linear-gradient(140deg, #ffffff 0%, #f8fafc 100%);
+    box-shadow: 0 6px 24px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
+    border: 1px solid rgba(15, 23, 42, 0.05);
+    align-items: center;
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+}
+
+.feature-banner-img,
+.feature-banner-img-grid,
+.feature-banner-img-hero,
+.feature-banner-img-asym {
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.12);
+    overflow: hidden;
+    background: #0f172a;
+}
+
+.feature-banner-img img,
+.feature-banner-img-grid img,
+.feature-banner-img-hero img,
+.feature-banner-img-asym img {
+    display: block;
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+}
+
+/* Mosaic — 2×2 image grid */
+.banner-layout-mosaic .feature-banner-imgs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+.banner-layout-mosaic .feature-banner-imgs .feature-banner-img {
+    aspect-ratio: 16 / 9;
+}
+
+/* Mosaic with a single hero image (when only 1 shot available) */
+.banner-layout-mosaic.banner-single .feature-banner-imgs {
+    grid-template-columns: 1fr;
+}
+.banner-layout-mosaic.banner-single .feature-banner-imgs .feature-banner-img {
+    aspect-ratio: 16 / 9;
+}
+
+/* Hero — one large image */
+.banner-layout-hero {
+    grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+}
+.banner-layout-hero .feature-banner-img-hero {
+    aspect-ratio: 4 / 3;
+}
+
+/* Asymmetric — one tall hero + 2 stacked thumbs to its right */
+.banner-layout-asymmetric .feature-banner-imgs {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 12px;
+}
+.banner-layout-asymmetric .feature-banner-img-asym {
+    aspect-ratio: 3 / 4;
+}
+.banner-layout-asymmetric .feature-banner-thumbs {
+    display: grid;
+    grid-template-rows: 1fr 1fr;
+    gap: 12px;
+}
+.banner-layout-asymmetric .feature-banner-thumbs .feature-banner-img {
+    aspect-ratio: 16 / 9;
+}
+
+/* Reverse direction variant — content left, images right */
+.feature-banner.banner-reverse {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+}
+.feature-banner.banner-reverse .feature-banner-content {
+    order: -1;
+}
+
+/* Content side */
+.feature-banner-content {
+    min-width: 0;
+}
+.feature-banner-eyebrow {
+    display: inline-block;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--pokemon-blue, #3B4CCA);
+    background: rgba(59, 76, 202, 0.08);
+    padding: 4px 10px;
+    border-radius: 999px;
+    margin-bottom: 12px;
+}
+.feature-banner-title {
+    font-size: 1.6rem;
+    font-weight: 900;
+    color: #0f172a;
+    margin: 0 0 8px;
+    line-height: 1.15;
+}
+.feature-banner-tagline {
+    font-size: 1rem;
+    color: #475569;
+    line-height: 1.55;
+    margin: 0 0 18px;
+}
+.feature-banner-bullets {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.feature-banner-bullets li {
+    position: relative;
+    padding-left: 22px;
+    font-size: 0.94rem;
+    line-height: 1.5;
+    color: #1e293b;
+}
+.feature-banner-bullets li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.55em;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--pokemon-blue, #3B4CCA), var(--pokemon-yellow, #FFCB05));
+}
+.feature-banner-bullets li strong {
+    color: var(--pokemon-blue, #3B4CCA);
+    font-weight: 700;
+}
+.feature-banner-protip {
+    margin-top: 16px;
+    padding: 10px 14px;
+    background: rgba(255, 203, 5, 0.10);
+    border-left: 3px solid var(--pokemon-yellow, #FFCB05);
+    border-radius: 6px;
+    font-size: 0.88rem;
+    color: #5c4a00;
+    line-height: 1.5;
+}
+.feature-banner-protip strong {
+    color: #8a6500;
+}
+
+/* Cover image fallback caption while screenshots are loading or 404 */
+.feature-banner-img-placeholder,
+.feature-banner-img-grid:has(img[src=""]),
+.feature-banner-img-hero:has(img[src=""]),
+.feature-banner-img-asym:has(img[src=""]) {
+    background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+    color: #cbd5e1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-size: 0.75rem;
+    padding: 14px;
+    aspect-ratio: 16 / 9;
+}
+
+/* Section header between banner groups */
+.feature-section-divider {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin: 36px 4px 18px;
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #64748b;
+}
+.feature-section-divider::before,
+.feature-section-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(15, 23, 42, 0.12), transparent);
+}
+
+/* Quick-start trio at the top of the tutorial */
+.quickstart-trio {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+    margin: 18px 0 36px;
+}
+.quickstart-step {
+    background: linear-gradient(135deg, #f0f7ff 0%, #ffffff 100%);
+    border: 1px solid rgba(59, 76, 202, 0.10);
+    border-radius: 14px;
+    padding: 22px 22px 24px;
+    position: relative;
+    box-shadow: 0 2px 12px rgba(59, 76, 202, 0.06);
+}
+.quickstart-step-num {
+    position: absolute;
+    top: 14px;
+    right: 18px;
+    font-size: 2.2rem;
+    font-weight: 900;
+    color: rgba(59, 76, 202, 0.16);
+    line-height: 1;
+}
+.quickstart-step h3 {
+    margin: 0 0 8px;
+    font-size: 1.05rem;
+    color: var(--pokemon-blue, #3B4CCA);
+    font-weight: 800;
+}
+.quickstart-step p {
+    margin: 0;
+    font-size: 0.88rem;
+    line-height: 1.55;
+    color: #334155;
+}
+
+/* Hero block at the top */
+.tutorial-hero {
+    background: linear-gradient(135deg, #1e293b 0%, #3B4CCA 100%);
+    color: #fff;
+    padding: 40px 32px 36px;
+    border-radius: 20px;
+    margin-bottom: 28px;
+    box-shadow: 0 12px 32px rgba(59, 76, 202, 0.18);
+}
+.tutorial-hero-eyebrow {
+    display: inline-block;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    background: rgba(255, 203, 5, 0.18);
+    color: #fde68a;
+    padding: 4px 12px;
+    border-radius: 999px;
+    margin-bottom: 14px;
+}
+.tutorial-hero h1 {
+    font-size: 2rem;
+    font-weight: 900;
+    line-height: 1.1;
+    margin: 0 0 12px;
+}
+.tutorial-hero-tagline {
+    font-size: 1.05rem;
+    line-height: 1.55;
+    color: rgba(255, 255, 255, 0.85);
+    margin: 0 0 22px;
+    max-width: 720px;
+}
+.tutorial-hero-killers {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+}
+.tutorial-hero-killer {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    border-radius: 10px;
+    padding: 14px 16px;
+    font-size: 0.88rem;
+    line-height: 1.4;
+}
+.tutorial-hero-killer strong {
+    display: block;
+    font-size: 1rem;
+    color: #fde68a;
+    margin-bottom: 4px;
+}
+
+/* Closing CTA */
+.tutorial-cta {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    border-radius: 16px;
+    padding: 28px 30px;
+    margin: 28px 0;
+    text-align: center;
+    box-shadow: 0 4px 16px rgba(253, 230, 138, 0.4);
+}
+.tutorial-cta h2 {
+    margin: 0 0 10px;
+    color: #8a6500;
+    font-size: 1.4rem;
+    font-weight: 900;
+}
+.tutorial-cta p {
+    margin: 0 0 16px;
+    color: #5c4a00;
+    font-size: 0.98rem;
+    line-height: 1.55;
+}
+
+/* ── Responsive ── */
+@media (max-width: 780px) {
+    .feature-banner,
+    .feature-banner.banner-reverse {
+        grid-template-columns: 1fr;
+    }
+    .feature-banner.banner-reverse .feature-banner-content {
+        order: 0;
+    }
+    .banner-layout-hero {
+        grid-template-columns: 1fr;
+    }
+    .feature-banner-title {
+        font-size: 1.35rem;
+    }
+    .quickstart-trio {
+        grid-template-columns: 1fr;
+    }
+    .tutorial-hero-killers {
+        grid-template-columns: 1fr;
+    }
+    .tutorial-hero h1 {
+        font-size: 1.6rem;
+    }
+}
+
 /* ── Profile tab header: compact override ─────────────── */
 #profile > .container > .header {
     padding: 10px 16px;

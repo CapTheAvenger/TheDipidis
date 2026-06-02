@@ -19,7 +19,7 @@ window.MetaCall = (function () {
   // and the CACHE_NAME suffix in service-worker.js. If the user
   // reports "feature X isn't working", check whether this number is
   // older than the expected deploy version before debugging further.
-  const _BUILD_VERSION = 'v202606020640';
+  const _BUILD_VERSION = 'v202606020800';
   try {
     console.info(
       '%c[MetaCall] Engine boot · build %s · ' + new Date().toISOString(),
@@ -2339,6 +2339,192 @@ window.MetaCall = (function () {
   }
   let _presenceFloorLastLogId = null;
 
+  // ── Predictor 5.6 — Format-Leader Within-Family Consolidation ──
+  // As a format matures, players consolidate the dominant multi-
+  // variant family onto its safest / most-pedigreed variant. The
+  // Indianapolis (2026-05-29) calibration showed pure Dragapult
+  // grew from 35 % within-family (TEF-POR labs average) to 62 %
+  // within-family — sub-variants (Dudunsparce, Blaziken) got
+  // dropped, Dusknoir mostly held. Net effect: pure Dragapult was
+  // under-predicted by 9.45 pp at Indy.
+  //
+  // Rule: for families with ≥ MIN_VARIANTS components AND family
+  // share ≥ FAMILY_DOMINANCE_THRESHOLD, redistribute CONSOLIDATION_RATE
+  // of sub-variant predictedShareRaw to the lead variant (highest
+  // current predictedShareRaw within family). Proportional split
+  // on the way out so sub-variants shrink in relation to their
+  // current size.
+  //
+  // Tuning notes:
+  //   • CONSOLIDATION_RATE 0.40 reproduces Dragapult ex 10.4 % →
+  //     ~16 % (still under 19.75 % actual but closes 5/9 pp).
+  //   • Higher rates (0.60) get closer to the leader but crush
+  //     Dusknoir (which actually held at Indy 6.29 %). 0.40 is
+  //     the conservative middle.
+  const PREDICTOR_56_FAMILY_DOMINANCE_THRESHOLD = 20.0;
+  const PREDICTOR_56_MIN_VARIANTS = 3;
+  const PREDICTOR_56_CONSOLIDATION_RATE = 0.40;
+  let _consolidationLastLogId = null;
+  function _computeFormatLeaderConsolidation() {
+    if (!_shareList || _shareList.length === 0) return;
+
+    const familyMap = new Map();
+    let totalRaw = 0;
+    _shareList.forEach(d => {
+      const family = extractMainPokemon(d.name);
+      if (!family || family === '_junk') return;
+      const share = d.predictedShareRaw || 0;
+      totalRaw += share;
+      if (!familyMap.has(family)) familyMap.set(family, []);
+      familyMap.get(family).push({ deck: d, share });
+    });
+    if (totalRaw <= 0) return;
+
+    const applied = [];
+    familyMap.forEach((variants, family) => {
+      if (variants.length < PREDICTOR_56_MIN_VARIANTS) return;
+      const familyTotal = variants.reduce((s, v) => s + v.share, 0);
+      const familyPct = (familyTotal / totalRaw) * 100;
+      if (familyPct < PREDICTOR_56_FAMILY_DOMINANCE_THRESHOLD) return;
+
+      variants.sort((a, b) => b.share - a.share);
+      const leader = variants[0];
+      const subVariants = variants.slice(1);
+      const subTotal = subVariants.reduce((s, v) => s + v.share, 0);
+      if (subTotal <= 0) return;
+
+      const redistribute = subTotal * PREDICTOR_56_CONSOLIDATION_RATE;
+      leader.deck.predictedShareRaw = (leader.deck.predictedShareRaw || 0) + redistribute;
+      leader.deck.consolidationBoostPp = redistribute;
+
+      subVariants.forEach(sv => {
+        const take = (sv.share / subTotal) * redistribute;
+        sv.deck.predictedShareRaw = Math.max(0, (sv.deck.predictedShareRaw || 0) - take);
+        sv.deck.consolidationDecayPp = -take;
+      });
+
+      applied.push({
+        family,
+        familyPct,
+        leader: leader.deck.name,
+        leaderShareBefore: leader.share,
+        leaderShareAfter: leader.deck.predictedShareRaw,
+        redistribute,
+        subVariantCount: subVariants.length,
+      });
+    });
+
+    try {
+      const majorId = _lastMajorInfo && _lastMajorInfo.id;
+      if (applied.length > 0 && majorId && _consolidationLastLogId !== majorId) {
+        _consolidationLastLogId = majorId;
+        const lines = applied
+          .sort((a, b) => b.redistribute - a.redistribute)
+          .map(a => `${a.family} (family ${a.familyPct.toFixed(1)}%, ${a.subVariantCount} sub-variants): ${a.leader} +${a.redistribute.toFixed(2)} pp → ${a.leaderShareAfter.toFixed(2)}`)
+          .join('\n  ');
+        console.log(`[Predictor 5.6] Format-leader within-family consolidation:\n  ${lines}`);
+      }
+    } catch (_e) { /* dev log only */ }
+  }
+
+  // ── Predictor 5.7 — Anti-Leader Tech-Boost ──────────────────
+  // When a leading family dominates the field, the player base
+  // brings hard counters in anticipation. At Indianapolis, Hydrapple,
+  // Mega Lucario, and Basic Box were ALL under-predicted (−3.35,
+  // −2.35, −1.55 pp) because online ladder shares didn't reflect
+  // this anti-Dragapult tech wave. Limitless labs matchup data
+  // would have surfaced the signal: Ogerpon Meganium 65 % vs
+  // N's Zoroark, 58 % vs Dragapult Dusknoir; Mega Lucario ~55 %
+  // vs Dragapult family.
+  //
+  // Rule: when ANY family's post-5.6 predictedShareRaw exceeds
+  // LEADER_DOMINANCE_THRESHOLD, look up the labs WR of every
+  // low-share non-family deck against the leader's lead variant.
+  // Decks with WR ≥ COUNTER_WR_THRESHOLD AND current field share
+  // ≤ COUNTER_MAX_FIELD_SHARE get an additive boost scaled by
+  // wrEdge × BOOST_SCALE, capped at BOOST_PP_MAX.
+  //
+  // Why the field-share cap? The boost is meant to surface
+  // genuine surprise counters, not double-boost decks that are
+  // already big in the field. The Counter-Pick badge logic uses
+  // the same 3 % rule of thumb.
+  const PREDICTOR_57_LEADER_DOMINANCE_THRESHOLD = 25.0;
+  const PREDICTOR_57_COUNTER_WR_THRESHOLD = 0.55;
+  const PREDICTOR_57_COUNTER_MAX_FIELD_SHARE = 5.0;
+  const PREDICTOR_57_BOOST_SCALE = 8.0; // wrEdge 0.05 → 0.4 pp, 0.10 → 0.8 pp, 0.18 → 1.5 pp cap
+  const PREDICTOR_57_BOOST_PP_MAX = 1.5;
+  let _antiLeaderLastLogId = null;
+  function _computeAntiLeaderTechBoost() {
+    if (!_shareList || _shareList.length === 0) return;
+    if (typeof getBaseMatchup !== 'function') return;
+
+    const familyMap = new Map();
+    let totalRaw = 0;
+    _shareList.forEach(d => {
+      const family = extractMainPokemon(d.name);
+      if (!family || family === '_junk') return;
+      const share = d.predictedShareRaw || 0;
+      totalRaw += share;
+      if (!familyMap.has(family)) familyMap.set(family, []);
+      familyMap.get(family).push({ deck: d, share });
+    });
+    if (totalRaw <= 0) return;
+
+    let leaderFamily = null;
+    let leaderPct = 0;
+    let leaderDeckName = null;
+    familyMap.forEach((variants, family) => {
+      const familyTotal = variants.reduce((s, v) => s + v.share, 0);
+      const familyPct = (familyTotal / totalRaw) * 100;
+      if (familyPct >= PREDICTOR_57_LEADER_DOMINANCE_THRESHOLD && familyPct > leaderPct) {
+        leaderPct = familyPct;
+        leaderFamily = family;
+        variants.sort((a, b) => b.share - a.share);
+        leaderDeckName = variants[0].deck.name;
+      }
+    });
+    if (!leaderFamily || !leaderDeckName) return;
+
+    const applied = [];
+    _shareList.forEach(d => {
+      const family = extractMainPokemon(d.name);
+      if (family === leaderFamily) return;
+      const fieldShare = ((d.predictedShareRaw || 0) / totalRaw) * 100;
+      if (fieldShare > PREDICTOR_57_COUNTER_MAX_FIELD_SHARE) return;
+
+      let matchup = null;
+      try { matchup = getBaseMatchup(d.name, leaderDeckName); }
+      catch (_e) { /* no data → skip */ }
+      if (!matchup || typeof matchup.pWin !== 'number') return;
+      if (matchup.pWin < PREDICTOR_57_COUNTER_WR_THRESHOLD) return;
+
+      const wrEdge = matchup.pWin - 0.50;
+      const boost = Math.min(PREDICTOR_57_BOOST_PP_MAX, wrEdge * PREDICTOR_57_BOOST_SCALE);
+      if (boost <= 0.05) return;
+
+      d.predictedShareRaw = (d.predictedShareRaw || 0) + boost;
+      d.antiLeaderBoostPp = boost;
+      applied.push({
+        name: d.name,
+        wr: matchup.pWin,
+        fieldShare,
+        boost,
+      });
+    });
+
+    try {
+      const majorId = _lastMajorInfo && _lastMajorInfo.id;
+      if (applied.length > 0 && majorId && _antiLeaderLastLogId !== majorId) {
+        _antiLeaderLastLogId = majorId;
+        const lines = applied
+          .sort((a, b) => b.boost - a.boost)
+          .map(a => `${a.name}: +${a.boost.toFixed(2)} pp (WR ${(a.wr * 100).toFixed(1)} % vs ${leaderDeckName}, field ${a.fieldShare.toFixed(2)} %)`)
+          .join('\n  ');
+        console.log(`[Predictor 5.7] Anti-leader tech-boost vs ${leaderFamily} (${leaderPct.toFixed(1)} % field):\n  ${lines}`);
+      }
+    } catch (_e) { /* dev log only */ }
+  }
+
   // ── Diagnostic: Counter Coverage vs Dominant Family ────────
   // Surfaces decks that should have a matchup row vs the
   // dominant family but don't, or whose WR falls below the 4.5
@@ -3045,6 +3231,21 @@ window.MetaCall = (function () {
     // step then redistributes the freed share from the dominant
     // family into these adopted counters.
     _computeCounterAdoptionBoost();
+
+    // Predictor 5.6 — Format-Leader Within-Family Consolidation
+    // and 5.7 — Anti-Leader Tech-Boost. Both target the
+    // "Indianapolis pattern": as the format matures, the dominant
+    // multi-variant family consolidates onto its lead variant
+    // (Dragapult family: pure Dragapult went 35 % within-family
+    // → 62 % within-family at Indy) and the player base brings
+    // hard counters in anticipation (Hydrapple, Mega Lucario,
+    // Basic Box all underpredicted by 1.5–3.5 pp at Indy because
+    // the online ladder didn't reflect this anti-Dragapult tech
+    // wave). 5.6 runs first so the leader's predicted share
+    // reflects consolidation; 5.7 then reads that updated share
+    // when deciding whether the leader threshold is breached.
+    _computeFormatLeaderConsolidation();
+    _computeAntiLeaderTechBoost();
 
     // Predictor 5.5 — Online-Presence Floor. Final safety floor for
     // decks with verified online + labs presence that the dampers

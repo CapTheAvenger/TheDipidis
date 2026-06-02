@@ -746,17 +746,17 @@
     async function loadSavedMetaBinder() {
         const user = window.auth?.currentUser;
         if (!user || !window.db) {
-            showToast(mbText('mb.loginRequired', 'Bitte einloggen um den letzten Binder zu laden.'), 'warning');
+            showToast(mbText('mb.loginRequired', 'Please log in to load the last binder.'), 'warning');
             return;
         }
         try {
-            showToast(mbText('mb.loadingSaved', 'Lade gespeicherten Binder…'), 'info');
+            showToast(mbText('mb.loadingSaved', 'Loading saved binder…'), 'info');
             const doc = await window.db.collection('users').doc(user.uid).get();
             const data = doc.exists ? doc.data() : {};
             const savedCards = Array.isArray(data.metaBinderCards) ? data.metaBinderCards : [];
             const savedDate = data.metaBinderSnapshotDate || null;
             if (savedCards.length === 0) {
-                showToast(mbText('mb.noSaved', 'Kein gespeicherter Binder vorhanden. Bitte zuerst generieren.'), 'warning');
+                showToast(mbText('mb.noSaved', 'No saved binder found. Please generate first.'), 'warning');
                 return;
             }
             const cards = recalcOwnership(savedCards);
@@ -769,10 +769,10 @@
             window._metaBinderDelta = delta;
             renderMetaBinder(delta);
             const dateStr = savedDate ? new Date(savedDate).toLocaleDateString(typeof getLang === 'function' && getLang() === 'de' ? 'de-DE' : 'en-US') : '?';
-            showToast(mbText('mb.loadedSaved', `Binder vom ${dateStr} geladen – Besitzstand aktualisiert.`), 'success');
+            showToast(mbText('mb.loadedSaved', `Saved binder loaded.`).replace('{date}', dateStr), 'success');
         } catch (e) {
             console.error('[MetaBinder] loadSavedMetaBinder failed', e);
-            showToast(mbText('mb.loadError', 'Fehler beim Laden des Binders.'), 'error');
+            showToast(mbText('mb.loadError', 'Error loading binder.'), 'error');
         }
     }
 
@@ -1548,7 +1548,7 @@
             });
 
         setSelect.innerHTML = [
-            '<option value="all">Alle Sets</option>',
+            `<option value="all">${mbText('mb.filterSetAllOption','All sets')}</option>`,
             ...setCodes.map(code => `<option value="${escapeHtml(code)}">${escapeHtml(code)}</option>`)
         ].join('');
 
@@ -1604,10 +1604,10 @@
                         <div class="deck-banner-content">
                             <div class="deck-banner-name">${bannerIcon}${safeName}</div>
                             <div class="deck-banner-stats" style="display:flex;flex-direction:column;align-items:flex-start;gap:4px;">
-                                <span class="stat-badge rank-performance-hint" style="background:#fff3e0;color:#e65100;" title="Lower Rank = Better Performance">${currentMetaLabel}: ${rankText}</span>
+                                <span class="stat-badge rank-performance-hint" style="background:#fff3e0;color:#e65100;" title="${mbText('mb.tooltipLowerRank','Lower rank = better performance')}">${currentMetaLabel}: ${rankText}</span>
                                 <span class="stat-badge">${currentMetaLabel}: ${shareText}</span>
-                                <span class="stat-badge">City current: ${cityCurrentText}</span>
-                                <span class="stat-badge">City past: ${cityPastText}</span>
+                                <span class="stat-badge">${mbText('mb.statCityCurrent','City current:')} ${cityCurrentText}</span>
+                                <span class="stat-badge">${mbText('mb.statCityPast','City past:')} ${cityPastText}</span>
                             </div>
                         </div>
                     </div>`;
@@ -1723,7 +1723,7 @@
                     <span class="meta-binder-stat-value meta-binder-stat-red">${missingUnique} / ${missingCopies}</span>
                     <span class="meta-binder-stat-label">${mbText('mb.missing', 'Missing (Cards / Copies)')}</span>
                 </div>
-                <div class="meta-binder-stat"${!hasProfile ? ' title="Login nötig für Vergleich"' : ''}>
+                <div class="meta-binder-stat"${!hasProfile ? ` title="${mbText('mb.tooltipLoginForCompare','Login required for comparison')}"` : ''}>
                     <span class="meta-binder-stat-value" style="color:#3B4CCA">${hasProfile ? newCount : '–'}</span>
                     <span class="meta-binder-stat-label">${newLabel}</span>
                 </div>
@@ -1902,23 +1902,23 @@
             return {
                 name: card.name,
                 html: `
-                <div class="meta-binder-card ${statusClass}" data-type="${escapeHtml(typeMeta.type)}" data-set="${safeSet}" data-supertype="${escapeHtml(typeMeta.supertype)}" data-is-ace-spec="${typeMeta.isAceSpec ? 'true' : 'false'}" data-name="${safeName}" data-pokedex="${String(dexNumber)}" data-set-order="${String(setOrder)}" data-number-sort="${String(numberSort)}" data-deck-count="${String(card.decks ? card.decks.length : 0)}" data-card-id="${safeCardId}" data-family-refs="${escapeHtml((Array.isArray(card.familyRefs) ? card.familyRefs : []).join(','))}" data-max-count="${String(card.maxCount || 0)}" title="Wird verwendet in: ${deckList}${ownershipHint}">
+                <div class="meta-binder-card ${statusClass}" data-type="${escapeHtml(typeMeta.type)}" data-set="${safeSet}" data-supertype="${escapeHtml(typeMeta.supertype)}" data-is-ace-spec="${typeMeta.isAceSpec ? 'true' : 'false'}" data-name="${safeName}" data-pokedex="${String(dexNumber)}" data-set-order="${String(setOrder)}" data-number-sort="${String(numberSort)}" data-deck-count="${String(card.decks ? card.decks.length : 0)}" data-card-id="${safeCardId}" data-family-refs="${escapeHtml((Array.isArray(card.familyRefs) ? card.familyRefs : []).join(','))}" data-max-count="${String(card.maxCount || 0)}" title="${mbText('mb.cardTitleUsedIn','Used in:')} ${deckList}${ownershipHint}">
                     ${imageUrl
                         ? `<img src="${safeImage}" alt="${safeName}" class="meta-binder-card-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
                            <div class="meta-binder-card-fallback" style="display:none">${safeName}</div>`
                         : `<div class="meta-binder-card-fallback">${safeName}<br><small>${escapeHtml(card.set)} ${escapeHtml(card.number)}</small></div>`}
                     <div class="pos-abs card-action-row-wide card-database-top-actions">
-                        <button type="button" data-card-id="${safeCardId}" onclick="addCollectionFromCardDbButton(this)" class="btn-green card-badge" title="Add to collection (${ownedCount}/4)" aria-label="Add ${safeName} to collection">+</button>
-                        <button type="button" data-card-id="${safeCardId}" onclick="removeCollectionFromCardDbButton(this)" class="btn-red card-badge" style="color: ${ownedCount > 0 ? '#fff' : '#999'}; background: ${ownedCount > 0 ? '#dc3545' : '#fff'};" title="Remove from collection (${ownedCount}/4)" aria-label="Remove ${safeName} from collection">-</button>
-                        <button type="button" data-card-id="${safeCardId}" data-missing="${String(Math.max(0, (card.maxCount || 0) - (card.ownedExact || 0)))}" onclick="toggleWishlistMetaBinder(this)" class="btn-wishlist card-badge" style="color: #fff; background: ${userWantsCard ? '#E91E63' : '#F48FB1'}; border: 2px solid ${userWantsCard ? '#E91E63' : '#F48FB1'};" title="${userWantsCard ? 'Remove from wishlist' : 'Add missing (' + Math.max(0, (card.maxCount || 0) - (card.ownedExact || 0)) + ') to wishlist'}" aria-label="${userWantsCard ? 'Remove' : 'Add'} ${safeName} wishlist">${userWantsCard ? '&#9829;' : '&#9825;'}</button>
+                        <button type="button" data-card-id="${safeCardId}" onclick="addCollectionFromCardDbButton(this)" class="btn-green card-badge" title="${mbText('mb.addToCollection','Add to collection ({owned}/{max})').replace('{owned}', ownedCount).replace('{max}', 4)}" aria-label="${mbText('mb.ariaAddToCollection','Add {name} to collection').replace('{name}', safeName)}">+</button>
+                        <button type="button" data-card-id="${safeCardId}" onclick="removeCollectionFromCardDbButton(this)" class="btn-red card-badge" style="color: ${ownedCount > 0 ? '#fff' : '#999'}; background: ${ownedCount > 0 ? '#dc3545' : '#fff'};" title="${mbText('mb.removeFromCollection','Remove from collection ({owned}/{max})').replace('{owned}', ownedCount).replace('{max}', 4)}" aria-label="${mbText('mb.ariaRemoveFromCollection','Remove {name} from collection').replace('{name}', safeName)}">-</button>
+                        <button type="button" data-card-id="${safeCardId}" data-missing="${String(Math.max(0, (card.maxCount || 0) - (card.ownedExact || 0)))}" onclick="toggleWishlistMetaBinder(this)" class="btn-wishlist card-badge" style="color: #fff; background: ${userWantsCard ? '#E91E63' : '#F48FB1'}; border: 2px solid ${userWantsCard ? '#E91E63' : '#F48FB1'};" title="${userWantsCard ? mbText('mb.removeFromWishlist','Remove from wishlist') : mbText('mb.addMissingToWishlist','Add missing ({n}) to wishlist').replace('{n}', Math.max(0, (card.maxCount || 0) - (card.ownedExact || 0)))}" aria-label="${mbText('mb.ariaWishlistOnOff','{action} {name} wishlist').replace('{action}', userWantsCard ? 'Remove' : 'Add').replace('{name}', safeName)}">${userWantsCard ? '&#9829;' : '&#9825;'}</button>
                     </div>
                     <div class="meta-binder-card-info">
                         ${newBadge}
                         <span class="meta-binder-card-need">${card.maxCount}x</span>
-                        <div class="deck-indicator-count">${card.decks.length} Decks</div>
+                        <div class="deck-indicator-count">${card.decks.length} ${mbText('mb.deckIndicatorCountSuffix','Decks')}</div>
                         ${countLabel}
                     </div>
-                    ${printCount > 1 ? `<button type="button" class="meta-binder-prints-btn" onclick="openRaritySwitcherFromDB('${escapeArchetypeForJs(card.name)}','${safeSet}','${safeNumber}')" title="${printCount} Prints verfügbar" aria-label="Show all prints for ${safeName}">🖨 ${printCount} Prints</button>` : ''}
+                    ${printCount > 1 ? `<button type="button" class="meta-binder-prints-btn" onclick="openRaritySwitcherFromDB('${escapeArchetypeForJs(card.name)}','${safeSet}','${safeNumber}')" title="${printCount} ${mbText('mb.printsAvailable','prints available')}" aria-label="${mbText('mb.ariaShowAllPrints','Show all prints for {name}').replace('{name}', safeName)}">🖨 ${printCount} Prints</button>` : ''}
                 </div>`
             };
         });

@@ -93,7 +93,9 @@
             }
             // Add modular class for live price state
             buttonElement.classList.add('price-btn-live');
-            buttonElement.title = `Live Price: ${price} (Click to buy on Cardmarket)`;
+            buttonElement.title = (typeof t === 'function'
+                ? t('price.liveTitle').replace('{price}', price)
+                : `Live Price: ${price} (Click to buy on Cardmarket)`);
         }
         
         // Auto-fetch live prices for visible cards (call this when rendering cards)

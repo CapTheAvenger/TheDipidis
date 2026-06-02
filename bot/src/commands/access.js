@@ -51,11 +51,19 @@ export async function handleAccessRequest(ctx) {
     if (admins.length === 0) {
         // No admins configured: tell the user the bot isn't accepting
         // new users so they don't sit waiting on a request that goes
-        // nowhere. Also log loudly so the operator sees the gap.
+        // nowhere. Include the requester's numeric ID so an operator
+        // who's testing their OWN bot (the most common cause of
+        // hitting this branch) can copy-paste it straight into the
+        // ADMIN_USER_IDS env var without going to @userinfobot.
+        // Also log loudly so the operator sees the gap.
         console.warn('[access] request from id=' + from.id + ' ignored: no ADMIN_USER_IDS configured');
         await ctx.reply(
-            '🔒 Dieser Bot ist aktuell nicht für neue User offen. ' +
-            'Wenn du Zugriff brauchst, melde dich beim Betreiber.',
+            '🔒 <b>Dieser Bot ist aktuell nicht für neue User offen.</b>\n' +
+            'Wenn du Zugriff brauchst, melde dich beim Betreiber.\n\n' +
+            `<i>Deine Telegram-User-ID:</i> <code>${from.id}</code>\n` +
+            '<i>(Betreiber: setze diese ID in <code>ADMIN_USER_IDS</code> ' +
+            'oder <code>ALLOWED_USER_IDS</code> im Bot-Deployment.)</i>',
+            { parse_mode: 'HTML' },
         );
         return;
     }

@@ -2611,6 +2611,74 @@
     margin-right: 2px;
 }
 
+/* Past-Meta tournament stack — one mini-row per regional in the
+ * rotation (TEF-POR = 5 events). Reads as a compact history strip
+ * under the per-deck intel grid. */
+.mc-pmt-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    padding: 6px 10px;
+    background: #f6fbff;
+    border: 1px solid #d8e9f9;
+    border-radius: 6px;
+    font-size: 0.78rem;
+    color: #1f4f7a;
+    font-variant-numeric: tabular-nums;
+}
+.mc-pmt-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 6px 10px;
+    padding: 2px 0;
+    border-bottom: 1px dashed rgba(13,75,135,0.08);
+}
+.mc-pmt-row:last-child { border-bottom: none; }
+.mc-pmt-row-winner {
+    background: linear-gradient(90deg, rgba(243,156,18,0.10), transparent 60%);
+    border-radius: 4px;
+    padding-left: 4px;
+    margin-left: -4px;
+}
+.mc-pmt-place {
+    font-weight: 700;
+    color: #0d4b87;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: baseline;
+    gap: 4px;
+}
+.mc-pmt-winner {
+    font-size: 0.95em;
+    line-height: 1;
+}
+.mc-pmt-date {
+    font-weight: 500;
+    color: #6b7c93;
+    font-size: 0.88em;
+    margin-left: 2px;
+}
+.mc-pmt-stats {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 4px 10px;
+}
+.mc-pmt-seg { white-space: nowrap; }
+.mc-pmt-k {
+    color: #6b7c93;
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    margin-right: 2px;
+}
+@media (max-width: 700px) {
+    .mc-pmt-stack { font-size: 0.72rem; padding: 5px 8px; }
+    .mc-pmt-row { gap: 4px 8px; padding: 3px 0; flex-direction: column; align-items: stretch; }
+    .mc-pmt-stats { gap: 3px 8px; }
+}
+
 /* ── Column-coded numeric values ── */
 .mc-cell-online .mc-share-online {
     color: #2980b9;

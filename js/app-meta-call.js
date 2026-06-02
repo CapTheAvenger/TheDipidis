@@ -19,7 +19,7 @@ window.MetaCall = (function () {
   // and the CACHE_NAME suffix in service-worker.js. If the user
   // reports "feature X isn't working", check whether this number is
   // older than the expected deploy version before debugging further.
-  const _BUILD_VERSION = 'v202606020530';
+  const _BUILD_VERSION = 'v202606020640';
   try {
     console.info(
       '%c[MetaCall] Engine boot · build %s · ' + new Date().toISOString(),
@@ -3641,9 +3641,25 @@ window.MetaCall = (function () {
               _majorSharesByDeck[k].push({
                 date  : rowDate,
                 tid   : tid,
+                tournamentName: (r.tournament_name || '').trim(),
+                shortName: _shortMajorName((r.tournament_name || '').trim()),
                 share : share,
                 day1  : parseEU(r.day1_share_pct || '0'),
                 day2  : parseEU(r.day2_share_pct || '0'),
+                // Extended fields for the Past Meta per-tournament
+                // breakdown UI — overall WR, Day-1 WR + share, Day-2
+                // WR + share, conv, top-1 marker so the renderer can
+                // ✓ a deck that won the event.
+                players:       parseInt(r.player_count || '0', 10) || 0,
+                winPct:        parseEU(r.win_pct || '0'),
+                day1Share:     parseEU(r.day1_share_pct || '0'),
+                day1WinPct:    parseEU(r.day1_win_pct || '0'),
+                day1Players:   parseInt(r.day1_players || '0', 10) || 0,
+                day2Share:     parseEU(r.day2_share_pct || '0'),
+                day2WinPct:    parseEU(r.day2_win_pct || '0'),
+                day2Players:   parseInt(r.day2_players || '0', 10) || 0,
+                dayConv:       parseEU(r.day1_to_day2_conv || '0'),
+                top1Count:     parseInt(r.top1_count || '0', 10) || 0,
               });
               if (!_topByTournament[tid]) _topByTournament[tid] = [];
               _topByTournament[tid].push({ k, share });
@@ -3889,6 +3905,9 @@ window.MetaCall = (function () {
         && _currentSetCodeUpper
         && _activeInPersonSetCode !== _currentSetCodeUpper;
       if (_currentMetaLagWindow) {
+        // Drop the labs aggregates that the predictor would read —
+        // these represent the PREVIOUS rotation (TEF-POR) and would
+        // anchor CRI predictions to the wrong format.
         labsRowsByDeck = {};
         _labsRowsByDeck = {};
         _labsConvByDeck = {};
@@ -3898,19 +3917,13 @@ window.MetaCall = (function () {
         _labsShareGrowthByDeck = {};
         _activeFormatLabsDecks = new Set();
         _activeFormatTop15Decks = new Set();
-        _majorSharesByDeck = {};
         _tournamentStats = {};
         _labsMajorRows = 0;
-        // Also clear the per-deck "Last Major" snapshot + the major
-        // info banner — those drive the Melbourne (D1 4.7 % / D2 4.5 %)
-        // chip that was still appearing on CRI-deck rows after the
-        // first lag-window fix. The chip pulls from _lastMajorByDeck
-        // + _lastMajorInfo, both of which are populated from the same
-        // TEF-POR labs rows. For a CRI prediction these aren't
-        // representative and must be hidden.
-        _lastMajorByDeck = {};
-        _lastMajorInfo = null;
-        _lastMajorDate = null;
+        // KEEP _majorSharesByDeck, _lastMajorByDeck, _lastMajorInfo
+        // populated even in lag-window — Past Meta needs them for
+        // the per-tournament breakdown UI. The renderer suppresses
+        // the Current-Meta "Last Major" chip via the lag-window
+        // guard at the chip site instead of clearing the data here.
         console.info(
           '[MetaCall] Lag-window guard — dropped TEF-POR (%s) labs aggregates for CRI (%s) ' +
           'current-meta predictions. Mode A (online ladder only). Kept underdog-champion + online-win signals.',
@@ -6790,8 +6803,32 @@ window.MetaCall = (function () {
     // box. Single inline line: "Prag · D1 5,2% (WR 46%) · D2 5,5% (WR
     // 37%) · Konv 19,7%". Visually subordinate to the stat tiles so
     // the user reads "current state first, history second".
+    //
+    // Past Meta override: the rotation has a handful of regionals
+    // (TEF-POR has 5: Prague, LA, Utrecht, Campinas, Melbourne) and
+    // the user wants to see them ALL stacked per deck rather than
+    // just the last one. Renders a compact mini-row per tournament
+    // with a 🏆 marker on the winner (top1_count > 0), D1 share/WR,
+    // D2 share/WR, conversion. Falls back to the single-chip path
+    // for Current Meta.
     let majorChipHtml = '';
-    if (_lastMajorInfo && _lastMajorByDeck[k]) {
+    // Current Meta lag-window: suppress the chip even though the
+    // data exists. _lastMajorByDeck / _majorSharesByDeck still
+    // hold TEF-POR rows for the Past Meta UI, but they're not
+    // representative of CRI predictions and showed up as
+    // misleading "Melbourne (D1 4.7 %)" chips on CRI deck rows.
+    const _currentSetCodeUpperRender = (_formatWindow && _formatWindow.current_set)
+      ? String(_formatWindow.current_set).trim().toUpperCase()
+      : '';
+    const _renderLagWindow = _metaSource === 'current'
+      && _activeInPersonSetCode
+      && _currentSetCodeUpperRender
+      && _activeInPersonSetCode !== _currentSetCodeUpperRender;
+    if (_metaSource === 'past'
+        && Array.isArray(_majorSharesByDeck[k])
+        && _majorSharesByDeck[k].length > 0) {
+      majorChipHtml = _renderPastMetaTournamentStack(_majorSharesByDeck[k]);
+    } else if (!_renderLagWindow && _lastMajorInfo && _lastMajorByDeck[k]) {
       const lm      = _lastMajorByDeck[k];
       const dateStr = _formatShortDate(_lastMajorInfo.date);
       const where   = _lastMajorInfo.shortName || t('mc.intelMajorFallback');
@@ -6871,6 +6908,48 @@ window.MetaCall = (function () {
   // Helper: render the Last-Major info as a single inline chip line.
   // Replaces the old bordered card. Format:
   //   📍 Prag · D1 5,2% (WR 46%) · D2 5,5% (WR 37%) · Konv 19,7%
+  // Past-Meta-only: stack ALL tournaments of the rotation in one
+  // compact block. Each row = 🏆 (if winner) · short event name + date
+  // · D1 X % (WR Y %) · D2 X % (WR Y %) · Konv Z %.
+  // Sorted oldest-first so the chronology reads left-to-right within
+  // the rotation arc; the user sees "early format → late format" and
+  // can spot adoption / drop-off trends per deck.
+  function _renderPastMetaTournamentStack(events) {
+    if (!Array.isArray(events) || events.length === 0) return '';
+    const fmt = (n, dp) => n.toFixed(dp).replace('.', ',');
+    const sorted = events.slice().sort((a, b) =>
+      (a.date || '').localeCompare(b.date || '')
+    );
+    const rows = sorted.map(ev => {
+      const isWinner = (ev.top1Count || 0) > 0;
+      const winnerMark = isWinner
+        ? `<span class="mc-pmt-winner" title="Won this event">🏆</span>`
+        : '';
+      const dateStr = _formatShortDate(ev.date);
+      const where = ev.shortName || ev.tournamentName || '—';
+      const day1Val = ev.day1Share > 0 ? `${fmt(ev.day1Share, 1)} %` : '—';
+      const day1Wr  = ev.day1WinPct > 0 ? ` (WR ${fmt(ev.day1WinPct, 0)} %)` : '';
+      const day2Made = ev.day2Players > 0;
+      const day2Val = day2Made ? `${fmt(ev.day2Share, 1)} %` : '—';
+      const day2Wr  = (day2Made && ev.day2WinPct > 0) ? ` (WR ${fmt(ev.day2WinPct, 0)} %)` : '';
+      const conv = (ev.dayConv && ev.dayConv > 0)
+        ? ev.dayConv
+        : (ev.day1Players > 0 ? ev.day2Players / ev.day1Players : 0);
+      const convVal = conv > 0 ? `${fmt(conv * 100, 1)} %` : '—';
+      return `<div class="mc-pmt-row${isWinner ? ' mc-pmt-row-winner' : ''}">
+        <span class="mc-pmt-place">${winnerMark}${esc(where)}${dateStr ? `<span class="mc-pmt-date">${esc(dateStr)}</span>` : ''}</span>
+        <span class="mc-pmt-stats">
+          <span class="mc-pmt-seg"><span class="mc-pmt-k">${esc(t('mc.intelMajorDay1'))}</span> ${day1Val}${day1Wr}</span>
+          <span class="mc-pmt-seg"><span class="mc-pmt-k">${esc(t('mc.intelMajorDay2'))}</span> ${day2Val}${day2Wr}</span>
+          <span class="mc-pmt-seg"><span class="mc-pmt-k">Konv.</span> ${convVal}</span>
+        </span>
+      </div>`;
+    }).join('');
+    return `<div class="mc-pmt-stack" title="All ${sorted.length} ${_pastMetaFormatKey || ''} regionals">
+      ${rows}
+    </div>`;
+  }
+
   function _intelMajorChip(where, lm) {
     const fmt = (n, dp) => n.toFixed(dp).replace('.', ',');
     const made = lm.day2Players > 0;

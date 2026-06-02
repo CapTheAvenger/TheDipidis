@@ -19,7 +19,7 @@ window.MetaCall = (function () {
   // and the CACHE_NAME suffix in service-worker.js. If the user
   // reports "feature X isn't working", check whether this number is
   // older than the expected deploy version before debugging further.
-  const _BUILD_VERSION = 'v202606020005';
+  const _BUILD_VERSION = 'v202606020137';
   try {
     console.info(
       '%c[MetaCall] Engine boot · build %s · ' + new Date().toISOString(),
@@ -252,6 +252,13 @@ window.MetaCall = (function () {
                                             // Used by Predictor 4.7 (Online-Tournament-Win Signal) to filter
                                             // winners CSV rows to the rotation that's actually producing
                                             // in-person results.
+  // Newest scraped_at timestamp seen across the labs + online CSVs.
+  // Surfaced in the Mode B banner so the user can sanity-check that
+  // they aren't looking at months-old cached data — if it reads
+  // "Daten von 2025-XX-XX" while the user knows the scraper ran today,
+  // the browser cache is lying and they should clear it. User-flagged
+  // 2026-06 after the Miraidon/Lugia-Archeops incident.
+  let _dataLastScrapedAt       = '';        // ISO 'YYYY-MM-DD HH:MM:SS+00:00' or just date
   const PHASE_B_MIN_TOURNAMENTS = 2;        // require ≥2 majors to count as "established"
   const PHASE_B_MIN_SHARE_PCT   = 2.0;      // each at ≥2 % share
   // Tuned 2026-06 against Indy actuals via tools/calibrate_sweep_indy.py.
@@ -3394,6 +3401,7 @@ window.MetaCall = (function () {
       _majorSharesByDeck      = {};
       _activeInPersonSetCode  = '';
       _onlineWinsByDeck       = {};
+      _dataLastScrapedAt      = '';
       let labsRowsByDeck = {};
       try {
         const labsResp = await fetch('data/labs_tournament_decks.csv?t=' + Date.now());
@@ -3546,6 +3554,13 @@ window.MetaCall = (function () {
             if (!latestId || tid > latestId) {
               latestId = tid;
               latestRow = r;
+            }
+            // Track newest scraped_at across ALL rows — surfaced in
+            // the Mode B banner so the user can spot stale-cache
+            // problems at a glance.
+            const scr = (r.scraped_at || '').trim();
+            if (scr && scr > _dataLastScrapedAt) {
+              _dataLastScrapedAt = scr;
             }
           });
           if (latestRow) {
@@ -6568,6 +6583,24 @@ window.MetaCall = (function () {
     const activeTag = _activeInPersonSetCode
       ? ` <span class="mc-predictor-banner-active" style="opacity:0.75;">active rotation: ${_activeInPersonSetCode}</span>`
       : '';
+    // Stale-cache canary (2026-06). Surfaces the newest scraped_at
+    // timestamp we saw across the loaded labs CSV. If this displays
+    // a date the user knows is older than the latest scraper run,
+    // their browser is serving stale-cached CSVs and they need to
+    // hard-reload / clear site data.
+    let staleTag = '';
+    if (_dataLastScrapedAt) {
+      const shortDate = _dataLastScrapedAt.slice(0, 10);
+      const ageDays = (function () {
+        try {
+          return Math.floor((Date.now() - new Date(shortDate + 'T00:00:00Z').getTime()) / 86400000);
+        } catch (_e) { return 0; }
+      })();
+      const isStale = ageDays > 8; // weekly scraper + 1d slack
+      const color = isStale ? '#b91c1c' : '#374151';
+      const warn = isStale ? ' ⚠ STALE' : '';
+      staleTag = ` <span class="mc-predictor-banner-stale" style="opacity:0.85;color:${color};" title="Newest scraped_at timestamp in the loaded labs CSV. If this is older than the last weekly scraper run, the browser is serving cached data — clear site data + hard-reload to refresh.">Daten: ${shortDate}${warn}</span>`;
+    }
 
     // Predictor 3.0: when a post-major baseline snapshot is loaded, append
     // "+ Online-Entwicklung seit DD.MM." so the user sees that the trend
@@ -6587,12 +6620,12 @@ window.MetaCall = (function () {
       const tournNum = _labsMajorRows;
       return `<div class="mc-predictor-banner mc-predictor-banner-b">
         <span class="mc-predictor-banner-icon">📊</span>
-        <span class="mc-predictor-banner-text">${t('mc.bannerModeB').replace('{n}', tournNum)}${sourceTag}${activeTag}${trendSuffix}${clSuffix}${accuracySuffix}</span>
+        <span class="mc-predictor-banner-text">${t('mc.bannerModeB').replace('{n}', tournNum)}${sourceTag}${activeTag}${staleTag}${trendSuffix}${clSuffix}${accuracySuffix}</span>
       </div>`;
     }
     return `<div class="mc-predictor-banner mc-predictor-banner-a">
       <span class="mc-predictor-banner-icon">⚡</span>
-      <span class="mc-predictor-banner-text">${t('mc.bannerModeA')}${sourceTag}${activeTag}${trendSuffix}${clSuffix}${accuracySuffix}</span>
+      <span class="mc-predictor-banner-text">${t('mc.bannerModeA')}${sourceTag}${activeTag}${staleTag}${trendSuffix}${clSuffix}${accuracySuffix}</span>
     </div>`;
   }
 

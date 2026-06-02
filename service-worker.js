@@ -1,12 +1,12 @@
 // Service Worker for Pokemon TCG Analysis PWA
-// v202606020005
+// v202606020137
 // Strategies:
 //   HTML / navigation → Network-first  (users always see latest version)
 //   JS / CSS          → Network-first  (always serve fresh; fall back to cache offline)
 //   Images            → Cache-first    (rarely change)
 //   Data files        → Network-first  (fresh scraper output; fall back to cache offline)
 
-const CACHE_NAME = 'tcg-analysis-v202606020005';
+const CACHE_NAME = 'tcg-analysis-v202606020137';
 
 // Static shell — cached on install.
 //
@@ -232,16 +232,19 @@ self.addEventListener('fetch', function(event) {
     return;
   }
 
-  // Data files (CSV / JSON under /data/): NETWORK-FIRST
-  // Always try the network so users see the latest scraper output.
-  // Falls back to cache only when offline. Was stale-while-revalidate
-  // until 2026-05-24 — that masked mid-scrape partial chunks (e.g.
-  // TEF-POR.csv with only Prague before LA/Utrecht/Campinas were
-  // appended), forcing users to hard-reload to see updated data.
-  // Network-first trades ~200 ms initial-load latency for freshness.
+  // Data files (CSV / JSON under /data/): NETWORK-FIRST, STRICT WHEN ONLINE.
+  // User-flagged 2026-06: cache fallback was silently serving STALE data
+  // even when the browser was online but the fetch hit a transient
+  // error (CDN hiccup, captive portal, weak wifi). Result: months-old
+  // shares lying about the meta. Fix is to fall back to cache ONLY
+  // when the browser self-reports offline (navigator.onLine === false).
+  // When online, propagate the network error so the calling code can
+  // show "data unavailable" rather than a confidently-wrong stale
+  // value. Also upgraded the request cache mode from 'no-cache' to
+  // 'no-store' to bypass HTTP cache layers as well.
   if (url.pathname.indexOf('/data/') !== -1) {
     event.respondWith(
-      fetch(event.request, { cache: 'no-cache' })
+      fetch(event.request, { cache: 'no-store' })
         .then(function(response) {
           if (response && response.ok) {
             var clone = response.clone();
@@ -251,17 +254,27 @@ self.addEventListener('fetch', function(event) {
           }
           return response;
         })
-        .catch(function() {
-          return caches.match(cleanUrl);
+        .catch(function(err) {
+          // STRICT ONLINE: only cache-fall-back when the browser
+          // reports offline. Some user agents have flaky onLine, but
+          // it's strictly better than the alternative (lying with
+          // months-old shares to a connected user).
+          if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+            return caches.match(cleanUrl);
+          }
+          // Online failure: propagate the error. Callers in
+          // app-meta-call.js wrap the fetch in try/catch and degrade
+          // gracefully (e.g. show "no data yet" instead of stale).
+          throw err;
         })
     );
     return;
   }
 
-  // — JS / CSS: NETWORK-FIRST (always serve latest, fallback to cache offline) —
+  // — JS / CSS: NETWORK-FIRST, STRICT WHEN ONLINE (same rationale) —
   if (url.pathname.endsWith('.js') || url.pathname.endsWith('.css')) {
     event.respondWith(
-      fetch(event.request, { cache: 'no-cache' })
+      fetch(event.request, { cache: 'no-store' })
         .then(function(response) {
           if (response && response.ok) {
             var clone = response.clone();
@@ -271,8 +284,11 @@ self.addEventListener('fetch', function(event) {
           }
           return response;
         })
-        .catch(function() {
-          return caches.match(cleanUrl);
+        .catch(function(err) {
+          if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+            return caches.match(cleanUrl);
+          }
+          throw err;
         })
     );
     return;

@@ -2084,6 +2084,68 @@ def main() -> None:
             tournament_types=tournament_types,
         )
 
+        # ── Recent-TID gap-fill (2026-06) ───────────────────────────
+        # User-flagged: Special Event Lima (TID 0067, 499 players,
+        # 2026-05-23) existed on labs but wasn't picked up by the
+        # weekly run. The index-page scrape at scrape_tournament_list()
+        # only lists tournaments labs HIGHLIGHTS on their landing page
+        # — Special Events and smaller / regional events sometimes get
+        # filtered out of that listing even though their /standings +
+        # /decks pages are fully published.
+        #
+        # Fix: after the index fetch, walk the GAP between the highest
+        # TID we found AND the highest TID we already know about (from
+        # labs_tournaments.json) — plus a small lookback window of
+        # GAP_FILL_LOOKBACK so we catch any TIDs the index NEVER
+        # listed. Each probed TID hits /standings; 200 → add to the
+        # discovery list, 404 → skip silently.
+        #
+        # Cost: at most GAP_FILL_LOOKBACK extra HTTP requests per
+        # weekly run (currently 10 → ~5 seconds at the default delay).
+        GAP_FILL_LOOKBACK = 10
+        try:
+            cached_index = _load_cached_tournament_index()
+            known_tids = {
+                int(t['tournament_id']) for t in (tournaments + cached_index)
+                if str(t.get('tournament_id', '')).isdigit()
+            }
+            if known_tids:
+                max_tid = max(known_tids)
+                gap_window = set(range(max_tid - GAP_FILL_LOOKBACK, max_tid + 1))
+                missing = sorted(gap_window - known_tids)
+                if missing:
+                    logger.info(
+                        "Gap-fill: probing %d missing TIDs in [%04d..%04d]: %s",
+                        len(missing), missing[0], missing[-1],
+                        ', '.join(f'{t:04d}' for t in missing),
+                    )
+                    new_tids = discover_tournament_ids_by_walk(
+                        min(missing), max(missing), delay=delay,
+                    )
+                    # Only the actually-missing ones get added (the walk
+                    # also surfaces TIDs we already have).
+                    new_to_add = [tid for tid in new_tids if int(tid) in set(missing)]
+                    for tid in new_to_add:
+                        meta = _meta_from_cache_or_scrape(tid, fallback_type='special')
+                        tournaments.append({
+                            'tournament_id'  : tid,
+                            'tournament_name': meta['tournament_name'],
+                            'tournament_date': meta['tournament_date'],
+                            'tournament_type': meta['tournament_type'],
+                            'country'        : meta['country'],
+                        })
+                        logger.info(
+                            "Gap-fill: added %s — %s (%s, %s)",
+                            tid, meta['tournament_name'],
+                            meta['tournament_type'], meta['tournament_date'] or 'date n/a',
+                        )
+                else:
+                    logger.info("Gap-fill: no missing TIDs in lookback window of %d",
+                                GAP_FILL_LOOKBACK)
+        except Exception as e:
+            # Gap-fill is best-effort — never let it kill the run.
+            logger.warning("Gap-fill skipped due to error: %s", e)
+
     if not tournaments:
         logger.warning("No tournaments matched the given filters – nothing to do.")
         return

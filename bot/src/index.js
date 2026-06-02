@@ -20,7 +20,7 @@
 import express from 'express';
 import { Telegraf } from 'telegraf';
 
-import { allowedCount, isAdmin, isAllowed } from './auth.js';
+import { allowedCount, isAdmin, isAllowed, listAdmins } from './auth.js';
 import { installBotCommands, registerStart } from './commands/start.js';
 import { registerMetaCall } from './commands/metacall.js';
 import { registerDeck, handleDeckSearch } from './commands/deck.js';
@@ -162,6 +162,21 @@ async function start() {
     // state — so it's safe to call on every boot.
     await installBotCommands(bot);
     console.info(`[boot] whitelist: ${allowedCount()} user id(s) allowed`);
+    const _admins = listAdmins();
+    if (_admins.length === 0) {
+        // Loudly surface the missing-admin config — the access-request
+        // flow silently no-ops when no admin is around to receive the
+        // ✅ / ❌ DM, and the requester just sees "Bot nicht für neue
+        // User offen". Operator misses that there's no one being
+        // notified at all.
+        console.warn(
+            '[boot] ADMIN_USER_IDS is empty — /start requests from new users will be ' +
+            'rejected with the "Bot nicht offen" message and NO admin DM will be sent. ' +
+            'Set ADMIN_USER_IDS=<your_telegram_id> in env to enable approvals.',
+        );
+    } else {
+        console.info(`[boot] admins: ${_admins.length} configured`);
+    }
 }
 
 start().catch((err) => {

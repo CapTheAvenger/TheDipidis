@@ -19,7 +19,7 @@ window.MetaCall = (function () {
   // and the CACHE_NAME suffix in service-worker.js. If the user
   // reports "feature X isn't working", check whether this number is
   // older than the expected deploy version before debugging further.
-  const _BUILD_VERSION = 'v202606020415';
+  const _BUILD_VERSION = 'v202606020530';
   try {
     console.info(
       '%c[MetaCall] Engine boot · build %s · ' + new Date().toISOString(),
@@ -2580,7 +2580,16 @@ window.MetaCall = (function () {
       // the new range catches the real signal. Single-major samples
       // get extra damping (0.50 trust) so a noise spike doesn't move
       // the predictor by itself.
-      if (_meanDay2Conv > 0 && _deckDay2Conv > 0 && _day2Q && _day2Q.n >= 1) {
+      //
+      // Past Meta — skip the multiplicative boost entirely. Day-2-conv
+      // ratios are designed to forecast a deck's performance at the
+      // NEXT major given its history; applied retrospectively against
+      // the same labs aggregate the boost was computed from, it just
+      // redistributes share away from the family leader (Dragapult
+      // family 29 % actual → ~20 % after the booster/laggard split
+      // hits Blaziken/Dusknoir/Dudunsparce variants differently).
+      if (_metaSource !== 'past'
+          && _meanDay2Conv > 0 && _deckDay2Conv > 0 && _day2Q && _day2Q.n >= 1) {
         const rawBoost = _deckDay2Conv / _meanDay2Conv;
         const trust = _day2Q.n >= 3 ? 1.00 : (_day2Q.n === 2 ? 0.80 : 0.50);
         const tempered = 1.0 + (rawBoost - 1.0) * trust;
@@ -4374,15 +4383,28 @@ window.MetaCall = (function () {
           try { renderAll(); } catch (_e) { /* tolerate */ }
         }).catch(() => { /* tolerate */ });
       }
-      // 2026-06 — User-flagged: skip the predictor for ALL past meta
-      // views, not just truly-closed ones. The predictor's dampers
-      // and multipliers reshape historical labs shares away from
-      // ground truth (e.g. TEF-POR Dragapult family 29.34 % actual
-      // → ~20 % predicted, Raging Bolt 6.10 % → 4.32 %). Past Meta
-      // is a retrospective view; the labs aggregate from
-      // _loadPastMetaShares above is the truth and sits in
-      // _shareList[].onlineShare. The UI's "Final %" column falls
-      // back to onlineShare when predictedShare isn't computed.
+      // 2026-06 — Past Meta predictor runs IF the format matches the
+      // current labs rotation (TEF-POR during the lag window). The
+      // predictor inherits the additive boost signals — Predictor 4.6
+      // Underdog-Champion (Hydrapple +0.87 pp from the Campinas win),
+      // 4.7 Online-Win signal, 5.4 Day-2 share-growth — on top of the
+      // labs aggregate base, so the user can see the "calibration
+      // sandbox" view: "what would the engine have predicted for the
+      // next regional given this rotation's labs history?"
+      //
+      // The multiplicative dampers (P5.1 Day-2 booster/laggard, P5.3
+      // Pilot-Skill, P5.2 Concentration-Exp) are SKIPPED for past
+      // meta inside _runPredictor itself — those distort the family
+      // aggregate (Dragapult family 29 % actual → 20 % predicted) and
+      // their value is only for forward forecasting where the field
+      // hasn't crystallised yet.
+      //
+      // Truly closed past metas (frozen=true) still skip the predictor
+      // entirely — the Final-Cumulative table from the frozen panel
+      // is the right view there.
+      if (!frozen) {
+        _runPredictor();
+      }
       try { await _decorateMetaCallEntries(); } catch (_e) { /* tolerate */ }
       try { renderAll(); } catch (_e) { /* tolerate */ }
       // Diagnostic: surface whether _majorMatchupMap has data for this

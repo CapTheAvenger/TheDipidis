@@ -1928,6 +1928,23 @@
     .mc-rec-table td { padding: 6px 6px; }
     .mc-rec-wins,
     .mc-rec-players { display: none; }
+    /* Stop the Counter-Pick badge from eating the deck name in
+     * the narrow mobile recs column. On mobile we let the badge
+     * wrap to its own line under the name rather than competing
+     * for horizontal space. */
+    .mc-rec-name-inner {
+        flex-wrap: wrap;
+        row-gap: 4px;
+    }
+    .mc-rec-name-text {
+        flex: 1 1 100%;
+        min-width: 0;
+    }
+    .mc-rec-counterpick-tag,
+    .mc-rec-mine-tag {
+        margin-left: 24px;
+        font-size: 0.6rem;
+    }
 }
 
 /* TG-share chip — distinct teal so user sees it as a folded-in

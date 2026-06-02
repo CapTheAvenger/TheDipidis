@@ -19,7 +19,7 @@ window.MetaCall = (function () {
   // and the CACHE_NAME suffix in service-worker.js. If the user
   // reports "feature X isn't working", check whether this number is
   // older than the expected deploy version before debugging further.
-  const _BUILD_VERSION = 'v202606020830';
+  const _BUILD_VERSION = 'v202606020930';
   try {
     console.info(
       '%c[MetaCall] Engine boot · build %s · ' + new Date().toISOString(),
@@ -2364,6 +2364,25 @@ window.MetaCall = (function () {
   const PREDICTOR_56_FAMILY_DOMINANCE_THRESHOLD = 20.0;
   const PREDICTOR_56_MIN_VARIANTS = 3;
   const PREDICTOR_56_CONSOLIDATION_RATE = 0.40;
+  // Absolute family growth (cross-family) — counteracts the renorm
+  // absorption when P5.7 adds counter boosts elsewhere, AND models
+  // the small but real "format-leader consolidation also grows the
+  // family" effect (Indy: Dragapult family 29.3 % labs avg → 32.2 %
+  // actual, +2.9 pp absolute family growth). Without this boost the
+  // family ended up REGRESSING under P5.7's renorm impact (Dragapult
+  // family 29.3 → 24.9 % in v202606020800, then back to 29-32 %
+  // after this absolute-growth term lands).
+  //
+  // Tuning math (Indy anchor):
+  //   target family fraction = 32.2 %
+  //   labs family fraction   = 29.3 %
+  //   typical other-boost pp = 7  (P5.4 + P5.7 + P4.6 across field)
+  //   absolute growth pp X solves: (29.3 + X) / (107 + X) = 0.322
+  //   → X ≈ 7.3 pp
+  // 5.0 pp lands family at ~30.5 % post-renorm — under-shoots Indy
+  // by ~2 pp but stays conservative so a less-spiky meta doesn't
+  // get an artificial leader inflation.
+  const PREDICTOR_56_FAMILY_GROWTH_BOOST_PP = 5.0;
   let _consolidationLastLogId = null;
   function _computeFormatLeaderConsolidation() {
     if (!_shareList || _shareList.length === 0) return;
@@ -2394,8 +2413,11 @@ window.MetaCall = (function () {
       if (subTotal <= 0) return;
 
       const redistribute = subTotal * PREDICTOR_56_CONSOLIDATION_RATE;
-      leader.deck.predictedShareRaw = (leader.deck.predictedShareRaw || 0) + redistribute;
+      leader.deck.predictedShareRaw = (leader.deck.predictedShareRaw || 0)
+        + redistribute
+        + PREDICTOR_56_FAMILY_GROWTH_BOOST_PP;
       leader.deck.consolidationBoostPp = redistribute;
+      leader.deck.familyGrowthBoostPp  = PREDICTOR_56_FAMILY_GROWTH_BOOST_PP;
 
       subVariants.forEach(sv => {
         const take = (sv.share / subTotal) * redistribute;
@@ -2410,6 +2432,7 @@ window.MetaCall = (function () {
         leaderShareBefore: leader.share,
         leaderShareAfter: leader.deck.predictedShareRaw,
         redistribute,
+        familyGrowth: PREDICTOR_56_FAMILY_GROWTH_BOOST_PP,
         subVariantCount: subVariants.length,
       });
     });
@@ -2420,9 +2443,9 @@ window.MetaCall = (function () {
         _consolidationLastLogId = majorId;
         const lines = applied
           .sort((a, b) => b.redistribute - a.redistribute)
-          .map(a => `${a.family} (family ${a.familyPct.toFixed(1)}%, ${a.subVariantCount} sub-variants): ${a.leader} +${a.redistribute.toFixed(2)} pp → ${a.leaderShareAfter.toFixed(2)}`)
+          .map(a => `${a.family} (family ${a.familyPct.toFixed(1)}%, ${a.subVariantCount} sub-variants): ${a.leader} +${a.redistribute.toFixed(2)} pp internal + ${a.familyGrowth.toFixed(2)} pp family-growth → ${a.leaderShareAfter.toFixed(2)}`)
           .join('\n  ');
-        console.log(`[Predictor 5.6] Format-leader within-family consolidation:\n  ${lines}`);
+        console.log(`[Predictor 5.6] Format-leader consolidation + family growth:\n  ${lines}`);
       }
     } catch (_e) { /* dev log only */ }
   }

@@ -23,6 +23,7 @@ const P56 = {
     FAMILY_DOMINANCE_THRESHOLD: 20.0,
     MIN_VARIANTS:               3,
     CONSOLIDATION_RATE:         0.40,
+    FAMILY_GROWTH_BOOST_PP:     5.0,
 };
 
 // Mirror of js/app-meta-call.js _computeFormatLeaderConsolidation,
@@ -49,7 +50,7 @@ function p56Apply(shares) {
         const subTotal = subs.reduce((s, v) => s + v.share, 0);
         if (subTotal <= 0) continue;
         const redistribute = subTotal * P56.CONSOLIDATION_RATE;
-        out[leader.deck] += redistribute;
+        out[leader.deck] += redistribute + P56.FAMILY_GROWTH_BOOST_PP;
         for (const sv of subs) {
             out[sv.deck] -= (sv.share / subTotal) * redistribute;
         }
@@ -58,7 +59,7 @@ function p56Apply(shares) {
 }
 
 describe('P5.6 — Indianapolis anchor: Dragapult family consolidation', () => {
-    it('Dragapult family redistributes ~40 % of sub-variant share to pure Dragapult', () => {
+    it('Dragapult family redistributes ~40 % of sub-variant share to pure Dragapult + 5 pp family growth', () => {
         const shares = {
             Dragapult: [
                 { deck: 'Dragapult',             share: 10.4 },
@@ -71,17 +72,20 @@ describe('P5.6 — Indianapolis anchor: Dragapult family consolidation', () => {
             Padding: [{ deck: 'PaddingDeck', share: 70.4 }],
         };
         const out = p56Apply(shares);
-        // Sub-variant pool = 19.2; redistribute 40 % = 7.68 pp to pure Dragapult.
-        assert.ok(out.Dragapult > 17.9 && out.Dragapult < 18.5,
-            `Dragapult should land ~18 % after consolidation; got ${out.Dragapult.toFixed(2)}`);
-        // Sub-variants shrink proportionally.
+        // Sub-variant pool = 19.2; redistribute 40 % = 7.68 pp internal +
+        // 5 pp absolute family growth → 10.4 + 7.68 + 5 = 23.08
+        assert.ok(out.Dragapult > 22.5 && out.Dragapult < 23.6,
+            `Dragapult should land ~23 % after consolidation + family growth; got ${out.Dragapult.toFixed(2)}`);
+        // Sub-variants shrink proportionally to the INTERNAL
+        // redistribution (the +5 pp comes from renorm absorption,
+        // not from sub-variants).
         assert.ok(out['Dragapult Dudunsparce'] < 5.4 && out['Dragapult Dudunsparce'] > 3.0,
             `Dudunsparce should shrink ~40 %; got ${out['Dragapult Dudunsparce'].toFixed(2)}`);
-        // Family total stays unchanged (redistribution is within family).
+        // Family total grows by +5 pp (the absolute family growth term).
         const famTotal = ['Dragapult', 'Dragapult Dusknoir', 'Dragapult Blaziken', 'Dragapult Dudunsparce', 'Dragapult Froslass']
             .reduce((s, k) => s + out[k], 0);
-        assert.ok(Math.abs(famTotal - 29.6) < 0.001,
-            `Family total preserved: ${famTotal.toFixed(2)}`);
+        assert.ok(Math.abs(famTotal - 34.6) < 0.001,
+            `Family total = labs + 5 pp family growth: ${famTotal.toFixed(2)}`);
     });
 
     it('Single-variant family (Raging Bolt Ogerpon) is untouched', () => {

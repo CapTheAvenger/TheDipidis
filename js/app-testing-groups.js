@@ -1116,7 +1116,7 @@ window.TestingGroups = (function () {
     container.innerHTML = `
 <div class="tg-wrap">
   <div class="tg-header">
-    <h2>${_esc(t('tg.title'))}</h2>
+    <h2>${_esc(t('tg.title'))} <button class="tab-help-btn" onclick="openTabHelp('testing-groups')" title="Help" aria-label="Help for Testing Groups" data-i18n-title="btn.helpTitle"></button></h2>
     <p class="color-grey">${_esc(t('tg.subtitle'))}</p>
   </div>
   <div class="tg-create-row">

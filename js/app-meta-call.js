@@ -19,7 +19,7 @@ window.MetaCall = (function () {
   // and the CACHE_NAME suffix in service-worker.js. If the user
   // reports "feature X isn't working", check whether this number is
   // older than the expected deploy version before debugging further.
-  const _BUILD_VERSION = 'v202606020545';
+  const _BUILD_VERSION = 'v202606021100';
   try {
     console.info(
       '%c[MetaCall] Engine boot · build %s · ' + new Date().toISOString(),
@@ -6441,7 +6441,7 @@ window.MetaCall = (function () {
     container.innerHTML = `
 <div class="metacall-wrap">
   <div class="metacall-header">
-    <h2>${t('mc.title')}</h2>
+    <h2>${t('mc.title')} <button class="tab-help-btn" onclick="openTabHelp('meta-call')" title="Help" aria-label="Help for Meta Call" data-i18n-title="btn.helpTitle"></button></h2>
     <p class="color-grey">${t('mc.subtitle')}</p>
   </div>
   <div class="mc-top-bar">
@@ -8943,7 +8943,7 @@ window.MetaCall = (function () {
 
     container.innerHTML = `
 <div class="metacall-wrap">
-  <div class="metacall-header"><h2>${t('mc.title')}</h2></div>
+  <div class="metacall-header"><h2>${t('mc.title')} <button class="tab-help-btn" onclick="openTabHelp('meta-call')" title="Help" aria-label="Help for Meta Call" data-i18n-title="btn.helpTitle"></button></h2></div>
   <div class="metacall-loading">${t('mb.loading')}</div>
 </div>`;
 

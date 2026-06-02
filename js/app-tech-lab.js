@@ -746,13 +746,10 @@
             .slice(0, 24);
         if (sorted.length === 0) { wrapEl.innerHTML = ''; return; }
 
-        const lang = (typeof getLang === 'function') ? getLang() : 'en';
-        const heading = (lang === 'de')
-            ? _t('techLab.nonExHeading', 'Nicht-EX Angreifer (ignorieren die Fähigkeit)')
-            : _t('techLab.nonExHeading', 'Non-EX attackers (ability does not apply)');
-        const hint = (lang === 'de')
-            ? _t('techLab.nonExHint', 'Diese Pokemon greifen normal an — die Fähigkeit blockt nur Pokemon-ex. Top {n} aus dem aktuellen Meta nach Deck-Inklusion.')
-            : _t('techLab.nonExHint', 'These Pokemon attack normally — the ability only blocks Pokemon ex. Top {n} from the current meta by deck inclusion.');
+        // i18n routing happens inside _t() via getLang() — keep one
+        // English fallback per key, no per-branch dispatch needed.
+        const heading = _t('techLab.nonExHeading', 'Non-EX attackers (ability does not apply)');
+        const hint = _t('techLab.nonExHint', 'These Pokemon attack normally — the ability only blocks Pokemon ex. Top {n} from the current meta by deck inclusion.');
         const tiles = sorted.map(c => {
             const img = _cardImageUrl(c.key);
             const safeName = _escapeHtml(c.name);

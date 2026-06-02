@@ -59,10 +59,10 @@
 
     function cbSaveCurrentAsPreset() {
         if (cbSelectedArchetypes.length === 0) {
-            if (typeof showToast === 'function') showToast('Keine Archetypes ausgewählt.', 'warning');
+            if (typeof showToast === 'function') showToast(cbText('cb.noArchetypesSelected', 'No archetypes selected.'), 'warning');
             return;
         }
-        const name = prompt('Name für diesen Binder:');
+        const name = prompt(cbText('cb.promptPresetName', 'Name for this binder:'));
         if (!name || !name.trim()) return;
         const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
         cbPresets.push({ id, name: name.trim(), archetypes: cbSelectedArchetypes.map(a => ({ name: a.name, source: a.source })) });
@@ -211,7 +211,7 @@
         if (exists) return;
 
         if (cbSelectedArchetypes.length >= 30) {
-            if (typeof showToast === 'function') showToast('Maximum 30 archetypes.', 'warning');
+            if (typeof showToast === 'function') showToast(cbText('cb.maxArchetypes', 'Maximum 30 archetypes.'), 'warning');
             return;
         }
 
@@ -232,7 +232,7 @@
             cbSelectedArchetypes.splice(idx, 1);
         } else {
             if (cbSelectedArchetypes.length >= 30) {
-                if (typeof showToast === 'function') showToast('Maximum 30 archetypes.', 'warning');
+                if (typeof showToast === 'function') showToast(cbText('cb.maxArchetypes', 'Maximum 30 archetypes.'), 'warning');
                 return;
             }
             cbSelectedArchetypes.push({ name, source });
@@ -267,7 +267,7 @@
         if (!dd) return;
 
         dd.classList.remove('display-none');
-        dd.innerHTML = '<div class="custom-binder-dropdown-loading">Loading archetypes…</div>';
+        dd.innerHTML = `<div class="custom-binder-dropdown-loading">${cbText('cb.loadingArchetypes','Loading archetypes…')}</div>`;
 
         await cbEnsureArchetypeList();
         await cbEnsureTierGroups();
@@ -363,7 +363,7 @@
         }
 
         if (items.length === 0) {
-            dd.innerHTML = '<div class="custom-binder-dropdown-empty">No archetypes found.</div>';
+            dd.innerHTML = `<div class="custom-binder-dropdown-empty">${cbText('cb.noArchetypesFound','No archetypes found.')}</div>`;
             return;
         }
 
@@ -391,7 +391,7 @@
                 .slice(0, 5);
 
             if (topMainGroups.length > 0) {
-                html += '<div class="custom-binder-dropdown-group-label" style="color:var(--accent,#3b4cca);font-weight:900;">🏆 Top Main Pokemon</div>';
+                html += `<div class="custom-binder-dropdown-group-label" style="color:var(--accent,#3b4cca);font-weight:900;">${cbText('cb.topMainPokemon','🏆 Top Main Pokémon')}</div>`;
                 html += '<div class="cb-main-pokemon-grid">';
                 topMainGroups.forEach((g, idx) => {
                     // Check if all variants are already selected
@@ -536,7 +536,7 @@
     // ── Build Custom Binder ──
     async function buildCustomBinder() {
         if (cbSelectedArchetypes.length === 0) {
-            if (typeof showToast === 'function') showToast('Please select at least one archetype.', 'warning');
+            if (typeof showToast === 'function') showToast(cbText('cb.selectAtLeastOne','Please select at least one archetype.'), 'warning');
             return;
         }
 
@@ -572,7 +572,7 @@
         window._cbDelta = delta;
 
         cbRenderBinder(delta, shared);
-        if (typeof showToast === 'function') showToast('Custom Binder generated!', 'success');
+        if (typeof showToast === 'function') showToast(cbText('cb.generated','Custom Binder generated!'), 'success');
     }
 
     function buildCbGroupDefs() {
@@ -716,7 +716,7 @@
                     <button class="meta-binder-filter-btn active" data-filter="all" onclick="cbSetFilter('all')">${cbText('cb.filterAll','All')} (${totalUnique})</button>
                     <button class="meta-binder-filter-btn" data-filter="owned" onclick="cbSetFilter('owned')">${cbText('cb.filterOwned','In Collection')} (${ownedComplete})</button>
                     <button class="meta-binder-filter-btn" data-filter="missing" onclick="cbSetFilter('missing')">${cbText('cb.filterMissing','Missing')} (${missingUnique})</button>
-                    <button class="meta-binder-filter-btn" data-filter="new" onclick="cbSetFilter('new')">🆕 Neu (${newCount})</button>
+                    <button class="meta-binder-filter-btn" data-filter="new" onclick="cbSetFilter('new')">🆕 ${cbText('cb.filterNew','New')} (${newCount})</button>
                 </div>
                 <div class="filter-group">
                     <select id="cbFilterType" onchange="cbApplyFilter()" class="select-system">
@@ -947,13 +947,13 @@
         if (!delta || !delta.cards) return;
 
         if (!window.auth?.currentUser) {
-            if (typeof showToast === 'function') showToast('Please sign in to use this feature.', 'warning');
+            if (typeof showToast === 'function') showToast(cbText('cb.signInRequired','Please sign in to use this feature.'), 'warning');
             return;
         }
 
         const missingCards = delta.cards.filter(c => c.missing > 0);
         if (missingCards.length === 0) {
-            if (typeof showToast === 'function') showToast('All cards are already in your collection!', 'info');
+            if (typeof showToast === 'function') showToast(cbText('cb.nothingMissing','All cards are already in your collection!'), 'info');
             return;
         }
 
@@ -967,7 +967,7 @@
             }
         });
 
-        if (typeof showToast === 'function') showToast(`${added} cards added to wishlist.`, 'success');
+        if (typeof showToast === 'function') showToast(cbText('cb.wishlistDone','{n} cards added to wishlist.').replace('{n}', added), 'success');
     }
 
     function cbSendMissingToProxy() {
@@ -976,7 +976,7 @@
 
         const missingCards = delta.cards.filter(c => c.missing > 0);
         if (missingCards.length === 0) {
-            if (typeof showToast === 'function') showToast('All cards are already in your collection!', 'info');
+            if (typeof showToast === 'function') showToast(cbText('cb.nothingMissing','All cards are already in your collection!'), 'info');
             return;
         }
 
@@ -989,7 +989,7 @@
         });
 
         if (typeof renderProxyQueue === 'function') renderProxyQueue();
-        if (typeof showToast === 'function') showToast(`${totalAdded} cards sent to Proxy Printer.`, 'success');
+        if (typeof showToast === 'function') showToast(cbText('cb.proxyDone','{n} cards sent to Proxy Printer.').replace('{n}', totalAdded), 'success');
     }
 
     // ── Init: Load previous selections ──

@@ -1349,7 +1349,7 @@
                     <div class="bj-history-clip">${escapeHtml(clipText)}</div>
                 </div>
                 <div class="bj-history-actions">
-                    <button type="button" class="bj-history-brick-btn${entry.brick ? ' is-active' : ''}" onclick="toggleBrickEntry('${escapeHtml(entry.id)}')" title="${entry.brick ? 'Brick entfernen' : 'Als Brick markieren'}">🧱</button>
+                    <button type="button" class="bj-history-brick-btn${entry.brick ? ' is-active' : ''}" onclick="toggleBrickEntry('${escapeHtml(entry.id)}')" title="${entry.brick ? battleJournalText('bj.removeBrickTitle','Remove brick flag') : battleJournalText('bj.markBrickTitle','Mark as brick')}">🧱</button>
                     <button type="button" class="bj-history-edit-btn" onclick="openEditEntryModal('${escapeHtml(entry.id)}')" title="${escapeHtml(battleJournalText('bj.editEntry', 'Edit'))}">Edit</button>
                     <button type="button" class="bj-history-delete-btn" onclick="deleteJournalEntry('${escapeHtml(entry.id)}')" title="${escapeHtml(battleJournalText('bj.deleteEntry', 'Delete'))}">Del</button>
                     <button type="button" class="bj-history-copy-btn" onclick="copyJournalEntry('${escapeHtml(entry.id)}')" title="${escapeHtml(battleJournalText('bj.copyEntry', 'Copy'))}">Copy</button>
@@ -2329,7 +2329,7 @@
         // Update cache
         cached.brick = newBrick;
         renderJournalHistory();
-        showToast(newBrick ? '🧱 Brick markiert' : 'Brick entfernt', 'success');
+        showToast(newBrick ? battleJournalText('bj.toastBrickMarked','🧱 Marked as brick') : battleJournalText('bj.toastBrickRemoved','Brick flag removed'), 'success');
     }
 
     async function deleteJournalEntry(entryId) {

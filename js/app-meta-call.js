@@ -19,7 +19,7 @@ window.MetaCall = (function () {
   // and the CACHE_NAME suffix in service-worker.js. If the user
   // reports "feature X isn't working", check whether this number is
   // older than the expected deploy version before debugging further.
-  const _BUILD_VERSION = 'v202606020330';
+  const _BUILD_VERSION = 'v202606020415';
   try {
     console.info(
       '%c[MetaCall] Engine boot · build %s · ' + new Date().toISOString(),
@@ -837,15 +837,19 @@ window.MetaCall = (function () {
   // freshness we can't confirm.
   function _isPastMetaFrozen(metaKey) {
     if (!metaKey) return false;
-    // 2026-06 — User-flagged: Past Meta should ALWAYS be retrospective.
-    // The earlier "latest format during lag window = live" branch made
-    // Past Meta TEF-POR run the live predictor against TEF-POR labs,
-    // which then re-shaped the historical shares (Dragapult family
-    // 29 % actual → 20 % predicted, Raging Bolt 6.1 % → 4.3 %, etc.)
-    // The user expects to see WHAT HAPPENED in TEF-POR, not a re-run
-    // prediction. Switch to always-frozen — labs aggregate goes
-    // straight to the field table without predictor reshaping.
-    return true;
+    // "Frozen" = the format is no longer played in-person anywhere.
+    // That's strictly the OLDER past metas. TEF-POR during the CRI
+    // lag window is still in-person-legal (regionals run TEF-POR
+    // until 2026-06-05), so it must NOT show the "Closed meta —
+    // Fun-Event mode" banner. The retrospective-view aspect (labs
+    // aggregate, no predictor reshape) is enforced separately —
+    // see the predictor-skip-for-past-meta logic in _setMetaSource.
+    if (!_formatWindow || !_formatWindow.in_person_legal_date) return true;
+    const today = new Date().toISOString().slice(0, 10);
+    if (today >= _formatWindow.in_person_legal_date) return true;
+    if (!Array.isArray(_pastMetaAvailableFormats) || _pastMetaAvailableFormats.length === 0) return true;
+    const latest = _pastMetaAvailableFormats[0]; // sorted newest-first by maxDate
+    return metaKey !== latest.key;
   }
 
   // Aggregate labs_tournament_decks_<META>.csv into per-archetype totals
@@ -3888,6 +3892,16 @@ window.MetaCall = (function () {
         _majorSharesByDeck = {};
         _tournamentStats = {};
         _labsMajorRows = 0;
+        // Also clear the per-deck "Last Major" snapshot + the major
+        // info banner — those drive the Melbourne (D1 4.7 % / D2 4.5 %)
+        // chip that was still appearing on CRI-deck rows after the
+        // first lag-window fix. The chip pulls from _lastMajorByDeck
+        // + _lastMajorInfo, both of which are populated from the same
+        // TEF-POR labs rows. For a CRI prediction these aren't
+        // representative and must be hidden.
+        _lastMajorByDeck = {};
+        _lastMajorInfo = null;
+        _lastMajorDate = null;
         console.info(
           '[MetaCall] Lag-window guard — dropped TEF-POR (%s) labs aggregates for CRI (%s) ' +
           'current-meta predictions. Mode A (online ladder only). Kept underdog-champion + online-win signals.',
@@ -4360,16 +4374,15 @@ window.MetaCall = (function () {
           try { renderAll(); } catch (_e) { /* tolerate */ }
         }).catch(() => { /* tolerate */ });
       }
-      // In frozen past-meta mode the field is closed and there is
-      // nothing to predict — running the predictor would re-shape the
-      // raw historical shares (Stage 4.5 concentration counters,
-      // Stage 5.2 concentration-exp + hype-damper, etc.) and produce
-      // numbers that disagree with the Frozen Final-Cumulative table
-      // shown on the same page. Skip it; _shareList.onlineShare already
-      // holds the raw labs player-share (or cards-CSV fallback).
-      if (!frozen) {
-        _runPredictor();
-      }
+      // 2026-06 — User-flagged: skip the predictor for ALL past meta
+      // views, not just truly-closed ones. The predictor's dampers
+      // and multipliers reshape historical labs shares away from
+      // ground truth (e.g. TEF-POR Dragapult family 29.34 % actual
+      // → ~20 % predicted, Raging Bolt 6.10 % → 4.32 %). Past Meta
+      // is a retrospective view; the labs aggregate from
+      // _loadPastMetaShares above is the truth and sits in
+      // _shareList[].onlineShare. The UI's "Final %" column falls
+      // back to onlineShare when predictedShare isn't computed.
       try { await _decorateMetaCallEntries(); } catch (_e) { /* tolerate */ }
       try { renderAll(); } catch (_e) { /* tolerate */ }
       // Diagnostic: surface whether _majorMatchupMap has data for this

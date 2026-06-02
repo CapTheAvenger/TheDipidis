@@ -1,0 +1,64 @@
+name: Tutorial Screenshots
+
+# Re-generates the 6 PNGs the How-To-Use section embeds at
+# /images/tutorials/. Triggered MANUALLY (workflow_dispatch) — the
+# screenshots only need to be refreshed when the captured views
+# change UI, not on every push.
+#
+# Outputs:
+#   images/tutorials/01-meta-hub.png
+#   images/tutorials/02-meta-call.png
+#   images/tutorials/03-deck-builder.png
+#   images/tutorials/04-cooking-mode.png
+#   images/tutorials/05-card-overview.png
+#   images/tutorials/06-telegram-bot.png
+#
+# The job commits the new PNGs back to the source branch so they
+# land on Pages with the next deploy. If nothing changed, the
+# commit step no-ops.
+
+on:
+  workflow_dispatch:
+    inputs:
+      shots:
+        description: 'Comma-separated list of shot numbers (01-06) or "all"'
+        required: false
+        default: 'all'
+
+permissions:
+  contents: write
+
+jobs:
+  screenshot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci || npm install
+
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Generate tutorial screenshots
+        env:
+          SHOTS: ${{ inputs.shots }}
+        run: node prerender/screenshot-tutorial.js
+
+      - name: Commit new screenshots
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          git add images/tutorials/*.png
+          if git diff --cached --quiet; then
+            echo "No screenshot changes to commit."
+          else
+            git commit -m "tutorial: regenerate screenshots (workflow_dispatch)"
+            git push
+          fi

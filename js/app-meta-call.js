@@ -19,7 +19,7 @@ window.MetaCall = (function () {
   // and the CACHE_NAME suffix in service-worker.js. If the user
   // reports "feature X isn't working", check whether this number is
   // older than the expected deploy version before debugging further.
-  const _BUILD_VERSION = 'v202606020137';
+  const _BUILD_VERSION = 'v202606020220';
   try {
     console.info(
       '%c[MetaCall] Engine boot · build %s · ' + new Date().toISOString(),
@@ -3499,7 +3499,19 @@ window.MetaCall = (function () {
           const _rowMatchesCurrentFormat = (r) => {
             if (!activeSetCode) return true; // no format_window → no filter
             const meta = String(r.meta || '').trim().toUpperCase();
-            if (!meta) return true;           // unknown meta column → keep
+            // 2026-06 fix — DROP rows with empty meta. The previous
+            // "keep on unknown" rule was naive: it let the scraper's
+            // malformed "Special Event San Juan" output (96 rows, empty
+            // meta column AND empty date, deck shares from pre-rotation
+            // BRS-era — Miraidon 13.9 %, Lugia Archeops 40 %, Gardevoir
+            // 12.2 %, Charizard Pidgeot 10 %, Lost Zone Box 8 %) into
+            // the active aggregate. Predictor 5.5 then read those as
+            // "current labs presence" and floored those decks at
+            // 5–12 % in the current-meta prediction, even though they
+            // have zero presence in TEF-POR. If the scraper can't
+            // classify a tournament's meta, it doesn't go in the
+            // active-rotation pile. Period.
+            if (!meta || meta === '_UNSORTED') return false;
             return meta === activeSetCode || meta.endsWith('-' + activeSetCode);
           };
           const labsRows = (effectiveCutoffISO || activeSetCode)

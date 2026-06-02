@@ -146,6 +146,19 @@ document.addEventListener('DOMContentLoaded', function () {
         'metacall':              'profile',    // Meta Call lives inside Profile tab
         'meta-call':             'profile',
         'journal':               'profile',    // Battle Journal too
+        // Per-profile-sub-tab deep links — added 2026-06 so the screenshot
+        // tutorial can drive directly into a specific profile sub-tab via
+        // the same hash routing mechanism the Telegram bot uses for deep-
+        // linking. Each one needs a matching entry in PROFILE_SUBTAB_FOR_HASH
+        // below to actually fire the sub-tab switch.
+        'metabinder':            'profile',
+        'meta-binder':           'profile',
+        'custombinder':          'profile',
+        'custom-binder':         'profile',
+        'testinggroups':         'profile',
+        'testing-groups':        'profile',
+        'wishlist':              'profile',
+        'collection':            'profile',
     };
 
     // For hash aliases that target Profile, we also want to auto-switch
@@ -153,9 +166,17 @@ document.addEventListener('DOMContentLoaded', function () {
     // is the same function the in-page buttons use, so behaviour stays
     // identical regardless of how the user arrived.
     const PROFILE_SUBTAB_FOR_HASH = {
-        'metacall':  'metacall',
-        'meta-call': 'metacall',
-        'journal':   'journal',
+        'metacall':       'metacall',
+        'meta-call':      'metacall',
+        'journal':        'journal',
+        'metabinder':     'metabinder',
+        'meta-binder':    'metabinder',
+        'custombinder':   'custombinder',
+        'custom-binder':  'custombinder',
+        'testinggroups':  'testinggroups',
+        'testing-groups': 'testinggroups',
+        'wishlist':       'wishlist',
+        'collection':     'collection',
     };
 
     function applyHash() {

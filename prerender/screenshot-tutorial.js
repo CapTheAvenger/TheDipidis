@@ -121,7 +121,6 @@ async function openPage(browser, urlPath) {
     // log so the failure mode is visible instead of cascading.
     page.on('framenavigated', (frame) => {
         if (frame === page.mainFrame()) {
-            // Don't spam — only log the post-initial-load navigations.
             const url = frame.url();
             if (url && !url.endsWith(urlPath)) {
                 console.warn(`[page] mid-shot navigation: ${url}`);
@@ -154,6 +153,41 @@ async function openPage(browser, urlPath) {
     return { page, context };
 }
 
+// Drive a screenshot via the app's own hash-based routing. The
+// inline-init.js HASH_ALIASES table maps short tokens (metacall,
+// current-analysis, cards, profile, etc.) to the canonical tabId
+// AND, for Profile sub-tabs, the right profile-sub-tab switch. This
+// is the same mechanism the Telegram bot uses for deep-linking, so
+// we know it lands the page in a stable state.
+//
+// Returns once the page settles — defined as either the named
+// selector becoming visible (best signal) or a generous timeout
+// (because some views need Firebase data we don't have in CI).
+async function navigateViaHash(page, hash, settleSelector) {
+    await page.evaluate((h) => {
+        // Trigger applyHash() via hashchange listener.
+        window.location.hash = '#' + h;
+    }, hash);
+    if (settleSelector) {
+        try {
+            await page.waitForFunction(
+                (sel) => {
+                    const el = document.querySelector(sel);
+                    if (!el) return false;
+                    const r = el.getBoundingClientRect();
+                    return r.width > 50 && r.height > 50;
+                },
+                settleSelector,
+                { timeout: 15_000 },
+            );
+        } catch (_) {
+            console.warn(`  ! ${settleSelector} didn't settle — shooting anyway`);
+        }
+    }
+    // Final settle window for late-binding visuals.
+    await page.waitForTimeout(2500);
+}
+
 async function shoot(page, outFile, options = {}) {
     const fullPath = path.join(OUTPUT_DIR, outFile);
     await page.screenshot({
@@ -171,9 +205,9 @@ async function shoot(page, outFile, options = {}) {
 async function capture01MetaHub(browser) {
     console.log('[01] Meta Hub');
     const { page, context } = await openPage(browser, '/index.html');
-    await page.evaluate(() => window.switchTab && window.switchTab('current-meta-hub'));
-    // Hub tiles + card legend below — let the tile data render.
-    await page.waitForTimeout(2000);
+    // Hub is the default landing tab. Wait for the tile grid to
+    // render — it's the first thing inside #meta-analysis-hub.
+    await navigateViaHash(page, 'current-meta', '.meta-hub-tiles, .meta-tile, .meta-hub-legend');
     await shoot(page, '01-meta-hub.png');
     await context.close();
 }
@@ -181,27 +215,9 @@ async function capture01MetaHub(browser) {
 async function capture02MetaCall(browser) {
     console.log('[02] Meta Call');
     const { page, context } = await openPage(browser, '/index.html');
-    // Meta Call lives under the Profile tab as a sub-tab — drive the
-    // tab switches via the helper functions the rest of the app uses.
-    await page.evaluate(async () => {
-        if (typeof window.switchTab === 'function') window.switchTab('profile');
-        if (typeof window.switchProfileTab === 'function') {
-            window.switchProfileTab('metacall');
-        }
-        // Force Meta Call to load even if the toggle missed.
-        if (window.MetaCall && typeof window.MetaCall.init === 'function') {
-            try { await window.MetaCall.init(); } catch (_) { /* tolerate */ }
-        }
-    });
-    // Wait for VISIBLE Meta Call content (the header h2 only renders
-    // once init() has produced the dashboard markup).
-    await page.waitForFunction(() => {
-        const wrap = document.querySelector('.metacall-wrap');
-        if (!wrap) return false;
-        const rect = wrap.getBoundingClientRect();
-        return rect.width > 100 && rect.height > 100;
-    }, { timeout: 30_000 });
-    await page.waitForTimeout(3000);
+    // #metacall hash → routes to profile tab + switchProfileTab('metacall')
+    // via inline-init's HASH_ALIASES.
+    await navigateViaHash(page, 'metacall', '.metacall-wrap');
     await shoot(page, '02-meta-call.png');
     await context.close();
 }
@@ -209,9 +225,7 @@ async function capture02MetaCall(browser) {
 async function capture03DeckBuilder(browser) {
     console.log('[03] Deck Builder (Current Meta Deck Analysis)');
     const { page, context } = await openPage(browser, '/index.html');
-    await page.evaluate(() => window.switchTab && window.switchTab('current-meta-analysis'));
-    // Wait for analysis data to load + a deck card to render.
-    await page.waitForTimeout(3500);
+    await navigateViaHash(page, 'current-analysis', '.deck-builder, .current-analysis-deck');
     await shoot(page, '03-deck-builder.png');
     await context.close();
 }
@@ -219,11 +233,8 @@ async function capture03DeckBuilder(browser) {
 async function capture04CookingMode(browser) {
     console.log('[04] Cooking Mode');
     const { page, context } = await openPage(browser, '/index.html');
-    await page.evaluate(() => window.switchTab && window.switchTab('current-meta-analysis'));
-    await page.waitForTimeout(2500);
-    // Toggle Cooking Mode if a button is present. Falls back to
-    // the regular Deck Analysis view if Cooking Mode UI is hidden
-    // behind a flag.
+    await navigateViaHash(page, 'current-analysis', '.deck-builder, .current-analysis-deck');
+    // Cooking Mode toggle if available.
     await page.evaluate(() => {
         const btn = document.querySelector('[data-action="toggle-cooking"], .cooking-mode-toggle, #cookingModeToggle');
         if (btn) btn.click();
@@ -236,12 +247,7 @@ async function capture04CookingMode(browser) {
 async function capture05CardOverview(browser) {
     console.log('[05] Card Database');
     const { page, context } = await openPage(browser, '/index.html');
-    await page.evaluate(() => window.switchTab && window.switchTab('cards'));
-    // Wait for card grid to populate.
-    await page.waitForSelector('.cards-grid, .card-database-grid, .card-result', {
-        timeout: 30_000,
-    }).catch(() => { /* tolerate selector miss — shoot whatever rendered */ });
-    await page.waitForTimeout(2500);
+    await navigateViaHash(page, 'cards', '.cards-grid, .card-database-grid, .card-result, #cardsTabContent');
     await shoot(page, '05-card-overview.png');
     await context.close();
 }

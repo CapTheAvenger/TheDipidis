@@ -1,0 +1,51 @@
+tournament_id,tournament_date,format,player_count,winner_archetype,winner_winrate
+6a149cd28c163b809799739d,2026-06-01,CRI,168,Dragapult Dusknoir,21.0
+6a17753a0f6c1f08998626af,2026-06-01,CRI,181,Rocket's Honchkrow,30.0
+6a1358470f6c1f089986042b,2026-05-31,CRI,129,Archaludon Dudunsparce,21.0
+6a18254a8c163b8097998d06,2026-05-30,CRI,100,Dragapult Blaziken,25.0
+not-at-indy,2026-05-30,CRI,289,Slowking,31.0
+69fdf8222b59cd9b66b26f6e,2026-05-29,CRI,108,Rocket's Honchkrow,24.0
+6a15f7da8c163b8097997eb4,2026-05-28,CRI,107,Dragapult Blaziken,27.0
+6a183bec0f6c1f0899862992,2026-05-28,CRI,117,Slowking,22.0
+6a0f9b31dfbdf089cbbdec47,2026-05-28,CRI,186,Dragapult Dusknoir,37.0
+6a09ede013f957d6d4b4a556,2026-05-26,CRI,216,Archaludon Dudunsparce,21.0
+697253489c739a2ff7bf5585,2026-05-26,CRI,101,Mega Greninja,21.0
+really-tries,2026-05-26,CRI,128,Slowking,21.0
+6a0b5f2913f957d6d4b4ae56,2026-05-25,CRI,170,Mega Greninja,21.0
+6a1353ec0f6c1f0899860401,2026-05-25,CRI,127,Crustle,21.0
+6a0c908513f957d6d4b4b729,2026-05-25,CRI,260,Dragapult,37.0
+6a0ae95213f957d6d4b4ab3a,2026-05-25,CRI,101,Slowking,27.0
+6a0d4df7dfbdf089cbbddba5,2026-05-25,CRI,140,Slowking,27.0
+6a0c882813f957d6d4b4b701,2026-05-24,CRI,181,Alakazam Dudunsparce,36.0
+6a1051be0f6c1f089985e5c5,2026-05-24,CRI,102,Slowking,18.0
+6a0ae8dedfbdf089cbbdc90e,2026-05-24,CRI,100,Slowking,25.0
+6a0dfdc813f957d6d4b4bfb4,2026-05-23,CRI,170,Lopunny Dudunsparce,28.0
+yes-chaos-rising-is-legal,2026-05-23,CRI,284,N's Zoroark,31.0
+6a075d6cdfbdf089cbbdae47,2026-05-21,CRI,161,Dragapult,34.0
+6a0db12ddfbdf089cbbddd0f,2026-05-20,CRI,112,Alakazam Dudunsparce,28.0
+6a05e7e913f957d6d4b47be5,2026-05-19,CRI,128,Grimmsnarl Froslass,18.0
+6a01268213f957d6d4b4574a,2026-05-18,CRI,163,Raging Bolt Ogerpon,21.0
+6a02f37213f957d6d4b46851,2026-05-18,CRI,201,Alakazam Dudunsparce,35.0
+6a04e3e2dfbdf089cbbd9b5e,2026-05-18,CRI,213,Dragapult Dusknoir,28.0
+6a04a54e13f957d6d4b474d6,2026-05-17,CRI,108,Dragapult Blaziken,21.0
+6a0476cb13f957d6d4b47405,2026-05-16,CRI,215,Dragapult Dudunsparce,30.0
+art-art-art,2026-05-16,CRI,276,Dragapult,34.0
+6a04910adfbdf089cbbd9803,2026-05-14,CRI,103,Dragapult Dusknoir,28.0
+69fe22972b59cd9b66b271bd,2026-05-14,CRI,200,Dragapult,36.0
+69c9518a36f5b5c303dc144e,2026-05-13,CRI,153,Slowking,36.0
+6a008dd4dfbdf089cbbd7088,2026-05-13,CRI,129,Alakazam Dudunsparce,21.0
+6a027c0adfbdf089cbbd87cf,2026-05-12,CRI,133,Rocket's Honchkrow,21.0
+6a01d5f2dfbdf089cbbd7da0,2026-05-12,CRI,114,Grimmsnarl Froslass,18.0
+69f911d8e23aab068aadafe5,2026-05-11,CRI,171,Clefairy Ogerpon,21.0
+6a00e0c0dfbdf089cbbd7654,2026-05-11,CRI,125,Dragapult Dudunsparce,21.0
+69fa0db04f71d664893ed8b4,2026-05-11,CRI,182,Steven's Metagross,36.0
+69f4579be23aab068aad6b4a,2026-05-11,CRI,109,Alakazam Dudunsparce,31.0
+69f9383e4f71d664893ed246,2026-05-09,CRI,232,Dragapult Dusknoir,31.0
+is-something,2026-05-09,CRI,257,Dragapult,30.0
+69f0df364f71d664893e65fe,2026-05-07,CRI,104,Arboliva Ogerpon,25.0
+69fb3adc4f71d664893ee513,2026-05-07,CRI,156,Lucario Hariyama,33.0
+69f553544f71d664893e99f0,2026-05-07,CRI,197,Dragapult Dusknoir,36.0
+69fb3abc4f71d664893ee510,2026-05-06,CRI,129,Dragapult Dudunsparce,28.0
+69f442124f71d664893e8a93,2026-05-06,CRI,102,Grimmsnarl Froslass,21.0
+69f3c02c4f71d664893e8327,2026-05-05,CRI,196,Starmie Froslass,21.0
+69f5fcfce23aab068aad84d5,2026-05-05,CRI,158,Ursaluna Lunatone,7.0

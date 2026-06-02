@@ -227,10 +227,17 @@ const SHOT_CONFIG = {
             hash: 'metacall',
             settle: '.metacall-wrap',
             drive: async (page) => {
-                // Scroll to Field Composition section if not already in view.
+                // Wait long enough for the predictor pipeline to finish —
+                // MetaCall.init() loads CSV data then re-renders, and
+                // shooting too early gives an empty loading state.
+                await page.waitForTimeout(3500);
+                // Field Composition is the first panel after the header;
+                // scroll to the top of .metacall-wrap so the field table
+                // is the focal point.
                 await page.evaluate(() => {
-                    const el = document.querySelector('.mc-field-panel');
+                    const el = document.querySelector('.metacall-wrap');
                     if (el) el.scrollIntoView({ block: 'start' });
+                    window.scrollBy(0, -10);
                 });
             },
         },
@@ -239,11 +246,20 @@ const SHOT_CONFIG = {
             hash: 'metacall',
             settle: '.metacall-wrap',
             drive: async (page) => {
+                await page.waitForTimeout(3500);
+                // Recommendations panel appears further down — wait for it
+                // to render (it's gated on data load) before scrolling.
+                try {
+                    await page.waitForSelector('.mc-rec-panel, .mc-rec-table', { timeout: 8_000 });
+                } catch (_) { /* tolerate */ }
                 await page.evaluate(() => {
-                    const recs = document.querySelector('.mc-rec-panel, .mc-recommended');
-                    if (recs) recs.scrollIntoView({ block: 'start' });
+                    const recs = document.querySelector('.mc-rec-panel');
+                    if (recs) {
+                        recs.scrollIntoView({ block: 'start' });
+                        window.scrollBy(0, -20);
+                    }
                 });
-                await page.waitForTimeout(500);
+                await page.waitForTimeout(1000);
             },
         },
     ],

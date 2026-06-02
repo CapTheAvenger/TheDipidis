@@ -234,12 +234,21 @@ async function capture04CookingMode(browser) {
     console.log('[04] Cooking Mode');
     const { page, context } = await openPage(browser, '/index.html');
     await navigateViaHash(page, 'current-analysis', '.deck-builder, .current-analysis-deck');
-    // Cooking Mode toggle if available.
+    // Cooking Mode (Deep Dive) is gated behind a view-mode toggle pair
+    // (#cmViewModeVanillaBtn / #cmViewModeDeepDiveBtn) — vanilla is
+    // the page-load default. Calling setCurrentMetaViewMode directly
+    // also flips the data-cm-view attribute that the .cm-deep-dive-only
+    // CSS keys off, so the pin / exclude badges + the matchup vs
+    // Meta Call section become visible in one tick.
     await page.evaluate(() => {
-        const btn = document.querySelector('[data-action="toggle-cooking"], .cooking-mode-toggle, #cookingModeToggle');
-        if (btn) btn.click();
+        if (typeof window.setCurrentMetaViewMode === 'function') {
+            window.setCurrentMetaViewMode('deepDive');
+        } else {
+            const btn = document.getElementById('cmViewModeDeepDiveBtn');
+            if (btn) btn.click();
+        }
     });
-    await page.waitForTimeout(1500);
+    await page.waitForTimeout(2000);
     await shoot(page, '04-cooking-mode.png');
     await context.close();
 }

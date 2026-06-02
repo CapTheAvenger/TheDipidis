@@ -19,7 +19,7 @@ window.MetaCall = (function () {
   // and the CACHE_NAME suffix in service-worker.js. If the user
   // reports "feature X isn't working", check whether this number is
   // older than the expected deploy version before debugging further.
-  const _BUILD_VERSION = 'v202606020800';
+  const _BUILD_VERSION = 'v202606020830';
   try {
     console.info(
       '%c[MetaCall] Engine boot · build %s · ' + new Date().toISOString(),
@@ -7112,14 +7112,14 @@ window.MetaCall = (function () {
   // Past-Meta-only: stack ALL tournaments of the rotation in one
   // compact block. Each row = 🏆 (if winner) · short event name + date
   // · D1 X % (WR Y %) · D2 X % (WR Y %) · Konv Z %.
-  // Sorted oldest-first so the chronology reads left-to-right within
-  // the rotation arc; the user sees "early format → late format" and
-  // can spot adoption / drop-off trends per deck.
+  // Sorted newest-first so the most recent regional reads first;
+  // the user's eye lands on Melbourne / the latest data point and
+  // then scans backward in time for trend context.
   function _renderPastMetaTournamentStack(events) {
     if (!Array.isArray(events) || events.length === 0) return '';
     const fmt = (n, dp) => n.toFixed(dp).replace('.', ',');
     const sorted = events.slice().sort((a, b) =>
-      (a.date || '').localeCompare(b.date || '')
+      (b.date || '').localeCompare(a.date || '')
     );
     const rows = sorted.map(ev => {
       const isWinner = (ev.top1Count || 0) > 0;

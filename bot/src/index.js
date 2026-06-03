@@ -25,6 +25,7 @@ import { installBotCommands, registerStart } from './commands/start.js';
 import { registerMetaCall } from './commands/metacall.js';
 import { registerDeck, handleDeckSearch } from './commands/deck.js';
 import { handleAccessRequest, registerAccess } from './commands/access.js';
+import { registerMyId } from './commands/myid.js';
 
 const BOT_TOKEN = process.env.BOT_TOKEN;
 const PORT = parseInt(process.env.PORT || '3000', 10);
@@ -68,6 +69,7 @@ registerStart(bot);
 registerAccess(bot);
 registerMetaCall(bot);
 registerDeck(bot);
+registerMyId(bot);
 
 // Catch-all for truly unrecognised text (anything that isn't a slash
 // command we registered and isn't the persistent keyboard's button

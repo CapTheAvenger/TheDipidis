@@ -56,6 +56,7 @@ export async function installBotCommands(bot) {
             { command: 'metacall', description: 'Meta Call Dashboard rendern' },
             { command: 'deck', description: 'Deck Builder + Tech-Cards' },
             { command: 'menu', description: 'Buttons-Tastatur wieder einblenden' },
+            { command: 'myid', description: 'Telegram-Chat-ID für Preisalarme anzeigen' },
         ]);
     } catch (err) {
         console.warn('[boot] setMyCommands failed:', err && err.message);

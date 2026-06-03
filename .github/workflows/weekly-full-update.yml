@@ -143,6 +143,7 @@ jobs:
           mkdir -p backend/core/data
           for f in \
               all_cards_database.csv \
+              all_cards_database.json \
               japanese_cards_database.csv \
               cardmarket_id_mapping.csv \
               price_data.csv \

@@ -1158,6 +1158,65 @@
     .mockup-hub-tile .mockup-tile-desc  { font-size: 0.63rem; }
 }
 
+/* Text-only banner — no image slot, content takes the full width.
+   Used for orientation-heavy sections where bullets do the
+   explaining better than a screenshot or a mockup. */
+.feature-banner.banner-text-only {
+    grid-template-columns: 1fr;
+}
+.feature-banner.banner-text-only .feature-banner-imgs,
+.feature-banner.banner-text-only > .feature-banner-img,
+.feature-banner.banner-text-only > .feature-banner-img-hero,
+.feature-banner.banner-text-only > .feature-banner-img-asym {
+    display: none;
+}
+.feature-banner.banner-text-only .feature-banner-content {
+    max-width: 78ch;
+}
+
+/* Inline figure attached to a single bullet. Small visual proof
+   of a specific feature (e.g. Wishlist custom prices + export)
+   without expanding into a full image banner slot. */
+.feature-banner-bullets .bullet-figure {
+    display: block;
+    margin: 10px 0 4px;
+    max-width: 360px;
+    border-radius: 10px;
+    overflow: hidden;
+    background: #f8fafc;
+    border: 1px solid rgba(15, 23, 42, 0.10);
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05);
+}
+.feature-banner-bullets .bullet-figure img {
+    display: block;
+    width: 100%;
+    height: auto;
+    background: #0f172a;
+}
+.feature-banner-bullets .bullet-figure-caption {
+    padding: 6px 12px 7px;
+    font-size: 0.78rem;
+    color: #475569;
+    background: #ffffff;
+    border-top: 1px solid rgba(15, 23, 42, 0.06);
+    line-height: 1.4;
+}
+/* Placeholder shown until the real screenshot lands. Reads as
+   intentional "Bild folgt" instead of a 404. */
+.feature-banner-bullets .bullet-figure--pending {
+    aspect-ratio: 16 / 9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    background: linear-gradient(135deg, #f1f5f9 0%, #ffffff 100%);
+    color: #64748b;
+    font-size: 0.78rem;
+    font-weight: 700;
+    padding: 14px;
+    letter-spacing: 0.03em;
+}
+
 /* ── Profile tab header: compact override ─────────────── */
 #profile > .container > .header {
     padding: 10px 16px;

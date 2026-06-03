@@ -410,9 +410,14 @@
         gap: 12px;
     }
     .banner-layout-asymmetric .feature-banner-thumbs {
+        /* Stacked thumbs (single column) instead of side-by-side, so
+           mockup tables / pill rows have room to render their labels
+           without slicing the trailing word. Side-by-side at ~160 px
+           per thumb was clipping "CLIMBERS" → "CLIMBER", "COUNT" → "CO",
+           and forcing the card-name to wrap word-by-word. */
         grid-template-rows: auto auto;
-        grid-template-columns: 1fr 1fr;
-        gap: 10px;
+        grid-template-columns: 1fr;
+        gap: 12px;
     }
 
     /* Phone-screenshot aspect ratio across every frame on mobile so the
@@ -837,15 +842,21 @@
     overflow: hidden;
 }
 /* When a mockup is dropped directly into a .feature-banner-img*
-   slot, the slot's dark background-color shouldn't show through.
-   Override the navy + aspect-ratio because mockups are square-ish
-   and self-size. */
+   slot, the slot's dark background-color shouldn't show through
+   and the slot must self-size to the mockup. The selectors below
+   use the banner-layout context so they out-specific the layout
+   rules that otherwise force aspect-ratio: 16/9 on thumbs etc. */
 .feature-banner-img:has(> .tutorial-mockup),
 .feature-banner-img-hero:has(> .tutorial-mockup),
-.feature-banner-img-asym:has(> .tutorial-mockup) {
+.feature-banner-img-asym:has(> .tutorial-mockup),
+.banner-layout-mosaic .feature-banner-imgs .feature-banner-img:has(> .tutorial-mockup),
+.banner-layout-hero .feature-banner-img-hero:has(> .tutorial-mockup),
+.banner-layout-asymmetric .feature-banner-img-asym:has(> .tutorial-mockup),
+.banner-layout-asymmetric .feature-banner-thumbs .feature-banner-img:has(> .tutorial-mockup) {
     background: transparent;
     box-shadow: none;
     aspect-ratio: auto;
+    overflow: visible;
 }
 .tutorial-mockup .mockup-header {
     display: flex;

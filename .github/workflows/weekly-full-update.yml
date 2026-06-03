@@ -273,6 +273,27 @@ jobs:
               else
                   rc_summary+=("OK   $step")
               fi
+              # Mid-batch mirror: all_cards_scraper writes the freshly-
+              # scraped card master DB to backend/core/data/ (its native
+              # output dir), but the very next steps — cardmarket_id_mapper
+              # and cardmarket_price_merger — read all_cards_database.csv
+              # from the project-root data/ directory via get_project_data_dir().
+              # Without this copy the mapper sees the stale seed (last
+              # week's CSV) and produces mappings for last week's set
+              # rotation only — exactly what happened on the 2026-05-22
+              # CRI release: 122 CRI cards in the new scrape, 0 in the
+              # mapping output → 0 CRI prices → N/A in every Wishlist /
+              # Trade List / Deck Builder grid for 2 weeks running. The
+              # end-of-batch prepare_card_data sync would have caught it
+              # too late (mapper had already run against stale data).
+              if [ "$step" = "scrapers/all_cards_scraper.py" ]; then
+                  for mirror in all_cards_database.csv all_cards_database.json; do
+                      if [ -f "core/data/$mirror" ]; then
+                          cp "core/data/$mirror" "../data/$mirror"
+                          echo "  ↳ mirrored $mirror to data/"
+                      fi
+                  done
+              fi
               echo "::endgroup::"
           done
           echo "── Summary ──"

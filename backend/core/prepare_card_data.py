@@ -469,6 +469,32 @@ def split_card_database_chunks(all_cards: list, frontend_data: str):
 # Files that each scraper produces and the frontend needs.
 # Patterns are matched with str.startswith against filenames in backend/core/data/.
 SYNC_PATTERNS = [
+    # Card master databases — produced by all_cards_scraper +
+    # japanese_cards_scraper. The frontend's Card DB tab, deck builder
+    # card-name lookups, and every (set, number) → name resolution
+    # read these. Without them in SYNC_PATTERNS, a CI scraper run
+    # writes to backend/core/data/ and the frontend stays frozen on
+    # the last hand-synced snapshot — which is exactly how the 2026-
+    # 05-22 CRI rotation produced empty Cardmarket prices for ~2
+    # weeks: the scraper happily scraped CRI cards into backend/core/
+    # data/all_cards_database.csv every Tuesday, prepare_card_data
+    # synced nothing CRI-shaped back, and the cardmarket_id_mapper
+    # had no CRI rows to map against → 0 CRI Cardmarket IDs → N/A
+    # prices in Wishlist + Trade List + every Deck Builder grid.
+    "all_cards_database.csv",
+    "all_cards_database.json",
+    "japanese_cards_database.csv",
+    # Cardmarket pricing pipeline outputs — cardmarket_id_mapper builds
+    # the (set, number) → idProduct map, cardmarket_price_merger pulls
+    # the daily price snapshot and writes price_data.csv. Both consumed
+    # by the frontend's price-resolver (card-data-cache.js).
+    "cardmarket_id_mapping.csv",
+    "price_data.csv",
+    # Card-text dump — produced by pokemon_card_text_scraper. Read by
+    # the Tech Lab capability engine + the deck builder's tech-audit
+    # step. New-set ability text needs to reach the frontend within
+    # the same weekly run, not after a separate manual sync.
+    "pokemon_card_text.json",
     # Tournament Scraper JH  →  Past Meta tab
     "tournament_cards_data_cards.csv",
     "tournament_cards_data_overview.csv",

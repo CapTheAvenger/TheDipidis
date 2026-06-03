@@ -1209,6 +1209,53 @@ async function clearWishlist() {
   }
 }
 
+// ── Price-alert helpers ──────────────────────────────────────────
+//
+// Two pill styles surface deal/risk states in the Wishlist + Trade List
+// grids without needing the user to read the price input field next to
+// the live Cardmarket number:
+//
+//   buildWishlistTargetPill(cmPrice, userMaxPrice)
+//     Green "🎯 Unter deinem Ziel!" when the live Cardmarket low price
+//     has dropped to (or below) the user's wishlist max. Mirrors the
+//     bot's wishlist notification trigger — same logic, in-page
+//     version for the manual scroll-through case.
+//
+//   buildTradelistUnderpricedPill(cmPrice, userMinPrice)
+//     Red "⚠ 10 %+ unter Markt" when the live Cardmarket trend price
+//     is at least 10 % above the user's listed trade price — i.e. the
+//     user is underselling. Same threshold as the bot's trade-list
+//     notification trigger (TRADELIST_NOTIFY_THRESHOLD_PCT = 10).
+const TRADELIST_NOTIFY_THRESHOLD_PCT = 10;
+
+function _parsePriceNum(raw) {
+  if (raw === undefined || raw === null || raw === '') return null;
+  const n = parseFloat(String(raw).replace(',', '.').replace('€', '').trim());
+  return (isNaN(n) || n <= 0) ? null : n;
+}
+
+function buildWishlistTargetPill(cmPriceRaw, userMaxRaw) {
+  const cm = _parsePriceNum(cmPriceRaw);
+  const max = _parsePriceNum(userMaxRaw);
+  if (cm === null || max === null) return '';
+  if (cm > max) return '';
+  return `<div style="margin-top:4px;display:inline-flex;align-items:center;gap:4px;padding:2px 8px;background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;border-radius:999px;font-size:0.70em;font-weight:800;letter-spacing:0.02em;box-shadow:0 1px 4px rgba(22,163,74,0.35);" title="Cardmarket-Preis (${cm.toFixed(2).replace('.',',')} €) ist auf oder unter deinem Wunsch-Maximum (${max.toFixed(2).replace('.',',')} €)">🎯 Unter deinem Ziel</div>`;
+}
+
+function buildTradelistUnderpricedPill(cmPriceRaw, userMinRaw) {
+  const cm = _parsePriceNum(cmPriceRaw);
+  const min = _parsePriceNum(userMinRaw);
+  if (cm === null || min === null) return '';
+  const threshold = min * (1 + TRADELIST_NOTIFY_THRESHOLD_PCT / 100);
+  if (cm < threshold) return '';
+  const deltaPct = ((cm - min) / min) * 100;
+  return `<div style="margin-top:4px;display:inline-flex;align-items:center;gap:4px;padding:2px 8px;background:linear-gradient(135deg,#dc2626,#b91c1c);color:#fff;border-radius:999px;font-size:0.70em;font-weight:800;letter-spacing:0.02em;box-shadow:0 1px 4px rgba(220,38,38,0.35);" title="Markt (${cm.toFixed(2).replace('.',',')} €) ist ${deltaPct.toFixed(0)} % über deinem Preis (${min.toFixed(2).replace('.',',')} €). Tipp den Preis-Input an, um anzupassen.">⚠ +${deltaPct.toFixed(0)} % über Markt</div>`;
+}
+// Expose for the cron-side reuse + bot tooling.
+window.buildWishlistTargetPill = buildWishlistTargetPill;
+window.buildTradelistUnderpricedPill = buildTradelistUnderpricedPill;
+window.TRADELIST_NOTIFY_THRESHOLD_PCT = TRADELIST_NOTIFY_THRESHOLD_PCT;
+
 // Update wishlist UI
 function updateWishlistUI(searchFilter = '', setFilter = '') {
   const wishlistGrid = document.getElementById('wishlist-grid');
@@ -1338,6 +1385,7 @@ function updateWishlistUI(searchFilter = '', setFilter = '') {
                 onkeydown="if(event.key==='Enter'){this.blur();}">
               <span style="font-size: 0.72em; color: #8e44ad; font-weight: 600;">€</span>
             </div>
+            ${buildWishlistTargetPill(wishlistPriceRaw, maxPrice)}
           </div>
         </div>
       `);
@@ -5370,6 +5418,7 @@ function updateTradelistUI(searchFilter = '', setFilter = '') {
                 onkeydown="if(event.key==='Enter'){this.blur();}">
               <span style="font-size: 0.72em; color: #16a085; font-weight: 600;">\u20ac</span>
             </div>
+            ${buildTradelistUnderpricedPill(card.eur_price, minPriceRaw)}
           </div>
         </div>
       `);

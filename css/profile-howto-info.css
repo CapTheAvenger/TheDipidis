@@ -809,6 +809,344 @@
     }
 }
 
+/* ─────────────────────────────────────────────────────────────
+ * Tutorial mockups — inline HTML/CSS reproductions of the app's
+ * UI for use in tutorial banners. Replaces the dark "phone
+ * screenshot in a frame" look that read as amateurish marketing.
+ * Mockups scale with the viewport, match the page's design
+ * language, and surface the same labels the user sees in the
+ * real app — without forcing the reader to squint at a 9:16
+ * portrait capture stuffed into a 16:9 banner slot.
+ * ─────────────────────────────────────────────────────────────── */
+
+/* Light card surface that replaces the phone-screenshot frame.
+   Lives inside the same .feature-banner-img / -hero / -asym slot
+   so banner layouts don't need to change. */
+.tutorial-mockup {
+    background: #ffffff;
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    border-radius: 14px;
+    padding: 18px 18px 20px;
+    box-shadow: 0 6px 22px rgba(15, 23, 42, 0.08);
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+/* When a mockup is dropped directly into a .feature-banner-img*
+   slot, the slot's dark background-color shouldn't show through.
+   Override the navy + aspect-ratio because mockups are square-ish
+   and self-size. */
+.feature-banner-img:has(> .tutorial-mockup),
+.feature-banner-img-hero:has(> .tutorial-mockup),
+.feature-banner-img-asym:has(> .tutorial-mockup) {
+    background: transparent;
+    box-shadow: none;
+    aspect-ratio: auto;
+}
+.tutorial-mockup .mockup-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+}
+.tutorial-mockup .mockup-title {
+    font-size: 0.82rem;
+    font-weight: 800;
+    color: #0f172a;
+    letter-spacing: 0.02em;
+}
+.tutorial-mockup .mockup-subtitle {
+    font-size: 0.72rem;
+    color: #64748b;
+    font-weight: 600;
+}
+.tutorial-mockup .mockup-pill {
+    font-size: 0.65rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 3px 9px;
+    border-radius: 999px;
+    background: rgba(59, 76, 202, 0.10);
+    color: var(--pokemon-blue, #3B4CCA);
+}
+.tutorial-mockup .mockup-pill--green { background: rgba(34, 197, 94, 0.12); color: #16a34a; }
+.tutorial-mockup .mockup-pill--red   { background: rgba(239, 68, 68, 0.12);  color: #dc2626; }
+.tutorial-mockup .mockup-pill--amber { background: rgba(255, 203, 5, 0.20);  color: #8a6500; }
+
+/* Hub tile grid — replaces the homepage-tiles screenshot. */
+.mockup-hub-tiles {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+}
+.mockup-hub-tile {
+    background: linear-gradient(135deg, #f0f7ff 0%, #ffffff 100%);
+    border: 1px solid rgba(59, 76, 202, 0.18);
+    border-radius: 10px;
+    padding: 12px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    position: relative;
+}
+.mockup-hub-tile .mockup-tile-icon {
+    font-size: 1.4rem;
+    line-height: 1;
+}
+.mockup-hub-tile .mockup-tile-title {
+    font-size: 0.78rem;
+    font-weight: 800;
+    color: var(--pokemon-blue, #3B4CCA);
+    line-height: 1.2;
+}
+.mockup-hub-tile .mockup-tile-desc {
+    font-size: 0.68rem;
+    color: #64748b;
+    line-height: 1.3;
+}
+
+/* Sample card with all the badges — replaces the "card legend"
+   screenshot. Mimics a real card tile from the deck builder. */
+.mockup-card-tile {
+    background: #ffffff;
+    border: 1px solid rgba(15, 23, 42, 0.10);
+    border-radius: 10px;
+    padding: 8px;
+    display: grid;
+    grid-template-columns: 60px 1fr;
+    gap: 10px;
+    position: relative;
+}
+.mockup-card-art {
+    aspect-ratio: 5 / 7;
+    background: linear-gradient(135deg, #fef3c7 0%, #fcd34d 50%, #f59e0b 100%);
+    border-radius: 6px;
+    position: relative;
+    overflow: hidden;
+}
+.mockup-card-art::after {
+    content: '✦';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 1.8rem;
+}
+.mockup-card-badge {
+    position: absolute;
+    font-size: 0.6rem;
+    font-weight: 800;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    box-shadow: 0 1px 4px rgba(15, 23, 42, 0.25);
+    z-index: 2;
+}
+.mockup-card-badge--max  { top: -6px; right: -6px; background: #ef4444; }
+.mockup-card-badge--in   { top: -6px; left: -6px;  background: #16a34a; }
+.mockup-card-badge--wish { bottom: -4px; right: -4px; background: #ec4899; font-size: 0.7rem; }
+.mockup-card-info {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+}
+.mockup-card-name {
+    font-size: 0.74rem;
+    font-weight: 800;
+    color: #0f172a;
+    line-height: 1.15;
+}
+.mockup-card-stats {
+    font-size: 0.65rem;
+    color: #64748b;
+    line-height: 1.3;
+}
+.mockup-card-stats strong { color: var(--pokemon-blue, #3B4CCA); font-weight: 700; }
+.mockup-action-row {
+    display: flex;
+    gap: 4px;
+    margin-top: 4px;
+    flex-wrap: wrap;
+}
+.mockup-action-btn {
+    font-size: 0.55rem;
+    font-weight: 800;
+    padding: 3px 6px;
+    border-radius: 4px;
+    background: #f1f5f9;
+    color: #475569;
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    letter-spacing: 0.04em;
+}
+.mockup-action-btn--blue   { background: rgba(59, 76, 202, 0.12); color: var(--pokemon-blue, #3B4CCA); border-color: rgba(59, 76, 202, 0.20); }
+.mockup-action-btn--yellow { background: rgba(255, 203, 5, 0.18); color: #8a6500;                     border-color: rgba(255, 203, 5, 0.35); }
+.mockup-action-btn--red    { background: rgba(239, 68, 68, 0.12); color: #dc2626;                     border-color: rgba(239, 68, 68, 0.22); }
+.mockup-action-btn--green  { background: rgba(34, 197, 94, 0.12); color: #16a34a;                     border-color: rgba(34, 197, 94, 0.22); }
+
+/* Profile navigation — replaces the My Profile menu screenshot. */
+.mockup-profile-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.mockup-nav-section {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.mockup-nav-heading {
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #0f172a;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.mockup-nav-heading .mockup-nav-icon { font-size: 1rem; }
+.mockup-nav-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+.mockup-nav-chip {
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 4px 9px;
+    border-radius: 999px;
+    background: rgba(59, 76, 202, 0.08);
+    color: var(--pokemon-blue, #3B4CCA);
+    border: 1px solid rgba(59, 76, 202, 0.16);
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+.mockup-nav-chip-count {
+    font-size: 0.6rem;
+    font-weight: 800;
+    background: rgba(255, 255, 255, 0.7);
+    color: #64748b;
+    padding: 0 4px;
+    border-radius: 6px;
+}
+
+/* Tier bracket — replaces tier-1/2/3 screenshots. */
+.mockup-tier-bracket {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.mockup-tier-card {
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid rgba(15, 23, 42, 0.08);
+}
+.mockup-tier-card .mockup-tier-header {
+    padding: 7px 10px;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    color: #fff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.mockup-tier-card--t1 .mockup-tier-header { background: linear-gradient(90deg, #d32f2f, #ef4444); }
+.mockup-tier-card--t2 .mockup-tier-header { background: linear-gradient(90deg, #f57c00, #fb923c); }
+.mockup-tier-card--t3 .mockup-tier-header { background: linear-gradient(90deg, #388e3c, #4ade80); }
+.mockup-tier-rows {
+    background: #fff;
+}
+.mockup-tier-row {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: 10px;
+    align-items: center;
+    padding: 6px 10px;
+    font-size: 0.72rem;
+    border-top: 1px solid rgba(15, 23, 42, 0.05);
+}
+.mockup-tier-row:first-child { border-top: 0; }
+.mockup-tier-row-name { font-weight: 700; color: #0f172a; }
+.mockup-tier-row-share { font-weight: 700; color: #64748b; }
+.mockup-tier-row-arrow {
+    font-size: 0.7rem;
+    font-weight: 800;
+    padding: 1px 5px;
+    border-radius: 4px;
+}
+.mockup-tier-row-arrow--up   { color: #16a34a; background: rgba(34, 197, 94, 0.12); }
+.mockup-tier-row-arrow--down { color: #dc2626; background: rgba(239, 68, 68, 0.12); }
+.mockup-tier-row-arrow--flat { color: #64748b; background: rgba(100, 116, 139, 0.10); }
+
+/* Comparison table — replaces the rank-Δ table screenshot. */
+.mockup-comparison {
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid rgba(15, 23, 42, 0.10);
+    background: #fff;
+}
+.mockup-comparison-head {
+    display: grid;
+    grid-template-columns: 1fr 60px 60px;
+    background: #1e293b;
+    color: #cbd5e1;
+    padding: 6px 10px;
+    font-size: 0.65rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+.mockup-comparison-row {
+    display: grid;
+    grid-template-columns: 1fr 60px 60px;
+    padding: 6px 10px;
+    font-size: 0.74rem;
+    align-items: center;
+    border-top: 1px solid rgba(15, 23, 42, 0.05);
+}
+.mockup-comparison-row:nth-child(odd) { background: rgba(241, 245, 249, 0.5); }
+.mockup-comparison-row .mockup-row-deck { font-weight: 700; color: #0f172a; }
+.mockup-comparison-row .mockup-row-rank { color: #64748b; font-weight: 700; }
+.mockup-comparison-row .mockup-row-count { font-weight: 800; color: var(--pokemon-blue, #3B4CCA); }
+.mockup-comparison-row .mockup-row-count small {
+    display: block;
+    font-size: 0.62rem;
+    font-weight: 800;
+}
+.mockup-comparison-row .mockup-row-count small.up   { color: #16a34a; }
+.mockup-comparison-row .mockup-row-count small.down { color: #dc2626; }
+
+/* Layout helper: side-by-side mockups in one banner image slot */
+.tutorial-mockup-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+.tutorial-mockup-stack > * { flex: 0 0 auto; }
+
+@media (max-width: 780px) {
+    .tutorial-mockup { padding: 14px 14px 16px; }
+    .mockup-hub-tiles { gap: 8px; }
+    .mockup-hub-tile { padding: 10px; }
+    .mockup-hub-tile .mockup-tile-title { font-size: 0.74rem; }
+    .mockup-hub-tile .mockup-tile-desc  { font-size: 0.63rem; }
+}
+
 /* ── Profile tab header: compact override ─────────────── */
 #profile > .container > .header {
     padding: 10px 16px;

@@ -158,6 +158,8 @@ document.addEventListener('DOMContentLoaded', function () {
         'testinggroups':         'profile',
         'testing-groups':        'profile',
         'wishlist':              'profile',
+        'tradelist':             'profile',
+        'trade-list':            'profile',
         'collection':            'profile',
     };
 
@@ -176,6 +178,8 @@ document.addEventListener('DOMContentLoaded', function () {
         'testinggroups':  'testinggroups',
         'testing-groups': 'testinggroups',
         'wishlist':       'wishlist',
+        'tradelist':      'tradelist',
+        'trade-list':     'tradelist',
         'collection':     'collection',
     };
 
@@ -238,6 +242,58 @@ document.addEventListener('DOMContentLoaded', function () {
         const profileSub = PROFILE_SUBTAB_FOR_HASH[rawTab];
         if (tabId === 'profile' && profileSub && typeof window.switchProfileTab === 'function') {
             try { window.switchProfileTab(profileSub); } catch (_e) { /* tolerate */ }
+        }
+
+        // focusCard=<set>|<number> deep-link (driven by the Telegram
+        // price-alert messages). Scrolls to the matching card row in
+        // the wishlist / tradelist grid and flashes a highlight so
+        // the user can spot which card the bot pinged about. The
+        // wishlist/tradelist render is async (Firestore + cards DB
+        // load), so we poll for the element to appear before giving
+        // up. 5 s is plenty for a warm cache; cold loads usually
+        // finish in ~2 s.
+        const focusCard = params?.get('focusCard')?.trim();
+        if (focusCard) {
+            const tryFocus = (attempt = 0) => {
+                if (attempt > 50) return; // ~5 s @ 100 ms
+                const grids = (profileSub === 'tradelist')
+                    ? [document.getElementById('tradelist-grid')]
+                    : (profileSub === 'wishlist')
+                        ? [document.getElementById('wishlist-grid')]
+                        : [document.getElementById('wishlist-grid'), document.getElementById('tradelist-grid')];
+                const grid = grids.find(g => g && g.children.length > 0);
+                if (!grid) {
+                    setTimeout(() => tryFocus(attempt + 1), 100);
+                    return;
+                }
+                // Cards' input[aria-label] carries the card name; we
+                // match by Cardmarket URL slug because both wishlist
+                // + tradelist embed it in the price chip. Simpler +
+                // robust to name punctuation.
+                const [setCode, number] = focusCard.split('|');
+                const selector = `[alt*="${number}"], [title*="${setCode} ${number}"]`;
+                // Walk children, find the one whose text contains the set+number
+                let target = null;
+                for (const child of grid.children) {
+                    const text = child.textContent || '';
+                    if (text.includes(`${setCode} ${number}`)) {
+                        target = child;
+                        break;
+                    }
+                }
+                if (!target) {
+                    setTimeout(() => tryFocus(attempt + 1), 100);
+                    return;
+                }
+                target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                // Flash highlight — 3 second amber ring
+                target.style.transition = 'box-shadow 0.4s ease';
+                target.style.boxShadow = '0 0 0 4px rgba(255, 203, 5, 0.85), 0 4px 18px rgba(15, 23, 42, 0.18)';
+                setTimeout(() => {
+                    target.style.boxShadow = '';
+                }, 3000);
+            };
+            setTimeout(() => tryFocus(0), 400);
         }
     }
 

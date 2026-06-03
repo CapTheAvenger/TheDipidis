@@ -1,0 +1,76 @@
+name: Daily Price Alerts
+
+# Sends Telegram price-watch notifications to users who opted in via
+# Mein Profil → Account → Einstellungen → Preisalarme.
+#
+# Reads the latest data/price_data.csv (refreshed every Tuesday by
+# weekly-full-update.yml + on every workflow_dispatch) and queries
+# Firestore for users with priceAlerts.telegram.enabled == true.
+#
+# Trigger logic implemented in scripts/send_price_alerts.py:
+#   • Wishlist:  cardmarket eur_low <= user wishlistMaxPrice
+#   • Tradelist: cardmarket eur_price >= user tradelistMinPrice
+#                                       * (1 + thresholdPct/100)
+#                                       (threshold defaults to 10 %)
+# Plus a 48-hour per-card snooze so repeat triggers don't spam.
+#
+# Required GitHub repo secrets (Settings → Secrets and variables → Actions):
+#   BOT_TOKEN                — Telegram bot token (same as Render service)
+#   FIREBASE_SERVICE_ACCOUNT — JSON service-account credentials with
+#                              Firestore read+write scope on the
+#                              `users` collection. Generate via the
+#                              Firebase console → Project Settings →
+#                              Service accounts → "Generate new private
+#                              key", then paste the entire JSON blob
+#                              as the secret value.
+
+on:
+  schedule:
+    # 08:00 UTC = 09:00 CET winter / 10:00 CEST summer. Late enough
+    # that the Tuesday weekly-full-update has long since rewritten
+    # price_data.csv and the deploy has completed.
+    - cron: '0 8 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: daily-price-alerts
+  cancel-in-progress: false
+
+jobs:
+  send-alerts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install firebase-admin
+
+      - name: Run alert script
+        env:
+          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: |
+          if [ -z "$BOT_TOKEN" ]; then
+            echo "::error::BOT_TOKEN secret is missing — add it in Settings → Secrets and variables → Actions"
+            exit 1
+          fi
+          if [ -z "$FIREBASE_SERVICE_ACCOUNT" ]; then
+            echo "::error::FIREBASE_SERVICE_ACCOUNT secret is missing — add the JSON blob from Firebase Console → Project Settings → Service accounts"
+            exit 1
+          fi
+          python scripts/send_price_alerts.py

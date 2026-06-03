@@ -433,6 +433,72 @@ async function saveCurrentDeckToProfile(source) {
     });
 }
 
+// ── Price-alert settings (Phase 2) ───────────────────────────────
+//
+// Save / load the user's Telegram price-alert preferences. The daily
+// cron job (.github/workflows/daily-price-alerts.yml) queries Firestore
+// for users with priceAlerts.telegram.enabled == true and pushes alerts
+// to the stored chatId. The lastNotified per-card map is written by
+// the Python alert script and read here only for diagnostic display.
+async function savePriceAlerts() {
+  const user = auth.currentUser;
+  if (!user) {
+    showNotification('Bitte erst einloggen', 'error');
+    return;
+  }
+  const enabledEl   = document.getElementById('settings-price-alerts-enabled');
+  const chatIdEl    = document.getElementById('settings-price-alerts-chatid');
+  const thresholdEl = document.getElementById('settings-price-alerts-threshold');
+  const enabled = !!(enabledEl && enabledEl.checked);
+  const chatIdRaw = (chatIdEl && chatIdEl.value || '').trim();
+  const thresholdPct = Math.max(0, Math.min(100, parseInt(thresholdEl && thresholdEl.value || '10', 10) || 10));
+
+  if (enabled && !/^\d{4,}$/.test(chatIdRaw)) {
+    showNotification('Bitte eine gültige Telegram-Chat-ID einfügen (z. B. 123456789). Hol sie dir per /myid beim Bot.', 'error');
+    return;
+  }
+
+  try {
+    await db.collection('users').doc(user.uid).set({
+      priceAlerts: {
+        telegram: {
+          enabled,
+          chatId: chatIdRaw || null,
+          tradelistThresholdPct: thresholdPct,
+          // lastNotified is written by the cron, NOT here. Don't
+          // overwrite an existing map with empty {} on save.
+        },
+      },
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+    }, { merge: true });
+    if (window.userProfile) {
+      window.userProfile.priceAlerts = window.userProfile.priceAlerts || {};
+      window.userProfile.priceAlerts.telegram = {
+        ...(window.userProfile.priceAlerts.telegram || {}),
+        enabled,
+        chatId: chatIdRaw || null,
+        tradelistThresholdPct: thresholdPct,
+      };
+    }
+    showNotification(enabled ? '✅ Preisalarme aktiviert' : '🔕 Preisalarme deaktiviert', 'success');
+  } catch (error) {
+    console.error('Error saving price alerts:', error);
+    showNotification('Speichern fehlgeschlagen', 'error');
+  }
+}
+
+function loadPriceAlertsIntoSettings() {
+  const alerts = window.userProfile && window.userProfile.priceAlerts && window.userProfile.priceAlerts.telegram;
+  const enabledEl   = document.getElementById('settings-price-alerts-enabled');
+  const chatIdEl    = document.getElementById('settings-price-alerts-chatid');
+  const thresholdEl = document.getElementById('settings-price-alerts-threshold');
+  if (enabledEl)   enabledEl.checked   = !!(alerts && alerts.enabled);
+  if (chatIdEl)    chatIdEl.value      = (alerts && alerts.chatId) || '';
+  if (thresholdEl) thresholdEl.value   = (alerts && Number.isFinite(alerts.tradelistThresholdPct)) ? alerts.tradelistThresholdPct : 10;
+}
+window.savePriceAlerts = savePriceAlerts;
+window.loadPriceAlertsIntoSettings = loadPriceAlertsIntoSettings;
+
 // Save display name
 async function saveDisplayName() {
   const user = auth.currentUser;
@@ -1741,7 +1807,15 @@ function updateProfileUI(profile) {
   if (nameInput) {
     nameInput.value = profile.displayName || '';
   }
-  
+
+  // Hydrate the price-alert section with the user's saved telegram
+  // prefs so toggling the Account → Settings tab shows the current
+  // state instead of empty defaults. Safe to call when the inputs
+  // aren't in the DOM yet (the function null-checks each one).
+  if (typeof loadPriceAlertsIntoSettings === 'function') {
+    loadPriceAlertsIntoSettings();
+  }
+
   // Calculate collection stats
   const stats = getCollectionStats();
   

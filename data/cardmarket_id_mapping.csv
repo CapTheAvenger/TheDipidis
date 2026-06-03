@@ -3202,6 +3202,122 @@ CRE,230,567338,ordered(2↔2),Welcoming Lantern
 CRE,231,567339,unique,Water Energy
 CRE,232,567340,unique,Psychic Energy
 CRE,233,567341,unique,Fighting Energy
+CRI,1,886393,unique,Weedle
+CRI,2,886394,unique,Kakuna
+CRI,3,886395,ordered(2↔2),Beedrill ex
+CRI,4,886396,unique,Carnivine
+CRI,5,886397,ordered(2↔2),Chespin
+CRI,6,886398,unique,Quilladin
+CRI,7,886399,unique,Chesnaught
+CRI,8,886400,unique,Vulpix
+CRI,9,886401,unique,Ninetales
+CRI,10,886402,unique,Ho-Oh
+CRI,11,886403,unique,Fennekin
+CRI,12,886404,unique,Braixen
+CRI,13,886405,unique,Delphox
+CRI,14,886406,unique,Litleo
+CRI,15,886407,ordered(2↔2),Mega Pyroar ex
+CRI,16,886408,unique,Remoraid
+CRI,17,886409,unique,Octillery
+CRI,18,886410,unique,Delibird
+CRI,19,886411,unique,Keldeo
+CRI,20,886412,ordered(2↔2),Froakie
+CRI,21,886413,ordered(2↔2),Frogadier
+CRI,22,886414,ordered(4↔4),Mega Greninja ex
+CRI,23,886415,unique,Bergmite
+CRI,24,886416,unique,Avalugg
+CRI,25,886417,unique,Wimpod
+CRI,26,886418,unique,Golisopod
+CRI,27,886419,unique,Mareep
+CRI,28,886420,unique,Flaaffy
+CRI,29,886421,ordered(2↔2),Ampharos
+CRI,30,886422,unique,Emolga
+CRI,31,886423,ordered(4↔4),Deoxys
+CRI,32,886424,ordered(4↔4),Deoxys
+CRI,33,886425,ordered(4↔4),Deoxys
+CRI,34,886426,ordered(4↔4),Deoxys
+CRI,35,886427,ordered(3↔3),Mega Floette ex
+CRI,36,886428,unique,Espurr
+CRI,37,886429,unique,Meowstic
+CRI,38,886430,unique,Phantump
+CRI,39,886431,unique,Trevenant
+CRI,40,886432,unique,Pumpkaboo
+CRI,41,886433,ordered(2↔2),Gourgeist ex
+CRI,42,886434,ordered(2↔2),Xerneas
+CRI,43,886435,unique,Sudowoodo
+CRI,44,886436,unique,Phanpy
+CRI,45,886437,unique,Donphan
+CRI,46,886438,unique,Baltoy
+CRI,47,886439,ordered(2↔2),Claydol
+CRI,48,886440,unique,Mega Gallade ex
+CRI,49,886441,unique,Zubat
+CRI,50,886442,unique,Golbat
+CRI,51,886443,ordered(2↔2),Crobat
+CRI,52,886444,unique,Qwilfish
+CRI,53,886445,unique,Stunky
+CRI,54,886446,unique,Skuntank
+CRI,55,886447,unique,Krookodile ex
+CRI,56,886448,unique,Trubbish
+CRI,57,886449,unique,Garbodor
+CRI,58,886450,unique,Skrelp
+CRI,59,886451,unique,Beldum
+CRI,60,886452,ordered(2↔2),Metang
+CRI,61,886453,unique,Metagross
+CRI,62,886454,unique,Ferroseed
+CRI,63,886455,unique,Ferrothorn
+CRI,64,886456,ordered(2↔2),Cobalion ex
+CRI,65,886457,ordered(3↔3),Mega Dragalge ex
+CRI,66,886458,unique,Goomy
+CRI,67,886459,ordered(2↔2),Sliggoo
+CRI,68,886460,unique,Goodra
+CRI,69,886461,ordered(2↔2),Tauros
+CRI,70,886462,unique,Patrat
+CRI,71,886463,ordered(2↔2),Watchog
+CRI,72,886464,unique,Minccino
+CRI,73,886465,ordered(3↔3),Cinccino ex
+CRI,75,886467,unique,Ange Floette
+CRI,76,886468,ordered(3↔3),AZ's Tranquility
+CRI,77,886470,ordered(2↔2),Emma
+CRI,79,886471,ordered(2↔2),Philippe
+CRI,80,886472,ordered(2↔2),Prism Tower
+CRI,81,886473,ordered(3↔3),Roxie's Performance
+CRI,82,886474,ordered(2↔2),Special Red Card
+CRI,87,886479,ordered(2↔2),Chespin
+CRI,88,886480,ordered(2↔2),Froakie
+CRI,89,886481,ordered(2↔2),Frogadier
+CRI,90,886482,ordered(2↔2),Ampharos
+CRI,91,886483,ordered(2↔2),Xerneas
+CRI,92,886484,ordered(2↔2),Claydol
+CRI,93,886485,ordered(2↔2),Crobat
+CRI,94,886487,ordered(2↔2),Metang
+CRI,95,886486,ordered(2↔2),Sliggoo
+CRI,96,886488,ordered(2↔2),Tauros
+CRI,97,886489,ordered(2↔2),Watchog
+CRI,98,886490,ordered(2↔2),Beedrill ex
+CRI,99,886491,ordered(2↔2),Mega Pyroar ex
+CRI,100,886492,ordered(4↔4),Mega Greninja ex
+CRI,101,886493,ordered(3↔3),Mega Floette ex
+CRI,102,886494,ordered(2↔2),Gourgeist ex
+CRI,103,886495,ordered(2↔2),Cobalion ex
+CRI,104,886496,ordered(3↔3),Mega Dragalge ex
+CRI,105,886497,ordered(3↔3),Cinccino ex
+CRI,106,886500,ordered(3↔3),AZ's Tranquility
+CRI,107,886501,ordered(2↔2),Emma
+CRI,108,886498,unique,Energy Retrieval
+CRI,109,886503,unique,Jumbo Ice Cream
+CRI,110,886502,ordered(2↔2),Philippe
+CRI,111,886504,ordered(2↔2),Prism Tower
+CRI,112,886505,ordered(3↔3),Roxie's Performance
+CRI,113,886506,ordered(2↔2),Special Red Card
+CRI,114,886507,unique,Surfing Beach
+CRI,115,886508,unique,Tool Scrapper
+CRI,116,886509,ordered(4↔4),Mega Greninja ex
+CRI,117,886510,ordered(3↔3),Mega Floette ex
+CRI,118,886511,ordered(3↔3),Mega Dragalge ex
+CRI,119,886512,ordered(3↔3),Cinccino ex
+CRI,120,886513,ordered(3↔3),AZ's Tranquility
+CRI,121,886514,ordered(3↔3),Roxie's Performance
+CRI,122,886515,ordered(4↔4),Mega Greninja ex
 CRZ,1,691718,unique,Oddish
 CRZ,2,691719,unique,Gloom
 CRZ,3,691720,unique,Bellossom

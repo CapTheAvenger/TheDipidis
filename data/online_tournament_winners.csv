@@ -1,6 +1,9 @@
 tournament_id,tournament_date,format,player_count,winner_archetype,winner_winrate
+6a1661c08c163b8097998337,2026-06-02,CRI,170,Hydrapple Ogerpon,21.0
+6a1eaac047f3797bf6ba9d10,2026-06-02,CRI,134,Dragapult,31.0
 eh-why-not,2026-06-02,CRI,128,Slowking,21.0
 6a149cd28c163b809799739d,2026-06-01,CRI,168,Dragapult Dusknoir,21.0
+6a15d93e8c163b8097997d76,2026-06-01,CRI,170,Alakazam Dudunsparce,34.0
 6a17753a0f6c1f08998626af,2026-06-01,CRI,181,Rocket's Honchkrow,30.0
 6a1358470f6c1f089986042b,2026-05-31,CRI,129,Archaludon Dudunsparce,21.0
 6a18254a8c163b8097998d06,2026-05-30,CRI,100,Dragapult Blaziken,25.0
@@ -47,6 +50,3 @@ is-something,2026-05-09,CRI,257,Dragapult,30.0
 69fb3adc4f71d664893ee513,2026-05-07,CRI,156,Lucario Hariyama,33.0
 69f553544f71d664893e99f0,2026-05-07,CRI,197,Dragapult Dusknoir,36.0
 69fb3abc4f71d664893ee510,2026-05-06,CRI,129,Dragapult Dudunsparce,28.0
-69f442124f71d664893e8a93,2026-05-06,CRI,102,Grimmsnarl Froslass,21.0
-69f3c02c4f71d664893e8327,2026-05-05,CRI,196,Starmie Froslass,21.0
-69f5fcfce23aab068aad84d5,2026-05-05,CRI,158,Ursaluna Lunatone,7.0

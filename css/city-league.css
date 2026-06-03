@@ -52,8 +52,13 @@
 .tutorial-screenshot-frame {
     aspect-ratio: 9 / 16;
     background-image: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    background-size: cover;
+    /* Tutorial captures are portrait phone shots — contain shows the
+       whole screenshot inside whatever frame aspect the banner uses
+       instead of slicing the middle. The placeholder gradient still
+       fills the frame until the real image loads. */
+    background-size: contain;
     background-position: center;
+    background-repeat: no-repeat;
     display: flex;
     align-items: flex-end;
     justify-content: center;

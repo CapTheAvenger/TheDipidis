@@ -82,7 +82,14 @@
     border-radius: 12px;
     box-shadow: 0 4px 16px rgba(15, 23, 42, 0.12);
     overflow: hidden;
-    background: #0f172a;
+    /* Phone-screenshot frame look. background-size: contain shows the
+       whole shot rather than slicing the middle, which matters because
+       every user-curated tutorial screenshot is a portrait phone
+       capture — desktop banner aspect ratios would crop them. */
+    background-color: #0f172a;
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
 }
 
 .feature-banner-img img,
@@ -368,11 +375,22 @@
     line-height: 1.55;
 }
 
-/* ── Responsive ── */
+/* ── Responsive ──
+ * Two things go wrong on mobile if we don't override:
+ *   1. The 2-column banner grid stays 2-up → image and text both squeeze
+ *      into ~150px columns and become unreadable.
+ *   2. The multi-image grids inside .feature-banner-imgs stay grid-template-
+ *      columns: 1fr 1fr or 1.4fr 1fr, so thumbnails end up ~80px wide and
+ *      phone-screenshots become unreadable letterbox specks.
+ * Fix: collapse everything to single column on narrow viewports and let
+ * each image-frame use phone-screenshot aspect (9 / 16).
+ * ─────────────────────────────────────────────────────────────────────── */
 @media (max-width: 780px) {
     .feature-banner,
     .feature-banner.banner-reverse {
         grid-template-columns: 1fr;
+        padding: 22px 18px 24px;
+        gap: 22px;
     }
     .feature-banner.banner-reverse .feature-banner-content {
         order: 0;
@@ -383,6 +401,38 @@
     .feature-banner-title {
         font-size: 1.35rem;
     }
+
+    /* Multi-image grids inside mosaic / asymmetric — stack vertically so
+       each shot gets the full column width. */
+    .banner-layout-mosaic .feature-banner-imgs,
+    .banner-layout-asymmetric .feature-banner-imgs {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+    .banner-layout-asymmetric .feature-banner-thumbs {
+        grid-template-rows: auto auto;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+
+    /* Phone-screenshot aspect ratio across every frame on mobile so the
+       portrait captures show edge-to-edge instead of leaving huge dark
+       borders or getting horizontally sliced. */
+    .feature-banner-img,
+    .feature-banner-img-hero,
+    .feature-banner-img-asym,
+    .banner-layout-mosaic .feature-banner-imgs .feature-banner-img,
+    .banner-layout-hero .feature-banner-img-hero,
+    .banner-layout-asymmetric .feature-banner-img-asym,
+    .banner-layout-asymmetric .feature-banner-thumbs .feature-banner-img {
+        aspect-ratio: 9 / 16;
+    }
+    /* Thumbs in the two-up bottom row of an asymmetric banner can stay
+       a touch shorter so the asym hero gets visual priority above. */
+    .banner-layout-asymmetric .feature-banner-thumbs .feature-banner-img {
+        aspect-ratio: 3 / 4;
+    }
+
     .quickstart-trio {
         grid-template-columns: 1fr;
     }

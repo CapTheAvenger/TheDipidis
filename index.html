@@ -2859,86 +2859,840 @@
                         <!-- --- DEUTSCH --- -->
                         <div class="lang-de">
 
-                        <!-- Visual Quick-Start Guide (DE) — gleiche Bilder-Slots, andere Captions -->
-                        <section class="tutorial-section tutorial-visual-guide">
-                            <h2 class="tutorial-section-title">🚀 Schnellstart-Bildguide</h2>
-                            <p class="tutorial-section-desc">
-                                Sechs Screens in fünf Minuten — alles, um die Seite wie ein Power-User zu bedienen. Jeder Screenshot ist austauschbar: leg deinen eigenen unter
-                                <code>/images/tutorials/&lt;name&gt;.png</code> ab und er erscheint hier automatisch.
+                        <!-- ════════════════════════════════════════════════════
+                             DE-Übersetzung des englischen Long-Read-Guides.
+                             Gleiche HTML-Struktur, gleiche Bilder, gleiche
+                             Banner-Layouts (mosaic / hero / asymmetric +
+                             Hotspots). Nach diesem Block folgt unten ab
+                             "Website-Übersicht" weiterhin die ausführliche
+                             Tab-Referenz + FAQ + Support-Sektion als
+                             zusätzliches Manual.
+                             ════════════════════════════════════════════════════ -->
+
+                        <!-- ── Hero ── -->
+                        <section class="tutorial-hero">
+                            <span class="tutorial-hero-eyebrow">v47 · Juni 2026</span>
+                            <h1>Das Pokémon TCG Meta, bevor es auf den Tisch kommt.</h1>
+                            <p class="tutorial-hero-tagline">
+                                Sag das Spielfeld deines nächsten Regionals voraus, bau ein Deck dagegen, log jedes gespielte Match, um die Vorhersage zu schärfen, und schick die Einschätzung deiner Testing-Crew per Telegram — alles ohne die Seite zu verlassen.
                             </p>
-                            <div class="tutorial-screenshot-grid">
-                                <figure class="tutorial-screenshot">
-                                    <div class="tutorial-screenshot-frame" data-tutorial-img="/images/tutorials/01-meta-hub.png" aria-label="Meta Analyse Hub Kachel-Grid">
-                                        <span class="tutorial-screenshot-label">Meta- &amp; Deck-Analyse Hub</span>
-                                    </div>
-                                    <figcaption><strong>Hier startet alles.</strong> Sechs Kacheln decken alles ab: City League Meta, Deck Analyse (JP &amp; Global), Past Meta, Meta Call. Die Karten-Legende unter den Kacheln erklärt jedes Badge und jeden Button, den du auf echten Karten siehst.</figcaption>
-                                </figure>
-                                <figure class="tutorial-screenshot">
-                                    <div class="tutorial-screenshot-frame" data-tutorial-img="/images/tutorials/02-meta-call.png" aria-label="Meta Call Dashboard">
-                                        <span class="tutorial-screenshot-label">Meta Call Dashboard</span>
-                                    </div>
-                                    <figcaption><strong>Sage das Meta deines nächsten Turniers voraus.</strong> Kombiniere die laufende Online-Rotation mit den neuesten Majors, override einzelne Archetypen nach Bauchgefühl und lies die Pro-Runde-Begegnungsrate ab.</figcaption>
-                                </figure>
-                                <figure class="tutorial-screenshot">
-                                    <div class="tutorial-screenshot-frame" data-tutorial-img="/images/tutorials/03-deck-builder.png" aria-label="Deck Builder mit Tech Slots">
-                                        <span class="tutorial-screenshot-label">Deck Builder + Tech Slots</span>
-                                    </div>
-                                    <figcaption><strong>Baue ein 60-Karten-Deck in einem Klick.</strong> Consistency Generate nutzt Math.round + Largest-Remainder, damit der Build matcht, was Top-Spieler tatsächlich spielen. Die Tech-Slots über dem Grid lassen dich bis zu 10 Karten fixieren.</figcaption>
-                                </figure>
-                                <figure class="tutorial-screenshot">
-                                    <div class="tutorial-screenshot-frame" data-tutorial-img="/images/tutorials/04-cooking-mode.png" aria-label="Cooking Mode mit Pin und Exclude">
-                                        <span class="tutorial-screenshot-label">Cooking Mode</span>
-                                    </div>
-                                    <figcaption><strong>Für tiefere Deck-Arbeit.</strong> Schalte Cooking Mode in Deck Analyse (Global) frei und du bekommst Fusion-Deck-Builds, Pro-Karte Pin- / Exclude-Buttons und das Tech Lab — zeigt jede Meta-Karte, die ein gewähltes Ziel per Kartentext-Interaktion schlägt.</figcaption>
-                                </figure>
-                                <figure class="tutorial-screenshot">
-                                    <div class="tutorial-screenshot-frame" data-tutorial-img="/images/tutorials/05-card-overview.png" aria-label="Card Overview mit allen Badges">
-                                        <span class="tutorial-screenshot-label">Card Overview Kacheln</span>
-                                    </div>
-                                    <figcaption><strong>Jede Karten-Kachel nutzt dasselbe Vokabular.</strong> Oben rechts: maximale Kopien in einem Deck. Oben links: Kopien in deinem Deck. Pinkes Herz: Wishlist. Amber-Kreis: gleiche Karte in einer anderen Variante besessen. Stats-Zeile unten: Set / Inklusionsrate / Ø-Anzahl / Decks die sie spielen.</figcaption>
-                                </figure>
-                                <figure class="tutorial-screenshot">
-                                    <div class="tutorial-screenshot-frame" data-tutorial-img="/images/tutorials/06-telegram-bot.png" aria-label="Telegram Bot Menü">
-                                        <span class="tutorial-screenshot-label">Telegram-Bot</span>
-                                    </div>
-                                    <figcaption><strong>Bring das Meta in deinen Gruppen-Chat.</strong> Der Telegram-Companion-Bot (<code>@TheDipidisBot</code>) schickt vorgerenderte Meta-Call-PNGs (current + past) und Deck-Builder-Snapshots direkt in jeden Chat.</figcaption>
-                                </figure>
+                            <div class="tutorial-hero-killers">
+                                <div class="tutorial-hero-killer">
+                                    <strong>📊 Meta Call</strong>
+                                    Vorhergesagtes Spielfeld + deine Day-2-Chance dagegen. Sechs Predictor-Stufen, inkl. dem Indianapolis-kalibrierten Underdog-Champion-Booster.
+                                </div>
+                                <div class="tutorial-hero-killer">
+                                    <strong>🍳 Cooking Mode</strong>
+                                    Deck Builder + Pin / Ausschließen + Tech-Slots + Build-vs…-Modal + Tech-Lab-Counter-Engine.
+                                </div>
+                                <div class="tutorial-hero-killer">
+                                    <strong>📱 Telegram-Bot</strong>
+                                    Schick <code>/metacall</code> in jeden Chat und bekomme die Live-Tier-Liste in unter einer Sekunde als PNG.
+                                </div>
                             </div>
                         </section>
 
-                        <!-- Telegram Bot Sektion (DE) -->
-                        <section class="tutorial-section tutorial-telegram-section">
-                            <h2 class="tutorial-section-title">📱 Telegram-Bot — @TheDipidisBot</h2>
-                            <p class="tutorial-section-desc">
-                                Ein Companion-Bot, der Meta-Daten ohne manuelles Screenshotten in Telegram-Gruppen postet. Die vorgerenderten PNGs kommen von dieser Seite, also antwortet der Bot unter einer Sekunde.
-                            </p>
-                            <div class="tutorial-telegram-grid">
-                                <div class="tutorial-telegram-feature">
-                                    <h3>So bekommst du Zugang</h3>
-                                    <ol>
-                                        <li>Telegram öffnen, nach <strong>@TheDipidisBot</strong> suchen.</li>
-                                        <li><code>/start</code> schicken — bist du noch nicht auf der Whitelist, öffnet der Bot eine Zugangsanfrage, die ein Admin direkt im eigenen Chat freigeben kann.</li>
-                                        <li>Nach Freigabe sitzt das persistente Menü (Meta Call + Deck Builder Buttons) für immer unter dem Chat-Input.</li>
-                                    </ol>
+                        <!-- ════════════════════════════════════════════════════
+                             Get Started — Erste Orientierung: Meta Hub + Profil
+                             ════════════════════════════════════════════════════ -->
+
+                        <div class="feature-section-divider">Erste Schritte</div>
+
+                        <article class="feature-banner banner-layout-asymmetric">
+                            <div class="feature-banner-imgs">
+                                <div class="feature-banner-img-asym tutorial-screenshot-frame tutorial-screenshot-frame-loaded" style="background-image: url('/images/tutorials/get-started/1-hub-tiles.jpeg');" aria-label="Meta Hub Homepage mit sechs Kategorie-Kacheln">
+                                    <span class="tutorial-screenshot-label">Meta Hub · sechs Kategorien, ein Klick zu den Daten</span>
                                 </div>
-                                <div class="tutorial-telegram-feature">
-                                    <h3>Befehle</h3>
-                                    <ul>
-                                        <li><code>/metacall</code> — Zwei-Button-Untermenü (Current / Past). Jede Variante schickt zwei Bilder: Per-Variant-Tier-Liste + Familien-gruppierte Übersicht nach Haupt-Pokémon kombiniert.</li>
-                                        <li><code>/deck</code> — Voller Deck-Builder-Picker. Listet jeden bekannten Archetyp paginiert; wähl einen aus, um das Consistency-generierte 60-Karten-Bild + eine copy-friendly Deckliste zu bekommen.</li>
-                                        <li><code>/menu</code> — Pinnt die persistente Button-Reihe neu, falls du sie versehentlich gelöscht hast.</li>
-                                    </ul>
-                                </div>
-                                <div class="tutorial-telegram-feature">
-                                    <h3>Tipps</h3>
-                                    <ul>
-                                        <li>Der Bot schickt nur Daten — kein Chat-Scraping, keine Analytics auf deinen Nachrichten.</li>
-                                        <li>Whitelist ist pro User, nicht pro Gruppe. Bot in eine Gruppe einladen, und nur freigegebene Mitglieder bekommen Antworten.</li>
-                                        <li>Eigenen Bot aufsetzen: Sourcecode + Render-Blueprint liegen unter <code>bot/</code> im Repository.</li>
-                                    </ul>
+                                <div class="feature-banner-thumbs">
+                                    <div class="feature-banner-img tutorial-screenshot-frame tutorial-screenshot-frame-loaded" style="background-image: url('/images/tutorials/get-started/2-card-legend.jpeg');" aria-label="Karten-Legende auf der Homepage erklärt jedes Badge">
+                                        <span class="tutorial-screenshot-label">Karten-Legende — jedes Badge erklärt</span>
+                                    </div>
+                                    <div class="feature-banner-img tutorial-screenshot-frame tutorial-screenshot-frame-loaded" style="background-image: url('/images/tutorials/get-started/3-action-buttons.jpeg');" aria-label="Action-Buttons: copy / drucken / Limitless / Proxy / Cardmarket / Pin / Ausschließen">
+                                        <span class="tutorial-screenshot-label">Action-Buttons auf jeder Karte</span>
+                                    </div>
                                 </div>
                             </div>
+                            <div class="feature-banner-content">
+                                <span class="feature-banner-eyebrow">Orientierung</span>
+                                <h2 class="feature-banner-title">Sechs Kategorien. Eine Landing-Page.</h2>
+                                <p class="feature-banner-tagline">
+                                    Der Meta Hub ist die Startseite — wähl eine Datenquelle und tauch ein. Jedes andere Werkzeug verlinkt zurück hierher, also ist das der natürliche Startpunkt jeder Session.
+                                </p>
+                                <ul class="feature-banner-bullets">
+                                    <li><strong>City League Meta</strong> — Live-Share aus Japans wöchentlichen Cardshop-Turnieren. Tier-Verschiebungen Woche für Woche, der früheste Vorlaufindikator vor internationalen Majors.</li>
+                                    <li><strong>Deck Analyse (Japan)</strong> — Deep-Dive in einzelne JP-Decks: Kartenverteilungen, gängige Stock-Listen, Tech-Picks, Matchup-WR aus japanischen Turnieren.</li>
+                                    <li><strong>Current Meta (Global)</strong> — Online-Turnierdaten von <code>play.limitlesstcg.com</code>. Top-8 / Top-16 Konversion pro Deck. Näher an der EU- / US-Competitive-Szene.</li>
+                                    <li><strong>Deck Analyse (Global)</strong> — Deep-Dive in weltweit gespielte Online-Decks. Kartenlisten, Eröffnungshand-Stats, Win-Rates für Spieler, die international antreten.</li>
+                                    <li><strong>Past Meta</strong> — historische Major-Daten (Regionals, Internationals, Worlds) plus Ergebnisse aus älteren Standard-Formaten. Aus der Vergangenheit lernen, um zukünftige Meta Calls zu schärfen.</li>
+                                    <li><strong>Meta Call</strong> — sagt den Meta-Share für dein nächstes Turnier voraus, mischt die Online-Daten mit deinen eigenen Einschätzungen und liefert erwartete Begegnungen pro Runde inkl. Matchup-Übersicht.</li>
+                                </ul>
+                                <div class="feature-banner-protip">
+                                    <strong>Pro-Tipp:</strong> Direkt unter dem Kachel-Grid erklärt eine Beispielkarte <em>jedes</em> Badge, jeden Button und jede Stat-Zeile, die du quer durch die App auf echten Karten triffst — Max-Count, im Deck, Wishlist, andere Prints besessen, Set + Inklusionsrate, Ø-Anzahlen, Action-Buttons, plus Pin / Ausschließen für den Cooking Mode. Eine Legende, jedes Screen.
+                                </div>
+                            </div>
+                        </article>
+
+                        <article class="feature-banner banner-layout-hero banner-reverse">
+                            <div class="feature-banner-img-hero tutorial-screenshot-frame tutorial-screenshot-frame-loaded" style="background-image: url('/images/tutorials/get-started/4-profile.jpeg');" aria-label="Mein Profil Navigation mit vier Sektionen: Karten und Sammlung, Decks, Spiel und Analyse, Account">
+                                <span class="tutorial-screenshot-label">Mein Profil · vier Sektionen, zwölf Werkzeuge</span>
+                            </div>
+                            <div class="feature-banner-content">
+                                <span class="feature-banner-eyebrow">Dein persönliches HQ</span>
+                                <h2 class="feature-banner-title">Alles was du baust, speicherst, loggst und teilst — wohnt hier.</h2>
+                                <p class="feature-banner-tagline">
+                                    Mein Profil ist der einzige Tab mit Cross-Feature-Integration. Deine Sammlung füttert den Meta-Binder. Dein Battle-Journal füttert den bayesianischen WR-Mix des Meta Calls. Deine gespeicherten Decks laden in Compare und in den Telegram-Bot.
+                                </p>
+                                <ul class="feature-banner-bullets">
+                                    <li>📦 <strong>Karten &amp; Sammlung</strong> — <em>Meine Sammlung</em> (pro Print, Set + Nummer aware) · <em>Wishlist</em> (Karten die du willst, mit Cardmarket-€-Links) · <em>Tauschliste</em> · <em>Meta-Binder</em> (auto-gebauter A4-Ordner) · <em>Custom-Binder</em> (du wählst die Archetypen).</li>
+                                    <li>🃏 <strong>Decks</strong> — <em>Meine Decks</em> (Builds speichern, ★ Prints tauschen) · <em>Decklisten vergleichen</em> (zwei Listen einfügen, farbcodierter Diff).</li>
+                                    <li>⚔️ <strong>Spiel &amp; Analyse</strong> — <em>Battle-Journal</em> (Offline-Log + Cloud-Sync) · <em>Testing Groups</em> (geteiltes Journal + Gruppen-Meta-Call) · <em>Meta Call</em> (der Predictor selbst).</li>
+                                    <li>⚙️ <strong>Account</strong> — <em>Einstellungen</em>: Sprache, Theme, Profil-Sync-Controls.</li>
+                                </ul>
+                                <div class="feature-banner-protip">
+                                    <strong>Pro-Tipp:</strong> Die kleine Zahl neben jeder Sektion (<code>Meine Sammlung (97)</code>, <code>Meine Decks (1)</code>) updatet live, sobald du Karten hinzufügst oder Builds speicherst — Quick-Signal auf einen Blick, dass dir kein State beim Gerätewechsel verloren ging.
+                                </div>
+                            </div>
+                        </article>
+
+                        <!-- ── Quick Start (60 s) ── -->
+                        <div class="feature-section-divider">Die ersten 60 Sekunden</div>
+
+                        <div class="quickstart-trio">
+                            <div class="quickstart-step">
+                                <span class="quickstart-step-num">1</span>
+                                <h3>Deck wählen</h3>
+                                <p>
+                                    Öffne <strong>Current Meta · Deck Analyse</strong>, such einen Archetyp, drück <strong>Generate</strong>. Du bekommst eine turniergenaue 60-Karten-Liste in zwei Klicks.
+                                </p>
+                            </div>
+                            <div class="quickstart-step">
+                                <span class="quickstart-step-num">2</span>
+                                <h3>Spielfeld einschätzen</h3>
+                                <p>
+                                    Öffne <strong>Meta Call</strong>, setz Spieleranzahl + Runden für dein Event, optional My-Estimate-Spalte anpassen. Day-2-Chance + Matchup-Heatmap erscheinen sofort.
+                                </p>
+                            </div>
+                            <div class="quickstart-step">
+                                <span class="quickstart-step-num">3</span>
+                                <h3>Tech dagegen</h3>
+                                <p>
+                                    <strong>Cooking Mode</strong> einschalten, <em>Build vs…</em> drücken, schlechtestes Matchup + Standard-Aggression wählen. Tech-Slots füllen sich auto mit den hochwirksamsten Counter-Karten und du generierst neu.
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- ════════════════════════════════════════════════════
+                             City League · Japans wöchentliches Meta + Deck-Analyse
+                             ════════════════════════════════════════════════════ -->
+
+                        <div class="feature-section-divider">City League · Meta + Deck-Analyse</div>
+
+                        <article class="feature-banner banner-layout-asymmetric">
+                            <div class="feature-banner-imgs">
+                                <div class="feature-banner-img-asym tutorial-screenshot-frame tutorial-screenshot-frame-loaded" style="background-image: url('/images/tutorials/city-league/1-overview.jpeg');" aria-label="City League Development Übersicht mit Top Archetypen und Tier-1-Definition">
+                                    <span class="tutorial-screenshot-label">City League Development · Top-Archetypen + Tiers</span>
+                                </div>
+                                <div class="feature-banner-thumbs">
+                                    <div class="feature-banner-img tutorial-screenshot-frame tutorial-screenshot-frame-loaded" style="background-image: url('/images/tutorials/city-league/2-archetype-overview.png');" aria-label="Archetyp-Übersicht mit Top 3 nach Anzahl und durchschnittlicher Platzierung sowie Decliners">
+                                        <span class="tutorial-screenshot-label">Archetyp-Übersicht · Climbers + Decliners</span>
+                                    </div>
+                                    <div class="feature-banner-img tutorial-screenshot-frame tutorial-screenshot-frame-loaded" style="background-image: url('/images/tutorials/city-league/3-comparison-table.png');" aria-label="Volle Vergleichstabelle mit Top 30 Archetypen und Rangbewegung">
+                                        <span class="tutorial-screenshot-label">Volle Vergleichstabelle (Top 30)</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="feature-banner-content">
+                                <span class="feature-banner-eyebrow">Japans wöchentlicher Pulsschlag</span>
+                                <h2 class="feature-banner-title">City League Meta — wer gewinnt, wer verliert, Woche für Woche.</h2>
+                                <p class="feature-banner-tagline">
+                                    Wähl <em>City League Meta</em> auf der Startseite und du landest hier: die volle Übersicht von Japans Cardshop-Circuit, dem größten kompetitiven Ökosystem weltweit. Live-Archetyp-Shares, Tier-Brackets, Rangbewegung — alles dabei.
+                                </p>
+                                <ul class="feature-banner-bullets">
+                                    <li><strong>Top-Archetypen</strong> — gerankt nach Deck-Anzahl + Varianten-Anzahl. <em>Dragapult mit 26 Varianten / 2298 Decks</em> sagt dir sofort: das ist gerade der Anker des Metas.</li>
+                                    <li><strong>Tier-Definitionen</strong> — Tier 1 / 2 / 3 Buckets, jedes Deck mit Share und durchschnittlicher Platzierung. <em>Avg Rank 8.0</em> heißt „kam im Schnitt in Runde 8".</li>
+                                    <li><strong>Archetyp-Übersicht</strong> — Top 3 nach reiner Anzahl, Top 3 nach durchschnittlicher Platzierung, plus ein Top-10-Veränderungs-Ticker, damit du Rotationsfolgen schnell siehst.</li>
+                                    <li><strong>Performance-Decliners + Climbers</strong> — Woche-zu-Woche-Deltas für jeden Archetyp. Grüne Pfeile steigen, rote fallen, mit exakter Rangveränderung.</li>
+                                    <li><strong>Volle Vergleichstabelle (Top 30)</strong> — jeder Archetyp mit Count Δ und Avg Rank Δ für den Zeitraum. Durchsuchbar, jede Zeile zum Drilldown klickbar.</li>
+                                    <li><strong>Past-Meta-Toggle</strong> — schalte den Dropdown oben von Current auf Past, um ohne Seitenwechsel mit einem eingefrorenen Vergleichsfenster zu arbeiten.</li>
+                                </ul>
+                                <div class="feature-banner-protip">
+                                    <strong>Pro-Tipp:</strong> Das „<em>Season pause</em>"-Banner erscheint zwischen City-League-Seasons, wenn keine neuen Events laufen — die historischen Filter und Deck-Analyse-Tools darunter arbeiten weiterhin gegen den letzten verfügbaren Snapshot, die Seite geht also nie dunkel.
+                                </div>
+                            </div>
+                        </article>
+
+                        <article class="feature-banner banner-layout-hero banner-reverse">
+                            <div class="feature-banner-img-hero tutorial-screenshot-frame tutorial-screenshot-frame-loaded" style="background-image: url('/images/tutorials/city-league/7-main-cards.png'); background-position: center top; background-size: cover;" aria-label="Deck-Analyse · Main Cards Sektion mit Pro-Karte-Statistiken">
+                                <span class="tutorial-screenshot-label">Deck-Analyse · Main-Cards-Unterteilung</span>
+                            </div>
+                            <div class="feature-banner-content">
+                                <span class="feature-banner-eyebrow">In jedes Deck rein</span>
+                                <h2 class="feature-banner-title">Klick auf einen Deck-Namen. Sieh exakt, wie Spieler das bauen.</h2>
+                                <p class="feature-banner-tagline">
+                                    Tippe einen Archetyp im Top-Archetypen-Grid, in den Tier-Brackets oder in der Vergleichstabelle an — und du springst direkt in die Karten-Ebene der Deck-Analyse. Die volle Aufschlüsselung, wie das Deck tatsächlich zusammengebaut wird.
+                                </p>
+                                <ul class="feature-banner-bullets">
+                                    <li><strong>Unterteilt nach Sektionen</strong> — <em>Main Cards</em> (Staples + #1 Ace Spec), Tech-/Counter-Karten, und ein „Rare Picks (zum Einklappen klicken)"-Block für Edge Cases. Jede Sektion faltet sich auto ein, damit du die Form scannen kannst, nicht eine 60-Karten-Wand.</li>
+                                    <li><strong>Pro-Karte Stats</strong> — Share-% innerhalb des Archetyps (<em>100 % auf Hariyama, 99,8 % auf Ultra Ball</em>), durchschnittliche Kopien pro Deck, exaktes Set + Nummer, Rarity-Tier, Live-Cardmarket-€-Preis.</li>
+                                    <li><strong>Datumsfilter</strong> — auf ein bestimmtes Turnierfenster eingrenzen (z. B. nur die letzten 2 Wochen einer Rotation oder ein einzelner Shop), und jede Statistik rechnet neu.</li>
+                                    <li><strong>Share-%-Filter</strong> — nur Karten in ≥ 90 % der Decks (Core-Staples), ≥ 70 % (Konsens-Picks) oder ≥ 50 % (volle Liste). Rauschen sofort weg.</li>
+                                    <li><strong>Current ↔ Past Meta Toggle</strong> — Zeitraum oben tauschen, ohne die Seite zu verlassen. Gleiches Deck, anderer Snapshot, sofortiger Vergleich.</li>
+                                    <li><strong>★ Alle Artworks zeigen</strong> — tippe den gelben Stern auf einer Karte und du bekommst jeden bekannten Print samt Ein-Klick-Tausch. Perfekt, um eine günstigere Variante eines teuren Staples zu finden — oder ein Build auf Full Art für den Ordner zu upgraden.</li>
+                                </ul>
+                                <div class="feature-banner-protip">
+                                    <strong>Pro-Tipp:</strong> Die „Rare Picks"-Sektion ist Gold fürs Tech-Hunting. Sie zeigt Karten, die nur in 5–20 % der Listen auftauchen, aber der Unterschied zwischen Platzierung und Top-Cut sind — Ethan's Sudowoodo, Lillie's Determination, Genesect, sowas.
+                                </div>
+                            </div>
+                        </article>
+
+                        <article class="feature-banner banner-layout-hero">
+                            <div class="feature-banner-img-hero">
+                                <div class="screenshot-with-hotspots">
+                                    <img src="/images/tutorials/city-league/8-deck-builder.png" alt="Deck-Builder-Controls mit nummerierten Annotationen" />
+                                    <span class="screenshot-hotspot" style="top: 24.5%; left: 27%;" aria-label="1 — Consistency Button">1</span>
+                                    <span class="screenshot-hotspot" style="top: 24.5%; left: 73%;" aria-label="2 — Max Rarity Button">2</span>
+                                    <span class="screenshot-hotspot" style="top: 41%; left: 73%;" aria-label="3 — Test Draw Button">3</span>
+                                    <span class="screenshot-hotspot" style="top: 47%; left: 27%;" aria-label="4 — TCG Showdown Button">4</span>
+                                    <span class="screenshot-hotspot is-accent" style="top: 64%; left: 17%;" aria-label="5 — Save Button">5</span>
+                                    <span class="screenshot-hotspot" style="top: 64%; left: 83%;" aria-label="6 — Compare Button">6</span>
+                                    <span class="screenshot-hotspot" style="top: 72%; left: 50%;" aria-label="7 — Deck → Proxy Button">7</span>
+                                    <span class="screenshot-hotspot is-accent" style="top: 72%; left: 83%;" aria-label="8 — Share Button">8</span>
+                                </div>
+                            </div>
+                            <div class="feature-banner-content">
+                                <span class="feature-banner-eyebrow">Von der Analyse zum Build</span>
+                                <h2 class="feature-banner-title">Deck Builder — generieren, tweaken, teilen.</h2>
+                                <p class="feature-banner-tagline">
+                                    Gleiche Karten-Übersicht, mit dem Generate-Panel, das die Pro-Karte-Mittelwerte in eine turniergenaue 60-Karten-Liste verwandelt. Acht Buttons decken alles ab — von „bau es" bis „schick es in einen Discord-Chat".
+                                </p>
+                                <ul class="feature-banner-bullets is-keyed-to-hotspots">
+                                    <li><strong>Consistency</strong> — generiert die 60-Karten-Liste auto aus Pro-Karte avg-when-used. Math.round + Largest-Remainder + Reverse-LRM-Mathematik; landet <em>exakt</em> bei 60.</li>
+                                    <li><strong>Max Rarity ↔ Low Rarity</strong> — jede Karte mit einem Klick auf den höchsten / niedrigsten Rarity-Print umflippen. Bidirektionaler Toggle. Resettet bei jedem neuen Generate auf Max.</li>
+                                    <li><strong>Test Draw</strong> — Eröffnungshand-Simulator. Zieht 7 Karten + trackt Mulligans (<em>Basic in der Hand 77,8 % · Mulligan 22,2 %</em> im Screenshot).</li>
+                                    <li><strong>TCG Showdown ↗</strong> — kopiert die Liste und öffnet <code>tcg-showdown.com</code> in einem neuen Tab für volle externe Playtests.</li>
+                                    <li><strong>Save</strong> — speichert den Build in deinem Profil unter <em>Meine Decks</em> mit Name + Format-Tag. Synced über Geräte.</li>
+                                    <li><strong>Compare</strong> — Seite-an-Seite-Diff mit einem anderen Build (Liste einfügen oder gespeicherten Build wählen). Farbcodierte Änderungen.</li>
+                                    <li><strong>Deck → Proxy</strong> — schickt alle 60 mit einem Klick in die Proxy-Printer-Queue. Sleeven und testen.</li>
+                                    <li><strong>Share</strong> — exportiert das gebaute Deck als Full-Color PNG, das du direkt in Discord / Telegram / WhatsApp einfügst. Kein Clipping, keine Link-Vorschauen.</li>
+                                </ul>
+                                <div class="feature-banner-protip">
+                                    <strong>Pro-Tipp:</strong> Die Suchleiste über dem Karten-Grid akzeptiert Name (EN <em>oder</em> DE) oder <code>Set + Nummer</code> — handlich, wenn du eine bestimmte Tech-Karte suchst, ohne die volle Liste zu scrollen. Treffer antippen und sie rutscht direkt in den Build.
+                                </div>
+                            </div>
+                        </article>
+
+                        <!-- ════════════════════════════════════════════════════
+                             Theme 3 — Current International Meta · Analyse + Cooking + Tech Lab
+                             Long-Read mit Kapitel-Headings, Erklär-Absätzen,
+                             Methoden-Callouts und Pull-Quotes.
+                             ════════════════════════════════════════════════════ -->
+                        <div class="feature-section-divider">Current International Meta · Analyse + Cooking + Tech Lab</div>
+
+                        <section class="tutorial-chapter-intro">
+                            <div class="chapter-meta">
+                                <span class="chapter-pill">Deep Dive</span>
+                                <span class="chapter-pill chapter-pill--light">~ 9 min Lesezeit</span>
+                            </div>
+                            <h2>Der tiefste Tab in TheDipidis. Gleiche Screens wie City League — viel mehr Daten, viel mehr Stellschrauben.</h2>
+                            <p class="chapter-lede">
+                                Vieles davon kommt dir bekannt vor, wenn du das City-League-Kapitel oben gelesen hast. Die Screens sehen gleich aus, die Buttons funktionieren gleich. Der Unterschied ist die Größe der Stichprobe hinter jeder Zahl: Current International Meta mischt <strong>Limitless-Online-Runs</strong> mit jedem registrierten <strong>Major-Live-Turnier</strong>. Das gibt dir einen viel größeren Pool, breitere Matchup-Abdeckung und die Möglichkeit, die Daten nach Turnier-Format, Quelle oder eigenem Datumsfenster zu slicen. Diese zusätzliche Tiefe ist auch der Grund, warum dieser Tab einen zweiten Modus hat — <strong>Cooking</strong> — den erfahrene Builder nutzen, um den Algorithmus an ihren Gameplan anzupassen.
+                            </p>
+                            <ul class="chapter-toc">
+                                <li>Woher die Daten kommen + wie Share, WR und Top-8 berechnet werden</li>
+                                <li>Das Meta auf einen Blick lesen: Tiers, Climbers, Format-Staples, Archetyp-Übersicht</li>
+                                <li>Deck-Analyse (Global): Matchup-Matrix vs Top 100, Vergleichstabelle mit Rang-Δ</li>
+                                <li>Cooking: Filterzeile, PIN, Ausschließen, Build vs…-Ziele + Aggression</li>
+                                <li>Tech Lab: Capability-Tags, Non-EX-Block und wie die Engine von dir lernt</li>
+                            </ul>
                         </section>
+
+                        <h3 class="tutorial-chapter-heading"><span>01</span> Woher die Daten kommen</h3>
+                        <p class="tutorial-paragraph">
+                            Current Meta (Global) öffnet auf der <strong>Brought-Share</strong>-Ansicht: jeder gerade gespielte Archetyp, sortiert nach roher Deck-Anzahl. Der Header sagt dir genau, was hinter dem Snapshot steht — zum Zeitpunkt des Schreibens <strong>6 687 Deck-Einträge über 107 Archetypen</strong>, täglich aktualisiert. Zwei Streams fließen in den Feed: hochfrequente Online-Events von <strong>Limitless</strong> (die globale Ladder-Bewegung) und jedes registrierte <strong>Major-Live-Turnier</strong> (das Signal, das echte Metas entscheidet). Die gemischte Stichprobe ist größer, als sie ein einzelnes Regional je liefern könnte, und die tägliche Online-Bewegung hält die Zahlen frisch.
+                        </p>
+
+                        <article class="feature-banner banner-layout-asymmetric">
+                            <div class="feature-banner-imgs">
+                                <div class="feature-banner-img-asym tutorial-screenshot-frame tutorial-screenshot-frame-loaded" style="background-image: url('/images/tutorials/current-meta/01-brought-share.jpeg');" aria-label="Current Meta Global Tab mit Brought Share Tabelle und Live-Eintragszähler">
+                                    <span class="tutorial-screenshot-label">Current Meta (Global) · Brought Share</span>
+                                </div>
+                                <div class="feature-banner-thumbs">
+                                    <div class="feature-banner-img tutorial-screenshot-frame tutorial-screenshot-frame-loaded" style="background-image: url('/images/tutorials/current-meta/02-top8-conversion.png');" aria-label="Top-8-Konversionstabelle mit gewichteter Quote pro Archetyp">
+                                        <span class="tutorial-screenshot-label">Top-8-Konversion (Top 12 nach Quote)</span>
+                                    </div>
+                                    <div class="feature-banner-img tutorial-screenshot-frame tutorial-screenshot-frame-loaded" style="background-image: url('/images/tutorials/current-meta/05-archetype-overview.png');" aria-label="Archetyp-Übersicht mit Format-Legality und Climbers/Fallers">
+                                        <span class="tutorial-screenshot-label">Archetyp-Übersicht · 107 total · Climbers / Fallers</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="feature-banner-content">
+                                <span class="feature-banner-eyebrow">Der Hub-View</span>
+                                <h2 class="feature-banner-title">Das ganze Format auf einem Screen — Stichprobengröße immer sichtbar.</h2>
+                                <p class="feature-banner-tagline">
+                                    Brought Share, Top-8-Konversion und Archetyp-Übersicht liegen im gleichen Tab nebeneinander. Der Deck-Eintrags-Zähler oben macht sofort klar, ob du gerade einen 7-Tages-Burst oder ein stabilisiertes 30-Tages-Fenster liest.
+                                </p>
+                                <ul class="feature-banner-bullets">
+                                    <li><strong>Brought Share %</strong> — <em>(Decks eines Archetyps) ÷ (gesamte Deck-Einträge im aktiven Fenster)</em>. Varianten werden separat gelistet, sodass eine Dragapult-ex-Zeile und eine Dragapult-Dusknoir-Zeile nicht zusammengeworfen werden.</li>
+                                    <li><strong>Top-8-Konversion</strong> — <em>(Top-8-Plätze) ÷ (Deck-Einträge desselben Archetyps)</em>. Bringt die „wenig Share, viel Punch"-Decks ans Licht, die brought share allein versteckt.</li>
+                                    <li><strong>Archetyp-Übersicht</strong> — jeder im aktuellen Format legale Archetyp mit Legality-Stempel auf einen Blick (z. B. TEF-CRI) und rollierenden Climbers/Fallers samt WR-Δ gegen das vorherige Fenster.</li>
+                                    <li><strong>Live-Eintrags-Zähler</strong> — das <em>6 687 Deck-Einträge</em>-Badge wird mit jedem Refresh neu gedruckt; kleine Stichproben markieren sich selbst visuell, statt sich hinter einer selbstbewusst aussehenden Prozentzahl zu verstecken.</li>
+                                </ul>
+                                <div class="feature-banner-protip">
+                                    <strong>Pro-Tipp:</strong> Sitzt eine Zeile bei &lt; 30 Spielen im Fenster, behandle WR und Matchup-Zahlen als richtungweisend, nicht als prädiktiv. Die Cooking-Filterzeile lässt dich das Fenster bei dünner Stichprobe vergrößern.
+                                </div>
+                            </div>
+                        </article>
+
+                        <aside class="tutorial-callout">
+                            <strong>Wie „Share %" berechnet wird</strong>
+                            <p>Share ist immer ein Verhältnis gegen das <em>aktive Datenfenster</em>, nicht gegen einen All-Time-Pool. Default-Fenster = letzte 30 Tage. Cooking lässt dich das auf ein einzelnes Turnier eindampfen oder so weit zurückziehen, wie die Rotation reicht. Das Fenster treibt jede Prozentzahl auf der Seite — änder es, und jede Zahl rechnet im Gleichschritt neu.</p>
+                        </aside>
+
+                        <h3 class="tutorial-chapter-heading"><span>02</span> Das Meta auf einen Blick lesen</h3>
+                        <p class="tutorial-paragraph">
+                            Unter Brought Share findest du zwei abgeleitete Ansichten: die <strong>Tier-Brackets</strong> (Tier 1 Meta Dominators, Tier 2 Strong Contenders, Tier 3 Niche Picks) und die <strong>Most-Used Cards / Format Staples</strong>. Tiers sind ein zusammengesetzter Score: gewichteter Brought-Share + Top-8-Konversion + rollierende WR über dem aktiven Fenster. Die Climber-/Faller-Pfeile neben jedem Archetyp vergleichen seinen aktuellen Tier-Score mit dem Score desselben Archetyps eines Fensters zuvor — du siehst Momentum direkt.
+                        </p>
+
+                        <article class="feature-banner banner-layout-hero banner-reverse">
+                            <div class="feature-banner-img-hero tutorial-screenshot-frame tutorial-screenshot-frame-loaded" style="background-image: url('/images/tutorials/current-meta/03-tiers.png'); background-position: center top; background-size: cover;" aria-label="Tier 1 Meta Dominators und Tier 2 Strong Contenders mit Climber-Pfeilen">
+                                <span class="tutorial-screenshot-label">Tier 1 Dominators + Tier 2 Strong Contenders</span>
+                            </div>
+                            <div class="feature-banner-content">
+                                <span class="feature-banner-eyebrow">Tiers + Momentum</span>
+                                <h2 class="feature-banner-title">Drei Tiers, gewichtet aus Share + Konversion + rollierender WR.</h2>
+                                <p class="feature-banner-tagline">
+                                    Die Tier-Brackets sind ein Composite — kein reiner Popularitätscontest. Nur Share würde Netdecks überproportional pushen; nur Konversion würde Regional-One-Shots mit kleiner Stichprobe überschätzen. Der Mix hält beides ehrlich.
+                                </p>
+                                <ul class="feature-banner-bullets">
+                                    <li><strong>Tier-Score</strong> — gewichteter Mix aus Brought Share, Top-8-Konversion und 30-Tages-WR; updated bei jedem Daten-Refresh.</li>
+                                    <li><strong>▲ / ▼ Pfeile</strong> — Woche-zu-Woche Tier-Score Δ gegen das vorherige gleich lange Fenster. Grün = steigt, rot = fällt, grau = unverändert.</li>
+                                    <li><strong>„Strong Contenders"</strong> = Tier 2 — hoher Share, aber Konversion knapp unter Dominator-Schwelle. Das sind meist die Decks, die Techs on-the-fly brauchen.</li>
+                                    <li><strong>„Niche Picks"</strong> = Tier 3 — wenig Share, hohe Konversion. Bestes Tech-Lab-Futter; kleine Ziele, die nach oben schlagen.</li>
+                                </ul>
+                                <div class="feature-banner-protip">
+                                    <strong>Pro-Tipp:</strong> Ein Deck, das von Tier 2 → Tier 1 wechselt mit grünem Pfeil + steigender Top-8-Konversion, ist das sauberste „das ist der echte Gewinner"-Signal, das du kriegen kannst.
+                                </div>
+                            </div>
+                        </article>
+
+                        <article class="feature-banner banner-layout-asymmetric banner-reverse">
+                            <div class="feature-banner-imgs">
+                                <div class="feature-banner-img-asym tutorial-screenshot-frame tutorial-screenshot-frame-loaded" style="background-image: url('/images/tutorials/current-meta/04-format-staples.jpeg');" aria-label="Most Used Cards (Format Staples) sortiert nach Inklusion in Prozent">
+                                    <span class="tutorial-screenshot-label">Most Used Cards · Format Staples</span>
+                                </div>
+                                <div class="feature-banner-thumbs">
+                                    <div class="feature-banner-img tutorial-screenshot-frame tutorial-screenshot-frame-loaded" style="background-image: url('/images/tutorials/current-meta/05-archetype-overview.png');" aria-label="Archetyp-Übersicht Climbers und Fallers mit WR-Delta">
+                                        <span class="tutorial-screenshot-label">Climbers / Fallers · WR Δ</span>
+                                    </div>
+                                    <div class="feature-banner-img tutorial-screenshot-frame tutorial-screenshot-frame-loaded" style="background-image: url('/images/tutorials/current-meta/02-top8-conversion.png');" aria-label="Top-8-Konversion-Leaderboard">
+                                        <span class="tutorial-screenshot-label">Top-8-Konversion-Leaderboard</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="feature-banner-content">
+                                <span class="feature-banner-eyebrow">Format Staples</span>
+                                <h2 class="feature-banner-title">Die Karten, die 9 von 10 Listen gemeinsam haben — und die wenigen, die das Meta verschieben.</h2>
+                                <p class="feature-banner-tagline">
+                                    Format Staples sortiert jede Karte nach <em>format-weiter Inklusion</em>: dem Anteil <em>aller</em> aktiven Deck-Einträge, die mindestens eine Kopie davon spielen. Night Stretcher bei 100 %, Lillie's bei 97,1 % usw. Das ist der Eintrittspreis — fällt eine Karte hier unter 80 %, verschiebt sich das Format um sie herum.
+                                </p>
+                                <ul class="feature-banner-bullets">
+                                    <li><strong>Inklusion %</strong> = <em>(Decks mit ≥ 1 Kopie) ÷ (gesamte Deck-Einträge im Fenster)</em>. Karten-Ebene, nicht Archetyp-Ebene.</li>
+                                    <li><strong>Tipp auf jede Zeile</strong> → springt zum Karten-DB-Eintrag mit Live-Cardmarket-Preis + jedem Print + Wishlist-Hook.</li>
+                                    <li><strong>WR Δ bei Climbers/Fallers</strong> — rollierende 14-Tages-Matchup-WR-Veränderung. Ein Faller-Archetyp ohne Karten-Pool-Änderung wird meist nur teched, nicht strukturell geschwächt.</li>
+                                </ul>
+                                <div class="feature-banner-protip">
+                                    <strong>Pro-Tipp:</strong> Vergleiche den Drop eines fallenden Archetyps mit der Most-Used-Cards-Liste. Wenn ein Staple in dessen typischer Engine abgerutscht ist, kannst du oft genau die Karte zeigen, die den Meta-Speed-Check nicht besteht.
+                                </div>
+                            </div>
+                        </article>
+
+                        <h3 class="tutorial-chapter-heading"><span>03</span> Deck-Analyse (Global) — klick ein Deck, sieh wie es wirklich gespielt wird</h3>
+                        <p class="tutorial-paragraph">
+                            Tipp einen Archetyp-Namen in den Views oben an und du landest in der <strong>Deck-Analyse (Global)</strong>. Gleiche Idee wie die City-League-Deck-Seite, viel größerer Datensatz hinter jeder Zeile. Zwei Extra-Views schaltest du hier frei, die City League nicht zeigt: <strong>Matchup Analysis — Top 100 Decks</strong> und die <strong>Volle Vergleichstabelle</strong> mit expliziten Rangbewegungs-Pfeilen.
+                        </p>
+
+                        <article class="feature-banner banner-layout-asymmetric">
+                            <div class="feature-banner-img-asym tutorial-screenshot-frame tutorial-screenshot-frame-loaded" style="background-image: url('/images/tutorials/current-meta/06-top10-matchups.png');" aria-label="Matchup Analysis Top 100 Decks mit Best Matchups und Worst Matchups für Dragapult">
+                                <span class="tutorial-screenshot-label">Matchup Analysis · Top 10 Decks (Rang 1–10)</span>
+                            </div>
+                            <div class="feature-banner-thumbs">
+                                <div class="feature-banner-img tutorial-screenshot-frame tutorial-screenshot-frame-loaded" style="background-image: url('/images/tutorials/current-meta/07-comparison-table.png');" aria-label="Volle Vergleichstabelle mit Dragapult Mega Greninja und Rangbewegungspfeilen">
+                                    <span class="tutorial-screenshot-label">Volle Vergleichstabelle · Rang Δ ▲ ▼</span>
+                                </div>
+                                <div class="feature-banner-img tutorial-screenshot-frame tutorial-screenshot-frame-loaded" style="background-image: url('/images/tutorials/current-meta/06-top100-matchups.png');" aria-label="Top 100 Matchup-Tabelle mit Deck-vs-Deck Win-Rates und Bilanz">
+                                    <span class="tutorial-screenshot-label">Top 100 · Pro-Gegner WR + Bilanz</span>
+                                </div>
+                            </div>
+                            <div class="feature-banner-content">
+                                <span class="feature-banner-eyebrow">Deck → Matchups</span>
+                                <h2 class="feature-banner-title">Best- / Worst-Matchups, mit der echten Spielbilanz hinter jedem Prozent.</h2>
+                                <p class="feature-banner-tagline">
+                                    Die Top-100-Decks-Matchup-Matrix listet jedes registrierte H2H für den gewählten Archetyp gegen die 100 meistgespielten Gegner. WR <em>und</em> W-L-T werden gezeigt, sodass du den Prozent gegen die Stichprobe gegenchecken kannst.
+                                </p>
+                                <ul class="feature-banner-bullets">
+                                    <li><strong>Best Matchups (grün)</strong> — Top-Gegner nach WR mit mindestens 30 geloggten Spielen. <em>Dragapult vs Rocket's Honchkrow 70,4 % (57–24–0)</em>.</li>
+                                    <li><strong>Worst Matchups (rot)</strong> — gleiche Schwelle, untere Tabellenhälfte. Die genauen Decks, gegen die dein Build planen muss.</li>
+                                    <li><strong>Select &amp; Analyze Opponent</strong> — Typeahead-Suche wählt jedes Deck für eine eigenständige Matchup-Karte mit Notizen + Tech-Vorschlägen.</li>
+                                    <li><strong>Volle Vergleichstabelle</strong> — jeder Archetyp mit aktuellem Rang, Count und ▲/▼-Bewegung (z. B. <em>Raging Bolt Ogerpon ▲ 1, Ogerpon Meganium Hydrapple ▼ 1</em>). Zeile klicken → Drilldown.</li>
+                                </ul>
+                                <div class="feature-banner-protip">
+                                    <strong>Pro-Tipp:</strong> Die Matchup-Matrix braucht <strong>≥ 30 Spiele</strong>, damit eine Zeile angezeigt wird — weniger und du würdest Rauschen lesen. Fehlt ein Schlüssel-Matchup, vergrößere das Datenfenster in Cooking, und es taucht meist auf.
+                                </div>
+                            </div>
+                        </article>
+
+                        <h3 class="tutorial-chapter-heading"><span>04</span> Cooking — der tiefere Deck-Bau-Modus</h3>
+                        <p class="tutorial-paragraph">
+                            Die Deck-Analyse öffnet standardmäßig auf <strong>Quick Overview</strong>, was exakt wie die City-League-Deck-Seite funktioniert (siehe Kapitel <em>City League · Meta + Deck-Analyse</em> oben). Schalte auf <strong>Cooking</strong> um und derselbe Screen schaltet vier zusätzliche Schichten frei: eine Filterzeile zum Slicen der Quell-Daten, eine Tech-Cards-Slot-Reihe im Deck Builder, den Build-vs…-Ziel-Picker und die Matchups-vs-Meta-Call-Sektion. Cooking ist der Unterschied zwischen „zeig mir, wie das Meta dieses Deck baut" und „hilf mir, meins gegen das Meta zu bauen".
+                        </p>
+
+                        <article class="feature-banner banner-layout-hero">
+                            <div class="feature-banner-img-hero tutorial-screenshot-frame tutorial-screenshot-frame-loaded" style="background-image: url('/images/tutorials/current-meta/08-cooking-toggle.png'); background-position: center top; background-size: cover;" aria-label="Hub mit Quick Overview vs Cooking Toggle und Tournament Format und Data Window Filtern">
+                                <span class="tutorial-screenshot-label">Quick Overview ↔ Cooking · Filterzeile</span>
+                            </div>
+                            <div class="feature-banner-content">
+                                <span class="feature-banner-eyebrow">Cooking-Einstieg</span>
+                                <h2 class="feature-banner-title">Gleicher Hub, gleiches Deck — Cooking schaltet die Advanced-Controls frei.</h2>
+                                <p class="feature-banner-tagline">
+                                    Auf dem Pokémon TCG Hub <em>Deck-Analyse (Global)</em> wählen, dann auf der Deck-Seite die <strong>Cooking</strong>-Pille drücken. Die Seite ändert die Ansicht nicht — sie wachsen neue Controls dran.
+                                </p>
+                                <ul class="feature-banner-bullets">
+                                    <li><strong>Tournament Format Filter</strong> — Alle / Limitless Decks / Major Tournament Decks. Strip das Online-Rauschen weg, wenn du nur Paper-Turnier-Signal willst.</li>
+                                    <li><strong>Datenfenster</strong> — wähl ein „from-date", und die ganze Seite rechnet gegen dieses Fenster neu. Default = letzte 30 Tage.</li>
+                                    <li><strong>Aktiver Filter-Chip</strong> — das Badge unter der Filterzeile zeigt immer den gemischten Scope (<em>Aktiver Filter: All Tournaments</em>), damit du nie eine Zahl gegen das falsche Slice liest.</li>
+                                    <li><strong>Gleicher Quick-Overview-Body darunter</strong> — jeder Staple, Share %, Matchup wird auf das gewählte Fenster neu gewichtet, ohne die Seite zu verlassen.</li>
+                                </ul>
+                                <div class="feature-banner-protip">
+                                    <strong>Pro-Tipp:</strong> Für ein Turnier-Vorbereitungswochenende setz Tournament Format = <em>Major Tournament Decks</em> und ein 14-Tage-Fenster. Das filtert Ladder-Bewegung raus und gibt dir den sauberen „was bringen echte Spieler gerade mit"-View.
+                                </div>
+                            </div>
+                        </article>
+
+                        <blockquote class="tutorial-pullquote">
+                            Cooking ist der Deck-Bau-Modus für erfahrene Spieler. Das Tool liefert Daten, Vorschläge und Presets. Die letzte Entscheidung — welcher Slot raus, welche Tech rein — bleibt bei dir.
+                            <cite>— die Regel, die der Rest dieses Kapitels voraussetzt</cite>
+                        </blockquote>
+
+                        <article class="feature-banner banner-layout-asymmetric banner-reverse">
+                            <div class="feature-banner-imgs">
+                                <div class="feature-banner-img-asym tutorial-screenshot-frame tutorial-screenshot-frame-loaded" style="background-image: url('/images/tutorials/current-meta/09-main-cards.png');" aria-label="Main Cards Staples Ansicht mit Kopien-Mengen und Cardmarket-Preisen">
+                                    <span class="tutorial-screenshot-label">Main Cards (Staples) · #1 Ace Spec</span>
+                                </div>
+                                <div class="feature-banner-thumbs">
+                                    <div class="feature-banner-img tutorial-screenshot-frame tutorial-screenshot-frame-loaded" style="background-image: url('/images/tutorials/current-meta/16-card-pool.png');" aria-label="Card Pool Grid mit dem ganzen Karten-Universum des Formats">
+                                        <span class="tutorial-screenshot-label">Card Pool · format-weites Grid</span>
+                                    </div>
+                                    <div class="feature-banner-img tutorial-screenshot-frame tutorial-screenshot-frame-loaded" style="background-image: url('/images/tutorials/current-meta/10-meta-call.png');" aria-label="Matchups vs Meta Call vorhergesagtes Spielfeld mit gewichteter WR">
+                                        <span class="tutorial-screenshot-label">Matchups vs Meta Call · gewichtete WR</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="feature-banner-content">
+                                <span class="feature-banner-eyebrow">Pro-Karte-View + vorhergesagtes Spielfeld</span>
+                                <h2 class="feature-banner-title">Main Cards, Card Pool und die Predicted-Field-WR — alle gegen dasselbe Fenster.</h2>
+                                <p class="feature-banner-tagline">
+                                    Unter der Filterzeile zeigt Cooking drei neue Sektionen: das Staple-für-Staple Main-Cards-Grid, den format-weiten Card Pool (jede legale Karte mit Inklusionsstatistik) und das Matchups-vs-Meta-Call-Panel, das die WR deines Builds gegen das vorhergesagte Spielfeld projiziert.
+                                </p>
+                                <ul class="feature-banner-bullets">
+                                    <li><strong>ASC vs SCR</strong> — ASC = <em>durchschnittliche Kopien, wenn die Karte gespielt wird</em>; SCR = <em>Anteil der Decks, die sie spielen</em>. Lillie's Clefairy ex bei 1,00× / 100 % heißt „jedes Deck spielt genau eine"; Metagross bei 4,00× / 90 % heißt „9 von 10 Decks spielen sie, und die maxen sie".</li>
+                                    <li><strong>L / P / O / M Marker</strong> — Limitless / Paper-only / Online-only / Major-Tournament-Marker auf jeder Kachel, damit du auf einen Blick siehst, woher die Evidenz für die Karte kommt.</li>
+                                    <li><strong>Cardmarket €</strong> — Live-Preis pro Karte; Klick öffnet das Listing.</li>
+                                    <li><strong>Card-Pool-Grid</strong> — gleiche Metriken über <em>jede</em> legale Karte, nicht nur Staples. Nützlich zum Jagen günstiger Ersatzkarten, wenn Preise hochschießen.</li>
+                                    <li><strong>Matchups vs Meta Call</strong> — <em>Gewichtete WR vs Feld = Σ(Feld-% × deine WR)</em>. Field Coverage zeigt, wie viel des vorhergesagten Metas die Tabelle tatsächlich abbildet.</li>
+                                </ul>
+                                <div class="feature-banner-protip">
+                                    <strong>Pro-Tipp:</strong> Das „Even vs field"-Label neben der Gewichteten WR ist kalibriert: ± 2 pts = ausgeglichen, &gt; 52 % = vorteilhaft, &lt; 48 % = unvorteilhaft. Bewahrt dich davor, 51,3 % als bedeutsame Kante zu lesen.
+                                </div>
+                            </div>
+                        </article>
+
+                        <aside class="tutorial-callout">
+                            <strong>Wie das Meta-Call-Feld zusammengesetzt wird</strong>
+                            <p>Feld-% pro Gegner = gewichteter Mix aus den letzten 5 Live-Majors + dem rollierenden 14-Tages-Online-Ladder. Aktuelle Live-Ergebnisse bekommen einen Underdog-Champion-Booster (ein Regional-Sieger, der unter 2 % Usage cruisst, bekommt einen Bump eine Woche vor dem Modell). Format-Leader-Consolidation greift innerhalb von Multi-Varianten-Familien — sobald ein Parent-Archetyp 25 % within-family Share überschreitet, werden Sub-Varianten in den Parent-Bucket zurückgefaltet, damit das Feld nicht doppelt zählt.</p>
+                        </aside>
+
+                        <h3 class="tutorial-chapter-heading"><span>05</span> Cooking — Deck Builder, PIN &amp; Ausschließen</h3>
+                        <p class="tutorial-paragraph">
+                            Scroll unter die Cooking-Metriken und du erreichst das Deck-Builder-Panel. Alle Generate-Buttons, die du aus City League kennst (Max Consistency, Max Rarity, Test Draw, TCG Showdown, Clear), funktionieren hier gleich. <strong>Zwei neue Hebel</strong> sitzen über dem Karten-Grid, die nur in Cooking auftauchen: <strong>PIN</strong> (zwangsweise rein) und <strong>Ausschließen</strong> (nie reinnehmen). Das sind die zwei saubersten Wege, den nächsten Generate-Algorithmus an den Build anzupassen, den du im Kopf hast — ohne die Konsistenz-Mathematik wegzuwerfen.
+                        </p>
+
+                        <article class="feature-banner banner-layout-hero">
+                            <div class="feature-banner-img-hero">
+                                <div class="screenshot-with-hotspots">
+                                    <img src="/images/tutorials/current-meta/11-deck-builder.png" alt="Deck-Builder Generate-Panel mit Tech Cards Slot-Reihe" />
+                                    <span class="screenshot-hotspot" style="top: 17%; left: 30%;" aria-label="1 — Max Consistency">1</span>
+                                    <span class="screenshot-hotspot" style="top: 17%; left: 72%;" aria-label="2 — Build vs…">2</span>
+                                    <span class="screenshot-hotspot" style="top: 25%; left: 30%;" aria-label="3 — Max Rarity">3</span>
+                                    <span class="screenshot-hotspot" style="top: 35%; left: 30%;" aria-label="4 — Test Draw">4</span>
+                                    <span class="screenshot-hotspot" style="top: 35%; left: 72%;" aria-label="5 — TCG Showdown">5</span>
+                                    <span class="screenshot-hotspot is-accent" style="top: 56%; left: 50%;" aria-label="6 — Tech Cards Slot-Reihe">6</span>
+                                </div>
+                            </div>
+                            <div class="feature-banner-content">
+                                <span class="feature-banner-eyebrow">Build-Panel — Cooking-Edition</span>
+                                <h2 class="feature-banner-title">Generieren, fixieren, iterieren — mit bis zu 10 Tech-Slot-Pins.</h2>
+                                <p class="feature-banner-tagline">
+                                    Jeden Generate-Button, den du schon gesehen hast, plus die Reihe, die Cooking ausmacht: <strong>Tech Cards (forced into next Generate)</strong>. PIN füttert diese Slot-Reihe; Ausschließen verhindert, dass der Algorithmus sie je mit einer abgelehnten Karte füllt.
+                                </p>
+                                <ul class="feature-banner-bullets is-keyed-to-hotspots">
+                                    <li><strong>Max Consistency</strong> — generiert die 60-Karten-Liste aus avg-when-used + Largest-Remainder-Rundung. Immer exakt 60.</li>
+                                    <li><strong>Build vs…</strong> — öffnet das Ziel-Picker-Modal (gleich erklärt). Nur in Cooking.</li>
+                                    <li><strong>Max Rarity ↔ Low Rarity</strong> — flippt jeden Print zwischen höchster und niedrigster Variante. Bidirektionaler Toggle.</li>
+                                    <li><strong>Test Draw</strong> — Eröffnungshand-Simulator (7 + Mulligans) zum Stress-Testen der Konsistenz vor dem Versenden.</li>
+                                    <li><strong>TCG Showdown ↗</strong> — kopiert die Liste + öffnet tcg-showdown.com in einem neuen Tab für externe Playtests.</li>
+                                    <li><strong>Tech Cards Slot-Reihe (0 / 10)</strong> — PIN'te Karten landen hier. In Stage-0 jedes nachfolgenden Generates eingezwungen. Persistent über Reloads, per Quelle gescopet, sodass Current-Meta-Pins nicht ins Past-Meta lecken.</li>
+                                </ul>
+                                <div class="feature-banner-protip">
+                                    <strong>Pro-Tipp:</strong> Nutze <strong>📌 PIN</strong> direkt auf einer Karten-Kachel im Grid darunter, um sie zu fixieren. Nutze <strong>🚫 Ausschließen</strong>, um dem Algorithmus zu sagen „diese Print-/Karten-Kombination für diese Quelle nie wieder picken". Die Slot-Reihe füllt sich nur mit Karten, die du bestätigt hast.
+                                </div>
+                            </div>
+                        </article>
+
+                        <article class="feature-banner banner-layout-mosaic">
+                            <div class="feature-banner-imgs">
+                                <div class="feature-banner-img tutorial-screenshot-frame tutorial-screenshot-frame-loaded" style="background-image: url('/images/tutorials/current-meta/12-build-vs-targets.png');" aria-label="Build vs Specific Decks Modal mit Quick Picks Meta Call Feld und Tech-Prioritäts-Pillen">
+                                    <span class="tutorial-screenshot-label">Build vs Specific Decks · Quick Picks</span>
+                                </div>
+                                <div class="feature-banner-img tutorial-screenshot-frame tutorial-screenshot-frame-loaded" style="background-image: url('/images/tutorials/current-meta/13-aggression.png');" aria-label="Aggression Preset-Picker Mild Standard Heavy">
+                                    <span class="tutorial-screenshot-label">Aggression-Preset · Mild / Standard / Heavy</span>
+                                </div>
+                            </div>
+                            <div class="feature-banner-content">
+                                <span class="feature-banner-eyebrow">Build vs… — Flow Teil 1</span>
+                                <h2 class="feature-banner-title">Wähl deine Ziele. Wähl wie aggressiv. Weiter.</h2>
+                                <p class="feature-banner-tagline">
+                                    Das Build-vs…-Modal stellt zwei Fragen: <em>gegen wen</em> und <em>wie viel Konsistenz bist du bereit für Tech aufzugeben</em>. Alles danach ist auto-abgeleitet.
+                                </p>
+                                <ul class="feature-banner-bullets">
+                                    <li><strong>Quick-Picks-Liste</strong> — das vorhergesagte Meta-Call-Feld, sortiert nach Share %. Jede Zeile zeigt den Feld-Share und eine WR-Pille — <em>rot = du verlierst dieses Matchup, Tech-Priorität</em>; <em>grün = du bist schon im Vorteil, überspring</em>.</li>
+                                    <li><strong>Feld-%-Spalte</strong> = <em>wie oft das Deck im vorhergesagten Meta auftaucht</em>. WR-Pille = <em>deine aktuelle Vanilla-WR vs dieses Deck</em>. Zusammen ranken sie „wo der Impact am höchsten ist".</li>
+                                    <li><strong>Aggression-Presets</strong> — Mild (Baseline-Tech-Slots, Konsistenz bleibt), <strong>Standard (+1 Slot pro Bedrohungs-Kategorie — empfohlen)</strong>, Heavy (+2 Slots, tauscht Konsistenz gegen Coverage).</li>
+                                    <li><strong>Multi-Target-Stacking</strong> — wähl 2–3 Ziele und die Engine zeigt nur Karten, die überlappende Bedrohungs-Kategorien treffen, damit du das Konsistenz-Budget nicht in Single-Purpose-Techs versenkst.</li>
+                                </ul>
+                                <div class="feature-banner-protip">
+                                    <strong>Pro-Tipp:</strong> Standard ist aus gutem Grund Default — fügt <em>einen</em> Slot pro erkannter Bedrohungs-Kategorie hinzu. Heavy ist für „ich bin 40 % unter dem Schnitt gegen dieses Deck und verliere lieber 2 % Konsistenz als dieses Matchup".
+                                </div>
+                            </div>
+                        </article>
+
+                        <article class="feature-banner banner-layout-asymmetric">
+                            <div class="feature-banner-imgs">
+                                <div class="feature-banner-img-asym tutorial-screenshot-frame tutorial-screenshot-frame-loaded" style="background-image: url('/images/tutorials/current-meta/14-suggested-techs.png');" aria-label="Suggested Tech Cards Modal mit Karten Prime Catcher Shaymin Surfer Switch angehakt gegen N's Zoroark mit Threat-Tags">
+                                    <span class="tutorial-screenshot-label">Suggested Tech Cards · Checkbox-Fix</span>
+                                </div>
+                                <div class="feature-banner-thumbs">
+                                    <div class="feature-banner-img tutorial-screenshot-frame tutorial-screenshot-frame-loaded" style="background-image: url('/images/tutorials/current-meta/15-build-vs-vanilla.png');" aria-label="Your Build vs Vanilla gewichteter Win-Rate-Vergleich mit Delta">
+                                        <span class="tutorial-screenshot-label">Your Build vs Vanilla · gewichtete WR Δ</span>
+                                    </div>
+                                    <div class="feature-banner-img tutorial-screenshot-frame tutorial-screenshot-frame-loaded" style="background-image: url('/images/tutorials/current-meta/10-meta-call.png');" aria-label="Meta Call Feld gegen das der WR-Vergleich gewichtet ist">
+                                        <span class="tutorial-screenshot-label">…gewichtet gegen das Meta-Call-Feld</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="feature-banner-content">
+                                <span class="feature-banner-eyebrow">Build vs… — Flow Teil 2</span>
+                                <h2 class="feature-banner-title">Die Engine bringt Kandidaten — und sagt dir das WR-Δ, wenn du wirklich damit baust.</h2>
+                                <p class="feature-banner-tagline">
+                                    Suggested Tech Cards sind <em>Kandidaten</em>, keine Befehle. Jede Karte trägt ihren Threat-Tag (<code>RETREAT_LOCK</code>, <code>BENCH_DAMAGE</code>, <code>ABILITY_EX_IMMUNITY</code>, <code>ATTACK_IGNORES_EFFECTS</code>), damit du genau verstehst, warum sie aufgetaucht ist. Du hakst die Boxen ab, die du willst, und baust.
+                                </p>
+                                <ul class="feature-banner-bullets">
+                                    <li><strong>Woher Vorschläge kommen</strong> — die Karten-Text-Capability-Engine scannt den gedruckten Text jeder Karte und taggt ihre Interaktionen. Build vs… schneidet diese Tags dann mit den Threats, die deine gewählten Ziele tatsächlich darstellen.</li>
+                                    <li><strong>Threat-Tags auf jeder Karte</strong> — blau neben jedem Vorschlag gelabelt, damit das „warum diese Karte?" direkt da steht. Surfer getaggt mit <code>RETREAT_LOCK</code> gegen N's Zoroark; Shaymin mit <code>BENCH_DAMAGE</code>.</li>
+                                    <li><strong>Lock-in-Checkboxen</strong> — hak die Karten an, die in den nächsten Generate sollen. Der Button unten updatet auf „Build with N cards", damit du immer weißt, was du commitest.</li>
+                                    <li><strong>Your Build vs Vanilla</strong> — gleicher Archetyp, mit vs ohne deine Tech-Overrides, gegen das Meta-Call-Feld gewichtet. <em>Vanilla 52,2 % → Your Build 52,8 %, Δ +0,6 pts</em>.</li>
+                                    <li><strong>Pro-Gegner-Aufschlüsselung</strong> — die Tabelle unten zeigt, wo das Δ tatsächlich herkam. Du siehst die +3 pts vs N's Zoroark und Dragapult Dusknoir kommen aus den Retreat-Lock-Techs.</li>
+                                    <li><strong>Estimator-Cap</strong> — Δ ist hart auf +9 pts gedeckelt, damit Claims ehrlich bleiben; der Pro-Karte-Threat-Bonus ist <em>+3 pts pro getroffener Threat-Kategorie</em>.</li>
+                                </ul>
+                                <div class="feature-banner-protip">
+                                    <strong>Pro-Tipp:</strong> Das Detection-Log oben (<em>„retreat_lock, surfer, switch"</em>) ist die Audit-Spur fürs Δ. Fühlt sich ein Δ zu gut an, scan das Log — manchmal wird ein Threat doppelt gezählt und du kannst eine Tech manuell abhaken, um neu zu rechnen.
+                                </div>
+                            </div>
+                        </article>
+
+                        <blockquote class="tutorial-pullquote">
+                            Tech-Karten kommen nicht aus dem Nichts — aber sie sind auch keine Orakel-Wahrheit. Die Engine flaggt Kandidaten basierend auf Karten-Text-Capabilities und vorhergesagtem Feld. Nicht gegen jedes Deck gibt es eine perfekte Tech. Das Nachdenken passiert weiterhin bei dir.
+                            <cite>— Das Cooking-Versprechen</cite>
+                        </blockquote>
+
+                        <h3 class="tutorial-chapter-heading"><span>06</span> Tech Lab — Techs für jede Meta-Karte finden, der Engine beibringen was du siehst</h3>
+                        <p class="tutorial-paragraph">
+                            Unter dem Build-vs…-Flow zeigt Cooking die <strong>Tech-Lab</strong>-Sektion. Dieselbe Capability-Tag-Engine, die die Build-vs…-Vorschläge antreibt, wird hier direkt freigelegt: wähl irgendeine Meta-Karte als Ziel und die Seite listet jede Karte mit passenden Counter-Tags, gerankt danach, wie stark die Tags den Karten-Text des Ziels treffen. Die Zwei-Wege-Struktur — <em>Beaten by</em> (Karten die das hier schlagen) + <em>Good against</em> (Karten die das hier schlägt) — lässt dich eine Interaktionskette in beide Richtungen abgehen.
+                        </p>
+
+                        <article class="feature-banner banner-layout-asymmetric">
+                            <div class="feature-banner-img-asym tutorial-screenshot-frame tutorial-screenshot-frame-loaded" style="background-image: url('/images/tutorials/current-meta/17-tech-lab-target.png');" aria-label="Tech Lab mit Crustle als Ziel und Beaten-by-Sektion mit Card-Text-Bypassern und HIGH-Match">
+                                <span class="tutorial-screenshot-label">Tech Lab · Ziel-Picker + Beaten-by</span>
+                            </div>
+                            <div class="feature-banner-thumbs">
+                                <div class="feature-banner-img tutorial-screenshot-frame tutorial-screenshot-frame-loaded" style="background-image: url('/images/tutorials/current-meta/18-non-ex-attackers.png');" aria-label="Non-EX-Attackers-Sektion listet Pokémon deren Fähigkeiten nur ex blocken">
+                                    <span class="tutorial-screenshot-label">Non-EX-Attackers · Ability gilt nicht</span>
+                                </div>
+                                <div class="feature-banner-img tutorial-screenshot-frame tutorial-screenshot-frame-loaded" style="background-image: url('/images/tutorials/current-meta/19-good-against.png');" aria-label="Good-against-Sektion mit attack ignores effects Tag und konkreten Meta-Matchups">
+                                    <span class="tutorial-screenshot-label">Good against + Capability-Tag</span>
+                                </div>
+                            </div>
+                            <div class="feature-banner-content">
+                                <span class="feature-banner-eyebrow">Tech Lab</span>
+                                <h2 class="feature-banner-title">Capability-Tags auf jeder Karte. HIGH / MED / LOW Match. + Add missing.</h2>
+                                <p class="feature-banner-tagline">
+                                    Tech Lab läuft den Karten-Text-Capability-Graphen ab. Wähl ein Ziel, und die Seite bringt die Karten, die es schlagen (mit dem genauen Text-Mechanismus, der schlägt), plus die Karten, <em>die es</em> schlägt — und eine parallele Liste von Non-EX-Attackers, wenn die Ability des Ziels <em>nur</em> Pokémon ex blockt.
+                                </p>
+                                <ul class="feature-banner-bullets">
+                                    <li><strong>Beaten by — Karten die das hier schlagen</strong> — Card-Text-Bypassers (z. B. <code>ABILITY_EX_IMMUNITY</code>-Angreifer, die den ex-only-Schutz des Ziels umgehen) und Non-EX-Attackers, wenn die Ability nur ex blockt.</li>
+                                    <li><strong>Good against — Karten die das hier schlägt</strong> — konkrete Meta-Matchups (Farigiraf ex, Pikachu ex, Sylveon) mit HIGH- / MED- / LOW-Match-Stärke aus der Capability-Tag-Überlappung.</li>
+                                    <li><strong>Capability-Tags</strong> — <code>ATTACK_IGNORES_EFFECTS</code>, <code>ABILITY_EX_IMMUNITY</code>, <code>RETREAT_LOCK</code>, <code>BENCH_DAMAGE</code> und mehr. Jeder kommt aus einem deterministischen Scan des gedruckten Karten-Texts, nicht aus einer Community-Abstimmung.</li>
+                                    <li><strong>+ Add missing tech</strong> — siehst du eine Karte, die die Engine übersehen hat, registriert der Button sie als lokales Override. In <code>localStorage</code> unter <code>techLab.overrides.v1</code> gespeichert — verlässt nie deinen Browser.</li>
+                                    <li><strong>× Not a tech</strong> — gleiche Idee, andere Richtung. Versteckt einen Kandidaten, den die Engine vorgeschlagen hat, wenn dein Testing bestätigt, dass er nicht wirklich hilft.</li>
+                                </ul>
+                                <div class="feature-banner-protip">
+                                    <strong>Pro-Tipp:</strong> Lokale Overrides sind genau das — lokal. Community-Rollout ist für ein Follow-up-Release geplant: bestätigte Overrides aggregieren → im nächsten Datenfile ausliefern → die Engine lernt von allen. Je mehr Leute Tech Lab nutzen, desto besser werden die Tech-Vorschläge für die ganze Community.
+                                </div>
+                            </div>
+                        </article>
+
+                        <aside class="tutorial-callout">
+                            <strong>Das Datenfile hinter Tech Lab</strong>
+                            <p>Vorschläge kommen aus <code>data/card_capability_*.json</code> — ein deterministischer Scan des gedruckten Ability- + Attack-Texts jeder Karte in ein Set von Capability-Tags. Die Seite liest diese Files beim Boot, legt deine lokalen Overrides drauf und rankt dann Vorschläge fürs gewählte Ziel nach Tag-Overlap-Stärke.</p>
+                            <p>Roadmap: Community-Overrides werden in einem Follow-up-Release ausgeliefert, nachdem sie aggregiert und reviewt sind.</p>
+                        </aside>
+
+                        <aside class="tutorial-callout tutorial-callout--warn">
+                            <strong>Wann du den Cooking-Vorschlägen NICHT trauen solltest</strong>
+                            <p>Zeigt die Matchup-Matrix unter 30 geloggten Spielen, behandle die WR als richtungweisend. Wurde der Archetyp deines Ziels in den letzten 7 Tagen released, hat der Tag-Scan vielleicht noch nicht alle Interaktionen erfasst — öffne Tech Lab und nutze „+ Add missing tech", um die Lücke zu füllen. Fallen zwei deiner drei Build-vs…-Ziele in dieselbe Bedrohungs-Kategorie, rechne mit einem Über-Reporten des Δ.</p>
+                            <p>Das Cooking-Versprechen: <em>die Engine flaggt Kandidaten; du wählst den Build</em>.</p>
+                        </aside>
+
+                        <!-- ════════════════════════════════════════════════════
+                             Theme 4 — Past Meta · gleiche Screens, anderes Zeitfenster
+                             ════════════════════════════════════════════════════ -->
+                        <div class="feature-section-divider">Past Meta · Die Zeitmaschine</div>
+
+                        <section class="tutorial-chapter-intro">
+                            <div class="chapter-meta">
+                                <span class="chapter-pill">Gleiche Screens, andere Linse</span>
+                                <span class="chapter-pill chapter-pill--light">~ 3 min Lesezeit</span>
+                            </div>
+                            <h2>Gleiche Analyse- + Builder-Mechanik wie Current Meta — nur eingefroren auf ein gewähltes Fenster.</h2>
+                            <p class="chapter-lede">
+                                Past Meta ist der Zeitmaschinen-Tab. Die Brought-Share-Tabelle, die Deck-Analyse, der Cooking-+-Tech-Lab-Flow — jeder Screen funktioniert gleich wie in Current Meta. Die zwei Dinge, die sich ändern: das <strong>Datenfenster</strong> ist nicht mehr „jetzt" (du wählst ein Format, optional ein einzelnes Turnier), und der Quell-Feed schmeißt die Limitless-Online-Runs raus. <strong>Nur Major-Live-Turniere.</strong> Damit liest du eine stabilisierte Sicht eines älteren Formats ohne Online-Ladder-Bewegung — oder schaust dir ein noch laufendes Format an, mit nur dem Live-Signal rausgezogen.
+                            </p>
+                        </section>
+
+                        <article class="feature-banner banner-layout-mosaic">
+                            <div class="feature-banner-imgs">
+                                <div class="feature-banner-img tutorial-screenshot-frame tutorial-screenshot-frame-loaded" style="background-image: url('/images/tutorials/past-meta/01-format-picker.png');" aria-label="Past Tournament Deck Analysis Tab mit Format-Picker für TEF-POR SVI-ASC SVI-PFL SVI-MEG SVI-BLK SVI-DRI">
+                                    <span class="tutorial-screenshot-label">Meta- / Format-Filter — jedes legale Format-Fenster</span>
+                                </div>
+                                <div class="feature-banner-img tutorial-screenshot-frame tutorial-screenshot-frame-loaded" style="background-image: url('/images/tutorials/past-meta/02-tournament-picker.png');" aria-label="Tournament-Filter-Dropdown listet Alle Turniere und einzelne Regionals">
+                                    <span class="tutorial-screenshot-label">Turnier-Filter — Alle oder ein einzelnes Regional</span>
+                                </div>
+                            </div>
+                            <div class="feature-banner-content">
+                                <span class="feature-banner-eyebrow">Past Meta betreten</span>
+                                <h2 class="feature-banner-title">Zwei Dropdowns bestimmen die ganze Seite.</h2>
+                                <p class="feature-banner-tagline">
+                                    Auf dem Pokémon TCG Hub <em>Past Meta</em> wählen. Zwei Filter treiben alles drunter: welches <strong>Format-Fenster</strong> du anschauen willst und ob du <strong>alle Turniere</strong> in diesem Fenster willst oder ein einzelnes <strong>Regional</strong>.
+                                </p>
+                                <ul class="feature-banner-bullets">
+                                    <li><strong>Meta- / Format-Filter</strong> — jeder legale Format-Snapshot, den die Datenbank hat (TEF-POR, SVI-ASC, SVI-PFL, SVI-MEG, SVI-BLK, SVI-DRI …). Wähl eins und Deck-Pool, Staples und Matchups tauschen aufs Fenster.</li>
+                                    <li><strong>Turnier-Filter</strong> — „Alle Turniere" zum Aggregieren oder pick eins spezifisch (Regional Indianapolis, Melbourne, Lima, Campinas, Utrecht, LA, Prague …), um ein einzelnes Event isoliert zu lesen.</li>
+                                    <li><strong>Nur Major-Live-Turnier-Quelle</strong> — Limitless-Online-Runs werden hier explizit ausgeschlossen. Past Meta ist ausschließlich Paper-Signal.</li>
+                                    <li><strong>Funktioniert auch für noch laufende Formate</strong> — TEF-POR ist zum Schreibzeitpunkt das aktuelle Format, und Past Meta darauf gewählt gibt dir dieselben Screens wie Current Meta, aber mit rausgezogenem Online-Rauschen. Nützlich für Turnier-Vorbereitung gegen das Live-Feld.</li>
+                                </ul>
+                                <div class="feature-banner-protip">
+                                    <strong>Pro-Tipp:</strong> Setz Past Meta = TEF-POR + „Alle Turniere" am Tag vor einem Regional-Wochenende. Du bekommst denselben View wie Current Meta minus Online-Ladder — am nächsten dran an dem, was deine Gegner vor Ort tatsächlich mitbringen.
+                                </div>
+                            </div>
+                        </article>
+
+                        <article class="feature-banner banner-layout-asymmetric banner-reverse">
+                            <div class="feature-banner-imgs">
+                                <div class="feature-banner-img-asym tutorial-screenshot-frame tutorial-screenshot-frame-loaded" style="background-image: url('/images/tutorials/past-meta/03-archetype-picker.png');" aria-label="Archetyp-Picker Typeahead zeigt Dragapult-Varianten mit jeweiliger Turnier-Anzahl">
+                                    <span class="tutorial-screenshot-label">Archetyp-Picker · Turnier-Zähler pro Archetyp</span>
+                                </div>
+                                <div class="feature-banner-thumbs">
+                                    <div class="feature-banner-img tutorial-screenshot-frame tutorial-screenshot-frame-loaded" style="background-image: url('/images/tutorials/past-meta/04-deck-stats.png');" aria-label="Deck-Stats-Karte zeigt Turniere Spieler Bilanz kumulative Win Rate Day-2-Konversion">
+                                        <span class="tutorial-screenshot-label">Deck-Stats · kumulative Performance des gewählten Archetyps</span>
+                                    </div>
+                                    <div class="feature-banner-img tutorial-screenshot-frame tutorial-screenshot-frame-loaded" style="background-image: url('/images/tutorials/past-meta/05-matchup-matrix.png');" aria-label="Matchup-Matrix aggregiert über Turniere wo der Archetyp auftauchte">
+                                        <span class="tutorial-screenshot-label">Matchup-Matrix · nur Paper-Gegner</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="feature-banner-content">
+                                <span class="feature-banner-eyebrow">Past Tournament Deck Analysis</span>
+                                <h2 class="feature-banner-title">Wähl einen Archetyp. Bekomm seine volle Paper-Format-Bilanz.</h2>
+                                <p class="feature-banner-tagline">
+                                    Sobald Format- + Turnier-Filter gesetzt sind, listet der Archetyp-Picker jedes Deck, das im Fenster gespielt wurde, mit Turnier-Zähler hinterm Namen. Wähl eins und du landest auf demselben Deck-Analyse-Screen wie in Current Meta — Quick Overview + Cooking — eingegrenzt aufs gewählte Fenster.
+                                </p>
+                                <ul class="feature-banner-bullets">
+                                    <li><strong>Deck-Stats-Karte</strong> — <em>Cards in Deck (102 / 135), 7 Turniere (348 Decklists), Format TEF-POR</em>. Die 102 / 135 ist die Vereinigung von Karten, die mindestens einmal auftauchten / Karten, die fürs Format zugelassen sind.</li>
+                                    <li><strong>Tournament Performance</strong> — Spieler (1 320), Bilanz (5 179 – 4 273 – 1 752), kumulative WR (54,0 %), Day-2-Konversion (26,3 %). Alles aggregiert über die gewählten Turniere im Fenster.</li>
+                                    <li><strong>Matchup-Matrix</strong> — aggregiert über Labs-Turniere, wo dieser Archetyp auftauchte. Pro-Gegner Spiele + WR. Gleiche Farbcodierung wie Current Meta.</li>
+                                    <li><strong>Gleicher Cooking + Tech Lab darunter</strong> — PIN, Ausschließen, Build vs…, Suggested Techs — alles funktioniert gleich, gescopet auf die Daten des gewählten Fensters.</li>
+                                </ul>
+                                <div class="feature-banner-protip">
+                                    <strong>Pro-Tipp:</strong> Day-2-Konversion ist die sauberste „hat dieses Deck am Venue wirklich konvertiert"-Stat. Eine 50 %+ WR mit unter 25 % Day-2 heißt meist: Deck, das frühe Runden gewinnt, aber gegen die obere Hälfte einknickt.
+                                </div>
+                            </div>
+                        </article>
+
+                        <section class="tutorial-chapter-wrap">
+                            <h3>Damit ist Current Meta + Past Meta durch — Analyse und Deckbau, von Anfang bis Ende.</h3>
+                            <p>
+                                Du hast jetzt jeden Screen gesehen, den der Meta Hub für den internationalen Circuit zeigt. Das Muster wiederholt sich: <strong>wähl die Linse</strong> (welcher Feed, welches Fenster), <strong>lies das Meta</strong> (Shares, Tiers, Staples, Climbers), <strong>tauch in ein Deck ein</strong> (Matchup-Matrix, Vergleichstabelle, Deck-Stats), und dann <strong>cook dagegen</strong> (PIN, Ausschließen, Build vs…, Tech Lab).
+                            </p>
+                            <p>
+                                Die restlichen Sektionen unten decken die umgebenden Werkzeuge ab — Karten-Datenbank, Battle-Journal, Meta- &amp; Custom-Binder, Testing Groups und den Telegram-Bot — die um die Meta-Analyse-Schleife herum laufen, die du gerade durchgegangen bist.
+                            </p>
+                        </section>
+
+                        <div class="feature-section-divider">Mehr Werkzeuge · Jenseits der Meta-Analyse-Schleife</div>
+
+                        <article class="feature-banner banner-layout-mosaic banner-single banner-reverse">
+                            <div class="feature-banner-imgs">
+                                <div class="feature-banner-img tutorial-screenshot-frame" data-tutorial-img="/images/tutorials/card-database/1-grid.png" aria-label="Karten-Datenbank mit Such-Filtern und Live-Preisen">
+                                    <span class="tutorial-screenshot-label">Karten-Grid · Live-Cardmarket-Preise</span>
+                                </div>
+                            </div>
+                            <div class="feature-banner-content">
+                                <span class="feature-banner-eyebrow">Karten-Intel</span>
+                                <h2 class="feature-banner-title">Jede Karte, jeder Print, jedes Detail.</h2>
+                                <p class="feature-banner-tagline">
+                                    Volle Pokémon-TCG-Datenbank mit Set-Filtern, Typ-Filtern, Rarity-Optionen und einem Pro-Print-Sammlungs-Tracker, an dein Profil gekoppelt.
+                                </p>
+                                <ul class="feature-banner-bullets">
+                                    <li><strong>Print-aware</strong> — Set + Nummer-Kombinationen separat getrackt; gleiche Karte in unterschiedlichen Sets zeigt den internationalen ✨-Indikator, wenn du einen Sibling-Print besitzt.</li>
+                                    <li><strong>Live-Cardmarket-Preise</strong> — Ø-Preis-Badge auf jeder Karte holt den echten Marktdurchschnitt und linkt zur Cardmarket-Suche.</li>
+                                    <li><strong>Wishlist-Herz (♡ / ♥)</strong> — markier Karten, die dir noch fehlen; füttert Custom-Binder-Generation und die „Fehlende in Wishlist"-Buttons überall.</li>
+                                    <li><strong>Proxy-Queue</strong> — P-Button auf jeder Karte hängt sie an die Druck-Queue fürs Testen.</li>
+                                    <li><strong>Set-Liste neuestes → ältestes</strong> — neuestes Set immer oben, damit du nicht dran vorbeiscrollst.</li>
+                                </ul>
+                                <div class="feature-banner-protip">
+                                    <strong>Pro-Tipp:</strong> Tipp den ★ auf einer Karte in irgendeinem Deck-Builder-Grid, um den Rarity-Switcher aufzurufen und Prints zu tauschen, ohne deinen Build zu verlassen.
+                                </div>
+                            </div>
+                        </article>
+
+                        <article class="feature-banner banner-layout-hero banner-reverse">
+                            <div class="feature-banner-img-hero tutorial-screenshot-frame" data-tutorial-img="/images/tutorials/battle-journal/1-tab.png" aria-label="Battle-Journal mit Quick-Log und Match-History">
+                                <span class="tutorial-screenshot-label">Battle-Journal · Quick-Log + History</span>
+                            </div>
+                            <div class="feature-banner-content">
+                                <span class="feature-banner-eyebrow">Match-Log</span>
+                                <h2 class="feature-banner-title">Trackt jedes Spiel. Vertrau deinen Trends.</h2>
+                                <p class="feature-banner-tagline">
+                                    Der <strong>⚔️</strong>-Button im Header loggt ein Match in unter 10 Sekunden — Deck, Gegner, Zugreihenfolge (1. / 2.), Ergebnis (W / L / T), Notizen. Cloud-gesynct mit deinem Profil, Brick- / Mulligan-Flags unterstützt.
+                                </p>
+                                <ul class="feature-banner-bullets">
+                                    <li><strong>Pro-Deck-WR + Pro-Gegner-WR</strong> — aggregiert über deine volle History.</li>
+                                    <li><strong>Trend-Chart</strong> — WR über die Zeit, damit du siehst, ob ein Deck steigt oder einpendelt.</li>
+                                    <li><strong>Filter nach Format / Deck / Datum</strong> — eingrenzen auf „was hat in den letzten zwei Wochen gegen Dragapult funktioniert".</li>
+                                    <li><strong>Meta-Call-Integration</strong> — strict-match Journal-Daten mischen sich bayesianisch mit der Meta-WR (30-Spiel-Gewicht) für die Vorhersagen deines Builds.</li>
+                                    <li><strong>Brick-Filter</strong> — schmeiß Pech-Spiele raus, bevor die Matchup-WR berechnet wird.</li>
+                                </ul>
+                                <div class="feature-banner-protip">
+                                    <strong>Pro-Tipp:</strong> Kombinier Battle-Journal mit Testing Groups, um die Matches aller in einen Trend-Chart zu rollen — der sauberste Weg zu sehen, was in deiner Testing-Crew wirklich läuft.
+                                </div>
+                            </div>
+                        </article>
+
+                        <article class="feature-banner banner-layout-asymmetric">
+                            <div class="feature-banner-imgs">
+                                <div class="feature-banner-img-asym tutorial-screenshot-frame" data-tutorial-img="/images/tutorials/meta-binder/1-tab.png" aria-label="Meta-Binder mit 9-Pocket-Grid und Preisen">
+                                    <span class="tutorial-screenshot-label">Meta-Binder · 9-Pocket-Grid + € pro Slot</span>
+                                </div>
+                                <div class="feature-banner-thumbs">
+                                    <div class="feature-banner-img tutorial-screenshot-frame" data-tutorial-img="/images/tutorials/custom-binder/1-picker.png" aria-label="Custom-Binder Archetyp-Picker">
+                                        <span class="tutorial-screenshot-label">Custom-Binder · wähl deine Decks</span>
+                                    </div>
+                                    <div class="feature-banner-img tutorial-screenshot-frame" data-tutorial-img="/images/tutorials/meta-binder/1-tab.png" aria-label="Besessen vs Fehlend Diff im Binder">
+                                        <span class="tutorial-screenshot-label">Besessen / Fehlend Diff</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="feature-banner-content">
+                                <span class="feature-banner-eyebrow">Sammlungs-Werkzeuge</span>
+                                <h2 class="feature-banner-title">Zwei Binder. Drucken, sleeven, mitnehmen.</h2>
+                                <p class="feature-banner-tagline">
+                                    <strong>Meta-Binder</strong> baut auto einen druckbaren A4-Binder aller meta-relevanten Karten der aktuellen Rotation. <strong>Custom-Binder</strong> lässt dich Archetypen selbst aussuchen.
+                                </p>
+                                <ul class="feature-banner-bullets">
+                                    <li><strong>9-Pocket-Grid</strong> — optimiert für 6,3 × 8,8 cm Sleeves, bereit für Browser-Druck.</li>
+                                    <li><strong>Cardmarket-€-Preis pro Slot</strong> — sieh genau, was es kostet, den Binder zu füllen.</li>
+                                    <li><strong>Auto-markiert Besessen</strong> — zieht aus deiner Profil-Sammlung; fehlende Kopien leuchten durch.</li>
+                                    <li><strong>Fehlende in Wishlist &amp; Alle fehlenden in Proxy</strong> — zwei Ein-Klick-Aktionen, die auf einen ganzen Binder skalieren.</li>
+                                    <li><strong>Save / Load Presets</strong> (Custom-Binder) — benannte Auswahlen, die du vor einer Reise oder einem Event neu laden kannst.</li>
+                                </ul>
+                                <div class="feature-banner-protip">
+                                    <strong>Pro-Tipp:</strong> Speicher deinen Lieblings-Custom-Binder als „Travel" vor einem Regional-Wochenende — ein Klick, um ihn nächstes Mal bei Preisänderungen neu zu generieren.
+                                </div>
+                            </div>
+                        </article>
+
+                        <article class="feature-banner banner-layout-hero">
+                            <div class="feature-banner-img-hero tutorial-screenshot-frame" data-tutorial-img="/images/tutorials/testing-groups/1-dashboard.png" aria-label="Testing-Groups geteiltes Dashboard mit gerolltem Journal">
+                                <span class="tutorial-screenshot-label">Testing-Group-Dashboard · geteiltes Journal</span>
+                            </div>
+                            <div class="feature-banner-content">
+                                <span class="feature-banner-eyebrow">Team-Play</span>
+                                <h2 class="feature-banner-title">Testet als Crew. Entscheidet als Crew.</h2>
+                                <p class="feature-banner-tagline">
+                                    Privates Match-Log + geteilter Meta Call für deine Testing-Gruppe. Member-Daten rollen in einen Trend-Chart; die Gruppen-Vorhersage hat eine Edit-History, damit du siehst, wer was wann geändert hat.
+                                </p>
+                                <ul class="feature-banner-bullets">
+                                    <li><strong>Join per Einladungslink</strong> — Admin teilt einen Code, Mitglieder sehen das Gruppen-Dashboard.</li>
+                                    <li><strong>Geteiltes Journal</strong> — Battle-Journal-Matches jedes Mitglieds rollen in eine deck-übergreifende WR-Sicht.</li>
+                                    <li><strong>Geteilter Meta Call</strong> — Overrides von jedem Mitglied applybar; letzte Änderung gewinnt, History sichtbar.</li>
+                                    <li><strong>Privat</strong> — gescopet auf Mitglieder, nichts leckt in globale Turnier-Views.</li>
+                                </ul>
+                                <div class="feature-banner-protip">
+                                    <strong>Pro-Tipp:</strong> Halt einen Member-Account als „kanonisch" — wenn ein Regional vorbei ist, rolle den Gruppen-Meta-Call auf die Overrides dieses Accounts zurück fürs Post-Mortem, dann siehst du exakt, was die Gruppe gecallt hat.
+                                </div>
+                            </div>
+                        </article>
+
+                        <article class="feature-banner banner-layout-mosaic banner-single">
+                            <div class="feature-banner-imgs">
+                                <div class="feature-banner-img tutorial-screenshot-frame" data-tutorial-img="/images/tutorials/telegram-bot/1-metacall.png" aria-label="Telegram-Bot liefert Meta-Call-PNG im Chat">
+                                    <span class="tutorial-screenshot-label">@TheDipidisBot · /metacall in jedem Chat</span>
+                                </div>
+                            </div>
+                            <div class="feature-banner-content">
+                                <span class="feature-banner-eyebrow">Mobile Companion</span>
+                                <h2 class="feature-banner-title">@TheDipidisBot — Meta + Decks in jedem Telegram-Chat.</h2>
+                                <p class="feature-banner-tagline">
+                                    Der Companion-Bot liefert vorgerenderte PNGs von der Seite direkt in Telegram. Sub-Sekunden-Antwort, weil Bilder vom GitHub-Pages-Deploy kommen, nicht aus einem Browser pro Anfrage.
+                                </p>
+                                <ul class="feature-banner-bullets">
+                                    <li><strong>/metacall</strong> — Zwei-Tipp-Untermenü (Current / Past). Jede Variante schickt die Per-Variant-Tier-Liste + Familien-gruppierte Übersicht, nach Haupt-Pokémon kombiniert.</li>
+                                    <li><strong>/deck</strong> — voller Archetyp-Picker. Wähl einen für das Consistency-generierte 60-Karten-Bild + eine copy-friendly Deckliste.</li>
+                                    <li><strong>/menu</strong> — pinnt die persistente Button-Reihe neu, falls du sie versehentlich gelöscht hast.</li>
+                                    <li><strong>Self-Service-Zugang</strong> — <code>/start</code> von einem neuen User pingt Admins im Chat mit ✅ / ❌-Buttons; keine manuellen Env-Var-Edits.</li>
+                                    <li><strong>Whitelist pro User, nicht pro Gruppe</strong> — Bot in einen Turnier-Chat einladen; nur freigegebene Mitglieder bekommen Antworten.</li>
+                                </ul>
+                                <div class="feature-banner-protip">
+                                    <strong>Pro-Tipp:</strong> Source-Code + Render-Blueprint des Bots liegen unter <code>bot/</code> im Repo — fork ihn für deine eigene Testing-Crew mit zwei Env-Vars (<code>BOT_TOKEN</code>, <code>ADMIN_USER_IDS</code>).
+                                </div>
+                            </div>
+                        </article>
+
+                        <!-- ── Closing CTA ── -->
+                        <section class="tutorial-cta">
+                            <h2>Du hast die Werkzeuge gesehen. Jetzt geh das Regional gewinnen.</h2>
+                            <p>
+                                Starte mit <strong>Meta Hub → Current Meta</strong>, um das Spielfeld heute zu sehen. Bau etwas dagegen in der <strong>Deck-Analyse</strong>. Logge jedes Test-Match im <strong>Battle-Journal</strong>. Wenn deine Testing-Crew zu groß für einen Kopf wird, spann eine <strong>Testing Group</strong> auf und rolle die Matches aller in denselben Trend-Chart.
+                            </p>
+                            <p>
+                                Fragen, Bugs, Feature-Wünsche? Das Repo liegt auf GitHub unter <code>CapTheAvenger/TheDipidis</code>. Pull Requests willkommen.
+                            </p>
+                        </section>
+
+                        <!-- ════════════════════════════════════════════════════
+                             DE-Referenz-Manual (Übersicht + Tab-Beschreibungen +
+                             FAQ + Support). Bleibt als ausführliches Nachschlage-
+                             Material unter dem Long-Read.
+                             ════════════════════════════════════════════════════ -->
 
                         <!-- Übersicht -->
                         <section class="de-overview-section">

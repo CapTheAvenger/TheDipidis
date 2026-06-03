@@ -511,6 +511,254 @@
     box-shadow: 0 1px 3px rgba(15, 23, 42, 0.2);
 }
 
+/* ─────────────────────────────────────────────────────────────
+ * Long-read / blog-style additions for deep-dive tutorial chapters
+ * (Current International Meta, Past Meta).
+ * Designed to sit between feature-banners so the page reads more
+ * like a guided article than a stream of disconnected boxes.
+ * ─────────────────────────────────────────────────────────────── */
+
+/* Chapter intro block — sits below a section divider, replaces a
+   normal paragraph as the "hello, here's what we'll cover" lede. */
+.tutorial-chapter-intro {
+    background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+    border: 1px solid rgba(15, 23, 42, 0.06);
+    border-radius: 16px;
+    padding: 28px 30px 26px;
+    margin: 0 0 28px;
+    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);
+}
+.tutorial-chapter-intro .chapter-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 16px;
+}
+.tutorial-chapter-intro .chapter-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    background: rgba(59, 76, 202, 0.10);
+    color: var(--pokemon-blue, #3B4CCA);
+    padding: 5px 12px;
+    border-radius: 999px;
+}
+.tutorial-chapter-intro .chapter-pill--light {
+    background: rgba(255, 203, 5, 0.18);
+    color: #8a6500;
+}
+.tutorial-chapter-intro h2 {
+    font-size: 1.7rem;
+    font-weight: 900;
+    color: #0f172a;
+    margin: 0 0 12px;
+    line-height: 1.18;
+}
+.tutorial-chapter-intro .chapter-lede {
+    font-size: 1rem;
+    color: #334155;
+    line-height: 1.65;
+    margin: 0 0 16px;
+}
+.tutorial-chapter-intro .chapter-toc {
+    list-style: none;
+    margin: 0;
+    padding: 14px 16px;
+    background: rgba(59, 76, 202, 0.05);
+    border-left: 3px solid var(--pokemon-blue, #3B4CCA);
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.tutorial-chapter-intro .chapter-toc li {
+    font-size: 0.88rem;
+    color: #1e293b;
+    line-height: 1.45;
+    padding-left: 18px;
+    position: relative;
+}
+.tutorial-chapter-intro .chapter-toc li::before {
+    content: '→';
+    position: absolute;
+    left: 0;
+    color: var(--pokemon-blue, #3B4CCA);
+    font-weight: 800;
+}
+
+/* Chapter heading — h3-style marker between thematic clusters.
+   Visually softer than a feature-section-divider; reads as the
+   article's section breaks rather than the headline above. */
+.tutorial-chapter-heading {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    margin: 32px 4px 14px;
+    font-size: 1.25rem;
+    font-weight: 900;
+    color: #0f172a;
+    line-height: 1.2;
+}
+.tutorial-chapter-heading > span {
+    font-size: 0.85rem;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    color: var(--pokemon-blue, #3B4CCA);
+    background: rgba(59, 76, 202, 0.10);
+    padding: 4px 10px;
+    border-radius: 6px;
+}
+
+/* Narrative paragraph between banners — bigger line-height, easy on
+   the eyes after a dense banner. */
+.tutorial-paragraph {
+    font-size: 1rem;
+    line-height: 1.7;
+    color: #334155;
+    margin: 0 4px 24px;
+    max-width: 78ch;
+}
+.tutorial-paragraph strong {
+    color: #0f172a;
+}
+.tutorial-paragraph code {
+    background: rgba(15, 23, 42, 0.06);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 0.92em;
+}
+
+/* Methodology / data-source callout — used when we need to explain
+   how a value is computed. Sits between banners. */
+.tutorial-callout {
+    background: linear-gradient(135deg, #f0f7ff 0%, #ffffff 100%);
+    border: 1px solid rgba(59, 76, 202, 0.14);
+    border-left: 4px solid var(--pokemon-blue, #3B4CCA);
+    border-radius: 12px;
+    padding: 18px 22px;
+    margin: 0 4px 24px;
+}
+.tutorial-callout strong {
+    display: block;
+    color: var(--pokemon-blue, #3B4CCA);
+    font-weight: 800;
+    margin-bottom: 6px;
+    font-size: 0.95rem;
+}
+.tutorial-callout p {
+    margin: 0;
+    color: #1e293b;
+    line-height: 1.6;
+    font-size: 0.93rem;
+}
+.tutorial-callout p + p {
+    margin-top: 8px;
+}
+.tutorial-callout--warn {
+    background: linear-gradient(135deg, #fffbeb 0%, #ffffff 100%);
+    border-color: rgba(255, 203, 5, 0.5);
+    border-left-color: #f59e0b;
+}
+.tutorial-callout--warn strong {
+    color: #8a6500;
+}
+
+/* Pull-quote — the big italic break between sections that puts
+   the editorial finger on the key insight. */
+.tutorial-pullquote {
+    font-size: 1.25rem;
+    font-weight: 700;
+    font-style: italic;
+    color: #0f172a;
+    line-height: 1.35;
+    padding: 22px 28px 22px 32px;
+    margin: 28px 4px;
+    border-left: 5px solid var(--pokemon-yellow, #FFCB05);
+    background: rgba(255, 203, 5, 0.06);
+    border-radius: 0 12px 12px 0;
+    position: relative;
+}
+.tutorial-pullquote::before {
+    content: '\201C';
+    position: absolute;
+    left: 10px;
+    top: -4px;
+    font-size: 3rem;
+    color: rgba(255, 203, 5, 0.55);
+    font-family: Georgia, serif;
+    line-height: 1;
+}
+.tutorial-pullquote cite {
+    display: block;
+    margin-top: 10px;
+    font-style: normal;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #64748b;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+/* Closing chapter-wrap card */
+.tutorial-chapter-wrap {
+    background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+    color: #f1f5f9;
+    border-radius: 16px;
+    padding: 24px 28px;
+    margin: 28px 0 32px;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.14);
+}
+.tutorial-chapter-wrap h3 {
+    color: #fde68a;
+    font-size: 1.1rem;
+    margin: 0 0 10px;
+    font-weight: 800;
+}
+.tutorial-chapter-wrap p {
+    margin: 0 0 10px;
+    line-height: 1.65;
+    font-size: 0.95rem;
+    color: #e2e8f0;
+}
+.tutorial-chapter-wrap p:last-child {
+    margin-bottom: 0;
+}
+.tutorial-chapter-wrap code {
+    background: rgba(255, 255, 255, 0.08);
+    padding: 1px 6px;
+    border-radius: 4px;
+}
+
+/* Tighten layout on narrow screens — paragraphs and callouts hug
+   the edge less. */
+@media (max-width: 700px) {
+    .tutorial-chapter-intro {
+        padding: 22px 18px;
+    }
+    .tutorial-chapter-intro h2 {
+        font-size: 1.35rem;
+    }
+    .tutorial-chapter-heading {
+        font-size: 1.05rem;
+        gap: 10px;
+    }
+    .tutorial-paragraph {
+        font-size: 0.95rem;
+        line-height: 1.6;
+    }
+    .tutorial-pullquote {
+        font-size: 1.05rem;
+        padding: 18px 20px 18px 28px;
+    }
+    .tutorial-chapter-wrap {
+        padding: 20px 18px;
+    }
+}
+
 /* ── Profile tab header: compact override ─────────────── */
 #profile > .container > .header {
     padding: 10px 16px;

@@ -1,0 +1,190 @@
+name: Daily Price Refresh + Alerts
+
+# Combined daily job:
+#
+#   1. Pull fresh Cardmarket JSON dumps (Cardmarket publishes a new
+#      snapshot every morning at 07:00 UTC, give them 1 hour buffer)
+#   2. Run the lightweight pricing pipeline only:
+#        - cardmarket_id_mapper   (rebuild (set, number) → idProduct)
+#        - cardmarket_price_merger (write price_data.csv with the
+#                                   latest eur_price / eur_low values)
+#      The card-DB scrapers, tournament scrapers, labs scraper, etc.
+#      stay in weekly-full-update.yml — those don't change daily and
+#      running them every morning would just burn CI minutes for no
+#      data delta.
+#   3. Commit + push the refreshed price files so the live site
+#      picks them up via the network-first data fetch path.
+#   4. Send Telegram alerts to users who opted in (the same logic
+#      that lived in the standalone daily-price-alerts.yml before).
+#
+# Order rationale: commit BEFORE alerts. If the Telegram send step
+# crashes, the fresh price data is already on main — tomorrow's run
+# starts from the latest state without losing a day of price moves.
+# If we alerted first and then crashed during commit, we'd send the
+# same alerts again the next morning before the snooze window had
+# any new state to compare against.
+#
+# Required GitHub repo secrets:
+#   BOT_TOKEN                — Telegram bot token (same as Render service)
+#   FIREBASE_SERVICE_ACCOUNT — Firebase Admin SDK service-account JSON
+
+on:
+  schedule:
+    # 08:00 UTC = 09:00 CET winter / 10:00 CEST summer.
+    # Cardmarket dumps refresh at 07:00 UTC; the 1-hour offset is
+    # enough headroom that the JSON CDN has settled.
+    - cron: '0 8 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions:  write
+
+concurrency:
+  group: daily-price-refresh
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install firebase-admin
+
+      # Seed only the files the mapper + merger need to run. The
+      # full weekly seed has 27 entries — we don't need most of
+      # them. Both scrapers read all_cards_database.csv and the
+      # existing cardmarket_id_mapping.csv / price_data.csv (the
+      # merger preserves Limitless-historic prices for cards with
+      # no Cardmarket mapping). They also load sets.json / sets_
+      # metadata.json for set-order resolution.
+      - name: Seed backend/core/data/ from data/
+        run: |
+          mkdir -p backend/core/data
+          for f in \
+              all_cards_database.csv \
+              all_cards_database.json \
+              cardmarket_id_mapping.csv \
+              price_data.csv \
+              sets.json \
+              sets_metadata.json \
+              format_window.json \
+          ; do
+              if [ -f "data/$f" ]; then
+                  cp "data/$f" "backend/core/data/$f"
+                  echo "  seeded: $f"
+              fi
+          done
+
+      - name: Download Cardmarket JSONs
+        run: |
+          mkdir -p data
+          curl -fsSL --retry 3 -o data/products_singles_6.json    https://downloads.s3.cardmarket.com/productCatalog/productList/products_singles_6.json
+          curl -fsSL --retry 3 -o data/products_nonsingles_6.json https://downloads.s3.cardmarket.com/productCatalog/productList/products_nonsingles_6.json
+          curl -fsSL --retry 3 -o data/price_guide_6.json         https://downloads.s3.cardmarket.com/productCatalog/priceGuide/price_guide_6.json
+          ls -lh data/*_6.json
+
+      - name: Cardmarket ID mapper
+        env:
+          PYTHONPATH: ${{ github.workspace }}/backend/core
+        working-directory: backend
+        run: |
+          python scrapers/cardmarket_id_mapper.py
+
+      - name: Cardmarket price merger
+        env:
+          PYTHONPATH: ${{ github.workspace }}/backend/core
+        working-directory: backend
+        run: |
+          python scrapers/cardmarket_price_merger.py
+
+      - name: Bump version
+        run: |
+          chmod +x bump-version.sh
+          ./bump-version.sh
+
+      # Commit FIRST so the day's price snapshot is on main even if
+      # the alert step fails. The alert script reads the file on
+      # disk (already fresh), so commit order doesn't affect alert
+      # accuracy — only resilience.
+      - name: Commit + push price updates
+        id: commit
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name  "github-actions[bot]"
+          git add data/cardmarket_id_mapping.csv data/price_data.csv \
+                  index.html service-worker.js version.json
+          if git diff --cached --quiet; then
+            echo "No price changes to commit — skipping push."
+            echo "pushed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          ts="$(date -u +'%Y-%m-%d %H:%M UTC')"
+          git commit -m "Auto: daily price refresh — ${ts}
+
+          Triggered by .github/workflows/daily-price-refresh.yml
+          Run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+
+          # Same push-with-retry pattern weekly-full-update uses:
+          # origin/main can advance while this 5-min job runs (manual
+          # pushes from the maintainer, the daily-price-alerts run
+          # racing if both were enabled at the same time). -X ours
+          # only triggers on actual conflict — code-only changes ride
+          # along on the rebase base.
+          for attempt in 1 2 3; do
+            if git push origin HEAD:main; then
+              echo "Push succeeded on attempt $attempt"
+              echo "pushed=true" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            echo "Push rejected on attempt $attempt — pulling with rebase…"
+            if ! git pull --rebase=true -X ours origin main; then
+              echo "::error::Rebase conflict beyond price files — manual resolution needed"
+              git rebase --abort || true
+              exit 1
+            fi
+          done
+          echo "::error::Push failed after 3 attempts"
+          exit 1
+
+      # Trigger Pages deploy so the new price_data.csv hits the
+      # live origin within minutes of the commit.
+      - name: Trigger GitHub Pages deploy
+        if: steps.commit.outputs.pushed == 'true'
+        run: gh workflow run deploy-pages.yml --ref main
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      # Alerts always run, even if the commit step was a no-op
+      # (price data unchanged today). The snooze window is what
+      # prevents spam — alerts don't fire if lastNotified < 48h.
+      - name: Send price alerts to opted-in users
+        env:
+          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: |
+          if [ -z "$BOT_TOKEN" ]; then
+            echo "::error::BOT_TOKEN secret is missing — add it in Settings → Secrets and variables → Actions"
+            exit 1
+          fi
+          if [ -z "$FIREBASE_SERVICE_ACCOUNT" ]; then
+            echo "::error::FIREBASE_SERVICE_ACCOUNT secret is missing — add the JSON blob from Firebase Console → Project Settings → Service accounts"
+            exit 1
+          fi
+          python scripts/send_price_alerts.py

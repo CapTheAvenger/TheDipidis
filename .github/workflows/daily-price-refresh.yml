@@ -35,6 +35,11 @@ on:
     # enough headroom that the JSON CDN has settled.
     - cron: '0 8 * * *'
   workflow_dispatch:
+    inputs:
+      force_no_snooze:
+        description: 'Bypass the 48 h per-card snooze (for verification runs)'
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -194,6 +199,7 @@ jobs:
         env:
           BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          FORCE_NO_SNOOZE: ${{ github.event.inputs.force_no_snooze || 'false' }}
         run: |
           if [ -z "$BOT_TOKEN" ]; then
             echo "::error::BOT_TOKEN secret is missing — add it in Settings → Secrets and variables → Actions"

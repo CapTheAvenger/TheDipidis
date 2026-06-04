@@ -140,6 +140,8 @@ def build_user_alerts(
     user_doc: dict,
     price_index: Dict[str, dict],
     now_ms: int,
+    force_no_snooze: bool = False,
+    diag_label: str = "",
 ) -> Tuple[list, list, list, list]:
     """Return four lists:
 
@@ -155,12 +157,30 @@ def build_user_alerts(
     redundant when a single footer link per message points at the
     right tab anyway. Each line keeps its OWN Cardmarket link
     (different per card) but drops the in-page deep link.
+
+    Per-card diagnostic logging records why each candidate did or
+    didn't trigger; `force_no_snooze` lets the workflow_dispatch
+    operator bypass the 48 h cool-down for ad-hoc verification runs.
     """
     alerts = user_doc.get("priceAlerts", {}).get("telegram", {})
     threshold_pct = alerts.get("tradelistThresholdPct") or DEFAULT_TRADELIST_THRESHOLD_PCT
     last_notified = alerts.get("lastNotified") or {}
 
     snooze_cutoff = now_ms - SNOOZE_HOURS * 3600 * 1000
+    diag = {
+        "wishlist_total": 0,
+        "wishlist_no_max": 0,
+        "wishlist_no_price": 0,
+        "wishlist_above_target": 0,
+        "wishlist_snoozed": 0,
+        "wishlist_triggered": 0,
+        "tradelist_total": 0,
+        "tradelist_no_min": 0,
+        "tradelist_no_price": 0,
+        "tradelist_below_threshold": 0,
+        "tradelist_snoozed": 0,
+        "tradelist_triggered": 0,
+    }
 
     wishlist_lines: list = []
     wishlist_cards: list = []
@@ -171,17 +191,23 @@ def build_user_alerts(
     wishlist = user_doc.get("wishlist") or []
     max_prices = user_doc.get("wishlistMaxPrices") or {}
     for card_id in wishlist:
+        diag["wishlist_total"] += 1
         max_p = max_prices.get(card_id)
         if not (isinstance(max_p, (int, float)) and max_p > 0):
+            diag["wishlist_no_max"] += 1
             continue
         info = price_index.get(card_id)
         if not info:
+            diag["wishlist_no_price"] += 1
             continue
         cm = info.get("eur_low") or info.get("eur_price")
         if cm is None or cm > max_p:
+            diag["wishlist_above_target"] += 1
             continue
-        if (last_notified.get(card_id) or 0) > snooze_cutoff:
+        if not force_no_snooze and (last_notified.get(card_id) or 0) > snooze_cutoff:
+            diag["wishlist_snoozed"] += 1
             continue
+        diag["wishlist_triggered"] += 1
         cm_url = _cardmarket_link(info)
         cm_link = f" · 🛒 <a href=\"{cm_url}\">Cardmarket</a>" if cm_url else ""
         wishlist_lines.append(
@@ -194,26 +220,27 @@ def build_user_alerts(
     tradelist = user_doc.get("tradelist") or []
     min_prices = user_doc.get("tradelistMinPrices") or {}
     for card_id in tradelist:
+        diag["tradelist_total"] += 1
         min_p = min_prices.get(card_id)
         if not (isinstance(min_p, (int, float)) and min_p > 0):
+            diag["tradelist_no_min"] += 1
             continue
         info = price_index.get(card_id)
         if not info:
+            diag["tradelist_no_price"] += 1
             continue
         cm = info.get("eur_price") or info.get("eur_low")
         if cm is None:
+            diag["tradelist_no_price"] += 1
             continue
         threshold = min_p * (1 + threshold_pct / 100.0)
         if cm < threshold:
+            diag["tradelist_below_threshold"] += 1
             continue
-        if (last_notified.get(card_id) or 0) > snooze_cutoff:
+        if not force_no_snooze and (last_notified.get(card_id) or 0) > snooze_cutoff:
+            diag["tradelist_snoozed"] += 1
             continue
-        # Delta % stays out of the header — user feedback was that
-        # "+43 % über Markt" parsed visually as "my price is +43 %
-        # above market" (the opposite of the actual trigger). The
-        # raw numbers in the next line already make the under-pricing
-        # obvious — Markt 17,14 € · dein Preis 12,00 € reads
-        # unambiguously without an annotated %.
+        diag["tradelist_triggered"] += 1
         cm_url = _cardmarket_link(info)
         cm_link = f" · 💶 <a href=\"{cm_url}\">Cardmarket</a>" if cm_url else ""
         tradelist_lines.append(
@@ -221,6 +248,25 @@ def build_user_alerts(
             f"  Markt {_fmt_eur(cm)} · dein Preis {_fmt_eur(min_p)}{cm_link}"
         )
         tradelist_cards.append(card_id)
+
+    print(
+        f"  [{diag_label or 'user'}] wishlist: "
+        f"{diag['wishlist_total']} on list, "
+        f"{diag['wishlist_no_max']} no max set, "
+        f"{diag['wishlist_no_price']} no price data, "
+        f"{diag['wishlist_above_target']} above your target, "
+        f"{diag['wishlist_snoozed']} snoozed, "
+        f"{diag['wishlist_triggered']} → notify"
+    )
+    print(
+        f"  [{diag_label or 'user'}] tradelist: "
+        f"{diag['tradelist_total']} on list, "
+        f"{diag['tradelist_no_min']} no min set, "
+        f"{diag['tradelist_no_price']} no price data, "
+        f"{diag['tradelist_below_threshold']} below {threshold_pct:.0f} % over min, "
+        f"{diag['tradelist_snoozed']} snoozed, "
+        f"{diag['tradelist_triggered']} → notify"
+    )
 
     return wishlist_lines, wishlist_cards, tradelist_lines, tradelist_cards
 
@@ -240,6 +286,14 @@ def main() -> int:
     if not svc_account_json:
         print("✗ FIREBASE_SERVICE_ACCOUNT env var missing", file=sys.stderr)
         return 1
+
+    # workflow_dispatch input to bypass the 48 h per-card snooze for a
+    # one-off verification run. The GitHub Actions runner passes its
+    # boolean inputs as the strings 'true' / 'false', not real bools,
+    # hence the explicit comparison.
+    force_no_snooze = (os.environ.get("FORCE_NO_SNOOZE", "false").lower() == "true")
+    if force_no_snooze:
+        print("⚠ FORCE_NO_SNOOZE = true — 48 h cool-down bypassed for this run")
 
     here = os.path.dirname(os.path.abspath(__file__))
     project_root = os.path.dirname(here)
@@ -275,7 +329,9 @@ def main() -> int:
         users_processed += 1
 
         wl_lines, wl_cards, tl_lines, tl_cards = build_user_alerts(
-            user_doc, price_index, now_ms
+            user_doc, price_index, now_ms,
+            force_no_snooze=force_no_snooze,
+            diag_label=user_snap.id,
         )
         if not wl_lines and not tl_lines:
             continue

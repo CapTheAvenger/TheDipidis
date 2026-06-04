@@ -1104,6 +1104,190 @@
 .mockup-tier-row-arrow--down { color: #dc2626; background: rgba(239, 68, 68, 0.12); }
 .mockup-tier-row-arrow--flat { color: #64748b; background: rgba(100, 116, 139, 0.10); }
 
+/* ── Tier bracket deck-banner-cards (matches live City League) ────
+   The real .deck-banner-card on the City League page is a small
+   card with the archetype's card art masked to the right side
+   (60 % width, opacity 0.2, linear-gradient mask) and two stacked
+   "stat-badge" rows (Rank / Share) under the deck name. This
+   primitive mirrors that look so the tutorial mockup reads as a
+   screenshot of the live page, not a generic data table.
+   ───────────────────────────────────────────────────────────── */
+.mockup-tier-rows.is-banners {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    padding: 6px;
+    background: #f8fafc;
+}
+.mockup-deck-banner {
+    background: #fff;
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    border-radius: 8px;
+    position: relative;
+    overflow: hidden;
+    padding: 8px 10px 9px;
+    min-height: 70px;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+.mockup-deck-banner::before {
+    content: '';
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    width: 55%;
+    height: 130%;
+    background-size: cover;
+    background-position: top center;
+    background-image: var(--bg);
+    opacity: 0.2;
+    -webkit-mask-image: linear-gradient(to right, transparent 0%, black 60%);
+            mask-image: linear-gradient(to right, transparent 0%, black 60%);
+    z-index: 0;
+    pointer-events: none;
+}
+.mockup-deck-banner > * { position: relative; z-index: 1; }
+.mockup-deck-banner-name {
+    font-size: 0.74rem;
+    font-weight: 800;
+    color: #0f172a;
+    line-height: 1.15;
+    margin-bottom: 4px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.mockup-deck-banner-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    align-items: flex-start;
+    margin-top: auto;
+}
+.mockup-stat-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.6rem;
+    font-weight: 700;
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    color: #475569;
+}
+.mockup-stat-badge.is-rank {
+    background: #fff3e0;
+    color: #e65100;
+    border-color: rgba(230, 81, 0, 0.18);
+}
+.mockup-stat-badge .trend-up   { color: #16a34a; font-weight: 800; }
+.mockup-stat-badge .trend-down { color: #dc2626; font-weight: 800; }
+.mockup-stat-badge .trend-flat { color: #64748b; font-weight: 800; }
+
+/* ── Two-up Performance Improvers / Decliners side-by-side ─────── */
+.mockup-movers {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+}
+.mockup-movers-block {
+    border: 1px solid rgba(15, 23, 42, 0.10);
+    border-radius: 8px;
+    overflow: hidden;
+    background: #fff;
+}
+.mockup-movers-head {
+    padding: 5px 8px;
+    font-size: 0.62rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    color: #fff;
+}
+.mockup-movers-block.is-up   .mockup-movers-head { background: linear-gradient(90deg, #16a34a, #4ade80); }
+.mockup-movers-block.is-down .mockup-movers-head { background: linear-gradient(90deg, #dc2626, #f87171); }
+.mockup-movers-table {
+    display: grid;
+    grid-template-columns: 1fr 36px;
+    font-size: 0.62rem;
+}
+.mockup-movers-row {
+    display: contents;
+}
+.mockup-movers-row > span {
+    padding: 4px 8px;
+    border-top: 1px solid rgba(15, 23, 42, 0.05);
+}
+.mockup-movers-name {
+    font-weight: 700;
+    color: #0f172a;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.mockup-movers-delta {
+    text-align: right;
+    font-weight: 800;
+}
+.mockup-movers-row.is-up   .mockup-movers-delta { color: #16a34a; }
+.mockup-movers-row.is-down .mockup-movers-delta { color: #dc2626; }
+
+/* ── Two-up Overall vs Top-8 mini-tables ──────────────────────── */
+.mockup-vs-top8 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+}
+.mockup-vs-top8-block {
+    border: 1px solid rgba(15, 23, 42, 0.10);
+    border-radius: 8px;
+    overflow: hidden;
+    background: #fff;
+}
+.mockup-vs-top8-head {
+    padding: 5px 8px;
+    font-size: 0.62rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    color: #fff;
+    background: #1e293b;
+}
+.mockup-vs-top8-block.is-top8 .mockup-vs-top8-head {
+    background: linear-gradient(90deg, #b45309, #f59e0b);
+}
+.mockup-vs-top8-row {
+    display: grid;
+    grid-template-columns: 18px 1fr auto;
+    gap: 6px;
+    padding: 4px 8px;
+    font-size: 0.64rem;
+    border-top: 1px solid rgba(15, 23, 42, 0.05);
+    align-items: center;
+}
+.mockup-vs-top8-row:nth-child(odd) { background: rgba(241, 245, 249, 0.4); }
+.mockup-vs-top8-rank {
+    font-weight: 800;
+    color: #94a3b8;
+    text-align: right;
+    font-size: 0.6rem;
+}
+.mockup-vs-top8-name {
+    font-weight: 700;
+    color: #0f172a;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.mockup-vs-top8-value {
+    font-weight: 800;
+    color: var(--pokemon-blue, #3B4CCA);
+    text-align: right;
+    font-size: 0.66rem;
+}
+
 /* Comparison table — replaces the rank-Δ table screenshot. */
 .mockup-comparison {
     border-radius: 10px;

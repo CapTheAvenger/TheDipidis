@@ -1582,7 +1582,12 @@ async function addOwnedFromWishlist(cardId) {
   }
 }
 
-// Save max price user is willing to pay for a wishlist card
+// Save max price user is willing to pay for a wishlist card.
+// Also clears the per-card snooze marker so the next daily Telegram
+// run re-evaluates this card without the 48 h cool-down blocking it.
+// A price change is a new intent — if the user just bumped their max
+// from 5 € to 100 €, they want the next run to ping them about it
+// even if the bot pinged them about this same card two hours ago.
 async function saveWishlistMaxPrice(cardId, rawValue) {
   const user = auth.currentUser;
   if (!user) return;
@@ -1592,17 +1597,17 @@ async function saveWishlistMaxPrice(cardId, rawValue) {
   const val = parseFloat(cleaned);
 
   try {
+    const update = {
+      [`priceAlerts.telegram.lastNotified.${cardId}`]: firebase.firestore.FieldValue.delete(),
+    };
     if (!cleaned || isNaN(val) || val <= 0) {
-      // Clear the max price
-      await db.collection('users').doc(user.uid).update({
-        [`wishlistMaxPrices.${cardId}`]: firebase.firestore.FieldValue.delete()
-      });
+      update[`wishlistMaxPrices.${cardId}`] = firebase.firestore.FieldValue.delete();
+      await db.collection('users').doc(user.uid).update(update);
       if (window.userWishlistMaxPrices) window.userWishlistMaxPrices.delete(cardId);
     } else {
       const rounded = Math.round(val * 100) / 100;
-      await db.collection('users').doc(user.uid).update({
-        [`wishlistMaxPrices.${cardId}`]: rounded
-      });
+      update[`wishlistMaxPrices.${cardId}`] = rounded;
+      await db.collection('users').doc(user.uid).update(update);
       if (!window.userWishlistMaxPrices) window.userWishlistMaxPrices = new Map();
       window.userWishlistMaxPrices.set(cardId, rounded);
     }
@@ -5595,23 +5600,27 @@ function exportTradelistAsImage() {
   }
 }
 
-// Save min price for tradelist card
+// Save min price for tradelist card. Also clears the per-card
+// Telegram snooze marker so the next daily run re-evaluates the
+// card without the 48 h cool-down — same rationale as
+// saveWishlistMaxPrice above.
 async function saveTradelistMinPrice(cardId, rawValue) {
   const user = auth.currentUser;
   if (!user) return;
   const cleaned = rawValue.replace(',', '.').trim();
   const val = parseFloat(cleaned);
   try {
+    const update = {
+      [`priceAlerts.telegram.lastNotified.${cardId}`]: firebase.firestore.FieldValue.delete(),
+    };
     if (!cleaned || isNaN(val) || val <= 0) {
-      await db.collection('users').doc(user.uid).update({
-        [`tradelistMinPrices.${cardId}`]: firebase.firestore.FieldValue.delete()
-      });
+      update[`tradelistMinPrices.${cardId}`] = firebase.firestore.FieldValue.delete();
+      await db.collection('users').doc(user.uid).update(update);
       if (window.userTradelistMinPrices) window.userTradelistMinPrices.delete(cardId);
     } else {
       const rounded = Math.round(val * 100) / 100;
-      await db.collection('users').doc(user.uid).update({
-        [`tradelistMinPrices.${cardId}`]: rounded
-      });
+      update[`tradelistMinPrices.${cardId}`] = rounded;
+      await db.collection('users').doc(user.uid).update(update);
       if (!window.userTradelistMinPrices) window.userTradelistMinPrices = new Map();
       window.userTradelistMinPrices.set(cardId, rounded);
     }

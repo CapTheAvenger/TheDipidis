@@ -140,16 +140,32 @@ def build_user_alerts(
     user_doc: dict,
     price_index: Dict[str, dict],
     now_ms: int,
-) -> Tuple[list, dict]:
-    """Returns (alert_lines, updated_lastNotified_map)."""
+) -> Tuple[list, list, list, list]:
+    """Return four lists:
+
+      wishlist_lines  — formatted message rows (one per triggered card)
+      wishlist_cards  — card_ids that drove the wishlist_lines
+      tradelist_lines — formatted message rows
+      tradelist_cards — card_ids that drove the tradelist_lines
+
+    The Wishlist and Trade List streams are returned separately so the
+    caller can fire them as two distinct Telegram messages — user
+    feedback was that one mega-message mixing both streams was harder
+    to skim than two focused ones, and the per-card deep link was
+    redundant when a single footer link per message points at the
+    right tab anyway. Each line keeps its OWN Cardmarket link
+    (different per card) but drops the in-page deep link.
+    """
     alerts = user_doc.get("priceAlerts", {}).get("telegram", {})
     threshold_pct = alerts.get("tradelistThresholdPct") or DEFAULT_TRADELIST_THRESHOLD_PCT
     last_notified = alerts.get("lastNotified") or {}
 
     snooze_cutoff = now_ms - SNOOZE_HOURS * 3600 * 1000
-    updated: Dict[str, int] = {}
 
-    lines = []
+    wishlist_lines: list = []
+    wishlist_cards: list = []
+    tradelist_lines: list = []
+    tradelist_cards: list = []
 
     # ── Wishlist (cardmarket_low <= userMaxPrice) ──
     wishlist = user_doc.get("wishlist") or []
@@ -166,19 +182,13 @@ def build_user_alerts(
             continue
         if (last_notified.get(card_id) or 0) > snooze_cutoff:
             continue
-        url = _deep_link("wishlist", info["set"], info["number"])
         cm_url = _cardmarket_link(info)
-        cm_link_html = (
-            f"\n   🛒 <a href=\"{cm_url}\">Direkt auf Cardmarket kaufen</a>"
-            if cm_url else ""
+        cm_link = f" · 🛒 <a href=\"{cm_url}\">Cardmarket</a>" if cm_url else ""
+        wishlist_lines.append(
+            f"• <b>{info['name']}</b> ({info['set']} {info['number']})\n"
+            f"  Markt {_fmt_eur(cm)} · Ziel {_fmt_eur(max_p)}{cm_link}"
         )
-        lines.append(
-            f"🎯 <b>{info['name']}</b> ({info['set']} {info['number']})\n"
-            f"   Markt: {_fmt_eur(cm)} · dein Ziel: {_fmt_eur(max_p)}\n"
-            f"   → <a href=\"{url}\">In der Wishlist anschauen</a>"
-            f"{cm_link_html}"
-        )
-        updated[card_id] = now_ms
+        wishlist_cards.append(card_id)
 
     # ── Tradelist (cardmarket >= userMinPrice * (1 + pct/100)) ──
     tradelist = user_doc.get("tradelist") or []
@@ -199,22 +209,20 @@ def build_user_alerts(
         if (last_notified.get(card_id) or 0) > snooze_cutoff:
             continue
         delta_pct = (cm - min_p) / min_p * 100
-        url = _deep_link("tradelist", info["set"], info["number"])
         cm_url = _cardmarket_link(info)
-        cm_link_html = (
-            f"\n   💶 <a href=\"{cm_url}\">Marktpreise auf Cardmarket prüfen</a>"
-            if cm_url else ""
-        )
-        lines.append(
-            f"⚠ <b>{info['name']}</b> ({info['set']} {info['number']}) "
+        cm_link = f" · 💶 <a href=\"{cm_url}\">Cardmarket</a>" if cm_url else ""
+        tradelist_lines.append(
+            f"• <b>{info['name']}</b> ({info['set']} {info['number']}) "
             f"+{delta_pct:.0f} %\n"
-            f"   Markt: {_fmt_eur(cm)} · dein Preis: {_fmt_eur(min_p)}\n"
-            f"   → <a href=\"{url}\">Trade-Preis anpassen</a>"
-            f"{cm_link_html}"
+            f"  Markt {_fmt_eur(cm)} · dein Preis {_fmt_eur(min_p)}{cm_link}"
         )
-        updated[card_id] = now_ms
+        tradelist_cards.append(card_id)
 
-    return lines, updated
+    return wishlist_lines, wishlist_cards, tradelist_lines, tradelist_cards
+
+
+def _pluralize_cards(n: int) -> str:
+    return "1 Karte" if n == 1 else f"{n} Karten"
 
 
 # ── main loop ─────────────────────────────────────────────────────
@@ -247,7 +255,7 @@ def main() -> int:
 
     now_ms = int(time.time() * 1000)
     users_processed = 0
-    alerts_sent = 0
+    messages_sent = 0
 
     # We can't where() on a nested map field reliably with the admin
     # SDK if the index isn't deployed, so we scan all users and skip
@@ -262,15 +270,49 @@ def main() -> int:
             continue
         users_processed += 1
 
-        lines, last_notified_updates = build_user_alerts(user_doc, price_index, now_ms)
-        if not lines:
+        wl_lines, wl_cards, tl_lines, tl_cards = build_user_alerts(
+            user_doc, price_index, now_ms
+        )
+        if not wl_lines and not tl_lines:
             continue
 
-        body = "💸 <b>Preisalarme von TheDipidis</b>\n\n" + "\n\n".join(lines)
-        if send_telegram(bot_token, str(chat_id), body):
-            alerts_sent += 1
+        notified_card_ids: list = []
+
+        # ── Message 1: Wishlist hits ──
+        if wl_lines:
+            body = (
+                f"🎯 <b>Wishlist-Treffer</b> ({_pluralize_cards(len(wl_lines))})\n\n"
+                + "\n\n".join(wl_lines)
+                + f"\n\n→ <a href=\"{SITE_BASE_URL}/#wishlist\">In der Wishlist anschauen</a>"
+            )
+            if send_telegram(bot_token, str(chat_id), body):
+                messages_sent += 1
+                notified_card_ids.extend(wl_cards)
+                print(f"  ✓ wishlist message ({len(wl_lines)} cards) → user {user_snap.id}")
+            else:
+                print(f"  ✗ wishlist delivery failed for user {user_snap.id}")
+
+        # ── Message 2: Trade-list warnings ──
+        if tl_lines:
+            body = (
+                f"⚠ <b>Trade-List-Warnungen</b> ({_pluralize_cards(len(tl_lines))})\n\n"
+                + "\n\n".join(tl_lines)
+                + f"\n\n→ <a href=\"{SITE_BASE_URL}/#tradelist\">Trade-Preise anpassen</a>"
+            )
+            if send_telegram(bot_token, str(chat_id), body):
+                messages_sent += 1
+                notified_card_ids.extend(tl_cards)
+                print(f"  ✓ trade-list message ({len(tl_lines)} cards) → user {user_snap.id}")
+            else:
+                print(f"  ✗ trade-list delivery failed for user {user_snap.id}")
+
+        # Persist the snooze marks only for cards we actually pinged
+        # successfully. A failed message means tomorrow's run can
+        # retry the same cards without the 48 h cool-down blocking.
+        if notified_card_ids:
             merged_last = dict(telegram.get("lastNotified") or {})
-            merged_last.update(last_notified_updates)
+            for cid in notified_card_ids:
+                merged_last[cid] = now_ms
             db.collection("users").document(user_snap.id).set({
                 "priceAlerts": {
                     "telegram": {
@@ -278,11 +320,8 @@ def main() -> int:
                     },
                 },
             }, merge=True)
-            print(f"  ✓ sent {len(lines)} alert(s) to user {user_snap.id}")
-        else:
-            print(f"  ✗ telegram delivery failed for user {user_snap.id}")
 
-    print(f"\nDone. users_processed={users_processed} alerts_sent={alerts_sent}")
+    print(f"\nDone. users_processed={users_processed} messages_sent={messages_sent}")
     return 0
 
 

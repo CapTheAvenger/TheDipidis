@@ -2660,6 +2660,41 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 return 'https://images.weserv.nl/?url=' + encodeURIComponent(originalUrl);
             }
 
+            // Per-image timeout. Without one, a hanging fetch (the
+            // weserv.nl CORS proxy occasionally stalls on iOS standalone
+            // PWA — user reported the export sitting on "Creating
+            // image…" forever) blocks Promise.all indefinitely. 10 s is
+            // long enough for slow mobile networks; cards whose images
+            // didn't load get the "?" placeholder so the export still
+            // ships.
+            const IMAGE_LOAD_TIMEOUT_MS = 10000;
+            function _loadImageWithTimeout(src, useCrossOrigin) {
+                return new Promise((resolve) => {
+                    let settled = false;
+                    const image = new Image();
+                    if (useCrossOrigin) image.crossOrigin = 'anonymous';
+                    const timer = setTimeout(() => {
+                        if (settled) return;
+                        settled = true;
+                        console.warn('[ExportImage] image load timeout (' + IMAGE_LOAD_TIMEOUT_MS + 'ms): ' + src);
+                        resolve(null);
+                    }, IMAGE_LOAD_TIMEOUT_MS);
+                    image.onload = () => {
+                        if (settled) return;
+                        settled = true;
+                        clearTimeout(timer);
+                        resolve(image);
+                    };
+                    image.onerror = () => {
+                        if (settled) return;
+                        settled = true;
+                        clearTimeout(timer);
+                        resolve(null);
+                    };
+                    image.src = src;
+                });
+            }
+
             const imgPromises = Array.from(cards).map(async (cardEl) => {
                 const imgEl = cardEl.querySelector('img');
                 const src = imgEl ? (imgEl.currentSrc || imgEl.src) : '';
@@ -2672,27 +2707,24 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 const corsUrl = _toCorsUrl(src);
 
                 // Load image via CORS proxy
-                const corsImg = await new Promise(resolve => {
-                    const image = new Image();
-                    image.crossOrigin = 'anonymous';
-                    image.onload  = () => resolve(image);
-                    image.onerror = () => resolve(null);
-                    image.src = corsUrl;
-                });
+                const corsImg = await _loadImageWithTimeout(corsUrl, true);
                 if (corsImg) return corsImg;
 
-                // Fallback: fetch via proxy as blob
+                // Fallback: fetch via proxy as blob. Same timeout +
+                // settled guard so a stalled fetch can't keep the
+                // whole canvas build pinned.
                 try {
-                    const resp = await fetch(corsUrl, { mode: 'cors' }).catch(() => null);
+                    const fetchPromise = fetch(corsUrl, { mode: 'cors' }).catch(() => null);
+                    const resp = await Promise.race([
+                        fetchPromise,
+                        new Promise(r => setTimeout(() => r(null), IMAGE_LOAD_TIMEOUT_MS)),
+                    ]);
                     if (resp && resp.ok) {
                         const blob = await resp.blob();
                         const blobUrl = URL.createObjectURL(blob);
-                        return await new Promise(resolve => {
-                            const image = new Image();
-                            image.onload  = () => { URL.revokeObjectURL(blobUrl); resolve(image); };
-                            image.onerror = () => { URL.revokeObjectURL(blobUrl); resolve(null); };
-                            image.src = blobUrl;
-                        });
+                        const img = await _loadImageWithTimeout(blobUrl, false);
+                        URL.revokeObjectURL(blobUrl);
+                        if (img) return img;
                     }
                 } catch (_) { /* ignore */ }
 

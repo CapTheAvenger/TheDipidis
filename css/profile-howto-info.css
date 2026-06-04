@@ -1961,6 +1961,265 @@
     display: none;
 }
 
+/* ── Brought-Share / Top-8 / Archetype tables ─────────────────────
+   Reusable table primitive for the Current Meta Global hub view.
+   The same skeleton renders Brought Share (rank + deck + share %),
+   Top-8 Conversion (rank + deck + Top-8 %) and Archetype Overview
+   thumbs. Wider variant for the hero slot, narrower for thumbs.
+   ───────────────────────────────────────────────────────────── */
+.mockup-bs {
+    border: 1px solid rgba(15, 23, 42, 0.10);
+    border-radius: 10px;
+    overflow: hidden;
+    background: #fff;
+}
+.mockup-bs-head {
+    display: grid;
+    grid-template-columns: 28px 1fr auto auto;
+    gap: 8px;
+    background: #1e293b;
+    color: #cbd5e1;
+    padding: 6px 10px;
+    font-size: 0.62rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+.mockup-bs-head span:last-child { text-align: right; }
+.mockup-bs-row {
+    display: grid;
+    grid-template-columns: 28px 1fr auto auto;
+    gap: 8px;
+    padding: 7px 10px;
+    align-items: center;
+    font-size: 0.74rem;
+    border-top: 1px solid rgba(15, 23, 42, 0.05);
+}
+.mockup-bs-row:nth-child(even) { background: rgba(241, 245, 249, 0.45); }
+.mockup-bs-rank {
+    font-weight: 800;
+    color: #fff;
+    background: #475569;
+    border-radius: 5px;
+    text-align: center;
+    padding: 2px 0;
+    font-size: 0.66rem;
+}
+.mockup-bs-rank.is-t1 { background: linear-gradient(135deg, #d32f2f, #ef4444); }
+.mockup-bs-rank.is-t2 { background: linear-gradient(135deg, #f57c00, #fb923c); }
+.mockup-bs-rank.is-t3 { background: linear-gradient(135deg, #388e3c, #4ade80); }
+.mockup-bs-deck {
+    font-weight: 800;
+    color: #0f172a;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    min-width: 0;
+}
+.mockup-bs-deck small {
+    font-size: 0.58rem;
+    font-weight: 700;
+    color: #64748b;
+    letter-spacing: 0.04em;
+}
+.mockup-bs-share {
+    font-weight: 800;
+    color: var(--pokemon-blue, #3B4CCA);
+    text-align: right;
+    font-size: 0.74rem;
+    min-width: 48px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 1px;
+}
+.mockup-bs-share small {
+    font-size: 0.58rem;
+    font-weight: 800;
+    padding: 0 4px;
+    border-radius: 4px;
+}
+.mockup-bs-share small.up   { color: #16a34a; background: rgba(34, 197, 94, 0.12); }
+.mockup-bs-share small.down { color: #dc2626; background: rgba(239, 68, 68, 0.12); }
+.mockup-bs-count {
+    font-weight: 700;
+    color: #64748b;
+    text-align: right;
+    font-size: 0.66rem;
+    min-width: 36px;
+}
+.mockup-bs--compact .mockup-bs-head,
+.mockup-bs--compact .mockup-bs-row {
+    grid-template-columns: 24px 1fr auto;
+}
+.mockup-bs--compact .mockup-bs-count { display: none; }
+
+/* Format-legality stamp pill (e.g. TEF-CRI) */
+.mockup-legality {
+    font-size: 0.55rem;
+    font-weight: 800;
+    padding: 1px 5px;
+    border-radius: 3px;
+    background: rgba(59, 76, 202, 0.10);
+    color: var(--pokemon-blue, #3B4CCA);
+    letter-spacing: 0.04em;
+    display: inline-block;
+}
+
+/* Sample-size banner shown above the table */
+.mockup-bs-sample {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 7px 10px;
+    background: linear-gradient(90deg, rgba(34, 197, 94, 0.12), rgba(34, 197, 94, 0.02));
+    border: 1px solid rgba(34, 197, 94, 0.20);
+    border-radius: 8px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #475569;
+    gap: 8px;
+}
+.mockup-bs-sample b {
+    color: #16a34a;
+    font-weight: 800;
+    font-size: 0.82rem;
+}
+
+/* ── Format Staples list — card-tile rows with inclusion bar ──── */
+.mockup-staples {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.mockup-staple-row {
+    display: grid;
+    grid-template-columns: 24px 36px 1fr 52px;
+    gap: 8px;
+    align-items: center;
+    padding: 6px 8px;
+    background: #fff;
+    border: 1px solid rgba(15, 23, 42, 0.10);
+    border-radius: 8px;
+}
+.mockup-staple-rank {
+    font-weight: 800;
+    font-size: 0.64rem;
+    color: #64748b;
+    text-align: center;
+}
+.mockup-staple-img {
+    aspect-ratio: 2.5 / 3.5;
+    background-size: cover;
+    background-position: center top;
+    border-radius: 4px;
+    background-color: #1e293b;
+}
+.mockup-staple-info {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+}
+.mockup-staple-name {
+    font-size: 0.7rem;
+    font-weight: 800;
+    color: #0f172a;
+    line-height: 1.15;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.mockup-staple-set {
+    font-size: 0.58rem;
+    font-weight: 700;
+    color: #64748b;
+    letter-spacing: 0.04em;
+}
+.mockup-staple-bar {
+    height: 5px;
+    border-radius: 999px;
+    background: rgba(15, 23, 42, 0.08);
+    overflow: hidden;
+}
+.mockup-staple-bar > span {
+    display: block;
+    height: 100%;
+    background: linear-gradient(90deg, var(--pokemon-blue, #3B4CCA), #6366f1);
+    border-radius: inherit;
+}
+.mockup-staple-pct {
+    font-weight: 800;
+    color: var(--pokemon-blue, #3B4CCA);
+    text-align: right;
+    font-size: 0.72rem;
+}
+
+/* Cooking toggle pill — Quick Overview ↔ Cooking */
+.mockup-cooking-toggle {
+    display: inline-flex;
+    border: 1px solid rgba(15, 23, 42, 0.12);
+    border-radius: 999px;
+    background: #f1f5f9;
+    padding: 2px;
+    gap: 2px;
+}
+.mockup-cooking-toggle span {
+    padding: 4px 12px;
+    font-size: 0.66rem;
+    font-weight: 800;
+    border-radius: 999px;
+    color: #475569;
+    letter-spacing: 0.04em;
+}
+.mockup-cooking-toggle span.is-active {
+    background: linear-gradient(135deg, #ef4444, #f97316);
+    color: #fff;
+    box-shadow: 0 2px 6px rgba(239, 68, 68, 0.3);
+}
+
+/* Filter row used in Cooking entry banner */
+.mockup-cooking-filters {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    background: rgba(241, 245, 249, 0.6);
+    border-radius: 10px;
+    padding: 10px;
+}
+.mockup-cooking-filter {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #fff;
+    border: 1px solid rgba(15, 23, 42, 0.10);
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #0f172a;
+}
+.mockup-cooking-filter-value {
+    color: var(--pokemon-blue, #3B4CCA);
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+.mockup-cooking-active {
+    font-size: 0.66rem;
+    font-weight: 800;
+    color: #16a34a;
+    background: rgba(34, 197, 94, 0.12);
+    padding: 4px 10px;
+    border-radius: 999px;
+    align-self: flex-start;
+    letter-spacing: 0.04em;
+}
+
 /* Text-only banner — no image slot, content takes the full width.
    Used for orientation-heavy sections where bullets do the
    explaining better than a screenshot or a mockup. */

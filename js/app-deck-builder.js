@@ -2832,15 +2832,27 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 const fileName = `${safeName}_${new Date().toISOString().slice(0,10)}.png`;
                 const file = new File([blob], fileName, { type: 'image/png' });
 
-                // Mobile: native Share API → saves to photo library / WhatsApp etc.
-                if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                // Mobile: native Share API → opens the OS share sheet
+                // ("Save Image" → Photos, AirDrop, WhatsApp, …). We try
+                // navigator.share() any time it exists rather than gating
+                // on canShare({files: [file]}): on iOS standalone PWA the
+                // capability probe sometimes reports false even though
+                // share() with files actually works, and the result was
+                // that the user got the "Save as / Files / Drive" file-
+                // picker dialog instead of the share sheet (no way to
+                // land the image in Photos or WhatsApp). The try/catch
+                // catches the real "unsupported" rejection and falls
+                // through to the download path; AbortError on user
+                // cancel exits cleanly without a fallback download.
+                if (typeof navigator.share === 'function') {
                     try {
                         await navigator.share({ files: [file], title: title || 'Deck' });
                         showToast(getLang() === 'de' ? 'Bild geteilt!' : 'Image shared!', 'success');
                         return;
                     } catch (e) {
                         if (e.name === 'AbortError') return; // User cancelled
-                        // Share failed — fall through to download
+                        console.warn('[ExportImage] navigator.share failed, falling back to download:', e && e.message);
+                        // fall through to download
                     }
                 }
 

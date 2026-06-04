@@ -1895,45 +1895,78 @@
     font-size: 0.68rem;
 }
 .mockup-deckgrid-info {
-    padding: 5px 7px 6px;
+    padding: 5px 6px 6px;
     display: flex;
     flex-direction: column;
-    gap: 1px;
-    font-size: 0.65rem;
+    gap: 2px;
+    font-size: 0.62rem;
     background: #fff;
+    text-align: center;
+    border-top: 1px solid #f0f0f0;
 }
 .mockup-deckgrid-info .name {
     font-weight: 800;
-    color: #0f172a;
+    color: #333;
     font-size: 0.72rem;
     line-height: 1.15;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
-.mockup-deckgrid-info .set {
+.mockup-deckgrid-info .set-stats {
+    display: flex;
+    justify-content: center;
+    align-items: baseline;
+    gap: 6px;
+    color: #333;
+    font-weight: 600;
+}
+.mockup-deckgrid-info .set-stats .set {
     color: #64748b;
     font-weight: 700;
-    font-size: 0.6rem;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.02em;
 }
-.mockup-deckgrid-info .pct {
-    color: #16a34a;
-    font-weight: 800;
-}
-.mockup-deckgrid-info .pct.is-mid  { color: #b45309; }
-.mockup-deckgrid-info .pct.is-low  { color: #64748b; }
-.mockup-deckgrid-info .price {
+.mockup-deckgrid-info .set-stats .pct {
     color: var(--pokemon-blue, #3B4CCA);
     font-weight: 800;
-    font-size: 0.66rem;
 }
-.mockup-deckgrid-info-row {
+.mockup-deckgrid-info .set-stats .pct.is-mid  { color: #b45309; }
+.mockup-deckgrid-info .set-stats .pct.is-low  { color: #64748b; }
+.mockup-deckgrid-info .avg,
+.mockup-deckgrid-info .deck-stats {
+    color: #475569;
+    font-weight: 600;
+    font-size: 0.6rem;
+}
+.mockup-deckgrid-actions {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 4px;
+    gap: 2px;
+    margin-top: 3px;
 }
+.mockup-deckgrid-actions + .mockup-deckgrid-actions { margin-top: 2px; }
+.mockup-deckgrid-actions .btn {
+    flex: 1;
+    min-width: 0;
+    text-align: center;
+    height: 17px;
+    line-height: 17px;
+    font-size: 0.56rem;
+    font-weight: 800;
+    border-radius: 3px;
+    background: #f1f5f9;
+    color: #475569;
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    letter-spacing: 0.02em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.mockup-deckgrid-actions .btn.is-remove { background: #fee2e2; color: #dc2626; border-color: rgba(220, 38, 38, 0.18); }
+.mockup-deckgrid-actions .btn.is-add    { background: #dcfce7; color: #16a34a; border-color: rgba(22, 163, 74, 0.18); }
+.mockup-deckgrid-actions .btn.is-rarity { background: #fef3c7; color: #b45309; border-color: rgba(245, 158, 11, 0.22); }
+.mockup-deckgrid-actions .btn.is-l      { background: #e0e7ff; color: var(--pokemon-blue, #3B4CCA); border-color: rgba(59, 76, 202, 0.18); }
+.mockup-deckgrid-actions .btn.is-p      { background: #ffedd5; color: #ea580c; border-color: rgba(234, 88, 12, 0.22); }
+.mockup-deckgrid-actions .btn.is-price  { background: #ccfbf1; color: #0d9488; border-color: rgba(13, 148, 136, 0.22); flex: 2; }
 .mockup-deckgrid-rare-pill {
     display: flex;
     align-items: center;

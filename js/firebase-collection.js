@@ -1329,6 +1329,26 @@ window.buildWishlistTargetPill = buildWishlistTargetPill;
 window.buildTradelistUnderpricedPill = buildTradelistUnderpricedPill;
 window.TRADELIST_NOTIFY_THRESHOLD_PCT = TRADELIST_NOTIFY_THRESHOLD_PCT;
 
+// Select-all-on-focus for the Wishlist/Trade-List price inputs. On
+// iOS the focus handler fires BEFORE the tap-driven cursor placement,
+// so calling input.select() inline gets immediately undone. Deferring
+// to a microtask via setTimeout(0) lets the tap-cursor settle, then
+// the explicit setSelectionRange covers the cases (Safari + standalone
+// PWA) where plain .select() still gets ignored. Side effect: tapping
+// an already-focused field re-selects all — also what the user wants.
+function selectPriceInput(el) {
+  if (!el) return;
+  setTimeout(() => {
+    try {
+      el.select();
+      if (typeof el.setSelectionRange === 'function') {
+        el.setSelectionRange(0, (el.value || '').length);
+      }
+    } catch (_) { /* iOS sometimes throws on type=text quirks */ }
+  }, 0);
+}
+window.selectPriceInput = selectPriceInput;
+
 // Update wishlist UI
 function updateWishlistUI(searchFilter = '', setFilter = '') {
   const wishlistGrid = document.getElementById('wishlist-grid');
@@ -1454,7 +1474,7 @@ function updateWishlistUI(searchFilter = '', setFilter = '') {
               <input type="text" inputmode="decimal" value="${maxPriceVal}" placeholder="—"
                 aria-label="Maximum price for ${safeNameHtml}"
                 style="width: 52px; padding: 2px 4px; border: 1.5px solid #ddd; border-radius: 4px; font-size: 0.75em; font-weight: 600; color: #8e44ad; text-align: right; outline: none;"
-                onfocus="this.style.borderColor='#8e44ad'" onblur="this.style.borderColor='#ddd'; saveWishlistMaxPrice('${safeCardIdJs}', this.value)"
+                onfocus="this.style.borderColor='#8e44ad'; selectPriceInput(this)" onblur="this.style.borderColor='#ddd'; saveWishlistMaxPrice('${safeCardIdJs}', this.value)"
                 onkeydown="if(event.key==='Enter'){this.blur();}">
               <span style="font-size: 0.72em; color: #8e44ad; font-weight: 600;">€</span>
             </div>
@@ -5499,7 +5519,7 @@ function updateTradelistUI(searchFilter = '', setFilter = '') {
               <input type="text" inputmode="decimal" value="${minPriceVal}" placeholder="\u2014"
                 aria-label="Minimum price for ${safeNameHtml}"
                 style="width: 52px; padding: 2px 4px; border: 1.5px solid #ddd; border-radius: 4px; font-size: 0.75em; font-weight: 600; color: #16a085; text-align: right; outline: none;"
-                onfocus="this.style.borderColor='#16a085'" onblur="this.style.borderColor='#ddd'; saveTradelistMinPrice('${safeCardIdJs}', this.value)"
+                onfocus="this.style.borderColor='#16a085'; selectPriceInput(this)" onblur="this.style.borderColor='#ddd'; saveTradelistMinPrice('${safeCardIdJs}', this.value)"
                 onkeydown="if(event.key==='Enter'){this.blur();}">
               <span style="font-size: 0.72em; color: #16a085; font-weight: 600;">\u20ac</span>
             </div>

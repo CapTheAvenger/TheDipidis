@@ -1614,6 +1614,16 @@ const translations = {
     'profile.nameNote':         'This name will be displayed in your profile',
     'profile.signOut':          'Sign Out',
 
+    // ── Telegram Price Alerts (Settings sub-section) ─────────
+    'profile.priceAlerts.title':          'Telegram price alerts',
+    'profile.priceAlerts.intro':          'Get a Telegram message when the market price of a wishlist card drops to or below your maximum — or when the market price of a trade-list card climbs above your minimum. Stay current without opening the page.',
+    'profile.priceAlerts.toggle':         'Enable Telegram price alerts',
+    'profile.priceAlerts.chatIdLabel':    'Telegram chat ID',
+    'profile.priceAlerts.chatIdHelp':     'Send <code>/myid</code> to <a href="https://t.me/TheDipidisBot" target="_blank" rel="noopener">@TheDipidisBot</a> and paste the number here.',
+    'profile.priceAlerts.thresholdLabel': 'Trade-list threshold',
+    'profile.priceAlerts.thresholdHelp':  'above your minimum price triggers an alert',
+    'profile.priceAlerts.save':           'Save',
+
     // ── Deck Compare Modal ───────────────────────────────────
     'compare.heading':          'Deck Compare',
     'compare.option1':          'Option 1: Compare with Manual Decklist',
@@ -3299,6 +3309,16 @@ const translations = {
     'profile.namePlaceholder':  'Deinen Namen eingeben',
     'profile.nameNote':         'Dieser Name wird in deinem Profil angezeigt',
     'profile.signOut':          'Abmelden',
+
+    // ── Telegram Preisalarme (Einstellungen Unter-Sektion) ───
+    'profile.priceAlerts.title':          'Telegram-Preisalarme',
+    'profile.priceAlerts.intro':          'Bekomme eine Telegram-Nachricht, wenn der Marktpreis einer Wishlist-Karte auf oder unter deinen Maximalwert sinkt — oder wenn der Marktpreis einer Trade-Karte über deinem Mindestpreis liegt. So bist du immer auf dem aktuellen Stand.',
+    'profile.priceAlerts.toggle':         'Telegram-Preisalarme aktivieren',
+    'profile.priceAlerts.chatIdLabel':    'Telegram-Chat-ID',
+    'profile.priceAlerts.chatIdHelp':     'Sende <code>/myid</code> an <a href="https://t.me/TheDipidisBot" target="_blank" rel="noopener">@TheDipidisBot</a> und füg die Zahl hier ein.',
+    'profile.priceAlerts.thresholdLabel': 'Trade-List-Schwelle',
+    'profile.priceAlerts.thresholdHelp':  'über deinem Mindestpreis löst Alert aus',
+    'profile.priceAlerts.save':           'Speichern',
 
     // ── Deck-Vergleich Modal ─────────────────────────────────
     'compare.heading':          'Deck-Vergleich',

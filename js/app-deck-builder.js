@@ -2773,23 +2773,45 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                     ctx.textBaseline = 'alphabetic';
                 }
 
-                // Max price badge (bottom-left, for wishlist cards)
+                // Soft-budget price strip (bottom-left). Used by both
+                // wishlist (data-max-price, purple) and tradelist
+                // (data-min-price, teal). Label reads "ca …" (circa)
+                // because the export usually lands in WhatsApp /
+                // Telegram where leaving negotiation room matters —
+                // matches the in-app modal change shipped in PR #252.
+                //
+                // Font was 12 px on a 245 px-wide card (~5 % of card
+                // width), which got squashed below legibility once
+                // the export was resized down for chat sharing —
+                // exactly what the user reported (Wishlist screenshot
+                // with unreadable price strips on iOS). Bumped to 26 px
+                // bold so it has roughly the same visual weight as
+                // the quantity badge and stays readable after a
+                // 50 %-ish downsize in a Telegram chat preview.
+                const PRICE_FONT      = 'bold 26px sans-serif';
+                const PRICE_STRIP_H   = 34;
+                const PRICE_STRIP_PAD = 6;
                 const maxPriceAttr = cardEl.dataset.maxPrice;
-                if (maxPriceAttr) {
-                    const pText = 'max ' + parseFloat(maxPriceAttr).toFixed(2).replace('.', ',') + '€';
-                    ctx.font = 'bold 12px sans-serif';
-                    const tw = ctx.measureText(pText).width + 10;
-                    const ph = 18;
+                const minPriceAttr = cardEl.dataset.minPrice;
+                if (maxPriceAttr || minPriceAttr) {
+                    const isWishlist = !!maxPriceAttr;
+                    const value = isWishlist ? maxPriceAttr : minPriceAttr;
+                    const pText = 'ca ' + parseFloat(value).toFixed(2).replace('.', ',') + ' €';
+                    ctx.font = PRICE_FONT;
+                    const tw = ctx.measureText(pText).width + PRICE_STRIP_PAD * 2;
+                    const ph = PRICE_STRIP_H;
                     const px = x + 4;
                     const py = y + CARD_H - ph - 4;
-                    ctx.fillStyle = 'rgba(142,68,173,0.9)';
+                    ctx.fillStyle = isWishlist
+                        ? 'rgba(142,68,173,0.9)'   // wishlist purple
+                        : 'rgba(22,160,133,0.9)';  // tradelist teal
                     ctx.beginPath();
-                    ctx.roundRect(px, py, tw, ph, 4);
+                    ctx.roundRect(px, py, tw, ph, 6);
                     ctx.fill();
                     ctx.fillStyle = '#fff';
                     ctx.textBaseline = 'middle';
                     ctx.textAlign = 'left';
-                    ctx.fillText(pText, px + 5, py + ph / 2);
+                    ctx.fillText(pText, px + PRICE_STRIP_PAD, py + ph / 2);
                     ctx.textBaseline = 'alphabetic';
                 }
             });

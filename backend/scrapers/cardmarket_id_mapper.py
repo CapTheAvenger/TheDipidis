@@ -275,46 +275,88 @@ def map_cards_to_products(cards: list, singles: list, set_to_exp: dict,
         # Group our cards by card number ascending.
         group_sorted = sorted(group, key=lambda c: card_number_sort_key(c['number']))
 
-        # Two-step hybrid resolution:
+        # Three-step variant resolution:
         #
-        # Step 1 — narrow the candidate pool.
-        # Cardmarket products for a single Pokemon name in a set can
-        # exceed what our DB knows about (e.g. SVP "Charmander" has 3
-        # Cardmarket products — Heat Tackle standard + Heat Tackle
-        # YEEUR full-art + a 151-set Ember promo — but Limitless only
-        # catalogues 2). Pick the N lowest idProduct candidates: these
-        # were created at set release (the "official checklist"), with
-        # later reprints and alt-collection cross-listings getting
-        # higher idProducts. This filters out the cross-listed variants
-        # that aren't really part of the set's checklist.
+        # Step 1 — group candidates by dateAdded.
+        # Cardmarket creates products in waves: announcement-day pre-
+        # release variants (Master Ball Pattern, Build & Battle promo),
+        # main set distribution wave, later reprints + cross-listed
+        # collections. The MAIN DISTRIBUTION WAVE is what Limitless
+        # catalogues. The 151 set example: Bulbasaur has 4 products,
+        # 3 dates — 2023-06-29 (Master Ball, 1 product, very expensive),
+        # 2023-09-22 (official set release, 2 products: Common + IR),
+        # 2024-10-25 (later reprint, 1 product). Our DB has 2 cards
+        # (Common + IR) and the right ones to map are exactly the
+        # 2-product group from 2023-09-22.
         #
-        # Step 2 — assign cards to picked candidates by price rank.
-        # Within the chosen subset, sort by trend price ascending and
-        # pair to our cards sorted by number ascending. Card number
-        # correlates with rarity in modern sets (low = common, high =
-        # special print), and price correlates with rarity directly,
-        # so number-order ↔ price-order gives the right mapping
-        # regardless of idProduct chronology.
+        # Step 2 — pick the date group with the most candidates as the
+        # pool. Tiebreak by older date first (real set releases over
+        # newer reprints). Fall back to ALL candidates when no group
+        # has enough for our card count.
+        #
+        # Step 3 — within the pool, sort by trend price ascending. Pair
+        # to our cards (sorted by number ascending) positionally. Card
+        # number correlates with rarity (low = common, high = special),
+        # price correlates with rarity directly, so number-order ↔
+        # price-order gives the right rarity-to-product mapping.
         n_grp = len(group_sorted)
-        cand_by_idproduct = sorted(candidates, key=lambda p: p['idProduct'])
-        picked = cand_by_idproduct[:n_grp]
 
         def cand_sort_key(p):
-            # Priced candidates ranked by their trend price (ascending
-            # = cheapest first). Candidates with no usable price fall
-            # to the back, ordered by idProduct so the result stays
-            # deterministic across runs.
+            # Priced candidates ranked by their trend price ascending.
+            # Candidates with no usable price fall to the back, ordered
+            # by idProduct so the result stays deterministic across
+            # runs.
             v = candidate_price(p)
             return (1, p['idProduct']) if v is None else (0, v)
 
-        picked_by_price = sorted(picked, key=cand_sort_key)
-        match_method = f'priced({n_grp}↔{len(candidates)})'
+        # Bucket by dateAdded prefix (yyyy-mm-dd)
+        date_buckets = defaultdict(list)
+        for p in candidates:
+            date_key = (p.get('dateAdded') or '')[:10]
+            date_buckets[date_key].append(p)
+
+        # Largest bucket; tiebreak by oldest date
+        sorted_buckets = sorted(
+            date_buckets.values(),
+            key=lambda b: (-len(b), (b[0].get('dateAdded') or '')),
+        )
+        best_bucket = sorted_buckets[0] if sorted_buckets else []
+        if len(best_bucket) >= n_grp:
+            pool = best_bucket
+            tag = 'date'
+        else:
+            # No date group has enough candidates — fall back to all
+            # candidates (rare; happens when each variant was added in
+            # a separate wave).
+            pool = candidates
+            tag = 'all'
+
+        pool_sorted = sorted(pool, key=cand_sort_key)
+
+        # If the pool still has more candidates than our cards, spread
+        # picks across the price range so the lowest-numbered card
+        # matches the cheapest and the highest-numbered the most
+        # expensive. With one card we take the cheapest because our
+        # DB more often catalogues a Common than the rare variant it
+        # shares a name with.
+        if len(pool_sorted) > n_grp:
+            picked = []
+            for i in range(n_grp):
+                if n_grp <= 1:
+                    pos = 0
+                else:
+                    pos = round(i / (n_grp - 1) * (len(pool_sorted) - 1))
+                picked.append(pool_sorted[min(pos, len(pool_sorted) - 1)])
+        else:
+            picked = pool_sorted
+
+        match_method = f'priced-by-{tag}({n_grp}↔{len(candidates)})'
 
         for i, c in enumerate(group_sorted):
-            if i >= len(picked_by_price):
+            if i >= len(picked):
                 stats['ordered_skipped'] += 1
                 continue
-            chosen = picked_by_price[i]
+            chosen = picked[i]
             mappings.append({
                 'set': sc, 'number': c['number'],
                 'cardmarket_product_id': chosen['idProduct'],

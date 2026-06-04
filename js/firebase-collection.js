@@ -1501,9 +1501,13 @@ function openWishlistGridModal() {
     const safeImage = escapeHtml(card.image_url);
     const safeName = escapeHtml(card.name);
 
-    // Max price shown as semi-transparent overlay strip at bottom of card image
+    // Soft budget chip at bottom of the card image. Reads "ca" (circa)
+    // rather than "max" so the buyer leaves room for negotiation when
+    // they hand the screenshot to a seller via WhatsApp / Telegram —
+    // user feedback after the first export round. Matches the tradelist
+    // export's "ca …" chip styling.
     const maxPriceStrip = maxPrice > 0
-      ? `<div style="position:absolute;bottom:0;left:0;right:0;background:rgba(142,68,173,0.85);color:#fff;text-align:center;font-size:8px;font-weight:700;padding:2px 0;border-radius:0 0 5px 5px;white-space:nowrap;overflow:hidden;">max ${maxPrice.toFixed(2).replace('.',',')}€</div>`
+      ? `<div style="position:absolute;bottom:0;left:0;right:0;background:rgba(142,68,173,0.85);color:#fff;text-align:center;font-size:8px;font-weight:700;padding:2px 0;border-radius:0 0 5px 5px;white-space:nowrap;overflow:hidden;">ca ${maxPrice.toFixed(2).replace('.',',')} €</div>`
       : '';
 
     html += `<div class="compact-card" data-export-card${maxPrice > 0 ? ` data-max-price="${maxPrice.toFixed(2)}"` : ''}>

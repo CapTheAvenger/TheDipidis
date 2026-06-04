@@ -946,7 +946,7 @@ BKT,60,286306,unique,Gengar
 BKT,65,286311,unique,Misdreavus
 BKT,66,286312,unique,Mismagius
 BKT,67,286313,unique,Wobbuffet
-BKT,68,286346,priced-by-date(2↔2),Ralts
+BKT,68,286314,priced-by-date(2↔2),Ralts
 BKT,69,286315,unique,Kirlia
 BKT,70,286316,unique,Cresselia
 BKT,71,286317,unique,Woobat
@@ -978,7 +978,7 @@ BKT,96,286342,unique,Bronzong
 BKT,97,286343,unique,Mr. Mime
 BKT,98,286344,unique,Snubbull
 BKT,99,286345,unique,Granbull
-BKT,100,286314,priced-by-date(2↔2),Ralts
+BKT,100,286346,priced-by-date(2↔2),Ralts
 BKT,102,286348,unique,Floette
 BKT,103,286349,unique,Florges
 BKT,104,286350,unique,Florges BREAK
@@ -1205,8 +1205,8 @@ BLK,169,836243,priced-by-date(3↔3),Genesect ex
 BLK,170,836244,priced-by-date(3↔3),N's Plan
 BLK,171,836245,priced-by-date(2↔2),Victini
 BLK,172,836246,priced-by-date(4↔4),Zekrom ex
-BLW,1,279739,priced-by-date(2↔3),Snivy
-BLW,2,279740,priced-by-date(2↔3),Snivy
+BLW,1,279740,priced-by-date(2↔3),Snivy
+BLW,2,279739,priced-by-date(2↔3),Snivy
 BLW,3,279741,priced-by-date(2↔2),Servine
 BLW,4,279742,priced-by-date(2↔2),Servine
 BLW,5,279743,priced-by-date(2↔2),Serperior
@@ -1251,7 +1251,7 @@ BLW,43,279781,priced-by-date(2↔3),Zebstrika
 BLW,44,279783,priced-by-date(2↔2),Joltik
 BLW,45,279782,priced-by-date(2↔2),Joltik
 BLW,46,279784,unique,Galvantula
-BLW,47,279852,priced-by-date(2↔2),Zekrom
+BLW,47,279785,priced-by-date(2↔2),Zekrom
 BLW,48,279786,unique,Munna
 BLW,49,279787,unique,Musharna
 BLW,50,279788,unique,Woobat
@@ -1262,8 +1262,8 @@ BLW,54,279792,unique,Scolipede
 BLW,55,279793,unique,Solosis
 BLW,56,279794,unique,Duosion
 BLW,57,279795,unique,Reuniclus
-BLW,58,279797,priced-by-date(2↔2),Timburr
-BLW,59,279796,priced-by-date(2↔2),Timburr
+BLW,58,279796,priced-by-date(2↔2),Timburr
+BLW,59,279797,priced-by-date(2↔2),Timburr
 BLW,60,279798,unique,Gurdurr
 BLW,61,279799,unique,Throh
 BLW,62,279800,unique,Sawk
@@ -1318,7 +1318,7 @@ BLW,110,279848,priced-by-date(1↔3),Fighting Energy
 BLW,111,279849,priced-by-date(1↔3),Darkness Energy
 BLW,112,279850,priced-by-date(1↔3),Metal Energy
 BLW,113,279851,priced-by-date(2↔2),Reshiram
-BLW,114,279785,priced-by-date(2↔2),Zekrom
+BLW,114,279852,priced-by-date(2↔2),Zekrom
 BLW,115,279853,unique,Pikachu
 BRS,1,608425,unique,Exeggcute
 BRS,2,608426,unique,Exeggutor
@@ -2121,8 +2121,8 @@ BWP,26,279916,priced-by-date(3↔3),Axew
 BWP,27,279951,unique,Litwick
 BWP,28,279875,priced-by-date(2↔2),Tropical Beach
 BWP,29,279952,priced-by-date(3↔3),Victory Cup
-BWP,30,279947,priced-by-date(3↔3),Victory Cup
-BWP,31,279943,priced-by-date(3↔3),Victory Cup
+BWP,30,279943,priced-by-date(3↔3),Victory Cup
+BWP,31,279947,priced-by-date(3↔3),Victory Cup
 BWP,32,279936,priced-by-date(1↔2),Victini
 BWP,33,279935,unique,Riolu
 BWP,34,279934,unique,Luxio
@@ -2268,8 +2268,8 @@ CEC,94,408114,unique,Trevenant
 CEC,96,408124,priced-by-all(3↔3),Mimikyu
 CEC,97,408129,priced-by-all(3↔3),Mimikyu
 CEC,98,408134,unique,Dhelmise
-CEC,99,408139,priced-by-date(2↔3),Cosmog
-CEC,100,408144,priced-by-date(2↔3),Cosmog
+CEC,99,408144,priced-by-date(2↔3),Cosmog
+CEC,100,408139,priced-by-date(2↔3),Cosmog
 CEC,101,408149,priced-by-date(1↔2),Cosmoem
 CEC,102,408154,priced-by-date(1↔2),Lunala
 CEC,103,408159,unique,Marshadow
@@ -2642,8 +2642,8 @@ CG,53,277134,unique,Jigglypuff
 CG,54,277135,unique,Krabby
 CG,55,277136,unique,Lotad
 CG,56,277137,unique,Meditite
-CG,57,277139,priced-by-date(2↔2),Mudkip
-CG,58,277138,priced-by-date(2↔2),Mudkip
+CG,57,277138,priced-by-date(2↔2),Mudkip
+CG,58,277139,priced-by-date(2↔2),Mudkip
 CG,59,277140,unique,Numel
 CG,60,277141,unique,Seedot
 CG,61,277142,unique,Spearow
@@ -3360,8 +3360,8 @@ CRZ,39,691756,priced-by-date(2↔2),Shinx
 CRZ,40,691757,priced-by-date(2↔2),Shinx
 CRZ,41,691758,priced-by-date(2↔2),Luxio
 CRZ,42,691759,priced-by-date(2↔2),Luxio
-CRZ,43,691760,priced-by-date(2↔2),Luxray
-CRZ,44,691761,priced-by-date(2↔2),Luxray
+CRZ,43,691761,priced-by-date(2↔2),Luxray
+CRZ,44,691760,priced-by-date(2↔2),Luxray
 CRZ,45,691762,unique,Rotom V
 CRZ,46,691763,unique,Rotom VSTAR
 CRZ,47,691764,unique,Emolga
@@ -3575,7 +3575,7 @@ DAA,24,482994,unique,Blaziken
 DAA,25,482999,unique,Heatran
 DAA,26,483004,unique,Pansear
 DAA,27,483009,unique,Simisear
-DAA,28,483099,priced-by-date(2↔3),Galarian Darmanitan
+DAA,28,483014,priced-by-date(2↔3),Galarian Darmanitan
 DAA,29,483019,unique,Larvesta
 DAA,30,483024,unique,Volcarona
 DAA,31,483029,unique,Fletchinder
@@ -3591,7 +3591,7 @@ DAA,40,483079,unique,Relicanth
 DAA,41,483084,unique,Panpour
 DAA,42,483089,unique,Simipour
 DAA,43,483094,unique,Galarian Darumaka
-DAA,44,483014,priced-by-date(2↔3),Galarian Darmanitan
+DAA,44,483099,priced-by-date(2↔3),Galarian Darmanitan
 DAA,45,483104,unique,Vanillite
 DAA,46,483109,unique,Vanillish
 DAA,47,483114,unique,Vanilluxe
@@ -4311,8 +4311,8 @@ DRM,30,363502,unique,Phione
 DRM,31,363503,unique,Wishiwashi
 DRM,32,363504,unique,Trapinch
 DRM,33,363505,unique,Hydreigon
-DRM,34,363507,priced-by-date(2↔3),Dratini
-DRM,35,363506,priced-by-date(2↔3),Dratini
+DRM,34,363506,priced-by-date(2↔3),Dratini
+DRM,35,363507,priced-by-date(2↔3),Dratini
 DRM,36,363508,unique,Dragonair
 DRM,38,363509,unique,Vibrava
 DRM,39,363510,unique,Flygon
@@ -4411,8 +4411,8 @@ DRX,44,280483,priced-by-date(2↔2),Manectric
 DRX,45,280484,unique,Emolga
 DRX,47,280486,unique,Dustox
 DRX,48,280487,unique,Shedinja
-DRX,49,280489,priced-by-date(2↔2),Drifloon
-DRX,50,280488,priced-by-date(2↔2),Drifloon
+DRX,49,280488,priced-by-date(2↔2),Drifloon
+DRX,50,280489,priced-by-date(2↔2),Drifloon
 DRX,51,280490,unique,Drifblim
 DRX,52,280491,unique,Sigilyph
 DRX,53,280492,unique,Trubbish
@@ -4571,8 +4571,8 @@ DX,12,276415,unique,Mightyena
 DX,13,276416,unique,Ninjask
 DX,14,276417,unique,Shedinja
 DX,15,276418,unique,Slaking
-DX,16,276420,priced-by-date(3↔4),Deoxys
-DX,17,276421,priced-by-date(3↔4),Deoxys
+DX,16,276421,priced-by-date(3↔4),Deoxys
+DX,17,276420,priced-by-date(3↔4),Deoxys
 DX,18,276419,priced-by-date(3↔4),Deoxys
 DX,19,276413,priced-by-date(2↔2),Ludicolo
 DX,20,276423,priced-by-date(2↔2),Magcargo
@@ -4791,8 +4791,8 @@ E1,127,275002,unique,Qwilfish
 E1,128,275003,unique,Rattata
 E1,129,275004,unique,Shellder
 E1,130,275005,unique,Spearow
-E1,131,275006,priced-by-date(2↔2),Squirtle
-E1,132,275007,priced-by-date(2↔2),Squirtle
+E1,131,275007,priced-by-date(2↔2),Squirtle
+E1,132,275006,priced-by-date(2↔2),Squirtle
 E1,133,275008,unique,Tauros
 E1,134,275010,priced-by-date(2↔2),Totodile
 E1,135,275009,priced-by-date(2↔2),Totodile
@@ -4901,8 +4901,8 @@ E2,72,275145,unique,Cubone
 E2,73,275146,unique,Doduo
 E2,74,275147,priced-by-date(1↔2),Drowzee
 E2,75,275149,unique,Eevee
-E2,76,275151,priced-by-date(2↔2),Exeggcute
-E2,77,275150,priced-by-date(2↔2),Exeggcute
+E2,76,275150,priced-by-date(2↔2),Exeggcute
+E2,77,275151,priced-by-date(2↔2),Exeggcute
 E2,78,275152,unique,Goldeen
 E2,79,275153,unique,Grimer
 E2,80,275124,priced-by-date(2↔2),Growlithe
@@ -5089,8 +5089,8 @@ E3,79,275337,unique,Murkrow
 E3,80,275338,unique,Natu
 E3,83,275341,unique,Nidorina
 E3,84,275342,unique,Pikachu
-E3,85,275343,priced-by-date(2↔2),Pineco
-E3,86,275344,priced-by-date(2↔2),Pineco
+E3,85,275344,priced-by-date(2↔2),Pineco
+E3,86,275343,priced-by-date(2↔2),Pineco
 E3,87,275345,unique,Poliwag
 E3,88,275346,unique,Poliwhirl
 E3,89,275347,unique,Raticate
@@ -5225,8 +5225,8 @@ EM,43,276554,unique,Baltoy
 EM,44,276555,unique,Cacnea
 EM,45,276556,unique,Doduo
 EM,46,276557,unique,Duskull
-EM,47,276558,priced-by-date(2↔2),Electrike
-EM,48,276559,priced-by-date(2↔2),Electrike
+EM,47,276559,priced-by-date(2↔2),Electrike
+EM,48,276558,priced-by-date(2↔2),Electrike
 EM,49,276561,priced-by-date(2↔2),Feebas
 EM,50,276560,priced-by-date(2↔2),Feebas
 EM,51,276562,unique,Gulpin
@@ -5754,8 +5754,8 @@ FCO,40,290534,priced-by-date(2↔2),Larvitar
 FCO,41,290535,priced-by-date(2↔2),Larvitar
 FCO,42,289866,unique,Pupitar
 FCO,44,289880,priced-by-date(3↔3),Wormadam
-FCO,45,290536,priced-by-date(2↔2),Riolu
-FCO,46,290537,priced-by-date(2↔2),Riolu
+FCO,45,290537,priced-by-date(2↔2),Riolu
+FCO,46,290536,priced-by-date(2↔2),Riolu
 FCO,47,449723,priced-by-date(2↔6),Lucario
 FCO,48,289870,unique,Hawlucha
 FCO,49,289871,priced-by-all(2↔2),Carbink
@@ -5881,8 +5881,8 @@ FFI,65,281729,unique,Drapion
 FFI,66,281730,unique,Scraggy
 FFI,67,281731,unique,Scrafty
 FFI,68,281732,unique,Pangoro
-FFI,69,281733,priced-by-date(2↔2),Clefairy
-FFI,70,281734,priced-by-date(2↔2),Clefairy
+FFI,69,281734,priced-by-date(2↔2),Clefairy
+FFI,70,281733,priced-by-date(2↔2),Clefairy
 FFI,71,281735,unique,Clefable
 FFI,72,281736,unique,Sylveon
 FFI,73,281737,unique,Klefki
@@ -6032,8 +6032,8 @@ FLI,16,355536,unique,Braixen
 FLI,17,355537,unique,Delphox
 FLI,18,355538,unique,Litleo
 FLI,19,355539,unique,Pyroar
-FLI,21,355541,priced-by-date(2↔2),Froakie
-FLI,22,355542,priced-by-date(2↔2),Froakie
+FLI,21,355542,priced-by-date(2↔2),Froakie
+FLI,22,355541,priced-by-date(2↔2),Froakie
 FLI,23,355543,unique,Frogadier
 FLI,25,355544,unique,Clauncher
 FLI,26,355545,unique,Clawitzer
@@ -6855,7 +6855,7 @@ GRI,10,297474,unique,Victini
 GRI,11,297475,unique,Litwick
 GRI,12,297476,unique,Lampent
 GRI,13,297477,unique,Chandelure
-GRI,14,297517,priced-by-date(4↔11),Oricorio
+GRI,14,297508,priced-by-date(4↔11),Oricorio
 GRI,15,297479,unique,Salandit
 GRI,16,297480,unique,Salazzle
 GRI,17,297481,unique,Turtonator
@@ -6885,7 +6885,7 @@ GRI,41,297503,unique,Alolan Graveler
 GRI,42,297504,unique,Alolan Golem
 GRI,43,297505,unique,Helioptile
 GRI,44,297506,unique,Heliolisk
-GRI,46,297508,priced-by-date(4↔11),Oricorio
+GRI,46,297517,priced-by-date(4↔11),Oricorio
 GRI,48,297510,unique,Slowpoke
 GRI,49,297511,unique,Slowbro
 GRI,50,297512,unique,Trubbish
@@ -6894,8 +6894,8 @@ GRI,51a,368739,priced-by-date(2↔5),Garbodor
 GRI,52,297514,unique,Gothita
 GRI,53,297515,unique,Gothorita
 GRI,54,297516,unique,Gothitelle
-GRI,55,297478,priced-by-date(4↔11),Oricorio
-GRI,56,297518,priced-by-date(4↔11),Oricorio
+GRI,55,297518,priced-by-date(4↔11),Oricorio
+GRI,56,297478,priced-by-date(4↔11),Oricorio
 GRI,58,297520,unique,Mimikyu
 GRI,59,297521,unique,Dhelmise
 GRI,61,297522,unique,Lunala
@@ -6999,8 +6999,8 @@ HIF,21,394642,priced-by-date(2↔2),Voltorb
 HIF,22,396617,unique,Electrode
 HIF,23,396622,unique,Jolteon
 HIF,24,394747,unique,Zapdos
-HIF,25,394767,priced-by-date(2↔2),Ekans
-HIF,26,394722,priced-by-date(2↔2),Ekans
+HIF,25,394722,priced-by-date(2↔2),Ekans
+HIF,26,394767,priced-by-date(2↔2),Ekans
 HIF,27,381231,unique,Arbok
 HIF,28,394762,unique,Koffing
 HIF,29,381228,unique,Weezing
@@ -7982,7 +7982,7 @@ LOR,73,674084,priced-by-date(2↔2),Banette
 LOR,74,674086,unique,Cresselia
 LOR,75,674088,unique,Hisuian Zorua
 LOR,76,670814,priced-by-date(1↔4),Hisuian Zoroark
-LOR,77,674090,priced-by-date(2↔2),Inkay
+LOR,77,674134,priced-by-date(2↔2),Inkay
 LOR,78,674091,unique,Malamar
 LOR,79,674092,unique,Comfey
 LOR,80,674093,unique,Mimikyu
@@ -8026,7 +8026,7 @@ LOR,117,674130,priced-by-date(2↔2),Spiritomb
 LOR,118,674131,priced-by-date(2↔2),Drapion V
 LOR,119,674132,priced-by-date(2↔2),Drapion VSTAR
 LOR,120,674133,unique,Darkrai
-LOR,121,674134,priced-by-date(2↔2),Inkay
+LOR,121,674090,priced-by-date(2↔2),Inkay
 LOR,122,674135,unique,Hoopa
 LOR,123,674136,unique,Radiant Hisuian Sneasler
 LOR,124,674137,unique,Radiant Steelix
@@ -8524,8 +8524,8 @@ MA,54,276031,priced-by-date(2↔2),Team Aqua's Poochyena
 MA,55,276032,priced-by-date(2↔2),Team Aqua's Poochyena
 MA,56,276033,priced-by-date(2↔2),Team Aqua's Spheal
 MA,57,276034,priced-by-date(2↔2),Team Aqua's Spheal
-MA,58,276036,priced-by-date(2↔2),Team Magma's Aron
-MA,59,276035,priced-by-date(2↔2),Team Magma's Aron
+MA,58,276035,priced-by-date(2↔2),Team Magma's Aron
+MA,59,276036,priced-by-date(2↔2),Team Magma's Aron
 MA,60,276038,priced-by-date(3↔3),Team Magma's Baltoy
 MA,61,276009,priced-by-date(3↔3),Team Magma's Baltoy
 MA,62,276040,priced-by-date(3↔3),Team Magma's Houndour
@@ -8785,7 +8785,7 @@ MEG,188,851259,priced-by-all(4↔4),Mega Lucario ex
 MEP,1,851043,priced-by-date(1↔2),Meganium
 MEP,2,851045,priced-by-date(1↔2),Inteleon
 MEP,3,851055,priced-by-date(2↔4),Alakazam
-MEP,4,851049,priced-by-date(1↔2),Lunatone
+MEP,4,851050,priced-by-date(1↔2),Lunatone
 MEP,5,851051,unique,Drifloon
 MEP,6,851052,unique,Drifblim
 MEP,7,851053,unique,Psyduck
@@ -9678,8 +9678,8 @@ OBF,70,725150,unique,Thundurus
 OBF,71,725151,unique,Toxel
 OBF,72,725152,priced-by-date(1↔2),Toxtricity
 OBF,73,725153,unique,Pawmot ex
-OBF,74,725156,priced-by-date(3↔3),Tadbulb
-OBF,75,725154,priced-by-date(3↔3),Tadbulb
+OBF,74,725154,priced-by-date(3↔3),Tadbulb
+OBF,75,725156,priced-by-date(3↔3),Tadbulb
 OBF,76,725155,priced-by-date(3↔3),Tadbulb
 OBF,77,725157,priced-by-date(3↔3),Bellibolt
 OBF,78,725158,priced-by-date(3↔3),Bellibolt
@@ -10018,7 +10018,7 @@ PAF,107,751646,unique,Scovillain
 PAF,108,751647,unique,Rellor
 PAF,109,751648,priced-by-date(2↔3),Charmander
 PAF,110,751649,priced-by-date(2↔3),Charmeleon
-PAF,111,751659,priced-by-date(3↔3),Paldean Tauros
+PAF,111,751711,priced-by-date(3↔3),Paldean Tauros
 PAF,112,751651,unique,Entei
 PAF,113,751652,unique,Oricorio
 PAF,114,751653,priced-by-date(2↔2),Charcadet
@@ -10027,7 +10027,7 @@ PAF,116,751655,unique,Slowpoke
 PAF,117,751656,unique,Slowbro
 PAF,118,751657,unique,Staryu
 PAF,119,751658,unique,Starmie
-PAF,120,751711,priced-by-date(3↔3),Paldean Tauros
+PAF,120,751659,priced-by-date(3↔3),Paldean Tauros
 PAF,121,751660,unique,Wiglett
 PAF,122,751771,priced-by-date(2↔2),Wugtrio
 PAF,123,751662,unique,Finizen
@@ -10049,7 +10049,7 @@ PAF,138,751677,unique,Pachirisu
 PAF,139,751678,unique,Thundurus
 PAF,140,751679,unique,Toxel
 PAF,141,751680,unique,Toxtricity
-PAF,142,751681,priced-by-date(2↔2),Pawmi
+PAF,142,751773,priced-by-date(2↔2),Pawmi
 PAF,143,751682,unique,Pawmo
 PAF,144,751683,unique,Pawmot
 PAF,145,751684,unique,Wattrel
@@ -10133,7 +10133,7 @@ PAF,222,751769,unique,Wigglytuff ex
 PAF,223,751770,priced-by-date(2↔2),Squawkabilly ex
 PAF,224,751661,priced-by-date(2↔2),Wugtrio
 PAF,225,751663,priced-by-date(2↔2),Palafin
-PAF,226,751773,priced-by-date(2↔2),Pawmi
+PAF,226,751681,priced-by-date(2↔2),Pawmi
 PAF,227,751774,priced-by-date(3↔3),Clive
 PAF,228,751775,unique,Judge
 PAF,229,751776,priced-by-date(3↔3),Nemona
@@ -10212,7 +10212,7 @@ PAL,56,715531,unique,Veluza
 PAL,57,715533,priced-by-all(3↔4),Frigibax
 PAL,58,785461,priced-by-all(3↔4),Frigibax
 PAL,59,715534,priced-by-all(2↔2),Arctibax
-PAL,60,715535,priced-by-all(2↔4),Baxcalibur
+PAL,60,719852,priced-by-all(2↔4),Baxcalibur
 PAL,61,715536,priced-by-all(4↔6),Chien-Pao ex
 PAL,62,715537,priced-by-date(1↔2),Pikachu
 PAL,63,715538,priced-by-date(1↔2),Pikachu ex
@@ -10220,8 +10220,8 @@ PAL,64,715539,priced-by-date(2↔2),Raichu
 PAL,65,715540,unique,Magnemite
 PAL,66,715541,unique,Voltorb
 PAL,67,715542,unique,Electrode
-PAL,68,715543,priced-by-date(2↔2),Shinx
-PAL,69,715544,priced-by-date(2↔2),Shinx
+PAL,68,715544,priced-by-date(2↔2),Shinx
+PAL,69,715543,priced-by-date(2↔2),Shinx
 PAL,70,715545,unique,Luxio
 PAL,71,715546,priced-by-date(1↔2),Luxray
 PAL,72,715548,priced-by-date(2↔2),Pincurchin
@@ -10476,8 +10476,8 @@ PAR,43,740519,unique,Vanillite
 PAR,44,740521,priced-by-date(2↔3),Vanillish
 PAR,45,740525,priced-by-date(1↔2),Vanilluxe
 PAR,46,740526,priced-by-date(2↔2),Tsareena ex
-PAR,47,740527,priced-by-date(3↔3),Wimpod
-PAR,48,740530,priced-by-date(3↔3),Wimpod
+PAR,47,740530,priced-by-date(3↔3),Wimpod
+PAR,48,740527,priced-by-date(3↔3),Wimpod
 PAR,49,740532,priced-by-date(1↔2),Golisopod
 PAR,50,740535,priced-by-date(3↔3),Golisopod ex
 PAR,51,740539,priced-by-date(2↔2),Wiglett
@@ -10939,8 +10939,8 @@ PHF,22,281826,unique,Alomomola
 PHF,25,281829,unique,Pachirisu
 PHF,26,281830,unique,Joltik
 PHF,27,281831,priced-by-date(1↔2),Galvantula
-PHF,28,281833,priced-by-date(2↔2),Helioptile
-PHF,29,281834,priced-by-date(2↔2),Helioptile
+PHF,28,281834,priced-by-date(2↔2),Helioptile
+PHF,29,281833,priced-by-date(2↔2),Helioptile
 PHF,30,281835,priced-by-date(1↔2),Heliolisk
 PHF,31,281837,unique,Zubat
 PHF,32,281838,unique,Golbat
@@ -12382,8 +12382,8 @@ RS,32,275680,priced-by-date(2↔2),Grovyle
 RS,33,275656,priced-by-date(2↔2),Hariyama
 RS,34,275682,priced-by-date(2↔2),Kirlia
 RS,35,275683,priced-by-date(2↔2),Kirlia
-RS,36,275685,priced-by-date(2↔2),Lairon
-RS,37,275684,priced-by-date(2↔2),Lairon
+RS,36,275684,priced-by-date(2↔2),Lairon
+RS,37,275685,priced-by-date(2↔2),Lairon
 RS,38,275686,unique,Linoone
 RS,39,275657,priced-by-date(2↔2),Manectric
 RS,40,275689,priced-by-date(2↔2),Marshtomp
@@ -12402,15 +12402,15 @@ RS,52,275700,priced-by-date(3↔3),Electrike
 RS,53,275678,priced-by-date(3↔3),Electrike
 RS,54,275702,unique,Koffing
 RS,55,275703,unique,Goldeen
-RS,56,275705,priced-by-date(3↔3),Makuhita
-RS,57,275704,priced-by-date(3↔3),Makuhita
+RS,56,275704,priced-by-date(3↔3),Makuhita
+RS,57,275705,priced-by-date(3↔3),Makuhita
 RS,58,275706,priced-by-date(3↔3),Makuhita
 RS,59,275708,priced-by-date(2↔3),Mudkip
 RS,60,275707,priced-by-date(2↔3),Mudkip
 RS,61,275709,unique,Numel
 RS,62,275710,unique,Phanpy
-RS,63,275711,priced-by-date(3↔3),Poochyena
-RS,64,275713,priced-by-date(3↔3),Poochyena
+RS,63,275713,priced-by-date(3↔3),Poochyena
+RS,64,275711,priced-by-date(3↔3),Poochyena
 RS,65,275712,priced-by-date(3↔3),Poochyena
 RS,66,275715,priced-by-date(3↔3),Ralts
 RS,67,275716,priced-by-date(3↔3),Ralts
@@ -13096,7 +13096,7 @@ SIT,134,682181,unique,Zygarde
 SIT,135,682182,priced-by-date(3↔3),Regidrago V
 SIT,136,682183,priced-by-date(2↔2),Regidrago VSTAR
 SIT,137,682184,priced-by-date(2↔2),Smeargle
-SIT,138,682185,priced-by-date(3↔3),Lugia V
+SIT,138,682232,priced-by-date(3↔3),Lugia V
 SIT,139,682186,priced-by-date(3↔4),Lugia VSTAR
 SIT,140,682187,priced-by-date(2↔2),Ho-Oh V
 SIT,141,682188,unique,Spinda
@@ -13143,7 +13143,7 @@ SIT,181,682228,priced-by-date(3↔3),Skuntank V
 SIT,182,682229,priced-by-date(2↔2),Magearna V
 SIT,183,682230,priced-by-date(3↔3),Regidrago V
 SIT,184,682231,priced-by-date(3↔3),Regidrago V
-SIT,185,682232,priced-by-date(3↔3),Lugia V
+SIT,185,682185,priced-by-date(3↔3),Lugia V
 SIT,186,682234,priced-by-date(3↔3),Lugia V
 SIT,187,682235,priced-by-date(2↔2),Ho-Oh V
 SIT,188,682251,priced-by-date(3↔3),Brandon
@@ -13302,7 +13302,7 @@ SP,27,461674,unique,Noctowl
 SP,28,453308,priced-by-all(2↔4),Duraludon
 SP,29,453313,unique,Rayquaza
 SP,30,477159,priced-by-date(1↔2),Copperajah V
-SP,31,461679,priced-by-all(3↔4),Morpeko
+SP,31,427106,priced-by-all(3↔4),Morpeko
 SP,32,557976,priced-by-all(3↔3),Snorlax
 SP,33,491179,unique,Zacian
 SP,34,491184,unique,Zamazenta
@@ -13326,7 +13326,7 @@ SP,51,505895,unique,Lapras
 SP,52,665984,priced-by-all(2↔2),Gengar
 SP,53,505885,priced-by-all(2↔2),Machamp
 SP,54,453458,priced-by-all(2↔2),Coalossal
-SP,55,510175,priced-by-date(1↔2),Hatterene V
+SP,55,510180,priced-by-date(1↔2),Hatterene V
 SP,56,510185,unique,Morpeko V
 SP,57,510190,priced-by-date(1↔2),Grimmsnarl V
 SP,58,516314,unique,Alcremie
@@ -13354,7 +13354,7 @@ SP,81,540631,unique,Polteageist
 SP,82,540636,unique,Bunnelby
 SP,83,530487,priced-by-date(1↔2),Alakazam V
 SP,84,540641,priced-by-date(1↔2),Eldegoss V
-SP,85,608109,priced-by-date(2↔4),Boltund V
+SP,85,608110,priced-by-date(2↔4),Boltund V
 SP,86,540651,priced-by-date(1↔2),Cramorant V
 SP,87,540656,unique,Eevee VMAX
 SP,88,546936,unique,Cherrim
@@ -13425,8 +13425,8 @@ SP,155,572157,priced-by-date(4↔5),Greninja V-UNION
 SP,156,572156,priced-by-date(4↔5),Greninja V-UNION
 SP,157,572158,priced-by-date(4↔5),Greninja V-UNION
 SP,158,572155,priced-by-date(4↔5),Greninja V-UNION
-SP,159,572161,priced-by-date(4↔5),Mewtwo V-UNION
-SP,160,572162,priced-by-date(4↔5),Mewtwo V-UNION
+SP,159,572162,priced-by-date(4↔5),Mewtwo V-UNION
+SP,160,572161,priced-by-date(4↔5),Mewtwo V-UNION
 SP,161,572159,priced-by-date(4↔5),Mewtwo V-UNION
 SP,162,572160,priced-by-date(4↔5),Mewtwo V-UNION
 SP,163,572164,priced-by-date(4↔5),Zacian V-UNION
@@ -13479,11 +13479,11 @@ SP,211,659063,unique,Sylveon
 SP,212,491204,priced-by-all(7↔7),Eevee
 SP,213,606783,unique,Lucario V
 SP,214,606785,priced-by-date(2↔4),Lucario VSTAR
-SP,215,651356,priced-by-date(4↔10),Morpeko V-UNION
-SP,216,651355,priced-by-date(4↔10),Morpeko V-UNION
+SP,215,651355,priced-by-date(4↔10),Morpeko V-UNION
+SP,216,651356,priced-by-date(4↔10),Morpeko V-UNION
 SP,217,651354,priced-by-date(4↔10),Morpeko V-UNION
 SP,218,651357,priced-by-date(4↔10),Morpeko V-UNION
-SP,219,608110,priced-by-date(2↔4),Boltund V
+SP,219,608109,priced-by-date(2↔4),Boltund V
 SP,220,609466,unique,Rowlet
 SP,221,609467,unique,Cyndaquil
 SP,222,609468,unique,Oshawott
@@ -13695,7 +13695,7 @@ SSH,31,427161,priced-by-all(2↔2),Scorbunny
 SSH,32,436319,priced-by-date(2↔2),Raboot
 SSH,33,436324,priced-by-date(2↔2),Raboot
 SSH,34,427226,priced-by-all(3↔4),Cinderace
-SSH,35,450573,priced-by-all(3↔4),Cinderace
+SSH,35,436329,priced-by-all(3↔4),Cinderace
 SSH,36,436334,priced-by-all(3↔4),Cinderace
 SSH,37,436339,priced-by-date(2↔2),Sizzlipede
 SSH,38,436344,priced-by-date(2↔2),Sizzlipede
@@ -13705,8 +13705,8 @@ SSH,41,436359,unique,Cloyster
 SSH,42,436364,priced-by-date(2↔2),Krabby
 SSH,43,436369,priced-by-date(2↔2),Krabby
 SSH,44,436374,unique,Kingler
-SSH,45,436379,priced-by-date(2↔2),Goldeen
-SSH,46,436384,priced-by-date(2↔2),Goldeen
+SSH,45,436384,priced-by-date(2↔2),Goldeen
+SSH,46,436379,priced-by-date(2↔2),Goldeen
 SSH,47,436389,unique,Seaking
 SSH,48,436394,priced-by-date(1↔2),Lapras
 SSH,49,436399,priced-by-date(2↔2),Lapras V
@@ -13756,8 +13756,8 @@ SSH,92,436579,unique,Diglett
 SSH,93,436584,unique,Dugtrio
 SSH,94,436589,unique,Hitmonlee
 SSH,95,436594,unique,Hitmonchan
-SSH,96,436599,priced-by-date(2↔2),Rhyhorn
-SSH,97,436604,priced-by-date(2↔2),Rhyhorn
+SSH,96,436604,priced-by-date(2↔2),Rhyhorn
+SSH,97,436599,priced-by-date(2↔2),Rhyhorn
 SSH,98,436609,unique,Rhydon
 SSH,99,436614,unique,Rhyperior
 SSH,100,436619,unique,Sudowoodo
@@ -14426,15 +14426,15 @@ SVI,16,702312,priced-by-all(4↔4),Tarountula
 SVI,17,702313,priced-by-all(4↔4),Tarountula
 SVI,18,702314,priced-by-all(4↔4),Tarountula
 SVI,19,702315,priced-by-all(3↔3),Spidops ex
-SVI,20,702317,priced-by-date(2↔2),Smoliv
-SVI,21,702316,priced-by-date(2↔2),Smoliv
+SVI,20,702316,priced-by-date(2↔2),Smoliv
+SVI,21,702317,priced-by-date(2↔2),Smoliv
 SVI,22,702318,priced-by-all(2↔2),Dolliv
 SVI,23,702319,priced-by-date(1↔3),Arboliva
 SVI,24,702320,priced-by-all(3↔3),Toedscool
 SVI,25,702321,priced-by-all(3↔3),Toedscool
 SVI,26,702322,unique,Toedscruel
-SVI,27,702324,priced-by-date(2↔2),Capsakid
-SVI,28,702323,priced-by-date(2↔2),Capsakid
+SVI,27,702323,priced-by-date(2↔2),Capsakid
+SVI,28,702324,priced-by-date(2↔2),Capsakid
 SVI,29,702325,priced-by-all(2↔2),Scovillain
 SVI,30,702326,priced-by-date(2↔2),Growlithe
 SVI,31,702327,priced-by-date(2↔2),Growlithe
@@ -14546,8 +14546,8 @@ SVI,136,702430,priced-by-date(2↔2),Maschiff
 SVI,137,702432,priced-by-date(2↔2),Mabosstiff
 SVI,138,702433,priced-by-date(2↔2),Bombirdier
 SVI,139,702434,unique,Forretress
-SVI,140,702435,priced-by-date(2↔2),Varoom
-SVI,141,702436,priced-by-date(2↔2),Varoom
+SVI,140,702436,priced-by-date(2↔2),Varoom
+SVI,141,702435,priced-by-date(2↔2),Varoom
 SVI,142,702437,priced-by-date(1↔2),Revavroom
 SVI,143,702439,priced-by-date(3↔3),Iron Treads ex
 SVI,144,702440,unique,Chansey
@@ -14560,8 +14560,8 @@ SVI,150,702446,unique,Staraptor
 SVI,151,702447,priced-by-date(2↔2),Skwovet
 SVI,152,702448,unique,Greedent
 SVI,153,702449,priced-by-date(1↔2),Indeedee
-SVI,154,702450,priced-by-date(3↔9),Lechonk
-SVI,155,702452,priced-by-date(3↔9),Lechonk
+SVI,154,702452,priced-by-date(3↔9),Lechonk
+SVI,155,702450,priced-by-date(3↔9),Lechonk
 SVI,156,702451,priced-by-date(3↔9),Lechonk
 SVI,157,702453,unique,Oinkologne
 SVI,158,702454,priced-by-date(2↔3),Oinkologne ex
@@ -15107,8 +15107,8 @@ TEF,215,760835,priced-by-date(4↔4),Walking Wake ex
 TEF,216,760836,priced-by-date(4↔6),Iron Crown ex
 TEF,217,760837,priced-by-date(4↔4),Iron Boulder ex
 TEF,218,760838,priced-by-date(4↔6),Raging Bolt ex
-TEU,2,368935,priced-by-date(2↔2),Weedle
-TEU,3,368936,priced-by-date(2↔2),Weedle
+TEU,2,368936,priced-by-date(2↔2),Weedle
+TEU,3,368935,priced-by-date(2↔2),Weedle
 TEU,4,368937,unique,Kakuna
 TEU,5,368938,unique,Beedrill
 TEU,6,368939,unique,Paras
@@ -15590,7 +15590,7 @@ TWM,21,769195,priced-by-date(3↔3),Poltchageist
 TWM,22,769196,priced-by-date(1↔3),Sinistcha
 TWM,23,769197,priced-by-date(3↔3),Sinistcha ex
 TWM,24,771356,priced-by-date(1↔5),Teal Mask Ogerpon
-TWM,25,769364,priced-by-date(4↔4),Teal Mask Ogerpon ex
+TWM,25,769199,priced-by-date(4↔4),Teal Mask Ogerpon ex
 TWM,26,769200,unique,Vulpix
 TWM,27,769201,unique,Ninetales
 TWM,28,769202,unique,Slugma
@@ -15755,7 +15755,7 @@ TWM,186,769360,priced-by-date(2↔2),Tatsugiri
 TWM,187,769361,priced-by-date(2↔2),Chansey
 TWM,188,769362,priced-by-date(2↔2),Eevee
 TWM,189,769363,priced-by-date(3↔3),Sinistcha ex
-TWM,190,769199,priced-by-date(4↔4),Teal Mask Ogerpon ex
+TWM,190,769364,priced-by-date(4↔4),Teal Mask Ogerpon ex
 TWM,191,769365,priced-by-date(2↔2),Magcargo ex
 TWM,192,769366,priced-by-date(3↔5),Hearthflame Mask Ogerpon ex
 TWM,193,769367,priced-by-date(2↔2),Palafin ex
@@ -15838,8 +15838,8 @@ UD,43,279296,unique,Beldum
 UD,44,279297,unique,Combee
 UD,45,279298,unique,Doduo
 UD,46,279299,unique,Drifloon
-UD,47,279301,priced-by-date(2↔2),Eevee
-UD,48,279300,priced-by-date(2↔2),Eevee
+UD,47,279300,priced-by-date(2↔2),Eevee
+UD,48,279301,priced-by-date(2↔2),Eevee
 UD,49,279302,unique,Gligar
 UD,50,279303,unique,Grimer
 UD,51,279304,unique,Hitmonchan
@@ -15998,8 +15998,8 @@ UF,116,276762,unique,Rocket's Persian ex
 UF,117,276763,unique,Celebi ex
 UF,!,276630,priced-by-date(28↔28),Unown
 UF,?,276641,priced-by-date(28↔28),Unown
-UF,A,276626,priced-by-date(28↔28),Unown
-UF,B,276619,priced-by-date(28↔28),Unown
+UF,A,276619,priced-by-date(28↔28),Unown
+UF,B,276626,priced-by-date(28↔28),Unown
 UF,C,276634,priced-by-date(28↔28),Unown
 UF,D,276631,priced-by-date(28↔28),Unown
 UF,E,276621,priced-by-date(28↔28),Unown
@@ -16009,17 +16009,17 @@ UF,H,276629,priced-by-date(28↔28),Unown
 UF,I,276622,priced-by-date(28↔28),Unown
 UF,J,276644,priced-by-date(28↔28),Unown
 UF,K,276642,priced-by-date(28↔28),Unown
-UF,L,276625,priced-by-date(28↔28),Unown
-UF,M,276623,priced-by-date(28↔28),Unown
+UF,L,276627,priced-by-date(28↔28),Unown
+UF,M,276625,priced-by-date(28↔28),Unown
 UF,N,276624,priced-by-date(28↔28),Unown
-UF,O,276627,priced-by-date(28↔28),Unown
+UF,O,276623,priced-by-date(28↔28),Unown
 UF,P,276633,priced-by-date(28↔28),Unown
 UF,Q,276640,priced-by-date(28↔28),Unown
 UF,R,276643,priced-by-date(28↔28),Unown
 UF,S,276639,priced-by-date(28↔28),Unown
-UF,T,276636,priced-by-date(28↔28),Unown
-UF,U,276645,priced-by-date(28↔28),Unown
-UF,V,276632,priced-by-date(28↔28),Unown
+UF,T,276645,priced-by-date(28↔28),Unown
+UF,U,276632,priced-by-date(28↔28),Unown
+UF,V,276636,priced-by-date(28↔28),Unown
 UF,W,276628,priced-by-date(28↔28),Unown
 UF,X,276620,priced-by-date(28↔28),Unown
 UF,Y,276638,priced-by-date(28↔28),Unown
@@ -16142,8 +16142,8 @@ UNB,22,372314,unique,Arcanine
 UNB,23,372315,unique,Darumaka
 UNB,24,372316,unique,Darmanitan
 UNB,25,372317,unique,Volcanion
-UNB,26,372319,priced-by-date(2↔2),Litten
-UNB,27,372318,priced-by-date(2↔2),Litten
+UNB,26,372318,priced-by-date(2↔2),Litten
+UNB,27,372319,priced-by-date(2↔2),Litten
 UNB,28,372320,unique,Torracat
 UNB,29,372321,unique,Incineroar
 UNB,30,372322,unique,Salandit
@@ -17039,7 +17039,7 @@ WHT,173,836227,priced-by-date(4↔4),Reshiram ex
 WP,1,275423,priced-by-date(4↔4),Pikachu
 WP,2,275421,priced-by-date(2↔2),Electabuzz
 WP,3,275433,priced-by-date(3↔3),Mewtwo
-WP,4,275446,priced-by-date(4↔4),Pikachu
+WP,4,275420,priced-by-date(4↔4),Pikachu
 WP,5,275424,unique,Dragonite
 WP,6,275425,unique,Arcanine
 WP,7,275426,unique,Jigglypuff
@@ -17061,7 +17061,7 @@ WP,22,275441,priced-by-date(2↔2),Articuno
 WP,23,275442,unique,Zapdos
 WP,24,275443,unique,_____'s Pikachu
 WP,25,275444,unique,Flying Pikachu
-WP,26,275420,priced-by-date(4↔4),Pikachu
+WP,26,275446,priced-by-date(4↔4),Pikachu
 WP,27,275445,priced-by-date(4↔4),Pikachu
 WP,28,275447,unique,Surfing Pikachu
 WP,29,275448,unique,Marill

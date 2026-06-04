@@ -1473,7 +1473,7 @@ function updateWishlistUI(searchFilter = '', setFilter = '') {
               <span style="font-size: 0.72em; color: #8e44ad; font-weight: 600;">Max:</span>
               <input type="text" inputmode="decimal" value="${maxPriceVal}" placeholder="—"
                 aria-label="Maximum price for ${safeNameHtml}"
-                style="width: 52px; padding: 2px 4px; border: 1.5px solid #ddd; border-radius: 4px; font-size: 0.75em; font-weight: 600; color: #8e44ad; text-align: right; outline: none;"
+                style="width: 80px; min-width: 60px; padding: 4px 6px; border: 1.5px solid #ddd; border-radius: 5px; font-size: 0.85em; font-weight: 600; color: #8e44ad; text-align: right; outline: none; box-sizing: border-box;"
                 onfocus="this.style.borderColor='#8e44ad'; selectPriceInput(this)" onblur="this.style.borderColor='#ddd'; saveWishlistMaxPrice('${safeCardIdJs}', this.value)"
                 onkeydown="if(event.key==='Enter'){this.blur();}">
               <span style="font-size: 0.72em; color: #8e44ad; font-weight: 600;">€</span>
@@ -5523,7 +5523,7 @@ function updateTradelistUI(searchFilter = '', setFilter = '') {
               <span style="font-size: 0.72em; color: #16a085; font-weight: 600;">ca</span>
               <input type="text" inputmode="decimal" value="${minPriceVal}" placeholder="\u2014"
                 aria-label="Minimum price for ${safeNameHtml}"
-                style="width: 52px; padding: 2px 4px; border: 1.5px solid #ddd; border-radius: 4px; font-size: 0.75em; font-weight: 600; color: #16a085; text-align: right; outline: none;"
+                style="width: 80px; min-width: 60px; padding: 4px 6px; border: 1.5px solid #ddd; border-radius: 5px; font-size: 0.85em; font-weight: 600; color: #16a085; text-align: right; outline: none; box-sizing: border-box;"
                 onfocus="this.style.borderColor='#16a085'; selectPriceInput(this)" onblur="this.style.borderColor='#ddd'; saveTradelistMinPrice('${safeCardIdJs}', this.value)"
                 onkeydown="if(event.key==='Enter'){this.blur();}">
               <span style="font-size: 0.72em; color: #16a085; font-weight: 600;">\u20ac</span>

@@ -1158,6 +1158,375 @@
     .mockup-hub-tile .mockup-tile-desc  { font-size: 0.63rem; }
 }
 
+/* ── Wishlist / Trade List card-grid mockups ──────────────────────
+   Replaces the raw screenshots that previously sat in the Mein
+   Profil → Cards & Collection bullets. Three cards across, each
+   carrying the live Cardmarket pill + the user-input field + a
+   trigger pill — all the visual signal the actual app surfaces,
+   built from scratch so it renders cleanly on any background.
+   ───────────────────────────────────────────────────────────── */
+.mockup-wt-card-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+}
+.mockup-wt-card {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    background: #ffffff;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid rgba(15, 23, 42, 0.06);
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
+    min-width: 0;
+}
+.mockup-wt-card-art {
+    aspect-ratio: 5 / 7;
+    background-size: cover;
+    background-position: center;
+    position: relative;
+    background-color: #1e293b;
+}
+/* Per-card gradient stand-ins for the actual card art. */
+.mockup-wt-card-art.is-grass    { background-image: linear-gradient(135deg, #16a34a, #4ade80, #84cc16); }
+.mockup-wt-card-art.is-water    { background-image: linear-gradient(135deg, #1e40af, #2563eb, #0ea5e9); }
+.mockup-wt-card-art.is-fire     { background-image: linear-gradient(135deg, #b91c1c, #ef4444, #f59e0b); }
+.mockup-wt-card-art.is-bug      { background-image: linear-gradient(135deg, #4d7c0f, #a3e635, #fbbf24); }
+.mockup-wt-card-art.is-trainer  { background-image: linear-gradient(135deg, #b91c1c, #ef4444, #fde68a); }
+.mockup-wt-card-art.is-special  { background-image: linear-gradient(135deg, #7c3aed, #c026d3, #ec4899); }
+.mockup-wt-card-art.is-fairy    { background-image: linear-gradient(135deg, #db2777, #f472b6, #fce7f3); }
+.mockup-wt-card-art.is-psychic  { background-image: linear-gradient(135deg, #6d28d9, #a855f7, #c084fc); }
+.mockup-wt-card-art-qty {
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    background: #e67e22;
+    color: #fff;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: 800;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+.mockup-wt-card-art-qty.is-trade { background: #16a085; }
+.mockup-wt-card-art-actions {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    display: flex;
+    gap: 3px;
+}
+.mockup-wt-card-art-actions span {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #e67e22;
+    color: #fff;
+    font-size: 0.75rem;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+.mockup-wt-card-art-actions span.is-remove { background: #e74c3c; }
+.mockup-wt-card-art-actions span.is-trade  { background: #16a085; }
+.mockup-wt-card-body {
+    padding: 7px 7px 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+.mockup-wt-card-name {
+    font-size: 0.78rem;
+    font-weight: 800;
+    color: #0f172a;
+    line-height: 1.1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.mockup-wt-card-set {
+    font-size: 0.66rem;
+    color: #64748b;
+    line-height: 1.2;
+}
+.mockup-wt-card-owned {
+    font-size: 0.62rem;
+    color: #94a3b8;
+    line-height: 1.2;
+}
+.mockup-wt-card-live {
+    align-self: flex-start;
+    background: linear-gradient(135deg, #27ae60, #219a52);
+    color: #fff;
+    padding: 3px 9px;
+    border-radius: 6px;
+    font-size: 0.72rem;
+    font-weight: 800;
+    box-shadow: 0 1px 3px rgba(39, 174, 96, 0.25);
+    margin: 1px 0;
+}
+.mockup-wt-card-user {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin: 1px 0;
+}
+.mockup-wt-card-user-label {
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: #8e44ad;
+}
+.mockup-wt-card-user-input {
+    flex: 1;
+    min-width: 0;
+    padding: 2px 5px;
+    border: 1.2px solid #ddd;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #8e44ad;
+    text-align: right;
+    background: #fff;
+}
+.mockup-wt-card-user-suffix {
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: #8e44ad;
+}
+.mockup-wt-card-grid.is-tradelist .mockup-wt-card-user-label,
+.mockup-wt-card-grid.is-tradelist .mockup-wt-card-user-input,
+.mockup-wt-card-grid.is-tradelist .mockup-wt-card-user-suffix {
+    color: #16a085;
+}
+.mockup-wt-card-trigger {
+    margin-top: 4px;
+    padding: 5px 6px;
+    border-radius: 6px;
+    background: linear-gradient(135deg, #16a34a, #15803d);
+    color: #fff;
+    text-align: center;
+    font-size: 0.7rem;
+    font-weight: 800;
+    line-height: 1.1;
+    box-shadow: 0 1px 4px rgba(22, 163, 74, 0.30);
+}
+.mockup-wt-card-trigger.is-warn {
+    background: linear-gradient(135deg, #dc2626, #b91c1c);
+    box-shadow: 0 1px 4px rgba(220, 38, 38, 0.30);
+}
+
+/* ── Wishlist Overview (the "Save" PNG export) ────────────────
+   Compact landscape strip — the format you'd paste into a
+   WhatsApp chat. Mirrors what the canvas builder bakes in:
+   a row of card thumbnails with qty badges + a "ca …" price
+   strip on each.
+   ─────────────────────────────────────────────────────────── */
+.mockup-wt-export {
+    background: linear-gradient(135deg, #1a1a2e, #16213e);
+    border-radius: 12px;
+    padding: 14px 14px 12px;
+    box-shadow: 0 6px 18px rgba(15, 23, 42, 0.18);
+}
+.mockup-wt-export-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #fff;
+    margin-bottom: 10px;
+}
+.mockup-wt-export-title {
+    font-size: 0.92rem;
+    font-weight: 900;
+}
+.mockup-wt-export-count {
+    background: rgba(255, 255, 255, 0.15);
+    color: #fff;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 0.7rem;
+    font-weight: 700;
+}
+.mockup-wt-export-row {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 6px;
+}
+.mockup-wt-export-card {
+    aspect-ratio: 5 / 7;
+    border-radius: 5px;
+    overflow: hidden;
+    position: relative;
+    background-color: #2a2a3e;
+}
+.mockup-wt-export-card .mockup-wt-card-art {
+    height: 100%;
+    aspect-ratio: auto;
+}
+.mockup-wt-export-card .qty {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    background: #e74c3c;
+    color: #fff;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.66rem;
+    font-weight: 800;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+.mockup-wt-export-card .price-strip {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(142, 68, 173, 0.85);
+    color: #fff;
+    text-align: center;
+    font-size: 0.6rem;
+    font-weight: 800;
+    padding: 2px 0;
+}
+
+/* ── Settings form mockup ────────────────────────────────── */
+.mockup-form {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+.mockup-form-section {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.mockup-form-label {
+    font-size: 0.78rem;
+    font-weight: 800;
+    color: #0f172a;
+}
+.mockup-form-intro {
+    font-size: 0.74rem;
+    color: #64748b;
+    line-height: 1.5;
+}
+.mockup-form-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.mockup-form-checkbox {
+    width: 18px;
+    height: 18px;
+    border-radius: 4px;
+    background: var(--pokemon-blue, #3B4CCA);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: 900;
+}
+.mockup-form-input {
+    background: #fff;
+    border: 1px solid rgba(15, 23, 42, 0.18);
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 0.82rem;
+    color: #0f172a;
+    font-weight: 600;
+    min-width: 130px;
+}
+.mockup-form-input.is-narrow { min-width: 56px; }
+.mockup-form-help {
+    font-size: 0.7rem;
+    color: #64748b;
+    line-height: 1.5;
+}
+.mockup-form-help code {
+    background: rgba(15, 23, 42, 0.06);
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-size: 0.95em;
+}
+.mockup-form-help a { color: var(--pokemon-blue, #3B4CCA); font-weight: 700; }
+.mockup-form-save {
+    align-self: flex-start;
+    background: var(--pokemon-blue, #3B4CCA);
+    color: #fff;
+    padding: 8px 18px;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 800;
+    box-shadow: 0 2px 6px rgba(59, 76, 202, 0.20);
+}
+
+/* ── Telegram chat-bubble mockup ────────────────────────────
+   Stand-in for the bot screenshots — same dark-pattern
+   background + purple right bubbles / dark left bubbles so
+   the reader recognises it as Telegram without needing the
+   actual screenshot's chrome.
+   ─────────────────────────────────────────────────────────── */
+.mockup-tg {
+    background: linear-gradient(135deg, #18222d, #1f2c39);
+    border-radius: 14px;
+    padding: 14px 12px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    box-shadow: 0 6px 18px rgba(15, 23, 42, 0.16);
+    position: relative;
+}
+.mockup-tg-bubble {
+    max-width: 80%;
+    padding: 9px 12px;
+    border-radius: 12px;
+    font-size: 0.78rem;
+    line-height: 1.45;
+    color: #f8fafc;
+    word-wrap: break-word;
+}
+.mockup-tg-bubble.is-me {
+    align-self: flex-end;
+    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+    color: #fff;
+    border-bottom-right-radius: 4px;
+    font-weight: 700;
+}
+.mockup-tg-bubble.is-bot {
+    align-self: flex-start;
+    background: #2a3744;
+    border-bottom-left-radius: 4px;
+}
+.mockup-tg-bubble code {
+    background: rgba(255, 255, 255, 0.10);
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-size: 0.95em;
+}
+.mockup-tg-bubble b { font-weight: 800; }
+.mockup-tg-bubble a { color: #60a5fa; }
+.mockup-tg-bubble .alert-line {
+    margin: 6px 0 0;
+    line-height: 1.45;
+}
+.mockup-tg-bubble .alert-line:first-child { margin-top: 4px; }
+.mockup-tg-bubble .alert-footer {
+    display: block;
+    margin-top: 10px;
+    color: #60a5fa;
+    font-weight: 700;
+}
+
 /* Text-only banner — no image slot, content takes the full width.
    Used for orientation-heavy sections where bullets do the
    explaining better than a screenshot or a mockup. */

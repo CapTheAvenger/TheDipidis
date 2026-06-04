@@ -123,6 +123,19 @@ def _fmt_eur(v: Optional[float]) -> str:
     return f"{v:.2f}".replace(".", ",") + " €"
 
 
+def _cardmarket_link(info: dict) -> str:
+    """Build the Cardmarket product URL with our standard query string
+    (DE/EN sellers + Germany filter). Returns empty string when the
+    card has no Cardmarket mapping yet — the alert template skips
+    rendering the link in that case so we don't surface a broken
+    "Cardmarket öffnen" tap."""
+    raw = (info.get("cardmarket_url") or "").strip()
+    if not raw:
+        return ""
+    base = raw.split("?")[0]
+    return f"{base}?sellerCountry=7&language=1,3"
+
+
 def build_user_alerts(
     user_doc: dict,
     price_index: Dict[str, dict],
@@ -154,10 +167,16 @@ def build_user_alerts(
         if (last_notified.get(card_id) or 0) > snooze_cutoff:
             continue
         url = _deep_link("wishlist", info["set"], info["number"])
+        cm_url = _cardmarket_link(info)
+        cm_link_html = (
+            f"\n   🛒 <a href=\"{cm_url}\">Direkt auf Cardmarket kaufen</a>"
+            if cm_url else ""
+        )
         lines.append(
             f"🎯 <b>{info['name']}</b> ({info['set']} {info['number']})\n"
             f"   Markt: {_fmt_eur(cm)} · dein Ziel: {_fmt_eur(max_p)}\n"
             f"   → <a href=\"{url}\">In der Wishlist anschauen</a>"
+            f"{cm_link_html}"
         )
         updated[card_id] = now_ms
 
@@ -181,11 +200,17 @@ def build_user_alerts(
             continue
         delta_pct = (cm - min_p) / min_p * 100
         url = _deep_link("tradelist", info["set"], info["number"])
+        cm_url = _cardmarket_link(info)
+        cm_link_html = (
+            f"\n   💶 <a href=\"{cm_url}\">Marktpreise auf Cardmarket prüfen</a>"
+            if cm_url else ""
+        )
         lines.append(
             f"⚠ <b>{info['name']}</b> ({info['set']} {info['number']}) "
             f"+{delta_pct:.0f} %\n"
             f"   Markt: {_fmt_eur(cm)} · dein Preis: {_fmt_eur(min_p)}\n"
             f"   → <a href=\"{url}\">Trade-Preis anpassen</a>"
+            f"{cm_link_html}"
         )
         updated[card_id] = now_ms
 

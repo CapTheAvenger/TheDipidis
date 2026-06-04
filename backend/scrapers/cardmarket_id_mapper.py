@@ -182,8 +182,60 @@ def build_set_to_expansion(cards: list, singles: list, nonsingles: list):
     return set_to_exp, method, fallback_failed
 
 
-def map_cards_to_products(cards: list, singles: list, set_to_exp: dict):
-    """Returns list of mapping rows + stats."""
+def map_cards_to_products(cards: list, singles: list, set_to_exp: dict,
+                           price_guide: list):
+    """Returns list of mapping rows + stats.
+
+    Ambiguity-resolution strategy (multiple Cardmarket products share the
+    same base name within an expansion — e.g. four "Bulbasaur" products
+    in the 151 set: regular common, Art Rare, Master Ball reverse,
+    later reprint):
+
+      Our cards sorted by card NUMBER ascending → low number = regular
+      print (common / uncommon), high number = special print (Art Rare,
+      SAR, Hyper Rare).
+
+      Candidates sorted by daily TREND PRICE ascending → low price =
+      regular print, high price = special print. Candidates with no
+      price data fall through to an idProduct-based tiebreaker so a
+      missing price doesn't drop a valid candidate.
+
+      Pair positionally with a "spread to the edges" rule when there
+      are more candidates than our cards: the lowest-numbered card maps
+      to the cheapest candidate, the highest-numbered to the most
+      expensive, intermediates land at proportional positions.
+
+    Why this replaces the older idProduct-only ordering:
+      The old heuristic assumed lower idProduct = older product = released
+      first = special print. That holds for some 2023+ sets (e.g. 151
+      Bulbasaur: Art Rare at idProduct 720365 added 2023-06-29, Common
+      at 733596 added 2023-09-22 — old logic gave correct pairing).
+      But it breaks for sets where the Common product was created first
+      and the special print added later, OR where idProduct order is
+      jumbled by reprints (151 Ivysaur: Common at 733597, Art Rare at
+      733762 — old logic happened to be right). When idProduct order
+      and rarity order disagree the old logic produced inverted mappings
+      — the user reported a Bulbasaur MEW 166 (Art Rare, market value
+      ~144 €) showing a price of 0.11 € because it had been mapped to
+      the common reprint product. Sorting candidates by price ties the
+      pairing to the underlying market signal instead of catalogue
+      timing, which is reliable across set generations.
+    """
+    # Build product -> trend/avg price lookup
+    price_by_id = {g.get('idProduct'): g for g in price_guide}
+
+    def candidate_price(product):
+        g = price_by_id.get(product.get('idProduct'))
+        if not g:
+            return None
+        # Prefer trend (daily smoothed). Fall back to avg if trend is
+        # null/0 (newly added products without enough sales for a trend
+        # number still have an avg sometimes).
+        v = g.get('trend')
+        if not v or v <= 0:
+            v = g.get('avg')
+        return v if v and v > 0 else None
+
     # Index singles by (idExpansion, base_name)
     by_exp_name = defaultdict(list)  # (exp, base) -> [products...]
     for p in singles:
@@ -219,21 +271,57 @@ def map_cards_to_products(cards: list, singles: list, set_to_exp: dict):
             stats['unique'] += 1
             continue
 
-        # Ambiguous: pair sorted-by-number with sorted-by-idProduct
+        # Ambiguous: prefer the price-ranked subset of candidates.
+        # Group our cards by card number ascending.
         group_sorted = sorted(group, key=lambda c: card_number_sort_key(c['number']))
-        cand_sorted = sorted(candidates, key=lambda p: p['idProduct'])
-        n = min(len(group_sorted), len(cand_sorted))
-        for c, p in zip(group_sorted[:n], cand_sorted[:n]):
+
+        # Two-step hybrid resolution:
+        #
+        # Step 1 — narrow the candidate pool.
+        # Cardmarket products for a single Pokemon name in a set can
+        # exceed what our DB knows about (e.g. SVP "Charmander" has 3
+        # Cardmarket products — Heat Tackle standard + Heat Tackle
+        # YEEUR full-art + a 151-set Ember promo — but Limitless only
+        # catalogues 2). Pick the N lowest idProduct candidates: these
+        # were created at set release (the "official checklist"), with
+        # later reprints and alt-collection cross-listings getting
+        # higher idProducts. This filters out the cross-listed variants
+        # that aren't really part of the set's checklist.
+        #
+        # Step 2 — assign cards to picked candidates by price rank.
+        # Within the chosen subset, sort by trend price ascending and
+        # pair to our cards sorted by number ascending. Card number
+        # correlates with rarity in modern sets (low = common, high =
+        # special print), and price correlates with rarity directly,
+        # so number-order ↔ price-order gives the right mapping
+        # regardless of idProduct chronology.
+        n_grp = len(group_sorted)
+        cand_by_idproduct = sorted(candidates, key=lambda p: p['idProduct'])
+        picked = cand_by_idproduct[:n_grp]
+
+        def cand_sort_key(p):
+            # Priced candidates ranked by their trend price (ascending
+            # = cheapest first). Candidates with no usable price fall
+            # to the back, ordered by idProduct so the result stays
+            # deterministic across runs.
+            v = candidate_price(p)
+            return (1, p['idProduct']) if v is None else (0, v)
+
+        picked_by_price = sorted(picked, key=cand_sort_key)
+        match_method = f'priced({n_grp}↔{len(candidates)})'
+
+        for i, c in enumerate(group_sorted):
+            if i >= len(picked_by_price):
+                stats['ordered_skipped'] += 1
+                continue
+            chosen = picked_by_price[i]
             mappings.append({
                 'set': sc, 'number': c['number'],
-                'cardmarket_product_id': p['idProduct'],
-                'match_method': f'ordered({len(group)}↔{len(candidates)})',
+                'cardmarket_product_id': chosen['idProduct'],
+                'match_method': match_method,
                 'base_name': name,
             })
-            stats['ordered'] += 1
-        # Leftovers (one side longer than the other)
-        if len(group_sorted) > n:
-            stats['ordered_skipped'] += len(group_sorted) - n
+            stats['priced'] += 1
 
     return mappings, stats
 
@@ -255,9 +343,11 @@ def main():
     logger.info("=" * 60)
 
     cards = load_cards_db(data_dir)
-    singles, nonsingles, _ = load_jsons(data_dir)
-    logger.info("DB cards: %s, singles JSON: %s, nonsingles JSON: %s",
-                len(cards), len(singles), len(nonsingles))
+    singles, nonsingles, price_guide = load_jsons(data_dir)
+    logger.info(
+        "DB cards: %s, singles JSON: %s, nonsingles JSON: %s, price guide: %s",
+        len(cards), len(singles), len(nonsingles), len(price_guide),
+    )
 
     set_to_exp, method, fallback_failed = build_set_to_expansion(cards, singles, nonsingles)
     by_method = Counter(method.values())
@@ -267,7 +357,7 @@ def main():
         for sc, reason in fallback_failed:
             logger.warning("  unmapped set: %s (%s)", sc, reason)
 
-    mappings, stats = map_cards_to_products(cards, singles, set_to_exp)
+    mappings, stats = map_cards_to_products(cards, singles, set_to_exp, price_guide)
     total_cards = sum(1 for c in cards if c.get('number'))
     coverage = len(mappings) / total_cards * 100 if total_cards else 0
     logger.info("Card mapping: %s of %s cards (%.1f%%) | %s",

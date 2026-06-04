@@ -1133,6 +1133,16 @@
 .mockup-comparison-row:nth-child(odd) { background: rgba(241, 245, 249, 0.5); }
 .mockup-comparison-row .mockup-row-deck { font-weight: 700; color: #0f172a; }
 .mockup-comparison-row .mockup-row-rank { color: #64748b; font-weight: 700; }
+.mockup-comparison-row .mockup-row-rank small {
+    display: inline-block;
+    margin-left: 4px;
+    font-size: 0.62rem;
+    font-weight: 800;
+    padding: 0 4px;
+    border-radius: 4px;
+}
+.mockup-comparison-row .mockup-row-rank small.up   { color: #16a34a; background: rgba(34, 197, 94, 0.12); }
+.mockup-comparison-row .mockup-row-rank small.down { color: #dc2626; background: rgba(239, 68, 68, 0.12); }
 .mockup-comparison-row .mockup-row-count { font-weight: 800; color: var(--pokemon-blue, #3B4CCA); }
 .mockup-comparison-row .mockup-row-count small {
     display: block;
@@ -1790,6 +1800,165 @@
     .mockup-deck-row { grid-template-columns: 1fr 44px 50px; }
     .mockup-deck-row-avg { display: none; }
     .mockup-builder-grid { grid-template-columns: 1fr; }
+}
+
+/* ── Deck-grid mockup: real card-tile layout ─────────────────────
+   Replaces the table-style deck mockup so the tutorial banner
+   reads as the live Deck Analysis page (.card-item grid in
+   app-current-meta-analysis.js) instead of a generic list. Real
+   card art is loaded from the limitlesstcg CDN — the SW lazy
+   image cache (IMAGE_CACHE_HOSTS) already keeps these offline.
+   ───────────────────────────────────────────────────────────── */
+.mockup-deckgrid-section + .mockup-deckgrid-section { margin-top: 12px; }
+.mockup-deckgrid-section-head {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.78rem;
+    font-weight: 800;
+    color: #0f172a;
+    margin-bottom: 8px;
+    letter-spacing: 0.01em;
+}
+.mockup-deckgrid-section-head .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex: 0 0 auto;
+}
+.mockup-deckgrid-section-head .dot.is-main { background: #16a34a; }
+.mockup-deckgrid-section-head .dot.is-tech { background: #f59e0b; }
+.mockup-deckgrid-section-head .dot.is-rare { background: #94a3b8; }
+.mockup-deckgrid-section-head .hint {
+    font-size: 0.68rem;
+    font-weight: 500;
+    color: #64748b;
+}
+.mockup-deckgrid-section-head .count {
+    margin-left: auto;
+    font-size: 0.68rem;
+    font-weight: 800;
+    background: rgba(15, 23, 42, 0.06);
+    color: #475569;
+    padding: 2px 8px;
+    border-radius: 999px;
+}
+.mockup-deckgrid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+}
+.mockup-deckgrid-card {
+    background: #fff;
+    border: 1px solid rgba(15, 23, 42, 0.10);
+    border-radius: 8px;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 2px 6px rgba(15, 23, 42, 0.08);
+    display: flex;
+    flex-direction: column;
+}
+.mockup-deckgrid-img {
+    aspect-ratio: 2.5 / 3.5;
+    background-color: #1e293b;
+    background-size: cover;
+    background-position: center top;
+    background-repeat: no-repeat;
+    position: relative;
+}
+.mockup-deckgrid-badge {
+    position: absolute;
+    font-size: 0.6rem;
+    font-weight: 800;
+    padding: 2px 6px;
+    border-radius: 999px;
+    background: rgba(239, 68, 68, 0.92);
+    color: #fff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+    letter-spacing: 0.02em;
+}
+.mockup-deckgrid-badge.is-max { top: 4px; right: 4px; }
+.mockup-deckgrid-badge.is-deck {
+    top: 4px;
+    left: 4px;
+    background: rgba(34, 197, 94, 0.92);
+}
+.mockup-deckgrid-badge.is-star {
+    bottom: 4px;
+    right: 4px;
+    background: rgba(245, 158, 11, 0.96);
+    padding: 2px 5px;
+    font-size: 0.68rem;
+}
+.mockup-deckgrid-info {
+    padding: 5px 7px 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    font-size: 0.65rem;
+    background: #fff;
+}
+.mockup-deckgrid-info .name {
+    font-weight: 800;
+    color: #0f172a;
+    font-size: 0.72rem;
+    line-height: 1.15;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.mockup-deckgrid-info .set {
+    color: #64748b;
+    font-weight: 700;
+    font-size: 0.6rem;
+    letter-spacing: 0.04em;
+}
+.mockup-deckgrid-info .pct {
+    color: #16a34a;
+    font-weight: 800;
+}
+.mockup-deckgrid-info .pct.is-mid  { color: #b45309; }
+.mockup-deckgrid-info .pct.is-low  { color: #64748b; }
+.mockup-deckgrid-info .price {
+    color: var(--pokemon-blue, #3B4CCA);
+    font-weight: 800;
+    font-size: 0.66rem;
+}
+.mockup-deckgrid-info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 4px;
+}
+.mockup-deckgrid-rare-pill {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 8px 10px;
+    background: rgba(241, 245, 249, 0.6);
+    border: 1px dashed rgba(15, 23, 42, 0.18);
+    border-radius: 8px;
+    font-size: 0.7rem;
+    color: #64748b;
+    font-style: italic;
+}
+
+@media (max-width: 540px) {
+    .mockup-deckgrid { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* Test-draw hand cards now use real card art via background-image.
+   The .is-* color modifiers are dropped — the variant is encoded
+   directly on the element style="background-image: url(...)" so we
+   can swap any card in without needing a CSS class per type. */
+.mockup-builder-hand-card.is-art {
+    background-size: cover;
+    background-position: center top;
+    background-repeat: no-repeat;
+}
+.mockup-builder-hand-card.is-art::after {
+    display: none;
 }
 
 /* Text-only banner — no image slot, content takes the full width.

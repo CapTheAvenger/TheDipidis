@@ -1315,7 +1315,14 @@ function buildTradelistUnderpricedPill(cmPriceRaw, userMinRaw) {
   const threshold = min * (1 + TRADELIST_NOTIFY_THRESHOLD_PCT / 100);
   if (cm < threshold) return '';
   const deltaPct = ((cm - min) / min) * 100;
-  return `<div style="margin-top:4px;display:inline-flex;align-items:center;gap:4px;padding:2px 8px;background:linear-gradient(135deg,#dc2626,#b91c1c);color:#fff;border-radius:999px;font-size:0.70em;font-weight:800;letter-spacing:0.02em;box-shadow:0 1px 4px rgba(220,38,38,0.35);" title="Markt (${cm.toFixed(2).replace('.',',')} €) ist ${deltaPct.toFixed(0)} % über deinem Preis (${min.toFixed(2).replace('.',',')} €). Tipp den Preis-Input an, um anzupassen.">⚠ +${deltaPct.toFixed(0)} % über Markt</div>`;
+  // Pill text reads "⚠ Preis Check" rather than "+N % über Markt"
+  // because the latter parsed visually as "(my price is) +43 % over
+  // market" — exactly the opposite of what the trigger actually means
+  // (market is N % above the user's listed minimum, so the user is
+  // *underselling*). "Preis Check" is a neutral nudge: tap me and
+  // look at the numbers. The hover title still surfaces the full
+  // explanation including the delta for users who want the detail.
+  return `<div style="margin-top:4px;display:inline-flex;align-items:center;gap:4px;padding:2px 8px;background:linear-gradient(135deg,#dc2626,#b91c1c);color:#fff;border-radius:999px;font-size:0.70em;font-weight:800;letter-spacing:0.02em;box-shadow:0 1px 4px rgba(220,38,38,0.35);" title="Markt (${cm.toFixed(2).replace('.',',')} €) ist ${deltaPct.toFixed(0)} % über deinem Preis (${min.toFixed(2).replace('.',',')} €). Tipp den Preis-Input an, um anzupassen.">⚠ Preis Check</div>`;
 }
 // Expose for the cron-side reuse + bot tooling.
 window.buildWishlistTargetPill = buildWishlistTargetPill;

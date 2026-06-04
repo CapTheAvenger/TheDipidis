@@ -208,12 +208,16 @@ def build_user_alerts(
             continue
         if (last_notified.get(card_id) or 0) > snooze_cutoff:
             continue
-        delta_pct = (cm - min_p) / min_p * 100
+        # Delta % stays out of the header — user feedback was that
+        # "+43 % über Markt" parsed visually as "my price is +43 %
+        # above market" (the opposite of the actual trigger). The
+        # raw numbers in the next line already make the under-pricing
+        # obvious — Markt 17,14 € · dein Preis 12,00 € reads
+        # unambiguously without an annotated %.
         cm_url = _cardmarket_link(info)
         cm_link = f" · 💶 <a href=\"{cm_url}\">Cardmarket</a>" if cm_url else ""
         tradelist_lines.append(
-            f"• <b>{info['name']}</b> ({info['set']} {info['number']}) "
-            f"+{delta_pct:.0f} %\n"
+            f"• <b>{info['name']}</b> ({info['set']} {info['number']})\n"
             f"  Markt {_fmt_eur(cm)} · dein Preis {_fmt_eur(min_p)}{cm_link}"
         )
         tradelist_cards.append(card_id)

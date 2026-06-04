@@ -1527,6 +1527,271 @@
     font-weight: 700;
 }
 
+/* ── Deck Analysis · Main Cards mockup ────────────────────────────
+   Replaces the city-league/7-main-cards.png screenshot. Surfaces
+   the per-card share% / avg-copies / price columns the user sees
+   in the real Deck Analysis page, plus a folded "Rare Picks" row
+   to communicate the auto-collapse behaviour described in the
+   bullet list to the right of the banner.
+   ───────────────────────────────────────────────────────────── */
+.mockup-deck-section {
+    border: 1px solid rgba(15, 23, 42, 0.10);
+    border-radius: 10px;
+    overflow: hidden;
+    background: #fff;
+}
+.mockup-deck-section + .mockup-deck-section { margin-top: 8px; }
+.mockup-deck-section-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 6px 10px;
+    background: linear-gradient(90deg, rgba(59, 76, 202, 0.12), rgba(59, 76, 202, 0.04));
+    color: var(--pokemon-blue, #3B4CCA);
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+}
+.mockup-deck-section--tech .mockup-deck-section-head {
+    background: linear-gradient(90deg, rgba(245, 124, 0, 0.16), rgba(245, 124, 0, 0.04));
+    color: #b45309;
+}
+.mockup-deck-section--rare .mockup-deck-section-head {
+    background: linear-gradient(90deg, rgba(100, 116, 139, 0.16), rgba(100, 116, 139, 0.04));
+    color: #475569;
+    cursor: pointer;
+}
+.mockup-deck-section-count {
+    font-size: 0.65rem;
+    font-weight: 800;
+    background: rgba(255, 255, 255, 0.6);
+    padding: 1px 6px;
+    border-radius: 999px;
+    letter-spacing: 0.02em;
+}
+.mockup-deck-row {
+    display: grid;
+    grid-template-columns: 1fr 48px 50px 56px;
+    gap: 8px;
+    align-items: center;
+    padding: 6px 10px;
+    font-size: 0.72rem;
+    border-top: 1px solid rgba(15, 23, 42, 0.05);
+}
+.mockup-deck-row:nth-child(odd) { background: rgba(241, 245, 249, 0.5); }
+.mockup-deck-row-name {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+.mockup-deck-row-name b {
+    font-size: 0.74rem;
+    font-weight: 800;
+    color: #0f172a;
+    line-height: 1.2;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.mockup-deck-row-name small {
+    font-size: 0.6rem;
+    color: #64748b;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+}
+.mockup-deck-row-name .star {
+    color: #f59e0b;
+    font-size: 0.7rem;
+    margin-right: 3px;
+}
+.mockup-deck-row-share {
+    font-weight: 800;
+    color: #16a34a;
+    text-align: right;
+    font-size: 0.72rem;
+}
+.mockup-deck-row-share.is-mid  { color: #b45309; }
+.mockup-deck-row-share.is-low  { color: #64748b; }
+.mockup-deck-row-avg {
+    color: #475569;
+    font-weight: 700;
+    text-align: right;
+    font-size: 0.7rem;
+}
+.mockup-deck-row-price {
+    font-weight: 800;
+    color: var(--pokemon-blue, #3B4CCA);
+    text-align: right;
+    font-size: 0.7rem;
+}
+.mockup-deck-section--rare .mockup-deck-rare-folded {
+    padding: 6px 10px;
+    font-size: 0.68rem;
+    color: #64748b;
+    font-style: italic;
+    background: rgba(241, 245, 249, 0.4);
+    border-top: 1px solid rgba(15, 23, 42, 0.05);
+}
+.mockup-deck-chevron {
+    font-size: 0.7rem;
+    color: inherit;
+}
+
+/* Filter chips above the deck — share% / date filter mockups */
+.mockup-filter-row {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    padding: 0 2px;
+}
+.mockup-filter-chip {
+    font-size: 0.62rem;
+    font-weight: 800;
+    padding: 3px 8px;
+    border-radius: 999px;
+    background: #f1f5f9;
+    color: #475569;
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    letter-spacing: 0.04em;
+}
+.mockup-filter-chip.is-active {
+    background: var(--pokemon-blue, #3B4CCA);
+    color: #fff;
+    border-color: transparent;
+}
+
+/* ── Deck Builder · Generate Panel mockup ─────────────────────────
+   Replaces the city-league/8-deck-builder.png screenshot with the
+   hotspot annotations. The 8 buttons stay numbered 1–8 so the
+   "is-keyed-to-hotspots" bullet list on the right keeps its
+   visual anchor — the numbers in the bullets now point at the
+   numbered tiles in the mockup instead of into a screenshot.
+   ───────────────────────────────────────────────────────────── */
+.mockup-builder-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+}
+.mockup-builder-btn {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 11px 9px 30px;
+    background: #f8fafc;
+    border: 1px solid rgba(15, 23, 42, 0.10);
+    border-radius: 10px;
+    font-size: 0.74rem;
+    font-weight: 800;
+    color: #0f172a;
+    min-width: 0;
+}
+.mockup-builder-btn-num {
+    position: absolute;
+    left: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--pokemon-blue, #3B4CCA);
+    color: #fff;
+    font-size: 0.65rem;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 1px 4px rgba(15, 23, 42, 0.18);
+}
+.mockup-builder-btn-icon {
+    font-size: 1rem;
+    line-height: 1;
+}
+.mockup-builder-btn-label {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.mockup-builder-btn--accent {
+    background: linear-gradient(135deg, #fef3c7, #fde68a);
+    border-color: rgba(245, 158, 11, 0.4);
+    color: #8a6500;
+}
+.mockup-builder-btn--accent .mockup-builder-btn-num { background: #ef4444; }
+.mockup-builder-btn--blue {
+    background: linear-gradient(135deg, rgba(59, 76, 202, 0.12), rgba(59, 76, 202, 0.04));
+    border-color: rgba(59, 76, 202, 0.25);
+    color: var(--pokemon-blue, #3B4CCA);
+}
+.mockup-builder-btn--green {
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.14), rgba(34, 197, 94, 0.04));
+    border-color: rgba(34, 197, 94, 0.28);
+    color: #16a34a;
+}
+.mockup-builder-btn--green .mockup-builder-btn-num { background: #16a34a; }
+.mockup-builder-btn--full {
+    grid-column: 1 / -1;
+    justify-content: center;
+}
+
+/* Test-draw hand preview shown alongside the builder grid. */
+.mockup-builder-hand {
+    margin-top: 10px;
+    padding: 10px;
+    background: rgba(241, 245, 249, 0.6);
+    border-radius: 10px;
+    border: 1px dashed rgba(15, 23, 42, 0.12);
+}
+.mockup-builder-hand-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.68rem;
+    font-weight: 800;
+    color: #475569;
+    letter-spacing: 0.04em;
+    margin-bottom: 6px;
+}
+.mockup-builder-hand-cards {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+}
+.mockup-builder-hand-card {
+    aspect-ratio: 5 / 7;
+    border-radius: 4px;
+    background: linear-gradient(135deg, #1e40af, #3b4cca);
+    position: relative;
+    overflow: hidden;
+}
+.mockup-builder-hand-card::after {
+    content: '';
+    position: absolute;
+    inset: 14% 16%;
+    border: 1.5px solid rgba(255, 255, 255, 0.45);
+    border-radius: 4px;
+}
+.mockup-builder-hand-card.is-trainer { background: linear-gradient(135deg, #b91c1c, #ef4444); }
+.mockup-builder-hand-card.is-energy  { background: linear-gradient(135deg, #f59e0b, #fbbf24); }
+.mockup-builder-hand-stats {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 6px;
+    font-size: 0.62rem;
+    font-weight: 800;
+    color: #475569;
+}
+.mockup-builder-hand-stats .up   { color: #16a34a; }
+.mockup-builder-hand-stats .down { color: #dc2626; }
+
+@media (max-width: 540px) {
+    .mockup-deck-row { grid-template-columns: 1fr 44px 50px; }
+    .mockup-deck-row-avg { display: none; }
+    .mockup-builder-grid { grid-template-columns: 1fr; }
+}
+
 /* Text-only banner — no image slot, content takes the full width.
    Used for orientation-heavy sections where bullets do the
    explaining better than a screenshot or a mockup. */

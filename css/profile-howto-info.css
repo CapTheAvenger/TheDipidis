@@ -2685,6 +2685,330 @@
 .mockup-stat-cell .value.is-good { color: #4ade80; }
 .mockup-stat-cell .value.is-bad  { color: #f87171; }
 
+/* ── Card Database mockup — grid with hearts + prices ─────────── */
+.mockup-cdb-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+}
+.mockup-cdb-card {
+    position: relative;
+    background: #fff;
+    border: 1px solid rgba(15, 23, 42, 0.10);
+    border-radius: 8px;
+    overflow: hidden;
+}
+.mockup-cdb-card .img {
+    aspect-ratio: 2.5 / 3.5;
+    background-size: cover;
+    background-position: center top;
+    background-color: #1e293b;
+}
+.mockup-cdb-card .heart {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.92);
+    color: #ec4899;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.78rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+}
+.mockup-cdb-card .heart.is-on { background: #ec4899; color: #fff; }
+.mockup-cdb-card .star {
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    background: rgba(245, 158, 11, 0.95);
+    color: #fff;
+    border-radius: 50%;
+    width: 22px;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+}
+.mockup-cdb-card .price {
+    position: absolute;
+    bottom: 4px;
+    left: 4px;
+    right: 4px;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.92);
+    color: var(--pokemon-blue, #3B4CCA);
+    font-size: 0.62rem;
+    font-weight: 800;
+    padding: 2px 4px;
+    border-radius: 4px;
+    letter-spacing: 0.02em;
+}
+
+/* ── Battle Journal — quick-log + history ─────────────────────── */
+.mockup-bj-log {
+    display: grid;
+    grid-template-columns: 1fr 1fr 60px;
+    gap: 6px;
+    padding: 10px;
+    background: linear-gradient(135deg, rgba(59, 76, 202, 0.10), rgba(59, 76, 202, 0.02));
+    border: 1px solid rgba(59, 76, 202, 0.20);
+    border-radius: 10px;
+    margin-bottom: 8px;
+}
+.mockup-bj-field {
+    background: #fff;
+    border: 1px solid rgba(15, 23, 42, 0.10);
+    border-radius: 6px;
+    padding: 6px 8px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #0f172a;
+}
+.mockup-bj-field span {
+    display: block;
+    font-size: 0.55rem;
+    font-weight: 800;
+    color: #64748b;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    margin-bottom: 1px;
+}
+.mockup-bj-cta {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--pokemon-blue, #3B4CCA), #6366f1);
+    color: #fff;
+    font-size: 0.66rem;
+    font-weight: 800;
+    border-radius: 6px;
+    letter-spacing: 0.04em;
+}
+.mockup-bj-history {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.mockup-bj-row {
+    display: grid;
+    grid-template-columns: 28px 1fr 56px;
+    gap: 8px;
+    align-items: center;
+    padding: 6px 10px;
+    background: #fff;
+    border: 1px solid rgba(15, 23, 42, 0.10);
+    border-radius: 8px;
+    font-size: 0.7rem;
+}
+.mockup-bj-result {
+    width: 26px;
+    height: 26px;
+    border-radius: 6px;
+    color: #fff;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+}
+.mockup-bj-result.is-w { background: #16a34a; }
+.mockup-bj-result.is-l { background: #dc2626; }
+.mockup-bj-result.is-t { background: #b45309; }
+.mockup-bj-vs {
+    font-weight: 800;
+    color: #0f172a;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.mockup-bj-vs small {
+    display: block;
+    font-size: 0.58rem;
+    color: #64748b;
+    font-weight: 700;
+    margin-top: 2px;
+}
+.mockup-bj-order {
+    font-size: 0.6rem;
+    font-weight: 800;
+    color: #475569;
+    text-align: right;
+    letter-spacing: 0.04em;
+}
+
+/* ── Meta Binder · 9-pocket grid mockup ───────────────────────── */
+.mockup-binder {
+    background: #fef3c7;
+    border: 2px solid #f59e0b;
+    border-radius: 10px;
+    padding: 8px;
+}
+.mockup-binder-pocket-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+}
+.mockup-binder-slot {
+    aspect-ratio: 2.5 / 3.5;
+    border-radius: 4px;
+    background-color: rgba(245, 158, 11, 0.20);
+    background-size: cover;
+    background-position: center top;
+    position: relative;
+    border: 1px dashed rgba(180, 83, 9, 0.4);
+}
+.mockup-binder-slot.is-filled {
+    border-style: solid;
+    border-color: rgba(180, 83, 9, 0.6);
+}
+.mockup-binder-slot.is-missing::after {
+    content: '✕';
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(239, 68, 68, 0.50);
+    color: #fff;
+    font-weight: 800;
+    border-radius: inherit;
+    font-size: 1.4rem;
+}
+.mockup-binder-slot .pr {
+    position: absolute;
+    bottom: 2px;
+    left: 2px;
+    right: 2px;
+    text-align: center;
+    background: rgba(0, 0, 0, 0.7);
+    color: #fde68a;
+    font-size: 0.5rem;
+    font-weight: 800;
+    padding: 1px 2px;
+    border-radius: 3px;
+    letter-spacing: 0.02em;
+}
+.mockup-binder-foot {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 8px;
+    padding: 0 4px;
+    font-size: 0.66rem;
+    font-weight: 800;
+    color: #b45309;
+    letter-spacing: 0.04em;
+}
+
+/* ── Testing Groups — shared dashboard ────────────────────────── */
+.mockup-tg-dash-members {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 10px;
+    background: rgba(241, 245, 249, 0.6);
+    border-radius: 10px;
+    margin-bottom: 8px;
+}
+.mockup-tg-dash-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #6366f1, #ec4899);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: 800;
+    margin-left: -8px;
+    border: 2px solid #fff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+.mockup-tg-dash-avatar:first-child { margin-left: 0; }
+.mockup-tg-dash-avatar.v2 { background: linear-gradient(135deg, #16a34a, #facc15); }
+.mockup-tg-dash-avatar.v3 { background: linear-gradient(135deg, #f97316, #dc2626); }
+.mockup-tg-dash-avatar.v4 { background: linear-gradient(135deg, #0891b2, #6366f1); }
+.mockup-tg-dash-count {
+    margin-left: auto;
+    font-size: 0.66rem;
+    font-weight: 800;
+    color: #475569;
+    letter-spacing: 0.04em;
+}
+
+/* Mini bar chart for trend visual */
+.mockup-trend {
+    background: #fff;
+    border: 1px solid rgba(15, 23, 42, 0.10);
+    border-radius: 8px;
+    padding: 10px;
+}
+.mockup-trend-bars {
+    display: flex;
+    align-items: flex-end;
+    height: 60px;
+    gap: 4px;
+    margin-bottom: 6px;
+}
+.mockup-trend-bars > span {
+    flex: 1;
+    background: linear-gradient(180deg, #6366f1, var(--pokemon-blue, #3B4CCA));
+    border-radius: 3px 3px 0 0;
+}
+.mockup-trend-foot {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.6rem;
+    font-weight: 800;
+    color: #64748b;
+    letter-spacing: 0.04em;
+}
+.mockup-trend-foot .now { color: var(--pokemon-blue, #3B4CCA); }
+
+/* Telegram-bot chat with attached preview */
+.mockup-tg-bot-card {
+    background: linear-gradient(135deg, #0f172a, #1e293b);
+    border-radius: 10px;
+    padding: 12px;
+}
+.mockup-tg-bot-card .head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.10);
+    margin-bottom: 8px;
+}
+.mockup-tg-bot-card .head .avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #ef4444, #f59e0b);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 0.7rem;
+}
+.mockup-tg-bot-card .head .name {
+    font-size: 0.78rem;
+    font-weight: 800;
+    color: #fff;
+}
+.mockup-tg-bot-card .head .status {
+    margin-left: auto;
+    font-size: 0.6rem;
+    color: #4ade80;
+    font-weight: 700;
+}
+
 /* Text-only banner — no image slot, content takes the full width.
    Used for orientation-heavy sections where bullets do the
    explaining better than a screenshot or a mockup. */

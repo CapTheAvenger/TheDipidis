@@ -2086,22 +2086,36 @@
                 }
                 
                 // No coverage data or no matching print - use standard priority
-                // Prefer: Common/Uncommon from newest set
-                const setOrder = {
-                    // 2026 Sets (newest first)
+                // Prefer: Common/Uncommon from newest set.
+                //
+                // Pull from window.setOrderMap (sourced from data/sets.json
+                // by loadSetOrderMap() in app-core.js, refreshed on every
+                // boot). The hardcoded fallback below was missing every set
+                // released after POR — CRI in particular got rank 0 and
+                // lost every dedup tiebreak, which is why the Card DB tab
+                // hid all CRI Commons/Uncommons whose name also appeared
+                // in older sets (Vulpix, Fennekin, Ho-Oh, Litleo, Remoraid,
+                // Octillery, Delibird, Keldeo, Froakie, Frogadier, Bergmite,
+                // Carnivine — user could see CRI 3, 5, 6, 7, 12, 13 etc.
+                // but had to scroll for ages to find the missing #4 / #8-11
+                // entries in their actual set positions).
+                //
+                // The dynamic map keeps every new-set rotation honest
+                // without code edits. The fallback stays so an unbooted
+                // page (no fetch yet) still produces a deterministic sort.
+                const setOrder = (typeof window !== 'undefined' && window.setOrderMap) || {
+                    // Last-resort hardcoded fallback — only used if
+                    // setOrderMap hasn't loaded yet. Kept in line with
+                    // a pre-2026-06 snapshot so the ordering is still
+                    // sensible even when sets.json is unreachable.
                     'POR': 117, 'M3': 116, 'ASC': 115, 'PFL': 114, 'MEG': 113, 'MEE': 112, 'MEP': 111,
                     'BLK': 110, 'WHT': 109, 'DRI': 108, 'JTG': 107, 'PRE': 106, 'SSP': 105,
-                    // 2024-2025 Sets
                     'SCR': 104, 'SFA': 103, 'TWM': 102, 'TEF': 101, 'PAF': 100, 'PAR': 99,
                     'MEW': 98, 'OBF': 97, 'PAL': 96, 'SVI': 95, 'SVE': 94, 'SVP': 93,
-                    // 2023 Sets
                     'CRZ': 92, 'SIR': 91, 'LOR': 90, 'PGO': 89,
-                    // 2022 Sets
                     'ASR': 88, 'BRS': 87, 'FST': 86, 'CEL': 85, 'EVS': 84, 'CRE': 83,
-                    // 2021 Sets
                     'BST': 82, 'TM': 81, 'SHF': 80, 'VIV': 79, 'CPA': 78,
-                    // 2020 Sets
-                    'DAA': 77, 'RCL': 76, 'SSH': 75, 'SP': 74, 'CEC': 73
+                    'DAA': 77, 'RCL': 76, 'SSH': 75, 'SP': 74, 'CEC': 73,
                 };
                 
                 // Sort prints by priority

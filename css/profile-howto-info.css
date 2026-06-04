@@ -1111,10 +1111,13 @@
    "stat-badge" rows (Rank / Share) under the deck name. This
    primitive mirrors that look so the tutorial mockup reads as a
    screenshot of the live page, not a generic data table.
+   Vertical stacking — the thumb columns are too narrow for a
+   side-by-side grid; deck names like "Raging Bolt Ogerpon" or
+   "Hydrapple Ogerpon" truncate to "Raging Bolt Oger…" otherwise.
    ───────────────────────────────────────────────────────────── */
 .mockup-tier-rows.is-banners {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
+    display: flex;
+    flex-direction: column;
     gap: 6px;
     padding: 6px;
     background: #f8fafc;
@@ -1188,10 +1191,13 @@
 .mockup-stat-badge .trend-down { color: #dc2626; font-weight: 800; }
 .mockup-stat-badge .trend-flat { color: #64748b; font-weight: 800; }
 
-/* ── Two-up Performance Improvers / Decliners side-by-side ─────── */
+/* ── Performance Improvers / Decliners — stacked vertically ─────
+   Was a 2-up grid; the thumb slot is too narrow for two readable
+   tables side-by-side (deck names truncate to 4-5 chars).
+   Stacking shows full names. */
 .mockup-movers {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
+    display: flex;
+    flex-direction: column;
     gap: 6px;
 }
 .mockup-movers-block {
@@ -1235,10 +1241,13 @@
 .mockup-movers-row.is-up   .mockup-movers-delta { color: #16a34a; }
 .mockup-movers-row.is-down .mockup-movers-delta { color: #dc2626; }
 
-/* ── Two-up Overall vs Top-8 mini-tables ──────────────────────── */
+/* ── Overall vs Top-8 mini-tables — stacked vertically ──────────
+   Same reason as .mockup-movers above: 2-up grid collapsed deck
+   names to 1-2 letters ("D." / "M." / "Sl."). Stacking restores
+   readable names + ranks. */
 .mockup-vs-top8 {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
+    display: flex;
+    flex-direction: column;
     gap: 6px;
 }
 .mockup-vs-top8-block {

@@ -2076,14 +2076,21 @@
                                 <h3 class="tutorial-chapter-heading"><span>📦</span> Cards &amp; Collection</h3>
                                 <ul class="feature-banner-bullets">
                                     <li><strong>My Collection</strong> — track every owned card per print (set + number aware). The same card in different sets is logged separately; an ✨ indicator surfaces when you own a sibling print. Count badge updates live across all devices.</li>
-                                    <li><strong>Wishlist</strong> — flag cards you still need with a tap on the heart. Each row shows the live Cardmarket € so you see what hunting it down would cost. You can also <em>override the price</em> on any card and the totals recompute — handy if you've got a local pickup quote that's better than Cardmarket. Export the list as plain text or as a PNG with prices baked in to share with a trader.
-                                        <figure class="bullet-figure bullet-figure--pending" aria-label="Wishlist custom prices + export example — image pending">
-                                            <span>Beispielbild folgt — Wishlist Preise + Export</span>
+                                    <li><strong>Wishlist</strong> — flag cards you still need with a tap on the heart. Each row carries the live <em>Cardmarket low</em> price (the cheapest current asking price across all Cardmarket sellers), refreshed every morning at 10:00 CEST. Below that you fill in your own <em>Max</em> — the most you're willing to pay. When the live price drops to or below your Max, the row shows a green 🎯 "Unter deinem Ziel" pill — and the Telegram bot pings you on the next refresh (see the Account → Settings section below for the bot setup).
+                                        <figure class="bullet-figure">
+                                            <img src="/images/tutorials/profile-prices/03-wishlist-live.jpeg" alt="Wishlist with three CRI cards: Cardmarket low price on each card with a Max input below and a green Unter deinem Ziel pill when the Max is reached" loading="lazy">
+                                            <figcaption class="bullet-figure-caption">Live Cardmarket low (green pill) + your Max (input) + green 🎯 trigger pill when Cardmarket drops to or below your Max.</figcaption>
+                                        </figure>
+                                        <p style="margin: 6px 0 4px; font-size: 0.94em;">Tap the <em>Grid</em> button at the top to switch into Overview Mode and from there the <em>Save</em> button generates a shareable PNG with the cards + your Max prices baked in — paste it into any WhatsApp / Telegram chat with a trader.</p>
+                                        <figure class="bullet-figure">
+                                            <img src="/images/tutorials/profile-prices/04-wishlist-export.png" alt="Exported PNG of the Wishlist Overview showing five cards with quantity badges and ca prices baked in" loading="lazy">
+                                            <figcaption class="bullet-figure-caption">The exported PNG — drops straight into WhatsApp / Telegram, no further editing needed.</figcaption>
                                         </figure>
                                     </li>
-                                    <li><strong>Trade List</strong> — same flow, opposite direction: cards you have for trade, with the live Cardmarket € <em>plus</em> your own custom asking price per card. Export the whole list as text or PNG with your prices — paste it into any chat or print it for a swap meet.
-                                        <figure class="bullet-figure bullet-figure--pending" aria-label="Trade List custom prices + export example — image pending">
-                                            <span>Beispielbild folgt — Trade List Preise + Export</span>
+                                    <li><strong>Trade List</strong> — same flow, opposite direction: cards you have for trade, with the live <em>Cardmarket trend</em> price (the smoothed market reference, what most sellers actually charge — refreshed every morning at 10:00 CEST). Below that you fill in your own <em>ca</em> price — the soft target you'd accept. When the live market trend climbs more than <strong>10 %</strong> above your ca price, the row shows a red ⚠ "Preis Check" pill — and the Telegram bot pings you so you can bump your trade-list price before underselling.
+                                        <figure class="bullet-figure">
+                                            <img src="/images/tutorials/profile-prices/05-tradelist-live.jpeg" alt="Trade List with three MEW cards: Cardmarket trend price on each card with a ca input below and a red Preis Check pill on the cards where market is 10 percent above the asking price" loading="lazy">
+                                            <figcaption class="bullet-figure-caption">Live Cardmarket trend (green pill) + your ca price (input) + red ⚠ Preis Check pill when the market is ≥ 10 % above your asking price.</figcaption>
                                         </figure>
                                     </li>
                                     <li><strong>Meta Binder</strong> — auto-builds a printable A4 binder of every meta-relevant card across the current rotation, with Cardmarket € per slot. Owned copies are auto-marked from your collection so missing ones jump out.</li>
@@ -2103,6 +2110,23 @@
                                 <h3 class="tutorial-chapter-heading"><span>⚙️</span> Account</h3>
                                 <ul class="feature-banner-bullets">
                                     <li><strong>Settings</strong> — language toggle (EN / DE), theme, profile sync controls, sign-out. The first tab to visit on a fresh device so you're not staring at a tutorial you've already read in the wrong language.</li>
+                                    <li><strong>🔔 Telegram price alerts</strong> — optional, opt-in. Hooks the Wishlist + Trade List bullets above into the daily price refresh: every morning at 10:00 CEST the bot scans your two lists, compares the live Cardmarket numbers against the Max / ca prices you set, and pings you on the cards that crossed a threshold. Two-step setup:
+                                        <ol style="margin: 8px 0 8px 22px; padding: 0; font-size: 0.94em; line-height: 1.55;">
+                                            <li>Send <code>/myid</code> to <a href="https://t.me/TheDipidisBot" target="_blank" rel="noopener">@TheDipidisBot</a> on Telegram. The bot replies with your <em>Chat-ID</em> — tap the number to copy it.
+                                                <figure class="bullet-figure">
+                                                    <img src="/images/tutorials/profile-prices/01-telegram-myid.jpeg" alt="Telegram chat: user sends /myid command, bot replies with the chat ID 996462184 and instructions to paste it on the website" loading="lazy">
+                                                </figure>
+                                            </li>
+                                            <li>Open <strong>Mein Profil → Account → Einstellungen → 🔔 Telegram-Preisalarme</strong>, paste the Chat-ID, tick <em>Enable</em>, optionally tune the Trade-List threshold (default 10 % above your ca price), tap <em>Save</em>.
+                                                <figure class="bullet-figure">
+                                                    <img src="/images/tutorials/profile-prices/02-settings-alerts.jpeg" alt="Settings panel showing the Telegram price alerts section with the toggle enabled, Chat-ID 996462184 pasted in, threshold 10 percent" loading="lazy">
+                                                </figure>
+                                            </li>
+                                        </ol>
+                                        From the next 10:00 CEST run onwards you get two focused Telegram messages: a 🎯 <em>Wishlist-Treffer</em> with the cards that hit your Max, and a ⚠ <em>Trade-List-Warnungen</em> with the cards where market jumped above your ca price. Each line carries a direct Cardmarket link for the card.
+                                        <br><br>
+                                        <em>Spam-Bremse:</em> a card that triggered yesterday gets a 48 h cool-down — you won't be pinged about the same card every morning while it sits at a discount. <em>Exception:</em> if you change the Max / ca price yourself, the cool-down for that one card resets so the next run re-evaluates it cleanly.
+                                    </li>
                                 </ul>
                                 <div class="feature-banner-protip">
                                     <strong>Pro tip:</strong> The little count next to each section in the sidebar (<code>My Collection (97)</code>, <code>My Decks (1)</code>, <code>Trade List (15)</code>) updates live as you add cards or save builds — quick at-a-glance signal that you didn't lose state across a device switch.
@@ -3032,14 +3056,21 @@
                                 <h3 class="tutorial-chapter-heading"><span>📦</span> Karten &amp; Sammlung</h3>
                                 <ul class="feature-banner-bullets">
                                     <li><strong>Meine Sammlung</strong> — track jede besessene Karte pro Print (Set + Nummer aware). Dieselbe Karte in verschiedenen Sets wird separat geloggt; ein ✨-Indikator taucht auf, wenn du einen Sibling-Print besitzt. Count-Badge updatet live über alle Geräte.</li>
-                                    <li><strong>Wishlist</strong> — flagge Karten, die dir noch fehlen, mit einem Tipp aufs Herz. Jede Zeile zeigt den Live-Cardmarket-€, damit du siehst, was das Jagen kosten würde. Du kannst auch <em>deinen eigenen Preis</em> pro Karte hinterlegen und die Summen rechnen neu — handlich, wenn du ein lokales Angebot hast, das besser als Cardmarket ist. Liste exportierbar als Text oder als PNG mit den Preisen drin, um sie einem Tauschpartner zu schicken.
-                                        <figure class="bullet-figure bullet-figure--pending" aria-label="Wishlist eigene Preise + Export Beispiel — Bild folgt">
-                                            <span>Beispielbild folgt — Wishlist Preise + Export</span>
+                                    <li><strong>Wishlist</strong> — flagge Karten, die dir noch fehlen, mit einem Tipp aufs Herz. Jede Zeile trägt den Live-<em>Cardmarket-Low</em> (der günstigste aktuell verfügbare Angebotspreis über alle Cardmarket-Verkäufer), jeden Morgen um 10:00 CEST aktualisiert. Darunter trägst du deinen <em>Max</em>-Preis ein — den Höchstpreis, den du bereit bist zu zahlen. Sobald der Live-Preis auf oder unter dein Max fällt, zeigt die Karte eine grüne 🎯 „Unter deinem Ziel"-Pille — und der Telegram-Bot meldet sich beim nächsten Daily-Run (Setup unten in Account → Einstellungen).
+                                        <figure class="bullet-figure">
+                                            <img src="/images/tutorials/profile-prices/03-wishlist-live.jpeg" alt="Wishlist mit drei CRI-Karten: Cardmarket-Low pro Karte mit einem Max-Eingabefeld und einer grünen Unter deinem Ziel-Pille wenn das Max erreicht ist" loading="lazy">
+                                            <figcaption class="bullet-figure-caption">Live-Cardmarket-Low (grüne Pille) + dein Max (Eingabefeld) + grüne 🎯-Trigger-Pille wenn Cardmarket auf oder unter dein Max fällt.</figcaption>
+                                        </figure>
+                                        <p style="margin: 6px 0 4px; font-size: 0.94em;">Tipp oben den <em>Grid</em>-Button für die Overview-Ansicht, dann generiert <em>Save</em> ein teilbares PNG mit den Karten + deinen Max-Preisen drauf — direkt in jeden WhatsApp-/Telegram-Chat mit einem Tauschpartner einfügen.</p>
+                                        <figure class="bullet-figure">
+                                            <img src="/images/tutorials/profile-prices/04-wishlist-export.png" alt="Exportiertes PNG der Wishlist-Übersicht mit fünf Karten mit Anzahl-Badges und ca-Preisen" loading="lazy">
+                                            <figcaption class="bullet-figure-caption">Das exportierte PNG — landet direkt in WhatsApp / Telegram, kein Nachbearbeiten nötig.</figcaption>
                                         </figure>
                                     </li>
-                                    <li><strong>Tauschliste</strong> — gleicher Flow, andere Richtung: Karten, die du zum Tausch hast, mit Live-Cardmarket-€ <em>plus</em> deinem eigenen Wunschpreis pro Karte. Die ganze Liste exportierbar als Text oder PNG mit deinen Preisen — in jeden Chat pasten oder fürs Tauschtreffen ausdrucken.
-                                        <figure class="bullet-figure bullet-figure--pending" aria-label="Tauschliste eigene Preise + Export Beispiel — Bild folgt">
-                                            <span>Beispielbild folgt — Tauschliste Preise + Export</span>
+                                    <li><strong>Tauschliste</strong> — gleicher Flow, andere Richtung: Karten, die du zum Tausch hast, mit Live-<em>Cardmarket-Trend</em> (der geglättete Marktreferenzwert — was die meisten Verkäufer aktuell tatsächlich verlangen, jeden Morgen um 10:00 CEST aktualisiert). Darunter trägst du deinen <em>ca</em>-Preis ein — den weichen Zielwert, den du akzeptieren würdest. Sobald der Markttrend mehr als <strong>10 %</strong> über deinem ca-Preis liegt, zeigt die Karte eine rote ⚠ „Preis Check"-Pille — und der Telegram-Bot meldet sich, damit du den Tradelist-Preis anheben kannst, bevor du unter Wert verkaufst.
+                                        <figure class="bullet-figure">
+                                            <img src="/images/tutorials/profile-prices/05-tradelist-live.jpeg" alt="Tauschliste mit drei MEW-Karten: Cardmarket-Trend pro Karte mit einem ca-Eingabefeld und einer roten Preis-Check-Pille wenn der Markt 10 Prozent über dem ca-Preis liegt" loading="lazy">
+                                            <figcaption class="bullet-figure-caption">Live-Cardmarket-Trend (grüne Pille) + dein ca-Preis (Eingabefeld) + rote ⚠ Preis-Check-Pille wenn der Markt ≥ 10 % über deinem Wunschpreis liegt.</figcaption>
                                         </figure>
                                     </li>
                                     <li><strong>Meta-Binder</strong> — baut auto einen druckbaren A4-Binder aller meta-relevanten Karten der aktuellen Rotation, mit Cardmarket-€ pro Slot. Besessene Kopien werden auto aus deiner Sammlung markiert, sodass fehlende ins Auge springen.</li>
@@ -3059,6 +3090,23 @@
                                 <h3 class="tutorial-chapter-heading"><span>⚙️</span> Account</h3>
                                 <ul class="feature-banner-bullets">
                                     <li><strong>Einstellungen</strong> — Sprach-Toggle (DE / EN), Theme, Profil-Sync-Controls, Sign-out. Der erste Tab auf einem neuen Gerät, damit du nicht in einer Anleitung in der falschen Sprache landest.</li>
+                                    <li><strong>🔔 Telegram-Preisalarme</strong> — optional, Opt-in. Verbindet die Wishlist- + Tauschlist-Bullets von oben mit dem täglichen Preis-Refresh: jeden Morgen um 10:00 CEST scannt der Bot deine beiden Listen, vergleicht die Live-Cardmarket-Werte mit den Max-/ca-Preisen die du gesetzt hast, und pingt dich auf die Karten, die eine Schwelle gerissen haben. Zwei-Schritt-Setup:
+                                        <ol style="margin: 8px 0 8px 22px; padding: 0; font-size: 0.94em; line-height: 1.55;">
+                                            <li>Schicke <code>/myid</code> an <a href="https://t.me/TheDipidisBot" target="_blank" rel="noopener">@TheDipidisBot</a> in Telegram. Der Bot antwortet mit deiner <em>Chat-ID</em> — tippe die Zahl an, um sie zu kopieren.
+                                                <figure class="bullet-figure">
+                                                    <img src="/images/tutorials/profile-prices/01-telegram-myid.jpeg" alt="Telegram-Chat: User sendet /myid Befehl, Bot antwortet mit der Chat-ID 996462184 und Anweisungen sie auf der Webseite einzufügen" loading="lazy">
+                                                </figure>
+                                            </li>
+                                            <li>Öffne <strong>Mein Profil → Account → Einstellungen → 🔔 Telegram-Preisalarme</strong>, füg die Chat-ID ein, hake <em>Aktivieren</em> an, optional die Trade-List-Schwelle anpassen (Default 10 % über deinem ca-Preis), tippe <em>Speichern</em>.
+                                                <figure class="bullet-figure">
+                                                    <img src="/images/tutorials/profile-prices/02-settings-alerts.jpeg" alt="Einstellungen-Sektion zeigt Telegram-Preisalarme mit aktiviertem Toggle, Chat-ID 996462184 eingefügt, Schwelle 10 Prozent" loading="lazy">
+                                                </figure>
+                                            </li>
+                                        </ol>
+                                        Ab dem nächsten 10:00-CEST-Run bekommst du zwei fokussierte Telegram-Nachrichten: einen 🎯 <em>Wishlist-Treffer</em> mit den Karten die dein Max erreicht haben, und eine ⚠ <em>Trade-List-Warnungen</em> mit den Karten wo der Markt über deinen ca-Preis gesprungen ist. Jede Zeile trägt einen direkten Cardmarket-Link für die Karte.
+                                        <br><br>
+                                        <em>Spam-Bremse:</em> eine Karte, die gestern getriggert hat, bekommt 48 h Cool-Down — du wirst nicht jeden Morgen mit derselben Karte gepingt, solange sie im Schnäppchen-Bereich liegt. <em>Ausnahme:</em> wenn du den Max-/ca-Preis selbst änderst, wird der Cool-Down für diese Karte zurückgesetzt, sodass der nächste Run die Karte sauber neu auswertet.
+                                    </li>
                                 </ul>
                                 <div class="feature-banner-protip">
                                     <strong>Pro-Tipp:</strong> Die kleine Zahl neben jeder Sektion in der Sidebar (<code>Meine Sammlung (97)</code>, <code>Meine Decks (1)</code>, <code>Tauschliste (15)</code>) updatet live, sobald du Karten hinzufügst oder Builds speicherst — Quick-Signal auf einen Blick, dass dir kein State beim Gerätewechsel verloren ging.
@@ -4941,9 +4989,7 @@
                                     <div class="mb-10">
                                         <label for="settings-price-alerts-chatid" class="d-block fs-13 fw-bold mb-5" data-i18n="profile.priceAlerts.chatIdLabel">Telegram-Chat-ID</label>
                                         <input type="text" id="settings-price-alerts-chatid" placeholder="z. B. 123456789" class="py-10 px-10 border-grey br-6 fs-14" style="width: 200px;" inputmode="numeric" aria-label="Telegram chat ID">
-                                        <p class="color-grey fs-12 mt-5" data-i18n="profile.priceAlerts.chatIdHelp">
-                                            Sende <code>/myid</code> an <a href="https://t.me/TheDipidisBot" target="_blank" rel="noopener">@TheDipidisBot</a> und füg die Zahl hier ein.
-                                        </p>
+                                        <p class="color-grey fs-12 mt-5" data-i18n="profile.priceAlerts.chatIdHelp" data-i18n-html></p>
                                     </div>
                                     <div class="mb-10">
                                         <label for="settings-price-alerts-threshold" class="d-block fs-13 fw-bold mb-5" data-i18n="profile.priceAlerts.thresholdLabel">Trade-List Schwelle</label>

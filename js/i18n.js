@@ -3460,6 +3460,19 @@ function updateTranslationsInDOM() {
     const key = el.getAttribute('data-i18n');
     if (!key) return;
     const translated = t(key);
+    // Opt-in: when the translation string is meant to carry HTML
+    // (links, <code>, <strong> etc.), the page author can tag the
+    // element with `data-i18n-html` so the renderer drops the
+    // text-node-preservation logic and just replaces innerHTML.
+    // Without this, a translation like
+    //   Sende <code>/myid</code> an <a ...>@TheDipidisBot</a>
+    // gets pasted as literal text into the first child text node,
+    // exposing the angle brackets in the UI (Telegram-Preisalarme
+    // helper text reported on 2026-06-04).
+    if (el.hasAttribute('data-i18n-html')) {
+      el.innerHTML = translated;
+      return;
+    }
     const childElements = Array.from(el.children);
     if (childElements.length > 0) {
       // If the element has a dedicated label child, update that instead

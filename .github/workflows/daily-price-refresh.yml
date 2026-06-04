@@ -114,6 +114,19 @@ jobs:
         run: |
           python scrapers/cardmarket_price_merger.py
 
+      # Regenerate the card-DB chunks the frontend actually reads.
+      # The mapper + merger update data/price_data.csv, but the
+      # Wishlist / Trade List / Deck Builder grids consume
+      # cards_chunk_{standard,extended,legacy}.json — which embed
+      # the price columns directly. Without this step the new
+      # price_data.csv just sits next to stale chunks and the
+      # frontend keeps showing yesterday's eur_price.
+      - name: Regenerate card DB chunks from latest prices
+        env:
+          PYTHONPATH: ${{ github.workspace }}/backend/core
+        run: |
+          python backend/core/prepare_card_data.py
+
       - name: Bump version
         run: |
           chmod +x bump-version.sh
@@ -129,6 +142,9 @@ jobs:
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name  "github-actions[bot]"
           git add data/cardmarket_id_mapping.csv data/price_data.csv \
+                  data/cards_chunk_standard.json data/cards_chunk_extended.json \
+                  data/cards_chunk_legacy.json data/cards_manifest.json \
+                  data/all_cards_merged.json data/all_cards_merged.csv \
                   index.html service-worker.js version.json
           if git diff --cached --quiet; then
             echo "No price changes to commit — skipping push."

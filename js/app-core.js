@@ -2339,16 +2339,17 @@ const BASE_PATH = './data/';
             }
         }
 
-        async function loadAllCardsDatabase() {
+        async function loadAllCardsDatabase(options) {
             try {
                 // --- Strategy: Chunked loading with IndexedDB cache ---
                 // 1. Try manifest-based chunked loading (Standard chunk first, rest lazy)
                 // 2. Fallback to monolith all_cards_merged.json if chunks unavailable
                 const cache = window.cardDataCache;
                 const manifestUrl = './data/cards_manifest.json';
+                const force = !!(options && options.force);
 
                 if (cache) {
-                    const freshness = await cache.checkFreshness(manifestUrl);
+                    const freshness = await cache.checkFreshness(manifestUrl, { force: force });
 
                     if (freshness.fresh && freshness.cachedManifest) {
                         // --- Fast path: load from IndexedDB ---
@@ -2531,9 +2532,37 @@ const BASE_PATH = './data/';
             if (window.userDecks && window.userDecks.length > 0 && typeof updateDecksUI === 'function') updateDecksUI();
             if (typeof updateCollectionUI === 'function') updateCollectionUI();
             if (typeof updateWishlistUI === 'function') updateWishlistUI();
+            if (typeof updateTradelistUI === 'function') updateTradelistUI();
             if (window.userProfile && typeof updateProfileUI === 'function') updateProfileUI(window.userProfile);
         }
-        
+
+        // Expose so the visibility-change handler below + any external
+        // refresh path can re-trigger a card-DB load with force=true.
+        window.loadAllCardsDatabase = loadAllCardsDatabase;
+
+        // PWA-on-homescreen refresh: when the user brings the app back
+        // to the foreground (Android task switch, iOS Home + reopen,
+        // browser tab returning to focus), kick a forced freshness check
+        // so the price + chunk caches don't sit stale for hours. Without
+        // this, a PWA opened in the morning would keep showing the prior
+        // night's prices even after the daily 08:00 UTC refresh — exactly
+        // the symptom the user reported (Chrome browser had fresh prices,
+        // installed PWA still showed N/A on the same wishlist).
+        //
+        // Throttled to once per 60 s so rapid tab toggling doesn't fire
+        // a flurry of manifest fetches. The fetch itself is ~1 KB so the
+        // throttle is mostly for politeness, not bandwidth.
+        var _lastVisRefresh = 0;
+        document.addEventListener('visibilitychange', function () {
+            if (document.visibilityState !== 'visible') return;
+            var now = Date.now();
+            if (now - _lastVisRefresh < 60 * 1000) return;
+            _lastVisRefresh = now;
+            loadAllCardsDatabase({ force: true }).catch(function (err) {
+                console.warn('[CardDB] Visibility refresh failed:', err && err.message);
+            });
+        });
+
         async function loadAceSpecsList() {
             try {
                 const timestamp = new Date().getTime();

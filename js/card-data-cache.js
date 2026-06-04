@@ -13,7 +13,20 @@
     var MANIFEST_KEY = 'cards_manifest';
     var CARDS_PREFIX = 'chunk_';
     // Max age before we check the server for updates (ms)
-    var MAX_AGE_MS = 4 * 60 * 60 * 1000; // 4 hours
+    var MAX_AGE_MS = 5 * 60 * 1000; // 5 minutes
+    //
+    // Why 5 minutes (down from the original 4 hours):
+    //   The freshness window skips the network manifest check entirely
+    //   when the cached manifest is "young". 4 hours was way too long
+    //   for a PWA installed on the home screen: the user could open
+    //   the app, see N/A prices, the daily price refresh would commit
+    //   new chunks to main two hours later, and on the next PWA open
+    //   (within the 4-hour window) the freshness check would short-
+    //   circuit, the cached old chunks would be served, and prices
+    //   stayed N/A even though fresh chunks were sitting on the
+    //   origin. 5 minutes keeps the manifest-fetch cost negligible
+    //   (~1 KB per check) and brings the PWA in line with what
+    //   Chrome sees on every reload via the SW network-first path.
 
     // ---- Public API exposed on window.cardDataCache ----
 
@@ -67,15 +80,20 @@
      * Compares local manifest version against the server manifest.
      * Returns { fresh: true/false, serverManifest: ... }
      */
-    async function checkFreshness(manifestUrl) {
+    async function checkFreshness(manifestUrl, options) {
+        var force = !!(options && options.force);
         var cached = await getCachedManifest();
         if (!cached || !cached.timestamp) {
             return { fresh: false, serverManifest: null, cachedManifest: null };
         }
 
         var age = Date.now() - cached.timestamp;
-        if (age < MAX_AGE_MS) {
-            // Within freshness window — skip network check
+        if (!force && age < MAX_AGE_MS) {
+            // Within freshness window — skip network check.
+            // force=true (used by the visibilitychange refresh path in
+            // app-core.js) bypasses this so a returning PWA gets a
+            // version check even if the in-memory cache thinks it's
+            // young.
             return { fresh: true, serverManifest: null, cachedManifest: cached };
         }
 

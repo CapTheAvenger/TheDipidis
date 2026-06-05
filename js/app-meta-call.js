@@ -252,6 +252,27 @@ window.MetaCall = (function () {
                                             // Used by Predictor 4.7 (Online-Tournament-Win Signal) to filter
                                             // winners CSV rows to the rotation that's actually producing
                                             // in-person results.
+  // What set code should appear in the "Current Meta (XXX)" header
+  // label on rendered Meta-Call PNGs / canvases? `_activeInPersonSetCode`
+  // is data-derived and lags behind the official rotation by however
+  // long it takes for the first new-format tournament to be scraped.
+  // During that gap (e.g. 2026-06-05 — first TEF-CRI major has just
+  // started, labs still only has TEF-POR rows) the bare
+  // `_activeInPersonSetCode` would label everything "(POR)" even
+  // though the format has officially rotated to CRI — confusing for
+  // users who already see Past Meta = TEF-POR in the dropdown above.
+  //
+  // Fix: once today >= in_person_legal_date, the official rotation is
+  // live; report current_set (CRI) regardless of labs lag. Before
+  // that, fall back to _activeInPersonSetCode (POR — what labs has).
+  function _displayInPersonSetCode() {
+    const fw = _formatWindow || {};
+    const today = new Date().toISOString().slice(0, 10);
+    const legal = String(fw.in_person_legal_date || '').trim();
+    const current = String(fw.current_set || '').trim().toUpperCase();
+    if (legal && today >= legal && current) return current;
+    return _activeInPersonSetCode || current || '';
+  }
   // Newest scraped_at timestamp seen across the labs + online CSVs.
   // Surfaced in the Mode B banner so the user can sanity-check that
   // they aren't looking at months-old cached data — if it reads
@@ -7699,7 +7720,7 @@ window.MetaCall = (function () {
     _paintBackground(ctx, W, H);
     const _srcLabel = _metaSource === 'past'
       ? ` · Past Meta: ${_pastMetaFormatKey || '?'}`
-      : ` · Current Meta${_activeInPersonSetCode ? ' (' + _activeInPersonSetCode + ')' : ''}`;
+      : ` · Current Meta${(() => { const c = _displayInPersonSetCode(); return c ? ' (' + c + ')' : ''; })()}`;
     _paintHeader(ctx, W, 'META CALL',
       `${_settings.totalPlayers.toLocaleString()} ${t('mc.labelPlayers')} · ${_settings.rounds} ${t('mc.roundsAbbr')} · Day 2: ${_settings.day2Points} ${t('mc.ptsAbbr')}${_srcLabel}`);
 
@@ -7995,7 +8016,7 @@ window.MetaCall = (function () {
     // generated in Current Meta vs Past Meta vs a TG snapshot).
     const sourceLabel = _metaSource === 'past'
       ? ` · Past Meta: ${_pastMetaFormatKey || '?'}`
-      : ` · Current Meta${_activeInPersonSetCode ? ' (' + _activeInPersonSetCode + ')' : ''}`;
+      : ` · Current Meta${(() => { const c = _displayInPersonSetCode(); return c ? ' (' + c + ')' : ''; })()}`;
     const titleLine = baseTitleLine + viewLabel + sourceLabel;
     _paintHeader(ctx, W, 'META CALL', titleLine);
 
@@ -8071,7 +8092,7 @@ window.MetaCall = (function () {
     _paintBackground(ctx, W, H);
     const _srcLabel2 = _metaSource === 'past'
       ? ` · Past Meta: ${_pastMetaFormatKey || '?'}`
-      : ` · Current Meta${_activeInPersonSetCode ? ' (' + _activeInPersonSetCode + ')' : ''}`;
+      : ` · Current Meta${(() => { const c = _displayInPersonSetCode(); return c ? ' (' + c + ')' : ''; })()}`;
     _paintHeader(ctx, W, 'META CALL',
       `${_settings.myDeck} · ${_settings.totalPlayers.toLocaleString()} ${t('mc.labelPlayers')} · ${_settings.rounds} ${t('mc.roundsAbbr')}${_srcLabel2}`);
 

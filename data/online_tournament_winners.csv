@@ -1,4 +1,5 @@
 tournament_id,tournament_date,format,player_count,winner_archetype,winner_winrate
+6a1d8b3e47f3797bf6ba8e47,2026-06-03,CRI,122,Dragapult,27.0
 6a1661c08c163b8097998337,2026-06-02,CRI,170,Hydrapple Ogerpon,21.0
 6a1eaac047f3797bf6ba9d10,2026-06-02,CRI,134,Dragapult,31.0
 eh-why-not,2026-06-02,CRI,128,Slowking,21.0
@@ -46,6 +47,3 @@ art-art-art,2026-05-16,CRI,276,Dragapult,34.0
 69f4579be23aab068aad6b4a,2026-05-11,CRI,109,Alakazam Dudunsparce,31.0
 69f9383e4f71d664893ed246,2026-05-09,CRI,232,Dragapult Dusknoir,31.0
 is-something,2026-05-09,CRI,257,Dragapult,30.0
-69f0df364f71d664893e65fe,2026-05-07,CRI,104,Arboliva Ogerpon,25.0
-69fb3adc4f71d664893ee513,2026-05-07,CRI,156,Lucario Hariyama,33.0
-69f553544f71d664893e99f0,2026-05-07,CRI,197,Dragapult Dusknoir,36.0

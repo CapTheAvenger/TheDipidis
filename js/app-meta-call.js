@@ -3068,61 +3068,65 @@ window.MetaCall = (function () {
                   + 0.10 * trendPct
                   + 0.15 * clPastPct;
       } else {
-        // Mode A baseline 3.1 (no TG, no explicit CL toggle, no labs).
+        // Mode A baseline 3.2 (no TG, no explicit CL toggle, no labs).
         //
-        // 2026-06 rebalance (post-Turin Phase 1 review). This branch
-        // is the ONLY one in which labs data is absent — it's also
-        // the prediction path that gets used the most days (between
-        // rotations / when only ladder + tournament-online data is
-        // available). All four changes target the Turin Phase 1
-        // misses:
+        // 2026-06 rebalance, second iteration after first generation
+        // backtest against Turin Phase 1:
         //
-        //   Turin Phase 1, ~2 033 Masters, Mode A baseline output:
-        //     Mega Greninja  pred 9,1 %  actual <3 %   (Δ −6 pp)
-        //     Beedrill ex    pred 5,1 %  actual <3 %   (Δ −2 pp)
-        //     Festival Lead  pred 1,6 %  actual 4 %    (Δ +2,4 pp)
-        //     Basic Box      pred 1,3 %  actual 4 %    (Δ +2,7 pp)
+        //   What Phase 1 (3.1) did right:
+        //     Mega Greninja  9,1 % → 7,5 %  (still high, but trending right)
+        //     Beedrill ex    5,1 % → 4,2 %  (similar)
+        //     Recommendations swapped Diancie #1 → Crustle #1
+        //     Dark-Horse caught Lillie's Clefairy ex
         //
-        //   - top8Boost weight 0.20 → 0.45. Brought-share × T8 conv
-        //     is the strongest "is this deck actually closing out
-        //     rounds?" signal we have; making it the dominant term
-        //     naturally damps online-hype decks (high brought, low
-        //     conv → Mega Greninja, Beedrill ex) AND surfaces
-        //     tournament-only decks (low brought, high conv →
-        //     Festival Lead).
-        //   - brought-share weight 0.30 → 0.10. Same online-hype
-        //     evidence — bare brought was punching above its
-        //     epistemic weight.
-        //   - ladder weight 0.40 → 0.27. Online ladder is still a
-        //     real signal but should not dominate in a baseline
-        //     where labs data is absent — it skews to new-card
-        //     experimentation.
-        //   - new 0.08 clPast term — JP M4 past meta as a small
-        //     continuity signal (JP rotates exactly one set ahead
-        //     of international; what JP plays as "past meta" maps
-        //     onto our current in-person rotation). This addresses
-        //     the Basic Box / Festival Lead under-call directly.
-        //     clPastPct degrades to 0 when the past CL CSV is
-        //     missing — every deck loses the same 8 % term, the
-        //     predictedSum normalisation absorbs it.
+        //   What Phase 1 (3.1) did wrong:
+        //     Dragapult Family  34,1 % → 38,5 %  (Δ +4,4 pp WORSE)
+        //
+        //   Root cause of the Dragapult regression: the 0.08 clPast
+        //   default-on term injected JP M4 share unprocessed. JP M4
+        //   has the SAME Dragapult bias as the international meta —
+        //   Dragapult Meowth 12,81 %, Dragapult Blaziken 4,05 %,
+        //   Dragapult Dusknoir 3,60 %, Dragapult Dudunsparce 3,51 %.
+        //   Sum: ~25 % JP-side Dragapult variants → 25 × 0.08 ≈ 2 pp
+        //   extra boost to the Dragapult family on top of an already-
+        //   over-called share.
+        //
+        //   And the decks the 3.1 clPast term was supposed to help
+        //   (Festival Lead, Basic Box / Ogerpon Clefairy) are at
+        //   1,12 % / 1,41 % in JP M4 — too small to lift them
+        //   meaningfully even at 0.08 × share.
+        //
+        //   Lesson: JP M4 as raw-share continuity term ≠ free
+        //   precision. JP's meta is anchored to the same Dragapult
+        //   axis we are; using its share as an additive prior
+        //   amplifies our own bias instead of correcting it.
+        //   Festival Lead / Basic Box wins at Turin were regional /
+        //   BO3 phenomena that JP didn't pioneer either.
+        //
+        // 3.2 changes:
+        //   - clPast term REMOVED from baseline. Users who want
+        //     JP CL data in the mix can still flip the CL Past toggle
+        //     — Branch-5 at line ~3060 above still gives it 0.15
+        //     weight as before. The toggle stays the explicit
+        //     opt-in path it was designed to be.
+        //   - 0.08 freed up by clPast removal: redistribute 0.03 to
+        //     ladder (back closer to its historical weight) and 0.05
+        //     to top8 (push T8 conv even harder as the dominant
+        //     signal — that's what actually worked in 3.1).
         //
         // Final mix (sums to 1.00):
-        //   0.27 ladder (4.2-damped)
+        //   0.30 ladder (4.2-damped)
         //   0.10 brought
-        //   0.45 top8_boost (brought × conv-factor)
-        //   0.08 cl_past (JP M4)
+        //   0.50 top8_boost (brought × conv-factor) — dominant signal
         //   0.10 weekly_trend
         //
         // weeklySignal already incorporates the share-vs-week-ago
         // dynamic; when no week-ago snapshot exists it falls back
         // to (ladder - trendPct) so the formula degrades gracefully
-        // on first install. clPastPct degrades to 0 when the past
-        // CL CSV is missing — predictions stay consistent (every
-        // deck loses the same 8 % term, normalisation absorbs it).
-        predicted = 0.27 * ladderPctDamped
+        // on first install.
+        predicted = 0.30 * ladderPctDamped
                   + 0.10 * broughtPct
-                  + 0.45 * top8Boost
-                  + 0.08 * clPastPct
+                  + 0.50 * top8Boost
                   + 0.10 * weeklySignal;
       }
       // Predictor 5.1 — apply the Day-2 conversion quality multiplier.

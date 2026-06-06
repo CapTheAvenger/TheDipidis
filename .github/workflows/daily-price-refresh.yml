@@ -187,10 +187,61 @@ jobs:
       # Trigger Pages deploy so the new price_data.csv hits the
       # live origin within minutes of the commit.
       - name: Trigger GitHub Pages deploy
+        id: pages_deploy
         if: steps.commit.outputs.pushed == 'true'
-        run: gh workflow run deploy-pages.yml --ref main
+        run: |
+          gh workflow run deploy-pages.yml --ref main
+          # Give Actions ~10 s to register the new run before we ask
+          # for its id — otherwise `gh run list` returns the previous
+          # deploy (or no row at all) and the wait step ends up
+          # watching the wrong run.
+          sleep 10
+          run_id=$(gh run list \
+              --workflow=deploy-pages.yml \
+              --branch main \
+              --limit 1 \
+              --json databaseId \
+              --jq '.[0].databaseId')
+          if [ -z "$run_id" ] || [ "$run_id" = "null" ]; then
+            echo "::warning::Could not resolve Pages deploy run id — falling back to fixed 4 min sleep before alerts."
+            echo "run_id=" >> "$GITHUB_OUTPUT"
+          else
+            echo "Pages deploy run id: $run_id"
+            echo "run_id=$run_id" >> "$GITHUB_OUTPUT"
+          fi
         env:
           GH_TOKEN: ${{ github.token }}
+
+      # Wait for the Pages deploy to actually publish before we
+      # Telegram-alert users. Otherwise the user opens the site after
+      # the alert hits, the SW does a network-first fetch on
+      # /data/price_data.csv → gets the still-old CDN response, sees
+      # yesterday's eur_low (e.g. 3,00 €) while the alert message
+      # showed today's eur_low (e.g. 2,80 €), and asks the maintainer
+      # why "Telegram and the page disagree". 2026-06 bug — bot was
+      # already snitching today's prices ~2 min before Pages had them
+      # on the origin.
+      #
+      # gh run watch blocks until the deploy run reaches a terminal
+      # state and propagates the exit code via --exit-status. We
+      # tolerate failure of the watch itself — never block the alert
+      # send on a transient `gh` glitch — but a real deploy failure
+      # is surfaced as a warning so the operator can investigate.
+      - name: Wait for Pages deploy to finish
+        if: steps.commit.outputs.pushed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          DEPLOY_RUN_ID: ${{ steps.pages_deploy.outputs.run_id }}
+        run: |
+          if [ -z "$DEPLOY_RUN_ID" ]; then
+            echo "No run id resolved — sleeping 4 min as a fallback so Pages has time to publish."
+            sleep 240
+            exit 0
+          fi
+          echo "Watching Pages deploy run $DEPLOY_RUN_ID …"
+          if ! gh run watch "$DEPLOY_RUN_ID" --exit-status --interval 15; then
+            echo "::warning::Pages deploy run $DEPLOY_RUN_ID did not finish cleanly — alerts will still go out but the live site may serve stale prices for a moment."
+          fi
 
       # Alerts always run, even if the commit step was a no-op
       # (price data unchanged today). The snooze window is what

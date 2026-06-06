@@ -246,6 +246,36 @@ window.MetaCall = (function () {
   let _activeFormatLabsDecks   = new Set(); // norm(name) — appears in active-meta labs CSV
   let _activeFormatTop15Decks  = new Set(); // norm(name) — broke top-15 in any active-meta tournament
   let _majorSharesByDeck       = {};        // norm(name) -> [{ date, tid, share, day1, day2 }, ...] DESC by date
+
+  // ── Predictor 5.5 — Last-Meta-Labs floor ────────────────────────
+  // The TEF-CRI rotation (2026-06-05) is a SET ADDITION — every card
+  // legal in TEF-POR is still legal in TEF-CRI. Decks that put up a
+  // measurable share in the closed meta (Festival Lead 3.90 % across
+  // all TEF-POR Regionals, Basic Box 2.12 %, Cynthia's Garchomp
+  // 4.25 %) don't disappear overnight; their pilots keep playing them
+  // until the new set produces a deck that knocks them off. The
+  // baseline Mode A predictor was floor-blind to this continuity and
+  // came in below 2 % on each of them at the first TEF-CRI major.
+  //
+  // _lastMetaLabsByDeck holds the player-weighted average share each
+  // archetype put up across all tournaments of `previous_format_key`
+  // (read from format_window.json). It is consumed as a SOFT FLOOR in
+  // Mode A baseline only — applied as max(predicted, share*FACTOR) —
+  // and gated by format_window.set_addition_only. When that flag is
+  // false (a true rotation, oldest set leaves the legal pool), last-
+  // meta data becomes misleading (key support cards are gone) and the
+  // floor must NOT be applied.
+  //
+  // Why player-weighted: sum(share * players) / sum(players) gives a
+  // single "out of every brought deck across the whole meta, what
+  // fraction was this archetype" — which is exactly the unit our
+  // predicted-share output uses. Equal-tournament averaging would
+  // overweight tiny side events relative to the 1000-player
+  // Regionals.
+  let _lastMetaLabsByDeck      = {};        // norm(name) -> { share, players, n }
+  const PREDICTOR_5_5_FLOOR_FACTOR = 0.7;   // soft floor = lastMetaShare × 0.7
+                                            //   (allows for some natural decay between formats; a
+                                            //    deck at 3.90 % last meta floors at 2.73 %, not 3.90 %)
   let _activeInPersonSetCode   = '';        // e.g. "POR" during the lag window when current_set="CRI" but
                                             // in-person events still play TEF-POR. Derived once per
                                             // loadData() from labs_tournament_decks.csv's newest meta column.
@@ -3128,6 +3158,46 @@ window.MetaCall = (function () {
                   + 0.10 * broughtPct
                   + 0.50 * top8Boost
                   + 0.10 * weeklySignal;
+
+        // Predictor 5.5 — Last-Meta-Labs soft floor (Mode A baseline).
+        // Set-addition rotations (CRI is one) leave every previous-meta
+        // legal card legal; archetypes that put up real share in TEF-POR
+        // don't vanish on day 1 of TEF-CRI. The Mode A formula above
+        // weights ladder + online brought-share + online T8 conv — all
+        // sources that under-represent in-person-mainstays whose pilots
+        // played them at TEF-POR Regionals but never grinded them on the
+        // online ladder (Festival Lead 3.90 % brought, Basic Box 2.12 %,
+        // Cynthia's Garchomp 4.25 %).
+        //
+        // The floor is a one-sided guard: it only LIFTS predictions for
+        // decks the baseline under-called vs their previous-meta share.
+        // Decks the baseline already calls above the floor (Dragapult
+        // family, top ladder decks) are untouched — Math.max keeps the
+        // formula output. That deliberately avoids the JP-M4 mistake
+        // (PR #280) where last-meta data added on top of an already-
+        // over-called share doubled the bias.
+        //
+        // FLOOR_FACTOR = 0.7 → a 3.90 % last-meta deck floors at 2.73 %,
+        // not 3.90 %. The discount allows for some natural decay between
+        // formats — pilots try new shells, the field hedges, a deck or
+        // two falls out of favour — without erasing the continuity
+        // signal entirely.
+        //
+        // Gated by _lastMetaLabsByDeck being populated (loadData() only
+        // fills it when previous_format_key is set AND set_addition_only
+        // is true). True rotations get an empty map → this is a no-op.
+        const lastMetaShare = (_lastMetaLabsByDeck[k] && _lastMetaLabsByDeck[k].share) || 0;
+        if (lastMetaShare > 0) {
+          const floorPct = lastMetaShare * PREDICTOR_5_5_FLOOR_FACTOR;
+          if (predicted < floorPct) {
+            d.lastMetaLabsFloor = {
+              prevShare: Math.round(lastMetaShare * 100) / 100,
+              floorPct:  Math.round(floorPct * 100) / 100,
+              liftPP:    Math.round((floorPct - predicted) * 100) / 100,
+            };
+            predicted = floorPct;
+          }
+        }
       }
       // Predictor 5.1 — apply the Day-2 conversion quality multiplier.
       // Fires across all modes (A / B / mixed) so the signal lifts
@@ -3763,6 +3833,7 @@ window.MetaCall = (function () {
       _activeFormatLabsDecks  = new Set();
       _activeFormatTop15Decks = new Set();
       _majorSharesByDeck      = {};
+      _lastMetaLabsByDeck     = {};
       _activeInPersonSetCode  = '';
       _onlineWinsByDeck       = {};
       _dataLastScrapedAt      = '';
@@ -3902,6 +3973,62 @@ window.MetaCall = (function () {
                 );
               } catch (_e) { /* ignore */ }
             }
+          }
+
+          // Predictor 5.5 — Last-Meta-Labs aggregation (player-weighted).
+          // Iterate labsRowsAll separately, filtering for the immediately
+          // previous format key. Skipped entirely when format_window has
+          // no previous_format_key OR set_addition_only is false (true
+          // rotation — cards have left the legal pool, last-meta share
+          // is no longer a reliable continuity signal).
+          const prevFmtKey = String((_formatWindow && _formatWindow.previous_format_key) || '')
+            .trim().toUpperCase();
+          const setAdditionOnly = !!(_formatWindow && _formatWindow.set_addition_only);
+          if (prevFmtKey && setAdditionOnly) {
+            const lastMetaAgg = {}; // k -> { name, shareWeighted, players, n }
+            labsRowsAll.forEach(r => {
+              if (!r.deck_name) return;
+              const meta = String(r.meta || '').trim().toUpperCase();
+              if (meta !== prevFmtKey) return;
+              const share = parseEU(r.share_pct || '0');
+              const players = parseInt(r.player_count || '0', 10) || 0;
+              if (players <= 0 || share <= 0) return;
+              const k = normalize(r.deck_name);
+              if (!lastMetaAgg[k]) {
+                lastMetaAgg[k] = { name: r.deck_name, shareWeighted: 0, players: 0, n: 0 };
+              }
+              lastMetaAgg[k].shareWeighted += share * players;
+              lastMetaAgg[k].players += players;
+              lastMetaAgg[k].n += 1;
+            });
+            Object.keys(lastMetaAgg).forEach(k => {
+              const a = lastMetaAgg[k];
+              if (a.players > 0) {
+                _lastMetaLabsByDeck[k] = {
+                  name:    a.name,
+                  share:   a.shareWeighted / a.players,
+                  players: a.players,
+                  n:       a.n,
+                };
+              }
+            });
+            try {
+              const decks = Object.keys(_lastMetaLabsByDeck).length;
+              if (decks > 0) {
+                console.log(
+                  `[Predictor 5.5] Last-Meta-Labs floor armed (prev=${prevFmtKey}, ` +
+                  `set-addition): ${decks} archetypes from previous meta loaded.`
+                );
+              }
+            } catch (_e) { /* ignore */ }
+          } else if (prevFmtKey && !setAdditionOnly) {
+            try {
+              console.log(
+                `[Predictor 5.5] Last-Meta-Labs floor DISABLED — ${prevFmtKey} ` +
+                `was a true rotation (set_addition_only=false). Last-meta shares ` +
+                `would mislead because key cards have left the legal pool.`
+              );
+            } catch (_e) { /* ignore */ }
           }
 
           // Predictor 4.1 — Recency weight (linear ramp 0.5 → 1.0 from

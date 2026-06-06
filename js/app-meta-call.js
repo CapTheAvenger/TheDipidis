@@ -2969,26 +2969,69 @@ window.MetaCall = (function () {
         // from the online ladder. Ladder term damped by 4.2; labs term
         // family-aware via 4.4.
         //
-        // CL toggles ignored here BY DESIGN: once labs majors data is
-        // available, the labs aggregate IS the authoritative in-person
-        // signal that CL Past would otherwise stand in for. Baking
-        // CL (current or past) on top of labs creates two competing
-        // in-person voices in the same prediction. Users who want to
-        // mix CL data in anyway can flip the toggles in a Mode-A run
-        // (i.e. before the labs CSV exists for the rotation).
-        //
+        // Baseline (no CL toggle):
         //   0.40 labs (4.4-redistributed) × t8_conv_boost
         //   0.20 brought
         //   0.15 ladder (4.2-damped)
         //   0.15 post-major-trend
         //   0.10 weekly-trend
         //   + meta-dynamics counter-boost (4.0a, capped pp, additive)
-        predicted = 0.40 * labsPct * labsT8Boost
-                  + 0.20 * broughtPct
-                  + 0.15 * ladderPctDamped
-                  + 0.15 * postMajorSignal
-                  + 0.10 * weeklySignal
-                  + metaDynBoostPp;
+        //
+        // 2026-06 (Phase 1 follow-up): CL toggles are now wired into
+        // Mode B too. Previously the toggles were a silent no-op when
+        // labs data was available — confusing UX since the toggle
+        // buttons are visible regardless of mode. When the user
+        // explicitly enables CL Past and/or CL Current, those signals
+        // get mixed in alongside labs, with labs staying primary
+        // (slightly reduced from 0.40 to 0.32-0.35). CL acts as a
+        // supplementary "what is JP / the most recent locals are
+        // playing" voice, not a replacement for labs.
+        //
+        // Why smaller CL weights than Mode-A toggle branches: in
+        // Mode A, CL fills the in-person gap because labs is absent
+        // — so it can carry 0.12-0.15. In Mode B, labs already
+        // covers that gap; CL is a colour-tint on top, hence 0.08-
+        // 0.12.
+        if (clCurrentActive && clPastActive) {
+          //   0.32 labs × t8_conv | 0.17 brought | 0.12 ladder |
+          //   0.12 post-major | 0.08 weekly | 0.11 cl_cur | 0.08 cl_past
+          predicted = 0.32 * labsPct * labsT8Boost
+                    + 0.17 * broughtPct
+                    + 0.12 * ladderPctDamped
+                    + 0.12 * postMajorSignal
+                    + 0.08 * weeklySignal
+                    + 0.11 * clCurPct
+                    + 0.08 * clPastPct
+                    + metaDynBoostPp;
+        } else if (clCurrentActive) {
+          //   0.35 labs × t8_conv | 0.18 brought | 0.13 ladder |
+          //   0.13 post-major | 0.09 weekly | 0.12 cl_current
+          predicted = 0.35 * labsPct * labsT8Boost
+                    + 0.18 * broughtPct
+                    + 0.13 * ladderPctDamped
+                    + 0.13 * postMajorSignal
+                    + 0.09 * weeklySignal
+                    + 0.12 * clCurPct
+                    + metaDynBoostPp;
+        } else if (clPastActive) {
+          //   0.35 labs × t8_conv | 0.18 brought | 0.13 ladder |
+          //   0.13 post-major | 0.09 weekly | 0.12 cl_past
+          predicted = 0.35 * labsPct * labsT8Boost
+                    + 0.18 * broughtPct
+                    + 0.13 * ladderPctDamped
+                    + 0.13 * postMajorSignal
+                    + 0.09 * weeklySignal
+                    + 0.12 * clPastPct
+                    + metaDynBoostPp;
+        } else {
+          // Baseline Mode B — neither CL toggle on, original weights
+          predicted = 0.40 * labsPct * labsT8Boost
+                    + 0.20 * broughtPct
+                    + 0.15 * ladderPctDamped
+                    + 0.15 * postMajorSignal
+                    + 0.10 * weeklySignal
+                    + metaDynBoostPp;
+        }
       } else if (tgLoaded) {
         // Mode A + Testing Group: TG quantities reflect the user's
         // expert prep insight from their group, so weight it heavily.

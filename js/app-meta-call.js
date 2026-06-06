@@ -2964,21 +2964,41 @@ window.MetaCall = (function () {
 
       let predicted;
       if (_predictorMode === 'B') {
-        // Mode B (Predictor 3.0 + 4.2 + 4.4): labs majors authoritative
-        // + conv-rate weighted, plus post-major and weekly trend signals
-        // from the online ladder. Ladder term damped by 4.2; labs term
-        // family-aware via 4.4. CL toggles ignored.
+        // Mode B (Predictor 3.0 + 4.2 + 4.4 + 5.6): labs majors
+        // authoritative + conv-rate weighted, plus post-major and
+        // weekly trend signals from the online ladder, plus JP M4
+        // past-meta as a small continuity term.
+        //
+        // 2026-06 rebalance (post-Turin Phase 1 review):
+        //   - brought-share weight 0.20 → 0.10. Online brought-
+        //     share over-weighted ladder-hype decks (Turin: Mega
+        //     Greninja predicted 9,1 %, actual <3 %; Beedrill ex
+        //     predicted 5,1 %, actual <3 %). Top-8 conversion was
+        //     the natural filter we under-used.
+        //   - new 0.08 clPast term — JP rotates exactly one set
+        //     ahead of international, so JP's "past meta" (currently
+        //     M4 Ninja Spinner) maps cleanly onto our current
+        //     in-person rotation (TEF-CRI). This catches archetypes
+        //     like Basic Box (Ogerpon/Clefairy ex) and Festival Lead
+        //     that JP pioneers before they enter the international
+        //     ladder signal. clPastPct degrades to 0 if the past CL
+        //     CSV is missing, so this is a graceful add.
+        //   - weekly trend bumped 0.10 → 0.12 to absorb the slack.
+        //
+        // Final mix (sums to 1.00):
         //   0.40 labs (4.4-redistributed) × t8_conv_boost
-        //   0.20 brought
+        //   0.10 brought
         //   0.15 ladder (4.2-damped)
         //   0.15 post-major-trend
-        //   0.10 weekly-trend
+        //   0.08 cl_past (JP M4)
+        //   0.12 weekly-trend
         //   + meta-dynamics counter-boost (4.0a, capped pp, additive)
         predicted = 0.40 * labsPct * labsT8Boost
-                  + 0.20 * broughtPct
+                  + 0.10 * broughtPct
                   + 0.15 * ladderPctDamped
                   + 0.15 * postMajorSignal
-                  + 0.10 * weeklySignal
+                  + 0.08 * clPastPct
+                  + 0.12 * weeklySignal
                   + metaDynBoostPp;
       } else if (tgLoaded) {
         // Mode A + Testing Group: TG quantities reflect the user's
@@ -3016,14 +3036,43 @@ window.MetaCall = (function () {
                   + 0.10 * trendPct
                   + 0.15 * clPastPct;
       } else {
-        // Mode A baseline 3.0 + 4.2 (no TG, no CL, no labs).
-        //   0.40 ladder (4.2-damped) | 0.30 brought | 0.20 top8_boost | 0.10 weekly_trend
-        // weeklySignal already incorporates the share-vs-week-ago dynamic;
-        // when no week-ago snapshot exists it falls back to (ladder - trendPct)
-        // so the formula degrades gracefully on first install.
-        predicted = 0.40 * ladderPctDamped
-                  + 0.30 * broughtPct
-                  + 0.20 * top8Boost
+        // Mode A baseline 3.1 (no TG, no explicit CL toggle, no labs).
+        //
+        // 2026-06 rebalance (post-Turin Phase 1 review):
+        //   - top8Boost weight 0.20 → 0.45. Brought-share × T8 conv
+        //     is the strongest "is this deck actually closing out
+        //     rounds?" signal we have; making it the dominant term
+        //     naturally damps online-hype decks (high brought, low
+        //     conv) AND surfaces tournament-only decks (low brought,
+        //     high conv) like Festival Lead.
+        //   - brought-share weight 0.30 → 0.10. See Mode B above
+        //     for the Turin Phase 1 evidence (Mega Greninja /
+        //     Beedrill ex over-call by 2-6 pp each).
+        //   - ladder weight 0.40 → 0.27. Online ladder is still a
+        //     real signal but should not dominate in a baseline
+        //     where labs data is absent — it skews to new-card
+        //     experimentation.
+        //   - new 0.08 clPast term — JP M4 past meta as a small
+        //     continuity signal (JP rotates exactly one set ahead).
+        //     Same rationale as Mode B above.
+        //
+        // Final mix (sums to 1.00):
+        //   0.27 ladder (4.2-damped)
+        //   0.10 brought
+        //   0.45 top8_boost (brought × conv-factor)
+        //   0.08 cl_past (JP M4)
+        //   0.10 weekly_trend
+        //
+        // weeklySignal already incorporates the share-vs-week-ago
+        // dynamic; when no week-ago snapshot exists it falls back
+        // to (ladder - trendPct) so the formula degrades gracefully
+        // on first install. clPastPct degrades to 0 when the past
+        // CL CSV is missing — predictions stay consistent (every
+        // deck loses the same 8 % term, normalisation absorbs it).
+        predicted = 0.27 * ladderPctDamped
+                  + 0.10 * broughtPct
+                  + 0.45 * top8Boost
+                  + 0.08 * clPastPct
                   + 0.10 * weeklySignal;
       }
       // Predictor 5.1 — apply the Day-2 conversion quality multiplier.

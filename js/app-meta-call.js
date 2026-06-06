@@ -2964,41 +2964,30 @@ window.MetaCall = (function () {
 
       let predicted;
       if (_predictorMode === 'B') {
-        // Mode B (Predictor 3.0 + 4.2 + 4.4 + 5.6): labs majors
-        // authoritative + conv-rate weighted, plus post-major and
-        // weekly trend signals from the online ladder, plus JP M4
-        // past-meta as a small continuity term.
+        // Mode B (Predictor 3.0 + 4.2 + 4.4): labs majors authoritative
+        // + conv-rate weighted, plus post-major and weekly trend signals
+        // from the online ladder. Ladder term damped by 4.2; labs term
+        // family-aware via 4.4.
         //
-        // 2026-06 rebalance (post-Turin Phase 1 review):
-        //   - brought-share weight 0.20 → 0.10. Online brought-
-        //     share over-weighted ladder-hype decks (Turin: Mega
-        //     Greninja predicted 9,1 %, actual <3 %; Beedrill ex
-        //     predicted 5,1 %, actual <3 %). Top-8 conversion was
-        //     the natural filter we under-used.
-        //   - new 0.08 clPast term — JP rotates exactly one set
-        //     ahead of international, so JP's "past meta" (currently
-        //     M4 Ninja Spinner) maps cleanly onto our current
-        //     in-person rotation (TEF-CRI). This catches archetypes
-        //     like Basic Box (Ogerpon/Clefairy ex) and Festival Lead
-        //     that JP pioneers before they enter the international
-        //     ladder signal. clPastPct degrades to 0 if the past CL
-        //     CSV is missing, so this is a graceful add.
-        //   - weekly trend bumped 0.10 → 0.12 to absorb the slack.
+        // CL toggles ignored here BY DESIGN: once labs majors data is
+        // available, the labs aggregate IS the authoritative in-person
+        // signal that CL Past would otherwise stand in for. Baking
+        // CL (current or past) on top of labs creates two competing
+        // in-person voices in the same prediction. Users who want to
+        // mix CL data in anyway can flip the toggles in a Mode-A run
+        // (i.e. before the labs CSV exists for the rotation).
         //
-        // Final mix (sums to 1.00):
         //   0.40 labs (4.4-redistributed) × t8_conv_boost
-        //   0.10 brought
+        //   0.20 brought
         //   0.15 ladder (4.2-damped)
         //   0.15 post-major-trend
-        //   0.08 cl_past (JP M4)
-        //   0.12 weekly-trend
+        //   0.10 weekly-trend
         //   + meta-dynamics counter-boost (4.0a, capped pp, additive)
         predicted = 0.40 * labsPct * labsT8Boost
-                  + 0.10 * broughtPct
+                  + 0.20 * broughtPct
                   + 0.15 * ladderPctDamped
                   + 0.15 * postMajorSignal
-                  + 0.08 * clPastPct
-                  + 0.12 * weeklySignal
+                  + 0.10 * weeklySignal
                   + metaDynBoostPp;
       } else if (tgLoaded) {
         // Mode A + Testing Group: TG quantities reflect the user's
@@ -3038,23 +3027,41 @@ window.MetaCall = (function () {
       } else {
         // Mode A baseline 3.1 (no TG, no explicit CL toggle, no labs).
         //
-        // 2026-06 rebalance (post-Turin Phase 1 review):
+        // 2026-06 rebalance (post-Turin Phase 1 review). This branch
+        // is the ONLY one in which labs data is absent — it's also
+        // the prediction path that gets used the most days (between
+        // rotations / when only ladder + tournament-online data is
+        // available). All four changes target the Turin Phase 1
+        // misses:
+        //
+        //   Turin Phase 1, ~2 033 Masters, Mode A baseline output:
+        //     Mega Greninja  pred 9,1 %  actual <3 %   (Δ −6 pp)
+        //     Beedrill ex    pred 5,1 %  actual <3 %   (Δ −2 pp)
+        //     Festival Lead  pred 1,6 %  actual 4 %    (Δ +2,4 pp)
+        //     Basic Box      pred 1,3 %  actual 4 %    (Δ +2,7 pp)
+        //
         //   - top8Boost weight 0.20 → 0.45. Brought-share × T8 conv
         //     is the strongest "is this deck actually closing out
         //     rounds?" signal we have; making it the dominant term
         //     naturally damps online-hype decks (high brought, low
-        //     conv) AND surfaces tournament-only decks (low brought,
-        //     high conv) like Festival Lead.
-        //   - brought-share weight 0.30 → 0.10. See Mode B above
-        //     for the Turin Phase 1 evidence (Mega Greninja /
-        //     Beedrill ex over-call by 2-6 pp each).
+        //     conv → Mega Greninja, Beedrill ex) AND surfaces
+        //     tournament-only decks (low brought, high conv →
+        //     Festival Lead).
+        //   - brought-share weight 0.30 → 0.10. Same online-hype
+        //     evidence — bare brought was punching above its
+        //     epistemic weight.
         //   - ladder weight 0.40 → 0.27. Online ladder is still a
         //     real signal but should not dominate in a baseline
         //     where labs data is absent — it skews to new-card
         //     experimentation.
         //   - new 0.08 clPast term — JP M4 past meta as a small
-        //     continuity signal (JP rotates exactly one set ahead).
-        //     Same rationale as Mode B above.
+        //     continuity signal (JP rotates exactly one set ahead
+        //     of international; what JP plays as "past meta" maps
+        //     onto our current in-person rotation). This addresses
+        //     the Basic Box / Festival Lead under-call directly.
+        //     clPastPct degrades to 0 when the past CL CSV is
+        //     missing — every deck loses the same 8 % term, the
+        //     predictedSum normalisation absorbs it.
         //
         // Final mix (sums to 1.00):
         //   0.27 ladder (4.2-damped)

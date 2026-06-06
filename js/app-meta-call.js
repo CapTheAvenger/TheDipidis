@@ -3159,6 +3159,43 @@ window.MetaCall = (function () {
                   + 0.50 * top8Boost
                   + 0.10 * weeklySignal;
 
+        // Predictor 5.5.3 — Decline-Damper (Mode A baseline).
+        // The Turin Phase 1 abgleich showed that decks the previous
+        // format was actively shedding in its closing weeks come into
+        // a set-addition rotation already losing. Cynthia's Garchomp
+        // (TEF-POR early 4.83 % → late 3.03 %, ratio 0.63) and Rocket's
+        // Mewtwo (5.76 → 3.55, ratio 0.62) showed <2 % and 3 % at
+        // Turin respectively, but Mode A's baseline weights — online
+        // ladder + online-brought + online-top8 — read them as
+        // confidently mid-tier (~4-5 % predicted). The ladder is a
+        // lagging signal here; the labs late-vs-early trend is the
+        // forward one.
+        //
+        // We damp baseline by 0.85 when lateShare/earlyShare < 0.85.
+        // 0.85 is the threshold a deck must cross to NOT be considered
+        // declining — a sub-15 % drop in the closing tournaments is
+        // within noise, so we don't punish stable decks. The damper
+        // applies BEFORE the floor so an over-called declining deck
+        // can still be floored back up by max(early, late) — Festival
+        // Lead is exactly this case (lateShare 2.83 declined but
+        // earlyShare 4.50 keeps the floor at 3.15).
+        const PREDICTOR_5_5_DECLINE_THRESHOLD  = 0.85;
+        const PREDICTOR_5_5_DECLINE_DAMPER     = 0.85;
+        const dampEntry = _lastMetaLabsByDeck[k];
+        if (dampEntry && dampEntry.earlyShare > 0 && dampEntry.lateShare > 0) {
+          const trendRatio = dampEntry.lateShare / dampEntry.earlyShare;
+          if (trendRatio < PREDICTOR_5_5_DECLINE_THRESHOLD) {
+            d.declineDamper = {
+              earlyShare: Math.round(dampEntry.earlyShare * 100) / 100,
+              lateShare:  Math.round(dampEntry.lateShare * 100) / 100,
+              ratio:      Math.round(trendRatio * 100) / 100,
+              factor:     PREDICTOR_5_5_DECLINE_DAMPER,
+              prePP:      Math.round(predicted * 100) / 100,
+            };
+            predicted *= PREDICTOR_5_5_DECLINE_DAMPER;
+          }
+        }
+
         // Predictor 5.5 — Last-Meta-Labs soft floor (Mode A baseline).
         // Set-addition rotations (CRI is one) leave every previous-meta
         // legal card legal; archetypes that put up real share in TEF-POR
@@ -3187,40 +3224,24 @@ window.MetaCall = (function () {
         // fills it when previous_format_key is set AND set_addition_only
         // is true). True rotations get an empty map → this is a no-op.
         //
-        // 5.5.2 — Lebenszeichen-Gate (Turin post-mortem 2026-06):
-        //   The floor lifted Lopunny Dudunsparce to 3.07 % (TEF-POR
-        //   4.39 % × 0.7) and Cynthia's Garchomp to 2.98 %, but both
-        //   showed <2 % at Turin because their pilots had already
-        //   moved on after CRI dropped. The online ladder share is the
-        //   cheapest "is this deck still alive?" probe we have: when
-        //   ladderPct < lastMetaShare × VITAL_RATIO, players have
-        //   visibly dropped the deck and the floor must NOT pump it
-        //   back up. We respect the ladder's verdict.
-        //
-        //   VITAL_RATIO = 0.4 → ladder needs at least 40 % of the
-        //   last-meta share to keep the floor armed. A 4 % TEF-POR
-        //   deck needs ≥1.6 % ladder to floor. Below that → no floor,
-        //   the baseline call stands.
-        const lastMetaShare = (_lastMetaLabsByDeck[k] && _lastMetaLabsByDeck[k].share) || 0;
+        // Decline-Damper (5.5.3) above already dampens baseline for
+        // decks the previous format was actively shedding, so the
+        // first-iteration Lebenszeichen-Gate (which compared ladder
+        // share against last-meta share) was redundant — the data
+        // showed it never fired in cases where the floor would have
+        // over-pumped: declining decks always also tripped the damper.
+        // Removed for a simpler floor path.
+        const lastMetaEntry = _lastMetaLabsByDeck[k];
+        const lastMetaShare = (lastMetaEntry && lastMetaEntry.share) || 0;
         if (lastMetaShare > 0) {
-          const VITAL_RATIO = 0.4;
-          const isAlive = ladderPct >= lastMetaShare * VITAL_RATIO;
-          if (!isAlive) {
+          const floorPct = lastMetaShare * PREDICTOR_5_5_FLOOR_FACTOR;
+          if (predicted < floorPct) {
             d.lastMetaLabsFloor = {
               prevShare: Math.round(lastMetaShare * 100) / 100,
-              skipped:   'dropped_from_meta',
-              ladderPct: Math.round(ladderPct * 100) / 100,
+              floorPct:  Math.round(floorPct * 100) / 100,
+              liftPP:    Math.round((floorPct - predicted) * 100) / 100,
             };
-          } else {
-            const floorPct = lastMetaShare * PREDICTOR_5_5_FLOOR_FACTOR;
-            if (predicted < floorPct) {
-              d.lastMetaLabsFloor = {
-                prevShare: Math.round(lastMetaShare * 100) / 100,
-                floorPct:  Math.round(floorPct * 100) / 100,
-                liftPP:    Math.round((floorPct - predicted) * 100) / 100,
-              };
-              predicted = floorPct;
-            }
+            predicted = floorPct;
           }
         }
       }
@@ -4000,35 +4021,35 @@ window.MetaCall = (function () {
             }
           }
 
-          // Predictor 5.5 — Last-Meta-Labs aggregation (player-weighted,
-          // late-format-weighted).
-          // Iterate labsRowsAll separately, filtering for the immediately
-          // previous format key. Skipped entirely when format_window has
-          // no previous_format_key OR set_addition_only is false (true
-          // rotation — cards have left the legal pool, last-meta share
-          // is no longer a reliable continuity signal).
+          // Predictor 5.5 — Last-Meta-Labs aggregation (split early/late,
+          // floor uses MAX of the two periods).
           //
-          // 5.5.1 — Late-format weighting (Turin post-mortem 2026-06):
-          //   Decks that grew in the closing weeks of a format are the
-          //   ones most likely to keep that momentum into the next
-          //   format. Honchkrow and Slowking were absent from early
-          //   TEF-POR but climbed at the last 2 regionals — straight
-          //   averages drown that signal under early-format noise.
-          //   Pick the 2 latest TEF-POR tournament_ids (Limitless
-          //   sequential ID, falls back to tournament_date) and give
-          //   their rows a 2.0× weight; everything else stays at 1.0×.
-          //   Combined with player_count we get
-          //   share = Σ(share × players × lateWeight) / Σ(players × lateWeight)
-          //   which biases toward Decks that were big where it counted.
+          // 5.5.3 — Post-Turin redesign (2026-06):
+          //   The first iteration's binary 2× late multiplier had two
+          //   failure modes the Turin Phase 1 abgleich exposed:
+          //   (a) Festival Lead declined late (4.50 → 2.83) but came
+          //       back at 4 % at Turin → a late-weighted aggregate
+          //       suppressed its floor exactly when we needed it.
+          //   (b) Raging Bolt grew slightly late (6.32 → 7.22) and
+          //       got its already-stable share over-pumped via the
+          //       multiplier × player-count amplification.
+          //
+          //   Fix: compute early-period and late-period player-weighted
+          //   averages separately, store BOTH on _lastMetaLabsByDeck.
+          //   The floor uses max(earlyShare, lateShare) — captures the
+          //   "best version" of the deck across the format. The split
+          //   also lets the Decline-Damper (Mode A baseline) read
+          //   lateShare/earlyShare directly without re-aggregating.
+          //
+          //   The 2 latest tournaments (Indianapolis + Lima for
+          //   TEF-POR) are the "late" window; everything earlier is
+          //   the "early" window. Special Events with < ~500 players
+          //   are kept — they're noisy but the player-weight already
+          //   discounts them.
           const prevFmtKey = String((_formatWindow && _formatWindow.previous_format_key) || '')
             .trim().toUpperCase();
           const setAdditionOnly = !!(_formatWindow && _formatWindow.set_addition_only);
           if (prevFmtKey && setAdditionOnly) {
-            // Identify the 2 latest tournaments in the previous format.
-            // Limitless assigns sequential tournament_ids so max-id ==
-            // most recent; we keep tournament_date as a secondary
-            // fallback for the rare row without an id. We sort the
-            // unique-tid set once and slice the last two.
             const prevRows = labsRowsAll.filter(r => {
               const meta = String(r.meta || '').trim().toUpperCase();
               return meta === prevFmtKey;
@@ -4047,34 +4068,42 @@ window.MetaCall = (function () {
               return a < b ? -1 : 1;
             });
             const lateTidSet = new Set(sortedTids.slice(-2));
-            const LATE_FORMAT_WEIGHT_MULT = 2.0;
 
-            const lastMetaAgg = {}; // k -> { name, shareWeighted, weightSum, players, n }
+            // Per-deck: separate early/late accumulators
+            const lastMetaAgg = {}; // k -> { name, eSW, eP, lSW, lP, n }
             prevRows.forEach(r => {
               if (!r.deck_name) return;
               const share = parseEU(r.share_pct || '0');
               const players = parseInt(r.player_count || '0', 10) || 0;
               if (players <= 0 || share <= 0) return;
               const tid = (r.tournament_id || '').trim();
-              const lateMult = (tid && lateTidSet.has(tid)) ? LATE_FORMAT_WEIGHT_MULT : 1.0;
-              const w = players * lateMult;
+              const isLate = tid && lateTidSet.has(tid);
               const k = normalize(r.deck_name);
               if (!lastMetaAgg[k]) {
-                lastMetaAgg[k] = { name: r.deck_name, shareWeighted: 0, weightSum: 0, players: 0, n: 0 };
+                lastMetaAgg[k] = { name: r.deck_name, eSW: 0, eP: 0, lSW: 0, lP: 0, n: 0 };
               }
-              lastMetaAgg[k].shareWeighted += share * w;
-              lastMetaAgg[k].weightSum    += w;
-              lastMetaAgg[k].players      += players;
-              lastMetaAgg[k].n            += 1;
+              if (isLate) {
+                lastMetaAgg[k].lSW += share * players;
+                lastMetaAgg[k].lP  += players;
+              } else {
+                lastMetaAgg[k].eSW += share * players;
+                lastMetaAgg[k].eP  += players;
+              }
+              lastMetaAgg[k].n += 1;
             });
             Object.keys(lastMetaAgg).forEach(k => {
               const a = lastMetaAgg[k];
-              if (a.weightSum > 0) {
+              const earlyShare = a.eP > 0 ? a.eSW / a.eP : 0;
+              const lateShare  = a.lP > 0 ? a.lSW / a.lP : 0;
+              const floorShare = Math.max(earlyShare, lateShare);
+              if (floorShare > 0) {
                 _lastMetaLabsByDeck[k] = {
-                  name:    a.name,
-                  share:   a.shareWeighted / a.weightSum,
-                  players: a.players,
-                  n:       a.n,
+                  name:       a.name,
+                  share:      floorShare,
+                  earlyShare: earlyShare,
+                  lateShare:  lateShare,
+                  players:    a.eP + a.lP,
+                  n:          a.n,
                 };
               }
             });
@@ -4083,9 +4112,8 @@ window.MetaCall = (function () {
               if (decks > 0) {
                 console.log(
                   `[Predictor 5.5] Last-Meta-Labs floor armed (prev=${prevFmtKey}, ` +
-                  `set-addition): ${decks} archetypes loaded. ` +
-                  `Late-format tids (×${LATE_FORMAT_WEIGHT_MULT}): ` +
-                  `${Array.from(lateTidSet).join(', ') || 'n/a'}.`
+                  `set-addition, MAX(early,late)): ${decks} archetypes loaded. ` +
+                  `Late tids: ${Array.from(lateTidSet).join(', ') || 'n/a'}.`
                 );
               }
             } catch (_e) { /* ignore */ }

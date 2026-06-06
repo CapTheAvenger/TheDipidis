@@ -1785,7 +1785,7 @@ window.MetaCall = (function () {
     "Hop's Trevenant":      "Hop's Trevenant",
     "Lillie's Clefairy":    "Lillie's Clefairy ex",
     "Erika's Victreebel":   "Erika's Victreebel ex",
-    "Ethan's Typhlosion":   "Ethan's Typhlosion ex",
+    "Ethan's Typhlosion":   "Ethan's Typhlosion",
     "Ethan's Magcargo":     "Ethan's Magcargo",
     "Misty's Gyarados":     "Misty's Gyarados ex",
     "Alolan Exeggutor":     "Alolan Exeggutor ex",

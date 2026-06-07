@@ -3518,67 +3518,6 @@ window.MetaCall = (function () {
     // an actually-popular online deck (rare but possible).
     _computeOnlinePresenceFloor();
 
-    // Predictor 5.5.5 — Family-Aggregate Cap.
-    // The TEF-POR → TEF-CRI rotation Turin abgleich kept landing
-    // Dragapult Family at 33-34 % while real Turin Phase 1 came in
-    // at 29 %. Each variant prediction is roughly accurate vs its
-    // own TEF-POR brought share (solo ~13, Dusknoir ~7, Blaziken
-    // ~6, Dudunsparce ~5); the over-call lives at the AGGREGATE
-    // level — four small individual over-predictions compound.
-    //
-    // Recent regional Dragapult-family shares (Indianapolis 29.3 %,
-    // Utrecht 25.1 %, Prague 29.4 %, Campinas 32.9 %, LA 31.9 %,
-    // Turin Phase 1 29 %) cluster around 29 % with a ceiling near
-    // 33. Without an upper bound the predictor can drift past that
-    // ceiling whenever the late-format major data spikes the
-    // dominant variant.
-    //
-    // Hard cap on family-aggregate predictedShareRaw before the
-    // 100-% renorm: when a multi-variant family exceeds
-    // FAMILY_CAP_PCT, scale every member proportionally. After
-    // renormalisation the family ends up roughly at the cap (the
-    // 5-pp redistribution lifts each remaining deck by < 1 pp),
-    // so the post-renorm family share lands a touch above the
-    // raw cap — empirically ~30 % for a 28-% raw cap.
-    //
-    // Only fires for families with ≥ 2 named variants (solo
-    // archetypes — N's Zoroark, Raging Bolt — pass through
-    // untouched even if individually large; their own predictor
-    // checks govern them).
-    const FAMILY_CAP_PCT = 28.0;
-    const FAMILY_CAP_MIN_VARIANTS = 2;
-    const familyAgg = {}; // family-key -> { total, members[] }
-    _shareList.forEach(d => {
-      const fam = extractMainPokemon(d.name);
-      if (!fam || fam === '_junk') return;
-      if (!familyAgg[fam]) familyAgg[fam] = { total: 0, members: [] };
-      familyAgg[fam].total += d.predictedShareRaw || 0;
-      familyAgg[fam].members.push(d);
-    });
-    Object.keys(familyAgg).forEach(fam => {
-      const f = familyAgg[fam];
-      if (f.members.length < FAMILY_CAP_MIN_VARIANTS) return;
-      if (f.total <= FAMILY_CAP_PCT) return;
-      const scale = FAMILY_CAP_PCT / f.total;
-      f.members.forEach(d => {
-        const before = d.predictedShareRaw || 0;
-        d.predictedShareRaw = before * scale;
-        d.familyCap = {
-          family:  fam,
-          totalPP: Math.round(f.total * 100) / 100,
-          capPP:   FAMILY_CAP_PCT,
-          scale:   Math.round(scale * 1000) / 1000,
-          beforePP: Math.round(before * 100) / 100,
-        };
-      });
-      try {
-        console.log(
-          `[Predictor 5.5.5] Family-cap: ${fam} aggregate ${f.total.toFixed(2)} % ` +
-          `> ${FAMILY_CAP_PCT} % → ${f.members.length} variants scaled ×${scale.toFixed(3)}.`
-        );
-      } catch (_e) { /* ignore */ }
-    });
-
     // Diagnostic — surfaces matchup-coverage gaps once per major.
     _logCounterCoverageGaps();
 
@@ -3588,6 +3527,79 @@ window.MetaCall = (function () {
     _shareList.forEach(d => {
       d.predictedShare = (d.predictedShareRaw / predictedSum) * 100;
       d.onlineShare    = d.predictedShare; // legacy field name used by buildField()
+    });
+
+    // Predictor 5.5.5 — Family-Aggregate Cap (post-renorm).
+    // The TEF-POR → TEF-CRI Turin abgleich kept landing Dragapult
+    // Family at 33-34 % while real Turin Phase 1 came in at 29 %.
+    // Each variant prediction is roughly accurate vs its own TEF-POR
+    // brought share (solo ~13, Dusknoir ~7, Blaziken ~6, Dudunsparce
+    // ~5); the over-call lives at the AGGREGATE level — four small
+    // individual over-predictions compound.
+    //
+    // Recent regional Dragapult-family shares (Indianapolis 29.3 %,
+    // Utrecht 25.1 %, Prague 29.4 %, Campinas 32.9 %, LA 31.9 %,
+    // Turin Phase 1 29 %) cluster around 29 % with a ceiling near 33.
+    //
+    // Hard cap on the family-aggregate post-renorm predictedShare.
+    // When a multi-variant family exceeds FAMILY_CAP_PCT, scale every
+    // member down to bring the aggregate to the cap, and redistribute
+    // the freed pp proportionally to every other deck so the
+    // share-list still sums to 100 %. Doing this AFTER the renorm
+    // (rather than before) keeps the cap value an actual percentage
+    // and avoids the raw-vs-pp unit mismatch that v1 of this hook
+    // landed at — capping raw at 28 produced Dragapult at 22.8 %
+    // because the raw sum was ~150, not 100.
+    //
+    // Only fires for families with ≥ 2 named variants (solo archetypes
+    // pass through untouched, governed by their own predictor checks).
+    const FAMILY_CAP_PCT = 28.0;
+    const FAMILY_CAP_MIN_VARIANTS = 2;
+    const familyAgg = {}; // family-key -> { total, members[] }
+    _shareList.forEach(d => {
+      const fam = extractMainPokemon(d.name);
+      if (!fam || fam === '_junk') return;
+      if (!familyAgg[fam]) familyAgg[fam] = { total: 0, members: [] };
+      familyAgg[fam].total += d.predictedShare || 0;
+      familyAgg[fam].members.push(d);
+    });
+    Object.keys(familyAgg).forEach(fam => {
+      const f = familyAgg[fam];
+      if (f.members.length < FAMILY_CAP_MIN_VARIANTS) return;
+      if (f.total <= FAMILY_CAP_PCT) return;
+      const familyScale  = FAMILY_CAP_PCT / f.total;
+      const reductionPP  = f.total - FAMILY_CAP_PCT;
+      const othersTotal  = 100 - f.total;
+      // othersScale = (othersTotal + reductionPP) / othersTotal
+      // Edge case: othersTotal == 0 (the only family on the list)
+      // means there's nowhere to redistribute — skip in that case.
+      if (othersTotal <= 0) return;
+      const othersScale  = (othersTotal + reductionPP) / othersTotal;
+      const famSet = new Set(f.members);
+      f.members.forEach(d => {
+        const before = d.predictedShare || 0;
+        d.predictedShare = before * familyScale;
+        d.onlineShare    = d.predictedShare;
+        d.familyCap = {
+          family:    fam,
+          totalPP:   Math.round(f.total * 100) / 100,
+          capPP:     FAMILY_CAP_PCT,
+          scale:     Math.round(familyScale * 1000) / 1000,
+          beforePP:  Math.round(before * 100) / 100,
+        };
+      });
+      _shareList.forEach(d => {
+        if (famSet.has(d)) return;
+        d.predictedShare = (d.predictedShare || 0) * othersScale;
+        d.onlineShare    = d.predictedShare;
+      });
+      try {
+        console.log(
+          `[Predictor 5.5.5] Family-cap: ${fam} ${f.total.toFixed(2)} % ` +
+          `> ${FAMILY_CAP_PCT} % → ${f.members.length} variants ×${familyScale.toFixed(3)}, ` +
+          `others ×${othersScale.toFixed(3)}.`
+        );
+      } catch (_e) { /* ignore */ }
     });
     _shareList.sort((a, b) => b.predictedShare - a.predictedShare);
 

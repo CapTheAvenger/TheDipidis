@@ -4095,7 +4095,18 @@ window.MetaCall = (function () {
               const a = lastMetaAgg[k];
               const earlyShare = a.eP > 0 ? a.eSW / a.eP : 0;
               const lateShare  = a.lP > 0 ? a.lSW / a.lP : 0;
-              const floorShare = Math.max(earlyShare, lateShare);
+              // Floor source: full player-weighted average across the
+              // whole previous format. MAX(early, late) over-pumped
+              // decks with a single late-format spike — Dragapult solo
+              // jumped 10.67 → 19.80 at Indianapolis alone, MAX picked
+              // 19.80 as the floor reference, the family aggregate
+              // climbed 30.4 → 34.0 % in Phase 3c when the real Turin
+              // share stayed at 29 %. The full average smooths the
+              // single-event spike and is conservative for stable-late
+              // decks; the Decline-Damper handles the opposite case
+              // (early-strong, late-declining) on the baseline side.
+              const fullPlayers = a.eP + a.lP;
+              const floorShare  = fullPlayers > 0 ? (a.eSW + a.lSW) / fullPlayers : 0;
               if (floorShare > 0) {
                 _lastMetaLabsByDeck[k] = {
                   name:       a.name,
@@ -4112,7 +4123,7 @@ window.MetaCall = (function () {
               if (decks > 0) {
                 console.log(
                   `[Predictor 5.5] Last-Meta-Labs floor armed (prev=${prevFmtKey}, ` +
-                  `set-addition, MAX(early,late)): ${decks} archetypes loaded. ` +
+                  `set-addition, full-player-weighted): ${decks} archetypes loaded. ` +
                   `Late tids: ${Array.from(lateTidSet).join(', ') || 'n/a'}.`
                 );
               }

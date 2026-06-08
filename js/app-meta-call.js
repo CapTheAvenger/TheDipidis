@@ -3206,41 +3206,12 @@ window.MetaCall = (function () {
       // Gated by _lastMetaLabsByDeck (only populated when
       // set_addition_only=true) so true rotations stay no-op.
 
-      // Predictor 5.8 — Player-Stickiness-Damper (pre-floor).
-      // Damps decks the previous-format player base TRIED but didn't
-      // STICK with. Lopunny / Cynthia / OMH / Dragapult Dudunsparce
-      // at TEF-POR all had hundreds of brought-counts but <1.3 % of
-      // pilots returning — a clear "online-fun, in-person-disposable"
-      // signature. The Turin abgleich showed these as the remaining
-      // cluster of over-calls after Predictor 5.6 fixed Solo Dragapult.
-      const stickEntry = _stickinessByDeck[k];
-      // 2026-06-08 debug: log lookup result for the 4 worst-over decks
-      // so we can verify the lookup key normalisation matches between
-      // the CSV loader and the predictor loop.
-      try {
-        if (k === 'lopunnydudunsparce' || k === 'cynthiasgarchomp' ||
-            k === 'ogerponmeganiumhydrapple' || k === 'dragapultdudunsparce') {
-          console.log('[Predictor 5.8 trace]', k, 'stickEntry:', stickEntry,
-                      'predicted before:', predicted);
-        }
-      } catch (_e) { /* ignore */ }
-      if (stickEntry && stickEntry.brought >= PREDICTOR_5_8_MIN_BROUGHT) {
-        let dampFactor = 1.0;
-        if (stickEntry.sticky_pct < PREDICTOR_5_8_VERY_LOW_STICK) {
-          dampFactor = PREDICTOR_5_8_STRONG_DAMP;
-        } else if (stickEntry.sticky_pct < PREDICTOR_5_8_LOW_STICK) {
-          dampFactor = PREDICTOR_5_8_MILD_DAMP;
-        }
-        if (dampFactor < 1.0) {
-          d.stickinessDamper = {
-            brought:    stickEntry.brought,
-            sticky_pct: Math.round(stickEntry.sticky_pct * 100) / 100,
-            factor:     dampFactor,
-            prePP:      Math.round(predicted * 100) / 100,
-          };
-          predicted *= dampFactor;
-        }
-      }
+      // Predictor 5.8 application MOVED to post-everything block —
+      // see end of _runPredictor() after Family-Cap. Reason: the
+      // intermediate Floor / Family-Cap stages were overriding the
+      // damp before it could affect the final UI. Damping post-
+      // everything (with re-normalisation) is the only way to make
+      // the stickiness signal stick.
 
       // Predictor 5.6 — Growth-Boosted Last-Meta Floor + Post-Floor
       // Decline-Damper. Backtest-driven redesign (2026-06-07).
@@ -3703,6 +3674,66 @@ window.MetaCall = (function () {
         top2[0].onlineShare    = top2[0].predictedShare;
       }
     });
+
+    // ── Predictor 5.8 — Player-Stickiness-Damper (post-everything) ──
+    // Production-trace evidence (2026-06-08) showed the pre-floor
+    // version was a no-op: 5.6 Floor lifted Lopunny / OMH / Cynthia
+    // / Dragapult-Dudunsparce above their damped baseline (the floor
+    // value × 0.7 growth boost is bigger than baseline × 0.85), and
+    // Family-Cap "others × 1.087" boost then inflated them further
+    // via redistribution. The stickiness signal was being thrown away.
+    //
+    // New strategy: damp the FINAL post-renorm / post-family-cap
+    // predictedShare. Decks with very low previous-format stickiness
+    // (< 1 % with ≥ 100 brought) get × 0.70, low (1-3 %) get × 0.85.
+    // The freed share is redistributed proportionally to every other
+    // deck so the share-list still sums to 100 %.
+    //
+    // Backtest expectation (Turin Final):
+    //   OMH     9.18 % → 6.43 %  (real 5.61, Δ +0.82 vs +3.57 pre-fix)
+    //   Lopunny 5.15 % → 4.38 %  (real 2.61, Δ +1.77 vs +2.54 pre-fix)
+    //   Cynthia 3.20 % → 2.24 %  (real 2.61, Δ -0.37, near-perfect)
+    //   Dragapult Dudunsparce 5.95 % → 4.17 %  (real 1.67, Δ +2.50
+    //                                            vs +4.28 pre-fix)
+    let stickinessDamped = false;
+    _shareList.forEach(d => {
+      const k = normalize(d.name);
+      const stickEntry = _stickinessByDeck[k];
+      if (!stickEntry || stickEntry.brought < PREDICTOR_5_8_MIN_BROUGHT) return;
+      let dampFactor = 1.0;
+      if (stickEntry.sticky_pct < PREDICTOR_5_8_VERY_LOW_STICK) {
+        dampFactor = PREDICTOR_5_8_STRONG_DAMP;
+      } else if (stickEntry.sticky_pct < PREDICTOR_5_8_LOW_STICK) {
+        dampFactor = PREDICTOR_5_8_MILD_DAMP;
+      }
+      if (dampFactor < 1.0) {
+        d.stickinessDamper = {
+          brought:    stickEntry.brought,
+          sticky_pct: Math.round(stickEntry.sticky_pct * 100) / 100,
+          factor:     dampFactor,
+          prePP:      Math.round((d.predictedShare || 0) * 100) / 100,
+        };
+        d.predictedShare = (d.predictedShare || 0) * dampFactor;
+        d.onlineShare    = d.predictedShare;
+        stickinessDamped = true;
+      }
+    });
+    // Re-normalise so the list still sums to 100 % after damping
+    if (stickinessDamped) {
+      const total = _shareList.reduce((s, d) => s + (d.predictedShare || 0), 0) || 1;
+      const scale = 100 / total;
+      _shareList.forEach(d => {
+        d.predictedShare = (d.predictedShare || 0) * scale;
+        d.onlineShare    = d.predictedShare;
+      });
+      try {
+        const damped = _shareList.filter(d => d.stickinessDamper).length;
+        console.log(
+          `[Predictor 5.8] Post-everything stickiness damp: ${damped} decks ` +
+          `damped; re-renorm scale ×${scale.toFixed(3)} to maintain 100 %.`
+        );
+      } catch (_e) { /* ignore */ }
+    }
 
     _shareList.sort((a, b) => b.predictedShare - a.predictedShare);
 

@@ -3504,7 +3504,17 @@ window.MetaCall = (function () {
     // wave). 5.6 runs first so the leader's predicted share
     // reflects consolidation; 5.7 then reads that updated share
     // when deciding whether the leader threshold is breached.
-    _computeFormatLeaderConsolidation();
+    // Predictor 5.6 — Format-Leader Consolidation: DISABLED 2026-06-08.
+    // Replaced by the post-renorm within-family donation block below
+    // (search "Within-family donation"). The old consolidation logic
+    // was double-stacking with the new donation in the Turin abgleich:
+    //   Production pre-fix had Dragapult solo at 73 % within-family
+    //   (20.4 / 28.0) vs real Turin 46 % (13.29 / 28.99). The old
+    //   stage pushed solo to ~60 % within-family, the new donation
+    //   then pushed it to 73 %, ending +7 pp over.
+    // Anti-Leader Tech-Boost (5.7) stays — that addresses counter-deck
+    // discovery which the new code path does NOT replicate.
+    // _computeFormatLeaderConsolidation();
     _computeAntiLeaderTechBoost();
 
     // Predictor 5.5 — Online-Presence Floor. Final safety floor for

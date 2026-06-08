@@ -13,9 +13,14 @@ name: Weekly Full Update
 #
 # Schedule: Tuesday 06:00 UTC (= 07:00 CET winter / 08:00 CEST summer)
 # Manual trigger: GitHub UI → Actions → Weekly Full Update → Run workflow
+#
+# 2026-06-07: cron SUSPENDED so the Tuesday 06-09 run doesn't overwrite
+# the data files the Turin post-mortem abgleich is reading. Re-enable
+# by restoring the `schedule:` block below once the Predictor 5.6
+# redesign lands.
 on:
-  schedule:
-    - cron: '0 6 * * 2'
+  # schedule:
+  #   - cron: '0 6 * * 2'
   workflow_dispatch:
 
 # GITHUB_TOKEN needs:

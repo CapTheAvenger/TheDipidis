@@ -335,9 +335,26 @@ window.MetaCall = (function () {
   const PREDICTOR_5_9_NEW_BOOST_PP_MAX  = 2.0;
   const PREDICTOR_5_9_RISING_BOOST_FACT = 0.40;   // (current - prev) × factor
   const PREDICTOR_5_9_RISING_BOOST_PP_MAX = 1.5;
-  const PREDICTOR_5_9_WR_NEUTRAL        = 48;    // WR at which wrFactor = 0
-  const PREDICTOR_5_9_WR_SLOPE          = 4;     // every +4 WR adds +1 to factor
+  // Tightened 2026-06-08 after the Beedrill over-pump (Beedrill WR
+  // 50.45 % at NEW formula produced +0.8 pp boost → ended +0.59 over
+  // real). Lifting the WR-neutral to 50 % keeps mediocre online-WR
+  // decks out of the boost cluster while still rewarding 52-56 % WR.
+  const PREDICTOR_5_9_WR_NEUTRAL        = 50;
+  const PREDICTOR_5_9_WR_SLOPE          = 3;     // every +3 WR adds +1 to factor
   const PREDICTOR_5_9_WR_FACTOR_MAX     = 1.5;
+  // Quality-Concentration pattern (Crustle case): the deck's online
+  // share DECLINED POR → CUR (people stopped grinding it) but the WR
+  // climbed materially (the pilots who STAYED win more). Signals
+  // "this archetype consolidated into committed pilots" — real Turin
+  // Crustle 1.67 % despite online ladder share dropping POR 2.06 % →
+  // CUR 1.50 % (WR 51.06 → 55.02, +3.96 %). Fires when:
+  //   POR share > 1.0  AND  CUR < POR  AND  CUR WR > 53  AND  ΔWR > 2
+  // Flat +0.5 pp boost (no scaling — these are typically small decks
+  // where a large boost would over-correct).
+  const PREDICTOR_5_9_QC_MIN_POR_SHARE  = 1.0;
+  const PREDICTOR_5_9_QC_MIN_WR         = 53;
+  const PREDICTOR_5_9_QC_MIN_WR_DELTA   = 2.0;
+  const PREDICTOR_5_9_QC_BOOST_PP       = 0.5;
                                             //   (allows for some natural decay between formats; a
                                             //    deck at 3.90 % last meta floors at 2.73 %, not 3.90 %)
   let _activeInPersonSetCode   = '';        // e.g. "POR" during the lag window when current_set="CRI" but
@@ -3739,27 +3756,49 @@ window.MetaCall = (function () {
         const por = _porSnapshotByDeck[k];
         const cur = _curSnapshotByDeck[k];
         if (!cur || cur.share <= 0) return;
+        // 2026-06-08 gate: a deck about to be stickiness-damped by 5.8
+        // gets NO format-migration boost. The damp says "the field
+        // tries this but doesn't bring it" — boosting on top would
+        // fight 5.8 and end up over-pumping (OMH: damp ×0.7 + boost
+        // +1 pp → 7.1 % vs real 5.61). Stickiness signal wins.
+        const stickEntry = _stickinessByDeck[k];
+        if (stickEntry && stickEntry.brought >= PREDICTOR_5_8_MIN_BROUGHT
+            && stickEntry.sticky_pct < PREDICTOR_5_8_LOW_STICK) {
+          return;
+        }
         const porShare = por ? por.share : 0;
+        const porWr    = por ? por.wr    : 0;
         const wr = cur.wr;
         const wrFactor = Math.max(0, Math.min(
           PREDICTOR_5_9_WR_FACTOR_MAX,
           (wr - PREDICTOR_5_9_WR_NEUTRAL) / PREDICTOR_5_9_WR_SLOPE
         ));
-        if (wrFactor <= 0) return;
         let boost = 0;
         let kind = '';
-        if (porShare < PREDICTOR_5_9_NEW_POR_THRESHOLD &&
+        if (wrFactor > 0 &&
+            porShare < PREDICTOR_5_9_NEW_POR_THRESHOLD &&
             cur.share >= PREDICTOR_5_9_NEW_CUR_MIN) {
           // NEW deck (didn't exist meaningfully in POR)
           boost = Math.min(PREDICTOR_5_9_NEW_BOOST_PP_MAX,
                            cur.share * PREDICTOR_5_9_NEW_BOOST_FACTOR) * wrFactor;
           kind = 'NEW';
-        } else if (porShare >= PREDICTOR_5_9_NEW_POR_THRESHOLD &&
+        } else if (wrFactor > 0 &&
+                   porShare >= PREDICTOR_5_9_NEW_POR_THRESHOLD &&
                    cur.share / porShare > PREDICTOR_5_9_RISING_RATIO_MIN) {
           // RISING deck (existed in POR but exploded in CRI)
           boost = Math.min(PREDICTOR_5_9_RISING_BOOST_PP_MAX,
                            (cur.share - porShare) * PREDICTOR_5_9_RISING_BOOST_FACT) * wrFactor;
           kind = 'RISING';
+        } else if (porShare >= PREDICTOR_5_9_QC_MIN_POR_SHARE &&
+                   cur.share < porShare &&
+                   wr >= PREDICTOR_5_9_QC_MIN_WR &&
+                   (wr - porWr) >= PREDICTOR_5_9_QC_MIN_WR_DELTA) {
+          // QUALITY-CONCENTRATION (Crustle pattern): share shrunk but
+          // WR jumped — committed pilots stayed, casual pilots left.
+          // Flat boost (these are typically small decks where the
+          // % scaling would over-correct).
+          boost = PREDICTOR_5_9_QC_BOOST_PP;
+          kind = 'QUALITY-CONC';
         }
         if (boost > 0.1) {
           d.formatMigrationBoost = {

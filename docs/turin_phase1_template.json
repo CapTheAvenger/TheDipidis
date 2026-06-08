@@ -1,0 +1,16 @@
+{
+  "_comment": "Manually-digitised Turin Phase 1 ground truth. Format: { archetype name: share_pct }. Names should match labs deck_name spellings — capitalisation matters less than spelling. The harness lowercases + collapses whitespace before matching. Once filled in, run: python3 scripts/predictor_backtest.py --event 0069 --ground-truth docs/turin_phase1_template.json — and add a row for Turin to TEST_EVENTS in scripts/predictor_backtest.py with (tid='0069', date='2026-06-07', name='Turin', meta='TEF-CRI', prev='TEF-POR', set_addition=True).",
+
+  "Dragapult ex": 29.0,
+  "Teal Mask Ogerpon ex / Meganium": 7.0,
+  "Alakazam / Dudunsparce": 5.0,
+  "Raging Bolt ex": 5.0,
+  "Team Rockets Honchkrow": 4.0,
+  "Teal Mask Ogerpon ex / Lillie's Clefairy ex": 4.0,
+  "Slowking": 4.0,
+  "N's Zoroark ex": 4.0,
+  "Festival Lead": 4.0,
+  "Mega Starmie ex / Froslass": 3.0,
+  "Team Rockets Mewtwo ex": 3.0,
+  "Mega Lucario ex / Hariyama": 3.0
+}

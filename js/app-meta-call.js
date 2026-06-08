@@ -305,6 +305,39 @@ window.MetaCall = (function () {
   const PREDICTOR_5_8_LOW_STICK        = 3.0;
   const PREDICTOR_5_8_STRONG_DAMP      = 0.70;
   const PREDICTOR_5_8_MILD_DAMP        = 0.85;
+
+  // Predictor 5.9 — Format-Migration-Boost (2026-06-08).
+  // Compares the latest CRI-era online snapshot against the latest
+  // pre-rotation POR-era snapshot to detect decks that emerged or
+  // exploded after the rotation. Slowking (POR 1.66 % → CRI 5.29 %,
+  // 3.18× growth, 52.2 % WR) and Crustle (POR low → CRI 1.63 % at
+  // 56.2 % WR) are the canonical cases the Mode A baseline misses
+  // because the predicted share is anchored to ladder averages,
+  // not migration deltas.
+  //
+  // Classification:
+  //   NEW    — POR share < 0.5 %, CRI share ≥ 1.0 %
+  //   RISING — POR share ≥ 0.5 %, CRI/POR ratio > 1.2
+  //   STABLE / DECLINING — no boost from this stage
+  //
+  // Boost is gated by win-rate so we don't lift "rising but losing"
+  // decks (Mega Greninja: NEW, 6.9 % share, 44.75 % WR → wrFactor
+  // collapses to 0, no boost). The boost is additive PP, applied
+  // post-family-cap but BEFORE 5.8 damp — the 5.8 re-renorm then
+  // restores the 100 % sum with the freed damp share absorbed
+  // proportionally by the boosted decks.
+  let _porSnapshotByDeck = {};              // norm(name) -> { share, wr }
+  let _curSnapshotByDeck = {};              // norm(name) -> { share, wr }
+  const PREDICTOR_5_9_NEW_POR_THRESHOLD = 0.5;
+  const PREDICTOR_5_9_NEW_CUR_MIN       = 1.0;
+  const PREDICTOR_5_9_RISING_RATIO_MIN  = 1.2;
+  const PREDICTOR_5_9_NEW_BOOST_FACTOR  = 0.30;   // current_share × factor
+  const PREDICTOR_5_9_NEW_BOOST_PP_MAX  = 2.0;
+  const PREDICTOR_5_9_RISING_BOOST_FACT = 0.40;   // (current - prev) × factor
+  const PREDICTOR_5_9_RISING_BOOST_PP_MAX = 1.5;
+  const PREDICTOR_5_9_WR_NEUTRAL        = 48;    // WR at which wrFactor = 0
+  const PREDICTOR_5_9_WR_SLOPE          = 4;     // every +4 WR adds +1 to factor
+  const PREDICTOR_5_9_WR_FACTOR_MAX     = 1.5;
                                             //   (allows for some natural decay between formats; a
                                             //    deck at 3.90 % last meta floors at 2.73 %, not 3.90 %)
   let _activeInPersonSetCode   = '';        // e.g. "POR" during the lag window when current_set="CRI" but
@@ -3684,6 +3717,75 @@ window.MetaCall = (function () {
       }
     });
 
+    // ── Predictor 5.9 — Format-Migration-Boost (post-everything) ──
+    // Decks that emerged or exploded between the POR snapshot and
+    // the current CRI snapshot get an additive PP boost, gated by
+    // win-rate so we don't lift "rising but losing" decks (Mega
+    // Greninja 6.9 % current share but 44.75 % WR → wrFactor = 0,
+    // no boost). The boost addresses the chronic under-call of
+    // Slowking (POR 1.66 % → CRI 5.29 %, 52.2 % WR), Crustle (POR
+    // marginal → CRI 1.63 % at 56.2 % WR), Honchkrow (POR 2.26 % →
+    // CRI 2.85 %, 51.4 % WR) — the exact cluster the Turin abgleich
+    // showed as Tier-2 in-person mainstays the predictor couldn't see.
+    //
+    // Applied BEFORE the 5.8 stickiness damp. The 5.8 re-renorm then
+    // restores the 100 % sum, absorbing the boost-induced increase
+    // proportionally from the non-damped pool.
+    let migrationBoostFired = 0;
+    if (Object.keys(_porSnapshotByDeck).length > 0 &&
+        Object.keys(_curSnapshotByDeck).length > 0) {
+      _shareList.forEach(d => {
+        const k = normalize(d.name);
+        const por = _porSnapshotByDeck[k];
+        const cur = _curSnapshotByDeck[k];
+        if (!cur || cur.share <= 0) return;
+        const porShare = por ? por.share : 0;
+        const wr = cur.wr;
+        const wrFactor = Math.max(0, Math.min(
+          PREDICTOR_5_9_WR_FACTOR_MAX,
+          (wr - PREDICTOR_5_9_WR_NEUTRAL) / PREDICTOR_5_9_WR_SLOPE
+        ));
+        if (wrFactor <= 0) return;
+        let boost = 0;
+        let kind = '';
+        if (porShare < PREDICTOR_5_9_NEW_POR_THRESHOLD &&
+            cur.share >= PREDICTOR_5_9_NEW_CUR_MIN) {
+          // NEW deck (didn't exist meaningfully in POR)
+          boost = Math.min(PREDICTOR_5_9_NEW_BOOST_PP_MAX,
+                           cur.share * PREDICTOR_5_9_NEW_BOOST_FACTOR) * wrFactor;
+          kind = 'NEW';
+        } else if (porShare >= PREDICTOR_5_9_NEW_POR_THRESHOLD &&
+                   cur.share / porShare > PREDICTOR_5_9_RISING_RATIO_MIN) {
+          // RISING deck (existed in POR but exploded in CRI)
+          boost = Math.min(PREDICTOR_5_9_RISING_BOOST_PP_MAX,
+                           (cur.share - porShare) * PREDICTOR_5_9_RISING_BOOST_FACT) * wrFactor;
+          kind = 'RISING';
+        }
+        if (boost > 0.1) {
+          d.formatMigrationBoost = {
+            kind,
+            porShare: Math.round(porShare * 100) / 100,
+            curShare: Math.round(cur.share * 100) / 100,
+            wr:       Math.round(wr * 100) / 100,
+            wrFactor: Math.round(wrFactor * 100) / 100,
+            boostPP:  Math.round(boost * 100) / 100,
+            prePP:    Math.round((d.predictedShare || 0) * 100) / 100,
+          };
+          d.predictedShare = (d.predictedShare || 0) + boost;
+          d.onlineShare    = d.predictedShare;
+          migrationBoostFired++;
+        }
+      });
+      try {
+        if (migrationBoostFired > 0) {
+          console.log(
+            `[Predictor 5.9] Format-migration boost: ${migrationBoostFired} ` +
+            `decks lifted by NEW/RISING + WR gate.`
+          );
+        }
+      } catch (_e) { /* ignore */ }
+    }
+
     // ── Predictor 5.8 — Player-Stickiness-Damper (post-everything) ──
     // Production-trace evidence (2026-06-08) showed the pre-floor
     // version was a no-op: 5.6 Floor lifted Lopunny / OMH / Cynthia
@@ -4115,9 +4217,59 @@ window.MetaCall = (function () {
       _majorSharesByDeck      = {};
       _lastMetaLabsByDeck     = {};
       _stickinessByDeck       = {};
+      _porSnapshotByDeck      = {};
+      _curSnapshotByDeck      = {};
       _activeInPersonSetCode  = '';
       _onlineWinsByDeck       = {};
       _dataLastScrapedAt      = '';
+
+      // Predictor 5.9 — load POR-era and current online snapshots so
+      // we can compute per-deck format-migration deltas. Snapshots
+      // come from data/online_share_history/YYYY-MM-DD.csv. POR
+      // snapshot = latest one strictly BEFORE set_release_date.
+      // Current = the most recent snapshot.
+      try {
+        const manResp = await fetch('data/online_share_history/manifest.json?t=' + Date.now());
+        if (manResp.ok) {
+          const manifest = await manResp.json();
+          const dates = manifest.dates || [];
+          const releaseDate = (_formatWindow && _formatWindow.set_release_date) || '';
+          const porDates = dates.filter(d => releaseDate && d < releaseDate);
+          const porDate = porDates.length ? porDates[porDates.length - 1] : '';
+          const curDate = dates.length ? dates[dates.length - 1] : '';
+
+          const loadSnapshot = async (date, target) => {
+            if (!date) return;
+            try {
+              const r = await fetch(`data/online_share_history/${date}.csv?t=` + Date.now());
+              if (!r.ok) return;
+              const text = await r.text();
+              const rows = parseCSVQuoted(text, ';');
+              rows.forEach(row => {
+                const name = (row.deck_name || '').trim();
+                const share = parseEU(row.share || '0');
+                const wr = parseEU(row.winrate || '0');
+                if (name && share > 0) {
+                  target[normalize(name)] = { share, wr };
+                }
+              });
+            } catch (_e) { /* ignore */ }
+          };
+
+          await Promise.all([
+            loadSnapshot(porDate, _porSnapshotByDeck),
+            loadSnapshot(curDate, _curSnapshotByDeck),
+          ]);
+
+          try {
+            console.log(
+              `[Predictor 5.9] Migration snapshots loaded: POR=${porDate} ` +
+              `(${Object.keys(_porSnapshotByDeck).length} decks), ` +
+              `CUR=${curDate} (${Object.keys(_curSnapshotByDeck).length} decks).`
+            );
+          } catch (_e) { /* ignore */ }
+        }
+      } catch (_e) { /* optional — no boost when missing */ }
 
       // Predictor 5.8 — load player_continuity.csv → per-deck
       // {brought, sticky_pct}. Optional CSV; predictor degrades to

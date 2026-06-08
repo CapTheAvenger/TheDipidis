@@ -3214,6 +3214,16 @@ window.MetaCall = (function () {
       // signature. The Turin abgleich showed these as the remaining
       // cluster of over-calls after Predictor 5.6 fixed Solo Dragapult.
       const stickEntry = _stickinessByDeck[k];
+      // 2026-06-08 debug: log lookup result for the 4 worst-over decks
+      // so we can verify the lookup key normalisation matches between
+      // the CSV loader and the predictor loop.
+      try {
+        if (k === 'lopunnydudunsparce' || k === 'cynthiasgarchomp' ||
+            k === 'ogerponmeganiumhydrapple' || k === 'dragapultdudunsparce') {
+          console.log('[Predictor 5.8 trace]', k, 'stickEntry:', stickEntry,
+                      'predicted before:', predicted);
+        }
+      } catch (_e) { /* ignore */ }
       if (stickEntry && stickEntry.brought >= PREDICTOR_5_8_MIN_BROUGHT) {
         let dampFactor = 1.0;
         if (stickEntry.sticky_pct < PREDICTOR_5_8_VERY_LOW_STICK) {

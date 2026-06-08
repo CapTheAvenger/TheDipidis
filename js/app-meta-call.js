@@ -3189,111 +3189,97 @@ window.MetaCall = (function () {
                   + 0.10 * broughtPct
                   + 0.50 * top8Boost
                   + 0.10 * weeklySignal;
+      }
 
-        // Predictor 5.8 — Player-Stickiness-Damper (pre-floor).
-        // Damps decks the previous-format player base TRIED but didn't
-        // STICK with. Lopunny / Cynthia / OMH / Dragapult Dudunsparce
-        // at TEF-POR all had hundreds of brought-counts but <1.3 % of
-        // pilots returning — a clear "online-fun, in-person-disposable"
-        // signature. The Turin abgleich showed these as the remaining
-        // cluster of over-calls after Predictor 5.6 fixed Solo Dragapult.
-        //
-        // Applied to baseline BEFORE the floor so the growth-boosted
-        // floor (if it fires) still gives the deck the lift it needs.
-        // The damp says "the baseline predicted too high" — if labs
-        // continuity ALSO shows the deck was committed (high stickiness
-        // OR high last-meta floor), the floor recovers the prediction.
-        const stickEntry = _stickinessByDeck[k];
-        if (stickEntry && stickEntry.brought >= PREDICTOR_5_8_MIN_BROUGHT) {
-          let dampFactor = 1.0;
-          if (stickEntry.sticky_pct < PREDICTOR_5_8_VERY_LOW_STICK) {
-            dampFactor = PREDICTOR_5_8_STRONG_DAMP;
-          } else if (stickEntry.sticky_pct < PREDICTOR_5_8_LOW_STICK) {
-            dampFactor = PREDICTOR_5_8_MILD_DAMP;
-          }
-          if (dampFactor < 1.0) {
-            d.stickinessDamper = {
-              brought:    stickEntry.brought,
-              sticky_pct: Math.round(stickEntry.sticky_pct * 100) / 100,
-              factor:     dampFactor,
-              prePP:      Math.round(predicted * 100) / 100,
-            };
-            predicted *= dampFactor;
+      // ── Predictor 5.6 + 5.8 — Last-Meta-Continuity stages ──────
+      // CRITICAL ordering note (2026-06-08):
+      // These stages fire regardless of Mode A / Mode B because during
+      // a set-addition rotation lag-window, production runs in Mode B
+      // (the previous-format labs CSV still has rows that match the
+      // active-set filter — labs.length > 0 → Mode B even though no
+      // current-format major has been scraped yet). Earlier versions
+      // had these stages inside the Mode A branch and silently no-op'd
+      // for every Turin Phase 1 user. They MUST run outside the mode
+      // switch so the floor / damper / stickiness logic applies
+      // whichever predictor branch produced `predicted`.
+      //
+      // Gated by _lastMetaLabsByDeck (only populated when
+      // set_addition_only=true) so true rotations stay no-op.
+
+      // Predictor 5.8 — Player-Stickiness-Damper (pre-floor).
+      // Damps decks the previous-format player base TRIED but didn't
+      // STICK with. Lopunny / Cynthia / OMH / Dragapult Dudunsparce
+      // at TEF-POR all had hundreds of brought-counts but <1.3 % of
+      // pilots returning — a clear "online-fun, in-person-disposable"
+      // signature. The Turin abgleich showed these as the remaining
+      // cluster of over-calls after Predictor 5.6 fixed Solo Dragapult.
+      const stickEntry = _stickinessByDeck[k];
+      if (stickEntry && stickEntry.brought >= PREDICTOR_5_8_MIN_BROUGHT) {
+        let dampFactor = 1.0;
+        if (stickEntry.sticky_pct < PREDICTOR_5_8_VERY_LOW_STICK) {
+          dampFactor = PREDICTOR_5_8_STRONG_DAMP;
+        } else if (stickEntry.sticky_pct < PREDICTOR_5_8_LOW_STICK) {
+          dampFactor = PREDICTOR_5_8_MILD_DAMP;
+        }
+        if (dampFactor < 1.0) {
+          d.stickinessDamper = {
+            brought:    stickEntry.brought,
+            sticky_pct: Math.round(stickEntry.sticky_pct * 100) / 100,
+            factor:     dampFactor,
+            prePP:      Math.round(predicted * 100) / 100,
+          };
+          predicted *= dampFactor;
+        }
+      }
+
+      // Predictor 5.6 — Growth-Boosted Last-Meta Floor + Post-Floor
+      // Decline-Damper. Backtest-driven redesign (2026-06-07).
+      //
+      // Floor uses lm.full × 0.70 × growth, where growth =
+      //   min(1.80, lateShare/earlyShare) when ratio > 1.20, else 1.0.
+      // Captures the "this archetype is gaining share at the end of
+      // the previous format" pattern that the flat-floor missed
+      // (Basic Box TEF-POR 1.86 → 3.46, Slowking 1.26 → 1.87,
+      // Dragapult 10.67 → 19.80).
+      //
+      // Decline-damper (× 0.85 when ratio < 0.85) runs AFTER the
+      // floor so over-floored declining decks land at the right
+      // level. Production previously damped BEFORE the floor which
+      // immediately undid it.
+      const lastMetaEntry = _lastMetaLabsByDeck[k];
+      if (lastMetaEntry && lastMetaEntry.share > 0) {
+        // Step 1 — growth-boosted floor
+        let growth = 1.0;
+        const e = lastMetaEntry.earlyShare;
+        const l = lastMetaEntry.lateShare;
+        if (e > 0 && l > 0) {
+          const ratio = l / e;
+          if (ratio > PREDICTOR_5_6_GROWTH_THRESHOLD) {
+            growth = Math.min(PREDICTOR_5_6_GROWTH_CAP, ratio);
           }
         }
-
-        // Predictor 5.6 — Growth-Boosted Last-Meta Floor + Post-Floor
-        // Decline-Damper. Backtest-driven redesign (2026-06-07).
-        //
-        // Replaces Predictor 5.5 (plain × 0.7 floor) + 5.5.3
-        // (pre-floor decline damper). Two-step process:
-        //
-        //   1. FLOOR with growth boost:
-        //        ratio = lateShare / earlyShare
-        //        if ratio > 1.20 → growth = min(1.8, ratio)   (climbing
-        //                                                      deck)
-        //        else → growth = 1.0
-        //        floor = lm.full × 0.70 × growth
-        //
-        //      Captures the "this archetype is gaining share at the
-        //      end of the previous format" signal that the flat-floor
-        //      design missed (Basic Box TEF-POR 1.86 → 3.46, Slowking
-        //      1.26 → 1.87, Dragapult 10.67 → 19.80). All three were
-        //      under-called at Turin by the flat-floor approach.
-        //
-        //   2. DECLINE-DAMPER applied AFTER the floor:
-        //        if ratio < 0.85 → predicted × 0.85
-        //
-        //      Cynthia / Rocket's Mewtwo / N's Zoroark are over-called
-        //      by Mode A baseline because the online ladder still
-        //      shows them as mid-tier. TEF-POR labs shows the actual
-        //      drop. Damping AFTER the floor lets the floor lift
-        //      under-called decks first, then damps any over-floored
-        //      declining decks (current production damps BEFORE the
-        //      floor which immediately undoes the damp — wasted work).
-        //
-        // Backtest evidence (scripts/predictor_backtest.py, Turin):
-        //   Production current        MAE-top20 = 1.65
-        //   Old 5.5 + 5.5.3 (full)    MAE-top20 = 1.28
-        //   This Predictor 5.6        MAE-top20 = 0.93  (-44 % vs prod)
-        //
-        // Gated by _lastMetaLabsByDeck being populated (loadData() only
-        // fills it when set_addition_only=true). True rotations → no-op.
-        const lastMetaEntry = _lastMetaLabsByDeck[k];
-        if (lastMetaEntry && lastMetaEntry.share > 0) {
-          // Step 1 — growth-boosted floor
-          let growth = 1.0;
-          const e = lastMetaEntry.earlyShare;
-          const l = lastMetaEntry.lateShare;
-          if (e > 0 && l > 0) {
-            const ratio = l / e;
-            if (ratio > PREDICTOR_5_6_GROWTH_THRESHOLD) {
-              growth = Math.min(PREDICTOR_5_6_GROWTH_CAP, ratio);
-            }
-          }
-          const floorPct = lastMetaEntry.share * PREDICTOR_5_5_FLOOR_FACTOR * growth;
-          if (predicted < floorPct) {
-            d.lastMetaLabsFloor = {
-              prevShare: Math.round(lastMetaEntry.share * 100) / 100,
-              floorPct:  Math.round(floorPct * 100) / 100,
-              growth:    Math.round(growth * 100) / 100,
-              liftPP:    Math.round((floorPct - predicted) * 100) / 100,
+        const floorPct = lastMetaEntry.share * PREDICTOR_5_5_FLOOR_FACTOR * growth;
+        if (predicted < floorPct) {
+          d.lastMetaLabsFloor = {
+            prevShare: Math.round(lastMetaEntry.share * 100) / 100,
+            floorPct:  Math.round(floorPct * 100) / 100,
+            growth:    Math.round(growth * 100) / 100,
+            liftPP:    Math.round((floorPct - predicted) * 100) / 100,
+          };
+          predicted = floorPct;
+        }
+        // Step 2 — post-floor decline damper
+        if (e > 0 && l > 0) {
+          const ratio = l / e;
+          if (ratio < PREDICTOR_5_6_DECLINE_THRESHOLD) {
+            d.declineDamper = {
+              earlyShare: Math.round(e * 100) / 100,
+              lateShare:  Math.round(l * 100) / 100,
+              ratio:      Math.round(ratio * 100) / 100,
+              factor:     PREDICTOR_5_6_DECLINE_DAMPER,
+              prePP:      Math.round(predicted * 100) / 100,
             };
-            predicted = floorPct;
-          }
-          // Step 2 — post-floor decline damper
-          if (e > 0 && l > 0) {
-            const ratio = l / e;
-            if (ratio < PREDICTOR_5_6_DECLINE_THRESHOLD) {
-              d.declineDamper = {
-                earlyShare: Math.round(e * 100) / 100,
-                lateShare:  Math.round(l * 100) / 100,
-                ratio:      Math.round(ratio * 100) / 100,
-                factor:     PREDICTOR_5_6_DECLINE_DAMPER,
-                prePP:      Math.round(predicted * 100) / 100,
-              };
-              predicted *= PREDICTOR_5_6_DECLINE_DAMPER;
-            }
+            predicted *= PREDICTOR_5_6_DECLINE_DAMPER;
           }
         }
       }

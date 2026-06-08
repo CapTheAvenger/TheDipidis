@@ -55,6 +55,11 @@ TEST_EVENTS = [
     ('0066', '2026-05-23', 'Melbourne',    'TEF-POR', 'SVI-ASC', False),
     # 0067 Lima omitted — Special Event, 485 players, noisy
     ('0068', '2026-05-30', 'Indianapolis', 'TEF-POR', 'SVI-ASC', False),
+    # Turin — first TEF-CRI major. Not in labs CSV yet (scraper hasn't
+    # run), so backtests require --ground-truth docs/turin_final.json
+    # to load actuals. TEF-POR → TEF-CRI is a set-addition rotation
+    # → floor + damper fire.
+    ('0069', '2026-06-07', 'Turin',        'TEF-CRI', 'TEF-POR', True),
 ]
 
 # ── Utility ──────────────────────────────────────────────────────
@@ -386,11 +391,119 @@ def formula_full(ctx, trace=None):
     return out
 
 
+def formula_floor_then_damper(ctx, trace=None):
+    """Floor first (lift under-called decks), THEN damper (knock down
+    declining decks that got floor-lifted too high).
+
+    Hypothesis: the production sequence (damper → floor) wastes the
+    damper because the floor immediately undoes it. Reversing the order
+    lets declining decks get a smaller post-floor share."""
+    out = formula_baseline(ctx, trace=trace)
+    floor_factor = 0.7
+    for k, lm in ctx['last_meta'].items():
+        floor = lm['full'] * floor_factor
+        if floor > 0 and out.get(k, 0) < floor:
+            out[k] = floor
+    damper_factor = 0.85
+    damper_threshold = 0.85
+    for k, lm in ctx['last_meta'].items():
+        e, l = lm['early'], lm['late']
+        if e > 0 and l > 0 and (l / e) < damper_threshold:
+            if k in out:
+                out[k] *= damper_factor
+    return out
+
+
+def formula_consolidation(ctx, trace=None):
+    """Floor-first + within-family consolidation boost for the largest
+    variant. Tries to address the Turin within-family split bug where
+    every Dragapult variant got the same TEF-POR proportional floor,
+    leaving solo under and Dusknoir under (real Turin: solo 46 % of
+    family vs predicted 40 %; Dusknoir 34 % vs predicted 19 %)."""
+    out = formula_floor_then_damper(ctx, trace=trace)
+    # Identify each family and find its largest variant
+    family_groups = defaultdict(list)
+    for k in out:
+        fam = extract_family(k)
+        if fam:
+            family_groups[fam].append(k)
+    boost = 0.15  # 15 % shift from smaller variants to top-2 variants
+    for fam, members in family_groups.items():
+        if len(members) < 2:
+            continue
+        sorted_members = sorted(members, key=lambda m: -out.get(m, 0))
+        # Move `boost`% of the smallest variants' share to the top-2
+        top2 = sorted_members[:2]
+        rest = sorted_members[2:]
+        if not rest:
+            continue
+        donation = sum(out[m] * boost for m in rest)
+        for m in rest:
+            out[m] *= (1 - boost)
+        # Split donation 60/40 between top-1 and top-2
+        if len(top2) == 2:
+            out[top2[0]] += donation * 0.60
+            out[top2[1]] += donation * 0.40
+        else:
+            out[top2[0]] += donation
+    return out
+
+
+def formula_consolidation_floor85(ctx, trace=None):
+    """Consolidation + bumped floor factor 0.7 → 0.85. Hypothesis: the
+    current 0.7 floor under-lifts Tier-2 in-person mainstays (Basic Box,
+    Slowking, Honchkrow, Mega Lucario) whose pilots reliably bring them
+    but whose online ladder share doesn't reflect this.
+
+    At 0.85 a TEF-POR 2.47 % deck floors at 2.10 % instead of 1.73 %.
+    """
+    out = formula_baseline(ctx, trace=trace)
+    floor_factor = 0.85
+    for k, lm in ctx['last_meta'].items():
+        floor = lm['full'] * floor_factor
+        if floor > 0 and out.get(k, 0) < floor:
+            out[k] = floor
+    damper_factor = 0.85
+    damper_threshold = 0.85
+    for k, lm in ctx['last_meta'].items():
+        e, l = lm['early'], lm['late']
+        if e > 0 and l > 0 and (l / e) < damper_threshold:
+            if k in out:
+                out[k] *= damper_factor
+    # Within-family consolidation
+    family_groups = defaultdict(list)
+    for k in out:
+        fam = extract_family(k)
+        if fam:
+            family_groups[fam].append(k)
+    boost = 0.15
+    for fam, members in family_groups.items():
+        if len(members) < 2:
+            continue
+        sorted_members = sorted(members, key=lambda m: -out.get(m, 0))
+        top2 = sorted_members[:2]
+        rest = sorted_members[2:]
+        if not rest:
+            continue
+        donation = sum(out[m] * boost for m in rest)
+        for m in rest:
+            out[m] *= (1 - boost)
+        if len(top2) == 2:
+            out[top2[0]] += donation * 0.60
+            out[top2[1]] += donation * 0.40
+        else:
+            out[top2[0]] += donation
+    return out
+
+
 FORMULAS = {
-    'baseline':        formula_baseline,
-    'baseline+floor':  formula_baseline_plus_floor,
-    'baseline+damper': formula_baseline_plus_damper,
-    'full':            formula_full,
+    'baseline':                 formula_baseline,
+    'baseline+floor':           formula_baseline_plus_floor,
+    'baseline+damper':          formula_baseline_plus_damper,
+    'full':                     formula_full,
+    'floor_then_damper':        formula_floor_then_damper,
+    'consolidation':            formula_consolidation,
+    'consolidation_floor85':    formula_consolidation_floor85,
 }
 
 
@@ -558,7 +671,15 @@ def load_manual_ground_truth(path):
     if ext == '.json':
         with open(path, encoding='utf-8') as f:
             raw = json.load(f)
-        return {normalize_deck(k): float(v) for k, v in raw.items()}
+        out = {}
+        for k, v in raw.items():
+            if k.startswith('_'):  # skip metadata fields like _comment
+                continue
+            try:
+                out[normalize_deck(k)] = float(v)
+            except (TypeError, ValueError):
+                continue
+        return out
     # CSV fallback
     out = {}
     with open(path, encoding='utf-8') as f:

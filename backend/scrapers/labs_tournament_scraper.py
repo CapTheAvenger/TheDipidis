@@ -2100,9 +2100,25 @@ def main() -> None:
         # listed. Each probed TID hits /standings; 200 → add to the
         # discovery list, 404 → skip silently.
         #
-        # Cost: at most GAP_FILL_LOOKBACK extra HTTP requests per
-        # weekly run (currently 10 → ~5 seconds at the default delay).
-        GAP_FILL_LOOKBACK = 10
+        # Two windows are probed:
+        #   • LOOKBACK (rückwärts): max_tid-10 ... max_tid — catches
+        #     completed tournaments that fell off the index page (Lima
+        #     0067 pattern: small Special Event indexed below the
+        #     visible cutoff).
+        #   • LOOKAHEAD (vorwärts, added 2026-06-09): max_tid+1 ...
+        #     max_tid+5 — catches tournaments whose /standings page
+        #     EXISTS on labs.limitlesstcg.com but isn't linked yet from
+        #     the homepage feed (Turin 0069 pattern: tournament ran
+        #     2026-06-07, standings posted within hours, but the labs
+        #     index feed lagged 1-3 days). Without lookahead, our
+        #     Tuesday weekly run kept missing Turin even though its
+        #     data WAS reachable at https://labs.limitlesstcg.com/0069/standings.
+        #
+        # Cost: GAP_FILL_LOOKBACK + GAP_FILL_LOOKAHEAD HTTP requests
+        # per weekly run (15 → ~8 seconds at default delay). Trivial
+        # compared to the ~1500 HTTP for the matchup pass.
+        GAP_FILL_LOOKBACK  = 10
+        GAP_FILL_LOOKAHEAD = 5
         try:
             cached_index = _load_cached_tournament_index()
             known_tids = {
@@ -2111,7 +2127,10 @@ def main() -> None:
             }
             if known_tids:
                 max_tid = max(known_tids)
-                gap_window = set(range(max_tid - GAP_FILL_LOOKBACK, max_tid + 1))
+                gap_window = set(range(
+                    max_tid - GAP_FILL_LOOKBACK,
+                    max_tid + GAP_FILL_LOOKAHEAD + 1,
+                ))
                 missing = sorted(gap_window - known_tids)
                 if missing:
                     logger.info(

@@ -1,0 +1,274 @@
+/* Side Quest — Pokémon Champions Replica Codes
+ *
+ * Visual language matches the existing dashboard cards (rounded
+ * containers, soft borders, monospace replica codes) but keeps a
+ * distinct accent so users notice it's a separate Champions-game
+ * feature, not part of the TCG pipeline.
+ */
+
+.side-quest-intro {
+    margin: 0 0 1.25rem 0;
+    color: var(--text-secondary, #b0b8c1);
+}
+
+.side-quest-subtitle {
+    margin: 0 0 0.25rem 0;
+    font-size: 0.95rem;
+}
+
+.side-quest-updated {
+    margin: 0;
+    font-size: 0.78rem;
+    opacity: 0.65;
+}
+
+.side-quest-status {
+    font-size: 0.85rem;
+    color: var(--text-secondary, #b0b8c1);
+    margin: 0.5rem 0;
+}
+
+.side-quest-empty {
+    padding: 2rem 1rem;
+    text-align: center;
+    color: var(--text-secondary, #b0b8c1);
+    border: 1px dashed var(--border-color, #2a3140);
+    border-radius: 12px;
+    background: var(--surface-alt, rgba(255,255,255,0.02));
+}
+
+.side-quest-empty code {
+    background: rgba(255,255,255,0.05);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+.side-quest-teams {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: 1fr;
+}
+
+@media (min-width: 1000px) {
+    .side-quest-teams {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+.side-quest-team {
+    background: var(--surface, #1a1f2c);
+    border: 1px solid var(--border-color, #2a3140);
+    border-radius: 14px;
+    padding: 1rem 1.1rem 1.1rem 1.1rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.25);
+}
+
+.side-quest-team-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 0.9rem;
+    flex-wrap: wrap;
+}
+
+.side-quest-team-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    min-width: 0;
+    flex: 1 1 auto;
+}
+
+.side-quest-rank {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--accent, #5fb6ff);
+    letter-spacing: 0.04em;
+}
+
+.side-quest-team-name {
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--text-primary, #e6ebf3);
+}
+
+.side-quest-team-tourney {
+    font-size: 0.78rem;
+    color: var(--text-secondary, #8c95a5);
+    margin-top: 0.1rem;
+}
+
+.side-quest-copy-btn {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.15rem;
+    background: rgba(95, 182, 255, 0.08);
+    border: 1px solid rgba(95, 182, 255, 0.35);
+    border-radius: 10px;
+    padding: 0.55rem 0.85rem;
+    color: var(--text-primary, #e6ebf3);
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 120ms ease, transform 80ms ease;
+    position: relative;
+    min-width: 130px;
+}
+
+.side-quest-copy-btn:hover {
+    background: rgba(95, 182, 255, 0.16);
+}
+
+.side-quest-copy-btn:active {
+    transform: scale(0.98);
+}
+
+.side-quest-copy-btn.is-copied {
+    background: rgba(76, 209, 130, 0.18);
+    border-color: rgba(76, 209, 130, 0.55);
+}
+
+.side-quest-copy-label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-secondary, #9fa9bb);
+    font-weight: 600;
+}
+
+.side-quest-copy-code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 1.05rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+}
+
+.side-quest-copy-icon {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.55rem;
+    font-size: 0.85rem;
+    opacity: 0.6;
+}
+
+.side-quest-team-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.55rem;
+}
+
+@media (min-width: 740px) {
+    .side-quest-team-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+.side-quest-mon {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border-color, #242b39);
+    border-radius: 10px;
+    padding: 0.55rem 0.65rem;
+    min-height: 110px;
+}
+
+.side-quest-mon-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 0.5rem;
+    margin-bottom: 0.25rem;
+}
+
+.side-quest-mon-name {
+    font-weight: 600;
+    font-size: 0.92rem;
+    color: var(--text-primary, #e6ebf3);
+}
+
+.side-quest-tera {
+    font-size: 0.65rem;
+    color: var(--accent, #5fb6ff);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.side-quest-mon-meta {
+    display: flex;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+    font-size: 0.72rem;
+    color: var(--text-secondary, #98a3b6);
+    margin-bottom: 0.35rem;
+}
+
+.side-quest-ability {
+    color: var(--text-secondary, #b0b8c1);
+}
+
+.side-quest-item {
+    color: var(--text-secondary, #98a3b6);
+    font-style: italic;
+}
+
+.side-quest-moves {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    font-size: 0.78rem;
+    line-height: 1.35;
+    color: var(--text-primary, #d6dce7);
+}
+
+.side-quest-move {
+    padding: 1px 0;
+    border-top: 1px dotted rgba(255, 255, 255, 0.06);
+}
+
+.side-quest-move:first-child {
+    border-top: none;
+}
+
+.side-quest-strategy {
+    margin-top: 0.9rem;
+    border-top: 1px solid var(--border-color, #242b39);
+    padding-top: 0.7rem;
+}
+
+.side-quest-strategy summary {
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-secondary, #b0b8c1);
+    user-select: none;
+    list-style: none;
+}
+
+.side-quest-strategy summary::-webkit-details-marker {
+    display: none;
+}
+
+.side-quest-strategy summary::before {
+    content: '▸ ';
+    color: var(--accent, #5fb6ff);
+    transition: transform 120ms ease;
+    display: inline-block;
+}
+
+.side-quest-strategy[open] summary::before {
+    content: '▾ ';
+}
+
+.side-quest-strategy ul {
+    margin: 0.5rem 0 0 1.1rem;
+    padding: 0;
+    font-size: 0.85rem;
+    color: var(--text-primary, #d6dce7);
+    line-height: 1.45;
+}
+
+.side-quest-strategy li {
+    padding: 0.1rem 0;
+}

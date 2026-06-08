@@ -1,0 +1,89 @@
+{
+  "_meta": {
+    "title": "Pokémon Champions — Current Top Doubles Teams",
+    "subtitle": "Replica codes from top tournament finishes. Tap a code to copy.",
+    "last_updated": "2026-06-08",
+    "sources": [
+      "https://op.gg/pokemon-champions/replica-teams",
+      "https://victoryroad.pro/champions-replica/",
+      "https://docs.google.com/spreadsheets/u/0/d/1axlwmzPA49rYkqXh7zHvAtSP-TKbM0ijGYBPRflLSWw/htmlview/sheet?pli=1&headers=true&gid=736919171"
+    ],
+    "_note": "Replace via backend/scrapers/champions_replica_scraper.py once wired in; this sample seeds the UI so the tile renders something useful on first load."
+  },
+  "teams": [
+    {
+      "rank": 1,
+      "replica_code": "SQMPYRW6BP",
+      "team_name": "Sun Charizard Y",
+      "tournament": "Sample — Charizardite Y core",
+      "trainer": "MZ",
+      "format": "VGC Reg-A doubles",
+      "pokemon": [
+        {
+          "name": "Charizard",
+          "item": "Charizardite Y",
+          "ability": "Blaze → Drought",
+          "tera_type": "",
+          "moves": ["Heat Wave", "Weather Ball", "Solar Beam", "Protect"]
+        },
+        {
+          "name": "Sneasler",
+          "item": "White Herb",
+          "ability": "Unburden",
+          "tera_type": "",
+          "moves": ["Fake Out", "Close Combat", "Dire Claw", "Protect"]
+        },
+        {
+          "name": "Milotic",
+          "item": "Leftovers",
+          "ability": "Competitive",
+          "tera_type": "",
+          "moves": ["Muddy Water", "Coil", "Hypnosis", "Recover"]
+        },
+        {
+          "name": "Garchomp",
+          "item": "Sitrus Berry",
+          "ability": "Rough Skin",
+          "tera_type": "",
+          "moves": ["Dragon Claw", "Rock Slide", "Earthquake", "Protect"]
+        },
+        {
+          "name": "Incineroar",
+          "item": "Chople Berry",
+          "ability": "Intimidate",
+          "tera_type": "",
+          "moves": ["Throat Chop", "Parting Shot", "Fake Out", "Flare Blitz"]
+        },
+        {
+          "name": "Venusaur",
+          "item": "Focus Sash",
+          "ability": "Chlorophyll",
+          "tera_type": "",
+          "moves": ["Energy Ball", "Sludge Bomb", "Sleep Powder", "Protect"]
+        }
+      ],
+      "strategy": [
+        "Sun core — Charizard Y sets Drought from turn 1 with Charizardite Y.",
+        "Venusaur with Chlorophyll outspeeds in sun; lead vs Trick Room players.",
+        "Sneasler + Incineroar gives strong Fake Out support to set up Charizard.",
+        "Milotic Competitive punishes Incineroar Intimidate mirrors.",
+        "Garchomp Earthquake is the speed-control finish vs faster teams.",
+        "Pivot Incineroar with Parting Shot when Charizard runs low on Solar Beam KOs."
+      ]
+    },
+    {
+      "rank": 2,
+      "replica_code": "PASTEHERE2",
+      "team_name": "Placeholder — refresh via scraper",
+      "tournament": "—",
+      "trainer": "—",
+      "format": "VGC Reg-A doubles",
+      "pokemon": [],
+      "strategy": [
+        "Run the champions_replica_scraper to populate ranks 2-20.",
+        "Sources: op.gg/pokemon-champions/replica-teams and victoryroad.pro/champions-replica/.",
+        "Each team needs: replica_code, 6 pokemon (item+ability+4 moves), 5-10 line strategy."
+      ]
+    }
+  ]
+}

@@ -282,6 +282,29 @@ window.MetaCall = (function () {
   const PREDICTOR_5_6_GROWTH_CAP        = 1.80;  // upper bound on growth multiplier
   const PREDICTOR_5_6_DECLINE_THRESHOLD = 0.85;  // ratio below which damper fires
   const PREDICTOR_5_6_DECLINE_DAMPER    = 0.85;  // multiplier applied AFTER floor
+  // Predictor 5.8 — Player-Stickiness-Damper (2026-06-08, post-Turin).
+  // Maps deck → { broughtTotal, uniquePilots, repeatPilots } from
+  // data/player_continuity.csv. A "repeat pilot" is a player who
+  // brought the same archetype to ≥ 2 previous-format tournaments.
+  // Stickiness = repeat / unique × 100.
+  //
+  // High brought + low stickiness = "the deck gets tried a lot but
+  // pilots don't stay with it" — typical online-popular but in-person-
+  // disposable archetype (Lopunny 1.23 %, OMH 0.93 %, Cynthia 0.81 %,
+  // Dragapult Dudunsparce 0.87 % at TEF-POR). The Turin abgleich
+  // showed these were the cluster of remaining over-calls after
+  // Predictor 5.6 fixed Solo Dragapult.
+  //
+  // Damp baseline (pre-floor) by:
+  //   stickiness < 1 %  AND brought ≥ 100  →  × 0.70  (strong damp)
+  //   stickiness 1-3 % AND brought ≥ 100  →  × 0.85  (mild damp)
+  //   otherwise → no damp (sample too small, or proven sticky)
+  let _stickinessByDeck = {};               // norm(name) -> { brought, sticky_pct }
+  const PREDICTOR_5_8_MIN_BROUGHT      = 100;
+  const PREDICTOR_5_8_VERY_LOW_STICK   = 1.0;
+  const PREDICTOR_5_8_LOW_STICK        = 3.0;
+  const PREDICTOR_5_8_STRONG_DAMP      = 0.70;
+  const PREDICTOR_5_8_MILD_DAMP        = 0.85;
                                             //   (allows for some natural decay between formats; a
                                             //    deck at 3.90 % last meta floors at 2.73 %, not 3.90 %)
   let _activeInPersonSetCode   = '';        // e.g. "POR" during the lag window when current_set="CRI" but
@@ -3167,6 +3190,38 @@ window.MetaCall = (function () {
                   + 0.50 * top8Boost
                   + 0.10 * weeklySignal;
 
+        // Predictor 5.8 — Player-Stickiness-Damper (pre-floor).
+        // Damps decks the previous-format player base TRIED but didn't
+        // STICK with. Lopunny / Cynthia / OMH / Dragapult Dudunsparce
+        // at TEF-POR all had hundreds of brought-counts but <1.3 % of
+        // pilots returning — a clear "online-fun, in-person-disposable"
+        // signature. The Turin abgleich showed these as the remaining
+        // cluster of over-calls after Predictor 5.6 fixed Solo Dragapult.
+        //
+        // Applied to baseline BEFORE the floor so the growth-boosted
+        // floor (if it fires) still gives the deck the lift it needs.
+        // The damp says "the baseline predicted too high" — if labs
+        // continuity ALSO shows the deck was committed (high stickiness
+        // OR high last-meta floor), the floor recovers the prediction.
+        const stickEntry = _stickinessByDeck[k];
+        if (stickEntry && stickEntry.brought >= PREDICTOR_5_8_MIN_BROUGHT) {
+          let dampFactor = 1.0;
+          if (stickEntry.sticky_pct < PREDICTOR_5_8_VERY_LOW_STICK) {
+            dampFactor = PREDICTOR_5_8_STRONG_DAMP;
+          } else if (stickEntry.sticky_pct < PREDICTOR_5_8_LOW_STICK) {
+            dampFactor = PREDICTOR_5_8_MILD_DAMP;
+          }
+          if (dampFactor < 1.0) {
+            d.stickinessDamper = {
+              brought:    stickEntry.brought,
+              sticky_pct: Math.round(stickEntry.sticky_pct * 100) / 100,
+              factor:     dampFactor,
+              prePP:      Math.round(predicted * 100) / 100,
+            };
+            predicted *= dampFactor;
+          }
+        }
+
         // Predictor 5.6 — Growth-Boosted Last-Meta Floor + Post-Floor
         // Decline-Damper. Backtest-driven redesign (2026-06-07).
         //
@@ -4005,9 +4060,69 @@ window.MetaCall = (function () {
       _activeFormatTop15Decks = new Set();
       _majorSharesByDeck      = {};
       _lastMetaLabsByDeck     = {};
+      _stickinessByDeck       = {};
       _activeInPersonSetCode  = '';
       _onlineWinsByDeck       = {};
       _dataLastScrapedAt      = '';
+
+      // Predictor 5.8 — load player_continuity.csv → per-deck
+      // {brought, sticky_pct}. Optional CSV; predictor degrades to
+      // "no damper" gracefully when the file is missing.
+      try {
+        const stickResp = await fetch('data/player_continuity.csv?t=' + Date.now());
+        if (stickResp.ok) {
+          const rows = parseCSVQuoted(await stickResp.text(), ',');
+          const prev = (_formatWindow && _formatWindow.previous_format_key) || '';
+          // Aggregate: per (player, archetype) → set of tournament_ids
+          const seenByPair = {};
+          const broughtByArch = {};
+          rows.forEach(r => {
+            if (!r) return;
+            const player = (r.player_name || '').trim();
+            const arch   = (r.deck_archetype || '').trim();
+            const tid    = (r.tournament_id || '').trim();
+            const meta   = (r.meta || '').trim().toUpperCase();
+            if (!player || !arch || !tid) return;
+            // Restrict to previous-format rows when format_window is set
+            // (Turin uses TEF-POR continuity, not SVI-ASC etc.). If the
+            // CSV row has no meta we still count it — labs is the source
+            // of truth, missing meta is a scraper-side gap not relevant
+            // to the signal.
+            if (prev && meta && meta !== prev) return;
+            const k = normalize(arch);
+            const key = player + '|' + k;
+            if (!seenByPair[key]) seenByPair[key] = new Set();
+            seenByPair[key].add(tid);
+            broughtByArch[k] = (broughtByArch[k] || 0) + 1;
+          });
+          const uniqueByArch = {};
+          const repeatByArch = {};
+          Object.keys(seenByPair).forEach(key => {
+            const k = key.split('|', 2)[1];
+            uniqueByArch[k] = (uniqueByArch[k] || 0) + 1;
+            if (seenByPair[key].size >= 2) {
+              repeatByArch[k] = (repeatByArch[k] || 0) + 1;
+            }
+          });
+          Object.keys(broughtByArch).forEach(k => {
+            const u = uniqueByArch[k] || 0;
+            const r = repeatByArch[k] || 0;
+            _stickinessByDeck[k] = {
+              brought:    broughtByArch[k],
+              unique:     u,
+              repeat:     r,
+              sticky_pct: u > 0 ? (r / u) * 100 : 0,
+            };
+          });
+          try {
+            const decks = Object.keys(_stickinessByDeck).length;
+            console.log(
+              `[Predictor 5.8] Player-stickiness loaded: ${decks} archetypes ` +
+              `from previous-format (${prev || 'any'}) continuity data.`
+            );
+          } catch (_e) { /* ignore */ }
+        }
+      } catch (_e) { /* optional — no damper when missing */ }
       let labsRowsByDeck = {};
       try {
         const labsResp = await fetch('data/labs_tournament_decks.csv?t=' + Date.now());

@@ -274,6 +274,14 @@ window.MetaCall = (function () {
   // Regionals.
   let _lastMetaLabsByDeck      = {};        // norm(name) -> { share, players, n }
   const PREDICTOR_5_5_FLOOR_FACTOR = 0.7;   // soft floor = lastMetaShare × 0.7
+  // Predictor 5.6 — growth-boost on the floor + post-floor decline-damper.
+  // Backtest-tuned 2026-06-07 against Turin Final ground truth. Reduces
+  // MAE-top20 from 1.65 (production) to 0.93. See the in-line comment
+  // block in the Mode A baseline branch for the full derivation.
+  const PREDICTOR_5_6_GROWTH_THRESHOLD  = 1.20;  // ratio late/early needs to exceed
+  const PREDICTOR_5_6_GROWTH_CAP        = 1.80;  // upper bound on growth multiplier
+  const PREDICTOR_5_6_DECLINE_THRESHOLD = 0.85;  // ratio below which damper fires
+  const PREDICTOR_5_6_DECLINE_DAMPER    = 0.85;  // multiplier applied AFTER floor
                                             //   (allows for some natural decay between formats; a
                                             //    deck at 3.90 % last meta floors at 2.73 %, not 3.90 %)
   let _activeInPersonSetCode   = '';        // e.g. "POR" during the lag window when current_set="CRI" but
@@ -3159,89 +3167,78 @@ window.MetaCall = (function () {
                   + 0.50 * top8Boost
                   + 0.10 * weeklySignal;
 
-        // Predictor 5.5.3 — Decline-Damper (Mode A baseline).
-        // The Turin Phase 1 abgleich showed that decks the previous
-        // format was actively shedding in its closing weeks come into
-        // a set-addition rotation already losing. Cynthia's Garchomp
-        // (TEF-POR early 4.83 % → late 3.03 %, ratio 0.63) and Rocket's
-        // Mewtwo (5.76 → 3.55, ratio 0.62) showed <2 % and 3 % at
-        // Turin respectively, but Mode A's baseline weights — online
-        // ladder + online-brought + online-top8 — read them as
-        // confidently mid-tier (~4-5 % predicted). The ladder is a
-        // lagging signal here; the labs late-vs-early trend is the
-        // forward one.
+        // Predictor 5.6 — Growth-Boosted Last-Meta Floor + Post-Floor
+        // Decline-Damper. Backtest-driven redesign (2026-06-07).
         //
-        // We damp baseline by 0.85 when lateShare/earlyShare < 0.85.
-        // 0.85 is the threshold a deck must cross to NOT be considered
-        // declining — a sub-15 % drop in the closing tournaments is
-        // within noise, so we don't punish stable decks. The damper
-        // applies BEFORE the floor so an over-called declining deck
-        // can still be floored back up by max(early, late) — Festival
-        // Lead is exactly this case (lateShare 2.83 declined but
-        // earlyShare 4.50 keeps the floor at 3.15).
-        const PREDICTOR_5_5_DECLINE_THRESHOLD  = 0.85;
-        const PREDICTOR_5_5_DECLINE_DAMPER     = 0.85;
-        const dampEntry = _lastMetaLabsByDeck[k];
-        if (dampEntry && dampEntry.earlyShare > 0 && dampEntry.lateShare > 0) {
-          const trendRatio = dampEntry.lateShare / dampEntry.earlyShare;
-          if (trendRatio < PREDICTOR_5_5_DECLINE_THRESHOLD) {
-            d.declineDamper = {
-              earlyShare: Math.round(dampEntry.earlyShare * 100) / 100,
-              lateShare:  Math.round(dampEntry.lateShare * 100) / 100,
-              ratio:      Math.round(trendRatio * 100) / 100,
-              factor:     PREDICTOR_5_5_DECLINE_DAMPER,
-              prePP:      Math.round(predicted * 100) / 100,
-            };
-            predicted *= PREDICTOR_5_5_DECLINE_DAMPER;
-          }
-        }
-
-        // Predictor 5.5 — Last-Meta-Labs soft floor (Mode A baseline).
-        // Set-addition rotations (CRI is one) leave every previous-meta
-        // legal card legal; archetypes that put up real share in TEF-POR
-        // don't vanish on day 1 of TEF-CRI. The Mode A formula above
-        // weights ladder + online brought-share + online T8 conv — all
-        // sources that under-represent in-person-mainstays whose pilots
-        // played them at TEF-POR Regionals but never grinded them on the
-        // online ladder (Festival Lead 3.90 % brought, Basic Box 2.12 %,
-        // Cynthia's Garchomp 4.25 %).
+        // Replaces Predictor 5.5 (plain × 0.7 floor) + 5.5.3
+        // (pre-floor decline damper). Two-step process:
         //
-        // The floor is a one-sided guard: it only LIFTS predictions for
-        // decks the baseline under-called vs their previous-meta share.
-        // Decks the baseline already calls above the floor (Dragapult
-        // family, top ladder decks) are untouched — Math.max keeps the
-        // formula output. That deliberately avoids the JP-M4 mistake
-        // (PR #280) where last-meta data added on top of an already-
-        // over-called share doubled the bias.
+        //   1. FLOOR with growth boost:
+        //        ratio = lateShare / earlyShare
+        //        if ratio > 1.20 → growth = min(1.8, ratio)   (climbing
+        //                                                      deck)
+        //        else → growth = 1.0
+        //        floor = lm.full × 0.70 × growth
         //
-        // FLOOR_FACTOR = 0.7 → a 3.90 % last-meta deck floors at 2.73 %,
-        // not 3.90 %. The discount allows for some natural decay between
-        // formats — pilots try new shells, the field hedges, a deck or
-        // two falls out of favour — without erasing the continuity
-        // signal entirely.
+        //      Captures the "this archetype is gaining share at the
+        //      end of the previous format" signal that the flat-floor
+        //      design missed (Basic Box TEF-POR 1.86 → 3.46, Slowking
+        //      1.26 → 1.87, Dragapult 10.67 → 19.80). All three were
+        //      under-called at Turin by the flat-floor approach.
+        //
+        //   2. DECLINE-DAMPER applied AFTER the floor:
+        //        if ratio < 0.85 → predicted × 0.85
+        //
+        //      Cynthia / Rocket's Mewtwo / N's Zoroark are over-called
+        //      by Mode A baseline because the online ladder still
+        //      shows them as mid-tier. TEF-POR labs shows the actual
+        //      drop. Damping AFTER the floor lets the floor lift
+        //      under-called decks first, then damps any over-floored
+        //      declining decks (current production damps BEFORE the
+        //      floor which immediately undoes the damp — wasted work).
+        //
+        // Backtest evidence (scripts/predictor_backtest.py, Turin):
+        //   Production current        MAE-top20 = 1.65
+        //   Old 5.5 + 5.5.3 (full)    MAE-top20 = 1.28
+        //   This Predictor 5.6        MAE-top20 = 0.93  (-44 % vs prod)
         //
         // Gated by _lastMetaLabsByDeck being populated (loadData() only
-        // fills it when previous_format_key is set AND set_addition_only
-        // is true). True rotations get an empty map → this is a no-op.
-        //
-        // Decline-Damper (5.5.3) above already dampens baseline for
-        // decks the previous format was actively shedding, so the
-        // first-iteration Lebenszeichen-Gate (which compared ladder
-        // share against last-meta share) was redundant — the data
-        // showed it never fired in cases where the floor would have
-        // over-pumped: declining decks always also tripped the damper.
-        // Removed for a simpler floor path.
+        // fills it when set_addition_only=true). True rotations → no-op.
         const lastMetaEntry = _lastMetaLabsByDeck[k];
-        const lastMetaShare = (lastMetaEntry && lastMetaEntry.share) || 0;
-        if (lastMetaShare > 0) {
-          const floorPct = lastMetaShare * PREDICTOR_5_5_FLOOR_FACTOR;
+        if (lastMetaEntry && lastMetaEntry.share > 0) {
+          // Step 1 — growth-boosted floor
+          let growth = 1.0;
+          const e = lastMetaEntry.earlyShare;
+          const l = lastMetaEntry.lateShare;
+          if (e > 0 && l > 0) {
+            const ratio = l / e;
+            if (ratio > PREDICTOR_5_6_GROWTH_THRESHOLD) {
+              growth = Math.min(PREDICTOR_5_6_GROWTH_CAP, ratio);
+            }
+          }
+          const floorPct = lastMetaEntry.share * PREDICTOR_5_5_FLOOR_FACTOR * growth;
           if (predicted < floorPct) {
             d.lastMetaLabsFloor = {
-              prevShare: Math.round(lastMetaShare * 100) / 100,
+              prevShare: Math.round(lastMetaEntry.share * 100) / 100,
               floorPct:  Math.round(floorPct * 100) / 100,
+              growth:    Math.round(growth * 100) / 100,
               liftPP:    Math.round((floorPct - predicted) * 100) / 100,
             };
             predicted = floorPct;
+          }
+          // Step 2 — post-floor decline damper
+          if (e > 0 && l > 0) {
+            const ratio = l / e;
+            if (ratio < PREDICTOR_5_6_DECLINE_THRESHOLD) {
+              d.declineDamper = {
+                earlyShare: Math.round(e * 100) / 100,
+                lateShare:  Math.round(l * 100) / 100,
+                ratio:      Math.round(ratio * 100) / 100,
+                factor:     PREDICTOR_5_6_DECLINE_DAMPER,
+                prePP:      Math.round(predicted * 100) / 100,
+              };
+              predicted *= PREDICTOR_5_6_DECLINE_DAMPER;
+            }
           }
         }
       }
@@ -3601,6 +3598,51 @@ window.MetaCall = (function () {
         );
       } catch (_e) { /* ignore */ }
     });
+
+    // Predictor 5.6.1 — Within-family donation.
+    // After the family-aggregate cap, the cap'd shares are split
+    // proportionally across all variants. The Turin abgleich showed
+    // this produces a too-flat within-family distribution — the lead
+    // and #2 variants consolidate at majors more than the proportional
+    // split predicts (real Turin: Dragapult solo 46 %, Dusknoir 34 %,
+    // Blaziken 14 %, Dudunsparce 6 % within-family — predicted 40 / 19
+    // / 19 / 19 with the bare cap).
+    //
+    // Move 15 % of every non-top-2 variant's share to the top-2 split
+    // 60/40 (leader gets 60 %, #2 gets 40 %). Per-deck cleanup;
+    // family aggregate unchanged.
+    //
+    // Backtest evidence: this single change cut MAE-top20 on Turin
+    // from 1.17 (floor_then_damper alone) to 1.04 (consolidation).
+    const WITHIN_FAMILY_DONATION_PCT = 0.15;
+    const WITHIN_FAMILY_TOP_SPLIT    = 0.60;
+    Object.keys(familyAgg).forEach(fam => {
+      const f = familyAgg[fam];
+      if (f.members.length < 2) return;
+      const sorted = f.members.slice().sort(
+        (a, b) => (b.predictedShare || 0) - (a.predictedShare || 0)
+      );
+      const top2 = sorted.slice(0, 2);
+      const rest = sorted.slice(2);
+      if (rest.length === 0) return;
+      let donation = 0;
+      rest.forEach(d => {
+        const give = (d.predictedShare || 0) * WITHIN_FAMILY_DONATION_PCT;
+        donation += give;
+        d.predictedShare = (d.predictedShare || 0) - give;
+        d.onlineShare    = d.predictedShare;
+      });
+      if (top2.length === 2) {
+        top2[0].predictedShare += donation * WITHIN_FAMILY_TOP_SPLIT;
+        top2[0].onlineShare    = top2[0].predictedShare;
+        top2[1].predictedShare += donation * (1 - WITHIN_FAMILY_TOP_SPLIT);
+        top2[1].onlineShare    = top2[1].predictedShare;
+      } else {
+        top2[0].predictedShare += donation;
+        top2[0].onlineShare    = top2[0].predictedShare;
+      }
+    });
+
     _shareList.sort((a, b) => b.predictedShare - a.predictedShare);
 
     // Append run-log entry — Part 6 / system-learning groundwork. Captures

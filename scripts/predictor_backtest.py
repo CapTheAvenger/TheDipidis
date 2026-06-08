@@ -55,6 +55,11 @@ TEST_EVENTS = [
     ('0066', '2026-05-23', 'Melbourne',    'TEF-POR', 'SVI-ASC', False),
     # 0067 Lima omitted — Special Event, 485 players, noisy
     ('0068', '2026-05-30', 'Indianapolis', 'TEF-POR', 'SVI-ASC', False),
+    # Turin — first TEF-CRI major. Not in labs CSV yet (scraper hasn't
+    # run), so backtests require --ground-truth docs/turin_final.json
+    # to load actuals. TEF-POR → TEF-CRI is a set-addition rotation
+    # → floor + damper fire.
+    ('0069', '2026-06-07', 'Turin',        'TEF-CRI', 'TEF-POR', True),
 ]
 
 # ── Utility ──────────────────────────────────────────────────────
@@ -242,8 +247,8 @@ def aggregate_labs(pre_rows, meta_key, late_tids=None):
 
 def last_meta_labs(by_tid, prev_meta_key, set_addition_only):
     """Player-weighted full-period share for every deck in previous format,
-    plus early/late split. Returns {} if previous meta unset or not a
-    set-addition rotation."""
+    plus early/late split AND player-weighted win-rate. Returns {} if
+    previous meta unset or not a set-addition rotation."""
     if not prev_meta_key or not set_addition_only:
         return {}
     prev_tids = sorted(
@@ -253,12 +258,14 @@ def last_meta_labs(by_tid, prev_meta_key, set_addition_only):
     if not prev_tids:
         return {}
     late_set = set(prev_tids[-2:])
-    agg = defaultdict(lambda: {'eSum': 0, 'eP': 0, 'lSum': 0, 'lP': 0})
+    agg = defaultdict(lambda: {'eSum': 0, 'eP': 0, 'lSum': 0, 'lP': 0,
+                                'wpSum': 0, 'wpP': 0})
     for tid in prev_tids:
         for r in by_tid[tid]['rows']:
             share = parse_eu(r.get('share_pct') or '0')
             players = int(r.get('player_count') or 0)
             name = (r.get('deck_name') or '').strip()
+            wp = parse_eu(r.get('win_pct') or '0')
             if not name or share <= 0 or players <= 0:
                 continue
             k = normalize_deck(name)
@@ -268,15 +275,19 @@ def last_meta_labs(by_tid, prev_meta_key, set_addition_only):
             else:
                 agg[k]['eSum'] += share * players
                 agg[k]['eP']   += players
+            if wp > 0:
+                agg[k]['wpSum'] += wp * players
+                agg[k]['wpP']   += players
     out = {}
     for k, a in agg.items():
         fullP = a['eP'] + a['lP']
         if fullP <= 0:
             continue
         out[k] = {
-            'full':   (a['eSum'] + a['lSum']) / fullP,
-            'early':  (a['eSum'] / a['eP']) if a['eP'] > 0 else 0,
-            'late':   (a['lSum'] / a['lP']) if a['lP'] > 0 else 0,
+            'full':    (a['eSum'] + a['lSum']) / fullP,
+            'early':   (a['eSum'] / a['eP']) if a['eP'] > 0 else 0,
+            'late':    (a['lSum'] / a['lP']) if a['lP'] > 0 else 0,
+            'win_pct': (a['wpSum'] / a['wpP']) if a['wpP'] > 0 else 50.0,
         }
     return out
 
@@ -386,12 +397,326 @@ def formula_full(ctx, trace=None):
     return out
 
 
+def formula_floor_then_damper(ctx, trace=None):
+    """Floor first (lift under-called decks), THEN damper (knock down
+    declining decks that got floor-lifted too high).
+
+    Hypothesis: the production sequence (damper → floor) wastes the
+    damper because the floor immediately undoes it. Reversing the order
+    lets declining decks get a smaller post-floor share."""
+    out = formula_baseline(ctx, trace=trace)
+    floor_factor = 0.7
+    for k, lm in ctx['last_meta'].items():
+        floor = lm['full'] * floor_factor
+        if floor > 0 and out.get(k, 0) < floor:
+            out[k] = floor
+    damper_factor = 0.85
+    damper_threshold = 0.85
+    for k, lm in ctx['last_meta'].items():
+        e, l = lm['early'], lm['late']
+        if e > 0 and l > 0 and (l / e) < damper_threshold:
+            if k in out:
+                out[k] *= damper_factor
+    return out
+
+
+def formula_consolidation(ctx, trace=None):
+    """Floor-first + within-family consolidation boost for the largest
+    variant. Tries to address the Turin within-family split bug where
+    every Dragapult variant got the same TEF-POR proportional floor,
+    leaving solo under and Dusknoir under (real Turin: solo 46 % of
+    family vs predicted 40 %; Dusknoir 34 % vs predicted 19 %)."""
+    out = formula_floor_then_damper(ctx, trace=trace)
+    # Identify each family and find its largest variant
+    family_groups = defaultdict(list)
+    for k in out:
+        fam = extract_family(k)
+        if fam:
+            family_groups[fam].append(k)
+    boost = 0.15  # 15 % shift from smaller variants to top-2 variants
+    for fam, members in family_groups.items():
+        if len(members) < 2:
+            continue
+        sorted_members = sorted(members, key=lambda m: -out.get(m, 0))
+        # Move `boost`% of the smallest variants' share to the top-2
+        top2 = sorted_members[:2]
+        rest = sorted_members[2:]
+        if not rest:
+            continue
+        donation = sum(out[m] * boost for m in rest)
+        for m in rest:
+            out[m] *= (1 - boost)
+        # Split donation 60/40 between top-1 and top-2
+        if len(top2) == 2:
+            out[top2[0]] += donation * 0.60
+            out[top2[1]] += donation * 0.40
+        else:
+            out[top2[0]] += donation
+    return out
+
+
+def formula_consolidation_floor85(ctx, trace=None):
+    """Consolidation + bumped floor factor 0.7 → 0.85. Hypothesis: the
+    current 0.7 floor under-lifts Tier-2 in-person mainstays (Basic Box,
+    Slowking, Honchkrow, Mega Lucario) whose pilots reliably bring them
+    but whose online ladder share doesn't reflect this.
+
+    At 0.85 a TEF-POR 2.47 % deck floors at 2.10 % instead of 1.73 %.
+    """
+    out = formula_baseline(ctx, trace=trace)
+    floor_factor = 0.85
+    for k, lm in ctx['last_meta'].items():
+        floor = lm['full'] * floor_factor
+        if floor > 0 and out.get(k, 0) < floor:
+            out[k] = floor
+    damper_factor = 0.85
+    damper_threshold = 0.85
+    for k, lm in ctx['last_meta'].items():
+        e, l = lm['early'], lm['late']
+        if e > 0 and l > 0 and (l / e) < damper_threshold:
+            if k in out:
+                out[k] *= damper_factor
+    # Within-family consolidation
+    family_groups = defaultdict(list)
+    for k in out:
+        fam = extract_family(k)
+        if fam:
+            family_groups[fam].append(k)
+    boost = 0.15
+    for fam, members in family_groups.items():
+        if len(members) < 2:
+            continue
+        sorted_members = sorted(members, key=lambda m: -out.get(m, 0))
+        top2 = sorted_members[:2]
+        rest = sorted_members[2:]
+        if not rest:
+            continue
+        donation = sum(out[m] * boost for m in rest)
+        for m in rest:
+            out[m] *= (1 - boost)
+        if len(top2) == 2:
+            out[top2[0]] += donation * 0.60
+            out[top2[1]] += donation * 0.40
+        else:
+            out[top2[0]] += donation
+    return out
+
+
+def _wr_floor_factor(win_pct):
+    """Map a deck's previous-meta win-pct to a floor multiplier.
+
+    One-sided BOOST only — low-WR decks already get hit by the decline-
+    damper (Cynthia 0.63 ratio, N's Zoroark 0.78 ratio), so damping
+    them again from the WR side would over-correct. We instead lift the
+    floor for proven-competitive decks the floor under-shoots for:
+
+    < 49.5 % WR  → 1.00× floor (no change; decline-damper handles)
+    51.5 %  WR  → 1.20× floor (Basic Box, Crustle, Dragapult)
+    53.5 %  WR  → 1.40× floor (rare — Dragapult Dudunsparce, Slowking-tier
+                                  high-cut performers)
+    Linear ramp, clipped to [1.0, 1.4].
+    """
+    if win_pct <= 49.5:
+        return 1.0
+    factor = 1.0 + ((win_pct - 49.5) / 4) * 0.4
+    return min(1.4, factor)
+
+
+def formula_growth_boost(ctx, trace=None):
+    """Consolidation + late-period GROWTH boost on floor.
+
+    Decks whose late/early ratio > 1.2 (Basic Box 1.85, Slowking 1.48,
+    Dragapult 1.86) get the floor multiplied by clip(ratio, 1.0, 1.8).
+    Captures the 'this archetype is climbing as the format matures'
+    pattern that the decline-damper inverts but doesn't reward.
+
+    Basic Box at Turin is the canonical case: TEF-POR full avg 2.47,
+    real Turin 3.49 — the late spike (1.86 % early → 3.46 % late)
+    was the leading indicator the flat floor missed.
+    """
+    out = formula_baseline(ctx, trace=trace)
+    floor_base = 0.70
+    for k, lm in ctx['last_meta'].items():
+        e, l = lm['early'], lm['late']
+        growth = 1.0
+        if e > 0 and l > 0:
+            ratio = l / e
+            if ratio > 1.20:
+                growth = min(1.8, ratio)
+        floor = lm['full'] * floor_base * growth
+        if floor > 0 and out.get(k, 0) < floor:
+            out[k] = floor
+    damper_factor = 0.85
+    damper_threshold = 0.85
+    for k, lm in ctx['last_meta'].items():
+        e, l = lm['early'], lm['late']
+        if e > 0 and l > 0 and (l / e) < damper_threshold:
+            if k in out:
+                out[k] *= damper_factor
+    family_groups = defaultdict(list)
+    for k in out:
+        fam = extract_family(k)
+        if fam:
+            family_groups[fam].append(k)
+    boost = 0.15
+    for fam, members in family_groups.items():
+        if len(members) < 2:
+            continue
+        sorted_members = sorted(members, key=lambda m: -out.get(m, 0))
+        top2 = sorted_members[:2]
+        rest = sorted_members[2:]
+        if not rest:
+            continue
+        donation = sum(out[m] * boost for m in rest)
+        for m in rest:
+            out[m] *= (1 - boost)
+        if len(top2) == 2:
+            out[top2[0]] += donation * 0.60
+            out[top2[1]] += donation * 0.40
+        else:
+            out[top2[0]] += donation
+    return out
+
+
+def formula_predictor_5_6(ctx, trace=None):
+    """Predictor 5.6 — proposed redesign.
+
+    Five stages, in order:
+      1. Mode A baseline (0.30 ladder + 0.10 brought + 0.50 top8 + 0.10 weekly)
+      2. Last-meta floor with WR-weighted factor — high-WR decks get a
+         higher floor, low-WR decks get a smaller (or no) lift. The 0.70
+         base × 0.4-1.4 WR multiplier separates Festival/Basic-Box (real
+         competitive) from Lopunny/Cynthia (fun online but won't sustain).
+      3. Decline-damper applied AFTER floor (current production applies it
+         BEFORE which the floor immediately undoes — wasted operation).
+      4. Within-family donation: smaller variants donate 15 % of share to
+         the top-2 variants (60/40). Addresses the Dusknoir miss at Turin
+         where every Dragapult variant got the same TEF-POR-proportional
+         floor leaving the #2 variant starved.
+      5. Family-cap at 28 % aggregate (handled in run_formula post-renorm).
+    """
+    out = formula_baseline(ctx, trace=trace)
+
+    floor_base = 0.70
+    for k, lm in ctx['last_meta'].items():
+        wr_factor = _wr_floor_factor(lm.get('win_pct', 50.0))
+        floor = lm['full'] * floor_base * wr_factor
+        if floor > 0 and out.get(k, 0) < floor:
+            if trace and trace in k:
+                ctx.setdefault('trace_log', []).append({
+                    'stage': 'wr_floor', 'deck': k,
+                    'lm_full': round(lm['full'], 2),
+                    'lm_wr':   round(lm.get('win_pct', 0), 2),
+                    'wr_factor': round(wr_factor, 2),
+                    'floor':   round(floor, 2),
+                    'pred_before': round(out.get(k, 0), 2),
+                    'pred_after':  round(floor, 2),
+                })
+            out[k] = floor
+
+    damper_factor = 0.85
+    damper_threshold = 0.85
+    for k, lm in ctx['last_meta'].items():
+        e, l = lm['early'], lm['late']
+        if e > 0 and l > 0 and (l / e) < damper_threshold:
+            if k in out:
+                out[k] *= damper_factor
+
+    # Within-family donation
+    family_groups = defaultdict(list)
+    for k in out:
+        fam = extract_family(k)
+        if fam:
+            family_groups[fam].append(k)
+    boost = 0.15
+    for fam, members in family_groups.items():
+        if len(members) < 2:
+            continue
+        sorted_members = sorted(members, key=lambda m: -out.get(m, 0))
+        top2 = sorted_members[:2]
+        rest = sorted_members[2:]
+        if not rest:
+            continue
+        donation = sum(out[m] * boost for m in rest)
+        for m in rest:
+            out[m] *= (1 - boost)
+        if len(top2) == 2:
+            out[top2[0]] += donation * 0.60
+            out[top2[1]] += donation * 0.40
+        else:
+            out[top2[0]] += donation
+    return out
+
+
 FORMULAS = {
-    'baseline':        formula_baseline,
-    'baseline+floor':  formula_baseline_plus_floor,
-    'baseline+damper': formula_baseline_plus_damper,
-    'full':            formula_full,
+    'baseline':                 formula_baseline,
+    'baseline+floor':           formula_baseline_plus_floor,
+    'baseline+damper':          formula_baseline_plus_damper,
+    'full':                     formula_full,
+    'floor_then_damper':        formula_floor_then_damper,
+    'consolidation':            formula_consolidation,
+    'consolidation_floor85':    formula_consolidation_floor85,
+    'predictor_5_6':            formula_predictor_5_6,
+    'growth_boost':             formula_growth_boost,
+    'predictor_5_6_v2':         lambda ctx, trace=None: _predictor_5_6_v2(ctx, trace),
 }
+
+
+def _predictor_5_6_v2(ctx, trace=None):
+    """Combined: floor uses WR-boost AND growth-boost multiplicatively,
+    then decline-damper post-floor, then within-family donation."""
+    out = formula_baseline(ctx, trace=trace)
+    floor_base = 0.70
+    for k, lm in ctx['last_meta'].items():
+        wr_factor = _wr_floor_factor(lm.get('win_pct', 50.0))
+        e, l = lm['early'], lm['late']
+        growth = 1.0
+        if e > 0 and l > 0:
+            ratio = l / e
+            if ratio > 1.20:
+                growth = min(1.8, ratio)
+        floor = lm['full'] * floor_base * wr_factor * growth
+        if floor > 0 and out.get(k, 0) < floor:
+            if trace and trace in k:
+                ctx.setdefault('trace_log', []).append({
+                    'stage': 'wr+growth_floor', 'deck': k,
+                    'lm_full':    round(lm['full'], 2),
+                    'wr_factor':  round(wr_factor, 2),
+                    'growth':     round(growth, 2),
+                    'floor':      round(floor, 2),
+                    'pred_before': round(out.get(k, 0), 2),
+                })
+            out[k] = floor
+    damper_factor = 0.85
+    damper_threshold = 0.85
+    for k, lm in ctx['last_meta'].items():
+        e, l = lm['early'], lm['late']
+        if e > 0 and l > 0 and (l / e) < damper_threshold:
+            if k in out:
+                out[k] *= damper_factor
+    family_groups = defaultdict(list)
+    for k in out:
+        fam = extract_family(k)
+        if fam:
+            family_groups[fam].append(k)
+    boost = 0.15
+    for fam, members in family_groups.items():
+        if len(members) < 2:
+            continue
+        sorted_members = sorted(members, key=lambda m: -out.get(m, 0))
+        top2 = sorted_members[:2]
+        rest = sorted_members[2:]
+        if not rest:
+            continue
+        donation = sum(out[m] * boost for m in rest)
+        for m in rest:
+            out[m] *= (1 - boost)
+        if len(top2) == 2:
+            out[top2[0]] += donation * 0.60
+            out[top2[1]] += donation * 0.40
+        else:
+            out[top2[0]] += donation
+    return out
 
 
 # ── Family-cap + renormalize (post-processing, formula-agnostic) ──
@@ -558,7 +883,15 @@ def load_manual_ground_truth(path):
     if ext == '.json':
         with open(path, encoding='utf-8') as f:
             raw = json.load(f)
-        return {normalize_deck(k): float(v) for k, v in raw.items()}
+        out = {}
+        for k, v in raw.items():
+            if k.startswith('_'):  # skip metadata fields like _comment
+                continue
+            try:
+                out[normalize_deck(k)] = float(v)
+            except (TypeError, ValueError):
+                continue
+        return out
     # CSV fallback
     out = {}
     with open(path, encoding='utf-8') as f:

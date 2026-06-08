@@ -143,6 +143,58 @@ def _load_set_order_map() -> Dict[str, int]:
     return {k.upper(): v for k, v in raw.items()}
 
 
+# ── Date-based meta fallback ──────────────────────────────────────────────────
+# When the limitless tournament API doesn't echo a `format` field (happens
+# for events that ran very recently and haven't been classified yet), we
+# derive the meta from the tournament_date using format_window.json's
+# in_person_legal_date + current_set boundary. Mirrors the labs scraper's
+# _derive_meta_from_date but with a simpler "current vs previous" split
+# since this scraper doesn't have the multi-meta date-range cache.
+
+def _derive_meta_from_date_JH(date_iso: str) -> str:
+    """Pick the meta key for a tournament whose API record omitted format.
+
+    Reads data/format_window.json:
+      • current_set + previous_format_key define the active rotation
+      • in_person_legal_date is the cutoff between previous and current
+
+    Returns 'TEF-CRI' / 'TEF-POR' style key, or '' if the date can't be
+    parsed (caller defaults to 'Past Meta' as before)."""
+    if not date_iso:
+        return ''
+    try:
+        d = datetime.strptime(date_iso, '%Y-%m-%d')
+    except ValueError:
+        return ''
+    data_dir = get_data_dir()
+    fw_path = os.path.join(data_dir, 'format_window.json')
+    if not os.path.exists(fw_path):
+        return ''
+    try:
+        with open(fw_path, encoding='utf-8') as f:
+            fw = json.load(f)
+    except Exception:
+        return ''
+    current = (fw.get('current_set') or '').strip().upper()
+    previous = (fw.get('previous_format_key') or '').strip().upper()
+    oldest_legal = (fw.get('oldest_legal_set') or '').strip().upper()
+    legal_str = (fw.get('in_person_legal_date') or '').strip()
+    if not legal_str:
+        return ''
+    try:
+        legal = datetime.strptime(legal_str, '%Y-%m-%d')
+    except ValueError:
+        return ''
+    if d >= legal and current:
+        # After in-person legal date → current format
+        # Build full key like "TEF-CRI" if oldest_legal_set known
+        return f'{oldest_legal}-{current}' if oldest_legal else current
+    if d < legal and previous:
+        return previous
+    return ''
+
+
+
 SET_ORDER_MAP = _load_set_order_map()
 
 
@@ -480,10 +532,23 @@ def aggregate_tournament_cards(all_decks: list, t_info: dict, card_db: CardDatab
             deck_inclusion_count = stat["player_count"]  # Wie viele Decks haben die Karte mind. 1x?
             average_count = round(stat["total_count"] / deck_inclusion_count, 2) if deck_inclusion_count > 0 else 0
 
+            # 2026-06-08 — when limitlesstcg's tournament API doesn't
+            # echo back a format, fall back to a date-derived meta
+            # using format_window.json. The previous "Past Meta"
+            # default tagged Turin (2026-06-07) as "Past Meta" because
+            # limitless's API hadn't classified the tournament yet,
+            # which then propagated downstream: labs scraper's
+            # name-based meta lookup matched Turin against the
+            # "Past Meta" cards CSV, so the labs CSV row got meta=
+            # "Past Meta" instead of "TEF-CRI". The predictor's
+            # active-format filter then dropped Turin entirely.
+            api_format = t_info.get("format")
+            if not api_format:
+                api_format = _derive_meta_from_date_JH(t_info.get("date", ""))
             aggregated.append({
                 "tournament_id": t_info.get("id", ""),
                 "tournament_name": t_info.get("name", ""),
-                "meta": t_info.get("format") or "Past Meta",
+                "meta": api_format or "Past Meta",
                 "tournament_date": t_info.get("date", ""),
                 "archetype": arch_name,
                 "card_name": samp["name"],

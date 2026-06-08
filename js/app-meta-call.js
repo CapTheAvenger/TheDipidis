@@ -3397,13 +3397,35 @@ window.MetaCall = (function () {
           0,
           (PREDICTOR_4_6_MAX_SHARE_PCT - champ.share) / PREDICTOR_4_6_MAX_SHARE_PCT
         );
-        const bonus = PREDICTOR_4_6_BOOST_PP_MAX * freshness * underdogStrength;
+        const rawBonus = PREDICTOR_4_6_BOOST_PP_MAX * freshness * underdogStrength;
+        // 2026-06-08 — presence-cap added after the Turin/Hop's Trevenant
+        // over-call: HT won Turin at 0.44 % share, underdogStrength
+        // calculated 0.89 → rawBonus 2.22 pp → after renorm + 4.7
+        // → predicted 7.7 % vs real Turin 0.44 %.
+        //
+        // Root cause: a sub-1 % deck winning ONE regional is a single
+        // data point. Without confirming online presence, that boost
+        // is just noise amplified across renorm. Cap the boost at the
+        // deck's CURRENT online + brought signal — if the field isn't
+        // taking notice (ladder still <1 %), the champion-win signal
+        // doesn't get to lift the prediction past where the field
+        // already is.
+        //
+        // For decks with strong existing presence (Slowking 5.29 %
+        // ladder, Crustle 1.50 %), the cap doesn't bind and the full
+        // bonus applies.
+        const ladderShare = d.ladderShare || 0;
+        const broughtShare = d.broughtShare || 0;
+        const presenceCap = Math.max(ladderShare, broughtShare);
+        const bonus = Math.min(rawBonus, presenceCap);
         if (bonus > 0.01) {
           d.underdogChampion = {
             event:      champ.eventName,
             shareAtWin: Math.round(champ.share * 100) / 100,
             ageDays,
             boostPP:    Math.round(bonus * 100) / 100,
+            rawBoostPP: Math.round(rawBonus * 100) / 100,
+            presenceCap: Math.round(presenceCap * 100) / 100,
           };
           predicted += bonus;
         }

@@ -528,6 +528,17 @@ SYNC_PATTERNS = [
     "labs_tournament_decks.csv",
     "labs_tournament_matchups.csv",  # PR #199 — per-archetype matchup matrix (3:1 weight blend over online)
     "labs_tournaments.json",
+    # Player-Continuity  →  Meta Call Predictor 5.8 (stickiness damp)
+    # Per-(player × archetype × tournament) row from the labs standings
+    # pages. Predictor 5.8 reads it to damp decks the previous-format
+    # player base tried but didn't stick with (Lopunny / OMH / Cynthia /
+    # Dragapult Dudunsparce — all <1.5 % returning-pilot rate at TEF-POR
+    # despite >100 brought-count). Without this file present in data/,
+    # the JS predictor silently no-ops the stickiness damper and the
+    # over-callees come back. Synced for both reasons the labs files
+    # are: incremental --resume needs the prior CSV as input, AND the
+    # frontend reads from data/, not backend/core/data/.
+    "player_continuity.csv",
     # Scraper state files — list of tournament IDs each scraper has
     # already processed. Synced back to data/ so the next CI run can
     # resume incrementally instead of re-scraping every tournament from

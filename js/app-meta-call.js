@@ -3651,9 +3651,18 @@ window.MetaCall = (function () {
     Object.keys(familyAgg).forEach(fam => {
       const f = familyAgg[fam];
       if (f.members.length < 2) return;
-      const sorted = f.members.slice().sort(
-        (a, b) => (b.predictedShare || 0) - (a.predictedShare || 0)
-      );
+      // Sort by previous-format full share where available (TEF-POR
+      // Dusknoir was 7.43 % vs Dudunsparce 6.47 % — a clear hierarchy
+      // that the in-person field follows when the family-leader spikes).
+      // Fall back to current predictedShare if previous-format data
+      // missing (new family, true rotation, etc.).
+      const sortKey = (m) => {
+        const k = normalize(m.name);
+        const lm = _lastMetaLabsByDeck[k];
+        if (lm && lm.share > 0) return lm.share;
+        return m.predictedShare || 0;
+      };
+      const sorted = f.members.slice().sort((a, b) => sortKey(b) - sortKey(a));
       const top2 = sorted.slice(0, 2);
       const rest = sorted.slice(2);
       if (rest.length === 0) return;
@@ -3718,19 +3727,37 @@ window.MetaCall = (function () {
         stickinessDamped = true;
       }
     });
-    // Re-normalise so the list still sums to 100 % after damping
+    // Re-normalise so the list still sums to 100 % — but ONLY scale
+    // the non-damped decks. Damped decks keep their reduced values
+    // exactly. The freed share gets absorbed by every other deck
+    // proportionally to their current share.
+    //
+    // Previous version scaled ALL decks (damped + non-damped) by the
+    // same factor, which partially undid the damp: scale ×1.053 on
+    // Lopunny damped to 4.38 → 4.61. The new scheme keeps Lopunny at
+    // 4.38 and instead lifts Solo Dragapult / Raging Bolt / etc. by
+    // a slightly larger factor that just absorbs the freed share.
     if (stickinessDamped) {
-      const total = _shareList.reduce((s, d) => s + (d.predictedShare || 0), 0) || 1;
-      const scale = 100 / total;
+      const dampedTotal = _shareList
+        .filter(d => d.stickinessDamper)
+        .reduce((s, d) => s + (d.predictedShare || 0), 0);
+      const nonDampedTotal = _shareList
+        .filter(d => !d.stickinessDamper)
+        .reduce((s, d) => s + (d.predictedShare || 0), 0);
+      const targetForNonDamped = Math.max(0, 100 - dampedTotal);
+      const scale = nonDampedTotal > 0 ? targetForNonDamped / nonDampedTotal : 1;
       _shareList.forEach(d => {
-        d.predictedShare = (d.predictedShare || 0) * scale;
-        d.onlineShare    = d.predictedShare;
+        if (!d.stickinessDamper) {
+          d.predictedShare = (d.predictedShare || 0) * scale;
+          d.onlineShare    = d.predictedShare;
+        }
       });
       try {
         const damped = _shareList.filter(d => d.stickinessDamper).length;
         console.log(
           `[Predictor 5.8] Post-everything stickiness damp: ${damped} decks ` +
-          `damped; re-renorm scale ×${scale.toFixed(3)} to maintain 100 %.`
+          `damped (sum ${dampedTotal.toFixed(2)} %), non-damped scale ` +
+          `×${scale.toFixed(3)} (target ${targetForNonDamped.toFixed(2)} %).`
         );
       } catch (_e) { /* ignore */ }
     }

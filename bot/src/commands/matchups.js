@@ -32,7 +32,7 @@
 import { Markup } from 'telegraf';
 
 import { fetchDeckIndex } from '../data-index.js';
-import { formatMatchupMatrix } from './deck.js';
+import { formatCombinedMatchupMatrix } from './deck.js';
 import { MENU_KEYBOARD, MENU_LABEL_MATCHUPS } from './start.js';
 
 const PAGE_SIZE = 8;
@@ -126,56 +126,44 @@ async function sendMatchupView(ctx, deckKey) {
         ? ` · ${_fmtPct(deck.share_pct)} Share`
         : '';
 
-    // Title message: gives the user a clear "you picked X" anchor
-    // before the two matrix payloads land below it. The persistent
-    // reply keyboard rides on this first message so it re-asserts
-    // even when the user has been navigating inline keyboards for a
-    // while.
-    await ctx.reply(
-        `<b>Matchup Spread · ${escapeHtml(deck.name)}</b>${escapeHtml(rank)}${escapeHtml(share)}`,
-        { parse_mode: 'HTML', ...MENU_KEYBOARD },
+    // Combined Online + Major view — one message, two WR columns per
+    // row, so the user doesn't have to scroll between two separate
+    // messages just to compare the same opponent across sources. The
+    // header carries both contexts: format key for Major + Day-2
+    // conversion line + tournament/player counts.
+    //
+    // Persistent reply keyboard rides on this message so the menu
+    // re-asserts even after a long inline-keyboard navigation chain.
+    const combined = formatCombinedMatchupMatrix(
+        src.matchups_online,
+        src.matchups_majors,
     );
 
-    // 1. Online matchups (pure Limitless TCG online data).
-    const onlineMatrix = formatMatchupMatrix(src.matchups_online);
-    if (onlineMatrix) {
-        await ctx.reply(
-            `<b>Online Matchups</b>\n<pre>${escapeHtml(onlineMatrix)}</pre>`,
-            { parse_mode: 'HTML' },
-        );
-    } else {
-        await ctx.reply(
-            '<i>Keine Online-Matchup-Daten verfügbar.</i>',
-            { parse_mode: 'HTML' },
-        );
+    const day2    = Number.isFinite(src.majors_day2_conv_avg) ? src.majors_day2_conv_avg : 0;
+    const nTours  = src.majors_tournament_count || 0;
+    const players = src.majors_total_day1_players || 0;
+
+    const titleLine = `<b>Matchup Spread · ${escapeHtml(deck.name)}</b>${escapeHtml(rank)}${escapeHtml(share)}`;
+    const contextBits = [];
+    contextBits.push(`<i>Onl = Limitless Online · Maj = ${escapeHtml(formatKey)}</i>`);
+    if (nTours > 0) {
+        const majorMeta = [`Day-2 Conv ${_fmtPct(day2)}`,
+                           `${nTours} Turnier${nTours === 1 ? '' : 'e'}`];
+        if (players > 0) majorMeta.push(`${players} Day-1 Spieler`);
+        contextBits.push(`<i>${escapeHtml(majorMeta.join(' · '))}</i>`);
     }
 
-    // 2. Major tournament matchups (labs data) with conversion line
-    //    in the title. day2_conv_avg is the player-weighted average
-    //    day1→day2 conversion across the format's tournaments — a
-    //    direct read of how often this archetype's pilots survived
-    //    to the bubble round across the current format.
-    const majorsMatrix = formatMatchupMatrix(src.matchups_majors);
-    const day2 = Number.isFinite(src.majors_day2_conv_avg) ? src.majors_day2_conv_avg : 0;
-    const nTours = src.majors_tournament_count || 0;
-    const players = src.majors_total_day1_players || 0;
-    if (majorsMatrix) {
-        const titleBits = [
-            `<b>Major Matchups · ${escapeHtml(formatKey)}</b>`,
-        ];
-        if (nTours > 0) {
-            titleBits.push(`Day-2 Conv ${_fmtPct(day2)}`);
-            titleBits.push(`${nTours} Turnier${nTours === 1 ? '' : 'e'}`);
-            if (players > 0) titleBits.push(`${players} Day-1 Spieler`);
-        }
+    if (combined) {
         await ctx.reply(
-            `${titleBits.join(' · ')}\n<pre>${escapeHtml(majorsMatrix)}</pre>`,
-            { parse_mode: 'HTML' },
+            `${titleLine}\n${contextBits.join('\n')}\n<pre>${escapeHtml(combined)}</pre>`,
+            { parse_mode: 'HTML', ...MENU_KEYBOARD },
         );
     } else {
+        // Both sources empty — surface a single explanation message
+        // so the user knows it's a data gap, not a bot error.
         await ctx.reply(
-            `<i>Keine Major-Matchup-Daten für ${escapeHtml(formatKey)}.</i>`,
-            { parse_mode: 'HTML' },
+            `${titleLine}\n<i>Keine Matchup-Daten verfügbar (weder Online noch Major).</i>`,
+            { parse_mode: 'HTML', ...MENU_KEYBOARD },
         );
     }
 

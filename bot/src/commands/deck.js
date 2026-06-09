@@ -152,6 +152,113 @@ export function formatMatchupMatrix(matchups) {
     return lines.join('\n');
 }
 
+/**
+ * Combined Online + Major matchup table. The /matchups command used
+ * to ship the two as separate Telegram messages; this collapses them
+ * into a single side-by-side view so the user can compare both data
+ * sources for the same opponent on one row instead of cross-scrolling
+ * between messages.
+ *
+ * Sorting: by total games seen (online + major) descending — the
+ * most-faced opponents float to the top, matching how the website's
+ * Matchup Matrix orders rows. Opponents that appear in only one
+ * source still show with an "—" placeholder in the missing column.
+ *
+ * Width budget: same ~30-char portrait-phone target as the single-
+ * source table. Opponent col is narrower (15 chars) to make room for
+ * two WR cells + per-cell colour markers. Each cell renders as
+ * "WW,W m" where "m" is either an emoji marker or a single space —
+ * Telegram's emoji rendering inside <pre> varies by client (most
+ * render at ~2 column widths, a few render at 1), so columns may
+ * drift by a single cell on rows that mix a markered cell with a
+ * markerless one. That's acceptable; the alternative is dropping
+ * per-cell colours, which destroys the "Online says this is bad but
+ * Major says it's great" signal the user explicitly asked for.
+ */
+const COMBINED_OPP_W  = 15;
+const COMBINED_CELL_W = 6;   // "52,1 🟢" / "52,1  " — 6 grapheme chars
+
+function _combinedCell(matchup) {
+    if (!matchup) {
+        // Right-align "—" to where the WR digit would land so the
+        // missing-data placeholder still reads as a number column.
+        return _padLeft('—', COMBINED_CELL_W - 1) + ' ';
+    }
+    const wr = Number.isFinite(matchup.win_pct) ? matchup.win_pct : 0;
+    const wrText = wr.toFixed(1).replace('.', ',');
+    let marker = '  ';
+    if (wr >= 55) marker = ' 🟢';
+    else if (wr <= 45) marker = ' 🔴';
+    // _padLeft on grapheme count — wr ranges from "0,0" (3 graph) to
+    // "100,0" (5 graph). Pad to 4 so the digits stay right-aligned
+    // for the common 2-digit-percent case.
+    return _padLeft(wrText, 4) + marker;
+}
+
+export function formatCombinedMatchupMatrix(onlineMatchups, majorMatchups) {
+    const safeOnline = Array.isArray(onlineMatchups) ? onlineMatchups : [];
+    const safeMajor  = Array.isArray(majorMatchups)  ? majorMatchups  : [];
+    if (safeOnline.length === 0 && safeMajor.length === 0) return null;
+
+    // Merge by opponent name, preserve both source rows + the games
+    // counts for the sort key below.
+    const merged = new Map();
+    for (const m of safeOnline) {
+        const key = (m.opponent || '').trim();
+        if (!key) continue;
+        merged.set(key, {
+            opp: m.opponent,
+            online: m,
+            onlineGames: m.games || 0,
+            major: null,
+            majorGames: 0,
+        });
+    }
+    for (const m of safeMajor) {
+        const key = (m.opponent || '').trim();
+        if (!key) continue;
+        if (merged.has(key)) {
+            const e = merged.get(key);
+            e.major = m;
+            e.majorGames = m.games || 0;
+        } else {
+            merged.set(key, {
+                opp: m.opponent,
+                online: null,
+                onlineGames: 0,
+                major: m,
+                majorGames: m.games || 0,
+            });
+        }
+    }
+    if (merged.size === 0) return null;
+
+    // Sort by combined games desc — most-faced opponents at the top.
+    // Tiebreak by opponent name so the output is deterministic across
+    // re-renders (matters for snapshot-style screenshot diffs).
+    const rows = Array.from(merged.values()).sort((a, b) => {
+        const ga = (a.onlineGames || 0) + (a.majorGames || 0);
+        const gb = (b.onlineGames || 0) + (b.majorGames || 0);
+        if (gb !== ga) return gb - ga;
+        return String(a.opp).localeCompare(String(b.opp));
+    });
+
+    const lines = [];
+    lines.push(
+        `${_padRight('Gegner', COMBINED_OPP_W)} ` +
+        `${_padLeft('Onl', COMBINED_CELL_W)} ` +
+        `${_padLeft('Maj', COMBINED_CELL_W)}`
+    );
+    lines.push('─'.repeat(COMBINED_OPP_W + 1 + COMBINED_CELL_W + 1 + COMBINED_CELL_W));
+    for (const r of rows) {
+        lines.push(
+            `${_padRight(_truncate(r.opp, COMBINED_OPP_W), COMBINED_OPP_W)} ` +
+            `${_combinedCell(r.online)} ${_combinedCell(r.major)}`
+        );
+    }
+    return lines.join('\n');
+}
+
 function _deckButtonLabel(deck) {
     const rank = deck.rank;
     const prefix = rank && rank < 9999 ? `#${rank} ` : '';

@@ -8723,48 +8723,98 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             currentTotal = consistencyDeck.reduce((s, e) => s + (e.count || 0), 0);
 
             // ==========================================
-            // FINAL FILL — pad to 60 with the most-used basic energy.
+            // FINAL FILL — guarantee basic energies land in the deck.
             //
-            // The Energy-Budget (Stage 0c) + Energy-Floor passes both
-            // gate on `_aceSpecCondResult.bucketCount >= 3`. When the
-            // archetype has fewer than 3 ACE-SPEC-conditioned buckets
-            // (newer archetypes, low-Day-2 events, the user-flagged
-            // Turin Slowking sample — 21 decklists but inconsistent
-            // ACE-SPEC pattern), both stages are skipped and energies
-            // never get placed. The deck ships at 55/60 (Pokémon +
-            // Trainers only) with the basic energies missing.
+            // Two-mode pad. The Energy-Budget (Stage 0c) + Energy-Floor
+            // passes both gate on `_aceSpecCondResult.bucketCount >= 3`.
+            // When the archetype has fewer than 3 ACE-SPEC-conditioned
+            // buckets (newer archetypes, low-Day-2 events, the user-
+            // flagged Turin Slowking sample — 21 decklists but
+            // inconsistent ACE-SPEC pattern), both stages get skipped
+            // and basic energies never land in the deck.
             //
-            // Mirrors the older autoComplete() function's final fallback
-            // (~line 4327): when the deck is under 60 and a basic
-            // energy exists in the analyzed pool with non-trivial
-            // share, push it to fill the remaining slots. Basic
-            // energies are exempt from the 4-copy limit, so a single
-            // entry can absorb the entire shortfall.
-            if (currentTotal < 60) {
-                // Pick the basic energy with the highest share in the
-                // analyzed pool — that's the one the actual decklists
-                // are running. Stage 0c's `_isEnergyCardEntry` helper
-                // is in scope above; mirror its name-OR-type matching.
-                const basicEnergyCandidates = deckCards
-                    .filter(c => isBasicEnergyCardEntry(c))
-                    .sort((a, b) => (b.sharePercent || 0) - (a.sharePercent || 0));
-                const topBasic = basicEnergyCandidates[0];
-                if (topBasic) {
-                    const shortfall = 60 - currentTotal;
-                    const existing = consistencyDeck.find(e =>
-                        String(e.card.card_name || '').toLowerCase() ===
-                        String(topBasic.card_name || '').toLowerCase()
-                    );
-                    if (existing) {
-                        existing.count += shortfall;
-                    } else {
-                        consistencyDeck.push({ card: topBasic, count: shortfall });
-                    }
-                    currentTotal += shortfall;
-                    devLog(`[autoCompleteConsistency][FinalFill] padded ${shortfall}x ${topBasic.card_name} (share ${(topBasic.sharePercent || 0).toFixed(1)} %) to reach 60`);
+            // Mode A — currentTotal < 60: push the top-share basic
+            //   energy to fill the remaining slots (basic energies
+            //   are exempt from the 4-copy limit). Mirrors the older
+            //   autoComplete() function's final fallback (~line 4327).
+            //
+            // Mode B — currentTotal === 60 but ZERO basic energy in
+            //   the deck (the more common regression — Stage 1 LRM
+            //   rounding pumped trainer/tool counts up to fill all 60
+            //   slots before energies got a chance). Demote the
+            //   lowest-priority non-essential card (tools / extra
+            //   trainer copies that aren't pinned, skeleton-locked,
+            //   or ACE-SPEC), swap those slots for the top-share
+            //   basic energy. Target count = avgCountWhenUsed of the
+            //   energy rounded down, or 4 as a sane minimum if no
+            //   avg is present.
+            // ==========================================
+            const _deckHasBasicEnergy = consistencyDeck.some(e => isBasicEnergyCardEntry(e.card));
+            const _basicEnergyPool = deckCards
+                .filter(c => isBasicEnergyCardEntry(c))
+                .sort((a, b) => (b.sharePercent || 0) - (a.sharePercent || 0));
+            const _topBasic = _basicEnergyPool[0];
+
+            if (currentTotal < 60 && _topBasic) {
+                const shortfall = 60 - currentTotal;
+                const existing = consistencyDeck.find(e =>
+                    String(e.card.card_name || '').toLowerCase() ===
+                    String(_topBasic.card_name || '').toLowerCase()
+                );
+                if (existing) {
+                    existing.count += shortfall;
                 } else {
-                    devLog(`[autoCompleteConsistency][FinalFill] no basic energy in pool — deck ships at ${currentTotal}/60`);
+                    consistencyDeck.push({ card: _topBasic, count: shortfall });
                 }
+                currentTotal += shortfall;
+                devLog(`[autoCompleteConsistency][FinalFill][ModeA] padded ${shortfall}x ${_topBasic.card_name} (share ${(_topBasic.sharePercent || 0).toFixed(1)} %) to reach 60`);
+            } else if (currentTotal === 60 && !_deckHasBasicEnergy && _topBasic && (_topBasic.sharePercent || 0) >= 50) {
+                // Mode B: deck is full but missing required energies.
+                // Pool's top basic energy has share ≥ 50 % → the
+                // overwhelming majority of decklists run it → not
+                // having it is a builder bug, not a meta variant.
+                const targetCount = Math.max(4, Math.min(
+                    Math.floor(_topBasic.avgCountWhenUsed || 4),
+                    10  // sane upper bound for basic energy in a 60-deck
+                ));
+                // Demote non-essential cards to free `targetCount` slots.
+                // Protect: pinned, skeleton-locked, ACE-SPEC, basic
+                // Pokémon below 2 copies (drawing-basic mulligan rule).
+                const demoteCandidates = consistencyDeck
+                    .filter(e => {
+                        const c = e.card;
+                        if (e.count <= 0) return false;
+                        if (c._isPinned || c._isSkeletonLocked) return false;
+                        if (isAceSpecCard(c)) return false;
+                        if (isBasicEnergyCardEntry(c)) return false;
+                        // Trainer / Tool / Item / Stadium = safe to trim
+                        const t = String(c.type || c.card_type || '').toLowerCase();
+                        const isTrainerLike = /trainer|item|tool|stadium|supporter/.test(t);
+                        return isTrainerLike;
+                    })
+                    .sort((a, b) => (a.card.sharePercent || 0) - (b.card.sharePercent || 0));
+
+                let freed = 0;
+                for (const entry of demoteCandidates) {
+                    if (freed >= targetCount) break;
+                    const need = targetCount - freed;
+                    const take = Math.min(entry.count, need);
+                    entry.count -= take;
+                    freed += take;
+                }
+                // Drop entries that hit 0
+                for (let i = consistencyDeck.length - 1; i >= 0; i--) {
+                    if (consistencyDeck[i].count <= 0) consistencyDeck.splice(i, 1);
+                }
+                if (freed > 0) {
+                    consistencyDeck.push({ card: _topBasic, count: freed });
+                    devLog(`[autoCompleteConsistency][FinalFill][ModeB] swap-in ${freed}x ${_topBasic.card_name} (share ${(_topBasic.sharePercent || 0).toFixed(1)} %, avg ${(_topBasic.avgCountWhenUsed || 0).toFixed(2)}) — demoted ${freed} non-essential trainer slot(s)`);
+                } else {
+                    devLog(`[autoCompleteConsistency][FinalFill][ModeB] missing energy ${_topBasic.card_name} but no demote candidates (all slots are pinned / skeleton / ACE-SPEC / Pokémon)`);
+                }
+                currentTotal = consistencyDeck.reduce((s, e) => s + (e.count || 0), 0);
+            } else if (currentTotal < 60 && !_topBasic) {
+                devLog(`[autoCompleteConsistency][FinalFill] no basic energy in pool — deck ships at ${currentTotal}/60`);
             }
 
             devLog(`[autoCompleteConsistency] Deck complete: ${currentTotal}/60`);

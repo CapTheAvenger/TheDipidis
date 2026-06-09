@@ -100,6 +100,7 @@ jobs:
           for f in tournament_jh_scraped.json \
                    tournament_cards_data_overview.csv \
                    labs_tournament_id_overrides.json \
+                   labs_tournament_decks.csv \
                    tournament_decklists_per_player.csv \
                    all_cards_database.csv \
                    all_cards_database.json \
@@ -112,6 +113,16 @@ jobs:
           # Seed per-meta cards files for the labs-tid name lookup
           shopt -s nullglob
           for f in data/tournament_cards_data_cards_*.csv; do
+            cp "$f" "backend/core/data/$(basename "$f")"
+          done
+          # Per-meta labs CSVs — required for _build_labs_id_lookup to
+          # resolve (tournament_name + date → labs 4-digit tid). Without
+          # them, the labs-tid column ends up empty in every output row,
+          # which breaks the join with player_continuity.csv that the
+          # frontend uses to find the "best successful list".
+          # (2026-06-09 first backfill missed all 10 mappings because
+          # of this gap.)
+          for f in data/labs_tournament_decks_*.csv; do
             cp "$f" "backend/core/data/$(basename "$f")"
           done
           shopt -u nullglob

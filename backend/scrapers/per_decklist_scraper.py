@@ -240,16 +240,27 @@ def parse_standings_rows(tournament_url: str) -> List[Dict]:
     return rows_out
 
 
-def fetch_decklist_cards(deck_url: str, card_db: CardDatabaseLookup) -> List[Dict]:
-    """Fetch /decks/list/<id> and return a list of
-    { card_name, set_code, set_number, count, type, is_ace_spec } via
-    the existing shared extractor. Returns [] on fetch failure so the
-    caller can record an empty list for the affected player."""
+def fetch_decklist_cards_and_title(deck_url: str, card_db: CardDatabaseLookup) -> Tuple[List[Dict], str]:
+    """Fetch /decks/list/<id> and return (cards, deck_title).
+
+    cards: list of { card_name, set_code, set_number, count, type,
+    is_ace_spec } via the existing shared extractor. Returns ([], '')
+    on fetch failure.
+
+    deck_title: the archetype label scraped from the page's
+    .decklist-title element — the SAME source the JH aggregator uses,
+    so labels stay canonical across pipelines. The standings-table
+    link text doesn't carry the archetype name (just "View" or blank),
+    which is why the first 2026-06-09 backfill produced 78k rows with
+    deck_archetype = '' everywhere."""
     soup = fetch_page_bs4(deck_url)
     if not soup:
         logger.warning("    Decklist fetch failed: %s", deck_url)
-        return []
-    return extract_cards_from_decklist_soup(soup, card_db)
+        return ([], '')
+    title_elem = soup.select_one('.decklist-title')
+    raw_title = title_elem.get_text(strip=True) if title_elem else ''
+    title = _clean_deck_name(raw_title) if raw_title else ''
+    return (extract_cards_from_decklist_soup(soup, card_db), title)
 
 
 def load_tournament_index_from_jh_state() -> List[Dict]:
@@ -435,11 +446,18 @@ def scrape_one_tournament(
     out_rows: List[Dict] = []
     for deck_id, players in by_deck_id.items():
         time.sleep(delay)
-        cards = fetch_decklist_cards(players[0]['deck_url'], card_db)
+        cards, deck_title_from_page = fetch_decklist_cards_and_title(
+            players[0]['deck_url'], card_db)
         if not cards:
             logger.warning("  Empty card list for deck_id=%s (%d players affected)",
                            deck_id, len(players))
             continue
+        # The page-derived title is the canonical archetype label
+        # (matches JH aggregator's .decklist-title source). Fall back
+        # to the standings-table cell text only if the page didn't
+        # supply a title — that text is usually "View" / blank but
+        # better than nothing.
+        archetype_label = deck_title_from_page or players[0].get('deck_name', '')
         for p in players:
             for c in cards:
                 card_name = c.get('name', '') or c.get('card_name', '')
@@ -454,7 +472,7 @@ def scrape_one_tournament(
                     'meta':                      meta,
                     'place':                     p['place'],
                     'player_name':               p['player_name'],
-                    'deck_archetype':            p['deck_name'],
+                    'deck_archetype':            archetype_label,
                     'deck_slug':                 deck_id,
                     'wins':                      p['wins'],
                     'losses':                    p['losses'],

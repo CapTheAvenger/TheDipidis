@@ -159,40 +159,61 @@ export function formatMatchupMatrix(matchups) {
  * sources for the same opponent on one row instead of cross-scrolling
  * between messages.
  *
+ * Visual layout (~30-char portrait-phone target):
+ *
+ *   Gegner            Online │ Major
+ *   ──────────────────────────────────
+ *   Dragapult         52,1%  │ 49,7%
+ *   Dragapult Dusk…   60,6%🟢│ 50,0%
+ *   Ogerpon Megan…    38,7%🔴│ 42,9%🔴
+ *   …
+ *   Beedrill          52,4%  │  —
+ *   Cynthia's Garc…    —     │ 88,2%🟢
+ *
+ * Design decisions:
+ *   • `%` suffix on every win-rate — without it the numbers read
+ *     like raw scores rather than percentages (user feedback
+ *     2026-06-09).
+ *   • Vertical `│` separator between the two source columns — gives
+ *     the eye an anchor when scanning down, especially when one
+ *     side is "—".
+ *   • Per-cell colour markers AFTER the win-rate (🟢 ≥55 %, 🔴 ≤45 %)
+ *     so the "Online says bad but Major says great" cross-source
+ *     signal stays visible. Telegram's emoji rendering inside <pre>
+ *     varies by client (~1.5–2 cells), so markered rows can drift
+ *     a single cell vs markerless rows — acceptable trade-off vs
+ *     dropping colour entirely.
+ *   • Empty cell rendered as a single "—" left-padded to align with
+ *     where the WR digits would sit — keeps the column visually
+ *     intact instead of leaving a hole.
+ *
  * Sorting: by total games seen (online + major) descending — the
  * most-faced opponents float to the top, matching how the website's
- * Matchup Matrix orders rows. Opponents that appear in only one
- * source still show with an "—" placeholder in the missing column.
- *
- * Width budget: same ~30-char portrait-phone target as the single-
- * source table. Opponent col is narrower (15 chars) to make room for
- * two WR cells + per-cell colour markers. Each cell renders as
- * "WW,W m" where "m" is either an emoji marker or a single space —
- * Telegram's emoji rendering inside <pre> varies by client (most
- * render at ~2 column widths, a few render at 1), so columns may
- * drift by a single cell on rows that mix a markered cell with a
- * markerless one. That's acceptable; the alternative is dropping
- * per-cell colours, which destroys the "Online says this is bad but
- * Major says it's great" signal the user explicitly asked for.
+ * Matchup Matrix orders rows.
  */
 const COMBINED_OPP_W  = 15;
-const COMBINED_CELL_W = 6;   // "52,1 🟢" / "52,1  " — 6 grapheme chars
+const COMBINED_CELL_W = 7;   // grapheme budget per cell — "52,1%🟢"
+                             //   (6 graphemes, ~7 visual cells) and
+                             //   "52,1%  " (7 graphemes) both land in
+                             //   the same column for the eye.
 
 function _combinedCell(matchup) {
     if (!matchup) {
-        // Right-align "—" to where the WR digit would land so the
-        // missing-data placeholder still reads as a number column.
-        return _padLeft('—', COMBINED_CELL_W - 1) + ' ';
+        // "   —   " — em-dash centred in 7 grapheme cells, sitting
+        // roughly where the WR digits would land in a populated cell
+        // so the column still reads as a column when empty.
+        return '   —   ';
     }
     const wr = Number.isFinite(matchup.win_pct) ? matchup.win_pct : 0;
-    const wrText = wr.toFixed(1).replace('.', ',');
-    let marker = '  ';
-    if (wr >= 55) marker = ' 🟢';
-    else if (wr <= 45) marker = ' 🔴';
-    // _padLeft on grapheme count — wr ranges from "0,0" (3 graph) to
-    // "100,0" (5 graph). Pad to 4 so the digits stay right-aligned
-    // for the common 2-digit-percent case.
-    return _padLeft(wrText, 4) + marker;
+    const wrText = wr.toFixed(1).replace('.', ',') + '%';  // "52,1%" / "100,0%"
+    let marker = '  ';  // two-space slot keeps marker-vs-no-marker
+                        // alignment within the same grapheme count.
+    if (wr >= 55) marker = '🟢';
+    else if (wr <= 45) marker = '🔴';
+    // Right-align WR to 5 graphemes (covers "0,0%" → "99,9%";
+    // "100,0%" overflows by one and pushes the marker one cell right
+    // on that single row — vanishingly rare in real matchup data).
+    return _padLeft(wrText, 5) + marker;
 }
 
 export function formatCombinedMatchupMatrix(onlineMatchups, majorMatchups) {
@@ -243,18 +264,22 @@ export function formatCombinedMatchupMatrix(onlineMatchups, majorMatchups) {
         return String(a.opp).localeCompare(String(b.opp));
     });
 
+    // Header + separator. Cells right-aligned to COMBINED_CELL_W so
+    // the " │ " divider lands at a consistent column across header
+    // and every data row. The marker slot inside each cell is
+    // 2-grapheme so the divider never sits flush against an emoji.
+    const TOTAL_W = COMBINED_OPP_W + 1 + COMBINED_CELL_W + 3 + COMBINED_CELL_W;
+    //              opp           + sp + onl_cell        + ' │ ' + maj_cell
     const lines = [];
     lines.push(
         `${_padRight('Gegner', COMBINED_OPP_W)} ` +
-        `${_padLeft('Onl', COMBINED_CELL_W)} ` +
-        `${_padLeft('Maj', COMBINED_CELL_W)}`
+        `${_padLeft('Online', COMBINED_CELL_W)} │ ` +
+        `${_padLeft('Major',  COMBINED_CELL_W)}`
     );
-    lines.push('─'.repeat(COMBINED_OPP_W + 1 + COMBINED_CELL_W + 1 + COMBINED_CELL_W));
+    lines.push('─'.repeat(TOTAL_W));
     for (const r of rows) {
-        lines.push(
-            `${_padRight(_truncate(r.opp, COMBINED_OPP_W), COMBINED_OPP_W)} ` +
-            `${_combinedCell(r.online)} ${_combinedCell(r.major)}`
-        );
+        const oppCell = _padRight(_truncate(r.opp, COMBINED_OPP_W), COMBINED_OPP_W);
+        lines.push(`${oppCell} ${_combinedCell(r.online)} │ ${_combinedCell(r.major)}`);
     }
     return lines.join('\n');
 }

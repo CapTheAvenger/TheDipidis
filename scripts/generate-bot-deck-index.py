@@ -505,6 +505,101 @@ def _read_major_matchups(site_dir: str, format_key: str) -> dict[str, dict[str, 
     return out
 
 
+def _major_dict_to_lists(major_mu: dict[str, dict[str, dict]]) -> dict[str, list[dict]]:
+    """Flatten the {deck: {opponent: {games, win_pct}}} dict into the
+    same [{opponent, games, win_pct}] list shape the bot expects for
+    the online matchups. Used by the /matchups command which renders
+    Online and Major matchups as two SEPARATE tables — we can't reuse
+    the blended dict for that view.
+
+    Per-deck list is sorted by sample size (games desc) and capped at
+    MAX_MATCHUPS so the rendered table fits a phone screen."""
+    out: dict[str, list[dict]] = {}
+    for deck, opps in major_mu.items():
+        items = [
+            {
+                'opponent': opp,
+                'games':    int(stat['games']),
+                'win_pct':  round(float(stat['win_pct']), 1),
+            }
+            for opp, stat in opps.items()
+            if int(stat.get('games', 0)) >= MIN_MATCHUP_GAMES
+        ]
+        items.sort(key=lambda m: -m['games'])
+        out[deck] = items[:MAX_MATCHUPS]
+    return out
+
+
+def _read_format_deck_stats(site_dir: str, format_key: str) -> dict[str, dict]:
+    """Per-archetype tournament-aggregate stats for ONE rotation.
+
+    Reads data/labs_tournament_decks.csv and returns
+        { deck_name: {
+              day2_conv_avg:        weighted-average day1→day2 conversion
+                                    across the format's tournaments,
+                                    weighted by day1_players (so small
+                                    Special Events don't dominate a big
+                                    Regional's signal)
+              tournament_count:     #tournaments the archetype appeared in
+              total_day1_players:   sum of day1_players across those events
+              total_top8_count:     sum of top8_count across those events
+              top8_conv_avg:        top8_count / total_day1_players  (%)
+          } }
+
+    Used by the bot's /matchups command title line:
+        "Major Matchups · Slowking · Day-2 Conv 25.6% · 8 Turniere"
+    """
+    path = os.path.join(site_dir, 'data', 'labs_tournament_decks.csv')
+    out: dict[str, dict] = {}
+    if not os.path.exists(path):
+        return out
+    target_meta = format_key.strip().upper()
+    try:
+        with open(path, encoding='utf-8-sig') as f:
+            reader = csv.DictReader(f)
+            for r in reader:
+                meta = (r.get('meta') or '').strip().upper()
+                if meta != target_meta:
+                    continue
+                deck = (r.get('deck_name') or '').strip()
+                if not deck:
+                    continue
+                try:
+                    day1   = int(r.get('day1_players')  or 0)
+                    day1to2 = float(str(r.get('day1_to_day2_conv') or '0').replace(',', '.'))
+                    top8   = int(r.get('top8_count')    or 0)
+                except (TypeError, ValueError):
+                    continue
+                if day1 <= 0:
+                    continue
+                slot = out.setdefault(deck, {
+                    '_conv_weighted_sum': 0.0,
+                    '_conv_weight':       0,
+                    'tournament_count':   0,
+                    'total_day1_players': 0,
+                    'total_top8_count':   0,
+                })
+                slot['_conv_weighted_sum'] += day1to2 * day1
+                slot['_conv_weight']       += day1
+                slot['tournament_count']   += 1
+                slot['total_day1_players'] += day1
+                slot['total_top8_count']   += top8
+    except Exception as exc:
+        print(f'warn: format deck stats parse failed: {exc}', file=sys.stderr)
+        return {}
+
+    # Materialise the weighted averages and drop the working sums
+    for deck, s in out.items():
+        s['day2_conv_avg'] = (s['_conv_weighted_sum'] / s['_conv_weight']) if s['_conv_weight'] > 0 else 0.0
+        s['top8_conv_avg'] = (s['total_top8_count']   / s['total_day1_players']) if s['total_day1_players'] > 0 else 0.0
+        # Round to nicer percentages for the bot title (% with 1 dec).
+        s['day2_conv_avg'] = round(s['day2_conv_avg'] * 100, 1)
+        s['top8_conv_avg'] = round(s['top8_conv_avg'] * 100, 2)
+        del s['_conv_weighted_sum']
+        del s['_conv_weight']
+    return out
+
+
 def _blend_matchups_with_majors(
     limitless_mu: dict[str, list[dict]],
     major_mu:     dict[str, dict[str, dict]],
@@ -792,7 +887,10 @@ def _dedup_rows_by_identifier(rows: list[dict]) -> list[dict]:
 
 
 def _build_current_meta(site_dir: str, format_key: str, ranking: dict[str, dict],
-                         ace_spec_names: set[str], matchups: dict[str, list[dict]]) -> dict:
+                         ace_spec_names: set[str], matchups: dict[str, list[dict]],
+                         matchups_online:    dict[str, list[dict]] | None = None,
+                         matchups_majors:    dict[str, list[dict]] | None = None,
+                         format_deck_stats:  dict[str, dict] | None = None) -> dict:
     csv_path = os.path.join(site_dir, 'data', 'current_meta_card_data.csv')
     if not os.path.exists(csv_path):
         print(f'warn: {csv_path} missing, skipping current-meta', file=sys.stderr)
@@ -841,6 +939,20 @@ def _build_current_meta(site_dir: str, format_key: str, ranking: dict[str, dict]
             'cards': deck,
             'tech_cards': tech,
             'matchups': matchups.get(arch, []),
+            # New fields powering the /matchups command (separate
+            # Online + Major matrix views). Empty list when the source
+            # doesn't have data — bot renders the corresponding panel
+            # as "keine Daten" so the absence is explicit.
+            'matchups_online':  (matchups_online or {}).get(arch, []),
+            'matchups_majors':  (matchups_majors or {}).get(arch, []),
+            # Per-format aggregate stats for the /matchups title line.
+            # day2_conv_avg = weighted by day1_players across the
+            # format's tournaments. tournament_count = how many events
+            # the archetype actually appeared in.
+            'majors_day2_conv_avg':     (format_deck_stats or {}).get(arch, {}).get('day2_conv_avg', 0.0),
+            'majors_top8_conv_avg':     (format_deck_stats or {}).get(arch, {}).get('top8_conv_avg', 0.0),
+            'majors_tournament_count':  (format_deck_stats or {}).get(arch, {}).get('tournament_count', 0),
+            'majors_total_day1_players':(format_deck_stats or {}).get(arch, {}).get('total_day1_players', 0),
         }
     return out
 
@@ -1080,13 +1192,36 @@ def main(argv: list[str]) -> int:
     # numbers stay in lock-step with the predictor's internal map.
     # Past-meta stays on the per-format labs split — the website's
     # past-meta tab uses the same per-format files.
-    current_matchups = _read_limitless_matchups(site_dir)
-    major_matchups   = _read_major_matchups(site_dir, format_key)
-    current_matchups = _blend_matchups_with_majors(current_matchups, major_matchups)
+    # Online matchups (Limitless). We snapshot BEFORE blending so the
+    # /matchups command can render pure online numbers — the existing
+    # /deck command still uses the blended version that gets written
+    # into `matchups` per source below.
+    current_matchups_online_raw = _read_limitless_matchups(site_dir)
+    current_matchups_online = {
+        deck: [dict(m) for m in rows]
+        for deck, rows in current_matchups_online_raw.items()
+    }
+    # Major matchups (labs, per format). Used in two places:
+    #   • blended INTO the online matchups (mutates current_matchups_online_raw)
+    #     → becomes the per-source `matchups` field (existing /deck table).
+    #   • flattened into list form for the new /matchups command's
+    #     "Major Matchups" view.
+    major_matchups_raw = _read_major_matchups(site_dir, format_key)
+    current_matchups   = _blend_matchups_with_majors(current_matchups_online_raw, major_matchups_raw)
+    major_matchups_lists = _major_dict_to_lists(major_matchups_raw)
+    # Per-archetype day1→day2 conversion + tournament count for the
+    # /matchups title line.
+    current_format_stats = _read_format_deck_stats(site_dir, format_key)
+
     past_matchups    = _read_matchups(site_dir, PAST_META_FORMAT_KEY)
     print(f'  matchups:      {len(current_matchups)} current (limitless+labs blend) / {len(past_matchups)} past (labs)')
 
-    current_meta = _build_current_meta(site_dir, format_key, ranking, ace_spec_names, current_matchups)
+    current_meta = _build_current_meta(
+        site_dir, format_key, ranking, ace_spec_names, current_matchups,
+        matchups_online=current_matchups_online,
+        matchups_majors=major_matchups_lists,
+        format_deck_stats=current_format_stats,
+    )
     print(f'  current-meta:  {len(current_meta)} decks')
 
     past_meta = _build_past_meta(site_dir, ace_spec_names, past_matchups)

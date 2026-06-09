@@ -24,6 +24,7 @@ import { allowedCount, isAdmin, isAllowed, listAdmins } from './auth.js';
 import { installBotCommands, registerStart } from './commands/start.js';
 import { registerMetaCall } from './commands/metacall.js';
 import { registerDeck, handleDeckSearch } from './commands/deck.js';
+import { registerMatchups } from './commands/matchups.js';
 import { handleAccessRequest, registerAccess } from './commands/access.js';
 import { registerMyId } from './commands/myid.js';
 
@@ -69,6 +70,7 @@ registerStart(bot);
 registerAccess(bot);
 registerMetaCall(bot);
 registerDeck(bot);
+registerMatchups(bot);
 registerMyId(bot);
 
 // Catch-all for truly unrecognised text (anything that isn't a slash

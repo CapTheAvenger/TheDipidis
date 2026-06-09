@@ -19,10 +19,12 @@ import { Markup } from 'telegraf';
 
 export const MENU_LABEL_METACALL = '📊 Meta Call';
 export const MENU_LABEL_DECK = '🃏 Deck Builder';
+export const MENU_LABEL_MATCHUPS = '⚔️ Matchups';
 
 export const MENU_KEYBOARD = Markup.keyboard([
     [MENU_LABEL_METACALL],
     [MENU_LABEL_DECK],
+    [MENU_LABEL_MATCHUPS],
 ])
     .resize()       // compact button rows
     .persistent();  // sticks around even when the soft keyboard opens
@@ -55,6 +57,7 @@ export async function installBotCommands(bot) {
         await bot.telegram.setMyCommands([
             { command: 'metacall', description: 'Meta Call Dashboard rendern' },
             { command: 'deck', description: 'Deck Builder + Tech-Cards' },
+            { command: 'matchups', description: 'Matchup-Spread (Online + Majors)' },
             { command: 'menu', description: 'Buttons-Tastatur wieder einblenden' },
             { command: 'myid', description: 'Telegram-Chat-ID für Preisalarme anzeigen' },
         ]);

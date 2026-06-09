@@ -100,6 +100,12 @@
   let _byList          = null;  // Map(listKey → { meta, cards[] }) per
                                  // (tournament_id, player_name, place)
   let _tournamentSizes = null;  // Map(tournament_id → total_players)
+  let _aceSpecNames    = null;  // Set of normalized ACE-SPEC card names
+                                 // sourced from data/ace_specs.json. The
+                                 // per-decklist CSV's is_ace_spec column
+                                 // is empty for all 78k rows (limitless
+                                 // decklist HTML doesn't tag specs), so
+                                 // we resolve the flag by name here.
   let _loadPromise     = null;
 
   function _norm(s) {
@@ -146,6 +152,54 @@
     });
   }
 
+  // ACE-SPEC names come from data/ace_specs.json (the canonical list
+  // the rest of the app already consumes via window.isAceSpec in
+  // app-core.js). The per-decklist CSV's is_ace_spec column is empty
+  // for every row because the limitless decklist HTML doesn't tag
+  // specs — so without this lookup Phase 1 would never find an
+  // ACE-SPEC and every built deck would ship without one.
+  //
+  // We prefer the app-core's already-loaded list (avoids a duplicate
+  // network fetch when the app is hot) and fall back to a direct
+  // fetch when this module loads before app-init.js has populated it.
+  async function _loadAceSpecNames() {
+    const set = new Set();
+    try {
+      if (typeof global.isAceSpec === 'function') {
+        // app-core.js owns the canonical loader; if it has finished,
+        // its `isAceSpec` returns true for the right names. We still
+        // need a name list (not a probe function) because the spec
+        // pool we iterate in Phase 1 must be filterable up-front, so
+        // also fetch our own copy regardless — but cheaply, in
+        // parallel with the per-decklist CSV.
+      }
+      const res = await fetch('data/ace_specs.json?t=' + Date.now());
+      if (res && res.ok) {
+        const data = await res.json();
+        for (const name of (data.ace_specs || [])) {
+          const n = _norm(name);
+          if (n) set.add(n);
+        }
+      }
+    } catch (e) {
+      console.warn('[MostConsistencyBuilder] could not load ace_specs.json:', e);
+    }
+    return set;
+  }
+
+  // Single source of truth for "is this card name an ACE-SPEC?".
+  // Falls through to app-core's window.isAceSpec when our own Set is
+  // unavailable (e.g., fetch raced past first build call).
+  function _aceSpecByName(name) {
+    const n = _norm(name);
+    if (!n) return false;
+    if (_aceSpecNames && _aceSpecNames.has(n)) return true;
+    if (typeof global.isAceSpec === 'function') {
+      try { return !!global.isAceSpec(name); } catch (_) { return false; }
+    }
+    return false;
+  }
+
   // Tournament total_players come from labs_tournament_decks*.csv —
   // the labs scraper writes total_players per (tournament × deck) row;
   // dedupe by tournament_id and take the max.
@@ -171,12 +225,14 @@
     if (_allRows) return;
     if (_loadPromise) return _loadPromise;
     _loadPromise = (async () => {
-      const [rows, sizes] = await Promise.all([
+      const [rows, sizes, aceSpecs] = await Promise.all([
         _loadCsv(DATA_URL),
         _loadTournamentSizes(),
+        _loadAceSpecNames(),
       ]);
       _allRows         = rows;
       _tournamentSizes = sizes;
+      _aceSpecNames    = aceSpecs;
 
       _byArchetype = new Map();
       _byList      = new Map();
@@ -208,12 +264,19 @@
         }
         const cnt = parseInt(r.count || '0', 10) || 0;
         if (cnt <= 0) continue;
+        const cardName = r.card_name || '';
+        // CSV flag OR canonical ace_specs.json name match. The CSV
+        // column is empty for every current row; the name lookup is
+        // what actually populates is_ace_spec in practice. We keep
+        // the CSV check as a future-proof: if a later scraper run
+        // backfills the column, the flag wins immediately.
+        const csvFlag = (r.is_ace_spec || '').toLowerCase() === 'yes';
         _byList.get(listKey).cards.push({
-          name:          r.card_name || '',
+          name:          cardName,
           set_code:      r.set_code  || '',
           set_number:    r.set_number || '',
           count:         cnt,
-          is_ace_spec:   (r.is_ace_spec || '').toLowerCase() === 'yes',
+          is_ace_spec:   csvFlag || _aceSpecByName(cardName),
           type:          r.type || '',
         });
       }
@@ -239,22 +302,29 @@
   }
 
   // ── Card-DB enrichment (type + ACE-SPEC flag) ─────────────────────
-  // The CSV's type and is_ace_spec columns are populated for ~30 % of
-  // rows depending on which limitless decklist page format we hit.
-  // Fill the gaps via the frontend card_db. Keeps the algorithm honest
-  // about which slots are ACE-SPEC / Energy / Trainer when those
-  // columns are blank.
+  // The CSV's type column is populated for ~30 % of rows depending on
+  // which limitless decklist page format we hit, and is_ace_spec is
+  // empty in 100 % of rows. Fill the gaps via two sources, in order
+  // of trust:
+  //   1. Canonical ACE-SPEC name list (data/ace_specs.json) — always
+  //      authoritative for is_ace_spec, since the upstream HTML never
+  //      tags specs explicitly.
+  //   2. Frontend card_db (window.allCardsData) — fills `type` and
+  //      is_ace_spec when the name lookup missed.
   function _enrichCard(card, cardDb) {
+    // 1) Name-based ACE-SPEC tag. Overwrites whatever the CSV
+    //    parser put in, because we trust ace_specs.json over the
+    //    blank CSV column.
+    if (!card.is_ace_spec && _aceSpecByName(card.name)) {
+      card.is_ace_spec = true;
+    }
     if (card.type && card.is_ace_spec !== undefined) return card;
     if (!cardDb || !card.set_code || !card.set_number) return card;
     const key = `${card.set_code}-${card.set_number}`;
     const meta = cardDb.get(key) || cardDb.get(key.toLowerCase());
     if (!meta) return card;
     if (!card.type)         card.type = meta.type || '';
-    if (card.is_ace_spec === undefined || card.is_ace_spec === false) {
-      // Trust the meta unless the CSV explicitly said yes.
-      card.is_ace_spec = !!meta.is_ace_spec;
-    }
+    if (!card.is_ace_spec)  card.is_ace_spec = !!meta.is_ace_spec;
     return card;
   }
 
@@ -299,7 +369,8 @@
   }
 
   function _isAceSpec(card) {
-    return !!card.is_ace_spec;
+    if (card && card.is_ace_spec) return true;
+    return _aceSpecByName(card && card.name);
   }
 
   // ── Phase 0: weighted card scoring ────────────────────────────────
@@ -329,19 +400,55 @@
 
     // Aggregate per card (keyed by lowercase name; we keep the
     // best-data variant — first occurrence with set info — for
-    // downstream rendering)
+    // downstream rendering).
+    //
+    // CRITICAL: a single list may carry the SAME card name across
+    // multiple rows because limitless splits printings (e.g. 4×
+    // Psychic Energy SET A + 4× Psychic Energy SET B becomes two
+    // rows). Without per-list dedup, the naive `for (cRaw of l.cards)`
+    // loop double-counts the list — `shareNumerator` would be 2×w
+    // (inflating weightedShare beyond 100 %) and `weightedAvgCount`
+    // would underestimate by the split factor. We sum counts per
+    // normalized name PER LIST first, then feed one consolidated
+    // entry per (list, card-name) into the cross-list aggregation.
     const cardAgg = new Map();
     for (const l of lists) {
       const w = listW.get(l);
+      // Per-list rollup: name → { totalCount, best_variant }
+      const perListByName = new Map();
       for (const cRaw of l.cards) {
         const c = _enrichCard({ ...cRaw }, cardDb);
         const key = _norm(c.name);
         if (!key) continue;
+        if (!perListByName.has(key)) {
+          perListByName.set(key, {
+            name:        c.name,
+            best_variant: c,
+            totalCount:  0,
+            is_ace_spec: c.is_ace_spec,
+            is_energy:   _isEnergy(c),
+            is_basic_energy: _isBasicEnergy(c),
+            type:        c.type,
+          });
+        }
+        const e = perListByName.get(key);
+        e.totalCount += c.count;
+        // Prefer the printing variant that carries set info — keeps
+        // downstream rendering able to pick the right card art.
+        if (!e.best_variant.set_code && c.set_code) {
+          e.best_variant = c;
+        }
+        if (c.is_ace_spec)      e.is_ace_spec = true;
+        if (_isEnergy(c))       e.is_energy = true;
+        if (_isBasicEnergy(c))  e.is_basic_energy = true;
+        if (!e.type && c.type)  e.type = c.type;
+      }
+      // Cross-list aggregation — one entry per (list, card-name).
+      for (const [key, e] of perListByName.entries()) {
         if (!cardAgg.has(key)) {
           cardAgg.set(key, {
-            name:           c.name,
-            // Preferred variant: keep the one with non-empty set info
-            best_variant:   c,
+            name:           e.name,
+            best_variant:   e.best_variant,
             weightedShare:  0,
             shareNumerator: 0,
             weightedCount:  0,
@@ -350,23 +457,22 @@
             topCutWeight:   0,
             n_lists_with:   0,
             lists:          [],
-            is_ace_spec:    c.is_ace_spec,
-            is_energy:      _isEnergy(c),
-            is_basic_energy: _isBasicEnergy(c),
-            type:           c.type,
+            is_ace_spec:    e.is_ace_spec,
+            is_energy:      e.is_energy,
+            is_basic_energy: e.is_basic_energy,
+            type:           e.type,
           });
         }
         const a = cardAgg.get(key);
-        // Update best_variant if current row has more set info
-        if (!a.best_variant.set_code && c.set_code) {
-          a.best_variant = c;
-          a.is_ace_spec  = a.is_ace_spec || c.is_ace_spec;
-          a.is_energy    = a.is_energy   || _isEnergy(c);
-          a.is_basic_energy = a.is_basic_energy || _isBasicEnergy(c);
-          a.type         = a.type        || c.type;
+        if (!a.best_variant.set_code && e.best_variant.set_code) {
+          a.best_variant = e.best_variant;
         }
+        if (e.is_ace_spec)     a.is_ace_spec = true;
+        if (e.is_energy)       a.is_energy = true;
+        if (e.is_basic_energy) a.is_basic_energy = true;
+        if (!a.type && e.type) a.type = e.type;
         a.shareNumerator += w;
-        a.countNumerator += w * c.count;
+        a.countNumerator += w * e.totalCount;
         a.n_lists_with   += 1;
         a.lists.push(l);
         if (l.place <= 8) {

@@ -743,6 +743,36 @@ def split_tournament_cards(frontend_data):
             chunk_files.append(chunk_name)  # still list in manifest — file exists
             continue
 
+        # Dedup safety: TEF-CRI shipped 2x copies of every row in the
+        # 2026-06 rotation (first-time meta-chunk creation hit a write
+        # path that didn't dedupe). The frontend's aggregateCardStatsByDate
+        # sums total_count across rows, so duplicates push every Pokémon /
+        # Trainer card past the 4-copy legal cap → display freezes at
+        # "Ø 4,00x" / "Ø 8,10x" for basic energies and the user can't
+        # trust any avg-count number on the page. Dedup by the natural
+        # primary key (tournament_id, archetype, card_name, card_identifier)
+        # before writing so this can't recur even if the monolith gets
+        # rebuilt with stray duplicates.
+        seen_keys = set()
+        deduped_rows = []
+        dup_count = 0
+        for row in rows:
+            k = (
+                str(row.get("tournament_id", "")).strip(),
+                str(row.get("archetype", "")).strip(),
+                str(row.get("card_name", "")).strip(),
+                str(row.get("card_identifier", "")).strip(),
+            )
+            if k in seen_keys:
+                dup_count += 1
+                continue
+            seen_keys.add(k)
+            deduped_rows.append(row)
+        if dup_count > 0:
+            print(f"  ↪ {chunk_name}: dropped {dup_count} duplicate "
+                  f"(tournament,archetype,card) rows before write")
+        rows = deduped_rows
+
         with open(chunk_path, "w", newline="", encoding="utf-8-sig") as f:
             writer = csv.DictWriter(f, fieldnames=fieldnames, delimiter=";")
             writer.writeheader()

@@ -130,7 +130,7 @@ function _padLeft(s, w) {
     return ' '.repeat(Math.max(0, w - [...s].length)) + s;
 }
 
-function formatMatchupMatrix(matchups) {
+export function formatMatchupMatrix(matchups) {
     if (!Array.isArray(matchups) || matchups.length === 0) return null;
     const lines = [];
     lines.push(`${_padRight('Gegner', MATCHUP_OPP_W)} ${_padLeft('WR', 5)}`);

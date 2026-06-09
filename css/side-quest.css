@@ -222,6 +222,24 @@
     margin-bottom: 0.35rem;
 }
 
+.side-quest-evs,
+.side-quest-nature {
+    font-size: 0.7rem;
+    line-height: 1.35;
+    color: #98a3b6;
+    margin-bottom: 0.2rem;
+    word-break: break-word;
+}
+
+.side-quest-evs-label {
+    color: #5fb6ff;
+    font-weight: 600;
+}
+
+.side-quest-nature {
+    font-style: italic;
+}
+
 .side-quest-ability {
     color: #b0b8c1;
 }

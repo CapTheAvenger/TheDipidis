@@ -158,13 +158,23 @@ def _derive_meta_from_date_JH(date_iso: str) -> str:
       • current_set + previous_format_key define the active rotation
       • in_person_legal_date is the cutoff between previous and current
 
+    Accepts both ISO 'YYYY-MM-DD' and the English-ordinal format that
+    get_tournament_info() scrapes off the page ('6th June 2026'). The
+    raw page-scraped string was the actual hit — when this function
+    only parsed ISO, Turin (date='6th June 2026') returned '' here,
+    caller hit `api_format or "Past Meta"` and tagged the row 'Past
+    Meta' even though the date sits AFTER in_person_legal_date.
+
     Returns 'TEF-CRI' / 'TEF-POR' style key, or '' if the date can't be
     parsed (caller defaults to 'Past Meta' as before)."""
     if not date_iso:
         return ''
+    d = None
     try:
         d = datetime.strptime(date_iso, '%Y-%m-%d')
     except ValueError:
+        d = _parse_english_ordinal_date(date_iso)
+    if d is None:
         return ''
     data_dir = get_data_dir()
     fw_path = os.path.join(data_dir, 'format_window.json')

@@ -126,23 +126,42 @@ def fetch_sheet_csv(url: str = SHEET_CSV_URL) -> str:
 
 def parse_sheet(csv_text: str) -> List[Dict[str, str]]:
     """Parse the CSV — find the header row (anywhere in the first
-    50 rows) by the presence of 'Replica Code' (or similar), then
-    return each subsequent data row as a dict.
+    50 rows), then return each subsequent data row as a dict.
 
-    The VGCPastes sheet has decorative rows at the top (banner, blank
-    rows) before the actual header. The defensive parser handles both
-    that and any future re-ordering of columns."""
+    The VGCPastes sheet has decorative banner rows above the actual
+    header. Those banners contain prose like "DM us in Discord if
+    Replica Code is not available anymore!" — a substring match for
+    'replica code' alone hits that banner first and picks the wrong
+    row (2026-06-09 weekly run regression).
+
+    Header detection now requires the matched cell to look like an
+    actual column name: short ( ≤ 40 chars) AND the row carries
+    several other short, header-like cells. Real header rows are
+    things like ['Rank', 'Replica Code', 'Pokepaste', 'Team
+    Description', 'Full Name', 'Tournament / Event', …]."""
     reader = csv.reader(io.StringIO(csv_text))
     rows = list(reader)
     if not rows:
         return []
+
+    def _looks_like_header(row: List[str]) -> bool:
+        short_nonempty = [c.strip() for c in row if c and 0 < len(c.strip()) <= 40]
+        if len(short_nonempty) < 4:
+            return False
+        # The matched 'replica code' cell must itself be a short header,
+        # not a sentence containing the substring.
+        for c in short_nonempty:
+            if 'replica code' in c.lower():
+                return True
+        return False
+
     header_idx = None
     for i, row in enumerate(rows[:50]):
-        if any('replica code' in (c or '').lower() for c in row):
+        if _looks_like_header(row):
             header_idx = i
             break
     if header_idx is None:
-        logger.warning("Could not find header row with 'Replica Code'")
+        logger.warning("Could not find header row with 'Replica Code' (short-header heuristic)")
         return []
     headers = [h.strip() for h in rows[header_idx]]
     logger.info("  → header row at index %d, %d columns", header_idx, len(headers))

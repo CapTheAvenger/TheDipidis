@@ -281,10 +281,15 @@ def parse_pokemon_text(text: str) -> List[Dict]:
         m = _MON_FIRST_LINE_RE.match(first)
         if not m:
             continue
+        # Showdown lets builders nickname mons — when they do, the real
+        # species is in parens: "Mr. Fancy (Incineroar) @ Sitrus Berry".
+        # We need the species (not the nickname) so the Limitless R2
+        # icon lookup hits. The parens are skipped when they hold a
+        # gender token (M/F) or a single-word non-species hint.
         name = (m.group(1) or '').strip()
-        # Genitive-style nicknames like "Floette-Eternal" are part of
-        # the name — keep them. The parenthesised group is gender/form
-        # which we ignore for display purposes.
+        species_in_parens = (m.group(2) or '').strip()
+        if species_in_parens and species_in_parens.upper() not in ('M', 'F'):
+            name = species_in_parens
         if not name:
             continue
         item = (m.group(3) or '').strip()

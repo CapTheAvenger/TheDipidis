@@ -1751,9 +1751,22 @@
             const cardHtmls = cards.map(c => {
                 const setCode = String(c.set_code || '').trim().toUpperCase();
                 const setNum  = String(c.set_number || '').trim();
-                const imgUrl = (setCode && setNum)
-                    ? `https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/${setCode}/${setCode}_${setNum}_R_EN_LG.png`
-                    : '';
+                // Prefer the unified site image resolver — see same
+                // fix in current-meta-quickref.js for the rationale
+                // (hardcoded `_R_EN_LG.png` pattern + unpadded number
+                // misses ~40 % of cards because the limitless CDN
+                // varies rarity letter per print and zero-pads the
+                // number for 3-letter EN set codes).
+                let imgUrl = '';
+                if (setCode && setNum) {
+                    if (typeof window.getUnifiedCardImage === 'function') {
+                        try { imgUrl = window.getUnifiedCardImage(setCode, setNum) || ''; } catch (_) { imgUrl = ''; }
+                    }
+                    if (!imgUrl) {
+                        const padded = /^\d+$/.test(setNum) ? setNum.padStart(3, '0') : setNum;
+                        imgUrl = `https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/${setCode}/${setCode}_${padded}_R_EN_LG.png`;
+                    }
+                }
                 return `
                     <div class="past-meta-best-card" title="${_esc(c.name)} (${c.count}x)">
                         ${imgUrl ? `<img src="${imgUrl}" alt="${_esc(c.name)}" loading="lazy" onerror="this.style.display='none'">` : `<span style="display:flex;align-items:center;justify-content:center;height:100%;font-size:0.7rem;color:#6b7280;text-align:center;padding:4px;">${_esc(c.name)}</span>`}
@@ -1762,12 +1775,25 @@
                 `;
             }).join('');
 
+            // Suppress the record block when wins/losses/ties are all
+            // zero. The per-decklist scraper currently can't extract
+            // the W-L column for Special-Event standings tables; the
+            // CSV-side backfill from player_continuity.csv covers most
+            // affected rows but a handful of players don't appear in
+            // continuity. Showing "0-0-0 · 0,0%" for those would read
+            // as "this player went 0-0-0", which is wrong — better to
+            // hide the block than display misleading data.
+            const games = (best.wins || 0) + (best.losses || 0) + (best.ties || 0);
+            const recordBlock = games > 0
+                ? `<span class="past-meta-best-record">${best.wins || 0}-${best.losses || 0}-${best.ties || 0} · ${wpStr}</span>`
+                : '';
+
             body.innerHTML = `
                 <div class="past-meta-best-header">
                     <div class="past-meta-best-headline">
                         <span class="past-meta-best-place">${_esc(placeStr)}</span>
                         <span class="past-meta-best-name">${_esc(best.player_name)}</span>
-                        <span class="past-meta-best-record">${best.wins || 0}-${best.losses || 0}-${best.ties || 0} · ${wpStr}</span>
+                        ${recordBlock}
                     </div>
                     <div class="past-meta-best-sub">${_esc(tournName)} · ${_esc(best.tournament_date)} · ${totalCards} ${_esc(cardsLbl)}</div>
                     <div class="past-meta-best-actions">

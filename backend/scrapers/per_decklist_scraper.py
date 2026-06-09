@@ -287,6 +287,47 @@ def load_tournament_index_from_jh_state() -> List[Dict]:
     ]
 
 
+def load_player_continuity_records() -> Dict[Tuple[str, str, str], Tuple[int, int, int]]:
+    """Build { (labs_tid, place, player_name): (wins, losses, ties) }
+    from player_continuity.csv. Used as a W-L fallback when the
+    standings parser can't extract the record from the tournament's
+    HTML — Special-Event pages (e.g. Turin 2026-06) use a column
+    layout the per-decklist scraper's _HEADER_SYNONYMS table doesn't
+    cover (Match Points instead of Record). player_continuity.csv is
+    written by a separate scraper that DOES extract the right field
+    for those events, so cross-referencing fills the gap without
+    waiting for a per_decklist_scraper standings-parser fix.
+
+    Returns {} when the continuity file is missing — caller skips
+    the enrichment step silently."""
+    data_dir = get_data_dir()
+    path = os.path.join(data_dir, 'player_continuity.csv')
+    if not os.path.exists(path):
+        return {}
+    out: Dict[Tuple[str, str, str], Tuple[int, int, int]] = {}
+    try:
+        with open(path, encoding='utf-8') as f:
+            reader = csv.DictReader(f)
+            for r in reader:
+                tid = (r.get('tournament_id') or '').strip()
+                place = (r.get('place') or '').strip()
+                player = (r.get('player_name') or '').strip()
+                if not (tid and place and player):
+                    continue
+                try:
+                    w = int(r.get('wins') or 0)
+                    l = int(r.get('losses') or 0)
+                    t = int(r.get('ties') or 0)
+                except ValueError:
+                    continue
+                if (w + l + t) > 0:
+                    out[(tid, place, player)] = (w, l, t)
+    except Exception as e:
+        logger.warning("Could not parse player_continuity.csv: %s", e)
+        return {}
+    return out
+
+
 def load_tournament_metadata_lookup() -> Dict[str, Dict]:
     """Build { limitless_tid: {date_iso, meta} } from
     tournament_cards_data_overview.csv so we can pre-filter
@@ -401,6 +442,7 @@ def scrape_one_tournament(
     tournament: Dict,
     card_db: CardDatabaseLookup,
     delay: float = DEFAULT_DELAY,
+    continuity_records: Optional[Dict[Tuple[str, str, str], Tuple[int, int, int]]] = None,
 ) -> List[Dict]:
     """Scrape one tournament end-to-end and return the rows. Top-level
     flow:
@@ -436,6 +478,32 @@ def scrape_one_tournament(
     if not rows_std:
         logger.info("  No standings rows for %s — skipping", tid_lim)
         return []
+
+    # W-L fallback from player_continuity.csv. Special-Event standings
+    # pages (Turin 2026-06 was the first observed case) use a "Match
+    # Points" column that the current _HEADER_SYNONYMS table doesn't
+    # match, so parse_standings_rows() returns (0, 0, 0) for every
+    # player. player_continuity.csv carries the right record for those
+    # players (different scraper, different parser), so we fill the
+    # gap here. Only applies when the entire batch came back zeroed —
+    # if even one player has a non-zero record, we trust the standings
+    # parser and leave the data alone.
+    if continuity_records and labs_tid:
+        all_zero = all(
+            (r.get('wins', 0) + r.get('losses', 0) + r.get('ties', 0)) == 0
+            for r in rows_std
+        )
+        if all_zero:
+            fixed = 0
+            for r in rows_std:
+                key = (str(labs_tid), str(r.get('place', '')), str(r.get('player_name', '')))
+                if key in continuity_records:
+                    w, l, t = continuity_records[key]
+                    r['wins'], r['losses'], r['ties'] = w, l, t
+                    fixed += 1
+            if fixed > 0:
+                logger.info("  W-L fallback: enriched %d/%d players from player_continuity.csv",
+                            fixed, len(rows_std))
 
     # Group rows by deck_id so we fetch each unique decklist once
     by_deck_id: "OrderedDict[str, List[Dict]]" = OrderedDict()
@@ -638,11 +706,20 @@ def main():
     if args.max_tournaments:
         work = work[:args.max_tournaments]
 
+    # Continuity-record lookup for the W-L fallback path in
+    # scrape_one_tournament (see comment there). Loaded once per
+    # process and passed in by reference so each tournament can fall
+    # through to it without reopening the CSV.
+    continuity_records = load_player_continuity_records()
+    if continuity_records:
+        logger.info("Loaded %d player_continuity.csv (tid,place,player) records "
+                    "for W-L fallback.", len(continuity_records))
+
     total_rows = 0
     for i, t in enumerate(work, 1):
         logger.info("[%d/%d] tid=%s", i, len(work), t['id'])
         try:
-            rows = scrape_one_tournament(t, card_db, args.delay)
+            rows = scrape_one_tournament(t, card_db, args.delay, continuity_records)
         except Exception as e:
             logger.exception("Unexpected failure for tid=%s: %s", t['id'], e)
             continue

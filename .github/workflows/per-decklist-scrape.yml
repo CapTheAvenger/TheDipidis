@@ -102,6 +102,7 @@ jobs:
                    labs_tournament_id_overrides.json \
                    labs_tournament_decks.csv \
                    tournament_decklists_per_player.csv \
+                   player_continuity.csv \
                    all_cards_database.csv \
                    all_cards_database.json \
                    japanese_cards_database.csv \

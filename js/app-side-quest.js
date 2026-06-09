@@ -81,6 +81,11 @@
         ).join('');
         const tera = p.tera_type ? `<span class="side-quest-tera">Tera: ${escapeHtml(p.tera_type)}</span>` : '';
         const icon = pokemonIcon(p.name);
+        // EVs / Nature are only populated for refreshes after the
+        // 2026-06-09 scraper update — older snapshots have empty
+        // strings and the rows simply hide.
+        const evs = p.evs ? `<div class="side-quest-evs"><span class="side-quest-evs-label">EVs:</span> ${escapeHtml(p.evs)}</div>` : '';
+        const nature = p.nature ? `<div class="side-quest-nature">${escapeHtml(p.nature)} Nature</div>` : '';
         return `
             <div class="side-quest-mon">
                 <div class="side-quest-mon-head">
@@ -94,6 +99,8 @@
                     ${p.ability ? `<span class="side-quest-ability">${escapeHtml(p.ability)}</span>` : ''}
                     ${p.item ? `<span class="side-quest-item">@ ${escapeHtml(p.item)}</span>` : ''}
                 </div>
+                ${evs}
+                ${nature}
                 <ul class="side-quest-moves">${movesHtml}</ul>
             </div>
         `;

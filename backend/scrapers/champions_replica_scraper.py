@@ -263,11 +263,33 @@ _MON_FIRST_LINE_RE = re.compile(
     r'\s*$'
 )
 
+# Cosmetic-only form suffixes — visually identical to the base species
+# sprite, so dropping the suffix in both the display name and the slug
+# gives us a working Limitless R2 icon. Sinistcha / Polteageist / Sinistea
+# have three rarity variants (Masterpiece / Unremarkable / Counterfeit /
+# Antique / Phony) that the CDN doesn't host as form-specific sprites.
+# Extend this list when new cosmetic-only forms show up.
+_COSMETIC_FORM_SUFFIXES = {
+    'masterpiece', 'unremarkable', 'counterfeit',
+    'antique', 'phony',
+}
+
+
+def _strip_cosmetic_form(name: str) -> str:
+    """If the last hyphen-separated token is a purely-cosmetic form
+    marker, drop it. 'Sinistcha-Masterpiece' → 'Sinistcha'."""
+    if '-' not in name:
+        return name
+    head, _, tail = name.rpartition('-')
+    if tail.lower() in _COSMETIC_FORM_SUFFIXES and head:
+        return head
+    return name
+
 
 def parse_pokemon_text(text: str) -> List[Dict]:
     """Split the paste text on blank-line boundaries and parse each
-    block into a {name, item, ability, tera_type, moves[]} dict.
-    Skips comment / nickname-only blocks gracefully."""
+    block into a {name, item, ability, tera_type, evs, nature, moves[]}
+    dict. Skips comment / nickname-only blocks gracefully."""
     if not text:
         return []
     text = text.replace('\r\n', '\n').replace('\r', '\n').strip()
@@ -290,6 +312,7 @@ def parse_pokemon_text(text: str) -> List[Dict]:
         species_in_parens = (m.group(2) or '').strip()
         if species_in_parens and species_in_parens.upper() not in ('M', 'F'):
             name = species_in_parens
+        name = _strip_cosmetic_form(name)
         if not name:
             continue
         item = (m.group(3) or '').strip()
@@ -298,6 +321,8 @@ def parse_pokemon_text(text: str) -> List[Dict]:
             'item': item,
             'ability': '',
             'tera_type': '',
+            'evs': '',
+            'nature': '',
             'moves': [],
         }
         for line in lines[1:]:
@@ -306,6 +331,15 @@ def parse_pokemon_text(text: str) -> List[Dict]:
                 mon['ability'] = s.split(':', 1)[1].strip()
             elif s.lower().startswith('tera type:'):
                 mon['tera_type'] = s.split(':', 1)[1].strip()
+            elif s.lower().startswith('evs:'):
+                # Keep the verbatim "15 HP / 18 Def / 1 SpA / 32 Spe"
+                # spread — easier to render and matches what users
+                # already read on pokepaste.
+                mon['evs'] = s.split(':', 1)[1].strip()
+            elif s.lower().endswith(' nature'):
+                # Showdown writes the nature on its own line as
+                # "Modest Nature" / "Adamant Nature" — no colon.
+                mon['nature'] = s[:-len(' nature')].strip()
             elif s.startswith('-'):
                 move = s.lstrip('-').strip()
                 if move:

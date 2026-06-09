@@ -23,9 +23,9 @@ on:
         type: string
         default: ''
       from_date:
-        description: 'Backfill from this date forward (YYYY-MM-DD). Default 2026-04-01 = TEF-POR + TEF-CRI only. Pre-filters via overview CSV — no wasted page fetches.'
+        description: 'Backfill from this date forward (YYYY-MM-DD). Default "auto" reads in_person_legal_date from format_window.json so the scrape stays pinned to the current format. Pass an explicit date for broader backfills; pass "" to disable.'
         type: string
-        default: '2026-04-01'
+        default: 'auto'
       meta:
         description: 'Comma-separated meta codes (e.g. TEF-POR,TEF-CRI). Blank = no meta filter — date filter still applies.'
         type: string
@@ -105,7 +105,8 @@ jobs:
                    all_cards_database.csv \
                    all_cards_database.json \
                    japanese_cards_database.csv \
-                   sets.json; do
+                   sets.json \
+                   format_window.json; do
             if [ -f "data/$f" ]; then
               cp "data/$f" "backend/core/data/$f"
             fi
@@ -137,11 +138,17 @@ jobs:
           if [ -n "${{ github.event.inputs.tournament_id }}" ]; then
               ARGS="$ARGS --tournament-id ${{ github.event.inputs.tournament_id }}"
           fi
-          # Schedule runs use the safe defaults (--from-date 2026-04-01) so
-          # the cron iteration doesn't pull in BST-PAR / SVI-PFL legacy
-          # tournaments. Manual runs honour whatever the maintainer typed.
+          # Schedule runs use "auto" — the scraper reads
+          # in_person_legal_date from format_window.json so the cron
+          # iteration is auto-pinned to the current format. Without
+          # this, every format rotation would leave the previous
+          # rotation's data piling up in the output CSV (the
+          # 2026-06 rotation accumulated 48 k stale TEF-POR rows
+          # before this fix). Manual runs honour whatever the
+          # maintainer typed; pass an explicit date to backfill
+          # broader windows.
           if [ "${{ github.event_name }}" = "schedule" ]; then
-              ARGS="$ARGS --from-date 2026-04-01 --resume"
+              ARGS="$ARGS --from-date auto --resume"
           else
               if [ -n "${{ github.event.inputs.from_date }}" ]; then
                   ARGS="$ARGS --from-date ${{ github.event.inputs.from_date }}"

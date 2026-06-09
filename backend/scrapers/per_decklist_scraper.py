@@ -500,11 +500,15 @@ def main():
                     help='Limitless 3-digit tournament ID (alternative to --tournament-url).')
     ap.add_argument('--from-tournament-id', type=int, default=0,
                     help='Skip tournaments with limitless ID below this threshold.')
-    ap.add_argument('--from-date', type=str, default='',
+    ap.add_argument('--from-date', type=str, default='auto',
                     help='Skip tournaments dated before YYYY-MM-DD. Read from '
                          'tournament_cards_data_overview.csv — pre-filters BEFORE '
-                         'any network fetch. Use this for backfills (--from-date '
-                         '2026-04-01 limits to TEF-POR + TEF-CRI).')
+                         'any network fetch. Default "auto" reads '
+                         'in_person_legal_date from data/format_window.json so '
+                         'the scraper only pulls current-format tournaments '
+                         '(no stale rotation data piles up). Pass an explicit '
+                         'date (e.g. 2026-04-01) to backfill broader windows; '
+                         'pass "" to disable the date filter entirely.')
     ap.add_argument('--meta', type=str, default='',
                     help='Comma-separated list of meta codes to scrape '
                          '(e.g. TEF-POR,TEF-CRI). Pre-filters via overview CSV.')
@@ -553,6 +557,38 @@ def main():
         work = [w for w in work if int(w['id']) >= args.from_tournament_id]
         logger.info("--from-tournament-id %d: %d → %d tournaments",
                     args.from_tournament_id, before, len(work))
+
+    # Resolve "auto" sentinel from format_window.json — keeps the
+    # scrape window pinned to the current format so old rotation
+    # data (TEF-POR, SVI-ASC etc.) doesn't pile up in the output
+    # after a format change. The maintainer can still pass an
+    # explicit --from-date for backfills, or "" to skip the filter.
+    if args.from_date == 'auto':
+        fw_path = os.path.join(data_dir, 'format_window.json')
+        if os.path.exists(fw_path):
+            try:
+                with open(fw_path, encoding='utf-8') as f:
+                    fw = json.load(f)
+                legal = (fw.get('in_person_legal_date') or '').strip()
+                if legal:
+                    args.from_date = legal
+                    logger.info("--from-date auto → %s (in_person_legal_date "
+                                "from format_window.json, current format: %s-%s)",
+                                legal,
+                                (fw.get('oldest_legal_set') or '').strip().upper(),
+                                (fw.get('current_set') or '').strip().upper())
+                else:
+                    logger.warning("--from-date auto: format_window.json missing "
+                                   "in_person_legal_date — disabling date filter.")
+                    args.from_date = ''
+            except Exception as e:
+                logger.warning("--from-date auto: format_window.json unreadable "
+                               "(%s) — disabling date filter.", e)
+                args.from_date = ''
+        else:
+            logger.warning("--from-date auto: format_window.json not found at %s "
+                           "— disabling date filter.", fw_path)
+            args.from_date = ''
 
     overview = None
     if args.from_date or args.meta:

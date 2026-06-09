@@ -6447,7 +6447,18 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
         const ENERGY_CORRIDOR_MIN = 7;
         const ENERGY_CORRIDOR_MAX = 11;
         const ENERGY_DATA_FLOOR = 6.5;
-        function _allocateEnergyBudget(deckCards, conditionalAvgs, isEnergyCardEntry) {
+        function _allocateEnergyBudget(deckCards, conditionalAvgs, isEnergyCardEntry, options) {
+            options = options || {};
+            // useCorridor: clamp the budget to the doctrine corridor
+            // [ENERGY_CORRIDOR_MIN, ENERGY_CORRIDOR_MAX]. Default true to
+            // preserve the original behaviour when called with ACE-SPEC-
+            // conditioned avgs. The raw-avgs fallback path (when no
+            // ACE-SPEC bucket meets the >=3 gate) passes useCorridor=false
+            // because the empirical totalAvg from card stats already
+            // IS the true target — clamping to 11 would arbitrarily
+            // trim high-energy decks (Slowking averages ~16 energies
+            // empirically).
+            const useCorridor = options.useCorridor !== false;
             if (!Array.isArray(deckCards) || deckCards.length === 0) return null;
             if (!conditionalAvgs || typeof conditionalAvgs.get !== 'function') return null;
             const isEnergy = typeof isEnergyCardEntry === 'function'
@@ -6478,9 +6489,13 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             const totalAvg = items.reduce((s, it) => s + it.avg, 0);
             if (totalAvg < ENERGY_DATA_FLOOR) return null;  // data too thin
 
-            // budget = round(totalAvg) clamped to doctrine corridor
-            const budget = Math.max(ENERGY_CORRIDOR_MIN,
-                Math.min(ENERGY_CORRIDOR_MAX, Math.round(totalAvg)));
+            // budget = round(totalAvg), optionally clamped to the doctrine
+            // corridor. When useCorridor=false (raw-avgs fallback), respect
+            // the empirical sum — that's what the decklists actually run.
+            const rawBudget = Math.round(totalAvg);
+            const budget = useCorridor
+                ? Math.max(ENERGY_CORRIDOR_MIN, Math.min(ENERGY_CORRIDOR_MAX, rawBudget))
+                : rawBudget;
 
             // baseline = sum of floor(avg) per item
             let baseline = 0;
@@ -8271,12 +8286,25 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             // BEFORE Stage 1 so per-card rounding never touches energy
             // cards that got a budget allocation.
             //
-            // Pre-conditions (any failure → fallback to per-card via
-            // Stage 1 / EnergyFloor / EnergyCeiling):
-            //   - aceSpecSlotCard exists (need ACE-SPEC for conditional)
-            //   - condResult.bucketCount >= 3 (matched buckets gate)
-            //   - >=1 energy card has presence >= 3 in those buckets
-            //   - sum of qualifying avgs >= 6.5 (existing thin-data guard)
+            // Data source priority (no longer gated — Stage 0c now runs
+            // for every archetype as long as the pool has energies with
+            // share data):
+            //   1. ACE-SPEC-conditioned avgs IF aceSpecSlotCard exists
+            //      AND condResult.bucketCount >= 3 (precise per slot)
+            //   2. Raw avgCountWhenUsed from the card stats (empirical
+            //      sum across all 21 / N decklists, used when the
+            //      ACE-SPEC pattern is split or absent — Slowking case)
+            //
+            // The corridor [ENERGY_CORRIDOR_MIN, ENERGY_CORRIDOR_MAX]
+            // only clamps the ACE-SPEC branch (theoretical budget, can
+            // drift). Raw-avgs respects the empirical sum directly so
+            // high-energy decks (Slowking ~16 energies) aren't trimmed
+            // to a phantom 11-energy cap.
+            //
+            // Thin-data guard (totalAvg >= ENERGY_DATA_FLOOR) still
+            // applies to both paths — a sum below 6.5 means the pool
+            // has barely any energy and per-card rounding via Stage 1
+            // is fine.
             //
             // Marked cards (`_isEnergyBudgetAllocated = true`) bypass:
             //   - Stage 1 / Stage 2 per-card rounding (deterministic count
@@ -8290,13 +8318,58 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 const t = String(c.type || c.card_type || '').toLowerCase().trim();
                 return /\bspecial\s*energy\b/.test(t);
             };
-            let _energyBudgetResult = null;
-            if (aceSpecSlotCard
+            // Build the effective avgs Map for energy allocation.
+            // Prefer ACE-SPEC-conditioned avgs (precise per slot count
+            // — accounts for "Unfair Stamp builds run 8 Psychic, Secret
+            // Box builds run 7"). Fall back to raw avgCountWhenUsed
+            // from the card stats so energies still land in the deck
+            // when the archetype has a split ACE-SPEC pattern (Slowking
+            // 21 Turin decklists, Secret Box 65% / Unfair Stamp 35% →
+            // bucketCount < 3 → the gated path skipped entirely → all
+            // 16 energies fell through; user-flagged 2026-06-09).
+            //
+            // Both data sources have the same shape ({avg, presence})
+            // so _allocateEnergyBudget doesn't need to branch.
+            const _useAceSpecAvgs = !!(aceSpecSlotCard
                 && _aceSpecCondResult
                 && _aceSpecCondResult.bucketCount >= 3
-                && _aceSpecCondResult.conditionalAvgs.size > 0) {
+                && _aceSpecCondResult.conditionalAvgs.size > 0);
+
+            let _effectiveEnergyAvgs;
+            if (_useAceSpecAvgs) {
+                _effectiveEnergyAvgs = _aceSpecCondResult.conditionalAvgs;
+            } else {
+                _effectiveEnergyAvgs = new Map();
+                for (const c of deckCards) {
+                    if (!_isEnergyCardEntry(c)) continue;
+                    const cn = String(c.card_name || '').trim().toLowerCase();
+                    if (!cn) continue;
+                    const avg = Number(c.avgCountWhenUsed) || 0;
+                    if (avg <= 0) continue;
+                    // presence guard inside _allocateEnergyBudget needs
+                    // ≥ 3 to avoid small-sample noise. Use the deck-
+                    // inclusion count when available; otherwise fall
+                    // back to a high constant so 100 %-share cards
+                    // (which by definition appear in every analyzed
+                    // decklist) pass the guard.
+                    const presence = Number(c.deckInclusionCount
+                        || c.deck_inclusion_count
+                        || c.presence) || 99;
+                    // Dedupe by card_name — keep the highest-score
+                    // variant so pushCard() picks a sensible print.
+                    const existing = _effectiveEnergyAvgs.get(cn);
+                    if (!existing || (c.consistencyScore || 0) > (existing.score || 0)) {
+                        _effectiveEnergyAvgs.set(cn, { avg, presence,
+                            score: c.consistencyScore || 0 });
+                    }
+                }
+            }
+
+            let _energyBudgetResult = null;
+            if (_effectiveEnergyAvgs.size > 0) {
                 _energyBudgetResult = _allocateEnergyBudget(
-                    deckCards, _aceSpecCondResult.conditionalAvgs, _isEnergyCardEntry
+                    deckCards, _effectiveEnergyAvgs, _isEnergyCardEntry,
+                    { useCorridor: _useAceSpecAvgs }
                 );
                 if (_energyBudgetResult && Array.isArray(_energyBudgetResult.placements)) {
                     const _seenEnergy = new Set();
@@ -8316,7 +8389,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                         pushCard(p.card, placed, '[Consistency][Stage0c-EnergyBudget]');
                         _eAlloc += placed;
                     }
-                    devLog(`[Consistency][EnergyBudget] totalAvg=${_energyBudgetResult.totalAvg.toFixed(2)} → budget=${_energyBudgetResult.budget} → placed=${_eAlloc} via LRM`);
+                    devLog(`[Consistency][EnergyBudget] mode=${_useAceSpecAvgs ? 'ACE-SPEC-conditioned' : 'raw-avgs'} totalAvg=${_energyBudgetResult.totalAvg.toFixed(2)} → budget=${_energyBudgetResult.budget} → placed=${_eAlloc} via LRM`);
                 }
             }
 

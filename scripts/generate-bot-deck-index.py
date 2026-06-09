@@ -694,6 +694,103 @@ def _read_share_ranking(site_dir: str) -> dict[str, dict]:
     return out
 
 
+def _fix_mojibake(s: str) -> str:
+    """Repair Latin-1-decoded-as-UTF-8 mojibake. No-op when clean.
+
+    Mirror of backend/core/card_scraper_shared.fix_mojibake without
+    the import dependency — this script ships standalone in scripts/
+    and we don't want to pull the whole backend module in just for
+    one helper.
+
+    Cheap fast-path: if the string doesn't contain 'Ã' or 'Â' (the
+    two telltale bytes that always appear when Latin-1 multi-byte
+    UTF-8 is double-decoded), it's clean and we return it unchanged.
+    """
+    if not s or ('Ã' not in s and 'Â' not in s):
+        return s
+    try:
+        return s.encode('latin-1').decode('utf-8')
+    except (UnicodeEncodeError, UnicodeDecodeError):
+        return s
+
+
+def _dedup_rows_by_identifier(rows: list[dict]) -> list[dict]:
+    """Collapse rows with the same card_identifier within one
+    archetype, summing the count columns and keeping the
+    cleanest-encoded card_name.
+
+    The current_meta scraper writes two rows for some cards (one per
+    format variant — Meta Live vs Meta Play!), and the historical
+    encoding bug above produced different name strings for the same
+    POR 81 card. Without dedup, _build_deck() treats them as separate
+    cards and emits both lines into the user-facing deck list
+    (2026-06-09: 'Poké Pad' AND 'PokÃ© Pad' shown side by side).
+
+    Sum-aggregate the inclusion stats per card so the downstream
+    sort_by(percentage_in_archetype) still ranks the card correctly.
+    """
+    by_id: dict[str, dict] = {}
+    for r in rows:
+        ident = (r.get('card_identifier') or '').strip()
+        if not ident:
+            # No identifier → can't dedup; pass through unchanged so
+            # we don't accidentally lose data.
+            by_id[f'__noid__{len(by_id)}'] = dict(r)
+            continue
+        if ident not in by_id:
+            by_id[ident] = dict(r)
+            continue
+        # Existing entry — merge counts, prefer the cleaner card_name.
+        existing = by_id[ident]
+        # Sum the count columns (total_count, deck_inclusion_count).
+        for col in ('total_count', 'deck_inclusion_count'):
+            try:
+                existing[col] = str(
+                    int(_parse_eu(existing.get(col, 0))) +
+                    int(_parse_eu(r.get(col, 0)))
+                )
+            except (TypeError, ValueError):
+                pass
+        # average_count: weight by deck_inclusion_count so the merged
+        # average reflects actual usage (= total_count / sum-of-incl).
+        try:
+            tot = int(_parse_eu(existing.get('total_count', 0)))
+            inc = int(_parse_eu(existing.get('deck_inclusion_count', 0)))
+            if inc > 0:
+                existing['average_count'] = str(round(tot / inc, 2)).replace('.', ',')
+        except (TypeError, ValueError):
+            pass
+        # Recompute percentage_in_archetype against the SUMMED total.
+        # Meta Live and Meta Play! feed different scrape pools (ladder
+        # vs tournament builds) — treating them as separate deck
+        # populations and summing gives an accurate cross-pool
+        # inclusion rate. Initial implementation used max() which gave
+        # inclusion_pct = 190 % for cards that appeared in both pools
+        # (2026-06-09 user report after first dedup landed).
+        try:
+            # Sum totals across the merged rows. We seed `existing` with
+            # the first row's total on insert, so each merge step adds
+            # exactly the new row's total once.
+            new_total = int(_parse_eu(r.get('total_decks_in_archetype', 0)))
+            cur_total = int(_parse_eu(existing.get('total_decks_in_archetype', 0)))
+            t_use = cur_total + new_total
+            inc   = int(_parse_eu(existing.get('deck_inclusion_count', 0)))
+            if t_use > 0 and inc > 0:
+                existing['total_decks_in_archetype'] = str(t_use)
+                pct = min(inc / t_use * 100, 100.0)  # cap at 100, just in case
+                existing['percentage_in_archetype']  = str(round(pct, 2)).replace('.', ',')
+        except (TypeError, ValueError):
+            pass
+        # Prefer the cleaner card_name (no 'Ã' / 'Â' mojibake).
+        cur_name = existing.get('card_name', '') or ''
+        new_name = r.get('card_name', '') or ''
+        cur_clean = ('Ã' not in cur_name) and ('Â' not in cur_name)
+        new_clean = ('Ã' not in new_name) and ('Â' not in new_name)
+        if new_clean and not cur_clean and new_name:
+            existing['card_name'] = new_name
+    return list(by_id.values())
+
+
 def _build_current_meta(site_dir: str, format_key: str, ranking: dict[str, dict],
                          ace_spec_names: set[str], matchups: dict[str, list[dict]]) -> dict:
     csv_path = os.path.join(site_dir, 'data', 'current_meta_card_data.csv')
@@ -707,7 +804,24 @@ def _build_current_meta(site_dir: str, format_key: str, ranking: dict[str, dict]
             arch = (row.get('archetype') or '').strip()
             if not arch or arch.lower() == 'other':
                 continue
+            # Repair Latin-1-decoded-as-UTF-8 mojibake on the name
+            # field so 'PokÃ© Pad' becomes 'Poké Pad'. This is the
+            # same fix the backend's card_scraper_shared.fix_mojibake
+            # applies — duplicated here so this standalone script
+            # doesn't have to import the whole backend module.
+            row['card_name'] = _fix_mojibake(row.get('card_name') or '')
             grouped[arch].append(row)
+        # Per-archetype dedup by card_identifier. The Meta Live /
+        # Meta Play! formats both feed into current_meta_card_data.csv,
+        # and the encoding pipeline produced both 'Poké Pad' (UTF-8)
+        # and 'PokÃ© Pad' (mojibake) rows for the same POR 81 card.
+        # Without dedup, _build_deck emitted both as separate cards in
+        # the user's deck list (2026-06-09 report). Mojibake-fix
+        # above + dedup-by-identifier below catches both the wide
+        # case (different names, same id) and the narrow case (same
+        # card scraped twice via different paths).
+        for arch in list(grouped.keys()):
+            grouped[arch] = _dedup_rows_by_identifier(grouped[arch])
 
     out: dict[str, dict] = {}
     for arch, rows in grouped.items():
@@ -782,7 +896,12 @@ def _aggregate_per_archetype_cards(rows: Iterable[dict], scope_key: str) -> list
         if slot is None:
             slot = agg[key] = {
                 'archetype': arch,
-                'card_name': r.get('card_name') or '',
+                # Repair Latin-1-decoded-as-UTF-8 mojibake on the name
+                # ('PokÃ© Pad' → 'Poké Pad'). Defensive — current-meta
+                # had it (see _build_current_meta dedup path) and
+                # tournament_cards_data_*.csv could grow it under
+                # future scraper changes.
+                'card_name': _fix_mojibake(r.get('card_name') or ''),
                 'card_identifier': card_id,
                 'set_code': r.get('set_code') or '',
                 'set_number': r.get('set_number') or '',
@@ -792,6 +911,15 @@ def _aggregate_per_archetype_cards(rows: Iterable[dict], scope_key: str) -> list
                 '_total_count': 0,
                 '_inclusion_count': 0,
             }
+        else:
+            # Subsequent rows can replace a mojibake'd name with a
+            # clean one if the same card_identifier shows up clean
+            # later in the iteration order.
+            cur_name = slot.get('card_name', '') or ''
+            new_name = _fix_mojibake(r.get('card_name') or '')
+            cur_dirty = ('Ã' in cur_name) or ('Â' in cur_name)
+            if cur_dirty and new_name and not (('Ã' in new_name) or ('Â' in new_name)):
+                slot['card_name'] = new_name
         # The first non-empty image_url wins — later rows from other
         # tournaments occasionally have it blank.
         if not slot['image_url'] and r.get('image_url'):

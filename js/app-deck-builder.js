@@ -8722,6 +8722,51 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             // so the post-build summary log matches the actual deck size.
             currentTotal = consistencyDeck.reduce((s, e) => s + (e.count || 0), 0);
 
+            // ==========================================
+            // FINAL FILL — pad to 60 with the most-used basic energy.
+            //
+            // The Energy-Budget (Stage 0c) + Energy-Floor passes both
+            // gate on `_aceSpecCondResult.bucketCount >= 3`. When the
+            // archetype has fewer than 3 ACE-SPEC-conditioned buckets
+            // (newer archetypes, low-Day-2 events, the user-flagged
+            // Turin Slowking sample — 21 decklists but inconsistent
+            // ACE-SPEC pattern), both stages are skipped and energies
+            // never get placed. The deck ships at 55/60 (Pokémon +
+            // Trainers only) with the basic energies missing.
+            //
+            // Mirrors the older autoComplete() function's final fallback
+            // (~line 4327): when the deck is under 60 and a basic
+            // energy exists in the analyzed pool with non-trivial
+            // share, push it to fill the remaining slots. Basic
+            // energies are exempt from the 4-copy limit, so a single
+            // entry can absorb the entire shortfall.
+            if (currentTotal < 60) {
+                // Pick the basic energy with the highest share in the
+                // analyzed pool — that's the one the actual decklists
+                // are running. Stage 0c's `_isEnergyCardEntry` helper
+                // is in scope above; mirror its name-OR-type matching.
+                const basicEnergyCandidates = deckCards
+                    .filter(c => isBasicEnergyCardEntry(c))
+                    .sort((a, b) => (b.sharePercent || 0) - (a.sharePercent || 0));
+                const topBasic = basicEnergyCandidates[0];
+                if (topBasic) {
+                    const shortfall = 60 - currentTotal;
+                    const existing = consistencyDeck.find(e =>
+                        String(e.card.card_name || '').toLowerCase() ===
+                        String(topBasic.card_name || '').toLowerCase()
+                    );
+                    if (existing) {
+                        existing.count += shortfall;
+                    } else {
+                        consistencyDeck.push({ card: topBasic, count: shortfall });
+                    }
+                    currentTotal += shortfall;
+                    devLog(`[autoCompleteConsistency][FinalFill] padded ${shortfall}x ${topBasic.card_name} (share ${(topBasic.sharePercent || 0).toFixed(1)} %) to reach 60`);
+                } else {
+                    devLog(`[autoCompleteConsistency][FinalFill] no basic energy in pool — deck ships at ${currentTotal}/60`);
+                }
+            }
+
             devLog(`[autoCompleteConsistency] Deck complete: ${currentTotal}/60`);
 
             // Altes Deck löschen und neues speichern

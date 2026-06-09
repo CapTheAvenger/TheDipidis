@@ -6790,9 +6790,37 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             else if (source === 'currentMeta') saveCurrentMetaDeck();
             else if (source === 'pastMeta')   savePastMetaDeck();
 
+            // Trigger the UI re-render. The legacy path uses
+            // scheduleDeckDisplayUpdate (debounced rAF wrapper around
+            // updateDeckDisplay) — without it the deck panel keeps
+            // showing the pre-build state even though
+            // window.*Deck has the new cards. First-cut PR shipped
+            // without this call and produced a "toast says 60/60 but
+            // UI is empty" report (2026-06-09).
+            if (typeof scheduleDeckDisplayUpdate === 'function') {
+                scheduleDeckDisplayUpdate(source);
+            } else if (typeof updateDeckDisplay === 'function') {
+                updateDeckDisplay(source);  // fallback
+            }
+
+            // Verify the deck actually populated (silent fails inside
+            // addCardToDeckBatch — over-70 cap, 4-copy limit, etc. —
+            // can leave the deck under-built without throwing). Log
+            // the gap so the maintainer sees what the apply lost.
+            const liveDeck =
+                source === 'cityLeague' ? window.cityLeagueDeck :
+                source === 'currentMeta' ? window.currentMetaDeck :
+                window.pastMetaDeck;
+            const liveTotal = liveDeck
+                ? Object.values(liveDeck).reduce((s, n) => s + (n || 0), 0)
+                : 0;
+            if (liveTotal !== totalApplied) {
+                console.warn(`[MostConsistencyBuilder] apply gap: tried ${totalApplied}, deck has ${liveTotal} — some addCardToDeckBatch calls silently failed (over-cap or set-code mismatch).`);
+            }
+
             if (typeof showToast === 'function') {
                 showToast(
-                    `✓ ${archetype}: ${totalApplied}/60 Karten · `
+                    `✓ ${archetype}: ${liveTotal}/60 Karten · `
                     + `Core @ ${(result.coreThreshold * 100).toFixed(0)} % · `
                     + `${result.dataQuality.n_lists} Listen ausgewertet`,
                     'success', 4000

@@ -822,6 +822,14 @@
             // format filter is "all" (per-meta labs CSV is one-format-only).
             renderPastMetaPerformance(selectedArchetype, formatFilter, tournamentFilter);
 
+            // Most Successful List (Feature A) — surface the single best-
+            // placed decklist for the archetype within the active filter.
+            // Reads from the per-decklist CSV the MostConsistencyBuilder
+            // already loaded, so this is fast after the first archetype
+            // pick of the session. Filter handling matches the user's
+            // chosen format/tournament dropdowns.
+            renderPastMetaMostSuccessfulList(selectedArchetype, formatFilter, tournamentFilter);
+
             devLog(`Selected archetype: ${selectedArchetype} (${aggregatedCards.length} unique cards across ${uniqueTournamentCount} tournaments, ${totalDecklists} total decklists)`);
           } catch (err) {
             console.error('[Past Meta] Error loading deck cards:', err);
@@ -1580,8 +1588,302 @@
             `;
         }
 
+        // ── Most Successful List (Feature A) ─────────────────────
+        //
+        // Surfaces the SINGLE best-placed decklist for the selected
+        // archetype within the active format/tournament filter, with
+        // a one-click "Compare with built deck" action that diffs it
+        // against whatever the deck-builder has just generated.
+        //
+        // Data source: the same per-decklist CSV the
+        // MostConsistencyBuilder consumes. Reusing the builder's
+        // loader avoids a second network fetch and keeps the per-
+        // archetype index hot across the Past Meta + Deck-Builder
+        // flows.
+        //
+        // "Best" = lowest `place` first, then highest weighted win-
+        // rate (wins + 0.5·ties) / games as a tiebreak. We deliberately
+        // don't blend in tournament size here — the user asked for the
+        // "Most Successful List", singular, and a clear absolute
+        // placement is what they expect to see (deeper analysis is
+        // already in the Performance section above).
+
+        function _pmListWinRate(list) {
+            const games = (list.wins || 0) + (list.losses || 0) + (list.ties || 0);
+            if (games <= 0) return 0;
+            return ((list.wins || 0) + 0.5 * (list.ties || 0)) / games;
+        }
+
+        function _pmCleanTournamentName(name) {
+            return String(name || '').replace(/\s*[-|•–]\s*Limitless\s*$/i, '');
+        }
+
+        // Pre-aggregate cards per list by normalized name so the
+        // rendered grid doesn't show the same card twice when the
+        // upstream HTML split printings across rows (mirrors the
+        // dedup we did in MostConsistencyBuilder's _computeCardScores).
+        function _pmConsolidateCards(rawCards) {
+            const byName = new Map();
+            for (const c of (rawCards || [])) {
+                const key = String(c.name || '').trim().toLowerCase();
+                if (!key) continue;
+                if (!byName.has(key)) {
+                    byName.set(key, {
+                        name: c.name,
+                        set_code: c.set_code || '',
+                        set_number: c.set_number || '',
+                        count: 0,
+                        type: c.type || '',
+                        is_ace_spec: !!c.is_ace_spec,
+                    });
+                }
+                const e = byName.get(key);
+                e.count += (c.count || 0);
+                // Prefer the variant with set info for image rendering.
+                if (!e.set_code && c.set_code) {
+                    e.set_code = c.set_code;
+                    e.set_number = c.set_number;
+                }
+                if (c.is_ace_spec) e.is_ace_spec = true;
+                if (!e.type && c.type) e.type = c.type;
+            }
+            return Array.from(byName.values());
+        }
+
+        async function renderPastMetaMostSuccessfulList(archetype, formatKey, tournamentId) {
+            const section = document.getElementById('pastMetaMostSuccessfulSection');
+            const body    = document.getElementById('pastMetaMostSuccessfulBody');
+            if (!section || !body) return;
+
+            if (!archetype) {
+                section.classList.add('d-none');
+                window.pastMetaMostSuccessfulList = null;
+                return;
+            }
+
+            section.classList.remove('d-none');
+            body.innerHTML = `<div class="past-meta-loading-state">${(typeof t === 'function' ? t('pm.mostSuccessfulLoading') : 'Loading…')}</div>`;
+
+            const builder = window.MostConsistencyBuilder;
+            if (!builder || typeof builder.loadData !== 'function') {
+                body.innerHTML = `<p class="past-meta-section-hint past-meta-empty-state">${(typeof t === 'function' ? t('pm.mostSuccessfulUnavailable') : 'Per-decklist data not loaded yet.')}</p>`;
+                return;
+            }
+            try {
+                await builder.loadData();
+            } catch (e) {
+                console.warn('[Past Meta · Most Successful] data load failed:', e);
+                body.innerHTML = `<p class="past-meta-section-hint past-meta-empty-state">${(typeof t === 'function' ? t('pm.mostSuccessfulLoadError') : 'Could not load per-decklist data.')}</p>`;
+                return;
+            }
+
+            let lists = (builder.listsForArchetype(archetype) || []).slice();
+            if (formatKey && formatKey !== 'all') {
+                lists = lists.filter(l => (l.meta || '') === formatKey);
+            }
+            if (tournamentId && tournamentId !== 'all') {
+                lists = lists.filter(l => String(l.tournament_id || '') === String(tournamentId));
+            }
+
+            if (lists.length === 0) {
+                body.innerHTML = `<p class="past-meta-section-hint past-meta-empty-state">${(typeof t === 'function' ? t('pm.mostSuccessfulNoLists') : 'No per-decklist data for this archetype + filter.')}</p>`;
+                window.pastMetaMostSuccessfulList = null;
+                return;
+            }
+
+            // "Most successful" in a moving meta means: best placement
+            // at the LATEST relevant tournament — a #1 from the oldest
+            // event in the format shouldn't outrank a #2 from the most
+            // recent one. So when the user hasn't pinned a specific
+            // tournament, we narrow to the most recent date in the
+            // filtered set first, then rank by placement within it.
+            //
+            // Tiebreak: weighted win-rate (wins + 0.5·ties)/games.
+            //
+            // tournament_date is ISO yyyy-mm-dd in the per-decklist
+            // CSV, so a plain string compare gives correct ordering.
+            if (!tournamentId || tournamentId === 'all') {
+                const latestDate = lists.reduce((acc, l) => {
+                    const d = (l.tournament_date || '');
+                    return d > acc ? d : acc;
+                }, '');
+                if (latestDate) {
+                    lists = lists.filter(l => (l.tournament_date || '') === latestDate);
+                }
+            }
+
+            lists.sort((a, b) => {
+                const pA = a.place || 99999, pB = b.place || 99999;
+                if (pA !== pB) return pA - pB;
+                return _pmListWinRate(b) - _pmListWinRate(a);
+            });
+            const best = lists[0];
+            const cards = _pmConsolidateCards(best.cards);
+
+            // Stash for the compare/copy actions below.
+            window.pastMetaMostSuccessfulList = { ...best, cards };
+
+            const totalCards = cards.reduce((s, c) => s + (c.count || 0), 0);
+            const wpStr = (_pmListWinRate(best) * 100).toFixed(1).replace('.', ',') + '%';
+            const placeStr = (best.place && best.place < 9999) ? `#${best.place}` : '—';
+            const tournName = _pmCleanTournamentName(best.tournament_name);
+            const _esc = (s) => String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            const cardsLbl = (typeof t === 'function' ? t('pm.mostSuccessfulCardsCount') : 'cards');
+            const cmpBtnLbl = (typeof t === 'function' ? t('pm.mostSuccessfulCompareBtn') : 'Compare with built deck');
+            const copyBtnLbl = (typeof t === 'function' ? t('pm.mostSuccessfulCopyBtn') : 'Copy decklist');
+
+            // Card grid — sort high-count Pokémon first (visual heaviest at
+            // top), then trainers, then energies; falls back to count desc
+            // when type info is missing on a row.
+            const _typeRank = (c) => {
+                const ty = String(c.type || '').toLowerCase();
+                if (ty.includes('pok')) return 0;
+                if (ty.includes('supp') || ty.includes('item') || ty.includes('trainer') || ty.includes('stadium') || ty.includes('tool')) return 1;
+                if (ty.includes('energy')) return 2;
+                return 3;
+            };
+            cards.sort((a, b) => {
+                const tr = _typeRank(a) - _typeRank(b);
+                if (tr !== 0) return tr;
+                return (b.count || 0) - (a.count || 0);
+            });
+
+            const cardHtmls = cards.map(c => {
+                const setCode = String(c.set_code || '').trim().toUpperCase();
+                const setNum  = String(c.set_number || '').trim();
+                const imgUrl = (setCode && setNum)
+                    ? `https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/${setCode}/${setCode}_${setNum}_R_EN_LG.png`
+                    : '';
+                return `
+                    <div class="past-meta-best-card" title="${_esc(c.name)} (${c.count}x)">
+                        ${imgUrl ? `<img src="${imgUrl}" alt="${_esc(c.name)}" loading="lazy" onerror="this.style.display='none'">` : `<span style="display:flex;align-items:center;justify-content:center;height:100%;font-size:0.7rem;color:#6b7280;text-align:center;padding:4px;">${_esc(c.name)}</span>`}
+                        <div class="past-meta-best-card-count">${c.count}</div>
+                    </div>
+                `;
+            }).join('');
+
+            body.innerHTML = `
+                <div class="past-meta-best-header">
+                    <div class="past-meta-best-headline">
+                        <span class="past-meta-best-place">${_esc(placeStr)}</span>
+                        <span class="past-meta-best-name">${_esc(best.player_name)}</span>
+                        <span class="past-meta-best-record">${best.wins || 0}-${best.losses || 0}-${best.ties || 0} · ${wpStr}</span>
+                    </div>
+                    <div class="past-meta-best-sub">${_esc(tournName)} · ${_esc(best.tournament_date)} · ${totalCards} ${_esc(cardsLbl)}</div>
+                    <div class="past-meta-best-actions">
+                        <button class="btn-modern primary" onclick="compareMostSuccessfulWithBuilder('pastMeta')">${_esc(cmpBtnLbl)}</button>
+                        <button class="btn-modern" onclick="copyMostSuccessfulList()">${_esc(copyBtnLbl)}</button>
+                    </div>
+                </div>
+                <div class="past-meta-best-grid">${cardHtmls}</div>
+            `;
+        }
+
+        // One-click compare: convert the most-successful list to the
+        // oldDeck format performDeckComparison() expects, read the
+        // current deck-builder deck as the newDeck, fire the existing
+        // comparison modal pre-populated with the result. Reuses the
+        // proven diff logic from app-features.js instead of forking it.
+        function compareMostSuccessfulWithBuilder(source) {
+            const best = window.pastMetaMostSuccessfulList;
+            if (!best) {
+                if (typeof showToast === 'function') {
+                    showToast((typeof t === 'function' ? t('pm.mostSuccessfulNoLists') : 'No list available to compare.'), 'warning');
+                }
+                return;
+            }
+            const src = source || 'pastMeta';
+            const deckMap = src === 'cityLeague' ? window.cityLeagueDeck :
+                            src === 'currentMeta' ? window.currentMetaDeck :
+                            window.pastMetaDeck;
+            if (!deckMap || Object.keys(deckMap).length === 0) {
+                const msg = (typeof t === 'function' ? t('pm.mostSuccessfulNoBuilderDeck') : 'Deck builder is empty — run "Consistency Generate" first.');
+                if (typeof showToast === 'function') showToast(msg, 'warning');
+                return;
+            }
+
+            // Map the best list's cards into the { count, name, set,
+            // number, key } shape performDeckComparison() consumes.
+            const oldDeck = (best.cards || []).map(c => ({
+                count:  c.count || 0,
+                name:   c.name,
+                set:    c.set_code || null,
+                number: c.set_number || null,
+                key:    (c.set_code && c.set_number) ? `${c.set_code}-${c.set_number}` : (c.name || ''),
+            })).filter(e => e.count > 0);
+
+            // Build the current deck (mirrors compareWithSavedDeck in
+            // app-features.js — same key parser).
+            const currentDeck = [];
+            for (const [key, count] of Object.entries(deckMap)) {
+                const m = key.match(/^(.+?)\s+\(([A-Z0-9]+)\s+(\d+)\)$/);
+                if (m) {
+                    currentDeck.push({
+                        count, name: m[1], set: m[2], number: m[3],
+                        key: `${m[2]}-${m[3]}`,
+                    });
+                } else {
+                    currentDeck.push({ count, name: key, set: null, number: null, key });
+                }
+            }
+
+            // Open the standard compare modal so the result lands in
+            // the slot the user already knows. We don't need to set
+            // app-features.js's local `currentDeckSource` — we're
+            // calling performDeckComparison() directly with both
+            // decks, bypassing the saved-deck dropdown branch.
+            const modal = document.getElementById('deckCompareModal');
+            if (modal) modal.style.display = 'flex';
+
+            const labelBits = [];
+            if (best.player_name) labelBits.push(best.player_name);
+            if (best.place && best.place < 9999) labelBits.push(`#${best.place}`);
+            const cleanT = _pmCleanTournamentName(best.tournament_name);
+            if (cleanT) labelBits.push(cleanT);
+            const oldName = labelBits.join(' · ') || 'Most Successful List';
+
+            if (typeof performDeckComparison === 'function') {
+                performDeckComparison(oldDeck, currentDeck, oldName);
+            } else {
+                console.warn('[Most Successful Compare] performDeckComparison() not loaded.');
+            }
+        }
+
+        function copyMostSuccessfulList() {
+            const best = window.pastMetaMostSuccessfulList;
+            if (!best || !Array.isArray(best.cards) || best.cards.length === 0) return;
+            // PTCGO/PTCG Live export format — same shape every player
+            // pastes from Limitless / TCG Showdown, so the user can
+            // paste this straight into their client.
+            const lines = best.cards
+                .filter(c => c.count > 0)
+                .sort((a, b) => (b.count || 0) - (a.count || 0))
+                .map(c => {
+                    const setCode = String(c.set_code || '').trim();
+                    const setNum  = String(c.set_number || '').trim();
+                    return setCode && setNum
+                        ? `${c.count} ${c.name} ${setCode} ${setNum}`
+                        : `${c.count} ${c.name}`;
+                });
+            const total = best.cards.reduce((s, c) => s + (c.count || 0), 0);
+            const text = lines.join('\n') + `\n\nTotal: ${total}\n`;
+            const done = () => {
+                if (typeof showToast === 'function') {
+                    showToast((typeof t === 'function' ? t('pm.mostSuccessfulCopied') : 'Decklist copied.'), 'success');
+                }
+            };
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).then(done).catch(() => done());
+            } else {
+                done();
+            }
+        }
+
         // Expose for inline callers / dev tools (matches the convention
         // used by other Past Meta helpers like filterPastMetaOverviewCards).
         window.renderPastMetaPerformance = renderPastMetaPerformance;
+        window.renderPastMetaMostSuccessfulList = renderPastMetaMostSuccessfulList;
+        window.compareMostSuccessfulWithBuilder = compareMostSuccessfulWithBuilder;
+        window.copyMostSuccessfulList = copyMostSuccessfulList;
 
         // Generic function to render deck analysis tables

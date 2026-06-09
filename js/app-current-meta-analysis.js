@@ -1265,6 +1265,12 @@
             if (emptyState) emptyState.classList.add('display-none');
             if (!archetype) {
                 if (emptyState) emptyState.classList.remove('display-none');
+                // Also hide the Quick Reference panel when the user clears
+                // the selection — without this the panel sticks around
+                // showing the previous archetype's lists.
+                if (typeof renderCurrentMetaQuickRef === 'function') {
+                    renderCurrentMetaQuickRef('').catch(() => {});
+                }
                 return;
             }
 
@@ -1327,7 +1333,18 @@
             }
             
             window.currentMetaArchetype = archetype;
-            
+
+            // Quick Reference Lists (Feature B) — fire-and-forget so
+            // the heavy data loads (per-decklist CSV via the consistency
+            // builder + online dated_cards CSV) happen in parallel with
+            // the main deck-view aggregation below. Each panel renders
+            // its own loading state and resolves independently.
+            if (typeof renderCurrentMetaQuickRef === 'function') {
+                renderCurrentMetaQuickRef(archetype).catch(err => {
+                    console.warn('[Current Meta] QuickRef render failed:', err);
+                });
+            }
+
             // Check if we have a saved deck for this archetype
             const savedDeck = localStorage.getItem('currentMetaDeck');
             if (savedDeck) {

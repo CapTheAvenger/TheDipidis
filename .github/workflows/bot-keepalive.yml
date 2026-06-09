@@ -25,10 +25,20 @@ name: Bot Keepalive
 
 on:
   schedule:
-    # Every 10 minutes. Drift-tolerant — even with the ~5 min GH Actions
-    # cron jitter, the worst case is 15 min between pings, which matches
-    # Render's sleep threshold exactly.
-    - cron: '*/10 * * * *'
+    # Every 5 minutes. Observed in practice that GH Actions free-tier
+    # cron drift can stretch the gap between scheduled fires to
+    # 30–40+ minutes during peak load, well past Render's 15-min
+    # sleep threshold (2026-06-09 dashboard showed only 2 fires in
+    # the past hour at the original */10 cadence). Doubling the
+    # cadence to */5 dilutes the drift — even with a 30-min worst-
+    # case skip, at least one ping is more likely to land inside
+    # any 15-min window.
+    #
+    # Cost: GitHub Actions free tier is unlimited minutes on public
+    # repos, so doubling the cadence has zero monetary impact. The
+    # job itself takes ~5 s, so we're well below any abuse
+    # threshold the GH runner pool would care about.
+    - cron: '*/5 * * * *'
   workflow_dispatch:
 
 # No write permissions needed — pure HTTP probe.

@@ -183,6 +183,7 @@ jobs:
               limitless_online_decks_comparison.csv \
               limitless_online_decks_matchups.csv \
               player_continuity.csv \
+              tournament_decklists_per_player.csv \
               champions_replica_teams.json \
           ; do
               if [ -f "data/$f" ]; then
@@ -368,6 +369,28 @@ jobs:
           exit 0  # never block the pipeline — Predictor 5.8 degrades
                   # gracefully when the CSV is missing
 
+      - name: Run per-decklist scraper (success-weighted card stats)
+        env:
+          PYTHONPATH: ${{ github.workspace }}/backend/core
+        # Preserves per-(tournament × player × card) resolution. Reads
+        # the JH scraper's tournament_jh_scraped.json index so newly-
+        # discovered tournaments from THIS run get covered. --resume
+        # skips tournaments already in the output CSV → steady-state
+        # adds only the 1-3 new Regionals each week. Net runtime
+        # ~3-5 min for that delta. Failure non-blocking — the
+        # deck-builder degrades gracefully to archetype-aggregated
+        # stats when the per-list CSV is empty or missing.
+        run: |
+          set +e
+          echo "::group::scrapers/per_decklist_scraper.py"
+          python backend/scrapers/per_decklist_scraper.py --resume
+          rc=$?
+          if [ "$rc" -ne 0 ]; then
+              echo "::warning::per_decklist_scraper exited with $rc"
+          fi
+          echo "::endgroup::"
+          exit 0
+
       - name: Run champions-replica scraper (Pokémon Champions Side Quest)
         env:
           PYTHONPATH: ${{ github.workspace }}/backend/core
@@ -401,7 +424,7 @@ jobs:
           set +e
           mkdir -p data
           # Monolith files first
-          for f in labs_tournament_decks.csv labs_tournament_matchups.csv labs_tournaments.json player_continuity.csv champions_replica_teams.json; do
+          for f in labs_tournament_decks.csv labs_tournament_matchups.csv labs_tournaments.json player_continuity.csv tournament_decklists_per_player.csv champions_replica_teams.json; do
               if [ -f "backend/core/data/$f" ]; then
                   cp "backend/core/data/$f" "data/$f"
                   sz=$(stat -c%s "data/$f")

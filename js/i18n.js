@@ -33,6 +33,7 @@ const translations = {
     'menu.playtester':        'Playtester',
     'menu.profile':           'My Profile',
     'menu.howToUse':          'How to Use',
+    'menu.sideQuest':         'Side Quest: Pokémon Champions Replica',
 
     // ── Tab labels ───────────────────────────────────────────
     'tab.metaAnalysis':       'Meta & Deck Analysis',
@@ -1732,6 +1733,7 @@ const translations = {
     'menu.playtester':        'Playtester',
     'menu.profile':           'Mein Profil',
     'menu.howToUse':          'Anleitung',
+    'menu.sideQuest':         'Side Quest: Pokémon Champions Replica',
 
     // ── Tab labels ───────────────────────────────────────────
     'tab.metaAnalysis':       'Meta & Deck-Analyse',

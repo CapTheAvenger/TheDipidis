@@ -8,6 +8,7 @@
     "tournament_cards_data_cards_BRS-TEF.csv",
     "tournament_cards_data_cards_BRS-TWM.csv",
     "tournament_cards_data_cards_BST-PAR.csv",
+    "tournament_cards_data_cards_Past Meta.csv",
     "tournament_cards_data_cards_SVI-ASC.csv",
     "tournament_cards_data_cards_SVI-BLK.csv",
     "tournament_cards_data_cards_SVI-DRI.csv",
@@ -25,6 +26,7 @@
     "BRS-TEF",
     "BRS-TWM",
     "BST-PAR",
+    "Past Meta",
     "SVI-ASC",
     "SVI-BLK",
     "SVI-DRI",
@@ -98,13 +100,8 @@
     "tournament_cards_data_cards_TEF-POR.csv": {
       "min_date": "2026-04-25",
       "max_date": "2026-05-30"
-    },
-    "TEF-CRI": {
-      "min": "2026-06-06",
-      "max": "2026-06-07",
-      "count": 1
     }
   },
-  "total_rows": 463491,
-  "generated": "2026-06-09T04:49:18.876283"
+  "total_rows": 462228,
+  "generated": "2026-06-09T07:29:57.764200"
 }

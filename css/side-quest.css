@@ -189,6 +189,17 @@
     margin-bottom: 0.25rem;
 }
 
+.side-quest-mon-title {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    min-width: 0;
+}
+
+.side-quest-mon-title .tcg-pokemon-icon {
+    flex: 0 0 auto;
+}
+
 .side-quest-mon-name {
     font-weight: 600;
     font-size: 0.92rem;

@@ -52,16 +52,42 @@
         `;
     }
 
+    // Showdown-format names from pokepaste already follow the
+    // form-suffix convention Limitless R2 sprites use (lowercase +
+    // hyphen-separated): "Charizard-Mega-Y" → charizard-mega-y,
+    // "Floette-Mega" → floette-mega, "Incineroar" → incineroar. Forms
+    // Limitless doesn't host (e.g. "Sinistcha-Masterpiece" → not in
+    // their gen9 set yet) hide via <img onerror>.
+    function pokemonSlug(name) {
+        return String(name || '').toLowerCase().trim();
+    }
+
+    function pokemonIcon(name) {
+        const slug = pokemonSlug(name);
+        if (!slug) return '';
+        if (window.ArchetypeIcons && typeof window.ArchetypeIcons.slugIconHtml === 'function') {
+            return window.ArchetypeIcons.slugIconHtml(slug, { size: 'md', alt: name });
+        }
+        // Fallback when ArchetypeIcons hasn't loaded — render the img
+        // directly with the same R2 prefix the helper uses.
+        const url = 'https://r2.limitlesstcg.net/pokemon/gen9/' + slug + '.png';
+        return `<img class="tcg-pokemon-icon tcg-pokemon-icon--md" src="${url}" alt="${escapeHtml(name)}" loading="lazy" onerror="this.style.display='none'">`;
+    }
+
     function renderPokemon(p) {
         const moves = (p.moves || []).slice(0, 4);
         const movesHtml = moves.map(m =>
             `<li class="side-quest-move">${escapeHtml(m)}</li>`
         ).join('');
         const tera = p.tera_type ? `<span class="side-quest-tera">Tera: ${escapeHtml(p.tera_type)}</span>` : '';
+        const icon = pokemonIcon(p.name);
         return `
             <div class="side-quest-mon">
                 <div class="side-quest-mon-head">
-                    <span class="side-quest-mon-name">${escapeHtml(p.name || '—')}</span>
+                    <span class="side-quest-mon-title">
+                        ${icon}
+                        <span class="side-quest-mon-name">${escapeHtml(p.name || '—')}</span>
+                    </span>
                     ${tera}
                 </div>
                 <div class="side-quest-mon-meta">

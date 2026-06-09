@@ -1,0 +1,167 @@
+name: Per-Decklist Scrape
+
+# Per-decklist scraper — preserves per-(tournament × player × card)
+# resolution that the existing aggregated pipeline collapses into
+# archetype-level averages. Output: data/tournament_decklists_per_player.csv
+#
+# Three trigger modes:
+#   1. workflow_dispatch (manual) — pass a single tournament_id OR
+#      a from_tournament_id threshold for backfills.
+#   2. schedule cron (Tuesday post-weekly-run) — incremental refresh
+#      via --resume so only NEW tournaments get fetched.
+#
+# Network cost: 1 fetch per tournament page + 1 fetch per UNIQUE
+# decklist (multiple players with identical lists cache to 1 fetch).
+# Typical Regional: 1 + ~150 fetches × 1.0 s delay = ~2.5 min.
+# Backfill of 8 TEF-POR + TEF-CRI tournaments: ~25-40 min worst case.
+
+on:
+  workflow_dispatch:
+    inputs:
+      tournament_id:
+        description: 'Limitless 3-digit tournament ID (blank = scrape all known via JH state)'
+        type: string
+        default: ''
+      from_tournament_id:
+        description: 'Backfill from this tournament ID upwards (blank = no floor)'
+        type: string
+        default: ''
+      resume:
+        description: 'Skip tournaments already in tournament_decklists_per_player.csv'
+        type: boolean
+        default: true
+      max_tournaments:
+        description: 'Stop after N tournaments (0 = unlimited)'
+        type: string
+        default: '0'
+  schedule:
+    # 12:00 UTC Tuesday — runs ~6 h after the weekly full update so the
+    # JH scraper has already discovered the week's new tournaments.
+    - cron: '0 12 * * 2'
+
+permissions:
+  contents: write
+  actions:  write
+
+concurrency:
+  group: per-decklist-scrape
+  cancel-in-progress: false
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      # The scraper reads tournament_jh_scraped.json (and the cards CSVs
+      # for the labs-tid resolver). Seed backend/core/data/ before run.
+      - name: Seed backend/core/data/ from data/
+        run: |
+          mkdir -p backend/core/data
+          for f in tournament_jh_scraped.json \
+                   tournament_cards_data_overview.csv \
+                   labs_tournament_id_overrides.json \
+                   tournament_decklists_per_player.csv \
+                   sets.json; do
+            if [ -f "data/$f" ]; then
+              cp "data/$f" "backend/core/data/$f"
+            fi
+          done
+          # Seed per-meta cards files for the labs-tid name lookup
+          shopt -s nullglob
+          for f in data/tournament_cards_data_cards_*.csv; do
+            cp "$f" "backend/core/data/$(basename "$f")"
+          done
+          shopt -u nullglob
+
+      - name: Run per-decklist scraper
+        env:
+          PYTHONPATH: ${{ github.workspace }}/backend/core
+        run: |
+          set +e
+          echo "::group::scrapers/per_decklist_scraper.py"
+          ARGS=""
+          if [ -n "${{ github.event.inputs.tournament_id }}" ]; then
+              ARGS="$ARGS --tournament-id ${{ github.event.inputs.tournament_id }}"
+          fi
+          if [ -n "${{ github.event.inputs.from_tournament_id }}" ]; then
+              ARGS="$ARGS --from-tournament-id ${{ github.event.inputs.from_tournament_id }}"
+          fi
+          if [ "${{ github.event.inputs.resume }}" = "true" ] || [ "${{ github.event_name }}" = "schedule" ]; then
+              ARGS="$ARGS --resume"
+          fi
+          if [ -n "${{ github.event.inputs.max_tournaments }}" ] && [ "${{ github.event.inputs.max_tournaments }}" != "0" ]; then
+              ARGS="$ARGS --max-tournaments ${{ github.event.inputs.max_tournaments }}"
+          fi
+          python backend/scrapers/per_decklist_scraper.py $ARGS
+          rc=$?
+          echo "::endgroup::"
+          if [ "$rc" -ne 0 ]; then
+              echo "::warning::per_decklist_scraper exited with $rc"
+          fi
+          exit 0  # never block — partial data is still data
+
+      - name: Copy output back to data/
+        run: |
+          if [ -f backend/core/data/tournament_decklists_per_player.csv ]; then
+            cp backend/core/data/tournament_decklists_per_player.csv \
+               data/tournament_decklists_per_player.csv
+            wc -l data/tournament_decklists_per_player.csv
+          fi
+
+      - name: Bump version
+        run: |
+          chmod +x bump-version.sh
+          ./bump-version.sh
+
+      - name: Commit + push
+        id: commit
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name  "github-actions[bot]"
+          git add data/tournament_decklists_per_player.csv \
+                  index.html service-worker.js version.json
+          if git diff --cached --quiet; then
+            echo "No changes — skipping push."
+            echo "pushed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          ts="$(date -u +'%Y-%m-%d %H:%M UTC')"
+          git commit -m "Auto: per-decklist scrape — ${ts}
+
+          Triggered by .github/workflows/per-decklist-scrape.yml
+          Run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+
+          for attempt in 1 2 3; do
+            if git push origin HEAD:main; then
+              echo "Push succeeded on attempt $attempt"
+              echo "pushed=true" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            git pull --rebase=true -X ours origin main || { git rebase --abort; exit 1; }
+          done
+          exit 1
+
+      - name: Trigger GitHub Pages deploy
+        if: steps.commit.outputs.pushed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh workflow run deploy-pages.yml --ref main
+          echo "Dispatched deploy-pages.yml on main."

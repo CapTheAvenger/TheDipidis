@@ -539,6 +539,15 @@ SYNC_PATTERNS = [
     # are: incremental --resume needs the prior CSV as input, AND the
     # frontend reads from data/, not backend/core/data/.
     "player_continuity.csv",
+    # Per-decklist scraper output — preserves per-(tournament × player ×
+    # card) resolution that the existing aggregated pipeline collapses.
+    # Frontend consumers: Most-Consistency deck-builder (success-weighted
+    # card scoring), Past Meta "most successful list" display, Quick
+    # Overview "best major / best online list" panels. Refreshed by
+    # backend/scrapers/per_decklist_scraper.py (per-decklist-scrape.yml
+    # workflow). Without this file the consumers fall back to the
+    # archetype-aggregated stats — degraded gracefully but less precise.
+    "tournament_decklists_per_player.csv",
     # Champions Side Quest — VGCPastes Google-Sheet derived team list.
     # Refreshed by backend/scrapers/champions_replica_scraper.py on the
     # weekly run; the Side Quest tab (js/app-side-quest.js) reads from

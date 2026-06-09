@@ -93,6 +93,7 @@ jobs:
           ./bump-version.sh
 
       - name: Commit + push
+        id: commit
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name  "github-actions[bot]"
@@ -100,6 +101,7 @@ jobs:
                   index.html service-worker.js version.json
           if git diff --cached --quiet; then
             echo "No changes to champions_replica_teams.json — skipping push."
+            echo "pushed=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
           ts="$(date -u +'%Y-%m-%d %H:%M UTC')"
@@ -114,8 +116,22 @@ jobs:
           for attempt in 1 2 3; do
             if git push origin HEAD:main; then
               echo "Push succeeded on attempt $attempt"
+              echo "pushed=true" >> "$GITHUB_OUTPUT"
               exit 0
             fi
             git pull --rebase=true -X ours origin main || { git rebase --abort; exit 1; }
           done
           exit 1
+
+      # Without this, the new JSON sits on main but the live site keeps
+      # serving the previous Pages build — the user saw their 30-team
+      # run land on main but the Side Quest tab kept showing yesterday's
+      # 20 teams (2026-06-09 user report). weekly-full-update.yml and
+      # daily-price-refresh.yml both dispatch this — match the pattern.
+      - name: Trigger GitHub Pages deploy
+        if: steps.commit.outputs.pushed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh workflow run deploy-pages.yml --ref main
+          echo "Dispatched deploy-pages.yml on main."

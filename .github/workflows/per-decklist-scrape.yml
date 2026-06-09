@@ -84,6 +84,16 @@ jobs:
 
       # The scraper reads tournament_jh_scraped.json (and the cards CSVs
       # for the labs-tid resolver). Seed backend/core/data/ before run.
+      #
+      # CRITICAL: also seed all_cards_database.csv — the shared
+      # extract_cards_from_decklist_soup() helper resolves Trainer /
+      # Energy cards via CardDatabaseLookup.get_latest_low_rarity_version().
+      # Without the DB, ALL trainers + energies silently get dropped (only
+      # Pokémon survive because their HTML has explicit /cards/<set>/<num>
+      # hrefs). The 2026-06-09 first backfill hit this: top finishers'
+      # 60-card decks ended up as ~10 Pokémon each, no trainers, no
+      # energies. CardDatabaseLookup loads both the CSV (preferred) and
+      # the JSON; we seed both so either path works.
       - name: Seed backend/core/data/ from data/
         run: |
           mkdir -p backend/core/data
@@ -91,6 +101,9 @@ jobs:
                    tournament_cards_data_overview.csv \
                    labs_tournament_id_overrides.json \
                    tournament_decklists_per_player.csv \
+                   all_cards_database.csv \
+                   all_cards_database.json \
+                   japanese_cards_database.csv \
                    sets.json; do
             if [ -f "data/$f" ]; then
               cp "data/$f" "backend/core/data/$f"

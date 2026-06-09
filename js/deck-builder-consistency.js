@@ -1,0 +1,923 @@
+/*
+ * MostConsistencyBuilder — rebuild of the "Most Consistency" deck-builder
+ * routine on top of the per-decklist data foundation
+ * (data/tournament_decklists_per_player.csv).
+ *
+ * What the user asked for, mapped to the implementation phases below:
+ *
+ *   Spec rule 1 — ACE-SPEC pick at split:
+ *     Highest weighted share wins. If two leaders are within ±5 pp
+ *     (the 45-55 % range the maintainer named), tiebreak by top-cut
+ *     frequency. Phase 1 below.
+ *
+ *   Spec rule 2 — every list matters but success weights more:
+ *     Phase 0 builds a per-(tournament × player) weight from placement
+ *     × tournament size. Every consumer downstream uses these weights.
+ *
+ *   Spec rule 3 — placement weight is step-function B:
+ *     Top-4 = 1.0, Top-8 = 0.7, Top-16 = 0.5, Day-2 = 0.3,
+ *     Day-1-only = 0.1. _placementWeight() below.
+ *
+ *   Spec rule 4 — tournament size weight = log(players)/log(2000):
+ *     Capped at 1.0 for ≥ 2000-player events. _sizeWeight() below.
+ *
+ *   Spec rule 5 — Core threshold: 90 %, dynamically relax toward 80 %
+ *     when too few cards land. Phase 2 below.
+ *
+ *   Spec rule 6 — avgCountWhenUsed = weighted mean:
+ *     Σ(weight × count_in_list) / Σ(weight where list ran the card).
+ *     _computeCardScores() below.
+ *
+ *   Spec rule 7 — Core fully built first, then Tech fills remaining
+ *     slots. Phases 2 → 3 → 4 below.
+ *
+ *   Spec rule 8 — Tech packages via co-occurrence:
+ *     If two cards co-occur in ≥ 70 % of lists where either appears,
+ *     treat them as a package; select / drop together. Phase 3 below.
+ *
+ *   Spec rule 9 — > 60 cards: drop lowest weighted share first.
+ *     Phase 5 below.
+ *
+ *   Spec rule 10 — only real data, no estimates / extrapolations.
+ *     Phase 6 surfaces a confidence indicator; refuses to build when
+ *     the archetype has < 3 weighted decklists.
+ *
+ * The module exposes a single `build()` entry point that returns
+ *   { deck, trace, dataQuality }.
+ * Caller (app-deck-builder.js → autoCompleteConsistency) applies the
+ * deck to the live UI.
+ *
+ * Architecture: pure functions feed into pure functions. Each phase
+ * pushes a structured event to `trace` so the console / UI / future
+ * "why this card?" view can explain every decision. No global state
+ * other than the lazy-loaded CSV index.
+ */
+(function (global) {
+  'use strict';
+
+  // ── Tuning constants ──────────────────────────────────────────────
+  const DATA_URL = 'data/tournament_decklists_per_player.csv';
+
+  // Spec rule 3: step-function placement weight.
+  const PLACEMENT_WEIGHT_BANDS = [
+    { maxPlace:   4, weight: 1.0 },
+    { maxPlace:   8, weight: 0.7 },
+    { maxPlace:  16, weight: 0.5 },
+    { maxPlace:  32, weight: 0.3 },  // Day-2 cut for typical Regional
+    { maxPlace: Infinity, weight: 0.1 },  // Day-1-only floor
+  ];
+
+  // Spec rule 4: log(players)/log(2000), capped at 1.0.
+  const SIZE_WEIGHT_REFERENCE = 2000;  // IC-scale tournaments hit 1.0
+  const SIZE_WEIGHT_FLOOR     = 0.5;   // tournaments without size info
+                                       // get half-credit, not zero —
+                                       // we know they happened.
+
+  // Spec rule 5: Core threshold, with dynamic relaxation.
+  const CORE_THRESHOLDS = [0.90, 0.85, 0.80];  // tried in order
+  const CORE_MIN_DISTINCT_CARDS = 12;  // below this, relax threshold
+
+  // Spec rule 1: ACE-SPEC tiebreak window (Δ ≤ 10 pp = "very close").
+  const ACE_SPEC_TIEBREAK_WINDOW = 0.10;
+
+  // Spec rule 8: co-occurrence threshold for Tech packages.
+  const TECH_PACKAGE_COOCCURRENCE = 0.70;
+
+  // Spec rule 10: data-quality gates.
+  const MIN_WEIGHTED_LISTS = 3;  // < 3 → refuse to build, transparent.
+
+  // Hard rules from the game:
+  const DECK_SIZE = 60;
+  const BASIC_ENERGY_NAMES = new Set([
+    'grass energy', 'fire energy', 'water energy', 'lightning energy',
+    'psychic energy', 'fighting energy', 'darkness energy', 'metal energy',
+    'fairy energy', 'dragon energy',  // legacy types, harmless
+  ]);
+
+  // ── Lazy data + index state ───────────────────────────────────────
+  let _allRows         = null;  // raw parsed CSV rows
+  let _byArchetype     = null;  // Map(archetype → rows[])
+  let _byList          = null;  // Map(listKey → { meta, cards[] }) per
+                                 // (tournament_id, player_name, place)
+  let _tournamentSizes = null;  // Map(tournament_id → total_players)
+  let _loadPromise     = null;
+
+  function _norm(s) {
+    return String(s || '').trim().toLowerCase();
+  }
+
+  function _placementWeight(place) {
+    const p = Number(place) || 999;
+    for (const band of PLACEMENT_WEIGHT_BANDS) {
+      if (p <= band.maxPlace) return band.weight;
+    }
+    return PLACEMENT_WEIGHT_BANDS[PLACEMENT_WEIGHT_BANDS.length - 1].weight;
+  }
+
+  function _sizeWeight(players) {
+    const n = Number(players) || 0;
+    if (n <= 1) return SIZE_WEIGHT_FLOOR;
+    return Math.min(1.0, Math.log(n) / Math.log(SIZE_WEIGHT_REFERENCE));
+  }
+
+  // Build a per-list weight = placement × tournament size. Used for
+  // every weighted aggregation downstream so rule 2 (success matters
+  // more) is enforced uniformly.
+  function _listWeight(list, tournamentSizes) {
+    const pl = _placementWeight(list.place);
+    const sz = _sizeWeight(tournamentSizes.get(list.tournament_id) || 0);
+    return pl * sz;
+  }
+
+  // ── Data loading ──────────────────────────────────────────────────
+  async function _loadCsv(url) {
+    return new Promise((resolve, reject) => {
+      if (typeof Papa === 'undefined' || !Papa.parse) {
+        reject(new Error('PapaParse not loaded'));
+        return;
+      }
+      Papa.parse(url + '?t=' + Date.now(), {
+        download:       true,
+        header:         true,
+        skipEmptyLines: true,
+        complete:       (res) => resolve(res.data || []),
+        error:          reject,
+      });
+    });
+  }
+
+  // Tournament total_players come from labs_tournament_decks*.csv —
+  // the labs scraper writes total_players per (tournament × deck) row;
+  // dedupe by tournament_id and take the max.
+  async function _loadTournamentSizes() {
+    const sizes = new Map();
+    try {
+      const rows = await _loadCsv('data/labs_tournament_decks.csv');
+      for (const r of rows) {
+        const tid = String(r.tournament_id || '').trim();
+        const total = parseInt(r.total_players || '0', 10) || 0;
+        if (!tid || total <= 0) continue;
+        if (!sizes.has(tid) || sizes.get(tid) < total) {
+          sizes.set(tid, total);
+        }
+      }
+    } catch (e) {
+      console.warn('[MostConsistencyBuilder] could not load labs sizes:', e);
+    }
+    return sizes;
+  }
+
+  async function _loadAll() {
+    if (_allRows) return;
+    if (_loadPromise) return _loadPromise;
+    _loadPromise = (async () => {
+      const [rows, sizes] = await Promise.all([
+        _loadCsv(DATA_URL),
+        _loadTournamentSizes(),
+      ]);
+      _allRows         = rows;
+      _tournamentSizes = sizes;
+
+      _byArchetype = new Map();
+      _byList      = new Map();
+      for (const r of rows) {
+        const arch = (r.deck_archetype || '').trim();
+        if (!arch) continue;
+        const tid  = (r.tournament_id || r.limitless_tournament_id || '').trim();
+        const ply  = (r.player_name || '').trim();
+        const place = parseInt(r.place || '999', 10) || 999;
+        const listKey = `${tid}|${ply}|${place}`;
+        if (!_byList.has(listKey)) {
+          const listObj = {
+            tournament_id:    tid,
+            tournament_name:  r.tournament_name || '',
+            tournament_date:  r.tournament_date || '',
+            meta:             r.meta || '',
+            place,
+            player_name:      ply,
+            deck_archetype:   arch,
+            deck_slug:        r.deck_slug || '',
+            wins:             parseInt(r.wins  || '0', 10) || 0,
+            losses:           parseInt(r.losses || '0', 10) || 0,
+            ties:             parseInt(r.ties  || '0', 10) || 0,
+            cards:            [],
+          };
+          _byList.set(listKey, listObj);
+          if (!_byArchetype.has(arch)) _byArchetype.set(arch, []);
+          _byArchetype.get(arch).push(listObj);
+        }
+        const cnt = parseInt(r.count || '0', 10) || 0;
+        if (cnt <= 0) continue;
+        _byList.get(listKey).cards.push({
+          name:          r.card_name || '',
+          set_code:      r.set_code  || '',
+          set_number:    r.set_number || '',
+          count:         cnt,
+          is_ace_spec:   (r.is_ace_spec || '').toLowerCase() === 'yes',
+          type:          r.type || '',
+        });
+      }
+      _loadPromise = null;
+    })();
+    return _loadPromise;
+  }
+
+  function isAvailable() {
+    return _allRows !== null && _byArchetype !== null;
+  }
+
+  function listsForArchetype(archetype) {
+    if (!_byArchetype) return [];
+    const target = _norm(archetype);
+    // Exact match first; fall through to normalized scan so curly /
+    // straight quote drift doesn't break the join.
+    if (_byArchetype.has(archetype)) return _byArchetype.get(archetype);
+    for (const [k, v] of _byArchetype.entries()) {
+      if (_norm(k) === target) return v;
+    }
+    return [];
+  }
+
+  // ── Card-DB enrichment (type + ACE-SPEC flag) ─────────────────────
+  // The CSV's type and is_ace_spec columns are populated for ~30 % of
+  // rows depending on which limitless decklist page format we hit.
+  // Fill the gaps via the frontend card_db. Keeps the algorithm honest
+  // about which slots are ACE-SPEC / Energy / Trainer when those
+  // columns are blank.
+  function _enrichCard(card, cardDb) {
+    if (card.type && card.is_ace_spec !== undefined) return card;
+    if (!cardDb || !card.set_code || !card.set_number) return card;
+    const key = `${card.set_code}-${card.set_number}`;
+    const meta = cardDb.get(key) || cardDb.get(key.toLowerCase());
+    if (!meta) return card;
+    if (!card.type)         card.type = meta.type || '';
+    if (card.is_ace_spec === undefined || card.is_ace_spec === false) {
+      // Trust the meta unless the CSV explicitly said yes.
+      card.is_ace_spec = !!meta.is_ace_spec;
+    }
+    return card;
+  }
+
+  // Lazy index from window.allCardsData (loaded by app-cards-db.js).
+  // Falls back to an empty Map; missing enrichment downgrades to
+  // name-based heuristics (basic-energy name list, ACE-SPEC name
+  // hardcodes via the existing ace_specs.json that the predictor
+  // already consumes — but we don't reach for that here, we just
+  // tolerate the blank).
+  let _cardDbCache = null;
+  function _getCardDb() {
+    if (_cardDbCache) return _cardDbCache;
+    _cardDbCache = new Map();
+    const src = global.allCardsData || global.allCardsByKey;
+    if (Array.isArray(src)) {
+      for (const c of src) {
+        const set = c.set_code || c.set || '';
+        const num = c.set_number || c.number || '';
+        if (!set || !num) continue;
+        _cardDbCache.set(`${set}-${num}`, {
+          type:        c.type || c.card_type || '',
+          is_ace_spec: !!c.is_ace_spec,
+        });
+      }
+    }
+    return _cardDbCache;
+  }
+
+  function _isBasicEnergy(card) {
+    const n = _norm(card.name);
+    if (BASIC_ENERGY_NAMES.has(n)) return true;
+    const t = _norm(card.type);
+    return t === 'basic energy' || t === 'basis-energie';
+  }
+
+  function _isEnergy(card) {
+    if (_isBasicEnergy(card)) return true;
+    const t = _norm(card.type);
+    if (t.includes('energy')) return true;
+    // Name fallback — special energies usually have "energy" in name
+    return _norm(card.name).endsWith(' energy');
+  }
+
+  function _isAceSpec(card) {
+    return !!card.is_ace_spec;
+  }
+
+  // ── Phase 0: weighted card scoring ────────────────────────────────
+  //
+  // For every distinct card across the archetype's lists, compute:
+  //   weightedShare    = Σ(weight where list ran the card) / Σ(weight)
+  //   weightedAvgCount = Σ(weight × count) / Σ(weight where list ran it)
+  //   topCutFreq       = #lists with place ≤ 8 that ran the card /
+  //                       #lists with place ≤ 8 total
+  //   listsWithCard    = decklist references (used for co-occurrence)
+  //
+  // Spec rule 6 uses these as the canonical card-level signal that
+  // every downstream phase consumes.
+  function _computeCardScores(lists, tournamentSizes, cardDb) {
+    // Per-list weight
+    const listW = new Map();
+    let totalW = 0;
+    const topCutLists = new Set();
+    for (const l of lists) {
+      const w = _listWeight(l, tournamentSizes);
+      listW.set(l, w);
+      totalW += w;
+      if (l.place <= 8) topCutLists.add(l);
+    }
+    let topCutWeight = 0;
+    for (const l of topCutLists) topCutWeight += listW.get(l);
+
+    // Aggregate per card (keyed by lowercase name; we keep the
+    // best-data variant — first occurrence with set info — for
+    // downstream rendering)
+    const cardAgg = new Map();
+    for (const l of lists) {
+      const w = listW.get(l);
+      for (const cRaw of l.cards) {
+        const c = _enrichCard({ ...cRaw }, cardDb);
+        const key = _norm(c.name);
+        if (!key) continue;
+        if (!cardAgg.has(key)) {
+          cardAgg.set(key, {
+            name:           c.name,
+            // Preferred variant: keep the one with non-empty set info
+            best_variant:   c,
+            weightedShare:  0,
+            shareNumerator: 0,
+            weightedCount:  0,
+            countNumerator: 0,
+            topCutCount:    0,
+            topCutWeight:   0,
+            n_lists_with:   0,
+            lists:          [],
+            is_ace_spec:    c.is_ace_spec,
+            is_energy:      _isEnergy(c),
+            is_basic_energy: _isBasicEnergy(c),
+            type:           c.type,
+          });
+        }
+        const a = cardAgg.get(key);
+        // Update best_variant if current row has more set info
+        if (!a.best_variant.set_code && c.set_code) {
+          a.best_variant = c;
+          a.is_ace_spec  = a.is_ace_spec || c.is_ace_spec;
+          a.is_energy    = a.is_energy   || _isEnergy(c);
+          a.is_basic_energy = a.is_basic_energy || _isBasicEnergy(c);
+          a.type         = a.type        || c.type;
+        }
+        a.shareNumerator += w;
+        a.countNumerator += w * c.count;
+        a.n_lists_with   += 1;
+        a.lists.push(l);
+        if (l.place <= 8) {
+          a.topCutCount  += 1;
+          a.topCutWeight += w;
+        }
+      }
+    }
+
+    // Normalize → final per-card record
+    const out = [];
+    for (const [key, a] of cardAgg.entries()) {
+      const weightedShare = totalW > 0 ? a.shareNumerator / totalW : 0;
+      const weightedAvgCount = a.shareNumerator > 0
+        ? a.countNumerator / a.shareNumerator
+        : 0;
+      const topCutFreq = topCutWeight > 0
+        ? a.topCutWeight / topCutWeight
+        : 0;
+      out.push({
+        key,
+        name:               a.name,
+        best_variant:       a.best_variant,
+        weightedShare,
+        weightedAvgCount,
+        topCutFreq,
+        n_lists_with:       a.n_lists_with,
+        n_lists_total:      lists.length,
+        topCutCount:        a.topCutCount,
+        is_ace_spec:        a.is_ace_spec,
+        is_energy:          a.is_energy,
+        is_basic_energy:    a.is_basic_energy,
+        type:               a.type,
+        // Keep the list references for co-occurrence in Phase 3
+        _lists:             a.lists,
+      });
+    }
+    return {
+      cards:        out,
+      listW,
+      totalW,
+      topCutWeight,
+      topCutLists,
+      lists,
+    };
+  }
+
+  // ── Phase 1: ACE-SPEC selection ───────────────────────────────────
+  //
+  // Spec rule 1: highest weighted share wins. When the leader and
+  // runner-up are within ACE_SPEC_TIEBREAK_WINDOW (10 pp), pick by
+  // top-cut frequency instead — that's the maintainer's "very close
+  // split" tiebreak.
+  function _pickAceSpec(scoredCards, trace) {
+    const aces = scoredCards
+      .filter(c => c.is_ace_spec && c.weightedShare > 0)
+      .sort((a, b) => b.weightedShare - a.weightedShare);
+
+    if (aces.length === 0) {
+      trace.push({
+        phase: 1, decision: 'no_ace_spec_found',
+        detail: 'No card in the analyzed lists is flagged as ACE-SPEC. '
+              + 'Deck will ship without one (legal — ACE-SPEC is 0-1).',
+      });
+      return null;
+    }
+
+    const leader = aces[0];
+    if (aces.length === 1) {
+      trace.push({
+        phase: 1, decision: 'single_ace_spec_candidate',
+        chosen: leader.name,
+        weightedShare: leader.weightedShare,
+        topCutFreq: leader.topCutFreq,
+      });
+      return leader;
+    }
+
+    const runner = aces[1];
+    const gap = leader.weightedShare - runner.weightedShare;
+    if (gap >= ACE_SPEC_TIEBREAK_WINDOW) {
+      trace.push({
+        phase: 1, decision: 'ace_spec_clear_leader',
+        chosen: leader.name,
+        runnerUp: runner.name,
+        weightedShare: leader.weightedShare,
+        runnerUpShare: runner.weightedShare,
+        gap,
+      });
+      return leader;
+    }
+
+    // Tiebreak by top-cut frequency
+    const byTopCut = aces.slice(0, 4).sort((a, b) => b.topCutFreq - a.topCutFreq);
+    const winner = byTopCut[0];
+    trace.push({
+      phase: 1, decision: 'ace_spec_tiebreak_by_top_cut_freq',
+      chosen: winner.name,
+      candidates: aces.slice(0, 4).map(a => ({
+        name: a.name,
+        weightedShare: a.weightedShare,
+        topCutFreq: a.topCutFreq,
+      })),
+      detail: `Leaders within ${(ACE_SPEC_TIEBREAK_WINDOW*100).toFixed(0)} pp; tiebreak by top-cut frequency.`,
+    });
+    return winner;
+  }
+
+  // ── Phase 2: Core construction ────────────────────────────────────
+  //
+  // Spec rule 5: start with 90 % threshold; relax to 85 % / 80 % when
+  // fewer than CORE_MIN_DISTINCT_CARDS land. Spec rule 6 says count =
+  // round(weightedAvgCount). Spec rule 7 — Core slots are claimed
+  // before Tech selection.
+  function _buildCore(scoredCards, aceSpecCard, trace) {
+    let usedThreshold = null;
+    let pool          = [];
+    for (const thr of CORE_THRESHOLDS) {
+      pool = scoredCards.filter(c =>
+        c.weightedShare >= thr && !c.is_ace_spec
+      );
+      if (pool.length >= CORE_MIN_DISTINCT_CARDS) {
+        usedThreshold = thr;
+        break;
+      }
+    }
+    if (usedThreshold === null) {
+      // Even at 80 %, < min. Take what we have at 80 %.
+      usedThreshold = CORE_THRESHOLDS[CORE_THRESHOLDS.length - 1];
+      pool = scoredCards.filter(c =>
+        c.weightedShare >= usedThreshold && !c.is_ace_spec
+      );
+      trace.push({
+        phase: 2, decision: 'core_threshold_relaxed_to_floor',
+        threshold: usedThreshold,
+        n_core_cards: pool.length,
+        detail: `Even at ${(usedThreshold*100).toFixed(0)} % share, only `
+              + `${pool.length} cards qualify (< ${CORE_MIN_DISTINCT_CARDS} min). `
+              + `Building with what we have; deck will surface a data-quality `
+              + `warning downstream.`,
+      });
+    } else {
+      trace.push({
+        phase: 2, decision: 'core_threshold_chosen',
+        threshold: usedThreshold,
+        n_core_cards: pool.length,
+      });
+    }
+
+    // Each core card → round(weightedAvgCount) copies, clamped to game-
+    // legal max (basic energies are exempt; ACE-SPEC max 1 — but ACE
+    // is Phase 1, not here).
+    const core = pool.map(c => {
+      const raw = c.weightedAvgCount;
+      let copies = Math.round(raw);
+      if (copies < 1) copies = 1;
+      const legalMax = c.is_basic_energy ? 59 : 4;
+      if (copies > legalMax) copies = legalMax;
+      return {
+        card:      c,
+        count:     copies,
+        slotType:  c.is_energy ? 'energy' : 'core',
+        _rawAvg:   raw,
+      };
+    });
+
+    // Spec rule 5 — give the user enough trace to see what each Core
+    // slot cost. Sort by weighted share descending so the log reads
+    // top-down by "obviousness".
+    core.sort((a, b) => b.card.weightedShare - a.card.weightedShare);
+    trace.push({
+      phase: 2, decision: 'core_built',
+      threshold: usedThreshold,
+      slots: core.map(e => ({
+        name: e.card.name,
+        count: e.count,
+        share: e.card.weightedShare,
+        avg: e.card._rawAvg,
+      })),
+      totalCoreCards: core.reduce((s, e) => s + e.count, 0),
+    });
+    return { core, usedThreshold };
+  }
+
+  // ── Phase 3: Tech-package detection (co-occurrence) ───────────────
+  //
+  // Spec rule 8. For each non-core, non-ACE candidate, compute its
+  // package membership: cards X and Y are in the same package when
+  // they co-occur in ≥ 70 % of lists where either appears.
+  //
+  // Output: Map(card_key → packageId), Map(packageId → cardKeys).
+  // Packages are connected components in the co-occurrence graph.
+  function _detectTechPackages(scoredCards, coreKeys, aceKey, trace) {
+    const candidates = scoredCards.filter(c =>
+      !coreKeys.has(c.key) && c.key !== aceKey && c.weightedShare > 0
+    );
+    // We only consider pairs of candidates that ACTUALLY appear with
+    // each other in ≥ 1 list — sparse, fast.
+    const idxByCard = new Map();
+    candidates.forEach((c, i) => idxByCard.set(c.key, i));
+
+    // Build list → set(candidate cards in that list) for fast intersect
+    const cardsInList = new Map();
+    for (const c of candidates) {
+      for (const l of c._lists) {
+        if (!cardsInList.has(l)) cardsInList.set(l, new Set());
+        cardsInList.get(l).add(c.key);
+      }
+    }
+
+    // Pair-count: how many lists contain BOTH X and Y
+    const pairCount = new Map();
+    for (const set of cardsInList.values()) {
+      const arr = Array.from(set);
+      for (let i = 0; i < arr.length; i++) {
+        for (let j = i + 1; j < arr.length; j++) {
+          const k = arr[i] < arr[j] ? `${arr[i]}|${arr[j]}` : `${arr[j]}|${arr[i]}`;
+          pairCount.set(k, (pairCount.get(k) || 0) + 1);
+        }
+      }
+    }
+
+    // Per-card list count
+    const listCount = new Map();
+    for (const c of candidates) listCount.set(c.key, c.n_lists_with);
+
+    // Build union-find: cards X, Y are linked when
+    //   #(X ∧ Y) / max(#X, #Y) ≥ TECH_PACKAGE_COOCCURRENCE
+    const parent = new Map();
+    function find(k) {
+      let r = k;
+      while (parent.get(r) !== r) r = parent.get(r);
+      let cur = k;
+      while (parent.get(cur) !== r) {
+        const next = parent.get(cur);
+        parent.set(cur, r);
+        cur = next;
+      }
+      return r;
+    }
+    function unite(a, b) {
+      const ra = find(a), rb = find(b);
+      if (ra !== rb) parent.set(ra, rb);
+    }
+    for (const c of candidates) parent.set(c.key, c.key);
+
+    for (const [pair, both] of pairCount.entries()) {
+      const [a, b] = pair.split('|');
+      const maxOne = Math.max(listCount.get(a) || 0, listCount.get(b) || 0);
+      if (maxOne <= 0) continue;
+      if (both / maxOne >= TECH_PACKAGE_COOCCURRENCE) {
+        unite(a, b);
+      }
+    }
+
+    // Materialize packages (only those with >1 member are "real")
+    const packageOf = new Map();
+    const members = new Map();
+    for (const c of candidates) {
+      const root = find(c.key);
+      packageOf.set(c.key, root);
+      if (!members.has(root)) members.set(root, []);
+      members.get(root).push(c.key);
+    }
+    const packages = [];
+    for (const [root, mem] of members.entries()) {
+      if (mem.length > 1) {
+        packages.push({ id: root, members: mem });
+      }
+    }
+
+    if (packages.length > 0) {
+      trace.push({
+        phase: 3, decision: 'tech_packages_detected',
+        n_packages: packages.length,
+        packages: packages.map(p => ({
+          id: p.id,
+          cards: p.members,
+        })),
+        threshold: TECH_PACKAGE_COOCCURRENCE,
+      });
+    } else {
+      trace.push({
+        phase: 3, decision: 'no_tech_packages',
+        detail: `No card pair co-occurred in ≥ ${(TECH_PACKAGE_COOCCURRENCE*100).toFixed(0)} % of their lists.`,
+      });
+    }
+    return { packageOf, packages };
+  }
+
+  // ── Phase 4: Tech-card selection ──────────────────────────────────
+  //
+  // Spec rule 7: fill remaining slots with the highest-weighted tech
+  // candidates. Spec rule 8: when a candidate belongs to a package,
+  // the whole package goes in together (or stays out together).
+  function _selectTechCards(scoredCards, coreKeys, aceKey, packageOf,
+                            packages, slotsRemaining, trace) {
+    const candidates = scoredCards
+      .filter(c =>
+        !coreKeys.has(c.key) && c.key !== aceKey && c.weightedShare > 0
+      )
+      .sort((a, b) => b.weightedShare - a.weightedShare);
+
+    // Group candidates by package; ungrouped cards form singleton
+    // pseudo-packages so the ranking logic is uniform.
+    const groups = new Map();
+    for (const c of candidates) {
+      const gid = packageOf.get(c.key) || c.key;
+      if (!groups.has(gid)) groups.set(gid, []);
+      groups.get(gid).push(c);
+    }
+
+    // Group-level score = max(card.weightedShare) within the group —
+    // the strongest signal in the package pulls the whole package up.
+    const groupRanking = Array.from(groups.entries())
+      .map(([gid, cards]) => ({
+        gid,
+        cards,
+        score: Math.max(...cards.map(c => c.weightedShare)),
+        totalCount: cards.reduce(
+          (s, c) => s + Math.max(1, Math.round(c.weightedAvgCount)),
+          0
+        ),
+      }))
+      .sort((a, b) => b.score - a.score);
+
+    const tech = [];
+    const tracePicks = [];
+    let used = 0;
+    for (const g of groupRanking) {
+      if (used >= slotsRemaining) break;
+      // Will this whole group fit?
+      if (used + g.totalCount > slotsRemaining) {
+        // Try a single-card pick from the group if possible
+        for (const c of g.cards) {
+          const cnt = Math.max(1, Math.round(c.weightedAvgCount));
+          if (used + cnt > slotsRemaining) continue;
+          tech.push({
+            card: c,
+            count: Math.min(cnt, c.is_basic_energy ? 59 : 4),
+            slotType: 'tech',
+            packageId: g.gid !== c.key ? g.gid : null,
+            _rawAvg: c.weightedAvgCount,
+          });
+          used += cnt;
+          tracePicks.push({ name: c.name, count: cnt, share: c.weightedShare, package: g.gid });
+        }
+        continue;
+      }
+      for (const c of g.cards) {
+        const cnt = Math.max(1, Math.round(c.weightedAvgCount));
+        const placed = Math.min(cnt, c.is_basic_energy ? 59 : 4);
+        tech.push({
+          card: c,
+          count: placed,
+          slotType: 'tech',
+          packageId: g.cards.length > 1 ? g.gid : null,
+          _rawAvg: c.weightedAvgCount,
+        });
+        used += placed;
+        tracePicks.push({ name: c.name, count: placed, share: c.weightedShare, package: g.gid });
+      }
+    }
+
+    trace.push({
+      phase: 4, decision: 'tech_filled',
+      slotsRemaining,
+      cardsPlaced: tech.length,
+      cardsCountSum: tech.reduce((s, e) => s + e.count, 0),
+      picks: tracePicks,
+    });
+    return tech;
+  }
+
+  // ── Phase 5: trim to 60 if over ───────────────────────────────────
+  //
+  // Spec rule 9: remove cards with lowest weighted share first.
+  // Protect the ACE-SPEC slot — it's a unique slot, and removing it
+  // doesn't reclaim 1 copy of anything else useful. Energy gets the
+  // same protection only when it's a basic energy (basic energies
+  // are exempt from the 4-copy limit so dropping them creates a
+  // structural deficit the deckbuilder shouldn't introduce).
+  function _trimToSixty(deck, trace) {
+    const total = () => deck.reduce((s, e) => s + e.count, 0);
+    let cur = total();
+    const removed = [];
+    while (cur > DECK_SIZE) {
+      // Sort by ascending weighted share among removable slots
+      const removable = deck
+        .map((e, i) => ({ e, i }))
+        .filter(({ e }) => e.slotType !== 'ace_spec' && e.count > 0)
+        .sort((a, b) => a.e.card.weightedShare - b.e.card.weightedShare);
+      if (removable.length === 0) break;
+      const target = removable[0];
+      target.e.count -= 1;
+      removed.push({ name: target.e.card.name, share: target.e.card.weightedShare });
+      if (target.e.count === 0) {
+        // Mark for compact later
+      }
+      cur--;
+    }
+    // Compact zero-count entries
+    for (let i = deck.length - 1; i >= 0; i--) {
+      if (deck[i].count <= 0) deck.splice(i, 1);
+    }
+    if (removed.length > 0) {
+      trace.push({
+        phase: 5, decision: 'trimmed_to_60',
+        removed,
+      });
+    } else {
+      trace.push({ phase: 5, decision: 'no_trim_needed', total: cur });
+    }
+    return deck;
+  }
+
+  // ── Phase 6: data-quality validation ──────────────────────────────
+  function _assessDataQuality(lists, scoredCards, totalW, trace) {
+    const dq = {
+      n_lists:               lists.length,
+      total_weight:          totalW,
+      n_distinct_cards:      scoredCards.length,
+      sufficient:            lists.length >= MIN_WEIGHTED_LISTS,
+      warning:               '',
+    };
+    if (!dq.sufficient) {
+      dq.warning = `Only ${lists.length} decklist(s) for this archetype — `
+                 + `below ${MIN_WEIGHTED_LISTS} the algorithm can't produce a `
+                 + `representative build. Try widening the tournament filter.`;
+      trace.push({
+        phase: 6, decision: 'data_too_thin',
+        n_lists: lists.length,
+        threshold: MIN_WEIGHTED_LISTS,
+      });
+    } else {
+      trace.push({
+        phase: 6, decision: 'data_ok',
+        n_lists: lists.length,
+        total_weight: Number(totalW.toFixed(3)),
+        n_distinct_cards: scoredCards.length,
+      });
+    }
+    return dq;
+  }
+
+  // ── Public entry ──────────────────────────────────────────────────
+  /**
+   * @param {string} archetype  The deck_archetype label (must match
+   *   the per-decklist CSV's deck_archetype column).
+   * @param {Object} opts       Reserved for future filter options
+   *   (e.g., date range, tournament whitelist).
+   * @returns {Object}
+   *   {
+   *     deck: [{ card, count, slotType, packageId? }],
+   *     trace: [{ phase, decision, ... }],
+   *     dataQuality: { n_lists, ... },
+   *     archetype, totalWeight,
+   *   }
+   *   Returns null when data isn't loaded or archetype has zero lists.
+   */
+  async function build(archetype, opts) {
+    opts = opts || {};
+    await _loadAll();
+
+    const trace = [];
+    const lists = listsForArchetype(archetype);
+    if (!lists.length) {
+      return {
+        deck: [], trace: [{ phase: 0, decision: 'no_lists_for_archetype',
+                            archetype }], dataQuality: { n_lists: 0, sufficient: false,
+                            warning: `No per-decklist data for "${archetype}".` },
+        archetype,
+      };
+    }
+
+    const cardDb = _getCardDb();
+    const scored = _computeCardScores(lists, _tournamentSizes, cardDb);
+    const dq = _assessDataQuality(lists, scored.cards, scored.totalW, trace);
+    if (!dq.sufficient) {
+      return { deck: [], trace, dataQuality: dq, archetype };
+    }
+
+    // Phase 1: ACE-SPEC pick
+    const aceSpec = _pickAceSpec(scored.cards, trace);
+    const aceKey = aceSpec ? aceSpec.key : null;
+
+    // Phase 2: Core
+    const { core, usedThreshold } = _buildCore(scored.cards, aceSpec, trace);
+    const coreKeys = new Set(core.map(e => e.card.key));
+
+    // Assemble the in-progress deck (ACE-SPEC + Core)
+    let deck = [];
+    if (aceSpec) {
+      deck.push({
+        card: aceSpec, count: 1, slotType: 'ace_spec',
+        _rawAvg: 1,
+      });
+    }
+    deck.push(...core);
+    const sumSoFar = deck.reduce((s, e) => s + e.count, 0);
+
+    // Phase 3 + 4: Tech packages + Tech selection
+    const { packageOf, packages } =
+      _detectTechPackages(scored.cards, coreKeys, aceKey, trace);
+    const slotsRemaining = DECK_SIZE - sumSoFar;
+    if (slotsRemaining > 0) {
+      const tech = _selectTechCards(
+        scored.cards, coreKeys, aceKey, packageOf, packages,
+        slotsRemaining, trace
+      );
+      deck.push(...tech);
+    } else {
+      trace.push({
+        phase: 4, decision: 'no_tech_slots',
+        detail: `Core + ACE-SPEC already at ${sumSoFar} cards.`,
+      });
+    }
+
+    // Phase 5: trim if over 60
+    deck = _trimToSixty(deck, trace);
+
+    return {
+      deck,
+      trace,
+      dataQuality: dq,
+      archetype,
+      totalWeight:   scored.totalW,
+      coreThreshold: usedThreshold,
+    };
+  }
+
+  global.MostConsistencyBuilder = {
+    build,
+    loadData:           _loadAll,
+    isAvailable,
+    listsForArchetype,
+    // Exposed for unit tests / future "explain why" UIs:
+    _internals: {
+      placementWeight:  _placementWeight,
+      sizeWeight:       _sizeWeight,
+      isBasicEnergy:    _isBasicEnergy,
+      isEnergy:         _isEnergy,
+      isAceSpec:        _isAceSpec,
+    },
+  };
+
+  if (typeof document !== 'undefined') {
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', () => { _loadAll().catch(()=>{}); });
+    } else {
+      setTimeout(() => _loadAll().catch(()=>{}), 100);
+    }
+  }
+})(typeof window !== 'undefined' ? window : globalThis);

@@ -1691,7 +1691,27 @@
                 return;
             }
 
-            // Pick the best list: lowest placement first, then win-rate.
+            // "Most successful" in a moving meta means: best placement
+            // at the LATEST relevant tournament — a #1 from the oldest
+            // event in the format shouldn't outrank a #2 from the most
+            // recent one. So when the user hasn't pinned a specific
+            // tournament, we narrow to the most recent date in the
+            // filtered set first, then rank by placement within it.
+            //
+            // Tiebreak: weighted win-rate (wins + 0.5·ties)/games.
+            //
+            // tournament_date is ISO yyyy-mm-dd in the per-decklist
+            // CSV, so a plain string compare gives correct ordering.
+            if (!tournamentId || tournamentId === 'all') {
+                const latestDate = lists.reduce((acc, l) => {
+                    const d = (l.tournament_date || '');
+                    return d > acc ? d : acc;
+                }, '');
+                if (latestDate) {
+                    lists = lists.filter(l => (l.tournament_date || '') === latestDate);
+                }
+            }
+
             lists.sort((a, b) => {
                 const pA = a.place || 99999, pB = b.place || 99999;
                 if (pA !== pB) return pA - pB;

@@ -224,9 +224,24 @@
     const cells = sorted.map(c => {
       const set = String(c.set_code || '').trim().toUpperCase();
       const num = String(c.set_number || '').trim();
-      const img = (set && num)
-        ? `https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/${set}/${set}_${num}_R_EN_LG.png`
-        : '';
+      // Prefer the site's unified image resolver — it (1) checks the
+      // canonical all_cards_database for the real CDN URL, (2) falls
+      // back to PokemonProxies for M-series JP sets, (3) zero-pads
+      // the number for the limitless CDN pattern, (4) handles JP
+      // fallback URLs. Hardcoding `${set}_${num}_R_EN_LG.png` (no
+      // padding, no rarity variants) misses ~40 % of cards across
+      // a typical deck — that was the missing-images report from
+      // 2026-06-09.
+      let img = '';
+      if (set && num) {
+        if (typeof global.getUnifiedCardImage === 'function') {
+          try { img = global.getUnifiedCardImage(set, num) || ''; } catch (_) { img = ''; }
+        }
+        if (!img) {
+          const padded = /^\d+$/.test(num) ? num.padStart(3, '0') : num;
+          img = `https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/${set}/${set}_${padded}_R_EN_LG.png`;
+        }
+      }
       return `
         <div class="past-meta-best-card" title="${_escHtml(c.name)} (${c.count}x)">
           ${img ? `<img src="${img}" alt="${_escHtml(c.name)}" loading="lazy" onerror="this.style.display='none'">` : `<span style="display:flex;align-items:center;justify-content:center;height:100%;font-size:0.7rem;color:#6b7280;text-align:center;padding:4px;">${_escHtml(c.name)}</span>`}
@@ -295,13 +310,21 @@
     const cardsLbl  = _tt('cm.quickRefCards', 'cards');
     if (kind === 'major') {
       const placeStr = (ref.place && ref.place < 9999) ? `#${ref.place}` : '—';
-      const wpStr = (_winRate(ref) * 100).toFixed(1).replace('.', ',') + '%';
+      // Suppress the record block when wins/losses/ties are all 0 —
+      // that signals the per-decklist scraper couldn't extract the
+      // W-L column (currently breaks on Special-Event standings
+      // tables). 0-0-0 / 0,0% reads as "this player went 0-0-0" which
+      // is misleading; better to show nothing than wrong data.
+      const games = (ref.wins || 0) + (ref.losses || 0) + (ref.ties || 0);
+      const recordBlock = games > 0
+        ? `<span class="past-meta-best-record">${ref.wins || 0}-${ref.losses || 0}-${ref.ties || 0} · ${(_winRate(ref) * 100).toFixed(1).replace('.', ',')}%</span>`
+        : '';
       return `
         <div class="past-meta-best-header" style="background: linear-gradient(135deg, #fff9f0 0%, #fff3e0 100%);">
           <div class="past-meta-best-headline">
             <span class="past-meta-best-place">${_escHtml(placeStr)}</span>
             <span class="past-meta-best-name">${_escHtml(ref.player_name || '')}</span>
-            <span class="past-meta-best-record">${ref.wins || 0}-${ref.losses || 0}-${ref.ties || 0} · ${wpStr}</span>
+            ${recordBlock}
           </div>
           <div class="past-meta-best-sub">${_escHtml(tournName)} · ${_escHtml(ref.tournament_date)} · ${total} ${_escHtml(cardsLbl)}</div>
         </div>`;

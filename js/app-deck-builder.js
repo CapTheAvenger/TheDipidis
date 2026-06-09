@@ -6818,6 +6818,113 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 console.warn(`[MostConsistencyBuilder] apply gap: tried ${totalApplied}, deck has ${liveTotal} — some addCardToDeckBatch calls silently failed (over-cap or set-code mismatch).`);
             }
 
+            // Populate window.lastConsistencyBuild so the existing "Why?"
+            // modal (showConsistencyBuildInfo) can render the new
+            // builder's reasoning. Without this, the algo-hint bar's
+            // "Click Why? for per-card breakdown" would lead the user
+            // either to a "Run Max Consistency first" toast or to stale
+            // legacy-builder data — both bad. We map the new builder's
+            // output to the legacy report schema field-for-field so the
+            // modal's render code keeps working unchanged.
+            try {
+                const _aceTraceEntry = (result.trace || []).find(e => e.phase === 1);
+                const _coreEntry     = (result.trace || []).find(e => e.phase === 2 && e.decision === 'core_built');
+                const _techEntry     = (result.trace || []).find(e => e.phase === 4 && e.decision === 'tech_filled');
+                const _dqEntry       = (result.trace || []).find(e => e.phase === 6);
+
+                // Per-card report rows. The legacy modal expects
+                // share_percent (0-100), addCount, consistency_score.
+                // We synthesize consistency_score = round(share*100) so
+                // the modal's sort-by-score still produces a sensible
+                // ordering (highest-share cards float to the top).
+                const reportCards = (result.deck || []).map(entry => {
+                    const card  = entry.card || {};
+                    const share = Number(card.weightedShare || 0);
+                    return {
+                        card_name:        card.name || '',
+                        set_code:         (card.best_variant && card.best_variant.set_code) || '',
+                        set_number:       (card.best_variant && card.best_variant.set_number) || '',
+                        addCount:         entry.count || 0,
+                        share_percent:    +(share * 100).toFixed(1),
+                        weighted_share:   +(share * 100).toFixed(2),
+                        weighted_share_shift: 0,  // new builder is already success-weighted
+                        meta_share:       0,
+                        consistency_score: Math.round(share * 100),
+                        latest_major_anchored: false,
+                        latest_major_absent:   false,
+                        tech_counter_for:      [],
+                        card_function:         entry.slotType || '',
+                        card_function_tier:    entry.slotType === 'core' ? 'CORE'
+                                              : entry.slotType === 'ace_spec' ? 'CORE'
+                                              : entry.slotType === 'tech' ? 'TECH' : 'MID',
+                        _phase_y2:        true,
+                    };
+                });
+
+                // ACE-SPEC pick block — populated only when Phase 1
+                // actually picked one. The modal's renderer requires
+                // ace_spec_pick.candidates[] to render the explainer.
+                let acePick = null;
+                if (_aceTraceEntry && (_aceTraceEntry.chosen || (_aceTraceEntry.candidates && _aceTraceEntry.candidates.length > 0))) {
+                    const cands = Array.isArray(_aceTraceEntry.candidates)
+                        ? _aceTraceEntry.candidates
+                        : [{ name: _aceTraceEntry.chosen, weightedShare: _aceTraceEntry.weightedShare, topCutFreq: _aceTraceEntry.topCutFreq }];
+                    acePick = {
+                        chosen:              _aceTraceEntry.chosen || (cands[0] && cands[0].name) || '',
+                        has_major_anchor:    false,
+                        major_weight:        0,
+                        major_total_decks:   0,
+                        major_date:          '',
+                        major_age_days:      null,
+                        candidates: cands.map(c => ({
+                            card_name:        c.name || '',
+                            archetype_share:  Number(((c.weightedShare || 0) * 100).toFixed(1)),
+                            consistency_score: Math.round((c.weightedShare || 0) * 100),
+                            major_share:      null,
+                            major_deck_count: 0,
+                        })),
+                    };
+                }
+
+                // Quality audit — surface the data-quality summary as
+                // a single info row so the user sees how many decklists
+                // backed the build.
+                const auditFindings = [];
+                if (_dqEntry) {
+                    auditFindings.push({
+                        level:   _dqEntry.decision === 'data_too_thin' ? 'warn' : 'info',
+                        message: `Data quality: ${_dqEntry.n_lists || result.dataQuality.n_lists || 0} decklists analyzed`
+                               + (result.dataQuality.total_weight != null ? ` (weight ${Number(result.dataQuality.total_weight).toFixed(2)})` : ''),
+                        hint:    _coreEntry ? `Core threshold landed at ${(result.coreThreshold * 100).toFixed(0) }% — ${_coreEntry.slots ? _coreEntry.slots.length : 0} cards qualified as Core.` : '',
+                    });
+                }
+
+                window.lastConsistencyBuild = window.lastConsistencyBuild || {};
+                window.lastConsistencyBuild[source] = {
+                    source,
+                    archetype:    archetype || '',
+                    generated_at: new Date().toISOString(),
+                    deck_size:    liveTotal,
+                    algo_desc:    `MostConsistencyBuilder (Phase Y.2) — 6-phase per-decklist success-weighted build · Core @ ${(result.coreThreshold * 100).toFixed(0)}% · ${result.dataQuality.n_lists || 0} lists analyzed.`,
+                    layers: {
+                        meta_boost:       false,
+                        time_decay:       false,
+                        latest_major_anchor: false,
+                        tech_audit_active_categories: [],
+                        phase_y2:         true,
+                    },
+                    cards:        reportCards,
+                    ace_spec_pick: acePick,
+                    quality_audit: { findings: auditFindings },
+                    // Raw trace stashed for power-users / dev tools —
+                    // not rendered by the modal but invaluable in
+                    // console when debugging "why did THIS land?"
+                    _phase_y2_trace: result.trace || [],
+                };
+            } catch (err) {
+                console.warn('[MostConsistencyBuilder] failed to populate Why? report:', err);
+            }
+
             if (typeof showToast === 'function') {
                 showToast(
                     `✓ ${archetype}: ${liveTotal}/60 Karten · `

@@ -1,0 +1,121 @@
+name: Champions Replica Scrape
+
+# Daily refresh of the Pokémon Champions Side Quest tab.
+# Fetches the VGCPastes Google Sheet, parses the top-N team rows, and
+# for each one fetches the linked pokepast.es paste to materialize a
+# {mon, ability, item, EVs, nature, moves, tera} record. Writes
+# data/champions_replica_teams.json — the file the Side Quest tab in
+# js/app-side-quest.js consumes.
+#
+# Lightweight job (~25 s total: 1 sheet fetch + ~20 pokepaste fetches
+# with a 0.7 s delay). Runs daily because the sheet is hand-curated by
+# the VGCPastes community and new entries land throughout the week.
+#
+# Trigger: daily at 10:00 UTC OR GitHub UI → Actions →
+#          Champions Replica Scrape → Run workflow
+
+on:
+  schedule:
+    # 10:00 UTC = 11:00 CET winter / 12:00 CEST summer.
+    - cron: '0 10 * * *'
+  workflow_dispatch:
+    inputs:
+      top:
+        description: 'Number of top teams to include'
+        type: string
+        default: '20'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: champions-replica-scrape
+  cancel-in-progress: false
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      # The scraper writes to backend/core/data/ (legacy data_dir
+      # resolution in card_scraper_shared.get_data_dir). Pre-seed the
+      # previous snapshot so the fail-soft "0 teams → keep old JSON"
+      # path has something to fall back to.
+      - name: Seed backend/core/data/ from data/
+        run: |
+          mkdir -p backend/core/data
+          if [ -f data/champions_replica_teams.json ]; then
+            cp data/champions_replica_teams.json backend/core/data/champions_replica_teams.json
+          fi
+
+      - name: Run champions-replica scraper
+        env:
+          PYTHONPATH: ${{ github.workspace }}/backend/core
+        run: |
+          set +e
+          echo "::group::scrapers/champions_replica_scraper.py"
+          TOP="${{ github.event.inputs.top }}"
+          TOP="${TOP:-20}"
+          python backend/scrapers/champions_replica_scraper.py --top "$TOP"
+          rc=$?
+          echo "::endgroup::"
+          if [ "$rc" -ne 0 ]; then
+              echo "::warning::champions_replica_scraper exited with $rc"
+          fi
+          exit 0  # never block — scraper is fail-soft, JSON is kept
+
+      - name: Copy output back to data/
+        run: |
+          if [ -f backend/core/data/champions_replica_teams.json ]; then
+            cp backend/core/data/champions_replica_teams.json data/champions_replica_teams.json
+          fi
+
+      - name: Bump version
+        run: |
+          chmod +x bump-version.sh
+          ./bump-version.sh
+
+      - name: Commit + push
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name  "github-actions[bot]"
+          git add data/champions_replica_teams.json \
+                  index.html service-worker.js version.json
+          if git diff --cached --quiet; then
+            echo "No changes to champions_replica_teams.json — skipping push."
+            exit 0
+          fi
+          ts="$(date -u +'%Y-%m-%d %H:%M UTC')"
+          git commit -m "Auto: champions-replica scrape — ${ts}
+
+          Triggered by .github/workflows/champions-replica-scrape.yml
+          Run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+
+          # Push-with-retry — same pattern weekly-full-update uses, since
+          # this job overlaps the daily-price-refresh window on some
+          # days and origin/main can advance while we run.
+          for attempt in 1 2 3; do
+            if git push origin HEAD:main; then
+              echo "Push succeeded on attempt $attempt"
+              exit 0
+            fi
+            git pull --rebase=true -X ours origin main || { git rebase --abort; exit 1; }
+          done
+          exit 1

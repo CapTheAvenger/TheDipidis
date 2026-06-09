@@ -22,6 +22,14 @@ on:
         description: 'Limitless 3-digit tournament ID (blank = scrape all known via JH state)'
         type: string
         default: ''
+      from_date:
+        description: 'Backfill from this date forward (YYYY-MM-DD). Default 2026-04-01 = TEF-POR + TEF-CRI only. Pre-filters via overview CSV — no wasted page fetches.'
+        type: string
+        default: '2026-04-01'
+      meta:
+        description: 'Comma-separated meta codes (e.g. TEF-POR,TEF-CRI). Blank = no meta filter — date filter still applies.'
+        type: string
+        default: ''
       from_tournament_id:
         description: 'Backfill from this tournament ID upwards (blank = no floor)'
         type: string
@@ -50,7 +58,12 @@ concurrency:
 jobs:
   scrape:
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    # 6 hours — accommodates a worst-case full TEF-POR + TEF-CRI backfill
+    # (~12 tournaments × ~10 min each in degraded-network conditions). The
+    # default --from-date 2026-04-01 caps the work to ~12 tournaments;
+    # without that filter the 109-tournament historical set blew past
+    # 90 min on the 2026-06-09 first attempt.
+    timeout-minutes: 360
 
     steps:
       - name: Checkout repo
@@ -100,15 +113,29 @@ jobs:
           if [ -n "${{ github.event.inputs.tournament_id }}" ]; then
               ARGS="$ARGS --tournament-id ${{ github.event.inputs.tournament_id }}"
           fi
-          if [ -n "${{ github.event.inputs.from_tournament_id }}" ]; then
-              ARGS="$ARGS --from-tournament-id ${{ github.event.inputs.from_tournament_id }}"
+          # Schedule runs use the safe defaults (--from-date 2026-04-01) so
+          # the cron iteration doesn't pull in BST-PAR / SVI-PFL legacy
+          # tournaments. Manual runs honour whatever the maintainer typed.
+          if [ "${{ github.event_name }}" = "schedule" ]; then
+              ARGS="$ARGS --from-date 2026-04-01 --resume"
+          else
+              if [ -n "${{ github.event.inputs.from_date }}" ]; then
+                  ARGS="$ARGS --from-date ${{ github.event.inputs.from_date }}"
+              fi
+              if [ -n "${{ github.event.inputs.meta }}" ]; then
+                  ARGS="$ARGS --meta ${{ github.event.inputs.meta }}"
+              fi
+              if [ -n "${{ github.event.inputs.from_tournament_id }}" ]; then
+                  ARGS="$ARGS --from-tournament-id ${{ github.event.inputs.from_tournament_id }}"
+              fi
+              if [ "${{ github.event.inputs.resume }}" = "true" ]; then
+                  ARGS="$ARGS --resume"
+              fi
+              if [ -n "${{ github.event.inputs.max_tournaments }}" ] && [ "${{ github.event.inputs.max_tournaments }}" != "0" ]; then
+                  ARGS="$ARGS --max-tournaments ${{ github.event.inputs.max_tournaments }}"
+              fi
           fi
-          if [ "${{ github.event.inputs.resume }}" = "true" ] || [ "${{ github.event_name }}" = "schedule" ]; then
-              ARGS="$ARGS --resume"
-          fi
-          if [ -n "${{ github.event.inputs.max_tournaments }}" ] && [ "${{ github.event.inputs.max_tournaments }}" != "0" ]; then
-              ARGS="$ARGS --max-tournaments ${{ github.event.inputs.max_tournaments }}"
-          fi
+          echo "Running with args: $ARGS"
           python backend/scrapers/per_decklist_scraper.py $ARGS
           rc=$?
           echo "::endgroup::"

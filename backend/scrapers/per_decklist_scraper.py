@@ -276,6 +276,59 @@ def load_tournament_index_from_jh_state() -> List[Dict]:
     ]
 
 
+def load_tournament_metadata_lookup() -> Dict[str, Dict]:
+    """Build { limitless_tid: {date_iso, meta} } from
+    tournament_cards_data_overview.csv so we can pre-filter
+    tournaments by date / meta WITHOUT having to fetch each one's
+    page first. The overview file is written by the JH scraper —
+    every tournament the index walked is in there with its
+    canonicalised metadata.
+
+    Returns {} when the overview file is missing — caller treats
+    that as "no metadata, can't pre-filter, fetch all"."""
+    data_dir = get_data_dir()
+    path = os.path.join(data_dir, 'tournament_cards_data_overview.csv')
+    if not os.path.exists(path):
+        return {}
+    # English-ordinal date parser — same shape as the JH scraper helper
+    import re as _re
+    months = {'january':1,'february':2,'march':3,'april':4,'may':5,'june':6,
+              'july':7,'august':8,'september':9,'october':10,'november':11,'december':12}
+    def parse_eng_ord(s: str) -> str:
+        if not s:
+            return ''
+        m = _re.match(r'(\d{1,2})(?:st|nd|rd|th)?\s+(\w+)\s+(\d{4})', s.strip())
+        if not m:
+            return ''
+        mn = m.group(2).lower()
+        if mn not in months:
+            return ''
+        try:
+            d = datetime(int(m.group(3)), months[mn], int(m.group(1)))
+            return d.strftime('%Y-%m-%d')
+        except ValueError:
+            return ''
+    out: Dict[str, Dict] = {}
+    # The overview CSV uses ';' separator (JH legacy)
+    try:
+        with open(path, encoding='utf-8-sig') as f:
+            reader = csv.DictReader(f, delimiter=';')
+            for r in reader:
+                tid = (r.get('tournament_id') or '').strip()
+                if not tid:
+                    continue
+                out[tid] = {
+                    'date_iso': parse_eng_ord(r.get('tournament_date', '')),
+                    'meta':     (r.get('format') or '').strip(),
+                    'name':     (r.get('tournament_name') or '').strip(),
+                    'players':  (r.get('players') or '').strip(),
+                }
+    except Exception as e:
+        logger.warning("Could not parse overview CSV: %s", e)
+        return {}
+    return out
+
+
 def load_existing_output(out_path: str) -> set:
     """Return set of limitless tournament IDs already in the output.
     We key on the limitless ID (not labs) because that's what we
@@ -428,7 +481,15 @@ def main():
     ap.add_argument('--tournament-id', type=str,
                     help='Limitless 3-digit tournament ID (alternative to --tournament-url).')
     ap.add_argument('--from-tournament-id', type=int, default=0,
-                    help='Skip tournaments with ID below this threshold.')
+                    help='Skip tournaments with limitless ID below this threshold.')
+    ap.add_argument('--from-date', type=str, default='',
+                    help='Skip tournaments dated before YYYY-MM-DD. Read from '
+                         'tournament_cards_data_overview.csv — pre-filters BEFORE '
+                         'any network fetch. Use this for backfills (--from-date '
+                         '2026-04-01 limits to TEF-POR + TEF-CRI).')
+    ap.add_argument('--meta', type=str, default='',
+                    help='Comma-separated list of meta codes to scrape '
+                         '(e.g. TEF-POR,TEF-CRI). Pre-filters via overview CSV.')
     ap.add_argument('--resume', action='store_true',
                     help='Skip tournaments already in the output CSV.')
     ap.add_argument('--delay', type=float, default=DEFAULT_DELAY,
@@ -463,8 +524,57 @@ def main():
                          "or --tournament-id for a single-shot run.")
             return 1
 
+    # Apply pre-filters in order: --from-tournament-id, --from-date, --meta.
+    # Date + meta read tournament_cards_data_overview.csv so we DON'T have
+    # to fetch each tournament page just to discard it — the 109-tournament
+    # backfill on 2026-06-09 hit the 90-min timeout precisely because every
+    # tournament's standings page had to be fetched even when we wanted only
+    # ~11 of them. With --from-date the discard is free.
     if args.from_tournament_id:
+        before = len(work)
         work = [w for w in work if int(w['id']) >= args.from_tournament_id]
+        logger.info("--from-tournament-id %d: %d → %d tournaments",
+                    args.from_tournament_id, before, len(work))
+
+    overview = None
+    if args.from_date or args.meta:
+        overview = load_tournament_metadata_lookup()
+        if not overview:
+            logger.warning("Metadata pre-filter requested but overview CSV "
+                           "missing/unreadable — falling back to per-fetch filter "
+                           "(slower).")
+
+    if args.from_date and overview:
+        before = len(work)
+        cutoff_iso = args.from_date.strip()
+        kept = []
+        for w in work:
+            d = (overview.get(w['id']) or {}).get('date_iso', '')
+            if not d:
+                # No date metadata — keep it so we don't accidentally drop
+                # tournaments the overview CSV missed (newer tournaments
+                # the JH scraper just discovered). Per-fetch filter applies
+                # downstream.
+                kept.append(w)
+                continue
+            if d >= cutoff_iso:
+                kept.append(w)
+        work = kept
+        logger.info("--from-date %s: %d → %d tournaments (using overview metadata)",
+                    cutoff_iso, before, len(work))
+
+    if args.meta and overview:
+        wanted = {m.strip().upper() for m in args.meta.split(',') if m.strip()}
+        before = len(work)
+        kept = []
+        for w in work:
+            m = (overview.get(w['id']) or {}).get('meta', '').upper()
+            if not m or m in wanted:
+                kept.append(w)
+        work = kept
+        logger.info("--meta %s: %d → %d tournaments",
+                    ','.join(sorted(wanted)), before, len(work))
+
     if args.resume:
         seen = load_existing_output(out_path)
         before = len(work)

@@ -183,6 +183,7 @@ jobs:
               limitless_online_decks_comparison.csv \
               limitless_online_decks_matchups.csv \
               player_continuity.csv \
+              champions_replica_teams.json \
           ; do
               if [ -f "data/$f" ]; then
                   cp "data/$f" "backend/core/data/$f"
@@ -367,6 +368,28 @@ jobs:
           exit 0  # never block the pipeline — Predictor 5.8 degrades
                   # gracefully when the CSV is missing
 
+      - name: Run champions-replica scraper (Pokémon Champions Side Quest)
+        env:
+          PYTHONPATH: ${{ github.workspace }}/backend/core
+        working-directory: backend
+        # Independent feature, unrelated to TCG. Pulls the VGCPastes
+        # Champions M-A Repository Google Sheet (published-CSV export)
+        # + pokepast.es for each team's Showdown-format paste, writes
+        # data/champions_replica_teams.json for the Side Quest tab.
+        # Total HTTP: 1 (sheet) + N (one per pokepaste, default top-20)
+        # with a 0.7 s delay → ~15 s. Failure is non-blocking; the
+        # tab gracefully falls back to whatever JSON was last shipped.
+        run: |
+          set +e
+          echo "::group::scrapers/champions_replica_scraper.py"
+          python scrapers/champions_replica_scraper.py --top 20
+          rc=$?
+          if [ "$rc" -ne 0 ]; then
+              echo "::warning::champions_replica_scraper exited with $rc"
+          fi
+          echo "::endgroup::"
+          exit 0
+
       - name: Sync labs output to data/ (post-scraper)
         # prepare_card_data.py's SYNC_PATTERNS step runs IN the loop
         # above, BEFORE the labs scraper. So the labs CSVs that labs
@@ -378,7 +401,7 @@ jobs:
           set +e
           mkdir -p data
           # Monolith files first
-          for f in labs_tournament_decks.csv labs_tournament_matchups.csv labs_tournaments.json player_continuity.csv; do
+          for f in labs_tournament_decks.csv labs_tournament_matchups.csv labs_tournaments.json player_continuity.csv champions_replica_teams.json; do
               if [ -f "backend/core/data/$f" ]; then
                   cp "backend/core/data/$f" "data/$f"
                   sz=$(stat -c%s "data/$f")

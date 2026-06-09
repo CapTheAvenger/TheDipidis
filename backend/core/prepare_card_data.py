@@ -539,6 +539,12 @@ SYNC_PATTERNS = [
     # are: incremental --resume needs the prior CSV as input, AND the
     # frontend reads from data/, not backend/core/data/.
     "player_continuity.csv",
+    # Champions Side Quest — VGCPastes Google-Sheet derived team list.
+    # Refreshed by backend/scrapers/champions_replica_scraper.py on the
+    # weekly run; the Side Quest tab (js/app-side-quest.js) reads from
+    # data/. Unrelated to the TCG predictor pipeline but uses the same
+    # seed/sync infrastructure so the consistency test stays green.
+    "champions_replica_teams.json",
     # Scraper state files — list of tournament IDs each scraper has
     # already processed. Synced back to data/ so the next CI run can
     # resume incrementally instead of re-scraping every tournament from

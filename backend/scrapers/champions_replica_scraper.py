@@ -340,13 +340,32 @@ def main():
     # Filter to rows with a real replica code (skip "None" / "Extracted"
     # / blanks the sheet uses for entries waiting on a code).
     candidates = []
+    rejected_samples: List[str] = []
     for row in rows:
         code = _get_field(row, 'Replica Code (Click text for image)', 'Replica Code')
         if not _is_valid_replica(code):
+            if code and len(rejected_samples) < 8:
+                rejected_samples.append(code)
             continue
         candidates.append((row, _rank_priority(_get_field(row, 'Rank', 'Placement'))))
 
     logger.info("Candidate teams with valid replica codes: %d", len(candidates))
+    if not candidates and rows:
+        # Diagnostic: the sheet was reachable and parsed, but no row passed
+        # _is_valid_replica(). Surface the columns we saw + sample values
+        # for the columns whose names look promising so we can re-tune
+        # the regex / header lookup on the next run without another
+        # round-trip.
+        sample_row = rows[0]
+        logger.warning("No valid replica codes found. Sheet columns: %s",
+                       sorted(sample_row.keys()))
+        if rejected_samples:
+            logger.warning("Sample REJECTED values from the 'Replica Code'-like column: %s",
+                           rejected_samples)
+        for h, v in sample_row.items():
+            if 'replica' in h.lower() or 'code' in h.lower() or 'paste' in h.lower():
+                col_vals = [r.get(h, '') for r in rows[:5] if r.get(h, '').strip()]
+                logger.warning("  Column %r — first 5 non-empty: %s", h, col_vals)
 
     # Sort by rank priority (lower = better), then take top N
     candidates.sort(key=lambda x: x[1])
@@ -380,6 +399,17 @@ def main():
         return 0
 
     out_path = os.path.join(get_data_dir(), OUTPUT_FILE)
+
+    # FAIL-SOFT: if this run produced zero teams (parser regression,
+    # Google Sheet temporarily empty, column renamed, etc.), keep the
+    # last good JSON on disk instead of replacing the user-visible Side
+    # Quest tab with an empty list. Users get the previous snapshot
+    # rather than a blank panel; the diagnostic warnings above tell us
+    # what to fix next run.
+    if not teams and os.path.exists(out_path):
+        logger.warning("0 teams parsed — keeping previous %s untouched", out_path)
+        return 0
+
     tmp_path = out_path + '.tmp'
     with open(tmp_path, 'w', encoding='utf-8') as f:
         json.dump(output, f, indent=2, ensure_ascii=False)

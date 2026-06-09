@@ -86,5 +86,21 @@
     "tournament_type": "special",
     "country": "",
     "total_players": 485
+  },
+  {
+    "tournament_id": "0069",
+    "tournament_name": "Special Event Turin",
+    "tournament_date": "2026-06-06",
+    "tournament_type": "special",
+    "country": "",
+    "total_players": 2032
+  },
+  {
+    "tournament_id": "0070",
+    "tournament_name": "International Championship New Orleans",
+    "tournament_date": "",
+    "tournament_type": "special",
+    "country": "",
+    "total_players": 0
   }
 ]

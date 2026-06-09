@@ -305,6 +305,56 @@ window.MetaCall = (function () {
   const PREDICTOR_5_8_LOW_STICK        = 3.0;
   const PREDICTOR_5_8_STRONG_DAMP      = 0.70;
   const PREDICTOR_5_8_MILD_DAMP        = 0.85;
+
+  // Predictor 5.9 — Format-Migration-Boost (2026-06-08).
+  // Compares the latest CRI-era online snapshot against the latest
+  // pre-rotation POR-era snapshot to detect decks that emerged or
+  // exploded after the rotation. Slowking (POR 1.66 % → CRI 5.29 %,
+  // 3.18× growth, 52.2 % WR) and Crustle (POR low → CRI 1.63 % at
+  // 56.2 % WR) are the canonical cases the Mode A baseline misses
+  // because the predicted share is anchored to ladder averages,
+  // not migration deltas.
+  //
+  // Classification:
+  //   NEW    — POR share < 0.5 %, CRI share ≥ 1.0 %
+  //   RISING — POR share ≥ 0.5 %, CRI/POR ratio > 1.2
+  //   STABLE / DECLINING — no boost from this stage
+  //
+  // Boost is gated by win-rate so we don't lift "rising but losing"
+  // decks (Mega Greninja: NEW, 6.9 % share, 44.75 % WR → wrFactor
+  // collapses to 0, no boost). The boost is additive PP, applied
+  // post-family-cap but BEFORE 5.8 damp — the 5.8 re-renorm then
+  // restores the 100 % sum with the freed damp share absorbed
+  // proportionally by the boosted decks.
+  let _porSnapshotByDeck = {};              // norm(name) -> { share, wr }
+  let _curSnapshotByDeck = {};              // norm(name) -> { share, wr }
+  const PREDICTOR_5_9_NEW_POR_THRESHOLD = 0.5;
+  const PREDICTOR_5_9_NEW_CUR_MIN       = 1.0;
+  const PREDICTOR_5_9_RISING_RATIO_MIN  = 1.2;
+  const PREDICTOR_5_9_NEW_BOOST_FACTOR  = 0.30;   // current_share × factor
+  const PREDICTOR_5_9_NEW_BOOST_PP_MAX  = 2.0;
+  const PREDICTOR_5_9_RISING_BOOST_FACT = 0.40;   // (current - prev) × factor
+  const PREDICTOR_5_9_RISING_BOOST_PP_MAX = 1.5;
+  // Tightened 2026-06-08 after the Beedrill over-pump (Beedrill WR
+  // 50.45 % at NEW formula produced +0.8 pp boost → ended +0.59 over
+  // real). Lifting the WR-neutral to 50 % keeps mediocre online-WR
+  // decks out of the boost cluster while still rewarding 52-56 % WR.
+  const PREDICTOR_5_9_WR_NEUTRAL        = 50;
+  const PREDICTOR_5_9_WR_SLOPE          = 3;     // every +3 WR adds +1 to factor
+  const PREDICTOR_5_9_WR_FACTOR_MAX     = 1.5;
+  // Quality-Concentration pattern (Crustle case): the deck's online
+  // share DECLINED POR → CUR (people stopped grinding it) but the WR
+  // climbed materially (the pilots who STAYED win more). Signals
+  // "this archetype consolidated into committed pilots" — real Turin
+  // Crustle 1.67 % despite online ladder share dropping POR 2.06 % →
+  // CUR 1.50 % (WR 51.06 → 55.02, +3.96 %). Fires when:
+  //   POR share > 1.0  AND  CUR < POR  AND  CUR WR > 53  AND  ΔWR > 2
+  // Flat +0.5 pp boost (no scaling — these are typically small decks
+  // where a large boost would over-correct).
+  const PREDICTOR_5_9_QC_MIN_POR_SHARE  = 1.0;
+  const PREDICTOR_5_9_QC_MIN_WR         = 53;
+  const PREDICTOR_5_9_QC_MIN_WR_DELTA   = 2.0;
+  const PREDICTOR_5_9_QC_BOOST_PP       = 0.5;
                                             //   (allows for some natural decay between formats; a
                                             //    deck at 3.90 % last meta floors at 2.73 %, not 3.90 %)
   let _activeInPersonSetCode   = '';        // e.g. "POR" during the lag window when current_set="CRI" but
@@ -3206,31 +3256,12 @@ window.MetaCall = (function () {
       // Gated by _lastMetaLabsByDeck (only populated when
       // set_addition_only=true) so true rotations stay no-op.
 
-      // Predictor 5.8 — Player-Stickiness-Damper (pre-floor).
-      // Damps decks the previous-format player base TRIED but didn't
-      // STICK with. Lopunny / Cynthia / OMH / Dragapult Dudunsparce
-      // at TEF-POR all had hundreds of brought-counts but <1.3 % of
-      // pilots returning — a clear "online-fun, in-person-disposable"
-      // signature. The Turin abgleich showed these as the remaining
-      // cluster of over-calls after Predictor 5.6 fixed Solo Dragapult.
-      const stickEntry = _stickinessByDeck[k];
-      if (stickEntry && stickEntry.brought >= PREDICTOR_5_8_MIN_BROUGHT) {
-        let dampFactor = 1.0;
-        if (stickEntry.sticky_pct < PREDICTOR_5_8_VERY_LOW_STICK) {
-          dampFactor = PREDICTOR_5_8_STRONG_DAMP;
-        } else if (stickEntry.sticky_pct < PREDICTOR_5_8_LOW_STICK) {
-          dampFactor = PREDICTOR_5_8_MILD_DAMP;
-        }
-        if (dampFactor < 1.0) {
-          d.stickinessDamper = {
-            brought:    stickEntry.brought,
-            sticky_pct: Math.round(stickEntry.sticky_pct * 100) / 100,
-            factor:     dampFactor,
-            prePP:      Math.round(predicted * 100) / 100,
-          };
-          predicted *= dampFactor;
-        }
-      }
+      // Predictor 5.8 application MOVED to post-everything block —
+      // see end of _runPredictor() after Family-Cap. Reason: the
+      // intermediate Floor / Family-Cap stages were overriding the
+      // damp before it could affect the final UI. Damping post-
+      // everything (with re-normalisation) is the only way to make
+      // the stickiness signal stick.
 
       // Predictor 5.6 — Growth-Boosted Last-Meta Floor + Post-Floor
       // Decline-Damper. Backtest-driven redesign (2026-06-07).
@@ -3366,13 +3397,35 @@ window.MetaCall = (function () {
           0,
           (PREDICTOR_4_6_MAX_SHARE_PCT - champ.share) / PREDICTOR_4_6_MAX_SHARE_PCT
         );
-        const bonus = PREDICTOR_4_6_BOOST_PP_MAX * freshness * underdogStrength;
+        const rawBonus = PREDICTOR_4_6_BOOST_PP_MAX * freshness * underdogStrength;
+        // 2026-06-08 — presence-cap added after the Turin/Hop's Trevenant
+        // over-call: HT won Turin at 0.44 % share, underdogStrength
+        // calculated 0.89 → rawBonus 2.22 pp → after renorm + 4.7
+        // → predicted 7.7 % vs real Turin 0.44 %.
+        //
+        // Root cause: a sub-1 % deck winning ONE regional is a single
+        // data point. Without confirming online presence, that boost
+        // is just noise amplified across renorm. Cap the boost at the
+        // deck's CURRENT online + brought signal — if the field isn't
+        // taking notice (ladder still <1 %), the champion-win signal
+        // doesn't get to lift the prediction past where the field
+        // already is.
+        //
+        // For decks with strong existing presence (Slowking 5.29 %
+        // ladder, Crustle 1.50 %), the cap doesn't bind and the full
+        // bonus applies.
+        const ladderShare = d.ladderShare || 0;
+        const broughtShare = d.broughtShare || 0;
+        const presenceCap = Math.max(ladderShare, broughtShare);
+        const bonus = Math.min(rawBonus, presenceCap);
         if (bonus > 0.01) {
           d.underdogChampion = {
             event:      champ.eventName,
             shareAtWin: Math.round(champ.share * 100) / 100,
             ageDays,
             boostPP:    Math.round(bonus * 100) / 100,
+            rawBoostPP: Math.round(rawBonus * 100) / 100,
+            presenceCap: Math.round(presenceCap * 100) / 100,
           };
           predicted += bonus;
         }
@@ -3670,9 +3723,18 @@ window.MetaCall = (function () {
     Object.keys(familyAgg).forEach(fam => {
       const f = familyAgg[fam];
       if (f.members.length < 2) return;
-      const sorted = f.members.slice().sort(
-        (a, b) => (b.predictedShare || 0) - (a.predictedShare || 0)
-      );
+      // Sort by previous-format full share where available (TEF-POR
+      // Dusknoir was 7.43 % vs Dudunsparce 6.47 % — a clear hierarchy
+      // that the in-person field follows when the family-leader spikes).
+      // Fall back to current predictedShare if previous-format data
+      // missing (new family, true rotation, etc.).
+      const sortKey = (m) => {
+        const k = normalize(m.name);
+        const lm = _lastMetaLabsByDeck[k];
+        if (lm && lm.share > 0) return lm.share;
+        return m.predictedShare || 0;
+      };
+      const sorted = f.members.slice().sort((a, b) => sortKey(b) - sortKey(a));
       const top2 = sorted.slice(0, 2);
       const rest = sorted.slice(2);
       if (rest.length === 0) return;
@@ -3693,6 +3755,175 @@ window.MetaCall = (function () {
         top2[0].onlineShare    = top2[0].predictedShare;
       }
     });
+
+    // ── Predictor 5.9 — Format-Migration-Boost (post-everything) ──
+    // Decks that emerged or exploded between the POR snapshot and
+    // the current CRI snapshot get an additive PP boost, gated by
+    // win-rate so we don't lift "rising but losing" decks (Mega
+    // Greninja 6.9 % current share but 44.75 % WR → wrFactor = 0,
+    // no boost). The boost addresses the chronic under-call of
+    // Slowking (POR 1.66 % → CRI 5.29 %, 52.2 % WR), Crustle (POR
+    // marginal → CRI 1.63 % at 56.2 % WR), Honchkrow (POR 2.26 % →
+    // CRI 2.85 %, 51.4 % WR) — the exact cluster the Turin abgleich
+    // showed as Tier-2 in-person mainstays the predictor couldn't see.
+    //
+    // Applied BEFORE the 5.8 stickiness damp. The 5.8 re-renorm then
+    // restores the 100 % sum, absorbing the boost-induced increase
+    // proportionally from the non-damped pool.
+    let migrationBoostFired = 0;
+    if (Object.keys(_porSnapshotByDeck).length > 0 &&
+        Object.keys(_curSnapshotByDeck).length > 0) {
+      _shareList.forEach(d => {
+        const k = normalize(d.name);
+        const por = _porSnapshotByDeck[k];
+        const cur = _curSnapshotByDeck[k];
+        if (!cur || cur.share <= 0) return;
+        // 2026-06-08 gate: a deck about to be stickiness-damped by 5.8
+        // gets NO format-migration boost. The damp says "the field
+        // tries this but doesn't bring it" — boosting on top would
+        // fight 5.8 and end up over-pumping (OMH: damp ×0.7 + boost
+        // +1 pp → 7.1 % vs real 5.61). Stickiness signal wins.
+        const stickEntry = _stickinessByDeck[k];
+        if (stickEntry && stickEntry.brought >= PREDICTOR_5_8_MIN_BROUGHT
+            && stickEntry.sticky_pct < PREDICTOR_5_8_LOW_STICK) {
+          return;
+        }
+        const porShare = por ? por.share : 0;
+        const porWr    = por ? por.wr    : 0;
+        const wr = cur.wr;
+        const wrFactor = Math.max(0, Math.min(
+          PREDICTOR_5_9_WR_FACTOR_MAX,
+          (wr - PREDICTOR_5_9_WR_NEUTRAL) / PREDICTOR_5_9_WR_SLOPE
+        ));
+        let boost = 0;
+        let kind = '';
+        if (wrFactor > 0 &&
+            porShare < PREDICTOR_5_9_NEW_POR_THRESHOLD &&
+            cur.share >= PREDICTOR_5_9_NEW_CUR_MIN) {
+          // NEW deck (didn't exist meaningfully in POR)
+          boost = Math.min(PREDICTOR_5_9_NEW_BOOST_PP_MAX,
+                           cur.share * PREDICTOR_5_9_NEW_BOOST_FACTOR) * wrFactor;
+          kind = 'NEW';
+        } else if (wrFactor > 0 &&
+                   porShare >= PREDICTOR_5_9_NEW_POR_THRESHOLD &&
+                   cur.share / porShare > PREDICTOR_5_9_RISING_RATIO_MIN) {
+          // RISING deck (existed in POR but exploded in CRI)
+          boost = Math.min(PREDICTOR_5_9_RISING_BOOST_PP_MAX,
+                           (cur.share - porShare) * PREDICTOR_5_9_RISING_BOOST_FACT) * wrFactor;
+          kind = 'RISING';
+        } else if (porShare >= PREDICTOR_5_9_QC_MIN_POR_SHARE &&
+                   cur.share < porShare &&
+                   wr >= PREDICTOR_5_9_QC_MIN_WR &&
+                   (wr - porWr) >= PREDICTOR_5_9_QC_MIN_WR_DELTA) {
+          // QUALITY-CONCENTRATION (Crustle pattern): share shrunk but
+          // WR jumped — committed pilots stayed, casual pilots left.
+          // Flat boost (these are typically small decks where the
+          // % scaling would over-correct).
+          boost = PREDICTOR_5_9_QC_BOOST_PP;
+          kind = 'QUALITY-CONC';
+        }
+        if (boost > 0.1) {
+          d.formatMigrationBoost = {
+            kind,
+            porShare: Math.round(porShare * 100) / 100,
+            curShare: Math.round(cur.share * 100) / 100,
+            wr:       Math.round(wr * 100) / 100,
+            wrFactor: Math.round(wrFactor * 100) / 100,
+            boostPP:  Math.round(boost * 100) / 100,
+            prePP:    Math.round((d.predictedShare || 0) * 100) / 100,
+          };
+          d.predictedShare = (d.predictedShare || 0) + boost;
+          d.onlineShare    = d.predictedShare;
+          migrationBoostFired++;
+        }
+      });
+      try {
+        if (migrationBoostFired > 0) {
+          console.log(
+            `[Predictor 5.9] Format-migration boost: ${migrationBoostFired} ` +
+            `decks lifted by NEW/RISING + WR gate.`
+          );
+        }
+      } catch (_e) { /* ignore */ }
+    }
+
+    // ── Predictor 5.8 — Player-Stickiness-Damper (post-everything) ──
+    // Production-trace evidence (2026-06-08) showed the pre-floor
+    // version was a no-op: 5.6 Floor lifted Lopunny / OMH / Cynthia
+    // / Dragapult-Dudunsparce above their damped baseline (the floor
+    // value × 0.7 growth boost is bigger than baseline × 0.85), and
+    // Family-Cap "others × 1.087" boost then inflated them further
+    // via redistribution. The stickiness signal was being thrown away.
+    //
+    // New strategy: damp the FINAL post-renorm / post-family-cap
+    // predictedShare. Decks with very low previous-format stickiness
+    // (< 1 % with ≥ 100 brought) get × 0.70, low (1-3 %) get × 0.85.
+    // The freed share is redistributed proportionally to every other
+    // deck so the share-list still sums to 100 %.
+    //
+    // Backtest expectation (Turin Final):
+    //   OMH     9.18 % → 6.43 %  (real 5.61, Δ +0.82 vs +3.57 pre-fix)
+    //   Lopunny 5.15 % → 4.38 %  (real 2.61, Δ +1.77 vs +2.54 pre-fix)
+    //   Cynthia 3.20 % → 2.24 %  (real 2.61, Δ -0.37, near-perfect)
+    //   Dragapult Dudunsparce 5.95 % → 4.17 %  (real 1.67, Δ +2.50
+    //                                            vs +4.28 pre-fix)
+    let stickinessDamped = false;
+    _shareList.forEach(d => {
+      const k = normalize(d.name);
+      const stickEntry = _stickinessByDeck[k];
+      if (!stickEntry || stickEntry.brought < PREDICTOR_5_8_MIN_BROUGHT) return;
+      let dampFactor = 1.0;
+      if (stickEntry.sticky_pct < PREDICTOR_5_8_VERY_LOW_STICK) {
+        dampFactor = PREDICTOR_5_8_STRONG_DAMP;
+      } else if (stickEntry.sticky_pct < PREDICTOR_5_8_LOW_STICK) {
+        dampFactor = PREDICTOR_5_8_MILD_DAMP;
+      }
+      if (dampFactor < 1.0) {
+        d.stickinessDamper = {
+          brought:    stickEntry.brought,
+          sticky_pct: Math.round(stickEntry.sticky_pct * 100) / 100,
+          factor:     dampFactor,
+          prePP:      Math.round((d.predictedShare || 0) * 100) / 100,
+        };
+        d.predictedShare = (d.predictedShare || 0) * dampFactor;
+        d.onlineShare    = d.predictedShare;
+        stickinessDamped = true;
+      }
+    });
+    // Re-normalise so the list still sums to 100 % — but ONLY scale
+    // the non-damped decks. Damped decks keep their reduced values
+    // exactly. The freed share gets absorbed by every other deck
+    // proportionally to their current share.
+    //
+    // Previous version scaled ALL decks (damped + non-damped) by the
+    // same factor, which partially undid the damp: scale ×1.053 on
+    // Lopunny damped to 4.38 → 4.61. The new scheme keeps Lopunny at
+    // 4.38 and instead lifts Solo Dragapult / Raging Bolt / etc. by
+    // a slightly larger factor that just absorbs the freed share.
+    if (stickinessDamped) {
+      const dampedTotal = _shareList
+        .filter(d => d.stickinessDamper)
+        .reduce((s, d) => s + (d.predictedShare || 0), 0);
+      const nonDampedTotal = _shareList
+        .filter(d => !d.stickinessDamper)
+        .reduce((s, d) => s + (d.predictedShare || 0), 0);
+      const targetForNonDamped = Math.max(0, 100 - dampedTotal);
+      const scale = nonDampedTotal > 0 ? targetForNonDamped / nonDampedTotal : 1;
+      _shareList.forEach(d => {
+        if (!d.stickinessDamper) {
+          d.predictedShare = (d.predictedShare || 0) * scale;
+          d.onlineShare    = d.predictedShare;
+        }
+      });
+      try {
+        const damped = _shareList.filter(d => d.stickinessDamper).length;
+        console.log(
+          `[Predictor 5.8] Post-everything stickiness damp: ${damped} decks ` +
+          `damped (sum ${dampedTotal.toFixed(2)} %), non-damped scale ` +
+          `×${scale.toFixed(3)} (target ${targetForNonDamped.toFixed(2)} %).`
+        );
+      } catch (_e) { /* ignore */ }
+    }
 
     _shareList.sort((a, b) => b.predictedShare - a.predictedShare);
 
@@ -4047,9 +4278,59 @@ window.MetaCall = (function () {
       _majorSharesByDeck      = {};
       _lastMetaLabsByDeck     = {};
       _stickinessByDeck       = {};
+      _porSnapshotByDeck      = {};
+      _curSnapshotByDeck      = {};
       _activeInPersonSetCode  = '';
       _onlineWinsByDeck       = {};
       _dataLastScrapedAt      = '';
+
+      // Predictor 5.9 — load POR-era and current online snapshots so
+      // we can compute per-deck format-migration deltas. Snapshots
+      // come from data/online_share_history/YYYY-MM-DD.csv. POR
+      // snapshot = latest one strictly BEFORE set_release_date.
+      // Current = the most recent snapshot.
+      try {
+        const manResp = await fetch('data/online_share_history/manifest.json?t=' + Date.now());
+        if (manResp.ok) {
+          const manifest = await manResp.json();
+          const dates = manifest.dates || [];
+          const releaseDate = (_formatWindow && _formatWindow.set_release_date) || '';
+          const porDates = dates.filter(d => releaseDate && d < releaseDate);
+          const porDate = porDates.length ? porDates[porDates.length - 1] : '';
+          const curDate = dates.length ? dates[dates.length - 1] : '';
+
+          const loadSnapshot = async (date, target) => {
+            if (!date) return;
+            try {
+              const r = await fetch(`data/online_share_history/${date}.csv?t=` + Date.now());
+              if (!r.ok) return;
+              const text = await r.text();
+              const rows = parseCSVQuoted(text, ';');
+              rows.forEach(row => {
+                const name = (row.deck_name || '').trim();
+                const share = parseEU(row.share || '0');
+                const wr = parseEU(row.winrate || '0');
+                if (name && share > 0) {
+                  target[normalize(name)] = { share, wr };
+                }
+              });
+            } catch (_e) { /* ignore */ }
+          };
+
+          await Promise.all([
+            loadSnapshot(porDate, _porSnapshotByDeck),
+            loadSnapshot(curDate, _curSnapshotByDeck),
+          ]);
+
+          try {
+            console.log(
+              `[Predictor 5.9] Migration snapshots loaded: POR=${porDate} ` +
+              `(${Object.keys(_porSnapshotByDeck).length} decks), ` +
+              `CUR=${curDate} (${Object.keys(_curSnapshotByDeck).length} decks).`
+            );
+          } catch (_e) { /* ignore */ }
+        }
+      } catch (_e) { /* optional — no boost when missing */ }
 
       // Predictor 5.8 — load player_continuity.csv → per-deck
       // {brought, sticky_pct}. Optional CSV; predictor degrades to

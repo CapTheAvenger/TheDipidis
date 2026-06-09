@@ -4594,3 +4594,515 @@ tournament_id,tournament_date,meta,place,player_name,country,deck_slug,deck_arch
 0067,2026-05-23,,497,Moises Ramirez,,dragapult-ex,Dragapult,0,3,0
 0067,2026-05-23,,498,Luiguer Santos Llerena,,dragapult-ex,Dragapult,0,4,0
 0067,2026-05-23,,499,Mike William Lucho Molina,,n-zoroark,N's Zoroark,0,4,0
+0069,2026-06-06,,1,Jose López,,hops-trevenant,Hop's Trevenant,13,1,2
+0069,2026-06-06,,2,Brennan Kamerman,,slowking-scr,Slowking,13,1,2
+0069,2026-06-06,,3,Lorenzo Nebuloni,,dragapult-blaziken,Dragapult Blaziken,11,2,2
+0069,2026-06-06,,4,Toby Clark,,raging-bolt-ogerpon,Raging Bolt Ogerpon,11,2,2
+0069,2026-06-06,,5,Emma Hagen,,lillie-clefairy,Lillie's Clefairy,11,3,0
+0069,2026-06-06,,6,Jonathan Gorgos,,alakazam-dudunsparce,Alakazam Dudunsparce,10,2,2
+0069,2026-06-06,,7,Markus Schulze,,dragapult-blaziken,Dragapult Blaziken,10,2,2
+0069,2026-06-06,,8,Pedro Vicêncio,,dragapult-ex,Dragapult,10,2,2
+0069,2026-06-06,,9,Max Herzog,,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,10,2,1
+0069,2026-06-06,,10,Pascal Tillenberg,,dragapult-ex,Dragapult,10,2,1
+0069,2026-06-06,,11,Luc Gantner,,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,9,0,4
+0069,2026-06-06,,12,Nikoline Pedersen,,n-zoroark,N's Zoroark,9,0,4
+0069,2026-06-06,,13,Manuel Zanardi,,dragapult-ex,Dragapult,10,2,1
+0069,2026-06-06,,14,riccardo corino,,dragapult-dudunsparce,Dragapult Dudunsparce,10,2,1
+0069,2026-06-06,,15,Francesco Padovani,,dragapult-ex,Dragapult,10,2,1
+0069,2026-06-06,,16,Francesco Pironti,,dragapult-ex,Dragapult,10,2,1
+0069,2026-06-06,,17,Julio Sánchez Rodríguez,,dragapult-dusknoir,Dragapult Dusknoir,10,3,0
+0069,2026-06-06,,18,Ted Tobyn,,dragapult-ex,Dragapult,10,3,0
+0069,2026-06-06,,19,Kim Pobega,,dragapult-ex,Dragapult,10,3,0
+0069,2026-06-06,,20,Samuel Arreytabot,,basic-box-m,Basic Box,10,3,0
+0069,2026-06-06,,21,Jimmy Lambourion,,festival-lead,Dipplin,10,3,0
+0069,2026-06-06,,22,Alessandro Vezzoni,,dragapult-ex,Dragapult,10,3,0
+0069,2026-06-06,,23,Margherita Caponeri,,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,9,1,3
+0069,2026-06-06,,24,Jessica Robinson,,dragapult-dusknoir,Dragapult Dusknoir,9,1,3
+0069,2026-06-06,,25,Alexandru Rat,,dragapult-ex,Dragapult,9,2,2
+0069,2026-06-06,,26,Francesco Paolo Palumbo,,dragapult-ex,Dragapult,9,2,2
+0069,2026-06-06,,27,Yasmin Kiss,,ethan-typhlosion,Ethan's Typhlosion,9,2,2
+0069,2026-06-06,,28,Francesco D'Angelo,,dragapult-ex,Dragapult,9,2,2
+0069,2026-06-06,,29,Nicolas Santoni,,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,9,2,2
+0069,2026-06-06,,30,Eliot Duclos,,dragapult-ex,Dragapult,8,0,5
+0069,2026-06-06,,31,Raz Wolpe,,dragapult-ex,Dragapult,9,2,2
+0069,2026-06-06,,32,Thomas Becker,,dragapult-ex,Dragapult,9,2,2
+0069,2026-06-06,,33,Cristian Grosu,,dragapult-ex,Dragapult,9,2,2
+0069,2026-06-06,,34,Thomas GULINO,,dragapult-ex,Dragapult,9,2,2
+0069,2026-06-06,,35,Ajay Sridhar,,dragapult-ex,Dragapult,8,0,5
+0069,2026-06-06,,36,Joah Wiegner,,dragapult-ex,Dragapult,9,2,2
+0069,2026-06-06,,37,Alberto Conti,,dragapult-dusknoir,Dragapult Dusknoir,9,2,2
+0069,2026-06-06,,38,Riccardo Coviello,,dragapult-ex,Dragapult,9,2,2
+0069,2026-06-06,,39,valerio puccio,,slowking-scr,Slowking,9,3,1
+0069,2026-06-06,,40,Andrea Marcassoli,,dragapult-ex,Dragapult,9,3,1
+0069,2026-06-06,,41,Raffaele Chiocca,,ogerpon-meganium-arboliva,Ogerpon Meganium Arboliva,9,3,1
+0069,2026-06-06,,42,Simone Morandi,,alakazam-dudunsparce,Alakazam Dudunsparce,9,3,1
+0069,2026-06-06,,43,Victor ZHAO,,mega-lucario-ex,Mega Lucario,9,3,1
+0069,2026-06-06,,44,Kamil Colatosti,,dragapult-ex,Dragapult,9,3,1
+0069,2026-06-06,,45,Nicolai Stiborg,,mega-lucario-ex,Mega Lucario,9,3,1
+0069,2026-06-06,,46,JOEL NGUYEN,,diancie-dusknoir,Diancie Dusknoir,9,3,1
+0069,2026-06-06,,47,Simone Blanda,,crustle-dri,Crustle,8,1,4
+0069,2026-06-06,,48,Vincenzo Cannata,,raging-bolt-ogerpon,Raging Bolt Ogerpon,9,3,1
+0069,2026-06-06,,49,tommaso sponziello,,dragapult-dusknoir,Dragapult Dusknoir,9,3,1
+0069,2026-06-06,,50,Lisa Steinmüller,,dragapult-dusknoir,Dragapult Dusknoir,9,3,1
+0069,2026-06-06,,51,gonçalo ferreira,,starmie-froslass,Starmie Froslass,9,3,1
+0069,2026-06-06,,52,Dylan Vargas,,dragapult-dusknoir,Dragapult Dusknoir,9,3,1
+0069,2026-06-06,,53,Lucas Malouh,,dragapult-ex,Dragapult,9,3,1
+0069,2026-06-06,,54,Rene Ess,,mega-lucario-ex,Mega Lucario,9,3,1
+0069,2026-06-06,,55,Sergio Alcaide Nieto,,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,9,3,1
+0069,2026-06-06,,56,Enrique Casas,,dragapult-ex,Dragapult,9,3,1
+0069,2026-06-06,,57,Agustin Coraggio,,lucario-hariyama,Lucario Hariyama,9,3,1
+0069,2026-06-06,,58,Caleb Barber,,beedrill-ex-cri,Beedrill,9,3,1
+0069,2026-06-06,,59,Daniel Veres,,mega-lucario-ex,Mega Lucario,9,3,1
+0069,2026-06-06,,60,Edoardo Cremente,,festival-lead,Dipplin,9,3,1
+0069,2026-06-06,,61,Matteo Gucci,,dragapult-ex,Dragapult,9,3,1
+0069,2026-06-06,,62,Jérémy Vindrola,,raging-bolt-ogerpon,Raging Bolt Ogerpon,9,3,1
+0069,2026-06-06,,63,Fabio Battistella,,basic-box-m,Basic Box,9,3,1
+0069,2026-06-06,,64,Jan Hausmann,,dragapult-dusknoir,Dragapult Dusknoir,9,3,1
+0069,2026-06-06,,65,Rone Nielsen,,dragapult-ex,Dragapult,9,3,1
+0069,2026-06-06,,66,Simone Tambascia,,festival-lead,Dipplin,9,3,1
+0069,2026-06-06,,67,Matteo Fellico,,dragapult-blaziken,Dragapult Blaziken,9,3,1
+0069,2026-06-06,,68,Sam Hunt,,dragapult-ex,Dragapult,9,3,1
+0069,2026-06-06,,69,Davide Saladino,,dragapult-blaziken,Dragapult Blaziken,9,3,1
+0069,2026-06-06,,70,Riccardo Calzavara,,rockets-honchkrow,Rocket's Honchkrow,9,3,1
+0069,2026-06-06,,71,Riccardo Maganza,,slowking-scr,Slowking,9,3,1
+0069,2026-06-06,,72,alessandro brovelli,,dragapult-ex,Dragapult,8,1,4
+0069,2026-06-06,,73,Aidan Tauber,,crustle-dri,Crustle,8,1,4
+0069,2026-06-06,,74,Erik Bladh,,n-zoroark,N's Zoroark,9,3,1
+0069,2026-06-06,,75,Adriano D'Angelo,,dragapult-dusknoir,Dragapult Dusknoir,8,2,3
+0069,2026-06-06,,76,Patrik Bartošovič,,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,8,2,3
+0069,2026-06-06,,77,Nathan Bonavia Zammit,,greninja-ex,Greninja,9,4,0
+0069,2026-06-06,,78,Michele Berto,,slowking-scr,Slowking,8,2,3
+0069,2026-06-06,,79,Vincenzo Cipolla,,dragapult-blaziken,Dragapult Blaziken,9,4,0
+0069,2026-06-06,,80,Ingvar Hjartarson,,metagross-cri,Metagross,9,4,0
+0069,2026-06-06,,81,Andrea Pittarello,,tera-box,Tera Box,8,2,3
+0069,2026-06-06,,82,Nicola benedetto Torraca,,dragapult-ex,Dragapult,8,2,3
+0069,2026-06-06,,83,Mattia Monticelli,,slowking-scr,Slowking,8,2,3
+0069,2026-06-06,,84,Nicola Bortolotti,,slowking-scr,Slowking,9,4,0
+0069,2026-06-06,,85,Leonardo Andreoni,,dragapult-blaziken,Dragapult Blaziken,8,2,3
+0069,2026-06-06,,86,Davide Marino,,dragapult-dusknoir,Dragapult Dusknoir,8,2,3
+0069,2026-06-06,,87,Claudio Vargas,,basic-box-m,Basic Box,8,2,3
+0069,2026-06-06,,88,Drew Stephenson,,dragapult-ex,Dragapult,8,2,3
+0069,2026-06-06,,89,Thomas Ducrot,,dragapult-dusknoir,Dragapult Dusknoir,8,2,3
+0069,2026-06-06,,90,Marcel Karls,,dragapult-blaziken,Dragapult Blaziken,8,2,3
+0069,2026-06-06,,91,Alex Bortolini,,dragapult-ex,Dragapult,8,2,3
+0069,2026-06-06,,92,Cristian Sarnataro,,dragapult-ex,Dragapult,8,2,3
+0069,2026-06-06,,93,Stefano Bambini,,dragapult-ex,Dragapult,8,2,3
+0069,2026-06-06,,94,Bruno Arcelli,,rockets-honchkrow,Rocket's Honchkrow,8,2,3
+0069,2026-06-06,,95,Alessandro Fumagalli,,alakazam-dudunsparce,Alakazam Dudunsparce,8,2,3
+0069,2026-06-06,,96,Krzysztof Figas,,lopunny-dudunsparce,Lopunny Dudunsparce,8,3,2
+0069,2026-06-06,,97,Benjamin Gorgos,,alakazam-dudunsparce,Alakazam Dudunsparce,8,3,2
+0069,2026-06-06,,98,Jan Schäfer,,dragapult-dusknoir,Dragapult Dusknoir,8,3,2
+0069,2026-06-06,,99,Valerio Pompili,,festival-lead,Dipplin,8,3,2
+0069,2026-06-06,,100,Daniel James,,dragapult-dusknoir,Dragapult Dusknoir,8,3,2
+0069,2026-06-06,,101,Daniel Grisenti,,dragapult-ex,Dragapult,8,3,2
+0069,2026-06-06,,102,ZHENG DONG HU,,alakazam-dudunsparce,Alakazam Dudunsparce,8,3,2
+0069,2026-06-06,,103,Paolo Bretti,,rockets-honchkrow,Rocket's Honchkrow,8,3,2
+0069,2026-06-06,,104,Samuele Roma,,dragapult-ex,Dragapult,8,3,2
+0069,2026-06-06,,105,Domenico Longo,,dragapult-ex,Dragapult,8,3,2
+0069,2026-06-06,,106,Matteo Lampugnano,,dragapult-ex,Dragapult,8,3,2
+0069,2026-06-06,,107,Matteo Negro,,dragapult-ex,Dragapult,8,3,2
+0069,2026-06-06,,108,Andrea Stranieri,,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,8,3,2
+0069,2026-06-06,,109,Julien Charnet,,lopunny-dudunsparce,Lopunny Dudunsparce,8,3,2
+0069,2026-06-06,,110,Gabriele Ledda,,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,8,3,2
+0069,2026-06-06,,111,Gabriele Chiocca,,dragapult-ex,Dragapult,8,3,2
+0069,2026-06-06,,112,Michele Pio Lillo,,other,Other,7,1,5
+0069,2026-06-06,,113,Benjamin Shum,,dragapult-ex,Dragapult,8,3,2
+0069,2026-06-06,,114,Alberto Benvenga,,slowking-scr,Slowking,8,3,2
+0069,2026-06-06,,115,Lorenzo Zanchi,,crustle-dri,Crustle,8,3,2
+0069,2026-06-06,,116,Sameer Sangwan,,dragapult-dusknoir,Dragapult Dusknoir,8,3,2
+0069,2026-06-06,,117,Elia Grilli,,festival-lead,Dipplin,8,3,2
+0069,2026-06-06,,118,Kristopher Kemp,,crustle-dri,Crustle,8,3,2
+0069,2026-06-06,,119,Enrico Sgulmar,,archaludon-dudunsparce,Archaludon Dudunsparce,8,3,2
+0069,2026-06-06,,120,Stefano Ricchiuti,,dragapult-blaziken,Dragapult Blaziken,7,1,5
+0069,2026-06-06,,121,Alfredo Santangelo,,alakazam-dudunsparce,Alakazam Dudunsparce,8,3,2
+0069,2026-06-06,,122,Michele Roselli,,alakazam-dudunsparce,Alakazam Dudunsparce,8,3,2
+0069,2026-06-06,,123,Gianluca Cipriano,,dragapult-ex,Dragapult,8,3,2
+0069,2026-06-06,,124,Jaden Berberich,,dragapult-ex,Dragapult,8,3,2
+0069,2026-06-06,,125,Dimitrios Gasteratos,,crustle-dri,Crustle,8,4,1
+0069,2026-06-06,,126,Stefano Da Silva Fontinha Coelho,,dragapult-ex,Dragapult,8,4,1
+0069,2026-06-06,,127,Mateusz Wandzel,,raging-bolt-ogerpon,Raging Bolt Ogerpon,8,4,1
+0069,2026-06-06,,128,Tommaso Stoppini,,n-zoroark,N's Zoroark,7,2,4
+0069,2026-06-06,,129,Claudio Esposito,,dragapult-dusknoir,Dragapult Dusknoir,7,2,4
+0069,2026-06-06,,130,Janus Wagner,,raging-bolt-ogerpon,Raging Bolt Ogerpon,8,4,1
+0069,2026-06-06,,131,samuele garro,,dragapult-dusknoir,Dragapult Dusknoir,7,2,4
+0069,2026-06-06,,132,Carmine D'ANIELLO,,lucario-hariyama,Lucario Hariyama,8,4,1
+0069,2026-06-06,,133,Stefano Grenno,,clefairy-ogerpon,Clefairy Ogerpon,8,4,1
+0069,2026-06-06,,134,Gabriele Amore,,dragapult-dusknoir,Dragapult Dusknoir,8,4,1
+0069,2026-06-06,,135,Tommaso Arcaniolo,,slowking-scr,Slowking,8,4,1
+0069,2026-06-06,,136,Alessandro Falcone,,ogerpon-meganium-arboliva,Ogerpon Meganium Arboliva,8,4,1
+0069,2026-06-06,,137,Edoardo Rigutto,,dragapult-ex,Dragapult,8,4,1
+0069,2026-06-06,,138,Julius Brunfeldt,,dragapult-ex,Dragapult,8,4,1
+0069,2026-06-06,,139,Denis Provázek,,beedrill-ex-cri,Beedrill,8,4,1
+0069,2026-06-06,,140,Mattia Lorusso,,dragapult-ex,Dragapult,8,4,1
+0069,2026-06-06,,141,Joshua Bausch,,dragapult-dusknoir,Dragapult Dusknoir,8,4,1
+0069,2026-06-06,,142,Pierfrancesco Scala,,crustle-dri,Crustle,8,4,1
+0069,2026-06-06,,143,Mattia Caponigro,,dragapult-ex,Dragapult,7,2,4
+0069,2026-06-06,,144,Marco Perico,,lucario-hariyama,Lucario Hariyama,8,4,1
+0069,2026-06-06,,145,John Luo,,dragapult-blaziken,Dragapult Blaziken,8,4,1
+0069,2026-06-06,,146,Elmar Tresp,,crustle-dri,Crustle,8,4,1
+0069,2026-06-06,,147,Andrea Cristiano Maria Napolitano,,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,8,4,1
+0069,2026-06-06,,148,Matteo Jiang,,n-zoroark,N's Zoroark,8,4,1
+0069,2026-06-06,,149,ciro del luongo,,dragapult-ex,Dragapult,8,4,1
+0069,2026-06-06,,150,Samuele Gnoli,,dragapult-dusknoir,Dragapult Dusknoir,8,4,1
+0069,2026-06-06,,151,Nataniel Sypko,,dragapult-ex,Dragapult,8,4,1
+0069,2026-06-06,,152,Andrea Pardo,,slowking-scr,Slowking,8,4,1
+0069,2026-06-06,,153,Giuseppe De Rosa,,alakazam-dudunsparce,Alakazam Dudunsparce,8,4,1
+0069,2026-06-06,,154,Luca De Tomassi,,dragapult-blaziken,Dragapult Blaziken,8,4,1
+0069,2026-06-06,,155,Juan Jose Perez Hernandez,,dragapult-blaziken,Dragapult Blaziken,8,4,1
+0069,2026-06-06,,156,Alessandro Laudini,,festival-lead,Dipplin,8,4,1
+0069,2026-06-06,,157,Alonso Corral Sabag,,raging-bolt-ogerpon,Raging Bolt Ogerpon,8,4,1
+0069,2026-06-06,,158,Alessandro Cremascoli,,festival-lead,Dipplin,8,4,1
+0069,2026-06-06,,159,Frank Luciano,,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,8,4,1
+0069,2026-06-06,,160,Raul Mendez,,dragapult-dusknoir,Dragapult Dusknoir,8,4,1
+0069,2026-06-06,,161,Stefano Nejib Doula,,alakazam-dudunsparce,Alakazam Dudunsparce,8,4,1
+0069,2026-06-06,,162,Mirko Martino Azzolini,,dragapult-ex,Dragapult,8,4,1
+0069,2026-06-06,,163,Stefano Di Ludovico,,mega-lucario-ex,Mega Lucario,8,4,1
+0069,2026-06-06,,164,Jason Pham,,mega-lucario-ex,Mega Lucario,8,4,1
+0069,2026-06-06,,165,Antonio Castiglia,,raging-bolt-ogerpon,Raging Bolt Ogerpon,8,4,1
+0069,2026-06-06,,166,Fabio Florindo,,n-zoroark,N's Zoroark,8,4,1
+0069,2026-06-06,,167,FILIPPOS LAMPRINOS,,dragapult-ex,Dragapult,8,4,1
+0069,2026-06-06,,168,Giuseppe Geraci,,beedrill-ex-cri,Beedrill,8,4,1
+0069,2026-06-06,,169,Victor Lopes,,n-zoroark,N's Zoroark,8,4,1
+0069,2026-06-06,,170,Luca Chiariello,,raging-bolt-ogerpon,Raging Bolt Ogerpon,8,4,1
+0069,2026-06-06,,171,Daniele S. del Rosso,,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,8,4,1
+0069,2026-06-06,,172,Lorenzo Ciberti,,dragapult-ex,Dragapult,8,4,1
+0069,2026-06-06,,173,Stavros Chassoméris,,mega-greninja-ex,Mega Greninja,8,4,1
+0069,2026-06-06,,174,Loris Lombardi,,slowking-scr,Slowking,8,4,1
+0069,2026-06-06,,175,Dario Scarnò,,dragapult-ex,Dragapult,7,3,3
+0069,2026-06-06,,176,Sebastian Invernizzi,,basic-box-m,Basic Box,7,3,3
+0069,2026-06-06,,177,Marcello Aiello,,n-zoroark,N's Zoroark,7,3,3
+0069,2026-06-06,,178,Barbaros Büyükcakir,,slowking-scr,Slowking,7,3,3
+0069,2026-06-06,,179,Andrea Benedetto,,dragapult-dusknoir,Dragapult Dusknoir,7,3,3
+0069,2026-06-06,,180,Iacopo Tardelli,,dragapult-ex,Dragapult,7,3,3
+0069,2026-06-06,,181,Davide Ferraris,,dragapult-ex,Dragapult,7,3,3
+0069,2026-06-06,,182,Florian Giesa,,ethan-typhlosion,Ethan's Typhlosion,7,3,3
+0069,2026-06-06,,183,Francesco Nardi,,dragapult-blaziken,Dragapult Blaziken,7,3,3
+0069,2026-06-06,,184,Gioele Angelo Valentino Reitano,,festival-lead,Dipplin,7,3,3
+0069,2026-06-06,,185,Matt Bacnis,,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,8,5,0
+0069,2026-06-06,,186,Renziel Dumlao,,dragapult-blaziken,Dragapult Blaziken,8,5,0
+0069,2026-06-06,,187,Davide Conte,,archaludon-ex,Archaludon,7,3,3
+0069,2026-06-06,,188,Carlo Melonari,,rockets-honchkrow,Rocket's Honchkrow,7,3,3
+0069,2026-06-06,,189,Luca Danese,,dragapult-ex,Dragapult,7,3,3
+0069,2026-06-06,,190,Paolo Miroballi,,slowking-scr,Slowking,7,3,3
+0069,2026-06-06,,191,Carmine Cusati,,dragapult-ex,Dragapult,8,5,0
+0069,2026-06-06,,192,Andrea Elia,,dragapult-blaziken,Dragapult Blaziken,7,3,3
+0069,2026-06-06,,193,Yuri Senaldi,,dragapult-blaziken,Dragapult Blaziken,7,3,3
+0069,2026-06-06,,194,Fabio Ambroggi,,dragapult-ex,Dragapult,7,3,3
+0069,2026-06-06,,195,Alfredo Morra,,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,7,3,3
+0069,2026-06-06,,196,Gabriele Cammarata,,ethan-typhlosion,Ethan's Typhlosion,7,3,3
+0069,2026-06-06,,197,Roberto Chiodo,,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,7,3,3
+0069,2026-06-06,,198,Francesco Coppolino,,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,7,3,3
+0069,2026-06-06,,199,Simone Canziani,,dragapult-ex,Dragapult,7,3,3
+0069,2026-06-06,,200,Giovanni Orefice,,dragapult-dudunsparce,Dragapult Dudunsparce,7,3,3
+0069,2026-06-06,,201,Marco Chiudaroli,,mega-greninja-ex,Mega Greninja,7,3,3
+0069,2026-06-06,,202,Mattia Giuseppe Gambino,,dragapult-ex,Dragapult,7,3,3
+0069,2026-06-06,,203,Vincent Fatunz,,dragapult-ex,Dragapult,7,3,3
+0069,2026-06-06,,204,Luke Ayla Mallia,,dragapult-ex,Dragapult,8,5,0
+0069,2026-06-06,,205,Lorenzo Pasini,,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,7,3,3
+0069,2026-06-06,,206,Bryan Corsano,,lucario-hariyama,Lucario Hariyama,7,3,3
+0069,2026-06-06,,207,Ruben Filipe Prazeres Pereira,,dragapult-ex,Dragapult,7,3,3
+0069,2026-06-06,,208,Raul Guerrero Solano,,festival-lead,Dipplin,7,4,2
+0069,2026-06-06,,209,Renato Argento,,dragapult-ex,Dragapult,7,4,2
+0069,2026-06-06,,210,Damiano Napoli,,dragapult-dusknoir,Dragapult Dusknoir,7,4,2
+0069,2026-06-06,,211,Tommaso Vinciguerra,,toxtricity-box,Toxtricity Box,7,4,2
+0069,2026-06-06,,212,Leonardo Lattanzi,,dragapult-blaziken,Dragapult Blaziken,7,4,2
+0069,2026-06-06,,213,Arthur Gibelin,,n-zoroark,N's Zoroark,7,4,2
+0069,2026-06-06,,214,filippo fabbro,,n-zoroark,N's Zoroark,7,4,2
+0069,2026-06-06,,215,Michal Truban,,beedrill-ex-cri,Beedrill,7,4,2
+0069,2026-06-06,,216,Matteo Lorenzato,,dragapult-ex,Dragapult,7,4,2
+0069,2026-06-06,,217,Sebastian Kwatsch,,rockets-honchkrow,Rocket's Honchkrow,7,4,2
+0069,2026-06-06,,218,Endry Gostivari,,beedrill-ex-cri,Beedrill,7,4,2
+0069,2026-06-06,,219,Michael Reil,,raging-bolt-ogerpon,Raging Bolt Ogerpon,7,4,2
+0069,2026-06-06,,220,cristian lombardo,,ogerpon-meganium-arboliva,Ogerpon Meganium Arboliva,7,4,2
+0069,2026-06-06,,221,Francesco Macrì,,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,7,4,2
+0069,2026-06-06,,222,Giorgia Guglielminotti Canun,,starmie-froslass,Starmie Froslass,7,4,2
+0069,2026-06-06,,223,Filippo Colamorea,,other,Other,7,4,2
+0069,2026-06-06,,224,Petrus Francisco de Paula,,rockets-honchkrow,Rocket's Honchkrow,7,4,2
+0069,2026-06-06,,225,Leonardo Bambini,,festival-lead,Dipplin,7,4,2
+0069,2026-06-06,,226,Andrea Drastic Morales,,basic-box-m,Basic Box,7,4,2
+0069,2026-06-06,,227,Vojtěch Kotlán,,dragapult-dusknoir,Dragapult Dusknoir,7,4,2
+0069,2026-06-06,,228,Rufus Aiello,,festival-lead,Dipplin,7,4,2
+0069,2026-06-06,,229,Sandro De Simoni,,rockets-honchkrow,Rocket's Honchkrow,7,4,2
+0069,2026-06-06,,230,Alessandro Moroni,,slowking-scr,Slowking,7,4,2
+0069,2026-06-06,,231,Aaroon D'occhio,,slowking-scr,Slowking,7,4,2
+0069,2026-06-06,,232,Arsène HIRIART,,dragapult-ex,Dragapult,7,4,2
+0069,2026-06-06,,233,Mirco Di Paola,,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,7,4,2
+0069,2026-06-06,,234,Francesco Parazzini,,slowking-scr,Slowking,7,4,2
+0069,2026-06-06,,235,Alessandro De Francesco,,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,7,4,2
+0069,2026-06-06,,236,Davide Parenti,,slowking-scr,Slowking,7,4,2
+0069,2026-06-06,,237,Mirco Quatrale,,slowking-scr,Slowking,7,4,2
+0069,2026-06-06,,238,Alexis Sosa,,dragapult-ex,Dragapult,7,4,2
+0069,2026-06-06,,239,Alexandre Dubourg,,starmie-froslass,Starmie Froslass,7,4,2
+0069,2026-06-06,,240,Emanuele Basilisco,,dragapult-dudunsparce,Dragapult Dudunsparce,7,4,2
+0069,2026-06-06,,241,Adiris Milascevic,,slowking-scr,Slowking,7,4,2
+0069,2026-06-06,,242,Mattia Marcarini,,basic-box-m,Basic Box,6,2,5
+0069,2026-06-06,,243,Simone Mariotti,,festival-lead,Dipplin,7,4,2
+0069,2026-06-06,,244,Matteo Tobaldo,,metagross-cri,Metagross,7,4,2
+0069,2026-06-06,,245,Paolo Cantile,,raging-bolt-ogerpon,Raging Bolt Ogerpon,7,4,2
+0069,2026-06-06,,246,Luca Granato,,mega-greninja-ex,Mega Greninja,7,4,2
+0069,2026-06-06,,247,Mirko Ciarrocchi,,dragapult-dusknoir,Dragapult Dusknoir,6,2,5
+0069,2026-06-06,,248,Philip Unzeitig,,basic-box-m,Basic Box,7,4,2
+0069,2026-06-06,,249,Alessio Mariotti,,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,7,4,2
+0069,2026-06-06,,250,Filippo Porcelli,,raging-bolt-ogerpon,Raging Bolt Ogerpon,6,3,4
+0069,2026-06-06,,251,Ismaël Garin,,rockets-honchkrow,Rocket's Honchkrow,7,5,1
+0069,2026-06-06,,252,Victor De Torres Palacios,,basic-box-m,Basic Box,6,3,4
+0069,2026-06-06,,253,Jose Jorge Sayegh Lens,,raging-bolt-ogerpon,Raging Bolt Ogerpon,7,5,1
+0069,2026-06-06,,254,Tommaso Tagliaferro,,diancie-dusknoir,Diancie Dusknoir,7,5,1
+0069,2026-06-06,,255,Charles matthew Magnaye,,dragapult-dusknoir,Dragapult Dusknoir,7,5,1
+0069,2026-06-06,,256,Giulio Fantini,,raging-bolt-ogerpon,Raging Bolt Ogerpon,6,3,4
+0069,2026-06-06,,257,Mattia Stragliotto,,dragapult-blaziken,Dragapult Blaziken,6,3,4
+0069,2026-06-06,,258,Francesco Pasquale Caterino,,dragapult-ex,Dragapult,7,5,1
+0069,2026-06-06,,259,Jerry Galipò,,lillie-clefairy,Lillie's Clefairy,7,5,1
+0069,2026-06-06,,260,Lorenzo Bruno,,dragapult-dusknoir,Dragapult Dusknoir,7,5,1
+0069,2026-06-06,,261,Andreas Hillebrand,,festival-lead,Dipplin,7,5,1
+0069,2026-06-06,,262,Mike Davies,,festival-lead,Dipplin,7,5,1
+0069,2026-06-06,,263,Francesco Luciani,,rockets-honchkrow,Rocket's Honchkrow,6,3,4
+0069,2026-06-06,,264,Mario Jiang,,dragapult-dusknoir,Dragapult Dusknoir,7,5,1
+0069,2026-06-06,,265,Adam Marshall,,n-zoroark,N's Zoroark,7,5,1
+0069,2026-06-06,,266,Davide Nicolini,,basic-box-m,Basic Box,7,5,1
+0069,2026-06-06,,267,Marinette Wellein,,slowking-scr,Slowking,7,5,1
+0069,2026-06-06,,268,Filippo Grassi,,dragapult-ex,Dragapult,7,5,1
+0069,2026-06-06,,269,Giacomo Pagliaro,,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,7,5,1
+0069,2026-06-06,,270,Andrea Abele Pellegrino,,basic-box-m,Basic Box,7,5,1
+0069,2026-06-06,,271,Paolo Ambrosini,,dragapult-dusknoir,Dragapult Dusknoir,7,5,1
+0069,2026-06-06,,272,Riccardo Calzoni,,basic-box-m,Basic Box,6,3,4
+0069,2026-06-06,,273,Daniele Amodio,,dragapult-dusknoir,Dragapult Dusknoir,6,3,4
+0069,2026-06-06,,274,Federico Dore,,festival-lead,Dipplin,7,5,1
+0069,2026-06-06,,275,Francesco Zanotti,,dragapult-blaziken,Dragapult Blaziken,7,5,1
+0069,2026-06-06,,276,Luca Fortuna,,dragapult-dusknoir,Dragapult Dusknoir,6,3,4
+0069,2026-06-06,,277,Pierluigi Castelli,,cynthia-garchomp-ex,Cynthia's Garchomp,7,5,1
+0069,2026-06-06,,278,Daniele Dall'Asta,,dragapult-blaziken,Dragapult Blaziken,7,5,1
+0069,2026-06-06,,279,Leonardo Cuzzolin,,greninja-ex,Greninja,7,5,1
+0069,2026-06-06,,280,Jasmin Kirchherr,,ogerpon-meganium-arboliva,Ogerpon Meganium Arboliva,7,5,1
+0069,2026-06-06,,281,Jacopo Caranza,,starmie-froslass,Starmie Froslass,7,5,1
+0069,2026-06-06,,282,James Stone,,dragapult-ex,Dragapult,7,5,1
+0069,2026-06-06,,283,Simone Veronese,,alakazam-dudunsparce,Alakazam Dudunsparce,6,3,4
+0069,2026-06-06,,284,Umberto Allais,,starmie-dusknoir,Starmie Dusknoir,7,5,1
+0069,2026-06-06,,285,Lorenzo Pollice,,dragapult-dudunsparce,Dragapult Dudunsparce,6,3,4
+0069,2026-06-06,,286,Karlis Simanovics,,festival-lead,Dipplin,7,5,1
+0069,2026-06-06,,287,Julian Santamaria Volpini,,basic-box-m,Basic Box,7,5,1
+0069,2026-06-06,,288,Riccardo Lamera,,n-zoroark,N's Zoroark,7,5,1
+0069,2026-06-06,,289,Francesco Marchetti,,basic-box-m,Basic Box,7,5,1
+0069,2026-06-06,,290,Pasquale Lillo,,festival-lead,Dipplin,7,5,1
+0069,2026-06-06,,291,Christian Gomitoli,,dragapult-ex,Dragapult,7,5,1
+0069,2026-06-06,,292,Andrea Sergas,,festival-lead,Dipplin,7,5,1
+0069,2026-06-06,,293,Gioele Dell'Andrino,,dragapult-dusknoir,Dragapult Dusknoir,7,5,1
+0069,2026-06-06,,294,David Jiménez Miguel,,basic-box-m,Basic Box,7,5,1
+0069,2026-06-06,,295,Dominik Bielinski,,raging-bolt-ogerpon,Raging Bolt Ogerpon,7,5,1
+0069,2026-06-06,,296,Andrea Baudino,,dragapult-ex,Dragapult,7,6,0
+0069,2026-06-06,,297,Kai Shahmeen Kasim,,alakazam-dudunsparce,Alakazam Dudunsparce,6,4,3
+0069,2026-06-06,,298,Andrea Milesi,,dragapult-ex,Dragapult,6,4,3
+0069,2026-06-06,,299,Leonardo Scarsella,,festival-lead,Dipplin,7,6,0
+0069,2026-06-06,,300,Andrea Araldi,,crustle-dri,Crustle,6,4,3
+0069,2026-06-06,,301,Fabio Cheli,,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,6,4,3
+0069,2026-06-06,,302,Steffen Hoffmann,,n-zoroark,N's Zoroark,6,4,3
+0069,2026-06-06,,303,Niklas Kwatsch,,dragapult-ex,Dragapult,6,4,3
+0069,2026-06-06,,304,Tommaso Visani,,dragapult-ex,Dragapult,5,2,6
+0069,2026-06-06,,305,Yuri Foti,,n-zoroark,N's Zoroark,5,2,6
+0069,2026-06-06,,306,Daniele Savarese,,dragapult-ex,Dragapult,6,4,3
+0069,2026-06-06,,307,Alessandro Lisi,,n-zoroark,N's Zoroark,6,4,3
+0069,2026-06-06,,308,Davide Abbondandolo,,dragapult-ex,Dragapult,6,4,3
+0069,2026-06-06,,309,Michel Bressan,,crustle-dri,Crustle,6,4,3
+0069,2026-06-06,,310,Alfonso Cesarano,,lopunny-dudunsparce,Lopunny Dudunsparce,6,4,3
+0069,2026-06-06,,311,Francesco Monno,,rockets-honchkrow,Rocket's Honchkrow,6,4,3
+0069,2026-06-06,,312,Sylvain Flaction,,slowking-scr,Slowking,6,4,3
+0069,2026-06-06,,313,Andrea Pipitone,,hops-trevenant,Hop's Trevenant,6,4,3
+0069,2026-06-06,,314,Alessio Di Ricco,,raging-bolt-ogerpon,Raging Bolt Ogerpon,6,4,3
+0069,2026-06-06,,315,Leonardo Marcelli,,dragapult-dusknoir,Dragapult Dusknoir,6,4,3
+0069,2026-06-06,,316,Amedeo Abbondanza,,mega-starmie-ex,Mega Starmie,6,4,3
+0069,2026-06-06,,317,Matteo Infarinato,,dragapult-ex,Dragapult,6,4,3
+0069,2026-06-06,,318,Elia Gentili,,n-zoroark,N's Zoroark,6,4,3
+0069,2026-06-06,,319,Erwan David,,dragapult-blaziken,Dragapult Blaziken,6,4,3
+0069,2026-06-06,,320,David Mertens,,beedrill-ex-cri,Beedrill,6,5,2
+0069,2026-06-06,,321,Timothy William Romano,,starmie-froslass,Starmie Froslass,6,5,2
+0069,2026-06-06,,322,Aryan Chand,,dragapult-dusknoir,Dragapult Dusknoir,6,5,2
+0069,2026-06-06,,323,Joseph Philip,,rockets-honchkrow,Rocket's Honchkrow,6,5,2
+0069,2026-06-06,,324,Hugo Luis Lage Vázquez,,stevens-metagross,Steven's Metagross,6,5,2
+0069,2026-06-06,,325,Kieran Cobley,,raging-bolt-ogerpon,Raging Bolt Ogerpon,6,5,2
+0069,2026-06-06,,326,Fabrizio Tallone,,dragapult-dusknoir,Dragapult Dusknoir,6,5,2
+0069,2026-06-06,,327,mattia ceccotti,,dragapult-ex,Dragapult,6,5,2
+0069,2026-06-06,,328,McElroy Quinney,,dragapult-dudunsparce,Dragapult Dudunsparce,6,5,2
+0069,2026-06-06,,329,Luigi Amodio,,dragapult-dusknoir,Dragapult Dusknoir,6,5,2
+0069,2026-06-06,,330,Federico Balloni,,rocket-mewtwo-ex,Rocket's Mewtwo,6,5,2
+0069,2026-06-06,,331,andrea minopoli,,dragapult-ex,Dragapult,6,5,2
+0069,2026-06-06,,332,Hugo De Torres,,basic-box-m,Basic Box,6,5,2
+0069,2026-06-06,,333,Andrea Donato,,basic-box-m,Basic Box,6,5,2
+0069,2026-06-06,,334,JoSeMaa Lopez Romero,,rocket-mewtwo-ex,Rocket's Mewtwo,6,5,2
+0069,2026-06-06,,335,riccardo ceccolini,,n-zoroark,N's Zoroark,6,5,2
+0069,2026-06-06,,336,Alessandro Bertagna,,slowking-scr,Slowking,6,5,2
+0069,2026-06-06,,337,Andrea Meucci Romboni,,raging-bolt-ogerpon,Raging Bolt Ogerpon,6,5,2
+0069,2026-06-06,,338,NICOLAS GIRARDI,,n-zoroark,N's Zoroark,6,5,2
+0069,2026-06-06,,339,Erik Brusadelli,,rockets-honchkrow,Rocket's Honchkrow,6,5,2
+0069,2026-06-06,,340,Fred STAGNO,,greninja-ex,Greninja,6,5,2
+0069,2026-06-06,,341,Gioele Ciamaglia,,basic-box-m,Basic Box,6,5,2
+0069,2026-06-06,,342,Louis Peyron,,decidueye-ex,Decidueye,6,6,1
+0069,2026-06-06,,343,Salvatore Camiolo,,alakazam-dudunsparce,Alakazam Dudunsparce,6,4,1
+0069,2026-06-06,,344,Jamie Gilman-Lewis,,raging-bolt-ogerpon,Raging Bolt Ogerpon,6,6,1
+0069,2026-06-06,,345,Matteo Debernardis,,dragapult-dusknoir,Dragapult Dusknoir,6,6,1
+0069,2026-06-06,,346,Emanuele Mazzoleni,,dragapult-dudunsparce,Dragapult Dudunsparce,6,6,1
+0069,2026-06-06,,347,Simone Scarso,,raging-bolt-ogerpon,Raging Bolt Ogerpon,6,6,1
+0069,2026-06-06,,348,simone anastasio,,n-zoroark,N's Zoroark,6,6,1
+0069,2026-06-06,,349,Lorenzo Raucci,,dragapult-dusknoir,Dragapult Dusknoir,6,6,1
+0069,2026-06-06,,350,Marco Ceccon,,hops-trevenant,Hop's Trevenant,6,6,1
+0069,2026-06-06,,351,massimo di bitetto,,alakazam-dudunsparce,Alakazam Dudunsparce,6,3,1
+0069,2026-06-06,,352,Sascha Zihlmann,,rockets-honchkrow,Rocket's Honchkrow,5,4,4
+0069,2026-06-06,,353,Ashley Bennett,,rockets-honchkrow,Rocket's Honchkrow,5,4,4
+0069,2026-06-06,,354,Francesco Rencinai,,dragapult-ex,Dragapult,6,6,1
+0069,2026-06-06,,355,Giulio Pio Rossano Falco,,dragapult-ex,Dragapult,6,6,1
+0069,2026-06-06,,356,Lorenzo Zanzi,,ogerpon-meganium-arboliva,Ogerpon Meganium Arboliva,6,6,1
+0069,2026-06-06,,357,Rhéda Kadri,,raging-bolt-ogerpon,Raging Bolt Ogerpon,6,6,1
+0069,2026-06-06,,358,Andrea Martinelli,,mega-greninja-ex,Mega Greninja,6,6,1
+0069,2026-06-06,,359,Angel Miguel Sifuentes Oliveira,,rockets-honchkrow,Rocket's Honchkrow,6,6,1
+0069,2026-06-06,,360,Ettore Boccignone,,dragapult-ex,Dragapult,6,6,1
+0069,2026-06-06,,361,Sébastien VUILLERMOZ,,mega-greninja-ex,Mega Greninja,6,6,1
+0069,2026-06-06,,362,paolo antonio furfaro,,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,6,6,1
+0069,2026-06-06,,363,Jaime Notario,,dragapult-dudunsparce,Dragapult Dudunsparce,5,4,4
+0069,2026-06-06,,364,Mario Duarte Espasandin,,metagross-cri,Metagross,5,4,4
+0069,2026-06-06,,365,Simone Badalucco,,rocket-mewtwo-ex,Rocket's Mewtwo,6,6,1
+0069,2026-06-06,,366,Andrea Pio Prencipe,,greninja-ex,Greninja,6,6,1
+0069,2026-06-06,,367,Vianney Leroy,,basic-box-m,Basic Box,5,5,3
+0069,2026-06-06,,368,Alessandro Meyer,,crustle-dri,Crustle,5,5,3
+0069,2026-06-06,,369,Ragna Lund,,alakazam-dudunsparce,Alakazam Dudunsparce,5,5,3
+0069,2026-06-06,,370,lorenzo chiarato,,dragapult-dusknoir,Dragapult Dusknoir,5,5,3
+0069,2026-06-06,,371,Mattia Burchietti,,dragapult-blaziken,Dragapult Blaziken,5,6,2
+0069,2026-06-06,,372,Giammarco Cordaro,,dragapult-dusknoir,Dragapult Dusknoir,5,6,2
+0069,2026-06-06,,373,Domenico Paladino,,dragapult-ex,Dragapult,5,6,2
+0069,2026-06-06,,374,Pierre Thibault,,dragapult-dusknoir,Dragapult Dusknoir,5,6,2
+0069,2026-06-06,,375,Roberto Ciminna,,alakazam-dudunsparce,Alakazam Dudunsparce,4,4,5
+0069,2026-06-06,,376,Simone Bottari,,mega-greninja-ex,Mega Greninja,5,6,2
+0069,2026-06-06,,377,Lapo Orbi,,n-zoroark,N's Zoroark,5,6,2
+0069,2026-06-06,,378,Sebastian Fernandez,,n-zoroark,N's Zoroark,5,3,1
+0069,2026-06-06,,379,Carlo La Leggia,,crustle-dri,Crustle,5,3,1
+0069,2026-06-06,,380,Michelangelo Meulli,,mega-greninja-ex,Mega Greninja,4,2,4
+0069,2026-06-06,,381,Nicola Vescovo,,raging-bolt-ogerpon,Raging Bolt Ogerpon,5,7,1
+0069,2026-06-06,,382,Gabriele Bona,,mega-lucario-ex,Mega Lucario,4,5,4
+0069,2026-06-06,,383,Alessandro Marras,,n-zoroark,N's Zoroark,5,3,1
+0069,2026-06-06,,384,Luca Marcon,,dragapult-blaziken,Dragapult Blaziken,4,1,3
+0069,2026-06-06,,385,Luca Cavanna,,slowking-scr,Slowking,5,3,0
+0069,2026-06-06,,386,Francesco Sforza,,starmie-dusknoir,Starmie Dusknoir,5,3,0
+0069,2026-06-06,,387,Leonardo Rossi,,dragapult-dusknoir,Dragapult Dusknoir,5,3,0
+0069,2026-06-06,,388,mattia manfredi,,raging-bolt-ogerpon,Raging Bolt Ogerpon,5,3,0
+0069,2026-06-06,,389,Chris Orchard,,festival-lead,Dipplin,5,3,0
+0069,2026-06-06,,390,Massimiliano Longo,,dragapult-ex,Dragapult,4,1,3
+0069,2026-06-06,,391,Guillaume Gosset,,dragapult-ex,Dragapult,5,3,0
+0069,2026-06-06,,392,Damiano Taccia,,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,5,3,0
+0069,2026-06-06,,393,Marcin Kurek,,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,5,3,0
+0069,2026-06-06,,394,Paweł Syryjczyk,,raging-bolt-ogerpon,Raging Bolt Ogerpon,5,3,0
+0069,2026-06-06,,395,Richard Pines,,dragapult-ex,Dragapult,5,3,0
+0069,2026-06-06,,396,Gianluca D'alterio,,alakazam-dudunsparce,Alakazam Dudunsparce,5,3,0
+0069,2026-06-06,,397,Fabio Franceschi,,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,4,1,3
+0069,2026-06-06,,398,German Arribas Gongora,,basic-box-m,Basic Box,5,3,0
+0069,2026-06-06,,399,Stefano Nucifora,,diancie-dusknoir,Diancie Dusknoir,5,3,0
+0069,2026-06-06,,400,Andrea Ferrato,,dragapult-blaziken,Dragapult Blaziken,4,1,3
+0069,2026-06-06,,401,Dániel Samu,,dragapult-dusknoir,Dragapult Dusknoir,5,3,0
+0069,2026-06-06,,402,Andrea Mario Schroder,,cynthia-garchomp-ex,Cynthia's Garchomp,5,3,0
+0069,2026-06-06,,403,Giuseppe Sirchia,,starmie-froslass,Starmie Froslass,5,3,0
+0069,2026-06-06,,404,Christian Gallo,,dragapult-ex,Dragapult,4,1,3
+0069,2026-06-06,,405,Simone Lasaponara,,slowking-scr,Slowking,5,3,0
+0069,2026-06-06,,406,Mario PedullÃ,,ceruledge-ex,Ceruledge,5,3,0
+0069,2026-06-06,,407,Manuele Carraturo,,dragapult-dusknoir,Dragapult Dusknoir,5,3,0
+0069,2026-06-06,,408,Maciej Chojnacki,,dragapult-ex,Dragapult,5,3,0
+0069,2026-06-06,,409,Mattia Canuti,,grimmsnarl-froslass,Grimmsnarl Froslass,5,3,0
+0069,2026-06-06,,410,Sara Barbuto,,stevens-metagross,Steven's Metagross,5,3,0
+0069,2026-06-06,,411,Alessandro Negri,,festival-lead,Dipplin,5,3,0
+0069,2026-06-06,,412,Alessio Marchetti,,dragapult-dusknoir,Dragapult Dusknoir,5,3,0
+0069,2026-06-06,,413,Kevin Král,,dragapult-ex,Dragapult,5,3,0
+0069,2026-06-06,,414,Stefano Carta,,slowking-scr,Slowking,5,3,0
+0069,2026-06-06,,415,Daniel Otero Menduiña,,dragapult-ex,Dragapult,5,3,0
+0069,2026-06-06,,416,Mattia Turini,,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,4,1,3
+0069,2026-06-06,,417,Andrea Simonti,,mega-starmie-ex,Mega Starmie,5,3,0
+0069,2026-06-06,,418,Mateusz Kwiatosz,,dragapult-ex,Dragapult,5,3,0
+0069,2026-06-06,,419,Davide Ieni,,rocket-spidops,Rocket's Spidops,5,3,0
+0069,2026-06-06,,420,Federico Rampinelli,,slowking-scr,Slowking,5,3,0
+0069,2026-06-06,,421,Niccolò Lopez,,alakazam-dudunsparce,Alakazam Dudunsparce,4,1,3
+0069,2026-06-06,,422,Gabriele Ulivi,,festival-lead,Dipplin,5,3,0
+0069,2026-06-06,,423,Tad Hansen,,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,5,3,0
+0069,2026-06-06,,424,Lorenzo Ferilli,,basic-box-m,Basic Box,5,3,0
+0069,2026-06-06,,425,Matteo Doda,,lucario-hariyama,Lucario Hariyama,5,3,0
+0069,2026-06-06,,426,Riccardo Galia,,slowking-scr,Slowking,5,3,0
+0069,2026-06-06,,427,Ginés Saura,,dragapult-blaziken,Dragapult Blaziken,5,3,0
+0069,2026-06-06,,428,Jawel Briki,,lopunny-dudunsparce,Lopunny Dudunsparce,4,1,3
+0069,2026-06-06,,429,giancarlo granata,,dragapult-dudunsparce,Dragapult Dudunsparce,5,3,0
+0069,2026-06-06,,430,Kévin Vacquier,,dragapult-dudunsparce,Dragapult Dudunsparce,5,3,0
+0069,2026-06-06,,431,Mario Sammarro,,cynthia-garchomp-ex,Cynthia's Garchomp,4,1,3
+0069,2026-06-06,,432,Mattia Ferrari,,basic-box-m,Basic Box,5,3,0
+0069,2026-06-06,,433,Giacomo Tiraboschi,,flareon-noctowl,Flareon Noctowl,5,3,0
+0069,2026-06-06,,434,Andrea Nosenzo,,dragapult-ex,Dragapult,4,1,3
+0069,2026-06-06,,435,Bo Vinke,,slowking-scr,Slowking,5,3,0
+0069,2026-06-06,,436,Matteo Zappalá,,dragapult-ex,Dragapult,4,1,3
+0069,2026-06-06,,437,Christian Schrader,,dragapult-blaziken,Dragapult Blaziken,5,3,0
+0069,2026-06-06,,438,Luigi Bautista,,ceruledge-ex,Ceruledge,5,3,0
+0069,2026-06-06,,439,niccolò genna,,slowking-scr,Slowking,5,3,0
+0069,2026-06-06,,440,Jakub Owczarek,,greninja-ex,Greninja,5,3,0
+0069,2026-06-06,,441,idan polak‬‏,,dragapult-ex,Dragapult,5,3,0
+0069,2026-06-06,,442,Stefano Cornelli,,dragapult-ex,Dragapult,5,3,0
+0069,2026-06-06,,443,Jeremy SEKSEK,,mega-lucario-ex,Mega Lucario,5,3,0
+0069,2026-06-06,,444,Marco Califano,,raging-bolt-ogerpon,Raging Bolt Ogerpon,5,3,0
+0069,2026-06-06,,445,Alessio Apollonio,,rocket-mewtwo-ex,Rocket's Mewtwo,5,3,0
+0069,2026-06-06,,446,Tomáš Bělohlávek,,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,5,3,0
+0069,2026-06-06,,447,Paweł Prędki,,cynthia-garchomp-ex,Cynthia's Garchomp,4,1,3
+0069,2026-06-06,,448,Goran Egić,,dragapult-dusknoir,Dragapult Dusknoir,5,3,0
+0069,2026-06-06,,449,Alp Ehliz,,dragapult-blaziken,Dragapult Blaziken,5,3,0
+0069,2026-06-06,,450,Matteo Basilici,,dragapult-ex,Dragapult,5,3,0
+0069,2026-06-06,,451,Guillaume FLAMENT,,alakazam-dudunsparce,Alakazam Dudunsparce,4,1,3
+0069,2026-06-06,,452,Sebastjan Bagon,,dragapult-dusknoir,Dragapult Dusknoir,5,3,0
+0069,2026-06-06,,453,Alessandro Frenda,,dragapult-blaziken,Dragapult Blaziken,4,1,3
+0069,2026-06-06,,454,Luciano Rizzo,,lucario-hariyama,Lucario Hariyama,5,3,0
+0069,2026-06-06,,455,Alessandro Martino,,dragapult-ex,Dragapult,5,3,0
+0069,2026-06-06,,456,Matteo Bonginelli,,grimmsnarl-froslass,Grimmsnarl Froslass,5,3,0
+0069,2026-06-06,,457,Tommaso Curti,,basic-box-m,Basic Box,5,3,0
+0069,2026-06-06,,458,Roberto Lenisa,,rocket-mewtwo-ex,Rocket's Mewtwo,5,3,0
+0069,2026-06-06,,459,Elvis Caccin,,starmie-dusknoir,Starmie Dusknoir,5,3,0
+0069,2026-06-06,,460,Mario Grimaldi,,alakazam-dudunsparce,Alakazam Dudunsparce,5,3,0
+0069,2026-06-06,,461,Mirko Bertolaso,,dragapult-blaziken,Dragapult Blaziken,5,3,0
+0069,2026-06-06,,462,Jacopo Diana,,mega-lucario-ex,Mega Lucario,5,3,0
+0069,2026-06-06,,463,Marcelo Blanes,,mega-greninja-ex,Mega Greninja,5,3,0
+0069,2026-06-06,,464,Daniel Monticelli,,dragapult-ex,Dragapult,5,3,0
+0069,2026-06-06,,465,Gabriele Giordano,,raging-bolt-ogerpon,Raging Bolt Ogerpon,5,3,0
+0069,2026-06-06,,466,Alex Siciliano,,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,5,3,0
+0069,2026-06-06,,467,Samuel Scime,,dragapult-ex,Dragapult,5,3,0
+0069,2026-06-06,,468,Luca Strazzacappa,,stevens-metagross,Steven's Metagross,5,3,0
+0069,2026-06-06,,469,Marco Senatore,,dragapult-dudunsparce,Dragapult Dudunsparce,5,3,0
+0069,2026-06-06,,470,Simone Fiorito,,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,4,2,2
+0069,2026-06-06,,471,leonardo Giannotta,,alakazam-dudunsparce,Alakazam Dudunsparce,4,2,2
+0069,2026-06-06,,472,Tjaša Repič,,mega-lucario-ex,Mega Lucario,4,2,2
+0069,2026-06-06,,473,Matteo Vassolo,,dragapult-dusknoir,Dragapult Dusknoir,4,2,2
+0069,2026-06-06,,474,Matteo Andrea Cofrancesco,,hops-trevenant,Hop's Trevenant,4,2,2
+0069,2026-06-06,,475,Corentin METGE,,mega-greninja-ex,Mega Greninja,4,2,2
+0069,2026-06-06,,476,juen Theo,,slowking-scr,Slowking,4,2,2
+0069,2026-06-06,,477,Dante Ippolito,,n-zoroark,N's Zoroark,4,2,2
+0069,2026-06-06,,478,Claudio Berardi,,alakazam-dudunsparce,Alakazam Dudunsparce,4,2,2
+0069,2026-06-06,,479,Cristian Malaguti,,slowking-scr,Slowking,4,2,2
+0069,2026-06-06,,480,Rino Malinconico,,mega-absol-box,Mega Absol Box,4,2,2
+0069,2026-06-06,,481,Vincenzo Bastelli,,dragapult-ex,Dragapult,4,2,2
+0069,2026-06-06,,482,Carmelo Spada,,dragapult-blaziken,Dragapult Blaziken,4,2,2
+0069,2026-06-06,,483,Davide Crisci,,dragapult-ex,Dragapult,4,2,2
+0069,2026-06-06,,484,Matteo Roma,,rocket-mewtwo-ex,Rocket's Mewtwo,4,2,2
+0069,2026-06-06,,485,Nicola Zantedeschi,,grimmsnarl-froslass,Grimmsnarl Froslass,4,2,2
+0069,2026-06-06,,486,Sajjad Mannan,,dragapult-dusknoir,Dragapult Dusknoir,4,2,2
+0069,2026-06-06,,487,Davide Alfio Pulvirenti,,dragapult-ex,Dragapult,4,2,2
+0069,2026-06-06,,488,Magnus Pedersen,,dragapult-ex,Dragapult,4,2,2
+0069,2026-06-06,,489,Beat Christen,,dragapult-ex,Dragapult,4,2,2
+0069,2026-06-06,,490,Solène Dreyer,,rockets-honchkrow,Rocket's Honchkrow,4,2,2
+0069,2026-06-06,,491,Raphaël Paquis,,basic-box-m,Basic Box,4,2,2
+0069,2026-06-06,,492,Caroline Ferino,,metagross-cri,Metagross,4,2,2
+0069,2026-06-06,,493,Andrea Cattozzo,,slowking-scr,Slowking,4,2,2
+0069,2026-06-06,,494,Cristiano Longordo,,lucario-hariyama,Lucario Hariyama,4,2,2
+0069,2026-06-06,,495,Alexandra Michiels,,dragapult-dudunsparce,Dragapult Dudunsparce,4,2,2
+0069,2026-06-06,,496,Frederic Roger,,okidogi-barbaracle,Okidogi Barbaracle,4,2,2
+0069,2026-06-06,,497,Modesto Bellipario,,alakazam-dudunsparce,Alakazam Dudunsparce,4,2,2
+0069,2026-06-06,,498,Davide Pasini,,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,4,2,2
+0069,2026-06-06,,499,Walter Pollo,,festival-lead,Dipplin,4,2,2
+0069,2026-06-06,,500,Federico GiarmanÃ,,mega-starmie-ex,Mega Starmie,4,2,2
+0069,2026-06-06,,501,Fiorino Dekaj,,dragapult-ex,Dragapult,4,2,2
+0069,2026-06-06,,502,Alessandro Campolo,,slowking-scr,Slowking,4,2,2
+0069,2026-06-06,,503,Diogo Lourenço,,rockets-honchkrow,Rocket's Honchkrow,4,2,2
+0069,2026-06-06,,504,Andrew Elliott,,alakazam-dudunsparce,Alakazam Dudunsparce,4,2,2
+0069,2026-06-06,,505,Fabrizio Cremascoli,,other,Other,4,2,2
+0069,2026-06-06,,506,Simone Cipolla,,slowking-scr,Slowking,4,2,2
+0069,2026-06-06,,507,Chris Davern,,dragapult-blaziken,Dragapult Blaziken,4,2,2
+0069,2026-06-06,,508,Antonio Porciello,,rockets-honchkrow,Rocket's Honchkrow,4,2,2
+0069,2026-06-06,,509,Cristina Aguilera Gonzalez,,festival-lead,Dipplin,4,2,2
+0069,2026-06-06,,510,Luca Meroni,,ursaluna-lunatone,Ursaluna Lunatone,4,2,2
+0069,2026-06-06,,511,Roberto Pittalis,,basic-box-m,Basic Box,4,2,2
+0069,2026-06-06,,512,Blagovest Vladimirov,,dragapult-blaziken,Dragapult Blaziken,4,2,2

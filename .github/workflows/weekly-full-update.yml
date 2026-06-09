@@ -14,13 +14,11 @@ name: Weekly Full Update
 # Schedule: Tuesday 06:00 UTC (= 07:00 CET winter / 08:00 CEST summer)
 # Manual trigger: GitHub UI → Actions → Weekly Full Update → Run workflow
 #
-# 2026-06-07: cron SUSPENDED so the Tuesday 06-09 run doesn't overwrite
-# the data files the Turin post-mortem abgleich is reading. Re-enable
-# by restoring the `schedule:` block below once the Predictor 5.6
-# redesign lands.
+# 2026-06-07: cron was briefly suspended for the Turin post-mortem.
+# Re-enabled 2026-06-08 after the Predictor 5.6/5.8/5.9 redesign landed.
 on:
-  # schedule:
-  #   - cron: '0 6 * * 2'
+  schedule:
+    - cron: '0 6 * * 2'
   workflow_dispatch:
 
 # GITHUB_TOKEN needs:
@@ -184,6 +182,8 @@ jobs:
               limitless_online_decks.csv \
               limitless_online_decks_comparison.csv \
               limitless_online_decks_matchups.csv \
+              player_continuity.csv \
+              champions_replica_teams.json \
           ; do
               if [ -f "data/$f" ]; then
                   cp "data/$f" "backend/core/data/$f"
@@ -342,6 +342,54 @@ jobs:
           # (matchup CSV is gracefully optional in Meta Call).
           exit 0
 
+      - name: Run player-continuity scraper
+        env:
+          PYTHONPATH: ${{ github.workspace }}/backend/core
+        working-directory: backend
+        # Depends on labs_tournaments.json + labs_tournament_decks.csv
+        # for the tid index + slug→archetype mapping. Run AFTER the
+        # labs scraper so any newly-scraped tournaments get player-
+        # continuity data captured in the same weekly run.
+        #
+        # --resume + --from-date keeps the runtime bounded: only fresh
+        # tournament IDs since the last scrape get fetched. Initial
+        # backfill happened on 2026-06-08 via the standalone workflow
+        # (player-continuity-scrape.yml), so steady-state runs add only
+        # the 1-3 new Regionals per week.
+        run: |
+          set +e
+          echo "::group::scrapers/player_continuity_scraper.py"
+          python scrapers/player_continuity_scraper.py --resume --from-date 2026-04-01
+          rc=$?
+          if [ "$rc" -ne 0 ]; then
+              echo "::warning::player_continuity_scraper exited with $rc"
+          fi
+          echo "::endgroup::"
+          exit 0  # never block the pipeline — Predictor 5.8 degrades
+                  # gracefully when the CSV is missing
+
+      - name: Run champions-replica scraper (Pokémon Champions Side Quest)
+        env:
+          PYTHONPATH: ${{ github.workspace }}/backend/core
+        working-directory: backend
+        # Independent feature, unrelated to TCG. Pulls the VGCPastes
+        # Champions M-A Repository Google Sheet (published-CSV export)
+        # + pokepast.es for each team's Showdown-format paste, writes
+        # data/champions_replica_teams.json for the Side Quest tab.
+        # Total HTTP: 1 (sheet) + N (one per pokepaste, default top-20)
+        # with a 0.7 s delay → ~15 s. Failure is non-blocking; the
+        # tab gracefully falls back to whatever JSON was last shipped.
+        run: |
+          set +e
+          echo "::group::scrapers/champions_replica_scraper.py"
+          python scrapers/champions_replica_scraper.py --top 20
+          rc=$?
+          if [ "$rc" -ne 0 ]; then
+              echo "::warning::champions_replica_scraper exited with $rc"
+          fi
+          echo "::endgroup::"
+          exit 0
+
       - name: Sync labs output to data/ (post-scraper)
         # prepare_card_data.py's SYNC_PATTERNS step runs IN the loop
         # above, BEFORE the labs scraper. So the labs CSVs that labs
@@ -353,7 +401,7 @@ jobs:
           set +e
           mkdir -p data
           # Monolith files first
-          for f in labs_tournament_decks.csv labs_tournament_matchups.csv labs_tournaments.json; do
+          for f in labs_tournament_decks.csv labs_tournament_matchups.csv labs_tournaments.json player_continuity.csv champions_replica_teams.json; do
               if [ -f "backend/core/data/$f" ]; then
                   cp "backend/core/data/$f" "data/$f"
                   sz=$(stat -c%s "data/$f")

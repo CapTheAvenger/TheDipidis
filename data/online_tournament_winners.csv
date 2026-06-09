@@ -1,4 +1,13 @@
 tournament_id,tournament_date,format,player_count,winner_archetype,winner_winrate
+6a1de09847f3797bf6ba93c0,2026-06-08,CRI,181,Rocket's Honchkrow,21.0
+6a256e4747f3797bf6bae558,2026-06-08,CRI,123,Dragapult Blaziken,21.0
+6a1f23b847f3797bf6baa1a4,2026-06-08,CRI,168,Dragapult,36.0
+6a23a40447f3797bf6bad463,2026-06-08,CRI,112,Crustle,34.0
+6a233b3f47f3797bf6bacdb5,2026-06-08,CRI,105,Dragapult Dusknoir,24.0
+6a0c8905dfbdf089cbbdd5e8,2026-06-07,CRI,176,Dragapult,36.0
+championship-ix,2026-06-06,CRI,450,Crustle,48.0
+6a1e390347f3797bf6ba9953,2026-06-05,CRI,102,Clefairy Ogerpon,26.0
+69fdf82e2b59cd9b66b26f70,2026-06-05,CRI,102,Dragapult Froslass,24.0
 6a1d8b3e47f3797bf6ba8e47,2026-06-03,CRI,122,Dragapult,27.0
 6a1661c08c163b8097998337,2026-06-02,CRI,170,Hydrapple Ogerpon,21.0
 6a1eaac047f3797bf6ba9d10,2026-06-02,CRI,134,Dragapult,31.0
@@ -40,10 +49,3 @@ art-art-art,2026-05-16,CRI,276,Dragapult,34.0
 69c9518a36f5b5c303dc144e,2026-05-13,CRI,153,Slowking,36.0
 6a008dd4dfbdf089cbbd7088,2026-05-13,CRI,129,Alakazam Dudunsparce,21.0
 6a027c0adfbdf089cbbd87cf,2026-05-12,CRI,133,Rocket's Honchkrow,21.0
-6a01d5f2dfbdf089cbbd7da0,2026-05-12,CRI,114,Grimmsnarl Froslass,18.0
-69f911d8e23aab068aadafe5,2026-05-11,CRI,171,Clefairy Ogerpon,21.0
-6a00e0c0dfbdf089cbbd7654,2026-05-11,CRI,125,Dragapult Dudunsparce,21.0
-69fa0db04f71d664893ed8b4,2026-05-11,CRI,182,Steven's Metagross,36.0
-69f4579be23aab068aad6b4a,2026-05-11,CRI,109,Alakazam Dudunsparce,31.0
-69f9383e4f71d664893ed246,2026-05-09,CRI,232,Dragapult Dusknoir,31.0
-is-something,2026-05-09,CRI,257,Dragapult,30.0

@@ -605,7 +605,40 @@ def write_format_window(sets_metadata_path: str,
             'human edit when the next set drops.'
         ),
     }
+
+    # Preserve manual fields the maintainer added (2026-06-09).
+    # Before this guard, weekly runs would wipe these on every cycle —
+    # the predictor's last-meta floor + decline-damper + stickiness +
+    # format-migration boost (5.5 / 5.6 / 5.8 / 5.9) all silently
+    # no-op'd in the Sat-night abgleich, which inflated Mega Greninja
+    # 3.10 → 9.8 and Slowking 4.04 → 9.5.
+    #
+    # Manual fields preserved:
+    #   previous_format_key — e.g. "TEF-POR", what set rotation was
+    #     IMMEDIATELY before the current one. Predictor uses this to
+    #     pull the right archetype shares for the last-meta floor.
+    #   set_addition_only — bool. true means the rotation ADDED cards
+    #     (TEF-POR → TEF-CRI is set-addition because TEF stays legal).
+    #     false means a true rotation that drops the oldest set —
+    #     gates the floor/damper off entirely because last-meta shares
+    #     are misleading when key cards rotated out.
+    #   Any other underscore-prefixed _note_* field — operator
+    #     documentation we keep around.
     out_path = os.path.join(data_dir, 'format_window.json')
+    if os.path.exists(out_path):
+        try:
+            with open(out_path, encoding='utf-8') as f:
+                existing = json.load(f)
+        except Exception:
+            existing = {}
+        for k in ('previous_format_key', 'set_addition_only'):
+            if k in existing and k not in out:
+                out[k] = existing[k]
+        # Preserve _note_* operator documentation
+        for k, v in existing.items():
+            if k.startswith('_note_') and k not in out:
+                out[k] = v
+
     with open(out_path, 'w', encoding='utf-8') as f:
         json.dump(out, f, indent=2, ensure_ascii=False)
 

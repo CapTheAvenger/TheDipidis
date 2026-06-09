@@ -4,11 +4,18 @@
  * containers, soft borders, monospace replica codes) but keeps a
  * distinct accent so users notice it's a separate Champions-game
  * feature, not part of the TCG pipeline.
+ *
+ * COLOR NOTE: the global stylesheet defines --text-primary as #333
+ * (light-mode dark gray). The dashboard tabs run on a DARK background,
+ * so reusing var(--text-primary) renders mon names / team titles /
+ * replica codes nearly invisible against the surface (#1a1f2c).
+ * The other dark-themed components in this codebase work around it
+ * by hardcoding #fff / light grays; this stylesheet does the same.
  */
 
 .side-quest-intro {
     margin: 0 0 1.25rem 0;
-    color: var(--text-secondary, #b0b8c1);
+    color: #b0b8c1;
 }
 
 .side-quest-subtitle {
@@ -24,15 +31,15 @@
 
 .side-quest-status {
     font-size: 0.85rem;
-    color: var(--text-secondary, #b0b8c1);
+    color: #b0b8c1;
     margin: 0.5rem 0;
 }
 
 .side-quest-empty {
     padding: 2rem 1rem;
     text-align: center;
-    color: var(--text-secondary, #b0b8c1);
-    border: 1px dashed var(--border-color, #2a3140);
+    color: #b0b8c1;
+    border: 1px dashed #2a3140;
     border-radius: 12px;
     background: var(--surface-alt, rgba(255,255,255,0.02));
 }
@@ -58,7 +65,7 @@
 
 .side-quest-team {
     background: var(--surface, #1a1f2c);
-    border: 1px solid var(--border-color, #2a3140);
+    border: 1px solid #2a3140;
     border-radius: 14px;
     padding: 1rem 1.1rem 1.1rem 1.1rem;
     box-shadow: 0 1px 3px rgba(0,0,0,0.25);
@@ -92,12 +99,12 @@
     margin: 0;
     font-size: 1.05rem;
     font-weight: 600;
-    color: var(--text-primary, #e6ebf3);
+    color: #e6ebf3;
 }
 
 .side-quest-team-tourney {
     font-size: 0.78rem;
-    color: var(--text-secondary, #8c95a5);
+    color: #8c95a5;
     margin-top: 0.1rem;
 }
 
@@ -110,7 +117,7 @@
     border: 1px solid rgba(95, 182, 255, 0.35);
     border-radius: 10px;
     padding: 0.55rem 0.85rem;
-    color: var(--text-primary, #e6ebf3);
+    color: #e6ebf3;
     cursor: pointer;
     font-family: inherit;
     transition: background 120ms ease, transform 80ms ease;
@@ -135,7 +142,7 @@
     font-size: 0.7rem;
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    color: var(--text-secondary, #9fa9bb);
+    color: #9fa9bb;
     font-weight: 600;
 }
 
@@ -168,7 +175,7 @@
 
 .side-quest-mon {
     background: rgba(255, 255, 255, 0.03);
-    border: 1px solid var(--border-color, #242b39);
+    border: 1px solid #242b39;
     border-radius: 10px;
     padding: 0.55rem 0.65rem;
     min-height: 110px;
@@ -185,7 +192,7 @@
 .side-quest-mon-name {
     font-weight: 600;
     font-size: 0.92rem;
-    color: var(--text-primary, #e6ebf3);
+    color: #e6ebf3;
 }
 
 .side-quest-tera {
@@ -200,16 +207,16 @@
     gap: 0.4rem;
     flex-wrap: wrap;
     font-size: 0.72rem;
-    color: var(--text-secondary, #98a3b6);
+    color: #98a3b6;
     margin-bottom: 0.35rem;
 }
 
 .side-quest-ability {
-    color: var(--text-secondary, #b0b8c1);
+    color: #b0b8c1;
 }
 
 .side-quest-item {
-    color: var(--text-secondary, #98a3b6);
+    color: #98a3b6;
     font-style: italic;
 }
 
@@ -219,7 +226,7 @@
     margin: 0;
     font-size: 0.78rem;
     line-height: 1.35;
-    color: var(--text-primary, #d6dce7);
+    color: #d6dce7;
 }
 
 .side-quest-move {
@@ -233,7 +240,7 @@
 
 .side-quest-strategy {
     margin-top: 0.9rem;
-    border-top: 1px solid var(--border-color, #242b39);
+    border-top: 1px solid #242b39;
     padding-top: 0.7rem;
 }
 
@@ -241,7 +248,7 @@
     cursor: pointer;
     font-size: 0.85rem;
     font-weight: 600;
-    color: var(--text-secondary, #b0b8c1);
+    color: #b0b8c1;
     user-select: none;
     list-style: none;
 }
@@ -265,7 +272,7 @@
     margin: 0.5rem 0 0 1.1rem;
     padding: 0;
     font-size: 0.85rem;
-    color: var(--text-primary, #d6dce7);
+    color: #d6dce7;
     line-height: 1.45;
 }
 

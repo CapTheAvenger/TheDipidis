@@ -6689,6 +6689,119 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
         }
         if (typeof window !== 'undefined') window._lockPokemonLines = _lockPokemonLines;
 
+        // ── Phase Y.2: Most-Consistency runner ──────────────────────
+        //
+        // Wraps window.MostConsistencyBuilder.build() with the live
+        // deck-builder's source-routing and apply-to-UI plumbing.
+        //
+        // Returns:
+        //   { applied: true }                 — built + applied to UI
+        //   { applied: false, reason: '…' }   — caller falls back to legacy
+        async function _runMostConsistencyBuilderPath(source, archetype) {
+            const builder = window.MostConsistencyBuilder;
+            if (!builder || typeof builder.build !== 'function') {
+                return { applied: false, reason: 'builder-not-loaded' };
+            }
+
+            let result;
+            try {
+                result = await builder.build(archetype);
+            } catch (err) {
+                return { applied: false, reason: 'build-threw: ' + (err && err.message) };
+            }
+            if (!result) return { applied: false, reason: 'build-returned-null' };
+
+            // Phase 6 inside the builder already flags data quality.
+            // We DECLINE the new path when:
+            //   • dataQuality.sufficient === false (per maintainer rule
+            //     10: no estimates, no extrapolation — better to fall
+            //     back to the legacy stages that can use aggregated
+            //     archetype stats than to show a hand-wavy build)
+            //   • the produced deck is < 10 cards (something went
+            //     wrong, legacy path probably handles it better)
+            if (!result.dataQuality || !result.dataQuality.sufficient) {
+                return { applied: false, reason: 'data-too-thin (' +
+                    (result.dataQuality?.warning || 'no warning') + ')' };
+            }
+            if (!Array.isArray(result.deck) || result.deck.length < 10) {
+                return { applied: false, reason: `deck-too-small (${result.deck?.length || 0})` };
+            }
+
+            // Surface the algorithm trace so the maintainer can see WHY
+            // each card landed in / out of the deck. The per-phase
+            // events were the whole reason for the rebuild — exposing
+            // them in the live console keeps the algorithm honest.
+            console.group(`[MostConsistencyBuilder] ${archetype} · trace`);
+            console.info(`Core threshold used: ${(result.coreThreshold * 100).toFixed(0)} %  ·  Data quality: ${result.dataQuality.n_lists} lists (weight ${result.dataQuality.total_weight?.toFixed(2)})`);
+            for (const event of result.trace) {
+                console.info(`  Phase ${event.phase}: ${event.decision}`, event);
+            }
+            console.groupEnd();
+
+            // Apply to the live UI. Mirrors the legacy path's clear →
+            // populate → save pattern. The UI re-renders off the
+            // window.*Deck object so each addCardToDeckBatch call
+            // immediately surfaces in the deck panel.
+            if (source === 'cityLeague') {
+                window.cityLeagueDeck = {};
+                window.cityLeagueDeckOrder = [];
+                saveCityLeagueDeck();
+            } else if (source === 'currentMeta') {
+                window.currentMetaDeck = {};
+                window.currentMetaDeckOrder = [];
+                saveCurrentMetaDeck();
+            } else if (source === 'pastMeta') {
+                window.pastMetaDeck = {};
+                window.pastMetaDeckOrder = [];
+                savePastMetaDeck();
+            }
+
+            // Resolve to the printed set version the user actually has
+            // (rarity preferences live in window.rarityPreferences and
+            // getPreferredVersionForCard wraps the lookup). We don't
+            // run normalizeGeneratedDeckTo60 here — the new builder
+            // ALREADY produces a 60-card deck via its Phase 5 trim;
+            // running another trim on top would risk yanking slots
+            // the algorithm just defended.
+            let totalApplied = 0;
+            for (const entry of result.deck) {
+                const card = entry.card?.best_variant || entry.card || {};
+                const rawName = (card.name || entry.card?.name || '').toString().trim();
+                if (!rawName) continue;
+                const fixedName = typeof fixCardNameEncoding === 'function'
+                    ? fixCardNameEncoding(rawName)
+                    : rawName;
+                const origSet = card.set_code || '';
+                const origNum = card.set_number || '';
+                let setCode = origSet, setNumber = origNum;
+                if (typeof getPreferredVersionForCard === 'function') {
+                    const pref = getPreferredVersionForCard(fixedName, origSet, origNum);
+                    if (pref) { setCode = pref.set; setNumber = pref.number; }
+                }
+                const copies = Math.max(1, parseInt(entry.count, 10) || 0);
+                for (let i = 0; i < copies; i++) {
+                    addCardToDeckBatch(source, fixedName, setCode, setNumber);
+                }
+                totalApplied += copies;
+            }
+
+            // Persist the freshly built deck.
+            if (source === 'cityLeague')      saveCityLeagueDeck();
+            else if (source === 'currentMeta') saveCurrentMetaDeck();
+            else if (source === 'pastMeta')   savePastMetaDeck();
+
+            if (typeof showToast === 'function') {
+                showToast(
+                    `✓ ${archetype}: ${totalApplied}/60 Karten · `
+                    + `Core @ ${(result.coreThreshold * 100).toFixed(0)} % · `
+                    + `${result.dataQuality.n_lists} Listen ausgewertet`,
+                    'success', 4000
+                );
+            }
+            return { applied: true };
+        }
+
+
         async function autoCompleteConsistency(source, rarityMode, options) {
             // Diagnostic trace — when the user reports "button does nothing"
             // these console lines pinpoint which step bails. The Surface-Audit
@@ -6768,6 +6881,51 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             devLog('[autoCompleteConsistency] Starting CONSISTENCY-based deck generation');
             devLog('[autoCompleteConsistency] Total available cards:', cards.length);
             console.info('[autoCompleteConsistency] PROCEEDING with', cards.length, 'cards');
+
+            // ==========================================
+            // Phase Y.2 — New Most-Consistency builder hook.
+            //
+            // When js/deck-builder-consistency.js has loaded the
+            // per-decklist CSV AND the selected archetype has a
+            // record in that data, run the rebuilt 6-phase
+            // algorithm (ACE-SPEC → Core → Tech-packages → trim).
+            // The new path consumes REAL per-decklist data with
+            // success-weighted scoring per the maintainer's 10-rule
+            // spec — much more accurate than the aggregated stats
+            // the legacy stages below can see.
+            //
+            // Falls back to the legacy path (Stage 0/0c/1/2/LRM/
+            // EnergyFloor/EnergyCeiling/FinalFill) when:
+            //   • MostConsistencyBuilder isn't loaded yet (still
+            //     fetching the CSV), OR
+            //   • the archetype label has no per-decklist data
+            //     (newer archetype, JP-only, etc.), OR
+            //   • the build returns a sub-10-card deck (data too
+            //     thin — Phase 6 already flagged it).
+            //
+            // The legacy stages stay intact below this branch so
+            // any regression in the new builder degrades gracefully
+            // instead of breaking the whole feature.
+            const _archetypeForNewBuilder =
+                source === 'cityLeague' ? window.currentCityLeagueArchetype :
+                source === 'currentMeta' ? window.currentMetaArchetype :
+                window.pastMetaCurrentArchetype;
+            if (window.MostConsistencyBuilder
+                && typeof window.MostConsistencyBuilder.build === 'function'
+                && _archetypeForNewBuilder) {
+                try {
+                    const _newPath = await _runMostConsistencyBuilderPath(
+                        source, _archetypeForNewBuilder
+                    );
+                    if (_newPath && _newPath.applied) {
+                        console.info('[autoCompleteConsistency] ✓ Phase Y.2 (MostConsistencyBuilder) used — legacy stages bypassed.');
+                        return;
+                    }
+                    console.info('[autoCompleteConsistency] Phase Y.2 declined, falling back to legacy stages:', _newPath?.reason);
+                } catch (err) {
+                    console.warn('[autoCompleteConsistency] Phase Y.2 threw, falling back to legacy:', err && err.message);
+                }
+            }
 
             // Catch silent exceptions that would otherwise become unhandled
             // promise rejections (some browsers swallow these without a

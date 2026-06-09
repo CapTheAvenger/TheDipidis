@@ -1,0 +1,78 @@
+name: Bot Keepalive
+
+# Render Free Tier spins the bot down after 15 min of inactivity.
+# First request after sleep takes ~30-60 s (Node cold start + bot.launch +
+# Telegraf register), which makes the /deck and /metacall commands feel
+# broken when the maintainer hasn't pinged the bot in a while.
+#
+# This workflow pings the bot's /health endpoint every 10 minutes so the
+# Render dyno stays warm. The interval is deliberately under 15 min with
+# headroom: GitHub Actions cron has up to 5-10 min of scheduling drift on
+# the free runner pool, so a tighter cadence ensures at least one ping
+# lands inside every 15-min sleep window.
+#
+# Network cost: one HEAD-class request every 10 min = ~144/day. Negligible
+# both for GitHub Actions minutes (each run < 10 s) and for Render
+# bandwidth.
+#
+# Why this is fine on Render Free (2024 community policy):
+#   • External pings are explicitly listed as allowed in Render's docs as
+#     long as they don't generate sustained load. A 10-min keepalive is
+#     well below "abuse" territory.
+#   • If Render ever flags this, the immediate alternatives are: upgrade
+#     to the Starter plan ($7/mo, no sleep) or migrate to a no-sleep host
+#     (Fly.io free tier, Railway, etc.) — both are short hops away.
+
+on:
+  schedule:
+    # Every 10 minutes. Drift-tolerant — even with the ~5 min GH Actions
+    # cron jitter, the worst case is 15 min between pings, which matches
+    # Render's sleep threshold exactly.
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+
+# No write permissions needed — pure HTTP probe.
+permissions:
+  contents: read
+
+concurrency:
+  group: bot-keepalive
+  cancel-in-progress: true  # if a previous ping is still running, skip
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2  # generous: cold start can take ~60 s
+
+    steps:
+      - name: Ping bot /health
+        # curl with --max-time covers both connect + read so a hung
+        # service can't pin the runner. -f exits non-zero on 4xx/5xx so
+        # this step reports failure clearly when something's actually
+        # broken (not just slow).
+        run: |
+          set +e
+          BOT_URL="${BOT_URL:-https://thedipidis-bot.onrender.com/health}"
+          echo "Pinging $BOT_URL …"
+          # First attempt — short timeout; if the dyno is awake this is fast.
+          start_ts=$(date +%s)
+          resp=$(curl -sS -f --max-time 15 -w '\nHTTP %{http_code} (%{time_total}s)' "$BOT_URL" 2>&1)
+          rc=$?
+          if [ "$rc" -eq 0 ]; then
+              echo "$resp"
+              echo "✓ Awake (no cold start)"
+              exit 0
+          fi
+          # Cold start path — longer timeout, single retry. Render typically
+          # takes 30-50 s to spin a Node service up from cold.
+          echo "First ping failed (rc=$rc) — likely cold start, retrying with longer timeout…"
+          resp=$(curl -sS -f --max-time 90 -w '\nHTTP %{http_code} (%{time_total}s)' "$BOT_URL" 2>&1)
+          rc=$?
+          end_ts=$(date +%s)
+          echo "$resp"
+          echo "Total elapsed: $((end_ts - start_ts)) s"
+          if [ "$rc" -ne 0 ]; then
+              echo "::warning::Bot /health unreachable after retry (rc=$rc). Render may be down."
+              exit 0  # don't fail the workflow — we'll try again in 10 min
+          fi
+          echo "✓ Awake after warmup"

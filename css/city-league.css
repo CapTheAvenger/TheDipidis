@@ -2925,6 +2925,34 @@
 .three-way-compare-table tr.three-way-row-two { background: #fffbeb; }
 .three-way-compare-table tr.three-way-row-one { background: #fef2f2; }
 .three-way-compare-table td.three-way-cell-zero { color: #cbd5e1; }
+.three-way-compare-table .three-way-col-total {
+    font-weight: 500;
+    color: #6b7280;
+    font-size: 0.78em;
+}
+/* Category-section divider rows — break the table into Pokémon /
+   Trainer / Energy blocks so a 25-row deck doesn't read as one
+   undifferentiated wall on a phone screen. The section row sticks
+   below the column header when scrolling so the user always sees
+   which section they're in. */
+.three-way-compare-table tr.three-way-section-row {
+    background: transparent;
+}
+.three-way-compare-table th.three-way-section-th {
+    text-align: left;
+    background: #eef2ff;
+    color: #3b4cca;
+    font-weight: 800;
+    font-size: 0.78rem;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    padding: 6px 10px;
+    border-top: 2px solid rgba(59, 76, 202, 0.18);
+    border-bottom: 1px solid rgba(59, 76, 202, 0.12);
+    position: sticky;
+    top: 38px;  /* sits below the main thead row */
+    z-index: 0;
+}
 .three-way-compare-summary {
     display: flex;
     gap: 10px;
@@ -2944,3 +2972,28 @@
 .three-way-compare-summary .three-way-chip-all  { background: #d1fae5; color: #065f46; }
 .three-way-compare-summary .three-way-chip-two  { background: #fef3c7; color: #92400e; }
 .three-way-compare-summary .three-way-chip-one  { background: #fee2e2; color: #991b1b; }
+
+/* Mobile: shrink the card-name min-width and tighten cell padding so
+   the table fits a 360-px portrait phone without horizontal scroll
+   while staying readable. Column headers wrap to 2 lines instead of
+   overflowing — the totals chip moves below the label. */
+@media (max-width: 600px) {
+    .three-way-compare-dialog {
+        width: 100vw;
+        max-height: 96vh;
+        border-radius: 10px 10px 0 0;
+    }
+    .three-way-compare-body { padding: 10px 8px; }
+    .three-way-compare-table { font-size: 0.86rem; }
+    .three-way-compare-table th,
+    .three-way-compare-table td { padding: 6px 4px; }
+    .three-way-compare-table th.three-way-card-col,
+    .three-way-compare-table td.three-way-card-col {
+        min-width: 0;
+        max-width: 42vw;
+        word-break: break-word;
+    }
+    .three-way-compare-table th { font-size: 0.74rem; line-height: 1.15; }
+    .three-way-compare-table .three-way-col-total { font-size: 0.7em; }
+    .three-way-compare-summary { font-size: 0.8rem; }
+}

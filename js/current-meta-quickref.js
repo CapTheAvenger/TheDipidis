@@ -207,12 +207,66 @@
 
   // ── UI: render the two reference panels ──────────────────────────
 
+  // Fill the `type` field from the global card DB when the source
+  // CSV didn't carry it. The per-decklist CSV ships with type empty
+  // on ~70 % of rows; without enrichment, _typeRank() returns the
+  // "unknown" bucket for most cards and the type-grouped sort
+  // collapses to count-desc only — Pokémon end up mixed in with
+  // Energies and Trainers, which is what the user flagged on
+  // 2026-06-10 ("Sortierung der Referenzdecks stimmt nicht").
+  function _enrichCardType(card) {
+    if (card && card.type) return card;
+    const set = String(card?.set_code || '').toUpperCase().trim();
+    const num = String(card?.set_number || '').trim();
+    if (!set || !num) return card;
+    const db = global.cardsBySetNumberMap;
+    if (!db) return card;
+    // Try the exact key first, then variants for zero-pad drift —
+    // limitless serves "057" but our CSV sometimes has "57".
+    const numStripped = num.replace(/^0+/, '') || '0';
+    const keys = [
+      `${set}-${num}`,
+      `${set}-${numStripped}`,
+      `${set}-${numStripped.padStart(3, '0')}`,
+    ];
+    for (const k of keys) {
+      const entry = db[k];
+      if (entry && (entry.type || entry.card_type)) {
+        card.type = entry.type || entry.card_type;
+        return card;
+      }
+    }
+    return card;
+  }
+
+  // typeOrder mirrors app-deck-builder.js sortCardsByType so the
+  // reference panels and 3-way table land in the same order as the
+  // Past Meta "Most Successful List" panel and the Card Overview
+  // section. Pokemon→Supporter→Item→Tool→Stadium→SpecEnergy→BasicEnergy.
+  const _TYPE_ORDER = {
+    'Pokemon': 1, 'Supporter': 2, 'Item': 3, 'Tool': 4,
+    'Stadium': 5, 'Special Energy': 6, 'Basic Energy': 7, 'Energy': 7,
+  };
+
   function _typeRank(c) {
+    _enrichCardType(c);
     const ty = _norm(c.type);
-    if (ty.includes('pok')) return 0;
-    if (ty.includes('supp') || ty.includes('item') || ty.includes('trainer') || ty.includes('stadium') || ty.includes('tool')) return 1;
-    if (ty.includes('energy')) return 2;
-    return 3;
+    if (!ty) return 99;  // unknown cards sink to the bottom instead
+                         // of polluting the Pokemon block (which is
+                         // what getCardTypeCategory('') returns).
+    if (typeof global.getCardTypeCategory === 'function') {
+      const cat = global.getCardTypeCategory(c.type || '');
+      return _TYPE_ORDER[cat] || 99;
+    }
+    // Fallback when the canonical helper isn't loaded yet.
+    if (ty.includes('special') && ty.includes('energy')) return 6;
+    if (ty.includes('energy')) return 7;
+    if (ty.includes('supp')) return 2;
+    if (ty.includes('tool')) return 4;
+    if (ty.includes('stadium')) return 5;
+    if (ty.includes('item') || ty === 'trainer') return 3;
+    if (ty.includes('pok')) return 1;
+    return 99;
   }
 
   function _renderCardGrid(cards) {
@@ -380,7 +434,12 @@
       return;
     }
 
-    // Merge into a single per-card record { name, builder, major, online }
+    // Merge into a single per-card record { name, type, builder,
+    // major, online }. We keep type alongside the counts so the row
+    // sort below can group by category (Pokémon → Trainer → Energy)
+    // instead of just throwing the highest-count rows on top — which
+    // mixed Pokémon and Energies and made the table hard to scan
+    // (user feedback 2026-06-10).
     const byName = new Map();
     const pushCards = (cards, field) => {
       if (!cards) return;
@@ -388,32 +447,82 @@
         const key = _norm(c.name);
         if (!key) continue;
         if (!byName.has(key)) {
-          byName.set(key, { name: c.name, builder: 0, major: 0, online: 0 });
+          byName.set(key, {
+            name: c.name,
+            type: '',
+            set_code: c.set_code || '',
+            set_number: c.set_number || '',
+            builder: 0, major: 0, online: 0,
+          });
         }
-        byName.get(key)[field] += (c.count || 0);
+        const e = byName.get(key);
+        e[field] += (c.count || 0);
+        // First non-empty type / set info wins — Major source has
+        // type populated more often than Builder's parsed deck-key
+        // shape, but any source is better than none.
+        if (!e.type && c.type) e.type = c.type;
+        if (!e.set_code && c.set_code) {
+          e.set_code = c.set_code;
+          e.set_number = c.set_number;
+        }
       }
     };
     pushCards(builderCards, 'builder');
     pushCards(major && major.cards, 'major');
     pushCards(online && online.cards, 'online');
 
+    // Sort: category (Pokémon → Trainer → Energy) → max-count desc
+    // → name. _typeRank handles the card-DB enrichment for rows whose
+    // type field was empty (most per-decklist data).
     const rows = Array.from(byName.values()).sort((a, b) => {
+      const tr = _typeRank(a) - _typeRank(b);
+      if (tr !== 0) return tr;
       const maxA = Math.max(a.builder, a.major, a.online);
       const maxB = Math.max(b.builder, b.major, b.online);
       if (maxB !== maxA) return maxB - maxA;
       return a.name.localeCompare(b.name);
     });
 
+    // Build the table body with category-section header rows that
+    // break Pokémon / Trainer / Energy visually. A single sticky
+    // header row per section gives the eye a landmark as it scrolls
+    // through a 25-row deck on a phone screen.
+    const _sectionLabel = (rank) => {
+      if (rank === 1) return _tt('cm.threeWaySectionPokemon', 'Pokémon');
+      if (rank >= 2 && rank <= 5) return _tt('cm.threeWaySectionTrainer', 'Trainer');
+      if (rank === 6 || rank === 7) return _tt('cm.threeWaySectionEnergy', 'Energy');
+      return _tt('cm.threeWaySectionOther', 'Other');
+    };
+    const _sectionBucket = (rank) => {
+      if (rank === 1) return 'pokemon';
+      if (rank >= 2 && rank <= 5) return 'trainer';
+      if (rank === 6 || rank === 7) return 'energy';
+      return 'other';
+    };
+
     const tallies = { all: 0, two: 0, one: 0 };
-    const trs = rows.map(r => {
-      const bucket = _agreeBucket(r.builder, r.major, r.online);
-      tallies[bucket]++;
-      const cell = (n) => `<td class="${n > 0 ? '' : 'three-way-cell-zero'}">${n > 0 ? n : '–'}</td>`;
-      return `<tr class="three-way-row-${bucket}">
-        <td class="three-way-card-col">${_escHtml(r.name)}</td>
-        ${cell(r.builder)}${cell(r.major)}${cell(r.online)}
-      </tr>`;
-    }).join('');
+    const cell = (n) => `<td class="${n > 0 ? '' : 'three-way-cell-zero'}">${n > 0 ? n : '–'}</td>`;
+    const trChunks = [];
+    let lastSectionBucket = '';
+    for (const r of rows) {
+      const rank = _typeRank(r);
+      const bucket = _sectionBucket(rank);
+      if (bucket !== lastSectionBucket) {
+        trChunks.push(
+          `<tr class="three-way-section-row"><th colspan="4" class="three-way-section-th">${_escHtml(_sectionLabel(rank))}</th></tr>`
+        );
+        lastSectionBucket = bucket;
+      }
+      const agree = _agreeBucket(r.builder, r.major, r.online);
+      tallies[agree]++;
+      trChunks.push(
+        `<tr class="three-way-row-${agree}">
+          <td class="three-way-card-col">${_escHtml(r.name)}</td>
+          ${cell(r.builder)}${cell(r.major)}${cell(r.online)}
+        </tr>`
+      );
+    }
+    const trs = trChunks.join('');
 
     const builderTotal = builderCards.reduce((s, c) => s + (c.count || 0), 0);
     const majorTotal   = major  ? major.cards.reduce((s, c) => s + (c.count || 0), 0)  : 0;
@@ -429,9 +538,9 @@
         <thead>
           <tr>
             <th class="three-way-card-col">${_escHtml(_tt('cm.threeWayCardCol', 'Card'))}</th>
-            <th>${_escHtml(_tt('cm.threeWayColBuilder', 'Your Builder'))}<br><small style="font-weight:500;color:#6b7280;">${builderTotal}</small></th>
-            <th>${_escHtml(_tt('cm.threeWayColMajor', 'Latest Major'))}<br><small style="font-weight:500;color:#6b7280;">${majorTotal || '—'}</small></th>
-            <th>${_escHtml(_tt('cm.threeWayColOnline', 'Latest Online'))}<br><small style="font-weight:500;color:#6b7280;">${onlineTotal || '—'}</small></th>
+            <th>${_escHtml(_tt('cm.threeWayColBuilder', 'Your Builder'))}<br><small class="three-way-col-total">${builderTotal}</small></th>
+            <th>${_escHtml(_tt('cm.threeWayColMajor', 'Latest Major'))}<br><small class="three-way-col-total">${majorTotal || '—'}</small></th>
+            <th>${_escHtml(_tt('cm.threeWayColOnline', 'Latest Online'))}<br><small class="three-way-col-total">${onlineTotal || '—'}</small></th>
           </tr>
         </thead>
         <tbody>${trs}</tbody>

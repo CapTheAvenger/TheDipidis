@@ -1732,15 +1732,56 @@
             const cmpBtnLbl = (typeof t === 'function' ? t('pm.mostSuccessfulCompareBtn') : 'Compare with built deck');
             const copyBtnLbl = (typeof t === 'function' ? t('pm.mostSuccessfulCopyBtn') : 'Copy decklist');
 
-            // Card grid — sort high-count Pokémon first (visual heaviest at
-            // top), then trainers, then energies; falls back to count desc
-            // when type info is missing on a row.
+            // Card grid — sort by the same category order the rest of
+            // the site uses (sortCardsByType in app-deck-builder.js):
+            // Pokemon → Supporter → Item → Tool → Stadium → SpecEnergy
+            // → BasicEnergy. The per-decklist CSV ships with `type`
+            // empty on ~70 % of rows, so enrich from the global card
+            // DB first — without that step the bucket collapses to
+            // count-desc only and you get Pokémon mixed in with
+            // energies, which is what the user flagged 2026-06-10.
+            const _enrichType = (c) => {
+                if (c && c.type) return c;
+                const set = String(c?.set_code || '').toUpperCase().trim();
+                const num = String(c?.set_number || '').trim();
+                if (!set || !num) return c;
+                const db = window.cardsBySetNumberMap;
+                if (!db) return c;
+                const numStripped = num.replace(/^0+/, '') || '0';
+                const keys = [
+                    `${set}-${num}`,
+                    `${set}-${numStripped}`,
+                    `${set}-${numStripped.padStart(3, '0')}`,
+                ];
+                for (const k of keys) {
+                    const entry = db[k];
+                    if (entry && (entry.type || entry.card_type)) {
+                        c.type = entry.type || entry.card_type;
+                        return c;
+                    }
+                }
+                return c;
+            };
+            const _TYPE_ORDER = {
+                'Pokemon': 1, 'Supporter': 2, 'Item': 3, 'Tool': 4,
+                'Stadium': 5, 'Special Energy': 6, 'Basic Energy': 7, 'Energy': 7,
+            };
             const _typeRank = (c) => {
+                _enrichType(c);
                 const ty = String(c.type || '').toLowerCase();
-                if (ty.includes('pok')) return 0;
-                if (ty.includes('supp') || ty.includes('item') || ty.includes('trainer') || ty.includes('stadium') || ty.includes('tool')) return 1;
-                if (ty.includes('energy')) return 2;
-                return 3;
+                if (!ty) return 99;  // unknown cards sink to the bottom
+                if (typeof window.getCardTypeCategory === 'function') {
+                    const cat = window.getCardTypeCategory(c.type || '');
+                    return _TYPE_ORDER[cat] || 99;
+                }
+                if (ty.includes('special') && ty.includes('energy')) return 6;
+                if (ty.includes('energy')) return 7;
+                if (ty.includes('supp')) return 2;
+                if (ty.includes('tool')) return 4;
+                if (ty.includes('stadium')) return 5;
+                if (ty.includes('item') || ty === 'trainer') return 3;
+                if (ty.includes('pok')) return 1;
+                return 99;
             };
             cards.sort((a, b) => {
                 const tr = _typeRank(a) - _typeRank(b);

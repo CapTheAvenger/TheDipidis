@@ -5,7 +5,7 @@
     "last_updated": "2026-06-10",
     "source": "VGCPastes Champions M-A spreadsheet (gid=791705272)",
     "source_url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTXHOfUSKTZyVoxF7BO-XIEqtbrsq1OSh_4bSaO0bhAMHqtsvYqM_4eZWIMqdZ--SKCb86EXuk75o1i/pub?gid=791705272&single=true&output=csv",
-    "team_count": 20
+    "team_count": 30
   },
   "teams": [
     {
@@ -1963,6 +1963,986 @@
             "Dazzling Gleam",
             "Protect",
             "Weather Ball"
+          ]
+        }
+      ],
+      "strategy": []
+    },
+    {
+      "rank": 21,
+      "replica_code": "P8D0K3H3T3",
+      "team_name": "ogrevgc's Alpensee Anniversary by codecentric AG Tour Champion Team",
+      "tournament": "Alpensee Anniversary by codecentric AG Tour",
+      "trainer": "ogrevgc",
+      "format": "VGC Champions",
+      "sheet_rank": "Champion",
+      "date_shared": "13 Apr 2026",
+      "pokepaste_url": "https://pokepast.es/110f1ffe9d58776b",
+      "pokemon": [
+        {
+          "name": "Sneasler",
+          "item": "White Herb",
+          "ability": "Unburden",
+          "tera_type": "",
+          "evs": "2 HP / 32 Atk / 32 Spe",
+          "nature": "Jolly",
+          "moves": [
+            "Dire Claw",
+            "Close Combat",
+            "Fake Out",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Floette-Eternal",
+          "item": "Floettite",
+          "ability": "Flower Veil",
+          "tera_type": "",
+          "evs": "26 HP / 3 Def / 25 SpA / 12 Spe",
+          "nature": "Modest",
+          "moves": [
+            "Moonblast",
+            "Dazzling Gleam",
+            "Calm Mind",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Basculegion",
+          "item": "Choice Scarf",
+          "ability": "Adaptability",
+          "tera_type": "",
+          "evs": "2 HP / 32 Atk / 32 Spe",
+          "nature": "Jolly",
+          "moves": [
+            "Aqua Jet",
+            "Wave Crash",
+            "Last Respects",
+            "Flip Turn"
+          ]
+        },
+        {
+          "name": "Maushold-Four",
+          "item": "Chople Berry",
+          "ability": "Friend Guard",
+          "tera_type": "",
+          "evs": "32 HP / 1 Def / 1 SpD / 32 Spe",
+          "nature": "Jolly",
+          "moves": [
+            "Super Fang",
+            "Follow Me",
+            "Helping Hand",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Aerodactyl",
+          "item": "Focus Sash",
+          "ability": "Unnerve",
+          "tera_type": "",
+          "evs": "2 HP / 32 Atk / 32 Spe",
+          "nature": "Jolly",
+          "moves": [
+            "Rock Slide",
+            "Dual Wingbeat",
+            "Tailwind",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Kingambit",
+          "item": "Black Glasses",
+          "ability": "Defiant",
+          "tera_type": "",
+          "evs": "32 HP / 32 Atk / 1 Def / 1 SpD",
+          "nature": "Adamant",
+          "moves": [
+            "Kowtow Cleave",
+            "Sucker Punch",
+            "Iron Head",
+            "Protect"
+          ]
+        }
+      ],
+      "strategy": []
+    },
+    {
+      "rank": 22,
+      "replica_code": "YJGBJARH4E",
+      "team_name": "homura_kurenai_'s Tera Challenge Daily #3 Champion Team",
+      "tournament": "Tera Challenge Daily #3",
+      "trainer": "homura_kurenai_",
+      "format": "VGC Champions",
+      "sheet_rank": "Champion",
+      "date_shared": "11 Apr 2026",
+      "pokepaste_url": "https://pokepast.es/d4a4030826913c70",
+      "pokemon": [
+        {
+          "name": "Garchomp",
+          "item": "Sitrus Berry",
+          "ability": "Rough Skin",
+          "tera_type": "",
+          "evs": "26 HP / 15 Atk / 1 Def / 24 Spe",
+          "nature": "Adamant",
+          "moves": [
+            "Earthquake",
+            "Dragon Claw",
+            "Rock Slide",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Maushold-Four",
+          "item": "Chople Berry",
+          "ability": "Friend Guard",
+          "tera_type": "",
+          "evs": "32 HP / 1 Def / 1 SpD / 32 Spe",
+          "nature": "Jolly",
+          "moves": [
+            "Super Fang",
+            "Follow Me",
+            "Taunt",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Delphox",
+          "item": "Delphoxite",
+          "ability": "Blaze",
+          "tera_type": "",
+          "evs": "9 HP / 23 Def / 5 SpA / 29 Spe",
+          "nature": "Timid",
+          "moves": [
+            "Heat Wave",
+            "Psychic",
+            "Encore",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Aerodactyl",
+          "item": "Focus Sash",
+          "ability": "Unnerve",
+          "tera_type": "",
+          "evs": "2 HP / 32 Atk / 32 Spe",
+          "nature": "Jolly",
+          "moves": [
+            "Rock Slide",
+            "Dual Wingbeat",
+            "Tailwind",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Floette-Eternal",
+          "item": "Floettite",
+          "ability": "Flower Veil",
+          "tera_type": "",
+          "evs": "26 HP / 3 Def / 25 SpA / 12 Spe",
+          "nature": "Modest",
+          "moves": [
+            "Moonblast",
+            "Dazzling Gleam",
+            "Calm Mind",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Sneasler",
+          "item": "White Herb",
+          "ability": "Unburden",
+          "tera_type": "",
+          "evs": "32 Atk / 1 Def / 1 SpD / 32 Spe",
+          "nature": "Adamant",
+          "moves": [
+            "Close Combat",
+            "Dire Claw",
+            "Fake Out",
+            "Protect"
+          ]
+        }
+      ],
+      "strategy": []
+    },
+    {
+      "rank": 23,
+      "replica_code": "SPMJ8BQ863",
+      "team_name": "pokefey's Torneo Salida Pokemon Champions Tour Champion Team",
+      "tournament": "-Torneo Salida Pokemon Champions Tour",
+      "trainer": "pokefey",
+      "format": "VGC Champions",
+      "sheet_rank": "Champion",
+      "date_shared": "10 Apr 2026",
+      "pokepaste_url": "https://pokepast.es/44dace349421e14c",
+      "pokemon": [
+        {
+          "name": "Golurk",
+          "item": "Golurkite",
+          "ability": "Iron Fist",
+          "tera_type": "",
+          "evs": "27 HP / 32 Atk / 1 Def / 1 SpD / 5 Spe",
+          "nature": "Adamant",
+          "moves": [
+            "Headlong Rush",
+            "Poltergeist",
+            "Ice Punch",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Farigiraf",
+          "item": "Sitrus Berry",
+          "ability": "Armor Tail",
+          "tera_type": "",
+          "evs": "31 HP / 24 Def / 10 SpD",
+          "nature": "Quiet",
+          "moves": [
+            "Psychic",
+            "Hyper Voice",
+            "Helping Hand",
+            "Trick Room"
+          ]
+        },
+        {
+          "name": "Incineroar",
+          "item": "Shuca Berry",
+          "ability": "Intimidate",
+          "tera_type": "",
+          "evs": "30 HP / 1 Atk / 21 Def / 9 SpD / 5 Spe",
+          "nature": "Impish",
+          "moves": [
+            "Throat Chop",
+            "Flare Blitz",
+            "Parting Shot",
+            "Fake Out"
+          ]
+        },
+        {
+          "name": "Torkoal",
+          "item": "Charcoal",
+          "ability": "Drought",
+          "tera_type": "",
+          "evs": "20 HP / 32 SpA / 13 SpD",
+          "nature": "Quiet",
+          "moves": [
+            "Eruption",
+            "Weather Ball",
+            "Protect",
+            "Heat Wave"
+          ]
+        },
+        {
+          "name": "Sneasler",
+          "item": "White Herb",
+          "ability": "Unburden",
+          "tera_type": "",
+          "evs": "1 HP / 32 Atk / 1 Def / 32 Spe",
+          "nature": "Jolly",
+          "moves": [
+            "Close Combat",
+            "Dire Claw",
+            "Fake Out",
+            "Coaching"
+          ]
+        },
+        {
+          "name": "Venusaur",
+          "item": "Focus Sash",
+          "ability": "Chlorophyll",
+          "tera_type": "",
+          "evs": "1 HP / 32 SpA / 32 Spe",
+          "nature": "Modest",
+          "moves": [
+            "Protect",
+            "Leaf Storm",
+            "Sludge Bomb",
+            "Sleep Powder"
+          ]
+        }
+      ],
+      "strategy": []
+    },
+    {
+      "rank": 24,
+      "replica_code": "71S9VTS8EN",
+      "team_name": "ursakingvgc's Ninopokebros Pokemon Champions First Tour Champion Team",
+      "tournament": "Ninopokebros Pokemon Champions First Tour",
+      "trainer": "ursakingvgc",
+      "format": "VGC Champions",
+      "sheet_rank": "Champion",
+      "date_shared": "10 Apr 2026",
+      "pokepaste_url": "https://pokepast.es/bfcfc47093e5ed1b",
+      "pokemon": [
+        {
+          "name": "Clefable",
+          "item": "Sitrus Berry",
+          "ability": "Unaware",
+          "tera_type": "",
+          "evs": "32 HP / 32 Def / 1 SpD",
+          "nature": "Bold",
+          "moves": [
+            "Follow Me",
+            "Moonblast",
+            "Helping Hand",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Kingambit",
+          "item": "Black Glasses",
+          "ability": "Defiant",
+          "tera_type": "",
+          "evs": "32 HP / 32 Atk / 1 SpD",
+          "nature": "Adamant",
+          "moves": [
+            "Kowtow Cleave",
+            "Swords Dance",
+            "Sucker Punch",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Sneasler",
+          "item": "Focus Sash",
+          "ability": "Unburden",
+          "tera_type": "",
+          "evs": "32 Atk / 1 Def / 32 Spe",
+          "nature": "Jolly",
+          "moves": [
+            "Close Combat",
+            "Dire Claw",
+            "Fake Out",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Dragonite",
+          "item": "Lum Berry",
+          "ability": "Multiscale",
+          "tera_type": "",
+          "evs": "32 Atk / 1 SpD / 32 Spe",
+          "nature": "Adamant",
+          "moves": [
+            "Scale Shot",
+            "Extreme Speed",
+            "Haze",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Delphox",
+          "item": "Delphoxite",
+          "ability": "Blaze",
+          "tera_type": "",
+          "evs": "1 Def / 32 SpA / 32 Spe",
+          "nature": "Timid",
+          "moves": [
+            "Heat Wave",
+            "Psychic",
+            "Substitute",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Basculegion",
+          "item": "Choice Scarf",
+          "ability": "Adaptability",
+          "tera_type": "",
+          "evs": "1 HP / 28 Atk / 4 Def / 1 SpD / 32 Spe",
+          "nature": "Adamant",
+          "moves": [
+            "Flip Turn",
+            "Aqua Jet",
+            "Wave Crash",
+            "Last Respects"
+          ]
+        }
+      ],
+      "strategy": []
+    },
+    {
+      "rank": 25,
+      "replica_code": "P41L3BSYRX",
+      "team_name": "Hojun Y.'s Korea PTC 2026 Champion Team (Seniors)",
+      "tournament": "Korea PTC 2026",
+      "trainer": "Hojun Y.",
+      "format": "VGC Champions",
+      "sheet_rank": "Champion (Seniors)",
+      "date_shared": "24 May 2026",
+      "pokepaste_url": "https://pokepast.es/ac6bcffb91d7bcb7",
+      "pokemon": [
+        {
+          "name": "Aerodactyl",
+          "item": "Aerodactylite",
+          "ability": "Unnerve",
+          "tera_type": "",
+          "evs": "22 HP / 13 Atk / 5 SpD / 26 Spe",
+          "nature": "Jolly",
+          "moves": [
+            "Rock Slide",
+            "Dual Wingbeat",
+            "Tailwind",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Sylveon",
+          "item": "Fairy Feather",
+          "ability": "Pixilate",
+          "tera_type": "",
+          "evs": "19 HP / 29 Def / 18 SpA",
+          "nature": "Modest",
+          "moves": [
+            "Hyper Voice",
+            "Quick Attack",
+            "Moonblast",
+            "Detect"
+          ]
+        },
+        {
+          "name": "Garchomp",
+          "item": "Sitrus Berry",
+          "ability": "Rough Skin",
+          "tera_type": "",
+          "evs": "22 HP / 20 Atk / 24 Spe",
+          "nature": "Adamant",
+          "moves": [
+            "Dragon Claw",
+            "Stomping Tantrum",
+            "Rock Tomb",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Scovillain",
+          "item": "Scovillainite",
+          "ability": "Chlorophyll",
+          "tera_type": "",
+          "evs": "32 HP / 19 Def / 15 SpD",
+          "nature": "Calm",
+          "moves": [
+            "Overheat",
+            "Leech Seed",
+            "Rage Powder",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Basculegion",
+          "item": "Focus Sash",
+          "ability": "Adaptability",
+          "tera_type": "",
+          "evs": "32 Atk / 2 Def / 32 Spe",
+          "nature": "Jolly",
+          "moves": [
+            "Last Respects",
+            "Liquidation",
+            "Aqua Jet",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Kingambit",
+          "item": "Chople Berry",
+          "ability": "Defiant",
+          "tera_type": "",
+          "evs": "32 HP / 25 Atk / 9 Spe",
+          "nature": "Adamant",
+          "moves": [
+            "Kowtow Cleave",
+            "Iron Head",
+            "Low Kick",
+            "Sucker Punch"
+          ]
+        }
+      ],
+      "strategy": []
+    },
+    {
+      "rank": 26,
+      "replica_code": "G8JVKBFKXA",
+      "team_name": "alaninepoke's PJCS 2026 Runner Up Team",
+      "tournament": "PJCS 2026",
+      "trainer": "alaninepoke",
+      "format": "VGC Champions",
+      "sheet_rank": "Runner Up",
+      "date_shared": "8 Jun 2026",
+      "pokepaste_url": "https://pokepast.es/34cb00fce368cd94",
+      "pokemon": [
+        {
+          "name": "Gengar",
+          "item": "Gengarite",
+          "ability": "Cursed Body",
+          "tera_type": "",
+          "evs": "30 HP / 1 Def / 1 SpA / 28 SpD / 6 Spe",
+          "nature": "Modest",
+          "moves": [
+            "Shadow Ball",
+            "Sludge Bomb",
+            "Perish Song",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Sinistcha",
+          "item": "Colbur Berry",
+          "ability": "Hospitality",
+          "tera_type": "",
+          "evs": "31 HP / 15 Def / 20 SpD",
+          "nature": "Calm",
+          "moves": [
+            "Matcha Gotcha",
+            "Trick Room",
+            "Rage Powder",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Archaludon",
+          "item": "Leftovers",
+          "ability": "Stamina",
+          "tera_type": "",
+          "evs": "27 HP / 30 SpD / 9 Spe",
+          "nature": "Modest",
+          "moves": [
+            "Electro Shot",
+            "Dragon Pulse",
+            "Flash Cannon",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Politoed",
+          "item": "Sitrus Berry",
+          "ability": "Drizzle",
+          "tera_type": "",
+          "evs": "31 HP / 23 Def / 12 SpD",
+          "nature": "Calm",
+          "moves": [
+            "Weather Ball",
+            "Hypnosis",
+            "Perish Song",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Incineroar",
+          "item": "Chople Berry",
+          "ability": "Intimidate",
+          "tera_type": "",
+          "evs": "31 HP / 15 Def / 20 SpD",
+          "nature": "Sassy",
+          "moves": [
+            "Flare Blitz",
+            "Fake Out",
+            "Parting Shot",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Froslass",
+          "item": "Froslassite",
+          "ability": "Cursed Body",
+          "tera_type": "",
+          "evs": "32 HP / 2 SpA / 32 Spe",
+          "nature": "Timid",
+          "moves": [
+            "Blizzard",
+            "Aurora Veil",
+            "Rain Dance",
+            "Protect"
+          ]
+        }
+      ],
+      "strategy": []
+    },
+    {
+      "rank": 27,
+      "replica_code": "B28CWAPJ20",
+      "team_name": "husky_vgc's Singapore MBL 2026 Runner Up Team",
+      "tournament": "Singapore MBL 2026",
+      "trainer": "husky_vgc",
+      "format": "VGC Champions",
+      "sheet_rank": "Runner Up",
+      "date_shared": "24 May 2026",
+      "pokepaste_url": "https://pokepast.es/5ccf3041b09b5c88",
+      "pokemon": [
+        {
+          "name": "Charizard",
+          "item": "Charizardite Y",
+          "ability": "Blaze",
+          "tera_type": "",
+          "evs": "28 HP / 14 Def / 3 SpA / 21 Spe",
+          "nature": "Modest",
+          "moves": [
+            "Heat Wave",
+            "Solar Beam",
+            "Weather Ball",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Garchomp",
+          "item": "Sitrus Berry",
+          "ability": "Rough Skin",
+          "tera_type": "",
+          "evs": "25 HP / 12 Atk / 29 Spe",
+          "nature": "Adamant",
+          "moves": [
+            "Earthquake",
+            "Dragon Claw",
+            "Rock Tomb",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Kingambit",
+          "item": "Chople Berry",
+          "ability": "Defiant",
+          "tera_type": "",
+          "evs": "32 HP / 25 Atk / 9 Spe",
+          "nature": "Adamant",
+          "moves": [
+            "Iron Head",
+            "Sucker Punch",
+            "Kowtow Cleave",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Basculegion",
+          "item": "Focus Sash",
+          "ability": "Adaptability",
+          "tera_type": "",
+          "evs": "2 HP / 32 Atk / 32 Spe",
+          "nature": "Adamant",
+          "moves": [
+            "Liquidation",
+            "Aqua Jet",
+            "Last Respects",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Sylveon",
+          "item": "Fairy Feather",
+          "ability": "Pixilate",
+          "tera_type": "",
+          "evs": "18 HP / 12 Def / 20 SpA / 16 Spe",
+          "nature": "Modest",
+          "moves": [
+            "Hyper Voice",
+            "Quick Attack",
+            "Hyper Beam",
+            "Detect"
+          ]
+        },
+        {
+          "name": "Aerodactyl",
+          "item": "Aerodactylite",
+          "ability": "Unnerve",
+          "tera_type": "",
+          "evs": "10 HP / 10 Atk / 14 SpD / 32 Spe",
+          "nature": "Jolly",
+          "moves": [
+            "Rock Slide",
+            "Dual Wingbeat",
+            "Tailwind",
+            "Protect"
+          ]
+        }
+      ],
+      "strategy": []
+    },
+    {
+      "rank": 28,
+      "replica_code": "NLNDPK9F57",
+      "team_name": "ptr_vgc's Thailand MBL 2026 Runner Up Team",
+      "tournament": "Thailand MBL 2026",
+      "trainer": "ptr_vgc",
+      "format": "VGC Champions",
+      "sheet_rank": "Runner Up",
+      "date_shared": "18 May 2026",
+      "pokepaste_url": "https://pokepast.es/de2397783eaa94f6",
+      "pokemon": [
+        {
+          "name": "Gengar",
+          "item": "Gengarite",
+          "ability": "Cursed Body",
+          "tera_type": "",
+          "evs": "30 HP / 21 Def / 5 SpA / 10 Spe",
+          "nature": "Timid",
+          "moves": [
+            "Sludge Bomb",
+            "Shadow Ball",
+            "Will-O-Wisp",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Incineroar",
+          "item": "Sitrus Berry",
+          "ability": "Intimidate",
+          "tera_type": "",
+          "evs": "31 HP / 23 Def / 4 SpD / 8 Spe",
+          "nature": "Impish",
+          "moves": [
+            "Flare Blitz",
+            "Throat Chop",
+            "Fake Out",
+            "Parting Shot"
+          ]
+        },
+        {
+          "name": "Basculegion",
+          "item": "Focus Sash",
+          "ability": "Adaptability",
+          "tera_type": "",
+          "evs": "2 HP / 32 Atk / 32 Spe",
+          "nature": "Jolly",
+          "moves": [
+            "Wave Crash",
+            "Last Respects",
+            "Aqua Jet",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Dragonite",
+          "item": "Dragon Fang",
+          "ability": "Multiscale",
+          "tera_type": "",
+          "evs": "19 HP / 32 Atk / 1 Def / 1 SpD / 13 Spe",
+          "nature": "Adamant",
+          "moves": [
+            "Dragon Claw",
+            "Low Kick",
+            "Extreme Speed",
+            "Tailwind"
+          ]
+        },
+        {
+          "name": "Kingambit",
+          "item": "Chople Berry",
+          "ability": "Defiant",
+          "tera_type": "",
+          "evs": "32 HP / 31 Atk / 2 Def / 1 Spe",
+          "nature": "Adamant",
+          "moves": [
+            "Kowtow Cleave",
+            "Sucker Punch",
+            "Low Kick",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Floette-Eternal",
+          "item": "Floettite",
+          "ability": "Flower Veil",
+          "tera_type": "",
+          "evs": "26 HP / 18 Def / 6 SpA / 16 Spe",
+          "nature": "Timid",
+          "moves": [
+            "Moonblast",
+            "Dazzling Gleam",
+            "Calm Mind",
+            "Protect"
+          ]
+        }
+      ],
+      "strategy": []
+    },
+    {
+      "rank": 29,
+      "replica_code": "HEPQFCGMWM",
+      "team_name": "mariruri's Kurotama Mountain Cup Runner Up Team",
+      "tournament": "Kurotama Mountain Cup",
+      "trainer": "mariruri",
+      "format": "VGC Champions",
+      "sheet_rank": "Runner Up",
+      "date_shared": "16 May 2026",
+      "pokepaste_url": "https://pokepast.es/8f088e5a9ecb0344",
+      "pokemon": [
+        {
+          "name": "Floette-Eternal",
+          "item": "Floettite",
+          "ability": "Flower Veil",
+          "tera_type": "",
+          "evs": "22 HP / 6 Def / 5 SpA / 1 SpD / 32 Spe",
+          "nature": "Modest",
+          "moves": [
+            "Moonblast",
+            "Dazzling Gleam",
+            "Calm Mind",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Charizard",
+          "item": "Charizardite Y",
+          "ability": "Blaze",
+          "tera_type": "",
+          "evs": "16 HP / 18 Def / 3 SpA / 29 Spe",
+          "nature": "Modest",
+          "moves": [
+            "Heat Wave",
+            "Weather Ball",
+            "Solar Beam",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Garchomp",
+          "item": "Choice Scarf",
+          "ability": "Rough Skin",
+          "tera_type": "",
+          "evs": "32 Atk / 2 Def / 32 Spe",
+          "nature": "Adamant",
+          "moves": [
+            "Dragon Claw",
+            "Stomping Tantrum",
+            "Earthquake",
+            "Rock Tomb"
+          ]
+        },
+        {
+          "name": "Sinistcha",
+          "item": "Sitrus Berry",
+          "ability": "Hospitality",
+          "tera_type": "",
+          "evs": "32 HP / 7 Def / 27 SpD",
+          "nature": "Relaxed",
+          "moves": [
+            "Matcha Gotcha",
+            "Rage Powder",
+            "Trick Room",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Incineroar",
+          "item": "Leftovers",
+          "ability": "Intimidate",
+          "tera_type": "",
+          "evs": "32 HP / 8 Def / 8 SpD / 18 Spe",
+          "nature": "Impish",
+          "moves": [
+            "Flare Blitz",
+            "Throat Chop",
+            "Parting Shot",
+            "Fake Out"
+          ]
+        },
+        {
+          "name": "Aegislash",
+          "item": "Focus Sash",
+          "ability": "Stance Change",
+          "tera_type": "",
+          "evs": "2 HP / 32 Atk / 32 Spe",
+          "nature": "Adamant",
+          "moves": [
+            "Iron Head",
+            "Poltergeist",
+            "Shadow Sneak",
+            "King's Shield"
+          ]
+        }
+      ],
+      "strategy": []
+    },
+    {
+      "rank": 30,
+      "replica_code": "8L8QVB7ARU",
+      "team_name": "tdumbreon's Grand Champions Festival Runner Up Team",
+      "tournament": "Grand Champions Festival",
+      "trainer": "tdumbreon",
+      "format": "VGC Champions",
+      "sheet_rank": "Runner Up",
+      "date_shared": "26 Apr 2026",
+      "pokepaste_url": "https://pokepast.es/6d519d75ac9843bd",
+      "pokemon": [
+        {
+          "name": "Froslass",
+          "item": "Froslassite",
+          "ability": "Cursed Body",
+          "tera_type": "",
+          "evs": "32 HP / 15 Def / 1 SpA / 18 Spe",
+          "nature": "Timid",
+          "moves": [
+            "Protect",
+            "Blizzard",
+            "Shadow Ball",
+            "Aurora Veil"
+          ]
+        },
+        {
+          "name": "Kingambit",
+          "item": "Chople Berry",
+          "ability": "Defiant",
+          "tera_type": "",
+          "evs": "8 HP / 32 Atk / 1 Def / 25 Spe",
+          "nature": "Adamant",
+          "moves": [
+            "Protect",
+            "Kowtow Cleave",
+            "Low Kick",
+            "Sucker Punch"
+          ]
+        },
+        {
+          "name": "Sneasler",
+          "item": "White Herb",
+          "ability": "Unburden",
+          "tera_type": "",
+          "evs": "32 HP / 28 Def / 6 Spe",
+          "nature": "Adamant",
+          "moves": [
+            "Protect",
+            "Close Combat",
+            "Dire Claw",
+            "Fake Out"
+          ]
+        },
+        {
+          "name": "Basculegion",
+          "item": "Focus Sash",
+          "ability": "Adaptability",
+          "tera_type": "",
+          "evs": "32 Atk / 1 Def / 1 SpD / 32 Spe",
+          "nature": "Adamant",
+          "moves": [
+            "Protect",
+            "Liquidation",
+            "Last Respects",
+            "Aqua Jet"
+          ]
+        },
+        {
+          "name": "Milotic",
+          "item": "Sitrus Berry",
+          "ability": "Competitive",
+          "tera_type": "",
+          "evs": "31 HP / 11 Def / 7 SpA / 4 SpD / 13 Spe",
+          "nature": "Bold",
+          "moves": [
+            "Protect",
+            "Scald",
+            "Icy Wind",
+            "Life Dew"
+          ]
+        },
+        {
+          "name": "Dragonite",
+          "item": "Dragon Fang",
+          "ability": "Multiscale",
+          "tera_type": "",
+          "evs": "21 HP / 32 Atk / 13 Spe",
+          "nature": "Adamant",
+          "moves": [
+            "Dragon Claw",
+            "Extreme Speed",
+            "Low Kick",
+            "Tailwind"
           ]
         }
       ],

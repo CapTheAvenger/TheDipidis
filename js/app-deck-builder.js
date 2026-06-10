@@ -3479,6 +3479,58 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 modal.appendChild(aceWrap);
             }
 
+            // Alternative-count suggestions (Phase 4.5 / 2nd Prüfstand).
+            // Non-blocking: the builder kept its naive Math.round but
+            // the field plurality plays a different count AND places
+            // clearly better. Surfaces here so the user can decide
+            // whether to tweak the deck manually.
+            const altSuggestions = Array.isArray(report.alt_suggestions)
+                ? report.alt_suggestions : [];
+            if (altSuggestions.length > 0) {
+                const altWrap = document.createElement('div');
+                altWrap.className = 'build-info-alt-suggestions';
+                const altTitle = document.createElement('h4');
+                const _altT = t('buildInfo.altSuggestionsTitle');
+                altTitle.textContent = (_altT && _altT !== 'buildInfo.altSuggestionsTitle')
+                    ? _altT
+                    : 'Alternative Anzahl basierend auf Performance';
+                altWrap.appendChild(altTitle);
+
+                const altIntro = document.createElement('p');
+                altIntro.className = 'build-info-alt-intro';
+                const _altI = t('buildInfo.altSuggestionsIntro');
+                altIntro.textContent = (_altI && _altI !== 'buildInfo.altSuggestionsIntro')
+                    ? _altI
+                    : 'Bei diesen Karten spielt die Mehrheit des Feldes eine andere Anzahl als die naive Math.round-Rundung — UND diese Mehrheit platziert sich deutlich besser. Der Builder hat NICHT automatisch angepasst, du kannst manuell überlegen ob du den Vorschlag übernimmst.';
+                altWrap.appendChild(altIntro);
+
+                altSuggestions
+                    .slice()
+                    .sort((a, b) => (b.placement_gap || 0) - (a.placement_gap || 0))
+                    .forEach(s => {
+                        const row = document.createElement('div');
+                        row.className = `build-info-alt-row build-info-alt-${s.direction || 'up'}`;
+                        const arrow = s.direction === 'up' ? '↑' : '↓';
+                        const card = document.createElement('div');
+                        card.className = 'build-info-alt-card';
+                        card.textContent = `${s.builder_count}× → ${arrow} ${s.suggested_count}× ${s.card_name}`;
+                        const detail = document.createElement('div');
+                        detail.className = 'build-info-alt-detail';
+                        const shareP = Math.round((s.plurality_share || 0) * 100);
+                        const totN = (s.plurality_n || 0) + (s.naive_n || 0);
+                        detail.textContent =
+                            `${s.plurality_n}/${totN} Listen spielen ${s.suggested_count}× ` +
+                            `(${shareP}%) · median Platz P.${Math.round(s.plurality_median)} ` +
+                            `vs P.${Math.round(s.naive_median)} (Δ ${Math.round(s.placement_gap)} besser) · ` +
+                            `Ø ${(s.weighted_avg || 0).toFixed(2)}`;
+                        row.appendChild(card);
+                        row.appendChild(detail);
+                        altWrap.appendChild(row);
+                    });
+
+                modal.appendChild(altWrap);
+            }
+
             // Card reasoning list — one row per card, badges explain
             // which layer(s) contributed.
             const list = document.createElement('div');
@@ -6899,6 +6951,29 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                     });
                 }
 
+                // Phase 4.5 alternative-count suggestions — non-blocking
+                // diagnostic. Each event tells the user "the builder
+                // kept N copies but the field plurality plays M and
+                // places clearly better; consider M". Rendered as a
+                // standalone section in the Why? modal so the user
+                // can decide whether to manually adjust the count.
+                const altSuggestions = (result.trace || [])
+                    .filter(ev => ev.phase === 4.5 && ev.decision === 'alternative_count_suggestion')
+                    .map(ev => ({
+                        card_name:        ev.card,
+                        slotType:         ev.slotType,
+                        builder_count:    ev.naive_count,
+                        suggested_count:  ev.suggested_count,
+                        plurality_share:  ev.plurality_share,
+                        plurality_n:      ev.plurality_n,
+                        naive_n:          ev.naive_n,
+                        plurality_median: ev.plurality_median,
+                        naive_median:     ev.naive_median,
+                        placement_gap:    ev.placement_gap,
+                        weighted_avg:     ev.weighted_avg,
+                        direction:        ev.direction,
+                    }));
+
                 window.lastConsistencyBuild = window.lastConsistencyBuild || {};
                 window.lastConsistencyBuild[source] = {
                     source,
@@ -6913,13 +6988,14 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                         tech_audit_active_categories: [],
                         phase_y2:         true,
                     },
-                    cards:        reportCards,
-                    ace_spec_pick: acePick,
-                    quality_audit: { findings: auditFindings },
+                    cards:            reportCards,
+                    ace_spec_pick:    acePick,
+                    quality_audit:    { findings: auditFindings },
+                    alt_suggestions:  altSuggestions,
                     // Raw trace stashed for power-users / dev tools —
                     // not rendered by the modal but invaluable in
                     // console when debugging "why did THIS land?"
-                    _phase_y2_trace: result.trace || [],
+                    _phase_y2_trace:  result.trace || [],
                 };
             } catch (err) {
                 console.warn('[MostConsistencyBuilder] failed to populate Why? report:', err);

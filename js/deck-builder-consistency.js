@@ -86,6 +86,28 @@
   // Spec rule 10: data-quality gates.
   const MIN_WEIGHTED_LISTS = 3;  // < 3 → refuse to build, transparent.
 
+  // ── Phase 4.5: alternative-count suggestion (2nd Prüfstand) ─────
+  //
+  // When the naive Math.round of weightedAvgCount lands close to a
+  // round-boundary, the field plurality + that plurality group's
+  // median placement form a "what would change if we trusted the
+  // field consensus instead?" diagnostic. Emitted into the trace so
+  // the Why? modal can surface it without overriding the live build.
+  //
+  // The thresholds below are deliberately conservative — the Turin
+  // sweep showed a 50/50 win-rate for naive vs plurality with looser
+  // settings, but the tighter "≥50 % plurality + ≥5-list sample +
+  // ≥50-place median gap" combo only fires on cases where plurality
+  // genuinely correlated with better placements (3 / 4 wins on Turin
+  // data). Once enough TEF-CRI tournaments land we revisit the
+  // thresholds and consider promoting the diagnostic to a live
+  // override.
+  const ALT_SUGGESTION_FRAC_MIN     = 0.30;
+  const ALT_SUGGESTION_FRAC_MAX     = 0.70;
+  const ALT_SUGGESTION_MIN_SHARE    = 0.50;
+  const ALT_SUGGESTION_MIN_SAMPLE   = 5;
+  const ALT_SUGGESTION_MIN_GAP      = 50;
+
   // Hard rules from the game:
   const DECK_SIZE = 60;
   const BASIC_ENERGY_NAMES = new Set([
@@ -457,6 +479,13 @@
             topCutWeight:   0,
             n_lists_with:   0,
             lists:          [],
+            // perListCounts: one entry per list that ran the card,
+            // {place, count}. Powers the Phase 4.5 "alternative count
+            // suggestion" diagnostic — we need both the placement and
+            // the actual copies played to compute plurality + median
+            // placement gap. Cheap to track (one push per (card, list)
+            // tuple) and easy to drop later if the diagnostic moves.
+            perListCounts:  [],
             is_ace_spec:    e.is_ace_spec,
             is_energy:      e.is_energy,
             is_basic_energy: e.is_basic_energy,
@@ -475,6 +504,7 @@
         a.countNumerator += w * e.totalCount;
         a.n_lists_with   += 1;
         a.lists.push(l);
+        a.perListCounts.push({ place: l.place, count: e.totalCount });
         if (l.place <= 8) {
           a.topCutCount  += 1;
           a.topCutWeight += w;
@@ -508,6 +538,9 @@
         type:               a.type,
         // Keep the list references for co-occurrence in Phase 3
         _lists:             a.lists,
+        // Per-list (place, count) — consumed by
+        // _computeAlternativeSuggestion() in Phase 4.5 below.
+        _perListCounts:     a.perListCounts,
       });
     }
     return {
@@ -581,6 +614,78 @@
     return winner;
   }
 
+  // ── Alternative-count suggestion (2nd Prüfstand) ─────────────────
+  //
+  // For a card whose naive Math.round(weightedAvgCount) lands in the
+  // borderline zone, compute the field plurality + that group's
+  // median placement. If the plurality is well-represented (≥50 % of
+  // lists running the card) AND places clearly better than the naive
+  // group (≥50-place median delta), emit a suggestion. Caller
+  // attaches it to the deck entry; the live build does NOT change.
+  //
+  // Returns null when no suggestion fires.
+  function _computeAlternativeSuggestion(scoredCard, naiveCount) {
+    const perList = scoredCard._perListCounts;
+    if (!Array.isArray(perList) || perList.length < ALT_SUGGESTION_MIN_SAMPLE) return null;
+
+    const raw = scoredCard.weightedAvgCount || 0;
+    const frac = raw - Math.floor(raw);
+    if (frac < ALT_SUGGESTION_FRAC_MIN || frac > ALT_SUGGESTION_FRAC_MAX) return null;
+
+    // Plurality (most common copy count among lists running the card)
+    const histogram = new Map();
+    for (const entry of perList) {
+      const c = entry.count || 0;
+      histogram.set(c, (histogram.get(c) || 0) + 1);
+    }
+    let plurality = naiveCount;
+    let pluralityHits = 0;
+    for (const [cnt, hits] of histogram) {
+      if (hits > pluralityHits || (hits === pluralityHits && cnt > plurality)) {
+        plurality = cnt;
+        pluralityHits = hits;
+      }
+    }
+    if (plurality === naiveCount) return null;  // already aligned
+    const pluralityShare = pluralityHits / perList.length;
+    if (pluralityShare < ALT_SUGGESTION_MIN_SHARE) return null;
+
+    // Median placement of the plurality group vs the naive group
+    const placesIn = (cnt) => perList
+      .filter(e => e.count === cnt)
+      .map(e => Number(e.place) || 9999)
+      .sort((a, b) => a - b);
+    const median = (arr) => arr.length === 0 ? null
+      : arr.length % 2 === 1
+        ? arr[(arr.length - 1) / 2]
+        : (arr[arr.length / 2 - 1] + arr[arr.length / 2]) / 2;
+
+    const pluralityPlaces = placesIn(plurality);
+    const naivePlaces     = placesIn(naiveCount);
+    const pluralityMedian = median(pluralityPlaces);
+    const naiveMedian     = median(naivePlaces);
+    if (pluralityMedian == null || naiveMedian == null) return null;
+
+    // Only flag when plurality places MEANINGFULLY better than naive.
+    // Direction matches the user's intuition: higher copies should
+    // correlate with lower median place (smaller place = better).
+    const gap = naiveMedian - pluralityMedian;
+    if (gap < ALT_SUGGESTION_MIN_GAP) return null;
+
+    return {
+      naive_count:        naiveCount,
+      suggested_count:    plurality,
+      plurality_share:    pluralityShare,
+      plurality_n:        pluralityHits,
+      naive_n:            naivePlaces.length,
+      plurality_median:   pluralityMedian,
+      naive_median:       naiveMedian,
+      placement_gap:      gap,
+      weighted_avg:       raw,
+      direction:          plurality > naiveCount ? 'up' : 'down',
+    };
+  }
+
   // ── Phase 2: Core construction ────────────────────────────────────
   //
   // Spec rule 5: start with 90 % threshold; relax to 85 % / 80 % when
@@ -631,11 +736,29 @@
       if (copies < 1) copies = 1;
       const legalMax = c.is_basic_energy ? 59 : 4;
       if (copies > legalMax) copies = legalMax;
+      // 2nd Prüfstand — non-blocking suggestion if the field plurality
+      // places clearly better than the naive group. See
+      // _computeAlternativeSuggestion() for thresholds.
+      const altSuggestion = _computeAlternativeSuggestion(c, copies);
+      if (altSuggestion) {
+        trace.push({
+          phase: 4.5,
+          decision: 'alternative_count_suggestion',
+          card: c.name,
+          slotType: c.is_energy ? 'energy' : 'core',
+          ...altSuggestion,
+          detail: `Field plurality (${altSuggestion.plurality_n}/${altSuggestion.plurality_n + altSuggestion.naive_n} lists) `
+                + `plays ${altSuggestion.suggested_count} and places ${altSuggestion.placement_gap.toFixed(0)} `
+                + `places better (median P.${altSuggestion.plurality_median.toFixed(0)} vs P.${altSuggestion.naive_median.toFixed(0)}). `
+                + `Builder kept ${copies}; consider ${altSuggestion.suggested_count}.`,
+        });
+      }
       return {
         card:      c,
         count:     copies,
         slotType:  c.is_energy ? 'energy' : 'core',
         _rawAvg:   raw,
+        _altSuggestion: altSuggestion || null,
       };
     });
 
@@ -802,6 +925,34 @@
     const tech = [];
     const tracePicks = [];
     let used = 0;
+    // Helper: build a tech entry + emit the alternative-count
+    // diagnostic if the field plurality places clearly better.
+    const _emitTech = (c, placed, packageId) => {
+      const altSuggestion = _computeAlternativeSuggestion(c, placed);
+      if (altSuggestion) {
+        trace.push({
+          phase: 4.5,
+          decision: 'alternative_count_suggestion',
+          card: c.name,
+          slotType: 'tech',
+          ...altSuggestion,
+          detail: `Field plurality (${altSuggestion.plurality_n}/${altSuggestion.plurality_n + altSuggestion.naive_n} lists) `
+                + `plays ${altSuggestion.suggested_count} and places ${altSuggestion.placement_gap.toFixed(0)} `
+                + `places better (median P.${altSuggestion.plurality_median.toFixed(0)} vs P.${altSuggestion.naive_median.toFixed(0)}). `
+                + `Builder kept ${placed}; consider ${altSuggestion.suggested_count}.`,
+        });
+      }
+      tech.push({
+        card: c,
+        count: placed,
+        slotType: 'tech',
+        packageId,
+        _rawAvg: c.weightedAvgCount,
+        _altSuggestion: altSuggestion || null,
+      });
+      tracePicks.push({ name: c.name, count: placed, share: c.weightedShare, package: packageId || c.key });
+    };
+
     for (const g of groupRanking) {
       if (used >= slotsRemaining) break;
       // Will this whole group fit?
@@ -810,30 +961,17 @@
         for (const c of g.cards) {
           const cnt = Math.max(1, Math.round(c.weightedAvgCount));
           if (used + cnt > slotsRemaining) continue;
-          tech.push({
-            card: c,
-            count: Math.min(cnt, c.is_basic_energy ? 59 : 4),
-            slotType: 'tech',
-            packageId: g.gid !== c.key ? g.gid : null,
-            _rawAvg: c.weightedAvgCount,
-          });
+          const placed = Math.min(cnt, c.is_basic_energy ? 59 : 4);
+          _emitTech(c, placed, g.gid !== c.key ? g.gid : null);
           used += cnt;
-          tracePicks.push({ name: c.name, count: cnt, share: c.weightedShare, package: g.gid });
         }
         continue;
       }
       for (const c of g.cards) {
         const cnt = Math.max(1, Math.round(c.weightedAvgCount));
         const placed = Math.min(cnt, c.is_basic_energy ? 59 : 4);
-        tech.push({
-          card: c,
-          count: placed,
-          slotType: 'tech',
-          packageId: g.cards.length > 1 ? g.gid : null,
-          _rawAvg: c.weightedAvgCount,
-        });
+        _emitTech(c, placed, g.cards.length > 1 ? g.gid : null);
         used += placed;
-        tracePicks.push({ name: c.name, count: placed, share: c.weightedShare, package: g.gid });
       }
     }
 

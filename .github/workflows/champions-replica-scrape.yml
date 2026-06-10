@@ -27,6 +27,11 @@ on:
 
 permissions:
   contents: write
+  actions:  write   # needed for the `gh workflow run deploy-pages.yml`
+                    # dispatch step at the end — without this the
+                    # GITHUB_TOKEN returns 403 "Resource not accessible
+                    # by integration" on the workflow_dispatch API call
+                    # (observed 2026-06-10).
 
 concurrency:
   group: champions-replica-scrape

@@ -3312,6 +3312,46 @@ img[src*="limitlesstcg"] {
     margin-top: 3px;
 }
 
+/* ── Alternative-count suggestions (Phase 4.5 / 2nd Prüfstand) ── */
+.build-info-alt-suggestions {
+    margin: 0 0 12px;
+    padding: 10px 12px;
+    border: 1px solid #2f3a55;
+    border-radius: 8px;
+    background: rgba(180, 130, 50, 0.08);
+}
+.build-info-alt-suggestions h4 {
+    margin: 0 0 6px;
+    color: #d6a14a;
+    font-size: 0.92rem;
+}
+.build-info-alt-intro {
+    margin: 0 0 10px;
+    font-size: 0.82rem;
+    color: #aab;
+    line-height: 1.4;
+}
+.build-info-alt-row {
+    padding: 6px 8px;
+    border-radius: 6px;
+    margin-bottom: 6px;
+    background: rgba(255, 255, 255, 0.04);
+    border-left: 3px solid #d6a14a;
+}
+.build-info-alt-row.build-info-alt-up   { border-left-color: #6ab66a; }
+.build-info-alt-row.build-info-alt-down { border-left-color: #c97a5a; }
+.build-info-alt-card {
+    font-weight: 700;
+    color: #e8e8ee;
+    font-size: 0.9rem;
+}
+.build-info-alt-detail {
+    margin-top: 3px;
+    font-size: 0.78rem;
+    color: #99a;
+    line-height: 1.4;
+}
+
 /* ── ACE-SPEC pick rationale section ─────────────────────── */
 .build-info-ace-pick {
     margin: 0 0 12px;

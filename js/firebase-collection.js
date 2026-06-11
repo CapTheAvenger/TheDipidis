@@ -1881,25 +1881,6 @@ function updateProfileUI(profile) {
   if (decksCount) {
     decksCount.textContent = window.userDecks?.length || 0;
   }
-  
-  const profileEl = document.getElementById('user-profile-data');
-  if (profileEl) {
-    const _pt = (key, fallback) => {
-      if (typeof t === 'function') {
-        const v = t(key);
-        if (v && v !== key) return v;
-      }
-      return fallback;
-    };
-    profileEl.innerHTML = `
-      <div class="profile-info">
-        <p><strong>${_pt('profile.infoEmail', 'Email:')}</strong> ${auth.currentUser?.email || ''}</p>
-        <p><strong>${_pt('profile.infoMemberSince', 'Member since:')}</strong> ${formatProfileDate(profile.createdAt)}</p>
-        <p><strong>${_pt('profile.infoCards', 'Cards:')}</strong> ${stats.cardCount}</p>
-        <p><strong>${_pt('profile.infoDecks', 'Decks:')}</strong> ${window.userDecks?.length || 0}</p>
-      </div>
-    `;
-  }
 }
 
 // Update decks UI

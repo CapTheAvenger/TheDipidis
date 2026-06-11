@@ -40,51 +40,66 @@ function _renderCloudSyncStatus(detail) {
   if (el) el.textContent = detail;
 }
 
-// Friendly German error labels for known persistence-failure codes.
+// Small helper: pull a key through the i18n layer if available; otherwise
+// fall back to the literal string baked in at the call site. Used by the
+// cloud-sync banner so the labels follow the active language instead of
+// staying in German under EN.
+function _csT(key, fallback) {
+  if (typeof t === 'function') {
+    var v = t(key);
+    if (v && v !== key) return v;
+  }
+  return fallback;
+}
+
+// Friendly error labels for known persistence-failure codes.
 // Without this map the banner just shows the raw code (e.g.
 // 'failed-precondition', 'TypeError', 'api-removed') which doesn't
 // tell a non-developer anything actionable.
-var _PERSIST_ERR_LABELS = {
-  'failed-precondition': 'anderer Tab nutzt den Cache',
-  'unimplemented':       'Browser unterstützt keinen Offline-Cache',
-  'api-removed':         'SDK-Version ohne Offline-Cache',
-  'init-threw':          'Cache-Init fehlgeschlagen',
-  'unknown':             'unbekannter Grund',
-};
+function _getPersistErrLabel(code) {
+  var map = {
+    'failed-precondition': _csT('cloudSync.errPrecondition', 'another tab is using the cache'),
+    'unimplemented':       _csT('cloudSync.errUnimplemented', 'browser does not support offline cache'),
+    'api-removed':         _csT('cloudSync.errApiRemoved', 'SDK version without offline cache'),
+    'init-threw':          _csT('cloudSync.errInitThrew', 'cache init failed'),
+    'unknown':             _csT('cloudSync.errUnknown', 'unknown reason'),
+  };
+  return map[code] || code;
+}
 
 function updateCloudSyncStatus() {
   var online = (typeof navigator !== 'undefined') ? !!navigator.onLine : true;
   var mode = window.__firestorePersistenceMode || null;
   var enabled = window.__firestorePersistenceEnabled === true;
   var error = window.__firestorePersistenceError || null;
-  var errLabel = error ? (_PERSIST_ERR_LABELS[error] || error) : null;
+  var errLabel = error ? _getPersistErrLabel(error) : null;
 
   var detail;
   if (!online && !enabled) {
-    detail = 'Offline · Cache nicht aktiv (' + (errLabel || 'unbekannter Grund') + ')';
+    detail = _csT('cloudSync.offlineCacheInactive', 'Offline · cache inactive') + ' (' + (errLabel || _csT('cloudSync.errUnknown', 'unknown reason')) + ')';
   } else if (!online && enabled) {
-    detail = 'Offline · Cache aktiv (' + mode + ')';
+    detail = _csT('cloudSync.offlineCacheActive', 'Offline · cache active') + ' (' + mode + ')';
   } else if (online && enabled) {
-    detail = 'Online · Cache aktiv (' + mode + ')';
+    detail = _csT('cloudSync.onlineCacheActive', 'Online · cache active') + ' (' + mode + ')';
   } else if (online && !enabled) {
-    detail = 'Online · Cache nicht aktiv' + (errLabel ? ' (' + errLabel + ')' : '');
+    detail = _csT('cloudSync.onlineCacheInactive', 'Online · cache inactive') + (errLabel ? ' (' + errLabel + ')' : '');
   } else {
-    detail = 'Initialisiere…';
+    detail = _csT('cloudSync.initializing', 'Initializing…');
   }
   _renderCloudSyncStatus(detail);
 }
 
 async function forceCloudSync() {
   var btn = document.getElementById('cloud-sync-refresh-btn');
-  if (btn) { btn.disabled = true; btn.textContent = 'Synchronisiere…'; }
+  if (btn) { btn.disabled = true; btn.textContent = _csT('cloudSync.syncing', 'Syncing…'); }
   try {
     if (!navigator.onLine) {
-      _renderCloudSyncStatus('Offline · kein Server-Read möglich');
+      _renderCloudSyncStatus(_csT('cloudSync.offlineNoServer', 'Offline · no server read possible'));
       return;
     }
     var user = window.auth && window.auth.currentUser;
     if (!user) {
-      _renderCloudSyncStatus('Nicht angemeldet');
+      _renderCloudSyncStatus(_csT('cloudSync.notSignedIn', 'Not signed in'));
       return;
     }
     // Wait for persistence to be ready BEFORE the read so the fetched
@@ -94,35 +109,38 @@ async function forceCloudSync() {
     if (window.__firestorePersistenceReady && typeof window.__firestorePersistenceReady.then === 'function') {
       try { await window.__firestorePersistenceReady; } catch (_) {}
     }
-    _renderCloudSyncStatus('Lade Profil + Decks vom Server…');
+    _renderCloudSyncStatus(_csT('cloudSync.loadingProfile', 'Loading profile + decks from server…'));
     // forcePull bypasses the "mirror is authoritative" short-circuit
     // so this button actually re-fetches from the server, the entire
     // point of the manual sync action.
     if (typeof loadUserData === 'function') await loadUserData(user.uid);
     if (typeof loadUserDecks === 'function') await loadUserDecks(user.uid, { forcePull: true });
     var deckCount = (window.userDecks || []).length;
+    var deckWord = deckCount === 1
+      ? _csT('cloudSync.deckSingular', 'Deck')
+      : _csT('cloudSync.deckPlural', 'Decks');
 
     // Second phase: refresh the tournament data bundle so the user
     // gets fresh scraper output on the same tap. The prefetcher's
     // bottom-right pill takes over the per-file progress; we just
     // surface "started" / "done" in the Cloud-Sync banner.
     if (window.__offlinePrefetch && typeof window.__offlinePrefetch.run === 'function') {
-      _renderCloudSyncStatus('Sync abgeschlossen · ' + deckCount + ' Deck' + (deckCount === 1 ? '' : 's') + ' · Tournament-Daten werden aktualisiert…');
+      _renderCloudSyncStatus(_csT('cloudSync.doneRefreshing', 'Sync complete') + ' · ' + deckCount + ' ' + deckWord + ' · ' + _csT('cloudSync.tournamentRefreshing', 'tournament data refreshing…'));
       // Fire-and-forget — the prefetcher manages its own pill UI and
       // the user can navigate away while it runs in the background.
       window.__offlinePrefetch.run({ refresh: true })
         .then(function () {
-          _renderCloudSyncStatus('Sync abgeschlossen · ' + deckCount + ' Deck' + (deckCount === 1 ? '' : 's') + ' · Tournament-Daten aktuell');
+          _renderCloudSyncStatus(_csT('cloudSync.doneRefreshing', 'Sync complete') + ' · ' + deckCount + ' ' + deckWord + ' · ' + _csT('cloudSync.tournamentFresh', 'tournament data up to date'));
         })
         .catch(function () { /* prefetcher pill already shows errors */ });
     } else {
-      _renderCloudSyncStatus('Sync abgeschlossen · ' + deckCount + ' Deck' + (deckCount === 1 ? '' : 's') + ' im Cache');
+      _renderCloudSyncStatus(_csT('cloudSync.doneRefreshing', 'Sync complete') + ' · ' + deckCount + ' ' + deckWord + ' ' + _csT('cloudSync.inCache', 'in cache'));
     }
   } catch (err) {
     console.error('[forceCloudSync] failed:', err);
-    _renderCloudSyncStatus('Sync-Fehler: ' + (err && err.message ? err.message : err));
+    _renderCloudSyncStatus(_csT('cloudSync.syncError', 'Sync error') + ': ' + (err && err.message ? err.message : err));
   } finally {
-    if (btn) { btn.disabled = false; btn.textContent = 'Jetzt synchronisieren'; }
+    if (btn) { btn.disabled = false; btn.textContent = _csT('cloudSync.syncNow', 'Sync now'); }
   }
 }
 
@@ -144,6 +162,10 @@ if (typeof window !== 'undefined') {
   if (window.__firestorePersistenceReady && typeof window.__firestorePersistenceReady.then === 'function') {
     window.__firestorePersistenceReady.then(updateCloudSyncStatus, updateCloudSyncStatus);
   }
+  // Re-paint the banner when the user toggles language so the localized
+  // labels swap immediately instead of waiting for the next persistence
+  // event (which on a stable connection effectively never fires).
+  document.addEventListener('languageChanged', updateCloudSyncStatus);
   // Initial paint on next tick (DOM may not be ready when this file loads).
   setTimeout(updateCloudSyncStatus, 0);
 }

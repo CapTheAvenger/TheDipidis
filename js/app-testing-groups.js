@@ -557,7 +557,7 @@ window.TestingGroups = (function () {
   }
 
   function _parsePct(v) {
-    const n = parseFloat(String(v).replace(',', '.'));
+    const n = parseLocaleNumber(v, 0);
     if (isNaN(n) || n < 0 || n > 100) return null;
     return Math.round(n * 100) / 100;
   }

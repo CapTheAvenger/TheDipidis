@@ -950,10 +950,10 @@
             sortedCards.forEach(card => {
                 const cardFullName = fixMojibake(card.full_card_name || card.card_name || 'Unknown Card');
                 const cardNameEscaped = escapeJsStr(cardFullName);
-                const avgCount = parseFloat(String(card.card_count || card.average_count_overall || 0).replace(',', '.')) || 0; // Average count across all decklists (e.g., 0.98)
+                const avgCount = parseLocaleNumber(card.card_count || card.average_count_overall || 0, 0); // Average count across all decklists (e.g., 0.98)
                 const maxCount = getPastMetaDisplayCount(card);
-                const decklistCount = parseFloat(String(card.decklist_count || card.total_decks_in_archetype || 0).replace(',', '.')) || 0; // Total decklists in archetype
-                const deckCountByStats = parseFloat(String(card.deck_count || card.deck_inclusion_count || 0).replace(',', '.')) || 0; // Number of decks containing this card
+                const decklistCount = parseLocaleNumber(card.decklist_count || card.total_decks_in_archetype || 0, 0); // Total decklists in archetype
+                const deckCountByStats = parseLocaleNumber(card.deck_count || card.deck_inclusion_count || 0, 0); // Number of decks containing this card
                 
                 // Prefer explicit CSV fields first; only parse from full_card_name as fallback.
                 let cardName = cardFullName;
@@ -982,8 +982,8 @@
                 cardName = getDisplayCardName(cardName, setCodeFromName, setNumberFromName);
                 
                 // Calculate statistics
-                const rawPercentage = parseFloat(String(card.percentage_in_archetype || card.share_percent || '').replace(',', '.'));
-                const avgInUsingDecksRaw = parseFloat(String(card.average_count || card.avg_count || '').replace(',', '.'));
+                const rawPercentage = parseLocaleNumber(card.percentage_in_archetype || card.share_percent || '', 0);
+                const avgInUsingDecksRaw = parseLocaleNumber(card.average_count || card.avg_count || '', 0);
 
                 const resolvedPercentage = Number.isFinite(rawPercentage) && rawPercentage > 0
                     ? rawPercentage
@@ -1549,7 +1549,7 @@
             const opps = myRows.map(r => ({
                 name: r.opponent_deck_name || r.opponent_deck_slug || 'Unknown',
                 games: parseInt(r.vs_count || '0', 10) || 0,
-                winPct: parseFloat((r.vs_win_pct || '0').replace(',', '.')) || 0,
+                winPct: parseLocaleNumber(r.vs_win_pct || '0', 0) || 0,
             })).sort((a, b) => (b.games - a.games) || (b.winPct - a.winPct));
 
             const headerOpp = (typeof t === 'function' ? t('pm.matchupColOpponent') : 'Opponent');

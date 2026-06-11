@@ -677,7 +677,7 @@ function getCollectionStats() {
     );
     
     if (card && card.eur_price) {
-      const price = parseFloat(card.eur_price.replace(',', '.'));
+      const price = parseLocaleNumber(card.eur_price, 0);
       if (!isNaN(price)) {
         totalValue += price * ownedCount;
       }
@@ -850,7 +850,7 @@ function getPokemonElementFromCard(card) {
 
 function getCollectionPrice(card) {
   if (!card || !card.eur_price) return 0;
-  const parsed = parseFloat(String(card.eur_price).replace(',', '.'));
+  const parsed = parseLocaleNumber(card.eur_price, 0);
   return isNaN(parsed) ? 0 : parsed;
 }
 
@@ -1118,7 +1118,7 @@ function updateCollectionUI(searchFilter = '', filterMode = '') {
       const safeNameJs = escapeJsSingleQuoted(card.name);
       const safeCardIdJs = escapeJsSingleQuoted(cardId);
 
-      const price = card.eur_price ? parseFloat(card.eur_price.replace(',', '.')) : 0;
+      const price = card.eur_price ? parseLocaleNumber(card.eur_price, 0) : 0;
       const priceDisplay = (!isNaN(price) && price > 0) ? `${price.toFixed(2).replace('.', ',')} €` : 'N/A';
 
       collectionHtml.push(`
@@ -1442,7 +1442,7 @@ function updateWishlistUI(searchFilter = '', setFilter = '') {
       // Wishlist uses Cardmarket "low" price (cheapest available) when present;
       // falls back to "trend" (eur_price) for legacy/unmapped cards.
       const wishlistPriceRaw = card.eur_low || card.eur_price;
-      const price = wishlistPriceRaw ? parseFloat(wishlistPriceRaw.replace(',', '.')) : 0;
+      const price = wishlistPriceRaw ? parseLocaleNumber(wishlistPriceRaw, 0) : 0;
       const priceDisplay = (!isNaN(price) && price > 0) ? `${price.toFixed(2).replace('.', ',')} €` : 'N/A';
       if (!isNaN(price) && price > 0) totalValue += price * wantedCount;
 
@@ -1641,7 +1641,7 @@ function copyWishlistToClipboard() {
     const [cardName, cardSet, cardNumber] = cardId.split('|');
     const card = allCards.find(c => c.name === cardName && c.set === cardSet && c.number === cardNumber);
     const count = window.userWishlistCounts ? (window.userWishlistCounts.get(cardId) || 1) : 1;
-    const price = card && card.eur_price ? parseFloat(card.eur_price.replace(',', '.')) : 0;
+    const price = card && card.eur_price ? parseLocaleNumber(card.eur_price, 0) : 0;
     const priceStr = (!isNaN(price) && price > 0) ? `${price.toFixed(2).replace('.', ',')} €` : '';
     const maxP = window.userWishlistMaxPrices ? (window.userWishlistMaxPrices.get(cardId) || 0) : 0;
     const maxPStr = maxP > 0 ? ` (max ${maxP.toFixed(2).replace('.', ',')} €)` : '';
@@ -5507,7 +5507,7 @@ function updateTradelistUI(searchFilter = '', setFilter = '') {
       const safeNameJs = escapeJsSingleQuoted(card.name);
       const safeCardIdJs = escapeJsSingleQuoted(cardId);
 
-      const price = card.eur_price ? parseFloat(card.eur_price.replace(',', '.')) : 0;
+      const price = card.eur_price ? parseLocaleNumber(card.eur_price, 0) : 0;
       const priceDisplay = (!isNaN(price) && price > 0) ? `${price.toFixed(2).replace('.', ',')} \u20ac` : 'N/A';
       if (!isNaN(price) && price > 0) totalValue += price * tradeCount;
 
@@ -5662,7 +5662,7 @@ function copyTradelistToClipboard() {
     const [cardName, cardSet, cardNumber] = cardId.split('|');
     const card = allCards.find(c => c.name === cardName && c.set === cardSet && c.number === cardNumber);
     const count = window.userTradelistCounts ? (window.userTradelistCounts.get(cardId) || 1) : 1;
-    const price = card && card.eur_price ? parseFloat(card.eur_price.replace(',', '.')) : 0;
+    const price = card && card.eur_price ? parseLocaleNumber(card.eur_price, 0) : 0;
     const priceStr = (!isNaN(price) && price > 0) ? `${price.toFixed(2).replace('.', ',')} \u20ac` : '';
     const minP = window.userTradelistMinPrices ? (window.userTradelistMinPrices.get(cardId) || 0) : 0;
     const minPStr = minP > 0 ? ` (ca ${minP.toFixed(2).replace('.', ',')} \u20ac)` : '';

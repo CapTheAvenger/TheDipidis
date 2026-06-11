@@ -731,8 +731,8 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             (fallbackCards || []).forEach(ingest);
 
             const candidates = Array.from(byName.values()).sort((a, b) => {
-                const shareA = parseFloat(String(a.sharePercent || a.percentage_in_archetype || 0).replace(',', '.')) || 0;
-                const shareB = parseFloat(String(b.sharePercent || b.percentage_in_archetype || 0).replace(',', '.')) || 0;
+                const shareA = parseLocaleNumber(a.sharePercent || a.percentage_in_archetype || 0, 0);
+                const shareB = parseLocaleNumber(b.sharePercent || b.percentage_in_archetype || 0, 0);
                 return shareB - shareA;
             });
 
@@ -1243,7 +1243,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                         cardData = (cardIndexMap && cardIndexMap.get(deckKey)) || null;
                     }
                     if (cardData && cardData.eur_price && cardData.eur_price !== '' && cardData.eur_price !== 'N/A') {
-                        const p = parseFloat(String(cardData.eur_price).replace(',', '.'));
+                        const p = parseLocaleNumber(cardData.eur_price, 0);
                         if (!isNaN(p)) { totalPrice += p * (parseInt(count) || 0); hasAnyPrice = true; }
                     }
                 }
@@ -1366,8 +1366,8 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                     const normalizedName = normalizeCardName(cardName);
                     if (normalizedName) {
                         const prev = cardStatsByNormalizedName[normalizedName];
-                        const prevShare = parseFloat(String(prev?.percentage_in_archetype || prev?.share || 0).replace(',', '.')) || 0;
-                        const currentShare = parseFloat(String(card.percentage_in_archetype || card.share || 0).replace(',', '.')) || 0;
+                        const prevShare = parseLocaleNumber(prev?.percentage_in_archetype || prev?.share || 0, 0);
+                        const currentShare = parseLocaleNumber(card.percentage_in_archetype || card.share || 0, 0);
                         if (!prev || currentShare >= prevShare) {
                             cardStatsByNormalizedName[normalizedName] = card;
                         }
@@ -1593,11 +1593,11 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                     cardDataByName[baseName] ||
                     cardStatsByNormalizedName[normalizeCardName(baseName)] ||
                     card;
-                const totalCount = parseFloat(String(baseCardData.total_count || 0).replace(',', '.')) || 0;
-                const cardCountOverallRaw = parseFloat(String(baseCardData.card_count || 0).replace(',', '.')) || 0;
-                const decksWithCard = parseFloat(String(baseCardData.deck_count || baseCardData.deck_inclusion_count || baseCardData.decks_with_card || 0).replace(',', '.')) || 0;
-                const totalDecksInArchetype = parseFloat(String(baseCardData.total_decks_in_archetype || baseCardData.decklist_count || baseCardData.total_decks || 0).replace(',', '.')) || 0;
-                const shareFromDataRaw = parseFloat(String(
+                const totalCount = parseLocaleNumber(baseCardData.total_count || 0, 0);
+                const cardCountOverallRaw = parseLocaleNumber(baseCardData.card_count || 0, 0);
+                const decksWithCard = parseLocaleNumber(baseCardData.deck_count || baseCardData.deck_inclusion_count || baseCardData.decks_with_card || 0, 0);
+                const totalDecksInArchetype = parseLocaleNumber(baseCardData.total_decks_in_archetype || baseCardData.decklist_count || baseCardData.total_decks || 0, 0);
+                const shareFromDataRaw = parseLocaleNumber(
                     baseCardData.percentage_in_archetype ||
                     baseCardData.share ||
                     baseCardData.share_percent ||
@@ -1605,12 +1605,12 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                     baseCardData.metaShare ||
                     percentage ||
                     0
-                ).replace(',', '.'));
+                , 0);
                 const computedShareRaw = totalDecksInArchetype > 0 && decksWithCard > 0 ? (decksWithCard / totalDecksInArchetype) * 100 : 0;
                 const fallbackShareValue = Number.isFinite(shareFromDataRaw) && shareFromDataRaw > 0 ? shareFromDataRaw : computedShareRaw;
 
-                const avgWhenUsedRaw = parseFloat(String(baseCardData.average_count || baseCardData.avg_count || baseCardData.avgCountWhenUsed || 0).replace(',', '.'));
-                const avgOverallRaw = parseFloat(String(baseCardData.average_count_overall || baseCardData.avg_count_overall || baseCardData.avgCount || baseCardData.card_count || 0).replace(',', '.'));
+                const avgWhenUsedRaw = parseLocaleNumber(baseCardData.average_count || baseCardData.avg_count || baseCardData.avgCountWhenUsed || 0, 0);
+                const avgOverallRaw = parseLocaleNumber(baseCardData.average_count_overall || baseCardData.avg_count_overall || baseCardData.avgCount || baseCardData.card_count || 0, 0);
 
                 // Only derive averages from totals when totals are truly available.
                 // Some datasets provide card_count as an average already (not as total_count).
@@ -1872,8 +1872,8 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 }
                 
                 // Parse percentage once for both cards
-                const percA = parseFloat((a.percentage_in_archetype || '0').toString().replace(',', '.')) || 0;
-                const percB = parseFloat((b.percentage_in_archetype || '0').toString().replace(',', '.')) || 0;
+                const percA = parseLocaleNumber(a.percentage_in_archetype || '0', 0) || 0;
+                const percB = parseLocaleNumber(b.percentage_in_archetype || '0', 0) || 0;
                 
                 // Helper: resolve Pokedex number from card data or global map.
                 //
@@ -2333,8 +2333,8 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 let percentage = parseFloat(percentageStr);
                 // FIX: Zuerst Durchschnitt berechnen, dann Max-Wert absichern
                 // totalCount already declared above, do not redeclare here.
-                const decksWithCard = parseFloat(String(card.deck_count || card.deck_inclusion_count || 0).replace(',', '.')) || 0;
-                const avgCountFromRow = parseFloat(String(card.average_count || card.avg_count || '').replace(',', '.'));
+                const decksWithCard = parseLocaleNumber(card.deck_count || card.deck_inclusion_count || 0, 0);
+                const avgCountFromRow = parseLocaleNumber(card.average_count || card.avg_count || '', 0);
                 const avgCountValue = Number.isFinite(avgCountFromRow) && avgCountFromRow > 0
                     ? avgCountFromRow
                     : (decksWithCard > 0 ? (totalCount / decksWithCard) : 0);
@@ -4272,8 +4272,8 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             
             // Step 2: Sort by percentage (descending)
             deckCards.sort((a, b) => {
-                const percentageA = parseFloat((a.percentage_in_archetype || '0').toString().replace(',', '.'));
-                const percentageB = parseFloat((b.percentage_in_archetype || '0').toString().replace(',', '.'));
+                const percentageA = parseLocaleNumber(a.percentage_in_archetype || '0', 0);
+                const percentageB = parseLocaleNumber(b.percentage_in_archetype || '0', 0);
                 return percentageB - percentageA;
             });
             
@@ -4286,8 +4286,8 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             // Find all Ace Spec cards and sort by percentage
             const aceSpecCards = deckCards.filter(card => isAceSpec(card));
             aceSpecCards.sort((a, b) => {
-                const percentageA = parseFloat((a.percentage_in_archetype || '0').toString().replace(',', '.'));
-                const percentageB = parseFloat((b.percentage_in_archetype || '0').toString().replace(',', '.'));
+                const percentageA = parseLocaleNumber(a.percentage_in_archetype || '0', 0);
+                const percentageB = parseLocaleNumber(b.percentage_in_archetype || '0', 0);
                 return percentageB - percentageA; // Sort descending by percentage
             });
             
@@ -4295,7 +4295,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             let bestAceSpec = null;
             if (aceSpecCards.length > 0) {
                 bestAceSpec = aceSpecCards[0]; // First one = highest percentage
-                const acePercentage = parseFloat((bestAceSpec.percentage_in_archetype || '0').toString().replace(',', '.'));
+                const acePercentage = parseLocaleNumber(bestAceSpec.percentage_in_archetype || '0', 0);
                 devLog('[autoComplete] ACE SPEC SELECTED:', bestAceSpec.card_name, `(${acePercentage}%)`);
                 
                 if (!addedNames.has(bestAceSpec.card_name)) {
@@ -4328,7 +4328,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 if (addedNames.has(cardName)) continue;
                 if (isAceSpec(card)) { devLog('[autoComplete] Skipping Ace Spec (already added):', cardName); continue; }
                 if (isRadiantPokemon(cardName)) { if (radiantAdded) { devLog('[autoComplete] Skipping Radiant (deck already has one):', cardName); continue; } radiantAdded = true; }
-                const percentage = parseFloat((card.percentage_in_archetype || '0').toString().replace(',', '.'));
+                const percentage = parseLocaleNumber(card.percentage_in_archetype || '0', 0);
                 // --- LARGEST REMAINDER METHOD ---
                 let addCount;
                 let exactAvg = 0;
@@ -4338,7 +4338,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 } else {
                     const totalCount = parseFloat(card.total_count) || 0;
                     const decksWithCard = parseFloat(card.deck_count || card.deck_inclusion_count) || 0;
-                    const avgCountFromRow = parseFloat(String(card.average_count || card.avg_count || '').replace(',', '.'));
+                    const avgCountFromRow = parseLocaleNumber(card.average_count || card.avg_count || '', 0);
                     const avgWhenUsed = Number.isFinite(avgCountFromRow) && avgCountFromRow > 0 ? avgCountFromRow : (decksWithCard > 0 ? (totalCount / decksWithCard) : 1);
                     exactAvg = avgWhenUsed;
                     addCount = Math.round(avgWhenUsed);
@@ -6178,7 +6178,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 const tid = r.tournament_id || '';
                 const cn = String(r.card_name || '').trim().toLowerCase();
                 if (!tid || !cn) continue;
-                const avgRaw = parseFloat(String(r.average_count || '0').replace(',', '.'));
+                const avgRaw = parseLocaleNumber(r.average_count || '0', 0);
                 if (!Number.isFinite(avgRaw) || avgRaw <= 0) continue;
                 const k = `${tid}|${archNorm}`;
                 if (!buckets.has(k)) buckets.set(k, new Map());
@@ -6284,7 +6284,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                     const tid = r.tournament_id || '';
                     const cn = String(r.card_name || '').trim().toLowerCase();
                     if (!tid || !cn) continue;
-                    const avgRaw = parseFloat(String(r.average_count || '0').replace(',', '.'));
+                    const avgRaw = parseLocaleNumber(r.average_count || '0', 0);
                     if (!Number.isFinite(avgRaw) || avgRaw <= 0) continue;
                     // Bucket key namespaced by source-weight so the same
                     // tournament_id appearing in both sources (unlikely
@@ -6401,7 +6401,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 const typeRaw = String(r.type || '').toLowerCase().trim();
                 if (/\b(basic|special)\s*energy\b/.test(typeRaw)) continue;
                 if (/\bstadium\b/.test(typeRaw)) continue;
-                const avgRaw = parseFloat(String(r.average_count || '0').replace(',', '.'));
+                const avgRaw = parseLocaleNumber(r.average_count || '0', 0);
                 if (!Number.isFinite(avgRaw) || avgRaw <= 0) continue;
                 const k = `${tid}|${archNorm}`;
                 if (!buckets.has(k)) {
@@ -7182,7 +7182,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
 
                 const deckCountValue = parseInt(card.deck_count || card.deck_inclusion_count || 0) || 0;
                 const totalCountValue = parseFloat(card.total_count || 0) || 0;
-                const avgCountValue = parseFloat(String(card.average_count || card.avg_count || 0).replace(',', '.')) || 0;
+                const avgCountValue = parseLocaleNumber(card.average_count || card.avg_count || 0, 0);
 
                 if (!uniqueCards[cardName]) {
                     uniqueCards[cardName] = { 
@@ -7538,7 +7538,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                                 const cn = String(r.card_name || '').trim().toLowerCase();
                                 if (!cn) return;
                                 const dc = parseInt(r.deck_inclusion_count || 0, 10) || 0;
-                                const tc = parseFloat(String(r.total_count || 0).replace(',', '.')) || 0;
+                                const tc = parseLocaleNumber(r.total_count || 0, 0);
                                 if (!cardAgg.has(cn)) cardAgg.set(cn, { deckCount: 0, totalCount: 0 });
                                 const e = cardAgg.get(cn);
                                 e.deckCount += dc;
@@ -7801,7 +7801,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 const _avgOf = (c) => {
                     if (c._recommendedCount != null && Number.isFinite(c._recommendedCount)) return c._recommendedCount;
                     if (Number.isFinite(c.avgCountWhenUsed) && c.avgCountWhenUsed > 0) return c.avgCountWhenUsed;
-                    const parsed = parseFloat(String(c.average_count || c.avg_count || '').replace(',', '.'));
+                    const parsed = parseLocaleNumber(c.average_count || c.avg_count || '', 0);
                     return Number.isFinite(parsed) && parsed > 0 ? parsed : 1;
                 };
                 const _outsTarget = (metaShare) => {
@@ -7888,7 +7888,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
 
             // ── 2c. Compute final consistencyScore per card ──
             deckCards.forEach(card => {
-                const sharePercent = Math.min(100, Math.max(0, parseFloat((card.percentage_in_archetype || '0').toString().replace(',', '.')) || 0));
+                const sharePercent = Math.min(100, Math.max(0, parseLocaleNumber(card.percentage_in_archetype || '0', 0) || 0));
 
                 let avgCountWhenUsed = 0;
                 if (card.total_count > 0 && card.deck_count > 0) {
@@ -7896,7 +7896,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 } else if (card.sum_avg_count > 0 && card.count_entries > 0) {
                     avgCountWhenUsed = card.sum_avg_count / card.count_entries;
                 } else {
-                    const parsedAvg = parseFloat(String(card.average_count || card.avg_count || '').replace(',', '.'));
+                    const parsedAvg = parseLocaleNumber(card.average_count || card.avg_count || '', 0);
                     if (Number.isFinite(parsedAvg) && parsedAvg > 0) avgCountWhenUsed = parsedAvg;
                 }
 

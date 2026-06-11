@@ -29,7 +29,7 @@
          */
         function getDeckTier(deck) {
             const shareRaw = deck.share || deck.new_share || deck.new_meta_share || deck.percentage_in_archetype || 0;
-            const share = parseFloat(String(shareRaw).replace(',', '.')) || 0;
+            const share = parseLocaleNumber(shareRaw, 0);
             const winRate = parseFloat(deck.winrate || deck.new_winrate || null);
             const countChange = parseInt(deck.count_change || 0);
 
@@ -78,7 +78,7 @@
             if (!Array.isArray(history) || history.length < 2) return '';
 
             const parseShare = (value) => {
-                const parsed = parseFloat(String(value ?? 0).replace(',', '.'));
+                const parsed = parseLocaleNumber(value ?? 0, 0);
                 return Number.isFinite(parsed) ? parsed : NaN;
             };
 
@@ -118,7 +118,7 @@
 
             const targetName = normalizeName(cardName);
             const targetArchNormalized = targetArchetype && targetArchetype !== 'all' ? targetArchetype.trim().toLowerCase() : null;
-            const parseNum = (value) => parseFloat(String(value ?? 0).replace(',', '.')) || 0;
+            const parseNum = (value) => parseLocaleNumber(value ?? 0, 0);
 
             const getIsoWeekFromDate = (isoDate) => {
                 const match = String(isoDate).match(/^(\d{4})-(\d{2})-(\d{2})$/);
@@ -518,7 +518,7 @@
                 const rankRaw = isCurrentFormat
                     ? (deck.new_avg_placement || deck.avg_placement || deck.average_placement || '999')
                     : (deck.average_placement || deck.avg_placement || deck.new_avg_placement || '999');
-                const parsed = parseFloat(String(rankRaw).replace(',', '.'));
+                const parsed = parseLocaleNumber(rankRaw, 0);
                 return Number.isFinite(parsed) && parsed > 0 ? parsed : 999;
             };
 
@@ -696,14 +696,14 @@
 
                     if (isM4WithComparison) {
                         // 1. Werte sicher als Zahlen extrahieren
-                        const currentR = parseFloat(String(currentRankValue || 0).replace(',', '.'));
+                        const currentR = parseLocaleNumber(currentRankValue || 0, 0);
                         const previousR = m3Deck
-                            ? parseFloat(String(m3Deck.average_placement || m3Deck.avg_placement || 0).replace(',', '.'))
+                            ? parseLocaleNumber(m3Deck.average_placement || m3Deck.avg_placement || 0, 0)
                             : null;
 
                         const normalizedCurrentS = parseFloat(currentShareValue || 0);
                         const normalizedPreviousS = m3Deck
-                            ? parseFloat((m3Deck.share || m3Deck.percentage_in_archetype || 0).toString().replace(',', '.'))
+                            ? parseLocaleNumber(m3Deck.share || m3Deck.percentage_in_archetype || 0, 0)
                             : null;
 
                         let rankClass = "trend-neutral";
@@ -1016,15 +1016,15 @@
                 const t8resp = await fetch(`${BASE_PATH}online_tournament_top8_decks.csv?t=${timestamp}`);
                 if (t8resp.ok) {
                     const t8rows = await fetchAndParseCSV(`${BASE_PATH}online_tournament_top8_decks.csv?t=${timestamp}`);
-                    const totalBrought = t8rows.reduce((s, r) => s + parseFloat((r.total_brought_weighted || '0').replace(',', '.')), 0) || 1;
+                    const totalBrought = t8rows.reduce((s, r) => s + parseLocaleNumber(r.total_brought_weighted || '0', 0), 0) || 1;
                     const enriched = t8rows.map(r => {
-                        const brought = parseFloat((r.total_brought_weighted || '0').replace(',', '.'));
-                        const top8 = parseFloat((r.top8_count_weighted || '0').replace(',', '.'));
+                        const brought = parseLocaleNumber(r.total_brought_weighted || '0', 0);
+                        const top8 = parseLocaleNumber(r.top8_count_weighted || '0', 0);
                         return {
                             name: r.deck_name,
                             broughtPct: (brought / totalBrought) * 100,
                             top8: top8,
-                            top8ConvPct: parseFloat((r.top8_conv_rate || '0').replace(',', '.')) * 100,
+                            top8ConvPct: parseLocaleNumber(r.top8_conv_rate || '0', 0) * 100,
                         };
                     });
                     const overallTop = [...enriched].sort((a, b) => b.broughtPct - a.broughtPct).slice(0, 12);

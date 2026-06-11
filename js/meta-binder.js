@@ -78,7 +78,7 @@
                 const name = String(row.deck_name || '').trim();
                 if (!name) return;
                 const rank = parseInt(String(row.new_rank || '').trim(), 10);
-                const share = Number.parseFloat(String(row.new_share || '').replace(',', '.'));
+                const share = Number.parseLocaleNumber(row.new_share || '', 0);
                 exactMap.set(name.toLowerCase(), {
                     rank: Number.isFinite(rank) ? rank : null,
                     share: Number.isFinite(share) ? share : null
@@ -512,8 +512,8 @@
         }
 
         function parseUsagePercent(row) {
-            const inclusion = Number.parseFloat(String(row.deck_inclusion_count || '').replace(',', '.'));
-            const total = Number.parseFloat(String(row.total_decks_in_archetype || '').replace(',', '.'));
+            const inclusion = Number.parseLocaleNumber(row.deck_inclusion_count || '', 0);
+            const total = Number.parseLocaleNumber(row.total_decks_in_archetype || '', 0);
             if (!Number.isNaN(inclusion) && !Number.isNaN(total) && total > 0) {
                 return (inclusion / total) * 100;
             }
@@ -860,7 +860,7 @@
     }
 
     function parseLocaleNumber(value) {
-        const parsed = Number.parseFloat(String(value || '').replace(',', '.'));
+        const parsed = Number.parseLocaleNumber(value || '', 0);
         return Number.isFinite(parsed) ? parsed : null;
     }
 

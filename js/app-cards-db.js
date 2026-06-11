@@ -2747,7 +2747,7 @@
             // Format price button
             let priceButton = '';
             if (card.eur_price && card.eur_price !== '' && card.eur_price !== '0' && card.eur_price !== 'N/A') {
-                const price = parseFloat(card.eur_price.replace(',', '.'));
+                const price = parseLocaleNumber(card.eur_price, 0);
                 if (!isNaN(price)) {
                     priceButton = `<a href="${displayCardMarketUrl}" target="_blank" rel="noopener noreferrer" class="card-database-price-btn" title="View on CardMarket" aria-label="View ${displayName} on CardMarket (opens in new tab)">
                         <span class="card-database-price-value">Ø ${price.toFixed(2).replace('.', ',')} €</span>

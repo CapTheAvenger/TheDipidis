@@ -178,7 +178,7 @@
     for (const r of dayRows) {
       const name = String(r.card_name || '').trim();
       if (!name) continue;
-      const avg = parseFloat(String(r.average_count || '0').replace(',', '.'));
+      const avg = parseLocaleNumber(r.average_count || '0', 0);
       if (!Number.isFinite(avg) || avg < 0.5) continue;  // <0.5 rounds to 0
       const count = Math.min(60, Math.max(1, Math.round(avg)));
       cards.push({

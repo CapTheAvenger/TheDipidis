@@ -572,13 +572,13 @@
             const countThreshold = maxCountForThreshold * 0.1;
             
             const improvers = data
-                .filter(d => parseFloat((d.avg_placement_change || '0').replace(',', '.')) < 0 && parseInt(d.new_count || 0) >= countThreshold)
-                .sort((a, b) => parseFloat((a.avg_placement_change || '0').replace(',', '.')) - parseFloat((b.avg_placement_change || '0').replace(',', '.')))
+                .filter(d => parseLocaleNumber(d.avg_placement_change || '0', 0) < 0 && parseInt(d.new_count || 0) >= countThreshold)
+                .sort((a, b) => parseLocaleNumber(a.avg_placement_change || '0', 0) - parseLocaleNumber(b.avg_placement_change || '0', 0))
                 .slice(0, 10);
             
             const decliners = data
-                .filter(d => parseFloat((d.avg_placement_change || '0').replace(',', '.')) > 0 && parseInt(d.new_count || 0) >= countThreshold)
-                .sort((a, b) => parseFloat((b.avg_placement_change || '0').replace(',', '.')) - parseFloat((a.avg_placement_change || '0').replace(',', '.')))
+                .filter(d => parseLocaleNumber(d.avg_placement_change || '0', 0) > 0 && parseInt(d.new_count || 0) >= countThreshold)
+                .sort((a, b) => parseLocaleNumber(b.avg_placement_change || '0', 0) - parseLocaleNumber(a.avg_placement_change || '0', 0))
                 .slice(0, 10);
             
             const sorted = [...data].sort((a, b) => parseInt(b.new_count || 0) - parseInt(a.new_count || 0));
@@ -589,7 +589,7 @@
             const minCountThreshold = maxCount * 0.1;
             const topByPlacement = [...data]
                 .filter(d => parseInt(d.new_count || 0) >= minCountThreshold)
-                .sort((a, b) => parseFloat((a.new_avg_placement || '0').replace(',', '.')) - parseFloat((b.new_avg_placement || '0').replace(',', '.')))
+                .sort((a, b) => parseLocaleNumber(a.new_avg_placement || '0', 0) - parseLocaleNumber(b.new_avg_placement || '0', 0))
                 .slice(0, 3);
             const top10New = sorted.slice(0, 10).map(d => d.archetype);
             const top10Old = [...data]
@@ -671,7 +671,7 @@
                             <tbody>`;
                 decreased.slice(0, 10).forEach(d => {
                     const change = parseInt(d.count_change || 0);
-                    const placement_change = parseFloat((d.avg_placement_change || '0').replace(',', '.'));
+                    const placement_change = parseLocaleNumber(d.avg_placement_change || '0', 0);
                     const placement_color = placement_change < 0 ? '#27ae60' : '#e74c3c';
                     const archetypeEscaped = escapeJsStr(d.archetype);
                     html += `
@@ -706,7 +706,7 @@
                             </thead>
                             <tbody>`;
                 improvers.slice(0, 10).forEach(d => {
-                    const improvement = Math.abs(parseFloat((d.avg_placement_change || '0').replace(',', '.')));
+                    const improvement = Math.abs(parseLocaleNumber(d.avg_placement_change || '0', 0));
                     const countChange = parseInt(d.new_count) - parseInt(d.old_count);
                     const countChangeText = countChange > 0 ? `+${countChange}` : `${countChange}`;
                     const archetypeEscaped = escapeJsStr(d.archetype);
@@ -735,7 +735,7 @@
                             </thead>
                             <tbody>`;
                 decliners.slice(0, 10).forEach(d => {
-                    const decline = parseFloat((d.avg_placement_change || '0').replace(',', '.'));
+                    const decline = parseLocaleNumber(d.avg_placement_change || '0', 0);
                     const countChange = parseInt(d.new_count) - parseInt(d.old_count);
                     const countChangeText = countChange > 0 ? `+${countChange}` : `${countChange}`;
                     const archetypeEscaped = escapeJsStr(d.archetype);
@@ -839,8 +839,8 @@
                 
                 grouped[mainPokemon].new_count += parseInt(d.new_count || 0);
                 grouped[mainPokemon].old_count += parseInt(d.old_count || 0);
-                grouped[mainPokemon].new_placement_sum += parseFloat((d.new_avg_placement || '0').replace(',', '.')) * parseInt(d.new_count || 0);
-                grouped[mainPokemon].old_placement_sum += parseFloat((d.old_avg_placement || '0').replace(',', '.')) * parseInt(d.old_count || 0);
+                grouped[mainPokemon].new_placement_sum += parseLocaleNumber(d.new_avg_placement || '0', 0) * parseInt(d.new_count || 0);
+                grouped[mainPokemon].old_placement_sum += parseLocaleNumber(d.old_avg_placement || '0', 0) * parseInt(d.old_count || 0);
                 grouped[mainPokemon].variants.push(d.archetype);
             });
             
@@ -984,7 +984,7 @@
                 data.forEach(d => {
                     const changeValue = parseInt(d.count_change || 0);
                     const changeColor = changeValue > 0 ? '#27ae60' : changeValue < 0 ? '#e74c3c' : '#95a5a6';
-                    const placementChange = parseFloat((d.avg_placement_change || '0').replace(',', '.'));
+                    const placementChange = parseLocaleNumber(d.avg_placement_change || '0', 0);
                     const placementColor = placementChange < 0 ? '#27ae60' : placementChange > 0 ? '#e74c3c' : '#95a5a6';
                     const archetypeEscaped = escapeJsStr(d.archetype);
                     
@@ -1015,7 +1015,7 @@
                     const changeColor = changeValue > 0 ? '#27ae60' : changeValue < 0 ? '#e74c3c' : '#95a5a6';
                     const changeText = changeValue > 0 ? `+${changeValue}` : `${changeValue}`;
                     
-                    const placementChange = parseFloat((d.avg_placement_change || '0').replace(',', '.'));
+                    const placementChange = parseLocaleNumber(d.avg_placement_change || '0', 0);
                     const placementColor = placementChange < 0 ? '#27ae60' : placementChange > 0 ? '#e74c3c' : '#95a5a6';
                     const placementText = placementChange > 0 ? `+${placementChange.toFixed(2)}` : placementChange.toFixed(2);
                     const archetypeEscaped = escapeJsStr(d.archetype);
@@ -2073,7 +2073,7 @@
                 const cardData = cardMap.get(cardName);
                 
                 // Aggregate counts
-                cardData.totalCount += parseFloat(String(row.total_count || 0).replace(',', '.')) || 0;
+                cardData.totalCount += parseLocaleNumber(row.total_count || 0, 0);
                 const maxCount = parseInt(row.max_count || 0);
                 if (maxCount > 0) {
                     cardData.maxCountValues.push(maxCount);
@@ -3682,7 +3682,7 @@
         }
 
         // Helper function to safely parse percentage_in_archetype (can be string with comma)
-        const parsePct = (val) => parseFloat(String(val || "0").replace(',', '.'));
+        const parsePct = (val) => parseLocaleNumber(val || "0", 0);
 
         function renderCityLeagueAnalysisTable(data) {
             devLog('renderCityLeagueAnalysisTable called with', data ? data.length : 0, 'rows');
@@ -3824,7 +3824,7 @@
                 card.old_share
             ];
             for (const candidate of candidates) {
-                const parsed = parseFloat(String(candidate ?? '').replace(',', '.'));
+                const parsed = parseLocaleNumber(candidate ?? '', 0);
                 if (Number.isFinite(parsed)) return parsed;
             }
             return null;

@@ -1982,8 +1982,8 @@ const BASE_PATH = './data/';
                 }
 
                 if (!normalized.average_count_overall && normalized.total_count && normalized.total_decks_in_archetype) {
-                    const totalCount = parseFloat(String(normalized.total_count).replace(',', '.')) || 0;
-                    const totalDecks = parseFloat(String(normalized.total_decks_in_archetype).replace(',', '.')) || 0;
+                    const totalCount = parseLocaleNumber(normalized.total_count, 0);
+                    const totalDecks = parseLocaleNumber(normalized.total_decks_in_archetype, 0);
                     normalized.average_count_overall = totalDecks > 0 ? (totalCount / totalDecks).toFixed(2) : '0';
                 }
 

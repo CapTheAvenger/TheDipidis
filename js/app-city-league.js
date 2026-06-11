@@ -1445,8 +1445,15 @@
                 selectEl.value = value;
                 display.textContent = text;
                 close();
-                // Trigger the existing change handler on the hidden <select>
-                selectEl.dispatchEvent(new Event('change', { bubbles: true }));
+                // Trigger the existing change handler on the hidden <select>.
+                // _syncSuppressed flips the global change-listener (registered
+                // at the bottom of _initSearchableSelectImpl) into a no-op
+                // for this dispatch — we already set display.textContent
+                // above to the exact source-of-truth `text`, so re-syncing
+                // would just be a redundant lookup.
+                selectEl._syncSuppressed = true;
+                try { selectEl.dispatchEvent(new Event('change', { bubbles: true })); }
+                finally { selectEl._syncSuppressed = false; }
             }
 
             // Position the dropdown using getBoundingClientRect — required
@@ -1524,6 +1531,28 @@
 
             // Keep display text in sync when select.value changes programmatically
             selectEl._searchableDisplay = display;
+
+            // 2026-06-11 Chrome-plugin regression report flagged a
+            // label-desync bug: when select.value is set externally
+            // (deep-link restoration, JS calling `select.value =`,
+            // language switch re-rendering options) the label stayed
+            // on the previously-picked archetype until the user
+            // manually opened the dropdown. The codebase has 30+
+            // call sites of `syncSearchableSelectDisplay()` patching
+            // this case-by-case — easy to miss one. Centralise here
+            // by listening on the hidden <select>'s `change` event:
+            // any dispatchEvent('change') (whether from our pick()
+            // below, an external programmatic update, or a browser
+            // form-reset) re-renders the display label. A
+            // _syncSuppressed guard prevents loops with the internal
+            // pick() path which already sets the label directly.
+            selectEl.addEventListener('change', () => {
+                if (selectEl._syncSuppressed) return;
+                const opt = selectEl.options[selectEl.selectedIndex];
+                display.textContent = opt
+                    ? opt.textContent
+                    : (selectEl.options[0]?.textContent || t('cl.selectDeck'));
+            });
         }
 
         // Helper: update searchable select display when value set externally

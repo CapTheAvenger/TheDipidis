@@ -685,9 +685,14 @@
     flex-wrap: wrap;
 }
 .past-meta-best-grid {
+    /* Migrated to .card-grid[data-size="sm"] semantics (audit Punkt 2,
+     * 2026-06-11). 82 px minmax + 8 px gap matches the new SM tier;
+     * keeping the dedicated class so the existing JS selectors
+     * (.past-meta-best-grid) still work without an HTML rewrite. */
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(82px, 1fr));
-    gap: 8px;
+    grid-template-columns: repeat(auto-fill, minmax(var(--card-grid-min, 90px), 1fr));
+    gap: var(--card-grid-gap, 8px);
+    --card-grid-min: 82px;
     margin-bottom: 18px;
 }
 .past-meta-best-card {

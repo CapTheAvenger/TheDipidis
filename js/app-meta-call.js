@@ -4182,10 +4182,48 @@ window.MetaCall = (function () {
   }
 
   async function _loadDataImpl() {
+    // ─────────────────────────────────────────────────────────────
+    // TABLE OF CONTENTS (1,200-line function — navigation aid added
+    // 2026-06-11 audit Punkt 3). Loads 9 data sources sequentially
+    // into module-scoped state. Each block writes to its own caches
+    // (no shared mutation between blocks), so the function is
+    // structurally extractable — but every block reads helpers from
+    // the surrounding closure (parseEU, normalize, parseCSV, etc.),
+    // making the per-block extraction a non-trivial refactor.
+    //
+    //   §1  Limitless online decks (share + trend)            L4190
+    //   §2  Online tournament top-8 stats                     L4229
+    //   §3  format_window.json (rotation + lag_days)          L4257
+    //   §4  Online share history manifest + sources           L4295
+    //   §5  Player continuity (Predictor 5.8 stickiness)      L4341
+    //   §6  Labs tournament decks (live WR per archetype)     L4397
+    //   §7  Online matchup CSV (per-deck matchup matrix)      L5135
+    //   §8  Labs matchup CSV (Major tournaments)              L5212
+    //   §9  Online tournament winners (Predictor 5.6/5.7)     L5340
+    //
+    // Recommended split path (1 PR per source, low-risk):
+    //   1. Move parseEU / normalize / parseCSV out of closure
+    //      (already global after the 2026-06-10 helper migration —
+    //      this step is mostly verifying nothing depends on the
+    //      shadowed local versions).
+    //   2. Extract each §X block to `_load<SourceName>()` returning
+    //      a fresh object. Caller assigns to the module-scoped
+    //      caches.
+    //   3. Add per-loader unit tests using mocked fetch.
+    //
+    // Skipped for now (audit Punkt 3): the extraction without
+    // screenshot diffing or strong integration tests is high-risk
+    // for the heaviest predictor pipeline in the app. The TOC + the
+    // helper-migration foundation (audit Punkt 1) clear the runway
+    // for a per-source PR.
+    // ─────────────────────────────────────────────────────────────
+
     // No early-return on partial state here — the outer loadData() owns
     // the "is it fully loaded" decision via _loadDataComplete. Leaving
     // the old `if (_matchupMap && _shareList) return true;` shortcut
     // would re-introduce the race we just fixed.
+
+    // §1 — limitless_online_decks_comparison.csv → _trendMap + _shareList
     try {
       const shareResp = await fetch('data/limitless_online_decks_comparison.csv?t=' + Date.now());
       if (!shareResp.ok) throw new Error('share CSV not found');

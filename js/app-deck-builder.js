@@ -7015,7 +7015,42 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
 
 
         async function autoCompleteConsistency(source, rarityMode, options) {
-            // Diagnostic trace — when the user reports "button does nothing"
+            // ─────────────────────────────────────────────────────────────
+            // TABLE OF CONTENTS (2,620-line function — navigation aid added
+            // 2026-06-11 audit Punkt 3). Search for the SECTION markers
+            // below to jump to a phase:
+            //
+            //   §0   Input validation + source resolution     L7017
+            //   §1   Phase Y.2 hook (new builder fast-path)   L7097
+            //   §2   Aggregate cards by name                  L7177
+            //   §3   Combined variants (per-print rollup)     L7220
+            //   §4   Per-card statistics + meta boost         L7271
+            //   §5   Stage 0: ACE-SPEC pick                   ~L8011
+            //   §5b  Stage 0: User-pinned cards               ~L8044
+            //   §5c  Stage 0b: Skeleton lock                  ~L8516
+            //   §5d  Stage 0c: Energy budget                  ~L8608
+            //   §5e  Stage 0d: Stadium budget                 ~L8684
+            //   §5f  Stage 0e: Pokémon line lock              ~L8779
+            //   §6   Stage 1: Core cards (score ≥ 75)         ~L8867
+            //   §7   Stage 2: Extended cards (score ≥ 40)     ~L8943
+            //   §8   Largest-Remainder redistribution         ~L9003
+            //   §9   Bidirectional LRM swap                   ~L9028
+            //   §10  Basic-energy fallback fill               ~L9050
+            //   §11  Quality audit + apply to deck            ~L9300+
+            //
+            // The big stages (§5–§10) all read from `consistencyDeck` +
+            // `deckCards` mutable closures and share helper lambdas
+            // (`isBasicEnergyCardEntry`, `_isEnergyCardEntry`, etc.)
+            // defined at the head of §5. Extracting a phase requires
+            // either passing those helpers in or hoisting them to
+            // module scope — high-regression-risk without screenshot
+            // diffing, so the work is currently incremental: extracted
+            // helpers (`_redistributeByLargestRemainder`,
+            // `_trimByReverseLrm`, `_bidirectionalLrmSwap`) live at
+            // module scope and are called from §8/§9 above.
+            // ─────────────────────────────────────────────────────────────
+
+            // §0 — Diagnostic trace — when the user reports "button does nothing"
             // these console lines pinpoint which step bails. The Surface-Audit
             // 2026-05-27 found this handler had four distinct silent-return
             // paths with no user feedback. Logs are info-level so they

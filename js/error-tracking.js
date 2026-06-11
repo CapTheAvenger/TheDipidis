@@ -144,19 +144,10 @@
         });
     });
 
-    // Expose for manual error reporting
-    window.trackError = function (error, context) {
-        if (!_shouldSend()) return;
-        _sendToSentry({
-            type: error.name || 'ManualError',
-            message: error.message || String(error),
-            filename: '',
-            lineno: 0,
-            colno: 0,
-            stack: error.stack || '',
-            componentStack: context || ''
-        });
-    };
+    // (2026-06-10 audit) window.trackError manual-report hook removed —
+    // zero callers in the codebase. Global onerror + unhandledrejection
+    // hooks above cover all the cases we care about; if a future caller
+    // needs manual reporting, re-add a thin wrapper around _sendToSentry.
 
     if (_parsed) {
         console.log('[ErrorTracking] Active — errors will be reported to Sentry');

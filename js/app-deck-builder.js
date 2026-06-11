@@ -3254,6 +3254,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 div.setAttribute('data-export-card', '1');
                 const img = document.createElement('img');
                 img.src = getBestCardImage(card);
+                img.alt = card.card_name || card.full_card_name || 'Card';
                 div.appendChild(img);
                 const badge = document.createElement('div');
                 badge.className = 'compact-badge';

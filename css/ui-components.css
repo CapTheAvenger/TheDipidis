@@ -4659,3 +4659,65 @@ img[src*="limitlesstcg"] {
     background: rgba(231,76,60,0.12);
     color: #e74c3c;
 }
+
+/* ── .toolbar-action ─ unified pill button for Wishlist / Tradelist /
+ * future profile toolbars. Replaces five 200-char inline-style blobs
+ * per toolbar that all encoded the same gradient/padding/shadow with
+ * a colour swap. Colour comes from a CSS variable so each instance
+ * picks a tone without re-stating the rest of the rule.
+ *
+ * Sized to comfortably hit a 44 × 44 px tap target on phones (height
+ * 44 fits within the existing flex row with --wrap, font-size 14
+ * stays readable). On desktop it's tighter (38 × 14) so the toolbar
+ * doesn't dominate the page.
+ */
+.toolbar-action {
+    --toolbar-action-bg-from: #6b7280;
+    --toolbar-action-bg-to:   #4b5563;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 38px;
+    min-height: 38px;
+    padding: 0 16px;
+    background: linear-gradient(135deg, var(--toolbar-action-bg-from), var(--toolbar-action-bg-to));
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+    line-height: 1;
+    white-space: nowrap;
+}
+.toolbar-action:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.18);
+}
+.toolbar-action:active { transform: translateY(0); }
+.toolbar-action:focus-visible {
+    outline: 2px solid var(--pokemon-blue);
+    outline-offset: 2px;
+}
+
+/* Colour modifiers — keep the gradient + shadow consistent, only swap
+ * the two stop colours. Picked to match the previous inline values so
+ * the toolbar looks the same from a distance. */
+.toolbar-action--orange { --toolbar-action-bg-from: #e67e22; --toolbar-action-bg-to: #d35400; }
+.toolbar-action--blue   { --toolbar-action-bg-from: #3498db; --toolbar-action-bg-to: #2980b9; }
+.toolbar-action--teal   { --toolbar-action-bg-from: #00838f; --toolbar-action-bg-to: #006064; }
+.toolbar-action--green  { --toolbar-action-bg-from: #16a085; --toolbar-action-bg-to: #1abc9c; }
+.toolbar-action--red    { --toolbar-action-bg-from: #e74c3c; --toolbar-action-bg-to: #c0392b; }
+
+/* Mobile — raise to the standard 44 × 44 touch target the audit
+ * flagged the 16 px inline buttons for missing. */
+@media (max-width: 600px) {
+    .toolbar-action {
+        height: 44px;
+        min-height: 44px;
+        padding: 0 14px;
+        font-size: 14px;
+    }
+}

@@ -346,22 +346,11 @@ const BASE_PATH = './data/';
             return 10; // Catch-all
         };
 
-        window.sortDeckCards = function(cardsArray) {
-            return cardsArray.sort((a, b) => {
-                // 1. Nach offiziellem Kartentyp sortieren
-                const priorityA = window.getCardSortPriority(a);
-                const priorityB = window.getCardSortPriority(b);
-
-                if (priorityA !== priorityB) {
-                    return priorityA - priorityB;
-                }
-
-                // 2. Innerhalb des gleichen Typs alphabetisch sortieren
-                const nameA = a.name || '';
-                const nameB = b.name || '';
-                return nameA.localeCompare(nameB);
-            });
-        };
+        // (2026-06-10 audit) window.sortDeckCards removed — zero callers.
+        // The deck-builder rendering path uses sortCardsByType()
+        // (app-deck-builder.js) which sorts by category + element + share,
+        // and the cards-database path uses cards-db's own sorter. This
+        // helper was an early/legacy alphabetical fallback never wired up.
 
         // CRITICAL: Initialize deck objects immediately to prevent undefined errors
         window.cityLeagueDeck = window.cityLeagueDeck || {};

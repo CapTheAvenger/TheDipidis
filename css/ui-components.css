@@ -4792,3 +4792,181 @@ img[src*="limitlesstcg"] {
     .empty-state__icon { width: 40px; height: 40px; }
     .empty-state__icon svg { width: 20px; height: 20px; }
 }
+
+/* ── Card Replacement Modal (audit Sprint 3 — 2026-06-10) ───── */
+.card-replacement-dialog {
+    background: #fff;
+    border-radius: 14px;
+    width: min(94vw, 720px);
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.25);
+}
+.card-replacement-header {
+    padding: 14px 18px;
+    border-bottom: 1px solid #e5e7eb;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: linear-gradient(135deg, #f8fbff 0%, #eff6ff 100%);
+}
+.card-replacement-header h3 {
+    margin: 0;
+    font-size: 1.05rem;
+    color: #1f2937;
+    font-weight: 800;
+}
+.card-replacement-close {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+    background: #fff;
+    font-size: 1.2rem;
+    cursor: pointer;
+    color: #6b7280;
+}
+.card-replacement-close:hover { background: #f3f4f6; }
+.card-replacement-body {
+    padding: 14px 18px;
+    overflow: auto;
+    flex: 1;
+}
+.card-replacement-loading,
+.card-replacement-empty {
+    color: #6b7280;
+    font-style: italic;
+    text-align: center;
+    padding: 28px 8px;
+}
+.card-replacement-intro {
+    margin: 0 0 14px;
+    color: #4b5563;
+    font-size: 0.92rem;
+    line-height: 1.45;
+}
+.card-replacement-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.card-replacement-row {
+    display: grid;
+    grid-template-columns: 36px 60px 1fr;
+    gap: 12px;
+    align-items: center;
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #f8fbff 0%, #eef2ff 100%);
+    border: 1px solid rgba(59, 76, 202, 0.10);
+}
+.card-replacement-rank {
+    font-weight: 800;
+    color: #3b4cca;
+    font-size: 0.95rem;
+}
+.card-replacement-thumb {
+    width: 60px;
+    aspect-ratio: 5 / 7;
+    background: #f3f4f6;
+    border-radius: 4px;
+    overflow: hidden;
+}
+.card-replacement-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.card-replacement-thumb-fallback {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #dbe2f0 0%, #cdd6e6 100%);
+}
+.card-replacement-name {
+    font-weight: 700;
+    color: #1f2937;
+    font-size: 0.95rem;
+    margin-bottom: 4px;
+}
+.card-replacement-detail {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    font-size: 0.84rem;
+    color: #4b5563;
+}
+.card-replacement-stat-count {
+    color: #94a3b8;
+    font-size: 0.78rem;
+    margin-left: 2px;
+}
+.card-replacement-delta {
+    padding: 1px 8px;
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: 0.76rem;
+    letter-spacing: 0.2px;
+}
+.card-replacement-delta--pos  { background: #d1fae5; color: #065f46; }
+.card-replacement-delta--zero { background: #f1f5f9; color: #475569; }
+.card-replacement-note {
+    margin: 14px 0 0;
+    font-size: 0.82rem;
+    color: #6b7280;
+    line-height: 1.45;
+    padding: 10px 12px;
+    border-left: 3px solid #cbd5e1;
+    background: #f8fafc;
+    border-radius: 0 6px 6px 0;
+}
+
+@media (max-width: 600px) {
+    .card-replacement-dialog {
+        width: 100vw;
+        max-height: 96vh;
+        border-radius: 10px 10px 0 0;
+    }
+    .card-replacement-row {
+        grid-template-columns: 28px 50px 1fr;
+        gap: 8px;
+        padding: 8px 10px;
+    }
+    .card-replacement-thumb { width: 50px; }
+    .card-replacement-name { font-size: 0.88rem; }
+}
+
+/* Card-substitute button — top-left of every deck-builder card.
+ * Triggers the openCardReplacementModal() lookup. See
+ * js/card-replacement.js. */
+.card-substitute-btn {
+    position: absolute;
+    top: 6px;
+    left: 6px;
+    width: 26px;
+    height: 26px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.92);
+    border: 1px solid rgba(59, 76, 202, 0.35);
+    color: #3b4cca;
+    font-weight: 800;
+    font-size: 14px;
+    line-height: 1;
+    cursor: pointer;
+    z-index: 3;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.18);
+    transition: transform 0.12s ease, background 0.12s ease;
+    padding: 0;
+}
+.card-substitute-btn:hover {
+    background: #fff;
+    transform: scale(1.08);
+}
+.card-substitute-btn:focus-visible {
+    outline: 2px solid var(--pokemon-blue);
+    outline-offset: 2px;
+}

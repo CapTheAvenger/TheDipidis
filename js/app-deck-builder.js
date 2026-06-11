@@ -1654,28 +1654,6 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                         <img src="${imageUrl}" alt="${safeCardName}" loading="lazy" class="card-img-std cursor-zoom" onerror="handleCardImageError(this, '${setCode}', '${setNumber}')" onclick="showSingleCard(this.src, '${cardNameEscaped} (${setCode} ${setNumber})')">
                         ${ownedBadge}
                         ${typeof getWishlistBadgeHtml === 'function' ? getWishlistBadgeHtml(safeCardName, setCode, setNumber) : ''}
-                        ${(() => {
-                            // Card Replacement Suggester button — top-left
-                            // pill that triggers a modal showing what the
-                            // field swaps this card for, derived from the
-                            // per-decklist CSV. Only render when the
-                            // module is loaded so we don't add a button
-                            // that links to nothing.
-                            if (typeof openCardReplacementModal !== 'function') return '';
-                            const _arch =
-                                source === 'cityLeague'  ? (window.currentCityLeagueArchetype || '')
-                              : source === 'currentMeta' ? (window.currentMetaArchetype || '')
-                              :                            (window.pastMetaCurrentArchetype || '');
-                            if (!_arch) return '';
-                            const archEsc = escapeJsStr(_arch);
-                            const title = (typeof t === 'function')
-                              ? (t('replacement.buttonTitle') || 'Find field-observed substitutes')
-                              : 'Find field-observed substitutes';
-                            return `<button class="card-substitute-btn"
-                                onclick="openCardReplacementModal('${cardNameEscaped}', '${archEsc}'); event.stopPropagation();"
-                                title="${escapeHtml(title)}"
-                                aria-label="${escapeHtml(title)}">≈</button>`;
-                        })()}
                         <div class="card-max-count">${count}</div>
                         <div class="deck-card-overlay">${overlayText}</div>
                         <div class="deck-card-actions">

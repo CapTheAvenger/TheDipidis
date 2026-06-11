@@ -1239,3 +1239,107 @@ function showTableSkeleton(containerOrId, opts) {
 
         // ============================================================================
         // META DECK TIER LIST SYSTEM (PokemonMeta.com Style)
+// ============================================================================
+// SHARED HELPERS (audit Sprint 2 — 2026-06-10)
+// ----------------------------------------------------------------------------
+// Consolidates the helpers the 2026-06-10 code-quality audit flagged as
+// duplicated across 5+ files. Each function below was implemented inline
+// multiple times with subtle drift — centralising means future bug-fixes
+// land in one place instead of "fix it in app-meta-call, forget the other
+// four". Top-level function declarations + explicit `window.X = X` exports
+// so legacy `t = window.parseLocaleNumber` callers and direct callers both
+// work.
+// ============================================================================
+
+/**
+ * Parse a German-locale number string ("4,75") into a JS Number (4.75).
+ *
+ * Accepts:
+ *   "4,75"   → 4.75
+ *   "4.75"   → 4.75
+ *   "4,75 €" → 4.75  (trailing units stripped)
+ *   "1.234,56" → 1234.56  (DE thousand separator)
+ *   number   → number     (idempotent on numeric input)
+ *   ""/null  → fallback   (default 0)
+ *
+ * The audit found at least 6 local re-implementations (parseEU,
+ * parsePastMetaNumber, _parsePriceNum, plus inline
+ * parseFloat(x.replace(',', '.')) in 10+ spots). Use this everywhere.
+ */
+function parseLocaleNumber(input, fallback = 0) {
+    if (typeof input === 'number' && Number.isFinite(input)) return input;
+    if (input == null) return fallback;
+    let s = String(input).trim();
+    if (!s) return fallback;
+    // Strip trailing units / percent sign / whitespace.
+    s = s.replace(/[€$%\s]+$/, '').trim();
+    // German format: dot is thousands sep, comma is decimal sep.
+    // Heuristic: if the string contains both, the LAST one is the
+    // decimal separator and the other becomes the thousands sep.
+    const lastComma = s.lastIndexOf(',');
+    const lastDot   = s.lastIndexOf('.');
+    if (lastComma >= 0 && lastDot >= 0) {
+        const decimalSep = lastComma > lastDot ? ',' : '.';
+        const thousandSep = decimalSep === ',' ? '.' : ',';
+        s = s.split(thousandSep).join('').replace(decimalSep, '.');
+    } else if (lastComma >= 0) {
+        s = s.replace(',', '.');
+    }
+    const n = parseFloat(s);
+    return Number.isFinite(n) ? n : fallback;
+}
+window.parseLocaleNumber = parseLocaleNumber;
+
+/**
+ * Escape a string for safe interpolation into HTML text content.
+ *
+ * For attribute values prefer `escapeHtmlAttr` (declared elsewhere in
+ * this file) which also escapes quotes. This helper handles the
+ * common case of `${variable}` inside backtick-templated HTML where
+ * the variable becomes visible text — five files had a local copy
+ * each, this is the single source.
+ */
+function escapeHtml(s) {
+    return String(s ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+}
+window.escapeHtml = escapeHtml;
+
+/**
+ * Build the HTML string for a `.empty-state` panel — the unified
+ * empty-state slot the 2026-06-10 audit specced. Pass an opts object;
+ * everything is optional.
+ *
+ *   getEmptyStateHtml({
+ *     title: 'Your wishlist is empty',
+ *     body:  'Find cards from the Card Database and tap the heart.',
+ *     cta:   { label: 'Find Cards', onclick: "switchTab('cards')" },
+ *     icon:  'heart',   // 'heart' | 'deck' | 'sparkles' | undefined
+ *   })
+ *
+ * The icon set is deliberately tiny (3 SVGs) — adding more is a 4-line
+ * patch but anything more than that is bikeshedding for an empty state.
+ * Title goes through innerHTML (so emoji + light formatting like `<em>`
+ * survive), but the values are author-controlled — DO NOT pass user
+ * input here without escapeHtml first.
+ */
+function getEmptyStateHtml(opts) {
+    const o = Object.assign({ title: '', body: '', cta: null, icon: '' }, opts || {});
+    const icons = {
+        heart:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>',
+        deck:     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>',
+        sparkles: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M5.6 18.4l2.8-2.8M15.6 8.4l2.8-2.8"/></svg>',
+    };
+    const iconHtml = o.icon && icons[o.icon]
+        ? '<div class="empty-state__icon" aria-hidden="true">' + icons[o.icon] + '</div>'
+        : '';
+    const titleHtml = o.title ? '<h4 class="empty-state__title">' + o.title + '</h4>' : '';
+    const bodyHtml  = o.body  ? '<p class="empty-state__body">' + o.body + '</p>' : '';
+    const ctaHtml   = o.cta
+        ? '<button class="empty-state__cta"' + (o.cta.onclick ? ' onclick="' + o.cta.onclick + '"' : '') + '>' + (o.cta.label || 'OK') + '</button>'
+        : '';
+    return '<div class="empty-state" role="status" aria-live="polite">' + iconHtml + titleHtml + bodyHtml + ctaHtml + '</div>';
+}
+window.getEmptyStateHtml = getEmptyStateHtml;

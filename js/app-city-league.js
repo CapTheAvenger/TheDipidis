@@ -676,7 +676,7 @@
                     const archetypeEscaped = escapeJsStr(d.archetype);
                     html += `
                         <tr class="city-league-info-table-row" tabindex="0">
-                            <td class="city-league-info-table-cell city-league-info-table-cell-archetype" title="${t('cl.goToAnalysis')} ${d.archetype}"><a href="javascript:void(0)" onclick="jumpToCardAnalysis('${archetypeEscaped}', 'cityLeague')" class="archetype-jump-link">${(typeof window.ArchetypeIcons!=='undefined'?window.ArchetypeIcons.getIconHtml(d.archetype,{size:'sm',layout:'inline'}):'')}${d.archetype}</a></td>
+                            <td class="city-league-info-table-cell city-league-info-table-cell-archetype" title="${t('cl.goToAnalysis')} ${escapeHtml(d.archetype)}"><a href="javascript:void(0)" onclick="jumpToCardAnalysis('${archetypeEscaped}', 'cityLeague')" class="archetype-jump-link">${(typeof window.ArchetypeIcons!=='undefined'?window.ArchetypeIcons.getIconHtml(d.archetype,{size:'sm',layout:'inline'}):'')}${escapeHtml(d.archetype)}</a></td>
                             <td class="city-league-info-table-cell city-league-info-table-cell-center">${d.old_count}</td>
                             <td class="city-league-info-table-cell city-league-info-table-cell-center">${d.new_count}</td>
                             <td class="city-league-info-table-cell city-league-info-table-cell-center city-league-info-table-cell-exit">${change}</td>
@@ -712,7 +712,7 @@
                     const archetypeEscaped = escapeJsStr(d.archetype);
                     html += `
                         <tr class="city-league-info-table-row" tabindex="0">
-                            <td class="city-league-info-table-cell city-league-info-table-cell-archetype" title="${t('cl.goToAnalysis')} ${d.archetype}"><a href="javascript:void(0)" onclick="jumpToCardAnalysis('${archetypeEscaped}', 'cityLeague')" class="archetype-jump-link">${(typeof window.ArchetypeIcons!=='undefined'?window.ArchetypeIcons.getIconHtml(d.archetype,{size:'sm',layout:'inline'}):'')}${d.archetype}</a></td>
+                            <td class="city-league-info-table-cell city-league-info-table-cell-archetype" title="${t('cl.goToAnalysis')} ${escapeHtml(d.archetype)}"><a href="javascript:void(0)" onclick="jumpToCardAnalysis('${archetypeEscaped}', 'cityLeague')" class="archetype-jump-link">${(typeof window.ArchetypeIcons!=='undefined'?window.ArchetypeIcons.getIconHtml(d.archetype,{size:'sm',layout:'inline'}):'')}${escapeHtml(d.archetype)}</a></td>
                             <td class="city-league-info-table-cell city-league-info-table-cell-center">${d.new_count} <span class="city-league-info-table-count-change">(${countChangeText})</span></td>
                             <td class="city-league-info-table-cell city-league-info-table-cell-center city-league-info-table-cell-entry">${d.new_avg_placement} <span class="city-league-info-table-placement" style="--placement-color: #27ae60;">(-${improvement.toFixed(2)})</span></td>
                         </tr>`;
@@ -741,7 +741,7 @@
                     const archetypeEscaped = escapeJsStr(d.archetype);
                     html += `
                         <tr class="city-league-info-table-row" tabindex="0">
-                            <td class="city-league-info-table-cell city-league-info-table-cell-archetype" title="${t('cl.goToAnalysis')} ${d.archetype}"><a href="javascript:void(0)" onclick="jumpToCardAnalysis('${archetypeEscaped}', 'cityLeague')" class="archetype-jump-link">${(typeof window.ArchetypeIcons!=='undefined'?window.ArchetypeIcons.getIconHtml(d.archetype,{size:'sm',layout:'inline'}):'')}${d.archetype}</a></td>
+                            <td class="city-league-info-table-cell city-league-info-table-cell-archetype" title="${t('cl.goToAnalysis')} ${escapeHtml(d.archetype)}"><a href="javascript:void(0)" onclick="jumpToCardAnalysis('${archetypeEscaped}', 'cityLeague')" class="archetype-jump-link">${(typeof window.ArchetypeIcons!=='undefined'?window.ArchetypeIcons.getIconHtml(d.archetype,{size:'sm',layout:'inline'}):'')}${escapeHtml(d.archetype)}</a></td>
                             <td class="city-league-info-table-cell city-league-info-table-cell-center">${d.new_count} <span class="city-league-info-table-count-change">(${countChangeText})</span></td>
                             <td class="city-league-info-table-cell city-league-info-table-cell-center city-league-info-table-cell-exit">${d.new_avg_placement} <span class="city-league-info-table-placement" style="--placement-color: #e74c3c;">(+${decline.toFixed(2)})</span></td>
                         </tr>`;
@@ -2663,12 +2663,11 @@
             }
         };
 
-        // Backward compatibility for existing handlers.
-        window.handleM3ImageError = function(img, setCode, cardNumber) {
-            const fallbackUrl = getM3JapaneseFallbackUrl(setCode, cardNumber);
-            window.handleCardImageError(img, setCode, cardNumber, fallbackUrl);
-        };
-        
+        // (2026-06-10 audit) window.handleM3ImageError removed — zero
+        // inline-onerror references still hit this shim. handleCardImageError
+        // is the live path and accepts an explicit fallback URL.
+
+
         // Helper function to fix Japanese card image URLs with intelligent fallback logic
         function fixJapaneseCardImageUrl(url, setCode, cardName = '', cardNumber = '') {
             if (!url) return url;

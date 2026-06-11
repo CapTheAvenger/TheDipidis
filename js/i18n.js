@@ -129,6 +129,21 @@ const translations = {
     'cards.notLoadedYet':     'Card database not loaded yet — please wait a moment and try again.',
     'price.liveTitle':        'Live price: {price}',
 
+    // Card Replacement Suggester (Sprint 3 — 2026-06-10)
+    'replacement.title':           'Field substitutes for',
+    'replacement.loading':         'Looking at what the field plays without this card…',
+    'replacement.error':           'Could not load per-decklist data.',
+    'replacement.none':            'No same-category substitutes found in the data.',
+    'replacement.intro':           'From',
+    'replacement.lists':           'lists',
+    'replacement.skipTarget':      'skip the target card. Same-category cards that show up in those lists, ranked by Δ vs lists that DO run the target:',
+    'replacement.without':         'without',
+    'replacement.with':            'with',
+    'replacement.withoutTooltip':  'Share of lists that do not play the target',
+    'replacement.withTooltip':     'Share of lists that play the target',
+    'replacement.note':            'These are field-observed swaps from real decklists — no curated table. Cards that appear ONLY in lists without the target are the strongest replacement signal (high Δ).',
+    'replacement.buttonTitle':     'Find field-observed substitutes for this card',
+
     // Language-audit 2026-06-10 — strings that were hard-coded EN-only
     // (or worse, hard-coded DE in places EN users would see). All
     // wired into the affected HTML elements via data-i18n in the same
@@ -1907,6 +1922,21 @@ const translations = {
     'buildInfo.auditTitle':   'Build-Qualitäts-Check',
     'cards.notLoadedYet':     'Karten-Datenbank noch nicht geladen — bitte kurz warten und erneut versuchen.',
     'price.liveTitle':        'Live-Preis: {price}',
+
+    // Card Replacement Suggester (Sprint 3 — 2026-06-10)
+    'replacement.title':           'Feld-Ersatz für',
+    'replacement.loading':         'Schaue was das Feld spielt wenn diese Karte nicht dabei ist…',
+    'replacement.error':           'Per-Decklist-Daten konnten nicht geladen werden.',
+    'replacement.none':            'Keine Same-Category-Ersatzkarten in den Daten gefunden.',
+    'replacement.intro':           'Von',
+    'replacement.lists':           'Listen',
+    'replacement.skipTarget':      'spielen die Zielkarte nicht. Same-Category-Karten die in diesen Listen auftauchen, sortiert nach Δ vs Listen die die Karte spielen:',
+    'replacement.without':         'ohne',
+    'replacement.with':            'mit',
+    'replacement.withoutTooltip':  'Anteil der Listen die die Zielkarte NICHT spielen',
+    'replacement.withTooltip':     'Anteil der Listen die die Zielkarte spielen',
+    'replacement.note':            'Diese Ersatzkarten sind im Feld beobachtet — keine kuratierte Tabelle. Karten die NUR ohne die Zielkarte auftauchen, sind das stärkste Ersatz-Signal (hohes Δ).',
+    'replacement.buttonTitle':     'Im Feld beobachtete Ersatzkarten für diese Karte finden',
 
     // Language-audit 2026-06-10 — DE counterparts of the strings added
     // to the EN block above. See the EN comment block for context.

@@ -1884,12 +1884,19 @@ function updateProfileUI(profile) {
   
   const profileEl = document.getElementById('user-profile-data');
   if (profileEl) {
+    const _pt = (key, fallback) => {
+      if (typeof t === 'function') {
+        const v = t(key);
+        if (v && v !== key) return v;
+      }
+      return fallback;
+    };
     profileEl.innerHTML = `
       <div class="profile-info">
-        <p><strong>Email:</strong> ${auth.currentUser?.email || ''}</p>
-        <p><strong>Member since:</strong> ${formatProfileDate(profile.createdAt)}</p>
-        <p><strong>Cards:</strong> ${stats.cardCount}</p>
-        <p><strong>Decks:</strong> ${window.userDecks?.length || 0}</p>
+        <p><strong>${_pt('profile.infoEmail', 'Email:')}</strong> ${auth.currentUser?.email || ''}</p>
+        <p><strong>${_pt('profile.infoMemberSince', 'Member since:')}</strong> ${formatProfileDate(profile.createdAt)}</p>
+        <p><strong>${_pt('profile.infoCards', 'Cards:')}</strong> ${stats.cardCount}</p>
+        <p><strong>${_pt('profile.infoDecks', 'Decks:')}</strong> ${window.userDecks?.length || 0}</p>
       </div>
     `;
   }
@@ -5720,3 +5727,21 @@ window.exportTradelistAsImage        = exportTradelistAsImage;
 window.saveTradelistMinPrice         = saveTradelistMinPrice;
 window.copyTradelistToClipboard      = copyTradelistToClipboard;
 window.toggleTradelistFromCardDbButton = toggleTradelistFromCardDbButton;
+
+// ── i18n: re-render profile surfaces on language toggle ─────────────
+// The saved-decks grid and the profile-info block bake the active
+// language into their HTML at render time (getLang() ternaries for the
+// action-button labels, formatProfileDate() for dates). Without this
+// listener the rendered output froze on whichever language was active
+// when the data loaded — the 2026-06-11 Chrome-plugin verification
+// caught "May 29, 2026" persisting in DE mode after a toggle.
+document.addEventListener('languageChanged', () => {
+  try {
+    if (typeof updateDecksUI === 'function') updateDecksUI();
+    if (window.userProfile && typeof updateProfileUI === 'function') {
+      updateProfileUI(window.userProfile);
+    }
+  } catch (err) {
+    console.warn('[i18n] profile re-render on languageChanged failed:', err);
+  }
+});

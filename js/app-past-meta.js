@@ -83,12 +83,21 @@
                 .trim() || 'Unknown Deck';
         }
 
-        function resetSelectWithPlaceholder(selectEl, placeholderText, placeholderValue) {
+        function resetSelectWithPlaceholder(selectEl, placeholderText, placeholderValue, placeholderI18nKey) {
             if (!selectEl) return;
             selectEl.innerHTML = '';
             const placeholderOption = document.createElement('option');
             placeholderOption.value = placeholderValue;
             placeholderOption.textContent = placeholderText;
+            // Tag with the i18n key so updateTranslationsInDOM keeps the
+            // placeholder text in sync after a language toggle. Without
+            // this the option text is frozen at the language active when
+            // the dropdown was first populated, and the searchable-select
+            // display (which mirrors options[0].textContent) shows German
+            // strings in EN mode and vice versa.
+            if (placeholderI18nKey) {
+                placeholderOption.setAttribute('data-i18n', placeholderI18nKey);
+            }
             selectEl.appendChild(placeholderOption);
         }
 
@@ -643,7 +652,7 @@
             archetypes.sort((a, b) => a.archetype.localeCompare(b.archetype));
             
             // Populate deck select dropdown
-            resetSelectWithPlaceholder(deckSelect, typeof t === 'function' ? t('currentMeta.selectDeck') : '-- Select a Deck --', '');
+            resetSelectWithPlaceholder(deckSelect, typeof t === 'function' ? t('currentMeta.selectDeck') : '-- Select a Deck --', '', 'currentMeta.selectDeck');
             
             archetypes.forEach(entry => {
                 const tournamentCount = entry.tournaments.length;

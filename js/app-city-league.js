@@ -1553,6 +1553,26 @@
                     ? opt.textContent
                     : (selectEl.options[0]?.textContent || t('cl.selectDeck'));
             });
+
+            // 2026-06-11 Chrome-plugin regression: the placeholder option
+            // (e.g. "-- Select a Deck --") was first populated with the
+            // language that was active when the tab was opened. After a
+            // later EN↔DE toggle, the <option>'s textContent got updated
+            // by updateTranslationsInDOM (now that we tag the option with
+            // data-i18n), but the searchable-select's visible label +
+            // search-input placeholder still showed the stale string
+            // because they don't re-read the underlying <option>. Mirror
+            // the language switch into both surfaces here.
+            const onLangChange = () => {
+                const opt = selectEl.options[selectEl.selectedIndex];
+                const fallback = selectEl.options[0]?.textContent || t('cl.selectDeck');
+                display.textContent = opt ? opt.textContent : fallback;
+                const searchPh = t('filter.searchDeckPlaceholder') || 'Search deck…';
+                search.placeholder = searchPh;
+                search.setAttribute('aria-label', searchPh);
+                if (isOpen()) buildList(search.value);
+            };
+            document.addEventListener('languageChanged', onLangChange);
         }
 
         // Helper: update searchable select display when value set externally

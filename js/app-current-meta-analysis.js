@@ -215,7 +215,7 @@
                 if (!bucketCardsByName.has(bucketKey)) bucketCardsByName.set(bucketKey, new Map());
                 const cardMap = bucketCardsByName.get(bucketKey);
                 const dc = parseInt(r.deck_inclusion_count || 0, 10) || 0;
-                const tc = parseFloat(String(r.total_count || 0).replace(',', '.')) || 0;
+                const tc = parseLocaleNumber(r.total_count || 0, 0);
                 const mc = parseInt(r.max_count || 0, 10) || 0;
                 if (!cardMap.has(cn)) {
                     cardMap.set(cn, {
@@ -316,7 +316,7 @@
                 const tmpl = rows[0];
                 rows.forEach(r => {
                     const dc = parseInt(r.deck_count || r.deck_inclusion_count || 0, 10) || 0;
-                    const tc = parseFloat(String(r.total_count || 0).replace(',', '.')) || 0;
+                    const tc = parseLocaleNumber(r.total_count || 0, 0);
                     if (dc > online_dc) online_dc = dc;
                     if (tc > online_tc) online_tc = tc;
                     online_mc = Math.max(online_mc, parseInt(r.max_count || 0, 10) || 0);
@@ -1170,7 +1170,7 @@
                 }
                 const dc = parseInt(r.deck_inclusion_count || 0, 10) || 0;
                 if (dc > tc.deck_inclusion_count) tc.deck_inclusion_count = dc;
-                tc.total_count += parseFloat(String(r.total_count || 0).replace(',', '.')) || 0;
+                tc.total_count += parseLocaleNumber(r.total_count || 0, 0);
                 const m = parseInt(r.max_count || 0, 10) || 0;
                 if (m > tc.max_count) tc.max_count = m;
             }
@@ -1580,7 +1580,7 @@
                         
                         relevantMatchups.forEach(m => {
                             const games = parseInt(m.total_games) || 0;
-                            const winRate = parseFloat((m.win_rate || '0').replace(',', '.'));
+                            const winRate = parseLocaleNumber(m.win_rate || '0', 0);
                             totalGames += games;
                             totalWins += (games * winRate / 100);
                         });
@@ -1751,7 +1751,7 @@
 
             // Parse "62,50" or "62.50" → 62.50; strip "%" suffix.
             const parseWr = (s) => {
-                const v = parseFloat(String(s || '0').replace(',', '.').replace('%', '').trim());
+                const v = parseLocaleNumber(s || '0', 0);
                 return Number.isFinite(v) ? v : 0;
             };
 
@@ -1841,7 +1841,7 @@
             const target = archetype.trim().toLowerCase();
             const stripped = stripExSuffix(archetype).trim().toLowerCase();
             const parseWr = (s) => {
-                const v = parseFloat(String(s || '0').replace(',', '.').replace('%', '').trim());
+                const v = parseLocaleNumber(s || '0', 0);
                 return Number.isFinite(v) ? v : 0;
             };
             const wrByOpp = {};
@@ -2073,7 +2073,7 @@
             const target = archetype.trim().toLowerCase();
             const stripped = stripExSuffix(archetype).trim().toLowerCase();
             const parseWr = (s) => {
-                const v = parseFloat(String(s || '0').replace(',', '.').replace('%', '').trim());
+                const v = parseLocaleNumber(s || '0', 0);
                 return Number.isFinite(v) ? v : 0;
             };
             const wrByOpp = {};
@@ -3440,12 +3440,12 @@
                         ...displayCard,
                         card_name: cardName
                     });
-                    const rawPercentage = parseFloat(String(card.percentage_in_archetype || card.share_percent || 0).replace(',', '.'));
+                    const rawPercentage = parseLocaleNumber(card.percentage_in_archetype || card.share_percent || 0, 0);
                     const maxCount = parseInt(card.max_count) || card.max_count || '?';
                     const cardNameEscaped = escapeJsStr(cardName);
                     const setCode = displayCard.set_code || '';
                     const setNumber = displayCard.set_number || '';
-                    const avgCountUsedRaw = parseFloat(String(card.average_count || card.avg_count || 0).replace(',', '.'));
+                    const avgCountUsedRaw = parseLocaleNumber(card.average_count || card.avg_count || 0, 0);
                     
                     let deckCount = 0;
                     if (setCode && setNumber) {
@@ -3460,10 +3460,10 @@
                         deckCount = currentDeck[cardName] || 0;
                     }
                     
-                    const decksWithCard = parseFloat(String(card.deck_count || card.deck_inclusion_count || 0).replace(',', '.')) || 0;
-                    const totalDecksInArchetype = parseFloat(String(card.total_decks_in_archetype || 0).replace(',', '.')) || 0;
-                    const totalCount = parseFloat(String(card.total_count || 0).replace(',', '.')) || 0;
-                    const avgCountOverallRaw = parseFloat(String(card.average_count_overall || 0).replace(',', '.'));
+                    const decksWithCard = parseLocaleNumber(card.deck_count || card.deck_inclusion_count || 0, 0);
+                    const totalDecksInArchetype = parseLocaleNumber(card.total_decks_in_archetype || 0, 0);
+                    const totalCount = parseLocaleNumber(card.total_count || 0, 0);
+                    const avgCountOverallRaw = parseLocaleNumber(card.average_count_overall || 0, 0);
 
                     const resolvedPercentage = Number.isFinite(rawPercentage) && rawPercentage > 0
                         ? rawPercentage

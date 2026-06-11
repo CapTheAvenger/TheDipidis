@@ -5240,7 +5240,7 @@ window.MetaCall = (function () {
             const opName = (r.opponent_deck_name || '').trim();
             if (!meta || !myName || !opName) continue;
             const games = parseInt(r.vs_count || '0', 10);
-            const wpRaw = parseFloat(String(r.vs_win_pct || '0').replace(',', '.'));
+            const wpRaw = parseLocaleNumber(r.vs_win_pct || '0', 0);
             if (!Number.isFinite(games) || games <= 0) continue;
             if (!Number.isFinite(wpRaw)) continue;
             const d = normalize(myName);

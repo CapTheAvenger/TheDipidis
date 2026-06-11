@@ -728,7 +728,7 @@
             const key = `${set}|${num}`;
             const rec = cardEffectsIndex.bySetNumber.get(key);
             if (!_isViableNonExAttacker(rec)) continue;
-            const inclusion = parseFloat(String(r.deck_inclusion_count || 0).replace(',', '.')) || 0;
+            const inclusion = parseLocaleNumber(r.deck_inclusion_count || 0, 0);
             const existing = byCard.get(name.toLowerCase());
             if (!existing || inclusion > existing.inclusion) {
                 byCard.set(name.toLowerCase(), { key, name, inclusion });

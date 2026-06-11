@@ -295,12 +295,12 @@
                     const rawArchetypeLower = (archetype || '').toLowerCase();
                     const archetypeLower = (analysisToCompMap && analysisToCompMap.get(rawArchetypeLower))
                         || rawArchetypeLower;
-                    const percentage = parseFloat((row.percentage_in_archetype || '0').replace(',', '.'));
-                    const deckCount = parseFloat(String(row.deck_count || row.deck_inclusion_count || '0').replace(',', '.')) || 0;
-                    const totalCount = parseFloat(String(row.total_count || '0').replace(',', '.')) || 0;
-                    const avgCountWhenUsed = parseFloat(String(row.average_count || row.avg_count || '0').replace(',', '.')) || 0;
-                    const avgCountOverall = parseFloat(String(row.average_count_overall || '0').replace(',', '.')) || 0;
-                    const sampledDecksInArchetype = parseFloat(String(row.total_decks_in_archetype || '0').replace(',', '.')) || 0;
+                    const percentage = parseLocaleNumber(row.percentage_in_archetype || '0', 0);
+                    const deckCount = parseLocaleNumber(row.deck_count || row.deck_inclusion_count || '0', 0);
+                    const totalCount = parseLocaleNumber(row.total_count || '0', 0);
+                    const avgCountWhenUsed = parseLocaleNumber(row.average_count || row.avg_count || '0', 0);
+                    const avgCountOverall = parseLocaleNumber(row.average_count_overall || '0', 0);
+                    const sampledDecksInArchetype = parseLocaleNumber(row.total_decks_in_archetype || '0', 0);
                     const archetypeDeckCount = archetypeMap[archetypeLower] || 0;
                     const safePercentage = Math.min(100, Math.max(0, percentage));
                     
@@ -1251,7 +1251,7 @@
                 if (rows.length === 0) return 0;
                 const registry = window._matchupRegistry = window._matchupRegistry || {};
                 const num = (s) => {
-                    const v = parseFloat(String(s || '').replace(',', '.'));
+                    const v = parseLocaleNumber(s || '', 0);
                     return Number.isFinite(v) ? v : 0;
                 };
                 let pairs = 0;

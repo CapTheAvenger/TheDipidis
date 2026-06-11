@@ -767,8 +767,10 @@ window.MetaCall = (function () {
     return undefined;
   }
 
+  // (2026-06-10 audit) Thin alias around window.parseLocaleNumber —
+  // see app-utils.js. The old single-arg signature is preserved.
   function parseEU(str) {
-    return parseFloat((str || '0').replace(',', '.')) || 0;
+    return window.parseLocaleNumber(str, 0);
   }
 
   // Load a city_league_archetypes_comparison*.csv and return

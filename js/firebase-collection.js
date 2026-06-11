@@ -1294,9 +1294,11 @@ async function clearWishlist() {
 //     notification trigger (TRADELIST_NOTIFY_THRESHOLD_PCT = 10).
 const TRADELIST_NOTIFY_THRESHOLD_PCT = 10;
 
+// (2026-06-10 audit) Wraps window.parseLocaleNumber with the
+// price-specific "0 or negative → null" convention this file relies on.
 function _parsePriceNum(raw) {
   if (raw === undefined || raw === null || raw === '') return null;
-  const n = parseFloat(String(raw).replace(',', '.').replace('€', '').trim());
+  const n = window.parseLocaleNumber(raw, NaN);
   return (isNaN(n) || n <= 0) ? null : n;
 }
 
@@ -1362,7 +1364,16 @@ function updateWishlistUI(searchFilter = '', setFilter = '') {
   }
 
   if (!window.userWishlist || window.userWishlist.size === 0) {
-    wishlistGrid.innerHTML = '<p style="color: #999;">No cards in wishlist yet</p>';
+    const t = (typeof window.t === 'function') ? window.t : (k) => k;
+    const isDe = (typeof getLang === 'function') ? getLang() === 'de' : false;
+    wishlistGrid.innerHTML = window.getEmptyStateHtml({
+      icon:  'heart',
+      title: t('emptyState.wishlist') || (isDe ? 'Deine Wunschliste ist leer' : 'Your wishlist is empty'),
+      body:  isDe
+        ? 'Finde Karten in der Karten-Datenbank und tippe auf das Herz, um sie hinzuzufügen.'
+        : 'Find cards in the Card Database and tap the heart to add them.',
+      cta:   { label: isDe ? 'Karten finden' : 'Find Cards', onclick: "switchTabAndUpdateMenu('cards')" },
+    });
     const searchResults = document.getElementById('wishlist-search-results');
     if (searchResults) searchResults.textContent = '';
     return;
@@ -5426,7 +5437,16 @@ function updateTradelistUI(searchFilter = '', setFilter = '') {
   }
 
   if (!window.userTradelist || window.userTradelist.size === 0) {
-    tradelistGrid.innerHTML = '<p style="color: #999;">No cards in trade list yet</p>';
+    const t = (typeof window.t === 'function') ? window.t : (k) => k;
+    const isDe = (typeof getLang === 'function') ? getLang() === 'de' : false;
+    tradelistGrid.innerHTML = window.getEmptyStateHtml({
+      icon:  'deck',
+      title: t('emptyState.tradeList') || (isDe ? 'Deine Tauschliste ist leer' : 'Your trade list is empty'),
+      body:  isDe
+        ? 'Füge Karten zur Tauschliste hinzu, indem du sie in deiner Sammlung markierst.'
+        : 'Mark cards in your collection to add them to the trade list.',
+      cta:   { label: isDe ? 'Sammlung öffnen' : 'Open Collection', onclick: "switchTabAndUpdateMenu('profile')" },
+    });
     const searchResults = document.getElementById('tradelist-search-results');
     if (searchResults) searchResults.textContent = '';
     return;

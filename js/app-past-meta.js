@@ -92,16 +92,12 @@
             selectEl.appendChild(placeholderOption);
         }
 
-        function parsePastMetaNumber(value, fallback = 0) {
-            if (value === null || value === undefined || value === '') return fallback;
-            const raw = String(value).trim();
-            if (!raw) return fallback;
-            const normalized = raw.includes(',') && !raw.includes('.')
-                ? raw.replace(',', '.')
-                : raw;
-            const parsed = Number.parseFloat(normalized);
-            return Number.isFinite(parsed) ? parsed : fallback;
-        }
+        // (2026-06-10 audit) Delegated to window.parseLocaleNumber —
+        // see app-utils.js. Keeping the named export as a thin alias so
+        // existing call sites (parsePastMetaNumber) keep working without
+        // a 30-file find-and-replace.
+        const parsePastMetaNumber = (value, fallback = 0) =>
+            window.parseLocaleNumber(value, fallback);
 
         function normalizeCardAggregationKey(name) {
             if (typeof normalizeCardName === 'function') {

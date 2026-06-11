@@ -36,10 +36,19 @@ function load() {
         path.resolve(__dirname, '../../js/app-deck-builder.js'),
         'utf-8'
     );
+    // parseLocaleNumber lives in app-utils.js; the production code now
+    // depends on it as a window-scoped global. Extract its source and
+    // include it in the sandbox so the same DE-number parsing
+    // behaviour runs in tests (2026-06-11 helper migration).
+    const utilsSrc = fs.readFileSync(
+        path.resolve(__dirname, '../../js/app-utils.js'),
+        'utf-8'
+    );
     // _aceSpecConditionalAvgs references _recencyWeight when called with
     // a todayMs argument — extract that too so the recency-weighted
     // path is exercised end-to-end in tests.
     const snippet = [
+        extractTopLevel(utilsSrc, 'parseLocaleNumber'),
         extractTopLevel(src, '_recencyWeight'),
         extractTopLevel(src, '_aceSpecConditionalAvgs'),
     ].join('\n\n');

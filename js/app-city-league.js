@@ -3824,7 +3824,16 @@
                 card.old_share
             ];
             for (const candidate of candidates) {
-                const parsed = parseLocaleNumber(candidate ?? '', 0);
+                // NaN fallback (not 0) so the Number.isFinite check
+                // distinguishes "field missing" from "field is 0".
+                // 2026-06-11 helper-migration regression — old code was
+                // `parseFloat(String(x ?? '').replace(',','.'))` which
+                // returned NaN for missing input, letting the loop walk
+                // every candidate before returning null. A 0 fallback
+                // would short-circuit on the FIRST missing field, which
+                // breaks applyShareFilterWithAceSpecBoost's "no share
+                // data → return all cards" branch.
+                const parsed = parseLocaleNumber(candidate ?? '', NaN);
                 if (Number.isFinite(parsed)) return parsed;
             }
             return null;

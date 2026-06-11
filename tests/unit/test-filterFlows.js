@@ -55,8 +55,17 @@ function loadFilterFns(overrides = {}) {
         path.resolve(__dirname, '../../js/app-current-meta-analysis.js'),
         'utf-8'
     );
+    // parseLocaleNumber lives in app-utils.js — production code now
+    // depends on it as a window-scoped global. Pull the source in so
+    // the sandbox has the same DE-number parsing the live code does
+    // (2026-06-11 helper migration).
+    const utilsSrc = fs.readFileSync(
+        path.resolve(__dirname, '../../js/app-utils.js'),
+        'utf-8'
+    );
 
     const snippets = [
+        extractFunction(utilsSrc, 'parseLocaleNumber'),
         'let _cityLeagueSortCache = null;',
         'let _cityLeagueSortDataRef = null;',
         extractFunction(citySrc, 'getCardShareValue'),

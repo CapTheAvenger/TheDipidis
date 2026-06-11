@@ -41,6 +41,14 @@ function loadNormalizeCurrentMetaFallbackRows() {
         path.resolve(__dirname, '../../js/app-core.js'),
         'utf-8'
     );
+    // parseLocaleNumber lives in app-utils.js — production code now
+    // depends on it as a window-scoped global. Pull the source in so
+    // the sandbox has the same DE-number parsing the live code does
+    // (2026-06-11 helper migration).
+    const utilsSrc = fs.readFileSync(
+        path.resolve(__dirname, '../../js/app-utils.js'),
+        'utf-8'
+    );
 
     const knownFormats = src.match(/const KNOWN_META_FORMAT_CODES = \[[\s\S]*?\];/m);
     const formatMap = src.match(/const TOURNAMENT_FORMAT_NAME_TO_CODE = \{[\s\S]*?\};/m);
@@ -49,6 +57,7 @@ function loadNormalizeCurrentMetaFallbackRows() {
     }
 
     const snippet = [
+        extractFunction(utilsSrc, 'parseLocaleNumber'),
         knownFormats[0],
         formatMap[0],
         extractFunction(src, 'mapSetCodeToMetaFormat'),

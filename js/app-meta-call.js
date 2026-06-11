@@ -8070,7 +8070,7 @@ window.MetaCall = (function () {
         <span class="mc-pmt-stats">
           <span class="mc-pmt-seg"><span class="mc-pmt-k">${esc(t('mc.intelMajorDay1'))}</span> ${day1Val}${day1Wr}</span>
           <span class="mc-pmt-seg"><span class="mc-pmt-k">${esc(t('mc.intelMajorDay2'))}</span> ${day2Val}${day2Wr}</span>
-          <span class="mc-pmt-seg"><span class="mc-pmt-k">Konv.</span> ${convVal}</span>
+          <span class="mc-pmt-seg"><span class="mc-pmt-k">${esc(t('mc.intelMajorConv'))}</span> ${convVal}</span>
         </span>
       </div>`;
     }).join('');
@@ -8097,7 +8097,7 @@ window.MetaCall = (function () {
       <span class="mc-intel-major-chip-sep">·</span>
       <span class="mc-intel-major-chip-seg"><span class="mc-intel-major-chip-k">${esc(t('mc.intelMajorDay2'))}</span> ${day2Val}${day2Wr}</span>
       <span class="mc-intel-major-chip-sep">·</span>
-      <span class="mc-intel-major-chip-seg"><span class="mc-intel-major-chip-k">Konv.</span> ${convVal}</span>
+      <span class="mc-intel-major-chip-seg"><span class="mc-intel-major-chip-k">${esc(t('mc.intelMajorConv'))}</span> ${convVal}</span>
     </div>`;
   }
 

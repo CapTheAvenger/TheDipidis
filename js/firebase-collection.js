@@ -3378,10 +3378,11 @@ function formatProfileDate(timestamp) {
   if (!timestamp) return '—';
   const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
   if (isNaN(date.getTime())) return '—';
-  return date.toLocaleDateString('de-DE', { 
-    year: 'numeric', 
-    month: 'short', 
-    day: 'numeric' 
+  const locale = (typeof getLang === 'function' && getLang() === 'de') ? 'de-DE' : 'en-US';
+  return date.toLocaleDateString(locale, {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric'
   });
 }
 

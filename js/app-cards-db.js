@@ -78,13 +78,13 @@
                     targetId: 'metaFormatOptions',
                     html: `
                         <div class="cards-filter-header collapsed" onclick="toggleCardFilter('metaFormatOptions')" role="button" tabindex="0" aria-expanded="false">
-                            <span>Meta / Format</span>
+                            <span data-i18n="cdb.filterMetaFormat">Meta / Format</span>
                             <span class="toggle-icon">▼</span>
                         </div>
                         <div class="cards-filter-options collapsed" id="metaFormatOptions">
-                            <label class="label-block"><input type="radio" name="baseMetaFilter" value="total" checked onchange="filterAndRenderCards()"> Total (All Cards)</label>
-                            <label class="label-block"><input type="radio" name="baseMetaFilter" value="all_playables" onchange="filterAndRenderCards()"> All Playables</label>
-                            <label class="label-block"><input type="radio" name="baseMetaFilter" value="city_league" onchange="filterAndRenderCards()"> City League Only</label>
+                            <label class="label-block"><input type="radio" name="baseMetaFilter" value="total" checked onchange="filterAndRenderCards()"> <span data-i18n="cards.totalAll">Total (All Cards)</span></label>
+                            <label class="label-block"><input type="radio" name="baseMetaFilter" value="all_playables" onchange="filterAndRenderCards()"> <span data-i18n="cards.allPlayables">All Playables</span></label>
+                            <label class="label-block"><input type="radio" name="baseMetaFilter" value="city_league" onchange="filterAndRenderCards()"> <span data-i18n="cdb.filterCityLeagueOnly">City League Only</span></label>
                         </div>
                     `
                 },
@@ -93,7 +93,7 @@
                     targetId: 'setFilterOptions',
                     html: `
                         <div class="cards-filter-header collapsed" onclick="toggleCardFilter('setFilterOptions')" role="button" tabindex="0" aria-expanded="false">
-                            <span>Set</span>
+                            <span data-i18n="cdb.filterSet">Set</span>
                             <span class="toggle-icon">▼</span>
                         </div>
                         <div class="cards-filter-options collapsed" id="setFilterOptions"></div>
@@ -104,7 +104,7 @@
                     targetId: 'rarityFilterOptions',
                     html: `
                         <div class="cards-filter-header collapsed" onclick="toggleCardFilter('rarityFilterOptions')" role="button" tabindex="0" aria-expanded="false">
-                            <span>Rarity</span>
+                            <span data-i18n="cdb.filterRarity">Rarity</span>
                             <span class="toggle-icon">▼</span>
                         </div>
                         <div class="cards-filter-options collapsed" id="rarityFilterOptions"></div>
@@ -115,7 +115,7 @@
                     targetId: 'categoryFilterOptions',
                     html: `
                         <div class="cards-filter-header collapsed" onclick="toggleCardFilter('categoryFilterOptions')" role="button" tabindex="0" aria-expanded="false">
-                            <span>Category</span>
+                            <span data-i18n="cdb.filterCategory">Category</span>
                             <span class="toggle-icon">▼</span>
                         </div>
                         <div class="cards-filter-options collapsed" id="categoryFilterOptions"></div>
@@ -126,7 +126,7 @@
                     targetId: 'elementTypeFilterOptions',
                     html: `
                         <div class="cards-filter-header collapsed" onclick="toggleCardFilter('elementTypeFilterOptions')" role="button" tabindex="0" aria-expanded="false">
-                            <span>Element Type</span>
+                            <span data-i18n="cdb.filterElementType">Element Type</span>
                             <span class="toggle-icon">▼</span>
                         </div>
                         <div class="cards-filter-options collapsed" id="elementTypeFilterOptions"></div>
@@ -137,10 +137,10 @@
                     targetId: 'mainPokemonList',
                     html: `
                         <div class="cards-filter-header collapsed" onclick="toggleCardFilter('mainPokemonList')" role="button" tabindex="0" aria-expanded="false">
-                            <span>Main Pokemon</span>
+                            <span data-i18n="cdb.filterMainPokemon">Main Pokemon</span>
                             <span class="toggle-icon">▼</span>
                         </div>
-                        <input type="text" id="mainPokemonSearch" class="cards-filter-search-input" placeholder="Search main Pokemon..." oninput="filterMainPokemonList()" aria-label="Search main Pokemon filter list" style="display:none">
+                        <input type="text" id="mainPokemonSearch" class="cards-filter-search-input" placeholder="Search main Pokemon..." data-i18n-placeholder="cards.searchPokemon" oninput="filterMainPokemonList()" aria-label="Search main Pokemon filter list" data-i18n-aria="cards.searchPokemonAria" style="display:none">
                         <div class="cards-filter-options collapsed" id="mainPokemonList"></div>
                     `
                 },
@@ -149,10 +149,10 @@
                     targetId: 'archetypeList',
                     html: `
                         <div class="cards-filter-header collapsed" onclick="toggleCardFilter('archetypeList')" role="button" tabindex="0" aria-expanded="false">
-                            <span>Archetype</span>
+                            <span data-i18n="cdb.filterArchetype">Archetype</span>
                             <span class="toggle-icon">▼</span>
                         </div>
-                        <input type="text" id="archetypeSearch" class="cards-filter-search-input" placeholder="Search archetype..." oninput="filterArchetypeList()" aria-label="Search archetype filter list" style="display:none">
+                        <input type="text" id="archetypeSearch" class="cards-filter-search-input" placeholder="Search archetype..." data-i18n-placeholder="cards.searchArchetype" oninput="filterArchetypeList()" aria-label="Search archetype filter list" data-i18n-aria="cards.searchArchetypeAria" style="display:none">
                         <div class="cards-filter-options collapsed" id="archetypeList"></div>
                     `
                 },
@@ -161,7 +161,7 @@
                     targetId: 'deckCoverageFilterOptions',
                     html: `
                         <div class="cards-filter-header collapsed" onclick="toggleCardFilter('deckCoverageFilterOptions')" role="button" tabindex="0" aria-expanded="false">
-                            <span>Deck Coverage</span>
+                            <span data-i18n="cdb.filterDeckCoverage">Deck Coverage</span>
                             <span class="toggle-icon">▼</span>
                         </div>
                         <div class="cards-filter-options collapsed" id="deckCoverageFilterOptions"></div>
@@ -185,6 +185,14 @@
                     });
                 }
             });
+
+            // Filter labels were injected as data-i18n markup; trigger a
+            // translation pass so the freshly inserted nodes pick up the
+            // active language (the initial DOMContentLoaded pass ran
+            // before this markup existed).
+            if (typeof updateTranslationsInDOM === 'function') {
+                try { updateTranslationsInDOM(); } catch (_) {}
+            }
         }
         
         // Pagination for Cards Tab
@@ -247,7 +255,10 @@
 
                 if (!window.allCardsData || window.allCardsData.length === 0) {
                     content.innerHTML = '<div class="error">No card data available. allCardsDatabase: ' + (window.allCardsDatabase ? window.allCardsDatabase.length : 'null') + ', englishSetCodes: ' + (window.englishSetCodes ? window.englishSetCodes.size : 'null') + '</div>';
-                    if (resultsInfo) resultsInfo.textContent = '0 cards found';
+                    if (resultsInfo) {
+                        const zeroLabel = (typeof t === 'function') ? t('cdb.zeroCardsFound') : '0 cards found';
+                        resultsInfo.textContent = zeroLabel && zeroLabel !== 'cdb.zeroCardsFound' ? zeroLabel : '0 cards found';
+                    }
                     window.cardsLoaded = false;
                     return;
                 }
@@ -859,18 +870,22 @@
             if (!container) return;
 
             const categories = [
-                { value: 'pokemon_all', label: 'Pokemon (All)' },
-                { value: 'supporter', label: 'Supporter' },
-                { value: 'item', label: 'Item' },
-                { value: 'tool', label: 'Pokemon Tool' },
-                { value: 'stadium', label: 'Stadium' },
-                { value: 'special_energy', label: 'Special Energy' },
-                { value: 'basic_energy', label: 'Basic Energy' }
+                { value: 'pokemon_all', i18nKey: 'cdb.catPokemonAll', label: 'Pokemon (All)' },
+                { value: 'supporter', i18nKey: 'cdb.catSupporter', label: 'Supporter' },
+                { value: 'item', i18nKey: 'cdb.catItem', label: 'Item' },
+                { value: 'tool', i18nKey: 'cdb.catTool', label: 'Pokemon Tool' },
+                { value: 'stadium', i18nKey: 'cdb.catStadium', label: 'Stadium' },
+                { value: 'special_energy', i18nKey: 'cdb.catSpecialEnergy', label: 'Special Energy' },
+                { value: 'basic_energy', i18nKey: 'cdb.catBasicEnergy', label: 'Basic Energy' }
             ];
 
             container.innerHTML = categories.map(category => (
-                `<label class="label-block"><input type="checkbox" value="${category.value}" onchange="filterAndRenderCards()"> ${category.label}</label>`
+                `<label class="label-block"><input type="checkbox" value="${category.value}" onchange="filterAndRenderCards()"> <span data-i18n="${category.i18nKey}">${category.label}</span></label>`
             )).join('');
+
+            if (typeof updateTranslationsInDOM === 'function') {
+                try { updateTranslationsInDOM(); } catch (_) {}
+            }
         }
 
         // Load Pokédex → TCG element type mapping (Fire, Water, Grass, etc.)
@@ -1460,11 +1475,22 @@
                 console.warn('[Cards Tab] No cards loaded yet');
                 const content = document.getElementById('cardsContent');
                 const resultsInfo = document.getElementById('cardResultsInfo');
+                const _safeT = (key, fallback) => {
+                    if (typeof t === 'function') {
+                        const v = t(key);
+                        if (v && v !== key) return v;
+                    }
+                    return fallback;
+                };
                 if (content) {
-                    content.innerHTML = getEmptyStateBoxHtml({ title: 'No Cards Loaded', description: 'Check your data files or reload the page.', icon: 'pokeball' });
+                    content.innerHTML = getEmptyStateBoxHtml({
+                        title: _safeT('cdb.noCardsLoaded', 'No Cards Loaded'),
+                        description: _safeT('cdb.noCardsLoadedDesc', 'Check your data files or reload the page.'),
+                        icon: 'pokeball'
+                    });
                 }
                 if (resultsInfo) {
-                    resultsInfo.textContent = '0 cards found';
+                    resultsInfo.textContent = _safeT('cdb.zeroCardsFound', '0 cards found');
                 }
                 return;
             }
@@ -2368,27 +2394,44 @@
 
             destroyCardsVirtualGrid();
             
+            const _cdbLang = (typeof getLang === 'function' ? getLang() : 'en');
+            const _cdbLocale = _cdbLang === 'de' ? 'de-DE' : 'en-US';
+            const _cdbT = (key, fallback) => {
+                if (typeof t === 'function') {
+                    const v = t(key);
+                    if (v && v !== key) return v;
+                }
+                return fallback;
+            };
             if (cards.length === 0) {
-                content.innerHTML = '<div style="text-align: center; padding: 40px; color: #444;"><h2>No Cards Found</h2><p style="font-weight: 500;">Try adjusting your filter settings</p></div>';
-                resultsInfo.textContent = '0 cards found';
+                const emptyTitle = _cdbT('cdb.noCardsFound', 'No Cards Found');
+                const emptyDesc = _cdbT('cdb.adjustFilters', 'Try adjusting your filter settings');
+                const zeroLabel = _cdbT('cdb.zeroCardsFound', '0 cards found');
+                content.innerHTML = `<div style="text-align: center; padding: 40px; color: #444;"><h2>${emptyTitle}</h2><p style="font-weight: 500;">${emptyDesc}</p></div>`;
+                resultsInfo.textContent = zeroLabel;
                 return;
             }
-            
+
             // Calculate pagination
             let cardsToShow, totalPages, startIndex, endIndex;
-            
+
             if (showAllCards) {
                 cardsToShow = cards;
                 totalPages = 1;
                 startIndex = 0;
                 endIndex = cards.length;
-                resultsInfo.textContent = `${cards.length.toLocaleString()} cards found (all shown)`;
+                const allShownTpl = _cdbT('cdb.cardsFoundAllShown', '{n} cards found (all shown)');
+                resultsInfo.textContent = allShownTpl.replace('{n}', cards.length.toLocaleString(_cdbLocale));
             } else {
                 totalPages = Math.ceil(cards.length / cardsPerPage);
                 startIndex = (currentCardsPage - 1) * cardsPerPage;
                 endIndex = Math.min(startIndex + cardsPerPage, cards.length);
                 cardsToShow = cards.slice(startIndex, endIndex);
-                resultsInfo.textContent = `${cards.length.toLocaleString()} cards found (page ${currentCardsPage} of ${totalPages})`;
+                const pageTpl = _cdbT('cdb.cardsFoundPage', '{n} cards found (page {page} of {total})');
+                resultsInfo.textContent = pageTpl
+                    .replace('{n}', cards.length.toLocaleString(_cdbLocale))
+                    .replace('{page}', String(currentCardsPage))
+                    .replace('{total}', String(totalPages));
             }
             
             // Create pagination controls

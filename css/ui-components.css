@@ -4793,3 +4793,57 @@ img[src*="limitlesstcg"] {
     .empty-state__icon svg { width: 20px; height: 20px; }
 }
 
+
+/* ── .card-grid ─ unified card-overview grid (audit Punkt 2) ─────
+ *
+ * Audit 2026-06-10 flagged ~40 `grid-template-columns: repeat(
+ * auto-fill, minmax(NNNpx, 1fr))` declarations across 5 CSS files
+ * (city-league.css, meta-card-analysis.css, styles.css,
+ * ui-components.css, mobile-responsive.css). Each carried its own
+ * minmax NN, gap, and mobile override; behaviourally they're the
+ * same component.
+ *
+ * This block establishes:
+ *   .card-grid              base — display+gap, no column rule
+ *   .card-grid[data-size]   sets the column minmax via CSS var
+ *
+ * Five standard sizes cover the observed buckets:
+ *
+ *   xs   60 px  — micro / 3-way compare thumbs
+ *   sm   90 px  — compact thumbnails
+ *   md  130 px  — standard cards (default)
+ *   lg  180 px  — large preview cards
+ *   xl  280 px  — full deck cards
+ *
+ * Mobile rule shrinks one tier so layouts that fit MD on desktop
+ * fall back to SM on phone without per-consumer @media blocks.
+ *
+ * Migration path for existing grids: replace
+ *   display: grid;
+ *   grid-template-columns: repeat(auto-fill, minmax(NNNpx, 1fr));
+ *   gap: NNpx;
+ * with:
+ *   class="card-grid" data-size="md"
+ *
+ * Migrated examples (more to follow per-consumer as nearby code is
+ * touched, deliberately incremental to avoid visual regressions):
+ *   .past-meta-best-grid                        (size sm)
+ */
+.card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(var(--card-grid-min, 130px), 1fr));
+    gap: var(--card-grid-gap, 12px);
+}
+.card-grid[data-size="xs"] { --card-grid-min:  60px; --card-grid-gap:  6px; }
+.card-grid[data-size="sm"] { --card-grid-min:  90px; --card-grid-gap:  8px; }
+.card-grid[data-size="md"] { --card-grid-min: 130px; --card-grid-gap: 12px; }
+.card-grid[data-size="lg"] { --card-grid-min: 180px; --card-grid-gap: 16px; }
+.card-grid[data-size="xl"] { --card-grid-min: 280px; --card-grid-gap: 20px; }
+
+@media (max-width: 600px) {
+    .card-grid[data-size="xl"] { --card-grid-min: 180px; --card-grid-gap: 14px; }
+    .card-grid[data-size="lg"] { --card-grid-min: 130px; --card-grid-gap: 12px; }
+    .card-grid[data-size="md"] { --card-grid-min:  90px; --card-grid-gap:  8px; }
+    .card-grid[data-size="sm"] { --card-grid-min:  64px; --card-grid-gap:  6px; }
+    /* xs unchanged — already at minimum */
+}

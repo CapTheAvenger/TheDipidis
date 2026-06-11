@@ -758,7 +758,7 @@
             const select = document.getElementById('currentMetaDeckSelect');
             if (!select) return;
             
-            select.innerHTML = `<option value="">${typeof t === 'function' ? t('currentMeta.selectDeck') : '-- Select a Deck --'}</option>`;
+            select.innerHTML = `<option value="" data-i18n="currentMeta.selectDeck">${typeof t === 'function' ? t('currentMeta.selectDeck') : '-- Select a Deck --'}</option>`;
             
             if (top10.length > 0) {
                 const optgroup = document.createElement('optgroup');

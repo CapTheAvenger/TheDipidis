@@ -92,6 +92,27 @@ jobs:
             cp backend/core/data/champions_replica_teams.json data/champions_replica_teams.json
           fi
 
+      # Auto-generate beginner strategy guides for NEW/changed teams
+      # via the Claude API (scripts/generate_team_strategies.py).
+      # Cached per replica code in data/champions_team_strategies.json,
+      # so unchanged teams cost zero API calls. Fail-soft: a missing
+      # ANTHROPIC_API_KEY secret or an API outage only skips this step;
+      # the team scrape itself still commits.
+      - name: Generate team strategies (Claude API)
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          set +e
+          echo "::group::scripts/generate_team_strategies.py"
+          python scripts/generate_team_strategies.py
+          rc=$?
+          echo "::endgroup::"
+          if [ "$rc" -ne 0 ]; then
+              echo "::warning::generate_team_strategies exited with $rc — strategies JSON kept as-is"
+              git checkout -- data/champions_team_strategies.json 2>/dev/null
+          fi
+          exit 0
+
       - name: Bump version
         run: |
           chmod +x bump-version.sh
@@ -104,6 +125,11 @@ jobs:
           git config --local user.name  "github-actions[bot]"
           git add data/champions_replica_teams.json \
                   index.html service-worker.js version.json
+          # Strategies file only exists once the ANTHROPIC_API_KEY
+          # secret is set and the generator ran at least once.
+          if [ -f data/champions_team_strategies.json ]; then
+            git add data/champions_team_strategies.json
+          fi
           if git diff --cached --quiet; then
             echo "No changes to champions_replica_teams.json — skipping push."
             echo "pushed=false" >> "$GITHUB_OUTPUT"

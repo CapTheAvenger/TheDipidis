@@ -308,3 +308,190 @@
 .side-quest-strategy li {
     padding: 0.1rem 0;
 }
+
+/* ── Strategy info button + modal ──────────────────────────────────
+ * The button only renders when scripts/generate_team_strategies.py
+ * has produced a guide for the team (data/champions_team_strategies
+ * .json). Modal follows the same dark-surface language as the cards.
+ */
+
+.side-quest-info-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    margin-top: 0.85rem;
+    background: rgba(95, 182, 255, 0.08);
+    border: 1px solid rgba(95, 182, 255, 0.35);
+    border-radius: 10px;
+    padding: 0.45rem 0.8rem;
+    color: #e6ebf3;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.82rem;
+    font-weight: 600;
+    transition: background 120ms ease, transform 80ms ease;
+}
+
+.side-quest-info-btn:hover {
+    background: rgba(95, 182, 255, 0.16);
+}
+
+.side-quest-info-btn:active {
+    transform: scale(0.98);
+}
+
+.side-quest-info-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.15rem;
+    height: 1.15rem;
+    border-radius: 50%;
+    border: 1.5px solid var(--accent, #5fb6ff);
+    color: var(--accent, #5fb6ff);
+    font-size: 0.72rem;
+    font-weight: 700;
+    font-style: normal;
+    flex: 0 0 auto;
+}
+
+.side-quest-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    background: rgba(8, 11, 18, 0.72);
+    backdrop-filter: blur(2px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+}
+
+.side-quest-modal {
+    background: var(--surface, #1a1f2c);
+    border: 1px solid #2a3140;
+    border-radius: 14px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    width: min(680px, 100%);
+    max-height: min(85vh, 100%);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.side-quest-modal-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1rem 1.1rem 0.8rem 1.1rem;
+    border-bottom: 1px solid #242b39;
+}
+
+.side-quest-modal-title {
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: #e6ebf3;
+}
+
+.side-quest-modal-sub {
+    margin: 0.2rem 0 0 0;
+    font-size: 0.78rem;
+    color: #8c95a5;
+}
+
+.side-quest-modal-close {
+    background: transparent;
+    border: none;
+    color: #8c95a5;
+    font-size: 1.5rem;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0.1rem 0.35rem;
+    border-radius: 6px;
+    flex: 0 0 auto;
+}
+
+.side-quest-modal-close:hover {
+    color: #e6ebf3;
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.side-quest-modal-body {
+    padding: 0.9rem 1.1rem 1.1rem 1.1rem;
+    overflow-y: auto;
+    color: #d6dce7;
+    font-size: 0.88rem;
+    line-height: 1.5;
+}
+
+.side-quest-modal-body h4 {
+    margin: 1.1rem 0 0.4rem 0;
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--accent, #5fb6ff);
+}
+
+.side-quest-modal-overview {
+    margin: 0;
+    color: #e6ebf3;
+}
+
+.side-quest-modal-roles {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.side-quest-modal-role {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid #242b39;
+    border-radius: 10px;
+    padding: 0.5rem 0.65rem;
+}
+
+.side-quest-modal-role-mon {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-bottom: 0.15rem;
+    color: #e6ebf3;
+}
+
+.side-quest-modal-role-text {
+    display: block;
+    font-size: 0.84rem;
+    color: #b0b8c1;
+}
+
+.side-quest-modal-plan {
+    margin: 0 0 0 1.2rem;
+    padding: 0;
+}
+
+.side-quest-modal-plan li {
+    padding: 0.15rem 0;
+}
+
+.side-quest-modal-tips {
+    margin: 0 0 0 1.2rem;
+    padding: 0;
+}
+
+.side-quest-modal-tips li {
+    padding: 0.15rem 0;
+}
+
+.side-quest-modal-ai-note {
+    margin: 1.2rem 0 0 0;
+    font-size: 0.72rem;
+    color: #6f7a8d;
+    border-top: 1px dotted rgba(255, 255, 255, 0.08);
+    padding-top: 0.6rem;
+}

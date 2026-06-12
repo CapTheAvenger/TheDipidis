@@ -1,4 +1,7 @@
 tournament_id,tournament_date,format,player_count,winner_archetype,winner_winrate
+6a26df6747f3797bf6baf1e7,2026-06-11,CRI,135,Slowking,33.0
+6a1fa4b756b11a587a947287,2026-06-09,CRI,143,Mega Lopunny,21.0
+6a22eb7747f3797bf6bac764,2026-06-09,CRI,100,Blaziken,25.0
 6a26d71a56b11a587a94c21b,2026-06-09,CRI,139,Rocket's Mewtwo,18.0
 6a1de09847f3797bf6ba93c0,2026-06-08,CRI,181,Rocket's Honchkrow,21.0
 6a256e4747f3797bf6bae558,2026-06-08,CRI,123,Dragapult Blaziken,21.0
@@ -45,7 +48,3 @@ yes-chaos-rising-is-legal,2026-05-23,CRI,284,N's Zoroark,31.0
 6a04a54e13f957d6d4b474d6,2026-05-17,CRI,108,Dragapult Blaziken,21.0
 6a0476cb13f957d6d4b47405,2026-05-16,CRI,215,Dragapult Dudunsparce,30.0
 art-art-art,2026-05-16,CRI,276,Dragapult,34.0
-6a04910adfbdf089cbbd9803,2026-05-14,CRI,103,Dragapult Dusknoir,28.0
-69fe22972b59cd9b66b271bd,2026-05-14,CRI,200,Dragapult,36.0
-69c9518a36f5b5c303dc144e,2026-05-13,CRI,153,Slowking,36.0
-6a008dd4dfbdf089cbbd7088,2026-05-13,CRI,129,Alakazam Dudunsparce,21.0

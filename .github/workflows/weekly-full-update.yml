@@ -308,6 +308,24 @@ jobs:
           echo "── Summary ──"
           printf '  %s\n' "${rc_summary[@]}"
 
+          # F-D04 + F-D20 (AUDIT_DATA_PIPELINE): the per-step `set +e`
+          # is intentional — single Cloudflare hits shouldn't kill an
+          # 8-scraper batch — but a SILENT all-fail (e.g. PyPI infra
+          # outage, IP-block on the runner pool) would slip through
+          # green. Surface anything more than a single non-zero exit
+          # as a job-level `::error::` so GitHub fires the default
+          # maintainer email-notification. Single sporadic failures
+          # stay as `::warning::` only.
+          fail_count=$(printf '%s\n' "${rc_summary[@]}" | grep -c '^FAIL ' || true)
+          critical_failed=$(printf '%s\n' "${rc_summary[@]}" \
+            | grep -E '^FAIL (core/update_sets|scrapers/all_cards_scraper|scrapers/current_meta_analysis_scraper|scrapers/limitless_online_scraper)' \
+            | wc -l)
+          echo "  failed_step_count=$fail_count critical_failed=$critical_failed"
+          if [ "$fail_count" -gt 2 ] || [ "$critical_failed" -gt 0 ]; then
+            echo "::error::Weekly scraper batch: $fail_count step(s) failed (critical_failed=$critical_failed). Manual review needed."
+            echo "WEEKLY_FAIL_REASON=$fail_count steps failed (critical=$critical_failed)" >> "$GITHUB_ENV"
+          fi
+
       - name: Run labs tournament scraper (deck list + matchups)
         env:
           PYTHONPATH: ${{ github.workspace }}/backend/core
@@ -536,3 +554,18 @@ jobs:
         run: |
           gh workflow run deploy-pages.yml --ref main
           echo "Dispatched deploy-pages.yml on main."
+
+      - name: Fail job on multi-scraper / critical-scraper batch failure
+        # AUDIT_DATA_PIPELINE F-D04 + F-D20: per-step `set +e` keeps a
+        # single sporadic failure from killing the whole batch (intended,
+        # since most Cloudflare hits self-recover next run), but a
+        # multi-fail or critical-scraper-fail needs to surface as a
+        # job-level failure so the maintainer's default email
+        # notification fires. The Run-scrapers step sets WEEKLY_FAIL_REASON
+        # when fail_count > 2 OR critical_failed > 0; we just promote it
+        # to the job conclusion here, AFTER the commit + dispatch so the
+        # partial data still ships through.
+        if: env.WEEKLY_FAIL_REASON != ''
+        run: |
+          echo "::error::$WEEKLY_FAIL_REASON"
+          exit 1

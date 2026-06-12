@@ -24,7 +24,10 @@ services:
     # to the GitHub Pages deploy (see prerender/). The bot just
     # fetches https://thedipidis.app/data/meta-call-snapshot.png.
     # Build is now Express + Telegraf only — under 30 s.
-    buildCommand: npm install
+    # `npm ci` since bot/package-lock.json is now committed
+    # (AUDIT_GITHUB.md F-19) — deterministic install + faster than
+    # `npm install` re-resolves a tree on each cold start.
+    buildCommand: npm ci
     startCommand: npm start
     healthCheckPath: /health
     # Auto-deploy on every push to main. Required so renamed/removed

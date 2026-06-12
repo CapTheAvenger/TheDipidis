@@ -1,0 +1,38 @@
+Copyright (c) 2026 CapTheAvenger
+
+All rights reserved.
+
+This is a personal project published as a public repository for portfolio
+and discussion purposes. No license is granted to copy, modify,
+redistribute, or use any part of this codebase, in source or compiled
+form, without explicit prior written permission from the copyright
+holder.
+
+For permission requests, open an issue at
+https://github.com/CapTheAvenger/TheDipidis/issues or contact the
+maintainer directly.
+
+Third-party content
+-------------------
+This repository fetches and processes data from third-party sources
+including Limitless TCG (limitlesstcg.com), Cardmarket, the Pokémon
+Trading Card Game Online, and Pokémon TCG Live. All trademarks, card
+artwork, set names, and game mechanics are property of their respective
+owners (The Pokémon Company, Nintendo, Creatures Inc., GAME FREAK Inc.,
+and partner publishers). Nothing in this repository implies endorsement
+by or affiliation with those entities.
+
+The Telegram bot integration (bot/) uses the Telegraf library under its
+own MIT license; that license stays with that subdirectory.
+
+The Firebase Web SDK redistributed in js/vendor/firebase-*.js stays
+under Google's Apache-2.0 license bundled with the SDK.
+
+NO WARRANTY
+-----------
+The software is provided "as is", without warranty of any kind, express
+or implied, including but not limited to the warranties of
+merchantability, fitness for a particular purpose, and noninfringement.
+In no event shall the copyright holder be liable for any claim, damages,
+or other liability arising from the use of, or inability to use, this
+software.

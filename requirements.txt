@@ -14,5 +14,11 @@ pandas>=2.0.0,<3
 flask>=3.0.0,<4
 flask-cors>=4.0.0,<5
 
+# Firestore admin SDK (price-alert pipeline reads + writes user docs
+# server-side via service-account). Previously installed ad-hoc in
+# daily-price-refresh.yml; pinned here so every CI workflow that loads
+# requirements.txt gets the same resolution.
+firebase-admin>=6.5,<8
+
 # Optional: For better performance
 urllib3>=2.0.0,<3

@@ -117,6 +117,7 @@ tests/artifacts/
 _archive/
 archive/
 data/_archive/
+old\ Data\ for\ Claude/
 
 # Large monolith CSV (replaced by per-meta chunks + manifest)
 data/tournament_cards_data_cards.csv

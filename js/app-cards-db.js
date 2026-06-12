@@ -2595,6 +2595,13 @@
         }
         
         function createPaginationControls(totalCards, totalPages) {
+            // Compact mode on phones: shorter prev/next labels and a
+            // tighter page-number window so the whole bar fits in two
+            // rows instead of wrapping into four-plus (390px regression
+            // finding). Evaluated per render — the bar re-renders on
+            // every page change, so rotation changes self-heal.
+            const compactPager = typeof window.matchMedia === 'function'
+                && window.matchMedia('(max-width: 600px)').matches;
             const container = document.createElement('div');
             container.className = 'pagination-controls';
             // Left side: Copy button
@@ -2629,7 +2636,8 @@
             // Previous button
             const prevBtn = document.createElement('button');
             prevBtn.type = 'button';
-            prevBtn.textContent = '← Previous';
+            prevBtn.textContent = compactPager ? '←' : '← Previous';
+            prevBtn.setAttribute('aria-label', 'Previous page');
             prevBtn.className = 'btn-blue btn-outline btn-lg';
             prevBtn.disabled = currentCardsPage === 1 || showAllCards;
             if (prevBtn.disabled) {
@@ -2653,7 +2661,7 @@
             pagesToShow.push(1);
             
             // Show pages around current page
-            const range = 2; // Show 2 pages before and after current
+            const range = compactPager ? 1 : 2; // pages shown either side of current
             for (let i = Math.max(2, currentCardsPage - range); i <= Math.min(totalPages - 1, currentCardsPage + range); i++) {
                 if (!pagesToShow.includes(i)) {
                     pagesToShow.push(i);
@@ -2699,7 +2707,8 @@
             // Next button
             const nextBtn = document.createElement('button');
             nextBtn.type = 'button';
-            nextBtn.textContent = 'Next →';
+            nextBtn.textContent = compactPager ? '→' : 'Next →';
+            nextBtn.setAttribute('aria-label', 'Next page');
             nextBtn.className = 'btn-blue btn-outline btn-lg';
             nextBtn.disabled = currentCardsPage === totalPages || showAllCards;
             if (nextBtn.disabled) {

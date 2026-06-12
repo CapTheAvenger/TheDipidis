@@ -454,6 +454,19 @@ jobs:
           chmod +x bump-version.sh
           ./bump-version.sh
 
+      - name: Data sanity check (F-D19 — revert empty/short CSVs before commit)
+        # AUDIT_DATA_PIPELINE.md F-D19 — the commit step below pushes any
+        # diff git sees, including header-only CSVs from a Cloudflare
+        # escalation or other source failure. This step enforces per-file
+        # minimum row thresholds and `git checkout`s any CSV that drops
+        # below its floor, so the previous good snapshot survives.
+        # Sommerpause / known-empty files are listed with threshold=0 in
+        # the script and pass through with a ::watch:: line.
+        # Always exits 0 — the failure mode is "this file got rolled
+        # back", not "the pipeline is broken".
+        run: |
+          python3 scripts/sanity_check_data.py data
+
       - name: Upload scraper logs on failure
         if: failure()
         uses: actions/upload-artifact@v4

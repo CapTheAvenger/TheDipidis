@@ -20,5 +20,9 @@ flask-cors>=4.0.0,<5
 # requirements.txt gets the same resolution.
 firebase-admin>=6.5,<8
 
+# Claude API SDK (Side Quest team-strategy generation in
+# champions-replica-scrape.yml via scripts/generate_team_strategies.py)
+anthropic>=0.40,<2
+
 # Optional: For better performance
 urllib3>=2.0.0,<3

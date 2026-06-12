@@ -12,11 +12,14 @@
     'use strict';
 
     const DATA_URL = 'data/champions_replica_teams.json';
+    const STRATEGY_URL = 'data/champions_team_strategies.json';
     const HOST_ID  = 'sideQuestTeamsHost';
     const STATUS_ID = 'sideQuestStatus';
 
     let _data = null;
     let _loaded = false;
+    let _strategies = null;        // { replicaCode: {de:{…}, en:{…}, …} }
+    let _strategiesLoaded = false;
 
     async function loadData() {
         if (_loaded && _data) return _data;
@@ -31,6 +34,54 @@
         }
         return _data;
     }
+
+    // Strategy guides are generated CI-side by
+    // scripts/generate_team_strategies.py (Claude API) and cached in
+    // STRATEGY_URL keyed by replica code. The file may simply not
+    // exist yet (404) — every card then renders without an info
+    // button, nothing breaks.
+    async function loadStrategies() {
+        if (_strategiesLoaded) return _strategies || {};
+        try {
+            const resp = await fetch(`${STRATEGY_URL}?t=${Date.now()}`);
+            if (!resp.ok) throw new Error('HTTP ' + resp.status);
+            const json = await resp.json();
+            _strategies = (json && json.strategies) || {};
+        } catch (err) {
+            _strategies = {};
+        }
+        _strategiesLoaded = true;
+        return _strategies;
+    }
+
+    // UI labels for the strategy modal. The strategy CONTENT comes
+    // pre-translated (de+en) from the generator; only the chrome
+    // around it needs local strings. window.getLang() is the global
+    // i18n switch ('en' | 'de', default 'en').
+    function uiLang() {
+        return (typeof window.getLang === 'function' && window.getLang() === 'de') ? 'de' : 'en';
+    }
+
+    const LABELS = {
+        de: {
+            infoBtn: 'So spielst du das Team',
+            infoAria: 'Strategie-Erklärung anzeigen für',
+            roles: 'Die Pokémon und ihre Rollen',
+            gamePlan: 'So läuft ein typisches Spiel',
+            tips: 'Tipps für den Einstieg',
+            aiNote: 'KI-generierte Erklärung (Claude) · Stand',
+            close: 'Schließen',
+        },
+        en: {
+            infoBtn: 'How to play this team',
+            infoAria: 'Show strategy explanation for',
+            roles: 'The Pokémon and their roles',
+            gamePlan: 'How a typical game goes',
+            tips: 'Beginner tips',
+            aiNote: 'AI-generated guide (Claude) · as of',
+            close: 'Close',
+        },
+    };
 
     function escapeHtml(s) {
         return String(s == null ? '' : s)
@@ -114,6 +165,17 @@
         const code = team.replica_code || '';
         const trainer = team.trainer ? ` · ${escapeHtml(team.trainer)}` : '';
         const tourney = team.tournament ? `<span class="side-quest-team-tourney">${escapeHtml(team.tournament)}${trainer}</span>` : '';
+        const labels = LABELS[uiLang()];
+        const hasGuide = !!(_strategies && _strategies[code] &&
+                            _strategies[code][uiLang()]);
+        const infoBtn = hasGuide ? `
+                    <button class="side-quest-info-btn"
+                            type="button"
+                            data-strategy-code="${escapeHtml(code)}"
+                            aria-label="${escapeHtml(labels.infoAria)} ${escapeHtml(team.team_name || code)}">
+                        <span class="side-quest-info-icon" aria-hidden="true">ℹ</span>
+                        <span class="side-quest-info-label">${escapeHtml(labels.infoBtn)}</span>
+                    </button>` : '';
         return `
             <article class="side-quest-team" data-replica-code="${escapeHtml(code)}">
                 <header class="side-quest-team-head">
@@ -132,6 +194,7 @@
                     </button>
                 </header>
                 <div class="side-quest-team-grid">${monsHtml}</div>
+                ${infoBtn}
                 ${stratHtml ? `
                     <details class="side-quest-strategy">
                         <summary>Strategy notes</summary>
@@ -140,6 +203,81 @@
                 ` : ''}
             </article>
         `;
+    }
+
+    // ── Strategy modal ────────────────────────────────────────────
+    // One overlay element, rebuilt per open. Content comes from the
+    // CI-generated cache (already bilingual), chrome strings from
+    // LABELS. Closes on ×, backdrop click and Escape.
+
+    function closeStrategyModal() {
+        const overlay = document.getElementById('sideQuestStrategyModal');
+        if (overlay) overlay.remove();
+        document.removeEventListener('keydown', onModalKeydown);
+    }
+
+    function onModalKeydown(e) {
+        if (e.key === 'Escape') closeStrategyModal();
+    }
+
+    function openStrategyModal(team, entry) {
+        closeStrategyModal();
+        const lang = uiLang();
+        const labels = LABELS[lang];
+        const guide = entry[lang] || entry.en || entry.de;
+        if (!guide) return;
+
+        const rolesHtml = (guide.roles || []).map(r => `
+            <li class="side-quest-modal-role">
+                <span class="side-quest-modal-role-mon">${pokemonIcon(r.name)}<strong>${escapeHtml(r.name)}</strong></span>
+                <span class="side-quest-modal-role-text">${escapeHtml(r.role)}</span>
+            </li>
+        `).join('');
+        const planHtml = (guide.game_plan || []).map(s =>
+            `<li>${escapeHtml(s)}</li>`
+        ).join('');
+        const tipsHtml = (guide.tips || []).map(t =>
+            `<li>${escapeHtml(t)}</li>`
+        ).join('');
+        const generatedDate = (entry.generated_at || '').slice(0, 10);
+
+        const overlay = document.createElement('div');
+        overlay.id = 'sideQuestStrategyModal';
+        overlay.className = 'side-quest-modal-overlay';
+        overlay.innerHTML = `
+            <div class="side-quest-modal" role="dialog" aria-modal="true"
+                 aria-label="${escapeHtml(team.team_name || '')}">
+                <header class="side-quest-modal-head">
+                    <div>
+                        <h3 class="side-quest-modal-title">${escapeHtml(team.team_name || '')}</h3>
+                        ${team.tournament ? `<p class="side-quest-modal-sub">${escapeHtml(team.tournament)}${team.trainer ? ' · ' + escapeHtml(team.trainer) : ''}</p>` : ''}
+                    </div>
+                    <button class="side-quest-modal-close" type="button"
+                            aria-label="${escapeHtml(labels.close)}">×</button>
+                </header>
+                <div class="side-quest-modal-body">
+                    <p class="side-quest-modal-overview">${escapeHtml(guide.overview || '')}</p>
+                    ${rolesHtml ? `
+                        <h4>${escapeHtml(labels.roles)}</h4>
+                        <ul class="side-quest-modal-roles">${rolesHtml}</ul>` : ''}
+                    ${planHtml ? `
+                        <h4>${escapeHtml(labels.gamePlan)}</h4>
+                        <ol class="side-quest-modal-plan">${planHtml}</ol>` : ''}
+                    ${tipsHtml ? `
+                        <h4>${escapeHtml(labels.tips)}</h4>
+                        <ul class="side-quest-modal-tips">${tipsHtml}</ul>` : ''}
+                    <p class="side-quest-modal-ai-note">${escapeHtml(labels.aiNote)}${generatedDate ? ' ' + escapeHtml(generatedDate) : ''}</p>
+                </div>
+            </div>
+        `;
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) closeStrategyModal();
+        });
+        overlay.querySelector('.side-quest-modal-close')
+            .addEventListener('click', closeStrategyModal);
+        document.addEventListener('keydown', onModalKeydown);
+        document.body.appendChild(overlay);
+        overlay.querySelector('.side-quest-modal-close').focus();
     }
 
     async function copyCode(btn) {
@@ -171,7 +309,7 @@
         if (!host) return;
         const status = document.getElementById(STATUS_ID);
         if (status) status.textContent = 'Loading…';
-        const data = await loadData();
+        const [data] = await Promise.all([loadData(), loadStrategies()]);
         const meta  = data._meta || {};
         const teams = Array.isArray(data.teams) ? data.teams : [];
         if (status) status.textContent = '';
@@ -200,6 +338,15 @@
         host.querySelectorAll('.side-quest-copy-btn').forEach(btn => {
             btn.addEventListener('click', () => copyCode(btn));
         });
+
+        host.querySelectorAll('.side-quest-info-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const code = btn.getAttribute('data-strategy-code') || '';
+                const entry = _strategies && _strategies[code];
+                const team = teams.find(t => (t.replica_code || '') === code);
+                if (entry && team) openStrategyModal(team, entry);
+            });
+        });
     }
 
     // Expose for the tab-switch hook
@@ -224,6 +371,13 @@
         document.addEventListener('click', (e) => {
             const t = e.target.closest('[data-tab-id="side-quest"], [onclick*="side-quest"]');
             if (t) setTimeout(hook, 50);
+        });
+        // Language toggle: info-button labels + a potentially open
+        // strategy modal are language-dependent — re-render the tab
+        // (cheap, data is cached) and drop the modal.
+        document.addEventListener('languageChanged', () => {
+            closeStrategyModal();
+            hook();
         });
     });
 })();

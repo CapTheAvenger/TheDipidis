@@ -212,20 +212,82 @@
 .user-info-hidden { display: none; }
 
 /* ── Responsive ──────────────────────────────────────────────── */
-@media (max-width: 768px) {
+
+/* Tablet (641–900px): compact the toolbar so logo + title + all six
+   quick-access buttons share ONE row. Previously the phone layout
+   below kicked in at ≤768px and pushed the buttons onto a stretched
+   second row even on iPad-portrait-class widths where a single row
+   fits — flagged as nav-wrap in the 768px regression sweep. */
+@media (max-width: 900px) {
     .cards-header {
-        padding: 14px 14px;
+        padding: 14px 16px;
         border-radius: 14px;
         margin-bottom: 16px;
     }
     .cards-header .header-flex-row {
         gap: 12px;
     }
+    .cards-header .header-flex-group {
+        gap: 10px;
+    }
     .cards-header .header-title {
-        font-size: 1.18em;
+        font-size: 1.2em;
         gap: 8px;
     }
+    /* The subtitle ("Your Portal for…") is wider than the title itself
+       (217px in DE) and is what pushes the toolbar onto a second row.
+       Pure marketing copy — hidden on tablet, returns on desktop. */
     .cards-header .header-subtitle {
+        display: none;
+    }
+    /* !important + the .cards-header prefix so this wins against the
+       later-loaded mobile-responsive.css `gap: 8px !important` — at
+       768px those 3px per gap are exactly what pushes the toolbar
+       onto a second row. */
+    .cards-header .header-flex-user {
+        gap: 5px !important;
+    }
+    .header-icon-btn {
+        min-width: 48px;
+        height: 50px;
+        padding: 5px 3px 4px;
+        gap: 3px;
+        border-radius: 11px;
+    }
+    .header-icon-svg {
+        width: 19px;
+        height: 19px;
+    }
+    .header-icon-img {
+        width: 22px;
+        height: 22px;
+    }
+    .header-icon-label {
+        font-size: 9px;
+    }
+    .lang-toggle-btn {
+        height: 50px;
+        min-width: 42px;
+        padding: 0 9px;
+        font-size: 12px;
+        flex: 0 0 auto;
+    }
+}
+
+/* Phone (≤640px): quick-access buttons drop to their own full-width
+   row and stretch evenly — the intentional two-row mobile layout. */
+@media (max-width: 640px) {
+    .cards-header {
+        padding: 14px 14px;
+    }
+    .cards-header .header-title {
+        font-size: 1.18em;
+    }
+    /* Tablet block above hides the subtitle to win one-row space;
+       on phones the toolbar has its own row anyway, so bring the
+       subtitle back — phone layout stays as it always was. */
+    .cards-header .header-subtitle {
+        display: block;
         font-size: 0.78em;
     }
     .header-flex-user {
@@ -239,7 +301,6 @@
         height: 54px;
         padding: 6px 4px 5px;
         gap: 4px;
-        border-radius: 11px;
     }
     .header-icon-svg {
         width: 20px;
@@ -256,8 +317,6 @@
         height: 54px;
         min-width: 44px;
         padding: 0 10px;
-        font-size: 12px;
-        flex: 0 0 auto;
     }
 }
 @media (max-width: 380px) {

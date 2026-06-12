@@ -1,65 +1,136 @@
+// Firestore Security Rules — TheDipidis
+//
+// SINGLE SOURCE OF TRUTH for the Firestore security model.
+//
+// FIRESTORE_RULES.md is documentation: it walks through the model
+// (collections, roles, deploy steps) and embeds a copy of this file
+// for readability. If you change rules here, regenerate or hand-edit
+// the snippet in FIRESTORE_RULES.md to match.
+//
+// Deploy path (manual):
+//   1. Copy the contents of this file
+//   2. Firebase Console → Firestore Database → Rules → paste → Publish
+// There is no `firebase deploy` automation in CI today. Adding one
+// would be:
+//   - commit a firebase.json with `firestore.rules` pointed at this file
+//   - a workflow that runs `firebase deploy --only firestore:rules`
+//     against a service-account secret on push-to-main affecting
+//     this file
+//
+// Reconciled with Live on 2026-06-12 (AUDIT_GITHUB.md F-24). Before
+// that the file was the 65-LOC 2026-03 legacy version and live had
+// drifted ~100 LOC ahead via Console hand-edits.
+
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // ══════════════════════════════════════════════════════════════════════
-    // HELPER FUNCTIONS (DRY)
-    // ══════════════════════════════════════════════════════════════════════
-
-    function isOwner(userId) {
-      return request.auth != null && request.auth.uid == userId;
+    // ─────────────────────────────────────────────────────────
+    // Users' own data (Battle Journal, Decks, Collection, etc.)
+    // ─────────────────────────────────────────────────────────
+    match /users/{uid}/{document=**} {
+      allow read, write: if request.auth != null && request.auth.uid == uid;
     }
 
-    function isValidSize(maxBytes) {
-      return request.resource.size < maxBytes;
+    // ─────────────────────────────────────────────────────────
+    // Public profile index — used by Testing Groups to add members
+    // by email. Each user writes their own entry; anyone signed in
+    // can read it (to resolve email → uid).
+    // ─────────────────────────────────────────────────────────
+    match /publicProfiles/{uid} {
+      allow read:  if request.auth != null;
+      allow write: if request.auth != null && request.auth.uid == uid;
     }
 
-    // ══════════════════════════════════════════════════════════════════════
-    // USER COLLECTIONS (bereits vorhanden - nicht überschreiben!)
-    // ══════════════════════════════════════════════════════════════════════
-    
-    match /users/{userId} {
-      allow read: if isOwner(userId);
-      allow write: if isOwner(userId) && isValidSize(1048576); // 1MB max
-    }
-    
-    match /users/{userId}/decks/{deckId} {
-      allow read: if isOwner(userId);
-      allow write: if isOwner(userId) && isValidSize(524288); // 512KB max
-    }
-    
-    match /users/{userId}/favorites/{favoriteId} {
-      allow read: if isOwner(userId);
-      allow write: if isOwner(userId) && isValidSize(524288);
+    // ─────────────────────────────────────────────────────────
+    // Testing Group Invites — one invite doc per group, world-readable
+    // by authenticated users so a non-member clicking a shared link
+    // can validate the token before attempting to join.
+    // Only the group owner can create/update/delete.
+    // ─────────────────────────────────────────────────────────
+    match /testingGroupInvites/{groupId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null
+        && get(/databases/$(database)/documents/testingGroups/$(groupId))
+             .data.ownerUid == request.auth.uid;
     }
 
-    // ══════════════════════════════════════════════════════════════════════
-    // USER PROFILES, COLLECTIONS & WISHLISTS
-    // ══════════════════════════════════════════════════════════════════════
+    // ─────────────────────────────────────────────────────────
+    // Testing Groups — collaborative matchup tables
+    // ─────────────────────────────────────────────────────────
+    match /testingGroups/{groupId} {
 
-    match /profiles/{userId} {
-      allow read: if isOwner(userId);
-      allow write: if isOwner(userId) && isValidSize(524288);
-    }
+      // Helpers
+      function isMember() {
+        return request.auth != null
+          && resource.data.memberUids.hasAny([request.auth.uid]);
+      }
+      function isOwner() {
+        return request.auth != null
+          && resource.data.ownerUid == request.auth.uid;
+      }
+      function roleIs(role) {
+        return request.auth != null
+          && resource.data.members[request.auth.uid].role == role;
+      }
 
-    match /collections/{userId} {
-      allow read: if isOwner(userId);
-      allow write: if isOwner(userId) && isValidSize(1048576);
-    }
+      // Members can read the group.
+      allow read: if isMember();
 
-    match /wishlists/{userId} {
-      allow read: if isOwner(userId);
-      allow write: if isOwner(userId) && isValidSize(1048576);
+      // Any signed-in user can create a group IF the new doc lists
+      // them as the sole owner + member.
+      allow create: if request.auth != null
+        && request.resource.data.ownerUid == request.auth.uid
+        && request.resource.data.memberUids == [request.auth.uid]
+        && request.resource.data.members[request.auth.uid].role == 'owner';
+
+      // Owner: full update / delete.
+      // Editor: can only modify the 'data' field + 'updatedAt'.
+      // Viewer: cannot write.
+      // Non-members must go through the /joinRequests subcollection
+      // now — owners approve/deny there and then update the group.
+      allow update: if
+        (isOwner()) ||
+        (
+          roleIs('editor') &&
+          request.resource.data.diff(resource.data)
+            .affectedKeys().hasOnly(['data', 'updatedAt'])
+        );
+
+      allow delete: if isOwner();
+
+      // Activity log — any member can append, nobody can modify.
+      match /activity/{activityId} {
+        allow read:   if request.auth != null
+          && get(/databases/$(database)/documents/testingGroups/$(groupId))
+               .data.memberUids.hasAny([request.auth.uid]);
+        allow create: if request.auth != null
+          && get(/databases/$(database)/documents/testingGroups/$(groupId))
+               .data.memberUids.hasAny([request.auth.uid])
+          && request.resource.data.uid == request.auth.uid;
+        allow update, delete: if false;
+      }
+
+      // Join requests — created by non-members via invite link, read/
+      // deleted by the group owner (approve = delete + group update,
+      // deny = delete). Doc id = requesting user's uid so we get
+      // unique-per-user for free.
+      match /joinRequests/{uid} {
+        // Requester can create their own request IF a valid invite
+        // exists for this group.
+        allow create: if request.auth != null
+          && request.auth.uid == uid
+          && request.resource.data.uid == uid
+          && exists(/databases/$(database)/documents/testingGroupInvites/$(groupId));
+        // Requester can read + delete (cancel) their own request.
+        // Owner of the group can read + delete any request.
+        allow read, delete: if request.auth != null && (
+          request.auth.uid == uid ||
+          get(/databases/$(database)/documents/testingGroups/$(groupId))
+               .data.ownerUid == request.auth.uid
+        );
+        allow update: if false;
+      }
     }
-    
-    // ══════════════════════════════════════════════════════════════════════
-    // PUBLIC READ FOR CARD DATA (Optional)
-    // ══════════════════════════════════════════════════════════════════════
-    
-    // Falls du Card-Daten in Firestore speicherst:
-    // match /cards/{cardId} {
-    //   allow read: if true;  // Public read
-    //   allow write: if false; // Nur Admin
-    // }
   }
 }

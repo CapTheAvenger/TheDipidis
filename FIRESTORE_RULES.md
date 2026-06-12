@@ -1,9 +1,19 @@
 # Firestore Security Rules
 
 The app uses Firestore for Battle Journal sync, user profiles, My Decks,
-and — as of this document — Testing Groups (collaborative meta editor).
-Paste the rules below into Firebase Console →
-**Firestore Database → Rules**.
+the Wishlist/Tradelist, and Testing Groups (collaborative meta editor).
+
+> **Single source of truth:** [`firestore.rules`](firestore.rules) at the
+> repo root. The snippet below is a verbatim copy for reading
+> convenience — if you change one, update the other (or just regenerate
+> this section from the `.rules` file). 2026-06-12 reconciliation note:
+> before that day the `.rules` file was the 65-LOC 2026-03 legacy
+> version and Live had drifted ~100 LOC ahead via Console hand-edits;
+> see `AUDIT_GITHUB.md` F-24.
+
+To deploy: copy the rules below into Firebase Console →
+**Firestore Database → Rules**. There is no `firebase deploy`
+automation in CI today.
 
 ---
 

@@ -7462,10 +7462,33 @@ window.MetaCall = (function () {
             <span class="mc-rec-d2wr-mult">×${r.d2WrMult.toFixed(2).replace('.', ',')}</span>
           </div>`
         : '';
+      // Empirical companion to the simulated Day-2 odds: how often
+      // this deck actually made cut at majors (regionals + special
+      // events), recency-weighted. User asked to extend the
+      // dark-horse-style track-record signal to the Top-10 list —
+      // r.empConv is already on every evaluated row, just wasn't
+      // exposed in the rec-row expand panel. Re-uses the same
+      // good/mid/weak color tiers as d2WrHtml so the two read as one
+      // history block. Threshold tiers chosen to match the
+      // tipReasonConv "Strong ≥ 0.15" cutoff: good ≥ 25 %, mid ≥ 15 %,
+      // weak otherwise.
+      const d2ConvHtml = (r.empConv != null && r.empConv > 0)
+        ? (() => {
+            const pct = r.empConv * 100;
+            const cls = pct >= 25 ? 'mc-rec-d2wr-good'
+                      : pct >= 15 ? 'mc-rec-d2wr-mid'
+                      : 'mc-rec-d2wr-weak';
+            return `<div class="mc-rec-d2wr ${cls}" title="${esc(t('mc.d2ConvTooltip'))}">
+              <span class="mc-rec-d2wr-label">${esc(t('mc.d2ConvLabel'))}:</span>
+              <span class="mc-rec-d2wr-value">${pct.toFixed(1).replace('.', ',')} %</span>
+            </div>`;
+          })()
+        : '';
 
       const reasonHtml = matchupRows
         ? `<div class="mc-rec-reason-block">
             ${d2WrHtml}
+            ${d2ConvHtml}
             <div class="mc-rec-reason-title">${esc(t('mc.reasonTopMatchups'))}</div>
             <ul class="mc-rec-reason-list">${matchupRows}</ul>
             <div class="mc-rec-reason-breakdown">${

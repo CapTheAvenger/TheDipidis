@@ -946,19 +946,30 @@
     letter-spacing: 0.05em;
 }
 .mc-vs-th-opp   { width: auto; }
+/* Numeric column widths declared on the TH directly (rather than via
+ * <col> alone) because under `table-layout: fixed` browsers treat
+ * <col width> as a hint that the first-row width on the cell can
+ * override. The historical `width: 1%` here was a relic of the older
+ * `table-layout: auto + width: 1% on numeric cols` trick that
+ * collapsed the columns to 13 px on desktop (the FIE…clipped report
+ * from 2026-06-12). Mobile is unaffected — the ≤ 768 px block
+ * overrides every `width` with `auto !important` and switches the
+ * row to a CSS Grid layout. */
 .mc-vs-th-share {
-    width: 1%;
+    width: 96px;
     white-space: nowrap;
     text-align: right;
     padding-left: 18px;
 }
 .mc-vs-th-wr    {
-    width: 1%;
+    width: 110px;
     white-space: nowrap;
     text-align: center;
     padding-left: 8px;
     padding-right: 8px;
 }
+.mc-vs-table.uv-opp-table .mc-vs-th-share { width: 78px; }
+.mc-vs-table.uv-opp-table .mc-vs-th-wr    { width: 86px; }
 .mc-vs-table.uv-opp-table .mc-vs-th-wr,
 .mc-vs-table.uv-opp-table .mc-vs-th-share {
     padding-left: 4px;
@@ -995,7 +1006,9 @@
 .mc-vs-table td.mc-vs-wr {
     font-variant-numeric: tabular-nums;
     white-space: nowrap;
-    width: 1%;          /* matches the TH width:1% trick — content-width */
+    /* Width comes from the colgroup; per-cell `width: 1%` here was the
+     * same relic as on the THs above and produced the same 13 px-wide
+     * clipped column on desktop. Dropped 2026-06-12. */
 }
 .mc-vs-table td.mc-vs-share {
     text-align: right;

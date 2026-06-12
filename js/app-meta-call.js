@@ -10784,27 +10784,32 @@ window.MetaCall = (function () {
             diag:           d._tier1Diag,
           }));
       },
-      // Predictor 6.0 inspector — raw underlying data sources.
+      // Predictor 6.0 inspector — raw underlying data sources. One
+      // canonical sample (Dragapult) plus the family-level aggregates
+      // is enough to debug both Tier-1 and Live-Share Floor decisions;
+      // the per-deck `_tier1Diag` / `_liveShareFloor` fields on each
+      // _shareList entry carry the rest.
       tier1DataSources: () => ({
         majorSharesByDeckCount: Object.keys(_majorSharesByDeck || {}).length,
         lastMajorByDeckCount:   Object.keys(_lastMajorByDeck || {}).length,
         lastMajorDate:          _lastMajorDate,
         sampleDragapultMajors:  _majorSharesByDeck && _majorSharesByDeck.dragapult,
         sampleDragapultLm:      _lastMajorByDeck && _lastMajorByDeck.dragapult,
-        sampleDuskLm:           _lastMajorByDeck && _lastMajorByDeck.dragapultdusknoir,
-        sampleBlazikenLm:       _lastMajorByDeck && _lastMajorByDeck.dragapultblaziken,
-        sampleDudunsparceLm:    _lastMajorByDeck && _lastMajorByDeck.dragapultdudunsparce,
-        sampleMegaStarmieLm:    _lastMajorByDeck && _lastMajorByDeck.megastarmie,
-        sampleStarmieLm:        _lastMajorByDeck && _lastMajorByDeck.starmie,
-        familyKeyMegaStarmie:   _familyKeyForDeck('Mega Starmie'),
-        familyKeyStarmieFros:   _familyKeyForDeck('Starmie Froslass'),
-        familyKeyStarmieDusk:   _familyKeyForDeck('Starmie Dusknoir'),
-        liveFloorFamMegaStarmie: _lsFamsLastRun && _lsFamsLastRun['Mega Starmie'],
-        liveFloorFamStarmie:     _lsFamsLastRun && _lsFamsLastRun['Starmie'],
         famLadderAgg:           _famLadderAgg,
         famLastMajorAgg:        _famLastMajorAgg,
         famMedianAgg:           _famMedianAgg,
       }),
+      // Predictor 6.1 inspector — look up the Live-Share Floor's
+      // last-run aggregate for the family that contains `deckName`.
+      // Returns null when the predictor hasn't built _shareList yet
+      // or when the deck's family didn't accumulate any last-major
+      // brought-share. Use from the console:
+      //   MetaCall._diag.liveFloorFamily('Mega Starmie')
+      liveFloorFamily: (deckName) => {
+        if (!deckName || !_lsFamsLastRun) return null;
+        const fk = _familyKeyForDeck(deckName);
+        return _lsFamsLastRun[fk] || null;
+      },
     },
   };
 })();

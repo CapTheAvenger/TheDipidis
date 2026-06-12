@@ -2947,104 +2947,14 @@ function compareActiveDecks() {
 }
 
 // Open modal to pick 2 decks for playtest
-function openMyDecksPlaytest() {
-  const modal = document.getElementById('myDecksPlaytestModal');
-  if (!modal) return;
-  const decks = window.userDecks || [];
-  if (decks.length === 0) {
-    if (typeof showNotification === 'function') {
-      showNotification('No saved decks yet.', 'error');
-    } else {
-      showToast('No saved decks yet!', 'warning');
-    }
-    return;
-  }
-  ['myDeckSelectP1', 'myDeckSelectP2'].forEach((selId, idx) => {
-    const sel = document.getElementById(selId);
-    if (!sel) return;
-    sel.innerHTML = decks.map((d, i) => `<option value="${i}">${escapeHtml(d.name || 'Deck ' + (i + 1))}</option>`).join('');
-    if (idx === 1 && decks.length > 1) sel.value = '1';
-  });
-  modal.style.display = 'flex';
-}
-
-function closeMyDecksPlaytest() {
-  const modal = document.getElementById('myDecksPlaytestModal');
-  if (modal) modal.style.display = 'none';
-}
-
-async function startMyDecksPlaytest() {
-  const p1Idx = parseInt(document.getElementById('myDeckSelectP1').value);
-  const p2Idx = parseInt(document.getElementById('myDeckSelectP2').value);
-  const deck1 = window.userDecks && window.userDecks[p1Idx];
-  const deck2 = window.userDecks && window.userDecks[p2Idx];
-  if (!deck1 || !deck1.cards) {
-    if (typeof showNotification === 'function') {
-      showNotification('Could not load Player 1 deck.', 'error');
-    } else {
-      showToast('Could not load Player 1 deck!', 'error');
-    }
-    return;
-  }
-  if (!deck2 || !deck2.cards) {
-    if (typeof showNotification === 'function') {
-      showNotification('Could not load Player 2 deck.', 'error');
-    } else {
-      showToast('Could not load Player 2 deck!', 'error');
-    }
-    return;
-  }
-
-  if (typeof standaloneDecks === 'undefined' && typeof window.ensurePlaytesterScriptsLoaded === 'function') {
-    try {
-      await window.ensurePlaytesterScriptsLoaded({ notify: true });
-    } catch (error) {
-      console.error('[My Decks Playtest] Failed to load playtester scripts:', error);
-    }
-  }
-
-  if (typeof standaloneDecks === 'undefined') {
-    if (typeof showNotification === 'function') {
-      showNotification('Playtester could not be loaded.', 'error');
-    } else {
-      showToast('Playtester not loaded yet!', 'error');
-    }
-    return;
-  }
-
-  // Regex handles all number formats: 183, TG01, GG01, 001/198, PA-01, etc.
-  const keyRx = /^(.+?)\s+\(([A-Z0-9-]+)\s+([A-Z0-9/a-z-]+)\)$/;
-  const backUrl = typeof CARD_BACK_URL !== 'undefined' ? CARD_BACK_URL : '';
-
-  function buildDeck(deckObj) {
-    const result = [];
-    for (const [deckKey, count] of Object.entries(deckObj)) {
-      if (!count || count <= 0) continue;
-      let cardName = deckKey, imageUrl = backUrl, cardType = '', setCode = '', number = '';
-      const m = deckKey.match(keyRx);
-      if (m) {
-        cardName = m[1]; setCode = m[2]; number = m[3];
-        // Direct exact-print lookup — same as _simFindCard in draw-simulator.js
-        let cd = null;
-        if (window.cardsBySetNumberMap) cd = window.cardsBySetNumberMap[`${setCode}-${number}`] || null;
-        if (!cd && window.allCardsDatabase) cd = window.allCardsDatabase.find(c => c.set === setCode && c.number === number) || null;
-        if (!cd && window.allCardsDatabase) cd = window.allCardsDatabase.find(c => c.name === cardName) || null;
-        if (cd) { imageUrl = cd.image_url || backUrl; cardType = cd.card_type || cd.type || ''; }
-      } else {
-        const cd = window.allCardsDatabase && window.allCardsDatabase.find(c => c.name === cardName);
-        if (cd) { imageUrl = cd.image_url || backUrl; cardType = cd.card_type || cd.type || ''; setCode = cd.set || ''; number = cd.number || ''; }
-      }
-      result.push({ name: cardName, imageUrl, cardType, setCode, number, count });
-    }
-    return result;
-  }
-
-  standaloneDecks.p1 = buildDeck(deck1.cards);
-  standaloneDecks.p2 = buildDeck(deck2.cards);
-
-  closeMyDecksPlaytest();
-  if (typeof startStandalonePlaytester === 'function') startStandalonePlaytester();
-}
+// openMyDecksPlaytest / closeMyDecksPlaytest / startMyDecksPlaytest
+// were the My-Decks → in-app Playtester handoff. The in-app sandbox
+// itself was retired (see js/app-core.js + index.html — replaced by
+// tcg-showdown-link.js external Playtester). The three handlers stayed
+// behind as dead code: every "Start Playtest" click resolved through
+// the deferred-script loader to four js/*.js files that no longer exist
+// and a `standaloneDecks` global that no module defines anymore.
+// Removed 2026-06-12 per AUDIT_GITHUB.md F-01.
 
 // Copy a saved deck to clipboard in Pokémon TCG Live format
 function copyMyDeck(deckIndex) {

@@ -7976,7 +7976,6 @@
                                 <h2 class="m-0" data-i18n="profile.myDecks">My Decks</h2>
                                 <div class="flex gap-8 flex-wrap">
                                     <button onclick="compareActiveDecks()" class="btn btn-secondary btn-lift" data-i18n="profile.compareBuilt">Compare Built Decks</button>
-                                    <button onclick="openMyDecksPlaytest()" class="btn btn-secondary btn-lift" data-i18n="profile.playtest">Playtest</button>
                                     <button onclick="createDeckFolder()" class="btn btn-primary btn-lift" data-i18n="profile.newFolder">New Folder</button>
                                 </div>
                             </div>
@@ -8844,26 +8843,12 @@
 
     <script src="js/inline-init.js?v=202606121114" defer></script>
 
-    <!-- My Decks Playtest Modal -->
-    <div id="myDecksPlaytestModal" class="rarity-switcher-modal" onclick="if(event.target===this)closeMyDecksPlaytest()" style="z-index: 20000; display: none;" role="dialog" aria-modal="true" aria-label="My Decks playtest selector">
-        <div class="rarity-switcher-modal-content" style="max-width: 500px; background: #f8f9fa;">
-            <span class="rarity-switcher-close" onclick="closeMyDecksPlaytest()" aria-label="Close" data-i18n-aria="btn.close">&times;</span>
-            <h2 style="margin-top: 0; color: #27ae60; border-bottom: 2px solid #e1e8ed; padding-bottom: 10px;" data-i18n="ui.playtestMyDecks">Playtest — My Decks</h2>
-            <p style="color: #555; margin-bottom: 20px;">Choose a deck for each player, then start the match!</p>
-            <div style="margin-bottom: 16px;">
-                <label for="myDeckSelectP1" style="display: block; font-weight: 700; margin-bottom: 6px; color: #3B4CCA;">Player 1</label>
-                <select id="myDeckSelectP1" style="width: 100%; padding: 10px 12px; border: 2px solid #3B4CCA; border-radius: 8px; font-size: 14px; background: white; cursor: pointer;"></select>
-            </div>
-            <div style="margin-bottom: 24px;">
-                <label for="myDeckSelectP2" style="display: block; font-weight: 700; margin-bottom: 6px; color: #E3350D;">Player 2</label>
-                <select id="myDeckSelectP2" style="width: 100%; padding: 10px 12px; border: 2px solid #E3350D; border-radius: 8px; font-size: 14px; background: white; cursor: pointer;"></select>
-            </div>
-            <div style="display: flex; gap: 12px;">
-                <button onclick="closeMyDecksPlaytest()" style="flex:1; padding:12px; background:#e1e8ed; color:#2c3e50; font-weight:700; border:2px solid #ccd6dd; border-radius:8px; cursor:pointer; font-size:14px;">Cancel</button>
-                <button onclick="startMyDecksPlaytest()" style="flex:2; padding:12px; background:linear-gradient(135deg,#27ae60 0%,#1e8449 100%); color:white; font-weight:700; border:none; border-radius:8px; cursor:pointer; font-size:14px; box-shadow:0 4px 10px rgba(39,174,96,0.3);" data-i18n="ui.startPlaytest">Start Playtest</button>
-            </div>
-        </div>
-    </div>
+    <!-- My Decks Playtest Modal — removed 2026-06-12 with the in-app
+         sandbox retirement (AUDIT_GITHUB.md F-01). The "Playtest" button
+         on My Decks and the openMyDecksPlaytest / startMyDecksPlaytest
+         handlers went with it. External-Playtester routing now lives
+         in js/tcg-showdown-link.js. -->
+
 
     <div id="battleJournalOverlay" class="battle-journal-overlay" aria-hidden="true">
         <div id="battleJournalSheet" class="battle-journal-sheet" role="dialog" aria-modal="true" aria-label="Battle journal">

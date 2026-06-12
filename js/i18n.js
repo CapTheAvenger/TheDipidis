@@ -166,9 +166,7 @@ const translations = {
     'ui.clearWishlist':               'Clear Wishlist',
     'ui.clearTradeList':              'Clear Trade List',
     'ui.generateCustomBinder':        'Generate Custom Binder',
-    'ui.startPlaytest':               'Start Playtest',
     'ui.droppedCards':                'Dropped Cards',
-    'ui.playtestMyDecks':             'Playtest — My Decks',
     'ui.wishlistOverview':            'Wishlist Overview',
     'ui.tradeListOverview':           'Trade List Overview',
     'matchupAnalysis.tournamentType': 'Tournament type',
@@ -268,8 +266,6 @@ const translations = {
     'proxy.addCard':            'Add Card',
     'proxy.clearQueue':         'Clear Queue',
     'proxy.pageFooter':         'Page',
-    'notify.playtesterLoading': 'Playtester is loading…',
-    'notify.playtesterError':   'Playtester could not be loaded.',
 
     // ── app-deck-builder.js ─────────────────────────────────
     'deck.maxReached':          'Deck has reached maximum (70 cards)!',
@@ -642,7 +638,6 @@ const translations = {
     'profile.groupDecks':       'Decks',
     'profile.groupPlay':        'Play & Analysis',
     'profile.groupMisc':        'Account',
-    'profile.playtest':         'Playtest',
     'profile.compareBuilt':     'Compare Built Decks',
     'profile.filterBuilt':      'IRL Built Only',
     'profile.dexImport':        'Dex Import',
@@ -2015,9 +2010,7 @@ const translations = {
     'ui.clearWishlist':               'Wunschliste leeren',
     'ui.clearTradeList':              'Tauschliste leeren',
     'ui.generateCustomBinder':        'Custom Binder generieren',
-    'ui.startPlaytest':               'Playtest starten',
     'ui.droppedCards':                'Verworfene Karten',
-    'ui.playtestMyDecks':             'Playtest — Meine Decks',
     'ui.wishlistOverview':            'Wunschliste — Übersicht',
     'ui.tradeListOverview':           'Tauschliste — Übersicht',
     'matchupAnalysis.tournamentType': 'Turnier-Typ',
@@ -2115,8 +2108,6 @@ const translations = {
     'proxy.addCard':            'Karte hinzufügen',
     'proxy.clearQueue':         'Warteschlange leeren',
     'proxy.pageFooter':         'Seite',
-    'notify.playtesterLoading': 'Playtester wird geladen…',
-    'notify.playtesterError':   'Playtester konnte nicht geladen werden.',
 
     // ── app-deck-builder.js ─────────────────────────────────
     'deck.maxReached':          'Deck hat Maximum erreicht (70 Karten)!',
@@ -2490,7 +2481,6 @@ const translations = {
     'profile.groupPlay':        'Spielen & Analyse',
     'profile.groupMisc':        'Konto',
     'profile.settings':         'Einstellungen',
-    'profile.playtest':         'Playtesten',
     'profile.compareBuilt':     'Gebaute Decks vergleichen',
     'profile.filterBuilt':      'Nur IRL Gebaute',
     'profile.dexImport':        'Dex Import',

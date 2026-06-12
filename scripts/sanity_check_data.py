@@ -90,6 +90,20 @@ THRESHOLDS: Dict[str, int] = {
 }
 
 
+# Files that should normally be EMPTY — emit a warning when rows
+# appear, since "rows here" means the scraper couldn't classify them
+# and an operator needs to look. AUDIT_DATA_PIPELINE.md F-D08.
+ANOMALY_WATCH: Dict[str, str] = {
+    'labs_tournament_decks__unsorted.csv': (
+        'rows here mean labs_tournament_scraper.py routed tournaments '
+        'into the in-person-legal lag window with no matching meta '
+        'chunk — operator needs to set previous_format_key in '
+        'format_window.json or hand-classify the entries. See the '
+        'scraper warning at backend/scrapers/labs_tournament_scraper.py:497.'
+    ),
+}
+
+
 def count_csv_rows(path: str) -> int:
     """Count non-header rows in `path`. Returns -1 on read error."""
     try:
@@ -167,12 +181,31 @@ def main(argv: list[str]) -> int:
             passes.append(f'{fname}: {rows} rows')
             print(f'  ✓     {fname:55s} {rows:>8} rows  (≥{threshold})')
 
+    # Anomaly watch — files that should be empty (F-D08 __unsorted etc.).
+    anomalies: list[str] = []
+    for fname, why in sorted(ANOMALY_WATCH.items()):
+        path = os.path.join(data_dir_abs, fname)
+        if not os.path.isfile(path):
+            continue
+        rows = count_csv_rows(path)
+        if rows > 0:
+            anomalies.append(f'{fname}: {rows} rows')
+            print(f'  ⚠ {fname:55s} {rows:>8} rows  (expected 0; operator review)')
+            print(f'    ::warning::Data anomaly: {fname} has {rows} rows. {why}')
+        else:
+            print(f'  ✓     {fname:55s} {rows:>8} rows  (expected 0, OK)')
+
     print()
-    print(f'Summary: {len(passes)} pass · {len(watches)} watch-only · {len(reverts)} revert')
+    print(f'Summary: {len(passes)} pass · {len(watches)} watch-only · '
+          f'{len(reverts)} revert · {len(anomalies)} anomaly')
     if reverts:
         print('Reverted files:')
         for r in reverts:
             print(f'  - {r}')
+    if anomalies:
+        print('Anomaly files (operator review):')
+        for a in anomalies:
+            print(f'  - {a}')
 
     # Always exit 0: the failure mode is "this file got rolled back",
     # not "the entire pipeline is broken". The reverts produce

@@ -298,7 +298,6 @@ def main():
         logger.info("Detail-Download uebersprungen (skip_detail_scraping = True).")
 
     csv_path  = os.path.join(data_dir, "japanese_cards_database.csv")
-    json_path = os.path.join(data_dir, "japanese_cards_database.json")
 
     with open(csv_path, "w", encoding="utf-8", newline="") as f:
         writer = csv.DictWriter(
@@ -308,17 +307,11 @@ def main():
         writer.writeheader()
         writer.writerows(filtered_cards)
 
-    with open(json_path, "w", encoding="utf-8") as f:
-        json.dump(
-            {
-                "timestamp": datetime.now().isoformat(),
-                "total_count": len(filtered_cards),
-                "sets": list(latest_sets),
-                "cards": filtered_cards,
-            },
-            f, indent=2, ensure_ascii=False,
-        )
-
+    # NOTE: the legacy japanese_cards_database.json output was dropped
+    # 2026-06-12 (AUDIT_DATA_PIPELINE.md F-D15). Only the CSV is
+    # consumed downstream (prepare_card_data.py merges it with the EN
+    # database into all_cards_merged.json). The JSON variant carried
+    # no consumer for 12+ months — write-only artefact.
     logger.info("Erfolgreich ueberschrieben. %s Karten in Datenbank gespeichert.", len(filtered_cards))
     logger.info("=" * 80)
 

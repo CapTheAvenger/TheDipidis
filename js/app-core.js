@@ -166,10 +166,6 @@ const BASE_PATH = './data/';
                 title: '\ud83d\udda8\ufe0f Proxy Printer',
                 html: '<p>Create printable proxy cards for testing and casual play.</p><ul><li><strong>Import Deck:</strong> Paste a deck list and auto-generate proxies</li><li><strong>Manual Add:</strong> Search and add individual cards</li><li><strong>Print Layout:</strong> Optimized for standard 6.3cm \u00d7 8.8cm card size (fits sleeves)</li><li><strong>Adjust Quantities:</strong> Set exact copies for each card</li><li><strong>@media print:</strong> Browser print produces A4 pages with correct card dimensions</li></ul><hr style="margin:14px 0;border:none;border-top:1px solid #ddd;"><p style="font-weight:700;margin:0 0 6px;">Page Buttons:</p><ul><li>+ / \u2013 <strong>Quantity</strong> \u2014 Increase or decrease copy count per card</li><li>\u2716 <strong>Remove</strong> \u2014 Remove card from the proxy list</li><li><strong>Import Deck</strong> \u2014 Paste a full deck list to load all cards at once</li><li><strong>Clear All</strong> \u2014 Remove all cards from the proxy list</li><li><strong>Print</strong> \u2014 Send proxy sheet to browser print dialog</li></ul>'
             },
-            'sandbox': {
-                title: '\u2694\ufe0f Battle Sandbox',
-                html: '<p>Simulate 2-player Pok\u00e9mon TCG matches with full game mechanics.</p><ul><li><strong>Import Decks:</strong> Paste deck lists for Player 1 and Player 2</li><li><strong>Draw Simulator:</strong> Test opening hands and prize cards</li><li><strong>Game Board:</strong> Full interactive play area with bench and active slots</li><li><strong>Load Saved Decks:</strong> Use decks from your profile</li><li><strong>Judge:</strong> Both players shuffle hand into deck, draw exactly 4 (TCG rule)</li><li><strong>Iono:</strong> Shuffle hand under deck, draw equal to remaining prizes</li><li><strong>Deck Search \ud83d\udd0d:</strong> Browse your deck mid-game with sort options</li></ul><hr style="margin:14px 0;border:none;border-top:1px solid #ddd;"><p style="font-weight:700;margin:0 0 6px;">Game Buttons:</p><ul><li><strong>Draw</strong> \u2014 Draw the top card from your deck</li><li><strong>Shuffle</strong> \u2014 Shuffle your deck randomly</li><li><strong>Judge</strong> \u2014 Both players shuffle hand into deck, draw 4</li><li><strong>Iono</strong> \u2014 Shuffle hand under deck, draw cards equal to remaining prizes</li><li>\ud83d\udd0d <strong>Deck Search</strong> \u2014 Browse and pick a card from your deck</li><li><strong>New Game</strong> \u2014 Reset board and deal new hands</li></ul>'
-            },
             'profile': {
                 title: '\ud83d\udc64 User Profile',
                 html: '<p>Manage your personal card collection, saved decks, and settings.</p><ul><li><strong>My Collection:</strong> Exact print counts (set+number) synced to Firebase</li><li><strong>Dex Import:</strong> CSV import supports set-name mapping and id-based number parsing</li><li><strong>My Decks:</strong> Per-card badges show exact owned count for that print</li><li><strong>\u2728 Indicator:</strong> Shows when other international prints of same card exist in your collection</li><li><strong>Rarity Switcher (\u2605):</strong> Swap print directly from saved deck cards</li><li><strong>Compare (\u2696\ufe0f):</strong> Choose source (paste Limitless/PTCGL or search saved decks)</li><li><strong>Compare Mode:</strong> Functional (prints merged) or Exact print</li><li><strong>Wishlist + Settings:</strong> Manage targets and account preferences</li></ul><hr style="margin:14px 0;border:none;border-top:1px solid #ddd;"><p style="font-weight:700;margin:0 0 6px;">Card Action Buttons:</p><ul><li>\u2661 <strong>Wishlist</strong> \u2014 Add or remove this card from your wishlist</li><li>+ <strong>Collection</strong> \u2014 Add card to your collection (shows owned count)</li><li>\u2605 <strong>Show Other Prints</strong> \u2014 Swap to a different print of the same card</li><li>L <strong>Open Limitless Card Details</strong> \u2014 View card info on limitlesstcg.com</li><li>P <strong>Add to Proxy Printer</strong> \u2014 Send card to the proxy print queue</li><li>\u20ac <strong>Cardmarket</strong> \u2014 Search this card on Cardmarket</li></ul>'
@@ -248,10 +244,6 @@ const BASE_PATH = './data/';
             'proxy': {
                 title: '\ud83d\udda8\ufe0f Proxy-Drucker',
                 html: '<p>Erstelle druckbare Proxy-Karten fuer Tests und Casual Play.</p><ul><li><strong>Deck importieren:</strong> Deckliste einfuegen und Proxys automatisch erzeugen</li><li><strong>Manuell hinzufuegen:</strong> Einzelkarten suchen und hinzufuegen</li><li><strong>Drucklayout:</strong> Optimiert fuer 6.3cm x 8.8cm Kartenmass</li><li><strong>Mengen anpassen:</strong> Exakte Kopienzahl je Karte setzen</li><li><strong>@media print:</strong> Browserdruck erzeugt A4-Seiten mit korrekten Kartengroessen</li></ul><hr style="margin:14px 0;border:none;border-top:1px solid #ddd;"><p style="font-weight:700;margin:0 0 6px;">Seiten-Buttons:</p><ul><li>+ / \u2013 <strong>Menge</strong> \u2014 Kopienzahl pro Karte erhoehen oder verringern</li><li>\u2716 <strong>Entfernen</strong> \u2014 Karte aus der Proxy-Liste loeschen</li><li><strong>Deck importieren</strong> \u2014 Komplette Deckliste einfuegen, alle Karten laden</li><li><strong>Alle loeschen</strong> \u2014 Alle Karten aus der Proxy-Liste entfernen</li><li><strong>Drucken</strong> \u2014 Proxy-Bogen an den Browserdruck senden</li></ul>'
-            },
-            'sandbox': {
-                title: '\u2694\ufe0f Battle Sandbox',
-                html: '<p>Simuliere 2-Spieler-Pokemon-TCG-Matches mit vollstaendigen Spielmechaniken.</p><ul><li><strong>Decks importieren:</strong> Decklisten fuer Spieler 1 und 2 einfuegen</li><li><strong>Draw-Simulator:</strong> Starthaende und Preiskarten testen</li><li><strong>Spielbrett:</strong> Interaktives Feld mit Bank- und Aktiv-Slots</li><li><strong>Gespeicherte Decks laden:</strong> Decks aus deinem Profil nutzen</li><li><strong>Judge:</strong> Beide mischen Hand ins Deck und ziehen genau 4</li><li><strong>Iono:</strong> Hand unter Deck mischen, Anzahl nach Preiskarten ziehen</li><li><strong>Decksuche:</strong> Deck waehrend des Spiels mit Sortierung durchsuchen</li></ul><hr style="margin:14px 0;border:none;border-top:1px solid #ddd;"><p style="font-weight:700;margin:0 0 6px;">Spiel-Buttons:</p><ul><li><strong>Ziehen</strong> \u2014 Oberste Karte vom Deck ziehen</li><li><strong>Mischen</strong> \u2014 Deck zufaellig mischen</li><li><strong>Judge</strong> \u2014 Beide Spieler mischen Hand ins Deck und ziehen 4</li><li><strong>Iono</strong> \u2014 Hand unter Deck mischen, Karten gleich Restpreisen ziehen</li><li>\ud83d\udd0d <strong>Decksuche</strong> \u2014 Karte aus dem Deck durchsuchen und auswaehlen</li><li><strong>Neues Spiel</strong> \u2014 Brett zuruecksetzen und neue Haende austeilen</li></ul>'
             },
             'profile': {
                 title: '\ud83d\udc64 Benutzerprofil',
@@ -404,14 +396,6 @@ const BASE_PATH = './data/';
             return normalizeProxyCardNumber(card?.number || card?.set_number || '');
         }
 
-        const DEFERRED_PLAYTESTER_SCRIPTS = [
-            'js/playtester.js?v=20260320-v68',
-            'js/playtester-mobile.js?v=20260320-v2',
-            'js/playtester-patch.js?v=3fc0227',
-            'js/firebase-multiplayer.js?v=20260315-v1'
-        ];
-        let deferredPlaytesterScriptsPromise = null;
-
         function createCardSkeletonMarkup(count = 10) {
             return Array.from({ length: count }, () => `
                 <div class="card-skeleton" aria-hidden="true">
@@ -452,79 +436,14 @@ const BASE_PATH = './data/';
             if (grid._skeletonTimer) { clearTimeout(grid._skeletonTimer); grid._skeletonTimer = null; }
         }
 
-        function loadDeferredScript(src) {
-            return new Promise((resolve, reject) => {
-                const existing = document.querySelector(`script[src="${src}"]`);
-                if (existing) {
-                    if (existing.dataset.loaded === 'true') {
-                        resolve();
-                        return;
-                    }
-                    existing.addEventListener('load', () => resolve(), { once: true });
-                    existing.addEventListener('error', () => reject(new Error(`Failed to load ${src}`)), { once: true });
-                    return;
-                }
-
-                const script = document.createElement('script');
-                script.src = src;
-                script.async = false;
-                script.dataset.deferredPlaytester = 'true';
-                script.addEventListener('load', () => {
-                    script.dataset.loaded = 'true';
-                    resolve();
-                }, { once: true });
-                script.addEventListener('error', () => reject(new Error(`Failed to load ${src}`)), { once: true });
-                document.body.appendChild(script);
-            });
-        }
-
-        async function ensurePlaytesterScriptsLoaded(options = {}) {
-            const { notify = false } = options;
-
-            if (window.__playtesterScriptsReady === true) {
-                return;
-            }
-
-            if (!deferredPlaytesterScriptsPromise) {
-                if (notify && typeof showNotification === 'function') {
-                    showNotification(t('notify.playtesterLoading'), 'info', 1800);
-                }
-
-                deferredPlaytesterScriptsPromise = (async () => {
-                    for (const src of DEFERRED_PLAYTESTER_SCRIPTS) {
-                        await loadDeferredScript(src);
-                    }
-                    window.__playtesterScriptsReady = true;
-                })().catch(error => {
-                    deferredPlaytesterScriptsPromise = null;
-                    throw error;
-                });
-            }
-
-            return deferredPlaytesterScriptsPromise;
-        }
-
-        window.ensurePlaytesterScriptsLoaded = ensurePlaytesterScriptsLoaded;
-
-        ['openPlaytester', 'openPlaytesterSetup', 'startPlaytesterWithMirror', 'startPlaytesterWithOpponent', 'startStandalonePlaytester', 'parseSandboxDeckToExactPrints', 'openMultiplayerFromSandbox'].forEach(functionName => {
-            if (typeof window[functionName] === 'function') return;
-
-            const deferredWrapper = async function(...args) {
-                try {
-                    await ensurePlaytesterScriptsLoaded({ notify: true });
-                    if (typeof window[functionName] === 'function' && window[functionName] !== deferredWrapper) {
-                        return window[functionName](...args);
-                    }
-                } catch (error) {
-                    console.error(`[Playtester] Could not load ${functionName}:`, error);
-                    if (typeof showNotification === 'function') {
-                        showNotification(t('notify.playtesterError'), 'error');
-                    }
-                }
-            };
-
-            window[functionName] = deferredWrapper;
-        });
+        // The deferred Playtester loader + its 7 entry-point wrappers
+        // (openPlaytester / openPlaytesterSetup / startStandalonePlaytester
+        // / parseSandboxDeckToExactPrints / openMultiplayerFromSandbox /
+        // …) were retired with the in-app sandbox. External Playtester
+        // routing now lives in tcg-showdown-link.js. The loader pointed
+        // at js/playtester*.js + js/firebase-multiplayer.js — all four
+        // files no longer exist in the repo, so every wrapped call
+        // resolved to a 404. Removed 2026-06-12 per AUDIT_GITHUB.md F-01.
 
         function buildProxyManualSearchIndex() {
             const cards = Array.isArray(window.allCardsDatabase) ? window.allCardsDatabase : [];

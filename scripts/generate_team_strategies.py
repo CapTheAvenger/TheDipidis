@@ -331,13 +331,21 @@ def main(argv: List[str]) -> int:
         todo = todo[:MAX_GENERATIONS_PER_RUN]
 
     if todo:
+        # Line-buffer stdout so per-team progress streams to the
+        # Actions log even when callers forget `python -u`. Without
+        # this, a 20-team run looks like 20 minutes of nothing
+        # followed by a wall of output at the end.
+        try:
+            sys.stdout.reconfigure(line_buffering=True)
+        except (AttributeError, OSError):
+            pass
         client = anthropic.Anthropic(api_key=api_key)
         consecutive_failures = 0
         generated = 0
         for team in todo:
             code = team['replica_code']
             name = team.get('team_name') or code
-            print(f'  generating: {name} ({code}) …')
+            print(f'  generating: {name} ({code}) …', flush=True)
             try:
                 strategy = generate_for_team(client, team)
             except anthropic.APIStatusError as e:

@@ -7423,10 +7423,15 @@ window.MetaCall = (function () {
       const day2Pct = (r.day2Prob * 100).toFixed(1).replace('.', ',');
       const wrPct   = r.avgWR.toFixed(1).replace('.', ',');
       const fieldShare = fieldShareByName[normalize(r.name)] || 0;
+      // 2026-06-12: counter-pick badge removed from the rec rows per user
+      // feedback — the truncated "COUNTER-P" pill (see CSS clip) was
+      // visually noisy and the signal is already implicit in the
+      // ranking (low field share + high Day-2 odds = counter-pick by
+      // construction). The classifier + i18n keys stay live so we can
+      // re-introduce as a filter/legend later without re-deriving it.
       const isCounterPick = fieldShare > 0 && fieldShare < COUNTER_PICK_MAX_SHARE;
-      const counterPickTag = isCounterPick
-        ? `<span class="mc-rec-counterpick-tag" title="${esc(t('mc.recCounterPickTooltip'))}">${esc(t('mc.recCounterPickLabel'))}</span>`
-        : '';
+      void isCounterPick;
+      const counterPickTag = '';
       const safeNameJs = escJs(r.name);
       const reasonId = 'mc-rec-reason-' + normalize(r.name).replace(/[^a-z0-9]/g, '');
       // Reason row HTML — top-3 favourable matchups + the Day-2-odds

@@ -87,6 +87,20 @@ window.MetaCall = (function () {
   let _shareList  = null;  // [{name, onlineShare}] sorted desc — onlineShare is the
                             // PREDICTED share once Predictor 2.0 has run; the raw ladder
                             // share is kept on each entry as `ladderShare` for the badge.
+
+  // Meta bucket labels — Limitless aggregates everything below their
+  // archetype-classification threshold into a single "Other" row.
+  // Treating it as an archetype produces nonsense everywhere (the
+  // 2026-06-12 dark-horse-tips bug: "Other" landed at 22.3 % Day-2
+  // odds because the bucket's combined Day-2 shares look like a
+  // strong deck). Filtered out at the share-list / labs-aggregation
+  // gates so the bucket never reaches the predictor or the
+  // recommendation surfaces. Keeps the long-tail count fixed (no
+  // re-imputation) — we just refuse to treat the bucket as a deck.
+  const _META_BUCKET_LABELS = new Set(['other', 'unclassified', 'misc']);
+  function _isMetaBucketLabel(name) {
+    return _META_BUCKET_LABELS.has(String(name || '').trim().toLowerCase());
+  }
   let _trendMap   = null;  // normalize(deck) -> share_change (%-points week-over-week)
   let _tournamentStats = null; // normalize(deck) -> { broughtShare, top8Conv, top16Conv, ... }
   let _predictorMode  = 'A'; // 'A' = online-only fallback, 'B' = labs-major data available
@@ -1097,14 +1111,16 @@ window.MetaCall = (function () {
   // week-over-week history or per-deck cumulative WR for past formats).
   function _pastMetaToShareList(aggregate) {
     if (!aggregate || !Array.isArray(aggregate.shares)) return [];
-    return aggregate.shares.map(s => ({
-      name        : s.name,
-      onlineShare : s.share,
-      ladderShare : s.share,
-      trend       : 0,
-      onlineWinPct: 0,
-      _pastMetaSeen: s.tournamentsSeen,  // diagnostic only — not used by predictor
-    }));
+    return aggregate.shares
+      .filter(s => !_isMetaBucketLabel(s.name))
+      .map(s => ({
+        name        : s.name,
+        onlineShare : s.share,
+        ladderShare : s.share,
+        trend       : 0,
+        onlineWinPct: 0,
+        _pastMetaSeen: s.tournamentsSeen,  // diagnostic only — not used by predictor
+      }));
   }
 
   async function _loadClShares(path) {
@@ -4243,7 +4259,7 @@ window.MetaCall = (function () {
       // unchanged; the raw ladder share is kept on `ladderShare` for
       // the per-deck badge.
       _shareList = shareRows
-        .filter(r => r.deck_name && (r.new_share || r.old_share))
+        .filter(r => r.deck_name && !_isMetaBucketLabel(r.deck_name) && (r.new_share || r.old_share))
         .map(r => ({
           name          : r.deck_name,
           onlineShare   : parseEU(r.new_share || r.old_share || '0'),
@@ -4752,6 +4768,12 @@ window.MetaCall = (function () {
           const _topByTournament = {}; // tid -> [{ k, share }, …]
           labsRows.forEach(r => {
             if (!r.deck_name) return;
+            // The "Other" bucket has high combined d2_share at every
+            // major (it's the sum of every long-tail deck), which
+            // poisons the synthetic-conv / quality-ratio aggregators
+            // and produces phantom "strong signal" tips. Skip at
+            // ingest so the bucket can't influence any per-deck stat.
+            if (_isMetaBucketLabel(r.deck_name)) return;
             const k = normalize(r.deck_name);
             const share = parseEU(r.share_pct || '0');
             const w = _recencyWeight(_rowISO(r));
@@ -6342,6 +6364,7 @@ window.MetaCall = (function () {
 
     // Geheimtipps — off-radar, strong-signal picks below the Day-2 line.
     const tipPool = evaluated.filter(e => {
+      if (_isMetaBucketLabel(e.name)) return false; // belt-and-braces
       const k = normalize(e.name);
       if (day2Names.has(k)) return false;
       const shareEntry = _shareList.find(d => normalize(d.name) === k);
@@ -7530,7 +7553,7 @@ window.MetaCall = (function () {
         historyParts.push(`${t('mc.histD2Wr')} ${r.d2WrPct.toFixed(1).replace('.', ',')} %`);
       }
       const historyLine = historyParts.length
-        ? `<span class="mc-rec-history-line" title="${esc(t('mc.d2ConvTooltip'))}">${esc(historyParts.join(' · '))}</span>`
+        ? `<span class="mc-rec-history-line" title="${esc(t('mc.d2ConvTooltip'))}">${esc(t('mc.histPrefix'))} ${esc(historyParts.join(' · '))}</span>`
         : '';
 
       const reasonHtml = matchupRows

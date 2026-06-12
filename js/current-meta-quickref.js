@@ -543,7 +543,33 @@
     };
 
     const tallies = { all: 0, two: 0, one: 0 };
-    const cell = (n) => `<td class="${n > 0 ? '' : 'three-way-cell-zero'}">${n > 0 ? n : '–'}</td>`;
+    // Per-row count-mismatch detector — if the three columns don't
+    // agree on the copy count (e.g. Builder 2 / Major 1 / Online 2)
+    // we want each non-zero cell that doesn't match the max to be
+    // visually flagged, even when the row is otherwise green ("all 3
+    // agree" only checks PRESENCE, not quantity — user feedback
+    // 2026-06-12). Zero cells already carry .three-way-cell-zero and
+    // stay as the existing dash placeholder.
+    const _mismatchMask = (b, m, o) => {
+      const max = Math.max(b, m, o);
+      const allSame = b === m && m === o;
+      if (allSame) return [false, false, false];
+      return [
+        b > 0 && b !== max,
+        m > 0 && m !== max,
+        o > 0 && o !== max,
+      ];
+    };
+    const cell = (n, isMismatch) => {
+      const cls = [];
+      if (n > 0) {
+        if (isMismatch) cls.push('three-way-cell-mismatch');
+      } else {
+        cls.push('three-way-cell-zero');
+      }
+      const clsAttr = cls.length ? ` class="${cls.join(' ')}"` : '';
+      return `<td${clsAttr}>${n > 0 ? n : '–'}</td>`;
+    };
     const trChunks = [];
     let lastSectionBucket = '';
     for (const r of rows) {
@@ -557,10 +583,11 @@
       }
       const agree = _agreeBucket(r.builder, r.major, r.online);
       tallies[agree]++;
+      const mismatch = _mismatchMask(r.builder, r.major, r.online);
       trChunks.push(
         `<tr class="three-way-row-${agree}">
           <td class="three-way-card-col">${_escHtml(r.name)}</td>
-          ${cell(r.builder)}${cell(r.major)}${cell(r.online)}
+          ${cell(r.builder, mismatch[0])}${cell(r.major, mismatch[1])}${cell(r.online, mismatch[2])}
         </tr>`
       );
     }

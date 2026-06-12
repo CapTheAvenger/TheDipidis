@@ -2930,6 +2930,17 @@
 .three-way-compare-table tr.three-way-row-two { background: #fffbeb; }
 .three-way-compare-table tr.three-way-row-one { background: #fef2f2; }
 .three-way-compare-table td.three-way-cell-zero { color: #cbd5e1; }
+/* Count-mismatch — the three columns disagree on copy count even
+   though all three contain the card (so the row stays green). The
+   amber tint + inset border draws the eye to the diverging quantity
+   without breaking the row-level all-agree semantic. */
+.three-way-compare-table td.three-way-cell-mismatch {
+    color: #b45309;
+    font-weight: 700;
+    background: rgba(245, 158, 11, 0.18);
+    box-shadow: inset 0 0 0 2px rgba(245, 158, 11, 0.55);
+    border-radius: 4px;
+}
 .three-way-compare-table .three-way-col-total {
     font-weight: 500;
     color: #6b7280;

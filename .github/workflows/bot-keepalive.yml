@@ -5,19 +5,19 @@ name: Bot Keepalive
 # Telegraf register), which makes the /deck and /metacall commands feel
 # broken when the maintainer hasn't pinged the bot in a while.
 #
-# This workflow pings the bot's /health endpoint every 10 minutes so the
+# This workflow pings the bot's /health endpoint every 5 minutes so the
 # Render dyno stays warm. The interval is deliberately under 15 min with
 # headroom: GitHub Actions cron has up to 5-10 min of scheduling drift on
 # the free runner pool, so a tighter cadence ensures at least one ping
 # lands inside every 15-min sleep window.
 #
-# Network cost: one HEAD-class request every 10 min = ~144/day. Negligible
+# Network cost: one HEAD-class request every 5 min = ~288/day. Negligible
 # both for GitHub Actions minutes (each run < 10 s) and for Render
 # bandwidth.
 #
 # Why this is fine on Render Free (2024 community policy):
 #   • External pings are explicitly listed as allowed in Render's docs as
-#     long as they don't generate sustained load. A 10-min keepalive is
+#     long as they don't generate sustained load. A 5-min keepalive is
 #     well below "abuse" territory.
 #   • If Render ever flags this, the immediate alternatives are: upgrade
 #     to the Starter plan ($7/mo, no sleep) or migrate to a no-sleep host

@@ -7356,7 +7356,15 @@ window.MetaCall = (function () {
   ${_inFrozenPastMode() ? '' : _renderCombinedConfigPanel()}
   ${renderSettingsPanel()}
   ${_inFrozenPastMode() ? renderFrozenBanner() : ''}
-  ${_inFrozenPastMode() ? '' : _renderPredictorStatusBanner()}
+  ${/* Mode B predictor-status banner (2026-06-12: user feedback —
+       "Data window: from 2026-05-22 onwards · 4520 of 4585
+       major-tournament rows excluded" is operator-grade pipeline
+       detail, not end-user info. The current format is already
+       visible in Tournament Settings above; the row-drop count
+       served the May rotation rollout and is now noise.) The
+       function stays in place so we can re-enable via a debug flag
+       if needed — devs can still call MetaCall._renderPredictorStatusBanner
+       from the console. */ ''}
   ${_inFrozenPastMode() ? '' : renderFieldPanel(field)}
   ${_inFrozenPastMode() ? '' : renderCustomDecksPanel()}
   ${_inFrozenPastMode() ? '' : renderMyDeckPanel()}

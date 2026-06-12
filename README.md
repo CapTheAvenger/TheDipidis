@@ -1,400 +1,196 @@
-# 🎴 TheDipidis - Pokemon TCG Analysis System
+# 🎴 TheDipidis · Pokémon TCG Analysis System
 
-Komplettes Pokemon TCG Scraping & Analysis System mit interaktiver Web-Oberfläche, Deck Builder, Proxy Printer, Playtester und Firebase-User-Profilen.
+Pokémon TCG scraping & analysis platform — Limitless TCG, Cardmarket
+and Play! Pokémon data, processed nightly, rendered as an interactive
+web frontend with deck builder, proxy printer, card database, Firebase
+user profiles and a Telegram bot companion.
 
-## 🌐 Live Demo
-**Website:** https://thedipidis.app/
-**GitHub Pages backend:** https://captheavenger.github.io/TheDipidis/ (redirects to the custom domain)
+## 🌐 Live
 
-## 📁 Projekt-Struktur
+- **Website:** https://thedipidis.app/
+- **GitHub Pages backend:** https://captheavenger.github.io/TheDipidis/
+  (redirects to the custom domain)
+- **Telegram bot:** [@TheDipidisBot](https://t.me/TheDipidisBot)
+  — `/metacall`, `/deck <archetype>`, /-style commands
+- **External Playtester handoff:** TCG Showdown
+  (`js/tcg-showdown-link.js` opens decks in a new tab)
+
+## 📁 High-level structure
 
 ```
 TheDipidis/
-├── 🐍 Python Scraper & Utilities (13 Scripts)
-│   ├── all_cards_scraper.py              # Alle EN Karten (Limitless TCG)
-│   ├── japanese_cards_scraper.py         # Japanische Karten
-│   ├── cardmarket_id_mapper.py           # Set+Number → Cardmarket idProduct
-│   ├── cardmarket_price_merger.py        # Cardmarket-Preise nach price_data.csv
-│   ├── city_league_archetype_scraper.py  # City League Archetypen (JP)
-│   ├── city_league_analysis_scraper.py   # City League Deck-Analyse (JP)
-│   ├── current_meta_analysis_scraper.py  # Current Meta Karten
-│   ├── limitless_online_scraper.py       # Limitless Online Rankings
-│   ├── tournament_scraper_JH.py          # Tournament Data (Regionals etc.)
-│   ├── update_sets.py                    # Set-Liste & Mapping
-│   ├── prepare_card_data.py              # Merge EN+JP+Preise → merged JSON
-│   ├── card_scraper_shared.py            # Shared Utilities (CardDB etc.)
-│   └── start_scraper_dashboard.py        # Interaktives Dashboard-Menü
-│
-├── 📊 Data Output (data/)
-│   ├── all_cards_database.json           # Alle englischen Karten
-│   ├── all_cards_merged.json             # EN + JP + Preise (merged)
-│   ├── japanese_cards_database.json      # Japanische Karten
-│   ├── city_league_analysis.csv          # City League Deck-Daten
-│   ├── city_league_archetypes.csv        # Archetyp-Statistiken
-│   ├── limitless_online_decks.csv        # Online Rankings + Matchups
-│   ├── tournament_cards_data_cards.csv   # Tournament Karten-Daten
-│   ├── tournament_cards_data_overview.csv# Tournament Übersicht
-│   ├── price_data.csv                    # CardMarket Preise
-│   ├── sets.json                         # Set-Reihenfolge
-│   ├── formats_catalog.json              # Bekannte Formate
-│   └── ... (Logs, HTML Reports, Comparison Files)
-│
-├── 🌐 Web Interface
-│   ├── index.html                        # Hauptseite mit 10 Tabs
-│   ├── js/
-│   │   ├── app.js                        # Haupt-App (~16.000 Zeilen)
-│   │   ├── playtester.js                 # Playtester Simulator
-│   │   ├── playtester-mobile.js          # Playtester Mobile Support
-│   │   ├── draw-simulator.js             # Draw Simulator
-│   │   ├── firebase-auth.js              # Firebase Authentication
-│   │   ├── firebase-collection.js        # Collection/Decks/Wishlist
-│   │   ├── firebase-config.js            # Firebase Config
-│   │   ├── firebase-credentials.js       # Firebase Credentials
-│   │   ├── firebase-globals.js           # Firebase Globals
-│   │   ├── firebase-multiplayer.js       # Multiplayer Playtester
-│   │   └── auth-ui-helpers.js            # Auth UI Helpers
-│   └── css/
-│       ├── styles.css                    # Haupt-Styles
-│       └── auth-styles.css               # Auth Modal Styles
-│
-├── 🚀 Quick-Start
-│   ├── START_DASHBOARD.bat               # Interaktives Scraper-Menü
-│   └── PUSH_TO_GITHUB.bat               # Commit & Push zu GitHub
-│
-└── 📖 Dokumentation (16 MD-Dateien)
-    ├── README.md                         # Diese Datei
-    ├── PROJECT_STRUCTURE.md              # Detaillierte Struktur
-    ├── DATA_DIRECTORY_STRUCTURE.md       # Daten-Übersicht
-    └── ... (Scraper-spezifische READMEs)
+├── index.html                # Single-page app entry
+├── js/                       # Frontend modules (44 files, plain ES5/ES2015 + IIFEs)
+│   ├── app-core.js           # Tab routing, tab-help map, shared helpers
+│   ├── app-cards-db.js       # Card Database tab
+│   ├── app-city-league.js    # City League Meta + Deck Analysis (JP)
+│   ├── app-current-meta-analysis.js  # Current Meta · Deck Analysis (Global)
+│   ├── app-deck-builder.js   # Deck Builder + MostConsistency engine
+│   ├── app-meta-call.js      # Meta Call predictor
+│   ├── app-past-meta.js      # Past Meta tab
+│   ├── battle-journal.js     # IRL match log
+│   ├── firebase-*.js         # Auth, Firestore sync, collection + decks
+│   ├── i18n.js               # EN ↔ DE localisation
+│   ├── tcg-showdown-link.js  # External playtester handoff
+│   └── …                     # See `ls js/` for the full list
+├── css/                      # Stylesheets — load order in index.html
+├── data/                     # CSV/JSON outputs from the scrapers
+├── backend/
+│   ├── core/                 # Shared scraper utilities (card DB, fetchers)
+│   ├── scrapers/             # 20+ Python scrapers
+│   ├── services/             # Price proxy + helpers
+│   └── tools/                # One-off CLIs
+├── bot/                      # Telegram bot (Node + Telegraf, deploys to Render)
+├── prerender/                # Puppeteer renderer for the bot snapshot PNG
+├── config/                   # Per-scraper settings JSONs
+├── tests/
+│   ├── unit/                 # node:test JS unit suite (run via scripts/run-js-unit-tests.sh)
+│   ├── python/               # pytest, including cross-surface consistency
+│   └── e2e/                  # Playwright visual + interaction specs
+├── scripts/                  # CI helpers (manifest generation, deck-index, etc.)
+├── .github/workflows/        # 10 GitHub Actions workflows
+└── docs/audit/               # Investigation write-ups per feature
 ```
 
-## 🚀 Schnellstart
+## 🚀 Quickstart
 
-### 1️⃣ Einmalige Einrichtung
-```powershell
-# Repository klonen
-git clone https://github.com/CapTheAvenger/TheDipidis.git
-cd TheDipidis
+### Run the frontend locally
 
-# Python Virtual Environment erstellen
-python -m venv .venv
-
-# Aktivieren
-.venv\Scripts\Activate.ps1
-
-# Dependencies installieren
-pip install -r requirements.txt
-```
-
-**Dependencies** (siehe `requirements.txt`):
-- `cloudscraper` + `beautifulsoup4` — für die meisten Scraper
-- `selenium` + `selenium-stealth` — für Card Price Scraper (CardMarket)
-- `lxml` — HTML Parser
-- `pandas` — Datenverarbeitung
-
-### 2️⃣ Scraper ausführen
-Doppelklick auf: **`START_DASHBOARD.bat`**
-
-Das interaktive Dashboard-Menü bietet:
-```
-  --- BASE DATA (Fundament) ---
-  [1]  Update Sets (sets.json)
-  [2]  All Cards Scraper (EN/DE)
-  [3]  Japanese Cards Scraper
-  [4]  Card Price Scraper
-  --- META & TOURNAMENTS ---
-  [5]  Current Meta Analysis (Play! & Live)
-  [6]  Limitless Online Scraper (Trends)
-  [7]  City League Analysis (Deep Dive JP)
-  [8]  City League Archetypes (Trends JP)
-  [9]  Historical Meta Scraper (JH)
-  --- FRONTEND ---
-  [10] Prepare Frontend Data (Merge)
-  --- BATCH SHORTCUTS ---
-  [B]  Base Data Update (1-4 + 10)
-  [M]  Meta Update / Dienstags-Update (5-10)
-  [F]  Full System Update (1-10)
-```
-
-### 3️⃣ Web-Interface öffnen
-```powershell
-# Lokaler Server starten
-python -m http.server 8000
-
-# Dann öffnen: http://localhost:8000/index.html
-```
-
-**Oder direkt mit VSCode Tasks:**
-- `Start HTTP Server Root` (Port 8000)
-
-### 4️⃣ Zu GitHub pushen
-Doppelklick auf: **`PUSH_TO_GITHUB.bat`**
-- Zeigt Git Status
-- Fügt alle wichtigen Dateien hinzu
-- Fragt nach Commit-Message
-- Pusht zu GitHub Repository
-
-## 📊 Web-Interface — 10 Tabs
-
-### 1. 🇯🇵 City League Meta
-- Übersicht aller Japan City League Turniere
-- Archetype-Entwicklung und Trends über Zeit
-- Vergleich alter vs. neuer Daten (HTML Comparison Reports)
-- Sortierbare Tabellen mit Statistiken
-
-### 2. 📊 City League Deck Analysis
-- Detaillierte Deck-Analysen mit interaktiven Filtern
-- **Datum-Filter**: Turniere nach Zeitraum filtern
-- **Deck-Auswahl**: 30+ Archetypen mit Autocomplete-Suche
-- **Karten-Filter**: Pokémon, Trainer, Energie separat
-- **Card Overview**: Alle Karten mit Usage%, Rarity-Optionen
-- **Deck Builder**: +/− Buttons, Auto-Generate (Max Consistency), Copy to Clipboard
-- **Rarity-Switcher (★)**: Verschiedene Karten-Versionen wählen
-- **Deck Compare**: Zwei Decklisten visuell vergleichen (farbcodiert)
-- **CardMarket Integration**: EUR-Preise & Links
-- **Combined Variants**: Karten aus verschiedenen Sets automatisch zusammengefasst
-
-### 3. 🎮 Current Meta
-- Aktuelle Meta-Übersicht (Limitless Online + Play! Pokémon)
-- Top-Decks und Winrates
-- Meta-Share Analysen
-- Matchup-Tabellen mit Win/Loss Records
-
-### 4. 📈 Current Meta Deck Analysis
-- **Format-Filter**: All / Limitless only / Tournament only
-- **Win Rate Stats**: Online-Turnier-Winrates
-- **Matchup-Analyse**: Beste/schlechteste Matchups mit Records
-- **Meta Card Analysis**: Meistgespielte Karten über Top-10-Decks
-- **Max Consistency Mode**: Auto-Generate basierend auf Turnierdaten
-- **Deck Builder** mit allen Features (Save, Copy, Compare, Playtest)
-- **Rarity-Switcher (★)**: Click auf jede Karte für alternative Prints
-
-### 5. 🏆 Past Meta
-- Historische Tournament-Daten (Regionals, LAICs, EUICs, NAICs, Worlds)
-- **Format-Filter**: Nach Meta-Perioden filtern (SVI-ASC, SVI-PFL, BRS-PRE, etc.)
-- Archetype-Performance über Zeit
-- Deck Builder mit denselben Features wie andere Tabs
-
-### 6. 🧰 Cards (Karten-Datenbank)
-- Vollständige Karten-Datenbank (21.000+ Karten)
-- **Multi-Select Filter**:
-  - Meta/Format (Total, All Playables, City League, aktuelle Formate)
-  - Set (sortiert neueste → älteste, nur englische Sets)
-  - Rarity (SAR, IR, SIR, UR, etc.)
-  - Category (Pokémon nach Typ, Trainer, Energy, Ace Spec)
-- **Autocomplete-Suche** mit Thumbnails
-- **CardMarket Preis-Display**
-- **Lightbox**: Click auf Karte für Full-Size-Preview
-- **Collection ✓ / Wishlist ❤️ Buttons** auf jeder Karte
-
-### 7. 🖨️ Proxy Printer
-- Decklisten importieren (Pokémon TCG Live Format)
-- Einzelne Karten manuell hinzufügen (Name, Set, Nummer)
-- Decks direkt aus City League / Current Meta / Past Meta übernehmen
-- **Print Queue**: Alle Karten in druckbarem Layout ausgeben
-- Unique Count + Copies Counter
-
-### 8. ⚔️ Playtester Sandbox
-- Vollständiger 2-Spieler Pokémon TCG Simulator im Browser
-- **Deck laden**: Paste & Load, aus Deck Builder, oder aus My Decks
-- **Board Zones**: Active, Bench (5 Slots), Discard, Prize Cards, Stadium, Hand
-- **Controls**: Draw, Shuffle, New Game, Judge/Iono, Undo, Coin Flip
-- **Stepper ＋/－**: Damage Counter, Energy, Prize Count
-- **Damage Modifier**: Buff Counter (z.B. +30 von Choice Belt)
-- **/attach Command**: Energy aus Hand an Feld-Zone attachen
-- **Drag & Drop**: Karten zwischen allen Zonen verschieben
-
-### 9. 👤 My Profile
-- **My Collection**: Eigene Karten verwalten, durchsuchbar
-- **My Decks**: Gespeicherte Decks mit Card Previews, ⚔️ Playtest Button
-- **Wishlist**: Karten-Wunschliste
-- **Settings**: Account-Verwaltung
-- Firebase-Sync über alle Geräte
-
-### 10. 📖 How to Use
-- Komplette Dokumentation aller Features
-- Tab-Erklärungen, Deck Building Guide, Playtester Guide
-- FAQ zu häufigen Fragen
-
-## 🐍 Scraper-System
-
-### All Cards Scraper (`all_cards_scraper.py`)
-- Scraped alle englischen Karten von Limitless TCG
-- Automatische Set-Erkennung und Incremental Updates
-- 21.000+ Karten mit Bildern, Rarity, Type
-
-### Japanese Cards Scraper (`japanese_cards_scraper.py`)
-- Neueste japanische Sets (vor internationalem Release)
-- Unified mit English Cards über `prepare_card_data.py`
-
-### Cardmarket Price Pipeline (`cardmarket_id_mapper.py` + `cardmarket_price_merger.py`)
-- Liest die täglichen Cardmarket JSON-Dumps (`products_singles_6.json`, `products_nonsingles_6.json`, `price_guide_6.json`) statt zu scrapen
-- ID-Mapper baut `(set, number) → idProduct`
-- Price-Merger schreibt EUR-Preise nach `price_data.csv` (`trend` als kanonischer Wert + `low` als Lowest-Listing)
-
-### City League Scrapers
-- **Archetype Scraper** (`city_league_archetype_scraper.py`): Trends & Meta-Share
-- **Analysis Scraper** (`city_league_analysis_scraper.py`): Detaillierte Deck-Daten
-
-### Tournament Scraper JH (`tournament_scraper_JH.py`)
-- Scraped individuelle Deck-Listen von Limitless TCG
-- Extrahiert Archetyp-Namen aus HTML (z.B. "Mega Absol Box")
-- Regionals, LAICs, EUICs, NAICs, Worlds, Special Events
-- **Competitive Metriken**: deck_inclusion_count, average_count pro Karte
-- Intelligente Format-Erkennung (SVI-ASC, BRS-PRE, etc.)
-- Incremental Scraping (überspringt bereits gescrapte Turniere)
-- Japanische & Expanded Turniere werden automatisch übersprungen
-
-### Current Meta Scraper (`current_meta_analysis_scraper.py`)
-- Meta Live (Limitless Online) + Meta Play! (Play! Pokémon Events)
-- Karten-Usage pro Archetyp
-- Automatische Format-Zuordnung
-
-### Limitless Online Scraper (`limitless_online_scraper.py`)
-- Online Ladder Rankings und Trends
-- Matchup-Daten (Win/Loss Records)
-
-### Update Sets (`update_sets.py`)
-- Aktualisiert `sets.json` mit Set-Reihenfolge
-- Basis für Format-Erkennung in allen Scrapern
-
-### Prepare Card Data (`prepare_card_data.py`)
-- Merged EN + JP + Preise → `all_cards_merged.json`
-- Frontend-ready Output für das Web-Interface
-
-## ⚙️ Konfiguration
-
-### Scraper Settings
-Alle Settings-Dateien im Root-Verzeichnis (JSON):
-- `all_cards_scraper_settings.json`
-- `japanese_cards_scraper_settings.json`
-- `city_league_archetype_settings.json`
-- `city_league_analysis_settings.json`
-- `current_meta_analysis_settings.json`
-- `limitless_online_settings.json`
-- `tournament_JH_settings.json`
-
-**Beispiel** (`tournament_JH_settings.json`):
-```json
-{
-    "max_tournaments": 150,
-    "delay_between_tournaments": 1.0,
-    "max_workers": 5,
-    "start_tournament_id": 391,
-    "output_file": "tournament_cards_data.csv",
-    "format_filter": ["Standard"],
-    "tournament_types": [
-        "Regional", "Special Event", "LAIC",
-        "EUIC", "NAIC", "Worlds", "International", "Championship"
-    ],
-    "append_mode": true
-}
-```
-
-## 📝 Entwicklung
-
-### Anforderungen
-- Python 3.9+
-- Dependencies: `pip install -r requirements.txt`
-- Chrome + ChromeDriver (nur für Card Price Scraper)
-- Git für GitHub-Integration
-
-### Projekt klonen
 ```bash
-git clone https://github.com/CapTheAvenger/TheDipidis.git
-cd TheDipidis
-python -m venv .venv
-.venv\Scripts\Activate.ps1
+python3 -m http.server 8000
+# open http://localhost:8000/index.html
+```
+
+That's enough to develop the JS — the data files in `data/` ship with
+the repo so the SPA loads against committed scraper output.
+
+### Run a scraper
+
+```bash
+python3 -m venv .venv && source .venv/bin/activate   # or .venv\Scripts\Activate.ps1 on Windows
 pip install -r requirements.txt
+python3 backend/scrapers/limitless_online_scraper.py
 ```
 
-## 🔄 Workflow
+Interactive dashboard for the full batch:
 
-1. **Dashboard starten** → `START_DASHBOARD.bat`
-2. **Scraper wählen** → Einzeln oder Batch (Base / Meta / Full)
-3. **Daten prüfen** → CSV/JSON-Dateien in `data/`
-4. **Web-Interface testen** → `python -m http.server 8000` → `http://localhost:8000`
-5. **Zu GitHub pushen** → `PUSH_TO_GITHUB.bat`
-
-## 🧹 Cleanup-Checkliste (sicheres Entfernen)
-
-Wenn Skripte als ungenutzt markiert sind, bitte nicht sofort endgueltig loeschen.
-
-1. Datei zuerst nach `_archive/` oder `archive/` verschieben.
-2. Lokalen Lauf pruefen (Dashboard starten, Seite lokal oeffnen, relevante Tests ausfuehren).
-3. Auf dynamische Dateinamen achten (z. B. String-Verkettungen bei Dateipfaden).
-4. Wenn alles stabil bleibt, Datei im Archiv belassen und erst spaeter final loeschen.
-
-Hinweis:
-- Die aktuelle Utility-Archivierung ist in `archive/utils/` dokumentiert.
-- Aktive manuelle Utilities sind in `utils/README.md` beschrieben.
-
-### PR-Loesch-Freigabevorlage (Copy/Paste)
-
-Nutze diese Vorlage in PR-Beschreibungen, wenn Dateien entfernt oder archiviert werden:
-
-```md
-## Loesch-/Archivierungs-Freigabe
-
-### Kandidaten
-- [ ] Datei(en) in `_archive/` oder `archive/` verschoben (nicht hart geloescht)
-- [ ] Grund pro Datei kurz dokumentiert
-
-### Sicherheitspruefung
-- [ ] Nach statischen Referenzen gesucht (Imports, Dateipfade, Workflow-Aufrufe)
-- [ ] Auf dynamische Pfadbildung geprueft (z. B. `"data/cards_" + year + ".json"`)
-- [ ] GitHub Actions/Workflows geprueft (`.github/workflows/`)
-
-### Laufzeit-Check
-- [ ] Lokalen Server gestartet und Hauptseiten geoeffnet
-- [ ] Relevante Skripte/Tests ausgefuehrt
-- [ ] Keine Regression sichtbar
-
-### Entscheidung
-- [ ] Datei bleibt vorerst im Archiv (empfohlen)
-- [ ] Finales Loeschen erst nach Beobachtungszeitraum (z. B. 2-4 Wochen)
+```bash
+START_DASHBOARD.bat        # Windows
+python3 backend/start_scraper_dashboard.py
 ```
 
-## 📚 Dokumentation
+### Run the test suites
 
-Detaillierte Dokumentation in separaten Dateien:
-- `PROJECT_STRUCTURE.md` — Vollständige Projektstruktur
-- `DATA_DIRECTORY_STRUCTURE.md` — Daten-Übersicht
-- `ALL_CARDS_SCRAPER_README.md` — All Cards Scraper
-- `JAPANESE_CARDS_SCRAPER_README.md` — Japanese Cards
-- `PRICE_SCRAPER_README.md` — Price Scraper (Selenium + CardMarket)
-- `CARD_DATA_SYSTEM.md` — Card Data Manager System
-- `TOURNAMENT_META_IMPLEMENTATION.md` — Tournament Meta Perioden
-- `CITY_LEAGUE_ADDITIONAL_TOURNAMENTS.md` — City League Turnier-IDs
-- `FIREBASE_SETUP_GUIDE.md` — Firebase Auth & Firestore Setup
-- `MULTIPLAYER_INTEGRATION_GUIDE.md` — Multiplayer Playtester
-- `LIVE_PRICE_SYSTEM.md` — Live-Preis-Proxy
-- `GITHUB_ACTIONS_SCHEDULE.md` — Automatisiertes Scraping
-- `CARDMARKET_UI_CHANGELOG.md` — UI Changelog
-- `PERFORMANCE_OPTIMIZATION_PLAN.md` — Performance Plan
+```bash
+npm run test:unit       # JS unit tests (node:test)
+npm run test:py         # Python (scraper logic + cross-surface consistency)
+npm run test:all        # Both
+```
 
-## 🐛 Bekannte Issues (alle gelöst)
+Visual regression (Playwright):
 
-- ~~Tournament Scraper stoppt nach 16 statt 87 Turnieren~~ ✅ FIXED
-- ~~Tournament Scraper extrahiert "unknown" als Archetype~~ ✅ FIXED
-- ~~M3 (Japanese set) erscheint in Set-Auswahl~~ ✅ FIXED
-- ~~Data Mismatch: Globale Card Counts / Format-gefilterte Deck Counts~~ ✅ FIXED
-- ~~GROUP Archetypes: Nur ein Sub-Archetyp Deck Count statt Summe~~ ✅ FIXED
-- ~~Energy Sort: Special Energy erschien nach Basic Energy~~ ✅ FIXED
+```bash
+npm run test:visual:fullpage:ci
+npm run test:visual:nonmeta:ci
+```
 
-## 📜 Lizenz
+## 📊 Web interface — current tabs
 
-Dieses Projekt ist für den privaten Gebrauch. Alle Daten werden von öffentlich zugänglichen Quellen gescraped (Limitless TCG, CardMarket).
+| # | Tab | Purpose |
+|---|---|---|
+| 1 | **Meta & Deck Analysis Hub** | Landing hub linking the five meta tabs |
+| 2 | **City League Meta** | Japan City League archetypes & trends |
+| 3 | **City League Deck Analysis** | Per-archetype deck breakdown for JP CL |
+| 4 | **Current Meta (Global)** | Limitless Online ladder + Major aggregation |
+| 5 | **Deck Analysis (Global)** | Per-archetype card-share for current meta, with Quick Reference panels (Latest Major, Latest Online) and 3-way Compare |
+| 6 | **Past Meta** | Historical regional/special-event archive |
+| 7 | **Card Database** | 21 000+ card index with multi-select filters, lightbox, Cardmarket prices, collection & wishlist hooks |
+| 8 | **Proxy Printer** | Import decks → printable A4 sheets |
+| 9 | **Meta Call** | Predictive field-composition + Day-2 odds engine |
+| 10 | **My Profile** | Collection, Wishlist, Trade List, Saved Decks, Battle Journal, Settings, Firebase sync |
+| 11 | **How to Use** | In-app tutorial |
+| 12 | **Side Quest: Champions** | Pokémon Champions top-doubles teams + replica codes |
+
+Standalone tools accessible from the menu: **Probability Calculator**,
+**Proxy Printer** (also linked from each deck card), **TCG Showdown**
+(external Playtester handoff).
+
+## 🐍 Scraper system (backend/scrapers/)
+
+All scrapers live under `backend/scrapers/`. The main ones:
+
+| Scraper | Output | Schedule |
+|---|---|---|
+| `all_cards_scraper.py` | `data/all_cards_database.json` | Weekly Full Update (Tue + Fri) |
+| `japanese_cards_scraper.py` | `data/japanese_cards_database.json` | Manual |
+| `limitless_online_scraper.py` | `data/limitless_online_decks*.csv` | Weekly Full Update |
+| `current_meta_analysis_scraper.py` | `data/current_meta_card_data.csv` | Weekly Full Update |
+| `city_league_analysis_scraper.py` | `data/city_league_analysis.csv` | Weekly Full Update |
+| `city_league_archetype_scraper.py` | `data/city_league_archetypes.csv` | Weekly Full Update |
+| `online_tournament_scraper.py` | `data/online_tournament_dated_cards.csv` | Weekly Full Update |
+| `labs_tournament_scraper.py` | `data/labs_tournament_decks.csv` | Weekly Full Update |
+| `per_decklist_scraper.py` | `data/tournament_decklists_per_player.csv` | Tuesdays |
+| `cardmarket_id_mapper.py` + `cardmarket_price_merger.py` | `data/price_data.csv` | Daily 08:00 UTC |
+| `champions_replica_scraper.py` | Side-quest doubles teams | Daily 10:00 UTC |
+| `player_continuity_scraper.py` | `data/player_continuity.csv` | Manual |
+
+Each scraper reads its config from `config/<name>_settings.json`.
+
+## ⚙️ Configuration
+
+Per-scraper settings live in `config/*_settings.json`. CI secrets:
+
+- `FIREBASE_CONFIG` — Web SDK config (injected into `js/firebase-credentials.js` at deploy time)
+- `GOOGLE_CLIENT_ID` — Google Sign-In Client ID (also injected at deploy)
+- `SENTRY_DSN` — error tracking endpoint (token-substituted in `js/error-tracking.js`)
+- `BOT_TOKEN` — Telegram bot token (Render env + price-alert workflow)
+- `FIREBASE_SERVICE_ACCOUNT` — server-side Firestore write access (price-alert workflow)
+
+Repository-local Firestore rules: `firestore.rules` (synced with
+`FIRESTORE_RULES.md` — see the audit note below).
+
+## 📦 GitHub Actions
+
+| Workflow | Trigger | What it does |
+|---|---|---|
+| Deploy to GitHub Pages | push to `main` | Build + minify + cache-bust + cross-surface tests + deploy |
+| Weekly Full Update | Tue + Fri 06:00 UTC | Full scraper batch + commit + dispatch deploy |
+| Daily Price Refresh + Alerts | 08:00 UTC daily | Cardmarket refresh + Telegram price alerts |
+| Champions Replica Scrape | 10:00 UTC daily | Side Quest tab data |
+| Per-Decklist Scrape | Tuesdays 12:00 UTC + manual | Per-player tournament decklists |
+| Player Continuity Scrape | manual | Player-thread continuity audit |
+| Tutorial Screenshots | manual | Regenerate `images/tutorials/` |
+| Bot Keepalive | every 5 min | Pings the Render-hosted bot to avoid cold-starts |
+| Visual Fullpage Coverage | 03:00 UTC daily + manual | Playwright fullpage regression |
+| Visual Non-Meta Regression | PR + push to `main` | Playwright PR-gate |
+
+## 📚 Other docs in this repo
+
+- [`AUDIT_GITHUB.md`](AUDIT_GITHUB.md) — repository audit (24 findings, scored, with fix list)
+- [`FIREBASE_SETUP_GUIDE.md`](FIREBASE_SETUP_GUIDE.md) — Firebase project setup
+- [`FIRESTORE_RULES.md`](FIRESTORE_RULES.md) — current Firestore security rules (also lives in `firestore.rules`)
+- [`GITHUB_ACTIONS_SCHEDULE.md`](GITHUB_ACTIONS_SCHEDULE.md) — schedule + secret reference
+- [`ALL_CARDS_SCRAPER_README.md`](ALL_CARDS_SCRAPER_README.md) — all-cards-scraper specifics
+- [`JAPANESE_CARDS_SCRAPER_README.md`](JAPANESE_CARDS_SCRAPER_README.md) — JP cards scraper
+- [`PRICE_SCRAPER_README.md`](PRICE_SCRAPER_README.md) — Cardmarket pipeline
+- `bot/README.md` — Telegram bot setup
+- `docs/audit/` — per-feature investigations
+
+## 📜 License
+
+See [`LICENSE`](LICENSE) — proprietary, all rights reserved. Public
+for portfolio purposes only; third-party trademarks belong to their
+respective owners (The Pokémon Company, Nintendo, Creatures Inc.,
+GAME FREAK Inc., partner publishers).
 
 ## 🙏 Credits
 
-- **Limitless TCG** — Card Database & Tournament Data
-- **CardMarket** — EUR Preise
-- **Play! Pokémon** — Official Tournament Data
-- **Firebase** — Authentication & Cloud Firestore
+- **Limitless TCG** — card database, ladder & tournament data
+- **Cardmarket** — EUR pricing
+- **Play! Pokémon** — official tournament data
+- **Firebase** — auth + Firestore sync
+- **Telegraf**, **Telegram** — bot framework + delivery
 
 ---
 
-**Version:** 3.0  
-**Letztes Update:** März 2026  
-**Repository:** https://github.com/CapTheAvenger/TheDipidis
+**Last refreshed:** 2026-06-12

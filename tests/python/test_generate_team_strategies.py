@@ -18,6 +18,7 @@ REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 sys.path.insert(0, os.path.join(REPO_ROOT, "scripts"))
 
 from generate_team_strategies import (  # noqa: E402
+    PROMPT_VERSION,
     extract_json,
     prune_cache,
     team_hash,
@@ -91,14 +92,35 @@ class TestDiff:
 
     def test_cached_team_with_matching_hash_skipped(self):
         t = _team("AAA")
-        cache = {"strategies": {"AAA": {"team_hash": team_hash(t)}}}
+        cache = {"strategies": {"AAA": {
+            "team_hash": team_hash(t),
+            "prompt_version": PROMPT_VERSION,
+        }}}
         assert teams_needing_generation([t], cache) == []
 
     def test_changed_team_regenerates(self):
         old = _team("AAA", moves=["Fake Out", "Flare Blitz"])
         new = _team("AAA", moves=["Fake Out", "Parting Shot"])
-        cache = {"strategies": {"AAA": {"team_hash": team_hash(old)}}}
+        cache = {"strategies": {"AAA": {
+            "team_hash": team_hash(old),
+            "prompt_version": PROMPT_VERSION,
+        }}}
         assert [t["replica_code"] for t in teams_needing_generation([new], cache)] == ["AAA"]
+
+    def test_old_prompt_version_regenerates(self):
+        t = _team("AAA")
+        cache = {"strategies": {"AAA": {
+            "team_hash": team_hash(t),
+            "prompt_version": PROMPT_VERSION - 1,
+        }}}
+        assert [x["replica_code"] for x in teams_needing_generation([t], cache)] == ["AAA"]
+
+    def test_missing_prompt_version_regenerates(self):
+        # Entries written before versioning existed have no field at
+        # all — they must refresh too.
+        t = _team("AAA")
+        cache = {"strategies": {"AAA": {"team_hash": team_hash(t)}}}
+        assert [x["replica_code"] for x in teams_needing_generation([t], cache)] == ["AAA"]
 
     def test_team_without_code_or_mons_ignored(self):
         no_code = _team("")

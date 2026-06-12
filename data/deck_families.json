@@ -34,6 +34,17 @@
         "Lillie's Clefairy Ogerpon",
         "Clefairy Ogerpon"
       ]
+    },
+    {
+      "key": "Mega Starmie",
+      "display": "Mega Starmie ex",
+      "_note": "Limitless's variant-grouping-ON view aggregates Mega Starmie + Starmie tech variants (Froslass, Dusknoir) under 'Mega Starmie ex' (Turin 2026-06-06: 56 pilots / 2.76 % combined). Without this override our extractMainPokemon heuristic split them: 'Mega Starmie' → key 'Mega Starmie', 'Starmie Froslass' → key 'Starmie'. The Live-Share Floor (Predictor 6.1) needed the aggregated last-major brought-share to clear its 2.5 % gate.",
+      "members": [
+        "Mega Starmie",
+        "Starmie",
+        "Starmie Froslass",
+        "Starmie Dusknoir"
+      ]
     }
   ]
 }

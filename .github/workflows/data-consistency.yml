@@ -1,0 +1,62 @@
+name: Data Consistency
+
+# Cross-surface consistency tests (tests/python/test_cross_surface_consistency.py)
+# as a PR-gate. Previously they only ran in deploy-pages.yml's `build` job,
+# AFTER the bot-deck-index.json had been generated into _site/. That meant
+# a PR could green-light CI and still break the bot ↔ website matchup
+# agreement on merge — the deploy would catch it but only by failing live.
+#
+# This workflow:
+#   1. Generates bot-deck-index.json into ./data/ using the same generator
+#      the deploy uses (scripts/generate-bot-deck-index.py).
+#   2. Runs the cross-surface suite with DATA_DIR pointed at ./data/ so
+#      the bot-index fixtures find the freshly-built artifact.
+#
+# Trigger parity with visual-nonmeta.yml — pull_request + push to main.
+
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+    branches:
+      - main
+
+# Same concurrency idea as visual-nonmeta — squash redundant PR pushes,
+# don't squash main-branch runs.
+concurrency:
+  group: data-consistency-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+jobs:
+  cross-surface:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest
+          # The generator only needs csv/json/re from stdlib — nothing
+          # heavy from requirements.txt is required here.
+
+      - name: Generate bot-deck-index.json into ./data/
+        # Generator expects <site_dir> as argv[1] and reads
+        # <site_dir>/data/. Passing "." treats the repo root as the
+        # site dir, so data/ stays the input + output. version_stamp
+        # is irrelevant for the consistency tests (cosmetic only).
+        run: |
+          python3 scripts/generate-bot-deck-index.py . pr-gate
+          ls -la data/bot-deck-index.json
+
+      - name: Run cross-surface consistency tests
+        env:
+          DATA_DIR: ${{ github.workspace }}/data
+        run: |
+          python -m pytest tests/python/test_cross_surface_consistency.py -v --tb=short

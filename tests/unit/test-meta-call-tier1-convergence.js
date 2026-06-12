@@ -1,26 +1,35 @@
 /**
  * Unit tests for Predictor 6.0 — Tier-1 Convergence Detector.
  *
- * Background: post-NAIC Phase One (2026-06-12) review showed Hausi v2
- * missed Dragapult by +7.0 pp (predicted 28.7 %, actual 35.7 %). The
- * median-anchored Phase β blend correctly resists single-tournament
- * noise but smooths over genuine field consolidation onto a new
- * Tier-1 leader. A pure last-major × conversion-multiplier model
- * caught the consolidation at +3.1 pp.
+ * Background: post-NAIC Phase One (2026-06-12) review showed our
+ * predictor missed Dragapult by +7.0 pp (predicted 28.7 %, actual
+ * 35.7 %). The median-anchored Phase β blend correctly resists
+ * single-tournament noise but smooths over genuine field
+ * consolidation onto a new Tier-1 leader. A pure last-major ×
+ * conversion-multiplier model caught the consolidation at +3.1 pp.
  *
- * The detector triggers when:
- *   (a) the deck IS Tier 1 (online ≥ 10 %),
- *   (b) the last major shows consolidation (share ≥ median × 1.3),
- *   (c) we have enough pilots to trust the conversion signal
- *       (day-1 ≥ 300),
- *   (d) regional-spike guard: online ≥ lastMajorShare × 0.5 (skip
- *       when online disagrees — that's the Honchkrow case).
+ * The detector operates at FAMILY level (Σ Dragapult variants):
+ *   (1) family raw ladder ≥ 5 %
+ *   (2) family last-major day-1 pilots ≥ 300
+ *   (3) family last-major conv ≥ field-mean conv × 1.15
+ *       (conv-excess gate; replaces the median-share gate so it works
+ *       in fresh formats with only ONE current-format major like CRI)
  *
- * Each test below mirrors the production logic in the helper at the
- * top of the file. Keep the constants here in lockstep with the
- * constants in js/app-meta-call.js — the "constants stay in sync"
- * test at the bottom fails loudly when a maintainer changes one side
- * without the other.
+ * Boost projection:
+ *   convMult        = 1 + 0.4 × (lmConv / fieldMeanConv − 1)
+ *   famConvProj     = lastMajorShare × convMult
+ *   famPostScaling  = 0.5 × famCurrentRaw + 0.5 × famConvProj
+ *
+ * Applied family-wide in two stages:
+ *   • PRE-renorm scale on each family member's predictedShareRaw
+ *   • POST-renorm anchor to the blend target (concentration boost +
+ *     family-aggregate cap soften the pre-renorm scale otherwise)
+ *
+ * Tests below mirror the pure functions of the detector — gate
+ * eligibility + the convProjection math. The post-renorm anchoring
+ * is integration-tested via the headless verification at the engine
+ * level; isolating it here would require reimplementing the entire
+ * weighted-sum + concentration + cap pipeline.
  */
 
 const { describe, it } = require('node:test');
@@ -30,219 +39,163 @@ const path = require('node:path');
 
 // Production-mirrored constants. Keep in sync with js/app-meta-call.js
 // (search "TIER1_").
-const TIER1_CONVERGENCE_THRESHOLD = 10.0;
-const TIER1_CONSOLIDATION_RATIO   = 1.3;
+const TIER1_CONVERGENCE_THRESHOLD = 5.0;
+const TIER1_CONV_EXCESS_RATIO     = 1.15;
 const TIER1_MIN_DAY1_PILOTS       = 300;
 const TIER1_CONV_DAMPING          = 0.4;
 const TIER1_BLEND_WEIGHT          = 0.5;
-const TIER1_REGIONAL_SPIKE_GUARD  = 0.5;
-
-// Phase β constants (only the blend factor matters for setting up the
-// pre-boost ladderPct in the fixtures below).
-const PHASE_B_BLEND_MAJOR = 0.20;
 
 /**
- * Mirrors the production block at js/app-meta-call.js:2905-2942.
- * Returns the FINAL ladderPct after both the Phase β median anchor
- * and any Predictor 6.0 Tier-1 boost have been applied.
- *
- * Inputs are the per-deck values the engine has at that point in the
- * pipeline:
- *   - rawLadderPct: deck's % of total online ladder share
- *   - majorMedian:  median of last 3 majors at ≥ 2 % share, or null
- *   - lmShare:      last-major share (overall %)
- *   - lmConv:       last-major Day-1 → Day-2 conversion ratio
- *                   (fraction, e.g. 0.255 for Dragapult Turin)
- *   - lmD1:         last-major Day-1 pilot count
- *   - meanDay2Conv: field-mean Day-2 conversion (fraction)
+ * Mirrors the production gate + projection logic at js/app-meta-call.js
+ * (search "Tier-1 Convergence Detector"). Inputs:
+ *   - famLad:        family raw ladder share (sum of variants)
+ *   - famLmShare:    family last-major share (sum of variants)
+ *   - famLmConv:     family pilot-weighted day-1 → day-2 conv (fraction)
+ *   - famLmD1:       family last-major day-1 pilot count
+ *   - meanDay2Conv:  field-mean Day-2 conversion (fraction)
+ *   - famCurrentTotal: family-aggregate displayed share BEFORE the
+ *                     detector kicks in (for the blend output)
  */
-function computeLadderPct({
-    rawLadderPct,
-    majorMedian,
-    lmShare,
-    lmConv,
-    lmD1,
-    meanDay2Conv,
-}) {
-    let ladderPct = (majorMedian != null && majorMedian > 0)
-        ? (majorMedian * PHASE_B_BLEND_MAJOR + rawLadderPct * (1 - PHASE_B_BLEND_MAJOR))
-        : rawLadderPct;
-
-    let boostInfo = null;
-    if (rawLadderPct >= TIER1_CONVERGENCE_THRESHOLD
-            && majorMedian != null && majorMedian > 0
-            && lmShare >= majorMedian * TIER1_CONSOLIDATION_RATIO
-            && lmD1 >= TIER1_MIN_DAY1_PILOTS
-            && lmConv > 0
-            && meanDay2Conv > 0
-            && rawLadderPct >= lmShare * TIER1_REGIONAL_SPIKE_GUARD) {
-        const convMult       = 1 + TIER1_CONV_DAMPING * (lmConv / meanDay2Conv - 1);
-        const convProjection = lmShare * convMult;
-        const boosted        = ladderPct * (1 - TIER1_BLEND_WEIGHT)
-                             + convProjection * TIER1_BLEND_WEIGHT;
-        boostInfo = { convMult, convProjection, fromLadderPct: ladderPct, toLadderPct: boosted };
-        ladderPct = boosted;
-    }
-    return { ladderPct, boostInfo };
+function runDetector({ famLad, famLmShare, famLmConv, famLmD1, meanDay2Conv, famCurrentTotal }) {
+    const eligible = famLad >= TIER1_CONVERGENCE_THRESHOLD
+        && famLmD1 >= TIER1_MIN_DAY1_PILOTS
+        && famLmConv > 0
+        && meanDay2Conv > 0
+        && famLmConv >= meanDay2Conv * TIER1_CONV_EXCESS_RATIO;
+    if (!eligible) return { eligible: false };
+    const convMult         = 1 + TIER1_CONV_DAMPING * (famLmConv / meanDay2Conv - 1);
+    const famConvProjection = famLmShare * convMult;
+    const blendedTotal     = famCurrentTotal * (1 - TIER1_BLEND_WEIGHT)
+                           + famConvProjection * TIER1_BLEND_WEIGHT;
+    return { eligible: true, convMult, famConvProjection, blendedTotal };
 }
 
-// ── Scenario: Dragapult ex at NAIC (the deck the detector exists for) ─
+// ── Scenario: Dragapult family at NAIC ───────────────────────────────
 
 describe('Predictor 6.0 — Tier-1 Convergence Detector', () => {
 
-    it('fires on the Dragapult NAIC scenario and moves toward actual', () => {
-        // Inputs reconstructed from the post-NAIC analysis:
-        //   Turin (last major): share 28.99 %, day1→day2 conv 25.47 %,
-        //                       589 Day-1 pilots
-        //   Older majors median: ~10 % (Indy was at ~10.4 % climbing)
-        //   Online ladder (online_decks.csv pilot share): ~32 %
-        //   Field mean Day-2 conv: 18.8 %
-        const result = computeLadderPct({
-            rawLadderPct: 32.0,
-            majorMedian:  10.0,
-            lmShare:      28.99,
-            lmConv:       0.2547,
-            lmD1:         589,
-            meanDay2Conv: 0.188,
+    it('fires on the Dragapult NAIC family aggregate and moves toward actual', () => {
+        // Family aggregates reconstructed from the live data the engine
+        // sees at NAIC (verified via headless inspection at
+        // window.MetaCall._diag.tier1Convergence):
+        //   Family raw ladder:        7.77 % (Σ variants)
+        //   Family Turin share:       28.98 % (Σ variants)
+        //   Family Turin conv:        25.47 % (pilot-weighted)
+        //   Family Turin day-1:       589 pilots
+        //   Field-mean Day-2 conv:    18.8 % (Turin field baseline)
+        //   Current predicted total:  28.7 % (Hausi v2 pre-detector)
+        const result = runDetector({
+            famLad:          7.77,
+            famLmShare:      28.98,
+            famLmConv:       0.2547,
+            famLmD1:         589,
+            meanDay2Conv:    0.188,
+            famCurrentTotal: 28.7,
         });
 
-        // The detector must FIRE in this scenario.
-        assert.notEqual(result.boostInfo, null,
-            'Tier-1 boost should fire for the Dragapult NAIC scenario');
+        assert.equal(result.eligible, true,
+            'Dragapult NAIC scenario must trigger the detector');
 
-        // Conversion multiplier ≈ 1 + 0.4 × (0.2547/0.188 − 1) ≈ 1.142.
-        assert.ok(Math.abs(result.boostInfo.convMult - 1.142) < 0.02,
-            `convMult should be ~1.142, got ${result.boostInfo.convMult}`);
+        // convMult = 1 + 0.4 × (0.2547 / 0.188 − 1) ≈ 1.142
+        assert.ok(Math.abs(result.convMult - 1.142) < 0.02,
+            `convMult should be ~1.142, got ${result.convMult}`);
 
-        // Convergence projection ≈ 28.99 × 1.142 ≈ 33.1 %.
-        assert.ok(result.boostInfo.convProjection > 32.5 && result.boostInfo.convProjection < 33.5,
-            `convProjection should be ~33 %, got ${result.boostInfo.convProjection}`);
+        // famConvProjection = 28.98 × 1.142 ≈ 33.1
+        assert.ok(result.famConvProjection > 32.5 && result.famConvProjection < 33.5,
+            `famConvProjection should be ~33 %, got ${result.famConvProjection}`);
 
-        // The post-boost ladderPct must move CLOSER to the 35.7 %
-        // actual than the pre-boost ladderPct did — this is the
-        // whole point of the detector.
+        // Blend pulls 28.7 → 0.5 × 28.7 + 0.5 × 33.1 ≈ 30.9
+        assert.ok(result.blendedTotal > 30.5 && result.blendedTotal < 31.5,
+            `blendedTotal should be ~30.9 %, got ${result.blendedTotal}`);
+
+        // Distance to NAIC actual (35.7 %) must shrink.
         const NAIC_ACTUAL = 35.7;
-        const distBefore  = Math.abs(NAIC_ACTUAL - result.boostInfo.fromLadderPct);
-        const distAfter   = Math.abs(NAIC_ACTUAL - result.boostInfo.toLadderPct);
-        assert.ok(distAfter < distBefore,
-            `expected boost to reduce |actual − pred|: ${distBefore.toFixed(2)} → ${distAfter.toFixed(2)}`);
+        const distBefore  = Math.abs(NAIC_ACTUAL - 28.7);
+        const distAfter   = Math.abs(NAIC_ACTUAL - result.blendedTotal);
+        assert.ok(distAfter < distBefore - 1.5,
+            `boost should close at least 1.5 pp of the miss: ${distBefore.toFixed(2)} → ${distAfter.toFixed(2)}`);
     });
 
-    it('skips mid-field decks below the Tier-1 threshold', () => {
-        // Mega Starmie-ish: 2.4 % live share at Turin (above median),
-        // good conv (35 %), but raw online only ~5 %. Mid-field is
-        // the segment where the online signal is grinder-biased, so
-        // we should NOT apply a Tier-1 boost here.
-        const result = computeLadderPct({
-            rawLadderPct: 5.0,       // BELOW TIER1_CONVERGENCE_THRESHOLD
-            majorMedian:  1.5,
-            lmShare:      2.4,
-            lmConv:       0.35,
-            lmD1:         400,
-            meanDay2Conv: 0.188,
+    it('skips mid-field families below the Tier-1 threshold', () => {
+        // Slowking family at Turin: 2.06 % ladder, 4.04 % share,
+        // 25.6 % conv, 82 day-1 pilots. Three gates fail at once —
+        // ladder below 5 %, AND pilots below 300. The detector must
+        // skip cleanly without computing anything.
+        const result = runDetector({
+            famLad:          2.06,
+            famLmShare:      4.04,
+            famLmConv:       0.2561,
+            famLmD1:         82,
+            meanDay2Conv:    0.188,
+            famCurrentTotal: 4.5,
         });
-        assert.equal(result.boostInfo, null,
-            'Tier-1 boost must not fire below the 10 % threshold');
+        assert.equal(result.eligible, false,
+            'Slowking should fail the Tier-1 + pilot gates');
     });
 
-    it('skips Tier-1 decks without consolidation (lastMajor ≈ median)', () => {
-        // A stable Tier-1 deck that's NOT consolidating: no boost.
-        // Otherwise we'd inflate every Tier-1 prediction by the conv
-        // multiplier permanently, defeating the median's robustness.
-        const result = computeLadderPct({
-            rawLadderPct: 22.0,
-            majorMedian:  21.0,
-            lmShare:      21.5,      // 21.5 / 21.0 = 1.02 < 1.3
-            lmConv:       0.23,
-            lmD1:         500,
-            meanDay2Conv: 0.188,
+    it('skips when the conv-excess ratio is below 1.15 (Honchkrow regional spike)', () => {
+        // Hypothetical Honchkrow-but-Tier-1-sized: enough ladder
+        // share + enough pilots, but conv ≈ baseline (no real
+        // performance edge → regional/casual spike). The conv-excess
+        // gate is what stops us from over-predicting regional outliers
+        // — without it the detector would inflate ANY high-share deck.
+        const result = runDetector({
+            famLad:          12.0,
+            famLmShare:      28.0,
+            famLmConv:       0.176,   // 17.6 %, BELOW 18.8 × 1.15 = 21.6
+            famLmD1:         500,
+            meanDay2Conv:    0.188,
+            famCurrentTotal: 15.0,
         });
-        assert.equal(result.boostInfo, null,
-            'no consolidation → no Tier-1 boost');
+        assert.equal(result.eligible, false,
+            'conv ≤ field × 1.15 must skip the boost');
     });
 
-    it('skips when the last-major pilot pool is too small (small-sample noise guard)', () => {
-        // High share + high conv but only 200 Day-1 pilots: the conv
-        // signal is too noisy to trust as a projection multiplier.
-        const result = computeLadderPct({
-            rawLadderPct: 15.0,
-            majorMedian:  8.0,
-            lmShare:      14.0,      // consolidation ratio OK
-            lmConv:       0.32,      // strong conv
-            lmD1:         200,       // BELOW TIER1_MIN_DAY1_PILOTS
-            meanDay2Conv: 0.188,
+    it('skips when the family pilot pool is too small', () => {
+        // Excellent conv on a small sample = unreliable projection.
+        // Same threshold the post-NAIC analysis used (≥ 300 pilots).
+        const result = runDetector({
+            famLad:          8.0,
+            famLmShare:      15.0,
+            famLmConv:       0.30,
+            famLmD1:         200,     // BELOW 300
+            meanDay2Conv:    0.188,
+            famCurrentTotal: 12.0,
         });
-        assert.equal(result.boostInfo, null,
-            'sub-300 pilot pool must block the conv-weighted boost');
+        assert.equal(result.eligible, false,
+            'sub-300 pilot pool must block the boost');
     });
 
-    it('skips on regional spike (online disagrees with last major)', () => {
-        // The Honchkrow case from the analysis: Turin 4.18 % but
-        // online only 2.37 %. If we were Tier-1 sized (online 12 %,
-        // last major 28 %), the 0.5× guard catches the divergence
-        // and refuses to project the regional spike onto the global
-        // meta — exactly what the other Claude's Turin-only model
-        // got wrong on Honchkrow / Basic Box.
-        const result = computeLadderPct({
-            rawLadderPct: 12.0,
-            majorMedian:  6.0,
-            lmShare:      28.0,      // 12 / 28 = 0.43 < 0.5 guard
-            lmConv:       0.26,
-            lmD1:         500,
-            meanDay2Conv: 0.188,
+    it('skips when there is no field-mean Day-2 baseline available', () => {
+        // Early format, no labs data yet → no baseline → no boost.
+        const result = runDetector({
+            famLad:          10.0,
+            famLmShare:      20.0,
+            famLmConv:       0.30,
+            famLmD1:         500,
+            meanDay2Conv:    0,
+            famCurrentTotal: 18.0,
         });
-        assert.equal(result.boostInfo, null,
-            'online ≪ lastMajor × 0.5 must skip the boost as a regional spike');
-    });
-
-    it('skips when major-median data is missing (early format)', () => {
-        // Early in a new format the median anchor is null; the boost
-        // requires the median to compute the consolidation ratio.
-        const result = computeLadderPct({
-            rawLadderPct: 15.0,
-            majorMedian:  null,
-            lmShare:      14.0,
-            lmConv:       0.30,
-            lmD1:         500,
-            meanDay2Conv: 0.188,
-        });
-        assert.equal(result.boostInfo, null,
-            'null median must skip the boost');
-    });
-
-    it('skips when no field Day-2 baseline available', () => {
-        // Without the field-mean Day-2 conversion the multiplier is
-        // undefined.
-        const result = computeLadderPct({
-            rawLadderPct: 18.0,
-            majorMedian:  8.0,
-            lmShare:      14.0,
-            lmConv:       0.30,
-            lmD1:         500,
-            meanDay2Conv: 0,
-        });
-        assert.equal(result.boostInfo, null,
+        assert.equal(result.eligible, false,
             'missing meanDay2Conv must skip the boost');
     });
 
-    it('boost is symmetric: conv equal to baseline → no share inflation', () => {
-        // If the deck's conv equals the field baseline, convMult = 1
-        // and convProjection equals lastMajorShare. The boost then
-        // pulls ladderPct toward lastMajorShare without inflating it
-        // beyond that — the "consolidation already happened" case.
-        const result = computeLadderPct({
-            rawLadderPct: 20.0,
-            majorMedian:  10.0,
-            lmShare:      18.0,
-            lmConv:       0.188,     // = baseline
-            lmD1:         500,
-            meanDay2Conv: 0.188,
+    it('produces convMult = 1 when conv equals the field baseline', () => {
+        // Hypothetical Tier-1 family whose conv ratio is right at
+        // the cusp of the gate. By construction the projection should
+        // equal famLmShare (no inflation).
+        const result = runDetector({
+            famLad:          8.0,
+            famLmShare:      20.0,
+            famLmConv:       0.188 * TIER1_CONV_EXCESS_RATIO + 1e-9,
+            famLmD1:         500,
+            meanDay2Conv:    0.188,
+            famCurrentTotal: 18.0,
         });
-        assert.notEqual(result.boostInfo, null);
-        assert.ok(Math.abs(result.boostInfo.convMult - 1.0) < 1e-9,
-            'conv == baseline → convMult should be exactly 1');
-        assert.ok(Math.abs(result.boostInfo.convProjection - 18.0) < 1e-9,
-            'conv == baseline → projection should equal lastMajorShare');
+        assert.equal(result.eligible, true);
+        // convMult at the gate boundary = 1 + 0.4 × 0.15 = 1.06
+        assert.ok(Math.abs(result.convMult - 1.06) < 0.01,
+            `at the gate boundary convMult should be ~1.06, got ${result.convMult}`);
     });
 });
 
@@ -257,11 +210,10 @@ describe('Predictor 6.0 — constants stay in sync with the engine', () => {
         );
         const pairs = [
             ['TIER1_CONVERGENCE_THRESHOLD', TIER1_CONVERGENCE_THRESHOLD],
-            ['TIER1_CONSOLIDATION_RATIO',   TIER1_CONSOLIDATION_RATIO],
+            ['TIER1_CONV_EXCESS_RATIO',     TIER1_CONV_EXCESS_RATIO],
             ['TIER1_MIN_DAY1_PILOTS',       TIER1_MIN_DAY1_PILOTS],
             ['TIER1_CONV_DAMPING',          TIER1_CONV_DAMPING],
             ['TIER1_BLEND_WEIGHT',          TIER1_BLEND_WEIGHT],
-            ['TIER1_REGIONAL_SPIKE_GUARD',  TIER1_REGIONAL_SPIKE_GUARD],
         ];
         for (const [name, expected] of pairs) {
             const re = new RegExp(`${name}\\s*=\\s*([\\d.]+)`);

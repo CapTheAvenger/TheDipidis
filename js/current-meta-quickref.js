@@ -167,15 +167,57 @@
     const dayRows = archRows.filter(r => String(r.tournament_date || '').trim() === latestDate);
     if (dayRows.length === 0) return null;
 
+    // Multiple online tournaments can share a date — e.g. on 2026-06-09
+    // both "Sunny's Weekly #260" and "Card Temple Weekly Battles #62"
+    // ran Mega Greninja decks. Before this guard the function summed
+    // card counts across every tournament on latestDate but only kept
+    // the FIRST tournament's name/deck-count, producing nonsense like
+    // "1 Decks · 120 cards" and per-card totals above the 4-copy limit
+    // (Froakie 8, Lillie's Determination 8 — both = 4 + 4 from two
+    // separate tournaments). Pick ONE tournament to represent
+    // "Latest Online · Typical Build": the strongest sample first
+    // (largest total_decks_in_archetype), break ties by larger
+    // total_players (more prestige), final deterministic tiebreak on
+    // tournament_id so identical rankings stay stable across reloads.
+    const perTournament = new Map();
+    for (const r of dayRows) {
+      const tid = String(r.tournament_id || '').trim();
+      if (!tid) continue;
+      let agg = perTournament.get(tid);
+      if (!agg) {
+        agg = {
+          tournament_id: tid,
+          tournament_name: String(r.tournament_name || '').trim(),
+          total_decks_in_archetype: 0,
+          total_players: 0,
+        };
+        perTournament.set(tid, agg);
+      }
+      const td = parseInt(r.total_decks_in_archetype || '0', 10) || 0;
+      if (td > agg.total_decks_in_archetype) agg.total_decks_in_archetype = td;
+      const tp = parseInt(r.total_players || '0', 10) || 0;
+      if (tp > agg.total_players) agg.total_players = tp;
+    }
+    const candidates = Array.from(perTournament.values());
+    if (candidates.length === 0) return null;
+    candidates.sort((a, b) =>
+      (b.total_decks_in_archetype - a.total_decks_in_archetype) ||
+      (b.total_players - a.total_players) ||
+      a.tournament_id.localeCompare(b.tournament_id)
+    );
+    const winnerTid = candidates[0].tournament_id;
+    const winnerRows = dayRows.filter(r => String(r.tournament_id || '').trim() === winnerTid);
+
     // The dated CSV uses one row per (tournament × archetype × card).
-    // Since we already narrowed to a single tournament_date AND a
-    // single archetype, every row here is one card variant. Build
-    // the synthesized list straight off Math.round(average_count).
+    // Since we now narrowed to a single tournament_date AND a single
+    // archetype AND a single tournament, every row here is one card
+    // variant. Build the synthesized list straight off
+    // Math.round(average_count).
     const cards = [];
     let tournamentId = '';
     let tournamentName = '';
     let totalDecksInArchetype = 0;
-    for (const r of dayRows) {
+    for (const r of winnerRows) {
       const name = String(r.card_name || '').trim();
       if (!name) continue;
       const avg = parseLocaleNumber(r.average_count || '0', 0);

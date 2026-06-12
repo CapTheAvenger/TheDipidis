@@ -4766,7 +4766,37 @@ window.MetaCall = (function () {
           //   • per-tournament top-15 lists, later consolidated into
           //     _activeFormatTop15Decks.
           const _topByTournament = {}; // tid -> [{ k, share }, …]
-          labsRows.forEach(r => {
+
+          // Slug-dedup guard (2026-06-12 audit F-D07): 4 archetype names
+          // in labs_tournament_decks.csv carry two slug variants —
+          // Okidogi (ex/twm), Alakazam (ex/meg), Tyranitar (ex/jtg),
+          // Toxtricity Box (pfl/box). Both rows share the same
+          // tournament_id + deck_name but differ on deck_slug. Without
+          // a guard, the aggregator below would sum BOTH slug rows'
+          // share / day1/day2 / top8_conv values into one
+          // `normalize(deck_name)` bucket → that archetype's labs share
+          // appears doubled per major (= the bug behind Toxtricity Box
+          // showing up in dark-horse tips on a 2-pilot Turin sample).
+          // Pick the slug with the higher share_pct as the canonical
+          // row for that (tournament, name); ties resolve to the first
+          // occurrence for stable ordering. Long-tail decks where both
+          // slugs sit at < 0.1 % each barely move, but the doubling on
+          // bigger samples is what we want to kill.
+          const _winnerByTournamentName = new Map(); // "tid|nameLower" -> row index
+          labsRows.forEach((r, i) => {
+            if (!r.deck_name) return;
+            if (_isMetaBucketLabel(r.deck_name)) return;
+            const tid = (r.tournament_id || '').trim();
+            if (!tid) return;
+            const key = tid + '|' + normalize(r.deck_name);
+            const myShare = parseEU(r.share_pct || '0');
+            const prev = _winnerByTournamentName.get(key);
+            if (!prev || myShare > prev.share) {
+              _winnerByTournamentName.set(key, { idx: i, share: myShare });
+            }
+          });
+
+          labsRows.forEach((r, i) => {
             if (!r.deck_name) return;
             // The "Other" bucket has high combined d2_share at every
             // major (it's the sum of every long-tail deck), which
@@ -4774,6 +4804,14 @@ window.MetaCall = (function () {
             // and produces phantom "strong signal" tips. Skip at
             // ingest so the bucket can't influence any per-deck stat.
             if (_isMetaBucketLabel(r.deck_name)) return;
+            // Slug-dedup (F-D07): if this (tid, name) has a winner
+            // chosen above and we're not it, skip — the winner row
+            // already represents the canonical share for the name.
+            const _tid = (r.tournament_id || '').trim();
+            if (_tid) {
+              const _w = _winnerByTournamentName.get(_tid + '|' + normalize(r.deck_name));
+              if (_w && _w.idx !== i) return;
+            }
             const k = normalize(r.deck_name);
             const share = parseEU(r.share_pct || '0');
             const w = _recencyWeight(_rowISO(r));

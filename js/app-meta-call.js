@@ -4797,14 +4797,21 @@ window.MetaCall = (function () {
             // weighted averages so a recent strong major matters more
             // than an old "early format" one.
             //
-            // NOTE: top8_conv_rate is currently not populated by the
-            // labs scraper for any tournament (data bug). The Day-1
+            // NOTE: top8_conv_rate is not populated by the labs
+            // scraper for any tournament in the current format window
+            // (verified 2026-06-12: 0 of 236 window rows carry it;
+            // historical rows do at 0–100 percent scale). The Day-1
             // → Day-2 quality ratio below is the live replacement
             // signal — it captures the same "this deck overperforms
             // its share in the cut" idea using fields that ARE
             // populated. labsT8Boost falls back to the quality ratio
             // when this top-8-conv aggregate is empty.
-            const t8 = parseEU(r.top8_conv_rate || '0');
+            const t8raw = parseEU(r.top8_conv_rate || '0');
+            // Historical CSV rows store this as 0–100 (e.g. 52.05);
+            // the aggregate is consumed as a 0–1 fraction everywhere
+            // downstream. Normalise here so a future scraper fix
+            // doesn't silently render "5205 % conversion".
+            const t8 = t8raw > 1 ? t8raw / 100 : t8raw;
             if (t8 > 0) {
               if (!_labsConvByDeck[k]) _labsConvByDeck[k] = { sum: 0, n: 0 };
               _labsConvByDeck[k].sum += t8 * w;
@@ -4819,9 +4826,17 @@ window.MetaCall = (function () {
             const d1Pct = parseEU(r.day1_share_pct || '0');
             const d2Pct = parseEU(r.day2_share_pct || '0');
             if (d1Pct > 0) {
-              if (!_labsQualityByDeck[k]) _labsQualityByDeck[k] = { d1: 0, d2: 0 };
+              if (!_labsQualityByDeck[k]) _labsQualityByDeck[k] = { d1: 0, d2: 0, d1Players: 0, d2Players: 0 };
               _labsQualityByDeck[k].d1 += d1Pct * w;
               _labsQualityByDeck[k].d2 += d2Pct * w;
+              // Raw (unweighted) pilot counts across the window's
+              // majors — sample-size guard for the synthetic conv
+              // signal. 2026-06-12 user report: Archaludon showed
+              // "Strong 40 % Top-8 conversion" off a 2-pilot Turin
+              // sample (1 of 2 made Day 2 → ratio 2.65 → cap). With
+              // ≤ 2 pilots the ratio is a coin flip, not a signal.
+              _labsQualityByDeck[k].d1Players += parseInt(r.day1_players || '0', 10) || 0;
+              _labsQualityByDeck[k].d2Players += parseInt(r.day2_players || '0', 10) || 0;
             }
             // Predictor 5.4 — Day-2 share growth (Δ pp). Captures
             // ABSOLUTE share gained Day-1 → Day-2 (e.g. Lillie's
@@ -6354,10 +6369,18 @@ window.MetaCall = (function () {
       // 40 % is already an extreme upper bound for any real archetype.
       const qStats = _labsQualityByDeck[k];
       const qualityRatio = (qStats && qStats.d1 > 0) ? qStats.d2 / qStats.d1 : 0;
+      const qD1Pilots = qStats ? (qStats.d1Players || 0) : 0;
+      const qD2Pilots = qStats ? (qStats.d2Players || 0) : 0;
       const _labsConvCapped = Math.min(1.0, labsConv);
-      const _syntheticConv  = qualityRatio > 0
+      // Sample guard (2026-06-12): the synthetic conv only counts
+      // when at least 3 pilots played the deck on Day 1 across the
+      // window's majors. Below that, "1 of 2 made Day 2" produced a
+      // capped 40 % pseudo-conversion that the tips presented as a
+      // strong signal (Archaludon / Toxtricity Box at Turin).
+      const _syntheticConv  = (qualityRatio > 0 && qD1Pilots >= 3)
         ? Math.min(0.40, Math.max(0, (qualityRatio - 1)) * 0.25 + 0.05)
         : 0;
+      const convIsSynthetic = _labsConvCapped <= 0;
       const labsConvEffective = _labsConvCapped > 0 ? _labsConvCapped : _syntheticConv;
       const lm = _lastMajorByDeck[k];
       const lmWr = lm ? lm.winPct : 0;
@@ -6368,15 +6391,24 @@ window.MetaCall = (function () {
       const reasons = [];
       if (labsConvEffective >= 0.15) {
         score += labsConvEffective * 100;
-        reasons.push({ kind: 'conv', value: labsConvEffective });
+        reasons.push({
+          kind: 'conv',
+          value: labsConvEffective,
+          synthetic: convIsSynthetic,
+          ratio: qualityRatio,
+          d1Pilots: qD1Pilots,
+          d2Pilots: qD2Pilots,
+        });
       }
       if (trend >= 0.5) {
         score += trend * 10;
         reasons.push({ kind: 'trend', value: trend });
       }
-      if (lm && lmWr >= 50) {
+      // Same sample-size logic for the last-major WR claim: a 54 %
+      // win rate from a 2-pilot showing is noise, not a tip reason.
+      if (lm && lmWr >= 50 && (lm.players || 0) >= 3) {
         score += (lmWr - 50) * 1.5;
-        reasons.push({ kind: 'wr', value: lmWr, share: lm.share });
+        reasons.push({ kind: 'wr', value: lmWr, share: lm.share, players: lm.players });
       }
       if (e.day2Prob >= 0.20) {
         score += e.day2Prob * 30;
@@ -7484,6 +7516,22 @@ window.MetaCall = (function () {
             </div>`;
           })()
         : '';
+      // Always-visible compact history line under the deck name —
+      // user feedback 2026-06-12: the Major track record shouldn't
+      // hide behind the expand chevron ("wollten wir nicht bei den
+      // Top 10 Picks auch Daten dazu schreiben"). Shows the same two
+      // numbers the expand panel details: empirical Day-2 cut rate +
+      // post-cut win rate, both from labs majors.
+      const historyParts = [];
+      if (r.empConv != null && r.empConv > 0) {
+        historyParts.push(`${t('mc.histD2Conv')} ${(r.empConv * 100).toFixed(1).replace('.', ',')} %`);
+      }
+      if (r.d2WrPct != null) {
+        historyParts.push(`${t('mc.histD2Wr')} ${r.d2WrPct.toFixed(1).replace('.', ',')} %`);
+      }
+      const historyLine = historyParts.length
+        ? `<span class="mc-rec-history-line" title="${esc(t('mc.d2ConvTooltip'))}">${esc(historyParts.join(' · '))}</span>`
+        : '';
 
       const reasonHtml = matchupRows
         ? `<div class="mc-rec-reason-block">
@@ -7509,7 +7557,7 @@ window.MetaCall = (function () {
             tabindex="0"
             data-reason-id="${reasonId}">
         <td class="mc-rec-rank">${i + 1}</td>
-        <td class="mc-rec-name"><span class="mc-rec-name-inner">${icon}<span class="mc-rec-name-text">${esc(r.name)}</span>${isMine ? `<span class="mc-rec-mine-tag">${esc(t('mc.recYourDeck'))}</span>` : ''}${counterPickTag}</span></td>
+        <td class="mc-rec-name"><span class="mc-rec-name-inner">${icon}<span class="mc-rec-name-text">${esc(r.name)}</span>${isMine ? `<span class="mc-rec-mine-tag">${esc(t('mc.recYourDeck'))}</span>` : ''}${counterPickTag}</span>${historyLine}</td>
         <td class="mc-rec-day2"><strong>${day2Pct}%</strong></td>
         <td class="mc-rec-wr">${wrPct}%</td>
         <td class="mc-rec-wins">∅ ${r.expWin.toFixed(2)}</td>
@@ -7794,6 +7842,20 @@ window.MetaCall = (function () {
             .replace('{share}',  fmt(r.shareAtWin, 1))
             .replace('{ageDays}', String(r.ageDays));
         case 'conv':
+          // Synthetic conv = derived from the Day-1→Day-2 share ratio
+          // at majors, NOT from a real top-8 stat (the scraper doesn't
+          // populate top8_conv_rate in the current window). Say what
+          // the data actually shows — pilots in, pilots through —
+          // instead of dressing it up as a Top-8 number (2026-06-12
+          // user report: Archaludon "40 % Top-8 conversion" despite
+          // never seeing Turin's Top 8).
+          if (r.synthetic) {
+            return t('mc.tipReasonCutGain')
+              .replace('{d2}', String(r.d2Pilots))
+              .replace('{d1}', String(r.d1Pilots))
+              .replace('{ratio}', fmt(r.ratio, 1))
+              .replace('{share}', onlineShareTxt);
+          }
           return t('mc.tipReasonConv')
             .replace('{conv}', fmt(r.value * 100, 1))
             .replace('{share}', onlineShareTxt);

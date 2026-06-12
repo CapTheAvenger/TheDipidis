@@ -40,7 +40,12 @@ concurrency:
 jobs:
   scrape:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    # 45 min instead of 10: the strategy-generation step (Claude API)
+    # can take 30-60 s per team with adaptive thinking, so the first
+    # full run (~20 teams = ~15-20 min) used to hit the 10-min cap and
+    # the job got cancelled mid-generation. Delta runs (1-2 new teams
+    # per day) finish well inside this budget too.
+    timeout-minutes: 45
 
     steps:
       - name: Checkout repo
@@ -104,7 +109,11 @@ jobs:
         run: |
           set +e
           echo "::group::scripts/generate_team_strategies.py"
-          python scripts/generate_team_strategies.py
+          # -u: unbuffered stdout so per-team progress shows in real
+          # time in the Actions log (otherwise long generations look
+          # like the job is frozen and you can't tell which team is
+          # currently running).
+          python -u scripts/generate_team_strategies.py
           rc=$?
           echo "::endgroup::"
           if [ "$rc" -ne 0 ]; then

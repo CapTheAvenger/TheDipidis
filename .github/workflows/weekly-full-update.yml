@@ -11,14 +11,17 @@ name: Weekly Full Update
 # Still excluded from this batch:
 #   - japanese_cards_scraper  (manual trigger when JP set drops)
 #
-# Schedule: Tuesday 06:00 UTC (= 07:00 CET winter / 08:00 CEST summer)
+# Schedule: Tuesdays + Fridays 06:00 UTC (= 07:00 CET winter / 08:00 CEST summer)
 # Manual trigger: GitHub UI → Actions → Weekly Full Update → Run workflow
 #
 # 2026-06-07: cron was briefly suspended for the Turin post-mortem.
 # Re-enabled 2026-06-08 after the Predictor 5.6/5.8/5.9 redesign landed.
+# 2026-06-12: added Friday slot so the Card DB + format/legality data
+# refresh twice a week — the Tuesday-only cadence left Thu/Fri tournament
+# weekends running against a 5-day-old snapshot.
 on:
   schedule:
-    - cron: '0 6 * * 2'
+    - cron: '0 6 * * 2,5'
   workflow_dispatch:
 
 # GITHUB_TOKEN needs:

@@ -1915,6 +1915,20 @@
     text-overflow: ellipsis;
     white-space: nowrap;
 }
+/* Compact major-track-record line under the deck name in the Top-10
+   rec rows — "Majors: D2-Konv. 26,4 % · D2-WR 51,2 %". Always
+   visible (the expand panel carries the detailed/tinted variants). */
+.mc-rec-history-line {
+    display: block;
+    margin-top: 2px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--mc-text-faint, #8a93a6);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
 .mc-rec-day2,
 .mc-rec-score {
     font-variant-numeric: tabular-nums;

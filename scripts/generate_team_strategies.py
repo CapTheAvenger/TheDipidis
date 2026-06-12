@@ -44,6 +44,13 @@ MAX_TOKENS = 6000           # both languages in one response
 MAX_GENERATIONS_PER_RUN = 25  # cost guard: full first run is ~20 teams
 MAX_CONSECUTIVE_FAILURES = 3
 
+# Bump this whenever SYSTEM_PROMPT changes in a way that should
+# refresh EXISTING guides — cached entries with an older version
+# regenerate on the next run even if the team itself is unchanged.
+# v2: moves/abilities/items always bilingual "Deutsch (English)" /
+#     "English (Deutsch)" (user request 2026-06-12).
+PROMPT_VERSION = 2
+
 DEFAULT_TEAMS_PATH = os.path.join('data', 'champions_replica_teams.json')
 DEFAULT_STRATEGIES_PATH = os.path.join('data', 'champions_team_strategies.json')
 
@@ -82,8 +89,10 @@ def team_hash(team: Dict[str, Any]) -> str:
 def teams_needing_generation(
     teams: List[Dict[str, Any]],
     cache: Dict[str, Any],
+    prompt_version: int = PROMPT_VERSION,
 ) -> List[Dict[str, Any]]:
-    """Teams with no cached strategy or a stale team_hash."""
+    """Teams with no cached strategy, a stale team_hash, or a guide
+    generated under an older SYSTEM_PROMPT version."""
     strategies = cache.get('strategies') or {}
     todo = []
     for team in teams:
@@ -91,7 +100,9 @@ def teams_needing_generation(
         if not code or not team.get('pokemon'):
             continue
         entry = strategies.get(code)
-        if not entry or entry.get('team_hash') != team_hash(team):
+        if (not entry
+                or entry.get('team_hash') != team_hash(team)
+                or entry.get('prompt_version') != prompt_version):
             todo.append(team)
     return todo
 
@@ -213,6 +224,15 @@ Stil:
   nicht abstrakte Theorie.
 - Wenn das Team eine Mega-Entwicklung oder mehrere Mega-Kandidaten hat:
   erkläre kurz, wann man welche wählt.
+- Attacken, Fähigkeiten und Items nennst du IMMER zweisprachig, mit dem
+  offiziellen Namen der jeweils anderen Sprache in Klammern:
+  im deutschen Guide "Deutscher Name (English Name)", z. B.
+  "Rückenwind (Tailwind)", "Bedroher (Intimidate)", "Prunusbeere (Sitrus Berry)";
+  im englischen Guide "English Name (Deutscher Name)", z. B.
+  "Tailwind (Rückenwind)", "Intimidate (Bedroher)", "Sitrus Berry (Prunusbeere)".
+  Pokémon-Namen bleiben unverändert wie in den Teamdaten.
+  Bist du dir bei einer offiziellen deutschen Übersetzung nicht sicher,
+  schreibe nur den englischen Namen — niemals raten oder selbst übersetzen.
 
 Antworte AUSSCHLIESSLICH mit einem JSON-Objekt, exakt in diesem Schema \
 (kein Markdown, kein Text davor oder danach):
@@ -337,6 +357,7 @@ def main(argv: List[str]) -> int:
             generated += 1
             cache['strategies'][code] = {
                 'team_hash': team_hash(team),
+                'prompt_version': PROMPT_VERSION,
                 'team_name': team.get('team_name') or '',
                 'generated_at': datetime.now(timezone.utc)
                                         .strftime('%Y-%m-%dT%H:%M:%SZ'),

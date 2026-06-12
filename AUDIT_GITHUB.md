@@ -17,11 +17,11 @@ für ein öffentliches Repo, ein toter Playtester-Loader, der bei jedem
 Klick auf den (in der Sidebar bereits entfernten) Sandbox-Pfad mit 404
 crasht, und ein Drift zwischen `firestore.rules` im Repo, dem Markdown-
 Spickzettel `FIRESTORE_RULES.md` und dem Code, der Collections beschreibt
-die das Repo-Rule-Set nicht abdeckt. Daneben ein HIGH-Befund am
-`per-decklist-scrape.yml`-Trigger: die Cron-Zeile ist als
-Kommentar-Subitem unter `workflow_dispatch:` einsortiert und wird von
-GitHub ignoriert — alle 4 bisherigen Runs waren manuell. Sechs MEDIUM-
-Befunde betreffen vor allem stale Doku (README/PROJECT_STRUCTURE/
+die das Repo-Rule-Set nicht abdeckt. (Ein vierter HIGH-Befund am
+`per-decklist-scrape.yml`-Trigger hat sich beim Re-Verify als False
+Positive herausgestellt — die Cron-Struktur ist korrekt, der Workflow
+ist nur 3 Tage alt und hatte seinen ersten Slot noch nicht.) Sechs
+MEDIUM-Befunde betreffen vor allem stale Doku (README/PROJECT_STRUCTURE/
 MULTIPLAYER zeigen auf entfernte Module), fehlende Lockfiles in
 `bot/` + `prerender/` sowie das Fehlen jedes Lint/Typecheck-Gates. Keine
 hartkodierten Secrets im tracked Code, `npm audit` ist sauber, Firestore-
@@ -46,7 +46,7 @@ adressierbar.
 | F-09 | n/a | — | (reserviert / nicht vergeben) | — | — |
 | F-10 | n/a | Audit-Spec | Audit-Anweisung erwartet esbuild- + tsconfig-Setup. Projekt nutzt weder esbuild noch TypeScript noch ES-Module — 51 plain `<script src=>`-Tags in `index.html`. `npx tsc --noEmit` ist nicht ausführbar. | `find . -name "tsconfig*" -o -name "esbuild*"` → 0; `grep -cE "<script src=" index.html` → 51; `grep -E "type=\"module\"" index.html` → 0 | Kein Fix nötig — Audit-Spec-Annahme, nicht Realität. Für künftige Audits Phase-2-Spec an reale Toolchain anpassen. |
 | F-11 | MEDIUM | CI-Qualität | Pre-Deploy-Gate prüft nur Syntax (`terser --no-module -o /dev/null` über `js/*.js`) und Unit-/Pytest-Suite. **Kein Linter, kein Typecheck, keine Style-Konsistenz.** Bei ~17.5k LOC JS in 44 Modulen läuft alles ohne Static Analysis. | `deploy-pages.yml:100-106`; `ls node_modules/.bin/` → nur `playwright`, kein `eslint`/`tsc`; `package.json:devDependencies` → kein Linter | Minimal: `eslint` als devDep + `eslint --max-warnings 0 js/*.js` ins Pre-Deploy-Gate. Schon ohne Regeln fängt das No-Unused-Vars + No-Undef ab. |
-| F-12 | HIGH | Workflow-Bug | `.github/workflows/per-decklist-scrape.yml` definiert in der `on:`-Sektion zwar `cron: '0 12 * * 2'`, hat das Element aber unter `workflow_dispatch:` einsortiert (YAML-Struktur-Drift). GitHub-API meldet **alle 4 bisherigen Runs als `workflow_dispatch`** — kein einziger Schedule-Lauf. | `per-decklist-scrape.yml:9-15`; API: `total_count: 4`, alle `event=workflow_dispatch` | `on:`-Block neu strukturieren: `schedule:` als eigener Top-Level-Key gleichrangig zu `workflow_dispatch:`. |
+| F-12 | ~~HIGH~~ **False Positive** | Workflow-Bug | **Korrektur (2026-06-12):** Beim Re-Verifizieren ist `schedule:` in `per-decklist-scrape.yml:45-48` strukturell korrekt als Top-Level-Key unter `on:`. Mein Phase-2-Grep hatte fälschlich die Kommentar-Zeile 10 (`#   2. schedule cron …`) als „Cron-Sub-Item unter `workflow_dispatch:`" eingeordnet. Workflow wurde am 2026-06-09 15:24 UTC angelegt — nach dem 12:00-UTC-Slot des Dienstags. Erster Schedule-Lauf ist erst 2026-06-16. Keine Aktion nötig. | `per-decklist-scrape.yml:18-48`; Workflow `created_at: 2026-06-09T10:24:53-05:00` (= 15:24 UTC) | Keine. |
 | F-13 | MEDIUM | CI-Frequenz | `bot-keepalive.yml` Doku im Header sagt „every 10 minutes" (mehrfach betont), Cron ist `*/5 * * * *` = alle 5 Minuten. Doppelte Frequenz gegen Plan = doppelter Free-Tier-Verbrauch (~288 Runs/Tag statt 144). | `bot-keepalive.yml:13` Kommentar vs. `:41` `cron: '*/5 * * * *'` | Entscheiden: Cron auf `*/10` ziehen ODER Kommentar auf „every 5 min" ändern. |
 | F-14 | LOW | Action-Pins | Inkonsistente Action-Versionen: `actions/checkout@v6` + `setup-python@v6` in fünf Workflows (`weekly-full-update`, `daily-price-refresh`, `champions-replica`, `per-decklist`, `player-continuity`), `@v4` + `setup-python@v5` in vier (`deploy-pages`, `tutorial-screenshots`, `visual-fullpage`, `visual-nonmeta`). | `grep -lE "actions/checkout@v6" .github/workflows/*.yml`; dito @v4 | Einmaliges Sweep: alle auf `@v6` ziehen oder bei `@v4` halten. |
 | F-15 | LOW | Workflow-Stabilität | `tutorial-screenshots.yml` hatte 40 % Fail-Rate in den letzten 5 Runs (2 Fails 2026-06-02 vor erstem Success). | API: `total_count: 5`, davon failure am 18:53Z + 20:04Z, success ab 20:16Z | Workflow ist manuell-only, geringes Risiko; Log der Fails bei Bedarf via `mcp__github__get_job_logs`. |
@@ -67,8 +67,8 @@ adressierbar.
 ### Quick Wins (≤ 30 Min, niedriges Risiko)
 
 1. **F-02** `git rm tmp_404_probe.py tmp_past_meta_probe.py` — sofortig.
-2. **F-13** Einzeiler: `cron: '*/5 * * * *'` → `*/10` oder Kommentar an Cron angleichen. Spart Workflow-Minuten oder klärt Doku.
-3. **F-12** YAML-Strukturfix in `per-decklist-scrape.yml`: `schedule:` als eigener Top-Level-Key — danach läuft der Dienstags-Cron tatsächlich.
+2. **F-13** Einzeiler: Kommentar an Cron angleichen (Cron `*/5` ist absichtlich tighter als das alte `*/10`, siehe Begründung im File; nur die Header-Kommentare „every 10 min" sind stale).
+3. ~~**F-12**~~ False Positive — keine Aktion (siehe Tabelle).
 4. **F-08** `git rm --cached -r _archive/`. Einmaliger Commit; künftige Files greifen über `.gitignore`.
 5. **F-18** `cancel-in-progress: true` in `deploy-pages.yml`.
 6. **F-03** `git rm --cached -r "old Data for Claude"`.

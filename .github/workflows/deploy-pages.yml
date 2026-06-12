@@ -12,7 +12,12 @@ permissions:
 
 concurrency:
   group: pages
-  cancel-in-progress: false
+  # Pages deploys are idempotent and only the latest commit's artifact
+  # matters. Cancelling an in-flight run when a newer push lands shortens
+  # the hot-fix latency window without losing anything — the abandoned
+  # build would have been overwritten anyway. Was `false` historically;
+  # 2026-06-12 audit flagged it as unnecessary serialisation.
+  cancel-in-progress: true
 
 jobs:
   test:

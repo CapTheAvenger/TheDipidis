@@ -1,23 +1,31 @@
 name: Champions Replica Scrape
 
-# Daily refresh of the Pokémon Champions Side Quest tab.
+# Twice-weekly refresh of the Pokémon Champions Side Quest tab.
 # Fetches the VGCPastes Google Sheet, parses the top-N team rows, and
 # for each one fetches the linked pokepast.es paste to materialize a
 # {mon, ability, item, EVs, nature, moves, tera} record. Writes
 # data/champions_replica_teams.json — the file the Side Quest tab in
 # js/app-side-quest.js consumes.
 #
-# Lightweight job (~25 s total: 1 sheet fetch + ~20 pokepaste fetches
-# with a 0.7 s delay). Runs daily because the sheet is hand-curated by
-# the VGCPastes community and new entries land throughout the week.
+# Lightweight job under normal conditions (~25 s for the scrape itself),
+# but the Claude-API strategy-generation step on a fresh / heavily-
+# changed cache can take ~15 min — that's why the job timeout is 45 min
+# (see jobs.scrape.timeout-minutes below).
 #
-# Trigger: daily at 10:00 UTC OR GitHub UI → Actions →
+# Cadence changed 2026-06-12 from daily to Tuesdays + Fridays. The
+# VGCPastes community sheet doesn't see new tournament-winning teams
+# every day; a 3-4 day cadence catches every meaningful update without
+# triggering the team-strategy generator (Claude API cost) on noisy
+# day-over-day churn that doesn't change the actual strategy.
+#
+# Trigger: Tuesday + Friday at 10:00 UTC OR GitHub UI → Actions →
 #          Champions Replica Scrape → Run workflow
 
 on:
   schedule:
     # 10:00 UTC = 11:00 CET winter / 12:00 CEST summer.
-    - cron: '0 10 * * *'
+    # cron day-of-week: 2 = Tuesday, 5 = Friday.
+    - cron: '0 10 * * 2,5'
   workflow_dispatch:
     inputs:
       top:

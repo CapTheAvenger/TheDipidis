@@ -2,96 +2,94 @@
   "_meta": {
     "generated_by": "scripts/generate_team_strategies.py",
     "model": "claude-opus-4-8",
-    "last_run": "2026-06-12T20:23:32Z",
+    "last_run": "2026-06-13T21:32:48Z",
     "strategy_count": 20
   },
   "strategies": {
     "42TTHSSH9V": {
       "team_hash": "a0c8731bde8a6527",
-      "prompt_version": 2,
+      "prompt_version": 3,
       "team_name": "cona's PJCS 2026 Champion Team",
-      "generated_at": "2026-06-12T20:08:55Z",
+      "generated_at": "2026-06-13T21:19:24Z",
       "model": "claude-opus-4-8",
       "de": {
-        "overview": "Dieses Team will schnell viel Schaden machen und den Gegner unter Druck setzen. Es hat zwei mögliche Mega-Entwicklungen (Floette und Charizard), aber du darfst pro Kampf nur eine wählen. Whimsicott macht mit Rückenwind (Tailwind) dein Team schneller, und mehrere starke Angreifer räumen dann auf.",
+        "overview": "Dieses Team will früh viel Druck mit starken Fee- und Feuer-Attacken machen. Whimsicott beschleunigt euch mit Rückenwind (Tailwind) und stört den Gegner mit Zugabe (Encore), während eure Angreifer hart zuschlagen. Wichtig: Ihr könnt nur EIN Pokémon pro Kampf zur Mega-Form entwickeln — also vorher entscheiden, ob Florges oder Charizard eure Mega wird.",
         "roles": [
           {
             "name": "Floette-Eternal",
-            "role": "Starker spezieller Angreifer und einer deiner beiden Mega-Kandidaten. Mit Mondgewalt (Moonblast), Zauberschein (Zauberschein/Dazzling Gleam) und Light of Ruin haut es Drachen und gegnerische Bedrohungen weg."
+            "role": "Mit dem Item Florgessit (Floettite) wird es beim Einsatz zu Mega-Florges, einem brutalen Spezial-Angreifer vom Typ Fee. Mondgewalt (Moonblast) und Zauberschein (Dazzling Gleam, trifft beide Gegner) sind eure Hauptwaffen, dazu die starke Einzel-Attacke Light of Ruin."
           },
           {
             "name": "Charizard",
-            "role": "Dein zweiter Mega-Kandidat. Als Mega setzt es Sonne (Wetter) und schlägt mit Hitzewelle (Heat Wave) beide Gegner gleichzeitig; Solarstrahl (Solar Beam) wird in der Sonne sofort einsetzbar."
+            "role": "Mit Glurakit Y (Charizardite Y) wird es zu Mega-Glurak Y und bringt mit der Fähigkeit Dürre (Drought) 5 Runden harsches Sonnenlicht. Im Sonnenlicht schlagen Hitzewelle (Heat Wave, trifft beide Gegner), Wetterball (Weather Ball) und Solarstrahl (Solar Beam) besonders hart zu."
           },
           {
             "name": "Whimsicott",
-            "role": "Dein Support. Es bringt mit Strolch (Prankster) zuerst Rückenwind (Tailwind), damit dein Team doppelt so schnell ist, und kann mit Zugabe (Encore) einen Gegner auf eine Attacke festnageln. Der Fokusgurt (Focus Sash) lässt es einen Treffer überleben."
+            "role": "Euer Unterstützer. Dank Strolch (Prankster) kommen seine Status-Attacken zuerst: Rückenwind (Tailwind) verdoppelt 4 Runden lang die Initiative eures Teams, und Zugabe (Encore) zwingt ein Ziel 3 Runden, dieselbe Attacke zu wiederholen. Der Fokusgurt (Focus Sash) lässt es einen K.-o.-Treffer mit 1 KP überleben."
           },
           {
             "name": "Garchomp",
-            "role": "Schneller körperlicher Angreifer. Mit Steinhagel (Rock Slide) trifft es beide Gegner und kann sie kurz erschrecken (Zucken). Die Roseli Berry schützt einmal gegen eine Feen-Attacke."
+            "role": "Schneller physischer Angreifer. Steinhagel (Rock Slide) trifft beide Gegner, Drachenklaue (Dragon Claw), Wutstampfer (Stomping Tantrum) und Gifthieb (Poison Jab) decken viele Typen ab. Die Rosolinbeere (Roseli Berry) halbiert einmalig einen super-effektiven Fee-Treffer."
           },
           {
             "name": "Basculegion",
-            "role": "Harter Wasser-Angreifer. Last Respects wird stärker, je mehr eigene Pokémon schon besiegt sind, und Aqua Jet trifft immer zuerst, um angeschlagene Gegner zu erledigen."
+            "role": "Harter Wasser-Angreifer. Dank Anpassung (Adaptability) und Zauberwasser (Mystic Water, +20 % auf Wasser) hauen Wellenbrecher (Wave Crash) und der Vorzieher Aqua Jet richtig rein. Last Respects wird stärker, je mehr eigene Pokémon schon besiegt sind."
           },
           {
             "name": "Kingambit",
-            "role": "Räumer mit Vorrang-Attacke. Tiefschlag (Sucker Punch) schlägt zuerst zu, wenn der Gegner angreift. Die Koakobeere (Occa Berry) schwächt eine Feuer-Attacke ab, damit es überlebt."
+            "role": "Schwerer Schlussmann mit Vorzieher-Attacke Tiefschlag (Sucker Punch), die zuerst trifft, wenn das Ziel angreift. Eisenschädel (Iron Head) und Kowtow Cleave bringen Schaden. Siegeswille (Defiant) erhöht seinen Angriff stark, wenn ein Gegner seine Werte senkt. Die Wasmelbeere (Occa Berry) halbiert einmalig einen super-effektiven Feuer-Treffer."
           }
         ],
         "game_plan": [
-          "Schritt 1: Entscheide vor dem Kampf, welches Mega du brauchst. Gegen viele Drachen und Kämpfer wähle Mega-Floette; wenn du Flächenschaden und Sonne willst, wähle Mega-Charizard.",
-          "Schritt 2: Schicke meist Whimsicott zusammen mit einem Angreifer (z. B. Charizard oder Floette) zuerst ins Feld. Whimsicott setzt sofort Rückenwind (Tailwind), damit dein Team schneller zieht.",
-          "Schritt 3: Nutze die schnellen Runden, um mit Flächen-Attacken wie Hitzewelle (Heat Wave) oder Steinhagel (Rock Slide) beide Gegner zu treffen. Setze Schutzschild (Protect) ein, wenn du einen gefährlichen Angriff abwarten willst.",
-          "Schritt 4: Am Ende beenden Garchomp, Basculegion und Kingambit angeschlagene Gegner mit ihren schnellen oder vorrangigen Attacken."
+          "Schritt 1: Such dir deinen Plan aus. Variante A: Whimsicott + Charizard starten. Whimsicott stellt Rückenwind (Tailwind) auf, Charizard bringt mit Mega-Entwicklung das Sonnenlicht und feuert Hitzewelle (Heat Wave) auf beide Gegner.",
+          "Schritt 2: Mit Rückenwind seid ihr 4 Runden lang schneller. Nutze diese Zeit, um mit deinen Angreifern (Charizard, Garchomp oder Mega-Florges) so schnell wie möglich Gegner auszuschalten.",
+          "Schritt 3: Stört den Gegner mit Whimsicotts Zugabe (Encore), wenn er etwas aufbaut, und räum mit Vorzieher-Attacken wie Aqua Jet (Basculegion) oder Tiefschlag (Sucker Punch, Kingambit) am Ende geschwächte Gegner ab."
         ],
         "tips": [
-          "Du kannst nur EIN Pokémon pro Kampf zum Mega entwickeln – plane das vorher und verschwende es nicht.",
-          "Bring Rückenwind (Tailwind) früh ins Spiel; er hält nur wenige Runden, also nutze die Zeit zum Angreifen.",
-          "Pass mit eigenen Flächen-Attacken auf, dass du nicht deinen Partner mit triffst (z. B. Hitzewelle und Steinhagel treffen auch das eigene Pokémon).",
-          "Ziehe ein angeschlagenes Pokémon lieber zurück, statt es zu verlieren – es kann später noch wichtig werden."
+          "Du kannst nur EIN Pokémon pro Kampf zur Mega-Form machen. Entscheide vorher: Sonnen-Charizard ODER Mega-Florges — nicht beide.",
+          "Schutzschild (Protect) schützt 1 Runde, aber direkt hintereinander sinkt die Chance. Nutze es gezielt, nicht jede Runde.",
+          "Whimsicott hält dank Fokusgurt (Focus Sash) einen Treffer aus — stell deshalb in Runde 1 ruhig Rückenwind (Tailwind) auf, statt es zu verstecken.",
+          "Pass mit Garchomps Steinhagel (Rock Slide) auf: Es trifft beide Gegner, aber auch nur Gegner — dein Partner ist sicher. Setze es ein, wenn beide Gegner anfällig sind."
         ]
       },
       "en": {
-        "overview": "This team wants to deal a lot of damage fast and keep the opponent under pressure. It has two possible Mega Evolutions (Floette and Charizard), but you may only pick one per battle. Whimsicott makes your team faster with Tailwind (Rückenwind), and several strong attackers then clean up.",
+        "overview": "This team wants to apply heavy pressure early with strong Fairy and Fire attacks. Whimsicott speeds you up with Tailwind (Rückenwind) and disrupts the opponent with Encore (Zugabe), while your attackers hit hard. Important: you can only Mega Evolve ONE Pokémon per battle — decide beforehand whether Florges or Charizard is your Mega.",
         "roles": [
           {
             "name": "Floette-Eternal",
-            "role": "A strong special attacker and one of your two Mega options. With Moonblast (Mondgewalt), Dazzling Gleam (Zauberschein) and Light of Ruin it removes Dragons and other threats."
+            "role": "With the item Floettite (Florgessit) it becomes Mega Florges on entry, a brutal special Fairy-type attacker. Moonblast (Mondgewalt) and Dazzling Gleam (Zauberschein, hits both opponents) are your main weapons, plus the strong single-target Light of Ruin."
           },
           {
             "name": "Charizard",
-            "role": "Your second Mega option. As a Mega it sets sun (weather) and hits both opponents with Heat Wave (Hitzewelle); Solar Beam (Solarstrahl) fires instantly in the sun."
+            "role": "With Charizardite Y (Glurakit Y) it becomes Mega Charizard Y and brings 5 turns of harsh sunlight through the ability Drought (Dürre). In sun, Heat Wave (Hitzewelle, hits both opponents), Weather Ball (Wetterball) and Solar Beam (Solarstrahl) hit especially hard."
           },
           {
             "name": "Whimsicott",
-            "role": "Your support. With Prankster (Strolch) it goes first to set Tailwind (Rückenwind) so your team is twice as fast, and Encore (Zugabe) locks an opponent into one move. The Focus Sash (Fokusgurt) lets it survive one hit."
+            "role": "Your support. Thanks to Prankster (Strolch) its status moves go first: Tailwind (Rückenwind) doubles your team's Speed for 4 turns, and Encore (Zugabe) forces a target to repeat the same move for 3 turns. The Focus Sash (Fokusgurt) lets it survive a KO hit on 1 HP."
           },
           {
             "name": "Garchomp",
-            "role": "A fast physical attacker. Rock Slide (Steinhagel) hits both opponents and can make them flinch (skip a turn). The Roseli Berry softens one Fairy-type attack."
+            "role": "Fast physical attacker. Rock Slide (Steinhagel) hits both opponents, while Dragon Claw (Drachenklaue), Stomping Tantrum (Wutstampfer) and Poison Jab (Gifthieb) cover many types. The Roseli Berry (Rosolinbeere) halves one super-effective Fairy hit, once."
           },
           {
             "name": "Basculegion",
-            "role": "A hard-hitting Water attacker. Last Respects gets stronger the more of your own Pokémon have fainted, and Aqua Jet always strikes first to finish off weakened foes."
+            "role": "Hard-hitting Water attacker. Thanks to Adaptability (Anpassung) and Mystic Water (Zauberwasser, +20% on Water) both Wave Crash (Wellenbrecher) and the priority move Aqua Jet hit very hard. Last Respects gets stronger the more of your own Pokémon have already fainted."
           },
           {
             "name": "Kingambit",
-            "role": "A finisher with a priority move. Sucker Punch (Tiefschlag) strikes first when the opponent attacks. The Occa Berry (Koakobeere) weakens one Fire attack so it survives."
+            "role": "Heavy closer with the priority move Sucker Punch (Tiefschlag), which strikes first if the target is about to attack. Iron Head (Eisenschädel) and Kowtow Cleave deal damage. Defiant (Siegeswille) sharply raises its Attack when an opponent lowers its stats. The Occa Berry (Wasmelbeere) halves one super-effective Fire hit, once."
           }
         ],
         "game_plan": [
-          "Step 1: Before the battle decide which Mega you need. Against many Dragons and Fighters pick Mega Floette; if you want spread damage and sun, pick Mega Charizard.",
-          "Step 2: Usually lead with Whimsicott plus one attacker (e.g. Charizard or Floette). Whimsicott sets Tailwind (Rückenwind) right away so your team moves first.",
-          "Step 3: Use the fast turns to hit both opponents with spread moves like Heat Wave (Hitzewelle) or Rock Slide (Steinhagel). Use Protect (Schutzschild) when you want to wait out a dangerous attack.",
-          "Step 4: At the end, Garchomp, Basculegion and Kingambit finish off weakened foes with their fast or priority moves."
+          "Step 1: Pick your plan. Option A: lead Whimsicott + Charizard. Whimsicott sets up Tailwind (Rückenwind), Charizard Mega Evolves to bring sunlight and fires Heat Wave (Hitzewelle) at both opponents.",
+          "Step 2: With Tailwind you are faster for 4 turns. Use that window to knock out opponents as fast as possible with your attackers (Charizard, Garchomp or Mega Florges).",
+          "Step 3: Disrupt the opponent with Whimsicott's Encore (Zugabe) when they try to set up, and clean up weakened opponents at the end with priority moves like Aqua Jet (Basculegion) or Sucker Punch (Tiefschlag, Kingambit)."
         ],
         "tips": [
-          "You can Mega Evolve only ONE Pokémon per battle – plan it in advance and don't waste it.",
-          "Get Tailwind (Rückenwind) up early; it lasts only a few turns, so use that time to attack.",
-          "Be careful with your own spread moves so you don't hit your partner too (Heat Wave and Rock Slide also hit your own Pokémon).",
-          "Pull back a weakened Pokémon instead of losing it – it can still matter later."
+          "You can only Mega Evolve ONE Pokémon per battle. Decide first: sun Charizard OR Mega Florges — not both.",
+          "Protect (Schutzschild) shields for 1 turn, but its success chance drops if used back to back. Use it on purpose, not every turn.",
+          "Whimsicott survives one hit thanks to the Focus Sash (Fokusgurt) — so feel free to set Tailwind (Rückenwind) on turn 1 instead of hiding it.",
+          "Be careful with Garchomp's Rock Slide (Steinhagel): it hits both opponents but only opponents — your partner is safe. Use it when both opponents are vulnerable."
         ]
       }
     },
@@ -184,175 +182,177 @@
     },
     "7UWGKDSYDT": {
       "team_hash": "589ee329b866e93d",
-      "prompt_version": 2,
+      "prompt_version": 3,
       "team_name": "Arsal and Ink's Indianapolis Regional 2026 Champion Team",
-      "generated_at": "2026-06-12T20:10:33Z",
+      "generated_at": "2026-06-13T21:21:03Z",
       "model": "claude-opus-4-8",
       "de": {
-        "overview": "Dieses Team will den Gegner mit starken Flächenangriffen unter Druck setzen und hat dafür zwei verschiedene Pläne. Plan A ist Sonne: Charizard-Mega-Y macht es heiß und Venusaur wird darunter blitzschnell. Plan B ist Kontrolle: Incineroar und Sinistcha schwächen den Gegner und schützen deine Angreifer.",
+        "overview": "Dieses Team ist flexibel: Es kann entweder mit Sonne und schnellen Spezial-Angriffen Druck machen oder mit Bizarroraum (Trick Room) – einer Regel, die 5 Runden lang die langsameren Pokémon zuerst handeln lässt – das Tempo umdrehen. Du suchst dir je nach Gegner einen der beiden Pläne aus. Wichtig: Du darfst pro Kampf nur EIN Pokémon mega-entwickeln, also entscheide dich zwischen Charizard und Floette.",
         "roles": [
           {
             "name": "Incineroar",
-            "role": "Dein Stützpfeiler. Senkt mit Bedroher (Intimidate) den Angriff der Gegner und stoppt mit Mogelhieb (Fake Out) einen Gegner für eine Runde. Mit Abgangsbund (Parting Shot) schwächt es Gegner und tauscht aus."
+            "role": "Dein Support-Anker. Bedroher (Intimidate) senkt beim Erscheinen den Angriff der Gegner. Mit Standpauke (Parting Shot) schwächst du das Ziel (−1 Angriff & Spez.-Angriff) und wechselst dabei selbst aus, um ein passendes Pokémon nachzuholen."
           },
           {
             "name": "Sinistcha",
-            "role": "Schutz-Pokémon. Zieht mit Aggropulver (Rage Powder) gegnerische Angriffe auf sich, damit deine Angreifer überleben. Kann mit Bizarroraum (Trick Room) bei langsamen Teams die Reihenfolge umdrehen."
+            "role": "Dein Bizarroraum-Schalter. Es stellt mit Bizarroraum (Trick Room) für 5 Runden die Reihenfolge auf den Kopf. Mit Wutpulver (Rage Powder) zieht es 1 Runde lang alle Einzelziel-Attacken der Gegner auf sich und schützt so deine Angreifer (wirkt nicht gegen Pflanzen-Typen)."
           },
           {
             "name": "Floette-Mega",
-            "role": "Eine deiner zwei Mega-Optionen. Ein Feen-Angreifer, der sich mit Calm Mind selbst stärkt und dann mit Mondgewalt (Moonblast) und Zauberschein (Dazzling Gleam) durchschlägt – stark gegen Drachen."
+            "role": "Deine starke Spezial-Angreiferin, wird per Florgessit (Floettite) zu Mega-Florges mit riesigem Spez.-Angriff. Mit Gedankengut (Calm Mind) erhöht sie ihren eigenen Spez.-Angriff & Spez.-Verteidigung um je eine Stufe und haut dann mit Fee-Attacken zu."
           },
           {
             "name": "Garchomp",
-            "role": "Schneller Sofort-Angreifer dank Wahlschal (Choice Scarf). Trifft mit Steinhagel (Rock Slide) beide Gegner und mit Erdbeben (Earthquake) Boden-schwache Ziele."
+            "role": "Schneller physischer Angreifer. Der Wahlschal (Choice Scarf) macht es 1,5-mal so schnell, fixiert es aber auf eine Attacke bis zum Auswechseln. Gut für sofortigen Druck außerhalb von Bizarroraum."
           },
           {
             "name": "Charizard-Mega-Y",
-            "role": "Deine zweite Mega-Option und Hauptangreifer. Macht mit der Fähigkeit Dürre (Drought) Sonne und trifft beide Gegner gleichzeitig mit Hitzewelle (Heat Wave)."
+            "role": "Wird beim Einsatz sofort zu Mega-Glurak Y und bringt mit Dürre (Drought) 5 Runden harsches Sonnenlicht mit. Die Sonne verstärkt seine Feuer-Attacken und macht Venusaur schneller."
           },
           {
             "name": "Venusaur",
-            "role": "Sonnen-Partner. Mit der Fähigkeit Chlorophyll wird es bei Sonne doppelt so schnell. Schläft mit Schlafpuder (Sleep Powder) einen Gegner ein und greift mit Matschbombe (Sludge Bomb) an."
+            "role": "Profitiert von der Sonne: Mit Chlorophyll verdoppelt sich seine Initiative bei Sonnenlicht. Mit Schlafpuder (Sleep Powder) kann es einen Gegner einschläfern und so eine Bedrohung ausschalten."
           }
         ],
         "game_plan": [
-          "Schritt 1: Entscheide vor dem Kampf, welches Mega du nimmst. Charizard-Mega-Y für Sonne und Flächenschaden (besonders mit Venusaur dabei). Floette-Mega gegen Teams mit vielen Drachen oder wenn du einen selbst-stärkenden Angreifer brauchst.",
-          "Schritt 2: Schicke meist Incineroar zusammen mit deinem Mega ins Feld. Incineroar schwächt mit Bedroher (Intimidate) und blockt mit Mogelhieb (Fake Out) eine Gefahr, während dein Mega Schaden austeilt.",
-          "Schritt 3: Bei Sonne lässt du Venusaur einen Gegner mit Schlafpuder (Sleep Powder) ausschalten und drückst dann mit Charizards Hitzewelle (Heat Wave) durch. Mit Sinistcha-Schutz (Aggropulver/Rage Powder) hältst du deine Angreifer am Leben."
+          "Schritt 1: Entscheide vor dem Kampf, welchen Plan du fährst. Gegen schnelle Gegner: Bizarroraum mit Sinistcha. Gegen langsamere oder normale Teams: Sonne mit Charizard und Venusaur.",
+          "Schritt 2 (Sonnen-Plan): Schicke Charizard-Mega-Y zuerst ins Feld, damit Dürre die Sonne bringt. Venusaur danebenstellen – es ist jetzt schnell und kann mit Schlafpuder (Sleep Powder, 75% Genauigkeit, Ziel schläft 1–3 Runden) eine Gefahr ausschalten oder direkt Schaden machen.",
+          "Schritt 3 (Trick-Room-Plan): Bringe Sinistcha und stelle Bizarroraum (Trick Room). Danach schlagen deine langsameren Angreifer wie Floette-Mega oder Incineroar zuerst zu. Sinistcha schützt sie mit Wutpulver (Rage Powder).",
+          "Schritt 4: Nutze Incineroars Standpauke (Parting Shot), um einen gefährlichen Gegner zu schwächen und gleichzeitig dein nächstes Pokémon sicher reinzuholen."
         ],
         "tips": [
-          "Setze Mogelhieb (Fake Out) gezielt ein: damit stoppst du genau den Gegner, der dir am gefährlichsten wird.",
-          "Achtung mit Erdbeben (Earthquake) von Garchomp – es trifft auch deine eigenen Pokémon neben ihm. Nutze es lieber, wenn dein Partner Flug- oder Schwebe-Typ ist oder geschützt steht.",
-          "Wenn ein Pokémon fast besiegt ist und nichts mehr bewirkt, zieh es lieber zurück, statt es zu opfern.",
-          "Bringe Venusaur am besten erst raus, wenn die Sonne von Charizard schon scheint – ohne Sonne ist es deutlich langsamer."
+          "Mega-Entwicklung nur EINMAL pro Kampf: Wähle Charizard für den Sonnen-Plan, Floette für den Bizarroraum-/Spezial-Plan. Nicht beide gleichzeitig planen.",
+          "Bizarroraum hält nur 5 Runden – setz ihn erst, wenn du auch sofort damit angreifen kannst, sonst läuft die Zeit ungenutzt ab.",
+          "Schutzschild (Protect) verliert an Erfolgschance, wenn du es zwei Runden hintereinander nutzt – also nicht jede Runde spammen.",
+          "Garchomp ist durch den Wahlschal auf eine Attacke festgelegt, bis du es auswechselst. Wähle die erste Attacke also mit Bedacht."
         ]
       },
       "en": {
-        "overview": "This team wants to pressure the enemy with strong spread attacks and has two different plans for it. Plan A is sun: Charizard-Mega-Y heats things up and Venusaur becomes lightning fast under it. Plan B is control: Incineroar and Sinistcha weaken the opponent and protect your attackers.",
+        "overview": "This team is flexible: it can either apply pressure with sun and fast special attackers, or flip the speed order using Trick Room (Bizarroraum) – a rule that lets the slower Pokémon act first for 5 turns. You pick one of the two plans depending on your opponent. Important: you may only Mega-evolve ONE Pokémon per battle, so choose between Charizard and Floette.",
         "roles": [
           {
             "name": "Incineroar",
-            "role": "Your backbone. Lowers the enemy's attack with Intimidate (Bedroher) and stops one foe for a turn with Fake Out (Mogelhieb). With Parting Shot (Abgangsbund) it weakens foes and switches out."
+            "role": "Your support anchor. Intimidate (Bedroher) lowers the opponents' Attack on entry. With Parting Shot (Standpauke) you weaken the target (−1 Attack & Special Attack) and switch out yourself to bring in a better Pokémon."
           },
           {
             "name": "Sinistcha",
-            "role": "Your protector. Pulls enemy attacks onto itself with Rage Powder (Aggropulver) so your attackers survive. Can flip turn order against slow teams with Trick Room (Bizarroraum)."
+            "role": "Your Trick Room setter. It uses Trick Room (Bizarroraum) to reverse the turn order for 5 turns. With Rage Powder (Wutpulver) it pulls all single-target enemy attacks onto itself for 1 turn, protecting your attackers (doesn't work against Grass types)."
           },
           {
             "name": "Floette-Mega",
-            "role": "One of your two Mega options. A Fairy attacker that powers itself up with Calm Mind and then hits with Moonblast (Mondgewalt) and Dazzling Gleam (Zauberschein) – strong against Dragons."
+            "role": "Your strong special attacker, becomes Mega-Florges via Floettite (Florgessit) with a huge Special Attack. With Calm Mind (Gedankengut) it raises its own Special Attack & Special Defense by one stage each, then hits hard with Fairy moves."
           },
           {
             "name": "Garchomp",
-            "role": "A fast instant attacker thanks to Choice Scarf (Wahlschal). Hits both foes with Rock Slide (Steinhagel) and Ground-weak targets with Earthquake (Erdbeben)."
+            "role": "Fast physical attacker. The Choice Scarf (Wahlschal) makes it 1.5x faster but locks it into one move until it switches out. Great for instant pressure outside of Trick Room."
           },
           {
             "name": "Charizard-Mega-Y",
-            "role": "Your second Mega option and main attacker. Makes sun with the ability Drought (Dürre) and hits both foes at once with Heat Wave (Hitzewelle)."
+            "role": "Becomes Mega-Charizard Y on entry and brings 5 turns of harsh sunlight with Drought (Dürre). The sun boosts its Fire moves and makes Venusaur faster."
           },
           {
             "name": "Venusaur",
-            "role": "Your sun partner. With the ability Chlorophyll it becomes twice as fast in sun. Puts a foe to sleep with Sleep Powder (Schlafpuder) and attacks with Sludge Bomb (Matschbombe)."
+            "role": "Benefits from the sun: with Chlorophyll its Speed doubles in sunlight. With Sleep Powder (Schlafpuder) it can put an opponent to sleep and shut down a threat."
           }
         ],
         "game_plan": [
-          "Step 1: Before the match, decide which Mega to use. Charizard-Mega-Y for sun and spread damage (especially with Venusaur along). Floette-Mega against teams with many Dragons or when you want a self-boosting attacker.",
-          "Step 2: Usually lead Incineroar together with your Mega. Incineroar weakens with Intimidate (Bedroher) and blocks one threat with Fake Out (Mogelhieb) while your Mega deals damage.",
-          "Step 3: In sun, let Venusaur take a foe out of the fight with Sleep Powder (Schlafpuder), then push through with Charizard's Heat Wave (Hitzewelle). Use Sinistcha's protection (Rage Powder/Aggropulver) to keep your attackers alive."
+          "Step 1: Decide your plan before the match. Against fast opponents: Trick Room with Sinistcha. Against slower or normal teams: sun with Charizard and Venusaur.",
+          "Step 2 (sun plan): Lead Charizard-Mega-Y so Drought brings the sun. Put Venusaur next to it – it's now fast and can shut down a threat with Sleep Powder (Schlafpuder, 75% accuracy, target sleeps 1–3 turns) or deal damage directly.",
+          "Step 3 (Trick Room plan): Bring in Sinistcha and set Trick Room (Bizarroraum). Now your slower attackers like Floette-Mega or Incineroar strike first. Sinistcha protects them with Rage Powder (Wutpulver).",
+          "Step 4: Use Incineroar's Parting Shot (Standpauke) to weaken a dangerous opponent while safely bringing in your next Pokémon."
         ],
         "tips": [
-          "Use Fake Out (Mogelhieb) on purpose: stop exactly the foe that is most dangerous to you.",
-          "Be careful with Garchomp's Earthquake (Erdbeben) – it also hits your own Pokémon next to it. Use it when your partner is a Flying/levitating type or is protected.",
-          "If a Pokémon is nearly fainted and can't do anything useful, switch it out instead of sacrificing it.",
-          "Bring Venusaur in best after Charizard's sun is already shining – without sun it is much slower."
+          "You only Mega-evolve ONCE per battle: pick Charizard for the sun plan, Floette for the Trick Room/special plan. Don't plan to use both.",
+          "Trick Room only lasts 5 turns – set it only when you can attack with it right away, or the timer runs out unused.",
+          "Protect (Schutzschild) loses success chance if you use it two turns in a row – so don't spam it every turn.",
+          "Garchomp is locked into one move by the Choice Scarf until you switch it out. Choose its first move carefully."
         ]
       }
     },
     "Y6NBFBXEQG": {
       "team_hash": "3c85238b39b823b6",
-      "prompt_version": 2,
+      "prompt_version": 3,
       "team_name": "og_albina's Indianapolis Side Event VG Cup Champion Team",
-      "generated_at": "2026-06-12T20:11:20Z",
+      "generated_at": "2026-06-13T21:21:39Z",
       "model": "claude-opus-4-8",
       "de": {
-        "overview": "Dieses Team baut auf starkes Sonnenwetter und schnelle Fee-Angriffe. Charizard macht mit seiner Mega-Form die Sonne an und feuert dann harte Feuer-Attacken ab, während Whimsicott mit Rückenwind (Tailwind) das ganze Team schneller macht. Du willst früh viel Schaden anrichten und den Gegner unter Tempo-Druck setzen.",
+        "overview": "Dieses Team will schnell und hart zuschlagen. Charizard wird zu Mega-Glurak Y und erzeugt Sonne, die seine Feuer-Attacken verstärkt. Whimsicott macht das Team mit Rückenwind blitzschnell, und mehrere Pokémon teilen starken Flächenschaden aus, um beide Gegner gleichzeitig unter Druck zu setzen.",
         "roles": [
           {
             "name": "Charizard",
-            "role": "Dein Haupt-Angreifer und Wetter-Macher. Als Mega-Charizard Y stellt es Dürre (Drought) auf, also dauerhaftes Sonnenwetter, und feuert dann mit Hitzewelle (Heat Wave) auf beide Gegner."
+            "role": "Dein Haupt-Angreifer. Bei Einsatz wird es zu Mega-Glurak Y mit Fähigkeit Dürre (Drought) — das erzeugt 5 Runden harsches Sonnenlicht, das Feuer-Attacken verstärkt. Mit Hitzewelle (Heat Wave) trifft es beide Gegner."
           },
           {
             "name": "Garchomp",
-            "role": "Schneller Boden- und Drachen-Angreifer. Mit Erdbeben (Earthquake) trifft es beide Gegner und räumt auf, sobald sie geschwächt sind."
+            "role": "Physischer Brecher. Erdbeben (Earthquake) trifft beide Gegner am Boden. Seine Fähigkeit Rauhaut (Rough Skin) verletzt Pokémon, die es mit Kontakt angreifen."
           },
           {
             "name": "Whimsicott",
-            "role": "Dein wichtigster Helfer. Dank Strolch (Prankster) kommen seine Unterstützungs-Attacken zuerst: Rückenwind (Tailwind) für Tempo und Da Capo (Encore), um einen Gegner in eine harmlose Attacke zu sperren."
+            "role": "Dein Tempo-Geber. Dank Fähigkeit Strolch (Prankster) bekommen seine Status-Attacken Vorrang. Rückenwind (Tailwind) und Zugabe (Encore) sind hier der Schlüssel."
           },
           {
             "name": "Floette-Eternal",
-            "role": "Spezial-Angreifer mit starken Fee-Attacken. Über sein eigenes Mega-Item (Floettite) wird es noch gefährlicher und trifft beide Gegner mit Zauberschein (Dazzling Gleam)."
+            "role": "Spezial-Angreifer. Mit dem Mega-Stein wird es zu Mega-Florges mit riesigem Spezial-Angriff. Funkelregen (Dazzling Gleam) trifft beide Gegner."
           },
           {
             "name": "Glimmora",
-            "role": "Gesteins- und Gift-Angreifer mit Fokusgurt (Focus Sash), das einen tödlichen Treffer mit 1 KP überlebt. Trifft mit Juwelenkraft (Power Gem) breit und ist gut gegen andere Feuer-Teams."
+            "role": "Zweiter Spezial-Angreifer mit Fokusgurt (Focus Sash), der einen sicheren KO-Treffer mit 1 KP überlebt. Achtung: Glimmora hat KEINE Mega-Form."
           },
           {
             "name": "Kingambit",
-            "role": "Harter Nahkämpfer und Aufräumer. Mit Tiefschlag (Sucker Punch) schlägt es noch vor dem Gegner zu, wenn dieser angreifen will, und holt sich so Knockouts am Spielende."
+            "role": "Harter Schlussspieler. Tiefschlag (Sucker Punch) trifft mit Vorrang, wenn der Gegner angreift. Seine Tahaibeere (Chople Berry) halbiert einen super-effektiven Kampf-Treffer."
           }
         ],
         "game_plan": [
-          "Schritt 1: Schicke meist Charizard und Whimsicott zuerst ins Feld. Whimsicott setzt Rückenwind (Tailwind), damit dein Team schneller ist, und Charizard schaltet mit seiner Mega-Form die Sonne an.",
-          "Schritt 2: Greife mit Charizards Hitzewelle (Heat Wave) und Floettes Fee-Attacken beide Gegner gleichzeitig an. In der Sonne braucht Solarstrahl (Solar Beam) keine Aufladerunde und trifft sofort.",
-          "Schritt 3: Wenn die Gegner geschwächt sind, hol dir die Knockouts mit Garchomps Erdbeben (Earthquake) oder Kingambits Tiefschlag (Sucker Punch). Nutze Schutzschild (Protect), um eine gefährliche Runde abzuwarten."
+          "Schritt 1: Starte meist mit Charizard und Whimsicott. Charizard wird sofort zu Mega-Glurak Y und bringt die Sonne; Whimsicott setzt Rückenwind (Tailwind), der die Initiative deines Teams 4 Runden lang verdoppelt.",
+          "Schritt 2: Schlage mit Flächenschaden zu. Hitzewelle (Heat Wave) von Charizard, Funkelregen (Dazzling Gleam) von Floette oder Erdbeben (Earthquake) von Garchomp treffen beide Gegner gleichzeitig — aber pass auf, dass du dein eigenes Pokémon mit Erdbeben nicht triffst.",
+          "Schritt 3: Wenn der Gegner ein Setup-Pokémon hat, nutze Zugabe (Encore) von Whimsicott — das Ziel muss seine letzte Attacke 3 Runden lang wiederholen und sitzt fest. Räume den Rest mit Kingambits Tiefschlag (Sucker Punch) ab."
         ],
         "tips": [
-          "Du hast zwei Mega-Kandidaten, aber pro Kampf nur eine Mega-Form: Wähle fast immer Charizard, weil die Sonne dein ganzes Team stärkt. Floette als Mega nur, wenn du keine Sonne brauchst.",
-          "Pass mit Garchomps Erdbeben (Earthquake) auf: Es trifft auch deinen eigenen Partner neben Garchomp. Nutze es, wenn dein Partner Schutzschild (Protect) setzt oder selbst Boden-Typ ist.",
-          "Vergiss Whimsicotts Rückenwind (Tailwind) nicht am Anfang. Ohne den Tempo-Schub ist dein Team langsamer und verliert wichtige Erstschläge.",
-          "Glimmoras Fokusgurt (Focus Sash) wirkt nur bei voller KP. Lass es nicht vorher Schaden nehmen, sonst überlebt es den harten Treffer nicht."
+          "Wichtig: Du kannst pro Kampf nur EINE Mega-Entwicklung einsetzen. Entscheide dich vor dem Kampf zwischen Charizard und Floette — bring beide nie als Mega gleichzeitig.",
+          "Setze Schutzschild (Protect) klug ein: Es schützt 1 Runde, aber bei mehrmaligem Einsatz hintereinander sinkt die Erfolgschance stark.",
+          "Solarstrahl (Solar Beam) lädt bei Sonne sofort und feuert in derselben Runde — nutze es nur, solange die Sonne von Charizard aktiv ist.",
+          "Pass mit Erdbeben (Earthquake) auf: Es trifft auch deinen eigenen Partner am Boden. Charizard fliegt und ist sicher."
         ]
       },
       "en": {
-        "overview": "This team is built around strong sunshine and fast Fairy attacks. Charizard turns on the sun with its Mega form and then fires off powerful Fire moves, while Whimsicott uses Tailwind (Rückenwind) to make the whole team faster. You want to deal big damage early and put the opponent under speed pressure.",
+        "overview": "This team wants to hit fast and hard. Charizard turns into Mega Charizard Y and creates sun, which powers up its Fire moves. Whimsicott makes the whole team super fast with Tailwind, and several Pokémon deal strong spread damage to pressure both opponents at once.",
         "roles": [
           {
             "name": "Charizard",
-            "role": "Your main attacker and weather setter. As Mega Charizard Y it sets Drought (Dürre), meaning permanent sunshine, and then hits both opponents with Heat Wave (Hitzewelle)."
+            "role": "Your main attacker. On entry it becomes Mega Charizard Y with the ability Drought (Dürre) — this creates 5 turns of harsh sunlight that boosts Fire moves. Heat Wave (Hitzewelle) hits both opponents."
           },
           {
             "name": "Garchomp",
-            "role": "Fast Ground and Dragon attacker. With Earthquake (Erdbeben) it hits both opponents and cleans up once they are weakened."
+            "role": "Physical breaker. Earthquake (Erdbeben) hits both grounded opponents. Its ability Rough Skin (Rauhaut) hurts Pokémon that attack it with contact moves."
           },
           {
             "name": "Whimsicott",
-            "role": "Your most important support. Thanks to Prankster (Strolch) its support moves go first: Tailwind (Rückenwind) for speed and Encore (Da Capo) to lock an opponent into a harmless move."
+            "role": "Your speed setter. Thanks to its ability Prankster (Strolch), its status moves get priority. Tailwind (Rückenwind) and Encore (Zugabe) are the key here."
           },
           {
             "name": "Floette-Eternal",
-            "role": "Special attacker with strong Fairy moves. Through its own Mega item (Floettite) it becomes even more dangerous and hits both opponents with Dazzling Gleam (Zauberschein)."
+            "role": "Special attacker. With the mega stone it becomes Mega Florges with a huge Special Attack. Dazzling Gleam (Funkelregen) hits both opponents."
           },
           {
             "name": "Glimmora",
-            "role": "Rock and Poison attacker with Focus Sash (Fokusgurt), which lets it survive a lethal hit with 1 HP. It hits wide with Power Gem (Juwelenkraft) and is good against other Fire teams."
+            "role": "Second special attacker holding a Focus Sash (Fokusgurt), which survives a sure KO hit with 1 HP. Note: Glimmora has NO mega form."
           },
           {
             "name": "Kingambit",
-            "role": "Tough melee fighter and finisher. With Sucker Punch (Tiefschlag) it strikes before the opponent if they try to attack, grabbing late-game knockouts."
+            "role": "Tough closer. Sucker Punch (Tiefschlag) strikes with priority when the opponent attacks. Its Chople Berry (Tahaibeere) halves one super-effective Fighting hit."
           }
         ],
         "game_plan": [
-          "Step 1: Usually lead with Charizard and Whimsicott. Whimsicott sets Tailwind (Rückenwind) so your team is faster, and Charizard turns on the sun with its Mega form.",
-          "Step 2: Attack both opponents at once with Charizard's Heat Wave (Hitzewelle) and Floette's Fairy moves. In the sun, Solar Beam (Solarstrahl) needs no charge turn and hits right away.",
-          "Step 3: Once the opponents are weakened, grab knockouts with Garchomp's Earthquake (Erdbeben) or Kingambit's Sucker Punch (Tiefschlag). Use Protect (Schutzschild) to wait out a dangerous turn."
+          "Step 1: Usually start with Charizard and Whimsicott. Charizard becomes Mega Charizard Y right away and brings the sun; Whimsicott uses Tailwind (Rückenwind), which doubles your team's Speed for 4 turns.",
+          "Step 2: Hit with spread damage. Heat Wave (Hitzewelle) from Charizard, Dazzling Gleam (Funkelregen) from Floette, or Earthquake (Erdbeben) from Garchomp all hit both opponents — but be careful not to hit your own Pokémon with Earthquake.",
+          "Step 3: If the opponent has a setup Pokémon, use Encore (Zugabe) from Whimsicott — the target must repeat its last move for 3 turns and is stuck. Clean up the rest with Kingambit's Sucker Punch (Tiefschlag)."
         ],
         "tips": [
-          "You have two Mega candidates, but only one Mega form per battle: almost always pick Charizard, because the sun powers up your whole team. Only Mega Floette if you don't need sun.",
-          "Be careful with Garchomp's Earthquake (Erdbeben): it also hits your own partner next to Garchomp. Use it when your partner uses Protect (Schutzschild) or is a Ground type itself.",
-          "Don't forget Whimsicott's Tailwind (Rückenwind) at the start. Without that speed boost your team is slower and loses important first strikes.",
-          "Glimmora's Focus Sash (Fokusgurt) only works at full HP. Don't let it take damage first, or it won't survive the strong hit."
+          "Important: You can only use ONE mega evolution per battle. Decide before the match between Charizard and Floette — never bring both as megas at the same time.",
+          "Use Protect (Schutzschild) wisely: it protects for 1 turn, but if you use it several times in a row, the success chance drops sharply.",
+          "Solar Beam (Solarstrahl) charges instantly in sun and fires the same turn — only use it while Charizard's sun is active.",
+          "Be careful with Earthquake (Erdbeben): it also hits your own partner on the ground. Charizard flies and is safe."
         ]
       }
     },
@@ -445,351 +445,351 @@
     },
     "X8XJ7PDMJ2": {
       "team_hash": "11fee06d206d8073",
-      "prompt_version": 2,
+      "prompt_version": 3,
       "team_name": "Zestimon's Singapore MBL 2026 Champion Team",
-      "generated_at": "2026-06-12T20:12:44Z",
+      "generated_at": "2026-06-13T21:23:34Z",
       "model": "claude-opus-4-8",
       "de": {
-        "overview": "Dieses Team will schnell Druck machen. Talonflame oder Alola-Ninetales beschleunigen das ganze Team, danach hauen starke Angreifer wie Glimmora, Garchomp und Kingambit zu. Du gewinnst durch Tempo und harte Treffer, nicht durch langes Aushalten.",
+        "overview": "Dieses Team will schnell Druck machen: Es macht euer Team mit Rückenwind (Tailwind) für ein paar Runden viel schneller und drückt dann mit starken Spezial- und Eis-Angriffen durch. Gleichzeitig stört es den Gegner mit Verbrennen und Schnee, damit eure Angreifer leichter durchkommen.",
         "roles": [
           {
             "name": "Talonflame",
-            "role": "Dein Tempo-Geber. Es nutzt Rückenwind (Tailwind), um euer Team zwei Runden lang doppelt so schnell zu machen, und kann mit Feuer dazwischenhauen."
+            "role": "Euer Tempomacher. Es bringt Rückenwind (Tailwind) ins Spiel, der eure ganze Seite 4 Runden lang doppelt so schnell macht. Dank Fähigkeit Gale Wings (seine Flugattacken kommen bei vollen KP zuerst) kann es schnelle Gegner mit Acrobatics früh treffen."
           },
           {
             "name": "Rotom-Wash",
-            "role": "Solider Stör-Angreifer. Mit Irrlicht (Will-O-Wisp) schwächt es gegnerische Angreifer und teilt nebenbei Wasser- und Elektroschaden aus."
+            "role": "Euer Störer und Dauerschaden. Mit Irrlicht (Will-O-Wisp) verbrennt es Gegner: Das Ziel verliert pro Runde 1/16 KP und sein körperlicher Angriff wird halbiert. Mit Thunderbolt (durch das Item Magnet 20 % stärker) und Hydro Pump teilt es selbst aus."
           },
           {
             "name": "Ninetales-Alola",
-            "role": "Tempo und Kontrolle. Es bringt Schnee mit (verstärkt Eis-Angriffe), schießt starke Eis-Attacken und kann mit Zugabe (Encore) Gegner in eine Aktion einsperren."
+            "role": "Eure Haupt-Angreiferin. Ihre Fähigkeit Snow Warning lässt es schneien, was eure Eis-Attacken stützt. Blizzard (durch das Item Ewiges Eis 20 % stärker) trifft beide Gegner, und Freeze-Dry trifft sogar Wasser-Pokémon super effektiv. Mit Zugabe (Encore) zwingt sie einen Gegner, 3 Runden lang dieselbe Attacke zu wiederholen."
           },
           {
             "name": "Glimmora",
-            "role": "Dein Mega-Pokémon und Haupt-Schadenswerfer. Nach der Mega-Entwicklung trifft es extrem hart mit Gift- und Gesteins-Attacken über beide Gegner hinweg."
+            "role": "Euer breiter Spezial-Angreifer. Power Gem, Sludge Bomb und Earth Power decken viele Gegner ab. Mit Schutzstacheln (Spiky Shield) schützt es sich eine Runde, und ein Gegner, der es dabei mit Kontakt angreift, verliert 1/8 KP."
           },
           {
             "name": "Kingambit",
-            "role": "Harter Nahkämpfer mit Vorhand-Trick. Knochenschneider (Sucker Punch) trifft zuerst, wenn der Gegner angreift, und es wird stärker, wenn seine Werte gesenkt werden."
+            "role": "Euer harter Schläger. Sucker Punch trifft zuerst, wenn das Ziel angreift. Seine Fähigkeit Defiant lässt seinen Angriff stark steigen, wenn ein Gegner einen seiner Werte senkt. Die Tahaibeere (Chople Berry) fängt einen super-effektiven Kampf-Treffer einmal halb ab."
           },
           {
             "name": "Garchomp",
-            "role": "Schneller Allrounder. Mit Schwerttanz (Swords Dance) lädt es seinen Angriff auf und räumt dann mit Erdbeben (Earthquake) und Drachenklaue (Dragon Claw) auf."
+            "role": "Euer flexibler Allrounder. Mit Schwerttanz (Swords Dance) steigt sein Angriff um +2, danach hauen Earthquake (trifft beide Gegner) und Dragon Claw hart rein. Die Wunderbeere (Lum Berry) heilt einmal sofort jeden Status wie Brand, Schlaf oder Paralyse."
           }
         ],
         "game_plan": [
-          "Schritt 1: Starte meist mit Talonflame plus einem Angreifer (z. B. Glimmora oder Garchomp). Setze in Runde 1 Rückenwind (Tailwind), damit dein Team schneller ist.",
-          "Schritt 2: Nutze das Tempo und greife sofort an. Lass Glimmora Mega werden, wenn du flächendeckenden Schaden auf beide Gegner brauchst.",
-          "Schritt 3: Räume Stück für Stück ab. Sichere wichtige Treffer mit Schutzschild (Protect) ab und ersetze Tempo später durch Schnee von Ninetales-Alola."
+          "Schritt 1: Starte oft mit Talonflame plus einem Angreifer. Setze in Runde 1 Rückenwind (Tailwind), damit eure ganze Seite 4 Runden lang doppelt so schnell ist.",
+          "Schritt 2: Nutze das Tempo aus. Ninetales-Alola schießt mit Blizzard auf beide Gegner, Glimmora und Rotom-Wash teilen mit Spezial-Attacken aus. Verbrenne mit Rotom-Washs Irrlicht (Will-O-Wisp) gegnerische körperliche Angreifer.",
+          "Schritt 3: Räume Restwerk auf. Kingambit holt mit Sucker Punch und Garchomp nach Schwerttanz (Swords Dance) langsame oder angeschlagene Gegner ab, solange Rückenwind euch schnell hält."
         ],
         "tips": [
-          "Setze nicht beide Schnellmacher gleichzeitig ab. Halte Ninetales-Alola in der Hinterhand, falls Talonflame fällt.",
-          "Glimmora kann nur einmal pro Kampf Mega werden – entscheide das, wenn du wirklich beide Gegner treffen willst.",
-          "Mit Knochenschneider (Sucker Punch) von Kingambit triffst du nur, wenn der Gegner angreift – nutzlos, wenn er Schutzschild (Protect) oder Statusattacken nutzt.",
-          "Ziehe ein angeschlagenes Pokémon zurück, bevor es fällt – behalte lieber Druck mit frischen Angreifern."
+          "Vergiss Schutzschild (Protect) nicht: Schützt eine Runde, aber wirkt nicht zuverlässig, wenn du es zweimal hintereinander nutzt — also nicht spammen.",
+          "Pass auf bei Earthquake von Garchomp: Es trifft auch dein eigenes Pokémon daneben. Stelle Ninetales, Glimmora oder Rotom-Wash daneben (Rotom-Wash schwebt durch Levitate) oder lass den Partner Schutzschild nutzen.",
+          "Setze Rückenwind möglichst früh, denn er hält nur 4 Runden — danach geht euer Tempovorteil verloren.",
+          "Ziehe ein angeschlagenes Pokémon lieber zurück, statt es zu opfern. Kingambit und Garchomp sind deine späten Räumer und sollten gegen Ende noch leben."
         ]
       },
       "en": {
-        "overview": "This team wants to apply fast pressure. Talonflame or Alolan Ninetales speed up the whole team, then hard hitters like Glimmora, Garchomp and Kingambit clean up. You win through speed and big hits, not by stalling.",
+        "overview": "This team wants to apply fast pressure: it makes your whole side much faster for a few turns with Tailwind (Rückenwind), then pushes through with strong special and ice attacks. At the same time it disrupts the opponent with burns and snow so your attackers get through more easily.",
         "roles": [
           {
             "name": "Talonflame",
-            "role": "Your speed setter. It uses Tailwind (Rückenwind) to make your team move twice as fast for two turns, and can also chip in with Fire attacks."
+            "role": "Your speed-setter. It brings Tailwind (Rückenwind), which makes your whole side twice as fast for 4 turns. Thanks to its ability Gale Wings (its Flying moves go first at full HP) it can hit fast foes early with Acrobatics."
           },
           {
             "name": "Rotom-Wash",
-            "role": "A solid disruptive attacker. With Will-O-Wisp (Irrlicht) it weakens enemy attackers while dealing Water and Electric damage."
+            "role": "Your disruptor and chip damage. With Will-O-Wisp (Irrlicht) it burns foes: the target loses 1/16 HP each turn and its physical attack is halved. With Thunderbolt (20% stronger from the item Magnet) and Hydro Pump it deals damage itself."
           },
           {
             "name": "Ninetales-Alola",
-            "role": "Speed and control. It brings snow (boosts Ice attacks), fires strong Ice moves, and can use Encore (Zugabe) to lock a foe into one action."
+            "role": "Your main attacker. Its ability Snow Warning makes it snow, which supports your ice attacks. Blizzard (20% stronger from the item Never-Melt Ice) hits both foes, and Freeze-Dry even hits Water Pokémon super effectively. With Encore (Zugabe) it forces a foe to repeat the same move for 3 turns."
           },
           {
             "name": "Glimmora",
-            "role": "Your Mega Pokémon and main damage dealer. After Mega Evolving it hits extremely hard with Poison and Rock attacks across both foes."
+            "role": "Your broad special attacker. Power Gem, Sludge Bomb and Earth Power cover many foes. With Spiky Shield (Schutzstacheln) it protects itself for one turn, and a foe who attacks it with contact during that loses 1/8 HP."
           },
           {
             "name": "Kingambit",
-            "role": "A heavy melee hitter with a priority trick. Sucker Punch (Knochenschneider) strikes first when the foe attacks, and it grows stronger when its stats get lowered."
+            "role": "Your hard hitter. Sucker Punch strikes first when the target attacks. Its ability Defiant sharply raises its attack when a foe lowers one of its stats. The Chople Berry (Tahaibeere) softens one super-effective Fighting hit once."
           },
           {
             "name": "Garchomp",
-            "role": "A fast all-rounder. With Swords Dance (Schwerttanz) it boosts its attack, then sweeps with Earthquake (Erdbeben) and Dragon Claw (Drachenklaue)."
+            "role": "Your flexible all-rounder. With Swords Dance (Schwerttanz) its attack rises by +2, then Earthquake (hits both foes) and Dragon Claw hit hard. The Lum Berry (Wunderbeere) instantly cures any status once, like burn, sleep or paralysis."
           }
         ],
         "game_plan": [
-          "Step 1: Usually lead with Talonflame plus one attacker (e.g. Glimmora or Garchomp). On turn 1, use Tailwind (Rückenwind) so your team is faster.",
-          "Step 2: Use that speed and attack right away. Let Glimmora Mega Evolve when you need spread damage on both foes.",
-          "Step 3: Clean up piece by piece. Protect (Schutzschild) key Pokémon from damage and switch your speed source to Ninetales-Alola's snow later."
+          "Step 1: Often start with Talonflame plus one attacker. Use Tailwind (Rückenwind) on turn 1 so your whole side is twice as fast for 4 turns.",
+          "Step 2: Use the speed. Ninetales-Alola fires Blizzard at both foes, while Glimmora and Rotom-Wash deal damage with special moves. Burn enemy physical attackers with Rotom-Wash's Will-O-Wisp (Irrlicht).",
+          "Step 3: Clean up. Kingambit finishes with Sucker Punch and Garchomp after Swords Dance (Schwerttanz) takes out slow or weakened foes while Tailwind keeps you fast."
         ],
         "tips": [
-          "Don't send out both speed setters at once. Keep Ninetales-Alola in reserve in case Talonflame faints.",
-          "Glimmora can only Mega Evolve once per battle – do it when you really want to hit both foes.",
-          "Kingambit's Sucker Punch (Knochenschneider) only works if the foe attacks – useless if they use Protect (Schutzschild) or a status move.",
-          "Pull a weakened Pokémon out before it faints – keep the pressure up with fresh attackers."
+          "Don't forget Protect (Schutzschild): it guards for one turn, but it becomes unreliable if you use it twice in a row — so don't spam it.",
+          "Be careful with Garchomp's Earthquake: it also hits your own ally next to it. Place Ninetales, Glimmora or Rotom-Wash beside it (Rotom-Wash floats thanks to Levitate) or have the partner use Protect.",
+          "Set Tailwind early, since it only lasts 4 turns — after that you lose your speed advantage.",
+          "Pull a weakened Pokémon back rather than sacrificing it. Kingambit and Garchomp are your late-game cleaners and should still be alive near the end."
         ]
       }
     },
     "CEM5K27S1W": {
       "team_hash": "65f86b2ea9373d5a",
-      "prompt_version": 2,
+      "prompt_version": 3,
       "team_name": "Crystal's Korea PTC 2026 Champion Team",
-      "generated_at": "2026-06-12T20:13:40Z",
+      "generated_at": "2026-06-13T21:24:24Z",
       "model": "claude-opus-4-8",
       "de": {
-        "overview": "Dieses Team ist flexibel: Es hat zwei mögliche Mega-Entwicklungen und kann je nach Gegner entweder schnell und aggressiv mit Sonne (Charizard) oder kontrolliert mit einer aufbauenden Fee (Floette) spielen. Incineroar schwächt Gegner, Sinistcha kann sogar einen langsamen Plan über Bizarroraum (Trick Room) ermöglichen. Du wählst pro Kampf eine Strategie und passt deine ersten zwei Pokémon daran an.",
+        "overview": "Dieses Team hat zwei Gesichter und du entscheidest pro Kampf, welches du spielst. Entweder du gehst auf schnellen Schaden mit Sonne durch Mega-Glurak Y, oder du verlangsamst das Spiel mit Bizarroraum (Trick Room) und Sinistcha. Wichtig: Du kannst nur EIN Pokémon pro Kampf mega-entwickeln – also entweder Floette zu Mega-Florges ODER Glurak zu Mega-Glurak Y.",
         "roles": [
           {
             "name": "Floette-Eternal",
-            "role": "Mega-Kandidat und Aufbau-Angreifer. Mit Calm Mind steigert es seine Spezial-Stärke und Verteidigung und räumt dann mit Fee-Attacken auf."
+            "role": "Wird beim Einsatz zu Mega-Florges (riesiger Spezial-Angriff). Mit Gedankengut (Calm Mind) steigert es eigenen Spezial-Angriff und Spezial-Verteidigung um je eine Stufe und haut dann mit Mondgewalt (Moonblast) und der Flächenattacke Zauberschein (Dazzling Gleam) zu."
           },
           {
             "name": "Aegislash",
-            "role": "Robuster Angreifer mit Fokusgurt (Focus Sash), der einen Treffer überlebt. Schadet hart und kann mit Königsschild (King's Shield) Angriffe blocken und gegnerische Angreifer schwächen."
+            "role": "Harter Zweitschläger. Schattenstoß (Shadow Sneak) trifft immer zuerst und sichert KOs. Mit Königsschild (King's Shield) schützt es sich und senkt den Angriff von Gegnern, die es per Kontakt angreifen, um eine Stufe. Der Fokusgurt (Focus Sash) lässt es einen sicheren K.O.-Treffer mit 1 KP überleben."
           },
           {
             "name": "Incineroar",
-            "role": "Dein Support-Anker. Senkt beim Reinkommen mit Bedroher (Intimidate) den Angriff der Gegner, stört mit Mogelhieb (Fake Out) und kann mit Abschiedsbrief (Parting Shot) tauschen und schwächen."
+            "role": "Dein Support-Anker. Bedroher (Intimidate) senkt beim Erscheinen den Angriff beider Gegner. Mitnehmer (Fake Out) lässt im ersten Zug ein Ziel zurückschrecken. Mit Standpauke (Parting Shot) senkt es Angriff und Spezial-Angriff des Ziels um je eine Stufe und wechselt selbst aus."
           },
           {
             "name": "Charizard",
-            "role": "Mega-Kandidat mit Glurakonit Y (Charizardite Y): Es ruft Sonne und schlägt extrem hart mit Feuer-Flächenattacken zu. Dein schneller Spezial-Brecher."
+            "role": "Wird beim Einsatz zu Mega-Glurak Y und erzeugt durch Dürre (Drought) 5 Runden harsches Sonnenlicht. Damit wird Feuer stark, Solarstrahl (Solar Beam) muss nicht aufladen und Heißluft (Heat Wave) trifft beide Gegner gleichzeitig."
           },
           {
             "name": "Garchomp",
-            "role": "Schneller Räumer mit Wahlschal (Choice Scarf), der dank Tempo viele Gegner zuerst trifft. Mit Felsgrab (Rock Tomb) kann es Gegner langsamer machen."
+            "role": "Schneller Sweeper. Durch den Wahlschal (Choice Scarf) ist es 1,5-fach schneller, aber auf eine Attacke festgelegt, bis es auswechselt. Erdbeben (Earthquake) trifft alle anderen Pokémon, Felswurf (Rock Tomb) senkt zusätzlich die Initiative des Ziels."
           },
           {
             "name": "Sinistcha",
-            "role": "Defensiver Helfer. Zieht mit Wutpulver (Rage Powder) gegnerische Angriffe auf sich und kann Bizarroraum (Trick Room) stellen, damit langsame Pokémon zuerst angreifen."
+            "role": "Dein Bizarroraum-Pokémon. Bizarroraum (Trick Room) lässt 5 Runden lang die langsameren Pokémon zuerst handeln. Wutpulver (Rage Powder) zieht alle Einzelziel-Angriffe der Gegner eine Runde auf sich. Seine Fähigkeit Gastlichkeit (Hospitality) heilt den Partner beim Erscheinen ein Stück."
           }
         ],
         "game_plan": [
-          "Schritt 1: Entscheide vor dem Kampf, welche Strategie passt. Gegen schnelle, offensive Teams nimm Charizard als Mega (Sonne + harte Treffer). Gegen defensive Teams nimm Floette als Mega und baue mit Calm Mind auf.",
-          "Schritt 2: Plan A 'Sonne' – Schicke Charizard und Incineroar zuerst ins Feld. Incineroar schwächt mit Bedroher (Intimidate) die Gegner, Charizard schlägt unter Sonne mit Hitzewelle (Heat Wave) doppelt zu. Garchomp kommt als schneller Nachschlag.",
-          "Schritt 3: Plan B 'Kontrolle' – Schicke Floette mit einem Schützer wie Incineroar oder Sinistcha. Stelle Floette mit Schutzschild (Protect) sicher, baue Calm Mind auf und übernimm dann mit Zauberschein (Moonblast). Sinistcha kann zur Not Bizarroraum (Trick Room) stellen, damit deine langsamen Pokémon zuerst handeln."
+          "Schritt 1: Entscheide vor dem Kampf, welcher Plan zum Gegner passt. Schneller Gegner ohne dicke Wände? Dann Sonne mit Mega-Glurak Y. Sehr schnelle oder offensive Gegner? Dann Bizarroraum mit Sinistcha.",
+          "Schritt 2 (Sonne): Starte mit Charizard (wird Mega-Glurak Y) plus Incineroar. Incineroar schwächt mit Bedroher und Mitnehmer die Gegner, Glurak drückt mit Heißluft auf beide Ziele. Garchomp kommt als schneller Aufräumer nach.",
+          "Schritt 3 (Bizarroraum): Starte mit Sinistcha plus Floette (wird Mega-Florges). Sinistcha stellt Bizarroraum, danach räumt Mega-Florges mit Gedankengut und Zauberschein auf, während Wutpulver es schützt.",
+          "Schritt 4: Nutze Incineroars Standpauke, um sicher rauszugehen und einen Angreifer einzuwechseln. Schutzschild (Protect) bei Glurak, Floette oder Sinistcha gibt dir eine sichere Runde, wenn du den Druck abwarten willst."
         ],
         "tips": [
-          "Du darfst pro Kampf nur EINE Mega-Entwicklung machen. Lege dich früh fest und entwickle das gewählte Pokémon im ersten Zug.",
-          "Nutze Schutzschild (Protect), um einen gefährlichen Doppelangriff abzuwarten, während dein Partner aufräumt.",
-          "Mit Mogelhieb (Fake Out) von Incineroar legst du einen Gegner für eine Runde lahm – nutze das, um sicher Charizard zu entwickeln oder Floette aufzubauen.",
-          "Zieh ein angeschlagenes Pokémon lieber zurück, statt es zu verlieren – besonders Incineroar willst du mehrfach reinschicken, damit Bedroher (Intimidate) immer wieder wirkt."
+          "Denk dran: Nur EINE Mega-Entwicklung pro Kampf. Lege dich vorher fest, ob Glurak oder Florges dein Mega ist.",
+          "Garchomp und Bizarroraum passen schlecht zusammen – im Bizarroraum ist langsam besser, der Wahlschal macht Garchomp aber schnell. Spiele Garchomp im Sonnen-Plan, Sinistcha im Trick-Room-Plan.",
+          "Mitnehmer (Fake Out) funktioniert nur in der ersten Runde, in der Incineroar im Feld ist – nutze es früh, um Tempo zu klauen.",
+          "Ziehe Incineroar mit Standpauke zurück, statt es sterben zu lassen – so behältst du Bedroher für später."
         ]
       },
       "en": {
-        "overview": "This team is flexible: it has two possible Mega Evolutions and can play either fast and aggressive with sun (Charizard) or slow and controlled with a setup fairy (Floette), depending on the opponent. Incineroar weakens foes, and Sinistcha can even enable a slow plan with Trick Room (Bizarroraum). You pick one strategy per battle and choose your first two Pokémon to match it.",
+        "overview": "This team has two faces, and you decide each game which one to play. Either you go for fast damage with sun from Mega Charizard Y, or you slow the game down with Trick Room (Bizarroraum) and Sinistcha. Important: you can only Mega Evolve ONE Pokémon per battle – so either Floette into Mega Florges OR Charizard into Mega Charizard Y.",
         "roles": [
           {
             "name": "Floette-Eternal",
-            "role": "Mega candidate and setup attacker. With Calm Mind it boosts its special power and defense, then cleans up with Fairy attacks."
+            "role": "Turns into Mega Florges on entry (huge Special Attack). With Calm Mind (Gedankengut) it raises its own Special Attack and Special Defense by one stage each, then hits hard with Moonblast (Mondgewalt) and the spread move Dazzling Gleam (Zauberschein)."
           },
           {
             "name": "Aegislash",
-            "role": "Tough attacker with Focus Sash (Fokusgurt) that survives one hit. Hits hard and can block attacks and weaken attackers with King's Shield (Königsschild)."
+            "role": "Strong second hitter. Shadow Sneak (Schattenstoß) always strikes first and secures KOs. King's Shield (Königsschild) protects it and lowers the Attack of contact attackers by one stage. The Focus Sash (Fokusgurt) lets it survive one sure-KO hit with 1 HP."
           },
           {
             "name": "Incineroar",
-            "role": "Your support anchor. Lowers foes' attack on entry with Intimidate (Bedroher), disrupts with Fake Out (Mogelhieb), and can switch out while weakening foes with Parting Shot (Abschiedsbrief)."
+            "role": "Your support anchor. Intimidate (Bedroher) lowers both opponents' Attack on entry. Fake Out (Mitnehmer) makes a target flinch on the first turn. With Parting Shot (Standpauke) it lowers the target's Attack and Special Attack by one stage each and switches itself out."
           },
           {
             "name": "Charizard",
-            "role": "Mega candidate with Charizardite Y (Glurakonit Y): it summons sun and hits extremely hard with spread Fire attacks. Your fast special breaker."
+            "role": "Turns into Mega Charizard Y on entry and creates 5 turns of harsh sunlight with Drought (Dürre). This powers up Fire moves, lets Solar Beam (Solarstrahl) fire without charging, and Heat Wave (Heißluft) hits both opponents at once."
           },
           {
             "name": "Garchomp",
-            "role": "Fast cleaner with Choice Scarf (Wahlschal) that hits many foes first thanks to its speed. With Rock Tomb (Felsgrab) it can also slow opponents down."
+            "role": "Fast sweeper. The Choice Scarf (Wahlschal) makes it 1.5× faster but locks it into one move until it switches. Earthquake (Erdbeben) hits every other Pokémon, and Rock Tomb (Felswurf) also lowers the target's Speed."
           },
           {
             "name": "Sinistcha",
-            "role": "Defensive helper. Pulls enemy attacks onto itself with Rage Powder (Wutpulver) and can set Trick Room (Bizarroraum) so slow Pokémon move first."
+            "role": "Your Trick Room Pokémon. Trick Room (Bizarroraum) lets the slower Pokémon act first for 5 turns. Rage Powder (Wutpulver) pulls all single-target attacks onto itself for one turn. Its ability Hospitality (Gastlichkeit) heals its partner a bit on entry."
           }
         ],
         "game_plan": [
-          "Step 1: Decide before the battle which strategy fits. Against fast, offensive teams use Charizard as your Mega (sun + heavy hits). Against defensive teams use Floette as your Mega and build up with Calm Mind.",
-          "Step 2: Plan A 'Sun' – Lead Charizard and Incineroar. Incineroar weakens foes with Intimidate (Bedroher), and Charizard hits both opponents under sun with Heat Wave (Hitzewelle). Bring Garchomp as a fast follow-up.",
-          "Step 3: Plan B 'Control' – Lead Floette with a protector like Incineroar or Sinistcha. Keep Floette safe with Protect (Schutzschild), stack Calm Mind, then take over with Moonblast (Zauberschein). If needed, Sinistcha can set Trick Room (Bizarroraum) so your slow Pokémon act first."
+          "Step 1: Before the game, decide which plan fits the opponent. Fast opponent without big walls? Go sun with Mega Charizard Y. Very fast or offensive opponents? Go Trick Room with Sinistcha.",
+          "Step 2 (Sun): Lead with Charizard (becomes Mega Charizard Y) plus Incineroar. Incineroar weakens the opponents with Intimidate and Fake Out, while Charizard pressures both targets with Heat Wave. Garchomp comes in afterwards as a fast cleaner.",
+          "Step 3 (Trick Room): Lead with Sinistcha plus Floette (becomes Mega Florges). Sinistcha sets Trick Room, then Mega Florges cleans up with Calm Mind and Dazzling Gleam while Rage Powder shields it.",
+          "Step 4: Use Incineroar's Parting Shot to leave safely and bring in an attacker. Protect (Schutzschild) on Charizard, Floette or Sinistcha buys you a safe turn when you want to wait out pressure."
         ],
         "tips": [
-          "You can only Mega Evolve ONE Pokémon per battle. Decide early and evolve your chosen one on the first turn.",
-          "Use Protect (Schutzschild) to wait out a dangerous double attack while your partner cleans up.",
-          "Incineroar's Fake Out (Mogelhieb) flinches one foe for a turn – use it to safely Mega Evolve Charizard or set up Floette.",
-          "Pull back a weakened Pokémon instead of losing it – especially Incineroar, which you want to send in multiple times so Intimidate (Bedroher) triggers again and again."
+          "Remember: only ONE Mega Evolution per battle. Decide beforehand whether Charizard or Florges is your Mega.",
+          "Garchomp and Trick Room don't mix – under Trick Room slow is better, but the Choice Scarf makes Garchomp fast. Play Garchomp in the sun plan, Sinistcha in the Trick Room plan.",
+          "Fake Out (Mitnehmer) only works on the first turn Incineroar is on the field – use it early to steal momentum.",
+          "Pull Incineroar back with Parting Shot instead of letting it die – that way you keep Intimidate for later."
         ]
       }
     },
     "H5NCMMSKFG": {
       "team_hash": "a0d37a7b27d2da6f",
-      "prompt_version": 2,
+      "prompt_version": 3,
       "team_name": "ElctroLychee's Spikemuth Showdown #1 Champion Team",
-      "generated_at": "2026-06-12T20:14:27Z",
+      "generated_at": "2026-06-13T21:25:20Z",
       "model": "claude-opus-4-8",
       "de": {
-        "overview": "Dieses Team baut auf Regen. Politoed bringt mit seiner Fähigkeit dauerhaftes Regenwetter, das Wasser-Attacken stärker macht. Darum schlagen Basculegion und die schnellen Angreifer hart und schnell zu, während du das Tempo mit Rückenwind (Tailwind) kontrollierst.",
+        "overview": "Das ist ein Regen-Team. Politoed bringt mit seiner Fähigkeit Niederschlag (Drizzle) automatisch Regen aufs Feld, und im Regen schlagen eure Wasser-Attacken viel härter zu. Dazu hast du schnelle Angreifer und mit Talonflame Rückenwind (Tailwind), um das Tempo zu kontrollieren und früh Druck zu machen.",
         "roles": [
           {
             "name": "Meowscarada",
-            "role": "Schneller Angreifer mit Fokusgurt (Focus Sash), der einen Treffer überlebt. Mit U-turn (Kehrtwende) holst du es zurück und schickst frischen Schaden nach."
+            "role": "Schneller Angreifer und Stör-Pokémon. Trifft mit Flower Trick zuverlässig und kann mit U-turn herausspringen, um einen Mitspieler sicher reinzuholen. Mit Fokusgurt (Focus Sash) überlebt es einen sonst tödlichen Treffer mit 1 KP."
           },
           {
             "name": "Basculegion",
-            "role": "Dein Haupt-Schadensbringer. Im Regen werden seine Wasser-Attacken sehr stark, und Aqua Jet (Aquadüse) trifft sogar vor dem Gegner."
+            "role": "Eure Hauptwaffe im Regen. Wave Crash macht durch Zauberwasser (Mystic Water, +20 % auf Wasser-Attacken), die Fähigkeit Adaptability und den Regen enormen Schaden. Aqua Jet trifft vor dem Gegner und holt angeschlagene Ziele ab. Last Respects wird stärker, je mehr eigene Pokémon schon K.O. sind."
           },
           {
             "name": "Lucario",
-            "role": "Mega-Kandidat mit breiter Angriffsauswahl. Schlägt gezielt Lücken, gegen die andere im Team Probleme haben (z. B. Stahl, Gestein)."
+            "role": "Flexibler Angreifer mit gutem Typ-Mix. Aura Sphere, Meteor Mash, Bone Rush und Stone Edge decken viele Gegner ab. Hält Lucarionite – die genaue Mechanik überlasse ich dir im Kampf, behandle es einfach als Angriffs-Pokémon."
           },
           {
             "name": "Politoed",
-            "role": "Das Herz des Teams. Seine Fähigkeit Niesel (Drizzle) macht Regen, der deine Wasser-Angreifer befeuert. Abgesang (Perish Song) zwingt Gegner notfalls zum Wechseln."
+            "role": "Der Regen-Macher. Setzt mit Niederschlag (Drizzle) sofort beim Reinkommen Regen, der eure Wasser-Attacken stärkt. Wetterball (Weather Ball) wird im Regen zu einer starken Wasser-Attacke. Mit Abgesang (Perish Song) gehen nach 3 Runden alle Pokémon auf dem Feld K.O., außer sie wechseln aus. Prunusbeere (Sitrus Berry) heilt 25 % KP, wenn es unter die Hälfte fällt."
           },
           {
             "name": "Talonflame",
-            "role": "Tempo-Geber. Mit Rückenwind (Tailwind) wird dein ganzes Team für mehrere Runden schneller, und Sturzflug (Brave Bird) trifft dank Fähigkeit immer zuerst."
+            "role": "Euer Tempo- und Stör-Pokémon. Rückenwind (Tailwind) verdoppelt 4 Runden lang die Initiative eurer ganzen Seite. Irrlicht (Will-O-Wisp, 85 % Genauigkeit) verbrennt ein Ziel: Es verliert pro Runde 1/16 KP und sein physischer Angriff wird halbiert."
           },
           {
             "name": "Drampa",
-            "role": "Mega-Kandidat mit starkem Flächenangriff Lautstärke (Hyper Voice), der beide Gegner gleichzeitig trifft. Gut, um zwei schwache Gegner auf einmal wegzuräumen."
+            "role": "Spezial-Angreifer für Flächenschaden. Hyper Voice trifft beide Gegner gleichzeitig, Dragon Pulse und Earth Power decken Einzelziele ab. Protect schützt es eine Runde, wenn es gefährdet ist."
           }
         ],
         "game_plan": [
-          "Schritt 1: Schicke meistens Politoed zuerst raus, damit sofort Regen liegt. Daneben Basculegion, das vom Regen profitiert.",
-          "Schritt 2: Alternativ Talonflame mit raus, um in Runde 1 Rückenwind (Tailwind) zu setzen — dann ist dein Team schneller und du schlägst zuerst zu.",
-          "Schritt 3: Greife im Regen mit Basculegions Wasser-Attacken an. Hol angeschlagene Pokémon mit Meowscaradas U-turn (Kehrtwende) sicher zurück.",
-          "Schritt 4: Entscheide deine Mega-Entwicklung: Nimm Lucario, wenn du gezielt Stahl-/Gesteins-Gegner brauchst; nimm Drampa, wenn du mit Lautstärke (Hyper Voice) beide Gegner gleichzeitig treffen willst. Pro Kampf nur ein Mega!"
+          "Schritt 1: Bring Politoed früh ins Feld, damit der Regen läuft. Stell Basculegion daneben – seine Wasser-Attacken werden so richtig stark.",
+          "Schritt 2: Drück mit Basculegion (Wave Crash) und Drampa (Hyper Voice für beide Gegner) auf Schaden. Mit Talonflame kannst du Rückenwind (Tailwind) setzen, damit dein Team 4 Runden lang schneller als der Gegner ist.",
+          "Schritt 3: Räum angeschlagene Ziele mit Aqua Jet (Basculegion) ab, das vor dem Gegner trifft. Wenn du in einer Pattsituation steckst, setze mit Politoed Abgesang (Perish Song) und wechsle deine eigenen Pokémon rechtzeitig aus."
         ],
         "tips": [
-          "Halte Schutzschild (Protect) für die Runde bereit, in der du einen starken Angriff erwartest — aber nutze es nicht jede Runde, sonst wird es vorhersehbar.",
-          "Wenn der Regen vom gegnerischen Wetter abgelöst wird, schicke Politoed kurz noch einmal raus, um den Regen neu zu setzen.",
-          "Meowscaradas Fokusgurt (Focus Sash) wirkt nur bei vollen KP — vermeide vorher Schaden durch Wirbelsturm oder Splitter.",
-          "Lege dich früh fest, welches Mega du brauchst, und entwickle es lieber sofort, statt zu zögern."
+          "Halte den Regen am Laufen: Wenn Politoed K.O. geht oder der Gegner anderes Wetter setzt, verlierst du viel Schaden. Bring Politoed bei Bedarf erneut.",
+          "Nutze Protect, wenn du eine starke gegnerische Attacke oder das Auslaufen von Rückenwind abwarten willst – aber nicht zweimal hintereinander, sonst sinkt die Chance stark.",
+          "Mit U-turn (Meowscarada) kannst du schlechte Aufstellungen sicher korrigieren: Schaden machen und gleichzeitig den besseren Mitspieler reinholen.",
+          "Bei Abgesang (Perish Song) den eigenen Countdown nicht vergessen – wechsle deine Pokémon vor der dritten Runde aus, sonst gehen sie selbst K.O."
         ]
       },
       "en": {
-        "overview": "This team is built around rain. Politoed brings permanent rain with its ability, and rain makes Water moves hit harder. So Basculegion and your fast attackers strike quickly and hard, while you control the speed with Tailwind (Rückenwind).",
+        "overview": "This is a rain team. Politoed automatically sets rain with its ability Drizzle, and in the rain your Water moves hit much harder. On top of that you have fast attackers and Talonflame's Tailwind to control the speed and apply pressure early.",
         "roles": [
           {
             "name": "Meowscarada",
-            "role": "A fast attacker with Focus Sash (Fokusgurt), so it survives one hit. With U-turn (Kehrtwende) you pull it back and bring in fresh damage."
+            "role": "Fast attacker and disruptor. Flower Trick lands reliably, and U-turn lets it jump out and bring in a teammate safely. With Focus Sash (Fokusgurt) it survives an otherwise lethal hit on 1 HP."
           },
           {
             "name": "Basculegion",
-            "role": "Your main damage dealer. In rain its Water moves become very strong, and Aqua Jet (Aquadüse) even hits before the opponent."
+            "role": "Your main weapon in the rain. Wave Crash deals huge damage thanks to Mystic Water (Zauberwasser, +20 % to Water moves), the Adaptability ability and the rain. Aqua Jet strikes before the opponent to finish off weakened targets. Last Respects gets stronger the more of your own Pokémon have fainted."
           },
           {
             "name": "Lucario",
-            "role": "A Mega candidate with a wide range of attacks. It picks off threats the rest of the team struggles with (e.g. Steel, Rock)."
+            "role": "Flexible attacker with great coverage. Aura Sphere, Meteor Mash, Bone Rush and Stone Edge hit many opponents. It holds Lucarionite – I'll leave the exact mechanic to you in battle, just treat it as an offensive Pokémon."
           },
           {
             "name": "Politoed",
-            "role": "The heart of the team. Its ability Drizzle (Niesel) makes rain, which powers up your Water attackers. Perish Song (Abgesang) forces opponents to switch when needed."
+            "role": "The rain setter. Drizzle (Niederschlag) brings rain the moment it enters, boosting your Water moves. Weather Ball (Wetterball) becomes a strong Water move in rain. With Perish Song (Abgesang) every Pokémon on the field faints 3 turns later unless it switches out. Sitrus Berry (Prunusbeere) restores 25 % HP when it drops below half."
           },
           {
             "name": "Talonflame",
-            "role": "Speed setter. With Tailwind (Rückenwind) your whole team is faster for a few turns, and thanks to its ability Brave Bird (Sturzflug) always moves first."
+            "role": "Your speed and disruption Pokémon. Tailwind (Rückenwind) doubles your whole side's Speed for 4 turns. Will-O-Wisp (Irrlicht, 85 % accuracy) burns a target: it loses 1/16 HP each turn and its physical attack is halved."
           },
           {
             "name": "Drampa",
-            "role": "A Mega candidate with the strong spread move Hyper Voice (Lautstärke), which hits both opponents at once. Great for clearing two weakened foes together."
+            "role": "Special attacker for spread damage. Hyper Voice hits both opponents at once, while Dragon Pulse and Earth Power cover single targets. Protect (Schutzschild) shields it for a turn when it's in danger."
           }
         ],
         "game_plan": [
-          "Step 1: Usually lead with Politoed so rain is up right away. Next to it, bring Basculegion, which loves the rain.",
-          "Step 2: Alternatively bring Talonflame to set Tailwind (Rückenwind) turn 1 — then your team is faster and strikes first.",
-          "Step 3: Attack in the rain with Basculegion's Water moves. Pull weakened Pokémon out safely with Meowscarada's U-turn (Kehrtwende).",
-          "Step 4: Choose your Mega: take Lucario when you need to hit Steel/Rock foes; take Drampa when you want to hit both opponents at once with Hyper Voice (Lautstärke). Only one Mega per battle!"
+          "Step 1: Bring Politoed out early so the rain is up. Put Basculegion next to it – its Water moves become really strong.",
+          "Step 2: Push damage with Basculegion (Wave Crash) and Drampa (Hyper Voice hitting both opponents). With Talonflame you can set Tailwind (Rückenwind) so your team outspeeds the opponent for 4 turns.",
+          "Step 3: Clean up weakened targets with Aqua Jet (Basculegion), which strikes before the opponent. If you're in a stalemate, use Perish Song (Abgesang) with Politoed and switch your own Pokémon out in time."
         ],
         "tips": [
-          "Keep Protect (Schutzschild) ready for the turn you expect a big attack — but don't use it every turn or it becomes predictable.",
-          "If enemy weather replaces your rain, briefly send Politoed back in to reset the rain.",
-          "Meowscarada's Focus Sash (Fokusgurt) only works at full HP — avoid chip damage from things like spread moves beforehand.",
-          "Decide early which Mega you need and evolve it right away instead of hesitating."
+          "Keep the rain going: if Politoed faints or the opponent sets different weather, you lose a lot of damage. Bring Politoed back when needed.",
+          "Use Protect when you want to wait out a strong enemy move or let Tailwind run out – but not twice in a row, or the success chance drops sharply.",
+          "Use U-turn (Meowscarada) to fix a bad matchup safely: deal damage and bring in the better teammate at the same time.",
+          "Don't forget your own Perish Song (Abgesang) countdown – switch your Pokémon out before the third turn, otherwise they faint too."
         ]
       }
     },
     "FQMW1X02WU": {
       "team_hash": "ea8d76ba5c38babc",
-      "prompt_version": 2,
+      "prompt_version": 3,
       "team_name": "punihina1334's Extreme Speed PokÃ©mon Champions #5 Champion Team",
-      "generated_at": "2026-06-12T20:15:24Z",
+      "generated_at": "2026-06-13T21:26:12Z",
       "model": "claude-opus-4-8",
       "de": {
-        "overview": "Dieses Team setzt auf Mega-Charizard Y, das beim Erscheinen die Sonne anschaltet und damit Feuer-Attacken stark verbessert. Drumherum hast du schnelle Angreifer plus zwei Wege, das Tempo zu steuern: Rückenwind (Tailwind) für Speed oder Bizarroraum (Trick Room) für langsame Pokémon. Du suchst dir je nach Gegner aus, ob du schneller sein willst oder langsam draufhaust.",
+        "overview": "Dieses Team setzt auf Sonne und Tempo. Charizard wird zu Mega-Glurak Y und macht die Sonne an, damit seine Feuer-Attacken brennen. Whimsicott macht euer Team mit Rückenwind (Tailwind) schnell, und ihr drückt mit harten Treffern auf beide Gegner gleichzeitig. Als zweiten Plan habt ihr mit Farigiraf den Bizarroraum (Trick Room) für langsame Angreifer.",
         "roles": [
           {
             "name": "Charizard",
-            "role": "Dein Hauptangreifer. Durch die Mega-Entwicklung (Charizardite Y) bekommt es die Fähigkeit Dürre (Drought) und macht die Sonne an, dadurch hauen Hitzewelle (Heat Wave) und Wetterball (Wetterball/Weather Ball) richtig rein und Solarstrahl (Solar Beam) lädt sofort."
+            "role": "Euer Hauptangreifer. Beim Einsatz wird es zu Mega-Glurak Y und seine Fähigkeit Dürre (Drought) erzeugt 5 Runden harsches Sonnenlicht. Damit schlagen Hitzewelle (Heat Wave, trifft beide Gegner) und Wetterball (Weather Ball) richtig hart zu, und Solarstrahl (Solar Beam) braucht keine Aufladerunde mehr."
           },
           {
             "name": "Whimsicott",
-            "role": "Dein Tempomacher. Mit Strolch (Prankster) nutzt es Rückenwind (Tailwind) immer zuerst, damit dein Team doppelt so schnell wird. Mit Zugabe (Encore) zwingt es Gegner, ihre letzte Attacke zu wiederholen, und der Fokusgurt (Focus Sash) hält es bei einem starken Treffer mit 1 KP am Leben."
+            "role": "Euer Tempo-Macher. Mit Rückenwind (Tailwind) verdoppelt es 4 Runden lang die Initiative eures ganzen Teams. Dank Fähigkeit Strolch (Prankster) kommen seine Status-Attacken zuerst. Mit Zugabe (Encore) zwingt es den Gegner, seine letzte Attacke 3 Runden zu wiederholen."
           },
           {
             "name": "Garchomp",
-            "role": "Schneller, harter Allrounder gegen Boden- und Drachenziele. Steinhagel (Rock Slide) trifft beide Gegner gleichzeitig und kann sie kurz erschrecken."
+            "role": "Stabiler Angreifer gegen Boden- und Drachen-Ziele. Steinhagel (Rock Slide) trifft beide Gegner. Fähigkeit Rauhaut (Rough Skin) verletzt Angreifer, die euch berühren. Die Prunusbeere (Sitrus Berry) heilt 25 % der KP, wenn es unter die Hälfte fällt."
           },
           {
             "name": "Farigiraf",
-            "role": "Dein Unterstützer. Mit Rückendeckung (Helping Hand) verstärkt es die Attacke eines Partners, und mit Bizarroraum (Trick Room) drehst du das Tempo um, sodass langsame Pokémon zuerst angreifen."
+            "role": "Euer Unterstützer und zweiter Plan. Mit Bizarroraum (Trick Room) handeln 5 Runden lang die langsameren Pokémon zuerst — gut für Kingambit. Rechte Hand (Helping Hand) verstärkt die Attacke eines Partners um 50 %. Die Kerzalbeere (Colbur Berry) halbiert einen super-effektiven Unlicht-Treffer."
           },
           {
             "name": "Kingambit",
-            "role": "Harter Schläger für späte Spielphasen. Tiefschlag (Sucker Punch) trifft vor dem Gegner, wenn der angreifen will. Dank Siegeswille (Defiant) wird sein Angriff sogar stärker, wenn ein Gegner ihn einschüchtert."
+            "role": "Schwerer Schläger, der im Bizarroraum (Trick Room) glänzt, weil er langsam ist. Tiefschlag (Sucker Punch) trifft zuerst, wenn das Ziel angreifen will. Fähigkeit Siegeswille (Defiant) macht ihn stärker, wenn ein Gegner seine Werte senkt."
           },
           {
             "name": "Tauros-Paldea-Aqua",
-            "role": "Schneller Wasser-Angreifer mit Bedroher (Intimidate), das beim Erscheinen den Angriff beider Gegner senkt. Aqua Jet trifft immer zuerst und holt sich angeschlagene Ziele."
+            "role": "Schneller Wasser-Angreifer. Seine Fähigkeit Bedroher (Intimidate) senkt beim Erscheinen den Angriff beider Gegner. Zauberwasser (Mystic Water) macht seine Wasser-Attacken um 20 % stärker. Aqua Jet trifft mit Vorrang zuerst."
           }
         ],
         "game_plan": [
-          "Schritt 1: Starte meistens mit Charizard und Whimsicott. Charizard macht die Sonne an, Whimsicott nutzt Rückenwind (Tailwind), damit dein Team schneller wird.",
-          "Schritt 2: Schlag mit Charizards Hitzewelle (Heat Wave) und einem Partner auf beide Gegner ein. Nutze Zugabe (Encore) von Whimsicott, um störende Gegner-Attacken festzunageln.",
-          "Schritt 3: Gegen sehr schnelle Gegner wählst du stattdessen den langsamen Plan: Bring Farigiraf für Bizarroraum (Trick Room) und drück mit Kingambit und Garchomp durch. Aqua Jet von Tauros und Tiefschlag (Sucker Punch) von Kingambit räumen am Ende verletzte Ziele weg."
+          "Schritt 1: Starte meist mit Charizard und Whimsicott. Charizard macht die Sonne an, Whimsicott setzt im ersten Zug Rückenwind (Tailwind) für 4 Runden Tempo.",
+          "Schritt 2: Drücke jetzt aufs Tempo. Charizard trifft mit Hitzewelle (Heat Wave) beide Gegner, Garchomp oder Tauros räumen einzelne Ziele ab. Nutze Zugabe (Encore), um einen lästigen Gegner festzunageln.",
+          "Schritt 3: Gegen sehr schnelle Gegnerteams kannst du stattdessen auf Farigiraf + Kingambit umstellen: Farigiraf setzt Bizarroraum (Trick Room), danach schlägt der langsame Kingambit zuerst zu."
         ],
         "tips": [
-          "Entscheide dich vor dem Kampf für EINEN Plan: schnell mit Rückenwind (Tailwind) oder langsam mit Bizarroraum (Trick Room). Beides gleichzeitig hebt sich auf.",
-          "Setz Schutzschild (Protect) nicht jede Runde. Heb es dir auf, wenn du einen großen Treffer kommen siehst oder eine Runde Zeit brauchst.",
-          "Mega-Charizard Y ist dein wichtigstes Pokémon – schick es nicht leichtfertig in offensichtliche Konter wie Stein- oder Wasser-Angriffe.",
-          "Mit Tauros' Bedroher (Intimidate) schwächst du gleich zwei gegnerische Angreifer; schick es gern rein, wenn der Gegner stark körperlich angreift."
+          "Entscheide dich pro Kampf für EINEN Plan: entweder schnell mit Rückenwind (Tailwind) oder langsam mit Bizarroraum (Trick Room) — nicht beides gleichzeitig.",
+          "Schutzschild (Protect) schützt 1 Runde, aber die Erfolgschance sinkt bei direkter Wiederholung. Setze es nicht jede Runde.",
+          "Die Sonne hält nur 5 Runden. Wirf Charizard nicht zu früh raus, wenn du seine starken Feuer-Treffer noch brauchst.",
+          "Whimsicotts Fokusgurt (Focus Sash) lässt es einen tödlichen Treffer mit 1 KP überleben — gut, um sicher Rückenwind (Tailwind) zu setzen, aber nur einmal."
         ]
       },
       "en": {
-        "overview": "This team is built around Mega-Charizard Y, which turns on the sun when it appears and makes Fire moves much stronger. Around it you have fast attackers plus two ways to control speed: Tailwind (Rückenwind) for going fast, or Trick Room (Bizarroraum) for slow Pokémon. You pick, based on the opponent, whether you want to be faster or hit hard while slow.",
+        "overview": "This team is built around sun and speed. Charizard turns into Mega Charizard Y and brings out the sun, so its Fire moves hit hard. Whimsicott speeds up your team with Tailwind (Rückenwind) while you smash both opponents with strong hits. As a backup plan, Farigiraf gives you Trick Room (Bizarroraum) for your slow attackers.",
         "roles": [
           {
             "name": "Charizard",
-            "role": "Your main attacker. Through Mega Evolution (Charizardite Y) it gets the ability Drought (Dürre) and turns on the sun, so Heat Wave (Hitzewelle) and Weather Ball (Wetterball) hit hard and Solar Beam (Solarstrahl) fires instantly."
+            "role": "Your main attacker. On entry it becomes Mega Charizard Y and its ability Drought (Dürre) creates 5 turns of harsh sunlight. That makes Heat Wave (Hitzewelle, hits both foes) and Weather Ball (Wetterball) hit very hard, and Solar Beam (Solarstrahl) no longer needs a charge turn."
           },
           {
             "name": "Whimsicott",
-            "role": "Your speed setter. With Prankster (Strolch) it uses Tailwind (Rückenwind) first, doubling your team's speed. With Encore (Zugabe) it forces an enemy to repeat its last move, and the Focus Sash (Fokusgurt) lets it survive a big hit with 1 HP."
+            "role": "Your speed setter. Tailwind (Rückenwind) doubles your whole team's Speed for 4 turns. Thanks to its ability Prankster (Strolch), its status moves go first. Encore (Zugabe) forces the foe to repeat its last move for 3 turns."
           },
           {
             "name": "Garchomp",
-            "role": "A fast, hard-hitting all-rounder against Ground and Dragon targets. Rock Slide (Steinhagel) hits both opponents at once and can briefly make them flinch."
+            "role": "Sturdy attacker against Ground and Dragon targets. Rock Slide (Steinhagel) hits both foes. Its ability Rough Skin (Rauhaut) hurts attackers that touch it. The Sitrus Berry (Prunusbeere) heals 25 % HP when it drops below half."
           },
           {
             "name": "Farigiraf",
-            "role": "Your supporter. With Helping Hand (Rückendeckung) it boosts a partner's attack, and with Trick Room (Bizarroraum) it flips the speed order so slow Pokémon move first."
+            "role": "Your supporter and backup plan. Trick Room (Bizarroraum) lets the slower Pokémon move first for 5 turns — great for Kingambit. Helping Hand (Rechte Hand) boosts a partner's move by 50 %. The Colbur Berry (Kerzalbeere) halves one super-effective Dark hit."
           },
           {
             "name": "Kingambit",
-            "role": "A heavy hitter for the late game. Sucker Punch (Tiefschlag) strikes before the enemy if they try to attack. Thanks to Defiant (Siegeswille), its attack even rises when an opponent intimidates it."
+            "role": "A heavy hitter that shines under Trick Room (Bizarroraum) because it is slow. Sucker Punch (Tiefschlag) strikes first if the target tries to attack. Its ability Defiant (Siegeswille) makes it stronger when a foe lowers its stats."
           },
           {
             "name": "Tauros-Paldea-Aqua",
-            "role": "A fast Water attacker with Intimidate (Bedroher), which lowers both opponents' attack when it appears. Aqua Jet always strikes first and finishes off weakened targets."
+            "role": "A fast Water attacker. Its ability Intimidate (Bedroher) lowers both foes' Attack on entry. Mystic Water (Zauberwasser) boosts its Water moves by 20 %. Aqua Jet strikes first with priority."
           }
         ],
         "game_plan": [
-          "Step 1: Most of the time start with Charizard and Whimsicott. Charizard turns on the sun, Whimsicott uses Tailwind (Rückenwind) to make your team faster.",
-          "Step 2: Hit both opponents with Charizard's Heat Wave (Hitzewelle) plus a partner. Use Whimsicott's Encore (Zugabe) to lock down annoying enemy moves.",
-          "Step 3: Against very fast opponents, pick the slow plan instead: bring Farigiraf for Trick Room (Bizarroraum) and push through with Kingambit and Garchomp. Tauros' Aqua Jet and Kingambit's Sucker Punch (Tiefschlag) clean up hurt targets at the end."
+          "Step 1: Usually lead with Charizard and Whimsicott. Charizard turns on the sun, and Whimsicott uses Tailwind (Rückenwind) turn one for 4 turns of speed.",
+          "Step 2: Now press your speed advantage. Charizard hits both foes with Heat Wave (Hitzewelle), while Garchomp or Tauros remove single targets. Use Encore (Zugabe) to lock down an annoying foe.",
+          "Step 3: Against very fast teams, switch to Farigiraf + Kingambit instead: Farigiraf sets Trick Room (Bizarroraum), then your slow Kingambit moves first and hits hard."
         ],
         "tips": [
-          "Decide on ONE plan before the match: fast with Tailwind (Rückenwind) or slow with Trick Room (Bizarroraum). Doing both at once cancels itself out.",
-          "Don't use Protect (Schutzschild) every turn. Save it for when you see a big hit coming or need to buy a turn.",
-          "Mega-Charizard Y is your most important Pokémon – don't carelessly send it into obvious counters like Rock or Water attacks.",
-          "Tauros' Intimidate (Bedroher) weakens two enemy attackers at once; send it in when the opponent relies on strong physical attacks."
+          "Pick ONE plan per game: either fast with Tailwind (Rückenwind) or slow with Trick Room (Bizarroraum) — not both at once.",
+          "Protect (Schutzschild) blocks for 1 turn, but its success chance drops if you use it again right away. Don't spam it every turn.",
+          "The sun only lasts 5 turns. Don't send Charizard out too early if you still need its strong Fire hits.",
+          "Whimsicott's Focus Sash (Fokusgurt) lets it survive a lethal hit with 1 HP — handy to set Tailwind (Rückenwind) safely, but it works only once."
         ]
       }
     },
@@ -882,264 +882,266 @@
     },
     "YMXHPNQ9EB": {
       "team_hash": "7880ba8eb8e79f55",
-      "prompt_version": 2,
+      "prompt_version": 3,
       "team_name": "PsychoR&R's Sheep Cup 14 Champion Team",
-      "generated_at": "2026-06-12T20:17:03Z",
+      "generated_at": "2026-06-13T21:28:04Z",
       "model": "claude-opus-4-8",
       "de": {
-        "overview": "Dieses Team will schnell Druck machen. Charizard verwandelt sich (Mega) und macht die Sonne an, dadurch werden Feuer-Attacken stärker. Whimsicott gibt allen mehr Tempo mit Rückenwind (Tailwind), und dann schlagen deine starken Angreifer schnell zu, bevor der Gegner reagieren kann.",
+        "overview": "Dieses Team will schnell viel Druck machen: Whimsicott macht euer Team mit Rückenwind (Tailwind) für 4 Runden doppelt so schnell, und Mega-Glurak Y bringt 5 Runden starke Sonne mit, die eure Feuer-Attacken noch härter macht. Unter Sonne und mit Tempo-Vorsprung schlagt ihr zuerst zu und holt schnelle K.O.s, bevor der Gegner reagieren kann.",
         "roles": [
           {
             "name": "Whimsicott",
-            "role": "Dein Unterstützer. Es ist sehr schnell und gibt mit Rückenwind (Tailwind) dem ganzen Team für ein paar Runden mehr Tempo. Mit Vorahnung (Prankster) kommen seine Hilfs-Attacken fast immer zuerst, und mit Zugabe (Encore) zwingt es einen Gegner, dieselbe Attacke zu wiederholen."
+            "role": "Euer Tempo-Macher und Stör-Pokémon. Dank Strolch (Prankster) gehen seine Status-Attacken mit Vorrang zuerst — so bekommt ihr Rückenwind (Tailwind) sicher raus und könnt mit Zugabe (Encore) einen Gegner 3 Runden lang in seine letzte Attacke einsperren."
           },
           {
             "name": "Glimmora",
-            "role": "Streut beim Reinkommen und beim Treffer giftige Stacheln (Toxic Debris), die gegnerische Pokémon vergiften. Es teilt mit Spezialattacken aus und überlebt einen Treffer dank Überlebens-Item (Focus Sash), das es bei vollem KP mit 1 KP rettet."
+            "role": "Schneller Spezial-Angreifer mit breitem Schaden. Hält dank Fokusgurt (Focus Sash) auch einen K.O.-Treffer mit 1 KP aus. Schutzstacheln (Spiky Shield) schützt eine Runde und kostet Angreifer mit Körperkontakt 1/8 ihrer KP."
           },
           {
             "name": "Charizard",
-            "role": "Dein Herzstück. Beim Kampfstart verwandelt es sich (Mega-Entwicklung) und macht die Sonne an. In der Sonne sind Heat Wave und Co. brandgefährlich. Heat Wave trifft beide Gegner gleichzeitig."
+            "role": "Euer Haupt-Angreifer. Beim Einsatz wird es mit dem Glurakit Y (Charizardite Y) zu Mega-Glurak Y und bringt 5 Runden harte Sonne. In der Sonne wird Solarstrahl (Solar Beam) ohne Aufladen sofort gefeuert und Wetterball (Weather Ball) wird zur starken Feuer-Attacke."
           },
           {
             "name": "Garchomp",
-            "role": "Schneller, harter Körper-Angreifer. Erdbeben (Earthquake) trifft beide Gegner. Mit Schutzschild (Protect) kannst du es vor deinem eigenen Erdbeben oder gegnerischen Angriffen bewahren."
+            "role": "Robuster Nahkämpfer mit Flächenschaden durch Erdbeben (Earthquake). Rauhaut (Rough Skin) verletzt Gegner, die es mit Körperkontakt angreifen. Die Prunusbeere (Sitrus Berry) heilt 25 % der KP, sobald es unter die Hälfte fällt."
           },
           {
             "name": "Kingambit",
-            "role": "Dein Aufräumer. Mit Tiefschlag (Sucker Punch) schlägt es vor dem Gegner zu, wenn dieser angreift. Wird es von einem Gegner geschwächt (z. B. durch Bedroher/Intimidate), steigt durch Härte (Defiant) sein Angriff stark an."
+            "role": "Harter Schläger und Absicherung. Mit Tiefschlag (Sucker Punch) trifft es zuerst, wenn der Gegner angreifen will. Die Tahaibeere (Chople Berry) halbiert einmal einen super-effektiven Kampf-Treffer und lässt es gefährliche Hits überleben."
           },
           {
             "name": "Basculegion",
-            "role": "Wasser-Angreifer mit Wuchtigkeit (Adaptability), wodurch Wasser-Attacken besonders weh tun. Mit Aquahaubitze (Aqua Jet) schlägt es zuerst zu. Letzte Worte (Last Respects) wird stärker, je mehr eigene Pokémon vorher besiegt wurden."
+            "role": "Schneller Wasser-Angreifer. Dank Anpassung (Adaptability) und Zauberwasser (Mystic Water) treffen seine Wasser-Attacken besonders hart. Mit Aqua Jet greift es mit Vorrang zuerst an und kann angeschlagene Gegner erledigen."
           }
         ],
         "game_plan": [
-          "Schritt 1: Meistens Charizard zusammen mit Whimsicott ins Feld schicken. Charizard verwandelt sich und macht die Sonne an, Whimsicott setzt sofort Rückenwind (Tailwind) für mehr Tempo.",
-          "Schritt 2: Solange das Tempo durch Rückenwind (Tailwind) hoch ist, mit Charizards Heat Wave und deinen Angreifern beide Gegner unter Druck setzen. Nutze Zugabe (Encore), um eine gegnerische Hilfs-Attacke zu blockieren.",
-          "Schritt 3: Hat der Gegner kaum noch Pokémon, räume mit den Erste-Schlag-Attacken auf: Tiefschlag (Sucker Punch) von Kingambit und Aquahaubitze (Aqua Jet) von Basculegion."
+          "Schritt 1: Starte meistens mit Whimsicott und Charizard. Whimsicott setzt sofort Rückenwind (Tailwind) für 4 Runden doppeltes Tempo, Charizard wird zu Mega-Glurak Y und bringt die Sonne mit.",
+          "Schritt 2: Nutze das Tempo. Schlage mit Charizards Feuer-Attacken (in der Sonne stärker) und einem zweiten Angreifer zu, bevor der Gegner dran ist. Mit Whimsicotts Zugabe (Encore) kannst du einen Gegner einsperren, der etwas aufbauen will.",
+          "Schritt 3: Räume auf. Wenn der Gegner geschwächt ist, beenden Garchomp, Kingambit und Basculegion das Spiel — Kingambit mit Tiefschlag (Sucker Punch) und Basculegion mit Aqua Jet treffen auch mit Vorrang zuerst."
         ],
         "tips": [
-          "Pass mit Garchomps Erdbeben (Earthquake) auf: Es trifft auch dein eigenes Pokémon daneben. Stell daneben am besten Charizard (fliegt) oder nutze Schutzschild (Protect).",
-          "Whimsicott ist zerbrechlich. Setze früh Rückenwind (Tailwind) und zieh es danach lieber raus, statt es im Feld sterben zu lassen.",
-          "Wenn der Gegner zu schnell wird, ist Rückenwind (Tailwind) deine Antwort – plane Whimsicott bewusst ein, statt es zu verschwenden.",
-          "Charizard kann sich nur einmal pro Kampf verwandeln. Schick es früh ins Feld, damit du die Sonne lange nutzt."
+          "Bring Rückenwind (Tailwind) früh raus — die 4 Runden Tempo sind euer wichtigster Vorteil. Verschwende sie nicht, indem du erst lange wartest.",
+          "Glimmora hat den Fokusgurt (Focus Sash): Stelle es nur dann ein, wenn es voll geheilt ist, denn der Gurt rettet nur aus vollen KP. Vorschaden macht ihn nutzlos.",
+          "Pass mit Garchomps Erdbeben (Earthquake) auf: Es trifft auch dein eigenes danebenstehendes Pokémon. Setze Partner mit Schutzschild (Protect) ein oder stelle einen Flieger neben Garchomp.",
+          "Whimsicott ist zerbrechlich. Zieh es zurück, sobald sein Job (Tempo, Zugabe) erledigt ist, statt es unnötig im Feld zu lassen."
         ]
       },
       "en": {
-        "overview": "This team wants to apply fast pressure. Charizard transforms (Mega) and turns on the sun, which makes Fire moves stronger. Whimsicott gives the whole team more speed with Tailwind (Rückenwind), and then your strong attackers hit fast before the opponent can react.",
+        "overview": "This team wants to apply fast pressure: Whimsicott uses Tailwind (Rückenwind) to make your whole side twice as fast for 4 turns, and Mega Charizard Y brings 5 turns of strong sun that powers up your Fire attacks. With sun and a speed lead, you strike first and grab quick knockouts before the opponent can react.",
         "roles": [
           {
             "name": "Whimsicott",
-            "role": "Your support. It is very fast and uses Tailwind (Rückenwind) to give the whole team more speed for a few turns. With Prankster (Vorahnung) its support moves almost always go first, and with Encore (Zugabe) it forces an opponent to repeat the same move."
+            "role": "Your speed setter and disruptor. Thanks to Prankster (Strolch) its status moves go first, so you reliably land Tailwind (Rückenwind) and can use Encore (Zugabe) to lock an opponent into its last move for 3 turns."
           },
           {
             "name": "Glimmora",
-            "role": "Spreads poison spikes (Toxic Debris) when it comes in and when hit, poisoning enemy Pokémon. It deals damage with special attacks and survives one hit thanks to its Focus Sash (Überlebens-Item), which saves it with 1 HP from full health."
+            "role": "Fast special attacker with wide damage. Its Focus Sash (Fokusgurt) lets it survive a knockout hit with 1 HP from full health. Spiky Shield (Schutzstacheln) protects for one turn and makes contact attackers lose 1/8 of their HP."
           },
           {
             "name": "Charizard",
-            "role": "Your core piece. At the start it transforms (Mega Evolution) and turns on the sun. In the sun, Heat Wave and similar moves are very dangerous. Heat Wave hits both opponents at once."
+            "role": "Your main attacker. On entry the Charizardite Y (Glurakit Y) turns it into Mega Charizard Y and brings 5 turns of harsh sun. In sun, Solar Beam (Solarstrahl) fires instantly without charging and Weather Ball (Wetterball) becomes a strong Fire attack."
           },
           {
             "name": "Garchomp",
-            "role": "A fast, hard physical attacker. Earthquake (Erdbeben) hits both opponents. With Protect (Schutzschild) you can shield it from your own Earthquake or from enemy attacks."
+            "role": "A tough melee attacker with spread damage from Earthquake (Erdbeben). Rough Skin (Rauhaut) hurts opponents that make contact with it. Its Sitrus Berry (Prunusbeere) heals 25 % of its HP once it drops below half."
           },
           {
             "name": "Kingambit",
-            "role": "Your cleaner. With Sucker Punch (Tiefschlag) it strikes before the opponent if they attack. If an opponent lowers its stats (for example with Intimidate/Bedroher), Defiant (Härte) sharply raises its Attack."
+            "role": "A heavy hitter and backup. With Sucker Punch (Tiefschlag) it strikes first when the opponent tries to attack. Its Chople Berry (Tahaibeere) halves one super-effective Fighting hit and helps it survive dangerous attacks."
           },
           {
             "name": "Basculegion",
-            "role": "A Water attacker with Adaptability (Wuchtigkeit), which makes its Water moves hurt extra. With Aqua Jet (Aquahaubitze) it strikes first. Last Respects (Letzte Worte) gets stronger the more of your own Pokémon were knocked out before."
+            "role": "A fast Water attacker. Thanks to Adaptability (Anpassung) and Mystic Water (Zauberwasser) its Water attacks hit very hard. With Aqua Jet it strikes first and can finish off weakened opponents."
           }
         ],
         "game_plan": [
-          "Step 1: Usually send Charizard together with Whimsicott. Charizard transforms and turns on the sun, Whimsicott immediately sets Tailwind (Rückenwind) for more speed.",
-          "Step 2: While your speed is high from Tailwind (Rückenwind), pressure both opponents with Charizard's Heat Wave and your attackers. Use Encore (Zugabe) to block an enemy support move.",
-          "Step 3: When the opponent has few Pokémon left, clean up with the first-strike moves: Sucker Punch (Tiefschlag) from Kingambit and Aqua Jet (Aquahaubitze) from Basculegion."
+          "Step 1: Usually lead with Whimsicott and Charizard. Whimsicott immediately sets Tailwind (Rückenwind) for 4 turns of doubled speed, and Charizard becomes Mega Charizard Y and brings the sun.",
+          "Step 2: Use the speed. Hit with Charizard's Fire moves (stronger in sun) and a second attacker before the opponent moves. Use Whimsicott's Encore (Zugabe) to lock down an opponent that tries to set up.",
+          "Step 3: Clean up. Once the opponent is weakened, Garchomp, Kingambit and Basculegion finish the game — Kingambit's Sucker Punch (Tiefschlag) and Basculegion's Aqua Jet both strike first with priority."
         ],
         "tips": [
-          "Be careful with Garchomp's Earthquake (Erdbeben): it also hits your own Pokémon next to it. Best to place Charizard (it flies) beside it or use Protect (Schutzschild).",
-          "Whimsicott is fragile. Set Tailwind (Rückenwind) early and then switch it out rather than letting it die in the field.",
-          "If the opponent gets too fast, Tailwind (Rückenwind) is your answer – plan Whimsicott in on purpose instead of wasting it.",
-          "Charizard can only transform once per battle. Bring it in early so you use the sun for as long as possible."
+          "Get Tailwind (Rückenwind) out early — the 4 turns of speed are your biggest advantage. Don't waste them by waiting too long.",
+          "Glimmora holds a Focus Sash (Fokusgurt): only bring it in at full HP, because the Sash only saves it from full health. Any prior damage makes it useless.",
+          "Be careful with Garchomp's Earthquake (Erdbeben): it also hits your own partner next to it. Use Protect (Schutzschild) on the partner or place a Flying-type next to Garchomp.",
+          "Whimsicott is fragile. Pull it back once its job (speed, Encore) is done instead of leaving it on the field for no reason."
         ]
       }
     },
     "VBTU7EP7BH": {
       "team_hash": "f3e64a2038bc34e0",
-      "prompt_version": 2,
+      "prompt_version": 3,
       "team_name": "Sow Wei Harng's Malaysia MBL 2026 Champion Team",
-      "generated_at": "2026-06-12T20:17:52Z",
+      "generated_at": "2026-06-13T21:29:05Z",
       "model": "claude-opus-4-8",
       "de": {
-        "overview": "Dieses Team will schnell und hart zuschlagen. Es nutzt Rückenwind (Tailwind), also einen Tempo-Boost für das ganze Team, und greift dann mit starken Angreifern an, bevor der Gegner reagieren kann. Du hast zwei mögliche Mega-Pokémon (Aerodactyl und Floette) und wählst je nach Gegner aus.",
+        "overview": "Dieses Team will schnell und hart zuschlagen. Aerodactyl macht euer Team mit Rückenwind (Tailwind) blitzschnell, danach drücken eure starken Angreifer das Gegner-Team in kurzer Zeit weg. Es geht um Tempo und Druck, nicht um langes Aushalten.",
         "roles": [
           {
             "name": "Aerodactyl",
-            "role": "Dein schneller Tempomacher. Es setzt Rückenwind (Tailwind) ein, damit dein Team doppelt so schnell wird, und macht mit Steinhagel (Rock Slide) Druck auf beide Gegner."
+            "role": "Euer Tempo-Geber. Es setzt Rückenwind (Tailwind), das alle eure Pokémon 4 Runden lang doppelt so schnell macht. Mit Steinhagel (Rock Slide) trifft es beide Gegner gleichzeitig."
           },
           {
             "name": "Basculegion",
-            "role": "Harter Wasser-Angreifer. Letzte Ehre (Last Respects) wird stärker, je mehr deiner Pokémon schon besiegt wurden, und Aquadüse (Aqua Jet) trifft auch ohne Tempo-Boost zuerst."
+            "role": "Ein harter Angreifer, dessen Attacke Letzte Ehre (Last Respects) stärker wird, je mehr eigene Pokémon schon umgefallen sind — also besonders gut im späteren Spielverlauf. Mit Aquadüse (Aqua Jet) trifft es sogar zuerst, ohne Rückenwind. Die Maronbeere (Kasib Berry) halbiert einmalig einen super-effektiven Geist-Treffer."
           },
           {
             "name": "Kingambit",
-            "role": "Robuster Schläger, der einsteckt und austeilt. Tiefschlag (Sucker Punch) trifft fast immer zuerst, wenn der Gegner angreift, und es wird wütender, je mehr deiner Pokémon fallen."
+            "role": "Ein zäher Schläger mit dem Vorzieher Tiefschlag (Sucker Punch), der noch vor dem Gegner trifft, wenn dieser angreifen will. Die Tahaibeere (Chople Berry) halbiert einmalig einen super-effektiven Kampf-Treffer und hilft, einen sonst tödlichen Angriff zu überleben."
           },
           {
             "name": "Floette-Eternal",
-            "role": "Feen-Spezialangreifer und zweiter Mega-Kandidat. Schlägt Drachen und Kampf-Pokémon hart und kann mit kräftigen Spezial-Attacken aus der Distanz Schaden machen."
+            "role": "Euer Spezial-Angreifer. Mit dem Florgessit (Floettite) entwickelt es sich zu Mega-Florges und bekommt einen massiven Spezial-Angriff. Mondgewalt (Moonblast) und Zauberschein (Dazzling Gleam) treffen hart, Zauberschein sogar beide Gegner."
           },
           {
             "name": "Sneasler",
-            "role": "Schneller Eröffner. Mogelhieb (Fake Out) lässt einen Gegner eine Runde lang zappeln (er kann nicht angreifen), so gewinnst du Zeit für Rückenwind (Tailwind)."
+            "role": "Euer Störer für die erste Runde. Mogelhieb (Fake Out) lässt das Ziel für eine Runde zurückzucken — es kann nicht angreifen. So gewinnt ihr Zeit für Rückenwind. Der Fokusgurt (Focus Sash) lässt es einen sonst tödlichen Treffer mit 1 KP überleben."
           },
           {
             "name": "Garchomp",
-            "role": "Vielseitiger Boden-/Drachen-Angreifer. Erdbeben (Earthquake) trifft beide Gegner, und mit Steinhagel (Rock Slide) hast du extra Druck gegen Flieger und Feuer-Pokémon."
+            "role": "Ein vielseitiger Angreifer. Erdbeben (Earthquake) trifft beide Gegner, kann aber auch eigene Partner treffen. Seine Fähigkeit Rauhaut (Rough Skin) fügt Angreifern, die es berühren, Schaden zu. Die Prunusbeere (Sitrus Berry) heilt 25 % der KP, wenn es unter die Hälfte fällt."
           }
         ],
         "game_plan": [
-          "Schritt 1: Starte meist mit Aerodactyl und Sneasler. Sneasler stoppt mit Mogelhieb (Fake Out) einen Gegner, Aerodactyl setzt in Ruhe Rückenwind (Tailwind) für den Tempo-Boost.",
-          "Schritt 2: Wähle dein Mega vor dem Kampf. Gegen Drachen, Kampf- und Unlicht-Gegner nimm Mega-Floette als Spezial-Angreifer. Wenn du pures Tempo und Druck willst, nimm Mega-Aerodactyl. Nur eines kann sich pro Kampf entwickeln.",
-          "Schritt 3: Solange der Tempo-Boost läuft, greife jede Runde gezielt an und hole dir Abschüsse. Basculegion und Kingambit werden stärker, je mehr deiner eigenen Pokémon schon gefallen sind – das ist gegen Ende ein Vorteil."
+          "Schritt 1: Schicke Aerodactyl und Sneasler zuerst ins Feld. Sneasler nutzt Mogelhieb (Fake Out), um einen Gegner für eine Runde lahmzulegen, während Aerodactyl in Ruhe Rückenwind (Tailwind) setzt.",
+          "Schritt 2: Jetzt seid ihr 4 Runden lang doppelt so schnell. Greife in dieser Zeit voll an und versuche, die gefährlichsten Gegner schnell auszuschalten.",
+          "Schritt 3: Bringe Floette-Eternal ins Spiel und entwickle es sofort zu Mega-Florges, um mit Mondgewalt (Moonblast) und Zauberschein (Dazzling Gleam) großen Spezial-Schaden zu machen.",
+          "Schritt 4: Im späteren Spiel wird Basculegions Letzte Ehre (Last Respects) immer stärker. Nutze außerdem Vorzieher-Attacken wie Tiefschlag (Sucker Punch) und Aquadüse (Aqua Jet), um auch ohne Rückenwind zuerst zu treffen."
         ],
         "tips": [
-          "Setze Schutzschild (Protect) nicht in jeder Runde – der Gegner gewöhnt sich daran. Nutze es, wenn du eine Doppel-Attacke wie Erdbeben (Earthquake) abwarten willst.",
-          "Denk daran: Garchombs Erdbeben (Earthquake) trifft auch dein eigenes Pokémon daneben. Stelle Flieger wie Aerodactyl danebenoder lass den Partner Schutzschild (Protect) nutzen.",
-          "Rückenwind (Tailwind) hält nur wenige Runden. Nutze diese Zeit aggressiv aus, statt vorsichtig zu spielen.",
-          "Entscheide dein Mega schon beim Team-Vorschau-Blick anhand der gegnerischen Pokémon, nicht erst im Kampf."
+          "Rückenwind hält nur 4 Runden. Plane deine stärksten Angriffe in dieses Zeitfenster — trödle nicht.",
+          "Vorsicht mit Erdbeben (Earthquake) von Garchomp: Es trifft auch deinen eigenen Partner. Setze es nur, wenn dein zweites Pokémon nicht im Feld steht oder selbst nicht getroffen wird.",
+          "Schutzschild (Protect) schützt eine Runde, aber wenn du es zweimal hintereinander nutzt, klappt es oft nicht mehr. Spare es für gefährliche Momente auf.",
+          "Mogelhieb (Fake Out) wirkt nur in der ersten Runde, in der Sneasler neu im Feld ist. Setze es gleich am Anfang ein."
         ]
       },
       "en": {
-        "overview": "This team wants to hit fast and hard. It uses Tailwind (Rückenwind), a speed boost for your whole team, and then attacks with strong hitters before the opponent can react. You have two possible Mega Pokémon (Aerodactyl and Floette) and pick one depending on the opponent.",
+        "overview": "This team wants to strike fast and hard. Aerodactyl makes your whole team super fast with Tailwind (Rückenwind), and then your strong attackers knock out the opponents quickly. It's all about speed and pressure, not about outlasting the enemy.",
         "roles": [
           {
             "name": "Aerodactyl",
-            "role": "Your fast speed-setter. It uses Tailwind (Rückenwind) to double your team's speed and applies pressure on both opponents with Rock Slide (Steinhagel)."
+            "role": "Your speed setter. It uses Tailwind (Rückenwind), which makes all your Pokémon twice as fast for 4 turns. With Rock Slide (Steinhagel) it hits both opponents at once."
           },
           {
             "name": "Basculegion",
-            "role": "A hard-hitting Water attacker. Last Respects (Letzte Ehre) gets stronger the more of your Pokémon have already fainted, and Aqua Jet (Aquadüse) strikes first even without a speed boost."
+            "role": "A heavy hitter whose move Last Respects (Letzte Ehre) gets stronger the more of your own Pokémon have fainted — so it's great later in the game. With Aqua Jet (Aquadüse) it even strikes first, without Tailwind. The Kasib Berry (Maronbeere) once halves a super-effective Ghost hit."
           },
           {
             "name": "Kingambit",
-            "role": "A bulky bruiser that takes hits and deals them out. Sucker Punch (Tiefschlag) almost always goes first when the opponent attacks, and it gets angrier as your Pokémon fall."
+            "role": "A tough bruiser with the priority move Sucker Punch (Tiefschlag), which hits before the opponent if they try to attack. The Chople Berry (Tahaibeere) once halves a super-effective Fighting hit and helps it survive an otherwise deadly attack."
           },
           {
             "name": "Floette-Eternal",
-            "role": "A Fairy special attacker and your second Mega option. It hits Dragon and Fighting Pokémon hard and can deal big damage from a distance with strong special moves."
+            "role": "Your special attacker. With the Floettite (Florgessit) it becomes Mega Florges and gains a huge special attack. Moonblast (Mondgewalt) and Dazzling Gleam (Zauberschein) hit hard, and Dazzling Gleam even hits both opponents."
           },
           {
             "name": "Sneasler",
-            "role": "A fast lead. Fake Out (Mogelhieb) makes one opponent flinch for a turn (they can't attack), giving you time to set up Tailwind (Rückenwind)."
+            "role": "Your turn-one disruptor. Fake Out (Mogelhieb) makes the target flinch for one turn — it can't attack. That buys time for Tailwind. The Focus Sash (Fokusgurt) lets it survive an otherwise deadly hit with 1 HP."
           },
           {
             "name": "Garchomp",
-            "role": "A flexible Ground/Dragon attacker. Earthquake (Erdbeben) hits both opponents, and Rock Slide (Steinhagel) gives you extra pressure against Flying and Fire Pokémon."
+            "role": "A versatile attacker. Earthquake (Erdbeben) hits both opponents, but can also hit your own partner. Its ability Rough Skin (Rauhaut) damages anyone who touches it with an attack. The Sitrus Berry (Prunusbeere) heals 25% of its HP when it drops below half."
           }
         ],
         "game_plan": [
-          "Step 1: Usually start with Aerodactyl and Sneasler. Sneasler stops one opponent with Fake Out (Mogelhieb) while Aerodactyl safely sets Tailwind (Rückenwind) for the speed boost.",
-          "Step 2: Choose your Mega before the battle. Against Dragon, Fighting and Dark opponents, take Mega Floette as a special attacker. If you want pure speed and pressure, take Mega Aerodactyl. Only one can Mega Evolve per battle.",
-          "Step 3: While the speed boost is active, attack with purpose every turn and grab knockouts. Basculegion and Kingambit grow stronger as your own Pokémon faint – that's an advantage late in the game."
+          "Step 1: Lead with Aerodactyl and Sneasler. Sneasler uses Fake Out (Mogelhieb) to lock down one opponent for a turn, while Aerodactyl safely sets up Tailwind (Rückenwind).",
+          "Step 2: Now you're twice as fast for 4 turns. Attack with everything during this window and try to knock out the most dangerous opponents quickly.",
+          "Step 3: Bring in Floette-Eternal and immediately evolve it into Mega Florges to deal big special damage with Moonblast (Mondgewalt) and Dazzling Gleam (Zauberschein).",
+          "Step 4: Later in the game, Basculegion's Last Respects (Letzte Ehre) keeps getting stronger. Also use priority moves like Sucker Punch (Tiefschlag) and Aqua Jet (Aquadüse) to strike first even without Tailwind."
         ],
         "tips": [
-          "Don't use Protect (Schutzschild) every turn – the opponent will read it. Save it to dodge a spread move like Earthquake (Erdbeben).",
-          "Remember Garchomp's Earthquake (Erdbeben) also hits your own Pokémon next to it. Pair it with a Flying type like Aerodactyl, or have your partner use Protect (Schutzschild).",
-          "Tailwind (Rückenwind) only lasts a few turns. Use that window aggressively instead of playing it safe.",
-          "Decide your Mega during team preview based on the opponent's Pokémon, not in the middle of the battle."
+          "Tailwind only lasts 4 turns. Plan your strongest attacks inside that window — don't waste time.",
+          "Be careful with Garchomp's Earthquake (Erdbeben): it also hits your own partner. Only use it when your second Pokémon isn't out or won't be hit.",
+          "Protect (Schutzschild) blocks for one turn, but if you use it twice in a row it often fails. Save it for dangerous moments.",
+          "Fake Out (Mogelhieb) only works on the first turn Sneasler is newly in play. Use it right at the start."
         ]
       }
     },
     "1PAK2DKR5H": {
       "team_hash": "d24f8c820cbdbc10",
-      "prompt_version": 2,
+      "prompt_version": 3,
       "team_name": "madzisbadz__'s Monotype Tour Champion Team",
-      "generated_at": "2026-06-12T20:18:47Z",
+      "generated_at": "2026-06-13T21:29:54Z",
       "model": "claude-opus-4-8",
       "de": {
-        "overview": "Das ist ein reines Geister-Team (alle Pokémon sind vom Typ Geist). Es kann auf zwei Arten spielen: schnell mit Auroraschleier (Aurora Veil) als Schutzschild, oder langsam und brutal mit Bizarroraum (Trick Room), wo langsame Pokémon zuerst angreifen. Du entscheidest je nach Gegner, welcher Plan passt.",
+        "overview": "Das ist ein reines Geister-Team (Monotype Geist) — alle sechs Pokémon haben den Typ Geist. Es kann auf zwei Arten gewinnen: schnell mit viel Schaden auf einmal (z. B. Typhlosion-Hisui) oder über Bizarroraum (Trick Room), wo die langsamen Schläger Golurk und Aegislash zuerst zuschlagen. Du wählst je nach Gegner einen der beiden Pläne.",
         "roles": [
           {
             "name": "Typhlosion-Hisui",
-            "role": "Schneller Sonderangreifer mit Wahlschal (Choice Scarf), der die Geschwindigkeit erhöht. Macht mit Eruption und Heat Wave (Hitzewelle) sofort viel Schaden, kann aber nur eine Attacke nutzen, bis es gewechselt wird."
+            "role": "Schneller Spezialangreifer mit Wahlschal (Choice Scarf: Initiative ×1,5, aber bis zum Auswechseln auf eine Attacke festgelegt). Macht mit Heat Wave und Rock Slide Schaden auf beide Gegner gleichzeitig; Eruption schlägt bei vollen KP am härtesten zu."
           },
           {
             "name": "Basculegion",
-            "role": "Harter Angreifer mit Aqua Jet, einer Prioritäts-Attacke, die immer zuerst trifft. Last Respects wird stärker, je mehr Teamkollegen schon besiegt sind – ein guter Aufräumer am Spielende."
+            "role": "Harter physischer Angreifer. Aqua Jet trifft mit Vorrang auch schnellere Gegner. Last Respects wird stärker, je mehr eigene Pokémon schon besiegt wurden — also spät im Kampf gefährlich."
           },
           {
             "name": "Golurk",
-            "role": "Schwerer, langsamer Schläger und ein Mega-Kandidat (Golurkite). Mit Volltreffer (No Guard), das jede Attacke treffen lässt, landen seine starken Schläge wie Headlong Rush sicher. Glänzt im Bizarroraum (Trick Room)."
+            "role": "Langsamer, schwerer Schläger für den Bizarroraum (Trick Room). No Guard lässt seine Attacken immer treffen. Headlong Rush und Close Combat hauen sehr hart rein."
           },
           {
             "name": "Froslass",
-            "role": "Schneller Unterstützer und ein Mega-Kandidat (Froslassite). Stellt Auroraschleier (Aurora Veil) auf, der den erlittenen Schaden des Teams reduziert, und greift mit Blizzard (Eissturm) an."
+            "role": "Support und Spezialangreifer. Auroraschleier (Aurora Veil) halbiert eingehenden Schaden 5 Runden lang — aber nur bei Schnee einsetzbar. Blizzard trifft beide Gegner."
           },
           {
             "name": "Sinistcha",
-            "role": "Der Beschützer und Bizarroraum-Aufsteller (Trick Room). Mit Aggropulver (Rage Powder) zieht es gegnerische Angriffe auf sich, damit deine Angreifer sicher sind."
+            "role": "Der Steller für Bizarroraum (Trick Room: 5 Runden lang ziehen die langsameren Pokémon zuerst). Wutpulver (Rage Powder) zieht alle Einzelziel-Angriffe der Gegner 1 Runde auf Sinistcha und schützt so deine Schläger. Hospitality heilt den Partner beim Reinkommen."
           },
           {
             "name": "Aegislash",
-            "role": "Flexibler Angreifer, der dank Taktikwechsel (Stance Change) zwischen Angriffs- und Schutzform wechselt. Schattenstoß (Shadow Sneak) trifft zuerst, Iron Head (Eisenschädel) trifft hart – stark im Bizarroraum."
+            "role": "Zäher Schläger mit Königsschild (King's Shield): schützt und gibt Kontaktangreifern −1 Angriff. Shadow Sneak trifft mit Vorrang. Stark in beiden Plänen, weil langsam genug für Bizarroraum."
           }
         ],
         "game_plan": [
-          "Schritt 1: Entscheide vor dem Kampf, welcher Plan passt. Gegen schnelle Gegner: Tempo-Plan mit Froslass und Typhlosion-Hisui. Gegen langsame, harte Gegner: Bizarroraum-Plan mit Sinistcha und Golurk.",
-          "Schritt 2 (Tempo): Schicke Froslass mit zuerst. Stelle Auroraschleier (Aurora Veil) auf, damit dein Team weniger Schaden nimmt. Daneben Typhlosion-Hisui für sofortigen Druck, danach Basculegion zum Aufräumen mit Aqua Jet.",
-          "Schritt 2 (Bizarroraum): Schicke Sinistcha mit zuerst und setze Bizarroraum (Trick Room). Daneben Golurk oder Aegislash, die jetzt zuerst zuschlagen. Sinistcha hält mit Aggropulver (Rage Powder) Angriffe von deinen Schlägern fern.",
-          "Schritt 3: Mega wählen – nimm Froslass-Mega für den Tempo-Plan (Schutzschilde und Speed), oder Golurk-Mega für den Bizarroraum-Plan (ein riesiger, langsamer Schläger). Pro Kampf darf nur EIN Pokémon Mega werden."
+          "Schritt 1: Entscheide vor dem Kampf, ob du schnell spielst (Typhlosion-Hisui vorne) oder über Bizarroraum (Sinistcha vorne). Gegen schnelle Gegner ist Bizarroraum oft besser.",
+          "Schritt 2: Schneller Plan — Typhlosion-Hisui und Basculegion zuerst. Mit Heat Wave/Rock Slide beide Gegner treffen, mit Aqua Jet schnelle Ziele abräumen.",
+          "Schritt 3: Bizarroraum-Plan — Sinistcha stellt Bizarroraum, daneben Golurk oder Aegislash. Schütze den Steller im Zweifel mit Schutzschild (Protect) und Wutpulver (Rage Powder), dann hauen deine langsamen Schläger 5 Runden lang zuerst zu.",
+          "Schritt 4: Last Respects von Basculegion stark machen: spät im Kampf, wenn schon eigene Pokémon gefallen sind, wird die Attacke richtig hart."
         ],
         "tips": [
-          "Nutze Schutzschild (Protect) klug: Wenn der Gegner auf ein Pokémon zielt, blockt Schutzschild den Schaden und du gewinnst eine Runde.",
-          "Typhlosion-Hisui sitzt durch den Wahlschal (Choice Scarf) auf einer Attacke fest. Wähle die erste Attacke mit Bedacht – willst du wechseln, schick es kurz raus.",
-          "Mische die beiden Pläne nicht: Bizarroraum (Trick Room) macht deine schnellen Pokémon langsam. Spiele entweder Tempo ODER Bizarroraum, nicht beides gleichzeitig.",
-          "Halte Basculegion und sein Last Respects für später auf – die Attacke wird stärker, je mehr eigene Pokémon schon gefallen sind."
+          "Wahlschal-Falle: Typhlosion-Hisui ist nach dem ersten Angriff auf diese eine Attacke festgelegt — du musst auswechseln, um zu wechseln. Wähle die erste Attacke also bewusst.",
+          "Bizarroraum dreht die Reihenfolge nur 5 Runden lang um. Setze ihn nicht zu früh und bring danach schnell deine langsamen Schläger ins Spiel.",
+          "Nutze Schutzschild (Protect), um eine Runde zu überleben, während Bizarroraum noch läuft, oder um einen Doppelangriff abzuwarten — aber nicht jede Runde, die Erfolgschance sinkt bei Wiederholung.",
+          "Auroraschleier (Aurora Veil) brauchst du Schnee — ohne Schneewetter geht die Attacke nicht. Verlass dich darauf nicht als Standardplan."
         ]
       },
       "en": {
-        "overview": "This is a pure Ghost-type team (every Pokémon is Ghost type). It can play two ways: fast with Aurora Veil (Auroraschleier) as a shield, or slow and brutal with Trick Room (Bizarroraum), where slow Pokémon move first. You pick the plan based on the opponent.",
+        "overview": "This is a pure Ghost-type team (Monotype Ghost) — all six Pokémon are Ghost type. It can win two ways: fast with big damage at once (e.g. Typhlosion-Hisui), or through Trick Room (Bizarroraum), where the slow hitters Golurk and Aegislash move first. You pick one plan depending on the opponent.",
         "roles": [
           {
             "name": "Typhlosion-Hisui",
-            "role": "A fast special attacker holding a Choice Scarf (Wahlschal), which boosts its speed. It deals big damage right away with Eruption and Heat Wave (Hitzewelle), but is locked into one move until you switch it out."
+            "role": "Fast special attacker with Choice Scarf (Wahlschal: Speed ×1.5, but locked into one move until you switch out). Heat Wave and Rock Slide hit both opponents at once; Eruption hits hardest at full HP."
           },
           {
             "name": "Basculegion",
-            "role": "A hard hitter with Aqua Jet, a priority move that always strikes first. Last Respects gets stronger the more teammates have fainted – a great late-game finisher."
+            "role": "Hard-hitting physical attacker. Aqua Jet (Aquaknarre) strikes first even against faster foes. Last Respects gets stronger the more of your own Pokémon have fainted — so it's dangerous late in the game."
           },
           {
             "name": "Golurk",
-            "role": "A heavy, slow bruiser and a Mega candidate (Golurkite). With No Guard (Volltreffer), which makes every move hit, its strong attacks like Headlong Rush always land. It shines under Trick Room (Bizarroraum)."
+            "role": "Slow, heavy hitter for Trick Room (Bizarroraum). No Guard makes its attacks always land. Headlong Rush and Close Combat hit very hard."
           },
           {
             "name": "Froslass",
-            "role": "A fast supporter and a Mega candidate (Froslassite). It sets Aurora Veil (Auroraschleier), which lowers the damage your team takes, and attacks with Blizzard (Eissturm)."
+            "role": "Support and special attacker. Aurora Veil (Auroraschleier) halves incoming damage for 5 turns — but it can only be used in snow. Blizzard hits both opponents."
           },
           {
             "name": "Sinistcha",
-            "role": "The protector and Trick Room (Bizarroraum) setter. With Rage Powder (Aggropulver) it pulls enemy attacks onto itself, keeping your attackers safe."
+            "role": "The Trick Room setter (Bizarroraum: for 5 turns the slower Pokémon move first). Rage Powder (Wutpulver) pulls all single-target attacks onto Sinistcha for 1 turn, protecting your hitters. Hospitality heals its partner when it comes in."
           },
           {
             "name": "Aegislash",
-            "role": "A flexible attacker that swaps between attack and shield form thanks to Stance Change (Taktikwechsel). Shadow Sneak (Schattenstoß) strikes first, Iron Head (Eisenschädel) hits hard – strong under Trick Room."
+            "role": "Tough hitter with King's Shield (Königsschild): it blocks attacks and gives contact attackers −1 Attack. Shadow Sneak strikes first. Great in both plans because it's slow enough for Trick Room."
           }
         ],
         "game_plan": [
-          "Step 1: Before the battle, decide which plan fits. Against fast opponents: speed plan with Froslass and Typhlosion-Hisui. Against slow, hard hitters: Trick Room plan with Sinistcha and Golurk.",
-          "Step 2 (Speed): Lead with Froslass. Set up Aurora Veil (Auroraschleier) so your team takes less damage. Pair it with Typhlosion-Hisui for instant pressure, then bring Basculegion to clean up with Aqua Jet.",
-          "Step 2 (Trick Room): Lead with Sinistcha and use Trick Room (Bizarroraum). Pair it with Golurk or Aegislash, who now move first. Sinistcha uses Rage Powder (Aggropulver) to keep attacks off your hitters.",
-          "Step 3: Choose your Mega – take Froslass-Mega for the speed plan (screens and speed), or Golurk-Mega for the Trick Room plan (a huge, slow hitter). Only ONE Pokémon may Mega Evolve per battle."
+          "Step 1: Before the match decide whether to play fast (Typhlosion-Hisui in front) or through Trick Room (Sinistcha in front). Against fast teams Trick Room is often better.",
+          "Step 2: Fast plan — lead Typhlosion-Hisui and Basculegion. Hit both foes with Heat Wave/Rock Slide, clean up fast targets with Aqua Jet.",
+          "Step 3: Trick Room plan — Sinistcha sets Trick Room with Golurk or Aegislash beside it. When in doubt protect the setter with Protect (Schutzschild) and Rage Powder (Wutpulver), then your slow hitters move first for 5 turns.",
+          "Step 4: Make Basculegion's Last Respects strong: use it late, once some of your own Pokémon have fainted, when the move hits really hard."
         ],
         "tips": [
-          "Use Protect (Schutzschild) wisely: if the opponent targets one of your Pokémon, Protect blocks the damage and you win a turn.",
-          "Typhlosion-Hisui is locked into one move by the Choice Scarf (Wahlschal). Pick its first move carefully – if you want to change moves, switch it out briefly.",
-          "Don't mix the two plans: Trick Room (Bizarroraum) makes your fast Pokémon slow. Play either Speed OR Trick Room, never both at once.",
-          "Save Basculegion and its Last Respects for later – the move gets stronger the more of your own Pokémon have fainted."
+          "Choice Scarf trap: after its first attack Typhlosion-Hisui is locked into that one move — you have to switch out to change it. So pick the first move carefully.",
+          "Trick Room only flips the order for 5 turns. Don't set it too early, and bring in your slow hitters quickly afterwards.",
+          "Use Protect (Schutzschild) to survive a turn while Trick Room is still up, or to dodge a double attack — but not every turn, the success rate drops with repeated use.",
+          "Aurora Veil (Auroraschleier) needs snow — without snow weather the move fails. Don't rely on it as a default plan."
         ]
       }
     },
@@ -1232,90 +1234,88 @@
     },
     "H7HM18T977": {
       "team_hash": "74939b005223a87d",
-      "prompt_version": 2,
+      "prompt_version": 3,
       "team_name": "ragimali's Grand Champions Festival Champion Team",
-      "generated_at": "2026-06-12T20:19:50Z",
+      "generated_at": "2026-06-13T21:31:34Z",
       "model": "claude-opus-4-8",
       "de": {
-        "overview": "Dieses Team will schnell viel Schaden machen und das Tempo bestimmen. Charizard verwandelt sich (Mega-Entwicklung) und macht starkes Sonnenwetter, das seine Feuer-Attacken verstärkt. Aerodactyl sorgt mit Rückenwind (Tailwind) für mehr Speed, damit dein Team zuerst angreift.",
+        "overview": "Dieses Team will schnell viel Schaden machen. Charizard verwandelt sich in Mega-Charizard Y und ruft starke Sonne, die seine Feuer-Attacken verstärkt. Dazu macht Aerodactyl euer ganzes Team mit Rückenwind schneller, damit ihr zuerst zuschlagt.",
         "roles": [
           {
             "name": "Charizard",
-            "role": "Dein Haupt-Mega. Nach der Mega-Entwicklung macht es Sonne, dadurch werden Heat Wave und Weather Ball richtig stark. Trifft beide Gegner gleichzeitig."
+            "role": "Euer Haupt-Angreifer. Mit Glurakit Y (Charizardite Y) wird es zu Mega-Charizard Y und bringt durch seine Fähigkeit Dürre (Drought) 5 Runden harsche Sonne. In der Sonne wird Solarstrahl (Solar Beam) sofort abgefeuert und der Wetterball (Weather Ball) wird zur starken Feuer-Attacke."
           },
           {
             "name": "Aerodactyl",
-            "role": "Dein Speed-Geber. Setzt Rückenwind (Tailwind), damit dein Team 4 Runden lang zuerst zieht. Wide Guard (Breitseite) blockt Attacken, die beide Gegner treffen."
+            "role": "Euer Tempo-Geber und Schutzschild. Es setzt Rückenwind (Tailwind) und macht euer ganzes Team 4 Runden lang doppelt so schnell. Mit Rundumschutz (Wide Guard) blockt es eine Runde lang gegnerische Flächen-Attacken."
           },
           {
             "name": "Garchomp",
-            "role": "Schneller, harter Angreifer am Boden. Earthquake trifft beide Gegner, Scale Shot macht Garchomp danach noch schneller. Solider Allrounder."
+            "role": "Stabiler körperlicher Angreifer. Erdbeben (Earthquake) trifft beide Gegner, also setzt es das, wenn deine eigenen Pokémon nicht getroffen werden. Mit Tera Drache verstärkt es seine Drachen-Attacken."
           },
           {
             "name": "Kingambit",
-            "role": "Robuster Hauer. Sucker Punch schlägt zuerst zu, wenn der Gegner angreift. Defiant (Hass) macht Kingambit stärker, wenn ein Gegner deine Werte senkt."
+            "role": "Harter Einzelziel-Angreifer mit Tiefschlag (Sucker Punch), einer Prioritäts-Attacke, die zuerst zuschlägt — aber nur wirkt, wenn das Ziel selbst angreift. Die Tahaibeere (Chople Berry) halbiert einmalig einen super-effektiven Kampf-Treffer."
           },
           {
             "name": "Basculegion",
-            "role": "Sehr schneller Angreifer durch das Choice-Scarf-Item (Wahlschal). Last Respects wird stärker, je mehr eigene Pokémon schon besiegt sind. Aqua Jet trifft immer zuerst."
+            "role": "Sehr schneller Wasser-Angreifer. Durch den Wahlschal (Choice Scarf) ist es 1,5-mal schneller, aber auf eine Attacke festgelegt, bis du es auswechselst. Last Respects wird stärker, je mehr eigene Pokémon schon besiegt sind."
           },
           {
             "name": "Floette-Eternal",
-            "role": "Zweiter Mega-Kandidat. Als Mega ein starker Spezial-Angreifer mit Light of Ruin und Moonblast. Wähle es, wenn du gegen Drachen oder Kampf-Pokémon Vorteile brauchst."
+            "role": "Spezial-Angreifer und zweite Mega-Option. Mit dem Florgessit (Floettite) wird es zu Mega-Florges mit riesigem Spezial-Angriff. Zauberschein (Dazzling Gleam) trifft beide Gegner. Mit Tera Fee schlägt es noch härter Feen-Attacken."
           }
         ],
         "game_plan": [
-          "Schritt 1: Entscheide vor dem Kampf, welches Pokémon Mega wird – meist Charizard für Sonne und Flächenschaden, oder Floette gegen viele Drachen/Kampf-Gegner.",
-          "Schritt 2: Schicke oft Aerodactyl plus einen Angreifer (z. B. Charizard) zuerst ins Feld. Aerodactyl setzt sofort Rückenwind (Tailwind), damit alle deine Pokémon zuerst ziehen.",
-          "Schritt 3: Nutze die schnellen Runden, um mit Flächen-Attacken wie Heat Wave, Earthquake und Rock Slide beide Gegner gleichzeitig zu treffen.",
-          "Schritt 4: Hol nach besiegten eigenen Pokémon Basculegion rein – sein Last Respects wird dann immer stärker."
+          "Schritt 1: Starte meistens mit Charizard und Aerodactyl. Verwandle Charizard sofort in Mega-Charizard Y, damit die Sonne scheint.",
+          "Schritt 2: Lass Aerodactyl in der ersten Runde Rückenwind (Tailwind) setzen. Danach ist dein Team 4 Runden lang viel schneller und schlägt zuerst zu.",
+          "Schritt 3: Drück jetzt aufs Tempo. Charizard feuert Hitzewelle (Heat Wave) oder den sofortigen Solarstrahl (Solar Beam), Garchomp und Kingambit räumen mit kräftigen Treffern auf, Basculegion ist über den Wahlschal schon von allein schnell."
         ],
         "tips": [
-          "Vergiss nie die Mega-Entwicklung – ohne sie ist Charizard schwächer und macht keine Sonne.",
-          "Achtung bei Earthquake: Es trifft auch deinen eigenen Partner, wenn er am Boden steht. Garchomp neben Charizard oder Aerodactyl (beide fliegen) ist sicher.",
-          "Setze Protect (Schutzschild) clever, um eine Runde Zeit zu gewinnen, wenn der Gegner gefährlich zieht.",
-          "Rückenwind (Tailwind) hält nur 4 Runden – mach in dieser Zeit so viel Schaden wie möglich."
+          "Du kannst nur EIN Pokémon pro Kampf mega-entwickeln. Entscheide dich pro Spiel: meist Charizard für die Sonne, sonst Floette zu Mega-Florges.",
+          "Pass mit Erdbeben (Earthquake) von Garchomp auf — es trifft auch deinen eigenen Partner. Nutze in der Runde ein eigenes Schutzschild (Protect) oder eine fliegende/immune Stellung.",
+          "Aerodactyl hat den Fokusgurt (Focus Sash) und überlebt damit einmal einen tödlichen Treffer mit 1 KP. Setz Rückenwind ruhig auch, wenn es riskant aussieht.",
+          "Bedenke: Basculegion ist über den Wahlschal auf eine Attacke festgelegt, bis du es auswechselst. Wähle die erste Attacke mit Bedacht."
         ]
       },
       "en": {
-        "overview": "This team wants to deal heavy damage fast and control the pace. Charizard transforms (Mega Evolution) and creates sun, which boosts its Fire moves. Aerodactyl uses Tailwind (Rückenwind) to make your whole team faster so you attack first.",
+        "overview": "This team wants to deal a lot of damage fast. Charizard turns into Mega Charizard Y and brings strong sun, which boosts its Fire moves. On top of that, Aerodactyl makes your whole team faster with Tailwind so you strike first.",
         "roles": [
           {
             "name": "Charizard",
-            "role": "Your main Mega. After Mega Evolving it sets sun, making Heat Wave and Weather Ball very strong. Hits both opponents at once."
+            "role": "Your main attacker. With Charizardite Y (Glurakit Y) it becomes Mega Charizard Y and, through its ability Drought (Dürre), brings 5 turns of harsh sun. In sun, Solar Beam (Solarstrahl) fires instantly and Weather Ball (Wetterball) becomes a strong Fire move."
           },
           {
             "name": "Aerodactyl",
-            "role": "Your speed-setter. Uses Tailwind (Rückenwind) so your team moves first for 4 turns. Wide Guard (Breitseite) blocks moves that hit both of your Pokémon."
+            "role": "Your speed setter and shield. It uses Tailwind (Rückenwind) to make your whole team twice as fast for 4 turns. With Wide Guard (Rundumschutz) it blocks enemy spread moves for one turn."
           },
           {
             "name": "Garchomp",
-            "role": "Fast, hard-hitting ground attacker. Earthquake hits both opponents, and Scale Shot makes Garchomp even faster after using it. A solid all-rounder."
+            "role": "A solid physical attacker. Earthquake (Erdbeben) hits both opponents, so use it when your own Pokémon won't get hit. With Tera Dragon it boosts its Dragon moves."
           },
           {
             "name": "Kingambit",
-            "role": "Tough hitter. Sucker Punch strikes first when the opponent attacks. Defiant (Hass) makes Kingambit stronger if an opponent lowers your stats."
+            "role": "A hard single-target attacker with Sucker Punch (Tiefschlag), a priority move that strikes first — but only works if the target attacks. The Chople Berry (Tahaibeere) halves one super-effective Fighting hit, once."
           },
           {
             "name": "Basculegion",
-            "role": "Very fast attacker thanks to the Choice Scarf (Wahlschal). Last Respects gets stronger the more of your own Pokémon have fainted. Aqua Jet always strikes first."
+            "role": "A very fast Water attacker. The Choice Scarf (Wahlschal) makes it 1.5× faster, but locks it into one move until you switch it out. Last Respects gets stronger the more of your own Pokémon have fainted."
           },
           {
             "name": "Floette-Eternal",
-            "role": "Your second Mega option. As a Mega it's a strong special attacker with Light of Ruin and Moonblast. Pick it when you need an edge against Dragon or Fighting types."
+            "role": "A special attacker and second Mega option. With the Floettite (Florgessit) it becomes Mega Florges with huge Special Attack. Dazzling Gleam (Zauberschein) hits both opponents. With Tera Fairy its Fairy moves hit even harder."
           }
         ],
         "game_plan": [
-          "Step 1: Before the battle, decide which Pokémon will Mega Evolve – usually Charizard for sun and spread damage, or Floette against many Dragon/Fighting opponents.",
-          "Step 2: Often lead with Aerodactyl plus one attacker (e.g. Charizard). Aerodactyl uses Tailwind (Rückenwind) right away so all your Pokémon move first.",
-          "Step 3: Use the fast turns to hit both opponents at once with spread moves like Heat Wave, Earthquake, and Rock Slide.",
-          "Step 4: After your own Pokémon faint, bring in Basculegion – its Last Respects keeps getting stronger."
+          "Step 1: Usually start with Charizard and Aerodactyl. Mega evolve Charizard right away so the sun is up.",
+          "Step 2: Let Aerodactyl use Tailwind (Rückenwind) on turn one. After that your team is much faster for 4 turns and moves first.",
+          "Step 3: Now push the pace. Charizard fires Heat Wave (Hitzewelle) or the instant Solar Beam (Solarstrahl), Garchomp and Kingambit clean up with heavy hits, and Basculegion is already fast on its own from the Choice Scarf."
         ],
         "tips": [
-          "Never forget to Mega Evolve – without it Charizard is weaker and makes no sun.",
-          "Careful with Earthquake: it also hits your own partner if they're on the ground. Garchomp next to Charizard or Aerodactyl (both flying) is safe.",
-          "Use Protect (Schutzschild) smartly to buy a turn when the opponent has a dangerous move coming.",
-          "Tailwind (Rückenwind) only lasts 4 turns – deal as much damage as possible during that time."
+          "You can only mega evolve ONE Pokémon per battle. Decide each game: usually Charizard for the sun, otherwise Floette into Mega Florges.",
+          "Be careful with Garchomp's Earthquake (Erdbeben) — it also hits your own partner. That turn, use your partner's own Protect (Schutzschild) or a safe position.",
+          "Aerodactyl holds the Focus Sash (Fokusgurt), so it survives one deadly hit with 1 HP. Feel free to set Tailwind even when it looks risky.",
+          "Remember: the Choice Scarf locks Basculegion into one move until you switch it out. Pick that first move carefully."
         ]
       }
     },

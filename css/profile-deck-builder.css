@@ -54,23 +54,32 @@
     margin-top: 1.25rem;
 }
 
-.pdb-search-input {
+/* The global `input` style forces a white background, so light text
+ * (the dark-panel default) becomes unreadable. Pin both search inputs
+ * to white-bg + near-black text with #profile-deckbuilder specificity
+ * so they beat the generic input rules. User-flagged: "die
+ * Schriftfarbe in der Suche SCHWARZ". */
+#profile-deckbuilder .pdb-search-input {
     width: 100%;
     box-sizing: border-box;
-    background: rgba(255, 255, 255, 0.04);
+    background: #ffffff;
     border: 1px solid #2a3140;
     border-radius: 10px;
-    color: #e6ebf3;
+    color: #1a1f2c;
     padding: 0.65rem 0.85rem;
     font-size: 0.95rem;
     font-family: inherit;
     margin-bottom: 0.7rem;
 }
 
-.pdb-search-input:focus {
+#profile-deckbuilder .pdb-search-input::placeholder {
+    color: #6f7a8d;
+}
+
+#profile-deckbuilder .pdb-search-input:focus {
     outline: none;
     border-color: rgba(95, 182, 255, 0.7);
-    background: rgba(255, 255, 255, 0.06);
+    box-shadow: 0 0 0 2px rgba(95, 182, 255, 0.25);
 }
 
 .pdb-filter-row {
@@ -316,16 +325,20 @@
     font-weight: 500;
 }
 
-.pdb-deck-name-input {
+#profile-deckbuilder .pdb-deck-name-input {
     width: 100%;
     box-sizing: border-box;
-    background: rgba(255, 255, 255, 0.04);
+    background: #ffffff;
     border: 1px solid #2a3140;
     border-radius: 8px;
-    color: #e6ebf3;
+    color: #1a1f2c;
     padding: 0.45rem 0.7rem;
     font-size: 0.88rem;
     font-family: inherit;
+}
+
+#profile-deckbuilder .pdb-deck-name-input::placeholder {
+    color: #6f7a8d;
 }
 
 .pdb-deck-body {
@@ -477,19 +490,23 @@
     margin-bottom: 0.6rem;
 }
 
-.pdb-paste-area {
+#profile-deckbuilder .pdb-paste-area {
     width: 100%;
     box-sizing: border-box;
-    background: rgba(255, 255, 255, 0.04);
+    background: #ffffff;
     border: 1px solid #2a3140;
     border-radius: 8px;
-    color: #e6ebf3;
+    color: #1a1f2c;
     padding: 0.6rem 0.75rem;
     font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
     font-size: 0.84rem;
     line-height: 1.45;
     margin-bottom: 0.7rem;
     resize: vertical;
+}
+
+#profile-deckbuilder .pdb-paste-area::placeholder {
+    color: #6f7a8d;
 }
 
 /* ── Mulligan panel ───────────────────────────────────────────── */
@@ -620,13 +637,13 @@
     padding: 0 0.7rem 0.5rem 0.7rem;
 }
 
-.pdb-set-search-input {
+#profile-deckbuilder .pdb-set-search-input {
     width: 100%;
     box-sizing: border-box;
-    background: rgba(255, 255, 255, 0.04);
+    background: #ffffff;
     border: 1px solid #2a3140;
     border-radius: 8px;
-    color: #e6ebf3;
+    color: #1a1f2c;
     padding: 0.4rem 0.65rem;
     font-size: 0.85rem;
     font-family: inherit;

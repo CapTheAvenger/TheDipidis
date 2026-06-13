@@ -466,6 +466,42 @@
         return out;
     }
 
+    // Build a normalized-name → {name_en, name_de} lookup from the
+    // international cards. JP cards only carry an English species name
+    // (the scraper pulls them with translate=en), so to make the
+    // GERMAN search term find a JP card we copy the German name across
+    // from its international counterpart. Keyed on a normalized English
+    // name so "Manectric ex", "Mega Manectric ex" etc. each map to
+    // their own German equivalent ("Voltenso-ex", "Mega-Voltenso-ex").
+    function buildIntlNameMap(intlCards) {
+        const map = new Map();
+        for (const c of intlCards) {
+            const en = (c.name_en || c.name || '').trim();
+            const de = (c.name_de || '').trim();
+            if (!en) continue;
+            const key = en.toLowerCase();
+            // First non-empty German name wins; don't overwrite with a
+            // later print that lost its localisation.
+            if (!map.has(key) || (!map.get(key).name_de && de)) {
+                map.set(key, { name_en: en, name_de: de });
+            }
+        }
+        return map;
+    }
+
+    // Copy the German name onto each JP card from the intl name map.
+    // Mutates + returns the same array. JP cards keep their English
+    // name; only name_de is filled in (when a match exists).
+    function enrichJpNames(jpCards, intlNameMap) {
+        for (const c of jpCards) {
+            if (c.name_de) continue;            // already has one
+            const key = (c.name_en || '').trim().toLowerCase();
+            const hit = key && intlNameMap.get(key);
+            if (hit && hit.name_de) c.name_de = hit.name_de;
+        }
+        return jpCards;
+    }
+
     async function buildCardIndex() {
         if (_cardIndex) return _cardIndex;
         const intl = Array.isArray(window.allCardsDatabase) ? window.allCardsDatabase : [];
@@ -485,6 +521,9 @@
             is_japanese: false,
         }));
         const jp = await loadJapaneseCards();
+        // Cross-link German names onto JP cards so a German search term
+        // ("Voltenso") surfaces the Japanese print too.
+        enrichJpNames(jp, buildIntlNameMap(intlNormalised));
         _cardIndex = intlNormalised.concat(jp);
         // Tee up the meta-format chunks + format-window key in the
         // background — the result powers the Meta filter chips.
@@ -1151,6 +1190,8 @@
         parseDeckList,
         matchesSearch,
         passesFilters,
+        buildIntlNameMap,
+        enrichJpNames,
         // Action surface
         activate,
         getDeck: () => _deck,

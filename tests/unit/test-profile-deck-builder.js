@@ -372,6 +372,60 @@ describe('ProfileDeckBuilder — card key', () => {
 });
 
 
+describe('ProfileDeckBuilder — JP name cross-linking', () => {
+    const intl = [
+        { name_en: 'Manectric ex', name_de: 'Voltenso-ex', set: 'DRI', number: '76' },
+        { name_en: 'Mega Manectric ex', name_de: 'Mega-Voltenso-ex', set: 'MEG', number: '50' },
+        { name_en: 'Pikachu', name_de: 'Pikachu', set: 'CRI', number: '50' },
+        // A print that lost its German localisation — must not clobber
+        // the good one above.
+        { name_en: 'Manectric ex', name_de: '', set: 'SMP', number: '130' },
+    ];
+
+    it('builds an EN→DE map keyed on lowercased English name', () => {
+        const map = PDB.buildIntlNameMap(intl);
+        assert.equal(map.get('manectric ex').name_de, 'Voltenso-ex');
+        assert.equal(map.get('mega manectric ex').name_de, 'Mega-Voltenso-ex');
+    });
+
+    it('keeps the first non-empty German name (no clobber by a later blank print)', () => {
+        const map = PDB.buildIntlNameMap(intl);
+        // The SMP print has empty name_de but must not erase DRI's.
+        assert.equal(map.get('manectric ex').name_de, 'Voltenso-ex');
+    });
+
+    it('copies German names onto JP cards so a German search matches', () => {
+        const map = PDB.buildIntlNameMap(intl);
+        const jp = [
+            { name_en: 'Manectric ex', name_de: '', set: 'M5', number: '23', is_japanese: true },
+            { name_en: 'Mega Manectric ex', name_de: '', set: 'M5', number: '90', is_japanese: true },
+        ];
+        PDB.enrichJpNames(jp, map);
+        assert.equal(jp[0].name_de, 'Voltenso-ex');
+        assert.equal(jp[1].name_de, 'Mega-Voltenso-ex');
+        // And now the German term finds the JP card.
+        assert.equal(PDB.matchesSearch(jp[0], 'voltenso'), true);
+        assert.equal(PDB.matchesSearch(jp[0], 'Voltenso-ex'), true);
+    });
+
+    it('leaves JP cards with no intl match untouched', () => {
+        const map = PDB.buildIntlNameMap(intl);
+        const jp = [{ name_en: 'SomeJpOnlyMon', name_de: '', set: 'M5', number: '5', is_japanese: true }];
+        PDB.enrichJpNames(jp, map);
+        assert.equal(jp[0].name_de, '');
+        // Still findable by its English name.
+        assert.equal(PDB.matchesSearch(jp[0], 'somejponlymon'), true);
+    });
+
+    it('does not overwrite a JP card that already has a German name', () => {
+        const map = PDB.buildIntlNameMap(intl);
+        const jp = [{ name_en: 'Manectric ex', name_de: 'AlreadySet', set: 'M5', number: '23', is_japanese: true }];
+        PDB.enrichJpNames(jp, map);
+        assert.equal(jp[0].name_de, 'AlreadySet');
+    });
+});
+
+
 describe('ProfileDeckBuilder — newest-set-first sort', () => {
     // Mirrors the production sort in js/app-profile-deck-builder.js
     // (search 'setOrder'). Keeps the assertion focused on the

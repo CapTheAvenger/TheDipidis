@@ -1,0 +1,524 @@
+/* Profile Deck Builder — sandbox deck builder in My Profile.
+ *
+ * Visual language matches the existing profile sub-panels (dark surface,
+ * rounded cards, soft borders) plus the same blue accent the rest of
+ * the dashboard uses. Two-column layout on desktop; single-column
+ * stack ≤ 900 px so the search and the deck panel each get full width
+ * on phones.
+ */
+
+#profile-deckbuilder {
+    color: #e6ebf3;
+}
+
+.pdb-heading {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin: 0 0 0.25rem 0;
+}
+
+.pdb-subtitle {
+    margin: 0 0 1rem 0;
+    color: #9fa9bb;
+    font-size: 0.9rem;
+    line-height: 1.45;
+}
+
+.pdb-layout {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+}
+
+@media (min-width: 900px) {
+    .pdb-layout {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    }
+}
+
+/* ── Search panel ─────────────────────────────────────────────── */
+
+.pdb-search-panel,
+.pdb-deck-panel,
+.pdb-paste-panel,
+.pdb-mulligan-panel {
+    background: var(--surface, #1a1f2c);
+    border: 1px solid #2a3140;
+    border-radius: 14px;
+    padding: 1rem 1.1rem 1.1rem 1.1rem;
+}
+
+.pdb-paste-panel,
+.pdb-mulligan-panel {
+    margin-top: 1.25rem;
+}
+
+.pdb-search-input {
+    width: 100%;
+    box-sizing: border-box;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid #2a3140;
+    border-radius: 10px;
+    color: #e6ebf3;
+    padding: 0.65rem 0.85rem;
+    font-size: 0.95rem;
+    font-family: inherit;
+    margin-bottom: 0.7rem;
+}
+
+.pdb-search-input:focus {
+    outline: none;
+    border-color: rgba(95, 182, 255, 0.7);
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.pdb-filter-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 0.7rem;
+}
+
+.pdb-chip-group {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid #242b39;
+    border-radius: 999px;
+    padding: 0.2rem 0.45rem;
+}
+
+.pdb-chip-label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #8c95a5;
+    padding: 0 0.3rem 0 0.1rem;
+}
+
+.pdb-chip {
+    display: inline-flex;
+    align-items: center;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    color: #b0b8c1;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.78rem;
+    font-weight: 600;
+    padding: 0.25rem 0.7rem;
+    transition: background 120ms ease, color 120ms ease, border-color 120ms ease;
+}
+
+.pdb-chip:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: #e6ebf3;
+}
+
+.pdb-chip.is-active {
+    background: rgba(95, 182, 255, 0.18);
+    border-color: rgba(95, 182, 255, 0.55);
+    color: #e6ebf3;
+}
+
+.pdb-results-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin: 0.2rem 0 0.5rem 0;
+    font-size: 0.78rem;
+    color: #8c95a5;
+}
+
+.pdb-link-btn {
+    background: transparent;
+    border: none;
+    color: #5fb6ff;
+    cursor: pointer;
+    font-size: 0.78rem;
+    padding: 0;
+    font-family: inherit;
+}
+
+.pdb-link-btn:hover {
+    text-decoration: underline;
+}
+
+.pdb-link-btn--danger {
+    color: #ff7676;
+}
+
+.pdb-results-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    max-height: 540px;
+    overflow-y: auto;
+    padding-right: 0.25rem;
+}
+
+.pdb-result-row {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    padding: 0.45rem 0.55rem;
+    background: rgba(255, 255, 255, 0.025);
+    border: 1px solid #242b39;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 120ms ease, border-color 120ms ease;
+}
+
+.pdb-result-row:hover,
+.pdb-result-row:focus-visible {
+    background: rgba(95, 182, 255, 0.08);
+    border-color: rgba(95, 182, 255, 0.4);
+    outline: none;
+}
+
+.pdb-result-img {
+    width: 38px;
+    height: 53px;
+    object-fit: cover;
+    border-radius: 4px;
+    background: rgba(0, 0, 0, 0.3);
+    flex: 0 0 auto;
+}
+
+.pdb-result-text {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.pdb-result-name {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-weight: 600;
+    font-size: 0.92rem;
+    color: #e6ebf3;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.pdb-result-sub {
+    font-size: 0.72rem;
+    color: #8c95a5;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.pdb-result-meta {
+    font-size: 0.72rem;
+    color: #8c95a5;
+    margin-top: 0.1rem;
+}
+
+.pdb-result-add {
+    width: 1.6rem;
+    height: 1.6rem;
+    border-radius: 50%;
+    background: rgba(95, 182, 255, 0.18);
+    color: #5fb6ff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    flex: 0 0 auto;
+    font-size: 0.95rem;
+}
+
+.pdb-result-row:hover .pdb-result-add {
+    background: rgba(95, 182, 255, 0.35);
+    color: #fff;
+}
+
+.pdb-energy-dot {
+    width: 0.7rem;
+    height: 0.7rem;
+    border-radius: 50%;
+    display: inline-block;
+    flex: 0 0 auto;
+}
+
+.pdb-energy-fire      { background: #ff7a45; }
+.pdb-energy-water     { background: #5db4ff; }
+.pdb-energy-grass     { background: #5dd66f; }
+.pdb-energy-lightning { background: #ffd84d; }
+.pdb-energy-electric  { background: #ffd84d; }
+.pdb-energy-psychic   { background: #b67aff; }
+.pdb-energy-fighting  { background: #c97a3a; }
+.pdb-energy-darkness  { background: #5a6172; }
+.pdb-energy-dark      { background: #5a6172; }
+.pdb-energy-metal     { background: #a0a8b5; }
+.pdb-energy-fairy     { background: #ff9eda; }
+.pdb-energy-dragon    { background: #b9a73a; }
+.pdb-energy-colorless { background: #d5dae3; }
+
+.pdb-jp-badge {
+    display: inline-block;
+    background: rgba(255, 154, 92, 0.22);
+    color: #ffae74;
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    padding: 0.05rem 0.35rem;
+    border-radius: 6px;
+    text-transform: uppercase;
+}
+
+.pdb-empty {
+    margin: 0.5rem 0;
+    color: #8c95a5;
+    font-size: 0.88rem;
+    line-height: 1.5;
+    text-align: center;
+    padding: 1rem 0.5rem;
+}
+
+/* ── Deck panel ───────────────────────────────────────────────── */
+
+.pdb-deck-head {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 0.8rem;
+}
+
+.pdb-deck-title {
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: #e6ebf3;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.pdb-deck-count {
+    font-size: 0.82rem;
+    color: #9fa9bb;
+    font-weight: 500;
+}
+
+.pdb-deck-name-input {
+    width: 100%;
+    box-sizing: border-box;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid #2a3140;
+    border-radius: 8px;
+    color: #e6ebf3;
+    padding: 0.45rem 0.7rem;
+    font-size: 0.88rem;
+    font-family: inherit;
+}
+
+.pdb-deck-body {
+    min-height: 80px;
+    max-height: 540px;
+    overflow-y: auto;
+    padding-right: 0.25rem;
+}
+
+.pdb-deck-section {
+    margin-bottom: 0.85rem;
+}
+
+.pdb-deck-section-h {
+    margin: 0 0 0.35rem 0;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--accent, #5fb6ff);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.4rem;
+}
+
+.pdb-deck-section-total {
+    background: rgba(95, 182, 255, 0.14);
+    color: #e6ebf3;
+    border-radius: 6px;
+    padding: 0.05rem 0.45rem;
+    font-size: 0.78rem;
+    font-weight: 700;
+}
+
+.pdb-deck-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.pdb-deck-row {
+    display: grid;
+    grid-template-columns: 2.2rem 1fr auto auto;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.35rem 0.55rem;
+    background: rgba(255, 255, 255, 0.025);
+    border: 1px solid #242b39;
+    border-radius: 8px;
+    font-size: 0.86rem;
+}
+
+.pdb-deck-row-count {
+    color: var(--accent, #5fb6ff);
+    font-weight: 700;
+    text-align: right;
+}
+
+.pdb-deck-row-name {
+    color: #e6ebf3;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.pdb-deck-row-set {
+    color: #8c95a5;
+    font-size: 0.74rem;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+.pdb-deck-remove {
+    width: 1.6rem;
+    height: 1.6rem;
+    border-radius: 6px;
+    background: rgba(255, 118, 118, 0.12);
+    border: 1px solid rgba(255, 118, 118, 0.3);
+    color: #ff7676;
+    font-weight: 700;
+    cursor: pointer;
+    line-height: 1;
+    font-family: inherit;
+    transition: background 120ms ease;
+}
+
+.pdb-deck-remove:hover {
+    background: rgba(255, 118, 118, 0.3);
+    color: #fff;
+}
+
+.pdb-deck-actions {
+    margin-top: 0.6rem;
+    display: flex;
+    justify-content: flex-end;
+}
+
+/* ── Paste panel ──────────────────────────────────────────────── */
+
+.pdb-section-h {
+    margin: 0 0 0.35rem 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #e6ebf3;
+}
+
+.pdb-section-help {
+    margin: 0 0 0.7rem 0;
+    font-size: 0.82rem;
+    color: #9fa9bb;
+    line-height: 1.45;
+}
+
+.pdb-paste-area {
+    width: 100%;
+    box-sizing: border-box;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid #2a3140;
+    border-radius: 8px;
+    color: #e6ebf3;
+    padding: 0.6rem 0.75rem;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.84rem;
+    line-height: 1.45;
+    margin-bottom: 0.7rem;
+    resize: vertical;
+}
+
+/* ── Mulligan panel ───────────────────────────────────────────── */
+
+.pdb-mulligan-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.8rem;
+}
+
+.pdb-mulligan-cell {
+    background: rgba(255, 255, 255, 0.025);
+    border: 1px solid #242b39;
+    border-radius: 10px;
+    padding: 0.7rem 0.85rem;
+    text-align: center;
+}
+
+.pdb-mulligan-label {
+    font-size: 0.78rem;
+    color: #9fa9bb;
+    margin-bottom: 0.2rem;
+}
+
+.pdb-mulligan-value {
+    font-size: 1.3rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+.pdb-mulligan-good { color: #4cd182; }
+.pdb-mulligan-bad  { color: #ff7676; }
+
+.pdb-mulligan-note {
+    margin: 0.65rem 0 0 0;
+    font-size: 0.78rem;
+    color: #8c95a5;
+    text-align: center;
+}
+
+.pdb-mulligan-warn {
+    margin: 0 0 0.6rem 0;
+    font-size: 0.78rem;
+    color: #ffae74;
+    text-align: center;
+}
+
+/* ── Toast ────────────────────────────────────────────────────── */
+
+.pdb-toast {
+    position: fixed;
+    bottom: 1.5rem;
+    left: 50%;
+    transform: translateX(-50%) translateY(8px);
+    background: rgba(20, 25, 35, 0.96);
+    border: 1px solid #2a3140;
+    border-radius: 10px;
+    padding: 0.55rem 0.95rem;
+    color: #e6ebf3;
+    font-size: 0.85rem;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 180ms ease, transform 180ms ease;
+    z-index: 10100;
+}
+
+.pdb-toast.is-visible {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}

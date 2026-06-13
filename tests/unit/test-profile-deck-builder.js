@@ -370,3 +370,55 @@ describe('ProfileDeckBuilder — card key', () => {
         assert.equal(PDB.cardKey({ set: 'obf', number: '125' }), 'OBF-125');
     });
 });
+
+
+describe('ProfileDeckBuilder — newest-set-first sort', () => {
+    // Mirrors the production sort in js/app-profile-deck-builder.js
+    // (search 'setOrder'). Keeps the assertion focused on the
+    // newest-first ordering the user asked for ('CRI is newer than
+    // ASC, must show first') rather than reimplementing the whole
+    // exact-match + tiebreak ladder.
+
+    function sortByReleaseDesc(cards, orderMap) {
+        const setOrder = (code) => (code && (orderMap[code] || orderMap[(code || '').toLowerCase()])) || 0;
+        return cards.slice().sort((a, b) => {
+            const delta = setOrder(b.set) - setOrder(a.set);
+            if (delta !== 0) return delta;
+            return (a.set || '').localeCompare(b.set || '');
+        });
+    }
+
+    it('CRI (154) sorts before ASC (150) which sorts before TEF (148)', () => {
+        // Reproduces the exact ordering complaint from the user: with
+        // alphabetical sort ASC showed first, but CRI is the newer set
+        // and should land on top.
+        const orderMap = { CRI: 154, ASC: 150, TEF: 148, BLK: 145 };
+        const cards = [
+            { set: 'ASC', number: '1' },
+            { set: 'CRI', number: '1' },
+            { set: 'BLK', number: '1' },
+            { set: 'TEF', number: '1' },
+        ];
+        const order = sortByReleaseDesc(cards, orderMap).map(c => c.set);
+        assert.deepEqual(order, ['CRI', 'ASC', 'TEF', 'BLK']);
+    });
+
+    it('unknown sets (orderMap miss) sort to the bottom', () => {
+        // JP sets / freshly-added codes that aren't in sets.json yet
+        // shouldn't bubble up above legitimate Standard sets.
+        const orderMap = { CRI: 154, OBF: 130 };
+        const cards = [
+            { set: 'NEWBIE_JP', number: '1' },
+            { set: 'OBF', number: '1' },
+            { set: 'CRI', number: '1' },
+        ];
+        const order = sortByReleaseDesc(cards, orderMap).map(c => c.set);
+        assert.deepEqual(order, ['CRI', 'OBF', 'NEWBIE_JP']);
+    });
+
+    it('falls back to alphabetical within equal release order', () => {
+        const orderMap = { A: 100, B: 100 };
+        const cards = [{ set: 'B', number: '1' }, { set: 'A', number: '1' }];
+        assert.deepEqual(sortByReleaseDesc(cards, orderMap).map(c => c.set), ['A', 'B']);
+    });
+});

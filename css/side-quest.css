@@ -495,3 +495,105 @@
     border-top: 1px dotted rgba(255, 255, 255, 0.08);
     padding-top: 0.6rem;
 }
+
+/* ── Team marks (will-ich-spielen / fand-ich-gut / nicht-nochmal) ────
+ * Per-card status row in the footer next to the strategy info button.
+ * State is keyed by team CONTENT (see app-side-quest.js
+ * teamIdentityHash) so it survives trainer / rank / replica-code
+ * churn — the same composition re-entering the top 20 keeps its mark.
+ */
+
+.side-quest-mark-hint {
+    margin: 0.5rem 0 0 0;
+    font-size: 0.76rem;
+    color: #8c95a5;
+}
+
+.side-quest-team-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-top: 0.85rem;
+    flex-wrap: wrap;
+}
+
+/* The info button already carries its own margin-top from the standalone
+ * layout; inside the footer flex row we zero it so both controls align. */
+.side-quest-team-footer .side-quest-info-btn {
+    margin-top: 0;
+}
+
+.side-quest-marks {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin-left: auto;
+}
+
+.side-quest-mark-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+    border-radius: 9px;
+    border: 1px solid #2a3140;
+    background: rgba(255, 255, 255, 0.03);
+    cursor: pointer;
+    font-size: 0.95rem;
+    line-height: 1;
+    filter: grayscale(0.55) opacity(0.7);
+    transition: filter 120ms ease, background 120ms ease,
+                border-color 120ms ease, transform 80ms ease;
+}
+
+.side-quest-mark-btn:hover {
+    filter: grayscale(0) opacity(1);
+    background: rgba(255, 255, 255, 0.07);
+}
+
+.side-quest-mark-btn:active {
+    transform: scale(0.92);
+}
+
+/* Active states — full colour + a tinted ring matching the verdict. */
+.side-quest-mark-btn.is-active {
+    filter: none;
+}
+
+.side-quest-mark-want.is-active {
+    background: rgba(95, 182, 255, 0.18);
+    border-color: rgba(95, 182, 255, 0.6);
+}
+
+.side-quest-mark-liked.is-active {
+    background: rgba(76, 209, 130, 0.18);
+    border-color: rgba(76, 209, 130, 0.6);
+}
+
+.side-quest-mark-disliked.is-active {
+    background: rgba(245, 96, 96, 0.18);
+    border-color: rgba(245, 96, 96, 0.6);
+}
+
+/* Card-level treatment per verdict. "Want" and "liked" get a left
+ * accent bar; "not again" dims the whole card so it recedes (it's also
+ * sorted to the bottom in render()). */
+.side-quest-team.side-quest-mark-state-want {
+    border-left: 3px solid rgba(95, 182, 255, 0.7);
+}
+
+.side-quest-team.side-quest-mark-state-liked {
+    border-left: 3px solid rgba(76, 209, 130, 0.7);
+}
+
+.side-quest-team.side-quest-mark-state-disliked {
+    opacity: 0.5;
+    border-left: 3px solid rgba(245, 96, 96, 0.55);
+}
+
+.side-quest-team.side-quest-mark-state-disliked:hover {
+    opacity: 0.85;
+}

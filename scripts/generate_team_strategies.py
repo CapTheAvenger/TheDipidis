@@ -49,10 +49,21 @@ MAX_CONSECUTIVE_FAILURES = 3
 # regenerate on the next run even if the team itself is unchanged.
 # v2: moves/abilities/items always bilingual "Deutsch (English)" /
 #     "English (Deutsch)" (user request 2026-06-12).
-PROMPT_VERSION = 2
+# v3: factual grounding — local moves/items reference DB is loaded
+#     per team and injected as a "Verbindliche Fakten"-Block in the
+#     system prompt; anti-hallucination guards in the validator
+#     (reject "Mega <Pokemon>" if Pokemon isn't actually Mega in the
+#     team, reject mentions of Pokemon not on the roster). Triggered
+#     by user-reported errors in the v2 pilot: "Tailwind 2 Runden"
+#     (correct: 4), Will-O-Wisp without burn mechanic, hallucinated
+#     "Glimmora Mega" + "flächendeckenden Schaden" (Glimmora has no
+#     Mega and no spread move on the team).
+PROMPT_VERSION = 3
 
 DEFAULT_TEAMS_PATH = os.path.join('data', 'champions_replica_teams.json')
 DEFAULT_STRATEGIES_PATH = os.path.join('data', 'champions_team_strategies.json')
+DEFAULT_MOVES_REF_PATH = os.path.join('data', 'champions_moves_reference.json')
+DEFAULT_ITEMS_REF_PATH = os.path.join('data', 'champions_items_reference.json')
 
 # Entries for teams that dropped off the top-N list are kept (teams
 # rotate back in), but the cache is bounded: when it exceeds this,
@@ -185,6 +196,326 @@ def validate_strategy(obj: Any) -> Tuple[bool, str]:
     return True, ''
 
 
+# ─────────────────── Factual grounding (v3) ───────────────────────
+# References for moves + items are loaded once from JSON. Both files
+# carry an English `key` and a German `de_name`; lookups are normalized
+# (lowercase, stripped) and try BOTH fields so deck JSON written in
+# either language matches. The matched entries become a "Verbindliche
+# Fakten"-Block in the system prompt — the model is instructed to cite
+# those mechanics verbatim and not invent its own. Stops the v2-pilot
+# error class (wrong Tailwind duration, missing burn-mechanic detail).
+
+def _norm_lookup(s: str) -> str:
+    return (s or '').strip().lower()
+
+
+def load_reference(path: str) -> Dict[str, Any]:
+    """Load a JSON reference file. Returns {} on any error (missing
+    file, parse error). The generator runs without references in that
+    case — same as before v3, just no facts-block injection."""
+    if not os.path.isfile(path):
+        return {}
+    try:
+        with open(path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        return data if isinstance(data, dict) else {}
+    except (OSError, json.JSONDecodeError):
+        return {}
+
+
+def build_lookup_index(ref: Dict[str, Any], collection_key: str) -> Dict[str, Tuple[str, Dict[str, Any]]]:
+    """Index every reference entry by both its English key and German
+    name (lowercase). Value is `(canonical_english_key, entry_dict)`
+    so the caller can render a stable label."""
+    out: Dict[str, Tuple[str, Dict[str, Any]]] = {}
+    entries = ref.get(collection_key) or {}
+    for canonical, entry in entries.items():
+        if not isinstance(entry, dict):
+            continue
+        out[_norm_lookup(canonical)] = (canonical, entry)
+        de_name = entry.get('de_name')
+        if de_name:
+            out[_norm_lookup(de_name)] = (canonical, entry)
+    return out
+
+
+def collect_team_facts(
+    team: Dict[str, Any],
+    moves_idx: Dict[str, Tuple[str, Dict[str, Any]]],
+    items_idx: Dict[str, Tuple[str, Dict[str, Any]]],
+) -> Dict[str, List[Tuple[str, Dict[str, Any]]]]:
+    """Walk the team's Pokémon, collect every move + item that has a
+    reference entry. Deduplicated by canonical English key, ordered by
+    first appearance in the team — keeps the facts block compact and
+    deterministic for caching."""
+    moves_seen: Dict[str, Tuple[str, Dict[str, Any]]] = {}
+    items_seen: Dict[str, Tuple[str, Dict[str, Any]]] = {}
+    for p in team.get('pokemon') or []:
+        item_name = (p.get('item') or '').strip()
+        if item_name:
+            hit = items_idx.get(_norm_lookup(item_name))
+            if hit and hit[0] not in items_seen:
+                items_seen[hit[0]] = hit
+        for m in p.get('moves') or []:
+            move_name = (m or '').strip()
+            if not move_name:
+                continue
+            hit = moves_idx.get(_norm_lookup(move_name))
+            if hit and hit[0] not in moves_seen:
+                moves_seen[hit[0]] = hit
+    return {'moves': list(moves_seen.values()), 'items': list(items_seen.values())}
+
+
+def format_facts_block(facts: Dict[str, List[Tuple[str, Dict[str, Any]]]]) -> str:
+    """Render the collected facts as the prompt-injection block. Empty
+    string when nothing matched (no harm done, just no grounding)."""
+    if not facts['moves'] and not facts['items']:
+        return ''
+    lines: List[str] = []
+    lines.append('=== VERBINDLICHE FAKTEN für diesen Team-Guide ===')
+    lines.append('Diese Mechaniken stammen aus der internen Referenz-Datenbank.')
+    lines.append('NUTZE genau diese Effekte (Rundenzahl, %, Bedingungen) im')
+    lines.append('Guide — erfinde NIEMALS abweichende Werte. Wenn eine Attacke /')
+    lines.append('ein Item hier nicht steht, lass die genaue Mechanik weg statt')
+    lines.append('sie zu raten.')
+    lines.append('')
+    if facts['moves']:
+        lines.append('-- Attacken --')
+        for canonical, entry in facts['moves']:
+            de = entry.get('de_name') or canonical
+            acc = entry.get('accuracy')
+            acc_str = f' [Genauigkeit {acc}%]' if acc is not None else ''
+            lines.append(f"• {de} ({canonical}){acc_str}: {entry.get('effect', '')}")
+        lines.append('')
+    if facts['items']:
+        lines.append('-- Items --')
+        for canonical, entry in facts['items']:
+            de = entry.get('de_name') or canonical
+            lines.append(f"• {de} ({canonical}): {entry.get('effect', '')}")
+        lines.append('')
+    lines.append('=== Ende Faktenblock ===')
+    return '\n'.join(lines)
+
+
+# ─────────────────── Hallucination guard (v3) ─────────────────────
+# Post-generation validator that catches the failure modes the user
+# flagged in the v2 pilot. Each guard returns (ok, reason) so the
+# generator can log WHY a strategy was rejected; rejected strategies
+# are NOT cached so the next run retries them.
+
+# Form prefixes that signal a Pokémon is in its Mega/Alolan/etc.
+# form on the actual team sheet. The team JSON spells these out as
+# the species name (e.g. "Charizard-Mega-Y"), so we check the species
+# field for the prefix — not the move list.
+FORM_PREFIXES_RE = re.compile(
+    r'\b(Mega|Alolan|Galarian|Hisuian|Paldean|Primal|Origin|Ultra)\b',
+    re.IGNORECASE,
+)
+
+
+def _team_pokemon_names(team: Dict[str, Any]) -> List[str]:
+    return [(p.get('name') or '').strip() for p in team.get('pokemon') or [] if p.get('name')]
+
+
+def _team_pokemon_forms(team: Dict[str, Any]) -> Dict[str, str]:
+    """Return {base_species_lower: form_prefix_or_empty}. So a team
+    that lists 'Charizard-Mega-Y' produces {'charizard': 'mega'} —
+    used to verify whether the model can legitimately call this mon
+    'Mega Charizard' in prose."""
+    forms: Dict[str, str] = {}
+    for n in _team_pokemon_names(team):
+        parts = [p for p in re.split(r'[-\s]+', n) if p]
+        if not parts:
+            continue
+        # Look for a form-prefix anywhere in the name
+        form = ''
+        species_parts = []
+        for part in parts:
+            if FORM_PREFIXES_RE.fullmatch(part) and not form:
+                form = part.lower()
+            else:
+                species_parts.append(part)
+        species = ' '.join(species_parts).lower().strip()
+        # First mention wins per species — covers rare double-variants
+        forms.setdefault(species, form)
+    return forms
+
+
+# Species we explicitly know have no Mega form in this generation.
+# Used to catch the "Mega Glimmora" hallucination class. Not an
+# exhaustive Pokédex — only species the model has demonstrably
+# tried to wrongly Mega-evolve in the v2 pilot.
+NEVER_MEGA_SPECIES = {
+    'glimmora', 'kingambit', 'basculegion', 'whimsicott', 'incineroar',
+    'sinistcha', 'rotom', 'rotom-wash', 'rotom-heat', 'rotom-frost',
+    'rotom-mow', 'rotom-fan', 'ninetales-alola', 'talonflame', 'garchomp-mega',
+    "n's zoroark", 'ogerpon', 'meganium', 'archaludon', 'pecharunt',
+    'dudunsparce', 'lokix', 'iron hands', 'iron valiant', 'iron bundle',
+    'flutter mane', 'roaring moon', 'walking wake', 'gouging fire',
+}
+
+
+def _team_legitimate_mega_species(team: Dict[str, Any]) -> set:
+    """Lowercase species names that the team can legitimately call
+    'Mega <X>' in prose. A species qualifies if:
+      (a) its team-JSON name already carries a 'Mega' / 'Mega-Y'
+          form prefix (e.g. 'Charizard-Mega-Y'), OR
+      (b) its held item is a known Mega Stone whose ref-entry
+          effect starts with 'Mega-Stein:' (and does NOT contain
+          'EXISTIERT NICHT' — that flags our deliberate trap entries
+          for items that don't actually exist, e.g. 'Glimmorite').
+
+    Mega-evolution is triggered by the item mid-battle, so a pre-Mega
+    species name + a real Mega-Stone item is a perfectly legitimate
+    'Mega <X>' mention in the guide.
+    """
+    _ensure_references_loaded()
+    items_idx = _ITEMS_IDX or {}
+    legit: set = set()
+    for n in _team_pokemon_names(team):
+        # (a) name already carries the Mega prefix
+        parts = re.split(r'[-\s]+', n)
+        has_mega = any(p.lower() == 'mega' for p in parts)
+        species = ' '.join(p for p in parts if p.lower() != 'mega').lower().strip()
+        # Also store under the bare first word, so 'Charizard-Mega-Y'
+        # → 'charizard' AND 'charizard y' both work for matching.
+        if has_mega:
+            legit.add(species)
+            if parts and parts[0].lower() != 'mega':
+                legit.add(parts[0].lower())
+    for p in team.get('pokemon') or []:
+        item = (p.get('item') or '').strip()
+        if not item:
+            continue
+        hit = items_idx.get(_norm_lookup(item))
+        if not hit:
+            continue
+        eff = (hit[1].get('effect') or '')
+        if 'EXISTIERT NICHT' in eff:
+            continue
+        if eff.startswith('Mega-Stein:') or eff.lower().startswith('mega-stein:'):
+            species = (p.get('name') or '').strip().lower()
+            if species:
+                legit.add(species)
+                # First word too (e.g. "Charizard" for "Charizard-Mega-Y").
+                legit.add(species.split('-', 1)[0].split(' ', 1)[0])
+    return {s for s in legit if s}
+
+
+# Patterns the guard scans for. Each captures the SPECIES name in
+# group 1. Covered:
+#   English / pre-Mega:    "Mega Charizard", "Mega-Charizard"
+#   German post-position:  "Charizard mega-entwickeln", "X mega werden",
+#                          "Lass X Mega werden"
+# Bare "<Species> Mega" without a verb is intentionally NOT matched —
+# German imperatives like "Schick Mega Whimsicott vor" produced false
+# positives on the leading verb. The verb-suffixed German forms are
+# unambiguous enough to keep.
+_SPECIES_TOKEN = r"[A-ZÄÖÜ][a-zäöüßéí'\-]+(?:[\s-][A-ZÄÖÜ][a-zäöüßéí'\-]+)?"
+_MEGA_PATTERNS = [
+    re.compile(rf"\bMega[\s-]+({_SPECIES_TOKEN})\b"),
+    re.compile(rf"\blass(?:t)?\s+({_SPECIES_TOKEN})\s+mega", re.IGNORECASE),
+    re.compile(rf"\b({_SPECIES_TOKEN})\s+mega[\s-]?(?:entwickel|werden|evolv|geht|evolviert)",
+               re.IGNORECASE),
+]
+
+
+# German imperative / sentence-starter words that LOOK capitalised but
+# aren't Pokémon names. Used to suppress false positives in the
+# "<Species> mega …" pattern where a sentence like "Lass Charizard mega
+# werden" would otherwise capture "Lass Charizard" as the species.
+_GERMAN_STOPWORDS = {
+    'lass', 'lasst', 'schick', 'schickt', 'bring', 'bringt', 'setz', 'setzt',
+    'geh', 'wechsl', 'wechsle', 'wechsel', 'wähl', 'wähle', 'nimm', 'nimmt',
+    'spiel', 'spiele', 'spielt', 'nutz', 'nutze', 'hol', 'hole', 'mach',
+    'macht', 'spar', 'tausch', 'starte', 'starten', 'dann', 'dabei', 'danach',
+    'direkt', 'deshalb', 'wenn', 'sobald', 'falls', 'denn', 'weil',
+}
+
+
+def find_hallucinated_megas(text: str, team: Dict[str, Any]) -> List[str]:
+    """Scan the strategy text for 'Mega <Species>' or 'X mega-entwickeln'
+    claims that aren't backed by the actual team sheet.
+
+    The guard is asymmetric on purpose:
+      • A Mega claim about a species in NEVER_MEGA_SPECIES is ALWAYS
+        flagged — that's the Glimmora-class hallucination the user
+        reported and a hard false-negative is unacceptable.
+      • A Mega claim about a TEAM species that lacks a mega-stone item
+        AND isn't in NEVER_MEGA gets flagged ('im Team nicht Mega').
+      • A Mega claim about a species NOT on the team is silently
+        ignored — the false-positive rate on unknown capitalised tokens
+        (German verbs, trainer titles) outweighs the rare case where
+        the model invents a wholly out-of-team Mega mention.
+    """
+    legit = _team_legitimate_mega_species(team)
+    team_species = {_norm_lookup(n).split('-')[0].split(' ')[0] for n in _team_pokemon_names(team)}
+    team_species.update(_norm_lookup(n) for n in _team_pokemon_names(team))
+    offenders: List[str] = []
+    for pat in _MEGA_PATTERNS:
+        for match in pat.finditer(text):
+            species_phrase = match.group(1).strip().lower()
+            # Strip trailing descriptors like 'ex', 'form', 'y', 'x'.
+            species_phrase = re.sub(r'\b(ex|form|y|x)\s*$', '', species_phrase).strip()
+            if not species_phrase:
+                continue
+            # Drop the leading word if it's a German imperative — keeps
+            # "Lass Charizard" → "charizard", not "lass charizard".
+            first_word = species_phrase.split(' ', 1)[0]
+            if first_word in _GERMAN_STOPWORDS:
+                rest = species_phrase[len(first_word):].strip()
+                species_phrase = rest
+                if not species_phrase:
+                    continue
+            # Skip phrases that are themselves stop-words.
+            if species_phrase in {'form', 'mega', 'phase', 'attacke', 'angriff'}:
+                continue
+            if species_phrase in _GERMAN_STOPWORDS:
+                continue
+            # Legitimate Mega-mention → fine.
+            if species_phrase in legit:
+                continue
+            # Strongest signal: species explicitly has no Mega form.
+            if species_phrase in NEVER_MEGA_SPECIES:
+                offenders.append(f"Mega {species_phrase} (Spezies hat keine Mega-Form)")
+                continue
+            # Team species without a mega-stone — flag.
+            if species_phrase in team_species or species_phrase.split(' ')[0] in team_species:
+                offenders.append(f"Mega {species_phrase} (im Team nicht Mega, kein Mega-Stein)")
+                continue
+            # Unknown capitalised token → silently ignore (likely a
+            # German verb / trainer prefix / proper noun, not a
+            # hallucinated Pokémon name).
+    seen: set = set()
+    uniq: List[str] = []
+    for o in offenders:
+        if o not in seen:
+            seen.add(o)
+            uniq.append(o)
+    return uniq
+
+
+def validate_strategy_facts(obj: Dict[str, Any], team: Dict[str, Any]) -> Tuple[bool, str]:
+    """Run the v3 hallucination guards across the generated strategy.
+    Returns (ok, reason). Currently checks for invented Mega forms;
+    additional guards can plug in here as failure modes surface."""
+    # Concatenate every prose field across both languages.
+    prose_parts: List[str] = []
+    for lang in ('de', 'en'):
+        block = obj.get(lang) or {}
+        prose_parts.append(block.get('overview') or '')
+        for r in block.get('roles') or []:
+            prose_parts.append(r.get('role') or '')
+        prose_parts.extend(block.get('game_plan') or [])
+        prose_parts.extend(block.get('tips') or [])
+    blob = '\n'.join(prose_parts)
+
+    bad_megas = find_hallucinated_megas(blob, team)
+    if bad_megas:
+        return False, 'hallucinated Mega forms: ' + '; '.join(bad_megas)
+    return True, ''
+
+
 def format_team_for_prompt(team: Dict[str, Any]) -> str:
     """Render the team as compact plain text for the user message."""
     lines = [
@@ -211,28 +542,49 @@ def format_team_for_prompt(team: Dict[str, Any]) -> str:
     return '\n'.join(lines)
 
 
-SYSTEM_PROMPT = """\
+SYSTEM_PROMPT_BASE = """\
 Du bist ein erfahrener Pokémon-VGC-Coach (Doppelkämpfe, Pokémon Champions). \
 Deine Aufgabe: einem blutigen Anfänger erklären, wie ein Turnier-Team \
 gespielt wird — ohne Fachjargon, und wo ein Fachbegriff unvermeidbar ist \
 (z. B. "Rückenwind/Tailwind", "Intimidate"), erkläre ihn in einem Halbsatz.
+
+GENAUIGKEITS-REGELN (höchste Priorität — Verstöße führen dazu, dass der \
+ganze Guide verworfen und neu generiert wird):
+
+1. Erfinde KEINE Mega-Formen. Ein Pokémon ist nur dann "Mega <X>", wenn \
+   das Team-JSON es genau so listet (z. B. "Charizard-Mega-Y") ODER das \
+   Item ein Mega-Stein ist, der im Faktenblock unten als solcher \
+   ausgewiesen ist. Glimmora, Kingambit, Whimsicott, Incineroar, Rotom, \
+   Basculegion u. v. m. haben KEINE Mega-Form — nenne sie niemals "Mega …".
+
+2. Behaupte KEINE Attacken oder Fähigkeiten, die nicht im Team-JSON stehen. \
+   Wenn ein Pokémon keine Flächenattacke hat, redet der Guide auch nicht \
+   von "Flächenschaden mit diesem Pokémon".
+
+3. Mechaniken (Rundenzahl, %, Bedingungen) zitierst du AUSSCHLIESSLICH \
+   aus dem Faktenblock unten — falls eine Attacke/Item dort nicht steht, \
+   nennst du sie beim Namen und überlässt die Mechanik dem Spieler, statt \
+   eine Zahl zu raten. NIE "Rückenwind macht euer Team 2 Runden lang \
+   schneller" schreiben, wenn die Quelle "4 Runden" sagt.
 
 Stil:
 - Deutsch: Du-Form, einfach, freundlich, konkret. Englisch: ebenso einfach.
 - Kurze Sätze. Keine Floskeln, kein Marketing-Ton.
 - Konkrete Handlungsempfehlungen ("Schicke X und Y zuerst ins Feld, weil …"),
   nicht abstrakte Theorie.
-- Wenn das Team eine Mega-Entwicklung oder mehrere Mega-Kandidaten hat:
-  erkläre kurz, wann man welche wählt.
-- Attacken, Fähigkeiten und Items nennst du IMMER zweisprachig, mit dem
-  offiziellen Namen der jeweils anderen Sprache in Klammern:
+- Bei Status-Attacken nennst du den konkreten Effekt EINMAL kurz aus dem
+  Faktenblock (z. B. "Irrlicht (Will-O-Wisp) verbrennt das Ziel — es
+  verliert 1/16 KP pro Runde und sein physischer Angriff wird halbiert").
+  Das ist genau die Tiefe, die Anfänger brauchen.
+- Wenn das Team eine Mega-Entwicklung hat: erkläre kurz, wann man sie nutzt.
+- Attacken, Fähigkeiten und Items nennst du IMMER zweisprachig:
   im deutschen Guide "Deutscher Name (English Name)", z. B.
   "Rückenwind (Tailwind)", "Bedroher (Intimidate)", "Prunusbeere (Sitrus Berry)";
   im englischen Guide "English Name (Deutscher Name)", z. B.
   "Tailwind (Rückenwind)", "Intimidate (Bedroher)", "Sitrus Berry (Prunusbeere)".
   Pokémon-Namen bleiben unverändert wie in den Teamdaten.
   Bist du dir bei einer offiziellen deutschen Übersetzung nicht sicher,
-  schreibe nur den englischen Namen — niemals raten oder selbst übersetzen.
+  schreibe nur den englischen Namen — niemals raten.
 
 Antworte AUSSCHLIESSLICH mit einem JSON-Objekt, exakt in diesem Schema \
 (kein Markdown, kein Text davor oder danach):
@@ -253,10 +605,62 @@ Die "roles"-Liste enthält genau ein Objekt pro Pokémon des Teams, in der \
 Reihenfolge der Teamdaten."""
 
 
+def build_system_prompt(facts_block: str) -> str:
+    """Stitch the base prompt with the per-team facts block. Empty
+    block (no reference hits) just appends a no-facts hint instead of
+    a real block — keeps the structure deterministic for the model."""
+    if not facts_block:
+        return SYSTEM_PROMPT_BASE + (
+            '\n\n=== Faktenblock ===\n'
+            '(Für dieses Team liegen keine Referenz-Einträge vor. '
+            'Halte dich strikt an die Genauigkeits-Regeln oben und '
+            'verzichte auf konkrete Mechanik-Zahlen.)'
+        )
+    return SYSTEM_PROMPT_BASE + '\n\n' + facts_block
+
+
+# Back-compat alias for older tests that import SYSTEM_PROMPT directly.
+SYSTEM_PROMPT = SYSTEM_PROMPT_BASE
+
+
+# Module-level caches for the reference indices — loaded once per
+# process. Tests can monkey-patch _MOVES_IDX / _ITEMS_IDX directly.
+_MOVES_REF: Optional[Dict[str, Any]] = None
+_ITEMS_REF: Optional[Dict[str, Any]] = None
+_MOVES_IDX: Optional[Dict[str, Tuple[str, Dict[str, Any]]]] = None
+_ITEMS_IDX: Optional[Dict[str, Tuple[str, Dict[str, Any]]]] = None
+
+
+def _ensure_references_loaded(
+    moves_path: str = DEFAULT_MOVES_REF_PATH,
+    items_path: str = DEFAULT_ITEMS_REF_PATH,
+) -> None:
+    global _MOVES_REF, _ITEMS_REF, _MOVES_IDX, _ITEMS_IDX
+    if _MOVES_IDX is None:
+        _MOVES_REF = load_reference(moves_path)
+        _MOVES_IDX = build_lookup_index(_MOVES_REF, 'moves')
+    if _ITEMS_IDX is None:
+        _ITEMS_REF = load_reference(items_path)
+        _ITEMS_IDX = build_lookup_index(_ITEMS_REF, 'items')
+
+
 # ─────────────────────────── API section ───────────────────────────
 
 def generate_for_team(client: Any, team: Dict[str, Any]) -> Optional[Dict[str, Any]]:
-    """One Claude API call → validated bilingual strategy dict, or None."""
+    """One Claude API call → validated bilingual strategy dict, or None.
+
+    v3: looks up every move + item on the team in the local reference
+    DB, builds a per-team facts block, and injects it into the system
+    prompt. Then runs both the structural validator (schema check) and
+    the factual validator (Mega-form hallucination guard). A factual
+    failure logs a warning and returns None — same handling as a JSON
+    parse failure, so the next run retries.
+    """
+    _ensure_references_loaded()
+    facts = collect_team_facts(team, _MOVES_IDX or {}, _ITEMS_IDX or {})
+    facts_block = format_facts_block(facts)
+    system_prompt = build_system_prompt(facts_block)
+
     user_msg = (
         "Erkläre die Strategie dieses Pokémon-Champions-Teams für einen "
         "absoluten Anfänger:\n\n" + format_team_for_prompt(team)
@@ -265,7 +669,7 @@ def generate_for_team(client: Any, team: Dict[str, Any]) -> Optional[Dict[str, A
         model=MODEL,
         max_tokens=MAX_TOKENS,
         thinking={'type': 'adaptive'},
-        system=SYSTEM_PROMPT,
+        system=system_prompt,
         messages=[{'role': 'user', 'content': user_msg}],
     ) as stream:
         message = stream.get_final_message()
@@ -277,6 +681,10 @@ def generate_for_team(client: Any, team: Dict[str, Any]) -> Optional[Dict[str, A
     ok, reason = validate_strategy(obj)
     if not ok:
         print(f"    ::warning::invalid strategy payload ({reason})")
+        return None
+    fact_ok, fact_reason = validate_strategy_facts(obj, team)
+    if not fact_ok:
+        print(f"    ::warning::factual guard rejected strategy ({fact_reason})")
         return None
     return obj
 

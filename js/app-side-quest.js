@@ -71,6 +71,10 @@
             tips: 'Tipps für den Einstieg',
             aiNote: 'KI-generierte Erklärung (Claude) · Stand',
             close: 'Schließen',
+            markWant: 'Will ich probieren',
+            markLiked: 'Fand ich gut',
+            markDisliked: 'Nicht nochmal',
+            markHint: 'Markieren: ⭐ probieren · 👍 gut · 👎 nicht nochmal',
         },
         en: {
             infoBtn: 'How to play this team',
@@ -80,8 +84,106 @@
             tips: 'Beginner tips',
             aiNote: 'AI-generated guide (Claude) · as of',
             close: 'Close',
+            markWant: 'Want to try',
+            markLiked: 'Liked it',
+            markDisliked: 'Not again',
+            markHint: 'Mark teams: ⭐ try · 👍 liked · 👎 not again',
         },
     };
+
+    // ── Team marks (will-ich-spielen / fand-ich-gut / nicht-nochmal) ──
+    // Stored locally, keyed by a CONTENT hash of the team — not by the
+    // trainer name, rank or replica code. That's deliberate: the same
+    // 6-mon composition often re-enters the top 20 under a different
+    // pilot ("Person X plays Person Y's team and does well"). The user
+    // wants their verdict to stick to the TEAM, so a team they already
+    // tried and disliked stays marked even when the name on the card
+    // changes. EVs / nature / tera are excluded from the hash so a copy
+    // with a tweaked spread still matches the original.
+    const MARKS_KEY = 'dipidis.sideQuest.teamMarks.v1';
+    const MARK_STATES = ['want', 'liked', 'disliked'];
+    let _marks = null;
+
+    function teamIdentityHash(team) {
+        const mons = (team.pokemon || []).map(p => {
+            const moves = (p.moves || [])
+                .map(m => String(m).toLowerCase().trim())
+                .filter(Boolean)
+                .sort();
+            return [
+                String(p.name || '').toLowerCase().trim(),
+                String(p.item || '').toLowerCase().trim(),
+                String(p.ability || '').toLowerCase().trim(),
+                moves.join(','),
+            ].join('|');
+        }).sort();
+        const canonical = mons.join(';');
+        // FNV-1a 32-bit → base36. Collision risk across ~20-80 teams is
+        // negligible; we only need a stable short key, not crypto.
+        let h = 0x811c9dc5;
+        for (let i = 0; i < canonical.length; i++) {
+            h ^= canonical.charCodeAt(i);
+            h = (h * 0x01000193) >>> 0;
+        }
+        return 't_' + h.toString(36);
+    }
+
+    function loadMarks() {
+        if (_marks) return _marks;
+        try {
+            const raw = localStorage.getItem(MARKS_KEY);
+            const parsed = raw ? JSON.parse(raw) : {};
+            _marks = (parsed && typeof parsed === 'object') ? parsed : {};
+        } catch (e) {
+            _marks = {};
+        }
+        return _marks;
+    }
+
+    function saveMarks() {
+        try {
+            localStorage.setItem(MARKS_KEY, JSON.stringify(_marks || {}));
+        } catch (e) {
+            console.warn('[SideQuest] failed to persist team marks', e);
+        }
+    }
+
+    function getMark(hash) {
+        return loadMarks()[hash] || null;
+    }
+
+    // Toggle semantics: clicking the active state clears it; clicking a
+    // different state replaces it.
+    function setMark(hash, status) {
+        const m = loadMarks();
+        if (!status || m[hash] === status || MARK_STATES.indexOf(status) === -1) {
+            delete m[hash];
+        } else {
+            m[hash] = status;
+        }
+        saveMarks();
+    }
+
+    function renderMarkButtons(hash, status) {
+        const labels = LABELS[uiLang()];
+        const btn = (mark, icon, label) => `
+            <button class="side-quest-mark-btn side-quest-mark-${mark}${status === mark ? ' is-active' : ''}"
+                    type="button"
+                    data-mark="${mark}"
+                    data-team-hash="${escapeHtml(hash)}"
+                    title="${escapeHtml(label)}"
+                    aria-pressed="${status === mark ? 'true' : 'false'}"
+                    aria-label="${escapeHtml(label)}">
+                <span class="side-quest-mark-icon" aria-hidden="true">${icon}</span>
+            </button>`;
+        return `
+            <div class="side-quest-marks" role="group" aria-label="${escapeHtml(labels.markHint)}">
+                ${btn('want', '⭐', labels.markWant)}
+                ${btn('liked', '👍', labels.markLiked)}
+                ${btn('disliked', '👎', labels.markDisliked)}
+            </div>`;
+    }
+
 
     function escapeHtml(s) {
         return String(s == null ? '' : s)
@@ -95,10 +197,12 @@
     function renderHeader(meta) {
         const subtitle = meta.subtitle || '';
         const updated  = meta.last_updated || '';
+        const labels   = LABELS[uiLang()];
         return `
             <div class="side-quest-intro">
                 <p class="side-quest-subtitle">${escapeHtml(subtitle)}</p>
                 ${updated ? `<p class="side-quest-updated">Last updated: ${escapeHtml(updated)}</p>` : ''}
+                <p class="side-quest-mark-hint">${escapeHtml(labels.markHint)}</p>
             </div>
         `;
     }
@@ -166,6 +270,9 @@
         const trainer = team.trainer ? ` · ${escapeHtml(team.trainer)}` : '';
         const tourney = team.tournament ? `<span class="side-quest-team-tourney">${escapeHtml(team.tournament)}${trainer}</span>` : '';
         const labels = LABELS[uiLang()];
+        const hash = teamIdentityHash(team);
+        const status = getMark(hash);
+        const stateClass = status ? ` side-quest-mark-state-${status}` : '';
         const hasGuide = !!(_strategies && _strategies[code] &&
                             _strategies[code][uiLang()]);
         const infoBtn = hasGuide ? `
@@ -177,7 +284,7 @@
                         <span class="side-quest-info-label">${escapeHtml(labels.infoBtn)}</span>
                     </button>` : '';
         return `
-            <article class="side-quest-team" data-replica-code="${escapeHtml(code)}">
+            <article class="side-quest-team${stateClass}" data-replica-code="${escapeHtml(code)}" data-team-hash="${escapeHtml(hash)}">
                 <header class="side-quest-team-head">
                     <div class="side-quest-team-meta">
                         <span class="side-quest-rank">#${escapeHtml(String(team.rank || '—'))}</span>
@@ -194,7 +301,10 @@
                     </button>
                 </header>
                 <div class="side-quest-team-grid">${monsHtml}</div>
-                ${infoBtn}
+                <div class="side-quest-team-footer">
+                    ${infoBtn}
+                    ${renderMarkButtons(hash, status)}
+                </div>
                 ${stratHtml ? `
                     <details class="side-quest-strategy">
                         <summary>Strategy notes</summary>
@@ -308,7 +418,10 @@
         const host = document.getElementById(HOST_ID);
         if (!host) return;
         const status = document.getElementById(STATUS_ID);
-        if (status) status.textContent = 'Loading…';
+        // Only show the loading hint on the first build — re-renders
+        // after a mark click run off the cached data and shouldn't
+        // flash "Loading…".
+        if (status && !_loaded) status.textContent = 'Loading…';
         const [data] = await Promise.all([loadData(), loadStrategies()]);
         const meta  = data._meta || {};
         const teams = Array.isArray(data.teams) ? data.teams : [];
@@ -325,8 +438,17 @@
         }
 
         const headerHtml = renderHeader(meta);
+        // Sort: "not again" teams sink to the bottom (out of the way but
+        // still visible so the verdict can be revisited); everything
+        // else stays in rank order.
         const teamsHtml = teams
-            .sort((a, b) => (a.rank || 999) - (b.rank || 999))
+            .slice()
+            .sort((a, b) => {
+                const da = getMark(teamIdentityHash(a)) === 'disliked' ? 1 : 0;
+                const db = getMark(teamIdentityHash(b)) === 'disliked' ? 1 : 0;
+                if (da !== db) return da - db;
+                return (a.rank || 999) - (b.rank || 999);
+            })
             .map(renderTeam)
             .join('');
 
@@ -347,12 +469,25 @@
                 if (entry && team) openStrategyModal(team, entry);
             });
         });
+
+        host.querySelectorAll('.side-quest-mark-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const hash = btn.getAttribute('data-team-hash') || '';
+                const mark = btn.getAttribute('data-mark') || '';
+                if (!hash) return;
+                setMark(hash, mark);
+                render();  // cheap: data is cached, just re-sorts + repaints
+            });
+        });
     }
 
     // Expose for the tab-switch hook
     window.sideQuest = {
         render,
         loadData,
+        teamIdentityHash,
+        getMark,
+        setMark,
     };
 
     // Auto-render when the side-quest tab becomes active. The site uses

@@ -461,8 +461,171 @@ class TestValidateStrategyFacts:
 
 
 class TestPromptVersionBumped:
-    def test_prompt_version_is_v3_or_higher(self):
+    def test_prompt_version_is_v4_or_higher(self):
         # The bump is what triggers regeneration of all cached
-        # strategies. If a maintainer reverts SYSTEM_PROMPT changes
-        # without bumping, this assertion is the tripwire.
-        assert PROMPT_VERSION >= 3
+        # strategies. v4 added abilities reference + name-translation
+        # softening + Champions-exclusive Mega Stones.
+        assert PROMPT_VERSION >= 4
+
+
+# ── v4: abilities reference + Champions-exclusive Mega Stones ──────
+
+_ABILITIES_REF = {
+    "abilities": {
+        "Intimidate":   {"de_name": "Bedroher",
+                         "effect": "Senkt beim Einwechseln den Angriff aller Gegner um 1 Stufe."},
+        "Gale Wings":   {"de_name": "Mutwind",
+                         "effect": "Flug-Attacken erhalten Vorrang (Priorität +1), aber nur bei vollen KP."},
+        "Snow Warning": {"de_name": "Diamantstaub",
+                         "effect": "Lässt es beim Einwechseln 5 Runden schneien."},
+        "Defiant":      {"de_name": "Siegeswille",
+                         "effect": "Angriff +2 wenn ein Wert vom Gegner gesenkt wird."},
+    },
+}
+
+# Champions-exclusive Mega Stones — the v3 ref was missing these and
+# the hardcoded NEVER_MEGA list wrongly forbade their Pokémon from
+# ever being called "Mega <X>". v4 drops the list and adds the stones.
+_ITEMS_REF_V4 = {
+    "items": dict(_ITEMS_REF["items"], **{
+        "Glimmoranite":  {"de_name": "Mortipotit",
+                          "effect": "Mega-Stein (Champions-exklusiv): Glimmora wird zu Mega-Mortipot."},
+        "Chandelurite": {"de_name": "Lichtelit",
+                         "effect": "Mega-Stein (Champions-exklusiv): Chandelure wird zu Mega-Skelabra."},
+    }),
+}
+
+
+def _team_with_champions_mega():
+    """A team where Glimmora HAS the Champions-exclusive Mega Stone
+    equipped — so "Mega Glimmora" is now a LEGITIMATE mention."""
+    return {
+        "pokemon": [
+            {"name": "Charizard", "item": "Charizardite Y", "ability": "Blaze",
+             "moves": ["Heat Wave", "Protect", "Tailwind"]},
+            {"name": "Glimmora", "item": "Glimmoranite", "ability": "Toxic Debris",
+             "moves": ["Sludge Bomb", "Earth Power", "Protect"]},
+            {"name": "Kingambit", "item": "Chople Berry", "ability": "Defiant",
+             "moves": ["Kowtow Cleave", "Sucker Punch", "Protect"]},
+        ],
+    }
+
+
+class TestAbilitiesReference:
+    def test_abilities_index_keys_by_both_languages(self):
+        idx = build_lookup_index(_ABILITIES_REF, "abilities")
+        assert idx["intimidate"][0] == "Intimidate"
+        assert idx["bedroher"][0] == "Intimidate"
+        assert idx["mutwind"][0] == "Gale Wings"
+        assert idx["snow warning"][0] == "Snow Warning"
+
+    def test_collect_team_facts_picks_up_abilities(self):
+        moves_idx = build_lookup_index(_MOVES_REF, "moves")
+        items_idx = build_lookup_index(_ITEMS_REF, "items")
+        abilities_idx = build_lookup_index(_ABILITIES_REF, "abilities")
+        team = {"pokemon": [
+            {"name": "Talonflame", "item": "Sharp Beak", "ability": "Gale Wings",
+             "moves": ["Tailwind", "Protect"]},
+            {"name": "Incineroar", "item": "Sitrus Berry", "ability": "Intimidate",
+             "moves": ["Will-O-Wisp", "Protect"]},
+        ]}
+        facts = collect_team_facts(team, moves_idx, items_idx, abilities_idx)
+        ability_names = {a[0] for a in facts["abilities"]}
+        assert ability_names == {"Gale Wings", "Intimidate"}
+
+    def test_facts_block_renders_abilities_section(self):
+        moves_idx = build_lookup_index(_MOVES_REF, "moves")
+        items_idx = build_lookup_index(_ITEMS_REF, "items")
+        abilities_idx = build_lookup_index(_ABILITIES_REF, "abilities")
+        team = {"pokemon": [
+            {"name": "Incineroar", "item": "Sitrus Berry", "ability": "Intimidate",
+             "moves": ["Will-O-Wisp", "Protect"]},
+        ]}
+        facts = collect_team_facts(team, moves_idx, items_idx, abilities_idx)
+        block = format_facts_block(facts)
+        assert "-- Fähigkeiten --" in block
+        assert "Bedroher (Intimidate)" in block
+        assert "Senkt beim Einwechseln" in block
+
+    def test_collect_team_facts_works_without_abilities_index(self):
+        # Backwards compat — old callers passing only 3 args still work.
+        moves_idx = build_lookup_index(_MOVES_REF, "moves")
+        items_idx = build_lookup_index(_ITEMS_REF, "items")
+        team = {"pokemon": [
+            {"name": "Incineroar", "item": "Sitrus Berry", "ability": "Intimidate",
+             "moves": ["Will-O-Wisp"]},
+        ]}
+        facts = collect_team_facts(team, moves_idx, items_idx)
+        assert facts["abilities"] == []
+
+
+class TestChampionsExclusiveMegaStones:
+    """v4 dropped the NEVER_MEGA_SPECIES hardcode because Champions
+    ships Mega Stones for many species that have no Mega in mainline
+    (Glimmoranite, Chandelurite, Drampanite, …). The guard now relies
+    entirely on the items reference flagging entries with 'Mega-
+    Stein:' as legit Mega Stones."""
+
+    def setup_method(self):
+        _gen._ITEMS_REF = _ITEMS_REF_V4
+        _gen._ITEMS_IDX = build_lookup_index(_ITEMS_REF_V4, "items")
+        _gen._MOVES_REF = _MOVES_REF
+        _gen._MOVES_IDX = build_lookup_index(_MOVES_REF, "moves")
+        _gen._ABILITIES_REF = _ABILITIES_REF
+        _gen._ABILITIES_IDX = build_lookup_index(_ABILITIES_REF, "abilities")
+
+    def test_glimmora_with_glimmoranite_is_legit_mega(self):
+        # The v3 test asserted "Mega Glimmora" was always invalid.
+        # In Champions with the stone equipped it's now legitimate.
+        offenders = find_hallucinated_megas(
+            "Lass Glimmora Mega werden, sobald du Druck brauchst.",
+            _team_with_champions_mega(),
+        )
+        assert offenders == [], f"Glimmora + Glimmoranite should pass, got {offenders}"
+
+    def test_kingambit_without_mega_stone_still_flagged(self):
+        # Same team — Kingambit holds Chople Berry, no Mega Stone.
+        # 'Mega Kingambit' must still be flagged.
+        offenders = find_hallucinated_megas(
+            "Mega Kingambit räumt im Endgame auf.",
+            _team_with_champions_mega(),
+        )
+        assert offenders
+        assert any("kingambit" in o for o in offenders)
+
+    def test_charizard_with_charizardite_y_is_legit(self):
+        offenders = find_hallucinated_megas(
+            "Charizard mega-entwickelt sich zu Mega Charizard.",
+            _team_with_champions_mega(),
+        )
+        assert offenders == []
+
+
+class TestRelaxedNameTranslationPrompt:
+    """v4 softens the prompt to ALLOW name-only translation from the
+    model's training data when not in the facts DB — the mechanic
+    rule (no inventing turns/percents) stays strict."""
+
+    def test_prompt_still_forbids_invented_mechanics(self):
+        prompt = build_system_prompt("")
+        # The strict mechanic rule must survive the softening.
+        assert "MECHANIK" in prompt or "Mechanik" in prompt
+        assert "Faktenblock" in prompt
+        # The Rückenwind 2-vs-4 anti-example must still be there as
+        # the concrete reminder.
+        assert "4 Runden" in prompt
+
+    def test_prompt_allows_translation_from_training_when_sure(self):
+        prompt = build_system_prompt("")
+        # The new permissive clause for NAMES (only) must exist.
+        # Wrapped across lines in the prompt — check on the joined
+        # whitespace-collapsed form so a soft wrap change doesn't
+        # break this assertion.
+        collapsed = " ".join(prompt.split())
+        assert "offizielle deutsche Pokémon-Lokalisierung" in collapsed
+        # The bilingual schema rule must apply to EVERY mention.
+        assert "JEDE Erwähnung" in prompt
+        # Example translations that AREN'T in the reference DB — proof
+        # the prompt explicitly authorises this (otherwise Acrobatics /
+        # Thunderbolt would stay English like in the v3 pilot).
+        assert "Akrobatik" in prompt and "Donnerblitz" in prompt

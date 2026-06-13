@@ -152,114 +152,121 @@
     color: #ff7676;
 }
 
-.pdb-results-list {
+/* Card picker — Kartendatenbank-style grid of small tiles. Image on
+ * top (2.5:3.5 card ratio), compact name + set caption below. Dense
+ * auto-fill grid so many cards fit per row at a glance. */
+.pdb-results-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+    gap: 0.5rem;
+    max-height: 560px;
+    overflow-y: auto;
+    padding: 0.15rem 0.25rem 0.15rem 0.15rem;
+    align-content: start;
+}
+
+.pdb-result-card {
     display: flex;
     flex-direction: column;
-    gap: 0.4rem;
-    max-height: 540px;
-    overflow-y: auto;
-    padding-right: 0.25rem;
-}
-
-.pdb-result-row {
-    display: flex;
-    align-items: center;
-    gap: 0.65rem;
-    padding: 0.45rem 0.55rem;
     background: rgba(255, 255, 255, 0.025);
     border: 1px solid #242b39;
-    border-radius: 10px;
+    border-radius: 9px;
+    overflow: hidden;
     cursor: pointer;
-    transition: background 120ms ease, border-color 120ms ease;
+    transition: transform 110ms ease, border-color 110ms ease, box-shadow 110ms ease;
 }
 
-.pdb-result-row:hover,
-.pdb-result-row:focus-visible {
-    background: rgba(95, 182, 255, 0.08);
-    border-color: rgba(95, 182, 255, 0.4);
+.pdb-result-card:hover,
+.pdb-result-card:focus-visible {
+    transform: translateY(-2px);
+    border-color: rgba(95, 182, 255, 0.55);
+    box-shadow: 0 6px 16px rgba(8, 11, 18, 0.45);
     outline: none;
 }
 
+.pdb-result-card.is-added {
+    border-color: rgba(76, 209, 130, 0.8);
+    box-shadow: 0 0 0 2px rgba(76, 209, 130, 0.45);
+}
+
+.pdb-result-imgwrap {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 2.5 / 3.5;
+    background: linear-gradient(180deg, #232a39 0%, #1b2230 100%);
+}
+
 .pdb-result-img {
-    width: 38px;
-    height: 53px;
+    width: 100%;
+    height: 100%;
     object-fit: cover;
-    border-radius: 4px;
-    background: rgba(0, 0, 0, 0.3);
-    flex: 0 0 auto;
+    display: block;
 }
 
-.pdb-result-text {
-    flex: 1 1 auto;
-    min-width: 0;
+.pdb-result-imgwrap.pdb-noimg .pdb-result-img {
+    visibility: hidden;
 }
 
-.pdb-result-name {
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-    font-weight: 600;
-    font-size: 0.92rem;
-    color: #e6ebf3;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.pdb-result-sub {
-    font-size: 0.72rem;
-    color: #8c95a5;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.pdb-result-meta {
-    font-size: 0.72rem;
-    color: #8c95a5;
-    margin-top: 0.1rem;
-}
-
-.pdb-result-add {
-    width: 1.6rem;
-    height: 1.6rem;
+/* The + overlay sits bottom-right of the art; always faintly visible,
+ * full on hover so it reads as "click to add". */
+.pdb-result-addbadge {
+    position: absolute;
+    bottom: 0.25rem;
+    right: 0.25rem;
+    width: 1.45rem;
+    height: 1.45rem;
     border-radius: 50%;
-    background: rgba(95, 182, 255, 0.18);
+    background: rgba(20, 25, 35, 0.82);
     color: #5fb6ff;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     font-weight: 700;
-    flex: 0 0 auto;
     font-size: 0.95rem;
+    line-height: 1;
+    opacity: 0.75;
+    transition: background 110ms ease, opacity 110ms ease, color 110ms ease;
 }
 
-.pdb-result-row:hover .pdb-result-add {
-    background: rgba(95, 182, 255, 0.35);
+.pdb-result-card:hover .pdb-result-addbadge {
+    background: rgba(95, 182, 255, 0.9);
     color: #fff;
+    opacity: 1;
 }
 
-.pdb-energy-dot {
-    width: 0.7rem;
-    height: 0.7rem;
-    border-radius: 50%;
-    display: inline-block;
-    flex: 0 0 auto;
+.pdb-result-card.is-added .pdb-result-addbadge {
+    background: rgba(76, 209, 130, 0.95);
+    color: #fff;
+    opacity: 1;
 }
 
-.pdb-energy-fire      { background: #ff7a45; }
-.pdb-energy-water     { background: #5db4ff; }
-.pdb-energy-grass     { background: #5dd66f; }
-.pdb-energy-lightning { background: #ffd84d; }
-.pdb-energy-electric  { background: #ffd84d; }
-.pdb-energy-psychic   { background: #b67aff; }
-.pdb-energy-fighting  { background: #c97a3a; }
-.pdb-energy-darkness  { background: #5a6172; }
-.pdb-energy-dark      { background: #5a6172; }
-.pdb-energy-metal     { background: #a0a8b5; }
-.pdb-energy-fairy     { background: #ff9eda; }
-.pdb-energy-dragon    { background: #b9a73a; }
-.pdb-energy-colorless { background: #d5dae3; }
+.pdb-result-cap {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+    padding: 0.3rem 0.4rem 0.4rem 0.4rem;
+    min-width: 0;
+}
+
+.pdb-result-cap-name {
+    font-size: 0.74rem;
+    font-weight: 600;
+    color: #e6ebf3;
+    line-height: 1.25;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.pdb-result-cap-set {
+    font-size: 0.66rem;
+    color: #8c95a5;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
 
 .pdb-jp-badge {
     display: inline-block;
@@ -436,6 +443,38 @@
     font-size: 0.82rem;
     color: #9fa9bb;
     line-height: 1.45;
+}
+
+/* Paste-import is now a collapsed details — keeps it out of the way
+ * until the user actually wants to seed a deck from a list. */
+.pdb-paste-summary {
+    cursor: pointer;
+    user-select: none;
+    list-style: none;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #e6ebf3;
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+}
+
+.pdb-paste-summary::-webkit-details-marker { display: none; }
+
+.pdb-paste-summary::before {
+    content: '▸';
+    color: var(--accent, #5fb6ff);
+    font-size: 0.78rem;
+    transition: transform 120ms ease;
+    display: inline-block;
+}
+
+.pdb-paste-panel[open] .pdb-paste-summary::before {
+    transform: rotate(90deg);
+}
+
+.pdb-paste-panel[open] .pdb-paste-summary {
+    margin-bottom: 0.6rem;
 }
 
 .pdb-paste-area {

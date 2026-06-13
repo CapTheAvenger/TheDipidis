@@ -19,12 +19,19 @@ sys.path.insert(0, os.path.join(REPO_ROOT, "scripts"))
 
 from generate_team_strategies import (  # noqa: E402
     PROMPT_VERSION,
+    build_lookup_index,
+    build_system_prompt,
+    collect_team_facts,
     extract_json,
+    find_hallucinated_megas,
+    format_facts_block,
     prune_cache,
     team_hash,
     teams_needing_generation,
     validate_strategy,
+    validate_strategy_facts,
 )
+import generate_team_strategies as _gen  # for monkey-patching module state
 
 
 def _team(code="ABC123", name="Incineroar", moves=None, rank=1, team_name="T"):
@@ -237,3 +244,225 @@ class TestPrune:
         evicted = prune_cache(cache, ["A", "B"], max_entries=1)
         assert evicted == 0
         assert set(cache["strategies"]) == {"A", "B"}
+
+
+# ── v3: factual-grounding reference DB ─────────────────────────────
+
+# A tiny synthetic reference matching the production schema so the
+# tests don't load the real JSON files (keeps them fast and avoids
+# coupling to real-world content that may change).
+_MOVES_REF = {
+    "moves": {
+        "Tailwind":    {"de_name": "Rückenwind",  "type": "Flying",
+                        "effect": "Verdoppelt die Initiative aller Pokémon auf der eigenen Seite für 4 Runden."},
+        "Will-O-Wisp": {"de_name": "Irrlicht",    "type": "Fire", "accuracy": 85,
+                        "effect": "Verbrennt das Ziel: 1/16 KP pro Runde, physischer Angriff halbiert."},
+        "Protect":     {"de_name": "Schutzschild","type": "Normal",
+                        "effect": "Schützt 1 Runde."},
+    },
+}
+_ITEMS_REF = {
+    "items": {
+        "Charizardite Y": {"de_name": "Glurakit Y",
+                           "effect": "Mega-Stein: Charizard wird zu Mega-Glurak Y."},
+        "Focus Sash":     {"de_name": "Fokusgurt",
+                           "effect": "Überlebt 1-Hit-KO mit 1 KP."},
+        "Glimmorite":     {"de_name": "Mortipotit",
+                           "effect": "EXISTIERT NICHT — Glimmora hat keine Mega-Form."},
+    },
+}
+
+
+def _team_with_starter():
+    """Team for the Mega-form tests. Charizard (real Mega via item),
+    Glimmora (the user-reported hallucination case), Kingambit (NEVER_MEGA,
+    no item)."""
+    return {
+        "pokemon": [
+            {"name": "Charizard", "item": "Charizardite Y", "ability": "Blaze",
+             "moves": ["Heat Wave", "Solar Beam", "Protect", "Tailwind"]},
+            {"name": "Glimmora", "item": "Focus Sash", "ability": "Toxic Debris",
+             "moves": ["Sludge Bomb", "Earth Power", "Protect"]},
+            {"name": "Kingambit", "item": "Focus Sash", "ability": "Defiant",
+             "moves": ["Kowtow Cleave", "Protect", "Will-O-Wisp"]},
+        ],
+    }
+
+
+# ── Reference loading + lookup ─────────────────────────────────────
+
+class TestReferenceLookup:
+    def test_build_lookup_index_keys_by_english_and_german(self):
+        idx = build_lookup_index(_MOVES_REF, "moves")
+        # Both names resolve to the same canonical entry
+        assert idx["tailwind"][0] == "Tailwind"
+        assert idx["rückenwind"][0] == "Tailwind"
+        assert idx["will-o-wisp"][0] == "Will-O-Wisp"
+        assert idx["irrlicht"][0] == "Will-O-Wisp"
+
+    def test_lookup_is_case_insensitive(self):
+        idx = build_lookup_index(_MOVES_REF, "moves")
+        assert "rückenwind" in idx
+        # Verify both casings of input would find it (lookup helper
+        # normalizes via _norm_lookup)
+        from generate_team_strategies import _norm_lookup
+        assert idx.get(_norm_lookup("RÜCKENWIND")) is not None
+        assert idx.get(_norm_lookup("  Tailwind  ")) is not None
+
+
+class TestCollectTeamFacts:
+    def test_collects_known_moves_and_items_dedups(self):
+        moves_idx = build_lookup_index(_MOVES_REF, "moves")
+        items_idx = build_lookup_index(_ITEMS_REF, "items")
+        facts = collect_team_facts(_team_with_starter(), moves_idx, items_idx)
+        move_names = {m[0] for m in facts["moves"]}
+        item_names = {i[0] for i in facts["items"]}
+        # Protect appears on multiple Pokémon — must dedupe
+        assert move_names == {"Tailwind", "Protect", "Will-O-Wisp"}
+        # Focus Sash on both Glimmora + Kingambit — must dedupe too
+        assert "Focus Sash" in item_names
+        assert "Charizardite Y" in item_names
+
+    def test_ignores_unknown_moves_and_items(self):
+        moves_idx = build_lookup_index(_MOVES_REF, "moves")
+        items_idx = build_lookup_index(_ITEMS_REF, "items")
+        team = {"pokemon": [{
+            "name": "X", "item": "Mythical-Item", "ability": "",
+            "moves": ["UnknownMove", "Tailwind"],
+        }]}
+        facts = collect_team_facts(team, moves_idx, items_idx)
+        assert [m[0] for m in facts["moves"]] == ["Tailwind"]
+        assert facts["items"] == []
+
+
+class TestFactsBlock:
+    def test_empty_facts_returns_empty_string(self):
+        assert format_facts_block({"moves": [], "items": []}) == ""
+
+    def test_block_contains_verbatim_effect_text(self):
+        moves_idx = build_lookup_index(_MOVES_REF, "moves")
+        items_idx = build_lookup_index(_ITEMS_REF, "items")
+        facts = collect_team_facts(_team_with_starter(), moves_idx, items_idx)
+        block = format_facts_block(facts)
+        # The exact Tailwind duration must appear (the v2 bug was
+        # "2 Runden" — this asserts the real value 4 lands in the prompt)
+        assert "4 Runden" in block
+        # The burn mechanic detail the user wanted
+        assert "1/16 KP pro Runde" in block
+        # Hard rule about not inventing values
+        assert "erfinde NIEMALS" in block.lower() or "NIEMALS" in block
+
+
+class TestSystemPromptBuilder:
+    def test_includes_facts_block_when_provided(self):
+        block = "=== VERBINDLICHE FAKTEN ===\ndummy fact"
+        prompt = build_system_prompt(block)
+        assert "VERBINDLICHE FAKTEN" in prompt
+        assert "Du bist ein erfahrener Pokémon-VGC-Coach" in prompt
+
+    def test_no_facts_still_includes_accuracy_rules(self):
+        prompt = build_system_prompt("")
+        assert "GENAUIGKEITS-REGELN" in prompt
+        # The Mega-form rule has to survive into the no-facts branch
+        assert "Mega-Formen" in prompt
+
+
+# ── Hallucination guards ───────────────────────────────────────────
+
+class TestMegaHallucinationGuard:
+    """Pre-load the items index so _team_legitimate_mega_species can
+    resolve Charizardite Y. monkey-patches the module-level _ITEMS_IDX
+    instead of touching disk."""
+    def setup_method(self):
+        _gen._ITEMS_REF = _ITEMS_REF
+        _gen._ITEMS_IDX = build_lookup_index(_ITEMS_REF, "items")
+        _gen._MOVES_REF = _MOVES_REF
+        _gen._MOVES_IDX = build_lookup_index(_MOVES_REF, "moves")
+
+    def test_no_mega_mention_is_clean(self):
+        assert find_hallucinated_megas(
+            "Charizard greift mit Heat Wave an.", _team_with_starter()
+        ) == []
+
+    def test_legit_mega_via_mega_stone_passes(self):
+        # Charizard with Charizardite Y → 'Mega Charizard' is legitimate
+        assert find_hallucinated_megas(
+            "Charizard mega-entwickelt sich zu Mega Charizard.", _team_with_starter()
+        ) == []
+
+    def test_glimmora_mega_is_flagged(self):
+        # The exact pattern from the user's bug report
+        offenders = find_hallucinated_megas(
+            "Lass Glimmora Mega werden, wenn du Flächenschaden brauchst.",
+            _team_with_starter(),
+        )
+        assert offenders
+        assert any("glimmora" in o for o in offenders)
+
+    def test_kingambit_mega_is_flagged_in_team_but_no_mega(self):
+        offenders = find_hallucinated_megas(
+            "Mega Kingambit räumt im Endgame auf.", _team_with_starter()
+        )
+        assert offenders
+        assert any("kingambit" in o for o in offenders)
+
+    def test_german_imperative_does_not_false_positive(self):
+        # "Schick" / "Lass" are German verbs, not Pokémon names — the
+        # guard must not flag them
+        assert find_hallucinated_megas(
+            "Schick Charizard vor und lass es mega-entwickeln.",
+            _team_with_starter(),
+        ) == []
+
+
+class TestValidateStrategyFacts:
+    def setup_method(self):
+        _gen._ITEMS_REF = _ITEMS_REF
+        _gen._ITEMS_IDX = build_lookup_index(_ITEMS_REF, "items")
+        _gen._MOVES_REF = _MOVES_REF
+        _gen._MOVES_IDX = build_lookup_index(_MOVES_REF, "moves")
+
+    def _strategy(self, prose):
+        # Minimal valid strategy with the given prose inserted into
+        # game_plan — _validate_strategy_facts scans ALL prose fields
+        return {
+            "de": {"overview": "Team-Übersicht.",
+                   "roles": [{"name": "Charizard", "role": prose}],
+                   "game_plan": [prose, "S2", "S3"],
+                   "tips": []},
+            "en": {"overview": "Overview.",
+                   "roles": [{"name": "Charizard", "role": "role"}],
+                   "game_plan": ["S1", "S2", "S3"],
+                   "tips": []},
+        }
+
+    def test_clean_strategy_passes(self):
+        ok, reason = validate_strategy_facts(
+            self._strategy("Charizard mega-entwickelt sich für mehr Schaden."),
+            _team_with_starter(),
+        )
+        assert ok, reason
+
+    def test_glimmora_mega_rejected(self):
+        ok, reason = validate_strategy_facts(
+            self._strategy("Lass Glimmora Mega werden für AoE."),
+            _team_with_starter(),
+        )
+        assert not ok
+        assert "glimmora" in reason.lower()
+
+    def test_kingambit_mega_rejected(self):
+        ok, reason = validate_strategy_facts(
+            self._strategy("Mega Kingambit räumt am Ende auf."),
+            _team_with_starter(),
+        )
+        assert not ok
+        assert "kingambit" in reason.lower()
+
+
+class TestPromptVersionBumped:
+    def test_prompt_version_is_v3_or_higher(self):
+        # The bump is what triggers regeneration of all cached
+        # strategies. If a maintainer reverts SYSTEM_PROMPT changes
+        # without bumping, this assertion is the tripwire.
+        assert PROMPT_VERSION >= 3

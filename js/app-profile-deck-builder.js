@@ -718,7 +718,7 @@
                         <span id="pdb-result-count">—</span>
                         <button type="button" class="pdb-link-btn" id="pdb-clear-filters">${escapeHtml(L.filterClear)}</button>
                     </div>
-                    <div id="pdb-results" class="pdb-results-list" role="list"></div>
+                    <div id="pdb-results" class="pdb-results-grid" role="list"></div>
                 </section>
 
                 <section class="pdb-deck-panel" aria-label="${escapeHtml(L.deckHeading)}">
@@ -735,13 +735,13 @@
                 </section>
             </div>
 
-            <section class="pdb-paste-panel">
-                <h3 class="pdb-section-h">${escapeHtml(L.pasteHeading)}</h3>
+            <details class="pdb-paste-panel">
+                <summary class="pdb-paste-summary">${escapeHtml(L.pasteHeading)}</summary>
                 <p class="pdb-section-help">${escapeHtml(L.pasteHelp)}</p>
-                <textarea id="pdb-paste" class="pdb-paste-area" rows="6" spellcheck="false"
+                <textarea id="pdb-paste" class="pdb-paste-area" rows="4" spellcheck="false"
                           placeholder="4 Charizard ex OBF 125&#10;3 Pidgeot ex OBF 164&#10;…"></textarea>
-                <button type="button" class="btn btn-primary" id="pdb-paste-btn">${escapeHtml(L.pasteBtn)}</button>
-            </section>
+                <button type="button" class="btn btn-primary btn-sm" id="pdb-paste-btn">${escapeHtml(L.pasteBtn)}</button>
+            </details>
 
             <section class="pdb-mulligan-panel" aria-live="polite">
                 <h3 class="pdb-section-h">${escapeHtml(L.mulliganTitle)}</h3>
@@ -929,39 +929,54 @@
             host.innerHTML = `<p class="pdb-empty">${escapeHtml(t().noResults)}</p>`;
             return;
         }
-        host.innerHTML = hits.map(c => renderResultRow(c)).join('');
-        host.querySelectorAll('.pdb-result-row').forEach(row => {
-            row.addEventListener('click', () => {
-                const key = row.getAttribute('data-card-key');
-                const card = _cardIndex.find(c => cardKey(c) === key);
-                if (card) addCard(card);
+        host.innerHTML = hits.map(c => renderResultCard(c)).join('');
+        const addFromCard = (card) => {
+            const key = card.getAttribute('data-card-key');
+            const found = _cardIndex.find(c => cardKey(c) === key);
+            if (found) {
+                addCard(found);
+                // Brief visual pulse so the user sees the add register
+                // even though their eyes are on the grid, not the deck.
+                card.classList.add('is-added');
+                setTimeout(() => card.classList.remove('is-added'), 350);
+            }
+        };
+        host.querySelectorAll('.pdb-result-card').forEach(card => {
+            card.addEventListener('click', () => addFromCard(card));
+            card.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    addFromCard(card);
+                }
             });
         });
     }
 
-    function renderResultRow(c) {
+    // Database-style mini-card: image on top, compact name + set badge
+    // below — matches the Kartendatenbank grid optic the user asked
+    // for. The whole tile is the click target; a + overlay appears on
+    // hover. Deliberately no card_text / HP / price here — this is a
+    // dense picker, not the full database browser.
+    function renderResultCard(c) {
         const key = cardKey(c);
         const lang = uiLang();
         const primary = lang === 'de' && c.name_de ? c.name_de : c.name_en;
-        const secondary = lang === 'de' && c.name_de && c.name_de !== c.name_en ? c.name_en
-                        : lang === 'en' && c.name_de && c.name_de !== c.name_en ? c.name_de : '';
         const setBadge = `${escapeHtml(c.set || '?')} ${escapeHtml(c.number || '')}`.trim();
         const jp = c.is_japanese ? `<span class="pdb-jp-badge">${escapeHtml(t().jpBadge)}</span>` : '';
-        const energyDot = c.energy_type
-            ? `<span class="pdb-energy-dot pdb-energy-${escapeHtml((c.energy_type || '').toLowerCase())}" title="${escapeHtml(c.energy_type)}"></span>`
-            : '';
         return `
-            <div class="pdb-result-row" data-card-key="${escapeHtml(key)}"
+            <div class="pdb-result-card" data-card-key="${escapeHtml(key)}"
                  role="button" tabindex="0"
+                 title="${escapeHtml(primary || setBadge)}"
                  aria-label="${escapeHtml(t().addAria(primary || setBadge))}">
-                <img class="pdb-result-img" src="${escapeHtml(c.image_url || '')}"
-                     alt="" loading="lazy" onerror="this.style.visibility='hidden'">
-                <div class="pdb-result-text">
-                    <div class="pdb-result-name">${energyDot}${escapeHtml(primary || '?')}${jp}</div>
-                    ${secondary ? `<div class="pdb-result-sub">${escapeHtml(secondary)}</div>` : ''}
-                    <div class="pdb-result-meta">${escapeHtml(c.type || '')} · ${setBadge}${c.hp ? ' · ' + escapeHtml(c.hp) + ' HP' : ''}</div>
+                <div class="pdb-result-imgwrap">
+                    <img class="pdb-result-img" src="${escapeHtml(c.image_url || '')}"
+                         alt="" loading="lazy" onerror="this.closest('.pdb-result-imgwrap').classList.add('pdb-noimg')">
+                    <span class="pdb-result-addbadge" aria-hidden="true">＋</span>
                 </div>
-                <div class="pdb-result-add" aria-hidden="true">＋</div>
+                <div class="pdb-result-cap">
+                    <span class="pdb-result-cap-name">${escapeHtml(primary || '?')}${jp}</span>
+                    <span class="pdb-result-cap-set">${setBadge}</span>
+                </div>
             </div>`;
     }
 

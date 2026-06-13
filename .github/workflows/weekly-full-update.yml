@@ -8,8 +8,15 @@ name: Weekly Full Update
 # the card DB stale (the 2026-05-22 CRI rotation made this user-
 # visible: 0 CRI cards searchable in the Card DB tab for 4 days).
 #
-# Still excluded from this batch:
-#   - japanese_cards_scraper  (manual trigger when JP set drops)
+# japanese_cards_scraper now runs in this batch too (added 2026-06-13).
+# It self-skips cheaply when the JP DB already has the latest sets
+# (one index fetch → abort), and only does the full latest-4-sets
+# scrape + per-card image detail-fetch when a new JP set drops. It
+# sits right before prepare_card_data.py so the freshly-scraped JP
+# cards get merged into all_cards_merged.json. Previously manual-only,
+# which is why the M5 (2026-05-22) set never reached the Deck Builder
+# even though weekly runs kept firing — the JP DB sat at M4 since the
+# 2026-05-23 snapshot.
 #
 # Schedule: Tuesdays + Fridays 06:00 UTC (= 07:00 CET winter / 08:00 CEST summer)
 # Manual trigger: GitHub UI → Actions → Weekly Full Update → Run workflow
@@ -267,6 +274,7 @@ jobs:
               "scrapers/tournament_scraper_JH.py" \
               "scrapers/online_tournament_scraper.py" \
               "scrapers/cardmarket_price_merger.py" \
+              "scrapers/japanese_cards_scraper.py" \
               "core/prepare_card_data.py" \
               "scrapers/archetype_icons_scraper.py" \
               "scrapers/pokemon_card_text_scraper.py" \

@@ -49,21 +49,30 @@ MAX_CONSECUTIVE_FAILURES = 3
 # regenerate on the next run even if the team itself is unchanged.
 # v2: moves/abilities/items always bilingual "Deutsch (English)" /
 #     "English (Deutsch)" (user request 2026-06-12).
-# v3: factual grounding — local moves/items reference DB is loaded
-#     per team and injected as a "Verbindliche Fakten"-Block in the
-#     system prompt; anti-hallucination guards in the validator
-#     (reject "Mega <Pokemon>" if Pokemon isn't actually Mega in the
-#     team, reject mentions of Pokemon not on the roster). Triggered
-#     by user-reported errors in the v2 pilot: "Tailwind 2 Runden"
-#     (correct: 4), Will-O-Wisp without burn mechanic, hallucinated
-#     "Glimmora Mega" + "flächendeckenden Schaden" (Glimmora has no
-#     Mega and no spread move on the team).
-PROMPT_VERSION = 3
+# v4 (2026-06-13): full name+effect coverage for moves + items + a
+#     new abilities reference. User-reported pilot still had English
+#     names for Acrobatics / Thunderbolt / Hydro Pump / Blizzard /
+#     Earth Power / Sucker Punch / Earthquake / Dragon Claw / Gale
+#     Wings / Snow Warning / Defiant — none of which were in the v3
+#     reference, so the model correctly refused to translate them and
+#     left the English name only. v4 ships the full vocabulary that
+#     appears in the 20 current top teams (~100 moves, ~35 abilities,
+#     ~30 items), AND relaxes the system prompt to let Claude use its
+#     training-knowledge for well-known Pokémon-localisation NAMES
+#     when sure — strict no-guessing rule still applies to MECHANIC
+#     values (turns, percents, conditions). Also drops the hardcoded
+#     NEVER_MEGA_SPECIES list: Champions adds Mega Stones for many
+#     species that have no Mega in mainline (Glimmoranite for Glimmora,
+#     Chandelurite for Chandelure, …), so the heuristic was wrong.
+#     Mega-form legitimacy now derives purely from whether the held
+#     item is flagged as 'Mega-Stein:' in the items reference.
+PROMPT_VERSION = 4
 
 DEFAULT_TEAMS_PATH = os.path.join('data', 'champions_replica_teams.json')
 DEFAULT_STRATEGIES_PATH = os.path.join('data', 'champions_team_strategies.json')
 DEFAULT_MOVES_REF_PATH = os.path.join('data', 'champions_moves_reference.json')
 DEFAULT_ITEMS_REF_PATH = os.path.join('data', 'champions_items_reference.json')
+DEFAULT_ABILITIES_REF_PATH = os.path.join('data', 'champions_abilities_reference.json')
 
 # Entries for teams that dropped off the top-N list are kept (teams
 # rotate back in), but the cache is bounded: when it exceeds this,
@@ -243,19 +252,27 @@ def collect_team_facts(
     team: Dict[str, Any],
     moves_idx: Dict[str, Tuple[str, Dict[str, Any]]],
     items_idx: Dict[str, Tuple[str, Dict[str, Any]]],
+    abilities_idx: Optional[Dict[str, Tuple[str, Dict[str, Any]]]] = None,
 ) -> Dict[str, List[Tuple[str, Dict[str, Any]]]]:
-    """Walk the team's Pokémon, collect every move + item that has a
-    reference entry. Deduplicated by canonical English key, ordered by
-    first appearance in the team — keeps the facts block compact and
-    deterministic for caching."""
+    """Walk the team's Pokémon, collect every move / item / ability
+    that has a reference entry. Deduplicated by canonical English key,
+    ordered by first appearance in the team — keeps the facts block
+    compact and deterministic for caching."""
     moves_seen: Dict[str, Tuple[str, Dict[str, Any]]] = {}
     items_seen: Dict[str, Tuple[str, Dict[str, Any]]] = {}
+    abilities_seen: Dict[str, Tuple[str, Dict[str, Any]]] = {}
+    abilities_idx = abilities_idx or {}
     for p in team.get('pokemon') or []:
         item_name = (p.get('item') or '').strip()
         if item_name:
             hit = items_idx.get(_norm_lookup(item_name))
             if hit and hit[0] not in items_seen:
                 items_seen[hit[0]] = hit
+        ability_name = (p.get('ability') or '').strip()
+        if ability_name:
+            hit = abilities_idx.get(_norm_lookup(ability_name))
+            if hit and hit[0] not in abilities_seen:
+                abilities_seen[hit[0]] = hit
         for m in p.get('moves') or []:
             move_name = (m or '').strip()
             if not move_name:
@@ -263,21 +280,27 @@ def collect_team_facts(
             hit = moves_idx.get(_norm_lookup(move_name))
             if hit and hit[0] not in moves_seen:
                 moves_seen[hit[0]] = hit
-    return {'moves': list(moves_seen.values()), 'items': list(items_seen.values())}
+    return {
+        'moves':     list(moves_seen.values()),
+        'items':     list(items_seen.values()),
+        'abilities': list(abilities_seen.values()),
+    }
 
 
 def format_facts_block(facts: Dict[str, List[Tuple[str, Dict[str, Any]]]]) -> str:
     """Render the collected facts as the prompt-injection block. Empty
     string when nothing matched (no harm done, just no grounding)."""
-    if not facts['moves'] and not facts['items']:
+    abilities = facts.get('abilities') or []
+    if not facts['moves'] and not facts['items'] and not abilities:
         return ''
     lines: List[str] = []
     lines.append('=== VERBINDLICHE FAKTEN für diesen Team-Guide ===')
-    lines.append('Diese Mechaniken stammen aus der internen Referenz-Datenbank.')
+    lines.append('Diese Mechaniken UND die offiziellen deutsch/englischen Namen')
+    lines.append('stammen aus der internen Referenz-Datenbank.')
     lines.append('NUTZE genau diese Effekte (Rundenzahl, %, Bedingungen) im')
-    lines.append('Guide — erfinde NIEMALS abweichende Werte. Wenn eine Attacke /')
-    lines.append('ein Item hier nicht steht, lass die genaue Mechanik weg statt')
-    lines.append('sie zu raten.')
+    lines.append('Guide — erfinde NIEMALS abweichende MECHANIK-WERTE.')
+    lines.append('Verwende für JEDE Erwähnung das zweisprachige Schema')
+    lines.append('"<Deutscher Name> (<English Name>)" wie unten gelistet.')
     lines.append('')
     if facts['moves']:
         lines.append('-- Attacken --')
@@ -286,6 +309,12 @@ def format_facts_block(facts: Dict[str, List[Tuple[str, Dict[str, Any]]]]) -> st
             acc = entry.get('accuracy')
             acc_str = f' [Genauigkeit {acc}%]' if acc is not None else ''
             lines.append(f"• {de} ({canonical}){acc_str}: {entry.get('effect', '')}")
+        lines.append('')
+    if abilities:
+        lines.append('-- Fähigkeiten --')
+        for canonical, entry in abilities:
+            de = entry.get('de_name') or canonical
+            lines.append(f"• {de} ({canonical}): {entry.get('effect', '')}")
         lines.append('')
     if facts['items']:
         lines.append('-- Items --')
@@ -341,18 +370,13 @@ def _team_pokemon_forms(team: Dict[str, Any]) -> Dict[str, str]:
     return forms
 
 
-# Species we explicitly know have no Mega form in this generation.
-# Used to catch the "Mega Glimmora" hallucination class. Not an
-# exhaustive Pokédex — only species the model has demonstrably
-# tried to wrongly Mega-evolve in the v2 pilot.
-NEVER_MEGA_SPECIES = {
-    'glimmora', 'kingambit', 'basculegion', 'whimsicott', 'incineroar',
-    'sinistcha', 'rotom', 'rotom-wash', 'rotom-heat', 'rotom-frost',
-    'rotom-mow', 'rotom-fan', 'ninetales-alola', 'talonflame', 'garchomp-mega',
-    "n's zoroark", 'ogerpon', 'meganium', 'archaludon', 'pecharunt',
-    'dudunsparce', 'lokix', 'iron hands', 'iron valiant', 'iron bundle',
-    'flutter mane', 'roaring moon', 'walking wake', 'gouging fire',
-}
+# Note (v4, 2026-06-13): the previous NEVER_MEGA_SPECIES hardcode was
+# wrong. Pokémon Champions ships Mega Stones for many species that
+# have no Mega in the mainline games (Glimmoranite for Glimmora,
+# Chandelurite for Chandelure, Drampanite for Drampa, …). Mega
+# legitimacy is now derived ENTIRELY from whether the held item is
+# tagged 'Mega-Stein:' in the items reference — no static species
+# list. _team_legitimate_mega_species() below does the lookup.
 
 
 def _team_legitimate_mega_species(team: Dict[str, Any]) -> set:
@@ -393,7 +417,13 @@ def _team_legitimate_mega_species(team: Dict[str, Any]) -> set:
         eff = (hit[1].get('effect') or '')
         if 'EXISTIERT NICHT' in eff:
             continue
-        if eff.startswith('Mega-Stein:') or eff.lower().startswith('mega-stein:'):
+        # The item is a Mega Stone when its effect starts with the
+        # 'Mega-Stein' marker. Parenthetical notes between the marker
+        # and the colon ('Mega-Stein (Champions-exklusiv):') still
+        # count — the v4 items reference flags the Champions-exclusive
+        # stones that way.
+        eff_lower = eff.lower().lstrip()
+        if eff_lower.startswith('mega-stein'):
             species = (p.get('name') or '').strip().lower()
             if species:
                 legit.add(species)
@@ -475,11 +505,12 @@ def find_hallucinated_megas(text: str, team: Dict[str, Any]) -> List[str]:
             # Legitimate Mega-mention → fine.
             if species_phrase in legit:
                 continue
-            # Strongest signal: species explicitly has no Mega form.
-            if species_phrase in NEVER_MEGA_SPECIES:
-                offenders.append(f"Mega {species_phrase} (Spezies hat keine Mega-Form)")
-                continue
-            # Team species without a mega-stone — flag.
+            # Team species without a mega-stone item — flag. Champions
+            # has Mega Stones for many unexpected species, so a
+            # blanket NEVER_MEGA list would false-positive (Glimmora,
+            # Chandelure, Drampa etc. all have Mega Stones here). We
+            # only flag when the species IS on this specific team
+            # and ISN'T holding a Mega-Stein item.
             if species_phrase in team_species or species_phrase.split(' ')[0] in team_species:
                 offenders.append(f"Mega {species_phrase} (im Team nicht Mega, kein Mega-Stein)")
                 continue
@@ -553,38 +584,51 @@ ganze Guide verworfen und neu generiert wird):
 
 1. Erfinde KEINE Mega-Formen. Ein Pokémon ist nur dann "Mega <X>", wenn \
    das Team-JSON es genau so listet (z. B. "Charizard-Mega-Y") ODER das \
-   Item ein Mega-Stein ist, der im Faktenblock unten als solcher \
-   ausgewiesen ist. Glimmora, Kingambit, Whimsicott, Incineroar, Rotom, \
-   Basculegion u. v. m. haben KEINE Mega-Form — nenne sie niemals "Mega …".
+   getragene Item ein Mega-Stein ist, der im Faktenblock unten mit \
+   "Mega-Stein:" gekennzeichnet ist. Hinweis: Pokémon Champions hat \
+   eigene Mega-Steine für viele Pokémon, die in den Hauptspielen keine \
+   Mega-Form haben (z. B. Mortipotit für Glimmora, Lichtelit für Chandelure, \
+   Frosdedjeit für Froslass). Lies also den Faktenblock — verlass dich \
+   nicht auf "weiß ich aus den Hauptspielen".
 
 2. Behaupte KEINE Attacken oder Fähigkeiten, die nicht im Team-JSON stehen. \
    Wenn ein Pokémon keine Flächenattacke hat, redet der Guide auch nicht \
    von "Flächenschaden mit diesem Pokémon".
 
-3. Mechaniken (Rundenzahl, %, Bedingungen) zitierst du AUSSCHLIESSLICH \
-   aus dem Faktenblock unten — falls eine Attacke/Item dort nicht steht, \
-   nennst du sie beim Namen und überlässt die Mechanik dem Spieler, statt \
-   eine Zahl zu raten. NIE "Rückenwind macht euer Team 2 Runden lang \
-   schneller" schreiben, wenn die Quelle "4 Runden" sagt.
+3. MECHANIK-WERTE (Rundenzahl, %, KP-Anteil, Bedingungen) zitierst du \
+   AUSSCHLIESSLICH aus dem Faktenblock unten. Wenn eine Attacke/Item/ \
+   Fähigkeit DORT nicht aufgeführt ist, lass die exakte Zahl weg — \
+   niemals 2 Runden / 50 % / 1/8 KP raten. NIE "Rückenwind macht euer \
+   Team 2 Runden lang schneller" schreiben, wenn die Quelle "4 Runden" sagt.
 
 Stil:
 - Deutsch: Du-Form, einfach, freundlich, konkret. Englisch: ebenso einfach.
 - Kurze Sätze. Keine Floskeln, kein Marketing-Ton.
 - Konkrete Handlungsempfehlungen ("Schicke X und Y zuerst ins Feld, weil …"),
   nicht abstrakte Theorie.
-- Bei Status-Attacken nennst du den konkreten Effekt EINMAL kurz aus dem
-  Faktenblock (z. B. "Irrlicht (Will-O-Wisp) verbrennt das Ziel — es
-  verliert 1/16 KP pro Runde und sein physischer Angriff wird halbiert").
-  Das ist genau die Tiefe, die Anfänger brauchen.
+- Bei wichtigen Status-Attacken / Fähigkeiten nennst du den konkreten Effekt
+  EINMAL kurz aus dem Faktenblock (z. B. "Irrlicht (Will-O-Wisp) verbrennt
+  das Ziel — es verliert 1/16 KP pro Runde und sein physischer Angriff
+  wird halbiert"). Das ist die Tiefe, die Anfänger brauchen.
 - Wenn das Team eine Mega-Entwicklung hat: erkläre kurz, wann man sie nutzt.
-- Attacken, Fähigkeiten und Items nennst du IMMER zweisprachig:
-  im deutschen Guide "Deutscher Name (English Name)", z. B.
-  "Rückenwind (Tailwind)", "Bedroher (Intimidate)", "Prunusbeere (Sitrus Berry)";
-  im englischen Guide "English Name (Deutscher Name)", z. B.
-  "Tailwind (Rückenwind)", "Intimidate (Bedroher)", "Sitrus Berry (Prunusbeere)".
-  Pokémon-Namen bleiben unverändert wie in den Teamdaten.
-  Bist du dir bei einer offiziellen deutschen Übersetzung nicht sicher,
-  schreibe nur den englischen Namen — niemals raten.
+
+ZWEISPRACHIGE BENENNUNG (zwingend für JEDE Erwähnung):
+- Im deutschen Guide schreibst du IMMER "<Deutscher Name> (<English Name>)"
+  für jede Attacke, Fähigkeit und jedes Item — beim ersten UND bei jeder
+  weiteren Erwähnung. Beispiele: "Rückenwind (Tailwind)", "Bedroher
+  (Intimidate)", "Donnerblitz (Thunderbolt)", "Prunusbeere (Sitrus Berry)".
+- Im englischen Guide spiegelbildlich: "<English Name> (<Deutscher Name>)".
+- Wenn der Begriff im Faktenblock unten steht, verwende EXAKT den dortigen
+  deutschen Namen — keine eigene Übersetzung, kein Synonym.
+- Wenn der Begriff NICHT im Faktenblock steht, verwende die offizielle
+  deutsche Pokémon-Lokalisierung aus deinem Wissen (Acrobatics = Akrobatik,
+  Thunderbolt = Donnerblitz, Earthquake = Erdbeben, Snow Warning =
+  Diamantstaub, Gale Wings = Mutwind usw.) — solange du dir bei der
+  Standard-Pokémon-Übersetzung sicher bist. NUR wenn du wirklich keinen
+  offiziellen deutschen Namen kennst, schreibe nur den englischen Namen.
+  NIEMALS eine Mechanik dazuerfinden — das gilt unabhängig.
+- Pokémon-Namen (Charizard, Iono, Glimmora …) bleiben unverändert wie im
+  Team-JSON, keine Übersetzung.
 
 Antworte AUSSCHLIESSLICH mit einem JSON-Objekt, exakt in diesem Schema \
 (kein Markdown, kein Text davor oder danach):
@@ -624,24 +668,30 @@ SYSTEM_PROMPT = SYSTEM_PROMPT_BASE
 
 
 # Module-level caches for the reference indices — loaded once per
-# process. Tests can monkey-patch _MOVES_IDX / _ITEMS_IDX directly.
+# process. Tests can monkey-patch the *_IDX globals directly.
 _MOVES_REF: Optional[Dict[str, Any]] = None
 _ITEMS_REF: Optional[Dict[str, Any]] = None
+_ABILITIES_REF: Optional[Dict[str, Any]] = None
 _MOVES_IDX: Optional[Dict[str, Tuple[str, Dict[str, Any]]]] = None
 _ITEMS_IDX: Optional[Dict[str, Tuple[str, Dict[str, Any]]]] = None
+_ABILITIES_IDX: Optional[Dict[str, Tuple[str, Dict[str, Any]]]] = None
 
 
 def _ensure_references_loaded(
     moves_path: str = DEFAULT_MOVES_REF_PATH,
     items_path: str = DEFAULT_ITEMS_REF_PATH,
+    abilities_path: str = DEFAULT_ABILITIES_REF_PATH,
 ) -> None:
-    global _MOVES_REF, _ITEMS_REF, _MOVES_IDX, _ITEMS_IDX
+    global _MOVES_REF, _ITEMS_REF, _ABILITIES_REF, _MOVES_IDX, _ITEMS_IDX, _ABILITIES_IDX
     if _MOVES_IDX is None:
         _MOVES_REF = load_reference(moves_path)
         _MOVES_IDX = build_lookup_index(_MOVES_REF, 'moves')
     if _ITEMS_IDX is None:
         _ITEMS_REF = load_reference(items_path)
         _ITEMS_IDX = build_lookup_index(_ITEMS_REF, 'items')
+    if _ABILITIES_IDX is None:
+        _ABILITIES_REF = load_reference(abilities_path)
+        _ABILITIES_IDX = build_lookup_index(_ABILITIES_REF, 'abilities')
 
 
 # ─────────────────────────── API section ───────────────────────────
@@ -657,7 +707,12 @@ def generate_for_team(client: Any, team: Dict[str, Any]) -> Optional[Dict[str, A
     parse failure, so the next run retries.
     """
     _ensure_references_loaded()
-    facts = collect_team_facts(team, _MOVES_IDX or {}, _ITEMS_IDX or {})
+    facts = collect_team_facts(
+        team,
+        _MOVES_IDX or {},
+        _ITEMS_IDX or {},
+        _ABILITIES_IDX or {},
+    )
     facts_block = format_facts_block(facts)
     system_prompt = build_system_prompt(facts_block)
 

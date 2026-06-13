@@ -150,6 +150,7 @@
     <link rel="stylesheet" href="css/city-league-display-toggles.css?v=202606130905" type="text/css" media="print" onload="this.media='all'">
     <link rel="stylesheet" href="css/de-overview-tabs.css?v=202606130905" type="text/css" media="print" onload="this.media='all'">
     <link rel="stylesheet" href="css/profile-howto-info.css?v=202606130905" type="text/css" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="css/profile-deck-builder.css?v=202606130905" type="text/css" media="print" onload="this.media='all'">
     <link rel="stylesheet" href="css/meta-call.css?v=202606130905" type="text/css" media="print" onload="this.media='all'">
     <link rel="stylesheet" href="css/side-quest.css?v=202606130905" type="text/css" media="print" onload="this.media='all'">
     <link rel="stylesheet" href="css/testing-groups.css?v=202606130905" type="text/css" media="print" onload="this.media='all'">
@@ -7868,6 +7869,9 @@
                                     <button class="profile-tab-btn" onclick="switchProfileTab('deckcompare')">
                                         <span data-i18n="profile.compareDecklists">Compare Decklists</span>
                                     </button>
+                                    <button class="profile-tab-btn" onclick="switchProfileTab('deckbuilder')">
+                                        <span data-i18n="profile.deckBuilder">Deck Builder</span>
+                                    </button>
                                 </div>
                             </div>
                             <!-- Group 3: Play & Analysis -->
@@ -8220,6 +8224,13 @@
                             </div>
                             <button onclick="profileCompareDecklists()" class="btn btn-primary btn-lift mb-15" data-i18n="profile.compareBtn">Compare</button>
                             <div id="profileCompareResult" class="d-none"></div>
+                        </div>
+
+                        <!-- Deck Builder Tab -->
+                        <div id="profile-deckbuilder" class="profile-tab-content display-none">
+                            <!-- Rendered dynamically by ProfileDeckBuilder.activate()
+                                 on first switchProfileTab('deckbuilder'). Search /
+                                 deck list / mulligan calculator all live here. -->
                         </div>
 
                         <!-- Meta Call Tab -->
@@ -9057,6 +9068,7 @@
     <script src="js/combo-worker.js?v=202606130905" defer></script>
     <script src="js/app-calculator.js?v=202606130905" defer></script>
     <script src="js/app-side-quest.js?v=202606130905" defer></script>
+    <script src="js/app-profile-deck-builder.js?v=202606130905" defer></script>
     <script src="js/deck-builder-consistency.js?v=202606130905" defer></script>
     <script src="js/current-meta-quickref.js?v=202606130905" defer></script>
 

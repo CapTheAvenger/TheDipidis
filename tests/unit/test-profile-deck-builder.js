@@ -156,7 +156,7 @@ describe('ProfileDeckBuilder — search matching', () => {
 
 
 describe('ProfileDeckBuilder — passesFilters', () => {
-    const empty = { type: new Set(), set: new Set(), energy: new Set(), rarity: new Set(), jpOnly: false };
+    const empty = { meta: 'all', type: new Set(), set: new Set(), energy: new Set(), rarity: new Set(), jpInclude: false };
 
     it('passes everything when no filter is set', () => {
         assert.equal(PDB.passesFilters(charizard, empty), true);
@@ -171,10 +171,80 @@ describe('ProfileDeckBuilder — passesFilters', () => {
         assert.equal(PDB.passesFilters(basicFire, f), false);
     });
 
-    it('respects the JP-only filter', () => {
-        const f = { ...empty, jpOnly: true };
+    it('hides JP cards by default and includes them with jpInclude', () => {
+        // Default: JP hidden, intl shown
+        assert.equal(PDB.passesFilters(jpCard, empty), false,
+            'JP card should be hidden when jpInclude is off');
+        assert.equal(PDB.passesFilters(charizard, empty), true);
+        // Toggle on: BOTH shown side by side (the "TEF-CRI + JP" case)
+        const f = { ...empty, jpInclude: true };
         assert.equal(PDB.passesFilters(jpCard, f), true);
-        assert.equal(PDB.passesFilters(charizard, f), false);
+        assert.equal(PDB.passesFilters(charizard, f), true);
+    });
+
+    it('classifies trainer subtypes', () => {
+        // Iono = Supporter
+        assert.equal(PDB.trainerSubtype(iono), 'supporter');
+        // Build small fixtures for the other subtypes
+        const itemCard = { type: 'Item', name_en: 'Ultra Ball' };
+        const toolCard = { type: 'Tool', name_en: 'Forest Seal Stone' };
+        const stadiumCard = { type: 'Stadium', name_en: 'Town Store' };
+        const pokemonToolCard = { type: 'Pokémon Tool', name_en: 'Defiance Vest' };
+        assert.equal(PDB.trainerSubtype(itemCard), 'item');
+        assert.equal(PDB.trainerSubtype(toolCard), 'tool');
+        assert.equal(PDB.trainerSubtype(stadiumCard), 'stadium');
+        assert.equal(PDB.trainerSubtype(pokemonToolCard), 'tool');
+        // Non-trainers return null
+        assert.equal(PDB.trainerSubtype(charizard), null);
+        assert.equal(PDB.trainerSubtype(basicFire), null);
+    });
+
+    it('type filter routes Trainer subtypes correctly', () => {
+        const itemCard = { type: 'Item', name_en: 'Ultra Ball' };
+        const fSupporter = { ...empty, type: new Set(['supporter']) };
+        const fItem = { ...empty, type: new Set(['item']) };
+        // Iono (Supporter) matches only the supporter chip
+        assert.equal(PDB.passesFilters(iono, fSupporter), true);
+        assert.equal(PDB.passesFilters(iono, fItem), false);
+        // Ultra Ball (Item) matches only the item chip
+        assert.equal(PDB.passesFilters(itemCard, fItem), true);
+        assert.equal(PDB.passesFilters(itemCard, fSupporter), false);
+    });
+
+    it('meta filter restricts intl cards to the chunk; JP cards bypass it', () => {
+        const setsByEra = {
+            standard: new Set(['CRI', 'OBF', 'PAL']),
+            extended: new Set(['PAR', 'SVI']),
+            legacy:   new Set(['BS', 'JU']),
+        };
+        const legacyCharizard = { ...charizard, set: 'BS' };  // intl, legacy
+        const stdIono = { ...iono, set: 'PAL' };               // intl, standard
+        // Standard filter: only standard intl passes; legacy intl drops.
+        const fStd = { ...empty, meta: 'standard' };
+        assert.equal(PDB.passesFilters(stdIono, fStd, setsByEra), true);
+        assert.equal(PDB.passesFilters(legacyCharizard, fStd, setsByEra), false);
+        // JP cards always bypass the meta gate (they have JP sets that
+        // wouldn't be in any intl chunk).
+        const fStdJp = { ...empty, meta: 'standard', jpInclude: true };
+        assert.equal(PDB.passesFilters(jpCard, fStdJp, setsByEra), true);
+        // Extended filter: standard OR extended sets pass.
+        const fExt = { ...empty, meta: 'extended' };
+        const extIono = { ...iono, set: 'PAR' };
+        assert.equal(PDB.passesFilters(stdIono, fExt, setsByEra), true);
+        assert.equal(PDB.passesFilters(extIono, fExt, setsByEra), true);
+        assert.equal(PDB.passesFilters(legacyCharizard, fExt, setsByEra), false);
+    });
+
+    it('"TEF-CRI + JP" combined scenario returns both sides', () => {
+        // The exact example the user named. Meta=standard + jpInclude=on
+        // must produce intl-current-meta AND every JP card together.
+        const setsByEra = { standard: new Set(['CRI']), extended: new Set(), legacy: new Set() };
+        const f = { ...empty, meta: 'standard', jpInclude: true };
+        const intlCurrent = { ...weedle, set: 'CRI' };
+        const intlOld     = { ...charizard, set: 'BS' };
+        assert.equal(PDB.passesFilters(intlCurrent, f, setsByEra), true);
+        assert.equal(PDB.passesFilters(intlOld, f, setsByEra), false);
+        assert.equal(PDB.passesFilters(jpCard, f, setsByEra), true);
     });
 
     it('respects the set filter', () => {

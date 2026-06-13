@@ -30,14 +30,30 @@
     let _cardIndex = null;        // flat array of every searchable card
     let _searchTimer = null;
     let _activeFilters = {        // mirrored from the filter chips
-        type:    new Set(),       // 'pokemon' | 'trainer' | 'energy'
+        // Meta-format band (radio — pick one). 'all' = no restriction;
+        // 'standard'|'extended'|'legacy' restricts intl cards to that
+        // chunk. JP cards bypass this gate (they have their own sets).
+        meta:    'all',
+        // Trainer subtypes are now first-class options here alongside
+        // pokemon / energy — see passesFilters for the dispatch.
+        type:    new Set(),       // 'pokemon' | 'supporter' | 'item' | 'tool' | 'stadium' | 'energy'
         set:     new Set(),       // set code, e.g. 'CRI'
         energy:  new Set(),       // 'Fire' | 'Water' | …
         rarity:  new Set(),       // 'Common' | 'Rare' | …
-        jpOnly:  false,
+        // JP toggle: OFF (default) hides Japanese cards entirely; ON
+        // includes them additively next to whatever the intl filters
+        // matched. This implements the user's "TEF-CRI + JP" combo:
+        // meta=standard + jpInclude=true → all current-meta intl
+        // cards PLUS every JP card.
+        jpInclude: false,
     };
     let _searchTerm = '';
     let _initialized = false;
+    // Sets-per-era index, populated lazily from cards_manifest.json.
+    // null until loaded; treat null as "no meta filter possible yet".
+    let _setsByEra = null;
+    let _metaFormatKey = '';       // "TEF-CRI" sourced from format_window.json
+    let _allSetsList = [];          // sorted union of every set in the index
 
     // ── i18n labels ──────────────────────────────────────────────────
 
@@ -50,14 +66,24 @@
             heading:       'Deck Builder',
             subtitle:      'Bau dir aus allen Karten der Datenbank ein eigenes Deck — Suche in Deutsch, Englisch, Set oder Kartentext.',
             searchPh:      'Suchen: Name, Set, Kartentext, Fähigkeit …',
+            filterMeta:    'Meta',
+            filterMetaAll: 'Alle',
+            filterMetaStd: 'Current',           // dynamic key appended at render time, e.g. "Current (TEF-CRI)"
+            filterMetaExt: 'Extended',
+            filterMetaLeg: 'Legacy',
             filterType:    'Typ',
             filterTypePok: 'Pokémon',
-            filterTypeTra: 'Trainer',
+            filterTypeSup: 'Supporter',
+            filterTypeItm: 'Item',
+            filterTypeTool: 'Tool',
+            filterTypeStd: 'Stadion',
             filterTypeEne: 'Energie',
             filterEnergy:  'Energie-Typ',
-            filterSet:     'Set',
+            filterSet:     'Sets',
+            filterSetSearch: 'Set suchen …',
+            filterSetNone: 'Keine Sets gewählt — alle aktiv.',
             filterRarity:  'Seltenheit',
-            filterJp:      'Nur JP',
+            filterJp:      '+ JP einschließen',
             filterClear:   'Filter zurücksetzen',
             results:       'Treffer',
             noResults:     'Keine Karten gefunden. Versuche einen anderen Begriff oder weniger Filter.',
@@ -88,14 +114,24 @@
             heading:       'Deck Builder',
             subtitle:      'Build a deck from every card in the database — search by German name, English name, set code or card text.',
             searchPh:      'Search: name, set, card text, ability …',
+            filterMeta:    'Meta',
+            filterMetaAll: 'All',
+            filterMetaStd: 'Current',
+            filterMetaExt: 'Extended',
+            filterMetaLeg: 'Legacy',
             filterType:    'Type',
             filterTypePok: 'Pokémon',
-            filterTypeTra: 'Trainer',
+            filterTypeSup: 'Supporter',
+            filterTypeItm: 'Item',
+            filterTypeTool: 'Tool',
+            filterTypeStd: 'Stadium',
             filterTypeEne: 'Energy',
             filterEnergy:  'Energy type',
-            filterSet:     'Set',
+            filterSet:     'Sets',
+            filterSetSearch: 'Search set …',
+            filterSetNone: 'No sets picked — all active.',
             filterRarity:  'Rarity',
-            filterJp:      'JP only',
+            filterJp:      '+ Include JP',
             filterClear:   'Clear filters',
             results:       'Results',
             noResults:     'No cards found. Try a different term or fewer filters.',
@@ -221,6 +257,22 @@
         return t === 'basic energy' || t === 'basis energie' || t === 'basis-energie';
     }
 
+    // Trainer subtype detection. Returns 'supporter' | 'item' |
+    // 'tool' | 'stadium' | null. Used by the type filter to let
+    // users narrow Trainers further; null means the card isn't a
+    // trainer at all (caller handles that — usually returns false
+    // when a trainer subtype is in the active filter set).
+    function trainerSubtype(card) {
+        if (!isTrainer(card)) return null;
+        const t = (card.type || '').toLowerCase().trim();
+        if (t === 'supporter') return 'supporter';
+        if (t === 'stadium')   return 'stadium';
+        if (t === 'tool' || t === 'pokémon tool' || t === 'pokemon tool') return 'tool';
+        // "Item" + "Technical Machine" + bare "Trainer" all land here —
+        // they're the catch-all bucket users mentally call "items".
+        return 'item';
+    }
+
     function countCards(deck) {
         return (deck.cards || []).reduce((s, c) => s + (c.count || 0), 0);
     }
@@ -325,15 +377,44 @@
         return false;
     }
 
-    function passesFilters(card, filters) {
-        if (filters.jpOnly && !card.is_japanese) return false;
-        if (filters.type.size > 0) {
-            const kind = isPokemon(card) ? 'pokemon'
-                       : isTrainer(card) ? 'trainer'
-                       : isEnergy(card)  ? 'energy'
-                       : 'other';
-            if (!filters.type.has(kind)) return false;
-        }
+    // Decide whether a card belongs to the kind(s) in the type filter
+    // set. Trainer subtypes (supporter / item / tool / stadium) are
+    // first-class — selecting 'item' shows only item Trainers, not all
+    // Trainers. Pokemon / energy are unchanged broad buckets.
+    function _matchesTypeFilter(card, typeSet) {
+        if (typeSet.size === 0) return true;
+        if (isPokemon(card))      return typeSet.has('pokemon');
+        if (isEnergy(card))       return typeSet.has('energy');
+        const sub = trainerSubtype(card);
+        if (sub) return typeSet.has(sub);
+        return false;
+    }
+
+    // Meta-format dispatch. Intl cards live in one of three chunks
+    // (standard / extended / legacy); the JP cards live in their own
+    // dataset and always pass the meta gate (they have their own JP
+    // set codes that wouldn't be in the intl chunks anyway).
+    function _matchesMetaFilter(card, meta, setsByEra) {
+        if (card.is_japanese) return true;
+        if (meta === 'all' || !meta) return true;
+        if (!setsByEra) return true;   // index not loaded yet — don't gate
+        if (meta === 'standard') return setsByEra.standard.has(card.set);
+        if (meta === 'extended') return setsByEra.standard.has(card.set)
+                                     || setsByEra.extended.has(card.set);
+        if (meta === 'legacy')   return true;   // legacy ⊇ everything
+        return true;
+    }
+
+    function passesFilters(card, filters, setsByEra) {
+        // JP toggle is the outermost gate: if jpInclude is off and the
+        // card is Japanese, drop it before anything else runs. When
+        // jpInclude is on, JP cards still need to clear the OTHER
+        // filters (type, set, search) — the meta filter is skipped via
+        // _matchesMetaFilter so "TEF-CRI + JP" actually returns both
+        // sides at once.
+        if (card.is_japanese && !filters.jpInclude) return false;
+        if (!_matchesMetaFilter(card, filters.meta, setsByEra || _setsByEra)) return false;
+        if (!_matchesTypeFilter(card, filters.type)) return false;
         if (filters.set.size > 0 && !filters.set.has(card.set)) return false;
         if (filters.energy.size > 0 && !filters.energy.has(card.energy_type || '')) return false;
         if (filters.rarity.size > 0 && !filters.rarity.has(card.rarity || '')) return false;
@@ -405,7 +486,72 @@
         }));
         const jp = await loadJapaneseCards();
         _cardIndex = intlNormalised.concat(jp);
+        // Tee up the meta-format chunks + format-window key in the
+        // background — the result powers the Meta filter chips.
+        loadMetaFormatIndex();   // fire-and-forget
+        // Cheap one-pass sorted set list for the Set-filter checkbox
+        // list. Includes both intl and JP set codes so the JP-only
+        // case is browsable too.
+        _allSetsList = Array.from(new Set(_cardIndex.map(c => c.set).filter(Boolean))).sort();
         return _cardIndex;
+    }
+
+    async function loadMetaFormatIndex() {
+        // _setsByEra and _metaFormatKey are populated from the same
+        // manifest the main app uses — chunks file → set membership
+        // per era; format_window.json → the human-readable meta key
+        // (e.g. "TEF-CRI") the user sees on the Meta chip.
+        if (_setsByEra) return;
+        const setsByEra = { standard: new Set(), extended: new Set(), legacy: new Set() };
+        try {
+            const manifestResp = await fetch('data/cards_manifest.json?t=' + Date.now());
+            if (!manifestResp.ok) throw new Error('manifest HTTP ' + manifestResp.status);
+            const manifest = await manifestResp.json();
+            const chunks = Array.isArray(manifest.chunks) ? manifest.chunks : [];
+            await Promise.all(chunks.map(async (chunk) => {
+                const era = String(chunk.era || '').toLowerCase();
+                if (!setsByEra[era]) return;
+                // Prefer the IndexedDB cache — saves the network round-trip
+                // when the user has already loaded the card DB once this
+                // session. Falls back to network when the cache is empty.
+                let cards = null;
+                try {
+                    if (window.cardDataCache) {
+                        cards = await window.cardDataCache.getCachedChunk(chunk.file);
+                    }
+                } catch (_) { /* ignore */ }
+                if (!cards) {
+                    try {
+                        const chunkResp = await fetch('data/' + chunk.file + '?t=' + Date.now());
+                        if (!chunkResp.ok) return;
+                        const json = await chunkResp.json();
+                        cards = json.cards || json;
+                    } catch (_) { return; }
+                }
+                if (!Array.isArray(cards)) return;
+                for (const c of cards) {
+                    if (c && c.set) setsByEra[era].add(String(c.set).toUpperCase());
+                }
+            }));
+        } catch (e) {
+            console.warn('[ProfileDeckBuilder] meta-format index failed', e);
+        }
+        _setsByEra = setsByEra;
+        // Resolve the human-readable meta key from format_window.json.
+        try {
+            const resp = await fetch('data/format_window.json?t=' + Date.now());
+            if (resp.ok) {
+                const fw = await resp.json();
+                if (fw && fw.oldest_legal_set && fw.current_set) {
+                    _metaFormatKey = `${fw.oldest_legal_set}-${fw.current_set}`.toUpperCase();
+                }
+            }
+        } catch (_) { /* keep _metaFormatKey empty */ }
+        // Re-render the filter row so the dynamic "Current (TEF-CRI)"
+        // chip picks up the meta key once it's known.
+        if (_initialized && document.getElementById('pdb-filter-row')) {
+            renderFilterRow();
+        }
     }
 
     // ── Search results ──────────────────────────────────────────────
@@ -416,7 +562,7 @@
         const filters = _activeFilters;
         const hits = [];
         for (const c of _cardIndex) {
-            if (!passesFilters(c, filters)) continue;
+            if (!passesFilters(c, filters, _setsByEra)) continue;
             if (!matchesSearch(c, term)) continue;
             hits.push(c);
             if (hits.length >= MAX_RESULTS * 4) break;  // hard ceiling before sort
@@ -618,7 +764,15 @@
             }, SEARCH_DEBOUNCE);
         });
         document.getElementById('pdb-clear-filters').addEventListener('click', () => {
-            _activeFilters = { type: new Set(), set: new Set(), energy: new Set(), rarity: new Set(), jpOnly: false };
+            _activeFilters = {
+                meta:      'all',
+                type:      new Set(),
+                set:       new Set(),
+                energy:    new Set(),
+                rarity:    new Set(),
+                jpInclude: false,
+            };
+            _setSearchTerm = '';
             renderFilterRow();
             renderResults();
         });
@@ -655,29 +809,111 @@
                 ${escapeHtml(label)}
             </button>`;
         const segments = [];
-        // Type
+
+        // Meta-format band (radio — single selection).
+        const stdLabel = _metaFormatKey
+            ? `${L.filterMetaStd} (${_metaFormatKey})`
+            : L.filterMetaStd;
+        segments.push(`<div class="pdb-chip-group" data-group="meta" aria-label="${escapeHtml(L.filterMeta)}">
+            <span class="pdb-chip-label">${escapeHtml(L.filterMeta)}:</span>
+            ${chip('meta', 'all',      L.filterMetaAll, _activeFilters.meta === 'all')}
+            ${chip('meta', 'standard', stdLabel,        _activeFilters.meta === 'standard')}
+            ${chip('meta', 'extended', L.filterMetaExt, _activeFilters.meta === 'extended')}
+            ${chip('meta', 'legacy',   L.filterMetaLeg, _activeFilters.meta === 'legacy')}
+        </div>`);
+
+        // Type — pokemon + trainer subtypes + energy.
         segments.push(`<div class="pdb-chip-group" data-group="type" aria-label="${escapeHtml(L.filterType)}">
             <span class="pdb-chip-label">${escapeHtml(L.filterType)}:</span>
-            ${chip('type', 'pokemon', L.filterTypePok, _activeFilters.type.has('pokemon'))}
-            ${chip('type', 'trainer', L.filterTypeTra, _activeFilters.type.has('trainer'))}
-            ${chip('type', 'energy',  L.filterTypeEne, _activeFilters.type.has('energy'))}
+            ${chip('type', 'pokemon',   L.filterTypePok,  _activeFilters.type.has('pokemon'))}
+            ${chip('type', 'supporter', L.filterTypeSup,  _activeFilters.type.has('supporter'))}
+            ${chip('type', 'item',      L.filterTypeItm,  _activeFilters.type.has('item'))}
+            ${chip('type', 'tool',      L.filterTypeTool, _activeFilters.type.has('tool'))}
+            ${chip('type', 'stadium',   L.filterTypeStd,  _activeFilters.type.has('stadium'))}
+            ${chip('type', 'energy',    L.filterTypeEne,  _activeFilters.type.has('energy'))}
         </div>`);
-        // JP toggle
+
+        // JP toggle.
         segments.push(`<div class="pdb-chip-group" data-group="jp">
-            ${chip('jpOnly', '1', L.filterJp, _activeFilters.jpOnly)}
+            ${chip('jpInclude', '1', L.filterJp, _activeFilters.jpInclude)}
         </div>`);
+
+        // Set group — collapsible details so 20+ chips don't blow up
+        // the layout when nobody touches it.
+        const setSelected = _activeFilters.set.size;
+        segments.push(`<details class="pdb-set-details" ${setSelected ? 'open' : ''}>
+            <summary class="pdb-set-summary">
+                <span class="pdb-chip-label">${escapeHtml(L.filterSet)}:</span>
+                <span class="pdb-set-counter">${setSelected || L.filterSetNone}</span>
+            </summary>
+            <div class="pdb-set-controls">
+                <input type="text" id="pdb-set-search"
+                       class="pdb-set-search-input"
+                       placeholder="${escapeHtml(L.filterSetSearch)}"
+                       value="${escapeHtml(_setSearchTerm)}"
+                       aria-label="${escapeHtml(L.filterSetSearch)}">
+            </div>
+            <div id="pdb-set-chips" class="pdb-set-chip-list"></div>
+        </details>`);
+
         host.innerHTML = segments.join('');
         host.querySelectorAll('.pdb-chip').forEach(btn => {
             btn.addEventListener('click', () => {
                 const key = btn.getAttribute('data-filter-key');
                 const val = btn.getAttribute('data-filter-value');
-                if (key === 'jpOnly') {
-                    _activeFilters.jpOnly = !_activeFilters.jpOnly;
-                } else {
-                    const set = _activeFilters[key];
+                if (key === 'meta') {
+                    _activeFilters.meta = val;
+                } else if (key === 'jpInclude') {
+                    _activeFilters.jpInclude = !_activeFilters.jpInclude;
+                } else if (key === 'type') {
+                    const set = _activeFilters.type;
                     if (set.has(val)) set.delete(val); else set.add(val);
                 }
                 renderFilterRow();
+                renderResults();
+            });
+        });
+        renderSetChips();
+        const searchEl = document.getElementById('pdb-set-search');
+        if (searchEl) {
+            searchEl.addEventListener('input', () => {
+                _setSearchTerm = searchEl.value;
+                renderSetChips();
+            });
+        }
+    }
+
+    let _setSearchTerm = '';
+
+    function renderSetChips() {
+        const host = document.getElementById('pdb-set-chips');
+        if (!host) return;
+        const term = (_setSearchTerm || '').toUpperCase().trim();
+        const sets = (_allSetsList.length ? _allSetsList : [])
+            .filter(s => !term || s.includes(term));
+        if (sets.length === 0) {
+            host.innerHTML = '<p class="pdb-empty pdb-set-empty">—</p>';
+            return;
+        }
+        host.innerHTML = sets.map(s => `
+            <button type="button"
+                    class="pdb-chip pdb-set-chip${_activeFilters.set.has(s) ? ' is-active' : ''}"
+                    data-set-code="${escapeHtml(s)}">${escapeHtml(s)}</button>
+        `).join('');
+        host.querySelectorAll('.pdb-set-chip').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const code = btn.getAttribute('data-set-code');
+                if (_activeFilters.set.has(code)) _activeFilters.set.delete(code);
+                else _activeFilters.set.add(code);
+                btn.classList.toggle('is-active');
+                // Update the counter in the <summary> without a full
+                // re-render so the user keeps the details panel open
+                // and their search-input focus.
+                const counter = document.querySelector('.pdb-set-counter');
+                if (counter) {
+                    const n = _activeFilters.set.size;
+                    counter.textContent = n || t().filterSetNone;
+                }
                 renderResults();
             });
         });
@@ -871,6 +1107,7 @@
         cardKey,
         isPokemon,
         isTrainer,
+        trainerSubtype,
         isEnergy,
         isBasicPokemon,
         isBasicEnergy,

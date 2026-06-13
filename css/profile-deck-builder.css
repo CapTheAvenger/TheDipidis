@@ -522,3 +522,93 @@
     opacity: 1;
     transform: translateX(-50%) translateY(0);
 }
+
+/* ── Meta-format chip group ───────────────────────────────────── */
+/* Visually the same as other chip groups; the difference is
+ * single-selection (radio-like) instead of multi-select. */
+.pdb-chip-group[data-group="meta"] .pdb-chip.is-active {
+    background: rgba(255, 188, 95, 0.18);
+    border-color: rgba(255, 188, 95, 0.55);
+}
+
+/* ── Set details (collapsible) ────────────────────────────────── */
+
+.pdb-set-details {
+    background: rgba(255, 255, 255, 0.025);
+    border: 1px solid #242b39;
+    border-radius: 12px;
+    padding: 0;
+    overflow: hidden;
+    flex: 0 0 100%;          /* always wraps onto its own row */
+}
+
+.pdb-set-summary {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.45rem 0.7rem;
+    cursor: pointer;
+    user-select: none;
+    list-style: none;
+    color: #b0b8c1;
+    font-size: 0.82rem;
+}
+
+.pdb-set-summary::-webkit-details-marker { display: none; }
+.pdb-set-summary::before {
+    content: '▸';
+    color: var(--accent, #5fb6ff);
+    font-size: 0.7rem;
+    transition: transform 120ms ease;
+    display: inline-block;
+}
+
+.pdb-set-details[open] .pdb-set-summary::before {
+    transform: rotate(90deg);
+}
+
+.pdb-set-counter {
+    margin-left: auto;
+    font-weight: 600;
+    color: #e6ebf3;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 999px;
+    padding: 0.1rem 0.55rem;
+    font-size: 0.74rem;
+}
+
+.pdb-set-controls {
+    padding: 0 0.7rem 0.5rem 0.7rem;
+}
+
+.pdb-set-search-input {
+    width: 100%;
+    box-sizing: border-box;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid #2a3140;
+    border-radius: 8px;
+    color: #e6ebf3;
+    padding: 0.4rem 0.65rem;
+    font-size: 0.85rem;
+    font-family: inherit;
+}
+
+.pdb-set-chip-list {
+    padding: 0 0.7rem 0.7rem 0.7rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+    max-height: 220px;
+    overflow-y: auto;
+}
+
+.pdb-set-chip {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.74rem;
+    padding: 0.18rem 0.55rem;
+}
+
+.pdb-set-empty {
+    padding: 0.5rem;
+    margin: 0;
+}

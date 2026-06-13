@@ -567,14 +567,33 @@
             hits.push(c);
             if (hits.length >= MAX_RESULTS * 4) break;  // hard ceiling before sort
         }
-        // Sort: exact-name matches first, then set, then number numerically.
+        // Sort:
+        //   (1) exact name matches first (English or German equal to
+        //       the search term)
+        //   (2) set release order — NEWEST first. window.setOrderMap
+        //       (loaded by app-core.js from data/sets.json) maps set
+        //       codes to a release-order integer (CRI=154, ASC=150,
+        //       TEF=148, …). Higher = newer. JP sets and unknowns
+        //       fall back to 0 so they cluster at the bottom — the
+        //       picker is intl-meta-focused by default and JP is
+        //       opt-in via the toggle.
+        //   (3) within a set, ascending card number.
         const termLower = (term || '').toLowerCase().trim();
+        const orderMap = (typeof window !== 'undefined' && window.setOrderMap) || {};
+        const setOrder = (code) => {
+            if (!code) return 0;
+            return orderMap[code] || orderMap[code.toLowerCase()] || 0;
+        };
         hits.sort((a, b) => {
             const ax = (a.name_en || '').toLowerCase() === termLower ? 0
                      : (a.name_de || '').toLowerCase() === termLower ? 0 : 1;
             const bx = (b.name_en || '').toLowerCase() === termLower ? 0
                      : (b.name_de || '').toLowerCase() === termLower ? 0 : 1;
             if (ax !== bx) return ax - bx;
+            const orderDelta = setOrder(b.set) - setOrder(a.set);   // newer first
+            if (orderDelta !== 0) return orderDelta;
+            // Tie-break for same release order (or both unknown):
+            // alphabetical set code, then numeric card number.
             const setCmp = (a.set || '').localeCompare(b.set || '');
             if (setCmp !== 0) return setCmp;
             const aN = parseInt(a.number, 10) || 0;

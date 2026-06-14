@@ -486,6 +486,52 @@
         // 'M5': { folder: '???',         prefix: '5a' },  // pending publication
     };
 
+    // Merge two card-source arrays by set+number, preferring non-empty
+    // fields. Used to combine the Standard-chunk JP entries (carry
+    // jp_only flag + EN name, no name_de) with the
+    // japanese_cards_database.csv entries (carry name_de copied over
+    // by enrichJpNames + the proxy URL we applied at parse time). The
+    // result has one row per print and the best available data per
+    // field.
+    function mergeCardSources(primary, secondary) {
+        const out = primary.slice();
+        const byKey = new Map();
+        for (let i = 0; i < out.length; i++) {
+            byKey.set(cardKey(out[i]), i);
+        }
+        const preferNonEmpty = (a, b) => (a && String(a).trim()) ? a : b;
+        for (const sec of secondary) {
+            const key = cardKey(sec);
+            const idx = byKey.get(key);
+            if (idx === undefined) {
+                out.push(sec);
+                byKey.set(key, out.length - 1);
+                continue;
+            }
+            const cur = out[idx];
+            out[idx] = {
+                name_en:     preferNonEmpty(cur.name_en, sec.name_en),
+                name_de:     preferNonEmpty(cur.name_de, sec.name_de),
+                set:         cur.set || sec.set,
+                number:      cur.number || sec.number,
+                type:        preferNonEmpty(cur.type, sec.type),
+                energy_type: preferNonEmpty(cur.energy_type, sec.energy_type),
+                hp:          preferNonEmpty(cur.hp, sec.hp),
+                rarity:      preferNonEmpty(cur.rarity, sec.rarity),
+                // Image: prefer the proxy URL (pokemonproxies.com) over
+                // a raw Limitless _JP_LG.png. Both sources may have run
+                // applyJpProxyUrl; we just pick whichever ended up on
+                // the proxy domain.
+                image_url:   /pokemonproxies\.com/.test(sec.image_url) ? sec.image_url
+                           : /pokemonproxies\.com/.test(cur.image_url) ? cur.image_url
+                           : preferNonEmpty(cur.image_url, sec.image_url),
+                card_text:   preferNonEmpty(cur.card_text, sec.card_text),
+                is_japanese: cur.is_japanese || sec.is_japanese || false,
+            };
+        }
+        return out;
+    }
+
     function applyJpProxyUrl(card) {
         // Backend writes proxy URLs into all_cards_merged.json for M3/M4
         // but the Deck Builder reads the raw japanese_cards_database.csv
@@ -545,24 +591,46 @@
         const intl = Array.isArray(window.allCardsDatabase) ? window.allCardsDatabase : [];
         // The CSV-merged objects use slightly different field names —
         // normalise to the schema this module expects.
-        const intlNormalised = intl.map(c => ({
-            name_en:     c.name_en || c.name || '',
-            name_de:     c.name_de || '',
-            set:         (c.set || '').toUpperCase(),
-            number:      String(c.number || '').toUpperCase(),
-            type:        c.type || '',
-            energy_type: c.energy_type || '',
-            hp:          c.hp || '',
-            rarity:      c.rarity || '',
-            image_url:   c.image_url || '',
-            card_text:   c.card_text || '',
-            is_japanese: false,
-        }));
+        //
+        // Side branch: as of the 2026-06-14 weekly run prepare_card_data.py
+        // writes JP-only cards into cards_chunk_standard.json (tagged
+        // jp_only: true) with the raw Limitless _JP_LG.png URL. We
+        // detect that here so they (a) get flagged as is_japanese:
+        // true for the meta filter to skip them, (b) run through
+        // applyJpProxyUrl so M3/M4 land on pokemonproxies, and
+        // (c) compete with the japanese_cards_database.csv copy in
+        // the dedup pass below — whichever copy carries a German
+        // name wins.
+        const intlNormalised = intl.map(c => {
+            const url = c.image_url || '';
+            const isJp = !!c.jp_only || /_JP_LG\.png/i.test(url);
+            const normalised = {
+                name_en:     c.name_en || c.name || '',
+                name_de:     c.name_de || '',
+                set:         (c.set || '').toUpperCase(),
+                number:      String(c.number || '').toUpperCase(),
+                type:        c.type || '',
+                energy_type: c.energy_type || '',
+                hp:          c.hp || '',
+                rarity:      c.rarity || '',
+                image_url:   url,
+                card_text:   c.card_text || '',
+                is_japanese: isJp,
+            };
+            if (isJp) normalised.image_url = applyJpProxyUrl(normalised);
+            return normalised;
+        });
         const jp = await loadJapaneseCards();
         // Cross-link German names onto JP cards so a German search term
         // ("Voltenso") surfaces the Japanese print too.
         enrichJpNames(jp, buildIntlNameMap(intlNormalised));
-        _cardIndex = intlNormalised.concat(jp);
+        // Dedup: if the same JP print appears in both sources (chunk
+        // standard + japanese_cards_database.csv) keep the one with
+        // the richer record. The CSV-sourced row may carry a name_de
+        // copied over by enrichJpNames; the chunk row may carry the
+        // EN canonical name. Merge field-by-field, preferring non-
+        // empty values.
+        _cardIndex = mergeCardSources(intlNormalised, jp);
         // Tee up the meta-format chunks + format-window key in the
         // background — the result powers the Meta filter chips.
         loadMetaFormatIndex();   // fire-and-forget
@@ -1232,6 +1300,7 @@
         enrichJpNames,
         applyJpProxyUrl,
         JP_PROXY_SET_MAP,
+        mergeCardSources,
         // Action surface
         activate,
         getDeck: () => _deck,

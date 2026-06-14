@@ -525,6 +525,65 @@ describe('ProfileDeckBuilder — pokemonproxies JP image URL substitution', () =
 });
 
 
+describe('ProfileDeckBuilder — JP chunk + CSV dedup (mergeCardSources)', () => {
+    // Once prepare_card_data.py started emitting JP-only cards into
+    // cards_chunk_standard.json (2026-06-14 weekly run), we suddenly
+    // had two sources for the same M5 print: one from
+    // window.allCardsDatabase and one from japanese_cards_database.csv.
+    // mergeCardSources collapses the duplicates and keeps the richer
+    // record per field.
+
+    it('keeps the only copy when sources do not overlap', () => {
+        const a = [{ set: 'CRI', number: '1', name_en: 'Weedle' }];
+        const b = [{ set: 'M5',  number: '1', name_en: 'Tropius', is_japanese: true }];
+        const merged = PDB.mergeCardSources(a, b);
+        assert.equal(merged.length, 2);
+    });
+
+    it('dedupes by set+number and keeps the German name from either side', () => {
+        // Primary (chunk) lacks name_de; secondary (CSV after enrich
+        // pass) has it.
+        const chunk = [{ set: 'M5', number: '23', name_en: 'Manectric', name_de: '',
+                         image_url: 'https://limitlesstcg.../M5_23_R_JP_LG.png',
+                         is_japanese: true }];
+        const csv = [{ set: 'M5', number: '23', name_en: 'Manectric', name_de: 'Voltenso-ex',
+                       image_url: 'https://limitlesstcg.../M5_23_R_JP_LG.png',
+                       is_japanese: true }];
+        const merged = PDB.mergeCardSources(chunk, csv);
+        assert.equal(merged.length, 1);
+        assert.equal(merged[0].name_de, 'Voltenso-ex');
+    });
+
+    it('prefers the pokemonproxies URL when either side has one', () => {
+        // Chunk row carries raw Limitless URL; CSV row was already
+        // run through applyJpProxyUrl and carries the proxy. The
+        // merge must surface the proxy.
+        const proxy = 'https://pokemonproxies.com/images/cards/sets/Chaos_Rising/4a-001-Weedle.png';
+        const raw = 'https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M4/M4_1_R_JP_LG.png';
+        const chunk = [{ set: 'M4', number: '1', name_en: 'Weedle', image_url: raw }];
+        const csv   = [{ set: 'M4', number: '1', name_en: 'Weedle', image_url: proxy, is_japanese: true }];
+        assert.equal(PDB.mergeCardSources(chunk, csv)[0].image_url, proxy);
+        // And the inverse — proxy on the primary, raw on the secondary
+        // — still keeps the proxy.
+        assert.equal(PDB.mergeCardSources(
+            [{ set: 'M4', number: '1', image_url: proxy }],
+            [{ set: 'M4', number: '1', image_url: raw }],
+        )[0].image_url, proxy);
+    });
+
+    it('propagates is_japanese when EITHER source carries it', () => {
+        // The chunk may forget the flag (jp_only field, picked up
+        // upstream); the CSV always sets it. After merge the print
+        // must be JP-tagged so the meta filter routes it correctly.
+        const merged = PDB.mergeCardSources(
+            [{ set: 'M5', number: '1', is_japanese: false }],
+            [{ set: 'M5', number: '1', is_japanese: true }],
+        );
+        assert.equal(merged[0].is_japanese, true);
+    });
+});
+
+
 describe('ProfileDeckBuilder — newest-set-first sort', () => {
     // Mirrors the production sort in js/app-profile-deck-builder.js
     // (search 'setOrder'). Keeps the assertion focused on the

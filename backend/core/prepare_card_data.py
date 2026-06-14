@@ -519,6 +519,24 @@ SYNC_PATTERNS = [
     "all_cards_database.csv",
     "all_cards_database.json",
     "japanese_cards_database.csv",
+    # Merged card master — produced fresh by create_merged_database()
+    # each run (EN cards + JP cards + prices + pokedex numbers all
+    # folded into one dataset). Frontend fallback consumer:
+    # js/app-core.js _loadMonolithCardDatabase() reads this when the
+    # chunked load path can't recover. Also referenced by the service-
+    # worker offline manifest (data/offline-manifest.json) and the
+    # pre-commit sanity gate (scripts/sanity_check_data.py:71-72).
+    #
+    # No matching seed entry — these files are write-only outputs
+    # of prepare_card_data.py (whole file rewritten every run, no
+    # historical-row preservation needed), so they live in the
+    # consistency test's ALLOWED_SYNC_ONLY whitelist alongside the
+    # HTML reports. Before 2026-06-14 the SYNC_PATTERNS entry was
+    # missing entirely, so the freshly-merged file stayed marooned
+    # in backend/core/data/ and the data/ copy hadn't been touched
+    # since 2026-05-23 — fixed here.
+    "all_cards_merged.json",
+    "all_cards_merged.csv",
     # Tournament Scraper JH  →  Past Meta tab
     "tournament_cards_data_cards.csv",
     "tournament_cards_data_overview.csv",

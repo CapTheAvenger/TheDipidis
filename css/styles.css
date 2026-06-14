@@ -5511,6 +5511,16 @@ details[open] > .tier-trending-summary::after {
     font-weight: 500;
 }
 
+/* Surfaces the labs tournament WR + tournament count when the
+ * Current-Meta tier list has labs_tournament_decks_<META>.csv loaded.
+ * Slight gold tint so it reads as "tournament-validated" without
+ * stealing focus from the share/WR headline. */
+.stat-badge.stat-labs {
+    background: rgba(255, 193, 7, 0.18);
+    color: #8a5a00;
+    font-weight: 600;
+}
+
 /* F-08 from visual sweep: when a Hero/Tier card aggregates multiple
  * variants (Dragapult-family = Dragapult + Dragapult Dusknoir + …),
  * surface the variant count so the user understands why the

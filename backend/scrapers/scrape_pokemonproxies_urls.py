@@ -233,6 +233,39 @@ def discover_internal_links(html: str, base_url: str) -> List[str]:
     return out
 
 
+def discover_bundle_urls(html: str, base_url: str) -> List[str]:
+    """Find every ``<script src="...">`` and ``<link rel="modulepreload"
+    href="...">`` URL in ``html`` and return absolute URLs. Vite splits
+    the app into module chunks — the main bundle plus per-route
+    chunks. We download all of them and grep for ``/assets/*.png``
+    strings because that's where the SPA's asset paths actually live
+    (the static HTML only holds the bootstrap shell)."""
+    base_host = urlparse(base_url).netloc
+    out = []
+    seen = set()
+    # Script tags carry both the entry point and (often) inline-
+    # preloaded chunks.
+    for m in re.finditer(r'<script[^>]+src\s*=\s*["\']([^"\']+\.js)["\']', html or ""):
+        href = m.group(1)
+        url = urljoin(base_url, href)
+        if urlparse(url).netloc in (base_host, ""):
+            if url not in seen:
+                seen.add(url); out.append(url)
+    # Vite emits <link rel="modulepreload" href="/assets/Chunk-XXX.js">
+    # for code-split routes — these usually carry the per-route
+    # asset URLs we need.
+    for m in re.finditer(
+        r'<link[^>]+rel\s*=\s*["\']modulepreload["\'][^>]+href\s*=\s*["\']([^"\']+)["\']',
+        html or "",
+    ):
+        href = m.group(1)
+        url = urljoin(base_url, href)
+        if urlparse(url).netloc in (base_host, ""):
+            if url not in seen:
+                seen.add(url); out.append(url)
+    return out
+
+
 def run_scrape(debug: bool = False) -> Dict[str, str]:
     """Top-level scrape. Returns a (possibly empty) ``key → URL`` map.
     Caller decides whether to persist it (e.g. only on non-empty)."""
@@ -274,6 +307,32 @@ def run_scrape(debug: bool = False) -> Dict[str, str]:
                 continue
             merge_into_map(urls_map, extract_urls(text), BASE_URL)
             time.sleep(0.25)
+
+    # Phase 3: Vite SPA bundle inspection. The user-reported empty
+    # scrape from the 2026-06-14 weekly run was caused by
+    # pokemonproxies.com being a Vite SPA — its homepage HTML is just
+    # ``<div id="app"></div>`` plus a script tag. The actual asset
+    # URLs live as string literals inside the compiled JS bundles
+    # (Vite inlines the asset path table for runtime resolution).
+    # Download every <script src> and <link rel=modulepreload> the
+    # homepage references and grep them with the same regex.
+    if fetched:
+        home_url, home_html = fetched[0]
+        bundles = discover_bundle_urls(home_html, home_url)
+        if debug:
+            print(f"  [phase3] {len(bundles)} JS bundles to inspect", file=sys.stderr)
+        bundle_matches = 0
+        for url in bundles[:50]:                  # cap; SPAs rarely emit more
+            text = _fetch(session, url, debug=debug)
+            if not text:
+                continue
+            found = extract_urls(text)
+            bundle_matches += len(found)
+            merge_into_map(urls_map, found, BASE_URL)
+            time.sleep(0.2)
+        if debug:
+            print(f"  [phase3] {bundle_matches} raw matches in JS bundles "
+                  f"→ {len(urls_map)} total unique keys", file=sys.stderr)
 
     return urls_map
 

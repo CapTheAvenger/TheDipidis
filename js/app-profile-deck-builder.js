@@ -107,8 +107,12 @@
             jpBadge:       'JP',
             cardCount:     (n) => `${n} / ${DECK_SIZE} Karten`,
             addAria:       (name) => `${name} ins Deck hinzufügen`,
+            zoomAria:      (name) => `${name} vergrößern`,
             removeAria:    (name) => `${name} aus dem Deck entfernen`,
             illegalMax:    (n) => `Mehr als ${MAX_PER_CARD}× pro Karte ist nicht erlaubt (außer Standard-Energien).`,
+            zoomAddBtn:    'Ins Deck',
+            zoomCloseBtn:  'Schließen',
+            zoomNoText:    'Kein Kartentext verfügbar.',
         },
         en: {
             heading:       'Deck Builder',
@@ -155,8 +159,12 @@
             jpBadge:       'JP',
             cardCount:     (n) => `${n} / ${DECK_SIZE} cards`,
             addAria:       (name) => `Add ${name} to deck`,
+            zoomAria:      (name) => `Zoom into ${name}`,
             removeAria:    (name) => `Remove ${name} from deck`,
             illegalMax:    (n) => `More than ${MAX_PER_CARD}× per card is not allowed (except basic energy).`,
+            zoomAddBtn:    'Add to deck',
+            zoomCloseBtn:  'Close',
+            zoomNoText:    'No card text available.',
         },
     };
 
@@ -877,6 +885,92 @@
                ) || null;
     }
 
+    // ── Zoom modal ───────────────────────────────────────────────────
+    // Click on a result-card image opens this — big card art so the
+    // user can actually read the rules text, plus an "add to deck"
+    // button so they don't have to close + click the + badge.
+    //
+    // The modal renders into a top-level overlay (#pdb-zoom-overlay)
+    // attached on demand; we never leave the DOM dirty after close.
+    // Esc + backdrop-click close, like the strategy modal in the
+    // Side Quest tab. Click on the big image is a no-op (the modal
+    // body absorbs it) so users can't accidentally re-trigger.
+
+    let _zoomOpenCard = null;       // current card for the "add to deck" action
+    let _zoomKeyHandler = null;
+
+    function openZoomModal(card) {
+        closeZoomModal();             // collapse any previous one first
+        _zoomOpenCard = card;
+        const lang = uiLang();
+        const labels = t();
+        const primary = lang === 'de' && card.name_de ? card.name_de : card.name_en;
+        const secondary = lang === 'de' && card.name_de && card.name_de !== card.name_en
+                        ? card.name_en
+                        : lang === 'en' && card.name_de && card.name_de !== card.name_en
+                        ? card.name_de : '';
+        const setBadge = `${card.set || '?'} ${card.number || ''}`.trim();
+        const meta = [card.type, setBadge, card.hp ? card.hp + ' HP' : '']
+                        .filter(Boolean).join(' · ');
+        const jp = card.is_japanese
+            ? `<span class="pdb-jp-badge">${escapeHtml(labels.jpBadge)}</span>` : '';
+        // Card text — preserve newlines + the Limitless ' || ' separator.
+        const textBlocks = (card.card_text || '').trim();
+        const textHtml = textBlocks
+            ? textBlocks.split(/\s*\|\|\s*/).map(t => `<p>${escapeHtml(t)}</p>`).join('')
+            : `<p class="pdb-zoom-empty">${escapeHtml(labels.zoomNoText)}</p>`;
+
+        const overlay = document.createElement('div');
+        overlay.id = 'pdb-zoom-overlay';
+        overlay.className = 'pdb-zoom-overlay';
+        overlay.innerHTML = `
+            <div class="pdb-zoom-panel" role="dialog" aria-modal="true"
+                 aria-label="${escapeHtml(primary || setBadge)}">
+                <button type="button" class="pdb-zoom-close"
+                        aria-label="${escapeHtml(labels.zoomCloseBtn)}">×</button>
+                <div class="pdb-zoom-img-wrap">
+                    <img class="pdb-zoom-img" src="${escapeHtml(card.image_url || '')}"
+                         alt="${escapeHtml(primary || '')}">
+                </div>
+                <div class="pdb-zoom-meta">
+                    <h3 class="pdb-zoom-name">${escapeHtml(primary || '?')}${jp}</h3>
+                    ${secondary ? `<p class="pdb-zoom-sub">${escapeHtml(secondary)}</p>` : ''}
+                    <p class="pdb-zoom-cap">${escapeHtml(meta)}</p>
+                    <div class="pdb-zoom-text">${textHtml}</div>
+                    <button type="button" class="pdb-zoom-add btn btn-primary">＋ ${escapeHtml(labels.zoomAddBtn)}</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(overlay);
+
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) closeZoomModal();
+        });
+        overlay.querySelector('.pdb-zoom-close').addEventListener('click', closeZoomModal);
+        overlay.querySelector('.pdb-zoom-add').addEventListener('click', () => {
+            if (_zoomOpenCard) addCard(_zoomOpenCard);
+            // Quick visual feedback: tint the modal briefly before closing
+            overlay.classList.add('is-added');
+            setTimeout(closeZoomModal, 250);
+        });
+        _zoomKeyHandler = (e) => { if (e.key === 'Escape') closeZoomModal(); };
+        document.addEventListener('keydown', _zoomKeyHandler);
+        // Focus the close button so Tab order is sane and Esc works
+        // even when the page itself didn't have focus.
+        overlay.querySelector('.pdb-zoom-close').focus();
+    }
+
+    function closeZoomModal() {
+        const overlay = document.getElementById('pdb-zoom-overlay');
+        if (overlay) overlay.remove();
+        if (_zoomKeyHandler) {
+            document.removeEventListener('keydown', _zoomKeyHandler);
+            _zoomKeyHandler = null;
+        }
+        _zoomOpenCard = null;
+    }
+
+
     // ── Toast ────────────────────────────────────────────────────────
 
     let _toastTimer = null;
@@ -1121,23 +1215,42 @@
             return;
         }
         host.innerHTML = hits.map(c => renderResultCard(c)).join('');
-        const addFromCard = (card) => {
-            const key = card.getAttribute('data-card-key');
-            const found = _cardIndex.find(c => cardKey(c) === key);
-            if (found) {
-                addCard(found);
-                // Brief visual pulse so the user sees the add register
-                // even though their eyes are on the grid, not the deck.
-                card.classList.add('is-added');
-                setTimeout(() => card.classList.remove('is-added'), 350);
-            }
+        const lookup = (cardEl) => {
+            const key = cardEl.getAttribute('data-card-key');
+            return _cardIndex.find(c => cardKey(c) === key);
         };
-        host.querySelectorAll('.pdb-result-card').forEach(card => {
-            card.addEventListener('click', () => addFromCard(card));
-            card.addEventListener('keydown', (e) => {
+        const addFromCard = (cardEl) => {
+            const found = lookup(cardEl);
+            if (!found) return;
+            addCard(found);
+            // Brief visual pulse so the user sees the add register
+            // even though their eyes are on the grid, not the deck.
+            cardEl.classList.add('is-added');
+            setTimeout(() => cardEl.classList.remove('is-added'), 350);
+        };
+        const zoomFromCard = (cardEl) => {
+            const found = lookup(cardEl);
+            if (found) openZoomModal(found);
+        };
+        host.querySelectorAll('.pdb-result-card').forEach(cardEl => {
+            // Image area opens the zoom modal — user-requested:
+            // "ein Klick auf die Karte → groß zoomen". The + badge
+            // (separate click target, stopPropagation below) stays
+            // for one-click quick-add without entering the modal.
+            const img = cardEl.querySelector('.pdb-result-imgwrap');
+            if (img) img.addEventListener('click', () => zoomFromCard(cardEl));
+            const addBtn = cardEl.querySelector('.pdb-result-addbadge');
+            if (addBtn) addBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                addFromCard(cardEl);
+            });
+            // Keyboard: Enter / Space on the card focus = zoom (matches
+            // the click-on-image affordance). The + badge has its own
+            // Enter handler via being a real <button>.
+            cardEl.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault();
-                    addFromCard(card);
+                    zoomFromCard(cardEl);
                 }
             });
         });
@@ -1145,9 +1258,10 @@
 
     // Database-style mini-card: image on top, compact name + set badge
     // below — matches the Kartendatenbank grid optic the user asked
-    // for. The whole tile is the click target; a + overlay appears on
-    // hover. Deliberately no card_text / HP / price here — this is a
-    // dense picker, not the full database browser.
+    // for. Click on image area → zoom modal (user requested), click on
+    // the + badge → quick-add to deck (stops propagation so the modal
+    // doesn't open at the same time). Deliberately no card_text / HP /
+    // price here — this is a dense picker, not the full database browser.
     function renderResultCard(c) {
         const key = cardKey(c);
         const lang = uiLang();
@@ -1156,13 +1270,16 @@
         const jp = c.is_japanese ? `<span class="pdb-jp-badge">${escapeHtml(t().jpBadge)}</span>` : '';
         return `
             <div class="pdb-result-card" data-card-key="${escapeHtml(key)}"
-                 role="button" tabindex="0"
+                 tabindex="0"
                  title="${escapeHtml(primary || setBadge)}"
-                 aria-label="${escapeHtml(t().addAria(primary || setBadge))}">
-                <div class="pdb-result-imgwrap">
+                 aria-label="${escapeHtml(t().zoomAria(primary || setBadge))}">
+                <div class="pdb-result-imgwrap" role="button"
+                     aria-label="${escapeHtml(t().zoomAria(primary || setBadge))}">
                     <img class="pdb-result-img" src="${escapeHtml(c.image_url || '')}"
                          alt="" loading="lazy" onerror="this.closest('.pdb-result-imgwrap').classList.add('pdb-noimg')">
-                    <span class="pdb-result-addbadge" aria-hidden="true">＋</span>
+                    <button type="button" class="pdb-result-addbadge"
+                            aria-label="${escapeHtml(t().addAria(primary || setBadge))}"
+                            title="${escapeHtml(t().addAria(primary || setBadge))}">＋</button>
                 </div>
                 <div class="pdb-result-cap">
                     <span class="pdb-result-cap-name">${escapeHtml(primary || '?')}${jp}</span>
@@ -1328,6 +1445,8 @@
         applyJpProxyUrl,
         loadPokemonproxiesMap,
         mergeCardSources,
+        openZoomModal,
+        closeZoomModal,
         // Action surface
         activate,
         getDeck: () => _deck,

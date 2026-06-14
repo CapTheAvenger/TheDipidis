@@ -23,6 +23,116 @@
         }
 
         /**
+         * Composite tier score for the Current Meta tier list.
+         *
+         * Pre-fix the tier list sorted by online-play share alone — that
+         * landed Mega Greninja (6 % share, 44 % WR) in Tier 1 just
+         * because it was popular. This score blends three signals:
+         *
+         *   1. Online play share (capped at 15 %)            — popularity
+         *   2. Online winrate, Bayesian-shrunk to handle      — quality, with
+         *      small samples (prior: 30 games at 50 % WR)      small-N protection
+         *   3. Labs tournament performance, when the meta's   — strongest signal
+         *      labs CSV is loaded: aggregate WR + Day-2 conv    when available
+         *
+         * Bayesian shrinkage uses a 50-game prior at 50 % so a
+         * 5-game-100 %-WR fluke collapses to ~54.5 %, not 100 % — which
+         * is the other half of the user's complaint ("ein Deck was nur
+         * 5x zu nem Turnier geht und alle gewinnt … ist ja kein Tier 1").
+         * The min-count gate downstream still excludes tiny samples
+         * from Tier 1/2/3 outright; the shrinkage only protects against
+         * a small-sample WR-overflow contaminating the score ranking.
+         *
+         * Labs branch is opt-in: pass `labsByName = null` (or a deck
+         * not in the dict / with games < 15) and the score collapses
+         * to share + adjusted-WR. Same caller path for both modes.
+         *
+         * @param {{share:number, winrate:number, new_count:number, archetype:string}} deck
+         * @param {Object<string,{games:number,winPct:number,day2Conv:number,players:number}>|null} labsByName
+         * @returns {{score:number, adjWR:number, labsHit:boolean,
+         *            shareComp:number, wrComp:number, labsComp:number}}
+         */
+        function computeTierScore(deck, labsByName) {
+            const share = Math.max(0, Number(deck.share) || 0);
+            const rawWR = Math.max(0, Number(deck.winrate) || 0);
+            const games = Math.max(0, Number(deck.new_count) || 0);
+
+            const PRIOR_GAMES = 50;
+            const wins = games * (rawWR / 100);
+            const adjWR = games > 0
+                ? (wins + PRIOR_GAMES * 0.5) / (games + PRIOR_GAMES) * 100
+                : 50;
+
+            const shareComp = Math.min(share, 15) * 0.6;                  // 0..9
+            const wrComp = Math.max(0, Math.min(adjWR - 50, 10)) * 0.8;   // 0..8
+
+            let labsComp = 0;
+            let labsHit = false;
+            if (labsByName && deck.archetype) {
+                const ent = labsByName[deck.archetype]
+                         || labsByName[String(deck.archetype).trim()];
+                if (ent && ent.games >= 15) {
+                    labsHit = true;
+                    // Labs WR over 50, capped at +12 pp, weight 1.5
+                    // (tournament data is a stronger trust signal).
+                    const labsWRComp = Math.max(0, Math.min((ent.winPct || 0) - 50, 12)) * 1.5;
+                    // Day-2 conversion: "actually converts entries
+                    // into a deep run". 0..0.4 covers the realistic
+                    // range across TEF-CRI / TEF-POR data.
+                    const day2Comp = Math.max(0, Math.min(ent.day2Conv || 0, 0.4)) * 8;
+                    labsComp = labsWRComp + day2Comp;
+                }
+            }
+
+            return {
+                score: shareComp + wrComp + labsComp,
+                adjWR, labsHit, shareComp, wrComp, labsComp,
+            };
+        }
+
+        /**
+         * Aggregate raw labs_tournament_decks_<META>.csv rows into a
+         * per-deck-name dict for computeTierScore(). Mirrors the
+         * weighting in _loadPastMetaLabsAggregate (ties = ½ win, day-2
+         * conv = day2/day1) so the Current-Meta tier list and the past-
+         * meta cumulative ranking speak the same language.
+         *
+         * @param {Array<Object>} rows
+         * @returns {Object<string, {games:number,winPct:number,day2Conv:number,players:number,tournaments:number}>}
+         */
+        function aggregateLabsRowsByDeck(rows) {
+            const byName = new Map();
+            for (const r of (rows || [])) {
+                const name = String(r.deck_name || '').trim();
+                if (!name) continue;
+                const wins = parseFloat(r.wins || 0) || 0;
+                const losses = parseFloat(r.losses || 0) || 0;
+                const ties = parseFloat(r.ties || 0) || 0;
+                const players = parseInt(r.player_count || 0, 10) || 0;
+                const day1 = parseInt(r.day1_players || 0, 10) || 0;
+                const day2 = parseInt(r.day2_players || 0, 10) || 0;
+                const tid = String(r.tournament_id || '').trim();
+                if (!byName.has(name)) {
+                    byName.set(name, { wins:0, losses:0, ties:0, players:0,
+                                       day1:0, day2:0, tournaments: new Set() });
+                }
+                const e = byName.get(name);
+                e.wins += wins; e.losses += losses; e.ties += ties;
+                e.players += players; e.day1 += day1; e.day2 += day2;
+                if (tid) e.tournaments.add(tid);
+            }
+            const out = {};
+            for (const [name, e] of byName) {
+                const games = e.wins + e.losses + e.ties;
+                const winPct = games > 0 ? (e.wins + 0.5 * e.ties) / games * 100 : 0;
+                const day2Conv = e.day1 > 0 ? e.day2 / e.day1 : 0;
+                out[name] = { games, winPct, day2Conv,
+                              players: e.players, tournaments: e.tournaments.size };
+            }
+            return out;
+        }
+
+        /**
          * Determine tier for a deck
          * @param {Object} deck - Deck object with share, winrate, etc.
          * @returns {string} - 'tier-1', 'tier-2', 'tier-3', or 'tier-trending'
@@ -949,21 +1059,62 @@
             // ===================== TIER SECTIONS =====================
             const tierGroups = { 'tier-1': [], 'tier-2': [], 'tier-3': [], 'tier-trending': [] };
 
-            // Tier-Einteilung mit festen Limits und Mindestspielanzahl
+            // Best-effort labs tournament data for the current meta. If
+            // the per-meta CSV exists, computeTierScore weights it as the
+            // strongest signal (user explicit ask: "Sobald wir Labs Daten
+            // … haben sollten die natürlich den meisten impact auf die
+            // Tier Einordnung haben"). Missing file is fine — score
+            // collapses to share + Bayesian-shrunk WR.
+            let labsByName = null;
+            try {
+                const fw = (typeof window !== 'undefined') ? window._formatWindow : null;
+                const metaKey = (fw && fw.oldest_legal_set && fw.current_set)
+                    ? `${String(fw.oldest_legal_set).toUpperCase()}-${String(fw.current_set).toUpperCase()}`
+                    : null;
+                if (metaKey) {
+                    const labsUrl = `${BASE_PATH}labs_tournament_decks_${metaKey}.csv?t=${timestamp}`;
+                    const labsHead = await fetch(labsUrl, { method: 'HEAD' });
+                    if (labsHead.ok) {
+                        const labsRows = await fetchAndParseCSV(labsUrl);
+                        labsByName = aggregateLabsRowsByDeck(labsRows);
+                    }
+                }
+            } catch (_e) { /* labs missing — share + WR only */ }
+
+            // Composite tier score per deck (replaces pure share-DESC
+            // sort that landed 44 %-WR Mega Greninja in Tier 1).
+            normalizedDecks.forEach(d => { d._tierScore = computeTierScore(d, labsByName); });
+            normalizedDecks.sort((a, b) => b._tierScore.score - a._tierScore.score);
+
+            // Tier-Einteilung mit festen Limits und Mindestspielanzahl.
             // Alle Tier 1-3 Decks müssen ≥ 10 % der Spielanzahl des Rang-1-Decks haben
-            const rank1Count = normalizedDecks.length > 0 ? (normalizedDecks[0].new_count || 0) : 0;
-            const minCountThreshold = rank1Count * 0.10;
+            // (Rang-1 hier = nach Composite-Score, nicht nach Share).
+            const _maxCount = normalizedDecks.reduce((m, d) => Math.max(m, d.new_count || 0), 0);
+            const minCountThreshold = _maxCount * 0.10;
 
             const T1_MAX = 6;
             const T2_MAX = 9;
             const T3_MAX = 12;
-            const T1_MIN_SHARE = 5; // Tier 1 zusätzlich: Share > 5 %
+            const T1_MIN_SHARE = 4.0;   // still must be played
+            const T1_MIN_WR    = 49.0;  // shrunk-WR (or labs WR) floor — no "Tier 1 with 44 %"
 
             let t1 = 0, t2 = 0, t3 = 0;
             normalizedDecks.forEach((deck) => {
                 const meetsMinCount = (deck.new_count || 0) >= minCountThreshold;
+                const sc = deck._tierScore;
+                const labsWR = (sc.labsHit && labsByName && labsByName[deck.archetype])
+                    ? (labsByName[deck.archetype].winPct || 0) : 0;
+                // Quality gate for Tier 1: either the Bayesian-shrunk
+                // online WR or the labs tournament WR has to clear 49 %.
+                // Without this floor, popular-but-losing decks
+                // (Mega Greninja 6 %/44 % case) stay in Tier 1 just
+                // for being played a lot.
+                const wrFloorOK = sc.adjWR >= T1_MIN_WR || labsWR >= T1_MIN_WR;
+                const tier1Eligible = meetsMinCount
+                                   && deck.share >= T1_MIN_SHARE
+                                   && wrFloorOK;
 
-                if (t1 < T1_MAX && meetsMinCount && deck.share > T1_MIN_SHARE) {
+                if (t1 < T1_MAX && tier1Eligible) {
                     tierGroups['tier-1'].push(deck);
                     t1++;
                 } else if (t2 < T2_MAX && meetsMinCount) {
@@ -1221,6 +1372,20 @@
                         inlineTrend = `<span class="tier-trend-chip tier-trend-flat" title="Trend over the last 7 days (previous snapshot: ${oldShare.toFixed(1)}%)">→&nbsp;${oldShare.toFixed(1)}%</span>`;
                     }
 
+                    // When labs CSV is loaded for this meta, surface the
+                    // tournament WR + #tournaments so users can see *why*
+                    // the tier ranking weighs this deck high/low — pure
+                    // share would never explain a strong-WR deck climbing
+                    // past a higher-share one.
+                    let labsBadge = '';
+                    const _sc = deck._tierScore;
+                    if (_sc && _sc.labsHit && labsByName) {
+                        const ent = labsByName[archetypeName];
+                        if (ent) {
+                            labsBadge = `<span class="stat-badge stat-labs" title="Labs tournament data (${ent.tournaments} Turniere, ${ent.games} Games)">🏆 ${ent.winPct.toFixed(1)}% WR · ${ent.tournaments}T</span>`;
+                        }
+                    }
+
                     html += `
                         <div class="deck-banner-card" data-deck-name="${escapeJsStr(archetypeName).toLowerCase()}" onclick="navigateToCurrentMetaWithDeck('${archetypeEscaped}')">
                             ${imageUrl ? `<div class="deck-banner-bg" style="background-image: url('${imageUrl}')"></div>` : ''}
@@ -1231,6 +1396,7 @@
                                     ${parseInt(deck.new_count || 0) > 0
                                       ? `<span class="stat-badge stat-sample-size" title="Anzahl Decks in dieser Auswertung">${parseInt(deck.new_count)} Decks</span>`
                                       : ''}
+                                    ${labsBadge}
                                     ${inlineTrend}
                                     ${trendHtml}
                                 </div>

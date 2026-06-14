@@ -427,101 +427,78 @@ describe('ProfileDeckBuilder — JP name cross-linking', () => {
 
 
 describe('ProfileDeckBuilder — pokemonproxies JP image URL substitution', () => {
-    // Mirrors backend/core/prepare_card_data.py PROXY_SET_MAP. The
-    // map is intentionally empty by default: pokemonproxies fallback
-    // only applies to JP-only sets without an international counter-
-    // part yet, so M3/M4 entries were removed once POR + the next
-    // intl set shipped. M5 will land here once pokemonproxies
-    // publishes the M5 folder.
+    // The site moved off the predictable folder/prefix scheme to a
+    // Vite content-hashed /assets/... layout, so the URL is now a
+    // pure lookup against data/pokemonproxies_url_map.json — populated
+    // by scripts/scrape_pokemonproxies_urls.py. applyJpProxyUrl takes
+    // the map as a second argument here so the test doesn't depend on
+    // a successful network fetch.
 
-    it('passes the helper through unchanged when no set is mapped', () => {
-        // With the empty map every JP scan flows through untouched —
-        // exactly the right behaviour while we wait for pokemonproxies
-        // to publish M5.
+    it('returns the mapped URL when the key is present', () => {
+        const proxy = 'https://www.pokemonproxies.com/assets/5a-023-Manectric-UWQu1Mvp.png';
+        const map = { M5_23: proxy };
+        const card = {
+            name_en: 'Manectric', set: 'M5', number: '23',
+            image_url: 'https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M5/M5_23_R_JP_LG.png',
+        };
+        assert.equal(PDB.applyJpProxyUrl(card, map), proxy);
+    });
+
+    it('falls back to the raw JP scan when the key is missing', () => {
+        const orig = 'https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M5/M5_1_R_JP_LG.png';
+        const card = { name_en: 'Tropius', set: 'M5', number: '1', image_url: orig };
+        assert.equal(PDB.applyJpProxyUrl(card, { M5_23: 'whatever' }), orig);
+    });
+
+    it('falls back when the map argument is null/empty', () => {
+        // Both: no second arg (no module-level map cached either —
+        // tests don't await loadPokemonproxiesMap), and explicit {}.
         const orig = 'https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M5/M5_23_R_JP_LG.png';
         const card = { name_en: 'Manectric', set: 'M5', number: '23', image_url: orig };
         assert.equal(PDB.applyJpProxyUrl(card), orig);
+        assert.equal(PDB.applyJpProxyUrl(card, {}), orig);
+        assert.equal(PDB.applyJpProxyUrl(card, null), orig);
     });
 
-    it('leaves non-JP image URLs untouched', () => {
-        // International (EN) cards must NOT be remapped — only URLs
-        // that contain the _JP_LG.png suffix can ever trigger the
-        // substitution path.
+    it('leaves non-JP image URLs untouched even when a key collides', () => {
+        // International (EN) URL does NOT contain _JP_LG.png so the
+        // helper must not transform it — even if some malicious map
+        // had an entry that "matches" the set+number.
         const enUrl = 'https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/CRI/CRI_001_R_EN_LG.png';
         const card = { name_en: 'Weedle', set: 'CRI', number: '1', image_url: enUrl };
-        assert.equal(PDB.applyJpProxyUrl(card), enUrl);
+        assert.equal(PDB.applyJpProxyUrl(card, { CRI_1: 'https://attacker.example/x.png' }), enUrl);
     });
 
-    it('rewrites a JP URL when a hypothetical mapping is wired in', () => {
-        // Use a synthetic set code + injected map to verify the
-        // formula still produces the canonical
-        //   .../<folder>/<prefix>-<NNN>-<Name_With_Underscores>.png
-        // shape — the same one prepare_card_data.py emits — so that
-        // when M5 (or any future set) lands in the real map the URL
-        // construction is guaranteed correct.
-        const realMap = PDB.JP_PROXY_SET_MAP;
-        const realKeys = Object.keys(realMap);
-        realKeys.forEach(k => delete realMap[k]);          // clear
-        try {
-            realMap.TEST = { folder: 'Test_Folder', prefix: '9z' };
-            const card = {
-                name_en: 'Mega Manectric ex', set: 'TEST', number: '50',
-                image_url: 'https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/TEST/TEST_50_R_JP_LG.png',
-            };
-            assert.equal(
-                PDB.applyJpProxyUrl(card),
-                'https://pokemonproxies.com/images/cards/sets/Test_Folder/9z-050-Mega_Manectric_ex.png',
-            );
-        } finally {
-            delete realMap.TEST;
-        }
-    });
-
-    it('handles malformed input gracefully (no number, no name)', () => {
-        // Even with a populated mapping, garbage in stays garbage
-        // out — the helper must never construct a broken URL.
-        const realMap = PDB.JP_PROXY_SET_MAP;
-        try {
-            realMap.M9 = { folder: 'Whatever', prefix: '9a' };
-            const orig = 'https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M9/M9_X_R_JP_LG.png';
-            const card = { name_en: '', set: 'M9', number: 'X', image_url: orig };
-            assert.equal(PDB.applyJpProxyUrl(card), orig);
-        } finally {
-            delete realMap.M9;
-        }
-    });
-
-    it('JP_PROXY_SET_MAP mirrors backend/core/prepare_card_data.py', () => {
-        // Tripwire: if the backend Python map adds a new set (e.g.
-        // M5 once the proxy folder lands), this assertion forces the
-        // JS mirror to be updated in lockstep.
-        const fs = require('node:fs');
-        const path = require('node:path');
-        const src = fs.readFileSync(
-            path.join(__dirname, '..', '..', 'backend', 'core', 'prepare_card_data.py'),
-            'utf-8',
+    it('handles malformed input gracefully (no number, no set)', () => {
+        // Garbage card data → return the original URL, never throw.
+        const orig = 'https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M5/M5_X_R_JP_LG.png';
+        assert.equal(
+            PDB.applyJpProxyUrl({ name_en: '', set: 'M5', number: 'X', image_url: orig }, {}),
+            orig,
         );
-        // Pull every active "'XYZ': ('Folder', 'prefix')" line out of
-        // the Python PROXY_SET_MAP block (commented lines excluded).
-        const block = src.match(/PROXY_SET_MAP\s*=\s*\{([\s\S]*?)\n\s*\}/);
-        assert.ok(block, 'PROXY_SET_MAP block not found in prepare_card_data.py');
-        const re = /^\s*'([A-Z0-9]+)':\s*\('([^']+)',\s*'([^']+)'\)/gm;
-        const pyEntries = {};
-        let m;
-        while ((m = re.exec(block[1]))) {
-            pyEntries[m[1]] = { folder: m[2], prefix: m[3] };
-        }
-        const jsEntries = PDB.JP_PROXY_SET_MAP;
-        assert.deepEqual(
-            Object.keys(jsEntries).sort(), Object.keys(pyEntries).sort(),
-            'PROXY_SET_MAP set-code keys diverged between Python and JS',
+        assert.equal(
+            PDB.applyJpProxyUrl({ name_en: '', set: '', number: '23', image_url: orig }, {}),
+            orig,
         );
-        for (const set of Object.keys(pyEntries)) {
-            assert.equal(jsEntries[set].folder, pyEntries[set].folder,
-                `Folder for ${set} diverged`);
-            assert.equal(jsEntries[set].prefix, pyEntries[set].prefix,
-                `Prefix for ${set} diverged`);
-        }
+    });
+
+    it('normalizes the set code to upper-case before lookup', () => {
+        // Defensive: a stray lowercase set code (m5 vs M5) must still
+        // hit the upper-case key the map uses.
+        const proxy = 'https://www.pokemonproxies.com/assets/5a-023-Manectric-UWQu1Mvp.png';
+        const card = { name_en: 'Manectric', set: 'm5', number: '23',
+                       image_url: 'https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M5/M5_23_R_JP_LG.png' };
+        assert.equal(PDB.applyJpProxyUrl(card, { M5_23: proxy }), proxy);
+    });
+
+    it('strips leading zeros from the card number for the key', () => {
+        // The JP CSV writes "1" while some other sources write "001".
+        // Both must match the same M5_1 key.
+        const proxy = 'https://www.pokemonproxies.com/assets/5a-001-Tropius-AB12cd34.png';
+        const map = { M5_1: proxy };
+        const url = 'https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M5/M5_1_R_JP_LG.png';
+        assert.equal(PDB.applyJpProxyUrl({ set: 'M5', number: '1',   image_url: url }, map), proxy);
+        assert.equal(PDB.applyJpProxyUrl({ set: 'M5', number: '001', image_url: url }, map), proxy);
     });
 });
 

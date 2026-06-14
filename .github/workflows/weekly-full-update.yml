@@ -158,6 +158,7 @@ jobs:
               all_cards_database.csv \
               all_cards_database.json \
               japanese_cards_database.csv \
+              pokemonproxies_url_map.json \
               cardmarket_id_mapping.csv \
               price_data.csv \
               sets.json \
@@ -275,6 +276,7 @@ jobs:
               "scrapers/online_tournament_scraper.py" \
               "scrapers/cardmarket_price_merger.py" \
               "scrapers/japanese_cards_scraper.py" \
+              "scrapers/scrape_pokemonproxies_urls.py" \
               "core/prepare_card_data.py" \
               "scrapers/archetype_icons_scraper.py" \
               "scrapers/pokemon_card_text_scraper.py" \

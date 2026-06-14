@@ -449,7 +449,7 @@
             if (!line.trim()) continue;
             const parts = line.split(',');
             if (parts.length < head.length) continue;
-            out.push({
+            const card = {
                 name_en:      iName >= 0 ? parts[iName] : '',
                 name_de:      '',
                 set:          iSet >= 0 ? parts[iSet] : '',
@@ -461,9 +461,47 @@
                 image_url:    iImg >= 0 ? parts[iImg] : '',
                 card_text:    '',
                 is_japanese:  true,
-            });
+            };
+            // Replace the raw Japanese scan with the English pokemonproxies
+            // image when the set is mapped. Mirrors backend/core/
+            // prepare_card_data.py PROXY_SET_MAP.
+            card.image_url = applyJpProxyUrl(card);
+            out.push(card);
         }
         return out;
+    }
+
+    // pokemonproxies.com hosts English proxy renders of JP-only cards.
+    // The map is intentional and limited — only sets with a confirmed
+    // proxy folder go in here. M5 (Ninja Spinner, JP 2026-05-22) lands
+    // here as soon as the proxy site publishes the folder; until then
+    // M5 cards keep their raw Limitless JP scan as fallback.
+    //
+    // KEEP IN SYNC with backend/core/prepare_card_data.py PROXY_SET_MAP.
+    // Format: setCode -> { folder, prefix }
+    //   → https://pokemonproxies.com/images/cards/sets/<folder>/<prefix>-<NNN>-<Name_With_Underscores>.png
+    const JP_PROXY_SET_MAP = {
+        'M3': { folder: 'Munikis_Zero',  prefix: '3a' },
+        'M4': { folder: 'Chaos_Rising',  prefix: '4a' },
+        // 'M5': { folder: '???',         prefix: '5a' },  // pending publication
+    };
+
+    function applyJpProxyUrl(card) {
+        // Backend writes proxy URLs into all_cards_merged.json for M3/M4
+        // but the Deck Builder reads the raw japanese_cards_database.csv
+        // (which still has Limitless JP URLs). Apply the same mapping
+        // client-side so the picker shows English proxy art for the
+        // mapped sets and falls back gracefully for unmapped ones.
+        const orig = card.image_url || '';
+        if (!orig.includes('_JP_LG.png')) return orig;
+        const mapping = JP_PROXY_SET_MAP[card.set];
+        if (!mapping) return orig;
+        const num = parseInt(card.number, 10);
+        const name = (card.name_en || '').trim();
+        if (!Number.isFinite(num) || !name) return orig;
+        const numPadded = String(num).padStart(3, '0');
+        const nameNormalized = name.replace(/\s+/g, '_');
+        return `https://pokemonproxies.com/images/cards/sets/${mapping.folder}/${mapping.prefix}-${numPadded}-${nameNormalized}.png`;
     }
 
     // Build a normalized-name → {name_en, name_de} lookup from the
@@ -1192,6 +1230,8 @@
         passesFilters,
         buildIntlNameMap,
         enrichJpNames,
+        applyJpProxyUrl,
+        JP_PROXY_SET_MAP,
         // Action surface
         activate,
         getDeck: () => _deck,

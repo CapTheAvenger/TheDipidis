@@ -426,6 +426,105 @@ describe('ProfileDeckBuilder — JP name cross-linking', () => {
 });
 
 
+describe('ProfileDeckBuilder — pokemonproxies JP image URL substitution', () => {
+    // Mirrors backend/core/prepare_card_data.py PROXY_SET_MAP. If
+    // the production map changes, this test fails loudly so the JS
+    // mirror gets resynced too.
+
+    it('rewrites M4 JP URLs to the pokemonproxies layout', () => {
+        const card = {
+            name_en: 'Weedle', set: 'M4', number: '1',
+            image_url: 'https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M4/M4_1_R_JP_LG.png',
+        };
+        // Same format prepare_card_data.py emits — Chaos_Rising/4a-001-Weedle.png
+        assert.equal(
+            PDB.applyJpProxyUrl(card),
+            'https://pokemonproxies.com/images/cards/sets/Chaos_Rising/4a-001-Weedle.png',
+        );
+    });
+
+    it('rewrites M3 JP URLs', () => {
+        const card = {
+            name_en: 'Pikachu', set: 'M3', number: '25',
+            image_url: 'https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M3/M3_25_R_JP_LG.png',
+        };
+        assert.equal(
+            PDB.applyJpProxyUrl(card),
+            'https://pokemonproxies.com/images/cards/sets/Munikis_Zero/3a-025-Pikachu.png',
+        );
+    });
+
+    it('replaces spaces in the card name with underscores', () => {
+        const card = {
+            name_en: 'Mega Manectric ex', set: 'M4', number: '50',
+            image_url: 'https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M4/M4_50_R_JP_LG.png',
+        };
+        assert.equal(
+            PDB.applyJpProxyUrl(card),
+            'https://pokemonproxies.com/images/cards/sets/Chaos_Rising/4a-050-Mega_Manectric_ex.png',
+        );
+    });
+
+    it('leaves unmapped sets (e.g. M5) on their Limitless JP scan', () => {
+        // User-reported case: M5/23 Manectric. pokemonproxies hasn't
+        // published the M5 folder yet, so the proxy substitution
+        // intentionally falls back to the raw JP scan rather than
+        // building a 404 URL.
+        const orig = 'https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M5/M5_23_R_JP_LG.png';
+        const card = { name_en: 'Manectric', set: 'M5', number: '23', image_url: orig };
+        assert.equal(PDB.applyJpProxyUrl(card), orig);
+    });
+
+    it('leaves non-JP image URLs untouched', () => {
+        // International (EN) cards must NOT be remapped — only URLs
+        // that contain the _JP_LG.png suffix trigger the substitution.
+        const enUrl = 'https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/CRI/CRI_001_R_EN_LG.png';
+        const card = { name_en: 'Weedle', set: 'CRI', number: '1', image_url: enUrl };
+        assert.equal(PDB.applyJpProxyUrl(card), enUrl);
+    });
+
+    it('handles malformed input gracefully (no number, no name)', () => {
+        const orig = 'https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M4/M4_X_R_JP_LG.png';
+        const card = { name_en: '', set: 'M4', number: 'X', image_url: orig };
+        // Non-numeric card number → fall back to the original.
+        assert.equal(PDB.applyJpProxyUrl(card), orig);
+    });
+
+    it('JP_PROXY_SET_MAP mirrors backend/core/prepare_card_data.py', () => {
+        // Tripwire: if the backend Python map adds a new set (e.g.
+        // M5 once the proxy folder lands), this assertion forces the
+        // JS mirror to be updated in lockstep.
+        const fs = require('node:fs');
+        const path = require('node:path');
+        const src = fs.readFileSync(
+            path.join(__dirname, '..', '..', 'backend', 'core', 'prepare_card_data.py'),
+            'utf-8',
+        );
+        // Pull every active "'XYZ': ('Folder', 'prefix')" line out of
+        // the Python PROXY_SET_MAP block (commented lines excluded).
+        const block = src.match(/PROXY_SET_MAP\s*=\s*\{([\s\S]*?)\n\s*\}/);
+        assert.ok(block, 'PROXY_SET_MAP block not found in prepare_card_data.py');
+        const re = /^\s*'([A-Z0-9]+)':\s*\('([^']+)',\s*'([^']+)'\)/gm;
+        const pyEntries = {};
+        let m;
+        while ((m = re.exec(block[1]))) {
+            pyEntries[m[1]] = { folder: m[2], prefix: m[3] };
+        }
+        const jsEntries = PDB.JP_PROXY_SET_MAP;
+        assert.deepEqual(
+            Object.keys(jsEntries).sort(), Object.keys(pyEntries).sort(),
+            'PROXY_SET_MAP set-code keys diverged between Python and JS',
+        );
+        for (const set of Object.keys(pyEntries)) {
+            assert.equal(jsEntries[set].folder, pyEntries[set].folder,
+                `Folder for ${set} diverged`);
+            assert.equal(jsEntries[set].prefix, pyEntries[set].prefix,
+                `Prefix for ${set} diverged`);
+        }
+    });
+});
+
+
 describe('ProfileDeckBuilder — newest-set-first sort', () => {
     // Mirrors the production sort in js/app-profile-deck-builder.js
     // (search 'setOrder'). Keeps the assertion focused on the

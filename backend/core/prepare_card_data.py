@@ -165,12 +165,33 @@ def create_merged_database():
             card['eur_low'] = card.get('eur_low', '')
             card['price_last_updated'] = card.get('price_last_updated', '')
             
-        # For JP-origin cards, replace the Japanese scan with the English proxy
-        # from pokemonproxies.com. The URL is predictable: set folder + prefix + number + name.
-        # Only M3 and M4 are available on pokemonproxies; other JP sets keep the JP image.
+        # For JP-only cards whose international counterpart hasn't
+        # shipped yet, swap the raw Japanese scan for an English
+        # proxy render from pokemonproxies.com — same URL shape as
+        # the official intl product, easier on the eyes than the
+        # Japanese-only artwork for German/English-speaking players.
+        #
+        # The map is INTENTIONALLY EMPTY by default. Policy:
+        #   • Add an entry when a NEW JP set drops AND pokemonproxies
+        #     publishes the matching folder.
+        #   • REMOVE the entry the moment the international set
+        #     ships — then the intl chunks carry the real EN scans
+        #     and the JP variant becomes redundant.
+        #
+        # Historical entries (now removed because their intl
+        # counterparts shipped):
+        #   'M3': ('Munikis_Zero', '3a')  # → POR (Perfect Order)
+        #   'M4': ('Chaos_Rising', '4a')  # → next intl set
+        #
+        # Currently pending: M5 (Ninja Spinner, JP 2026-05-22). The
+        # pokemonproxies folder name is not published yet — once it
+        # is, uncomment the M5 line below AND add the matching entry
+        # to JP_PROXY_SET_MAP in js/app-profile-deck-builder.js. The
+        # test 'JP_PROXY_SET_MAP mirrors backend/core/prepare_card_
+        # data.py' in tests/unit/test-profile-deck-builder.js will
+        # fail if the two sides drift.
         PROXY_SET_MAP = {
-            'M3': ('Munikis_Zero', '3a'),
-            'M4': ('Chaos_Rising', '4a'),
+            # 'M5': ('???', '5a'),
         }
         if '_JP_LG.png' in card.get('image_url', ''):
             set_code = card.get('set', '')

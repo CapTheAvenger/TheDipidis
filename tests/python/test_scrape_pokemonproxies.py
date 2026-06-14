@@ -18,6 +18,7 @@ REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 sys.path.insert(0, os.path.join(REPO_ROOT, "backend", "scrapers"))
 
 from scrape_pokemonproxies_urls import (    # noqa: E402
+    discover_bundle_urls,
     discover_internal_links,
     extract_urls,
     load_existing,
@@ -154,6 +155,71 @@ class TestDiscoverInternalLinks:
     def test_dedupes(self):
         html = '<a href="/a">x</a><a href="/a">y</a>'
         assert discover_internal_links(html, BASE_URL) == [BASE_URL + "/a"]
+
+
+# ── discover_bundle_urls ─────────────────────────────────────────
+
+class TestDiscoverBundleUrls:
+    """Vite SPAs serve <div id="app"> + script bundle; the actual
+    asset URLs only live as string literals inside those JS files.
+    The bundle discovery step picks up <script src> and
+    <link rel=modulepreload> so phase 3 of the scraper can grep
+    them. Real bug: the 2026-06-14 weekly run found 0 URLs because
+    phases 1+2 only saw the bootstrap HTML."""
+
+    def test_picks_up_script_src_bundles(self):
+        html = '<script type="module" src="/assets/index-AbCd123.js"></script>'
+        out = discover_bundle_urls(html, BASE_URL)
+        assert out == [BASE_URL + "/assets/index-AbCd123.js"]
+
+    def test_picks_up_modulepreload_chunks(self):
+        html = '<link rel="modulepreload" href="/assets/CardGrid-XYz789.js">'
+        out = discover_bundle_urls(html, BASE_URL)
+        assert out == [BASE_URL + "/assets/CardGrid-XYz789.js"]
+
+    def test_picks_up_both_kinds_combined(self):
+        html = """
+            <link rel="modulepreload" href="/assets/Chunk-AAA.js">
+            <script type="module" src="/assets/index-BBB.js"></script>
+            <link rel="modulepreload" href="/assets/Chunk-CCC.js">
+        """
+        urls = discover_bundle_urls(html, BASE_URL)
+        assert set(urls) == {
+            BASE_URL + "/assets/Chunk-AAA.js",
+            BASE_URL + "/assets/index-BBB.js",
+            BASE_URL + "/assets/Chunk-CCC.js",
+        }
+
+    def test_dedupes_repeated_references(self):
+        html = (
+            '<script src="/assets/index.js"></script>'
+            '<script src="/assets/index.js"></script>'
+        )
+        assert discover_bundle_urls(html, BASE_URL) == [BASE_URL + "/assets/index.js"]
+
+    def test_drops_external_script_hosts(self):
+        # A CDN-hosted analytics blob is none of our business.
+        html = (
+            '<script src="https://cdn.example.com/analytics.js"></script>'
+            '<script src="/assets/index.js"></script>'
+        )
+        urls = discover_bundle_urls(html, BASE_URL)
+        assert urls == [BASE_URL + "/assets/index.js"]
+
+    def test_ignores_non_js_links(self):
+        # Stylesheet / preconnect / icon links should not be confused
+        # with module bundles.
+        html = (
+            '<link rel="stylesheet" href="/assets/style.css">'
+            '<link rel="icon" href="/favicon.png">'
+            '<link rel="modulepreload" href="/assets/Chunk-X.js">'
+        )
+        urls = discover_bundle_urls(html, BASE_URL)
+        assert urls == [BASE_URL + "/assets/Chunk-X.js"]
+
+    def test_handles_empty_html(self):
+        assert discover_bundle_urls("", BASE_URL) == []
+        assert discover_bundle_urls(None, BASE_URL) == []
 
 
 # ── io round-trip ────────────────────────────────────────────────

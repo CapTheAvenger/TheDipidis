@@ -54,6 +54,14 @@ ALLOWED_SYNC_ONLY = {
     "limitless_online_decks.html": "HTML report — regenerated each run",
     "limitless_online_decks_comparison.html": "HTML report — regenerated each run",
     "limitless_online_decks_comparison_local.html": "HTML report — regenerated each run",
+    # Merged card master — prepare_card_data.create_merged_database()
+    # rewrites these whole each run from the EN + JP card DBs (which
+    # ARE seeded). No historical-row preservation: a fresh merge
+    # makes a fresh file, so seeding the prior copy would be wasted
+    # I/O. Consumed by js/app-core.js (chunk-load fallback) and the
+    # service-worker offline manifest (data/offline-manifest.json).
+    "all_cards_merged.json": "regenerated whole each run from seeded EN+JP DBs",
+    "all_cards_merged.csv":  "regenerated whole each run from seeded EN+JP DBs",
 }
 
 

@@ -64,6 +64,8 @@
 
     const LABELS = {
         de: {
+            playBtn: 'Play',
+            playAria: 'Live-Hilfe (Speed-Werte + Schwächen + Gegner-Erfassung) öffnen für',
             infoBtn: 'So spielst du das Team',
             infoAria: 'Strategie-Erklärung anzeigen für',
             roles: 'Die Pokémon und ihre Rollen',
@@ -77,6 +79,8 @@
             markHint: 'Markieren: ⭐ probieren · 👍 gut · 👎 nicht nochmal',
         },
         en: {
+            playBtn: 'Play',
+            playAria: 'Open live helper (speed values + weaknesses + opponent capture) for',
             infoBtn: 'How to play this team',
             infoAria: 'Show strategy explanation for',
             roles: 'The Pokémon and their roles',
@@ -283,6 +287,18 @@
                         <span class="side-quest-info-icon" aria-hidden="true">ℹ</span>
                         <span class="side-quest-info-label">${escapeHtml(labels.infoBtn)}</span>
                     </button>` : '';
+        // Play-Button: opens the live-helper overlay (Speed-Werte +
+        // Schwächen + Gegner-Erfassung). Visible on every card — the
+        // helper does its own data-availability check, so the button
+        // always works even if a species isn't in the stats DB yet.
+        const playBtn = `
+                    <button class="side-quest-play-btn"
+                            type="button"
+                            data-team-code="${escapeHtml(code)}"
+                            aria-label="${escapeHtml(labels.playAria)} ${escapeHtml(team.team_name || code)}">
+                        <span class="side-quest-play-icon" aria-hidden="true">▶</span>
+                        <span class="side-quest-play-label">${escapeHtml(labels.playBtn)}</span>
+                    </button>`;
         return `
             <article class="side-quest-team${stateClass}" data-replica-code="${escapeHtml(code)}" data-team-hash="${escapeHtml(hash)}">
                 <header class="side-quest-team-head">
@@ -302,6 +318,7 @@
                 </header>
                 <div class="side-quest-team-grid">${monsHtml}</div>
                 <div class="side-quest-team-footer">
+                    ${playBtn}
                     ${infoBtn}
                     ${renderMarkButtons(hash, status)}
                 </div>
@@ -467,6 +484,16 @@
                 const entry = _strategies && _strategies[code];
                 const team = teams.find(t => (t.replica_code || '') === code);
                 if (entry && team) openStrategyModal(team, entry);
+            });
+        });
+
+        host.querySelectorAll('.side-quest-play-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const code = btn.getAttribute('data-team-code') || '';
+                const team = teams.find(t => (t.replica_code || '') === code);
+                if (team && window.sideQuestPlay && typeof window.sideQuestPlay.openPlayModal === 'function') {
+                    window.sideQuestPlay.openPlayModal(team);
+                }
             });
         });
 

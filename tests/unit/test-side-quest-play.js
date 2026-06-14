@@ -97,6 +97,46 @@ function parseEVs(str) {
     return out;
 }
 
+// Mirror of aggregateLegalPool + the picker sort+filter rule.
+// User-flagged 2026-06-14: the opponent picker dumped the full
+// 1480-entry Showdown pokedex on a 2-second-decision UI — Absol,
+// Abra, Arceus-Dark were the first three. Restrict to species in
+// the current top-team data and sort by usage DESC so the
+// most-likely matches surface first.
+
+function aggregateLegalPool(teams) {
+    const pool = new Set();
+    const counts = new Map();
+    for (const t of (teams || [])) {
+        for (const p of (t.pokemon || [])) {
+            const name = p && p.name;
+            if (!name) continue;
+            pool.add(name);
+            counts.set(name, (counts.get(name) || 0) + 1);
+        }
+    }
+    return { pool, counts };
+}
+
+// Replays the production picker sort+filter without DOM. Inputs
+// match what app-side-quest-play.js' pickerSortedNames() sees.
+function pickerSortedNames(opts) {
+    const dex = opts.dex || {};
+    const legalPool = opts.legalPool || new Set();
+    const counts = opts.counts || new Map();
+    const showAll = !!opts.showAll;
+    const allDex = Object.keys(dex);
+    const usingFull = showAll || !legalPool || legalPool.size === 0;
+    const pool = usingFull ? allDex : allDex.filter(n => legalPool.has(n));
+    pool.sort((a, b) => {
+        const ua = counts.get(a) || 0;
+        const ub = counts.get(b) || 0;
+        if (ua !== ub) return ub - ua;
+        return a.localeCompare(b);
+    });
+    return { names: pool, usingFull, dexSize: allDex.length };
+}
+
 // ── Speed formula anchors against well-known L50 numbers ──────────
 
 describe('Speed formula — Gen 9 at Level 50', () => {
@@ -300,5 +340,98 @@ describe('integration: Talonflame example from user screenshot', () => {
         assert.strictEqual(byType.Rock, 4);
         assert.strictEqual(byType.Electric, 2);
         assert.strictEqual(byType.Water, 2);
+    });
+});
+
+// ── Picker pool / usage sort (user-flagged restriction) ────────────
+
+describe('aggregateLegalPool — derive format pool from top teams', () => {
+    it('collects every species across teams and counts occurrences', () => {
+        const teams = [
+            { pokemon: [ { name: 'Garchomp' }, { name: 'Kingambit' }, { name: 'Talonflame' } ] },
+            { pokemon: [ { name: 'Garchomp' }, { name: 'Whimsicott' } ] },
+            { pokemon: [ { name: 'Kingambit' }, { name: 'Garchomp' } ] },
+        ];
+        const { pool, counts } = aggregateLegalPool(teams);
+        assert.strictEqual(pool.size, 4);
+        assert.ok(pool.has('Garchomp'));
+        assert.ok(pool.has('Talonflame'));
+        assert.strictEqual(counts.get('Garchomp'), 3);
+        assert.strictEqual(counts.get('Kingambit'), 2);
+        assert.strictEqual(counts.get('Talonflame'), 1);
+        assert.strictEqual(counts.get('Whimsicott'), 1);
+    });
+
+    it('ignores blank / missing names', () => {
+        const teams = [
+            { pokemon: [ { name: 'Garchomp' }, { name: '' }, { name: null }, {} ] },
+        ];
+        const { pool } = aggregateLegalPool(teams);
+        assert.strictEqual(pool.size, 1);
+    });
+
+    it('empty / null teams return empty pool', () => {
+        assert.strictEqual(aggregateLegalPool([]).pool.size, 0);
+        assert.strictEqual(aggregateLegalPool(null).pool.size, 0);
+    });
+});
+
+describe('pickerSortedNames — format-pool filter + usage sort', () => {
+    // Simulate a dex with 5 species, 3 of which are "legal".
+    const dex = {
+        'Abomasnow': true, 'Abra': true,            // not in pool — should be hidden
+        'Garchomp': true, 'Kingambit': true, 'Talonflame': true,
+    };
+    const legalPool = new Set(['Garchomp', 'Kingambit', 'Talonflame']);
+    const counts = new Map([['Garchomp', 12], ['Kingambit', 5], ['Talonflame', 1]]);
+
+    it('defaults to legal-pool only (hides non-pool species)', () => {
+        const { names, usingFull } = pickerSortedNames({ dex, legalPool, counts });
+        assert.strictEqual(usingFull, false);
+        assert.deepStrictEqual(names, ['Garchomp', 'Kingambit', 'Talonflame']);
+        assert.ok(!names.includes('Abra'));
+        assert.ok(!names.includes('Abomasnow'));
+    });
+
+    it('sorts by usage DESC — most-played first', () => {
+        const { names } = pickerSortedNames({ dex, legalPool, counts });
+        assert.strictEqual(names[0], 'Garchomp');   // 12×
+        assert.strictEqual(names[1], 'Kingambit');  // 5×
+        assert.strictEqual(names[2], 'Talonflame'); // 1×
+    });
+
+    it('alphabetical tiebreak when usage counts match', () => {
+        const tied = new Map([['Garchomp', 3], ['Kingambit', 3], ['Talonflame', 3]]);
+        const { names } = pickerSortedNames({ dex, legalPool, counts: tied });
+        assert.deepStrictEqual(names, ['Garchomp', 'Kingambit', 'Talonflame']);
+    });
+
+    it('showAll toggle widens to the full pokedex (and resorts)', () => {
+        const { names, usingFull } = pickerSortedNames({ dex, legalPool, counts, showAll: true });
+        assert.strictEqual(usingFull, true);
+        // Garchomp (12×) leads; the two unused mons (Abomasnow / Abra)
+        // sort alphabetically among the 0-count tail.
+        assert.strictEqual(names[0], 'Garchomp');
+        assert.strictEqual(names[1], 'Kingambit');
+        assert.strictEqual(names[2], 'Talonflame');
+        assert.deepStrictEqual(names.slice(3), ['Abomasnow', 'Abra']);
+    });
+
+    it('empty legal pool falls back to the full dex (graceful when load failed)', () => {
+        const { names, usingFull } = pickerSortedNames({ dex, legalPool: new Set(), counts: new Map() });
+        assert.strictEqual(usingFull, true);
+        // Everything alphabetical because all usage counts are 0.
+        assert.deepStrictEqual(names, ['Abomasnow', 'Abra', 'Garchomp', 'Kingambit', 'Talonflame']);
+    });
+
+    it('dexSize reports the full dex size regardless of filter mode', () => {
+        assert.strictEqual(pickerSortedNames({ dex, legalPool, counts }).dexSize, 5);
+        assert.strictEqual(pickerSortedNames({ dex, legalPool, counts, showAll: true }).dexSize, 5);
+    });
+
+    it('species in legalPool that are NOT in the dex are silently dropped', () => {
+        const phantomPool = new Set(['Garchomp', 'GhostMon-NotInDex']);
+        const { names } = pickerSortedNames({ dex, legalPool: phantomPool, counts });
+        assert.deepStrictEqual(names, ['Garchomp']);
     });
 });

@@ -62,6 +62,9 @@
             pickerClose:    'Auswahl schließen',
             clearOpp:       'Slot leeren',
             unknownSpecies: 'Spezies nicht in Stats-DB',
+            poolLegal:      'Nur Format-Pool ({count})',
+            poolAll:        'Alle Pokémon ({count})',
+            usedNxTimes:    (n) => `${n}× im Top-Team-Pool gespielt`,
         },
         en: {
             playBtn:        'Play',
@@ -83,10 +86,81 @@
             pickerClose:    'Close picker',
             clearOpp:       'Clear slot',
             unknownSpecies: 'Species not in stats DB',
+            poolLegal:      'Format pool only ({count})',
+            poolAll:        'All pokémon ({count})',
+            usedNxTimes:    (n) => `Used ${n}× in top-team pool`,
         },
     };
 
     function t() { return LABELS[uiLang()]; }
+
+    // ── Format pool (legal species + usage frequency) ───────────────
+    // User-flagged 2026-06-14: the full 1480-entry Showdown pokedex is
+    // far too noisy for a "tap the opponent's mon in 2 seconds"
+    // workflow. The actually-relevant pool is the species that show
+    // up in the current Pokémon Champions top-team data, sorted by
+    // how often they appear (more played = quicker to spot).
+    //
+    // legalPool + usageCount are derived from
+    // data/champions_replica_teams.json via window.sideQuest.loadData.
+    // Falls back to "show all" if the side-quest data isn't reachable.
+    let _legalPool = null;       // Set<string>   — species playing in top teams
+    let _usageCount = null;      // Map<string, number>
+    let _showAllInPicker = false;
+    let _poolLoading = null;
+
+    function aggregateLegalPool(teams) {
+        const pool = new Set();
+        const counts = new Map();
+        for (const t of (teams || [])) {
+            for (const p of (t.pokemon || [])) {
+                const name = p && p.name;
+                if (!name) continue;
+                pool.add(name);
+                counts.set(name, (counts.get(name) || 0) + 1);
+            }
+        }
+        return { pool, counts };
+    }
+
+    function loadLegalPool() {
+        if (_legalPool) return Promise.resolve();
+        if (_poolLoading) return _poolLoading;
+        _poolLoading = (async () => {
+            try {
+                if (window.sideQuest && typeof window.sideQuest.loadData === 'function') {
+                    const data = await window.sideQuest.loadData();
+                    const { pool, counts } = aggregateLegalPool((data && data.teams) || []);
+                    _legalPool = pool;
+                    _usageCount = counts;
+                    return;
+                }
+            } catch (_e) { /* fall through to empty */ }
+            _legalPool = new Set();
+            _usageCount = new Map();
+        })();
+        return _poolLoading;
+    }
+
+    // Returns the picker source list, sorted by usage DESC then name.
+    // When the legal pool is empty (load failure) or the user toggled
+    // "Alle anzeigen", the full pokedex is used as the source. Always
+    // restricted to species we actually have stats for — a picker hit
+    // on something the pokedex doesn't know would render as "?".
+    function pickerSortedNames() {
+        const allDex = Object.keys(_pokedex || {});
+        const usingFull = _showAllInPicker || !_legalPool || _legalPool.size === 0;
+        const pool = usingFull
+            ? allDex
+            : allDex.filter(n => _legalPool.has(n));
+        pool.sort((a, b) => {
+            const ua = (_usageCount && _usageCount.get(a)) || 0;
+            const ub = (_usageCount && _usageCount.get(b)) || 0;
+            if (ua !== ub) return ub - ua;        // usage DESC
+            return a.localeCompare(b);            // alpha fallback
+        });
+        return { names: pool, usingFull, dexSize: allDex.length };
+    }
 
     // ── Type effectiveness (defensive) ──────────────────────────────
     // Map from attacking_type → defending_type → multiplier.
@@ -321,27 +395,21 @@
     }
 
     // ── Sprite picker (sub-modal triggered from empty opponent slot) ──
-    // Full pokedex grid with a fast filter. autofocus the input so
-    // the first keystroke immediately narrows the list.
+    // Defaults to the format pool (species seen in the current top-
+    // team data, sorted by usage DESC), with a toggle to widen to the
+    // full pokedex when the user needs a deeper cut. Live-filter input
+    // narrows the visible cells without re-sorting.
     function openSpritePicker(onPick) {
         closeSpritePicker();
         const labels = t();
         const overlay = document.createElement('div');
         overlay.id = 'sq-play-picker';
         overlay.className = 'sq-play-picker-overlay';
-        const all = Object.keys(_pokedex || {}).sort();
+        const head = renderPickerHead(labels);
         overlay.innerHTML = `
             <div class="sq-play-picker-panel" role="dialog" aria-modal="true">
-                <header class="sq-play-picker-head">
-                    <input type="search" class="sq-play-picker-search"
-                           placeholder="${escapeHtml(labels.searchPh)}"
-                           autocomplete="off" inputmode="search" autofocus>
-                    <button type="button" class="sq-play-picker-close"
-                            aria-label="${escapeHtml(labels.pickerClose)}">×</button>
-                </header>
-                <div class="sq-play-picker-grid" id="sq-play-picker-grid">
-                    ${all.slice(0, 200).map(n => spriteCellHtml(n)).join('')}
-                </div>
+                ${head}
+                <div class="sq-play-picker-grid" id="sq-play-picker-grid"></div>
             </div>
         `;
         document.body.appendChild(overlay);
@@ -350,13 +418,40 @@
         const input = overlay.querySelector('.sq-play-picker-search');
 
         const updateGrid = (filter) => {
+            const { names } = pickerSortedNames();
             const f = String(filter || '').toLowerCase().trim();
             const matches = f
-                ? all.filter(n => n.toLowerCase().includes(f)).slice(0, 200)
-                : all.slice(0, 200);
-            grid.innerHTML = matches.map(n => spriteCellHtml(n)).join('');
+                ? names.filter(n => n.toLowerCase().includes(f)).slice(0, 200)
+                : names.slice(0, 200);
+            grid.innerHTML = matches.length
+                ? matches.map(n => spriteCellHtml(n)).join('')
+                : `<p class="sq-play-picker-empty">${escapeHtml(
+                    uiLang() === 'de' ? 'Kein Treffer — Filter ändern oder „Alle anzeigen".'
+                                      : 'No match — adjust filter or "Show all".')}</p>`;
         };
-        input.addEventListener('input', () => updateGrid(input.value));
+        const rerenderHead = () => {
+            const headEl = overlay.querySelector('.sq-play-picker-head');
+            if (headEl) headEl.outerHTML = renderPickerHead(labels);
+            rebind();
+        };
+        const rebind = () => {
+            const newInput = overlay.querySelector('.sq-play-picker-search');
+            if (newInput) {
+                newInput.addEventListener('input', () => updateGrid(newInput.value));
+                setTimeout(() => newInput.focus(), 30);
+            }
+            const closeBtn = overlay.querySelector('.sq-play-picker-close');
+            if (closeBtn) closeBtn.addEventListener('click', closeSpritePicker);
+            const toggle = overlay.querySelector('.sq-play-picker-toggle');
+            if (toggle) toggle.addEventListener('click', () => {
+                _showAllInPicker = !_showAllInPicker;
+                rerenderHead();
+                updateGrid(overlay.querySelector('.sq-play-picker-search').value);
+            });
+        };
+
+        rebind();
+        updateGrid('');
 
         overlay.addEventListener('click', (e) => {
             if (e.target === overlay) closeSpritePicker();
@@ -367,13 +462,33 @@
                 closeSpritePicker();
             }
         });
-        overlay.querySelector('.sq-play-picker-close')
-            .addEventListener('click', closeSpritePicker);
         _pickerKeyHandler = (e) => { if (e.key === 'Escape') closeSpritePicker(); };
         document.addEventListener('keydown', _pickerKeyHandler);
 
         // Autofocus loses on iOS when an overlay opens; nudge it.
-        setTimeout(() => input.focus(), 30);
+        setTimeout(() => input && input.focus(), 30);
+    }
+
+    function renderPickerHead(labels) {
+        const { names, usingFull, dexSize } = pickerSortedNames();
+        const poolSize = names.length;
+        const toggleLabel = usingFull
+            ? labels.poolLegal.replace('{count}', (_legalPool && _legalPool.size) || 0)
+            : labels.poolAll.replace('{count}', dexSize);
+        const counterText = `${poolSize}`;
+        return `
+            <header class="sq-play-picker-head">
+                <input type="search" class="sq-play-picker-search"
+                       placeholder="${escapeHtml(labels.searchPh)}"
+                       autocomplete="off" inputmode="search" autofocus>
+                <button type="button" class="sq-play-picker-toggle"
+                        aria-pressed="${usingFull ? 'true' : 'false'}"
+                        title="${escapeHtml(toggleLabel)}">
+                    ${usingFull ? '⤓' : '⤒'} <span class="sq-play-picker-toggle-count">${escapeHtml(counterText)}</span>
+                </button>
+                <button type="button" class="sq-play-picker-close"
+                        aria-label="${escapeHtml(labels.pickerClose)}">×</button>
+            </header>`;
     }
 
     let _pickerKeyHandler = null;
@@ -388,11 +503,16 @@
     }
 
     function spriteCellHtml(name) {
-        return `<button type="button" class="sq-play-picker-cell"
+        const usage = (_usageCount && _usageCount.get(name)) || 0;
+        const badge = usage > 0
+            ? `<span class="sq-play-picker-cell-usage" title="${escapeHtml(t().usedNxTimes(usage))}">${usage}</span>`
+            : '';
+        return `<button type="button" class="sq-play-picker-cell${usage > 0 ? ' sq-play-picker-cell-played' : ''}"
                         data-name="${escapeHtml(name)}"
-                        title="${escapeHtml(name)}">
+                        title="${escapeHtml(name)}${usage > 0 ? ' · ' + t().usedNxTimes(usage) : ''}">
                     ${pokemonIconHtml(name, 'sm')}
                     <span class="sq-play-picker-cell-name">${escapeHtml(name)}</span>
+                    ${badge}
                 </button>`;
     }
 
@@ -406,7 +526,9 @@
         closePlayModal();
         _playTeam = team;
         _opponent = [null, null, null, null, null, null];
-        await loadPokedex();
+        // Both loads run in parallel — pokedex for stats/typing,
+        // legal-pool for the opponent picker default.
+        await Promise.all([loadPokedex(), loadLegalPool()]);
 
         const labels = t();
         const overlay = document.createElement('div');
@@ -497,6 +619,7 @@
         actualSpeedAt50,
         natureSpeedMod,
         parseEVs,
+        aggregateLegalPool,
         labels: () => t(),
     };
 })();

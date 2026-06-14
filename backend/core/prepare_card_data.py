@@ -147,13 +147,31 @@ def create_merged_database():
         c['jp_only'] = True
 
     merged_cards = english_cards + jp_to_add
-    
+
     match_count = 0
-    
+
+    # Load the pokemonproxies URL lookup once. Same file the frontend
+    # deck builder reads — populated by scripts/scrape_pokemonproxies_
+    # urls.py (runs in the weekly batch before this script). When the
+    # file is missing or empty (first ever run, scraper down) every
+    # lookup falls through and JP cards keep their raw Limitless scan.
+    pokemonproxies_map = {}
+    proxy_map_path = os.path.join(data_dir, 'pokemonproxies_url_map.json')
+    try:
+        if os.path.isfile(proxy_map_path):
+            with open(proxy_map_path, 'r', encoding='utf-8') as f:
+                proxy_payload = json.load(f)
+            pokemonproxies_map = (proxy_payload or {}).get('urls') or {}
+    except (OSError, json.JSONDecodeError) as e:
+        print(f"::warning::pokemonproxies map unreadable, ignoring: {e}")
+        pokemonproxies_map = {}
+    if pokemonproxies_map:
+        print(f"✓ pokemonproxies map: {len(pokemonproxies_map)} entries available")
+
     for card in merged_cards:
         if 'name' in card and 'name_en' not in card:
             card['name_en'] = card.pop('name')
-            
+
         key = f"{card.get('set')}_{card.get('number')}"
         
         if key in prices_dict:
@@ -166,45 +184,26 @@ def create_merged_database():
             card['price_last_updated'] = card.get('price_last_updated', '')
             
         # For JP-only cards whose international counterpart hasn't
-        # shipped yet, swap the raw Japanese scan for an English
-        # proxy render from pokemonproxies.com — same URL shape as
-        # the official intl product, easier on the eyes than the
-        # Japanese-only artwork for German/English-speaking players.
-        #
-        # The map is INTENTIONALLY EMPTY by default. Policy:
-        #   • Add an entry when a NEW JP set drops AND pokemonproxies
-        #     publishes the matching folder.
-        #   • REMOVE the entry the moment the international set
-        #     ships — then the intl chunks carry the real EN scans
-        #     and the JP variant becomes redundant.
-        #
-        # Historical entries (now removed because their intl
-        # counterparts shipped):
-        #   'M3': ('Munikis_Zero', '3a')  # → POR (Perfect Order)
-        #   'M4': ('Chaos_Rising', '4a')  # → next intl set
-        #
-        # Currently pending: M5 (Ninja Spinner, JP 2026-05-22). The
-        # pokemonproxies folder name is not published yet — once it
-        # is, uncomment the M5 line below AND add the matching entry
-        # to JP_PROXY_SET_MAP in js/app-profile-deck-builder.js. The
-        # test 'JP_PROXY_SET_MAP mirrors backend/core/prepare_card_
-        # data.py' in tests/unit/test-profile-deck-builder.js will
-        # fail if the two sides drift.
-        PROXY_SET_MAP = {
-            # 'M5': ('???', '5a'),
-        }
+        # shipped yet, swap the raw Japanese scan for the English
+        # proxy render hosted on pokemonproxies.com. Up to 2026-06-14
+        # the site used a predictable folder/prefix scheme that we
+        # constructed inline, but it rebuilt on Vite and now serves
+        # ``/assets/<prefix>-<num>-<name>-<HASH>.png`` where the hash
+        # is per-file content-derived (Vite content-hash). The hash
+        # isn't derivable from card metadata, so we maintain
+        # data/pokemonproxies_url_map.json — populated by
+        # scripts/scrape_pokemonproxies_urls.py earlier in the same
+        # weekly batch — and look up the URL from there.
         if '_JP_LG.png' in card.get('image_url', ''):
             set_code = card.get('set', '')
             card_num = card.get('number', '')
-            card_name = card.get('name_en', card.get('name', ''))
-            if set_code in PROXY_SET_MAP:
-                folder, prefix = PROXY_SET_MAP[set_code]
-                try:
-                    num_padded = str(int(card_num)).zfill(3)
-                    name_normalized = card_name.replace(' ', '_')
-                    card['image_url'] = f"https://pokemonproxies.com/images/cards/sets/{folder}/{prefix}-{num_padded}-{name_normalized}.png"
-                except (ValueError, TypeError):
-                    pass  # keep original JP image as fallback
+            try:
+                key = f"{set_code}_{int(card_num)}"
+            except (ValueError, TypeError):
+                key = ''
+            proxied = pokemonproxies_map.get(key)
+            if proxied:
+                card['image_url'] = proxied
 
         card['pokedex_number'] = ''
         
@@ -537,6 +536,13 @@ SYNC_PATTERNS = [
     # since 2026-05-23 — fixed here.
     "all_cards_merged.json",
     "all_cards_merged.csv",
+    # pokemonproxies URL lookup — produced by backend/scrapers/
+    # scrape_pokemonproxies_urls.py before this script runs in the
+    # weekly batch. Frontend deck-builder + this very script read it
+    # to substitute the proxy URL for JP-only cards. Seeded too
+    # (matching workflow entry) so a transient scrape failure doesn't
+    # wipe the previously-good map.
+    "pokemonproxies_url_map.json",
     # Tournament Scraper JH  →  Past Meta tab
     "tournament_cards_data_cards.csv",
     "tournament_cards_data_overview.csv",

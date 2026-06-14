@@ -471,28 +471,41 @@
         return out;
     }
 
-    // pokemonproxies.com hosts English proxy renders of JP-only cards
-    // — a stopgap until the international set ships. Policy:
-    //   • Add a mapping when a NEW JP set drops AND pokemonproxies
-    //     publishes the matching folder.
-    //   • REMOVE the mapping the moment the international set ships
-    //     — the intl chunks then carry the real EN scans and the
-    //     JP variant is redundant.
+    // pokemonproxies.com hosts English proxy renders of JP-only cards.
+    // Up to 2026-06-14 we constructed the URLs algorithmically from a
+    // <folder, prefix> mapping, but the site rebuilt on Vite and now
+    // serves /assets/<prefix>-<num>-<name>-<HASH>.png where the hash
+    // is a per-file Vite content-hash. The hash isn't derivable from
+    // card metadata, so a static formula no longer works.
     //
-    // Historical entries (now removed because their intl counterparts
-    // exist):
-    //   'M3': { folder: 'Munikis_Zero', prefix: '3a' }  → POR
-    //   'M4': { folder: 'Chaos_Rising', prefix: '4a' }  → next intl
+    // Lookup file: data/pokemonproxies_url_map.json — populated by
+    // scripts/scrape_pokemonproxies_urls.py in the weekly batch and
+    // committed alongside the card DB. Keys are <SET>_<NUMBER> (e.g.
+    // "M5_23"), values are the absolute URL.
     //
-    // Currently pending: M5 (Ninja Spinner, JP 2026-05-22). The
-    // pokemonproxies folder isn't published yet; once it is, add
-    // both this map AND backend/core/prepare_card_data.py
-    // PROXY_SET_MAP. The Python↔JS parity test in
-    // tests/unit/test-profile-deck-builder.js trips loudly if only
-    // one side gets updated.
-    const JP_PROXY_SET_MAP = {
-        // 'M5': { folder: '???', prefix: '5a' },
-    };
+    // Loaded lazily on first activation so unrelated pages don't pay
+    // the fetch cost. _pokemonproxiesUrlMap stays null until the
+    // fetch resolves; applyJpProxyUrl falls through to the raw URL
+    // until then (safe default).
+    let _pokemonproxiesUrlMap = null;            // { "M5_23": "https://.../5a-023-Manectric-XXXX.png", ... } | null
+    let _pokemonproxiesLoading = null;            // single-flight promise
+
+    async function loadPokemonproxiesMap() {
+        if (_pokemonproxiesUrlMap) return _pokemonproxiesUrlMap;
+        if (_pokemonproxiesLoading) return _pokemonproxiesLoading;
+        _pokemonproxiesLoading = (async () => {
+            try {
+                const resp = await fetch('data/pokemonproxies_url_map.json?t=' + Date.now());
+                if (!resp.ok) throw new Error('HTTP ' + resp.status);
+                const json = await resp.json();
+                _pokemonproxiesUrlMap = (json && json.urls) || {};
+            } catch (e) {
+                _pokemonproxiesUrlMap = {};       // never re-throw — fail open
+            }
+            return _pokemonproxiesUrlMap;
+        })();
+        return _pokemonproxiesLoading;
+    }
 
     // Merge two card-source arrays by set+number, preferring non-empty
     // fields. Used to combine the Standard-chunk JP entries (carry
@@ -540,22 +553,22 @@
         return out;
     }
 
-    function applyJpProxyUrl(card) {
-        // Backend writes proxy URLs into all_cards_merged.json for M3/M4
-        // but the Deck Builder reads the raw japanese_cards_database.csv
-        // (which still has Limitless JP URLs). Apply the same mapping
-        // client-side so the picker shows English proxy art for the
-        // mapped sets and falls back gracefully for unmapped ones.
+    function applyJpProxyUrl(card, urlMap) {
+        // Two arities to keep the callers (and the unit tests) simple:
+        //   • applyJpProxyUrl(card)            — uses the lazily-loaded
+        //     module-level map; safe to call before the fetch resolves
+        //     (returns the original URL until it does)
+        //   • applyJpProxyUrl(card, urlMap)    — explicit map argument
+        //     for tests and one-off callers
         const orig = card.image_url || '';
         if (!orig.includes('_JP_LG.png')) return orig;
-        const mapping = JP_PROXY_SET_MAP[card.set];
-        if (!mapping) return orig;
+        const map = urlMap || _pokemonproxiesUrlMap;
+        if (!map) return orig;
+        const setCode = (card.set || '').toUpperCase();
         const num = parseInt(card.number, 10);
-        const name = (card.name_en || '').trim();
-        if (!Number.isFinite(num) || !name) return orig;
-        const numPadded = String(num).padStart(3, '0');
-        const nameNormalized = name.replace(/\s+/g, '_');
-        return `https://pokemonproxies.com/images/cards/sets/${mapping.folder}/${mapping.prefix}-${numPadded}-${nameNormalized}.png`;
+        if (!setCode || !Number.isFinite(num)) return orig;
+        const key = `${setCode}_${num}`;
+        return map[key] || orig;
     }
 
     // Build a normalized-name → {name_en, name_de} lookup from the
@@ -596,6 +609,12 @@
 
     async function buildCardIndex() {
         if (_cardIndex) return _cardIndex;
+        // Load the pokemonproxies URL map BEFORE we normalize cards
+        // so applyJpProxyUrl can do its lookup synchronously inside
+        // the .map() pass below. If the fetch fails the map stays
+        // empty and JP cards keep their raw Limitless scan — no
+        // crash, just no proxy substitution.
+        await loadPokemonproxiesMap();
         const intl = Array.isArray(window.allCardsDatabase) ? window.allCardsDatabase : [];
         // The CSV-merged objects use slightly different field names —
         // normalise to the schema this module expects.
@@ -1307,7 +1326,7 @@
         buildIntlNameMap,
         enrichJpNames,
         applyJpProxyUrl,
-        JP_PROXY_SET_MAP,
+        loadPokemonproxiesMap,
         mergeCardSources,
         // Action surface
         activate,

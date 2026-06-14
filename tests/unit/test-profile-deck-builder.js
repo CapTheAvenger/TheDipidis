@@ -427,49 +427,17 @@ describe('ProfileDeckBuilder — JP name cross-linking', () => {
 
 
 describe('ProfileDeckBuilder — pokemonproxies JP image URL substitution', () => {
-    // Mirrors backend/core/prepare_card_data.py PROXY_SET_MAP. If
-    // the production map changes, this test fails loudly so the JS
-    // mirror gets resynced too.
+    // Mirrors backend/core/prepare_card_data.py PROXY_SET_MAP. The
+    // map is intentionally empty by default: pokemonproxies fallback
+    // only applies to JP-only sets without an international counter-
+    // part yet, so M3/M4 entries were removed once POR + the next
+    // intl set shipped. M5 will land here once pokemonproxies
+    // publishes the M5 folder.
 
-    it('rewrites M4 JP URLs to the pokemonproxies layout', () => {
-        const card = {
-            name_en: 'Weedle', set: 'M4', number: '1',
-            image_url: 'https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M4/M4_1_R_JP_LG.png',
-        };
-        // Same format prepare_card_data.py emits — Chaos_Rising/4a-001-Weedle.png
-        assert.equal(
-            PDB.applyJpProxyUrl(card),
-            'https://pokemonproxies.com/images/cards/sets/Chaos_Rising/4a-001-Weedle.png',
-        );
-    });
-
-    it('rewrites M3 JP URLs', () => {
-        const card = {
-            name_en: 'Pikachu', set: 'M3', number: '25',
-            image_url: 'https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M3/M3_25_R_JP_LG.png',
-        };
-        assert.equal(
-            PDB.applyJpProxyUrl(card),
-            'https://pokemonproxies.com/images/cards/sets/Munikis_Zero/3a-025-Pikachu.png',
-        );
-    });
-
-    it('replaces spaces in the card name with underscores', () => {
-        const card = {
-            name_en: 'Mega Manectric ex', set: 'M4', number: '50',
-            image_url: 'https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M4/M4_50_R_JP_LG.png',
-        };
-        assert.equal(
-            PDB.applyJpProxyUrl(card),
-            'https://pokemonproxies.com/images/cards/sets/Chaos_Rising/4a-050-Mega_Manectric_ex.png',
-        );
-    });
-
-    it('leaves unmapped sets (e.g. M5) on their Limitless JP scan', () => {
-        // User-reported case: M5/23 Manectric. pokemonproxies hasn't
-        // published the M5 folder yet, so the proxy substitution
-        // intentionally falls back to the raw JP scan rather than
-        // building a 404 URL.
+    it('passes the helper through unchanged when no set is mapped', () => {
+        // With the empty map every JP scan flows through untouched —
+        // exactly the right behaviour while we wait for pokemonproxies
+        // to publish M5.
         const orig = 'https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M5/M5_23_R_JP_LG.png';
         const card = { name_en: 'Manectric', set: 'M5', number: '23', image_url: orig };
         assert.equal(PDB.applyJpProxyUrl(card), orig);
@@ -477,17 +445,50 @@ describe('ProfileDeckBuilder — pokemonproxies JP image URL substitution', () =
 
     it('leaves non-JP image URLs untouched', () => {
         // International (EN) cards must NOT be remapped — only URLs
-        // that contain the _JP_LG.png suffix trigger the substitution.
+        // that contain the _JP_LG.png suffix can ever trigger the
+        // substitution path.
         const enUrl = 'https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/CRI/CRI_001_R_EN_LG.png';
         const card = { name_en: 'Weedle', set: 'CRI', number: '1', image_url: enUrl };
         assert.equal(PDB.applyJpProxyUrl(card), enUrl);
     });
 
+    it('rewrites a JP URL when a hypothetical mapping is wired in', () => {
+        // Use a synthetic set code + injected map to verify the
+        // formula still produces the canonical
+        //   .../<folder>/<prefix>-<NNN>-<Name_With_Underscores>.png
+        // shape — the same one prepare_card_data.py emits — so that
+        // when M5 (or any future set) lands in the real map the URL
+        // construction is guaranteed correct.
+        const realMap = PDB.JP_PROXY_SET_MAP;
+        const realKeys = Object.keys(realMap);
+        realKeys.forEach(k => delete realMap[k]);          // clear
+        try {
+            realMap.TEST = { folder: 'Test_Folder', prefix: '9z' };
+            const card = {
+                name_en: 'Mega Manectric ex', set: 'TEST', number: '50',
+                image_url: 'https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/TEST/TEST_50_R_JP_LG.png',
+            };
+            assert.equal(
+                PDB.applyJpProxyUrl(card),
+                'https://pokemonproxies.com/images/cards/sets/Test_Folder/9z-050-Mega_Manectric_ex.png',
+            );
+        } finally {
+            delete realMap.TEST;
+        }
+    });
+
     it('handles malformed input gracefully (no number, no name)', () => {
-        const orig = 'https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M4/M4_X_R_JP_LG.png';
-        const card = { name_en: '', set: 'M4', number: 'X', image_url: orig };
-        // Non-numeric card number → fall back to the original.
-        assert.equal(PDB.applyJpProxyUrl(card), orig);
+        // Even with a populated mapping, garbage in stays garbage
+        // out — the helper must never construct a broken URL.
+        const realMap = PDB.JP_PROXY_SET_MAP;
+        try {
+            realMap.M9 = { folder: 'Whatever', prefix: '9a' };
+            const orig = 'https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M9/M9_X_R_JP_LG.png';
+            const card = { name_en: '', set: 'M9', number: 'X', image_url: orig };
+            assert.equal(PDB.applyJpProxyUrl(card), orig);
+        } finally {
+            delete realMap.M9;
+        }
     });
 
     it('JP_PROXY_SET_MAP mirrors backend/core/prepare_card_data.py', () => {

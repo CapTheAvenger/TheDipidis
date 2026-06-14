@@ -471,19 +471,27 @@
         return out;
     }
 
-    // pokemonproxies.com hosts English proxy renders of JP-only cards.
-    // The map is intentional and limited — only sets with a confirmed
-    // proxy folder go in here. M5 (Ninja Spinner, JP 2026-05-22) lands
-    // here as soon as the proxy site publishes the folder; until then
-    // M5 cards keep their raw Limitless JP scan as fallback.
+    // pokemonproxies.com hosts English proxy renders of JP-only cards
+    // — a stopgap until the international set ships. Policy:
+    //   • Add a mapping when a NEW JP set drops AND pokemonproxies
+    //     publishes the matching folder.
+    //   • REMOVE the mapping the moment the international set ships
+    //     — the intl chunks then carry the real EN scans and the
+    //     JP variant is redundant.
     //
-    // KEEP IN SYNC with backend/core/prepare_card_data.py PROXY_SET_MAP.
-    // Format: setCode -> { folder, prefix }
-    //   → https://pokemonproxies.com/images/cards/sets/<folder>/<prefix>-<NNN>-<Name_With_Underscores>.png
+    // Historical entries (now removed because their intl counterparts
+    // exist):
+    //   'M3': { folder: 'Munikis_Zero', prefix: '3a' }  → POR
+    //   'M4': { folder: 'Chaos_Rising', prefix: '4a' }  → next intl
+    //
+    // Currently pending: M5 (Ninja Spinner, JP 2026-05-22). The
+    // pokemonproxies folder isn't published yet; once it is, add
+    // both this map AND backend/core/prepare_card_data.py
+    // PROXY_SET_MAP. The Python↔JS parity test in
+    // tests/unit/test-profile-deck-builder.js trips loudly if only
+    // one side gets updated.
     const JP_PROXY_SET_MAP = {
-        'M3': { folder: 'Munikis_Zero',  prefix: '3a' },
-        'M4': { folder: 'Chaos_Rising',  prefix: '4a' },
-        // 'M5': { folder: '???',         prefix: '5a' },  // pending publication
+        // 'M5': { folder: '???', prefix: '5a' },
     };
 
     // Merge two card-source arrays by set+number, preferring non-empty

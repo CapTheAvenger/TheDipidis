@@ -840,3 +840,51 @@
     line-height: 1.1; max-width: 100%; overflow: hidden; text-overflow: ellipsis;
     white-space: nowrap; width: 100%;
 }
+
+/* Picker pool toggle + usage badge — restricts the picker to the
+ * current Pokémon Champions format-legal pool by default (species
+ * seen in champions_replica_teams.json), with a per-cell usage
+ * counter and a one-tap escape hatch to widen to the full pokedex.
+ */
+.sq-play-picker-toggle {
+    background: rgba(95, 182, 255, 0.12);
+    border: 1px solid rgba(95, 182, 255, 0.4);
+    color: #cfe2ff;
+    border-radius: 8px;
+    padding: 0.35rem 0.6rem;
+    font-size: 0.78rem; font-weight: 700;
+    cursor: pointer; font-family: inherit;
+    display: inline-flex; align-items: center; gap: 4px;
+    white-space: nowrap;
+}
+.sq-play-picker-toggle:hover { background: rgba(95, 182, 255, 0.22); }
+.sq-play-picker-toggle[aria-pressed="true"] {
+    background: rgba(255, 193, 7, 0.18);
+    border-color: rgba(255, 193, 7, 0.45);
+    color: #f5d27a;
+}
+.sq-play-picker-toggle-count { opacity: 0.75; font-weight: 600; }
+
+.sq-play-picker-cell-played {
+    border-color: rgba(76, 209, 130, 0.55);
+}
+.sq-play-picker-cell-usage {
+    position: absolute;
+    top: 2px; right: 2px;
+    background: #4cd182; color: #0a1018;
+    border-radius: 999px;
+    font-size: 0.55rem; font-weight: 800;
+    padding: 1px 5px;
+    line-height: 1.2;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+}
+/* Make the cell a positioning context for the absolute badge. */
+.sq-play-picker-cell { position: relative; }
+.sq-play-picker-empty {
+    grid-column: 1 / -1;
+    text-align: center;
+    color: #8c95a5;
+    font-size: 0.8rem;
+    padding: 1.2rem;
+    margin: 0;
+}

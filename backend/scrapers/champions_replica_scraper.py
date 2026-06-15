@@ -46,8 +46,8 @@ import os
 import re
 import sys
 import time
-from datetime import datetime
-from typing import Dict, List, Optional
+from datetime import date, datetime, timedelta
+from typing import Dict, Iterable, List, Optional, Tuple
 
 _SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 _CORE_DIR = os.path.join(_SCRIPT_DIR, '..', 'core')
@@ -72,6 +72,13 @@ SHEET_CSV_URL = (
 )
 POKEPASTE_BASE = "https://pokepast.es"
 OUTPUT_FILE = "champions_replica_teams.json"
+# Speed corpus: a separate analytical artefact built from a wider slice
+# of the same sheet — every team within the date window, not just the
+# top-N selected for UI display. Used by the Side Quest "Play this team"
+# panel to compute typical opponent Speed from a much larger sample than
+# the 20 teams we render. User-flagged 2026-06-15: 14-day mode estimate
+# is dominated by the active set of decklists, top-20 is too narrow.
+SPEED_CORPUS_FILE = "champions_speed_corpus.json"
 
 # Rank priority — used to sort the top-N picks. The sheet has
 # "Champion", "Runner Up", "Top 4", "Top 8", "Top 16", "Top 32" plus
@@ -107,6 +114,97 @@ def _rank_priority(rank_raw: str) -> float:
     if m:
         return 5.0 + int(m.group(1)) / 200.0 + nudge
     return 900.0 + nudge
+
+
+# Tolerant parser for the "Date Shared" column. The sheet writes dates
+# inconsistently ("8 Jun 2026", "24 May 2026", sometimes "2026-06-08",
+# rarely "08/06/2026"). Falls back to None on garbage — downstream
+# filtering treats None as "out of window".
+_MONTHS = {m: i for i, m in enumerate(
+    ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'], 1)}
+
+
+def parse_date_shared(raw: str) -> Optional[date]:
+    """Parse the verbatim Date Shared cell into a date. Permissive —
+    the sheet has been manually maintained for years so the formats
+    aren't normalised."""
+    if not raw:
+        return None
+    s = str(raw).strip()
+    if not s:
+        return None
+    # "8 Jun 2026" / "24 May 2026" — the common case
+    m = re.match(r'^(\d{1,2})\s+([A-Za-z]{3,9})\s+(\d{4})$', s)
+    if m:
+        mon = _MONTHS.get(m.group(2)[:3].lower())
+        if mon:
+            try:
+                return date(int(m.group(3)), mon, int(m.group(1)))
+            except ValueError:
+                return None
+    # ISO "2026-06-08"
+    m = re.match(r'^(\d{4})-(\d{1,2})-(\d{1,2})$', s)
+    if m:
+        try:
+            return date(int(m.group(1)), int(m.group(2)), int(m.group(3)))
+        except ValueError:
+            return None
+    # Slash-separated "08/06/2026" — assume DMY (sheet is European)
+    m = re.match(r'^(\d{1,2})/(\d{1,2})/(\d{4})$', s)
+    if m:
+        try:
+            return date(int(m.group(3)), int(m.group(2)), int(m.group(1)))
+        except ValueError:
+            return None
+    return None
+
+
+def filter_within_window(
+    candidates: List[Tuple[Dict[str, str], float]],
+    today: date,
+    window_days: int,
+) -> List[Tuple[Dict[str, str], float]]:
+    """Keep candidates whose Date Shared sits within
+    [today - window_days, today]. Unparseable dates are dropped (we
+    can't safely include them in a moving-window stat). Maintains the
+    input order — caller has already sorted by rank-priority."""
+    if window_days <= 0:
+        return list(candidates)
+    cutoff = today - timedelta(days=window_days)
+    out = []
+    for row, prio in candidates:
+        raw = _get_field(row, 'Date Shared', 'Date')
+        d = parse_date_shared(raw)
+        if d is None:
+            continue
+        if cutoff <= d <= today:
+            out.append((row, prio))
+    return out
+
+
+def build_speed_samples(team_records: Iterable[Dict]) -> List[Dict]:
+    """Flatten team records into per-mon (species, evs, nature, date,
+    replica) sample objects. Skips mons missing an evs string — those
+    contribute nothing to a Speed-investment mode estimate."""
+    out: List[Dict] = []
+    for t in team_records:
+        date_shared = t.get('date_shared', '')
+        replica = t.get('replica_code', '')
+        for p in t.get('pokemon', []):
+            evs = (p.get('evs') or '').strip()
+            if not evs:
+                continue
+            name = (p.get('name') or '').strip()
+            if not name:
+                continue
+            out.append({
+                'species': name,
+                'evs': evs,
+                'nature': (p.get('nature') or '').strip(),
+                'date': date_shared,
+                'replica': replica,
+            })
+    return out
 
 
 def fetch_sheet_csv(url: str = SHEET_CSV_URL) -> str:
@@ -388,6 +486,12 @@ def main():
                     help='Number of top teams to include (default 20)')
     ap.add_argument('--delay', type=float, default=0.7,
                     help='Seconds between pokepaste fetches (default 0.7)')
+    ap.add_argument('--speed-window-days', type=int, default=14,
+                    help='Date window (days back from today) for the Speed corpus '
+                         '(default 14). 0 disables corpus build.')
+    ap.add_argument('--speed-max-teams', type=int, default=120,
+                    help='Hard cap on teams fetched for the Speed corpus '
+                         '(default 120). Includes the top-N already fetched.')
     ap.add_argument('--dry-run', action='store_true',
                     help='Print the result instead of writing the JSON')
     args = ap.parse_args()
@@ -425,20 +529,46 @@ def main():
                 col_vals = [r.get(h, '') for r in rows[:5] if r.get(h, '').strip()]
                 logger.warning("  Column %r — first 5 non-empty: %s", h, col_vals)
 
-    # Sort by rank priority (lower = better), then take top N
+    # Sort by rank priority (lower = better), then take top N for the
+    # UI display. Speed corpus uses a wider slice — every team in the
+    # date window, capped to --speed-max-teams.
     candidates.sort(key=lambda x: x[1])
     chosen = candidates[:args.top]
-    logger.info("Selected top %d", len(chosen))
+    logger.info("Selected top %d for UI", len(chosen))
+
+    today = date.today()
+    corpus_pool: List[Tuple[Dict[str, str], float]] = []
+    if args.speed_window_days > 0:
+        corpus_pool = filter_within_window(candidates, today, args.speed_window_days)
+        # Always include the top-N in the corpus so we don't double-
+        # fetch and the corpus is at least as broad as what we display.
+        chosen_keys = {id(r) for r, _ in chosen}
+        merged = list(chosen)
+        for row, prio in corpus_pool:
+            if id(row) not in chosen_keys:
+                merged.append((row, prio))
+                chosen_keys.add(id(row))
+        merged = merged[:max(args.top, args.speed_max_teams)]
+        logger.info("Speed corpus pool: %d teams within %d-day window (capped to %d)",
+                    len(merged), args.speed_window_days, args.speed_max_teams)
+        full_fetch_list = merged
+    else:
+        full_fetch_list = list(chosen)
 
     teams: List[Dict] = []
-    for i, (row, _prio) in enumerate(chosen, 1):
+    for i, (row, _prio) in enumerate(full_fetch_list, 1):
         logger.info("[%d/%d] %s",
-                    i, len(chosen),
+                    i, len(full_fetch_list),
                     _get_field(row, 'Team Description', 'Team Name')[:60])
         rec = build_team_record(row, i)
         teams.append(rec)
-        if i < len(chosen):
+        if i < len(full_fetch_list):
             time.sleep(args.delay)
+
+    # Split: the first args.top entries (still sorted by rank) drive
+    # the UI list; everything is part of the speed corpus.
+    ui_teams = teams[:args.top]
+    corpus_teams = teams
 
     output = {
         '_meta': {
@@ -447,13 +577,36 @@ def main():
             'last_updated': datetime.utcnow().strftime('%Y-%m-%d'),
             'source':       'VGCPastes Champions M-A spreadsheet (gid=791705272)',
             'source_url':   SHEET_CSV_URL,
-            'team_count':   len(teams),
+            'team_count':   len(ui_teams),
         },
-        'teams': teams,
+        'teams': ui_teams,
+    }
+
+    # Build the Speed corpus from the full fetch list, then attach a
+    # window-meta block. The corpus is consumed by the Side Quest
+    # "Play this team" panel for typical-Speed mode estimation.
+    samples = build_speed_samples(corpus_teams)
+    species_counts: Dict[str, int] = {}
+    for s in samples:
+        species_counts[s['species']] = species_counts.get(s['species'], 0) + 1
+    corpus_output = {
+        '_meta': {
+            'last_updated':  datetime.utcnow().strftime('%Y-%m-%d'),
+            'window_days':   args.speed_window_days,
+            'window_start':  (today - timedelta(days=args.speed_window_days)).isoformat()
+                              if args.speed_window_days > 0 else None,
+            'window_end':    today.isoformat(),
+            'team_count':    len(corpus_teams),
+            'sample_count':  len(samples),
+            'species_count': len(species_counts),
+            'source':        'VGCPastes Champions M-A spreadsheet (gid=791705272)',
+        },
+        'samples': samples,
     }
 
     if args.dry_run:
-        print(json.dumps(output, indent=2, ensure_ascii=False))
+        print(json.dumps({'top_n': output, 'corpus': corpus_output},
+                         indent=2, ensure_ascii=False))
         return 0
 
     out_path = os.path.join(get_data_dir(), OUTPUT_FILE)
@@ -472,7 +625,24 @@ def main():
     with open(tmp_path, 'w', encoding='utf-8') as f:
         json.dump(output, f, indent=2, ensure_ascii=False)
     os.replace(tmp_path, out_path)
-    logger.info("Wrote %s (%d teams)", out_path, len(teams))
+    logger.info("Wrote %s (%d teams)", out_path, len(ui_teams))
+
+    # Speed corpus: written only when there's something to write.
+    # Fail-soft like the UI JSON above.
+    corpus_path = os.path.join(get_data_dir(), SPEED_CORPUS_FILE)
+    if samples:
+        tmp_corpus = corpus_path + '.tmp'
+        with open(tmp_corpus, 'w', encoding='utf-8') as f:
+            json.dump(corpus_output, f, indent=2, ensure_ascii=False)
+        os.replace(tmp_corpus, corpus_path)
+        logger.info("Wrote %s (%d samples across %d species, %d-day window)",
+                    corpus_path,
+                    len(samples),
+                    len(species_counts),
+                    args.speed_window_days)
+    elif os.path.exists(corpus_path):
+        logger.warning("0 samples — keeping previous %s untouched", corpus_path)
+
     return 0
 
 

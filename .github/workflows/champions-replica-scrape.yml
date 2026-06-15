@@ -104,6 +104,11 @@ jobs:
           if [ -f backend/core/data/champions_replica_teams.json ]; then
             cp backend/core/data/champions_replica_teams.json data/champions_replica_teams.json
           fi
+          # Speed corpus (added 2026-06-15): broader EV/nature sample
+          # the Side Quest Play panel uses for typical-Speed estimation.
+          if [ -f backend/core/data/champions_speed_corpus.json ]; then
+            cp backend/core/data/champions_speed_corpus.json data/champions_speed_corpus.json
+          fi
 
       # Auto-generate beginner strategy guides for NEW/changed teams
       # via the Claude API (scripts/generate_team_strategies.py).

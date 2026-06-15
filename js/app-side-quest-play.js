@@ -28,10 +28,17 @@
     // — user-flagged 2026-06-15: top-20 sample was too narrow per
     // species to read as "what does the opponent actually play".
     const SPEED_CORPUS_URL = 'data/champions_speed_corpus.json';
+    // German species names so search "Knakrack" / "Vulnona" / "Eis"
+    // finds the right Showdown entry. User-flagged 2026-06-15: typing
+    // names a German speaker doesn't know in English is friction.
+    const NAMES_DE_URL = 'data/pokemon_names_de.json';
     let _pokedex = null;
     let _pokedexLoading = null;
     let _speedCorpus = null;
     let _speedCorpusLoading = null;
+    let _namesDe = null;          // { englishName: germanName, ... }
+    let _namesDeLoading = null;
+    let _baseNameCache = new Map(); // lowercase-showdown-name → base-EN cache
 
     // Lazy-load — 150 KB is meaningful on mobile data. Only paid when
     // the user actually opens the Play panel for the first time.
@@ -48,7 +55,9 @@
     // Optional load — the corpus file may not exist on a fresh deploy
     // (older scraper run, missing weekly job, etc.). When absent the
     // typical-Speed estimator falls back to the top-20 teams just like
-    // before.
+    // before. Same fallback for the picker pool: corpus species/counts
+    // are far richer than top-20 (~500 samples / ~40-60 species vs
+    // ~120 samples / ~40 species).
     function loadSpeedCorpus() {
         if (_speedCorpus !== null) return Promise.resolve(_speedCorpus);
         if (_speedCorpusLoading) return _speedCorpusLoading;
@@ -57,10 +66,21 @@
             .then(json => {
                 _speedCorpus = (json && Array.isArray(json.samples)) ? json : { samples: [] };
                 rebuildTypicalSpeeds();
+                rebuildLegalPool();
                 return _speedCorpus;
             })
             .catch(() => { _speedCorpus = { samples: [] }; return _speedCorpus; });
         return _speedCorpusLoading;
+    }
+
+    function loadNamesDe() {
+        if (_namesDe) return Promise.resolve(_namesDe);
+        if (_namesDeLoading) return _namesDeLoading;
+        _namesDeLoading = fetch(`${NAMES_DE_URL}?t=${Date.now()}`)
+            .then(r => r.ok ? r.json() : {})
+            .then(json => { _namesDe = json || {}; return _namesDe; })
+            .catch(() => { _namesDe = {}; return _namesDe; });
+        return _namesDeLoading;
     }
 
     function uiLang() {
@@ -84,7 +104,7 @@
             noWeak:         'Keine Schwächen.',
             tap:            'Tippen',
             empty:          'leer',
-            searchPh:       '🔎 Pokémon suchen — z. B. „garcho"…',
+            searchPh:       '🔎 Pokémon, deutsche Namen oder Typ („Knakrack" · „Eis")…',
             pickerClose:    'Auswahl schließen',
             clearOpp:       'Slot leeren',
             unknownSpecies: 'Spezies nicht in Stats-DB',
@@ -121,7 +141,7 @@
             noWeak:         'No weaknesses.',
             tap:            'Tap',
             empty:          'empty',
-            searchPh:       '🔎 Search pokémon — e.g. "garcho"…',
+            searchPh:       '🔎 Pokémon, German names or type ("Knakrack" · "Eis")…',
             pickerClose:    'Close picker',
             clearOpp:       'Clear slot',
             unknownSpecies: 'Species not in stats DB',
@@ -173,6 +193,96 @@
             }
         }
         return { pool, counts };
+    }
+
+    // Mirror of aggregateLegalPool but for the flat samples shape the
+    // 14-day Speed corpus carries. Same output contract so the picker
+    // doesn't care which source built the pool.
+    function aggregateLegalPoolFromSamples(samples) {
+        const pool = new Set();
+        const counts = new Map();
+        for (const s of (samples || [])) {
+            const name = s && s.species;
+            if (!name) continue;
+            pool.add(name);
+            counts.set(name, (counts.get(name) || 0) + 1);
+        }
+        return { pool, counts };
+    }
+
+    // Rebuilds _legalPool / _usageCount after either data source
+    // loads. Corpus wins when it carries non-zero samples — that's
+    // the broader window the user explicitly wants ("nicht nur Top
+    // zwanzig"). Falls back to top-20 teams when the corpus file is
+    // missing or empty (older deploys).
+    function rebuildLegalPool() {
+        if (_speedCorpus && Array.isArray(_speedCorpus.samples) && _speedCorpus.samples.length > 0) {
+            const { pool, counts } = aggregateLegalPoolFromSamples(_speedCorpus.samples);
+            _legalPool = pool;
+            _usageCount = counts;
+            return;
+        }
+        if (_teamsCache) {
+            const { pool, counts } = aggregateLegalPool(_teamsCache);
+            _legalPool = pool;
+            _usageCount = counts;
+        }
+    }
+
+    // German type names — searching "Eis" / "Drache" / "Feuer" should
+    // pull every Pokémon of that type, even if the user doesn't know
+    // the English type word. Keys must match TYPE_CHART exactly so
+    // the lookup via pokedex entry.types[] hits.
+    const TYPE_NAMES_DE = {
+        Normal: 'Normal', Fire: 'Feuer', Water: 'Wasser', Electric: 'Elektro',
+        Grass: 'Pflanze', Ice: 'Eis', Fighting: 'Kampf', Poison: 'Gift',
+        Ground: 'Boden', Flying: 'Flug', Psychic: 'Psycho', Bug: 'Käfer',
+        Rock: 'Gestein', Ghost: 'Geist', Dragon: 'Drache', Dark: 'Unlicht',
+        Steel: 'Stahl', Fairy: 'Fee',
+    };
+
+    // Strip the Showdown form suffix ("Garchomp-Mega" → "Garchomp",
+    // "Ninetales-Alola" → "Ninetales") so the German-name lookup hits
+    // the base species — DE translations only cover base mons. Cached
+    // because the picker iterates the full pool on every keystroke.
+    function baseEnglish(name) {
+        const k = String(name || '');
+        const cached = _baseNameCache.get(k);
+        if (cached) return cached;
+        const base = k.split('-')[0];
+        _baseNameCache.set(k, base);
+        return base;
+    }
+
+    // Does `name` (a Showdown species key) match `filter` under the
+    // expanded rule set? Used by the picker grid on every keystroke.
+    //   - English Showdown name substring (current behaviour)
+    //   - German base-species name substring
+    //   - Either-language type name — typing "Eis" / "Ice" surfaces
+    //     all Ice-type Pokémon
+    // All comparisons are lowercased; filter is pre-normalised by the
+    // caller for speed (one toLowerCase per keystroke, not per cell).
+    function speciesMatchesFilter(name, lcFilter) {
+        if (!lcFilter) return true;
+        if (name.toLowerCase().includes(lcFilter)) return true;
+        const base = baseEnglish(name);
+        if (_namesDe) {
+            const de = _namesDe[base];
+            if (de && de.toLowerCase().includes(lcFilter)) return true;
+        }
+        // Type rule: prefix match, NOT substring. "eis" must hit "Eis"
+        // (Ice) but not "Geist" (Ghost). Without the prefix rule,
+        // every Ghost-type Pokémon surfaced when the user typed "eis"
+        // — exactly the wrong direction.
+        const spec = _pokedex && _pokedex[name];
+        if (spec && Array.isArray(spec.types)) {
+            for (const ty of spec.types) {
+                if (ty.toLowerCase().startsWith(lcFilter)) return true;
+                const tyDe = TYPE_NAMES_DE[ty];
+                if (tyDe && tyDe.toLowerCase().startsWith(lcFilter)) return true;
+            }
+        }
+        return false;
     }
 
     let _typicalSpeeds = null;   // { [name]: {typicalSpeed, evMode, natureMode, sampleSize} }
@@ -718,8 +828,11 @@
         const updateGrid = (filter) => {
             const { names } = pickerSortedNames();
             const f = String(filter || '').toLowerCase().trim();
+            // Multi-source matcher: English Showdown name + German base
+            // species name (Knakrack→Garchomp) + type names in EN/DE
+            // (Eis→every Ice-type). One toLowerCase per keystroke.
             const matches = f
-                ? names.filter(n => n.toLowerCase().includes(f)).slice(0, 200)
+                ? names.filter(n => speciesMatchesFilter(n, f)).slice(0, 200)
                 : names.slice(0, 200);
             grid.innerHTML = matches.length
                 ? matches.map(n => spriteCellHtml(n)).join('')
@@ -842,11 +955,11 @@
         closePlayModal();
         _playTeam = team;
         _opponent = [null, null, null, null, null, null];
-        // Three loads in parallel — pokedex for stats/typing, legal-
-        // pool for the opponent picker default, speed corpus for the
-        // wider typical-Speed estimate. Corpus is best-effort: the
-        // estimator gracefully falls back to top-20 if missing.
-        await Promise.all([loadPokedex(), loadLegalPool(), loadSpeedCorpus()]);
+        // Four loads in parallel — pokedex for stats/typing, legal-
+        // pool seed (top-20 fallback), speed corpus for the wider
+        // typical-Speed estimate AND the broader picker pool, and the
+        // German species names for multi-lingual search.
+        await Promise.all([loadPokedex(), loadLegalPool(), loadSpeedCorpus(), loadNamesDe()]);
 
         const labels = t();
         const overlay = document.createElement('div');
@@ -973,10 +1086,13 @@
         natureSpeedMod,
         parseEVs,
         aggregateLegalPool,
+        aggregateLegalPoolFromSamples,
         nextEmptyOppIndex,
         buildTypicalSpeeds,
         buildTypicalSpeedsFromSamples,
         buildSpeedLadder,
+        speciesMatchesFilter,
+        baseEnglish,
         labels: () => t(),
     };
 })();

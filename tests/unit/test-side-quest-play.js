@@ -902,3 +902,236 @@ describe('buildTypicalSpeedsFromSamples — corpus-driven mode', () => {
         assert.strictEqual(out.Garchomp.natureMode, '');
     });
 });
+
+// ── DE-name + type filter (user-asked 2026-06-15) ─────────────────
+// "Pokémon Suche … nach deutschem Namen … nach Typen suchen, weil
+// wenn ich Eis tippe, dann werden alle Eis-Mons aufgelistet."
+
+const TYPE_NAMES_DE = {
+    Normal: 'Normal', Fire: 'Feuer', Water: 'Wasser', Electric: 'Elektro',
+    Grass: 'Pflanze', Ice: 'Eis', Fighting: 'Kampf', Poison: 'Gift',
+    Ground: 'Boden', Flying: 'Flug', Psychic: 'Psycho', Bug: 'Käfer',
+    Rock: 'Gestein', Ghost: 'Geist', Dragon: 'Drache', Dark: 'Unlicht',
+    Steel: 'Stahl', Fairy: 'Fee',
+};
+
+function baseEnglish(name) {
+    return String(name || '').split('-')[0];
+}
+
+// Mirror of speciesMatchesFilter. Production reads from module-
+// scope state (_pokedex, _namesDe); tests inject explicitly.
+function speciesMatchesFilter(name, lcFilter, deepDex, namesDe) {
+    if (!lcFilter) return true;
+    if (name.toLowerCase().includes(lcFilter)) return true;
+    const base = baseEnglish(name);
+    if (namesDe) {
+        const de = namesDe[base];
+        if (de && de.toLowerCase().includes(lcFilter)) return true;
+    }
+    const spec = deepDex && deepDex[name];
+    if (spec && Array.isArray(spec.types)) {
+        for (const ty of spec.types) {
+            if (ty.toLowerCase().startsWith(lcFilter)) return true;
+            const tyDe = TYPE_NAMES_DE[ty];
+            if (tyDe && tyDe.toLowerCase().startsWith(lcFilter)) return true;
+        }
+    }
+    return false;
+}
+
+describe('speciesMatchesFilter — German name + type search', () => {
+    const dex = {
+        'Garchomp':         { types: ['Dragon', 'Ground'] },
+        'Garchomp-Mega':    { types: ['Dragon', 'Ground'] },
+        'Ninetales':        { types: ['Fire'] },
+        'Ninetales-Alola':  { types: ['Ice', 'Fairy'] },
+        'Talonflame':       { types: ['Fire', 'Flying'] },
+        'Vanilluxe':        { types: ['Ice'] },
+        'Beartic':          { types: ['Ice'] },
+        'Kingambit':        { types: ['Dark', 'Steel'] },
+    };
+    const namesDe = {
+        Garchomp:   'Knakrack',
+        Ninetales:  'Vulnona',
+        Talonflame: 'Fiaro',
+        Vanilluxe:  'Vaniluxe',
+        Beartic:    'Polar',
+        Kingambit:  'Gladimperio',
+    };
+
+    it('English Showdown name still matches (existing behaviour)', () => {
+        assert.ok(speciesMatchesFilter('Garchomp', 'garch', dex, namesDe));
+        assert.ok(!speciesMatchesFilter('Garchomp', 'zzz', dex, namesDe));
+    });
+
+    it('German base-species name finds the EN entry', () => {
+        // "knakrack" → Garchomp AND Garchomp-Mega (same base species)
+        assert.ok(speciesMatchesFilter('Garchomp',      'knakrack', dex, namesDe));
+        assert.ok(speciesMatchesFilter('Garchomp-Mega', 'knakrack', dex, namesDe));
+        assert.ok(!speciesMatchesFilter('Kingambit',    'knakrack', dex, namesDe));
+    });
+
+    it('Partial DE name still matches (substring rule)', () => {
+        // User types "vul" → Vulnona base → matches Ninetales + Alola form
+        assert.ok(speciesMatchesFilter('Ninetales',       'vul', dex, namesDe));
+        assert.ok(speciesMatchesFilter('Ninetales-Alola', 'vul', dex, namesDe));
+    });
+
+    it('German type "Eis" surfaces every Ice-type Pokémon', () => {
+        // The headline user example. "Eis" must hit Ice-type even when
+        // the Showdown name has no "eis" substring.
+        assert.ok(speciesMatchesFilter('Vanilluxe',       'eis', dex, namesDe));
+        assert.ok(speciesMatchesFilter('Beartic',         'eis', dex, namesDe));
+        assert.ok(speciesMatchesFilter('Ninetales-Alola', 'eis', dex, namesDe));
+        // Garchomp is Dragon/Ground — must NOT match Eis
+        assert.ok(!speciesMatchesFilter('Garchomp', 'eis', dex, namesDe));
+    });
+
+    it('English type "ice" matches the same set', () => {
+        assert.ok(speciesMatchesFilter('Vanilluxe',       'ice', dex, namesDe));
+        assert.ok(speciesMatchesFilter('Beartic',         'ice', dex, namesDe));
+        assert.ok(speciesMatchesFilter('Ninetales-Alola', 'ice', dex, namesDe));
+    });
+
+    it('Type "Drache" finds Dragon-types', () => {
+        assert.ok(speciesMatchesFilter('Garchomp',      'drache', dex, namesDe));
+        assert.ok(speciesMatchesFilter('Garchomp-Mega', 'drache', dex, namesDe));
+        assert.ok(!speciesMatchesFilter('Talonflame',   'drache', dex, namesDe));
+    });
+
+    it('Type "Stahl" finds Steel-types', () => {
+        assert.ok(speciesMatchesFilter('Kingambit', 'stahl', dex, namesDe));
+    });
+
+    it('Type "Feuer" finds Fire-types including the base Ninetales (Kanto)', () => {
+        assert.ok(speciesMatchesFilter('Ninetales',  'feuer', dex, namesDe));
+        assert.ok(speciesMatchesFilter('Talonflame', 'feuer', dex, namesDe));
+        // Ninetales-Alola is Ice/Fairy now — must NOT match Feuer
+        assert.ok(!speciesMatchesFilter('Ninetales-Alola', 'feuer', dex, namesDe));
+    });
+
+    it('Empty filter matches everything', () => {
+        assert.ok(speciesMatchesFilter('Garchomp', '', dex, namesDe));
+        assert.ok(speciesMatchesFilter('Anything', null, dex, namesDe));
+    });
+
+    it('Works without the namesDe map (graceful fallback)', () => {
+        // Before names_de.json finishes loading, filter still works on
+        // English + type (English) — no crash, just narrower hits.
+        assert.ok(speciesMatchesFilter('Garchomp', 'garch', dex, null));
+        assert.ok(speciesMatchesFilter('Beartic',  'ice',   dex, null));
+        assert.ok(!speciesMatchesFilter('Garchomp', 'knakrack', dex, null));
+    });
+
+    it('baseEnglish strips form suffixes for the DE lookup', () => {
+        assert.strictEqual(baseEnglish('Garchomp-Mega'), 'Garchomp');
+        assert.strictEqual(baseEnglish('Ninetales-Alola'), 'Ninetales');
+        assert.strictEqual(baseEnglish('Charizard-Mega-Y'), 'Charizard');
+        assert.strictEqual(baseEnglish('Garchomp'), 'Garchomp');
+    });
+});
+
+// ── aggregateLegalPoolFromSamples (broader picker pool) ───────────
+// Same shape as the top-20 aggregator, but reads from the corpus's
+// flat sample list. User-asked 2026-06-15: picker pool / count
+// ranking should reflect the 14-day window, not just the top 20.
+
+function aggregateLegalPoolFromSamples(samples) {
+    const pool = new Set();
+    const counts = new Map();
+    for (const s of (samples || [])) {
+        const name = s && s.species;
+        if (!name) continue;
+        pool.add(name);
+        counts.set(name, (counts.get(name) || 0) + 1);
+    }
+    return { pool, counts };
+}
+
+describe('aggregateLegalPoolFromSamples — corpus-driven pool', () => {
+    it('builds pool + counts from the flat samples shape', () => {
+        const samples = [
+            { species: 'Garchomp', evs: '32 Spe', nature: 'Jolly' },
+            { species: 'Garchomp', evs: '24 Spe', nature: 'Adamant' },
+            { species: 'Garchomp', evs: '32 Spe', nature: 'Jolly' },
+            { species: 'Kingambit', evs: '0 Spe', nature: 'Adamant' },
+            { species: 'Talonflame', evs: '32 Spe', nature: 'Jolly' },
+        ];
+        const { pool, counts } = aggregateLegalPoolFromSamples(samples);
+        assert.strictEqual(pool.size, 3);
+        assert.strictEqual(counts.get('Garchomp'), 3);
+        assert.strictEqual(counts.get('Kingambit'), 1);
+        assert.strictEqual(counts.get('Talonflame'), 1);
+    });
+
+    it('counts mirror what the picker uses for "× N played" badges', () => {
+        // The badge shown in the picker reads straight from
+        // _usageCount.get(name). 14-day corpus typically pushes
+        // top picks into the 30-70 range vs the 5-15 of top-20.
+        const samples = [];
+        for (let i = 0; i < 50; i++) samples.push({ species: 'Garchomp' });
+        for (let i = 0; i < 30; i++) samples.push({ species: 'Talonflame' });
+        for (let i = 0; i < 5; i++) samples.push({ species: 'Mega-Latios' });
+        const { counts } = aggregateLegalPoolFromSamples(samples);
+        assert.strictEqual(counts.get('Garchomp'), 50);
+        assert.strictEqual(counts.get('Talonflame'), 30);
+        assert.strictEqual(counts.get('Mega-Latios'), 5);
+    });
+
+    it('blank species + null inputs handled gracefully', () => {
+        const { pool: p1 } = aggregateLegalPoolFromSamples([
+            { species: '' }, { species: null }, { species: 'Garchomp' },
+        ]);
+        assert.strictEqual(p1.size, 1);
+        assert.strictEqual(aggregateLegalPoolFromSamples([]).pool.size, 0);
+        assert.strictEqual(aggregateLegalPoolFromSamples(null).pool.size, 0);
+    });
+});
+
+// ── Regression: "eis" must NOT pull Ghost-types via "Geist" ────────
+// First headless run showed the substring rule on types matched
+// "Geist" → every Ghost-type Pokémon. Type rule is now prefix-only.
+
+describe('speciesMatchesFilter — type prefix vs substring', () => {
+    const dex = {
+        'Beartic':   { types: ['Ice'] },
+        'Gengar':    { types: ['Ghost', 'Poison'] },
+        'Aegislash': { types: ['Steel', 'Ghost'] },
+        'Garchomp':  { types: ['Dragon', 'Ground'] },
+        'Drampa':    { types: ['Normal', 'Dragon'] },
+    };
+
+    it('"eis" matches Eis-type only, not Geist-type (regression)', () => {
+        assert.ok(speciesMatchesFilter('Beartic',   'eis', dex, {}));
+        assert.ok(!speciesMatchesFilter('Gengar',   'eis', dex, {}));
+        assert.ok(!speciesMatchesFilter('Aegislash', 'eis', dex, {}));
+    });
+
+    it('"geist" still pulls Ghost (Geist startsWith geist)', () => {
+        assert.ok(speciesMatchesFilter('Gengar',    'geist', dex, {}));
+        assert.ok(speciesMatchesFilter('Aegislash', 'geist', dex, {}));
+        assert.ok(!speciesMatchesFilter('Beartic',  'geist', dex, {}));
+    });
+
+    it('"drac" pulls Drache (DE startsWith) but not Dragon (different prefix)', () => {
+        assert.ok(speciesMatchesFilter('Garchomp', 'drac', dex, {}));
+        assert.ok(speciesMatchesFilter('Drampa',   'drac', dex, {}));
+    });
+
+    it('"drag" pulls Dragon (EN startsWith)', () => {
+        assert.ok(speciesMatchesFilter('Garchomp', 'drag', dex, {}));
+        assert.ok(speciesMatchesFilter('Drampa',   'drag', dex, {}));
+    });
+
+    it('partial type prefix still narrows correctly', () => {
+        // "ele" → Elektro (DE), but also "Electric" — both startsWith
+        // "ele". An Ice-type must not match.
+        const dexExt = {
+            'Pikachu': { types: ['Electric'] },
+            'Vanilluxe': { types: ['Ice'] },
+        };
+        assert.ok(speciesMatchesFilter('Pikachu',   'ele', dexExt, {}));
+        assert.ok(!speciesMatchesFilter('Vanilluxe', 'ele', dexExt, {}));
+    });
+});

@@ -966,7 +966,8 @@
 }
 .sq-play-ladder-row {
     display: grid;
-    grid-template-columns: 1.4rem 1.6rem minmax(0, 1fr) 1.3rem 3rem 3rem;
+    /* rank | icon | name | side | speed | base-max range | tailwind */
+    grid-template-columns: 1.4rem 1.6rem minmax(0, 1fr) 1.3rem 3rem 3.6rem 3rem;
     align-items: center;
     gap: 6px;
     padding: 4px 6px;
@@ -1016,16 +1017,29 @@
     color: #e6ebf3;
     font-size: 0.92rem;
 }
-.sq-play-ladder-tag {
-    font-size: 0.55rem;
-    color: #b6c3d5;
-    margin-left: 2px;
-    opacity: 0.75;
+/* "~" prefix on opponent typical-speed numbers; "?" prefix when
+ * the species isn't represented in the top-pool data. Replaces the
+ * old "typ" superscript that the user reported reading as "Type"
+ * — universally-known "approximately" glyph is unambiguous. */
+.sq-play-ladder-prefix {
+    color: #8c95a5;
     font-weight: 600;
-    vertical-align: super;
+    margin-right: 1px;
+    font-size: 0.85em;
 }
-.sq-play-ladder-tag-base {
+.sq-play-ladder-prefix-base {
     color: #f5d27a;
+}
+/* Base–Max range column: tertiary info (after actual / typical
+ * Speed but before tailwind). Muted so the eye finds the speed
+ * number first. */
+.sq-play-ladder-range {
+    text-align: right;
+    color: #8c95a5;
+    font-variant-numeric: tabular-nums;
+    font-size: 0.7rem;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    white-space: nowrap;
 }
 .sq-play-ladder-tw {
     text-align: right;
@@ -1060,7 +1074,8 @@
  * the viewport on small phones (iPhone SE / 13 mini). */
 @media (max-width: 480px) {
     .sq-play-ladder-row {
-        grid-template-columns: 1.2rem 1.5rem minmax(0, 1fr) 1.1rem 2.6rem 2.6rem;
+        /* rank | icon | name | side | speed | range | tw */
+        grid-template-columns: 1.1rem 1.4rem minmax(0, 1fr) 1.1rem 2.6rem 3.2rem 2.5rem;
         font-size: 0.74rem;
         min-height: 26px;
         gap: 4px;
@@ -1068,6 +1083,7 @@
     }
     .sq-play-ladder-row .tcg-pokemon-icon { width: 22px; height: 22px; }
     .sq-play-ladder-speed { font-size: 0.86rem; }
+    .sq-play-ladder-range { font-size: 0.65rem; }
     .sq-play-ladder-tw    { font-size: 0.68rem; }
     .sq-play-ladder-hint  { display: none; }
 }

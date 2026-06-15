@@ -796,3 +796,109 @@ describe('buildSpeedLadder — base–max range column', () => {
         assert.strictEqual(rows[1].rangeMax, 112);
     });
 });
+
+// ── buildTypicalSpeedsFromSamples (new corpus shape) ──────────────
+// User-flagged 2026-06-15: top-20 teams was too narrow per species.
+// The scraper now writes a 14-day samples corpus (~500-600 rows
+// across ~40 species). Same mode logic, but the input is a flat
+// list of {species, evs, nature} rather than nested team records.
+
+function buildTypicalSpeedsFromSamples(samples, lookupSpec) {
+    const grouped = new Map();
+    for (const s of (samples || [])) {
+        const name = s && s.species;
+        if (!name) continue;
+        if (!grouped.has(name)) grouped.set(name, []);
+        grouped.get(name).push({ ev: parseEVs(s.evs).spe, nature: s.nature || '' });
+    }
+    const out = {};
+    for (const [name, instances] of grouped) {
+        const spec = lookupSpec(name);
+        if (!spec || !spec.baseStats) continue;
+        const baseSpe = spec.baseStats.spe;
+        const counts = new Map();
+        for (const inst of instances) {
+            const key = inst.ev + '|' + inst.nature;
+            counts.set(key, (counts.get(key) || 0) + 1);
+        }
+        let bestKey = null, bestCount = 0, bestSpeed = -1;
+        for (const [k, v] of counts) {
+            const [evStr, nat] = k.split('|');
+            const spd = actualSpeedAt50(baseSpe, parseInt(evStr, 10), natureSpeedMod(nat));
+            if (v > bestCount || (v === bestCount && spd > bestSpeed)) {
+                bestCount = v; bestKey = k; bestSpeed = spd;
+            }
+        }
+        if (!bestKey) continue;
+        const [evStr, nature] = bestKey.split('|');
+        out[name] = {
+            typicalSpeed: bestSpeed,
+            evMode: parseInt(evStr, 10),
+            natureMode: nature,
+            sampleSize: instances.length,
+            modeShare: bestCount / instances.length,
+        };
+    }
+    return out;
+}
+
+describe('buildTypicalSpeedsFromSamples — corpus-driven mode', () => {
+    const lookupSpec = (n) => ({
+        Garchomp: GARCHOMP_SPEC, Talonflame: TALONFLAME_SPEC, Kingambit: KINGAMBIT_SPEC,
+    })[n] || null;
+
+    it('picks the mode spread out of a flat samples list', () => {
+        const samples = [
+            { species: 'Garchomp', evs: '32 Spe', nature: 'Jolly' },
+            { species: 'Garchomp', evs: '32 Spe', nature: 'Jolly' },
+            { species: 'Garchomp', evs: '32 Spe', nature: 'Jolly' },
+            { species: 'Garchomp', evs: '24 Spe', nature: 'Adamant' },
+            { species: 'Garchomp', evs: '24 Spe', nature: 'Adamant' },
+            // sample noise across other species shouldn't bleed in
+            { species: 'Talonflame', evs: '32 Spe', nature: 'Jolly' },
+        ];
+        const out = buildTypicalSpeedsFromSamples(samples, lookupSpec);
+        assert.strictEqual(out.Garchomp.evMode, 32);
+        assert.strictEqual(out.Garchomp.natureMode, 'Jolly');
+        assert.strictEqual(out.Garchomp.typicalSpeed, 169);
+        assert.strictEqual(out.Garchomp.sampleSize, 5);
+        // Mode share = 3/5 → 0.6
+        assert.ok(Math.abs(out.Garchomp.modeShare - 0.6) < 0.01);
+        // Talonflame computed independently
+        assert.strictEqual(out.Talonflame.typicalSpeed, 195);
+    });
+
+    it('larger sample size sharpens the modeShare confidence', () => {
+        // 10 samples, 7 of them the same spread → modeShare 0.7
+        const samples = [];
+        for (let i = 0; i < 7; i++) samples.push({ species: 'Garchomp', evs: '32 Spe', nature: 'Jolly' });
+        for (let i = 0; i < 3; i++) samples.push({ species: 'Garchomp', evs: '20 Spe', nature: 'Adamant' });
+        const out = buildTypicalSpeedsFromSamples(samples, lookupSpec);
+        assert.strictEqual(out.Garchomp.sampleSize, 10);
+        assert.ok(Math.abs(out.Garchomp.modeShare - 0.7) < 0.01);
+        // Mode is still 32 Spe Jolly
+        assert.strictEqual(out.Garchomp.typicalSpeed, 169);
+    });
+
+    it('empty / null samples returns {}', () => {
+        assert.deepStrictEqual(buildTypicalSpeedsFromSamples([], lookupSpec), {});
+        assert.deepStrictEqual(buildTypicalSpeedsFromSamples(null, lookupSpec), {});
+    });
+
+    it('species not in dex are skipped', () => {
+        const samples = [{ species: 'GhostMon', evs: '32 Spe', nature: 'Jolly' }];
+        const out = buildTypicalSpeedsFromSamples(samples, () => null);
+        assert.strictEqual(Object.keys(out).length, 0);
+    });
+
+    it('per-sample nature missing → treated as neutral (no crash)', () => {
+        const samples = [
+            { species: 'Garchomp', evs: '32 Spe', nature: '' },
+            { species: 'Garchomp', evs: '32 Spe' },  // no nature key at all
+        ];
+        const out = buildTypicalSpeedsFromSamples(samples, lookupSpec);
+        // Both samples collapse to one mode (32 Spe, neutral).
+        assert.strictEqual(out.Garchomp.sampleSize, 2);
+        assert.strictEqual(out.Garchomp.natureMode, '');
+    });
+});

@@ -455,7 +455,7 @@ jobs:
           set +e
           mkdir -p data
           # Monolith files first
-          for f in labs_tournament_decks.csv labs_tournament_matchups.csv labs_tournaments.json player_continuity.csv tournament_decklists_per_player.csv champions_replica_teams.json; do
+          for f in labs_tournament_decks.csv labs_tournament_matchups.csv labs_tournaments.json player_continuity.csv tournament_decklists_per_player.csv champions_replica_teams.json champions_speed_corpus.json; do
               if [ -f "backend/core/data/$f" ]; then
                   cp "backend/core/data/$f" "data/$f"
                   sz=$(stat -c%s "data/$f")

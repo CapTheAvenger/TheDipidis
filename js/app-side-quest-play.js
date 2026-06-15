@@ -22,8 +22,16 @@
     'use strict';
 
     const DATA_URL = 'data/pokemon_battle_data.json';
+    // Wider per-mon EV/nature corpus pulled from the full VGCPastes
+    // sheet within a 14-day window (~80-100 teams vs the top-20 we
+    // render for the UI). Used to compute the typical opponent Speed
+    // — user-flagged 2026-06-15: top-20 sample was too narrow per
+    // species to read as "what does the opponent actually play".
+    const SPEED_CORPUS_URL = 'data/champions_speed_corpus.json';
     let _pokedex = null;
     let _pokedexLoading = null;
+    let _speedCorpus = null;
+    let _speedCorpusLoading = null;
 
     // Lazy-load — 150 KB is meaningful on mobile data. Only paid when
     // the user actually opens the Play panel for the first time.
@@ -35,6 +43,24 @@
             .then(json => { _pokedex = json || {}; rebuildTypicalSpeeds(); return _pokedex; })
             .catch(() => { _pokedex = {}; return _pokedex; });
         return _pokedexLoading;
+    }
+
+    // Optional load — the corpus file may not exist on a fresh deploy
+    // (older scraper run, missing weekly job, etc.). When absent the
+    // typical-Speed estimator falls back to the top-20 teams just like
+    // before.
+    function loadSpeedCorpus() {
+        if (_speedCorpus !== null) return Promise.resolve(_speedCorpus);
+        if (_speedCorpusLoading) return _speedCorpusLoading;
+        _speedCorpusLoading = fetch(`${SPEED_CORPUS_URL}?t=${Date.now()}`)
+            .then(r => r.ok ? r.json() : null)
+            .then(json => {
+                _speedCorpus = (json && Array.isArray(json.samples)) ? json : { samples: [] };
+                rebuildTypicalSpeeds();
+                return _speedCorpus;
+            })
+            .catch(() => { _speedCorpus = { samples: [] }; return _speedCorpus; });
+        return _speedCorpusLoading;
     }
 
     function uiLang() {
@@ -175,8 +201,20 @@
     }
 
     function rebuildTypicalSpeeds() {
-        if (!_teamsCache || !_pokedex) return;
-        _typicalSpeeds = buildTypicalSpeeds(_teamsCache, (n) => lookupSpecies(n));
+        if (!_pokedex) return;
+        // Prefer the wider Speed corpus (14-day window across the full
+        // sheet) when loaded. Fall back to the top-20 team list — keeps
+        // the panel functional on deploys before the corpus file lands.
+        if (_speedCorpus && Array.isArray(_speedCorpus.samples) && _speedCorpus.samples.length > 0) {
+            _typicalSpeeds = buildTypicalSpeedsFromSamples(
+                _speedCorpus.samples,
+                (n) => lookupSpecies(n),
+            );
+            return;
+        }
+        if (_teamsCache) {
+            _typicalSpeeds = buildTypicalSpeeds(_teamsCache, (n) => lookupSpecies(n));
+        }
     }
 
     // For each species appearing in the top-team data, derive the
@@ -190,17 +228,29 @@
     // rep races, so the higher value is the safer assumption when
     // two spreads tie in popularity).
     function buildTypicalSpeeds(teams, lookupSpec) {
-        const grouped = new Map();
+        // Wrap team records into the shared sample shape so the mode
+        // math has one implementation. Callers with the new corpus
+        // file should use buildTypicalSpeedsFromSamples directly.
+        const samples = [];
         for (const t of (teams || [])) {
             for (const p of (t.pokemon || [])) {
-                const name = p && p.name;
-                if (!name) continue;
-                if (!grouped.has(name)) grouped.set(name, []);
-                grouped.get(name).push({
-                    ev: parseEVs(p.evs).spe,
-                    nature: p.nature || '',
-                });
+                if (!p || !p.name) continue;
+                samples.push({ species: p.name, evs: p.evs || '', nature: p.nature || '' });
             }
+        }
+        return buildTypicalSpeedsFromSamples(samples, lookupSpec);
+    }
+
+    function buildTypicalSpeedsFromSamples(samples, lookupSpec) {
+        const grouped = new Map();
+        for (const s of (samples || [])) {
+            const name = s && s.species;
+            if (!name) continue;
+            if (!grouped.has(name)) grouped.set(name, []);
+            grouped.get(name).push({
+                ev: parseEVs(s.evs).spe,
+                nature: s.nature || '',
+            });
         }
         const out = {};
         for (const [name, instances] of grouped) {
@@ -792,9 +842,11 @@
         closePlayModal();
         _playTeam = team;
         _opponent = [null, null, null, null, null, null];
-        // Both loads run in parallel — pokedex for stats/typing,
-        // legal-pool for the opponent picker default.
-        await Promise.all([loadPokedex(), loadLegalPool()]);
+        // Three loads in parallel — pokedex for stats/typing, legal-
+        // pool for the opponent picker default, speed corpus for the
+        // wider typical-Speed estimate. Corpus is best-effort: the
+        // estimator gracefully falls back to top-20 if missing.
+        await Promise.all([loadPokedex(), loadLegalPool(), loadSpeedCorpus()]);
 
         const labels = t();
         const overlay = document.createElement('div');
@@ -923,6 +975,7 @@
         aggregateLegalPool,
         nextEmptyOppIndex,
         buildTypicalSpeeds,
+        buildTypicalSpeedsFromSamples,
         buildSpeedLadder,
         labels: () => t(),
     };

@@ -73,10 +73,11 @@
             speedLadderHint:'Wer schneller ist, geht zuerst — beide Teams nach effektiver Geschwindigkeit sortiert.',
             sideYours:      'Du',
             sideOpp:        'Gegner',
-            typicalTag:     'typ',
-            typicalTitle:   (ev, nat, n) => `Häufigster Spread im Pool: ${ev} Spe ${nat} (n=${n})`,
+            typicalTag:     '~',
+            typicalTitle:   (ev, nat, n) => `Typischer Spread (am häufigsten im Top-Pool gespielt): ${ev} Spe ${nat} (n=${n}) — „~" steht für „ungefähr", nicht für Typ.`,
             fallbackBase:   (n) => `Spezies erst ${n}× im Pool — Basis-Speed als Fallback`,
             tailwindLabel:  'TW',
+            rangeTitle:     'Basis–Max bei Level 50 (kein EV/+Nature → voll-EV/+Nature)',
         },
         en: {
             playBtn:        'Play',
@@ -109,10 +110,11 @@
             speedLadderHint:'Whoever\'s faster moves first — both teams ranked by effective Speed.',
             sideYours:      'You',
             sideOpp:        'Opp',
-            typicalTag:     'typ',
-            typicalTitle:   (ev, nat, n) => `Most-played spread in pool: ${ev} Spe ${nat} (n=${n})`,
+            typicalTag:     '~',
+            typicalTitle:   (ev, nat, n) => `Typical spread (most-played in top-pool): ${ev} Spe ${nat} (n=${n}) — "~" means "approximately", not "type".`,
             fallbackBase:   (n) => `Species only appears ${n}× — base Speed shown as fallback`,
             tailwindLabel:  'TW',
+            rangeTitle:     'Base–Max at Level 50 (zero EV / neutral nature → max EV / +nature)',
         },
     };
 
@@ -412,6 +414,8 @@
                 name: p.name,
                 speed: actual,
                 tailwind: actual * 2,
+                rangeMin: baseSpeedAt50(baseSpe),
+                rangeMax: maxSpeedAt50(baseSpe),
                 types: spec.types || [],
                 source: 'actual',
                 evMode: evs.spe,
@@ -424,12 +428,15 @@
             const spec = lookupSpec(o.name);
             if (!spec || !spec.baseStats) continue;
             const baseSpe = spec.baseStats.spe;
+            const rangeMin = baseSpeedAt50(baseSpe);
+            const rangeMax = maxSpeedAt50(baseSpe);
             const typ = typicalMap && typicalMap[o.name];
             if (typ && typ.typicalSpeed > 0) {
                 rows.push({
                     side: 'O', name: o.name,
                     speed: typ.typicalSpeed,
                     tailwind: typ.typicalSpeed * 2,
+                    rangeMin, rangeMax,
                     types: spec.types || [],
                     source: 'typical',
                     evMode: typ.evMode,
@@ -439,11 +446,11 @@
             } else {
                 // Unknown spread — base L50, no Tailwind value
                 // (we don't know if opponent has +nature investment).
-                const base = baseSpeedAt50(baseSpe);
                 rows.push({
                     side: 'O', name: o.name,
-                    speed: base,
-                    tailwind: base * 2,
+                    speed: rangeMin,
+                    tailwind: rangeMin * 2,
+                    rangeMin, rangeMax,
                     types: spec.types || [],
                     source: 'base',
                     evMode: 0,
@@ -468,10 +475,21 @@
             return '';  // nothing to ladder yet (pokedex still loading)
         }
         const rowHtml = rows.map((r, i) => {
-            const tag = r.source === 'typical'
-                ? `<sup class="sq-play-ladder-tag" title="${escapeHtml(labels.typicalTitle(r.evMode, r.natureMode || '—', r.sampleSize))}">${escapeHtml(labels.typicalTag)}</sup>`
-                : r.source === 'base'
-                ? `<sup class="sq-play-ladder-tag sq-play-ladder-tag-base" title="${escapeHtml(labels.fallbackBase(0))}">?</sup>`
+            // Prefix instead of superscript abbreviation: "~" is the
+            // universal "approximately" glyph, can't be misread as
+            // "Type" the way the old "typ" abbreviation could.
+            // (User-asked 2026-06-15: clear up the typ/Typ confusion.)
+            let prefix = '';
+            let prefixTitle = '';
+            if (r.source === 'typical') {
+                prefix = '~';
+                prefixTitle = labels.typicalTitle(r.evMode, r.natureMode || '—', r.sampleSize);
+            } else if (r.source === 'base') {
+                prefix = '?';
+                prefixTitle = labels.fallbackBase(0);
+            }
+            const prefixHtml = prefix
+                ? `<span class="sq-play-ladder-prefix${r.source === 'base' ? ' sq-play-ladder-prefix-base' : ''}" title="${escapeHtml(prefixTitle)}">${escapeHtml(prefix)}</span>`
                 : '';
             return `
                 <li class="sq-play-ladder-row sq-play-ladder-${r.side === 'Y' ? 'yours' : 'opp'}">
@@ -479,7 +497,8 @@
                     ${pokemonIconHtml(r.name, 'sm')}
                     <span class="sq-play-ladder-name">${escapeHtml(r.name)}</span>
                     <span class="sq-play-ladder-side" title="${escapeHtml(r.side === 'Y' ? labels.sideYours : labels.sideOpp)}">${escapeHtml(r.side)}</span>
-                    <span class="sq-play-ladder-speed">${r.speed}${tag}</span>
+                    <span class="sq-play-ladder-speed">${prefixHtml}${r.speed}</span>
+                    <span class="sq-play-ladder-range" title="${escapeHtml(labels.rangeTitle)}">${r.rangeMin}–${r.rangeMax}</span>
                     <span class="sq-play-ladder-tw" title="${escapeHtml(labels.tailwind)}">${escapeHtml(labels.tailwindLabel)} ${r.tailwind}</span>
                 </li>`;
         }).join('');
@@ -587,8 +606,8 @@
                 speedHtml = `
                     <span class="sq-play-opp-speed sq-play-opp-speed-typ"
                           title="${escapeHtml(labels.typicalTitle(typ.evMode, typ.natureMode || '—', typ.sampleSize))}">
-                        <strong>${typ.typicalSpeed}</strong>
-                        <small>${escapeHtml(labels.typicalTag)} · ${baseV}–${maxV}</small>
+                        <strong>~${typ.typicalSpeed}</strong>
+                        <small>${baseV}–${maxV}</small>
                     </span>`;
             } else {
                 speedHtml = `<span class="sq-play-opp-speed">${baseV}–${maxV}</span>`;

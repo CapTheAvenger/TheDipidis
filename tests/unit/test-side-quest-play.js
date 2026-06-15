@@ -586,19 +586,25 @@ function buildSpeedLadder(team, opponent, lookupSpec, typicalMap) {
         const baseSpe = spec.baseStats.spe;
         const evs = parseEVs(p.evs);
         const actual = actualSpeedAt50(baseSpe, evs.spe, natureSpeedMod(p.nature));
-        rows.push({ side: 'Y', name: p.name, speed: actual, tailwind: actual * 2, source: 'actual' });
+        rows.push({
+            side: 'Y', name: p.name,
+            speed: actual, tailwind: actual * 2,
+            rangeMin: baseSpeedAt50(baseSpe), rangeMax: maxSpeedAt50(baseSpe),
+            source: 'actual',
+        });
     }
     for (const o of (opponent || [])) {
         if (!o || !o.name) continue;
         const spec = lookupSpec(o.name);
         if (!spec || !spec.baseStats) continue;
         const baseSpe = spec.baseStats.spe;
+        const rangeMin = baseSpeedAt50(baseSpe);
+        const rangeMax = maxSpeedAt50(baseSpe);
         const typ = typicalMap && typicalMap[o.name];
         if (typ && typ.typicalSpeed > 0) {
-            rows.push({ side: 'O', name: o.name, speed: typ.typicalSpeed, tailwind: typ.typicalSpeed * 2, source: 'typical' });
+            rows.push({ side: 'O', name: o.name, speed: typ.typicalSpeed, tailwind: typ.typicalSpeed * 2, rangeMin, rangeMax, source: 'typical' });
         } else {
-            const base = baseSpeedAt50(baseSpe);
-            rows.push({ side: 'O', name: o.name, speed: base, tailwind: base * 2, source: 'base' });
+            rows.push({ side: 'O', name: o.name, speed: rangeMin, tailwind: rangeMin * 2, rangeMin, rangeMax, source: 'base' });
         }
     }
     rows.sort((a, b) => {
@@ -733,5 +739,60 @@ describe('buildSpeedLadder — both teams ranked DESC by effective Speed', () =>
         const team = { pokemon: [{ name: 'Talonflame', evs: '32 Spe', nature: 'Jolly' }] };
         const rows = buildSpeedLadder(team, [], lookupSpec, null);
         assert.strictEqual(rows[0].speed * 2, rows[0].tailwind);
+    });
+});
+
+// ── Ladder range column (added 2026-06-15 per user ask) ───────────
+// Every row carries base–max alongside the actual/typical speed so
+// the user sees the floor and ceiling at a glance, not just the
+// most-likely value.
+
+describe('buildSpeedLadder — base–max range column', () => {
+    const lookupSpec = (n) => ({
+        Garchomp:   GARCHOMP_SPEC,    // base 102 → range 122–169
+        Talonflame: TALONFLAME_SPEC,  // base 126 → range 146–195
+        Kingambit:  KINGAMBIT_SPEC,   // base  50 → range  70–112
+    })[n] || null;
+
+    it('your-team row carries rangeMin and rangeMax for the species', () => {
+        const team = { pokemon: [{ name: 'Garchomp', evs: '32 Spe', nature: 'Jolly' }] };
+        const rows = buildSpeedLadder(team, [], lookupSpec, null);
+        assert.strictEqual(rows[0].rangeMin, 122);
+        assert.strictEqual(rows[0].rangeMax, 169);
+    });
+
+    it('opponent typical row carries rangeMin and rangeMax', () => {
+        const typ = { Garchomp: { typicalSpeed: 169, evMode: 32, natureMode: 'Jolly', sampleSize: 5 } };
+        const rows = buildSpeedLadder({ pokemon: [] }, [{ name: 'Garchomp' }], lookupSpec, typ);
+        assert.strictEqual(rows[0].rangeMin, 122);
+        assert.strictEqual(rows[0].rangeMax, 169);
+        // Typical speed should equal the species max in this case.
+        assert.strictEqual(rows[0].speed, 169);
+    });
+
+    it('opponent base-fallback row still carries the full range', () => {
+        // Talonflame not in typical map → falls back to base, but
+        // the user still sees 146–195 as the possible range.
+        const rows = buildSpeedLadder({ pokemon: [] }, [{ name: 'Talonflame' }], lookupSpec, {});
+        assert.strictEqual(rows[0].source, 'base');
+        assert.strictEqual(rows[0].rangeMin, 146);
+        assert.strictEqual(rows[0].rangeMax, 195);
+        // Speed itself sits at rangeMin in fallback mode.
+        assert.strictEqual(rows[0].speed, 146);
+    });
+
+    it('ladder rows preserve range across the DESC sort', () => {
+        const team = { pokemon: [{ name: 'Kingambit', evs: '0 Spe', nature: 'Adamant' }] };
+        const opp = [{ name: 'Talonflame' }];
+        const typ = { Talonflame: { typicalSpeed: 195, evMode: 32, natureMode: 'Jolly', sampleSize: 3 } };
+        const rows = buildSpeedLadder(team, opp, lookupSpec, typ);
+        // Talonflame leads at 195 with its own range.
+        assert.strictEqual(rows[0].name, 'Talonflame');
+        assert.strictEqual(rows[0].rangeMin, 146);
+        assert.strictEqual(rows[0].rangeMax, 195);
+        // Kingambit at the bottom keeps its 70-112 range.
+        assert.strictEqual(rows[1].name, 'Kingambit');
+        assert.strictEqual(rows[1].rangeMin, 70);
+        assert.strictEqual(rows[1].rangeMax, 112);
     });
 });

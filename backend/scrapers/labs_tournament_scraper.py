@@ -704,6 +704,11 @@ def _load_cached_tournament_index() -> List[Dict]:
                 'tournament_date': row.get('tournament_date', ''),
                 'tournament_type': row.get('tournament_type', 'regional'),
                 'country'        : row.get('country', ''),
+                # Preserve total_players so the next run can tell
+                # "previously-scraped, real data" apart from
+                # "previously-scraped, mid-tournament 0-row response".
+                # The zero-player re-add pass below uses this.
+                'total_players'  : int(row.get('total_players') or 0),
             })
         return out
     except (json.JSONDecodeError, OSError) as e:
@@ -2165,6 +2170,51 @@ def main() -> None:
             # Gap-fill is best-effort — never let it kill the run.
             logger.warning("Gap-fill skipped due to error: %s", e)
 
+        # ── Zero-player revisit (2026-06-15) ─────────────────────────
+        # User-flagged: NAIC (TID 0070) sat in labs_tournaments.json
+        # with total_players=0 for days — the scraper had probed the
+        # /decks page mid-tournament, found no deck rows, persisted
+        # an empty entry, and then SKIPPED 0070 on every subsequent
+        # run because:
+        #   - the live index sometimes drops finished tournaments
+        #     off the visible feed within a day
+        #   - gap-fill probes only TIDs that aren't in known_tids,
+        #     so a known-but-empty TID stays empty forever
+        # Fix: after gap-fill, force any cached entry with
+        # total_players==0 back into the iteration list. The downstream
+        # rescrape will hit /decks again with the now-populated data.
+        try:
+            tournaments_tids = {
+                str(t.get('tournament_id') or '').strip() for t in tournaments
+            }
+            cached_zero = [
+                c for c in cached_index
+                if (c.get('total_players') or 0) == 0
+                and str(c.get('tournament_id') or '').strip() not in tournaments_tids
+            ]
+            for c in cached_zero:
+                tid = str(c.get('tournament_id') or '').strip()
+                if not tid:
+                    continue
+                meta = _meta_from_cache_or_scrape(
+                    tid, fallback_type=c.get('tournament_type', 'special'),
+                )
+                tournaments.append({
+                    'tournament_id'  : tid,
+                    'tournament_name': meta['tournament_name'] or c.get('tournament_name', ''),
+                    'tournament_date': meta['tournament_date'] or c.get('tournament_date', ''),
+                    'tournament_type': meta['tournament_type'] or c.get('tournament_type', ''),
+                    'country'        : meta['country'] or c.get('country', ''),
+                })
+                logger.info(
+                    "Zero-player revisit: re-queueing %s — %s (cached total_players=0)",
+                    tid, meta['tournament_name'] or c.get('tournament_name', ''),
+                )
+            if cached_zero:
+                logger.info("Zero-player revisit: queued %d previously-empty tournaments", len(cached_zero))
+        except Exception as e:
+            logger.warning("Zero-player revisit skipped due to error: %s", e)
+
     if not tournaments:
         logger.warning("No tournaments matched the given filters – nothing to do.")
         return
@@ -2255,6 +2305,16 @@ def main() -> None:
 
         logger.info("[%d/%d] %s (%s)", idx + 1, len(tournaments), t['tournament_name'], tid)
         decks, total_players = scrape_tournament_decks(tid)
+        # Loud warning when a tournament produces zero deck rows — this
+        # is the "stuck cache" failure mode the zero-player revisit pass
+        # exists to recover from. Surfacing it here makes the failure
+        # obvious in the workflow log instead of silently dropping the
+        # event for weeks (NAIC 0070 pattern, 2026-06-15).
+        if not decks:
+            logger.warning(
+                "  ⚠ %s (%s) returned 0 deck rows — will retry next run via zero-player revisit",
+                t.get('tournament_name', ''), tid,
+            )
         t['total_players'] = total_players
         tournaments_meta.append(t)
         rescraped_tids.add(tid)

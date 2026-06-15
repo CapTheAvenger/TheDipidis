@@ -32,7 +32,7 @@
         if (_pokedexLoading) return _pokedexLoading;
         _pokedexLoading = fetch(`${DATA_URL}?t=${Date.now()}`)
             .then(r => r.ok ? r.json() : {})
-            .then(json => { _pokedex = json || {}; return _pokedex; })
+            .then(json => { _pokedex = json || {}; rebuildTypicalSpeeds(); return _pokedex; })
             .catch(() => { _pokedex = {}; return _pokedex; });
         return _pokedexLoading;
     }
@@ -69,6 +69,14 @@
             quickPickAria:  'Alle gegnerischen Pokémon nacheinander auswählen',
             fillProgress:   (a, b) => `Pick ${a} / ${b}`,
             clearAll:       'Alle leeren',
+            speedLadder:    'Speed-Ladder',
+            speedLadderHint:'Wer schneller ist, geht zuerst — beide Teams nach effektiver Geschwindigkeit sortiert.',
+            sideYours:      'Du',
+            sideOpp:        'Gegner',
+            typicalTag:     'typ',
+            typicalTitle:   (ev, nat, n) => `Häufigster Spread im Pool: ${ev} Spe ${nat} (n=${n})`,
+            fallbackBase:   (n) => `Spezies erst ${n}× im Pool — Basis-Speed als Fallback`,
+            tailwindLabel:  'TW',
         },
         en: {
             playBtn:        'Play',
@@ -97,6 +105,14 @@
             quickPickAria:  'Pick all six opponent pokémon in sequence',
             fillProgress:   (a, b) => `Pick ${a} / ${b}`,
             clearAll:       'Clear all',
+            speedLadder:    'Speed ladder',
+            speedLadderHint:'Whoever\'s faster moves first — both teams ranked by effective Speed.',
+            sideYours:      'You',
+            sideOpp:        'Opp',
+            typicalTag:     'typ',
+            typicalTitle:   (ev, nat, n) => `Most-played spread in pool: ${ev} Spe ${nat} (n=${n})`,
+            fallbackBase:   (n) => `Species only appears ${n}× — base Speed shown as fallback`,
+            tailwindLabel:  'TW',
         },
     };
 
@@ -131,6 +147,9 @@
         return { pool, counts };
     }
 
+    let _typicalSpeeds = null;   // { [name]: {typicalSpeed, evMode, natureMode, sampleSize} }
+    let _teamsCache = null;      // raw teams list, kept for typical-speed rebuild after pokedex loads
+
     function loadLegalPool() {
         if (_legalPool) return Promise.resolve();
         if (_poolLoading) return _poolLoading;
@@ -138,9 +157,12 @@
             try {
                 if (window.sideQuest && typeof window.sideQuest.loadData === 'function') {
                     const data = await window.sideQuest.loadData();
-                    const { pool, counts } = aggregateLegalPool((data && data.teams) || []);
+                    const teams = (data && data.teams) || [];
+                    _teamsCache = teams;
+                    const { pool, counts } = aggregateLegalPool(teams);
                     _legalPool = pool;
                     _usageCount = counts;
+                    rebuildTypicalSpeeds();
                     return;
                 }
             } catch (_e) { /* fall through to empty */ }
@@ -148,6 +170,65 @@
             _usageCount = new Map();
         })();
         return _poolLoading;
+    }
+
+    function rebuildTypicalSpeeds() {
+        if (!_teamsCache || !_pokedex) return;
+        _typicalSpeeds = buildTypicalSpeeds(_teamsCache, (n) => lookupSpecies(n));
+    }
+
+    // For each species appearing in the top-team data, derive the
+    // most-played Speed spread (Spe EVs + nature → resulting actual
+    // L50 Speed). Used by the Speed Ladder and the opponent slot
+    // card so the user sees "what does Garchomp actually run", not
+    // just "Garchomp base–max range 122-169".
+    //
+    // Mode rule: most-frequent (ev, nature) combo wins. Ties broken
+    // by highest resulting Speed (speed-creep tends to win meta-
+    // rep races, so the higher value is the safer assumption when
+    // two spreads tie in popularity).
+    function buildTypicalSpeeds(teams, lookupSpec) {
+        const grouped = new Map();
+        for (const t of (teams || [])) {
+            for (const p of (t.pokemon || [])) {
+                const name = p && p.name;
+                if (!name) continue;
+                if (!grouped.has(name)) grouped.set(name, []);
+                grouped.get(name).push({
+                    ev: parseEVs(p.evs).spe,
+                    nature: p.nature || '',
+                });
+            }
+        }
+        const out = {};
+        for (const [name, instances] of grouped) {
+            const spec = lookupSpec(name);
+            if (!spec || !spec.baseStats) continue;
+            const baseSpe = spec.baseStats.spe;
+            const counts = new Map();
+            for (const inst of instances) {
+                const key = inst.ev + '|' + inst.nature;
+                counts.set(key, (counts.get(key) || 0) + 1);
+            }
+            let bestKey = null, bestCount = 0, bestSpeed = -1;
+            for (const [k, v] of counts) {
+                const [evStr, nat] = k.split('|');
+                const spd = actualSpeedAt50(baseSpe, parseInt(evStr, 10), natureSpeedMod(nat));
+                if (v > bestCount || (v === bestCount && spd > bestSpeed)) {
+                    bestCount = v; bestKey = k; bestSpeed = spd;
+                }
+            }
+            if (!bestKey) continue;
+            const [evStr, nature] = bestKey.split('|');
+            out[name] = {
+                typicalSpeed: bestSpeed,
+                evMode: parseInt(evStr, 10),
+                natureMode: nature,
+                sampleSize: instances.length,
+                modeShare: bestCount / instances.length,
+            };
+        }
+        return out;
     }
 
     // Returns the picker source list, sorted by usage DESC then name.
@@ -305,6 +386,114 @@
         return `<img class="tcg-pokemon-icon tcg-pokemon-icon--${size || 'md'}" src="${url}" alt="${escapeHtml(name)}" loading="lazy" onerror="this.style.display='none'">`;
     }
 
+    // ── Speed Ladder ───────────────────────────────────────────────
+    // User-flagged 2026-06-15: "wir müssen irgendwie eine Lösung
+    // finden wie ich auf dem Smartphone meine Infos und die des
+    // Gegners auf einem Blick sehe ohne zu scrollen". The ladder is
+    // the answer — one compact row per pokémon, both teams ranked by
+    // effective Speed, fits 12 rows in ≤ 400 px (iPhone safe area).
+    //
+    // Yours uses actual Speed (from EVs + nature). Opponent uses the
+    // typical Speed from the top-team data when available; falls back
+    // to base L50 with a visible "?" marker when the species isn't
+    // represented.
+
+    function buildSpeedLadder(team, opponent, lookupSpec, typicalMap) {
+        const rows = [];
+        for (const p of (team && team.pokemon) || []) {
+            const spec = lookupSpec(p.name);
+            if (!spec || !spec.baseStats) continue;
+            const baseSpe = spec.baseStats.spe;
+            const evs = parseEVs(p.evs);
+            const natMod = natureSpeedMod(p.nature);
+            const actual = actualSpeedAt50(baseSpe, evs.spe, natMod);
+            rows.push({
+                side: 'Y',
+                name: p.name,
+                speed: actual,
+                tailwind: actual * 2,
+                types: spec.types || [],
+                source: 'actual',
+                evMode: evs.spe,
+                natureMode: p.nature || '',
+                sampleSize: 1,
+            });
+        }
+        for (const o of (opponent || [])) {
+            if (!o || !o.name) continue;
+            const spec = lookupSpec(o.name);
+            if (!spec || !spec.baseStats) continue;
+            const baseSpe = spec.baseStats.spe;
+            const typ = typicalMap && typicalMap[o.name];
+            if (typ && typ.typicalSpeed > 0) {
+                rows.push({
+                    side: 'O', name: o.name,
+                    speed: typ.typicalSpeed,
+                    tailwind: typ.typicalSpeed * 2,
+                    types: spec.types || [],
+                    source: 'typical',
+                    evMode: typ.evMode,
+                    natureMode: typ.natureMode,
+                    sampleSize: typ.sampleSize,
+                });
+            } else {
+                // Unknown spread — base L50, no Tailwind value
+                // (we don't know if opponent has +nature investment).
+                const base = baseSpeedAt50(baseSpe);
+                rows.push({
+                    side: 'O', name: o.name,
+                    speed: base,
+                    tailwind: base * 2,
+                    types: spec.types || [],
+                    source: 'base',
+                    evMode: 0,
+                    natureMode: '',
+                    sampleSize: 0,
+                });
+            }
+        }
+        rows.sort((a, b) => {
+            if (b.speed !== a.speed) return b.speed - a.speed;
+            // Tiebreak: yours first (you usually win the tie), then alpha
+            if (a.side !== b.side) return a.side === 'Y' ? -1 : 1;
+            return a.name.localeCompare(b.name);
+        });
+        return rows;
+    }
+
+    function renderSpeedLadder() {
+        const labels = t();
+        const rows = buildSpeedLadder(_playTeam, _opponent, (n) => lookupSpecies(n), _typicalSpeeds);
+        if (rows.length === 0) {
+            return '';  // nothing to ladder yet (pokedex still loading)
+        }
+        const rowHtml = rows.map((r, i) => {
+            const tag = r.source === 'typical'
+                ? `<sup class="sq-play-ladder-tag" title="${escapeHtml(labels.typicalTitle(r.evMode, r.natureMode || '—', r.sampleSize))}">${escapeHtml(labels.typicalTag)}</sup>`
+                : r.source === 'base'
+                ? `<sup class="sq-play-ladder-tag sq-play-ladder-tag-base" title="${escapeHtml(labels.fallbackBase(0))}">?</sup>`
+                : '';
+            return `
+                <li class="sq-play-ladder-row sq-play-ladder-${r.side === 'Y' ? 'yours' : 'opp'}">
+                    <span class="sq-play-ladder-rank">${i + 1}</span>
+                    ${pokemonIconHtml(r.name, 'sm')}
+                    <span class="sq-play-ladder-name">${escapeHtml(r.name)}</span>
+                    <span class="sq-play-ladder-side" title="${escapeHtml(r.side === 'Y' ? labels.sideYours : labels.sideOpp)}">${escapeHtml(r.side)}</span>
+                    <span class="sq-play-ladder-speed">${r.speed}${tag}</span>
+                    <span class="sq-play-ladder-tw" title="${escapeHtml(labels.tailwind)}">${escapeHtml(labels.tailwindLabel)} ${r.tailwind}</span>
+                </li>`;
+        }).join('');
+        return `
+            <section class="sq-play-ladder" aria-label="${escapeHtml(labels.speedLadder)}">
+                <header class="sq-play-ladder-head">
+                    <h4 class="sq-play-col-title">${escapeHtml(labels.speedLadder)}</h4>
+                </header>
+                <p class="sq-play-col-hint sq-play-ladder-hint">${escapeHtml(labels.speedLadderHint)}</p>
+                <ol class="sq-play-ladder-rows">${rowHtml}</ol>
+            </section>
+        `;
+    }
+
     // ── Render: one of your-team rows ──────────────────────────────
     function renderYourMon(p) {
         const labels = t();
@@ -387,9 +576,24 @@
         const species = lookupSpecies(mon.name);
         const types = species ? species.types : [];
         const baseSpe = species ? species.baseStats.spe : null;
-        const speedRange = baseSpe != null
-            ? `${baseSpeedAt50(baseSpe)}–${maxSpeedAt50(baseSpe)}`
-            : '?';
+        const typ = _typicalSpeeds && _typicalSpeeds[mon.name];
+        let speedHtml;
+        if (baseSpe == null) {
+            speedHtml = `<span class="sq-play-opp-speed">?</span>`;
+        } else {
+            const baseV = baseSpeedAt50(baseSpe);
+            const maxV  = maxSpeedAt50(baseSpe);
+            if (typ) {
+                speedHtml = `
+                    <span class="sq-play-opp-speed sq-play-opp-speed-typ"
+                          title="${escapeHtml(labels.typicalTitle(typ.evMode, typ.natureMode || '—', typ.sampleSize))}">
+                        <strong>${typ.typicalSpeed}</strong>
+                        <small>${escapeHtml(labels.typicalTag)} · ${baseV}–${maxV}</small>
+                    </span>`;
+            } else {
+                speedHtml = `<span class="sq-play-opp-speed">${baseV}–${maxV}</span>`;
+            }
+        }
         return `
             <article class="sq-play-opp-slot sq-play-opp-filled" data-opp-idx="${idx}">
                 <button class="sq-play-opp-clear" type="button"
@@ -398,7 +602,7 @@
                 ${pokemonIconHtml(mon.name, 'md')}
                 <span class="sq-play-opp-name">${escapeHtml(mon.name)}</span>
                 ${renderTypeBadges(types)}
-                <span class="sq-play-opp-speed" title="${escapeHtml(t().speed)} ${escapeHtml(t().base)}–${escapeHtml(t().max)}">${speedRange}</span>
+                ${speedHtml}
             </article>`;
     }
 
@@ -586,6 +790,7 @@
                             aria-label="${escapeHtml(labels.close)}">×</button>
                 </header>
                 <div class="sq-play-body">
+                    <div id="sq-play-ladder-mount">${renderSpeedLadder()}</div>
                     <section class="sq-play-col sq-play-col-yours">
                         <h4 class="sq-play-col-title">${escapeHtml(labels.yourTeam)}</h4>
                         <div class="sq-play-mons">
@@ -671,6 +876,8 @@
         if (!_playOverlay) return;
         const host = _playOverlay.querySelector('#sq-play-opps');
         if (host) host.innerHTML = _opponent.map((m, i) => renderOpponentSlot(i, m)).join('');
+        const ladderMount = _playOverlay.querySelector('#sq-play-ladder-mount');
+        if (ladderMount) ladderMount.innerHTML = renderSpeedLadder();
     }
 
     function closePlayModal() {
@@ -696,6 +903,8 @@
         parseEVs,
         aggregateLegalPool,
         nextEmptyOppIndex,
+        buildTypicalSpeeds,
+        buildSpeedLadder,
         labels: () => t(),
     };
 })();

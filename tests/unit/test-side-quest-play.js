@@ -528,3 +528,210 @@ describe('fill-mode loop — sequential picks land in order', () => {
         assert.deepStrictEqual(opp.map(m => m.name).join(''), 'ABCDEF');
     });
 });
+
+// ── buildTypicalSpeeds + buildSpeedLadder (mode + ladder sort) ────
+// User-flagged 2026-06-15: opponent slots showed base–max range
+// (122–169 for Garchomp) but the actually useful number is the
+// most-played spread's resulting Speed (typically 169 — every top
+// Garchomp runs 32 Spe Jolly). The ladder sorts both teams by
+// effective Speed so the at-a-glance "who's faster" answer is
+// always one screen.
+
+function buildTypicalSpeeds(teams, lookupSpec) {
+    const grouped = new Map();
+    for (const t of (teams || [])) {
+        for (const p of (t.pokemon || [])) {
+            const name = p && p.name;
+            if (!name) continue;
+            if (!grouped.has(name)) grouped.set(name, []);
+            grouped.get(name).push({ ev: parseEVs(p.evs).spe, nature: p.nature || '' });
+        }
+    }
+    const out = {};
+    for (const [name, instances] of grouped) {
+        const spec = lookupSpec(name);
+        if (!spec || !spec.baseStats) continue;
+        const baseSpe = spec.baseStats.spe;
+        const counts = new Map();
+        for (const inst of instances) {
+            const key = inst.ev + '|' + inst.nature;
+            counts.set(key, (counts.get(key) || 0) + 1);
+        }
+        let bestKey = null, bestCount = 0, bestSpeed = -1;
+        for (const [k, v] of counts) {
+            const [evStr, nat] = k.split('|');
+            const spd = actualSpeedAt50(baseSpe, parseInt(evStr, 10), natureSpeedMod(nat));
+            if (v > bestCount || (v === bestCount && spd > bestSpeed)) {
+                bestCount = v; bestKey = k; bestSpeed = spd;
+            }
+        }
+        if (!bestKey) continue;
+        const [evStr, nature] = bestKey.split('|');
+        out[name] = {
+            typicalSpeed: bestSpeed,
+            evMode: parseInt(evStr, 10),
+            natureMode: nature,
+            sampleSize: instances.length,
+            modeShare: bestCount / instances.length,
+        };
+    }
+    return out;
+}
+
+function buildSpeedLadder(team, opponent, lookupSpec, typicalMap) {
+    const rows = [];
+    for (const p of (team && team.pokemon) || []) {
+        const spec = lookupSpec(p.name);
+        if (!spec || !spec.baseStats) continue;
+        const baseSpe = spec.baseStats.spe;
+        const evs = parseEVs(p.evs);
+        const actual = actualSpeedAt50(baseSpe, evs.spe, natureSpeedMod(p.nature));
+        rows.push({ side: 'Y', name: p.name, speed: actual, tailwind: actual * 2, source: 'actual' });
+    }
+    for (const o of (opponent || [])) {
+        if (!o || !o.name) continue;
+        const spec = lookupSpec(o.name);
+        if (!spec || !spec.baseStats) continue;
+        const baseSpe = spec.baseStats.spe;
+        const typ = typicalMap && typicalMap[o.name];
+        if (typ && typ.typicalSpeed > 0) {
+            rows.push({ side: 'O', name: o.name, speed: typ.typicalSpeed, tailwind: typ.typicalSpeed * 2, source: 'typical' });
+        } else {
+            const base = baseSpeedAt50(baseSpe);
+            rows.push({ side: 'O', name: o.name, speed: base, tailwind: base * 2, source: 'base' });
+        }
+    }
+    rows.sort((a, b) => {
+        if (b.speed !== a.speed) return b.speed - a.speed;
+        if (a.side !== b.side) return a.side === 'Y' ? -1 : 1;
+        return a.name.localeCompare(b.name);
+    });
+    return rows;
+}
+
+const GARCHOMP_SPEC = { baseStats: { spe: 102 }, types: ['Dragon', 'Ground'] };
+const TALONFLAME_SPEC = { baseStats: { spe: 126 }, types: ['Fire', 'Flying'] };
+const KINGAMBIT_SPEC = { baseStats: { spe: 50 }, types: ['Dark', 'Steel'] };
+
+describe('buildTypicalSpeeds — mode-spread per species', () => {
+    it('picks the most-frequent (Spe EV, nature) combo', () => {
+        const teams = [
+            { pokemon: [{ name: 'Garchomp', evs: '32 Atk / 32 Spe', nature: 'Jolly' }] },
+            { pokemon: [{ name: 'Garchomp', evs: '32 Atk / 32 Spe', nature: 'Jolly' }] },
+            { pokemon: [{ name: 'Garchomp', evs: '32 Atk',          nature: 'Adamant' }] },
+        ];
+        const lookupSpec = (n) => n === 'Garchomp' ? GARCHOMP_SPEC : null;
+        const out = buildTypicalSpeeds(teams, lookupSpec);
+        assert.strictEqual(out.Garchomp.evMode, 32);
+        assert.strictEqual(out.Garchomp.natureMode, 'Jolly');
+        assert.strictEqual(out.Garchomp.typicalSpeed, 169);
+        assert.strictEqual(out.Garchomp.sampleSize, 3);
+        // Mode share = 2/3 → 0.66
+        assert.ok(Math.abs(out.Garchomp.modeShare - (2/3)) < 0.01);
+    });
+
+    it('ties broken by highest resulting Speed (speed-creep wins)', () => {
+        const teams = [
+            { pokemon: [{ name: 'Garchomp', evs: '32 Spe',  nature: 'Jolly'   }] },  // 169
+            { pokemon: [{ name: 'Garchomp', evs: '24 Spe',  nature: 'Adamant' }] },  // lower
+        ];
+        const out = buildTypicalSpeeds(teams, () => GARCHOMP_SPEC);
+        // Both unique → tie at count=1 → faster spread wins.
+        assert.strictEqual(out.Garchomp.typicalSpeed, 169);
+        assert.strictEqual(out.Garchomp.natureMode, 'Jolly');
+    });
+
+    it('single instance: typical = that single Speed', () => {
+        const teams = [
+            { pokemon: [{ name: 'Kingambit', evs: '32 HP / 32 Atk / 1 Spe', nature: 'Adamant' }] },
+        ];
+        const out = buildTypicalSpeeds(teams, () => KINGAMBIT_SPEC);
+        // 1 Champions Spe EV = 8 mainline = floor(8/4) = 2 bonus. Almost uninvested.
+        const baseSpe = 50;
+        const expected = Math.floor((Math.floor((2 * baseSpe + 31 + 2) * 50 / 100 + 5)) * 1.0);
+        assert.strictEqual(out.Kingambit.typicalSpeed, expected);
+        assert.strictEqual(out.Kingambit.sampleSize, 1);
+    });
+
+    it('skips species not in the dex', () => {
+        const teams = [{ pokemon: [{ name: 'GhostMon', evs: '32 Spe', nature: 'Jolly' }] }];
+        const out = buildTypicalSpeeds(teams, () => null);
+        assert.strictEqual(Object.keys(out).length, 0);
+    });
+});
+
+describe('buildSpeedLadder — both teams ranked DESC by effective Speed', () => {
+    const lookupSpec = (n) => ({
+        Garchomp:   GARCHOMP_SPEC,
+        Talonflame: TALONFLAME_SPEC,
+        Kingambit:  KINGAMBIT_SPEC,
+    })[n] || null;
+
+    it('your-team mons use actual Speed; sorted DESC', () => {
+        const team = { pokemon: [
+            { name: 'Garchomp',   evs: '32 Spe', nature: 'Jolly' },   // 169
+            { name: 'Kingambit',  evs: '1 Spe',  nature: 'Adamant' }, // ~67
+            { name: 'Talonflame', evs: '32 Spe', nature: 'Jolly' },   // 195 (Jolly base 126)
+        ]};
+        const rows = buildSpeedLadder(team, [], lookupSpec, null);
+        assert.deepStrictEqual(rows.map(r => r.name), ['Talonflame', 'Garchomp', 'Kingambit']);
+        assert.ok(rows.every(r => r.side === 'Y'));
+    });
+
+    it('opponent uses typical when available, base as fallback', () => {
+        const team = { pokemon: [] };
+        const opp = [{ name: 'Garchomp' }, { name: 'Kingambit' }];
+        const typ = { Garchomp: { typicalSpeed: 169, evMode: 32, natureMode: 'Jolly', sampleSize: 5 } };
+        const rows = buildSpeedLadder(team, opp, lookupSpec, typ);
+        const garchompRow = rows.find(r => r.name === 'Garchomp');
+        const kingambitRow = rows.find(r => r.name === 'Kingambit');
+        assert.strictEqual(garchompRow.source, 'typical');
+        assert.strictEqual(garchompRow.speed, 169);
+        assert.strictEqual(kingambitRow.source, 'base');
+        // Base Kingambit at L50 with 0 EVs neutral: 2*50+31 = 131; *50/100=65; +5=70.
+        assert.strictEqual(kingambitRow.speed, 70);
+    });
+
+    it('combined ladder interleaves yours and opponent by Speed', () => {
+        const team = { pokemon: [
+            { name: 'Talonflame', evs: '32 Spe', nature: 'Jolly' },   // Y, 195
+            { name: 'Kingambit',  evs: '0 Spe',  nature: 'Adamant' }, // Y, slow
+        ]};
+        const opp = [{ name: 'Garchomp' }, { name: 'Talonflame' }];
+        const typ = {
+            Garchomp:   { typicalSpeed: 169, evMode: 32, natureMode: 'Jolly', sampleSize: 5 },
+            Talonflame: { typicalSpeed: 195, evMode: 32, natureMode: 'Jolly', sampleSize: 3 },
+        };
+        const rows = buildSpeedLadder(team, opp, lookupSpec, typ);
+        // Talonflame(Y) and Talonflame(O) tie at 195 — yours wins tiebreak.
+        assert.strictEqual(rows[0].name, 'Talonflame');
+        assert.strictEqual(rows[0].side, 'Y');
+        assert.strictEqual(rows[1].name, 'Talonflame');
+        assert.strictEqual(rows[1].side, 'O');
+        // Then Garchomp(O) at 169.
+        assert.strictEqual(rows[2].name, 'Garchomp');
+        assert.strictEqual(rows[2].side, 'O');
+        // Slowest is your Kingambit.
+        assert.strictEqual(rows[rows.length - 1].name, 'Kingambit');
+    });
+
+    it('empty teams returns empty ladder (no crash)', () => {
+        assert.deepStrictEqual(buildSpeedLadder({ pokemon: [] }, [], lookupSpec, null), []);
+        assert.deepStrictEqual(buildSpeedLadder(null, null, lookupSpec, null), []);
+    });
+
+    it('opponent slots with null entries (unfilled) are skipped', () => {
+        const team = { pokemon: [] };
+        const opp = [null, { name: 'Garchomp' }, null];
+        const typ = { Garchomp: { typicalSpeed: 169, evMode: 32, natureMode: 'Jolly', sampleSize: 5 } };
+        const rows = buildSpeedLadder(team, opp, lookupSpec, typ);
+        assert.strictEqual(rows.length, 1);
+        assert.strictEqual(rows[0].name, 'Garchomp');
+    });
+
+    it('tailwind = 2 × effective Speed (every row)', () => {
+        const team = { pokemon: [{ name: 'Talonflame', evs: '32 Spe', nature: 'Jolly' }] };
+        const rows = buildSpeedLadder(team, [], lookupSpec, null);
+        assert.strictEqual(rows[0].speed * 2, rows[0].tailwind);
+    });
+});

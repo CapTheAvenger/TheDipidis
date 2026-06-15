@@ -940,3 +940,134 @@
     box-shadow: 0 0 0 2px rgba(76, 209, 130, 0.35),
                 0 18px 60px rgba(0, 0, 0, 0.55);
 }
+
+/* ── Speed Ladder ───────────────────────────────────────────────
+ * Top section of the Play modal — both teams ranked by effective
+ * Speed in one compact list. Mobile-first: 12 rows in ≤ 400 px so
+ * the user sees the whole field at a glance without scrolling.
+ */
+.sq-play-ladder {
+    background: #11151e;
+    border: 1px solid #232a39;
+    border-radius: 10px;
+    padding: 0.55rem 0.6rem 0.65rem 0.6rem;
+    margin-bottom: 0.6rem;
+}
+.sq-play-ladder-head { display: flex; align-items: baseline; justify-content: space-between; }
+.sq-play-ladder-hint {
+    margin: 0.2rem 0 0.45rem 0;
+    font-size: 0.72rem;
+    color: #8c95a5;
+}
+.sq-play-ladder-rows {
+    list-style: none; padding: 0; margin: 0;
+    display: flex; flex-direction: column;
+    gap: 2px;
+}
+.sq-play-ladder-row {
+    display: grid;
+    grid-template-columns: 1.4rem 1.6rem minmax(0, 1fr) 1.3rem 3rem 3rem;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 6px;
+    border-radius: 6px;
+    border-left: 3px solid transparent;
+    background: #161c28;
+    font-size: 0.78rem;
+    min-height: 28px;
+}
+.sq-play-ladder-yours { border-left-color: #5fb6ff; }
+.sq-play-ladder-opp   { border-left-color: #f56666; }
+
+.sq-play-ladder-rank {
+    color: #6b7585;
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-align: right;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+.sq-play-ladder-row .tcg-pokemon-icon {
+    width: 24px; height: 24px;
+    object-fit: contain;
+}
+.sq-play-ladder-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: #e6ebf3;
+    font-weight: 600;
+}
+.sq-play-ladder-side {
+    text-align: center;
+    font-size: 0.62rem;
+    font-weight: 800;
+    padding: 1px 5px;
+    border-radius: 8px;
+    color: #fff;
+    letter-spacing: 0.04em;
+}
+.sq-play-ladder-yours .sq-play-ladder-side { background: rgba(95, 182, 255, 0.7); }
+.sq-play-ladder-opp   .sq-play-ladder-side { background: rgba(245, 102, 102, 0.7); }
+
+.sq-play-ladder-speed {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    font-weight: 800;
+    color: #e6ebf3;
+    font-size: 0.92rem;
+}
+.sq-play-ladder-tag {
+    font-size: 0.55rem;
+    color: #b6c3d5;
+    margin-left: 2px;
+    opacity: 0.75;
+    font-weight: 600;
+    vertical-align: super;
+}
+.sq-play-ladder-tag-base {
+    color: #f5d27a;
+}
+.sq-play-ladder-tw {
+    text-align: right;
+    color: #4cd182;
+    font-variant-numeric: tabular-nums;
+    font-size: 0.72rem;
+    font-weight: 600;
+}
+
+/* Opponent slot "typical" speed treatment — bigger number,
+ * smaller range underneath so the user reads the most-likely
+ * value first and the bounds second.
+ */
+.sq-play-opp-speed-typ {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    line-height: 1.05;
+    color: #cfe2ff;
+}
+.sq-play-opp-speed-typ strong {
+    font-size: 0.95rem;
+    color: #5fb6ff;
+}
+.sq-play-opp-speed-typ small {
+    font-size: 0.62rem;
+    color: #8c95a5;
+    font-weight: 500;
+}
+
+/* Mobile: shave a couple of px to keep the 12-row ladder inside
+ * the viewport on small phones (iPhone SE / 13 mini). */
+@media (max-width: 480px) {
+    .sq-play-ladder-row {
+        grid-template-columns: 1.2rem 1.5rem minmax(0, 1fr) 1.1rem 2.6rem 2.6rem;
+        font-size: 0.74rem;
+        min-height: 26px;
+        gap: 4px;
+        padding: 3px 5px;
+    }
+    .sq-play-ladder-row .tcg-pokemon-icon { width: 22px; height: 22px; }
+    .sq-play-ladder-speed { font-size: 0.86rem; }
+    .sq-play-ladder-tw    { font-size: 0.68rem; }
+    .sq-play-ladder-hint  { display: none; }
+}

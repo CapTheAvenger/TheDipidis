@@ -1072,9 +1072,15 @@ def main():
         deck_links = get_deck_list_links(t["url"])
 
         if not deck_links:
+            # Decklists not posted yet (tournament still mid-event or only
+            # just finished — Limitless publishes lists with a lag). Do NOT
+            # mark as scraped: leave the id OUT of the ledger so the next run
+            # revisits it once the lists appear. Previously this branch
+            # committed the id, so a tournament probed too early (e.g. NAIC)
+            # was cached empty and skipped forever.
             t["cards"]  = []
             t["status"] = "no decks found"
-            newly_scraped.add(t["id"])
+            logger.info("   Keine Decklisten (noch) – NICHT als erledigt markiert, Revisit naechster Lauf: %s", t["name"])
             continue
 
         logger.info("Lade %s Decklisten parallel...", len(deck_links))
@@ -1107,17 +1113,22 @@ def main():
             t["cards"]       = aggregate_tournament_cards(decks_data, t, card_db)
             t["total_cards"] = len(t["cards"])
             t["status"]      = "success"
+
+            # Commit to the scraped-ledger ONLY when the tournament yielded
+            # real deck rows. Empty/failed probes are left out so the next
+            # run revisits them — this prevents the "cached empty, skipped
+            # forever" poisoning that hid NAIC from the cards pipeline.
+            newly_scraped.add(t["id"])
+            processed += 1
+
+            # Inkrementelles Speichern nach jedem Turnier
+            save_scraped_tournaments(scraped_ids | newly_scraped)
+            save_csv_files([t], settings["output_file"], append_mode=(settings["append_mode"] if processed == 1 else True))
+            logger.info(f"Gespeichert: {t['name']} ({t['total_cards']} Karten-Eintraege)")
         else:
             t["cards"]  = []
             t["status"] = "failed"
-
-        newly_scraped.add(t["id"])
-        processed += 1
-
-        # Inkrementelles Speichern nach jedem Turnier
-        save_scraped_tournaments(scraped_ids | newly_scraped)
-        save_csv_files([t], settings["output_file"], append_mode=(settings["append_mode"] if processed == 1 else True))
-        logger.info(f"Gespeichert: {t['name']} ({t['total_cards']} Karten-Eintraege)")
+            logger.warning("   Decklisten gefunden, aber Extraktion lieferte 0 Decks – NICHT als erledigt markiert, Revisit naechster Lauf: %s", t["name"])
 
     logger.info("=" * 60)
     logger.info("Scraping beendet. %s Turniere verarbeitet.", processed)

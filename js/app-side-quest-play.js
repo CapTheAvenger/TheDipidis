@@ -48,7 +48,7 @@
             close:          'Schließen',
             yourTeam:       'Dein Team',
             opponentTeam:   'Gegnerisches Team',
-            opponentHint:   'Tippe ein Sprite, um den Gegner zu erfassen — die Namen sind im Spiel ausgeblendet, deshalb hier per Bild auswählen.',
+            opponentHint:   'Tippe „Alle 6 schnell auswählen" und klick dann die gegnerischen Pokémon der Reihe nach — die Auswahl bleibt offen, bis das Team voll ist.',
             speed:          'Speed',
             base:           'Basis',
             max:            'Max',
@@ -65,6 +65,10 @@
             poolLegal:      'Nur Format-Pool ({count})',
             poolAll:        'Alle Pokémon ({count})',
             usedNxTimes:    (n) => `${n}× im Top-Team-Pool gespielt`,
+            quickPick:      '✱ Alle 6 schnell auswählen',
+            quickPickAria:  'Alle gegnerischen Pokémon nacheinander auswählen',
+            fillProgress:   (a, b) => `Pick ${a} / ${b}`,
+            clearAll:       'Alle leeren',
         },
         en: {
             playBtn:        'Play',
@@ -72,7 +76,7 @@
             close:          'Close',
             yourTeam:       'Your team',
             opponentTeam:   'Opponent team',
-            opponentHint:   'Tap a sprite to capture the opponent — names are hidden in-game, picking by image is the fastest path.',
+            opponentHint:   'Tap "Quick-pick all 6" once and rattle through the opponent\'s mons — the picker stays open until the team is full.',
             speed:          'Speed',
             base:           'Base',
             max:            'Max',
@@ -89,6 +93,10 @@
             poolLegal:      'Format pool only ({count})',
             poolAll:        'All pokémon ({count})',
             usedNxTimes:    (n) => `Used ${n}× in top-team pool`,
+            quickPick:      '✱ Quick-pick all 6',
+            quickPickAria:  'Pick all six opponent pokémon in sequence',
+            fillProgress:   (a, b) => `Pick ${a} / ${b}`,
+            clearAll:       'Clear all',
         },
     };
 
@@ -394,28 +402,45 @@
             </article>`;
     }
 
-    // ── Sprite picker (sub-modal triggered from empty opponent slot) ──
-    // Defaults to the format pool (species seen in the current top-
-    // team data, sorted by usage DESC), with a toggle to widen to the
-    // full pokedex when the user needs a deeper cut. Live-filter input
-    // narrows the visible cells without re-sorting.
-    function openSpritePicker(onPick) {
+    // Index of the next still-empty opponent slot, or -1 if all 6 are
+    // filled. Pulled out as a pure helper so the test suite can pin
+    // down the rapid-fire fill order independent of DOM.
+    function nextEmptyOppIndex(opponent) {
+        if (!Array.isArray(opponent)) return -1;
+        for (let i = 0; i < opponent.length; i++) {
+            if (!opponent[i]) return i;
+        }
+        return -1;
+    }
+
+    // ── Sprite picker (sub-modal) ──────────────────────────────────
+    // Two modes:
+    //   - single-slot: legacy "tap a specific empty slot → pick one →
+    //                  picker closes" flow. Still wired on per-slot
+    //                  tap so the user can replace any individual mon.
+    //   - fill-mode:   user-flagged 2026-06-14: one tap on "Quick-pick
+    //                  all 6" opens the picker and KEEPS it open while
+    //                  the user rattles through the opponent's six
+    //                  mons. Each pick lands in the next empty slot,
+    //                  search input clears for the next keystroke, and
+    //                  the picker auto-closes once 6 / 6 are filled.
+    //                  Manual × / Esc still works mid-flow.
+    function openSpritePicker(onPick, options) {
         closeSpritePicker();
         const labels = t();
+        const fillMode = !!(options && options.fillMode);
         const overlay = document.createElement('div');
         overlay.id = 'sq-play-picker';
-        overlay.className = 'sq-play-picker-overlay';
-        const head = renderPickerHead(labels);
+        overlay.className = 'sq-play-picker-overlay' + (fillMode ? ' sq-play-picker-fillmode' : '');
         overlay.innerHTML = `
             <div class="sq-play-picker-panel" role="dialog" aria-modal="true">
-                ${head}
+                ${renderPickerHead(labels, fillMode)}
                 <div class="sq-play-picker-grid" id="sq-play-picker-grid"></div>
             </div>
         `;
         document.body.appendChild(overlay);
 
         const grid = overlay.querySelector('#sq-play-picker-grid');
-        const input = overlay.querySelector('.sq-play-picker-search');
 
         const updateGrid = (filter) => {
             const { names } = pickerSortedNames();
@@ -431,7 +456,7 @@
         };
         const rerenderHead = () => {
             const headEl = overlay.querySelector('.sq-play-picker-head');
-            if (headEl) headEl.outerHTML = renderPickerHead(labels);
+            if (headEl) headEl.outerHTML = renderPickerHead(labels, fillMode);
             rebind();
         };
         const rebind = () => {
@@ -458,26 +483,44 @@
             const cell = e.target.closest('.sq-play-picker-cell');
             if (cell) {
                 const name = cell.getAttribute('data-name');
-                if (name) onPick({ name });
-                closeSpritePicker();
+                if (!name) return;
+                const consumed = onPick({ name });
+                if (fillMode) {
+                    if (consumed === false) {
+                        closeSpritePicker();
+                        return;
+                    }
+                    const inp = overlay.querySelector('.sq-play-picker-search');
+                    if (inp) inp.value = '';
+                    rerenderHead();          // refreshes "Pick 4 / 6" progress chip
+                    updateGrid('');
+                } else {
+                    closeSpritePicker();
+                }
             }
         });
         _pickerKeyHandler = (e) => { if (e.key === 'Escape') closeSpritePicker(); };
         document.addEventListener('keydown', _pickerKeyHandler);
 
         // Autofocus loses on iOS when an overlay opens; nudge it.
-        setTimeout(() => input && input.focus(), 30);
+        const initialInput = overlay.querySelector('.sq-play-picker-search');
+        setTimeout(() => initialInput && initialInput.focus(), 30);
     }
 
-    function renderPickerHead(labels) {
+    function renderPickerHead(labels, fillMode) {
         const { names, usingFull, dexSize } = pickerSortedNames();
         const poolSize = names.length;
         const toggleLabel = usingFull
             ? labels.poolLegal.replace('{count}', (_legalPool && _legalPool.size) || 0)
             : labels.poolAll.replace('{count}', dexSize);
         const counterText = `${poolSize}`;
+        const filledCount = _opponent.filter(Boolean).length;
+        const progressChip = fillMode
+            ? `<span class="sq-play-picker-progress" aria-live="polite">${escapeHtml(labels.fillProgress(filledCount + 1, 6))}</span>`
+            : '';
         return `
             <header class="sq-play-picker-head">
+                ${progressChip}
                 <input type="search" class="sq-play-picker-search"
                        placeholder="${escapeHtml(labels.searchPh)}"
                        autocomplete="off" inputmode="search" autofocus>
@@ -550,7 +593,13 @@
                         </div>
                     </section>
                     <section class="sq-play-col sq-play-col-opp">
-                        <h4 class="sq-play-col-title">${escapeHtml(labels.opponentTeam)}</h4>
+                        <div class="sq-play-col-titlebar">
+                            <h4 class="sq-play-col-title">${escapeHtml(labels.opponentTeam)}</h4>
+                            <button type="button" class="sq-play-quickpick-btn"
+                                    aria-label="${escapeHtml(labels.quickPickAria)}">
+                                ${escapeHtml(labels.quickPick)}
+                            </button>
+                        </div>
                         <p class="sq-play-col-hint">${escapeHtml(labels.opponentHint)}</p>
                         <div class="sq-play-opps" id="sq-play-opps">
                             ${_opponent.map((m, i) => renderOpponentSlot(i, m)).join('')}
@@ -564,6 +613,32 @@
 
         overlay.addEventListener('click', (e) => {
             if (e.target === overlay) closePlayModal();
+            // Quick-pick: keeps the picker open and lands each tap in
+            // the next empty slot. Auto-closes when all 6 are filled.
+            const quick = e.target.closest('.sq-play-quickpick-btn');
+            if (quick) {
+                if (nextEmptyOppIndex(_opponent) === -1) {
+                    // All slots already filled — wipe and start over,
+                    // matches the "just-clicked-it-by-accident vs
+                    // intentional reset" expectation of a clearly-CTA-
+                    // styled button.
+                    _opponent = [null, null, null, null, null, null];
+                    rerenderOpponents();
+                }
+                openSpritePicker((mon) => {
+                    const idx = nextEmptyOppIndex(_opponent);
+                    if (idx === -1) return false;          // signal: close
+                    _opponent[idx] = mon;
+                    rerenderOpponents();
+                    if (nextEmptyOppIndex(_opponent) === -1) {
+                        // Hit 6/6 — small grace delay so the last fill
+                        // visually registers before the overlay folds.
+                        setTimeout(closeSpritePicker, 220);
+                    }
+                    return true;
+                }, { fillMode: true });
+                return;
+            }
             const empty = e.target.closest('.sq-play-opp-empty');
             if (empty) {
                 const idx = parseInt(empty.getAttribute('data-opp-idx'), 10);
@@ -620,6 +695,7 @@
         natureSpeedMod,
         parseEVs,
         aggregateLegalPool,
+        nextEmptyOppIndex,
         labels: () => t(),
     };
 })();

@@ -435,3 +435,96 @@ describe('pickerSortedNames — format-pool filter + usage sort', () => {
         assert.deepStrictEqual(names, ['Garchomp']);
     });
 });
+
+// ── nextEmptyOppIndex + fill-mode loop (rapid-pick) ──────────────
+// User-flagged 2026-06-15: per-slot tapping wastes the time you don't
+// have during the 90-second team-selection window. The "Quick-pick
+// all 6" button keeps the picker open and lands each tap in the
+// next empty slot. Auto-close fires when 6/6 are filled.
+
+function nextEmptyOppIndex(opponent) {
+    if (!Array.isArray(opponent)) return -1;
+    for (let i = 0; i < opponent.length; i++) {
+        if (!opponent[i]) return i;
+    }
+    return -1;
+}
+
+describe('nextEmptyOppIndex — fill-mode next-slot resolver', () => {
+    it('returns 0 for a fresh team', () => {
+        assert.strictEqual(nextEmptyOppIndex([null, null, null, null, null, null]), 0);
+    });
+
+    it('skips already-filled slots and picks the first empty one', () => {
+        assert.strictEqual(
+            nextEmptyOppIndex([{name:'A'}, {name:'B'}, null, null, null, null]),
+            2,
+        );
+    });
+
+    it('returns -1 when all 6 are filled (signal: auto-close picker)', () => {
+        const full = [{name:'A'},{name:'B'},{name:'C'},{name:'D'},{name:'E'},{name:'F'}];
+        assert.strictEqual(nextEmptyOppIndex(full), -1);
+    });
+
+    it('handles holes in the middle by picking the lowest empty index', () => {
+        // Slot 3 cleared by user mid-flow → next pick fills it before
+        // moving on, not slot 5.
+        assert.strictEqual(
+            nextEmptyOppIndex([{name:'A'}, {name:'B'}, null, {name:'D'}, null, null]),
+            2,
+        );
+    });
+
+    it('non-array / null input returns -1 (caller treats as "no slot")', () => {
+        assert.strictEqual(nextEmptyOppIndex(null), -1);
+        assert.strictEqual(nextEmptyOppIndex(undefined), -1);
+        assert.strictEqual(nextEmptyOppIndex({}), -1);
+    });
+});
+
+describe('fill-mode loop — sequential picks land in order', () => {
+    // Replays what happens inside the production overlay's pick handler
+    // without DOM: each picked mon lands at nextEmptyOppIndex, picker
+    // stays open until that returns -1.
+    function runFillSequence(picks) {
+        const opp = [null, null, null, null, null, null];
+        let closed = false;
+        for (const mon of picks) {
+            if (closed) break;
+            const idx = nextEmptyOppIndex(opp);
+            if (idx === -1) { closed = true; break; }
+            opp[idx] = mon;
+            if (nextEmptyOppIndex(opp) === -1) closed = true;
+        }
+        return { opp, closed };
+    }
+
+    it('lands 6 picks in order 0..5 and triggers auto-close', () => {
+        const { opp, closed } = runFillSequence([
+            {name:'Garchomp'}, {name:'Kingambit'}, {name:'Talonflame'},
+            {name:'Charizard'}, {name:'Whimsicott'}, {name:'Incineroar'},
+        ]);
+        assert.deepStrictEqual(opp.map(m => m.name),
+            ['Garchomp', 'Kingambit', 'Talonflame', 'Charizard', 'Whimsicott', 'Incineroar']);
+        assert.strictEqual(closed, true);
+    });
+
+    it('stays open at 3/6 (no auto-close until the team is full)', () => {
+        const { opp, closed } = runFillSequence([
+            {name:'A'}, {name:'B'}, {name:'C'},
+        ]);
+        assert.strictEqual(closed, false);
+        assert.strictEqual(opp.filter(Boolean).length, 3);
+        assert.strictEqual(nextEmptyOppIndex(opp), 3);
+    });
+
+    it('ignores extra picks beyond the 6th (no overflow into nowhere)', () => {
+        const { opp, closed } = runFillSequence(
+            'ABCDEFGH'.split('').map(n => ({ name: n })),
+        );
+        assert.strictEqual(opp.length, 6);
+        assert.strictEqual(closed, true);
+        assert.deepStrictEqual(opp.map(m => m.name).join(''), 'ABCDEF');
+    });
+});

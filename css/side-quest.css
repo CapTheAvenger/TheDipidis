@@ -888,3 +888,55 @@
     padding: 1.2rem;
     margin: 0;
 }
+
+/* Quick-pick button — one-tap-then-rattle workflow for the opponent
+ * picker. Sits at the top of the opponent column next to the
+ * section title. Solid green to read as the primary action of the
+ * column.
+ */
+.sq-play-col-titlebar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+    margin-bottom: 0.3rem;
+}
+.sq-play-col-titlebar .sq-play-col-title { margin: 0; }
+
+.sq-play-quickpick-btn {
+    background: linear-gradient(180deg, #5ac98a 0%, #3fa86a 100%);
+    color: #08130d;
+    border: 1px solid rgba(76, 209, 130, 0.85);
+    border-radius: 10px;
+    padding: 0.4rem 0.8rem;
+    font-size: 0.82rem;
+    font-weight: 800;
+    cursor: pointer;
+    font-family: inherit;
+    transition: filter 120ms ease, transform 80ms ease;
+    box-shadow: 0 1px 4px rgba(76, 209, 130, 0.25);
+}
+.sq-play-quickpick-btn:hover { filter: brightness(1.08); }
+.sq-play-quickpick-btn:active { transform: scale(0.97); }
+
+/* Live progress chip shown in the picker header in fill-mode
+ * ("Pick 3 / 6"). Tiny but persistent — gives the user a sense of
+ * how many more picks until the picker auto-closes. */
+.sq-play-picker-progress {
+    background: rgba(76, 209, 130, 0.18);
+    color: #b6efcb;
+    border: 1px solid rgba(76, 209, 130, 0.45);
+    border-radius: 8px;
+    padding: 0.3rem 0.55rem;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+    align-self: center;
+}
+
+.sq-play-picker-fillmode .sq-play-picker-panel {
+    box-shadow: 0 0 0 2px rgba(76, 209, 130, 0.35),
+                0 18px 60px rgba(0, 0, 0, 0.55);
+}

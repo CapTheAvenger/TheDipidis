@@ -95,10 +95,14 @@
           count: 0,
           type: c.type || '',
           is_ace_spec: !!c.is_ace_spec,
+          _inclusion: 0,   // sum of deck_inclusion_count across merged prints
+          _avg: 0,         // max average_count across merged prints
         });
       }
       const e = byName.get(key);
       e.count += (c.count || 0);
+      e._inclusion += (c._inclusion || 0);
+      if ((c._avg || 0) > e._avg) e._avg = c._avg || 0;
       if (!e.set_code && c.set_code) {
         e.set_code = c.set_code;
         e.set_number = c.set_number;
@@ -107,6 +111,48 @@
       if (!e.type && c.type) e.type = c.type;
     }
     return Array.from(byName.values());
+  }
+
+  // Legalize the synthesized "Latest Online · Typical Build".
+  // findBestOnlineBuild rounds the per-card average across
+  // `total_decks_in_archetype` decks, so whenever >1 deck is averaged the raw
+  // result can break deck legality: more than 4 copies of a card (two prints
+  // each rounding up — e.g. Charcadet 4 + 1 = 5), more than one Ace Spec (each
+  // deck's different Ace Spec rounds to a 1-of), and a >60-card total
+  // (reported "2 Decks · 69 cards"). Enforce a legal 60-card list: ≤4 copies
+  // except Basic Energy, ≤1 Ace Spec (keep the most-played one), then trim to
+  // 60 by dropping the least-confident copies first — lowest deck-inclusion,
+  // i.e. exactly the cards that appeared in only one of the averaged decks,
+  // which is where the artifacts live. Pure function (unit-tested).
+  function _legalizeOnlineBuild(cards) {
+    const out = (cards || []).map(c => Object.assign({}, c, { count: c.count || 0 }));
+    // ≤4 copies, except Basic Energy (which may run any number).
+    out.forEach(c => {
+      if (String(c.type || '') !== 'Basic Energy') c.count = Math.min(c.count, 4);
+    });
+    // ≤1 Ace Spec — keep the highest-count (then highest-inclusion) one.
+    const aces = out
+      .filter(c => c.is_ace_spec && c.count > 0)
+      .sort((a, b) => (b.count - a.count) || ((b._inclusion || 0) - (a._inclusion || 0)));
+    aces.slice(1).forEach(c => { c.count = 0; });
+    let kept = out.filter(c => c.count > 0);
+    // Trim to 60: remove copies from the least-confident cards first.
+    let total = kept.reduce((s, c) => s + c.count, 0);
+    if (total > 60) {
+      const order = kept.slice().sort((a, b) =>
+        ((a._inclusion || 0) - (b._inclusion || 0)) ||
+        (a.count - b.count) ||
+        ((a._avg || 0) - (b._avg || 0))
+      );
+      for (const c of order) {
+        if (total <= 60) break;
+        const remove = Math.min(c.count, total - 60);
+        c.count -= remove;
+        total -= remove;
+      }
+      kept = kept.filter(c => c.count > 0);
+    }
+    return kept;
   }
 
   // ── Best Major: best-placed list from latest tournament ──────────
@@ -230,6 +276,8 @@
         count,
         type:       String(r.type || '').trim(),
         is_ace_spec: String(r.is_ace_spec || '').toLowerCase() === 'yes',
+        _inclusion: parseInt(r.deck_inclusion_count || '0', 10) || 0,
+        _avg:       avg,
       });
       if (!tournamentId)   tournamentId   = String(r.tournament_id || '').trim();
       if (!tournamentName) tournamentName = String(r.tournament_name || '').trim();
@@ -243,7 +291,7 @@
       tournament_name:  tournamentName,
       tournament_date:  latestDate,
       total_decks_in_archetype: totalDecksInArchetype,
-      cards: _consolidateCards(cards),
+      cards: _legalizeOnlineBuild(_consolidateCards(cards)),
     };
   }
 

@@ -43,10 +43,30 @@ gets 0 decks → still writes the id into its ledger as "done" → skips it fore
 - **Past Meta (JH)**: `tournament_scraper_JH.py` marked empty/failed probes as
   scraped (lines ~1074 and ~1101). **Fix applied: only commit an id to the ledger
   when the tournament yielded real deck rows; empty/failed probes are revisited.**
-  NOTE: NAIC's JH-id is **not yet in the JH ledger** (max id 563) → NAIC has not
-  been scraped by the limitlesstcg.com pipeline yet (its lists may not be posted
-  there). The code fix prevents future poisoning; whether NAIC ever lands in
-  Past Meta depends on limitlesstcg.com publishing it (OPEN — see below).
+  UPDATE 2026-06-16 (post weekly run): NAIC's JH-id is **518** (maintainer
+  confirmed `limitlesstcg.com/tournaments/518`). The JH ledger has a gap exactly
+  at 518 (516,517,[518],519…) yet 519–525 ARE there → 518 is DISCOVERED every
+  run but FILTERED before ledgering, so it never reaches
+  `tournament_cards_data_cards_TEF-CRI.csv` (still only Turin/540 after the run).
+  Most likely cause: the broad `"format=Expanded" in html_text` substring in
+  `get_tournament_info` misclassifies a Standard major whose page links an
+  Expanded view in a menu. **Fix 2026-06-16:** tightened the Expanded check to
+  the parsed format link only + added a type-skip diagnostic log. Verify after
+  the next run; if NAIC is still missing the log will name the real filter (e.g.
+  the JP flag heuristic). labs already has NAIC (0070) correctly.
+  POST-RUN GOOD STATE: current_meta ledger has 0069+0070, deck-cache holds 512
+  decks from both, Meta Play! 229→1309 rows — Current Meta Global + cumulative
+  denominators work; only the JH/Past-Meta side still misses NAIC.
+
+### Meta Call display — stack ALL current-format majors (2026-06-16)
+Current Meta showed only the LAST major per deck (single chip = NAIC), hiding
+Turin and its 🏆 winner. Past Meta already stacks every major with a 🏆 on the
+winner. Fixed: Current Meta uses the same stack when the in-person majors are
+the current format (not the lag window), so each deck shows NAIC (winner
+Lillie's Clefairy 🏆) AND Turin (winner Hop's Trevenant 🏆). Display only —
+predictor math untouched. Meta Call freeze LIFTED by maintainer (accuracy = top
+priority). Data verified: Lillie's won NAIC (top1=1, 1.12%), Hop's won Turin
+(top1=1, 0.44%) — so the winner markings were a display gap, not bad data.
 - ⚠️ Discarded a dangerous idea: purging all JH-ledger ids >540. Verified those
   (542–563) are **legit older-meta tournaments with data** in SVI-ASC/SVI-PFL/
   TEF-POR chunks — purging them would have created duplicates.

@@ -96,10 +96,17 @@ already covers the F-D19 row-count layer (revert empty/short CSVs). ·
 ~~SHA-pinning~~ DONE 2026-06-16 (all 30 action uses across 11 workflows pinned
 to full commit SHAs with `# vX` comments; added `.github/dependabot.yml` to keep
 them current) · trainer-variant consolidation · JP "EN beats JP" dedup.
-P1 champions guardrails: post-generation validator that every referenced
-move/item/ability/species is on the team's paste (resolve Mega-derived forms!) ·
-regex-guard numeric speed/KO claims + actually load speed_corpus + battle_data ·
-per-rotation reference-coverage check · set temperature low · force clean v4 regen.
+~~P1 champions guardrails~~ DONE 2026-06-16: `find_offteam_moves` rejects any
+move the German guide attributes that no team Pokémon runs (prompt rule #2) —
+German-guide + English-canonical-only matching, validated zero false positives
+on all 20 live strategies; wired into `validate_strategy_facts`. Plus a
+per-rotation `reference_coverage` `::warning::`. NOT done (with reasons):
+temperature stays unset — extended thinking requires temperature=1, so the
+audit's "set it low" is impossible; the validators are the lever instead. The
+numeric speed/KO guard + loading speed_corpus/battle_data into the prompt is
+deferred (current guides are qualitative; preventive only). Clean v4 regen needs
+no code — cached entries are v2/v3 < PROMPT_VERSION=4 so the next run
+regenerates them through the new validator.
 P2: F-006 HTML-as-data confirm · npm lockfiles in bot/+prerender · firebase-admin pin.
 P3 (own sessions): Firebase v9→v10 modular · monolith code-split per tab.
 

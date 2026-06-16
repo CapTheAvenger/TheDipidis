@@ -212,3 +212,16 @@ STILL OPEN (prioritized, need Chrome-verify before merge — GitHub MCP was down
   start-page 3-col grid too tight at ~500px → needs responsive CSS + browser test.
 - 🟡 Onboarding: "new here? start with Meta Call" entry point; a 1-line
   "expected field → bring techs vs X" action summary on Meta Call.
+
+## Firebase compat bump (P3, 2026-06-16) — PREPARED, needs verification
+Vendored Firebase compat SDK bumped v9.22.0 → **v10.14.1** (drop-in: same compat
+API, so the ~107 call sites in firebase-*.js are unchanged). Files replaced:
+js/vendor/firebase-{app,auth,firestore}-compat.js (pulled via `npm pack
+firebase@10.14.1`; gstatic/jsdelivr/unpkg are blocked in the sandbox, npm
+registry works). This is the low-risk security path chosen over the full v10
+MODULAR migration (107 sites). MUST be browser-verified before relying on it:
+log in (Google), save a deck, reload, confirm it syncs; check the console for
+Firebase init errors. Recommended: test locally first
+(`python3 -m http.server`, the Chrome plugin can hit localhost) before merge —
+Firebase is login/data-critical. v11/v12 compat also available if a bigger jump
+is wanted later.

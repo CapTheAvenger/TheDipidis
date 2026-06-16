@@ -318,9 +318,12 @@
         if (!raw) return '';
         if (raw.startsWith('mega ')) return raw.split(' ').slice(0, 2).join(' ');
         if (raw.startsWith('alolan ') || raw.startsWith('galarian ') || raw.startsWith('hisuian ')) return raw.split(' ').slice(0, 2).join(' ');
-        if (raw.startsWith("rocket's") || raw.startsWith("rocket\u2019s")) return "rocket's";
-        if (raw.startsWith("n's") || raw.startsWith("n\u2019s")) return "n's";
-        if (raw.startsWith("ethan's") || raw.startsWith("ethan\u2019s")) return "ethan's";
+        // Group every "<Trainer>'s X" under its owner token via the shared
+        // helper (N's, Rocket's, Hop's, Cynthia's, \u2026). Was a hardcoded
+        // rocket's/n's/ethan's list that missed every other trainer.
+        const owner = (typeof window !== 'undefined' && window.stripTrainerOwnerPrefix)
+            ? window.stripTrainerOwnerPrefix(raw).owner : '';
+        if (owner) return owner;
         return raw.split(' ')[0];
     }
 

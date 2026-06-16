@@ -2334,9 +2334,11 @@
 
                 function getBasePokemonName(cardName) {
                     let n = (cardName || '').toLowerCase().trim();
-                    // Strip possessive trainer prefix: "erika's ", "team rocket's ", etc.
-                    const possMatch = n.match(/^[^']+\'s\s+(.+)$/);
-                    if (possMatch) n = possMatch[1];
+                    // Strip possessive trainer prefix ("erika's ", "team rocket's ",
+                    // "n's ", …) via the shared helper (handles curly apostrophes too).
+                    if (typeof window !== 'undefined' && window.stripTrainerOwnerPrefix) {
+                        n = window.stripTrainerOwnerPrefix(n).base;
+                    }
                     // Strip variant/form prefixes that map to same species
                     n = n.replace(/^(mega|alolan|galarian|hisuian|paldean|primal|shadow|dark|light|ancient|future|origin|blade|shield|hero of many battles )\s+/, '');
                     // Strip common card type suffixes (order matters: longest first)

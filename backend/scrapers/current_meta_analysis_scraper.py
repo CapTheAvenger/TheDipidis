@@ -18,7 +18,7 @@ import time
 import logging
 import threading
 import concurrent.futures
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Dict, List, Any, Optional
 
 try:
@@ -247,7 +247,7 @@ def _load_settings() -> Dict[str, Any]:
 # ============================================================
 def _fetch_meta_live_decklist(list_url: str, deck_name: str, deck_slug: str, card_db: CardDatabaseLookup, timeout: int,
                               tournament_id: str = "", tournament_date: str = "", tournament_name: str = "",
-                              total_players: int = 0) -> dict:
+                              total_players: int = 0, place: str = "", score: str = "", player: str = "") -> dict:
     """
     Extrahiert Deckliste von play.limitlesstcg.com mit 100%iger Set-Genauigkeit.
     Priorität:
@@ -330,6 +330,12 @@ def _fetch_meta_live_decklist(list_url: str, deck_name: str, deck_slug: str, car
             "tournament_date": tournament_date,
             "tournament_name": tournament_name,
             "total_players": int(total_players or 0),
+            # Per-deck finish data (parsed from the /decks/<slug> "Best
+            # Finishes" row) — lets us surface the single best-placed REAL
+            # decklist of the last N days instead of a synthesized average.
+            "place": place,
+            "score": score,
+            "player": player,
         }
     return None
 
@@ -432,6 +438,9 @@ def scrape_limitless_online(settings: dict, card_db: CardDatabaseLookup) -> list
                     r.get("tournament_date", ""),
                     r.get("tournament_name", ""),
                     int(r.get("total_players") or 0),
+                    r.get("place", ""),
+                    r.get("score", ""),
+                    r.get("player", ""),
                 )
                 for r in history_rows
             ]
@@ -698,6 +707,83 @@ def scrape_tournaments(settings: dict, card_db: CardDatabaseLookup) -> list:
 
     return all_decks
 
+
+def build_best_online_decklists(limitless_decks: list, recent_days: int = 7) -> dict:
+    """Per archetype, pick the single BEST-placed REAL decklist from the last
+    `recent_days` days of Meta-Live results — no averaging/synthesis, an actual
+    list a player ran. Feeds the "Latest Online" quick-reference panel.
+
+    Best = lowest finishing place; ties broken by higher win%, then more recent.
+    Returns { archetype: { tournament_name, tournament_date, player, place,
+    place_rank, total_players, score, win_pct, cards: [...] } }.
+    """
+    cutoff = datetime.now() - timedelta(days=recent_days)
+
+    def _place_rank(place_str):
+        m = re.match(r'^\s*(\d+)(?:st|nd|rd|th)\b', str(place_str or ''), re.IGNORECASE)
+        return int(m.group(1)) if m else None
+
+    def _win_pct(score_str):
+        m = re.match(r'^\s*(\d+)\s*-\s*(\d+)\s*-\s*(\d+)\s*$', str(score_str or ''))
+        if not m:
+            return 0.0
+        w, l, t = int(m.group(1)), int(m.group(2)), int(m.group(3))
+        g = w + l + t
+        return ((w + 0.5 * t) / g * 100.0) if g else 0.0
+
+    def _date_num(date_iso):
+        try:
+            return int((date_iso or '').strip().replace('-', ''))
+        except ValueError:
+            return 0
+
+    def _within_window(date_iso):
+        try:
+            return datetime.strptime((date_iso or '').strip(), '%Y-%m-%d') >= cutoff
+        except ValueError:
+            return False
+
+    best: Dict[str, dict] = {}
+    for d in limitless_decks:
+        arch = (d.get('archetype') or '').strip()
+        cards = d.get('cards') or []
+        date_iso = (d.get('tournament_date') or '').strip()
+        rank = _place_rank(d.get('place'))
+        if not arch or not cards or rank is None or not _within_window(date_iso):
+            continue  # only ranked, carded, in-window decks qualify
+        wp = _win_pct(d.get('score'))
+        key = (rank, -wp, -_date_num(date_iso))   # lower place, higher WR, newer
+        cur = best.get(arch)
+        if cur is not None and key >= cur['_key']:
+            continue
+        best[arch] = {
+            '_key':            key,
+            'tournament_id':   d.get('tournament_id') or '',
+            'tournament_name': d.get('tournament_name') or '',
+            'tournament_date': date_iso,
+            'player':          d.get('player') or '',
+            'place':           d.get('place') or '',
+            'place_rank':      rank,
+            'total_players':   int(d.get('total_players') or 0),
+            'score':           d.get('score') or '',
+            'win_pct':         round(wp, 1),
+            'cards': [
+                {
+                    'name':        c.get('name') or c.get('card_name') or '',
+                    'count':       int(c.get('count') or 0),
+                    'set_code':    c.get('set_code') or '',
+                    'set_number':  c.get('set_number') or '',
+                    'type':        c.get('type') or '',
+                    'is_ace_spec': bool(c.get('is_ace_spec')),
+                }
+                for c in cards
+            ],
+        }
+    for v in best.values():
+        v.pop('_key', None)
+    return best
+
+
 # ============================================================
 # AGGREGATION + OUTPUT
 # ============================================================
@@ -806,6 +892,18 @@ def main():
         "Online Dated CSV: %d Karten-Rows aus %d (Tournament, Archetyp)-Buckets → %s",
         len(dated_rows), distinct_tids, dated_csv_path,
     )
+
+    # Best REAL online decklist per archetype (last 7 days) — the actual list a
+    # player ran, for the "Latest Online" quick-reference panel (no synthesis).
+    best_online = build_best_online_decklists(limitless_decks, recent_days=7)
+    best_path = os.path.join(get_data_dir(), "online_best_decklists.json")
+    try:
+        with open(best_path, "w", encoding="utf-8") as f:
+            json.dump(best_online, f, ensure_ascii=False)
+        logger.info("Best Online Decklists: %d Archetypen (letzte 7 Tage) → %s",
+                    len(best_online), best_path)
+    except OSError as e:
+        logger.warning("Konnte online_best_decklists.json nicht schreiben: %s", e)
 
     logger.info("=" * 60)
     logger.info("SCRAPING KOMPLETT!")

@@ -62,6 +62,10 @@ ALLOWED_SYNC_ONLY = {
     # service-worker offline manifest (data/offline-manifest.json).
     "all_cards_merged.json": "regenerated whole each run from seeded EN+JP DBs",
     "all_cards_merged.csv":  "regenerated whole each run from seeded EN+JP DBs",
+    # Best REAL online decklist per archetype — current_meta_analysis_scraper
+    # rebuilds it whole each run from the fresh Meta-Live crawl (no historical
+    # preservation), so it's synced to data/ but not seeded back.
+    "online_best_decklists.json": "regenerated whole each run from fresh Meta Live",
 }
 
 

@@ -83,10 +83,13 @@ gets 0 decks → still writes the id into its ledger as "done" → skips it fore
 
 ## Approved backlog (maintainer said yes; do on feature branch, with tests)
 P0 data integrity: NAIC fix (DONE) · denominator+mojibake fix · .bat footgun.
-P1: cross-pipeline reconciliation sanity-gate ("every tournament in the current
-labs file must appear in the cards + current_meta outputs"; allowlist the
-intentionally-empty JP City League files — Japan summer break) · SHA-pinning ·
-trainer-variant consolidation · JP "EN beats JP" dedup.
+P1: ~~cross-pipeline reconciliation sanity-gate~~ DONE 2026-06-16
+(`scripts/reconcile_tournament_coverage.py` + test + wired into
+weekly-full-update.yml; soft `::warning::`, matches labs↔cards majors by
+date+fuzzy-name, grace period so fresh majors don't false-alarm; flip to
+`--strict` later to hard-gate). The existing `scripts/sanity_check_data.py`
+already covers the F-D19 row-count layer (revert empty/short CSVs). ·
+SHA-pinning · trainer-variant consolidation · JP "EN beats JP" dedup.
 P1 champions guardrails: post-generation validator that every referenced
 move/item/ability/species is on the team's paste (resolve Mega-derived forms!) ·
 regex-guard numeric speed/KO claims + actually load speed_corpus + battle_data ·

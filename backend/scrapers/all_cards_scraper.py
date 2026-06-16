@@ -404,6 +404,49 @@ RARITY_KEYWORDS = [
 ]
 
 
+def parse_prints_table(prints_table):
+    """Parse a card detail page's "Other Prints" table.
+
+    Returns (international_prints, jp_prints, cardmarket_url):
+      * international_prints — set of "<SET>-<NUM>" for EN/DE/… reprints.
+      * jp_prints            — set of "<SET>-<NUM>" for Japanese prints
+        (href /cards/jp/<SET>/<NUM>). Recorded so the frontend merge can
+        suppress a JP card once its international (EN) version exists
+        ("EN beats JP"). JP set codes never leak into international_prints.
+      * cardmarket_url       — EUR price link from the current row.
+    """
+    int_prints = set()
+    jp_prints = set()
+    cardmarket_url = ""
+    if not prints_table:
+        return int_prints, jp_prints, cardmarket_url
+    # Limitless does not use <tbody> on this table either
+    for row in [tr for tr in prints_table.select("tr") if tr.find("td")]:
+        td = row.select_one("td:first-child")
+        if td:
+            a = td.select_one("a[href*='/cards/']")
+            if a and a.has_attr("href"):
+                path = a["href"].split("/cards/", 1)[-1].strip()
+                parts = path.split("/")
+                if parts and parts[0].lower() == "jp" and len(parts) >= 3:
+                    jp_prints.add(f"{parts[1].upper()}-{parts[2]}")
+                else:
+                    if (len(parts) >= 3 and
+                            parts[0].lower() in ("en", "de", "fr", "es", "it", "pt", "ja", "ko")):
+                        sc, sn = parts[1].upper(), parts[2]
+                    elif len(parts) >= 2:
+                        sc, sn = parts[0].upper(), parts[1]
+                    else:
+                        sc, sn = "", ""
+                    if sc and sc != "JP":
+                        int_prints.add(f"{sc}-{sn}")
+        if "current" in row.get("class", []):
+            eur = row.select_one("a.card-price.eur")
+            if eur and eur.has_attr("href"):
+                cardmarket_url = eur["href"]
+    return int_prints, jp_prints, cardmarket_url
+
+
 def _fetch_single_card(card: dict) -> dict:
     if not card.get("card_url"):
         return card
@@ -480,36 +523,13 @@ def _fetch_single_card(card: dict) -> dict:
     if card["set"] in PROMO_SETS and not card.get("rarity"):
         card["rarity"] = "Promo"
 
-    # International Prints + Cardmarket URL
-    int_prints = {f"{card['set']}-{card['number']}"}
-    cardmarket_url = ""
-
-    prints_table = soup.select_one("table.card-prints-versions")
-    if prints_table:
-        # Limitless does not use <tbody> on this table either
-        for row in [tr for tr in prints_table.select("tr") if tr.find("td")]:
-            td = row.select_one("td:first-child")
-            if td:
-                a = td.select_one("a[href*='/cards/']")
-                if a and a.has_attr("href"):
-                    path  = a["href"].split("/cards/", 1)[-1].strip()
-                    parts = path.split("/")
-                    if (len(parts) >= 3 and
-                            parts[0].lower() in ("en","de","fr","es","it","pt","ja","ko")):
-                        sc, sn = parts[1].upper(), parts[2]
-                    elif len(parts) >= 2:
-                        sc, sn = parts[0].upper(), parts[1]
-                    else:
-                        sc, sn = "", ""
-                    if sc and sc != "JP":
-                        int_prints.add(f"{sc}-{sn}")
-
-            if "current" in row.get("class", []):
-                eur = row.select_one("a.card-price.eur")
-                if eur and eur.has_attr("href"):
-                    cardmarket_url = eur["href"]
-
+    # International Prints + JP Prints + Cardmarket URL
+    extra_int, jp_prints, cardmarket_url = parse_prints_table(
+        soup.select_one("table.card-prints-versions")
+    )
+    int_prints = {f"{card['set']}-{card['number']}"} | extra_int
     card["international_prints"] = ",".join(sorted(int_prints))
+    card["jp_prints"] = ",".join(sorted(jp_prints))
     card["cardmarket_url"] = cardmarket_url
 
     # ── Card text / TCG energy type from detail page ──────────────
@@ -580,7 +600,7 @@ def scrape_card_details(
 
     fieldnames = ["name_en", "name_de", "set", "number", "type", "energy_type",
                   "hp", "rarity", "image_url", "international_prints",
-                  "cardmarket_url", "card_text"]
+                  "jp_prints", "cardmarket_url", "card_text"]
 
     def write_csv_batch(current_cards: list):
         all_data = (existing_cards + current_cards) if append_mode else current_cards
@@ -785,7 +805,7 @@ def main():
 
         fieldnames = ["name_en", "name_de", "set", "number", "type", "energy_type",
                       "hp", "rarity", "image_url", "international_prints",
-                      "cardmarket_url", "card_text"]
+                      "jp_prints", "cardmarket_url", "card_text"]
 
         with open(csv_path, "w", encoding="utf-8", newline="") as f:
             writer = csv.DictWriter(f, fieldnames=fieldnames, extrasaction="ignore")

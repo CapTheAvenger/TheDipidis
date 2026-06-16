@@ -132,7 +132,31 @@ def create_merged_database():
                 be_override += 1
     print(f"✓ Preise geladen: {len(prices_dict)} Einträge ({fe_count} frontend, {be_override} backend-override)")
     en_keys = {f"{c.get('set')}_{c.get('number')}" for c in english_cards}
-    jp_to_add = [c for c in japanese_cards if f"{c.get('set')}_{c.get('number')}" not in en_keys]
+
+    # "EN beats JP": when an EN card's detail page lists a JP print (captured by
+    # all_cards_scraper into jp_prints as "<SET>-<NUM>"), that JP card has an
+    # international version and is redundant — drop it so only the EN print
+    # shows. Genuinely JP-only cards (no EN counterpart yet — the City League
+    # cards before their international release) are kept. This is the reliable
+    # per-card EN<->JP link the old name/international_prints heuristics lacked.
+    jp_superseded = set()
+    for c in english_cards:
+        for tok in (c.get('jp_prints') or '').split(','):
+            tok = tok.strip().upper()
+            if tok:
+                jp_superseded.add(tok)
+
+    def _jp_id(c):
+        return f"{(c.get('set') or '').strip().upper()}-{(c.get('number') or '').strip()}"
+
+    jp_to_add = [
+        c for c in japanese_cards
+        if f"{c.get('set')}_{c.get('number')}" not in en_keys
+        and _jp_id(c) not in jp_superseded
+    ]
+    if jp_superseded:
+        print(f"✓ EN-beats-JP: {len(jp_superseded)} JP prints have an EN version "
+              f"→ JP cards suppressed where the international print exists.")
 
     # Tag JP-only rows so the frontend can render an honest
     # "Japan-only, no Cardmarket listing" affordance instead of an

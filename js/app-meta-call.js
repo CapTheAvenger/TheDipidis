@@ -8589,9 +8589,18 @@ window.MetaCall = (function () {
       && _activeInPersonSetCode
       && _currentSetCodeUpperRender
       && _activeInPersonSetCode !== _currentSetCodeUpperRender;
-    if (_metaSource === 'past'
-        && Array.isArray(_majorSharesByDeck[k])
-        && _majorSharesByDeck[k].length > 0) {
+    // Stack ALL in-person majors of the active format (🏆 on each winner),
+    // newest-first — Past Meta always, and Current Meta too when the in-person
+    // majors ARE the current format (i.e. NOT the lag window, where
+    // _majorSharesByDeck still holds the previous format's regionals). This is
+    // what "show every recent major, not just the last" means: e.g. TEF-CRI
+    // shows both NAIC (winner Lillie's Clefairy 🏆) and Turin (winner Hop's
+    // Trevenant 🏆) instead of only the latest single chip. Display only — the
+    // predictor math (4.6 underdog-champion boost etc.) is untouched.
+    const _stackMajors = (_metaSource === 'past' || !_renderLagWindow)
+      && Array.isArray(_majorSharesByDeck[k])
+      && _majorSharesByDeck[k].length > 0;
+    if (_stackMajors) {
       majorChipHtml = _renderPastMetaTournamentStack(_majorSharesByDeck[k]);
     } else if (!_renderLagWindow && _lastMajorInfo && _lastMajorByDeck[k]) {
       const lm      = _lastMajorByDeck[k];

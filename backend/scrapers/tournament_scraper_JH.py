@@ -428,8 +428,15 @@ def get_tournament_info(url: str) -> dict:
     if is_jp:
         info["meta"] = "Standard (JP)"
         info["format"] = ""
-    # FIX: Suche "Expanded" nur im Format-Namen oder in echten Format-Links, nicht im Menü!
-    elif info["format"] == "Expanded" or "format=Expanded" in html_text:
+    # Expanded is taken ONLY from the parsed format link (section 3 above),
+    # never from a raw "format=Expanded" substring anywhere on the page — a
+    # Standard event whose page merely links an Expanded format view (menu,
+    # related-tournaments sidebar) would otherwise be misclassified Expanded
+    # and dropped from the Standard cards pipeline. This was the suspected
+    # cause of NAIC (TID 518) never reaching tournament_cards_data: discovered
+    # every run, then skipped at the meta filter. (The old broad substring
+    # check contradicted this function's own comment.)
+    elif info["format"] == "Expanded":
         info["meta"] = "Expanded"
 
     return info
@@ -1062,10 +1069,14 @@ def main():
 
         name_lower = t["name"].lower()
         if t["meta"] in ["Standard (JP)", "Expanded"]:
-            logger.info(f"Ueberspringe: {t['name']} ({t['meta']})")
+            logger.info(f"Ueberspringe (meta={t['meta']}): {t['name']} [id {t.get('id')}]")
             continue
 
         if not any(tt.lower() in name_lower for tt in settings["tournament_types"]):
+            # Diagnostic: a major dropped here never reaches the cards pipeline
+            # AND never enters the ledger (so it's re-evaluated every run). Log
+            # it so a missing tournament is visible instead of silent.
+            logger.info(f"Ueberspringe (kein Turnier-Typ-Match): {t['name']} [id {t.get('id')}]")
             continue
 
         logger.info(f"Lade Turnier: {t['name']} ({t['format']})")

@@ -95,7 +95,25 @@ date+fuzzy-name, grace period so fresh majors don't false-alarm; flip to
 already covers the F-D19 row-count layer (revert empty/short CSVs). ·
 ~~SHA-pinning~~ DONE 2026-06-16 (all 30 action uses across 11 workflows pinned
 to full commit SHAs with `# vX` comments; added `.github/dependabot.yml` to keep
-them current) · trainer-variant consolidation · JP "EN beats JP" dedup.
+them current).
+
+~~Trainer-variant consolidation~~ DONE 2026-06-16: `window.stripTrainerOwnerPrefix`
+in app-core.js is the single source of truth (generic `X's ` match, both
+apostrophes, multi-word owners). custom-binder (hardcoded 3-owner list — the real
+bug), app-cards-db (straight-quote-only regex) and app-deck-builder (single-word
+regex) all switched to it; meta-binder's fuzzy tokenizer left as-is. Predictor
+(app-meta-call.js) injection deliberately NOT done — Meta Call is frozen until
+the August Worlds review. JS unit test added.
+
+**JP "EN beats JP" dedup — NOT done (can't be done correctly yet).** Verified in
+data: the proper EN<->JP link (`international_prints`) yields 0 matches for the
+327 jp_only cards (they're all genuinely JP-only, no international release).
+A name-based dedup would be a REGRESSION — e.g. Tropius JP M5-1 shares the name
+with EN JTG-123 but that's an *older, different* Tropius card; suppressing the
+new M5-1 would hide a genuinely-new JP card the City League meta needs. Correct
+fix needs the JP scraper to populate `international_prints` with the real EN
+counterpart per card (a scraper enhancement) — then the existing union-find
+suppresses automatically. Queued, not a quick safe change.
 ~~P1 champions guardrails~~ DONE 2026-06-16: `find_offteam_moves` rejects any
 move the German guide attributes that no team Pokémon runs (prompt rule #2) —
 German-guide + English-canonical-only matching, validated zero false positives

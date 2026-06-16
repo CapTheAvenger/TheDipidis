@@ -11,6 +11,28 @@ const BASE_PATH = './data/';
         const devWarn = (...args) => DEV_MODE && console.warn(...args);
 
         // ============================================================
+        // TRAINER OWNER-PREFIX HELPER (single source of truth)
+        // ============================================================
+        // Split a possessive trainer-owner prefix off a card/archetype name:
+        // returns { owner, base }. Recognizes ANY leading "X's " generically
+        // (N's, Rocket's, Team Rocket's, Hop's, Cynthia's, Ethan's, Erika's, …),
+        // so there is no owner list to keep in sync, and handles both the
+        // straight (') and curly (’) apostrophe. Callers that want the base
+        // species read .base; custom-binder groups by .owner. Replaces three
+        // ad-hoc, individually-incomplete copies (custom-binder's hardcoded
+        // 3-owner list, app-cards-db's straight-quote-only regex, and
+        // app-deck-builder's single-word regex).
+        function stripTrainerOwnerPrefix(name) {
+            const raw = String(name == null ? '' : name).trim();
+            const m = raw.match(/^(.+?['’]s)\s+(.+)$/);
+            if (m) return { owner: m[1], base: m[2] };
+            return { owner: '', base: raw };
+        }
+        if (typeof window !== 'undefined') {
+            window.stripTrainerOwnerPrefix = stripTrainerOwnerPrefix;
+        }
+
+        // ============================================================
         // TOAST NOTIFICATION SYSTEM
         // ============================================================
 

@@ -1915,8 +1915,11 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                     const direct = parseInt(dexMap[rawName], 10);
                     if (!isNaN(direct) && direct > 0) return direct;
                     // Strip trainer-possessive prefixes ("Cynthia's Gible" →
-                    // "gible", "Hop's Trevenant" → "trevenant", etc.).
-                    const trainerStripped = rawName.replace(/^[a-zäöüß]+'s\s+/, '').trim();
+                    // "gible", "Hop's Trevenant" → "trevenant", "Team Rocket's
+                    // Mewtwo" → "mewtwo") via the shared helper.
+                    const trainerStripped = (typeof window !== 'undefined' && window.stripTrainerOwnerPrefix)
+                        ? window.stripTrainerOwnerPrefix(rawName).base.trim()
+                        : rawName.replace(/^[a-zäöüß]+'s\s+/, '').trim();
                     if (trainerStripped !== rawName) {
                         const stripMap = parseInt(dexMap[trainerStripped], 10);
                         if (!isNaN(stripMap) && stripMap > 0) return stripMap;

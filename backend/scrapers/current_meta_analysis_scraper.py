@@ -150,6 +150,37 @@ def load_scraped_meta_tournaments() -> set:
 def save_scraped_meta_tournaments(tournament_ids: set) -> None:
     save_scraped_ids(get_scraped_meta_tournaments_file(), tournament_ids, 'scraped_tournament_ids')
 
+
+# ── Meta Play! raw-deck cache ────────────────────────────────────────────────
+# The ledger above gates FETCHING (a major is scraped once). This cache holds
+# the raw decks of every scraped major keyed by tournament_id, so the full
+# cumulative Meta Play! aggregate — and its total_decks_in_archetype
+# denominators — can be recomputed every run WITHOUT re-scraping. Reset on
+# rotation by backend/core/update_sets.py (lockstep with the ledger); seeded
+# into backend/core/data/ and synced back by the weekly workflow +
+# prepare_card_data.SYNC_PATTERNS (lockstep with the ledger).
+def get_meta_play_cache_file() -> str:
+    return os.path.join(get_data_dir(), 'meta_play_decks_cache.json')
+
+def load_meta_play_cache() -> Dict[str, list]:
+    path = get_meta_play_cache_file()
+    if not os.path.exists(path):
+        return {}
+    try:
+        with open(path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        return data if isinstance(data, dict) else {}
+    except (OSError, json.JSONDecodeError):
+        return {}
+
+def save_meta_play_cache(cache: Dict[str, list]) -> None:
+    try:
+        with open(get_meta_play_cache_file(), 'w', encoding='utf-8') as f:
+            json.dump(cache, f, ensure_ascii=False)
+    except OSError as e:
+        logger.warning("Konnte Meta-Play!-Deck-Cache nicht speichern: %s", e)
+
+
 # ============================================================================
 # FORMAT-WINDOW HELPER
 # ============================================================================
@@ -652,6 +683,7 @@ def scrape_tournaments(settings: dict, card_db: CardDatabaseLookup) -> list:
             for future in concurrent.futures.as_completed(futures):
                 res = future.result()
                 if res:
+                    res['tournament_id'] = tid   # tag for the Meta Play! deck cache
                     all_decks.append(res)
 
         # Only mark as scraped if we actually retrieved deck data
@@ -679,59 +711,27 @@ def aggregate_with_meta(all_decks: list, card_db: CardDatabaseLookup, meta_label
 
 
 def _merge_current_meta_rows(new_rows: list, output_file: str) -> list:
-    """Merge freshly-aggregated rows with the committed CSV, per meta source.
+    """Replace, per meta, the prior rows with the freshly-aggregated ones.
 
-    The two sources have different correct semantics:
-
-    * "Meta Live" is a COMPLETE fresh snapshot of the online ladder every run
-      (no scraped-ids ledger). It must REPLACE all prior Meta Live rows
-      wholesale — otherwise a card that left the ladder keeps its old row with
-      a now-stale total_decks_in_archetype denominator, and the per-run ladder
-      size drift (e.g. 19 -> 20 decks) leaves the same archetype group carrying
-      two different denominators. That was the bulk of the
-      AUDIT_DATA_PIPELINE denominator bug (43 of 70 Meta Live groups).
-
-    * "Meta Play!" is INCREMENTAL (only tournaments new since the last run are
-      scraped, gated by the ledger), so its prior rows are preserved and only
-      the colliding (archetype, card_name) entries are replaced.
-
-    The previous code routed both through save_to_csv's append-merge whose key
-    omits `meta`, which left stale Meta Live rows AND let a Meta Live row
-    collide with a Meta Play! row for the same archetype+card.
+    Both sources are complete snapshots each run: "Meta Live" is the full
+    online ladder; "Meta Play!" is the full aggregate recomputed from the
+    cumulative raw-deck cache (data/meta_play_decks_cache.json). So any meta
+    present in `new_rows` REPLACES all of its prior rows wholesale — which fixes
+    the stale-denominator bug (a card that left the ladder, or a per-run partial
+    deck count, no longer lingers). A meta ABSENT from `new_rows` (the ladder
+    fetch failed, or the Play! cache is still empty) keeps its last good rows so
+    a transient failure never wipes data. Keying on `meta` also stops a Meta
+    Live row from clobbering a Meta Play! row for the same archetype+card, which
+    the old save_to_csv append-merge (key without `meta`) allowed.
     """
     out_path = os.path.join(get_data_dir(), output_file)
     if not os.path.exists(out_path):
         return new_rows
     with open(out_path, 'r', encoding='utf-8-sig') as f:
         existing = list(csv.DictReader(f, delimiter=';'))
-
-    new_live = [r for r in new_rows if r.get('meta') == 'Meta Live']
-    new_play = [r for r in new_rows if r.get('meta') == 'Meta Play!']
-
-    result: list = []
-
-    # Meta Live — full replace, but only when we actually got a fresh snapshot
-    # (a failed ladder fetch must never wipe the last good Meta Live rows).
-    if new_live:
-        result.extend(new_live)
-    else:
-        result.extend(r for r in existing if r.get('meta') == 'Meta Live')
-
-    # Meta Play! — incremental: keep prior rows except those superseded by a
-    # newly-scraped (archetype, card_name).
-    if new_play:
-        play_keys = {(r.get('archetype', ''), r.get('card_name', '')) for r in new_play}
-        result.extend(
-            r for r in existing
-            if r.get('meta') == 'Meta Play!'
-            and (r.get('archetype', ''), r.get('card_name', '')) not in play_keys
-        )
-        result.extend(new_play)
-    else:
-        result.extend(r for r in existing if r.get('meta') == 'Meta Play!')
-
-    # Any other meta (defensive) — pass through untouched.
-    result.extend(r for r in existing if r.get('meta') not in ('Meta Live', 'Meta Play!'))
+    refreshed = {r.get('meta') for r in new_rows}
+    result = [r for r in existing if r.get('meta') not in refreshed]
+    result.extend(new_rows)
     return result
 
 # ============================================================
@@ -758,18 +758,39 @@ def main():
     limitless_decks = scrape_limitless_online(settings, card_db)
     tournament_decks = scrape_tournaments(settings, card_db)
 
+    # Meta Play! cumulative cache: persist the raw decks of every major keyed by
+    # tournament_id, then recompute the FULL aggregate from the whole cache each
+    # run. The ledger still gates fetching (no major is re-scraped), but the
+    # denominators are now consistent across runs instead of carrying each run's
+    # partial deck count. scrape_tournaments tags each deck with its
+    # tournament_id for this.
+    play_cache = load_meta_play_cache()
+    if tournament_decks:
+        new_by_tid: Dict[str, list] = {}
+        for d in tournament_decks:
+            tid = str(d.get('tournament_id', '') or '')
+            if tid:
+                new_by_tid.setdefault(tid, []).append(d)
+        for tid, decks in new_by_tid.items():
+            play_cache[tid] = decks   # replace this tournament's decks (re-scrape safe)
+        save_meta_play_cache(play_cache)
+        logger.info("Meta-Play!-Cache: %d Turniere, %d Decks gesamt",
+                    len(play_cache), sum(len(v) for v in play_cache.values()))
+    all_play_decks = [d for decks in play_cache.values() for d in decks]
+
     aggregated_data = []
     aggregated_data.extend(aggregate_with_meta(limitless_decks, card_db, "Meta Live"))
-    aggregated_data.extend(aggregate_with_meta(tournament_decks, card_db, "Meta Play!"))
+    aggregated_data.extend(aggregate_with_meta(all_play_decks, card_db, "Meta Play!"))
 
     if not aggregated_data:
         logger.info("Keine Daten gesammelt. Vorgang beendet.")
         return
 
-    # Do the per-meta merge ourselves (Meta Live = full replace, Meta Play! =
-    # incremental) instead of save_to_csv's generic append-merge, which keys on
-    # archetype|card_name without `meta` and leaves stale Meta Live rows with
-    # outdated denominators. Then write the fully-merged set in one shot.
+    # Per-meta merge: any meta refreshed this run (Meta Live always; Meta Play!
+    # whenever the cache is non-empty) fully REPLACES its prior rows; a meta we
+    # did NOT refresh (failed ladder fetch, still-empty cache) keeps its last
+    # good rows. Both sources are complete snapshots now, so no stale rows
+    # survive. Then write in one shot.
     if settings.get('append_mode', False):
         aggregated_data = _merge_current_meta_rows(aggregated_data, settings["output_file"])
     save_to_csv(aggregated_data, settings["output_file"], append_mode=False)

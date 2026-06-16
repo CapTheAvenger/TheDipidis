@@ -608,6 +608,12 @@ SYNC_PATTERNS = [
     "city_league_analysis_past_scraped.json",
     "tournament_jh_scraped.json",
     "current_meta_scraped_tournaments.json",
+    # Meta Play! raw-deck cache — paired with current_meta_scraped_tournaments
+    # above. The ledger says which majors were fetched; this holds their raw
+    # decks so current_meta_analysis_scraper can recompute the full cumulative
+    # Meta Play! aggregate (consistent denominators) without re-scraping. MUST
+    # stay in lockstep with the ledger in the workflow seed step + rotation reset.
+    "meta_play_decks_cache.json",
     # Set metadata — produced by backend/core/update_sets.py and read
     # by the frontend (Meta Call format-filter, format-window display,
     # etc.). Without this in SYNC_PATTERNS, an Actions-side update_sets

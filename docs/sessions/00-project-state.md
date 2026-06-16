@@ -52,17 +52,18 @@ gets 0 decks → still writes the id into its ledger as "done" → skips it fore
   TEF-POR chunks — purging them would have created duplicates.
 
 ### Verified REAL, not yet fixed
-- **Denominator bug** in `current_meta_card_data.csv` — PARTLY FIXED 2026-06-16
-  (PR pending): `current_meta_analysis_scraper._merge_current_meta_rows` now
-  does a per-meta merge — Meta Live (full ladder snapshot) is REPLACED wholesale
-  each run (fixes the 43/70 inconsistent Meta Live groups + the missing-`meta`
-  cross-collision), Meta Play! stays incremental. Mojibake fixed too:
-  Meta Play! card names now run through `fix_mojibake()` (was `PokÃ© Pad` ×52).
-  REMAINING: Meta Play! cumulative denominators (12/35 groups, e.g. 66 vs 103)
-  are still per-run-partial because there's no raw-deck cache — each run only
-  scrapes NEW majors. Proper fix = persist raw Meta Play! decks and recompute
-  the full aggregate each run (the "separate fetch-cache from aggregate" work).
-  Needs a decision on adding a cache file — see open questions.
+- **Denominator bug** in `current_meta_card_data.csv` — FIXED 2026-06-16
+  (PRs #420 + deck-cache): `_merge_current_meta_rows` replaces each meta's rows
+  wholesale (no stale rows, `meta` in key so Live can't clobber Play). Mojibake
+  fixed (`fix_mojibake()` on Meta Play! names). Meta Play! cumulative
+  denominators fixed via a raw-deck cache: `data/meta_play_decks_cache.json`
+  holds each major's raw decks keyed by tournament_id, so the full Meta Play!
+  aggregate is recomputed every run WITHOUT re-scraping (ledger still gates
+  fetching). The cache is a state file paired with the ledger everywhere:
+  weekly seed step, `prepare_card_data.SYNC_PATTERNS`, and the `update_sets.py`
+  rotation reset. The current_meta ledger was reset to empty once so the next
+  run re-scrapes all current majors to populate the cache (and lands NAIC in
+  Meta Play!).
 - **PUSH_TO_GITHUB.bat footgun** — FIXED 2026-06-16: pointed the bat at
   `backend\core\prepare_card_data.py` and deleted the 0-byte dead root file.
   CI was always fine (uses full path); this only affected local `.bat` pushes.

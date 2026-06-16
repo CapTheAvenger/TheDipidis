@@ -942,6 +942,19 @@ def apply_format_window_to_scraper_settings(format_window_path: str,
         except OSError as e:
             print(f"[Update Sets] ! could not reset current_meta_scraped_tournaments.json: {e}")
 
+        # Reset the Meta Play! raw-deck cache in lockstep with the ledger above.
+        # It accumulates the current format's majors so the cumulative Meta
+        # Play! aggregate stays consistent; carrying old-format decks past a
+        # rotation would inflate the new format with stale tournaments.
+        cma_cache_path = os.path.join(data_dir, 'meta_play_decks_cache.json')
+        try:
+            with open(cma_cache_path, 'w', encoding='utf-8') as f:
+                json.dump({}, f)
+                f.write('\n')
+            changes.append("meta_play_decks_cache.json reset to empty")
+        except OSError as e:
+            print(f"[Update Sets] ! could not reset meta_play_decks_cache.json: {e}")
+
     if not changes:
         print("[Update Sets] ✓ Scraper settings already in sync with format_window.json")
         return False

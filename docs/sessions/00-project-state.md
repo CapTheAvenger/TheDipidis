@@ -157,7 +157,20 @@ numeric speed/KO guard + loading speed_corpus/battle_data into the prompt is
 deferred (current guides are qualitative; preventive only). Clean v4 regen needs
 no code — cached entries are v2/v3 < PROMPT_VERSION=4 so the next run
 regenerates them through the new validator.
-P2: F-006 HTML-as-data confirm · npm lockfiles in bot/+prerender · firebase-admin pin.
+~~P2~~ DONE/verified 2026-06-16:
+- F-006: the dangerous part (eval-style `<script>` execution from the comparison
+  HTML) was already removed — matchup data now comes from CSV
+  (`buildMatchupRegistryFromCsv`). `loadCurrentMeta` still injects the scraper
+  HTML via innerHTML (the only `.html`-as-data spot left); added
+  `_sanitizeScraperHtml` to strip `<script>/<iframe>/<object>/<embed>`, all `on*`
+  handlers and `javascript:` URLs before injection, closing the residual XSS
+  vector. The remaining concern is pure PERFORMANCE (a 1.5 MB HTML fetch+parse
+  on each Current Meta load) — that's a larger refactor (render from JSON/CSV),
+  parked near P3.
+- npm lockfiles: already present (`bot/package-lock.json`,
+  `prerender/package-lock.json`).
+- firebase-admin: already bounded-pinned (`>=6.5,<8`), consistent with every
+  other dep in requirements.txt (all carry upper bounds).
 P3 (own sessions): Firebase v9→v10 modular · monolith code-split per tab.
 
 ## Open questions for the maintainer

@@ -1280,6 +1280,31 @@
             }
         }
 
+        // Defensive sanitization of the scraper-generated comparison HTML
+        // before it goes into the DOM via innerHTML (F-006). The <script>
+        // blocks are already inert when inserted this way and we deliberately
+        // don't execute them, but innerHTML still honours inline event-handler
+        // attributes — an unescaped deck/archetype name rendered as
+        // "<img src=x onerror=…>" would fire. Strip <script>/<iframe>/<object>/
+        // <embed>, every on* attribute, and javascript: URLs. The legitimate
+        // content carries no inline handlers (the JS attaches them
+        // programmatically afterwards), so this is purely belt-and-suspenders.
+        function _sanitizeScraperHtml(root) {
+            if (!root) return root;
+            root.querySelectorAll('script, iframe, object, embed').forEach(el => el.remove());
+            root.querySelectorAll('*').forEach(el => {
+                Array.from(el.attributes).forEach(attr => {
+                    const name = attr.name.toLowerCase();
+                    const val = (attr.value || '').trim().toLowerCase();
+                    const isUrlAttr = name === 'href' || name === 'src' || name === 'xlink:href';
+                    if (name.startsWith('on') || (isUrlAttr && val.startsWith('javascript:'))) {
+                        el.removeAttribute(attr.name);
+                    }
+                });
+            });
+            return root;
+        }
+
         // Toggle for Current Meta cards
         // Load Current Meta - load HTML for display + matchup data from CSV
         async function loadCurrentMeta() {
@@ -1307,6 +1332,7 @@
                 const container = doc.querySelector('.container');
                 if (container) {
                     // Insert the full container HTML (includes stats, climbers, matchups, table)
+                    _sanitizeScraperHtml(container);
                     currentMetaContent.innerHTML = container.innerHTML;
                     
                     // PATCH: Remove inline grid styles from matchup containers for mobile responsiveness

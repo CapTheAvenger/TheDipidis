@@ -121,19 +121,25 @@ them current).
 in app-core.js is the single source of truth (generic `X's ` match, both
 apostrophes, multi-word owners). custom-binder (hardcoded 3-owner list — the real
 bug), app-cards-db (straight-quote-only regex) and app-deck-builder (single-word
-regex) all switched to it; meta-binder's fuzzy tokenizer left as-is. Predictor
-(app-meta-call.js) injection deliberately NOT done — Meta Call is frozen until
-the August Worlds review. JS unit test added.
+regex) all switched to it; meta-binder's fuzzy tokenizer left as-is. JS unit
+test added. Predictor (app-meta-call.js) injection — VERIFIED NOT NEEDED
+2026-06-16 (freeze lifted): the predictor matches archetypes via `normalize()`
+which strips only apostrophe TYPOGRAPHY, not the owner prefix, so "N's Zoroark"
+(`nszoroark`) already stays distinct from "Zoroark" (`zoroark`). Injecting the
+strip helper would MERGE distinct archetypes and HARM accuracy — the old
+"trainer-disambiguation bug" suspicion was a false alarm. Deliberately left
+unchanged. Any real predictor tuning belongs with the August backtest harness.
 
-**JP "EN beats JP" dedup — NOT done (can't be done correctly yet).** Verified in
-data: the proper EN<->JP link (`international_prints`) yields 0 matches for the
-327 jp_only cards (they're all genuinely JP-only, no international release).
-A name-based dedup would be a REGRESSION — e.g. Tropius JP M5-1 shares the name
-with EN JTG-123 but that's an *older, different* Tropius card; suppressing the
-new M5-1 would hide a genuinely-new JP card the City League meta needs. Correct
-fix needs the JP scraper to populate `international_prints` with the real EN
-counterpart per card (a scraper enhancement) — then the existing union-find
-suppresses automatically. Queued, not a quick safe change.
+**JP "EN beats JP" dedup — DONE 2026-06-16** (maintainer supplied the missing
+data source). The EN card detail page (`/cards/CRI/1`) lists the JP counterpart
+under "JP. Prints" (`/cards/jp/M4/1`). `all_cards_scraper.parse_prints_table`
+now captures those into a new `jp_prints` column ("<SET>-<NUM>"), and
+`prepare_card_data.create_merged_database` drops any JP card whose id appears in
+some EN card's `jp_prints` — so the international print wins and genuinely-JP-only
+cards (no EN counterpart yet) stay. Parser verified against the real HTML sample;
+4 unit tests. Takes effect on the next detail-scraping run (the weekly batch).
+(Name-based dedup was correctly rejected earlier — it would hide genuinely-new
+JP cards like Tropius M5-1 that merely share a name with an older EN Tropius.)
 ~~P1 champions guardrails~~ DONE 2026-06-16: `find_offteam_moves` rejects any
 move the German guide attributes that no team Pokémon runs (prompt rule #2) —
 German-guide + English-canonical-only matching, validated zero false positives

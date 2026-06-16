@@ -50,25 +50,28 @@ function initFirebaseRuntime() {
   // window.__firestorePersistenceReady resolves when persistence is
   // enabled (or false if both attempts failed).
   window.__firestorePersistenceReady = (function() {
-    // Feature-detect the persistence APIs instead of try/calling and
-    // catching TypeError. Newer Firestore SDKs (≥ v11) removed
-    // enableMultiTabIndexedDbPersistence — the old try/catch hid the
-    // TypeError but the user-facing 'Cache nicht aktiv (TypeError)'
-    // banner outed it anyway (F-10 from the visual sweep).
     var fs = firebase.firestore();
 
+    // The COMPAT SDK exposes IndexedDB persistence through the instance
+    // method enablePersistence({synchronizeTabs}) — NOT the modular
+    // function names enableIndexedDbPersistence() / initializeFirestore(),
+    // which are not present on the compat firestore() object. An earlier
+    // version guarded on those modular names, so it always fell through to
+    // the in-memory branch and persistence was never actually on. We
+    // feature-detect the real compat method here.
+    if (typeof fs.enablePersistence !== 'function') {
+      window.__firestorePersistenceEnabled = false;
+      window.__firestorePersistenceError = 'api-removed';
+      console.info(
+        '[Firestore] enablePersistence() not available in this SDK build; ' +
+        'decks will be in-memory for this session.'
+      );
+      return Promise.resolve(false);
+    }
+
+    // Single-tab persistence: each tab keeps its own IndexedDB cache.
     function applySingleTab() {
-      if (typeof fs.enableIndexedDbPersistence !== 'function') {
-        window.__firestorePersistenceEnabled = false;
-        window.__firestorePersistenceError = 'api-removed';
-        console.info(
-          '[Firestore] Offline persistence APIs not available in this SDK; ' +
-          'decks will be in-memory for this session. Modern Firestore SDKs ' +
-          'configure persistence via initializeFirestore({localCache: ...}).'
-        );
-        return Promise.resolve(false);
-      }
-      return fs.enableIndexedDbPersistence()
+      return fs.enablePersistence()
         .then(function() {
           window.__firestorePersistenceEnabled = true;
           window.__firestorePersistenceMode = 'single-tab';
@@ -79,7 +82,7 @@ function initFirebaseRuntime() {
           window.__firestorePersistenceEnabled = false;
           window.__firestorePersistenceError = (err && err.code) || 'unknown';
           if (err && err.code === 'failed-precondition') {
-            console.warn('[Firestore] Single-tab persistence also failed: another tab already has it open. Decks will be in-memory only this session.');
+            console.warn('[Firestore] Persistence unavailable: another tab already holds it. Decks will be in-memory only this session.');
           } else if (err && err.code === 'unimplemented') {
             console.warn('[Firestore] Persistence unsupported by this browser (private mode?). Decks will be in-memory only.');
           } else {
@@ -89,14 +92,9 @@ function initFirebaseRuntime() {
         });
     }
 
-    if (typeof fs.enableMultiTabIndexedDbPersistence !== 'function') {
-      // Skip the multi-tab attempt entirely — it would throw a TypeError
-      // that surfaces in the user-facing CLOUD-SYNC banner as
-      // 'TypeError'. Single-tab path also gracefully degrades when
-      // its method is missing.
-      return applySingleTab();
-    }
-    return fs.enableMultiTabIndexedDbPersistence()
+    // Prefer multi-tab (synchronizeTabs) so two open tabs share one cache;
+    // gracefully fall back to single-tab where multi-tab is rejected.
+    return fs.enablePersistence({ synchronizeTabs: true })
       .then(function() {
         window.__firestorePersistenceEnabled = true;
         window.__firestorePersistenceMode = 'multi-tab';
@@ -105,14 +103,16 @@ function initFirebaseRuntime() {
       })
       .catch(function(err) {
         var code = err && err.code;
-        if (code === 'failed-precondition' || code === 'unimplemented') {
-          console.info('[Firestore] Multi-tab persistence rejected (' + code + '); trying single-tab…');
-          return applySingleTab();
+        if (code === 'unimplemented') {
+          // Browser can't do IndexedDB persistence (e.g. private mode).
+          window.__firestorePersistenceEnabled = false;
+          window.__firestorePersistenceError = code;
+          console.info('[Firestore] Persistence unsupported by this browser (private mode?). Decks will be in-memory only.');
+          return false;
         }
-        window.__firestorePersistenceEnabled = false;
-        window.__firestorePersistenceError = code || 'unknown';
-        console.warn('[Firestore] Multi-tab persistence failed:', err);
-        return false;
+        // failed-precondition (another tab) or anything else → try single-tab.
+        console.info('[Firestore] Multi-tab persistence rejected (' + (code || 'unknown') + '); trying single-tab…');
+        return applySingleTab();
       });
   })();
 

@@ -441,7 +441,7 @@
                         _applyCityLeaguePastFallback();
                         return loadCityLeagueData(_fallbackDepth + 1);
                     }
-                    console.error('Leere Hauptdaten fuer Format:', format);
+                    console.info('City League: no main data for format', format, '— expected during the season pause (no tournaments running).');
                     content.innerHTML = '<div class="error">' + (getLang() === 'de'
                         ? 'Aktuell keine City-League-Daten verfügbar (Saison-Pause).'
                         : 'No City League data available right now (off-season).') + '</div>';

@@ -121,9 +121,14 @@ them current).
 in app-core.js is the single source of truth (generic `X's ` match, both
 apostrophes, multi-word owners). custom-binder (hardcoded 3-owner list — the real
 bug), app-cards-db (straight-quote-only regex) and app-deck-builder (single-word
-regex) all switched to it; meta-binder's fuzzy tokenizer left as-is. Predictor
-(app-meta-call.js) injection deliberately NOT done — Meta Call is frozen until
-the August Worlds review. JS unit test added.
+regex) all switched to it; meta-binder's fuzzy tokenizer left as-is. JS unit
+test added. Predictor (app-meta-call.js) injection — VERIFIED NOT NEEDED
+2026-06-16 (freeze lifted): the predictor matches archetypes via `normalize()`
+which strips only apostrophe TYPOGRAPHY, not the owner prefix, so "N's Zoroark"
+(`nszoroark`) already stays distinct from "Zoroark" (`zoroark`). Injecting the
+strip helper would MERGE distinct archetypes and HARM accuracy — the old
+"trainer-disambiguation bug" suspicion was a false alarm. Deliberately left
+unchanged. Any real predictor tuning belongs with the August backtest harness.
 
 **JP "EN beats JP" dedup — DONE 2026-06-16** (maintainer supplied the missing
 data source). The EN card detail page (`/cards/CRI/1`) lists the JP counterpart

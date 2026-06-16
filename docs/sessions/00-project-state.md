@@ -43,20 +43,26 @@ gets 0 decks → still writes the id into its ledger as "done" → skips it fore
 - **Past Meta (JH)**: `tournament_scraper_JH.py` marked empty/failed probes as
   scraped (lines ~1074 and ~1101). **Fix applied: only commit an id to the ledger
   when the tournament yielded real deck rows; empty/failed probes are revisited.**
-  UPDATE 2026-06-16 (post weekly run): NAIC's JH-id is **518** (maintainer
-  confirmed `limitlesstcg.com/tournaments/518`). The JH ledger has a gap exactly
-  at 518 (516,517,[518],519…) yet 519–525 ARE there → 518 is DISCOVERED every
-  run but FILTERED before ledgering, so it never reaches
-  `tournament_cards_data_cards_TEF-CRI.csv` (still only Turin/540 after the run).
-  Most likely cause: the broad `"format=Expanded" in html_text` substring in
-  `get_tournament_info` misclassifies a Standard major whose page links an
-  Expanded view in a menu. **Fix 2026-06-16:** tightened the Expanded check to
-  the parsed format link only + added a type-skip diagnostic log. Verify after
-  the next run; if NAIC is still missing the log will name the real filter (e.g.
-  the JP flag heuristic). labs already has NAIC (0070) correctly.
+  ROOT CAUSE FOUND 2026-06-16 (from the 11:05 UTC run's CI log via the GitHub
+  MCP): the JH scraper was **crashing at startup every run** —
+  `_reassemble_monolith_from_chunks` raised `ValueError: dict contains fields
+  not in fieldnames: 'is_ace_spec,'`. The committed
+  `tournament_cards_data_cards_TEF-CRI.csv` had a **corrupted header** with a
+  stray trailing comma on its last column (`is_ace_spec,`); every other chunk
+  has `is_ace_spec`. The writer crashed on the mismatch, so the scraper aborted
+  BEFORE discovering any tournament — 518 was never even reached (my earlier
+  Expanded tweak + the JP flag heuristic were red herrings: the discovery loop
+  never ran). FIX: (1) repaired the TEF-CRI header, (2) hardened
+  `_reassemble_monolith_from_chunks` to strip trailing commas/whitespace from
+  every chunk's field names + `extrasaction="ignore"`, so a malformed header
+  can never silently kill the scraper again (2 regression tests). The
+  reconciliation sanity-gate I added earlier CORRECTLY fired the
+  `::warning::` for the missing NAIC — good validation. Next run should now
+  discover + scrape 518 and land NAIC in Past Meta + Deck Analysis Global.
   POST-RUN GOOD STATE: current_meta ledger has 0069+0070, deck-cache holds 512
-  decks from both, Meta Play! 229→1309 rows — Current Meta Global + cumulative
-  denominators work; only the JH/Past-Meta side still misses NAIC.
+  decks from both, Meta Play! grew to ~1309 rows, and the new EN-beats-JP dedup
+  suppressed **1632** JP prints — those pipelines work; only the JH cards side
+  was blocked by the crash.
 
 ### Meta Call display — stack ALL current-format majors (2026-06-16)
 Current Meta showed only the LAST major per deck (single chip = NAIC), hiding

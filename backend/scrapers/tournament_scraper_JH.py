@@ -979,17 +979,31 @@ def _reassemble_monolith_from_chunks(monolith_path: str, data_dir: str) -> int:
 
     rows_written = 0
     fieldnames: List[str] = []
+
+    # Normalize away header corruption before it can crash the whole
+    # reassembly. A single chunk once shipped a stray trailing comma on its
+    # last column ("is_ace_spec," in tournament_cards_data_cards_TEF-CRI.csv);
+    # csv.DictWriter then raised "dict contains fields not in fieldnames" and
+    # the JH scraper aborted at startup — silently, so NO new tournament
+    # (including NAIC) ever reached the cards pipeline. Strip trailing
+    # commas/whitespace from every chunk's field names and remap each row's
+    # keys to the clean form; extrasaction="ignore" is a final safety net.
+    def _clean_field(fn: str) -> str:
+        return (fn or "").strip().rstrip(",").strip()
+
     with open(monolith_path, "w", newline="", encoding="utf-8-sig") as dst:
         writer = None
         for chunk_path in chunks:
             with open(chunk_path, "r", encoding="utf-8-sig") as src:
                 reader = csv.DictReader(src, delimiter=";")
+                key_map = {rf: _clean_field(rf) for rf in (reader.fieldnames or [])}
                 if writer is None:
-                    fieldnames = list(reader.fieldnames or [])
-                    writer = csv.DictWriter(dst, fieldnames=fieldnames, delimiter=";")
+                    fieldnames = [_clean_field(rf) for rf in (reader.fieldnames or [])]
+                    writer = csv.DictWriter(dst, fieldnames=fieldnames,
+                                            delimiter=";", extrasaction="ignore")
                     writer.writeheader()
                 for row in reader:
-                    writer.writerow(row)
+                    writer.writerow({key_map.get(k, k): v for k, v in row.items()})
                     rows_written += 1
 
     logger.info(

@@ -1907,8 +1907,11 @@ window.MetaCall = (function () {
   // dd.MM. for short display under deck cards (e.g. "27.4.").
   function _formatShortDate(iso) {
     if (!iso || !/^\d{4}-\d{2}-\d{2}$/.test(iso)) return '';
-    const [, m, d] = iso.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-    return `${parseInt(d, 10)}.${parseInt(m, 10)}.`;
+    // Match groups are [full, year, month, day]. The old `[, m, d]` bound
+    // year+month and dropped the day, rendering "2026-06-12" as "6.2026."
+    // instead of "12.6.". Bind month + day explicitly.
+    const [, , mo, da] = iso.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    return `${parseInt(da, 10)}.${parseInt(mo, 10)}.`;
   }
 
   // Extract the "main pokemon" for grouping purposes.

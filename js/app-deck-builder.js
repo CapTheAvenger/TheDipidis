@@ -3712,6 +3712,24 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 const safeCardId = cardId.replace(/'/g, "\\'");
                 const safeCardName = resolvedName.replace(/'/g, "\\'");
 
+                // Resolve the Cardmarket URL for this card so the "Open Cardmarket"
+                // button actually opens a page. Prefer a url carried on the card
+                // object, otherwise look it up in the price index (same set/number
+                // normalisation the deck/meta card buttons use: padded + stripped).
+                let scCardmarketUrl = (normalizedCardData && normalizedCardData.cardmarket_url) || '';
+                if (!scCardmarketUrl && resolvedSet && resolvedNum && window.cardsBySetNumberMap) {
+                    const setNorm = String(resolvedSet).trim().toUpperCase();
+                    const numPadded = String(resolvedNum).trim();
+                    const numStripped = numPadded.replace(/^0+/, '') || '0';
+                    const priceCard = window.cardsBySetNumberMap[`${setNorm}-${numStripped}`]
+                                   || window.cardsBySetNumberMap[`${setNorm}-${numPadded}`]
+                                   || window.cardsBySetNumberMap[`${resolvedSet}-${numStripped}`]
+                                   || window.cardsBySetNumberMap[`${resolvedSet}-${numPadded}`]
+                                   || null;
+                    if (priceCard) scCardmarketUrl = priceCard.cardmarket_url || '';
+                }
+                const scCardmarketUrlEscaped = String(scCardmarketUrl).replace(/'/g, "\\'");
+
                 let btns = '';
                 // Wishlist
                 btns += `<button class="sc-action-btn sc-action-wishlist${isW ? ' active' : ''}" onclick="toggleWishlist('${safeCardId}'); setTimeout(()=>{const p=document.getElementById('singleCardActionsPanel'); if(p){const b=p.querySelector('.sc-action-wishlist'); const w=window.userWishlist&&window.userWishlist.has('${safeCardId}'); b.classList.toggle('active',w); b.querySelector('.sc-action-icon').textContent=w?'♥':'♡'; b.querySelector('.sc-action-label').textContent=w?t('action.wishlistActive'):t('action.wishlist');}},200);">
@@ -3741,7 +3759,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                     <span class="sc-action-label">${t('action.printProxy')}</span>
                 </button>`;
                 // Cardmarket
-                btns += `<button class="sc-action-btn sc-action-market" onclick="if(typeof openCardmarket==='function')openCardmarket('','${safeCardName}')">
+                btns += `<button class="sc-action-btn sc-action-market" onclick="if(typeof openCardmarket==='function')openCardmarket('${scCardmarketUrlEscaped}','${safeCardName}')">
                     <span class="sc-action-icon">€</span>
                     <span class="sc-action-label">${t('action.cardmarket')}</span>
                 </button>`;

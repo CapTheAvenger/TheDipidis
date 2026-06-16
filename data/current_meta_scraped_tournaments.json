@@ -1,5 +1,8 @@
 {
-  "scraped_tournament_ids": [],
-  "last_updated": "2026-06-16 07:46:00",
-  "total_count": 0
+  "scraped_tournament_ids": [
+    "0069",
+    "0070"
+  ],
+  "last_updated": "2026-06-16 08:05:17",
+  "total_count": 2
 }

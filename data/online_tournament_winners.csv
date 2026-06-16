@@ -1,4 +1,7 @@
 tournament_id,tournament_date,format,player_count,winner_archetype,winner_winrate
+6a3054592d97f3b0c26177c9,2026-06-16,CRI,108,Dragapult Dusknoir,18.0
+6a271ec756b11a587a94c62a,2026-06-15,CRI,136,Lucario Hariyama,21.0
+6a27213f47f3797bf6baf54d,2026-06-15,CRI,162,Okidogi Barbaracle,34.0
 6a272b2856b11a587a94c6c3,2026-06-15,CRI,141,Lucario Hariyama,28.0
 6a2cae432d97f3b0c2615295,2026-06-13,CRI,104,Rocket's Honchkrow,30.0
 not-at-naic-but-thats-ok,2026-06-13,CRI,266,Dragapult Blaziken,31.0
@@ -44,6 +47,3 @@ really-tries,2026-05-26,CRI,128,Slowking,21.0
 yes-chaos-rising-is-legal,2026-05-23,CRI,284,N's Zoroark,31.0
 6a075d6cdfbdf089cbbdae47,2026-05-21,CRI,161,Dragapult,34.0
 6a0db12ddfbdf089cbbddd0f,2026-05-20,CRI,112,Alakazam Dudunsparce,28.0
-6a05e7e913f957d6d4b47be5,2026-05-19,CRI,128,Grimmsnarl Froslass,18.0
-6a01268213f957d6d4b4574a,2026-05-18,CRI,163,Raging Bolt Ogerpon,21.0
-6a02f37213f957d6d4b46851,2026-05-18,CRI,201,Alakazam Dudunsparce,35.0

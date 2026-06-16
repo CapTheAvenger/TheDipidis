@@ -98,7 +98,7 @@ echo.
 echo [3c/7] Pruefen ob Scraper-Daten aktuell sind...
 set "BACKEND_DATA=backend\core\data"
 set "MANIFEST=data\cards_manifest.json"
-set "PREPARE_SCRIPT=prepare_card_data.py"
+set "PREPARE_SCRIPT=backend\core\prepare_card_data.py"
 
 REM --- Check 1: Backend scraper data vorhanden? ---
 set "CSV_COUNT=0"

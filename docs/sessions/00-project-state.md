@@ -60,9 +60,9 @@ gets 0 decks → still writes the id into its ledger as "done" → skips it fore
   band-aids (`app-current-meta-analysis.js:524`). Root cause unfixed.
   + Compounding: Meta Play! card names skip `fix_mojibake()`
   (`current_meta_analysis_scraper.py:~491`) → `PokÃ© Pad` duplicates (52 rows).
-- **PUSH_TO_GITHUB.bat footgun**: runs `prepare_card_data.py` from repo root,
-  which is a **0-byte dead file** (the real one is `backend/core/prepare_card_data.py`).
-  CI is fine (uses full path); only local `.bat` pushes are affected.
+- **PUSH_TO_GITHUB.bat footgun** — FIXED 2026-06-16: pointed the bat at
+  `backend\core\prepare_card_data.py` and deleted the 0-byte dead root file.
+  CI was always fine (uses full path); this only affected local `.bat` pushes.
 - **keep_latest_sets divergence**: config=1, japanese settings=12, hardcode=4.
   Decision: don't drive by set count — keep JP CSVs but make the **international
   (EN) print always win on card identity** in merge/dedup.

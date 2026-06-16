@@ -661,6 +661,9 @@ SYNC_PATTERNS = [
     # of current_meta_analysis_scraper.py (same crawl, dual emit).
     # Read by the deck-builder's time-decay scoring path.
     "online_tournament_dated_cards.csv",
+    # Best REAL online decklist per archetype (last 7 days) — feeds the
+    # "Latest Online" quick-reference panel with an actual player's list.
+    "online_best_decklists.json",
 ]
 
 

@@ -196,7 +196,11 @@
   // single representative deck by taking Math.round(average_count)
   // for every card with positive average. This is the same shape
   // the deck-builder produces, so the 3-way diff is apples-to-apples.
-  async function findBestOnlineBuild(archetype) {
+  //
+  // FALLBACK ONLY: used when online_best_decklists.json (the REAL best-placed
+  // decklist produced by the scraper) isn't available yet or doesn't cover the
+  // archetype. The real list is always preferred — see findBestOnlineBuild.
+  async function _findSynthesizedOnlineBuild(archetype) {
     const rows = await _loadOnlineDatedCards();
     if (!Array.isArray(rows) || rows.length === 0) return null;
 
@@ -293,6 +297,56 @@
       total_decks_in_archetype: totalDecksInArchetype,
       cards: _legalizeOnlineBuild(_consolidateCards(cards)),
     };
+  }
+
+  // ── Best Online (REAL): the actual best-placed decklist of the last 7 days,
+  // produced by current_meta_analysis_scraper into online_best_decklists.json.
+  // No synthesis/averaging — an actual list a player ran. Falls back to the
+  // synthesized build only when the file is missing or doesn't cover the
+  // archetype (e.g. before the first scraper run that produces it).
+  let _bestOnlinePromise = null;
+  function _loadBestOnlineDecklists() {
+    if (_bestOnlinePromise) return _bestOnlinePromise;
+    if (typeof fetch !== 'function') {        // non-browser (unit tests) → fall back
+      _bestOnlinePromise = Promise.resolve(null);
+      return _bestOnlinePromise;
+    }
+    _bestOnlinePromise = fetch('data/online_best_decklists.json?t=' + Date.now())
+      .then(r => (r.ok ? r.json() : null))
+      .catch(() => null);
+    return _bestOnlinePromise;
+  }
+
+  async function findBestOnlineBuild(archetype) {
+    const best = await _loadBestOnlineDecklists();
+    if (best && typeof best === 'object') {
+      let entry = best[archetype];
+      if (!entry) {
+        const want = _norm(archetype);
+        for (const k of Object.keys(best)) {
+          if (_norm(k) === want) { entry = best[k]; break; }
+        }
+      }
+      if (entry && Array.isArray(entry.cards) && entry.cards.length) {
+        const m = String(entry.score || '').match(/^\s*(\d+)\s*-\s*(\d+)\s*-\s*(\d+)/);
+        return {
+          isReal:          true,
+          tournament_id:   entry.tournament_id || '',
+          tournament_name: entry.tournament_name || '',
+          tournament_date: entry.tournament_date || '',
+          place:           entry.place || '',
+          player:          entry.player || '',
+          wins:   m ? parseInt(m[1], 10) : 0,
+          losses: m ? parseInt(m[2], 10) : 0,
+          ties:   m ? parseInt(m[3], 10) : 0,
+          win_pct: entry.win_pct || 0,
+          total_players: entry.total_players || 0,
+          cards: _consolidateCards((entry.cards || []).map(c => Object.assign({}, c, { count: c.count || 0 }))),
+        };
+      }
+    }
+    // Fallback: synthesized (legalized) build until the real file exists.
+    return _findSynthesizedOnlineBuild(archetype);
   }
 
   // ── UI: render the two reference panels ──────────────────────────
@@ -473,7 +527,23 @@
           <div class="past-meta-best-sub">${_escHtml(tournName)} · ${_escHtml(ref.tournament_date)} · ${total} ${_escHtml(cardsLbl)}</div>
         </div>`;
     }
-    // Online — no player/placement, just tournament + aggregated total
+    // Online — REAL best-placed decklist (place + player + record) when the
+    // scraper provides it; otherwise the synthesized aggregate fallback.
+    if (ref.isReal) {
+      const games = (ref.wins || 0) + (ref.losses || 0) + (ref.ties || 0);
+      const recordBlock = games > 0
+        ? `<span class="past-meta-best-record">${ref.wins || 0}-${ref.losses || 0}-${ref.ties || 0} · ${(ref.win_pct || 0).toFixed(1).replace('.', ',')}%</span>`
+        : '';
+      return `
+        <div class="past-meta-best-header" style="background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);">
+          <div class="past-meta-best-headline">
+            <span class="past-meta-best-place">${_escHtml(ref.place || '')}</span>
+            <span class="past-meta-best-name">${_escHtml(ref.player || '')}</span>
+            ${recordBlock}
+          </div>
+          <div class="past-meta-best-sub">${_escHtml(tournName || 'Limitless Online')} · ${_escHtml(ref.tournament_date)} · ${total} ${_escHtml(cardsLbl)}</div>
+        </div>`;
+    }
     return `
       <div class="past-meta-best-header" style="background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);">
         <div class="past-meta-best-headline">

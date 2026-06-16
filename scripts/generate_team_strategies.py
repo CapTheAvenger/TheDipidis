@@ -526,10 +526,94 @@ def find_hallucinated_megas(text: str, team: Dict[str, Any]) -> List[str]:
     return uniq
 
 
+# Parenthetical English name in the bilingual "Deutsch (English)" form.
+_PAREN_EN_RE = re.compile(r"\(([A-Za-z][A-Za-z0-9 '\-\.]+?)\)")
+
+
+def _german_prose(obj: Dict[str, Any]) -> str:
+    b = obj.get('de') or {}
+    parts: List[str] = [b.get('overview') or '']
+    for r in b.get('roles') or []:
+        parts.append(r.get('role') or '')
+    parts.extend(b.get('game_plan') or [])
+    parts.extend(b.get('tips') or [])
+    return '\n'.join(parts)
+
+
+def find_offteam_moves(obj: Dict[str, Any], team: Dict[str, Any]) -> List[str]:
+    """Enforce prompt rule #2: the guide must not attribute a move to the
+    team that no team Pokémon actually runs.
+
+    Only the GERMAN guide is scanned. There the bilingual form is
+    "<Deutsch> (<English>)", so the parenthetical is the English canonical
+    name and we can match it against the English move keys precisely. (The
+    English guide's parenthetical is the German name, which collides with
+    de_name aliases like 'Felswurf' -> 'Rock Tomb' and produced a false
+    positive in testing.) We only accept a hit when the matched key equals
+    the canonical English name (`key == hit[0]`), never a de_name alias.
+
+    Unlike abilities/items this needs no Mega-stone resolution — a Mega form
+    changes ability/stats but never gains a move. Validated against all 20
+    live strategies: zero false positives (matches the 2026-06-15 audit's
+    finding of zero genuine hallucinations).
+    """
+    _ensure_references_loaded()
+    moves_idx = _MOVES_IDX or {}
+    team_moves: set = set()
+    for p in team.get('pokemon') or []:
+        for m in p.get('moves') or []:
+            key = _norm_lookup(m)
+            hit = moves_idx.get(key)
+            if hit:
+                team_moves.add(hit[0].lower())
+            team_moves.add(key)
+    offenders: List[str] = []
+    seen: set = set()
+    for match in _PAREN_EN_RE.finditer(_german_prose(obj)):
+        key = _norm_lookup(match.group(1))
+        hit = moves_idx.get(key)
+        if not hit or key != hit[0].lower():
+            continue  # unknown token, or a de_name alias — skip
+        canon = hit[0].lower()
+        if canon in team_moves or canon in seen:
+            continue
+        seen.add(canon)
+        offenders.append(hit[0])
+    return offenders
+
+
+# Coverage below this fraction means the model had to improvise un-grounded
+# names/effects for most of the team — surfaced as a ::warning:: per run.
+REFERENCE_COVERAGE_WARN = 0.5
+
+
+def reference_coverage(team: Dict[str, Any]) -> float:
+    """Fraction of the team's moves + items + abilities that have a
+    reference entry (i.e. are grounded). Low coverage flags exactly the
+    teams where the model must lean on training knowledge."""
+    _ensure_references_loaded()
+    moves_idx = _MOVES_IDX or {}
+    items_idx = _ITEMS_IDX or {}
+    abilities_idx = _ABILITIES_IDX or {}
+    total = 0
+    covered = 0
+    for p in team.get('pokemon') or []:
+        for m in p.get('moves') or []:
+            if (m or '').strip():
+                total += 1
+                covered += 1 if moves_idx.get(_norm_lookup(m)) else 0
+        for value, idx in ((p.get('item'), items_idx), (p.get('ability'), abilities_idx)):
+            if (value or '').strip():
+                total += 1
+                covered += 1 if idx.get(_norm_lookup(value)) else 0
+    return (covered / total) if total else 1.0
+
+
 def validate_strategy_facts(obj: Dict[str, Any], team: Dict[str, Any]) -> Tuple[bool, str]:
-    """Run the v3 hallucination guards across the generated strategy.
-    Returns (ok, reason). Currently checks for invented Mega forms;
-    additional guards can plug in here as failure modes surface."""
+    """Run the hallucination guards across the generated strategy.
+    Returns (ok, reason): invented Mega forms (rule #1) and off-team moves
+    (rule #2). A failure logs a warning and is not cached, so the next run
+    retries."""
     # Concatenate every prose field across both languages.
     prose_parts: List[str] = []
     for lang in ('de', 'en'):
@@ -544,6 +628,10 @@ def validate_strategy_facts(obj: Dict[str, Any], team: Dict[str, Any]) -> Tuple[
     bad_megas = find_hallucinated_megas(blob, team)
     if bad_megas:
         return False, 'hallucinated Mega forms: ' + '; '.join(bad_megas)
+
+    offteam = find_offteam_moves(obj, team)
+    if offteam:
+        return False, 'off-team moves (not on any team Pokémon): ' + '; '.join(offteam)
     return True, ''
 
 
@@ -716,10 +804,26 @@ def generate_for_team(client: Any, team: Dict[str, Any]) -> Optional[Dict[str, A
     facts_block = format_facts_block(facts)
     system_prompt = build_system_prompt(facts_block)
 
+    # Surface the grounding gap: a low coverage means most of this team's
+    # moves/items/abilities have no reference entry, so the model has to
+    # improvise their names/effects from training knowledge — exactly where
+    # hallucinations creep in. Worth a per-rotation ::warning:: so the
+    # reference files can be topped up.
+    cov = reference_coverage(team)
+    if cov < REFERENCE_COVERAGE_WARN:
+        print(f"    ::warning::low reference coverage {cov:.0%} for team "
+              f"{team.get('team_name') or team.get('replica_code') or '?'} — "
+              f"model must improvise un-grounded names/effects for the rest")
+
     user_msg = (
         "Erkläre die Strategie dieses Pokémon-Champions-Teams für einen "
         "absoluten Anfänger:\n\n" + format_team_for_prompt(team)
     )
+    # NB: temperature is intentionally NOT set. The request uses extended
+    # thinking (thinking={'type': 'adaptive'}), which requires temperature=1 —
+    # a low temperature would be rejected by the API. The factual guards
+    # (Mega + off-team-move validators) are the lever against drift here, not
+    # sampling temperature.
     with client.messages.stream(
         model=MODEL,
         max_tokens=MAX_TOKENS,

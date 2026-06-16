@@ -11,6 +11,7 @@ Combines Limitless Online (Meta Live) and Play! Tournaments (Meta Play!).
 
 import os
 import sys
+import csv
 import json
 import re
 import time
@@ -488,7 +489,7 @@ def _fetch_meta_play_decklist(url: str, archetype: str, card_db: CardDatabaseLoo
 
                 for category in ['pokemon', 'trainer', 'energy']:
                     for c in msg.get(category, []):
-                        name = html_module.unescape(c.get('name', '')).replace("\u2019", "'")
+                        name = fix_mojibake(html_module.unescape(c.get('name', ''))).replace("\u2019", "'")
                         count = int(c.get('count', 0))
                         set_code = str(c.get('set', '')).strip().upper()
                         set_num = str(c.get('number', '')).strip()
@@ -676,6 +677,63 @@ def aggregate_with_meta(all_decks: list, card_db: CardDatabaseLookup, meta_label
         row["meta"] = meta_label
     return aggregated
 
+
+def _merge_current_meta_rows(new_rows: list, output_file: str) -> list:
+    """Merge freshly-aggregated rows with the committed CSV, per meta source.
+
+    The two sources have different correct semantics:
+
+    * "Meta Live" is a COMPLETE fresh snapshot of the online ladder every run
+      (no scraped-ids ledger). It must REPLACE all prior Meta Live rows
+      wholesale — otherwise a card that left the ladder keeps its old row with
+      a now-stale total_decks_in_archetype denominator, and the per-run ladder
+      size drift (e.g. 19 -> 20 decks) leaves the same archetype group carrying
+      two different denominators. That was the bulk of the
+      AUDIT_DATA_PIPELINE denominator bug (43 of 70 Meta Live groups).
+
+    * "Meta Play!" is INCREMENTAL (only tournaments new since the last run are
+      scraped, gated by the ledger), so its prior rows are preserved and only
+      the colliding (archetype, card_name) entries are replaced.
+
+    The previous code routed both through save_to_csv's append-merge whose key
+    omits `meta`, which left stale Meta Live rows AND let a Meta Live row
+    collide with a Meta Play! row for the same archetype+card.
+    """
+    out_path = os.path.join(get_data_dir(), output_file)
+    if not os.path.exists(out_path):
+        return new_rows
+    with open(out_path, 'r', encoding='utf-8-sig') as f:
+        existing = list(csv.DictReader(f, delimiter=';'))
+
+    new_live = [r for r in new_rows if r.get('meta') == 'Meta Live']
+    new_play = [r for r in new_rows if r.get('meta') == 'Meta Play!']
+
+    result: list = []
+
+    # Meta Live — full replace, but only when we actually got a fresh snapshot
+    # (a failed ladder fetch must never wipe the last good Meta Live rows).
+    if new_live:
+        result.extend(new_live)
+    else:
+        result.extend(r for r in existing if r.get('meta') == 'Meta Live')
+
+    # Meta Play! — incremental: keep prior rows except those superseded by a
+    # newly-scraped (archetype, card_name).
+    if new_play:
+        play_keys = {(r.get('archetype', ''), r.get('card_name', '')) for r in new_play}
+        result.extend(
+            r for r in existing
+            if r.get('meta') == 'Meta Play!'
+            and (r.get('archetype', ''), r.get('card_name', '')) not in play_keys
+        )
+        result.extend(new_play)
+    else:
+        result.extend(r for r in existing if r.get('meta') == 'Meta Play!')
+
+    # Any other meta (defensive) — pass through untouched.
+    result.extend(r for r in existing if r.get('meta') not in ('Meta Live', 'Meta Play!'))
+    return result
+
 # ============================================================
 # MAIN
 # ============================================================
@@ -708,8 +766,13 @@ def main():
         logger.info("Keine Daten gesammelt. Vorgang beendet.")
         return
 
-    append_mode = settings.get('append_mode', False)
-    save_to_csv(aggregated_data, settings["output_file"], append_mode=append_mode)
+    # Do the per-meta merge ourselves (Meta Live = full replace, Meta Play! =
+    # incremental) instead of save_to_csv's generic append-merge, which keys on
+    # archetype|card_name without `meta` and leaves stale Meta Live rows with
+    # outdated denominators. Then write the fully-merged set in one shot.
+    if settings.get('append_mode', False):
+        aggregated_data = _merge_current_meta_rows(aggregated_data, settings["output_file"])
+    save_to_csv(aggregated_data, settings["output_file"], append_mode=False)
 
     # Dated CSV — same crawl, second output. Frontend's recency-decay
     # (_aggregateWeightedSource in app-deck-builder.js) reads this path

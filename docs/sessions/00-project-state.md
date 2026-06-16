@@ -52,14 +52,17 @@ gets 0 decks → still writes the id into its ledger as "done" → skips it fore
   TEF-POR chunks — purging them would have created duplicates.
 
 ### Verified REAL, not yet fixed
-- **Denominator bug** in `current_meta_card_data.csv`: append-merge in
-  `card_scraper_shared.py:889` keys on `archetype|card_name` (not `meta`, denom
-  not in key). 55/105 (archetype,meta) groups have inconsistent
-  `total_decks_in_archetype`; ~38% of rows carry a stale denominator → wrong
-  `percentage_in_archetype` (up to +83pp). Frontend masks it with max()/min()
-  band-aids (`app-current-meta-analysis.js:524`). Root cause unfixed.
-  + Compounding: Meta Play! card names skip `fix_mojibake()`
-  (`current_meta_analysis_scraper.py:~491`) → `PokÃ© Pad` duplicates (52 rows).
+- **Denominator bug** in `current_meta_card_data.csv` — PARTLY FIXED 2026-06-16
+  (PR pending): `current_meta_analysis_scraper._merge_current_meta_rows` now
+  does a per-meta merge — Meta Live (full ladder snapshot) is REPLACED wholesale
+  each run (fixes the 43/70 inconsistent Meta Live groups + the missing-`meta`
+  cross-collision), Meta Play! stays incremental. Mojibake fixed too:
+  Meta Play! card names now run through `fix_mojibake()` (was `PokÃ© Pad` ×52).
+  REMAINING: Meta Play! cumulative denominators (12/35 groups, e.g. 66 vs 103)
+  are still per-run-partial because there's no raw-deck cache — each run only
+  scrapes NEW majors. Proper fix = persist raw Meta Play! decks and recompute
+  the full aggregate each run (the "separate fetch-cache from aggregate" work).
+  Needs a decision on adding a cache file — see open questions.
 - **PUSH_TO_GITHUB.bat footgun** — FIXED 2026-06-16: pointed the bat at
   `backend\core\prepare_card_data.py` and deleted the 0-byte dead root file.
   CI was always fine (uses full path); this only affected local `.bat` pushes.

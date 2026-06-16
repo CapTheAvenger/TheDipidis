@@ -179,3 +179,36 @@ P3 (own sessions): Firebase v9→v10 modular · monolith code-split per tab.
   limitlesstcg.com to publish? (The JH code fix is in either way.)
 - Sequence: bundle the denominator+mojibake fix with the reconciliation sanity-gate
   next, or ship the small wins (.bat, SHA-pinning) first?
+
+## UX / clarity audit (2026-06-16, via Chrome plugin) — findings + status
+A full beginner-perspective UX test landed. Key code-level findings + plan:
+
+DONE this batch (safe copy fixes, language-aware via getLang()):
+- "Aktuelles Meta" tier view: hardcoded English headings → DE/EN
+  ("Overall (Brought share)" → "Wie oft gespielt", "Top-8 (Conversion)" →
+  "Wie oft Top-8 erreicht", "Share" → "Anteil", the "Data: …" line →
+  "Datenbasis: …"). (js/app-tier-meta.js)
+- City League red error during the off-season now reads
+  "Aktuell keine City-League-Daten verfügbar (Saison-Pause)." instead of the
+  English "Error loading City League Meta data" (js/app-city-league.js, 4 spots).
+- F-006 HTML sanitization (separate commit 1214baf).
+
+REFINED finding (important): the Meta Call column headers ALREADY have tooltips
+(native `title=` with DE+EN text in i18n.js, mc.header*Tooltip). The audit's "no
+tooltips" is real from the USER's side because native `title` tooltips don't show
+on touch/mobile and are slow on desktop. Real fix = a visible/tappable ⓘ
+indicator (CSS + small JS) — needs browser verification, not done blind.
+
+STILL OPEN (prioritized, need Chrome-verify before merge — GitHub MCP was down):
+- 🔴 Tappable ⓘ tooltips on Meta Call + Aktuelles Meta headers (mobile).
+- 🔴 Remaining DE/EN mix: tier subtitles (Meta Dominators/Strong Contenders/
+  Niche Picks, config objects in app-tier-meta.js), "Trade List" → "Tauschliste",
+  deck search placeholder, badge strings.
+- 🟠 Glossary tooltips for jargon (Day-2, KONV., WR, brought share, Avg. Enc.,
+  Counter-Meta, Cooking) — the maintainer's report has ready 1-sentence DE texts.
+- 🟠 Unify date format to TT.MM.JJJJ (the ISO "Datenfenster ab: ≥ 2026-05-22"
+  still shows ISO; the major-stack date was already fixed to day.month).
+- 🟠 Mobile: Meta Call table horizontal-scrolls, last col (Avg. Enc.) hidden;
+  start-page 3-col grid too tight at ~500px → needs responsive CSS + browser test.
+- 🟡 Onboarding: "new here? start with Meta Call" entry point; a 1-line
+  "expected field → bring techs vs X" action summary on Meta Call.

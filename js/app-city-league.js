@@ -369,7 +369,9 @@
                         return loadCityLeagueData(_fallbackDepth + 1);
                     }
                     console.error('Hauptdaten fehlen fuer Format:', format);
-                    content.innerHTML = '<div class="error">Error loading City League Meta data</div>';
+                    content.innerHTML = '<div class="error">' + (getLang() === 'de'
+                        ? 'Aktuell keine City-League-Daten verfügbar (Saison-Pause).'
+                        : 'No City League data available right now (off-season).') + '</div>';
                     return;
                 }
 
@@ -440,7 +442,9 @@
                         return loadCityLeagueData(_fallbackDepth + 1);
                     }
                     console.error('Leere Hauptdaten fuer Format:', format);
-                    content.innerHTML = '<div class="error">Error loading City League Meta data</div>';
+                    content.innerHTML = '<div class="error">' + (getLang() === 'de'
+                        ? 'Aktuell keine City-League-Daten verfügbar (Saison-Pause).'
+                        : 'No City League data available right now (off-season).') + '</div>';
                     return;
                 }
 
@@ -548,7 +552,9 @@
                     '.deck-banner-card, .tier-section, .tier-hero-card, .city-league-table-wrap, .meta-share-section'
                 );
                 if (content && !renderedSomething) {
-                    content.innerHTML = '<div class="error">Error loading City League Meta data</div>';
+                    content.innerHTML = '<div class="error">' + (getLang() === 'de'
+                        ? 'Aktuell keine City-League-Daten verfügbar (Saison-Pause).'
+                        : 'No City League data available right now (off-season).') + '</div>';
                 }
             }
         }
@@ -1174,7 +1180,9 @@
                 if (tableContainer) {
                     const errorMsg = 'Error loading City League Analysis data';
                     console.error(errorMsg, { format, hasAnalysis: !!data, hasArchetypes: !!archetypesData });
-                    tableContainer.innerHTML = `<div class="error">${errorMsg}</div>`;
+                    tableContainer.innerHTML = `<div class="error">${getLang() === 'de'
+                        ? 'Aktuell keine City-League-Daten verfügbar (Saison-Pause).'
+                        : 'No City League data available right now (off-season).'}</div>`;
                 }
             }
         }

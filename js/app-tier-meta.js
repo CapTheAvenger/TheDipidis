@@ -1194,14 +1194,14 @@
                     overallTop8Html = `
                         <div class="cm-vs-top8-row">
                             <div class="cm-vs-top8-block">
-                                <h3>🌐 Overall (Brought share)</h3>
+                                <h3>🌐 ${getLang() === 'de' ? 'Wie oft gespielt' : 'Overall (brought share)'}</h3>
                                 <table class="cm-vs-top8-table">
-                                    <thead><tr><th>#</th><th>Deck</th><th>Share</th></tr></thead>
+                                    <thead><tr><th>#</th><th>Deck</th><th>${getLang() === 'de' ? 'Anteil' : 'Share'}</th></tr></thead>
                                     <tbody>${overallTop.map((d, i) => renderRow(d, i, 'brought share', d.broughtPct.toFixed(1) + '%')).join('')}</tbody>
                                 </table>
                             </div>
                             <div class="cm-vs-top8-block">
-                                <h3>🏆 Top-8 (Conversion)</h3>
+                                <h3>🏆 ${getLang() === 'de' ? 'Wie oft Top-8 erreicht' : 'Top-8 (conversion)'}</h3>
                                 <table class="cm-vs-top8-table">
                                     <thead><tr><th>#</th><th>Deck</th><th>Top-8</th></tr></thead>
                                     <tbody>${top8Top.map((d, i) => renderRow(d, i, 'top-8 conversion', d.top8ConvPct.toFixed(1) + '%')).join('')}</tbody>
@@ -1300,8 +1300,9 @@
                 <div class="tier-data-source">
                     <span class="tier-data-source-icon">📊</span>
                     <span class="tier-data-source-text">
-                        Data: <strong>${totalEntries.toLocaleString()}</strong> deck entries across
-                        <strong>${totalDecks}</strong> archetypes (Limitless Online, current snapshot)
+                        ${getLang() === 'de'
+                            ? `Datenbasis: <strong>${totalEntries.toLocaleString()}</strong> Decks aus <strong>${totalDecks}</strong> Archetypen (Limitless Online, aktueller Stand)`
+                            : `Data: <strong>${totalEntries.toLocaleString()}</strong> deck entries across <strong>${totalDecks}</strong> archetypes (Limitless Online, current snapshot)`}
                     </span>
                 </div>`;
 

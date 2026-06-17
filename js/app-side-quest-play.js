@@ -563,6 +563,22 @@
         return null;
     }
 
+    // Species-based Mega lookup — used for OPPONENT mons where we don't
+    // know the held item (so we can't tell whether they'll actually
+    // Mega Evolve). Returns the species' Mega form if one exists in the
+    // pokedex, so the ladder can surface the Mega Speed POTENTIAL ("if
+    // their Froslass / Dragonite Megas, here's how fast it gets"). For
+    // the rare X/Y dual megas (Charizard, Raichu, Mewtwo) it returns the
+    // -X form — the opponent's choice is unknown either way.
+    function lookupMegaSpecies(name) {
+        if (!_pokedex || !name) return null;
+        const base = String(name).split('-')[0];
+        for (const c of [base + '-Mega', base + '-Mega-X', base + '-Mega-Y']) {
+            if (_pokedex[c] && _pokedex[c].baseStats) return _pokedex[c];
+        }
+        return null;
+    }
+
     function escapeHtml(s) {
         return String(s == null ? '' : s)
             .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
@@ -635,11 +651,25 @@
             const baseSpe = spec.baseStats.spe;
             const rangeMin = baseSpeedAt50(baseSpe);
             const rangeMax = maxSpeedAt50(baseSpe);
+            // Mega POTENTIAL — opponent item is unknown, so show the
+            // Mega form's Speed/range whenever the species has one. The
+            // range is spread-independent; the single Mega Speed mirrors
+            // the basis of the row's own (typical or base) Speed.
+            const mega = lookupMegaSpecies(o.name);
+            const megaMin = mega ? baseSpeedAt50(mega.baseStats.spe) : null;
+            const megaMax = mega ? maxSpeedAt50(mega.baseStats.spe) : null;
+            const showMega = !!mega && (megaMin !== rangeMin || megaMax !== rangeMax);
             const typ = typicalMap && typicalMap[o.name];
             if (typ && typ.typicalSpeed > 0) {
+                const megaSpeed = mega
+                    ? actualSpeedAt50(mega.baseStats.spe, typ.evMode, natureSpeedMod(typ.natureMode))
+                    : null;
                 rows.push({
                     side: 'O', name: o.name,
                     speed: typ.typicalSpeed,
+                    megaSpeed: showMega ? megaSpeed : null,
+                    megaRangeMin: showMega ? megaMin : null,
+                    megaRangeMax: showMega ? megaMax : null,
                     tailwind: typ.typicalSpeed * 2,
                     rangeMin, rangeMax,
                     types: spec.types || [],
@@ -654,6 +684,9 @@
                 rows.push({
                     side: 'O', name: o.name,
                     speed: rangeMin,
+                    megaSpeed: showMega ? megaMin : null,
+                    megaRangeMin: showMega ? megaMin : null,
+                    megaRangeMax: showMega ? megaMax : null,
                     tailwind: rangeMin * 2,
                     rangeMin, rangeMax,
                     types: spec.types || [],
@@ -697,7 +730,7 @@
                 ? `<span class="sq-play-ladder-prefix${r.source === 'base' ? ' sq-play-ladder-prefix-base' : ''}" title="${escapeHtml(prefixTitle)}">${escapeHtml(prefix)}</span>`
                 : '';
             const megaHtml = (r.megaSpeed != null)
-                ? `<span class="sq-play-ladder-mega" title="${escapeHtml(labels.megaTitle(r.speed, r.megaSpeed))}">${escapeHtml(labels.megaShort)}&nbsp;${r.megaSpeed}</span>`
+                ? `<span class="sq-play-ladder-mega" title="${escapeHtml(labels.megaTitle(r.speed, r.megaSpeed))}">${escapeHtml(labels.megaShort)}&nbsp;${escapeHtml(prefix)}${r.megaSpeed}</span>`
                 : '';
             const megaRangeHtml = (r.megaRangeMin != null)
                 ? `<span class="sq-play-ladder-mega sq-play-ladder-mega-range" title="${escapeHtml(labels.megaRangeTitle(r.megaRangeMin, r.megaRangeMax))}">${escapeHtml(labels.megaShort)}&nbsp;${r.megaRangeMin}–${r.megaRangeMax}</span>`

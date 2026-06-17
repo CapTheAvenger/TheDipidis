@@ -1072,15 +1072,14 @@
 .sq-play-ladder-prefix-base {
     color: #f5d27a;
 }
-/* Post-Mega Speed badge — Mega Evolution (held Mega Stone) changes the
- * base stats, so we show the resulting Speed next to the base one. The
- * violet "M …" pill matches the Mega accent used elsewhere. */
+/* Post-Mega Speed pill — Mega Evolution (held Mega Stone) changes the
+ * base stats, so we show the resulting Speed + range. The violet "M …"
+ * pill matches the Mega accent used elsewhere. */
 .sq-play-ladder-mega,
 .sq-play-speed-mega {
     display: inline-flex;
-    align-items: center;
-    margin-left: 5px;
-    padding: 0 5px;
+    align-items: baseline;
+    padding: 0 6px;
     border-radius: 6px;
     background: rgba(193, 138, 255, 0.16);
     color: #d8b6ff;
@@ -1089,17 +1088,31 @@
     font-variant-numeric: tabular-nums;
     white-space: nowrap;
 }
-.sq-play-speed-mega { font-size: 0.9rem; }
-/* Post-Mega Speed RANGE pill — secondary to the actual-Speed pill, so
- * a touch smaller / lighter weight. Sits in the range column (ladder)
- * or after the base range (per-mon detail). */
-.sq-play-ladder-mega-range,
-.sq-play-speed-mega-range {
-    font-weight: 600;
-    background: rgba(193, 138, 255, 0.12);
+.sq-play-speed-mega { font-size: 0.9rem; margin-left: 5px; }
+.sq-play-speed-mega-range { font-weight: 600; background: rgba(193, 138, 255, 0.12); font-size: 0.78rem; }
+
+/* Full-width Mega sub-line under a ladder row — holds the post-Mega
+ * Speed + range, one pill per form (X and Y both for dual megas).
+ * Indented to start under the name so it reads as that row's detail. */
+.sq-play-ladder-megaline {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 3px 7px;
+    margin-top: 1px;
+    padding-left: 2.9rem;
 }
-.sq-play-ladder-mega-range { font-size: 0.7rem; }
-.sq-play-speed-mega-range { font-size: 0.78rem; }
+.sq-play-ladder-megaline .sq-play-ladder-mega {
+    font-size: 0.68rem;
+    padding: 1px 6px;
+}
+.sq-play-ladder-megaline .sq-play-ladder-mega b { font-weight: 800; }
+.sq-play-ladder-megaline .sq-play-ladder-mega small {
+    margin-left: 5px;
+    font-weight: 600;
+    opacity: 0.82;
+}
 /* Base–Max range column: tertiary info (after actual / typical
  * Speed but before tailwind). Muted so the eye finds the speed
  * number first. */

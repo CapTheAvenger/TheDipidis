@@ -543,10 +543,18 @@
     // held Mega Stone (item name ends in "-ite", optionally " X"/" Y")
     // swaps the species for its "-Mega" form, which has DIFFERENT base
     // stats — most importantly a different Speed. Returns the mega
-    // pokedex entry ({types, baseStats}) or null when the mon can't
-    // Mega Evolve. Eviolite is the one "-ite" item that isn't a Mega
-    // Stone, and it's never legal on a (fully-evolved) mega-capable mon
-    // anyway — excluded for safety.
+    // pokedex entry (with a ._megaLabel of '', 'X' or 'Y') or null when
+    // the mon can't Mega Evolve. Eviolite is the one "-ite" item that
+    // isn't a Mega Stone, and it's never legal on a (fully-evolved)
+    // mega-capable mon anyway — excluded for safety.
+    function megaLabelFromKey(key) {
+        if (/-Mega-X$/i.test(key)) return 'X';
+        if (/-Mega-Y$/i.test(key)) return 'Y';
+        return '';
+    }
+    function withMegaLabel(spec, key) {
+        return Object.assign({}, spec, { _megaLabel: megaLabelFromKey(key) });
+    }
     function lookupMega(name, item) {
         if (!_pokedex || !name || !item) return null;
         const it = String(item).trim();
@@ -558,25 +566,44 @@
         if (xy) candidates.push(base + '-Mega' + xy);
         candidates.push(base + '-Mega', base + '-Mega-X', base + '-Mega-Y');
         for (const c of candidates) {
-            if (_pokedex[c] && _pokedex[c].baseStats) return _pokedex[c];
+            if (_pokedex[c] && _pokedex[c].baseStats) return withMegaLabel(_pokedex[c], c);
         }
         return null;
     }
 
     // Species-based Mega lookup — used for OPPONENT mons where we don't
     // know the held item (so we can't tell whether they'll actually
-    // Mega Evolve). Returns the species' Mega form if one exists in the
-    // pokedex, so the ladder can surface the Mega Speed POTENTIAL ("if
-    // their Froslass / Dragonite Megas, here's how fast it gets"). For
-    // the rare X/Y dual megas (Charizard, Raichu, Mewtwo) it returns the
-    // -X form — the opponent's choice is unknown either way.
-    function lookupMegaSpecies(name) {
-        if (!_pokedex || !name) return null;
+    // Mega Evolve). Returns EVERY Mega form the species has so the
+    // ladder can surface the Speed POTENTIAL ("if their Froslass /
+    // Dragonite Megas, here's how fast"). For X/Y dual megas (Raichu,
+    // Mewtwo, Charizard) both forms are returned, each labelled.
+    function listMegaSpecies(name) {
+        if (!_pokedex || !name) return [];
         const base = String(name).split('-')[0];
+        const out = [];
         for (const c of [base + '-Mega', base + '-Mega-X', base + '-Mega-Y']) {
-            if (_pokedex[c] && _pokedex[c].baseStats) return _pokedex[c];
+            if (_pokedex[c] && _pokedex[c].baseStats) out.push(withMegaLabel(_pokedex[c], c));
         }
-        return null;
+        return out;
+    }
+
+    // Build the per-row Mega list (each: {label, speed, min, max}) from
+    // a set of Mega specs. Returned empty unless at least one form
+    // actually shifts the Speed range — keeps noise off megas that don't
+    // change Speed (Venusaur, Charizard). When one of an X/Y pair does
+    // change, BOTH are kept so the comparison reads clearly.
+    function buildMegaList(megaSpecs, baseMin, baseMax, speedFn) {
+        if (!megaSpecs || !megaSpecs.length) return [];
+        const anyDelta = megaSpecs.some(ms =>
+            baseSpeedAt50(ms.baseStats.spe) !== baseMin ||
+            maxSpeedAt50(ms.baseStats.spe) !== baseMax);
+        if (!anyDelta) return [];
+        return megaSpecs.map(ms => ({
+            label: ms._megaLabel || '',
+            speed: speedFn(ms.baseStats.spe),
+            min: baseSpeedAt50(ms.baseStats.spe),
+            max: maxSpeedAt50(ms.baseStats.spe),
+        }));
     }
 
     function escapeHtml(s) {
@@ -615,25 +642,19 @@
             const evs = parseEVs(p.evs);
             const natMod = natureSpeedMod(p.nature);
             const actual = actualSpeedAt50(baseSpe, evs.spe, natMod);
-            // Mega Evolution (held Mega Stone) changes the base Speed —
-            // surface the post-Mega Speed AND its range alongside the
-            // base ones so the player sees both. Only when something
-            // actually differs.
-            const mega = lookupMega(p.name, p.item);
             const baseMin = baseSpeedAt50(baseSpe);
             const baseMax = maxSpeedAt50(baseSpe);
-            const megaSpeed = mega ? actualSpeedAt50(mega.baseStats.spe, evs.spe, natMod) : null;
-            const megaMin = mega ? baseSpeedAt50(mega.baseStats.spe) : null;
-            const megaMax = mega ? maxSpeedAt50(mega.baseStats.spe) : null;
-            const showMega = !!mega &&
-                (megaSpeed !== actual || megaMin !== baseMin || megaMax !== baseMax);
+            // Mega Evolution (held Mega Stone) changes the base Speed —
+            // surface the post-Mega Speed + range on a sub-line. Your own
+            // item picks exactly one form, so this is 0 or 1 entry.
+            const mega = lookupMega(p.name, p.item);
+            const megas = buildMegaList(mega ? [mega] : [], baseMin, baseMax,
+                (spe) => actualSpeedAt50(spe, evs.spe, natMod));
             rows.push({
                 side: 'Y',
                 name: p.name,
                 speed: actual,
-                megaSpeed: showMega ? megaSpeed : null,
-                megaRangeMin: showMega ? megaMin : null,
-                megaRangeMax: showMega ? megaMax : null,
+                megas,
                 tailwind: actual * 2,
                 rangeMin: baseMin,
                 rangeMax: baseMax,
@@ -651,25 +672,19 @@
             const baseSpe = spec.baseStats.spe;
             const rangeMin = baseSpeedAt50(baseSpe);
             const rangeMax = maxSpeedAt50(baseSpe);
-            // Mega POTENTIAL — opponent item is unknown, so show the
-            // Mega form's Speed/range whenever the species has one. The
-            // range is spread-independent; the single Mega Speed mirrors
+            // Mega POTENTIAL — opponent item is unknown, so show EVERY
+            // Mega form the species has (X and Y both, when present).
+            // The range is spread-independent; the per-form Speed mirrors
             // the basis of the row's own (typical or base) Speed.
-            const mega = lookupMegaSpecies(o.name);
-            const megaMin = mega ? baseSpeedAt50(mega.baseStats.spe) : null;
-            const megaMax = mega ? maxSpeedAt50(mega.baseStats.spe) : null;
-            const showMega = !!mega && (megaMin !== rangeMin || megaMax !== rangeMax);
+            const megaSpecs = listMegaSpecies(o.name);
             const typ = typicalMap && typicalMap[o.name];
             if (typ && typ.typicalSpeed > 0) {
-                const megaSpeed = mega
-                    ? actualSpeedAt50(mega.baseStats.spe, typ.evMode, natureSpeedMod(typ.natureMode))
-                    : null;
+                const megas = buildMegaList(megaSpecs, rangeMin, rangeMax,
+                    (spe) => actualSpeedAt50(spe, typ.evMode, natureSpeedMod(typ.natureMode)));
                 rows.push({
                     side: 'O', name: o.name,
                     speed: typ.typicalSpeed,
-                    megaSpeed: showMega ? megaSpeed : null,
-                    megaRangeMin: showMega ? megaMin : null,
-                    megaRangeMax: showMega ? megaMax : null,
+                    megas,
                     tailwind: typ.typicalSpeed * 2,
                     rangeMin, rangeMax,
                     types: spec.types || [],
@@ -681,12 +696,12 @@
             } else {
                 // Unknown spread — base L50, no Tailwind value
                 // (we don't know if opponent has +nature investment).
+                const megas = buildMegaList(megaSpecs, rangeMin, rangeMax,
+                    (spe) => baseSpeedAt50(spe));
                 rows.push({
                     side: 'O', name: o.name,
                     speed: rangeMin,
-                    megaSpeed: showMega ? megaMin : null,
-                    megaRangeMin: showMega ? megaMin : null,
-                    megaRangeMax: showMega ? megaMax : null,
+                    megas,
                     tailwind: rangeMin * 2,
                     rangeMin, rangeMax,
                     types: spec.types || [],
@@ -729,11 +744,17 @@
             const prefixHtml = prefix
                 ? `<span class="sq-play-ladder-prefix${r.source === 'base' ? ' sq-play-ladder-prefix-base' : ''}" title="${escapeHtml(prefixTitle)}">${escapeHtml(prefix)}</span>`
                 : '';
-            const megaHtml = (r.megaSpeed != null)
-                ? `<span class="sq-play-ladder-mega" title="${escapeHtml(labels.megaTitle(r.speed, r.megaSpeed))}">${escapeHtml(labels.megaShort)}&nbsp;${escapeHtml(prefix)}${r.megaSpeed}</span>`
-                : '';
-            const megaRangeHtml = (r.megaRangeMin != null)
-                ? `<span class="sq-play-ladder-mega sq-play-ladder-mega-range" title="${escapeHtml(labels.megaRangeTitle(r.megaRangeMin, r.megaRangeMax))}">${escapeHtml(labels.megaShort)}&nbsp;${r.megaRangeMin}–${r.megaRangeMax}</span>`
+            // Mega info goes on its own full-width sub-line (grid-column
+            // 1 / -1) below the main row — the speed/range columns are
+            // too narrow to hold it without overlapping the tailwind
+            // column, and X/Y dual megas need room for two entries.
+            const megaLineHtml = (r.megas && r.megas.length)
+                ? `<div class="sq-play-ladder-megaline">${r.megas.map(m => {
+                       const tag = labels.megaShort + (m.label ? '‑' + m.label : '');
+                       return `<span class="sq-play-ladder-mega" title="${escapeHtml(labels.megaTitle(r.speed, m.speed))}">`
+                           + `<b>${escapeHtml(tag)}</b> ${escapeHtml(prefix)}${m.speed}`
+                           + `<small>${m.min}–${m.max}</small></span>`;
+                   }).join('')}</div>`
                 : '';
             return `
                 <li class="sq-play-ladder-row sq-play-ladder-${r.side === 'Y' ? 'yours' : 'opp'}">
@@ -741,9 +762,10 @@
                     ${pokemonIconHtml(r.name, 'sm')}
                     <span class="sq-play-ladder-name">${escapeHtml(r.name)}</span>
                     <span class="sq-play-ladder-side" title="${escapeHtml(r.side === 'Y' ? labels.sideYours : labels.sideOpp)}">${escapeHtml(r.side)}</span>
-                    <span class="sq-play-ladder-speed">${prefixHtml}${r.speed}${megaHtml}</span>
-                    <span class="sq-play-ladder-range" title="${escapeHtml(labels.rangeTitle)}">${r.rangeMin}–${r.rangeMax}${megaRangeHtml}</span>
+                    <span class="sq-play-ladder-speed">${prefixHtml}${r.speed}</span>
+                    <span class="sq-play-ladder-range" title="${escapeHtml(labels.rangeTitle)}">${r.rangeMin}–${r.rangeMax}</span>
                     <span class="sq-play-ladder-tw" title="${escapeHtml(labels.tailwind)}">${escapeHtml(labels.tailwindLabel)} ${r.tailwind}</span>
+                    ${megaLineHtml}
                 </li>`;
         }).join('');
         return `

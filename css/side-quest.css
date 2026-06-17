@@ -1090,6 +1090,16 @@
     white-space: nowrap;
 }
 .sq-play-speed-mega { font-size: 0.9rem; }
+/* Post-Mega Speed RANGE pill — secondary to the actual-Speed pill, so
+ * a touch smaller / lighter weight. Sits in the range column (ladder)
+ * or after the base range (per-mon detail). */
+.sq-play-ladder-mega-range,
+.sq-play-speed-mega-range {
+    font-weight: 600;
+    background: rgba(193, 138, 255, 0.12);
+}
+.sq-play-ladder-mega-range { font-size: 0.7rem; }
+.sq-play-speed-mega-range { font-size: 0.78rem; }
 /* Base–Max range column: tertiary info (after actual / typical
  * Speed but before tailwind). Muted so the eye finds the speed
  * number first. */

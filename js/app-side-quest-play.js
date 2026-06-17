@@ -126,6 +126,7 @@
             rangeTitle:     'Basis–Max bei Level 50 (kein EV/+Nature → voll-EV/+Nature)',
             megaShort:      'M',
             megaTitle:      (base, mega) => `Mega-Initiative bei Level 50: ${mega} (Basis ${base}). Mega-Stein im Item — bei Mega-Entwicklung ändern sich die Stats.`,
+            megaRangeTitle: (min, max) => `Mega-Initiative-Range bei Level 50: ${min}–${max} (kein EV/+Nature → voll-EV/+Nature, nach Mega-Entwicklung).`,
         },
         en: {
             playBtn:        'Play',
@@ -165,6 +166,7 @@
             rangeTitle:     'Base–Max at Level 50 (zero EV / neutral nature → max EV / +nature)',
             megaShort:      'M',
             megaTitle:      (base, mega) => `Mega Speed at Level 50: ${mega} (base ${base}). Mega Stone held — stats change on Mega Evolution.`,
+            megaRangeTitle: (min, max) => `Mega Speed range at Level 50: ${min}–${max} (zero EV / neutral nature → max EV / +nature, after Mega Evolution).`,
         },
     };
 
@@ -598,20 +600,27 @@
             const natMod = natureSpeedMod(p.nature);
             const actual = actualSpeedAt50(baseSpe, evs.spe, natMod);
             // Mega Evolution (held Mega Stone) changes the base Speed —
-            // surface the post-Mega Speed alongside the base one so the
-            // player sees both. Only when it actually differs.
+            // surface the post-Mega Speed AND its range alongside the
+            // base ones so the player sees both. Only when something
+            // actually differs.
             const mega = lookupMega(p.name, p.item);
-            const megaSpeed = mega
-                ? actualSpeedAt50(mega.baseStats.spe, evs.spe, natMod)
-                : null;
+            const baseMin = baseSpeedAt50(baseSpe);
+            const baseMax = maxSpeedAt50(baseSpe);
+            const megaSpeed = mega ? actualSpeedAt50(mega.baseStats.spe, evs.spe, natMod) : null;
+            const megaMin = mega ? baseSpeedAt50(mega.baseStats.spe) : null;
+            const megaMax = mega ? maxSpeedAt50(mega.baseStats.spe) : null;
+            const showMega = !!mega &&
+                (megaSpeed !== actual || megaMin !== baseMin || megaMax !== baseMax);
             rows.push({
                 side: 'Y',
                 name: p.name,
                 speed: actual,
-                megaSpeed: (megaSpeed != null && megaSpeed !== actual) ? megaSpeed : null,
+                megaSpeed: showMega ? megaSpeed : null,
+                megaRangeMin: showMega ? megaMin : null,
+                megaRangeMax: showMega ? megaMax : null,
                 tailwind: actual * 2,
-                rangeMin: baseSpeedAt50(baseSpe),
-                rangeMax: maxSpeedAt50(baseSpe),
+                rangeMin: baseMin,
+                rangeMax: baseMax,
                 types: spec.types || [],
                 source: 'actual',
                 evMode: evs.spe,
@@ -690,6 +699,9 @@
             const megaHtml = (r.megaSpeed != null)
                 ? `<span class="sq-play-ladder-mega" title="${escapeHtml(labels.megaTitle(r.speed, r.megaSpeed))}">${escapeHtml(labels.megaShort)}&nbsp;${r.megaSpeed}</span>`
                 : '';
+            const megaRangeHtml = (r.megaRangeMin != null)
+                ? `<span class="sq-play-ladder-mega sq-play-ladder-mega-range" title="${escapeHtml(labels.megaRangeTitle(r.megaRangeMin, r.megaRangeMax))}">${escapeHtml(labels.megaShort)}&nbsp;${r.megaRangeMin}–${r.megaRangeMax}</span>`
+                : '';
             return `
                 <li class="sq-play-ladder-row sq-play-ladder-${r.side === 'Y' ? 'yours' : 'opp'}">
                     <span class="sq-play-ladder-rank">${i + 1}</span>
@@ -697,7 +709,7 @@
                     <span class="sq-play-ladder-name">${escapeHtml(r.name)}</span>
                     <span class="sq-play-ladder-side" title="${escapeHtml(r.side === 'Y' ? labels.sideYours : labels.sideOpp)}">${escapeHtml(r.side)}</span>
                     <span class="sq-play-ladder-speed">${prefixHtml}${r.speed}${megaHtml}</span>
-                    <span class="sq-play-ladder-range" title="${escapeHtml(labels.rangeTitle)}">${r.rangeMin}–${r.rangeMax}</span>
+                    <span class="sq-play-ladder-range" title="${escapeHtml(labels.rangeTitle)}">${r.rangeMin}–${r.rangeMax}${megaRangeHtml}</span>
                     <span class="sq-play-ladder-tw" title="${escapeHtml(labels.tailwind)}">${escapeHtml(labels.tailwindLabel)} ${r.tailwind}</span>
                 </li>`;
         }).join('');
@@ -729,8 +741,13 @@
             const tail   = actual * 2;
             const mega   = lookupMega(p.name, p.item);
             const megaActual = mega ? actualSpeedAt50(mega.baseStats.spe, evs.spe, natMod) : null;
+            const megaMin = mega ? baseSpeedAt50(mega.baseStats.spe) : null;
+            const megaMax = mega ? maxSpeedAt50(mega.baseStats.spe) : null;
             const megaHtml = (megaActual != null && megaActual !== actual)
                 ? `<span class="sq-play-speed-mega" title="${escapeHtml(labels.megaTitle(actual, megaActual))}">${escapeHtml(labels.megaShort)}&nbsp;${megaActual}</span>`
+                : '';
+            const megaRangeHtml = (megaMin != null && (megaMin !== base || megaMax !== max))
+                ? `<span class="sq-play-speed-mega sq-play-speed-mega-range" title="${escapeHtml(labels.megaRangeTitle(megaMin, megaMax))}">${escapeHtml(labels.megaShort)}&nbsp;${megaMin}–${megaMax}</span>`
                 : '';
             speedHtml = `
                 <div class="sq-play-speed">
@@ -738,6 +755,7 @@
                     ${megaHtml}
                     <span class="sq-play-speed-tail" title="${escapeHtml(labels.tailwind)}">(${tail})</span>
                     <span class="sq-play-speed-range" title="${escapeHtml(labels.base)} ${base} · ${escapeHtml(labels.max)} ${max}">${base}–${max}</span>
+                    ${megaRangeHtml}
                 </div>`;
         } else {
             speedHtml = `<div class="sq-play-speed sq-play-speed-missing" title="${escapeHtml(labels.unknownSpecies)}">?</div>`;

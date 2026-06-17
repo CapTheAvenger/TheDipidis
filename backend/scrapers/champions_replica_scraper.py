@@ -482,8 +482,8 @@ def build_team_record(row: Dict[str, str], rank_position: int) -> Dict:
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('--top', type=int, default=20,
-                    help='Number of top teams to include (default 20)')
+    ap.add_argument('--top', type=int, default=40,
+                    help='Number of top teams to include (default 40)')
     ap.add_argument('--delay', type=float, default=0.7,
                     help='Seconds between pokepaste fetches (default 0.7)')
     ap.add_argument('--speed-window-days', type=int, default=14,

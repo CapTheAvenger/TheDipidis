@@ -1,37 +1,36 @@
 name: Champions Replica Scrape
 
-# Twice-weekly refresh of the Pokémon Champions Side Quest tab.
+# Daily refresh of the Pokémon Champions Side Quest tab.
 # Fetches the VGCPastes Google Sheet, parses the top-N team rows, and
 # for each one fetches the linked pokepast.es paste to materialize a
 # {mon, ability, item, EVs, nature, moves, tera} record. Writes
 # data/champions_replica_teams.json — the file the Side Quest tab in
 # js/app-side-quest.js consumes.
 #
-# Lightweight job under normal conditions (~25 s for the scrape itself),
-# but the Claude-API strategy-generation step on a fresh / heavily-
-# changed cache can take ~15 min — that's why the job timeout is 45 min
-# (see jobs.scrape.timeout-minutes below).
+# Lightweight job (~25 s scrape + ~40 pokepaste fetches). The old
+# Claude-API strategy-generation step is disabled (see the "Generate
+# team strategies" step below), so there's no API cost and nothing slow
+# left — the job runs comfortably inside its timeout.
 #
-# Cadence changed 2026-06-12 from daily to Tuesdays + Fridays. The
-# VGCPastes community sheet doesn't see new tournament-winning teams
-# every day; a 3-4 day cadence catches every meaningful update without
-# triggering the team-strategy generator (Claude API cost) on noisy
-# day-over-day churn that doesn't change the actual strategy.
+# Cadence: daily. It was briefly cut to Tue+Fri (2026-06-12) only to
+# avoid running the paid strategy generator on day-over-day churn. With
+# that step now disabled and replaced by the zero-cost client-side
+# "via Claude" button, daily is free again — so we catch new
+# tournament-winning teams the day they're shared.
 #
-# Trigger: Tuesday + Friday at 10:00 UTC OR GitHub UI → Actions →
+# Trigger: daily at 10:00 UTC OR GitHub UI → Actions →
 #          Champions Replica Scrape → Run workflow
 
 on:
   schedule:
     # 10:00 UTC = 11:00 CET winter / 12:00 CEST summer.
-    # cron day-of-week: 2 = Tuesday, 5 = Friday.
-    - cron: '0 10 * * 2,5'
+    - cron: '0 10 * * *'
   workflow_dispatch:
     inputs:
       top:
         description: 'Number of top teams to include'
         type: string
-        default: '20'
+        default: '40'
 
 permissions:
   contents: write
@@ -48,12 +47,11 @@ concurrency:
 jobs:
   scrape:
     runs-on: ubuntu-latest
-    # 45 min instead of 10: the strategy-generation step (Claude API)
-    # can take 30-60 s per team with adaptive thinking, so the first
-    # full run (~20 teams = ~15-20 min) used to hit the 10-min cap and
-    # the job got cancelled mid-generation. Delta runs (1-2 new teams
-    # per day) finish well inside this budget too.
-    timeout-minutes: 45
+    # 20 min: the scrape itself is ~25 s; the rest is ~40 sequential
+    # pokepast.es fetches (top-40). The slow Claude-API strategy step
+    # that once needed a 45-min budget is disabled now, so this is
+    # generous headroom against a slow sheet / paste host.
+    timeout-minutes: 20
 
     steps:
       - name: Checkout repo
@@ -90,7 +88,7 @@ jobs:
           set +e
           echo "::group::scrapers/champions_replica_scraper.py"
           TOP="${{ github.event.inputs.top }}"
-          TOP="${TOP:-20}"
+          TOP="${TOP:-40}"
           python backend/scrapers/champions_replica_scraper.py --top "$TOP"
           rc=$?
           echo "::endgroup::"

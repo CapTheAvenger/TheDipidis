@@ -355,6 +355,48 @@
     flex: 0 0 auto;
 }
 
+/* "How to play this team — via Claude": same shape as the info button,
+ * distinct violet/AI accent. Copies a prompt + opens Claude (no API cost). */
+.side-quest-claude-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    margin-top: 0.85rem;
+    background: rgba(193, 138, 255, 0.08);
+    border: 1px solid rgba(193, 138, 255, 0.38);
+    border-radius: 10px;
+    padding: 0.45rem 0.8rem;
+    color: #e6ebf3;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.82rem;
+    font-weight: 600;
+    transition: background 120ms ease, transform 80ms ease;
+}
+
+.side-quest-claude-btn:hover {
+    background: rgba(193, 138, 255, 0.18);
+}
+
+.side-quest-claude-btn:active {
+    transform: scale(0.98);
+}
+
+.side-quest-claude-btn.is-copied {
+    background: rgba(120, 210, 150, 0.18);
+    border-color: rgba(120, 210, 150, 0.5);
+}
+
+.side-quest-claude-icon {
+    font-size: 0.95rem;
+    line-height: 1;
+    flex: 0 0 auto;
+}
+
+.side-quest-team-footer .side-quest-claude-btn {
+    margin-top: 0;
+}
+
 .side-quest-modal-overlay {
     position: fixed;
     inset: 0;

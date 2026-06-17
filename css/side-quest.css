@@ -1350,3 +1350,19 @@
     font-size: 0.86rem;
     line-height: 1.5;
 }
+.sq-res-verified {
+    color: #4cd182;
+    font-weight: 900;
+    margin-right: 4px;
+}
+.sq-res-noeff {
+    color: #8c95a5;
+    font-style: italic;
+}
+.sq-res-source {
+    display: block;
+    margin-top: 0.4rem;
+    color: #6b7585;
+    font-size: 0.68rem;
+}
+.sq-res-entry.is-verified .sq-res-source { color: #5aa873; }

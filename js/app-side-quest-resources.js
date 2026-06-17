@@ -14,11 +14,9 @@
 (function () {
     'use strict';
 
-    const ITEMS_URL     = 'data/champions_items_reference.json';
-    const ABILITIES_URL = 'data/champions_abilities_reference.json';
-    const MOVES_URL     = 'data/champions_moves_reference.json';
+    const RESOURCES_URL = 'data/champions_resources.json';
 
-    let _entries = null;       // flat [{cat, en, de, type, effect, field}]
+    let _entries = null;       // [{cat, en, de, type, en_effect, de_effect, field, verified}]
     let _loading = null;
     let _activated = false;    // lazy: only fetch on first Resources view
     let _query = '';
@@ -44,6 +42,10 @@
             catAbility:  'Fähigkeit',
             catMove:     'Attacke',
             fieldTag:    'Feld',
+            verifiedHint:'Für Champions geprüft',
+            srcVerified: '✓ Champions-geprüft',
+            srcMainline: 'Standard-Mechanik · offizieller Spieltext (PokéAPI)',
+            noEffect:    'Keine Beschreibung hinterlegt.',
             none:        'Nichts gefunden — andere Schreibweise oder Stichwort probieren.',
             loading:     'Lade Referenzdaten …',
             error:       'Referenzdaten konnten nicht geladen werden.',
@@ -64,6 +66,10 @@
             catAbility:  'Ability',
             catMove:     'Move',
             fieldTag:    'Field',
+            verifiedHint:'Checked for Champions',
+            srcVerified: '✓ Champions-checked',
+            srcMainline: 'Mainline mechanic · official in-game text (PokéAPI)',
+            noEffect:    'No description available yet.',
             none:        'Nothing found — try a different spelling or keyword.',
             loading:     'Loading reference data …',
             error:       'Could not load reference data.',
@@ -72,57 +78,32 @@
     };
     function t() { return LABELS[uiLang()]; }
 
-    // Field effects = entities that SET or EXTEND a battlefield / side
-    // condition (weather, terrain, Trick Room, Tailwind, screens). Match
-    // on the English name so new entries from future updates are caught
-    // without re-tagging; the curated set covers anything off-pattern.
-    const FIELD_RE = /\b(terrain|tailwind|trick ?room|light screen|reflect|aurora veil|sunny day|rain dance|sandstorm|sand stream|snowscape|snow warning|drought|drizzle|electric surge|grassy surge|psychic surge|misty surge|gravity|heat rock|damp rock|smooth rock|icy rock|light clay)\b/i;
-    const FIELD_SET = new Set([
-        'Tailwind', 'Trick Room', 'Rain Dance', 'Light Screen', 'Reflect', 'Aurora Veil',
-        'Snow Warning', 'Drought', 'Drizzle', 'Sand Stream',
-        'Light Clay', 'Terrain Extender', 'Heat Rock', 'Damp Rock', 'Smooth Rock', 'Icy Rock',
-    ]);
-    function isField(en) {
-        return FIELD_SET.has(en) || FIELD_RE.test(en);
-    }
-
     function escapeHtml(s) {
         return String(s == null ? '' : s)
             .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
             .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
     }
 
-    function fetchJson(url) {
-        return fetch(`${url}?t=${Date.now()}`).then(r => r.ok ? r.json() : null).catch(() => null);
-    }
-
     function loadData() {
         if (_entries) return Promise.resolve(_entries);
         if (_loading) return _loading;
-        _loading = Promise.all([fetchJson(ITEMS_URL), fetchJson(ABILITIES_URL), fetchJson(MOVES_URL)])
-            .then(([items, abilities, moves]) => {
-                const out = [];
-                const push = (cat, coll, withType) => {
-                    if (!coll) return;
-                    Object.keys(coll).forEach(en => {
-                        const v = coll[en] || {};
-                        out.push({
-                            cat,
-                            en,
-                            de: v.de_name || en,
-                            type: withType ? (v.type || '') : '',
-                            effect: v.effect || '',
-                            field: isField(en),
-                        });
-                    });
-                };
-                push('item',    items     && items.items,         false);
-                push('ability', abilities && abilities.abilities, false);
-                push('move',    moves     && moves.moves,          true);
-                _entries = out;
+        _loading = fetch(`${RESOURCES_URL}?t=${Date.now()}`)
+            .then(r => r.ok ? r.json() : null)
+            .then(json => {
+                _entries = (json && Array.isArray(json.entries)) ? json.entries : [];
                 return _entries;
-            });
+            })
+            .catch(() => { _entries = []; return _entries; });
         return _loading;
+    }
+
+    // Effect text in the UI language, falling back to the other language
+    // (PokéAPI sometimes only has one). '' when neither exists.
+    function effectFor(e) {
+        const lang = uiLang();
+        const primary = lang === 'de' ? e.de_effect : e.en_effect;
+        const other   = lang === 'de' ? e.en_effect : e.de_effect;
+        return (primary && primary.trim()) ? primary : (other || '');
     }
 
     // ── Filtering / search ─────────────────────────────────────────
@@ -130,8 +111,10 @@
 
     function matches(e, q) {
         if (!q) return true;
-        const hay = norm(e.en) + ' ' + norm(e.de) + ' ' + norm(e.effect) + ' ' + norm(e.type);
-        // every whitespace-separated token must appear somewhere
+        // Search both languages' names AND effects so "tailwind" finds it
+        // from a German UI and "rückenwind" finds it from an English one.
+        const hay = norm(e.en) + ' ' + norm(e.de) + ' ' +
+                    norm(e.en_effect) + ' ' + norm(e.de_effect) + ' ' + norm(e.type);
         return q.split(/\s+/).every(tok => hay.indexOf(tok) !== -1);
     }
 
@@ -168,14 +151,23 @@
 
     function renderEntry(e) {
         const lang = uiLang();
+        const l = t();
         const primary   = lang === 'de' ? e.de : e.en;
         const secondary = lang === 'de' ? e.en : e.de;
-        const fieldTag = e.field ? `<span class="sq-res-fieldtag">${escapeHtml(t().fieldTag)}</span>` : '';
+        const fieldTag = e.field ? `<span class="sq-res-fieldtag">${escapeHtml(l.fieldTag)}</span>` : '';
+        const verTag = e.verified
+            ? `<span class="sq-res-verified" title="${escapeHtml(l.verifiedHint)}">✓</span>`
+            : '';
+        const eff = effectFor(e);
+        const effHtml = eff
+            ? escapeHtml(eff)
+            : `<span class="sq-res-noeff">${escapeHtml(l.noEffect)}</span>`;
+        const srcHtml = `<span class="sq-res-source">${escapeHtml(e.verified ? l.srcVerified : l.srcMainline)}</span>`;
         return `
-            <li class="sq-res-entry sq-res-cat-${e.cat}">
+            <li class="sq-res-entry sq-res-cat-${e.cat}${e.verified ? ' is-verified' : ''}">
                 <button class="sq-res-head" type="button" aria-expanded="false">
                     <span class="sq-res-names">
-                        <span class="sq-res-name">${escapeHtml(primary)}</span>
+                        <span class="sq-res-name">${verTag}${escapeHtml(primary)}</span>
                         <span class="sq-res-name-alt">${escapeHtml(secondary)}</span>
                     </span>
                     <span class="sq-res-badges">
@@ -185,7 +177,7 @@
                         <span class="sq-res-chevron" aria-hidden="true">▾</span>
                     </span>
                 </button>
-                <div class="sq-res-effect" hidden>${escapeHtml(e.effect)}</div>
+                <div class="sq-res-effect" hidden>${effHtml}${srcHtml}</div>
             </li>`;
     }
 

@@ -748,11 +748,17 @@
             // 1 / -1) below the main row — the speed/range columns are
             // too narrow to hold it without overlapping the tailwind
             // column, and X/Y dual megas need room for two entries.
+            // For unknown-spread opponents (source 'base') the single
+            // Speed equals the range minimum, so we drop it (and its
+            // confusing "?" floor marker) and show just the range.
             const megaLineHtml = (r.megas && r.megas.length)
                 ? `<div class="sq-play-ladder-megaline">${r.megas.map(m => {
                        const tag = labels.megaShort + (m.label ? '‑' + m.label : '');
+                       const speedPart = (r.source === 'base')
+                           ? ''
+                           : `${escapeHtml(prefix)}${m.speed} `;
                        return `<span class="sq-play-ladder-mega" title="${escapeHtml(labels.megaTitle(r.speed, m.speed))}">`
-                           + `<b>${escapeHtml(tag)}</b> ${escapeHtml(prefix)}${m.speed}`
+                           + `<b>${escapeHtml(tag)}</b> ${speedPart}`
                            + `<small>${m.min}–${m.max}</small></span>`;
                    }).join('')}</div>`
                 : '';

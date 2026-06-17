@@ -1170,3 +1170,183 @@
     .sq-play-ladder-tw    { font-size: 0.68rem; }
     .sq-play-ladder-hint  { display: none; }
 }
+
+/* ── Side Quest sub-tabs (Teams ↔ Look up) ───────────────────────── */
+.side-quest-subtabs {
+    display: inline-flex;
+    gap: 3px;
+    padding: 3px;
+    margin: 0 0 1rem 0;
+    background: #11161f;
+    border: 1px solid #232b39;
+    border-radius: 11px;
+}
+.side-quest-subtab {
+    appearance: none;
+    border: 0;
+    background: transparent;
+    color: #aab3c2;
+    font: inherit;
+    font-weight: 700;
+    font-size: 0.86rem;
+    padding: 0.42rem 0.95rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 120ms ease, color 120ms ease;
+}
+.side-quest-subtab:hover { color: #e6ebf3; }
+.side-quest-subtab.is-active {
+    background: #2563ad;
+    color: #fff;
+}
+
+/* ── Resources / Nachschlagen ────────────────────────────────────── */
+.sq-res-intro {
+    margin: 0 0 0.8rem 0;
+    color: #9aa3b2;
+    font-size: 0.85rem;
+    line-height: 1.45;
+}
+.sq-res-search {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0.7rem 0.9rem;
+    border-radius: 10px;
+    border: 1px solid #2a3140;
+    background: #11161f;
+    color: #e6ebf3;
+    font: inherit;
+    font-size: 0.95rem;
+    margin-bottom: 0.7rem;
+}
+.sq-res-search:focus {
+    outline: none;
+    border-color: #5fb6ff;
+    box-shadow: 0 0 0 2px rgba(95, 182, 255, 0.18);
+}
+.sq-res-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 0.55rem;
+}
+.sq-res-chip {
+    appearance: none;
+    border: 1px solid #2a3140;
+    background: rgba(255, 255, 255, 0.03);
+    color: #c4ccd9;
+    font: inherit;
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 0.32rem 0.7rem;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: background 120ms ease, border-color 120ms ease, color 120ms ease;
+}
+.sq-res-chip:hover { background: rgba(255, 255, 255, 0.07); }
+.sq-res-chip.is-active {
+    background: rgba(95, 182, 255, 0.16);
+    border-color: rgba(95, 182, 255, 0.5);
+    color: #e6ebf3;
+}
+.sq-res-chip-n {
+    opacity: 0.6;
+    font-weight: 700;
+    margin-left: 2px;
+}
+.sq-res-count {
+    margin: 0 0 0.5rem 0;
+    color: #6b7585;
+    font-size: 0.74rem;
+}
+.sq-res-status {
+    color: #8c95a5;
+    font-size: 0.88rem;
+    padding: 0.6rem 0;
+}
+
+.sq-res-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.sq-res-entry {
+    border: 1px solid #232b39;
+    border-radius: 9px;
+    background: #161c28;
+    overflow: hidden;
+}
+.sq-res-entry.is-open { border-color: #2f6dad; }
+.sq-res-head {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.6rem;
+    padding: 0.55rem 0.7rem;
+    background: transparent;
+    border: 0;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+.sq-res-head:hover { background: rgba(255, 255, 255, 0.03); }
+.sq-res-names {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+.sq-res-name {
+    color: #e6ebf3;
+    font-weight: 700;
+    font-size: 0.92rem;
+}
+.sq-res-name-alt {
+    color: #7b8494;
+    font-size: 0.74rem;
+}
+.sq-res-badges {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    flex: 0 0 auto;
+}
+.sq-res-type {
+    padding: 1px 7px;
+    border-radius: 999px;
+    color: #fff;
+    font-size: 0.66rem;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.35);
+}
+.sq-res-fieldtag {
+    padding: 1px 7px;
+    border-radius: 999px;
+    background: rgba(120, 200, 120, 0.16);
+    color: #8fd49a;
+    border: 1px solid rgba(120, 200, 120, 0.4);
+    font-size: 0.66rem;
+    font-weight: 700;
+}
+.sq-res-cat {
+    color: #8c95a5;
+    font-size: 0.68rem;
+    font-weight: 600;
+}
+.sq-res-chevron {
+    color: #6b7585;
+    font-size: 0.7rem;
+    transition: transform 140ms ease;
+}
+.sq-res-entry.is-open .sq-res-chevron { transform: rotate(180deg); }
+.sq-res-effect {
+    padding: 0 0.7rem 0.65rem 0.7rem;
+    color: #d6dce7;
+    font-size: 0.86rem;
+    line-height: 1.5;
+}

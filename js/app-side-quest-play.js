@@ -124,6 +124,8 @@
             fallbackBase:   (n) => `Spezies erst ${n}× im Pool — Basis-Speed als Fallback`,
             tailwindLabel:  'TW',
             rangeTitle:     'Basis–Max bei Level 50 (kein EV/+Nature → voll-EV/+Nature)',
+            megaShort:      'M',
+            megaTitle:      (base, mega) => `Mega-Initiative bei Level 50: ${mega} (Basis ${base}). Mega-Stein im Item — bei Mega-Entwicklung ändern sich die Stats.`,
         },
         en: {
             playBtn:        'Play',
@@ -161,6 +163,8 @@
             fallbackBase:   (n) => `Species only appears ${n}× — base Speed shown as fallback`,
             tailwindLabel:  'TW',
             rangeTitle:     'Base–Max at Level 50 (zero EV / neutral nature → max EV / +nature)',
+            megaShort:      'M',
+            megaTitle:      (base, mega) => `Mega Speed at Level 50: ${mega} (base ${base}). Mega Stone held — stats change on Mega Evolution.`,
         },
     };
 
@@ -533,6 +537,30 @@
         return null;
     }
 
+    // Mega detection — in this format Mega Evolution replaces Tera. A
+    // held Mega Stone (item name ends in "-ite", optionally " X"/" Y")
+    // swaps the species for its "-Mega" form, which has DIFFERENT base
+    // stats — most importantly a different Speed. Returns the mega
+    // pokedex entry ({types, baseStats}) or null when the mon can't
+    // Mega Evolve. Eviolite is the one "-ite" item that isn't a Mega
+    // Stone, and it's never legal on a (fully-evolved) mega-capable mon
+    // anyway — excluded for safety.
+    function lookupMega(name, item) {
+        if (!_pokedex || !name || !item) return null;
+        const it = String(item).trim();
+        if (!/ite( ?[XY])?$/i.test(it)) return null;   // not a Mega Stone
+        if (/^eviolite$/i.test(it)) return null;
+        const base = String(name).split('-')[0];
+        const xy = / X$/i.test(it) ? '-X' : / Y$/i.test(it) ? '-Y' : '';
+        const candidates = [];
+        if (xy) candidates.push(base + '-Mega' + xy);
+        candidates.push(base + '-Mega', base + '-Mega-X', base + '-Mega-Y');
+        for (const c of candidates) {
+            if (_pokedex[c] && _pokedex[c].baseStats) return _pokedex[c];
+        }
+        return null;
+    }
+
     function escapeHtml(s) {
         return String(s == null ? '' : s)
             .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
@@ -569,10 +597,18 @@
             const evs = parseEVs(p.evs);
             const natMod = natureSpeedMod(p.nature);
             const actual = actualSpeedAt50(baseSpe, evs.spe, natMod);
+            // Mega Evolution (held Mega Stone) changes the base Speed —
+            // surface the post-Mega Speed alongside the base one so the
+            // player sees both. Only when it actually differs.
+            const mega = lookupMega(p.name, p.item);
+            const megaSpeed = mega
+                ? actualSpeedAt50(mega.baseStats.spe, evs.spe, natMod)
+                : null;
             rows.push({
                 side: 'Y',
                 name: p.name,
                 speed: actual,
+                megaSpeed: (megaSpeed != null && megaSpeed !== actual) ? megaSpeed : null,
                 tailwind: actual * 2,
                 rangeMin: baseSpeedAt50(baseSpe),
                 rangeMax: maxSpeedAt50(baseSpe),
@@ -651,13 +687,16 @@
             const prefixHtml = prefix
                 ? `<span class="sq-play-ladder-prefix${r.source === 'base' ? ' sq-play-ladder-prefix-base' : ''}" title="${escapeHtml(prefixTitle)}">${escapeHtml(prefix)}</span>`
                 : '';
+            const megaHtml = (r.megaSpeed != null)
+                ? `<span class="sq-play-ladder-mega" title="${escapeHtml(labels.megaTitle(r.speed, r.megaSpeed))}">${escapeHtml(labels.megaShort)}&nbsp;${r.megaSpeed}</span>`
+                : '';
             return `
                 <li class="sq-play-ladder-row sq-play-ladder-${r.side === 'Y' ? 'yours' : 'opp'}">
                     <span class="sq-play-ladder-rank">${i + 1}</span>
                     ${pokemonIconHtml(r.name, 'sm')}
                     <span class="sq-play-ladder-name">${escapeHtml(r.name)}</span>
                     <span class="sq-play-ladder-side" title="${escapeHtml(r.side === 'Y' ? labels.sideYours : labels.sideOpp)}">${escapeHtml(r.side)}</span>
-                    <span class="sq-play-ladder-speed">${prefixHtml}${r.speed}</span>
+                    <span class="sq-play-ladder-speed">${prefixHtml}${r.speed}${megaHtml}</span>
                     <span class="sq-play-ladder-range" title="${escapeHtml(labels.rangeTitle)}">${r.rangeMin}–${r.rangeMax}</span>
                     <span class="sq-play-ladder-tw" title="${escapeHtml(labels.tailwind)}">${escapeHtml(labels.tailwindLabel)} ${r.tailwind}</span>
                 </li>`;
@@ -688,9 +727,15 @@
             const max    = maxSpeedAt50(baseSpe);
             const actual = actualSpeedAt50(baseSpe, evs.spe, natMod);
             const tail   = actual * 2;
+            const mega   = lookupMega(p.name, p.item);
+            const megaActual = mega ? actualSpeedAt50(mega.baseStats.spe, evs.spe, natMod) : null;
+            const megaHtml = (megaActual != null && megaActual !== actual)
+                ? `<span class="sq-play-speed-mega" title="${escapeHtml(labels.megaTitle(actual, megaActual))}">${escapeHtml(labels.megaShort)}&nbsp;${megaActual}</span>`
+                : '';
             speedHtml = `
                 <div class="sq-play-speed">
                     <span class="sq-play-speed-actual" title="${escapeHtml(labels.actual)} @ L50, ${p.nature || 'Hardy'}, ${evs.spe} EVs">${actual}</span>
+                    ${megaHtml}
                     <span class="sq-play-speed-tail" title="${escapeHtml(labels.tailwind)}">(${tail})</span>
                     <span class="sq-play-speed-range" title="${escapeHtml(labels.base)} ${base} · ${escapeHtml(labels.max)} ${max}">${base}–${max}</span>
                 </div>`;

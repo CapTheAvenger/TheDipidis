@@ -439,12 +439,24 @@
         const de = uiLang() === 'de';
         const langName = de ? 'Deutsch' : 'English';
         const lines = [];
+        let anyMega = false;
         (team.pokemon || []).forEach(p => {
             const parts = [`- ${p.name || '—'}`];
             if (p.item) parts.push(`@ ${p.item}`);
             const meta = [];
             if (p.ability) meta.push((de ? 'Fähigkeit: ' : 'Ability: ') + p.ability);
-            if (p.tera_type) meta.push('Tera: ' + p.tera_type);
+            // This format has no Tera — instead a held Mega Stone (item
+            // ending in "-ite", optionally " X"/" Y") lets the mon Mega
+            // Evolve, which changes its stats. Flag it so Claude accounts
+            // for it. Eviolite is the one "-ite" item that isn't a stone.
+            const isMegaStone = p.item &&
+                /ite( ?[XY])?$/i.test(p.item.trim()) &&
+                !/^eviolite$/i.test(p.item.trim());
+            if (isMegaStone) {
+                anyMega = true;
+                meta.push(de ? 'Mega-Entwicklung (Item ist Mega-Stein)'
+                             : 'Mega Evolves (item is a Mega Stone)');
+            }
             if (p.nature) meta.push((de ? 'Wesen: ' : 'Nature: ') + p.nature);
             if (p.evs) meta.push('EVs: ' + p.evs);
             let line = parts.join(' ');
@@ -455,6 +467,8 @@
         });
         const header = team.team_name || team.replica_code || 'Team';
         const ctx = [team.tournament, team.trainer].filter(Boolean).join(' · ');
+        const megaNoteDe = `Hinweis zum Format: Es gibt KEINE Tera-Mechanik. Stattdessen entwickeln sich Pokémon mit einem Mega-Stein (als Item) Mega — dabei ändern sich ihre Werte, auch die Initiative/Geschwindigkeit. Berücksichtige, welche Pokémon Mega gehen und wie das den Spielplan verändert.`;
+        const megaNoteEn = `Format note: there is NO Tera mechanic. Instead, Pokémon holding a Mega Stone (as their item) Mega Evolve, which changes their stats — including Speed. Account for which Pokémon Mega Evolve and how that shifts the game plan.`;
 
         if (de) {
             return [
@@ -465,6 +479,7 @@
                 ``,
                 lines.join('\n'),
                 ``,
+                ...(anyMega ? [megaNoteDe, ``] : []),
                 `Bitte gehe auf Folgendes ein:`,
                 `1. Kurzer Überblick (2–3 Sätze): Was ist der Spielplan des Teams?`,
                 `2. Die Rolle jedes Pokémon (je ein kurzer Absatz).`,
@@ -482,6 +497,7 @@
             ``,
             lines.join('\n'),
             ``,
+            ...(anyMega ? [megaNoteEn, ``] : []),
             `Please cover:`,
             `1. A short 2–3 sentence overview of the team's game plan.`,
             `2. Each Pokémon's role (one short paragraph each).`,

@@ -1072,6 +1072,24 @@
 .sq-play-ladder-prefix-base {
     color: #f5d27a;
 }
+/* Post-Mega Speed badge — Mega Evolution (held Mega Stone) changes the
+ * base stats, so we show the resulting Speed next to the base one. The
+ * violet "M …" pill matches the Mega accent used elsewhere. */
+.sq-play-ladder-mega,
+.sq-play-speed-mega {
+    display: inline-flex;
+    align-items: center;
+    margin-left: 5px;
+    padding: 0 5px;
+    border-radius: 6px;
+    background: rgba(193, 138, 255, 0.16);
+    color: #d8b6ff;
+    font-size: 0.82em;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+.sq-play-speed-mega { font-size: 0.9rem; }
 /* Base–Max range column: tertiary info (after actual / typical
  * Speed but before tailwind). Muted so the eye finds the speed
  * number first. */

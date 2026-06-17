@@ -110,13 +110,16 @@ jobs:
             cp backend/core/data/champions_speed_corpus.json data/champions_speed_corpus.json
           fi
 
-      # Auto-generate beginner strategy guides for NEW/changed teams
-      # via the Claude API (scripts/generate_team_strategies.py).
-      # Cached per replica code in data/champions_team_strategies.json,
-      # so unchanged teams cost zero API calls. Fail-soft: a missing
-      # ANTHROPIC_API_KEY secret or an API outage only skips this step;
-      # the team scrape itself still commits.
+      # DISABLED (2026-06-16): server-side strategy generation via the
+      # Claude API was the only recurring cost of the Side Quest feature.
+      # We now offer a zero-cost client-side alternative instead — the
+      # "How to play this team (via Claude)" button copies a ready-made
+      # prompt and opens Claude in the user's own browser (js/app-side-
+      # quest.js → openClaudeForTeam). Already-generated guides in
+      # data/champions_team_strategies.json stay cached and keep showing.
+      # To re-enable paid auto-generation, flip `if:` back to true.
       - name: Generate team strategies (Claude API)
+        if: false
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: |

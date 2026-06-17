@@ -68,6 +68,11 @@
             playAria: 'Live-Hilfe (Speed-Werte + Schwächen + Gegner-Erfassung) öffnen für',
             infoBtn: 'So spielst du das Team',
             infoAria: 'Strategie-Erklärung anzeigen für',
+            claudeBtn: 'So spielst du das Team (via Claude)',
+            claudeAria: 'Strategie-Prompt kopieren und Claude öffnen für',
+            claudeCopied: 'Kopiert! Bei Claude einfügen ✓',
+            claudeToastOk: 'Prompt kopiert — füge ihn im Claude-Tab mit Strg/⌘+V ein und sende ab.',
+            claudeToastManual: 'Automatisches Kopieren ging nicht — bitte den Prompt im Tab manuell kopieren.',
             roles: 'Die Pokémon und ihre Rollen',
             gamePlan: 'So läuft ein typisches Spiel',
             tips: 'Tipps für den Einstieg',
@@ -83,6 +88,11 @@
             playAria: 'Open live helper (speed values + weaknesses + opponent capture) for',
             infoBtn: 'How to play this team',
             infoAria: 'Show strategy explanation for',
+            claudeBtn: 'How to play this team (via Claude)',
+            claudeAria: 'Copy strategy prompt and open Claude for',
+            claudeCopied: 'Copied! Paste into Claude ✓',
+            claudeToastOk: 'Prompt copied — paste it into the Claude tab with Ctrl/⌘+V and send.',
+            claudeToastManual: 'Auto-copy failed — please copy the prompt manually in the tab.',
             roles: 'The Pokémon and their roles',
             gamePlan: 'How a typical game goes',
             tips: 'Beginner tips',
@@ -287,6 +297,17 @@
                         <span class="side-quest-info-icon" aria-hidden="true">ℹ</span>
                         <span class="side-quest-info-label">${escapeHtml(labels.infoBtn)}</span>
                     </button>` : '';
+        // Claude-Button: shown when there's no cached guide. Copies a
+        // ready-made prompt and opens Claude so the user gets the
+        // explanation from their own Claude — no API cost to the site.
+        const claudeBtn = hasGuide ? '' : `
+                    <button class="side-quest-claude-btn"
+                            type="button"
+                            data-team-code="${escapeHtml(code)}"
+                            aria-label="${escapeHtml(labels.claudeAria)} ${escapeHtml(team.team_name || code)}">
+                        <span class="side-quest-claude-icon" aria-hidden="true">✨</span>
+                        <span class="side-quest-claude-label">${escapeHtml(labels.claudeBtn)}</span>
+                    </button>`;
         // Play-Button: opens the live-helper overlay (Speed-Werte +
         // Schwächen + Gegner-Erfassung). Visible on every card — the
         // helper does its own data-availability check, so the button
@@ -320,6 +341,7 @@
                 <div class="side-quest-team-footer">
                     ${playBtn}
                     ${infoBtn}
+                    ${claudeBtn}
                     ${renderMarkButtons(hash, status)}
                 </div>
                 ${stratHtml ? `
@@ -407,6 +429,133 @@
         overlay.querySelector('.side-quest-modal-close').focus();
     }
 
+    // ── "How to play this team — via Claude" ──────────────────────
+    // Zero-API-cost alternative to the CI-generated guides: build a
+    // ready-to-send prompt from the team composition, copy it to the
+    // clipboard and open Claude in a new tab. The end user pastes it
+    // and gets the explanation from their own Claude — the site pays
+    // nothing. Used for teams that don't have a cached guide.
+    function buildClaudePrompt(team) {
+        const de = uiLang() === 'de';
+        const langName = de ? 'Deutsch' : 'English';
+        const lines = [];
+        let anyMega = false;
+        (team.pokemon || []).forEach(p => {
+            const parts = [`- ${p.name || '—'}`];
+            if (p.item) parts.push(`@ ${p.item}`);
+            const meta = [];
+            if (p.ability) meta.push((de ? 'Fähigkeit: ' : 'Ability: ') + p.ability);
+            // This format has no Tera — instead a held Mega Stone (item
+            // ending in "-ite", optionally " X"/" Y") lets the mon Mega
+            // Evolve, which changes its stats. Flag it so Claude accounts
+            // for it. Eviolite is the one "-ite" item that isn't a stone.
+            const isMegaStone = p.item &&
+                /ite( ?[XY])?$/i.test(p.item.trim()) &&
+                !/^eviolite$/i.test(p.item.trim());
+            if (isMegaStone) {
+                anyMega = true;
+                meta.push(de ? 'Mega-Entwicklung (Item ist Mega-Stein)'
+                             : 'Mega Evolves (item is a Mega Stone)');
+            }
+            if (p.nature) meta.push((de ? 'Wesen: ' : 'Nature: ') + p.nature);
+            if (p.evs) meta.push('EVs: ' + p.evs);
+            let line = parts.join(' ');
+            if (meta.length) line += ' | ' + meta.join(' | ');
+            const moves = (p.moves || []).slice(0, 4).filter(Boolean);
+            if (moves.length) line += '\n    ' + (de ? 'Attacken: ' : 'Moves: ') + moves.join(', ');
+            lines.push(line);
+        });
+        const header = team.team_name || team.replica_code || 'Team';
+        const ctx = [team.tournament, team.trainer].filter(Boolean).join(' · ');
+        const megaNoteDe = `Hinweis zum Format: Es gibt KEINE Tera-Mechanik. Stattdessen entwickeln sich Pokémon mit einem Mega-Stein (als Item) Mega — dabei ändern sich ihre Werte, auch die Initiative/Geschwindigkeit. Berücksichtige, welche Pokémon Mega gehen und wie das den Spielplan verändert.`;
+        const megaNoteEn = `Format note: there is NO Tera mechanic. Instead, Pokémon holding a Mega Stone (as their item) Mega Evolve, which changes their stats — including Speed. Account for which Pokémon Mega Evolve and how that shifts the game plan.`;
+
+        if (de) {
+            return [
+                `Du bist ein erfahrener Pokémon-VGC-Coach (Format: Pokémon Champions, Doppelkämpfe, 4 von 6 mitnehmen).`,
+                `Erkläre einsteigerfreundlich auf ${langName}, wie man das folgende Team spielt. Sei konkret und praktisch.`,
+                ``,
+                `Team: ${header}${ctx ? ' (' + ctx + ')' : ''}`,
+                ``,
+                lines.join('\n'),
+                ``,
+                ...(anyMega ? [megaNoteDe, ``] : []),
+                `Bitte gehe auf Folgendes ein:`,
+                `1. Kurzer Überblick (2–3 Sätze): Was ist der Spielplan des Teams?`,
+                `2. Die Rolle jedes Pokémon (je ein kurzer Absatz).`,
+                `3. So läuft ein typisches Spiel ab — Schritt für Schritt.`,
+                `4. 3–5 Einsteiger-Tipps (typische Fehler, was beschützen, welcher Lead).`,
+                ``,
+                `Antworte auf ${langName}.`,
+            ].join('\n');
+        }
+        return [
+            `You are an experienced Pokémon VGC coach (format: Pokémon Champions, doubles, bring 4 of 6).`,
+            `Explain in beginner-friendly ${langName} how to play the following team. Be concrete and practical.`,
+            ``,
+            `Team: ${header}${ctx ? ' (' + ctx + ')' : ''}`,
+            ``,
+            lines.join('\n'),
+            ``,
+            ...(anyMega ? [megaNoteEn, ``] : []),
+            `Please cover:`,
+            `1. A short 2–3 sentence overview of the team's game plan.`,
+            `2. Each Pokémon's role (one short paragraph each).`,
+            `3. How a typical game goes — step by step.`,
+            `4. 3–5 beginner tips (common mistakes, what to protect, lead choices).`,
+            ``,
+            `Answer in ${langName}.`,
+        ].join('\n');
+    }
+
+    // Synchronous clipboard write (kept inside the click gesture so the
+    // subsequent window.open isn't treated as a pop-up). Falls back to
+    // the async Clipboard API as a best-effort enhancement.
+    function copyTextSync(text) {
+        let ok = false;
+        try {
+            const ta = document.createElement('textarea');
+            ta.value = text;
+            ta.setAttribute('readonly', '');
+            ta.style.position = 'fixed';
+            ta.style.top = '-1000px';
+            ta.style.opacity = '0';
+            document.body.appendChild(ta);
+            ta.focus();
+            ta.select();
+            ok = document.execCommand('copy');
+            document.body.removeChild(ta);
+        } catch (_) { ok = false; }
+        if (!ok && navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).then(() => {}).catch(() => {});
+            ok = true;
+        }
+        return ok;
+    }
+
+    function openClaudeForTeam(team, btn) {
+        const labels = LABELS[uiLang()];
+        const prompt = buildClaudePrompt(team);
+        const copied = copyTextSync(prompt);
+        // Open Claude synchronously after the copy so the gesture stays
+        // valid and the pop-up blocker doesn't intervene.
+        window.open('https://claude.ai/new', '_blank', 'noopener');
+        if (btn) {
+            const label = btn.querySelector('.side-quest-claude-label');
+            const prev = label ? label.textContent : '';
+            btn.classList.add('is-copied');
+            if (label) label.textContent = labels.claudeCopied;
+            setTimeout(() => {
+                btn.classList.remove('is-copied');
+                if (label) label.textContent = prev || labels.claudeBtn;
+            }, 2200);
+        }
+        if (typeof window.showToast === 'function') {
+            window.showToast(copied ? labels.claudeToastOk : labels.claudeToastManual,
+                             copied ? 'success' : 'warning');
+        }
+    }
+
     async function copyCode(btn) {
         const code = btn.getAttribute('data-code') || '';
         if (!code) return;
@@ -484,6 +633,14 @@
                 const entry = _strategies && _strategies[code];
                 const team = teams.find(t => (t.replica_code || '') === code);
                 if (entry && team) openStrategyModal(team, entry);
+            });
+        });
+
+        host.querySelectorAll('.side-quest-claude-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const code = btn.getAttribute('data-team-code') || '';
+                const team = teams.find(t => (t.replica_code || '') === code);
+                if (team) openClaudeForTeam(team, btn);
             });
         });
 

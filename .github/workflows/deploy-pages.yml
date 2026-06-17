@@ -157,6 +157,19 @@ jobs:
           cp config/current_meta_analysis_settings.json _site/config/ 2>/dev/null || true
           cp _config.yml _site/ 2>/dev/null || true
 
+      # Restore previously-optimized images. The key tracks the source
+      # image content (hashFiles over images/**), so it only misses when
+      # an image is added/changed/removed — in which case the Optimize
+      # step below re-runs and the post-job save refreshes the cache.
+      # Placed AFTER "Prepare deployment directory" so the restore
+      # overwrites the freshly-copied (unoptimized) _site/images.
+      - name: Restore optimized-image cache
+        id: img-cache
+        uses: actions/cache@v4
+        with:
+          path: _site/images
+          key: optipng-o2-${{ hashFiles('images/**') }}
+
       - name: Minify JS, CSS & HTML
         run: |
           shopt -s nullglob
@@ -170,6 +183,14 @@ jobs:
           echo "✓ Minification complete"
 
       - name: Optimize images
+        # optipng -o2 over the full images/ tree is lossless but SLOW
+        # (~4.5 min for ~60 PNGs / 73 MB). Images change roughly weekly
+        # while deploys run several times a day, so we cache the
+        # OPTIMIZED _site/images keyed by the source image content: on a
+        # cache hit the optimized tree is restored above and this step
+        # is skipped entirely, turning ~4.5 min into ~0 on the vast
+        # majority of deploys. optipng only re-runs when images change.
+        if: steps.img-cache.outputs.cache-hit != 'true'
         run: |
           sudo apt-get install -y -qq optipng > /dev/null 2>&1
           find _site/images -name '*.png' -exec optipng -o2 -quiet {} + 2>/dev/null || true

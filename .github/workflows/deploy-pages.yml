@@ -165,7 +165,7 @@ jobs:
       # overwrites the freshly-copied (unoptimized) _site/images.
       - name: Restore optimized-image cache
         id: img-cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: _site/images
           key: optipng-o2-${{ hashFiles('images/**') }}

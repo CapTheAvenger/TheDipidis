@@ -136,6 +136,21 @@ jobs:
           fi
           exit 0
 
+      # Rebuild the Side Quest "Look up" reference (items/abilities/moves/
+      # field effects) from the Champions dataset + PokéAPI German text.
+      # Both sources are on GitHub, so this works in CI. Fail-soft: keeps
+      # the committed JSON if the fetch hiccups.
+      - name: Build Champions resources reference
+        run: |
+          set +e
+          python -u scripts/build_champions_resources.py
+          rc=$?
+          if [ "$rc" -ne 0 ]; then
+              echo "::warning::build_champions_resources exited with $rc — resources JSON kept as-is"
+              git checkout -- data/champions_resources.json 2>/dev/null
+          fi
+          exit 0
+
       - name: Bump version
         run: |
           chmod +x bump-version.sh
@@ -147,6 +162,7 @@ jobs:
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name  "github-actions[bot]"
           git add data/champions_replica_teams.json \
+                  data/champions_resources.json \
                   index.html service-worker.js version.json
           # Strategies file only exists once the ANTHROPIC_API_KEY
           # secret is set and the generator ran at least once.

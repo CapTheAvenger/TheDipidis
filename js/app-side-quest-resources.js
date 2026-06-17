@@ -42,14 +42,13 @@
             catAbility:  'Fähigkeit',
             catMove:     'Attacke',
             fieldTag:    'Feld',
-            verifiedHint:'Für Champions geprüft',
-            srcVerified: '✓ Champions-geprüft',
-            srcMainline: 'Standard-Mechanik · offizieller Spieltext (PokéAPI)',
+            verifiedHint:'Deutsche Beschreibung handgeprüft',
             noEffect:    'Keine Beschreibung hinterlegt.',
             none:        'Nichts gefunden — andere Schreibweise oder Stichwort probieren.',
             loading:     'Lade Referenzdaten …',
             error:       'Referenzdaten konnten nicht geladen werden.',
             count:       (n) => `${n} Einträge`,
+            attribution: 'Daten: Pokémon-Champions-Datensatz (CC BY 4.0) · Deutsche Texte: PokéAPI',
         },
         en: {
             tabTeams:    'Teams',
@@ -66,14 +65,13 @@
             catAbility:  'Ability',
             catMove:     'Move',
             fieldTag:    'Field',
-            verifiedHint:'Checked for Champions',
-            srcVerified: '✓ Champions-checked',
-            srcMainline: 'Mainline mechanic · official in-game text (PokéAPI)',
+            verifiedHint:'German description hand-checked',
             noEffect:    'No description available yet.',
             none:        'Nothing found — try a different spelling or keyword.',
             loading:     'Loading reference data …',
             error:       'Could not load reference data.',
             count:       (n) => `${n} entries`,
+            attribution: 'Data: Pokémon Champions dataset (CC BY 4.0) · German text: PokéAPI',
         },
     };
     function t() { return LABELS[uiLang()]; }
@@ -162,7 +160,6 @@
         const effHtml = eff
             ? escapeHtml(eff)
             : `<span class="sq-res-noeff">${escapeHtml(l.noEffect)}</span>`;
-        const srcHtml = `<span class="sq-res-source">${escapeHtml(e.verified ? l.srcVerified : l.srcMainline)}</span>`;
         return `
             <li class="sq-res-entry sq-res-cat-${e.cat}${e.verified ? ' is-verified' : ''}">
                 <button class="sq-res-head" type="button" aria-expanded="false">
@@ -177,7 +174,7 @@
                         <span class="sq-res-chevron" aria-hidden="true">▾</span>
                     </span>
                 </button>
-                <div class="sq-res-effect" hidden>${effHtml}${srcHtml}</div>
+                <div class="sq-res-effect" hidden>${effHtml}</div>
             </li>`;
     }
 
@@ -226,6 +223,7 @@
                 ${renderChips()}
                 <p class="sq-res-count">${escapeHtml(l.count(results.length))}</p>
                 ${listHtml}
+                <p class="sq-res-attr">${escapeHtml(l.attribution)}</p>
             </div>`;
 
         wireEvents(host);

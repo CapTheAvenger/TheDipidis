@@ -753,7 +753,10 @@
 
         const updateGrid = () => {
             const f = normSpecies(search ? search.value : '');
-            const list = f ? _allSpecies.filter(s => normSpecies(s).indexOf(f) !== -1) : _allSpecies;
+            const list = (f ? _allSpecies.filter(s => normSpecies(s).indexOf(f) !== -1) : _allSpecies.slice())
+                // Most-used first (by # of teams running it), then alphabetical.
+                .sort((a, b) => (_speciesCounts.get(b) || 0) - (_speciesCounts.get(a) || 0)
+                                || a.localeCompare(b));
             grid.innerHTML = list.length
                 ? list.map(speciesCellHtml).join('')
                 : `<p class="sq-play-picker-empty">${escapeHtml(labels.pickerEmpty)}</p>`;

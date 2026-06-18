@@ -1101,6 +1101,31 @@
 }
 /* Make the cell a positioning context for the absolute badge. */
 .sq-play-picker-cell { position: relative; }
+
+/* Species picker (Teams-with filter) — species are listed by their full
+ * form name ("Floette-Eternal", "Ninetales-Alola"), which the single-line
+ * opponent-picker tiles would truncate. Give this picker slightly wider
+ * tiles and let names wrap to two lines so they stay readable. */
+#sideQuestSpeciesPicker .sq-play-picker-grid {
+    grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
+}
+#sideQuestSpeciesPicker .sq-play-picker-cell {
+    padding: 0.4rem 0.3rem 0.45rem;
+    min-height: 80px;
+    justify-content: flex-start;
+    gap: 3px;
+}
+#sideQuestSpeciesPicker .sq-play-picker-cell-name {
+    white-space: normal;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    line-height: 1.18;
+    font-size: 0.66rem;
+    min-height: 2.36em;
+    color: #d6dee9;
+}
 .sq-play-picker-empty {
     grid-column: 1 / -1;
     text-align: center;

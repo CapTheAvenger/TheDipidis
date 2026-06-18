@@ -51,6 +51,105 @@
     font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }
 
+/* ── "Teams with …" species filter ──────────────────────────────── */
+.side-quest-filter {
+    margin: 0 0 1rem 0;
+    padding: 0.8rem 0.9rem;
+    background: #11161f;
+    border: 1px solid #232b39;
+    border-radius: 12px;
+}
+.side-quest-filter-head {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 0.55rem;
+}
+.side-quest-filter-title {
+    font-weight: 800;
+    font-size: 0.95rem;
+    color: #e6ebf3;
+}
+.side-quest-filter-count {
+    color: #8c95a5;
+    font-size: 0.78rem;
+}
+.side-quest-filter-clear {
+    margin-left: auto;
+    appearance: none;
+    border: 1px solid #2a3140;
+    background: rgba(255, 255, 255, 0.03);
+    color: #c4ccd9;
+    font: inherit;
+    font-size: 0.76rem;
+    font-weight: 600;
+    padding: 0.25rem 0.6rem;
+    border-radius: 999px;
+    cursor: pointer;
+}
+.side-quest-filter-clear:hover { background: rgba(255, 255, 255, 0.08); }
+.side-quest-filter-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 0.55rem;
+}
+.side-quest-filter-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 5px 3px 6px;
+    background: rgba(95, 182, 255, 0.12);
+    border: 1px solid rgba(95, 182, 255, 0.4);
+    border-radius: 999px;
+    font-size: 0.82rem;
+    color: #e6ebf3;
+}
+.side-quest-filter-chip .tcg-pokemon-icon { width: 22px; height: 22px; }
+.side-quest-filter-chip-name { font-weight: 600; }
+.side-quest-filter-remove {
+    appearance: none;
+    border: 0;
+    background: transparent;
+    color: #9fb6d0;
+    font-size: 1rem;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0 2px;
+}
+.side-quest-filter-remove:hover { color: #fff; }
+.side-quest-filter-input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0.6rem 0.8rem;
+    border-radius: 9px;
+    border: 1px solid #2a3140;
+    background: #0d1219;
+    color: #e6ebf3;
+    font: inherit;
+    font-size: 0.92rem;
+}
+.side-quest-filter-input:focus {
+    outline: none;
+    border-color: #5fb6ff;
+    box-shadow: 0 0 0 2px rgba(95, 182, 255, 0.18);
+}
+.side-quest-filter-input:disabled { opacity: 0.5; cursor: not-allowed; }
+.side-quest-filter-hint {
+    margin: 0.45rem 0 0 0;
+    color: #6b7585;
+    font-size: 0.72rem;
+}
+.side-quest-filter-none {
+    margin: 1rem 0;
+    padding: 1rem;
+    text-align: center;
+    color: #9aa3b2;
+    background: #11161f;
+    border: 1px dashed #2a3140;
+    border-radius: 10px;
+}
+
 .side-quest-teams {
     display: grid;
     gap: 1rem;

@@ -82,6 +82,13 @@
             markLiked: 'Fand ich gut',
             markDisliked: 'Nicht nochmal',
             markHint: 'Markieren: ⭐ probieren · 👍 gut · 👎 nicht nochmal',
+            filterTitle: 'Teams mit …',
+            filterPh: 'Pokémon eingeben (bis zu 6) …',
+            filterHint: 'Zeigt nur Teams, die ALLE gewählten Pokémon enthalten.',
+            filterClear: 'Zurücksetzen',
+            filterCount: (n, total) => `${n} von ${total} Teams`,
+            filterNone: 'Kein Team enthält alle gewählten Pokémon.',
+            filterRemove: 'Entfernen',
         },
         en: {
             playBtn: 'Play',
@@ -102,6 +109,13 @@
             markLiked: 'Liked it',
             markDisliked: 'Not again',
             markHint: 'Mark teams: ⭐ try · 👍 liked · 👎 not again',
+            filterTitle: 'Teams with …',
+            filterPh: 'Type a Pokémon (up to 6) …',
+            filterHint: 'Shows only teams that contain ALL selected Pokémon.',
+            filterClear: 'Reset',
+            filterCount: (n, total) => `${n} of ${total} teams`,
+            filterNone: 'No team contains all selected Pokémon.',
+            filterRemove: 'Remove',
         },
     };
 
@@ -580,6 +594,113 @@
         }
     }
 
+    // ── "Teams with …" species filter ──────────────────────────────
+    // User picks up to 6 Pokémon; only teams that contain ALL of them
+    // stay visible (AND logic). State is module-level so it survives the
+    // re-renders triggered by mark clicks etc.
+    const MAX_FILTER = 6;
+    let _speciesFilter = [];
+
+    function normSpecies(s) { return String(s || '').trim().toLowerCase(); }
+
+    function allSpeciesFrom(teams) {
+        const seen = new Map();  // norm → display name
+        teams.forEach(t => (t.pokemon || []).forEach(p => {
+            const nm = (p.name || '').trim();
+            if (nm) seen.set(normSpecies(nm), nm);
+        }));
+        return [...seen.values()].sort((a, b) => a.localeCompare(b));
+    }
+
+    function teamHasSpecies(team, sp) {
+        const n = normSpecies(sp);
+        return (team.pokemon || []).some(p => normSpecies(p.name) === n);
+    }
+
+    // Resolve a free-typed value to a species actually present in the
+    // data: exact, then prefix, then substring.
+    function resolveSpecies(input, allSpecies) {
+        const n = normSpecies(input);
+        if (!n) return null;
+        return allSpecies.find(s => normSpecies(s) === n)
+            || allSpecies.find(s => normSpecies(s).startsWith(n))
+            || allSpecies.find(s => normSpecies(s).indexOf(n) !== -1)
+            || null;
+    }
+
+    function addSpecies(sp) {
+        if (!sp || _speciesFilter.length >= MAX_FILTER) return;
+        if (_speciesFilter.some(x => normSpecies(x) === normSpecies(sp))) return;
+        _speciesFilter.push(sp);
+    }
+    function removeSpecies(sp) {
+        _speciesFilter = _speciesFilter.filter(x => normSpecies(x) !== normSpecies(sp));
+    }
+
+    function renderSpeciesFilter(allSpecies, shown, total) {
+        const labels = LABELS[uiLang()];
+        const atMax = _speciesFilter.length >= MAX_FILTER;
+        const active = _speciesFilter.length > 0;
+        const chips = _speciesFilter.map(sp => `
+            <span class="side-quest-filter-chip">
+                ${pokemonIcon(sp)}
+                <span class="side-quest-filter-chip-name">${escapeHtml(sp)}</span>
+                <button class="side-quest-filter-remove" type="button"
+                        data-filter-remove="${escapeHtml(sp)}"
+                        aria-label="${escapeHtml(labels.filterRemove)} ${escapeHtml(sp)}">×</button>
+            </span>`).join('');
+        const options = allSpecies.map(s => `<option value="${escapeHtml(s)}"></option>`).join('');
+        return `
+            <div class="side-quest-filter">
+                <div class="side-quest-filter-head">
+                    <span class="side-quest-filter-title">${escapeHtml(labels.filterTitle)}</span>
+                    ${active ? `<span class="side-quest-filter-count">${escapeHtml(labels.filterCount(shown, total))}</span>` : ''}
+                    ${active ? `<button class="side-quest-filter-clear" type="button" data-filter-clear>${escapeHtml(labels.filterClear)}</button>` : ''}
+                </div>
+                ${chips ? `<div class="side-quest-filter-chips">${chips}</div>` : ''}
+                <input class="side-quest-filter-input" id="sideQuestFilterInput" type="text"
+                       list="sideQuestSpeciesList" placeholder="${escapeHtml(labels.filterPh)}"
+                       autocomplete="off" ${atMax ? 'disabled' : ''}
+                       aria-label="${escapeHtml(labels.filterTitle)}">
+                <datalist id="sideQuestSpeciesList">${options}</datalist>
+                <p class="side-quest-filter-hint">${escapeHtml(labels.filterHint)}</p>
+            </div>`;
+    }
+
+    function wireSpeciesFilter(host, allSpecies) {
+        const input = host.querySelector('#sideQuestFilterInput');
+        const commit = (val) => {
+            const sp = resolveSpecies(val, allSpecies);
+            if (!sp) return;
+            addSpecies(sp);
+            render().then(() => {
+                const i = document.getElementById('sideQuestFilterInput');
+                if (i && !i.disabled) i.focus();
+            });
+        };
+        if (input) {
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') { e.preventDefault(); commit(input.value); }
+            });
+            input.addEventListener('input', (e) => {
+                // A datalist selection fires 'input' with no inputType
+                // (typing yields 'insertText') — add immediately on pick.
+                if (!e.inputType) {
+                    const exact = allSpecies.find(s => normSpecies(s) === normSpecies(input.value));
+                    if (exact) commit(exact);
+                }
+            });
+        }
+        host.querySelectorAll('[data-filter-remove]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                removeSpecies(btn.getAttribute('data-filter-remove'));
+                render();
+            });
+        });
+        const clearBtn = host.querySelector('[data-filter-clear]');
+        if (clearBtn) clearBtn.addEventListener('click', () => { _speciesFilter = []; render(); });
+    }
+
     async function render() {
         const host = document.getElementById(HOST_ID);
         if (!host) return;
@@ -604,10 +725,19 @@
         }
 
         const headerHtml = renderHeader(meta);
+
+        // "Teams with …" species filter (AND across all picked Pokémon).
+        const allSpecies = allSpeciesFrom(teams);
+        const filtered = _speciesFilter.length
+            ? teams.filter(t => _speciesFilter.every(sp => teamHasSpecies(t, sp)))
+            : teams;
+        const filterHtml = renderSpeciesFilter(allSpecies, filtered.length, teams.length);
+        const labels = LABELS[uiLang()];
+
         // Sort: "not again" teams sink to the bottom (out of the way but
         // still visible so the verdict can be revisited); everything
         // else stays in rank order.
-        const teamsHtml = teams
+        const teamsHtml = filtered
             .slice()
             .sort((a, b) => {
                 const da = getMark(teamIdentityHash(a)) === 'disliked' ? 1 : 0;
@@ -618,10 +748,17 @@
             .map(renderTeam)
             .join('');
 
+        const teamsBody = filtered.length
+            ? `<div class="side-quest-teams">${teamsHtml}</div>`
+            : `<p class="side-quest-filter-none">${escapeHtml(labels.filterNone)}</p>`;
+
         host.innerHTML = `
             ${headerHtml}
-            <div class="side-quest-teams">${teamsHtml}</div>
+            ${filterHtml}
+            ${teamsBody}
         `;
+
+        wireSpeciesFilter(host, allSpecies);
 
         host.querySelectorAll('.side-quest-copy-btn').forEach(btn => {
             btn.addEventListener('click', () => copyCode(btn));

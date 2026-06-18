@@ -150,6 +150,54 @@
     border-radius: 10px;
 }
 
+/* ── Regulation / meta blocks ────────────────────────────────────── */
+.side-quest-reg-block { margin: 0 0 1.6rem 0; }
+.side-quest-reg-head {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    margin: 0 0 0.7rem 0;
+    padding-bottom: 0.4rem;
+    border-bottom: 1px solid #232b39;
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: #aab3c2;
+}
+.side-quest-reg-head.is-current { color: #e6ebf3; }
+.side-quest-reg-head.is-current::before {
+    content: "";
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: #4cd182;
+    box-shadow: 0 0 0 3px rgba(76, 209, 130, 0.18);
+}
+.side-quest-reg-count {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #8c95a5;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 1px 8px;
+    border-radius: 999px;
+}
+/* Per-card meta badge */
+.side-quest-reg-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 1px 7px;
+    border-radius: 999px;
+    font-size: 0.66rem;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    color: #aab3c2;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid #2a3140;
+}
+.side-quest-reg-badge.is-current {
+    color: #8fe0aa;
+    background: rgba(76, 209, 130, 0.14);
+    border-color: rgba(76, 209, 130, 0.4);
+}
+
 .side-quest-teams {
     display: grid;
     gap: 1rem;

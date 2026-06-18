@@ -447,6 +447,38 @@ def parse_pokemon_text(text: str) -> List[Dict]:
     return mons
 
 
+# Champions regulation timeline (newest first). M-A ran from the
+# 2026-04-08 launch; M-B from 2026-06-16. The active meta should always
+# fill the top of the UI list, so selection sorts current-regulation
+# teams ahead of older ones (see the sort in main()).
+REGULATIONS = [('M-B', date(2026, 6, 16)), ('M-A', date(2026, 4, 8))]
+CURRENT_REGULATION = 'M-B'
+
+
+def team_regulation(row: Dict[str, str]) -> str:
+    """Which Champions regulation a team belongs to. Prefers an explicit
+    sheet column (Regulation / Format / Reg) if the maintainers ever add
+    one; otherwise derives it from Date Shared against the timeline."""
+    col = _get_field(row, 'Regulation', 'Format', 'Reg', 'Ruleset').strip().lower()
+    if col:
+        flat = col.replace('-', '').replace(' ', '')
+        for rid, _ in REGULATIONS:
+            if rid.lower().replace('-', '') in flat:
+                return rid
+    d = parse_date_shared(_get_field(row, 'Date Shared', 'Date'))
+    if d:
+        for rid, start in REGULATIONS:  # newest-first
+            if d >= start:
+                return rid
+    return REGULATIONS[-1][0]
+
+
+def _reg_order(rid: str) -> int:
+    """Sort key: current regulation first, then the rest newest-first."""
+    order = [CURRENT_REGULATION] + [r for r, _ in REGULATIONS if r != CURRENT_REGULATION]
+    return order.index(rid) if rid in order else len(order)
+
+
 def build_team_record(row: Dict[str, str], rank_position: int) -> Dict:
     code = _get_field(row, 'Replica Code (Click text for image)', 'Replica Code')
     pokepaste = _get_field(row, 'Pokepaste', 'PokePaste', 'Paste')
@@ -472,6 +504,7 @@ def build_team_record(row: Dict[str, str], rank_position: int) -> Dict:
         'tournament':    tournament,
         'trainer':       trainer,
         'format':        'VGC Champions',
+        'regulation':    team_regulation(row),
         'sheet_rank':    sheet_rank,
         'date_shared':   date_shared,
         'pokepaste_url': pokepaste,
@@ -529,12 +562,16 @@ def main():
                 col_vals = [r.get(h, '') for r in rows[:5] if r.get(h, '').strip()]
                 logger.warning("  Column %r — first 5 non-empty: %s", h, col_vals)
 
-    # Sort by rank priority (lower = better), then take top N for the
-    # UI display. Speed corpus uses a wider slice — every team in the
-    # date window, capped to --speed-max-teams.
-    candidates.sort(key=lambda x: x[1])
+    # Sort current-regulation teams first (so the active meta is never
+    # crowded out of the top-N by higher-ranked teams from a past
+    # regulation), then by rank priority within each regulation. Take
+    # top N for the UI display. Speed corpus uses a wider slice.
+    candidates.sort(key=lambda x: (_reg_order(team_regulation(x[0])), x[1]))
     chosen = candidates[:args.top]
-    logger.info("Selected top %d for UI", len(chosen))
+    from collections import Counter
+    _reg_breakdown = Counter(team_regulation(r) for r, _ in chosen)
+    logger.info("Selected top %d for UI (by regulation: %s)",
+                len(chosen), dict(_reg_breakdown))
 
     today = date.today()
     corpus_pool: List[Tuple[Dict[str, str], float]] = []

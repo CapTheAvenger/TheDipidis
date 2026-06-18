@@ -89,6 +89,7 @@
             filterCount: (n, total) => `${n} von ${total} Teams`,
             filterNone: 'Kein Team enthält alle gewählten Pokémon.',
             filterRemove: 'Entfernen',
+            regCurrent: 'aktuelles Meta',
         },
         en: {
             playBtn: 'Play',
@@ -116,6 +117,7 @@
             filterCount: (n, total) => `${n} of ${total} teams`,
             filterNone: 'No team contains all selected Pokémon.',
             filterRemove: 'Remove',
+            regCurrent: 'current meta',
         },
     };
 
@@ -339,6 +341,7 @@
                 <header class="side-quest-team-head">
                     <div class="side-quest-team-meta">
                         <span class="side-quest-rank">#${escapeHtml(String(team.rank || '—'))}</span>
+                        <span class="side-quest-reg-badge${regOf(team) === CURRENT_REG ? ' is-current' : ''}" title="Regulation ${escapeHtml(regOf(team))}">${escapeHtml(regOf(team))}</span>
                         <h3 class="side-quest-team-name">${escapeHtml(team.team_name || 'Untitled team')}</h3>
                         ${tourney}
                     </div>
@@ -594,6 +597,34 @@
         }
     }
 
+    // ── Champions regulation / meta timeline ───────────────────────
+    // Teams are grouped into blocks by regulation, current meta first,
+    // and each card carries a meta badge. A team's regulation is taken
+    // from team.regulation when the scraper provides it, else derived
+    // from its share date. Newest-first. (Champions: M-A from launch
+    // 2026-04-08, M-B from 2026-06-16.)
+    const REG_TIMELINE = [
+        { id: 'M-B', start: Date.parse('2026-06-16') },
+        { id: 'M-A', start: Date.parse('2026-04-08') },
+    ];
+    const CURRENT_REG = 'M-B';
+
+    function regOf(team) {
+        if (team && team.regulation) return team.regulation;
+        const t = Date.parse(team && team.date_shared);
+        if (!isNaN(t)) {
+            for (const r of REG_TIMELINE) if (t >= r.start) return r.id;
+        }
+        return REG_TIMELINE[REG_TIMELINE.length - 1].id;
+    }
+    function regOrder() {
+        return [CURRENT_REG].concat(REG_TIMELINE.map(r => r.id).filter(id => id !== CURRENT_REG));
+    }
+    function regBlockLabel(id) {
+        const labels = LABELS[uiLang()];
+        return id === CURRENT_REG ? `Regulation ${id} · ${labels.regCurrent}` : `Regulation ${id}`;
+    }
+
     // ── "Teams with …" species filter ──────────────────────────────
     // User picks up to 6 Pokémon; only teams that contain ALL of them
     // stay visible (AND logic). State is module-level so it survives the
@@ -734,22 +765,35 @@
         const filterHtml = renderSpeciesFilter(allSpecies, filtered.length, teams.length);
         const labels = LABELS[uiLang()];
 
-        // Sort: "not again" teams sink to the bottom (out of the way but
-        // still visible so the verdict can be revisited); everything
-        // else stays in rank order.
-        const teamsHtml = filtered
-            .slice()
-            .sort((a, b) => {
-                const da = getMark(teamIdentityHash(a)) === 'disliked' ? 1 : 0;
-                const db = getMark(teamIdentityHash(b)) === 'disliked' ? 1 : 0;
-                if (da !== db) return da - db;
-                return (a.rank || 999) - (b.rank || 999);
-            })
-            .map(renderTeam)
-            .join('');
+        // Within a block: "not again" teams sink to the bottom (still
+        // visible so the verdict can be revisited); else rank order.
+        const sortTeams = (arr) => arr.slice().sort((a, b) => {
+            const da = getMark(teamIdentityHash(a)) === 'disliked' ? 1 : 0;
+            const db = getMark(teamIdentityHash(b)) === 'disliked' ? 1 : 0;
+            if (da !== db) return da - db;
+            return (a.rank || 999) - (b.rank || 999);
+        });
+
+        // Group into regulation blocks, current meta first.
+        const byReg = new Map();
+        filtered.forEach(t => {
+            const r = regOf(t);
+            if (!byReg.has(r)) byReg.set(r, []);
+            byReg.get(r).push(t);
+        });
+        const order = regOrder().filter(id => byReg.has(id));
+        byReg.forEach((_, id) => { if (order.indexOf(id) === -1) order.push(id); });
+        const blocksHtml = order.map(id => `
+            <section class="side-quest-reg-block">
+                <h3 class="side-quest-reg-head${id === CURRENT_REG ? ' is-current' : ''}">
+                    ${escapeHtml(regBlockLabel(id))}
+                    <span class="side-quest-reg-count">${byReg.get(id).length}</span>
+                </h3>
+                <div class="side-quest-teams">${sortTeams(byReg.get(id)).map(renderTeam).join('')}</div>
+            </section>`).join('');
 
         const teamsBody = filtered.length
-            ? `<div class="side-quest-teams">${teamsHtml}</div>`
+            ? blocksHtml
             : `<p class="side-quest-filter-none">${escapeHtml(labels.filterNone)}</p>`;
 
         host.innerHTML = `

@@ -602,9 +602,16 @@ def main():
         if i < len(full_fetch_list):
             time.sleep(args.delay)
 
-    # Split: the first args.top entries (still sorted by rank) drive
-    # the UI list; everything is part of the speed corpus.
-    ui_teams = teams[:args.top]
+    # UI list = the FULL fetched pool, not just the rank-capped top-N.
+    # full_fetch_list already = top-N by (regulation, rank) ∪ every team
+    # within the recent date window (capped to --speed-max-teams), and
+    # we've already paid the pokepaste fetch for all of them for the
+    # Speed corpus — so exposing them is free and just gives the user
+    # more selection. They're regulation-ordered (current meta first) and
+    # the frontend regroups + sorts within each regulation block, so the
+    # list scales automatically as M-B teams arrive. `--top` is now a
+    # floor (teams guaranteed by rank), `--speed-max-teams` the ceiling.
+    ui_teams = teams
     corpus_teams = teams
 
     output = {

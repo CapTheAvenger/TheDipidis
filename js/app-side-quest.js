@@ -90,6 +90,11 @@
             filterNone: 'Kein Team enthält alle gewählten Pokémon.',
             filterRemove: 'Entfernen',
             regCurrent: 'aktuelles Meta',
+            filterAdd: 'Pokémon auswählen',
+            filterMax: 'Maximum erreicht (6)',
+            filterPickProgress: (n) => `${n} / 6 gewählt`,
+            pickerClose: 'Schließen',
+            pickerEmpty: 'Kein Treffer — Schreibweise prüfen.',
         },
         en: {
             playBtn: 'Play',
@@ -118,6 +123,11 @@
             filterNone: 'No team contains all selected Pokémon.',
             filterRemove: 'Remove',
             regCurrent: 'current meta',
+            filterAdd: 'Choose a Pokémon',
+            filterMax: 'Maximum reached (6)',
+            filterPickProgress: (n) => `${n} / 6 selected`,
+            pickerClose: 'Close',
+            pickerEmpty: 'No match — check the spelling.',
         },
     };
 
@@ -631,6 +641,8 @@
     // re-renders triggered by mark clicks etc.
     const MAX_FILTER = 6;
     let _speciesFilter = [];
+    let _allSpecies = [];           // species present across teams (for the picker)
+    let _speciesCounts = new Map(); // species → number of teams running it
 
     function normSpecies(s) { return String(s || '').trim().toLowerCase(); }
 
@@ -646,17 +658,6 @@
     function teamHasSpecies(team, sp) {
         const n = normSpecies(sp);
         return (team.pokemon || []).some(p => normSpecies(p.name) === n);
-    }
-
-    // Resolve a free-typed value to a species actually present in the
-    // data: exact, then prefix, then substring.
-    function resolveSpecies(input, allSpecies) {
-        const n = normSpecies(input);
-        if (!n) return null;
-        return allSpecies.find(s => normSpecies(s) === n)
-            || allSpecies.find(s => normSpecies(s).startsWith(n))
-            || allSpecies.find(s => normSpecies(s).indexOf(n) !== -1)
-            || null;
     }
 
     function addSpecies(sp) {
@@ -680,7 +681,6 @@
                         data-filter-remove="${escapeHtml(sp)}"
                         aria-label="${escapeHtml(labels.filterRemove)} ${escapeHtml(sp)}">×</button>
             </span>`).join('');
-        const options = allSpecies.map(s => `<option value="${escapeHtml(s)}"></option>`).join('');
         return `
             <div class="side-quest-filter">
                 <div class="side-quest-filter-head">
@@ -689,39 +689,107 @@
                     ${active ? `<button class="side-quest-filter-clear" type="button" data-filter-clear>${escapeHtml(labels.filterClear)}</button>` : ''}
                 </div>
                 ${chips ? `<div class="side-quest-filter-chips">${chips}</div>` : ''}
-                <input class="side-quest-filter-input" id="sideQuestFilterInput" type="text"
-                       list="sideQuestSpeciesList" placeholder="${escapeHtml(labels.filterPh)}"
-                       autocomplete="off" ${atMax ? 'disabled' : ''}
-                       aria-label="${escapeHtml(labels.filterTitle)}">
-                <datalist id="sideQuestSpeciesList">${options}</datalist>
+                <button class="side-quest-filter-trigger" type="button" id="sideQuestFilterOpen" ${atMax ? 'disabled' : ''}>
+                    <span class="side-quest-filter-trigger-icon" aria-hidden="true">＋</span>
+                    <span>${escapeHtml(atMax ? labels.filterMax : labels.filterAdd)}</span>
+                </button>
                 <p class="side-quest-filter-hint">${escapeHtml(labels.filterHint)}</p>
             </div>`;
     }
 
-    function wireSpeciesFilter(host, allSpecies) {
-        const input = host.querySelector('#sideQuestFilterInput');
-        const commit = (val) => {
-            const sp = resolveSpecies(val, allSpecies);
-            if (!sp) return;
-            addSpecies(sp);
-            render().then(() => {
-                const i = document.getElementById('sideQuestFilterInput');
-                if (i && !i.disabled) i.focus();
-            });
+    // ── Species picker (Quick-Pick-style grid overlay) ─────────────
+    // Same design as the Play opponent picker (sq-play-picker-* classes):
+    // a full-screen overlay with a search box + a tappable grid of the
+    // species present in the teams, each showing how many teams run it.
+    // Multi-select up to 6; auto-closes when full.
+    let _pickerKey = null;
+
+    function speciesCountsFrom(teams, allSpecies) {
+        const m = new Map();
+        allSpecies.forEach(sp => m.set(sp, teams.filter(t => teamHasSpecies(t, sp)).length));
+        return m;
+    }
+
+    function speciesCellHtml(sp) {
+        const n = _speciesCounts.get(sp) || 0;
+        const selected = _speciesFilter.some(x => normSpecies(x) === normSpecies(sp));
+        const badge = n > 0 ? `<span class="sq-play-picker-cell-usage">${n}</span>` : '';
+        return `<button type="button" class="sq-play-picker-cell${n > 0 ? ' sq-play-picker-cell-played' : ''}${selected ? ' is-selected' : ''}"
+                        data-pick-species="${escapeHtml(sp)}" aria-pressed="${selected ? 'true' : 'false'}"
+                        title="${escapeHtml(sp)}">
+                    ${pokemonIcon(sp)}
+                    <span class="sq-play-picker-cell-name">${escapeHtml(sp)}</span>
+                    ${badge}
+                </button>`;
+    }
+
+    function closeSpeciesPicker() {
+        const el = document.getElementById('sideQuestSpeciesPicker');
+        if (el) el.remove();
+        if (_pickerKey) { document.removeEventListener('keydown', _pickerKey); _pickerKey = null; }
+    }
+
+    function openSpeciesPicker() {
+        closeSpeciesPicker();
+        const labels = LABELS[uiLang()];
+        const overlay = document.createElement('div');
+        overlay.id = 'sideQuestSpeciesPicker';
+        overlay.className = 'sq-play-picker-overlay';
+        overlay.innerHTML = `
+            <div class="sq-play-picker-panel" role="dialog" aria-modal="true" aria-label="${escapeHtml(labels.filterTitle)}">
+                <header class="sq-play-picker-head">
+                    <span class="sq-play-picker-progress" id="sqSpeciesProgress">${escapeHtml(labels.filterPickProgress(_speciesFilter.length))}</span>
+                    <input type="search" class="sq-play-picker-search" id="sqSpeciesSearch"
+                           placeholder="${escapeHtml(labels.filterPh)}" autocomplete="off" inputmode="search">
+                    <button type="button" class="sq-play-picker-close" aria-label="${escapeHtml(labels.pickerClose)}">×</button>
+                </header>
+                <div class="sq-play-picker-grid" id="sqSpeciesGrid"></div>
+            </div>`;
+        document.body.appendChild(overlay);
+
+        const grid = overlay.querySelector('#sqSpeciesGrid');
+        const search = overlay.querySelector('#sqSpeciesSearch');
+        const progress = overlay.querySelector('#sqSpeciesProgress');
+
+        const updateGrid = () => {
+            const f = normSpecies(search ? search.value : '');
+            const list = f ? _allSpecies.filter(s => normSpecies(s).indexOf(f) !== -1) : _allSpecies;
+            grid.innerHTML = list.length
+                ? list.map(speciesCellHtml).join('')
+                : `<p class="sq-play-picker-empty">${escapeHtml(labels.pickerEmpty)}</p>`;
         };
-        if (input) {
-            input.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') { e.preventDefault(); commit(input.value); }
-            });
-            input.addEventListener('input', (e) => {
-                // A datalist selection fires 'input' with no inputType
-                // (typing yields 'insertText') — add immediately on pick.
-                if (!e.inputType) {
-                    const exact = allSpecies.find(s => normSpecies(s) === normSpecies(input.value));
-                    if (exact) commit(exact);
-                }
-            });
-        }
+        const refresh = () => {
+            if (progress) progress.textContent = labels.filterPickProgress(_speciesFilter.length);
+            updateGrid();
+            render();  // live-update the teams behind the overlay
+        };
+
+        updateGrid();
+        if (search) search.addEventListener('input', updateGrid);
+        overlay.querySelector('.sq-play-picker-close').addEventListener('click', closeSpeciesPicker);
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) { closeSpeciesPicker(); return; }
+            const cell = e.target.closest('.sq-play-picker-cell');
+            if (!cell) return;
+            const sp = cell.getAttribute('data-pick-species');
+            if (!sp) return;
+            if (_speciesFilter.some(x => normSpecies(x) === normSpecies(sp))) {
+                removeSpecies(sp);
+                refresh();
+            } else {
+                addSpecies(sp);
+                if (_speciesFilter.length >= MAX_FILTER) { closeSpeciesPicker(); render(); }
+                else refresh();
+            }
+        });
+        _pickerKey = (e) => { if (e.key === 'Escape') closeSpeciesPicker(); };
+        document.addEventListener('keydown', _pickerKey);
+        setTimeout(() => search && search.focus(), 30);
+    }
+
+    function wireSpeciesFilter(host) {
+        const trigger = host.querySelector('#sideQuestFilterOpen');
+        if (trigger) trigger.addEventListener('click', openSpeciesPicker);
         host.querySelectorAll('[data-filter-remove]').forEach(btn => {
             btn.addEventListener('click', () => {
                 removeSpecies(btn.getAttribute('data-filter-remove'));
@@ -758,11 +826,12 @@
         const headerHtml = renderHeader(meta);
 
         // "Teams with …" species filter (AND across all picked Pokémon).
-        const allSpecies = allSpeciesFrom(teams);
+        _allSpecies = allSpeciesFrom(teams);
+        _speciesCounts = speciesCountsFrom(teams, _allSpecies);
         const filtered = _speciesFilter.length
             ? teams.filter(t => _speciesFilter.every(sp => teamHasSpecies(t, sp)))
             : teams;
-        const filterHtml = renderSpeciesFilter(allSpecies, filtered.length, teams.length);
+        const filterHtml = renderSpeciesFilter(_allSpecies, filtered.length, teams.length);
         const labels = LABELS[uiLang()];
 
         // Within a block: "not again" teams sink to the bottom (still
@@ -802,7 +871,7 @@
             ${teamsBody}
         `;
 
-        wireSpeciesFilter(host, allSpecies);
+        wireSpeciesFilter(host);
 
         host.querySelectorAll('.side-quest-copy-btn').forEach(btn => {
             btn.addEventListener('click', () => copyCode(btn));

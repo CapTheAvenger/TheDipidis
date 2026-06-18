@@ -118,23 +118,39 @@
     padding: 0 2px;
 }
 .side-quest-filter-remove:hover { color: #fff; }
-.side-quest-filter-input {
+/* Opens the Quick-Pick-style grid overlay. Looks like a tappable field. */
+.side-quest-filter-trigger {
     width: 100%;
     box-sizing: border-box;
-    padding: 0.6rem 0.8rem;
-    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.7rem 0.85rem;
+    border-radius: 10px;
     border: 1px solid #2a3140;
     background: #0d1219;
-    color: #e6ebf3;
+    color: #c4ccd9;
     font: inherit;
     font-size: 0.92rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: left;
+    transition: border-color 120ms ease, background 120ms ease;
 }
-.side-quest-filter-input:focus {
-    outline: none;
-    border-color: #5fb6ff;
-    box-shadow: 0 0 0 2px rgba(95, 182, 255, 0.18);
+.side-quest-filter-trigger:hover { border-color: #5fb6ff; background: rgba(95, 182, 255, 0.06); }
+.side-quest-filter-trigger:disabled { opacity: 0.5; cursor: not-allowed; }
+.side-quest-filter-trigger-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.5rem; height: 1.5rem;
+    border-radius: 7px;
+    background: rgba(95, 182, 255, 0.16);
+    color: #9fd0ff;
+    font-size: 1.1rem;
+    font-weight: 700;
+    flex: 0 0 auto;
 }
-.side-quest-filter-input:disabled { opacity: 0.5; cursor: not-allowed; }
 .side-quest-filter-hint {
     margin: 0.45rem 0 0 0;
     color: #6b7585;
@@ -975,7 +991,10 @@
     background: rgba(8, 11, 18, 0.92);
     z-index: 10002;
     display: flex; align-items: center; justify-content: center;
-    padding: 0.5rem;
+    /* Respect the notch / status bar when launched as an installed PWA
+     * (home-screen shortcut → standalone, no browser chrome). */
+    padding: max(0.5rem, env(safe-area-inset-top)) max(0.5rem, env(safe-area-inset-right))
+             max(0.5rem, env(safe-area-inset-bottom)) max(0.5rem, env(safe-area-inset-left));
     overflow-y: auto;
     animation: sq-play-fade 100ms ease-out;
 }
@@ -1024,6 +1043,19 @@
     font-family: inherit;
 }
 .sq-play-picker-cell:hover { background: rgba(95, 182, 255, 0.12); border-color: #5fb6ff; }
+.sq-play-picker-cell.is-selected {
+    background: rgba(95, 182, 255, 0.18);
+    border-color: #5fb6ff;
+    box-shadow: inset 0 0 0 1px #5fb6ff;
+}
+.sq-play-picker-cell.is-selected::after {
+    content: "✓";
+    position: absolute;
+    top: 2px; left: 4px;
+    color: #9fd0ff;
+    font-size: 0.7rem;
+    font-weight: 900;
+}
 .sq-play-picker-cell-name {
     font-size: 0.62rem; text-align: center;
     line-height: 1.1; max-width: 100%; overflow: hidden; text-overflow: ellipsis;

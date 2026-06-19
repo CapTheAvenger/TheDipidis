@@ -62,6 +62,14 @@ DE_NAME_SUPPLEMENT = {
     "Booster Energy": "Energiebooster",
 }
 
+# Curated German-name corrections, highest priority — for entries where
+# PokéAPI's dump has no German name AND the hand-verified file's name is
+# wrong/missing. (Wave Crash had been "Wellenbrecher"; correct is
+# "Wellentackle".) Add flagged fixes here.
+NAME_CORRECTIONS = {
+    "Wave Crash": "Wellentackle",
+}
+
 
 def norm(s):
     return re.sub(r"[^a-z0-9]", "", str(s or "").lower())
@@ -134,6 +142,7 @@ def main():
 
     verified = load_verified()
     supp = {norm(k): v for k, v in DE_NAME_SUPPLEMENT.items()}
+    corr = {norm(k): v for k, v in NAME_CORRECTIONS.items()}
 
     entries = []
 
@@ -141,7 +150,11 @@ def main():
         key = norm(en)
         v = verified.get(key)
         pk = demap.get(key, {})
-        de = (v or {}).get("de_name") or pk.get("de_name") or supp.get(key) or en
+        # Name priority: curated correction → PokéAPI's OFFICIAL German
+        # name → hand-verified name (gap fill, can have typos) → DE-name
+        # supplement → English. PokéAPI beats the hand-typed names so a
+        # mistake in the verified file can't override the official name.
+        de = corr.get(key) or pk.get("de_name") or (v or {}).get("de_name") or supp.get(key) or en
         # German effect: hand-verified (Champions-correct) wins, else
         # PokéAPI's official German text, else fall back to English in UI.
         de_eff = (v or {}).get("effect") or pk.get("de_eff") or ""

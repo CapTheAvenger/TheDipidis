@@ -136,10 +136,22 @@ jobs:
           fi
           exit 0
 
+      # Refresh the authoritative DE↔EN name maps (PokeWiki moves +
+      # pokemonexperte items). Reachable from CI (not from the build
+      # sandbox). Fail-soft: keeps the committed overrides on any error.
+      - name: Scrape German name maps
+        run: |
+          set +e
+          python -u scripts/scrape_de_names.py
+          if [ "$?" -ne 0 ]; then
+              echo "::warning::scrape_de_names failed — keeping committed de_name_overrides.json"
+              git checkout -- data/de_name_overrides.json 2>/dev/null
+          fi
+          exit 0
+
       # Rebuild the Side Quest "Look up" reference (items/abilities/moves/
-      # field effects) from the Champions dataset + PokéAPI German text.
-      # Both sources are on GitHub, so this works in CI. Fail-soft: keeps
-      # the committed JSON if the fetch hiccups.
+      # field effects) from the Champions dataset + PokéAPI + the scraped
+      # German name overrides. Fail-soft: keeps the committed JSON.
       - name: Build Champions resources reference
         run: |
           set +e
@@ -163,6 +175,7 @@ jobs:
           git config --local user.name  "github-actions[bot]"
           git add data/champions_replica_teams.json \
                   data/champions_resources.json \
+                  data/de_name_overrides.json \
                   index.html service-worker.js version.json
           # Strategies file only exists once the ANTHROPIC_API_KEY
           # secret is set and the generator ran at least once.

@@ -208,20 +208,29 @@ def main():
     supp = {norm(k): v for k, v in DE_NAME_SUPPLEMENT.items()}
     corr = {norm(k): v for k, v in NAME_CORRECTIONS.items()}
 
+    # Authoritative DE name maps scraped from the German wikis (PokeWiki
+    # moves + pokemonexperte items) by scripts/scrape_de_names.py. These
+    # are the current in-game German names and win over PokeAPI AND the
+    # hand-verified files (which carry occasional typos / outdated names).
+    ov_move, ov_item = {}, {}
+    ov_path = os.path.join(DATA, "de_name_overrides.json")
+    if os.path.exists(ov_path):
+        ov = json.load(open(ov_path, encoding="utf-8"))
+        ov_move = {norm(k): v for k, v in (ov.get("moves") or {}).items()}
+        ov_item = {norm(k): v for k, v in (ov.get("items") or {}).items()}
+        print(f"Loaded de_name_overrides: {len(ov_move)} moves, {len(ov_item)} items")
+
     entries = []
 
     def build(cat, en, en_eff, demap, mtype=""):
         key = norm(en)
         v = verified.get(key)
         pk = demap.get(key, {})
-        # Name priority: curated correction → hand-verified name → PokéAPI
-        # German → DE-name supplement → English. The hand-verified file
-        # has the CURRENT Champions names; PokéAPI's dump sometimes carries
-        # an older-gen translation (e.g. Sucker Punch "Tiefschlag" instead
-        # of "Überrumpler"), so it's only the fallback for entries the
-        # verified file doesn't cover. NAME_CORRECTIONS fixes the few
-        # verified-file typos (Wave Crash …).
-        de = corr.get(key) or (v or {}).get("de_name") or pk.get("de_name") or supp.get(key) or en
+        ov = (ov_move if cat == "move" else ov_item if cat == "item" else {}).get(key)
+        # Name priority: curated correction → scraped wiki override
+        # (authoritative, current) → hand-verified name → PokéAPI German →
+        # DE-name supplement → English.
+        de = corr.get(key) or ov or (v or {}).get("de_name") or pk.get("de_name") or supp.get(key) or en
         # German effect: hand-verified (Champions-correct) wins, else
         # PokéAPI's official German text, else fall back to English in UI.
         de_eff = (v or {}).get("effect") or pk.get("de_eff") or ""

@@ -27,6 +27,7 @@ import { registerDeck, handleDeckSearch } from './commands/deck.js';
 import { registerMatchups } from './commands/matchups.js';
 import { handleAccessRequest, registerAccess } from './commands/access.js';
 import { registerMyId } from './commands/myid.js';
+import { registerChampions } from './commands/champions.js';
 
 const BOT_TOKEN = process.env.BOT_TOKEN;
 const PORT = parseInt(process.env.PORT || '3000', 10);
@@ -72,6 +73,9 @@ registerMetaCall(bot);
 registerDeck(bot);
 registerMatchups(bot);
 registerMyId(bot);
+// Before the text catch-all so pokepaste links + photos are handled
+// here first (its hears/photo handlers stop the chain when they match).
+registerChampions(bot);
 
 // Catch-all for truly unrecognised text (anything that isn't a slash
 // command we registered and isn't the persistent keyboard's button

@@ -120,8 +120,12 @@ async function handlePhoto(ctx) {
         const { code } = await extractCodeFromImage(buf);
         if (code) {
             await ctx.reply(
-                `✅ Erkannter Code:\n<code>${esc(code)}</code>\n\nFalls falsch erkannt, bitte prüfen (O↔0, I↔1).`,
+                '✅ Erkannter Code — zum Kopieren antippen 👇\n<i>(falls falsch erkannt: O↔0, I↔1 prüfen)</i>',
                 { parse_mode: 'HTML' });
+            // The code on its own line, as its own message: tapping the
+            // monospace text copies it, and a long-press copies exactly
+            // the code (no surrounding text).
+            await ctx.reply(`<code>${esc(code)}</code>`, { parse_mode: 'HTML' });
         } else {
             await ctx.reply('❌ Konnte keinen 10-stelligen Code erkennen. Schick das Bild näher/schärfer an der „Team ID" — oder tippe den Code ab.');
         }

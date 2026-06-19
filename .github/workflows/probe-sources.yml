@@ -1,10 +1,5 @@
 name: Probe DE name sources
 
-# One-off parser test (manual dispatch). Fetches the PokeWiki move-name
-# wikitext table + the pokemonexperte item page and prints parsed pairs
-# + coverage checks, so the real scraper can be written against the
-# confirmed format. Safe: prints only, commits nothing.
-
 on:
   workflow_dispatch:
 
@@ -12,53 +7,52 @@ jobs:
   probe:
     runs-on: ubuntu-latest
     steps:
-      - name: Parse-test PokeWiki moves + pokemonexperte items
+      - name: Parse-test (current names) PokeWiki moves + pokemonexperte items
         run: |
           python3 - <<'PY'
-          import urllib.request, json, re, html
-          UA = {"User-Agent": "Mozilla/5.0 (X11; Linux x86_64) Chrome/124 Safari/537.36"}
+          import urllib.request, json, re
+          UA={"User-Agent":"Mozilla/5.0 (X11; Linux x86_64) Chrome/124 Safari/537.36"}
+          def get(u): return urllib.request.urlopen(urllib.request.Request(u,headers=UA),timeout=30).read().decode("utf-8","replace")
 
-          def get(url):
-              return urllib.request.urlopen(urllib.request.Request(url, headers=UA), timeout=30).read().decode("utf-8", "replace")
+          def clean(c):
+              c=re.sub(r"\[\[(?:[^|\]]*\|)?([^\]]*)\]\]",r"\1",c)   # [[a|b]]->b
+              c=re.sub(r"\{\{[^}]*\}\}","",c)
+              c=re.sub(r"<[^>]+>","",c)
+              return c
 
-          # ── PokeWiki: moves wikitext table (Deutsch | Englisch | …) ──
-          print("=== PokeWiki moves ===")
-          api = ("https://www.pokewiki.de/api.php?action=parse&format=json&prop=wikitext"
-                 "&page=Liste_der_Attackennamen_in_anderen_Sprachen")
-          wt = json.loads(get(api))["parse"]["wikitext"]["*"]
+          def current(cell):
+              # cells may read "OLD (vor <gen>) NEW (ab <gen>)" — take the
+              # current (ab) name; else strip any (vor ...) note.
+              cell=clean(cell)
+              if "(ab" in cell:
+                  pre=cell.split("(ab")[0]
+                  cur=pre.split(")")[-1]
+                  return cur.strip(" .,\n\t")
+              cell=re.sub(r"\(vor[^)]*\)?","",cell)
+              return cell.strip(" .,\n\t")
 
-          def clean_cell(c):
-              c = c.strip()
-              c = re.sub(r"\[\[(?:[^|\]]*\|)?([^\]]*)\]\]", r"\1", c)   # [[a|b]]->b, [[a]]->a
-              c = re.sub(r"<[^>]+>", "", c)
-              c = re.sub(r"\{\{[^}]*\}\}", "", c)
-              return c.strip()
-
-          pairs = {}
-          # rows are separated by |- ; cells by || ; first data cell after a leading |
+          wt=json.loads(get("https://www.pokewiki.de/api.php?action=parse&format=json&prop=wikitext&page=Liste_der_Attackennamen_in_anderen_Sprachen"))["parse"]["wikitext"]["*"]
+          moves={}
           for row in wt.split("\n|-"):
-              # take the cell block; cells may be on one line "| a || b || c" or multiline
-              cells = re.split(r"\|\||\n\|", row)
-              cells = [clean_cell(c.lstrip("|")) for c in cells if c.strip() and not c.strip().startswith("!")]
-              cells = [c for c in cells if c]
-              if len(cells) >= 2:
-                  de, en = cells[0], cells[1]
-                  # plausibility: en should look like an English move name
-                  if de and en and not de.startswith("{") and len(en) < 40:
-                      pairs[en] = de
+              cells=re.split(r"\|\||\n\|",row)
+              cells=[c.lstrip("|") for c in cells if c.strip() and not c.lstrip().startswith("!")]
+              cells=[current(c) for c in cells]
+              cells=[c for c in cells if c]
+              if len(cells)>=2:
+                  de,en=cells[0],cells[1]
+                  if de and en and len(en)<40 and not de.startswith("{"):
+                      moves[en]=de
+          print("MOVES parsed:",len(moves))
+          for en in ["Hyper Voice","Sucker Punch","Stomping Tantrum","Pound","Double Slap","Wave Crash","Matcha Gotcha","Salt Cure","Bitter Blade","Aqua Step","Close Combat","Protect"]:
+              print(f"   {en:18} -> {moves.get(en,'(missing)')}")
 
-          print("parsed move pairs:", len(pairs))
-          for en in ["Wave Crash","Matcha Gotcha","Hyper Voice","Sucker Punch","Salt Cure","Aqua Step","Bitter Blade","Stone Axe","Tachyon Cutter"]:
-              print(f"   {en:16} -> {pairs.get(en, '(missing)')}")
-          import itertools
-          print("   sample:", dict(itertools.islice(pairs.items(), 8)))
-
-          # ── pokemonexperte: item table ──
-          print("\n=== pokemonexperte items (raw structure sample) ===")
-          h = get("https://pokemonexperte.de/items/")
-          # show a slice around the first occurrence of a known item to see the row markup
-          i = h.find("Wahlschal")
-          if i == -1: i = h.find("Leftovers")
-          print(repr(h[max(0,i-400):i+200]) if i!=-1 else "marker not found; first 400:", )
-          if i!=-1: print(repr(h[max(0,i-400):i+200]))
+          h=get("https://pokemonexperte.de/items/")
+          items={}
+          for m in re.finditer(r"<li>\s*<a[^>]*>([^<]+)</a>\s*\(([^)]+)\)\s*</li>", h):
+              de=m.group(1).strip(); en=m.group(2).strip()
+              # de uses windows-1252 mojibake for umlauts in this page; note it
+              items[en]=de
+          print("\nITEMS parsed:",len(items))
+          for en in ["Choice Scarf","Choice Band","Life Orb","Leftovers","Focus Sash","Covert Cloak","Loaded Dice","Clear Amulet"]:
+              print(f"   {en:16} -> {items.get(en,'(missing)')}")
           PY

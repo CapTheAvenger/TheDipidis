@@ -80,20 +80,23 @@ function buildClaudePrompt(mons, maps) {
         return line;
     });
     return [
-        'Du bist ein erfahrener Pokémon-VGC-Coach für das Format Pokémon Champions (Doppelkämpfe, 4 von 6 mitnehmen). Antworte einsteigerfreundlich auf Deutsch.',
+        'Du bist ein erfahrener Pokémon-VGC-Coach für das Format Pokémon Champions (Doppelkämpfe). Antworte einsteigerfreundlich auf Deutsch.',
         '',
         'WICHTIG – als Allererstes: Erkläre mir kurz, was die ITEMS machen, die meine Pokémon tragen (ein Satz pro Item).',
         '',
-        'Mein Team:',
+        'Mein Team (6 Pokémon):',
         lines.join('\n'),
         '',
-        'Hinweis zum Format: Es gibt kein Tera. Stattdessen entwickeln sich Pokémon mit einem Mega-Stein (Item) Mega — dabei ändern sich ihre Werte, auch die Initiative.',
+        'STRIKTE FORMAT-REGELN (bitte unbedingt beachten, sonst ist die Erklärung falsch):',
+        '- Pro Kampf werden aus den 6 Pokémon nur 4 ausgewählt (im Team-Preview) und nur diese 4 kämpfen. Erkläre also NICHT so, als wären alle 6 gleichzeitig im Kampf. Sprich über sinnvolle 4er-Auswahlen / Lead-Paare gegen typische Gegner.',
+        '- Es gibt KEIN Tera. Stattdessen kann sich pro Kampf nur EIN einziges Pokémon Mega-entwickeln (über seinen Mega-Stein als Item) — auch wenn mehrere Pokémon einen Mega-Stein tragen. Man bringt also evtl. mehrere Mega-Kandidaten mit, aber im Match megat sich nur eines. Sag klar, welches Mega man wann wählen sollte. Beim Mega ändern sich die Werte inkl. Initiative.',
         '',
         'Erkläre danach:',
         '1. Kurzer Überblick (2–3 Sätze): Was ist der Spielplan des Teams?',
         '2. Die Rolle jedes Pokémon (je ein kurzer Absatz).',
-        '3. So läuft ein typisches Spiel ab — Schritt für Schritt.',
-        '4. 3–5 Einsteiger-Tipps (typische Fehler, was beschützen, welcher Lead).',
+        '3. Welche 4 Pokémon man typischerweise mitnimmt (gern 2–3 Beispiel-Auswahlen je nach Gegner) und welche 2 eher auf der Bank bleiben.',
+        '4. So läuft ein typisches Spiel ab — Schritt für Schritt.',
+        '5. 3–5 Einsteiger-Tipps (typische Fehler, was beschützen, welcher Lead, welches Mega).',
     ].join('\n');
 }
 

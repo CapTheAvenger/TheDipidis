@@ -527,42 +527,46 @@
         });
         const header = team.team_name || team.replica_code || 'Team';
         const ctx = [team.tournament, team.trainer].filter(Boolean).join(' · ');
-        const megaNoteDe = `Hinweis zum Format: Es gibt KEINE Tera-Mechanik. Stattdessen entwickeln sich Pokémon mit einem Mega-Stein (als Item) Mega — dabei ändern sich ihre Werte, auch die Initiative/Geschwindigkeit. Berücksichtige, welche Pokémon Mega gehen und wie das den Spielplan verändert.`;
-        const megaNoteEn = `Format note: there is NO Tera mechanic. Instead, Pokémon holding a Mega Stone (as their item) Mega Evolve, which changes their stats — including Speed. Account for which Pokémon Mega Evolve and how that shifts the game plan.`;
+        const rulesDe = `STRIKTE FORMAT-REGELN (bitte unbedingt beachten, sonst ist die Erklärung falsch):\n- Pro Kampf werden aus den 6 Pokémon nur 4 ausgewählt (Team-Preview) und nur diese 4 kämpfen. Erkläre also NICHT so, als wären alle 6 gleichzeitig im Kampf — sprich über sinnvolle 4er-Auswahlen / Lead-Paare.\n- Es gibt KEINE Tera-Mechanik. Stattdessen kann sich pro Kampf nur EIN einziges Pokémon Mega-entwickeln (über seinen Mega-Stein als Item) — auch wenn mehrere Pokémon einen Mega-Stein tragen. Sag klar, welches Mega man wann wählen sollte. Beim Mega ändern sich die Werte inkl. Initiative.`;
+        const rulesEn = `STRICT FORMAT RULES (must be followed, otherwise the explanation is wrong):\n- Each battle only 4 of the 6 Pokémon are chosen (team preview) and only those 4 fight. Do NOT explain as if all 6 are in play at once — talk about sensible 4-Pokémon picks / lead pairs.\n- There is NO Tera mechanic. Instead, only ONE Pokémon may Mega Evolve per battle (via its Mega Stone item) — even if several carry a Mega Stone. State clearly which Mega to pick and when. Mega Evolving changes its stats, including Speed.`;
 
         if (de) {
             return [
-                `Du bist ein erfahrener Pokémon-VGC-Coach (Format: Pokémon Champions, Doppelkämpfe, 4 von 6 mitnehmen).`,
+                `Du bist ein erfahrener Pokémon-VGC-Coach (Format: Pokémon Champions, Doppelkämpfe).`,
                 `Erkläre einsteigerfreundlich auf ${langName}, wie man das folgende Team spielt. Sei konkret und praktisch.`,
                 ``,
-                `Team: ${header}${ctx ? ' (' + ctx + ')' : ''}`,
+                `Team (6 Pokémon):${header ? ' ' + header : ''}${ctx ? ' (' + ctx + ')' : ''}`,
                 ``,
                 lines.join('\n'),
                 ``,
-                ...(anyMega ? [megaNoteDe, ``] : []),
+                rulesDe,
+                ``,
                 `Bitte gehe auf Folgendes ein:`,
                 `1. Kurzer Überblick (2–3 Sätze): Was ist der Spielplan des Teams?`,
                 `2. Die Rolle jedes Pokémon (je ein kurzer Absatz).`,
-                `3. So läuft ein typisches Spiel ab — Schritt für Schritt.`,
-                `4. 3–5 Einsteiger-Tipps (typische Fehler, was beschützen, welcher Lead).`,
+                `3. Welche 4 Pokémon man typischerweise mitnimmt (gern 2–3 Beispiel-Auswahlen je nach Gegner) und welche 2 eher auf der Bank bleiben.`,
+                `4. So läuft ein typisches Spiel ab — Schritt für Schritt.`,
+                `5. 3–5 Einsteiger-Tipps (typische Fehler, was beschützen, welcher Lead, welches Mega).`,
                 ``,
                 `Antworte auf ${langName}.`,
             ].join('\n');
         }
         return [
-            `You are an experienced Pokémon VGC coach (format: Pokémon Champions, doubles, bring 4 of 6).`,
+            `You are an experienced Pokémon VGC coach (format: Pokémon Champions, doubles).`,
             `Explain in beginner-friendly ${langName} how to play the following team. Be concrete and practical.`,
             ``,
-            `Team: ${header}${ctx ? ' (' + ctx + ')' : ''}`,
+            `Team (6 Pokémon):${header ? ' ' + header : ''}${ctx ? ' (' + ctx + ')' : ''}`,
             ``,
             lines.join('\n'),
             ``,
-            ...(anyMega ? [megaNoteEn, ``] : []),
+            rulesEn,
+            ``,
             `Please cover:`,
             `1. A short 2–3 sentence overview of the team's game plan.`,
             `2. Each Pokémon's role (one short paragraph each).`,
-            `3. How a typical game goes — step by step.`,
-            `4. 3–5 beginner tips (common mistakes, what to protect, lead choices).`,
+            `3. Which 4 Pokémon you typically bring (give 2–3 example picks depending on the opponent) and which 2 usually stay on the bench.`,
+            `4. How a typical game goes — step by step.`,
+            `5. 3–5 beginner tips (common mistakes, what to protect, lead choices, which Mega).`,
             ``,
             `Answer in ${langName}.`,
         ].join('\n');

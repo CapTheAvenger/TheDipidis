@@ -221,16 +221,41 @@ def main():
         print(f"Loaded de_name_overrides: {len(ov_move)} moves, {len(ov_item)} items")
 
     entries = []
+    conflicts = []   # names where the sources disagree (no majority)
+
+    def name_key(s):
+        return re.sub(r"[^a-zäöüß0-9]", "", str(s or "").lower())
+
+    def pick_de(key, cat, en, v, pk):
+        """Cross-check German name across sources. No single source is
+        fully reliable (PokeWiki lists Weather Ball→'Meteorologe'; the
+        verified file had 'Wellenbrecher' for Wave Crash; PokeAPI has gaps
+        and old names). So: manual correction wins; otherwise a majority
+        vote among PokeWiki / PokeAPI / verified — only a value ≥2 sources
+        agree on is trusted. True conflicts are recorded (not guessed),
+        with a flagged fallback (PokeAPI official → PokeWiki → verified)."""
+        if corr.get(key):
+            return corr[key]
+        ov = (ov_move if cat == "move" else ov_item if cat == "item" else {}).get(key)  # PokeWiki
+        vf = (v or {}).get("de_name")    # verified file
+        pa = pk.get("de_name")           # PokeAPI
+        srcs = [s for s in (ov, vf, pa) if s]
+        if not srcs:
+            return supp.get(key) or en
+        from collections import Counter
+        cnt = Counter(name_key(s) for s in srcs)
+        top, n = cnt.most_common(1)[0]
+        if n >= 2:
+            return next(s for s in srcs if name_key(s) == top)
+        if len(cnt) > 1:
+            conflicts.append((cat, en, {"PokeWiki": ov, "PokeAPI": pa, "verified": vf}))
+        return pa or ov or vf or supp.get(key) or en
 
     def build(cat, en, en_eff, demap, mtype=""):
         key = norm(en)
         v = verified.get(key)
         pk = demap.get(key, {})
-        ov = (ov_move if cat == "move" else ov_item if cat == "item" else {}).get(key)
-        # Name priority: curated correction → scraped wiki override
-        # (authoritative, current) → hand-verified name → PokéAPI German →
-        # DE-name supplement → English.
-        de = corr.get(key) or ov or (v or {}).get("de_name") or pk.get("de_name") or supp.get(key) or en
+        de = pick_de(key, cat, en, v, pk)
         # German effect: hand-verified (Champions-correct) wins, else
         # PokéAPI's official German text, else fall back to English in UI.
         de_eff = (v or {}).get("effect") or pk.get("de_eff") or ""
@@ -285,6 +310,11 @@ def main():
     with open(OUT, "w", encoding="utf-8") as f:
         json.dump(out, f, ensure_ascii=False, separators=(",", ":"))
     print(f"Wrote {OUT}\n  {len(entries)} entries  {counts}")
+    if conflicts:
+        print(f"\n⚠ {len(conflicts)} name conflicts (no majority — using flagged fallback, "
+              f"confirm via NAME_CORRECTIONS):")
+        for cat, en, srcs in sorted(conflicts):
+            print(f"  [{cat}] {en}: " + " | ".join(f"{k}={v}" for k, v in srcs.items() if v))
 
 
 if __name__ == "__main__":

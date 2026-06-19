@@ -529,6 +529,8 @@
         const ctx = [team.tournament, team.trainer].filter(Boolean).join(' · ');
         const rulesDe = `STRIKTE FORMAT-REGELN (bitte unbedingt beachten, sonst ist die Erklärung falsch):\n- Pro Kampf werden aus den 6 Pokémon nur 4 ausgewählt (Team-Preview) und nur diese 4 kämpfen. Erkläre also NICHT so, als wären alle 6 gleichzeitig im Kampf — sprich über sinnvolle 4er-Auswahlen / Lead-Paare.\n- Es gibt KEINE Tera-Mechanik. Stattdessen kann sich pro Kampf nur EIN einziges Pokémon Mega-entwickeln (über seinen Mega-Stein als Item) — auch wenn mehrere Pokémon einen Mega-Stein tragen. Sag klar, welches Mega man wann wählen sollte. Beim Mega ändern sich die Werte inkl. Initiative.`;
         const rulesEn = `STRICT FORMAT RULES (must be followed, otherwise the explanation is wrong):\n- Each battle only 4 of the 6 Pokémon are chosen (team preview) and only those 4 fight. Do NOT explain as if all 6 are in play at once — talk about sensible 4-Pokémon picks / lead pairs.\n- There is NO Tera mechanic. Instead, only ONE Pokémon may Mega Evolve per battle (via its Mega Stone item) — even if several carry a Mega Stone. State clearly which Mega to pick and when. Mega Evolving changes its stats, including Speed.`;
+        const accuracyDe = `GENAUIGKEIT (extrem wichtig — sonst ist die Anleitung unbrauchbar):\n- Verwende AUSSCHLIESSLICH die oben gelisteten Daten. Jedes Pokémon hat GENAU die oben gelisteten Attacken. Schreibe einem Pokémon NIEMALS eine Attacke zu, die nicht in SEINER eigenen Liste steht (z. B. niemals eine Attacke von Pokémon A bei Pokémon B nennen).\n- Erfinde nichts und benenne nichts um: nutze die exakt angegebenen Namen für Pokémon, Items, Fähigkeiten und Attacken.\n- Wenn du dir bei etwas nicht sicher bist, sag es offen, statt zu raten. Prüfe vor dem Absenden, dass jede von dir genannte Attacke wirklich beim richtigen Pokémon steht.`;
+        const accuracyEn = `ACCURACY (extremely important — otherwise the guide is useless):\n- Use ONLY the data listed above. Each Pokémon has EXACTLY the moves listed above. NEVER attribute a move to a Pokémon that is not in ITS OWN list (e.g. never give a move of Pokémon A to Pokémon B).\n- Do not invent or rename anything: use the exact given names for Pokémon, items, abilities and moves.\n- If you are unsure about something, say so openly instead of guessing. Before sending, verify that every move you mention really belongs to the correct Pokémon.`;
 
         if (de) {
             return [
@@ -540,6 +542,8 @@
                 lines.join('\n'),
                 ``,
                 rulesDe,
+                ``,
+                accuracyDe,
                 ``,
                 `Bitte gehe auf Folgendes ein:`,
                 `1. Kurzer Überblick (2–3 Sätze): Was ist der Spielplan des Teams?`,
@@ -560,6 +564,8 @@
             lines.join('\n'),
             ``,
             rulesEn,
+            ``,
+            accuracyEn,
             ``,
             `Please cover:`,
             `1. A short 2–3 sentence overview of the team's game plan.`,

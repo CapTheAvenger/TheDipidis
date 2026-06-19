@@ -213,6 +213,73 @@
     background: rgba(76, 209, 130, 0.14);
     border-color: rgba(76, 209, 130, 0.4);
 }
+.side-quest-import-badge {
+    color: #cbb3ff;
+    background: rgba(150, 120, 255, 0.16);
+    border-color: rgba(150, 120, 255, 0.45);
+}
+
+/* ── Import your own team ────────────────────────────────────────── */
+.side-quest-importbar { margin: 0 0 0.8rem 0; }
+.side-quest-import-open {
+    appearance: none;
+    border: 1px solid rgba(150, 120, 255, 0.45);
+    background: rgba(150, 120, 255, 0.12);
+    color: #e6ebf3;
+    font: inherit;
+    font-size: 0.86rem;
+    font-weight: 700;
+    padding: 0.5rem 0.9rem;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 120ms ease;
+}
+.side-quest-import-open:hover { background: rgba(150, 120, 255, 0.2); }
+.side-quest-myteams .side-quest-reg-head.is-current::before { background: #a98bff; box-shadow: 0 0 0 3px rgba(169, 139, 255, 0.18); }
+
+.side-quest-remove-btn {
+    appearance: none;
+    border: 1px solid #3a2a3a;
+    background: rgba(255, 100, 100, 0.08);
+    color: #e6a0a0;
+    font-size: 1rem;
+    line-height: 1;
+    width: 2.1rem; height: 2.1rem;
+    border-radius: 9px;
+    cursor: pointer;
+    flex: 0 0 auto;
+}
+.side-quest-remove-btn:hover { background: rgba(255, 100, 100, 0.18); color: #fff; }
+
+.side-quest-import .side-quest-modal-body { display: flex; flex-direction: column; }
+.side-quest-import-hint { margin: 0 0 0.7rem 0; color: #9aa3b2; font-size: 0.84rem; line-height: 1.45; }
+.side-quest-import-name {
+    box-sizing: border-box; width: 100%;
+    padding: 0.55rem 0.7rem; margin-bottom: 0.6rem;
+    border: 1px solid #2a3140; border-radius: 8px;
+    background: #0d1219; color: #e6ebf3; font: inherit; font-size: 0.9rem;
+}
+.side-quest-import-text {
+    box-sizing: border-box; width: 100%; resize: vertical;
+    min-height: 9rem;
+    padding: 0.6rem 0.7rem;
+    border: 1px solid #2a3140; border-radius: 8px;
+    background: #0d1219; color: #e6ebf3;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.82rem; line-height: 1.4;
+}
+.side-quest-import-name:focus, .side-quest-import-text:focus {
+    outline: none; border-color: #9678ff; box-shadow: 0 0 0 2px rgba(150, 120, 255, 0.2);
+}
+.side-quest-import-error { color: #f08a8a; font-size: 0.82rem; margin: 0.5rem 0 0 0; }
+.side-quest-import-actions { display: flex; justify-content: flex-end; gap: 0.6rem; margin-top: 0.9rem; }
+.side-quest-import-cancel, .side-quest-import-do {
+    appearance: none; border: 1px solid #2a3140; font: inherit; font-weight: 700;
+    font-size: 0.86rem; padding: 0.5rem 1rem; border-radius: 9px; cursor: pointer;
+}
+.side-quest-import-cancel { background: rgba(255, 255, 255, 0.04); color: #c4ccd9; }
+.side-quest-import-do { background: #6f4fe0; border-color: #6f4fe0; color: #fff; }
+.side-quest-import-do:hover { background: #7e60ee; }
 
 .side-quest-teams {
     display: grid;

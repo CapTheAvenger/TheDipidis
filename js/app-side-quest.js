@@ -95,6 +95,18 @@
             filterPickProgress: (n) => `${n} / 6 gewählt`,
             pickerClose: 'Schließen',
             pickerEmpty: 'Kein Treffer — Schreibweise prüfen.',
+            importBtn: '➕ Eigenes Team importieren',
+            importTitle: 'Eigenes Team importieren',
+            importHint: 'Füge den Team-Text im Showdown-Format ein (von pokepast.es kopieren). Danach hast du für dein Team die Play-Funktion (Speed-Tabelle usw.).',
+            importPlaceholder: 'Swampert @ Swampertite\nAbility: Torrent\nEVs: 2 HP / 32 Atk / 32 Spe\nAdamant Nature\n- Wave Crash\n…',
+            importNamePh: 'Team-Name (optional)',
+            importDo: 'Importieren',
+            importCancel: 'Abbrechen',
+            importFail: 'Konnte kein Team erkennen — bitte den vollständigen Showdown-Text einfügen.',
+            myTeams: 'Meine Teams',
+            importBadge: 'Eigenes Team',
+            importRemove: 'Entfernen',
+            importRemoveConfirm: 'Dieses importierte Team entfernen?',
         },
         en: {
             playBtn: 'Play',
@@ -128,6 +140,18 @@
             filterPickProgress: (n) => `${n} / 6 selected`,
             pickerClose: 'Close',
             pickerEmpty: 'No match — check the spelling.',
+            importBtn: '➕ Import your own team',
+            importTitle: 'Import your own team',
+            importHint: 'Paste the team text in Showdown format (copy it from pokepast.es). You then get the Play helper (speed table etc.) for your team.',
+            importPlaceholder: 'Swampert @ Swampertite\nAbility: Torrent\nEVs: 2 HP / 32 Atk / 32 Spe\nAdamant Nature\n- Wave Crash\n…',
+            importNamePh: 'Team name (optional)',
+            importDo: 'Import',
+            importCancel: 'Cancel',
+            importFail: 'Could not read a team — please paste the full Showdown text.',
+            myTeams: 'My teams',
+            importBadge: 'Your team',
+            importRemove: 'Remove',
+            importRemoveConfirm: 'Remove this imported team?',
         },
     };
 
@@ -346,23 +370,32 @@
                         <span class="side-quest-play-icon" aria-hidden="true">▶</span>
                         <span class="side-quest-play-label">${escapeHtml(labels.playBtn)}</span>
                     </button>`;
-        return `
-            <article class="side-quest-team${stateClass}" data-replica-code="${escapeHtml(code)}" data-team-hash="${escapeHtml(hash)}">
-                <header class="side-quest-team-head">
-                    <div class="side-quest-team-meta">
-                        <span class="side-quest-rank">#${escapeHtml(String(team.rank || '—'))}</span>
-                        <span class="side-quest-reg-badge${regOf(team) === CURRENT_REG ? ' is-current' : ''}" title="Regulation ${escapeHtml(regOf(team))}">${escapeHtml(regOf(team))}</span>
-                        <h3 class="side-quest-team-name">${escapeHtml(team.team_name || 'Untitled team')}</h3>
-                        ${tourney}
-                    </div>
-                    <button class="side-quest-copy-btn"
+        // Imported teams have no real replica code: show a "your team"
+        // badge + a remove button instead of the copy-code control.
+        const cornerBtn = team._imported
+            ? `<button class="side-quest-remove-btn" type="button" data-remove-import="${escapeHtml(code)}"
+                       aria-label="${escapeHtml(labels.importRemove)} ${escapeHtml(team.team_name || '')}">🗑</button>`
+            : `<button class="side-quest-copy-btn"
                             type="button"
                             data-code="${escapeHtml(code)}"
                             aria-label="Copy replica code ${escapeHtml(code)}">
                         <span class="side-quest-copy-label">Replica</span>
                         <span class="side-quest-copy-code">${escapeHtml(code) || '—'}</span>
                         <span class="side-quest-copy-icon" aria-hidden="true">📋</span>
-                    </button>
+                    </button>`;
+        const metaBadge = team._imported
+            ? `<span class="side-quest-reg-badge side-quest-import-badge">${escapeHtml(labels.importBadge)}</span>`
+            : `<span class="side-quest-rank">#${escapeHtml(String(team.rank || '—'))}</span>
+               <span class="side-quest-reg-badge${regOf(team) === CURRENT_REG ? ' is-current' : ''}" title="Regulation ${escapeHtml(regOf(team))}">${escapeHtml(regOf(team))}</span>`;
+        return `
+            <article class="side-quest-team${stateClass}" data-replica-code="${escapeHtml(code)}" data-team-hash="${escapeHtml(hash)}">
+                <header class="side-quest-team-head">
+                    <div class="side-quest-team-meta">
+                        ${metaBadge}
+                        <h3 class="side-quest-team-name">${escapeHtml(team.team_name || 'Untitled team')}</h3>
+                        ${tourney}
+                    </div>
+                    ${cornerBtn}
                 </header>
                 <div class="side-quest-team-grid">${monsHtml}</div>
                 <div class="side-quest-team-footer">
@@ -803,6 +836,121 @@
         if (clearBtn) clearBtn.addEventListener('click', () => { _speciesFilter = []; render(); });
     }
 
+    // ── Import your own team (pokepaste / Showdown text) ───────────
+    // Parse pasted Showdown text into the same shape as the scraped
+    // teams (evs kept as the raw "X HP / Y Def …" string the Play
+    // overlay expects), save to localStorage, and surface a "My teams"
+    // block with the Play helper. Pokepaste itself can't be fetched
+    // cross-origin, so we take the text directly.
+    const IMPORT_KEY = 'sideQuestImportedTeams';
+
+    function loadImported() {
+        try { const a = JSON.parse(localStorage.getItem(IMPORT_KEY) || '[]'); return Array.isArray(a) ? a : []; }
+        catch (_) { return []; }
+    }
+    function saveImported(a) {
+        try { localStorage.setItem(IMPORT_KEY, JSON.stringify(a)); } catch (_) {}
+    }
+    function removeImported(id) {
+        saveImported(loadImported().filter(t => t.replica_code !== id));
+    }
+
+    function parsePokepasteText(text) {
+        if (!text) return null;
+        const blocks = String(text).replace(/\r/g, '').split(/\n\s*\n/);
+        const mons = [];
+        for (const block of blocks) {
+            const lines = block.split('\n').map(l => l.replace(/\s+$/, '')).filter(l => l.trim() !== '');
+            if (!lines.length) continue;
+            let lhs = lines[0].trim(), item = '';
+            const at = lhs.split(/\s+@\s+/);
+            lhs = at[0].trim();
+            if (at[1]) item = at[1].trim();
+            lhs = lhs.replace(/\s*\((?:M|F|N)\)\s*$/i, '').trim();
+            const par = lhs.match(/^(.*?)\s+\(([^)]+)\)\s*$/);   // Nickname (Species)
+            const name = (par ? par[2] : lhs).trim();
+            if (!name) continue;
+            const mon = { name, item, ability: '', nature: '', tera_type: '', evs: '', moves: [] };
+            for (let i = 1; i < lines.length; i++) {
+                const l = lines[i].trim();
+                let mt;
+                if (l.startsWith('- ')) { mon.moves.push(l.slice(2).trim()); }
+                else if ((mt = l.match(/^Ability:\s*(.+)$/i))) { mon.ability = mt[1].trim(); }
+                else if ((mt = l.match(/^Tera Type:\s*(.+)$/i))) { mon.tera_type = mt[1].trim(); }
+                else if ((mt = l.match(/^EVs:\s*(.+)$/i))) { mon.evs = mt[1].trim(); }
+                else if ((mt = l.match(/^(\w+)\s+Nature$/i))) { mon.nature = mt[1].trim(); }
+            }
+            mon.moves = mon.moves.slice(0, 4);
+            mons.push(mon);
+            if (mons.length >= 6) break;
+        }
+        return mons.length ? mons : null;
+    }
+
+    function makeImportedTeam(mons, name) {
+        const id = 'imp-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 6);
+        const auto = mons.slice(0, 3).map(m => (m.name || '').split('-')[0]).join(' / ');
+        return {
+            _imported: true,
+            replica_code: id,            // synthetic — drives Play/find/marks
+            team_name: (name || '').trim() || auto || 'Eigenes Team',
+            tournament: '', trainer: '',
+            regulation: CURRENT_REG,
+            date_shared: new Date().toISOString().slice(0, 10),
+            pokemon: mons,
+            strategy: [],
+        };
+    }
+
+    function closeImportModal() {
+        const el = document.getElementById('sideQuestImportModal');
+        if (el) el.remove();
+        document.removeEventListener('keydown', onImportKeydown);
+    }
+    function onImportKeydown(e) { if (e.key === 'Escape') closeImportModal(); }
+
+    function openImportModal() {
+        closeImportModal();
+        const l = LABELS[uiLang()];
+        const overlay = document.createElement('div');
+        overlay.id = 'sideQuestImportModal';
+        overlay.className = 'side-quest-modal-overlay';
+        overlay.innerHTML = `
+            <div class="side-quest-modal side-quest-import" role="dialog" aria-modal="true" aria-label="${escapeHtml(l.importTitle)}">
+                <header class="side-quest-modal-head">
+                    <h3 class="side-quest-modal-title">${escapeHtml(l.importTitle)}</h3>
+                    <button class="side-quest-modal-close" type="button" aria-label="${escapeHtml(l.importCancel)}">×</button>
+                </header>
+                <div class="side-quest-modal-body">
+                    <p class="side-quest-import-hint">${escapeHtml(l.importHint)}</p>
+                    <input class="side-quest-import-name" id="sqImportName" type="text" placeholder="${escapeHtml(l.importNamePh)}" autocomplete="off">
+                    <textarea class="side-quest-import-text" id="sqImportText" rows="10" spellcheck="false" placeholder="${escapeHtml(l.importPlaceholder)}"></textarea>
+                    <p class="side-quest-import-error" id="sqImportError" hidden>${escapeHtml(l.importFail)}</p>
+                    <div class="side-quest-import-actions">
+                        <button class="side-quest-import-cancel" type="button">${escapeHtml(l.importCancel)}</button>
+                        <button class="side-quest-import-do" type="button">${escapeHtml(l.importDo)}</button>
+                    </div>
+                </div>
+            </div>`;
+        overlay.addEventListener('click', (e) => { if (e.target === overlay) closeImportModal(); });
+        overlay.querySelector('.side-quest-modal-close').addEventListener('click', closeImportModal);
+        overlay.querySelector('.side-quest-import-cancel').addEventListener('click', closeImportModal);
+        overlay.querySelector('.side-quest-import-do').addEventListener('click', () => {
+            const text = overlay.querySelector('#sqImportText').value;
+            const nm = overlay.querySelector('#sqImportName').value;
+            const mons = parsePokepasteText(text);
+            if (!mons) { overlay.querySelector('#sqImportError').hidden = false; return; }
+            const arr = loadImported();
+            arr.unshift(makeImportedTeam(mons, nm));
+            saveImported(arr);
+            closeImportModal();
+            render();
+        });
+        document.addEventListener('keydown', onImportKeydown);
+        document.body.appendChild(overlay);
+        overlay.querySelector('#sqImportText').focus();
+    }
+
     async function render() {
         const host = document.getElementById(HOST_ID);
         if (!host) return;
@@ -837,6 +985,18 @@
         const filterHtml = renderSpeciesFilter(_allSpecies, filtered.length, teams.length);
         const labels = LABELS[uiLang()];
 
+        // Imported ("my") teams — stored locally, shown in their own
+        // block on top, with the same Play/Claude/marks controls.
+        const importedAll = loadImported();
+        const importedShown = _speciesFilter.length
+            ? importedAll.filter(t => _speciesFilter.every(sp => teamHasSpecies(t, sp)))
+            : importedAll;
+        const allTeams = importedAll.concat(teams);   // for handler lookups
+        const importBarHtml = `
+            <div class="side-quest-importbar">
+                <button class="side-quest-import-open" type="button">${escapeHtml(labels.importBtn)}</button>
+            </div>`;
+
         // Within a block: "not again" teams sink to the bottom (still
         // visible so the verdict can be revisited); else rank order.
         const sortTeams = (arr) => arr.slice().sort((a, b) => {
@@ -864,17 +1024,38 @@
                 <div class="side-quest-teams">${sortTeams(byReg.get(id)).map(renderTeam).join('')}</div>
             </section>`).join('');
 
+        const myTeamsHtml = importedShown.length ? `
+            <section class="side-quest-reg-block side-quest-myteams">
+                <h3 class="side-quest-reg-head is-current">
+                    ⭐ ${escapeHtml(labels.myTeams)}
+                    <span class="side-quest-reg-count">${importedShown.length}</span>
+                </h3>
+                <div class="side-quest-teams">${sortTeams(importedShown).map(renderTeam).join('')}</div>
+            </section>` : '';
+
         const teamsBody = filtered.length
             ? blocksHtml
             : `<p class="side-quest-filter-none">${escapeHtml(labels.filterNone)}</p>`;
 
         host.innerHTML = `
             ${headerHtml}
+            ${importBarHtml}
             ${filterHtml}
+            ${myTeamsHtml}
             ${teamsBody}
         `;
 
         wireSpeciesFilter(host);
+
+        const importOpen = host.querySelector('.side-quest-import-open');
+        if (importOpen) importOpen.addEventListener('click', openImportModal);
+        host.querySelectorAll('[data-remove-import]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                if (!window.confirm(labels.importRemoveConfirm)) return;
+                removeImported(btn.getAttribute('data-remove-import'));
+                render();
+            });
+        });
 
         host.querySelectorAll('.side-quest-copy-btn').forEach(btn => {
             btn.addEventListener('click', () => copyCode(btn));
@@ -884,7 +1065,7 @@
             btn.addEventListener('click', () => {
                 const code = btn.getAttribute('data-strategy-code') || '';
                 const entry = _strategies && _strategies[code];
-                const team = teams.find(t => (t.replica_code || '') === code);
+                const team = allTeams.find(t => (t.replica_code || '') === code);
                 if (entry && team) openStrategyModal(team, entry);
             });
         });
@@ -892,7 +1073,7 @@
         host.querySelectorAll('.side-quest-claude-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 const code = btn.getAttribute('data-team-code') || '';
-                const team = teams.find(t => (t.replica_code || '') === code);
+                const team = allTeams.find(t => (t.replica_code || '') === code);
                 if (team) openClaudeForTeam(team, btn);
             });
         });
@@ -900,7 +1081,7 @@
         host.querySelectorAll('.side-quest-play-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 const code = btn.getAttribute('data-team-code') || '';
-                const team = teams.find(t => (t.replica_code || '') === code);
+                const team = allTeams.find(t => (t.replica_code || '') === code);
                 if (team && window.sideQuestPlay && typeof window.sideQuestPlay.openPlayModal === 'function') {
                     window.sideQuestPlay.openPlayModal(team);
                 }

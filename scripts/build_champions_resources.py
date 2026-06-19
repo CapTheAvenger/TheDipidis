@@ -137,6 +137,7 @@ DE_NAME_SUPPLEMENT = {
 NAME_CORRECTIONS = {
     "Wave Crash": "Wellentackle",       # verified file had "Wellenbrecher"
     "Venusaurite": "Bisaflornit",       # verified file had "Bisaflorit" (missing n)
+    "Matcha Gotcha": "Matchattacke",    # verified file had "Tee-Verkostung"
 }
 
 

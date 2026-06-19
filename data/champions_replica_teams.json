@@ -2,10 +2,10 @@
   "_meta": {
     "title": "Pokémon Champions — Current Top Doubles Teams",
     "subtitle": "Replica codes from top tournament finishes. Tap a code to copy.",
-    "last_updated": "2026-06-18",
+    "last_updated": "2026-06-19",
     "source": "VGCPastes Champions M-A spreadsheet (gid=791705272)",
     "source_url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTXHOfUSKTZyVoxF7BO-XIEqtbrsq1OSh_4bSaO0bhAMHqtsvYqM_4eZWIMqdZ--SKCb86EXuk75o1i/pub?gid=791705272&single=true&output=csv",
-    "team_count": 75
+    "team_count": 74
   },
   "teams": [
     {
@@ -7329,105 +7329,6 @@
             "Thunderbolt",
             "Helping Hand",
             "Protect"
-          ]
-        }
-      ],
-      "strategy": []
-    },
-    {
-      "rank": 75,
-      "replica_code": "QLGP0E2NQK",
-      "team_name": "dodoriosiriru's Excadrill Tyranitar Team",
-      "tournament": "-",
-      "trainer": "Hijito Kihara",
-      "format": "VGC Champions",
-      "regulation": "M-A",
-      "sheet_rank": "",
-      "date_shared": "4 Jun 2026",
-      "pokepaste_url": "https://pokepast.es/9f3e47be6590332d",
-      "pokemon": [
-        {
-          "name": "Hawlucha",
-          "item": "Focus Sash",
-          "ability": "Unburden",
-          "tera_type": "",
-          "evs": "32 Atk / 2 SpD / 32 Spe",
-          "nature": "Jolly",
-          "moves": [
-            "Close Combat",
-            "Coaching",
-            "Quick Guard",
-            "Detect"
-          ]
-        },
-        {
-          "name": "Excadrill",
-          "item": "Excadrite",
-          "ability": "Sand Rush",
-          "tera_type": "",
-          "evs": "19 Atk / 15 SpD / 32 Spe",
-          "nature": "Jolly",
-          "moves": [
-            "Iron Head",
-            "Earthquake",
-            "Rock Slide",
-            "Protect"
-          ]
-        },
-        {
-          "name": "Tyranitar",
-          "item": "Tyranitarite",
-          "ability": "Sand Stream",
-          "tera_type": "",
-          "evs": "18 HP / 16 Atk / 32 Spe",
-          "nature": "Jolly",
-          "moves": [
-            "Rock Slide",
-            "Knock Off",
-            "Dragon Dance",
-            "Protect"
-          ]
-        },
-        {
-          "name": "Basculegion",
-          "item": "Choice Scarf",
-          "ability": "Adaptability",
-          "tera_type": "",
-          "evs": "32 Atk / 2 Def / 32 Spe",
-          "nature": "Jolly",
-          "moves": [
-            "Wave Crash",
-            "Aqua Jet",
-            "Flip Turn",
-            "Last Respects"
-          ]
-        },
-        {
-          "name": "Talonflame",
-          "item": "Charcoal",
-          "ability": "Gale Wings",
-          "tera_type": "",
-          "evs": "6 HP / 28 SpA / 32 Spe",
-          "nature": "Timid",
-          "moves": [
-            "Fire Blast",
-            "Air Slash",
-            "Tailwind",
-            "Quick Guard"
-          ]
-        },
-        {
-          "name": "Incineroar",
-          "item": "Chople Berry",
-          "ability": "Intimidate",
-          "tera_type": "",
-          "evs": "32 HP / 2 Atk / 14 Def / 10 SpD / 8 Spe",
-          "nature": "Careful",
-          "moves": [
-            "Flare Blitz",
-            "Throat Chop",
-            "Fake Out",
-            "Parting Shot"
           ]
         }
       ],

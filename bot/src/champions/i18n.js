@@ -56,12 +56,15 @@ export async function getMaps() {
 }
 
 // ── Static tables ──────────────────────────────────────────────────
+// Official German nature names (verified against PokéAPI nature_names,
+// language_id 6). Do not hand-edit — several were wrong before
+// (Careful is "Sacht" not "Vorsichtig", Calm is "Still" not "Sanft").
 const NATURE_DE = {
     Hardy: 'Robust', Lonely: 'Solo', Brave: 'Mutig', Adamant: 'Hart', Naughty: 'Frech',
-    Bold: 'Kühn', Docile: 'Zaghaft', Relaxed: 'Locker', Impish: 'Pfiffig', Lax: 'Lasch',
+    Bold: 'Kühn', Docile: 'Sanft', Relaxed: 'Locker', Impish: 'Pfiffig', Lax: 'Lasch',
     Timid: 'Scheu', Hasty: 'Hastig', Serious: 'Ernst', Jolly: 'Froh', Naive: 'Naiv',
-    Modest: 'Mäßig', Mild: 'Mild', Quiet: 'Ruhig', Bashful: 'Sacht', Rash: 'Hitzig',
-    Calm: 'Sanft', Gentle: 'Zart', Sassy: 'Forsch', Careful: 'Vorsichtig', Quirky: 'Kauzig',
+    Modest: 'Mäßig', Mild: 'Mild', Quiet: 'Ruhig', Bashful: 'Zaghaft', Rash: 'Hitzig',
+    Calm: 'Still', Gentle: 'Zart', Sassy: 'Forsch', Careful: 'Sacht', Quirky: 'Kauzig',
 };
 
 // EN stat key → [DE label, EN label]

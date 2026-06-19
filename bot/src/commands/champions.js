@@ -12,11 +12,15 @@
  * a closed game with no API); this just removes the tab-hopping.
  */
 
+import { Markup } from 'telegraf';
+
 import { parseShowdownTeam } from '../champions/parse.js';
 import {
     getMaps, speciesBi, itemBi, abilityBi, moveBi, natureBi, typeBi, statsLine,
 } from '../champions/i18n.js';
 import { extractCodeFromImage } from '../champions/ocr.js';
+
+const CLAUDE_URL = 'https://claude.ai/new';
 
 const NUMS = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣'];
 const MAX_PASTES = 8;
@@ -51,6 +55,46 @@ function formatTeam(mons, maps) {
         out.push('');
     });
     return out.join('\n').trim();
+}
+
+// "DE (EN)" for the Claude prompt — German first (the answer should be
+// German) with the English name so Claude maps the right card.
+function biText(b) { return b ? `${b.de} (${b.en})` : ''; }
+
+function buildClaudePrompt(mons, maps) {
+    const lines = mons.map((m) => {
+        const parts = [`- ${biText(speciesBi(maps, m.species))}`];
+        const it = itemBi(maps, m.item);
+        if (it && it.en) parts.push(`@ ${biText(it)}`);
+        const meta = [];
+        const ab = abilityBi(maps, m.ability);
+        if (ab && ab.en) meta.push(`Fähigkeit: ${biText(ab)}`);
+        const na = natureBi(m.nature);
+        if (na && na.en) meta.push(`Wesen: ${biText(na)}`);
+        const sp = statsLine(m.evs);
+        if (sp) meta.push(`SP: ${sp}`);
+        let line = parts.join(' ');
+        if (meta.length) line += ' | ' + meta.join(' | ');
+        const moves = m.moves.map(mv => biText(moveBi(maps, mv))).filter(Boolean);
+        if (moves.length) line += '\n    Attacken: ' + moves.join(', ');
+        return line;
+    });
+    return [
+        'Du bist ein erfahrener Pokémon-VGC-Coach für das Format Pokémon Champions (Doppelkämpfe, 4 von 6 mitnehmen). Antworte einsteigerfreundlich auf Deutsch.',
+        '',
+        'WICHTIG – als Allererstes: Erkläre mir kurz, was die ITEMS machen, die meine Pokémon tragen (ein Satz pro Item).',
+        '',
+        'Mein Team:',
+        lines.join('\n'),
+        '',
+        'Hinweis zum Format: Es gibt kein Tera. Stattdessen entwickeln sich Pokémon mit einem Mega-Stein (Item) Mega — dabei ändern sich ihre Werte, auch die Initiative.',
+        '',
+        'Erkläre danach:',
+        '1. Kurzer Überblick (2–3 Sätze): Was ist der Spielplan des Teams?',
+        '2. Die Rolle jedes Pokémon (je ein kurzer Absatz).',
+        '3. So läuft ein typisches Spiel ab — Schritt für Schritt.',
+        '4. 3–5 Einsteiger-Tipps (typische Fehler, was beschützen, welcher Lead).',
+    ].join('\n');
 }
 
 // Split into ≤TG_LIMIT chunks on blank-line (per-mon) boundaries.
@@ -100,6 +144,15 @@ async function handlePastes(ctx, ids) {
             }
             await replyHTML(ctx,
                 `🛠 <b>Champions-Bauplan</b> — <code>pokepast.es/${esc(id)}</code>\n\n${formatTeam(mons, maps)}`);
+
+            // Claude prompt (items-first) + open-in-Claude button.
+            const prompt = buildClaudePrompt(mons, maps);
+            await ctx.reply('💬 <b>Prompt für Claude</b> — antippen zum Kopieren, dann bei Claude einfügen:',
+                { parse_mode: 'HTML' });
+            await ctx.reply(`<code>${esc(prompt)}</code>`, {
+                parse_mode: 'HTML',
+                ...Markup.inlineKeyboard([Markup.button.url('🤖 In Claude öffnen', CLAUDE_URL)]),
+            });
         } catch (err) {
             await ctx.reply(`⚠️ pokepast.es/${id}: ${err.message}`).catch(() => {});
         }

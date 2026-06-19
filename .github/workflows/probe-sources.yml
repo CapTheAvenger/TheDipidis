@@ -1,0 +1,41 @@
+name: Probe DE name sources
+
+# One-off reachability probe (manual dispatch). Checks whether the
+# German-name sources (PokéWiki / pokemonexperte / Fandom) are reachable
+# from a GitHub Actions runner and what their responses look like, so we
+# know if a real scraper can run in CI before building one. Safe: it only
+# curls + prints, commits nothing.
+
+on:
+  workflow_dispatch:
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Probe sources
+        run: |
+          set +e
+          UA="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124 Safari/537.36"
+          probe () {
+            local label="$1"; local url="$2"
+            echo "=================================================="
+            echo "### $label"
+            echo "URL: $url"
+            code=$(curl -s -o /tmp/body -w "%{http_code}" -L --max-time 25 -A "$UA" "$url")
+            echo "HTTP: $code   bytes: $(wc -c </tmp/body)"
+            echo "--- first 600 chars ---"
+            head -c 600 /tmp/body; echo
+            echo
+          }
+          probe "PokeWiki MediaWiki API (move-name list, wikitext)" \
+            "https://www.pokewiki.de/api.php?action=parse&page=Liste_der_Attackennamen_in_anderen_Sprachen&format=json&prop=wikitext"
+          probe "PokeWiki article (HTML)" \
+            "https://www.pokewiki.de/Quirlschuss"
+          probe "pokemonexperte items (HTML)" \
+            "https://pokemonexperte.de/items/"
+          probe "Fandom DE MediaWiki API (Wesen, wikitext)" \
+            "https://pokemon.fandom.com/de/api.php?action=parse&page=Wesen&format=json&prop=wikitext"
+          probe "Fandom DE MediaWiki API (siteinfo)" \
+            "https://pokemon.fandom.com/de/api.php?action=query&format=json&meta=siteinfo"
+          echo "=== probe done ==="

@@ -36,6 +36,74 @@ OUT = os.path.join(DATA, "champions_resources.json")
 
 LANG_DE, LANG_EN = 6, 9
 
+def norm(s):
+    return re.sub(r"[^a-z0-9]", "", str(s or "").lower())
+
+
+# ── Item categories (the in-game Champions item-menu groups) ─────────
+# Champions sorts held items into Statuswerte / Stärke / Verteidigung /
+# Heilung / Effektlänge / Beeren / Megasteine / Anderes. There's no
+# published mapping, so this is a best-effort classifier: auto-rules for
+# mega stones / berries / extenders, a curated table for the named
+# competitive items, everything else → Anderes. Corrections go in here.
+ITEM_GROUP_CURATED = {
+    'Stärke': {
+        'Life Orb', 'Muscle Band', 'Wise Glasses', 'Expert Belt', 'Punching Glove',
+        'Metronome', 'Scope Lens', 'Razor Claw', 'Light Ball', 'Thick Club',
+        'Deep Sea Tooth', 'Charcoal', 'Mystic Water', 'Magnet', 'Miracle Seed',
+        'Never-Melt Ice', 'Black Glasses', 'Sharp Beak', 'Hard Stone', 'Dragon Fang',
+        'Spell Tag', 'Poison Barb', 'Soft Sand', 'Silk Scarf', 'Twisted Spoon',
+        'Silver Powder', 'Metal Coat', 'Fairy Feather', 'Black Belt', 'Magmarizer',
+        'Adamant Orb', 'Lustrous Orb', 'Griseous Orb', 'Adamant Crystal',
+        'Lustrous Globe', 'Griseous Core', 'Cornerstone Mask', 'Hearthflame Mask',
+        'Wellspring Mask', 'Legend Plate', 'Blank Plate',
+    },
+    'Statuswerte': {
+        'Choice Band', 'Choice Specs', 'Choice Scarf', 'Assault Vest', 'Eviolite',
+        'Booster Energy', 'Weakness Policy', 'White Herb', 'Throat Spray',
+        'Absorb Bulb', 'Cell Battery', 'Snowball', 'Luminous Moss', 'Room Service',
+        'Adrenaline Orb', 'Blunder Policy', 'Electric Seed', 'Grassy Seed',
+        'Psychic Seed', 'Misty Seed', 'Weakness Policy',
+    },
+    'Verteidigung': {
+        'Focus Sash', 'Focus Band', 'Rocky Helmet', 'Covert Cloak', 'Clear Amulet',
+        'Safety Goggles', 'Eject Button', 'Eject Pack', 'Red Card', 'Air Balloon',
+        'Heavy-Duty Boots', 'Bright Powder', 'Lax Incense', 'Protective Pads',
+        'Metal Powder', 'Deep Sea Scale', 'Ability Shield',
+    },
+    'Heilung': {
+        'Leftovers', 'Black Sludge', 'Shell Bell', 'Big Root',
+    },
+    'Effektlänge': {
+        'Light Clay', 'Terrain Extender', 'Heat Rock', 'Damp Rock', 'Smooth Rock',
+        'Icy Rock', 'Grip Claw', 'Binding Band',
+    },
+}
+# Flatten to en-name → group
+_ITEM_GROUP = {}
+for _g, _set in ITEM_GROUP_CURATED.items():
+    for _n in _set:
+        _ITEM_GROUP[norm(_n)] = _g
+
+
+def is_mega_stone(name):
+    n = name.strip()
+    return bool(re.search(r'ite( ?[XY])?$', n, re.I)) and not re.match(r'^eviolite$', n, re.I)
+
+
+def item_group(name):
+    if is_mega_stone(name):
+        return 'Megasteine'
+    if re.search(r'\bberry$', name, re.I):
+        return 'Beeren'
+    if re.search(r'(Plate|Gem|Memory)$', name):
+        return 'Stärke'
+    g = _ITEM_GROUP.get(norm(name))
+    if g:
+        return g
+    return 'Anderes'
+
+
 # Field / "stadium" effects (weather, terrain, rooms, screens, tailwind,
 # gravity) matched on the display name per category.
 FIELD = {
@@ -67,12 +135,10 @@ DE_NAME_SUPPLEMENT = {
 # wrong/missing. (Wave Crash had been "Wellenbrecher"; correct is
 # "Wellentackle".) Add flagged fixes here.
 NAME_CORRECTIONS = {
-    "Wave Crash": "Wellentackle",
+    "Wave Crash": "Wellentackle",       # verified file had "Wellenbrecher"
+    "Venusaurite": "Bisaflornit",       # verified file had "Bisaflorit" (missing n)
 }
 
-
-def norm(s):
-    return re.sub(r"[^a-z0-9]", "", str(s or "").lower())
 
 
 def fetch_json(url):
@@ -150,22 +216,28 @@ def main():
         key = norm(en)
         v = verified.get(key)
         pk = demap.get(key, {})
-        # Name priority: curated correction → PokéAPI's OFFICIAL German
-        # name → hand-verified name (gap fill, can have typos) → DE-name
-        # supplement → English. PokéAPI beats the hand-typed names so a
-        # mistake in the verified file can't override the official name.
-        de = corr.get(key) or pk.get("de_name") or (v or {}).get("de_name") or supp.get(key) or en
+        # Name priority: curated correction → hand-verified name → PokéAPI
+        # German → DE-name supplement → English. The hand-verified file
+        # has the CURRENT Champions names; PokéAPI's dump sometimes carries
+        # an older-gen translation (e.g. Sucker Punch "Tiefschlag" instead
+        # of "Überrumpler"), so it's only the fallback for entries the
+        # verified file doesn't cover. NAME_CORRECTIONS fixes the few
+        # verified-file typos (Wave Crash …).
+        de = corr.get(key) or (v or {}).get("de_name") or pk.get("de_name") or supp.get(key) or en
         # German effect: hand-verified (Champions-correct) wins, else
         # PokéAPI's official German text, else fall back to English in UI.
         de_eff = (v or {}).get("effect") or pk.get("de_eff") or ""
         if v and cat == "move" and v.get("type"):
             mtype = v["type"]
-        entries.append({
+        entry = {
             "cat": cat, "en": en, "de": de, "type": mtype,
             "en_effect": clean(en_eff), "de_effect": clean(de_eff),
             "field": bool(FIELD[cat].search(en)),
             "verified": v is not None,
-        })
+        }
+        if cat == "item":
+            entry["group"] = item_group(en)   # Champions item-menu category
+        entries.append(entry)
 
     for it in champ_items:
         build("item", it["name"], it.get("description", ""), de_item)

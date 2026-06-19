@@ -45,8 +45,10 @@ export async function getMaps() {
     }
     const item = new Map(), ability = new Map(), move = new Map();
     for (const e of (res?.entries || [])) {
-        const m = e.cat === 'item' ? item : e.cat === 'ability' ? ability : e.cat === 'move' ? move : null;
-        if (m && e.en) m.set(norm(e.en), e.de || e.en);
+        if (!e.en) continue;
+        if (e.cat === 'item') item.set(norm(e.en), { de: e.de || e.en, group: e.group || null });
+        else if (e.cat === 'ability') ability.set(norm(e.en), e.de || e.en);
+        else if (e.cat === 'move') move.set(norm(e.en), e.de || e.en);
     }
     _cache = { item, ability, move, species: species || {} };
     _cachedAt = Date.now();
@@ -103,7 +105,12 @@ export function speciesBi(maps, en) {
     return bi(`${baseDe} (${formDe})`, en);
 }
 
-export function itemBi(maps, en) { return en ? bi(maps.item.get(norm(en)), en) : null; }
+export function itemBi(maps, en) {
+    if (!en) return null;
+    const v = maps.item.get(norm(en));
+    if (v && typeof v === 'object') return { de: v.de || en, en, group: v.group || null };
+    return { de: v || en, en, group: null };   // tolerate older cached data
+}
 export function abilityBi(maps, en) { return en ? bi(maps.ability.get(norm(en)), en) : null; }
 export function moveBi(maps, en) { return bi(maps.move.get(norm(en)), en); }
 export function natureBi(en) { return en ? bi(NATURE_DE[en], en) : null; }

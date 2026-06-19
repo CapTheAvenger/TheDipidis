@@ -33,7 +33,9 @@ function formatTeam(mons, maps) {
     mons.forEach((m, i) => {
         out.push(`${NUMS[i] || '•'} <b>${pair(speciesBi(maps, m.species))}</b>`);
         const it = itemBi(maps, m.item);
-        if (it && it.en) out.push(`   📿 Item: ${pair(it)}`);
+        if (it && it.en) {
+            out.push(`   📿 Item: ${pair(it)}${it.group ? ` · <i>${esc(it.group)}</i>` : ''}`);
+        }
         const ab = abilityBi(maps, m.ability);
         if (ab && ab.en) out.push(`   ✨ Fähigkeit / Ability: ${pair(ab)}`);
         const na = natureBi(m.nature);

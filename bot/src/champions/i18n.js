@@ -74,14 +74,12 @@ const STAT_LABELS = {
 };
 const STAT_ORDER = ['hp', 'atk', 'def', 'spa', 'spd', 'spe'];
 
-// Regional / special form suffixes → DE label (EN suffix kept exact in
-// the EN column anyway, so a reasonable label is enough).
+// Form suffixes → DE label. Only the region/Mega names that are
+// identical/official in German are kept (verified). Anything else falls
+// back to the raw English suffix rather than a guessed translation.
 const FORM_DE = {
     Alola: 'Alola', Galar: 'Galar', Hisui: 'Hisui', Paldea: 'Paldea',
-    Mega: 'Mega', 'Mega-X': 'Mega X', 'Mega-Y': 'Mega Y', Gmax: 'Gigadynamax',
-    Therian: 'Tiergeist', Origin: 'Ur', Crowned: 'Edel', Eternal: 'Ewige Blume',
-    Wash: 'Wasch', Heat: 'Hitze', Frost: 'Frost', Fan: 'Wirbel', Mow: 'Schneid',
-    Bloodmoon: 'Blutmond', 'Four': 'Vier', 'Family-of-Four': 'Viererpack',
+    Mega: 'Mega', 'Mega-X': 'Mega X', 'Mega-Y': 'Mega Y',
 };
 
 const TYPE_DE = {

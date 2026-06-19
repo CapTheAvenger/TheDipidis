@@ -119,15 +119,12 @@ FIELD = {
         r"(heat rock|damp rock|smooth rock|icy rock|light clay|terrain extender|seed)", re.I),
 }
 
-# Hand-checked German names for the newest competitive items PokéAPI's
-# dump has no German entry for yet.
+# German names for items PokéAPI's dump has no German entry for. These
+# MUST be verified (PokéWiki / in-game) before being added — no guessing.
+# Empty until verified names are supplied; unverified items fall back to
+# their English name rather than a guess.
 DE_NAME_SUPPLEMENT = {
-    "Ability Shield": "Fähigkeitsschutz", "Clear Amulet": "Reinheitsplakette",
-    "Covert Cloak": "Schleiermantel", "Loaded Dice": "Trickwürfel",
-    "Mirror Herb": "Spiegelkraut", "Punching Glove": "Schlaghandschuh",
-    "Legend Plate": "Legendentafel", "Cornerstone Mask": "Fundamentmaske",
-    "Hearthflame Mask": "Feuerstellenmaske", "Wellspring Mask": "Brunnenmaske",
-    "Booster Energy": "Energiebooster",
+    # "EN name": "Verified DE name",   # source: <PokeWiki URL / in-game>
 }
 
 # Curated German-name corrections, highest priority — for entries where

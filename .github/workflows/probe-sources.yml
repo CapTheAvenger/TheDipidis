@@ -1,10 +1,9 @@
 name: Probe DE name sources
 
-# One-off reachability probe (manual dispatch). Checks whether the
-# German-name sources (PokéWiki / pokemonexperte / Fandom) are reachable
-# from a GitHub Actions runner and what their responses look like, so we
-# know if a real scraper can run in CI before building one. Safe: it only
-# curls + prints, commits nothing.
+# One-off parser test (manual dispatch). Fetches the PokeWiki move-name
+# wikitext table + the pokemonexperte item page and prints parsed pairs
+# + coverage checks, so the real scraper can be written against the
+# confirmed format. Safe: prints only, commits nothing.
 
 on:
   workflow_dispatch:
@@ -13,29 +12,53 @@ jobs:
   probe:
     runs-on: ubuntu-latest
     steps:
-      - name: Probe sources
+      - name: Parse-test PokeWiki moves + pokemonexperte items
         run: |
-          set +e
-          UA="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124 Safari/537.36"
-          probe () {
-            local label="$1"; local url="$2"
-            echo "=================================================="
-            echo "### $label"
-            echo "URL: $url"
-            code=$(curl -s -o /tmp/body -w "%{http_code}" -L --max-time 25 -A "$UA" "$url")
-            echo "HTTP: $code   bytes: $(wc -c </tmp/body)"
-            echo "--- first 600 chars ---"
-            head -c 600 /tmp/body; echo
-            echo
-          }
-          probe "PokeWiki MediaWiki API (move-name list, wikitext)" \
-            "https://www.pokewiki.de/api.php?action=parse&page=Liste_der_Attackennamen_in_anderen_Sprachen&format=json&prop=wikitext"
-          probe "PokeWiki article (HTML)" \
-            "https://www.pokewiki.de/Quirlschuss"
-          probe "pokemonexperte items (HTML)" \
-            "https://pokemonexperte.de/items/"
-          probe "Fandom DE MediaWiki API (Wesen, wikitext)" \
-            "https://pokemon.fandom.com/de/api.php?action=parse&page=Wesen&format=json&prop=wikitext"
-          probe "Fandom DE MediaWiki API (siteinfo)" \
-            "https://pokemon.fandom.com/de/api.php?action=query&format=json&meta=siteinfo"
-          echo "=== probe done ==="
+          python3 - <<'PY'
+          import urllib.request, json, re, html
+          UA = {"User-Agent": "Mozilla/5.0 (X11; Linux x86_64) Chrome/124 Safari/537.36"}
+
+          def get(url):
+              return urllib.request.urlopen(urllib.request.Request(url, headers=UA), timeout=30).read().decode("utf-8", "replace")
+
+          # ── PokeWiki: moves wikitext table (Deutsch | Englisch | …) ──
+          print("=== PokeWiki moves ===")
+          api = ("https://www.pokewiki.de/api.php?action=parse&format=json&prop=wikitext"
+                 "&page=Liste_der_Attackennamen_in_anderen_Sprachen")
+          wt = json.loads(get(api))["parse"]["wikitext"]["*"]
+
+          def clean_cell(c):
+              c = c.strip()
+              c = re.sub(r"\[\[(?:[^|\]]*\|)?([^\]]*)\]\]", r"\1", c)   # [[a|b]]->b, [[a]]->a
+              c = re.sub(r"<[^>]+>", "", c)
+              c = re.sub(r"\{\{[^}]*\}\}", "", c)
+              return c.strip()
+
+          pairs = {}
+          # rows are separated by |- ; cells by || ; first data cell after a leading |
+          for row in wt.split("\n|-"):
+              # take the cell block; cells may be on one line "| a || b || c" or multiline
+              cells = re.split(r"\|\||\n\|", row)
+              cells = [clean_cell(c.lstrip("|")) for c in cells if c.strip() and not c.strip().startswith("!")]
+              cells = [c for c in cells if c]
+              if len(cells) >= 2:
+                  de, en = cells[0], cells[1]
+                  # plausibility: en should look like an English move name
+                  if de and en and not de.startswith("{") and len(en) < 40:
+                      pairs[en] = de
+
+          print("parsed move pairs:", len(pairs))
+          for en in ["Wave Crash","Matcha Gotcha","Hyper Voice","Sucker Punch","Salt Cure","Aqua Step","Bitter Blade","Stone Axe","Tachyon Cutter"]:
+              print(f"   {en:16} -> {pairs.get(en, '(missing)')}")
+          import itertools
+          print("   sample:", dict(itertools.islice(pairs.items(), 8)))
+
+          # ── pokemonexperte: item table ──
+          print("\n=== pokemonexperte items (raw structure sample) ===")
+          h = get("https://pokemonexperte.de/items/")
+          # show a slice around the first occurrence of a known item to see the row markup
+          i = h.find("Wahlschal")
+          if i == -1: i = h.find("Leftovers")
+          print(repr(h[max(0,i-400):i+200]) if i!=-1 else "marker not found; first 400:", )
+          if i!=-1: print(repr(h[max(0,i-400):i+200]))
+          PY

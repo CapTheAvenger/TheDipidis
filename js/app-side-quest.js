@@ -865,8 +865,67 @@
         saveImported(loadImported().filter(t => t.replica_code !== id));
     }
 
+    // The Telegram bot replies with a bilingual "DE / EN" build sheet
+    // (emoji bullets, "Wesen / Nature", SP in "Wert DE/EN" columns). Users
+    // paste that straight in here, so detect it and pull out the ENGLISH
+    // side — the rest of the site stores/renders English species names.
+    function looksLikeBuildSheet(text) {
+        return /Champions-Bauplan|Attacken\s*\/\s*Moves|[\u{1F4FF}✨\u{1F9EC}\u{1F4CA}⚔]|[0-9]️?⃣/u.test(text || '');
+    }
+    function enPart(s) {
+        // "Sturzbach / Torrent" → "Torrent"; "Pelipper" → "Pelipper".
+        const str = String(s || '').trim();
+        const i = str.lastIndexOf(' / ');
+        return (i >= 0 ? str.slice(i + 3) : str).trim();
+    }
+    function stripGroup(s) {
+        // Drop a trailing " · Megasteine"/category tag from the item line.
+        return String(s || '').split(' · ')[0].trim();
+    }
+    function spToEvs(s) {
+        // "2 KP/HP · 32 Ang/Atk · 32 Init/Spe" → "2 HP / 32 Atk / 32 Spe".
+        return String(s || '').split(' · ').map(part => {
+            const m = part.trim().match(/^(\d+)\s+\S+\/(\S+)$/);
+            return m ? `${m[1]} ${m[2]}` : '';
+        }).filter(Boolean).join(' / ');
+    }
+    const KEYCAP_RE = /[0-9]️?⃣/u;
+    function parseBuildSheet(text) {
+        const mons = [];
+        let cur = null;
+        for (const raw of String(text).replace(/\r/g, '').split('\n')) {
+            const trimmed = raw.trim();
+            if (!trimmed) continue;
+            if (KEYCAP_RE.test(trimmed)) {                 // new Pokémon
+                if (mons.length >= 6) break;
+                const core = trimmed.replace(KEYCAP_RE, '').replace(/^[^\p{L}(]+/u, '').trim();
+                const name = enPart(core);
+                if (!name) continue;
+                cur = { name, item: '', ability: '', nature: '', tera_type: '', evs: '', moves: [] };
+                mons.push(cur);
+                continue;
+            }
+            if (!cur) continue;                            // skip header lines
+            if (trimmed.startsWith('•') || trimmed.startsWith('-')) {   // move bullet
+                const mv = enPart(trimmed.replace(/^[•-]\s*/, ''));
+                if (mv && cur.moves.length < 4) cur.moves.push(mv);
+                continue;
+            }
+            const core = trimmed.replace(/^[^\p{L}]+/u, '').trim();   // strip leading emoji
+            let m;
+            if ((m = core.match(/Ability:\s*(.+)$/i))) cur.ability = enPart(stripGroup(m[1]));
+            else if ((m = core.match(/Nature:\s*(.+)$/i))) cur.nature = enPart(m[1]);
+            else if ((m = core.match(/^SP:\s*(.+)$/i))) cur.evs = spToEvs(m[1]);
+            else if ((m = core.match(/^Item:\s*(.+)$/i))) cur.item = enPart(stripGroup(m[1]));
+            // "Attacken / Moves:" header and anything else: ignore.
+        }
+        const out = mons.slice(0, 6).filter(mn => mn.name);
+        return out.length ? out : null;
+    }
+
     function parsePokepasteText(text) {
         if (!text) return null;
+        if (looksLikeBuildSheet(text)) return parseBuildSheet(text);
         const blocks = String(text).replace(/\r/g, '').split(/\n\s*\n/);
         const mons = [];
         for (const block of blocks) {

@@ -69,9 +69,17 @@ export async function extractCodeFromImage(buf) {
         const variants = [await topBannerVariant(buf), await fullVariant(buf)].filter(Boolean);
         const { createWorker } = await import('tesseract.js');
         worker = await createWorker('eng');
+        // The in-game "Team ID" keyboard only offers A–Z and 0–9 — every
+        // symbol (@ = & ; * # ! ?) and the space bar are greyed out, and
+        // codes are always uppercase and exactly 10 chars long. So restrict
+        // OCR to that alphabet: this stops tesseract from resolving an
+        // ambiguous glyph to a symbol/lowercase letter that can't occur in
+        // a real code. (Confusable letters like I/O are NOT excluded by the
+        // game — real codes use them — so we must not drop any letter.)
+        // ":" and a space are kept only to help delimit the "Team ID:" label
+        // from the code; pickCode strips them.
         await worker.setParameters({
-            tessedit_char_whitelist:
-                'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 :.-IDTeam',
+            tessedit_char_whitelist: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789: ',
         });
         let joined = '';
         for (const v of variants) {

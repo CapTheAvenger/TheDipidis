@@ -1,12 +1,12 @@
 {
   "_meta": {
-    "last_updated": "2026-06-19",
+    "last_updated": "2026-06-20",
     "window_days": 14,
-    "window_start": "2026-06-05",
-    "window_end": "2026-06-19",
-    "team_count": 55,
-    "sample_count": 330,
-    "species_count": 75,
+    "window_start": "2026-06-06",
+    "window_end": "2026-06-20",
+    "team_count": 54,
+    "sample_count": 324,
+    "species_count": 73,
     "source": "VGCPastes Champions M-A spreadsheet (gid=791705272)"
   },
   "samples": [
@@ -2151,48 +2151,6 @@
       "nature": "Adamant",
       "date": "8 Jun 2026",
       "replica": "4P7YQ18VD8"
-    },
-    {
-      "species": "Froslass",
-      "evs": "1 HP / 32 SpA / 1 SpD / 32 Spe",
-      "nature": "Timid",
-      "date": "12 Jun 2026",
-      "replica": "BTUPPKB6D9"
-    },
-    {
-      "species": "Dragonite",
-      "evs": "19 HP / 10 Def / 17 SpA / 10 SpD / 10 Spe",
-      "nature": "Modest",
-      "date": "12 Jun 2026",
-      "replica": "BTUPPKB6D9"
-    },
-    {
-      "species": "Lycanroc-Dusk",
-      "evs": "2 HP / 32 Atk / 32 Spe",
-      "nature": "Adamant",
-      "date": "12 Jun 2026",
-      "replica": "BTUPPKB6D9"
-    },
-    {
-      "species": "Sableye",
-      "evs": "28 HP / 18 Def / 20 SpD",
-      "nature": "Calm",
-      "date": "12 Jun 2026",
-      "replica": "BTUPPKB6D9"
-    },
-    {
-      "species": "Samurott-Hisui",
-      "evs": "1 HP / 32 Atk / 1 SpD / 32 Spe",
-      "nature": "Adamant",
-      "date": "12 Jun 2026",
-      "replica": "BTUPPKB6D9"
-    },
-    {
-      "species": "Archaludon",
-      "evs": "3 HP / 10 Def / 30 SpA / 5 SpD / 18 Spe",
-      "nature": "Modest",
-      "date": "12 Jun 2026",
-      "replica": "BTUPPKB6D9"
     },
     {
       "species": "Farigiraf",

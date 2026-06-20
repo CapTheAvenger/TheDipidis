@@ -1,4 +1,7 @@
 tournament_id,tournament_date,format,player_count,winner_archetype,winner_winrate
+1000-years-doom-tournaments,2026-06-20,CRI,302,Slowking,30.0
+6a0b676d13f957d6d4b4aed0,2026-06-19,CRI,102,N's Zoroark,21.0
+6a2eca29e334c3c9befd6934,2026-06-19,CRI,129,N's Zoroark,30.0
 6a2c30502d97f3b0c2614c64,2026-06-18,CRI,151,Clefairy Ogerpon,34.0
 6a28d75ce334c3c9befd2cd9,2026-06-16,CRI,206,Dragapult,21.0
 6a3054592d97f3b0c26177c9,2026-06-16,CRI,108,Dragapult Dusknoir,18.0
@@ -46,4 +49,3 @@ really-tries,2026-05-26,CRI,128,Slowking,21.0
 6a1051be0f6c1f089985e5c5,2026-05-24,CRI,102,Slowking,18.0
 6a0ae8dedfbdf089cbbdc90e,2026-05-24,CRI,100,Slowking,25.0
 6a0dfdc813f957d6d4b4bfb4,2026-05-23,CRI,170,Lopunny Dudunsparce,28.0
-yes-chaos-rising-is-legal,2026-05-23,CRI,284,N's Zoroark,31.0

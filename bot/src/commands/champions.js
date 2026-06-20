@@ -23,7 +23,7 @@ import { extractCodeFromImage } from '../champions/ocr.js';
 const CLAUDE_URL = 'https://claude.ai/new';
 
 const NUMS = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣'];
-const MAX_PASTES = 8;
+const MAX_PASTES = 10;
 const TG_LIMIT = 3900;
 
 function esc(s) {

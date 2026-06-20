@@ -2,10 +2,10 @@
   "_meta": {
     "title": "Pokémon Champions — Current Top Doubles Teams",
     "subtitle": "Replica codes from top tournament finishes. Tap a code to copy.",
-    "last_updated": "2026-06-19",
+    "last_updated": "2026-06-20",
     "source": "VGCPastes Champions M-A spreadsheet (gid=791705272)",
     "source_url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTXHOfUSKTZyVoxF7BO-XIEqtbrsq1OSh_4bSaO0bhAMHqtsvYqM_4eZWIMqdZ--SKCb86EXuk75o1i/pub?gid=791705272&single=true&output=csv",
-    "team_count": 74
+    "team_count": 73
   },
   "teams": [
     {
@@ -6940,105 +6940,6 @@
     },
     {
       "rank": 71,
-      "replica_code": "BTUPPKB6D9",
-      "team_name": "DjSanders' Froslass Dragonite Team",
-      "tournament": "-",
-      "trainer": "DjSanders",
-      "format": "VGC Champions",
-      "regulation": "M-A",
-      "sheet_rank": "",
-      "date_shared": "12 Jun 2026",
-      "pokepaste_url": "https://pokepast.es/c56565d274aa4b37",
-      "pokemon": [
-        {
-          "name": "Froslass",
-          "item": "Froslassite",
-          "ability": "Snow Cloak",
-          "tera_type": "",
-          "evs": "1 HP / 32 SpA / 1 SpD / 32 Spe",
-          "nature": "Timid",
-          "moves": [
-            "Blizzard",
-            "Shadow Ball",
-            "Aurora Veil",
-            "Protect"
-          ]
-        },
-        {
-          "name": "Dragonite",
-          "item": "Dragoninite",
-          "ability": "Multiscale",
-          "tera_type": "",
-          "evs": "19 HP / 10 Def / 17 SpA / 10 SpD / 10 Spe",
-          "nature": "Modest",
-          "moves": [
-            "Hurricane",
-            "Dragon Pulse",
-            "Ice Beam",
-            "Protect"
-          ]
-        },
-        {
-          "name": "Lycanroc-Dusk",
-          "item": "Focus Sash",
-          "ability": "Tough Claws",
-          "tera_type": "",
-          "evs": "2 HP / 32 Atk / 32 Spe",
-          "nature": "Adamant",
-          "moves": [
-            "Rock Slide",
-            "Close Combat",
-            "Accelerock",
-            "Protect"
-          ]
-        },
-        {
-          "name": "Sableye",
-          "item": "Roseli Berry",
-          "ability": "Prankster",
-          "tera_type": "",
-          "evs": "28 HP / 18 Def / 20 SpD",
-          "nature": "Calm",
-          "moves": [
-            "Quash",
-            "Encore",
-            "Light Screen",
-            "Rain Dance"
-          ]
-        },
-        {
-          "name": "Samurott-Hisui",
-          "item": "Choice Scarf",
-          "ability": "Sharpness",
-          "tera_type": "",
-          "evs": "1 HP / 32 Atk / 1 SpD / 32 Spe",
-          "nature": "Adamant",
-          "moves": [
-            "Sacred Sword",
-            "Sucker Punch",
-            "Aqua Cutter",
-            "Night Slash"
-          ]
-        },
-        {
-          "name": "Archaludon",
-          "item": "Leftovers",
-          "ability": "Stamina",
-          "tera_type": "",
-          "evs": "3 HP / 10 Def / 30 SpA / 5 SpD / 18 Spe",
-          "nature": "Modest",
-          "moves": [
-            "Electro Shot",
-            "Flash Cannon",
-            "Aura Sphere",
-            "Protect"
-          ]
-        }
-      ],
-      "strategy": []
-    },
-    {
-      "rank": 72,
       "replica_code": "N4GE7412C2",
       "team_name": "barudoru's PJCS 2026 Team",
       "tournament": "PJCS 2026",
@@ -7137,7 +7038,7 @@
       "strategy": []
     },
     {
-      "rank": 73,
+      "rank": 72,
       "replica_code": "QNVE25B6C1",
       "team_name": "pikaso's PJCS 2026 Team",
       "tournament": "PJCS 2026",
@@ -7236,7 +7137,7 @@
       "strategy": []
     },
     {
-      "rank": 74,
+      "rank": 73,
       "replica_code": "QMJHN6HHK2",
       "team_name": "Gio's PJCS 2026 Team",
       "tournament": "PJCS 2026",

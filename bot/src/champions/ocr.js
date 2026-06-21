@@ -53,14 +53,23 @@ function isCode(tok) {
     return /[A-Z]/.test(tok) && /[0-9]/.test(tok);   // letters AND digits
 }
 
+// The in-game Team-ID keyboard greys out the letters I, O and Z (so a
+// code can never be confused with the digits 1, 0, 2). A code therefore
+// CANNOT contain I/O/Z — so any such glyph the OCR produced is really the
+// look-alike digit. This is a forced correction, not a guess, and it
+// resolves the classic I/1 and O/0 ambiguities deterministically.
+function canonicalizeCode(tok) {
+    return tok.replace(/I/g, '1').replace(/O/g, '0').replace(/Z/g, '2');
+}
+
 // Prefer the token immediately after "ID"; else a mixed alphanumeric run.
 function pickCode(rawText) {
     const text = String(rawText || '').toUpperCase();
     const near = text.match(/I[D0][:\s.\-]*([A-Z0-9]{10})/);
-    if (near && /[A-Z0-9]{10}/.test(near[1])) return near[1];
+    if (near && /[A-Z0-9]{10}/.test(near[1])) return canonicalizeCode(near[1]);
     const all = text.match(/[A-Z0-9]{10}/g) || [];
-    const mixed = all.filter(isCode);
-    return mixed[0] || null;          // never return a pure-letter token
+    const mixed = all.filter(isCode);          // reject pure-letter names first
+    return mixed[0] ? canonicalizeCode(mixed[0]) : null;
 }
 
 export async function extractCodeFromImage(buf) {

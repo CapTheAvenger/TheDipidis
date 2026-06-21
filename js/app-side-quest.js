@@ -772,6 +772,16 @@
         if (_pickerKey) { document.removeEventListener('keydown', _pickerKey); _pickerKey = null; }
     }
 
+    // Close + re-render the teams list ONCE. The picker overlay is
+    // full-screen, so re-rendering the (hidden) teams behind it on every
+    // tap was pure wasted work — 120 teams × icons per tap could lock up
+    // the main thread on a phone. We apply the filter when the picker
+    // closes instead.
+    function closeSpeciesPickerAndRender() {
+        closeSpeciesPicker();
+        render();
+    }
+
     function openSpeciesPicker() {
         closeSpeciesPicker();
         const labels = LABELS[uiLang()];
@@ -804,17 +814,19 @@
                 ? list.map(speciesCellHtml).join('')
                 : `<p class="sq-play-picker-empty">${escapeHtml(labels.pickerEmpty)}</p>`;
         };
+        // Only update the overlay's own UI on each tap (progress + grid
+        // selection state). The teams list behind the overlay is hidden,
+        // so we defer its re-render to closeSpeciesPickerAndRender().
         const refresh = () => {
             if (progress) progress.textContent = labels.filterPickProgress(_speciesFilter.length);
             updateGrid();
-            render();  // live-update the teams behind the overlay
         };
 
         updateGrid();
         if (search) search.addEventListener('input', updateGrid);
-        overlay.querySelector('.sq-play-picker-close').addEventListener('click', closeSpeciesPicker);
+        overlay.querySelector('.sq-play-picker-close').addEventListener('click', closeSpeciesPickerAndRender);
         overlay.addEventListener('click', (e) => {
-            if (e.target === overlay) { closeSpeciesPicker(); return; }
+            if (e.target === overlay) { closeSpeciesPickerAndRender(); return; }
             const cell = e.target.closest('.sq-play-picker-cell');
             if (!cell) return;
             const sp = cell.getAttribute('data-pick-species');
@@ -824,11 +836,11 @@
                 refresh();
             } else {
                 addSpecies(sp);
-                if (_speciesFilter.length >= MAX_FILTER) { closeSpeciesPicker(); render(); }
+                if (_speciesFilter.length >= MAX_FILTER) closeSpeciesPickerAndRender();
                 else refresh();
             }
         });
-        _pickerKey = (e) => { if (e.key === 'Escape') closeSpeciesPicker(); };
+        _pickerKey = (e) => { if (e.key === 'Escape') closeSpeciesPickerAndRender(); };
         document.addEventListener('keydown', _pickerKey);
         setTimeout(() => search && search.focus(), 30);
     }

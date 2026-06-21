@@ -1057,7 +1057,7 @@
     position: fixed; inset: 0;
     background: rgba(8, 11, 18, 0.92);
     z-index: 10002;
-    display: flex; align-items: center; justify-content: center;
+    display: flex; align-items: flex-start; justify-content: center;
     /* Respect the notch / status bar when launched as an installed PWA
      * (home-screen shortcut → standalone, no browser chrome). */
     padding: max(0.5rem, env(safe-area-inset-top)) max(0.5rem, env(safe-area-inset-right))
@@ -1068,7 +1068,12 @@
 .sq-play-picker-panel {
     background: #1a1f2c; border: 1px solid #2a3140; border-radius: 14px;
     width: min(96vw, 720px);
-    max-height: calc(100vh - 1rem);
+    /* Anchor to the top (align-items: flex-start) and cap to the VISIBLE
+     * viewport (dvh, not vh) minus the safe areas, so the header — and its
+     * × close button — is always on-screen and tappable, never pushed up
+     * under the status bar / notch. The grid scrolls inside the panel. */
+    max-height: calc(100vh - 2rem);
+    max-height: calc(100dvh - max(1rem, env(safe-area-inset-top)) - max(1rem, env(safe-area-inset-bottom)));
     display: flex; flex-direction: column;
     color: #e6ebf3;
     overflow: hidden;
@@ -1077,6 +1082,8 @@
     display: flex; align-items: center; gap: 0.5rem;
     padding: 0.6rem 0.7rem;
     border-bottom: 1px solid #242b39;
+    position: sticky; top: 0; z-index: 1;
+    background: #1a1f2c;
 }
 .sq-play-picker-search {
     flex: 1;

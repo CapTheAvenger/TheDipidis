@@ -7,26 +7,36 @@ jobs:
   probe:
     runs-on: ubuntu-latest
     steps:
-      - name: Compare publish-proxy CSV for M-A vs M-B gid
+      - name: Dump full structure of M-B publish-proxy CSV
         run: |
           python3 - <<'PY'
-          import urllib.request, csv, io
+          import urllib.request, csv, io, re
           UA={"User-Agent":"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124 Safari/537.36"}
           PUB=("https://docs.google.com/spreadsheets/d/e/"
                "2PACX-1vTXHOfUSKTZyVoxF7BO-XIEqtbrsq1OSh_4bSaO0bhAMHqtsvYqM_4eZWIMqdZ--SKCb86EXuk75o1i/"
-               "pub?gid={gid}&single=true&output=csv")
-          def get(url):
-              req=urllib.request.Request(url,headers=UA)
-              r=urllib.request.urlopen(req,timeout=40)
-              return r.getcode(), r.read().decode("utf-8","replace")
-          for label,gid in (("M-A","791705272"),("M-B","1458357160")):
-              try:
-                  code,txt=get(PUB.format(gid=gid))
-                  rows=list(csv.reader(io.StringIO(txt)))
-                  pastes=txt.lower().count("pokepast.es")
-                  print(f"\n=== publish-proxy {label} gid {gid}: HTTP {code}, {len(rows)} rows, {pastes} pokepastes ===")
-                  for i,r in enumerate(rows[:5]):
-                      print(i, [c[:22] for c in r[:10]])
-              except Exception as e:
-                  print(f"\n=== {label} gid {gid}: ERROR {e} ===")
+               "pub?gid=1458357160&single=true&output=csv")
+          req=urllib.request.Request(PUB,headers=UA)
+          txt=urllib.request.urlopen(req,timeout=40).read().decode("utf-8","replace")
+          rows=list(csv.reader(io.StringIO(txt)))
+          print("rows:", len(rows), "cols(header guess):", len(rows[2]) if len(rows)>2 else 0)
+          print("\n--- header row (idx 2), every column ---")
+          for j,c in enumerate(rows[2]):
+              print("  col%02d %r" % (j, c))
+          print("\n--- data row idx 3, every column ---")
+          for j,c in enumerate(rows[3]):
+              print("  col%02d %r" % (j, c[:60]))
+          print("\n--- data row idx 4, every column ---")
+          for j,c in enumerate(rows[4]):
+              print("  col%02d %r" % (j, c[:60]))
+          # Are full pokepaste URLs present, or only display text?
+          urls=re.findall(r'pokepast\.es/[A-Za-z0-9]+', txt)
+          print("\nfull pokepaste URL matches:", len(urls), "| samples:", urls[:5])
+          # 10-char in-game replica codes?
+          codes=re.findall(r'\b[A-Z0-9]{10}\b', txt)
+          print("10-char code-ish tokens:", len(codes), "| samples:", codes[:8])
+          # Which columns hold pokepaste text?
+          if len(rows)>3:
+              for j,c in enumerate(rows[3]):
+                  if 'pokepast' in c.lower() or re.search(r'[A-Z0-9]{10}', c):
+                      print("  row3 col%02d carries link/code: %r" % (j, c[:80]))
           PY

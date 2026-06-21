@@ -40,13 +40,11 @@ jobs:
               if not isinstance(html, str) or st != 200:
                   print(repr(html[:300]) if isinstance(html,str) else html); continue
               names = links(html, dex)
+              # Drop the "ItemDex" nav link that heads the table.
+              names = [n for n in names if n.lower() not in ("itemdex","abilitydex","attackdex")]
               print("parsed %d names via /%s/ links" % (len(names), dex))
-              print("FIRST 30:", names[:30])
-              print("LAST 10:", names[-10:])
-              # also show any <h2>/<h3> headers to understand sections
-              hs = re.findall(r'<h[123][^>]*>(.*?)</h[123]>', html, re.I|re.S)
-              hs = [re.sub(r'<[^>]+>','',h).strip() for h in hs]
-              print("HEADERS:", [h for h in hs if h][:20])
+              import json as _j
+              print("FULL_JSON_%s=%s" % (dex, _j.dumps(names, ensure_ascii=False)))
           # game8 items list (different structure) — just status + a content sample
           for label,url in [("GAME8 items","https://game8.co/games/Pokemon-Champions/archives/588871"),
                             ("GAME8 abilities/590403","https://game8.co/games/Pokemon-Champions/archives/590403")]:

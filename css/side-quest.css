@@ -1728,6 +1728,7 @@
    horizontally-scrollable table on the dark theme. */
 #sideQuestPokedexHost .sqp-table {
     display: table;
+    table-layout: auto;
     border-collapse: collapse;
     width: max-content;
     min-width: 100%;
@@ -1735,8 +1736,16 @@
     font-size: 0.82rem;
     color: #e6ebf3;
 }
+/* Neutralise the global `table { display:block }` and
+   `table thead, table tbody { display:table; table-layout:fixed }` rules,
+   which otherwise turn the header/body into separate fixed-layout tables
+   and collapse every column except the first. */
+#sideQuestPokedexHost .sqp-table thead { display: table-header-group; width: auto; }
+#sideQuestPokedexHost .sqp-table tbody { display: table-row-group; width: auto; }
+#sideQuestPokedexHost .sqp-table tr { display: table-row; }
 #sideQuestPokedexHost .sqp-table th,
 #sideQuestPokedexHost .sqp-table td {
+    display: table-cell;
     padding: 0.45rem 0.55rem;
     text-align: center;
     white-space: nowrap;

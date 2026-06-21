@@ -220,6 +220,20 @@ def main():
         ov_item = {norm(k): v for k, v in (ov.get("items") or {}).items()}
         print(f"Loaded de_name_overrides: {len(ov_move)} moves, {len(ov_item)} items")
 
+    # Items actually available in Pokémon Champions (Serebii's Champions
+    # items list, scraped by scripts/scrape_champions_items.py). The
+    # otterlyclueless item list is the *full* held-item set, but Champions
+    # only enables a subset (e.g. Choice Scarf yes, Choice Band/Specs no),
+    # so we flag each item. Abilities/moves are already Champions-restricted
+    # in the dataset. If the list is missing, default everything to available
+    # (never hide on missing data).
+    champ_avail_items = set()
+    avail_path = os.path.join(DATA, "champions_available_items.json")
+    if os.path.exists(avail_path):
+        av = json.load(open(avail_path, encoding="utf-8"))
+        champ_avail_items = {norm(n) for n in (av.get("items") or [])}
+        print(f"Loaded champions_available_items: {len(champ_avail_items)} items")
+
     entries = []
     conflicts = []   # names where the sources disagree (no majority)
 
@@ -269,6 +283,11 @@ def main():
         }
         if cat == "item":
             entry["group"] = item_group(en)   # Champions item-menu category
+            # Only flag as Champions-available if Serebii lists it (held
+            # items / Mega Stones / berries). With no list, keep available.
+            entry["champ"] = (key in champ_avail_items) if champ_avail_items else True
+        else:
+            entry["champ"] = True             # abilities/moves already restricted
         entries.append(entry)
 
     for it in champ_items:

@@ -1806,3 +1806,52 @@
     margin: 0.5rem 0 0;
 }
 .sqp-attr { margin-top: 0.25rem; }
+
+/* ── Look-up: "Champions only" availability toggle ─────────────── */
+.sq-res-champ-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 0.6rem;
+}
+.sq-res-champ {
+    appearance: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    border: 1px solid #3a4456;
+    background: #222b3a;
+    color: #c4ccd9;
+    font: inherit;
+    font-size: 0.82rem;
+    font-weight: 700;
+    padding: 0.4rem 0.8rem;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: background 120ms ease, border-color 120ms ease, color 120ms ease;
+}
+.sq-res-champ-dot {
+    width: 0.7rem;
+    height: 0.7rem;
+    border-radius: 50%;
+    background: #4a566b;
+    box-shadow: inset 0 0 0 2px rgba(0,0,0,0.25);
+    transition: background 120ms ease;
+}
+.sq-res-champ.is-on {
+    background: #1f6f43;
+    border-color: #2e9d60;
+    color: #ffffff;
+}
+.sq-res-champ.is-on .sq-res-champ-dot {
+    background: #5be39a;
+    box-shadow: 0 0 6px rgba(91, 227, 154, 0.6);
+}
+.sq-res-champ-note {
+    color: #8b95a5;
+    font-size: 0.72rem;
+    line-height: 1.3;
+    flex: 1 1 12rem;
+    min-width: 9rem;
+}

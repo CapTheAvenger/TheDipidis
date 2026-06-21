@@ -149,9 +149,23 @@ jobs:
           fi
           exit 0
 
+      # Refresh the list of items actually available in Champions (Serebii's
+      # Champions items page). Drives the "Champions only" filter in the
+      # Look-up tab. Fail-soft: keeps the committed list on any error.
+      - name: Scrape Champions item availability
+        run: |
+          set +e
+          python -u scripts/scrape_champions_items.py
+          if [ "$?" -ne 0 ]; then
+              echo "::warning::scrape_champions_items failed — keeping committed champions_available_items.json"
+              git checkout -- data/champions_available_items.json 2>/dev/null
+          fi
+          exit 0
+
       # Rebuild the Side Quest "Look up" reference (items/abilities/moves/
       # field effects) from the Champions dataset + PokéAPI + the scraped
-      # German name overrides. Fail-soft: keeps the committed JSON.
+      # German name overrides + the Champions item-availability list.
+      # Fail-soft: keeps the committed JSON.
       - name: Build Champions resources reference
         run: |
           set +e
@@ -189,6 +203,7 @@ jobs:
           git add data/champions_replica_teams.json \
                   data/champions_resources.json \
                   data/champions_pokedex.json \
+                  data/champions_available_items.json \
                   data/de_name_overrides.json \
                   index.html service-worker.js version.json
           # Strategies file only exists once the ANTHROPIC_API_KEY

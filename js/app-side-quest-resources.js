@@ -21,6 +21,7 @@
     let _activated = false;    // lazy: only fetch on first Resources view
     let _query = '';
     let _filter = 'all';       // all | item | ability | move | field
+    let _champOnly = true;     // show only entries available in Champions
 
     function uiLang() {
         return (typeof window.getLang === 'function' && window.getLang() === 'de') ? 'de' : 'en';
@@ -45,6 +46,8 @@
             verifiedHint:'Deutsche Beschreibung handgeprüft',
             noEffect:    'Keine Beschreibung hinterlegt.',
             none:        'Nichts gefunden — andere Schreibweise oder Stichwort probieren.',
+            champOnly:    'Nur in Champions',
+            champNote:    'Zeigt nur Items/Fähigkeiten/Attacken, die in Pokémon Champions verfügbar sind.',
             loading:     'Lade Referenzdaten …',
             error:       'Referenzdaten konnten nicht geladen werden.',
             count:       (n) => `${n} Einträge`,
@@ -68,6 +71,8 @@
             verifiedHint:'German description hand-checked',
             noEffect:    'No description available yet.',
             none:        'Nothing found — try a different spelling or keyword.',
+            champOnly:    'Champions only',
+            champNote:    'Shows only items/abilities/moves available in Pokémon Champions.',
             loading:     'Loading reference data …',
             error:       'Could not load reference data.',
             count:       (n) => `${n} entries`,
@@ -121,6 +126,7 @@
         const q = norm(_query).trim();
         const lang = uiLang();
         return _entries
+            .filter(e => !_champOnly || e.champ !== false)   // Champions-availability gate
             .filter(e => _filter === 'all' ? true : (_filter === 'field' ? e.field : e.cat === _filter))
             .filter(e => matches(e, q))
             .sort((a, b) => {
@@ -132,7 +138,9 @@
 
     function counts() {
         const c = { all: 0, item: 0, ability: 0, move: 0, field: 0 };
-        (_entries || []).forEach(e => { c.all++; c[e.cat]++; if (e.field) c.field++; });
+        (_entries || [])
+            .filter(e => !_champOnly || e.champ !== false)
+            .forEach(e => { c.all++; c[e.cat]++; if (e.field) c.field++; });
         return c;
     }
 
@@ -193,6 +201,18 @@
             </div>`;
     }
 
+    function renderChampToggle() {
+        const l = t();
+        return `
+            <div class="sq-res-champ-row">
+                <button class="sq-res-champ${_champOnly ? ' is-on' : ''}" type="button"
+                        data-sq-res-champ role="switch" aria-checked="${_champOnly ? 'true' : 'false'}">
+                    <span class="sq-res-champ-dot" aria-hidden="true"></span>${escapeHtml(l.champOnly)}
+                </button>
+                <span class="sq-res-champ-note">${escapeHtml(l.champNote)}</span>
+            </div>`;
+    }
+
     function render() {
         const host = document.getElementById('sideQuestResourcesHost');
         if (!host) return;
@@ -220,6 +240,7 @@
                        value="${escapeHtml(_query)}"
                        autocomplete="off" spellcheck="false"
                        aria-label="${escapeHtml(l.heading)}">
+                ${renderChampToggle()}
                 ${renderChips()}
                 <p class="sq-res-count">${escapeHtml(l.count(results.length))}</p>
                 ${listHtml}
@@ -243,6 +264,8 @@
                 render();
             });
         });
+        const champBtn = host.querySelector('[data-sq-res-champ]');
+        if (champBtn) champBtn.addEventListener('click', () => { _champOnly = !_champOnly; render(); });
         wireEntryButtons(host);
     }
 

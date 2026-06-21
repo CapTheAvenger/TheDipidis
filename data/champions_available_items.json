@@ -1,7 +1,7 @@
 {
  "_meta": {
   "source": "https://www.serebii.net/pokemonchampions/items.shtml",
-  "description": "Items available in Pokémon Champions (English names exactly as listed by Serebii's Champions items page). Includes held items, Mega Stones, berries and non-held shop tickets; the build intersects this against the held-item reference so only real held items get flagged.",
+  "description": "Items available in Pokémon Champions (English names, exactly as listed by Serebii's Champions items page).",
   "count": 181
  },
  "items": [

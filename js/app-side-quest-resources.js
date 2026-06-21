@@ -282,20 +282,27 @@
         wireEntryButtons(host);
     }
 
-    // ── Sub-tab toggle (Teams ↔ Nachschlagen) ──────────────────────
+    // ── Sub-tab toggle (Teams ↔ Pokémon ↔ Nachschlagen) ────────────
+    // Generic over the three view hosts; the Pokédex view delegates to
+    // its own module (window.sideQuestPokedex).
+    const VIEW_HOSTS = {
+        teams: 'sideQuestTeamsHost',
+        pokedex: 'sideQuestPokedexHost',
+        resources: 'sideQuestResourcesHost',
+    };
     function showView(view) {
-        const teamsHost = document.getElementById('sideQuestTeamsHost');
-        const resHost   = document.getElementById('sideQuestResourcesHost');
-        const status    = document.getElementById('sideQuestStatus');
-        const isRes = view === 'resources';
-        if (teamsHost) teamsHost.hidden = isRes;
-        if (resHost)   resHost.hidden = !isRes;
-        if (status)    status.hidden = isRes;   // team load status is teams-only
+        if (!VIEW_HOSTS[view]) view = 'teams';
+        const status = document.getElementById('sideQuestStatus');
+        Object.keys(VIEW_HOSTS).forEach(v => {
+            const el = document.getElementById(VIEW_HOSTS[v]);
+            if (el) el.hidden = (v !== view);
+        });
+        if (status) status.hidden = (view !== 'teams');   // team load status is teams-only
         document.querySelectorAll('.side-quest-subtab').forEach(b => {
             b.classList.toggle('is-active', b.getAttribute('data-sq-view') === view);
             b.setAttribute('aria-selected', b.getAttribute('data-sq-view') === view ? 'true' : 'false');
         });
-        if (isRes) {
+        if (view === 'resources') {
             if (!_activated) {
                 _activated = true;
                 render();                 // paints the loading state
@@ -303,14 +310,19 @@
             } else {
                 render();
             }
+        } else if (view === 'pokedex' && window.sideQuestPokedex) {
+            window.sideQuestPokedex.activate();
         }
     }
 
     function setSubtabLabels() {
         const l = t();
+        const pokedexLabel = uiLang() === 'de' ? 'Pokémon' : 'Pokémon';
         document.querySelectorAll('.side-quest-subtab').forEach(b => {
             const v = b.getAttribute('data-sq-view');
-            b.textContent = v === 'resources' ? l.tabResources : l.tabTeams;
+            b.textContent = v === 'resources' ? l.tabResources
+                          : v === 'pokedex' ? pokedexLabel
+                          : l.tabTeams;
         });
     }
 

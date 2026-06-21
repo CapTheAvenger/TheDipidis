@@ -1638,3 +1638,149 @@
     font-size: 0.7rem;
     line-height: 1.4;
 }
+
+/* ── Side Quest · Champions — Pokédex table ─────────────────────── */
+.sqp-intro {
+    color: #9aa4b2;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    margin: 0 0 0.7rem;
+}
+.sqp-search {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0.7rem 0.9rem;
+    border-radius: 10px;
+    border: 1px solid #2a3140;
+    background: #11161f;
+    color: #e6ebf3;
+    font: inherit;
+    font-size: 0.95rem;
+    margin-bottom: 0.7rem;
+}
+.sqp-search:focus { outline: none; border-color: rgba(95, 182, 255, 0.6); }
+.sqp-presets {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem;
+    margin-bottom: 0.55rem;
+}
+.sqp-presets-label {
+    color: #6b7585;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    margin-right: 0.15rem;
+}
+.sqp-preset {
+    appearance: none;
+    border: 1px solid #2a3140;
+    background: rgba(255, 255, 255, 0.03);
+    color: #c4ccd9;
+    font: inherit;
+    font-size: 0.78rem;
+    font-weight: 600;
+    padding: 0.3rem 0.65rem;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: background 120ms ease, border-color 120ms ease, color 120ms ease;
+}
+.sqp-preset:hover { background: rgba(255, 255, 255, 0.07); }
+.sqp-preset.is-active {
+    background: rgba(95, 182, 255, 0.16);
+    border-color: rgba(95, 182, 255, 0.5);
+    color: #e6ebf3;
+}
+.sqp-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 0.6rem;
+}
+.sqp-select {
+    appearance: none;
+    border: 1px solid #2a3140;
+    background: #11161f;
+    color: #e6ebf3;
+    font: inherit;
+    font-size: 0.82rem;
+    padding: 0.4rem 1.8rem 0.4rem 0.7rem;
+    border-radius: 8px;
+    cursor: pointer;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%239aa4b2' d='M0 0l5 6 5-6z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.6rem center;
+}
+.sqp-count { color: #6b7585; font-size: 0.78rem; margin: 0 0 0.45rem; }
+.sqp-status { color: #9aa4b2; font-size: 0.9rem; padding: 1rem 0; }
+
+.sqp-table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border: 1px solid #1c2330;
+    border-radius: 10px;
+}
+.sqp-table {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 0.82rem;
+    color: #e6ebf3;
+}
+.sqp-table th, .sqp-table td {
+    padding: 0.45rem 0.55rem;
+    text-align: center;
+    white-space: nowrap;
+    border-bottom: 1px solid #1c2330;
+}
+.sqp-table thead th {
+    position: sticky;
+    top: 0;
+    background: #161c27;
+    color: #9aa4b2;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    z-index: 2;
+}
+.sqp-sortable { cursor: pointer; user-select: none; }
+.sqp-sortable:hover { color: #e6ebf3; background: #1b2330; }
+.sqp-table thead th.is-sorted { color: #7cc0ff; }
+.sqp-table tbody tr:hover { background: rgba(255, 255, 255, 0.03); }
+
+/* Sticky Pokémon name column (left) for horizontal scrolling. */
+.sqp-c-mon {
+    position: sticky;
+    left: 0;
+    text-align: left !important;
+    background: #0e131b;
+    z-index: 1;
+    min-width: 120px;
+}
+.sqp-table thead th.sqp-c-mon { background: #161c27; z-index: 3; }
+.sqp-table tbody tr:hover .sqp-c-mon { background: #141b25; }
+.sqp-mon-name { display: block; font-weight: 700; }
+.sqp-mon-sub { display: block; color: #6b7585; font-size: 0.68rem; margin-top: 1px; }
+
+.sqp-type {
+    display: inline-block;
+    padding: 0.12rem 0.45rem;
+    border-radius: 6px;
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+}
+.sqp-stat b { display: block; font-weight: 700; font-size: 0.86rem; }
+.sqp-stat small { display: block; color: #6b7585; font-size: 0.64rem; margin-top: 1px; }
+.sqp-c-total b { color: #c4ccd9; }
+
+.sqp-note, .sqp-attr {
+    color: #6b7585;
+    font-size: 0.7rem;
+    line-height: 1.4;
+    margin: 0.5rem 0 0;
+}
+.sqp-attr { margin-top: 0.25rem; }

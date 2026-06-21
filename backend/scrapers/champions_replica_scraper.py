@@ -65,13 +65,17 @@ logger = setup_logging("champions_replica_scraper")
 
 # The VGCPastes "Champions" repository is a public Google Sheet with one
 # tab per regulation (plus non-Champions tabs we ignore). We DISCOVER the
-# Champions regulation tabs dynamically from the sheet's tab list, so a
-# new regulation (e.g. M-C) is picked up automatically with no code
-# change. Each tab's CSV is pulled from the live-doc export endpoint.
+# Champions regulation tabs dynamically from the sheet's tab list (via the
+# doc's htmlview), so a new regulation (e.g. M-C) is picked up
+# automatically with no code change. Each tab's CSV is then pulled from the
+# stable "publish to web" endpoint — the /export endpoint redirects to a
+# googleusercontent host that times out, whereas /pub is fast and reliable.
 SHEET_DOC_ID = "1axlwmzPA49rYkqXh7zHvAtSP-TKbM0ijGYBPRflLSWw"
 SHEET_HTMLVIEW_URL = f"https://docs.google.com/spreadsheets/d/{SHEET_DOC_ID}/htmlview"
 SHEET_CSV_TEMPLATE = (
-    f"https://docs.google.com/spreadsheets/d/{SHEET_DOC_ID}/export?format=csv&gid={{gid}}"
+    "https://docs.google.com/spreadsheets/d/e/"
+    "2PACX-1vTXHOfUSKTZyVoxF7BO-XIEqtbrsq1OSh_4bSaO0bhAMHqtsvYqM_4eZWIMqdZ--SKCb86EXuk75o1i/"
+    "pub?gid={gid}&single=true&output=csv"
 )
 # Fallback if tab discovery fails (e.g. Google changes its markup) — the
 # last-known Champions regulation tabs, newest first, so the scraper never

@@ -1,16 +1,21 @@
 /**
  * Best-effort OCR: pull a 10-character team / replica code out of a
- * screenshot (e.g. the in-game "Team ID: XEX629QEEY" banner, or a
- * Victory-Road-style code image).
+ * screenshot (e.g. the in-game "Team ID: XEX629QEEY" banner).
  *
  * The in-game code sits in a small top banner, while the Pokémon names
  * below it are large and clear — so a naive full-image pass tends to
- * grab a 10-letter name ("TYPHLOSION") instead. Two defences:
- *   1. OCR the top strip (upscaled + sharpened) as well as the full
- *      image, so the small banner text actually gets read.
- *   2. Only accept a real code: the token right after "ID", or failing
- *      that a MIXED alphanumeric run (codes have letters AND digits —
- *      this rejects pure-letter Pokémon/ability names).
+ * grab a 10-letter name ("TYPHLOSION") instead. Defences:
+ *   1. OCR the top strip (upscaled) in several preprocessings — plain
+ *      high-contrast, binarised, and inverted-binarised — because the
+ *      banner is light text on a glossy coloured background and the best
+ *      polarity/threshold varies with the photo.
+ *   2. Read each strip in single-LINE page-segmentation mode (PSM 7),
+ *      which is far more reliable for one short code than the default
+ *      auto-layout mode.
+ *   3. CONSENSUS VOTE across all variants: a single bad read (e.g. a 9
+ *      misread as 0) gets outvoted by the variants that got it right.
+ *   4. Only accept a real code: the token right after "ID", or a MIXED
+ *      alphanumeric run (codes have letters AND digits — rejects names).
  *
  * tesseract.js is pure-WASM (no system binary), lazily downloads its eng
  * model on first use, and we terminate the worker after each call to
@@ -20,33 +25,52 @@
 
 import sharp from 'sharp';
 
-async function fullVariant(buf) {
-    return sharp(buf)
-        .grayscale()
-        .resize({ width: 1800, withoutEnlargement: false })
-        .normalize()
-        .sharpen()
-        .toFormat('png')
-        .toBuffer();
+// In-game keyboard only offers A–Z and 0–9 (symbols + space greyed out);
+// codes are uppercase, exactly 10 chars. Restricting OCR to that alphabet
+// stops tesseract resolving an ambiguous glyph to an impossible char.
+// ":" + space are kept only to delimit the "Team ID:" label (pickCode
+// strips them). Confusable letters (I/O/Z) are handled in canonicalize.
+const WHITELIST = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789: ';
+const TOP_FRACTION = 0.30;          // the "Team ID" banner lives up top
+const BANNER_WIDTH = 2400;          // upscale small banner text for OCR
+
+async function _safe(fn) {
+    try { return await fn(); } catch (_) { return null; }
 }
 
-// Top ~28 % of the image — where the "Team ID" banner lives — cropped
-// and blown up so the small code text becomes legible.
-async function topBannerVariant(buf) {
-    const img = sharp(buf);
-    const meta = await img.metadata();
+async function bannerCrop(buf) {
+    const meta = await sharp(buf).metadata();
     const h = meta.height || 0;
-    if (!h) return null;
-    const cropH = Math.max(1, Math.round(h * 0.28));
-    return sharp(buf)
-        .extract({ left: 0, top: 0, width: meta.width, height: cropH })
-        .grayscale()
-        .resize({ width: 1700, withoutEnlargement: false })
-        .normalize()
-        .linear(1.25, -12)
-        .sharpen()
-        .toFormat('png')
-        .toBuffer();
+    if (!h || !meta.width) return null;
+    const cropH = Math.max(1, Math.round(h * TOP_FRACTION));
+    return { width: meta.width, height: cropH };
+}
+
+// Variant A — full image, light sharpening. PSM 6 (uniform block).
+function vFull(buf) {
+    return sharp(buf).grayscale().resize({ width: 2000, withoutEnlargement: false })
+        .normalize().sharpen().toFormat('png').toBuffer();
+}
+// Variant B — banner strip, strong local contrast (grey). PSM 7 (one line).
+async function vBanner(buf) {
+    const c = await bannerCrop(buf); if (!c) return null;
+    return sharp(buf).extract({ left: 0, top: 0, width: c.width, height: c.height })
+        .grayscale().resize({ width: BANNER_WIDTH, withoutEnlargement: false })
+        .normalize().median(1).linear(1.4, -35).sharpen().toFormat('png').toBuffer();
+}
+// Variant C — banner strip, binarised (dark text on white).
+async function vBannerBin(buf) {
+    const c = await bannerCrop(buf); if (!c) return null;
+    return sharp(buf).extract({ left: 0, top: 0, width: c.width, height: c.height })
+        .grayscale().resize({ width: BANNER_WIDTH, withoutEnlargement: false })
+        .normalize().threshold(150).toFormat('png').toBuffer();
+}
+// Variant D — banner strip, inverted then binarised (for light-on-dark).
+async function vBannerInv(buf) {
+    const c = await bannerCrop(buf); if (!c) return null;
+    return sharp(buf).extract({ left: 0, top: 0, width: c.width, height: c.height })
+        .grayscale().negate().resize({ width: BANNER_WIDTH, withoutEnlargement: false })
+        .normalize().threshold(150).toFormat('png').toBuffer();
 }
 
 function isCode(tok) {
@@ -56,8 +80,8 @@ function isCode(tok) {
 // The in-game Team-ID keyboard greys out the letters I, O and Z (so a
 // code can never be confused with the digits 1, 0, 2). A code therefore
 // CANNOT contain I/O/Z — so any such glyph the OCR produced is really the
-// look-alike digit. This is a forced correction, not a guess, and it
-// resolves the classic I/1 and O/0 ambiguities deterministically.
+// look-alike digit. (Caveat: a real 9 misread as O would become 0 here;
+// the consensus vote across variants is what guards against that.)
 function canonicalizeCode(tok) {
     return tok.replace(/I/g, '1').replace(/O/g, '0').replace(/Z/g, '2');
 }
@@ -72,33 +96,47 @@ function pickCode(rawText) {
     return mixed[0] ? canonicalizeCode(mixed[0]) : null;
 }
 
+// Most-frequent candidate wins; ties fall back to the first (highest-
+// priority variant) seen.
+function vote(candidates) {
+    if (!candidates.length) return null;
+    const counts = new Map();
+    for (const c of candidates) counts.set(c, (counts.get(c) || 0) + 1);
+    let best = candidates[0], bestN = 0;
+    for (const [k, n] of counts) { if (n > bestN) { bestN = n; best = k; } }
+    return best;
+}
+
 export async function extractCodeFromImage(buf) {
     let worker;
     try {
-        const variants = [await topBannerVariant(buf), await fullVariant(buf)].filter(Boolean);
+        // Order matters: banner/single-line variants first (most reliable
+        // for a short code), full image last. vote() ties to the first.
+        const builds = [
+            { buf: await _safe(() => vBanner(buf)),    psm: '7' },
+            { buf: await _safe(() => vBannerBin(buf)), psm: '7' },
+            { buf: await _safe(() => vBannerInv(buf)), psm: '7' },
+            { buf: await _safe(() => vFull(buf)),      psm: '6' },
+        ].filter(v => v.buf);
+        if (!builds.length) return { code: null, raw: '', error: true };
+
         const { createWorker } = await import('tesseract.js');
         worker = await createWorker('eng');
-        // The in-game "Team ID" keyboard only offers A–Z and 0–9 — every
-        // symbol (@ = & ; * # ! ?) and the space bar are greyed out, and
-        // codes are always uppercase and exactly 10 chars long. So restrict
-        // OCR to that alphabet: this stops tesseract from resolving an
-        // ambiguous glyph to a symbol/lowercase letter that can't occur in
-        // a real code. (Confusable letters like I/O are NOT excluded by the
-        // game — real codes use them — so we must not drop any letter.)
-        // ":" and a space are kept only to help delimit the "Team ID:" label
-        // from the code; pickCode strips them.
-        await worker.setParameters({
-            tessedit_char_whitelist: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789: ',
-        });
+
+        const candidates = [];
         let joined = '';
-        for (const v of variants) {
-            const { data } = await worker.recognize(v);
+        for (const v of builds) {
+            await worker.setParameters({
+                tessedit_char_whitelist: WHITELIST,
+                tessedit_pageseg_mode: v.psm,     // 7 = single line, 6 = block
+            });
+            const { data } = await worker.recognize(v.buf);
             const t = (data?.text || '').trim();
             joined += '\n' + t;
             const hit = pickCode(t);
-            if (hit) return { code: hit, raw: joined.trim() };
+            if (hit) candidates.push(hit);
         }
-        return { code: pickCode(joined), raw: joined.trim() };
+        return { code: vote(candidates), raw: joined.trim() };
     } catch (err) {
         console.warn('[champions/ocr] failed:', err?.message || err);
         return { code: null, raw: '', error: true };

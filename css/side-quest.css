@@ -1722,19 +1722,28 @@
     border: 1px solid #1c2330;
     border-radius: 10px;
 }
-.sqp-table {
+/* The global `.tab-content table { display:block }` rule (and its white
+   sticky-first-column) would collapse this grid — scope every table rule
+   under #sideQuestPokedexHost so it wins specificity and stays a real,
+   horizontally-scrollable table on the dark theme. */
+#sideQuestPokedexHost .sqp-table {
+    display: table;
     border-collapse: collapse;
-    width: 100%;
+    width: max-content;
+    min-width: 100%;
+    white-space: nowrap;
     font-size: 0.82rem;
     color: #e6ebf3;
 }
-.sqp-table th, .sqp-table td {
+#sideQuestPokedexHost .sqp-table th,
+#sideQuestPokedexHost .sqp-table td {
     padding: 0.45rem 0.55rem;
     text-align: center;
     white-space: nowrap;
     border-bottom: 1px solid #1c2330;
+    background-clip: padding-box;
 }
-.sqp-table thead th {
+#sideQuestPokedexHost .sqp-table thead th {
     position: sticky;
     top: 0;
     background: #161c27;
@@ -1745,22 +1754,25 @@
     letter-spacing: 0.02em;
     z-index: 2;
 }
-.sqp-sortable { cursor: pointer; user-select: none; }
-.sqp-sortable:hover { color: #e6ebf3; background: #1b2330; }
-.sqp-table thead th.is-sorted { color: #7cc0ff; }
-.sqp-table tbody tr:hover { background: rgba(255, 255, 255, 0.03); }
+#sideQuestPokedexHost .sqp-sortable { cursor: pointer; user-select: none; }
+#sideQuestPokedexHost .sqp-sortable:hover { color: #e6ebf3; background: #1b2330; }
+#sideQuestPokedexHost .sqp-table thead th.is-sorted { color: #7cc0ff; }
+#sideQuestPokedexHost .sqp-table tbody tr:hover { background: rgba(255, 255, 255, 0.03); }
 
-/* Sticky Pokémon name column (left) for horizontal scrolling. */
-.sqp-c-mon {
+/* Sticky Pokémon name column (left) for horizontal scrolling. The id
+   prefix overrides the global white `td:first-child` background. */
+#sideQuestPokedexHost .sqp-table td.sqp-c-mon,
+#sideQuestPokedexHost .sqp-table th.sqp-c-mon {
     position: sticky;
     left: 0;
-    text-align: left !important;
-    background: #0e131b;
+    text-align: left;
+    background-color: #0e131b;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.28);
     z-index: 1;
-    min-width: 120px;
+    min-width: 124px;
 }
-.sqp-table thead th.sqp-c-mon { background: #161c27; z-index: 3; }
-.sqp-table tbody tr:hover .sqp-c-mon { background: #141b25; }
+#sideQuestPokedexHost .sqp-table thead th.sqp-c-mon { background-color: #161c27; z-index: 3; }
+#sideQuestPokedexHost .sqp-table tbody tr:hover td.sqp-c-mon { background-color: #141b25; }
 .sqp-mon-name { display: block; font-weight: 700; }
 .sqp-mon-sub { display: block; color: #6b7585; font-size: 0.68rem; margin-top: 1px; }
 
@@ -1773,9 +1785,9 @@
     text-transform: uppercase;
     letter-spacing: 0.02em;
 }
-.sqp-stat b { display: block; font-weight: 700; font-size: 0.86rem; }
-.sqp-stat small { display: block; color: #6b7585; font-size: 0.64rem; margin-top: 1px; }
-.sqp-c-total b { color: #c4ccd9; }
+#sideQuestPokedexHost .sqp-stat b { display: block; font-weight: 700; font-size: 0.86rem; }
+#sideQuestPokedexHost .sqp-stat small { display: block; color: #6b7585; font-size: 0.64rem; margin-top: 1px; }
+#sideQuestPokedexHost .sqp-c-total b { color: #c4ccd9; }
 
 .sqp-note, .sqp-attr {
     color: #6b7585;

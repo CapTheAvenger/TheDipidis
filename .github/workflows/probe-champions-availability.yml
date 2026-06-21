@@ -7,43 +7,41 @@ jobs:
   probe:
     runs-on: ubuntu-latest
     steps:
-      - name: Resolve tinyurl + enumerate spreadsheet tabs
+      - name: Enumerate tabs + sample candidate M-B tab CSV
         run: |
           python3 - <<'PY'
-          import urllib.request, re
+          import urllib.request, re, csv, io
           UA={"User-Agent":"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124 Safari/537.36"}
+          DOC="1axlwmzPA49rYkqXh7zHvAtSP-TKbM0ijGYBPRflLSWw"
           def get(url):
               req=urllib.request.Request(url,headers=UA)
               r=urllib.request.urlopen(req,timeout=40)
-              return r.geturl(), r.read().decode("utf-8","replace")
+              return r.read().decode("utf-8","replace")
 
-          # 1) Resolve the Discord-shared tinyurl to the real spreadsheet.
-          final,_=get("https://tinyurl.com/vgcpastes2026")
-          print("tinyurl resolves to:", final)
-          m=re.search(r'/spreadsheets/d/([a-zA-Z0-9-_]+)', final)
-          doc_id=m.group(1) if m else None
-          print("doc_id:", doc_id)
+          html=get(f"https://docs.google.com/spreadsheets/d/{DOC}/htmlview")
+          # Each tab in htmlview: <li ...><a ... href="#gid=NNN" ...>Name</a></li>
+          tabs=re.findall(r'href="#(?:gid=)?(\d+)"[^>]*>([^<]+)</a>', html)
+          if not tabs:
+              tabs=re.findall(r'\{"name":"([^"]+)"[^}]*?(\d{6,})', html)
+              tabs=[(g,n) for n,g in tabs]
+          print("TABS (gid -> name):")
+          seen=set()
+          for gid,name in tabs:
+              if gid in seen: continue
+              seen.add(gid)
+              print("   gid=%-12s %r" % (gid, name.strip()))
+          print("\nRaw slice [4900:7400]:")
+          print(html[4900:7400])
 
-          # 2) Enumerate tabs of the real doc via the htmlview/pubhtml menu.
-          if doc_id:
-              for variant in ("htmlview","pubhtml"):
-                  try:
-                      u=f"https://docs.google.com/spreadsheets/d/{doc_id}/{variant}"
-                      fu,html=get(u)
-                      print(f"\n=== {variant}: {fu} | bytes {len(html)} ===")
-                      # Newer Google menu: items={...} JS, or <a ... gid=...>Name</a>
-                      pairs=re.findall(r'\{"name":"([^"]+)"[^}]*?"gid":"?(\d+)', html)
-                      if not pairs:
-                          pairs=[(n,g) for g,n in re.findall(r'gid=(\d+)[^>]*>([^<]+)<', html)]
-                      if not pairs:
-                          pairs=[(n,g) for g,n in re.findall(r'sheet-button-(\d+)"[^>]*>(?:<[^>]+>)*([^<]+)', html)]
-                      print("TAB pairs (name, gid):")
-                      for name,gid in pairs:
-                          print("   %-28r gid=%s" % (name, gid))
-                      # raw hints
-                      for needle in ("Regulation","M-B","MB","gid="):
-                          idx=html.find(needle)
-                          print("  find %-12r -> %d" % (needle, idx))
-                  except Exception as e:
-                      print(variant, "ERROR", e)
+          # Sample the active-tab CSV (gid from the share link) to confirm content.
+          for gid in ("736919171","791705272"):
+              try:
+                  csv_text=get(f"https://docs.google.com/spreadsheets/d/{DOC}/export?format=csv&gid={gid}")
+                  rows=list(csv.reader(io.StringIO(csv_text)))
+                  pastes=csv_text.lower().count("pokepast.es")
+                  print(f"\n=== gid {gid}: {len(rows)} rows, {pastes} pokepaste links ===")
+                  for r in rows[:6]:
+                      print("   ", [c[:18] for c in r[:8]])
+              except Exception as e:
+                  print(f"\n=== gid {gid}: ERROR {e} ===")
           PY

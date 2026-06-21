@@ -1063,6 +1063,7 @@
     padding: max(0.5rem, env(safe-area-inset-top)) max(0.5rem, env(safe-area-inset-right))
              max(0.5rem, env(safe-area-inset-bottom)) max(0.5rem, env(safe-area-inset-left));
     overflow-y: auto;
+    overscroll-behavior: contain;   /* don't chain scroll to the page behind */
     animation: sq-play-fade 100ms ease-out;
 }
 .sq-play-picker-panel {
@@ -1108,6 +1109,8 @@
     gap: 0.4rem;
     padding: 0.6rem;
     overflow-y: auto;
+    overscroll-behavior: contain;   /* keep scroll inside the grid */
+    -webkit-overflow-scrolling: touch;
 }
 .sq-play-picker-cell {
     background: #11151e; border: 1px solid #232a39; border-radius: 8px;

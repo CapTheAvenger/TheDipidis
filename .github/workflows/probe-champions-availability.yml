@@ -1,0 +1,56 @@
+name: Probe Champions availability
+
+on:
+  workflow_dispatch:
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch + parse Serebii / game8 Champions lists
+        run: |
+          python3 - <<'PY'
+          import urllib.request, re, sys
+          UA = {"User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124 Safari/537.36"}
+          def get(url):
+              try:
+                  req = urllib.request.Request(url, headers=UA)
+                  with urllib.request.urlopen(req, timeout=40) as r:
+                      return r.status, r.read().decode("utf-8", "replace")
+              except Exception as e:
+                  return None, f"ERROR {e}"
+          def links(html, dex):
+              # Serebii links each entry to /<dex>/name.shtml — grab anchor text.
+              rx = re.compile(r'href="/%s/[^"]*"[^>]*>([^<]+)</a>' % dex, re.I)
+              names = [m.strip() for m in rx.findall(html) if m.strip()]
+              # de-dupe preserving order
+              seen=set(); out=[]
+              for n in names:
+                  if n not in seen: seen.add(n); out.append(n)
+              return out
+          targets = [
+              ("SEREBII items",     "https://www.serebii.net/pokemonchampions/items.shtml",     "itemdex"),
+              ("SEREBII abilities", "https://www.serebii.net/pokemonchampions/abilities.shtml", "abilitydex"),
+              ("SEREBII moves",     "https://www.serebii.net/pokemonchampions/attacks.shtml",   "attackdex"),
+          ]
+          for label, url, dex in targets:
+              st, html = get(url)
+              print("\n========== %s ==========" % label)
+              print("URL:", url, "| status:", st, "| bytes:", len(html) if isinstance(html,str) else 0)
+              if not isinstance(html, str) or st != 200:
+                  print(repr(html[:300]) if isinstance(html,str) else html); continue
+              names = links(html, dex)
+              print("parsed %d names via /%s/ links" % (len(names), dex))
+              print("FIRST 30:", names[:30])
+              print("LAST 10:", names[-10:])
+              # also show any <h2>/<h3> headers to understand sections
+              hs = re.findall(r'<h[123][^>]*>(.*?)</h[123]>', html, re.I|re.S)
+              hs = [re.sub(r'<[^>]+>','',h).strip() for h in hs]
+              print("HEADERS:", [h for h in hs if h][:20])
+          # game8 items list (different structure) — just status + a content sample
+          for label,url in [("GAME8 items","https://game8.co/games/Pokemon-Champions/archives/588871"),
+                            ("GAME8 abilities/590403","https://game8.co/games/Pokemon-Champions/archives/590403")]:
+              st, html = get(url)
+              print("\n========== %s ==========" % label)
+              print("URL:", url, "| status:", st, "| bytes:", len(html) if isinstance(html,str) else 0)
+          PY

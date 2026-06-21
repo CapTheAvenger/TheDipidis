@@ -63,13 +63,24 @@ from card_scraper_shared import (
 setup_console_encoding()
 logger = setup_logging("champions_replica_scraper")
 
-# Google Sheets "publish to web" CSV export URL. The pubhtml URL the
-# user shared exposes the same data at /pub?gid=...&output=csv.
-SHEET_CSV_URL = (
+# Google Sheets "publish to web" CSV export. The VGCPastes Champions
+# repository keeps each regulation on its own tab (gid); we fetch all of
+# them so the active meta (currently M-B) shows up alongside the M-A
+# archive. Earlier this scraper fetched only the M-A tab, so M-B teams
+# never appeared even though the sheet had them.
+SHEET_PUB_TEMPLATE = (
     "https://docs.google.com/spreadsheets/d/e/"
     "2PACX-1vTXHOfUSKTZyVoxF7BO-XIEqtbrsq1OSh_4bSaO0bhAMHqtsvYqM_4eZWIMqdZ--SKCb86EXuk75o1i/"
-    "pub?gid=791705272&single=true&output=csv"
+    "pub?gid={gid}&single=true&output=csv"
 )
+# (regulation, gid) — newest first. M-B (gid 1458357160) was added to the
+# repository in June 2026; M-A (gid 791705272) is the original tab.
+SHEET_TABS = [
+    ('M-B', '1458357160'),
+    ('M-A', '791705272'),
+]
+# Back-compat alias (some callers/metadata still reference a single URL).
+SHEET_CSV_URL = SHEET_PUB_TEMPLATE.format(gid=SHEET_TABS[-1][1])
 POKEPASTE_BASE = "https://pokepast.es"
 OUTPUT_FILE = "champions_replica_teams.json"
 # Speed corpus: a separate analytical artefact built from a wider slice
@@ -459,6 +470,11 @@ def team_regulation(row: Dict[str, str]) -> str:
     """Which Champions regulation a team belongs to. Prefers an explicit
     sheet column (Regulation / Format / Reg) if the maintainers ever add
     one; otherwise derives it from Date Shared against the timeline."""
+    # The row was tagged with the regulation of the sheet tab it came
+    # from — authoritative, so prefer it over date/column heuristics.
+    tab = (row.get('__regulation') or '').strip()
+    if tab:
+        return tab
     col = _get_field(row, 'Regulation', 'Format', 'Reg', 'Ruleset').strip().lower()
     if col:
         flat = col.replace('-', '').replace(' ', '')
@@ -529,8 +545,20 @@ def main():
                     help='Print the result instead of writing the JSON')
     args = ap.parse_args()
 
-    csv_text = fetch_sheet_csv()
-    rows = parse_sheet(csv_text)
+    # Fetch every regulation tab and tag each row with its regulation
+    # (the tab it came from is the authoritative regulation).
+    rows: List[Dict[str, str]] = []
+    for reg, gid in SHEET_TABS:
+        try:
+            tab_csv = fetch_sheet_csv(SHEET_PUB_TEMPLATE.format(gid=gid))
+        except Exception as e:  # noqa: BLE001 — one bad tab shouldn't sink the rest
+            logger.warning("Tab %s (gid %s) fetch failed: %s", reg, gid, e)
+            continue
+        tab_rows = parse_sheet(tab_csv)
+        for r in tab_rows:
+            r['__regulation'] = reg
+        logger.info("Tab %s (gid %s): %d data rows", reg, gid, len(tab_rows))
+        rows.extend(tab_rows)
 
     # Filter to rows with a real replica code (skip "None" / "Extracted"
     # / blanks the sheet uses for entries waiting on a code).
@@ -619,7 +647,7 @@ def main():
             'title':        'Pokémon Champions — Current Top Doubles Teams',
             'subtitle':     'Replica codes from top tournament finishes. Tap a code to copy.',
             'last_updated': datetime.utcnow().strftime('%Y-%m-%d'),
-            'source':       'VGCPastes Champions M-A spreadsheet (gid=791705272)',
+            'source':       'VGCPastes Champions spreadsheet (M-B gid=1458357160 + M-A gid=791705272)',
             'source_url':   SHEET_CSV_URL,
             'team_count':   len(ui_teams),
         },

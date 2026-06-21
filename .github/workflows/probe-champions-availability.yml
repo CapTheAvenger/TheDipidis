@@ -7,41 +7,20 @@ jobs:
   probe:
     runs-on: ubuntu-latest
     steps:
-      - name: Enumerate tabs + sample candidate M-B tab CSV
+      - name: Sample the Champions M-B tab
         run: |
           python3 - <<'PY'
-          import urllib.request, re, csv, io
+          import urllib.request, csv, io
           UA={"User-Agent":"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124 Safari/537.36"}
           DOC="1axlwmzPA49rYkqXh7zHvAtSP-TKbM0ijGYBPRflLSWw"
           def get(url):
               req=urllib.request.Request(url,headers=UA)
-              r=urllib.request.urlopen(req,timeout=40)
-              return r.read().decode("utf-8","replace")
-
-          html=get(f"https://docs.google.com/spreadsheets/d/{DOC}/htmlview")
-          # Each tab in htmlview: <li ...><a ... href="#gid=NNN" ...>Name</a></li>
-          tabs=re.findall(r'href="#(?:gid=)?(\d+)"[^>]*>([^<]+)</a>', html)
-          if not tabs:
-              tabs=re.findall(r'\{"name":"([^"]+)"[^}]*?(\d{6,})', html)
-              tabs=[(g,n) for n,g in tabs]
-          print("TABS (gid -> name):")
-          seen=set()
-          for gid,name in tabs:
-              if gid in seen: continue
-              seen.add(gid)
-              print("   gid=%-12s %r" % (gid, name.strip()))
-          print("\nRaw slice [4900:7400]:")
-          print(html[4900:7400])
-
-          # Sample the active-tab CSV (gid from the share link) to confirm content.
-          for gid in ("736919171","791705272"):
-              try:
-                  csv_text=get(f"https://docs.google.com/spreadsheets/d/{DOC}/export?format=csv&gid={gid}")
-                  rows=list(csv.reader(io.StringIO(csv_text)))
-                  pastes=csv_text.lower().count("pokepast.es")
-                  print(f"\n=== gid {gid}: {len(rows)} rows, {pastes} pokepaste links ===")
-                  for r in rows[:6]:
-                      print("   ", [c[:18] for c in r[:8]])
-              except Exception as e:
-                  print(f"\n=== gid {gid}: ERROR {e} ===")
+              return urllib.request.urlopen(req,timeout=40).read().decode("utf-8","replace")
+          for label,gid in (("M-B","1458357160"),):
+              csv_text=get(f"https://docs.google.com/spreadsheets/d/{DOC}/export?format=csv&gid={gid}")
+              rows=list(csv.reader(io.StringIO(csv_text)))
+              pastes=csv_text.lower().count("pokepast.es")
+              print(f"=== {label} gid {gid}: {len(rows)} rows, {pastes} pokepaste links ===")
+              for i,r in enumerate(rows[:12]):
+                  print(i, [c[:24] for c in r[:12]])
           PY

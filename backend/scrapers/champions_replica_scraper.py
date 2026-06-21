@@ -63,24 +63,22 @@ from card_scraper_shared import (
 setup_console_encoding()
 logger = setup_logging("champions_replica_scraper")
 
-# Google Sheets "publish to web" CSV export. The VGCPastes Champions
-# repository keeps each regulation on its own tab (gid); we fetch all of
-# them so the active meta (currently M-B) shows up alongside the M-A
-# archive. Earlier this scraper fetched only the M-A tab, so M-B teams
-# never appeared even though the sheet had them.
-SHEET_PUB_TEMPLATE = (
-    "https://docs.google.com/spreadsheets/d/e/"
-    "2PACX-1vTXHOfUSKTZyVoxF7BO-XIEqtbrsq1OSh_4bSaO0bhAMHqtsvYqM_4eZWIMqdZ--SKCb86EXuk75o1i/"
-    "pub?gid={gid}&single=true&output=csv"
+# The VGCPastes "Champions" repository is a public Google Sheet with one
+# tab per regulation (plus non-Champions tabs we ignore). We DISCOVER the
+# Champions regulation tabs dynamically from the sheet's tab list, so a
+# new regulation (e.g. M-C) is picked up automatically with no code
+# change. Each tab's CSV is pulled from the live-doc export endpoint.
+SHEET_DOC_ID = "1axlwmzPA49rYkqXh7zHvAtSP-TKbM0ijGYBPRflLSWw"
+SHEET_HTMLVIEW_URL = f"https://docs.google.com/spreadsheets/d/{SHEET_DOC_ID}/htmlview"
+SHEET_CSV_TEMPLATE = (
+    f"https://docs.google.com/spreadsheets/d/{SHEET_DOC_ID}/export?format=csv&gid={{gid}}"
 )
-# (regulation, gid) — newest first. M-B (gid 1458357160) was added to the
-# repository in June 2026; M-A (gid 791705272) is the original tab.
-SHEET_TABS = [
-    ('M-B', '1458357160'),
-    ('M-A', '791705272'),
-]
-# Back-compat alias (some callers/metadata still reference a single URL).
-SHEET_CSV_URL = SHEET_PUB_TEMPLATE.format(gid=SHEET_TABS[-1][1])
+# Fallback if tab discovery fails (e.g. Google changes its markup) — the
+# last-known Champions regulation tabs, newest first, so the scraper never
+# goes dark.
+FALLBACK_TABS = [('M-B', '1458357160'), ('M-A', '791705272')]
+# Back-compat alias for metadata / older references.
+SHEET_CSV_URL = SHEET_CSV_TEMPLATE.format(gid=FALLBACK_TABS[0][1])
 POKEPASTE_BASE = "https://pokepast.es"
 OUTPUT_FILE = "champions_replica_teams.json"
 # Speed corpus: a separate analytical artefact built from a wider slice
@@ -231,6 +229,48 @@ def fetch_sheet_csv(url: str = SHEET_CSV_URL) -> str:
     text = resp.text
     logger.info("  → %d bytes received", len(text))
     return text
+
+
+def discover_regulation_tabs() -> List[Tuple[str, str]]:
+    """Read the sheet's tab list and return [(regulation, gid)] for every
+    'Champions M-x' tab, newest regulation first (so M-C outranks M-B
+    outranks M-A automatically). The "… Featured Teams" tabs and any
+    non-Champions tabs (e.g. 'SV Regulation I') are ignored.
+
+    Falls back to FALLBACK_TABS on any error so a Google markup change
+    never takes the scraper offline."""
+    import requests
+    try:
+        resp = requests.get(SHEET_HTMLVIEW_URL, timeout=30, headers={
+            'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 '
+                          '(KHTML, like Gecko) Chrome/124 Safari/537.36',
+        })
+        resp.raise_for_status()
+        html = resp.text
+        # The tab switcher embeds JS like:
+        #   {name: "Champions M-B", pageUrl: "...gid=1458357160", gid: "1458357160", …}
+        items = re.findall(r'name:\s*"([^"]+)"[^}]*?gid:\s*"(\d+)"', html)
+        tabs: List[Tuple[str, str]] = []
+        for name, gid in items:
+            # Match exactly 'Champions M-<letters>' (no trailing words like
+            # 'Featured Teams'); capture the regulation suffix.
+            m = re.match(r'champions\s+m-?([a-z]+)\s*$', name.strip(), re.IGNORECASE)
+            if m:
+                tabs.append(('M-' + m.group(1).upper(), gid))
+        # De-dupe by regulation, newest (lexically-largest letter) first.
+        tabs.sort(key=lambda t: t[0], reverse=True)
+        seen, out = set(), []
+        for reg, gid in tabs:
+            if reg not in seen:
+                seen.add(reg)
+                out.append((reg, gid))
+        if out:
+            logger.info("Discovered Champions regulation tabs: %s", out)
+            return out
+        logger.warning("No 'Champions M-x' tabs found in sheet — using fallback")
+    except Exception as e:  # noqa: BLE001 — discovery is best-effort
+        logger.warning("Tab discovery failed (%s) — using fallback", e)
+    return FALLBACK_TABS
 
 
 def parse_sheet(csv_text: str) -> List[Dict[str, str]]:
@@ -545,12 +585,16 @@ def main():
                     help='Print the result instead of writing the JSON')
     args = ap.parse_args()
 
-    # Fetch every regulation tab and tag each row with its regulation
-    # (the tab it came from is the authoritative regulation).
+    # Discover the Champions regulation tabs (newest first), fetch each,
+    # and tag every row with its regulation (the tab it came from is the
+    # authoritative regulation). New regulations like M-C are picked up
+    # automatically — no code change needed.
+    sheet_tabs = discover_regulation_tabs()
+    reg_rank = {reg: i for i, (reg, _) in enumerate(sheet_tabs)}
     rows: List[Dict[str, str]] = []
-    for reg, gid in SHEET_TABS:
+    for reg, gid in sheet_tabs:
         try:
-            tab_csv = fetch_sheet_csv(SHEET_PUB_TEMPLATE.format(gid=gid))
+            tab_csv = fetch_sheet_csv(SHEET_CSV_TEMPLATE.format(gid=gid))
         except Exception as e:  # noqa: BLE001 — one bad tab shouldn't sink the rest
             logger.warning("Tab %s (gid %s) fetch failed: %s", reg, gid, e)
             continue
@@ -594,7 +638,9 @@ def main():
     # crowded out of the top-N by higher-ranked teams from a past
     # regulation), then by rank priority within each regulation. Take
     # top N for the UI display. Speed corpus uses a wider slice.
-    candidates.sort(key=lambda x: (_reg_order(team_regulation(x[0])), x[1]))
+    # Order by the discovered tab order (newest regulation first), then by
+    # rank priority within each regulation.
+    candidates.sort(key=lambda x: (reg_rank.get(team_regulation(x[0]), len(reg_rank)), x[1]))
     chosen = candidates[:args.top]
     from collections import Counter
     _reg_breakdown = Counter(team_regulation(r) for r, _ in chosen)
@@ -647,8 +693,11 @@ def main():
             'title':        'Pokémon Champions — Current Top Doubles Teams',
             'subtitle':     'Replica codes from top tournament finishes. Tap a code to copy.',
             'last_updated': datetime.utcnow().strftime('%Y-%m-%d'),
-            'source':       'VGCPastes Champions spreadsheet (M-B gid=1458357160 + M-A gid=791705272)',
+            'source':       'VGCPastes Champions spreadsheet (auto-discovered tabs: '
+                            + ', '.join(f'{r}=gid{g}' for r, g in sheet_tabs) + ')',
             'source_url':   SHEET_CSV_URL,
+            'current_regulation': sheet_tabs[0][0] if sheet_tabs else None,
+            'regulations':  [r for r, _ in sheet_tabs],
             'team_count':   len(ui_teams),
         },
         'teams': ui_teams,

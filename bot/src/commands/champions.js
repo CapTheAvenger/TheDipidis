@@ -183,7 +183,7 @@ async function handlePhoto(ctx) {
         const { code } = await extractCodeFromImage(buf);
         if (code) {
             await ctx.reply(
-                '✅ Erkannter Code — zum Kopieren antippen 👇\n<i>(Codes enthalten nie I, O oder Z — die werden als 1/0/2 gelesen. Sonst ähnliche Zeichen wie B↔8 oder S↔5 kurz prüfen.)</i>',
+                '✅ Erkannter Code — zum Kopieren antippen 👇\n<i>(Codes enthalten nie I, O oder Z — die werden als 1/0/2 gelesen. Sonst ähnliche Zeichen wie A↔4, B↔8 oder S↔5 kurz prüfen — am besten Foto gerade & ohne Spiegelung.)</i>',
                 { parse_mode: 'HTML' });
             // The code on its own line, as its own message: tapping the
             // monospace text copies it, and a long-press copies exactly

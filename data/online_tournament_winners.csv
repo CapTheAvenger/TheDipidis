@@ -1,4 +1,11 @@
 tournament_id,tournament_date,format,player_count,winner_archetype,winner_winrate
+sleep-sleep-sleep,2026-06-23,CRI,128,Rocket's Mewtwo,21.0
+6a3068072d97f3b0c2617872,2026-06-22,CRI,130,Beedrill,18.0
+6a316326e334c3c9befd7f8b,2026-06-22,CRI,127,Mega Lucario,34.0
+6a380828ceacae7d6441bda1,2026-06-22,CRI,103,Dragapult,27.0
+6a35ed32ceacae7d6441a2e1,2026-06-22,CRI,119,Cynthia's Garchomp,25.0
+6a29ca7f2d97f3b0c2613476,2026-06-21,CRI,105,Lucario Hariyama,28.0
+6a2f0446e334c3c9befd6dc5,2026-06-21,CRI,105,Alakazam Dudunsparce,21.0
 1000-years-doom-tournaments,2026-06-20,CRI,302,Slowking,30.0
 6a0b676d13f957d6d4b4aed0,2026-06-19,CRI,102,N's Zoroark,21.0
 6a2eca29e334c3c9befd6934,2026-06-19,CRI,129,N's Zoroark,30.0
@@ -39,13 +46,3 @@ not-at-indy,2026-05-30,CRI,289,Slowking,31.0
 6a0f9b31dfbdf089cbbdec47,2026-05-28,CRI,186,Dragapult Dusknoir,37.0
 6a09ede013f957d6d4b4a556,2026-05-26,CRI,216,Archaludon Dudunsparce,21.0
 697253489c739a2ff7bf5585,2026-05-26,CRI,101,Mega Greninja,21.0
-really-tries,2026-05-26,CRI,128,Slowking,21.0
-6a0b5f2913f957d6d4b4ae56,2026-05-25,CRI,170,Mega Greninja,21.0
-6a1353ec0f6c1f0899860401,2026-05-25,CRI,127,Crustle,21.0
-6a0c908513f957d6d4b4b729,2026-05-25,CRI,260,Dragapult,37.0
-6a0ae95213f957d6d4b4ab3a,2026-05-25,CRI,101,Slowking,27.0
-6a0d4df7dfbdf089cbbddba5,2026-05-25,CRI,140,Slowking,27.0
-6a0c882813f957d6d4b4b701,2026-05-24,CRI,181,Alakazam Dudunsparce,36.0
-6a1051be0f6c1f089985e5c5,2026-05-24,CRI,102,Slowking,18.0
-6a0ae8dedfbdf089cbbdc90e,2026-05-24,CRI,100,Slowking,25.0
-6a0dfdc813f957d6d4b4bfb4,2026-05-23,CRI,170,Lopunny Dudunsparce,28.0

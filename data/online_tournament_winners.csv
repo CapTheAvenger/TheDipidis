@@ -1,4 +1,9 @@
 tournament_id,tournament_date,format,player_count,winner_archetype,winner_winrate
+6a35668cceacae7d64419aa0,2026-06-25,CRI,142,Alakazam Dudunsparce,32.0
+6a3869d3af50e12308407ffe,2026-06-24,CRI,104,Alakazam Dudunsparce,27.0
+6a348858e334c3c9befd9b30,2026-06-23,CRI,155,N's Zoroark,21.0
+6a3869d7af50e12308407fff,2026-06-23,CRI,107,Dragapult,24.0
+6a36158daf50e12308405e02,2026-06-23,CRI,100,Dragapult Dusknoir,27.0
 sleep-sleep-sleep,2026-06-23,CRI,128,Rocket's Mewtwo,21.0
 6a3068072d97f3b0c2617872,2026-06-22,CRI,130,Beedrill,18.0
 6a316326e334c3c9befd7f8b,2026-06-22,CRI,127,Mega Lucario,34.0
@@ -41,8 +46,3 @@ eh-why-not,2026-06-02,CRI,128,Slowking,21.0
 6a18254a8c163b8097998d06,2026-05-30,CRI,100,Dragapult Blaziken,25.0
 not-at-indy,2026-05-30,CRI,289,Slowking,31.0
 69fdf8222b59cd9b66b26f6e,2026-05-29,CRI,108,Rocket's Honchkrow,24.0
-6a15f7da8c163b8097997eb4,2026-05-28,CRI,107,Dragapult Blaziken,27.0
-6a183bec0f6c1f0899862992,2026-05-28,CRI,117,Slowking,22.0
-6a0f9b31dfbdf089cbbdec47,2026-05-28,CRI,186,Dragapult Dusknoir,37.0
-6a09ede013f957d6d4b4a556,2026-05-26,CRI,216,Archaludon Dudunsparce,21.0
-697253489c739a2ff7bf5585,2026-05-26,CRI,101,Mega Greninja,21.0

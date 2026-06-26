@@ -142,11 +142,70 @@ def stat_block(base, is_hp=False):
     return {"base": base, "min": mn, "max": mx}
 
 
+def _norm(s):
+    return re.sub(r"[^a-z0-9]", "", str(s).lower())
+
+
+def entry_base(en):
+    """Pokédex EN name → its base species, e.g. 'Mega Eelektross' →
+    'Eelektross', 'Alolan Ninetales' → 'Ninetales', 'Rotom (Heat)' →
+    'Rotom'. Used to attach meta EV data (which is per species)."""
+    b, _ = base_species_and_form(en)
+    return re.sub(r"\s*\(.*\)\s*$", "", b).strip()
+
+
+def team_base(name):
+    """Replica-team species name → base species (Smogon style):
+    'Eelektross-Mega' → 'Eelektross', 'Floette-Eternal' → 'Floette'."""
+    if name in HYPHEN_BASE:
+        return name
+    return name.split("-")[0]
+
+
+def load_meta_spreads():
+    """Most-common EV/SP spread + nature per base species, from real
+    top-team data (replica teams + the wider speed corpus). Refreshed
+    every scrape run, so it tracks the live meta. Returns
+    {norm(base): {evs, nature, n, total}}."""
+    from collections import Counter
+    samples = {}   # norm(base) -> Counter((evs, nature))
+    totals = {}    # norm(base) -> total samples seen
+
+    def add(species, evs, nature):
+        evs = (evs or "").strip()
+        if not species or not evs:
+            return
+        k = _norm(team_base(species))
+        samples.setdefault(k, Counter())[(evs, nature or "")] += 1
+        totals[k] = totals.get(k, 0) + 1
+
+    teams_path = os.path.join(ROOT, "data", "champions_replica_teams.json")
+    corpus_path = os.path.join(ROOT, "data", "champions_speed_corpus.json")
+    try:
+        for tm in json.load(open(teams_path, encoding="utf-8")).get("teams", []):
+            for p in tm.get("pokemon", []):
+                add(p.get("name"), p.get("evs"), p.get("nature"))
+    except Exception as e:  # noqa: BLE001
+        print(f"WARN: meta spreads — replica teams unavailable ({e})")
+    try:
+        for s in json.load(open(corpus_path, encoding="utf-8")).get("samples", []):
+            add(s.get("species"), s.get("evs"), s.get("nature"))
+    except Exception as e:  # noqa: BLE001
+        print(f"WARN: meta spreads — speed corpus unavailable ({e})")
+
+    out = {}
+    for k, cnt in samples.items():
+        (evs, nature), n = cnt.most_common(1)[0]
+        out[k] = {"evs": evs, "nature": nature, "n": n, "total": totals.get(k, n)}
+    return out
+
+
 def main():
     roster = fetch_json(ROSTER_URL)
     stats = fetch_json(STATS_URL)
     with open(NAMES_DE_PATH, encoding="utf-8") as f:
         names_de = json.load(f)
+    meta_spreads = load_meta_spreads()
 
     # Index base stats by (name) — roster + stats share the same name field.
     stats_by_name = {e["name"]: e for e in stats}
@@ -231,6 +290,16 @@ def main():
         added += 1
     if added:
         print(f"Added {added} M-B roster supplement entries (Smogon stats)")
+
+    # Attach the live-meta "most-common SP spread" to each entry (per base
+    # species), so players see what is actually run, not just base stats.
+    meta_hits = 0
+    for e in entries:
+        m = meta_spreads.get(_norm(entry_base(e["en"])))
+        if m:
+            e["meta"] = m
+            meta_hits += 1
+    print(f"Attached meta spreads to {meta_hits}/{len(entries)} entries")
 
     # Stable, friendly default order: by total descending, then name.
     entries.sort(key=lambda e: (-(e["total"] or 0), e["en"]))

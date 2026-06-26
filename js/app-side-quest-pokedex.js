@@ -53,7 +53,9 @@
             none: 'Nichts gefunden — andere Schreibweise, Nummer oder Filter probieren.',
             loading: 'Lade Pokédex …',
             error: 'Pokédex konnte nicht geladen werden.',
-            rangeNote: 'Range = mögliche Endwerte auf Lv. 50 (0 bis max. FP/IS, Wesen ±10 %).',
+            rangeNote: 'Basiswert + Range (mögliche Endwerte auf Lv. 50). Tipp auf eine Zeile → meistgenutzter SP-Spread aus echten Top-Teams.',
+            metaTitle: 'Meist genutzt:',
+            metaFrom: (n, total) => `(${n} von ${total} Builds)`,
             attribution: 'Daten: Pokémon-Champions-Datensatz (CC BY 4.0) · Deutsche Namen: PokéAPI',
         },
         en: {
@@ -76,7 +78,9 @@
             none: 'Nothing found — try a different spelling, number or filter.',
             loading: 'Loading Pokédex …',
             error: 'Could not load the Pokédex.',
-            rangeNote: 'Range = possible final stats at Lv. 50 (0 to max EV/IV, nature ±10%).',
+            rangeNote: 'Base stat + range (possible final stats at Lv. 50). Tap a row → most-used SP spread from real top teams.',
+            metaTitle: 'Most used:',
+            metaFrom: (n, total) => `(${n} of ${total} builds)`,
             attribution: 'Data: Pokémon Champions dataset (CC BY 4.0) · German names: PokéAPI',
         },
     };
@@ -176,15 +180,17 @@
         }).join('') + '</tr>';
     }
 
-    function rowFor(e) {
+    function rowFor(e, idx) {
         const lang = uiLang();
         const primary = lang === 'de' ? e.de : e.en;
         const secondary = lang === 'de' ? e.en : e.de;
         const dex = e.dex != null ? `#${e.dex}` : '';
-        return `
-            <tr>
+        const hasMeta = !!(e.meta && e.meta.evs);
+        const caret = hasMeta ? '<span class="sqp-caret" aria-hidden="true">▸</span>' : '';
+        const mainRow = `
+            <tr class="sqp-row${hasMeta ? ' has-meta' : ''}" data-row="${idx}"${hasMeta ? ' tabindex="0" role="button"' : ''}>
                 <td class="sqp-c-mon">
-                    <span class="sqp-mon-name">${escapeHtml(primary)}</span>
+                    <span class="sqp-mon-name">${caret}${escapeHtml(primary)}</span>
                     <span class="sqp-mon-sub">${escapeHtml(secondary)} · ${escapeHtml(dex)}</span>
                 </td>
                 <td class="sqp-c-type">${typeBadge(e.t1, e.t1de)}</td>
@@ -197,6 +203,11 @@
                 ${statCell(e.spe)}
                 <td class="sqp-c-total"><b>${e.total || ''}</b></td>
             </tr>`;
+        if (!hasMeta) return mainRow;
+        return mainRow + `
+            <tr class="sqp-detail" data-detail="${idx}" hidden>
+                <td class="sqp-detail-cell" colspan="${COLS.length}">${metaLineHtml(e)}</td>
+            </tr>`;
     }
 
     function tableHtml(results) {
@@ -206,7 +217,7 @@
             <div class="sqp-table-wrap">
                 <table class="sqp-table">
                     <thead>${headRow()}</thead>
-                    <tbody>${results.map(rowFor).join('')}</tbody>
+                    <tbody>${results.map((e, i) => rowFor(e, i)).join('')}</tbody>
                 </table>
             </div>`;
     }
@@ -252,6 +263,38 @@
     };
     function deType(en) { return _DE_TYPE[en] || en; }
 
+    // Most-common SP/EV spread (from real top teams) — German labels.
+    const _STAT_LABEL_DE = { HP: 'KP', Atk: 'Ang', Def: 'Vert', SpA: 'SpAng', SpD: 'SpVert', Spe: 'Init' };
+    const _NATURE_DE = {
+        Hardy: 'Robust', Lonely: 'Solo', Brave: 'Mutig', Adamant: 'Hart', Naughty: 'Frech',
+        Bold: 'Kühn', Docile: 'Sanft', Relaxed: 'Locker', Impish: 'Pfiffig', Lax: 'Lasch',
+        Timid: 'Scheu', Hasty: 'Hastig', Serious: 'Ernst', Jolly: 'Froh', Naive: 'Naiv',
+        Modest: 'Mäßig', Mild: 'Mild', Quiet: 'Ruhig', Bashful: 'Zaghaft', Rash: 'Hitzig',
+        Calm: 'Still', Gentle: 'Zart', Sassy: 'Forsch', Careful: 'Sacht', Quirky: 'Kauzig',
+    };
+    function evsDisplay(evs) {
+        const de = uiLang() === 'de';
+        return String(evs || '').split('/').map(part => {
+            const m = part.trim().match(/^(\d+)\s+(\S+)$/);
+            if (!m) return part.trim();
+            const lab = de ? (_STAT_LABEL_DE[m[2]] || m[2]) : m[2];
+            return `${m[1]} ${lab}`;
+        }).join(' / ');
+    }
+    function metaLineHtml(e) {
+        const m = e.meta;
+        if (!m || !m.evs) return '';
+        const l = t();
+        const nat = m.nature ? (uiLang() === 'de' ? (_NATURE_DE[m.nature] || m.nature) : m.nature) : '';
+        return `
+            <div class="sqp-meta">
+                <span class="sqp-meta-tag">${escapeHtml(l.metaTitle)}</span>
+                <b class="sqp-meta-evs">${escapeHtml(evsDisplay(m.evs))}</b>
+                ${nat ? `· <span class="sqp-meta-nat">${escapeHtml(nat)}</span>` : ''}
+                <span class="sqp-meta-n">${escapeHtml(l.metaFrom(m.n, m.total))}</span>
+            </div>`;
+    }
+
     function render() {
         const host = document.getElementById('sideQuestPokedexHost');
         if (!host) return;
@@ -286,6 +329,32 @@
         const wrap = host.querySelector('.sqp-table-wrap') || host.querySelector('.sqp-status');
         if (wrap) wrap.outerHTML = tableHtml(results);
         wireSortHeaders(host);
+        wireRows(host);
+    }
+
+    // Tap a Pokémon row → reveal its most-used SP spread (meta) detail row.
+    function wireRows(host) {
+        const table = host.querySelector('.sqp-table');
+        if (!table || table._sqpRowsWired) return;
+        table._sqpRowsWired = true;
+        const toggle = (row) => {
+            if (!row || !row.classList.contains('has-meta')) return;
+            const idx = row.getAttribute('data-row');
+            const detail = table.querySelector(`.sqp-detail[data-detail="${idx}"]`);
+            if (!detail) return;
+            if (detail.hasAttribute('hidden')) { detail.removeAttribute('hidden'); row.classList.add('is-open'); }
+            else { detail.setAttribute('hidden', ''); row.classList.remove('is-open'); }
+        };
+        table.addEventListener('click', (ev) => {
+            if (ev.target.closest('.sqp-sortable')) return;   // header sort handles itself
+            toggle(ev.target.closest('.sqp-row'));
+        });
+        table.addEventListener('keydown', (ev) => {
+            if (ev.key === 'Enter' || ev.key === ' ') {
+                const row = ev.target.closest('.sqp-row');
+                if (row) { ev.preventDefault(); toggle(row); }
+            }
+        });
     }
 
     function setSort(key, dir) {
@@ -319,6 +388,7 @@
         const formSel = host.querySelector('#sqpForm');
         if (formSel) formSel.addEventListener('change', () => { _formFilter = formSel.value; render(); });
         wireSortHeaders(host);
+        wireRows(host);
     }
 
     // Called by the sub-tab controller when the Pokédex view is shown.

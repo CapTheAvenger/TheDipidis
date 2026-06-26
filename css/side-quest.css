@@ -1865,3 +1865,42 @@
     flex: 1 1 12rem;
     min-width: 9rem;
 }
+
+/* ── Pokédex: most-used SP spread (meta) expandable row ─────────── */
+#sideQuestPokedexHost .sqp-row.has-meta { cursor: pointer; }
+#sideQuestPokedexHost .sqp-row.has-meta:hover td { background: #1b2330; }
+#sideQuestPokedexHost .sqp-row.has-meta:hover td.sqp-c-mon { background: #141b25; }
+.sqp-caret {
+    display: inline-block;
+    color: #7cc0ff;
+    font-size: 0.7rem;
+    margin-right: 0.3rem;
+    transition: transform 120ms ease;
+}
+#sideQuestPokedexHost .sqp-row.is-open .sqp-caret { transform: rotate(90deg); }
+#sideQuestPokedexHost .sqp-detail td {
+    background: #0e131b;
+    border-bottom: 1px solid #1c2330;
+    padding: 0;
+}
+.sqp-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.4rem;
+    padding: 0.5rem 0.7rem 0.6rem;
+    font-size: 0.82rem;
+    color: #e6ebf3;
+    white-space: normal;
+    text-align: left;
+}
+.sqp-meta-tag {
+    color: #8fe0aa;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.68rem;
+    letter-spacing: 0.03em;
+}
+.sqp-meta-evs { font-weight: 700; color: #fff; }
+.sqp-meta-nat { color: #c4ccd9; }
+.sqp-meta-n { color: #6b7585; font-size: 0.72rem; }

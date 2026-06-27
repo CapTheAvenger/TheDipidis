@@ -78,7 +78,7 @@
                 const name = String(row.deck_name || '').trim();
                 if (!name) return;
                 const rank = parseInt(String(row.new_rank || '').trim(), 10);
-                const share = Number.parseLocaleNumber(row.new_share || '', 0);
+                const share = window.parseLocaleNumber(row.new_share || '', 0);
                 exactMap.set(name.toLowerCase(), {
                     rank: Number.isFinite(rank) ? rank : null,
                     share: Number.isFinite(share) ? share : null
@@ -512,8 +512,8 @@
         }
 
         function parseUsagePercent(row) {
-            const inclusion = Number.parseLocaleNumber(row.deck_inclusion_count || '', 0);
-            const total = Number.parseLocaleNumber(row.total_decks_in_archetype || '', 0);
+            const inclusion = window.parseLocaleNumber(row.deck_inclusion_count || '', 0);
+            const total = window.parseLocaleNumber(row.total_decks_in_archetype || '', 0);
             if (!Number.isNaN(inclusion) && !Number.isNaN(total) && total > 0) {
                 return (inclusion / total) * 100;
             }
@@ -859,8 +859,12 @@
         return { cards: results, droppedCards, hasProfile, snapshotDate };
     }
 
+    // Local wrapper: one-arg, returns null (not 0) when the value isn't a
+    // finite number. Delegates to the GLOBAL window.parseLocaleNumber util
+    // (NOT itself — that would recurse, and NOT the non-existent
+    // Number.parseLocaleNumber — that was the original bug).
     function parseLocaleNumber(value) {
-        const parsed = Number.parseLocaleNumber(value || '', 0);
+        const parsed = window.parseLocaleNumber(value || '', 0);
         return Number.isFinite(parsed) ? parsed : null;
     }
 

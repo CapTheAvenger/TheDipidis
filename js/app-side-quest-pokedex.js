@@ -53,8 +53,9 @@
             none: 'Nichts gefunden — andere Schreibweise, Nummer oder Filter probieren.',
             loading: 'Lade Pokédex …',
             error: 'Pokédex konnte nicht geladen werden.',
-            rangeNote: 'Basiswert + Range (mögliche Endwerte auf Lv. 50). Tipp auf eine Zeile → meistgenutzter SP-Spread aus echten Top-Teams.',
+            rangeNote: 'Basiswert + Range (Endwerte auf Lv. 50: IS fix 31, 0–32 SP, Wesen ±10 %). Tipp auf eine Zeile → meistgenutzter SP-Spread + echte Endwerte aus Top-Teams.',
             metaTitle: 'Meist genutzt:',
+            metaStats: 'Endwerte Lv. 50:',
             metaFrom: (n, total) => `(${n} von ${total} Builds)`,
             attribution: 'Daten: Pokémon-Champions-Datensatz (CC BY 4.0) · Deutsche Namen: PokéAPI',
         },
@@ -78,8 +79,9 @@
             none: 'Nothing found — try a different spelling, number or filter.',
             loading: 'Loading Pokédex …',
             error: 'Could not load the Pokédex.',
-            rangeNote: 'Base stat + range (possible final stats at Lv. 50). Tap a row → most-used SP spread from real top teams.',
+            rangeNote: 'Base stat + range (final stats at Lv. 50: IV fixed 31, 0–32 SP, nature ±10%). Tap a row → most-used SP spread + real final stats from top teams.',
             metaTitle: 'Most used:',
+            metaStats: 'Final stats Lv. 50:',
             metaFrom: (n, total) => `(${n} of ${total} builds)`,
             attribution: 'Data: Pokémon Champions dataset (CC BY 4.0) · German names: PokéAPI',
         },
@@ -281,17 +283,34 @@
             return `${m[1]} ${lab}`;
         }).join(' / ');
     }
+    // hp/atk/… → [DE label, EN label], in display order.
+    const _FINAL_ORDER = [['hp', 'KP', 'HP'], ['atk', 'Ang', 'Atk'], ['def', 'Vert', 'Def'],
+        ['spa', 'SpAng', 'SpA'], ['spd', 'SpVert', 'SpD'], ['spe', 'Init', 'Spe']];
+    function finalStatsDisplay(final) {
+        if (!final) return '';
+        const de = uiLang() === 'de';
+        return _FINAL_ORDER
+            .filter(([k]) => final[k] != null)
+            .map(([k, d, e]) => `${de ? d : e} ${final[k]}`)
+            .join(' · ');
+    }
     function metaLineHtml(e) {
         const m = e.meta;
         if (!m || !m.evs) return '';
         const l = t();
         const nat = m.nature ? (uiLang() === 'de' ? (_NATURE_DE[m.nature] || m.nature) : m.nature) : '';
+        const finalLine = m.final
+            ? `<div class="sqp-meta-row sqp-meta-final"><span class="sqp-meta-tag">${escapeHtml(l.metaStats)}</span> <b>${escapeHtml(finalStatsDisplay(m.final))}</b></div>`
+            : '';
         return `
             <div class="sqp-meta">
-                <span class="sqp-meta-tag">${escapeHtml(l.metaTitle)}</span>
-                <b class="sqp-meta-evs">${escapeHtml(evsDisplay(m.evs))}</b>
-                ${nat ? `· <span class="sqp-meta-nat">${escapeHtml(nat)}</span>` : ''}
-                <span class="sqp-meta-n">${escapeHtml(l.metaFrom(m.n, m.total))}</span>
+                <div class="sqp-meta-row">
+                    <span class="sqp-meta-tag">${escapeHtml(l.metaTitle)}</span>
+                    <b class="sqp-meta-evs">${escapeHtml(evsDisplay(m.evs))}</b>
+                    ${nat ? `· <span class="sqp-meta-nat">${escapeHtml(nat)}</span>` : ''}
+                    <span class="sqp-meta-n">${escapeHtml(l.metaFrom(m.n, m.total))}</span>
+                </div>
+                ${finalLine}
             </div>`;
     }
 

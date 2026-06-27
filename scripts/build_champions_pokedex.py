@@ -126,20 +126,68 @@ def make_entry(en, de, dex, form, t1, t2, st):
     }
 
 
-def stat_range(base, is_hp):
-    """Level-50 final-stat min/max via the standard formula."""
+# Exact Pokémon Champions Lv.50 stat formula (IV fixed at 31, Level 50):
+#   HP   = Base + StatPoints + 75
+#   Stat = floor((Base + StatPoints + 20) × Alignment)   (Atk/Def/SpA/SpD/Spe)
+# Alignment: 1.1 boosting nature, 0.9 hindering, 1.0 neutral. SP 0..32 per
+# stat. (Documented on Bulbapedia; verified vs in-game: Pelipper Spe 85@0SP
+# /117@32SP, HP 135@0SP; Venusaur SpA 167 @100base/32SP/boosting.)
+HP_CONST = 75
+STAT_CONST = 20
+SP_MAX = 32
+
+
+def champ_stat(base, sp, is_hp, align=1.0):
     if is_hp:
-        mn = (2 * base) * 50 // 100 + 50 + 10
-        mx = (2 * base + 31 + 63) * 50 // 100 + 50 + 10
-    else:
-        mn = math.floor(((2 * base) * 50 // 100 + 5) * 0.9)
-        mx = math.floor(((2 * base + 31 + 63) * 50 // 100 + 5) * 1.1)
-    return mn, mx
+        return base + sp + HP_CONST
+    return math.floor((base + sp + STAT_CONST) * align)
+
+
+def stat_range(base, is_hp):
+    """Lv.50 final-stat min/max (Champions formula). Min = 0 SP + hindering
+    nature; max = 32 SP + boosting nature. HP nature is always neutral."""
+    if is_hp:
+        return champ_stat(base, 0, True), champ_stat(base, SP_MAX, True)
+    return champ_stat(base, 0, False, 0.9), champ_stat(base, SP_MAX, False, 1.1)
 
 
 def stat_block(base, is_hp=False):
     mn, mx = stat_range(base, is_hp)
     return {"base": base, "min": mn, "max": mx}
+
+
+# Nature → (raised stat, lowered stat). Neutral natures (incl. Champions'
+# "Serious") raise/lower nothing → all alignments 1.0.
+NATURE_EFFECT = {
+    "Lonely": ("atk", "def"), "Brave": ("atk", "spe"), "Adamant": ("atk", "spa"), "Naughty": ("atk", "spd"),
+    "Bold": ("def", "atk"), "Relaxed": ("def", "spe"), "Impish": ("def", "spa"), "Lax": ("def", "spd"),
+    "Timid": ("spe", "atk"), "Hasty": ("spe", "def"), "Jolly": ("spe", "spa"), "Naive": ("spe", "spd"),
+    "Modest": ("spa", "atk"), "Mild": ("spa", "def"), "Quiet": ("spa", "spe"), "Rash": ("spa", "spd"),
+    "Calm": ("spd", "atk"), "Gentle": ("spd", "def"), "Sassy": ("spd", "spe"), "Careful": ("spd", "spa"),
+}
+_EV_KEY = {"hp": "hp", "atk": "atk", "def": "def", "spa": "spa", "spd": "spd", "spe": "spe",
+           "HP": "hp", "Atk": "atk", "Def": "def", "SpA": "spa", "SpD": "spd", "Spe": "spe"}
+
+
+def parse_sp(evs):
+    """'2 HP / 32 SpA / 32 Spe' → {hp:2, atk:0, …, spa:32, spe:32}."""
+    out = {k: 0 for k in ("hp", "atk", "def", "spa", "spd", "spe")}
+    for part in str(evs or "").split("/"):
+        m = re.match(r"\s*(\d+)\s+(\S+)\s*$", part)
+        if m and m.group(2) in _EV_KEY:
+            out[_EV_KEY[m.group(2)]] = int(m.group(1))
+    return out
+
+
+def final_stats(base6, sp6, nature):
+    """Final Lv.50 stats for a given SP spread + nature, via the Champions
+    formula (the now-confirmed exact mapping)."""
+    up, down = NATURE_EFFECT.get(nature, (None, None))
+    out = {"hp": champ_stat(base6["hp"], sp6["hp"], True)}
+    for k in ("atk", "def", "spa", "spd", "spe"):
+        align = 1.1 if k == up else 0.9 if k == down else 1.0
+        out[k] = champ_stat(base6[k], sp6[k], False, align)
+    return out
 
 
 def _norm(s):
@@ -297,7 +345,11 @@ def main():
     for e in entries:
         m = meta_spreads.get(_norm(entry_base(e["en"])))
         if m:
-            e["meta"] = m
+            # Compute the real Lv.50 final stats for this most-used spread,
+            # using THIS form's base stats + the spread's SP + nature.
+            base6 = {k: e[k]["base"] for k in ("hp", "atk", "def", "spa", "spd", "spe")}
+            final = final_stats(base6, parse_sp(m["evs"]), m["nature"])
+            e["meta"] = {**m, "final": final}
             meta_hits += 1
     print(f"Attached meta spreads to {meta_hits}/{len(entries)} entries")
 

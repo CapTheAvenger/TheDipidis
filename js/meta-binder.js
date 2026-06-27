@@ -1617,14 +1617,16 @@
                     </div>`;
             }).join('');
 
-            const groupIcon = (typeof window.ArchetypeIcons !== 'undefined')
-                ? window.ArchetypeIcons.getIconHtml(group.title, { size: 'md', layout: 'inline' })
-                : '';
+            // NOTE: no icon here — group.title is a section label
+            // ("Top 20 Current Meta", "Top 10 City League past"), NOT a
+            // Pokémon archetype, so feeding it to the archetype-icon
+            // resolver only produced bogus "??" placeholders. The real
+            // archetype icons live on each deck-banner card below.
             return `
                 <div class="meta-binder-archetype-group">
                     <details class="meta-binder-archetype-panel" open>
                         <summary class="meta-binder-archetype-summary">
-                            <h3 class="meta-binder-archetype-title">${groupIcon}${escapeHtml(group.title)}</h3>
+                            <h3 class="meta-binder-archetype-title">${escapeHtml(group.title)}</h3>
                             <span class="meta-binder-archetype-count">${group.items.length}</span>
                         </summary>
                         <div class="meta-binder-archetype-grid">${cardsHtml}</div>
@@ -1922,7 +1924,7 @@
                         <div class="deck-indicator-count">${card.decks.length} ${mbText('mb.deckIndicatorCountSuffix','Decks')}</div>
                         ${countLabel}
                     </div>
-                    ${printCount > 1 ? `<button type="button" class="meta-binder-prints-btn" onclick="openRaritySwitcherFromDB('${escapeArchetypeForJs(card.name)}','${safeSet}','${safeNumber}')" title="${printCount} ${mbText('mb.printsAvailable','prints available')}" aria-label="${mbText('mb.ariaShowAllPrints','Show all prints for {name}').replace('{name}', safeName)}">🖨 ${printCount} Prints</button>` : ''}
+                    ${printCount > 1 ? `<button type="button" class="meta-binder-prints-btn" onclick="openRaritySwitcherFromDB('${escapeArchetypeForJs(card.name)}','${safeSet}','${safeNumber}')" title="${mbText('mb.printsAvailable','{n} print versions of this card exist — tap to switch art/set (deck limit stays {max}×)').replace('{n}', printCount).replace('{max}', card.maxCount || 4)}" aria-label="${mbText('mb.ariaShowAllPrints','Show all prints for {name}').replace('{name}', safeName)}">🎴 ${printCount} ${mbText('mb.printsBtnLabel','Versions')}</button>` : ''}
                 </div>`
             };
         });

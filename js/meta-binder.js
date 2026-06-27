@@ -1321,14 +1321,19 @@
         const bOrder = META_BINDER_CATEGORY_ORDER[bCategory] || 99;
         if (aOrder !== bOrder) return aOrder - bOrder;
 
-        // User preference (standard view): within each card-type group sort
-        // by SET newest → oldest first, so the newest set's cards (e.g. CRI)
-        // lead each section. Skipped in All Prints mode, where every print of
-        // a card should stay grouped together (handled by the dex/name keys).
+        // Standard view: clean "set binder" order within each card-type
+        // group — newest set first, then by collector number inside the set
+        // (001, 002, 003 …). No element/Pokédex interleave: with meta cards
+        // spanning many sets that looked chaotic. (All Prints keeps the
+        // element/dex grouping below so every print of a card stays together.)
         if (!metaBinderAllPrints) {
             const aSetTop = Number.isFinite(a.setOrder) ? a.setOrder : 0;
             const bSetTop = Number.isFinite(b.setOrder) ? b.setOrder : 0;
             if (aSetTop !== bSetTop) return bSetTop - aSetTop;
+            const aNumTop = Number.isFinite(a.numberSort) ? a.numberSort : Number.MAX_SAFE_INTEGER;
+            const bNumTop = Number.isFinite(b.numberSort) ? b.numberSort : Number.MAX_SAFE_INTEGER;
+            if (aNumTop !== bNumTop) return aNumTop - bNumTop;
+            return META_BINDER_NAME_COLLATOR.compare(String(a.name || ''), String(b.name || ''));
         }
 
         if (aCategory === 'Pokemon') {

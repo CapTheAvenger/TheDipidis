@@ -942,7 +942,7 @@ BKT,56,286302,unique,Stunfisk
 BKT,57,286303,unique,Dedenne
 BKT,58,286304,unique,Gastly
 BKT,59,286305,unique,Haunter
-BKT,60,286306,unique,Gengar
+BKT,60,286306,priced-by-date(1↔2),Gengar
 BKT,65,286311,unique,Misdreavus
 BKT,66,286312,unique,Mismagius
 BKT,67,286313,unique,Wobbuffet

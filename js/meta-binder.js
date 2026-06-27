@@ -1321,6 +1321,16 @@
         const bOrder = META_BINDER_CATEGORY_ORDER[bCategory] || 99;
         if (aOrder !== bOrder) return aOrder - bOrder;
 
+        // User preference (standard view): within each card-type group sort
+        // by SET newest → oldest first, so the newest set's cards (e.g. CRI)
+        // lead each section. Skipped in All Prints mode, where every print of
+        // a card should stay grouped together (handled by the dex/name keys).
+        if (!metaBinderAllPrints) {
+            const aSetTop = Number.isFinite(a.setOrder) ? a.setOrder : 0;
+            const bSetTop = Number.isFinite(b.setOrder) ? b.setOrder : 0;
+            if (aSetTop !== bSetTop) return bSetTop - aSetTop;
+        }
+
         if (aCategory === 'Pokemon') {
             // 1. Element type
             const aElementOrder = getMetaBinderPokemonElementOrder(aTypeMeta);

@@ -2022,7 +2022,15 @@
 
         if (promises.length > 0) {
             console.log('[MetaBinder] Waiting for', promises.length, 'data sources…');
-            await Promise.all(promises);
+            // Defensive timeout: never block the binder forever on a stalled
+            // loader (e.g. a raw fetch with no timeout). Proceed with whatever
+            // loaded; the caller shows a "no data" toast if nothing arrived.
+            const timeoutMs = 30000;
+            const timeout = new Promise(resolve => setTimeout(() => {
+                console.warn('[MetaBinder] data load timed out after', timeoutMs, 'ms — proceeding with partial data');
+                resolve();
+            }, timeoutMs));
+            await Promise.race([Promise.all(promises), timeout]);
             console.log('[MetaBinder] Data loading complete.',
                 'currentMetaAnalysisData:', Array.isArray(window.currentMetaAnalysisData) ? window.currentMetaAnalysisData.length + ' rows' : 'null',
                 'cityLeagueAnalysisData:', Array.isArray(window.cityLeagueAnalysisData) ? window.cityLeagueAnalysisData.length + ' rows' : 'null');
@@ -2033,7 +2041,17 @@
     async function buildMetaBinder() {
         const grid = document.getElementById('metaBinderGrid');
         if (grid) grid.innerHTML = `<p class="color-grey">${mbText('mb.loading', 'Loading meta data…')}</p>`;
+        try {
+            await _buildMetaBinderInner(grid);
+        } catch (err) {
+            // Never leave the spinner stuck: surface the failure and clear it.
+            console.error('[MetaBinder] build failed:', err);
+            if (grid) grid.innerHTML = `<p class="color-grey">${mbText('mb.buildError', 'Could not build the binder — please try again.')}</p>`;
+            showToast(mbText('mb.buildError', 'Could not build the binder — please try again.'), 'error');
+        }
+    }
 
+    async function _buildMetaBinderInner(grid) {
         console.log('[MetaBinder] Building binder…');
         await ensureMetaDataLoaded();
 

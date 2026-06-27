@@ -2164,7 +2164,26 @@ const BASE_PATH = './data/';
 
         // Async CSV fetch and parse using PapaParse with Web Worker
         async function fetchAndParseCSV(url, delimiter = ';') {
+            // Hard timeout so a stalled download (flaky mobile network, a
+            // request that never gets a response) can't leave the promise
+            // unsettled forever — that would hang every caller awaiting it
+            // (e.g. the Meta Binder's "Loading meta data…" spinner). On
+            // timeout we reject; loadCSV's .catch turns that into null and
+            // the UI shows a real "no data" state instead of spinning.
+            const TIMEOUT_MS = 25000;
             return new Promise((resolve, reject) => {
+                let settled = false;
+                let parser = null;
+                const finish = (fn, arg) => {
+                    if (settled) return;
+                    settled = true;
+                    clearTimeout(timer);
+                    fn(arg);
+                };
+                const timer = setTimeout(() => {
+                    try { if (parser && typeof parser.abort === 'function') parser.abort(); } catch (_) {}
+                    finish(reject, new Error('CSV load timed out after ' + TIMEOUT_MS + 'ms: ' + url));
+                }, TIMEOUT_MS);
                 Papa.parse(url, {
                     download: true,
                     header: true,
@@ -2183,10 +2202,10 @@ const BASE_PATH = './data/';
                                 }
                             });
                         }
-                        resolve(results.data);
+                        finish(resolve, results.data);
                     },
                     error: function(err) {
-                        reject(err);
+                        finish(reject, err);
                     }
                 });
             });

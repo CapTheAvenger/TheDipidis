@@ -2019,3 +2019,7 @@ body.sqp-d-open { overflow: hidden; }
 .sqp-fmt-btn.is-active { background: #234; border-color: #5fb6ff; color: #8fd6ff; }
 
 .sqp-d-pct.is-approx { color: #9fb4cc; font-weight: 600; font-style: italic; }
+
+/* German name shown beside the English one in the detail usage rows. */
+.sqp-d-de { color: #7f8ca0; margin-left: 7px; font-size: 0.82em; }
+.sqp-d-de::before { content: "· "; }

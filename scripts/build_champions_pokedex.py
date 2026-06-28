@@ -39,7 +39,10 @@ SMOGON_PATH = os.path.join(ROOT, "data", "pokemon_battle_data.json")
 DEX_PATH = os.path.join(ROOT, "data", "pokemon_dex_numbers.json")
 EXTRA_PATH = os.path.join(ROOT, "data", "champions_roster_extra.json")
 USAGE_PATH = os.path.join(ROOT, "data", "champions_usage.json")
+DE_OVERRIDES_PATH = os.path.join(ROOT, "data", "de_name_overrides.json")
+RESOURCES_PATH = os.path.join(ROOT, "data", "champions_resources.json")
 OUT_PATH = os.path.join(ROOT, "data", "champions_pokedex.json")
+NAMES_DE_OUT = os.path.join(ROOT, "data", "champions_names_de.json")
 
 # Which format's usage drives the Pokédex "Meist genutzt" line. Doubles =
 # the in-game Doppelkämpfe analysis the screenshots came from, and the VGC
@@ -310,6 +313,35 @@ def usage_meta(rec, base6):
     return meta
 
 
+def write_names_de(pokemon_names_de):
+    """Write data/champions_names_de.json — EN→DE name maps for moves, items,
+    abilities and Pokémon, so the German web UI can show the German name
+    beside the English one in the in-game usage detail view (the source data
+    is English-only). Reuses the already-scraped German sources. Fail-soft:
+    on any error the committed file is kept."""
+    out = {"moves": {}, "items": {}, "abilities": {}, "pokemon": {}}
+    try:
+        ov = json.load(open(DE_OVERRIDES_PATH, encoding="utf-8"))
+        out["moves"] = {k: v for k, v in (ov.get("moves") or {}).items() if v}
+        out["items"] = {k: v for k, v in (ov.get("items") or {}).items() if v}
+    except Exception as e:  # noqa: BLE001
+        print(f"WARN: names_de — move/item overrides unavailable ({e})")
+    try:
+        res = json.load(open(RESOURCES_PATH, encoding="utf-8"))
+        for e in res.get("entries", []):
+            if e.get("cat") == "ability" and e.get("en") and e.get("de"):
+                out["abilities"][e["en"]] = e["de"]
+    except Exception as e:  # noqa: BLE001
+        print(f"WARN: names_de — ability names unavailable ({e})")
+    out["pokemon"] = {k: v for k, v in (pokemon_names_de or {}).items() if v}
+    with open(NAMES_DE_OUT, "w", encoding="utf-8") as f:
+        json.dump(out, f, ensure_ascii=False, separators=(",", ":"))
+    kb = os.path.getsize(NAMES_DE_OUT) / 1024
+    print(f"Wrote {NAMES_DE_OUT} — moves {len(out['moves'])}, items "
+          f"{len(out['items'])}, abilities {len(out['abilities'])}, "
+          f"pokemon {len(out['pokemon'])} ({kb:.1f} KB)")
+
+
 def main():
     roster = fetch_json(ROSTER_URL)
     stats = fetch_json(STATS_URL)
@@ -462,6 +494,12 @@ def main():
 
     size_kb = os.path.getsize(OUT_PATH) / 1024
     print(f"Wrote {OUT_PATH} — {len(entries)} Pokémon, {size_kb:.1f} KB")
+
+    # EN→DE name maps for the German web UI (moves/items/abilities/Pokémon).
+    try:
+        write_names_de(names_de)
+    except Exception as e:  # noqa: BLE001 — non-fatal
+        print(f"WARN: names_de write failed ({e}) — keeping committed file")
     if missing_stats:
         print(f"WARN: {len(missing_stats)} roster entries had no base stats:", missing_stats[:10])
     if missing_de:

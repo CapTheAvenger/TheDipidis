@@ -234,6 +234,7 @@ jobs:
                   data/champions_resources.json \
                   data/champions_pokedex.json \
                   data/champions_usage.json \
+                  data/champions_names_de.json \
                   data/champions_roster_extra.json \
                   data/champions_available_items.json \
                   data/de_name_overrides.json \

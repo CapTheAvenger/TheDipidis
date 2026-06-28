@@ -14,12 +14,15 @@
 
     const POKEDEX_URL = 'data/champions_pokedex.json';
     const USAGE_URL = 'data/champions_usage.json';
+    const NAMES_DE_URL = 'data/champions_names_de.json';
 
     let _entries = null;
     let _loading = null;
     let _usage = null;               // { slug: rec } — full per-Pokémon usage
     let _usageSeason = null;
     let _usageLoading = null;
+    let _namesDe = null;             // { moves, items, abilities, pokemon } EN→DE
+    let _namesDeLoading = null;
     let _detailEntry = null;         // entry currently shown in the overlay
     let _detailFormat = 'doubles';   // 'doubles' | 'singles'
     let _tableFormat = 'doubles';    // which format the table's "used" cells show
@@ -171,6 +174,18 @@
             })
             .catch(() => { _usage = {}; return _usage; });
         return _usageLoading;
+    }
+
+    // EN→DE name maps for moves/items/abilities/Pokémon (German UI only).
+    function loadNamesDe() {
+        if (_namesDe) return Promise.resolve(_namesDe);
+        if (uiLang() !== 'de') return Promise.resolve(null);
+        if (_namesDeLoading) return _namesDeLoading;
+        _namesDeLoading = fetch(`${NAMES_DE_URL}?t=${Date.now()}`)
+            .then(r => r.ok ? r.json() : null)
+            .then(j => { _namesDe = j || {}; return _namesDe; })
+            .catch(() => { _namesDe = {}; return _namesDe; });
+        return _namesDeLoading;
     }
 
     // ── Filtering / sorting ────────────────────────────────────────
@@ -501,17 +516,39 @@
     }
 
     // A horizontal percentage bar + label, used for every usage list row.
+    // `nameHtml` is trusted, pre-escaped markup (build it with nmHtml/escapeHtml).
     // `approx` prefixes "≈" — the source omits the #1 item's %, so we derive
     // it from the other items (100 − Σ rest); it's an estimate, not exact.
-    function usageRow(name, pct, extra, approx) {
+    function usageRow(nameHtml, pct, extra, approx) {
         const width = pct != null ? Math.max(2, Math.min(100, pct)) : 0;
         const pctTxt = pct != null ? (approx ? '≈ ' : '') + escapeHtml(fmtPct(pct)) : '';
         const title = approx ? ` title="${escapeHtml(l_approxItem())}"` : '';
         return `<div class="sqp-d-row"${title}>
                 <div class="sqp-d-bar" style="width:${width}%"></div>
-                <span class="sqp-d-name">${escapeHtml(name)}${extra ? ` <span class="sqp-d-extra">${escapeHtml(extra)}</span>` : ''}</span>
+                <span class="sqp-d-name">${nameHtml}${extra ? ` <span class="sqp-d-extra">${escapeHtml(extra)}</span>` : ''}</span>
                 <span class="sqp-d-pct${approx ? ' is-approx' : ''}">${pctTxt}</span>
             </div>`;
+    }
+    // The source data is English-only. In the German UI, show the German name
+    // beside the English one (so players on either language can follow).
+    // kind ∈ 'moves' | 'items' | 'abilities' | 'pokemon' | 'nature'.
+    function deName(en, kind) {
+        if (!en) return null;
+        if (kind === 'nature') return _NATURE_DE[en] || null;
+        const map = _namesDe && _namesDe[kind];
+        if (!map) return null;
+        if (map[en]) return map[en];
+        if (kind === 'pokemon') {                 // form fallbacks: "Basculegion Male"
+            const base = en.replace(/\s+(Male|Female)$/i, '').replace(/\s*\(.*\)\s*$/, '').trim();
+            if (map[base]) return map[base];
+        }
+        return null;
+    }
+    function nmHtml(en, kind) {
+        const de = uiLang() === 'de' ? deName(en, kind) : null;
+        return de && de !== en
+            ? `${escapeHtml(en)}<span class="sqp-d-de">${escapeHtml(de)}</span>`
+            : escapeHtml(en);
     }
     function l_approxItem() {
         return uiLang() === 'de'
@@ -560,22 +597,20 @@
     function detailUsageBlock(e, block) {
         const l = t();
         if (!block) return `<p class="sqp-d-none">${escapeHtml(l.noUsage)}</p>`;
-        const de = uiLang() === 'de';
 
         const natRows = (block.nature || []).map(n => {
-            const nm = de ? (_NATURE_DE[n.name] || n.name) : n.name;
             const fx = _NATURE_FX[n.name];
             const ex = fx ? `${_statLabel(fx[0])}↑ ${_statLabel(fx[1])}↓` : '';
-            return usageRow(nm, n.pct, ex);
+            return usageRow(nmHtml(n.name, 'nature'), n.pct, ex);
         }).join('');
 
         const spreadRows = (block.stat_points || [])
-            .map(s => usageRow(evsDisplay(s.evs) || '—', s.pct)).join('');
+            .map(s => usageRow(escapeHtml(evsDisplay(s.evs) || '—'), s.pct)).join('');
 
-        const moveRows = (block.move || []).map(m => usageRow(m.name, m.pct)).join('');
-        const itemRows = (block.held_item || []).map(i => usageRow(i.name, i.pct, null, i.derived)).join('');
-        const abilRows = (block.ability || []).map(a => usageRow(a.name, a.pct)).join('');
-        const teamRows = (block.teammate || []).map(tm => usageRow(tm.name, tm.pct)).join('');
+        const moveRows = (block.move || []).map(m => usageRow(nmHtml(m.name, 'moves'), m.pct)).join('');
+        const itemRows = (block.held_item || []).map(i => usageRow(nmHtml(i.name, 'items'), i.pct, null, i.derived)).join('');
+        const abilRows = (block.ability || []).map(a => usageRow(nmHtml(a.name, 'abilities'), a.pct)).join('');
+        const teamRows = (block.teammate || []).map(tm => usageRow(nmHtml(tm.name, 'pokemon'), tm.pct)).join('');
 
         return `
             <div class="sqp-d-grid">
@@ -703,7 +738,7 @@
         if (!e) return;
         _detailEntry = e;
         _detailFormat = 'doubles';
-        loadUsage().then(renderDetailOverlay);
+        Promise.all([loadUsage(), loadNamesDe()]).then(renderDetailOverlay);
     }
 
     function closeDetail() {

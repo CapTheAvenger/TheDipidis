@@ -13,34 +13,17 @@
  * by hardcoding #fff / light grays; this stylesheet does the same.
  */
 
-/* The Side Quest feature is built dark (dark cards + dark detail overlay +
-   hardcoded light text), but the app shell is light (--bg-main #fff). Give
-   the whole tab a dark surface so the light text is readable and the cards
-   sit on a matching backdrop — instead of light text on a white page. */
+/* Side Quest sits on the normal light page like every other tab — the
+   container keeps a little breathing room but no surface fill of its own;
+   the back button uses its default light pill style. */
 #side-quest .container {
-    background: #0a0e16;
-    border: 1px solid #1b2330;
-    border-radius: 16px;
     padding: 14px 14px 22px;
     margin-top: 10px;
-}
-/* The global back button is a light pill (built for the app's white tabs);
-   on the Side Quest dark surface it clashed, so re-tone it to fit. */
-#side-quest .tool-back-btn {
-    background: #131a26;
-    border-color: #2a3340;
-    color: #c2cad6;
-}
-#side-quest .tool-back-btn:hover,
-#side-quest .tool-back-btn:focus-visible {
-    background: #1b2330;
-    border-color: #3a4658;
-    color: #e6ebf3;
 }
 
 .side-quest-intro {
     margin: 0 0 1.25rem 0;
-    color: #c2cad6;
+    color: #4a4a4a;
 }
 
 .side-quest-subtitle {
@@ -56,21 +39,21 @@
 
 .side-quest-status {
     font-size: 0.85rem;
-    color: #b0b8c1;
+    color: #5a6473;
     margin: 0.5rem 0;
 }
 
 .side-quest-empty {
     padding: 2rem 1rem;
     text-align: center;
-    color: #b0b8c1;
-    border: 1px dashed #2a3140;
+    color: #5a6473;
+    border: 1px dashed #e0e0e0;
     border-radius: 12px;
-    background: var(--surface-alt, rgba(255,255,255,0.02));
+    background: var(--surface-alt, #f8f9fa);
 }
 
 .side-quest-empty code {
-    background: rgba(255,255,255,0.05);
+    background: rgba(0,0,0,0.05);
     padding: 2px 6px;
     border-radius: 4px;
     font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
@@ -80,9 +63,10 @@
 .side-quest-filter {
     margin: 0 0 1rem 0;
     padding: 0.8rem 0.9rem;
-    background: #11161f;
-    border: 1px solid #232b39;
+    background: #ffffff;
+    border: 1px solid #e0e0e0;
     border-radius: 12px;
+    box-shadow: var(--shadow-sm, 0 1px 3px rgba(0,0,0,0.08));
 }
 .side-quest-filter-head {
     display: flex;
@@ -93,18 +77,18 @@
 .side-quest-filter-title {
     font-weight: 800;
     font-size: 0.95rem;
-    color: #e6ebf3;
+    color: #2c3e50;
 }
 .side-quest-filter-count {
-    color: #8c95a5;
+    color: #6b7280;
     font-size: 0.78rem;
 }
 .side-quest-filter-clear {
     margin-left: auto;
     appearance: none;
-    border: 1px solid #2a3140;
-    background: rgba(255, 255, 255, 0.03);
-    color: #c4ccd9;
+    border: 1px solid #e0e0e0;
+    background: #f8f9fa;
+    color: #4a4a4a;
     font: inherit;
     font-size: 0.76rem;
     font-weight: 600;
@@ -112,7 +96,7 @@
     border-radius: 999px;
     cursor: pointer;
 }
-.side-quest-filter-clear:hover { background: rgba(255, 255, 255, 0.08); }
+.side-quest-filter-clear:hover { background: #ecf0f1; }
 .side-quest-filter-chips {
     display: flex;
     flex-wrap: wrap;
@@ -128,7 +112,7 @@
     border: 1px solid rgba(95, 182, 255, 0.4);
     border-radius: 999px;
     font-size: 0.82rem;
-    color: #e6ebf3;
+    color: #2c3e50;
 }
 .side-quest-filter-chip .tcg-pokemon-icon { width: 22px; height: 22px; }
 .side-quest-filter-chip-name { font-weight: 600; }
@@ -136,13 +120,13 @@
     appearance: none;
     border: 0;
     background: transparent;
-    color: #9fb6d0;
+    color: #2980b9;
     font-size: 1rem;
     line-height: 1;
     cursor: pointer;
     padding: 0 2px;
 }
-.side-quest-filter-remove:hover { color: #fff; }
+.side-quest-filter-remove:hover { color: #1d6fd0; }
 /* Opens the Quick-Pick-style grid overlay. Looks like a tappable field. */
 .side-quest-filter-trigger {
     width: 100%;
@@ -152,9 +136,9 @@
     gap: 0.55rem;
     padding: 0.7rem 0.85rem;
     border-radius: 10px;
-    border: 1px solid #2a3140;
-    background: #0d1219;
-    color: #c4ccd9;
+    border: 1px solid #e0e0e0;
+    background: #f8f9fa;
+    color: #4a4a4a;
     font: inherit;
     font-size: 0.92rem;
     font-weight: 600;
@@ -171,23 +155,23 @@
     width: 1.5rem; height: 1.5rem;
     border-radius: 7px;
     background: rgba(95, 182, 255, 0.16);
-    color: #9fd0ff;
+    color: #1d6fd0;
     font-size: 1.1rem;
     font-weight: 700;
     flex: 0 0 auto;
 }
 .side-quest-filter-hint {
     margin: 0.45rem 0 0 0;
-    color: #6b7585;
+    color: #6b7280;
     font-size: 0.72rem;
 }
 .side-quest-filter-none {
     margin: 1rem 0;
     padding: 1rem;
     text-align: center;
-    color: #9aa3b2;
-    background: #11161f;
-    border: 1px dashed #2a3140;
+    color: #5a6473;
+    background: #f8f9fa;
+    border: 1px dashed #e0e0e0;
     border-radius: 10px;
 }
 
@@ -199,12 +183,12 @@
     gap: 0.55rem;
     margin: 0 0 0.7rem 0;
     padding-bottom: 0.4rem;
-    border-bottom: 1px solid #232b39;
+    border-bottom: 1px solid #e0e0e0;
     font-size: 0.95rem;
     font-weight: 800;
-    color: #aab3c2;
+    color: #5a6473;
 }
-.side-quest-reg-head.is-current { color: #e6ebf3; }
+.side-quest-reg-head.is-current { color: #2c3e50; }
 .side-quest-reg-head.is-current::before {
     content: "";
     width: 8px; height: 8px;
@@ -215,8 +199,8 @@
 .side-quest-reg-count {
     font-size: 0.72rem;
     font-weight: 700;
-    color: #8c95a5;
-    background: rgba(255, 255, 255, 0.05);
+    color: #6b7280;
+    background: rgba(0, 0, 0, 0.05);
     padding: 1px 8px;
     border-radius: 999px;
 }
@@ -229,28 +213,28 @@
     font-size: 0.66rem;
     font-weight: 800;
     letter-spacing: 0.02em;
-    color: #aab3c2;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid #2a3140;
+    color: #5a6473;
+    background: rgba(0, 0, 0, 0.04);
+    border: 1px solid #e0e0e0;
 }
 .side-quest-reg-badge.is-current {
-    color: #8fe0aa;
-    background: rgba(76, 209, 130, 0.14);
-    border-color: rgba(76, 209, 130, 0.4);
+    color: #2e9d60;
+    background: rgba(76, 209, 130, 0.16);
+    border-color: rgba(76, 209, 130, 0.45);
 }
 .side-quest-import-badge {
-    color: #cbb3ff;
+    color: #6f4fe0;
     background: rgba(150, 120, 255, 0.16);
-    border-color: rgba(150, 120, 255, 0.45);
+    border-color: rgba(150, 120, 255, 0.5);
 }
 
 /* ── Import your own team ────────────────────────────────────────── */
 .side-quest-importbar { margin: 0 0 0.8rem 0; }
 .side-quest-import-open {
     appearance: none;
-    border: 1px solid rgba(150, 120, 255, 0.45);
+    border: 1px solid rgba(150, 120, 255, 0.5);
     background: rgba(150, 120, 255, 0.12);
-    color: #e6ebf3;
+    color: #5b3fc4;
     font: inherit;
     font-size: 0.86rem;
     font-weight: 700;
@@ -264,9 +248,9 @@
 
 .side-quest-remove-btn {
     appearance: none;
-    border: 1px solid #3a2a3a;
+    border: 1px solid rgba(220, 80, 80, 0.4);
     background: rgba(255, 100, 100, 0.08);
-    color: #e6a0a0;
+    color: #c0392b;
     font-size: 1rem;
     line-height: 1;
     width: 2.1rem; height: 2.1rem;
@@ -274,35 +258,35 @@
     cursor: pointer;
     flex: 0 0 auto;
 }
-.side-quest-remove-btn:hover { background: rgba(255, 100, 100, 0.18); color: #fff; }
+.side-quest-remove-btn:hover { background: rgba(255, 100, 100, 0.18); color: #a93226; }
 
 .side-quest-import .side-quest-modal-body { display: flex; flex-direction: column; }
-.side-quest-import-hint { margin: 0 0 0.7rem 0; color: #9aa3b2; font-size: 0.84rem; line-height: 1.45; }
+.side-quest-import-hint { margin: 0 0 0.7rem 0; color: #5a6473; font-size: 0.84rem; line-height: 1.45; }
 .side-quest-import-name {
     box-sizing: border-box; width: 100%;
     padding: 0.55rem 0.7rem; margin-bottom: 0.6rem;
-    border: 1px solid #2a3140; border-radius: 8px;
-    background: #0d1219; color: #e6ebf3; font: inherit; font-size: 0.9rem;
+    border: 1px solid #e0e0e0; border-radius: 8px;
+    background: #ffffff; color: #2c3e50; font: inherit; font-size: 0.9rem;
 }
 .side-quest-import-text {
     box-sizing: border-box; width: 100%; resize: vertical;
     min-height: 9rem;
     padding: 0.6rem 0.7rem;
-    border: 1px solid #2a3140; border-radius: 8px;
-    background: #0d1219; color: #e6ebf3;
+    border: 1px solid #e0e0e0; border-radius: 8px;
+    background: #ffffff; color: #2c3e50;
     font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
     font-size: 0.82rem; line-height: 1.4;
 }
 .side-quest-import-name:focus, .side-quest-import-text:focus {
     outline: none; border-color: #9678ff; box-shadow: 0 0 0 2px rgba(150, 120, 255, 0.2);
 }
-.side-quest-import-error { color: #f08a8a; font-size: 0.82rem; margin: 0.5rem 0 0 0; }
+.side-quest-import-error { color: #c0392b; font-size: 0.82rem; margin: 0.5rem 0 0 0; }
 .side-quest-import-actions { display: flex; justify-content: flex-end; gap: 0.6rem; margin-top: 0.9rem; }
 .side-quest-import-cancel, .side-quest-import-do {
-    appearance: none; border: 1px solid #2a3140; font: inherit; font-weight: 700;
+    appearance: none; border: 1px solid #e0e0e0; font: inherit; font-weight: 700;
     font-size: 0.86rem; padding: 0.5rem 1rem; border-radius: 9px; cursor: pointer;
 }
-.side-quest-import-cancel { background: rgba(255, 255, 255, 0.04); color: #c4ccd9; }
+.side-quest-import-cancel { background: #f8f9fa; color: #4a4a4a; }
 .side-quest-import-do { background: #6f4fe0; border-color: #6f4fe0; color: #fff; }
 .side-quest-import-do:hover { background: #7e60ee; }
 
@@ -319,11 +303,11 @@
 }
 
 .side-quest-team {
-    background: var(--surface, #1a1f2c);
-    border: 1px solid #2a3140;
+    background: #ffffff;
+    border: 1px solid #e0e0e0;
     border-radius: 14px;
     padding: 1rem 1.1rem 1.1rem 1.1rem;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.25);
+    box-shadow: var(--shadow-sm, 0 1px 3px rgba(0,0,0,0.08));
 }
 
 .side-quest-team-head {
@@ -354,12 +338,12 @@
     margin: 0;
     font-size: 1.05rem;
     font-weight: 600;
-    color: #e6ebf3;
+    color: #2c3e50;
 }
 
 .side-quest-team-tourney {
     font-size: 0.78rem;
-    color: #8c95a5;
+    color: #6b7280;
     margin-top: 0.1rem;
 }
 
@@ -372,7 +356,7 @@
     border: 1px solid rgba(95, 182, 255, 0.35);
     border-radius: 10px;
     padding: 0.55rem 0.85rem;
-    color: #e6ebf3;
+    color: #2c3e50;
     cursor: pointer;
     font-family: inherit;
     transition: background 120ms ease, transform 80ms ease;
@@ -397,7 +381,7 @@
     font-size: 0.7rem;
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    color: #9fa9bb;
+    color: #5a6473;
     font-weight: 600;
 }
 
@@ -429,8 +413,8 @@
 }
 
 .side-quest-mon {
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid #242b39;
+    background: #f8f9fa;
+    border: 1px solid #e0e0e0;
     border-radius: 10px;
     padding: 0.55rem 0.65rem;
     min-height: 110px;
@@ -458,7 +442,7 @@
 .side-quest-mon-name {
     font-weight: 600;
     font-size: 0.92rem;
-    color: #e6ebf3;
+    color: #2c3e50;
 }
 
 .side-quest-tera {
@@ -473,7 +457,7 @@
     gap: 0.4rem;
     flex-wrap: wrap;
     font-size: 0.72rem;
-    color: #98a3b6;
+    color: #5a6473;
     margin-bottom: 0.35rem;
 }
 
@@ -481,7 +465,7 @@
 .side-quest-nature {
     font-size: 0.7rem;
     line-height: 1.35;
-    color: #98a3b6;
+    color: #5a6473;
     margin-bottom: 0.2rem;
     word-break: break-word;
 }
@@ -496,11 +480,11 @@
 }
 
 .side-quest-ability {
-    color: #b0b8c1;
+    color: #4a4a4a;
 }
 
 .side-quest-item {
-    color: #98a3b6;
+    color: #5a6473;
     font-style: italic;
 }
 
@@ -510,12 +494,12 @@
     margin: 0;
     font-size: 0.78rem;
     line-height: 1.35;
-    color: #d6dce7;
+    color: #4a4a4a;
 }
 
 .side-quest-move {
     padding: 1px 0;
-    border-top: 1px dotted rgba(255, 255, 255, 0.06);
+    border-top: 1px dotted rgba(0, 0, 0, 0.08);
 }
 
 .side-quest-move:first-child {
@@ -524,7 +508,7 @@
 
 .side-quest-strategy {
     margin-top: 0.9rem;
-    border-top: 1px solid #242b39;
+    border-top: 1px solid #e0e0e0;
     padding-top: 0.7rem;
 }
 
@@ -532,7 +516,7 @@
     cursor: pointer;
     font-size: 0.85rem;
     font-weight: 600;
-    color: #b0b8c1;
+    color: #4a4a4a;
     user-select: none;
     list-style: none;
 }
@@ -556,7 +540,7 @@
     margin: 0.5rem 0 0 1.1rem;
     padding: 0;
     font-size: 0.85rem;
-    color: #d6dce7;
+    color: #4a4a4a;
     line-height: 1.45;
 }
 
@@ -579,7 +563,7 @@
     border: 1px solid rgba(95, 182, 255, 0.35);
     border-radius: 10px;
     padding: 0.45rem 0.8rem;
-    color: #e6ebf3;
+    color: #2563ad;
     cursor: pointer;
     font-family: inherit;
     font-size: 0.82rem;
@@ -621,7 +605,7 @@
     border: 1px solid rgba(193, 138, 255, 0.38);
     border-radius: 10px;
     padding: 0.45rem 0.8rem;
-    color: #e6ebf3;
+    color: #6f4fe0;
     cursor: pointer;
     font-family: inherit;
     font-size: 0.82rem;
@@ -656,7 +640,7 @@
     position: fixed;
     inset: 0;
     z-index: 10000;
-    background: rgba(8, 11, 18, 0.72);
+    background: rgba(0, 0, 0, 0.5);
     backdrop-filter: blur(2px);
     display: flex;
     align-items: center;
@@ -665,10 +649,10 @@
 }
 
 .side-quest-modal {
-    background: var(--surface, #1a1f2c);
-    border: 1px solid #2a3140;
+    background: #ffffff;
+    border: 1px solid #e0e0e0;
     border-radius: 14px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    box-shadow: var(--shadow-md, 0 4px 12px rgba(0, 0, 0, 0.10));
     width: min(680px, 100%);
     max-height: min(85vh, 100%);
     display: flex;
@@ -682,26 +666,26 @@
     align-items: flex-start;
     gap: 1rem;
     padding: 1rem 1.1rem 0.8rem 1.1rem;
-    border-bottom: 1px solid #242b39;
+    border-bottom: 1px solid #e0e0e0;
 }
 
 .side-quest-modal-title {
     margin: 0;
     font-size: 1.05rem;
     font-weight: 600;
-    color: #e6ebf3;
+    color: #2c3e50;
 }
 
 .side-quest-modal-sub {
     margin: 0.2rem 0 0 0;
     font-size: 0.78rem;
-    color: #8c95a5;
+    color: #6b7280;
 }
 
 .side-quest-modal-close {
     background: transparent;
     border: none;
-    color: #8c95a5;
+    color: #6b7280;
     font-size: 1.5rem;
     line-height: 1;
     cursor: pointer;
@@ -711,14 +695,14 @@
 }
 
 .side-quest-modal-close:hover {
-    color: #e6ebf3;
-    background: rgba(255, 255, 255, 0.06);
+    color: #2c3e50;
+    background: rgba(0, 0, 0, 0.06);
 }
 
 .side-quest-modal-body {
     padding: 0.9rem 1.1rem 1.1rem 1.1rem;
     overflow-y: auto;
-    color: #d6dce7;
+    color: #333;
     font-size: 0.88rem;
     line-height: 1.5;
 }
@@ -734,7 +718,7 @@
 
 .side-quest-modal-overview {
     margin: 0;
-    color: #e6ebf3;
+    color: #2c3e50;
 }
 
 .side-quest-modal-roles {
@@ -747,8 +731,8 @@
 }
 
 .side-quest-modal-role {
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid #242b39;
+    background: #f8f9fa;
+    border: 1px solid #e0e0e0;
     border-radius: 10px;
     padding: 0.5rem 0.65rem;
 }
@@ -758,13 +742,13 @@
     align-items: center;
     gap: 0.4rem;
     margin-bottom: 0.15rem;
-    color: #e6ebf3;
+    color: #2c3e50;
 }
 
 .side-quest-modal-role-text {
     display: block;
     font-size: 0.84rem;
-    color: #b0b8c1;
+    color: #4a4a4a;
 }
 
 .side-quest-modal-plan {
@@ -788,8 +772,8 @@
 .side-quest-modal-ai-note {
     margin: 1.2rem 0 0 0;
     font-size: 0.72rem;
-    color: #6f7a8d;
-    border-top: 1px dotted rgba(255, 255, 255, 0.08);
+    color: #6b7280;
+    border-top: 1px dotted rgba(0, 0, 0, 0.1);
     padding-top: 0.6rem;
 }
 
@@ -803,7 +787,7 @@
 .side-quest-mark-hint {
     margin: 0.5rem 0 0 0;
     font-size: 0.76rem;
-    color: #8c95a5;
+    color: #6b7280;
 }
 
 .side-quest-team-footer {
@@ -836,8 +820,8 @@
     height: 2rem;
     padding: 0;
     border-radius: 9px;
-    border: 1px solid #2a3140;
-    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid #e0e0e0;
+    background: #f8f9fa;
     cursor: pointer;
     font-size: 0.95rem;
     line-height: 1;
@@ -848,7 +832,7 @@
 
 .side-quest-mark-btn:hover {
     filter: grayscale(0) opacity(1);
-    background: rgba(255, 255, 255, 0.07);
+    background: #ecf0f1;
 }
 
 .side-quest-mark-btn:active {
@@ -910,7 +894,7 @@
     border: 1px solid rgba(76, 209, 130, 0.45);
     border-radius: 10px;
     padding: 0.45rem 0.85rem;
-    color: #e6ebf3;
+    color: #1f8a52;
     cursor: pointer;
     font-family: inherit;
     font-size: 0.82rem;
@@ -930,7 +914,7 @@
 /* ── Play modal (fullscreen overlay) ────────────────────────────── */
 .sq-play-overlay {
     position: fixed; inset: 0;
-    background: rgba(8, 11, 18, 0.92);
+    background: rgba(0, 0, 0, 0.55);
     backdrop-filter: blur(3px);
     z-index: 10001;
     display: flex; align-items: center; justify-content: center;
@@ -941,29 +925,29 @@
 @keyframes sq-play-fade { from { opacity: 0; } to { opacity: 1; } }
 
 .sq-play-panel {
-    background: #1a1f2c;
-    border: 1px solid #2a3140;
+    background: #ffffff;
+    border: 1px solid #e0e0e0;
     border-radius: 14px;
-    box-shadow: 0 18px 60px rgba(0, 0, 0, 0.55);
+    box-shadow: var(--shadow-md, 0 4px 12px rgba(0, 0, 0, 0.10));
     width: min(96vw, 1180px);
     max-height: calc(100vh - 1.5rem);
     display: flex; flex-direction: column;
-    color: #e6ebf3;
+    color: #333;
     overflow: hidden;
 }
 
 .sq-play-head {
     display: flex; align-items: center; justify-content: space-between;
     padding: 0.85rem 1rem;
-    border-bottom: 1px solid #242b39;
+    border-bottom: 1px solid #e0e0e0;
     flex-shrink: 0;
 }
-.sq-play-title { margin: 0; font-size: 1rem; font-weight: 700; }
+.sq-play-title { margin: 0; font-size: 1rem; font-weight: 700; color: #2c3e50; }
 .sq-play-close {
     width: 2rem; height: 2rem; border-radius: 50%;
-    background: rgba(20, 25, 35, 0.65);
-    border: 1px solid #2a3140;
-    color: #e6ebf3; font-size: 1.2rem; line-height: 1; cursor: pointer;
+    background: #f8f9fa;
+    border: 1px solid #e0e0e0;
+    color: #4a4a4a; font-size: 1.2rem; line-height: 1; cursor: pointer;
 }
 .sq-play-close:hover { background: rgba(95, 182, 255, 0.25); }
 
@@ -978,28 +962,28 @@
     .sq-play-body { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
 }
 
-.sq-play-col-title { margin: 0 0 0.4rem 0; font-size: 0.95rem; font-weight: 700; color: #b6c3d5; }
-.sq-play-col-hint { margin: 0 0 0.6rem 0; font-size: 0.78rem; color: #8c95a5; }
+.sq-play-col-title { margin: 0 0 0.4rem 0; font-size: 0.95rem; font-weight: 700; color: #2c3e50; }
+.sq-play-col-hint { margin: 0 0 0.6rem 0; font-size: 0.78rem; color: #6b7280; }
 
 .sq-play-mons { display: flex; flex-direction: column; gap: 0.45rem; }
 .sq-play-mon {
-    background: #11151e;
-    border: 1px solid #232a39;
+    background: #f8f9fa;
+    border: 1px solid #e0e0e0;
     border-radius: 10px;
     padding: 0.55rem 0.7rem;
     display: flex; flex-direction: column; gap: 0.35rem;
 }
 .sq-play-mon-head { display: flex; align-items: center; gap: 0.5rem; }
 .sq-play-mon-titleblock { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
-.sq-play-mon-name { font-weight: 700; font-size: 0.9rem; }
+.sq-play-mon-name { font-weight: 700; font-size: 0.9rem; color: #2c3e50; }
 
 .sq-play-mon-row { display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; font-size: 0.8rem; }
-.sq-play-row-label { color: #8c95a5; min-width: 5.2rem; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.04em; }
+.sq-play-row-label { color: #6b7280; min-width: 5.2rem; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.04em; }
 .sq-play-speed { display: inline-flex; align-items: baseline; gap: 0.4rem; }
-.sq-play-speed-actual { font-weight: 700; font-size: 1.05rem; color: #5fb6ff; }
-.sq-play-speed-tail { color: #4cd182; font-weight: 600; font-size: 0.85rem; }
-.sq-play-speed-range { color: #8c95a5; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.78rem; }
-.sq-play-speed-missing { color: #f25656; }
+.sq-play-speed-actual { font-weight: 700; font-size: 1.05rem; color: #2980b9; }
+.sq-play-speed-tail { color: #2e9d60; font-weight: 600; font-size: 0.85rem; }
+.sq-play-speed-range { color: #6b7280; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.78rem; }
+.sq-play-speed-missing { color: #d9483b; }
 
 .sq-play-types, .sq-play-weaks { display: inline-flex; gap: 4px; flex-wrap: wrap; }
 .sq-play-type, .sq-play-weak {
@@ -1012,7 +996,7 @@
 }
 .sq-play-weak small { opacity: 0.85; font-weight: 600; }
 .sq-play-weak-4x { box-shadow: 0 0 0 2px #ffb347 inset, 0 1px 2px rgba(0,0,0,0.4) inset; }
-.sq-play-noweak { color: #6b7585; font-style: italic; font-size: 0.78rem; }
+.sq-play-noweak { color: #6b7280; font-style: italic; font-size: 0.78rem; }
 
 /* Type-color palette (gen 6+ canonical hex) */
 .sq-play-type-normal   { background: #a8a878; }
@@ -1044,29 +1028,29 @@
 
 .sq-play-opp-slot {
     position: relative;
-    background: #11151e;
-    border: 1px solid #232a39;
+    background: #f8f9fa;
+    border: 1px solid #e0e0e0;
     border-radius: 10px;
     padding: 0.55rem 0.45rem;
     display: flex; flex-direction: column; align-items: center;
     gap: 4px; min-height: 6.2rem;
     font-family: inherit;
-    color: #e6ebf3;
+    color: #2c3e50;
     cursor: pointer;
 }
 .sq-play-opp-empty {
     border-style: dashed;
-    border-color: #38415a;
-    color: #6b7585;
+    border-color: #cdd3da;
+    color: #6b7280;
     justify-content: center;
 }
-.sq-play-opp-empty:hover { background: rgba(95, 182, 255, 0.08); color: #b6c3d5; }
+.sq-play-opp-empty:hover { background: rgba(95, 182, 255, 0.08); color: #2563ad; }
 .sq-play-opp-empty-icon { font-size: 1.8rem; line-height: 1; opacity: 0.5; }
 .sq-play-opp-empty-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em; }
 
 .sq-play-opp-filled { cursor: default; }
 .sq-play-opp-name { font-size: 0.75rem; font-weight: 700; text-align: center; }
-.sq-play-opp-speed { font-size: 0.7rem; color: #8c95a5; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+.sq-play-opp-speed { font-size: 0.7rem; color: #6b7280; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
 
 .sq-play-opp-clear {
     position: absolute; top: 4px; right: 4px;
@@ -1080,7 +1064,7 @@
 /* Sprite picker (sub-modal) */
 .sq-play-picker-overlay {
     position: fixed; inset: 0;
-    background: rgba(8, 11, 18, 0.92);
+    background: rgba(0, 0, 0, 0.55);
     z-index: 10002;
     display: flex; align-items: flex-start; justify-content: center;
     /* Respect the notch / status bar when launched as an installed PWA
@@ -1092,7 +1076,7 @@
     animation: sq-play-fade 100ms ease-out;
 }
 .sq-play-picker-panel {
-    background: #1a1f2c; border: 1px solid #2a3140; border-radius: 14px;
+    background: #ffffff; border: 1px solid #e0e0e0; border-radius: 14px;
     width: min(96vw, 720px);
     /* Anchor to the top (align-items: flex-start) and cap to the VISIBLE
      * viewport (dvh, not vh) minus the safe areas, so the header — and its
@@ -1101,31 +1085,31 @@
     max-height: calc(100vh - 2rem);
     max-height: calc(100dvh - max(1rem, env(safe-area-inset-top)) - max(1rem, env(safe-area-inset-bottom)));
     display: flex; flex-direction: column;
-    color: #e6ebf3;
+    color: #333;
     overflow: hidden;
 }
 .sq-play-picker-head {
     display: flex; align-items: center; gap: 0.5rem;
     padding: 0.6rem 0.7rem;
-    border-bottom: 1px solid #242b39;
+    border-bottom: 1px solid #e0e0e0;
     position: sticky; top: 0; z-index: 1;
-    background: #1a1f2c;
+    background: #ffffff;
 }
 .sq-play-picker-search {
     flex: 1;
-    background: #0d1118;
-    border: 1px solid #242b39;
+    background: #f8f9fa;
+    border: 1px solid #e0e0e0;
     border-radius: 8px;
     padding: 0.5rem 0.7rem;
-    color: #e6ebf3;
+    color: #2c3e50;
     font-size: 0.9rem;
     font-family: inherit;
 }
 .sq-play-picker-search:focus { outline: 2px solid #5fb6ff; outline-offset: 1px; }
 .sq-play-picker-close {
     width: 2rem; height: 2rem; border-radius: 50%;
-    background: rgba(20, 25, 35, 0.65); border: 1px solid #2a3140;
-    color: #e6ebf3; font-size: 1.2rem; line-height: 1; cursor: pointer;
+    background: #f8f9fa; border: 1px solid #e0e0e0;
+    color: #4a4a4a; font-size: 1.2rem; line-height: 1; cursor: pointer;
 }
 
 .sq-play-picker-grid {
@@ -1138,10 +1122,10 @@
     -webkit-overflow-scrolling: touch;
 }
 .sq-play-picker-cell {
-    background: #11151e; border: 1px solid #232a39; border-radius: 8px;
+    background: #f8f9fa; border: 1px solid #e0e0e0; border-radius: 8px;
     padding: 0.35rem; cursor: pointer;
     display: flex; flex-direction: column; align-items: center; gap: 2px;
-    color: #c8d3e3;
+    color: #4a4a4a;
     font-family: inherit;
 }
 .sq-play-picker-cell:hover { background: rgba(95, 182, 255, 0.12); border-color: #5fb6ff; }
@@ -1154,7 +1138,7 @@
     content: "✓";
     position: absolute;
     top: 2px; left: 4px;
-    color: #9fd0ff;
+    color: #1d6fd0;
     font-size: 0.7rem;
     font-weight: 900;
 }
@@ -1172,7 +1156,7 @@
 .sq-play-picker-toggle {
     background: rgba(95, 182, 255, 0.12);
     border: 1px solid rgba(95, 182, 255, 0.4);
-    color: #cfe2ff;
+    color: #2563ad;
     border-radius: 8px;
     padding: 0.35rem 0.6rem;
     font-size: 0.78rem; font-weight: 700;
@@ -1183,8 +1167,8 @@
 .sq-play-picker-toggle:hover { background: rgba(95, 182, 255, 0.22); }
 .sq-play-picker-toggle[aria-pressed="true"] {
     background: rgba(255, 193, 7, 0.18);
-    border-color: rgba(255, 193, 7, 0.45);
-    color: #f5d27a;
+    border-color: rgba(255, 193, 7, 0.5);
+    color: #a87b1a;
 }
 .sq-play-picker-toggle-count { opacity: 0.75; font-weight: 600; }
 
@@ -1226,12 +1210,12 @@
     line-height: 1.18;
     font-size: 0.66rem;
     min-height: 2.36em;
-    color: #d6dee9;
+    color: #4a4a4a;
 }
 .sq-play-picker-empty {
     grid-column: 1 / -1;
     text-align: center;
-    color: #8c95a5;
+    color: #6b7280;
     font-size: 0.8rem;
     padding: 1.2rem;
     margin: 0;
@@ -1273,8 +1257,8 @@
  * how many more picks until the picker auto-closes. */
 .sq-play-picker-progress {
     background: rgba(76, 209, 130, 0.18);
-    color: #b6efcb;
-    border: 1px solid rgba(76, 209, 130, 0.45);
+    color: #1f8a52;
+    border: 1px solid rgba(76, 209, 130, 0.5);
     border-radius: 8px;
     padding: 0.3rem 0.55rem;
     font-size: 0.72rem;
@@ -1295,8 +1279,8 @@
  * the user sees the whole field at a glance without scrolling.
  */
 .sq-play-ladder {
-    background: #11151e;
-    border: 1px solid #232a39;
+    background: #f8f9fa;
+    border: 1px solid #e0e0e0;
     border-radius: 10px;
     padding: 0.55rem 0.6rem 0.65rem 0.6rem;
     margin-bottom: 0.6rem;
@@ -1305,7 +1289,7 @@
 .sq-play-ladder-hint {
     margin: 0.2rem 0 0.45rem 0;
     font-size: 0.72rem;
-    color: #8c95a5;
+    color: #6b7280;
 }
 .sq-play-ladder-rows {
     list-style: none; padding: 0; margin: 0;
@@ -1321,7 +1305,9 @@
     padding: 4px 6px;
     border-radius: 6px;
     border-left: 3px solid transparent;
-    background: #161c28;
+    background: #ffffff;
+    border: 1px solid #e8eaed;
+    border-left: 3px solid transparent;
     font-size: 0.78rem;
     min-height: 28px;
 }
@@ -1329,7 +1315,7 @@
 .sq-play-ladder-opp   { border-left-color: #f56666; }
 
 .sq-play-ladder-rank {
-    color: #6b7585;
+    color: #6b7280;
     font-size: 0.68rem;
     font-weight: 700;
     text-align: right;
@@ -1343,7 +1329,7 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    color: #e6ebf3;
+    color: #2c3e50;
     font-weight: 600;
 }
 .sq-play-ladder-side {
@@ -1362,7 +1348,7 @@
     text-align: right;
     font-variant-numeric: tabular-nums;
     font-weight: 800;
-    color: #e6ebf3;
+    color: #2c3e50;
     font-size: 0.92rem;
 }
 /* "~" prefix on opponent typical-speed numbers; "?" prefix when
@@ -1370,13 +1356,13 @@
  * old "typ" superscript that the user reported reading as "Type"
  * — universally-known "approximately" glyph is unambiguous. */
 .sq-play-ladder-prefix {
-    color: #8c95a5;
+    color: #6b7280;
     font-weight: 600;
     margin-right: 1px;
     font-size: 0.85em;
 }
 .sq-play-ladder-prefix-base {
-    color: #f5d27a;
+    color: #b8860b;
 }
 /* Post-Mega Speed pill — Mega Evolution (held Mega Stone) changes the
  * base stats, so we show the resulting Speed + range. The violet "M …"
@@ -1388,7 +1374,7 @@
     padding: 0 6px;
     border-radius: 6px;
     background: rgba(193, 138, 255, 0.16);
-    color: #d8b6ff;
+    color: #6f4fe0;
     font-size: 0.82em;
     font-weight: 700;
     font-variant-numeric: tabular-nums;
@@ -1424,7 +1410,7 @@
  * number first. */
 .sq-play-ladder-range {
     text-align: right;
-    color: #8c95a5;
+    color: #6b7280;
     font-variant-numeric: tabular-nums;
     font-size: 0.7rem;
     font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
@@ -1432,7 +1418,7 @@
 }
 .sq-play-ladder-tw {
     text-align: right;
-    color: #4cd182;
+    color: #2e9d60;
     font-variant-numeric: tabular-nums;
     font-size: 0.72rem;
     font-weight: 600;
@@ -1447,15 +1433,15 @@
     flex-direction: column;
     align-items: center;
     line-height: 1.05;
-    color: #cfe2ff;
+    color: #2563ad;
 }
 .sq-play-opp-speed-typ strong {
     font-size: 0.95rem;
-    color: #5fb6ff;
+    color: #2563ad;
 }
 .sq-play-opp-speed-typ small {
     font-size: 0.62rem;
-    color: #8c95a5;
+    color: #6b7280;
     font-weight: 500;
 }
 
@@ -1483,15 +1469,15 @@
     gap: 3px;
     padding: 3px;
     margin: 0 0 1rem 0;
-    background: #11161f;
-    border: 1px solid #232b39;
+    background: #f8f9fa;
+    border: 1px solid #e0e0e0;
     border-radius: 11px;
 }
 .side-quest-subtab {
     appearance: none;
     border: 0;
     background: transparent;
-    color: #aab3c2;
+    color: #5a6473;
     font: inherit;
     font-weight: 700;
     font-size: 0.86rem;
@@ -1500,7 +1486,7 @@
     cursor: pointer;
     transition: background 120ms ease, color 120ms ease;
 }
-.side-quest-subtab:hover { color: #e6ebf3; }
+.side-quest-subtab:hover { color: #2c3e50; }
 .side-quest-subtab.is-active {
     background: #2563ad;
     color: #fff;
@@ -1509,7 +1495,7 @@
 /* ── Resources / Nachschlagen ────────────────────────────────────── */
 .sq-res-intro {
     margin: 0 0 0.8rem 0;
-    color: #9aa3b2;
+    color: #4a4a4a;
     font-size: 0.85rem;
     line-height: 1.45;
 }
@@ -1518,9 +1504,9 @@
     box-sizing: border-box;
     padding: 0.7rem 0.9rem;
     border-radius: 10px;
-    border: 1px solid #2a3140;
-    background: #11161f;
-    color: #e6ebf3;
+    border: 1px solid #e0e0e0;
+    background: #ffffff;
+    color: #2c3e50;
     font: inherit;
     font-size: 0.95rem;
     margin-bottom: 0.7rem;
@@ -1538,9 +1524,9 @@
 }
 .sq-res-chip {
     appearance: none;
-    border: 1px solid #2a3140;
-    background: rgba(255, 255, 255, 0.03);
-    color: #c4ccd9;
+    border: 1px solid #e0e0e0;
+    background: #f8f9fa;
+    color: #4a4a4a;
     font: inherit;
     font-size: 0.8rem;
     font-weight: 600;
@@ -1549,11 +1535,11 @@
     cursor: pointer;
     transition: background 120ms ease, border-color 120ms ease, color 120ms ease;
 }
-.sq-res-chip:hover { background: rgba(255, 255, 255, 0.07); }
+.sq-res-chip:hover { background: #ecf0f1; }
 .sq-res-chip.is-active {
     background: rgba(95, 182, 255, 0.16);
     border-color: rgba(95, 182, 255, 0.5);
-    color: #e6ebf3;
+    color: #2563ad;
 }
 .sq-res-chip-n {
     opacity: 0.6;
@@ -1562,11 +1548,11 @@
 }
 .sq-res-count {
     margin: 0 0 0.5rem 0;
-    color: #6b7585;
+    color: #6b7280;
     font-size: 0.74rem;
 }
 .sq-res-status {
-    color: #8c95a5;
+    color: #6b7280;
     font-size: 0.88rem;
     padding: 0.6rem 0;
 }
@@ -1580,9 +1566,9 @@
     gap: 4px;
 }
 .sq-res-entry {
-    border: 1px solid #232b39;
+    border: 1px solid #e0e0e0;
     border-radius: 9px;
-    background: #161c28;
+    background: #ffffff;
     overflow: hidden;
 }
 .sq-res-entry.is-open { border-color: #2f6dad; }
@@ -1600,19 +1586,19 @@
     text-align: left;
     cursor: pointer;
 }
-.sq-res-head:hover { background: rgba(255, 255, 255, 0.03); }
+.sq-res-head:hover { background: rgba(0, 0, 0, 0.03); }
 .sq-res-names {
     display: flex;
     flex-direction: column;
     min-width: 0;
 }
 .sq-res-name {
-    color: #e6ebf3;
+    color: #2c3e50;
     font-weight: 700;
     font-size: 0.92rem;
 }
 .sq-res-name-alt {
-    color: #7b8494;
+    color: #6b7280;
     font-size: 0.74rem;
 }
 .sq-res-badges {
@@ -1634,49 +1620,49 @@
     padding: 1px 7px;
     border-radius: 999px;
     background: rgba(120, 200, 120, 0.16);
-    color: #8fd49a;
-    border: 1px solid rgba(120, 200, 120, 0.4);
+    color: #2e9d60;
+    border: 1px solid rgba(120, 200, 120, 0.45);
     font-size: 0.66rem;
     font-weight: 700;
 }
 .sq-res-cat {
-    color: #8c95a5;
+    color: #6b7280;
     font-size: 0.68rem;
     font-weight: 600;
 }
 .sq-res-chevron {
-    color: #6b7585;
+    color: #6b7280;
     font-size: 0.7rem;
     transition: transform 140ms ease;
 }
 .sq-res-entry.is-open .sq-res-chevron { transform: rotate(180deg); }
 .sq-res-effect {
     padding: 0 0.7rem 0.65rem 0.7rem;
-    color: #d6dce7;
+    color: #333;
     font-size: 0.86rem;
     line-height: 1.5;
 }
 .sq-res-verified {
-    color: #4cd182;
+    color: #2e9d60;
     font-weight: 900;
     margin-right: 4px;
 }
 .sq-res-noeff {
-    color: #8c95a5;
+    color: #6b7280;
     font-style: italic;
 }
 .sq-res-attr {
     margin: 0.9rem 0 0 0;
     padding-top: 0.6rem;
-    border-top: 1px solid #1c2330;
-    color: #6b7585;
+    border-top: 1px solid #e0e0e0;
+    color: #6b7280;
     font-size: 0.7rem;
     line-height: 1.4;
 }
 
 /* ── Side Quest · Champions — Pokédex table ─────────────────────── */
 .sqp-intro {
-    color: #9aa4b2;
+    color: #4a4a4a;
     font-size: 0.85rem;
     line-height: 1.5;
     margin: 0 0 0.7rem;
@@ -1686,9 +1672,9 @@
     box-sizing: border-box;
     padding: 0.7rem 0.9rem;
     border-radius: 10px;
-    border: 1px solid #2a3140;
-    background: #11161f;
-    color: #e6ebf3;
+    border: 1px solid #e0e0e0;
+    background: #ffffff;
+    color: #2c3e50;
     font: inherit;
     font-size: 0.95rem;
     margin-bottom: 0.7rem;
@@ -1702,7 +1688,7 @@
     margin-bottom: 0.55rem;
 }
 .sqp-presets-label {
-    color: #aeb8c6;
+    color: #5a6473;
     font-size: 0.74rem;
     font-weight: 700;
     text-transform: uppercase;
@@ -1711,9 +1697,9 @@
 }
 .sqp-preset {
     appearance: none;
-    border: 1px solid #3a4456;
-    background: #222b3a;
-    color: #eef2f8;
+    border: 1px solid #e0e0e0;
+    background: #f8f9fa;
+    color: #4a4a4a;
     font: inherit;
     font-size: 0.8rem;
     font-weight: 600;
@@ -1722,7 +1708,7 @@
     cursor: pointer;
     transition: background 120ms ease, border-color 120ms ease, color 120ms ease;
 }
-.sqp-preset:hover { background: #2c374a; border-color: #4a566b; }
+.sqp-preset:hover { background: #ecf0f1; border-color: #d8dee7; }
 .sqp-preset.is-active {
     background: #3d7fd0;
     border-color: #5b9cef;
@@ -1737,9 +1723,9 @@
 }
 .sqp-select {
     appearance: none;
-    border: 1px solid #2a3140;
-    background: #11161f;
-    color: #e6ebf3;
+    border: 1px solid #e0e0e0;
+    background: #ffffff;
+    color: #2c3e50;
     font: inherit;
     font-size: 0.82rem;
     padding: 0.4rem 1.8rem 0.4rem 0.7rem;
@@ -1749,13 +1735,13 @@
     background-repeat: no-repeat;
     background-position: right 0.6rem center;
 }
-.sqp-count { color: #6b7585; font-size: 0.78rem; margin: 0 0 0.45rem; }
-.sqp-status { color: #9aa4b2; font-size: 0.9rem; padding: 1rem 0; }
+.sqp-count { color: #6b7280; font-size: 0.78rem; margin: 0 0 0.45rem; }
+.sqp-status { color: #6b7280; font-size: 0.9rem; padding: 1rem 0; }
 
 .sqp-table-wrap {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
-    border: 1px solid #1c2330;
+    border: 1px solid #e0e0e0;
     border-radius: 10px;
 }
 /* The global `.tab-content table { display:block }` rule (and its white
@@ -1770,7 +1756,7 @@
     min-width: 100%;
     white-space: nowrap;
     font-size: 0.82rem;
-    color: #e6ebf3;
+    color: #333;
 }
 /* Neutralise the global `table { display:block }` and
    `table thead, table tbody { display:table; table-layout:fixed }` rules,
@@ -1785,14 +1771,14 @@
     padding: 0.45rem 0.55rem;
     text-align: center;
     white-space: nowrap;
-    border-bottom: 1px solid #1c2330;
+    border-bottom: 1px solid #e0e0e0;
     background-clip: padding-box;
 }
 #sideQuestPokedexHost .sqp-table thead th {
     position: sticky;
     top: 0;
-    background: #161c27;
-    color: #9aa4b2;
+    background: #ecf0f1;
+    color: #5a6473;
     font-size: 0.72rem;
     font-weight: 700;
     text-transform: uppercase;
@@ -1800,9 +1786,9 @@
     z-index: 2;
 }
 #sideQuestPokedexHost .sqp-sortable { cursor: pointer; user-select: none; }
-#sideQuestPokedexHost .sqp-sortable:hover { color: #e6ebf3; background: #1b2330; }
-#sideQuestPokedexHost .sqp-table thead th.is-sorted { color: #7cc0ff; }
-#sideQuestPokedexHost .sqp-table tbody tr:hover { background: rgba(255, 255, 255, 0.03); }
+#sideQuestPokedexHost .sqp-sortable:hover { color: #2c3e50; background: #dfe6e9; }
+#sideQuestPokedexHost .sqp-table thead th.is-sorted { color: #2563ad; }
+#sideQuestPokedexHost .sqp-table tbody tr:hover { background: rgba(0, 0, 0, 0.03); }
 
 /* Sticky Pokémon name column (left) for horizontal scrolling. The id
    prefix overrides the global white `td:first-child` background. */
@@ -1811,15 +1797,15 @@
     position: sticky;
     left: 0;
     text-align: left;
-    background-color: #0e131b;
-    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.28);
+    background-color: #ffffff;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.08);
     z-index: 1;
     min-width: 124px;
 }
-#sideQuestPokedexHost .sqp-table thead th.sqp-c-mon { background-color: #161c27; z-index: 3; }
-#sideQuestPokedexHost .sqp-table tbody tr:hover td.sqp-c-mon { background-color: #141b25; }
+#sideQuestPokedexHost .sqp-table thead th.sqp-c-mon { background-color: #ecf0f1; z-index: 3; }
+#sideQuestPokedexHost .sqp-table tbody tr:hover td.sqp-c-mon { background-color: #f0f2f5; }
 .sqp-mon-name { display: block; font-weight: 700; }
-.sqp-mon-sub { display: block; color: #6b7585; font-size: 0.68rem; margin-top: 1px; }
+.sqp-mon-sub { display: block; color: #6b7280; font-size: 0.68rem; margin-top: 1px; }
 
 .sqp-type {
     display: inline-block;
@@ -1832,12 +1818,12 @@
 }
 #sideQuestPokedexHost .sqp-stat-top { display: block; font-size: 0.86rem; white-space: nowrap; }
 #sideQuestPokedexHost .sqp-stat-top b { font-weight: 700; }
-#sideQuestPokedexHost .sqp-stat-used { color: #8fd6ff; font-weight: 600; font-size: 0.74rem; margin-left: 2px; }
-#sideQuestPokedexHost .sqp-stat small { display: block; color: #6b7585; font-size: 0.64rem; margin-top: 1px; }
-#sideQuestPokedexHost .sqp-c-total b { color: #c4ccd9; }
+#sideQuestPokedexHost .sqp-stat-used { color: #1d6fd0; font-weight: 600; font-size: 0.74rem; margin-left: 2px; }
+#sideQuestPokedexHost .sqp-stat small { display: block; color: #6b7280; font-size: 0.64rem; margin-top: 1px; }
+#sideQuestPokedexHost .sqp-c-total b { color: #2c3e50; }
 
 .sqp-note, .sqp-attr {
-    color: #6b7585;
+    color: #6b7280;
     font-size: 0.7rem;
     line-height: 1.4;
     margin: 0.5rem 0 0;
@@ -1857,9 +1843,9 @@
     display: inline-flex;
     align-items: center;
     gap: 0.45rem;
-    border: 1px solid #3a4456;
-    background: #222b3a;
-    color: #c4ccd9;
+    border: 1px solid #e0e0e0;
+    background: #f8f9fa;
+    color: #4a4a4a;
     font: inherit;
     font-size: 0.82rem;
     font-weight: 700;
@@ -1872,8 +1858,8 @@
     width: 0.7rem;
     height: 0.7rem;
     border-radius: 50%;
-    background: #4a566b;
-    box-shadow: inset 0 0 0 2px rgba(0,0,0,0.25);
+    background: #c0c7d0;
+    box-shadow: inset 0 0 0 2px rgba(0,0,0,0.12);
     transition: background 120ms ease;
 }
 .sq-res-champ.is-on {
@@ -1886,7 +1872,7 @@
     box-shadow: 0 0 6px rgba(91, 227, 154, 0.6);
 }
 .sq-res-champ-note {
-    color: #8b95a5;
+    color: #6b7280;
     font-size: 0.72rem;
     line-height: 1.3;
     flex: 1 1 12rem;
@@ -1895,19 +1881,19 @@
 
 /* ── Pokédex: most-used SP spread (meta) expandable row ─────────── */
 #sideQuestPokedexHost .sqp-row.has-meta { cursor: pointer; }
-#sideQuestPokedexHost .sqp-row.has-meta:hover td { background: #1b2330; }
-#sideQuestPokedexHost .sqp-row.has-meta:hover td.sqp-c-mon { background: #141b25; }
+#sideQuestPokedexHost .sqp-row.has-meta:hover td { background: rgba(0, 0, 0, 0.03); }
+#sideQuestPokedexHost .sqp-row.has-meta:hover td.sqp-c-mon { background: #f0f2f5; }
 .sqp-caret {
     display: inline-block;
-    color: #7cc0ff;
+    color: #2563ad;
     font-size: 0.7rem;
     margin-right: 0.3rem;
     transition: transform 120ms ease;
 }
 #sideQuestPokedexHost .sqp-row.is-open .sqp-caret { transform: rotate(90deg); }
 #sideQuestPokedexHost .sqp-detail td {
-    background: #0e131b;
-    border-bottom: 1px solid #1c2330;
+    background: #f8f9fa;
+    border-bottom: 1px solid #e0e0e0;
     padding: 0;
 }
 .sqp-meta {
@@ -1916,7 +1902,7 @@
     gap: 0.3rem;
     padding: 0.5rem 0.7rem 0.6rem;
     font-size: 0.82rem;
-    color: #e6ebf3;
+    color: #333;
     white-space: normal;
     text-align: left;
 }
@@ -1926,22 +1912,22 @@
     align-items: baseline;
     gap: 0.4rem;
 }
-.sqp-meta-final b { color: #8fd6ff; font-weight: 700; }
+.sqp-meta-final b { color: #1d6fd0; font-weight: 700; }
 .sqp-meta-tag {
-    color: #8fe0aa;
+    color: #2e9d60;
     font-weight: 700;
     text-transform: uppercase;
     font-size: 0.68rem;
     letter-spacing: 0.03em;
 }
-.sqp-meta-evs { font-weight: 700; color: #fff; }
-.sqp-meta-nat { color: #c4ccd9; }
-.sqp-meta-n { color: #6b7585; font-size: 0.72rem; }
-.sqp-meta-pct { color: #8fd6ff; font-weight: 700; font-size: 0.78rem; }
+.sqp-meta-evs { font-weight: 700; color: #2c3e50; }
+.sqp-meta-nat { color: #4a4a4a; }
+.sqp-meta-n { color: #6b7280; font-size: 0.72rem; }
+.sqp-meta-pct { color: #1d6fd0; font-weight: 700; font-size: 0.78rem; }
 /* In-game ladder provenance tag (replaces the "(n von total)" sample note
    when the build comes from the authoritative championsbattledata usage). */
 .sqp-meta-src {
-    color: #8fe0aa;
+    color: #2e9d60;
     font-size: 0.72rem;
     font-weight: 600;
     white-space: nowrap;
@@ -1951,7 +1937,7 @@
 body.sqp-d-open { overflow: hidden; }
 .sqp-d-overlay {
     position: fixed; inset: 0; z-index: 1000;
-    background: rgba(6, 10, 16, 0.74);
+    background: rgba(0, 0, 0, 0.5);
     display: flex; align-items: flex-start; justify-content: center;
     padding: 4vh 12px; overflow-y: auto;
     -webkit-backdrop-filter: blur(2px); backdrop-filter: blur(2px);
@@ -1960,95 +1946,96 @@ body.sqp-d-open { overflow: hidden; }
 .sqp-d-card {
     position: relative;
     width: 100%; max-width: 640px;
-    background: #141b25; border: 1px solid #2c374a; border-radius: 14px;
-    box-shadow: 0 18px 50px rgba(0, 0, 0, 0.55);
+    background: #ffffff; border: 1px solid #e0e0e0; border-radius: 14px;
+    box-shadow: var(--shadow-md, 0 4px 12px rgba(0, 0, 0, 0.10));
     padding: 18px 18px 14px;
 }
 .sqp-d-close {
     position: absolute; top: 8px; right: 10px;
-    background: none; border: none; color: #9aa4b2;
+    background: none; border: none; color: #6b7280;
     font-size: 1.5rem; line-height: 1; cursor: pointer; padding: 4px 8px;
     border-radius: 8px;
 }
-.sqp-d-close:hover { color: #fff; background: #1b2330; }
+.sqp-d-close:hover { color: #2c3e50; background: #f0f2f5; }
 .sqp-d-head { display: flex; align-items: center; gap: 12px; padding-right: 28px; flex-wrap: wrap; }
-.sqp-d-name-main { font-size: 1.25rem; font-weight: 800; color: #e6ebf3; }
-.sqp-d-name-sub { display: block; color: #6b7585; font-size: 0.74rem; margin-top: 2px; }
+.sqp-d-name-main { font-size: 1.25rem; font-weight: 800; color: #2c3e50; }
+.sqp-d-name-sub { display: block; color: #6b7280; font-size: 0.74rem; margin-top: 2px; }
 .sqp-d-types { display: flex; gap: 6px; margin-left: auto; }
 .sqp-d-searchwrap { position: relative; margin: 12px 0 8px; }
 .sqp-d-search {
     width: 100%; box-sizing: border-box;
-    background: #0f141d; border: 1px solid #2c374a; border-radius: 9px;
-    color: #e6ebf3; padding: 8px 11px; font-size: 0.9rem;
+    background: #ffffff; border: 1px solid #e0e0e0; border-radius: 9px;
+    color: #2c3e50; padding: 8px 11px; font-size: 0.9rem;
 }
 .sqp-d-search:focus { outline: none; border-color: rgba(95, 182, 255, 0.6); }
 .sqp-d-results {
     position: absolute; left: 0; right: 0; top: calc(100% + 4px); z-index: 5;
-    background: #0f141d; border: 1px solid #2c374a; border-radius: 9px;
+    background: #ffffff; border: 1px solid #e0e0e0; border-radius: 9px;
+    box-shadow: var(--shadow-md, 0 4px 12px rgba(0, 0, 0, 0.10));
     max-height: 260px; overflow-y: auto; padding: 4px;
 }
 .sqp-d-hit {
     display: block; width: 100%; text-align: left; cursor: pointer;
-    background: none; border: none; color: #c4ccd9;
+    background: none; border: none; color: #333;
     padding: 7px 9px; border-radius: 7px; font-size: 0.88rem;
 }
-.sqp-d-hit:hover { background: #1b2330; color: #fff; }
-.sqp-d-hit span { color: #6b7585; font-size: 0.78rem; margin-left: 4px; }
-.sqp-d-nohit { color: #6b7585; padding: 8px; font-size: 0.85rem; }
+.sqp-d-hit:hover { background: #f0f2f5; color: #2c3e50; }
+.sqp-d-hit span { color: #6b7280; font-size: 0.78rem; margin-left: 4px; }
+.sqp-d-nohit { color: #6b7280; padding: 8px; font-size: 0.85rem; }
 .sqp-d-fmts { display: flex; align-items: center; gap: 8px; margin: 4px 0 12px; flex-wrap: wrap; }
 .sqp-d-fmt {
-    background: #1b2330; border: 1px solid #2c374a; border-radius: 999px;
-    color: #c4ccd9; padding: 5px 14px; font-size: 0.82rem; font-weight: 600; cursor: pointer;
+    background: #f8f9fa; border: 1px solid #e0e0e0; border-radius: 999px;
+    color: #4a4a4a; padding: 5px 14px; font-size: 0.82rem; font-weight: 600; cursor: pointer;
 }
-.sqp-d-fmt:hover:not(:disabled) { border-color: #4a566b; }
-.sqp-d-fmt.is-active { background: #234; border-color: #5fb6ff; color: #8fd6ff; }
+.sqp-d-fmt:hover:not(:disabled) { border-color: #c8d0da; }
+.sqp-d-fmt.is-active { background: rgba(95, 182, 255, 0.14); border-color: #5fb6ff; color: #1d6fd0; }
 .sqp-d-fmt:disabled { opacity: 0.35; cursor: default; }
-.sqp-d-season { color: #6b7585; font-size: 0.74rem; margin-left: auto; }
+.sqp-d-season { color: #6b7280; font-size: 0.74rem; margin-left: auto; }
 .sqp-d-sec { margin-top: 14px; }
 .sqp-d-sec-title {
-    margin: 0 0 7px; color: #8fe0aa; font-size: 0.72rem; font-weight: 700;
+    margin: 0 0 7px; color: #2e9d60; font-size: 0.72rem; font-weight: 700;
     text-transform: uppercase; letter-spacing: 0.04em;
 }
 .sqp-d-stats { width: 100%; border-collapse: collapse; font-size: 0.84rem; }
-.sqp-d-stats th { color: #6b7585; font-weight: 600; font-size: 0.68rem; text-align: right; padding: 2px 6px; }
+.sqp-d-stats th { color: #6b7280; font-weight: 600; font-size: 0.68rem; text-align: right; padding: 2px 6px; }
 .sqp-d-stats th:first-child { text-align: left; }
-.sqp-d-stats td { padding: 3px 6px; text-align: right; border-top: 1px solid #1b2330; }
-.sqp-d-st-lab { text-align: left !important; color: #9aa4b2; }
-.sqp-d-st-base { color: #e6ebf3; font-weight: 700; }
-.sqp-d-st-used { color: #8fd6ff; font-weight: 700; }
-.sqp-d-st-range { color: #6b7585; font-size: 0.78rem; }
+.sqp-d-stats td { padding: 3px 6px; text-align: right; border-top: 1px solid #e0e0e0; }
+.sqp-d-st-lab { text-align: left !important; color: #5a6473; }
+.sqp-d-st-base { color: #2c3e50; font-weight: 700; }
+.sqp-d-st-used { color: #1d6fd0; font-weight: 700; }
+.sqp-d-st-range { color: #6b7280; font-size: 0.78rem; }
 .sqp-d-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 18px; margin-top: 4px; }
 @media (max-width: 520px) { .sqp-d-grid { grid-template-columns: 1fr; } }
 .sqp-d-row {
     position: relative; display: flex; align-items: center; gap: 8px;
     padding: 4px 8px; border-radius: 6px; overflow: hidden;
-    font-size: 0.84rem; margin-bottom: 2px; background: #0f141d;
+    font-size: 0.84rem; margin-bottom: 2px; background: #f8f9fa;
 }
 .sqp-d-bar {
     position: absolute; left: 0; top: 0; bottom: 0; z-index: 0;
-    background: rgba(95, 182, 255, 0.16); border-right: 1px solid rgba(95, 182, 255, 0.3);
+    background: rgba(95, 182, 255, 0.18); border-right: 1px solid rgba(95, 182, 255, 0.45);
 }
-.sqp-d-name { position: relative; z-index: 1; color: #e6ebf3; flex: 1; }
-.sqp-d-extra { color: #9aa6b8; font-size: 0.74rem; }
-.sqp-d-pct { position: relative; z-index: 1; color: #8fd6ff; font-weight: 700; font-size: 0.8rem; }
-.sqp-d-none { color: #9aa4b2; font-size: 0.88rem; padding: 10px 0; }
+.sqp-d-name { position: relative; z-index: 1; color: #2c3e50; flex: 1; }
+.sqp-d-extra { color: #5a6473; font-size: 0.74rem; }
+.sqp-d-pct { position: relative; z-index: 1; color: #1d6fd0; font-weight: 700; font-size: 0.8rem; }
+.sqp-d-none { color: #6b7280; font-size: 0.88rem; padding: 10px 0; }
 
 /* Pokédex table format toggle (which format the "used" brackets show). */
 .sqp-fmt-toggle { display: inline-flex; align-items: center; gap: 6px; }
-.sqp-fmt-lbl { color: #6b7585; font-size: 0.74rem; }
+.sqp-fmt-lbl { color: #6b7280; font-size: 0.74rem; }
 .sqp-fmt-btn {
-    background: #1b2330; border: 1px solid #2c374a; border-radius: 999px;
-    color: #c4ccd9; padding: 4px 12px; font-size: 0.78rem; font-weight: 600; cursor: pointer;
+    background: #f8f9fa; border: 1px solid #e0e0e0; border-radius: 999px;
+    color: #4a4a4a; padding: 4px 12px; font-size: 0.78rem; font-weight: 600; cursor: pointer;
 }
-.sqp-fmt-btn:hover { border-color: #4a566b; }
-.sqp-fmt-btn.is-active { background: #234; border-color: #5fb6ff; color: #8fd6ff; }
+.sqp-fmt-btn:hover { border-color: #c8d0da; }
+.sqp-fmt-btn.is-active { background: rgba(95, 182, 255, 0.14); border-color: #5fb6ff; color: #1d6fd0; }
 
-.sqp-d-pct.is-approx { color: #9fb4cc; font-weight: 600; font-style: italic; }
+.sqp-d-pct.is-approx { color: #70788a; font-weight: 600; font-style: italic; }
 
 /* German name shown beside the English one in the detail usage rows. */
-.sqp-d-de { color: #aeb9c9; margin-left: 7px; font-size: 0.82em; }
-.sqp-d-de::before { content: "· "; color: #6b7585; }
+.sqp-d-de { color: #5a6473; margin-left: 7px; font-size: 0.82em; }
+.sqp-d-de::before { content: "· "; color: #6b7280; }
 
 /* Teammate list (no % in-game — clean numbered rows). */
-.sqp-d-team { display: flex; align-items: center; gap: 8px; padding: 4px 8px; border-radius: 6px; background: #0f141d; margin-bottom: 2px; font-size: 0.84rem; }
-.sqp-d-team-rank { color: #6b7585; font-weight: 700; min-width: 1.1em; text-align: center; }
+.sqp-d-team { display: flex; align-items: center; gap: 8px; padding: 4px 8px; border-radius: 6px; background: #f8f9fa; margin-bottom: 2px; font-size: 0.84rem; }
+.sqp-d-team-rank { color: #6b7280; font-weight: 700; min-width: 1.1em; text-align: center; }

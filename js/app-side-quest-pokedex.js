@@ -53,9 +53,10 @@
             none: 'Nichts gefunden — andere Schreibweise, Nummer oder Filter probieren.',
             loading: 'Lade Pokédex …',
             error: 'Pokédex konnte nicht geladen werden.',
-            rangeNote: 'Basiswert + Range (Endwerte auf Lv. 50: IS fix 31, 0–32 SP, Wesen ±10 %). Tipp auf eine Zeile → meistgenutzter SP-Spread + echte Endwerte aus Top-Teams.',
+            rangeNote: 'Pro Wert: Lv-50-Basiswert (in Klammern der meistgenutzte Endwert aus Top-Teams) · darunter die Range (Lv. 50, IS fix 31, 0–32 SP, Wesen ±10 %). Tipp auf eine Zeile → absolute Basiswerte + meistgenutzter SP-Spread.',
             metaTitle: 'Meist genutzt:',
             metaStats: 'Endwerte Lv. 50:',
+            baseStatsLabel: 'Basiswerte:',
             metaFrom: (n, total) => `(${n} von ${total} Builds)`,
             attribution: 'Daten: Pokémon-Champions-Datensatz (CC BY 4.0) · Deutsche Namen: PokéAPI',
         },
@@ -79,9 +80,10 @@
             none: 'Nothing found — try a different spelling, number or filter.',
             loading: 'Loading Pokédex …',
             error: 'Could not load the Pokédex.',
-            rangeNote: 'Base stat + range (final stats at Lv. 50: IV fixed 31, 0–32 SP, nature ±10%). Tap a row → most-used SP spread + real final stats from top teams.',
+            rangeNote: 'Per stat: Lv. 50 base value (in brackets the most-used final value from top teams) · range below (Lv. 50, IV fixed 31, 0–32 SP, nature ±10%). Tap a row → absolute base stats + most-used SP spread.',
             metaTitle: 'Most used:',
             metaStats: 'Final stats Lv. 50:',
+            baseStatsLabel: 'Base stats:',
             metaFrom: (n, total) => `(${n} of ${total} builds)`,
             attribution: 'Data: Pokémon Champions dataset (CC BY 4.0) · German names: PokéAPI',
         },
@@ -153,9 +155,12 @@
         return `<span class="sqp-type sq-play-type-${escapeHtml(en.toLowerCase())}">${escapeHtml(uiLang() === 'de' ? de : en)}</span>`;
     }
 
-    function statCell(s) {
+    // Top line: Lv.50 base value (0 SP, neutral) + the actually-used value
+    // from real top teams in brackets, e.g. "85 (128)". Bottom: the range.
+    function statCell(s, used) {
         if (!s) return '<td class="sqp-stat"></td>';
-        return `<td class="sqp-stat"><b>${s.base}</b><small>${s.min}–${s.max}</small></td>`;
+        const usedHtml = (used != null) ? `<span class="sqp-stat-used">(${used})</span>` : '';
+        return `<td class="sqp-stat"><span class="sqp-stat-top"><b>${s.lv50}</b>${usedHtml}</span><small>${s.min}–${s.max}</small></td>`;
     }
 
     const COLS = [
@@ -187,28 +192,29 @@
         const primary = lang === 'de' ? e.de : e.en;
         const secondary = lang === 'de' ? e.en : e.de;
         const dex = e.dex != null ? `#${e.dex}` : '';
-        const hasMeta = !!(e.meta && e.meta.evs);
-        const caret = hasMeta ? '<span class="sqp-caret" aria-hidden="true">▸</span>' : '';
+        const f = (e.meta && e.meta.final) || null;   // used per-stat values
+        const caret = '<span class="sqp-caret" aria-hidden="true">▸</span>';
         const mainRow = `
-            <tr class="sqp-row${hasMeta ? ' has-meta' : ''}" data-row="${idx}"${hasMeta ? ' tabindex="0" role="button"' : ''}>
+            <tr class="sqp-row has-meta" data-row="${idx}" tabindex="0" role="button">
                 <td class="sqp-c-mon">
                     <span class="sqp-mon-name">${caret}${escapeHtml(primary)}</span>
                     <span class="sqp-mon-sub">${escapeHtml(secondary)} · ${escapeHtml(dex)}</span>
                 </td>
                 <td class="sqp-c-type">${typeBadge(e.t1, e.t1de)}</td>
                 <td class="sqp-c-type">${typeBadge(e.t2, e.t2de)}</td>
-                ${statCell(e.hp)}
-                ${statCell(e.atk)}
-                ${statCell(e.def)}
-                ${statCell(e.spa)}
-                ${statCell(e.spd)}
-                ${statCell(e.spe)}
+                ${statCell(e.hp, f && f.hp)}
+                ${statCell(e.atk, f && f.atk)}
+                ${statCell(e.def, f && f.def)}
+                ${statCell(e.spa, f && f.spa)}
+                ${statCell(e.spd, f && f.spd)}
+                ${statCell(e.spe, f && f.spe)}
                 <td class="sqp-c-total"><b>${e.total || ''}</b></td>
             </tr>`;
-        if (!hasMeta) return mainRow;
+        // Every row expands to show the absolute base stats (and, when known,
+        // the most-used SP spread from real teams).
         return mainRow + `
             <tr class="sqp-detail" data-detail="${idx}" hidden>
-                <td class="sqp-detail-cell" colspan="${COLS.length}">${metaLineHtml(e)}</td>
+                <td class="sqp-detail-cell" colspan="${COLS.length}">${detailHtml(e)}</td>
             </tr>`;
     }
 
@@ -312,6 +318,36 @@
                 </div>
                 ${finalLine}
             </div>`;
+    }
+
+    // Absolute base stats (the species' intrinsic values, not Lv.50).
+    function baseStatsDisplay(e) {
+        const de = uiLang() === 'de';
+        return _FINAL_ORDER
+            .filter(([k]) => e[k] && e[k].base != null)
+            .map(([k, d, en]) => `${de ? d : en} ${e[k].base}`)
+            .join(' · ');
+    }
+    // Expanded detail row: absolute base stats (always) + the most-used SP
+    // spread from real teams (when known). The per-stat final values now live
+    // in the table cells' "(…)" brackets, so they're not repeated here.
+    function detailHtml(e) {
+        const l = t();
+        const baseLine = `<div class="sqp-meta-row sqp-meta-base">
+                <span class="sqp-meta-tag">${escapeHtml(l.baseStatsLabel)}</span>
+                <b>${escapeHtml(baseStatsDisplay(e))}</b>
+            </div>`;
+        const m = e.meta;
+        const nat = (m && m.nature) ? (uiLang() === 'de' ? (_NATURE_DE[m.nature] || m.nature) : m.nature) : '';
+        const metaRow = (m && m.evs)
+            ? `<div class="sqp-meta-row">
+                <span class="sqp-meta-tag">${escapeHtml(l.metaTitle)}</span>
+                <b class="sqp-meta-evs">${escapeHtml(evsDisplay(m.evs))}</b>
+                ${nat ? `· <span class="sqp-meta-nat">${escapeHtml(nat)}</span>` : ''}
+                <span class="sqp-meta-n">${escapeHtml(l.metaFrom(m.n, m.total))}</span>
+               </div>`
+            : '';
+        return `<div class="sqp-meta">${baseLine}${metaRow}</div>`;
     }
 
     function render() {

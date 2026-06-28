@@ -1805,7 +1805,9 @@
     text-transform: uppercase;
     letter-spacing: 0.02em;
 }
-#sideQuestPokedexHost .sqp-stat b { display: block; font-weight: 700; font-size: 0.86rem; }
+#sideQuestPokedexHost .sqp-stat-top { display: block; font-size: 0.86rem; white-space: nowrap; }
+#sideQuestPokedexHost .sqp-stat-top b { font-weight: 700; }
+#sideQuestPokedexHost .sqp-stat-used { color: #8fd6ff; font-weight: 600; font-size: 0.74rem; margin-left: 2px; }
 #sideQuestPokedexHost .sqp-stat small { display: block; color: #6b7585; font-size: 0.64rem; margin-top: 1px; }
 #sideQuestPokedexHost .sqp-c-total b { color: #c4ccd9; }
 

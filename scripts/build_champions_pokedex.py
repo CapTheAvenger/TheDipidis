@@ -153,7 +153,9 @@ def stat_range(base, is_hp):
 
 def stat_block(base, is_hp=False):
     mn, mx = stat_range(base, is_hp)
-    return {"base": base, "min": mn, "max": mx}
+    # lv50 = the Lv.50 value with 0 SP and a neutral nature (Base + 20, or
+    # Base + 75 for HP) — the "base stat at Level 50" shown in the table.
+    return {"base": base, "lv50": champ_stat(base, 0, is_hp, 1.0), "min": mn, "max": mx}
 
 
 # Nature → (raised stat, lowered stat). Neutral natures (incl. Champions'

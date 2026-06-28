@@ -381,7 +381,7 @@ def main():
 
         hp, atk, df = st["hp"], st["atk"], st["def"]
         spa, spd, spe = st["spa"], st["spd"], st["spe"]
-        entries.append({
+        entry = {
             "en": name,
             "de": name_de,
             "dex": r.get("dexNumber"),
@@ -397,7 +397,16 @@ def main():
             "total": st.get("total", hp + atk + df + spa + spd + spe),
             "bulkPhys": hp * df,
             "bulkSpec": hp * spd,
-        })
+        }
+        # A Mega's fixed ability (after evolving). roster.json carries it for
+        # the established megas; the in-game usage shows the PRE-mega base
+        # ability, so we surface this one next to the name in the web UI.
+        if r.get("form") == "Mega":
+            abz = r.get("abilities") or {}
+            mega_ab = abz.get("0") or (next(iter(abz.values()), None))
+            if mega_ab:
+                entry["megaAbility"] = mega_ab
+        entries.append(entry)
 
     # ── M-B (and later) roster additions not yet in the otterlyclueless
     # M-A dataset: base species from pokebase's Champions dex + the new

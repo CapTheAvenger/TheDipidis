@@ -86,6 +86,7 @@
             secFinal: 'Endwerte (meistgenutzter Build)',
             noUsage: 'Für dieses Pokémon gibt es noch keine In-Game-Nutzungsdaten.',
             closeLabel: 'Schließen',
+            megaAbility: 'Mega-Fähigkeit',
             usageSeasonLbl: (s) => `Saison: ${s}`,
             colBase: 'Lv50', colUsed: 'Genutzt', colRange: 'Range',
             tblFormatLabel: 'Genutzte Werte:',
@@ -132,6 +133,7 @@
             secFinal: 'Final stats (most-used build)',
             noUsage: 'No in-game usage data for this Pokémon yet.',
             closeLabel: 'Close',
+            megaAbility: 'Mega ability',
             usageSeasonLbl: (s) => `Season: ${s}`,
             colBase: 'Lv50', colUsed: 'Used', colRange: 'Range',
             tblFormatLabel: 'Used values:',
@@ -651,12 +653,25 @@
             </div>`;
     }
 
+    // For Mega forms: the fixed ability they get after evolving (the usage
+    // section shows the PRE-mega base ability, so this is shown by the name).
+    function megaAbilityBadge(en) {
+        const l = t();
+        const fx = abilityFxText(en);
+        const title = fx ? ` title="${escapeHtml(fx)}"` : '';
+        return `<span class="sqp-d-megaab"${title}>
+                <span class="sqp-d-megaab-lbl">${escapeHtml(l.megaAbility)}</span>
+                <span class="sqp-d-megaab-name">${nmHtml(en, 'abilities')}</span>
+            </span>`;
+    }
+
     function detailOverlayHtml(e) {
         const l = t();
         const lang = uiLang();
         const primary = lang === 'de' ? e.de : e.en;
         const secondary = lang === 'de' ? e.en : e.de;
         const dex = e.dex != null ? `#${e.dex}` : '';
+        const megaAb = e.megaAbility ? megaAbilityBadge(e.megaAbility) : '';
         const rec = usageRecFor(e);
         // Pick a format that exists for this Pokémon.
         let fmt = _detailFormat;
@@ -682,6 +697,7 @@
                     </div>
                     <div class="sqp-d-types">${typeBadge(e.t1, e.t1de)} ${e.t2 ? typeBadge(e.t2, e.t2de) : ''}</div>
                 </div>
+                ${megaAb}
                 <div class="sqp-d-searchwrap">
                     <input type="search" class="sqp-d-search" placeholder="${escapeHtml(l.detailSearchPh)}"
                            autocomplete="off" spellcheck="false" aria-label="${escapeHtml(l.detailSearchPh)}">

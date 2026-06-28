@@ -2046,3 +2046,18 @@ body.sqp-d-open { overflow: hidden; }
 .sqp-d-ab-top { position: relative; z-index: 1; display: flex; align-items: center; gap: 8px; }
 .sqp-d-ab-top .sqp-d-name { flex: 1; }
 .sqp-d-ab-fx { position: relative; z-index: 1; color: #6b7280; font-size: 0.76rem; line-height: 1.35; }
+
+/* Mega ability badge in the detail header (the ability a Mega gets after
+   evolving — shown by the name; the usage section lists the pre-mega base). */
+.sqp-d-megaab {
+    display: inline-flex; align-items: baseline; gap: 7px; flex-wrap: wrap;
+    margin: 8px 0 2px; padding: 5px 11px;
+    background: rgba(150, 120, 255, 0.10);
+    border: 1px solid rgba(150, 120, 255, 0.35);
+    border-radius: 9px; font-size: 0.88rem;
+}
+.sqp-d-megaab-lbl {
+    color: #6f4fe0; font-weight: 800; font-size: 0.68rem;
+    text-transform: uppercase; letter-spacing: 0.03em;
+}
+.sqp-d-megaab-name { color: #2c3e50; font-weight: 700; }

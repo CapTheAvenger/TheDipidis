@@ -24,6 +24,19 @@
     padding: 14px 14px 22px;
     margin-top: 10px;
 }
+/* The global back button is a light pill (built for the app's white tabs);
+   on the Side Quest dark surface it clashed, so re-tone it to fit. */
+#side-quest .tool-back-btn {
+    background: #131a26;
+    border-color: #2a3340;
+    color: #c2cad6;
+}
+#side-quest .tool-back-btn:hover,
+#side-quest .tool-back-btn:focus-visible {
+    background: #1b2330;
+    border-color: #3a4658;
+    color: #e6ebf3;
+}
 
 .side-quest-intro {
     margin: 0 0 1.25rem 0;

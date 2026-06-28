@@ -280,6 +280,25 @@
         Modest: 'Mäßig', Mild: 'Mild', Quiet: 'Ruhig', Bashful: 'Zaghaft', Rash: 'Hitzig',
         Calm: 'Still', Gentle: 'Zart', Sassy: 'Forsch', Careful: 'Sacht', Quirky: 'Kauzig',
     };
+    // Nature → [raised stat, lowered stat]. Makes the ±10 % visible so the
+    // bracketed value is self-explanatory (e.g. Timid boosts Speed by 10 %,
+    // which is why a 32-SP Timid Pelipper has 128 Speed, not 85+32=117).
+    const _NATURE_FX = {
+        Lonely: ['atk', 'def'], Brave: ['atk', 'spe'], Adamant: ['atk', 'spa'], Naughty: ['atk', 'spd'],
+        Bold: ['def', 'atk'], Relaxed: ['def', 'spe'], Impish: ['def', 'spa'], Lax: ['def', 'spd'],
+        Timid: ['spe', 'atk'], Hasty: ['spe', 'def'], Jolly: ['spe', 'spa'], Naive: ['spe', 'spd'],
+        Modest: ['spa', 'atk'], Mild: ['spa', 'def'], Quiet: ['spa', 'spe'], Rash: ['spa', 'spd'],
+        Calm: ['spd', 'atk'], Gentle: ['spd', 'def'], Sassy: ['spd', 'spe'], Careful: ['spd', 'spa'],
+    };
+    function _statLabel(k) {
+        const row = _FINAL_ORDER.find(r => r[0] === k);
+        return row ? (uiLang() === 'de' ? row[1] : row[2]) : k;
+    }
+    function natureWithFx(nature) {
+        const name = uiLang() === 'de' ? (_NATURE_DE[nature] || nature) : nature;
+        const fx = _NATURE_FX[nature];
+        return fx ? `${name} (${_statLabel(fx[0])}↑ ${_statLabel(fx[1])}↓)` : name;
+    }
     function evsDisplay(evs) {
         const de = uiLang() === 'de';
         return String(evs || '').split('/').map(part => {
@@ -338,7 +357,7 @@
                 <b>${escapeHtml(baseStatsDisplay(e))}</b>
             </div>`;
         const m = e.meta;
-        const nat = (m && m.nature) ? (uiLang() === 'de' ? (_NATURE_DE[m.nature] || m.nature) : m.nature) : '';
+        const nat = (m && m.nature) ? natureWithFx(m.nature) : '';
         const metaRow = (m && m.evs)
             ? `<div class="sqp-meta-row">
                 <span class="sqp-meta-tag">${escapeHtml(l.metaTitle)}</span>

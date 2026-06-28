@@ -1,0 +1,26 @@
+name: Probe Champions Usage Sources
+
+# TEMPORARY probe: checks whether public mirrors of the in-game Pokémon
+# Champions usage analysis are reachable from CI and carry per-Pokémon
+# nature breakdowns. Writes nothing — output goes to the job log only.
+# Delete once the real usage pipeline is decided.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        with:
+          fetch-depth: 1
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6
+        with:
+          python-version: '3.12'
+      - name: Run probe
+        run: python -u scripts/probe_champions_usage.py

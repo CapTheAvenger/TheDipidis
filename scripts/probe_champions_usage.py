@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""PROBE (temporary): dump the structure of championsbattledata.com's JSON
-API so we can build a reliable per-Pokémon usage parser. Verified earlier
-that /api/pokemon/<slug> returns nature splits matching the in-game usage
-analysis (Pelipper Modest ~52% / Timid ~24% ≈ in-game 53.9% / 23.4%).
+"""PROBE (temporary): dump championsbattledata.com's battleSummary block and
+the raw Singles battle-data CSV for Pelipper, so we can build a reliable
+usage parser. Verified the Singles nature split (Modest ~52% / Timid ~24%)
+matches the in-game analysis (53.9% / 23.4%).
 
 Prints structure only — writes nothing. Run from CI.
 """
@@ -11,9 +11,10 @@ import json
 import urllib.request
 import urllib.error
 
+BASE = "https://championsbattledata.com"
 UA = {"User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
                     "(KHTML, like Gecko) Chrome/124 Safari/537.36",
-      "Accept": "application/json,text/html,*/*"}
+      "Accept": "application/json,text/csv,*/*"}
 
 
 def get(url):
@@ -22,79 +23,66 @@ def get(url):
         return r.status, r.headers.get("Content-Type", ""), r.read()
 
 
-def show(label, url):
-    print(f"\n=== {label} ===\n{url}")
-    try:
-        status, ct, body = get(url)
-    except urllib.error.HTTPError as e:
-        print(f"  HTTP {e.code}")
-        return None
-    except Exception as e:  # noqa: BLE001
-        print(f"  ERR {type(e).__name__}: {e}")
-        return None
-    print(f"  status={status} ct={ct} bytes={len(body)}")
-    return body
-
-
-def dump_pokemon(slug):
-    body = show(f"api/pokemon/{slug}", f"https://championsbattledata.com/api/pokemon/{slug}")
-    if not body:
-        return
-    j = json.loads(body.decode("utf-8", "replace"))
-    print(f"  top keys: {list(j.keys())}")
-    print(f"  name={j.get('name')} battleName={j.get('battleName')} slug={j.get('slug')}")
-
-    summary = j.get("summary")
-    print(f"  summary type={type(summary).__name__}")
-    if isinstance(summary, dict):
-        print(f"  summary keys: {list(summary.keys())}")
-        print(f"  summary (trunc): {json.dumps(summary)[:800]}")
-
-    meta = j.get("metadataCsv")
-    if isinstance(meta, str):
-        print(f"  metadataCsv (first 600): {meta[:600]!r}")
-
-    bdc = j.get("battleDataCsvs")
-    print(f"  battleDataCsvs type={type(bdc).__name__}")
-    if isinstance(bdc, dict):
-        for k, v in bdc.items():
-            print(f"   --- format key: {k} ---")
-            if isinstance(v, str):
-                lines = v.splitlines()
-                for ln in lines[:8]:
-                    print(f"      {ln[:160]}")
-            else:
-                print(f"      (value type {type(v).__name__}): {json.dumps(v)[:300]}")
-    elif isinstance(bdc, list):
-        print(f"  list len={len(bdc)}")
-        for it in bdc[:4]:
-            print(f"   item keys: {list(it.keys()) if isinstance(it,dict) else type(it).__name__}")
-            print(f"   item (trunc): {json.dumps(it)[:400]}")
-
-
 def main():
-    dump_pokemon("pelipper")
-    # How do we enumerate all Pokémon / find season+format labels?
-    for label, url in [
-        ("api/pokemon index", "https://championsbattledata.com/api/pokemon"),
-        ("api/pokedex",       "https://championsbattledata.com/api/pokedex"),
-        ("api/meta",          "https://championsbattledata.com/api/meta"),
-        ("api/formats",       "https://championsbattledata.com/api/formats"),
-        ("api/usage",         "https://championsbattledata.com/api/usage"),
-        ("api/seasons",       "https://championsbattledata.com/api/seasons"),
-        ("api/pokemon-list",  "https://championsbattledata.com/api/pokemon-list"),
+    # 1) Full battleSummary for Pelipper.
+    url = f"{BASE}/api/pokemon/pelipper"
+    print(f"=== {url} ===")
+    _, _, body = get(url)
+    j = json.loads(body.decode("utf-8", "replace"))
+    summary = j.get("summary", {})
+    bs = summary.get("battleSummary")
+    print(f"battleSummary type={type(bs).__name__}")
+    print(json.dumps(bs, indent=1)[:3500])
+
+    # 2) Raw battle-data CSV assets (the ground-truth distributions).
+    for item in j.get("battleDataCsvs", []):
+        path = item.get("path")
+        fmt = item.get("format")
+        season = item.get("season")
+        asset = f"{BASE}/{path}"
+        print(f"\n=== CSV {season}/{fmt}: {asset} ===")
+        try:
+            st, ct, cb = get(asset)
+            txt = cb.decode("utf-8", "replace")
+            print(f"  status={st} ct={ct} bytes={len(cb)}")
+            lines = txt.splitlines()
+            print(f"  rows={len(lines)}")
+            for ln in lines[:18]:
+                print(f"   {ln[:200]}")
+        except urllib.error.HTTPError as e:
+            print(f"  HTTP {e.code}")
+        except Exception as e:  # noqa: BLE001
+            print(f"  ERR {type(e).__name__}: {e}")
+
+    # 3) metadata CSV asset.
+    meta_path = j.get("metadataCsv")
+    if isinstance(meta_path, str) and meta_path.endswith(".csv"):
+        asset = f"{BASE}/{meta_path}"
+        print(f"\n=== metadata CSV: {asset} ===")
+        try:
+            st, ct, cb = get(asset)
+            txt = cb.decode("utf-8", "replace")
+            print(f"  status={st} ct={ct} bytes={len(cb)}")
+            for ln in txt.splitlines()[:18]:
+                print(f"   {ln[:200]}")
+        except Exception as e:  # noqa: BLE001
+            print(f"  ERR {type(e).__name__}: {e}")
+
+    # 4) Enumeration: is there a master manifest / sitemap of all slugs?
+    for label, u in [
+        ("sitemap.xml", f"{BASE}/sitemap.xml"),
+        ("assets manifest", f"{BASE}/pokemon_champions_assets/battle_data/Singles/"),
+        ("pokemon-list asset", f"{BASE}/pokemon_champions_assets/pokemon_list.json"),
     ]:
-        b = show(label, url)
-        if b:
-            txt = b.decode("utf-8", "replace")
-            try:
-                j = json.loads(txt)
-                if isinstance(j, list):
-                    print(f"  list len={len(j)} first={json.dumps(j[0])[:200] if j else '[]'}")
-                elif isinstance(j, dict):
-                    print(f"  keys={list(j.keys())[:30]}")
-            except Exception:
-                print(f"  (not json) first 200: {txt[:200]!r}")
+        print(f"\n=== {label}: {u} ===")
+        try:
+            st, ct, cb = get(u)
+            print(f"  status={st} ct={ct} bytes={len(cb)} first200={cb[:200]!r}")
+        except urllib.error.HTTPError as e:
+            print(f"  HTTP {e.code}")
+        except Exception as e:  # noqa: BLE001
+            print(f"  ERR {type(e).__name__}: {e}")
+
     print("\n=== done ===")
 
 

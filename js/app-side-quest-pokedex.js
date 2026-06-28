@@ -517,16 +517,18 @@
 
     // A horizontal percentage bar + label, used for every usage list row.
     // `nameHtml` is trusted, pre-escaped markup (build it with nmHtml/escapeHtml).
-    // `approx` prefixes "≈" — the source omits the #1 item's %, so we derive
-    // it from the other items (100 − Σ rest); it's an estimate, not exact.
+    // `approx` marks the derived #1-item % (the source omits it; we compute it
+    // as 100 − Σ of the other items). It renders identically to every other
+    // row — same blue/bold, no "≈" — and keeps only an invisible hover tooltip
+    // noting it's computed, so the table stays visually consistent.
     function usageRow(nameHtml, pct, extra, approx) {
         const width = pct != null ? Math.max(2, Math.min(100, pct)) : 0;
-        const pctTxt = pct != null ? (approx ? '≈ ' : '') + escapeHtml(fmtPct(pct)) : '';
+        const pctTxt = pct != null ? escapeHtml(fmtPct(pct)) : '';
         const title = approx ? ` title="${escapeHtml(l_approxItem())}"` : '';
         return `<div class="sqp-d-row"${title}>
                 <div class="sqp-d-bar" style="width:${width}%"></div>
                 <span class="sqp-d-name">${nameHtml}${extra ? ` <span class="sqp-d-extra">${escapeHtml(extra)}</span>` : ''}</span>
-                <span class="sqp-d-pct${approx ? ' is-approx' : ''}">${pctTxt}</span>
+                <span class="sqp-d-pct">${pctTxt}</span>
             </div>`;
     }
     // The source data is English-only. In the German UI, show the German name

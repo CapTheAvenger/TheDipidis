@@ -2030,8 +2030,6 @@ body.sqp-d-open { overflow: hidden; }
 .sqp-fmt-btn:hover { border-color: #c8d0da; }
 .sqp-fmt-btn.is-active { background: rgba(95, 182, 255, 0.14); border-color: #5fb6ff; color: #1d6fd0; }
 
-.sqp-d-pct.is-approx { color: #70788a; font-weight: 600; font-style: italic; }
-
 /* German name shown beside the English one in the detail usage rows. */
 .sqp-d-de { color: #5a6473; margin-left: 7px; font-size: 0.82em; }
 .sqp-d-de::before { content: "· "; color: #6b7280; }

@@ -120,15 +120,12 @@
         return pill;
     }
 
-    function updatePill(text, opts) {
-        opts = opts || {};
-        var pill = ensurePill();
-        pill.textContent = text;
-        pill.style.opacity = '1';
-        pill.style.background = opts.warn ? 'rgba(220,38,38,0.95)' : 'rgba(30,41,59,0.92)';
-        if (opts.dismissAfter) {
-            setTimeout(function () { pill.style.opacity = '0'; }, opts.dismissAfter);
-        }
+    function updatePill(_text, _opts) {
+        // The on-screen image-cache progress pill ("Bilder-Cache: …") was
+        // removed at the owner's request — it's dev/debug noise for users.
+        // The offline prefetch still runs silently in the background; this is
+        // a no-op so the callers above don't need to change.
+        return;
     }
 
     function showHomescreenHint() {

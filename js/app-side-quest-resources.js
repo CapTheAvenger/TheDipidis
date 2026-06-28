@@ -311,6 +311,7 @@
     const VIEW_HOSTS = {
         teams: 'sideQuestTeamsHost',
         pokedex: 'sideQuestPokedexHost',
+        battle: 'sideQuestBattleHost',
         resources: 'sideQuestResourcesHost',
     };
     function showView(view) {
@@ -335,16 +336,20 @@
             }
         } else if (view === 'pokedex' && window.sideQuestPokedex) {
             window.sideQuestPokedex.activate();
+        } else if (view === 'battle' && window.sideQuestPokedex && window.sideQuestPokedex.activateBattle) {
+            window.sideQuestPokedex.activateBattle();
         }
     }
 
     function setSubtabLabels() {
         const l = t();
         const pokedexLabel = uiLang() === 'de' ? 'Pokémon' : 'Pokémon';
+        const battleLabel = uiLang() === 'de' ? 'Kampfdaten' : 'Battle data';
         document.querySelectorAll('.side-quest-subtab').forEach(b => {
             const v = b.getAttribute('data-sq-view');
             b.textContent = v === 'resources' ? l.tabResources
                           : v === 'pokedex' ? pokedexLabel
+                          : v === 'battle' ? battleLabel
                           : l.tabTeams;
         });
     }

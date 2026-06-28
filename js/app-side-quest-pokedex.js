@@ -73,6 +73,8 @@
             attribution: 'Daten: Pokémon-Champions-Datensatz (CC BY 4.0) · Nutzungsdaten: championsbattledata.com (In-Game-Analyse) · Deutsche Namen: PokéAPI',
             // Detail overlay
             detailHint: 'Tipp auf ein Pokémon → alle In-Game-Infos',
+            battleIntro: 'Such ein Pokémon und tipp drauf — dann siehst du direkt alle Kampfdaten (Wesen, SP, Attacken, Item, Fähigkeit, Team) für Doppel & Einzel.',
+            battleSearchPh: '🔎 Pokémon suchen …',
             detailSearchPh: '🔎 Anderes Pokémon …',
             fmtDoubles: 'Doppelkämpfe',
             fmtSingles: 'Einzelkämpfe',
@@ -120,6 +122,8 @@
             attribution: 'Data: Pokémon Champions dataset (CC BY 4.0) · Usage: championsbattledata.com (in-game analysis) · German names: PokéAPI',
             // Detail overlay
             detailHint: 'Tap a Pokémon → full in-game info',
+            battleIntro: 'Search a Pokémon and tap it — you get all its battle data (nature, SP, moves, item, ability, team) for Doubles & Singles, straight away.',
+            battleSearchPh: '🔎 Search a Pokémon …',
             detailSearchPh: '🔎 Another Pokémon …',
             fmtDoubles: 'Doubles',
             fmtSingles: 'Singles',
@@ -908,10 +912,75 @@
         }
     }
 
+    // ── "Kampfdaten" view: a direct search → detail overlay, so you can jump
+    // straight to a Pokémon's battle data without scrolling the table. ──
+    let _battleQuery = '';
+    function battleListHtml() {
+        const l = t();
+        const lang = uiLang();
+        const q = norm(_battleQuery).trim();
+        const list = _entries
+            .filter(e => matches(e, q))
+            .sort((a, b) => (lang === 'de' ? a.de : a.en).localeCompare(lang === 'de' ? b.de : b.en));
+        const rows = list.map(e => {
+            const primary = lang === 'de' ? e.de : e.en;
+            const secondary = lang === 'de' ? e.en : e.de;
+            const dex = e.dex != null ? `#${e.dex}` : '';
+            const idx = _entries.indexOf(e);
+            return `<button type="button" class="sqp-bf-item" data-bidx="${idx}">
+                    <span class="sqp-bf-name">${escapeHtml(primary)}<span class="sqp-bf-sub">${escapeHtml(secondary)} · ${escapeHtml(dex)}</span></span>
+                    <span class="sqp-bf-types">${typeBadge(e.t1, e.t1de)} ${e.t2 ? typeBadge(e.t2, e.t2de) : ''}</span>
+                </button>`;
+        }).join('');
+        return { count: list.length, rows: rows || `<p class="sqp-status">${escapeHtml(l.none)}</p>` };
+    }
+    function wireBattleRows(host) {
+        host.querySelectorAll('.sqp-bf-item').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const e = _entries[parseInt(btn.getAttribute('data-bidx'), 10)];
+                if (e) openDetail(e);
+            });
+        });
+    }
+    // Update only the count + list on input, so the search box keeps focus.
+    function updateBattleList(host) {
+        const { count, rows } = battleListHtml();
+        const cEl = host.querySelector('.sqp-count');
+        if (cEl) cEl.textContent = t().count(count);
+        const lEl = host.querySelector('.sqp-bf-list');
+        if (lEl) { lEl.innerHTML = rows; wireBattleRows(host); }
+    }
+    function renderBattle() {
+        const host = document.getElementById('sideQuestBattleHost');
+        if (!host) return;
+        const l = t();
+        if (!_entries) { host.innerHTML = `<p class="sqp-status">${escapeHtml(l.loading)}</p>`; return; }
+        if (_entries.length === 0) { host.innerHTML = `<p class="sqp-status">${escapeHtml(l.error)}</p>`; return; }
+        const { count, rows } = battleListHtml();
+        host.innerHTML = `
+            <div class="sqp sqp-battle">
+                <p class="sqp-intro">${escapeHtml(l.battleIntro)}</p>
+                <input id="sqbSearch" class="sqp-search" type="search"
+                       placeholder="${escapeHtml(l.battleSearchPh)}" value="${escapeHtml(_battleQuery)}"
+                       autocomplete="off" spellcheck="false" aria-label="${escapeHtml(l.battleSearchPh)}">
+                <p class="sqp-count">${escapeHtml(l.count(count))}</p>
+                <div class="sqp-bf-list">${rows}</div>
+            </div>`;
+        const search = host.querySelector('#sqbSearch');
+        if (search) search.addEventListener('input', () => { _battleQuery = search.value; updateBattleList(host); });
+        wireBattleRows(host);
+    }
+    function activateBattle() {
+        if (!_entries) { renderBattle(); loadData().then(renderBattle); }
+        else renderBattle();
+    }
+
     document.addEventListener('languageChanged', () => {
         const host = document.getElementById('sideQuestPokedexHost');
         if (_activated && host && !host.hidden) render();
+        const bhost = document.getElementById('sideQuestBattleHost');
+        if (bhost && !bhost.hidden) renderBattle();
     });
 
-    window.sideQuestPokedex = { activate, render, loadData };
+    window.sideQuestPokedex = { activate, render, loadData, activateBattle, renderBattle };
 })();

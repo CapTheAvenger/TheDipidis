@@ -2061,3 +2061,17 @@ body.sqp-d-open { overflow: hidden; }
     text-transform: uppercase; letter-spacing: 0.03em;
 }
 .sqp-d-megaab-name { color: #2c3e50; font-weight: 700; }
+
+/* "Kampfdaten" finder — a direct search list that opens the detail overlay. */
+.sqp-bf-list { display: flex; flex-direction: column; gap: 4px; margin-top: 8px; }
+.sqp-bf-item {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    width: 100%; text-align: left; cursor: pointer;
+    background: #fff; border: 1px solid #e0e0e0; border-radius: 10px;
+    padding: 9px 12px; font: inherit;
+    transition: background 120ms ease, border-color 120ms ease;
+}
+.sqp-bf-item:hover { background: #f8f9fa; border-color: #c9d2dc; }
+.sqp-bf-name { font-weight: 700; color: #2c3e50; }
+.sqp-bf-sub { display: block; font-weight: 500; color: #6b7280; font-size: 0.74rem; margin-top: 1px; }
+.sqp-bf-types { display: flex; gap: 5px; flex-shrink: 0; }

@@ -1,0 +1,30 @@
+name: Test Champions Usage Scrape
+
+# TEMPORARY: runs scrape_champions_usage.py from CI and prints the Pelipper
+# record to verify it matches the in-game Doubles analysis before wiring the
+# scraper into the daily job. Commits nothing. Delete after verification.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        with:
+          fetch-depth: 1
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6
+        with:
+          python-version: '3.12'
+      - name: Run usage scraper
+        run: python -u scripts/scrape_champions_usage.py
+      - name: Show Pelipper record (verify vs in-game Doubles)
+        run: |
+          python -c "import json; d=json.load(open('data/champions_usage.json')); print(json.dumps(d['pokemon'].get('pelipper'), indent=1, ensure_ascii=False))"
+          echo '--- meta ---'
+          python -c "import json; d=json.load(open('data/champions_usage.json')); print(json.dumps(d['_meta'], indent=1, ensure_ascii=False))"

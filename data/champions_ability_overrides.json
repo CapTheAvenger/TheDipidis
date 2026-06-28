@@ -1,0 +1,13 @@
+{
+  "_meta": {
+    "note": "Curated, verified DE name + effect for abilities the standard datasets (champions_resources.json / PokéAPI / Smogon) don't carry. Two reasons an ability lands here: (1) a real ability that was simply missing from our scraped list (e.g. Electric Surge), or (2) a Champions-ORIGINAL ability that exists nowhere public (only in-game). For the latter, fill in the in-game text when known — do NOT guess.",
+    "source": "Mainline-ability text: Bulbapedia/PokéWiki (canonical). Champions-original abilities: in-game only."
+  },
+  "abilities": {
+    "Electric Surge": {
+      "de": "Elektroerzeuger",
+      "de_effect": "Erzeugt beim Einwechseln 5 Runden ein Elektrofeld: Pokémon am Boden können nicht einschlafen, und ihre Elektro-Attacken werden verstärkt.",
+      "en_effect": "On switch-in, this Pokemon summons Electric Terrain for 5 turns."
+    }
+  }
+}

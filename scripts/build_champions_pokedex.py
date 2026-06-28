@@ -41,6 +41,7 @@ EXTRA_PATH = os.path.join(ROOT, "data", "champions_roster_extra.json")
 USAGE_PATH = os.path.join(ROOT, "data", "champions_usage.json")
 DE_OVERRIDES_PATH = os.path.join(ROOT, "data", "de_name_overrides.json")
 RESOURCES_PATH = os.path.join(ROOT, "data", "champions_resources.json")
+ABILITY_OVERRIDES_PATH = os.path.join(ROOT, "data", "champions_ability_overrides.json")
 OUT_PATH = os.path.join(ROOT, "data", "champions_pokedex.json")
 NAMES_DE_OUT = os.path.join(ROOT, "data", "champions_names_de.json")
 
@@ -339,6 +340,20 @@ def write_names_de(pokemon_names_de):
                                                  "en": en_fx or de_fx}
     except Exception as e:  # noqa: BLE001
         print(f"WARN: names_de — ability names unavailable ({e})")
+    # Curated overrides for abilities the standard datasets miss (e.g. a real
+    # ability not in our scraped list, or a Champions-original one with text
+    # supplied by hand). These win over / fill in the resources values.
+    try:
+        ov_ab = (json.load(open(ABILITY_OVERRIDES_PATH, encoding="utf-8"))
+                 .get("abilities") or {})
+        for en, v in ov_ab.items():
+            if v.get("de"):
+                out["abilities"][en] = v["de"]
+            de_fx, en_fx = v.get("de_effect"), v.get("en_effect")
+            if de_fx or en_fx:
+                out["abilityFx"][en] = {"de": de_fx or en_fx, "en": en_fx or de_fx}
+    except Exception as e:  # noqa: BLE001
+        print(f"WARN: names_de — ability overrides unavailable ({e})")
     out["pokemon"] = {k: v for k, v in (pokemon_names_de or {}).items() if v}
     with open(NAMES_DE_OUT, "w", encoding="utf-8") as f:
         json.dump(out, f, ensure_ascii=False, separators=(",", ":"))

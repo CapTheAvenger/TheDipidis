@@ -291,6 +291,7 @@ def usage_meta(rec, base6):
     meta = {
         "source": "ingame",
         "format": fmt,
+        "slug": rec.get("slug"),   # lets the web detail view load the full usage record
         "nature": nature,
         "naturePct": nat.get("pct"),
         "evs": evs,

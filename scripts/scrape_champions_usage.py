@@ -52,8 +52,8 @@ OUT = os.path.join(ROOT, "data", "champions_usage.json")
 # The site labels the nature category "stat_alignment" (the in-game
 # "Statuswertanpassung" panel) and the SP/EV spread "stat_points"
 # ("Statuswertpunkte"). We re-key stat_alignment → "nature" on output.
-KEEP = {"stat_alignment": 3, "stat_points": 3, "held_item": 4, "move": 6,
-        "ability": 3, "teammate": 5}
+KEEP = {"stat_alignment": 6, "stat_points": 6, "held_item": 8, "move": 12,
+        "ability": 3, "teammate": 8}
 # Output key per source category.
 OUT_KEY = {"stat_alignment": "nature"}
 

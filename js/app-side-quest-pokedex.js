@@ -13,9 +13,16 @@
     'use strict';
 
     const POKEDEX_URL = 'data/champions_pokedex.json';
+    const USAGE_URL = 'data/champions_usage.json';
 
     let _entries = null;
     let _loading = null;
+    let _usage = null;               // { slug: rec } — full per-Pokémon usage
+    let _usageSeason = null;
+    let _usageLoading = null;
+    let _detailEntry = null;         // entry currently shown in the overlay
+    let _detailFormat = 'doubles';   // 'doubles' | 'singles'
+    let _lastResults = [];           // current filtered/sorted result set
     let _activated = false;
     let _query = '';
     let _typeFilter = '';            // '' = all, else EN type
@@ -53,13 +60,30 @@
             none: 'Nichts gefunden — andere Schreibweise, Nummer oder Filter probieren.',
             loading: 'Lade Pokédex …',
             error: 'Pokédex konnte nicht geladen werden.',
-            rangeNote: 'Pro Wert: Lv-50-Basiswert (in Klammern der meistgenutzte Endwert) · darunter die Range (Lv. 50, IS fix 31, 0–32 SP, Wesen ±10 %). Tipp auf eine Zeile → absolute Basiswerte + meistgenutzter SP-Spread.',
+            rangeNote: 'Pro Wert: Lv-50-Basiswert (in Klammern der meistgenutzte Endwert) · darunter die Range (Lv. 50, IS fix 31, 0–32 SP, Wesen ±10 %). Tipp auf ein Pokémon → alle In-Game-Infos (Wesen, SP, Attacken, Item, Team) für Doppel & Einzel.',
             metaTitle: 'Meist genutzt:',
             metaStats: 'Endwerte Lv. 50:',
             baseStatsLabel: 'Basiswerte:',
             metaFrom: (n, total) => `(${n} von ${total} Builds)`,
             metaIngame: 'In-Game-Nutzung · Doppelkämpfe',
             attribution: 'Daten: Pokémon-Champions-Datensatz (CC BY 4.0) · Nutzungsdaten: championsbattledata.com (In-Game-Analyse) · Deutsche Namen: PokéAPI',
+            // Detail overlay
+            detailHint: 'Tipp auf ein Pokémon → alle In-Game-Infos',
+            detailSearchPh: '🔎 Anderes Pokémon …',
+            fmtDoubles: 'Doppelkämpfe',
+            fmtSingles: 'Einzelkämpfe',
+            secStats: 'Statuswerte (Lv. 50)',
+            secNature: 'Wesen',
+            secSpread: 'Statuswertpunkte (SP)',
+            secMoves: 'Attacken',
+            secItem: 'Item',
+            secAbility: 'Fähigkeit',
+            secTeam: 'Team-Mitglieder',
+            secFinal: 'Endwerte (meistgenutzter Build)',
+            noUsage: 'Für dieses Pokémon gibt es noch keine In-Game-Nutzungsdaten.',
+            closeLabel: 'Schließen',
+            usageSeasonLbl: (s) => `Saison: ${s}`,
+            colBase: 'Lv50', colUsed: 'Genutzt', colRange: 'Range',
         },
         en: {
             tab: 'Pokémon',
@@ -81,13 +105,30 @@
             none: 'Nothing found — try a different spelling, number or filter.',
             loading: 'Loading Pokédex …',
             error: 'Could not load the Pokédex.',
-            rangeNote: 'Per stat: Lv. 50 base value (in brackets the most-used final value) · range below (Lv. 50, IV fixed 31, 0–32 SP, nature ±10%). Tap a row → absolute base stats + most-used SP spread.',
+            rangeNote: 'Per stat: Lv. 50 base value (in brackets the most-used final value) · range below (Lv. 50, IV fixed 31, 0–32 SP, nature ±10%). Tap a Pokémon → full in-game info (nature, SP, moves, item, team) for Doubles & Singles.',
             metaTitle: 'Most used:',
             metaStats: 'Final stats Lv. 50:',
             baseStatsLabel: 'Base stats:',
             metaFrom: (n, total) => `(${n} of ${total} builds)`,
             metaIngame: 'In-game usage · Doubles',
             attribution: 'Data: Pokémon Champions dataset (CC BY 4.0) · Usage: championsbattledata.com (in-game analysis) · German names: PokéAPI',
+            // Detail overlay
+            detailHint: 'Tap a Pokémon → full in-game info',
+            detailSearchPh: '🔎 Another Pokémon …',
+            fmtDoubles: 'Doubles',
+            fmtSingles: 'Singles',
+            secStats: 'Stats (Lv. 50)',
+            secNature: 'Nature',
+            secSpread: 'Stat points (SP)',
+            secMoves: 'Moves',
+            secItem: 'Item',
+            secAbility: 'Ability',
+            secTeam: 'Teammates',
+            secFinal: 'Final stats (most-used build)',
+            noUsage: 'No in-game usage data for this Pokémon yet.',
+            closeLabel: 'Close',
+            usageSeasonLbl: (s) => `Season: ${s}`,
+            colBase: 'Lv50', colUsed: 'Used', colRange: 'Range',
         },
     };
     function t() { return LABELS[uiLang()]; }
@@ -109,6 +150,24 @@
             })
             .catch(() => { _entries = []; return _entries; });
         return _loading;
+    }
+
+    // The full in-game usage record per Pokémon (nature / SP spread / item /
+    // move / ability / teammate, per format). Loaded lazily the first time a
+    // detail view is opened. Fail-soft: an empty map just means the detail
+    // view falls back to base stats only.
+    function loadUsage() {
+        if (_usage) return Promise.resolve(_usage);
+        if (_usageLoading) return _usageLoading;
+        _usageLoading = fetch(`${USAGE_URL}?t=${Date.now()}`)
+            .then(r => r.ok ? r.json() : null)
+            .then(json => {
+                _usage = (json && json.pokemon) ? json.pokemon : {};
+                _usageSeason = json && json._meta ? json._meta.season : null;
+                return _usage;
+            })
+            .catch(() => { _usage = {}; return _usage; });
+        return _usageLoading;
     }
 
     // ── Filtering / sorting ────────────────────────────────────────
@@ -196,7 +255,8 @@
         const dex = e.dex != null ? `#${e.dex}` : '';
         const f = (e.meta && e.meta.final) || null;   // used per-stat values
         const caret = '<span class="sqp-caret" aria-hidden="true">▸</span>';
-        const mainRow = `
+        // Tapping the row opens the full in-game detail overlay.
+        return `
             <tr class="sqp-row has-meta" data-row="${idx}" tabindex="0" role="button">
                 <td class="sqp-c-mon">
                     <span class="sqp-mon-name">${caret}${escapeHtml(primary)}</span>
@@ -212,16 +272,11 @@
                 ${statCell(e.spe, f && f.spe)}
                 <td class="sqp-c-total"><b>${e.total || ''}</b></td>
             </tr>`;
-        // Every row expands to show the absolute base stats (and, when known,
-        // the most-used SP spread from real teams).
-        return mainRow + `
-            <tr class="sqp-detail" data-detail="${idx}" hidden>
-                <td class="sqp-detail-cell" colspan="${COLS.length}">${detailHtml(e)}</td>
-            </tr>`;
     }
 
     function tableHtml(results) {
         const l = t();
+        _lastResults = results;   // so a tapped row maps back to its entry
         if (!results.length) return `<p class="sqp-status">${escapeHtml(l.none)}</p>`;
         return `
             <div class="sqp-table-wrap">
@@ -391,6 +446,236 @@
         return `<div class="sqp-meta">${baseLine}${metaRow}</div>`;
     }
 
+    // ── Detail overlay (full in-game analysis for one Pokémon) ─────────
+    // Champions Lv.50 stat formula (IV fixed 31): HP = base+SP+75,
+    // Stat = floor((base+SP+20) × nature-alignment). Mirrors the Python
+    // build so the toggled format's "used" values are computed live.
+    function computeFinal(e, natureName, points) {
+        const fx = _NATURE_FX[natureName] || [];
+        const up = fx[0], down = fx[1];
+        const out = {};
+        STAT_KEYS.forEach(k => {
+            const base = (e[k] && e[k].base) || 0;
+            const sp = (points && points[k]) || 0;
+            if (k === 'hp') out.hp = base + sp + 75;
+            else {
+                const align = k === up ? 1.1 : k === down ? 0.9 : 1.0;
+                out[k] = Math.floor((base + sp + 20) * align);
+            }
+        });
+        return out;
+    }
+
+    function usageRecFor(e) {
+        const slug = e && e.meta && e.meta.slug;
+        return (slug && _usage && _usage[slug]) || null;
+    }
+
+    // A horizontal percentage bar + label, used for every usage list row.
+    function usageRow(name, pct, extra) {
+        const width = pct != null ? Math.max(2, Math.min(100, pct)) : 0;
+        const pctTxt = pct != null ? escapeHtml(fmtPct(pct)) : '';
+        return `<div class="sqp-d-row">
+                <div class="sqp-d-bar" style="width:${width}%"></div>
+                <span class="sqp-d-name">${escapeHtml(name)}${extra ? ` <span class="sqp-d-extra">${escapeHtml(extra)}</span>` : ''}</span>
+                <span class="sqp-d-pct">${pctTxt}</span>
+            </div>`;
+    }
+
+    function usageSection(title, rows) {
+        if (!rows) return '';
+        return `<div class="sqp-d-sec">
+                <h4 class="sqp-d-sec-title">${escapeHtml(title)}</h4>
+                ${rows}
+            </div>`;
+    }
+
+    // Stats table for the detail view: Lv50 base · used (top build of the
+    // selected format) · range.
+    function detailStatsTable(e, block) {
+        const l = t();
+        let final = null;
+        if (block) {
+            const nat = (block.nature || [])[0];
+            const sp = (block.stat_points || [])[0];
+            if (nat && sp) final = computeFinal(e, nat.name, sp.points);
+        }
+        const rows = _FINAL_ORDER.map(([k, d, en]) => {
+            const s = e[k]; if (!s) return '';
+            const lab = uiLang() === 'de' ? d : en;
+            const used = final && final[k] != null ? final[k] : '';
+            return `<tr>
+                    <td class="sqp-d-st-lab">${escapeHtml(lab)}</td>
+                    <td class="sqp-d-st-base">${s.lv50}</td>
+                    <td class="sqp-d-st-used">${used !== '' ? escapeHtml(String(used)) : '—'}</td>
+                    <td class="sqp-d-st-range">${s.min}–${s.max}</td>
+                </tr>`;
+        }).join('');
+        return `<table class="sqp-d-stats">
+                <thead><tr>
+                    <th></th><th>${escapeHtml(l.colBase)}</th>
+                    <th>${escapeHtml(l.colUsed)}</th><th>${escapeHtml(l.colRange)}</th>
+                </tr></thead>
+                <tbody>${rows}</tbody>
+            </table>`;
+    }
+
+    function detailUsageBlock(e, block) {
+        const l = t();
+        if (!block) return `<p class="sqp-d-none">${escapeHtml(l.noUsage)}</p>`;
+        const de = uiLang() === 'de';
+
+        const natRows = (block.nature || []).map(n => {
+            const nm = de ? (_NATURE_DE[n.name] || n.name) : n.name;
+            const fx = _NATURE_FX[n.name];
+            const ex = fx ? `${_statLabel(fx[0])}↑ ${_statLabel(fx[1])}↓` : '';
+            return usageRow(nm, n.pct, ex);
+        }).join('');
+
+        const spreadRows = (block.stat_points || [])
+            .map(s => usageRow(evsDisplay(s.evs) || '—', s.pct)).join('');
+
+        const moveRows = (block.move || []).map(m => usageRow(m.name, m.pct)).join('');
+        const itemRows = (block.held_item || []).map(i => usageRow(i.name, i.pct)).join('');
+        const abilRows = (block.ability || []).map(a => usageRow(a.name, a.pct)).join('');
+        const teamRows = (block.teammate || []).map(tm => usageRow(tm.name, tm.pct)).join('');
+
+        return `
+            <div class="sqp-d-grid">
+                ${usageSection(l.secNature, natRows)}
+                ${usageSection(l.secSpread, spreadRows)}
+                ${usageSection(l.secMoves, moveRows)}
+                ${usageSection(l.secItem, itemRows)}
+                ${usageSection(l.secAbility, abilRows)}
+                ${usageSection(l.secTeam, teamRows)}
+            </div>`;
+    }
+
+    function detailOverlayHtml(e) {
+        const l = t();
+        const lang = uiLang();
+        const primary = lang === 'de' ? e.de : e.en;
+        const secondary = lang === 'de' ? e.en : e.de;
+        const dex = e.dex != null ? `#${e.dex}` : '';
+        const rec = usageRecFor(e);
+        // Pick a format that exists for this Pokémon.
+        let fmt = _detailFormat;
+        if (rec && !rec[fmt]) fmt = rec.doubles ? 'doubles' : (rec.singles ? 'singles' : fmt);
+        const block = rec ? rec[fmt] : null;
+
+        const fmtBtn = (key, label) => {
+            const has = rec && rec[key];
+            const active = fmt === key;
+            return `<button type="button" class="sqp-d-fmt${active ? ' is-active' : ''}"
+                        data-fmt="${key}"${has ? '' : ' disabled'}>${escapeHtml(label)}</button>`;
+        };
+
+        const season = _usageSeason ? `<span class="sqp-d-season">${escapeHtml(l.usageSeasonLbl(_usageSeason))}</span>` : '';
+
+        return `
+            <div class="sqp-d-card" role="dialog" aria-modal="true" aria-label="${escapeHtml(primary)}">
+                <button type="button" class="sqp-d-close" aria-label="${escapeHtml(l.closeLabel)}">×</button>
+                <div class="sqp-d-head">
+                    <div class="sqp-d-title">
+                        <span class="sqp-d-name-main">${escapeHtml(primary)}</span>
+                        <span class="sqp-d-name-sub">${escapeHtml(secondary)} · ${escapeHtml(dex)}</span>
+                    </div>
+                    <div class="sqp-d-types">${typeBadge(e.t1, e.t1de)} ${e.t2 ? typeBadge(e.t2, e.t2de) : ''}</div>
+                </div>
+                <div class="sqp-d-searchwrap">
+                    <input type="search" class="sqp-d-search" placeholder="${escapeHtml(l.detailSearchPh)}"
+                           autocomplete="off" spellcheck="false" aria-label="${escapeHtml(l.detailSearchPh)}">
+                    <div class="sqp-d-results" hidden></div>
+                </div>
+                <div class="sqp-d-fmts">
+                    ${fmtBtn('doubles', l.fmtDoubles)}
+                    ${fmtBtn('singles', l.fmtSingles)}
+                    ${season}
+                </div>
+                <div class="sqp-d-sec">
+                    <h4 class="sqp-d-sec-title">${escapeHtml(l.secStats)}</h4>
+                    ${detailStatsTable(e, block)}
+                </div>
+                ${detailUsageBlock(e, block)}
+                <p class="sqp-attr">${escapeHtml(l.attribution)}</p>
+            </div>`;
+    }
+
+    function ensureOverlayEl() {
+        let ov = document.getElementById('sqpDetailOverlay');
+        if (!ov) {
+            ov = document.createElement('div');
+            ov.id = 'sqpDetailOverlay';
+            ov.className = 'sqp-d-overlay';
+            ov.hidden = true;
+            document.body.appendChild(ov);
+            ov.addEventListener('click', (ev) => {
+                if (ev.target === ov || ev.target.closest('.sqp-d-close')) closeDetail();
+            });
+            document.addEventListener('keydown', (ev) => {
+                if (ev.key === 'Escape' && !ov.hidden) closeDetail();
+            });
+        }
+        return ov;
+    }
+
+    function renderDetailOverlay() {
+        if (!_detailEntry) return;
+        const ov = ensureOverlayEl();
+        ov.innerHTML = detailOverlayHtml(_detailEntry);
+        ov.hidden = false;
+        document.body.classList.add('sqp-d-open');
+        wireDetailEvents(ov);
+    }
+
+    function wireDetailEvents(ov) {
+        ov.querySelectorAll('.sqp-d-fmt').forEach(btn => {
+            if (btn.disabled) return;
+            btn.addEventListener('click', () => {
+                _detailFormat = btn.getAttribute('data-fmt');
+                renderDetailOverlay();
+            });
+        });
+        const search = ov.querySelector('.sqp-d-search');
+        const results = ov.querySelector('.sqp-d-results');
+        if (search && results) {
+            search.addEventListener('input', () => {
+                const q = norm(search.value).trim();
+                if (!q) { results.hidden = true; results.innerHTML = ''; return; }
+                const hits = (_entries || []).filter(en => matches(en, q)).slice(0, 12);
+                results.innerHTML = hits.map((en, i) => {
+                    const nm = uiLang() === 'de' ? en.de : en.en;
+                    const sub = uiLang() === 'de' ? en.en : en.de;
+                    return `<button type="button" class="sqp-d-hit" data-hit="${_entries.indexOf(en)}">
+                            <b>${escapeHtml(nm)}</b> <span>${escapeHtml(sub)}</span>
+                        </button>`;
+                }).join('') || `<div class="sqp-d-nohit">—</div>`;
+                results.hidden = false;
+                results.querySelectorAll('.sqp-d-hit').forEach(b => {
+                    b.addEventListener('click', () => {
+                        const idx = parseInt(b.getAttribute('data-hit'), 10);
+                        const en = _entries[idx];
+                        if (en) { _detailEntry = en; renderDetailOverlay(); }
+                    });
+                });
+            });
+        }
+    }
+
+    function openDetail(e) {
+        if (!e) return;
+        _detailEntry = e;
+        _detailFormat = 'doubles';
+        loadUsage().then(renderDetailOverlay);
+    }
+
+    function closeDetail() {
+        const ov = document.getElementById('sqpDetailOverlay');
+        if (ov) ov.hidden = true;
+        document.body.classList.remove('sqp-d-open');
+        _detailEntry = null;
+    }
+
     function render() {
         const host = document.getElementById('sideQuestPokedexHost');
         if (!host) return;
@@ -428,27 +713,25 @@
         wireRows(host);
     }
 
-    // Tap a Pokémon row → reveal its most-used SP spread (meta) detail row.
+    // Tap a Pokémon row → open the full in-game detail overlay.
     function wireRows(host) {
         const table = host.querySelector('.sqp-table');
         if (!table || table._sqpRowsWired) return;
         table._sqpRowsWired = true;
-        const toggle = (row) => {
-            if (!row || !row.classList.contains('has-meta')) return;
-            const idx = row.getAttribute('data-row');
-            const detail = table.querySelector(`.sqp-detail[data-detail="${idx}"]`);
-            if (!detail) return;
-            if (detail.hasAttribute('hidden')) { detail.removeAttribute('hidden'); row.classList.add('is-open'); }
-            else { detail.setAttribute('hidden', ''); row.classList.remove('is-open'); }
+        const open = (row) => {
+            if (!row) return;
+            const idx = parseInt(row.getAttribute('data-row'), 10);
+            const e = _lastResults[idx];
+            if (e) openDetail(e);
         };
         table.addEventListener('click', (ev) => {
             if (ev.target.closest('.sqp-sortable')) return;   // header sort handles itself
-            toggle(ev.target.closest('.sqp-row'));
+            open(ev.target.closest('.sqp-row'));
         });
         table.addEventListener('keydown', (ev) => {
             if (ev.key === 'Enter' || ev.key === ' ') {
                 const row = ev.target.closest('.sqp-row');
-                if (row) { ev.preventDefault(); toggle(row); }
+                if (row) { ev.preventDefault(); open(row); }
             }
         });
     }

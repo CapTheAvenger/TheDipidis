@@ -242,6 +242,21 @@ def scrape_pokemon(slug):
     if not forms:
         return None, None
     rec.update(forms)
+
+    # Mega ability: summary.forms lists each form (Base / Mega / Mega X / Y)
+    # with its abilities. For a "mega-…" slug, grab the matching Mega form's
+    # fixed ability — the only reliable source for it (the usage ability is
+    # the PRE-mega base ability, and roster.json lacks the new M-B megas).
+    slug_norm = re.sub(r"[^a-z0-9]", "", slug.lower())
+    for f in (summary.get("forms") or []):
+        if "mega" not in (f.get("form_kind") or "").lower():
+            continue
+        if re.sub(r"[^a-z0-9]", "", (f.get("saved_name") or "").lower()) == slug_norm:
+            mab = (f.get("abilities") or "").split("|")[0].strip()
+            if mab:
+                rec["megaAbility"] = mab
+            break
+
     return en_name, rec
 
 

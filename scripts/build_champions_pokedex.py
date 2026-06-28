@@ -466,6 +466,11 @@ def main():
         if not rec and e.get("form", "Base") == "Base":
             rec = usage_index.get(_norm(entry_base(e["en"])))
         if rec:
+            # championsbattledata's per-mega "megaAbility" covers ALL megas
+            # (incl. the Champions-original M-B ones); prefer it over the
+            # roster.json value set above.
+            if rec.get("megaAbility"):
+                e["megaAbility"] = rec["megaAbility"]
             meta = usage_meta(rec, base6)
             if meta:
                 e["meta"] = meta

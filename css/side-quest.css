@@ -327,11 +327,14 @@
     flex: 1 1 auto;
 }
 
-.side-quest-rank {
-    font-size: 0.75rem;
-    font-weight: 700;
-    color: var(--accent, #5fb6ff);
-    letter-spacing: 0.04em;
+/* Share date shown where the old "#N" rank used to be (teams are sorted
+   newest-first, so the date communicates freshness rather than a placement). */
+.side-quest-date {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: #6b7280;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
 }
 
 .side-quest-team-name {

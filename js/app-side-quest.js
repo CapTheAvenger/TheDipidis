@@ -383,9 +383,12 @@
                         <span class="side-quest-copy-code">${escapeHtml(code) || '—'}</span>
                         <span class="side-quest-copy-icon" aria-hidden="true">📋</span>
                     </button>`;
+        // No "#N" — it read like a placement/rank, which it isn't (teams are
+        // sorted newest-first, not ranked). Show the share date instead so the
+        // freshness is clear.
         const metaBadge = team._imported
             ? `<span class="side-quest-reg-badge side-quest-import-badge">${escapeHtml(labels.importBadge)}</span>`
-            : `<span class="side-quest-rank">#${escapeHtml(String(team.rank || '—'))}</span>
+            : `${team.date_shared ? `<span class="side-quest-date">${escapeHtml(team.date_shared)}</span>` : ''}
                <span class="side-quest-reg-badge${regOf(team) === CURRENT_REG ? ' is-current' : ''}" title="Regulation ${escapeHtml(regOf(team))}">${escapeHtml(regOf(team))}</span>`;
         return `
             <article class="side-quest-team${stateClass}" data-replica-code="${escapeHtml(code)}" data-team-hash="${escapeHtml(hash)}">
@@ -1088,6 +1091,11 @@
             const da = getMark(teamIdentityHash(a)) === 'disliked' ? 1 : 0;
             const db = getMark(teamIdentityHash(b)) === 'disliked' ? 1 : 0;
             if (da !== db) return da - db;
+            // Newest shared first; fall back to original list order for ties
+            // or missing dates.
+            const ta = Date.parse(a && a.date_shared) || 0;
+            const tb = Date.parse(b && b.date_shared) || 0;
+            if (tb !== ta) return tb - ta;
             return (a.rank || 999) - (b.rank || 999);
         });
 

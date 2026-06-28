@@ -70,6 +70,7 @@ _EV_LABEL = {"hp": "HP", "atk": "Atk", "def": "Def",
 # fully parallel one trips the 503 wall. A small worker pool + per-request
 # backoff on 503/429 is the sweet spot: ~3 min, full roster, self-healing.
 WORKERS = 6
+MAX_PASSES = 4   # main pass + up to 3 retry passes for slugs dropped to 503s
 
 
 def fetch(url, timeout=45, retries=4):
@@ -258,35 +259,64 @@ def main():
         slugs = slugs[:limit]
         print(f"--limit {limit}: scraping {len(slugs)} slugs")
 
+    # Scrape in passes: the host rate-limits bursts, so a single pass can
+    # silently drop dozens of Pokémon to 503s (observed: 302/356). Retry the
+    # slugs that failed, with fewer workers + a cooldown each pass, until none
+    # fail or we run out of passes. Deterministic full coverage matters more
+    # than speed here.
     pokemon = {}
     season = None
-    ok = 0
-    done = 0
-    with ThreadPoolExecutor(max_workers=WORKERS) as pool:
-        futures = {pool.submit(scrape_pokemon, slug): slug for slug in slugs}
-        for fut in as_completed(futures):
-            done += 1
-            slug = futures[fut]
-            try:
-                name, rec = fut.result()
-            except Exception as e:  # noqa: BLE001 — one bad mon must not kill the run
-                print(f"  WARN {slug}: {type(e).__name__}: {e}")
-                continue
-            if not rec:
-                continue
-            for fmt in ("doubles", "singles"):
-                if fmt in rec and rec[fmt].get("season"):
-                    season = rec[fmt]["season"]
-            pokemon[slug] = rec
-            ok += 1
-            if ok <= 3 or done % 50 == 0:
-                d = (rec.get("doubles") or {})
-                nat = (d.get("nature") or [{}])[0]
-                print(f"  [{done}/{len(slugs)}] {name}: doubles top nature="
-                      f"{nat.get('name')} {nat.get('pct')}%")
+    pending = list(slugs)
+    for attempt in range(MAX_PASSES):
+        if not pending:
+            break
+        if attempt > 0:
+            print(f"retry pass {attempt}: {len(pending)} slugs still missing")
+            time.sleep(6.0)   # let the rate limit cool down
+        workers = WORKERS if attempt == 0 else 3
+        failed, done = [], 0
+        with ThreadPoolExecutor(max_workers=workers) as pool:
+            futures = {pool.submit(scrape_pokemon, slug): slug for slug in pending}
+            for fut in as_completed(futures):
+                done += 1
+                slug = futures[fut]
+                try:
+                    name, rec = fut.result()
+                except Exception as e:  # noqa: BLE001 — never let one kill the run
+                    print(f"  WARN {slug}: {type(e).__name__}: {e}")
+                    rec = None
+                if not rec:
+                    failed.append(slug)
+                    continue
+                for fmt in ("doubles", "singles"):
+                    if fmt in rec and rec[fmt].get("season"):
+                        season = rec[fmt]["season"]
+                pokemon[slug] = rec
+                if attempt == 0 and (len(pokemon) <= 3 or done % 50 == 0):
+                    d = (rec.get("doubles") or {})
+                    nat = (d.get("nature") or [{}])[0]
+                    print(f"  [{done}/{len(pending)}] {name}: doubles top nature="
+                          f"{nat.get('name')} {nat.get('pct')}%")
+        pending = failed
+    ok = len(pokemon)
+    if pending:
+        print(f"WARN: {len(pending)} slugs never resolved after {MAX_PASSES} "
+              f"passes: {pending[:20]}")
 
     if ok == 0:
         print("FATAL: 0 Pokémon scraped — keeping committed JSON")
+        return 1
+
+    # Regression guard: never let a rate-limited thin scrape overwrite a good
+    # snapshot. If we got noticeably fewer than last time, keep the committed
+    # file (the workflow's fail-soft restores it on a non-zero exit).
+    try:
+        prev = len((json.load(open(OUT, encoding="utf-8")).get("pokemon") or {}))
+    except Exception:  # noqa: BLE001
+        prev = 0
+    if prev and ok < prev * 0.92:
+        print(f"FATAL: scraped {ok} Pokémon < 92% of previous {prev} — likely "
+              f"rate-limited; keeping committed JSON")
         return 1
 
     out = {

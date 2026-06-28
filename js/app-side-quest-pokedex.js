@@ -610,7 +610,13 @@
         const moveRows = (block.move || []).map(m => usageRow(nmHtml(m.name, 'moves'), m.pct)).join('');
         const itemRows = (block.held_item || []).map(i => usageRow(nmHtml(i.name, 'items'), i.pct, null, i.derived)).join('');
         const abilRows = (block.ability || []).map(a => usageRow(nmHtml(a.name, 'abilities'), a.pct)).join('');
-        const teamRows = (block.teammate || []).map(tm => usageRow(nmHtml(tm.name, 'pokemon'), tm.pct)).join('');
+        // Teammates have no percentage in-game — just a ranked list. Render
+        // them as a clean numbered list (no empty %-column / bar).
+        const teamRows = (block.teammate || []).map((tm, i) => `
+            <div class="sqp-d-team">
+                <span class="sqp-d-team-rank">${i + 1}</span>
+                <span class="sqp-d-name">${nmHtml(tm.name, 'pokemon')}</span>
+            </div>`).join('');
 
         return `
             <div class="sqp-d-grid">

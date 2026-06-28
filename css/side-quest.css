@@ -2023,3 +2023,7 @@ body.sqp-d-open { overflow: hidden; }
 /* German name shown beside the English one in the detail usage rows. */
 .sqp-d-de { color: #7f8ca0; margin-left: 7px; font-size: 0.82em; }
 .sqp-d-de::before { content: "· "; }
+
+/* Teammate list (no % in-game — clean numbered rows). */
+.sqp-d-team { display: flex; align-items: center; gap: 8px; padding: 4px 8px; border-radius: 6px; background: #0f141d; margin-bottom: 2px; font-size: 0.84rem; }
+.sqp-d-team-rank { color: #6b7585; font-weight: 700; min-width: 1.1em; text-align: center; }

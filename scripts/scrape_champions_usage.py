@@ -157,15 +157,12 @@ def summarize_csv(text):
     for r in rows:
         by_cat.setdefault(r.get("category", ""), []).append(r)
 
-    # The CSV's "column_position" appears to be a per-format usage ordering
-    # (it differs doubles vs singles). Capture it as `pos` so we can verify
-    # whether sorting by it reproduces the in-game usage ranking.
+    # NB: the CSV's "column_position" is a display-grid layout index, NOT a
+    # usage rank — verified: sorting all Pokémon by it does NOT reproduce the
+    # in-game usage ranking (gaps, form-shared values, and the in-game top-5
+    # Salmagnis/Elfun/Fatalitcha don't appear near the top). So we drop it;
+    # championsbattledata carries no aggregate usage ranking.
     out = {}
-    if rows:
-        try:
-            out["pos"] = int(rows[0].get("column_position"))
-        except (TypeError, ValueError):
-            pass
     for cat, lst in by_cat.items():
         keep = KEEP.get(cat)
         if not keep:

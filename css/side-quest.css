@@ -2007,3 +2007,13 @@ body.sqp-d-open { overflow: hidden; }
 .sqp-d-extra { color: #6b7585; font-size: 0.74rem; }
 .sqp-d-pct { position: relative; z-index: 1; color: #8fd6ff; font-weight: 700; font-size: 0.8rem; }
 .sqp-d-none { color: #9aa4b2; font-size: 0.88rem; padding: 10px 0; }
+
+/* Pokédex table format toggle (which format the "used" brackets show). */
+.sqp-fmt-toggle { display: inline-flex; align-items: center; gap: 6px; }
+.sqp-fmt-lbl { color: #6b7585; font-size: 0.74rem; }
+.sqp-fmt-btn {
+    background: #1b2330; border: 1px solid #2c374a; border-radius: 999px;
+    color: #c4ccd9; padding: 4px 12px; font-size: 0.78rem; font-weight: 600; cursor: pointer;
+}
+.sqp-fmt-btn:hover { border-color: #4a566b; }
+.sqp-fmt-btn.is-active { background: #234; border-color: #5fb6ff; color: #8fd6ff; }

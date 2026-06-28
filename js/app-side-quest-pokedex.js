@@ -22,6 +22,7 @@
     let _usageLoading = null;
     let _detailEntry = null;         // entry currently shown in the overlay
     let _detailFormat = 'doubles';   // 'doubles' | 'singles'
+    let _tableFormat = 'doubles';    // which format the table's "used" cells show
     let _lastResults = [];           // current filtered/sorted result set
     let _activated = false;
     let _query = '';
@@ -84,6 +85,7 @@
             closeLabel: 'Schließen',
             usageSeasonLbl: (s) => `Saison: ${s}`,
             colBase: 'Lv50', colUsed: 'Genutzt', colRange: 'Range',
+            tblFormatLabel: 'Genutzte Werte:',
         },
         en: {
             tab: 'Pokémon',
@@ -129,6 +131,7 @@
             closeLabel: 'Close',
             usageSeasonLbl: (s) => `Season: ${s}`,
             colBase: 'Lv50', colUsed: 'Used', colRange: 'Range',
+            tblFormatLabel: 'Used values:',
         },
     };
     function t() { return LABELS[uiLang()]; }
@@ -248,12 +251,33 @@
         }).join('') + '</tr>';
     }
 
+    // Per-format "used" final stats for the table brackets. Doubles reuses
+    // the value precomputed by the build (no usage fetch needed); Singles is
+    // computed live from the loaded usage record. Cached per entry+format.
+    function usedFinalFor(e, fmt) {
+        if (fmt === 'doubles' && e.meta && e.meta.format === 'doubles' && e.meta.final) {
+            return e.meta.final;
+        }
+        if (!e._finalCache) e._finalCache = {};
+        if (fmt in e._finalCache) return e._finalCache[fmt];
+        let final = null;
+        const rec = usageRecFor(e);
+        const block = rec && rec[fmt];
+        if (block) {
+            const nat = (block.nature || [])[0];
+            const sp = (block.stat_points || [])[0];
+            if (nat && sp) final = computeFinal(e, nat.name, sp.points);
+        }
+        e._finalCache[fmt] = final;
+        return final;
+    }
+
     function rowFor(e, idx) {
         const lang = uiLang();
         const primary = lang === 'de' ? e.de : e.en;
         const secondary = lang === 'de' ? e.en : e.de;
         const dex = e.dex != null ? `#${e.dex}` : '';
-        const f = (e.meta && e.meta.final) || null;   // used per-stat values
+        const f = usedFinalFor(e, _tableFormat);   // used per-stat values
         const caret = '<span class="sqp-caret" aria-hidden="true">▸</span>';
         // Tapping the row opens the full in-game detail overlay.
         return `
@@ -315,6 +339,11 @@
             <div class="sqp-filters">
                 <select class="sqp-select" id="sqpType" aria-label="${escapeHtml(l.allTypes)}">${typeOpts}</select>
                 <select class="sqp-select" id="sqpForm" aria-label="${escapeHtml(l.allForms)}">${formOpts}</select>
+                <span class="sqp-fmt-toggle" role="group" aria-label="${escapeHtml(l.tblFormatLabel)}">
+                    <span class="sqp-fmt-lbl">${escapeHtml(l.tblFormatLabel)}</span>
+                    <button type="button" class="sqp-fmt-btn${_tableFormat === 'doubles' ? ' is-active' : ''}" data-tfmt="doubles">${escapeHtml(l.fmtDoubles)}</button>
+                    <button type="button" class="sqp-fmt-btn${_tableFormat === 'singles' ? ' is-active' : ''}" data-tfmt="singles">${escapeHtml(l.fmtSingles)}</button>
+                </span>
             </div>`;
     }
 
@@ -766,6 +795,17 @@
         if (typeSel) typeSel.addEventListener('change', () => { _typeFilter = typeSel.value; render(); });
         const formSel = host.querySelector('#sqpForm');
         if (formSel) formSel.addEventListener('change', () => { _formFilter = formSel.value; render(); });
+        host.querySelectorAll('.sqp-fmt-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const fmt = btn.getAttribute('data-tfmt');
+                if (fmt === _tableFormat) return;
+                _tableFormat = fmt;
+                // Singles needs the usage record loaded to recompute the
+                // "used" values; Doubles uses the build's precomputed values.
+                if (fmt === 'singles' && !_usage) loadUsage().then(render);
+                else render();
+            });
+        });
         wireSortHeaders(host);
         wireRows(host);
     }

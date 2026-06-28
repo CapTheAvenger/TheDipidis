@@ -167,6 +167,20 @@ def summarize_csv(text):
         keep = KEEP.get(cat)
         if not keep:
             continue
+
+        # Items quirk: the source leaves the #1 held item's % blank. A
+        # Pokémon holds exactly one item, so item shares sum to ~100% —
+        # derive the missing value from the FULL list (sum of all the
+        # others), not just the displayed top-N. Verified vs in-game:
+        # Pelipper Focus Sash 100 − Σ(others) ≈ 45.9% (in-game 45.9%).
+        derived_pct = {}   # row id() -> derived %
+        if cat == "held_item":
+            parsed = [(r, pct_to_float(r.get("percentage"))) for r in lst]
+            blanks = [r for r, p in parsed if p is None and r.get("name", "").strip()]
+            known = sum(p for _, p in parsed if p is not None)
+            if len(blanks) == 1:
+                derived_pct[id(blanks[0])] = round(max(0.0, 100.0 - known), 1)
+
         items = []
         for r in lst[:keep]:
             pct = pct_to_float(r.get("percentage"))
@@ -178,7 +192,13 @@ def summarize_csv(text):
             elif cat == "stat_points":           # SP / EV spread
                 evs, points = evs_string(r)
                 items.append({"evs": evs, "pct": pct, "points": points})
-            else:                                # held_item / move / ability / teammate
+            elif cat == "held_item":
+                entry = {"name": r.get("name", "").strip(), "pct": pct}
+                if pct is None and id(r) in derived_pct:
+                    entry["pct"] = derived_pct[id(r)]
+                    entry["derived"] = True   # computed, not source-reported
+                items.append(entry)
+            else:                                # move / ability / teammate
                 items.append({"name": r.get("name", "").strip(), "pct": pct})
         out[OUT_KEY.get(cat, cat)] = items
     return out

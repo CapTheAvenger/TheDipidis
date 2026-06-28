@@ -32,6 +32,8 @@ import json
 import os
 import re
 import sys
+import time
+import urllib.parse
 import urllib.request
 import urllib.error
 
@@ -46,8 +48,13 @@ ROOT = os.path.dirname(HERE)
 OUT = os.path.join(ROOT, "data", "champions_usage.json")
 
 # How many rows to keep per category (compact but useful for the UI).
-KEEP = {"nature": 3, "stat_points": 3, "held_item": 4, "move": 6,
+# The site labels the nature category "stat_alignment" (the in-game
+# "Statuswertanpassung" panel) and the SP/EV spread "stat_points"
+# ("Statuswertpunkte"). We re-key stat_alignment → "nature" on output.
+KEEP = {"stat_alignment": 3, "stat_points": 3, "held_item": 4, "move": 6,
         "ability": 3, "teammate": 5}
+# Output key per source category.
+OUT_KEY = {"stat_alignment": "nature"}
 
 _POINT_COLS = [("hp", "hp_points"), ("atk", "attack_points"),
                ("def", "defense_points"), ("spa", "sp_atk_points"),
@@ -57,10 +64,39 @@ _EV_LABEL = {"hp": "HP", "atk": "Atk", "def": "Def",
              "spa": "SpA", "spd": "SpD", "spe": "Spe"}
 
 
-def fetch(url, timeout=45):
-    req = urllib.request.Request(url, headers=UA)
-    with urllib.request.urlopen(req, timeout=timeout) as r:
-        return r.read()
+# Polite throttle + retry: the host rate-limits bursts (~200 rapid requests
+# → HTTP 503), which silently dropped meta-relevant Pokémon at the tail of
+# an un-throttled run. A small inter-request delay plus backoff on 503/429
+# keeps the whole roster.
+THROTTLE_S = 0.2
+
+
+def fetch(url, timeout=45, retries=4):
+    # Quote the path so asset filenames with spaces (e.g. "Vivillon Fancy
+    # Pattern.csv") don't raise "URL can't contain control characters".
+    parts = urllib.parse.urlsplit(url)
+    safe_path = urllib.parse.quote(parts.path)
+    url = urllib.parse.urlunsplit((parts.scheme, parts.netloc, safe_path,
+                                   parts.query, parts.fragment))
+    last = None
+    for attempt in range(retries):
+        try:
+            req = urllib.request.Request(url, headers=UA)
+            with urllib.request.urlopen(req, timeout=timeout) as r:
+                return r.read()
+        except urllib.error.HTTPError as e:
+            last = e
+            if e.code in (429, 500, 502, 503, 504) and attempt < retries - 1:
+                time.sleep(0.6 * (2 ** attempt))   # 0.6, 1.2, 2.4s
+                continue
+            raise
+        except Exception as e:  # noqa: BLE001 — transient network: back off
+            last = e
+            if attempt < retries - 1:
+                time.sleep(0.6 * (2 ** attempt))
+                continue
+            raise
+    raise last  # pragma: no cover
 
 
 def fetch_text(url, timeout=45):
@@ -120,15 +156,10 @@ def summarize_csv(text):
     for r in rows:
         by_cat.setdefault(r.get("category", ""), []).append(r)
 
+    # NB: the CSV's "column_position" is a layout index, NOT the Pokémon's
+    # usage rank (Pelipper is column 11 but 9th by usage in-game), so we do
+    # not expose it — reliable data only.
     out = {}
-    # column_position is the Pokémon's overall meta rank in this format.
-    if rows:
-        cp = rows[0].get("column_position")
-        try:
-            out["rank"] = int(cp)
-        except (TypeError, ValueError):
-            pass
-
     for cat, lst in by_cat.items():
         keep = KEEP.get(cat)
         if not keep:
@@ -136,17 +167,17 @@ def summarize_csv(text):
         items = []
         for r in lst[:keep]:
             pct = pct_to_float(r.get("percentage"))
-            if cat == "nature":
+            if cat == "stat_alignment":          # nature
                 items.append({"name": r.get("name", "").strip(),
                               "pct": pct,
                               "up": (r.get("stat_up") or "").strip(),
                               "down": (r.get("stat_down") or "").strip()})
-            elif cat == "stat_points":
+            elif cat == "stat_points":           # SP / EV spread
                 evs, points = evs_string(r)
                 items.append({"evs": evs, "pct": pct, "points": points})
-            else:
+            else:                                # held_item / move / ability / teammate
                 items.append({"name": r.get("name", "").strip(), "pct": pct})
-        out[cat] = items
+        out[OUT_KEY.get(cat, cat)] = items
     return out
 
 
@@ -208,6 +239,8 @@ def main():
     season = None
     ok = 0
     for i, slug in enumerate(slugs, 1):
+        if i > 1:
+            time.sleep(THROTTLE_S)   # be polite — avoid the 503 burst
         name, rec = scrape_pokemon(slug)
         if not rec:
             continue

@@ -21,24 +21,19 @@ jobs:
       - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6
         with:
           python-version: '3.12'
-      - name: Dump Pelipper Doubles raw CSV (find the nature category)
+      - name: Run usage scraper
+        run: python -u scripts/scrape_champions_usage.py
+      - name: Verify (Pelipper nature + tail mons captured)
         run: |
           python - <<'PY'
-          import urllib.request, collections
-          UA={"User-Agent":"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124 Safari/537.36"}
-          url="https://championsbattledata.com/pokemon_champions_assets/battle_data/Doubles/Pelipper.csv"
-          txt=urllib.request.urlopen(urllib.request.Request(url,headers=UA),timeout=45).read().decode("utf-8","replace")
-          lines=txt.splitlines()
-          print("HEADER:",lines[0])
-          cats=collections.Counter()
-          for ln in lines[1:]:
-              c=ln.split(",")
-              if len(c)>2: cats[c[2]]+=1
-          print("CATEGORIES:",dict(cats))
-          print("--- rows whose category is NOT move/held_item/ability/teammate/stat_points ---")
-          known={"move","held_item","ability","teammate","stat_points"}
-          for ln in lines[1:]:
-              c=ln.split(",")
-              if len(c)>2 and c[2] not in known:
-                  print(ln)
+          import json
+          d=json.load(open('data/champions_usage.json'))
+          print("count:", d['_meta']['count'], "season:", d['_meta']['season'])
+          pel=d['pokemon'].get('pelipper',{}).get('doubles',{})
+          print("Pelipper doubles nature:", pel.get('nature'))
+          print("Pelipper doubles top spread:", (pel.get('stat_points') or [{}])[0])
+          for slug in ('whimsicott','volcarona','zoroark','weavile','garchomp'):
+              p=d['pokemon'].get(slug)
+              nat=(p or {}).get('doubles',{}).get('nature',[{}])
+              print(f"  {slug}: {'OK' if p else 'MISSING'} top-nature={nat[0].get('name') if nat else None} {nat[0].get('pct') if nat else ''}")
           PY

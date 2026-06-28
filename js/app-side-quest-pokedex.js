@@ -662,11 +662,13 @@
     function megaAbilityBadge(en) {
         const l = t();
         const fx = abilityFxText(en);
-        const title = fx ? ` title="${escapeHtml(fx)}"` : '';
-        return `<span class="sqp-d-megaab"${title}>
-                <span class="sqp-d-megaab-lbl">${escapeHtml(l.megaAbility)}</span>
-                <span class="sqp-d-megaab-name">${nmHtml(en, 'abilities')}</span>
-            </span>`;
+        return `<div class="sqp-d-megaab">
+                <div class="sqp-d-megaab-top">
+                    <span class="sqp-d-megaab-lbl">${escapeHtml(l.megaAbility)}</span>
+                    <span class="sqp-d-megaab-name">${nmHtml(en, 'abilities')}</span>
+                </div>
+                ${fx ? `<div class="sqp-d-megaab-fx">${escapeHtml(fx)}</div>` : ''}
+            </div>`;
     }
 
     function detailOverlayHtml(e) {

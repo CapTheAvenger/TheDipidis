@@ -2050,17 +2050,18 @@ body.sqp-d-open { overflow: hidden; }
 /* Mega ability badge in the detail header (the ability a Mega gets after
    evolving — shown by the name; the usage section lists the pre-mega base). */
 .sqp-d-megaab {
-    display: inline-flex; align-items: baseline; gap: 7px; flex-wrap: wrap;
-    margin: 8px 0 2px; padding: 5px 11px;
+    margin: 8px 0 2px; padding: 7px 11px;
     background: rgba(150, 120, 255, 0.10);
     border: 1px solid rgba(150, 120, 255, 0.35);
     border-radius: 9px; font-size: 0.88rem;
 }
+.sqp-d-megaab-top { display: flex; align-items: baseline; gap: 7px; flex-wrap: wrap; }
 .sqp-d-megaab-lbl {
     color: #6f4fe0; font-weight: 800; font-size: 0.68rem;
     text-transform: uppercase; letter-spacing: 0.03em;
 }
 .sqp-d-megaab-name { color: #2c3e50; font-weight: 700; }
+.sqp-d-megaab-fx { color: #4a4a4a; font-size: 0.8rem; line-height: 1.35; margin-top: 4px; }
 
 /* "Kampfdaten" finder — a direct search list that opens the detail overlay. */
 .sqp-bf-list { display: flex; flex-direction: column; gap: 4px; margin-top: 8px; }

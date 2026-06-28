@@ -2017,3 +2017,5 @@ body.sqp-d-open { overflow: hidden; }
 }
 .sqp-fmt-btn:hover { border-color: #4a566b; }
 .sqp-fmt-btn.is-active { background: #234; border-color: #5fb6ff; color: #8fd6ff; }
+
+.sqp-d-pct.is-approx { color: #9fb4cc; font-weight: 600; font-style: italic; }

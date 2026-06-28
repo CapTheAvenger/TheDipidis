@@ -501,14 +501,22 @@
     }
 
     // A horizontal percentage bar + label, used for every usage list row.
-    function usageRow(name, pct, extra) {
+    // `approx` prefixes "≈" — the source omits the #1 item's %, so we derive
+    // it from the other items (100 − Σ rest); it's an estimate, not exact.
+    function usageRow(name, pct, extra, approx) {
         const width = pct != null ? Math.max(2, Math.min(100, pct)) : 0;
-        const pctTxt = pct != null ? escapeHtml(fmtPct(pct)) : '';
-        return `<div class="sqp-d-row">
+        const pctTxt = pct != null ? (approx ? '≈ ' : '') + escapeHtml(fmtPct(pct)) : '';
+        const title = approx ? ` title="${escapeHtml(l_approxItem())}"` : '';
+        return `<div class="sqp-d-row"${title}>
                 <div class="sqp-d-bar" style="width:${width}%"></div>
                 <span class="sqp-d-name">${escapeHtml(name)}${extra ? ` <span class="sqp-d-extra">${escapeHtml(extra)}</span>` : ''}</span>
-                <span class="sqp-d-pct">${pctTxt}</span>
+                <span class="sqp-d-pct${approx ? ' is-approx' : ''}">${pctTxt}</span>
             </div>`;
+    }
+    function l_approxItem() {
+        return uiLang() === 'de'
+            ? 'Geschätzt: die Quelle liefert den Wert des meistgenutzten Items nicht — berechnet aus 100 % minus der übrigen Items.'
+            : 'Estimated: the source omits the top item\'s share — computed as 100% minus the other items.';
     }
 
     function usageSection(title, rows) {
@@ -565,7 +573,7 @@
             .map(s => usageRow(evsDisplay(s.evs) || '—', s.pct)).join('');
 
         const moveRows = (block.move || []).map(m => usageRow(m.name, m.pct)).join('');
-        const itemRows = (block.held_item || []).map(i => usageRow(i.name, i.pct)).join('');
+        const itemRows = (block.held_item || []).map(i => usageRow(i.name, i.pct, null, i.derived)).join('');
         const abilRows = (block.ability || []).map(a => usageRow(a.name, a.pct)).join('');
         const teamRows = (block.teammate || []).map(tm => usageRow(tm.name, tm.pct)).join('');
 

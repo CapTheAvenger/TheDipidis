@@ -71,9 +71,14 @@ _EV_LABEL = {"hp": "HP", "atk": "Atk", "def": "Def",
 # backoff on 503/429 is the sweet spot: ~3 min, full roster, self-healing.
 WORKERS = 6
 MAX_PASSES = 4   # main pass + up to 3 retry passes for slugs dropped to 503s
+# Hard wall-clock budget. When the host is *sustained*-rate-limiting (e.g.
+# after a burst of CI runs), retries can't recover and would otherwise grind
+# for 10+ min per failing request set. Stop after this and let the regression
+# guard keep the committed snapshot; the daily safety-net run retries later.
+BUDGET_S = 420
 
 
-def fetch(url, timeout=45, retries=4):
+def fetch(url, timeout=30, retries=3):
     # Quote the path so asset filenames with spaces (e.g. "Vivillon Fancy
     # Pattern.csv") don't raise "URL can't contain control characters".
     parts = urllib.parse.urlsplit(url)
@@ -267,8 +272,13 @@ def main():
     pokemon = {}
     season = None
     pending = list(slugs)
+    start = time.time()
     for attempt in range(MAX_PASSES):
         if not pending:
+            break
+        if time.time() - start > BUDGET_S:
+            print(f"WARN: scrape budget ({BUDGET_S}s) exceeded — host likely "
+                  f"rate-limiting; stopping with {len(pokemon)} so far")
             break
         if attempt > 0:
             print(f"retry pass {attempt}: {len(pending)} slugs still missing")

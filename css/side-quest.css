@@ -2037,3 +2037,9 @@ body.sqp-d-open { overflow: hidden; }
 /* Teammate list (no % in-game — clean numbered rows). */
 .sqp-d-team { display: flex; align-items: center; gap: 8px; padding: 4px 8px; border-radius: 6px; background: #f8f9fa; margin-bottom: 2px; font-size: 0.84rem; }
 .sqp-d-team-rank { color: #6b7280; font-weight: 700; min-width: 1.1em; text-align: center; }
+
+/* Ability row in the detail overlay: name + % on top, effect text below. */
+.sqp-d-ability { flex-direction: column; align-items: stretch; gap: 3px; padding: 6px 8px; }
+.sqp-d-ab-top { position: relative; z-index: 1; display: flex; align-items: center; gap: 8px; }
+.sqp-d-ab-top .sqp-d-name { flex: 1; }
+.sqp-d-ab-fx { position: relative; z-index: 1; color: #6b7280; font-size: 0.76rem; line-height: 1.35; }

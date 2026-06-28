@@ -552,6 +552,26 @@
             ? `${escapeHtml(en)}<span class="sqp-d-de">${escapeHtml(de)}</span>`
             : escapeHtml(en);
     }
+    // What an ability does, in the current UI language.
+    function abilityFxText(en) {
+        const m = _namesDe && _namesDe.abilityFx && _namesDe.abilityFx[en];
+        if (!m) return '';
+        return (uiLang() === 'de' ? m.de : m.en) || m.de || m.en || '';
+    }
+    // Ability row: bilingual name + % on top, effect description below.
+    function abilityRow(a) {
+        const width = a.pct != null ? Math.max(2, Math.min(100, a.pct)) : 0;
+        const pctTxt = a.pct != null ? escapeHtml(fmtPct(a.pct)) : '';
+        const fx = abilityFxText(a.name);
+        return `<div class="sqp-d-row sqp-d-ability">
+                <div class="sqp-d-bar" style="width:${width}%"></div>
+                <div class="sqp-d-ab-top">
+                    <span class="sqp-d-name">${nmHtml(a.name, 'abilities')}</span>
+                    <span class="sqp-d-pct">${pctTxt}</span>
+                </div>
+                ${fx ? `<div class="sqp-d-ab-fx">${escapeHtml(fx)}</div>` : ''}
+            </div>`;
+    }
     function l_approxItem() {
         return uiLang() === 'de'
             ? 'Geschätzt: die Quelle liefert den Wert des meistgenutzten Items nicht — berechnet aus 100 % minus der übrigen Items.'
@@ -611,7 +631,7 @@
 
         const moveRows = (block.move || []).map(m => usageRow(nmHtml(m.name, 'moves'), m.pct)).join('');
         const itemRows = (block.held_item || []).map(i => usageRow(nmHtml(i.name, 'items'), i.pct, null, i.derived)).join('');
-        const abilRows = (block.ability || []).map(a => usageRow(nmHtml(a.name, 'abilities'), a.pct)).join('');
+        const abilRows = (block.ability || []).map(a => abilityRow(a)).join('');
         // Teammates have no percentage in-game — just a ranked list. Render
         // them as a clean numbered list (no empty %-column / bar).
         const teamRows = (block.teammate || []).map((tm, i) => `

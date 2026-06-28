@@ -319,7 +319,7 @@ def write_names_de(pokemon_names_de):
     beside the English one in the in-game usage detail view (the source data
     is English-only). Reuses the already-scraped German sources. Fail-soft:
     on any error the committed file is kept."""
-    out = {"moves": {}, "items": {}, "abilities": {}, "pokemon": {}}
+    out = {"moves": {}, "items": {}, "abilities": {}, "abilityFx": {}, "pokemon": {}}
     try:
         ov = json.load(open(DE_OVERRIDES_PATH, encoding="utf-8"))
         out["moves"] = {k: v for k, v in (ov.get("moves") or {}).items() if v}
@@ -331,6 +331,12 @@ def write_names_de(pokemon_names_de):
         for e in res.get("entries", []):
             if e.get("cat") == "ability" and e.get("en") and e.get("de"):
                 out["abilities"][e["en"]] = e["de"]
+                # Effect text (DE + EN) so the web UI can show what the
+                # ability does right beside it.
+                de_fx, en_fx = e.get("de_effect"), e.get("en_effect")
+                if de_fx or en_fx:
+                    out["abilityFx"][e["en"]] = {"de": de_fx or en_fx,
+                                                 "en": en_fx or de_fx}
     except Exception as e:  # noqa: BLE001
         print(f"WARN: names_de — ability names unavailable ({e})")
     out["pokemon"] = {k: v for k, v in (pokemon_names_de or {}).items() if v}

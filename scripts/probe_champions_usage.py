@@ -25,15 +25,12 @@ UA = {"User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
 # a season usage index. We look for: reachability, embedded JSON
 # (__NEXT_DATA__ / application/json), and any nature breakdown.
 CANDIDATES = [
-    ("pokemon-zone pelipper",   "https://www.pokemon-zone.com/champions/pokemon/pelipper/"),
-    ("pokemon-zone singles",    "https://www.pokemon-zone.com/champions/ranked-seasons/singles/"),
-    ("championsbattledata home","https://championsbattledata.com/"),
-    ("championsbattledata peli","https://championsbattledata.com/pokemon/pelipper"),
     ("pokechamdb pelipper",     "https://pokechamdb.com/en/pokemon/pelipper"),
-    ("pokechamdb home",         "https://pokechamdb.com/en"),
-    ("pikalytics pelipper",     "https://www.pikalytics.com/pokedex/championspreview/pelipper"),
-    ("op.gg pelipper",          "https://op.gg/pokemon-champions/pokemon/pelipper"),
-    ("pokeos stats-calc",       "https://www.pokeos.com/tools/stats-calc?game=champions"),
+    ("championsbattledata peli","https://championsbattledata.com/pokemon/pelipper"),
+    # Try a few alternate path shapes for championsbattledata's JSON API.
+    ("cbd api pelipper a",      "https://championsbattledata.com/api/pokemon/pelipper"),
+    ("cbd api pelipper b",      "https://championsbattledata.com/_next/data/pelipper.json"),
+    ("pokechamdb de pelipper",  "https://pokechamdb.com/de/pokemon/pelipper"),
 ]
 
 NATURE_WORDS = ["modest", "mäßig", "massig", "timid", "scheu", "nature", "wesen"]
@@ -98,14 +95,39 @@ def analyze(label, url):
                     break
             break
 
-    # Percentages near a nature word in raw HTML (e.g. "53.9%").
-    for w in ("modest", "mäßig", "timid", "scheu"):
-        i = low.find(w)
-        if i >= 0:
-            window = text[max(0, i - 60):i + 60]
-            pcts = re.findall(r"\d{1,3}[.,]\d%", window)
-            print(f"  near '{w}': {window.strip()!r} pct={pcts}")
-            break
+    # Dump every inline application/json blob (championsbattledata uses
+    # these to ship the usage record) and surface nature-related content.
+    blobs = re.findall(r'<script[^>]*type="application/json"[^>]*>(.*?)</script>',
+                       text, re.S | re.I)
+    for bi, blob in enumerate(blobs):
+        bl = blob.lower()
+        if any(w in bl for w in NATURE_WORDS) or "ev" in bl[:200]:
+            print(f"  >> json-blob[{bi}] {len(blob)}b; sample:")
+            i = max((bl.find(w) for w in NATURE_WORDS if w in bl), default=0)
+            print(f"     {blob[max(0,i-120):i+400]}")
+
+    # Strip tags and pull "<Nature> ... <pct>%" pairs from visible text —
+    # works for pokechamdb's server-rendered nature table.
+    plain = re.sub(r"<[^>]+>", " ", text)
+    plain = re.sub(r"\s+", " ", plain)
+    natures = ["Adamant","Modest","Timid","Jolly","Bold","Calm","Careful",
+               "Impish","Relaxed","Sassy","Brave","Quiet","Gentle","Hasty",
+               "Naive","Lonely","Mild","Rash","Naughty","Bashful","Hardy",
+               "Mäßig","Scheu","Hart","Froh","Kühn","Sanft","Pfiffig"]
+    found_pairs = []
+    for nat in natures:
+        for m in re.finditer(re.escape(nat), plain):
+            seg = plain[m.start():m.start()+40]
+            pm = re.search(r"(\d{1,3}(?:[.,]\d+)?)\s*%", seg)
+            if pm:
+                found_pairs.append((nat, pm.group(1)))
+    # de-dup, keep order
+    seen = set(); uniq = []
+    for p in found_pairs:
+        if p not in seen:
+            seen.add(p); uniq.append(p)
+    if uniq:
+        print(f"  NATURE %: {uniq[:12]}")
 
 
 def main():

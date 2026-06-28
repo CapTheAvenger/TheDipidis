@@ -40,7 +40,51 @@ def show(label, url):
     return ct, body
 
 
+def dig_bundle():
+    """Fetch the SPA shell, find its JS bundle(s), and grep them for the
+    real data path the homepage ranking uses (api routes / asset paths)."""
+    print("\n=== SPA bundle dig ===")
+    try:
+        _, _, body = get(f"{BASE}/")
+    except Exception as e:  # noqa: BLE001
+        print(f"  homepage err {e}"); return
+    html = body.decode("utf-8", "replace")
+    scripts = re.findall(r'<script[^>]+src="([^"]+)"', html)
+    links = re.findall(r'<link[^>]+href="([^"]+\.js)"', html)
+    cands = [s for s in scripts + links if s.endswith(".js")]
+    print("  script srcs:", cands)
+    for src in cands:
+        url = src if src.startswith("http") else BASE + (src if src.startswith("/") else "/" + src)
+        try:
+            _, _, b = get(url)
+        except Exception as e:  # noqa: BLE001
+            print(f"  bundle {url} err {e}"); continue
+        js = b.decode("utf-8", "replace")
+        print(f"  bundle {url} ({len(js)} bytes)")
+        # API-ish path literals and asset folders the app references.
+        paths = set(re.findall(r'["\'`](/api/[A-Za-z0-9_./{}$:-]+)["\'`]', js))
+        paths |= set(re.findall(r'["\'`](/pokemon_champions_assets/[A-Za-z0-9_./{}$:-]+)["\'`]', js))
+        for kw in ("rank", "usage", "popular", "leaderboard", "trending"):
+            paths |= set(re.findall(rf'["\'`](/[A-Za-z0-9_./{{}}$:-]*{kw}[A-Za-z0-9_./{{}}$:-]*)["\'`]', js, re.I))
+        for p in sorted(paths):
+            print("    path:", p)
+
+
 def main():
+    dig_bundle()
+    # Ranking-CSV asset guesses (the per-mon CSVs live under battle_data/).
+    for label, url in [
+        ("rankings/Doubles.csv", f"{BASE}/pokemon_champions_assets/rankings/Doubles.csv"),
+        ("usage/Doubles.csv", f"{BASE}/pokemon_champions_assets/usage/Doubles.csv"),
+        ("ranking_Doubles.csv", f"{BASE}/pokemon_champions_assets/ranking_Doubles.csv"),
+        ("Doubles.csv", f"{BASE}/pokemon_champions_assets/Doubles.csv"),
+        ("pokemon_list.csv", f"{BASE}/pokemon_champions_assets/pokemon_list.csv"),
+        ("index.csv", f"{BASE}/pokemon_champions_assets/index.csv"),
+    ]:
+        ct, body = show(label, url)
+        if body and ct and "csv" in ct.lower():
+            for ln in body.decode("utf-8", "replace").splitlines()[:6]:
+                print("   ", ln[:160])
     # (a) Full battleSummary for one Pokémon — does it carry an overall
     #     usage rate / rank for the mon itself?
     ct, body = show("api/pokemon/pelipper", f"{BASE}/api/pokemon/pelipper")

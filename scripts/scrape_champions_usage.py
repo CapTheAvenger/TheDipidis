@@ -157,10 +157,15 @@ def summarize_csv(text):
     for r in rows:
         by_cat.setdefault(r.get("category", ""), []).append(r)
 
-    # NB: the CSV's "column_position" is a layout index, NOT the Pokémon's
-    # usage rank (Pelipper is column 11 but 9th by usage in-game), so we do
-    # not expose it — reliable data only.
+    # The CSV's "column_position" appears to be a per-format usage ordering
+    # (it differs doubles vs singles). Capture it as `pos` so we can verify
+    # whether sorting by it reproduces the in-game usage ranking.
     out = {}
+    if rows:
+        try:
+            out["pos"] = int(rows[0].get("column_position"))
+        except (TypeError, ValueError):
+            pass
     for cat, lst in by_cat.items():
         keep = KEEP.get(cat)
         if not keep:

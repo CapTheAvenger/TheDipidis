@@ -1,0 +1,111 @@
+name: Champions Usage Refresh
+
+# Lean, fast refresh of just the in-game usage data + the Pokédex (and the
+# EN→DE name maps), decoupled from the heavy champions-replica-scrape (whose
+# pokepaste fetches are often slow). Runs the usage scraper (with retry +
+# regression guard), rebuilds the Pokédex, commits and deploys.
+#
+# Trigger: GitHub UI → Actions → Champions Usage Refresh → Run workflow.
+# Also runs daily as a safety net so the usage data stays fresh even if the
+# replica scrape is slow/blocked.
+
+on:
+  schedule:
+    - cron: '30 10 * * *'   # 30 min after the replica scrape's 10:00 UTC slot
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: write            # for the deploy-pages dispatch at the end
+
+concurrency:
+  group: champions-usage-refresh
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        with:
+          fetch-depth: 1
+
+      - name: Set up Python
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6
+        with:
+          python-version: '3.12'
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      # Authoritative in-game usage (nature / SP / item / move / ability /
+      # teammate, per format). Fail-soft + regression-guarded: a thin,
+      # rate-limited scrape never overwrites a good snapshot.
+      - name: Scrape in-game Champions usage
+        run: |
+          set +e
+          python -u scripts/scrape_champions_usage.py
+          if [ "$?" -ne 0 ]; then
+              echo "::warning::scrape_champions_usage failed/guarded — keeping committed champions_usage.json"
+              git checkout -- data/champions_usage.json 2>/dev/null
+          fi
+          exit 0
+
+      # Rebuild the Pokédex (also writes data/champions_names_de.json from the
+      # committed German name sources). Fail-soft: keeps committed JSON.
+      - name: Build Champions Pokédex
+        run: |
+          set +e
+          python -u scripts/build_champions_pokedex.py
+          rc=$?
+          if [ "$rc" -ne 0 ]; then
+              echo "::warning::build_champions_pokedex exited with $rc — pokedex JSON kept as-is"
+              git checkout -- data/champions_pokedex.json data/champions_names_de.json 2>/dev/null
+          fi
+          exit 0
+
+      - name: Bump version
+        run: |
+          chmod +x bump-version.sh
+          ./bump-version.sh
+
+      - name: Commit + push
+        id: commit
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name  "github-actions[bot]"
+          git add data/champions_usage.json \
+                  data/champions_pokedex.json \
+                  data/champions_names_de.json \
+                  index.html service-worker.js version.json
+          if git diff --cached --quiet; then
+            echo "No usage/pokedex changes — skipping push."
+            echo "pushed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          ts="$(date -u +'%Y-%m-%d %H:%M UTC')"
+          git commit -m "Auto: champions-usage refresh — ${ts}
+
+          Triggered by .github/workflows/champions-usage-refresh.yml
+          Run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          for attempt in 1 2 3; do
+            if git push origin HEAD:main; then
+              echo "pushed=true" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            git pull --rebase=true -X ours origin main || { git rebase --abort; exit 1; }
+          done
+          exit 1
+
+      - name: Trigger GitHub Pages deploy
+        if: steps.commit.outputs.pushed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh workflow run deploy-pages.yml --ref main
+          echo "Dispatched deploy-pages.yml on main."

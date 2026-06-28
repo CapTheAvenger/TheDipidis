@@ -38,7 +38,13 @@ NAMES_DE_PATH = os.path.join(ROOT, "data", "pokemon_names_de.json")
 SMOGON_PATH = os.path.join(ROOT, "data", "pokemon_battle_data.json")
 DEX_PATH = os.path.join(ROOT, "data", "pokemon_dex_numbers.json")
 EXTRA_PATH = os.path.join(ROOT, "data", "champions_roster_extra.json")
+USAGE_PATH = os.path.join(ROOT, "data", "champions_usage.json")
 OUT_PATH = os.path.join(ROOT, "data", "champions_pokedex.json")
+
+# Which format's usage drives the Pokédex "Meist genutzt" line. Doubles =
+# the in-game Doppelkämpfe analysis the screenshots came from, and the VGC
+# competitive format. Singles is still stored in champions_usage.json.
+PRIMARY_FORMAT = "doubles"
 
 # Official English → German type names (the 18 Champions/VGC types).
 TYPE_DE = {
@@ -250,12 +256,66 @@ def load_meta_spreads():
     return out
 
 
+def load_usage():
+    """Load the authoritative in-game usage (championsbattledata mirror),
+    indexed by normalized English name AND slug. Returns (index, season).
+    Empty on any error — the caller falls back to the VGCPastes sample."""
+    try:
+        data = json.load(open(USAGE_PATH, encoding="utf-8"))
+    except Exception as e:  # noqa: BLE001
+        print(f"WARN: in-game usage unavailable ({e}) — using VGCPastes sample")
+        return {}, None
+    season = (data.get("_meta") or {}).get("season")
+    index = {}
+    for slug, rec in (data.get("pokemon") or {}).items():
+        for key in (_norm(rec.get("name", "")), _norm(slug)):
+            if key:
+                index.setdefault(key, rec)
+    return index, season
+
+
+def usage_meta(rec, base6):
+    """Build the entry['meta'] block from one Pokémon's usage record, using
+    the PRIMARY_FORMAT (falling back to the other format if absent)."""
+    blk = rec.get(PRIMARY_FORMAT) or rec.get(
+        "singles" if PRIMARY_FORMAT == "doubles" else "doubles")
+    if not blk:
+        return None
+    fmt = PRIMARY_FORMAT if rec.get(PRIMARY_FORMAT) else (
+        "singles" if PRIMARY_FORMAT == "doubles" else "doubles")
+    nat = (blk.get("nature") or [{}])[0]
+    sp = (blk.get("stat_points") or [{}])[0]
+    nature = nat.get("name") or ""
+    evs = sp.get("evs") or ""
+    final = final_stats(base6, parse_sp(evs), nature) if (evs and nature) else None
+    meta = {
+        "source": "ingame",
+        "format": fmt,
+        "nature": nature,
+        "naturePct": nat.get("pct"),
+        "evs": evs,
+        "evsPct": sp.get("pct"),
+        "final": final,
+        "items": [{"name": it.get("name"), "pct": it.get("pct")}
+                  for it in (blk.get("held_item") or [])[:3] if it.get("name")],
+        "moves": [{"name": m.get("name"), "pct": m.get("pct")}
+                  for m in (blk.get("move") or [])[:4] if m.get("name")],
+        "teammates": [t.get("name") for t in (blk.get("teammate") or [])[:4]
+                      if t.get("name")],
+    }
+    ab = (blk.get("ability") or [{}])[0]
+    if ab.get("name"):
+        meta["ability"] = ab.get("name")
+    return meta
+
+
 def main():
     roster = fetch_json(ROSTER_URL)
     stats = fetch_json(STATS_URL)
     with open(NAMES_DE_PATH, encoding="utf-8") as f:
         names_de = json.load(f)
     meta_spreads = load_meta_spreads()
+    usage_index, usage_season = load_usage()
 
     # Index base stats by (name) — roster + stats share the same name field.
     stats_by_name = {e["name"]: e for e in stats}
@@ -341,19 +401,38 @@ def main():
     if added:
         print(f"Added {added} M-B roster supplement entries (Smogon stats)")
 
-    # Attach the live-meta "most-common SP spread" to each entry (per base
-    # species), so players see what is actually run, not just base stats.
-    meta_hits = 0
+    # Attach the "most-used" build to each entry. Priority:
+    #   1. In-game ladder usage (championsbattledata mirror) — authoritative,
+    #      per form when the name matches exactly, else per base species.
+    #   2. VGCPastes top-team sample (legacy) — only where the game has no
+    #      usage entry, so nothing regresses for off-meta Pokémon.
+    ingame_hits = 0
+    legacy_hits = 0
     for e in entries:
+        base6 = {k: e[k]["base"] for k in ("hp", "atk", "def", "spa", "spd", "spe")}
+
+        # In-game: exact full-name match; for base forms, fall back to the
+        # base species. Non-base forms require an exact match so a Mega never
+        # inherits its base form's spread.
+        rec = usage_index.get(_norm(e["en"]))
+        if not rec and e.get("form", "Base") == "Base":
+            rec = usage_index.get(_norm(entry_base(e["en"])))
+        if rec:
+            meta = usage_meta(rec, base6)
+            if meta:
+                e["meta"] = meta
+                ingame_hits += 1
+                continue
+
+        # Legacy fallback.
         m = meta_spreads.get(_norm(entry_base(e["en"])))
         if m:
-            # Compute the real Lv.50 final stats for this most-used spread,
-            # using THIS form's base stats + the spread's SP + nature.
-            base6 = {k: e[k]["base"] for k in ("hp", "atk", "def", "spa", "spd", "spe")}
             final = final_stats(base6, parse_sp(m["evs"]), m["nature"])
-            e["meta"] = {**m, "final": final}
-            meta_hits += 1
-    print(f"Attached meta spreads to {meta_hits}/{len(entries)} entries")
+            e["meta"] = {**m, "source": "vgcpastes", "final": final}
+            legacy_hits += 1
+    print(f"Attached meta: {ingame_hits} in-game + {legacy_hits} legacy "
+          f"= {ingame_hits + legacy_hits}/{len(entries)} entries "
+          f"(season={usage_season})")
 
     # Stable, friendly default order: by total descending, then name.
     entries.sort(key=lambda e: (-(e["total"] or 0), e["en"]))
@@ -366,10 +445,13 @@ def main():
             "rangeBasis": "Lv. 50 final stat: min = 0 IV / 0 SP / hindering nature, "
                           "max = 31 IV / 252 EV-equiv / beneficial nature (standard formula).",
             "bulk": "bulkPhys = base KP × base Verteidigung; bulkSpec = base KP × base Spezial-Verteidigung.",
+            "usageSeason": usage_season,
+            "usageFormat": PRIMARY_FORMAT,
             "sources": [
                 "otterlyclueless/pokemon-champions-data (CC BY 4.0) — M-A roster, base stats, types",
                 "M-B additions: pokebase.app Champions dex + official Mega list; stats/types from Smogon (pokemon-showdown)",
                 "PokéAPI — German species names",
+                "championsbattledata.com — in-game ranked usage (nature / SP spread / item / move / ability / teammate), per format",
             ],
         },
         "entries": entries,

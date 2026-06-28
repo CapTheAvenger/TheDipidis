@@ -36,6 +36,7 @@ import time
 import urllib.parse
 import urllib.request
 import urllib.error
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 BASE = "https://championsbattledata.com"
 SITEMAP = f"{BASE}/sitemap.xml"
@@ -64,11 +65,11 @@ _EV_LABEL = {"hp": "HP", "atk": "Atk", "def": "Def",
              "spa": "SpA", "spd": "SpD", "spe": "Spe"}
 
 
-# Polite throttle + retry: the host rate-limits bursts (~200 rapid requests
-# → HTTP 503), which silently dropped meta-relevant Pokémon at the tail of
-# an un-throttled run. A small inter-request delay plus backoff on 503/429
-# keeps the whole roster.
-THROTTLE_S = 0.2
+# The host rate-limits aggressive bursts (~200 rapid requests → HTTP 503).
+# A fully sequential run (~1000 requests) is reliable but takes ~10 min; a
+# fully parallel one trips the 503 wall. A small worker pool + per-request
+# backoff on 503/429 is the sweet spot: ~3 min, full roster, self-healing.
+WORKERS = 6
 
 
 def fetch(url, timeout=45, retries=4):
@@ -238,23 +239,29 @@ def main():
     pokemon = {}
     season = None
     ok = 0
-    for i, slug in enumerate(slugs, 1):
-        if i > 1:
-            time.sleep(THROTTLE_S)   # be polite — avoid the 503 burst
-        name, rec = scrape_pokemon(slug)
-        if not rec:
-            continue
-        # Record the season once (it's the same "Current" for all).
-        for fmt in ("doubles", "singles"):
-            if fmt in rec and rec[fmt].get("season"):
-                season = rec[fmt]["season"]
-        pokemon[slug] = rec
-        ok += 1
-        if i <= 3 or i % 50 == 0:
-            d = (rec.get("doubles") or {})
-            nat = (d.get("nature") or [{}])[0]
-            print(f"  [{i}/{len(slugs)}] {name}: doubles top nature="
-                  f"{nat.get('name')} {nat.get('pct')}% rank={d.get('rank')}")
+    done = 0
+    with ThreadPoolExecutor(max_workers=WORKERS) as pool:
+        futures = {pool.submit(scrape_pokemon, slug): slug for slug in slugs}
+        for fut in as_completed(futures):
+            done += 1
+            slug = futures[fut]
+            try:
+                name, rec = fut.result()
+            except Exception as e:  # noqa: BLE001 — one bad mon must not kill the run
+                print(f"  WARN {slug}: {type(e).__name__}: {e}")
+                continue
+            if not rec:
+                continue
+            for fmt in ("doubles", "singles"):
+                if fmt in rec and rec[fmt].get("season"):
+                    season = rec[fmt]["season"]
+            pokemon[slug] = rec
+            ok += 1
+            if ok <= 3 or done % 50 == 0:
+                d = (rec.get("doubles") or {})
+                nat = (d.get("nature") or [{}])[0]
+                print(f"  [{done}/{len(slugs)}] {name}: doubles top nature="
+                      f"{nat.get('name')} {nat.get('pct')}%")
 
     if ok == 0:
         print("FATAL: 0 Pokémon scraped — keeping committed JSON")

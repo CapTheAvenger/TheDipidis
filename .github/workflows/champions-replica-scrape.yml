@@ -47,11 +47,11 @@ concurrency:
 jobs:
   scrape:
     runs-on: ubuntu-latest
-    # 20 min: the scrape itself is ~25 s; the rest is ~40 sequential
-    # pokepast.es fetches (top-40). The slow Claude-API strategy step
-    # that once needed a 45-min budget is disabled now, so this is
-    # generous headroom against a slow sheet / paste host.
-    timeout-minutes: 20
+    # 30 min: the replica scrape is ~25 s + ~40 pokepaste fetches, but the
+    # in-game usage scrape adds ~1000 throttled sequential requests
+    # (championsbattledata, ~234 Pokémon × api+2 CSVs) which takes ~8–10 min
+    # on its own. Generous headroom against a slow host.
+    timeout-minutes: 30
 
     steps:
       - name: Checkout repo
@@ -189,8 +189,26 @@ jobs:
           fi
           exit 0
 
+      # Refresh the authoritative in-game usage analysis (most-used nature /
+      # SP spread / item / move / ability / teammate per Pokémon, per format)
+      # from championsbattledata.com — a public mirror of the in-game ranked
+      # "Statuswertanpassung / Statuswertpunkte / …" screens. This is the
+      # source the Pokédex "Meist genutzt" line uses (it's the real ladder
+      # usage; the old VGCPastes top-team sample was small and biased).
+      # Reachable from CI, not the build sandbox. Fail-soft: keeps committed.
+      - name: Scrape in-game Champions usage
+        run: |
+          set +e
+          python -u scripts/scrape_champions_usage.py
+          if [ "$?" -ne 0 ]; then
+              echo "::warning::scrape_champions_usage failed — keeping committed champions_usage.json"
+              git checkout -- data/champions_usage.json 2>/dev/null
+          fi
+          exit 0
+
       # Rebuild the Side Quest "Pokémon" Pokédex (roster + base stats +
-      # German names + Lv.50 ranges). Fail-soft: keeps the committed JSON.
+      # German names + Lv.50 ranges + the in-game "most used" build).
+      # Fail-soft: keeps the committed JSON.
       - name: Build Champions Pokédex
         run: |
           set +e
@@ -215,6 +233,7 @@ jobs:
           git add data/champions_replica_teams.json \
                   data/champions_resources.json \
                   data/champions_pokedex.json \
+                  data/champions_usage.json \
                   data/champions_roster_extra.json \
                   data/champions_available_items.json \
                   data/de_name_overrides.json \

@@ -1912,3 +1912,12 @@
 .sqp-meta-evs { font-weight: 700; color: #fff; }
 .sqp-meta-nat { color: #c4ccd9; }
 .sqp-meta-n { color: #6b7585; font-size: 0.72rem; }
+.sqp-meta-pct { color: #8fd6ff; font-weight: 700; font-size: 0.78rem; }
+/* In-game ladder provenance tag (replaces the "(n von total)" sample note
+   when the build comes from the authoritative championsbattledata usage). */
+.sqp-meta-src {
+    color: #8fe0aa;
+    font-size: 0.72rem;
+    font-weight: 600;
+    white-space: nowrap;
+}

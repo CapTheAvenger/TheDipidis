@@ -53,12 +53,13 @@
             none: 'Nichts gefunden — andere Schreibweise, Nummer oder Filter probieren.',
             loading: 'Lade Pokédex …',
             error: 'Pokédex konnte nicht geladen werden.',
-            rangeNote: 'Pro Wert: Lv-50-Basiswert (in Klammern der meistgenutzte Endwert aus Top-Teams) · darunter die Range (Lv. 50, IS fix 31, 0–32 SP, Wesen ±10 %). Tipp auf eine Zeile → absolute Basiswerte + meistgenutzter SP-Spread.',
+            rangeNote: 'Pro Wert: Lv-50-Basiswert (in Klammern der meistgenutzte Endwert) · darunter die Range (Lv. 50, IS fix 31, 0–32 SP, Wesen ±10 %). Tipp auf eine Zeile → absolute Basiswerte + meistgenutzter SP-Spread.',
             metaTitle: 'Meist genutzt:',
             metaStats: 'Endwerte Lv. 50:',
             baseStatsLabel: 'Basiswerte:',
             metaFrom: (n, total) => `(${n} von ${total} Builds)`,
-            attribution: 'Daten: Pokémon-Champions-Datensatz (CC BY 4.0) · Deutsche Namen: PokéAPI',
+            metaIngame: 'In-Game-Nutzung · Doppelkämpfe',
+            attribution: 'Daten: Pokémon-Champions-Datensatz (CC BY 4.0) · Nutzungsdaten: championsbattledata.com (In-Game-Analyse) · Deutsche Namen: PokéAPI',
         },
         en: {
             tab: 'Pokémon',
@@ -80,12 +81,13 @@
             none: 'Nothing found — try a different spelling, number or filter.',
             loading: 'Loading Pokédex …',
             error: 'Could not load the Pokédex.',
-            rangeNote: 'Per stat: Lv. 50 base value (in brackets the most-used final value from top teams) · range below (Lv. 50, IV fixed 31, 0–32 SP, nature ±10%). Tap a row → absolute base stats + most-used SP spread.',
+            rangeNote: 'Per stat: Lv. 50 base value (in brackets the most-used final value) · range below (Lv. 50, IV fixed 31, 0–32 SP, nature ±10%). Tap a row → absolute base stats + most-used SP spread.',
             metaTitle: 'Most used:',
             metaStats: 'Final stats Lv. 50:',
             baseStatsLabel: 'Base stats:',
             metaFrom: (n, total) => `(${n} of ${total} builds)`,
-            attribution: 'Data: Pokémon Champions dataset (CC BY 4.0) · German names: PokéAPI',
+            metaIngame: 'In-game usage · Doubles',
+            attribution: 'Data: Pokémon Champions dataset (CC BY 4.0) · Usage: championsbattledata.com (in-game analysis) · German names: PokéAPI',
         },
     };
     function t() { return LABELS[uiLang()]; }
@@ -319,22 +321,48 @@
             .map(([k, d, e]) => `${de ? d : e} ${final[k]}`)
             .join(' · ');
     }
+    // Localized percentage (German uses a comma): 53.9 → "53,9 %".
+    function fmtPct(p) {
+        if (p == null) return '';
+        const s = uiLang() === 'de' ? String(p).replace('.', ',') : String(p);
+        return `${s} %`;
+    }
+    // Provenance suffix: in-game ladder usage vs. the legacy top-team sample.
+    function metaProvenance(m) {
+        const l = t();
+        if (m.source === 'ingame') {
+            return `<span class="sqp-meta-src">${escapeHtml(l.metaIngame)}</span>`;
+        }
+        if (m.n != null && m.total != null) {
+            return `<span class="sqp-meta-n">${escapeHtml(l.metaFrom(m.n, m.total))}</span>`;
+        }
+        return '';
+    }
+    // Shared "Meist genutzt" inner row: SP spread (+%) · nature (+%) · source.
+    // `withFx` adds the nature's ↑/↓ effect (used in the expanded detail).
+    function metaUsageInner(m, withFx) {
+        const l = t();
+        const nat = m.nature
+            ? (withFx ? natureWithFx(m.nature)
+                      : (uiLang() === 'de' ? (_NATURE_DE[m.nature] || m.nature) : m.nature))
+            : '';
+        const evsPct = m.evsPct != null ? ` <span class="sqp-meta-pct">(${escapeHtml(fmtPct(m.evsPct))})</span>` : '';
+        const natPct = m.naturePct != null ? ` <span class="sqp-meta-pct">(${escapeHtml(fmtPct(m.naturePct))})</span>` : '';
+        return `<span class="sqp-meta-tag">${escapeHtml(l.metaTitle)}</span>
+            <b class="sqp-meta-evs">${escapeHtml(evsDisplay(m.evs))}</b>${evsPct}
+            ${nat ? `· <span class="sqp-meta-nat">${escapeHtml(nat)}${natPct}</span>` : ''}
+            ${metaProvenance(m)}`;
+    }
     function metaLineHtml(e) {
         const m = e.meta;
         if (!m || !m.evs) return '';
         const l = t();
-        const nat = m.nature ? (uiLang() === 'de' ? (_NATURE_DE[m.nature] || m.nature) : m.nature) : '';
         const finalLine = m.final
             ? `<div class="sqp-meta-row sqp-meta-final"><span class="sqp-meta-tag">${escapeHtml(l.metaStats)}</span> <b>${escapeHtml(finalStatsDisplay(m.final))}</b></div>`
             : '';
         return `
             <div class="sqp-meta">
-                <div class="sqp-meta-row">
-                    <span class="sqp-meta-tag">${escapeHtml(l.metaTitle)}</span>
-                    <b class="sqp-meta-evs">${escapeHtml(evsDisplay(m.evs))}</b>
-                    ${nat ? `· <span class="sqp-meta-nat">${escapeHtml(nat)}</span>` : ''}
-                    <span class="sqp-meta-n">${escapeHtml(l.metaFrom(m.n, m.total))}</span>
-                </div>
+                <div class="sqp-meta-row">${metaUsageInner(m, false)}</div>
                 ${finalLine}
             </div>`;
     }
@@ -357,14 +385,8 @@
                 <b>${escapeHtml(baseStatsDisplay(e))}</b>
             </div>`;
         const m = e.meta;
-        const nat = (m && m.nature) ? natureWithFx(m.nature) : '';
         const metaRow = (m && m.evs)
-            ? `<div class="sqp-meta-row">
-                <span class="sqp-meta-tag">${escapeHtml(l.metaTitle)}</span>
-                <b class="sqp-meta-evs">${escapeHtml(evsDisplay(m.evs))}</b>
-                ${nat ? `· <span class="sqp-meta-nat">${escapeHtml(nat)}</span>` : ''}
-                <span class="sqp-meta-n">${escapeHtml(l.metaFrom(m.n, m.total))}</span>
-               </div>`
+            ? `<div class="sqp-meta-row">${metaUsageInner(m, true)}</div>`
             : '';
         return `<div class="sqp-meta">${baseLine}${metaRow}</div>`;
     }

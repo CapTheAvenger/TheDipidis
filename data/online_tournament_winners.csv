@@ -1,4 +1,7 @@
 tournament_id,tournament_date,format,player_count,winner_archetype,winner_winrate
+6a03e4e413f957d6d4b4720f,2026-06-29,CRI,382,Slowking,35.0
+6a31d0cae334c3c9befd817e,2026-06-27,CRI,114,N's Zoroark,31.0
+bugs,2026-06-27,CRI,376,Mega Greninja,31.0
 6a35668cceacae7d64419aa0,2026-06-25,CRI,142,Alakazam Dudunsparce,32.0
 6a3869d3af50e12308407ffe,2026-06-24,CRI,104,Alakazam Dudunsparce,27.0
 6a348858e334c3c9befd9b30,2026-06-23,CRI,155,N's Zoroark,21.0
@@ -41,8 +44,3 @@ championship-ix,2026-06-06,CRI,450,Crustle,48.0
 eh-why-not,2026-06-02,CRI,128,Slowking,21.0
 6a149cd28c163b809799739d,2026-06-01,CRI,168,Dragapult Dusknoir,21.0
 6a15d93e8c163b8097997d76,2026-06-01,CRI,170,Alakazam Dudunsparce,34.0
-6a17753a0f6c1f08998626af,2026-06-01,CRI,181,Rocket's Honchkrow,30.0
-6a1358470f6c1f089986042b,2026-05-31,CRI,129,Archaludon Dudunsparce,21.0
-6a18254a8c163b8097998d06,2026-05-30,CRI,100,Dragapult Blaziken,25.0
-not-at-indy,2026-05-30,CRI,289,Slowking,31.0
-69fdf8222b59cd9b66b26f6e,2026-05-29,CRI,108,Rocket's Honchkrow,24.0

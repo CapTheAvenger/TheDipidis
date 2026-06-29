@@ -8,6 +8,18 @@
       "de": "Elektroerzeuger",
       "de_effect": "Erzeugt beim Einwechseln 5 Runden ein Elektrofeld: Pokémon am Boden können nicht einschlafen, und ihre Elektro-Attacken werden verstärkt.",
       "en_effect": "On switch-in, this Pokemon summons Electric Terrain for 5 turns."
+    },
+    "Fire Mane": {
+      "de": "Flammenmähne",
+      "de_effect": "Erhöht den Schaden von Feuer-Attacken um 50 %.",
+      "en_effect": "Powers up Fire-type moves by 50%.",
+      "_source": "Mega-Pyroleo, Champions-Originalfähigkeit. Bisafans Fähigkeitendex (flammenmaehne.php) / PokéWiki Flammenmähne."
+    },
+    "Eelevate": {
+      "de": "Emporwindung",
+      "de_effect": "Das Pokémon schwebt über dem Boden und ist dadurch immun gegen Boden-Attacken, Stachler, Giftspitzen und Klebenetz. Wenn dieses Pokémon ein Pokémon besiegt, wird sein höchster Statuswert um 1 Stufe erhöht.",
+      "en_effect": "This Pokemon floats above the ground, making it immune to Ground-type moves, Spikes, Toxic Spikes and Sticky Web. When it knocks out a Pokemon, its highest stat is raised by 1 stage.",
+      "_source": "Mega-Zapplarang (Mega Eelektross), Champions-Originalfähigkeit. Bisafans Fähigkeitendex (emporwindung.php)."
     }
   }
 }

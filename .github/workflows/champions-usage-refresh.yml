@@ -11,7 +11,11 @@ name: Champions Usage Refresh
 
 on:
   schedule:
-    - cron: '30 10 * * *'   # 30 min after the replica scrape's 10:00 UTC slot
+    # 05:00 UTC = 06:00 CET winter / 07:00 CEST summer — 1 h after the
+    # replica scrape's 04:00 UTC slot so the two never overlap (this stays
+    # the safety net that runs *after* the heavy job). Finishes well before
+    # 08:00 German time year-round (summer/UTC+2 is the binding case).
+    - cron: '0 5 * * *'
   workflow_dispatch:
 
 permissions:
@@ -98,7 +102,9 @@ jobs:
               echo "pushed=true" >> "$GITHUB_OUTPUT"
               exit 0
             fi
-            git pull --rebase=true -X ours origin main || { git rebase --abort; exit 1; }
+            # --autostash: avoid "cannot pull with rebase: You have unstaged
+            # changes" when the build leaves unstaged tracked-file edits.
+            git pull --rebase=true --autostash -X ours origin main || { git rebase --abort 2>/dev/null || true; exit 1; }
           done
           exit 1
 

@@ -18,13 +18,17 @@ name: Champions Replica Scrape
 # "via Claude" button, daily is free again — so we catch new
 # tournament-winning teams the day they're shared.
 #
-# Trigger: daily at 10:00 UTC OR GitHub UI → Actions →
+# Trigger: daily at 04:00 UTC OR GitHub UI → Actions →
 #          Champions Replica Scrape → Run workflow
 
 on:
   schedule:
-    # 10:00 UTC = 11:00 CET winter / 12:00 CEST summer.
-    - cron: '0 10 * * *'
+    # 04:00 UTC = 05:00 CET winter / 06:00 CEST summer. Scheduled so the
+    # whole job (scrape + build + deploy) finishes well before 08:00
+    # German time, regardless of DST. Fixed-UTC cron: summer (UTC+2) is
+    # the binding case — finishing before 06:00 UTC guarantees "done by
+    # 08:00 CEST"; in winter it just finishes an hour earlier.
+    - cron: '0 4 * * *'
   workflow_dispatch:
     inputs:
       top:
@@ -264,7 +268,11 @@ jobs:
               echo "pushed=true" >> "$GITHUB_OUTPUT"
               exit 0
             fi
-            git pull --rebase=true -X ours origin main || { git rebase --abort; exit 1; }
+            # --autostash: the scrapers/build can leave unstaged changes in
+            # tracked files that aren't in the `git add` list above; without
+            # autostash the rebase aborts with "cannot pull with rebase: You
+            # have unstaged changes" (observed 2026-06-29).
+            git pull --rebase=true --autostash -X ours origin main || { git rebase --abort 2>/dev/null || true; exit 1; }
           done
           exit 1
 

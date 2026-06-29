@@ -176,9 +176,12 @@ jobs:
               exit 0
             fi
             echo "Push rejected on attempt $attempt — pulling with rebase…"
-            if ! git pull --rebase=true -X ours origin main; then
+            # --autostash: prevents "cannot pull with rebase: You have
+            # unstaged changes" when a build step leaves unstaged tracked
+            # edits outside the `git add` list above.
+            if ! git pull --rebase=true --autostash -X ours origin main; then
               echo "::error::Rebase conflict beyond price files — manual resolution needed"
-              git rebase --abort || true
+              git rebase --abort 2>/dev/null || true
               exit 1
             fi
           done

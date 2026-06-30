@@ -1,4 +1,8 @@
 tournament_id,tournament_date,format,player_count,winner_archetype,winner_winrate
+6a42ef9d83fd320299bd444f,2026-06-30,CRI,102,Dragapult Blaziken,16.0
+6a39ac0083fd320299bce1d9,2026-06-29,CRI,156,Crustle,21.0
+6a3869c7ceacae7d6441c1d9,2026-06-29,CRI,124,Marnie's Grimmsnarl,26.0
+6a3aa95283fd320299bce9ba,2026-06-29,CRI,162,N's Zoroark,24.0
 6a03e4e413f957d6d4b4720f,2026-06-29,CRI,382,Slowking,35.0
 6a31d0cae334c3c9befd817e,2026-06-27,CRI,114,N's Zoroark,31.0
 bugs,2026-06-27,CRI,376,Mega Greninja,31.0
@@ -41,6 +45,3 @@ championship-ix,2026-06-06,CRI,450,Crustle,48.0
 6a1d8b3e47f3797bf6ba8e47,2026-06-03,CRI,122,Dragapult,27.0
 6a1661c08c163b8097998337,2026-06-02,CRI,170,Hydrapple Ogerpon,21.0
 6a1eaac047f3797bf6ba9d10,2026-06-02,CRI,134,Dragapult,31.0
-eh-why-not,2026-06-02,CRI,128,Slowking,21.0
-6a149cd28c163b809799739d,2026-06-01,CRI,168,Dragapult Dusknoir,21.0
-6a15d93e8c163b8097997d76,2026-06-01,CRI,170,Alakazam Dudunsparce,34.0

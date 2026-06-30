@@ -1,9 +1,9 @@
 {
   "_meta": {
-    "last_updated": "2026-06-29",
+    "last_updated": "2026-06-30",
     "window_days": 14,
-    "window_start": "2026-06-15",
-    "window_end": "2026-06-29",
+    "window_start": "2026-06-16",
+    "window_end": "2026-06-30",
     "team_count": 120,
     "sample_count": 720,
     "species_count": 93,

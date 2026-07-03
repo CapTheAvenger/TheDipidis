@@ -1,4 +1,12 @@
 tournament_id,tournament_date,format,player_count,winner_archetype,winner_winrate
+6a45bed1c87cd9ff0a314f10,2026-07-02,CRI,123,Dragapult,28.0
+6a3eb6de83fd320299bd0dfc,2026-07-02,CRI,164,Alakazam Dudunsparce,39.0
+6a3f5d3e83fd320299bd18de,2026-07-02,CRI,102,Dragapult,27.0
+6a238bf047f3797bf6bad37d,2026-07-01,CRI,128,N's Zoroark,21.0
+6a2a2ad82d97f3b0c2613980,2026-07-01,CRI,109,Dragapult Dusknoir,25.0
+6a42564583fd320299bd3d12,2026-07-01,CRI,114,Slowking,27.0
+6a427cb383fd320299bd3ed1,2026-06-30,CRI,116,Slowking,18.0
+6a3e9f8d83fd320299bd0c18,2026-06-30,CRI,107,Blaziken Zoroark,25.0
 6a42ef9d83fd320299bd444f,2026-06-30,CRI,102,Dragapult Blaziken,16.0
 6a39ac0083fd320299bce1d9,2026-06-29,CRI,156,Crustle,21.0
 6a3869c7ceacae7d6441c1d9,2026-06-29,CRI,124,Marnie's Grimmsnarl,26.0
@@ -42,6 +50,3 @@ not-at-naic-but-thats-ok,2026-06-13,CRI,266,Dragapult Blaziken,31.0
 championship-ix,2026-06-06,CRI,450,Crustle,48.0
 6a1e390347f3797bf6ba9953,2026-06-05,CRI,102,Clefairy Ogerpon,26.0
 69fdf82e2b59cd9b66b26f70,2026-06-05,CRI,102,Dragapult Froslass,24.0
-6a1d8b3e47f3797bf6ba8e47,2026-06-03,CRI,122,Dragapult,27.0
-6a1661c08c163b8097998337,2026-06-02,CRI,170,Hydrapple Ogerpon,21.0
-6a1eaac047f3797bf6ba9d10,2026-06-02,CRI,134,Dragapult,31.0

@@ -2,7 +2,7 @@
   "_meta": {
     "title": "Pokémon Champions — Current Top Doubles Teams",
     "subtitle": "Replica codes from top tournament finishes. Tap a code to copy.",
-    "last_updated": "2026-07-04",
+    "last_updated": "2026-07-05",
     "source": "VGCPastes Champions spreadsheet (auto-discovered tabs: M-B=gid1458357160, M-A=gid791705272)",
     "source_url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTXHOfUSKTZyVoxF7BO-XIEqtbrsq1OSh_4bSaO0bhAMHqtsvYqM_4eZWIMqdZ--SKCb86EXuk75o1i/pub?gid=1458357160&single=true&output=csv",
     "current_regulation": "M-B",
@@ -4436,105 +4436,6 @@
     },
     {
       "rank": 46,
-      "replica_code": "SR77A5DKC3",
-      "team_name": "Wolfey's r/VGC Regulation M-B Kickoff Cup Top 16 Team",
-      "tournament": "r/VGC Regulation M-B Kickoff Cup",
-      "trainer": "Wolfe Glick",
-      "format": "VGC Champions",
-      "regulation": "M-B",
-      "sheet_rank": "9th",
-      "date_shared": "20 Jun 2026",
-      "pokepaste_url": "https://pokepast.es/7d0d8f36a4fc312b",
-      "pokemon": [
-        {
-          "name": "Raichu",
-          "item": "Raichunite Y",
-          "ability": "Lightning Rod",
-          "tera_type": "",
-          "evs": "16 HP / 2 Def / 24 SpA / 24 Spe",
-          "nature": "Modest",
-          "moves": [
-            "Protect",
-            "Zap Cannon",
-            "Focus Blast",
-            "Fake Out"
-          ]
-        },
-        {
-          "name": "Basculegion",
-          "item": "Mystic Water",
-          "ability": "Adaptability",
-          "tera_type": "",
-          "evs": "12 HP / 32 Atk / 7 Def / 15 Spe",
-          "nature": "Adamant",
-          "moves": [
-            "Protect",
-            "Wave Crash",
-            "Last Respects",
-            "Aqua Jet"
-          ]
-        },
-        {
-          "name": "Whimsicott",
-          "item": "Focus Sash",
-          "ability": "Prankster",
-          "tera_type": "",
-          "evs": "2 HP / 32 SpA / 32 Spe",
-          "nature": "Timid",
-          "moves": [
-            "Protect",
-            "Moonblast",
-            "Tailwind",
-            "Encore"
-          ]
-        },
-        {
-          "name": "Garchomp",
-          "item": "Sitrus Berry",
-          "ability": "Rough Skin",
-          "tera_type": "",
-          "evs": "22 HP / 10 Atk / 2 SpD / 32 Spe",
-          "nature": "Adamant",
-          "moves": [
-            "Rock Slide",
-            "Stomping Tantrum",
-            "Dragon Claw",
-            "Protect"
-          ]
-        },
-        {
-          "name": "Floette-Eternal",
-          "item": "Floettite",
-          "ability": "Flower Veil",
-          "tera_type": "",
-          "evs": "2 HP / 32 SpA / 32 Spe",
-          "nature": "Modest",
-          "moves": [
-            "Protect",
-            "Moonblast",
-            "Light of Ruin",
-            "Dazzling Gleam"
-          ]
-        },
-        {
-          "name": "Gholdengo",
-          "item": "Life Orb",
-          "ability": "Good as Gold",
-          "tera_type": "",
-          "evs": "32 HP / 2 Def / 10 SpA / 3 SpD / 19 Spe",
-          "nature": "Modest",
-          "moves": [
-            "Protect",
-            "Make It Rain",
-            "Nasty Plot",
-            "Shadow Ball"
-          ]
-        }
-      ],
-      "strategy": []
-    },
-    {
-      "rank": 47,
       "replica_code": "PTF1KG3JJL",
       "team_name": "dodoriosiriru's Charizard-Y Raichu-Y Team",
       "tournament": "-",
@@ -4633,7 +4534,7 @@
       "strategy": []
     },
     {
-      "rank": 48,
+      "rank": 47,
       "replica_code": "PVV44A0WCR",
       "team_name": "sblazquezn's Charizard-Y Gholdengo Team",
       "tournament": "-",
@@ -4732,7 +4633,7 @@
       "strategy": []
     },
     {
-      "rank": 49,
+      "rank": 48,
       "replica_code": "2PBXB84UVE",
       "team_name": "rennyvgc's Mawile Gallade Team",
       "tournament": "-",
@@ -4831,7 +4732,7 @@
       "strategy": []
     },
     {
-      "rank": 50,
+      "rank": 49,
       "replica_code": "08L0GBSM6A",
       "team_name": "spy_anya11's Charizard-Y Aerodactyl Team",
       "tournament": "-",
@@ -4930,7 +4831,7 @@
       "strategy": []
     },
     {
-      "rank": 51,
+      "rank": 50,
       "replica_code": "GF2TSW4KME",
       "team_name": "Ryoma's Metagross Dragonite Team",
       "tournament": "-",
@@ -5029,7 +4930,7 @@
       "strategy": []
     },
     {
-      "rank": 52,
+      "rank": 51,
       "replica_code": "UP2T9GK34Q",
       "team_name": "LenVGC's Blastoise Delphox Team",
       "tournament": "-",
@@ -5128,7 +5029,7 @@
       "strategy": []
     },
     {
-      "rank": 53,
+      "rank": 52,
       "replica_code": "FAJ8VU84XH",
       "team_name": "JoeUX9's Glimmora Mamoswine Team",
       "tournament": "Video",
@@ -5227,7 +5128,7 @@
       "strategy": []
     },
     {
-      "rank": 54,
+      "rank": 53,
       "replica_code": "TDKJG3LGM7",
       "team_name": "hungrigekiwi's St. Jude VGC Charity Tournament Team",
       "tournament": "St. Jude Charity Tournament",
@@ -5326,7 +5227,7 @@
       "strategy": []
     },
     {
-      "rank": 55,
+      "rank": 54,
       "replica_code": "NUSSK0Q8J2",
       "team_name": "NatusPKMN's St. Jude VGC Charity Tournament Team",
       "tournament": "St. Jude Charity Tournament",
@@ -5425,7 +5326,7 @@
       "strategy": []
     },
     {
-      "rank": 56,
+      "rank": 55,
       "replica_code": "0TQMMS1W4L",
       "team_name": "mofumofunatsuhi's St. Jude VGC Charity Tournament Team",
       "tournament": "St. Jude Charity Tournament",
@@ -5524,7 +5425,7 @@
       "strategy": []
     },
     {
-      "rank": 57,
+      "rank": 56,
       "replica_code": "45SL2U276S",
       "team_name": "yabeamatup_poke's Staraptor Delphox Team",
       "tournament": "-",
@@ -5623,7 +5524,7 @@
       "strategy": []
     },
     {
-      "rank": 58,
+      "rank": 57,
       "replica_code": "YX9EM33Q0W",
       "team_name": "spy_anya11's Charizard-Y Floette Team",
       "tournament": "-",
@@ -5722,7 +5623,7 @@
       "strategy": []
     },
     {
-      "rank": 59,
+      "rank": 58,
       "replica_code": "JH1NXHU02J",
       "team_name": "tayopkmn's Metagross Blastoise Team",
       "tournament": "-",
@@ -5821,7 +5722,7 @@
       "strategy": []
     },
     {
-      "rank": 60,
+      "rank": 59,
       "replica_code": "8GLNSTTYX5",
       "team_name": "Krebs' Scrafty Espathra Team",
       "tournament": "-",
@@ -5920,7 +5821,7 @@
       "strategy": []
     },
     {
-      "rank": 61,
+      "rank": 60,
       "replica_code": "7CAS51TK7W",
       "team_name": "Betchman's Froslass Glaceon Team",
       "tournament": "-",
@@ -6019,7 +5920,7 @@
       "strategy": []
     },
     {
-      "rank": 62,
+      "rank": 61,
       "replica_code": "41Y21B475G",
       "team_name": "sasisu's Delphox Blastoise Team",
       "tournament": "-",
@@ -6118,7 +6019,7 @@
       "strategy": []
     },
     {
-      "rank": 63,
+      "rank": 62,
       "replica_code": "3C60R77WMR",
       "team_name": "Riopaser's Metagross Venusaur Team",
       "tournament": "-",
@@ -6217,7 +6118,7 @@
       "strategy": []
     },
     {
-      "rank": 64,
+      "rank": 63,
       "replica_code": "5HPHJVR8MF",
       "team_name": "Kaguya's Mawile Dragonite Team",
       "tournament": "Video",
@@ -6316,7 +6217,7 @@
       "strategy": []
     },
     {
-      "rank": 65,
+      "rank": 64,
       "replica_code": "J5RGD2YFDV",
       "team_name": "tyronesmth's Floette Talonflame Team",
       "tournament": "-",
@@ -6415,7 +6316,7 @@
       "strategy": []
     },
     {
-      "rank": 66,
+      "rank": 65,
       "replica_code": "SRF9YB2T6N",
       "team_name": "zeen's Charizard-Y Venusaur Team",
       "tournament": "-",
@@ -6514,7 +6415,7 @@
       "strategy": []
     },
     {
-      "rank": 67,
+      "rank": 66,
       "replica_code": "FA8VG6KHES",
       "team_name": "daikousin's Delphox Blastoise Team",
       "tournament": "-",
@@ -6613,7 +6514,7 @@
       "strategy": []
     },
     {
-      "rank": 68,
+      "rank": 67,
       "replica_code": "YULEPRGKHM",
       "team_name": "Giancarlo's Local Tour Team",
       "tournament": "-",
@@ -6712,7 +6613,7 @@
       "strategy": []
     },
     {
-      "rank": 69,
+      "rank": 68,
       "replica_code": "UY3N25S8R6",
       "team_name": "azuf_azelf_1001's Pyroar Blastoise Team",
       "tournament": "-",
@@ -6811,7 +6712,7 @@
       "strategy": []
     },
     {
-      "rank": 70,
+      "rank": 69,
       "replica_code": "30BXLF77HQ",
       "team_name": "elusivekimberly's Metagross Kommo-o Team",
       "tournament": "-",
@@ -6910,7 +6811,7 @@
       "strategy": []
     },
     {
-      "rank": 71,
+      "rank": 70,
       "replica_code": "KMNP85W670",
       "team_name": "jawncy86's Malamar Florges Team",
       "tournament": "-",
@@ -7009,7 +6910,7 @@
       "strategy": []
     },
     {
-      "rank": 72,
+      "rank": 71,
       "replica_code": "EL42JHGB4L",
       "team_name": "mumemo's Delphox Malamar Team",
       "tournament": "-",
@@ -7108,7 +7009,7 @@
       "strategy": []
     },
     {
-      "rank": 73,
+      "rank": 72,
       "replica_code": "QW1GFM8RVN",
       "team_name": "Andrew Picornell's Blaziken Ninetales-Alola Team",
       "tournament": "Video",
@@ -7207,7 +7108,7 @@
       "strategy": []
     },
     {
-      "rank": 74,
+      "rank": 73,
       "replica_code": "56JDNFXHF6",
       "team_name": "Misaka's Charizard-Y Raichu-Y Team",
       "tournament": "-",
@@ -7306,7 +7207,7 @@
       "strategy": []
     },
     {
-      "rank": 75,
+      "rank": 74,
       "replica_code": "8L412J0H8X",
       "team_name": "BattleRoom's Mimikyu Milotic Team",
       "tournament": "Video",
@@ -7405,7 +7306,7 @@
       "strategy": []
     },
     {
-      "rank": 76,
+      "rank": 75,
       "replica_code": "D86B7Q4S2W",
       "team_name": "mj4318815's Gallade Clefable Team",
       "tournament": "-",
@@ -7504,7 +7405,7 @@
       "strategy": []
     },
     {
-      "rank": 77,
+      "rank": 76,
       "replica_code": "A4AWGX10TU",
       "team_name": "PablitoNYA's Blaziken Palafin Team",
       "tournament": "-",
@@ -7603,7 +7504,7 @@
       "strategy": []
     },
     {
-      "rank": 78,
+      "rank": 77,
       "replica_code": "6P8SQ827DM",
       "team_name": "barudoru's Meganium Swampert Team",
       "tournament": "-",
@@ -7702,7 +7603,7 @@
       "strategy": []
     },
     {
-      "rank": 79,
+      "rank": 78,
       "replica_code": "B172A9S52H",
       "team_name": "online's Pokegam Cup Team",
       "tournament": "Pokegam Cup",
@@ -7801,7 +7702,7 @@
       "strategy": []
     },
     {
-      "rank": 80,
+      "rank": 79,
       "replica_code": "7JN6T97UGM",
       "team_name": "swcheong_vg's Garchomp Sun Team",
       "tournament": "-",
@@ -7900,7 +7801,7 @@
       "strategy": []
     },
     {
-      "rank": 81,
+      "rank": 80,
       "replica_code": "JVS3B98J2B",
       "team_name": "luixens' Lopunny Dragapult Team",
       "tournament": "-",
@@ -7999,7 +7900,7 @@
       "strategy": []
     },
     {
-      "rank": 82,
+      "rank": 81,
       "replica_code": "E3Q28DK75X",
       "team_name": "punihina1334's Raichu-X Gholdengo Team",
       "tournament": "-",
@@ -8098,7 +7999,7 @@
       "strategy": []
     },
     {
-      "rank": 83,
+      "rank": 82,
       "replica_code": "7EVAQY417N",
       "team_name": "usa_anrire's Raichu-Y Talonflame Team",
       "tournament": "-",
@@ -8197,7 +8098,7 @@
       "strategy": []
     },
     {
-      "rank": 84,
+      "rank": 83,
       "replica_code": "SNKCMUPNRU",
       "team_name": "DjSanders' Delphox Eelektross Team",
       "tournament": "-",
@@ -8296,7 +8197,7 @@
       "strategy": []
     },
     {
-      "rank": 85,
+      "rank": 84,
       "replica_code": "NUETYTEK6A",
       "team_name": "homura_kurenai_'s Blaziken Floette Team",
       "tournament": "-",
@@ -8395,7 +8296,7 @@
       "strategy": []
     },
     {
-      "rank": 86,
+      "rank": 85,
       "replica_code": "72EVY61UB5",
       "team_name": "frogapples_'s Blastoise Drampa Team",
       "tournament": "-",
@@ -8494,7 +8395,7 @@
       "strategy": []
     },
     {
-      "rank": 87,
+      "rank": 86,
       "replica_code": "2UYVJBUN09",
       "team_name": "MichaelderBeste's Champions Ladder Peak 1st Place Team",
       "tournament": "-",
@@ -8593,7 +8494,7 @@
       "strategy": []
     },
     {
-      "rank": 88,
+      "rank": 87,
       "replica_code": "N2X80AR9J3",
       "team_name": "Panda's Raichu-X Ninetales-Alola Team",
       "tournament": "Video",
@@ -8692,7 +8593,7 @@
       "strategy": []
     },
     {
-      "rank": 89,
+      "rank": 88,
       "replica_code": "AUHVVTKRSR",
       "team_name": "James Baek's Raichu-Y Mamoswine Team",
       "tournament": "Video",
@@ -8791,7 +8692,7 @@
       "strategy": []
     },
     {
-      "rank": 90,
+      "rank": 89,
       "replica_code": "KYRYPXVJDS",
       "team_name": "Cybertron's Barbaracle Gholdengo Team",
       "tournament": "Video",
@@ -8890,7 +8791,7 @@
       "strategy": []
     },
     {
-      "rank": 91,
+      "rank": 90,
       "replica_code": "43ETTKLUWS",
       "team_name": "ParkerVGC's Barbaracle Zoroark-Hisui Team",
       "tournament": "Video",
@@ -8989,7 +8890,7 @@
       "strategy": []
     },
     {
-      "rank": 92,
+      "rank": 91,
       "replica_code": "DPHCCER15H",
       "team_name": "Oupas' Venusaur Grimmsnarl Team",
       "tournament": "-",
@@ -9088,7 +8989,7 @@
       "strategy": []
     },
     {
-      "rank": 93,
+      "rank": 92,
       "replica_code": "Q41F6FM1TN",
       "team_name": "Riopaser's Gengar Scrafty Team",
       "tournament": "-",
@@ -9187,7 +9088,7 @@
       "strategy": []
     },
     {
-      "rank": 94,
+      "rank": 93,
       "replica_code": "77D1S6SYU9",
       "team_name": "KKCWind's Staraptor Gholdengo Team",
       "tournament": "-",
@@ -9286,7 +9187,7 @@
       "strategy": []
     },
     {
-      "rank": 95,
+      "rank": 94,
       "replica_code": "2KRFNJCHBF",
       "team_name": "dunksvgc's Sceptile Floette Team",
       "tournament": "-",
@@ -9385,7 +9286,7 @@
       "strategy": []
     },
     {
-      "rank": 96,
+      "rank": 95,
       "replica_code": "QQTBLYMXB2",
       "team_name": "MichaelderBeste's Falinks Aerodactyl Team",
       "tournament": "-",
@@ -9484,7 +9385,7 @@
       "strategy": []
     },
     {
-      "rank": 97,
+      "rank": 96,
       "replica_code": "D80DCA4NG2",
       "team_name": "soramitu's Charizard-Y Toxapex Team",
       "tournament": "-",
@@ -9583,7 +9484,7 @@
       "strategy": []
     },
     {
-      "rank": 98,
+      "rank": 97,
       "replica_code": "KRHAFGXXF2",
       "team_name": "kashiwagineru's Metagross Tyranitar Team",
       "tournament": "-",
@@ -9682,7 +9583,7 @@
       "strategy": []
     },
     {
-      "rank": 99,
+      "rank": 98,
       "replica_code": "6Y4A2T0NWN",
       "team_name": "junioichi's Raichu-Y Ninetales-Alola Team",
       "tournament": "-",
@@ -9781,7 +9682,7 @@
       "strategy": []
     },
     {
-      "rank": 100,
+      "rank": 99,
       "replica_code": "0D28BNM3PY",
       "team_name": "kanato_poke_'s Gardevoir Venusaur Team",
       "tournament": "-",
@@ -9880,7 +9781,7 @@
       "strategy": []
     },
     {
-      "rank": 101,
+      "rank": 100,
       "replica_code": "VRGFQRHU0N",
       "team_name": "kimyeongddiyp's Charizard-Y Gholdengo Team",
       "tournament": "-",
@@ -9979,7 +9880,7 @@
       "strategy": []
     },
     {
-      "rank": 102,
+      "rank": 101,
       "replica_code": "TGWU77DKV5",
       "team_name": "argent__mj's Gengar Dragonite Team",
       "tournament": "-",
@@ -10078,7 +9979,7 @@
       "strategy": []
     },
     {
-      "rank": 103,
+      "rank": 102,
       "replica_code": "M9GJ1S04E8",
       "team_name": "bribri_tweets' Swampert Mawile Team",
       "tournament": "-",
@@ -10177,7 +10078,7 @@
       "strategy": []
     },
     {
-      "rank": 104,
+      "rank": 103,
       "replica_code": "CFGBFFAWNR",
       "team_name": "Riopaser's Eelektross Falinks Team",
       "tournament": "-",
@@ -10276,7 +10177,7 @@
       "strategy": []
     },
     {
-      "rank": 105,
+      "rank": 104,
       "replica_code": "6HW1MPC1P6",
       "team_name": "Osada's Floette Maushold Annihilape Team",
       "tournament": "-",
@@ -10375,7 +10276,7 @@
       "strategy": []
     },
     {
-      "rank": 106,
+      "rank": 105,
       "replica_code": "BY32K88BSC",
       "team_name": "Electhor94's Staraptor Floette Team",
       "tournament": "-",
@@ -10474,7 +10375,7 @@
       "strategy": []
     },
     {
-      "rank": 107,
+      "rank": 106,
       "replica_code": "FUTTMMNQK3",
       "team_name": "robstar029's Blaziken Grimmsnarl Team",
       "tournament": "-",
@@ -10573,7 +10474,7 @@
       "strategy": []
     },
     {
-      "rank": 108,
+      "rank": 107,
       "replica_code": "7EVAQY417N",
       "team_name": "Elise's Raichu-Y Floette Team",
       "tournament": "Video",
@@ -10672,7 +10573,7 @@
       "strategy": []
     },
     {
-      "rank": 109,
+      "rank": 108,
       "replica_code": "7NR7V0V06R",
       "team_name": "Itachi's Charizard-Y Mawile Team",
       "tournament": "-",
@@ -10771,7 +10672,7 @@
       "strategy": []
     },
     {
-      "rank": 110,
+      "rank": 109,
       "replica_code": "XCTT0FF24X",
       "team_name": "WestGleen's Raichu-Y Scrafty Team",
       "tournament": "-",
@@ -10870,7 +10771,7 @@
       "strategy": []
     },
     {
-      "rank": 111,
+      "rank": 110,
       "replica_code": "YEXEDUDA7E",
       "team_name": "soramitu's Gardevoir Maushold Team",
       "tournament": "-",
@@ -10969,7 +10870,7 @@
       "strategy": []
     },
     {
-      "rank": 112,
+      "rank": 111,
       "replica_code": "MP91XNQFT8",
       "team_name": "Xena's Charizard-Y Mawile Team",
       "tournament": "-",
@@ -11068,7 +10969,7 @@
       "strategy": []
     },
     {
-      "rank": 113,
+      "rank": 112,
       "replica_code": "JMGCS3Y7U1",
       "team_name": "SwapDogVGC's Swampert Dragalge Team",
       "tournament": "-",
@@ -11167,7 +11068,7 @@
       "strategy": []
     },
     {
-      "rank": 114,
+      "rank": 113,
       "replica_code": "CTGNQ4EQSC",
       "team_name": "MichaelderBeste's Pyroar Sceptile Team",
       "tournament": "-",
@@ -11266,7 +11167,7 @@
       "strategy": []
     },
     {
-      "rank": 115,
+      "rank": 114,
       "replica_code": "5XJCR9WQ06",
       "team_name": "sbeve100's Sceptile Rotom-Wash Team",
       "tournament": "-",
@@ -11365,7 +11266,7 @@
       "strategy": []
     },
     {
-      "rank": 116,
+      "rank": 115,
       "replica_code": "0RJQKFESSA",
       "team_name": "abelpoke49r's Gardevoir Grimmsnarl Team",
       "tournament": "-",
@@ -11464,7 +11365,7 @@
       "strategy": []
     },
     {
-      "rank": 117,
+      "rank": 116,
       "replica_code": "7VL51RLF2S",
       "team_name": "nl0u2aalww3fh0e's Staraptor Whimsicott Team",
       "tournament": "-",
@@ -11563,7 +11464,7 @@
       "strategy": []
     },
     {
-      "rank": 118,
+      "rank": 117,
       "replica_code": "JG6QL74NE9",
       "team_name": "downtowntojun's Mawile Abomasnow HTR Team",
       "tournament": "-",
@@ -11662,7 +11563,7 @@
       "strategy": []
     },
     {
-      "rank": 119,
+      "rank": 118,
       "replica_code": "7QPLGHVFGV",
       "team_name": "alcana's Swampert Venusaur Team",
       "tournament": "Video",
@@ -11761,7 +11662,7 @@
       "strategy": []
     },
     {
-      "rank": 120,
+      "rank": 119,
       "replica_code": "5XQMPD234T",
       "team_name": "Rizaya's Floette Palafin Team",
       "tournament": "-",
@@ -11853,6 +11754,105 @@
             "Jet Punch",
             "Close Combat",
             "Wave Crash",
+            "Protect"
+          ]
+        }
+      ],
+      "strategy": []
+    },
+    {
+      "rank": 120,
+      "replica_code": "R6N28Y13TS",
+      "team_name": "MichaelderBeste's Eelektross Offense Team",
+      "tournament": "-",
+      "trainer": "Michael Kelsch",
+      "format": "VGC Champions",
+      "regulation": "M-B",
+      "sheet_rank": "",
+      "date_shared": "24 Jun 2026",
+      "pokepaste_url": "https://pokepast.es/5470e8f74ef6a8c6",
+      "pokemon": [
+        {
+          "name": "Eelektross",
+          "item": "Eelektrossite",
+          "ability": "Levitate",
+          "tera_type": "",
+          "evs": "31 HP / 2 Def / 25 SpA / 8 Spe",
+          "nature": "Modest",
+          "moves": [
+            "Thunderbolt",
+            "Flamethrower",
+            "Close Combat",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Gholdengo",
+          "item": "Life Orb",
+          "ability": "Good as Gold",
+          "tera_type": "",
+          "evs": "7 HP / 27 SpA / 32 Spe",
+          "nature": "Modest",
+          "moves": [
+            "Make It Rain",
+            "Shadow Ball",
+            "Power Gem",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Ninetales-Alola",
+          "item": "Focus Sash",
+          "ability": "Snow Warning",
+          "tera_type": "",
+          "evs": "1 HP / 1 Def / 32 SpA / 32 Spe",
+          "nature": "Timid",
+          "moves": [
+            "Blizzard",
+            "Freeze-Dry",
+            "Encore",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Talonflame",
+          "item": "Sharp Beak",
+          "ability": "Gale Wings",
+          "tera_type": "",
+          "evs": "4 HP / 28 Atk / 7 Def / 27 Spe",
+          "nature": "Jolly",
+          "moves": [
+            "Dual Wingbeat",
+            "Flare Blitz",
+            "Tailwind",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Tsareena",
+          "item": "Occa Berry",
+          "ability": "Queenly Majesty",
+          "tera_type": "",
+          "evs": "23 HP / 21 Atk / 1 Def / 21 Spe",
+          "nature": "Adamant",
+          "moves": [
+            "Trop Kick",
+            "Low Kick",
+            "Triple Axel",
+            "Taunt"
+          ]
+        },
+        {
+          "name": "Garchomp",
+          "item": "Sitrus Berry",
+          "ability": "Rough Skin",
+          "tera_type": "",
+          "evs": "13 HP / 21 Atk / 32 Spe",
+          "nature": "Jolly",
+          "moves": [
+            "Earthquake",
+            "Dragon Claw",
+            "Rock Tomb",
             "Protect"
           ]
         }

@@ -291,8 +291,22 @@
         // user-triggered call (e.g. dropdown switch to "Current")
         // always gets to try the fallback once, instead of being
         // permanently blocked by a flag set on the page's first load.
+        // The season-pause banner (.cl-season-notice) is hidden by default
+        // (CSS) and shown only when the CURRENT rotation has no City League
+        // data — a genuine off-season gap. Once a current-window event lands
+        // (e.g. a JP major pulled in via additional_tournament_ids), the
+        // banner disappears on its own instead of lingering as a stale notice.
+        function setCitySeasonNotice(show) {
+            document.querySelectorAll('.cl-season-notice').forEach(el => {
+                el.style.display = show ? '' : 'none';
+            });
+        }
+
         async function loadCityLeagueData(_autoFallbackDepth) {
             const _fallbackDepth = _autoFallbackDepth || 0;
+            // Fresh (non-fallback) load: assume the season is live; the
+            // empty-data branches below re-show the banner if it isn't.
+            if (_fallbackDepth === 0) setCitySeasonNotice(false);
             const content = document.getElementById('cityLeagueContent');
             try {
                 const timestamp = new Date().getTime();
@@ -358,6 +372,9 @@
                 const m3DataRaw = results.length > 3 ? results[3] : null;
 
                 if (!archetypesText) {
+                    // Current rotation has no data → genuine season pause;
+                    // surface the banner (hidden by default).
+                    if (format === 'current') setCitySeasonNotice(true);
                     // Same Season-pause fallback as the post-parse check
                     // below — if the current-rotation file is missing
                     // entirely (404, empty, or briefly stale during a
@@ -428,6 +445,9 @@
                 }
 
                 if (!archetypesData.length) {
+                    // Current rotation parsed to zero rows → season pause;
+                    // surface the banner (hidden by default).
+                    if (format === 'current') setCitySeasonNotice(true);
                     // Season-pause fallback: when the current-rotation
                     // archetypes CSV is empty (Pause-Banner is showing
                     // for a reason — no new tournaments produced data

@@ -2785,6 +2785,10 @@
  * the markup) once a fresh season is underway.
  */
 .cl-season-notice {
+    /* Hidden by default — app-city-league.js (setCitySeasonNotice) only
+     * shows it when the CURRENT rotation has no data (a real season pause).
+     * Once a current-window event lands, the banner stays gone. */
+    display: none;
     /* F-18 from visual sweep: previous gradient (#fff7e6 → #fff1d6)
      * was barely distinguishable from the white page background.
      * Bumped to a more saturated amber so the banner reads as a

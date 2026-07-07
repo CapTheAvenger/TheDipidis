@@ -66,13 +66,17 @@
                 "start_date": "22.05.2026",
                 "end_date": "auto",
                 "max_decklists_per_league": 50,
-                "additional_tournament_ids": []
+                "additional_tournament_ids": [
+                    567,
+                    568
+                ]
             }
         },
+        "auto_discover_js": true,
         "output_file": "city_league_analysis.csv",
         "delay_between_requests": 1.5,
         "append_mode": true,
-        "_comment": "start_date is auto-synced by backend/core/update_sets.apply_format_window_to_scraper_settings to format_window.jp_release_date (= EN release minus 14-day JP lead). Don't hand-edit the date — set the EN rotation anchor in update_sets.FALLBACK_RELEASE_DATES instead. additional_tournament_ids: append Champions-League / special-event IDs that aren't on the regular City-League listing (e.g. 548)."
+        "_comment": "start_date is auto-synced by backend/core/update_sets.apply_format_window_to_scraper_settings to format_window.jp_release_date (= EN release minus 14-day JP lead). Don't hand-edit the date — set the EN rotation anchor in update_sets.FALLBACK_RELEASE_DATES instead. additional_tournament_ids: Japan-Standard majors (Japan Championships, Korean/Champions League, …) for the current legality window. auto_discover_js=true lets update_sets auto-detect these from limitlesstcg.com/tournaments?format=standard-jp within [jp_release_date, today] and merge them here (manual IDs preserved; on JP rotation they move to the past snapshot). Set auto_discover_js=false to manage the list by hand."
     },
     "city_league_archetype": {
         "start_date": "22.05.2026",
@@ -82,7 +86,10 @@
         "region": "jp",
         "min_tournament_size": 1,
         "_min_size_comment": "JP City League events typically post 4-16 placements (NOT 32+). The earlier value 32 (added 2026-04-21) silently rejected every new tournament for two weeks — see backend/scrapers/city_league_archetype_scraper.py DEFAULT_SETTINGS comment for the full incident.",
-        "additional_tournament_ids": []
+        "additional_tournament_ids": [
+            567,
+            568
+        ]
     },
     "city_league_analysis_past": {
         "sources": {

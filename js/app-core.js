@@ -1048,32 +1048,6 @@ const BASE_PATH = './data/';
                 pages.push(copies.slice(i, i + 9));
             }
 
-            const pageHtml = pages.map((pageCards, pageIndex) => {
-                const cardsHtml = pageCards.map(card => {
-                    const imageUrl = getCardImageSource(card.name, card.set, card.number) || buildInlineCardPlaceholder(card.name);
-                    const safeImage = window.escapeHtmlAttr(imageUrl);
-
-                    return `
-                        <div class="proxy-slot">
-                            <span class="cut cut-top-left"></span>
-                            <span class="cut cut-top-right"></span>
-                            <span class="cut cut-bottom-left"></span>
-                            <span class="cut cut-bottom-right"></span>
-                            <div class="proxy-card">
-                                <img loading="lazy" src="${safeImage}" alt="">
-                            </div>
-                        </div>
-                    `;
-                }).join('');
-
-                return `
-                    <section class="proxy-page">
-                        <div class="proxy-grid">${cardsHtml}</div>
-                        <footer>${t('proxy.pageFooter')} ${pageIndex + 1} / ${pages.length}</footer>
-                    </section>
-                `;
-            }).join('');
-
             const popup = window.open('', '_blank');
             if (!popup) {
                 showToast(t('proxy.printBlocked'), 'error');
@@ -1096,26 +1070,21 @@ const BASE_PATH = './data/';
                 'body { margin: 0; font-family: Arial, sans-serif; background: #fff; }',
                 '.proxy-page { page-break-after: always; }',
                 '.proxy-page:last-child { page-break-after: auto; }',
-                '.proxy-grid { display: grid; grid-template-columns: repeat(3, 60mm); grid-auto-rows: 85mm; gap: 3mm; justify-content: center; }',
+                // Gapless 3x3 block: cards share edges so one straight cut
+                // separates two cards at once (rotary-trimmer friendly).
+                // margin-top keeps the -5mm top/left ticks inside the printable
+                // area (out of the non-printable @page margin) on every printer.
+                '.proxy-block { position: relative; width: 180mm; height: 255mm; margin: 6mm auto 0; }',
+                '.proxy-grid { display: grid; grid-template-columns: repeat(3, 60mm); grid-auto-rows: 85mm; gap: 0; }',
                 '.proxy-slot { position: relative; width: 60mm; height: 85mm; }',
-                '.proxy-card { position: absolute; inset: 0; overflow: hidden; border: 0.2mm solid rgba(0,0,0,0.35); border-radius: 1.8mm; background: #fff; }',
+                '.proxy-card { position: absolute; inset: 0; overflow: hidden; border: 0.2mm solid rgba(0,0,0,0.5); background: #fff; }',
                 '.proxy-card img { width: 100%; height: 100%; object-fit: cover; display: block; }',
-                '.cut { position: absolute; width: 4mm; height: 4mm; pointer-events: none; }',
-                '.cut::before, .cut::after { content: \'\'; position: absolute; background: #000; }',
-                '.cut::before { width: 4mm; height: 0.25mm; }',
-                '.cut::after { width: 0.25mm; height: 4mm; }',
-                '.cut-top-left { top: -1.6mm; left: -1.6mm; }',
-                '.cut-top-left::before, .cut-top-left::after { top: 0; left: 0; }',
-                '.cut-top-right { top: -1.6mm; right: -1.6mm; }',
-                '.cut-top-right::before { top: 0; right: 0; }',
-                '.cut-top-right::after { top: 0; right: 0; }',
-                '.cut-bottom-left { bottom: -1.6mm; left: -1.6mm; }',
-                '.cut-bottom-left::before { bottom: 0; left: 0; }',
-                '.cut-bottom-left::after { bottom: 0; left: 0; }',
-                '.cut-bottom-right { bottom: -1.6mm; right: -1.6mm; }',
-                '.cut-bottom-right::before { bottom: 0; right: 0; }',
-                '.cut-bottom-right::after { bottom: 0; right: 0; }',
-                'footer { margin-top: 3mm; text-align: center; font-size: 7.5pt; color: #666; }',
+                // Alignment/trim ticks sit only in the page margin (never on
+                // the card faces) at every cut line, top/bottom + left/right.
+                '.tick { position: absolute; background: #000; pointer-events: none; }',
+                '.tick-v { width: 0.3mm; height: 4mm; margin-left: -0.15mm; }',
+                '.tick-h { height: 0.3mm; width: 4mm; margin-top: -0.15mm; }',
+                'footer { margin-top: 8mm; text-align: center; font-size: 7.5pt; color: #666; }',
                 '@media print { body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }'
             ].join('\n');
             doc.head.appendChild(style);
@@ -1123,17 +1092,25 @@ const BASE_PATH = './data/';
             pages.forEach((pageCards, pageIndex) => {
                 const section = doc.createElement('section');
                 section.className = 'proxy-page';
+
+                // Size the block/marks to the rows & columns actually used on
+                // this page so a short last page doesn't get a full-height
+                // block with ticks for empty rows.
+                const colsUsed = Math.min(3, pageCards.length);
+                const rowsUsed = Math.ceil(pageCards.length / 3);
+
+                const block = doc.createElement('div');
+                block.className = 'proxy-block';
+                block.style.width = (colsUsed * 60) + 'mm';
+                block.style.height = (rowsUsed * 85) + 'mm';
+
                 const grid = doc.createElement('div');
                 grid.className = 'proxy-grid';
+                grid.style.gridTemplateColumns = 'repeat(' + colsUsed + ', 60mm)';
 
                 pageCards.forEach(card => {
                     const slot = doc.createElement('div');
                     slot.className = 'proxy-slot';
-                    ['cut-top-left','cut-top-right','cut-bottom-left','cut-bottom-right'].forEach(cls => {
-                        const span = doc.createElement('span');
-                        span.className = 'cut ' + cls;
-                        slot.appendChild(span);
-                    });
                     const cardDiv = doc.createElement('div');
                     cardDiv.className = 'proxy-card';
                     const img = doc.createElement('img');
@@ -1144,7 +1121,34 @@ const BASE_PATH = './data/';
                     grid.appendChild(slot);
                 });
 
-                section.appendChild(grid);
+                block.appendChild(grid);
+
+                // Trim/alignment marks in the page margin at every cut line so
+                // the whole sheet lines up on the rotary trimmer and each
+                // straight cut passes through the shared edges of two cards.
+                // COLS = vertical cut lines (mm from block left); ROWS =
+                // horizontal cut lines (mm from block top). The block is
+                // 3*60mm wide and 3*85mm tall, so the outer lines are the
+                // block border and the two inner lines split the cards.
+                const COLS = Array.from({ length: colsUsed + 1 }, (_, i) => i * 60);
+                const ROWS = Array.from({ length: rowsUsed + 1 }, (_, i) => i * 85);
+                const addTick = (cls, styles) => {
+                    const m = doc.createElement('span');
+                    m.className = 'tick ' + cls;
+                    Object.assign(m.style, styles);
+                    block.appendChild(m);
+                };
+                COLS.forEach(x => {
+                    addTick('tick-v', { top: '-5mm', left: x + 'mm' });
+                    addTick('tick-v', { bottom: '-5mm', left: x + 'mm' });
+                });
+                ROWS.forEach(y => {
+                    addTick('tick-h', { left: '-5mm', top: y + 'mm' });
+                    addTick('tick-h', { right: '-5mm', top: y + 'mm' });
+                });
+
+                section.appendChild(block);
+
                 const footer = doc.createElement('footer');
                 footer.textContent = `${t('proxy.pageFooter')} ${pageIndex + 1} / ${pages.length}`;
                 section.appendChild(footer);

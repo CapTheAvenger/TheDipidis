@@ -1,47 +1,63 @@
 #!/usr/bin/env python3
-"""PROBE: how does limitlesstcg.com encode the 'JS' (Japan Standard) format on
-the main completed-tournaments listing, and what does tournament 568 look like?
-Goal: reliably auto-detect JS majors to add to City-League additional IDs."""
-import re, urllib.request
-UA={"User-Agent":"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124 Safari/537.36","Accept-Language":"en"}
-def get(u):
-    try:
-        return urllib.request.urlopen(urllib.request.Request(u,headers=UA),timeout=45).read().decode("utf-8","replace")
-    except Exception as e:
-        return f"__ERR__ {e}"
+"""PROBE: run the JS-tournament discovery against live Limitless and print the
+IDs for the current window (jp_release_date .. today). Mirrors
+update_sets.discover_js_tournament_ids so we validate the regex/date parsing
+and capture the exact seed list — no guessing."""
+import re, json, os, datetime, urllib.request
 
-print("==== main completed listing (show=50) ====")
-html=get("https://limitlesstcg.com/tournaments?show=50")
-if html.startswith("__ERR__"):
-    print(html)
-else:
-    # filter form: format <select> options
-    for sel in re.finditer(r'<select[^>]*name="([^"]*)"[^>]*>(.*?)</select>', html, re.S):
-        name=sel.group(1)
-        opts=re.findall(r'<option[^>]*value="([^"]*)"[^>]*>(.*?)</option>', sel.group(2), re.S)
-        if any(k in name.lower() for k in ("format","game","type")) or any('standard' in (o[1] or '').lower() for o in opts):
-            print(f"  SELECT name={name}: {[ (v, re.sub('<[^>]+>','',t).strip()) for v,t in opts ][:20]}")
-    # sample rows: dump raw HTML of first ~6 data rows to see the format column
-    rows=[tr for tr in re.findall(r'<tr[^>]*>(.*?)</tr>', html, re.S)]
-    print(f"  rows found: {len(rows)}")
-    shown=0
-    for r in rows:
-        if '/tournaments/' not in r: continue
-        # compact
-        rc=re.sub(r'\s+',' ', r).strip()
-        print("  ROW:", rc[:600])
-        shown+=1
-        if shown>=6: break
+UA = {"User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124 Safari/537.36", "Accept-Language": "en"}
+URL = "https://limitlesstcg.com/tournaments?format=standard-jp&show=100&page={page}"
 
-print("\n==== tournament 568 page (format + date) ====")
-p=get("https://limitlesstcg.com/tournaments/568")
-if p.startswith("__ERR__"):
-    print(p)
-else:
-    t=re.search(r'<title>(.*?)</title>', p, re.S)
-    print("  title:", re.sub(r'\s+',' ',re.sub('<[^>]+>','',t.group(1))).strip() if t else '-')
-    # look for format label and date near the header
-    for kw in ("Standard","Format","format","Japan","2026-06","Jun"):
-        for m in re.finditer(re.escape(kw), p):
-            seg=re.sub(r'\s+',' ',re.sub('<[^>]+>',' ',p[max(0,m.start()-60):m.start()+60])).strip()
-            print(f"   [{kw}] …{seg}…"); break
+
+def fetch(u):
+    return urllib.request.urlopen(urllib.request.Request(u, headers=UA), timeout=30).read().decode("utf-8", "replace")
+
+
+def parse_date(t):
+    t = (t or "").strip()
+    for fmt in ("%d %b %y", "%d %b %Y"):
+        try:
+            return datetime.datetime.strptime(t, fmt).date()
+        except ValueError:
+            pass
+    return None
+
+
+def discover(start, end):
+    found = {}  # id -> (date, name)
+    for page in range(1, 11):
+        html = fetch(URL.format(page=page))
+        rows_seen = 0
+        oldest = None
+        for row in re.split(r"(?i)<tr\b", html):
+            if "/tournaments/" not in row:
+                continue
+            dm = re.search(r"<td[^>]*>\s*(\d{1,2}\s+[A-Za-z]{3,9}\s+\d{2,4})\s*</td>", row)
+            im = re.search(r'/tournaments/(\d+)"', row)
+            if not dm or not im:
+                continue
+            d = parse_date(dm.group(1))
+            if not d:
+                continue
+            rows_seen += 1
+            oldest = d if oldest is None or d < oldest else oldest
+            nm = re.search(r'/tournaments/\d+"[^>]*>([^<]+)</a>', row)
+            if start <= d <= end:
+                found[int(im.group(1))] = (d.isoformat(), (nm.group(1).strip() if nm else "?"))
+        print(f"  page {page}: rows={rows_seen} oldest={oldest}")
+        if rows_seen == 0:
+            break
+        if oldest is not None and oldest < start:
+            break
+    return found
+
+
+fw = json.load(open("data/format_window.json"))
+jp = fw.get("jp_release_date")
+today = datetime.date.today()
+print(f"jp_release_date={jp}  today={today.isoformat()}")
+res = discover(datetime.date.fromisoformat(jp), today)
+print("\n== JS tournaments in current window ==")
+for tid in sorted(res):
+    print(f"  {tid}  {res[tid][0]}  {res[tid][1]}")
+print("\nSEED_IDS =", sorted(res))

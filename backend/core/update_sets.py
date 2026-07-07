@@ -661,6 +661,86 @@ def _format_de_date(iso: str) -> str:
         return ''
 
 
+# Main-listing filter for Japan-Standard events (the "JS" icon on
+# limitlesstcg.com = data-tooltip "Standard (JP)", format=standard-jp).
+_JS_LISTING_URL = "https://limitlesstcg.com/tournaments?format=standard-jp&show=100&page={page}"
+_JS_MAX_PAGES = 10  # 10 * 100 = 1000 JS events — far beyond any real window.
+
+
+def _parse_listing_date(text: str):
+    """Limitless listing date cell, e.g. '06 Jun 26' → datetime.date (or None)."""
+    text = (text or '').strip()
+    for fmt in ("%d %b %y", "%d %b %Y"):
+        try:
+            return datetime.datetime.strptime(text, fmt).date()
+        except ValueError:
+            continue
+    return None
+
+
+def discover_js_tournament_ids(start_iso: str, end_iso: str) -> list:
+    """Return the integer IDs of every Japan-Standard ('standard-jp')
+    tournament on limitlesstcg.com whose date is in [start_iso, end_iso].
+
+    These are the JP majors — Japan Championships, Korean / Champions /
+    Regional-League events, etc. — that carry the JS format icon on the
+    MAIN completed listing but never appear on the /tournaments/jp
+    City-League region listing the scraper walks. Without an explicit ID
+    they'd be missed, so the settings-sync merges them into
+    additional_tournament_ids for the matching legality window.
+
+    Fail-soft: any network/parse problem returns []; the caller then
+    leaves the committed IDs untouched.
+    """
+    try:
+        start = datetime.date.fromisoformat(start_iso)
+        end = datetime.date.fromisoformat(end_iso)
+    except (TypeError, ValueError):
+        return []
+    if start > end:
+        return []
+
+    ids = set()
+    for page in range(1, _JS_MAX_PAGES + 1):
+        url = _JS_LISTING_URL.format(page=page)
+        try:
+            html = safe_fetch_html(url, timeout=20)
+        except Exception as e:  # noqa: BLE001 — fail-soft on any fetch error
+            print(f"[Update Sets] ! JS listing fetch failed (page {page}): {e}")
+            break
+        if not html:
+            break
+
+        page_hits = 0
+        page_rows = 0
+        page_oldest = None
+        for row in re.split(r'(?i)<tr\b', html):
+            if '/tournaments/' not in row:
+                continue
+            dm = re.search(r'<td[^>]*>\s*(\d{1,2}\s+[A-Za-z]{3,9}\s+\d{2,4})\s*</td>', row)
+            im = re.search(r'/tournaments/(\d+)"', row)
+            if not dm or not im:
+                continue
+            d = _parse_listing_date(dm.group(1))
+            if not d:
+                continue
+            page_rows += 1
+            if page_oldest is None or d < page_oldest:
+                page_oldest = d
+            if start <= d <= end:
+                ids.add(int(im.group(1)))
+                page_hits += 1
+
+        # Listing is newest-first: stop once a page's oldest row predates
+        # the window, or once a page yields no tournament rows at all.
+        if page_rows == 0:
+            break
+        if page_oldest is not None and page_oldest < start:
+            break
+
+    return sorted(ids)
+
+
 def apply_format_window_to_scraper_settings(format_window_path: str,
                                             settings_path: str) -> bool:
     """Sync the rotation-driven settings in config/scraper_settings.json from
@@ -859,6 +939,37 @@ def apply_format_window_to_scraper_settings(format_window_path: str,
     if cla_arch.get('start_date') != jp_de:
         changes.append(f"city_league_archetype.start_date {cla_arch.get('start_date')!r} → {jp_de!r}")
         cla_arch['start_date'] = jp_de
+
+    # ── Auto-discover Japan-Standard (JS) majors for the current window ──
+    # JP majors (Japan Championships, Korean/Champions/Regional League, …)
+    # carry the "Standard (JP)" format on the MAIN listing but are absent
+    # from the /tournaments/jp City-League region listing the scraper walks,
+    # so they must be pulled via additional_tournament_ids. Discover every JS
+    # tournament in [jp_release_date, today] and merge its ID into the current
+    # analysis + archetype lists, preserving manually-added IDs. On the next
+    # JP rotation the snapshot block above moves these to the past archive.
+    # Toggle off with city_league_analysis.auto_discover_js = false.
+    # Fail-soft: a network error yields no IDs and leaves the lists untouched.
+    if settings.get('city_league_analysis', {}).get('auto_discover_js', True):
+        today_iso = datetime.date.today().isoformat()
+        js_ids = discover_js_tournament_ids(jp_release, today_iso)
+        if js_ids:
+            for label, target in (
+                ('city_league_analysis.sources.city_league', cla),
+                ('city_league_archetype', cla_arch),
+            ):
+                existing = list(target.get('additional_tournament_ids') or [])
+                try:
+                    existing_norm = sorted({int(x) for x in existing})
+                except (TypeError, ValueError):
+                    existing_norm = []
+                merged = sorted(set(existing_norm) | set(js_ids))
+                if merged != existing_norm:
+                    changes.append(
+                        f"{label}.additional_tournament_ids {existing} → {merged} "
+                        f"(JS auto-discover, window {jp_de}–today)"
+                    )
+                    target['additional_tournament_ids'] = merged
 
     lo = settings.setdefault('limitless_online', {})
     if lo.get('set') != current_set:

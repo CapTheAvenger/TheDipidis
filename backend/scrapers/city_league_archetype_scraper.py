@@ -260,8 +260,16 @@ def _scrape_single_tournament(tournament: dict) -> list:
         placement = cells[0].get_text(strip=True)
         player = cells[1].get_text(strip=True)
 
-        # Extrahiere Pokémon-Namen aus img.pokemon Elementen
-        pokemon_imgs = cells[2].select('img.pokemon')
+        # Extrahiere Pokémon-Namen aus img.pokemon Elementen.
+        # ROBUST: scan the WHOLE row rather than a fixed cell index. Regular
+        # JP City Leagues put the deck icons in cell[2], but majors like the
+        # Japan Championships insert an extra country-flag column that shifts
+        # them to cell[3] (verified 2026-07: tournament 568 had empty cell[2]
+        # and img.pokemon in cell[3], so the old cells[2] lookup returned 0
+        # archetypes and the whole event was silently dropped). img.pokemon
+        # only ever marks a deck's Pokémon, so a row-wide select is layout-
+        # independent.
+        pokemon_imgs = row.select('img.pokemon')
         raw_names = [img['alt'] for img in pokemon_imgs if img.has_attr('alt')]
 
         # Bereinige Namen (entferne -EX, -VSTAR, etc. und fixe Mega)

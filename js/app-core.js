@@ -742,31 +742,125 @@ const BASE_PATH = './data/';
             if (copiesEl) copiesEl.textContent = String(totals.totalCopies);
         }
 
+        function proxyItemKey(item) {
+            return `${item.name || ''}|${item.set || ''}|${item.number || ''}`;
+        }
+
+        // Renders the "couldn't be added" panel above the queue: cards that
+        // resolve to no image (blank placeholders on print) + decklist lines
+        // that couldn't be parsed on the last import. Removes itself when
+        // there's nothing to report.
+        function renderProxyWarnings() {
+            const list = document.getElementById('proxyQueueList');
+            if (!list || !list.parentNode) return;
+            let box = document.getElementById('proxyWarningBox');
+
+            const failures = window.proxyImageFailures || {};
+            const failItems = Object.keys(failures).map(k => failures[k]);
+            const skipped = Array.isArray(window.proxyImportSkipped) ? window.proxyImportSkipped : [];
+
+            if (failItems.length === 0 && skipped.length === 0) {
+                if (box) box.remove();
+                return;
+            }
+            if (!box) {
+                box = document.createElement('div');
+                box.id = 'proxyWarningBox';
+                box.className = 'proxy-warning-box';
+                list.parentNode.insertBefore(box, list);
+            }
+
+            const sections = [];
+            if (failItems.length) {
+                const rows = failItems.map(it => {
+                    const nm = window.escapeHtmlAttr(it.name || '');
+                    const sn = (it.set && it.number)
+                        ? ` <span class="proxy-warning-print">${window.escapeHtmlAttr(it.set)} ${window.escapeHtmlAttr(it.number)}</span>` : '';
+                    return `<li>${nm}${sn}</li>`;
+                }).join('');
+                sections.push(
+                    `<div class="proxy-warning-section">
+                        <div class="proxy-warning-title">⚠ ${t('proxy.unresolvedTitle')} (${failItems.length})</div>
+                        <div class="proxy-warning-hint">${t('proxy.unresolvedHint')}</div>
+                        <ul class="proxy-warning-list">${rows}</ul>
+                    </div>`);
+            }
+            if (skipped.length) {
+                const rows = skipped.map(l => `<li>${window.escapeHtmlAttr(l)}</li>`).join('');
+                sections.push(
+                    `<div class="proxy-warning-section">
+                        <div class="proxy-warning-title">⚠ ${t('proxy.skippedTitle')} (${skipped.length})</div>
+                        <div class="proxy-warning-hint">${t('proxy.skippedHint')}</div>
+                        <ul class="proxy-warning-list">${rows}</ul>
+                    </div>`);
+            }
+            box.innerHTML = sections.join('');
+        }
+
+        // After the queue renders, watch each thumbnail: a card whose image
+        // 404s (e.g. a wrong set/number) is flagged as unresolved so it shows
+        // up in the warning panel instead of silently printing blank.
+        function wireProxyImageChecks(list, placeholderProxy) {
+            list.querySelectorAll('.proxy-queue-card-img').forEach(img => {
+                const key = img.getAttribute('data-proxy-key') || '';
+                if (window.proxyImageFailures[key]) return; // already flagged (no source)
+                const fail = () => {
+                    if (!window.proxyImageFailures[key]) {
+                        const item = (window.proxyQueue || []).find(it => proxyItemKey(it) === key);
+                        window.proxyImageFailures[key] = item
+                            ? { name: item.name, set: item.set || '', number: item.number || '' }
+                            : { name: key, set: '', number: '' };
+                        const card = img.closest && img.closest('.proxy-queue-card');
+                        if (card) card.classList.add('proxy-queue-card-unresolved');
+                        renderProxyWarnings();
+                    }
+                    if (img.getAttribute('src') !== placeholderProxy) img.src = placeholderProxy;
+                };
+                img.addEventListener('error', fail, { once: true });
+                // Handle images that already errored before this listener attached.
+                if (img.complete && img.naturalWidth === 0) fail();
+            });
+        }
+
         function renderProxyQueue() {
             syncProxyStats();
             const list = document.getElementById('proxyQueueList');
             if (!list) return;
 
+            // Reset per-render image-failure tracking; rebuilt below + on img error.
+            window.proxyImageFailures = {};
+
             const queue = window.proxyQueue || [];
             if (queue.length === 0) {
                 list.innerHTML = '<div class="proxy-queue-empty">' + t('proxy.queueEmpty') + '</div>';
+                renderProxyWarnings();
                 return;
             }
+
+            const placeholderProxy = buildInlineCardPlaceholder('Proxy');
 
             const html = queue.map(item => {
                 const safeName = window.escapeHtmlAttr(item.name);
                 const safeSet = window.escapeHtmlAttr(item.set || 'N/A');
                 const safeNumber = window.escapeHtmlAttr(item.number || 'N/A');
                 const displaySetNumber = (item.set && item.number) ? `${safeSet} ${safeNumber}` : t('proxy.noPrint');
-                const imageUrl = getCardImageSource(item.name, item.set, item.number) || buildInlineCardPlaceholder(item.name);
+                const resolved = getCardImageSource(item.name, item.set, item.number);
+                const key = proxyItemKey(item);
+                const noImage = !resolved;
+                if (noImage) {
+                    // No source at all → definite blank placeholder, flag immediately.
+                    window.proxyImageFailures[key] = { name: item.name, set: item.set || '', number: item.number || '' };
+                }
+                const imageUrl = resolved || placeholderProxy;
                 const escapedImageUrl = window.escapeHtmlAttr(imageUrl);
                 const jsName = escapeJsStr(item.name || '');
                 const jsSet = escapeJsStr(item.set || '');
                 const jsNumber = escapeJsStr(item.number || '');
+                const dataKey = window.escapeHtmlAttr(key);
 
                 return `
-                    <div class="proxy-queue-card">
-                        <img loading="lazy" src="${escapedImageUrl}" alt="${safeName}" class="proxy-queue-card-img" onerror="this.src='${buildInlineCardPlaceholder('Proxy')}';">
+                    <div class="proxy-queue-card${noImage ? ' proxy-queue-card-unresolved' : ''}">
+                        <img loading="lazy" src="${escapedImageUrl}" alt="${safeName}" class="proxy-queue-card-img" data-proxy-key="${dataKey}">
                         <div class="proxy-queue-card-info">
                             <div class="proxy-queue-card-title">${safeName}</div>
                             <div class="proxy-queue-card-print">${displaySetNumber}</div>
@@ -782,6 +876,8 @@ const BASE_PATH = './data/';
             }).join('');
 
             list.innerHTML = html;
+            wireProxyImageChecks(list, placeholderProxy);
+            renderProxyWarnings();
         }
 
         function addCardToProxy(cardName, setCode = '', cardNumber = '', count = 1, suppressToast = false) {
@@ -861,6 +957,7 @@ const BASE_PATH = './data/';
             if (!window.proxyQueue || window.proxyQueue.length === 0) return;
             if (!confirm(t('proxy.clearConfirm'))) return;
             window.proxyQueue = [];
+            window.proxyImportSkipped = [];
             renderProxyQueue();
         }
 
@@ -940,31 +1037,42 @@ const BASE_PATH = './data/';
                         return;
                     }
 
-                    let entries = [];
-                    try {
-                        entries = parseDeckList(text);
-                    } catch (parseErr) {
-                        console.warn('[Proxy] parseDeckList failed, using fallback parser:', parseErr);
-                        entries = [];
-                    }
+                    // Parse line-by-line so we can report exactly which lines
+                    // couldn't be read. Each line: try the strict parser
+                    // (count name SET number + PTCGL basic energies), then a
+                    // loose "count name" fallback, else record it as skipped.
+                    const HEADER_RE = /(pok[eé]mon|trainer(?:karten)?|energy|energie(?:karten)?)\s*:/i;
+                    const entries = [];
+                    const skipped = [];
+                    text.split('\n').forEach(rawLine => {
+                        const line = rawLine.trim();
+                        if (!line) return;
+                        if (HEADER_RE.test(line)) return;
 
-                    if (!Array.isArray(entries) || entries.length === 0) {
-                        entries = [];
-                        text.split('\n').forEach(line => {
-                            const trimmed = line.trim();
-                            if (!trimmed) return;
-                            const match = trimmed.match(/^(\d+)\s+(.+)$/);
-                            if (!match) return;
+                        let parsed = [];
+                        try { parsed = parseDeckList(line); } catch (e) { parsed = []; }
+                        if (Array.isArray(parsed) && parsed.length) {
+                            entries.push(...parsed);
+                            return;
+                        }
+                        const loose = line.match(/^(\d+)\s+(.+)$/);
+                        if (loose) {
                             entries.push({
-                                count: parseProxyCount(match[1], 1),
-                                name: String(match[2] || '').trim(),
+                                count: parseProxyCount(loose[1], 1),
+                                name: String(loose[2] || '').trim(),
                                 set: '',
                                 number: ''
                             });
-                        });
-                    }
+                            return;
+                        }
+                        skipped.push(line);
+                    });
 
-                    if (!Array.isArray(entries) || entries.length === 0) {
+                    // Persist skipped lines so the warning panel can list them.
+                    window.proxyImportSkipped = skipped;
+
+                    if (entries.length === 0) {
+                        renderProxyWarnings();
                         showToast(t('proxy.parseError'), 'error');
                         return;
                     }

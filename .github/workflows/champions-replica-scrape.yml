@@ -210,6 +210,21 @@ jobs:
           fi
           exit 0
 
+      # Refresh the pokemonproxies.com image index (set+number -> English proxy
+      # art) for Japanese-only sets like M5 that have no international print.
+      # Content-hashed asset URLs, so this rarely changes — but a refresh keeps
+      # it correct if pokemonproxies re-hashes or adds a new JP-only set.
+      # Reachable from CI, not the build sandbox. Fail-soft: keeps committed.
+      - name: Scrape pokemonproxies image index
+        run: |
+          set +e
+          python -u scripts/scrape_pokemonproxies.py
+          if [ "$?" -ne 0 ]; then
+              echo "::warning::scrape_pokemonproxies failed — keeping committed pokemonproxies_index.json"
+              git checkout -- data/pokemonproxies_index.json 2>/dev/null
+          fi
+          exit 0
+
       # Rebuild the Side Quest "Pokémon" Pokédex (roster + base stats +
       # German names + Lv.50 ranges + the in-game "most used" build).
       # Fail-soft: keeps the committed JSON.
@@ -242,6 +257,7 @@ jobs:
                   data/champions_roster_extra.json \
                   data/champions_available_items.json \
                   data/de_name_overrides.json \
+                  data/pokemonproxies_index.json \
                   index.html service-worker.js version.json
           # Strategies file only exists once the ANTHROPIC_API_KEY
           # secret is set and the generator ran at least once.

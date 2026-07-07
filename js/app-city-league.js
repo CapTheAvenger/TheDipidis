@@ -2557,6 +2557,18 @@
                 return '';
             }
 
+            // 0. pokemonproxies.com override for Japanese-only sets (e.g. M5):
+            //    these have no international print, so we prefer the English
+            //    proxy art here over the Japanese Limitless fallback (step 4).
+            //    The index only contains such sets, so international cards are
+            //    unaffected. Number matched unpadded (index keys use unpadded).
+            const ppx = window.pokemonProxiesIndex;
+            if (ppx) {
+                const plainNum = /^\d+$/.test(rawNumber) ? (rawNumber.replace(/^0+/, '') || '0') : rawNumber;
+                const hit = ppx[`${normalizedSet}-${rawNumber}`] || ppx[`${normalizedSet}-${plainNum}`];
+                if (hit) return hit;
+            }
+
             const card = getIndexedCardBySetNumber(normalizedSet, rawNumber);
 
             // 1. Canonical image from all_cards_merged

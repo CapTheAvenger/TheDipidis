@@ -2400,6 +2400,26 @@ const BASE_PATH = './data/';
             }
         }
 
+        // Map of "SET-number" -> pokemonproxies.com proxy image URL, for
+        // Japanese-only sets (e.g. M5) that have no international print. The
+        // image resolver (getUnifiedCardImage) prefers this over the Japanese
+        // Limitless fallback so those cards print as English proxies.
+        async function loadPokemonProxiesIndex() {
+            try {
+                const resp = await fetch(`./data/pokemonproxies_index.json?t=${Date.now()}`);
+                if (resp.ok) {
+                    const json = await resp.json();
+                    const images = json && json.images && typeof json.images === 'object' ? json.images : null;
+                    if (images) {
+                        window.pokemonProxiesIndex = images;
+                        devLog(`[init] pokemonproxies index: ${Object.keys(images).length} entries`);
+                    }
+                }
+            } catch (e) {
+                console.warn('[init] Could not load pokemonproxies_index.json:', e);
+            }
+        }
+
         async function loadAllCardsDatabase(options) {
             try {
                 // --- Strategy: Chunked loading with IndexedDB cache ---

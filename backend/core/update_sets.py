@@ -678,16 +678,24 @@ def _parse_listing_date(text: str):
     return None
 
 
-def discover_js_tournament_ids(start_iso: str, end_iso: str) -> list:
-    """Return the integer IDs of every Japan-Standard ('standard-jp')
-    tournament on limitlesstcg.com whose date is in [start_iso, end_iso].
+def discover_js_tournament_ids(start_iso: str, end_iso: str,
+                               countries=('JP',)) -> list:
+    """Return the integer IDs of Japan-region Japan-Standard ('standard-jp')
+    tournaments on limitlesstcg.com whose date is in [start_iso, end_iso].
 
-    These are the JP majors — Japan Championships, Korean / Champions /
-    Regional-League events, etc. — that carry the JS format icon on the
-    MAIN completed listing but never appear on the /tournaments/jp
-    City-League region listing the scraper walks. Without an explicit ID
-    they'd be missed, so the settings-sync merges them into
+    These are the JP majors — Japan Championships and the like — that carry
+    the JS format icon on the MAIN completed listing but never appear on the
+    /tournaments/jp City-League region listing the scraper walks. Without an
+    explicit ID they'd be missed, so the settings-sync merges them into
     additional_tournament_ids for the matching legality window.
+
+    countries restricts by the tournament's COUNTRY flag (default JP only).
+    Standard (JP) format is also used by Korea etc., but legality there
+    follows the local Play! rules / region, which go live later than Japan —
+    so a Korean 'standard-jp' event is NOT automatically legal in the JP
+    window and must be excluded. The country flag (<img class="flag" alt="JP">
+    before the tournament link) is the reliable discriminator; the trailing
+    winner-nationality flag is deliberately ignored.
 
     Fail-soft: any network/parse problem returns []; the caller then
     leaves the committed IDs untouched.
@@ -699,6 +707,7 @@ def discover_js_tournament_ids(start_iso: str, end_iso: str) -> list:
         return []
     if start > end:
         return []
+    allowed = {str(c).upper() for c in (countries or ())}
 
     ids = set()
     for page in range(1, _JS_MAX_PAGES + 1):
@@ -727,9 +736,17 @@ def discover_js_tournament_ids(start_iso: str, end_iso: str) -> list:
             page_rows += 1
             if page_oldest is None or d < page_oldest:
                 page_oldest = d
-            if start <= d <= end:
-                ids.add(int(im.group(1)))
-                page_hits += 1
+            if not (start <= d <= end):
+                continue
+            # Country flag = the flag <img> that precedes the tournament link
+            # (the trailing one is the winner's nationality — ignore it).
+            pre = row[:im.start()]
+            cm = re.search(r'class="flag"[^>]*\balt="([A-Za-z]{2})"', pre)
+            country = cm.group(1).upper() if cm else ''
+            if allowed and country not in allowed:
+                continue
+            ids.add(int(im.group(1)))
+            page_hits += 1
 
         # Listing is newest-first: stop once a page's oldest row predates
         # the window, or once a page yields no tournament rows at all.
@@ -940,15 +957,18 @@ def apply_format_window_to_scraper_settings(format_window_path: str,
         changes.append(f"city_league_archetype.start_date {cla_arch.get('start_date')!r} → {jp_de!r}")
         cla_arch['start_date'] = jp_de
 
-    # ── Auto-discover Japan-Standard (JS) majors for the current window ──
-    # JP majors (Japan Championships, Korean/Champions/Regional League, …)
-    # carry the "Standard (JP)" format on the MAIN listing but are absent
-    # from the /tournaments/jp City-League region listing the scraper walks,
-    # so they must be pulled via additional_tournament_ids. Discover every JS
+    # ── Auto-discover Japan-region Japan-Standard majors for the window ──
+    # Japan majors (e.g. Japan Championships) carry the "Standard (JP)" format
+    # on the MAIN listing but are absent from the /tournaments/jp City-League
+    # region listing the scraper walks, so they must be pulled via
+    # additional_tournament_ids. Discover every JP-COUNTRY standard-jp
     # tournament in [jp_release_date, today] and merge its ID into the current
-    # analysis + archetype lists, preserving manually-added IDs. On the next
-    # JP rotation the snapshot block above moves these to the past archive.
-    # Toggle off with city_league_analysis.auto_discover_js = false.
+    # analysis + archetype lists, preserving manually-added IDs. Korea / other
+    # regions also use standard-jp but their legality follows the local Play!
+    # rotation (which goes live later than Japan), so they are NOT auto-legal
+    # in the JP window and discover_js_tournament_ids excludes them by country.
+    # On the next JP rotation the snapshot block above moves these to the past
+    # archive. Toggle off with city_league_analysis.auto_discover_js = false.
     # Fail-soft: a network error yields no IDs and leaves the lists untouched.
     if settings.get('city_league_analysis', {}).get('auto_discover_js', True):
         today_iso = datetime.date.today().isoformat()

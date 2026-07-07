@@ -1,49 +1,32 @@
 #!/usr/bin/env python3
-"""PROBE: why did the archetype scraper get 0 decks from tournament 568 (Japan
-Championships) while the analysis scraper got 315 rows? Inspect the standings
-page structure vs what _scrape_single_tournament expects (table.striped rows
-with img.pokemon in cell 3, digit placement in cell 1)."""
-import re, urllib.request
-UA = {"User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124 Safari/537.36", "Accept-Language": "en"}
+"""PROBE: run the REAL archetype-scraper code against tournament 568 to see
+what _scrape_single_tournament returns (and whether get_tournament_by_id
+resolves it). Reproduces exactly what the weekly run did."""
+import os, sys, traceback
 
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+for p in (os.path.join(ROOT, "backend", "core"), os.path.join(ROOT, "backend", "scrapers")):
+    sys.path.insert(0, p)
 
-def get(u):
-    try:
-        return urllib.request.urlopen(urllib.request.Request(u, headers=UA), timeout=40).read().decode("utf-8", "replace")
-    except Exception as e:
-        return f"__ERR__ {e}"
+try:
+    import city_league_archetype_scraper as cl
+    print("import OK")
+except Exception:
+    traceback.print_exc()
+    sys.exit(0)
 
-
-for path in ("/tournaments/568", "/tournaments/568/standings", "/tournaments/568/decks"):
-    url = "https://limitlesstcg.com" + path
-    html = get(url)
-    print(f"\n==== {url} ====")
-    if html.startswith("__ERR__"):
-        print(" ", html)
-        continue
-    print("  len:", len(html))
-    print("  has 'table' 'striped':", ("striped" in html), "| class=\"pokemon\" count:", html.count('class="pokemon"'))
-    # first striped table
-    tm = re.search(r'<table[^>]*class="[^"]*striped[^"]*"[^>]*>(.*?)</table>', html, re.S)
-    if not tm:
-        print("  no table.striped found")
-        # show any <table ...> classes present
-        print("  tables present:", re.findall(r'<table[^>]*>', html)[:4])
-        # show links to decklists (how analysis scraper might find decks)
-        print("  /decklist links:", len(re.findall(r'href="[^"]*decklist[^"]*"', html)), "| ?deck= links:", len(re.findall(r'href="[^"]*[?&]deck', html)))
-        continue
-    rows = re.findall(r"<tr\b.*?</tr>", tm.group(1), re.S)
-    print("  striped table rows:", len(rows))
-    shown = 0
-    for r in rows:
-        if '<th' in r:
-            continue
-        cells = re.findall(r"<td\b[^>]*>(.*?)</td>", r, re.S)
-        if len(cells) < 4:
-            continue
-        placement = re.sub(r"<[^>]+>", "", cells[0]).strip()
-        poke = re.findall(r'class="pokemon"[^>]*alt="([^"]+)"', r)
-        print(f"    row: cells={len(cells)} placement={placement!r} pokemon={poke[:4]}")
-        shown += 1
-        if shown >= 5:
-            break
+try:
+    info = cl.get_tournament_by_id("568")
+    print("get_tournament_by_id(568) ->", info)
+    if info:
+        rows = cl._scrape_single_tournament(info)
+        print("scrape_single_tournament rows:", len(rows))
+        for r in rows[:8]:
+            print("   ", r.get("placement"), "|", r.get("archetype"))
+        # archetype distribution
+        from collections import Counter
+        c = Counter(r["archetype"] for r in rows)
+        print("distinct archetypes:", len(c))
+        print("top:", c.most_common(8))
+except Exception:
+    traceback.print_exc()

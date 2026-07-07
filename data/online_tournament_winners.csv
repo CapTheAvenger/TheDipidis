@@ -1,4 +1,10 @@
 tournament_id,tournament_date,format,player_count,winner_archetype,winner_winrate
+6a284d862d97f3b0c26124ea,2026-07-07,CRI,128,Dragapult Dusknoir,21.0
+6a431ad383fd320299bd46b4,2026-07-06,CRI,145,Lucario Hariyama,21.0
+6a44081f83fd320299bd5014,2026-07-06,CRI,184,Dragapult Dusknoir,38.0
+6a4856e465724db9ded3bc7e,2026-07-06,CRI,213,Rocket's Honchkrow,28.0
+6a43de5cc87cd9ff0a313932,2026-07-04,CRI,142,Mega Absol Box,34.0
+wait-wut,2026-07-04,CRI,346,Dragapult,31.0
 6a45bed1c87cd9ff0a314f10,2026-07-02,CRI,123,Dragapult,28.0
 6a3eb6de83fd320299bd0dfc,2026-07-02,CRI,164,Alakazam Dudunsparce,39.0
 6a3f5d3e83fd320299bd18de,2026-07-02,CRI,102,Dragapult,27.0
@@ -40,13 +46,3 @@ not-at-naic-but-thats-ok,2026-06-13,CRI,266,Dragapult Blaziken,31.0
 6a26df6747f3797bf6baf1e7,2026-06-11,CRI,135,Slowking,33.0
 6a1fa4b756b11a587a947287,2026-06-09,CRI,143,Mega Lopunny,21.0
 6a22eb7747f3797bf6bac764,2026-06-09,CRI,100,Blaziken,25.0
-6a26d71a56b11a587a94c21b,2026-06-09,CRI,139,Rocket's Mewtwo,18.0
-6a1de09847f3797bf6ba93c0,2026-06-08,CRI,181,Rocket's Honchkrow,21.0
-6a256e4747f3797bf6bae558,2026-06-08,CRI,123,Dragapult Blaziken,21.0
-6a1f23b847f3797bf6baa1a4,2026-06-08,CRI,168,Dragapult,36.0
-6a23a40447f3797bf6bad463,2026-06-08,CRI,112,Crustle,34.0
-6a233b3f47f3797bf6bacdb5,2026-06-08,CRI,105,Dragapult Dusknoir,24.0
-6a0c8905dfbdf089cbbdd5e8,2026-06-07,CRI,176,Dragapult,36.0
-championship-ix,2026-06-06,CRI,450,Crustle,48.0
-6a1e390347f3797bf6ba9953,2026-06-05,CRI,102,Clefairy Ogerpon,26.0
-69fdf82e2b59cd9b66b26f70,2026-06-05,CRI,102,Dragapult Froslass,24.0

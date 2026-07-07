@@ -1,54 +1,54 @@
 ﻿deck_name;rank;count;share;winrate
-Dragapult;1;2139;7,95;52,99
-Dragapult Dusknoir;2;1705;6,34;51,46
-N's Zoroark;3;1563;5,81;49,11
-Slowking;4;1561;5,8;51,93
-Mega Greninja;5;1529;5,68;43,97
-Alakazam Dudunsparce;6;1185;4,4;51,7
-Beedrill;7;1030;3,83;49,16
-Ogerpon Meganium Hydrapple;8;905;3,36;52,54
-Dragapult Blaziken;9;803;2,98;53,62
-Rocket's Honchkrow;10;770;2,86;53,04
-Lucario Hariyama;11;764;2,84;47,88
-Raging Bolt Ogerpon;12;660;2,45;51,42
-Festival Lead;13;619;2,3;50,45
-Rocket's Mewtwo;14;575;2,14;47,39
-Crustle;15;563;2,09;53,62
-Lopunny Dudunsparce;16;521;1,94;48,45
-Basic Box;17;426;1,58;52,27
-Cynthia's Garchomp;18;422;1,57;52,29
-Mega Lucario;19;410;1,52;48,88
-Hop's Trevenant;20;406;1,51;47,21
-Starmie Dusknoir;21;365;1,36;43,83
-Starmie Froslass;22;349;1,3;45,39
-Greninja;23;347;1,29;49,43
-Metagross;24;332;1,23;53,05
-Ethan's Typhlosion;25;304;1,13;49,89
-Ceruledge;26;304;1,13;45,72
+Dragapult;1;2158;7,97;52,98
+Dragapult Dusknoir;2;1719;6,35;51,42
+N's Zoroark;3;1575;5,82;49,13
+Slowking;4;1570;5,8;51,92
+Mega Greninja;5;1534;5,67;43,95
+Alakazam Dudunsparce;6;1190;4,4;51,62
+Beedrill;7;1032;3,81;49,13
+Ogerpon Meganium Hydrapple;8;908;3,35;52,53
+Dragapult Blaziken;9;815;3,01;53,74
+Rocket's Honchkrow;10;776;2,87;52,97
+Lucario Hariyama;11;769;2,84;47,83
+Raging Bolt Ogerpon;12;665;2,46;51,39
+Festival Lead;13;623;2,3;50,45
+Rocket's Mewtwo;14;575;2,12;47,39
+Crustle;15;572;2,11;53,73
+Lopunny Dudunsparce;16;523;1,93;48,52
+Basic Box;17;433;1,6;52,28
+Cynthia's Garchomp;18;423;1,56;52,23
+Mega Lucario;19;411;1,52;48,83
+Hop's Trevenant;20;410;1,51;47,23
+Starmie Dusknoir;21;366;1,35;44,06
+Starmie Froslass;22;351;1,3;45,34
+Greninja;23;349;1,29;49,43
+Metagross;24;333;1,23;53,02
+Ethan's Typhlosion;25;306;1,13;49,82
+Ceruledge;26;307;1,13;45,63
 Grimmsnarl Froslass;27;289;1,07;52,38
-Dragapult Dudunsparce;28;278;1,03;49,92
-Diancie Dusknoir;29;228;0,85;50,34
-Mega Venusaur;30;196;0,73;47,16
+Dragapult Dudunsparce;28;279;1,03;50,08
+Diancie Dusknoir;29;228;0,84;50,34
+Mega Venusaur;30;197;0,73;47,06
 Archaludon Dudunsparce;31;180;0,67;51,51
 Mega Starmie;32;173;0,64;47,36
-Mega Absol Box;33;166;0,62;51,26
-Okidogi Barbaracle;34;163;0,61;53,74
-Lillie's Clefairy;35;156;0,58;43,67
-Manectric Eelektrik;36;152;0,56;40,59
-Hydreigon;37;128;0,48;39,93
-Steven's Metagross;38;125;0,46;42,02
-Kangaskhan Bouffalant;39;119;0,44;49,61
-Ursaluna Lunatone;40;117;0,43;43,55
+Mega Absol Box;33;166;0,61;51,26
+Okidogi Barbaracle;34;164;0,61;53,59
+Lillie's Clefairy;35;157;0,58;43,8
+Manectric Eelektrik;36;154;0,57;40,69
+Hydreigon;37;129;0,48;40,11
+Steven's Metagross;38;126;0,47;42,2
+Kangaskhan Bouffalant;39;120;0,44;49,51
+Ursaluna Lunatone;40;118;0,44;43,37
 Ogerpon Meganium Arboliva;41;108;0,4;48,63
-Doublade;42;106;0,39;43,58
-Toxtricity Box;43;101;0,38;53,48
+Doublade;42;107;0,4;43,51
+Toxtricity Box;43;102;0,38;53,25
 Flareon Noctowl;44;97;0,36;44,27
-Archaludon;45;92;0,34;49,88
+Archaludon;45;93;0,34;49,64
 Mega Charizard X;46;92;0,34;37,74
-Joltik Box;47;89;0,33;48,74
+Joltik Box;47;90;0,33;48,5
 Hop's Zacian;48;86;0,32;45,36
 Mega Froslass;49;83;0,31;45,61
-Mega Dragonite;50;77;0,29;46,96
+Mega Dragonite;50;78;0,29;47,37
 Mega Abomasnow;51;73;0,27;41,52
 Sharpedo Toxtricity;52;72;0,27;41,23
 Yanmega;53;74;0,27;42,37
@@ -56,9 +56,9 @@ Sylveon;54;73;0,27;42,67
 Ogerpon Meganium;55;71;0,26;40,57
 Marnie's Grimmsnarl;56;70;0,26;43,33
 Froslass Dudunsparce;57;64;0,24;41,44
-Palafin;58;58;0,22;44,11
-Tera Box;59;59;0,22;46,79
-Clefairy Ogerpon;60;53;0,2;47,66
+Tera Box;58;59;0,22;46,79
+Palafin;59;58;0,21;44,11
+Clefairy Ogerpon;60;54;0,2;48,2
 Decidueye;61;51;0,19;41,44
 Froslass Munkidori;62;47;0,17;40,0
 Blaziken Zoroark;63;44;0,16;53,62
@@ -73,7 +73,7 @@ Archaludon Zoroark;71;32;0,12;44,0
 Mega Zygarde;72;32;0,12;35,45
 Mega Lopunny;73;26;0,1;56,43
 Dudunsparce Control;74;24;0,09;36,14
-Eelektrik;75;23;0,09;34,57
+Eelektrik;75;24;0,09;34,15
 Alakazam;76;22;0,08;44,63
 Dragapult Froslass;77;21;0,08;47,66
 Jellicent Dusknoir;78;22;0,08;47,87
@@ -103,11 +103,11 @@ Mega Manectric;101;7;0,03;38,24
 Rocket's Nidoking;102;7;0,03;31,25
 Tyranitar;103;8;0,03;25,0
 Seaking Festival Lead;104;7;0,03;43,48
-Dragapult Iron Thorns;105;6;0,02;66,67
-Bloodmoon Ursaluna;106;5;0,02;28,57
-Scizor;107;5;0,02;42,11
-Galvantula;108;5;0,02;33,33
-Cinderace;109;6;0,02;31,25
+Cinderace;105;7;0,03;29,41
+Dragapult Iron Thorns;106;6;0,02;66,67
+Bloodmoon Ursaluna;107;5;0,02;28,57
+Scizor;108;5;0,02;42,11
+Galvantula;109;5;0,02;33,33
 Iron Thorns Crustle;110;5;0,02;57,14
 Luxray;111;5;0,02;35,71
 Milotic;112;4;0,01;43,48

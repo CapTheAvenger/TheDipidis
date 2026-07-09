@@ -111,9 +111,12 @@
             exportAria: 'Team im Showdown-Format exportieren für',
             exportTitle: 'Team-Export (Showdown / Limitless)',
             exportHint: 'Kopier den Text und füg ihn im Showdown-Teambuilder unter „Import/Export" oder bei einem Limitless-Turnier unter „Submit teamlist" ein.',
-            exportCopy: 'Kopieren',
+            exportChoose: 'Wohin? (kopiert automatisch)',
+            exportCopy: 'Nur kopieren',
+            exportShowdown: '⚔️ Showdown ↗',
+            exportLimitless: '🏆 Limitless ↗',
             exportCopied: 'Kopiert! ✓',
-            exportToastOk: 'Team kopiert — bei Showdown oder Limitless im Import/Export-Feld einfügen.',
+            exportToastOk: 'Team kopiert — im Import/Export- bzw. „Submit teamlist"-Feld einfügen.',
             exportToastManual: 'Automatisches Kopieren ging nicht — Text im Fenster markieren und manuell kopieren.',
         },
         en: {
@@ -164,9 +167,12 @@
             exportAria: 'Export team in Showdown format for',
             exportTitle: 'Team export (Showdown / Limitless)',
             exportHint: 'Copy the text and paste it into the Showdown teambuilder under "Import/Export" or a Limitless tournament under "Submit teamlist".',
-            exportCopy: 'Copy',
+            exportChoose: 'Where to? (copies automatically)',
+            exportCopy: 'Just copy',
+            exportShowdown: '⚔️ Showdown ↗',
+            exportLimitless: '🏆 Limitless ↗',
             exportCopied: 'Copied! ✓',
-            exportToastOk: 'Team copied — paste it into the Import/Export box on Showdown or Limitless.',
+            exportToastOk: 'Team copied — paste it into the Import/Export or "Submit teamlist" box.',
             exportToastManual: 'Auto-copy failed — select the text in the dialog and copy it manually.',
         },
     };
@@ -700,9 +706,11 @@
                 <div class="side-quest-modal-body">
                     <p class="side-quest-import-hint">${escapeHtml(l.exportHint)}</p>
                     <textarea class="side-quest-import-text" id="sqExportText" rows="12" readonly spellcheck="false"></textarea>
-                    <div class="side-quest-import-actions">
-                        <a class="side-quest-export-link" href="https://play.pokemonshowdown.com/teambuilder" target="_blank" rel="noopener">Showdown ↗</a>
-                        <button class="side-quest-import-do" type="button" id="sqExportCopy">${escapeHtml(l.exportCopy)}</button>
+                    <p class="side-quest-export-choose">${escapeHtml(l.exportChoose)}</p>
+                    <div class="side-quest-import-actions side-quest-export-actions">
+                        <button class="side-quest-export-choice sq-target-copy" type="button" data-export-target="copy">${escapeHtml(l.exportCopy)}</button>
+                        <button class="side-quest-export-choice sq-target-showdown" type="button" data-export-target="showdown">${escapeHtml(l.exportShowdown)}</button>
+                        <button class="side-quest-export-choice sq-target-limitless" type="button" data-export-target="limitless">${escapeHtml(l.exportLimitless)}</button>
                     </div>
                 </div>
             </div>`;
@@ -710,18 +718,34 @@
         ta.value = text;
         overlay.addEventListener('click', (e) => { if (e.target === overlay) closeExportModal(); });
         overlay.querySelector('.side-quest-modal-close').addEventListener('click', closeExportModal);
-        const copyBtn = overlay.querySelector('#sqExportCopy');
-        copyBtn.addEventListener('click', () => {
-            // Select first: gives visible feedback and a manual-copy fallback
-            // on mobile where programmatic clipboard writes are flaky.
-            ta.focus(); ta.select();
-            try { ta.setSelectionRange(0, text.length); } catch (_) {}
-            const ok = copyTextSync(text);
-            copyBtn.textContent = ok ? l.exportCopied : l.exportCopy;
-            if (typeof window.showToast === 'function') {
-                window.showToast(ok ? l.exportToastOk : l.exportToastManual, ok ? 'success' : 'warning');
-            }
-            setTimeout(() => { copyBtn.textContent = l.exportCopy; }, 1800);
+        // Copy the paste, then (for a destination button) open Showdown or
+        // Limitless in a new tab. The text is identical for both — Limitless
+        // literally accepts a Showdown export — so the choice only changes
+        // where we send the user to paste it.
+        const TARGET_URLS = {
+            showdown: 'https://play.pokemonshowdown.com/teambuilder',
+            limitless: 'https://play.limitlesstcg.com/',
+        };
+        overlay.querySelectorAll('.side-quest-export-choice').forEach(b => {
+            b.addEventListener('click', () => {
+                // Select first: visible feedback + manual-copy fallback on
+                // mobile where programmatic clipboard writes are flaky.
+                ta.focus(); ta.select();
+                try { ta.setSelectionRange(0, text.length); } catch (_) {}
+                const ok = copyTextSync(text);
+                const target = b.getAttribute('data-export-target');
+                // Open synchronously inside the click gesture so the pop-up
+                // blocker allows it.
+                if (target && TARGET_URLS[target]) window.open(TARGET_URLS[target], '_blank', 'noopener');
+                if (target === 'copy') {
+                    const prev = b.textContent;
+                    b.textContent = ok ? l.exportCopied : prev;
+                    setTimeout(() => { b.textContent = prev; }, 1600);
+                }
+                if (typeof window.showToast === 'function') {
+                    window.showToast(ok ? l.exportToastOk : l.exportToastManual, ok ? 'success' : 'warning');
+                }
+            });
         });
         document.addEventListener('keydown', onExportKeydown);
         document.body.appendChild(overlay);

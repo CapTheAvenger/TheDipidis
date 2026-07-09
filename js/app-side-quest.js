@@ -107,6 +107,14 @@
             importBadge: 'Eigenes Team',
             importRemove: 'Entfernen',
             importRemoveConfirm: 'Dieses importierte Team entfernen?',
+            exportBtn: 'Export (Showdown / Limitless)',
+            exportAria: 'Team im Showdown-Format exportieren für',
+            exportTitle: 'Team-Export (Showdown / Limitless)',
+            exportHint: 'Kopier den Text und füg ihn im Showdown-Teambuilder unter „Import/Export" oder bei einem Limitless-Turnier unter „Submit teamlist" ein.',
+            exportCopy: 'Kopieren',
+            exportCopied: 'Kopiert! ✓',
+            exportToastOk: 'Team kopiert — bei Showdown oder Limitless im Import/Export-Feld einfügen.',
+            exportToastManual: 'Automatisches Kopieren ging nicht — Text im Fenster markieren und manuell kopieren.',
         },
         en: {
             playBtn: 'Play',
@@ -152,6 +160,14 @@
             importBadge: 'Your team',
             importRemove: 'Remove',
             importRemoveConfirm: 'Remove this imported team?',
+            exportBtn: 'Export (Showdown / Limitless)',
+            exportAria: 'Export team in Showdown format for',
+            exportTitle: 'Team export (Showdown / Limitless)',
+            exportHint: 'Copy the text and paste it into the Showdown teambuilder under "Import/Export" or a Limitless tournament under "Submit teamlist".',
+            exportCopy: 'Copy',
+            exportCopied: 'Copied! ✓',
+            exportToastOk: 'Team copied — paste it into the Import/Export box on Showdown or Limitless.',
+            exportToastManual: 'Auto-copy failed — select the text in the dialog and copy it manually.',
         },
     };
 
@@ -370,6 +386,16 @@
                         <span class="side-quest-play-icon" aria-hidden="true">▶</span>
                         <span class="side-quest-play-label">${escapeHtml(labels.playBtn)}</span>
                     </button>`;
+        // Export-Button: copies the team as a Showdown paste — the same text
+        // the Showdown teambuilder and Limitless "Submit teamlist" both accept.
+        const exportBtn = `
+                    <button class="side-quest-export-btn"
+                            type="button"
+                            data-export-code="${escapeHtml(code)}"
+                            aria-label="${escapeHtml(labels.exportAria)} ${escapeHtml(team.team_name || code)}">
+                        <span class="side-quest-export-icon" aria-hidden="true">⤴</span>
+                        <span class="side-quest-export-label">${escapeHtml(labels.exportBtn)}</span>
+                    </button>`;
         // Imported teams have no real replica code: show a "your team"
         // badge + a remove button instead of the copy-code control.
         const cornerBtn = team._imported
@@ -405,6 +431,7 @@
                     ${playBtn}
                     ${infoBtn}
                     ${claudeBtn}
+                    ${exportBtn}
                     ${renderMarkButtons(hash, status)}
                 </div>
                 ${stratHtml ? `
@@ -627,6 +654,79 @@
             window.showToast(copied ? labels.claudeToastOk : labels.claudeToastManual,
                              copied ? 'success' : 'warning');
         }
+    }
+
+    // Serialize a team back to a standard Showdown paste — the exact text
+    // the Showdown teambuilder AND Limitless "Submit teamlist" both accept
+    // (Limitless literally says "export from Showdown … and paste it"). The
+    // mon fields were parsed FROM a Showdown paste (pokepaste), so this
+    // round-trips to valid text. Champions is Lv.50 and has no Tera, so those
+    // lines are conditional.
+    function buildShowdownExport(team) {
+        return (team.pokemon || []).map(m => {
+            const name = String(m.name || '').trim();
+            const item = String(m.item || '').trim();
+            const lines = [item ? `${name} @ ${item}` : name];
+            if (m.ability) lines.push(`Ability: ${m.ability}`);
+            lines.push('Level: 50');
+            if (m.tera_type) lines.push(`Tera Type: ${m.tera_type}`);
+            if (m.evs) lines.push(`EVs: ${m.evs}`);
+            if (m.nature) lines.push(`${m.nature} Nature`);
+            (m.moves || []).forEach(mv => { if (mv) lines.push(`- ${mv}`); });
+            return lines.join('\n');
+        }).join('\n\n') + '\n';
+    }
+
+    function closeExportModal() {
+        const el = document.getElementById('sideQuestExportModal');
+        if (el) el.remove();
+        document.removeEventListener('keydown', onExportKeydown);
+    }
+    function onExportKeydown(e) { if (e.key === 'Escape') closeExportModal(); }
+
+    function openExportModal(team) {
+        closeExportModal();
+        const l = LABELS[uiLang()];
+        const text = buildShowdownExport(team);
+        const overlay = document.createElement('div');
+        overlay.id = 'sideQuestExportModal';
+        overlay.className = 'side-quest-modal-overlay';
+        overlay.innerHTML = `
+            <div class="side-quest-modal side-quest-export" role="dialog" aria-modal="true" aria-label="${escapeHtml(l.exportTitle)}">
+                <header class="side-quest-modal-head">
+                    <h3 class="side-quest-modal-title">${escapeHtml(l.exportTitle)}</h3>
+                    <button class="side-quest-modal-close" type="button" aria-label="${escapeHtml(l.close)}">×</button>
+                </header>
+                <div class="side-quest-modal-body">
+                    <p class="side-quest-import-hint">${escapeHtml(l.exportHint)}</p>
+                    <textarea class="side-quest-import-text" id="sqExportText" rows="12" readonly spellcheck="false"></textarea>
+                    <div class="side-quest-import-actions">
+                        <a class="side-quest-export-link" href="https://play.pokemonshowdown.com/teambuilder" target="_blank" rel="noopener">Showdown ↗</a>
+                        <button class="side-quest-import-do" type="button" id="sqExportCopy">${escapeHtml(l.exportCopy)}</button>
+                    </div>
+                </div>
+            </div>`;
+        const ta = overlay.querySelector('#sqExportText');
+        ta.value = text;
+        overlay.addEventListener('click', (e) => { if (e.target === overlay) closeExportModal(); });
+        overlay.querySelector('.side-quest-modal-close').addEventListener('click', closeExportModal);
+        const copyBtn = overlay.querySelector('#sqExportCopy');
+        copyBtn.addEventListener('click', () => {
+            // Select first: gives visible feedback and a manual-copy fallback
+            // on mobile where programmatic clipboard writes are flaky.
+            ta.focus(); ta.select();
+            try { ta.setSelectionRange(0, text.length); } catch (_) {}
+            const ok = copyTextSync(text);
+            copyBtn.textContent = ok ? l.exportCopied : l.exportCopy;
+            if (typeof window.showToast === 'function') {
+                window.showToast(ok ? l.exportToastOk : l.exportToastManual, ok ? 'success' : 'warning');
+            }
+            setTimeout(() => { copyBtn.textContent = l.exportCopy; }, 1800);
+        });
+        document.addEventListener('keydown', onExportKeydown);
+        document.body.appendChild(overlay);
+        ta.focus();
+        ta.select();
     }
 
     async function copyCode(btn) {
@@ -1178,6 +1278,14 @@
                 if (team && window.sideQuestPlay && typeof window.sideQuestPlay.openPlayModal === 'function') {
                     window.sideQuestPlay.openPlayModal(team);
                 }
+            });
+        });
+
+        host.querySelectorAll('.side-quest-export-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const code = btn.getAttribute('data-export-code') || '';
+                const team = allTeams.find(t => (t.replica_code || '') === code);
+                if (team) openExportModal(team);
             });
         });
 

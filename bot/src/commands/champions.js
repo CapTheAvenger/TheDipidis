@@ -145,13 +145,28 @@ async function handlePastes(ctx, ids) {
     const take = ids.slice(0, MAX_PASTES);
     for (const id of take) {
         try {
-            const mons = parseShowdownTeam(await fetchPasteRaw(id));
+            const raw = await fetchPasteRaw(id);
+            const mons = parseShowdownTeam(raw);
             if (!mons.length) {
                 await ctx.reply(`⚠️ pokepast.es/${id}: konnte keine Pokémon lesen.`).catch(() => {});
                 continue;
             }
             await replyHTML(ctx,
                 `🛠 <b>Champions-Bauplan</b> — <code>pokepast.es/${esc(id)}</code>\n\n${formatTeam(mons, maps)}`);
+
+            // Showdown / Limitless export — the raw pokepaste already IS the
+            // exact text both the Showdown teambuilder ("Import/Export") and a
+            // Limitless tournament ("Submit teamlist") accept, so we just hand
+            // it back as a tap-to-copy code block.
+            const showdown = (raw || '').trim();
+            if (showdown) {
+                await ctx.reply('📋 <b>Showdown / Limitless Export</b> — antippen zum Kopieren, dann bei Showdown oder im Limitless-Turnier („Submit teamlist") einfügen:',
+                    { parse_mode: 'HTML' });
+                await ctx.reply(`<code>${esc(showdown)}</code>`, {
+                    parse_mode: 'HTML',
+                    ...Markup.inlineKeyboard([Markup.button.url('⚔️ Showdown Teambuilder', 'https://play.pokemonshowdown.com/teambuilder')]),
+                });
+            }
 
             // Claude prompt (items-first) + open-in-Claude button.
             const prompt = buildClaudePrompt(mons, maps);
@@ -205,7 +220,7 @@ export function registerChampions(bot) {
         const ids = extractPasteIds(ctx.message?.text || '');
         if (ids.length) return handlePastes(ctx, ids);
         return ctx.reply(
-            'Schick mir einen oder mehrere pokepast.es-Links 📋 — ich baue dir den Champions-Bauplan auf Deutsch UND Englisch (Spezies, Item, Fähigkeit, Wesen, SP, Attacken).\n\nOder schick ein Foto mit der „Team ID", dann lese ich den Code aus.');
+            'Schick mir einen oder mehrere pokepast.es-Links 📋 — ich baue dir den Champions-Bauplan auf Deutsch UND Englisch (Spezies, Item, Fähigkeit, Wesen, SP, Attacken) und gebe dir den Showdown-/Limitless-Export zum Kopieren.\n\nOder schick ein Foto mit der „Team ID", dann lese ich den Code aus.');
     });
 
     // Plain messages containing pokepaste links (no slash command).

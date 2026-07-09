@@ -639,6 +639,42 @@
     margin-top: 0;
 }
 
+/* Export (Showdown / Limitless) — same shape as the other footer buttons,
+   Showdown-blue accent to read as "send elsewhere". */
+.side-quest-export-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    background: rgba(74, 144, 226, 0.08);
+    border: 1px solid rgba(74, 144, 226, 0.4);
+    border-radius: 10px;
+    padding: 0.45rem 0.8rem;
+    color: #2f6fb0;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.82rem;
+    font-weight: 600;
+    transition: background 120ms ease, transform 80ms ease;
+}
+.side-quest-export-btn:hover { background: rgba(74, 144, 226, 0.18); }
+.side-quest-export-btn:active { transform: scale(0.98); }
+.side-quest-export-icon { font-size: 0.95rem; line-height: 1; flex: 0 0 auto; }
+
+.side-quest-export .side-quest-import-text {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.8rem;
+}
+.side-quest-export-link {
+    display: inline-flex;
+    align-items: center;
+    margin-right: auto;              /* push copy button to the right */
+    color: #2f6fb0;
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-decoration: none;
+}
+.side-quest-export-link:hover { text-decoration: underline; }
+
 .side-quest-modal-overlay {
     position: fixed;
     inset: 0;

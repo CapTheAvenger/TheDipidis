@@ -397,6 +397,57 @@ PROMO_SETS = {
     "POP", "SWSH", "SWSHP", "PR-SW", "PR-SM", "PR-XY", "PR-BLW", "PR-HS", "PR-DP",
 }
 
+
+def scrape_promo_set_pages(existing_keys: set, seen_keys: set, settings: dict) -> list:
+    """Enumerate each promo set's own page and return cards not already known.
+
+    Promo sets grow over time and — verified 2026-07 — their newer cards do
+    NOT all appear in the global /cards?q=lang:en list the list-scraper walks
+    (e.g. "Mega Promos" MEP has 51 cards including Makuhita #68, but the global
+    list only surfaced MEP 1-33). The per-set page /cards/<SET> lists every
+    card, so we walk those for the PROMO_SETS and hand any missing numbers to
+    Phase 2 for detail scraping. Fail-soft per set."""
+    delay = float(settings.get("list_page_delay_seconds", 0.3))
+    set_filter = settings.get("set_filter", [])
+    out = []
+    for set_code in sorted(PROMO_SETS):
+        if set_filter and set_code not in set_filter:
+            continue
+        url = f"https://limitlesstcg.com/cards/{set_code}"
+        try:
+            html = safe_fetch_html(url, timeout=15)
+        except Exception as e:  # noqa: BLE001 — never let one set break the run
+            logger.warning("  Promo set %s: fetch failed (%s)", set_code, e)
+            continue
+        if not html:
+            continue
+        soup = BeautifulSoup(html, "lxml")
+        nums = set()
+        for a in soup.select(f"a[href*='/cards/{set_code}/']"):
+            m = re.search(rf"/cards/{re.escape(set_code)}/(\d+)", a.get("href", ""))
+            if m:
+                nums.add(m.group(1))
+        added = 0
+        for num in sorted(nums, key=lambda x: int(x)):
+            key = f"{set_code}::{num}"
+            if key in existing_keys or key in seen_keys:
+                continue
+            seen_keys.add(key)
+            out.append({
+                "set": set_code, "number": num, "name": "",
+                "type": "", "energy_type": "", "hp": "",
+                "card_url": f"/cards/{set_code}/{num}", "image_url": "",
+                "rarity": "", "international_prints": "",
+                "cardmarket_url": "", "card_text": "",
+            })
+            added += 1
+        if added:
+            logger.info("  Promo set %s: +%s neue Karten von der Set-Seite", set_code, added)
+        time.sleep(delay)
+    if out:
+        logger.info("Promo-Set-Seiten: %s neue Karten insgesamt.", len(out))
+    return out
+
 RARITY_KEYWORDS = [
     "Special Illustration Rare", "Illustration Rare", "Hyper Rare",
     "Double Rare", "Ultra Rare", "Secret Rare", "Amazing Rare",
@@ -538,6 +589,10 @@ def _fetch_single_card(card: dict) -> dict:
         title_text = title_el.get_text(" ", strip=True)
         # Format: "Name - Psychic - 70 HP" or "Name - Trainer" etc.
         parts = [p.strip() for p in title_text.split(" - ")]
+        # Cards discovered via a set page (promo backfill) arrive without a
+        # name from the list scrape — recover it from the detail title.
+        if parts and parts[0] and not card.get("name_en") and not card.get("name"):
+            card["name_en"] = parts[0]
         if len(parts) >= 3:
             # Pokemon card: Name - Type - HP
             detail_energy = parts[1].strip()
@@ -688,6 +743,15 @@ def main():
         en_cards = scrape_all_cards_list(
             settings, start_page=start_page, existing_keys=existing_keys, language="en"
         )
+
+        # Promo sets carry cards that never appear in the global lang:en list
+        # (verified: MEP "Mega Promos" 64-80 incl. Makuhita #68). Walk each
+        # promo set's own page and append any missing cards so Phase 2 detail-
+        # scrapes them like any other new card.
+        _seen_en = {f"{c['set']}::{c['number']}" for c in en_cards}
+        promo_new = scrape_promo_set_pages(existing_keys, _seen_en, settings)
+        if promo_new:
+            en_cards.extend(promo_new)
 
         # --- DE list: nur scrapen wenn Karten deutsche Namen brauchen ---
         de_needed_keys = set()

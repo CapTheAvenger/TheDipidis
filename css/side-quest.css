@@ -1717,6 +1717,29 @@
     font-size: 0.86rem;
     line-height: 1.5;
 }
+/* Move combat stats (power / accuracy / PP / damage class) — always-visible
+   row under the move header, wraps cleanly on mobile. */
+.sq-res-movestats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem 0.9rem;
+    padding: 0 0.7rem 0.55rem 0.7rem;
+    margin-top: -0.15rem;
+}
+.sq-res-stat {
+    font-size: 0.8rem;
+    color: #555;
+    white-space: nowrap;
+}
+.sq-res-stat-k { color: #8a8f98; }
+.sq-res-stat b { color: #2c3e50; font-variant-numeric: tabular-nums; }
+.sq-res-stat-dmg {
+    color: #4a4a4a;
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 6px;
+    padding: 0 0.4rem;
+    font-weight: 600;
+}
 .sq-res-verified {
     color: #2e9d60;
     font-weight: 900;

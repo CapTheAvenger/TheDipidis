@@ -51,6 +51,12 @@
             loading:     'Lade Referenzdaten …',
             error:       'Referenzdaten konnten nicht geladen werden.',
             count:       (n) => `${n} Einträge`,
+            statPower:   'Stärke',
+            statAcc:     'Genauigkeit',
+            statPP:      'AP',
+            dmgPhysical: 'Physisch',
+            dmgSpecial:  'Speziell',
+            dmgStatus:   'Status',
             attribution: 'Daten: Pokémon-Champions-Datensatz (CC BY 4.0) · Deutsche Texte: PokéAPI',
         },
         en: {
@@ -76,6 +82,12 @@
             loading:     'Loading reference data …',
             error:       'Could not load reference data.',
             count:       (n) => `${n} entries`,
+            statPower:   'Power',
+            statAcc:     'Accuracy',
+            statPP:      'PP',
+            dmgPhysical: 'Physical',
+            dmgSpecial:  'Special',
+            dmgStatus:   'Status',
             attribution: 'Data: Pokémon Champions dataset (CC BY 4.0) · German text: PokéAPI',
         },
     };
@@ -155,6 +167,29 @@
         return cat === 'item' ? l.catItem : cat === 'ability' ? l.catAbility : l.catMove;
     }
 
+    // Champions-verified move stats line (power / accuracy / PP / damage
+    // class). Status moves have no power → "—"; never-miss moves have no
+    // accuracy → "—". Only rendered for moves that carry any of these.
+    function moveStatsHtml(e, l) {
+        if (e.cat !== 'move') return '';
+        const has = e.power != null || e.accuracy != null || e.pp != null || e.damage_class;
+        if (!has) return '';
+        const dash = '—';
+        const dmg = e.damage_class === 'Physical' ? l.dmgPhysical
+                  : e.damage_class === 'Special'  ? l.dmgSpecial
+                  : e.damage_class === 'Status'   ? l.dmgStatus : '';
+        // power 0 = status move → show "—" rather than "0"; missing accuracy
+        // = never-miss / status → "—".
+        const hasPower = e.power != null && Number(e.power) > 0;
+        const parts = [
+            `<span class="sq-res-stat"><span class="sq-res-stat-k">${escapeHtml(l.statPower)}</span> <b>${hasPower ? escapeHtml(String(e.power)) : dash}</b></span>`,
+            `<span class="sq-res-stat"><span class="sq-res-stat-k">${escapeHtml(l.statAcc)}</span> <b>${e.accuracy != null ? escapeHtml(String(e.accuracy)) : dash}</b></span>`,
+        ];
+        if (e.pp != null) parts.push(`<span class="sq-res-stat"><span class="sq-res-stat-k">${escapeHtml(l.statPP)}</span> <b>${escapeHtml(String(e.pp))}</b></span>`);
+        if (dmg) parts.push(`<span class="sq-res-stat sq-res-stat-dmg">${escapeHtml(dmg)}</span>`);
+        return `<div class="sq-res-movestats">${parts.join('')}</div>`;
+    }
+
     function renderEntry(e) {
         const lang = uiLang();
         const l = t();
@@ -182,6 +217,7 @@
                         <span class="sq-res-chevron" aria-hidden="true">▾</span>
                     </span>
                 </button>
+                ${moveStatsHtml(e, l)}
                 <div class="sq-res-effect" hidden>${effHtml}</div>
             </li>`;
     }

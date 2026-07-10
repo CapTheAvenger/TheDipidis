@@ -265,7 +265,7 @@ def main():
             conflicts.append((cat, en, {"PokeWiki": ov, "PokeAPI": pa, "verified": vf}))
         return pa or ov or vf or supp.get(key) or en
 
-    def build(cat, en, en_eff, demap, mtype=""):
+    def build(cat, en, en_eff, demap, mtype="", stats=None):
         key = norm(en)
         v = verified.get(key)
         pk = demap.get(key, {})
@@ -281,6 +281,14 @@ def main():
             "field": bool(FIELD[cat].search(en)),
             "verified": v is not None,
         }
+        # Champions-verified combat stats for moves (power / accuracy / PP /
+        # damage class). Only stored when present so status moves stay lean.
+        if cat == "move" and stats:
+            for src, dst in (("power", "power"), ("accuracy", "accuracy"),
+                             ("pp", "pp"), ("damage_class", "damage_class")):
+                val = stats.get(src)
+                if val is not None and val != "":
+                    entry[dst] = val
         if cat == "item":
             entry["group"] = item_group(en)   # Champions item-menu category
             # Only flag as Champions-available if Serebii lists it (held
@@ -297,7 +305,10 @@ def main():
     for mv in champ_moves:
         if not mv.get("inChampions"):
             continue  # restrict to the actual Champions movepool
-        build("move", mv["name"], mv.get("description", ""), de_move, mtype=mv.get("type", ""))
+        build("move", mv["name"], mv.get("description", ""), de_move,
+              mtype=mv.get("type", ""),
+              stats={"power": mv.get("power"), "accuracy": mv.get("accuracy"),
+                     "pp": mv.get("pp"), "damage_class": mv.get("category")})
 
     entries.sort(key=lambda e: (e["cat"], e["de"].lower()))
     counts = {"item": 0, "ability": 0, "move": 0, "field": 0, "de_effect": 0}

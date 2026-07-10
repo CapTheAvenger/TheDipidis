@@ -55,7 +55,8 @@ export function registerStart(bot) {
 export async function installBotCommands(bot) {
     try {
         await bot.telegram.setMyCommands([
-            { command: 'team', description: 'Champions-Bauplan aus Pokepaste (DE/EN) + Code aus Bild' },
+            { command: 'limitless', description: 'Champions-Team aus Screenshots → Limitless-Export' },
+            { command: 'team', description: 'Champions-Bauplan aus Pokepaste/Screenshots (DE/EN)' },
             { command: 'metacall', description: 'Meta Call Dashboard rendern' },
             { command: 'deck', description: 'Deck Builder + Tech-Cards' },
             { command: 'matchups', description: 'Matchup-Spread (Online + Majors)' },

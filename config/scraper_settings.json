@@ -4,17 +4,14 @@
         "start_page": 1,
         "end_page": null,
         "max_pages": null,
-        "set_filter": [
-            "MEP"
-        ],
+        "set_filter": [],
         "append": true,
         "rescrape_incomplete": true,
         "headless": true,
         "skip_detail_scraping": false,
         "list_page_delay_seconds": 1.0,
         "detail_page_wait_seconds": 2.0,
-        "detail_request_delay_seconds": 0.5,
-        "_set_filter_note": "TEMP: MEP-only re-scrape to pull the missing Mega-Promos cards (34-80 incl. #68 Makuhita) into the card DB. RESET to [] after the run."
+        "detail_request_delay_seconds": 0.5
     },
     "japanese_cards_scraper": {
         "max_pages": 50,

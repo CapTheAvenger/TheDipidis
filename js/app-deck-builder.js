@@ -3758,8 +3758,10 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                     <span class="sc-action-icon">P</span>
                     <span class="sc-action-label">${t('action.printProxy')}</span>
                 </button>`;
-                // Cardmarket
-                btns += `<button class="sc-action-btn sc-action-market" onclick="if(typeof openCardmarket==='function')openCardmarket('${scCardmarketUrlEscaped}','${safeCardName}')">
+                // Cardmarket — enlarged view opens the standard product page (plain,
+                // no seller/language pre-filter) so the cheapest overall offer shows,
+                // regardless of card origin/language.
+                btns += `<button class="sc-action-btn sc-action-market" onclick="if(typeof openCardmarket==='function')openCardmarket('${scCardmarketUrlEscaped}','${safeCardName}', true)">
                     <span class="sc-action-icon">€</span>
                     <span class="sc-action-label">${t('action.cardmarket')}</span>
                 </button>`;

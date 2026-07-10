@@ -2848,7 +2848,7 @@
             
             item.innerHTML = `
                 <div class="pos-rel card-database-image-wrap">
-                    <img src="${escapedImageUrl}" alt="${displayName}" loading="lazy" decoding="async" onclick="showImageView('${escapedImageUrl}', '${escapedName}')" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();showImageView('${escapedImageUrl}', '${escapedName}');}" aria-label="Open ${displayName} image in fullscreen">
+                    <img src="${escapedImageUrl}" alt="${displayName}" loading="lazy" decoding="async" onclick="showImageView('${escapedImageUrl}', '${escapedName}', '${escapeJsStr(rawCardMarketUrl)}', '${escapeJsStr(proxySetCode)}', '${escapeJsStr(proxySetNumber)}')" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();showImageView('${escapedImageUrl}', '${escapedName}', '${escapeJsStr(rawCardMarketUrl)}', '${escapeJsStr(proxySetCode)}', '${escapeJsStr(proxySetNumber)}');}" aria-label="Open ${displayName} image in fullscreen">
                     ${ownedCount > 0 ? `<div class="card-database-owned-badge">${ownedCount}</div>` : ''}
                     ${ownedCount === 0 && altPrintOwnedCount > 0 ? `<div class="card-database-alt-owned-badge" title="Owned other INT prints">${altPrintOwnedCount}</div>` : ''}
                     <div class="pos-abs card-action-row-wide card-database-top-actions">
@@ -4141,10 +4141,20 @@
             }
         });
 
-        function showImageView(imageUrl, cardName) {
-            // Delegate to showSingleCard so users always see the action panel
+        function showImageView(imageUrl, cardName, cardmarketUrl, setCode, setNumber) {
+            // Delegate to showSingleCard so users always see the action panel.
+            // Pass through the card's identity + Cardmarket URL so the enlarged
+            // view's € button opens the right page (the card grid only knows the
+            // image + name, so without this the Cardmarket link resolves empty).
             if (typeof showSingleCard === 'function') {
-                showSingleCard(imageUrl, cardName);
+                const cardData = (cardmarketUrl || setCode || setNumber) ? {
+                    card_name: cardName,
+                    image_url: imageUrl,
+                    set_code: setCode || '',
+                    set_number: setNumber || '',
+                    cardmarket_url: cardmarketUrl || ''
+                } : null;
+                showSingleCard(imageUrl, cardName, cardData);
                 return;
             }
             const modal = document.getElementById('fullscreenCardModal');
@@ -4176,14 +4186,23 @@
             }
         }
 
-        function openCardmarket(cardmarketUrl, cardName) {
+        function openCardmarket(cardmarketUrl, cardName, plain) {
             if (!cardmarketUrl || cardmarketUrl.trim() === '') {
                 showToast(`Cardmarket link not available for ${cardName}`, 'warning');
                 return;
             }
-            
-            // Strip Limitless tracking params, add German seller + EN/DE language filter
+
+            // Strip Limitless tracking params.
             const cleanUrl = cardmarketUrl.split('?')[0];
+            // plain=true -> open the standard Cardmarket product page (no seller/
+            // language pre-filter) so the user sees the cheapest offer regardless of
+            // origin country or card language. Used by the enlarged single-card view.
+            // Otherwise keep the German seller + EN/DE language pre-filter used by the
+            // small grid / other-print buttons.
+            if (plain) {
+                window.open(cleanUrl, '_blank');
+                return;
+            }
             window.open(cleanUrl + '?sellerCountry=7&language=1,3', '_blank');
         }
 

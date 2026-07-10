@@ -19,6 +19,7 @@ import {
     getMaps, speciesBi, itemBi, abilityBi, moveBi, natureBi, typeBi, statsLine,
 } from '../champions/i18n.js';
 import { extractCodeFromImage } from '../champions/ocr.js';
+import { parseTeamScreens } from '../champions/team-screen.js';
 
 const CLAUDE_URL = 'https://claude.ai/new';
 
@@ -185,28 +186,85 @@ async function handlePastes(ctx, ids) {
     }
 }
 
-async function handlePhoto(ctx) {
-    const photos = ctx.message?.photo || [];
-    const file = photos[photos.length - 1];
-    if (!file) return;
+// Build an importable Showdown / Limitless paste from parsed screen data.
+// We deliberately emit NO EV line: the game's SP spread (0–32, sum 66) is a
+// different scale from Showdown EVs and we won't fabricate a conversion. Nature
+// is only written when it was actually read (currently never — arrow glyphs
+// aren't reliably OCR-able), so the paste imports as a legal team the user then
+// tops up with their spread. Species/item/ability/moves are the verified core.
+function toShowdownPaste(mons) {
+    return mons.filter(m => m.species).map((m) => {
+        const lines = [m.item ? `${m.species} @ ${m.item}` : m.species];
+        if (m.ability) lines.push(`Ability: ${m.ability}`);
+        if (m.nature) lines.push(`${m.nature} Nature`);
+        for (const mv of (m.moves || [])) lines.push(`- ${mv}`);
+        return lines.join('\n');
+    }).join('\n\n');
+}
+
+async function emitScreenshotTeam(ctx, mons, warnings, maps) {
+    await replyHTML(ctx,
+        `🛠 <b>Champions-Bauplan</b> — aus deinem „Share This Battle Team?"-Screenshot\n\n${formatTeam(mons, maps)}`);
+
+    const paste = toShowdownPaste(mons);
+    if (paste) {
+        await ctx.reply('📋 <b>Showdown / Limitless Export</b> — antippen zum Kopieren, dann bei Showdown oder im Limitless-Turnier („Submit teamlist") einfügen.\n<i>Ohne SP/Wesen (die liest der Bot aus dem Screenshot nicht sicher aus) — Spezies, Item, Fähigkeit & Attacken stimmen; Werte im Spiel prüfen.</i>',
+            { parse_mode: 'HTML' });
+        await ctx.reply(`<code>${esc(paste)}</code>`, {
+            parse_mode: 'HTML',
+            ...Markup.inlineKeyboard([Markup.button.url('⚔️ Showdown Teambuilder', 'https://play.pokemonshowdown.com/teambuilder')]),
+        });
+    }
+
+    if (warnings && warnings.length) {
+        await ctx.reply(`⚠️ <b>Bitte prüfen</b>\n${warnings.map(w => `• ${esc(w)}`).join('\n')}`,
+            { parse_mode: 'HTML' });
+    }
+
+    const prompt = buildClaudePrompt(mons, maps);
+    await ctx.reply('💬 <b>Prompt für Claude</b> — antippen zum Kopieren, dann bei Claude einfügen:',
+        { parse_mode: 'HTML' });
+    await ctx.reply(`<code>${esc(prompt)}</code>`, {
+        parse_mode: 'HTML',
+        ...Markup.inlineKeyboard([Markup.button.url('🤖 In Claude öffnen', CLAUDE_URL)]),
+    });
+}
+
+async function downloadPhoto(ctx, fileId) {
+    const link = await ctx.telegram.getFileLink(fileId);
+    const resp = await fetch(link.href);
+    return Buffer.from(await resp.arrayBuffer());
+}
+
+// Handle 1–2 screenshots: a lone image may be a Team-ID banner (try the code
+// path first) OR a team screen; a 2-image album is the "Moves & More" + "Stats"
+// pair, parsed together.
+async function processTeamPhotos(ctx, fileIds, { allowCode }) {
     let note;
     try {
-        note = await ctx.reply('🔍 Lese den Code aus dem Bild …');
-        const link = await ctx.telegram.getFileLink(file.file_id);
-        const resp = await fetch(link.href);
-        const buf = Buffer.from(await resp.arrayBuffer());
-        const { code } = await extractCodeFromImage(buf);
-        if (code) {
-            await ctx.reply(
-                '✅ Erkannter Code — zum Kopieren antippen 👇\n<i>(Codes enthalten nie I, O oder Z — die werden als 1/0/2 gelesen. Sonst ähnliche Zeichen wie A↔4, B↔8 oder S↔5 kurz prüfen — am besten Foto gerade & ohne Spiegelung.)</i>',
-                { parse_mode: 'HTML' });
-            // The code on its own line, as its own message: tapping the
-            // monospace text copies it, and a long-press copies exactly
-            // the code (no surrounding text).
-            await ctx.reply(`<code>${esc(code)}</code>`, { parse_mode: 'HTML' });
-        } else {
-            await ctx.reply('❌ Konnte keinen 10-stelligen Code erkennen. Schick das Bild näher/schärfer an der „Team ID" — oder tippe den Code ab.');
+        note = await ctx.reply('🔍 Lese das Team aus dem Bild …');
+        const buffers = [];
+        for (const id of fileIds.slice(0, 2)) buffers.push(await downloadPhoto(ctx, id));
+
+        if (allowCode && buffers.length === 1) {
+            const { code } = await extractCodeFromImage(buffers[0]);
+            if (code) {
+                await ctx.reply(
+                    '✅ Erkannter Code — zum Kopieren antippen 👇\n<i>(Codes enthalten nie I, O oder Z — die werden als 1/0/2 gelesen. Sonst ähnliche Zeichen wie A↔4, B↔8 oder S↔5 kurz prüfen — am besten Foto gerade & ohne Spiegelung.)</i>',
+                    { parse_mode: 'HTML' });
+                await ctx.reply(`<code>${esc(code)}</code>`, { parse_mode: 'HTML' });
+                return;
+            }
         }
+
+        const { mons, warnings } = await parseTeamScreens(buffers);
+        if (mons.length) {
+            const maps = await getMaps();
+            await emitScreenshotTeam(ctx, mons, warnings, maps);
+            return;
+        }
+
+        await ctx.reply('❌ Konnte weder einen Team-Code noch ein Team aus dem Bild lesen.\n\nSchick den „Moves & More"- und/oder „Stats"-Screenshot vom „Share This Battle Team?"-Bildschirm (gern beide zusammen als Album) — oder ein scharfes Foto der „Team ID".');
     } catch (err) {
         console.warn('[champions/photo] failed:', err?.message || err);
         await ctx.reply('⚠️ Bild konnte nicht verarbeitet werden — bitte nochmal.').catch(() => {});
@@ -215,12 +273,36 @@ async function handlePhoto(ctx) {
     }
 }
 
+// Telegram delivers an album as separate photo updates sharing a
+// media_group_id. Buffer them and flush ~1.8 s after the last arrives so we
+// parse both screens in one shot.
+const pendingGroups = new Map();
+
+function handlePhoto(ctx) {
+    const photos = ctx.message?.photo || [];
+    const file = photos[photos.length - 1];   // highest resolution
+    if (!file) return;
+
+    const gid = ctx.message.media_group_id;
+    if (!gid) return processTeamPhotos(ctx, [file.file_id], { allowCode: true });
+
+    let g = pendingGroups.get(gid);
+    if (!g) { g = { fileIds: [], ctx }; pendingGroups.set(gid, g); }
+    g.fileIds.push(file.file_id);
+    g.ctx = ctx;
+    if (g.timer) clearTimeout(g.timer);
+    g.timer = setTimeout(() => {
+        pendingGroups.delete(gid);
+        processTeamPhotos(g.ctx, g.fileIds, { allowCode: false }).catch(() => {});
+    }, 1800);
+}
+
 export function registerChampions(bot) {
     bot.command(['team', 'champions', 'bauplan'], async (ctx) => {
         const ids = extractPasteIds(ctx.message?.text || '');
         if (ids.length) return handlePastes(ctx, ids);
         return ctx.reply(
-            'Schick mir einen oder mehrere pokepast.es-Links 📋 — ich baue dir den Champions-Bauplan auf Deutsch UND Englisch (Spezies, Item, Fähigkeit, Wesen, SP, Attacken) und gebe dir den Showdown-/Limitless-Export zum Kopieren.\n\nOder schick ein Foto mit der „Team ID", dann lese ich den Code aus.');
+            'Schick mir einen oder mehrere pokepast.es-Links 📋 — ich baue dir den Champions-Bauplan auf Deutsch UND Englisch (Spezies, Item, Fähigkeit, Wesen, SP, Attacken) und gebe dir den Showdown-/Limitless-Export zum Kopieren.\n\n📸 Oder schick die Screenshots vom „Share This Battle Team?"-Bildschirm — am besten „Moves & More" UND „Stats" zusammen als Album. Ich lese Spezies, Item, Fähigkeit und Attacken aus und baue dir den Limitless-/Showdown-Export.\n\n(Ein Foto mit der „Team ID" lese ich weiterhin als Code aus.)');
     });
 
     // Plain messages containing pokepaste links (no slash command).

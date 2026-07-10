@@ -24,6 +24,7 @@ import {
     revokeAccess,
     tryGrantAccess,
 } from '../auth.js';
+import { persistenceEnabled } from '../store.js';
 
 // In-memory record of access requests that have already been
 // finalised this dyno lifetime. Lets parallel admin taps converge
@@ -120,13 +121,23 @@ export function registerAccess(bot) {
         // (or repeat taps) don't double-handle it.
         await ctx.editMessageReplyMarkup({ inline_keyboard: [] }).catch(() => {});
 
-        const whitelist = _formatWhitelistString();
-        await ctx.reply(
-            `✅ User <code>${userId}</code> freigegeben.\n\n` +
-            `Für Persistenz: setze in Render <code>ALLOWED_USER_IDS</code> auf:\n` +
-            `<pre>${_escapeHtml(whitelist)}</pre>`,
-            { parse_mode: 'HTML' },
-        );
+        if (persistenceEnabled()) {
+            // Grants are saved to Firestore and reloaded on boot — no manual step,
+            // survives deploys and Render Free idle spin-down.
+            await ctx.reply(
+                `✅ User <code>${userId}</code> freigegeben — dauerhaft gespeichert (übersteht Neustarts).`,
+                { parse_mode: 'HTML' },
+            );
+        } else {
+            const whitelist = _formatWhitelistString();
+            await ctx.reply(
+                `✅ User <code>${userId}</code> freigegeben.\n\n` +
+                `⚠️ Diese Freigabe liegt nur im Speicher (geht beim nächsten Neustart verloren).\n` +
+                `Für Persistenz setze in Render <code>ALLOWED_USER_IDS</code> auf:\n` +
+                `<pre>${_escapeHtml(whitelist)}</pre>`,
+                { parse_mode: 'HTML' },
+            );
+        }
 
         try {
             await ctx.telegram.sendMessage(

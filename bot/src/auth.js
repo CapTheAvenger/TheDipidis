@@ -20,6 +20,8 @@
  * /start attempt — which now triggers the request flow automatically.
  */
 
+import { loadPersistedGrants, persistGrant, persistRevoke } from './store.js';
+
 function _parseIds(raw) {
     return new Set(
         String(raw || '')
@@ -56,6 +58,7 @@ export function listAdmins() {
 
 export function grantAccess(userId) {
     _runtimeAllowed.add(String(userId));
+    persistGrant(userId);   // fire-and-forget; no-op if persistence is off
 }
 
 /**
@@ -68,11 +71,28 @@ export function tryGrantAccess(userId) {
     const s = String(userId);
     if (_envAllowed.has(s) || _runtimeAllowed.has(s)) return false;
     _runtimeAllowed.add(s);
+    persistGrant(s);        // fire-and-forget; survives restarts when enabled
     return true;
 }
 
 export function revokeAccess(userId) {
     _runtimeAllowed.delete(String(userId));
+    persistRevoke(userId);
+}
+
+/**
+ * Load durably-persisted grants (Firestore) into the runtime allow set. Called
+ * once at boot so button-approved users survive restarts / idle spin-down. Safe
+ * no-op when persistence is disabled.
+ */
+export async function loadPersistedWhitelist() {
+    try {
+        const ids = await loadPersistedGrants();
+        for (const id of ids) _runtimeAllowed.add(String(id));
+        return ids.length;
+    } catch (_) {
+        return 0;
+    }
 }
 
 export function getAllAllowed() {

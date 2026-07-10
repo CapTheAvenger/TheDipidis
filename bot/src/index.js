@@ -20,7 +20,7 @@
 import express from 'express';
 import { Telegraf } from 'telegraf';
 
-import { allowedCount, isAdmin, isAllowed, listAdmins } from './auth.js';
+import { allowedCount, isAdmin, isAllowed, listAdmins, loadPersistedWhitelist } from './auth.js';
 import { installBotCommands, registerStart } from './commands/start.js';
 import { registerMetaCall } from './commands/metacall.js';
 import { registerDeck, handleDeckSearch } from './commands/deck.js';
@@ -169,6 +169,10 @@ async function start() {
     // idempotent — Telegram only stores the new list, no per-user
     // state — so it's safe to call on every boot.
     await installBotCommands(bot);
+    // Restore durably-persisted grants (Firestore) so button-approved users
+    // survive restarts / Render Free idle spin-down. No-op without a service acct.
+    const _restored = await loadPersistedWhitelist();
+    if (_restored) console.info(`[boot] restored ${_restored} persisted grant(s) from Firestore`);
     console.info(`[boot] whitelist: ${allowedCount()} user id(s) allowed`);
     const _admins = listAdmins();
     if (_admins.length === 0) {

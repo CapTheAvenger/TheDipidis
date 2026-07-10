@@ -736,6 +736,14 @@ def extract_cards_from_decklist_soup(soup, card_db: CardDatabaseLookup) -> list:
                         set_code, set_number = parts[1].upper(), parts[2]
                     elif len(parts) == 2:
                         set_code, set_number = parts[0].upper(), parts[1]
+                    # Limitless links JP-set cards with a "?translate=en"
+                    # query (e.g. /cards/M5/37?translate=en). Strip the query +
+                    # fragment so the number stays a clean "37" — otherwise the
+                    # (set,number) image lookup fails and the frontend falls
+                    # back to the wrong same-name print (MEG-18 for M5-37
+                    # Dhelmise, ASC-91 for M5-32 Banette, …).
+                    if set_number:
+                        set_number = set_number.split('?', 1)[0].split('#', 1)[0].strip()
                 # METHOD 2: data attributes
                 if not set_code or not set_number:
                     set_code = card_div.get('data-set', '').strip().upper()

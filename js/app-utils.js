@@ -851,55 +851,71 @@ function showTableSkeleton(containerOrId, opts) {
                 
                 // Intelligent fallback: If no international prints OR if international prints has NO rarity data,
                 // fall back to all versions (fixes Judge DRI 222 issue while preserving Promo cards)
-                const hasSufficientRarity = versions.length > 0 && 
+                const hasSufficientRarity = versions.length > 0 &&
                     versions.some(v => v.rarity && v.rarity.trim() !== '');
                 debugVersionSelectionLog(`[getPreferredVersionForCard] hasSufficientRarity for ${cardName}: ${hasSufficientRarity}`);
-                
+
+                // CORE SAFETY RULE: a Pokémon must NEVER be swapped for a same-name card
+                // from an unrelated set. Same-name Pokémon in different sets are DIFFERENT
+                // cards with different attacks and art — e.g. Dhelmise "Vengeful Anchor"
+                // (M5 37, Japan-only) vs Dhelmise "Earthen Power" (MEG 18). A name-based
+                // swap would display a wrong card and print a wrong proxy. Trainer/Energy
+                // reprints ARE functionally identical, so they stay swappable by name.
+                // We derive the card type from the resolved international-print pool when
+                // we have one, otherwise from the same-name English pool.
+                const _typeSignalSource = versions.length > 0
+                    ? versions[0]
+                    : (getEnglishCardVersions(cardName)[0] || null);
+                const _typeSignal = String((_typeSignalSource && _typeSignalSource.type) || '').toLowerCase();
+                const isTrainerOrEnergy = _typeSignal.includes('energy') ||
+                    _typeSignal.includes('trainer') || _typeSignal.includes('supporter') ||
+                    _typeSignal.includes('item') || _typeSignal.includes('stadium') ||
+                    _typeSignal.includes('tool');
+
                 if (versions.length === 0 || !hasSufficientRarity) {
                     const fallbackReason = versions.length === 0 ? 'no international prints' :
                         'international prints has no rarity data';
-                    const nameVersions = getEnglishCardVersions(cardName);
 
-                    // SAFETY: a Pokémon whose OWN print is absent from the card DB —
-                    // e.g. a Japan-only, not-yet-released set like M5 (Dhelmise/Banette/
-                    // Shuppet/Poltchageist/Sinistcha) — must NEVER be swapped for a
-                    // same-name card from another set. Same-name Pokémon in different sets
-                    // are DIFFERENT cards with different attacks and art (Dhelmise
-                    // "Vengeful Anchor" M5 37 vs Dhelmise "Earthen Power" MEG 18), so a
-                    // name-based swap would show a wrong card and print a wrong proxy.
-                    // Trainer/Energy reprints ARE functionally identical, so they stay
-                    // swappable by name. When a Pokémon can't be resolved to its real
-                    // international-print family, return null so the caller keeps the
-                    // original print (which already carries the correct proxy image).
-                    if (versions.length === 0 && nameVersions.length > 0) {
-                        const fallbackType = String(nameVersions[0].type || '').toLowerCase();
-                        const isTrainerOrEnergy = fallbackType.includes('energy') ||
-                            fallbackType.includes('trainer') || fallbackType.includes('supporter') ||
-                            fallbackType.includes('item') || fallbackType.includes('stadium') ||
-                            fallbackType.includes('tool');
-                        if (!isTrainerOrEnergy) {
-                            debugVersionSelectionLog(`[getPreferredVersionForCard] Pokémon "${cardName}" (${normalizedSet} ${normalizedNumber}) not in card DB — refusing name-based substitution, keeping original print`);
+                    if (!isTrainerOrEnergy) {
+                        // Pokémon: no name-based guessing allowed.
+                        if (versions.length > 0) {
+                            // We have the real (strict) international-print pool — keep it
+                            // (e.g. [M5-37]). The promo-merge block below may still add
+                            // legitimate same-card reprints for promo-origin Pokémon.
+                            debugVersionSelectionLog(`[getPreferredVersionForCard] Pokémon "${cardName}" (${normalizedSet} ${normalizedNumber}) — ${fallbackReason}, keeping strict int-print pool (${versions.length}), no name swap`);
+                        } else {
+                            // Nothing resolvable at all — keep the original print (caller
+                            // uses its own set/number + proxy image) instead of guessing.
+                            debugVersionSelectionLog(`[getPreferredVersionForCard] Pokémon "${cardName}" (${normalizedSet} ${normalizedNumber}) — ${fallbackReason} and not in DB, refusing name substitution, keeping original`);
                             preferredVersionCache.set(cacheKey, null);
                             return null;
                         }
+                    } else {
+                        // Trainer/Energy: identical reprints, safe to pool by name.
+                        versions = getEnglishCardVersions(cardName);
+                        debugVersionSelectionLog(`[getPreferredVersionForCard] ${fallbackReason} for ${cardName} (${normalizedSet} ${normalizedNumber}), using ALL ${versions.length} versions`);
                     }
-
-                    versions = nameVersions;
-                    debugVersionSelectionLog(`[getPreferredVersionForCard] ${fallbackReason} for ${cardName} (${normalizedSet} ${normalizedNumber}), using ALL ${versions.length} versions`);
                 } else {
                     debugVersionSelectionLog(`[getPreferredVersionForCard] Using international prints for ${cardName} (${normalizedSet} ${normalizedNumber})`);
                     // If the original card is from a non-English set, prefer English versions only
                     // This prevents Japanese cards from being selected as the preferred version
-                    if (window.englishSetCodes && window.englishSetCodes.size > 0 && 
+                    if (window.englishSetCodes && window.englishSetCodes.size > 0 &&
                         normalizedSet && !window.englishSetCodes.has(normalizedSet)) {
                         const englishVersions = versions.filter(v => window.englishSetCodes.has(v.set));
                         if (englishVersions.length > 0) {
                             versions = englishVersions;
                             debugVersionSelectionLog(`[getPreferredVersionForCard] Filtered to ${versions.length} English versions for non-English original (${normalizedSet})`);
-                        } else {
-                            // No English int prints found, fall back to English by name
+                        } else if (isTrainerOrEnergy) {
+                            // No English int prints, but a Trainer/Energy reprint by name is safe.
                             versions = getEnglishCardVersions(cardName);
                             debugVersionSelectionLog(`[getPreferredVersionForCard] No English int prints for ${cardName} (${normalizedSet}), falling back to name lookup: ${versions.length} versions`);
+                        } else {
+                            // Pokémon with no English international print (e.g. a Japan-only
+                            // M5 card): KEEP the original (non-English) print. Never swap a
+                            // Pokémon to a different same-name card. versions stays the
+                            // strict int-print pool (e.g. [M5-37]) so the original M5 art +
+                            // proxy is preserved.
+                            debugVersionSelectionLog(`[getPreferredVersionForCard] Pokémon "${cardName}" (${normalizedSet} ${normalizedNumber}) has no English int print — keeping original print, no name swap`);
                         }
                     }
                 }

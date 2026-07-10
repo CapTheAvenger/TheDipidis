@@ -173,11 +173,33 @@ describe('getPreferredVersionForCard — mutation guards', () => {
         assert.equal(result.rarity, 'Common');
     });
 
-    it('refuses to substitute a JP-only Pokémon (M5) by name when its print is absent from the card DB', () => {
-        // Dhelmise M5 37 is a Japan-only, not-yet-released card that is not in the
-        // English card DB. A same-name English Dhelmise (e.g. MEG 18 "Earthen Power")
-        // is a DIFFERENT card, so NO name-based swap is allowed — keep the original
-        // print (return null so the caller renders it with its own proxy image).
+    it('keeps a JP-only Pokémon print (M5) instead of swapping to a same-name English card', () => {
+        // Real production case: M5 37 Dhelmise IS in the merged card DB (rarity present)
+        // and its international_prints is just itself. Original set M5 is non-English and
+        // has no English int print, so the resolver must KEEP M5 37 — it must never swap
+        // to Dhelmise MEG 18 ("Earthen Power"), which is a completely different card.
+        const m5 = {
+            set: 'M5', number: '37', rarity: 'Uncommon', type: 'Basic',
+            image_url: 'https://www.pokemonproxies.com/assets/5a-037-Dhelmise.png',
+        };
+        const fns = freshEnv({
+            globalPref: 'min',
+            getInternationalPrintsForCard: () => [m5],
+            getIndexedCardBySetNumber: (s, n) => (s === 'M5' && n === '37' ? m5 : null),
+            getEnglishCardVersions: () => [{ set: 'MEG', number: '18', rarity: 'Common', type: 'Basic' }],
+            cardsBySetNumberMap: { 'M5-37': m5 },
+        });
+        fns._sandbox.window.englishSetCodes = new Set(['MEG']);
+
+        const result = fns.getPreferredVersionForCard('Dhelmise', 'M5', '37');
+        assert.equal(result.set, 'M5');
+        assert.equal(result.number, '37');
+    });
+
+    it('refuses to substitute a JP-only Pokémon by name when its print is absent from the card DB entirely', () => {
+        // Defensive case: if a Pokémon print is not in the DB at all (empty int-prints),
+        // still never swap it for a same-name English card — return null so the caller
+        // keeps the original print + its own proxy image.
         const english = [
             { set: 'MEG', number: '18', rarity: 'Common', type: 'Basic' },
         ];

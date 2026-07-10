@@ -4,14 +4,17 @@
         "start_page": 1,
         "end_page": null,
         "max_pages": null,
-        "set_filter": [],
+        "set_filter": [
+            "MEP"
+        ],
         "append": true,
         "rescrape_incomplete": true,
         "headless": true,
         "skip_detail_scraping": false,
         "list_page_delay_seconds": 1.0,
         "detail_page_wait_seconds": 2.0,
-        "detail_request_delay_seconds": 0.5
+        "detail_request_delay_seconds": 0.5,
+        "_set_filter_note": "TEMP: MEP-only re-scrape to pull the missing Mega-Promos cards (34-80 incl. #68 Makuhita) into the card DB. RESET to [] after the run."
     },
     "japanese_cards_scraper": {
         "max_pages": 50,
@@ -97,7 +100,8 @@
                 "end_date": "21.05.2026",
                 "max_decklists_per_league": 50,
                 "additional_tournament_ids": [
-                    548,549
+                    548,
+                    549
                 ]
             }
         },
@@ -114,7 +118,8 @@
         "region": "jp",
         "min_tournament_size": 1,
         "additional_tournament_ids": [
-            548,549
+            548,
+            549
         ],
         "_comment": "Past-meta archive snapshot. Auto-populated on JP rotation alongside city_league_analysis_past. See that section's _comment for the rotation contract. The past archetype scraper (backend/scrapers/city_league_past_archetype_scraper.py) exits early when start_date is blank."
     },

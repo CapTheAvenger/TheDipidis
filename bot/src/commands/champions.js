@@ -143,6 +143,7 @@ async function fetchPasteRaw(id) {
 
 async function handlePastes(ctx, ids) {
     const maps = await getMaps();
+    const exportOnly = isExportOnly(ctx);
     const take = ids.slice(0, MAX_PASTES);
     for (const id of take) {
         try {
@@ -152,8 +153,10 @@ async function handlePastes(ctx, ids) {
                 await ctx.reply(`⚠️ pokepast.es/${id}: konnte keine Pokémon lesen.`).catch(() => {});
                 continue;
             }
-            await replyHTML(ctx,
-                `🛠 <b>Champions-Bauplan</b> — <code>pokepast.es/${esc(id)}</code>\n\n${formatTeam(mons, maps)}`);
+            if (!exportOnly) {
+                await replyHTML(ctx,
+                    `🛠 <b>Champions-Bauplan</b> — <code>pokepast.es/${esc(id)}</code>\n\n${formatTeam(mons, maps)}`);
+            }
 
             // Showdown / Limitless export — the raw pokepaste already IS the
             // exact text both the Showdown teambuilder ("Import/Export") and a
@@ -169,14 +172,17 @@ async function handlePastes(ctx, ids) {
                 });
             }
 
-            // Claude prompt (items-first) + open-in-Claude button.
-            const prompt = buildClaudePrompt(mons, maps);
-            await ctx.reply('💬 <b>Prompt für Claude</b> — antippen zum Kopieren, dann bei Claude einfügen:',
-                { parse_mode: 'HTML' });
-            await ctx.reply(`<code>${esc(prompt)}</code>`, {
-                parse_mode: 'HTML',
-                ...Markup.inlineKeyboard([Markup.button.url('🤖 In Claude öffnen', CLAUDE_URL)]),
-            });
+            // Claude prompt (items-first) + open-in-Claude button. Skipped in
+            // /limitless export-only mode.
+            if (!exportOnly) {
+                const prompt = buildClaudePrompt(mons, maps);
+                await ctx.reply('💬 <b>Prompt für Claude</b> — antippen zum Kopieren, dann bei Claude einfügen:',
+                    { parse_mode: 'HTML' });
+                await ctx.reply(`<code>${esc(prompt)}</code>`, {
+                    parse_mode: 'HTML',
+                    ...Markup.inlineKeyboard([Markup.button.url('🤖 In Claude öffnen', CLAUDE_URL)]),
+                });
+            }
         } catch (err) {
             await ctx.reply(`⚠️ pokepast.es/${id}: ${err.message}`).catch(() => {});
         }
@@ -215,9 +221,12 @@ function toShowdownPaste(mons) {
     }).join('\n\n');
 }
 
-async function emitScreenshotTeam(ctx, mons, warnings, maps) {
-    await replyHTML(ctx,
-        `🛠 <b>Champions-Bauplan</b> — aus deinem „Share This Battle Team?"-Screenshot\n\n${formatTeam(mons, maps)}`);
+async function emitScreenshotTeam(ctx, mons, warnings, maps, exportOnly) {
+    // /limitless mode: JUST the importable export — no build sheet, no Claude prompt.
+    if (!exportOnly) {
+        await replyHTML(ctx,
+            `🛠 <b>Champions-Bauplan</b> — aus deinem „Share This Battle Team?"-Screenshot\n\n${formatTeam(mons, maps)}`);
+    }
 
     const paste = toShowdownPaste(mons);
     if (paste) {
@@ -239,6 +248,8 @@ async function emitScreenshotTeam(ctx, mons, warnings, maps) {
         await ctx.reply(msg, { parse_mode: 'HTML' });
     }
 
+    if (exportOnly) return;
+
     const prompt = buildClaudePrompt(mons, maps);
     await ctx.reply('💬 <b>Prompt für Claude</b> — antippen zum Kopieren, dann bei Claude einfügen:',
         { parse_mode: 'HTML' });
@@ -246,6 +257,22 @@ async function emitScreenshotTeam(ctx, mons, warnings, maps) {
         parse_mode: 'HTML',
         ...Markup.inlineKeyboard([Markup.button.url('🤖 In Claude öffnen', CLAUDE_URL)]),
     });
+}
+
+// /limitless puts the chat into "export only" mode: the next screenshot batch (or
+// pokepaste) returns just the importable paste, no build sheet / Claude prompt.
+// Expires after 15 min so it doesn't silently affect a much later message; /team
+// clears it back to the full output.
+const EXPORT_ONLY_TTL_MS = 15 * 60 * 1000;
+const exportOnlyMode = new Map();   // chatId -> expiry timestamp
+
+function setExportOnly(ctx) { if (ctx.chat) exportOnlyMode.set(ctx.chat.id, Date.now() + EXPORT_ONLY_TTL_MS); }
+function clearExportOnly(ctx) { if (ctx.chat) exportOnlyMode.delete(ctx.chat.id); }
+function isExportOnly(ctx) {
+    const exp = ctx.chat && exportOnlyMode.get(ctx.chat.id);
+    if (!exp) return false;
+    if (Date.now() > exp) { exportOnlyMode.delete(ctx.chat.id); return false; }
+    return true;
 }
 
 async function downloadPhoto(ctx, fileId) {
@@ -278,7 +305,7 @@ async function processTeamPhotos(ctx, fileIds, { allowCode }) {
         const { mons, warnings } = await parseTeamScreens(buffers);
         if (mons.length) {
             const maps = await getMaps();
-            await emitScreenshotTeam(ctx, mons, warnings, maps);
+            await emitScreenshotTeam(ctx, mons, warnings, maps, isExportOnly(ctx));
             return;
         }
 
@@ -326,11 +353,23 @@ function handleDocument(ctx) {
 }
 
 export function registerChampions(bot) {
-    bot.command(['team', 'champions', 'bauplan', 'limitless', 'limitlesschampions'], async (ctx) => {
+    // /limitless — export-only mode: reply with JUST the Limitless paste.
+    bot.command(['limitless', 'limitlesschampions'], async (ctx) => {
+        setExportOnly(ctx);
         const ids = extractPasteIds(ctx.message?.text || '');
         if (ids.length) return handlePastes(ctx, ids);
         return ctx.reply(
-            '📸 <b>Champions-Team aus Screenshots</b>\nSchick die Screenshots vom „Share This Battle Team?"-Bildschirm — <b>„Moves & More" UND „Stats" zusammen</b>. Ich lese Spezies, Item, Fähigkeit, Attacken, Wesen und den EV-Spread aus und baue dir den <b>Limitless-/Showdown-Export</b> (mit Level 50) + den DE/EN-Bauplan.\n\n💡 <b>Für EVs + Wesen am besten als Datei schicken</b> (📎 → <i>Datei</i>, „ohne Komprimierung") — normale Fotos verkleinert Telegram und die kleinen Statuszahlen gehen verloren.\n\n📋 Oder schick pokepast.es-Links — dann baue ich den Export aus dem Paste.\n\n(Ein Foto mit der „Team ID" lese ich weiterhin als Code aus.)',
+            '📸 <b>Limitless-Export aus Screenshots</b>\nSchick jetzt die Screenshots vom „Share This Battle Team?"-Bildschirm — <b>„Moves & More" UND „Stats" zusammen</b>. Du bekommst <b>nur den Limitless-Export</b> (Level 50, EVs, Wesen) zurück, sonst nichts.\n\n💡 <b>Am besten als Datei schicken</b> (📎 → <i>Datei</i>, „ohne Komprimierung") — sonst verschluckt Telegram die kleinen Statuszahlen und EVs/Wesen fehlen.',
+            { parse_mode: 'HTML' });
+    });
+
+    // /team — full output (build sheet + export + Claude prompt).
+    bot.command(['team', 'champions', 'bauplan'], async (ctx) => {
+        clearExportOnly(ctx);
+        const ids = extractPasteIds(ctx.message?.text || '');
+        if (ids.length) return handlePastes(ctx, ids);
+        return ctx.reply(
+            '📸 <b>Champions-Team aus Screenshots</b>\nSchick die Screenshots vom „Share This Battle Team?"-Bildschirm — <b>„Moves & More" UND „Stats" zusammen</b>. Ich lese Spezies, Item, Fähigkeit, Attacken, Wesen und den EV-Spread aus und baue dir den <b>Limitless-/Showdown-Export</b> (mit Level 50) + den DE/EN-Bauplan.\n\n💡 <b>Für EVs + Wesen am besten als Datei schicken</b> (📎 → <i>Datei</i>, „ohne Komprimierung") — normale Fotos verkleinert Telegram und die kleinen Statuszahlen gehen verloren.\n\n📋 Oder schick pokepast.es-Links — dann baue ich den Export aus dem Paste.\n\n(Nur den reinen Limitless-Export willst du? Dann nimm /limitless.)',
             { parse_mode: 'HTML' });
     });
 

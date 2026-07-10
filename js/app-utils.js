@@ -856,9 +856,35 @@ function showTableSkeleton(containerOrId, opts) {
                 debugVersionSelectionLog(`[getPreferredVersionForCard] hasSufficientRarity for ${cardName}: ${hasSufficientRarity}`);
                 
                 if (versions.length === 0 || !hasSufficientRarity) {
-                    const fallbackReason = versions.length === 0 ? 'no international prints' : 
+                    const fallbackReason = versions.length === 0 ? 'no international prints' :
                         'international prints has no rarity data';
-                    versions = getEnglishCardVersions(cardName);
+                    const nameVersions = getEnglishCardVersions(cardName);
+
+                    // SAFETY: a Pokémon whose OWN print is absent from the card DB —
+                    // e.g. a Japan-only, not-yet-released set like M5 (Dhelmise/Banette/
+                    // Shuppet/Poltchageist/Sinistcha) — must NEVER be swapped for a
+                    // same-name card from another set. Same-name Pokémon in different sets
+                    // are DIFFERENT cards with different attacks and art (Dhelmise
+                    // "Vengeful Anchor" M5 37 vs Dhelmise "Earthen Power" MEG 18), so a
+                    // name-based swap would show a wrong card and print a wrong proxy.
+                    // Trainer/Energy reprints ARE functionally identical, so they stay
+                    // swappable by name. When a Pokémon can't be resolved to its real
+                    // international-print family, return null so the caller keeps the
+                    // original print (which already carries the correct proxy image).
+                    if (versions.length === 0 && nameVersions.length > 0) {
+                        const fallbackType = String(nameVersions[0].type || '').toLowerCase();
+                        const isTrainerOrEnergy = fallbackType.includes('energy') ||
+                            fallbackType.includes('trainer') || fallbackType.includes('supporter') ||
+                            fallbackType.includes('item') || fallbackType.includes('stadium') ||
+                            fallbackType.includes('tool');
+                        if (!isTrainerOrEnergy) {
+                            debugVersionSelectionLog(`[getPreferredVersionForCard] Pokémon "${cardName}" (${normalizedSet} ${normalizedNumber}) not in card DB — refusing name-based substitution, keeping original print`);
+                            preferredVersionCache.set(cacheKey, null);
+                            return null;
+                        }
+                    }
+
+                    versions = nameVersions;
                     debugVersionSelectionLog(`[getPreferredVersionForCard] ${fallbackReason} for ${cardName} (${normalizedSet} ${normalizedNumber}), using ALL ${versions.length} versions`);
                 } else {
                     debugVersionSelectionLog(`[getPreferredVersionForCard] Using international prints for ${cardName} (${normalizedSet} ${normalizedNumber})`);

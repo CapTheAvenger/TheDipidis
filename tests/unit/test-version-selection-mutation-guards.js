@@ -173,6 +173,45 @@ describe('getPreferredVersionForCard — mutation guards', () => {
         assert.equal(result.rarity, 'Common');
     });
 
+    it('refuses to substitute a JP-only Pokémon (M5) by name when its print is absent from the card DB', () => {
+        // Dhelmise M5 37 is a Japan-only, not-yet-released card that is not in the
+        // English card DB. A same-name English Dhelmise (e.g. MEG 18 "Earthen Power")
+        // is a DIFFERENT card, so NO name-based swap is allowed — keep the original
+        // print (return null so the caller renders it with its own proxy image).
+        const english = [
+            { set: 'MEG', number: '18', rarity: 'Common', type: 'Basic' },
+        ];
+        const fns = freshEnv({
+            globalPref: 'min',
+            getInternationalPrintsForCard: () => [],
+            getIndexedCardBySetNumber: () => null,
+            getEnglishCardVersions: () => english,
+        });
+        fns._sandbox.window.englishSetCodes = new Set(['MEG']);
+
+        const result = fns.getPreferredVersionForCard('Dhelmise', 'M5', '37');
+        assert.equal(result, null);
+    });
+
+    it('still substitutes a Trainer by name when its print is absent from the card DB', () => {
+        // Trainer/Energy reprints are functionally identical, so a name-based swap
+        // is safe even when the original print is not in the DB. Only Pokémon are
+        // protected from name-only substitution.
+        const english = [
+            { set: 'ASC', number: '183', rarity: 'Uncommon', type: 'Supporter' },
+        ];
+        const fns = freshEnv({
+            globalPref: 'min',
+            getInternationalPrintsForCard: () => [],
+            getIndexedCardBySetNumber: () => null,
+            getEnglishCardVersions: () => english,
+        });
+        fns._sandbox.window.englishSetCodes = new Set(['ASC']);
+
+        const result = fns.getPreferredVersionForCard("Boss's Orders", 'M5', '99');
+        assert.equal(result.set, 'ASC');
+    });
+
     it('falls back to null when no global preference and no card preference exist', () => {
         const fns = freshEnv({
             globalPref: null,

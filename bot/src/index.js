@@ -21,6 +21,7 @@ import express from 'express';
 import { Telegraf } from 'telegraf';
 
 import { allowedCount, isAdmin, isAllowed, listAdmins, loadPersistedWhitelist } from './auth.js';
+import { persistenceEnabled } from './store.js';
 import { installBotCommands, registerStart } from './commands/start.js';
 import { registerMetaCall } from './commands/metacall.js';
 import { registerDeck, handleDeckSearch } from './commands/deck.js';
@@ -139,6 +140,9 @@ app.get('/', (_req, res) => {
         service: 'thedipidis-bot',
         status: 'ok',
         allowedUsers: allowedCount(),
+        // 'firestore' = FIREBASE_SERVICE_ACCOUNT is set and valid, grants persist
+        // across restarts; 'memory' = not configured, in-memory only.
+        persistence: persistenceEnabled() ? 'firestore' : 'memory',
     });
 });
 app.get('/health', (_req, res) => res.json({ status: 'ok' }));

@@ -159,40 +159,43 @@ async function getData() {
 // ── OCR ─────────────────────────────────────────────────────────────────────
 const OCR_WIDTH = 2400;
 
-async function ocrWords(buf) {
-    const pre = await sharp(buf).grayscale()
-        .resize({ width: OCR_WIDTH, withoutEnlargement: false })
-        .normalize().sharpen().toFormat('png').toBuffer();
-    const meta = await sharp(pre).metadata();
-    const H = meta.height || 1;
+// Preprocess a screenshot for OCR. Variants (upscale width, extra contrast) give
+// the multi-pass consensus below different chances at the small stat numbers that
+// Telegram's photo compression degrades.
+async function preprocess(buf, opts = {}) {
+    const width = opts.width || OCR_WIDTH;
+    let s = sharp(buf).grayscale().resize({ width, withoutEnlargement: false }).normalize();
+    if (opts.contrast) s = s.linear(1.4, -30);
+    const out = await s.sharpen().toFormat('png').toBuffer();
+    const meta = await sharp(out).metadata();
+    return { buf: out, W: meta.width || width, H: meta.height || 1 };
+}
 
-    const { createWorker } = await import('tesseract.js');
-    const worker = await createWorker('eng', 1, TESS_OPTS);
-    try {
-        await worker.setParameters({ tessedit_pageseg_mode: '6' });
-        const { data } = await worker.recognize(pre, {}, { blocks: true, text: true });
-        const words = [];
-        for (const b of (data.blocks || [])) {
-            for (const p of (b.paragraphs || [])) {
-                for (const l of (p.lines || [])) {
-                    for (const w of (l.words || [])) {
-                        const t = (w.text || '').trim();
-                        if (!t) continue;
-                        words.push({
-                            text: t,
-                            cx: (w.bbox.x0 + w.bbox.x1) / 2 / OCR_WIDTH,
-                            cy: (w.bbox.y0 + w.bbox.y1) / 2 / H,
-                            x0: w.bbox.x0 / OCR_WIDTH,
-                        });
-                    }
+async function readWords(worker, pre) {
+    const { data } = await worker.recognize(pre.buf, {}, { blocks: true, text: true });
+    const words = [];
+    for (const b of (data.blocks || [])) {
+        for (const p of (b.paragraphs || [])) {
+            for (const l of (p.lines || [])) {
+                for (const w of (l.words || [])) {
+                    const t = (w.text || '').trim();
+                    if (!t) continue;
+                    words.push({
+                        text: t,
+                        cx: (w.bbox.x0 + w.bbox.x1) / 2 / pre.W,
+                        cy: (w.bbox.y0 + w.bbox.y1) / 2 / pre.H,
+                        x0: w.bbox.x0 / pre.W,
+                    });
                 }
             }
         }
-        return { words, text: data.text || '' };
-    } finally {
-        try { await worker.terminate(); } catch (_) {}
     }
+    return { words, text: data.text || '' };
 }
+
+// Extra preprocessings for the Stats screen only (its tiny SP/final numbers are
+// the compression casualty). The Moves screen reads fine in one pass.
+const STATS_EXTRA_PASSES = [{ width: 3000 }, { width: 2400, contrast: true }];
 
 // Screen tab: the Stats view repeats "Sp. Atk / Sp. Def / Speed / Defense"
 // labels six times; the Moves view does not.
@@ -490,26 +493,48 @@ export async function parseTeamScreens(buffers) {
     const data = await getData();
     const warnings = [];
 
-    let movesCells = null, statsCells = null;
-    for (const buf of buffers) {
-        const { words, text } = await ocrWords(buf);
-        const cells = groupCells(words);
-        if (isStatsScreen(text)) statsCells = parseStatsScreen(cells);
-        else movesCells = parseMovesScreen(cells, data);
+    let movesCells = null;
+    const statsPasses = [];   // one parseStatsScreen() result per OCR pass
+
+    const { createWorker } = await import('tesseract.js');
+    const worker = await createWorker('eng', 1, TESS_OPTS);
+    try {
+        await worker.setParameters({ tessedit_pageseg_mode: '6' });
+        for (const buf of buffers) {
+            const first = await readWords(worker, await preprocess(buf));
+            if (isStatsScreen(first.text)) {
+                statsPasses.push(parseStatsScreen(groupCells(first.words)));
+                // Multi-pass consensus: re-OCR the Stats screen with different
+                // preprocessings and keep each pass's finals. Per Pokémon we later
+                // take whichever pass yields a valid spread — so a stat number that
+                // one pass fumbles under compression is recovered by another.
+                for (const opts of STATS_EXTRA_PASSES) {
+                    const extra = await readWords(worker, await preprocess(buf, opts));
+                    statsPasses.push(parseStatsScreen(groupCells(extra.words)));
+                }
+            } else {
+                movesCells = parseMovesScreen(groupCells(first.words), data);
+            }
+        }
+    } finally {
+        try { await worker.terminate(); } catch (_) {}
     }
 
-    if (!movesCells && !statsCells) return { mons: [], warnings: ['Kein Team-Screen erkannt.'] };
+    if (!movesCells && !statsPasses.length) return { mons: [], warnings: ['Kein Team-Screen erkannt.'] };
 
     const mons = [];
     for (let i = 0; i < 6; i++) {
         const mv = movesCells?.[i] || { ability: null, item: null, moves: [] };
-        const st = statsCells?.[i] || {};
+        // All this slot's stat reads across passes; prefer a complete row for
+        // species fallback, and try each when solving the spread.
+        const slotStats = statsPasses.map(p => p[i]).filter(Boolean);
+        const primary = slotStats.find(s => s.statsComplete) || slotStats[0] || {};
         const mon = {
             ability: mv.ability || null,
             item: mv.item || null,
             moves: mv.moves || [],
-            stats: st.stats || null,
-            statsComplete: !!st.statsComplete,
+            stats: primary.stats || null,
+            statsComplete: slotStats.some(s => s.statsComplete),
         };
         // Skip empty slots (fewer than 6 mons, or a blank cell).
         if (!mon.ability && !mon.item && !mon.moves.length && !mon.statsComplete) continue;
@@ -523,15 +548,20 @@ export async function parseTeamScreens(buffers) {
         // stats and the read final stats (see solveSpread). This is the game's
         // native 0–32 spread, exposed as `evs` so statsLine()/formatTeam() render
         // it unchanged and the Limitless export can print "Level: 50 / EVs / Nature".
-        if (mon.species && mon.stats) {
+        if (mon.species && slotStats.length) {
             const entry = data.dexEntries.find(e =>
                 baseSpeciesName(e.en) === mon.species && !(e.form && /^mega/i.test(e.form)));
             if (entry) {
                 const base = {};
                 for (const k of STAT_KEYS) base[k] = entry[k]?.base;
                 if (STAT_KEYS.every(k => Number.isFinite(base[k]))) {
-                    const sol = solveSpread(base, mon.stats);
-                    if (sol && !sol.ambiguous) { mon.evs = sol.evs; mon.nature = sol.nature; }
+                    // Try each pass's finals; take the first that solves. Each pass's
+                    // solve is independently "correct or nothing" (the 66-sum guard),
+                    // so the first success is trustworthy — never a guessed spread.
+                    for (const s of slotStats) {
+                        const sol = s.stats ? solveSpread(base, s.stats) : null;
+                        if (sol && !sol.ambiguous) { mon.evs = sol.evs; mon.nature = sol.nature; break; }
+                    }
                 }
             }
         }
@@ -540,7 +570,7 @@ export async function parseTeamScreens(buffers) {
         } else if (!id.confident) {
             warnings.push(`Slot ${i + 1}: ${mon.species}? (nicht eindeutig — bitte prüfen)`);
         }
-        if (statsCells && !mon.evs) {
+        if (statsPasses.length && !mon.evs) {
             warnings.push(`Slot ${i + 1} (${mon.species || '?'}): SP-Spread nicht sicher gelesen — bitte im Spiel prüfen.`);
         }
         if (mon.moves.length < 4) {

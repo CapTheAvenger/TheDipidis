@@ -5,7 +5,7 @@
     "window_start": "2026-06-26",
     "window_end": "2026-07-10",
     "team_count": 120,
-    "sample_count": 710,
+    "sample_count": 716,
     "species_count": 116,
     "source": "VGCPastes Champions M-A spreadsheet (gid=791705272)"
   },
@@ -4097,6 +4097,48 @@
       "nature": "Brave",
       "date": "7 Jul 2026",
       "replica": "GAMEVJP996"
+    },
+    {
+      "species": "Mamoswine",
+      "evs": "32 Atk / 1 Def / 1 SpD / 32 Spe",
+      "nature": "Adamant",
+      "date": "8 Jul 2026",
+      "replica": "WTRPK58TAD"
+    },
+    {
+      "species": "Talonflame",
+      "evs": "32 Atk / 1 Def / 1 SpD / 32 Spe",
+      "nature": "Jolly",
+      "date": "8 Jul 2026",
+      "replica": "WTRPK58TAD"
+    },
+    {
+      "species": "Gholdengo",
+      "evs": "1 HP / 1 Def / 32 SpA / 32 Spe",
+      "nature": "Modest",
+      "date": "8 Jul 2026",
+      "replica": "WTRPK58TAD"
+    },
+    {
+      "species": "Sylveon",
+      "evs": "18 HP / 1 Def / 30 SpA / 1 SpD / 16 Spe",
+      "nature": "Modest",
+      "date": "8 Jul 2026",
+      "replica": "WTRPK58TAD"
+    },
+    {
+      "species": "Sneasler",
+      "evs": "16 HP / 32 Def / 18 Spe",
+      "nature": "Jolly",
+      "date": "8 Jul 2026",
+      "replica": "WTRPK58TAD"
+    },
+    {
+      "species": "Raichu",
+      "evs": "30 HP / 13 Def / 23 Spe",
+      "nature": "Timid",
+      "date": "8 Jul 2026",
+      "replica": "WTRPK58TAD"
     },
     {
       "species": "Floette-Eternal",

@@ -254133,6 +254133,72 @@
       "Illustrated by 5ban Graphics"
     ]
   },
+  "MEP|34": {
+    "name": "Mega Meganium ex",
+    "card_type": "Evolves from Bayleef",
+    "energy_type": "Grass",
+    "hp": "360",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Giant Bouquet",
+        "cost": [
+          "C",
+          "C",
+          "C"
+        ],
+        "damage": "70+",
+        "text": "This attack does 50 more damage for each [ G ] Energy attached to this Pokémon."
+      }
+    ],
+    "rules": [
+      "Illustrated by 5ban Graphics"
+    ]
+  },
+  "MEP|35": {
+    "name": "Mega Emboar ex",
+    "card_type": "Evolves from Pignite",
+    "energy_type": "Fire",
+    "hp": "380",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Crimson Blast",
+        "cost": [
+          "R",
+          "R",
+          "C"
+        ],
+        "damage": "320",
+        "text": "This Pokémon also does 60 damage to itself."
+      }
+    ],
+    "rules": [
+      "Illustrated by Keisuke Azuma"
+    ]
+  },
+  "MEP|36": {
+    "name": "Mega Feraligatr ex",
+    "card_type": "Evolves from Croconaw",
+    "energy_type": "Water",
+    "hp": "370",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Mortal Crunch",
+        "cost": [
+          "W",
+          "W",
+          "C"
+        ],
+        "damage": "200+",
+        "text": "If your opponent's Active Pokémon already has any damage counters on it, this attack does 200 more damage."
+      }
+    ],
+    "rules": [
+      "Illustrated by 5ban Graphics"
+    ]
+  },
   "MEP|4": {
     "name": "Lunatone",
     "card_type": "Basic",
@@ -254206,6 +254272,159 @@
       "Illustrated by Shimaris Yukichi"
     ]
   },
+  "MEP|64": {
+    "name": "Serperior",
+    "card_type": "Evolves from Servine",
+    "energy_type": "Grass",
+    "hp": "160",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Regal Command",
+        "cost": [
+          "G"
+        ],
+        "damage": "20×",
+        "text": "This attack does 20 damage for each of your Pokémon in play."
+      },
+      {
+        "name": "Solar Coiling",
+        "cost": [
+          "G",
+          "G",
+          "G"
+        ],
+        "damage": "100+",
+        "text": "If Rosa's Encouragement is in your discard pile, this attack does 150 more damage."
+      }
+    ],
+    "rules": [
+      "Illustrated by LINNE"
+    ]
+  },
+  "MEP|65": {
+    "name": "Barbaracle",
+    "card_type": "Evolves from Binacle",
+    "energy_type": "Fighting",
+    "hp": "130",
+    "abilities": [
+      {
+        "name": "Stone Arms",
+        "text": "Once during your turn, you may use this Ability. Attach a Basic [ F ] Energy card from your hand to 1 of your [ F ] Pokémon."
+      }
+    ],
+    "attacks": [
+      {
+        "name": "Hammer In",
+        "cost": [
+          "F",
+          "F",
+          "C"
+        ],
+        "damage": "80",
+        "text": ""
+      }
+    ],
+    "rules": [
+      "Illustrated by Hasuno"
+    ]
+  },
+  "MEP|66": {
+    "name": "Tyrantrum",
+    "card_type": "Evolves from Tyrunt",
+    "energy_type": "Fighting",
+    "hp": "180",
+    "abilities": [
+      {
+        "name": "Tyrannically Gutsy",
+        "text": "If this Pokémon has any Special Energy attached, it gets +150 HP."
+      }
+    ],
+    "attacks": [
+      {
+        "name": "Wreak Havoc",
+        "cost": [
+          "F",
+          "C"
+        ],
+        "damage": "160",
+        "text": "Flip a coin until you get tails. For each heads, discard the top card of your opponent's deck."
+      }
+    ],
+    "rules": [
+      "Illustrated by Nisota Niso"
+    ]
+  },
+  "MEP|67": {
+    "name": "Doublade",
+    "card_type": "Evolves from Honedge",
+    "energy_type": "Metal",
+    "hp": "100",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Weaponized Swords",
+        "cost": [
+          "C",
+          "C"
+        ],
+        "damage": "60×",
+        "text": "Reveal any number of Honedge, Doublade, and Aegislash from your hand, and this attack does 60 damage for each card you revealed in this way."
+      }
+    ],
+    "rules": [
+      "Illustrated by Yukihiro Tada"
+    ]
+  },
+  "MEP|68": {
+    "name": "Makuhita",
+    "card_type": "Basic",
+    "energy_type": "Fighting",
+    "hp": "80",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Corkscrew Punch",
+        "cost": [
+          "F"
+        ],
+        "damage": "10",
+        "text": ""
+      },
+      {
+        "name": "Confront",
+        "cost": [
+          "F",
+          "F"
+        ],
+        "damage": "30",
+        "text": ""
+      }
+    ],
+    "rules": [
+      "Illustrated by Takeshi Nakamura"
+    ]
+  },
+  "MEP|69": {
+    "name": "Chikorita",
+    "card_type": "Basic",
+    "energy_type": "Grass",
+    "hp": "70",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Razor Leaf",
+        "cost": [
+          "G"
+        ],
+        "damage": "20",
+        "text": ""
+      }
+    ],
+    "rules": [
+      "Illustrated by Makura Tami"
+    ]
+  },
   "MEP|7": {
     "name": "Psyduck",
     "card_type": "Basic",
@@ -254230,6 +254449,213 @@
     ],
     "rules": [
       "Illustrated by Jiro Sasumo"
+    ]
+  },
+  "MEP|70": {
+    "name": "Tyrunt",
+    "card_type": "Evolves from Antique Jaw Fossil",
+    "energy_type": "Fighting",
+    "hp": "100",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Get Angry",
+        "cost": [
+          "F",
+          "C"
+        ],
+        "damage": "20×",
+        "text": "This attack does 20 damage for each damage counter on this Pokémon."
+      }
+    ],
+    "rules": [
+      "Illustrated by Shimaris Yukichi"
+    ]
+  },
+  "MEP|71": {
+    "name": "Mega Zygarde ex",
+    "card_type": "Basic",
+    "energy_type": "Fighting",
+    "hp": "310",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Gaia Wave",
+        "cost": [
+          "F",
+          "F",
+          "F"
+        ],
+        "damage": "200",
+        "text": "During your opponent's next turn, this Pokémon takes 30 less damage from attacks (after applying Weakness and Resistance) ."
+      },
+      {
+        "name": "Nullifying Zero",
+        "cost": [
+          "F",
+          "F",
+          "F",
+          "F",
+          "F"
+        ],
+        "damage": "",
+        "text": "For each of your opponent's Pokémon, flip a coin. If heads, this attack does 150 damage to that Pokémon. (Don't apply Weakness and Resistance for Benched Pokémon.)"
+      }
+    ],
+    "rules": [
+      "Illustrated by takuyoa"
+    ]
+  },
+  "MEP|74": {
+    "name": "Delphox",
+    "card_type": "Evolves from Braixen",
+    "energy_type": "Fire",
+    "hp": "160",
+    "abilities": [
+      {
+        "name": "Flaring Magic",
+        "text": "Once during your turn, you may discard a Basic [ R ] Energy card from your hand in order to use this Ability. Draw cards until you have 7 cards in your hand."
+      }
+    ],
+    "attacks": [
+      {
+        "name": "Energized Storm",
+        "cost": [
+          "R",
+          "R"
+        ],
+        "damage": "30×",
+        "text": "This attack does 30 damage for each Energy attached to all Pokémon."
+      }
+    ],
+    "rules": [
+      "Illustrated by Souichirou Gunjima"
+    ]
+  },
+  "MEP|75": {
+    "name": "Ampharos",
+    "card_type": "Evolves from Flaaffy",
+    "energy_type": "Lightning",
+    "hp": "160",
+    "abilities": [
+      {
+        "name": "Synchro Pulse",
+        "text": "If you have the same number of cards in your hand as your opponent, attacks used by this Pokémon do 80 more damage to your opponent's Active Pokémon (before applying Weakness and Resistance) ."
+      }
+    ],
+    "attacks": [
+      {
+        "name": "Flashing Bolt",
+        "cost": [
+          "L",
+          "C"
+        ],
+        "damage": "140",
+        "text": "During your next turn, this Pokémon can't use Flashing Bolt."
+      }
+    ],
+    "rules": [
+      "Illustrated by Taiga Kasai"
+    ]
+  },
+  "MEP|76": {
+    "name": "Crobat",
+    "card_type": "Evolves from Golbat",
+    "energy_type": "Darkness",
+    "hp": "130",
+    "abilities": [
+      {
+        "name": "Nighttime Maneuvers",
+        "text": "Once during your turn, if this Pokémon is in the Active Spot, you may use this Ability. Search your deck for a card. Shuffle your deck, then put that card on top of it."
+      }
+    ],
+    "attacks": [
+      {
+        "name": "Poison Sound Wave",
+        "cost": [
+          "D"
+        ],
+        "damage": "80",
+        "text": "Your opponent's Active Pokémon is now Confused and Poisoned."
+      }
+    ],
+    "rules": [
+      "Illustrated by Apios"
+    ]
+  },
+  "MEP|77": {
+    "name": "Goodra",
+    "card_type": "Evolves from Sliggoo",
+    "energy_type": "Dragon",
+    "hp": "160",
+    "abilities": [
+      {
+        "name": "Slimy Sliding",
+        "text": "When your opponent's Active Pokémon retreats, your opponent flips a coin. If tails, Energy for its Retreat Cost is not discarded, and they don't switch Pokémon. The effect of Slimy Sliding doesn't stack."
+      }
+    ],
+    "attacks": [
+      {
+        "name": "Dragon Pulse",
+        "cost": [
+          "W",
+          "P"
+        ],
+        "damage": "160",
+        "text": "Discard the top card of your deck."
+      }
+    ],
+    "rules": [
+      "Illustrated by okayamatakatoshi"
+    ]
+  },
+  "MEP|78": {
+    "name": "Toxel",
+    "card_type": "Basic",
+    "energy_type": "Darkness",
+    "hp": "70",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Call for Family",
+        "cost": [
+          "D"
+        ],
+        "damage": "",
+        "text": "Search your deck for up to 2 Basic Pokémon and put them onto your Bench. Then, shuffle your deck."
+      },
+      {
+        "name": "Playful Kick",
+        "cost": [
+          "D",
+          "C"
+        ],
+        "damage": "20",
+        "text": ""
+      }
+    ],
+    "rules": [
+      "Illustrated by Mina Nakai"
+    ]
+  },
+  "MEP|79": {
+    "name": "Charmeleon",
+    "card_type": "Evolves from Charmander",
+    "energy_type": "Fire",
+    "hp": "110",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Steady Firebreathing",
+        "cost": [
+          "R"
+        ],
+        "damage": "40",
+        "text": ""
+      }
+    ],
+    "rules": [
+      "Illustrated by Teeziro"
     ]
   },
   "MEP|8": {
@@ -254257,6 +254683,34 @@
     ],
     "rules": [
       "Illustrated by Jiro Sasumo"
+    ]
+  },
+  "MEP|80": {
+    "name": "Fennekin",
+    "card_type": "Basic",
+    "energy_type": "Fire",
+    "hp": "70",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Call for Family",
+        "cost": [
+          "C"
+        ],
+        "damage": "",
+        "text": "Search your deck for up to 2 Basic Pokémon and put them onto your Bench. Then, shuffle your deck."
+      },
+      {
+        "name": "Steady Firebreathing",
+        "cost": [
+          "R"
+        ],
+        "damage": "10",
+        "text": ""
+      }
+    ],
+    "rules": [
+      "Illustrated by satoma"
     ]
   },
   "MEP|9": {
@@ -429476,6 +429930,18 @@
       "Illustrated by 5ban Graphics"
     ]
   },
+  "SVP|219": {
+    "name": "Black Belt's Training",
+    "card_type": "Supporter",
+    "energy_type": "",
+    "hp": "",
+    "abilities": [],
+    "attacks": [],
+    "rules": [
+      "During this turn, attacks used by your Pokémon do 40 more damage to your opponent's Active Pokémon ex (before applying Weakness and Resistance) .",
+      "Illustrated by GOSSAN"
+    ]
+  },
   "SVP|22": {
     "name": "Pelipper",
     "card_type": "Evolves from Wingull",
@@ -429501,6 +429967,54 @@
     ],
     "rules": [
       "Illustrated by Nisota Niso"
+    ]
+  },
+  "SVP|220": {
+    "name": "Black Belt's Training",
+    "card_type": "Supporter",
+    "energy_type": "",
+    "hp": "",
+    "abilities": [],
+    "attacks": [],
+    "rules": [
+      "During this turn, attacks used by your Pokémon do 40 more damage to your opponent's Active Pokémon ex (before applying Weakness and Resistance) .",
+      "Illustrated by GOSSAN"
+    ]
+  },
+  "SVP|221": {
+    "name": "Professor's Research",
+    "card_type": "Supporter",
+    "energy_type": "",
+    "hp": "",
+    "abilities": [],
+    "attacks": [],
+    "rules": [
+      "Discard your hand and draw 7 cards.",
+      "Illustrated by Hideki Ishikawa"
+    ]
+  },
+  "SVP|222": {
+    "name": "Professor's Research",
+    "card_type": "Supporter",
+    "energy_type": "",
+    "hp": "",
+    "abilities": [],
+    "attacks": [],
+    "rules": [
+      "Discard your hand and draw 7 cards.",
+      "Illustrated by Hideki Ishikawa"
+    ]
+  },
+  "SVP|223": {
+    "name": "Professor's Research",
+    "card_type": "Supporter",
+    "energy_type": "",
+    "hp": "",
+    "abilities": [],
+    "attacks": [],
+    "rules": [
+      "Discard your hand and draw 7 cards.",
+      "Illustrated by Taira Akitsu"
     ]
   },
   "SVP|224": {

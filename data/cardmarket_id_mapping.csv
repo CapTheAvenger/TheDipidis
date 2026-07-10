@@ -8815,6 +8815,24 @@ MEP,30,873699,unique,Mega Charizard Y ex
 MEP,31,873702,priced-by-date(1↔2),N's Zekrom
 MEP,32,873708,unique,Mega Gardevoir ex
 MEP,33,858146,priced-by-date(2↔3),Mega Lucario ex
+MEP,34,873717,priced-by-date(1↔2),Mega Meganium ex
+MEP,35,873720,priced-by-date(1↔2),Mega Emboar ex
+MEP,36,873722,priced-by-date(1↔2),Mega Feraligatr ex
+MEP,64,877543,priced-by-date(1↔2),Serperior
+MEP,65,877544,priced-by-date(1↔2),Barbaracle
+MEP,66,877545,priced-by-date(1↔2),Tyrantrum
+MEP,67,877546,priced-by-date(1↔2),Doublade
+MEP,68,879250,unique,Makuhita
+MEP,69,879255,priced-by-date(1↔2),Chikorita
+MEP,70,879262,unique,Tyrunt
+MEP,71,873310,priced-by-date(1↔2),Mega Zygarde ex
+MEP,74,884752,priced-by-date(1↔2),Delphox
+MEP,75,884754,priced-by-date(1↔2),Ampharos
+MEP,76,884757,priced-by-date(1↔2),Crobat
+MEP,77,884758,priced-by-date(1↔2),Goodra
+MEP,78,888609,unique,Toxel
+MEP,79,888607,unique,Charmeleon
+MEP,80,888506,priced-by-date(1↔3),Fennekin
 MEW,1,733596,priced-by-date(2↔4),Bulbasaur
 MEW,2,733597,priced-by-date(2↔2),Ivysaur
 MEW,3,733598,priced-by-date(3↔3),Venusaur ex
@@ -14874,6 +14892,11 @@ SVP,212,836658,unique,Reuniclus
 SVP,216,830110,priced-by-date(2↔3),Team Rocket's Mewtwo ex
 SVP,217,832226,unique,Team Rocket's Nidoking ex
 SVP,218,832227,unique,Team Rocket's Persian ex
+SVP,219,855672,priced-by-date(2↔2),Black Belt's Training
+SVP,220,855673,priced-by-date(2↔2),Black Belt's Training
+SVP,221,855676,priced-by-date(3↔3),Professor's Research
+SVP,222,855675,priced-by-date(3↔3),Professor's Research
+SVP,223,855674,priced-by-date(3↔3),Professor's Research
 SVP,224,727542,priced-by-all(3↔6),Paradise Resort
 SW,119,277872,unique,Bebe's Search
 SW,120,277873,unique,Night Maintenance

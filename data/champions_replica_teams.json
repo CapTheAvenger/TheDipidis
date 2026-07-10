@@ -9653,7 +9653,7 @@
     },
     {
       "rank": 99,
-      "replica_code": "BWGHTY59XR",
+      "replica_code": "WTRPK58TAD",
       "team_name": "BattleRoom's Raichu-Y Gholdengo Team",
       "tournament": "Video",
       "trainer": "Collin Heier",
@@ -9661,29 +9661,15 @@
       "regulation": "M-B",
       "sheet_rank": "",
       "date_shared": "8 Jul 2026",
-      "pokepaste_url": "https://pokepast.es/cd1cde8c54b42a68",
+      "pokepaste_url": "https://pokepast.es/4acbefd0b90556cf",
       "pokemon": [
-        {
-          "name": "Raichu-Mega-Y",
-          "item": "Raichunite Y",
-          "ability": "No Guard",
-          "tera_type": "",
-          "evs": "",
-          "nature": "",
-          "moves": [
-            "Fake Out",
-            "Zap Cannon",
-            "Focus Blast",
-            "Protect"
-          ]
-        },
         {
           "name": "Mamoswine",
           "item": "Focus Sash",
           "ability": "Oblivious",
           "tera_type": "",
-          "evs": "",
-          "nature": "",
+          "evs": "32 Atk / 1 Def / 1 SpD / 32 Spe",
+          "nature": "Adamant",
           "moves": [
             "Icicle Crash",
             "Ice Shard",
@@ -9696,8 +9682,8 @@
           "item": "Sharp Beak",
           "ability": "Gale Wings",
           "tera_type": "",
-          "evs": "",
-          "nature": "",
+          "evs": "32 Atk / 1 Def / 1 SpD / 32 Spe",
+          "nature": "Jolly",
           "moves": [
             "Dual Wingbeat",
             "Tailwind",
@@ -9710,8 +9696,8 @@
           "item": "Life Orb",
           "ability": "Good as Gold",
           "tera_type": "",
-          "evs": "",
-          "nature": "",
+          "evs": "1 HP / 1 Def / 32 SpA / 32 Spe",
+          "nature": "Modest",
           "moves": [
             "Make It Rain",
             "Shadow Ball",
@@ -9724,8 +9710,8 @@
           "item": "Fairy Feather",
           "ability": "Pixilate",
           "tera_type": "",
-          "evs": "",
-          "nature": "",
+          "evs": "18 HP / 1 Def / 30 SpA / 1 SpD / 16 Spe",
+          "nature": "Modest",
           "moves": [
             "Hyper Voice",
             "Hyper Beam",
@@ -9738,12 +9724,26 @@
           "item": "White Herb",
           "ability": "Unburden",
           "tera_type": "",
-          "evs": "",
-          "nature": "",
+          "evs": "16 HP / 32 Def / 18 Spe",
+          "nature": "Jolly",
           "moves": [
             "Fake Out",
             "Close Combat",
             "Dire Claw",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Raichu",
+          "item": "Raichunite Y",
+          "ability": "No Guard",
+          "tera_type": "",
+          "evs": "30 HP / 13 Def / 23 Spe",
+          "nature": "Timid",
+          "moves": [
+            "Fake Out",
+            "Zap Cannon",
+            "Focus Blast",
             "Protect"
           ]
         }

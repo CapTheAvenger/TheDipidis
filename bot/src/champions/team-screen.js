@@ -302,50 +302,122 @@ function parseMovesScreen(cells, data) {
 // game renders those as a small glyph tesseract mangles into a stray token, so
 // we instead read the arrow from the label suffix when present and otherwise
 // leave nature unset (never guessed).
-const STAT_LABEL_RE = [
-    { key: 'hp', re: /^hp$/ },
-    { key: 'atk', re: /^attack/ },
-    { key: 'def', re: /^defense/ },
-    { key: 'spa', re: /^sp\.?atk|^spatk|^sp\.?a$/ },
-    { key: 'spd', re: /^sp\.?def|^spdef|^sp\.?d(ef|et)?$/ },
-    { key: 'spe', re: /^speed/ },
-];
+// Cluster words into rows by their vertical centre.
+function clusterRows(items, tol = 0.025) {
+    const sorted = [...items].sort((a, b) => a.cy - b.cy);
+    const rows = [];
+    let cur = null;
+    for (const w of sorted) {
+        if (!cur || w.cy - cur.cy > tol) { cur = { cy: w.cy, ws: [w] }; rows.push(cur); }
+        else { cur.ws.push(w); cur.cy = (cur.cy * (cur.ws.length - 1) + w.cy) / cur.ws.length; }
+    }
+    return rows;
+}
 
-function classifyStatLabel(tok) {
-    const t = norm(tok);
-    for (const { key, re } of STAT_LABEL_RE) if (re.test(t)) return key;
+// Extract the six FINAL stat values by POSITION, not by reading the stat labels
+// (the labels OCR unreliably: "Sp.Atk"→"SpAkS", "Sp. Def" splits into two tokens).
+// Each cell has a left sub-column (HP / Attack / Defense, top→bottom) and a right
+// sub-column (Sp.Atk / Sp.Def / Speed). Within a stat row the final value is the
+// left number (the small SP sits to its right past the bar). Garbage reads become
+// null and are recovered later by solveSpread()'s sum-66 invariant.
+function parseStatsScreen(cells) {
+    const KEYS_L = ['hp', 'atk', 'def'], KEYS_R = ['spa', 'spd', 'spe'];
+    return cells.map((cellWords, idx) => {
+        const colBase = idx % 2 === 0 ? 0.16 : 0.50;
+        const mid = colBase + 0.17;       // boundary between the two stat sub-columns
+        const lo = colBase - 0.04, hi = colBase + 0.34;
+
+        const nums = cellWords.filter(w => w.cx >= lo && w.cx < hi).map(w => {
+            let d = w.text.replace(/[^0-9]/g, '');
+            if (!d) return null;
+            if (d.length >= 4) d = d.slice(0, 3);      // "1100" = 110 + 0 merge → keep final
+            return { v: parseInt(d, 10), cx: w.cx, cy: w.cy, side: w.cx < mid ? 'L' : 'R' };
+        }).filter(Boolean);
+
+        // A real stat row has numbers in BOTH sub-columns; the species-name / row-
+        // index rows carry at most a single stray digit and are dropped, so the
+        // three surviving rows map cleanly top→bottom to HP/Atk/Def | SpA/SpD/Spe.
+        const rows = clusterRows(nums)
+            .map(r => r.ws)
+            .filter(ws => ws.some(n => n.side === 'L') && ws.some(n => n.side === 'R'))
+            .slice(0, 3);
+
+        const finals = {};
+        // The final stat is the LARGEST number in the row's sub-column: the SP sits
+        // at ≤ 32 and the ± arrow glyph can OCR as a small stray digit (e.g. "4")
+        // to the left of the real value, so "leftmost" is wrong but "max" is robust.
+        // Any residual error is caught downstream by solveSpread's 0–32 / sum-66 test.
+        const pick = (ws, side) => {
+            const vals = ws.filter(n => n.side === side).map(n => n.v);
+            const v = vals.length ? Math.max(...vals) : null;
+            return (v >= 20 && v <= 600) ? v : null;
+        };
+        for (let r = 0; r < 3; r++) {
+            const ws = rows[r];
+            finals[KEYS_L[r]] = ws ? pick(ws, 'L') : null;
+            finals[KEYS_R[r]] = ws ? pick(ws, 'R') : null;
+        }
+
+        const stats = STAT_KEYS.map(k => finals[k] ?? null);
+        return { stats, statsComplete: stats.every(v => Number.isFinite(v)) };
+    });
+}
+
+// ── Nature + SP solver (exact, from base stats + final stats) ───────────────
+// Pokémon Champions uses Lv.50, IV 31, and a 0–32 "SP" per stat summing to 66.
+// Verified formula (matches the in-game Stats screen exactly):
+//   base = floor((2·Base + 31) / 2)
+//   HP     = base + 60 + SP
+//   others = floor((base + 5 + SP) · natureMod)   natureMod ∈ {1.1, 1.0, 0.9}
+// Given the identified species' base stats and the (reliably OCR'd) final stats,
+// we solve for the ONE nature whose SP values are all in [0,32] AND sum to 66 —
+// so nature and the exact SP spread come out deterministically, without reading
+// the ± arrows or the noisier small SP numbers. Self-validating: a wrong final
+// or species yields no valid nature, so we flag instead of guessing.
+function statBase(base) { return Math.floor((2 * base + 31) / 2); }
+
+function spForStat(key, base, obs, mod) {
+    if (!Number.isFinite(obs)) return null;
+    const b = statBase(base);
+    if (key === 'hp') { const sp = obs - (b + 60); return sp >= 0 && sp <= 32 ? sp : null; }
+    for (let sp = 0; sp <= 32; sp++) if (Math.floor((b + 5 + sp) * mod) === obs) return sp;
     return null;
 }
 
-function parseStatsScreen(cells) {
-    return cells.map(cellWords => {
-        const lines = cellLines(cellWords);
-        const finals = {}; const sp = {};
-        for (const line of lines) {
-            const ws = line.words;
-            // Walk tokens; when a stat label appears, take the next 1–2 numeric
-            // tokens as [final, sp]. Two labels can share a line (left+right col).
-            for (let i = 0; i < ws.length; i++) {
-                const key = classifyStatLabel(ws[i].text);
-                if (!key || finals[key] != null) continue;
-                const nums = [];
-                for (let j = i + 1; j < ws.length && nums.length < 2; j++) {
-                    const cleaned = ws[j].text.replace(/[^0-9]/g, '');
-                    if (classifyStatLabel(ws[j].text)) break;   // hit the next label
-                    if (cleaned) nums.push(parseInt(cleaned, 10));
-                }
-                if (nums.length >= 1) finals[key] = nums[0];
-                if (nums.length >= 2) sp[key] = nums[1];
-            }
+function solveSpread(base, finals) {
+    const natures = Object.entries(NATURE_BY_STATS)
+        .map(([k, n]) => { const [boost, hinder] = k.split('|'); return { nature: n, boost, hinder }; });
+    natures.push({ nature: null, boost: null, hinder: null });   // neutral fallback
+
+    const valid = [];
+    for (const { nature, boost, hinder } of natures) {
+        const evs = {}; const unknown = [];
+        for (let i = 0; i < STAT_KEYS.length; i++) {
+            const key = STAT_KEYS[i];
+            const mod = key === boost ? 1.1 : key === hinder ? 0.9 : 1.0;
+            const sp = spForStat(key, base[key], finals[i], mod);
+            if (sp == null) unknown.push(key); else evs[key] = sp;
         }
-        const stats = STAT_KEYS.map(k => finals[k]);
-        // Plausible Lv.50 final stats live roughly in [20, 500]; anything outside
-        // is an OCR artefact (merged/split digits) and disqualifies the row from
-        // stat-range identification.
-        const complete = stats.every(v => Number.isFinite(v) && v >= 20 && v <= 500);
-        const spSum = STAT_KEYS.reduce((a, k) => a + (sp[k] || 0), 0);
-        return { stats, statsComplete: complete, sp, spSum };
-    });
+        if (unknown.length > 1) continue;                      // too noisy to trust
+        let sum = Object.values(evs).reduce((a, b) => a + b, 0);
+        if (unknown.length === 1) {                            // recover one via the 66 invariant
+            const miss = 66 - sum;
+            if (miss < 0 || miss > 32) continue;
+            evs[unknown[0]] = miss; sum = 66;
+        }
+        if (sum !== 66) continue;
+        valid.push({ nature, evs, unknowns: unknown.length });
+    }
+    if (!valid.length) return null;
+    valid.sort((a, b) => a.unknowns - b.unknowns || (a.nature ? 0 : 1) - (b.nature ? 0 : 1));
+
+    // Ambiguity guard: two DIFFERENT non-neutral natures both fitting = don't guess.
+    const nonNeutral = valid.filter(v => v.nature);
+    const names = new Set(nonNeutral.map(v => v.nature));
+    if (names.size > 1 && nonNeutral[0].unknowns === nonNeutral[1].unknowns) {
+        return { ...valid[0], ambiguous: true };
+    }
+    return valid[0];
 }
 
 // ── Species identification (hard data only) ─────────────────────────────────
@@ -438,24 +510,31 @@ export async function parseTeamScreens(buffers) {
             moves: mv.moves || [],
             stats: st.stats || null,
             statsComplete: !!st.statsComplete,
-            sp: st.sp || null,
-            spSum: st.spSum || 0,
         };
         // Skip empty slots (fewer than 6 mons, or a blank cell).
         if (!mon.ability && !mon.item && !mon.moves.length && !mon.statsComplete) continue;
 
         const id = identifySpecies(mon, data);
         mon.species = id.species;
-        // SP spread in the game's 0–32 scale, exposed as `evs` so the existing
-        // statsLine()/formatTeam() renders it unchanged — but ONLY when the six
-        // numbers checksum to the game's 66-point budget. A wrong sum means the
-        // Stats OCR slipped, so we drop it rather than show a made-up spread.
-        if (mon.sp && mon.spSum === 66) mon.evs = { ...mon.sp };
-        // Nature stays unset here (arrow glyphs are not reliably OCR-able); the
-        // build sheet flags it so the user fills it in rather than us guessing.
         mon.nature = null;
         mon.tera = null;
 
+        // Derive the exact nature + SP spread from the identified species' base
+        // stats and the read final stats (see solveSpread). This is the game's
+        // native 0–32 spread, exposed as `evs` so statsLine()/formatTeam() render
+        // it unchanged and the Limitless export can print "Level: 50 / EVs / Nature".
+        if (mon.species && mon.stats) {
+            const entry = data.dexEntries.find(e =>
+                baseSpeciesName(e.en) === mon.species && !(e.form && /^mega/i.test(e.form)));
+            if (entry) {
+                const base = {};
+                for (const k of STAT_KEYS) base[k] = entry[k]?.base;
+                if (STAT_KEYS.every(k => Number.isFinite(base[k]))) {
+                    const sol = solveSpread(base, mon.stats);
+                    if (sol && !sol.ambiguous) { mon.evs = sol.evs; mon.nature = sol.nature; }
+                }
+            }
+        }
         if (!mon.species) {
             warnings.push(`Slot ${i + 1}: Spezies nicht sicher erkannt${mon.ability ? ` (Fähigkeit: ${mon.ability})` : ''} — bitte prüfen.`);
         } else if (!id.confident) {

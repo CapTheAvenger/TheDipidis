@@ -186,16 +186,29 @@ async function handlePastes(ctx, ids) {
     }
 }
 
-// Build an importable Showdown / Limitless paste from parsed screen data.
-// We deliberately emit NO EV line: the game's SP spread (0–32, sum 66) is a
-// different scale from Showdown EVs and we won't fabricate a conversion. Nature
-// is only written when it was actually read (currently never — arrow glyphs
-// aren't reliably OCR-able), so the paste imports as a legal team the user then
-// tops up with their spread. Species/item/ability/moves are the verified core.
+// Build an importable Limitless / Showdown paste from parsed screen data, in the
+// exact Pokémon Champions format the site export uses (and Limitless accepts):
+//   <Species> @ <Item> / Ability: … / Level: 50 / EVs: <0–32 spread> / <Nature> Nature / - moves
+// EVs are the game's native 0–32 SP spread (sum 66), and nature is solved exactly
+// from the base + final stats (see team-screen.solveSpread) — both verified, not
+// guessed. If a slot's spread couldn't be locked, the EV/Nature lines are simply
+// omitted for that mon (still a legal import) and it's listed under warnings.
+const EV_ORDER = ['hp', 'atk', 'def', 'spa', 'spd', 'spe'];
+const EV_LABEL = { hp: 'HP', atk: 'Atk', def: 'Def', spa: 'SpA', spd: 'SpD', spe: 'Spe' };
+
+function evLine(evs) {
+    if (!evs) return null;
+    const parts = EV_ORDER.filter(k => evs[k]).map(k => `${evs[k]} ${EV_LABEL[k]}`);
+    return parts.length ? `EVs: ${parts.join(' / ')}` : null;
+}
+
 function toShowdownPaste(mons) {
     return mons.filter(m => m.species).map((m) => {
         const lines = [m.item ? `${m.species} @ ${m.item}` : m.species];
         if (m.ability) lines.push(`Ability: ${m.ability}`);
+        lines.push('Level: 50');
+        const ev = evLine(m.evs);
+        if (ev) lines.push(ev);
         if (m.nature) lines.push(`${m.nature} Nature`);
         for (const mv of (m.moves || [])) lines.push(`- ${mv}`);
         return lines.join('\n');
@@ -208,7 +221,7 @@ async function emitScreenshotTeam(ctx, mons, warnings, maps) {
 
     const paste = toShowdownPaste(mons);
     if (paste) {
-        await ctx.reply('📋 <b>Showdown / Limitless Export</b> — antippen zum Kopieren, dann bei Showdown oder im Limitless-Turnier („Submit teamlist") einfügen.\n<i>Ohne SP/Wesen (die liest der Bot aus dem Screenshot nicht sicher aus) — Spezies, Item, Fähigkeit & Attacken stimmen; Werte im Spiel prüfen.</i>',
+        await ctx.reply('📋 <b>Limitless / Showdown Export</b> — antippen zum Kopieren, dann im Limitless-Turnier („Submit teamlist") oder bei Showdown einfügen.\n<i>Mit Level 50, EVs (0–32-Spread) & Wesen — exakt aus den Statuswerten berechnet.</i>',
             { parse_mode: 'HTML' });
         await ctx.reply(`<code>${esc(paste)}</code>`, {
             parse_mode: 'HTML',
@@ -298,11 +311,12 @@ function handlePhoto(ctx) {
 }
 
 export function registerChampions(bot) {
-    bot.command(['team', 'champions', 'bauplan'], async (ctx) => {
+    bot.command(['team', 'champions', 'bauplan', 'limitless', 'limitlesschampions'], async (ctx) => {
         const ids = extractPasteIds(ctx.message?.text || '');
         if (ids.length) return handlePastes(ctx, ids);
         return ctx.reply(
-            'Schick mir einen oder mehrere pokepast.es-Links 📋 — ich baue dir den Champions-Bauplan auf Deutsch UND Englisch (Spezies, Item, Fähigkeit, Wesen, SP, Attacken) und gebe dir den Showdown-/Limitless-Export zum Kopieren.\n\n📸 Oder schick die Screenshots vom „Share This Battle Team?"-Bildschirm — am besten „Moves & More" UND „Stats" zusammen als Album. Ich lese Spezies, Item, Fähigkeit und Attacken aus und baue dir den Limitless-/Showdown-Export.\n\n(Ein Foto mit der „Team ID" lese ich weiterhin als Code aus.)');
+            '📸 <b>Champions-Team aus Screenshots</b>\nSchick die Screenshots vom „Share This Battle Team?"-Bildschirm — am besten <b>„Moves & More" UND „Stats" zusammen als Album</b>. Ich lese Spezies, Item, Fähigkeit, Attacken, Wesen und den EV-Spread aus und baue dir den <b>Limitless-/Showdown-Export</b> (mit Level 50) + den DE/EN-Bauplan.\n\n📋 Oder schick pokepast.es-Links — dann baue ich den Export aus dem Paste.\n\n(Ein Foto mit der „Team ID" lese ich weiterhin als Code aus.)',
+            { parse_mode: 'HTML' });
     });
 
     // Plain messages containing pokepaste links (no slash command).

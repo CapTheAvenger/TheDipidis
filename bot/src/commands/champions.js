@@ -230,8 +230,13 @@ async function emitScreenshotTeam(ctx, mons, warnings, maps) {
     }
 
     if (warnings && warnings.length) {
-        await ctx.reply(`⚠️ <b>Bitte prüfen</b>\n${warnings.map(w => `• ${esc(w)}`).join('\n')}`,
-            { parse_mode: 'HTML' });
+        let msg = `⚠️ <b>Bitte prüfen</b>\n${warnings.map(w => `• ${esc(w)}`).join('\n')}`;
+        // Missing EV/Nature is almost always Telegram photo compression eating the
+        // small stat numbers. Sending the screenshots as an uncompressed FILE fixes it.
+        if (warnings.some(w => /SP-Spread/.test(w))) {
+            msg += '\n\n💡 <b>Tipp:</b> Für EVs + Wesen bei <i>allen</i> Pokémon schick die „Stats"-Screenshots als <b>Datei</b> (📎 → <i>Datei</i>, „ohne Komprimierung") — Telegram verkleinert normale Fotos und verschluckt dabei die kleinen Statuszahlen.';
+        }
+        await ctx.reply(msg, { parse_mode: 'HTML' });
     }
 
     const prompt = buildClaudePrompt(mons, maps);
@@ -286,22 +291,16 @@ async function processTeamPhotos(ctx, fileIds, { allowCode }) {
     }
 }
 
-// Telegram delivers an album as separate photo updates sharing a
-// media_group_id. Buffer them and flush ~1.8 s after the last arrives so we
-// parse both screens in one shot.
+// Telegram delivers an album as separate updates sharing a media_group_id.
+// Buffer them and flush ~1.8 s after the last arrives so we parse both screens
+// in one shot. Works for both photos and image documents (uncompressed files).
 const pendingGroups = new Map();
 
-function handlePhoto(ctx) {
-    const photos = ctx.message?.photo || [];
-    const file = photos[photos.length - 1];   // highest resolution
-    if (!file) return;
-
-    const gid = ctx.message.media_group_id;
-    if (!gid) return processTeamPhotos(ctx, [file.file_id], { allowCode: true });
-
+function bufferOrProcess(ctx, fileId, gid, allowCode) {
+    if (!gid) return processTeamPhotos(ctx, [fileId], { allowCode });
     let g = pendingGroups.get(gid);
     if (!g) { g = { fileIds: [], ctx }; pendingGroups.set(gid, g); }
-    g.fileIds.push(file.file_id);
+    g.fileIds.push(fileId);
     g.ctx = ctx;
     if (g.timer) clearTimeout(g.timer);
     g.timer = setTimeout(() => {
@@ -310,12 +309,28 @@ function handlePhoto(ctx) {
     }, 1800);
 }
 
+function handlePhoto(ctx) {
+    const photos = ctx.message?.photo || [];
+    const file = photos[photos.length - 1];   // highest resolution
+    if (!file) return;
+    bufferOrProcess(ctx, file.file_id, ctx.message.media_group_id, true);
+}
+
+// Screenshots sent as a FILE (not a compressed photo) arrive as a document.
+// These keep full resolution, so the small stat numbers survive and the whole
+// EV/Nature spread reads reliably — the recommended way for the Stats screen.
+function handleDocument(ctx) {
+    const doc = ctx.message?.document;
+    if (!doc || !/^image\//.test(doc.mime_type || '')) return;
+    bufferOrProcess(ctx, doc.file_id, ctx.message.media_group_id, true);
+}
+
 export function registerChampions(bot) {
     bot.command(['team', 'champions', 'bauplan', 'limitless', 'limitlesschampions'], async (ctx) => {
         const ids = extractPasteIds(ctx.message?.text || '');
         if (ids.length) return handlePastes(ctx, ids);
         return ctx.reply(
-            '📸 <b>Champions-Team aus Screenshots</b>\nSchick die Screenshots vom „Share This Battle Team?"-Bildschirm — am besten <b>„Moves & More" UND „Stats" zusammen als Album</b>. Ich lese Spezies, Item, Fähigkeit, Attacken, Wesen und den EV-Spread aus und baue dir den <b>Limitless-/Showdown-Export</b> (mit Level 50) + den DE/EN-Bauplan.\n\n📋 Oder schick pokepast.es-Links — dann baue ich den Export aus dem Paste.\n\n(Ein Foto mit der „Team ID" lese ich weiterhin als Code aus.)',
+            '📸 <b>Champions-Team aus Screenshots</b>\nSchick die Screenshots vom „Share This Battle Team?"-Bildschirm — <b>„Moves & More" UND „Stats" zusammen</b>. Ich lese Spezies, Item, Fähigkeit, Attacken, Wesen und den EV-Spread aus und baue dir den <b>Limitless-/Showdown-Export</b> (mit Level 50) + den DE/EN-Bauplan.\n\n💡 <b>Für EVs + Wesen am besten als Datei schicken</b> (📎 → <i>Datei</i>, „ohne Komprimierung") — normale Fotos verkleinert Telegram und die kleinen Statuszahlen gehen verloren.\n\n📋 Oder schick pokepast.es-Links — dann baue ich den Export aus dem Paste.\n\n(Ein Foto mit der „Team ID" lese ich weiterhin als Code aus.)',
             { parse_mode: 'HTML' });
     });
 
@@ -328,4 +343,5 @@ export function registerChampions(bot) {
     });
 
     bot.on('photo', handlePhoto);
+    bot.on('document', handleDocument);
 }

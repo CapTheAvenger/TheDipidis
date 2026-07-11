@@ -23,6 +23,12 @@
 
 import sharp from 'sharp';
 
+// Render Free is a 512 MB box shared with firebase-admin + telegraf, and OCR is
+// the memory-heavy path. Disable sharp's pixel cache and cap it to one worker
+// thread so image decode/resize doesn't balloon the resident set during a scan.
+sharp.cache(false);
+sharp.concurrency(1);
+
 const SITE_BASE = (process.env.SITE_BASE || 'https://thedipidis.app').replace(/\/+$/, '');
 const TTL_MS = 30 * 60 * 1000;
 const FETCH_TIMEOUT_MS = 15_000;
@@ -211,9 +217,11 @@ async function readWords(worker, pre) {
     return { words, text: data.text || '' };
 }
 
-// Extra preprocessings for the Stats screen only (its tiny SP/final numbers are
-// the compression casualty). The Moves screen reads fine in one pass.
-const STATS_EXTRA_PASSES = [{ width: 3000 }, { width: 2400, contrast: true }];
+// One extra preprocessing for the Stats screen only (its tiny SP/final numbers
+// are the compression casualty). Kept at the same width as the default pass so it
+// adds no bigger memory peak — just a different contrast that recovers numbers the
+// first pass fumbled. The Moves screen reads fine in one pass.
+const STATS_EXTRA_PASSES = [{ width: 2400, contrast: true }];
 
 // Screen tab: the Stats view repeats "Sp. Atk / Sp. Def / Speed / Defense"
 // labels six times; the Moves view does not.
@@ -508,11 +516,24 @@ function identifySpecies(mon, data) {
 }
 
 // ── Public entry point ──────────────────────────────────────────────────────
+// Serialize scans: OCR is the memory-heavy path and two concurrent runs would
+// double the peak RSS, which is what tripped Render Free's 512 MB limit. The
+// chain lets only one scan hold the tesseract worker + big image at a time; a
+// second submission simply waits its turn (a few extra seconds).
+let _ocrChain = Promise.resolve();
+
+export function parseTeamScreens(buffers) {
+    const run = () => _parseTeamScreens(buffers);
+    const next = _ocrChain.then(run, run);
+    _ocrChain = next.then(() => {}, () => {});
+    return next;
+}
+
 /**
  * @param {Buffer[]} buffers  one or two screenshots (Moves and/or Stats)
  * @returns {{mons:Array, warnings:string[]}}  mons in parseShowdownTeam shape
  */
-export async function parseTeamScreens(buffers) {
+async function _parseTeamScreens(buffers) {
     const data = await getData();
     const warnings = [];
 

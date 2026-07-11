@@ -35,6 +35,10 @@ function db() {
             admin.initializeApp({ credential: admin.credential.cert(creds) });
         }
         _db = admin.firestore();
+        // Prefer the REST transport so firebase-admin doesn't pull in the heavy
+        // gRPC stack — meaningful RAM saved on the 512 MB Render Free box. Guarded
+        // because the setting only exists on newer SDKs.
+        try { _db.settings({ preferRest: true }); } catch (_) { /* older SDK */ }
         console.info('[store] Firestore whitelist persistence enabled.');
     } catch (err) {
         console.warn('[store] failed to init Firestore (persistence off):', err?.message || err);

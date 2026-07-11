@@ -1740,6 +1740,9 @@
     padding: 0 0.4rem;
     font-weight: 600;
 }
+/* Priority is only shown when non-zero, so make it pop — it's the meaningful
+   bit (Fake Out +3, Trick Room −7). */
+.sq-res-stat-prio b { color: #d35400; }
 .sq-res-verified {
     color: #2e9d60;
     font-weight: 900;

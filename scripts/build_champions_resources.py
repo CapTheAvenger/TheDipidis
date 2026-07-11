@@ -180,6 +180,21 @@ def pokeapi_de_map(names_csv, flavor_csv, idkey):
     return out
 
 
+def pokeapi_move_priority():
+    """norm(EN name) -> move priority (int) from PokéAPI moves.csv.
+
+    The CSV keys moves by `identifier` (e.g. "fake-out"); norm() strips the
+    hyphen so it lines up with the Champions move name norm() ("Fake Out").
+    """
+    out = {}
+    for r in fetch_csv("moves"):
+        try:
+            out[norm(r["identifier"])] = int(r["priority"])
+        except (KeyError, ValueError, TypeError):
+            pass
+    return out
+
+
 def load_verified():
     """norm(EN) -> {de_name, effect, type} from the hand-verified references."""
     out = {}
@@ -203,6 +218,7 @@ def main():
     de_item = pokeapi_de_map("item_names", "item_flavor_text", "item_id")
     de_abil = pokeapi_de_map("ability_names", "ability_flavor_text", "ability_id")
     de_move = pokeapi_de_map("move_names", "move_flavor_text", "move_id")
+    prio_move = pokeapi_move_priority()
 
     verified = load_verified()
     supp = {norm(k): v for k, v in DE_NAME_SUPPLEMENT.items()}
@@ -285,7 +301,8 @@ def main():
         # damage class). Only stored when present so status moves stay lean.
         if cat == "move" and stats:
             for src, dst in (("power", "power"), ("accuracy", "accuracy"),
-                             ("pp", "pp"), ("damage_class", "damage_class")):
+                             ("pp", "pp"), ("damage_class", "damage_class"),
+                             ("priority", "priority")):
                 val = stats.get(src)
                 if val is not None and val != "":
                     entry[dst] = val
@@ -308,7 +325,8 @@ def main():
         build("move", mv["name"], mv.get("description", ""), de_move,
               mtype=mv.get("type", ""),
               stats={"power": mv.get("power"), "accuracy": mv.get("accuracy"),
-                     "pp": mv.get("pp"), "damage_class": mv.get("category")})
+                     "pp": mv.get("pp"), "damage_class": mv.get("category"),
+                     "priority": prio_move.get(norm(mv["name"]))})
 
     entries.sort(key=lambda e: (e["cat"], e["de"].lower()))
     counts = {"item": 0, "ability": 0, "move": 0, "field": 0, "de_effect": 0}

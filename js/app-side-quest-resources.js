@@ -54,6 +54,7 @@
             statPower:   'Stärke',
             statAcc:     'Genauigkeit',
             statPP:      'AP',
+            statPrio:    'Prio',
             dmgPhysical: 'Physisch',
             dmgSpecial:  'Speziell',
             dmgStatus:   'Status',
@@ -85,6 +86,7 @@
             statPower:   'Power',
             statAcc:     'Accuracy',
             statPP:      'PP',
+            statPrio:    'Prio',
             dmgPhysical: 'Physical',
             dmgSpecial:  'Special',
             dmgStatus:   'Status',
@@ -124,12 +126,21 @@
     // ── Filtering / search ─────────────────────────────────────────
     function norm(s) { return String(s || '').toLowerCase(); }
 
+    // Extra searchable aliases keyed by normalized EN name — common old / colloquial
+    // German names people still search by. "Finte" was the German name of the
+    // long-removed move Faint Attack; users often expect it to find Feint
+    // (now officially "Offenlegung"), so map it here.
+    const SEARCH_ALIASES = {
+        feint: 'finte',
+    };
+
     function matches(e, q) {
         if (!q) return true;
         // Search both languages' names AND effects so "tailwind" finds it
         // from a German UI and "rückenwind" finds it from an English one.
         const hay = norm(e.en) + ' ' + norm(e.de) + ' ' +
-                    norm(e.en_effect) + ' ' + norm(e.de_effect) + ' ' + norm(e.type);
+                    norm(e.en_effect) + ' ' + norm(e.de_effect) + ' ' + norm(e.type) +
+                    ' ' + (SEARCH_ALIASES[norm(e.en)] || '');
         return q.split(/\s+/).every(tok => hay.indexOf(tok) !== -1);
     }
 
@@ -172,7 +183,8 @@
     // accuracy → "—". Only rendered for moves that carry any of these.
     function moveStatsHtml(e, l) {
         if (e.cat !== 'move') return '';
-        const has = e.power != null || e.accuracy != null || e.pp != null || e.damage_class;
+        const hasPrio = e.priority != null && Number(e.priority) !== 0;
+        const has = e.power != null || e.accuracy != null || e.pp != null || e.damage_class || hasPrio;
         if (!has) return '';
         const dash = '—';
         const dmg = e.damage_class === 'Physical' ? l.dmgPhysical
@@ -186,6 +198,13 @@
             `<span class="sq-res-stat"><span class="sq-res-stat-k">${escapeHtml(l.statAcc)}</span> <b>${e.accuracy != null ? escapeHtml(String(e.accuracy)) : dash}</b></span>`,
         ];
         if (e.pp != null) parts.push(`<span class="sq-res-stat"><span class="sq-res-stat-k">${escapeHtml(l.statPP)}</span> <b>${escapeHtml(String(e.pp))}</b></span>`);
+        // Only shown when non-zero — a positive/negative priority is the meaningful
+        // case (Fake Out +3, Feint +2, Trick Room −7); priority 0 is the default.
+        if (hasPrio) {
+            const p = Number(e.priority);
+            const sign = p > 0 ? `+${p}` : String(p).replace('-', '−');
+            parts.push(`<span class="sq-res-stat sq-res-stat-prio"><span class="sq-res-stat-k">${escapeHtml(l.statPrio)}</span> <b>${escapeHtml(sign)}</b></span>`);
+        }
         if (dmg) parts.push(`<span class="sq-res-stat sq-res-stat-dmg">${escapeHtml(dmg)}</span>`);
         return `<div class="sq-res-movestats">${parts.join('')}</div>`;
     }

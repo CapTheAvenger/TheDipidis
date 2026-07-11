@@ -36,7 +36,13 @@ const TESS_OPTS = process.env.TESSDATA_DIR
 
 const STAT_KEYS = ['hp', 'atk', 'def', 'spa', 'spd', 'spe'];
 
-function norm(s) { return String(s || '').toLowerCase().replace(/[^a-z0-9]/g, ''); }
+// Fold German umlauts/ß to their base letters so a German name matches whether
+// the OCR reads "ä" or "a" (and so the German alias index keys line up).
+function norm(s) {
+    return String(s || '').toLowerCase()
+        .replace(/ä/g, 'a').replace(/ö/g, 'o').replace(/ü/g, 'u').replace(/ß/g, 'ss')
+        .replace(/[^a-z0-9]/g, '');
+}
 
 // ── Nature table: [boostedStat, hinderedStat] → nature (EN) ──────────────────
 const NATURE_BY_STATS = {
@@ -126,12 +132,24 @@ async function getData() {
         loadJson('champions_pokedex.json'),
     ]);
 
+    // Item/ability/move indexes map BOTH the English and German names to the
+    // English canonical, so a German screenshot ("Sturzbach", "Zähigkeit",
+    // "Stromstrahl") resolves to English ("Torrent", "Stamina", "Electro Shot")
+    // — the export is always English (what Limitless needs), regardless of the
+    // screenshot's language. English keys are laid down first so they always win
+    // a collision; German aliases only fill gaps.
     const items = new Map(), abilities = new Map(), moves = new Map();
+    const mapFor = (cat) => cat === 'item' ? items : cat === 'ability' ? abilities : cat === 'move' ? moves : null;
     for (const e of (res?.entries || [])) {
         if (!e.en) continue;
-        if (e.cat === 'item') items.set(norm(e.en), e.en);
-        else if (e.cat === 'ability') abilities.set(norm(e.en), e.en);
-        else if (e.cat === 'move') moves.set(norm(e.en), e.en);
+        mapFor(e.cat)?.set(norm(e.en), e.en);
+    }
+    for (const e of (res?.entries || [])) {
+        if (!e.en || !e.de) continue;
+        const m = mapFor(e.cat);
+        if (!m) continue;
+        const k = norm(e.de);
+        if (!m.has(k)) m.set(k, e.en);
     }
 
     // Species index: base-form entries carry Lv.50 stat ranges; build an
@@ -201,8 +219,13 @@ const STATS_EXTRA_PASSES = [{ width: 3000 }, { width: 2400, contrast: true }];
 // labels six times; the Moves view does not.
 function isStatsScreen(text) {
     const t = text.toLowerCase();
-    const hits = (t.match(/sp\.?\s*(atk|def)|speed|defense|attack/g) || []).length;
-    return hits >= 8;
+    // Stat labels in English OR German (Angr.=Attack, Vert.=Defense, Sp.Ang.,
+    // Sp.Vert., Initiative=Speed, KP=HP).
+    const labelHits = (t.match(/sp\.?\s*(atk|def|ang|vert)|speed|defense|attack|initiative|angr|\bvert\b|\bkp\b/g) || []).length;
+    // Language-independent fallback: the Stats screen is dense with 2–3 digit
+    // numbers (6 stats × 6 mons); the Moves screen has almost none.
+    const numHits = (text.match(/\d{2,3}/g) || []).length;
+    return labelHits >= 6 || numHits >= 15;
 }
 
 // Bucket a word into one of 6 cells (2 cols × 3 rows). Column split at x=0.5;

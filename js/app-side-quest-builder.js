@@ -1,22 +1,31 @@
-// Side Quest · Team Builder
+// Side Quest · Team Builder (doubles)
 // ============================================================================
-// Co-occurrence team builder over the real top-team list
-// (data/champions_replica_teams.json). Pick a Pokémon → the builder shows only
-// the Pokémon that appear alongside it on real teams, ranked by how often. Pick
-// another → the pool narrows to Pokémon that play with BOTH, and so on up to 6.
-// The matching real teams (with tap-to-copy replica codes) are shown below.
+// Co-occurrence team builder over the in-game DOUBLES teammate data
+// (data/champions_usage.json — the same source as the Kampfdaten "Team-
+// Mitglieder" list). Pick a Pokémon → the builder shows the Pokémon it's played
+// alongside. Pick another → the pool narrows to Pokémon that are teammates of
+// BOTH, and so on up to 6. Doubles only.
+//
+// The usage data keys Pokémon by SLUG ("hisuian-zoroark") but stores the base
+// `name` ("Zoroark"); the teammate lists carry the proper FORM names ("Hisuian
+// Zoroark"). So we work in slug space and take display names from the teammate
+// lists, which is the only place the form names appear.
 (function () {
     'use strict';
 
-    const DATA_URL = 'data/champions_replica_teams.json';
+    const USAGE_URL = 'data/champions_usage.json';
     const DE_NAMES_URL = 'data/pokemon_names_de.json';
     const HOST_ID = 'sideQuestBuilderHost';
     const MAX = 6;
-    const PREVIEW_TEAMS = 12;
+    const EMPTY_CAP = 40;   // "most-played" mons shown before any pick
 
-    let _teams = null, _loaded = false;
+    let _loaded = false;
+    let _bySlug = {};       // slug → { slug, display, baseEn, mates: [slug] }
+    let _mons = [];         // all mon objects
+    let _degree = {};       // slug → # of teammate lists it appears on (popularity)
     let _deNames = {}, _deLoaded = false;
-    let _team = [];          // selected species (display names as they appear in the data)
+
+    let _team = [];         // selected slugs
     let _query = '';
 
     function uiLang() { return (typeof window.getLang === 'function' && window.getLang() === 'de') ? 'de' : 'en'; }
@@ -26,37 +35,37 @@
             .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
     }
     function norm(s) { return String(s || '').trim().toLowerCase(); }
+    function slugify(s) { return norm(s).replace(/\s+/g, '-'); }
+    function titleFromSlug(slug) {
+        return String(slug || '').split('-').map(w => w ? w.charAt(0).toUpperCase() + w.slice(1) : w).join(' ');
+    }
 
     const LABELS = {
         de: {
-            intro: 'Bau dir ein Team aus echten Top-Teams: Wähl ein Pokémon — der Builder zeigt dir dann nur noch Pokémon, die damit zusammen gespielt werden. Jede weitere Wahl grenzt weiter ein.',
+            intro: 'Bau dir ein Doppelkampf-Team: Wähl ein Pokémon — der Builder zeigt dir, mit welchen Pokémon es zusammen gespielt wird (In-Game-Analyse). Jede weitere Wahl grenzt ein: es bleiben nur Pokémon, die mit allen Gewählten zusammen gespielt werden.',
             searchPh: '🔎 Pokémon hinzufügen (Deutsch oder Englisch) …',
             picked: (n) => `${n} / ${MAX} gewählt`,
-            matching: (n) => `${n} passende Teams`,
             suggestTitle: 'Passt dazu',
-            suggestHint: 'Sortiert nach Häufigkeit in den passenden Teams — Zahl = in wie vielen. Tippen zum Hinzufügen.',
-            teamsTitle: 'Passende Teams',
+            suggestHintFirst: 'Meistgespielte Pokémon — tippen zum Starten, oder oben suchen.',
+            suggestHint: 'Nur Pokémon, die mit allen Gewählten zusammen gespielt werden (Doppelkampf). Reihenfolge = wie gut es passt.',
             none: 'Keine weitere Kombination gefunden — nimm ein Pokémon raus.',
-            empty: 'Wähl oben ein Pokémon, um zu starten.',
+            empty: 'Wähl ein Pokémon, um zu starten.',
             clear: 'Zurücksetzen',
-            copied: 'Kopiert ✓',
             remove: 'Entfernen',
-            attribution: 'Basis: echte Top-Doppelkampf-Teams (op.gg / victoryroad).',
+            attribution: 'Basis: In-Game-Doppelkampf-Analyse (championsbattledata.com).',
         },
         en: {
-            intro: 'Build a team from real top teams: pick a Pokémon — the builder then shows only Pokémon it is played alongside. Each further pick narrows the pool.',
+            intro: 'Build a doubles team: pick a Pokémon — the builder shows who it is played alongside (in-game analysis). Each further pick narrows the pool to Pokémon played with ALL of your picks.',
             searchPh: '🔎 Add a Pokémon (German or English) …',
             picked: (n) => `${n} / ${MAX} selected`,
-            matching: (n) => `${n} matching teams`,
             suggestTitle: 'Plays with',
-            suggestHint: 'Ranked by how often they share a team — the number is the team count. Tap to add.',
-            teamsTitle: 'Matching teams',
+            suggestHintFirst: 'Most-played Pokémon — tap to start, or search above.',
+            suggestHint: 'Only Pokémon played with ALL of your picks (doubles). Order = how well it fits.',
             none: 'No further combination found — remove a Pokémon.',
-            empty: 'Pick a Pokémon above to start.',
+            empty: 'Pick a Pokémon to start.',
             clear: 'Reset',
-            copied: 'Copied ✓',
             remove: 'Remove',
-            attribution: 'Based on real top doubles teams (op.gg / victoryroad).',
+            attribution: 'Based on in-game doubles analysis (championsbattledata.com).',
         },
     };
     function t() { return LABELS[uiLang()]; }
@@ -64,13 +73,40 @@
     async function load() {
         if (_loaded) return;
         try {
-            const r = await fetch(`${DATA_URL}?t=${Date.now()}`);
+            const r = await fetch(`${USAGE_URL}?t=${Date.now()}`);
             if (!r.ok) throw new Error('HTTP ' + r.status);
             const j = await r.json();
-            _teams = (j && j.teams) || [];
+            const pk = (j && j.pokemon) || {};
+
+            // Proper form display names live only in the teammate lists.
+            const displayBySlug = {};
+            Object.keys(pk).forEach(slug => {
+                ((pk[slug].doubles || {}).teammate || []).forEach(x => {
+                    if (x && x.name) { const s = slugify(x.name); if (!displayBySlug[s]) displayBySlug[s] = x.name; }
+                });
+            });
+
+            _bySlug = {}; _mons = []; _degree = {};
+            Object.keys(pk).forEach(slug => {
+                const e = pk[slug] || {};
+                const mates = ((e.doubles || {}).teammate || []).map(x => slugify(x && x.name)).filter(Boolean);
+                const mon = {
+                    slug,
+                    display: displayBySlug[slug] || titleFromSlug(slug) || e.name || slug,
+                    baseEn: e.name || '',
+                    mates,
+                };
+                _bySlug[slug] = mon;
+                _mons.push(mon);
+            });
+            _mons.forEach(m => {
+                const seen = new Set();
+                m.mates.forEach(s => { if (seen.has(s)) return; seen.add(s); _degree[s] = (_degree[s] || 0) + 1; });
+            });
+            _mons.sort((a, b) => a.display.localeCompare(b.display));
         } catch (err) {
-            console.warn('[SideQuest/builder] failed to load teams', err);
-            _teams = [];
+            console.warn('[SideQuest/builder] failed to load usage', err);
+            _bySlug = {}; _mons = []; _degree = {};
         }
         _loaded = true;
     }
@@ -84,78 +120,78 @@
     }
 
     // ── Co-occurrence core ──────────────────────────────────────────────────
-    function teamNames(team) { return (team.pokemon || []).map(p => (p && p.name) || '').filter(Boolean); }
-
-    function matchingTeams() {
-        if (!_teams) return [];
-        const sel = _team.map(norm);
-        return _teams.filter(tm => {
-            const ns = teamNames(tm).map(norm);
-            return sel.every(s => ns.indexOf(s) !== -1);
-        });
-    }
-
-    // Species that appear on the matching teams (excluding the ones already
-    // picked), each with the number of matching teams it appears on.
+    // Candidate X (a slug) is valid when it is a teammate of EVERY selected
+    // Pokémon; ranked by the sum of its positions across those teammate lists
+    // (lower = fits all of them higher up). With nothing picked, rank by overall
+    // popularity (how many lists it appears on).
     function candidates() {
-        const mt = matchingTeams();
-        const selN = new Set(_team.map(norm));
-        const c = new Map();     // norm → { name, count }
-        mt.forEach(tm => {
-            const seen = new Set();
-            teamNames(tm).forEach(n => {
-                const k = norm(n);
-                if (selN.has(k) || seen.has(k)) return;
-                seen.add(k);
-                const e = c.get(k) || { name: n, count: 0 };
-                e.count++; c.set(k, e);
-            });
-        });
-        return [...c.values()].sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
+        const sel = new Set(_team);
+        if (_team.length === 0) {
+            return _mons
+                .filter(m => !sel.has(m.slug))
+                .map(m => ({ slug: m.slug, score: -(_degree[m.slug] || 0) }))
+                .sort((a, b) => a.score - b.score || dispSlug(a.slug).localeCompare(dispSlug(b.slug)));
+        }
+        const lists = _team.map(s => (_bySlug[s] && _bySlug[s].mates) || []);
+        const out = [];
+        const done = new Set();
+        for (const cs of (lists[0] || [])) {
+            if (sel.has(cs) || done.has(cs)) continue;
+            done.add(cs);
+            let ok = true, posSum = 0;
+            for (const list of lists) {
+                const idx = list.indexOf(cs);
+                if (idx < 0) { ok = false; break; }
+                posSum += idx;
+            }
+            if (ok) out.push({ slug: cs, score: posSum });
+        }
+        return out.sort((a, b) => a.score - b.score || dispSlug(a.slug).localeCompare(dispSlug(b.slug)));
     }
 
     // ── Names / sprites ─────────────────────────────────────────────────────
-    function deName(sp) { return _deNames[sp] || _deNames[String(sp || '').trim()] || ''; }
-    function displayName(sp) { const de = deName(sp); return (uiLang() === 'de' && de) ? de : sp; }
-    function searchHay(sp) { return norm(sp) + ' ' + norm(deName(sp)); }
-    function icon(name) {
-        const slug = norm(name).replace(/\s+/g, '-');
+    function dispSlug(slug) { const m = _bySlug[slug]; return (m && m.display) || titleFromSlug(slug); }
+    function displayName(slug) {
+        const m = _bySlug[slug];
+        if (uiLang() === 'de' && m && m.baseEn) {
+            const de = _deNames[m.baseEn];
+            // Pure base form → localise; form (Hisuian/Mega/…) → keep the English
+            // form name (German form names aren't in the base-name map).
+            if (de && norm(m.display) === norm(m.baseEn)) return de;
+        }
+        return dispSlug(slug);
+    }
+    function searchHay(slug) {
+        const m = _bySlug[slug];
+        return norm(dispSlug(slug)) + ' ' + norm((m && _deNames[m.baseEn]) || '');
+    }
+    function icon(slug) {
         if (window.ArchetypeIcons && typeof window.ArchetypeIcons.slugIconHtml === 'function') {
-            return window.ArchetypeIcons.slugIconHtml(slug, { size: 'md', alt: name });
+            return window.ArchetypeIcons.slugIconHtml(slug, { size: 'md', alt: dispSlug(slug) });
         }
         const url = 'https://r2.limitlesstcg.net/pokemon/gen9/' + slug + '.png';
-        return `<img class="tcg-pokemon-icon tcg-pokemon-icon--md" src="${url}" alt="${escapeHtml(name)}" loading="lazy" onerror="this.style.display='none'">`;
+        return `<img class="tcg-pokemon-icon tcg-pokemon-icon--md" src="${url}" alt="${escapeHtml(dispSlug(slug))}" loading="lazy" onerror="this.style.display='none'">`;
     }
 
     // ── Mutations ───────────────────────────────────────────────────────────
-    function addMon(sp) {
-        if (_team.length >= MAX || _team.some(x => norm(x) === norm(sp))) return;
-        _team.push(sp); _query = '';
+    function addMon(slug) {
+        if (_team.length >= MAX || _team.indexOf(slug) !== -1) return;
+        _team.push(slug); _query = '';
         render();
     }
-    function removeMon(sp) { _team = _team.filter(x => norm(x) !== norm(sp)); render(); }
+    function removeMon(slug) { _team = _team.filter(s => s !== slug); render(); }
     function clearAll() { _team = []; _query = ''; render(); }
-
-    async function copyCode(btn) {
-        const code = btn.getAttribute('data-code');
-        if (!code) return;
-        try { await navigator.clipboard.writeText(code); } catch (_) { /* ignore */ }
-        const old = btn.textContent;
-        btn.textContent = t().copied;
-        btn.classList.add('is-copied');
-        setTimeout(() => { btn.textContent = old; btn.classList.remove('is-copied'); }, 1400);
-    }
 
     // ── Render ──────────────────────────────────────────────────────────────
     function suggestionsHtml(l) {
         const q = norm(_query);
-        const cand = candidates().filter(c => !q || searchHay(c.name).indexOf(q) !== -1);
+        let cand = candidates().filter(c => !q || searchHay(c.slug).indexOf(q) !== -1);
+        if (_team.length === 0 && !q) cand = cand.slice(0, EMPTY_CAP);
         if (!cand.length) return `<p class="sqb-none">${escapeHtml(_team.length ? l.none : l.empty)}</p>`;
         return cand.map(c =>
-            `<button type="button" class="sqb-sugg" data-add="${escapeHtml(c.name)}">
-                ${icon(c.name)}
-                <span class="sqb-sugg-name">${escapeHtml(displayName(c.name))}</span>
-                <span class="sqb-sugg-count">${c.count}</span>
+            `<button type="button" class="sqb-sugg" data-add="${escapeHtml(c.slug)}">
+                ${icon(c.slug)}
+                <span class="sqb-sugg-name">${escapeHtml(displayName(c.slug))}</span>
             </button>`).join('');
     }
 
@@ -163,28 +199,13 @@
         const host = document.getElementById(HOST_ID);
         if (!host) return;
         const l = t();
-        const mt = matchingTeams();
 
         const chips = _team.length
-            ? _team.map(sp =>
-                `<button type="button" class="sqb-chip" data-remove="${escapeHtml(sp)}" title="${escapeHtml(l.remove)}">
-                    ${icon(sp)}<span class="sqb-chip-name">${escapeHtml(displayName(sp))}</span><span class="sqb-chip-x">×</span>
+            ? _team.map(slug =>
+                `<button type="button" class="sqb-chip" data-remove="${escapeHtml(slug)}" title="${escapeHtml(l.remove)}">
+                    ${icon(slug)}<span class="sqb-chip-name">${escapeHtml(displayName(slug))}</span><span class="sqb-chip-x">×</span>
                 </button>`).join('')
             : `<span class="sqb-empty">${escapeHtml(l.empty)}</span>`;
-
-        const teamsHtml = mt.slice(0, PREVIEW_TEAMS).map(tm => {
-            const sprites = teamNames(tm).map(n =>
-                `<span class="sqb-team-mon" title="${escapeHtml(displayName(n))}">${icon(n)}</span>`).join('');
-            const code = tm.replica_code || '';
-            const name = tm.team_name || tm.trainer || '';
-            return `<div class="sqb-team">
-                <div class="sqb-team-mons">${sprites}</div>
-                <div class="sqb-team-meta">
-                    <span class="sqb-team-name">${escapeHtml(name)}</span>
-                    ${code ? `<button type="button" class="sqb-code" data-code="${escapeHtml(code)}">${escapeHtml(code)}</button>` : ''}
-                </div>
-            </div>`;
-        }).join('');
 
         host.innerHTML = `
             <div class="sqb">
@@ -201,10 +222,9 @@
                            value="${escapeHtml(_query)}" autocomplete="off" spellcheck="false"
                            aria-label="${escapeHtml(l.searchPh)}">
                 </div>
-                <h4 class="sqb-sec">${escapeHtml(l.suggestTitle)} <span class="sqb-matching">· ${escapeHtml(l.matching(mt.length))}</span></h4>
-                <p class="sqb-hint">${escapeHtml(l.suggestHint)}</p>
+                <h4 class="sqb-sec">${escapeHtml(l.suggestTitle)}</h4>
+                <p class="sqb-hint">${escapeHtml(_team.length ? l.suggestHint : l.suggestHintFirst)}</p>
                 <div class="sqb-suggs">${suggestionsHtml(l)}</div>
-                ${mt.length ? `<h4 class="sqb-sec">${escapeHtml(l.teamsTitle)}</h4><div class="sqb-teams">${teamsHtml}</div>` : ''}
                 <p class="sqb-attr">${escapeHtml(l.attribution)}</p>
             </div>`;
         wire(host);
@@ -215,7 +235,6 @@
         if (search) {
             search.addEventListener('input', () => {
                 _query = search.value;
-                // Update only the suggestions list so the input keeps focus/caret.
                 const box = host.querySelector('.sqb-suggs');
                 if (box) { box.innerHTML = suggestionsHtml(t()); wireSuggs(box); }
             });
@@ -223,7 +242,6 @@
         wireSuggs(host);
         host.querySelectorAll('[data-remove]').forEach(b => b.addEventListener('click', () => removeMon(b.getAttribute('data-remove'))));
         const clr = host.querySelector('.sqb-clear'); if (clr) clr.addEventListener('click', clearAll);
-        host.querySelectorAll('.sqb-code').forEach(b => b.addEventListener('click', () => copyCode(b)));
     }
     function wireSuggs(scope) {
         scope.querySelectorAll('[data-add]').forEach(b => b.addEventListener('click', () => addMon(b.getAttribute('data-add'))));

@@ -165,12 +165,32 @@
         const m = _bySlug[slug];
         return norm(dispSlug(slug)) + ' ' + norm((m && _deNames[m.baseEn]) || '');
     }
+    // The usage slug ("alolan-ninetales", "basculegion-male",
+    // "maushold-family-of-four") is NOT the Limitless sprite slug. Derive the
+    // sprite slug from the display NAME the way the app's icon helper does:
+    // a regional/mega prefix combines with the species ("Alolan Ninetales" →
+    // ninetales-alola, "Hisuian Zoroark" → zoroark-hisui); otherwise use the base
+    // species word and drop trailing form words ("Basculegion Male" →
+    // basculegion, "Maushold Family of Four" → maushold).
+    const _FORM_SUFFIX = {
+        alolan: 'alola', alola: 'alola', galarian: 'galar', galar: 'galar',
+        hisuian: 'hisui', hisui: 'hisui', paldean: 'paldea', paldea: 'paldea',
+        mega: 'mega', bloodmoon: 'bloodmoon',
+    };
+    function spriteSlug(name) {
+        const words = norm(name).split(/[\s-]+/).filter(Boolean);
+        if (!words.length) return '';
+        if (_FORM_SUFFIX[words[0]] && words[1]) return words[1] + '-' + _FORM_SUFFIX[words[0]];
+        return words[0];
+    }
     function icon(slug) {
+        const name = dispSlug(slug);
+        const sprite = spriteSlug(name);
         if (window.ArchetypeIcons && typeof window.ArchetypeIcons.slugIconHtml === 'function') {
-            return window.ArchetypeIcons.slugIconHtml(slug, { size: 'md', alt: dispSlug(slug) });
+            return window.ArchetypeIcons.slugIconHtml(sprite, { size: 'md', alt: name });
         }
-        const url = 'https://r2.limitlesstcg.net/pokemon/gen9/' + slug + '.png';
-        return `<img class="tcg-pokemon-icon tcg-pokemon-icon--md" src="${url}" alt="${escapeHtml(dispSlug(slug))}" loading="lazy" onerror="this.style.display='none'">`;
+        const url = 'https://r2.limitlesstcg.net/pokemon/gen9/' + sprite + '.png';
+        return `<img class="tcg-pokemon-icon tcg-pokemon-icon--md" src="${url}" alt="${escapeHtml(name)}" loading="lazy" onerror="this.style.display='none'">`;
     }
 
     // ── Mutations ───────────────────────────────────────────────────────────

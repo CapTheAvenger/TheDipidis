@@ -13,6 +13,7 @@
 
     const DATA_URL = 'data/champions_replica_teams.json';
     const STRATEGY_URL = 'data/champions_team_strategies.json';
+    const DE_NAMES_URL = 'data/pokemon_names_de.json';
     const HOST_ID  = 'sideQuestTeamsHost';
     const STATUS_ID = 'sideQuestStatus';
 
@@ -20,6 +21,8 @@
     let _loaded = false;
     let _strategies = null;        // { replicaCode: {de:{…}, en:{…}, …} }
     let _strategiesLoaded = false;
+    let _deNames = {};             // { "Snorlax": "Relaxo", … } EN → DE species name
+    let _deNamesLoaded = false;
 
     async function loadData() {
         if (_loaded && _data) return _data;
@@ -52,6 +55,29 @@
         }
         _strategiesLoaded = true;
         return _strategies;
+    }
+
+    // German species names (EN → DE) so every Pokémon search matches both
+    // languages. Fail-soft: if the file 404s, search just stays English-only.
+    async function loadDeNames() {
+        if (_deNamesLoaded) return _deNames;
+        try {
+            const resp = await fetch(`${DE_NAMES_URL}?t=${Date.now()}`);
+            if (!resp.ok) throw new Error('HTTP ' + resp.status);
+            const json = await resp.json();
+            if (json && typeof json === 'object') _deNames = json;
+        } catch (err) {
+            _deNames = {};
+        }
+        _deNamesLoaded = true;
+        return _deNames;
+    }
+
+    // Searchable haystack for a species: its English name AND its German name,
+    // normalised — so "Relaxo" finds Snorlax and "Snorlax" finds it too.
+    function speciesSearchHay(sp) {
+        const de = _deNames[sp] || _deNames[String(sp || '').trim()] || '';
+        return normSpecies(sp) + ' ' + normSpecies(de);
     }
 
     // UI labels for the strategy modal. The strategy CONTENT comes
@@ -937,7 +963,7 @@
 
         const updateGrid = () => {
             const f = normSpecies(search ? search.value : '');
-            const list = (f ? _allSpecies.filter(s => normSpecies(s).indexOf(f) !== -1) : _allSpecies.slice())
+            const list = (f ? _allSpecies.filter(s => speciesSearchHay(s).indexOf(f) !== -1) : _allSpecies.slice())
                 // Most-used first (by # of teams running it), then alphabetical.
                 .sort((a, b) => (_speciesCounts.get(b) || 0) - (_speciesCounts.get(a) || 0)
                                 || a.localeCompare(b));
@@ -1171,7 +1197,7 @@
         // after a mark click run off the cached data and shouldn't
         // flash "Loading…".
         if (status && !_loaded) status.textContent = 'Loading…';
-        const [data] = await Promise.all([loadData(), loadStrategies()]);
+        const [data] = await Promise.all([loadData(), loadStrategies(), loadDeNames()]);
         const meta  = data._meta || {};
         const teams = Array.isArray(data.teams) ? data.teams : [];
         if (status) status.textContent = '';

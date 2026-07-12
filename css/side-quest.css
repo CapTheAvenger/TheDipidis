@@ -2062,6 +2062,25 @@ body.sqp-d-open { overflow: hidden; }
 .sqp-d-name-main { font-size: 1.25rem; font-weight: 800; color: #2c3e50; }
 .sqp-d-name-sub { display: block; color: #6b7280; font-size: 0.74rem; margin-top: 2px; }
 .sqp-d-types { display: flex; gap: 6px; margin-left: auto; }
+/* Defensive type matchups under the type badges (weak / immune / resist). */
+.sqp-fx { display: flex; flex-direction: column; gap: 6px; margin: 10px 0 2px; }
+.sqp-fx-row { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.sqp-fx-lbl {
+    font-size: 0.76rem; font-weight: 800; color: #6b7280;
+    flex: 0 0 auto; min-width: 96px;
+}
+.sqp-fx-row.is-weak   .sqp-fx-lbl { color: #c0392b; }
+.sqp-fx-row.is-immune .sqp-fx-lbl { color: #2c3e50; }
+.sqp-fx-row.is-resist .sqp-fx-lbl { color: #2e9d60; }
+.sqp-fx-badges { display: flex; flex-wrap: wrap; gap: 4px; }
+.sqp-fx-badge {
+    display: inline-flex; align-items: center; gap: 3px;
+    padding: 1px 7px; border-radius: 999px;
+    font-size: 0.72rem; font-weight: 700; color: #fff;
+    text-transform: capitalize;
+}
+.sqp-fx-mult { font-size: 0.64rem; font-weight: 800; opacity: 0.9; }
+@media (max-width: 480px) { .sqp-fx-lbl { min-width: 100%; } }
 .sqp-d-searchwrap { position: relative; margin: 12px 0 8px; }
 .sqp-d-search {
     width: 100%; box-sizing: border-box;

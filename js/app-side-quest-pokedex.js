@@ -79,6 +79,7 @@
             fmtDoubles: 'Doppelkämpfe',
             fmtSingles: 'Einzelkämpfe',
             secStats: 'Statuswerte (Lv. 50)',
+            fxWeak: 'Schwach gegen', fxResist: 'Resistent gegen', fxImmune: 'Immun gegen',
             secNature: 'Wesen',
             secSpread: 'Statuswertpunkte (SP)',
             secMoves: 'Attacken',
@@ -128,6 +129,7 @@
             fmtDoubles: 'Doubles',
             fmtSingles: 'Singles',
             secStats: 'Stats (Lv. 50)',
+            fxWeak: 'Weak to', fxResist: 'Resists', fxImmune: 'Immune to',
             secNature: 'Nature',
             secSpread: 'Stat points (SP)',
             secMoves: 'Moves',
@@ -377,6 +379,67 @@
         Steel: 'Stahl', Fairy: 'Fee',
     };
     function deType(en) { return _DE_TYPE[en] || en; }
+
+    // Defensive type chart (Gen 6+). _TYPE_FX[attacker][defender] = multiplier;
+    // anything not listed is ×1. Used to show what a Pokémon is weak to / immune
+    // to / resists, based on its own type(s).
+    const _TYPE_FX = {
+        Normal:   { Rock: 0.5, Ghost: 0, Steel: 0.5 },
+        Fire:     { Fire: 0.5, Water: 0.5, Grass: 2, Ice: 2, Bug: 2, Rock: 0.5, Dragon: 0.5, Steel: 2 },
+        Water:    { Fire: 2, Water: 0.5, Grass: 0.5, Ground: 2, Rock: 2, Dragon: 0.5 },
+        Electric: { Water: 2, Electric: 0.5, Grass: 0.5, Ground: 0, Flying: 2, Dragon: 0.5 },
+        Grass:    { Fire: 0.5, Water: 2, Grass: 0.5, Poison: 0.5, Ground: 2, Flying: 0.5, Bug: 0.5, Rock: 2, Dragon: 0.5, Steel: 0.5 },
+        Ice:      { Fire: 0.5, Water: 0.5, Grass: 2, Ice: 0.5, Ground: 2, Flying: 2, Dragon: 2, Steel: 0.5 },
+        Fighting: { Normal: 2, Ice: 2, Poison: 0.5, Flying: 0.5, Psychic: 0.5, Bug: 0.5, Rock: 2, Ghost: 0, Dark: 2, Steel: 2, Fairy: 0.5 },
+        Poison:   { Grass: 2, Poison: 0.5, Ground: 0.5, Rock: 0.5, Ghost: 0.5, Steel: 0, Fairy: 2 },
+        Ground:   { Fire: 2, Electric: 2, Grass: 0.5, Poison: 2, Flying: 0, Bug: 0.5, Rock: 2, Steel: 2 },
+        Flying:   { Electric: 0.5, Grass: 2, Fighting: 2, Bug: 2, Rock: 0.5, Steel: 0.5 },
+        Psychic:  { Fighting: 2, Poison: 2, Psychic: 0.5, Dark: 0, Steel: 0.5 },
+        Bug:      { Fire: 0.5, Grass: 2, Fighting: 0.5, Poison: 0.5, Flying: 0.5, Psychic: 2, Ghost: 0.5, Dark: 2, Steel: 0.5, Fairy: 0.5 },
+        Rock:     { Fire: 2, Ice: 2, Fighting: 0.5, Ground: 0.5, Flying: 2, Bug: 2, Steel: 0.5 },
+        Ghost:    { Normal: 0, Psychic: 2, Ghost: 2, Dark: 0.5 },
+        Dragon:   { Dragon: 2, Steel: 0.5, Fairy: 0 },
+        Dark:     { Fighting: 0.5, Psychic: 2, Ghost: 2, Dark: 0.5, Fairy: 0.5 },
+        Steel:    { Fire: 0.5, Water: 0.5, Electric: 0.5, Ice: 2, Rock: 2, Steel: 0.5, Fairy: 2 },
+        Fairy:    { Fire: 0.5, Fighting: 2, Poison: 0.5, Dragon: 2, Dark: 2, Steel: 0.5 },
+    };
+
+    // For a Pokémon of type(s) t1(/t2), classify every attacking type into
+    // weaknesses (×2 / ×4), resistances (×½ / ×¼) and immunities (×0).
+    function typeMatchups(t1, t2) {
+        const weak = [], resist = [], immune = [];
+        const fx = (A, d) => (_TYPE_FX[A] && _TYPE_FX[A][d] != null) ? _TYPE_FX[A][d] : 1;
+        for (const A of TYPES_EN) {
+            const m = fx(A, t1) * (t2 ? fx(A, t2) : 1);
+            if (m === 0) immune.push({ type: A, mult: 0 });
+            else if (m > 1) weak.push({ type: A, mult: m });
+            else if (m < 1) resist.push({ type: A, mult: m });
+        }
+        weak.sort((a, b) => b.mult - a.mult);      // ×4 before ×2
+        resist.sort((a, b) => a.mult - b.mult);    // ×¼ before ×½
+        return { weak, resist, immune };
+    }
+
+    function multLabel(m) {
+        return m === 0 ? '×0' : m === 4 ? '×4' : m === 2 ? '×2'
+             : m === 0.5 ? '×½' : m === 0.25 ? '×¼' : '×' + m;
+    }
+
+    function typeMatchupHtml(e) {
+        if (!e || !e.t1) return '';
+        const l = t();
+        const de = uiLang() === 'de';
+        const { weak, resist, immune } = typeMatchups(e.t1, e.t2);
+        const row = (title, arr, cls) => {
+            if (!arr.length) return '';
+            const badges = arr.map(x =>
+                `<span class="sqp-fx-badge sq-play-type-${x.type.toLowerCase()}">${escapeHtml(de ? deType(x.type) : x.type)}<span class="sqp-fx-mult">${multLabel(x.mult)}</span></span>`
+            ).join('');
+            return `<div class="sqp-fx-row ${cls}"><span class="sqp-fx-lbl">${escapeHtml(title)}</span><span class="sqp-fx-badges">${badges}</span></div>`;
+        };
+        const rows = row(l.fxWeak, weak, 'is-weak') + row(l.fxImmune, immune, 'is-immune') + row(l.fxResist, resist, 'is-resist');
+        return rows ? `<div class="sqp-fx">${rows}</div>` : '';
+    }
 
     // Most-common SP/EV spread (from real top teams) — German labels.
     const _STAT_LABEL_DE = { HP: 'KP', Atk: 'Ang', Def: 'Vert', SpA: 'SpAng', SpD: 'SpVert', Spe: 'Init' };
@@ -703,6 +766,7 @@
                     </div>
                     <div class="sqp-d-types">${typeBadge(e.t1, e.t1de)} ${e.t2 ? typeBadge(e.t2, e.t2de) : ''}</div>
                 </div>
+                ${typeMatchupHtml(e)}
                 ${megaAb}
                 <div class="sqp-d-searchwrap">
                     <input type="search" class="sqp-d-search" placeholder="${escapeHtml(l.detailSearchPh)}"

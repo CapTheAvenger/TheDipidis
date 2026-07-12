@@ -2193,3 +2193,75 @@ body.sqp-d-open { overflow: hidden; }
 .sqp-bf-name { font-weight: 700; color: #2c3e50; }
 .sqp-bf-sub { display: block; font-weight: 500; color: #6b7280; font-size: 0.74rem; margin-top: 1px; }
 .sqp-bf-types { display: flex; gap: 5px; flex-shrink: 0; }
+
+/* ── Team Builder (co-occurrence) ──────────────────────────────────────────── */
+.sqb { padding: 2px 0 8px; }
+.sqb-intro { font-size: 0.9rem; color: #4b5563; margin: 4px 0 12px; line-height: 1.4; }
+.sqb-team-bar {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    flex-wrap: wrap; padding: 8px; border-radius: 12px;
+    background: rgba(52, 152, 219, 0.06); border: 1px solid rgba(52, 152, 219, 0.15);
+}
+.sqb-chips { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.sqb-empty { font-size: 0.85rem; color: #94a3b8; padding: 4px 2px; }
+.sqb-chip {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 3px 8px 3px 4px; border-radius: 999px; cursor: pointer;
+    background: #fff; border: 1px solid #cbd5e1; font-weight: 700; color: #1f2d3d;
+    font-size: 0.82rem;
+}
+.sqb-chip:hover { border-color: #ef4444; }
+.sqb-chip .tcg-pokemon-icon { width: 26px; height: 26px; }
+.sqb-chip-x { color: #ef4444; font-weight: 900; margin-left: 2px; }
+.sqb-team-bar-meta { display: flex; align-items: center; gap: 10px; margin-left: auto; }
+.sqb-count { font-size: 0.82rem; font-weight: 800; color: #2c3e50; white-space: nowrap; }
+.sqb-clear {
+    font-size: 0.78rem; font-weight: 700; color: #64748b; cursor: pointer;
+    background: none; border: none; text-decoration: underline;
+}
+.sqb-searchwrap { margin: 12px 0 6px; }
+.sqb-search {
+    width: 100%; box-sizing: border-box; padding: 11px 14px;
+    border-radius: 12px; border: 1px solid #d1d5db; font-size: 1rem; background: #fff;
+}
+.sqb-search:focus { outline: none; border-color: #3498db; box-shadow: 0 0 0 3px rgba(52,152,219,0.15); }
+.sqb-sec { font-size: 0.82rem; font-weight: 900; letter-spacing: 0.04em; text-transform: uppercase;
+    color: #16a34a; margin: 16px 0 2px; }
+.sqb-matching { color: #64748b; font-weight: 700; text-transform: none; letter-spacing: 0; }
+.sqb-hint { font-size: 0.78rem; color: #94a3b8; margin: 0 0 8px; }
+.sqb-suggs { display: flex; flex-wrap: wrap; gap: 6px; }
+.sqb-sugg {
+    display: inline-flex; align-items: center; gap: 6px; cursor: pointer;
+    padding: 4px 10px 4px 5px; border-radius: 999px;
+    background: #f1f5f9; border: 1px solid #e2e8f0; color: #1f2d3d; font-weight: 700;
+    font-size: 0.85rem;
+}
+.sqb-sugg:hover { background: #dbeafe; border-color: #93c5fd; }
+.sqb-sugg .tcg-pokemon-icon { width: 30px; height: 30px; }
+.sqb-sugg-count {
+    font-size: 0.72rem; font-weight: 800; color: #0369a1;
+    background: rgba(3,105,161,0.1); border-radius: 999px; padding: 0 6px; min-width: 18px; text-align: center;
+}
+.sqb-none, .sqb-loading { font-size: 0.9rem; color: #94a3b8; padding: 6px 2px; }
+.sqb-teams { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
+.sqb-team {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    flex-wrap: wrap; padding: 8px 10px; border-radius: 12px;
+    background: #fff; border: 1px solid #e5e7eb;
+}
+.sqb-team-mons { display: flex; gap: 2px; flex-wrap: wrap; }
+.sqb-team-mon .tcg-pokemon-icon { width: 34px; height: 34px; }
+.sqb-team-meta { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+.sqb-team-name { font-size: 0.78rem; color: #64748b; font-weight: 600; max-width: 160px;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sqb-code {
+    font-family: ui-monospace, Menlo, monospace; font-size: 0.8rem; font-weight: 800;
+    letter-spacing: 0.06em; cursor: pointer; color: #b45309;
+    background: #fffbeb; border: 1px solid #fcd34d; border-radius: 8px; padding: 3px 8px;
+}
+.sqb-code.is-copied { color: #16a34a; border-color: #86efac; background: #f0fdf4; }
+.sqb-attr { font-size: 0.72rem; color: #9ca3af; margin-top: 14px; }
+@media (max-width: 480px) {
+    .sqb-team-name { max-width: 110px; }
+    .sqb-team-bar-meta { margin-left: 0; width: 100%; justify-content: space-between; }
+}

@@ -2265,3 +2265,6 @@ body.sqp-d-open { overflow: hidden; }
     .sqb-team-name { max-width: 110px; }
     .sqb-team-bar-meta { margin-left: 0; width: 100%; justify-content: space-between; }
 }
+/* Partial-overlap suggestions (<100%) in the Team Builder get an amber count. */
+.sqb-sugg.is-partial { background: #fffbeb; border-color: #fde68a; }
+.sqb-sugg.is-partial .sqb-sugg-count { color: #b45309; background: rgba(180,83,9,0.12); }

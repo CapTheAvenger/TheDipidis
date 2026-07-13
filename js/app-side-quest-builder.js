@@ -47,7 +47,7 @@
             picked: (n) => `${n} / ${MAX} gewählt`,
             suggestTitle: 'Passt dazu',
             suggestHintFirst: 'Meistgespielte Pokémon — tippen zum Starten, oder oben suchen.',
-            suggestHint: 'Nur Pokémon, die mit allen Gewählten zusammen gespielt werden (Doppelkampf). Reihenfolge = wie gut es passt.',
+            suggestHint: 'Sortiert nach Überschneidung — % = mit wie vielen deiner Gewählten das Pokémon zusammen gespielt wird (100 % = mit allen). Tippen zum Hinzufügen.',
             none: 'Keine weitere Kombination gefunden — nimm ein Pokémon raus.',
             empty: 'Wähl ein Pokémon, um zu starten.',
             clear: 'Zurücksetzen',
@@ -60,7 +60,7 @@
             picked: (n) => `${n} / ${MAX} selected`,
             suggestTitle: 'Plays with',
             suggestHintFirst: 'Most-played Pokémon — tap to start, or search above.',
-            suggestHint: 'Only Pokémon played with ALL of your picks (doubles). Order = how well it fits.',
+            suggestHint: 'Sorted by overlap — % is how many of your picks it is played alongside (100% = all). Tap to add.',
             none: 'No further combination found — remove a Pokémon.',
             empty: 'Pick a Pokémon to start.',
             clear: 'Reset',
@@ -120,33 +120,32 @@
     }
 
     // ── Co-occurrence core ──────────────────────────────────────────────────
-    // Candidate X (a slug) is valid when it is a teammate of EVERY selected
-    // Pokémon; ranked by the sum of its positions across those teammate lists
-    // (lower = fits all of them higher up). With nothing picked, rank by overall
-    // popularity (how many lists it appears on).
+    // Rank every candidate by OVERLAP: the share of the selected Pokémon whose
+    // teammate list contains it. 100 % = played alongside all of them; then 75 %
+    // (3 of 4), 50 %, … so the pool never dead-ends when no single Pokémon has
+    // been played with the whole selection. Ties break on the summed list
+    // position (fits higher up). With nothing picked, rank by overall popularity.
     function candidates() {
         const sel = new Set(_team);
         if (_team.length === 0) {
             return _mons
                 .filter(m => !sel.has(m.slug))
-                .map(m => ({ slug: m.slug, score: -(_degree[m.slug] || 0) }))
+                .map(m => ({ slug: m.slug, count: 0, overlap: 1, score: -(_degree[m.slug] || 0) }))
                 .sort((a, b) => a.score - b.score || dispSlug(a.slug).localeCompare(dispSlug(b.slug)));
         }
-        const lists = _team.map(s => (_bySlug[s] && _bySlug[s].mates) || []);
-        const out = [];
-        const done = new Set();
-        for (const cs of (lists[0] || [])) {
-            if (sel.has(cs) || done.has(cs)) continue;
-            done.add(cs);
-            let ok = true, posSum = 0;
-            for (const list of lists) {
-                const idx = list.indexOf(cs);
-                if (idx < 0) { ok = false; break; }
-                posSum += idx;
-            }
-            if (ok) out.push({ slug: cs, score: posSum });
-        }
-        return out.sort((a, b) => a.score - b.score || dispSlug(a.slug).localeCompare(dispSlug(b.slug)));
+        const agg = new Map();   // slug → { count, posSum }
+        _team.forEach(s => {
+            const mates = (_bySlug[s] && _bySlug[s].mates) || [];
+            mates.forEach((ts, i) => {
+                if (sel.has(ts)) return;
+                const e = agg.get(ts) || { count: 0, posSum: 0 };
+                e.count++; e.posSum += i; agg.set(ts, e);
+            });
+        });
+        const n = _team.length;
+        return [...agg.entries()]
+            .map(([slug, e]) => ({ slug, count: e.count, overlap: e.count / n, score: e.posSum }))
+            .sort((a, b) => b.count - a.count || a.score - b.score || dispSlug(a.slug).localeCompare(dispSlug(b.slug)));
     }
 
     // ── Names / sprites ─────────────────────────────────────────────────────
@@ -208,11 +207,19 @@
         let cand = candidates().filter(c => !q || searchHay(c.slug).indexOf(q) !== -1);
         if (_team.length === 0 && !q) cand = cand.slice(0, EMPTY_CAP);
         if (!cand.length) return `<p class="sqb-none">${escapeHtml(_team.length ? l.none : l.empty)}</p>`;
-        return cand.map(c =>
-            `<button type="button" class="sqb-sugg" data-add="${escapeHtml(c.slug)}">
+        // Overlap % is only meaningful with ≥ 2 picks (with 1 pick everything is
+        // 100 % — the mon's own teammate list).
+        const showPct = _team.length >= 2;
+        return cand.map(c => {
+            const pct = showPct
+                ? `<span class="sqb-sugg-count">${Math.round(c.overlap * 100)}%</span>` : '';
+            const partial = showPct && c.overlap < 1 ? ' is-partial' : '';
+            return `<button type="button" class="sqb-sugg${partial}" data-add="${escapeHtml(c.slug)}">
                 ${icon(c.slug)}
                 <span class="sqb-sugg-name">${escapeHtml(displayName(c.slug))}</span>
-            </button>`).join('');
+                ${pct}
+            </button>`;
+        }).join('');
     }
 
     function render() {

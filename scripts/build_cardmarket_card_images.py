@@ -34,8 +34,10 @@ Output CSV columns:
 
 Mirroring note (for the sister project): the S3 bucket is hotlink-protected — a
 bare request returns HTTP 403. Fetch with a browser User-Agent AND a
-`Referer: https://www.cardmarket.com/` header (GET, not HEAD). That is exactly how
-the verify step below confirms the URLs.
+`Referer: https://www.cardmarket.com/` header (GET, not HEAD). Cardmarket also
+stores a bogus `Content-Type: multerS3.AUTO_CONTENT_TYPE` on these objects, so do
+NOT trust the header — the bytes are a normal JPEG (magic FF D8 FF). That is
+exactly how the verify step below confirms the URLs.
 """
 
 import argparse
@@ -176,14 +178,19 @@ def verify_sample(rows, per_group=4, timeout=25):
             url = group[i]["image_url"]
             checked += 1
             try:
-                headers = dict(VERIFY_HEADERS, **{"Range": "bytes=0-0"})
+                headers = dict(VERIFY_HEADERS, **{"Range": "bytes=0-3"})
                 req = urllib.request.Request(url, method="GET", headers=headers)
                 with urllib.request.urlopen(req, timeout=timeout) as resp:
                     ct = resp.headers.get("Content-Type", "")
-                    if resp.status in (200, 206) and ct.startswith("image/"):
+                    body = resp.read()
+                    # Cardmarket stores a bogus Content-Type ("multerS3.AUTO_
+                    # CONTENT_TYPE") on these objects, so trust the JPEG magic
+                    # bytes, not the header. Accept a real image/* type too.
+                    is_jpeg = body[:3] == b"\xff\xd8\xff"
+                    if resp.status in (200, 206) and (is_jpeg or ct.startswith("image/")):
                         ok += 1
                     else:
-                        failures.append((url, f"HTTP {resp.status} {ct}"))
+                        failures.append((url, f"HTTP {resp.status} ct={ct} magic={body[:3].hex()}"))
             except Exception as e:  # noqa: BLE001
                 failures.append((url, str(e)))
     return checked, ok, failures

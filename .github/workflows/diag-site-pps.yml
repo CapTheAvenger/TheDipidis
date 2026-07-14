@@ -1,0 +1,35 @@
+name: Diag site PPS
+
+# TEMPORARY diagnostic (workflow_dispatch only). Loads the live site with a real
+# browser to verify the Prize Pack int-print integration, and checks CloudFront
+# image retrieval. Prints to the job log; writes nothing. Delete after.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  diag:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          fetch-depth: 1
+
+      - name: Set up Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22'
+
+      - name: Install Playwright + Chromium
+        run: |
+          npm init -y >/dev/null 2>&1 || true
+          npm install --no-save playwright@1.56.1
+          npx playwright install --with-deps chromium
+
+      - name: Run site diagnostic
+        run: node scripts/diag_site_pps.mjs

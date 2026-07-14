@@ -2507,6 +2507,12 @@
             box-shadow: 0 2px 8px rgba(192, 57, 43, 0.35);
         }
 
+        /* Read-only Prize Pack (stamped) tile in the main Card Database grid. */
+        .card-database-item.card-database-prizepack {
+            border: 2px solid #c0392b;
+            box-shadow: 0 0 0 1px rgba(192, 57, 43, 0.15);
+        }
+
         .rarity-option-card img {
             width: 100%;
             max-width: 118px;

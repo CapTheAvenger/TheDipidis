@@ -2414,6 +2414,36 @@
                 return;
             }
 
+            // Augment the list with official Prize Pack (stamped) prints: for every
+            // shown print that has one, insert a read-only stamped tile right after
+            // it. Guarded so a failure can never affect the normal grid.
+            try {
+                const ppsIdx = window.prizePackImagesIndex;
+                if (ppsIdx && typeof ppsIdx === 'object') {
+                    const augmented = [];
+                    for (const c of cards) {
+                        augmented.push(c);
+                        if (c && c.set && c.number && !c.__prizePack) {
+                            const s = String(c.set).toUpperCase();
+                            const n = String(c.number).replace(/^0+/, '') || '0';
+                            const e = ppsIdx[`${s}-${n}`];
+                            const stamped = e && (e.en || e.de);
+                            if (stamped) {
+                                augmented.push(Object.assign({}, c, {
+                                    __prizePack: true,
+                                    __prizePackSeries: e.series,
+                                    __baseSetNumber: `${c.set} ${c.number}`,
+                                    image_url: stamped,
+                                }));
+                            }
+                        }
+                    }
+                    cards = augmented;
+                }
+            } catch (ppsErr) {
+                console.warn('[CardDB] prize-pack augment failed:', ppsErr);
+            }
+
             // Calculate pagination
             let cardsToShow, totalPages, startIndex, endIndex;
 
@@ -2754,12 +2784,54 @@
             return container;
         }
         
+        // Read-only tile for an official Play! Pokémon Prize Pack (stamped) print.
+        // Purely visual: stamped image + label, click to enlarge. No deck / wishlist
+        // / collection / price controls, and a distinct data-card-id so it never
+        // collides with the base print's tile.
+        function createPrizePackDatabaseItem(card) {
+            const item = document.createElement('div');
+            item.className = 'card-database-item card-database-prizepack';
+            const displayName = escapeHtml(card.name || 'Unknown Card');
+            const escapedName = escapeJsStr(card.name || '');
+            const stamped = card.image_url || '';
+            const escapedImg = escapeJsStr(stamped);
+            const series = escapeHtml(String(card.__prizePackSeries || ''));
+            const baseRef = escapeHtml(card.__baseSetNumber || '');
+            item.setAttribute('data-card-id', `${card.name || ''}|PPS${series}|${card.__baseSetNumber || ''}`);
+            const ppsLabel = (typeof t === 'function' && t('rarity.prizePackPrint') !== 'rarity.prizePackPrint')
+                ? t('rarity.prizePackPrint') : 'Prize Pack Print';
+            item.innerHTML = `
+                <div class="pos-rel card-database-image-wrap">
+                    <img src="${escapeHtmlAttr(stamped)}" alt="${displayName} – Prize Pack" loading="lazy" decoding="async"
+                         onclick="showImageView('${escapedImg}', '${escapedName}', '', '', '')" role="button" tabindex="0"
+                         onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();showImageView('${escapedImg}', '${escapedName}', '', '', '');}"
+                         aria-label="Open ${displayName} Prize Pack image in fullscreen">
+                </div>
+                <div class="card-database-info">
+                    <div class="card-database-name">${displayName}</div>
+                    <div class="card-database-meta">
+                        <span class="card-database-set">Prize Pack Serie ${series} · ${baseRef}</span>
+                    </div>
+                    <div class="card-database-button-row">
+                        <div class="card-database-rarity-btn rarity-badge" style="--rarity-btn-bg:#c0392b;">${escapeHtml(ppsLabel)}</div>
+                    </div>
+                </div>
+            `;
+            return item;
+        }
+
         function createCardDatabaseItem(card, namePrintsIndex) {
             // Validate essential fields
             if (!card.name) {
                 return null;
             }
-            
+
+            // Official Prize Pack stamped print → read-only visual tile.
+            if (card.__prizePack) {
+                try { return createPrizePackDatabaseItem(card); }
+                catch (e) { console.warn('[CardDB] prize-pack tile failed:', e); return null; }
+            }
+
             const item = document.createElement('div');
             item.className = 'card-database-item';
             item.setAttribute('data-card-id', `${card.name || ''}|${card.set || ''}|${card.number || ''}`);

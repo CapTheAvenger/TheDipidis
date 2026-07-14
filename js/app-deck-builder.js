@@ -3630,6 +3630,27 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
         }
 
 
+        // Toggle the enlarged card image between its standard art and the official
+        // Play! Pokémon Prize Pack (stamped) print. Purely visual — swaps the <img>
+        // src and flips the button label. No collection/deck/version-state changes.
+        function togglePrizePackPrint(btn) {
+            try {
+                if (!btn) return;
+                const overlay = document.getElementById('fullCardOverlay') || document.getElementById('singleCardModal');
+                const img = overlay?.querySelector('img') || document.getElementById('singleCardImage');
+                if (!img) return;
+                const toPps = btn.dataset.state !== 'pps';
+                const url = toPps ? btn.dataset.pps : btn.dataset.normal;
+                if (!url) return;
+                img.src = url;
+                btn.dataset.state = toPps ? 'pps' : 'normal';
+                btn.classList.toggle('active', toPps);
+                const label = btn.querySelector('.sc-action-label');
+                if (label) label.textContent = toPps ? t('action.prizePackBack') : t('action.prizePack');
+            } catch (e) { /* non-fatal cosmetic toggle */ }
+        }
+        window.togglePrizePackPrint = togglePrizePackPrint;
+
         function showSingleCard(imageUrl, cardName, cardData = null) {
             const overlay = document.getElementById('fullCardOverlay') || document.getElementById('singleCardModal');
             const img = overlay?.querySelector('img') || document.getElementById('singleCardImage');
@@ -3730,6 +3751,18 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 }
                 const scCardmarketUrlEscaped = String(scCardmarketUrl).replace(/'/g, "\\'");
 
+                // Official Play! Pokémon Prize Pack (stamped) print — offered as a
+                // selectable international print. Keyed by the card's original
+                // set+number (stripped number, matching the card index). EN image
+                // preferred (tournament/Limitless context); DE as fallback. Purely
+                // visual: toggles the displayed image, no deck/collection impact.
+                let ppsImgUrl = '';
+                if (window.prizePackImagesIndex && resolvedSet && resolvedNum) {
+                    const _ppsNum = String(resolvedNum).replace(/^0+/, '') || '0';
+                    const _ppsEntry = window.prizePackImagesIndex[`${String(resolvedSet).toUpperCase()}-${_ppsNum}`];
+                    if (_ppsEntry) ppsImgUrl = _ppsEntry.en || _ppsEntry.de || '';
+                }
+
                 let btns = '';
                 // Wishlist
                 btns += `<button class="sc-action-btn sc-action-wishlist${isW ? ' active' : ''}" onclick="toggleWishlist('${safeCardId}'); setTimeout(()=>{const p=document.getElementById('singleCardActionsPanel'); if(p){const b=p.querySelector('.sc-action-wishlist'); const w=window.userWishlist&&window.userWishlist.has('${safeCardId}'); b.classList.toggle('active',w); b.querySelector('.sc-action-icon').textContent=w?'♥':'♡'; b.querySelector('.sc-action-label').textContent=w?t('action.wishlistActive'):t('action.wishlist');}},200);">
@@ -3746,6 +3779,15 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                     <span class="sc-action-icon">★</span>
                     <span class="sc-action-label">${t('action.otherPrint')}</span>
                 </button>`;
+                // Prize Pack stamped print (selectable international print) — only
+                // shown for the ~225 cards that have an official Play! Pokémon
+                // Prize Pack image. Toggles the enlarged image; no other effect.
+                if (ppsImgUrl) {
+                    btns += `<button class="sc-action-btn sc-action-prizepack" data-normal="${escapeHtmlAttr(resolvedImage)}" data-pps="${escapeHtmlAttr(ppsImgUrl)}" data-state="normal" onclick="togglePrizePackPrint(this)">
+                        <span class="sc-action-icon">◈</span>
+                        <span class="sc-action-label">${t('action.prizePack')}</span>
+                    </button>`;
+                }
                 // Limitless
                 if (resolvedSet && resolvedNum) {
                     btns += `<a class="sc-action-btn sc-action-limitless" href="https://limitlesstcg.com/cards/${encodeURIComponent(resolvedSet)}/${encodeURIComponent(resolvedNum)}" target="_blank" rel="noopener noreferrer">

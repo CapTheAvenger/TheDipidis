@@ -2420,6 +2420,25 @@ const BASE_PATH = './data/';
             }
         }
 
+        // Map of "SET-NUMBER" -> official Play! Pokémon Prize Pack (PPS) stamped
+        // image URLs (German + English) from play.pokemon.com, keyed by the card's
+        // ORIGINAL international print. Lets us offer the stamped Prize Pack variant
+        // as an international print. Loaded inert; consumed by the image resolver.
+        async function loadPrizePackImagesIndex() {
+            try {
+                const resp = await fetch(`./data/prizepack_official_images.json?t=${Date.now()}`);
+                if (resp.ok) {
+                    const json = await resp.json();
+                    if (json && typeof json === 'object') {
+                        window.prizePackImagesIndex = json;
+                        devLog(`[init] prize-pack images index: ${Object.keys(json).length} entries`);
+                    }
+                }
+            } catch (e) {
+                console.warn('[init] Could not load prizepack_official_images.json:', e);
+            }
+        }
+
         async function loadAllCardsDatabase(options) {
             try {
                 // --- Strategy: Chunked loading with IndexedDB cache ---

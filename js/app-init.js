@@ -70,7 +70,8 @@
                     { key: 'set_mapping', run: () => loadSetMapping() },
                     { key: 'rarity_preferences', run: () => loadRarityPreferences() },
                     { key: 'set_order', run: () => loadSetOrderMap() },
-                    { key: 'pokemonproxies', run: () => loadPokemonProxiesIndex() }
+                    { key: 'pokemonproxies', run: () => loadPokemonProxiesIndex() },
+                    { key: 'prizepack_images', run: () => loadPrizePackImagesIndex() }
                 ];
 
                 const settledLoads = await Promise.allSettled(startupLoads.map(load => load.run()));

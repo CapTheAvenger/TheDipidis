@@ -6,79 +6,104 @@ Pattern guess:
   https://d1wx537rtdixyy.cloudfront.net/expansions/series{N}/{locale}/OP_Prize_SE{N}_{LANG}_{num}-2x.png
   locale=de-de|en-us, LANG=DE|EN, num=collector number.
 
-Goal: confirm (a) images load WITHOUT a Referer (i.e. NOT hotlink-protected, so
-they can be embedded directly), (b) which series/locales/numbers exist, (c) they
-are real PNGs. Run in CI (open network); prints a coverage table. No output files.
+We must answer three things and finish fast (threaded, bounded work):
+  1. HOTLINK: does the lead image load with NO Referer? (embeddable if yes)
+     Also compare a bare request (no UA at all) vs a cross-origin Referer.
+  2. REAL PNG: are the bytes a PNG (magic), not an error page?
+  3. COVERAGE: for every series 1-9 x {de-de, en-us}, how many card numbers
+     exist — found via a threaded scan of 1..MAX with an "all remaining are
+     404" early stop, so populated series don't cost 60 sequential round-trips.
 
-Output is flushed per line so partial results survive a job timeout. Priority
-series (7-9, per the user) are probed first.
+Prints a flushed table. No output files. Run in CI (open network).
 """
+import concurrent.futures as cf
 import sys
 import urllib.error
 import urllib.request
 
 CF = "https://d1wx537rtdixyy.cloudfront.net"
-# Deliberately NO Referer header — a 200 here proves the CDN is not hotlink-locked.
 UA = {"User-Agent": ("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
                      "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36")}
 PNG_MAGIC = b"\x89PNG\r\n\x1a\n"
 TIMEOUT = 8
+MAX_N = 40          # scan 1..MAX_N per series/locale
+WORKERS = 12
 
 
 def out(msg):
     print(msg, flush=True)
 
 
-def check(url):
+def url_for(s, loc, lang, n):
+    return f"{CF}/expansions/series{s}/{loc}/OP_Prize_SE{s}_{lang}_{n}-2x.png"
+
+
+def check(url, headers=None):
     """Return (status, content_type, is_png). status None on network error."""
+    hdrs = dict(headers if headers is not None else UA, **{"Range": "bytes=0-7"})
     try:
-        req = urllib.request.Request(url, headers=dict(UA, **{"Range": "bytes=0-7"}))
+        req = urllib.request.Request(url, headers=hdrs)
         with urllib.request.urlopen(req, timeout=TIMEOUT) as r:
             body = r.read(8)
             return r.status, r.headers.get("Content-Type", ""), body.startswith(PNG_MAGIC)
     except urllib.error.HTTPError as e:
         return e.code, "", False
     except Exception as e:  # noqa: BLE001
-        return None, str(e)[:40], False
+        return None, str(e)[:50], False
 
 
-def probe_series(s, loc, lang, max_n=60, stop_after_misses=5):
-    found, misses = [], 0
-    sample_ct = None
-    first_status = None
-    for n in range(1, max_n + 1):
-        url = f"{CF}/expansions/series{s}/{loc}/OP_Prize_SE{s}_{lang}_{n}-2x.png"
-        st, ct, ispng = check(url)
-        if n == 1:
-            first_status = (st, ct)
-        if st in (200, 206) and ispng:
-            found.append(n); misses = 0
-            if sample_ct is None:
-                sample_ct = ct
-        else:
-            misses += 1
-            if misses >= stop_after_misses and (found or n > 8):
-                break
-    return found, sample_ct, first_status
+def hotlink_report():
+    lead = url_for(9, "de-de", "DE", 1)
+    out("== hotlink / reachability test on lead URL ==")
+    out(f"  URL: {lead}")
+    variants = {
+        "no headers at all": {},
+        "browser UA, NO referer": dict(UA),
+        "browser UA + cross-origin referer (example.com)":
+            dict(UA, **{"Referer": "https://example.com/"}),
+        "browser UA + cardmarket referer":
+            dict(UA, **{"Referer": "https://www.cardmarket.com/"}),
+    }
+    for label, hdrs in variants.items():
+        st, ct, ispng = check(lead, headers=hdrs)
+        out(f"  [{label}] -> status={st} png={ispng} ct={ct!r}")
+    out("")
+
+
+def scan_series(s, loc, lang):
+    """Threaded scan of 1..MAX_N; return sorted list of numbers that are PNGs."""
+    found = []
+    ct_seen = None
+    with cf.ThreadPoolExecutor(max_workers=WORKERS) as ex:
+        futs = {ex.submit(check, url_for(s, loc, lang, n)): n
+                for n in range(1, MAX_N + 1)}
+        for fut in cf.as_completed(futs):
+            n = futs[fut]
+            st, ct, ispng = fut.result()
+            if st in (200, 206) and ispng:
+                found.append(n)
+                if ct_seen is None:
+                    ct_seen = ct
+    return sorted(found), ct_seen
 
 
 def main():
-    out("== play.pokemon.com CDN probe (no Referer sent) ==")
+    hotlink_report()
+    out("== coverage scan (browser UA, NO referer, 1..%d per series) ==" % MAX_N)
     total = 0
-    series_order = [7, 8, 9, 1, 2, 3, 4, 5, 6]
-    for s in series_order:
+    for s in [7, 8, 9, 1, 2, 3, 4, 5, 6]:
         for loc, lang in (("de-de", "DE"), ("en-us", "EN")):
-            found, ct, first = probe_series(s, loc, lang)
+            found, ct = scan_series(s, loc, lang)
             total += len(found)
             if found:
                 lo, hi = found[0], found[-1]
                 contiguous = (found == list(range(lo, hi + 1)))
-                one = f"{CF}/expansions/series{s}/{loc}/OP_Prize_SE{s}_{lang}_{lo}-2x.png"
-                out(f"SE{s:<2} {loc}: {len(found):>3} imgs (num {lo}-{hi}, "
-                    f"contiguous={contiguous}, ct={ct!r})  e.g. {one}")
+                out(f"SE{s:<2} {loc}: {len(found):>3} imgs "
+                    f"(num {lo}-{hi}, contiguous={contiguous}, ct={ct!r})")
             else:
-                out(f"SE{s:<2} {loc}: none (first req -> {first})")
-    out(f"TOTAL images that loaded (PNG, no Referer): {total}")
+                out(f"SE{s:<2} {loc}: none")
+    out(f"TOTAL PNGs that loaded (no Referer): {total}")
+    out(f"NOTE: scan capped at n={MAX_N}; a series reporting {MAX_N} may have more.")
     return 0
 
 

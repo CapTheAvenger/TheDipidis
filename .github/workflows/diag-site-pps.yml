@@ -25,11 +25,11 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Install Playwright + Chromium
+      - name: Install + run diagnostic
         run: |
           npm init -y >/dev/null 2>&1 || true
           npm install --no-save playwright@1.56.1
-          npx playwright install --with-deps chromium
-
-      - name: Run site diagnostic
-        run: node scripts/diag_site_pps.mjs
+          # Pin the browser install to the SAME playwright version as the package,
+          # otherwise launch() can't find the expected build.
+          npx --yes playwright@1.56.1 install --with-deps chromium
+          node scripts/diag_site_pps.mjs

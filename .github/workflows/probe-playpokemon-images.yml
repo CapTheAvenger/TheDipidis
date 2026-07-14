@@ -1,0 +1,32 @@
+name: Probe play.pokemon.com images
+
+# TEMPORARY probe (workflow_dispatch only). Looks for a manifest/index for the
+# play.pokemon.com rewards gallery so we can enumerate PPS images without
+# brute-forcing the CDN. Prints findings; writes nothing. Delete after.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          fetch-depth: 1
+
+      - name: Set up Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: '3.12'
+
+      - name: Probe gallery manifest
+        env:
+          PYTHONUNBUFFERED: '1'
+        run: |
+          python scripts/probe_playpokemon_images.py

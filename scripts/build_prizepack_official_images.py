@@ -59,27 +59,24 @@ def http_get(url):
 
 
 def gallery_pdf_urls(locale):
-    """Return {series_int: pdf_url} scraped from the locale's gallery page(s)."""
+    """Return {series_int: pdf_url} scraped from the locale's main gallery page.
+
+    The single main gallery page already lists every currently-served series'
+    card-list PDF, so we fetch just that one page per locale — hammering the
+    per-series filter pages only re-triggers the CDN's rate limit for no gain.
+    """
     urls = {}
-    pages = [f"{PLAY}/{locale}/rewards/gallery/"]
-    # also hit per-series filters so archived series are covered if still linked
-    pages += [f"{PLAY}/{locale}/rewards/gallery/?filter=series{s}" for s in range(1, 13)]
-    seen_pages = set()
-    for page in pages:
-        if page in seen_pages:
-            continue
-        seen_pages.add(page)
-        try:
-            html = http_get(page).decode("utf-8", "replace")
-        except Exception as e:  # noqa: BLE001
-            log(f"::warning::gallery fetch failed {page}: {e}")
-            time.sleep(DELAY)
-            continue
-        for href in re.findall(r"https://[^\s\"']+?\.pdf", html):
-            m = re.search(r"/series(\d+)/", href)
-            if m and "Card_List" in href:
-                urls.setdefault(int(m.group(1)), href)
-        time.sleep(DELAY)
+    page = f"{PLAY}/{locale}/rewards/gallery/"
+    try:
+        html = http_get(page).decode("utf-8", "replace")
+    except Exception as e:  # noqa: BLE001
+        log(f"::warning::gallery fetch failed {page}: {e}")
+        return urls
+    for href in re.findall(r"https://[^\s\"']+?\.pdf", html):
+        m = re.search(r"/series(\d+)/", href)
+        if m and "Card_List" in href:
+            urls.setdefault(int(m.group(1)), href)
+    time.sleep(DELAY)
     return urls
 
 

@@ -2431,6 +2431,16 @@ const BASE_PATH = './data/';
                     const json = await resp.json();
                     if (json && typeof json === 'object') {
                         window.prizePackImagesIndex = json;
+                        // Synthetic-identity image map so getUnifiedCardImage can
+                        // resolve the stamped art for the "PPS{series}" print id
+                        // (used by proxy printing, collection views, etc.).
+                        const synth = {};
+                        for (const [k, e] of Object.entries(json)) {
+                            const num = k.split('-').slice(1).join('-');
+                            const img = e && (e.en || e.de);
+                            if (e && e.series && num && img) synth[`PPS${e.series}-${num}`] = img;
+                        }
+                        window.prizePackSynthImages = synth;
                         devLog(`[init] prize-pack images index: ${Object.keys(json).length} entries`);
                     }
                 }

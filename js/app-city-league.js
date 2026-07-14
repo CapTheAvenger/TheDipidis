@@ -2589,6 +2589,15 @@
                 if (hit) return hit;
             }
 
+            // 0b. Synthetic "PPS{series}" prints resolve to their stamped Play!
+            //     Pokémon Prize Pack image (proxy printing, collection views, etc.).
+            if (/^PPS\d+$/.test(normalizedSet) && window.prizePackSynthImages) {
+                const plainNum = /^\d+$/.test(rawNumber) ? (rawNumber.replace(/^0+/, '') || '0') : rawNumber;
+                const psHit = window.prizePackSynthImages[`${normalizedSet}-${rawNumber}`]
+                           || window.prizePackSynthImages[`${normalizedSet}-${plainNum}`];
+                if (psHit) return psHit;
+            }
+
             const card = getIndexedCardBySetNumber(normalizedSet, rawNumber);
 
             // 1. Canonical image from all_cards_merged

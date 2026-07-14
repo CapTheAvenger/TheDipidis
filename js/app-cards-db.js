@@ -2432,8 +2432,17 @@
                                 augmented.push(Object.assign({}, c, {
                                     __prizePack: true,
                                     __prizePackSeries: e.series,
+                                    __baseSet: c.set,
+                                    __baseNumber: c.number,
                                     __baseSetNumber: `${c.set} ${c.number}`,
+                                    // Distinct Cardmarket-style identity so collection /
+                                    // wishlist / tradelist track it independently.
+                                    set: `PPS${e.series}`,
+                                    number: c.number,
                                     image_url: stamped,
+                                    rarity: 'Prize Pack',
+                                    eur_price: (typeof e.price === 'number') ? String(e.price) : '',
+                                    cardmarket_url: e.market_url || '',
                                 }));
                             }
                         }
@@ -2784,36 +2793,80 @@
             return container;
         }
         
-        // Read-only tile for an official Play! Pokémon Prize Pack (stamped) print.
-        // Purely visual: stamped image + label, click to enlarge. No deck / wishlist
-        // / collection / price controls, and a distinct data-card-id so it never
-        // collides with the base print's tile.
+        // Full tile for an official Play! Pokémon Prize Pack (stamped) print. Treated
+        // like a normal card — market price + buy link, collection / wishlist /
+        // tradelist / proxy — but keyed on a distinct "PPS{series}" identity so it
+        // never collides with the base print, and Limitless points at the base print.
         function createPrizePackDatabaseItem(card) {
             const item = document.createElement('div');
             item.className = 'card-database-item card-database-prizepack';
+
             const displayName = escapeHtml(card.name || 'Unknown Card');
             const escapedName = escapeJsStr(card.name || '');
             const stamped = card.image_url || '';
             const escapedImg = escapeJsStr(stamped);
-            const series = escapeHtml(String(card.__prizePackSeries || ''));
-            const baseRef = escapeHtml(card.__baseSetNumber || '');
-            item.setAttribute('data-card-id', `${card.name || ''}|PPS${series}|${card.__baseSetNumber || ''}`);
+            const series = String(card.__prizePackSeries || '');
+            const ppsSet = String(card.set || `PPS${series}`);
+            const ppsNumber = String(card.number || '');
+            const baseSet = String(card.__baseSet || '');
+            const baseNumber = String(card.__baseNumber || '');
+            const baseRef = escapeHtml(card.__baseSetNumber || `${baseSet} ${baseNumber}`);
+
+            const cardId = `${card.name}|${ppsSet}|${ppsNumber}`;
+            item.setAttribute('data-card-id', cardId);
+            const safeCardId = escapeHtml(cardId);
+            const safeName = escapeJsStr(card.name || '');
+
+            const ownedCount = window.userCollectionCounts ? (window.userCollectionCounts.get(cardId) || 0) : 0;
+            const userWantsCard = window.userWishlist && window.userWishlist.has(cardId);
+            const userTradesCard = window.userTradelist && window.userTradelist.has(cardId);
+
+            // Price + buy link (Cardmarket search for the stamped print).
+            const marketUrl = card.cardmarket_url || '';
+            let priceButton;
+            const price = parseLocaleNumber(card.eur_price, 0);
+            if (card.eur_price && !isNaN(price) && price > 0 && marketUrl) {
+                priceButton = `<a href="${escapeHtmlAttr(marketUrl)}" target="_blank" rel="noopener noreferrer" class="card-database-price-btn" title="Prize Pack price on Cardmarket">
+                    <span class="card-database-price-value">Ø ${price.toFixed(2).replace('.', ',')} €</span>
+                </a>`;
+            } else {
+                priceButton = `<div class="card-database-price-placeholder" title="No Cardmarket price found">No Price</div>`;
+            }
+
             const ppsLabel = (typeof t === 'function' && t('rarity.prizePackPrint') !== 'rarity.prizePackPrint')
                 ? t('rarity.prizePackPrint') : 'Prize Pack Print';
+            const limitlessBtn = (baseSet && baseNumber)
+                ? `<button type="button" onclick="openLimitlessCard('${escapeJsStr(baseSet)}', '${escapeJsStr(baseNumber)}')" class="btn-gradient-blue card-limitless-btn card-database-limitless-btn" title="View base print on Limitless">Limitless</button>`
+                : '<div class="card-database-limitless-placeholder"></div>';
+
             item.innerHTML = `
                 <div class="pos-rel card-database-image-wrap">
                     <img src="${escapeHtmlAttr(stamped)}" alt="${displayName} – Prize Pack" loading="lazy" decoding="async"
-                         onclick="showImageView('${escapedImg}', '${escapedName}', '', '', '')" role="button" tabindex="0"
-                         onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();showImageView('${escapedImg}', '${escapedName}', '', '', '');}"
+                         onclick="showImageView('${escapedImg}', '${escapedName}', '${escapeJsStr(marketUrl)}', '', '')" role="button" tabindex="0"
+                         onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();showImageView('${escapedImg}', '${escapedName}', '${escapeJsStr(marketUrl)}', '', '');}"
                          aria-label="Open ${displayName} Prize Pack image in fullscreen">
+                    ${ownedCount > 0 ? `<div class="card-database-owned-badge">${ownedCount}</div>` : ''}
+                    <div class="pos-abs card-action-row-wide card-database-top-actions">
+                        <button type="button" data-card-id="${safeCardId}" onclick="addCollectionFromCardDbButton(this)" class="btn-green card-badge" title="Add to collection (${ownedCount}/4)" aria-label="Add ${displayName} Prize Pack to collection">+</button>
+                        <button type="button" data-card-id="${safeCardId}" onclick="removeCollectionFromCardDbButton(this)" class="btn-red card-badge" style="color: ${ownedCount > 0 ? '#fff' : '#999'}; background: ${ownedCount > 0 ? '#dc3545' : '#fff'};" title="Remove from collection (${ownedCount}/4)" aria-label="Remove ${displayName} Prize Pack from collection">-</button>
+                        <button type="button" data-card-id="${safeCardId}" onclick="toggleWishlistFromCardDbButton(this)" class="btn-wishlist card-badge" style="color:#fff; background: ${userWantsCard ? '#E91E63' : '#F48FB1'}; border: 2px solid ${userWantsCard ? '#E91E63' : '#F48FB1'};" title="${userWantsCard ? 'Remove from wishlist' : 'Add to wishlist'}" aria-label="Toggle ${displayName} Prize Pack wishlist">${userWantsCard ? '&#9829;' : '&#9825;'}</button>
+                        <button type="button" data-card-id="${safeCardId}" onclick="toggleTradelistFromCardDbButton(this)" class="btn-tradelist card-badge" style="color:#fff; background: ${userTradesCard ? '#16a085' : '#a3d9cd'}; border: 2px solid ${userTradesCard ? '#16a085' : '#a3d9cd'};" title="${userTradesCard ? 'Remove from trade list' : 'Add to trade list'}" aria-label="Toggle ${displayName} Prize Pack trade list">&#8644;</button>
+                    </div>
                 </div>
                 <div class="card-database-info">
                     <div class="card-database-name">${displayName}</div>
                     <div class="card-database-meta">
-                        <span class="card-database-set">Prize Pack Serie ${series} · ${baseRef}</span>
+                        <span class="card-database-set">Prize Pack Serie ${escapeHtml(series)} · ${baseRef}</span>
                     </div>
                     <div class="card-database-button-row">
-                        <div class="card-database-rarity-btn rarity-badge" style="--rarity-btn-bg:#c0392b;">${escapeHtml(ppsLabel)}</div>
+                        ${priceButton}
+                        <div class="card-database-rarity-btn rarity-badge" data-card-name="${escapeHtml(card.name || '')}" data-card-set="${escapeHtml(baseSet)}" data-card-number="${escapeHtml(baseNumber)}" onclick="openRarityFromCardDbButton(this)" style="--rarity-btn-bg:#c0392b;" title="View all prints" role="button" tabindex="0">
+                            ${escapeHtml(ppsLabel)}
+                        </div>
+                    </div>
+                    <div class="card-database-secondary-row">
+                        <button type="button" onclick="addCardToProxy('${escapedName}', '${escapeJsStr(ppsSet)}', '${escapeJsStr(ppsNumber)}', 1)" class="btn-gradient-red card-proxy-btn card-database-proxy-btn" title="Add stamped print to proxy queue" aria-label="Add ${displayName} Prize Pack to proxy queue">Proxy</button>
+                        ${limitlessBtn}
                     </div>
                 </div>
             `;

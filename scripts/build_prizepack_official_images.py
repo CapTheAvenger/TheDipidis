@@ -28,6 +28,7 @@ are spaced out. A single gentle pass (a couple of pages + a few PDFs) is fine.
 import argparse
 import csv
 import io
+import json
 import os
 import re
 import sys
@@ -183,12 +184,78 @@ def verify_images(rows, per_series=2):
     return checked, ok
 
 
+def _norm_name(s):
+    """Normalise a card name for the Cardmarket join: drop the '[Ability | Attack]'
+    suffix Cardmarket appends, unify apostrophes, collapse whitespace."""
+    s = (s or "").lower().split("[")[0]
+    s = s.replace("’", "'").replace("‘", "'").replace("`", "'")
+    return re.sub(r"\s+", " ", s).strip()
+
+
+def load_pps_cardmarket_products():
+    """{(series_int, norm_name): idProduct} from cardmarket_card_images.csv."""
+    path = os.path.join(DATA, "cardmarket_card_images.csv")
+    out = {}
+    if not os.path.exists(path):
+        return out
+    with open(path, encoding="utf-8-sig") as f:
+        for r in csv.DictReader(f):
+            code = (r.get("expansion_code") or "").strip()
+            m = re.match(r"PPS(\d+)$", code)
+            if not m:
+                continue
+            key = (int(m.group(1)), _norm_name(r.get("name_en")))
+            out.setdefault(key, (r.get("idProduct") or "").strip())  # first wins
+    return out
+
+
+def load_price_guide():
+    """{idProduct(str): {avg,low,trend}} from Cardmarket's daily price guide."""
+    path = os.path.join(DATA, "price_guide_6.json")
+    out = {}
+    if not os.path.exists(path):
+        return out
+    with open(path, encoding="utf-8") as f:
+        doc = json.load(f)
+    for g in doc.get("priceGuides", []):
+        out[str(g.get("idProduct"))] = {
+            "avg": g.get("avg"), "low": g.get("low"), "trend": g.get("trend"),
+        }
+    return out
+
+
+def _pick_price(guide):
+    """Prefer the average (matches the site's 'Ø' display), fall back to trend/low."""
+    for k in ("avg", "trend", "low"):
+        v = guide.get(k)
+        if isinstance(v, (int, float)) and v > 0:
+            return round(float(v), 2)
+    return None
+
+
+def search_url(name_en):
+    """Cardmarket search URL — the exact product slug isn't derivable, so link to a
+    name search (the stamped print sits in its Play! Prize Pack expansion there)."""
+    from urllib.parse import quote_plus  # noqa: PLC0415
+    return ("https://www.cardmarket.com/en/Pokemon/Products/Search?searchString="
+            + quote_plus((name_en or "").split("[")[0].strip()))
+
+
 def write_json_index(rows, path):
-    """Emit { "SET-NUMBER": {series, num, de, en, name_de, name_en} } for the SPA."""
+    """Emit { "SET-NUMBER": {series, num, de, en, names, idProduct, price, market_url} }.
+
+    Joins each Prize Pack card to its Cardmarket product (by series + name) and the
+    current price guide, so the site can show a market price + a buy link and treat
+    the stamped print like any other card.
+    """
+    products = load_pps_cardmarket_products()
+    prices = load_price_guide()
+    matched = priced = 0
+
     index = {}
     for r in rows:
         key = f"{r['set_code'].upper()}-{r['set_number']}"
-        index[key] = {  # later series overwrite -> newest stamped print wins
+        entry = {  # later series overwrite -> newest stamped print wins
             "series": r["series"],
             "num": r["gallery_number"],
             "de": r["image_url_de"],
@@ -196,19 +263,52 @@ def write_json_index(rows, path):
             "name_de": r["name_de"],
             "name_en": r["name_en"],
         }
+        idp = products.get((int(r["series"]), _norm_name(r["name_en"])))
+        if idp:
+            matched += 1
+            entry["idProduct"] = idp
+            price = _pick_price(prices.get(idp, {}))
+            if price is not None:
+                priced += 1
+                entry["price"] = price
+            entry["market_url"] = search_url(r["name_en"])
+        index[key] = entry
+
     tmp = path + ".tmp"
     with open(tmp, "w", encoding="utf-8") as f:
         json.dump(index, f, ensure_ascii=False, separators=(",", ":"), sort_keys=True)
     os.replace(tmp, path)
-    log(f"Wrote {path} — {len(index)} keyed prints")
+    log(f"Wrote {path} — {len(index)} keyed prints "
+        f"({matched} matched to Cardmarket, {priced} with a price)")
+
+
+def _rows_from_csv(path):
+    with open(path, encoding="utf-8-sig") as f:
+        return list(csv.DictReader(f))
 
 
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--no-verify", action="store_true")
+    ap.add_argument("--refresh-prices", action="store_true",
+                    help="rebuild the JSON (prices) from the existing CSV only — no "
+                         "gallery/CDN fetch. For the daily price job.")
     ap.add_argument("--out", default=os.path.join(DATA, "prizepack_official_images.csv"))
     ap.add_argument("--json-out", default=os.path.join(DATA, "prizepack_official_images.json"))
     args = ap.parse_args()
+
+    # Cheap daily path: refresh prices in the JSON from the committed CSV + the
+    # (daily-updated) price guide. No CloudFront, so it never hits the rate limit.
+    if args.refresh_prices:
+        if not os.path.exists(args.out):
+            log(f"::error::{args.out} missing — run the full build first")
+            return 1
+        rows = _rows_from_csv(args.out)
+        if not rows:
+            log("::error::CSV empty — nothing to refresh")
+            return 1
+        write_json_index(rows, args.json_out)
+        return 0
 
     log("Discovering per-series PDF card lists…")
     de_pdfs = gallery_pdf_urls("de-de")

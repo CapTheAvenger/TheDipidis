@@ -133,6 +133,14 @@ jobs:
         run: |
           python backend/core/prepare_card_data.py
 
+      # Refresh the Prize Pack (stamped) print prices in the frontend index
+      # from today's price guide. Cheap + offline (no CloudFront), so it can't
+      # hit the rate limit; the weekly job rebuilds the images/identities.
+      - name: Refresh Prize Pack prices
+        run: |
+          python scripts/build_prizepack_official_images.py --refresh-prices || \
+            echo "::warning::prize-pack price refresh failed (non-fatal)"
+
       - name: Bump version
         run: |
           chmod +x bump-version.sh
@@ -151,6 +159,7 @@ jobs:
                   data/cards_chunk_standard.json data/cards_chunk_extended.json \
                   data/cards_chunk_legacy.json data/cards_manifest.json \
                   data/all_cards_merged.json data/all_cards_merged.csv \
+                  data/prizepack_official_images.json \
                   index.html service-worker.js version.json
           if git diff --cached --quiet; then
             echo "No price changes to commit — skipping push."

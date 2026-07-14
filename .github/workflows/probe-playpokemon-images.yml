@@ -1,0 +1,31 @@
+name: Probe play.pokemon.com images
+
+# TEMPORARY probe (workflow_dispatch only). Verifies whether the official
+# play.pokemon.com rewards-gallery CDN (CloudFront) serves Prize Pack Series
+# card images without hotlink protection, and which series/locales/numbers
+# exist. Prints a coverage table to the job log; writes nothing. Delete after.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          fetch-depth: 1
+
+      - name: Set up Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: '3.12'
+
+      - name: Probe CloudFront image CDN
+        run: |
+          python scripts/probe_playpokemon_images.py

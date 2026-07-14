@@ -1,0 +1,72 @@
+name: Prize Pack Official Images
+
+# Refresh data/prizepack_official_images.csv — official Play! Pokémon Prize Pack
+# Series card images from the play.pokemon.com rewards gallery (CloudFront).
+# Maps each PPS card (gallery image number) to its original international print
+# (set code + number) plus German/English names, so the site can offer the
+# stamped Prize Pack variant as an "international print". Public assets, no
+# secrets. Needs live network (gallery pages + official PDF card lists), which
+# GitHub runners have.
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Weekly — a new Prize Pack series only drops every few months.
+    - cron: '45 7 * * 0'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: prizepack-official-images
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          fetch-depth: 1
+
+      - name: Set up Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: '3.12'
+
+      - name: Install deps
+        run: pip install --quiet pypdf
+
+      - name: Build + verify prize-pack image mapping
+        env:
+          PYTHONUNBUFFERED: '1'
+        run: python scripts/build_prizepack_official_images.py
+
+      - name: Commit + push mapping
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name  "github-actions[bot]"
+          git add data/prizepack_official_images.csv
+          if git diff --cached --quiet; then
+            echo "No prize-pack image changes to commit."
+            exit 0
+          fi
+          ts="$(date -u +'%Y-%m-%d %H:%M UTC')"
+          git commit -m "Auto: prize pack official images — ${ts}
+
+          Triggered by .github/workflows/prizepack-official-images.yml
+          Run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          for attempt in 1 2 3; do
+            if git push origin HEAD:main; then
+              echo "Push succeeded on attempt $attempt"; exit 0
+            fi
+            echo "Push rejected on attempt $attempt — pulling with rebase…"
+            if ! git pull --rebase=true --autostash -X ours origin main; then
+              echo "::error::Rebase conflict — manual resolution needed"
+              git rebase --abort 2>/dev/null || true
+              exit 1
+            fi
+          done
+          echo "::error::Could not push after 3 attempts"; exit 1

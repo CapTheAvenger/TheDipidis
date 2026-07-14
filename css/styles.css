@@ -2496,6 +2496,17 @@
             box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
         }
 
+        /* Official Play! Pokémon Prize Pack (stamped) alternative-print tile. */
+        .rarity-option-prizepack {
+            border-color: #c0392b;
+            background-color: #fdecea;
+        }
+
+        .rarity-option-prizepack:hover {
+            border-color: #e74c3c;
+            box-shadow: 0 2px 8px rgba(192, 57, 43, 0.35);
+        }
+
         .rarity-option-card img {
             width: 100%;
             max-width: 118px;

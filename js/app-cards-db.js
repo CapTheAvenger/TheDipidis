@@ -3786,6 +3786,46 @@
                 optionsList.appendChild(optionDiv);
             });
 
+            // ── Official Play! Pokémon Prize Pack (stamped) prints ───────────
+            // Show the stamped variant as an alternative print for any version of
+            // this card that has one. Read-only tiles (no Deck-Qty input / swap),
+            // so the deck-distribution math is untouched. Image click enlarges the
+            // stamped art. Keyed by the print's set+number (matches the card DB).
+            try {
+                const ppsIdx = window.prizePackImagesIndex;
+                if (ppsIdx && typeof ppsIdx === 'object') {
+                    const seenPps = new Set();
+                    versions.forEach(v => {
+                        const s = String(v.set || '').toUpperCase();
+                        const nStripped = String(v.number || '').replace(/^0+/, '') || '0';
+                        const e = ppsIdx[`${s}-${nStripped}`];
+                        if (!e) return;
+                        const stampedUrl = e.en || e.de || '';
+                        if (!stampedUrl || seenPps.has(stampedUrl)) return;
+                        seenPps.add(stampedUrl);
+
+                        const tile = document.createElement('div');
+                        tile.className = 'rarity-option-card rarity-option-prizepack';
+                        const safeName = escapeJsStr(actualCardName);
+                        const safeUrl = escapeJsStr(stampedUrl);
+                        tile.innerHTML = `
+                            <div style="position:relative;display:block;cursor:zoom-in;"
+                                 onclick="if(typeof showImageView==='function')showImageView('${safeUrl}','${safeName}','','','')">
+                                <img src="${escapeHtmlAttr(stampedUrl)}" alt="${escapeHtmlAttr(actualCardName)} – Prize Pack" loading="lazy">
+                            </div>
+                            <div class="rarity-option-info">
+                                <div><strong>${t('rarity.prizePackPrint')}</strong></div>
+                                <div class="rarity-option-rarity">Prize Pack Serie ${e.series} · ${v.set} ${v.number}</div>
+                            </div>
+                            <div class="rarity-badge" style="--rarity-badge-bg:#c0392b;">Prize Pack</div>
+                        `;
+                        optionsList.appendChild(tile);
+                    });
+                }
+            } catch (ppsErr) {
+                console.warn('[RaritySwitch] prize-pack tiles failed:', ppsErr);
+            }
+
             const controlsHost = document.getElementById('raritySwitcherDistributionControls');
             const totalCopies = currentRaritySwitcherCard.totalCopies || 0;
             const controlsHtml = `

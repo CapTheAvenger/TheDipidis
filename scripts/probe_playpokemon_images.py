@@ -1,96 +1,85 @@
 #!/usr/bin/env python3
-"""PROBE (temporary): find a MANIFEST for the play.pokemon.com rewards gallery.
+"""PROBE (temporary): dump the __NEXT_DATA__ structure of the rewards gallery.
 
-Brute-forcing the CDN gets rate-limited, so before enumerating we look for a
-single index/manifest that lists every reward (numbers + names + image paths):
-  1. fetch the de-de gallery HTML and surface any JSON / api / manifest / .json
-     references and inline data blobs,
-  2. try a handful of guessed manifest URLs on the CDN and on play.pokemon.com.
-
-Few requests, gentle. Prints findings; writes nothing.
+The gallery is a Next.js page with a __NEXT_DATA__ <script> blob that holds the
+full reward list (series, number, name, image). We parse it and print the JSON
+STRUCTURE (keys + one sample card + counts) so we can write a real builder that
+needs only 1-2 requests (no CDN brute force).
 """
+import json
 import re
 import sys
-import urllib.error
 import urllib.request
 
-CF = "https://d1wx537rtdixyy.cloudfront.net"
 PLAY = "https://play.pokemon.com"
 UA = {"User-Agent": ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
                      "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"),
-      "Accept": "*/*", "Accept-Language": "de-DE,de;q=0.9,en;q=0.8"}
+      "Accept": "text/html", "Accept-Language": "de-DE,de;q=0.9"}
 
 
 def out(m):
     print(m, flush=True)
 
 
-def get(url, limit=200000):
-    try:
-        req = urllib.request.Request(url, headers=UA)
-        with urllib.request.urlopen(req, timeout=20) as r:
-            return r.status, r.headers.get("Content-Type", ""), r.read(limit)
-    except urllib.error.HTTPError as e:
-        body = b""
-        try:
-            body = e.read()[:2000]
-        except Exception:  # noqa: BLE001
-            pass
-        return e.code, (e.headers.get("Content-Type", "") if e.headers else ""), body
-    except Exception as e:  # noqa: BLE001
-        return None, f"ERR {type(e).__name__}: {str(e)[:80]}", b""
+def fetch_next_data(url):
+    req = urllib.request.Request(url, headers=UA)
+    with urllib.request.urlopen(req, timeout=25) as r:
+        html = r.read().decode("utf-8", "replace")
+    m = re.search(r'<script[^>]*id="__NEXT_DATA__"[^>]*>(.*?)</script>', html, re.S)
+    if not m:
+        return None
+    return json.loads(m.group(1))
 
 
-def show_json_head(label, url):
-    st, ct, body = get(url)
-    looks_json = body[:1].strip() in (b"{", b"[")
-    out(f"\n[{label}] {url}")
-    out(f"   -> {st} ct={ct!r} bytes={len(body)} json-ish={looks_json}")
-    if looks_json:
-        out("   head: " + body[:400].decode("utf-8", "replace").replace("\n", " "))
+def walk(node, path="", depth=0, max_depth=6):
+    """Print the shape: dict keys, list lengths + first-item shape."""
+    ind = "  " * depth
+    if depth > max_depth:
+        return
+    if isinstance(node, dict):
+        keys = list(node.keys())
+        out(f"{ind}{path or '<root>'}: dict keys={keys[:25]}")
+        for k in keys:
+            v = node[k]
+            if isinstance(v, (dict, list)):
+                walk(v, f"{path}.{k}" if path else k, depth + 1, max_depth)
+    elif isinstance(node, list):
+        out(f"{ind}{path}: list len={len(node)}")
+        if node:
+            walk(node[0], path + "[0]", depth + 1, max_depth)
 
 
 def main():
-    out("== search gallery HTML for a data endpoint ==")
-    for page in (f"{PLAY}/de-de/rewards/gallery/?filter=series9",
-                 f"{PLAY}/de-de/rewards/gallery/"):
-        st, ct, body = get(page)
-        text = body.decode("utf-8", "replace")
-        out(f"\nGALLERY {page}\n   -> {st} ct={ct!r} bytes={len(body)}")
-        # surface references that look like data sources
-        hits = set()
-        for pat in (r'[\"\'][^\"\']*\.json[^\"\']*[\"\']',
-                    r'[\"\'][^\"\']*/api/[^\"\']*[\"\']',
-                    r'[\"\'][^\"\']*manifest[^\"\']*[\"\']',
-                    r'https?://[a-z0-9.\-]*cloudfront\.net[^\"\']*',
-                    r'[\"\']/expansions[^\"\']*[\"\']'):
-            for m in re.findall(pat, text, flags=re.I):
-                hits.add(m[:160])
-        if hits:
-            out("   references found:")
-            for h in sorted(hits)[:40]:
-                out("     " + h)
-        else:
-            out("   (no obvious json/api/manifest references in first bytes)")
-        # inline __NEXT_DATA__ / window.__ style blobs
-        for m in re.findall(r'<script[^>]*id=[\"\']__NEXT_DATA__[\"\'][^>]*>(.{0,300})',
-                            text, flags=re.I | re.S):
-            out("   __NEXT_DATA__ head: " + m.replace("\n", " ")[:300])
+    url = f"{PLAY}/de-de/rewards/gallery/"
+    out(f"== __NEXT_DATA__ structure of {url} ==")
+    data = fetch_next_data(url)
+    if data is None:
+        out("!! no __NEXT_DATA__ found")
+        return 1
+    page_props = data.get("props", {}).get("pageProps", {})
+    out(f"pageProps keys: {list(page_props.keys())}")
+    walk(page_props, "pageProps", 0, 5)
 
-    out("\n== try guessed manifest URLs ==")
-    for u in (
-        f"{CF}/expansions/series9/de-de/manifest.json",
-        f"{CF}/expansions/series9/de-de/index.json",
-        f"{CF}/expansions/series9/manifest.json",
-        f"{CF}/expansions/series9.json",
-        f"{CF}/expansions/manifest.json",
-        f"{CF}/expansions/index.json",
-        f"{CF}/manifest.json",
-        f"{CF}/expansions.json",
-        f"{PLAY}/api/rewards/gallery?filter=series9",
-        f"{PLAY}/de-de/api/rewards/gallery",
-    ):
-        show_json_head("manifest?", u)
+    # Heuristic: find any list of dicts whose items mention 'series'/'image'/'number'
+    out("\n== candidate card lists (list of dicts with image/number/name) ==")
+
+    def scan(node, path=""):
+        if isinstance(node, list) and node and isinstance(node[0], dict):
+            keys = set().union(*[set(d.keys()) for d in node[:5] if isinstance(d, dict)])
+            if keys & {"image", "imageUrl", "number", "cardNumber", "name", "title",
+                       "series", "assets", "asset"}:
+                out(f"\nLIST at {path}: len={len(node)} item_keys={sorted(keys)[:30]}")
+                out("  sample[0]: " + json.dumps(node[0], ensure_ascii=False)[:800])
+                if len(node) > 1:
+                    out("  sample[1]: " + json.dumps(node[1], ensure_ascii=False)[:400])
+        if isinstance(node, dict):
+            for k, v in node.items():
+                scan(v, f"{path}.{k}" if path else k)
+        elif isinstance(node, list):
+            for i, v in enumerate(node[:3]):
+                scan(v, f"{path}[{i}]")
+
+    scan(page_props, "pageProps")
     return 0
 
 

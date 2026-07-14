@@ -28,8 +28,8 @@ jobs:
       - name: Install + run diagnostic
         run: |
           npm init -y >/dev/null 2>&1 || true
-          npm install --no-save playwright@1.56.1
-          # Pin the browser install to the SAME playwright version as the package,
-          # otherwise launch() can't find the expected build.
-          npx --yes playwright@1.56.1 install --with-deps chromium
+          # Install playwright and its browsers from the SAME local package (no
+          # version pin) so the runtime build matches the downloaded build.
+          npm install --no-save playwright
+          npx playwright install --with-deps chromium
           node scripts/diag_site_pps.mjs

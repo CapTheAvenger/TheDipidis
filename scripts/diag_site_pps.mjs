@@ -4,8 +4,10 @@ import https from 'node:https';
 const SITE = 'https://thedipidis.app';
 const log = (...a) => console.log(...a);
 function get(url) {
+  // Cache-bust so we read the TRUE deployed asset, not a stale CDN edge copy.
+  const busted = url + (url.includes('?') ? '&' : '?') + 'cb=' + Date.now() + Math.random().toString(36).slice(2);
   return new Promise((resolve) => {
-    const req = https.request(url, { method: 'GET' }, (res) => {
+    const req = https.request(busted, { method: 'GET', headers: { 'Cache-Control': 'no-cache', Pragma: 'no-cache' } }, (res) => {
       const c = []; res.on('data', x => c.push(x));
       res.on('end', () => resolve({ status: res.statusCode, buf: Buffer.concat(c) }));
     });

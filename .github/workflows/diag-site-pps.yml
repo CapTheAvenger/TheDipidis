@@ -25,11 +25,5 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Install + run diagnostic
-        run: |
-          npm init -y >/dev/null 2>&1 || true
-          # Install playwright and its browsers from the SAME local package (no
-          # version pin) so the runtime build matches the downloaded build.
-          npm install --no-save playwright
-          npx playwright install --with-deps chromium
-          node scripts/diag_site_pps.mjs
+      - name: Run diagnostic
+        run: node scripts/diag_site_pps.mjs

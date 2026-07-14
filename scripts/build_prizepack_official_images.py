@@ -233,12 +233,41 @@ def _pick_price(guide):
     return None
 
 
-def search_url(name_en):
-    """Cardmarket search URL — the exact product slug isn't derivable, so link to a
-    name search (the stamped print sits in its Play! Prize Pack expansion there)."""
-    from urllib.parse import quote_plus  # noqa: PLC0415
-    return ("https://www.cardmarket.com/en/Pokemon/Products/Search?searchString="
-            + quote_plus((name_en or "").split("[")[0].strip()))
+# Cardmarket URL slugs for the Play! Prize Pack expansions are the series number
+# spelled out ("Play! Pokémon Prize Pack Series Eight" -> ...-Series-Eight).
+_SERIES_WORD = {
+    1: "One", 2: "Two", 3: "Three", 4: "Four", 5: "Five", 6: "Six", 7: "Seven",
+    8: "Eight", 9: "Nine", 10: "Ten", 11: "Eleven", 12: "Twelve", 13: "Thirteen",
+    14: "Fourteen", 15: "Fifteen", 16: "Sixteen", 17: "Seventeen", 18: "Eighteen",
+    19: "Nineteen", 20: "Twenty",
+}
+
+
+def _cm_slug(s):
+    """Cardmarket product/expansion slug: strip accents (é→e), drop apostrophes,
+    turn every other non-alphanumeric run into a single hyphen. Verified against a
+    real product URL (Team-Rockets-Mewtwo-ex)."""
+    import unicodedata  # noqa: PLC0415
+    s = unicodedata.normalize("NFKD", s or "").encode("ascii", "ignore").decode("ascii")
+    s = s.replace("'", "")
+    s = re.sub(r"[^A-Za-z0-9]+", "-", s)
+    return re.sub(r"-+", "-", s).strip("-")
+
+
+def product_url(series, name_en, orig_set, orig_num):
+    """Exact Cardmarket product page for a stamped Prize Pack print, e.g.
+    .../Singles/Play-Pokemon-Prize-Pack-Series-Eight/Team-Rockets-Mewtwo-ex-PPS8DRI-081
+    Slug = <name>-PPS<series><origSet>-<origNumber padded to 3>."""
+    try:
+        n = str(orig_num or "")
+        num3 = n.zfill(3) if n.isdigit() else n
+        exp = "Play-Pokemon-Prize-Pack-Series-" + _SERIES_WORD.get(int(series), str(series))
+        prod = f"{_cm_slug(name_en)}-PPS{series}{str(orig_set or '').upper()}-{num3}"
+        return f"https://www.cardmarket.com/en/Pokemon/Products/Singles/{exp}/{prod}"
+    except Exception:  # noqa: BLE001
+        from urllib.parse import quote_plus  # noqa: PLC0415
+        return ("https://www.cardmarket.com/en/Pokemon/Products/Search?searchString="
+                + quote_plus((name_en or "").split("[")[0].strip()))
 
 
 def write_json_index(rows, path):
@@ -271,7 +300,8 @@ def write_json_index(rows, path):
             if price is not None:
                 priced += 1
                 entry["price"] = price
-            entry["market_url"] = search_url(r["name_en"])
+            entry["market_url"] = product_url(
+                r["series"], r["name_en"], r["set_code"], r["set_number"])
         index[key] = entry
 
     tmp = path + ".tmp"

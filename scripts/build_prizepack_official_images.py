@@ -52,10 +52,35 @@ def log(m):
     print(m, flush=True)
 
 
-def http_get(url):
-    req = urllib.request.Request(url, headers=UA)
-    with urllib.request.urlopen(req, timeout=40) as r:
-        return r.read()
+def http_get(url, retries=5):
+    """GET with backoff on 403/429 — CloudFront rate-limits bursts of datacenter
+    traffic, so a throttled request must be retried after a pause rather than
+    treated as a hard failure."""
+    backoff = [8, 20, 45, 90, 150]
+    last = None
+    for attempt in range(retries):
+        try:
+            req = urllib.request.Request(url, headers=UA)
+            with urllib.request.urlopen(req, timeout=40) as r:
+                return r.read()
+        except urllib.error.HTTPError as e:
+            last = e
+            if e.code in (403, 429) and attempt < retries - 1:
+                wait = backoff[min(attempt, len(backoff) - 1)]
+                log(f"    {e.code} on {url.rsplit('/', 1)[-1]} — backing off {wait}s "
+                    f"(attempt {attempt + 1}/{retries})")
+                time.sleep(wait)
+                continue
+            raise
+        except urllib.error.URLError as e:
+            last = e
+            if attempt < retries - 1:
+                time.sleep(backoff[min(attempt, len(backoff) - 1)])
+                continue
+            raise
+    if last:
+        raise last
+    raise RuntimeError("unreachable")
 
 
 def gallery_pdf_urls(locale):
@@ -181,6 +206,12 @@ def main():
             log(f"::warning::SE{s} failed: {type(e).__name__}: {e}")
 
     rows.sort(key=lambda r: (r["series"], r["gallery_number"]))
+
+    # Never clobber an existing good CSV with an empty one (e.g. all PDFs got
+    # rate-limited). Fail loudly instead so the previous data is preserved.
+    if not rows:
+        log("::error::0 rows built (all PDF fetches failed?) — keeping existing CSV")
+        return 1
 
     # sanity: SE9 #19 should be a Mega Dragonite/Dragoran
     for r in rows:

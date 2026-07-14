@@ -31,6 +31,11 @@ Verification (network only; skipped offline / when --no-verify):
 
 Output CSV columns:
   idProduct,id_category,expansion_code,id_expansion,number,name_en,name_de,image_url
+
+Mirroring note (for the sister project): the S3 bucket is hotlink-protected — a
+bare request returns HTTP 403. Fetch with a browser User-Agent AND a
+`Referer: https://www.cardmarket.com/` header (GET, not HEAD). That is exactly how
+the verify step below confirms the URLs.
 """
 
 import argparse
@@ -137,8 +142,24 @@ def build_rows(singles, codes, numbers):
     return rows, skipped_no_code
 
 
-def verify_sample(rows, per_group=4, timeout=20):
-    """HEAD a few URLs per expansion_code; return (checked, ok, failures[])."""
+# The S3 bucket hotlink-protects the images: a bare request gets 403. A browser
+# GET with a cardmarket.com Referer + a real UA is served normally — this is the
+# request the sister project must use when mirroring. HEAD is rejected, so we GET
+# only the first byte (Range) to confirm the object without downloading it.
+VERIFY_HEADERS = {
+    "User-Agent": ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+                   "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"),
+    "Referer": "https://www.cardmarket.com/",
+    "Accept": "image/avif,image/webp,image/apng,image/*,*/*;q=0.8",
+}
+
+
+def verify_sample(rows, per_group=4, timeout=25):
+    """GET (Range 0-0) a few URLs per expansion_code with browser headers.
+
+    Returns (checked, ok, failures[]). Confirms the object exists and is an image
+    without downloading it in full.
+    """
     try:
         import urllib.request  # noqa: PLC0415
     except Exception:  # noqa: BLE001
@@ -148,20 +169,18 @@ def verify_sample(rows, per_group=4, timeout=20):
         by_code.setdefault(r["expansion_code"], []).append(r)
     checked = ok = 0
     failures = []
-    ua = {"User-Agent": "Mozilla/5.0 (compatible; thedipidis-image-mapper/1.0)"}
     for code, group in sorted(by_code.items()):
-        # spread the sample across the group (front, middle, back)
         n = len(group)
         idxs = sorted(set([0, n // 3, (2 * n) // 3, n - 1]))[:per_group]
         for i in idxs:
-            r = group[i]
-            url = r["image_url"]
+            url = group[i]["image_url"]
             checked += 1
             try:
-                req = urllib.request.Request(url, method="HEAD", headers=ua)
+                headers = dict(VERIFY_HEADERS, **{"Range": "bytes=0-0"})
+                req = urllib.request.Request(url, method="GET", headers=headers)
                 with urllib.request.urlopen(req, timeout=timeout) as resp:
                     ct = resp.headers.get("Content-Type", "")
-                    if resp.status == 200 and ct.startswith("image/"):
+                    if resp.status in (200, 206) and ct.startswith("image/"):
                         ok += 1
                     else:
                         failures.append((url, f"HTTP {resp.status} {ct}"))

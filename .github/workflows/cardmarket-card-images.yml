@@ -1,0 +1,78 @@
+name: Cardmarket Card Images
+
+# Refresh data/cardmarket_card_images.csv — Cardmarket Pokémon single → S3
+# product-image URL. Consumed by the sister project (tcg-exclusive-radar) to
+# mirror the stamped images pokemontcg.io lacks, notably the Play! Pokémon Prize
+# Pack Series (PPS*).
+#
+# The build itself is deterministic from Cardmarket's public product exports; the
+# only thing that needs live network is the URL sanity-check, which runs here
+# (GitHub runners can reach product-images.s3.cardmarket.com). Public output, no
+# secrets.
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Weekly — the product catalogue only changes when a new set/prize pack drops.
+    # Sunday 07:30 UTC, after Cardmarket's daily dump has settled.
+    - cron: '30 7 * * 0'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: cardmarket-card-images
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          fetch-depth: 1
+
+      - name: Set up Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: '3.12'
+
+      - name: Download Cardmarket product exports
+        run: |
+          mkdir -p data
+          curl -fsSL --retry 3 -o data/products_singles_6.json    https://downloads.s3.cardmarket.com/productCatalog/productList/products_singles_6.json
+          curl -fsSL --retry 3 -o data/products_nonsingles_6.json https://downloads.s3.cardmarket.com/productCatalog/productList/products_nonsingles_6.json
+          ls -lh data/products_*_6.json
+
+      - name: Build + verify card-image mapping
+        run: |
+          python scripts/build_cardmarket_card_images.py
+
+      - name: Commit + push mapping
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name  "github-actions[bot]"
+          git add data/cardmarket_card_images.csv
+          if git diff --cached --quiet; then
+            echo "No image-mapping changes to commit."
+            exit 0
+          fi
+          ts="$(date -u +'%Y-%m-%d %H:%M UTC')"
+          git commit -m "Auto: cardmarket card images — ${ts}
+
+          Triggered by .github/workflows/cardmarket-card-images.yml
+          Run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          for attempt in 1 2 3; do
+            if git push origin HEAD:main; then
+              echo "Push succeeded on attempt $attempt"; exit 0
+            fi
+            echo "Push rejected on attempt $attempt — pulling with rebase…"
+            if ! git pull --rebase=true --autostash -X ours origin main; then
+              echo "::error::Rebase conflict — manual resolution needed"
+              git rebase --abort 2>/dev/null || true
+              exit 1
+            fi
+          done
+          echo "::error::Could not push after 3 attempts"; exit 1

@@ -183,10 +183,31 @@ def verify_images(rows, per_series=2):
     return checked, ok
 
 
+def write_json_index(rows, path):
+    """Emit { "SET-NUMBER": {series, num, de, en, name_de, name_en} } for the SPA."""
+    index = {}
+    for r in rows:
+        key = f"{r['set_code'].upper()}-{r['set_number']}"
+        index[key] = {  # later series overwrite -> newest stamped print wins
+            "series": r["series"],
+            "num": r["gallery_number"],
+            "de": r["image_url_de"],
+            "en": r["image_url_en"],
+            "name_de": r["name_de"],
+            "name_en": r["name_en"],
+        }
+    tmp = path + ".tmp"
+    with open(tmp, "w", encoding="utf-8") as f:
+        json.dump(index, f, ensure_ascii=False, separators=(",", ":"), sort_keys=True)
+    os.replace(tmp, path)
+    log(f"Wrote {path} — {len(index)} keyed prints")
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--no-verify", action="store_true")
     ap.add_argument("--out", default=os.path.join(DATA, "prizepack_official_images.csv"))
+    ap.add_argument("--json-out", default=os.path.join(DATA, "prizepack_official_images.json"))
     args = ap.parse_args()
 
     log("Discovering per-series PDF card lists…")
@@ -232,6 +253,11 @@ def main():
         w.writeheader()
         w.writerows(rows)
     os.replace(tmp, args.out)
+
+    # Frontend index: keyed by "SET-NUMBER" (matching the site's card index) so
+    # the SPA can offer the official Play!-stamped Prize Pack image as an
+    # international print. Later series win on the rare set+number collision.
+    write_json_index(rows, args.json_out)
     from collections import Counter
     per = Counter(r["series"] for r in rows)
     log("Per-series counts: " + ", ".join(f"SE{s}={n}" for s, n in sorted(per.items())))

@@ -48,7 +48,7 @@ jobs:
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name  "github-actions[bot]"
-          git add data/prizepack_official_images.csv
+          git add data/prizepack_official_images.csv data/prizepack_official_images.json
           if git diff --cached --quiet; then
             echo "No prize-pack image changes to commit."
             exit 0

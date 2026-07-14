@@ -1,85 +1,82 @@
 #!/usr/bin/env python3
-"""PROBE (temporary): dump the __NEXT_DATA__ structure of the rewards gallery.
+"""PROBE (temporary): discover the per-series PDF card lists + dump their text.
 
-The gallery is a Next.js page with a __NEXT_DATA__ <script> blob that holds the
-full reward list (series, number, name, image). We parse it and print the JSON
-STRUCTURE (keys + one sample card + counts) so we can write a real builder that
-needs only 1-2 requests (no CDN brute force).
+The gallery's __NEXT_DATA__ only has curated highlights; the full card list per
+series lives in an official PDF (linked via cardList CTA), e.g.
+  .../series9/de-de/P12252_OP_Prize_Packs_Series9_Card_List_DE.pdf
+The P-number prefix is unpredictable, so we SCRAPE each series gallery page for
+the .pdf href instead of guessing. Then we extract the PDF text (pypdf) and print
+the first lines so we can write a correct (number -> name) parser.
 """
 import json
 import re
+import subprocess
 import sys
 import urllib.request
 
 PLAY = "https://play.pokemon.com"
 UA = {"User-Agent": ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
-                     "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"),
-      "Accept": "text/html", "Accept-Language": "de-DE,de;q=0.9"}
+                     "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36")}
 
 
 def out(m):
     print(m, flush=True)
 
 
-def fetch_next_data(url):
-    req = urllib.request.Request(url, headers=UA)
-    with urllib.request.urlopen(req, timeout=25) as r:
-        html = r.read().decode("utf-8", "replace")
-    m = re.search(r'<script[^>]*id="__NEXT_DATA__"[^>]*>(.*?)</script>', html, re.S)
-    if not m:
-        return None
-    return json.loads(m.group(1))
+def get(url, headers=None):
+    req = urllib.request.Request(url, headers=headers or UA)
+    with urllib.request.urlopen(req, timeout=30) as r:
+        return r.read()
 
 
-def walk(node, path="", depth=0, max_depth=6):
-    """Print the shape: dict keys, list lengths + first-item shape."""
-    ind = "  " * depth
-    if depth > max_depth:
-        return
-    if isinstance(node, dict):
-        keys = list(node.keys())
-        out(f"{ind}{path or '<root>'}: dict keys={keys[:25]}")
-        for k in keys:
-            v = node[k]
-            if isinstance(v, (dict, list)):
-                walk(v, f"{path}.{k}" if path else k, depth + 1, max_depth)
-    elif isinstance(node, list):
-        out(f"{ind}{path}: list len={len(node)}")
-        if node:
-            walk(node[0], path + "[0]", depth + 1, max_depth)
+def find_pdf_hrefs(html):
+    return sorted(set(re.findall(r'https://[^\s"\']+?\.pdf', html)))
 
 
 def main():
-    url = f"{PLAY}/de-de/rewards/gallery/"
-    out(f"== __NEXT_DATA__ structure of {url} ==")
-    data = fetch_next_data(url)
-    if data is None:
-        out("!! no __NEXT_DATA__ found")
-        return 1
-    page_props = data.get("props", {}).get("pageProps", {})
-    out(f"pageProps keys: {list(page_props.keys())}")
-    walk(page_props, "pageProps", 0, 5)
+    # 1) which series does the gallery expose, and what PDF does each link?
+    out("== discover PDF card-list URLs per series (de-de & en-us) ==")
+    pdfs = {}
+    for loc in ("de-de", "en-us"):
+        for s in range(1, 11):
+            url = f"{PLAY}/{loc}/rewards/gallery/?filter=series{s}"
+            try:
+                html = get(url).decode("utf-8", "replace")
+            except Exception as e:  # noqa: BLE001
+                out(f"  {loc} series{s}: fetch error {type(e).__name__}")
+                continue
+            hrefs = [h for h in find_pdf_hrefs(html) if f"eries{s}" in h.lower()
+                     or f"series{s}" in h.lower()]
+            # keep only ones under this series path
+            hrefs = [h for h in hrefs if f"/series{s}/" in h]
+            if hrefs:
+                pdfs[(loc, s)] = hrefs[0]
+                out(f"  {loc} series{s}: {hrefs[0]}")
+    out(f"\nfound {len(pdfs)} PDF links")
 
-    # Heuristic: find any list of dicts whose items mention 'series'/'image'/'number'
-    out("\n== candidate card lists (list of dicts with image/number/name) ==")
+    # 2) install pypdf and dump text of a couple PDFs to learn the format
+    out("\n== pip install pypdf ==")
+    subprocess.run([sys.executable, "-m", "pip", "install", "-q", "pypdf"], check=False)
+    import pypdf  # noqa: PLC0415
 
-    def scan(node, path=""):
-        if isinstance(node, list) and node and isinstance(node[0], dict):
-            keys = set().union(*[set(d.keys()) for d in node[:5] if isinstance(d, dict)])
-            if keys & {"image", "imageUrl", "number", "cardNumber", "name", "title",
-                       "series", "assets", "asset"}:
-                out(f"\nLIST at {path}: len={len(node)} item_keys={sorted(keys)[:30]}")
-                out("  sample[0]: " + json.dumps(node[0], ensure_ascii=False)[:800])
-                if len(node) > 1:
-                    out("  sample[1]: " + json.dumps(node[1], ensure_ascii=False)[:400])
-        if isinstance(node, dict):
-            for k, v in node.items():
-                scan(v, f"{path}.{k}" if path else k)
-        elif isinstance(node, list):
-            for i, v in enumerate(node[:3]):
-                scan(v, f"{path}[{i}]")
-
-    scan(page_props, "pageProps")
+    import io
+    for key in [("de-de", 9), ("en-us", 9), ("de-de", 7)]:
+        url = pdfs.get(key)
+        out(f"\n===== PDF {key} =====\n{url}")
+        if not url:
+            out("  (no url discovered)")
+            continue
+        try:
+            data = get(url)
+            reader = pypdf.PdfReader(io.BytesIO(data))
+            out(f"  pages={len(reader.pages)} bytes={len(data)}")
+            text = "\n".join((p.extract_text() or "") for p in reader.pages)
+            lines = [ln.rstrip() for ln in text.splitlines() if ln.strip()]
+            out(f"  non-empty lines={len(lines)}; first 60:")
+            for ln in lines[:60]:
+                out("   | " + ln[:160])
+        except Exception as e:  # noqa: BLE001
+            out(f"  parse error {type(e).__name__}: {str(e)[:120]}")
     return 0
 
 

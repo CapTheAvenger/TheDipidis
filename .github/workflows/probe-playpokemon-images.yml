@@ -27,5 +27,7 @@ jobs:
           python-version: '3.12'
 
       - name: Probe CloudFront image CDN
+        env:
+          PYTHONUNBUFFERED: '1'
         run: |
           python scripts/probe_playpokemon_images.py

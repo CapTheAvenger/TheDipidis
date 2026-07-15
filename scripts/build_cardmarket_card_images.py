@@ -119,7 +119,41 @@ def image_url(id_category, code, id_product):
     return f"{S3_BASE}/{id_category}/{code}/{id_product}/{id_product}.jpg"
 
 
-def build_rows(singles, codes, numbers):
+def _norm_name(s):
+    """Normalise a card name for the Prize Pack join: drop the '[Ability | Attack]'
+    suffix Cardmarket appends, unify apostrophes, collapse whitespace, lowercase."""
+    s = (s or "").lower().split("[")[0]
+    s = s.replace("’", "'").replace("‘", "'").replace("`", "'")
+    return re.sub(r"\s+", " ", s).strip()
+
+
+def load_stamped_urls():
+    """(series_int, norm_name) -> German CloudFront stamped-image URL.
+
+    Pulled from data/prizepack_official_images.csv, which resolves each Play!
+    Pokémon Prize Pack card to its official (non-hotlink-protected) CloudFront
+    image AND the in-gallery number the S3 path can't give us. Prefer the German
+    (de-de/DE) URL; the sister project reads this column for the actual stamp.
+    """
+    path = os.path.join(DATA, "prizepack_official_images.csv")
+    out = {}
+    if not os.path.exists(path):
+        print(f"::warning::{path} missing — stamped_image_url will be blank")
+        return out
+    with open(path, encoding="utf-8-sig") as f:
+        for r in csv.DictReader(f):
+            try:
+                s = int(r["series"])
+            except (KeyError, ValueError, TypeError):
+                continue
+            de = (r.get("image_url_de") or "").strip()
+            if de:
+                out.setdefault((s, _norm_name(r.get("name_en"))), de)
+    return out
+
+
+def build_rows(singles, codes, numbers, stamped=None):
+    stamped = stamped or {}
     rows = []
     skipped_no_code = 0
     for p in _products(singles):
@@ -130,15 +164,23 @@ def build_rows(singles, codes, numbers):
             continue
         id_cat = int(p.get("idCategory") or POKEMON_SINGLE_CATEGORY)
         id_prod = str(p["idProduct"])
+        name_en = p.get("name") or ""
+        stamped_url = ""
+        m = re.match(r"PPS(\d+)$", code)
+        if m:
+            stamped_url = stamped.get((int(m.group(1)), _norm_name(name_en)), "")
         rows.append({
             "idProduct": id_prod,
             "id_category": id_cat,
             "expansion_code": code,
             "id_expansion": id_exp,
             "number": numbers.get(id_prod, ""),
-            "name_en": p.get("name") or "",
+            "name_en": name_en,
             "name_de": "",   # Cardmarket's public export is English-only (see note)
             "image_url": image_url(id_cat, code, id_prod),
+            # Official Play! Pokémon CloudFront stamped image (de-de) — directly
+            # embeddable, unlike the hotlink-protected S3 image_url above.
+            "stamped_image_url": stamped_url,
         })
     rows.sort(key=lambda r: (r["expansion_code"], int(r["idProduct"])))
     return rows, skipped_no_code
@@ -208,8 +250,9 @@ def main():
     codes = derive_expansion_codes(nonsingles)
     codes.update(load_override_codes())        # overrides win / extend
     numbers = load_numbers()
+    stamped = load_stamped_urls()
 
-    rows, skipped = build_rows(singles, codes, numbers)
+    rows, skipped = build_rows(singles, codes, numbers, stamped)
 
     # ── Coverage summary ─────────────────────────────────────────────────────
     from collections import Counter
@@ -222,6 +265,8 @@ def main():
     print("PPS coverage: " + ", ".join(f"{c}={n}" for c, n in sorted(pps.items())))
     with_num = sum(1 for r in rows if r["number"])
     print(f"Rows with collector number: {with_num}/{len(rows)}")
+    with_stamp = sum(1 for r in rows if r.get("stamped_image_url"))
+    print(f"Rows with stamped_image_url (CloudFront): {with_stamp}/{len(rows)}")
 
     verified_line = "verification: skipped (offline / --no-verify)"
     if not args.no_verify:
@@ -236,7 +281,7 @@ def main():
             print(verified_line)
 
     fields = ["idProduct", "id_category", "expansion_code", "id_expansion",
-              "number", "name_en", "name_de", "image_url"]
+              "number", "name_en", "name_de", "image_url", "stamped_image_url"]
     tmp = args.out + ".tmp"
     with open(tmp, "w", encoding="utf-8", newline="") as f:
         w = csv.DictWriter(f, fieldnames=fields)

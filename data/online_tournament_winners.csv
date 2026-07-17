@@ -1,4 +1,6 @@
 tournament_id,tournament_date,format,player_count,winner_archetype,winner_winrate
+6a511572063cb29d318e8c3f,2026-07-16,CRI,104,Alakazam Dudunsparce,33.0
+6a53a6d63614df026848d798,2026-07-14,CRI,151,Slowking,21.0
 6a4c0d3d063cb29d318e5153,2026-07-13,CRI,143,Dragapult Dusknoir,21.0
 6a4d2cd565724db9ded3f5e3,2026-07-13,CRI,149,Mega Lucario,34.0
 6a4f5042063cb29d318e783e,2026-07-13,CRI,104,Crustle,25.0
@@ -49,5 +51,3 @@ sleep-sleep-sleep,2026-06-23,CRI,128,Rocket's Mewtwo,21.0
 1000-years-doom-tournaments,2026-06-20,CRI,302,Slowking,30.0
 6a0b676d13f957d6d4b4aed0,2026-06-19,CRI,102,N's Zoroark,21.0
 6a2eca29e334c3c9befd6934,2026-06-19,CRI,129,N's Zoroark,30.0
-6a2c30502d97f3b0c2614c64,2026-06-18,CRI,151,Clefairy Ogerpon,34.0
-6a28d75ce334c3c9befd2cd9,2026-06-16,CRI,206,Dragapult,21.0

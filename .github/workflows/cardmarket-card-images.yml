@@ -50,11 +50,16 @@ jobs:
         run: |
           python scripts/build_cardmarket_card_images.py
 
+      # idExpansion → expansion_code + name table for the sister project (#56).
+      - name: Build expansion table
+        run: |
+          python scripts/build_cm_expansions.py
+
       - name: Commit + push mapping
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name  "github-actions[bot]"
-          git add data/cardmarket_card_images.csv
+          git add data/cardmarket_card_images.csv data/cm_expansions.csv
           if git diff --cached --quiet; then
             echo "No image-mapping changes to commit."
             exit 0

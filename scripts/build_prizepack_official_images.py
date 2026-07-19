@@ -343,34 +343,52 @@ def main():
     log("Discovering per-series PDF card lists…")
     de_pdfs = gallery_pdf_urls("de-de")
     en_pdfs = gallery_pdf_urls("en-us")
-    series_list = sorted(de_pdfs)
-    log(f"Series with a DE card-list PDF: {series_list}")
-    if not series_list:
-        log("::error::no PDF card lists discovered — gallery layout may have changed")
+    gallery_series = sorted(de_pdfs)
+    log(f"Series in the gallery: {gallery_series}")
+
+    existing = _rows_from_csv(args.out) if os.path.exists(args.out) else []
+    have_series = {int(r["series"]) for r in existing if str(r.get("series", "")).isdigit()}
+
+    if not gallery_series and not existing:
+        log("::error::no PDF card lists discovered and no existing data")
         return 1
 
-    rows = []
-    for s in series_list:
+    # A series' card list never changes once published, and we already have it
+    # committed — so only fetch the PDFs for series we don't have yet. This stops
+    # the weekly job from re-hitting the CloudFront rate limit (403) for data that
+    # can't have changed, which was making it fail every week.
+    new_series = [s for s in gallery_series if s not in have_series]
+    log(f"Have series: {sorted(have_series)} | new to fetch: {new_series}")
+
+    rows = list(existing)
+    fetched_new = 0
+    for s in new_series:
         try:
-            rows.extend(build_series(s, de_pdfs[s], en_pdfs.get(s)))
+            new_rows = build_series(s, de_pdfs[s], en_pdfs.get(s))
+            for r in new_rows:  # match the string typing of CSV-loaded rows
+                r["series"] = str(r["series"])
+                r["gallery_number"] = str(r["gallery_number"])
+            rows.extend(new_rows)
+            fetched_new += 1
         except Exception as e:  # noqa: BLE001
-            log(f"::warning::SE{s} failed: {type(e).__name__}: {e}")
+            log(f"::warning::SE{s} (new) fetch failed — will retry a future run: "
+                f"{type(e).__name__}: {e}")
 
-    rows.sort(key=lambda r: (r["series"], r["gallery_number"]))
-
-    # Never clobber an existing good CSV with an empty one (e.g. all PDFs got
-    # rate-limited). Fail loudly instead so the previous data is preserved.
+    # We only ever fail when there's genuinely nothing to write; a throttled
+    # fetch of an already-known series is a no-op, not an error.
     if not rows:
-        log("::error::0 rows built (all PDF fetches failed?) — keeping existing CSV")
+        log("::error::no rows and no existing data to fall back to")
         return 1
+
+    rows.sort(key=lambda r: (int(r["series"]), int(r["gallery_number"])))
 
     # sanity: SE9 #19 should be a Mega Dragonite/Dragoran
     for r in rows:
-        if r["series"] == 9 and r["gallery_number"] == 19:
+        if str(r["series"]) == "9" and str(r["gallery_number"]) == "19":
             log(f"sanity SE9 #19 -> {r['name_de']} / {r['name_en']} ({r['set_code']} {r['set_number']})")
 
-    verified = "verification: skipped"
-    if not args.no_verify and rows:
+    verified = "verification: skipped (no new series fetched)"
+    if not args.no_verify and fetched_new:
         checked, ok = verify_images(rows)
         verified = f"verification: {ok}/{checked} sample images are PNG"
         log(verified)
@@ -389,9 +407,9 @@ def main():
     # international print. Later series win on the rare set+number collision.
     write_json_index(rows, args.json_out)
     from collections import Counter
-    per = Counter(r["series"] for r in rows)
+    per = Counter(int(r["series"]) for r in rows)
     log("Per-series counts: " + ", ".join(f"SE{s}={n}" for s, n in sorted(per.items())))
-    log(f"Wrote {args.out} — {len(rows)} rows. {verified}")
+    log(f"Wrote {args.out} — {len(rows)} rows ({fetched_new} new series fetched). {verified}")
     return 0
 
 

@@ -307998,6 +307998,2783 @@
       "Illustrated by OKUBO"
     ]
   },
+  "PBL|1": {
+    "name": "Tropius",
+    "card_type": "Basic",
+    "energy_type": "Grass",
+    "hp": "110",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Fruity Aroma",
+        "cost": [
+          "C"
+        ],
+        "damage": "",
+        "text": "Look at the top 6 cards of your deck, and you may reveal any number of Pokémon you find there and put them into your hand. Shuffle the other cards back into your deck."
+      },
+      {
+        "name": "Solar Beam",
+        "cost": [
+          "G",
+          "C"
+        ],
+        "damage": "60",
+        "text": ""
+      }
+    ],
+    "rules": [
+      "Illustrated by Akino Fukuji"
+    ]
+  },
+  "PBL|10": {
+    "name": "Centiskorch",
+    "card_type": "Evolves from Sizzlipede",
+    "energy_type": "Fire",
+    "hp": "140",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Controlled Burn",
+        "cost": [
+          "R"
+        ],
+        "damage": "",
+        "text": "Discard the top 2 cards of your opponent's deck."
+      },
+      {
+        "name": "Heat Tackle",
+        "cost": [
+          "R",
+          "C",
+          "C",
+          "C"
+        ],
+        "damage": "160",
+        "text": "This Pokémon also does 30 damage to itself."
+      }
+    ],
+    "rules": [
+      "Illustrated by Kouki Saitou"
+    ]
+  },
+  "PBL|100": {
+    "name": "Rampardos ex",
+    "card_type": "Evolves from Cranidos",
+    "energy_type": "Fighting",
+    "hp": "330",
+    "abilities": [
+      {
+        "name": "Destructive Headbutting",
+        "text": "Once during your turn, if this Pokémon is in the Active Spot, you may use this Ability. Flip a coin. If heads, discard an Energy from your opponent's Active Pokémon."
+      }
+    ],
+    "attacks": [
+      {
+        "name": "Rowdy Hammer",
+        "cost": [
+          "F",
+          "F"
+        ],
+        "damage": "150",
+        "text": "During your next turn, attacks used by this Pokémon do 150 more damage to your opponent's Active Pokémon (before applying Weakness and Resistance) ."
+      }
+    ],
+    "rules": [
+      "Illustrated by 5ban Graphics"
+    ]
+  },
+  "PBL|101": {
+    "name": "Mega Darkrai ex",
+    "card_type": "Basic",
+    "energy_type": "Darkness",
+    "hp": "280",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Dusk Raid",
+        "cost": [
+          "D",
+          "D"
+        ],
+        "damage": "110+",
+        "text": "If your Benched Pokémon have any damage counters on them, this attack does 110 more damage."
+      },
+      {
+        "name": "Abyss Eye",
+        "cost": [
+          "D",
+          "D",
+          "D"
+        ],
+        "damage": "",
+        "text": "If your opponent's Active Pokémon is affected by a Special Condition, it is Knocked Out."
+      }
+    ],
+    "rules": [
+      "Illustrated by 5ban Graphics"
+    ]
+  },
+  "PBL|102": {
+    "name": "Morpeko ex",
+    "card_type": "Basic",
+    "energy_type": "Darkness",
+    "hp": "180",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Wheely Draw",
+        "cost": [
+          "D"
+        ],
+        "damage": "",
+        "text": "Shuffle your hand into your deck. Then, draw 6 cards."
+      },
+      {
+        "name": "Hangry Blaster",
+        "cost": [
+          "D",
+          "D"
+        ],
+        "damage": "40+",
+        "text": "This attack does 40 more damage for each damage counter on this Pokémon."
+      }
+    ],
+    "rules": [
+      "Illustrated by 5ban Graphics"
+    ]
+  },
+  "PBL|103": {
+    "name": "Mega Excadrill ex",
+    "card_type": "Evolves from Drilbur",
+    "energy_type": "Metal",
+    "hp": "340",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Undermine",
+        "cost": [
+          "M",
+          "M"
+        ],
+        "damage": "90",
+        "text": "Discard the top 2 cards of your opponent's deck."
+      },
+      {
+        "name": "Maximum Drilling",
+        "cost": [
+          "M",
+          "M",
+          "M"
+        ],
+        "damage": "200+",
+        "text": "If this Pokémon has at least 2 extra Energy attached (in addition to this attack's cost) , this attack does 130 more damage."
+      }
+    ],
+    "rules": [
+      "Illustrated by Keisuke Azuma"
+    ]
+  },
+  "PBL|104": {
+    "name": "Brave Bangle",
+    "card_type": "Tool",
+    "energy_type": "",
+    "hp": "",
+    "abilities": [],
+    "attacks": [],
+    "rules": [
+      "If the Pokémon this card is attached to doesn't have a Rule Box, the attacks it uses do 30 more damage to your opponent's Active Pokémon ex (before applying Weakness and Resistance) . (Pokémon ex, Pokémon V, etc. have Rule Boxes.)",
+      "Illustrated by Toyste Beach"
+    ]
+  },
+  "PBL|105": {
+    "name": "Crushing Hammer",
+    "card_type": "Item",
+    "energy_type": "",
+    "hp": "",
+    "abilities": [],
+    "attacks": [],
+    "rules": [
+      "Flip a coin. If heads, discard an Energy attached to 1 of your opponent's Pokémon.",
+      "Illustrated by Ayaka Yoshida"
+    ]
+  },
+  "PBL|106": {
+    "name": "Dark Bell",
+    "card_type": "Item",
+    "energy_type": "",
+    "hp": "",
+    "abilities": [],
+    "attacks": [],
+    "rules": [
+      "Both Active non- [ D ] Pokémon are now Confused.",
+      "Illustrated by Toyste Beach"
+    ]
+  },
+  "PBL|107": {
+    "name": "Energy Switch",
+    "card_type": "Item",
+    "energy_type": "",
+    "hp": "",
+    "abilities": [],
+    "attacks": [],
+    "rules": [
+      "Move a basic Energy from 1 of your Pokémon to another of your Pokémon.",
+      "Illustrated by Studio Bora Inc."
+    ]
+  },
+  "PBL|108": {
+    "name": "Gladion's Final Battle",
+    "card_type": "Supporter",
+    "energy_type": "",
+    "hp": "",
+    "abilities": [],
+    "attacks": [],
+    "rules": [
+      "You can use this card only when it is the last card in your hand. During this turn, attacks used by your Pokémon that don't have a Rule Box do 80 more damage to your opponent's Active Pokémon (before applying Weakness and Resistance) . (Pokémon ex, Pokémon V, etc. have Rule Boxes.)",
+      "Illustrated by akagi"
+    ]
+  },
+  "PBL|109": {
+    "name": "Gwynn",
+    "card_type": "Supporter",
+    "energy_type": "",
+    "hp": "",
+    "abilities": [],
+    "attacks": [],
+    "rules": [
+      "Discard up to 2 Pokémon that don't have a Rule Box from your hand, and draw 3 cards for each card you discarded in this way. (Pokémon ex, Pokémon V, etc. have Rule Boxes.)",
+      "Illustrated by nagimiso"
+    ]
+  },
+  "PBL|11": {
+    "name": "Charcadet",
+    "card_type": "Basic",
+    "energy_type": "Fire",
+    "hp": "80",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Best Punch",
+        "cost": [
+          "R"
+        ],
+        "damage": "40",
+        "text": "Flip a coin. If tails, this attack does nothing."
+      }
+    ],
+    "rules": [
+      "Illustrated by Ryuta Fuse"
+    ]
+  },
+  "PBL|110": {
+    "name": "Iron Defender",
+    "card_type": "Item",
+    "energy_type": "",
+    "hp": "",
+    "abilities": [],
+    "attacks": [],
+    "rules": [
+      "During your opponent's next turn, all of your [ M ] Pokémon take 30 less damage from attacks from your opponent's Pokémon (after applying Weakness and Resistance) . (This includes new Pokémon that come into play.)",
+      "Illustrated by Studio Bora Inc."
+    ]
+  },
+  "PBL|111": {
+    "name": "Misty's Vitality",
+    "card_type": "Supporter",
+    "energy_type": "",
+    "hp": "",
+    "abilities": [],
+    "attacks": [],
+    "rules": [
+      "Search your deck for up to 4 Basic [ W ] Energy cards and attach them to 1 of your Pokémon. Then, shuffle your deck. Your turn ends.",
+      "Illustrated by En Morikura"
+    ]
+  },
+  "PBL|112": {
+    "name": "Rust Syndicate Grunt",
+    "card_type": "Supporter",
+    "energy_type": "",
+    "hp": "",
+    "abilities": [],
+    "attacks": [],
+    "rules": [
+      "You can use this card only if any of your Pokémon were Knocked Out during your opponent's last turn. Discard an Energy from 1 of your opponent's Pokémon.",
+      "Illustrated by Teeziro"
+    ]
+  },
+  "PBL|113": {
+    "name": "Tremendous Bomb",
+    "card_type": "Tool",
+    "energy_type": "",
+    "hp": "",
+    "abilities": [],
+    "attacks": [],
+    "rules": [
+      "If the Pokémon this card is attached to isn't a Mega Evolution Pokémon ex, is in the Active Spot, and takes 240 or more damage from an attack from your opponent's Mega Evolution Pokémon ex (even if this Pokémon is Knocked Out) , place 12 damage counters on the Attacking Pokémon. If you placed any damage counters in this way, discard this card.",
+      "Illustrated by inose yukie"
+    ]
+  },
+  "PBL|114": {
+    "name": "Mega Zeraora ex",
+    "card_type": "Basic",
+    "energy_type": "Lightning",
+    "hp": "270",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Thunderous Fist",
+        "cost": [
+          "L"
+        ],
+        "damage": "60×",
+        "text": "This attack does 60 damage for each [ L ] Energy attached to this Pokémon."
+      },
+      {
+        "name": "Zepto Turn",
+        "cost": [
+          "L",
+          "L",
+          "L"
+        ],
+        "damage": "150",
+        "text": "Switch this Pokémon with 1 of your Benched Pokémon."
+      }
+    ],
+    "rules": [
+      "Illustrated by GIDORA"
+    ]
+  },
+  "PBL|115": {
+    "name": "Mega Chandelure ex",
+    "card_type": "Evolves from Lampent",
+    "energy_type": "Psychic",
+    "hp": "350",
+    "abilities": [
+      {
+        "name": "Binding Flame",
+        "text": "Your opponent's Active Pokémon's Retreat Cost is [ C ] more."
+      }
+    ],
+    "attacks": [
+      {
+        "name": "Phantom Maze",
+        "cost": [
+          "P",
+          "P"
+        ],
+        "damage": "130+",
+        "text": "This attack does 50 more damage for each [ C ] in your opponent's Active Pokémon's Retreat Cost."
+      }
+    ],
+    "rules": [
+      "Illustrated by REND"
+    ]
+  },
+  "PBL|116": {
+    "name": "Mega Darkrai ex",
+    "card_type": "Basic",
+    "energy_type": "Darkness",
+    "hp": "280",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Dusk Raid",
+        "cost": [
+          "D",
+          "D"
+        ],
+        "damage": "110+",
+        "text": "If your Benched Pokémon have any damage counters on them, this attack does 110 more damage."
+      },
+      {
+        "name": "Abyss Eye",
+        "cost": [
+          "D",
+          "D",
+          "D"
+        ],
+        "damage": "",
+        "text": "If your opponent's Active Pokémon is affected by a Special Condition, it is Knocked Out."
+      }
+    ],
+    "rules": [
+      "Illustrated by AKIRA EGAWA"
+    ]
+  },
+  "PBL|117": {
+    "name": "Morpeko ex",
+    "card_type": "Basic",
+    "energy_type": "Darkness",
+    "hp": "180",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Wheely Draw",
+        "cost": [
+          "D"
+        ],
+        "damage": "",
+        "text": "Shuffle your hand into your deck. Then, draw 6 cards."
+      },
+      {
+        "name": "Hangry Blaster",
+        "cost": [
+          "D",
+          "D"
+        ],
+        "damage": "40+",
+        "text": "This attack does 40 more damage for each damage counter on this Pokémon."
+      }
+    ],
+    "rules": [
+      "Illustrated by NC Empire"
+    ]
+  },
+  "PBL|118": {
+    "name": "Gladion's Final Battle",
+    "card_type": "Supporter",
+    "energy_type": "",
+    "hp": "",
+    "abilities": [],
+    "attacks": [],
+    "rules": [
+      "You can use this card only when it is the last card in your hand. During this turn, attacks used by your Pokémon that don't have a Rule Box do 80 more damage to your opponent's Active Pokémon (before applying Weakness and Resistance) . (Pokémon ex, Pokémon V, etc. have Rule Boxes.)",
+      "Illustrated by DOM"
+    ]
+  },
+  "PBL|119": {
+    "name": "Gwynn",
+    "card_type": "Supporter",
+    "energy_type": "",
+    "hp": "",
+    "abilities": [],
+    "attacks": [],
+    "rules": [
+      "Discard up to 2 Pokémon that don't have a Rule Box from your hand, and draw 3 cards for each card you discarded in this way. (Pokémon ex, Pokémon V, etc. have Rule Boxes.)",
+      "Illustrated by Naoki Saito"
+    ]
+  },
+  "PBL|12": {
+    "name": "Armarouge",
+    "card_type": "Evolves from Charcadet",
+    "energy_type": "Fire",
+    "hp": "140",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Flame Legion",
+        "cost": [
+          "R"
+        ],
+        "damage": "40+",
+        "text": "This attack does 40 more damage for each of your Benched Pokémon that has any [ R ] Energy attached."
+      }
+    ],
+    "rules": [
+      "Illustrated by Jiro Sasumo"
+    ]
+  },
+  "PBL|120": {
+    "name": "Mega Darkrai ex",
+    "card_type": "Basic",
+    "energy_type": "Darkness",
+    "hp": "280",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Dusk Raid",
+        "cost": [
+          "D",
+          "D"
+        ],
+        "damage": "110+",
+        "text": "If your Benched Pokémon have any damage counters on them, this attack does 110 more damage."
+      },
+      {
+        "name": "Abyss Eye",
+        "cost": [
+          "D",
+          "D",
+          "D"
+        ],
+        "damage": "",
+        "text": "If your opponent's Active Pokémon is affected by a Special Condition, it is Knocked Out."
+      }
+    ],
+    "rules": [
+      "Illustrated by 5ban Graphics"
+    ]
+  },
+  "PBL|13": {
+    "name": "Goldeen",
+    "card_type": "Basic",
+    "energy_type": "Water",
+    "hp": "70",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Pierce",
+        "cost": [
+          "C",
+          "C"
+        ],
+        "damage": "30",
+        "text": ""
+      }
+    ],
+    "rules": [
+      "Illustrated by Shibuzoh."
+    ]
+  },
+  "PBL|14": {
+    "name": "Seaking",
+    "card_type": "Evolves from Goldeen",
+    "energy_type": "Water",
+    "hp": "110",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Hydro Jet",
+        "cost": [
+          "C",
+          "C",
+          "C"
+        ],
+        "damage": "",
+        "text": "This attack does 30 damage to 1 of your opponent's Pokémon for each [ W ] Energy attached to this Pokémon. (Don't apply Weakness and Resistance for Benched Pokémon.)"
+      }
+    ],
+    "rules": [
+      "Illustrated by OKUBO"
+    ]
+  },
+  "PBL|15": {
+    "name": "Wailmer",
+    "card_type": "Basic",
+    "energy_type": "Water",
+    "hp": "130",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Water Gun",
+        "cost": [
+          "W",
+          "W"
+        ],
+        "damage": "40",
+        "text": ""
+      },
+      {
+        "name": "Wave Splash",
+        "cost": [
+          "W",
+          "W",
+          "W"
+        ],
+        "damage": "80",
+        "text": ""
+      }
+    ],
+    "rules": [
+      "Illustrated by Asako Ito"
+    ]
+  },
+  "PBL|16": {
+    "name": "Wailord ex",
+    "card_type": "Evolves from Wailmer",
+    "energy_type": "Water",
+    "hp": "380",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Surf",
+        "cost": [
+          "W",
+          "W",
+          "W"
+        ],
+        "damage": "120",
+        "text": ""
+      },
+      {
+        "name": "Falling Down",
+        "cost": [
+          "W",
+          "W",
+          "W",
+          "W",
+          "W"
+        ],
+        "damage": "270",
+        "text": "This Pokémon is now Asleep."
+      }
+    ],
+    "rules": [
+      "Illustrated by 5ban Graphics"
+    ]
+  },
+  "PBL|17": {
+    "name": "Relicanth",
+    "card_type": "Basic",
+    "energy_type": "Water",
+    "hp": "100",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Fossil Beatdown",
+        "cost": [
+          "C"
+        ],
+        "damage": "10+",
+        "text": "This attack does 30 more damage for each of your Benched Pokémon that has \"Antique\" in its name."
+      }
+    ],
+    "rules": [
+      "Illustrated by Naoyo Kimura"
+    ]
+  },
+  "PBL|18": {
+    "name": "Popplio",
+    "card_type": "Basic",
+    "energy_type": "Water",
+    "hp": "70",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Pound",
+        "cost": [
+          "W"
+        ],
+        "damage": "20",
+        "text": ""
+      }
+    ],
+    "rules": [
+      "Illustrated by Oswaldo KATO"
+    ]
+  },
+  "PBL|19": {
+    "name": "Brionne",
+    "card_type": "Evolves from Popplio",
+    "energy_type": "Water",
+    "hp": "90",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Hyper Voice",
+        "cost": [
+          "W"
+        ],
+        "damage": "40",
+        "text": ""
+      }
+    ],
+    "rules": [
+      "Illustrated by MINAMINAMI Take"
+    ]
+  },
+  "PBL|2": {
+    "name": "Grubbin",
+    "card_type": "Basic",
+    "energy_type": "Grass",
+    "hp": "70",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "String Shot",
+        "cost": [
+          "C"
+        ],
+        "damage": "10",
+        "text": "Flip a coin. If heads, your opponent's Active Pokémon is now Paralyzed."
+      }
+    ],
+    "rules": [
+      "Illustrated by Mina Nakai"
+    ]
+  },
+  "PBL|20": {
+    "name": "Primarina",
+    "card_type": "Evolves from Brionne",
+    "energy_type": "Water",
+    "hp": "150",
+    "abilities": [
+      {
+        "name": "Enriching Melody",
+        "text": "Once during your turn, when you play this Pokémon from your hand to evolve 1 of your Pokémon, you may use this Ability. Heal all damage from 1 of your Pokémon."
+      }
+    ],
+    "attacks": [
+      {
+        "name": "Aqua Return",
+        "cost": [
+          "W",
+          "C"
+        ],
+        "damage": "120",
+        "text": "Shuffle this Pokémon and all attached cards into your deck."
+      }
+    ],
+    "rules": [
+      "Illustrated by Taira Akitsu"
+    ]
+  },
+  "PBL|21": {
+    "name": "Finizen",
+    "card_type": "Basic",
+    "energy_type": "Water",
+    "hp": "80",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Draining Fin",
+        "cost": [
+          "W",
+          "W"
+        ],
+        "damage": "20",
+        "text": "Heal 20 damage from this Pokémon."
+      }
+    ],
+    "rules": [
+      "Illustrated by Yukiko Baba"
+    ]
+  },
+  "PBL|22": {
+    "name": "Palafin",
+    "card_type": "Evolves from Finizen",
+    "energy_type": "Water",
+    "hp": "150",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Knuckle Justice",
+        "cost": [
+          "W",
+          "W"
+        ],
+        "damage": "80+",
+        "text": "If your opponent has exactly 1 Prize card remaining, this attack does 200 more damage."
+      }
+    ],
+    "rules": [
+      "Illustrated by satoma"
+    ]
+  },
+  "PBL|23": {
+    "name": "Electrike",
+    "card_type": "Basic",
+    "energy_type": "Lightning",
+    "hp": "70",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Collect",
+        "cost": [
+          "L"
+        ],
+        "damage": "",
+        "text": "Draw a card."
+      },
+      {
+        "name": "Tackle",
+        "cost": [
+          "L",
+          "L"
+        ],
+        "damage": "30",
+        "text": ""
+      }
+    ],
+    "rules": [
+      "Illustrated by Dsuke"
+    ]
+  },
+  "PBL|24": {
+    "name": "Manectric",
+    "card_type": "Evolves from Electrike",
+    "energy_type": "Lightning",
+    "hp": "120",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Flashing Barrier",
+        "cost": [
+          "L",
+          "L"
+        ],
+        "damage": "50",
+        "text": "During your opponent's next turn, prevent all damage done to this Pokémon by attacks from Evolution Pokémon."
+      },
+      {
+        "name": "Sonic Edge",
+        "cost": [
+          "L",
+          "L",
+          "L"
+        ],
+        "damage": "110",
+        "text": "This attack's damage isn't affected by any effects on your opponent's Active Pokémon."
+      }
+    ],
+    "rules": [
+      "Illustrated by Uninori"
+    ]
+  },
+  "PBL|25": {
+    "name": "Charjabug",
+    "card_type": "Evolves from Grubbin",
+    "energy_type": "Lightning",
+    "hp": "100",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Vise Grip",
+        "cost": [
+          "L"
+        ],
+        "damage": "30",
+        "text": ""
+      },
+      {
+        "name": "Ram",
+        "cost": [
+          "L",
+          "L"
+        ],
+        "damage": "50",
+        "text": ""
+      }
+    ],
+    "rules": [
+      "Illustrated by Kazuhisa Uragami"
+    ]
+  },
+  "PBL|26": {
+    "name": "Vikavolt",
+    "card_type": "Evolves from Charjabug",
+    "energy_type": "Lightning",
+    "hp": "160",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Quick Dive",
+        "cost": [
+          "L"
+        ],
+        "damage": "",
+        "text": "This attack does 50 damage to 1 of your opponent's Pokémon. (Don't apply Weakness and Resistance for Benched Pokémon.)"
+      },
+      {
+        "name": "Giga Railgun",
+        "cost": [
+          "L",
+          "L"
+        ],
+        "damage": "260",
+        "text": "If this Pokémon has no Voltaic [ L ] Energy attached, this attack does nothing."
+      }
+    ],
+    "rules": [
+      "Illustrated by KEIICHIRO ITO"
+    ]
+  },
+  "PBL|27": {
+    "name": "Mega Zeraora ex",
+    "card_type": "Basic",
+    "energy_type": "Lightning",
+    "hp": "270",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Thunderous Fist",
+        "cost": [
+          "L"
+        ],
+        "damage": "60×",
+        "text": "This attack does 60 damage for each [ L ] Energy attached to this Pokémon."
+      },
+      {
+        "name": "Zepto Turn",
+        "cost": [
+          "L",
+          "L",
+          "L"
+        ],
+        "damage": "150",
+        "text": "Switch this Pokémon with 1 of your Benched Pokémon."
+      }
+    ],
+    "rules": [
+      "Illustrated by 5ban Graphics"
+    ]
+  },
+  "PBL|28": {
+    "name": "Miraidon",
+    "card_type": "Basic",
+    "energy_type": "Lightning",
+    "hp": "120",
+    "abilities": [
+      {
+        "name": "Photon Cord",
+        "text": "If this Pokémon is in the Active Spot and is Knocked Out by damage from an attack from your opponent's Pokémon, move up to 2 Basic [ L ] Energy cards from this Pokémon to 1 of your Benched Pokémon."
+      }
+    ],
+    "attacks": [
+      {
+        "name": "Thunder",
+        "cost": [
+          "L",
+          "L"
+        ],
+        "damage": "90",
+        "text": "This Pokémon also does 30 damage to itself."
+      }
+    ],
+    "rules": [
+      "Illustrated by mashu"
+    ]
+  },
+  "PBL|29": {
+    "name": "Slowpoke",
+    "card_type": "Basic",
+    "energy_type": "Psychic",
+    "hp": "70",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "All-You-Can-Yeet",
+        "cost": [
+          "P"
+        ],
+        "damage": "",
+        "text": "You may discard any number of cards from your hand."
+      },
+      {
+        "name": "Headbutt",
+        "cost": [
+          "C",
+          "C"
+        ],
+        "damage": "20",
+        "text": ""
+      }
+    ],
+    "rules": [
+      "Illustrated by Nelnal"
+    ]
+  },
+  "PBL|3": {
+    "name": "Fomantis",
+    "card_type": "Basic",
+    "energy_type": "Grass",
+    "hp": "70",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Reckless Charge",
+        "cost": [
+          "G"
+        ],
+        "damage": "30",
+        "text": "This Pokémon also does 10 damage to itself."
+      }
+    ],
+    "rules": [
+      "Illustrated by nisimono"
+    ]
+  },
+  "PBL|30": {
+    "name": "Slowbro",
+    "card_type": "Evolves from Slowpoke",
+    "energy_type": "Psychic",
+    "hp": "130",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "All Out",
+        "cost": [
+          "P"
+        ],
+        "damage": "50+",
+        "text": "If you have no cards in your hand, this attack does 160 more damage."
+      },
+      {
+        "name": "Zen Headbutt",
+        "cost": [
+          "C",
+          "C",
+          "C"
+        ],
+        "damage": "110",
+        "text": ""
+      }
+    ],
+    "rules": [
+      "Illustrated by CHORISO"
+    ]
+  },
+  "PBL|31": {
+    "name": "Mega Slowbro ex",
+    "card_type": "Evolves from Slowpoke",
+    "energy_type": "Psychic",
+    "hp": "330",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Shellnado Spin",
+        "cost": [
+          "P",
+          "P",
+          "P"
+        ],
+        "damage": "180",
+        "text": "During your opponent's next turn, if this Pokémon is damaged by an attack (even if this Pokémon is Knocked Out) , place 12 damage counters on the Attacking Pokémon."
+      }
+    ],
+    "rules": [
+      "Illustrated by 5ban Graphics"
+    ]
+  },
+  "PBL|32": {
+    "name": "Jynx",
+    "card_type": "Basic",
+    "energy_type": "Psychic",
+    "hp": "100",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Intense Kiss",
+        "cost": [
+          "P"
+        ],
+        "damage": "",
+        "text": "At the end of your opponent's next turn, discard the Defending Pokémon and all attached cards."
+      },
+      {
+        "name": "Psy Bolt",
+        "cost": [
+          "P",
+          "C"
+        ],
+        "damage": "50",
+        "text": "Flip a coin. If heads, your opponent's Active Pokémon is now Paralyzed."
+      }
+    ],
+    "rules": [
+      "Illustrated by Yoshimoto Yoshimon"
+    ]
+  },
+  "PBL|33": {
+    "name": "Shuppet",
+    "card_type": "Basic",
+    "energy_type": "Psychic",
+    "hp": "50",
+    "abilities": [
+      {
+        "name": "Hide 'n' Sneak",
+        "text": "Prevent all effects of your opponent's Pokémon's attacks and Abilities done to this Pokémon. (Damage is not an effect.)"
+      }
+    ],
+    "attacks": [
+      {
+        "name": "Hang Down",
+        "cost": [
+          "P"
+        ],
+        "damage": "10",
+        "text": ""
+      }
+    ],
+    "rules": [
+      "Illustrated by Bun Toujo"
+    ]
+  },
+  "PBL|34": {
+    "name": "Banette",
+    "card_type": "Evolves from Shuppet",
+    "energy_type": "Psychic",
+    "hp": "80",
+    "abilities": [
+      {
+        "name": "Hide 'n' Sneak",
+        "text": "Prevent all effects of your opponent's Pokémon's attacks and Abilities done to this Pokémon. (Damage is not an effect.)"
+      }
+    ],
+    "attacks": [
+      {
+        "name": "Puppet Pull",
+        "cost": [
+          "P"
+        ],
+        "damage": "80",
+        "text": "You may search your deck for a card and put it into your hand. Then, shuffle your deck."
+      }
+    ],
+    "rules": [
+      "Illustrated by Mugi Hamada"
+    ]
+  },
+  "PBL|35": {
+    "name": "Spiritomb",
+    "card_type": "Basic",
+    "energy_type": "Psychic",
+    "hp": "60",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Spiritual End",
+        "cost": [
+          "P"
+        ],
+        "damage": "",
+        "text": "If you have 13 or more Pokémon that have the Hide 'n' Sneak Ability in your discard pile, choose 2 of your opponent's Pokémon and quadruple the number of damage counters on each of them."
+      }
+    ],
+    "rules": [
+      "Illustrated by danciao"
+    ]
+  },
+  "PBL|36": {
+    "name": "Litwick",
+    "card_type": "Basic",
+    "energy_type": "Psychic",
+    "hp": "70",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Will-O-Wisp",
+        "cost": [
+          "P"
+        ],
+        "damage": "20",
+        "text": ""
+      }
+    ],
+    "rules": [
+      "Illustrated by HYOGONOSUKE"
+    ]
+  },
+  "PBL|37": {
+    "name": "Lampent",
+    "card_type": "Evolves from Litwick",
+    "energy_type": "Psychic",
+    "hp": "90",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Spreading Light",
+        "cost": [
+          "P"
+        ],
+        "damage": "",
+        "text": "Search your deck for up to 3 Lampent and put them onto your Bench. Then, shuffle your deck."
+      }
+    ],
+    "rules": [
+      "Illustrated by sowsow"
+    ]
+  },
+  "PBL|38": {
+    "name": "Mega Chandelure ex",
+    "card_type": "Evolves from Lampent",
+    "energy_type": "Psychic",
+    "hp": "350",
+    "abilities": [
+      {
+        "name": "Binding Flame",
+        "text": "Your opponent's Active Pokémon's Retreat Cost is [ C ] more."
+      }
+    ],
+    "attacks": [
+      {
+        "name": "Phantom Maze",
+        "cost": [
+          "P",
+          "P"
+        ],
+        "damage": "130+",
+        "text": "This attack does 50 more damage for each [ C ] in your opponent's Active Pokémon's Retreat Cost."
+      }
+    ],
+    "rules": [
+      "Illustrated by 5ban Graphics"
+    ]
+  },
+  "PBL|39": {
+    "name": "Dhelmise",
+    "card_type": "Basic",
+    "energy_type": "Psychic",
+    "hp": "140",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Vengeful Anchor",
+        "cost": [
+          "P"
+        ],
+        "damage": "30+",
+        "text": "If you have 4 or more Pokémon that have the Hide 'n' Sneak Ability in your discard pile, this attack does 140 more damage."
+      }
+    ],
+    "rules": [
+      "Illustrated by Oku"
+    ]
+  },
+  "PBL|4": {
+    "name": "Lurantis ex",
+    "card_type": "Evolves from Fomantis",
+    "energy_type": "Grass",
+    "hp": "260",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Lively Cutter",
+        "cost": [
+          "G"
+        ],
+        "damage": "60+",
+        "text": "If this Pokémon was healed during this turn, this attack does 200 more damage."
+      },
+      {
+        "name": "Leaf Guard",
+        "cost": [
+          "G",
+          "C"
+        ],
+        "damage": "140",
+        "text": "During your opponent's next turn, this Pokémon takes 50 less damage from attacks (after applying Weakness and Resistance) ."
+      }
+    ],
+    "rules": [
+      "Illustrated by 5ban Graphics"
+    ]
+  },
+  "PBL|40": {
+    "name": "Marshadow",
+    "card_type": "Basic",
+    "energy_type": "Psychic",
+    "hp": "90",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Shadowy Knot",
+        "cost": [
+          "P"
+        ],
+        "damage": "30×",
+        "text": "This attack does 30 damage for each [ C ] in your opponent's Active Pokémon's Retreat Cost."
+      }
+    ],
+    "rules": [
+      "Illustrated by Nakamura Ippan"
+    ]
+  },
+  "PBL|41": {
+    "name": "Annihilape",
+    "card_type": "Evolves from Primeape",
+    "energy_type": "Psychic",
+    "hp": "150",
+    "abilities": [
+      {
+        "name": "Durable Body",
+        "text": "If this Pokémon would be Knocked Out by damage from an attack, flip a coin. If heads, this Pokémon is not Knocked Out, and its remaining HP becomes 10."
+      }
+    ],
+    "attacks": [
+      {
+        "name": "Ghostly Blow",
+        "cost": [
+          "P",
+          "P"
+        ],
+        "damage": "100",
+        "text": "Place 5 damage counters on 1 of your opponent's Benched Pokémon."
+      }
+    ],
+    "rules": [
+      "Illustrated by Haru Akasaka"
+    ]
+  },
+  "PBL|42": {
+    "name": "Mankey",
+    "card_type": "Basic",
+    "energy_type": "Fighting",
+    "hp": "50",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Low Kick",
+        "cost": [
+          "C"
+        ],
+        "damage": "20",
+        "text": ""
+      }
+    ],
+    "rules": [
+      "Illustrated by Yuka Morii"
+    ]
+  },
+  "PBL|43": {
+    "name": "Primeape",
+    "card_type": "Evolves from Mankey",
+    "energy_type": "Fighting",
+    "hp": "110",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Corkscrew Punch",
+        "cost": [
+          "C",
+          "C"
+        ],
+        "damage": "50",
+        "text": ""
+      }
+    ],
+    "rules": [
+      "Illustrated by GOSSAN"
+    ]
+  },
+  "PBL|44": {
+    "name": "Cranidos",
+    "card_type": "Evolves from Antique Skull Fossil",
+    "energy_type": "Fighting",
+    "hp": "100",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Push Down",
+        "cost": [
+          "F",
+          "F"
+        ],
+        "damage": "70",
+        "text": "Switch out your opponent's Active Pokémon to the Bench. (Your opponent chooses the new Active Pokémon.)"
+      }
+    ],
+    "rules": [
+      "Illustrated by Hideki Ishikawa"
+    ]
+  },
+  "PBL|45": {
+    "name": "Rampardos ex",
+    "card_type": "Evolves from Cranidos",
+    "energy_type": "Fighting",
+    "hp": "330",
+    "abilities": [
+      {
+        "name": "Destructive Headbutting",
+        "text": "Once during your turn, if this Pokémon is in the Active Spot, you may use this Ability. Flip a coin. If heads, discard an Energy from your opponent's Active Pokémon."
+      }
+    ],
+    "attacks": [
+      {
+        "name": "Rowdy Hammer",
+        "cost": [
+          "F",
+          "F"
+        ],
+        "damage": "150",
+        "text": "During your next turn, attacks used by this Pokémon do 150 more damage to your opponent's Active Pokémon (before applying Weakness and Resistance) ."
+      }
+    ],
+    "rules": [
+      "Illustrated by hncl"
+    ]
+  },
+  "PBL|46": {
+    "name": "Drilbur",
+    "card_type": "Basic",
+    "energy_type": "Fighting",
+    "hp": "70",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Call for Family",
+        "cost": [
+          "C"
+        ],
+        "damage": "",
+        "text": "Search your deck for up to 2 Basic Pokémon and put them onto your Bench. Then, shuffle your deck."
+      },
+      {
+        "name": "Dig Claws",
+        "cost": [
+          "C",
+          "C",
+          "C"
+        ],
+        "damage": "50",
+        "text": ""
+      }
+    ],
+    "rules": [
+      "Illustrated by Atsushi Furusawa"
+    ]
+  },
+  "PBL|47": {
+    "name": "Koraidon",
+    "card_type": "Basic",
+    "energy_type": "Fighting",
+    "hp": "130",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Battle Claw",
+        "cost": [
+          "F"
+        ],
+        "damage": "30+",
+        "text": "If your opponent's Active Pokémon is an Evolution Pokémon, this attack does 30 more damage."
+      },
+      {
+        "name": "Gaia Impact",
+        "cost": [
+          "F",
+          "F",
+          "C"
+        ],
+        "damage": "190",
+        "text": "Discard all Energy from this Pokémon."
+      }
+    ],
+    "rules": [
+      "Illustrated by kodama"
+    ]
+  },
+  "PBL|48": {
+    "name": "Mega Darkrai ex",
+    "card_type": "Basic",
+    "energy_type": "Darkness",
+    "hp": "280",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Dusk Raid",
+        "cost": [
+          "D",
+          "D"
+        ],
+        "damage": "110+",
+        "text": "If your Benched Pokémon have any damage counters on them, this attack does 110 more damage."
+      },
+      {
+        "name": "Abyss Eye",
+        "cost": [
+          "D",
+          "D",
+          "D"
+        ],
+        "damage": "",
+        "text": "If your opponent's Active Pokémon is affected by a Special Condition, it is Knocked Out."
+      }
+    ],
+    "rules": [
+      "Illustrated by 5ban Graphics"
+    ]
+  },
+  "PBL|49": {
+    "name": "Vullaby",
+    "card_type": "Basic",
+    "energy_type": "Darkness",
+    "hp": "70",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Flap",
+        "cost": [
+          "D"
+        ],
+        "damage": "10",
+        "text": ""
+      },
+      {
+        "name": "Gust",
+        "cost": [
+          "D",
+          "C"
+        ],
+        "damage": "20",
+        "text": ""
+      }
+    ],
+    "rules": [
+      "Illustrated by Shiburingaru"
+    ]
+  },
+  "PBL|5": {
+    "name": "Poltchageist",
+    "card_type": "Basic",
+    "energy_type": "Grass",
+    "hp": "30",
+    "abilities": [
+      {
+        "name": "Hide 'n' Sneak",
+        "text": "Prevent all effects of your opponent's Pokémon's attacks and Abilities done to this Pokémon. (Damage is not an effect.)"
+      }
+    ],
+    "attacks": [
+      {
+        "name": "Furtive Drop",
+        "cost": [
+          "C"
+        ],
+        "damage": "",
+        "text": "Place 1 damage counter on your opponent's Active Pokémon."
+      }
+    ],
+    "rules": [
+      "Illustrated by Mousho"
+    ]
+  },
+  "PBL|50": {
+    "name": "Mandibuzz",
+    "card_type": "Evolves from Vullaby",
+    "energy_type": "Darkness",
+    "hp": "120",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Bone Sniper",
+        "cost": [
+          "D"
+        ],
+        "damage": "",
+        "text": "This attack does 70 damage to 1 of your opponent's Pokémon that has any Special Energy attached. (Don't apply Weakness and Resistance for Benched Pokémon.)"
+      },
+      {
+        "name": "Blasting Wind",
+        "cost": [
+          "D",
+          "D",
+          "C"
+        ],
+        "damage": "120",
+        "text": ""
+      }
+    ],
+    "rules": [
+      "Illustrated by Nisota Niso"
+    ]
+  },
+  "PBL|51": {
+    "name": "Inkay",
+    "card_type": "Basic",
+    "energy_type": "Darkness",
+    "hp": "60",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Procurement",
+        "cost": [
+          "D"
+        ],
+        "damage": "",
+        "text": "Search your deck for an Item card, reveal it, and put it into your hand. Then, shuffle your deck."
+      },
+      {
+        "name": "Spinning Attack",
+        "cost": [
+          "D",
+          "D"
+        ],
+        "damage": "30",
+        "text": ""
+      }
+    ],
+    "rules": [
+      "Illustrated by Yuriko Akase"
+    ]
+  },
+  "PBL|52": {
+    "name": "Malamar",
+    "card_type": "Evolves from Inkay",
+    "energy_type": "Darkness",
+    "hp": "120",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Perplex",
+        "cost": [
+          "D"
+        ],
+        "damage": "",
+        "text": "Your opponent's Active Pokémon is now Confused."
+      },
+      {
+        "name": "Brain Crush",
+        "cost": [
+          "D"
+        ],
+        "damage": "130",
+        "text": "If your opponent's Active Pokémon isn't Confused, this attack does nothing."
+      }
+    ],
+    "rules": [
+      "Illustrated by Naoki Saito"
+    ]
+  },
+  "PBL|53": {
+    "name": "Nickit",
+    "card_type": "Basic",
+    "energy_type": "Darkness",
+    "hp": "70",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Gnaw",
+        "cost": [
+          "D"
+        ],
+        "damage": "10",
+        "text": ""
+      },
+      {
+        "name": "Rear Kick",
+        "cost": [
+          "D",
+          "C"
+        ],
+        "damage": "30",
+        "text": ""
+      }
+    ],
+    "rules": [
+      "Illustrated by Krgc"
+    ]
+  },
+  "PBL|54": {
+    "name": "Thievul",
+    "card_type": "Evolves from Nickit",
+    "energy_type": "Darkness",
+    "hp": "100",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Skill Thief",
+        "cost": [
+          "C",
+          "C"
+        ],
+        "damage": "",
+        "text": "If you have no cards in your hand, choose an attack from 1 of your opponent's Pokémon in play and use it as this attack."
+      },
+      {
+        "name": "Sharp Fang",
+        "cost": [
+          "D",
+          "C",
+          "C"
+        ],
+        "damage": "80",
+        "text": ""
+      }
+    ],
+    "rules": [
+      "Illustrated by GOTO minori"
+    ]
+  },
+  "PBL|55": {
+    "name": "Morpeko ex",
+    "card_type": "Basic",
+    "energy_type": "Darkness",
+    "hp": "180",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Wheely Draw",
+        "cost": [
+          "D"
+        ],
+        "damage": "",
+        "text": "Shuffle your hand into your deck. Then, draw 6 cards."
+      },
+      {
+        "name": "Hangry Blaster",
+        "cost": [
+          "D",
+          "D"
+        ],
+        "damage": "40+",
+        "text": "This attack does 40 more damage for each damage counter on this Pokémon."
+      }
+    ],
+    "rules": [
+      "Illustrated by aky CG Works"
+    ]
+  },
+  "PBL|56": {
+    "name": "Zarude",
+    "card_type": "Basic",
+    "energy_type": "Darkness",
+    "hp": "130",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Overhead Throw",
+        "cost": [
+          "D"
+        ],
+        "damage": "30",
+        "text": "This attack also does 30 damage to 1 of your Benched Pokémon. (Don't apply Weakness and Resistance for Benched Pokémon.)"
+      },
+      {
+        "name": "Shadowy Whip",
+        "cost": [
+          "D",
+          "D",
+          "D"
+        ],
+        "damage": "100+",
+        "text": "If your Benched Pokémon have any Shadowy [ D ] Energy attached, this attack does 70 more damage."
+      }
+    ],
+    "rules": [
+      "Illustrated by matazo"
+    ]
+  },
+  "PBL|57": {
+    "name": "Maschiff",
+    "card_type": "Basic",
+    "energy_type": "Darkness",
+    "hp": "70",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Bite",
+        "cost": [
+          "D",
+          "D"
+        ],
+        "damage": "40",
+        "text": ""
+      }
+    ],
+    "rules": [
+      "Illustrated by ryoma uratsuka"
+    ]
+  },
+  "PBL|58": {
+    "name": "Mabosstiff",
+    "card_type": "Evolves from Maschiff",
+    "energy_type": "Darkness",
+    "hp": "140",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Bite",
+        "cost": [
+          "D",
+          "D"
+        ],
+        "damage": "60",
+        "text": ""
+      },
+      {
+        "name": "Plunging Headbutt",
+        "cost": [
+          "D",
+          "D",
+          "D"
+        ],
+        "damage": "210",
+        "text": "During your opponent's next turn, this Pokémon takes 100 more damage from attacks (after applying Weakness and Resistance) ."
+      }
+    ],
+    "rules": [
+      "Illustrated by kawayoo"
+    ]
+  },
+  "PBL|59": {
+    "name": "Chi-Yu",
+    "card_type": "Basic",
+    "energy_type": "Darkness",
+    "hp": "90",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Whirling Envy",
+        "cost": [
+          "D"
+        ],
+        "damage": "20+",
+        "text": "If this Pokémon has 2 or more damage counters on it, this attack does 90 more damage. This attack's damage isn't affected by Weakness."
+      }
+    ],
+    "rules": [
+      "Illustrated by IKEDA Saki"
+    ]
+  },
+  "PBL|6": {
+    "name": "Sinistcha",
+    "card_type": "Evolves from Poltchageist",
+    "energy_type": "Grass",
+    "hp": "60",
+    "abilities": [
+      {
+        "name": "Hide 'n' Sneak",
+        "text": "Prevent all effects of your opponent's Pokémon's attacks and Abilities done to this Pokémon. (Damage is not an effect.)"
+      }
+    ],
+    "attacks": [
+      {
+        "name": "Matcha Spin",
+        "cost": [
+          "C"
+        ],
+        "damage": "",
+        "text": "If you have 6 or more Pokémon that have the Hide 'n' Sneak Ability in your discard pile, place 4 damage counters on each of your opponent's Pokémon."
+      }
+    ],
+    "rules": [
+      "Illustrated by mingo"
+    ]
+  },
+  "PBL|60": {
+    "name": "Skarmory",
+    "card_type": "Basic",
+    "energy_type": "Metal",
+    "hp": "120",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Steel Cutter",
+        "cost": [
+          "M"
+        ],
+        "damage": "40×",
+        "text": "Discard up to 2 Basic [ M ] Energy cards from your hand, and this attack does 40 damage for each card you discarded in this way."
+      }
+    ],
+    "rules": [
+      "Illustrated by Anesaki Dynamic"
+    ]
+  },
+  "PBL|61": {
+    "name": "Shieldon",
+    "card_type": "Evolves from Antique Armor Fossil",
+    "energy_type": "Metal",
+    "hp": "100",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Smithereen Smash",
+        "cost": [
+          "M",
+          "C"
+        ],
+        "damage": "50",
+        "text": "Discard an Energy from your opponent's Active Pokémon."
+      }
+    ],
+    "rules": [
+      "Illustrated by Kurata So"
+    ]
+  },
+  "PBL|62": {
+    "name": "Bastiodon",
+    "card_type": "Evolves from Shieldon",
+    "energy_type": "Metal",
+    "hp": "160",
+    "abilities": [
+      {
+        "name": "Ancient Bulwark",
+        "text": "As long as this Pokémon is on your Bench, prevent all damage done to each of your Pokémon by attacks from your opponent's Pokémon that have 2 or less Energy attached."
+      }
+    ],
+    "attacks": [
+      {
+        "name": "Hammer In",
+        "cost": [
+          "M",
+          "M",
+          "C"
+        ],
+        "damage": "160",
+        "text": ""
+      }
+    ],
+    "rules": [
+      "Illustrated by Kinu Nishimura"
+    ]
+  },
+  "PBL|63": {
+    "name": "Bronzor",
+    "card_type": "Basic",
+    "energy_type": "Metal",
+    "hp": "80",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Mirror Attack",
+        "cost": [
+          "M"
+        ],
+        "damage": "10+",
+        "text": "If your opponent's Active Pokémon is a [ M ] Pokémon, this attack does 30 more damage."
+      }
+    ],
+    "rules": [
+      "Illustrated by Saboteri"
+    ]
+  },
+  "PBL|64": {
+    "name": "Bronzong",
+    "card_type": "Evolves from Bronzor",
+    "energy_type": "Metal",
+    "hp": "130",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Gentle Slap",
+        "cost": [
+          "M"
+        ],
+        "damage": "40",
+        "text": ""
+      },
+      {
+        "name": "Metal Block",
+        "cost": [
+          "M",
+          "M",
+          "C"
+        ],
+        "damage": "120",
+        "text": "During your opponent's next turn, this Pokémon takes 100 less damage from attacks from Evolution Pokémon (after applying Weakness and Resistance) ."
+      }
+    ],
+    "rules": [
+      "Illustrated by Uta"
+    ]
+  },
+  "PBL|65": {
+    "name": "Mega Excadrill ex",
+    "card_type": "Evolves from Drilbur",
+    "energy_type": "Metal",
+    "hp": "340",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Undermine",
+        "cost": [
+          "M",
+          "M"
+        ],
+        "damage": "90",
+        "text": "Discard the top 2 cards of your opponent's deck."
+      },
+      {
+        "name": "Maximum Drilling",
+        "cost": [
+          "M",
+          "M",
+          "M"
+        ],
+        "damage": "200+",
+        "text": "If this Pokémon has at least 2 extra Energy attached (in addition to this attack's cost) , this attack does 130 more damage."
+      }
+    ],
+    "rules": [
+      "Illustrated by Keisuke Azuma"
+    ]
+  },
+  "PBL|66": {
+    "name": "Pikipek",
+    "card_type": "Basic",
+    "energy_type": "Colorless",
+    "hp": "70",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Double Stab",
+        "cost": [
+          "C"
+        ],
+        "damage": "10×",
+        "text": "Flip 2 coins. This attack does 10 damage for each heads."
+      }
+    ],
+    "rules": [
+      "Illustrated by Koji Nakata"
+    ]
+  },
+  "PBL|67": {
+    "name": "Trumbeak",
+    "card_type": "Evolves from Pikipek",
+    "energy_type": "Colorless",
+    "hp": "90",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Fly",
+        "cost": [
+          "C"
+        ],
+        "damage": "30",
+        "text": "Flip a coin. If tails, this attack does nothing. If heads, during your opponent's next turn, prevent all damage from and effects of attacks done to this Pokémon."
+      }
+    ],
+    "rules": [
+      "Illustrated by miki kudo"
+    ]
+  },
+  "PBL|68": {
+    "name": "Toucannon",
+    "card_type": "Evolves from Trumbeak",
+    "energy_type": "Colorless",
+    "hp": "150",
+    "abilities": [
+      {
+        "name": "Aerial Draw",
+        "text": "Once during your turn, you may use this Ability. Draw a card."
+      }
+    ],
+    "attacks": [
+      {
+        "name": "Feather Rondo",
+        "cost": [
+          "C"
+        ],
+        "damage": "60+",
+        "text": "This attack does 20 more damage for each Benched Pokémon (both yours and your opponent's) ."
+      }
+    ],
+    "rules": [
+      "Illustrated by Masako Tomii"
+    ]
+  },
+  "PBL|69": {
+    "name": "Type: Null",
+    "card_type": "Basic",
+    "energy_type": "Colorless",
+    "hp": "110",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Power Edge",
+        "cost": [
+          "C",
+          "C"
+        ],
+        "damage": "40",
+        "text": ""
+      }
+    ],
+    "rules": [
+      "Illustrated by Ligton"
+    ]
+  },
+  "PBL|7": {
+    "name": "Heatran",
+    "card_type": "Basic",
+    "energy_type": "Fire",
+    "hp": "140",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Singe",
+        "cost": [
+          "R"
+        ],
+        "damage": "",
+        "text": "Your opponent's Active Pokémon is now Burned."
+      },
+      {
+        "name": "Lava Wall",
+        "cost": [
+          "R",
+          "R",
+          "C"
+        ],
+        "damage": "120",
+        "text": "During your opponent's next turn, prevent all damage done to this Pokémon by attacks from Burned Pokémon."
+      }
+    ],
+    "rules": [
+      "Illustrated by Takeshi Nakamura"
+    ]
+  },
+  "PBL|70": {
+    "name": "Silvally",
+    "card_type": "Evolves from Type: Null",
+    "energy_type": "Colorless",
+    "hp": "140",
+    "abilities": [
+      {
+        "name": "Call a Buddy",
+        "text": "Once during your turn, if you have no cards in your hand, you may use this Ability. Search your deck for a Supporter card, reveal it, and put it into your hand. Then, shuffle your deck."
+      }
+    ],
+    "attacks": [
+      {
+        "name": "Air Slash",
+        "cost": [
+          "C",
+          "C",
+          "C"
+        ],
+        "damage": "130",
+        "text": "Discard an Energy from this Pokémon."
+      }
+    ],
+    "rules": [
+      "Illustrated by Takumi Wada"
+    ]
+  },
+  "PBL|71": {
+    "name": "Bombirdier",
+    "card_type": "Basic",
+    "energy_type": "Colorless",
+    "hp": "100",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Challenging Delivery",
+        "cost": [
+          "C",
+          "C"
+        ],
+        "damage": "",
+        "text": "Flip 2 coins. If both of them are heads, search your deck for a Pokémon and put it onto your Bench. Then, shuffle your deck."
+      },
+      {
+        "name": "Speed Wing",
+        "cost": [
+          "C",
+          "C",
+          "C"
+        ],
+        "damage": "100",
+        "text": ""
+      }
+    ],
+    "rules": [
+      "Illustrated by Wintr Wandr"
+    ]
+  },
+  "PBL|72": {
+    "name": "Antique Armor Fossil",
+    "card_type": "Item",
+    "energy_type": "",
+    "hp": "",
+    "abilities": [
+      {
+        "name": "Protective Armor",
+        "text": "As long as this Pokémon is in the Active Spot, all of your Pokémon take 10 less damage from attacks from your opponent's Pokémon (after applying Weakness and Resistance) ."
+      }
+    ],
+    "attacks": [],
+    "rules": [
+      "Illustrated by AYUMI ODASHIMA"
+    ]
+  },
+  "PBL|73": {
+    "name": "Antique Skull Fossil",
+    "card_type": "Item",
+    "energy_type": "",
+    "hp": "",
+    "abilities": [
+      {
+        "name": "Spiny Skull",
+        "text": "If this Pokémon is in the Active Spot and is damaged by an attack from your opponent's Pokémon (even if this Pokémon is Knocked Out) , place 3 damage counters on the Attacking Pokémon."
+      }
+    ],
+    "attacks": [],
+    "rules": [
+      "Illustrated by AYUMI ODASHIMA"
+    ]
+  },
+  "PBL|74": {
+    "name": "Backtrack Badge",
+    "card_type": "Tool",
+    "energy_type": "",
+    "hp": "",
+    "abilities": [],
+    "attacks": [],
+    "rules": [
+      "Once during your turn, after you flip any coins for an attack of the [ C ] Pokémon this card is attached to, you may ignore all results of those coin flips and begin flipping those coins again.",
+      "Illustrated by Toyste Beach"
+    ]
+  },
+  "PBL|75": {
+    "name": "Dark Bell",
+    "card_type": "Item",
+    "energy_type": "",
+    "hp": "",
+    "abilities": [],
+    "attacks": [],
+    "rules": [
+      "Both Active non- [ D ] Pokémon are now Confused.",
+      "Illustrated by Toyste Beach"
+    ]
+  },
+  "PBL|76": {
+    "name": "Fossil Quarry",
+    "card_type": "Stadium",
+    "energy_type": "",
+    "hp": "",
+    "abilities": [],
+    "attacks": [],
+    "rules": [
+      "Once during each player's turn, that player may search their deck for up to 2 Item cards that have \"Antique\" in their name and put them onto their Bench. Then, that player shuffles their deck.",
+      "Illustrated by Oswaldo KATO"
+    ]
+  },
+  "PBL|77": {
+    "name": "Gladion's Final Battle",
+    "card_type": "Supporter",
+    "energy_type": "",
+    "hp": "",
+    "abilities": [],
+    "attacks": [],
+    "rules": [
+      "You can use this card only when it is the last card in your hand. During this turn, attacks used by your Pokémon that don't have a Rule Box do 80 more damage to your opponent's Active Pokémon (before applying Weakness and Resistance) . (Pokémon ex, Pokémon V, etc. have Rule Boxes.)",
+      "Illustrated by akagi"
+    ]
+  },
+  "PBL|78": {
+    "name": "Gwynn",
+    "card_type": "Supporter",
+    "energy_type": "",
+    "hp": "",
+    "abilities": [],
+    "attacks": [],
+    "rules": [
+      "Discard up to 2 Pokémon that don't have a Rule Box from your hand, and draw 3 cards for each card you discarded in this way. (Pokémon ex, Pokémon V, etc. have Rule Boxes.)",
+      "Illustrated by nagimiso"
+    ]
+  },
+  "PBL|79": {
+    "name": "Jett",
+    "card_type": "Supporter",
+    "energy_type": "",
+    "hp": "",
+    "abilities": [],
+    "attacks": [],
+    "rules": [
+      "Draw a card for each of your opponent's Mega Evolution Pokémon ex in play.",
+      "Illustrated by GIDORA"
+    ]
+  },
+  "PBL|8": {
+    "name": "Mega Delphox ex",
+    "card_type": "Evolves from Braixen",
+    "energy_type": "Fire",
+    "hp": "350",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Trick Portal",
+        "cost": [
+          "R"
+        ],
+        "damage": "",
+        "text": "Look at the top 9 cards of your deck, and you may put any number of Pokémon you find there onto your Bench. Shuffle the other cards back into your deck."
+      },
+      {
+        "name": "Eerie Glow",
+        "cost": [
+          "R",
+          "C",
+          "C"
+        ],
+        "damage": "200",
+        "text": "Your opponent's Active Pokémon is now Burned and Confused."
+      }
+    ],
+    "rules": [
+      "Illustrated by 5ban Graphics"
+    ]
+  },
+  "PBL|80": {
+    "name": "Misty's Vitality",
+    "card_type": "Supporter",
+    "energy_type": "",
+    "hp": "",
+    "abilities": [],
+    "attacks": [],
+    "rules": [
+      "Search your deck for up to 4 Basic [ W ] Energy cards and attach them to 1 of your Pokémon. Then, shuffle your deck. Your turn ends.",
+      "Illustrated by En Morikura"
+    ]
+  },
+  "PBL|81": {
+    "name": "Rust Syndicate Grunt",
+    "card_type": "Supporter",
+    "energy_type": "",
+    "hp": "",
+    "abilities": [],
+    "attacks": [],
+    "rules": [
+      "You can use this card only if any of your Pokémon were Knocked Out during your opponent's last turn. Discard an Energy from 1 of your opponent's Pokémon.",
+      "Illustrated by Teeziro"
+    ]
+  },
+  "PBL|82": {
+    "name": "Tremendous Bomb",
+    "card_type": "Tool",
+    "energy_type": "",
+    "hp": "",
+    "abilities": [],
+    "attacks": [],
+    "rules": [
+      "If the Pokémon this card is attached to isn't a Mega Evolution Pokémon ex, is in the Active Spot, and takes 240 or more damage from an attack from your opponent's Mega Evolution Pokémon ex (even if this Pokémon is Knocked Out) , place 12 damage counters on the Attacking Pokémon. If you placed any damage counters in this way, discard this card.",
+      "Illustrated by inose yukie"
+    ]
+  },
+  "PBL|83": {
+    "name": "Shadowy Darkness Energy",
+    "card_type": "Special Energy",
+    "energy_type": "",
+    "hp": "",
+    "abilities": [],
+    "attacks": [],
+    "rules": [
+      "As long as this card is attached to a Pokémon, it provides [ D ] Energy. As long as the [ D ] Pokémon this card is attached to is on your Bench, prevent all damage done to it by attacks from your opponent's Pokémon."
+    ]
+  },
+  "PBL|84": {
+    "name": "Voltaic Lightning Energy",
+    "card_type": "Special Energy",
+    "energy_type": "",
+    "hp": "",
+    "abilities": [],
+    "attacks": [],
+    "rules": [
+      "As long as this card is attached to a Pokémon, it provides [ L ] Energy. Attacks used by the [ L ] Pokémon this card is attached to do 20 more damage to your opponent's Active Pokémon (before applying Weakness and Resistance) ."
+    ]
+  },
+  "PBL|85": {
+    "name": "Fomantis",
+    "card_type": "Basic",
+    "energy_type": "Grass",
+    "hp": "70",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Reckless Charge",
+        "cost": [
+          "G"
+        ],
+        "damage": "30",
+        "text": "This Pokémon also does 10 damage to itself."
+      }
+    ],
+    "rules": [
+      "Illustrated by Jiro Sasumo"
+    ]
+  },
+  "PBL|86": {
+    "name": "Armarouge",
+    "card_type": "Evolves from Charcadet",
+    "energy_type": "Fire",
+    "hp": "140",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Flame Legion",
+        "cost": [
+          "R"
+        ],
+        "damage": "40+",
+        "text": "This attack does 40 more damage for each of your Benched Pokémon that has any [ R ] Energy attached."
+      }
+    ],
+    "rules": [
+      "Illustrated by Iwamoto05"
+    ]
+  },
+  "PBL|87": {
+    "name": "Goldeen",
+    "card_type": "Basic",
+    "energy_type": "Water",
+    "hp": "70",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Pierce",
+        "cost": [
+          "C",
+          "C"
+        ],
+        "damage": "30",
+        "text": ""
+      }
+    ],
+    "rules": [
+      "Illustrated by Gemi"
+    ]
+  },
+  "PBL|88": {
+    "name": "Primarina",
+    "card_type": "Evolves from Brionne",
+    "energy_type": "Water",
+    "hp": "150",
+    "abilities": [
+      {
+        "name": "Enriching Melody",
+        "text": "Once during your turn, when you play this Pokémon from your hand to evolve 1 of your Pokémon, you may use this Ability. Heal all damage from 1 of your Pokémon."
+      }
+    ],
+    "attacks": [
+      {
+        "name": "Aqua Return",
+        "cost": [
+          "W",
+          "C"
+        ],
+        "damage": "120",
+        "text": "Shuffle this Pokémon and all attached cards into your deck."
+      }
+    ],
+    "rules": [
+      "Illustrated by satoma"
+    ]
+  },
+  "PBL|89": {
+    "name": "Manectric",
+    "card_type": "Evolves from Electrike",
+    "energy_type": "Lightning",
+    "hp": "120",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Flashing Barrier",
+        "cost": [
+          "L",
+          "L"
+        ],
+        "damage": "50",
+        "text": "During your opponent's next turn, prevent all damage done to this Pokémon by attacks from Evolution Pokémon."
+      },
+      {
+        "name": "Sonic Edge",
+        "cost": [
+          "L",
+          "L",
+          "L"
+        ],
+        "damage": "110",
+        "text": "This attack's damage isn't affected by any effects on your opponent's Active Pokémon."
+      }
+    ],
+    "rules": [
+      "Illustrated by HICO KIM"
+    ]
+  },
+  "PBL|9": {
+    "name": "Sizzlipede",
+    "card_type": "Basic",
+    "energy_type": "Fire",
+    "hp": "80",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Controlled Burn",
+        "cost": [
+          "R"
+        ],
+        "damage": "",
+        "text": "Discard the top card of your opponent's deck."
+      },
+      {
+        "name": "Bug Out",
+        "cost": [
+          "C",
+          "C",
+          "C"
+        ],
+        "damage": "50×",
+        "text": "Reveal the bottom 7 cards of your deck, and this attack does 50 damage for each Pokémon you find there that has the Bug Out attack. Then, shuffle any revealed Pokémon back into your deck. Discard the other cards."
+      }
+    ],
+    "rules": [
+      "Illustrated by Yuya Oka"
+    ]
+  },
+  "PBL|90": {
+    "name": "Slowbro",
+    "card_type": "Evolves from Slowpoke",
+    "energy_type": "Psychic",
+    "hp": "130",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "All Out",
+        "cost": [
+          "P"
+        ],
+        "damage": "50+",
+        "text": "If you have no cards in your hand, this attack does 160 more damage."
+      },
+      {
+        "name": "Zen Headbutt",
+        "cost": [
+          "C",
+          "C",
+          "C"
+        ],
+        "damage": "110",
+        "text": ""
+      }
+    ],
+    "rules": [
+      "Illustrated by Mékayu"
+    ]
+  },
+  "PBL|91": {
+    "name": "Dhelmise",
+    "card_type": "Basic",
+    "energy_type": "Psychic",
+    "hp": "140",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Vengeful Anchor",
+        "cost": [
+          "P"
+        ],
+        "damage": "30+",
+        "text": "If you have 4 or more Pokémon that have the Hide 'n' Sneak Ability in your discard pile, this attack does 140 more damage."
+      }
+    ],
+    "rules": [
+      "Illustrated by Nakamura Ippan"
+    ]
+  },
+  "PBL|92": {
+    "name": "Thievul",
+    "card_type": "Evolves from Nickit",
+    "energy_type": "Darkness",
+    "hp": "100",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Skill Thief",
+        "cost": [
+          "C",
+          "C"
+        ],
+        "damage": "",
+        "text": "If you have no cards in your hand, choose an attack from 1 of your opponent's Pokémon in play and use it as this attack."
+      },
+      {
+        "name": "Sharp Fang",
+        "cost": [
+          "D",
+          "C",
+          "C"
+        ],
+        "damage": "80",
+        "text": ""
+      }
+    ],
+    "rules": [
+      "Illustrated by Jerky"
+    ]
+  },
+  "PBL|93": {
+    "name": "Bastiodon",
+    "card_type": "Evolves from Shieldon",
+    "energy_type": "Metal",
+    "hp": "160",
+    "abilities": [
+      {
+        "name": "Ancient Bulwark",
+        "text": "As long as this Pokémon is on your Bench, prevent all damage done to each of your Pokémon by attacks from your opponent's Pokémon that have 2 or less Energy attached."
+      }
+    ],
+    "attacks": [
+      {
+        "name": "Hammer In",
+        "cost": [
+          "M",
+          "M",
+          "C"
+        ],
+        "damage": "160",
+        "text": ""
+      }
+    ],
+    "rules": [
+      "Illustrated by Yoriyuki Ikegami"
+    ]
+  },
+  "PBL|94": {
+    "name": "Toucannon",
+    "card_type": "Evolves from Trumbeak",
+    "energy_type": "Colorless",
+    "hp": "150",
+    "abilities": [
+      {
+        "name": "Aerial Draw",
+        "text": "Once during your turn, you may use this Ability. Draw a card."
+      }
+    ],
+    "attacks": [
+      {
+        "name": "Feather Rondo",
+        "cost": [
+          "C"
+        ],
+        "damage": "60+",
+        "text": "This attack does 20 more damage for each Benched Pokémon (both yours and your opponent's) ."
+      }
+    ],
+    "rules": [
+      "Illustrated by miki kudo"
+    ]
+  },
+  "PBL|95": {
+    "name": "Silvally",
+    "card_type": "Evolves from Type: Null",
+    "energy_type": "Colorless",
+    "hp": "140",
+    "abilities": [
+      {
+        "name": "Call a Buddy",
+        "text": "Once during your turn, if you have no cards in your hand, you may use this Ability. Search your deck for a Supporter card, reveal it, and put it into your hand. Then, shuffle your deck."
+      }
+    ],
+    "attacks": [
+      {
+        "name": "Air Slash",
+        "cost": [
+          "C",
+          "C",
+          "C"
+        ],
+        "damage": "130",
+        "text": "Discard an Energy from this Pokémon."
+      }
+    ],
+    "rules": [
+      "Illustrated by DOM"
+    ]
+  },
+  "PBL|96": {
+    "name": "Lurantis ex",
+    "card_type": "Evolves from Fomantis",
+    "energy_type": "Grass",
+    "hp": "260",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Lively Cutter",
+        "cost": [
+          "G"
+        ],
+        "damage": "60+",
+        "text": "If this Pokémon was healed during this turn, this attack does 200 more damage."
+      },
+      {
+        "name": "Leaf Guard",
+        "cost": [
+          "G",
+          "C"
+        ],
+        "damage": "140",
+        "text": "During your opponent's next turn, this Pokémon takes 50 less damage from attacks (after applying Weakness and Resistance) ."
+      }
+    ],
+    "rules": [
+      "Illustrated by 5ban Graphics"
+    ]
+  },
+  "PBL|97": {
+    "name": "Wailord ex",
+    "card_type": "Evolves from Wailmer",
+    "energy_type": "Water",
+    "hp": "380",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Surf",
+        "cost": [
+          "W",
+          "W",
+          "W"
+        ],
+        "damage": "120",
+        "text": ""
+      },
+      {
+        "name": "Falling Down",
+        "cost": [
+          "W",
+          "W",
+          "W",
+          "W",
+          "W"
+        ],
+        "damage": "270",
+        "text": "This Pokémon is now Asleep."
+      }
+    ],
+    "rules": [
+      "Illustrated by 5ban Graphics"
+    ]
+  },
+  "PBL|98": {
+    "name": "Mega Zeraora ex",
+    "card_type": "Basic",
+    "energy_type": "Lightning",
+    "hp": "270",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Thunderous Fist",
+        "cost": [
+          "L"
+        ],
+        "damage": "60×",
+        "text": "This attack does 60 damage for each [ L ] Energy attached to this Pokémon."
+      },
+      {
+        "name": "Zepto Turn",
+        "cost": [
+          "L",
+          "L",
+          "L"
+        ],
+        "damage": "150",
+        "text": "Switch this Pokémon with 1 of your Benched Pokémon."
+      }
+    ],
+    "rules": [
+      "Illustrated by 5ban Graphics"
+    ]
+  },
+  "PBL|99": {
+    "name": "Mega Chandelure ex",
+    "card_type": "Evolves from Lampent",
+    "energy_type": "Psychic",
+    "hp": "350",
+    "abilities": [
+      {
+        "name": "Binding Flame",
+        "text": "Your opponent's Active Pokémon's Retreat Cost is [ C ] more."
+      }
+    ],
+    "attacks": [
+      {
+        "name": "Phantom Maze",
+        "cost": [
+          "P",
+          "P"
+        ],
+        "damage": "130+",
+        "text": "This attack does 50 more damage for each [ C ] in your opponent's Active Pokémon's Retreat Cost."
+      }
+    ],
+    "rules": [
+      "Illustrated by 5ban Graphics"
+    ]
+  },
   "PFL|1": {
     "name": "Oddish",
     "card_type": "Basic",

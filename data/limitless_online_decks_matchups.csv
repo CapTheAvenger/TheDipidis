@@ -1,1601 +1,534 @@
 ﻿deck_name;opponent;win_rate;record;total_games
-Dragapult;Mega Greninja;64,97;358 - 193 - 5;556
-Dragapult;Festival Lead;63,01;184 - 108 - 6;298
-Dragapult;Beedrill;62,69;284 - 169 - 8;461
-Dragapult;Rocket's Honchkrow;59,44;192 - 131 - 9;332
-Dragapult;Alakazam Dudunsparce;58,6;317 - 224 - 19;560
-Dragapult;Hop's Trevenant;58,14;100 - 72 - 2;174
-Dragapult;Lopunny Dudunsparce;57,14;116 - 87 - 5;208
-Dragapult;Ogerpon Meganium Hydrapple;54,55;198 - 165 - 5;368
-Dragapult;Dragapult Dusknoir;54,46;452 - 378 - 11;841
-Dragapult;Lucario Hariyama;54,22;167 - 141 - 7;315
-Dragapult;Mega Lucario;50,6;84 - 82 - 5;171
-Dragapult;Dragapult Blaziken;50,56;226 - 221 - 11;458
-Dragapult;Rocket's Mewtwo;50,42;119 - 117 - 2;238
-Dragapult;Dragapult;50,0;532 - 532 - 30;1094
-Dragapult;N's Zoroark;48,37;311 - 332 - 16;659
-Dragapult;Slowking;47,5;333 - 368 - 13;714
-Dragapult;Raging Bolt Ogerpon;46,64;125 - 143 - 11;279
-Dragapult;Basic Box;41,87;85 - 118 - 3;206
-Dragapult;Cynthia's Garchomp;39,87;63 - 95 - 6;164
-Dragapult;Crustle;35,98;95 - 169 - 5;269
-Dragapult Dusknoir;Mega Greninja;63,88;290 - 164 - 6;460
-Dragapult Dusknoir;Festival Lead;62,25;155 - 94 - 2;251
-Dragapult Dusknoir;Alakazam Dudunsparce;61,23;248 - 157 - 17;422
-Dragapult Dusknoir;Beedrill;58,67;176 - 124 - 4;304
-Dragapult Dusknoir;Lopunny Dudunsparce;58,14;100 - 72 - 3;175
-Dragapult Dusknoir;Hop's Trevenant;57,04;77 - 58 - 1;136
-Dragapult Dusknoir;Rocket's Mewtwo;53,4;102 - 89 - 1;192
-Dragapult Dusknoir;Dragapult Blaziken;52,87;184 - 164 - 9;357
-Dragapult Dusknoir;Rocket's Honchkrow;51,39;148 - 140 - 3;291
-Dragapult Dusknoir;Lucario Hariyama;50,38;132 - 130 - 6;268
-Dragapult Dusknoir;Mega Lucario;50,34;74 - 73 - 1;148
-Dragapult Dusknoir;Dragapult Dusknoir;50,0;329 - 329 - 8;666
-Dragapult Dusknoir;Ogerpon Meganium Hydrapple;49,64;139 - 141 - 6;286
-Dragapult Dusknoir;Cynthia's Garchomp;49,39;81 - 83 - 1;165
-Dragapult Dusknoir;Raging Bolt Ogerpon;46,08;94 - 110 - 3;207
-Dragapult Dusknoir;Dragapult;45,54;378 - 452 - 11;841
-Dragapult Dusknoir;N's Zoroark;43,5;281 - 365 - 8;654
-Dragapult Dusknoir;Basic Box;41,15;79 - 113 - 3;195
-Dragapult Dusknoir;Slowking;41,05;250 - 359 - 5;614
-Dragapult Dusknoir;Crustle;40,47;104 - 153 - 5;262
-N's Zoroark;Hop's Trevenant;72,0;108 - 42 - 2;152
-N's Zoroark;Mega Greninja;62,14;256 - 156 - 3;415
-N's Zoroark;Lopunny Dudunsparce;58,7;81 - 57 - 4;142
-N's Zoroark;Dragapult Dusknoir;56,5;365 - 281 - 8;654
-N's Zoroark;Slowking;52,6;263 - 237 - 5;505
-N's Zoroark;Rocket's Honchkrow;52,46;160 - 145 - 4;309
-N's Zoroark;Dragapult;51,63;332 - 311 - 16;659
-N's Zoroark;N's Zoroark;50,0;296 - 296 - 10;602
-N's Zoroark;Dragapult Blaziken;49,21;156 - 161 - 11;328
-N's Zoroark;Raging Bolt Ogerpon;46,74;86 - 98 - 6;190
-N's Zoroark;Basic Box;44,03;59 - 75 - 2;136
-N's Zoroark;Alakazam Dudunsparce;41,63;174 - 244 - 11;429
-N's Zoroark;Lucario Hariyama;40,0;92 - 138 - 6;236
-N's Zoroark;Cynthia's Garchomp;38,22;60 - 97 - 2;159
-N's Zoroark;Mega Lucario;35,77;49 - 88 - 4;141
-N's Zoroark;Festival Lead;35,48;88 - 160 - 4;252
-N's Zoroark;Rocket's Mewtwo;34,81;63 - 118 - 2;183
-N's Zoroark;Crustle;34,76;73 - 137 - 3;213
-N's Zoroark;Ogerpon Meganium Hydrapple;34,07;93 - 180 - 1;274
-N's Zoroark;Beedrill;30,03;91 - 212 - 2;305
-Slowking;Lucario Hariyama;73,41;185 - 67 - 3;255
-Slowking;Mega Lucario;73,33;99 - 36 - 4;139
-Slowking;Crustle;65,96;124 - 64 - 4;192
-Slowking;Dragapult Dusknoir;58,95;359 - 250 - 5;614
-Slowking;Rocket's Mewtwo;57,62;87 - 64 - 1;152
-Slowking;Mega Greninja;55,37;227 - 183 - 4;414
-Slowking;Beedrill;54,77;178 - 147 - 3;328
-Slowking;Rocket's Honchkrow;54,55;156 - 130 - 1;287
-Slowking;Basic Box;53,29;81 - 71 - 2;154
-Slowking;Dragapult;52,5;368 - 333 - 13;714
-Slowking;Raging Bolt Ogerpon;51,17;109 - 104 - 4;217
-Slowking;Slowking;50,0;268 - 268 - 0;536
-Slowking;Dragapult Blaziken;48,23;136 - 146 - 7;289
-Slowking;N's Zoroark;47,4;237 - 263 - 5;505
-Slowking;Cynthia's Garchomp;47,15;58 - 65 - 5;128
-Slowking;Lopunny Dudunsparce;45,31;58 - 70 - 2;130
-Slowking;Festival Lead;44,39;87 - 109 - 1;197
-Slowking;Ogerpon Meganium Hydrapple;41,07;131 - 188 - 5;324
-Slowking;Hop's Trevenant;40,0;44 - 66 - 1;111
-Slowking;Alakazam Dudunsparce;33,07;128 - 259 - 9;396
-Mega Greninja;Hop's Trevenant;61,11;55 - 35 - 0;90
-Mega Greninja;Festival Lead;55,0;110 - 90 - 1;201
-Mega Greninja;Rocket's Mewtwo;53,46;85 - 74 - 1;160
-Mega Greninja;Rocket's Honchkrow;52,17;108 - 99 - 2;209
-Mega Greninja;Mega Greninja;50,0;191 - 191 - 2;384
-Mega Greninja;Beedrill;48,63;142 - 150 - 4;296
-Mega Greninja;Lopunny Dudunsparce;46,67;70 - 80 - 1;151
-Mega Greninja;Slowking;44,63;183 - 227 - 4;414
-Mega Greninja;Cynthia's Garchomp;42,74;53 - 71 - 0;124
-Mega Greninja;Lucario Hariyama;39,2;78 - 121 - 4;203
-Mega Greninja;Alakazam Dudunsparce;39,1;122 - 190 - 5;317
-Mega Greninja;N's Zoroark;37,86;156 - 256 - 3;415
-Mega Greninja;Dragapult Blaziken;37,44;79 - 132 - 2;213
-Mega Greninja;Mega Lucario;36,17;34 - 60 - 1;95
-Mega Greninja;Dragapult Dusknoir;36,12;164 - 290 - 6;460
-Mega Greninja;Raging Bolt Ogerpon;35,53;54 - 98 - 0;152
-Mega Greninja;Crustle;35,26;55 - 101 - 4;160
-Mega Greninja;Dragapult;35,03;193 - 358 - 5;556
-Mega Greninja;Ogerpon Meganium Hydrapple;33,99;86 - 167 - 2;255
-Mega Greninja;Basic Box;33,33;31 - 62 - 1;94
-Alakazam Dudunsparce;Slowking;66,93;259 - 128 - 9;396
-Alakazam Dudunsparce;Ogerpon Meganium Hydrapple;63,33;133 - 77 - 3;213
-Alakazam Dudunsparce;Beedrill;61,66;156 - 97 - 2;255
-Alakazam Dudunsparce;Mega Greninja;60,9;190 - 122 - 5;317
-Alakazam Dudunsparce;Basic Box;60,55;66 - 43 - 5;114
-Alakazam Dudunsparce;Hop's Trevenant;58,76;57 - 40 - 4;101
-Alakazam Dudunsparce;Mega Lucario;58,76;57 - 40 - 3;100
-Alakazam Dudunsparce;Lucario Hariyama;58,64;112 - 79 - 3;194
-Alakazam Dudunsparce;N's Zoroark;58,37;244 - 174 - 11;429
-Alakazam Dudunsparce;Raging Bolt Ogerpon;55,81;72 - 57 - 5;134
-Alakazam Dudunsparce;Festival Lead;54,72;87 - 72 - 3;162
-Alakazam Dudunsparce;Cynthia's Garchomp;51,11;46 - 44 - 3;93
-Alakazam Dudunsparce;Alakazam Dudunsparce;50,0;152 - 152 - 24;328
-Alakazam Dudunsparce;Lopunny Dudunsparce;43,93;47 - 60 - 4;111
-Alakazam Dudunsparce;Dragapult Blaziken;42,45;104 - 141 - 8;253
-Alakazam Dudunsparce;Dragapult;41,4;224 - 317 - 19;560
-Alakazam Dudunsparce;Crustle;38,79;64 - 101 - 3;168
-Alakazam Dudunsparce;Dragapult Dusknoir;38,77;157 - 248 - 17;422
-Alakazam Dudunsparce;Rocket's Honchkrow;21,51;37 - 135 - 10;182
-Alakazam Dudunsparce;Rocket's Mewtwo;21,43;30 - 110 - 3;143
-Beedrill;Lopunny Dudunsparce;73,74;73 - 26 - 1;100
-Beedrill;N's Zoroark;69,97;212 - 91 - 2;305
-Beedrill;Cynthia's Garchomp;66,2;47 - 24 - 0;71
-Beedrill;Rocket's Mewtwo;64,29;72 - 40 - 3;115
-Beedrill;Ogerpon Meganium Hydrapple;62,03;116 - 71 - 4;191
-Beedrill;Hop's Trevenant;58,43;52 - 37 - 0;89
-Beedrill;Rocket's Honchkrow;51,76;88 - 82 - 4;174
-Beedrill;Mega Greninja;51,37;150 - 142 - 4;296
-Beedrill;Raging Bolt Ogerpon;51,2;64 - 61 - 1;126
-Beedrill;Beedrill;50,0;105 - 105 - 2;212
-Beedrill;Basic Box;47,62;40 - 44 - 0;84
-Beedrill;Mega Lucario;46,75;36 - 41 - 1;78
-Beedrill;Festival Lead;45,32;63 - 76 - 2;141
-Beedrill;Slowking;45,23;147 - 178 - 3;328
-Beedrill;Lucario Hariyama;41,4;65 - 92 - 0;157
-Beedrill;Dragapult Dusknoir;41,33;124 - 176 - 4;304
-Beedrill;Alakazam Dudunsparce;38,34;97 - 156 - 2;255
-Beedrill;Dragapult;37,31;169 - 284 - 8;461
-Beedrill;Dragapult Blaziken;36,65;59 - 102 - 3;164
-Beedrill;Crustle;11,67;14 - 106 - 1;121
-Ogerpon Meganium Hydrapple;Cynthia's Garchomp;77,11;64 - 19 - 1;84
-Ogerpon Meganium Hydrapple;Mega Greninja;66,01;167 - 86 - 2;255
-Ogerpon Meganium Hydrapple;N's Zoroark;65,93;180 - 93 - 1;274
-Ogerpon Meganium Hydrapple;Basic Box;61,63;53 - 33 - 0;86
-Ogerpon Meganium Hydrapple;Rocket's Mewtwo;60,19;65 - 43 - 0;108
-Ogerpon Meganium Hydrapple;Slowking;58,93;188 - 131 - 5;324
-Ogerpon Meganium Hydrapple;Hop's Trevenant;58,23;46 - 33 - 1;80
-Ogerpon Meganium Hydrapple;Lucario Hariyama;55,24;79 - 64 - 1;144
-Ogerpon Meganium Hydrapple;Mega Lucario;53,75;43 - 37 - 0;80
-Ogerpon Meganium Hydrapple;Rocket's Honchkrow;50,36;70 - 69 - 2;141
-Ogerpon Meganium Hydrapple;Dragapult Dusknoir;50,36;141 - 139 - 6;286
-Ogerpon Meganium Hydrapple;Raging Bolt Ogerpon;50,35;71 - 70 - 5;146
-Ogerpon Meganium Hydrapple;Ogerpon Meganium Hydrapple;50,0;88 - 88 - 2;178
-Ogerpon Meganium Hydrapple;Lopunny Dudunsparce;46,84;37 - 42 - 0;79
-Ogerpon Meganium Hydrapple;Dragapult;45,45;165 - 198 - 5;368
-Ogerpon Meganium Hydrapple;Crustle;44,64;50 - 62 - 4;116
-Ogerpon Meganium Hydrapple;Festival Lead;41,79;56 - 78 - 1;135
-Ogerpon Meganium Hydrapple;Beedrill;37,97;71 - 116 - 4;191
-Ogerpon Meganium Hydrapple;Alakazam Dudunsparce;36,67;77 - 133 - 3;213
-Ogerpon Meganium Hydrapple;Dragapult Blaziken;32,68;50 - 103 - 4;157
-Dragapult Blaziken;Ogerpon Meganium Hydrapple;67,32;103 - 50 - 4;157
-Dragapult Blaziken;Beedrill;63,35;102 - 59 - 3;164
-Dragapult Blaziken;Mega Greninja;62,56;132 - 79 - 2;213
-Dragapult Blaziken;Hop's Trevenant;61,54;48 - 30 - 0;78
-Dragapult Blaziken;Festival Lead;59,2;74 - 51 - 4;129
-Dragapult Blaziken;Lopunny Dudunsparce;57,89;44 - 32 - 1;77
-Dragapult Blaziken;Alakazam Dudunsparce;57,55;141 - 104 - 8;253
-Dragapult Blaziken;Lucario Hariyama;56,78;67 - 51 - 4;122
-Dragapult Blaziken;Rocket's Honchkrow;55,47;76 - 61 - 4;141
-Dragapult Blaziken;Rocket's Mewtwo;54,84;51 - 42 - 0;93
-Dragapult Blaziken;Basic Box;54,05;40 - 34 - 3;77
-Dragapult Blaziken;Slowking;51,77;146 - 136 - 7;289
-Dragapult Blaziken;N's Zoroark;50,79;161 - 156 - 11;328
-Dragapult Blaziken;Dragapult Blaziken;50,0;91 - 91 - 6;188
-Dragapult Blaziken;Dragapult;49,44;221 - 226 - 11;458
-Dragapult Blaziken;Mega Lucario;47,3;35 - 39 - 3;77
-Dragapult Blaziken;Dragapult Dusknoir;47,13;164 - 184 - 9;357
-Dragapult Blaziken;Raging Bolt Ogerpon;45,38;54 - 65 - 10;129
-Dragapult Blaziken;Crustle;44,12;45 - 57 - 8;110
-Dragapult Blaziken;Cynthia's Garchomp;43,43;43 - 56 - 2;101
-Lucario Hariyama;Lopunny Dudunsparce;69,14;56 - 25 - 0;81
-Lucario Hariyama;Mega Greninja;60,8;121 - 78 - 4;203
-Lucario Hariyama;N's Zoroark;60,0;138 - 92 - 6;236
-Lucario Hariyama;Beedrill;58,6;92 - 65 - 0;157
-Lucario Hariyama;Crustle;57,14;44 - 33 - 1;78
-Lucario Hariyama;Lucario Hariyama;50,0;63 - 63 - 0;126
-Lucario Hariyama;Dragapult Dusknoir;49,62;130 - 132 - 6;268
-Lucario Hariyama;Cynthia's Garchomp;49,06;26 - 27 - 0;53
-Lucario Hariyama;Rocket's Mewtwo;46,94;46 - 52 - 0;98
-Lucario Hariyama;Dragapult;45,78;141 - 167 - 7;315
-Lucario Hariyama;Ogerpon Meganium Hydrapple;44,76;64 - 79 - 1;144
-Lucario Hariyama;Dragapult Blaziken;43,22;51 - 67 - 4;122
-Lucario Hariyama;Basic Box;42,86;27 - 36 - 1;64
-Lucario Hariyama;Alakazam Dudunsparce;41,36;79 - 112 - 3;194
-Lucario Hariyama;Mega Lucario;40,0;22 - 33 - 1;56
-Lucario Hariyama;Raging Bolt Ogerpon;38,61;39 - 62 - 1;102
-Lucario Hariyama;Festival Lead;38,32;41 - 66 - 1;108
-Lucario Hariyama;Rocket's Honchkrow;35,19;38 - 70 - 2;110
-Lucario Hariyama;Slowking;26,59;67 - 185 - 3;255
-Lucario Hariyama;Hop's Trevenant;20,59;14 - 54 - 1;69
-Rocket's Honchkrow;Crustle;79,82;87 - 22 - 1;110
-Rocket's Honchkrow;Alakazam Dudunsparce;78,49;135 - 37 - 10;182
-Rocket's Honchkrow;Lucario Hariyama;64,81;70 - 38 - 2;110
-Rocket's Honchkrow;Raging Bolt Ogerpon;63,55;68 - 39 - 3;110
-Rocket's Honchkrow;Rocket's Mewtwo;63,44;59 - 34 - 2;95
-Rocket's Honchkrow;Basic Box;61,11;44 - 28 - 3;75
-Rocket's Honchkrow;Cynthia's Garchomp;57,33;43 - 32 - 1;76
-Rocket's Honchkrow;Lopunny Dudunsparce;55,7;44 - 35 - 0;79
-Rocket's Honchkrow;Mega Lucario;53,16;42 - 37 - 0;79
-Rocket's Honchkrow;Rocket's Honchkrow;50,0;59 - 59 - 14;132
-Rocket's Honchkrow;Ogerpon Meganium Hydrapple;49,64;69 - 70 - 2;141
-Rocket's Honchkrow;Dragapult Dusknoir;48,61;140 - 148 - 3;291
-Rocket's Honchkrow;Beedrill;48,24;82 - 88 - 4;174
-Rocket's Honchkrow;Mega Greninja;47,83;99 - 108 - 2;209
-Rocket's Honchkrow;N's Zoroark;47,54;145 - 160 - 4;309
-Rocket's Honchkrow;Slowking;45,45;130 - 156 - 1;287
-Rocket's Honchkrow;Dragapult Blaziken;44,53;61 - 76 - 4;141
-Rocket's Honchkrow;Dragapult;40,56;131 - 192 - 9;332
-Rocket's Honchkrow;Hop's Trevenant;37,29;22 - 37 - 0;59
-Rocket's Honchkrow;Festival Lead;36,7;40 - 69 - 1;110
-Festival Lead;Cynthia's Garchomp;81,13;43 - 10 - 2;55
-Festival Lead;Rocket's Mewtwo;64,94;50 - 27 - 0;77
-Festival Lead;N's Zoroark;64,52;160 - 88 - 4;252
-Festival Lead;Rocket's Honchkrow;63,3;69 - 40 - 1;110
-Festival Lead;Lucario Hariyama;61,68;66 - 41 - 1;108
-Festival Lead;Crustle;59,3;51 - 35 - 3;89
-Festival Lead;Ogerpon Meganium Hydrapple;58,21;78 - 56 - 1;135
-Festival Lead;Mega Lucario;57,69;30 - 22 - 0;52
-Festival Lead;Lopunny Dudunsparce;56,86;29 - 22 - 0;51
-Festival Lead;Slowking;55,61;109 - 87 - 1;197
-Festival Lead;Basic Box;55,17;32 - 26 - 0;58
-Festival Lead;Beedrill;54,68;76 - 63 - 2;141
-Festival Lead;Raging Bolt Ogerpon;53,76;50 - 43 - 1;94
-Festival Lead;Festival Lead;50,0;45 - 45 - 0;90
-Festival Lead;Alakazam Dudunsparce;45,28;72 - 87 - 3;162
-Festival Lead;Mega Greninja;45,0;90 - 110 - 1;201
-Festival Lead;Dragapult Blaziken;40,8;51 - 74 - 4;129
-Festival Lead;Hop's Trevenant;40,38;21 - 31 - 0;52
-Festival Lead;Dragapult Dusknoir;37,75;94 - 155 - 2;251
-Festival Lead;Dragapult;36,99;108 - 184 - 6;298
-Raging Bolt Ogerpon;Mega Lucario;65,75;48 - 25 - 2;75
-Raging Bolt Ogerpon;Mega Greninja;64,47;98 - 54 - 0;152
-Raging Bolt Ogerpon;Rocket's Mewtwo;63,95;55 - 31 - 0;86
-Raging Bolt Ogerpon;Cynthia's Garchomp;62,5;30 - 18 - 0;48
-Raging Bolt Ogerpon;Lucario Hariyama;61,39;62 - 39 - 1;102
-Raging Bolt Ogerpon;Dragapult Blaziken;54,62;65 - 54 - 10;129
-Raging Bolt Ogerpon;Lopunny Dudunsparce;54,24;32 - 27 - 0;59
-Raging Bolt Ogerpon;Dragapult Dusknoir;53,92;110 - 94 - 3;207
-Raging Bolt Ogerpon;Dragapult;53,36;143 - 125 - 11;279
-Raging Bolt Ogerpon;N's Zoroark;53,26;98 - 86 - 6;190
-Raging Bolt Ogerpon;Raging Bolt Ogerpon;50,0;51 - 51 - 4;106
-Raging Bolt Ogerpon;Ogerpon Meganium Hydrapple;49,65;70 - 71 - 5;146
-Raging Bolt Ogerpon;Slowking;48,83;104 - 109 - 4;217
-Raging Bolt Ogerpon;Beedrill;48,8;61 - 64 - 1;126
-Raging Bolt Ogerpon;Festival Lead;46,24;43 - 50 - 1;94
-Raging Bolt Ogerpon;Hop's Trevenant;44,44;20 - 25 - 3;48
-Raging Bolt Ogerpon;Alakazam Dudunsparce;44,19;57 - 72 - 5;134
-Raging Bolt Ogerpon;Basic Box;40,82;20 - 29 - 3;52
-Raging Bolt Ogerpon;Crustle;38,96;30 - 47 - 3;80
-Raging Bolt Ogerpon;Rocket's Honchkrow;36,45;39 - 68 - 3;110
-Crustle;Beedrill;88,33;106 - 14 - 1;121
-Crustle;N's Zoroark;65,24;137 - 73 - 3;213
-Crustle;Mega Greninja;64,74;101 - 55 - 4;160
-Crustle;Dragapult;64,02;169 - 95 - 5;269
-Crustle;Alakazam Dudunsparce;61,21;101 - 64 - 3;168
-Crustle;Raging Bolt Ogerpon;61,04;47 - 30 - 3;80
-Crustle;Dragapult Dusknoir;59,53;153 - 104 - 5;262
-Crustle;Mega Lucario;58,06;36 - 26 - 0;62
-Crustle;Dragapult Blaziken;55,88;57 - 45 - 8;110
-Crustle;Ogerpon Meganium Hydrapple;55,36;62 - 50 - 4;116
-Crustle;Basic Box;54,39;31 - 26 - 1;58
-Crustle;Cynthia's Garchomp;51,11;23 - 22 - 0;45
-Crustle;Crustle;50,0;48 - 48 - 16;112
-Crustle;Hop's Trevenant;46,51;20 - 23 - 0;43
-Crustle;Lucario Hariyama;42,86;33 - 44 - 1;78
-Crustle;Festival Lead;40,7;35 - 51 - 3;89
-Crustle;Rocket's Mewtwo;40,0;24 - 36 - 1;61
-Crustle;Slowking;34,04;64 - 124 - 4;192
-Crustle;Lopunny Dudunsparce;22,41;13 - 45 - 0;58
-Crustle;Rocket's Honchkrow;20,18;22 - 87 - 1;110
-Rocket's Mewtwo;Alakazam Dudunsparce;78,57;110 - 30 - 3;143
-Rocket's Mewtwo;N's Zoroark;65,19;118 - 63 - 2;183
-Rocket's Mewtwo;Crustle;60,0;36 - 24 - 1;61
-Rocket's Mewtwo;Cynthia's Garchomp;60,0;30 - 20 - 0;50
-Rocket's Mewtwo;Mega Lucario;57,5;23 - 17 - 3;43
-Rocket's Mewtwo;Lucario Hariyama;53,06;52 - 46 - 0;98
-Rocket's Mewtwo;Rocket's Mewtwo;50,0;33 - 33 - 2;68
-Rocket's Mewtwo;Dragapult;49,58;117 - 119 - 2;238
-Rocket's Mewtwo;Hop's Trevenant;47,83;22 - 24 - 1;47
-Rocket's Mewtwo;Dragapult Dusknoir;46,6;89 - 102 - 1;192
-Rocket's Mewtwo;Mega Greninja;46,54;74 - 85 - 1;160
-Rocket's Mewtwo;Dragapult Blaziken;45,16;42 - 51 - 0;93
-Rocket's Mewtwo;Slowking;42,38;64 - 87 - 1;152
-Rocket's Mewtwo;Ogerpon Meganium Hydrapple;39,81;43 - 65 - 0;108
-Rocket's Mewtwo;Rocket's Honchkrow;36,56;34 - 59 - 2;95
-Rocket's Mewtwo;Raging Bolt Ogerpon;36,05;31 - 55 - 0;86
-Rocket's Mewtwo;Beedrill;35,71;40 - 72 - 3;115
-Rocket's Mewtwo;Festival Lead;35,06;27 - 50 - 0;77
-Rocket's Mewtwo;Lopunny Dudunsparce;31,15;19 - 42 - 4;65
-Rocket's Mewtwo;Basic Box;26,83;11 - 30 - 1;42
-Lopunny Dudunsparce;Crustle;77,59;45 - 13 - 0;58
-Lopunny Dudunsparce;Rocket's Mewtwo;68,85;42 - 19 - 4;65
-Lopunny Dudunsparce;Hop's Trevenant;67,74;21 - 10 - 1;32
-Lopunny Dudunsparce;Basic Box;62,5;25 - 15 - 1;41
-Lopunny Dudunsparce;Alakazam Dudunsparce;56,07;60 - 47 - 4;111
-Lopunny Dudunsparce;Slowking;54,69;70 - 58 - 2;130
-Lopunny Dudunsparce;Mega Greninja;53,33;80 - 70 - 1;151
-Lopunny Dudunsparce;Ogerpon Meganium Hydrapple;53,16;42 - 37 - 0;79
-Lopunny Dudunsparce;Lopunny Dudunsparce;50,0;31 - 31 - 2;64
-Lopunny Dudunsparce;Raging Bolt Ogerpon;45,76;27 - 32 - 0;59
-Lopunny Dudunsparce;Rocket's Honchkrow;44,3;35 - 44 - 0;79
-Lopunny Dudunsparce;Festival Lead;43,14;22 - 29 - 0;51
-Lopunny Dudunsparce;Dragapult;42,86;87 - 116 - 5;208
-Lopunny Dudunsparce;Dragapult Blaziken;42,11;32 - 44 - 1;77
-Lopunny Dudunsparce;Dragapult Dusknoir;41,86;72 - 100 - 3;175
-Lopunny Dudunsparce;N's Zoroark;41,3;57 - 81 - 4;142
-Lopunny Dudunsparce;Mega Lucario;32,43;12 - 25 - 0;37
-Lopunny Dudunsparce;Lucario Hariyama;30,86;25 - 56 - 0;81
-Lopunny Dudunsparce;Beedrill;26,26;26 - 73 - 1;100
-Lopunny Dudunsparce;Cynthia's Garchomp;14,29;3 - 18 - 1;22
-Basic Box;Rocket's Mewtwo;73,17;30 - 11 - 1;42
-Basic Box;Mega Greninja;66,67;62 - 31 - 1;94
-Basic Box;Mega Lucario;61,54;24 - 15 - 0;39
-Basic Box;Cynthia's Garchomp;59,26;16 - 11 - 2;29
-Basic Box;Raging Bolt Ogerpon;59,18;29 - 20 - 3;52
-Basic Box;Dragapult Dusknoir;58,85;113 - 79 - 3;195
-Basic Box;Dragapult;58,13;118 - 85 - 3;206
-Basic Box;Lucario Hariyama;57,14;36 - 27 - 1;64
-Basic Box;N's Zoroark;55,97;75 - 59 - 2;136
-Basic Box;Beedrill;52,38;44 - 40 - 0;84
-Basic Box;Basic Box;50,0;24 - 24 - 0;48
-Basic Box;Slowking;46,71;71 - 81 - 2;154
-Basic Box;Dragapult Blaziken;45,95;34 - 40 - 3;77
-Basic Box;Crustle;45,61;26 - 31 - 1;58
-Basic Box;Festival Lead;44,83;26 - 32 - 0;58
-Basic Box;Hop's Trevenant;42,42;14 - 19 - 2;35
-Basic Box;Alakazam Dudunsparce;39,45;43 - 66 - 5;114
-Basic Box;Rocket's Honchkrow;38,89;28 - 44 - 3;75
-Basic Box;Ogerpon Meganium Hydrapple;38,37;33 - 53 - 0;86
-Basic Box;Lopunny Dudunsparce;37,5;15 - 25 - 1;41
-Cynthia's Garchomp;Lopunny Dudunsparce;85,71;18 - 3 - 1;22
-Cynthia's Garchomp;Hop's Trevenant;65,0;13 - 7 - 0;20
-Cynthia's Garchomp;N's Zoroark;61,78;97 - 60 - 2;159
-Cynthia's Garchomp;Dragapult;60,13;95 - 63 - 6;164
-Cynthia's Garchomp;Mega Greninja;57,26;71 - 53 - 0;124
-Cynthia's Garchomp;Dragapult Blaziken;56,57;56 - 43 - 2;101
-Cynthia's Garchomp;Slowking;52,85;65 - 58 - 5;128
-Cynthia's Garchomp;Mega Lucario;51,72;15 - 14 - 1;30
-Cynthia's Garchomp;Lucario Hariyama;50,94;27 - 26 - 0;53
-Cynthia's Garchomp;Dragapult Dusknoir;50,61;83 - 81 - 1;165
-Cynthia's Garchomp;Cynthia's Garchomp;50,0;28 - 28 - 4;60
-Cynthia's Garchomp;Alakazam Dudunsparce;48,89;44 - 46 - 3;93
-Cynthia's Garchomp;Crustle;48,89;22 - 23 - 0;45
-Cynthia's Garchomp;Rocket's Honchkrow;42,67;32 - 43 - 1;76
-Cynthia's Garchomp;Basic Box;40,74;11 - 16 - 2;29
-Cynthia's Garchomp;Rocket's Mewtwo;40,0;20 - 30 - 0;50
-Cynthia's Garchomp;Raging Bolt Ogerpon;37,5;18 - 30 - 0;48
-Cynthia's Garchomp;Beedrill;33,8;24 - 47 - 0;71
-Cynthia's Garchomp;Ogerpon Meganium Hydrapple;22,89;19 - 64 - 1;84
-Cynthia's Garchomp;Festival Lead;18,87;10 - 43 - 2;55
-Mega Lucario;Lopunny Dudunsparce;67,57;25 - 12 - 0;37
-Mega Lucario;N's Zoroark;64,23;88 - 49 - 4;141
-Mega Lucario;Mega Greninja;63,83;60 - 34 - 1;95
-Mega Lucario;Lucario Hariyama;60,0;33 - 22 - 1;56
-Mega Lucario;Beedrill;53,25;41 - 36 - 1;78
-Mega Lucario;Dragapult Blaziken;52,7;39 - 35 - 3;77
-Mega Lucario;Mega Lucario;50,0;17 - 17 - 2;36
-Mega Lucario;Dragapult Dusknoir;49,66;73 - 74 - 1;148
-Mega Lucario;Dragapult;49,4;82 - 84 - 5;171
-Mega Lucario;Cynthia's Garchomp;48,28;14 - 15 - 1;30
-Mega Lucario;Rocket's Honchkrow;46,84;37 - 42 - 0;79
-Mega Lucario;Ogerpon Meganium Hydrapple;46,25;37 - 43 - 0;80
-Mega Lucario;Rocket's Mewtwo;42,5;17 - 23 - 3;43
-Mega Lucario;Festival Lead;42,31;22 - 30 - 0;52
-Mega Lucario;Crustle;41,94;26 - 36 - 0;62
-Mega Lucario;Alakazam Dudunsparce;41,24;40 - 57 - 3;100
-Mega Lucario;Basic Box;38,46;15 - 24 - 0;39
-Mega Lucario;Raging Bolt Ogerpon;34,25;25 - 48 - 2;75
-Mega Lucario;Hop's Trevenant;32,35;11 - 23 - 0;34
-Mega Lucario;Slowking;26,67;36 - 99 - 4;139
-Hop's Trevenant;Lucario Hariyama;79,41;54 - 14 - 1;69
-Hop's Trevenant;Mega Lucario;67,65;23 - 11 - 0;34
-Hop's Trevenant;Rocket's Honchkrow;62,71;37 - 22 - 0;59
-Hop's Trevenant;Slowking;60,0;66 - 44 - 1;111
-Hop's Trevenant;Festival Lead;59,62;31 - 21 - 0;52
-Hop's Trevenant;Basic Box;57,58;19 - 14 - 2;35
-Hop's Trevenant;Raging Bolt Ogerpon;55,56;25 - 20 - 3;48
-Hop's Trevenant;Crustle;53,49;23 - 20 - 0;43
-Hop's Trevenant;Rocket's Mewtwo;52,17;24 - 22 - 1;47
-Hop's Trevenant;Hop's Trevenant;50,0;20 - 20 - 0;40
-Hop's Trevenant;Dragapult Dusknoir;42,96;58 - 77 - 1;136
-Hop's Trevenant;Dragapult;41,86;72 - 100 - 2;174
-Hop's Trevenant;Ogerpon Meganium Hydrapple;41,77;33 - 46 - 1;80
-Hop's Trevenant;Beedrill;41,57;37 - 52 - 0;89
-Hop's Trevenant;Alakazam Dudunsparce;41,24;40 - 57 - 4;101
-Hop's Trevenant;Mega Greninja;38,89;35 - 55 - 0;90
-Hop's Trevenant;Dragapult Blaziken;38,46;30 - 48 - 0;78
-Hop's Trevenant;Cynthia's Garchomp;35,0;7 - 13 - 0;20
-Hop's Trevenant;Lopunny Dudunsparce;32,26;10 - 21 - 1;32
-Hop's Trevenant;N's Zoroark;28,0;42 - 108 - 2;152
-Starmie Froslass;Rocket's Mewtwo;70,45;31 - 13 - 0;44
-Starmie Froslass;Crustle;67,5;27 - 13 - 0;40
-Starmie Froslass;Mega Lucario;66,67;20 - 10 - 0;30
-Starmie Froslass;Hop's Trevenant;59,38;19 - 13 - 1;33
-Starmie Froslass;Festival Lead;56,41;22 - 17 - 0;39
-Starmie Froslass;Mega Greninja;52,69;49 - 44 - 0;93
-Starmie Froslass;Cynthia's Garchomp;51,72;15 - 14 - 0;29
-Starmie Froslass;Rocket's Honchkrow;48,98;24 - 25 - 0;49
-Starmie Froslass;Lopunny Dudunsparce;48,78;20 - 21 - 0;41
-Starmie Froslass;Basic Box;45,83;11 - 13 - 0;24
-Starmie Froslass;Alakazam Dudunsparce;44,09;41 - 52 - 2;95
-Starmie Froslass;Dragapult Dusknoir;43,33;52 - 68 - 1;121
-Starmie Froslass;Beedrill;43,33;26 - 34 - 0;60
-Starmie Froslass;Slowking;42,86;36 - 48 - 1;85
-Starmie Froslass;Lucario Hariyama;41,27;26 - 37 - 1;64
-Starmie Froslass;Ogerpon Meganium Hydrapple;37,88;25 - 41 - 1;67
-Starmie Froslass;Dragapult;37,84;56 - 92 - 3;151
-Starmie Froslass;N's Zoroark;37,74;40 - 66 - 2;108
-Starmie Froslass;Dragapult Blaziken;32,2;19 - 40 - 0;59
-Starmie Froslass;Raging Bolt Ogerpon;30,23;13 - 30 - 0;43
-Starmie Dusknoir;Hop's Trevenant;66,67;10 - 5 - 0;15
-Starmie Dusknoir;Rocket's Mewtwo;62,07;18 - 11 - 0;29
-Starmie Dusknoir;Festival Lead;58,97;23 - 16 - 0;39
-Starmie Dusknoir;Crustle;54,55;18 - 15 - 0;33
-Starmie Dusknoir;Mega Greninja;51,04;49 - 47 - 1;97
-Starmie Dusknoir;Alakazam Dudunsparce;50,0;26 - 26 - 0;52
-Starmie Dusknoir;Beedrill;48,1;38 - 41 - 0;79
-Starmie Dusknoir;Dragapult Blaziken;47,37;27 - 30 - 0;57
-Starmie Dusknoir;Rocket's Honchkrow;45,65;21 - 25 - 0;46
-Starmie Dusknoir;Lucario Hariyama;45,31;29 - 35 - 1;65
-Starmie Dusknoir;Dragapult Dusknoir;42,86;48 - 64 - 2;114
-Starmie Dusknoir;Dragapult;41,86;54 - 75 - 2;131
-Starmie Dusknoir;Mega Lucario;40,62;13 - 19 - 0;32
-Starmie Dusknoir;Slowking;40,21;39 - 58 - 0;97
-Starmie Dusknoir;N's Zoroark;40,0;44 - 66 - 0;110
-Starmie Dusknoir;Lopunny Dudunsparce;40,0;14 - 21 - 0;35
-Starmie Dusknoir;Ogerpon Meganium Hydrapple;38,89;21 - 33 - 0;54
-Starmie Dusknoir;Cynthia's Garchomp;38,24;13 - 21 - 0;34
-Starmie Dusknoir;Raging Bolt Ogerpon;31,25;15 - 33 - 2;50
-Starmie Dusknoir;Basic Box;30,0;9 - 21 - 0;30
-Metagross;Crustle;75,68;28 - 9 - 0;37
-Metagross;Lopunny Dudunsparce;65,22;15 - 8 - 0;23
-Metagross;Raging Bolt Ogerpon;64,86;24 - 13 - 1;38
-Metagross;Rocket's Mewtwo;60,53;23 - 15 - 0;38
-Metagross;Festival Lead;57,58;19 - 14 - 1;34
-Metagross;Ogerpon Meganium Hydrapple;56,25;36 - 28 - 1;65
-Metagross;Basic Box;54,05;20 - 17 - 0;37
-Metagross;Dragapult;53,52;76 - 66 - 0;142
-Metagross;N's Zoroark;52,73;58 - 52 - 3;113
-Metagross;Mega Lucario;51,85;14 - 13 - 0;27
-Metagross;Mega Greninja;51,02;50 - 48 - 0;98
-Metagross;Dragapult Dusknoir;50,68;75 - 73 - 2;150
-Metagross;Slowking;50,51;50 - 49 - 1;100
-Metagross;Rocket's Honchkrow;50,0;22 - 22 - 0;44
-Metagross;Alakazam Dudunsparce;47,19;42 - 47 - 4;93
-Metagross;Lucario Hariyama;46,15;24 - 28 - 1;53
-Metagross;Beedrill;44,68;21 - 26 - 0;47
-Metagross;Dragapult Blaziken;38,46;20 - 32 - 0;52
-Metagross;Hop's Trevenant;37,5;9 - 15 - 2;26
-Metagross;Cynthia's Garchomp;36,36;12 - 21 - 0;33
-Ethan's Typhlosion;Beedrill;83,05;49 - 10 - 0;59
-Ethan's Typhlosion;Crustle;76,6;36 - 11 - 0;47
-Ethan's Typhlosion;Ogerpon Meganium Hydrapple;67,35;33 - 16 - 0;49
-Ethan's Typhlosion;N's Zoroark;63,33;76 - 44 - 0;120
-Ethan's Typhlosion;Rocket's Mewtwo;60,61;20 - 13 - 0;33
-Ethan's Typhlosion;Basic Box;55,17;16 - 13 - 0;29
-Ethan's Typhlosion;Slowking;53,66;44 - 38 - 2;84
-Ethan's Typhlosion;Raging Bolt Ogerpon;53,57;15 - 13 - 0;28
-Ethan's Typhlosion;Lopunny Dudunsparce;44,83;13 - 16 - 1;30
-Ethan's Typhlosion;Festival Lead;42,55;20 - 27 - 0;47
-Ethan's Typhlosion;Dragapult;40,77;53 - 77 - 5;135
-Ethan's Typhlosion;Mega Greninja;40,74;33 - 48 - 1;82
-Ethan's Typhlosion;Dragapult Dusknoir;40,0;52 - 78 - 1;131
-Ethan's Typhlosion;Rocket's Honchkrow;38,6;22 - 35 - 0;57
-Ethan's Typhlosion;Dragapult Blaziken;37,1;23 - 39 - 2;64
-Ethan's Typhlosion;Alakazam Dudunsparce;36,36;28 - 49 - 0;77
-Ethan's Typhlosion;Mega Lucario;35,0;7 - 13 - 0;20
-Ethan's Typhlosion;Hop's Trevenant;31,03;9 - 20 - 0;29
-Ethan's Typhlosion;Lucario Hariyama;30,56;11 - 25 - 0;36
-Ethan's Typhlosion;Cynthia's Garchomp;30,3;10 - 23 - 0;33
-Greninja;Rocket's Honchkrow;63,16;36 - 21 - 0;57
-Greninja;Lopunny Dudunsparce;63,16;12 - 7 - 1;20
-Greninja;Crustle;58,82;20 - 14 - 1;35
-Greninja;Mega Lucario;58,33;14 - 10 - 1;25
-Greninja;Festival Lead;56,41;22 - 17 - 0;39
-Greninja;Basic Box;56,0;14 - 11 - 0;25
-Greninja;Rocket's Mewtwo;55,0;22 - 18 - 1;41
-Greninja;Ogerpon Meganium Hydrapple;53,45;31 - 27 - 1;59
-Greninja;Slowking;48,62;53 - 56 - 4;113
-Greninja;Lucario Hariyama;48,21;27 - 29 - 2;58
-Greninja;N's Zoroark;47,31;44 - 49 - 0;93
-Greninja;Alakazam Dudunsparce;46,58;34 - 39 - 3;76
-Greninja;Dragapult Dusknoir;45,95;51 - 60 - 1;112
-Greninja;Cynthia's Garchomp;45,45;15 - 18 - 0;33
-Greninja;Dragapult;44,44;60 - 75 - 1;136
-Greninja;Mega Greninja;44,21;42 - 53 - 0;95
-Greninja;Raging Bolt Ogerpon;42,55;20 - 27 - 0;47
-Greninja;Dragapult Blaziken;39,58;19 - 29 - 3;51
-Greninja;Hop's Trevenant;35,48;11 - 20 - 0;31
-Greninja;Beedrill;32,79;20 - 41 - 0;61
-Ceruledge;Beedrill;77,46;55 - 16 - 1;72
-Ceruledge;Lopunny Dudunsparce;63,33;19 - 11 - 1;31
-Ceruledge;Basic Box;62,96;17 - 10 - 0;27
-Ceruledge;Ogerpon Meganium Hydrapple;60,27;44 - 29 - 0;73
-Ceruledge;Hop's Trevenant;58,82;10 - 7 - 0;17
-Ceruledge;Mega Greninja;55,13;43 - 35 - 1;79
-Ceruledge;Dragapult Blaziken;52,94;27 - 24 - 1;52
-Ceruledge;Raging Bolt Ogerpon;52,0;13 - 12 - 0;25
-Ceruledge;Dragapult Dusknoir;51,49;52 - 49 - 1;102
-Ceruledge;Lucario Hariyama;50,0;18 - 18 - 1;37
-Ceruledge;Rocket's Mewtwo;50,0;11 - 11 - 0;22
-Ceruledge;Mega Lucario;47,37;9 - 10 - 1;20
-Ceruledge;Dragapult;40,86;38 - 55 - 1;94
-Ceruledge;N's Zoroark;40,0;38 - 57 - 1;96
-Ceruledge;Rocket's Honchkrow;38,78;19 - 30 - 0;49
-Ceruledge;Festival Lead;33,33;14 - 28 - 1;43
-Ceruledge;Alakazam Dudunsparce;30,38;24 - 55 - 0;79
-Ceruledge;Slowking;29,67;27 - 64 - 0;91
-Ceruledge;Cynthia's Garchomp;24,0;6 - 19 - 0;25
-Ceruledge;Crustle;9,09;3 - 30 - 0;33
-Grimmsnarl Froslass;Hop's Trevenant;89,47;17 - 2 - 0;19
-Grimmsnarl Froslass;Festival Lead;71,79;28 - 11 - 0;39
-Grimmsnarl Froslass;Mega Greninja;68,97;60 - 27 - 1;88
-Grimmsnarl Froslass;Dragapult Blaziken;58,93;33 - 23 - 2;58
-Grimmsnarl Froslass;Basic Box;53,85;14 - 12 - 0;26
-Grimmsnarl Froslass;Slowking;53,19;50 - 44 - 0;94
-Grimmsnarl Froslass;Mega Lucario;53,12;17 - 15 - 1;33
-Grimmsnarl Froslass;Rocket's Honchkrow;52,0;26 - 24 - 0;50
-Grimmsnarl Froslass;Alakazam Dudunsparce;50,7;36 - 35 - 1;72
-Grimmsnarl Froslass;N's Zoroark;50,57;44 - 43 - 1;88
-Grimmsnarl Froslass;Dragapult Dusknoir;50,48;53 - 52 - 0;105
-Grimmsnarl Froslass;Rocket's Mewtwo;50,0;17 - 17 - 1;35
-Grimmsnarl Froslass;Raging Bolt Ogerpon;50,0;15 - 15 - 1;31
-Grimmsnarl Froslass;Lucario Hariyama;45,28;24 - 29 - 2;55
-Grimmsnarl Froslass;Crustle;43,75;14 - 18 - 0;32
-Grimmsnarl Froslass;Dragapult;42,52;54 - 73 - 4;131
-Grimmsnarl Froslass;Cynthia's Garchomp;42,42;14 - 19 - 0;33
-Grimmsnarl Froslass;Lopunny Dudunsparce;33,33;10 - 20 - 2;32
-Grimmsnarl Froslass;Ogerpon Meganium Hydrapple;30,0;15 - 35 - 0;50
-Grimmsnarl Froslass;Beedrill;25,42;15 - 44 - 0;59
-Dragapult Dudunsparce;Hop's Trevenant;87,5;7 - 1 - 1;9
-Dragapult Dudunsparce;Mega Greninja;69,01;49 - 22 - 0;71
-Dragapult Dudunsparce;Festival Lead;62,5;20 - 12 - 3;35
-Dragapult Dudunsparce;Beedrill;60,32;38 - 25 - 0;63
-Dragapult Dudunsparce;Lucario Hariyama;59,52;25 - 17 - 2;44
-Dragapult Dudunsparce;Lopunny Dudunsparce;53,66;22 - 19 - 2;43
-Dragapult Dudunsparce;N's Zoroark;52,63;30 - 27 - 3;60
-Dragapult Dudunsparce;Rocket's Honchkrow;51,85;14 - 13 - 0;27
-Dragapult Dudunsparce;Cynthia's Garchomp;48,28;14 - 15 - 0;29
-Dragapult Dudunsparce;Dragapult;47,75;53 - 58 - 7;118
-Dragapult Dudunsparce;Dragapult Blaziken;47,37;18 - 20 - 2;40
-Dragapult Dudunsparce;Dragapult Dusknoir;46,74;43 - 49 - 0;92
-Dragapult Dudunsparce;Raging Bolt Ogerpon;46,67;21 - 24 - 2;47
-Dragapult Dudunsparce;Alakazam Dudunsparce;46,55;27 - 31 - 3;61
-Dragapult Dudunsparce;Ogerpon Meganium Hydrapple;42,59;23 - 31 - 0;54
-Dragapult Dudunsparce;Rocket's Mewtwo;42,42;14 - 19 - 0;33
-Dragapult Dudunsparce;Slowking;38,67;29 - 46 - 1;76
-Dragapult Dudunsparce;Basic Box;35,0;7 - 13 - 1;21
-Dragapult Dudunsparce;Mega Lucario;27,78;5 - 13 - 0;18
-Dragapult Dudunsparce;Crustle;27,27;6 - 16 - 2;24
-Mega Absol Box;Hop's Trevenant;85,71;12 - 2 - 0;14
-Mega Absol Box;Lopunny Dudunsparce;66,67;6 - 3 - 0;9
-Mega Absol Box;Mega Greninja;59,62;31 - 21 - 0;52
-Mega Absol Box;Basic Box;57,89;11 - 8 - 1;20
-Mega Absol Box;Dragapult;54,08;53 - 45 - 2;100
-Mega Absol Box;Dragapult Dusknoir;53,95;41 - 35 - 0;76
-Mega Absol Box;Raging Bolt Ogerpon;52,63;10 - 9 - 0;19
-Mega Absol Box;Alakazam Dudunsparce;50,0;33 - 33 - 1;67
-Mega Absol Box;Ogerpon Meganium Hydrapple;50,0;14 - 14 - 1;29
-Mega Absol Box;Cynthia's Garchomp;50,0;5 - 5 - 1;11
-Mega Absol Box;Dragapult Blaziken;48,28;14 - 15 - 1;30
-Mega Absol Box;Rocket's Mewtwo;47,83;11 - 12 - 1;24
-Mega Absol Box;Slowking;46,55;27 - 31 - 3;61
-Mega Absol Box;Mega Lucario;45,45;10 - 12 - 0;22
-Mega Absol Box;Lucario Hariyama;45,16;14 - 17 - 1;32
-Mega Absol Box;Crustle;40,0;12 - 18 - 1;31
-Mega Absol Box;Festival Lead;38,89;14 - 22 - 1;37
-Mega Absol Box;N's Zoroark;32,91;26 - 53 - 0;79
-Mega Absol Box;Beedrill;30,56;11 - 25 - 2;38
-Mega Absol Box;Rocket's Honchkrow;29,41;10 - 24 - 0;34
-Mega Venusaur;Cynthia's Garchomp;79,17;19 - 5 - 0;24
-Mega Venusaur;Basic Box;76,92;10 - 3 - 1;14
-Mega Venusaur;N's Zoroark;68,57;48 - 22 - 2;72
-Mega Venusaur;Hop's Trevenant;62,5;10 - 6 - 0;16
-Mega Venusaur;Mega Greninja;60,66;37 - 24 - 1;62
-Mega Venusaur;Rocket's Mewtwo;55,56;10 - 8 - 1;19
-Mega Venusaur;Slowking;54,84;34 - 28 - 0;62
-Mega Venusaur;Dragapult;54,67;41 - 34 - 1;76
-Mega Venusaur;Raging Bolt Ogerpon;54,55;12 - 10 - 0;22
-Mega Venusaur;Festival Lead;48,48;16 - 17 - 0;33
-Mega Venusaur;Rocket's Honchkrow;46,15;12 - 14 - 1;27
-Mega Venusaur;Mega Lucario;46,15;6 - 7 - 1;14
-Mega Venusaur;Crustle;45,16;14 - 17 - 0;31
-Mega Venusaur;Dragapult Dusknoir;42,86;30 - 40 - 2;72
-Mega Venusaur;Lucario Hariyama;38,24;13 - 21 - 0;34
-Mega Venusaur;Ogerpon Meganium Hydrapple;33,33;11 - 22 - 3;36
-Mega Venusaur;Alakazam Dudunsparce;32,08;17 - 36 - 1;54
-Mega Venusaur;Beedrill;31,43;11 - 24 - 1;36
-Mega Venusaur;Lopunny Dudunsparce;28,57;4 - 10 - 0;14
-Mega Venusaur;Dragapult Blaziken;9,68;3 - 28 - 2;33
-Diancie Dusknoir;Lucario Hariyama;73,33;22 - 8 - 0;30
-Diancie Dusknoir;Mega Lucario;72,22;13 - 5 - 0;18
-Diancie Dusknoir;Hop's Trevenant;69,23;9 - 4 - 0;13
-Diancie Dusknoir;Dragapult;65,71;69 - 36 - 1;106
-Diancie Dusknoir;Dragapult Dusknoir;59,72;43 - 29 - 1;73
-Diancie Dusknoir;Rocket's Mewtwo;53,85;7 - 6 - 0;13
-Diancie Dusknoir;Basic Box;52,38;11 - 10 - 0;21
-Diancie Dusknoir;Festival Lead;50,0;17 - 17 - 0;34
-Diancie Dusknoir;Slowking;49,06;26 - 27 - 1;54
-Diancie Dusknoir;N's Zoroark;48,98;24 - 25 - 2;51
-Diancie Dusknoir;Ogerpon Meganium Hydrapple;48,57;17 - 18 - 0;35
-Diancie Dusknoir;Mega Greninja;46,43;26 - 30 - 0;56
-Diancie Dusknoir;Cynthia's Garchomp;46,15;6 - 7 - 0;13
-Diancie Dusknoir;Raging Bolt Ogerpon;41,94;13 - 18 - 0;31
-Diancie Dusknoir;Alakazam Dudunsparce;41,51;22 - 31 - 1;54
-Diancie Dusknoir;Beedrill;39,22;20 - 31 - 0;51
-Diancie Dusknoir;Crustle;39,13;9 - 14 - 1;24
-Diancie Dusknoir;Lopunny Dudunsparce;37,04;10 - 17 - 0;27
-Diancie Dusknoir;Rocket's Honchkrow;37,04;10 - 17 - 0;27
-Diancie Dusknoir;Dragapult Blaziken;36,36;12 - 21 - 0;33
-Archaludon Dudunsparce;Hop's Trevenant;87,5;7 - 1 - 0;8
-Archaludon Dudunsparce;Rocket's Mewtwo;84,62;11 - 2 - 0;13
-Archaludon Dudunsparce;Raging Bolt Ogerpon;75,0;21 - 7 - 1;29
-Archaludon Dudunsparce;Festival Lead;61,9;13 - 8 - 0;21
-Archaludon Dudunsparce;Mega Greninja;60,42;29 - 19 - 2;50
-Archaludon Dudunsparce;Lopunny Dudunsparce;60,0;6 - 4 - 0;10
-Archaludon Dudunsparce;N's Zoroark;56,6;30 - 23 - 0;53
-Archaludon Dudunsparce;Basic Box;54,55;6 - 5 - 0;11
-Archaludon Dudunsparce;Ogerpon Meganium Hydrapple;51,35;19 - 18 - 0;37
-Archaludon Dudunsparce;Cynthia's Garchomp;47,37;9 - 10 - 0;19
-Archaludon Dudunsparce;Crustle;47,06;8 - 9 - 0;17
-Archaludon Dudunsparce;Beedrill;44,44;16 - 20 - 1;37
-Archaludon Dudunsparce;Dragapult;41,77;33 - 46 - 2;81
-Archaludon Dudunsparce;Slowking;41,18;21 - 30 - 1;52
-Archaludon Dudunsparce;Alakazam Dudunsparce;40,74;22 - 32 - 3;57
-Archaludon Dudunsparce;Lucario Hariyama;40,0;12 - 18 - 1;31
-Archaludon Dudunsparce;Dragapult Dusknoir;39,39;26 - 40 - 1;67
-Archaludon Dudunsparce;Rocket's Honchkrow;39,39;13 - 20 - 0;33
-Archaludon Dudunsparce;Mega Lucario;36,36;4 - 7 - 0;11
-Archaludon Dudunsparce;Dragapult Blaziken;24,24;8 - 25 - 1;34
-Mega Starmie;Crustle;68,42;13 - 6 - 0;19
-Mega Starmie;Hop's Trevenant;66,67;14 - 7 - 0;21
-Mega Starmie;Basic Box;62,5;5 - 3 - 0;8
-Mega Starmie;Festival Lead;61,9;13 - 8 - 0;21
-Mega Starmie;Rocket's Mewtwo;60,0;12 - 8 - 0;20
-Mega Starmie;Mega Lucario;56,25;9 - 7 - 0;16
-Mega Starmie;Lopunny Dudunsparce;54,55;6 - 5 - 0;11
-Mega Starmie;Mega Greninja;53,85;21 - 18 - 0;39
-Mega Starmie;Slowking;50,94;27 - 26 - 1;54
-Mega Starmie;Beedrill;50,0;21 - 21 - 0;42
-Mega Starmie;Lucario Hariyama;47,22;17 - 19 - 0;36
-Mega Starmie;Dragapult;46,27;31 - 36 - 1;68
-Mega Starmie;Dragapult Dusknoir;41,67;20 - 28 - 1;49
-Mega Starmie;Raging Bolt Ogerpon;39,13;9 - 14 - 0;23
-Mega Starmie;Cynthia's Garchomp;37,5;3 - 5 - 0;8
-Mega Starmie;Dragapult Blaziken;36,36;8 - 14 - 0;22
-Mega Starmie;Alakazam Dudunsparce;35,56;16 - 29 - 1;46
-Mega Starmie;Rocket's Honchkrow;26,67;4 - 11 - 0;15
-Mega Starmie;Ogerpon Meganium Hydrapple;26,09;6 - 17 - 0;23
-Mega Starmie;N's Zoroark;24,0;12 - 38 - 0;50
-Okidogi Barbaracle;Lopunny Dudunsparce;88,24;15 - 2 - 0;17
-Okidogi Barbaracle;Rocket's Mewtwo;87,5;14 - 2 - 1;17
-Okidogi Barbaracle;Crustle;77,78;14 - 4 - 0;18
-Okidogi Barbaracle;Festival Lead;76,19;16 - 5 - 0;21
-Okidogi Barbaracle;Cynthia's Garchomp;68,0;17 - 8 - 0;25
-Okidogi Barbaracle;Raging Bolt Ogerpon;64,71;11 - 6 - 0;17
-Okidogi Barbaracle;Lucario Hariyama;61,54;16 - 10 - 1;27
-Okidogi Barbaracle;Mega Lucario;60,0;6 - 4 - 0;10
-Okidogi Barbaracle;Slowking;58,62;34 - 24 - 0;58
-Okidogi Barbaracle;Hop's Trevenant;53,85;7 - 6 - 0;13
-Okidogi Barbaracle;Mega Greninja;50,0;17 - 17 - 1;35
-Okidogi Barbaracle;Beedrill;48,65;18 - 19 - 1;38
-Okidogi Barbaracle;Ogerpon Meganium Hydrapple;45,83;11 - 13 - 0;24
-Okidogi Barbaracle;Basic Box;44,44;4 - 5 - 0;9
-Okidogi Barbaracle;Alakazam Dudunsparce;43,75;14 - 18 - 3;35
-Okidogi Barbaracle;Dragapult Dusknoir;38,89;21 - 33 - 0;54
-Okidogi Barbaracle;Dragapult;38,81;26 - 41 - 5;72
-Okidogi Barbaracle;Rocket's Honchkrow;36,36;4 - 7 - 1;12
-Okidogi Barbaracle;Dragapult Blaziken;35,71;10 - 18 - 1;29
-Okidogi Barbaracle;N's Zoroark;34,29;12 - 23 - 3;38
-Manectric Eelektrik;Raging Bolt Ogerpon;66,67;6 - 3 - 0;9
-Manectric Eelektrik;Basic Box;63,64;7 - 4 - 0;11
-Manectric Eelektrik;N's Zoroark;54,72;29 - 24 - 0;53
-Manectric Eelektrik;Mega Greninja;52,78;19 - 17 - 0;36
-Manectric Eelektrik;Dragapult;51,06;24 - 23 - 1;48
-Manectric Eelektrik;Lopunny Dudunsparce;50,0;5 - 5 - 0;10
-Manectric Eelektrik;Rocket's Mewtwo;44,44;8 - 10 - 0;18
-Manectric Eelektrik;Cynthia's Garchomp;36,36;4 - 7 - 0;11
-Manectric Eelektrik;Hop's Trevenant;35,71;5 - 9 - 0;14
-Manectric Eelektrik;Dragapult Dusknoir;34,09;15 - 29 - 1;45
-Manectric Eelektrik;Dragapult Blaziken;33,33;9 - 18 - 0;27
-Manectric Eelektrik;Alakazam Dudunsparce;32,35;11 - 23 - 1;35
-Manectric Eelektrik;Beedrill;31,82;7 - 15 - 0;22
-Manectric Eelektrik;Ogerpon Meganium Hydrapple;30,77;8 - 18 - 0;26
-Manectric Eelektrik;Festival Lead;29,41;5 - 12 - 0;17
-Manectric Eelektrik;Slowking;23,53;12 - 39 - 0;51
-Manectric Eelektrik;Lucario Hariyama;23,08;6 - 20 - 0;26
-Manectric Eelektrik;Rocket's Honchkrow;21,43;3 - 11 - 1;15
-Manectric Eelektrik;Crustle;21,43;3 - 11 - 0;14
-Manectric Eelektrik;Mega Lucario;10,0;1 - 9 - 0;10
-Lillie's Clefairy;Lucario Hariyama;82,35;14 - 3 - 0;17
-Lillie's Clefairy;Dragapult Dusknoir;69,05;29 - 13 - 1;43
-Lillie's Clefairy;Dragapult;61,7;29 - 18 - 0;47
-Lillie's Clefairy;Dragapult Blaziken;61,11;11 - 7 - 0;18
-Lillie's Clefairy;Ogerpon Meganium Hydrapple;54,55;12 - 10 - 0;22
-Lillie's Clefairy;Beedrill;47,62;10 - 11 - 0;21
-Lillie's Clefairy;Mega Greninja;45,45;15 - 18 - 0;33
-Lillie's Clefairy;Raging Bolt Ogerpon;44,44;4 - 5 - 0;9
-Lillie's Clefairy;Cynthia's Garchomp;43,75;7 - 9 - 0;16
-Lillie's Clefairy;Rocket's Mewtwo;40,0;6 - 9 - 0;15
-Lillie's Clefairy;Slowking;39,29;22 - 34 - 0;56
-Lillie's Clefairy;Festival Lead;35,71;5 - 9 - 0;14
-Lillie's Clefairy;Basic Box;35,29;6 - 11 - 0;17
-Lillie's Clefairy;N's Zoroark;32,73;18 - 37 - 1;56
-Lillie's Clefairy;Mega Lucario;28,57;4 - 10 - 0;14
-Lillie's Clefairy;Rocket's Honchkrow;27,27;6 - 16 - 1;23
-Lillie's Clefairy;Hop's Trevenant;25,0;5 - 15 - 0;20
-Lillie's Clefairy;Crustle;25,0;5 - 15 - 0;20
-Lillie's Clefairy;Alakazam Dudunsparce;21,21;7 - 26 - 1;34
-Lillie's Clefairy;Lopunny Dudunsparce;20,0;2 - 8 - 0;10
-Kangaskhan Bouffalant;Hop's Trevenant;87,5;7 - 1 - 1;9
-Kangaskhan Bouffalant;Festival Lead;66,67;14 - 7 - 0;21
-Kangaskhan Bouffalant;Rocket's Mewtwo;66,67;6 - 3 - 1;10
-Kangaskhan Bouffalant;Raging Bolt Ogerpon;60,0;9 - 6 - 1;16
-Kangaskhan Bouffalant;Slowking;57,5;23 - 17 - 0;40
-Kangaskhan Bouffalant;Dragapult Dusknoir;57,14;28 - 21 - 0;49
-Kangaskhan Bouffalant;Beedrill;56,41;22 - 17 - 1;40
-Kangaskhan Bouffalant;Dragapult;56,1;23 - 18 - 1;42
-Kangaskhan Bouffalant;Lopunny Dudunsparce;50,0;5 - 5 - 0;10
-Kangaskhan Bouffalant;Alakazam Dudunsparce;43,9;18 - 23 - 0;41
-Kangaskhan Bouffalant;Mega Greninja;43,75;14 - 18 - 0;32
-Kangaskhan Bouffalant;N's Zoroark;42,22;19 - 26 - 0;45
-Kangaskhan Bouffalant;Dragapult Blaziken;41,18;7 - 10 - 0;17
-Kangaskhan Bouffalant;Ogerpon Meganium Hydrapple;35,0;7 - 13 - 0;20
-Kangaskhan Bouffalant;Lucario Hariyama;30,0;3 - 7 - 0;10
-Kangaskhan Bouffalant;Rocket's Honchkrow;27,78;5 - 13 - 0;18
-Kangaskhan Bouffalant;Basic Box;26,32;5 - 14 - 0;19
-Kangaskhan Bouffalant;Crustle;18,18;2 - 9 - 0;11
-Kangaskhan Bouffalant;Cynthia's Garchomp;0,0;0 - 16 - 0;16
-Kangaskhan Bouffalant;Mega Lucario;0,0;0 - 6 - 0;6
-Hydreigon;Hop's Trevenant;62,5;5 - 3 - 0;8
-Hydreigon;Cynthia's Garchomp;60,0;6 - 4 - 0;10
-Hydreigon;Slowking;50,0;18 - 18 - 0;36
-Hydreigon;Alakazam Dudunsparce;50,0;14 - 14 - 0;28
-Hydreigon;Rocket's Honchkrow;45,83;11 - 13 - 0;24
-Hydreigon;Dragapult Dusknoir;45,71;16 - 19 - 0;35
-Hydreigon;Crustle;44,44;8 - 10 - 1;19
-Hydreigon;N's Zoroark;42,11;16 - 22 - 1;39
-Hydreigon;Mega Greninja;41,67;15 - 21 - 0;36
-Hydreigon;Dragapult;40,54;15 - 22 - 0;37
-Hydreigon;Beedrill;34,62;9 - 17 - 0;26
-Hydreigon;Mega Lucario;33,33;2 - 4 - 0;6
-Hydreigon;Lucario Hariyama;31,58;6 - 13 - 0;19
-Hydreigon;Rocket's Mewtwo;30,77;4 - 9 - 0;13
-Hydreigon;Dragapult Blaziken;28,57;8 - 20 - 0;28
-Hydreigon;Raging Bolt Ogerpon;25,0;4 - 12 - 0;16
-Hydreigon;Lopunny Dudunsparce;25,0;1 - 3 - 0;4
-Hydreigon;Festival Lead;23,53;4 - 13 - 1;18
-Hydreigon;Basic Box;11,11;1 - 8 - 0;9
-Hydreigon;Ogerpon Meganium Hydrapple;0,0;0 - 18 - 0;18
-Steven's Metagross;Festival Lead;84,62;11 - 2 - 2;15
-Steven's Metagross;Basic Box;57,14;8 - 6 - 0;14
-Steven's Metagross;Lucario Hariyama;56,25;9 - 7 - 0;16
-Steven's Metagross;Raging Bolt Ogerpon;50,0;10 - 10 - 0;20
-Steven's Metagross;Rocket's Mewtwo;50,0;4 - 4 - 0;8
-Steven's Metagross;Alakazam Dudunsparce;48,28;14 - 15 - 0;29
-Steven's Metagross;Dragapult Dusknoir;46,88;15 - 17 - 0;32
-Steven's Metagross;Beedrill;46,43;13 - 15 - 0;28
-Steven's Metagross;Mega Greninja;46,15;18 - 21 - 2;41
-Steven's Metagross;Hop's Trevenant;46,15;6 - 7 - 0;13
-Steven's Metagross;Mega Lucario;45,45;5 - 6 - 0;11
-Steven's Metagross;Dragapult;43,75;21 - 27 - 0;48
-Steven's Metagross;Cynthia's Garchomp;42,86;6 - 8 - 0;14
-Steven's Metagross;Rocket's Honchkrow;40,0;8 - 12 - 0;20
-Steven's Metagross;Slowking;37,84;14 - 23 - 1;38
-Steven's Metagross;Lopunny Dudunsparce;37,5;3 - 5 - 1;9
-Steven's Metagross;Crustle;36,36;4 - 7 - 0;11
-Steven's Metagross;N's Zoroark;33,33;16 - 32 - 1;49
-Steven's Metagross;Dragapult Blaziken;33,33;7 - 14 - 0;21
-Steven's Metagross;Ogerpon Meganium Hydrapple;29,41;10 - 24 - 0;34
-Ursaluna Lunatone;Crustle;62,5;10 - 6 - 0;16
-Ursaluna Lunatone;Lopunny Dudunsparce;58,33;7 - 5 - 0;12
-Ursaluna Lunatone;Slowking;53,85;14 - 12 - 0;26
-Ursaluna Lunatone;Raging Bolt Ogerpon;50,0;9 - 9 - 1;19
-Ursaluna Lunatone;Hop's Trevenant;50,0;2 - 2 - 1;5
-Ursaluna Lunatone;N's Zoroark;46,67;14 - 16 - 0;30
-Ursaluna Lunatone;Festival Lead;46,15;6 - 7 - 0;13
-Ursaluna Lunatone;Mega Greninja;45,45;10 - 12 - 0;22
-Ursaluna Lunatone;Lucario Hariyama;45,45;5 - 6 - 0;11
-Ursaluna Lunatone;Dragapult Dusknoir;42,42;14 - 19 - 0;33
-Ursaluna Lunatone;Dragapult;36,84;21 - 36 - 0;57
-Ursaluna Lunatone;Beedrill;36,67;11 - 19 - 0;30
-Ursaluna Lunatone;Alakazam Dudunsparce;33,33;11 - 22 - 0;33
-Ursaluna Lunatone;Dragapult Blaziken;33,33;5 - 10 - 1;16
-Ursaluna Lunatone;Cynthia's Garchomp;33,33;3 - 6 - 0;9
-Ursaluna Lunatone;Ogerpon Meganium Hydrapple;26,32;5 - 14 - 1;20
-Ursaluna Lunatone;Mega Lucario;25,0;1 - 3 - 0;4
-Ursaluna Lunatone;Rocket's Mewtwo;22,22;2 - 7 - 0;9
-Ursaluna Lunatone;Rocket's Honchkrow;20,0;4 - 16 - 0;20
-Ursaluna Lunatone;Basic Box;16,67;1 - 5 - 0;6
-Doublade;Crustle;80,0;8 - 2 - 0;10
-Doublade;Raging Bolt Ogerpon;72,73;8 - 3 - 0;11
-Doublade;Beedrill;66,67;10 - 5 - 1;16
-Doublade;Rocket's Mewtwo;60,0;9 - 6 - 0;15
-Doublade;Mega Greninja;56,67;17 - 13 - 0;30
-Doublade;Mega Lucario;54,55;6 - 5 - 0;11
-Doublade;Lopunny Dudunsparce;50,0;3 - 3 - 0;6
-Doublade;N's Zoroark;42,86;18 - 24 - 1;43
-Doublade;Dragapult Blaziken;42,86;6 - 8 - 0;14
-Doublade;Lucario Hariyama;42,86;6 - 8 - 0;14
-Doublade;Dragapult Dusknoir;36,67;11 - 19 - 1;31
-Doublade;Slowking;34,62;9 - 17 - 0;26
-Doublade;Festival Lead;31,25;5 - 11 - 0;16
-Doublade;Ogerpon Meganium Hydrapple;31,25;5 - 11 - 0;16
-Doublade;Dragapult;30,56;11 - 25 - 0;36
-Doublade;Alakazam Dudunsparce;29,17;7 - 17 - 0;24
-Doublade;Cynthia's Garchomp;27,27;3 - 8 - 0;11
-Doublade;Hop's Trevenant;25,0;1 - 3 - 0;4
-Doublade;Rocket's Honchkrow;23,53;4 - 13 - 0;17
-Doublade;Basic Box;11,11;1 - 8 - 1;10
-Toxtricity Box;Basic Box;71,43;5 - 2 - 0;7
-Toxtricity Box;Rocket's Mewtwo;70,0;7 - 3 - 0;10
-Toxtricity Box;Mega Lucario;70,0;7 - 3 - 0;10
-Toxtricity Box;Lucario Hariyama;69,23;9 - 4 - 0;13
-Toxtricity Box;Raging Bolt Ogerpon;66,67;8 - 4 - 0;12
-Toxtricity Box;Slowking;65,91;29 - 15 - 0;44
-Toxtricity Box;Mega Greninja;58,62;17 - 12 - 1;30
-Toxtricity Box;Beedrill;55,56;10 - 8 - 0;18
-Toxtricity Box;Dragapult;51,72;30 - 28 - 0;58
-Toxtricity Box;Dragapult Blaziken;50,0;10 - 10 - 1;21
-Toxtricity Box;Rocket's Honchkrow;50,0;7 - 7 - 1;15
-Toxtricity Box;Hop's Trevenant;50,0;2 - 2 - 0;4
-Toxtricity Box;N's Zoroark;48,72;19 - 20 - 2;41
-Toxtricity Box;Alakazam Dudunsparce;47,37;9 - 10 - 1;20
-Toxtricity Box;Crustle;46,15;6 - 7 - 0;13
-Toxtricity Box;Dragapult Dusknoir;44,44;16 - 20 - 0;36
-Toxtricity Box;Ogerpon Meganium Hydrapple;38,71;12 - 19 - 1;32
-Toxtricity Box;Festival Lead;37,5;6 - 10 - 1;17
-Toxtricity Box;Lopunny Dudunsparce;37,5;3 - 5 - 0;8
-Toxtricity Box;Cynthia's Garchomp;25,0;2 - 6 - 0;8
-Archaludon;Rocket's Mewtwo;100,0;7 - 0 - 0;7
-Archaludon;Festival Lead;77,78;7 - 2 - 0;9
-Archaludon;Basic Box;62,5;5 - 3 - 0;8
-Archaludon;Crustle;60,0;6 - 4 - 0;10
-Archaludon;Raging Bolt Ogerpon;55,56;5 - 4 - 1;10
-Archaludon;Ogerpon Meganium Hydrapple;53,33;8 - 7 - 0;15
-Archaludon;Mega Greninja;51,61;16 - 15 - 0;31
-Archaludon;N's Zoroark;51,43;18 - 17 - 0;35
-Archaludon;Dragapult Blaziken;50,0;7 - 7 - 0;14
-Archaludon;Lucario Hariyama;45,45;5 - 6 - 0;11
-Archaludon;Slowking;41,94;13 - 18 - 0;31
-Archaludon;Alakazam Dudunsparce;41,67;10 - 14 - 1;25
-Archaludon;Dragapult Dusknoir;40,43;19 - 28 - 0;47
-Archaludon;Beedrill;40,0;10 - 15 - 0;25
-Archaludon;Lopunny Dudunsparce;40,0;2 - 3 - 0;5
-Archaludon;Dragapult;35,0;14 - 26 - 2;42
-Archaludon;Hop's Trevenant;33,33;3 - 6 - 0;9
-Archaludon;Mega Lucario;33,33;2 - 4 - 0;6
-Archaludon;Rocket's Honchkrow;30,77;4 - 9 - 0;13
-Archaludon;Cynthia's Garchomp;25,0;1 - 3 - 0;4
-Ogerpon Meganium Arboliva;Cynthia's Garchomp;83,33;5 - 1 - 0;6
-Ogerpon Meganium Arboliva;Slowking;77,27;17 - 5 - 2;24
-Ogerpon Meganium Arboliva;Alakazam Dudunsparce;60,0;12 - 8 - 0;20
-Ogerpon Meganium Arboliva;Rocket's Mewtwo;60,0;6 - 4 - 0;10
-Ogerpon Meganium Arboliva;Rocket's Honchkrow;58,33;7 - 5 - 0;12
-Ogerpon Meganium Arboliva;N's Zoroark;57,89;11 - 8 - 1;20
-Ogerpon Meganium Arboliva;Mega Greninja;54,55;12 - 10 - 1;23
-Ogerpon Meganium Arboliva;Ogerpon Meganium Hydrapple;52,17;12 - 11 - 2;25
-Ogerpon Meganium Arboliva;Hop's Trevenant;50,0;4 - 4 - 0;8
-Ogerpon Meganium Arboliva;Lucario Hariyama;44,44;8 - 10 - 0;18
-Ogerpon Meganium Arboliva;Festival Lead;40,0;4 - 6 - 0;10
-Ogerpon Meganium Arboliva;Mega Lucario;37,5;3 - 5 - 0;8
-Ogerpon Meganium Arboliva;Lopunny Dudunsparce;35,29;6 - 11 - 0;17
-Ogerpon Meganium Arboliva;Dragapult Dusknoir;33,33;9 - 18 - 0;27
-Ogerpon Meganium Arboliva;Basic Box;33,33;2 - 4 - 0;6
-Ogerpon Meganium Arboliva;Dragapult;32,43;12 - 25 - 0;37
-Ogerpon Meganium Arboliva;Raging Bolt Ogerpon;31,25;5 - 11 - 0;16
-Ogerpon Meganium Arboliva;Dragapult Blaziken;28,57;6 - 15 - 1;22
-Ogerpon Meganium Arboliva;Beedrill;27,27;3 - 8 - 1;12
-Ogerpon Meganium Arboliva;Crustle;22,22;2 - 7 - 0;9
-Flareon Noctowl;Beedrill;80,0;8 - 2 - 0;10
-Flareon Noctowl;Lucario Hariyama;76,47;13 - 4 - 0;17
-Flareon Noctowl;Festival Lead;57,14;4 - 3 - 0;7
-Flareon Noctowl;N's Zoroark;53,66;22 - 19 - 1;42
-Flareon Noctowl;Mega Greninja;50,0;14 - 14 - 0;28
-Flareon Noctowl;Mega Lucario;50,0;2 - 2 - 0;4
-Flareon Noctowl;Dragapult Dusknoir;46,67;14 - 16 - 2;32
-Flareon Noctowl;Rocket's Honchkrow;45,45;5 - 6 - 0;11
-Flareon Noctowl;Crustle;45,45;5 - 6 - 0;11
-Flareon Noctowl;Dragapult;40,91;18 - 26 - 1;45
-Flareon Noctowl;Ogerpon Meganium Hydrapple;38,89;7 - 11 - 0;18
-Flareon Noctowl;Basic Box;37,5;3 - 5 - 1;9
-Flareon Noctowl;Raging Bolt Ogerpon;36,36;4 - 7 - 0;11
-Flareon Noctowl;Slowking;35,0;7 - 13 - 0;20
-Flareon Noctowl;Rocket's Mewtwo;33,33;2 - 4 - 0;6
-Flareon Noctowl;Dragapult Blaziken;31,58;6 - 13 - 0;19
-Flareon Noctowl;Lopunny Dudunsparce;18,18;2 - 9 - 1;12
-Flareon Noctowl;Alakazam Dudunsparce;16,67;3 - 15 - 0;18
-Flareon Noctowl;Cynthia's Garchomp;16,67;1 - 5 - 0;6
-Froslass Dudunsparce;Hop's Trevenant;100,0;4 - 0 - 0;4
-Froslass Dudunsparce;Lopunny Dudunsparce;75,0;6 - 2 - 0;8
-Froslass Dudunsparce;Crustle;70,0;7 - 3 - 0;10
-Froslass Dudunsparce;Mega Lucario;66,67;6 - 3 - 0;9
-Froslass Dudunsparce;Mega Greninja;60,87;14 - 9 - 0;23
-Froslass Dudunsparce;Beedrill;59,09;13 - 9 - 0;22
-Froslass Dudunsparce;N's Zoroark;50,0;17 - 17 - 2;36
-Froslass Dudunsparce;Rocket's Mewtwo;50,0;2 - 2 - 1;5
-Froslass Dudunsparce;Slowking;47,62;10 - 11 - 0;21
-Froslass Dudunsparce;Dragapult Blaziken;44,44;8 - 10 - 0;18
-Froslass Dudunsparce;Basic Box;44,44;4 - 5 - 0;9
-Froslass Dudunsparce;Dragapult Dusknoir;43,9;18 - 23 - 1;42
-Froslass Dudunsparce;Lucario Hariyama;40,0;8 - 12 - 0;20
-Froslass Dudunsparce;Raging Bolt Ogerpon;40,0;6 - 9 - 1;16
-Froslass Dudunsparce;Dragapult;36,84;14 - 24 - 3;41
-Froslass Dudunsparce;Festival Lead;33,33;3 - 6 - 0;9
-Froslass Dudunsparce;Ogerpon Meganium Hydrapple;31,25;5 - 11 - 0;16
-Froslass Dudunsparce;Alakazam Dudunsparce;30,0;6 - 14 - 0;20
-Froslass Dudunsparce;Rocket's Honchkrow;11,11;1 - 8 - 0;9
-Froslass Dudunsparce;Cynthia's Garchomp;11,11;1 - 8 - 0;9
-Mega Charizard X;Lopunny Dudunsparce;75,0;3 - 1 - 0;4
-Mega Charizard X;Cynthia's Garchomp;66,67;4 - 2 - 1;7
-Mega Charizard X;Crustle;66,67;4 - 2 - 0;6
-Mega Charizard X;Beedrill;60,0;6 - 4 - 0;10
-Mega Charizard X;Mega Lucario;60,0;3 - 2 - 0;5
-Mega Charizard X;Alakazam Dudunsparce;50,0;10 - 10 - 1;21
-Mega Charizard X;Dragapult Blaziken;50,0;4 - 4 - 1;9
-Mega Charizard X;Lucario Hariyama;47,37;9 - 10 - 0;19
-Mega Charizard X;Rocket's Honchkrow;40,0;4 - 6 - 0;10
-Mega Charizard X;N's Zoroark;38,24;13 - 21 - 0;34
-Mega Charizard X;Mega Greninja;36,36;8 - 14 - 0;22
-Mega Charizard X;Hop's Trevenant;33,33;2 - 4 - 0;6
-Mega Charizard X;Basic Box;33,33;2 - 4 - 0;6
-Mega Charizard X;Dragapult Dusknoir;31,82;7 - 15 - 0;22
-Mega Charizard X;Raging Bolt Ogerpon;30,0;3 - 7 - 0;10
-Mega Charizard X;Festival Lead;30,0;3 - 7 - 0;10
-Mega Charizard X;Ogerpon Meganium Hydrapple;27,27;3 - 8 - 0;11
-Mega Charizard X;Slowking;23,81;5 - 16 - 1;22
-Mega Charizard X;Dragapult;21,95;9 - 32 - 0;41
-Mega Charizard X;Rocket's Mewtwo;16,67;1 - 5 - 0;6
-Mega Dragonite;Basic Box;100,0;3 - 0 - 0;3
-Mega Dragonite;Hop's Trevenant;66,67;2 - 1 - 0;3
-Mega Dragonite;Mega Lucario;60,0;3 - 2 - 0;5
-Mega Dragonite;Dragapult Dusknoir;54,55;12 - 10 - 0;22
-Mega Dragonite;Beedrill;53,85;7 - 6 - 0;13
-Mega Dragonite;Dragapult;53,12;17 - 15 - 1;33
-Mega Dragonite;N's Zoroark;53,12;17 - 15 - 0;32
-Mega Dragonite;Dragapult Blaziken;50,0;9 - 9 - 1;19
-Mega Dragonite;Rocket's Mewtwo;50,0;4 - 4 - 0;8
-Mega Dragonite;Mega Greninja;46,67;7 - 8 - 0;15
-Mega Dragonite;Ogerpon Meganium Hydrapple;46,15;6 - 7 - 0;13
-Mega Dragonite;Slowking;45,45;10 - 12 - 1;23
-Mega Dragonite;Raging Bolt Ogerpon;44,44;4 - 5 - 0;9
-Mega Dragonite;Festival Lead;42,86;3 - 4 - 1;8
-Mega Dragonite;Cynthia's Garchomp;38,46;5 - 8 - 0;13
-Mega Dragonite;Rocket's Honchkrow;36,36;4 - 7 - 2;13
-Mega Dragonite;Alakazam Dudunsparce;33,33;7 - 14 - 0;21
-Mega Dragonite;Lopunny Dudunsparce;28,57;2 - 5 - 0;7
-Mega Dragonite;Lucario Hariyama;25,0;2 - 6 - 0;8
-Mega Dragonite;Crustle;23,08;3 - 10 - 0;13
-Joltik Box;Lopunny Dudunsparce;83,33;5 - 1 - 0;6
-Joltik Box;Beedrill;71,43;10 - 4 - 0;14
-Joltik Box;Hop's Trevenant;66,67;6 - 3 - 0;9
-Joltik Box;Dragapult;64,86;24 - 13 - 0;37
-Joltik Box;Rocket's Mewtwo;62,5;5 - 3 - 0;8
-Joltik Box;Raging Bolt Ogerpon;58,33;7 - 5 - 0;12
-Joltik Box;Slowking;57,89;11 - 8 - 0;19
-Joltik Box;Dragapult Dusknoir;55,56;20 - 16 - 0;36
-Joltik Box;N's Zoroark;54,17;13 - 11 - 0;24
-Joltik Box;Lucario Hariyama;50,0;5 - 5 - 0;10
-Joltik Box;Mega Lucario;50,0;3 - 3 - 0;6
-Joltik Box;Mega Greninja;48,0;12 - 13 - 0;25
-Joltik Box;Ogerpon Meganium Hydrapple;47,83;11 - 12 - 1;24
-Joltik Box;Dragapult Blaziken;42,86;3 - 4 - 0;7
-Joltik Box;Cynthia's Garchomp;28,57;2 - 5 - 0;7
-Joltik Box;Alakazam Dudunsparce;26,67;4 - 11 - 0;15
-Joltik Box;Festival Lead;25,0;2 - 6 - 0;8
-Joltik Box;Basic Box;20,0;1 - 4 - 0;5
-Joltik Box;Crustle;20,0;1 - 4 - 0;5
-Joltik Box;Rocket's Honchkrow;9,09;1 - 10 - 0;11
-Sharpedo Toxtricity;Lopunny Dudunsparce;60,0;6 - 4 - 0;10
-Sharpedo Toxtricity;Crustle;60,0;3 - 2 - 0;5
-Sharpedo Toxtricity;Rocket's Mewtwo;57,14;4 - 3 - 0;7
-Sharpedo Toxtricity;Raging Bolt Ogerpon;54,55;6 - 5 - 0;11
-Sharpedo Toxtricity;Mega Greninja;52,38;11 - 10 - 0;21
-Sharpedo Toxtricity;Mega Lucario;50,0;3 - 3 - 0;6
-Sharpedo Toxtricity;Alakazam Dudunsparce;47,06;8 - 9 - 0;17
-Sharpedo Toxtricity;Rocket's Honchkrow;45,45;5 - 6 - 0;11
-Sharpedo Toxtricity;Slowking;40,0;10 - 15 - 0;25
-Sharpedo Toxtricity;Ogerpon Meganium Hydrapple;40,0;2 - 3 - 0;5
-Sharpedo Toxtricity;Lucario Hariyama;35,71;5 - 9 - 0;14
-Sharpedo Toxtricity;N's Zoroark;33,33;6 - 12 - 0;18
-Sharpedo Toxtricity;Dragapult Blaziken;33,33;3 - 6 - 0;9
-Sharpedo Toxtricity;Dragapult Dusknoir;32,0;8 - 17 - 1;26
-Sharpedo Toxtricity;Cynthia's Garchomp;28,57;2 - 5 - 0;7
-Sharpedo Toxtricity;Dragapult;27,78;10 - 26 - 0;36
-Sharpedo Toxtricity;Beedrill;25,0;3 - 9 - 0;12
-Sharpedo Toxtricity;Hop's Trevenant;25,0;2 - 6 - 0;8
-Sharpedo Toxtricity;Basic Box;25,0;1 - 3 - 0;4
-Sharpedo Toxtricity;Festival Lead;23,53;4 - 13 - 0;17
-Mega Froslass;Rocket's Mewtwo;77,78;7 - 2 - 0;9
-Mega Froslass;Raging Bolt Ogerpon;75,0;3 - 1 - 0;4
-Mega Froslass;Beedrill;65,0;13 - 7 - 0;20
-Mega Froslass;Lucario Hariyama;63,64;7 - 4 - 0;11
-Mega Froslass;Ogerpon Meganium Hydrapple;50,0;7 - 7 - 0;14
-Mega Froslass;Crustle;50,0;4 - 4 - 0;8
-Mega Froslass;Dragapult Dusknoir;45,0;9 - 11 - 0;20
-Mega Froslass;Mega Greninja;44,0;11 - 14 - 0;25
-Mega Froslass;N's Zoroark;42,11;8 - 11 - 0;19
-Mega Froslass;Dragapult Blaziken;41,67;5 - 7 - 0;12
-Mega Froslass;Lopunny Dudunsparce;41,67;5 - 7 - 0;12
-Mega Froslass;Dragapult;41,38;12 - 17 - 1;30
-Mega Froslass;Mega Lucario;40,0;2 - 3 - 0;5
-Mega Froslass;Slowking;39,13;9 - 14 - 0;23
-Mega Froslass;Alakazam Dudunsparce;30,77;4 - 9 - 1;14
-Mega Froslass;Rocket's Honchkrow;30,0;3 - 7 - 0;10
-Mega Froslass;Basic Box;22,22;2 - 7 - 0;9
-Mega Froslass;Festival Lead;18,18;2 - 9 - 0;11
-Mega Froslass;Hop's Trevenant;16,67;1 - 5 - 0;6
-Mega Froslass;Cynthia's Garchomp;14,29;1 - 6 - 0;7
-Marnie's Grimmsnarl;Rocket's Mewtwo;87,5;7 - 1 - 0;8
-Marnie's Grimmsnarl;Mega Greninja;60,0;12 - 8 - 0;20
-Marnie's Grimmsnarl;Festival Lead;60,0;6 - 4 - 0;10
-Marnie's Grimmsnarl;Alakazam Dudunsparce;56,25;9 - 7 - 0;16
-Marnie's Grimmsnarl;Dragapult Dusknoir;50,0;15 - 15 - 1;31
-Marnie's Grimmsnarl;Crustle;46,15;6 - 7 - 1;14
-Marnie's Grimmsnarl;Slowking;45,0;9 - 11 - 0;20
-Marnie's Grimmsnarl;Dragapult;43,75;14 - 18 - 0;32
-Marnie's Grimmsnarl;Cynthia's Garchomp;42,86;3 - 4 - 1;8
-Marnie's Grimmsnarl;Mega Lucario;42,86;3 - 4 - 0;7
-Marnie's Grimmsnarl;Hop's Trevenant;42,86;3 - 4 - 0;7
-Marnie's Grimmsnarl;Dragapult Blaziken;41,67;5 - 7 - 0;12
-Marnie's Grimmsnarl;Lucario Hariyama;40,0;4 - 6 - 0;10
-Marnie's Grimmsnarl;N's Zoroark;36,67;11 - 19 - 0;30
-Marnie's Grimmsnarl;Beedrill;31,58;6 - 13 - 0;19
-Marnie's Grimmsnarl;Basic Box;25,0;1 - 3 - 0;4
-Marnie's Grimmsnarl;Rocket's Honchkrow;25,0;1 - 3 - 0;4
-Marnie's Grimmsnarl;Lopunny Dudunsparce;14,29;1 - 6 - 0;7
-Marnie's Grimmsnarl;Ogerpon Meganium Hydrapple;0,0;0 - 10 - 0;10
-Marnie's Grimmsnarl;Raging Bolt Ogerpon;0,0;0 - 6 - 0;6
-Hop's Zacian;Lopunny Dudunsparce;85,71;6 - 1 - 0;7
-Hop's Zacian;Festival Lead;66,67;6 - 3 - 0;9
-Hop's Zacian;Hop's Trevenant;66,67;4 - 2 - 0;6
-Hop's Zacian;Cynthia's Garchomp;66,67;2 - 1 - 0;3
-Hop's Zacian;Mega Greninja;61,11;11 - 7 - 0;18
-Hop's Zacian;Mega Lucario;60,0;3 - 2 - 0;5
-Hop's Zacian;Rocket's Honchkrow;55,56;5 - 4 - 0;9
-Hop's Zacian;Raging Bolt Ogerpon;55,56;5 - 4 - 0;9
-Hop's Zacian;Crustle;50,0;2 - 2 - 0;4
-Hop's Zacian;Ogerpon Meganium Hydrapple;47,83;11 - 12 - 0;23
-Hop's Zacian;Beedrill;46,43;13 - 15 - 0;28
-Hop's Zacian;Slowking;45,0;9 - 11 - 0;20
-Hop's Zacian;Dragapult;42,11;16 - 22 - 0;38
-Hop's Zacian;Lucario Hariyama;33,33;4 - 8 - 0;12
-Hop's Zacian;N's Zoroark;31,58;6 - 13 - 0;19
-Hop's Zacian;Alakazam Dudunsparce;26,32;5 - 14 - 0;19
-Hop's Zacian;Rocket's Mewtwo;25,0;2 - 6 - 0;8
-Hop's Zacian;Dragapult Dusknoir;23,08;3 - 10 - 1;14
-Hop's Zacian;Dragapult Blaziken;16,67;1 - 5 - 0;6
-Hop's Zacian;Basic Box;14,29;1 - 6 - 1;8
-Mega Abomasnow;Raging Bolt Ogerpon;71,43;5 - 2 - 0;7
-Mega Abomasnow;Mega Greninja;68,18;15 - 7 - 0;22
-Mega Abomasnow;Mega Lucario;66,67;4 - 2 - 0;6
-Mega Abomasnow;Rocket's Mewtwo;60,0;3 - 2 - 0;5
-Mega Abomasnow;Lucario Hariyama;55,56;5 - 4 - 0;9
-Mega Abomasnow;N's Zoroark;51,85;14 - 13 - 0;27
-Mega Abomasnow;Dragapult Blaziken;50,0;4 - 4 - 0;8
-Mega Abomasnow;Ogerpon Meganium Hydrapple;46,15;6 - 7 - 0;13
-Mega Abomasnow;Dragapult Dusknoir;40,74;11 - 16 - 0;27
-Mega Abomasnow;Basic Box;40,0;2 - 3 - 0;5
-Mega Abomasnow;Crustle;37,5;3 - 5 - 0;8
-Mega Abomasnow;Festival Lead;36,36;4 - 7 - 0;11
-Mega Abomasnow;Lopunny Dudunsparce;33,33;1 - 2 - 0;3
-Mega Abomasnow;Dragapult;30,77;8 - 18 - 0;26
-Mega Abomasnow;Alakazam Dudunsparce;26,92;7 - 19 - 0;26
-Mega Abomasnow;Beedrill;26,67;4 - 11 - 0;15
-Mega Abomasnow;Cynthia's Garchomp;25,0;2 - 6 - 0;8
-Mega Abomasnow;Slowking;22,22;4 - 14 - 0;18
-Mega Abomasnow;Rocket's Honchkrow;20,0;2 - 8 - 0;10
-Mega Abomasnow;Hop's Trevenant;0,0;0 - 4 - 0;4
-Ogerpon Meganium;Slowking;61,9;13 - 8 - 0;21
-Ogerpon Meganium;Basic Box;60,0;3 - 2 - 0;5
-Ogerpon Meganium;N's Zoroark;57,89;11 - 8 - 0;19
-Ogerpon Meganium;Mega Greninja;55,56;10 - 8 - 0;18
-Ogerpon Meganium;Dragapult Dusknoir;45,45;10 - 12 - 1;23
-Ogerpon Meganium;Dragapult Blaziken;40,0;4 - 6 - 1;11
-Ogerpon Meganium;Ogerpon Meganium Hydrapple;40,0;4 - 6 - 0;10
-Ogerpon Meganium;Raging Bolt Ogerpon;40,0;2 - 3 - 0;5
-Ogerpon Meganium;Hop's Trevenant;40,0;2 - 3 - 0;5
-Ogerpon Meganium;Beedrill;33,33;4 - 8 - 0;12
-Ogerpon Meganium;Rocket's Mewtwo;33,33;3 - 6 - 0;9
-Ogerpon Meganium;Dragapult;31,82;7 - 15 - 0;22
-Ogerpon Meganium;Festival Lead;25,0;2 - 6 - 1;9
-Ogerpon Meganium;Rocket's Honchkrow;22,22;2 - 7 - 1;10
-Ogerpon Meganium;Alakazam Dudunsparce;20,0;4 - 16 - 0;20
-Ogerpon Meganium;Lucario Hariyama;20,0;2 - 8 - 0;10
-Ogerpon Meganium;Lopunny Dudunsparce;20,0;1 - 4 - 0;5
-Ogerpon Meganium;Crustle;12,5;1 - 7 - 0;8
-Yanmega;Cynthia's Garchomp;100,0;3 - 0 - 0;3
-Yanmega;Lucario Hariyama;69,23;9 - 4 - 0;13
-Yanmega;Rocket's Honchkrow;66,67;4 - 2 - 0;6
-Yanmega;Mega Greninja;58,33;7 - 5 - 0;12
-Yanmega;Lopunny Dudunsparce;57,14;4 - 3 - 0;7
-Yanmega;N's Zoroark;56,25;9 - 7 - 0;16
-Yanmega;Basic Box;50,0;2 - 2 - 0;4
-Yanmega;Dragapult Dusknoir;42,86;9 - 12 - 0;21
-Yanmega;Crustle;42,86;3 - 4 - 0;7
-Yanmega;Slowking;42,11;8 - 11 - 0;19
-Yanmega;Rocket's Mewtwo;40,0;4 - 6 - 0;10
-Yanmega;Festival Lead;37,5;3 - 5 - 0;8
-Yanmega;Ogerpon Meganium Hydrapple;33,33;2 - 4 - 0;6
-Yanmega;Raging Bolt Ogerpon;33,33;2 - 4 - 0;6
-Yanmega;Dragapult Blaziken;25,0;3 - 9 - 0;12
-Yanmega;Dragapult;20,69;6 - 23 - 0;29
-Yanmega;Alakazam Dudunsparce;20,0;3 - 12 - 1;16
-Yanmega;Beedrill;18,75;3 - 13 - 0;16
-Palafin;Rocket's Mewtwo;66,67;4 - 2 - 1;7
-Palafin;Mega Lucario;66,67;2 - 1 - 0;3
-Palafin;Raging Bolt Ogerpon;62,5;5 - 3 - 0;8
-Palafin;Crustle;60,0;6 - 4 - 0;10
-Palafin;Festival Lead;54,55;6 - 5 - 0;11
-Palafin;N's Zoroark;52,0;13 - 12 - 0;25
-Palafin;Ogerpon Meganium Hydrapple;50,0;5 - 5 - 0;10
-Palafin;Basic Box;50,0;2 - 2 - 0;4
-Palafin;Mega Greninja;47,37;9 - 10 - 1;20
-Palafin;Beedrill;46,15;6 - 7 - 0;13
-Palafin;Slowking;42,86;6 - 8 - 0;14
-Palafin;Hop's Trevenant;40,0;2 - 3 - 1;6
-Palafin;Alakazam Dudunsparce;36,84;7 - 12 - 0;19
-Palafin;Dragapult;35,29;6 - 11 - 0;17
-Palafin;Dragapult Dusknoir;33,33;7 - 14 - 0;21
-Palafin;Dragapult Blaziken;25,0;2 - 6 - 0;8
-Palafin;Cynthia's Garchomp;25,0;1 - 3 - 0;4
-Palafin;Lucario Hariyama;9,09;1 - 10 - 0;11
-Sylveon;Basic Box;100,0;3 - 0 - 1;4
-Sylveon;Raging Bolt Ogerpon;75,0;3 - 1 - 0;4
-Sylveon;Beedrill;71,43;5 - 2 - 0;7
-Sylveon;Mega Greninja;66,67;12 - 6 - 0;18
-Sylveon;Alakazam Dudunsparce;66,67;8 - 4 - 1;13
-Sylveon;Hop's Trevenant;66,67;4 - 2 - 0;6
-Sylveon;Mega Lucario;50,0;4 - 4 - 0;8
-Sylveon;Rocket's Mewtwo;44,44;4 - 5 - 0;9
-Sylveon;Festival Lead;44,44;4 - 5 - 0;9
-Sylveon;Dragapult;40,91;9 - 13 - 2;24
-Sylveon;Lopunny Dudunsparce;40,0;2 - 3 - 0;5
-Sylveon;Crustle;40,0;2 - 3 - 0;5
-Sylveon;N's Zoroark;39,29;11 - 17 - 0;28
-Sylveon;Dragapult Dusknoir;38,1;8 - 13 - 0;21
-Sylveon;Rocket's Honchkrow;36,36;4 - 7 - 0;11
-Sylveon;Slowking;20,0;4 - 16 - 0;20
-Sylveon;Ogerpon Meganium Hydrapple;16,67;2 - 10 - 0;12
-Sylveon;Dragapult Blaziken;16,67;1 - 5 - 0;6
-Sylveon;Lucario Hariyama;16,67;1 - 5 - 0;6
-Froslass Munkidori;Festival Lead;100,0;6 - 0 - 0;6
-Froslass Munkidori;Rocket's Mewtwo;100,0;4 - 0 - 0;4
-Froslass Munkidori;Ogerpon Meganium Hydrapple;85,71;6 - 1 - 1;8
-Froslass Munkidori;Slowking;50,0;13 - 13 - 1;27
-Froslass Munkidori;Lucario Hariyama;50,0;3 - 3 - 0;6
-Froslass Munkidori;Basic Box;50,0;3 - 3 - 0;6
-Froslass Munkidori;Alakazam Dudunsparce;46,15;6 - 7 - 1;14
-Froslass Munkidori;Dragapult;45,83;11 - 13 - 0;24
-Froslass Munkidori;Beedrill;36,36;4 - 7 - 0;11
-Froslass Munkidori;Mega Greninja;36,36;4 - 7 - 0;11
-Froslass Munkidori;Dragapult Dusknoir;35,29;6 - 11 - 0;17
-Froslass Munkidori;Hop's Trevenant;33,33;1 - 2 - 0;3
-Froslass Munkidori;Crustle;28,57;2 - 5 - 0;7
-Froslass Munkidori;N's Zoroark;25,0;3 - 9 - 1;13
-Froslass Munkidori;Dragapult Blaziken;25,0;2 - 6 - 0;8
-Froslass Munkidori;Rocket's Honchkrow;25,0;2 - 6 - 0;8
-Froslass Munkidori;Lopunny Dudunsparce;20,0;1 - 4 - 0;5
-Froslass Munkidori;Cynthia's Garchomp;20,0;1 - 4 - 0;5
-Froslass Munkidori;Raging Bolt Ogerpon;16,67;1 - 5 - 0;6
-Blaziken Zoroark;Hop's Trevenant;83,33;5 - 1 - 0;6
-Blaziken Zoroark;Beedrill;81,82;9 - 2 - 0;11
-Blaziken Zoroark;Dragapult Dusknoir;66,67;12 - 6 - 1;19
-Blaziken Zoroark;Festival Lead;66,67;2 - 1 - 2;5
-Blaziken Zoroark;Raging Bolt Ogerpon;66,67;2 - 1 - 0;3
-Blaziken Zoroark;Lucario Hariyama;63,64;7 - 4 - 0;11
-Blaziken Zoroark;Rocket's Mewtwo;62,5;5 - 3 - 0;8
-Blaziken Zoroark;Ogerpon Meganium Hydrapple;60,0;6 - 4 - 0;10
-Blaziken Zoroark;Alakazam Dudunsparce;58,33;7 - 5 - 0;12
-Blaziken Zoroark;Crustle;57,14;4 - 3 - 0;7
-Blaziken Zoroark;Dragapult;54,55;6 - 5 - 0;11
-Blaziken Zoroark;Rocket's Honchkrow;50,0;4 - 4 - 0;8
-Blaziken Zoroark;Mega Lucario;50,0;3 - 3 - 0;6
-Blaziken Zoroark;Basic Box;42,86;3 - 4 - 0;7
-Blaziken Zoroark;Cynthia's Garchomp;40,0;2 - 3 - 0;5
-Blaziken Zoroark;Slowking;37,5;6 - 10 - 0;16
-Blaziken Zoroark;Mega Greninja;35,71;5 - 9 - 0;14
-Blaziken Zoroark;N's Zoroark;27,27;3 - 8 - 1;12
-Blaziken Zoroark;Dragapult Blaziken;14,29;2 - 12 - 0;14
-Clefairy Ogerpon;Dragapult Dusknoir;90,91;10 - 1 - 0;11
-Clefairy Ogerpon;Lucario Hariyama;88,89;8 - 1 - 0;9
-Clefairy Ogerpon;Alakazam Dudunsparce;66,67;4 - 2 - 0;6
-Clefairy Ogerpon;Cynthia's Garchomp;60,0;3 - 2 - 0;5
-Clefairy Ogerpon;Festival Lead;57,14;4 - 3 - 0;7
-Clefairy Ogerpon;Slowking;53,33;8 - 7 - 0;15
-Clefairy Ogerpon;Dragapult;50,0;8 - 8 - 0;16
-Clefairy Ogerpon;Mega Greninja;50,0;6 - 6 - 0;12
-Clefairy Ogerpon;Mega Lucario;50,0;3 - 3 - 0;6
-Clefairy Ogerpon;Ogerpon Meganium Hydrapple;41,67;5 - 7 - 0;12
-Clefairy Ogerpon;N's Zoroark;40,0;6 - 9 - 0;15
-Clefairy Ogerpon;Beedrill;40,0;4 - 6 - 0;10
-Clefairy Ogerpon;Basic Box;40,0;2 - 3 - 0;5
-Clefairy Ogerpon;Rocket's Honchkrow;37,5;3 - 5 - 0;8
-Clefairy Ogerpon;Lopunny Dudunsparce;28,57;2 - 5 - 0;7
-Clefairy Ogerpon;Hop's Trevenant;28,57;2 - 5 - 0;7
-Clefairy Ogerpon;Crustle;25,0;3 - 9 - 0;12
-Clefairy Ogerpon;Rocket's Mewtwo;25,0;1 - 3 - 0;4
-Clefairy Ogerpon;Raging Bolt Ogerpon;20,0;1 - 4 - 0;5
-Clefairy Ogerpon;Dragapult Blaziken;16,67;1 - 5 - 0;6
-Tera Box;Mega Greninja;66,67;10 - 5 - 1;16
-Tera Box;Lucario Hariyama;66,67;6 - 3 - 1;10
-Tera Box;Raging Bolt Ogerpon;55,56;5 - 4 - 0;9
-Tera Box;Slowking;50,0;7 - 7 - 0;14
-Tera Box;Rocket's Honchkrow;50,0;3 - 3 - 0;6
-Tera Box;Cynthia's Garchomp;50,0;3 - 3 - 0;6
-Tera Box;Dragapult Blaziken;44,44;4 - 5 - 0;9
-Tera Box;Dragapult Dusknoir;42,86;6 - 8 - 0;14
-Tera Box;Dragapult;41,67;5 - 7 - 0;12
-Tera Box;Lopunny Dudunsparce;40,0;2 - 3 - 0;5
-Tera Box;N's Zoroark;35,71;5 - 9 - 0;14
-Tera Box;Beedrill;28,57;2 - 5 - 1;8
-Tera Box;Basic Box;25,0;1 - 3 - 0;4
-Tera Box;Festival Lead;25,0;1 - 3 - 0;4
-Tera Box;Crustle;20,0;1 - 4 - 0;5
-Tera Box;Alakazam Dudunsparce;11,11;1 - 8 - 1;10
-Decidueye;Mega Greninja;77,78;7 - 2 - 0;9
-Decidueye;Raging Bolt Ogerpon;62,5;5 - 3 - 0;8
-Decidueye;Alakazam Dudunsparce;60,0;9 - 6 - 0;15
-Decidueye;Beedrill;60,0;3 - 2 - 0;5
-Decidueye;Ogerpon Meganium Hydrapple;50,0;6 - 6 - 0;12
-Decidueye;Dragapult;50,0;5 - 5 - 0;10
-Decidueye;Crustle;50,0;1 - 1 - 1;3
-Decidueye;Rocket's Honchkrow;42,86;3 - 4 - 0;7
-Decidueye;Hop's Trevenant;42,86;3 - 4 - 0;7
-Decidueye;Rocket's Mewtwo;37,5;3 - 5 - 0;8
-Decidueye;Lopunny Dudunsparce;37,5;3 - 5 - 0;8
-Decidueye;N's Zoroark;33,33;6 - 12 - 0;18
-Decidueye;Basic Box;33,33;1 - 2 - 0;3
-Decidueye;Festival Lead;33,33;1 - 2 - 0;3
-Decidueye;Dragapult Dusknoir;26,67;4 - 11 - 1;16
-Decidueye;Slowking;25,0;2 - 6 - 0;8
-Decidueye;Lucario Hariyama;16,67;1 - 5 - 0;6
-Decidueye;Dragapult Blaziken;0,0;0 - 8 - 1;9
-Decidueye;Mega Lucario;0,0;0 - 4 - 1;5
-Archaludon Zoroark;Rocket's Honchkrow;83,33;5 - 1 - 0;6
-Archaludon Zoroark;Basic Box;75,0;3 - 1 - 0;4
-Archaludon Zoroark;Festival Lead;71,43;5 - 2 - 0;7
-Archaludon Zoroark;Lopunny Dudunsparce;71,43;5 - 2 - 0;7
-Archaludon Zoroark;Ogerpon Meganium Hydrapple;66,67;4 - 2 - 0;6
-Archaludon Zoroark;Mega Greninja;66,67;2 - 1 - 0;3
-Archaludon Zoroark;Dragapult Blaziken;57,14;4 - 3 - 0;7
-Archaludon Zoroark;Dragapult;53,33;8 - 7 - 1;16
-Archaludon Zoroark;Dragapult Dusknoir;42,11;8 - 11 - 0;19
-Archaludon Zoroark;Mega Lucario;40,0;2 - 3 - 0;5
-Archaludon Zoroark;Beedrill;37,5;3 - 5 - 0;8
-Archaludon Zoroark;Lucario Hariyama;33,33;1 - 2 - 0;3
-Archaludon Zoroark;Alakazam Dudunsparce;25,0;2 - 6 - 0;8
-Archaludon Zoroark;Slowking;20,0;2 - 8 - 0;10
-Archaludon Zoroark;N's Zoroark;9,09;1 - 10 - 0;11
-Archaludon Zoroark;Raging Bolt Ogerpon;0,0;0 - 3 - 0;3
-Archaludon Zoroark;Cynthia's Garchomp;0,0;0 - 3 - 0;3
-Archaludon Zoroark;Hop's Trevenant;0,0;0 - 3 - 0;3
-Rocket's Spidops;Alakazam Dudunsparce;87,5;7 - 1 - 0;8
-Rocket's Spidops;Lopunny Dudunsparce;75,0;3 - 1 - 0;4
-Rocket's Spidops;N's Zoroark;69,23;9 - 4 - 0;13
-Rocket's Spidops;Cynthia's Garchomp;57,14;4 - 3 - 0;7
-Rocket's Spidops;Dragapult Dusknoir;50,0;6 - 6 - 0;12
-Rocket's Spidops;Dragapult Blaziken;50,0;3 - 3 - 0;6
-Rocket's Spidops;Basic Box;50,0;1 - 1 - 1;3
-Rocket's Spidops;Slowking;45,45;5 - 6 - 0;11
-Rocket's Spidops;Beedrill;40,0;2 - 3 - 0;5
-Rocket's Spidops;Ogerpon Meganium Hydrapple;40,0;2 - 3 - 0;5
-Rocket's Spidops;Mega Greninja;33,33;3 - 6 - 1;10
-Rocket's Spidops;Crustle;33,33;2 - 4 - 0;6
-Rocket's Spidops;Rocket's Honchkrow;33,33;2 - 4 - 0;6
-Rocket's Spidops;Rocket's Mewtwo;33,33;1 - 2 - 0;3
-Rocket's Spidops;Mega Lucario;33,33;1 - 2 - 0;3
-Rocket's Spidops;Festival Lead;25,0;1 - 3 - 0;4
-Rocket's Spidops;Lucario Hariyama;20,0;1 - 4 - 0;5
-Rocket's Spidops;Dragapult;18,18;2 - 9 - 1;12
-Blaziken;Hop's Trevenant;66,67;4 - 2 - 1;7
-Blaziken;Rocket's Mewtwo;66,67;2 - 1 - 0;3
-Blaziken;Mega Lucario;66,67;2 - 1 - 0;3
-Blaziken;Slowking;62,5;5 - 3 - 0;8
-Blaziken;Mega Greninja;50,0;3 - 3 - 1;7
-Blaziken;Dragapult Blaziken;50,0;3 - 3 - 0;6
-Blaziken;Beedrill;50,0;3 - 3 - 0;6
-Blaziken;Crustle;50,0;2 - 2 - 1;5
-Blaziken;Raging Bolt Ogerpon;50,0;2 - 2 - 0;4
-Blaziken;Alakazam Dudunsparce;46,15;6 - 7 - 0;13
-Blaziken;Ogerpon Meganium Hydrapple;42,86;3 - 4 - 1;8
-Blaziken;Dragapult;35,71;5 - 9 - 0;14
-Blaziken;Dragapult Dusknoir;31,25;5 - 11 - 0;16
-Blaziken;N's Zoroark;30,0;3 - 7 - 0;10
-Blaziken;Festival Lead;25,0;1 - 3 - 0;4
-Blaziken;Basic Box;20,0;1 - 4 - 0;5
-Iono's Bellibolt;Dragapult;71,43;5 - 2 - 1;8
-Iono's Bellibolt;Crustle;66,67;2 - 1 - 1;4
-Iono's Bellibolt;Ogerpon Meganium Hydrapple;62,5;5 - 3 - 0;8
-Iono's Bellibolt;Alakazam Dudunsparce;55,56;5 - 4 - 0;9
-Iono's Bellibolt;N's Zoroark;50,0;6 - 6 - 0;12
-Iono's Bellibolt;Slowking;44,44;4 - 5 - 0;9
-Iono's Bellibolt;Beedrill;42,86;3 - 4 - 0;7
-Iono's Bellibolt;Mega Greninja;40,0;2 - 3 - 1;6
-Iono's Bellibolt;Cynthia's Garchomp;33,33;1 - 2 - 0;3
-Iono's Bellibolt;Mega Lucario;33,33;1 - 2 - 0;3
-Iono's Bellibolt;Lucario Hariyama;33,33;1 - 2 - 0;3
-Iono's Bellibolt;Dragapult Dusknoir;25,0;5 - 15 - 0;20
-Iono's Bellibolt;Lopunny Dudunsparce;0,0;0 - 2 - 1;3
-Mega Zygarde;Alakazam Dudunsparce;83,33;5 - 1 - 0;6
-Mega Zygarde;Festival Lead;80,0;4 - 1 - 0;5
-Mega Zygarde;Lopunny Dudunsparce;66,67;4 - 2 - 0;6
-Mega Zygarde;Rocket's Honchkrow;66,67;2 - 1 - 0;3
-Mega Zygarde;Dragapult Dusknoir;57,14;8 - 6 - 0;14
-Mega Zygarde;Raging Bolt Ogerpon;50,0;3 - 3 - 0;6
-Mega Zygarde;Slowking;50,0;2 - 2 - 0;4
-Mega Zygarde;Dragapult;42,86;3 - 4 - 1;8
-Mega Zygarde;Lucario Hariyama;42,86;3 - 4 - 0;7
-Mega Zygarde;N's Zoroark;33,33;4 - 8 - 0;12
-Mega Zygarde;Rocket's Mewtwo;33,33;1 - 2 - 0;3
-Mega Zygarde;Mega Greninja;25,0;3 - 9 - 0;12
-Mega Zygarde;Dragapult Blaziken;25,0;1 - 3 - 0;4
-Mega Zygarde;Ogerpon Meganium Hydrapple;11,11;1 - 8 - 0;9
-Mega Zygarde;Beedrill;0,0;0 - 4 - 0;4
-Mega Zygarde;Crustle;0,0;0 - 3 - 0;3
-Bronzong;Mega Greninja;77,78;7 - 2 - 0;9
-Bronzong;Alakazam Dudunsparce;71,43;5 - 2 - 2;9
-Bronzong;Lopunny Dudunsparce;60,0;3 - 2 - 0;5
-Bronzong;N's Zoroark;50,0;4 - 4 - 0;8
-Bronzong;Dragapult Blaziken;50,0;3 - 3 - 0;6
-Bronzong;Festival Lead;50,0;2 - 2 - 0;4
-Bronzong;Beedrill;40,0;2 - 3 - 0;5
-Bronzong;Dragapult Dusknoir;37,5;3 - 5 - 0;8
-Bronzong;Ogerpon Meganium Hydrapple;33,33;1 - 2 - 0;3
-Bronzong;Basic Box;33,33;1 - 2 - 0;3
-Bronzong;Raging Bolt Ogerpon;33,33;1 - 2 - 0;3
-Bronzong;Dragapult;30,77;4 - 9 - 0;13
-Bronzong;Rocket's Mewtwo;20,0;1 - 4 - 0;5
-Bronzong;Slowking;8,33;1 - 11 - 0;12
-Bronzong;Mega Lucario;0,0;0 - 3 - 0;3
-Sinistcha Ogerpon;N's Zoroark;100,0;8 - 0 - 0;8
-Sinistcha Ogerpon;Cynthia's Garchomp;100,0;3 - 0 - 0;3
-Sinistcha Ogerpon;Crustle;75,0;6 - 2 - 0;8
-Sinistcha Ogerpon;Hop's Trevenant;75,0;3 - 1 - 0;4
-Sinistcha Ogerpon;Slowking;72,73;8 - 3 - 0;11
-Sinistcha Ogerpon;Raging Bolt Ogerpon;66,67;4 - 2 - 0;6
-Sinistcha Ogerpon;Mega Greninja;66,67;4 - 2 - 0;6
-Sinistcha Ogerpon;Ogerpon Meganium Hydrapple;66,67;2 - 1 - 0;3
-Sinistcha Ogerpon;Alakazam Dudunsparce;53,85;7 - 6 - 0;13
-Sinistcha Ogerpon;Festival Lead;50,0;3 - 3 - 0;6
-Sinistcha Ogerpon;Rocket's Honchkrow;40,0;2 - 3 - 0;5
-Sinistcha Ogerpon;Dragapult Dusknoir;30,0;3 - 7 - 0;10
-Sinistcha Ogerpon;Dragapult;30,0;3 - 7 - 0;10
-Sinistcha Ogerpon;Dragapult Blaziken;11,11;1 - 8 - 0;9
-Sinistcha Ogerpon;Lucario Hariyama;0,0;0 - 3 - 0;3
-Mega Feraligatr;Mega Greninja;58,33;7 - 5 - 0;12
-Mega Feraligatr;Cynthia's Garchomp;50,0;2 - 2 - 1;5
-Mega Feraligatr;Beedrill;50,0;2 - 2 - 0;4
-Mega Feraligatr;Basic Box;50,0;1 - 1 - 1;3
-Mega Feraligatr;Dragapult Dusknoir;42,86;3 - 4 - 1;8
-Mega Feraligatr;Festival Lead;40,0;2 - 3 - 0;5
-Mega Feraligatr;Crustle;33,33;1 - 2 - 0;3
-Mega Feraligatr;Dragapult;25,0;3 - 9 - 0;12
-Mega Feraligatr;Lucario Hariyama;25,0;1 - 3 - 0;4
-Mega Feraligatr;Slowking;22,22;2 - 7 - 0;9
-Mega Feraligatr;N's Zoroark;14,29;1 - 6 - 0;7
-Mega Feraligatr;Alakazam Dudunsparce;0,0;0 - 4 - 0;4
-Mega Diancie;Slowking;85,71;6 - 1 - 0;7
-Mega Diancie;Lucario Hariyama;66,67;4 - 2 - 0;6
-Mega Diancie;Dragapult Blaziken;60,0;3 - 2 - 1;6
-Mega Diancie;Mega Lucario;60,0;3 - 2 - 0;5
-Mega Diancie;Dragapult;57,14;8 - 6 - 0;14
-Mega Diancie;Mega Greninja;54,55;6 - 5 - 0;11
-Mega Diancie;Alakazam Dudunsparce;50,0;3 - 3 - 0;6
-Mega Diancie;N's Zoroark;46,15;6 - 7 - 0;13
-Mega Diancie;Raging Bolt Ogerpon;33,33;2 - 4 - 0;6
-Mega Diancie;Crustle;33,33;1 - 2 - 0;3
-Mega Diancie;Dragapult Dusknoir;28,57;4 - 10 - 0;14
-Mega Diancie;Cynthia's Garchomp;25,0;1 - 3 - 0;4
-Mega Diancie;Beedrill;16,67;2 - 10 - 0;12
-Mega Diancie;Lopunny Dudunsparce;0,0;0 - 4 - 0;4
-Mega Diancie;Ogerpon Meganium Hydrapple;0,0;0 - 3 - 0;3
-Jellicent Dusknoir;Mega Lucario;100,0;3 - 0 - 0;3
-Jellicent Dusknoir;Lucario Hariyama;83,33;5 - 1 - 0;6
-Jellicent Dusknoir;Slowking;83,33;5 - 1 - 0;6
-Jellicent Dusknoir;Crustle;75,0;3 - 1 - 0;4
-Jellicent Dusknoir;Dragapult;66,67;6 - 3 - 0;9
-Jellicent Dusknoir;Dragapult Blaziken;66,67;4 - 2 - 0;6
-Jellicent Dusknoir;Beedrill;66,67;2 - 1 - 0;3
-Jellicent Dusknoir;Rocket's Mewtwo;66,67;2 - 1 - 0;3
-Jellicent Dusknoir;Hop's Trevenant;66,67;2 - 1 - 0;3
-Jellicent Dusknoir;Basic Box;66,67;2 - 1 - 0;3
-Jellicent Dusknoir;Dragapult Dusknoir;61,54;8 - 5 - 0;13
-Jellicent Dusknoir;Festival Lead;60,0;3 - 2 - 0;5
-Jellicent Dusknoir;Mega Greninja;50,0;2 - 2 - 0;4
-Jellicent Dusknoir;Alakazam Dudunsparce;44,44;4 - 5 - 0;9
-Jellicent Dusknoir;N's Zoroark;33,33;3 - 6 - 0;9
-Jellicent Dusknoir;Ogerpon Meganium Hydrapple;28,57;2 - 5 - 0;7
-Jellicent Dusknoir;Rocket's Honchkrow;0,0;0 - 5 - 0;5
-Eelektrik;Lucario Hariyama;66,67;2 - 1 - 0;3
-Eelektrik;Mega Greninja;37,5;3 - 5 - 0;8
-Eelektrik;Dragapult Dusknoir;33,33;3 - 6 - 0;9
-Eelektrik;Mega Lucario;33,33;1 - 2 - 0;3
-Eelektrik;N's Zoroark;33,33;1 - 2 - 0;3
-Eelektrik;Rocket's Honchkrow;33,33;1 - 2 - 0;3
-Eelektrik;Ogerpon Meganium Hydrapple;28,57;2 - 5 - 0;7
-Eelektrik;Dragapult Blaziken;25,0;1 - 3 - 0;4
-Eelektrik;Slowking;25,0;1 - 3 - 0;4
-Eelektrik;Alakazam Dudunsparce;20,0;1 - 4 - 0;5
-Eelektrik;Dragapult;14,29;1 - 6 - 0;7
-Mega Lopunny;Rocket's Mewtwo;100,0;3 - 0 - 0;3
-Mega Lopunny;Dragapult Blaziken;100,0;3 - 0 - 0;3
-Mega Lopunny;Mega Greninja;77,78;7 - 2 - 0;9
-Mega Lopunny;N's Zoroark;64,29;9 - 5 - 0;14
-Mega Lopunny;Dragapult Dusknoir;60,0;9 - 6 - 0;15
-Mega Lopunny;Dragapult;60,0;6 - 4 - 0;10
-Mega Lopunny;Slowking;50,0;6 - 6 - 0;12
-Mega Lopunny;Lucario Hariyama;50,0;3 - 3 - 0;6
-Mega Lopunny;Raging Bolt Ogerpon;50,0;2 - 2 - 0;4
-Mega Lopunny;Ogerpon Meganium Hydrapple;42,86;3 - 4 - 0;7
-Mega Lopunny;Beedrill;40,0;2 - 3 - 0;5
-Mega Lopunny;Rocket's Honchkrow;25,0;1 - 3 - 0;4
-Mega Lopunny;Alakazam Dudunsparce;22,22;2 - 7 - 0;9
-Flygon;Basic Box;100,0;3 - 0 - 0;3
-Flygon;Rocket's Mewtwo;66,67;2 - 1 - 0;3
-Flygon;Dragapult Blaziken;66,67;2 - 1 - 0;3
-Flygon;Alakazam Dudunsparce;66,67;2 - 1 - 0;3
-Flygon;Ogerpon Meganium Hydrapple;66,67;2 - 1 - 0;3
-Flygon;Slowking;57,14;4 - 3 - 0;7
-Flygon;Mega Greninja;50,0;3 - 3 - 1;7
-Flygon;Beedrill;50,0;3 - 3 - 0;6
-Flygon;Lucario Hariyama;40,0;2 - 3 - 0;5
-Flygon;Dragapult Dusknoir;28,57;2 - 5 - 0;7
-Flygon;N's Zoroark;28,57;2 - 5 - 0;7
-Flygon;Raging Bolt Ogerpon;20,0;1 - 4 - 1;6
-Flygon;Dragapult;14,29;2 - 12 - 0;14
-Dudunsparce Control;Rocket's Mewtwo;66,67;2 - 1 - 0;3
-Dudunsparce Control;Slowking;60,0;3 - 2 - 0;5
-Dudunsparce Control;Beedrill;50,0;2 - 2 - 1;5
-Dudunsparce Control;Mega Greninja;50,0;2 - 2 - 0;4
-Dudunsparce Control;Rocket's Honchkrow;50,0;2 - 2 - 0;4
-Dudunsparce Control;Raging Bolt Ogerpon;50,0;1 - 1 - 1;3
-Dudunsparce Control;Dragapult;33,33;3 - 6 - 0;9
-Dudunsparce Control;Lucario Hariyama;33,33;1 - 2 - 1;4
-Dudunsparce Control;Alakazam Dudunsparce;33,33;1 - 2 - 0;3
-Dudunsparce Control;Ogerpon Meganium Hydrapple;33,33;1 - 2 - 0;3
-Dudunsparce Control;Lopunny Dudunsparce;33,33;1 - 2 - 0;3
-Dudunsparce Control;Dragapult Dusknoir;0,0;0 - 3 - 0;3
-Alakazam;Ogerpon Meganium Hydrapple;75,0;3 - 1 - 0;4
-Alakazam;Basic Box;66,67;2 - 1 - 0;3
-Alakazam;N's Zoroark;50,0;5 - 5 - 0;10
-Alakazam;Beedrill;50,0;2 - 2 - 0;4
-Alakazam;Lucario Hariyama;44,44;4 - 5 - 0;9
-Alakazam;Alakazam Dudunsparce;40,0;2 - 3 - 0;5
-Alakazam;Slowking;33,33;2 - 4 - 0;6
-Alakazam;Dragapult;25,0;2 - 6 - 0;8
-Alakazam;Dragapult Dusknoir;15,38;2 - 11 - 0;13
-Alakazam;Rocket's Honchkrow;0,0;0 - 4 - 0;4
-Dragapult Froslass;Festival Lead;66,67;2 - 1 - 0;3
-Dragapult Froslass;Mega Greninja;62,5;5 - 3 - 0;8
-Dragapult Froslass;Beedrill;50,0;4 - 4 - 0;8
-Dragapult Froslass;Ogerpon Meganium Hydrapple;50,0;3 - 3 - 0;6
-Dragapult Froslass;Mega Lucario;50,0;2 - 2 - 0;4
-Dragapult Froslass;Raging Bolt Ogerpon;50,0;2 - 2 - 0;4
-Dragapult Froslass;Dragapult;42,86;3 - 4 - 0;7
-Dragapult Froslass;Dragapult Dusknoir;41,67;5 - 7 - 0;12
-Dragapult Froslass;Rocket's Mewtwo;33,33;1 - 2 - 0;3
-Dragapult Froslass;Lucario Hariyama;33,33;1 - 2 - 0;3
-Dragapult Froslass;Slowking;28,57;2 - 5 - 0;7
-Dragapult Froslass;Dragapult Blaziken;25,0;1 - 3 - 1;5
-Dragapult Froslass;N's Zoroark;14,29;1 - 6 - 0;7
-Toxtricity;Mega Greninja;50,0;4 - 4 - 0;8
-Toxtricity;Ogerpon Meganium Hydrapple;50,0;2 - 2 - 0;4
-Toxtricity;Slowking;50,0;2 - 2 - 0;4
-Toxtricity;N's Zoroark;40,0;2 - 3 - 0;5
-Toxtricity;Beedrill;33,33;1 - 2 - 0;3
-Toxtricity;Dragapult Blaziken;16,67;1 - 5 - 0;6
-Toxtricity;Alakazam Dudunsparce;0,0;0 - 4 - 0;4
-Toxtricity;Rocket's Mewtwo;0,0;0 - 4 - 0;4
-Toxtricity;Dragapult;0,0;0 - 3 - 0;3
-Toxtricity;Dragapult Dusknoir;0,0;0 - 3 - 0;3
-Misty's Gyarados;Mega Lucario;66,67;2 - 1 - 0;3
-Misty's Gyarados;Alakazam Dudunsparce;60,0;3 - 2 - 0;5
-Misty's Gyarados;N's Zoroark;40,0;2 - 3 - 0;5
-Misty's Gyarados;Dragapult Dusknoir;33,33;1 - 2 - 0;3
-Misty's Gyarados;Dragapult;33,33;1 - 2 - 0;3
-Misty's Gyarados;Rocket's Mewtwo;33,33;1 - 2 - 0;3
-Misty's Gyarados;Cynthia's Garchomp;25,0;1 - 3 - 0;4
-Misty's Gyarados;Mega Greninja;16,67;1 - 5 - 0;6
-Misty's Gyarados;Dragapult Blaziken;0,0;0 - 3 - 0;3
-Misty's Gyarados;Slowking;0,0;0 - 3 - 0;3
-Paldean Tauros;Ogerpon Meganium Hydrapple;66,67;2 - 1 - 0;3
-Paldean Tauros;N's Zoroark;50,0;2 - 2 - 0;4
-Paldean Tauros;Mega Greninja;40,0;4 - 6 - 0;10
-Paldean Tauros;Dragapult Blaziken;40,0;2 - 3 - 0;5
-Paldean Tauros;Beedrill;33,33;1 - 2 - 0;3
-Paldean Tauros;Festival Lead;33,33;1 - 2 - 0;3
-Paldean Tauros;Slowking;25,0;1 - 3 - 0;4
-Paldean Tauros;Alakazam Dudunsparce;25,0;1 - 3 - 0;4
-Paldean Tauros;Dragapult;20,0;1 - 4 - 0;5
-Paldean Tauros;Dragapult Dusknoir;0,0;0 - 5 - 0;5
-Azumarill;Cynthia's Garchomp;50,0;2 - 2 - 0;4
-Azumarill;N's Zoroark;33,33;2 - 4 - 0;6
-Azumarill;Beedrill;33,33;1 - 2 - 0;3
-Azumarill;Dragapult Dusknoir;16,67;1 - 5 - 0;6
-Azumarill;Dragapult;0,0;0 - 4 - 0;4
-Raging Bolt Bellibolt;Dragapult Dusknoir;100,0;4 - 0 - 0;4
-Raging Bolt Bellibolt;Lucario Hariyama;66,67;2 - 1 - 0;3
-Raging Bolt Bellibolt;Mega Greninja;44,44;4 - 5 - 0;9
-Raging Bolt Bellibolt;N's Zoroark;33,33;1 - 2 - 0;3
-Raging Bolt Bellibolt;Dragapult;28,57;2 - 5 - 1;8
-Raging Bolt Bellibolt;Rocket's Honchkrow;20,0;1 - 4 - 0;5
-Terapagos Noctowl;Slowking;75,0;3 - 1 - 1;5
-Terapagos Noctowl;Dragapult Dusknoir;75,0;3 - 1 - 0;4
-Terapagos Noctowl;Festival Lead;66,67;2 - 1 - 0;3
-Terapagos Noctowl;Mega Greninja;50,0;2 - 2 - 0;4
-Terapagos Noctowl;N's Zoroark;40,0;2 - 3 - 0;5
-Terapagos Noctowl;Rocket's Honchkrow;28,57;2 - 5 - 0;7
-Terapagos Noctowl;Dragapult;25,0;1 - 3 - 0;4
-Terapagos Noctowl;Dragapult Blaziken;0,0;0 - 3 - 0;3
-Ethan's Magcargo;Cynthia's Garchomp;33,33;1 - 2 - 0;3
-Ethan's Magcargo;Dragapult Dusknoir;28,57;2 - 5 - 0;7
-Ethan's Magcargo;Dragapult;25,0;2 - 6 - 0;8
-Ethan's Magcargo;Mega Greninja;25,0;1 - 3 - 0;4
-Ethan's Magcargo;Raging Bolt Ogerpon;25,0;1 - 3 - 0;4
-Ethan's Magcargo;Rocket's Honchkrow;0,0;0 - 4 - 0;4
-Zygarde Barbaracle;Festival Lead;71,43;5 - 2 - 0;7
-Zygarde Barbaracle;Dragapult;66,67;2 - 1 - 0;3
-Zygarde Barbaracle;Slowking;50,0;2 - 2 - 0;4
-Zygarde Barbaracle;Dragapult Dusknoir;37,5;3 - 5 - 0;8
-Zygarde Barbaracle;Rocket's Honchkrow;33,33;1 - 2 - 0;3
-Zygarde Barbaracle;N's Zoroark;25,0;3 - 9 - 0;12
-Zygarde Barbaracle;Alakazam Dudunsparce;0,0;0 - 6 - 0;6
-Zygarde Barbaracle;Ogerpon Meganium Hydrapple;0,0;0 - 4 - 0;4
-Lopunny Dusknoir;N's Zoroark;66,67;4 - 2 - 0;6
-Lopunny Dusknoir;Slowking;66,67;4 - 2 - 0;6
-Lopunny Dusknoir;Dragapult Dusknoir;66,67;2 - 1 - 0;3
-Lopunny Dusknoir;Dragapult;50,0;3 - 3 - 0;6
-Lopunny Dusknoir;Beedrill;50,0;2 - 2 - 0;4
-Lopunny Dusknoir;Mega Lucario;33,33;1 - 2 - 0;3
-Lopunny Dusknoir;Mega Greninja;20,0;1 - 4 - 0;5
-Lopunny Dusknoir;Basic Box;0,0;0 - 5 - 0;5
-Mega Camerupt;Basic Box;100,0;3 - 0 - 0;3
-Mega Camerupt;Festival Lead;80,0;4 - 1 - 0;5
-Mega Camerupt;Dragapult;33,33;2 - 4 - 0;6
-Mega Camerupt;Dragapult Dusknoir;33,33;1 - 2 - 0;3
-Mega Camerupt;Dragapult Blaziken;25,0;1 - 3 - 0;4
-Mega Camerupt;Mega Greninja;14,29;1 - 6 - 0;7
-Mega Camerupt;Alakazam Dudunsparce;0,0;0 - 5 - 0;5
-Mega Camerupt;Raging Bolt Ogerpon;0,0;0 - 3 - 0;3
-Mega Camerupt;Lucario Hariyama;0,0;0 - 3 - 0;3
-Mega Camerupt;Rocket's Honchkrow;0,0;0 - 3 - 0;3
-Mega Camerupt;N's Zoroark;0,0;0 - 3 - 0;3
-Heatran Metang;Mega Greninja;100,0;4 - 0 - 0;4
-Heatran Metang;Alakazam Dudunsparce;75,0;3 - 1 - 0;4
-Heatran Metang;Dragapult Dusknoir;66,67;2 - 1 - 0;3
-Heatran Metang;Beedrill;66,67;2 - 1 - 0;3
-Heatran Metang;Rocket's Honchkrow;40,0;2 - 3 - 0;5
-Heatran Metang;Dragapult;25,0;1 - 3 - 0;4
-Mega Gengar;N's Zoroark;66,67;2 - 1 - 0;3
-Mega Gengar;Dragapult;40,0;2 - 3 - 0;5
-Mega Gengar;Lucario Hariyama;25,0;1 - 3 - 0;4
-Mega Gengar;Lopunny Dudunsparce;0,0;0 - 6 - 0;6
-Mega Gengar;Beedrill;0,0;0 - 3 - 0;3
-Mega Gengar;Slowking;0,0;0 - 3 - 0;3
-Mega Gengar;Dragapult Blaziken;0,0;0 - 3 - 0;3
-Blissey;N's Zoroark;71,43;5 - 2 - 0;7
-Blissey;Dragapult Dusknoir;66,67;2 - 1 - 0;3
-Blissey;Slowking;40,0;2 - 3 - 0;5
-Blissey;Alakazam Dudunsparce;25,0;1 - 3 - 0;4
-Blissey;Crustle;0,0;0 - 3 - 0;3
-Mamoswine;Dragapult;75,0;3 - 1 - 0;4
-Mamoswine;Mega Greninja;66,67;2 - 1 - 0;3
-Mamoswine;Slowking;57,14;4 - 3 - 0;7
-Mamoswine;Ogerpon Meganium Hydrapple;50,0;2 - 2 - 0;4
-Mamoswine;Crustle;25,0;1 - 3 - 0;4
-Flareon;Dragapult Blaziken;50,0;1 - 1 - 1;3
-Flareon;Mega Greninja;33,33;1 - 2 - 0;3
-Flareon;Dragapult;0,0;0 - 4 - 0;4
-Flareon;Alakazam Dudunsparce;0,0;0 - 3 - 0;3
-Feraligatr;Beedrill;50,0;2 - 2 - 0;4
-Feraligatr;Festival Lead;33,33;1 - 2 - 0;3
-Feraligatr;Dragapult;0,0;0 - 6 - 0;6
-Feraligatr;Dragapult Dusknoir;0,0;0 - 5 - 0;5
-Feraligatr;Dragapult Blaziken;0,0;0 - 2 - 1;3
-Mega Latias;Lopunny Dudunsparce;33,33;1 - 2 - 0;3
-Mega Latias;Mega Greninja;0,0;0 - 3 - 0;3
-Mega Latias;Dragapult Dusknoir;0,0;0 - 3 - 0;3
-Iron Thorns;Hop's Trevenant;66,67;2 - 1 - 0;3
-Iron Thorns;Dragapult;40,0;2 - 3 - 0;5
+Mega Excadrill;Mega Greninja;85,71;12 - 2 - 0;14
+Mega Excadrill;Beedrill;78,57;11 - 3 - 1;15
+Mega Excadrill;Grimmsnarl Froslass;71,43;10 - 4 - 0;14
+Mega Excadrill;Mega Absol Box;68,0;17 - 8 - 0;25
+Mega Excadrill;Dhelmise;58,06;36 - 26 - 2;64
+Mega Excadrill;Dragapult Dusknoir;57,5;46 - 34 - 2;82
+Mega Excadrill;N's Zoroark;54,9;28 - 23 - 0;51
+Mega Excadrill;Festival Lead;53,66;44 - 38 - 1;83
+Mega Excadrill;Mega Excadrill;50,0;59 - 59 - 0;118
+Mega Excadrill;Basic Box;50,0;7 - 7 - 0;14
+Mega Excadrill;Cynthia's Garchomp;44,44;4 - 5 - 0;9
+Mega Excadrill;Dragapult;44,07;26 - 33 - 0;59
+Mega Excadrill;Tera Box;42,86;9 - 12 - 0;21
+Mega Excadrill;Slowking;38,71;24 - 38 - 0;62
+Mega Excadrill;Lucario Hariyama;33,33;4 - 8 - 0;12
+Mega Excadrill;Ogerpon Meganium Hydrapple;33,33;4 - 8 - 0;12
+Mega Excadrill;Dragapult Blaziken;30,43;21 - 48 - 1;70
+Mega Excadrill;Alakazam Dudunsparce;27,03;10 - 27 - 1;38
+Mega Excadrill;Rocket's Honchkrow;18,75;3 - 13 - 0;16
+Mega Excadrill;Ceruledge;11,11;1 - 8 - 0;9
+Dhelmise;Lucario Hariyama;87,5;7 - 1 - 0;8
+Dhelmise;Rocket's Honchkrow;66,67;6 - 3 - 0;9
+Dhelmise;Alakazam Dudunsparce;61,76;21 - 13 - 1;35
+Dhelmise;Ogerpon Meganium Hydrapple;60,0;6 - 4 - 1;11
+Dhelmise;Dragapult Dusknoir;53,66;22 - 19 - 2;43
+Dhelmise;Dhelmise;50,0;18 - 18 - 0;36
+Dhelmise;Mega Greninja;50,0;7 - 7 - 0;14
+Dhelmise;Basic Box;50,0;5 - 5 - 0;10
+Dhelmise;Slowking;48,57;17 - 18 - 1;36
+Dhelmise;Ceruledge;45,45;5 - 6 - 0;11
+Dhelmise;Mega Excadrill;41,94;26 - 36 - 2;64
+Dhelmise;Tera Box;41,67;5 - 7 - 0;12
+Dhelmise;N's Zoroark;40,62;13 - 19 - 0;32
+Dhelmise;Dragapult Blaziken;39,02;16 - 25 - 2;43
+Dhelmise;Mega Absol Box;38,89;7 - 11 - 0;18
+Dhelmise;Festival Lead;38,46;15 - 24 - 0;39
+Dhelmise;Beedrill;37,5;3 - 5 - 1;9
+Dhelmise;Dragapult;35,29;12 - 22 - 0;34
+Dhelmise;Cynthia's Garchomp;30,0;3 - 7 - 0;10
+Dhelmise;Grimmsnarl Froslass;23,08;3 - 10 - 2;15
+Festival Lead;Cynthia's Garchomp;87,5;7 - 1 - 1;9
+Festival Lead;Ceruledge;83,33;5 - 1 - 0;6
+Festival Lead;Rocket's Honchkrow;75,0;15 - 5 - 0;20
+Festival Lead;Lucario Hariyama;71,43;5 - 2 - 0;7
+Festival Lead;Ogerpon Meganium Hydrapple;66,67;12 - 6 - 0;18
+Festival Lead;N's Zoroark;65,12;28 - 15 - 0;43
+Festival Lead;Slowking;64,86;24 - 13 - 0;37
+Festival Lead;Dhelmise;61,54;24 - 15 - 0;39
+Festival Lead;Beedrill;60,0;3 - 2 - 0;5
+Festival Lead;Tera Box;53,85;7 - 6 - 1;14
+Festival Lead;Basic Box;53,33;8 - 7 - 0;15
+Festival Lead;Dragapult;51,35;19 - 18 - 3;40
+Festival Lead;Festival Lead;50,0;29 - 29 - 0;58
+Festival Lead;Mega Absol Box;50,0;7 - 7 - 0;14
+Festival Lead;Alakazam Dudunsparce;47,22;17 - 19 - 0;36
+Festival Lead;Mega Excadrill;46,34;38 - 44 - 1;83
+Festival Lead;Mega Greninja;44,44;4 - 5 - 0;9
+Festival Lead;Dragapult Blaziken;42,86;15 - 20 - 0;35
+Festival Lead;Grimmsnarl Froslass;40,0;4 - 6 - 0;10
+Festival Lead;Dragapult Dusknoir;38,78;19 - 30 - 0;49
+Dragapult Dusknoir;Rocket's Honchkrow;78,57;11 - 3 - 0;14
+Dragapult Dusknoir;Festival Lead;61,22;30 - 19 - 0;49
+Dragapult Dusknoir;Mega Greninja;55,56;5 - 4 - 0;9
+Dragapult Dusknoir;Tera Box;55,56;5 - 4 - 0;9
+Dragapult Dusknoir;Alakazam Dudunsparce;52,63;20 - 18 - 1;39
+Dragapult Dusknoir;N's Zoroark;51,35;19 - 18 - 0;37
+Dragapult Dusknoir;Dragapult Dusknoir;50,0;23 - 23 - 2;48
+Dragapult Dusknoir;Lucario Hariyama;50,0;3 - 3 - 0;6
+Dragapult Dusknoir;Beedrill;50,0;2 - 2 - 0;4
+Dragapult Dusknoir;Dhelmise;46,34;19 - 22 - 2;43
+Dragapult Dusknoir;Slowking;45,83;11 - 13 - 1;25
+Dragapult Dusknoir;Dragapult;44,74;17 - 21 - 1;39
+Dragapult Dusknoir;Mega Excadrill;42,5;34 - 46 - 2;82
+Dragapult Dusknoir;Ogerpon Meganium Hydrapple;40,0;6 - 9 - 0;15
+Dragapult Dusknoir;Ceruledge;40,0;4 - 6 - 0;10
+Dragapult Dusknoir;Dragapult Blaziken;36,11;13 - 23 - 1;37
+Dragapult Dusknoir;Mega Absol Box;30,0;6 - 14 - 0;20
+Dragapult Dusknoir;Grimmsnarl Froslass;26,67;4 - 11 - 0;15
+Dragapult Dusknoir;Basic Box;25,0;2 - 6 - 0;8
+Dragapult Dusknoir;Cynthia's Garchomp;20,0;1 - 4 - 1;6
+N's Zoroark;Mega Greninja;80,0;12 - 3 - 0;15
+N's Zoroark;Dhelmise;59,38;19 - 13 - 0;32
+N's Zoroark;Ogerpon Meganium Hydrapple;57,14;4 - 3 - 0;7
+N's Zoroark;Dragapult Blaziken;53,85;14 - 12 - 1;27
+N's Zoroark;Mega Absol Box;53,33;8 - 7 - 1;16
+N's Zoroark;N's Zoroark;50,0;18 - 18 - 0;36
+N's Zoroark;Lucario Hariyama;50,0;7 - 7 - 0;14
+N's Zoroark;Dragapult Dusknoir;48,65;18 - 19 - 0;37
+N's Zoroark;Slowking;45,71;16 - 19 - 0;35
+N's Zoroark;Mega Excadrill;45,1;23 - 28 - 0;51
+N's Zoroark;Rocket's Honchkrow;43,75;7 - 9 - 0;16
+N's Zoroark;Ceruledge;42,86;3 - 4 - 0;7
+N's Zoroark;Beedrill;42,86;3 - 4 - 0;7
+N's Zoroark;Dragapult;41,86;18 - 25 - 1;44
+N's Zoroark;Festival Lead;34,88;15 - 28 - 0;43
+N's Zoroark;Grimmsnarl Froslass;33,33;4 - 8 - 0;12
+N's Zoroark;Basic Box;30,77;4 - 9 - 0;13
+N's Zoroark;Alakazam Dudunsparce;23,53;8 - 26 - 0;34
+N's Zoroark;Tera Box;20,0;1 - 4 - 0;5
+N's Zoroark;Cynthia's Garchomp;14,29;1 - 6 - 0;7
+Dragapult;Rocket's Honchkrow;72,73;8 - 3 - 0;11
+Dragapult;Mega Absol Box;70,0;7 - 3 - 0;10
+Dragapult;Grimmsnarl Froslass;66,67;4 - 2 - 0;6
+Dragapult;Alakazam Dudunsparce;64,71;22 - 12 - 1;35
+Dragapult;Dhelmise;64,71;22 - 12 - 0;34
+Dragapult;Ceruledge;62,5;5 - 3 - 0;8
+Dragapult;N's Zoroark;58,14;25 - 18 - 1;44
+Dragapult;Mega Excadrill;55,93;33 - 26 - 0;59
+Dragapult;Dragapult Dusknoir;55,26;21 - 17 - 1;39
+Dragapult;Dragapult;50,0;20 - 20 - 2;42
+Dragapult;Mega Greninja;50,0;8 - 8 - 0;16
+Dragapult;Ogerpon Meganium Hydrapple;50,0;7 - 7 - 1;15
+Dragapult;Beedrill;50,0;4 - 4 - 0;8
+Dragapult;Tera Box;50,0;4 - 4 - 0;8
+Dragapult;Festival Lead;48,65;18 - 19 - 3;40
+Dragapult;Slowking;47,83;11 - 12 - 1;24
+Dragapult;Dragapult Blaziken;47,06;16 - 18 - 0;34
+Dragapult;Basic Box;33,33;2 - 4 - 0;6
+Dragapult;Lucario Hariyama;33,33;2 - 4 - 0;6
+Dragapult;Cynthia's Garchomp;25,0;2 - 6 - 0;8
+Dragapult Blaziken;Beedrill;84,62;11 - 2 - 0;13
+Dragapult Blaziken;Tera Box;76,92;10 - 3 - 0;13
+Dragapult Blaziken;Mega Excadrill;69,57;48 - 21 - 1;70
+Dragapult Blaziken;Grimmsnarl Froslass;69,23;9 - 4 - 1;14
+Dragapult Blaziken;Dragapult Dusknoir;63,89;23 - 13 - 1;37
+Dragapult Blaziken;Dhelmise;60,98;25 - 16 - 2;43
+Dragapult Blaziken;Ceruledge;60,0;3 - 2 - 0;5
+Dragapult Blaziken;Mega Greninja;60,0;3 - 2 - 0;5
+Dragapult Blaziken;Rocket's Honchkrow;58,33;7 - 5 - 0;12
+Dragapult Blaziken;Festival Lead;57,14;20 - 15 - 0;35
+Dragapult Blaziken;Slowking;57,14;12 - 9 - 1;22
+Dragapult Blaziken;Ogerpon Meganium Hydrapple;57,14;8 - 6 - 1;15
+Dragapult Blaziken;Lucario Hariyama;57,14;4 - 3 - 0;7
+Dragapult Blaziken;Mega Absol Box;54,55;6 - 5 - 0;11
+Dragapult Blaziken;Basic Box;54,55;6 - 5 - 0;11
+Dragapult Blaziken;Dragapult;52,94;18 - 16 - 0;34
+Dragapult Blaziken;Dragapult Blaziken;50,0;21 - 21 - 0;42
+Dragapult Blaziken;Cynthia's Garchomp;50,0;3 - 3 - 0;6
+Dragapult Blaziken;Alakazam Dudunsparce;47,5;19 - 21 - 0;40
+Dragapult Blaziken;N's Zoroark;46,15;12 - 14 - 1;27
+Slowking;Lucario Hariyama;83,33;5 - 1 - 0;6
+Slowking;Ceruledge;70,0;7 - 3 - 0;10
+Slowking;Beedrill;61,54;8 - 5 - 0;13
+Slowking;Mega Excadrill;61,29;38 - 24 - 0;62
+Slowking;Basic Box;60,0;3 - 2 - 0;5
+Slowking;Grimmsnarl Froslass;54,55;6 - 5 - 0;11
+Slowking;N's Zoroark;54,29;19 - 16 - 0;35
+Slowking;Dragapult Dusknoir;54,17;13 - 11 - 1;25
+Slowking;Dragapult;52,17;12 - 11 - 1;24
+Slowking;Dhelmise;51,43;18 - 17 - 1;36
+Slowking;Slowking;50,0;8 - 8 - 0;16
+Slowking;Cynthia's Garchomp;50,0;5 - 5 - 0;10
+Slowking;Tera Box;50,0;2 - 2 - 0;4
+Slowking;Mega Absol Box;46,15;6 - 7 - 0;13
+Slowking;Rocket's Honchkrow;44,44;4 - 5 - 0;9
+Slowking;Dragapult Blaziken;42,86;9 - 12 - 1;22
+Slowking;Ogerpon Meganium Hydrapple;42,86;6 - 8 - 0;14
+Slowking;Festival Lead;35,14;13 - 24 - 0;37
+Slowking;Mega Greninja;33,33;3 - 6 - 0;9
+Slowking;Alakazam Dudunsparce;20,69;6 - 23 - 0;29
+Alakazam Dudunsparce;Ceruledge;85,71;6 - 1 - 0;7
+Alakazam Dudunsparce;Slowking;79,31;23 - 6 - 0;29
+Alakazam Dudunsparce;N's Zoroark;76,47;26 - 8 - 0;34
+Alakazam Dudunsparce;Lucario Hariyama;75,0;3 - 1 - 0;4
+Alakazam Dudunsparce;Mega Excadrill;72,97;27 - 10 - 1;38
+Alakazam Dudunsparce;Grimmsnarl Froslass;66,67;4 - 2 - 0;6
+Alakazam Dudunsparce;Basic Box;57,14;4 - 3 - 0;7
+Alakazam Dudunsparce;Tera Box;55,56;5 - 4 - 0;9
+Alakazam Dudunsparce;Rocket's Honchkrow;55,56;5 - 4 - 0;9
+Alakazam Dudunsparce;Mega Greninja;54,55;6 - 5 - 1;12
+Alakazam Dudunsparce;Festival Lead;52,78;19 - 17 - 0;36
+Alakazam Dudunsparce;Dragapult Blaziken;52,5;21 - 19 - 0;40
+Alakazam Dudunsparce;Alakazam Dudunsparce;50,0;19 - 19 - 0;38
+Alakazam Dudunsparce;Dragapult Dusknoir;47,37;18 - 20 - 1;39
+Alakazam Dudunsparce;Ogerpon Meganium Hydrapple;45,45;5 - 6 - 0;11
+Alakazam Dudunsparce;Mega Absol Box;44,44;8 - 10 - 0;18
+Alakazam Dudunsparce;Dhelmise;38,24;13 - 21 - 1;35
+Alakazam Dudunsparce;Dragapult;35,29;12 - 22 - 1;35
+Alakazam Dudunsparce;Beedrill;0,0;0 - 3 - 0;3
+Mega Absol Box;Basic Box;100,0;3 - 0 - 0;3
+Mega Absol Box;Grimmsnarl Froslass;83,33;5 - 1 - 0;6
+Mega Absol Box;Dragapult Dusknoir;70,0;14 - 6 - 0;20
+Mega Absol Box;Ceruledge;66,67;2 - 1 - 0;3
+Mega Absol Box;Rocket's Honchkrow;66,67;2 - 1 - 0;3
+Mega Absol Box;Dhelmise;61,11;11 - 7 - 0;18
+Mega Absol Box;Alakazam Dudunsparce;55,56;10 - 8 - 0;18
+Mega Absol Box;Slowking;53,85;7 - 6 - 0;13
+Mega Absol Box;Festival Lead;50,0;7 - 7 - 0;14
+Mega Absol Box;Mega Absol Box;50,0;2 - 2 - 2;6
+Mega Absol Box;Mega Greninja;50,0;2 - 2 - 0;4
+Mega Absol Box;Cynthia's Garchomp;50,0;2 - 2 - 0;4
+Mega Absol Box;Ogerpon Meganium Hydrapple;50,0;2 - 2 - 0;4
+Mega Absol Box;N's Zoroark;46,67;7 - 8 - 1;16
+Mega Absol Box;Dragapult Blaziken;45,45;5 - 6 - 0;11
+Mega Absol Box;Mega Excadrill;32,0;8 - 17 - 0;25
+Mega Absol Box;Dragapult;30,0;3 - 7 - 0;10
+Mega Absol Box;Beedrill;0,0;0 - 5 - 0;5
+Mega Greninja;Beedrill;75,0;3 - 1 - 0;4
+Mega Greninja;Slowking;66,67;6 - 3 - 0;9
+Mega Greninja;Rocket's Honchkrow;66,67;2 - 1 - 0;3
+Mega Greninja;Ceruledge;60,0;3 - 2 - 0;5
+Mega Greninja;Festival Lead;55,56;5 - 4 - 0;9
+Mega Greninja;Dragapult;50,0;8 - 8 - 0;16
+Mega Greninja;Dhelmise;50,0;7 - 7 - 0;14
+Mega Greninja;Mega Greninja;50,0;3 - 3 - 0;6
+Mega Greninja;Mega Absol Box;50,0;2 - 2 - 0;4
+Mega Greninja;Ogerpon Meganium Hydrapple;50,0;2 - 2 - 0;4
+Mega Greninja;Alakazam Dudunsparce;45,45;5 - 6 - 1;12
+Mega Greninja;Dragapult Dusknoir;44,44;4 - 5 - 0;9
+Mega Greninja;Dragapult Blaziken;40,0;2 - 3 - 0;5
+Mega Greninja;Basic Box;33,33;1 - 2 - 0;3
+Mega Greninja;Grimmsnarl Froslass;28,57;2 - 5 - 0;7
+Mega Greninja;N's Zoroark;20,0;3 - 12 - 0;15
+Mega Greninja;Mega Excadrill;14,29;2 - 12 - 0;14
+Mega Greninja;Lucario Hariyama;0,0;0 - 4 - 0;4
+Mega Greninja;Cynthia's Garchomp;0,0;0 - 3 - 0;3
+Grimmsnarl Froslass;Rocket's Honchkrow;100,0;4 - 0 - 0;4
+Grimmsnarl Froslass;Basic Box;100,0;4 - 0 - 0;4
+Grimmsnarl Froslass;Dhelmise;76,92;10 - 3 - 2;15
+Grimmsnarl Froslass;Dragapult Dusknoir;73,33;11 - 4 - 0;15
+Grimmsnarl Froslass;Mega Greninja;71,43;5 - 2 - 0;7
+Grimmsnarl Froslass;N's Zoroark;66,67;8 - 4 - 0;12
+Grimmsnarl Froslass;Festival Lead;60,0;6 - 4 - 0;10
+Grimmsnarl Froslass;Cynthia's Garchomp;60,0;3 - 2 - 0;5
+Grimmsnarl Froslass;Tera Box;60,0;3 - 2 - 0;5
+Grimmsnarl Froslass;Slowking;45,45;5 - 6 - 0;11
+Grimmsnarl Froslass;Alakazam Dudunsparce;33,33;2 - 4 - 0;6
+Grimmsnarl Froslass;Dragapult;33,33;2 - 4 - 0;6
+Grimmsnarl Froslass;Dragapult Blaziken;30,77;4 - 9 - 1;14
+Grimmsnarl Froslass;Mega Excadrill;28,57;4 - 10 - 0;14
+Grimmsnarl Froslass;Mega Absol Box;16,67;1 - 5 - 0;6
+Grimmsnarl Froslass;Beedrill;0,0;0 - 5 - 0;5
+Rocket's Honchkrow;Mega Excadrill;81,25;13 - 3 - 0;16
+Rocket's Honchkrow;Ogerpon Meganium Hydrapple;66,67;4 - 2 - 0;6
+Rocket's Honchkrow;Lucario Hariyama;60,0;3 - 2 - 0;5
+Rocket's Honchkrow;N's Zoroark;56,25;9 - 7 - 0;16
+Rocket's Honchkrow;Slowking;55,56;5 - 4 - 0;9
+Rocket's Honchkrow;Basic Box;50,0;2 - 2 - 1;5
+Rocket's Honchkrow;Alakazam Dudunsparce;44,44;4 - 5 - 0;9
+Rocket's Honchkrow;Dragapult Blaziken;41,67;5 - 7 - 0;12
+Rocket's Honchkrow;Dhelmise;33,33;3 - 6 - 0;9
+Rocket's Honchkrow;Mega Greninja;33,33;1 - 2 - 0;3
+Rocket's Honchkrow;Mega Absol Box;33,33;1 - 2 - 0;3
+Rocket's Honchkrow;Dragapult;27,27;3 - 8 - 0;11
+Rocket's Honchkrow;Festival Lead;25,0;5 - 15 - 0;20
+Rocket's Honchkrow;Tera Box;25,0;1 - 3 - 1;5
+Rocket's Honchkrow;Dragapult Dusknoir;21,43;3 - 11 - 0;14
+Rocket's Honchkrow;Grimmsnarl Froslass;0,0;0 - 4 - 0;4
+Ogerpon Meganium Hydrapple;Mega Excadrill;66,67;8 - 4 - 0;12
+Ogerpon Meganium Hydrapple;Cynthia's Garchomp;66,67;2 - 1 - 0;3
+Ogerpon Meganium Hydrapple;Dragapult Dusknoir;60,0;9 - 6 - 0;15
+Ogerpon Meganium Hydrapple;Slowking;57,14;8 - 6 - 0;14
+Ogerpon Meganium Hydrapple;Alakazam Dudunsparce;54,55;6 - 5 - 0;11
+Ogerpon Meganium Hydrapple;Dragapult;50,0;7 - 7 - 1;15
+Ogerpon Meganium Hydrapple;Ogerpon Meganium Hydrapple;50,0;3 - 3 - 0;6
+Ogerpon Meganium Hydrapple;Mega Absol Box;50,0;2 - 2 - 0;4
+Ogerpon Meganium Hydrapple;Mega Greninja;50,0;2 - 2 - 0;4
+Ogerpon Meganium Hydrapple;Dragapult Blaziken;42,86;6 - 8 - 1;15
+Ogerpon Meganium Hydrapple;N's Zoroark;42,86;3 - 4 - 0;7
+Ogerpon Meganium Hydrapple;Dhelmise;40,0;4 - 6 - 1;11
+Ogerpon Meganium Hydrapple;Festival Lead;33,33;6 - 12 - 0;18
+Ogerpon Meganium Hydrapple;Rocket's Honchkrow;33,33;2 - 4 - 0;6
+Ogerpon Meganium Hydrapple;Lucario Hariyama;25,0;1 - 3 - 0;4
+Tera Box;N's Zoroark;80,0;4 - 1 - 0;5
+Tera Box;Rocket's Honchkrow;75,0;3 - 1 - 1;5
+Tera Box;Dhelmise;58,33;7 - 5 - 0;12
+Tera Box;Mega Excadrill;57,14;12 - 9 - 0;21
+Tera Box;Dragapult;50,0;4 - 4 - 0;8
+Tera Box;Tera Box;50,0;2 - 2 - 2;6
+Tera Box;Slowking;50,0;2 - 2 - 0;4
+Tera Box;Festival Lead;46,15;6 - 7 - 1;14
+Tera Box;Alakazam Dudunsparce;44,44;4 - 5 - 0;9
+Tera Box;Dragapult Dusknoir;44,44;4 - 5 - 0;9
+Tera Box;Grimmsnarl Froslass;40,0;2 - 3 - 0;5
+Tera Box;Dragapult Blaziken;23,08;3 - 10 - 0;13
+Tera Box;Beedrill;0,0;0 - 4 - 0;4
+Basic Box;Dragapult Dusknoir;75,0;6 - 2 - 0;8
+Basic Box;N's Zoroark;69,23;9 - 4 - 0;13
+Basic Box;Dragapult;66,67;4 - 2 - 0;6
+Basic Box;Mega Greninja;66,67;2 - 1 - 0;3
+Basic Box;Mega Excadrill;50,0;7 - 7 - 0;14
+Basic Box;Dhelmise;50,0;5 - 5 - 0;10
+Basic Box;Rocket's Honchkrow;50,0;2 - 2 - 1;5
+Basic Box;Festival Lead;46,67;7 - 8 - 0;15
+Basic Box;Dragapult Blaziken;45,45;5 - 6 - 0;11
+Basic Box;Alakazam Dudunsparce;42,86;3 - 4 - 0;7
+Basic Box;Slowking;40,0;2 - 3 - 0;5
+Basic Box;Ceruledge;33,33;1 - 2 - 0;3
+Basic Box;Grimmsnarl Froslass;0,0;0 - 4 - 0;4
+Basic Box;Mega Absol Box;0,0;0 - 3 - 0;3
+Beedrill;Mega Absol Box;100,0;5 - 0 - 0;5
+Beedrill;Grimmsnarl Froslass;100,0;5 - 0 - 0;5
+Beedrill;Tera Box;100,0;4 - 0 - 0;4
+Beedrill;Alakazam Dudunsparce;100,0;3 - 0 - 0;3
+Beedrill;Dhelmise;62,5;5 - 3 - 1;9
+Beedrill;N's Zoroark;57,14;4 - 3 - 0;7
+Beedrill;Dragapult;50,0;4 - 4 - 0;8
+Beedrill;Dragapult Dusknoir;50,0;2 - 2 - 0;4
+Beedrill;Festival Lead;40,0;2 - 3 - 0;5
+Beedrill;Slowking;38,46;5 - 8 - 0;13
+Beedrill;Mega Greninja;25,0;1 - 3 - 0;4
+Beedrill;Mega Excadrill;21,43;3 - 11 - 1;15
+Beedrill;Dragapult Blaziken;15,38;2 - 11 - 0;13
+Lucario Hariyama;Mega Greninja;100,0;4 - 0 - 0;4
+Lucario Hariyama;Ogerpon Meganium Hydrapple;75,0;3 - 1 - 0;4
+Lucario Hariyama;Mega Excadrill;66,67;8 - 4 - 0;12
+Lucario Hariyama;Dragapult;66,67;4 - 2 - 0;6
+Lucario Hariyama;N's Zoroark;50,0;7 - 7 - 0;14
+Lucario Hariyama;Dragapult Dusknoir;50,0;3 - 3 - 0;6
+Lucario Hariyama;Lucario Hariyama;50,0;2 - 2 - 0;4
+Lucario Hariyama;Dragapult Blaziken;42,86;3 - 4 - 0;7
+Lucario Hariyama;Rocket's Honchkrow;40,0;2 - 3 - 0;5
+Lucario Hariyama;Festival Lead;28,57;2 - 5 - 0;7
+Lucario Hariyama;Alakazam Dudunsparce;25,0;1 - 3 - 0;4
+Lucario Hariyama;Slowking;16,67;1 - 5 - 0;6
+Lucario Hariyama;Dhelmise;12,5;1 - 7 - 0;8
+Ceruledge;Mega Excadrill;88,89;8 - 1 - 0;9
+Ceruledge;Basic Box;66,67;2 - 1 - 0;3
+Ceruledge;Dragapult Dusknoir;60,0;6 - 4 - 0;10
+Ceruledge;N's Zoroark;57,14;4 - 3 - 0;7
+Ceruledge;Dhelmise;54,55;6 - 5 - 0;11
+Ceruledge;Dragapult Blaziken;40,0;2 - 3 - 0;5
+Ceruledge;Mega Greninja;40,0;2 - 3 - 0;5
+Ceruledge;Dragapult;37,5;3 - 5 - 0;8
+Ceruledge;Mega Absol Box;33,33;1 - 2 - 0;3
+Ceruledge;Slowking;30,0;3 - 7 - 0;10
+Ceruledge;Festival Lead;16,67;1 - 5 - 0;6
+Ceruledge;Alakazam Dudunsparce;14,29;1 - 6 - 0;7
+Cynthia's Garchomp;Mega Greninja;100,0;3 - 0 - 0;3
+Cynthia's Garchomp;N's Zoroark;85,71;6 - 1 - 0;7
+Cynthia's Garchomp;Dragapult Dusknoir;80,0;4 - 1 - 1;6
+Cynthia's Garchomp;Dragapult;75,0;6 - 2 - 0;8
+Cynthia's Garchomp;Dhelmise;70,0;7 - 3 - 0;10
+Cynthia's Garchomp;Mega Excadrill;55,56;5 - 4 - 0;9
+Cynthia's Garchomp;Slowking;50,0;5 - 5 - 0;10
+Cynthia's Garchomp;Dragapult Blaziken;50,0;3 - 3 - 0;6
+Cynthia's Garchomp;Mega Absol Box;50,0;2 - 2 - 0;4
+Cynthia's Garchomp;Cynthia's Garchomp;50,0;2 - 2 - 0;4
+Cynthia's Garchomp;Grimmsnarl Froslass;40,0;2 - 3 - 0;5
+Cynthia's Garchomp;Ogerpon Meganium Hydrapple;33,33;1 - 2 - 0;3
+Cynthia's Garchomp;Festival Lead;12,5;1 - 7 - 1;9
+Toxtricity;Dragapult Dusknoir;42,86;3 - 4 - 0;7
+Toxtricity;Dragapult;33,33;2 - 4 - 0;6
+Toxtricity;Dhelmise;33,33;2 - 4 - 0;6
+Toxtricity;Mega Excadrill;33,33;2 - 4 - 0;6
+Toxtricity;Mega Greninja;25,0;1 - 3 - 0;4
+Toxtricity;N's Zoroark;25,0;1 - 3 - 0;4
+Toxtricity;Festival Lead;20,0;1 - 4 - 0;5
+Toxtricity;Alakazam Dudunsparce;12,5;1 - 7 - 0;8
+Toxtricity;Slowking;0,0;0 - 5 - 0;5
+Toxtricity;Dragapult Blaziken;0,0;0 - 2 - 1;3
+Manectric Eelektrik;Dhelmise;87,5;7 - 1 - 0;8
+Manectric Eelektrik;Mega Greninja;66,67;2 - 1 - 0;3
+Manectric Eelektrik;Rocket's Honchkrow;50,0;2 - 2 - 0;4
+Manectric Eelektrik;Mega Absol Box;50,0;2 - 2 - 0;4
+Manectric Eelektrik;Dragapult Blaziken;42,86;3 - 4 - 0;7
+Manectric Eelektrik;Festival Lead;42,86;3 - 4 - 0;7
+Manectric Eelektrik;Mega Excadrill;36,36;4 - 7 - 0;11
+Manectric Eelektrik;N's Zoroark;33,33;1 - 2 - 0;3
+Manectric Eelektrik;Basic Box;33,33;1 - 2 - 0;3
+Manectric Eelektrik;Dragapult Dusknoir;28,57;2 - 5 - 0;7
+Manectric Eelektrik;Alakazam Dudunsparce;27,27;3 - 8 - 0;11
+Manectric Eelektrik;Dragapult;10,0;1 - 9 - 0;10
+Manectric Eelektrik;Ogerpon Meganium Hydrapple;0,0;0 - 4 - 0;4
+Crustle;Dragapult;83,33;5 - 1 - 0;6
+Crustle;N's Zoroark;68,75;11 - 5 - 0;16
+Crustle;Dragapult Dusknoir;50,0;5 - 5 - 0;10
+Crustle;Dhelmise;50,0;3 - 3 - 0;6
+Crustle;Dragapult Blaziken;50,0;3 - 3 - 0;6
+Crustle;Mega Excadrill;25,0;3 - 9 - 0;12
+Crustle;Rocket's Honchkrow;25,0;1 - 3 - 0;4
+Crustle;Festival Lead;20,0;2 - 8 - 0;10
+Crustle;Alakazam Dudunsparce;0,0;0 - 4 - 0;4
+Terapagos Noctowl;Mega Excadrill;85,71;12 - 2 - 0;14
+Terapagos Noctowl;N's Zoroark;75,0;12 - 4 - 0;16
+Terapagos Noctowl;Dhelmise;71,43;5 - 2 - 0;7
+Terapagos Noctowl;Slowking;50,0;6 - 6 - 0;12
+Terapagos Noctowl;Festival Lead;50,0;5 - 5 - 0;10
+Terapagos Noctowl;Rocket's Honchkrow;50,0;2 - 2 - 0;4
+Terapagos Noctowl;Tera Box;40,0;2 - 3 - 0;5
+Terapagos Noctowl;Alakazam Dudunsparce;33,33;2 - 4 - 0;6
+Terapagos Noctowl;Dragapult Blaziken;33,33;2 - 4 - 0;6
+Terapagos Noctowl;Grimmsnarl Froslass;33,33;1 - 2 - 0;3
+Terapagos Noctowl;Dragapult Dusknoir;16,67;1 - 5 - 0;6
+Terapagos Noctowl;Dragapult;16,67;1 - 5 - 0;6
+Rocket's Mewtwo;Dragapult Dusknoir;100,0;5 - 0 - 0;5
+Rocket's Mewtwo;N's Zoroark;75,0;6 - 2 - 1;9
+Rocket's Mewtwo;Dragapult Blaziken;60,0;3 - 2 - 0;5
+Rocket's Mewtwo;Dhelmise;44,44;4 - 5 - 0;9
+Rocket's Mewtwo;Mega Greninja;33,33;1 - 2 - 0;3
+Rocket's Mewtwo;Dragapult;33,33;1 - 2 - 0;3
+Rocket's Mewtwo;Festival Lead;22,22;2 - 7 - 0;9
+Rocket's Mewtwo;Mega Excadrill;22,22;2 - 7 - 0;9
+Rocket's Mewtwo;Slowking;20,0;1 - 4 - 0;5
+Kangaskhan Bouffalant;Dhelmise;100,0;5 - 0 - 0;5
+Kangaskhan Bouffalant;Slowking;80,0;4 - 1 - 0;5
+Kangaskhan Bouffalant;Festival Lead;76,92;10 - 3 - 0;13
+Kangaskhan Bouffalant;Beedrill;75,0;3 - 1 - 1;5
+Kangaskhan Bouffalant;Mega Absol Box;66,67;2 - 1 - 0;3
+Kangaskhan Bouffalant;Dragapult;60,0;3 - 2 - 0;5
+Kangaskhan Bouffalant;Dragapult Blaziken;40,0;2 - 3 - 0;5
+Kangaskhan Bouffalant;Mega Excadrill;33,33;4 - 8 - 0;12
+Kangaskhan Bouffalant;N's Zoroark;33,33;1 - 2 - 0;3
+Kangaskhan Bouffalant;Alakazam Dudunsparce;20,0;1 - 4 - 0;5
+Mega Lucario;Dragapult Dusknoir;80,0;4 - 1 - 0;5
+Mega Lucario;Mega Excadrill;66,67;6 - 3 - 0;9
+Mega Lucario;N's Zoroark;66,67;2 - 1 - 0;3
+Mega Lucario;Dragapult;50,0;3 - 3 - 0;6
+Mega Lucario;Festival Lead;20,0;1 - 4 - 0;5
+Mega Lucario;Slowking;16,67;1 - 5 - 0;6
+Iron Thorns;Alakazam Dudunsparce;66,67;2 - 1 - 0;3
+Iron Thorns;Beedrill;66,67;2 - 1 - 0;3
+Iron Thorns;Dragapult Dusknoir;40,0;2 - 3 - 0;5
 Iron Thorns;Slowking;33,33;1 - 2 - 0;3
-Iron Thorns;N's Zoroark;33,33;1 - 2 - 0;3
-Iron Thorns;Dragapult Dusknoir;0,0;0 - 4 - 0;4
-Mega Sharpedo;Dragapult Dusknoir;33,33;1 - 2 - 0;3
-Mega Sharpedo;Alakazam Dudunsparce;25,0;1 - 3 - 0;4
-Mega Sharpedo;Dragapult;25,0;1 - 3 - 0;4
-Mega Sharpedo;Ogerpon Meganium Hydrapple;0,0;0 - 3 - 0;3
-Slaking;Dragapult;50,0;2 - 2 - 0;4
-Slaking;Dragapult Dusknoir;25,0;1 - 3 - 1;5
+Iron Thorns;Mega Excadrill;0,0;0 - 8 - 0;8
+Iron Thorns;N's Zoroark;0,0;0 - 3 - 0;3
+Iron Thorns;Dragapult Blaziken;0,0;0 - 3 - 0;3
+Ethan's Typhlosion;Mega Excadrill;100,0;8 - 0 - 0;8
+Ethan's Typhlosion;N's Zoroark;75,0;3 - 1 - 0;4
+Ethan's Typhlosion;Dragapult Blaziken;75,0;3 - 1 - 0;4
+Ethan's Typhlosion;Ogerpon Meganium Hydrapple;66,67;2 - 1 - 0;3
+Ethan's Typhlosion;Dragapult;60,0;3 - 2 - 0;5
+Ethan's Typhlosion;Festival Lead;42,86;3 - 4 - 0;7
+Ethan's Typhlosion;Slowking;40,0;2 - 3 - 0;5
+Ethan's Typhlosion;Mega Greninja;33,33;1 - 2 - 0;3
+Ethan's Typhlosion;Dhelmise;14,29;1 - 6 - 0;7
+Ethan's Typhlosion;Lucario Hariyama;0,0;0 - 3 - 0;3
+Ethan's Typhlosion;Dragapult Dusknoir;0,0;0 - 3 - 0;3
+Starmie Froslass;Dhelmise;66,67;2 - 1 - 0;3
+Starmie Froslass;Dragapult Dusknoir;50,0;3 - 3 - 0;6
+Starmie Froslass;N's Zoroark;50,0;3 - 3 - 0;6
+Starmie Froslass;Slowking;40,0;2 - 3 - 0;5
+Starmie Froslass;Festival Lead;33,33;1 - 2 - 0;3
+Starmie Froslass;Dragapult Blaziken;33,33;1 - 2 - 0;3
+Starmie Froslass;Mega Excadrill;27,27;3 - 8 - 0;11
+Starmie Froslass;Rocket's Honchkrow;25,0;1 - 3 - 0;4
+Starmie Froslass;Ceruledge;0,0;0 - 3 - 0;3
+Raging Bolt Ogerpon;Mega Absol Box;100,0;3 - 0 - 0;3
+Raging Bolt Ogerpon;Mega Excadrill;66,67;6 - 3 - 0;9
+Raging Bolt Ogerpon;Rocket's Honchkrow;66,67;2 - 1 - 0;3
+Raging Bolt Ogerpon;N's Zoroark;60,0;3 - 2 - 0;5
+Raging Bolt Ogerpon;Alakazam Dudunsparce;57,14;4 - 3 - 0;7
+Raging Bolt Ogerpon;Dragapult Dusknoir;50,0;2 - 2 - 0;4
+Raging Bolt Ogerpon;Festival Lead;42,86;3 - 4 - 0;7
+Raging Bolt Ogerpon;Slowking;25,0;1 - 3 - 0;4
+Raging Bolt Ogerpon;Cynthia's Garchomp;0,0;0 - 3 - 0;3
+Toxtricity Box;N's Zoroark;100,0;3 - 0 - 0;3
+Toxtricity Box;Mega Excadrill;50,0;3 - 3 - 0;6
+Toxtricity Box;Festival Lead;40,0;2 - 3 - 0;5
+Mega Venusaur;Dragapult Blaziken;66,67;2 - 1 - 0;3
+Mega Venusaur;Dragapult Dusknoir;66,67;2 - 1 - 0;3
+Mega Venusaur;Alakazam Dudunsparce;50,0;2 - 2 - 0;4
+Mega Venusaur;N's Zoroark;33,33;1 - 2 - 0;3
+Mega Venusaur;Mega Excadrill;0,0;0 - 4 - 0;4
+Mega Venusaur;Slowking;0,0;0 - 3 - 0;3
+Starmie Dusknoir;Tera Box;100,0;3 - 0 - 0;3
+Starmie Dusknoir;Grimmsnarl Froslass;50,0;2 - 2 - 0;4
+Starmie Dusknoir;Mega Excadrill;50,0;2 - 2 - 0;4
+Starmie Dusknoir;Slowking;25,0;1 - 3 - 0;4
+Starmie Dusknoir;Dragapult Dusknoir;12,5;1 - 7 - 0;8
+Doublade;Festival Lead;66,67;2 - 1 - 1;4
+Doublade;Dragapult Dusknoir;66,67;2 - 1 - 0;3
+Doublade;Mega Excadrill;57,14;4 - 3 - 0;7
+Doublade;N's Zoroark;25,0;1 - 3 - 0;4
+Doublade;Basic Box;0,0;0 - 3 - 0;3
+Doublade;Grimmsnarl Froslass;0,0;0 - 3 - 0;3
+Lillie's Clefairy;Festival Lead;75,0;3 - 1 - 0;4
+Lillie's Clefairy;Dragapult Blaziken;66,67;2 - 1 - 0;3
+Lillie's Clefairy;Dragapult Dusknoir;50,0;3 - 3 - 0;6
+Lillie's Clefairy;Dhelmise;50,0;2 - 2 - 0;4
+Lillie's Clefairy;Basic Box;33,33;1 - 2 - 0;3
+Lillie's Clefairy;Mega Excadrill;30,0;3 - 7 - 0;10
+Lillie's Clefairy;N's Zoroark;0,0;0 - 3 - 0;3
+Metagross;Slowking;100,0;4 - 0 - 0;4
+Metagross;Festival Lead;66,67;2 - 1 - 0;3
+Metagross;Dragapult;66,67;2 - 1 - 0;3
+Metagross;N's Zoroark;57,14;4 - 3 - 0;7
+Metagross;Mega Excadrill;50,0;1 - 1 - 1;3
+Metagross;Dragapult Dusknoir;40,0;2 - 3 - 0;5
+Wailord;Alakazam Dudunsparce;66,67;2 - 1 - 0;3
+Wailord;Festival Lead;66,67;2 - 1 - 0;3
+Wailord;Mega Excadrill;50,0;2 - 2 - 0;4
+Wailord;Mega Absol Box;33,33;1 - 2 - 0;3
+Hop's Trevenant;Slowking;66,67;2 - 1 - 0;3
+Hop's Trevenant;Mega Excadrill;50,0;2 - 2 - 0;4
+Hop's Trevenant;N's Zoroark;20,0;1 - 4 - 0;5
+Hop's Trevenant;Alakazam Dudunsparce;0,0;0 - 3 - 0;3
+Hop's Trevenant;Mega Absol Box;0,0;0 - 3 - 0;3
+Froslass Munkidori;Slowking;66,67;2 - 1 - 0;3
+Froslass Munkidori;N's Zoroark;25,0;1 - 3 - 0;4
+Froslass Munkidori;Festival Lead;25,0;1 - 3 - 0;4
+Blaziken Zoroark;Mega Excadrill;100,0;4 - 0 - 0;4
+Blaziken Zoroark;Dhelmise;100,0;3 - 0 - 0;3
+Blaziken Zoroark;Alakazam Dudunsparce;66,67;4 - 2 - 0;6
+Blaziken Zoroark;Festival Lead;60,0;3 - 2 - 0;5
+Lopunny Dudunsparce;Slowking;80,0;4 - 1 - 0;5
+Lopunny Dudunsparce;Dragapult Dusknoir;75,0;3 - 1 - 0;4
+Lopunny Dudunsparce;Festival Lead;60,0;3 - 2 - 0;5
+Lopunny Dudunsparce;Dragapult Blaziken;33,33;1 - 2 - 0;3
+Lopunny Dudunsparce;Dragapult;25,0;1 - 3 - 0;4
+Lopunny Dudunsparce;Alakazam Dudunsparce;0,0;0 - 2 - 1;3
+Lopunny Dudunsparce;Mega Excadrill;0,0;0 - 3 - 0;3
+Mega Charizard X;Lucario Hariyama;75,0;3 - 1 - 0;4
+Mega Charizard X;N's Zoroark;60,0;3 - 2 - 0;5
+Mega Charizard X;Dhelmise;50,0;2 - 2 - 0;4
+Mega Charizard X;Tera Box;0,0;0 - 3 - 0;3
+Flareon Noctowl;Dhelmise;66,67;2 - 1 - 0;3
+Flareon Noctowl;Alakazam Dudunsparce;50,0;2 - 2 - 1;5
+Flareon Noctowl;Slowking;33,33;1 - 2 - 0;3
+Flareon Noctowl;Dragapult Dusknoir;0,0;0 - 3 - 0;3
+Dragapult Dudunsparce;Mega Excadrill;50,0;2 - 2 - 0;4
+Dragapult Dudunsparce;Slowking;0,0;0 - 4 - 0;4
+Froslass Dudunsparce;N's Zoroark;66,67;2 - 1 - 0;3
+Mega Abomasnow;Dragapult Blaziken;50,0;1 - 1 - 1;3
+Mega Abomasnow;Dragapult Dusknoir;0,0;0 - 3 - 0;3
+Steven's Metagross;N's Zoroark;0,0;0 - 3 - 0;3
+Greninja;Dragapult Dusknoir;66,67;2 - 1 - 0;3
+Greninja;Alakazam Dudunsparce;50,0;2 - 2 - 0;4
+Greninja;Dragapult;33,33;1 - 2 - 0;3
+Marnie's Grimmsnarl;Dhelmise;66,67;2 - 1 - 0;3
+Marnie's Grimmsnarl;Slowking;66,67;2 - 1 - 0;3
+Mega Dragonite;N's Zoroark;80,0;4 - 1 - 0;5
+Iono's Bellibolt;Mega Excadrill;0,0;0 - 3 - 0;3
+Zygarde Barbaracle;Dhelmise;66,67;2 - 1 - 0;3
+Zygarde Barbaracle;Dragapult Blaziken;66,67;2 - 1 - 0;3
+Zygarde Barbaracle;Dragapult;66,67;2 - 1 - 0;3
+Sharpedo Toxtricity;Dragapult;100,0;3 - 0 - 0;3
+Sharpedo Toxtricity;Festival Lead;33,33;1 - 2 - 0;3
+Sharpedo Toxtricity;Alakazam Dudunsparce;0,0;0 - 3 - 0;3
+Hydreigon;Dragapult Dusknoir;66,67;2 - 1 - 0;3
+Dragapult Froslass;Festival Lead;75,0;3 - 1 - 0;4
+Dragapult Froslass;Dragapult;66,67;2 - 1 - 0;3
+Bronzong;N's Zoroark;33,33;1 - 2 - 0;3

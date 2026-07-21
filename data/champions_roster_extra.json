@@ -23,6 +23,7 @@
   "Camerupt",
   "Camerupt-Mega",
   "Ceruledge",
+  "Chandelure",
   "Charizard",
   "Charizard-Mega-Y",
   "Clefable",
@@ -30,7 +31,6 @@
   "Delphox",
   "Delphox-Mega",
   "Dragalge",
-  "Dragalge-Mega",
   "Dragonite",
   "Dragonite-Mega",
   "Eelektross",
@@ -113,6 +113,7 @@
   "Scolipede-Mega",
   "Malamar-Mega",
   "Barbaracle-Mega",
+  "Dragalge-Mega",
   "Falinks-Mega"
  ]
 }

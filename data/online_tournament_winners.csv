@@ -1,4 +1,14 @@
 tournament_id,tournament_date,format,player_count,winner_archetype,winner_winrate
+6a5e4d3752c24ac2da647443,2026-07-23,CRI,121,Festival Lead,27.0
+6a5e2d63937230b102d401a2,2026-07-23,CRI,104,Dragapult Dusknoir,25.0
+6a5a671b52c24ac2da644850,2026-07-23,CRI,229,Mega Lucario,34.0
+6a58f606cc68177ec6c56a6c,2026-07-22,CRI,108,Lopunny Dudunsparce,21.0
+6a5e2d30937230b102d401a0,2026-07-22,CRI,156,Slowking,28.0
+6a5bb770937230b102d3ec7d,2026-07-22,CRI,103,Wailord,24.0
+6a5e8d4b937230b102d40671,2026-07-21,CRI,177,Dragapult Blaziken,21.0
+6a4e22cd063cb29d318e68d8,2026-07-21,CRI,118,Festival Lead,21.0
+6a5baefb52c24ac2da645a63,2026-07-21,CRI,141,Dragapult Dusknoir,30.0
+6a5b9ac952c24ac2da645851,2026-07-21,CRI,114,Festival Lead,25.0
 6a5e8dd6937230b102d40677,2026-07-21,CRI,117,Cynthia's Garchomp,18.0
 6a543fe6c0a6bab82fbbcca8,2026-07-20,CRI,210,Dragapult,21.0
 6a5d1549937230b102d3fa6f,2026-07-20,CRI,133,Alakazam Dudunsparce,21.0
@@ -45,7 +55,3 @@ wait-wut,2026-07-04,CRI,346,Dragapult,31.0
 6a03e4e413f957d6d4b4720f,2026-06-29,CRI,382,Slowking,35.0
 6a31d0cae334c3c9befd817e,2026-06-27,CRI,114,N's Zoroark,31.0
 bugs,2026-06-27,CRI,376,Mega Greninja,31.0
-6a35668cceacae7d64419aa0,2026-06-25,CRI,142,Alakazam Dudunsparce,32.0
-6a3869d3af50e12308407ffe,2026-06-24,CRI,104,Alakazam Dudunsparce,27.0
-6a348858e334c3c9befd9b30,2026-06-23,CRI,155,N's Zoroark,21.0
-6a3869d7af50e12308407fff,2026-06-23,CRI,107,Dragapult,24.0

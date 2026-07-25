@@ -393,18 +393,7 @@
                 }
 
                 // Hintergrund-Laden der grossen Analysis-CSV (non-blocking fuer FCP)
-                window._cityLeagueAnalysisPromise = fetch(`${analysisUrl}?t=${timestamp}`)
-                    .then(r => r.ok ? r.text() : null)
-                    .then(text => text ? parseCSV(text) : [])
-                    .then(data => {
-                        window.cityLeagueAnalysisData = data;
-                        devLog('Background: analysis data loaded,', data.length, 'rows');
-                        return data;
-                    })
-                    .catch(err => {
-                        console.error('Background analysis CSV load failed:', err);
-                        return [];
-                    });
+                window._cityLeagueAnalysisPromise = getCityLeagueAnalysisData(format, analysisUrl);
 
                 const archetypesData = parseCSV(archetypesText);
                 _captureKnownCityLeagueTournamentIds(archetypesData);
@@ -1105,6 +1094,49 @@
         window.switchCityLeagueFormat = switchCityLeagueFormat;
         
         // Load City League Analysis
+        // Single owner of the big city_league_analysis*.csv fetch.
+        //
+        // It used to be fetched TWICE per City League load, in parallel: once
+        // here into window._cityLeagueAnalysisPromise, and once inside
+        // renderCityLeagueTierList, whose prefetchedAnalysisData argument is
+        // null at its only call site. In the current format that is 70 KB
+        // wasted; in Past Meta the file is 41.4 MB, so the tab downloaded
+        // 82.8 MB to display 41.4 MB of data. The service worker serves
+        // /data/ with cache: 'no-store' (deliberately, after a stale-data
+        // incident), so nothing upstream deduplicated it either.
+        //
+        // Keyed by format: 'current' and 'past' are different files, and a
+        // single unkeyed promise would hand the wrong rotation's rows to
+        // whichever view asked second after a format switch.
+        const _clAnalysisCache = new Map();   // format -> Promise<rows>
+        function getCityLeagueAnalysisData(format, analysisUrl) {
+            const key = format || 'current';
+            if (_clAnalysisCache.has(key)) return _clAnalysisCache.get(key);
+            const url = analysisUrl || `${BASE_PATH}${key === 'past'
+                ? 'city_league_analysis_past.csv' : 'city_league_analysis.csv'}`;
+            const p = fetch(`${url}?t=${Date.now()}`)
+                .then(r => r.ok ? r.text() : null)
+                .then(text => text ? parseCSV(text) : [])
+                .then(data => {
+                    // Only publish as the active dataset when the user is still
+                    // on the format this fetch was started for.
+                    if ((window.currentCityLeagueFormat || 'current') === key) {
+                        window.cityLeagueAnalysisData = data;
+                    }
+                    devLog(`Analysis data loaded for ${key}: ${data.length} rows`);
+                    return data;
+                })
+                .catch(err => {
+                    console.error('Analysis CSV load failed:', err);
+                    // Do not cache a failure — the next view should retry.
+                    _clAnalysisCache.delete(key);
+                    return [];
+                });
+            _clAnalysisCache.set(key, p);
+            return p;
+        }
+        window.getCityLeagueAnalysisData = getCityLeagueAnalysisData;
+
         async function loadCityLeagueAnalysis() {
             devLog('Loading City League Analysis...');
 

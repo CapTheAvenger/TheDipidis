@@ -206,6 +206,12 @@
 
                 if (source === 'currentMeta') {
                     allAnalysisData = await loadCurrentMetaRowsWithFallback({ forceRefresh: true });
+                } else if (typeof window.getCityLeagueAnalysisData === 'function') {
+                    // Shared format-keyed loader in app-city-league.js. This tab
+                    // used to fetch city_league_analysis*.csv independently of
+                    // the City League tab's background load — 41.4 MB in Past
+                    // Meta, pulled again per visit.
+                    allAnalysisData = await window.getCityLeagueAnalysisData(isPastCl ? 'past' : 'current');
                 } else {
                     const analysisResponse = await fetch(`${BASE_PATH}${analysisFile}?t=${timestamp}`);
                     if (!analysisResponse.ok) throw new Error('Failed to load analysis data');
@@ -218,10 +224,19 @@
                     const looksLikeM4Analysis = Array.isArray(allAnalysisData) && allAnalysisData.length > 0 && allAnalysisData.length < 50000;
                     if (looksLikeM4Analysis) {
                         console.warn('[loadMetaCardAnalysis] Guard triggered: analysis data shape looks like current while past is selected. Forcing explicit past analysis file.');
-                        const forcedAnalysisResponse = await fetch(`${BASE_PATH}city_league_analysis_past.csv?t=${timestamp}&forcePast=1`);
-                        if (forcedAnalysisResponse.ok) {
-                            const forcedAnalysisText = await forcedAnalysisResponse.text();
-                            allAnalysisData = parseCSV(forcedAnalysisText);
+                        // Ask the shared loader for 'past' explicitly. It is keyed
+                        // by format, so this cannot return the current file — and
+                        // when the guard fires on data the loader already holds,
+                        // it costs nothing instead of a second 41.4 MB download.
+                        if (typeof window.getCityLeagueAnalysisData === 'function') {
+                            const forced = await window.getCityLeagueAnalysisData('past');
+                            if (Array.isArray(forced) && forced.length) allAnalysisData = forced;
+                        } else {
+                            const forcedAnalysisResponse = await fetch(`${BASE_PATH}city_league_analysis_past.csv?t=${timestamp}&forcePast=1`);
+                            if (forcedAnalysisResponse.ok) {
+                                const forcedAnalysisText = await forcedAnalysisResponse.text();
+                                allAnalysisData = parseCSV(forcedAnalysisText);
+                            }
                         }
                     }
                 }

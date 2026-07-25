@@ -593,7 +593,16 @@
                         // The old 'M3' identifier + city_league_analysis_M3.csv
                         // file are legacy — the past snapshot moved to the
                         // _past suffix on 2026-05-23.
-                        const formatSuffix = window.currentCityLeagueFormat === 'past' ? '_past' : '';
+                        const format = window.currentCityLeagueFormat === 'past' ? 'past' : 'current';
+                        // Go through the shared format-keyed loader in
+                        // app-city-league.js. This used to be its own fetch of
+                        // the same file that loadCityLeagueData already had in
+                        // flight — 41.4 MB downloaded twice in Past Meta, since
+                        // prefetchedAnalysisData is null at the only call site.
+                        if (typeof window.getCityLeagueAnalysisData === 'function') {
+                            return await window.getCityLeagueAnalysisData(format);
+                        }
+                        const formatSuffix = format === 'past' ? '_past' : '';
                         const cardsResponse = await fetch(`${BASE_PATH}city_league_analysis${formatSuffix}.csv?t=${timestamp}`);
                         if (!cardsResponse.ok) return [];
                         const cardsText = await cardsResponse.text();

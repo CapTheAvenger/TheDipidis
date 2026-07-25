@@ -323,3 +323,33 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@cd2ce8fcbc39b97be8ca5fce6e763baed58fa128 # v5.0.0
+
+      # "Merged to main" is not "live". Pages deploys are serialised, so a
+      # second push while one is in flight cancels it and the site can sit on
+      # an older build for 15+ minutes -- and the only way anyone noticed was
+      # the user reporting that a fix wasn't there. The repo's own rule is
+      # that a change counts as shipped when thedipidis.app/version.json
+      # shows the new timestamp, so check exactly that, here, automatically.
+      #
+      # Soft by design: the deploy itself already succeeded, and a CDN that
+      # needs another minute is not a build failure. It fails only if the
+      # version never appears, which IS the "silently serving the old build"
+      # case this exists to catch.
+      - name: Verify the new version is actually live
+        if: github.ref == 'refs/heads/main'
+        run: |
+          set -u
+          EXPECTED="$(python3 -c "import json;print(json.load(open('version.json'))['version'])")"
+          echo "expecting version.json to report: $EXPECTED"
+          for attempt in $(seq 1 20); do
+            LIVE="$(curl -fsS --max-time 15 "https://thedipidis.app/version.json?cb=$(date +%s)" 2>/dev/null \
+                    | python3 -c "import json,sys;print(json.load(sys.stdin).get('version',''))" 2>/dev/null || true)"
+            echo "  attempt $attempt: live=${LIVE:-<unreachable>}"
+            if [ "$LIVE" = "$EXPECTED" ]; then
+              echo "::notice title=Live::thedipidis.app is serving $EXPECTED"
+              exit 0
+            fi
+            sleep 15
+          done
+          echo "::error title=Not live::thedipidis.app still reports '${LIVE:-<unreachable>}' after 5 minutes, expected '$EXPECTED'. The deploy may have been cancelled by a later push."
+          exit 1

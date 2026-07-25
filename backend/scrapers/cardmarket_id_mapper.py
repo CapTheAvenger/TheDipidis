@@ -134,11 +134,19 @@ def build_set_to_expansion(cards: list, singles: list, nonsingles: list):
             slug_to_exp.setdefault(normalize_for_slug(m.group(1)), p['idExpansion'])
 
     # 3) primary mapping via slug match
+    #
+    # Iterate over EVERY set in our DB, not just the ones that already have a
+    # cardmarket_url. A brand-new set (e.g. PBL on release) has no Cardmarket
+    # URLs yet, so it produces no slug — before, such a set was silently dropped
+    # here and never even reached the overlap fallback below, which would have
+    # matched it correctly. Now a missing/unknown slug simply falls through.
     set_to_exp = {}
     method = {}
     unmapped_via_slug = []
-    for sc, slug in set_to_slug.items():
-        if slug in slug_to_exp:
+    all_set_codes = {c['set'] for c in cards if c.get('set')}
+    for sc in sorted(all_set_codes):
+        slug = set_to_slug.get(sc)
+        if slug and slug in slug_to_exp:
             set_to_exp[sc] = slug_to_exp[slug]
             method[sc] = 'booster'
         else:

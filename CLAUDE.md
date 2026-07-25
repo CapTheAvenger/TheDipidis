@@ -1,5 +1,15 @@
 # TheDipidis — working rules
 
+## Default process for every feature
+
+**Run `/feature-review` before building any user-facing feature or change**, and
+`/data-review` before trusting any data-pipeline change. This is the default, not
+the exception — the extra round trip is cheaper than shipping the wrong thing and
+rebuilding it, which is exactly what happened with the Prize Pack print.
+
+Skip it only for genuinely trivial edits (a typo, a colour value), and say so.
+
+
 German-language Pokémon TCG SPA (vanilla JS, GitHub Pages, deploys from `main`)
 plus a Telegram bot on Render. These are the rules this project learned the hard
 way; each one exists because breaking it cost real time.

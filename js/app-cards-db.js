@@ -2817,9 +2817,13 @@
             const stamped = card.image_url || '';
             const escapedImg = escapeJsStr(stamped);
             const series = String(card.__prizePackSeries || '');
-            const ppsSet = String(card.set || `PPS${series}`);
-            const ppsNumber = String(card.number || '');
             const baseSet = String(card.__baseSet || '');
+            // Fall back to the SET-QUALIFIED shape, never the bare "PPS9":
+            // a Prize Pack series spans several sets, so the bare form
+            // collided for 26 card pairs (ASC-150 Dratini vs JTG-150
+            // Levincia) and would re-create ids the migration exists to undo.
+            const ppsSet = String(card.set || `PPS${series}${baseSet.toUpperCase()}`);
+            const ppsNumber = String(card.number || '');
             const baseNumber = String(card.__baseNumber || '');
             const baseRef = escapeHtml(card.__baseSetNumber || `${baseSet} ${baseNumber}`);
 

@@ -123,7 +123,9 @@
                 const timestamp = new Date().getTime();
                 const cityLeagueFormat = source === 'cityLeague'
                     ? getActiveCityLeagueFormat()
-                    : (window.currentCityLeagueFormat || 'M4');
+                    // 'current', never a rotation name: the value is compared
+                    // against 'current' / 'past' below and downstream.
+                    : (window.currentCityLeagueFormat || 'current');
                 if (source === 'cityLeague') {
                     // Keep all loaders aligned even if a stale global value lingers.
                     window.currentCityLeagueFormat = cityLeagueFormat;

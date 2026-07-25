@@ -494,6 +494,10 @@
         // Set release dates for temporal filtering (format: YYYY-MM-DD)
         const SET_RELEASE_DATES = {
             // 2026 Sets
+            'PBL': '2026-07-17',
+            'CRI': '2026-05-22',
+            'M5': '2026-05-22',
+            'M4': '2026-03-13',
             'POR': '2026-04-01',
             'M3': '2026-03-01',
             'ASC': '2026-02-21',
@@ -2131,9 +2135,11 @@
                 // page (no fetch yet) still produces a deterministic sort.
                 const setOrder = (typeof window !== 'undefined' && window.setOrderMap) || {
                     // Last-resort hardcoded fallback — only used if
-                    // setOrderMap hasn't loaded yet. Kept in line with
-                    // a pre-2026-06 snapshot so the ordering is still
-                    // sensible even when sets.json is unreachable.
+                    // setOrderMap hasn't loaded yet. Numbers are this
+                    // snapshot's own scale, not sets.json's; only the
+                    // relative order matters, and the live setOrderMap
+                    // from data/sets.json supersedes it once loaded.
+                    'PBL': 121, 'CRI': 120, 'M5': 119, 'M4': 118,
                     'POR': 117, 'M3': 116, 'ASC': 115, 'PFL': 114, 'MEG': 113, 'MEE': 112, 'MEP': 111,
                     'BLK': 110, 'WHT': 109, 'DRI': 108, 'JTG': 107, 'PRE': 106, 'SSP': 105,
                     'SCR': 104, 'SFA': 103, 'TWM': 102, 'TEF': 101, 'PAF': 100, 'PAR': 99,

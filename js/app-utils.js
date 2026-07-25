@@ -1368,7 +1368,7 @@ window.escapeHtml = escapeHtml;
  * input here without escapeHtml first.
  */
 function getEmptyStateHtml(opts) {
-    const o = Object.assign({ title: '', body: '', cta: null, icon: '' }, opts || {});
+    const o = Object.assign({ title: '', body: '', cta: null, cta2: null, icon: '' }, opts || {});
     const icons = {
         heart:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>',
         deck:     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>',
@@ -1379,9 +1379,14 @@ function getEmptyStateHtml(opts) {
         : '';
     const titleHtml = o.title ? '<h4 class="empty-state__title">' + o.title + '</h4>' : '';
     const bodyHtml  = o.body  ? '<p class="empty-state__body">' + o.body + '</p>' : '';
-    const ctaHtml   = o.cta
-        ? '<button class="empty-state__cta"' + (o.cta.onclick ? ' onclick="' + o.cta.onclick + '"' : '') + '>' + (o.cta.label || 'OK') + '</button>'
+    // Two CTAs, because one empty state can have two legitimate next steps:
+    // an empty wishlist is reached both by "I want to browse for cards" and
+    // by "someone sent me a list", and offering only the first sent the
+    // second user to the wrong tab.
+    const btn = (c) => c
+        ? '<button class="empty-state__cta"' + (c.onclick ? ' onclick="' + c.onclick + '"' : '') + '>' + (c.label || 'OK') + '</button>'
         : '';
+    const ctaHtml = btn(o.cta) + btn(o.cta2);
     return '<div class="empty-state" role="status" aria-live="polite">' + iconHtml + titleHtml + bodyHtml + ctaHtml + '</div>';
 }
 window.getEmptyStateHtml = getEmptyStateHtml;

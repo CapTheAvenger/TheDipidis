@@ -14,16 +14,21 @@ function toggleMenuCluster(clusterId) {
     trigger.setAttribute('aria-expanded', String(isOpen));
 }
 
-function syncMenuClustersForTab(tabId) {
-    const metaTabs = new Set(['meta-analysis-hub', 'city-league', 'city-league-analysis', 'current-meta', 'current-analysis', 'past-meta']);
-    const metaSubmenu = document.getElementById('menu-submenu-meta');
-    const metaGroup = document.getElementById('menu-group-meta');
+const MENU_CLUSTERS = {
+    meta:  ['meta-analysis-hub', 'city-league', 'city-league-analysis',
+            'current-meta', 'current-analysis', 'past-meta'],
+    tools: ['proxy', 'calculator'],
+};
 
-    if (metaSubmenu && metaGroup) {
-        const shouldOpen = metaTabs.has(tabId);
-        metaSubmenu.classList.toggle('open', shouldOpen);
-        metaGroup.setAttribute('aria-expanded', String(shouldOpen));
-    }
+function syncMenuClustersForTab(tabId) {
+    Object.entries(MENU_CLUSTERS).forEach(([cluster, tabs]) => {
+        const submenu = document.getElementById('menu-submenu-' + cluster);
+        const group = document.getElementById('menu-group-' + cluster);
+        if (!submenu || !group) return;
+        const shouldOpen = tabs.indexOf(tabId) !== -1;
+        submenu.classList.toggle('open', shouldOpen);
+        group.setAttribute('aria-expanded', String(shouldOpen));
+    });
 }
 
 function toggleMainMenu() {
@@ -47,7 +52,7 @@ function switchTabAndUpdateMenu(tabId) {
         target.classList.add('active');
     }
 
-    document.querySelectorAll('.menu-item[data-tab-id]').forEach(btn => btn.classList.remove('active'));
+    document.querySelectorAll('.menu-item.active').forEach(btn => btn.classList.remove('active'));
     const activeBtn = document.getElementById('menu-btn-' + tabId);
     const badge = document.getElementById('current-tab-title');
     if (activeBtn) {
@@ -85,6 +90,24 @@ function openProfileSection(subTab) {
     });
 }
 
+// Point the menu highlight + header badge at a menu entry by id. Used by
+// switchProfileTab so that a profile sub-tab which has its OWN top-level
+// entry (Deck Builder) owns the highlight, and every other sub-tab hands it
+// back to "My Profile" — otherwise the badge kept reading "Deck Builder"
+// while the user was clicking around in Wunschliste.
+function setMenuHighlight(menuBtnId) {
+    const btn = document.getElementById(menuBtnId);
+    if (!btn) return;
+    document.querySelectorAll('.menu-item.active').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const badge = document.getElementById('current-tab-title');
+    if (!badge) return;
+    const labelEl = btn.querySelector('.menu-item-label');
+    badge.innerText = labelEl ? labelEl.textContent.trim() : btn.innerText.trim();
+    badge.style.display = '';
+}
+window.setMenuHighlight = setMenuHighlight;
+
 document.addEventListener('click', function(e) {
     const menu    = document.getElementById('mainMenuDropdown');
     const trigger = document.getElementById('mainMenuTrigger');
@@ -97,7 +120,10 @@ document.addEventListener('click', function(e) {
 });
 
 document.addEventListener('languageChanged', function() {
-    const activeBtn = document.querySelector('.menu-item.active[data-tab-id]');
+    // No [data-tab-id] filter: Deck Builder is a top-level entry that opens a
+    // profile SUB-tab and therefore has no data-tab-id, and filtering on it
+    // left the badge un-translated on that entry.
+    const activeBtn = document.querySelector('.menu-item.active');
     const badge = document.getElementById('current-tab-title');
     const labelEl = activeBtn ? activeBtn.querySelector('.menu-item-label') : null;
     if (activeBtn && badge) badge.innerText = labelEl ? labelEl.textContent.trim() : activeBtn.innerText.trim();

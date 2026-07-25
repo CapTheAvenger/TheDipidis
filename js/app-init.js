@@ -50,8 +50,28 @@
                     probe.src = src;
                 });
                 
-                // Initialize City League format dropdowns
-                const savedFormat = 'M4';
+                // Initialize City League format dropdowns.
+                //
+                // This used to hardcode 'M4', which broke three ways at once:
+                // the <select> options are 'current' / 'past', so assigning
+                // 'M4' left selectedIndex at -1 and the dropdown rendered
+                // BLANK; window.currentCityLeagueFormat became 'M4', which
+                // every consumer compares against 'current' / 'past'
+                // (app-tier-meta.js:627 etc.) so the current data was rendered
+                // through the past-format branch; and it overwrote whatever
+                // the user had picked last session (app-city-league.js:116
+                // restores it from localStorage, and this ran afterwards).
+                //
+                // Rotation names must not appear here at all — the set codes
+                // move and this file would need an edit every time.
+                const LEGACY_FORMAT_ALIASES = { M4: 'current', M3: 'past' };
+                let savedFormat = 'current';
+                try {
+                    const stored = localStorage.getItem('cityLeagueFormat');
+                    const resolved = LEGACY_FORMAT_ALIASES[stored] || stored;
+                    if (resolved === 'current' || resolved === 'past') savedFormat = resolved;
+                } catch (_e) { /* private mode / storage disabled — keep the default */ }
+
                 const formatDropdown = document.getElementById('cityLeagueFormatSelect');
                 const analysisFormatDropdown = document.getElementById('cityLeagueFormatSelectAnalysis');
                 if (formatDropdown) {

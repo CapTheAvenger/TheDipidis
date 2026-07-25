@@ -36,6 +36,8 @@ from __future__ import annotations
 
 import argparse
 import csv
+import difflib
+import glob
 import json
 import os
 import re
@@ -47,6 +49,36 @@ COMMA = ","
 
 # Ignore tiny local events that may legitimately live on one surface only.
 MAJOR_MIN_PLAYERS = 200
+
+
+class NotChecked(Exception):
+    """The reconciliation could not run because a required file is absent.
+
+    Distinct from "ran and found nothing": the caller must report
+    NOT CHECKED, never OK. Right after a rotation neither file for the new
+    format exists yet, and the previous code returned an empty gap list --
+    printing a green "OK (no gaps)" while examining zero tournaments.
+    """
+
+
+def _load_overrides(data_dir: str) -> dict:
+    """data/labs_tournament_id_overrides.json -> {cards_tid: labs_tid}.
+
+    Same file the scraper uses for the renames name-matching cannot bridge.
+    Missing or unreadable is fine -- the matcher just loses one layer.
+    """
+    path = os.path.join(data_dir, "labs_tournament_id_overrides.json")
+    try:
+        with open(path, encoding="utf-8-sig") as fh:
+            blob = json.load(fh)
+    except (OSError, json.JSONDecodeError):
+        return {}
+    out = {}
+    for cards_tid, entry in (blob.get("overrides") or {}).items():
+        labs_tid = entry.get("labs_tournament_id") if isinstance(entry, dict) else entry
+        if labs_tid:
+            out[str(cards_tid)] = str(labs_tid)
+    return out
 
 
 def _parse_date(raw: str):
@@ -73,6 +105,61 @@ def _norm_name(name: str) -> str:
     return re.sub(r"[^a-z0-9]", "", (name or "").lower())
 
 
+# Keep in sync with _US_STATE_CODES in backend/scrapers/tournament_scraper_JH.py.
+# Duplicated rather than imported: this script runs standalone in CI with only
+# data/ available, and importing the scraper drags in its whole dependency tree.
+_US_STATE_CODES = {
+    'al', 'ak', 'az', 'ar', 'ca', 'co', 'ct', 'de', 'fl', 'ga', 'hi', 'id',
+    'il', 'in', 'ia', 'ks', 'ky', 'la', 'me', 'md', 'ma', 'mi', 'mn', 'ms',
+    'mo', 'mt', 'ne', 'nv', 'nh', 'nj', 'nm', 'ny', 'nc', 'nd', 'oh', 'ok',
+    'or', 'pa', 'ri', 'sc', 'sd', 'tn', 'tx', 'ut', 'vt', 'va', 'wa', 'wv',
+    'wi', 'wy', 'dc',
+}
+
+_BOILERPLATE_RE = re.compile(
+    r'\b(championships?|limitless|regional|special\s+event|international|world|'
+    r'stadium|tcg|pokemon|pokémon)\b'
+)
+
+
+def _token_key(name: str) -> set:
+    """City tokens of a tournament name, boilerplate removed.
+
+    This is the same idea as _normalize_tournament_name_for_match in
+    backend/scrapers/tournament_scraper_JH.py, which is the normaliser that
+    actually works on this data. The substring test this script used before
+    ("is one flat string inside the other") flagged 58 of 58 checked majors
+    as gaps -- a 100% false-positive rate -- because labs writes
+    "Regional Championship Merida" and the cards pipeline writes
+    "Regional Merida - Limitless": the interposed "Championship" and the
+    appended "Limitless" mean neither string contains the other. Only
+    "Special Event X" ever passed, and only by accident of prefixing.
+    """
+    s = (name or "").lower()
+    s = re.sub(r'[–—\-]', ' ', s)
+    s = _BOILERPLATE_RE.sub(' ', s)
+    s = re.sub(r'[^a-z0-9]+', ' ', s)
+    # Drop state codes and bare years ("NAIC 2026" -> {"naic"}).
+    return {tok for tok in s.split()
+            if tok not in _US_STATE_CODES and not re.fullmatch(r'(19|20)\d{2}', tok)}
+
+
+def _fuzzy_close(a: set, b: set) -> bool:
+    """Last-resort match for locale spellings the token overlap misses --
+    labs "Seville" vs cards "Sevilla", "Nuremberg" vs "Nurnberg".
+
+    Compares the boilerplate-stripped TOKEN keys, not the raw names: against
+    the full strings, "specialeventseville" vs "specialeventsevillalimitless"
+    scores below the threshold purely because of the "Limitless" suffix, and
+    the one case this layer exists for would fail. Only ever consulted for
+    tournaments that already share a date.
+    """
+    if not a or not b:
+        return False
+    return difflib.SequenceMatcher(None, ' '.join(sorted(a)),
+                                   ' '.join(sorted(b))).ratio() >= 0.82
+
+
 def _distinct_tournaments(path: str, delimiter: str):
     """{tournament_id: (name, date_obj, players)} for a tournament CSV."""
     out: dict[str, tuple] = {}
@@ -96,10 +183,21 @@ def _distinct_tournaments(path: str, delimiter: str):
 
 
 def find_coverage_gaps(data_dir: str, grace_days: int) -> list[str]:
-    """Return human-readable gap descriptions (empty list = all covered).
+    """Gap descriptions only (empty list = all covered).
 
-    Raises FileNotFoundError if format_window.json is missing/unreadable.
+    Kept as the stable entry point; use find_coverage_gaps_detailed when the
+    caller needs to report WHICH format was actually reconciled.
     """
+    return find_coverage_gaps_detailed(data_dir, grace_days)[1]
+
+
+def find_coverage_gaps_detailed(data_dir: str, grace_days: int):
+    """(checked_format, gaps).
+
+    Raises FileNotFoundError if format_window.json is missing/unreadable and
+    NotChecked when there is no labs/cards pair to reconcile at all.
+    """
+    overrides = _load_overrides(data_dir)
     fw_path = os.path.join(data_dir, "format_window.json")
     with open(fw_path, encoding="utf-8-sig") as fh:
         fw = json.load(fh)
@@ -109,21 +207,53 @@ def find_coverage_gaps(data_dir: str, grace_days: int) -> list[str]:
         raise ValueError("format_window.json lacks current_set/oldest_legal_set")
     fmt = f"{oldest}-{current}"
 
-    labs_path = os.path.join(data_dir, f"labs_tournament_decks_{fmt}.csv")
-    cards_path = os.path.join(data_dir, f"tournament_cards_data_cards_{fmt}.csv")
-    if not os.path.isfile(labs_path):
-        # No labs file for the current format yet (just after rotation) →
-        # nothing to reconcile against.
-        return []
+    def paths_for(f):
+        return (os.path.join(data_dir, f"labs_tournament_decks_{f}.csv"),
+                os.path.join(data_dir, f"tournament_cards_data_cards_{f}.csv"))
 
+    labs_path, cards_path = paths_for(fmt)
+    if os.path.isfile(labs_path) and os.path.isfile(cards_path):
+        return fmt, _gaps_for_pair(fmt, labs_path, cards_path, grace_days, overrides)
+
+    # The current format has no files yet. That is the NORMAL state for the
+    # two weeks between a set's release and its in-person legality (PBL:
+    # released 2026-07-17, legal 2026-07-31), and the previous code returned
+    # an empty gap list here -- printing a green "OK (no gaps)" while
+    # examining zero tournaments, the same vacuous green as the "0 of 36
+    # images OK" incident.
+    #
+    # Rather than going dormant for a fortnight, fall back to the newest
+    # format that DOES have both files: propagation gaps in the format that
+    # just closed are exactly as worth catching, and the caller is told which
+    # format was actually checked.
+    candidates = []
+    for p in glob.glob(os.path.join(data_dir, "labs_tournament_decks_*.csv")):
+        other = os.path.basename(p)[len("labs_tournament_decks_"):-len(".csv")]
+        lp, cp = paths_for(other)
+        if os.path.isfile(cp):
+            candidates.append((os.path.getmtime(p), other, lp, cp))
+    if not candidates:
+        raise NotChecked(f"no labs/cards file pair for {fmt} and no earlier format to fall back to")
+
+    _mtime, prev_fmt, lp, cp = max(candidates)
+    gaps = _gaps_for_pair(prev_fmt, lp, cp, grace_days, overrides)
+    return (prev_fmt,
+            [f"(checked {prev_fmt}; {fmt} has no files yet) {g}" for g in gaps])
+
+
+def _gaps_for_pair(fmt, labs_path, cards_path, grace_days, overrides):
     labs = _distinct_tournaments(labs_path, COMMA)
     cards = _distinct_tournaments(cards_path, SEMI)
 
-    cards_names = {_norm_name(n) for (n, _d, _p) in cards.values()}
+    # Pre-compute both keys for every cards-side tournament once.
+    cards_entries = []   # (tid, flat_name, token_set, date_or_None)
+    for tid, (name, dobj, _players) in cards.items():
+        cards_entries.append((tid, _norm_name(name), _token_key(name),
+                              dobj.date() if dobj else None))
     cards_by_date: dict = {}
-    for name, dobj, _players in cards.values():
-        if dobj:
-            cards_by_date.setdefault(dobj.date(), []).append(_norm_name(name))
+    for entry in cards_entries:
+        if entry[3]:
+            cards_by_date.setdefault(entry[3], []).append(entry)
 
     cutoff = datetime.utcnow() - timedelta(days=grace_days)
     gaps: list[str] = []
@@ -132,12 +262,36 @@ def find_coverage_gaps(data_dir: str, grace_days: int) -> list[str]:
             continue
         if dobj is None or dobj > cutoff:
             continue  # too fresh / undated — give the cards pipeline time
-        norm = _norm_name(name)
+
+        flat = _norm_name(name)
+        tokens = _token_key(name)
         same_day = cards_by_date.get(dobj.date(), [])
-        matched = (
-            any(norm in c or c in norm for c in same_day)
-            or any(norm in c or c in norm for c in cards_names)
-        )
+
+        # Layer 1 — same date plus a shared city token. This is the one that
+        # does the work: the date already pins the event down, and the token
+        # overlap distinguishes two majors on the same weekend.
+        matched = any(tokens & c_tokens for (_t, _f, c_tokens, _d) in same_day)
+
+        # Layer 2 — the manual override table. It exists precisely for the
+        # renames no normaliser can bridge (labs "International Championship
+        # New Orleans" vs cards "NAIC 2026, New Orleans"), so consult it
+        # instead of re-flagging what a human already reconciled.
+        if not matched and overrides:
+            mapped = {c_tid for c_tid, labs_tid in overrides.items()
+                      if str(labs_tid).lstrip('0') == str(tid).lstrip('0')}
+            matched = any(c_tid in mapped for (c_tid, _f, _tk, _d) in cards_entries)
+
+        # Layer 3 — same date and a near-identical spelling ("Seville" vs
+        # "Sevilla"). Date-gated, so it can only rescue, never invent.
+        if not matched:
+            matched = any(_fuzzy_close(tokens, c_tokens) for (_t, _f, c_tokens, _d) in same_day)
+
+        # Layer 4 — the old flat-substring test, kept as a floor so this
+        # change can only ever match MORE than before, never less.
+        if not matched:
+            matched = any(flat in c_flat or c_flat in flat
+                          for (_t, c_flat, _tk, _d) in cards_entries)
+
         if not matched:
             gaps.append(
                 f"{fmt}: labs major '{name}' ({dobj.date()}, {players} players, "
@@ -161,16 +315,26 @@ def main(argv: list[str]) -> int:
         return 1
 
     try:
-        gaps = find_coverage_gaps(data_dir, args.grace_days)
+        checked_fmt, gaps = find_coverage_gaps_detailed(data_dir, args.grace_days)
+    except NotChecked as exc:
+        # Explicitly NOT "OK". Nothing was compared, and saying otherwise is
+        # how a check quietly stops checking. Exit 0 because this is the
+        # expected state in the two weeks between a set release and its
+        # in-person legality.
+        print(f"Tournament coverage reconciliation: NOT CHECKED — {exc}")
+        print(f"::notice::Tournament coverage not reconciled — {exc}")
+        return 0
     except (OSError, ValueError, json.JSONDecodeError) as exc:
         print(f"::error::reconciliation could not run: {exc}", file=sys.stderr)
         return 1
 
     if not gaps:
-        print("Tournament coverage reconciliation: OK (no gaps)")
+        # Always name the format that was compared. "OK" on its own cannot be
+        # distinguished from "OK because nothing was examined".
+        print(f"Tournament coverage reconciliation: OK (no gaps) — checked {checked_fmt}")
         return 0
 
-    print(f"Tournament coverage reconciliation: {len(gaps)} gap(s) found")
+    print(f"Tournament coverage reconciliation: {len(gaps)} gap(s) found in {checked_fmt}")
     for g in gaps:
         print(f"  - {g}")
         print(f"::warning::Tournament coverage gap — {g}")

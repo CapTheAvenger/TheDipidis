@@ -1524,6 +1524,10 @@ function updateWishlistUI(searchFilter = '', setFilter = '') {
         ? 'Finde Karten in der Karten-Datenbank und tippe auf das Herz, um sie hinzuzufügen.'
         : 'Find cards in the Card Database and tap the heart to add them.',
       cta:   { label: isDe ? 'Karten finden' : 'Find Cards', onclick: "switchTabAndUpdateMenu('cards')" },
+      // The other reason this list is empty: the user already has a list from
+      // the Telegram bot and nothing to browse for. Sending them to the Card
+      // Database in that case is the wrong next step.
+      cta2:  { label: isDe ? '📋 Liste einfügen' : '📋 Paste list', onclick: "wishlistBotImportOpen()" },
     });
     const searchResults = document.getElementById('wishlist-search-results');
     if (searchResults) searchResults.textContent = '';
@@ -1541,7 +1545,10 @@ function updateWishlistUI(searchFilter = '', setFilter = '') {
       if (cardSet) setsInWishlist.add(cardSet);
     });
     const currentVal = setDropdown.value;
-    setDropdown.innerHTML = '<option value="">All Sets</option>';
+    // Was hardcoded English, so a German user saw "All Sets" on a German page.
+    const allSetsLabel = (typeof window.t === 'function' && window.t('profile.allSets'))
+      || ((typeof getLang === 'function' && getLang() === 'de') ? 'Alle Sets' : 'All Sets');
+    setDropdown.innerHTML = '<option value="">' + escapeHtml(allSetsLabel) + '</option>';
     [...setsInWishlist].sort().forEach(s => {
       const opt = document.createElement('option');
       opt.value = s;
@@ -3464,6 +3471,16 @@ function switchProfileTab(tabName) {
   const activeBtn = document.querySelector(`.profile-tab-btn[onclick*="${tabName}"]`);
   if (activeBtn) {
     activeBtn.classList.add('active');
+  }
+
+  // Keep the main menu honest. Deck Builder has its own top-level entry, so
+  // it owns the highlight and the header badge while it is open; every other
+  // profile sub-tab hands both back to "My Profile". Without this the badge
+  // stayed on "Deck Builder" while the user browsed their Wunschliste, and
+  // the header shortcuts (My Decks / Wishlist) showed "My Profile" instead of
+  // the section they actually opened.
+  if (typeof window.setMenuHighlight === 'function') {
+    window.setMenuHighlight(tabName === 'deckbuilder' ? 'menu-btn-deckbuilder' : 'menu-btn-profile');
   }
 
   // Auto-load journal history when switching to journal tab
@@ -5527,7 +5544,10 @@ function updateTradelistUI(searchFilter = '', setFilter = '') {
       if (cardSet) setsInTradelist.add(cardSet);
     });
     const currentVal = setDropdown.value;
-    setDropdown.innerHTML = '<option value="">All Sets</option>';
+    // Was hardcoded English, so a German user saw "All Sets" on a German page.
+    const allSetsLabel = (typeof window.t === 'function' && window.t('profile.allSets'))
+      || ((typeof getLang === 'function' && getLang() === 'de') ? 'Alle Sets' : 'All Sets');
+    setDropdown.innerHTML = '<option value="">' + escapeHtml(allSetsLabel) + '</option>';
     [...setsInTradelist].sort().forEach(s => {
       const opt = document.createElement('option');
       opt.value = s;

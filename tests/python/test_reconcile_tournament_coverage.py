@@ -82,11 +82,74 @@ def test_small_event_is_ignored(tmp_path):
     assert rec.find_coverage_gaps(d, grace_days=3) == []
 
 
-def test_no_labs_file_is_not_an_error(tmp_path):
+def test_no_labs_file_reports_not_checked(tmp_path):
+    # No labs file at all → the script must say NOT CHECKED, not "OK".
+    # It used to return [] here, which main() printed as "OK (no gaps)"
+    # while examining zero tournaments — a green check that measured nothing.
     d = str(tmp_path)
     _write_format_window(d)
-    # No labs file written at all → nothing to reconcile, no gap.
+    with pytest.raises(rec.NotChecked):
+        rec.find_coverage_gaps(d, grace_days=3)
+
+
+def test_falls_back_to_previous_format_when_current_has_no_files(tmp_path):
+    # The two weeks between a set's release and its in-person legality are
+    # the normal state, and the check must stay useful through them.
+    d = str(tmp_path)
+    _write_format_window(d, current="PBL", oldest="TEF")   # no TEF-PBL files
+    old = _days_ago_iso(10)
+    _write_labs(d, "TEF-CRI", [("0070", "International Championship New Orleans", old, "3743")])
+    _write_cards(d, "TEF-CRI", [])
+    checked, gaps = rec.find_coverage_gaps_detailed(d, grace_days=3)
+    assert checked == "TEF-CRI"
+    assert len(gaps) == 1
+    assert "New Orleans" in gaps[0]
+
+
+def test_regional_name_divergence_is_not_a_false_gap(tmp_path):
+    # labs "Regional Championship Merida" vs cards "Regional Merida - Limitless".
+    # Neither string contains the other, which is why the old flat-substring
+    # test flagged 58 of 58 real majors as gaps.
+    d = str(tmp_path)
+    _write_format_window(d)
+    old = _days_ago_iso(10)
+    _write_labs(d, "TEF-CRI", [("0065", "Regional Championship Merida", old, "800")])
+    _write_cards(d, "TEF-CRI", [("530", "Regional Merida - Limitless", old)])
     assert rec.find_coverage_gaps(d, grace_days=3) == []
+
+
+def test_acronym_rename_is_not_a_false_gap(tmp_path):
+    # labs "International Championship New Orleans" vs cards "NAIC 2026, New
+    # Orleans - Limitless": no shared substring at all, only shared city tokens.
+    d = str(tmp_path)
+    _write_format_window(d)
+    old = _days_ago_iso(10)
+    _write_labs(d, "TEF-CRI", [("0070", "International Championship New Orleans", old, "3743")])
+    _write_cards(d, "TEF-CRI", [("518", "NAIC 2026, New Orleans - Limitless", old)])
+    assert rec.find_coverage_gaps(d, grace_days=3) == []
+
+
+def test_locale_spelling_divergence_is_not_a_false_gap(tmp_path):
+    # labs "Seville" vs cards "Sevilla" — same date, near-identical spelling.
+    d = str(tmp_path)
+    _write_format_window(d)
+    old = _days_ago_iso(10)
+    _write_labs(d, "TEF-CRI", [("0059", "Special Event Seville", old, "600")])
+    _write_cards(d, "TEF-CRI", [("533", "Special Event Sevilla - Limitless", old)])
+    assert rec.find_coverage_gaps(d, grace_days=3) == []
+
+
+def test_different_city_same_day_is_still_a_gap(tmp_path):
+    # The matcher must not degenerate into "same date = matched": two majors
+    # on one weekend are common, and a missing one still has to be caught.
+    d = str(tmp_path)
+    _write_format_window(d)
+    old = _days_ago_iso(10)
+    _write_labs(d, "TEF-CRI", [("0066", "Regional Championship Melbourne", old, "900")])
+    _write_cards(d, "TEF-CRI", [("536", "Regional Lima - Limitless", old)])
+    gaps = rec.find_coverage_gaps(d, grace_days=3)
+    assert len(gaps) == 1
+    assert "Melbourne" in gaps[0]
 
 
 def test_ordinal_date_matches_iso_date(tmp_path):

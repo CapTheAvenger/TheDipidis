@@ -177,7 +177,7 @@
     }
 
     function setSideMenuActive(tabId) {
-        document.querySelectorAll('.menu-item[data-tab-id]').forEach(btn => btn.classList.remove('active'));
+        document.querySelectorAll('.menu-item.active').forEach(btn => btn.classList.remove('active'));
         const sideBtn = document.getElementById('menu-btn-' + tabId);
         if (sideBtn) sideBtn.classList.add('active');
     }
@@ -213,8 +213,11 @@
         if (typeof window.switchTab === 'function') {
             window.switchTab('meta-analysis-hub');
         }
-        // No side-menu entry for the hub itself — clear all sub-item highlights.
-        document.querySelectorAll('.menu-item[data-tab-id]').forEach(btn => btn.classList.remove('active'));
+        // The hub now HAS its own top-level entry, so highlight it instead of
+        // leaving the menu with nothing selected — the "← Übersicht" buttons
+        // route through switchTabAndUpdateMenu and do highlight it, and two
+        // back-paths must not leave two different menu states.
+        setSideMenuActive('meta-analysis-hub');
     }
 
     function isSubTab(tabId) {

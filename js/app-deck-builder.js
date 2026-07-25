@@ -2113,6 +2113,10 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
              * even when sets.json hasn't loaded yet.
              */
             const setOrder = (typeof window !== 'undefined' && window.setOrderMap) || {
+                // Kept in the snapshot's own numbering (relative order is all
+                // that matters here); the live window.setOrderMap from data/sets.json
+                // supersedes this as soon as it loads.
+                'PBL': 121, 'CRI': 120, 'M5': 119, 'M4': 118,
                 'POR': 117, 'M3': 116, 'ASC': 115, 'PFL': 114, 'MEG': 113, 'MEE': 112, 'MEP': 111,
                 'BLK': 110, 'WHT': 109, 'DRI': 108, 'JTG': 107, 'PRE': 106, 'SSP': 105,
                 'SCR': 104, 'SFA': 103, 'TWM': 102, 'TEF': 101, 'PAF': 100, 'PAR': 99,

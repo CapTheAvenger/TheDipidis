@@ -276,23 +276,47 @@
   }
 
   // ─── DATEI LADEN (mit Cache) ───────────────────────────────────────────────
-  // Threshold below which a fetched file is treated as "header-only /
-  // empty" and NOT written into the IndexedDB cache. Default-state
-  // CSVs at the start of a new JP/EN rotation can be just a header
-  // row (city_league_archetypes.csv = 73 B, _comparison.csv = 183 B,
-  // city_league_analysis.csv = 304 B). Caching those would lock the
-  // user into the empty state until either the cache version bumps
-  // or the SW network-first revalidation runs. The threshold is
-  // generous (300 B catches header-only CSVs of all observed sizes)
-  // but small enough that any real data set blows through it on the
-  // first non-empty row.
-  const MIN_USEFUL_BYTES = 300;
+  // A header-only CSV must never reach the IndexedDB cache. At the start of a
+  // JP/EN rotation the City League files are genuinely just a header row, and
+  // caching that locks the user into an empty state until an unrelated
+  // frontend deploy bumps version.json — data/*.json refreshes deliberately
+  // do NOT bump it.
+  //
+  // This used to be a byte threshold, and it was off by one character: the
+  // header-only city_league_analysis.csv is 301 chars after the BOM strip and
+  // sailed straight through `>= 300`. Raising the number is not the fix — the
+  // same files carry legitimately tiny REAL payloads (five archetypes in
+  // city_league_archetypes_comparison.csv is 510 chars), so any threshold big
+  // enough to catch the headers also throws away real data. Counting data rows
+  // is exact and needs no magic number.
+  function hasUsefulPayload(fileInfo, text) {
+    if (!text) return false;
+    const s = String(text).replace(/^﻿/, '').trim();
+    if (!s) return false;
+    if (fileInfo && fileInfo.type === 'json') {
+      try {
+        const j = JSON.parse(s);
+        return Array.isArray(j) ? j.length > 0 : !!j && Object.keys(j).length > 0;
+      } catch { return false; }
+    }
+    // CSV: at least one non-empty line beyond the header.
+    let rows = 0;
+    for (const line of s.split(/\r?\n/)) {
+      if (line.trim() && ++rows > 1) return true;
+    }
+    return false;
+  }
 
   async function fetchWithCache(db, fileInfo, version) {
     const cacheKey = fileInfo.key + '_v2';
     try {
       const cached = await dbGet(db, cacheKey);
-      if (cached && cached.version === version && cached.data) {
+      // The same guard on READ, not just on write: users whose cache was
+      // poisoned by the off-by-one above are still stuck on the empty
+      // snapshot, and no threshold change reaches them. Re-checking here
+      // self-heals those entries on the next boot.
+      if (cached && cached.version === version && cached.data &&
+          hasUsefulPayload(fileInfo, cached.data)) {
         return { data: cached.data, fromCache: true };
       }
     } catch (e) { /* Cache-Fehler ignorieren */ }
@@ -301,12 +325,15 @@
     if (!r.ok) throw new Error('HTTP ' + r.status + ' for ' + fileInfo.url);
     const text = await r.text();
 
-    // Skip writing tiny / header-only payloads to the cache. The data
-    // is still returned to the caller (so the current page-load sees
-    // the empty state correctly), it just doesn't poison the next
-    // boot's cache with an outdated empty snapshot once the scraper
-    // catches up.
-    if (text && text.length >= MIN_USEFUL_BYTES) {
+    // The payload is returned to the caller either way, so the current page
+    // load always shows the true state — an empty file renders as empty. Only
+    // the cache write is skipped, so the next boot re-fetches instead of
+    // replaying a stale empty snapshot.
+    //
+    // 'unknown' means fetchCurrentVersion() failed. Writing under it would
+    // store payloads that a later failed-version boot would happily serve, so
+    // we read past the cache but never write to it in that state.
+    if (version !== 'unknown' && hasUsefulPayload(fileInfo, text)) {
       dbPut(db, { key: cacheKey, version, data: text, ts: Date.now() }).catch(() => {});
     }
 

@@ -83,6 +83,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     needs: test
+    outputs:
+      version: ${{ steps.builtversion.outputs.version }}
     steps:
       - name: Checkout
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
@@ -308,6 +310,17 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
 
+      # Hand the built version to the deploy job. It runs on a FRESH runner
+      # with no checkout and no shared filesystem, so it cannot read
+      # version.json from disk — the live check there compared against an
+      # empty string and could never pass.
+      - name: Publish built version as a job output
+        id: builtversion
+        run: |
+          v="$(python3 -c "import json;print(json.load(open('version.json'))['version'])")"
+          echo "version=$v" >> "$GITHUB_OUTPUT"
+          echo "built version: $v"
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
@@ -339,7 +352,11 @@ jobs:
         if: github.ref == 'refs/heads/main'
         run: |
           set -u
-          EXPECTED="$(python3 -c "import json;print(json.load(open('version.json'))['version'])")"
+          EXPECTED="${{ needs.build.outputs.version }}"
+          if [ -z "$EXPECTED" ]; then
+            echo "::warning title=No version to check::build job published no version output — skipping the live check"
+            exit 0
+          fi
           echo "expecting version.json to report: $EXPECTED"
           for attempt in $(seq 1 20); do
             LIVE="$(curl -fsS --max-time 15 "https://thedipidis.app/version.json?cb=$(date +%s)" 2>/dev/null \

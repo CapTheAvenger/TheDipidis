@@ -579,8 +579,15 @@ async function loadUserData(userId) {
       // tradelist / profile data even when Firestore IndexedDB
       // persistence is unavailable on this device.
       _writeUserDataBackup(userId);
+      // Collection / wishlist / trade list now reflect the server. Anything
+      // that REPLACES one of those maps wholesale must wait for this: writing
+      // a "full" map built from an empty in-memory state would delete
+      // everything the user owns.
+      window.userDataLoaded = true;
     } else {
       await createUserProfile(userId);
+      // A brand-new profile is legitimately empty — that is loaded, not unknown.
+      window.userDataLoaded = true;
     }
   } catch (error) {
     console.error('Error loading user data:', error);

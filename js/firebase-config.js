@@ -130,6 +130,9 @@ function initFirebaseRuntime() {
       }
     } else {
       console.info('[Auth] Firebase state: signed out');
+      // Whatever the previous user's data was, it is no longer loaded. Any
+      // write that replaces a full map must re-wait for loadUserData.
+      window.userDataLoaded = false;
       if (_fbDev) console.log('✗ User signed out');
       if (typeof onUserSignedOut === 'function') {
         onUserSignedOut();

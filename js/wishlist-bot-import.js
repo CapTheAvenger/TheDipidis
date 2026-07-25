@@ -405,6 +405,15 @@
 
   // ── Write ──────────────────────────────────────────────────────────────────
 
+  // Mirrors countFieldRef in firebase-collection.js: Firestore parses a dotted
+  // STRING key as a field path, so a cardId holding '[' or ']' throws and the
+  // card can never be written. A FieldPath with explicit segments is literal.
+  function fieldPath(...segments) {
+    const FP = (typeof firebase !== 'undefined') && firebase.firestore && firebase.firestore.FieldPath;
+    return FP ? new FP(...segments) : segments.join('.');
+  }
+
+
   async function execute() {
     const modal = document.getElementById('wishlistBotPreviewModal');
     if (!modal || !modal._matched) return;
@@ -414,33 +423,53 @@
       showNotification(t('Bitte zuerst einloggen', 'Please log in first'), 'error');
       return;
     }
+    // The merge below reads the current counts to keep the HIGHER of the two.
+    // If the user's data has not come back from Firestore yet, those maps are
+    // empty and "higher" would silently mean "lower" -- an import could then
+    // reduce a quantity the user set by hand. Wait rather than guess.
+    if (window.userDataLoaded !== true) {
+      showNotification(t('Deine Wunschliste wird noch geladen — bitte kurz warten.',
+                         'Your wishlist is still loading — please wait a moment.'), 'info');
+      return;
+    }
+
     const want = currentPreviewQty();
 
-    // Additive on purpose: this list comes from someone else's bot, so it
-    // must never be able to wipe the user's own wishlist. A card already on
-    // the list keeps the HIGHER of the two counts.
+    // Additive by construction, not just by intention: this list comes from
+    // someone else's bot and must never be able to remove anything.
+    //
+    // arrayUnion + one field path per imported card, rather than rewriting the
+    // whole wishlist array and the whole counts map. Rewriting them would make
+    // the write only as complete as the in-memory state -- exactly the failure
+    // that made the dex import's "replace" mode leave phantom cards behind --
+    // and any entry the client had not loaded would be deleted server-side.
+    // These two operations cannot touch a card that is not in `matched`.
     const nextList = new Set(window.userWishlist || []);
     const nextCounts = new Map(window.userWishlistCounts || []);
     let added = 0, raised = 0;
+    const ids = [];
+    const countArgs = [];
 
     matched.forEach(({ cardId }) => {
       const prev = nextCounts.get(cardId) || 0;
+      const next = Math.max(prev, want);
       if (!nextList.has(cardId)) added++;
-      else if (want > prev) raised++;
+      else if (next > prev) raised++;
       nextList.add(cardId);
-      nextCounts.set(cardId, Math.max(prev, want));
+      nextCounts.set(cardId, next);
+      ids.push(cardId);
+      // FieldPath, not a dotted string: a cardId containing '[' or ']' is
+      // parsed as a field path and rejected outright.
+      countArgs.push(fieldPath('wishlistCounts', cardId), next);
     });
 
-    const countsObj = {};
-    nextCounts.forEach((v, k) => { if (Number.isFinite(v) && v > 0) countsObj[k] = v; });
+    if (!ids.length) return;
 
     try {
-      // update(), not set({merge:true}) — wishlistCounts here is the full
-      // intended state; a deep merge would leave stale counts on the server.
-      await window.updateUserDoc({
-        wishlist: [...nextList],
-        wishlistCounts: countsObj
-      });
+      await db.collection('users').doc(user.uid).update(
+        'wishlist', firebase.firestore.FieldValue.arrayUnion(...ids),
+        ...countArgs
+      );
     } catch (err) {
       console.error('[wishlist-bot-import] write failed:', err);
       showNotification(t('Import fehlgeschlagen: ', 'Import failed: ') + err.message, 'error');

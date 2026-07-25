@@ -31,11 +31,13 @@ function load(win, doc, deps) {
         auth: { currentUser: { uid: 'u1' } },
         updateCollectionUI: () => {},
         filterWishlist: () => {},
+        db: null,
+        firebase: null,
     }, deps || {});
     new Function('window', 'document', 'getLang', 'showNotification', 'auth',
-                 'updateCollectionUI', 'filterWishlist', CODE)(
+                 'updateCollectionUI', 'filterWishlist', 'db', 'firebase', CODE)(
         win, doc, d.getLang, d.showNotification, d.auth,
-        d.updateCollectionUI, d.filterWishlist);
+        d.updateCollectionUI, d.filterWishlist, d.db, d.firebase);
     return win;
 }
 
@@ -136,7 +138,7 @@ describe('wishlist bot import — write path', { skip: JSDOM ? false : 'jsdom no
             escapeHtml: s => String(s == null ? '' : s).replace(/[&<>"']/g,
                 c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])),
             auth: { currentUser: { uid: 'u1' } },
-            updateUserDoc: async (p) => { written.payload = p; },
+            userDataLoaded: true,
             cardIndexBySetNumber: new Map([
                 ['PBL-5', { name: 'Poltchageist', set: 'PBL', number: '5' }],
                 ['PBL-12', { name: 'Rellor', set: 'PBL', number: '12' }],
@@ -145,12 +147,28 @@ describe('wishlist bot import — write path', { skip: JSDOM ? false : 'jsdom no
             userWishlistCounts: new Map(counts),
         });
         w.escapeHtmlAttr = w.escapeHtml;
+        // Capture the exact Firestore update() arguments so the test can assert
+        // the write is additive (arrayUnion + per-card field paths) rather than
+        // a full rewrite of the wishlist.
+        const fakeDb = {
+            collection: () => ({ doc: () => ({
+                update: async (...args) => { written.args = args; },
+            }) }),
+        };
+        const fakeFirebase = {
+            firestore: {
+                FieldPath: class { constructor(...segs) { this.segments = segs; } },
+                FieldValue: { arrayUnion: (...ids) => ({ __arrayUnion: ids }) },
+            },
+        };
         load(w, w.document, {
             getLang: w.getLang,
             showNotification: w.showNotification,
             auth: w.auth,
             updateCollectionUI: w.updateCollectionUI,
             filterWishlist: w.filterWishlist,
+            db: fakeDb,
+            firebase: fakeFirebase,
         });
         return { w, written };
     }
@@ -167,9 +185,45 @@ describe('wishlist bot import — write path', { skip: JSDOM ? false : 'jsdom no
         assert.equal(w.document.getElementById('wlBotPreviewQty').value, '1');
         await w.wishlistBotImportExecute();
 
-        assert.equal(written.payload.wishlistCounts['Rellor|PBL|12'], 3,
-            'a 1x import must leave an existing 3x alone');
-        assert.equal(written.payload.wishlistCounts['Poltchageist|PBL|5'], 1);
+        // args: 'wishlist', arrayUnion(...), FieldPath, value, FieldPath, value
+        const counts = {};
+        for (let i = 2; i < written.args.length; i += 2) {
+            counts[written.args[i].segments[1]] = written.args[i + 1];
+        }
+        assert.equal(counts['Rellor|PBL|12'], 3, 'a 1x import must leave an existing 3x alone');
+        assert.equal(counts['Poltchageist|PBL|5'], 1);
+    });
+
+    it('writes additively — arrayUnion and per-card paths, never a full rewrite', async () => {
+        // A full rewrite of `wishlist` / `wishlistCounts` would be only as
+        // complete as the in-memory state, so anything the client had not
+        // loaded would be deleted server-side.
+        const { w, written } = boot({ wishlist: ['Rellor|PBL|12'], counts: [['Rellor|PBL|12', 1]] });
+        w.wishlistBotImportOpen();
+        w.document.getElementById('wlBotImportText').value = MSG;
+        w.wishlistBotImportPreview();
+        await w.wishlistBotImportExecute();
+
+        assert.equal(written.args[0], 'wishlist');
+        assert.deepEqual(written.args[1].__arrayUnion.sort(),
+            ['Poltchageist|PBL|5', 'Rellor|PBL|12']);
+        for (let i = 2; i < written.args.length; i += 2) {
+            assert.deepEqual(written.args[i].segments[0], 'wishlistCounts',
+                'counts must be written per card path, not as a whole map');
+        }
+        assert.ok(!written.args.some(a => Array.isArray(a)),
+            'no raw array was written — that would replace the server list');
+    });
+
+    it('refuses to write before the user data has loaded', async () => {
+        const { w, written } = boot({ wishlist: ['Rellor|PBL|12'], counts: [['Rellor|PBL|12', 4]] });
+        w.userDataLoaded = false;   // Firestore has not answered yet
+        w.wishlistBotImportOpen();
+        w.document.getElementById('wlBotImportText').value = MSG;
+        w.wishlistBotImportPreview();
+        await w.wishlistBotImportExecute();
+        assert.equal(written.args, undefined,
+            'writing against an unloaded wishlist could lower a hand-set quantity');
     });
 
     it('warns before an import raises a quantity the user set', () => {

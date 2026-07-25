@@ -2431,16 +2431,31 @@ const BASE_PATH = './data/';
                     const json = await resp.json();
                     if (json && typeof json === 'object') {
                         window.prizePackImagesIndex = json;
-                        // Synthetic-identity image map so getUnifiedCardImage can
-                        // resolve the stamped art for the "PPS{series}" print id
-                        // (used by proxy printing, collection views, etc.).
+                        // Synthetic identity for a stamped Prize Pack print.
+                        // MUST include the base set: a Prize Pack series spans
+                        // several sets, so "PPS9-150" alone collided for 26
+                        // card pairs (ASC-150 Dratini vs JTG-150 Levincia), and
+                        // the proxy printer would print the wrong card. The
+                        // shape matches Cardmarket's own slug (…-PPS9ASC-150).
                         const synth = {};
+                        const rows = [];
                         for (const [k, e] of Object.entries(json)) {
-                            const num = k.split('-').slice(1).join('-');
-                            const img = e && (e.en || e.de);
-                            if (e && e.series && num && img) synth[`PPS${e.series}-${num}`] = img;
+                            const dash = k.indexOf('-');
+                            if (dash < 0 || !e || !e.series) continue;
+                            const baseSet = k.slice(0, dash);
+                            const num = k.slice(dash + 1);
+                            const img = e.en || e.de;
+                            if (!num || !img) continue;
+                            const ppsSet = `PPS${e.series}${baseSet}`;
+                            synth[`${ppsSet}-${num}`] = img;
+                            rows.push({ ppsSet, num, img, entry: e, baseSet });
                         }
                         window.prizePackSynthImages = synth;
+                        window.__prizePackIndexRows = rows;
+                        // The card index and this file load concurrently
+                        // (Promise.allSettled), so whichever finishes last does
+                        // the registration — this call is idempotent.
+                        registerPrizePackPrintsInIndex();
                         devLog(`[init] prize-pack images index: ${Object.keys(json).length} entries`);
                     }
                 }
@@ -2448,6 +2463,39 @@ const BASE_PATH = './data/';
                 console.warn('[init] Could not load prizepack_official_images.json:', e);
             }
         }
+
+        // Register the stamped Prize Pack prints in the set+number index ONLY —
+        // never in allCardsDatabase. Collection, wishlist and trade list resolve
+        // cards through this index; without an entry a Prize Pack card the user
+        // owns was counted but never rendered and valued at 0 €. Keeping it out
+        // of allCardsDatabase leaves search, filters and card counts untouched.
+        // Safe to call repeatedly and from either loader (idempotent).
+        function registerPrizePackPrintsInIndex() {
+            const rows = window.__prizePackIndexRows;
+            const idx = window.cardIndexBySetNumber;
+            if (!Array.isArray(rows) || !(idx instanceof Map)) return 0;
+            let n = 0;
+            for (const r of rows) {
+                const key = `${r.ppsSet}-${r.num}`;
+                if (idx.has(key)) continue;
+                idx.set(key, {
+                    name: r.entry.name_en || r.entry.name_de || '',
+                    name_en: r.entry.name_en || '',
+                    name_de: r.entry.name_de || '',
+                    set: r.ppsSet,
+                    number: r.num,
+                    rarity: 'Prize Pack',
+                    image_url: r.img,
+                    eur_price: (typeof r.entry.price === 'number') ? String(r.entry.price) : '',
+                    cardmarket_url: r.entry.market_url || '',
+                    __prizePack: true,
+                    __baseSet: r.baseSet
+                });
+                n++;
+            }
+            return n;
+        }
+        window.registerPrizePackPrintsInIndex = registerPrizePackPrintsInIndex;
 
         async function loadAllCardsDatabase(options) {
             try {
@@ -2605,6 +2653,9 @@ const BASE_PATH = './data/';
             window.allCardsDatabase = allCardsDatabase;
             cardIndexBySetNumber = buildCardIndexBySetNumber(allCardsDatabase);
             window.cardIndexBySetNumber = cardIndexBySetNumber;
+            // The index was just rebuilt from scratch — re-add the synthetic
+            // Prize Pack prints if their data already loaded.
+            registerPrizePackPrintsInIndex();
             cardsByNameMap = buildCardsByNameMap(allCardsDatabase);
             window.cardsByNameMap = cardsByNameMap;
             cardsBySetNumberMap = buildCardsBySetNumberMap(allCardsDatabase);

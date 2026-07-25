@@ -2589,13 +2589,22 @@
                 if (hit) return hit;
             }
 
-            // 0b. Synthetic "PPS{series}" prints resolve to their stamped Play!
-            //     Pokémon Prize Pack image (proxy printing, collection views, etc.).
-            if (/^PPS\d+$/.test(normalizedSet) && window.prizePackSynthImages) {
-                const plainNum = /^\d+$/.test(rawNumber) ? (rawNumber.replace(/^0+/, '') || '0') : rawNumber;
-                const psHit = window.prizePackSynthImages[`${normalizedSet}-${rawNumber}`]
-                           || window.prizePackSynthImages[`${normalizedSet}-${plainNum}`];
-                if (psHit) return psHit;
+            // 0b. Synthetic "PPS{series}{baseSet}" prints resolve to their stamped
+            //     Play! Pokémon Prize Pack image (proxy printing, collection
+            //     views, etc.). The base set is part of the id because a series
+            //     spans several sets — without it 26 card pairs collided and the
+            //     proxy printer produced the wrong card.
+            if (/^PPS\d+[A-Z0-9]*$/.test(normalizedSet)) {
+                if (window.prizePackSynthImages) {
+                    const plainNum = /^\d+$/.test(rawNumber) ? (rawNumber.replace(/^0+/, '') || '0') : rawNumber;
+                    const psHit = window.prizePackSynthImages[`${normalizedSet}-${rawNumber}`]
+                               || window.prizePackSynthImages[`${normalizedSet}-${plainNum}`];
+                    if (psHit) return psHit;
+                }
+                // Never fall through to the EN/JP CDN guesses below: those build
+                // a URL that is guaranteed to 404 for a PPS id and would print a
+                // blank proxy card.
+                return '';
             }
 
             const card = getIndexedCardBySetNumber(normalizedSet, rawNumber);

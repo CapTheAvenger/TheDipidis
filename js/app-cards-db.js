@@ -2437,7 +2437,12 @@
                                     __baseSetNumber: `${c.set} ${c.number}`,
                                     // Distinct Cardmarket-style identity so collection /
                                     // wishlist / tradelist track it independently.
-                                    set: `PPS${e.series}`,
+                                    // The BASE SET is part of the id: a Prize Pack
+                                    // series spans several sets, so "PPS9" + number
+                                    // alone collided for 26 card pairs (ASC-150
+                                    // Dratini vs JTG-150 Levincia). Shape matches
+                                    // Cardmarket's slug: …-PPS9ASC-150.
+                                    set: `PPS${e.series}${String(c.set).toUpperCase()}`,
                                     number: c.number,
                                     image_url: stamped,
                                     rarity: 'Prize Pack',
@@ -2842,8 +2847,8 @@
             item.innerHTML = `
                 <div class="pos-rel card-database-image-wrap">
                     <img src="${escapeHtmlAttr(stamped)}" alt="${displayName} – Prize Pack" loading="lazy" decoding="async"
-                         onclick="showImageView('${escapedImg}', '${escapedName}', '${escapeJsStr(marketUrl)}', '', '')" role="button" tabindex="0"
-                         onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();showImageView('${escapedImg}', '${escapedName}', '${escapeJsStr(marketUrl)}', '', '');}"
+                         onclick="showImageView('${escapedImg}', '${escapedName}', '${escapeJsStr(marketUrl)}', '${escapeJsStr(ppsSet)}', '${escapeJsStr(ppsNumber)}')" role="button" tabindex="0"
+                         onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();showImageView('${escapedImg}', '${escapedName}', '${escapeJsStr(marketUrl)}', '${escapeJsStr(ppsSet)}', '${escapeJsStr(ppsNumber)}');}"
                          aria-label="Open ${displayName} Prize Pack image in fullscreen">
                     ${ownedCount > 0 ? `<div class="card-database-owned-badge">${ownedCount}</div>` : ''}
                     <div class="pos-abs card-action-row-wide card-database-top-actions">

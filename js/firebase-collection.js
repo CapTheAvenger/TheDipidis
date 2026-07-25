@@ -96,34 +96,177 @@ function _lookupCardBySetNumber(setCode, number) {
     || null;
 }
 
+// One-time migration of the first Prize Pack identity shape.
+//
+// Stamped prints were originally keyed "Name|PPS{series}|{number}". That is not
+// unique — a Prize Pack series spans several sets, so 26 card pairs collided
+// (ASC-150 Dratini vs JTG-150 Levincia). The id now carries the base set:
+// "Name|PPS{series}{baseSet}|{number}". Entries written under the old shape
+// would otherwise be orphaned: still stored, never resolvable, invisible.
+//
+// The remap is unambiguous — (series, number, name) identifies exactly one of
+// the 225 prints, verified against data/prizepack_official_images.json.
+// Idempotent: once no legacy key remains it does nothing.
+async function migrateLegacyPrizePackKeys() {
+  const idx = window.prizePackImagesIndex;
+  if (!idx || typeof idx !== 'object') return 0;
+
+  // (series|number|lowercased name) -> base set
+  const lookup = new Map();
+  for (const [k, e] of Object.entries(idx)) {
+    const dash = k.indexOf('-');
+    if (dash < 0 || !e || !e.series) continue;
+    const baseSet = k.slice(0, dash);
+    const num = k.slice(dash + 1);
+    const nm = String(e.name_en || e.name_de || '').toLowerCase().trim();
+    lookup.set(`${e.series}|${num}|${nm}`, baseSet);
+  }
+  if (!lookup.size) return 0;
+
+  const LEGACY = /^PPS(\d+)$/;
+  const remapKey = (cardId) => {
+    if (typeof cardId !== 'string') return null;
+    const parts = cardId.split('|');
+    if (parts.length !== 3) return null;
+    const m = LEGACY.exec(parts[1]);
+    if (!m) return null;  // already migrated, or not a Prize Pack key
+    const baseSet = lookup.get(`${m[1]}|${parts[2]}|${parts[0].toLowerCase().trim()}`);
+    return baseSet ? `${parts[0]}|PPS${m[1]}${baseSet}|${parts[2]}` : null;
+  };
+
+  const migrateSetMap = (setRef, countsRef) => {
+    const moves = [];
+    if (setRef instanceof Set) {
+      for (const id of Array.from(setRef)) {
+        const next = remapKey(id);
+        if (next) moves.push([id, next]);
+      }
+    }
+    for (const [oldId, newId] of moves) {
+      setRef.delete(oldId); setRef.add(newId);
+      if (countsRef instanceof Map && countsRef.has(oldId)) {
+        countsRef.set(newId, countsRef.get(oldId));
+        countsRef.delete(oldId);
+      }
+    }
+    return moves.length;
+  };
+
+  const moved =
+    migrateSetMap(window.userCollection, window.userCollectionCounts) +
+    migrateSetMap(window.userWishlist, window.userWishlistCounts) +
+    migrateSetMap(window.userTradelist, window.userTradelistCounts);
+
+  if (!moved) return 0;
+
+  const user = auth.currentUser;
+  if (user) {
+    const payload = {};
+    // Only write a counts map that is actually loaded: update() REPLACES the
+    // field, so shipping "{}" because the Map happened to be missing would
+    // silently reset every quantity to 1 on the next load.
+    const put = (listKey, countsKey, set, counts) => {
+      if (!(set instanceof Set)) return;
+      payload[listKey] = [...set];
+      if (counts instanceof Map) payload[countsKey] = Object.fromEntries(counts);
+    };
+    put('collection', 'collectionCounts', window.userCollection, window.userCollectionCounts);
+    put('wishlist',   'wishlistCounts',   window.userWishlist,   window.userWishlistCounts);
+    put('tradelist',  'tradelistCounts',  window.userTradelist,  window.userTradelistCounts);
+    // update(), not set({merge:true}) — these maps are the full intended state.
+    try {
+      await updateUserDoc(payload);
+    } catch (err) {
+      console.error('[prizepack] key migration could not be persisted:', err);
+      return 0;
+    }
+  }
+  console.info(`[prizepack] migrated ${moved} legacy Prize Pack key(s) to the set-qualified id`);
+  return moved;
+}
+window.migrateLegacyPrizePackKeys = migrateLegacyPrizePackKeys;
+
 // Add card to collection (increment count, max 4)
+// Firestore parses a dotted string key as a field PATH, so any cardId holding
+// '[' or ']' throws "Paths must not contain '~', '*', '/', '[', or ']'" and the
+// card can never be added. 58 cards are affected (e.g. "Unown [J]|LA|76",
+// "ナッシー[Exeggutor]|EVO|109"), all of them browsable in the Card Database.
+// A FieldPath with explicit segments is literal and accepts any character.
+// Falls back to the dotted string if FieldPath is somehow unavailable, so this
+// can never be worse than before.
+function countFieldRef(...segments) {
+  const FP = (typeof firebase !== 'undefined') && firebase.firestore && firebase.firestore.FieldPath;
+  return FP ? new FP(...segments) : segments.join('.');
+}
+
+// update() replaces a map field outright — that is exactly what the clear /
+// replace paths need (a merge of an empty map is a no-op, see clearCollection).
+// But update() also rejects with 'not-found' when the profile document does not
+// exist yet, which is possible if createUserProfile() failed silently at first
+// sign-in. Falling back to set({merge:true}) in that one case creates the doc;
+// there is nothing to overwrite, so the merge semantics are harmless there.
+async function updateUserDoc(payload) {
+  const user = auth.currentUser;
+  if (!user) throw new Error('not signed in');
+  const ref = db.collection('users').doc(user.uid);
+  try {
+    await ref.update(payload);
+  } catch (err) {
+    if (err && err.code === 'not-found') await ref.set(payload, { merge: true });
+    else throw err;
+  }
+}
+window.updateUserDoc = updateUserDoc;
+
 async function addToCollection(cardId) {
   const user = auth.currentUser;
   if (!user) {
     showNotification('Please sign in to use this feature', 'error');
     return;
   }
-  
+
   const currentCount = window.userCollectionCounts ? (window.userCollectionCounts.get(cardId) || 0) : 0;
   if (currentCount >= 4) {
     showNotification('Maximum 4 copies per card (playset)', 'info');
     return;
   }
-  
+
   const newCount = currentCount + 1;
-  
+
   try {
-    await db.collection('users').doc(user.uid).update({
-      collection: firebase.firestore.FieldValue.arrayUnion(cardId),
-      [`collectionCounts.${cardId}`]: newCount
-    });
-    
+    // Local-first, then persist WITHOUT awaiting. Awaiting the round-trip meant
+    // that offline (or on a flaky mobile connection) the badge never moved and
+    // no toast appeared, and because currentCount was re-read from the
+    // un-updated map, three taps queued "count = 1" three times instead of
+    // reaching 3. Same reasoning as the deck-save path further down this file.
+    const hadBefore = window.userCollection.has(cardId);
     window.userCollection.add(cardId);
     if (!window.userCollectionCounts) window.userCollectionCounts = new Map();
     window.userCollectionCounts.set(cardId, newCount);
     updateCardUI(cardId);
-    showNotification(`Added to collection (${newCount}/4)`, 'success');
-    
+    showNotification(getLang() === 'de'
+      ? `Zur Sammlung hinzugefügt (${newCount}/4)`
+      : `Added to collection (${newCount}/4)`, 'success');
+
+    db.collection('users').doc(user.uid).update(
+      'collection', firebase.firestore.FieldValue.arrayUnion(cardId),
+      countFieldRef('collectionCounts', cardId), newCount
+    ).catch(err => {
+      // A genuine write rejection (not offline — those queue and drain later).
+      // Roll the optimistic change back so the UI never claims a card is owned
+      // when the server refused it.
+      console.error('[collection] persist failed, reverting:', err);
+      if (!hadBefore) window.userCollection.delete(cardId);
+      if (currentCount > 0) window.userCollectionCounts.set(cardId, currentCount);
+      else window.userCollectionCounts.delete(cardId);
+      updateCardUI(cardId);
+      showNotification(getLang() === 'de'
+        ? 'Konnte nicht gespeichert werden'
+        : 'Could not be saved', 'error');
+      if (typeof filterCollection === 'function') filterCollection();
+      else updateCollectionUI();
+    });
+
     // Auto-decrement wishlist: if the card is on the wishlist, reduce by 1
     if (window.userWishlist && window.userWishlist.has(cardId)) {
       await removeFromWishlist(cardId);
@@ -159,24 +302,25 @@ async function removeFromCollection(cardId) {
   const newCount = currentCount - 1;
 
   try {
+    // Local-first + FieldPath, same reasoning as addToCollection.
     if (newCount <= 0) {
-      await db.collection('users').doc(user.uid).update({
-        collection: firebase.firestore.FieldValue.arrayRemove(cardId),
-        [`collectionCounts.${cardId}`]: firebase.firestore.FieldValue.delete()
-      });
-
       window.userCollection.delete(cardId);
       if (window.userCollectionCounts) window.userCollectionCounts.delete(cardId);
+      db.collection('users').doc(user.uid).update(
+        'collection', firebase.firestore.FieldValue.arrayRemove(cardId),
+        countFieldRef('collectionCounts', cardId), firebase.firestore.FieldValue.delete()
+      ).catch(err => console.error('[collection] remove failed:', err));
     } else {
-      await db.collection('users').doc(user.uid).update({
-        [`collectionCounts.${cardId}`]: newCount
-      });
-
       if (window.userCollectionCounts) window.userCollectionCounts.set(cardId, newCount);
+      db.collection('users').doc(user.uid).update(
+        countFieldRef('collectionCounts', cardId), newCount
+      ).catch(err => console.error('[collection] decrement failed:', err));
     }
 
     updateCardUI(cardId);
-    showNotification(newCount > 0 ? `Collection: ${newCount}/4 copies` : 'Removed from collection', 'success');
+    showNotification(getLang() === 'de'
+      ? (newCount > 0 ? `Sammlung: ${newCount}/4 Exemplare` : 'Aus Sammlung entfernt')
+      : (newCount > 0 ? `Collection: ${newCount}/4 copies` : 'Removed from collection'), 'success');
 
     // Update collection display and stats — preserve any active search
     // filter the user has in #collection-search (see addToCollection).
@@ -212,10 +356,10 @@ async function addToWishlistWithCount(cardId, count) {
   }
   const qty = Math.max(1, Math.min(count, 4));
   try {
-    await db.collection('users').doc(user.uid).update({
-      wishlist: firebase.firestore.FieldValue.arrayUnion(cardId),
-      [`wishlistCounts.${cardId}`]: qty
-    });
+    await db.collection('users').doc(user.uid).update(
+      'wishlist', firebase.firestore.FieldValue.arrayUnion(cardId),
+      countFieldRef('wishlistCounts', cardId), qty
+    );
     if (!window.userWishlist) window.userWishlist = new Set();
     window.userWishlist.add(cardId);
     if (!window.userWishlistCounts) window.userWishlistCounts = new Map();
@@ -251,10 +395,10 @@ async function addToWishlist(cardId) {
   const newCount = currentCount + 1;
 
   try {
-    await db.collection('users').doc(user.uid).update({
-      wishlist: firebase.firestore.FieldValue.arrayUnion(cardId),
-      [`wishlistCounts.${cardId}`]: newCount
-    });
+    await db.collection('users').doc(user.uid).update(
+      'wishlist', firebase.firestore.FieldValue.arrayUnion(cardId),
+      countFieldRef('wishlistCounts', cardId), newCount
+    );
     
     if (!window.userWishlist) window.userWishlist = new Set();
     window.userWishlist.add(cardId);
@@ -286,16 +430,16 @@ async function removeFromWishlist(cardId) {
 
   try {
     if (newCount <= 0) {
-      await db.collection('users').doc(user.uid).update({
-        wishlist: firebase.firestore.FieldValue.arrayRemove(cardId),
-        [`wishlistCounts.${cardId}`]: firebase.firestore.FieldValue.delete()
-      });
+      await db.collection('users').doc(user.uid).update(
+        'wishlist', firebase.firestore.FieldValue.arrayRemove(cardId),
+        countFieldRef('wishlistCounts', cardId), firebase.firestore.FieldValue.delete()
+      );
       window.userWishlist.delete(cardId);
       if (window.userWishlistCounts) window.userWishlistCounts.delete(cardId);
     } else {
-      await db.collection('users').doc(user.uid).update({
-        [`wishlistCounts.${cardId}`]: newCount
-      });
+      await db.collection('users').doc(user.uid).update(
+        countFieldRef('wishlistCounts', cardId), newCount
+      );
       if (window.userWishlistCounts) window.userWishlistCounts.set(cardId, newCount);
     }
     showNotification(newCount > 0 ? `Wishlist: ${newCount}x` : 'Removed from wishlist', 'success');
@@ -1217,10 +1361,15 @@ async function clearCollection() {
   if (!ok) return;
 
   try {
-    await db.collection('users').doc(user.uid).set({
+    // update(), NOT set({merge:true}): merging an EMPTY map is a no-op, so the
+    // server kept every collectionCounts key. `collection` (an array) was
+    // replaced, but the loader falls back to the count keys when the array is
+    // empty (firebase-globals.js), so the whole collection came back on the next
+    // reload — the reset only ever looked like it worked.
+    await updateUserDoc({
       collection: [],
       collectionCounts: {}
-    }, { merge: true });
+    });
 
     window.userCollection = new Set();
     window.userCollectionCounts = new Map();
@@ -1253,10 +1402,12 @@ async function clearWishlist() {
   if (!ok) return;
 
   try {
-    await db.collection('users').doc(user.uid).set({
+    // update(), not set({merge:true}) — see clearCollection: merging an empty
+    // map leaves every server-side count in place.
+    await updateUserDoc({
       wishlist: [],
       wishlistCounts: {}
-    }, { merge: true });
+    });
 
     window.userWishlist = new Set();
     window.userWishlistCounts = new Map();
@@ -1608,17 +1759,20 @@ async function saveWishlistMaxPrice(cardId, rawValue) {
   const val = parseFloat(cleaned);
 
   try {
-    const update = {
-      [`priceAlerts.telegram.lastNotified.${cardId}`]: firebase.firestore.FieldValue.delete(),
-    };
+    // Varargs + FieldPath: a cardId containing '[' or ']' would otherwise be
+    // parsed as a field path and rejected (see countFieldRef).
+    const alertPath = countFieldRef('priceAlerts', 'telegram', 'lastNotified', cardId);
+    const pricePath = countFieldRef('wishlistMaxPrices', cardId);
     if (!cleaned || isNaN(val) || val <= 0) {
-      update[`wishlistMaxPrices.${cardId}`] = firebase.firestore.FieldValue.delete();
-      await db.collection('users').doc(user.uid).update(update);
+      await db.collection('users').doc(user.uid).update(
+        alertPath, firebase.firestore.FieldValue.delete(),
+        pricePath, firebase.firestore.FieldValue.delete());
       if (window.userWishlistMaxPrices) window.userWishlistMaxPrices.delete(cardId);
     } else {
       const rounded = Math.round(val * 100) / 100;
-      update[`wishlistMaxPrices.${cardId}`] = rounded;
-      await db.collection('users').doc(user.uid).update(update);
+      await db.collection('users').doc(user.uid).update(
+        alertPath, firebase.firestore.FieldValue.delete(),
+        pricePath, rounded);
       if (!window.userWishlistMaxPrices) window.userWishlistMaxPrices = new Map();
       window.userWishlistMaxPrices.set(cardId, rounded);
     }
@@ -5151,7 +5305,11 @@ async function dexImportExecute(mode) {
           collectionCounts: countsObj
         };
 
-        await db.collection('users').doc(user.uid).set(updateData, { merge: true });
+        // update(), not set({merge:true}): countsObj is the FULL intended state.
+        // A deep merge would keep every pre-existing count on the server, so an
+        // import in "replace" mode left the old cards behind as phantom
+        // ownership (inflating the binder's "you already own this").
+        await updateUserDoc(updateData);
 
         window.userCollection      = newCollection;
         window.userCollectionCounts = newCounts;
@@ -5213,9 +5371,11 @@ async function addToTradelistWithCount(cardId, count) {
   const qty = Math.max(1, Math.min(count, 4));
   try {
     await db.collection('users').doc(user.uid).update({
-      tradelist: firebase.firestore.FieldValue.arrayUnion(cardId),
-      [`tradelistCounts.${cardId}`]: qty
+      tradelist: firebase.firestore.FieldValue.arrayUnion(cardId)
     });
+    await db.collection('users').doc(user.uid).update(
+      countFieldRef('tradelistCounts', cardId), qty
+    );
     if (!window.userTradelist) window.userTradelist = new Set();
     window.userTradelist.add(cardId);
     if (!window.userTradelistCounts) window.userTradelistCounts = new Map();
@@ -5239,9 +5399,11 @@ async function addToTradelist(cardId) {
   const newCount = currentCount + 1;
   try {
     await db.collection('users').doc(user.uid).update({
-      tradelist: firebase.firestore.FieldValue.arrayUnion(cardId),
-      [`tradelistCounts.${cardId}`]: newCount
+      tradelist: firebase.firestore.FieldValue.arrayUnion(cardId)
     });
+    await db.collection('users').doc(user.uid).update(
+      countFieldRef('tradelistCounts', cardId), newCount
+    );
     if (!window.userTradelist) window.userTradelist = new Set();
     window.userTradelist.add(cardId);
     if (!window.userTradelistCounts) window.userTradelistCounts = new Map();
@@ -5265,15 +5427,17 @@ async function removeFromTradelist(cardId) {
   try {
     if (newCount <= 0) {
       await db.collection('users').doc(user.uid).update({
-        tradelist: firebase.firestore.FieldValue.arrayRemove(cardId),
-        [`tradelistCounts.${cardId}`]: firebase.firestore.FieldValue.delete()
+        tradelist: firebase.firestore.FieldValue.arrayRemove(cardId)
       });
+      await db.collection('users').doc(user.uid).update(
+        countFieldRef('tradelistCounts', cardId), firebase.firestore.FieldValue.delete()
+      );
       window.userTradelist.delete(cardId);
       if (window.userTradelistCounts) window.userTradelistCounts.delete(cardId);
     } else {
-      await db.collection('users').doc(user.uid).update({
-        [`tradelistCounts.${cardId}`]: newCount
-      });
+      await db.collection('users').doc(user.uid).update(
+        countFieldRef('tradelistCounts', cardId), newCount
+      );
       if (window.userTradelistCounts) window.userTradelistCounts.set(cardId, newCount);
     }
     showNotification(newCount > 0 ? `Trade list: ${newCount}x` : 'Removed from trade list', 'success');
@@ -5306,11 +5470,12 @@ async function clearTradelist() {
   const ok = confirm(getLang()==='de' ? 'Wirklich die gesamte Trade List leeren?' : 'Really clear the entire trade list?');
   if (!ok) return;
   try {
-    await db.collection('users').doc(user.uid).set({
+    // update(), not set({merge:true}) — see clearCollection.
+    await updateUserDoc({
       tradelist: [],
       tradelistCounts: {},
       tradelistMinPrices: {}
-    }, { merge: true });
+    });
     window.userTradelist = new Set();
     window.userTradelistCounts = new Map();
     window.userTradelistMinPrices = new Map();
@@ -5529,17 +5694,20 @@ async function saveTradelistMinPrice(cardId, rawValue) {
   const cleaned = rawValue.replace(',', '.').trim();
   const val = parseFloat(cleaned);
   try {
-    const update = {
-      [`priceAlerts.telegram.lastNotified.${cardId}`]: firebase.firestore.FieldValue.delete(),
-    };
+    // Varargs + FieldPath: a cardId containing '[' or ']' would otherwise be
+    // parsed as a field path and rejected (see countFieldRef).
+    const alertPath = countFieldRef('priceAlerts', 'telegram', 'lastNotified', cardId);
+    const pricePath = countFieldRef('tradelistMinPrices', cardId);
     if (!cleaned || isNaN(val) || val <= 0) {
-      update[`tradelistMinPrices.${cardId}`] = firebase.firestore.FieldValue.delete();
-      await db.collection('users').doc(user.uid).update(update);
+      await db.collection('users').doc(user.uid).update(
+        alertPath, firebase.firestore.FieldValue.delete(),
+        pricePath, firebase.firestore.FieldValue.delete());
       if (window.userTradelistMinPrices) window.userTradelistMinPrices.delete(cardId);
     } else {
       const rounded = Math.round(val * 100) / 100;
-      update[`tradelistMinPrices.${cardId}`] = rounded;
-      await db.collection('users').doc(user.uid).update(update);
+      await db.collection('users').doc(user.uid).update(
+        alertPath, firebase.firestore.FieldValue.delete(),
+        pricePath, rounded);
       if (!window.userTradelistMinPrices) window.userTradelistMinPrices = new Map();
       window.userTradelistMinPrices.set(cardId, rounded);
     }

@@ -363,6 +363,35 @@ function _scheduleIntlIdMigration(userId) {
   }, { once: true });
 }
 
+// Runs the legacy Prize Pack id migration once the PPS index is available.
+// Mirrors _scheduleIntlIdMigration: migrate now if the data is already there,
+// otherwise wait for resources to settle. Cheap no-op when nothing to migrate.
+function _scheduleLegacyPrizePackMigration() {
+  const hasLegacy = (set) => {
+    if (!(set instanceof Set)) return false;
+    for (const id of set) {
+      if (typeof id === 'string' && /\|PPS\d+\|/.test(id)) return true;
+    }
+    return false;
+  };
+  if (!hasLegacy(window.userCollection) &&
+      !hasLegacy(window.userWishlist) &&
+      !hasLegacy(window.userTradelist)) return;
+
+  const run = () => {
+    if (typeof window.migrateLegacyPrizePackKeys !== 'function') return;
+    Promise.resolve(window.migrateLegacyPrizePackKeys()).then(moved => {
+      if (moved && typeof updateCollectionUI === 'function') updateCollectionUI();
+    }).catch(err => console.error('[prizepack] migration failed:', err));
+  };
+
+  if (window.prizePackImagesIndex && Object.keys(window.prizePackImagesIndex).length) {
+    run();
+  } else {
+    window.addEventListener('app:resources-settled', run, { once: true });
+  }
+}
+
 async function loadUserData(userId) {
   // Paint last-known state from the mirror immediately so the user
   // sees their collection / wishlist instead of zeros while Firestore
@@ -530,6 +559,11 @@ async function loadUserData(userId) {
           window.userTradelistCounts.set(cardId, 1);
         }
       });
+
+      // Collection, wishlist and trade list are all populated now — remap any
+      // legacy "Name|PPS{series}|{number}" ids to the set-qualified shape.
+      // Needs data/prizepack_official_images.json, so wait for it if necessary.
+      _scheduleLegacyPrizePackMigration();
       const tMinPrices = data.tradelistMinPrices || {};
       window.userTradelistMinPrices = new Map();
       if (typeof tMinPrices === 'object') {

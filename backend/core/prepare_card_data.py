@@ -53,6 +53,22 @@ def _file_md5(path: str, chunk_size: int = 1 << 20) -> str:
 
 setup_console_encoding()
 
+
+def _parse_eur(value) -> float:
+    """'12,34€' -> 12.34. Returns 0.0 for empty/unparseable input.
+
+    Deliberately lenient: the only caller uses it to spot a zero price, and a
+    value it cannot read must not be treated as a price worth showing.
+    """
+    s = str(value or '').replace('€', '').replace('.', '').replace(',', '.').strip()
+    if not s:
+        return 0.0
+    try:
+        return float(s)
+    except ValueError:
+        return 0.0
+
+
 def load_csv(filepath: str) -> List[Dict]:
     cards = []
     if os.path.exists(filepath):
@@ -199,9 +215,22 @@ def create_merged_database():
         key = f"{card.get('set')}_{card.get('number')}"
         
         if key in prices_dict:
-            card['eur_price'] = prices_dict[key].get('eur_price', '')
-            card['eur_low'] = prices_dict[key].get('eur_low', '')
-            card['price_last_updated'] = prices_dict[key].get('last_updated', '')
+            row = prices_dict[key]
+            price = row.get('eur_price', '')
+            low = row.get('eur_low', '')
+            # Cardmarket publishes trend 0 to mean "no trend can be computed",
+            # not "worthless". RCL 200 Boss's Orders ships as trend 0 with a
+            # cheapest offer of 85 EUR, and the site showed it at 0,00 EUR --
+            # on a heavily played card. When the trend is unusable but a real
+            # cheapest offer exists, show that instead of a false zero.
+            # price_status comes from the merger; the numeric test is the
+            # fallback for rows written before that column existed.
+            if low and (row.get('price_status') == 'no_trend'
+                        or _parse_eur(price) == 0.0):
+                price = low
+            card['eur_price'] = price
+            card['eur_low'] = low
+            card['price_last_updated'] = row.get('last_updated', '')
         else:
             card['eur_price'] = card.get('eur_price', '')
             card['eur_low'] = card.get('eur_low', '')

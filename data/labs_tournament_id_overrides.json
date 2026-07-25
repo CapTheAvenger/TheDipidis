@@ -1,6 +1,10 @@
 {
   "comment": "Manual cards-tid → labs-tid overrides for tournaments where automatic name-matching fails. Used by backend/scrapers/tournament_scraper_JH.py (_resolve_labs_tournament_id) for new scrapes and by backend/scrapers/backfill_labs_tournament_id.py for historical overview rows. Cause of mismatch is in 'reason' for each entry. Add new entries when the limitlesstcg.com name diverges from the labs.limitlesstcg.com name in a way the normalize step can't bridge.",
   "overrides": {
+    "518": {
+      "labs_tournament_id": "0070",
+      "reason": "NAIC 2026 abbreviation vs labs 'International Championship New Orleans' — same event 2026-06-10 (same city, same date, same event type; exactly the pattern of its 2025 sibling, cards 463 -> labs 0034). The name normaliser cannot bridge it: it strips 'international/championship/limitless' but nothing strips the acronym 'naic' or the year, so the keys are 'new orleans' vs 'naic 2026 new orleans'."
+    },
     "533": {
       "labs_tournament_id": "0059",
       "reason": "limitless Spanish 'Sevilla' vs labs English 'Seville' — same event 2026-03-28"

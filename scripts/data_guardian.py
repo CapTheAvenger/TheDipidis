@@ -69,8 +69,11 @@ CONSUMERS = {
     },
     "price_data.csv": {
         "required": ["name", "set", "number", "eur_price", "eur_low",
-                     "cardmarket_url", "last_updated"],
-        "purpose": "Per-print market prices consumed by the site and the bot.",
+                     "cardmarket_url", "last_updated", "price_status"],
+        "purpose": "Per-print market prices consumed by the site and the bot. "
+                   "price_status distinguishes ok / no_trend / stale / no_data — "
+                   "eur_price alone cannot: Cardmarket publishes trend 0 to mean "
+                   "'no trend computable', including on an 85 EUR card.",
     },
 }
 

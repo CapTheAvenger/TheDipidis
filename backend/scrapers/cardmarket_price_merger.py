@@ -83,7 +83,7 @@ def main():
 
     now = datetime.now().isoformat()
     out_rows = []
-    stats = {'cardmarket': 0, 'preserved': 0, 'no_data': 0}
+    stats = {'cardmarket': 0, 'preserved': 0, 'no_data': 0, 'no_trend': 0}
 
     for c in cards:
         if not c.get('number'):
@@ -96,14 +96,27 @@ def main():
         guide_entry = guide.get(idp) if idp else None
 
         if guide_entry:
+            # Cardmarket uses trend == 0 (and null) to mean "no trend can be
+            # computed", NOT "this card is worthless". idProduct 653295
+            # (RCL 200 Boss's Orders) is literally {'trend': 0, 'low': 85}:
+            # a card whose cheapest offer is 85 EUR, published as 0. Copying
+            # that faithfully into eur_price is correct, but a consumer that
+            # reads eur_price as *the* price then shows an 85 EUR card at
+            # 0,00 EUR. price_status says which of the two it is so nobody has
+            # to guess from the number itself.
+            trend = guide_entry.get('trend')
+            has_trend = trend not in (None, '', 0, 0.0)
+            if not has_trend:
+                stats['no_trend'] += 1
             out_rows.append({
                 'name': name,
                 'set': c['set'],
                 'number': c['number'],
-                'eur_price': fmt_price(guide_entry.get('trend')),
+                'eur_price': fmt_price(trend),
                 'eur_low': fmt_price(guide_entry.get('low')),
                 'cardmarket_url': cm_url,
                 'last_updated': now,
+                'price_status': 'ok' if has_trend else 'no_trend',
             })
             stats['cardmarket'] += 1
         elif key in existing:
@@ -116,16 +129,43 @@ def main():
                 'eur_low': row.get('eur_low', ''),
                 'cardmarket_url': cm_url or row.get('cardmarket_url', ''),
                 'last_updated': row.get('last_updated', ''),
+                # Carried over from an earlier run: today's guide has no entry
+                # for this product. The price is real but not current, which
+                # last_updated already shows and price_status now makes
+                # filterable.
+                'price_status': 'stale' if (row.get('eur_price') or row.get('eur_low')) else 'no_data',
             })
             stats['preserved'] += 1
         else:
+            # Emit the row instead of skipping it. Silently omitting a card
+            # left THREE states behind one column -- a value, an empty cell,
+            # and an absent row -- and only a consumer that also reads
+            # all_cards_merged.csv could tell "no price" from "no such card".
+            # (PBL 74 / 83 / 84 are exactly this: real cards, no Cardmarket
+            # product.) Measured cost: 9 extra rows on 20,382.
+            out_rows.append({
+                'name': name,
+                'set': c['set'],
+                'number': c['number'],
+                'eur_price': '',
+                'eur_low': '',
+                'cardmarket_url': cm_url,
+                'last_updated': '',
+                'price_status': 'no_data',
+            })
             stats['no_data'] += 1
 
-    logger.info("Result: %s from Cardmarket | %s preserved (Limitless/historic) | %s no data",
-                stats['cardmarket'], stats['preserved'], stats['no_data'])
+    logger.info("Result: %s from Cardmarket (%s without a usable trend) | "
+                "%s preserved (Limitless/historic) | %s no data",
+                stats['cardmarket'], stats['no_trend'], stats['preserved'], stats['no_data'])
 
+    # extrasaction='ignore' below means a key missing from THIS list is dropped
+    # without a word. Any new column must be added here in the same commit or
+    # the next daily run silently deletes it again. price_status goes LAST so
+    # positional readers (if any exist) keep working -- data/_consumers.md
+    # documents adding a column as safe, removing or reordering one as not.
     fieldnames = ['name', 'set', 'number', 'eur_price', 'eur_low',
-                  'cardmarket_url', 'last_updated']
+                  'cardmarket_url', 'last_updated', 'price_status']
 
     def _write(f):
         w = csv.DictWriter(f, fieldnames=fieldnames, extrasaction='ignore')

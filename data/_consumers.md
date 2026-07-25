@@ -66,11 +66,29 @@ Each Prize Pack card mapped to its **original** print (`set_code` + `set_number`
 the join key into any card database) and to both official image URLs.
 
 ### `price_data.csv`
-`name, set, number, eur_price, eur_low, cardmarket_url, last_updated`
+`name, set, number, eur_price, eur_low, cardmarket_url, last_updated, price_status`
 
 Per-print market prices. `eur_price` is the trend/average, `eur_low` the cheapest
 current offer — a card legitimately shows both (e.g. 13,07 € average vs. "from
 4,89 €"). Rebuilt daily.
+
+**Read `price_status` before trusting `eur_price`.** Cardmarket publishes
+`trend: 0` to mean *no trend can be computed*, not *this card is worthless* —
+idProduct 653295 (RCL 200 Boss's Orders) ships as `{"trend": 0, "low": 85}`,
+an 85 € card. `eur_price` copies that faithfully, so a consumer reading it as
+*the* price shows an 85 € card at 0,00 €. The column removes the guesswork:
+
+| value      | meaning                                                        |
+|------------|----------------------------------------------------------------|
+| `ok`       | current Cardmarket trend — use `eur_price`                      |
+| `no_trend` | current entry, no usable trend — **fall back to `eur_low`**     |
+| `stale`    | no current entry; price carried over (see `last_updated`)       |
+| `no_data`  | no price at all; the row exists so the card is visible          |
+
+Rows with `price_status=no_data` are new as of 2026-07: the file previously
+omitted them, which left three states behind one column (a value, an empty
+cell, and an absent row) and made "no price" indistinguishable from "no such
+card" without also reading `all_cards_merged.csv`. Currently 11 rows.
 
 ## Rate limits worth knowing
 

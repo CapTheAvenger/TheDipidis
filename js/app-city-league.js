@@ -1108,10 +1108,16 @@
         // Keyed by format: 'current' and 'past' are different files, and a
         // single unkeyed promise would hand the wrong rotation's rows to
         // whichever view asked second after a format switch.
-        const _clAnalysisCache = new Map();   // format -> Promise<rows>
+        const _clAnalysisCache = new Map();   // format -> { p, ts }
+        // Deduplicating the four fetches must not turn into "never refresh":
+        // a PWA left open across a scraper run would show yesterday's rows
+        // with no way back short of a reload. Ten minutes is far longer than
+        // any single view's worth of re-asks and far shorter than a session.
+        const CL_ANALYSIS_TTL_MS = 10 * 60 * 1000;
         function getCityLeagueAnalysisData(format, analysisUrl) {
             const key = format || 'current';
-            if (_clAnalysisCache.has(key)) return _clAnalysisCache.get(key);
+            const hit = _clAnalysisCache.get(key);
+            if (hit && (Date.now() - hit.ts) < CL_ANALYSIS_TTL_MS) return hit.p;
             const url = analysisUrl || `${BASE_PATH}${key === 'past'
                 ? 'city_league_analysis_past.csv' : 'city_league_analysis.csv'}`;
             const p = fetch(`${url}?t=${Date.now()}`)
@@ -1132,10 +1138,12 @@
                     _clAnalysisCache.delete(key);
                     return [];
                 });
-            _clAnalysisCache.set(key, p);
+            _clAnalysisCache.set(key, { p, ts: Date.now() });
             return p;
         }
         window.getCityLeagueAnalysisData = getCityLeagueAnalysisData;
+        // Explicit escape hatch for a manual refresh affordance.
+        window.invalidateCityLeagueAnalysisCache = () => _clAnalysisCache.clear();
 
         async function loadCityLeagueAnalysis() {
             devLog('Loading City League Analysis...');
@@ -3857,10 +3865,24 @@
             const _isAceSpecCentral = (typeof window.isAceSpec === 'function')
                 ? window.isAceSpec
                 : () => false;
+            // Floor, not a replacement. isAceSpec reads aceSpecsList, which
+            // starts empty and is only filled by the data/ace_specs.json
+            // fetch; if that fetch fails it returns false for everything and
+            // the Ace Spec block silently empties instead of degrading. The
+            // rarity / rules checks below are known-unreliable ("CSV
+            // is_ace_spec is buggy"), so keep the names that used to work as
+            // a last resort. Deliberately NOT the source of truth — it is the
+            // drifted list that caused the bug this replaced.
+            const _ACE_SPEC_FLOOR = new Set(['prime catcher','unfair stamp','master ball',
+                'maximum belt',"hero's cape",'awakening drum','reboot pod','survival brace',
+                'grand tree','sparkling crystal','dangerous laser','scoop up cyclone',
+                'computer search','dowsing machine','rock guard','life dew','g booster',
+                'g scope','legacy energy','secret box','hyper aroma','neo upper energy',
+                'scramble switch','deluxe bomb','megaton blower','amulet of hope','poké vital a']);
             data.forEach(card => {
                 // Check if card is Ace Spec (exclusive category)
                 const _cn = String(card.card_name || card.name || '').trim().toLowerCase();
-                const isAceSpec = _isAceSpecCentral(_cn) ||
+                const isAceSpec = _isAceSpecCentral(_cn) || _ACE_SPEC_FLOOR.has(_cn) ||
                                   (card.rarity && card.rarity.toLowerCase().includes('ace spec')) ||
                                   (Array.isArray(card.rules) && card.rules.some(r => r.toUpperCase().includes('ACE SPEC')));
                 

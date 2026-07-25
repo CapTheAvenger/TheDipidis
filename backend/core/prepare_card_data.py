@@ -60,9 +60,29 @@ def _parse_eur(value) -> float:
     Deliberately lenient: the only caller uses it to spot a zero price, and a
     value it cannot read must not be treated as a price worth showing.
     """
-    s = str(value or '').replace('€', '').replace('.', '').replace(',', '.').strip()
+    s = str(value or '').replace('€', '').replace(' ', '').strip()
     if not s:
         return 0.0
+    # Both separator conventions reach this file: the merger writes German
+    # ('1.671,68'), but 13 rows carried over from older Limitless scrapes are
+    # US-style ('1,671.68'). Blindly stripping '.' read the latter as 1.67 --
+    # a 1000x error, harmless only because those rows happen to have no
+    # eur_low to compare against today. Decide by which separator comes last.
+    last_dot, last_comma = s.rfind('.'), s.rfind(',')
+    if last_dot >= 0 and last_comma >= 0:
+        # Both present: the LAST one is the decimal separator.
+        if last_dot > last_comma:
+            s = s.replace(',', '')                      # 1,671.68
+        else:
+            s = s.replace('.', '').replace(',', '.')    # 1.671,68
+    elif last_dot >= 0 or last_comma >= 0:
+        # Only one separator, so it is decimal or thousands depending on how
+        # many digits follow it. Prices carry two decimals and thousands come
+        # in threes, so the group length decides: '12,34' is a price, '1,234'
+        # is a thousand.
+        pos = max(last_dot, last_comma)
+        s = (s[:pos] + s[pos + 1:]) if len(s) - pos - 1 == 3 else \
+            (s[:pos] + '.' + s[pos + 1:])
     try:
         return float(s)
     except ValueError:
@@ -122,7 +142,13 @@ def create_merged_database():
     # Load frontend prices first (may be more complete from prior runs)
     for p in load_csv(frontend_prices):
         key = f"{p.get('set')}_{p.get('number')}"
-        if p.get('eur_price'):
+        # A row with only eur_low still carries a real, buyable price. Gating
+        # on eur_price alone dropped it before the fallback below could use it,
+        # which is why SP 60 Duraludon (no trend, 50,00 EUR cheapest offer) and
+        # six SVE/MEE energies still showed nothing after the trend_below_low
+        # work. Cardmarket returns trend null on those, not 0, so fmt_price
+        # writes '' and the truthiness test discarded the row.
+        if p.get('eur_price') or p.get('eur_low'):
             prices_dict[key] = p
     fe_count = len(prices_dict)
     # Backend prices override when they are newer (latest scrape).
@@ -132,7 +158,7 @@ def create_merged_database():
     be_override = 0
     for p in load_csv(backend_prices):
         key = f"{p.get('set')}_{p.get('number')}"
-        if not p.get('eur_price'):
+        if not (p.get('eur_price') or p.get('eur_low')):
             continue
         existing = prices_dict.get(key)
         if not existing:

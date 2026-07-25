@@ -317,7 +317,12 @@ jobs:
       - name: Publish built version as a job output
         id: builtversion
         run: |
-          v="$(python3 -c "import json;print(json.load(open('version.json'))['version'])")"
+          # _site/version.json, NOT the repo's. The cache-bust step rewrites it
+          # to "<buildtime>-<sha>" (e.g. 202607252301-c193317), which is what
+          # the site actually serves; the repo's committed value is only the
+          # local bump-version.sh stamp. Comparing against the repo value made
+          # the live check fail on a deploy that had in fact succeeded.
+          v="$(python3 -c "import json;print(json.load(open('_site/version.json'))['version'])")"
           echo "version=$v" >> "$GITHUB_OUTPUT"
           echo "built version: $v"
 

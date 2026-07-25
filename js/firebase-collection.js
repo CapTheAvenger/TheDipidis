@@ -256,9 +256,22 @@ async function addToCollection(cardId) {
       // Roll the optimistic change back so the UI never claims a card is owned
       // when the server refused it.
       console.error('[collection] persist failed, reverting:', err);
-      if (!hadBefore) window.userCollection.delete(cardId);
-      if (currentCount > 0) window.userCollectionCounts.set(cardId, currentCount);
-      else window.userCollectionCounts.delete(cardId);
+      // Undo THIS tap's increment rather than replaying the count captured
+      // when it started. Two rapid taps on an unowned card produce two
+      // in-flight writes; if both reject, replaying the snapshots left the
+      // Set saying "absent" while the counts Map said 1, and the next tap
+      // then wrote 2 to a server holding 0. Decrementing and deriving Set
+      // membership from the result keeps the two structures agreeing no
+      // matter how many rollbacks interleave.
+      const counts = window.userCollectionCounts;
+      const reverted = (counts.get(cardId) || 0) - 1;
+      if (reverted > 0) {
+        counts.set(cardId, reverted);
+        window.userCollection.add(cardId);
+      } else {
+        counts.delete(cardId);
+        if (!hadBefore) window.userCollection.delete(cardId);
+      }
       updateCardUI(cardId);
       showNotification(getLang() === 'de'
         ? 'Konnte nicht gespeichert werden'
@@ -5399,10 +5412,13 @@ async function addToTradelistWithCount(cardId, count) {
   if (!user) { showNotification('Please sign in to use this feature', 'error'); return; }
   const qty = Math.max(1, Math.min(count, 4));
   try {
-    await db.collection('users').doc(user.uid).update({
-      tradelist: firebase.firestore.FieldValue.arrayUnion(cardId)
-    });
+    // ONE call, not two. Split into two updates this was non-atomic: a
+    // rejection on the second left the card in `tradelist` with no count,
+    // and the loader backfills a missing count as 1 — the user's 3x
+    // silently became 1x. update() takes the array field and the FieldPath
+    // in the same varargs call, exactly as the collection path does.
     await db.collection('users').doc(user.uid).update(
+      'tradelist', firebase.firestore.FieldValue.arrayUnion(cardId),
       countFieldRef('tradelistCounts', cardId), qty
     );
     if (!window.userTradelist) window.userTradelist = new Set();
@@ -5427,10 +5443,9 @@ async function addToTradelist(cardId) {
   if (currentCount >= 4) { showNotification('Maximum 4 copies per card', 'info'); return; }
   const newCount = currentCount + 1;
   try {
-    await db.collection('users').doc(user.uid).update({
-      tradelist: firebase.firestore.FieldValue.arrayUnion(cardId)
-    });
+    // Single atomic write — see addToTradelistWithCount.
     await db.collection('users').doc(user.uid).update(
+      'tradelist', firebase.firestore.FieldValue.arrayUnion(cardId),
       countFieldRef('tradelistCounts', cardId), newCount
     );
     if (!window.userTradelist) window.userTradelist = new Set();
@@ -5455,10 +5470,10 @@ async function removeFromTradelist(cardId) {
   const newCount = currentCount - 1;
   try {
     if (newCount <= 0) {
-      await db.collection('users').doc(user.uid).update({
-        tradelist: firebase.firestore.FieldValue.arrayRemove(cardId)
-      });
+      // Single atomic write: split, a rejection on the second call left an
+      // orphaned tradelistCounts key behind for a card no longer on the list.
       await db.collection('users').doc(user.uid).update(
+        'tradelist', firebase.firestore.FieldValue.arrayRemove(cardId),
         countFieldRef('tradelistCounts', cardId), firebase.firestore.FieldValue.delete()
       );
       window.userTradelist.delete(cardId);

@@ -430,6 +430,45 @@ async function loadUserData(userId) {
         return out;
       }
 
+      // Flatten the NESTED form back to flat card ids on the server, once.
+      //
+      // 185 card names contain a '.' ("Arceus LV.X", "Galarian Mr. Mime",
+      // "Exp. Share"). update() parses a dotted string key as a field PATH, so
+      // those were stored as real nesting:
+      //     collectionCounts: { "Arceus LV": { "X|AR|94": 2 } }
+      // flattenCountsObject reconstructs the correct flat id from that, so
+      // reads have always worked. But the FieldPath writes introduced with
+      // countFieldRef store the flat key literally, so both shapes can now
+      // exist for the same card and which one wins depends on the order
+      // Firestore returns the fields in. That is not something to leave
+      // load-bearing. Write the flattened value under the flat key and drop
+      // the nested parent — in that order, so a failed delete only leaves the
+      // duplicate that is already there.
+      async function collapseNestedCounts(fieldName, rawMap) {
+        if (!rawMap || typeof rawMap !== 'object') return;
+        const nestedParents = Object.keys(rawMap).filter(
+          k => rawMap[k] && typeof rawMap[k] === 'object' && !Array.isArray(rawMap[k]));
+        if (!nestedParents.length) return;
+        const flat = flattenCountsObject(rawMap);
+        try {
+          const ref = window.db.collection('users').doc(userId);
+          const FP = firebase.firestore.FieldPath;
+          const args = [];
+          Object.entries(flat).forEach(([cardId, val]) => {
+            args.push(new FP(fieldName, cardId), val);
+          });
+          if (args.length) await ref.update(...args);
+          const del = [];
+          nestedParents.forEach(parent => {
+            del.push(new FP(fieldName, parent), firebase.firestore.FieldValue.delete());
+          });
+          await ref.update(...del);
+          console.info(`[${fieldName}] collapsed ${nestedParents.length} nested key(s) to flat card ids`);
+        } catch (e) {
+          console.warn(`[${fieldName}] could not collapse nested counts:`, e);
+        }
+      }
+
       // Collection
       const rawCollection = Array.isArray(data.collection) ? data.collection.filter(v => typeof v === 'string' && v.includes('|')) : [];
       const counts = flattenCountsObject(data.collectionCounts || {});
@@ -559,6 +598,13 @@ async function loadUserData(userId) {
           window.userTradelistCounts.set(cardId, 1);
         }
       });
+
+      // One-time collapse of nested count keys (card names containing a '.').
+      // Runs after all three lists are read, so a failure cannot interrupt the
+      // load; it only ever touches documents that actually carry nesting.
+      collapseNestedCounts('collectionCounts', data.collectionCounts);
+      collapseNestedCounts('wishlistCounts', data.wishlistCounts);
+      collapseNestedCounts('tradelistCounts', data.tradelistCounts);
 
       // Collection, wishlist and trade list are all populated now — remap any
       // legacy "Name|PPS{series}|{number}" ids to the set-qualified shape.

@@ -62,10 +62,22 @@ describe('city_league_analysis CSV is fetched once per format', () => {
         // hand the wrong rotation's rows to whichever view asked second.
         assert.ok(CITY_LEAGUE.includes('_clAnalysisCache'),
             'the format-keyed cache is gone');
-        assert.ok(/_clAnalysisCache\.has\(key\)/.test(CITY_LEAGUE),
+        assert.ok(/_clAnalysisCache\.get\(key\)/.test(CITY_LEAGUE),
             'the loader no longer looks up by format key');
         assert.ok(/_clAnalysisCache\.set\(key,/.test(CITY_LEAGUE),
             'the loader no longer stores by format key');
+    });
+
+    it('the cache expires, so a long-lived tab can still refresh', () => {
+        // Deduplicating four fetches must not become "never refresh": a PWA
+        // left open across a scraper run would otherwise be stuck on stale
+        // rows until reload.
+        assert.ok(/CL_ANALYSIS_TTL_MS/.test(CITY_LEAGUE),
+            'the analysis cache has no expiry');
+        assert.ok(/Date\.now\(\) - hit\.ts\) < CL_ANALYSIS_TTL_MS/.test(CITY_LEAGUE),
+            'the cache lookup no longer checks the age of the entry');
+        assert.ok(CITY_LEAGUE.includes('window.invalidateCityLeagueAnalysisCache'),
+            'there is no explicit way to force a refresh');
     });
 
     it('a failed load is not cached, so the next view retries', () => {

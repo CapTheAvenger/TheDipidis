@@ -78,12 +78,19 @@ idProduct 653295 (RCL 200 Boss's Orders) ships as `{"trend": 0, "low": 85}`,
 an 85 € card. `eur_price` copies that faithfully, so a consumer reading it as
 *the* price shows an 85 € card at 0,00 €. The column removes the guesswork:
 
-| value      | meaning                                                        |
-|------------|----------------------------------------------------------------|
-| `ok`       | current Cardmarket trend — use `eur_price`                      |
-| `no_trend` | current entry, no usable trend — **fall back to `eur_low`**     |
-| `stale`    | no current entry; price carried over (see `last_updated`)       |
-| `no_data`  | no price at all; the row exists so the card is visible          |
+| value | meaning |
+|---|---|
+| `ok`              | current Cardmarket trend — use `eur_price`                                    |
+| `no_trend`        | current entry, no usable trend — **fall back to `eur_low`** (26 rows)         |
+| `trend_below_low` | trend is BELOW the cheapest offer — **use `eur_low`** (110 rows)              |
+| `stale`           | no current entry; price carried over (see `last_updated`)                    |
+| `no_data`         | no price at all; the row exists so the card is visible                       |
+
+`trend_below_low` is the vintage/promo case: the trend is computed from old
+sales while the market moved on. TR 5 Dark Dragonite trends at 0,02 € against a
+cheapest offer of 18,90 € — a 945× gap. Nobody can buy at the trend, so treat
+`eur_low` as the floor. The CSV deliberately keeps Cardmarket's real numbers;
+only thedipidis.app's own display substitutes.
 
 Rows with `price_status=no_data` are new as of 2026-07: the file previously
 omitted them, which left three states behind one column (a value, an empty

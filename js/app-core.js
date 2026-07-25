@@ -2371,6 +2371,10 @@ const BASE_PATH = './data/';
             const normalized = cardName.toLowerCase().trim();
             return aceSpecsList.includes(normalized);
         }
+        // Exported so other modules stop keeping their own copy of the list.
+        // app-city-league.js had a hardcoded 30-name duplicate that had drifted
+        // from data/ace_specs.json in both directions.
+        window.isAceSpec = isAceSpec;
         async function loadPokedexNumbers() {
             try {
                 const ts = new Date().getTime();

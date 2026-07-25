@@ -83,7 +83,8 @@ def main():
 
     now = datetime.now().isoformat()
     out_rows = []
-    stats = {'cardmarket': 0, 'preserved': 0, 'no_data': 0, 'no_trend': 0}
+    stats = {'cardmarket': 0, 'preserved': 0, 'no_data': 0, 'no_trend': 0,
+             'trend_below_low': 0}
 
     for c in cards:
         if not c.get('number'):
@@ -105,18 +106,35 @@ def main():
             # 0,00 EUR. price_status says which of the two it is so nobody has
             # to guess from the number itself.
             trend = guide_entry.get('trend')
+            low = guide_entry.get('low')
             has_trend = trend not in (None, '', 0, 0.0)
             if not has_trend:
                 stats['no_trend'] += 1
+            # A trend BELOW the cheapest current offer is not a price anyone
+            # can pay. It happens on vintage and promo prints whose trend is
+            # computed from old sales while the market has moved: TR 5 Dark
+            # Dragonite trends at 0,02 EUR with a cheapest offer of 18,90 EUR,
+            # a 945x gap. 110 rows are like this. Flagged rather than
+            # rewritten -- the CSV keeps Cardmarket's real numbers, and
+            # consumers decide; prepare_card_data uses eur_low for display.
+            trend_below_low = False
+            try:
+                if has_trend and low not in (None, '') and float(low) > float(trend):
+                    trend_below_low = True
+                    stats['trend_below_low'] += 1
+            except (TypeError, ValueError):
+                pass
             out_rows.append({
                 'name': name,
                 'set': c['set'],
                 'number': c['number'],
                 'eur_price': fmt_price(trend),
-                'eur_low': fmt_price(guide_entry.get('low')),
+                'eur_low': fmt_price(low),
                 'cardmarket_url': cm_url,
                 'last_updated': now,
-                'price_status': 'ok' if has_trend else 'no_trend',
+                'price_status': ('no_trend' if not has_trend
+                                 else 'trend_below_low' if trend_below_low
+                                 else 'ok'),
             })
             stats['cardmarket'] += 1
         elif key in existing:
@@ -155,9 +173,11 @@ def main():
             })
             stats['no_data'] += 1
 
-    logger.info("Result: %s from Cardmarket (%s without a usable trend) | "
+    logger.info("Result: %s from Cardmarket (%s without a usable trend, "
+                "%s with a trend below the cheapest offer) | "
                 "%s preserved (Limitless/historic) | %s no data",
-                stats['cardmarket'], stats['no_trend'], stats['preserved'], stats['no_data'])
+                stats['cardmarket'], stats['no_trend'], stats['trend_below_low'],
+                stats['preserved'], stats['no_data'])
 
     # extrasaction='ignore' below means a key missing from THIS list is dropped
     # without a word. Any new column must be added here in the same commit or

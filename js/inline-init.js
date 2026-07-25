@@ -163,8 +163,13 @@ document.addEventListener('DOMContentLoaded', function () {
         'past-meta':             'past-meta',
         'cards':                 'cards',
         'proxy':                 'proxy',
-        'playtester':            'sandbox',
-        'sandbox':               'sandbox',
+        // The in-app playtester was retired in favour of the TCG Showdown
+        // handoff, and #playtester / #sandbox kept pointing at a tab id that
+        // no longer has an element. switchTab then hid every tab and showed
+        // none, so a shared link landed the user on a blank page. Send them
+        // to the overview and say where the playtester went.
+        'playtester':            'meta-analysis-hub',
+        'sandbox':               'meta-analysis-hub',
         'calculator':            'calculator',
         'probability':           'calculator',
         'wahrscheinlichkeit':    'calculator',
@@ -226,6 +231,22 @@ document.addEventListener('DOMContentLoaded', function () {
         const rawTab = (qIdx >= 0 ? rawFull.slice(0, qIdx) : rawFull).toLowerCase();
         const tabId = HASH_ALIASES[rawTab];
         if (!tabId) return;
+        // A hash that resolves to a tab id with no element in the DOM must
+        // not be routed: switchTab deactivates every tab and then finds
+        // nothing to activate, leaving a blank page with no way back except
+        // editing the URL. Retired tabs are the way this happens.
+        if (!document.getElementById(tabId)) {
+            console.warn('[deep-link] no tab element for', tabId, '— ignoring hash');
+            return;
+        }
+        const RETIRED_HASHES = { playtester: 1, sandbox: 1 };
+        if (RETIRED_HASHES[rawTab] && typeof showNotification === 'function') {
+            const de = typeof getLang === 'function' && getLang() === 'de';
+            setTimeout(() => showNotification(de
+                ? 'Der Playtester läuft jetzt extern über TCG Showdown — im Menü unter „Werkzeuge".'
+                : 'The playtester now runs externally on TCG Showdown — in the menu under "Tools".',
+                'info'), 600);
+        }
         const params = qIdx >= 0
             ? new URLSearchParams(rawFull.slice(qIdx + 1))
             : null;

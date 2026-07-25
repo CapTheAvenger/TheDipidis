@@ -69,9 +69,18 @@
         if (prizeResEl) prizeResEl.textContent = prizeProb.toFixed(2) + '%';
 
         // 3. Topdeck-Wahrscheinlichkeit (nächste Karte nach Hand + Preise)
+        //
+        // The denominator is the UNSEEN pool (deck + prizes), not the deck
+        // alone. After the opening hand, deckSize - drawn cards are unseen;
+        // six of them become prizes, but which six is unknown, so every unseen
+        // card is equally likely to be sitting on top of the deck. Dividing by
+        // deckSize - drawn - 6 while still counting every not-in-hand copy in
+        // the numerator overstated the chance on every input, and could exceed
+        // 100 % outright: deck 10, drawn 1, copies 4 gave 4/3 = 133 %.
+        const unseen = Math.max(deckSize - drawn, 0);
         let topdeckProb = 0;
-        if (remaining > 0 && copiesLeft > 0) {
-            topdeckProb = (copiesLeft / remaining) * 100;
+        if (remaining > 0 && copiesLeft > 0 && unseen > 0) {
+            topdeckProb = Math.min(100, (copiesLeft / unseen) * 100);
         }
         const topdeckResEl = document.getElementById('res-topdeck');
         if (topdeckResEl) topdeckResEl.textContent = topdeckProb.toFixed(2) + '%';

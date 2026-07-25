@@ -225,8 +225,21 @@ def create_merged_database():
             # cheapest offer exists, show that instead of a false zero.
             # price_status comes from the merger; the numeric test is the
             # fallback for rows written before that column existed.
-            if low and (row.get('price_status') == 'no_trend'
-                        or _parse_eur(price) == 0.0):
+            #
+            # The same reasoning covers the inverted case: a trend BELOW the
+            # cheapest current offer is not a price anyone can pay. On vintage
+            # and promo prints the trend is computed from old sales while the
+            # market moved on -- TR 5 Dark Dragonite trends at 0,02 EUR
+            # against a 18,90 EUR cheapest offer, a 945x gap, and 110 rows
+            # look like this. eur_low is the honest floor in both cases.
+            #
+            # price_data.csv keeps Cardmarket's real numbers either way; only
+            # what the site DISPLAYS is corrected, and price_status records
+            # which rows were affected.
+            status = row.get('price_status')
+            if low and (status in ('no_trend', 'trend_below_low')
+                        or _parse_eur(price) == 0.0
+                        or _parse_eur(low) > _parse_eur(price)):
                 price = low
             card['eur_price'] = price
             card['eur_low'] = low

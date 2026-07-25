@@ -3815,12 +3815,21 @@
             const spicyCards = [];
             
             // Hardcoded Ace Spec names for reliable detection (CSV is_ace_spec is buggy)
-            const _aceSpecNamesOverview = ['prime catcher','unfair stamp','master ball','maximum belt','hero\'s cape','awakening drum','reboot pod','survival brace','grand tree','neutral center','sparkling crystal','dangerous laser','scoop up cyclone','computer search','dowsing machine','rock guard','life dew','victory star','g booster','g scope','rich energy','legacy energy','secret box','hyper aroma','neo upper energy','scramble switch','deluxe bomb','megaton blower','amulet of hope','pok\u00e9 vital a'];
+            // Was a hardcoded 30-name copy of data/ace_specs.json that had
+            // drifted apart from it: 12 names missing (gold potion, max rod,
+            // crystal edge, ...) and 3 present that the real list does not
+            // contain. A card in either gap rendered in the wrong tier block.
+            // Use the central resolver, which reads the loaded list; keep the
+            // rarity / rules checks as a fallback for rows whose name the list
+            // has not caught up with yet.
+            const _isAceSpecCentral = (typeof window.isAceSpec === 'function')
+                ? window.isAceSpec
+                : () => false;
             data.forEach(card => {
                 // Check if card is Ace Spec (exclusive category)
                 const _cn = String(card.card_name || card.name || '').trim().toLowerCase();
-                const isAceSpec = _aceSpecNamesOverview.includes(_cn) ||
-                                  (card.rarity && card.rarity.toLowerCase().includes('ace spec')) || 
+                const isAceSpec = _isAceSpecCentral(_cn) ||
+                                  (card.rarity && card.rarity.toLowerCase().includes('ace spec')) ||
                                   (Array.isArray(card.rules) && card.rules.some(r => r.toUpperCase().includes('ACE SPEC')));
                 
                 if (isAceSpec) {

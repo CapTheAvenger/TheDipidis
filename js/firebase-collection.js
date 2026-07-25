@@ -1689,7 +1689,11 @@ function openWishlistGridModal() {
 
   window.userWishlist.forEach(cardId => {
     const [cardName, cardSet, cardNumber] = cardId.split('|');
-    const card = allCards.find(c => c.name === cardName && c.set === cardSet && c.number === cardNumber);
+    // Index lookup, not a linear scan: Prize Pack prints live in
+    // cardIndexBySetNumber only, so allCards.find() never saw them and every
+    // stamped card exported without a price. Also O(1) instead of O(20k) per row.
+    const card = _lookupCardBySetNumber(cardSet, cardNumber)
+      || allCards.find(c => c.name === cardName && c.set === cardSet && c.number === cardNumber);
     if (!card || !card.image_url) return;
 
     const wantedCount = window.userWishlistCounts ? (window.userWishlistCounts.get(cardId) || 1) : 1;
@@ -1800,7 +1804,11 @@ function copyWishlistToClipboard() {
 
   window.userWishlist.forEach(cardId => {
     const [cardName, cardSet, cardNumber] = cardId.split('|');
-    const card = allCards.find(c => c.name === cardName && c.set === cardSet && c.number === cardNumber);
+    // Index lookup, not a linear scan: Prize Pack prints live in
+    // cardIndexBySetNumber only, so allCards.find() never saw them and every
+    // stamped card exported without a price. Also O(1) instead of O(20k) per row.
+    const card = _lookupCardBySetNumber(cardSet, cardNumber)
+      || allCards.find(c => c.name === cardName && c.set === cardSet && c.number === cardNumber);
     const count = window.userWishlistCounts ? (window.userWishlistCounts.get(cardId) || 1) : 1;
     const price = card && card.eur_price ? parseLocaleNumber(card.eur_price, 0) : 0;
     const priceStr = (!isNaN(price) && price > 0) ? `${price.toFixed(2).replace('.', ',')} €` : '';
@@ -1881,7 +1889,10 @@ async function copyWishlistForCardmarket() {
   window.userWishlist.forEach(cardId => {
     const [cardName, cardSet, cardNumber] = cardId.split('|');
     if (!cardName) return;
-    const card = allCards.find(c => c && c.name === cardName && c.set === cardSet && c.number === cardNumber);
+    // See the note on the wishlist copy export — index first so Prize Pack
+    // prints resolve at all.
+    const card = _lookupCardBySetNumber(cardSet, cardNumber)
+      || allCards.find(c => c && c.name === cardName && c.set === cardSet && c.number === cardNumber);
     const count = window.userWishlistCounts ? (window.userWishlistCounts.get(cardId) || 1) : 1;
     let url = '';
     if (card && card.cardmarket_url) url = String(card.cardmarket_url).split('?')[0];
@@ -1915,7 +1926,8 @@ async function copyWishlistForCardmarket() {
     // Heuristic: only flag cards where multiple printings of the same
     // name exist in the DB AND the type is Pokémon (Basic / Stage 1
     // / Stage 2 / V / VMAX / etc., not Trainer / Item / Energy).
-    const card = allCards.find(c => c && c.name === it.name && c.set === it.set && c.number === it.number);
+    const card = _lookupCardBySetNumber(it.set, it.number)
+      || allCards.find(c => c && c.name === it.name && c.set === it.set && c.number === it.number);
     const type = card ? (card.type || '') : '';
     const isPokemon = type && !/^(Supporter|Item|Tool|Stadium|Basic Energy|Special Energy|Energy)$/i.test(type);
     return isPokemon;
@@ -5565,7 +5577,11 @@ function updateTradelistUI(searchFilter = '', setFilter = '') {
 
   window.userTradelist.forEach(cardId => {
     const [cardName, cardSet, cardNumber] = cardId.split('|');
-    const card = allCards.find(c => c.name === cardName && c.set === cardSet && c.number === cardNumber);
+    // Index lookup, not a linear scan: Prize Pack prints live in
+    // cardIndexBySetNumber only, so allCards.find() never saw them and every
+    // stamped card exported without a price. Also O(1) instead of O(20k) per row.
+    const card = _lookupCardBySetNumber(cardSet, cardNumber)
+      || allCards.find(c => c.name === cardName && c.set === cardSet && c.number === cardNumber);
     if (card && card.image_url) {
       totalCards++;
       const tradeCount = window.userTradelistCounts ? (window.userTradelistCounts.get(cardId) || 1) : 1;
@@ -5670,7 +5686,11 @@ function openTradelistGridModal() {
   let html = '';
   window.userTradelist.forEach(cardId => {
     const [cardName, cardSet, cardNumber] = cardId.split('|');
-    const card = allCards.find(c => c.name === cardName && c.set === cardSet && c.number === cardNumber);
+    // Index lookup, not a linear scan: Prize Pack prints live in
+    // cardIndexBySetNumber only, so allCards.find() never saw them and every
+    // stamped card exported without a price. Also O(1) instead of O(20k) per row.
+    const card = _lookupCardBySetNumber(cardSet, cardNumber)
+      || allCards.find(c => c.name === cardName && c.set === cardSet && c.number === cardNumber);
     if (!card || !card.image_url) return;
     const tradeCount = window.userTradelistCounts ? (window.userTradelistCounts.get(cardId) || 1) : 1;
     const minPrice = window.userTradelistMinPrices ? (window.userTradelistMinPrices.get(cardId) || 0) : 0;
@@ -5747,7 +5767,11 @@ function copyTradelistToClipboard() {
   let totalVal = 0;
   window.userTradelist.forEach(cardId => {
     const [cardName, cardSet, cardNumber] = cardId.split('|');
-    const card = allCards.find(c => c.name === cardName && c.set === cardSet && c.number === cardNumber);
+    // Index lookup, not a linear scan: Prize Pack prints live in
+    // cardIndexBySetNumber only, so allCards.find() never saw them and every
+    // stamped card exported without a price. Also O(1) instead of O(20k) per row.
+    const card = _lookupCardBySetNumber(cardSet, cardNumber)
+      || allCards.find(c => c.name === cardName && c.set === cardSet && c.number === cardNumber);
     const count = window.userTradelistCounts ? (window.userTradelistCounts.get(cardId) || 1) : 1;
     const price = card && card.eur_price ? parseLocaleNumber(card.eur_price, 0) : 0;
     const priceStr = (!isNaN(price) && price > 0) ? `${price.toFixed(2).replace('.', ',')} \u20ac` : '';

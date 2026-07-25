@@ -70,11 +70,18 @@ CONSUMERS = {
 }
 
 # Inputs that must keep refreshing; stale means a fetch job died quietly.
+# Age is measured from the file's last GIT COMMIT, never its mtime: CI checks out
+# with fetch-depth 1, which stamps every file with the clone time, so an
+# mtime-based check reads 0 days for everything and can never fire. (That was a
+# real dead check here — the detector for silent job death was itself silently
+# dead.)
 FRESHNESS = {
     "price_guide_6.json": 3,       # Cardmarket publishes daily
     "products_singles_6.json": 10,
     "cardmarket_id_mapping.csv": 3,
     "price_data.csv": 3,
+    "cardmarket_card_images.csv": 14,      # weekly job
+    "prizepack_official_images.csv": 14,   # weekly job
 }
 
 COVERAGE_DROP_PP = 10.0   # percentage points a set may lose before we flag it
@@ -136,6 +143,22 @@ def check_schema(findings):
                              f"data/{fn} lost required column(s) {missing} — this breaks consumers"))
 
 
+def _last_commit_date(path):
+    """Date of the file's most recent commit, or None if git can't tell us.
+
+    Deliberately not os.path.getmtime — see the note on FRESHNESS.
+    """
+    import subprocess  # noqa: PLC0415
+    try:
+        out = subprocess.run(
+            ["git", "log", "-1", "--format=%cI", "--", path],
+            cwd=ROOT, capture_output=True, text=True, timeout=20)
+        stamp = (out.stdout or "").strip()
+        return dt.date.fromisoformat(stamp[:10]) if stamp else None
+    except Exception:  # noqa: BLE001
+        return None
+
+
 def check_freshness(findings):
     today = dt.date.today()
     for fn, max_age in FRESHNESS.items():
@@ -143,11 +166,17 @@ def check_freshness(findings):
         if not os.path.exists(p):
             findings.append(("WARN", f"input missing: data/{fn}"))
             continue
-        age = (today - dt.date.fromtimestamp(os.path.getmtime(p))).days
+        committed = _last_commit_date(p)
+        if committed is None:
+            findings.append(("WARN",
+                             f"could not read git history for data/{fn} — freshness "
+                             f"unchecked (is this a shallow clone without history?)"))
+            continue
+        age = (today - committed).days
         if age > max_age:
             findings.append(("WARN",
-                             f"data/{fn} is {age} days old (expected <= {max_age}) — "
-                             f"a refresh job may have died silently"))
+                             f"data/{fn} last changed {age} days ago (expected <= "
+                             f"{max_age}) — a refresh job may have died silently"))
 
 
 def check_coverage(findings, cov, base_cov):

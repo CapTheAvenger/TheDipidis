@@ -86,6 +86,15 @@ FALLBACK_RELEASE_DATES = {
     'PRE': '2025-08-01',
 }
 
+# Sets that are deliberately absent from sets.json, so the release-date
+# backfill below neither adds them nor reports them as a gap.
+# Mirrors SUPERSEDED_SETS in backend/core/prepare_card_data.py — M3 is a
+# preview set fully superseded by POR (115 of 116 cards duplicated) and is
+# dropped from the card database on purpose. Kept as a literal rather than
+# an import: prepare_card_data pulls in the whole scraper-shared stack, and
+# update_sets runs first in the weekly chain.
+INTENTIONALLY_UNORDERED_SETS = {'M3'}
+
 # Hardcoded fallback — used if live scraping fails. KEEP IN SYNC with
 # data/sets.json: any new release that lands here also needs an entry
 # below, or update_sets.py on a CI runner that fails to scrape (Cloudflare,
@@ -410,7 +419,13 @@ def _extract_iso_date(text: str) -> str:
         mon = months[m.group(2).lower()[:3]]
         year = m.group(3)
         if len(year) == 2:
-            year = '20' + year  # 2-digit → 20YY
+            # "20" + yy is wrong for the WotC era: Limitless lists Base Set
+            # as "9 Jan 99", which became 2099-01-09 in sets_metadata.json
+            # (same for Jungle and Fossil). Pivot one year past today so
+            # every plausible future release still reads as 20YY.
+            pivot = (datetime.date.today().year % 100) + 1
+            century = '20' if int(year) <= pivot else '19'
+            year = century + year
         return f"{year}-{mon}-{day:02d}"
 
     # ISO: 2026-03-27
@@ -467,6 +482,79 @@ def _add_days(iso_date: str, days: int) -> str:
         return (dt + datetime.timedelta(days=days)).isoformat()
     except Exception:
         return ''
+
+
+def backfill_order_from_release_dates(sets_order: dict, release_dates: dict,
+                                      jp_release_dates: dict = None) -> list:
+    """Give brand-new sets an order number from their release date.
+
+    Why this exists: the two scrapes on limitlesstcg.com fail
+    independently, and in practice only the ORDER one fails. The
+    2026-07-25 weekly run logged
+
+        [Update Sets]   Found 28 sets in <select> dropdown
+        [Update Sets] Live scraping returned insufficient data.
+        [Update Sets] Using hardcoded fallback SET_ORDER.
+        [Update Sets] Scraped 143 EN release dates from live site.
+
+    so sets.json was written straight from FALLBACK_SET_ORDER — 162
+    entries, byte-identical to the dict in this file — while
+    format_window.json correctly picked up PBL from the release-date
+    scrape. PBL therefore had no order, which means: prepare_card_data's
+    chunker reads order 0 and bins every PBL card into the legacy chunk,
+    the Deck Builder can't find them, and the frontend's setOrderMap
+    sorts them last. That is the "new set is not picked up
+    automatically" symptom — the fallback is silent, so nothing ever
+    reported it.
+
+    The release-date scrape is the reliable one, so we use it: any set
+    that has a release date but no order and is NEWER than every dated
+    set we already know gets stacked on top in date order.
+
+    Deliberately conservative — a set with a date OLDER than the newest
+    known set is NOT inserted. Guessing a position inside the existing
+    order would silently re-bin cards between the standard and legacy
+    chunks. Those are returned to the caller so they get reported
+    instead of repaired (see data/_consumers.md).
+
+    Returns the list of codes that were skipped for that reason.
+    """
+    jp_release_dates = jp_release_dates or {}
+    dates = {}
+    dates.update(FALLBACK_RELEASE_DATES)
+    dates.update(FALLBACK_JP_RELEASE_DATES)
+    dates.update(jp_release_dates)
+    dates.update(release_dates or {})   # live EN wins
+
+    # An announced-but-unreleased set must not take the top order slot:
+    # the chunker would treat it as the newest standard-legal set.
+    today = datetime.date.today().isoformat()
+
+    # Newest release date among the sets that already have an order.
+    # Future dates are excluded on purpose — a single bad date would
+    # otherwise raise the bar above every real release and block the
+    # whole backfill. That is not hypothetical: BS / JU / FO carried
+    # 2099 dates from the two-digit-year bug fixed in _extract_iso_date.
+    known_newest = max((d for d in (dates.get(c, '') for c in sets_order)
+                        if d and d <= today), default='')
+    if not known_newest:
+        return []
+    missing = [(dates[c], c) for c in dates
+               if c and c not in sets_order and dates.get(c) and dates[c] <= today
+               and c.upper() not in INTENTIONALLY_UNORDERED_SETS]
+    skipped_older = [c for d, c in sorted(missing) if d <= known_newest]
+    to_add = sorted((d, c) for d, c in missing if d > known_newest)
+
+    next_order = max(sets_order.values(), default=0)
+    for rel, code in to_add:
+        next_order += 1
+        sets_order[code] = next_order
+        print(f"[Update Sets] + New set {code} ({rel}) → order {next_order} "
+              f"(derived from release date, order scrape had no entry)")
+    if skipped_older:
+        print(f"[Update Sets] ! {len(skipped_older)} dated set(s) have no order and are "
+              f"older than {known_newest}; NOT inserted: {', '.join(sorted(skipped_older)[:12])}")
+    return skipped_older
 
 
 def write_sets_metadata(sets_order: dict, release_dates: dict,
@@ -1107,9 +1195,17 @@ def main():
 
     sets_order = scrape_live_sets()
 
-    if len(sets_order) < 10:
+    used_fallback_order = len(sets_order) < 10
+    if used_fallback_order:
         print("[Update Sets] Live scraping returned insufficient data.")
         print("[Update Sets] Using hardcoded fallback SET_ORDER.")
+        # Loud, not silent: this path is how a new set goes missing. It is
+        # not fatal (the release-date backfill below usually rescues it),
+        # but it must show up in the run summary instead of scrolling past
+        # in a 6000-line log.
+        print("::warning title=Set order scrape failed::limitlesstcg.com order scrape "
+              "returned <10 sets — sets.json falls back to the hardcoded FALLBACK_SET_ORDER. "
+              "New sets then depend entirely on the release-date backfill.")
         sets_order = FALLBACK_SET_ORDER.copy()
     else:
         # Merge with fallback so old sets not on site are still covered
@@ -1142,6 +1238,17 @@ def main():
         print(f"[Update Sets] Scraped {len(jp_release_dates)} JP release dates from live site.")
     else:
         print("[Update Sets] No JP release dates scraped — using fallback dict.")
+
+    # A set that has a release date but no order number is invisible to
+    # every downstream consumer (chunker, Deck Builder, frontend sort).
+    # Stack genuinely-new releases on top so a rotation needs no code edit.
+    skipped_older = backfill_order_from_release_dates(
+        sets_order, release_dates, jp_release_dates)
+    if skipped_older:
+        print("::warning title=Sets without order::"
+              f"{len(skipped_older)} set(s) have a release date but no order and are too old "
+              "to append safely: " + ', '.join(sorted(skipped_older)[:20]) +
+              ". Reported, not repaired — add them to FALLBACK_SET_ORDER at the right position.")
 
     os.makedirs(data_dir, exist_ok=True)
 

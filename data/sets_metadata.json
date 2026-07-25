@@ -45,7 +45,7 @@
   },
   "BS": {
     "order": 2,
-    "release_date": "2099-01-09"
+    "release_date": "1999-01-09"
   },
   "BS2": {
     "order": 5,
@@ -205,7 +205,7 @@
   },
   "FO": {
     "order": 4,
-    "release_date": "2099-10-10"
+    "release_date": "1999-10-10"
   },
   "FST": {
     "order": 121,
@@ -257,7 +257,7 @@
   },
   "JU": {
     "order": 3,
-    "release_date": "2099-06-16"
+    "release_date": "1999-06-16"
   },
   "KSS": {
     "order": 78,
@@ -402,6 +402,10 @@
   "PAR": {
     "order": 134,
     "release_date": "2023-11-03"
+  },
+  "PBL": {
+    "order": 155,
+    "release_date": "2026-07-17"
   },
   "PFL": {
     "order": 149,

@@ -1,0 +1,118 @@
+name: Data Guardian
+
+# Daily data-quality watch. It REPORTS and never repairs: this data drives prices
+# and card identity, where a guessed correction is worse than a visible hole.
+#
+# Findings land in a single rolling GitHub issue (created on first finding,
+# updated afterwards, closed automatically once everything is clean again), so a
+# recurring problem doesn't spam a new issue every morning.
+#
+# Runs after the daily price refresh (08:00 UTC) so it inspects the day's fresh
+# data rather than yesterday's.
+
+on:
+  schedule:
+    - cron: '30 9 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write   # commit the updated baseline
+  issues: write     # open/update the findings issue
+
+concurrency:
+  group: data-guardian
+  cancel-in-progress: false
+
+jobs:
+  guard:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          fetch-depth: 1
+
+      - name: Set up Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: '3.12'
+
+      - name: Run guardian
+        id: guard
+        env:
+          PYTHONUNBUFFERED: '1'
+        run: |
+          set -o pipefail
+          python scripts/data_guardian.py --update-baseline 2>&1 | tee /tmp/guardian.log
+          # ::error:: / ::warning:: lines are the findings; collect them for the issue body.
+          grep -E '^::error::|^::warning::' /tmp/guardian.log \
+            | sed -e 's/^::error::/- **CRITICAL** /' -e 's/^::warning::/- WARN /' \
+            > /tmp/findings.md || true
+          crit=$(grep -c '^::error::' /tmp/guardian.log || true)
+          echo "crit=${crit:-0}" >> "$GITHUB_OUTPUT"
+
+      - name: Commit baseline
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name  "github-actions[bot]"
+          git add data/_guardian_baseline.json
+          if git diff --cached --quiet; then
+            echo "Baseline unchanged."
+            exit 0
+          fi
+          git commit -m "Auto: data guardian baseline — $(date -u +'%Y-%m-%d %H:%M UTC')"
+          for attempt in 1 2 3; do
+            if git push origin HEAD:main; then exit 0; fi
+            git pull --rebase=true --autostash -X ours origin main || exit 1
+          done
+          echo "::error::Could not push baseline after 3 attempts"; exit 1
+
+      - name: Report findings
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          CRIT: ${{ steps.guard.outputs.crit }}
+        run: |
+          TITLE="🛡️ Data guardian: findings"
+          # Reuse one rolling issue instead of opening a new one every morning.
+          NUM=$(curl -sS -H "Authorization: Bearer $GH_TOKEN" \
+                 "https://api.github.com/repos/$REPO/issues?state=open&per_page=100" \
+               | T="$TITLE" python3 -c "import sys,json,os;t=os.environ['T'];print(next((i['number'] for i in json.load(sys.stdin) if i['title']==t),''))")
+
+          if [ "${CRIT:-0}" = "0" ]; then
+            if [ -n "$NUM" ]; then
+              echo "All clear — closing issue #$NUM"
+              curl -sS -X PATCH -H "Authorization: Bearer $GH_TOKEN" \
+                "https://api.github.com/repos/$REPO/issues/$NUM" \
+                -d "$(python3 -c 'import json;print(json.dumps({"state":"closed"}))')" >/dev/null
+            else
+              echo "All clear — nothing to report."
+            fi
+            exit 0
+          fi
+
+          {
+            echo "The daily data guardian found issues. **Nothing was auto-corrected** —"
+            echo "this data drives prices and card identity, so holes are reported rather"
+            echo "than guessed at."
+            echo
+            cat /tmp/findings.md
+            echo
+            echo "Run: $RUN_URL"
+            echo
+            echo "See \`data/_consumers.md\` for the consumer contract these checks protect."
+          } > /tmp/body.md
+
+          if [ -n "$NUM" ]; then
+            echo "Updating issue #$NUM"
+            curl -sS -X PATCH -H "Authorization: Bearer $GH_TOKEN" \
+              "https://api.github.com/repos/$REPO/issues/$NUM" \
+              -d "$(python3 -c 'import json;print(json.dumps({"body":open("/tmp/body.md",encoding="utf-8").read()}))')" >/dev/null
+          else
+            echo "Opening new issue"
+            curl -sS -X POST -H "Authorization: Bearer $GH_TOKEN" \
+              "https://api.github.com/repos/$REPO/issues" \
+              -d "$(T="$TITLE" python3 -c 'import json,os;print(json.dumps({"title":os.environ["T"],"body":open("/tmp/body.md",encoding="utf-8").read()}))')" >/dev/null
+          fi

@@ -240,6 +240,7 @@ id_expansion,expansion_code,name,release_date,code_source,n_singles
 1569,TM,Triumphant,0000-00-00,tcg,111
 2028,,,2026-01-27,,111
 3866,,Super-Burst Impact,2021-03-15,,111
+6454,,"WCD 2025: Riley McKay """"KSI's Gardevoir""""",2026-01-22,,111
 1546,DX,EX Deoxys,0000-00-00,tcg,110
 1580,PLB,Plasma Blast,0000-00-00,tcg,110
 3896,,Forbidden Light JP,2021-03-17,,110
@@ -254,7 +255,6 @@ id_expansion,expansion_code,name,release_date,code_source,n_singles
 4314,,,2024-04-12,,108
 5217,,Violet ex,2022-12-09,,108
 6203,,"WCD 2022: André Chiasson """"The Shape of Mew""""",2022-12-22,,108
-6454,,"WCD 2025: Riley McKay """"KSI's Gardevoir""""",2026-01-22,,108
 1561,SF,Stormfront,0000-00-00,tcg,107
 1574,NXD,Next Destinies,0000-00-00,tcg,107
 1541,DR,EX Dragon,0000-00-00,tcg,106
@@ -619,6 +619,8 @@ id_expansion,expansion_code,name,release_date,code_source,n_singles
 6300,,,2025-11-10,,20
 6301,,Giratina VSTAR Deck Building Advanced Gift Box,2024-12-11,,20
 6347,,Mewtwo V-UNION Binder Collection,2025-10-14,,20
+6637,,MEGA Starter Set Eevee ex,2026-07-02,,20
+6638,,MEGA Starter Set Zorua & Zoroark ex,2026-07-02,,20
 4181,,Blastoise + Kyurem EX Combo Deck,2021-04-27,,19
 4192,,Team Plasma's Powered Half Deck,2021-04-27,,19
 4263,,Tyranitar Constructed Standard Deck,2021-05-25,,19
@@ -655,6 +657,8 @@ id_expansion,expansion_code,name,release_date,code_source,n_singles
 4357,SI,Tropical Island Jungle Set,2021-07-06,tcg,18
 5865,,,2024-08-21,,18
 5866,,Gift Box Latias & Latios ex,2024-08-21,,18
+6516,,,2026-03-16,,18
+6639,,MEGA Starter Set Sprigatito & Meowscarada ex,2026-07-02,,18
 1613,P1,POP Series 1,0000-00-00,tcg,17
 1614,P2,POP Series 2,0000-00-00,tcg,17
 1615,P3,POP Series 3,0000-00-00,tcg,17
@@ -678,7 +682,6 @@ id_expansion,expansion_code,name,release_date,code_source,n_singles
 5722,,Meganium Constructed Starter Deck,2024-04-08,,16
 6302,,Poké Ball Gift Box: Pokémon Art Illustration Celebration Gathering,2024-12-11,,16
 6349,,Art Illustration Celebration: Poké Ball,2025-10-14,,16
-6516,,,2026-03-16,,16
 4144,,Yveltal Half Deck,2021-03-19,,15
 4149,,Xerneas Half Deck,2021-03-19,,15
 4266,,,2022-07-22,,15

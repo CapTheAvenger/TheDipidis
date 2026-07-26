@@ -2,11 +2,11 @@
  "file_rows": {
   "cardmarket_card_images.csv": 1295,
   "cardmarket_id_mapping.csv": 17360,
-  "cm_expansions.csv": 762,
-  "price_data.csv": 20382,
+  "cm_expansions.csv": 765,
+  "price_data.csv": 20391,
   "prizepack_official_images.csv": 266
  },
- "generated": "2026-07-25 14:05 UTC",
+ "generated": "2026-07-26 10:11 UTC",
  "set_coverage": {
   "AOR": [
    76,

@@ -208,6 +208,78 @@ def probe_images(limit, seed):
     return tally
 
 
+def probe_sealed(limit, seed):
+    """Q3  Which path prefix do SEALED product images live under?
+
+    radar #72 builds  /51/<CODE>/<idProduct>/<idProduct>.jpg  for sealed too,
+    but 51 is idCategory "Pokémon Single". Sealed products carry their own
+    category ids -- 52 Booster, 53 Display, 54 Theme Deck, 1014 Tins,
+    1015 Box Set, 1016 Elite Trainer Boxes, 1017 Coins, 1083 Blisters. If the
+    prefix is the product's own category, then a hardcoded 51 fails for every
+    sealed product regardless of whether the expansion code is right -- which
+    would mean the missing code is not the only thing blocking that mirror.
+
+    Tries both prefixes for the same product so the comparison is direct.
+    """
+    here = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    data = os.path.join(here, "data")
+    with open(os.path.join(data, "cm_expansions.csv"), encoding="utf-8-sig", newline="") as f:
+        code_by_exp = {int(r["id_expansion"]): r["expansion_code"].strip()
+                       for r in csv.DictReader(f) if r["expansion_code"].strip()}
+    with open(os.path.join(data, "products_nonsingles_6.json"), encoding="utf-8") as f:
+        sealed = [p for p in json.load(f)["products"] if p["idExpansion"] in code_by_exp]
+
+    # Spread the sample over categories rather than taking the first N, which
+    # would all be boosters and answer only for category 52.
+    by_cat = collections.defaultdict(list)
+    for p in sealed:
+        by_cat[p["idCategory"]].append(p)
+    rng = random.Random(seed)
+    sample = []
+    for cat, items in sorted(by_cat.items()):
+        rng.shuffle(items)
+        sample.extend(items[:max(1, limit // max(1, len(by_cat)))])
+    sample = sample[:limit]
+
+    print()
+    print("=" * 72)
+    print("Q3  Do sealed images live under /51/ or under their own category?")
+    print("=" * 72)
+    headers = {"User-Agent": BROWSER_UA, "Referer": "https://www.cardmarket.com/",
+               "Accept": "image/avif,image/webp,image/*,*/*;q=0.8"}
+    score = collections.Counter()
+    per_cat = collections.defaultdict(collections.Counter)
+    for p in sample:
+        code = code_by_exp[p["idExpansion"]]
+        idp, cat = p["idProduct"], p["idCategory"]
+        hits = []
+        for prefix in ("51", str(cat)):
+            url = (f"https://product-images.s3.cardmarket.com/{prefix}/{code}/"
+                   f"{idp}/{idp}.jpg")
+            status, body = _get(url, headers)
+            good = body[:2] == b"\xff\xd8"
+            hits.append(f"{prefix}:{'JPEG' if good else status}")
+            if good:
+                score[prefix] += 1
+                per_cat[cat][prefix] += 1
+            time.sleep(0.5)
+        print(f"  cat={cat:<5} {code:<8} id={idp:<8} " + "  ".join(hits) +
+              f"   {p['name'][:34]}")
+
+    print(f"\n  JPEG via /51/: {score['51']}   via own category: "
+          f"{sum(v for k, v in score.items() if k != '51')}   (of {len(sample)})")
+    if score["51"] == 0 and sum(score.values()) > 0:
+        print("  => sealed images are NOT under /51/. A hardcoded 51 fails for every")
+        print("     sealed product even when the expansion code is correct.")
+    elif score["51"] == len(sample):
+        print("  => /51/ works for sealed too; the category prefix is not the issue.")
+    else:
+        print("  => mixed/inconclusive — see the per-row results above.")
+    for cat, c in sorted(per_cat.items()):
+        print(f"     cat {cat}: " + ", ".join(f"{k}={v}" for k, v in sorted(c.items())))
+    return score
+
+
 def main(argv):
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -215,11 +287,15 @@ def main(argv):
                     help="how many expansions to image-check (default 40; paced 0.6s apart)")
     ap.add_argument("--seed", type=int, default=7)
     ap.add_argument("--skip-images", action="store_true")
+    ap.add_argument("--sealed", type=int, default=0,
+                    help="also probe N sealed products for the /51/ vs own-category question")
     args = ap.parse_args(argv[1:])
 
     probe_bucket()
     if not args.skip_images:
         probe_images(args.images, args.seed)
+    if args.sealed:
+        probe_sealed(args.sealed, args.seed)
     print("\nDone. Nothing was written — this probe is read-only.")
     return 0
 

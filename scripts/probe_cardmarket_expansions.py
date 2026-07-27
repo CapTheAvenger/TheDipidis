@@ -249,7 +249,19 @@ def probe_sealed(limit, seed):
                "Accept": "image/avif,image/webp,image/*,*/*;q=0.8"}
     score = collections.Counter()
     per_cat = collections.defaultdict(collections.Counter)
+    consecutive_403 = 0
     for p in sample:
+        # Bail out rather than burn the whole sample against a throttled IP.
+        # This host answers 403 to bulk access from datacenter ranges, and a
+        # run that keeps going only deepens the throttle for the next one --
+        # data/_consumers.md: pace requests, back off on 403, never re-fetch
+        # what you already have.
+        if consecutive_403 >= 6:
+            print("\n  ::warning::6 consecutive 403s — this IP is throttled. Aborting")
+            print("  the sample instead of making it worse. Re-run in an hour, or run")
+            print("  the check from a non-datacenter IP. NOTHING here is evidence")
+            print("  about the codes or the path prefix.")
+            break
         code = code_by_exp[p["idExpansion"]]
         idp, cat = p["idProduct"], p["idCategory"]
         hits = []
@@ -262,6 +274,9 @@ def probe_sealed(limit, seed):
             if good:
                 score[prefix] += 1
                 per_cat[cat][prefix] += 1
+                consecutive_403 = 0
+            elif status == 403:
+                consecutive_403 += 1
             time.sleep(0.5)
         print(f"  cat={cat:<5} {code:<8} id={idp:<8} " + "  ".join(hits) +
               f"   {p['name'][:34]}")

@@ -29,6 +29,7 @@ Content-Type, so the only trustworthy signal is the JPEG magic number.
 from __future__ import annotations
 
 import argparse
+import collections
 import csv
 import json
 import os

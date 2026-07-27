@@ -25,6 +25,10 @@ on:
         type: boolean
         required: false
         default: false
+      sealed:
+        description: "Sealed products to test for /51/ vs own-category prefix (0 = skip)"
+        required: false
+        default: "0"
 
 permissions:
   contents: read
@@ -54,4 +58,5 @@ jobs:
         run: |
           python3 scripts/probe_cardmarket_expansions.py \
             --images "${{ inputs.images }}" \
+            --sealed "${{ inputs.sealed }}" \
             ${{ inputs.skip_images == true && '--skip-images' || '' }}

@@ -1,0 +1,57 @@
+name: Probe Cardmarket expansion codes
+
+# Read-only diagnostic, manual only. The dev sandbox has no route to
+# cardmarket.com (a bare curl returns 000 even for the URL the weekly job
+# downloads fine), so any "not found" measured there is a statement about the
+# network, not about Cardmarket. This runs the same probe from a runner that
+# demonstrably CAN reach the bucket, and prints the answer into the job log.
+#
+# Answers two things:
+#   1. whether the public productCatalog bucket publishes an expansion list
+#      (which would give idExpansion -> code exactly, instead of derived)
+#   2. whether the codes we derive today actually resolve on the image S3
+#
+# Writes nothing and commits nothing.
+
+on:
+  workflow_dispatch:
+    inputs:
+      images:
+        description: "How many expansions to image-check (paced 0.6s apart)"
+        required: false
+        default: "40"
+      skip_images:
+        description: "Only probe the bucket, skip the image checks"
+        type: boolean
+        required: false
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+
+      - name: Set up Python
+        uses: actions/setup-python@e797f83bcb11b83ae66e0230d6156d7c80228e7c # v6.0.0
+        with:
+          python-version: '3.11'
+
+      # products_singles_6.json is not committed (13 MB, refreshed weekly), and
+      # the probe needs one real idProduct per expansion to build image URLs.
+      - name: Download the Cardmarket product list
+        run: |
+          mkdir -p data
+          curl -fsSL --retry 3 -o data/products_singles_6.json \
+            https://downloads.s3.cardmarket.com/productCatalog/productList/products_singles_6.json
+          ls -lh data/products_singles_6.json
+
+      - name: Probe
+        run: |
+          python3 scripts/probe_cardmarket_expansions.py \
+            --images "${{ inputs.images }}" \
+            ${{ inputs.skip_images == true && '--skip-images' || '' }}

@@ -108,6 +108,39 @@ def probe_bucket():
     return found
 
 
+def check_code(code, idps, headers, tries=3):
+    """Verify ONE expansion code against the image S3.
+
+    Returns (verdict, status) with verdict in:
+      CONFIRMED    a real JPEG came back -> the code is right
+      NO-IMAGE     HTTP 200 but not a JPEG, for every product tried. The
+                   product simply has no image at that path; it says nothing
+                   about the code.
+      THROTTLED    403 after retries. Cardmarket throttles bulk access from
+                   datacenter IPs and answers 403; data/_consumers.md is
+                   explicit that a 403 must be backed off, not read as
+                   "missing".
+    There is deliberately no WRONG verdict. A failure to fetch cannot
+    distinguish a bad code from a product with no image or a throttle, and
+    the first version of this probe reported exactly that false conclusion:
+    it flagged PPS8 and PPS9, whose codes we KNOW are right because the whole
+    Prize Pack image dataset is built on them.
+    """
+    last = None
+    for idp in idps:                      # a product may simply have no image
+        for attempt in range(tries):
+            status, body = _get(IMG_URL.format(code=code, idp=idp), headers)
+            last = status
+            if body[:2] == b"\xff\xd8":
+                return "CONFIRMED", status
+            if status == 403:
+                time.sleep(2 * (attempt + 1))   # back off, then retry
+                continue
+            break                          # 200-but-not-JPEG: try next product
+        time.sleep(0.4)
+    return ("THROTTLED" if last == 403 else "NO-IMAGE"), last
+
+
 def probe_images(limit, seed):
     print()
     print("=" * 72)
@@ -121,10 +154,13 @@ def probe_images(limit, seed):
     with open(os.path.join(data, "products_singles_6.json"), encoding="utf-8") as f:
         singles = json.load(f)["products"]
 
-    # One real idProduct per expansion — the URL needs a product that exists.
-    first_product = {}
+    # SEVERAL real idProducts per expansion. One product having no image is
+    # common and is not evidence about the code, so give each code more than
+    # one chance to prove itself.
+    first_product = collections.defaultdict(list)
     for p in singles:
-        first_product.setdefault(p["idExpansion"], p["idProduct"])
+        if len(first_product[p["idExpansion"]]) < 4:
+            first_product[p["idExpansion"]].append(p["idProduct"])
 
     rows = [r for r in exps if int(r["id_expansion"]) in first_product]
     random.Random(seed).shuffle(rows)
@@ -136,34 +172,39 @@ def probe_images(limit, seed):
 
     headers = {"User-Agent": BROWSER_UA, "Referer": "https://www.cardmarket.com/",
                "Accept": "image/avif,image/webp,image/*,*/*;q=0.8"}
-    ok = bad = 0
-    failures = []
+    tally = collections.Counter()
+    inconclusive = []
+    confirmed_rows = []
     print(f"  sampling {len(sample)} expansions ({len(pps)} pps controls)\n")
     for r in sample:
         ie = int(r["id_expansion"])
         code = r["expansion_code"].strip()
-        idp = first_product[ie]
-        status, body = _get(IMG_URL.format(code=code, idp=idp), headers)
-        # Trust the magic bytes, not the Content-Type (Cardmarket sends
-        # multerS3.AUTO_CONTENT_TYPE, which is not the real type).
-        is_jpeg = body[:2] == b"\xff\xd8"
-        verdict = "OK " if is_jpeg else "MISS"
-        if is_jpeg:
-            ok += 1
+        verdict, status = check_code(code, first_product[ie], headers)
+        tally[verdict] += 1
+        if verdict == "CONFIRMED":
+            confirmed_rows.append((ie, code))
         else:
-            bad += 1
-            failures.append((code, ie, r["code_source"], r["name"][:34], status))
-        print(f"  {verdict} {str(status):>6} {code:<10} id_exp={ie:<6} "
+            inconclusive.append((code, ie, r["code_source"], r["name"][:34], verdict, status))
+        print(f"  {verdict:<10} {str(status):>6} {code:<10} id_exp={ie:<6} "
               f"src={r['code_source']:<4} {r['name'][:34]}")
-        # Pace: this bucket throttles bulk access from datacenter IPs.
         time.sleep(0.6)
 
-    print(f"\n  resolved: {ok}/{len(sample)}   failed: {bad}")
-    if failures:
-        print("\n  Codes that did NOT resolve — these are the ones to fix or blank:")
-        for code, ie, src, name, status in failures:
-            print(f"    {code:<10} id_exp={ie:<6} src={src:<4} status={status}  {name}")
-    return ok, bad
+    print(f"\n  CONFIRMED {tally['CONFIRMED']}   NO-IMAGE {tally['NO-IMAGE']}   "
+          f"THROTTLED {tally['THROTTLED']}   (of {len(sample)})")
+    print("\n  NOTE: neither NO-IMAGE nor THROTTLED means the code is wrong.")
+    print("  This probe can confirm a code and cannot refute one — a fetch that")
+    print("  fails is indistinguishable from a product with no image or a")
+    print("  throttled request.")
+    if inconclusive:
+        print("\n  Not confirmed (re-run later; do NOT treat as wrong):")
+        for code, ie, src, name, verdict, status in inconclusive:
+            print(f"    {code:<10} id_exp={ie:<6} src={src:<4} {verdict:<10} status={status}  {name}")
+
+    if confirmed_rows:
+        print("\n  --- confirmed id_expansion,expansion_code (paste-ready) ---")
+        for ie, code in sorted(confirmed_rows):
+            print(f"  {ie},{code}")
+    return tally
 
 
 def main(argv):

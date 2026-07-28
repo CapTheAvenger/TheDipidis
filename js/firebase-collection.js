@@ -4551,10 +4551,20 @@ function showDeckComparison(deckA, deckB, compareMode = 'functional', viewMode) 
     }
 
     // Fallback: collapse by normalized name.
+    //
+    // This is a NAME JOIN, which this project forbids for card data — names
+    // are not unique within a set (PBL ships four products called "Mega
+    // Darkrai ex" at 1,03 / 9,69 / 184,03 / 331,99 EUR). It only fires when
+    // the print is missing from all_cards_database, i.e. brand-new sets and
+    // JP-only promos: exactly the cards someone is most likely to be diffing.
+    // Changing the join here would alter comparison behaviour across the
+    // board, so instead the result is MARKED and the UI says so — report,
+    // don't silently repair.
     return {
       canonical: `name:${normalizedName}`,
       label: parsed.name || parsed.rawKey,
-      collapsedPrints: Boolean(parsed.set && parsed.number)
+      collapsedPrints: Boolean(parsed.set && parsed.number),
+      byName: true
     };
   }
 
@@ -4571,11 +4581,13 @@ function showDeckComparison(deckA, deckB, compareMode = 'functional', viewMode) 
         aggregated.set(info.canonical, {
           count,
           label: info.label,
-          collapsedPrints: info.collapsedPrints
+          collapsedPrints: info.collapsedPrints,
+          byName: info.byName
         });
       } else {
         existing.count += count;
         if (info.collapsedPrints) existing.collapsedPrints = true;
+        if (info.byName) existing.byName = true;
       }
     });
     return aggregated;
@@ -4638,6 +4650,13 @@ function showDeckComparison(deckA, deckB, compareMode = 'functional', viewMode) 
   window._deckCompareProxyCards = proxyCards;
   const totalProxyCopies = proxyCards.reduce((s, c) => s + c.count, 0);
 
+  const safeNameA = escapeHtml(deckA.name);
+  const safeNameB = escapeHtml(deckB.name);
+  // A pasted list with a typo lands here at 59 or 61 cards. Better to see that
+  // before pulling cards out of a sleeve than after.
+  const deckSize = obj => Object.values(obj || {}).reduce((n, v) => n + (parseInt(v, 10) || 0), 0);
+  const sizeA = deckSize(cardsA), sizeB = deckSize(cardsB);
+
   // ── Swap list: what to physically take OUT of deck A and put IN ────────
   // Deck A is the built deck, so A is the baseline and the deltas are the
   // actions. A card that merely changes print is NOT a swap in functional
@@ -4671,14 +4690,41 @@ function showDeckComparison(deckA, deckB, compareMode = 'functional', viewMode) 
       number: print ? print.number : '',
       qty: Math.abs(delta),
       from: a.count,
-      to: b.count
+      to: b.count,
+      // Identity came from a name join, not a verified print — see
+      // getCanonicalComparisonInfo. Shown on the tile so the user knows which
+      // rows are a guess.
+      byName: Boolean(a.byName || b.byName),
+      // Basic energy is fungible and usually already in the bulk box; it
+      // should not compete for attention with a tech swap you have to source.
+      //
+      // Name alone is not enough: decks store the user's own screenshot case
+      // as "Metal Energy", without the word Basic. So fall back to the rule —
+      // a deck may hold at most 4 of any card EXCEPT basic energy, so more
+      // than 4 copies of something called "… Energy" is basic energy by
+      // definition, whatever the label says.
+      isBasicEnergy: (/energy/i.test(String(a.label || b.label || key)) &&
+                      (/^basic\s/i.test(String(a.label || b.label || key)) ||
+                       Math.max(a.count, b.count) > 4))
     };
     (delta < 0 ? swapOut : swapIn).push(entry);
   });
+
+  // A card that appears on BOTH sides in exact-print mode is the same card in
+  // a different printing — legal-identical, nothing to source. Saying that on
+  // the tile stops "Judge out / Judge in" reading as real work.
+  if (mode === 'exact') {
+    const norm = n => normalizeCompareName(String(n || ''));
+    const inNames = new Set(swapIn.map(c => norm(c.name)));
+    const outNames = new Set(swapOut.map(c => norm(c.name)));
+    swapOut.forEach(c => { if (inNames.has(norm(c.name))) c.reprintOnly = true; });
+    swapIn.forEach(c => { if (outNames.has(norm(c.name))) c.reprintOnly = true; });
+  }
   // Biggest change first — that is the one worth seeing at a glance.
   swapOut.sort((x, y) => y.qty - x.qty);
   swapIn.sort((x, y) => y.qty - x.qty);
 
+  const de = getLang() === 'de';
   function swapTile(c, colour) {
     const card = (typeof _lookupCardBySetNumber === 'function')
       ? _lookupCardBySetNumber(c.set, c.number) : null;
@@ -4690,32 +4736,53 @@ function showDeckComparison(deckA, deckB, compareMode = 'functional', viewMode) 
       <div style="border:2px solid ${colour};border-radius:8px;padding:5px;text-align:center;background:#fff;position:relative;">
         ${img
           ? `<img src="${escapeHtmlAttr(img)}" alt="${nm}" loading="lazy" decoding="async" style="width:100%;aspect-ratio:2.5/3.5;object-fit:cover;border-radius:5px;">`
-          : `<div style="width:100%;aspect-ratio:2.5/3.5;background:#eee;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:0.7em;color:#999;padding:4px;text-align:center;">${escapeHtml(c.set || '')} ${escapeHtml(c.number || '')}</div>`}
+          : `<div style="width:100%;aspect-ratio:2.5/3.5;background:#eee;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:0.66em;color:#777;padding:4px;text-align:center;line-height:1.15;">${(c.set || c.number) ? `${escapeHtml(c.set || '')} ${escapeHtml(c.number || '')}` : nm}</div>`}
         <div style="position:absolute;top:2px;right:2px;background:${colour};color:#fff;border-radius:999px;min-width:26px;padding:2px 7px;font-weight:800;font-size:0.95em;box-shadow:0 1px 3px rgba(0,0,0,.3);">${c.qty}</div>
+        ${c.byName ? `<div style="position:absolute;top:2px;left:2px;background:#fcf8e3;color:#8a6d3b;border-radius:4px;padding:0 4px;font-size:0.7em;font-weight:800;" title="${de ? 'Nur über den Namen zugeordnet — dieser Druck fehlt in der Kartendatenbank, die Zuordnung ist nicht geprüft.' : 'Matched by name only — this print is missing from the card database, so the match is unverified.'}">⚠</div>` : ''}
         <div style="font-weight:600;font-size:0.72em;margin-top:3px;line-height:1.2;" title="${nm}">${nm}</div>
+        ${c.reprintOnly ? `<div style="font-size:0.63em;color:#8a6d3b;">${de ? 'nur anderer Druck' : 'same card, other print'}</div>` : ''}
         ${detail ? `<div style="font-size:0.66em;color:#888;">${detail}</div>` : ''}
       </div>`;
   }
 
   const gridStyle = 'display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px;';
-  const de = getLang() === 'de';
+
+  // Basic energy out of the artwork grid and into one compact line. It is
+  // fungible, it is already in the bulk box, and at full tile size it competes
+  // with the tech swap you actually have to go and find.
+  const outCards = swapOut.filter(c => !c.isBasicEnergy);
+  const inCards  = swapIn.filter(c => !c.isBasicEnergy);
+  const energyBits = []
+    .concat(swapOut.filter(c => c.isBasicEnergy).map(c => `−${c.qty} ${escapeHtml(c.name)}`))
+    .concat(swapIn.filter(c => c.isBasicEnergy).map(c => `+${c.qty} ${escapeHtml(c.name)}`));
+
+  const totalOut = swapOut.reduce((s2, c) => s2 + c.qty, 0);
+  const totalIn = swapIn.reduce((s2, c) => s2 + c.qty, 0);
+  const anyByName = [...swapOut, ...swapIn].some(c => c.byName);
+
+  const section = (title, colour, cards) => cards.length ? `
+      <div style="margin-bottom:16px;">
+        <h4 style="color:${colour};margin:0 0 8px 0;">${title} (${cards.reduce((s2, c) => s2 + c.qty, 0)})</h4>
+        <div style="${gridStyle}">${cards.map(c => swapTile(c, colour)).join('')}</div>
+      </div>` : '';
+
   const changesHtml = `
-    ${swapOut.length ? `
-      <div style="margin-bottom:16px;">
-        <h4 style="color:#c0392b;margin:0 0 8px 0;">${de ? '➖ Rausnehmen' : '➖ Take out'} (${swapOut.reduce((s2, c) => s2 + c.qty, 0)})</h4>
-        <div style="${gridStyle}">${swapOut.map(c => swapTile(c, '#c0392b')).join('')}</div>
+    <div style="text-align:center;font-size:13px;font-weight:800;color:#444;margin-bottom:12px;">
+      ${de ? `${totalOut} raus · ${totalIn} rein` : `${totalOut} out · ${totalIn} in`}
+    </div>
+    ${section(de ? `➖ Raus aus ${safeNameA}` : `➖ Out of ${safeNameA}`, '#c0392b', outCards)}
+    ${section(de ? `➕ Rein (aus ${safeNameB})` : `➕ In (from ${safeNameB})`, '#1e8449', inCards)}
+    ${energyBits.length ? `<div style="margin-bottom:14px;font-size:12px;color:#555;background:#f7f7f7;border-radius:6px;padding:8px 10px;">
+        <b>${de ? 'Basis-Energie' : 'Basic energy'}:</b> ${energyBits.join(' · ')}
       </div>` : ''}
-    ${swapIn.length ? `
-      <div style="margin-bottom:16px;">
-        <h4 style="color:#1e8449;margin:0 0 8px 0;">${de ? '➕ Reinlegen' : '➕ Put in'} (${swapIn.reduce((s2, c) => s2 + c.qty, 0)})</h4>
-        <div style="${gridStyle}">${swapIn.map(c => swapTile(c, '#1e8449')).join('')}</div>
+    ${anyByName ? `<div style="margin-bottom:12px;font-size:11px;color:#8a6d3b;background:#fcf8e3;border-radius:6px;padding:6px 8px;">
+        ⚠ ${de
+          ? 'Karten mit diesem Zeichen wurden nur über den Namen zugeordnet — der Druck fehlt in der Kartendatenbank. Vor dem Umbau kurz selbst prüfen.'
+          : 'Cards marked this way were matched by name only — the print is missing from the card database. Worth checking before you rebuild.'}
       </div>` : ''}
     ${(!swapOut.length && !swapIn.length) ? `<div style="text-align:center;color:#27ae60;font-weight:700;padding:24px 0;">${de ? 'Keine Unterschiede — die Decks sind identisch.' : 'No differences — the decks are identical.'}</div>` : ''}
   `;
 
-  const safeNameA = escapeHtml(deckA.name);
-  const safeNameB = escapeHtml(deckB.name);
-  
   // Create comparison modal
   let existingModal = document.getElementById('deck-compare-modal');
   if (existingModal) existingModal.remove();
@@ -4742,8 +4809,8 @@ function showDeckComparison(deckA, deckB, compareMode = 'functional', viewMode) 
       </div>
       <div style="margin:-4px 0 12px 0;font-size:12px;color:#666;">${mode === 'functional' ? (getLang()==='de' ? 'Artwork- und Set-Varianten derselben Karte werden zusammengefasst.' : 'Artwork and set variants of the same card are merged.') : (getLang()==='de' ? 'Jeder Print (set+nummer) wird einzeln verglichen.' : 'Each print (set+number) is compared individually.')}</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-bottom:${view === 'changes' ? '6px' : '15px'};">
-        <div style="background:#667eea;color:white;padding:10px;border-radius:8px;text-align:center;font-weight:700;">${safeNameA}</div>
-        <div style="background:#764ba2;color:white;padding:10px;border-radius:8px;text-align:center;font-weight:700;">${safeNameB}</div>
+        <div style="background:#667eea;color:white;padding:10px;border-radius:8px;text-align:center;font-weight:700;">${safeNameA}<div style="font-size:0.72em;font-weight:600;opacity:.95;">${sizeA === 60 ? '60/60' : `⚠ ${sizeA}/60`}</div></div>
+        <div style="background:#764ba2;color:white;padding:10px;border-radius:8px;text-align:center;font-weight:700;">${safeNameB}<div style="font-size:0.72em;font-weight:600;opacity:.95;">${sizeB === 60 ? '60/60' : `⚠ ${sizeB}/60`}</div></div>
       </div>
       ${view === 'changes' ? `<div style="font-size:12px;color:#666;margin-bottom:12px;text-align:center;">${de ? `So baust du <b>${safeNameA}</b> in <b>${safeNameB}</b> um:` : `How to turn <b>${safeNameA}</b> into <b>${safeNameB}</b>:`}</div>` : ''}
       ${view === 'changes' ? changesHtml : `
@@ -4751,7 +4818,7 @@ function showDeckComparison(deckA, deckB, compareMode = 'functional', viewMode) 
       ${onlyB.length ? `<div style="margin-bottom:12px;"><h4 style="color:#764ba2;margin:0 0 5px 0;">Only in ${safeNameB} (${onlyB.length})</h4><div style="font-size:0.9em;color:#555;">${onlyB.join('<br>')}</div></div>` : ''}
       ${different.length ? `<div style="margin-bottom:12px;"><h4 style="color:#e67e22;margin:0 0 5px 0;">Different counts (${different.length})</h4><div style="font-size:0.9em;color:#555;">${different.join('<br>')}</div></div>` : ''}
       <div style="margin-bottom:12px;"><h4 style="color:#27ae60;margin:0 0 5px 0;">Same cards (${same.length})</h4><div style="font-size:0.9em;color:#555;">${same.length > 0 ? same.join('<br>') : 'No cards in common'}</div></div>`}
-      ${totalProxyCopies > 0 ? `<div style="margin-top:16px;padding-top:14px;border-top:1px solid #eee;text-align:center;"><button onclick="addCompareNewCardsToProxy()" style="padding:10px 20px;border:none;border-radius:8px;background:#e74c3c;color:white;font-size:13px;font-weight:700;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.background='#c0392b';this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 12px rgba(231,76,60,0.35)'" onmouseout="this.style.background='#e74c3c';this.style.transform='';this.style.boxShadow=''">${getLang()==='de' ? 'Alle neuen Karten zum Proxy Printer hinzufügen' : 'Add all new cards to Proxy Printer'} (${totalProxyCopies})</button></div>` : ''}
+      ${totalProxyCopies > 0 ? `<div style="margin-top:16px;padding-top:14px;border-top:1px solid #eee;text-align:center;"><button onclick="addCompareNewCardsToProxy()" style="padding:10px 20px;border:none;border-radius:8px;background:#1e8449;color:white;font-size:13px;font-weight:700;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.background='#166b3a';this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 12px rgba(231,76,60,0.35)'" onmouseout="this.style.background='#1e8449';this.style.transform='';this.style.boxShadow=''">${getLang()==='de' ? '➕ Alle neuen Karten zum Proxy Printer' : 'Add all new cards to Proxy Printer'} (${totalProxyCopies})</button></div>` : ''}
     </div>
   `;
   

@@ -94,6 +94,23 @@ describe('deck swap list', () => {
         assert.equal(gravity.to, 0, 'a card cut entirely goes to zero');
     });
 
+    it('treats basic energy by the 4-copy rule, not by its name', () => {
+        // Decks store the reported case as "Metal Energy", without the word
+        // Basic — so a name test alone misses it. A deck may hold at most 4 of
+        // any card EXCEPT basic energy, so >4 copies of an "… Energy" card is
+        // basic energy whatever the label says. Special energies stay in the
+        // image grid, where they belong.
+        const isBasicEnergy = (name, a, b) =>
+            /energy/i.test(name) && (/^basic\s/i.test(name) || Math.max(a, b) > 4);
+
+        assert.equal(isBasicEnergy('Metal Energy', 14, 15), true, 'the reported case');
+        assert.equal(isBasicEnergy('Basic Fire Energy', 8, 8), true);
+        assert.equal(isBasicEnergy('Legacy Energy', 1, 2), false, 'ACE SPEC energy is a real swap');
+        assert.equal(isBasicEnergy('Luminous Energy', 3, 4), false);
+        assert.equal(isBasicEnergy('Jet Energy', 4, 3), false, '4 copies is still within the limit');
+        assert.equal(isBasicEnergy('Energy Recycler', 1, 2), false, 'not an energy card at all');
+    });
+
     it('says nothing to do when the decks match', () => {
         const r = swapList(V1, V1);
         assert.equal(r.out.length, 0);

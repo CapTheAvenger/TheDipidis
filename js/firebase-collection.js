@@ -4478,10 +4478,18 @@ async function openCompareSavedDeck(deckIndex) {
   setMode('saved');
 }
 
-function showDeckComparison(deckA, deckB, compareMode = 'functional') {
+function showDeckComparison(deckA, deckB, compareMode = 'functional', viewMode) {
   window._deckCompareA = deckA;
   window._deckCompareB = deckB;
   const mode = compareMode === 'exact' ? 'exact' : 'functional';
+  // 'list'    — the full text breakdown (unchanged)
+  // 'changes' — only what has to come out of deck A and go in, with card
+  //             images. The question this answers is "what do I physically
+  //             pull out of the built deck and what do I put in", so counts
+  //             are shown as DELTAS (3 -> 1 becomes "-2"), not as before/after
+  //             pairs the user has to subtract in their head.
+  const view = viewMode || window._deckCompareView || 'list';
+  window._deckCompareView = view;
 
   const cardsA = deckA.cards || {};
   const cardsB = deckB.cards || {};
@@ -4630,6 +4638,81 @@ function showDeckComparison(deckA, deckB, compareMode = 'functional') {
   window._deckCompareProxyCards = proxyCards;
   const totalProxyCopies = proxyCards.reduce((s, c) => s + c.count, 0);
 
+  // ── Swap list: what to physically take OUT of deck A and put IN ────────
+  // Deck A is the built deck, so A is the baseline and the deltas are the
+  // actions. A card that merely changes print is NOT a swap in functional
+  // mode — it is the same card — which is why this reads off the aggregated
+  // counts rather than the raw print keys.
+  function representativePrint(cardsObj, canonicalKey) {
+    let hit = null;
+    Object.keys(cardsObj || {}).some(rawKey => {
+      const info = mode === 'exact'
+        ? { canonical: `raw:${rawKey}` }
+        : getCanonicalComparisonInfo(rawKey);
+      if (info.canonical !== canonicalKey) return false;
+      hit = parseDeckCardKey(rawKey);
+      return true;
+    });
+    return hit;
+  }
+
+  const swapOut = [], swapIn = [];
+  allCanonicalKeys.forEach(key => {
+    const a = aggA.get(key) || { count: 0, label: '' };
+    const b = aggB.get(key) || { count: 0, label: '' };
+    if (a.count === b.count) return;                 // nothing to do
+    const delta = b.count - a.count;
+    const from = delta < 0 ? cardsA : cardsB;
+    const print = representativePrint(from, key) || representativePrint(cardsA, key)
+                  || representativePrint(cardsB, key);
+    const entry = {
+      name: (a.label || b.label || key),
+      set: print ? print.set : '',
+      number: print ? print.number : '',
+      qty: Math.abs(delta),
+      from: a.count,
+      to: b.count
+    };
+    (delta < 0 ? swapOut : swapIn).push(entry);
+  });
+  // Biggest change first — that is the one worth seeing at a glance.
+  swapOut.sort((x, y) => y.qty - x.qty);
+  swapIn.sort((x, y) => y.qty - x.qty);
+
+  function swapTile(c, colour) {
+    const card = (typeof _lookupCardBySetNumber === 'function')
+      ? _lookupCardBySetNumber(c.set, c.number) : null;
+    const img = card && card.image_url ? card.image_url : '';
+    const nm = escapeHtml(c.name);
+    const detail = (c.from > 0 && c.to > 0)
+      ? `${c.from} → ${c.to}` : '';
+    return `
+      <div style="border:2px solid ${colour};border-radius:8px;padding:5px;text-align:center;background:#fff;position:relative;">
+        ${img
+          ? `<img src="${escapeHtmlAttr(img)}" alt="${nm}" loading="lazy" decoding="async" style="width:100%;aspect-ratio:2.5/3.5;object-fit:cover;border-radius:5px;">`
+          : `<div style="width:100%;aspect-ratio:2.5/3.5;background:#eee;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:0.7em;color:#999;padding:4px;text-align:center;">${escapeHtml(c.set || '')} ${escapeHtml(c.number || '')}</div>`}
+        <div style="position:absolute;top:2px;right:2px;background:${colour};color:#fff;border-radius:999px;min-width:26px;padding:2px 7px;font-weight:800;font-size:0.95em;box-shadow:0 1px 3px rgba(0,0,0,.3);">${c.qty}</div>
+        <div style="font-weight:600;font-size:0.72em;margin-top:3px;line-height:1.2;" title="${nm}">${nm}</div>
+        ${detail ? `<div style="font-size:0.66em;color:#888;">${detail}</div>` : ''}
+      </div>`;
+  }
+
+  const gridStyle = 'display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px;';
+  const de = getLang() === 'de';
+  const changesHtml = `
+    ${swapOut.length ? `
+      <div style="margin-bottom:16px;">
+        <h4 style="color:#c0392b;margin:0 0 8px 0;">${de ? '➖ Rausnehmen' : '➖ Take out'} (${swapOut.reduce((s2, c) => s2 + c.qty, 0)})</h4>
+        <div style="${gridStyle}">${swapOut.map(c => swapTile(c, '#c0392b')).join('')}</div>
+      </div>` : ''}
+    ${swapIn.length ? `
+      <div style="margin-bottom:16px;">
+        <h4 style="color:#1e8449;margin:0 0 8px 0;">${de ? '➕ Reinlegen' : '➕ Put in'} (${swapIn.reduce((s2, c) => s2 + c.qty, 0)})</h4>
+        <div style="${gridStyle}">${swapIn.map(c => swapTile(c, '#1e8449')).join('')}</div>
+      </div>` : ''}
+    ${(!swapOut.length && !swapIn.length) ? `<div style="text-align:center;color:#27ae60;font-weight:700;padding:24px 0;">${de ? 'Keine Unterschiede — die Decks sind identisch.' : 'No differences — the decks are identical.'}</div>` : ''}
+  `;
+
   const safeNameA = escapeHtml(deckA.name);
   const safeNameB = escapeHtml(deckB.name);
   
@@ -4648,20 +4731,26 @@ function showDeckComparison(deckA, deckB, compareMode = 'functional') {
         <h2 style="margin:0;font-size:1.3em;">Deck Comparison</h2>
         <button onclick="this.closest('#deck-compare-modal').remove()" style="background:none;border:none;font-size:24px;cursor:pointer;">✕</button>
       </div>
+      <div style="display:flex;gap:8px;margin-bottom:12px;">
+        <button onclick="showDeckComparison(window._deckCompareA, window._deckCompareB, '${mode}', 'changes')" style="flex:1;min-height:44px;padding:8px 10px;border-radius:8px;border:${view === 'changes' ? 'none' : '1px solid #ccc'};background:${view === 'changes' ? '#c0392b' : '#f5f5f5'};color:${view === 'changes' ? 'white' : '#333'};font-size:13px;font-weight:800;cursor:pointer;">${de ? '🔄 Nur Änderungen' : '🔄 Changes only'}</button>
+        <button onclick="showDeckComparison(window._deckCompareA, window._deckCompareB, '${mode}', 'list')" style="flex:1;min-height:44px;padding:8px 10px;border-radius:8px;border:${view === 'list' ? 'none' : '1px solid #ccc'};background:${view === 'list' ? '#34495e' : '#f5f5f5'};color:${view === 'list' ? 'white' : '#333'};font-size:13px;font-weight:800;cursor:pointer;">${de ? '📋 Volle Liste' : '📋 Full list'}</button>
+      </div>
       <div style="display:flex;gap:8px;align-items:center;justify-content:flex-end;margin-bottom:12px;">
         <span style="font-size:12px;color:#666;font-weight:700;margin-right:4px;">Compare mode:</span>
         <button onclick="showDeckComparison(window._deckCompareA, window._deckCompareB, 'functional')" style="padding:6px 10px;border-radius:999px;border:${mode === 'functional' ? 'none' : '1px solid #ccc'};background:${mode === 'functional' ? '#2e7d32' : '#f5f5f5'};color:${mode === 'functional' ? 'white' : '#333'};font-size:12px;font-weight:700;cursor:pointer;">Functional (prints merged)</button>
         <button onclick="showDeckComparison(window._deckCompareA, window._deckCompareB, 'exact')" style="padding:6px 10px;border-radius:999px;border:${mode === 'exact' ? 'none' : '1px solid #ccc'};background:${mode === 'exact' ? '#1565c0' : '#f5f5f5'};color:${mode === 'exact' ? 'white' : '#333'};font-size:12px;font-weight:700;cursor:pointer;">Exact print</button>
       </div>
       <div style="margin:-4px 0 12px 0;font-size:12px;color:#666;">${mode === 'functional' ? (getLang()==='de' ? 'Artwork- und Set-Varianten derselben Karte werden zusammengefasst.' : 'Artwork and set variants of the same card are merged.') : (getLang()==='de' ? 'Jeder Print (set+nummer) wird einzeln verglichen.' : 'Each print (set+number) is compared individually.')}</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-bottom:15px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-bottom:${view === 'changes' ? '6px' : '15px'};">
         <div style="background:#667eea;color:white;padding:10px;border-radius:8px;text-align:center;font-weight:700;">${safeNameA}</div>
         <div style="background:#764ba2;color:white;padding:10px;border-radius:8px;text-align:center;font-weight:700;">${safeNameB}</div>
       </div>
+      ${view === 'changes' ? `<div style="font-size:12px;color:#666;margin-bottom:12px;text-align:center;">${de ? `So baust du <b>${safeNameA}</b> in <b>${safeNameB}</b> um:` : `How to turn <b>${safeNameA}</b> into <b>${safeNameB}</b>:`}</div>` : ''}
+      ${view === 'changes' ? changesHtml : `
       ${onlyA.length ? `<div style="margin-bottom:12px;"><h4 style="color:#667eea;margin:0 0 5px 0;">Only in ${safeNameA} (${onlyA.length})</h4><div style="font-size:0.9em;color:#555;">${onlyA.join('<br>')}</div></div>` : ''}
       ${onlyB.length ? `<div style="margin-bottom:12px;"><h4 style="color:#764ba2;margin:0 0 5px 0;">Only in ${safeNameB} (${onlyB.length})</h4><div style="font-size:0.9em;color:#555;">${onlyB.join('<br>')}</div></div>` : ''}
       ${different.length ? `<div style="margin-bottom:12px;"><h4 style="color:#e67e22;margin:0 0 5px 0;">Different counts (${different.length})</h4><div style="font-size:0.9em;color:#555;">${different.join('<br>')}</div></div>` : ''}
-      <div style="margin-bottom:12px;"><h4 style="color:#27ae60;margin:0 0 5px 0;">Same cards (${same.length})</h4><div style="font-size:0.9em;color:#555;">${same.length > 0 ? same.join('<br>') : 'No cards in common'}</div></div>
+      <div style="margin-bottom:12px;"><h4 style="color:#27ae60;margin:0 0 5px 0;">Same cards (${same.length})</h4><div style="font-size:0.9em;color:#555;">${same.length > 0 ? same.join('<br>') : 'No cards in common'}</div></div>`}
       ${totalProxyCopies > 0 ? `<div style="margin-top:16px;padding-top:14px;border-top:1px solid #eee;text-align:center;"><button onclick="addCompareNewCardsToProxy()" style="padding:10px 20px;border:none;border-radius:8px;background:#e74c3c;color:white;font-size:13px;font-weight:700;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.background='#c0392b';this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 12px rgba(231,76,60,0.35)'" onmouseout="this.style.background='#e74c3c';this.style.transform='';this.style.boxShadow=''">${getLang()==='de' ? 'Alle neuen Karten zum Proxy Printer hinzufügen' : 'Add all new cards to Proxy Printer'} (${totalProxyCopies})</button></div>` : ''}
     </div>
   `;

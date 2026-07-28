@@ -1,12 +1,12 @@
 {
  "file_rows": {
   "cardmarket_card_images.csv": 1295,
-  "cardmarket_id_mapping.csv": 17360,
+  "cardmarket_id_mapping.csv": 17370,
   "cm_expansions.csv": 765,
-  "price_data.csv": 20391,
+  "price_data.csv": 20401,
   "prizepack_official_images.csv": 266
  },
- "generated": "2026-07-27 10:46 UTC",
+ "generated": "2026-07-28 10:19 UTC",
  "set_coverage": {
   "AOR": [
    76,
@@ -389,8 +389,8 @@
    100.0
   ],
   "MEP": [
-   51,
-   51,
+   61,
+   61,
    100.0
   ],
   "MEW": [

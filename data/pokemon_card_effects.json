@@ -254506,6 +254506,58 @@
       "Illustrated by takuyoa"
     ]
   },
+  "MEP|72": {
+    "name": "Mega Clefable ex",
+    "card_type": "Evolves from Clefairy",
+    "energy_type": "Psychic",
+    "hp": "320",
+    "abilities": [
+      {
+        "name": "Luminous Wing",
+        "text": "Prevent all effects of your opponent's Pokémon's Abilities done to this Pokémon."
+      }
+    ],
+    "attacks": [
+      {
+        "name": "Shooting Moons",
+        "cost": [
+          "P",
+          "P"
+        ],
+        "damage": "120+",
+        "text": "You may discard up to 4 Energy cards from your hand, and this attack does 40 more damage for each card you discarded in this way."
+      }
+    ],
+    "rules": [
+      "Illustrated by aky CG Works"
+    ]
+  },
+  "MEP|73": {
+    "name": "Mega Gengar ex",
+    "card_type": "Evolves from Haunter",
+    "energy_type": "Darkness",
+    "hp": "350",
+    "abilities": [
+      {
+        "name": "Shadowy Concealment",
+        "text": "If 1 of your [ D ] Pokémon is Knocked Out by damage from an attack from your opponent's Pokémon ex, that player takes 1 fewer Prize card. The effect of Shadowy Concealment doesn't stack."
+      }
+    ],
+    "attacks": [
+      {
+        "name": "Void Gale",
+        "cost": [
+          "D",
+          "D"
+        ],
+        "damage": "230",
+        "text": "Move an Energy from this Pokémon to 1 of your Benched Pokémon."
+      }
+    ],
+    "rules": [
+      "Illustrated by Ultimateinudog"
+    ]
+  },
   "MEP|74": {
     "name": "Delphox",
     "card_type": "Evolves from Braixen",
@@ -254711,6 +254763,221 @@
     ],
     "rules": [
       "Illustrated by satoma"
+    ]
+  },
+  "MEP|81": {
+    "name": "Mega Greninja ex",
+    "card_type": "Evolves from Frogadier",
+    "energy_type": "Water",
+    "hp": "350",
+    "abilities": [
+      {
+        "name": "Mortal Shuriken",
+        "text": "Once during your turn, if this Pokémon is in the Active Spot, you may discard a Basic [ W ] Energy card from your hand in order to use this Ability. Place 6 damage counters on 1 of your opponent's Pokémon."
+      }
+    ],
+    "attacks": [
+      {
+        "name": "Ninja Spinner",
+        "cost": [
+          "W",
+          "W"
+        ],
+        "damage": "120+",
+        "text": "You may put a [ W ] Energy attached to this Pokémon into your hand and have this attack do 80 more damage."
+      }
+    ],
+    "rules": [
+      "Illustrated by 5ban Graphics"
+    ]
+  },
+  "MEP|82": {
+    "name": "Miraidon",
+    "card_type": "Basic",
+    "energy_type": "Lightning",
+    "hp": "120",
+    "abilities": [
+      {
+        "name": "Photon Cord",
+        "text": "If this Pokémon is in the Active Spot and is Knocked Out by damage from an attack from your opponent's Pokémon, move up to 2 Basic [ L ] Energy cards from this Pokémon to 1 of your Benched Pokémon."
+      }
+    ],
+    "attacks": [
+      {
+        "name": "Thunder",
+        "cost": [
+          "L",
+          "L"
+        ],
+        "damage": "90",
+        "text": "This Pokémon also does 30 damage to itself."
+      }
+    ],
+    "rules": [
+      "Illustrated by Taira Akitsu"
+    ]
+  },
+  "MEP|83": {
+    "name": "Slowbro",
+    "card_type": "Evolves from Slowpoke",
+    "energy_type": "Psychic",
+    "hp": "130",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "All Out",
+        "cost": [
+          "P"
+        ],
+        "damage": "50+",
+        "text": "If you have no cards in your hand, this attack does 160 more damage."
+      },
+      {
+        "name": "Zen Headbutt",
+        "cost": [
+          "C",
+          "C",
+          "C"
+        ],
+        "damage": "110",
+        "text": ""
+      }
+    ],
+    "rules": [
+      "Illustrated by Yuriko Akase"
+    ]
+  },
+  "MEP|84": {
+    "name": "Dhelmise",
+    "card_type": "Basic",
+    "energy_type": "Psychic",
+    "hp": "140",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Vengeful Anchor",
+        "cost": [
+          "P"
+        ],
+        "damage": "30+",
+        "text": "If you have 4 or more Pokémon that have the Hide 'n' Sneak Ability in your discard pile, this attack does 140 more damage."
+      }
+    ],
+    "rules": [
+      "Illustrated by Dsuke"
+    ]
+  },
+  "MEP|85": {
+    "name": "Bastiodon",
+    "card_type": "Evolves from Shieldon",
+    "energy_type": "Metal",
+    "hp": "160",
+    "abilities": [
+      {
+        "name": "Ancient Bulwark",
+        "text": "As long as this Pokémon is on your Bench, prevent all damage done to each of your Pokémon by attacks from your opponent's Pokémon that have 2 or less Energy attached."
+      }
+    ],
+    "attacks": [
+      {
+        "name": "Hammer In",
+        "cost": [
+          "M",
+          "M",
+          "C"
+        ],
+        "damage": "160",
+        "text": ""
+      }
+    ],
+    "rules": [
+      "Illustrated by Minahamu"
+    ]
+  },
+  "MEP|86": {
+    "name": "Slowpoke",
+    "card_type": "Basic",
+    "energy_type": "Psychic",
+    "hp": "80",
+    "abilities": [
+      {
+        "name": "Dopey Face",
+        "text": "This Pokémon can't be Confused."
+      }
+    ],
+    "attacks": [
+      {
+        "name": "Super Psy Bolt",
+        "cost": [
+          "P",
+          "P",
+          "C"
+        ],
+        "damage": "50",
+        "text": ""
+      }
+    ],
+    "rules": [
+      "Illustrated by miki kudo"
+    ]
+  },
+  "MEP|87": {
+    "name": "Binacle",
+    "card_type": "Basic",
+    "energy_type": "Fighting",
+    "hp": "80",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Double Draw",
+        "cost": [
+          "F"
+        ],
+        "damage": "",
+        "text": "Draw 2 cards."
+      },
+      {
+        "name": "Scratch",
+        "cost": [
+          "F",
+          "F"
+        ],
+        "damage": "30",
+        "text": ""
+      }
+    ],
+    "rules": [
+      "Illustrated by Shimaris Yukichi"
+    ]
+  },
+  "MEP|88": {
+    "name": "Zarude",
+    "card_type": "Basic",
+    "energy_type": "Darkness",
+    "hp": "130",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Overhead Throw",
+        "cost": [
+          "D"
+        ],
+        "damage": "30",
+        "text": "This attack also does 30 damage to 1 of your Benched Pokémon. (Don't apply Weakness and Resistance for Benched Pokémon.)"
+      },
+      {
+        "name": "Shadowy Whip",
+        "cost": [
+          "D",
+          "D",
+          "D"
+        ],
+        "damage": "100+",
+        "text": "If your Benched Pokémon have any Shadowy [ D ] Energy attached, this attack does 70 more damage."
+      }
+    ],
+    "rules": [
+      "Illustrated by IKEDA Saki"
     ]
   },
   "MEP|9": {

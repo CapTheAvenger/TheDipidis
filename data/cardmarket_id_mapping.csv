@@ -8826,6 +8826,8 @@ MEP,68,879250,unique,Makuhita
 MEP,69,879255,priced-by-date(1↔2),Chikorita
 MEP,70,879262,unique,Tyrunt
 MEP,71,873311,priced-by-date(1↔2),Mega Zygarde ex
+MEP,72,891720,unique,Mega Clefable ex
+MEP,73,891721,unique,Mega Gengar ex
 MEP,74,884752,priced-by-date(1↔2),Delphox
 MEP,75,884754,priced-by-date(1↔2),Ampharos
 MEP,76,884756,priced-by-date(1↔2),Crobat
@@ -8833,6 +8835,14 @@ MEP,77,884758,priced-by-date(1↔2),Goodra
 MEP,78,888609,unique,Toxel
 MEP,79,888607,unique,Charmeleon
 MEP,80,888506,priced-by-date(1↔3),Fennekin
+MEP,81,885516,priced-by-date(1↔2),Mega Greninja ex
+MEP,82,894261,unique,Miraidon
+MEP,83,894262,unique,Slowbro
+MEP,84,894263,unique,Dhelmise
+MEP,85,894264,unique,Bastiodon
+MEP,86,898176,unique,Slowpoke
+MEP,87,898177,unique,Binacle
+MEP,88,895779,priced-by-date(1↔2),Zarude
 MEW,1,733596,priced-by-date(2↔4),Bulbasaur
 MEW,2,733597,priced-by-date(2↔2),Ivysaur
 MEW,3,733598,priced-by-date(3↔3),Venusaur ex

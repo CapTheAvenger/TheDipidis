@@ -1,4 +1,6 @@
 tournament_id,tournament_date,format,player_count,winner_archetype,winner_winrate
+6a670957937230b102d46707,2026-07-28,CRI,104,Alakazam Dudunsparce,27.0
+so-many-cats,2026-07-28,CRI,128,Mega Excadrill,21.0
 6a672281937230b102d46759,2026-07-27,CRI,108,Beedrill,21.0
 6a5fa0c5937230b102d40ede,2026-07-27,CRI,246,Dragapult,34.0
 6a64f9a4937230b102d44a8a,2026-07-27,CRI,131,Toxtricity Box,27.0
@@ -62,4 +64,3 @@ wait-wut,2026-07-04,CRI,346,Dragapult,31.0
 6a2a2ad82d97f3b0c2613980,2026-07-01,CRI,109,Dragapult Dusknoir,25.0
 6a42564583fd320299bd3d12,2026-07-01,CRI,114,Slowking,27.0
 6a427cb383fd320299bd3ed1,2026-06-30,CRI,116,Slowking,18.0
-6a3e9f8d83fd320299bd0c18,2026-06-30,CRI,107,Blaziken Zoroark,25.0

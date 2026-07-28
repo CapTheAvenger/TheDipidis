@@ -822,6 +822,52 @@ async function _pushMirrorToServer(userId) {
   }
 }
 
+// Union the local mirror with the server, keeping the LOCAL copy of anything
+// we already have. Returns the decks that were adopted, for logging/tests.
+//
+// Pure, so the rule can be tested without Firestore: local wins on every id
+// collision, server-only ids are added, nothing is ever dropped.
+function _mergeAdoptOnly(mirrorDecks, serverDecks) {
+  const byId = new Map();
+  (serverDecks || []).forEach(d => { if (d && d.id) byId.set(d.id, d); });
+  const adopted = [];
+  byId.forEach((d, id) => {
+    if (!(mirrorDecks || []).some(m => m && m.id === id)) adopted.push(d);
+  });
+  const decks = (mirrorDecks || []).filter(d => d && d.id).slice();
+  adopted.forEach(d => decks.push(d));
+  return { decks, adopted };
+}
+window._mergeAdoptOnly = _mergeAdoptOnly;
+
+// Read the server and add any deck this device doesn't have yet.
+async function _adoptServerOnlyDecks(userId, mirrorDecks) {
+  // Offline: nothing to adopt, and no reason to spend a request.
+  if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
+  try {
+    const snapshot = await window.db.collection('users').doc(userId)
+      .collection('decks').get();
+    // A cache-only snapshot says nothing new — the mirror already covers it.
+    if (snapshot.metadata && snapshot.metadata.fromCache) return;
+
+    const server = [];
+    snapshot.forEach(doc => server.push({ id: doc.id, ...doc.data({ serverTimestamps: 'estimate' }) }));
+    const { decks, adopted } = _mergeAdoptOnly(mirrorDecks, server);
+    if (!adopted.length) return;
+
+    decks.sort((a, b) => {
+      const ms = d => (d.createdAt && d.createdAt.toMillis ? d.createdAt.toMillis() : (d.createdAtMs || 0));
+      return ms(b) - ms(a);
+    });
+    window.userDecks = decks;
+    _writeDeckBackup(userId, decks);
+    if (typeof updateDecksUI === 'function') updateDecksUI();
+    console.info('[decks] adopted', adopted.length, 'deck(s) saved on another device');
+  } catch (err) {
+    console.warn('[decks] could not check the server for new decks:', err && err.message);
+  }
+}
+
 async function loadUserDecks(userId, opts) {
   opts = opts || {};
   const forcePull = opts.forcePull === true;
@@ -837,15 +883,29 @@ async function loadUserDecks(userId, opts) {
   }
 
   // If we have a populated mirror and the caller didn't request a
-  // forced server pull (Force Sync button), stop here. The auto-load
-  // flow used to re-fetch on every app start, which lost any
-  // unsynced offline edits the moment Firestore returned its older
-  // server-side state on top of them.
+  // forced server pull (Force Sync button), the mirror stays
+  // authoritative for everything it already knows about — that is what
+  // protects offline edits that haven't synced yet.
+  //
+  // But it used to stop HERE, and that is why decks saved on one device
+  // never appeared on another: a phone with its own mirror never asked
+  // the server at all, so two decks saved on a PC stayed invisible.
+  //
+  // So: still never let the server overwrite a deck we hold locally, but
+  // do ADOPT decks the server has and we don't. Strictly additive — this
+  // branch cannot change or remove a single existing deck, which is why
+  // it is safe to run on every start.
+  //
+  // Deliberately NOT fixed here, because each needs work this change
+  // cannot carry safely (see the review notes in the commit message):
+  //   * a deck edited on two devices still resolves to the local copy
+  //   * a deck deleted on device A can still be resurrected by device B's
+  //     whole-mirror push (pre-existing; unchanged by this)
+  // Both need per-deck timestamps written by _persistDeckMutation and a
+  // single clock domain first.
   if (haveMirror && !forcePull) {
-    // Best-effort: push the mirror to the server in the background so
-    // edits made in earlier offline sessions back up whenever the
-    // device is online. Fire-and-forget — failure doesn't affect UI.
     _pushMirrorToServer(userId).catch(function () {});
+    _adoptServerOnlyDecks(userId, mirror.decks).catch(function () {});
     return;
   }
 

@@ -659,18 +659,46 @@
                 return;
             }
 
-            // Build comparison
-            const oldMap = {};
-            deckA.forEach(c => oldMap[c.key] = c);
-            const newMap = {};
-            deckB.forEach(c => newMap[c.key] = c);
+            // Build comparison — BY CARD, not by print.
+            //
+            // This used to key on `${set}-${number}`, so the same card from a
+            // different print counted as two different cards: one removed, one
+            // added. Comparing two builds of the same deck a few weeks apart
+            // then produced "everything removed, everything added", which is
+            // just both lists written out and answers nothing. Measured on a
+            // realistic pair: of 5 identical cards, exactly 1 was reported as
+            // unchanged.
+            //
+            // Counts are summed per card, because a list may legitimately
+            // split one card over two prints (2 Iono PAL + 2 Iono PAF = 4).
+            function fold(entries) {
+                const out = new Map();
+                entries.forEach(c => {
+                    const k = c.nameKey || normalizeDeckCardName(c.name);
+                    const prev = out.get(k);
+                    if (prev) {
+                        prev.count += c.count;
+                        if (c.set && !prev.prints.some(p => p.set === c.set && p.number === c.number)) {
+                            prev.prints.push({ set: c.set, number: c.number });
+                        }
+                    } else {
+                        out.set(k, {
+                            name: c.name, set: c.set, number: c.number, count: c.count,
+                            prints: c.set ? [{ set: c.set, number: c.number }] : []
+                        });
+                    }
+                });
+                return out;
+            }
+            const oldMap = fold(deckA);
+            const newMap = fold(deckB);
 
-            const allKeys = new Set([...Object.keys(oldMap), ...Object.keys(newMap)]);
+            const allKeys = new Set([...oldMap.keys(), ...newMap.keys()]);
             const allDisplayCards = [];
 
             allKeys.forEach(key => {
-                const oldCard = oldMap[key];
-                const newCard = newMap[key];
+                const oldCard = oldMap.get(key);
+                const newCard = newMap.get(key);
 
                 if (oldCard && !newCard) {
                     allDisplayCards.push({ name: oldCard.name, set: oldCard.set, number: oldCard.number, oldCount: oldCard.count, newCount: 0, changeType: 'removed' });
@@ -679,7 +707,19 @@
                 } else if (oldCard.count !== newCard.count) {
                     allDisplayCards.push({ name: newCard.name, set: newCard.set, number: newCard.number, oldCount: oldCard.count, newCount: newCard.count, changeType: 'changed' });
                 } else {
-                    allDisplayCards.push({ name: newCard.name, set: newCard.set, number: newCard.number, oldCount: oldCard.count, newCount: newCard.count, changeType: 'unchanged' });
+                    // Same card, same count. If the PRINT moved, say so — it is
+                    // a real difference between the two lists, just not a
+                    // deckbuilding one, and calling it "added + removed" was
+                    // the bug.
+                    const pa = (oldCard.prints || []).map(p => `${p.set} ${p.number}`).sort().join(', ');
+                    const pb = (newCard.prints || []).map(p => `${p.set} ${p.number}`).sort().join(', ');
+                    allDisplayCards.push({
+                        name: newCard.name, set: newCard.set, number: newCard.number,
+                        oldCount: oldCard.count, newCount: newCard.count,
+                        changeType: 'unchanged',
+                        printChanged: !!(pa && pb && pa !== pb),
+                        printFrom: pa, printTo: pb
+                    });
                 }
             });
 
@@ -756,6 +796,7 @@
                                 ${imageUrl ? `<img src="${imageUrl}" alt="${card.name}" loading="lazy" decoding="async" style="width: 100%; border-radius: 4px; margin-bottom: 4px; aspect-ratio: 2.5/3.5; object-fit: cover;">` : `<div style="width:100%;aspect-ratio:2.5/3.5;background:#ddd;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:0.7em;color:#999;">${card.set} ${card.number}</div>`}
                                 <div style="font-weight: 600; font-size: 0.75em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${card.name}">${card.name}</div>
                                 <div style="font-size: 0.95em; font-weight: bold; color: ${group.color};">${countDisplay}</div>
+                                ${card.printChanged ? `<div style="font-size:0.62em;color:#8a6d3b;background:#fcf8e3;border-radius:3px;padding:1px 3px;margin-top:2px;" title="${card.printFrom} → ${card.printTo}">anderer Druck</div>` : ''}
                                 ${proxyBtn}
                             </div>
                         `;
@@ -763,6 +804,21 @@
                     html += `</div></div>`;
                 }
             });
+
+            const unparsedLines = [].concat(deckA.unparsed || [], deckB.unparsed || []);
+            if (unparsedLines.length) {
+                // Dropping a line silently means a card is missing from the
+                // comparison and the user cannot tell. Say it out loud.
+                html += `
+                    <details style="margin-top:10px;font-size:12px;">
+                        <summary style="cursor:pointer;color:#856404;font-weight:600;">
+                            ${unparsedLines.length} Zeile(n) nicht gelesen — anzeigen
+                        </summary>
+                        <ul style="margin:6px 0 0;padding-left:18px;color:#666;">
+                            ${unparsedLines.map(l => `<li>${escapeHtml(l)}</li>`).join('')}
+                        </ul>
+                    </details>`;
+            }
 
             html += `</div>`;
             resultDiv.innerHTML = html;
@@ -779,8 +835,26 @@
             }
         });
 
+        // Same card, regardless of which print was written down. Strips the
+        // set/number noise, unifies the punctuation people actually type
+        // (apostrophes from phones, "Professor's" vs "Professors"), and lower
+        // -cases. Without this the comparison keyed on SET-NUMBER, so a reprint
+        // counted as a different card entirely.
+        function normalizeDeckCardName(name) {
+            return String(name || '')
+                .replace(/[\u2018\u2019\u02BC]/g, "'")
+                .replace(/\s+/g, ' ')
+                .trim()
+                .toLowerCase()
+                .replace(/[.'']/g, '')
+                .replace(/\s*\(.*?\)\s*/g, ' ')
+                .trim();
+        }
+        window.normalizeDeckCardName = normalizeDeckCardName;
+
         function parseDeckList(text) {
             const deck = [];
+            deck.unparsed = [];
             const lines = text.split('\n');
             
             for (let line of lines) {
@@ -802,7 +876,8 @@
                         name: cardName,
                         set: setCode,
                         number: setNumber,
-                        key: `${setCode}-${setNumber}` // Unique identifier
+                        key: `${setCode}-${setNumber}`,   // exact print
+                        nameKey: normalizeDeckCardName(cardName)  // the card itself
                     });
                 } else {
                     // Fallback: PTCGL basic energy lines like "10 Basic {R} Energy Energy"
@@ -811,13 +886,34 @@
                         const energyMap = { G:'1', R:'2', W:'3', L:'4', P:'5', F:'6', D:'7', M:'8' };
                         const energyNames = { G:'Basic Grass Energy', R:'Basic Fire Energy', W:'Basic Water Energy', L:'Basic Lightning Energy', P:'Basic Psychic Energy', F:'Basic Fighting Energy', D:'Basic Darkness Energy', M:'Basic Metal Energy' };
                         const code = energyMatch[2].toUpperCase();
+                        const eName = energyNames[code] || 'Basic Energy';
                         deck.push({
                             count: parseInt(energyMatch[1]),
-                            name: energyNames[code] || 'Basic Energy',
+                            name: eName,
                             set: 'SVE',
                             number: energyMap[code] || '1',
-                            key: `SVE-${energyMap[code] || '1'}`
+                            key: `SVE-${energyMap[code] || '1'}`,
+                            nameKey: normalizeDeckCardName(eName)
                         });
+                    } else {
+                        // "4 Iono" — no set/number. Extremely common in hand-typed
+                        // and older exports, and it used to be dropped without a
+                        // word, so the card silently vanished from the comparison.
+                        const loose = line.match(/^(\d+)\s+(.+?)\s*$/);
+                        if (loose) {
+                            const looseName = loose[2].trim();
+                            deck.push({
+                                count: parseInt(loose[1]),
+                                name: looseName,
+                                set: '',
+                                number: '',
+                                key: `NAME-${normalizeDeckCardName(looseName)}`,
+                                nameKey: normalizeDeckCardName(looseName),
+                                noPrint: true
+                            });
+                        } else if (deck.unparsed) {
+                            deck.unparsed.push(line);
+                        }
                     }
                 }
             }

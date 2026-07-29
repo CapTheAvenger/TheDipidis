@@ -1675,8 +1675,15 @@
                 const _liveFormat = (typeof window.getCurrentMetaFormat === 'function' && window.getCurrentMetaFormat()) || 'TEF-POR';
                 const _oldestLegal = (window._formatWindow && window._formatWindow.oldest_legal_set) || 'TEF';
                 let currentFormat = _liveFormat;
+                // data/format_window.json is the single source of truth for
+                // the rotation, and _liveFormat is its snapshot. The settings
+                // fetch below is a FALLBACK for when that snapshot is missing
+                // — it must never override it. It used to run unconditionally
+                // and win, which is how the meta card said "TEF-CRI" a week
+                // into the PBL window: config/current_meta_analysis_settings
+                // .json is a scraper config that nothing rotated.
                 try {
-                    const settingsPaths = [
+                    const settingsPaths = _liveFormat ? [] : [
                         './config/current_meta_analysis_settings.json?t=' + Date.now(),
                         './current_meta_analysis_settings.json?t=' + Date.now()
                     ];

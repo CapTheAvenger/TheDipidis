@@ -534,10 +534,20 @@ def main() -> int:
     # single-format run doesn't wipe the multi-format history.
     existing_winners: List[Dict[str, Any]] = []
     fmt_label = (settings.get("format_filter") or "").upper().strip()
+    # Every tournament re-scraped THIS run supersedes its old row, whatever
+    # format that row was stamped with. The keep-other-formats rule alone
+    # preserved rows forever, which froze a mislabeling bug in place: when
+    # format_filter sat at 'CRI' past the 2026-07-17 rotation, tournaments
+    # played under PBL were stamped 'CRI' — and once the filter was fixed,
+    # "keep rows whose format differs" would have protected exactly those
+    # wrong rows from ever being corrected.
+    rescraped_ids = {str(w.get("tournament_id") or "").strip() for w in winners}
     if os.path.exists(winners_path):
         try:
             with open(winners_path, "r", newline="", encoding="utf-8") as f:
                 for row in csv.DictReader(f):
+                    if str(row.get("tournament_id") or "").strip() in rescraped_ids:
+                        continue
                     if (row.get("format") or "").upper() != fmt_label:
                         existing_winners.append(row)
         except (OSError, csv.Error) as exc:

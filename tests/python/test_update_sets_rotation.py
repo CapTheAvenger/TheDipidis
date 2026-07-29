@@ -284,3 +284,90 @@ class TestCurrentMetaRotationReset:
         assert "'PFL'" in out and "'CRI'" in out, (
             f"change log should reference both formats; got:\n{out}"
         )
+
+
+class TestOnlineTournamentScraperRotation:
+    """online_tournament_scraper.format_filter was MISSING from the rotation.
+
+    It sat at 'CRI' a week into the PBL window: the scraper kept querying
+    Limitless with ?format=cri and stamped 'CRI' into every winners/top8 row,
+    and the frontend showed "Meta: TEF-CRI" over partly new-format data. Every
+    scraper key that encodes the rotation must be covered here — there is no
+    generic sweep, so an uncovered key rots silently until a user notices.
+    """
+
+    def test_rotates_online_tournament_format_filter(self, isolated_data_dir, tmp_path):
+        fw_path = tmp_path / "format_window.json"
+        settings_path = tmp_path / "scraper_settings.json"
+        _write_format_window(fw_path, current_set="PBL")
+        _write_settings(settings_path, current_meta_format="CRI")
+        # Seed the stale key exactly as found in production.
+        doc = json.loads(settings_path.read_text(encoding="utf-8"))
+        doc["online_tournament_scraper"] = {"format_filter": "CRI"}
+        settings_path.write_text(json.dumps(doc), encoding="utf-8")
+
+        update_sets.apply_format_window_to_scraper_settings(
+            str(fw_path), str(settings_path))
+
+        out = json.loads(settings_path.read_text(encoding="utf-8"))
+        assert out["online_tournament_scraper"]["format_filter"] == "PBL"
+
+    def test_rotates_standalone_settings_files(self, isolated_data_dir, tmp_path, monkeypatch):
+        # The FRONTEND reads config/current_meta_analysis_settings.json
+        # directly for its meta label, and nothing ever rotated the
+        # standalone files — one of them was still on 'POR', two whole
+        # rotations stale. They must move in lockstep with the unified file.
+        fw_path = tmp_path / "format_window.json"
+        settings_path = tmp_path / "scraper_settings.json"
+        cfg = tmp_path / "config"
+        cfg.mkdir()
+        monkeypatch.setattr(update_sets, "_CONFIG_DIR", str(cfg))
+
+        _write_format_window(fw_path, current_set="PBL")
+        _write_settings(settings_path, current_meta_format="CRI")
+        # BOM on purpose: the real current_meta_analysis_settings.json ships
+        # one, and a reader without utf-8-sig chokes on it.
+        (cfg / "current_meta_analysis_settings.json").write_bytes(
+            b"\xef\xbb\xbf" + json.dumps(
+                {"sources": {"limitless_online": {"format_filter": "CRI"}}}).encode())
+        (cfg / "online_tournament_scraper_settings.json").write_text(
+            json.dumps({"format_filter": "POR"}), encoding="utf-8")
+        (cfg / "limitless_online_settings.json").write_text(
+            json.dumps({"format": "STANDARD", "set": "POR"}), encoding="utf-8")
+
+        update_sets.apply_format_window_to_scraper_settings(
+            str(fw_path), str(settings_path))
+
+        cma = json.loads((cfg / "current_meta_analysis_settings.json")
+                         .read_text(encoding="utf-8-sig"))
+        assert cma["sources"]["limitless_online"]["format_filter"] == "PBL"
+        ots = json.loads((cfg / "online_tournament_scraper_settings.json")
+                         .read_text(encoding="utf-8"))
+        assert ots["format_filter"] == "PBL"
+        lo = json.loads((cfg / "limitless_online_settings.json")
+                        .read_text(encoding="utf-8"))
+        assert lo["set"] == "PBL"
+        assert lo["format"] == "STANDARD", "unrelated keys must survive"
+
+    def test_second_run_is_a_noop(self, isolated_data_dir, tmp_path, monkeypatch):
+        # Idempotence: once rotated, a re-run must not rewrite files or
+        # report changes (the weekly job runs this twice per cycle).
+        fw_path = tmp_path / "format_window.json"
+        settings_path = tmp_path / "scraper_settings.json"
+        cfg = tmp_path / "config"
+        cfg.mkdir()
+        monkeypatch.setattr(update_sets, "_CONFIG_DIR", str(cfg))
+        _write_format_window(fw_path, current_set="PBL")
+        _write_settings(settings_path, current_meta_format="CRI")
+        (cfg / "online_tournament_scraper_settings.json").write_text(
+            json.dumps({"format_filter": "POR"}), encoding="utf-8")
+
+        # First run normalises every rotated key; the second must then be a
+        # no-op — the weekly job calls this twice per cycle, and a function
+        # that keeps reporting changes would rewrite configs on every run.
+        first = update_sets.apply_format_window_to_scraper_settings(
+            str(fw_path), str(settings_path))
+        second = update_sets.apply_format_window_to_scraper_settings(
+            str(fw_path), str(settings_path))
+        assert first is True
+        assert second is False

@@ -1084,6 +1084,18 @@ def apply_format_window_to_scraper_settings(format_window_path: str,
         changes.append(f"limitless_online.set {lo.get('set')!r} → {current_set!r}")
         lo['set'] = current_set
 
+    # online_tournament_scraper was MISSING from this rotation, which is how
+    # its format_filter sat at 'CRI' a week into the PBL window: the scraper
+    # kept querying Limitless with ?format=cri and stamped 'CRI' into every
+    # winners/top8 row — including tournaments played after the 2026-07-17
+    # online rotation. The frontend then showed "Meta: TEF-CRI" over data
+    # that was partly new-format. Every scraper key that encodes the rotation
+    # must be listed here; there is no generic sweep.
+    ots = settings.setdefault('online_tournament_scraper', {})
+    if ots.get('format_filter') != current_set:
+        changes.append(f"online_tournament_scraper.format_filter {ots.get('format_filter')!r} → {current_set!r}")
+        ots['format_filter'] = current_set
+
     cma_lo = settings.setdefault('current_meta_analysis', {}).setdefault('sources', {}).setdefault('limitless_online', {})
     # Capture the previous format BEFORE writing the new one — needed to
     # decide whether this is a rotation (= old data must be wiped) or
@@ -1173,6 +1185,43 @@ def apply_format_window_to_scraper_settings(format_window_path: str,
             changes.append("meta_play_decks_cache.json reset to empty")
         except OSError as e:
             print(f"[Update Sets] ! could not reset meta_play_decks_cache.json: {e}")
+
+    # ── Standalone per-scraper settings files ────────────────────────
+    # The scrapers merge config/scraper_settings.json OVER these, so for
+    # them the standalone files are only a fallback. But the FRONTEND
+    # reads config/current_meta_analysis_settings.json directly for its
+    # "Meta: <format>" label — and because nothing ever rotated these
+    # files, that label showed TEF-CRI a week into the PBL window while
+    # online_tournament_scraper_settings.json still said POR, two whole
+    # rotations stale. Keep them in lockstep so no reader of either
+    # layer can see a rotted format again.
+    standalone_rotations = [
+        ('current_meta_analysis_settings.json',
+         ('sources', 'limitless_online', 'format_filter'), current_set),
+        ('online_tournament_scraper_settings.json',
+         ('format_filter',), current_set),
+        ('limitless_online_settings.json',
+         ('set',), current_set),
+    ]
+    for fname, keypath, value in standalone_rotations:
+        fpath = os.path.join(_CONFIG_DIR, fname)
+        if not os.path.isfile(fpath):
+            continue
+        try:
+            # utf-8-sig: current_meta_analysis_settings.json ships a BOM.
+            with open(fpath, 'r', encoding='utf-8-sig') as f:
+                doc = json.load(f)
+            node = doc
+            for k in keypath[:-1]:
+                node = node.setdefault(k, {})
+            if node.get(keypath[-1]) != value:
+                changes.append(f"{fname}:{'.'.join(keypath)} {node.get(keypath[-1])!r} → {value!r}")
+                node[keypath[-1]] = value
+                with open(fpath, 'w', encoding='utf-8') as f:
+                    json.dump(doc, f, indent=4, ensure_ascii=False)
+                    f.write('\n')
+        except (OSError, json.JSONDecodeError) as e:
+            print(f"[Update Sets] ! could not rotate {fname}: {e}")
 
     if not changes:
         print("[Update Sets] ✓ Scraper settings already in sync with format_window.json")

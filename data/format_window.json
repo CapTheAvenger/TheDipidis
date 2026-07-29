@@ -7,7 +7,7 @@
   "current_set_jp": "M5",
   "jp_release_date": "2026-05-22",
   "_note": "Auto-derived twice per weekly run from limitlesstcg.com/cards (EN) and /cards/jp (JP). EN and JP run on independent rotation cycles with different set codes — POR (Perfect Order, EN) is the international counterpart of M3 (Nihil Zero, JP); by the time POR shipped to EN on 2026-03-27, JP was already on M4 (Ninja Spinner, 2026-03-13). City League scrapers track jp_release_date; the EN-side scrapers track set_release_date and (for in-person majors) in_person_legal_date = release + lag_days. _pick_current_set() keeps these in sync without a human edit when the next set drops.",
-  "previous_format_key": "TEF-POR",
+  "previous_format_key": "TEF-CRI",
   "set_addition_only": true,
   "_note_previous_format": "previous_format_key + set_addition_only are MANUAL fields the maintainer sets at every rotation. They gate Predictor 5.5/5.6/5.8/5.9 (last-meta floor + decline-damper + stickiness + format-migration). update_sets.py preserves them — see write_format_window() — so the weekly run doesn't wipe them."
 }

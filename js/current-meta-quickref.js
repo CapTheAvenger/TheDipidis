@@ -161,6 +161,32 @@
   // means the most recent tournament_date across all tournaments
   // that carry this archetype — current meta is forward-looking,
   // so the freshest event always wins.
+  // The full data/format_window.json (the inline window._formatWindow
+  // snapshot carries only the set codes, not in_person_legal_date, which is
+  // what decides whether a major belongs to the current format). Cached —
+  // one fetch per page load.
+  let _fwPromise = null;
+  function _loadFormatWindow() {
+    if (!_fwPromise) {
+      _fwPromise = fetch('data/format_window.json?t=' + Date.now())
+        .then(r => (r.ok ? r.json() : null))
+        .catch(() => null);
+    }
+    return _fwPromise;
+  }
+
+  // A major played before the current format's first legal in-person day
+  // belongs to the previous format. Driven entirely by format_window.json —
+  // no set codes in code, so the gate survives every future rotation
+  // untouched. On any doubt (missing dates) it says "current": hiding real
+  // data on a config hiccup would be worse than the label being generous.
+  function _isPreviousFormatMajor(tournamentDate, fw) {
+    const d = String(tournamentDate || '').trim();
+    const legal = fw && String(fw.in_person_legal_date || '').trim();
+    if (!d || !legal) return false;
+    return d < legal;
+  }
+
   async function findBestMajorList(archetype) {
     const builder = global.MostConsistencyBuilder;
     if (!builder || typeof builder.loadData !== 'function') {
@@ -185,6 +211,21 @@
       return _winRate(b) - _winRate(a);
     });
     const best = lists[0];
+    const fw = await _loadFormatWindow();
+    if (_isPreviousFormatMajor(best.tournament_date, fw)) {
+      // NAIC 2026 (2026-06-10) is genuinely the latest major on record — but
+      // it was played in the PREVIOUS format. Presenting it unlabelled as
+      // "Latest Major" a week into TEF-PBL is a wrong meta assignment, which
+      // is exactly what got reported. Return a marker so the caller renders
+      // an honest empty state instead of the old-format deck.
+      return {
+        previousFormat: true,
+        formatKey: (typeof window.getCurrentMetaFormat === 'function' && window.getCurrentMetaFormat()) || '',
+        firstLegal: (fw && fw.in_person_legal_date) || '',
+        tournament_name: best.tournament_name || '',
+        tournament_date: best.tournament_date || ''
+      };
+    }
     return { ...best, cards: _consolidateCards(best.cards) };
   }
 
@@ -479,7 +520,22 @@
       findBestOnlineBuild(archetype),
     ]);
 
-    if (majorRes.status === 'fulfilled' && majorRes.value) {
+    if (majorRes.status === 'fulfilled' && majorRes.value && majorRes.value.previousFormat) {
+      // No major in the current format yet. Say so — and name the last
+      // previous-format major so nobody thinks the data is missing.
+      global.currentMetaBestMajor = null;
+      const v = majorRes.value;
+      const de = (typeof getLang === 'function') ? getLang() === 'de' : true;
+      const head = de
+        ? `Noch kein Major-Turnier im Format ${v.formatKey || 'aktuell'}${v.firstLegal ? ` — erstes Major ab ${v.firstLegal}` : ''}.`
+        : `No major tournament in the ${v.formatKey || 'current'} format yet${v.firstLegal ? ` — first major from ${v.firstLegal}` : ''}.`;
+      const tail = v.tournament_name
+        ? (de
+            ? `Letztes Major des vorherigen Formats: ${v.tournament_name} (${v.tournament_date}) — siehe Past Meta.`
+            : `Last major of the previous format: ${v.tournament_name} (${v.tournament_date}) — see Past Meta.`)
+        : '';
+      majorBody.innerHTML = `<p class="past-meta-section-hint past-meta-empty-state">${_escHtml(head)}${tail ? `<br><small>${_escHtml(tail)}</small>` : ''}</p>`;
+    } else if (majorRes.status === 'fulfilled' && majorRes.value) {
       global.currentMetaBestMajor = majorRes.value;
       majorBody.innerHTML = _renderRefHeader(majorRes.value, 'major') + _renderCardGrid(majorRes.value.cards);
     } else {

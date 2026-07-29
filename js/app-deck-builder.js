@@ -7083,6 +7083,70 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
         }
 
 
+        // ────────────────────────────────────────────────────────────
+        // Major-anchor FORMAT GATE.
+        //
+        // Every structural Major mechanism in the consistency builder —
+        // the absent-from-Major hard cap, the 4-of skeleton lock, the
+        // conditional-avg count locks, the co-occurrence map — anchors on
+        // "the latest Major chunk". The code around them documents the
+        // intent: "stays dormant during the first ~2 weeks after a set
+        // rotation (no current-format Major chunk yet)". That assumption
+        // was false: loadCSV(latestChunkOnly) serves the newest chunk
+        // THAT EXISTS, which after a rotation is the previous format's.
+        //
+        // Observed result (Alakazam Dudunsparce, TEF-PBL week 2): the
+        // builder anchored on NAIC (TEF-CRI, 46 decks). The Toucannon
+        // line — 80% of current online decks, but PBL cards that could
+        // not exist at NAIC — was hard-capped to score 24 and never
+        // auto-added, while Nighttime Mine (71.7% at NAIC, 35% now) was
+        // skeleton-locked at 4-of over Battle Cage (30.4% at NAIC, 80%
+        // now). The build was the OLD format's list.
+        //
+        // This gate drops Major rows dated before the current format's
+        // first legal in-person day (format_window.in_person_legal_date)
+        // — restoring the documented dormant state everywhere at once.
+        // It un-gates by itself the moment the first current-format
+        // Major chunk appears. No set codes in code. On a failed
+        // format_window fetch the gate stays OPEN: silently changing
+        // builds on a network hiccup would be worse than one stale build.
+        // ────────────────────────────────────────────────────────────
+        let _builderFwPromise = null;
+        function _loadFormatWindowForBuilder() {
+            if (!_builderFwPromise) {
+                _builderFwPromise = fetch('data/format_window.json?t=' + Date.now())
+                    .then(r => (r.ok ? r.json() : null))
+                    .catch(() => null);
+            }
+            return _builderFwPromise;
+        }
+
+        function _parseMajorRowDate(raw) {
+            const cleaned = String(raw || '').trim().replace(/(\d+)(st|nd|rd|th)/i, '$1');
+            if (!cleaned) return null;
+            const d = new Date(cleaned);
+            return isNaN(d.getTime()) ? null : d;
+        }
+
+        function _filterMajorRowsToCurrentFormat(rows, fw) {
+            if (!Array.isArray(rows) || rows.length === 0) return { rows: rows || [], dropped: 0 };
+            const legal = fw && fw.in_person_legal_date ? Date.parse(String(fw.in_person_legal_date)) : NaN;
+            if (!Number.isFinite(legal)) return { rows, dropped: 0 };
+            const kept = rows.filter(r => {
+                const d = (typeof parseEnglishTournamentDate === 'function')
+                    ? parseEnglishTournamentDate(r.tournament_date)
+                    : _parseMajorRowDate(r.tournament_date);
+                // Undated rows are kept: dropping data we cannot date would
+                // be a silent repair.
+                if (!d) return true;
+                return d.getTime() >= legal;
+            });
+            return { rows: kept, dropped: rows.length - kept.length };
+        }
+        if (typeof window !== 'undefined') {
+            window._filterMajorRowsToCurrentFormat = _filterMajorRowsToCurrentFormat;
+        }
+
         async function autoCompleteConsistency(source, rarityMode, options) {
             // ─────────────────────────────────────────────────────────────
             // TABLE OF CONTENTS (2,620-line function — navigation aid added
@@ -7143,6 +7207,23 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             const _opts = options || {};
             const _antiTechTarget = (_opts.antiTechTarget || '').toString().trim() || null;
             const _antiTechAggression = (_opts.antiTechAggression || 'standard').toString();
+
+            // Major-anchor format gate (see _filterMajorRowsToCurrentFormat).
+            // Resolved once per build; _gateMajorRows is used at EVERY read
+            // of window.currentMetaTournamentCardsData inside this function
+            // so no Major mechanism can see previous-format rows.
+            const _builderFw = (source === 'currentMeta') ? await _loadFormatWindowForBuilder() : null;
+            let _majorGateDropped = 0;
+            const _gateMajorRows = (rows) => {
+                const res = _filterMajorRowsToCurrentFormat(rows || [], _builderFw);
+                if (res.dropped > 0 && res.rows.length === 0 && _majorGateDropped === 0) {
+                    _majorGateDropped = res.dropped;
+                    devLog(`[Consistency][MajorGate] ${res.dropped} previous-format Major row(s) ignored `
+                        + `(before in_person_legal_date ${_builderFw && _builderFw.in_person_legal_date}) — `
+                        + `Major anchor dormant until the first current-format Major.`);
+                }
+                return res.rows;
+            };
 
             // Clear specific rarity preferences before generating
             rarityPreferences = {};
@@ -7455,7 +7536,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                             devLog('[Consistency][Recency] Major source load failed:', e);
                         }
                     }
-                    const majorRows = window.currentMetaTournamentCardsData || [];
+                    const majorRows = _gateMajorRows(window.currentMetaTournamentCardsData);
                     const _hasMajorData = Array.isArray(majorRows) && majorRows.length > 0;
 
                     // Online dated CSV — lazy-load once, cached on window.
@@ -7579,7 +7660,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                         devLog('[Consistency][LatestMajorAnchor] Could not load tournament data:', e);
                     }
                 }
-                let tournamentRows = window.currentMetaTournamentCardsData || [];
+                let tournamentRows = _gateMajorRows(window.currentMetaTournamentCardsData);
                 // Apply the user's "data window from" date filter — when
                 // set, the Major-anchor only considers rows on or after
                 // the cutoff. With a fresh cutoff this lets the user say
@@ -8202,11 +8283,12 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             if (Array.isArray(onlineRowsRaw)) {
                 for (const r of onlineRowsRaw) _cooccurrenceRows.push(r);
             }
-            if (typeof window !== 'undefined' && Array.isArray(window.currentMetaTournamentCardsData)) {
+            const _coocMajorRows = _gateMajorRows(typeof window !== 'undefined' ? window.currentMetaTournamentCardsData : []);
+            if (Array.isArray(_coocMajorRows) && _coocMajorRows.length > 0) {
                 const _stripPriceTag = (s) => String(s || '')
                     .replace(/\d+(?:[.,]\d+)?\$\d+(?:[.,]\d+)?€.*$/u, '')
                     .trim();
-                for (const r of window.currentMetaTournamentCardsData) {
+                for (const r of _coocMajorRows) {
                     if (!r) continue;
                     _cooccurrenceRows.push({
                         tournament_id: r.tournament_id,
@@ -8311,6 +8393,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                     chosen: aceSpecSlotCard.card_name,
                     major_weight: Math.round(_aceSpecMajorWeight * 100) / 100,
                     major_age_days: latestMajorAgeDays,
+                    major_gated_previous_format: _majorGateDropped > 0,
                     major_date: latestMajorDate || '',
                     major_total_decks: latestMajorTotalDecks || 0,
                     has_major_anchor: !!hasLatestMajorAnchor,
@@ -8495,7 +8578,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 // at avg 1.0-1.27 across 4 regionals, which should dominate
                 // when only 1/4 of Online happens to play that ACE-SPEC.
                 const _condSources = [];
-                const _majorRowsForCond = window.currentMetaTournamentCardsData;
+                const _majorRowsForCond = _gateMajorRows(window.currentMetaTournamentCardsData);
                 const _hasMajorForCond = Array.isArray(_majorRowsForCond) && _majorRowsForCond.length > 0;
                 if (Array.isArray(onlineRowsRaw) && onlineRowsRaw.length > 0) {
                     _condSources.push({
@@ -9440,6 +9523,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             if (hasMetaData) algoDesc += ' | +Meta Boost';
             if (hasTimeDecay) algoDesc += ' | +Time-Decay (last 7d full weight, decay to 21d)';
             if (hasLatestMajorAnchor) algoDesc += ` | +Latest Major Anchor (${latestMajorDate})`;
+            else if (_majorGateDropped > 0) algoDesc += ` | Major-Anker ruht: letztes Major ist Vorformat (erstes aktuelles Major ab ${(_builderFw && _builderFw.in_person_legal_date) || '—'})`;
             if (techAuditActiveThreats.size > 0) {
                 const cats = Array.from(techAuditActiveThreats.keys()).join(', ');
                 algoDesc += ` | +Tech Audit (active: ${cats})`;

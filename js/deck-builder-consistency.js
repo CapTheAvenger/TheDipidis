@@ -1060,8 +1060,13 @@
   /**
    * @param {string} archetype  The deck_archetype label (must match
    *   the per-decklist CSV's deck_archetype column).
-   * @param {Object} opts       Reserved for future filter options
-   *   (e.g., date range, tournament whitelist).
+   * @param {Object} opts
+   *   opts.minDate — ISO "YYYY-MM-DD": drop decklists dated before it
+   *   (format gate: after a set rotation the CSV is 100% previous-format
+   *   until the first current-format Major is scraped, and building from
+   *   it would reproduce the OLD format's deck). Lists whose
+   *   tournament_date is missing or not ISO are KEPT — dropping rows we
+   *   cannot date would be a silent repair.
    * @returns {Object}
    *   {
    *     deck: [{ card, count, slotType, packageId? }],
@@ -1076,7 +1081,7 @@
     await _loadAll();
 
     const trace = [];
-    const lists = listsForArchetype(archetype);
+    let lists = listsForArchetype(archetype);
     if (!lists.length) {
       return {
         deck: [], trace: [{ phase: 0, decision: 'no_lists_for_archetype',
@@ -1084,6 +1089,39 @@
                             warning: `No per-decklist data for "${archetype}".` },
         archetype,
       };
+    }
+
+    // Format gate (opts.minDate, ISO). The CSV's tournament_date is ISO;
+    // anything that isn't parseable as ISO is kept rather than guessed at.
+    const minDate = /^\d{4}-\d{2}-\d{2}$/.test(String(opts.minDate || ''))
+      ? String(opts.minDate) : null;
+    if (minDate) {
+      const before = lists.length;
+      lists = lists.filter(l => {
+        const d = String(l.tournament_date || '').trim().slice(0, 10);
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(d)) return true;
+        return d >= minDate;
+      });
+      if (lists.length !== before) {
+        trace.push({
+          phase: 0, decision: 'previous_format_lists_dropped',
+          dropped: before - lists.length, kept: lists.length,
+          min_date: minDate,
+        });
+      }
+      if (!lists.length) {
+        return {
+          deck: [], trace,
+          dataQuality: {
+            n_lists: 0, sufficient: false,
+            warning: `All ${before} decklist(s) for "${archetype}" predate `
+                   + `the current format window (first legal in-person day `
+                   + `${minDate}) — previous-format lists must not shape a `
+                   + `current-format build.`,
+          },
+          archetype,
+        };
+      }
     }
 
     const cardDb = _getCardDb();

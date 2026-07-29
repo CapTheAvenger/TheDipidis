@@ -169,8 +169,14 @@
   function _loadFormatWindow() {
     if (!_fwPromise) {
       _fwPromise = fetch('data/format_window.json?t=' + Date.now())
-        .then(r => (r.ok ? r.json() : null))
-        .catch(() => null);
+        .then(r => {
+          if (!r.ok) throw new Error('format_window HTTP ' + r.status);
+          return r.json();
+        })
+        // Fail open for THIS call but do not cache the failure — a
+        // hiccup on first paint must not leave the gate off for the
+        // whole session.
+        .catch(() => { _fwPromise = null; return null; });
     }
     return _fwPromise;
   }

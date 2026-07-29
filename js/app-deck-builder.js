@@ -6825,9 +6825,21 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 return { applied: false, reason: 'builder-not-loaded' };
             }
 
+            // Format gate for the per-decklist CSV: after a set rotation
+            // that file is 100% previous-format until the first current-
+            // format Major is scraped (e.g. TEF-PBL week 2: every row was
+            // Turin/NAIC, TEF-CRI). Without minDate this path would win
+            // (≥3 lists) and rebuild the OLD format's deck — bypassing
+            // the legacy stages' Major gate entirely. With all lists
+            // gated away the builder declines and the legacy path (which
+            // uses current online data) takes over.
+            const _fw = (source === 'currentMeta')
+                ? await _loadFormatWindowForBuilder() : null;
             let result;
             try {
-                result = await builder.build(archetype);
+                result = await builder.build(archetype, {
+                    minDate: (_fw && _fw.in_person_legal_date) || null,
+                });
             } catch (err) {
                 return { applied: false, reason: 'build-threw: ' + (err && err.message) };
             }
@@ -7089,53 +7101,57 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
         // Every structural Major mechanism in the consistency builder —
         // the absent-from-Major hard cap, the 4-of skeleton lock, the
         // conditional-avg count locks, the co-occurrence map — anchors on
-        // "the latest Major chunk". The code around them documents the
-        // intent: "stays dormant during the first ~2 weeks after a set
-        // rotation (no current-format Major chunk yet)". That assumption
-        // was false: loadCSV(latestChunkOnly) serves the newest chunk
-        // THAT EXISTS, which after a rotation is the previous format's.
+        // "the latest Major chunk" and is documented to stay dormant
+        // after a set rotation until the first current-format Major
+        // chunk exists.
         //
-        // Observed result (Alakazam Dudunsparce, TEF-PBL week 2): the
-        // builder anchored on NAIC (TEF-CRI, 46 decks). The Toucannon
-        // line — 80% of current online decks, but PBL cards that could
-        // not exist at NAIC — was hard-capped to score 24 and never
-        // auto-added, while Nighttime Mine (71.7% at NAIC, 35% now) was
-        // skeleton-locked at 4-of over Battle Cage (30.4% at NAIC, 80%
-        // now). The build was the OLD format's list.
+        // The chunk loader (app-core.js _loadTournamentCardsChunked) is
+        // itself format-aware and returns [] when no chunk matches
+        // format_window.current_set — but it reads format_window.json
+        // WITHOUT cache-busting, so a stale cached window (as during the
+        // 2026-07-17→21 config lag) can still hand previous-format rows
+        // to this function. Observed result then (Alakazam Dudunsparce,
+        // TEF-PBL week 2): anchored on NAIC (TEF-CRI, 46 decks), the
+        // Toucannon line (80% of current online decks — PBL cards that
+        // could not exist at NAIC) was hard-capped to 24, Nighttime Mine
+        // (71.7% at NAIC, 35% now) skeleton-locked at 4-of over Battle
+        // Cage (30.4% at NAIC, 80% now).
         //
-        // This gate drops Major rows dated before the current format's
-        // first legal in-person day (format_window.in_person_legal_date)
-        // — restoring the documented dormant state everywhere at once.
-        // It un-gates by itself the moment the first current-format
-        // Major chunk appears. No set codes in code. On a failed
-        // format_window fetch the gate stays OPEN: silently changing
-        // builds on a network hiccup would be worse than one stale build.
+        // This gate is the defense-in-depth for that path: it drops
+        // Major rows dated before format_window.in_person_legal_date,
+        // restoring the dormant state everywhere at once, and un-gates
+        // by itself the moment the first current-format Major chunk
+        // appears. The same format window also feeds the Phase Y.2
+        // per-decklist builder via opts.minDate (see
+        // _runMostConsistencyBuilderPath). No set codes in code. On a
+        // failed format_window fetch the gate stays OPEN for that build
+        // (silently changing builds on a network hiccup would be worse
+        // than one stale build) — but the failure is NOT cached, so the
+        // next build retries the fetch.
         // ────────────────────────────────────────────────────────────
         let _builderFwPromise = null;
         function _loadFormatWindowForBuilder() {
             if (!_builderFwPromise) {
                 _builderFwPromise = fetch('data/format_window.json?t=' + Date.now())
-                    .then(r => (r.ok ? r.json() : null))
-                    .catch(() => null);
+                    .then(r => {
+                        if (!r.ok) throw new Error('format_window HTTP ' + r.status);
+                        return r.json();
+                    })
+                    .catch(() => { _builderFwPromise = null; return null; });
             }
             return _builderFwPromise;
         }
 
-        function _parseMajorRowDate(raw) {
-            const cleaned = String(raw || '').trim().replace(/(\d+)(st|nd|rd|th)/i, '$1');
-            if (!cleaned) return null;
-            const d = new Date(cleaned);
-            return isNaN(d.getTime()) ? null : d;
-        }
-
         function _filterMajorRowsToCurrentFormat(rows, fw) {
             if (!Array.isArray(rows) || rows.length === 0) return { rows: rows || [], dropped: 0 };
+            // in_person_legal_date is ISO → Date.parse gives UTC midnight,
+            // matching _parseAnyTournamentDate's "Returns Date (UTC)" — a
+            // Major held ON the first legal day must be kept, and a local-
+            // midnight parser would drop it for every UTC+x visitor.
             const legal = fw && fw.in_person_legal_date ? Date.parse(String(fw.in_person_legal_date)) : NaN;
             if (!Number.isFinite(legal)) return { rows, dropped: 0 };
             const kept = rows.filter(r => {
-                const d = (typeof parseEnglishTournamentDate === 'function')
-                    ? parseEnglishTournamentDate(r.tournament_date)
-                    : _parseMajorRowDate(r.tournament_date);
+                const d = _parseAnyTournamentDate(r.tournament_date);
                 // Undated rows are kept: dropping data we cannot date would
                 // be a silent repair.
                 if (!d) return true;
@@ -7209,10 +7225,12 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             const _antiTechAggression = (_opts.antiTechAggression || 'standard').toString();
 
             // Major-anchor format gate (see _filterMajorRowsToCurrentFormat).
-            // Resolved once per build; _gateMajorRows is used at EVERY read
-            // of window.currentMetaTournamentCardsData inside this function
+            // Resolved once per build — but only after the cheap input
+            // validation below, so a fetch can't delay the error toasts.
+            // _gateMajorRows is used at EVERY read of
+            // window.currentMetaTournamentCardsData inside this function
             // so no Major mechanism can see previous-format rows.
-            const _builderFw = (source === 'currentMeta') ? await _loadFormatWindowForBuilder() : null;
+            let _builderFw = null;
             let _majorGateDropped = 0;
             const _gateMajorRows = (rows) => {
                 const res = _filterMajorRowsToCurrentFormat(rows || [], _builderFw);
@@ -7278,6 +7296,12 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             devLog('[autoCompleteConsistency] Starting CONSISTENCY-based deck generation');
             devLog('[autoCompleteConsistency] Total available cards:', cards.length);
             console.info('[autoCompleteConsistency] PROCEEDING with', cards.length, 'cards');
+
+            // Validation passed — now resolve the format window (cached
+            // across builds; a failed fetch retries next build).
+            if (source === 'currentMeta') {
+                _builderFw = await _loadFormatWindowForBuilder();
+            }
 
             // ==========================================
             // Phase Y.2 — New Most-Consistency builder hook.

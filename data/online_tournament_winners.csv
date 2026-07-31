@@ -2,6 +2,13 @@ tournament_id,tournament_date,format,player_count,winner_archetype,winner_winrat
 6a2a2ad82d97f3b0c2613980,2026-07-01,CRI,109,Dragapult Dusknoir,25.0
 6a42564583fd320299bd3d12,2026-07-01,CRI,114,Slowking,27.0
 6a427cb383fd320299bd3ed1,2026-06-30,CRI,116,Slowking,18.0
+6a68191b52c24ac2da64e30d,2026-07-30,PBL,197,Dragapult,28.0
+6a5e302452c24ac2da647321,2026-07-30,PBL,105,Mega Excadrill,27.0
+6a63970f52c24ac2da64aa36,2026-07-30,PBL,215,Festival Lead,35.0
+6a67099f52c24ac2da64d607,2026-07-30,PBL,138,Slowking,28.0
+6a58f6f1cc68177ec6c56a71,2026-07-29,PBL,127,Festival Lead,21.0
+6a699f7b937230b102d4811e,2026-07-29,PBL,135,Mega Excadrill,28.0
+6a5e2f31937230b102d401c3,2026-07-29,PBL,116,Alakazam Dudunsparce,27.0
 6a67097952c24ac2da64d606,2026-07-29,PBL,100,Blaziken Zoroark,25.0
 6a628c3252c24ac2da64a05e,2026-07-28,PBL,220,Raging Bolt Ogerpon,21.0
 6a6728ae52c24ac2da64d669,2026-07-28,PBL,128,Mega Excadrill,21.0
@@ -65,7 +72,3 @@ goodbye-chaos,2026-07-11,PBL,365,Alakazam Dudunsparce,31.0
 6a4856e465724db9ded3bc7e,2026-07-06,PBL,213,Rocket's Honchkrow,28.0
 6a43de5cc87cd9ff0a313932,2026-07-04,PBL,142,Mega Absol Box,34.0
 wait-wut,2026-07-04,PBL,346,Dragapult,31.0
-6a45bed1c87cd9ff0a314f10,2026-07-02,PBL,123,Dragapult,28.0
-6a3eb6de83fd320299bd0dfc,2026-07-02,PBL,164,Alakazam Dudunsparce,39.0
-6a3f5d3e83fd320299bd18de,2026-07-02,PBL,102,Dragapult,27.0
-6a238bf047f3797bf6bad37d,2026-07-01,PBL,128,N's Zoroark,21.0

@@ -2,10 +2,12 @@
     'use strict';
 
     const CB_STORAGE_KEY = 'customBinderArchetypesV1';
-    const CB_CACHE_KEY = 'customBinderCacheV1';
+    const CB_CACHE_KEY = 'customBinderCacheV1';          // legacy: ids only, superseded by V2
+    const CB_CACHE_KEY_V2 = 'customBinderCacheV2';       // {ids, cards, date}
     const CB_PRESETS_KEY = 'customBinderPresetsV1';
 
     let cbSelectedArchetypes = []; // [{name, source}]
+    let _cbSessionBaseline = null; // previous-binder baseline, stable per session
     let cbAllArchetypes = [];      // [{name, source, label}]
     let cbArchetypesLoaded = false;
     let cbFilter = 'all';
@@ -591,30 +593,53 @@
         return defs;
     }
 
-    // ── Delta with separate cache key ──
+    // ── Delta with the Custom Binder's OWN baseline ──
+    // The old version swapped the 'metaBinderCacheV1' localStorage key
+    // around shared.computeDelta — but that key was never read by anything,
+    // while computeDelta read AND wrote the Meta Binder's Firestore snapshot.
+    // Result: every Custom Binder generation destroyed the Meta Binder's
+    // "what's new" baseline (and vice versa). computeDelta is now pure;
+    // the CB keeps its baseline (ids + card objects for the dropped-diff)
+    // in localStorage, per device.
     async function cbComputeDelta(binderMap, shared) {
-        // Use shared computeDelta but swap cache key temporarily
-        const origCache = localStorage.getItem('metaBinderCacheV1');
-
-        // Load CB-specific previous cache
-        let previousIds = new Set();
+        let previous = { ids: new Set(), cards: [], date: null, hasProfile: false };
         try {
-            const cached = JSON.parse(localStorage.getItem(CB_CACHE_KEY) || '[]');
-            previousIds = new Set(cached);
+            const cachedV2 = JSON.parse(localStorage.getItem(CB_CACHE_KEY_V2) || 'null');
+            if (cachedV2 && Array.isArray(cachedV2.ids)) {
+                previous = {
+                    ids: new Set(cachedV2.ids),
+                    cards: Array.isArray(cachedV2.cards) ? cachedV2.cards : [],
+                    date: cachedV2.date || null,
+                    hasProfile: true
+                };
+            } else {
+                // Legacy v1 cache: ids only (no card objects — dropped
+                // entries from it show the raw id until the next save).
+                const cachedV1 = JSON.parse(localStorage.getItem(CB_CACHE_KEY) || '[]');
+                if (Array.isArray(cachedV1) && cachedV1.length > 0) {
+                    previous = { ids: new Set(cachedV1), cards: [], date: null, hasProfile: true };
+                }
+            }
         } catch (_) { /* ignore */ }
 
-        // Temporarily set the cache so computeDelta uses our key
-        localStorage.setItem('metaBinderCacheV1', JSON.stringify(Array.from(previousIds)));
+        // Baseline stays stable within the session (repeated Generate
+        // clicks diff against the same reference, not against themselves).
+        if (_cbSessionBaseline) previous = _cbSessionBaseline;
+        else _cbSessionBaseline = previous;
 
-        const delta = await shared.computeDelta(binderMap);
+        const delta = await shared.computeDelta(binderMap, { previous });
 
-        // Save to CB cache, restore original meta binder cache
-        localStorage.setItem(CB_CACHE_KEY, JSON.stringify(Array.from(binderMap.keys())));
-        if (origCache !== null) {
-            localStorage.setItem('metaBinderCacheV1', origCache);
-        } else {
-            localStorage.removeItem('metaBinderCacheV1');
-        }
+        try {
+            localStorage.setItem(CB_CACHE_KEY_V2, JSON.stringify({
+                ids: Array.from(binderMap.keys()),
+                cards: delta.cards.map(c => ({
+                    cardId: c.cardId, name: c.name, set: c.set,
+                    number: c.number, maxCount: c.maxCount
+                })),
+                date: new Date().toISOString()
+            }));
+            localStorage.removeItem(CB_CACHE_KEY);
+        } catch (_) { /* storage full/blocked — next diff just reuses the old baseline */ }
 
         return delta;
     }

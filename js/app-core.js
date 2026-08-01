@@ -1265,21 +1265,44 @@ const BASE_PATH = './data/';
 
             popup.focus();
 
-            // Wait for all images to load before printing
+            // Wait for all images to load before printing — but never
+            // forever. onload/onerror don't fire for a STALLED connection
+            // (CDN throttling, see CLAUDE.md), and a big binder queue is
+            // hundreds of images; without a watchdog one hung request
+            // meant the print dialog never opened and the popup just sat
+            // there blank. The watchdog prints whatever has loaded; a
+            // missing image is a reprintable card, a hung dialog is a
+            // dead feature.
             const allImages = Array.from(doc.querySelectorAll('.proxy-card img'));
             let loaded = 0;
             const total = allImages.length;
+            let printFired = false;
+            let watchdogId = null;
+
+            function firePrint(reason) {
+                if (printFired) return;
+                printFired = true;
+                if (watchdogId) clearTimeout(watchdogId);
+                if (reason) {
+                    console.warn('[Proxy] printing with ' + loaded + '/' + total + ' images loaded (' + reason + ')');
+                }
+                try { popup.print(); } catch (_) { /* popup closed by user */ }
+            }
 
             function checkAllLoaded() {
                 loaded++;
                 if (loaded >= total) {
-                    popup.print();
+                    firePrint(null);
                 }
             }
 
             if (total === 0) {
-                popup.print();
+                firePrint(null);
             } else {
+                // Generous for big queues: base 15s + 25ms per image
+                // (~45s for a 1200-copy full-binder job), capped at 60s.
+                const watchdogMs = Math.min(60000, 15000 + total * 25);
+                watchdogId = setTimeout(() => firePrint('watchdog after ' + watchdogMs + 'ms'), watchdogMs);
                 allImages.forEach(img => {
                     if (img.complete && img.naturalWidth > 0) {
                         checkAllLoaded();

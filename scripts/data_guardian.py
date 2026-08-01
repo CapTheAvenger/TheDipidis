@@ -265,6 +265,57 @@ def check_set_order(findings):
                              f"the standard chunk the Deck Builder reads"))
 
 
+def ace_guard_prints():
+    """{card name: ["SET NUM", ...]} — prints in all_cards_database.csv whose
+    name is on the canonical ACE SPEC list (data/ace_specs.json) AND whose
+    rarity passes the frontend's collision guard (rarity not exactly
+    common/uncommon/rare — meta-binder.js isAceSpecRow).
+
+    Why this exists: the binder's ACE detection is a NAME lookup guarded by
+    rarity, verified to have 0 false positives today (old Master Ball prints
+    are Uncommon, old Computer Search prints are Rare — both excluded). That
+    guarantee silently breaks the day a set prints a non-ACE Ultra Rare
+    with an ACE name. Baseline-diff per project rule: report the change,
+    don't judge it."""
+    ace_path = os.path.join(DATA, "ace_specs.json")
+    if not os.path.exists(ace_path):
+        return None
+    try:
+        with open(ace_path, encoding="utf-8") as f:
+            names = {str(n).strip().lower() for n in json.load(f).get("ace_specs", []) if str(n).strip()}
+    except Exception:  # noqa: BLE001
+        return None
+    if not names:
+        return None
+    guard = {"common", "uncommon", "rare"}
+    out = {}
+    for r in read_csv(os.path.join(DATA, "all_cards_database.csv")):
+        name = (col(r, "name_en") or col(r, "name")).lower()
+        if name not in names:
+            continue
+        if col(r, "rarity").lower() in guard:
+            continue
+        out.setdefault(name, []).append(f"{col(r, 'set')} {col(r, 'number')}".strip())
+    return {k: sorted(v) for k, v in sorted(out.items())}
+
+
+def check_ace_guard(findings, cur, base):
+    if cur is None or base is None:
+        return
+    for name in sorted(set(cur) | set(base)):
+        added = sorted(set(cur.get(name, [])) - set(base.get(name, [])))
+        removed = sorted(set(base.get(name, [])) - set(cur.get(name, [])))
+        if added:
+            findings.append(("WARN",
+                             f"ACE-name '{name}' has new guard-passing print(s) {added} — "
+                             f"verify they really are ACE SPECs (a non-ACE Ultra Rare "
+                             f"reprint would now wrongly bypass the binder threshold)"))
+        if removed:
+            findings.append(("WARN",
+                             f"ACE-name '{name}' lost guard-passing print(s) {removed} — "
+                             f"card DB or ace_specs.json changed"))
+
+
 def check_shrink(findings, rows, base_rows):
     for fn, n in sorted(rows.items()):
         prev = base_rows.get(fn)
@@ -298,6 +349,7 @@ def main():
 
     cov = set_coverage()
     rows = file_rows()
+    ace = ace_guard_prints()
 
     findings = []
     check_schema(findings)
@@ -308,6 +360,7 @@ def main():
         print("First run — recording baseline; change-based checks start next run.")
     else:
         check_coverage(findings, cov, base_cov)
+        check_ace_guard(findings, ace, baseline.get("ace_guard_prints"))
 
     crit = [f for lvl, f in findings if lvl == "CRITICAL"]
     warn = [f for lvl, f in findings if lvl == "WARN"]
@@ -328,6 +381,7 @@ def main():
                 "generated": dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%d %H:%M UTC"),
                 "set_coverage": {k: list(v) for k, v in sorted(cov.items())},
                 "file_rows": rows,
+                "ace_guard_prints": ace,
             }, f, ensure_ascii=False, indent=1, sort_keys=True)
         print(f"  Baseline updated -> {BASELINE}")
 

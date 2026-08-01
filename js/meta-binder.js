@@ -534,9 +534,27 @@
             const rarity = String(row.rarity || '').toLowerCase();
             const group = String(row.group || '').toLowerCase();
             const flag = String(row.is_ace_spec || '').toLowerCase();
-            // ACE SPECs are always Ultra Rare or higher — Common/Uncommon/Rare can never be ACE SPEC
+            // ACE SPECs are always Ultra Rare or higher — Common/Uncommon/Rare
+            // can never be ACE SPEC. This guard is the collision protection
+            // for the name lookup below (e.g. Master Ball DS 99 Uncommon vs
+            // Master Ball TEF 153 ACE): verified 0 false positives across
+            // the full 20k card DB with guard + name list combined.
             const nonAceRarities = ['common', 'uncommon', 'rare'];
             if (nonAceRarities.some(r => rarity === r)) return false;
+            // Primary: canonical ACE SPEC name list (data/ace_specs.json via
+            // window.isAceSpec — same source the whole app uses). The CSV
+            // columns checked below are dead in the primary data source
+            // (is_ace_spec is "No" on all rows, rarity never contains "ace",
+            // there is no group column) — without the name lookup every ACE
+            // SPEC under the usage threshold silently vanished from binders.
+            if (typeof window.isAceSpec === 'function') {
+                try {
+                    const name = String(row.card_name || row.full_card_name || '').trim();
+                    if (name && window.isAceSpec(name)) return true;
+                } catch (_) { /* fall through to the legacy column checks */ }
+            }
+            // Fallback for when the async name list hasn't loaded (yet):
+            // keeps today's behaviour instead of degrading to "nothing is ACE".
             return rarity.includes('ace spec') || group.includes('ace spec') || flag === 'yes' || flag === 'true';
         }
 
@@ -653,13 +671,18 @@
                 const data = doc.exists ? doc.data() : {};
                 const arr = Array.isArray(data.metaBinderSnapshot) ? data.metaBinderSnapshot : [];
                 const ts = data.metaBinderSnapshotDate || null;
-                return { ids: new Set(arr), date: ts, hasProfile: true };
+                // Full card objects of the previous binder — the dropped-cards
+                // diff needs name/set/number, which cannot be reconstructed
+                // from the family-signature IDs (splitting those on '|' was
+                // the old bug that rendered garbage in the dropped modal).
+                const cards = Array.isArray(data.metaBinderCards) ? data.metaBinderCards : [];
+                return { ids: new Set(arr), cards, date: ts, hasProfile: true };
             } catch (e) {
                 console.warn('[MetaBinder] Firestore load failed, falling back to localStorage', e);
             }
         }
         // Guest: no comparison data
-        return { ids: new Set(), date: null, hasProfile: false };
+        return { ids: new Set(), cards: [], date: null, hasProfile: false };
     }
 
     /**
@@ -776,7 +799,25 @@
         }
     }
 
-    async function computeDelta(binderMap) {
+    /**
+     * Compute ownership + New/Dropped delta for a binder map.
+     *
+     * PURE with respect to persistence: this function only READS the
+     * previous snapshot and never writes one. Callers that want the
+     * result to become the new baseline call saveBinderSnapshot()
+     * themselves. (The old version saved unconditionally, which made the
+     * Meta Binder and the Custom Binder overwrite each other's Firestore
+     * baseline on every generation — both share users/{uid}.metaBinderSnapshot.)
+     *
+     * options.previous — {ids:Set, cards:[], date, hasProfile} to diff
+     * against; when omitted, the Meta Binder baseline is loaded from
+     * Firestore. The Custom Binder passes its own localStorage-backed
+     * baseline here instead of swapping storage keys around a shared
+     * write (the old "cache key swap" protected nothing — the write
+     * always went to Firestore).
+     */
+    async function computeDelta(binderMap, options) {
+        const opts = options || {};
         const collectionCounts = window.userCollectionCounts || new Map();
         const ownedByPrintRef = new Map();
 
@@ -802,10 +843,12 @@
             return total;
         }
 
-        // Load previous binder snapshot (Firestore for logged-in, empty for guests)
-        const prev = await loadPreviousBinderIds();
-        const previousIds = prev.ids;
-        const hasProfile = prev.hasProfile;
+        // Previous binder snapshot: caller-provided baseline, or the Meta
+        // Binder's Firestore snapshot (empty for guests).
+        const prev = opts.previous || await loadPreviousBinderIds();
+        const previousIds = prev.ids instanceof Set ? prev.ids : new Set(prev.ids || []);
+        const previousCards = Array.isArray(prev.cards) ? prev.cards : [];
+        const hasProfile = !!prev.hasProfile;
         const snapshotDate = prev.date;
 
         const results = [];
@@ -840,21 +883,33 @@
             });
         });
 
-        // Cards that were in the previous binder but no longer needed
-        // For guests without profile: no New/Dropped comparison
+        // Cards that were in the previous binder but no longer needed.
+        // For guests without profile: no New/Dropped comparison.
+        // The display data comes from the SAVED card objects — the IDs are
+        // family signatures like "intl:SSP-32|PRE-40" or "intl:boss's orders"
+        // and cannot be split back into name/set/number.
         const currentIds = new Set(binderMap.keys());
         const droppedCards = [];
         if (hasProfile && previousIds.size > 0) {
+            const prevById = new Map(previousCards.map(c => [c && c.cardId, c]).filter(([k]) => k));
             previousIds.forEach(oldId => {
-                if (!currentIds.has(oldId)) {
-                    const [name, set, number] = oldId.split('|');
-                    droppedCards.push({ cardId: oldId, name: name || oldId, set: set || '', number: number || '' });
+                if (currentIds.has(oldId)) return;
+                const saved = prevById.get(oldId);
+                if (saved) {
+                    droppedCards.push({
+                        cardId: oldId,
+                        name: saved.name || oldId,
+                        set: saved.set || '',
+                        number: saved.number || '',
+                        maxCount: saved.maxCount || 0
+                    });
+                } else {
+                    // Legacy snapshot without stored card objects: show the
+                    // raw ID honestly instead of mis-parsing it into fields.
+                    droppedCards.push({ cardId: oldId, name: String(oldId).replace(/^intl:/, ''), set: '', number: '' });
                 }
             });
         }
-
-        // Save current binder snapshot to Firestore (logged-in) 
-        await saveBinderSnapshot(currentIds, results);
 
         return { cards: results, droppedCards, hasProfile, snapshotDate };
     }
@@ -2059,6 +2114,10 @@
     }
 
     // ── Main: build the binder ──
+    // Previous-binder baseline, loaded once per page session (see
+    // _buildMetaBinderInner for why rebuilds must reuse it).
+    let _mbSessionBaseline = null;
+
     async function buildMetaBinder() {
         const grid = document.getElementById('metaBinderGrid');
         if (grid) grid.innerHTML = `<p class="color-grey">${mbText('mb.loading', 'Loading meta data…')}</p>`;
@@ -2124,7 +2183,18 @@
             return;
         }
 
-        const delta = await computeDelta(binderMap);
+        // Baseline is loaded ONCE per page session: the chunk-poll rebuild
+        // (card DB grew → re-render) must diff against the same baseline as
+        // the first build, not against the snapshot the first build just
+        // saved — that made every rebuild report "0 new".
+        if (!_mbSessionBaseline) {
+            _mbSessionBaseline = await loadPreviousBinderIds();
+        }
+        const delta = await computeDelta(binderMap, { previous: _mbSessionBaseline });
+
+        // Persist explicitly (computeDelta no longer writes): this binder
+        // becomes the baseline for the NEXT session's New/Dropped diff.
+        await saveBinderSnapshot(new Set(binderMap.keys()), delta.cards);
 
         // Store on window for the action buttons
         window._metaBinderDelta = delta;

@@ -1,4 +1,130 @@
 {
+ "ace_guard_prints": {
+  "amulet of hope": [
+   "SSP 162"
+  ],
+  "awakening drum": [
+   "TEF 141"
+  ],
+  "brilliant blender": [
+   "SSP 164"
+  ],
+  "computer search": [
+   "BCR 137"
+  ],
+  "crystal edge": [
+   "BCR 138"
+  ],
+  "crystal wall": [
+   "BCR 139"
+  ],
+  "dangerous laser": [
+   "SFA 58"
+  ],
+  "deluxe bomb": [
+   "SCR 134"
+  ],
+  "dowsing machine": [
+   "PLS 128"
+  ],
+  "energy search pro": [
+   "SSP 176"
+  ],
+  "enriching energy": [
+   "SSP 191"
+  ],
+  "g booster": [
+   "PLB 92"
+  ],
+  "g scope": [
+   "PLB 93"
+  ],
+  "gold potion": [
+   "BCR 140"
+  ],
+  "grand tree": [
+   "SCR 136"
+  ],
+  "hero's cape": [
+   "TEF 152"
+  ],
+  "hyper aroma": [
+   "TWM 152"
+  ],
+  "legacy energy": [
+   "TWM 167"
+  ],
+  "life dew": [
+   "PLF 107"
+  ],
+  "master ball": [
+   "PLB 94",
+   "TEF 153"
+  ],
+  "max rod": [
+   "PRE 116"
+  ],
+  "maximum belt": [
+   "PRE 117",
+   "TEF 154"
+  ],
+  "megaton blower": [
+   "SSP 182"
+  ],
+  "miracle headset": [
+   "SSP 183"
+  ],
+  "neo upper energy": [
+   "TEF 162"
+  ],
+  "neutralization zone": [
+   "SFA 60"
+  ],
+  "poké vital a": [
+   "SFA 62"
+  ],
+  "precious trolley": [
+   "SSP 185"
+  ],
+  "prime catcher": [
+   "PRE 119",
+   "TEF 157"
+  ],
+  "reboot pod": [
+   "TEF 158"
+  ],
+  "rock guard": [
+   "PLF 108"
+  ],
+  "scoop up cyclone": [
+   "PLB 95",
+   "PRE 128",
+   "TWM 162"
+  ],
+  "scramble switch": [
+   "PLS 129",
+   "SSP 186"
+  ],
+  "secret box": [
+   "TWM 163"
+  ],
+  "sparkling crystal": [
+   "PRE 129",
+   "SCR 142"
+  ],
+  "survival brace": [
+   "TWM 164"
+  ],
+  "treasure tracker": [
+   "PRE 131"
+  ],
+  "unfair stamp": [
+   "TWM 165"
+  ],
+  "victory piece": [
+   "PLS 130"
+  ]
+ },
  "file_rows": {
   "cardmarket_card_images.csv": 1295,
   "cardmarket_id_mapping.csv": 17370,
@@ -6,7 +132,7 @@
   "price_data.csv": 20401,
   "prizepack_official_images.csv": 266
  },
- "generated": "2026-07-31 10:22 UTC",
+ "generated": "2026-08-01 10:10 UTC",
  "set_coverage": {
   "AOR": [
    76,

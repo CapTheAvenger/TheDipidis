@@ -1,0 +1,73 @@
+# Verify Cardmarket product mappings against the LIVE product pages.
+#
+# Why: the mapper pairs same-named variants positionally (card number rank
+# <-> trend price rank). That swapped OBF 223 <-> 228 (commit #256,
+# 2026-06-04) and systematically inverts all 40 SAR-vs-Secret-Rare groups.
+# The only external identity source is Limitless' per-print Cardmarket URL;
+# this job fetches those pages and records the real idProduct.
+#
+# Manually dispatched, paced (~2s per page), resumable: each run extends
+# data/cardmarket_mapping_verified.csv and commits it. A 403 streak trips
+# the circuit breaker (Cardmarket throttling — run again later). The
+# sandbox cannot reach cardmarket.com, so CI is the only place this runs.
+name: Verify Cardmarket mapping
+
+on:
+  workflow_dispatch:
+    inputs:
+      limit:
+        description: 'Max product pages to fetch this run'
+        required: false
+        default: '150'
+      only_conflicts:
+        description: 'Only the proven SAR-vs-Secret-Rare conflict groups (true/false)'
+        required: false
+        default: 'true'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: verify-cardmarket-mapping
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Verify mappings against live product pages
+        run: |
+          ARGS="--limit ${{ github.event.inputs.limit || '150' }}"
+          if [ "${{ github.event.inputs.only_conflicts || 'true' }}" = "true" ]; then
+            ARGS="$ARGS --only-conflicts"
+          fi
+          python scripts/verify_cardmarket_mapping.py $ARGS
+
+      - name: Commit verification results
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/cardmarket_mapping_verified.csv
+          if git diff --cached --quiet; then
+            echo "No new verification rows."
+            exit 0
+          fi
+          git commit -m "Auto: cardmarket mapping verification — $(date -u '+%Y-%m-%d %H:%M UTC')
+
+          Triggered by .github/workflows/verify-cardmarket-mapping.yml
+          Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          # Data-only commit: no bump-version needed (data/*.csv is fetched fresh).
+          for i in 1 2 3 4; do
+            git push && break
+            git pull --rebase && sleep $((2 ** i))
+          done

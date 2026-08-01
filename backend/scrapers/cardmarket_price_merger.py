@@ -67,8 +67,12 @@ def main():
     with open(cards_path, encoding='utf-8-sig', newline='') as f:
         cards = list(csv.DictReader(f))
     with open(mapping_path, encoding='utf-8-sig', newline='') as f:
-        mapping = {(m['set'], m['number']): int(m['cardmarket_product_id'])
-                   for m in csv.DictReader(f)}
+        mapping = {}
+        mapping_method = {}
+        for m in csv.DictReader(f):
+            key = (m['set'], m['number'])
+            mapping[key] = int(m['cardmarket_product_id'])
+            mapping_method[key] = m.get('match_method', '')
     with open(guide_path, encoding='utf-8') as f:
         guide = {int(p['idProduct']): p for p in json.load(f).get('priceGuides', [])}
 
@@ -84,7 +88,7 @@ def main():
     now = datetime.now().isoformat()
     out_rows = []
     stats = {'cardmarket': 0, 'preserved': 0, 'no_data': 0, 'no_trend': 0,
-             'trend_below_low': 0}
+             'trend_below_low': 0, 'unverified_mapping': 0}
 
     for c in cards:
         if not c.get('number'):
@@ -124,6 +128,23 @@ def main():
                     stats['trend_below_low'] += 1
             except (TypeError, ValueError):
                 pass
+            # Mapping-trust dimension: rows whose (set,number)->idProduct
+            # came from the POSITIONAL heuristic (match_method 'priced-by-*')
+            # are not verified product identities — the price may belong to a
+            # same-named sibling print (proven: OBF 223 <-> 228 swap, and all
+            # 40 SAR-vs-Secret-Rare groups inverted). Until the live
+            # verification job (scripts/verify_cardmarket_mapping.py) has
+            # confirmed the row, price_status says 'unverified_mapping'.
+            # Display is intentionally unchanged (prepare_card_data treats
+            # unknown statuses like 'ok' — maintainer decision 2026-08-01:
+            # verify first, then correct); consumers get the honest flag.
+            # Precedence: the trend-quality flags win, because they change
+            # WHICH number to read — no_trend/trend_below_low rows are
+            # unusable regardless of mapping trust.
+            method = mapping_method.get(key, '')
+            unverified = method.startswith('priced-by')
+            if unverified:
+                stats['unverified_mapping'] += 1
             out_rows.append({
                 'name': name,
                 'set': c['set'],
@@ -134,6 +155,7 @@ def main():
                 'last_updated': now,
                 'price_status': ('no_trend' if not has_trend
                                  else 'trend_below_low' if trend_below_low
+                                 else 'unverified_mapping' if unverified
                                  else 'ok'),
             })
             stats['cardmarket'] += 1
@@ -174,9 +196,11 @@ def main():
             stats['no_data'] += 1
 
     logger.info("Result: %s from Cardmarket (%s without a usable trend, "
-                "%s with a trend below the cheapest offer) | "
+                "%s with a trend below the cheapest offer, "
+                "%s on an unverified positional mapping) | "
                 "%s preserved (Limitless/historic) | %s no data",
                 stats['cardmarket'], stats['no_trend'], stats['trend_below_low'],
+                stats['unverified_mapping'],
                 stats['preserved'], stats['no_data'])
 
     # extrasaction='ignore' below means a key missing from THIS list is dropped

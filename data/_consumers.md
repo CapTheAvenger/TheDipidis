@@ -28,9 +28,26 @@ The join key for everything price-related: our `(set, number)` → Cardmarket
 > Rare, #101 Ultra Rare, #116 Special Art Rare, #120 Secret Rare). A name join
 > collapses them and can show the 1 € card at 332 €.
 
-`match_method` tells you how confident the row is: `unique` (only one candidate,
-safest) vs. `priced-by-*` (several same-named variants, paired by card number and
-price — reliable when prices differ a lot, less so for near-identical variants).
+`match_method` tells you how confident the row is:
+* `unique` — only one candidate product with that name in the expansion. Safe.
+* `live-verified` — the idProduct was read off the live Cardmarket product
+  page behind Limitless' per-print URL (`cardmarket_mapping_verified.csv`
+  below). Safest — this is an identity statement, not a heuristic.
+* `priced-by-*` — several same-named variants, paired POSITIONALLY (card
+  number rank ↔ trend price rank). **Known failure mode:** the pairing
+  inverts when a Special Art Rare sits at a lower number than a more
+  expensive Secret Rare — OBF 223/228 (Charizard ex) shipped swapped from
+  2026-06-04 to 2026-08-01, and all 40 SAR-vs-Secret-Rare groups were
+  affected. Treat these rows as unverified until they turn `live-verified`.
+
+### `cardmarket_mapping_verified.csv`
+`set, number, verified_product_id, status, evidence, heuristic_product_id, agrees_with_heuristic, checked_at, url`
+
+Live verification results (built incrementally by the
+`verify-cardmarket-mapping` CI job). Only rows with `status=verified` carry a
+`verified_product_id`; other statuses (`http_403`, `unparseable`, …) document
+why a row could not be verified — a 403 means Cardmarket throttling, never
+"missing". The mapper consumes this file and prefers verified ids.
 
 ### `cm_expansions.csv`
 `id_expansion, expansion_code, name, release_date, code_source, n_singles`
@@ -80,11 +97,16 @@ an 85 € card. `eur_price` copies that faithfully, so a consumer reading it as
 
 | value | meaning |
 |---|---|
-| `ok`              | current Cardmarket trend — use `eur_price`                                    |
+| `ok`              | current Cardmarket trend, verified product identity — use `eur_price`         |
+| `unverified_mapping` | current trend, but the (set,number)→idProduct row is a POSITIONAL guess (`match_method priced-by-*`) — the price may belong to a same-named sibling print. Value semantics are `ok`; trust is not. |
 | `no_trend`        | current entry, no usable trend — **fall back to `eur_low`** (26 rows)         |
 | `trend_below_low` | trend is BELOW the cheapest offer — **use `eur_low`** (110 rows)              |
 | `stale`           | no current entry; price carried over (see `last_updated`)                    |
 | `no_data`         | no price at all; the row exists so the card is visible                       |
+
+Precedence: `no_trend` / `trend_below_low` win over `unverified_mapping`
+(they change WHICH number to read; mapping trust is secondary). Rows shed
+`unverified_mapping` as the live-verification job confirms or corrects them.
 
 `trend_below_low` is the vintage/promo case: the trend is computed from old
 sales while the market moved on. TR 5 Dark Dragonite trends at 0,02 € against a

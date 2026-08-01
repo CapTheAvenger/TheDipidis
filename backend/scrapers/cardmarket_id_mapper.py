@@ -376,6 +376,54 @@ def map_cards_to_products(cards: list, singles: list, set_to_exp: dict,
     return mappings, stats
 
 
+def apply_live_verification(mappings: list, data_dir: str):
+    """Prefer LIVE-verified product ids over the positional heuristic.
+
+    data/cardmarket_mapping_verified.csv is written by
+    scripts/verify_cardmarket_mapping.py (CI job): it fetches the Cardmarket
+    product page behind Limitless' per-print URL and extracts the real
+    idProduct. That is an identity statement; the heuristic pairing below
+    (card-number rank <-> trend-price rank) is a monotonicity assumption
+    that provably inverts SAR-vs-Secret-Rare groups (OBF 223 <-> 228,
+    commit #256). Wherever a verified row exists, it wins — including when
+    it CONFIRMS the heuristic (match_method then records the confirmation,
+    so consumers can tell verified rows from guessed ones).
+
+    Returns (corrected, confirmed) counts for the log.
+    """
+    path = os.path.join(data_dir, 'cardmarket_mapping_verified.csv')
+    if not os.path.isfile(path):
+        return 0, 0
+    verified = {}
+    try:
+        with open(path, encoding='utf-8-sig', newline='') as f:
+            for r in csv.DictReader(f):
+                if r.get('status') == 'verified' and r.get('verified_product_id'):
+                    verified[(r['set'], r['number'])] = int(r['verified_product_id'])
+    except Exception as e:  # noqa: BLE001
+        logger.warning("could not read %s (%s) — heuristic mapping unchanged", path, e)
+        return 0, 0
+
+    corrected = confirmed = 0
+    for row in mappings:
+        pid = verified.get((row['set'], row['number']))
+        if pid is None:
+            continue
+        if int(row['cardmarket_product_id']) == pid:
+            confirmed += 1
+            row['match_method'] = 'live-verified'
+        else:
+            logger.warning("live verification corrects %s %s: %s -> %s (was %s)",
+                           row['set'], row['number'],
+                           row['cardmarket_product_id'], pid, row['match_method'])
+            row['cardmarket_product_id'] = pid
+            row['match_method'] = 'live-verified'
+            corrected += 1
+    if corrected or confirmed:
+        logger.info("Live verification: %s confirmed, %s corrected", confirmed, corrected)
+    return corrected, confirmed
+
+
 def write_mapping(mappings: list, out_path: str):
     fieldnames = ['set', 'number', 'cardmarket_product_id', 'match_method', 'base_name']
     def _write(f):
@@ -408,6 +456,7 @@ def main():
             logger.warning("  unmapped set: %s (%s)", sc, reason)
 
     mappings, stats = map_cards_to_products(cards, singles, set_to_exp, price_guide)
+    apply_live_verification(mappings, data_dir)
     total_cards = sum(1 for c in cards if c.get('number'))
     coverage = len(mappings) / total_cards * 100 if total_cards else 0
     logger.info("Card mapping: %s of %s cards (%.1f%%) | %s",

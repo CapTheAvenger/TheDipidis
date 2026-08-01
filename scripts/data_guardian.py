@@ -316,6 +316,59 @@ def check_ace_guard(findings, cur, base):
                              f"card DB or ace_specs.json changed"))
 
 
+def price_integrity():
+    """Signals that would have caught the 2026-06-04 price swap regression
+    (OBF 223 <-> 228: two idProducts exchanged INSIDE a set — row counts and
+    set coverage never moved, so no existing check could see it).
+
+    Returns {nonempty_eur_price, match_methods: {method_family: n},
+             duplicate_idproducts}. All diffed against the baseline — a
+    changed number is REPORTED, never repaired."""
+    out = {'nonempty_eur_price': 0, 'match_methods': {}, 'duplicate_idproducts': 0}
+    price_path = os.path.join(DATA, "price_data.csv")
+    if os.path.exists(price_path):
+        out['nonempty_eur_price'] = sum(
+            1 for r in read_csv(price_path) if col(r, 'eur_price'))
+    map_path = os.path.join(DATA, "cardmarket_id_mapping.csv")
+    if os.path.exists(map_path):
+        methods = collections.Counter()
+        ids = collections.Counter()
+        for r in read_csv(map_path):
+            m = col(r, 'match_method')
+            # Family only: 'priced-by-date(4<->5)' fluctuates per run.
+            methods[m.split('(')[0]] += 1
+            pid = col(r, 'cardmarket_product_id')
+            if pid:
+                ids[pid] += 1
+        out['match_methods'] = dict(methods)
+        out['duplicate_idproducts'] = sum(1 for n in ids.values() if n > 1)
+    return out
+
+
+def check_price_integrity(findings, cur, base):
+    if not base:
+        return
+    prev_prices = base.get('nonempty_eur_price', 0)
+    if prev_prices and cur['nonempty_eur_price'] < prev_prices * 0.98:
+        findings.append(("CRITICAL",
+                         f"filled eur_price values dropped {prev_prices} -> "
+                         f"{cur['nonempty_eur_price']} — a merge/mapping change is "
+                         f"silently blanking prices"))
+    base_methods = base.get('match_methods', {})
+    for fam in set(cur['match_methods']) | set(base_methods):
+        a, b = base_methods.get(fam, 0), cur['match_methods'].get(fam, 0)
+        if a and abs(b - a) > max(50, a * 0.05):
+            findings.append(("WARN",
+                             f"mapping method '{fam}' count moved {a} -> {b} — "
+                             f"verify the mapper change is intentional"))
+    prev_dupes = base.get('duplicate_idproducts')
+    if prev_dupes is not None and cur['duplicate_idproducts'] > prev_dupes:
+        findings.append(("WARN",
+                         f"idProduct assigned to multiple prints: "
+                         f"{prev_dupes} -> {cur['duplicate_idproducts']} rows — "
+                         f"two of our cards now claim the same product"))
+
+
 def check_shrink(findings, rows, base_rows):
     for fn, n in sorted(rows.items()):
         prev = base_rows.get(fn)
@@ -350,6 +403,7 @@ def main():
     cov = set_coverage()
     rows = file_rows()
     ace = ace_guard_prints()
+    price = price_integrity()
 
     findings = []
     check_schema(findings)
@@ -361,6 +415,7 @@ def main():
     else:
         check_coverage(findings, cov, base_cov)
         check_ace_guard(findings, ace, baseline.get("ace_guard_prints"))
+        check_price_integrity(findings, price, baseline.get("price_integrity"))
 
     crit = [f for lvl, f in findings if lvl == "CRITICAL"]
     warn = [f for lvl, f in findings if lvl == "WARN"]
@@ -382,6 +437,7 @@ def main():
                 "set_coverage": {k: list(v) for k, v in sorted(cov.items())},
                 "file_rows": rows,
                 "ace_guard_prints": ace,
+                "price_integrity": price,
             }, f, ensure_ascii=False, indent=1, sort_keys=True)
         print(f"  Baseline updated -> {BASELINE}")
 

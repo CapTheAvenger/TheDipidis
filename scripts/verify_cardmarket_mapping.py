@@ -40,6 +40,7 @@ Output: data/cardmarket_mapping_verified.csv
 
 import argparse
 import csv
+import json
 import os
 import re
 import sys
@@ -123,6 +124,221 @@ def load_done():
             for r in csv.DictReader(f):
                 done[(r['set'], r['number'])] = r
     return done
+
+
+# ── Limitless price-fingerprint verification ─────────────────────────────
+# Cardmarket 403s every CI runner (proven twice), but Limitless is
+# reachable and its card page lists EVERY print with (a) the print's own
+# /cards/SET/NUM link — Limitless' identity statement — and (b) the
+# Cardmarket EUR price it shows for exactly that print. Matching that
+# price against the guide prices of the candidate products identifies the
+# product WITHOUT any ordering assumption, under strict uniqueness:
+#
+#   verified  <=>  exactly ONE candidate within ±15% of the shown price
+#                  AND every other candidate at least 1.4x away.
+#
+# Anything else is recorded as fingerprint_ambiguous — never guessed.
+# This is the same standard the OBF 223 proof used (guide sample: the
+# shown price sits within ~4% of the product's trend; the next-nearest
+# candidate was 4x away). Two same-priced sibling products fail the gap
+# rule on purpose: they stay unverified.
+
+FP_TOLERANCE = 1.15   # shown price vs candidate metric, ratio band
+FP_MIN_GAP = 1.4      # every non-matching candidate must be this far away
+
+US_PRICE = re.compile(r'^(\d{1,3}(?:,\d{3})*(?:\.\d+)?)\s*€$')
+
+
+def parse_limitless_eur(text):
+    """Parse Limitless' US-formatted EUR text ('348.81€', '1,234.56€').
+
+    Strict: anything not matching the known format returns None — a
+    mis-parsed separator here is the documented 1000x price bug."""
+    m = US_PRICE.match(str(text or '').strip())
+    if not m:
+        return None
+    try:
+        return float(m.group(1).replace(',', ''))
+    except ValueError:
+        return None
+
+
+def parse_prints_prices(html, own_key):
+    """{(SET, NUMBER): eur_float} for every print row on a Limitless card
+    page. Row identity comes from the row's own /cards/SET/NUM link; the
+    'current' row carries no link, so it gets own_key (the page we asked
+    for). JP prints (/cards/jp/...) are skipped."""
+    from bs4 import BeautifulSoup  # noqa: PLC0415
+    soup = BeautifulSoup(html, 'lxml')
+    out = {}
+    for tr in soup.select('tr'):
+        eur = tr.select_one('a.card-price.eur')
+        if not eur:
+            continue
+        price = parse_limitless_eur(eur.get_text(strip=True))
+        if price is None:
+            continue
+        link = tr.select_one("td:first-child a[href*='/cards/']")
+        if link and link.has_attr('href'):
+            parts = link['href'].split('/cards/', 1)[-1].strip('/').split('/')
+            if parts and parts[0].lower() == 'jp':
+                continue
+            if len(parts) >= 2:
+                out[(parts[0].upper(), parts[1])] = price
+        elif 'current' in (tr.get('class') or []):
+            out[own_key] = price
+    return out
+
+
+def fingerprint_match(shown_price, pool_metrics):
+    """pool_metrics: {idProduct: guide_metric}. Returns (idProduct, evidence)
+    on a unique, well-separated match, else (None, reason)."""
+    if not shown_price or shown_price <= 0:
+        return None, 'no_price_shown'
+    matches, others = [], []
+    for pid, metric in pool_metrics.items():
+        if not metric or metric <= 0:
+            continue
+        ratio = max(metric / shown_price, shown_price / metric)
+        (matches if ratio <= FP_TOLERANCE else others).append((pid, metric, ratio))
+    if len(matches) != 1:
+        return None, f'fingerprint_ambiguous({len(matches)} in band)'
+    if any(r < FP_MIN_GAP for _, _, r in others):
+        return None, 'fingerprint_ambiguous(gap)'
+    pid, metric, ratio = matches[0]
+    return pid, (f'limitless-fingerprint {shown_price}EUR~{metric}EUR '
+                 f'(ratio {ratio:.2f}, pool {len(matches) + len(others)})')
+
+
+def load_pools():
+    """idProduct -> (idExpansion, base) and (idExpansion, base) -> {pid: metric}.
+
+    The candidate pool for a mapped row is every catalogue product sharing
+    expansion + base name with its currently mapped product — the same
+    universe the mapper chose from, so the fingerprint can also land on
+    the product the heuristic did NOT pick."""
+    with open(os.path.join(DATA, 'products_singles_6.json'), encoding='utf-8') as f:
+        singles = json.load(f)['products']
+    with open(os.path.join(DATA, 'price_guide_6.json'), encoding='utf-8') as f:
+        guide = {g.get('idProduct'): g for g in json.load(f)['priceGuides']}
+
+    def base(name):
+        return re.sub(r'\s*[\[(].*$', '', str(name or '')).strip().lower()
+
+    product_group = {}
+    pools = defaultdict(dict)
+    for p in singles:
+        key = (p.get('idExpansion'), base(p.get('name')))
+        product_group[p['idProduct']] = key
+        g = guide.get(p['idProduct']) or {}
+        metric = g.get('trend') or g.get('avg')
+        pools[key][p['idProduct']] = metric if metric and metric > 0 else None
+    return product_group, pools
+
+
+def limitless_verify(args):
+    import requests  # noqa: PLC0415
+
+    mapping, cards = load_rows()
+    done = load_done()
+    product_group, pools = load_pools()
+
+    # Group ambiguous rows by (set, base_name); conflict groups first.
+    groups = defaultdict(list)
+    for r in mapping:
+        if r.get('match_method', '').startswith('priced-by'):
+            groups[(r['set'], r.get('base_name', ''))].append(r)
+    ordered = sorted(groups.items(),
+                     key=lambda kv: (0 if is_conflict_group_member(kv[1], cards) else 1,
+                                     kv[0]))
+    if args.only_conflicts:
+        ordered = [kv for kv in ordered if is_conflict_group_member(kv[1], cards)]
+
+    session = requests.Session()
+    session.headers.update({'User-Agent': HEADERS['User-Agent']})
+
+    fetched = 0
+    consecutive_fail = 0
+    new_rows = []
+    for (sc, bname), members in ordered:
+        pending = [m for m in members
+                   if (m['set'], m['number']) not in done
+                   or done[(m['set'], m['number'])]['status'] != 'verified']
+        if not pending:
+            continue
+        if fetched >= args.limit:
+            print(f"limit {args.limit} reached — resume with the next run")
+            break
+        if consecutive_fail >= CIRCUIT_BREAKER_403:
+            print(f"::warning::circuit breaker: {consecutive_fail} consecutive "
+                  f"failed page fetches — stopping this run.")
+            break
+
+        own_key = (pending[0]['set'], pending[0]['number'])
+        url = f'https://limitlesstcg.com/cards/{own_key[0]}/{own_key[1]}'
+        try:
+            resp = session.get(url, timeout=25)
+            fetched += 1
+            if resp.status_code != 200:
+                consecutive_fail += 1
+                time.sleep(PACE_SECONDS * 2)
+                continue
+            consecutive_fail = 0
+            prices = parse_prints_prices(resp.text, own_key)
+        except Exception as e:  # noqa: BLE001
+            consecutive_fail += 1
+            print(f"::warning::fetch failed for {url}: {e}")
+            continue
+
+        for m in pending:
+            key = (m['set'], m['number'])
+            shown = prices.get(key)
+            pool_key = product_group.get(int(m['cardmarket_product_id']))
+            pool = pools.get(pool_key, {}) if pool_key else {}
+            row_out = {
+                'set': m['set'], 'number': m['number'],
+                'verified_product_id': '', 'status': '', 'evidence': '',
+                'heuristic_product_id': m['cardmarket_product_id'],
+                'agrees_with_heuristic': '',
+                'checked_at': datetime.now(timezone.utc).isoformat(timespec='seconds'),
+                'url': url,
+            }
+            if shown is None:
+                row_out['status'] = 'no_price_on_page'
+            elif not pool:
+                row_out['status'] = 'no_candidate_pool'
+            else:
+                pid, evidence = fingerprint_match(shown, pool)
+                if pid is None:
+                    row_out['status'] = evidence.split('(')[0]
+                    row_out['evidence'] = evidence
+                else:
+                    row_out['status'] = 'verified'
+                    row_out['verified_product_id'] = str(pid)
+                    row_out['evidence'] = evidence
+                    row_out['agrees_with_heuristic'] = (
+                        'yes' if str(pid) == str(m['cardmarket_product_id']) else 'no')
+            new_rows.append(row_out)
+            done[key] = row_out
+        time.sleep(PACE_SECONDS * 0.75)
+
+    with open(OUT, 'w', encoding='utf-8-sig', newline='') as f:
+        w = csv.DictWriter(f, fieldnames=FIELDNAMES)
+        w.writeheader()
+        for key in sorted(done):
+            w.writerow({k: done[key].get(k, '') for k in FIELDNAMES})
+
+    verified = [r for r in new_rows if r['status'] == 'verified']
+    mismatches = [r for r in verified if r['agrees_with_heuristic'] == 'no']
+    print(f"\nthis run: {fetched} pages | {len(new_rows)} rows judged | "
+          f"{len(verified)} verified | {len(mismatches)} disagree with heuristic")
+    for r in mismatches:
+        print(f"::warning::MISMATCH {r['set']} {r['number']}: fingerprint says "
+              f"{r['verified_product_id']}, mapping says {r['heuristic_product_id']} "
+              f"| {r['evidence']}")
+    total_verified = sum(1 for v in done.values() if v['status'] == 'verified')
+    print(f"total recorded: {len(done)} | total verified: {total_verified}")
+    return 0
 
 
 def is_conflict_group_member(group_rows, cards):
@@ -227,10 +443,18 @@ def main():
     ap.add_argument('--recon', action='store_true',
                     help='dump price-relevant HTML from Limitless probe pages '
                          'to design the extractor on evidence, fetch nothing else')
+    ap.add_argument('--source', choices=['limitless', 'cardmarket'],
+                    default='limitless',
+                    help='limitless (default): price-fingerprint via the '
+                         'reachable Limitless card pages; cardmarket: direct '
+                         'idProduct extraction (403-blocked from CI as of '
+                         '2026-08-01, kept for when that changes)')
     args = ap.parse_args()
 
     if args.recon:
         return recon(args.limit)
+    if args.source == 'limitless' and not args.dry_run:
+        return limitless_verify(args)
 
     import requests  # noqa: PLC0415 — keep import local for --dry-run offline use
 

@@ -217,3 +217,66 @@ def test_guardian_price_integrity_reads_real_repo():
     assert cur['nonempty_eur_price'] > 15000, 'live repo should have filled prices'
     assert cur['match_methods'].get('unique', 0) > 0
     assert cur['match_methods'].get('priced-by-date', 0) > 0
+
+
+# ── 5. Limitless price-fingerprint (Cardmarket 403s all CI runners) ──────
+
+def test_parse_limitless_eur_us_format_only():
+    assert verify.parse_limitless_eur('348.81€') == 348.81
+    assert verify.parse_limitless_eur('1,234.56€') == 1234.56
+    assert verify.parse_limitless_eur('0.56€') == 0.56
+    # German format / junk must NOT silently mis-parse (the 1000x bug class)
+    assert verify.parse_limitless_eur('348,81€') is None
+    assert verify.parse_limitless_eur('N/A') is None
+    assert verify.parse_limitless_eur('') is None
+
+
+def test_fingerprint_unique_match_verifies():
+    # OBF 223: Limitless shows ~130, pool = the five real candidates.
+    pid, evidence = verify.fingerprint_match(
+        130.17, {725205: 5.19, 725294: 17.66, 725308: 32.75,
+                 725303: 137.44, 749033: 7.58})
+    assert pid == 725303
+    assert 'limitless-fingerprint' in evidence
+
+
+def test_fingerprint_two_in_band_stays_unverified():
+    pid, reason = verify.fingerprint_match(100.0, {1: 98.0, 2: 105.0, 3: 5.0})
+    assert pid is None
+    assert reason.startswith('fingerprint_ambiguous')
+
+
+def test_fingerprint_near_miss_gap_stays_unverified():
+    # One candidate in band, but a second sits just outside (1.2x) — the
+    # separation is not clean enough to call it identity.
+    pid, reason = verify.fingerprint_match(100.0, {1: 100.0, 2: 120.0})
+    assert pid is None
+    assert reason == 'fingerprint_ambiguous(gap)'
+
+
+def test_fingerprint_no_price_is_not_a_verdict():
+    pid, reason = verify.fingerprint_match(None, {1: 10.0})
+    assert (pid, reason) == (None, 'no_price_shown')
+
+
+def test_parse_prints_prices_from_recon_html():
+    # Structure copied from the real recon log (2026-08-01 run): each print
+    # row links its own /cards/SET/NUM and shows the EUR price; the current
+    # row has an anchor WITHOUT href.
+    html = '''
+    <table>
+      <tr><td><a href="/cards/DRI/230">Destined Rivals
+        <span class="prints-table-card-number">#230</span></a></td>
+        <td><a class="card-price usd" href="x">$171.90</a></td>
+        <td><a class="card-price eur" href="y">256.06€</a></td></tr>
+      <tr class="current"><td><a>Destined Rivals
+        <span class="prints-table-card-number">#239</span></a></td>
+        <td><a class="card-price usd" href="x">$27.93</a></td>
+        <td><a class="card-price eur" href="y">21.47€</a></td></tr>
+      <tr><td><a href="/cards/jp/SV10/230">JP print</a></td>
+        <td><a class="card-price eur" href="y">99.99€</a></td></tr>
+    </table>'''
+    prices = verify.parse_prints_prices(html, ('DRI', '239'))
+    assert prices[('DRI', '230')] == 256.06
+    assert prices[('DRI', '239')] == 21.47, 'current row (no href) keys to the requested page'
+    assert ('SV10', '230') not in prices and len(prices) == 2, 'JP prints skipped'

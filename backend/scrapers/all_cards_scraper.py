@@ -219,6 +219,13 @@ def load_existing_cards(csv_path: str, rescrape_incomplete: bool = True):
                 "type": (row.get("type") or "").strip(),
                 "rarity": rarity, "image_url": image_url,
                 "international_prints": intl, "cardmarket_url": cm_url,
+                # jp_prints MUST be carried here: this dict is a field
+                # whitelist, and the writers fill missing keys with ''.
+                # Without this line every full save blanked jp_prints for
+                # all non-rescraped rows — the measured 464 -> 334 -> 464
+                # oscillation that periodically resurfaced JP duplicates
+                # ("EN beats JP" lost half its suppression links).
+                "jp_prints": (row.get("jp_prints") or "").strip(),
                 "card_url": "",
             }
 

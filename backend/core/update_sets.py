@@ -17,6 +17,7 @@ predictor reads format_window.json to filter labs/major data to the
 current format only and to recency-weight late-format tournaments.
 """
 
+import csv
 import datetime
 import json
 import os
@@ -1237,6 +1238,60 @@ def apply_format_window_to_scraper_settings(format_window_path: str,
     return True
 
 
+def ensure_set_in_pokemon_sets_mapping(format_window_path: str) -> bool:
+    """Append the EN current set to data/pokemon_sets_mapping.csv if missing.
+
+    That CSV is the card-database tab's set allowlist
+    (js/app-cards-db.js englishCards filter) and was hand-maintained:
+    when PBL released 2026-07-17 nobody added it, so all 120 PBL cards
+    were invisible on the site for two weeks while every other data file
+    was correct. This closes the propagation gap the same way
+    apply_format_window_to_scraper_settings does for scraper configs.
+
+    Strictly append-only (existing rows are never modified or removed —
+    the file is an EN allowlist, JP codes stay out because format_window's
+    current_set is always the EN set here). The set name comes from
+    cm_expansions.csv when resolvable, else the code itself; the frontend
+    only reads set_code, the name is informational.
+    Returns True when a row was appended."""
+    try:
+        with open(format_window_path, encoding='utf-8') as f:
+            code = (json.load(f).get('current_set') or '').strip().upper()
+    except Exception as e:  # noqa: BLE001
+        print(f"[Update Sets] ! could not read format_window for sets-mapping check: {e}")
+        return False
+    if not code:
+        return False
+
+    mapping_path = os.path.join(data_dir, 'pokemon_sets_mapping.csv')
+    if not os.path.isfile(mapping_path):
+        print("[Update Sets] ! pokemon_sets_mapping.csv missing — not creating it blind")
+        return False
+    with open(mapping_path, encoding='utf-8-sig', newline='') as f:
+        rows = list(csv.DictReader(f))
+    existing = {(r.get('set_code') or '').strip().upper() for r in rows}
+    if code in existing:
+        return False
+
+    name = code
+    exp_path = os.path.join(data_dir, 'cm_expansions.csv')
+    if os.path.isfile(exp_path):
+        try:
+            with open(exp_path, encoding='utf-8-sig', newline='') as f:
+                for r in csv.DictReader(f):
+                    if (r.get('expansion_code') or '').strip().upper() == code:
+                        name = (r.get('name') or code).strip() or code
+                        break
+        except Exception:  # noqa: BLE001
+            pass
+
+    with open(mapping_path, 'a', encoding='utf-8', newline='') as f:
+        f.write(f"{code},{name}\n")
+    print(f"[Update Sets] ✓ pokemon_sets_mapping.csv: appended {code},{name} "
+          f"(card-database set allowlist)")
+    return True
+
+
 def main():
     print("=" * 60)
     print("UPDATE SETS - Fetching set release order from Limitless")
@@ -1326,6 +1381,13 @@ def main():
         project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
         settings_path = os.path.join(project_root, 'config', 'scraper_settings.json')
         apply_format_window_to_scraper_settings(fw_path, settings_path)
+
+        # 5) The card-database tab filters through the hand-maintained
+        #    pokemon_sets_mapping.csv; a new EN set missing there has ALL
+        #    its cards silently dropped before any search runs (how the
+        #    120 PBL cards vanished 2026-07-17..08-01). Append-only:
+        #    existing rows are never touched.
+        ensure_set_in_pokemon_sets_mapping(fw_path)
 
     print("[Update Sets] Done!")
 

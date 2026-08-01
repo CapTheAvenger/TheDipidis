@@ -247,6 +247,17 @@ def check_set_order(findings):
     # boundary prepare_card_data bins it out of the standard chunk.
     # Mirrors STANDARD_MIN_ORDER in backend/core/prepare_card_data.py.
     standard_min = 136
+    # The card-database tab filters EVERYTHING through the hand-maintained
+    # pokemon_sets_mapping.csv (js/app-cards-db.js englishCards filter): a
+    # set missing there has ALL its cards silently removed before any
+    # search or filter runs. That is exactly how all 120 PBL cards
+    # vanished from the site 2026-07-17..08-01 while every other data
+    # file was correct.
+    mapping_codes = set()
+    map_path = os.path.join(DATA, "pokemon_sets_mapping.csv")
+    if os.path.exists(map_path):
+        mapping_codes = {col(r, "set_code").upper()
+                        for r in read_csv(map_path) if col(r, "set_code")}
     for field, region in (("current_set", "EN"), ("current_set_jp", "JP")):
         code = (fw.get(field) or "").strip().upper()
         if not code:
@@ -263,6 +274,11 @@ def check_set_order(findings):
                              f"{region} current set {code} has order {order[code]}, below the "
                              f"standard boundary {standard_min} — its cards are binned out of "
                              f"the standard chunk the Deck Builder reads"))
+        if region == "EN" and mapping_codes and code not in mapping_codes:
+            findings.append(("CRITICAL",
+                             f"EN current set {code} is missing from "
+                             f"pokemon_sets_mapping.csv — the card database tab "
+                             f"drops every card of the set before any filter runs"))
 
 
 def ace_guard_prints():

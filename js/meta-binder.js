@@ -438,8 +438,14 @@
     }
 
     // ── Core: collect max card counts across all target decks ──
-    function collectBinderCards(targetArchetypes) {
-        const thresholdPercent = 70;
+    // options.thresholdPercent — usage % a card needs in at least one
+    // selected archetype to enter the binder (default 70). ACE SPECs
+    // always bypass the threshold (floor, never a cap — capping would
+    // remove cards like Prime Catcher at 100% usage).
+    function collectBinderCards(targetArchetypes, options) {
+        const _optThreshold = options && Number.isFinite(options.thresholdPercent)
+            ? options.thresholdPercent : 70;
+        const thresholdPercent = Math.max(0, Math.min(100, _optThreshold));
         const intlFamilyCache = new Map();
         const setOrderMap = window.setOrderMap || {};
 
@@ -1715,15 +1721,19 @@
         modal.classList.add('display-none');
     }
 
-    function openMetaBinderDroppedModal() {
+    // cardsOverride: the Custom Binder reuses this modal with its own
+    // dropped list — one renderer, one DOM, no drift between two copies.
+    function openMetaBinderDroppedModal(cardsOverride) {
         const modal = document.getElementById('metaBinderDroppedModal');
         const listEl = document.getElementById('metaBinderDroppedList');
         const countEl = document.getElementById('metaBinderDroppedCount');
         if (!modal || !listEl || !countEl) return;
 
-        const droppedCards = Array.isArray(window._metaBinderDroppedCards)
-            ? window._metaBinderDroppedCards
-            : [];
+        const droppedCards = Array.isArray(cardsOverride)
+            ? cardsOverride
+            : (Array.isArray(window._metaBinderDroppedCards)
+                ? window._metaBinderDroppedCards
+                : []);
 
         countEl.textContent = String(droppedCards.length);
 

@@ -5,9 +5,26 @@
     const CB_CACHE_KEY = 'customBinderCacheV1';          // legacy: ids only, superseded by V2
     const CB_CACHE_KEY_V2 = 'customBinderCacheV2';       // {ids, cards, date}
     const CB_PRESETS_KEY = 'customBinderPresetsV1';
+    const CB_PRINTED_LS_KEY = 'printedProxiesV1';        // mirror / guest storage
+    const CB_THRESHOLD_KEY = 'customBinderThresholdV1';
 
     let cbSelectedArchetypes = []; // [{name, source}]
     let _cbSessionBaseline = null; // previous-binder baseline, stable per session
+
+    // ── Print-status state (Druckliste mode) ──
+    // "printed" is a GLOBAL per-card state (the proxy physically exists in
+    // the user's box), keyed by cardId = name|set|number of the displayed
+    // print and matched family-wide — NOT per binder and NOT related to
+    // MyDex ownership. Stored as an ARRAY of ids (never a map: 185 card
+    // names contain '.', and dotted keys are Firestore field paths).
+    let cbMode = 'collection';     // 'collection' | 'print'
+    let cbThreshold = 70;          // 0 | 30 | 70 (ACE SPECs always bypass)
+    let _cbPrintedSet = null;      // Set<cardId>
+    let _cbPrintedLoadPromise = null;
+    let _cbPrintedSaveTimer = null;
+    let _cbPrintedOwner = undefined;   // uid (or null for guest) the cached set belongs to
+    let _cbPrintedRemoteOk = false;    // signed-in: did the Firestore read ever succeed?
+    let _cbPrintedDirty = false;       // pending debounced write exists
     let cbAllArchetypes = [];      // [{name, source, label}]
     let cbArchetypesLoaded = false;
     let cbFilter = 'all';
@@ -563,8 +580,9 @@
         const groupDefs = buildCbGroupDefs();
         window._cbArchetypeGroups = shared.buildMetaBinderArchetypeGroups(groupDefs, metricMaps);
 
-        // Collect cards (same logic as Meta Binder)
-        const binderMap = shared.collectBinderCards(sourceTargets);
+        // Collect cards (same logic as Meta Binder, user-chosen threshold;
+        // ACE SPECs always bypass the threshold — floor, never cap)
+        const binderMap = shared.collectBinderCards(sourceTargets, { thresholdPercent: cbThreshold });
 
         if (binderMap.size === 0) {
             if (typeof showToast === 'function') showToast(cbText('mb.noCards', 'No card data found for the selected archetypes.'), 'warning');
@@ -576,6 +594,7 @@
         const delta = await cbComputeDelta(binderMap, shared);
         window._cbDelta = delta;
 
+        if (cbMode === 'print') await cbLoadPrintedSet();
         cbRenderBinder(delta, shared);
         if (typeof showToast === 'function') showToast(cbText('cb.generated','Custom Binder generated!'), 'success');
     }
@@ -605,13 +624,21 @@
         let previous = { ids: new Set(), cards: [], date: null, hasProfile: false };
         try {
             const cachedV2 = JSON.parse(localStorage.getItem(CB_CACHE_KEY_V2) || 'null');
-            if (cachedV2 && Array.isArray(cachedV2.ids)) {
+            // A baseline generated at a DIFFERENT threshold is not comparable:
+            // diffing a 70%-binder against an all-cards binder flags hundreds
+            // of cards as "new"/"no longer in the meta" that never changed.
+            const thresholdMatches = cachedV2
+                && (cachedV2.threshold === undefined || cachedV2.threshold === cbThreshold);
+            if (cachedV2 && Array.isArray(cachedV2.ids) && thresholdMatches) {
                 previous = {
                     ids: new Set(cachedV2.ids),
                     cards: Array.isArray(cachedV2.cards) ? cachedV2.cards : [],
                     date: cachedV2.date || null,
                     hasProfile: true
                 };
+            } else if (cachedV2 && Array.isArray(cachedV2.ids)) {
+                // Threshold changed → no comparison this run; the save below
+                // records the new threshold so the NEXT run compares cleanly.
             } else {
                 // Legacy v1 cache: ids only (no card objects — dropped
                 // entries from it show the raw id until the next save).
@@ -632,10 +659,14 @@
         try {
             localStorage.setItem(CB_CACHE_KEY_V2, JSON.stringify({
                 ids: Array.from(binderMap.keys()),
+                // familyRefs included so "Aus Binder laden" (proxy tab)
+                // answers "is it printed?" family-wide, same as the grid.
                 cards: delta.cards.map(c => ({
                     cardId: c.cardId, name: c.name, set: c.set,
-                    number: c.number, maxCount: c.maxCount
+                    number: c.number, maxCount: c.maxCount,
+                    familyRefs: Array.isArray(c.familyRefs) ? c.familyRefs : []
                 })),
+                threshold: cbThreshold,
                 date: new Date().toISOString()
             }));
             localStorage.removeItem(CB_CACHE_KEY);
@@ -661,10 +692,13 @@
         const ownedComplete = cards.filter(c => c.missing === 0).length;
         const newCount = cards.filter(c => c.isNew).length;
 
-        // Stats
+        // Stats (mode-dependent: ownership vs print status)
         if (statsEl) {
             statsEl.classList.remove('display-none');
-            statsEl.innerHTML = `
+            if (cbMode === 'print') {
+                cbRenderPrintStats();
+            } else {
+                statsEl.innerHTML = `
                 <div class="meta-binder-stat">
                     <span class="meta-binder-stat-value">${totalUnique}</span>
                     <span class="meta-binder-stat-label">${cbText('mb.uniqueCards', 'Unique Cards')}</span>
@@ -685,6 +719,7 @@
                     <span class="meta-binder-stat-value" style="color:#3B4CCA">${newCount}</span>
                     <span class="meta-binder-stat-label">${cbText('mb.newThisWeek', 'New This Week')}</span>
                 </div>`;
+            }
         }
 
         // Archetype groups
@@ -736,16 +771,30 @@
             }
         }
 
-        // Filters
-        if (filtersEl) {
-            filtersEl.classList.remove('display-none');
-            filtersEl.innerHTML = `
+        // Filters — the chip row is the mode's main navigation. In print
+        // mode the chips ARE the binder comparison (to print / printed /
+        // no longer in the meta) — no extra modal flow needed.
+        const droppedCount = Array.isArray(droppedCards) ? droppedCards.length : 0;
+        const printedCount = cards.filter(c => cbIsPrinted(c)).length;
+        const toPrintCount = totalUnique - printedCount;
+        const chipRow = cbMode === 'print'
+            ? `
+                <div class="filter-group">
+                    <button class="meta-binder-filter-btn active" data-filter="all" onclick="cbSetFilter('all')">${cbText('cb.filterAll','All')} (${totalUnique})</button>
+                    <button class="meta-binder-filter-btn" data-filter="toprint" onclick="cbSetFilter('toprint')">${cbText('cb.filterToPrint','To print')} (${toPrintCount})</button>
+                    <button class="meta-binder-filter-btn" data-filter="printed" onclick="cbSetFilter('printed')">${cbText('cb.filterPrinted','Printed')} ✓ (${printedCount})</button>
+                    <button class="meta-binder-filter-btn" data-filter="dropped" onclick="cbOpenDroppedModal()">${cbText('cb.filterDropped','No longer in the meta')} (${droppedCount})</button>
+                </div>`
+            : `
                 <div class="filter-group">
                     <button class="meta-binder-filter-btn active" data-filter="all" onclick="cbSetFilter('all')">${cbText('cb.filterAll','All')} (${totalUnique})</button>
                     <button class="meta-binder-filter-btn" data-filter="owned" onclick="cbSetFilter('owned')">${cbText('cb.filterOwned','In Collection')} (${ownedComplete})</button>
                     <button class="meta-binder-filter-btn" data-filter="missing" onclick="cbSetFilter('missing')">${cbText('cb.filterMissing','Missing')} (${missingUnique})</button>
                     <button class="meta-binder-filter-btn" data-filter="new" onclick="cbSetFilter('new')">🆕 ${cbText('cb.filterNew','New')} (${newCount})</button>
-                </div>
+                </div>`;
+        if (filtersEl) {
+            filtersEl.classList.remove('display-none');
+            filtersEl.innerHTML = `${chipRow}
                 <div class="filter-group">
                     <select id="cbFilterType" onchange="cbApplyFilter()" class="select-system">
                         <option value="all">${cbText('cb.filterAllTypes','All Types')}</option>
@@ -785,9 +834,43 @@
         const proxyBtn = document.getElementById('cbSendProxy');
         if (wishlistBtn) wishlistBtn.disabled = missingCopies === 0;
         if (proxyBtn) proxyBtn.disabled = missingCopies === 0;
+        const unprintedBtn = document.getElementById('cbSendUnprinted');
+        const bulkBtn = document.getElementById('cbBulkMarkPrinted');
+        if (unprintedBtn) unprintedBtn.disabled = false;
+        if (bulkBtn) bulkBtn.disabled = false;
+        cbUpdateActionButtons();
 
         cbFilter = 'all';
         cbRenderGrid(delta, shared);
+    }
+
+    // Print-mode stats: printed vs to-print, copies included.
+    function cbRenderPrintStats() {
+        if (cbMode !== 'print') return;
+        const statsEl = document.getElementById('cbStats');
+        const delta = window._cbDelta;
+        if (!statsEl || !delta || !Array.isArray(delta.cards)) return;
+        const cards = delta.cards;
+        const printed = cards.filter(c => cbIsPrinted(c));
+        const printedCopies = printed.reduce((s, c) => s + (c.maxCount || 0), 0);
+        const totalCopies = cards.reduce((s, c) => s + (c.maxCount || 0), 0);
+        statsEl.innerHTML = `
+                <div class="meta-binder-stat">
+                    <span class="meta-binder-stat-value">${cards.length}</span>
+                    <span class="meta-binder-stat-label">${cbText('mb.uniqueCards', 'Unique Cards')}</span>
+                </div>
+                <div class="meta-binder-stat">
+                    <span class="meta-binder-stat-value">${totalCopies}</span>
+                    <span class="meta-binder-stat-label">${cbText('mb.totalCopies', 'Total Copies')}</span>
+                </div>
+                <div class="meta-binder-stat">
+                    <span class="meta-binder-stat-value meta-binder-stat-green">${printed.length}</span>
+                    <span class="meta-binder-stat-label">${cbText('cb.statPrinted', 'Printed')}</span>
+                </div>
+                <div class="meta-binder-stat">
+                    <span class="meta-binder-stat-value meta-binder-stat-red">${cards.length - printed.length} / ${totalCopies - printedCopies}</span>
+                    <span class="meta-binder-stat-label">${cbText('cb.statToPrint', 'To print (Cards / Copies)')}</span>
+                </div>`;
     }
 
     function cbUpdateSetFilter(cards) {
@@ -814,6 +897,9 @@
         const filtersEl = document.getElementById('cbFilters');
         if (filtersEl) {
             filtersEl.querySelectorAll('.meta-binder-filter-btn').forEach(btn => {
+                // Buttons without data-filter (Standard Print / All Prints)
+                // carry independent state — never strip their highlight.
+                if (!btn.dataset.filter) return;
                 btn.classList.toggle('active', btn.dataset.filter === filter);
             });
         }
@@ -835,11 +921,14 @@
         cbRenderGrid(delta, mb());
     }
 
-    function cbRenderGrid(delta, shared) {
-        const grid = document.getElementById('cbGrid');
-        if (!grid) return;
-
-        const { cards } = delta;
+    // The filtered list BEFORE the All-Prints expansion — bulk actions
+    // must run on this (the expansion invents per-print ids that don't
+    // exist as binder entries).
+    function cbComputeFilteredCards() {
+        const delta = window._cbDelta;
+        const shared = mb();
+        if (!delta || !Array.isArray(delta.cards)) return [];
+        const cards = delta.cards;
         const typeFilterEl = document.getElementById('cbFilterType');
         const setFilterEl = document.getElementById('cbFilterSet');
         const typeFilter = typeFilterEl ? String(typeFilterEl.value || 'all') : 'all';
@@ -852,17 +941,32 @@
             filtered = cards.filter(c => c.missing > 0);
         } else if (cbFilter === 'owned') {
             filtered = cards.filter(c => c.missing === 0);
+        } else if (cbFilter === 'toprint') {
+            filtered = cards.filter(c => !cbIsPrinted(c));
+        } else if (cbFilter === 'printed') {
+            filtered = cards.filter(c => cbIsPrinted(c));
         } else {
             filtered = cards;
         }
 
-        filtered = filtered.filter(card => {
+        return filtered.filter(card => {
             const meta = shared.getMetaBinderTypeMeta(card);
             const cardSet = String(card.set || '').toLowerCase();
             if (typeFilter !== 'all' && meta.type !== typeFilter) return false;
             if (setFilter !== 'all' && cardSet !== setFilter) return false;
+            // Print mode: basic energies are hidden by default — nobody
+            // proxies them, and 8 energy tiles are pure noise in a print
+            // list. Explicitly selecting the type filter still shows them.
+            if (cbMode === 'print' && typeFilter === 'all' && meta.type === 'Basic Energy') return false;
             return true;
         });
+    }
+
+    function cbRenderGrid(delta, shared) {
+        const grid = document.getElementById('cbGrid');
+        if (!grid) return;
+
+        let filtered = cbComputeFilteredCards();
 
         // All Prints expansion
         if (cbAllPrints) {
@@ -895,17 +999,26 @@
             : shared.sortMetaCards([...filtered]);
 
         if (sorted.length === 0) {
-            grid.innerHTML = `<p class="color-grey">${cbText('mb.empty', 'No cards found for current filter.')}</p>`;
+            // "Everything printed" is success, not an error-looking empty state.
+            grid.innerHTML = (cbMode === 'print' && cbFilter === 'toprint')
+                ? `<p class="cb-all-printed">✓ ${cbText('cb.allPrinted', 'Everything printed — your binder is complete.')}</p>`
+                : `<p class="color-grey">${cbText('mb.empty', 'No cards found for current filter.')}</p>`;
             return;
         }
 
+        const isPrintMode = cbMode === 'print';
         const cardHtmlEntries = sorted.map(card => {
             const imageUrl = shared.findCardImage(card.name, card.set, card.number);
-            const statusClass = card.ownershipMode === 'exact'
-                ? 'meta-binder-card-owned card-owned'
-                : (card.ownershipMode === 'intl-complete'
-                    ? 'meta-binder-card-owned-intl card-owned'
-                    : 'meta-binder-card-missing card-missing');
+            // Print mode: the frame colour means PRINT status, never
+            // ownership — one axis at a time, so green stays unambiguous.
+            const isPrinted = isPrintMode && cbIsPrinted(card);
+            const statusClass = isPrintMode
+                ? (isPrinted ? 'meta-binder-card-printed' : 'meta-binder-card-toprint')
+                : (card.ownershipMode === 'exact'
+                    ? 'meta-binder-card-owned card-owned'
+                    : (card.ownershipMode === 'intl-complete'
+                        ? 'meta-binder-card-owned-intl card-owned'
+                        : 'meta-binder-card-missing card-missing'));
             const newBadge = card.isNew ? `<span class="meta-binder-badge-new">NEW</span>` : '';
             const safeImage = escapeHtml(imageUrl);
             const safeName = escapeHtml(card.name);
@@ -927,23 +1040,38 @@
             const userWantsCard = window.userWishlist && window.userWishlist.has(card.cardId);
             const missingCount = Math.max(0, card.maxCount - ownedCount);
 
-            return { name: card.name, html: `
-                <div class="meta-binder-card ${statusClass}" data-type="${escapeHtml(typeMeta.type)}" data-set="${escapeHtml(String(card.set || ''))}" data-supertype="${escapeHtml(typeMeta.supertype)}" data-is-ace-spec="${typeMeta.isAceSpec ? 'true' : 'false'}" data-name="${safeName}" data-pokedex="${String(dexNumber)}" data-set-order="${String(setOrder)}" data-number-sort="${String(numberSort)}" data-card-id="${safeCardId}" data-family-refs="${escapeHtml((Array.isArray(card.familyRefs) ? card.familyRefs : []).join(','))}" data-max-count="${String(card.maxCount || 0)}" title="Decks: ${deckList}">
-                    ${imageUrl
-                        ? `<img src="${safeImage}" alt="${safeName}" class="meta-binder-card-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-                           <div class="meta-binder-card-fallback" style="display:none">${safeName}</div>`
-                        : `<div class="meta-binder-card-fallback">${safeName}<br><small>${escapeHtml(card.set)} ${escapeHtml(card.number)}</small></div>`}
+            // Print mode: no collection +/-/wishlist micro-badges (other
+            // axis, and 21px targets), instead a full-width 44px toggle
+            // bar under the image. Ownership only as a grey side note.
+            const topActions = isPrintMode ? '' : `
                     <div class="pos-abs card-action-row-wide card-database-top-actions">
                         <button type="button" data-card-id="${safeCardId}" onclick="addCollectionFromCardDbButton(this)" class="btn-green card-badge" title="Add to collection (${ownedCount}/4)" aria-label="Add ${safeName} to collection">+</button>
                         <button type="button" data-card-id="${safeCardId}" onclick="removeCollectionFromCardDbButton(this)" class="btn-red card-badge" style="color: ${ownedCount > 0 ? '#fff' : '#999'}; background: ${ownedCount > 0 ? '#dc3545' : '#fff'};" title="Remove from collection (${ownedCount}/4)" aria-label="Remove ${safeName} from collection">-</button>
                         <button type="button" data-card-id="${safeCardId}" data-missing="${String(missingCount)}" onclick="toggleWishlistMetaBinder(this)" class="btn-wishlist card-badge" style="color: #fff; background: ${userWantsCard ? '#E91E63' : '#F48FB1'}; border: 2px solid ${userWantsCard ? '#E91E63' : '#F48FB1'};" title="${userWantsCard ? 'Remove from wishlist' : 'Add missing (' + missingCount + ') to wishlist'}" aria-label="${userWantsCard ? 'Remove' : 'Add'} ${safeName} wishlist">${userWantsCard ? '&#9829;' : '&#9825;'}</button>
+                    </div>`;
+            const infoBlock = isPrintMode ? `
+                    <div class="meta-binder-card-info">
+                        ${newBadge}
+                        <span class="meta-binder-card-need">${card.maxCount}x</span>
+                        <div class="deck-indicator-count">${card.decks.length} Decks</div>
+                        <span class="cb-owned-line">${card.ownedIntlTotal || 0} ${cbText('cb.ownedLine', 'in collection')}</span>
                     </div>
+                    <button type="button" class="cb-print-toggle ${isPrinted ? 'is-printed' : ''}" onclick="cbTogglePrintedBtn(this)" aria-pressed="${isPrinted ? 'true' : 'false'}" aria-label="${isPrinted ? cbText('cb.ariaUnmarkPrinted', 'Mark as not printed') : cbText('cb.ariaMarkPrinted', 'Mark as printed')}: ${safeName}">
+                        ${isPrinted ? `${cbText('cb.printedBadge', 'Printed')} ✓` : cbText('cb.toPrintBadge', 'To print')}
+                    </button>` : `
                     <div class="meta-binder-card-info">
                         ${newBadge}
                         <span class="meta-binder-card-need">${card.maxCount}x</span>
                         <div class="deck-indicator-count">${card.decks.length} Decks</div>
                         ${countLabel}
-                    </div>
+                    </div>`;
+
+            return { name: card.name, html: `
+                <div class="meta-binder-card ${statusClass}" data-type="${escapeHtml(typeMeta.type)}" data-set="${escapeHtml(String(card.set || ''))}" data-supertype="${escapeHtml(typeMeta.supertype)}" data-is-ace-spec="${typeMeta.isAceSpec ? 'true' : 'false'}" data-name="${safeName}" data-pokedex="${String(dexNumber)}" data-set-order="${String(setOrder)}" data-number-sort="${String(numberSort)}" data-card-id="${safeCardId}" data-family-refs="${escapeHtml((Array.isArray(card.familyRefs) ? card.familyRefs : []).join(','))}" data-max-count="${String(card.maxCount || 0)}" title="Decks: ${deckList}">
+                    ${imageUrl
+                        ? `<img src="${safeImage}" alt="${safeName}" class="meta-binder-card-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+                           <div class="meta-binder-card-fallback" style="display:none">${safeName}</div>`
+                        : `<div class="meta-binder-card-fallback">${safeName}<br><small>${escapeHtml(card.set)} ${escapeHtml(card.number)}</small></div>`}${topActions}${infoBlock}
                 </div>` };
         });
 
@@ -967,6 +1095,317 @@
             grid.innerHTML = cardHtmlEntries.map(e => e.html).join('');
         }
         refreshCustomBinderOwnership();
+    }
+
+    // ── Print status: load / persist / query / toggle ──
+    async function cbLoadPrintedSet() {
+        const uid = window.auth?.currentUser?.uid ?? null;
+        // The cached set belongs to ONE account. Sign-out/sign-in without a
+        // reload must not leak user A's printed list into user B's doc.
+        if (_cbPrintedSet && _cbPrintedOwner !== uid) {
+            _cbPrintedSet = null;
+            _cbPrintedLoadPromise = null;
+            _cbPrintedRemoteOk = false;
+        }
+        if (_cbPrintedSet) return _cbPrintedSet;
+        if (_cbPrintedLoadPromise) return _cbPrintedLoadPromise;
+        _cbPrintedLoadPromise = (async () => {
+            let entries = null;
+            _cbPrintedRemoteOk = false;
+            if (uid && window.db) {
+                try {
+                    const doc = await window.db.collection('users').doc(uid)
+                        .collection('binders').doc('printedProxies').get();
+                    // The read SUCCEEDED — remote is authoritative from here,
+                    // whether or not the doc exists yet. Merging in the local
+                    // mirror could resurrect un-marked cards from a stale
+                    // mirror on another device.
+                    _cbPrintedRemoteOk = true;
+                    if (doc.exists) {
+                        const data = doc.data() || {};
+                        entries = Array.isArray(data.entries) ? data.entries : [];
+                    } else {
+                        entries = [];
+                    }
+                } catch (e) {
+                    // Read FAILED: fall back to the mirror for display, but
+                    // cbPersistPrintedSet refuses the Firestore write in this
+                    // state — a full-doc set() based on a possibly-empty
+                    // mirror would wipe the server's good data.
+                    console.warn('[CustomBinder] printed-status load failed — read-only fallback to local mirror', e);
+                }
+            }
+            if (entries === null) {
+                try { entries = JSON.parse(localStorage.getItem(CB_PRINTED_LS_KEY) || '[]'); }
+                catch (_) { entries = []; }
+            }
+            _cbPrintedSet = new Set((entries || [])
+                .map(e => (typeof e === 'string' ? e : (e && e.cardId)))
+                .filter(Boolean));
+            _cbPrintedOwner = uid;
+            return _cbPrintedSet;
+        })().finally(() => { _cbPrintedLoadPromise = null; });
+        return _cbPrintedLoadPromise;
+    }
+
+    function cbPersistPrintedSet() {
+        const arr = Array.from(_cbPrintedSet || []);
+        try { localStorage.setItem(CB_PRINTED_LS_KEY, JSON.stringify(arr)); } catch (_) { /* mirror only */ }
+        const uid = window.auth?.currentUser?.uid ?? null;
+        if (!uid || !window.db) return;
+        if (uid !== _cbPrintedOwner) {
+            // Account changed underneath us — never write one user's list
+            // into another user's document.
+            console.warn('[CustomBinder] printed-status save skipped: account changed');
+            return;
+        }
+        if (!_cbPrintedRemoteOk) {
+            // The remote read never succeeded this session: a full-doc set()
+            // would overwrite good server data with the local fallback.
+            if (typeof showToast === 'function') {
+                showToast(cbText('cb.printedSyncOffline', 'Print status saved on this device only — cloud sync is currently unavailable.'), 'warning');
+            }
+            return;
+        }
+        _cbPrintedDirty = true;
+        clearTimeout(_cbPrintedSaveTimer);
+        _cbPrintedSaveTimer = setTimeout(() => cbFlushPrintedSet(uid), 800);
+    }
+
+    function cbFlushPrintedSet(uid) {
+        if (!_cbPrintedDirty || !_cbPrintedSet) return;
+        const targetUid = uid || (window.auth?.currentUser?.uid ?? null);
+        if (!targetUid || !window.db || targetUid !== _cbPrintedOwner || !_cbPrintedRemoteOk) return;
+        _cbPrintedDirty = false;
+        clearTimeout(_cbPrintedSaveTimer);
+        window.db.collection('users').doc(targetUid)
+            .collection('binders').doc('printedProxies')
+            .set({ entries: Array.from(_cbPrintedSet), updatedAt: new Date().toISOString() })
+            .catch(e => {
+                _cbPrintedDirty = true;
+                console.warn('[CustomBinder] printed-status save failed (kept in local mirror)', e);
+            });
+    }
+
+    // Flush the debounced write before the page goes away — marking the
+    // last card and closing the tab inside the 800ms window must not
+    // silently revert on the next load (the remote doc wins over the mirror).
+    if (typeof document !== 'undefined') {
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'hidden') cbFlushPrintedSet();
+        });
+        window.addEventListener('pagehide', () => cbFlushPrintedSet());
+    }
+
+    // Family-aware: a proxy printed as any print of the card counts —
+    // it is the same piece of paper in the box.
+    function cbPrintedIdsForCard(card) {
+        const shared = mb();
+        const ids = [String(card.cardId || '')];
+        const refs = Array.isArray(card.familyRefs) ? card.familyRefs : [];
+        refs.forEach(ref => {
+            const p = typeof shared.parseIntlPrintRef === 'function' ? shared.parseIntlPrintRef(ref) : null;
+            if (p && p.set && p.number && typeof shared.buildCardId === 'function') {
+                ids.push(shared.buildCardId(card.name, p.set, p.number));
+            }
+        });
+        return ids.filter(Boolean);
+    }
+
+    function cbIsPrinted(card) {
+        if (!_cbPrintedSet) return false;
+        return cbPrintedIdsForCard(card).some(id => _cbPrintedSet.has(id));
+    }
+
+    function cbTogglePrintedBtn(btn) {
+        const cardEl = btn.closest('.meta-binder-card');
+        if (!cardEl || !_cbPrintedSet) return;
+        const cardId = cardEl.getAttribute('data-card-id') || '';
+        const name = cardEl.getAttribute('data-name') || '';
+        const familyRefs = (cardEl.getAttribute('data-family-refs') || '').split(',').filter(Boolean);
+        const card = { cardId, name, familyRefs };
+        if (cbIsPrinted(card)) {
+            cbPrintedIdsForCard(card).forEach(id => _cbPrintedSet.delete(id));
+        } else {
+            _cbPrintedSet.add(cardId);
+        }
+        cbPersistPrintedSet();
+        // Grid frames + stats + chip counts all show the same numbers.
+        cbApplyFilter();
+        cbRenderPrintStats();
+        cbUpdatePrintChipCounts();
+    }
+
+    // The chips live in #cbFilters, which only cbRenderBinder rewrites —
+    // and calling that resets cbFilter to 'all'. Patch the counts in place
+    // instead so toggling cards doesn't leave "Noch drucken (40)" next to
+    // a stats block saying 0.
+    function cbUpdatePrintChipCounts() {
+        if (cbMode !== 'print') return;
+        const delta = window._cbDelta;
+        const filtersEl = document.getElementById('cbFilters');
+        if (!delta || !Array.isArray(delta.cards) || !filtersEl) return;
+        const printedCount = delta.cards.filter(c => cbIsPrinted(c)).length;
+        const toPrint = filtersEl.querySelector('[data-filter="toprint"]');
+        const printed = filtersEl.querySelector('[data-filter="printed"]');
+        if (toPrint) toPrint.textContent = `${cbText('cb.filterToPrint', 'To print')} (${delta.cards.length - printedCount})`;
+        if (printed) printed.textContent = `${cbText('cb.filterPrinted', 'Printed')} ✓ (${printedCount})`;
+    }
+
+    // ── Mode & threshold ──
+    function cbSetMode(mode) {
+        const next = mode === 'print' ? 'print' : 'collection';
+        if (next === cbMode) return;
+        cbMode = next;
+        const btnColl = document.getElementById('cbModeCollection');
+        const btnPrint = document.getElementById('cbModePrint');
+        if (btnColl) btnColl.classList.toggle('active', cbMode === 'collection');
+        if (btnPrint) btnPrint.classList.toggle('active', cbMode === 'print');
+        cbUpdateActionButtons();
+        const rerender = () => {
+            const delta = window._cbDelta;
+            if (delta) cbRenderBinder(delta, mb());
+        };
+        if (cbMode === 'print') { cbLoadPrintedSet().then(rerender); } else { rerender(); }
+    }
+
+    function cbSetThreshold(value) {
+        const v = Number(value);
+        const changed = ((v === 0 || v === 30) ? v : 70) !== cbThreshold;
+        cbThreshold = (v === 0 || v === 30) ? v : 70;
+        try { localStorage.setItem(CB_THRESHOLD_KEY, String(cbThreshold)); } catch (_) { /* ignore */ }
+        document.querySelectorAll('#cbThresholdSegment .cb-seg-btn').forEach(btn => {
+            btn.classList.toggle('active', Number(btn.dataset.threshold) === cbThreshold);
+        });
+        // A binder is already on screen: tapping the segment must change it,
+        // not silently wait for another Generate press.
+        if (changed && window._cbDelta && cbSelectedArchetypes.length > 0) {
+            buildCustomBinder();
+        }
+    }
+
+    function cbLoadThreshold() {
+        try {
+            const v = Number(localStorage.getItem(CB_THRESHOLD_KEY));
+            if (v === 0 || v === 30 || v === 70) cbThreshold = v;
+        } catch (_) { /* ignore */ }
+    }
+
+    function cbUpdateActionButtons() {
+        const isPrint = cbMode === 'print';
+        const toggleEl = (id, show) => {
+            const el = document.getElementById(id);
+            if (el) el.classList.toggle('display-none', !show);
+        };
+        toggleEl('cbAddWishlist', !isPrint);
+        toggleEl('cbSendProxy', !isPrint);
+        toggleEl('cbSendUnprinted', isPrint);
+        toggleEl('cbBulkMarkPrinted', isPrint);
+    }
+
+    // ── Print-mode quick actions ──
+    function cbUnprintedCards() {
+        const delta = window._cbDelta;
+        if (!delta || !Array.isArray(delta.cards)) return [];
+        return delta.cards.filter(c => !cbIsPrinted(c));
+    }
+
+    async function cbSendUnprintedToProxy() {
+        // The printed set may still be loading right after a mode switch —
+        // without this await every card counts as unprinted and the whole
+        // binder floods the queue.
+        await cbLoadPrintedSet();
+        const unprinted = cbUnprintedCards();
+        if (unprinted.length === 0) {
+            if (typeof showToast === 'function') showToast(cbText('cb.allPrinted', 'Everything printed — your binder is complete.'), 'info');
+            return;
+        }
+        let copies = 0;
+        unprinted.forEach(card => {
+            if (typeof addCardToProxy === 'function') {
+                addCardToProxy(card.name, card.set, card.number, card.maxCount, true);
+                copies += card.maxCount;
+            }
+        });
+        if (typeof renderProxyQueue === 'function') renderProxyQueue();
+        if (typeof showToast === 'function') {
+            showToast(cbText('cb.unprintedSent', '{n} proxies added to the print list (Proxy Printer tab). Note: the print list is per device — on another device, use "Load from binder" there.').replace('{n}', String(copies)), 'success');
+        }
+    }
+
+    function cbMarkFilteredPrinted() {
+        if (!_cbPrintedSet) return;
+        // Uses the PRE-expansion filtered list: the All-Prints expansion
+        // creates per-print ids that don't exist as binder entries.
+        const filtered = cbComputeFilteredCards();
+        const toMark = filtered.filter(c => !cbIsPrinted(c));
+        if (toMark.length === 0) {
+            if (typeof showToast === 'function') showToast(cbText('cb.nothingToMark', 'All shown cards are already marked as printed.'), 'info');
+            return;
+        }
+        const msg = cbText('cb.bulkMarkConfirm', 'Mark {n} shown cards as printed?').replace('{n}', String(toMark.length));
+        if (!window.confirm(msg)) return;
+        toMark.forEach(c => _cbPrintedSet.add(c.cardId));
+        cbPersistPrintedSet();
+        cbApplyFilter();
+        cbRenderPrintStats();
+        cbUpdatePrintChipCounts();
+        if (typeof showToast === 'function') showToast(cbText('cb.bulkMarked', '{n} cards marked as printed.').replace('{n}', String(toMark.length)), 'success');
+    }
+
+    // ── "Top 10 of the meta" one-tap selection ──
+    async function cbAddTopMetaArchetypes() {
+        const shared = mb();
+        if (typeof shared.getTopCurrentMetaArchetypes !== 'function') return;
+        try {
+            await shared.ensureMetaDataLoaded();
+            const names = await shared.getTopCurrentMetaArchetypes(10);
+            if (!Array.isArray(names) || names.length === 0) {
+                if (typeof showToast === 'function') showToast(cbText('mb.noData', 'No meta data loaded yet.'), 'warning');
+                return;
+            }
+            names.forEach(n => cbAddArchetype(n, 'current-meta'));
+        } catch (e) {
+            console.warn('[CustomBinder] top-meta selection failed', e);
+        }
+    }
+
+    // ── Proxy-tab entry: load unprinted binder cards into the queue ──
+    // Works from the SAVED binder (localStorage cache), so the user can
+    // fill the queue on the PC without re-generating first.
+    async function cbLoadBinderIntoProxy() {
+        let cached = null;
+        try { cached = JSON.parse(localStorage.getItem(CB_CACHE_KEY_V2) || 'null'); } catch (_) { /* ignore */ }
+        const cards = cached && Array.isArray(cached.cards) ? cached.cards : [];
+        if (cards.length === 0) {
+            if (typeof showToast === 'function') showToast(cbText('cb.noBinderSaved', 'No saved binder on this device — generate one under Profile → Custom Binder first.'), 'warning');
+            return;
+        }
+        await cbLoadPrintedSet();
+        const unprinted = cards.filter(c => !cbIsPrinted(c));
+        if (unprinted.length === 0) {
+            if (typeof showToast === 'function') showToast(cbText('cb.allPrinted', 'Everything printed — your binder is complete.'), 'info');
+            return;
+        }
+        let copies = 0;
+        unprinted.forEach(card => {
+            if (typeof addCardToProxy === 'function') {
+                addCardToProxy(card.name, card.set, card.number, card.maxCount || 1, true);
+                copies += card.maxCount || 1;
+            }
+        });
+        if (typeof renderProxyQueue === 'function') renderProxyQueue();
+        if (typeof showToast === 'function') {
+            showToast(cbText('cb.binderProxyLoaded', '{n} unprinted proxies loaded from your binder.').replace('{n}', String(copies)), 'success');
+        }
+    }
+
+    // ── Dropped-cards modal (print mode "no longer in the meta") ──
+    // One renderer for both binders: the Meta Binder modal takes an
+    // override list, so this stays a two-liner instead of a drifting copy.
+    function cbOpenDroppedModal() {
+        if (typeof window.openMetaBinderDroppedModal !== 'function') return;
+        window.openMetaBinderDroppedModal(Array.isArray(window._cbDroppedCards) ? window._cbDroppedCards : []);
     }
 
     // ── Quick Actions ──
@@ -1023,16 +1462,25 @@
     // ── Init: Load previous selections ──
     cbLoadSelections();
     cbLoadPresets();
+    cbLoadThreshold();
     // Defer chip rendering until DOM is ready
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', () => { cbRenderChips(); cbRenderPresetBar(); });
-    } else {
+    function _cbInitDom() {
         cbRenderChips();
         cbRenderPresetBar();
+        cbUpdateActionButtons();
+        cbSetThreshold(cbThreshold); // paint the persisted segment state
+    }
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', _cbInitDom);
+    } else {
+        _cbInitDom();
     }
 
     // ── Ownership Refresh (analog to refreshMetaBinderOwnership) ──
     function refreshCustomBinderOwnership() {
+        // Print mode renders print-status frames and no ownership badges —
+        // rewriting classes here would repaint the grid in the wrong axis.
+        if (cbMode === 'print') return;
         const grid = document.getElementById('cbGrid');
         if (!grid) return;
         const t = window.userCollectionCounts || new Map();
@@ -1097,4 +1545,12 @@
     window.cbSaveCurrentAsPreset = cbSaveCurrentAsPreset;
     window.cbLoadPreset = cbLoadPreset;
     window.cbDeletePreset = cbDeletePreset;
+    window.cbSetMode = cbSetMode;
+    window.cbSetThreshold = cbSetThreshold;
+    window.cbTogglePrintedBtn = cbTogglePrintedBtn;
+    window.cbSendUnprintedToProxy = cbSendUnprintedToProxy;
+    window.cbMarkFilteredPrinted = cbMarkFilteredPrinted;
+    window.cbAddTopMetaArchetypes = cbAddTopMetaArchetypes;
+    window.cbLoadBinderIntoProxy = cbLoadBinderIntoProxy;
+    window.cbOpenDroppedModal = cbOpenDroppedModal;
 })();

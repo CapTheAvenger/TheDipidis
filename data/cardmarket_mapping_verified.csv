@@ -1,7 +1,158 @@
 ﻿set,number,verified_product_id,status,evidence,heuristic_product_id,agrees_with_heuristic,checked_at,url
-ASC,152,,http_403,,869763,,2026-08-01T16:07:12+00:00,https://www.cardmarket.com/en/Pokemon/Products/Singles/Ascended-Heroes/Mega-Dragonite-ex-V1-ASC152?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices
-ASC,271,,http_403,,869882,,2026-08-01T16:07:18+00:00,https://www.cardmarket.com/en/Pokemon/Products/Singles/Ascended-Heroes/Mega-Dragonite-ex-V2-ASC271?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices
-ASC,290,,http_403,,869906,,2026-08-01T16:07:28+00:00,https://www.cardmarket.com/en/Pokemon/Products/Singles/Ascended-Heroes/Mega-Dragonite-ex-V3-ASC290?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices
-ASC,295,,http_403,,869901,,2026-08-01T16:07:46+00:00,https://www.cardmarket.com/en/Pokemon/Products/Singles/Ascended-Heroes/Mega-Dragonite-ex-V4-ASC295?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices
-BLK,158,,http_403,,836232,,2026-08-01T16:08:20+00:00,https://www.cardmarket.com/en/Pokemon/Products/Singles/Black-Bolt/Zekrom-ex-V2-BLK158?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices
-BLK,166,,http_403,,836240,,2026-08-01T16:08:54+00:00,https://www.cardmarket.com/en/Pokemon/Products/Singles/Black-Bolt/Zekrom-ex-V3-BLK166?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices
+ASC,152,869763,verified,"limitless-fingerprint 3.43EUR~3.42EUR (ratio 1.00, pool 4)",869763,yes,2026-08-01T16:21:06+00:00,https://limitlesstcg.com/cards/ASC/152
+ASC,271,869882,verified,"limitless-fingerprint 27.5EUR~27.55EUR (ratio 1.00, pool 4)",869882,yes,2026-08-01T16:21:06+00:00,https://limitlesstcg.com/cards/ASC/152
+ASC,290,869901,verified,"limitless-fingerprint 402.16EUR~388.73EUR (ratio 1.03, pool 4)",869906,no,2026-08-01T16:21:06+00:00,https://limitlesstcg.com/cards/ASC/152
+ASC,295,869906,verified,"limitless-fingerprint 145.1EUR~155.26EUR (ratio 1.07, pool 4)",869901,no,2026-08-01T16:21:06+00:00,https://limitlesstcg.com/cards/ASC/152
+BLK,158,836232,verified,"limitless-fingerprint 3.38EUR~3.37EUR (ratio 1.00, pool 4)",836232,yes,2026-08-01T16:21:08+00:00,https://limitlesstcg.com/cards/BLK/34
+BLK,166,,fingerprint_ambiguous,fingerprint_ambiguous(2 in band),836240,,2026-08-01T16:21:08+00:00,https://limitlesstcg.com/cards/BLK/34
+BLK,172,,fingerprint_ambiguous,fingerprint_ambiguous(2 in band),836246,,2026-08-01T16:21:08+00:00,https://limitlesstcg.com/cards/BLK/34
+BLK,34,835966,verified,"limitless-fingerprint 0.59EUR~0.6EUR (ratio 1.02, pool 4)",835966,yes,2026-08-01T16:21:08+00:00,https://limitlesstcg.com/cards/BLK/34
+CRI,100,886492,verified,"limitless-fingerprint 11.8EUR~12.09EUR (ratio 1.02, pool 4)",886492,yes,2026-08-01T16:21:10+00:00,https://limitlesstcg.com/cards/CRI/22
+CRI,116,,fingerprint_ambiguous,fingerprint_ambiguous(gap),886515,,2026-08-01T16:21:10+00:00,https://limitlesstcg.com/cards/CRI/22
+CRI,122,,fingerprint_ambiguous,fingerprint_ambiguous(gap),886509,,2026-08-01T16:21:10+00:00,https://limitlesstcg.com/cards/CRI/22
+CRI,22,886414,verified,"limitless-fingerprint 1.27EUR~1.28EUR (ratio 1.01, pool 4)",886414,yes,2026-08-01T16:21:10+00:00,https://limitlesstcg.com/cards/CRI/22
+DRI,104,825978,verified,"limitless-fingerprint 0.73EUR~0.72EUR (ratio 1.01, pool 4)",825978,yes,2026-08-01T16:21:11+00:00,https://limitlesstcg.com/cards/DRI/104
+DRI,122,825996,verified,"limitless-fingerprint 0.45EUR~0.44EUR (ratio 1.02, pool 4)",825996,yes,2026-08-01T16:21:15+00:00,https://limitlesstcg.com/cards/DRI/122
+DRI,209,826083,verified,"limitless-fingerprint 5.6EUR~5.71EUR (ratio 1.02, pool 4)",826083,yes,2026-08-01T16:21:13+00:00,https://limitlesstcg.com/cards/DRI/39
+DRI,213,826087,verified,"limitless-fingerprint 19.82EUR~19.21EUR (ratio 1.03, pool 4)",826087,yes,2026-08-01T16:21:16+00:00,https://limitlesstcg.com/cards/DRI/81
+DRI,215,826089,verified,"limitless-fingerprint 3.49EUR~3.55EUR (ratio 1.02, pool 4)",826089,yes,2026-08-01T16:21:11+00:00,https://limitlesstcg.com/cards/DRI/104
+DRI,217,826091,verified,"limitless-fingerprint 2.78EUR~2.77EUR (ratio 1.00, pool 4)",826091,yes,2026-08-01T16:21:15+00:00,https://limitlesstcg.com/cards/DRI/122
+DRI,230,826104,verified,"limitless-fingerprint 256.06EUR~270.64EUR (ratio 1.06, pool 4)",826113,no,2026-08-01T16:21:13+00:00,https://limitlesstcg.com/cards/DRI/39
+DRI,231,826105,verified,"limitless-fingerprint 594.94EUR~583.77EUR (ratio 1.02, pool 4)",826114,no,2026-08-01T16:21:16+00:00,https://limitlesstcg.com/cards/DRI/81
+DRI,232,826106,verified,"limitless-fingerprint 222.76EUR~231.31EUR (ratio 1.04, pool 4)",826115,no,2026-08-01T16:21:11+00:00,https://limitlesstcg.com/cards/DRI/104
+DRI,234,826108,verified,"limitless-fingerprint 63.67EUR~59.81EUR (ratio 1.06, pool 4)",826116,no,2026-08-01T16:21:15+00:00,https://limitlesstcg.com/cards/DRI/122
+DRI,239,826113,verified,"limitless-fingerprint 21.47EUR~21.97EUR (ratio 1.02, pool 4)",826104,no,2026-08-01T16:21:13+00:00,https://limitlesstcg.com/cards/DRI/39
+DRI,240,826114,verified,"limitless-fingerprint 53.67EUR~54.79EUR (ratio 1.02, pool 4)",826105,no,2026-08-01T16:21:16+00:00,https://limitlesstcg.com/cards/DRI/81
+DRI,241,826115,verified,"limitless-fingerprint 26.98EUR~27.8EUR (ratio 1.03, pool 4)",826106,no,2026-08-01T16:21:11+00:00,https://limitlesstcg.com/cards/DRI/104
+DRI,242,826116,verified,"limitless-fingerprint 21.12EUR~20.75EUR (ratio 1.02, pool 4)",826108,no,2026-08-01T16:21:15+00:00,https://limitlesstcg.com/cards/DRI/122
+DRI,39,825913,verified,"limitless-fingerprint 0.56EUR~0.53EUR (ratio 1.06, pool 4)",825913,yes,2026-08-01T16:21:13+00:00,https://limitlesstcg.com/cards/DRI/39
+DRI,81,825955,verified,"limitless-fingerprint 0.94EUR~0.91EUR (ratio 1.03, pool 4)",825955,yes,2026-08-01T16:21:16+00:00,https://limitlesstcg.com/cards/DRI/81
+JTG,172,817325,verified,"limitless-fingerprint 1.9EUR~1.92EUR (ratio 1.01, pool 4)",817325,yes,2026-08-01T16:21:18+00:00,https://limitlesstcg.com/cards/JTG/53
+JTG,175,817328,verified,"limitless-fingerprint 4.15EUR~4.18EUR (ratio 1.01, pool 4)",817328,yes,2026-08-01T16:21:20+00:00,https://limitlesstcg.com/cards/JTG/98
+JTG,183,817336,verified,"limitless-fingerprint 40.17EUR~37.58EUR (ratio 1.07, pool 4)",817341,no,2026-08-01T16:21:18+00:00,https://limitlesstcg.com/cards/JTG/53
+JTG,185,817338,verified,"limitless-fingerprint 53.63EUR~53.19EUR (ratio 1.01, pool 4)",817342,no,2026-08-01T16:21:20+00:00,https://limitlesstcg.com/cards/JTG/98
+JTG,188,817341,verified,"limitless-fingerprint 14.97EUR~15.09EUR (ratio 1.01, pool 4)",817336,no,2026-08-01T16:21:18+00:00,https://limitlesstcg.com/cards/JTG/53
+JTG,189,817342,verified,"limitless-fingerprint 21.0EUR~21.3EUR (ratio 1.01, pool 4)",817338,no,2026-08-01T16:21:20+00:00,https://limitlesstcg.com/cards/JTG/98
+JTG,53,817205,verified,"limitless-fingerprint 0.5EUR~0.49EUR (ratio 1.02, pool 4)",817205,yes,2026-08-01T16:21:18+00:00,https://limitlesstcg.com/cards/JTG/53
+JTG,98,817250,verified,"limitless-fingerprint 1.72EUR~1.71EUR (ratio 1.01, pool 4)",817250,yes,2026-08-01T16:21:20+00:00,https://limitlesstcg.com/cards/JTG/98
+MEG,159,851230,verified,"limitless-fingerprint 5.24EUR~5.23EUR (ratio 1.00, pool 4)",851230,yes,2026-08-01T16:21:22+00:00,https://limitlesstcg.com/cards/MEG/60
+MEG,160,851231,verified,"limitless-fingerprint 10.18EUR~9.92EUR (ratio 1.03, pool 4)",851231,yes,2026-08-01T16:21:23+00:00,https://limitlesstcg.com/cards/MEG/77
+MEG,178,,fingerprint_ambiguous,fingerprint_ambiguous(gap),851249,,2026-08-01T16:21:22+00:00,https://limitlesstcg.com/cards/MEG/60
+MEG,179,,fingerprint_ambiguous,fingerprint_ambiguous(gap),851250,,2026-08-01T16:21:23+00:00,https://limitlesstcg.com/cards/MEG/77
+MEG,187,,fingerprint_ambiguous,fingerprint_ambiguous(gap),851258,,2026-08-01T16:21:22+00:00,https://limitlesstcg.com/cards/MEG/60
+MEG,188,,fingerprint_ambiguous,fingerprint_ambiguous(gap),851259,,2026-08-01T16:21:23+00:00,https://limitlesstcg.com/cards/MEG/77
+MEG,60,851131,verified,"limitless-fingerprint 0.63EUR~0.62EUR (ratio 1.02, pool 4)",851131,yes,2026-08-01T16:21:22+00:00,https://limitlesstcg.com/cards/MEG/60
+MEG,77,851148,verified,"limitless-fingerprint 1.04EUR~1.07EUR (ratio 1.03, pool 4)",851148,yes,2026-08-01T16:21:23+00:00,https://limitlesstcg.com/cards/MEG/77
+OBF,125,725205,verified,"limitless-fingerprint 5.05EUR~5.19EUR (ratio 1.03, pool 5)",725205,yes,2026-08-01T16:21:25+00:00,https://limitlesstcg.com/cards/OBF/125
+OBF,215,725294,verified,"limitless-fingerprint 17.72EUR~17.66EUR (ratio 1.00, pool 5)",725294,yes,2026-08-01T16:21:25+00:00,https://limitlesstcg.com/cards/OBF/125
+OBF,223,725303,verified,"limitless-fingerprint 132.7EUR~137.44EUR (ratio 1.04, pool 5)",725308,no,2026-08-01T16:21:25+00:00,https://limitlesstcg.com/cards/OBF/125
+OBF,228,725308,verified,"limitless-fingerprint 31.64EUR~32.75EUR (ratio 1.04, pool 5)",725303,no,2026-08-01T16:21:25+00:00,https://limitlesstcg.com/cards/OBF/125
+PAL,127,715602,verified,"limitless-fingerprint 0.67EUR~0.66EUR (ratio 1.02, pool 4)",715602,yes,2026-08-01T16:21:33+00:00,https://limitlesstcg.com/cards/PAL/127
+PAL,15,715488,verified,"limitless-fingerprint 0.68EUR~0.72EUR (ratio 1.06, pool 4)",715488,yes,2026-08-01T16:21:28+00:00,https://limitlesstcg.com/cards/PAL/15
+PAL,231,715706,verified,"limitless-fingerprint 2.44EUR~2.39EUR (ratio 1.02, pool 4)",715706,yes,2026-08-01T16:21:28+00:00,https://limitlesstcg.com/cards/PAL/15
+PAL,233,715708,verified,"limitless-fingerprint 2.7EUR~2.73EUR (ratio 1.01, pool 4)",715708,yes,2026-08-01T16:21:32+00:00,https://limitlesstcg.com/cards/PAL/37
+PAL,235,715710,verified,"limitless-fingerprint 1.79EUR~1.84EUR (ratio 1.03, pool 4)",715710,yes,2026-08-01T16:21:30+00:00,https://limitlesstcg.com/cards/PAL/52
+PAL,236,715711,verified,"limitless-fingerprint 2.53EUR~2.5EUR (ratio 1.01, pool 6)",715711,yes,2026-08-01T16:21:27+00:00,https://limitlesstcg.com/cards/PAL/61
+PAL,243,715718,verified,"limitless-fingerprint 1.25EUR~1.25EUR (ratio 1.00, pool 4)",715718,yes,2026-08-01T16:21:33+00:00,https://limitlesstcg.com/cards/PAL/127
+PAL,256,715731,verified,"limitless-fingerprint 18.87EUR~20.16EUR (ratio 1.07, pool 4)",715746,no,2026-08-01T16:21:28+00:00,https://limitlesstcg.com/cards/PAL/15
+PAL,258,715733,verified,"limitless-fingerprint 20.85EUR~20.45EUR (ratio 1.02, pool 4)",715747,no,2026-08-01T16:21:32+00:00,https://limitlesstcg.com/cards/PAL/37
+PAL,260,715735,verified,"limitless-fingerprint 11.77EUR~11.71EUR (ratio 1.01, pool 4)",715748,no,2026-08-01T16:21:30+00:00,https://limitlesstcg.com/cards/PAL/52
+PAL,261,715736,verified,"limitless-fingerprint 23.92EUR~24.58EUR (ratio 1.03, pool 6)",715749,no,2026-08-01T16:21:27+00:00,https://limitlesstcg.com/cards/PAL/61
+PAL,263,715738,verified,"limitless-fingerprint 9.02EUR~9.22EUR (ratio 1.02, pool 4)",715750,no,2026-08-01T16:21:33+00:00,https://limitlesstcg.com/cards/PAL/127
+PAL,271,715746,verified,"limitless-fingerprint 5.41EUR~5.36EUR (ratio 1.01, pool 4)",715731,no,2026-08-01T16:21:28+00:00,https://limitlesstcg.com/cards/PAL/15
+PAL,272,715747,verified,"limitless-fingerprint 4.57EUR~4.4EUR (ratio 1.04, pool 4)",715733,no,2026-08-01T16:21:32+00:00,https://limitlesstcg.com/cards/PAL/37
+PAL,273,715748,verified,"limitless-fingerprint 4.6EUR~4.51EUR (ratio 1.02, pool 4)",715735,no,2026-08-01T16:21:30+00:00,https://limitlesstcg.com/cards/PAL/52
+PAL,274,715749,verified,"limitless-fingerprint 5.4EUR~5.59EUR (ratio 1.04, pool 6)",746573,no,2026-08-01T16:21:27+00:00,https://limitlesstcg.com/cards/PAL/61
+PAL,275,715750,verified,"limitless-fingerprint 3.44EUR~3.44EUR (ratio 1.00, pool 4)",715738,no,2026-08-01T16:21:33+00:00,https://limitlesstcg.com/cards/PAL/127
+PAL,37,715511,verified,"limitless-fingerprint 0.74EUR~0.77EUR (ratio 1.04, pool 4)",715511,yes,2026-08-01T16:21:32+00:00,https://limitlesstcg.com/cards/PAL/37
+PAL,52,715527,verified,"limitless-fingerprint 0.71EUR~0.71EUR (ratio 1.00, pool 4)",715527,yes,2026-08-01T16:21:30+00:00,https://limitlesstcg.com/cards/PAL/52
+PAL,61,715536,verified,"limitless-fingerprint 0.83EUR~0.88EUR (ratio 1.06, pool 6)",715536,yes,2026-08-01T16:21:27+00:00,https://limitlesstcg.com/cards/PAL/61
+PAR,124,740661,verified,"limitless-fingerprint 0.71EUR~0.73EUR (ratio 1.03, pool 4)",740661,yes,2026-08-01T16:21:39+00:00,https://limitlesstcg.com/cards/PAR/124
+PAR,219,,fingerprint_ambiguous,fingerprint_ambiguous(2 in band),740762,,2026-08-01T16:21:35+00:00,https://limitlesstcg.com/cards/PAR/38
+PAR,225,740768,verified,"limitless-fingerprint 2.01EUR~2.02EUR (ratio 1.00, pool 4)",740768,yes,2026-08-01T16:21:37+00:00,https://limitlesstcg.com/cards/PAR/89
+PAR,229,740772,verified,"limitless-fingerprint 2.96EUR~2.91EUR (ratio 1.02, pool 4)",740772,yes,2026-08-01T16:21:39+00:00,https://limitlesstcg.com/cards/PAR/124
+PAR,245,740788,verified,"limitless-fingerprint 33.48EUR~32.73EUR (ratio 1.02, pool 5)",740803,no,2026-08-01T16:21:35+00:00,https://limitlesstcg.com/cards/PAR/38
+PAR,249,740792,verified,"limitless-fingerprint 20.5EUR~20.86EUR (ratio 1.02, pool 4)",740804,no,2026-08-01T16:21:37+00:00,https://limitlesstcg.com/cards/PAR/89
+PAR,251,740794,verified,"limitless-fingerprint 28.87EUR~28.87EUR (ratio 1.00, pool 4)",740805,no,2026-08-01T16:21:39+00:00,https://limitlesstcg.com/cards/PAR/124
+PAR,260,740803,verified,"limitless-fingerprint 10.0EUR~10.43EUR (ratio 1.04, pool 5)",740788,no,2026-08-01T16:21:35+00:00,https://limitlesstcg.com/cards/PAR/38
+PAR,261,740804,verified,"limitless-fingerprint 3.87EUR~3.82EUR (ratio 1.01, pool 4)",740792,no,2026-08-01T16:21:37+00:00,https://limitlesstcg.com/cards/PAR/89
+PAR,262,740805,verified,"limitless-fingerprint 5.17EUR~5.25EUR (ratio 1.02, pool 4)",740794,no,2026-08-01T16:21:39+00:00,https://limitlesstcg.com/cards/PAR/124
+PAR,38,740514,verified,"limitless-fingerprint 0.91EUR~0.87EUR (ratio 1.05, pool 5)",740514,yes,2026-08-01T16:21:35+00:00,https://limitlesstcg.com/cards/PAR/38
+PAR,89,740582,verified,"limitless-fingerprint 0.71EUR~0.68EUR (ratio 1.04, pool 4)",740582,yes,2026-08-01T16:21:37+00:00,https://limitlesstcg.com/cards/PAR/89
+PBL,101,895886,verified,"limitless-fingerprint 8.58EUR~8.55EUR (ratio 1.00, pool 4)",895886,yes,2026-08-01T16:21:40+00:00,https://limitlesstcg.com/cards/PBL/48
+PBL,116,895901,verified,"limitless-fingerprint 282.9EUR~290.03EUR (ratio 1.03, pool 4)",895905,no,2026-08-01T16:21:40+00:00,https://limitlesstcg.com/cards/PBL/48
+PBL,120,895905,verified,"limitless-fingerprint 130.76EUR~131.15EUR (ratio 1.00, pool 4)",895901,no,2026-08-01T16:21:40+00:00,https://limitlesstcg.com/cards/PBL/48
+PBL,48,,fingerprint_ambiguous,fingerprint_ambiguous(0 in band),895788,,2026-08-01T16:21:40+00:00,https://limitlesstcg.com/cards/PBL/48
+PFL,109,857684,verified,"limitless-fingerprint 26.93EUR~26.82EUR (ratio 1.00, pool 4)",857684,yes,2026-08-01T16:21:42+00:00,https://limitlesstcg.com/cards/PFL/13
+PFL,125,857700,verified,"limitless-fingerprint 1001.97EUR~982.09EUR (ratio 1.02, pool 4)",857705,no,2026-08-01T16:21:42+00:00,https://limitlesstcg.com/cards/PFL/13
+PFL,13,857588,verified,"limitless-fingerprint 3.04EUR~3.06EUR (ratio 1.01, pool 4)",857588,yes,2026-08-01T16:21:42+00:00,https://limitlesstcg.com/cards/PFL/13
+PFL,130,857705,verified,"limitless-fingerprint 276.21EUR~280.88EUR (ratio 1.02, pool 4)",857700,no,2026-08-01T16:21:42+00:00,https://limitlesstcg.com/cards/PFL/13
+POR,104,877521,verified,"limitless-fingerprint 6.46EUR~6.31EUR (ratio 1.02, pool 4)",877521,yes,2026-08-01T16:21:44+00:00,https://limitlesstcg.com/cards/POR/47
+POR,120,877537,verified,"limitless-fingerprint 44.33EUR~46.38EUR (ratio 1.05, pool 4)",877537,yes,2026-08-01T16:21:44+00:00,https://limitlesstcg.com/cards/POR/47
+POR,124,877541,verified,"limitless-fingerprint 96.77EUR~99.12EUR (ratio 1.02, pool 4)",877541,yes,2026-08-01T16:21:44+00:00,https://limitlesstcg.com/cards/POR/47
+POR,47,877461,verified,"limitless-fingerprint 0.56EUR~0.55EUR (ratio 1.02, pool 4)",877461,yes,2026-08-01T16:21:44+00:00,https://limitlesstcg.com/cards/POR/47
+PRE,12,805401,verified,"limitless-fingerprint 3.73EUR~3.73EUR (ratio 1.00, pool 3)",805401,yes,2026-08-01T16:21:45+00:00,https://limitlesstcg.com/cards/PRE/12
+PRE,145,805539,verified,"limitless-fingerprint 20.43EUR~20.86EUR (ratio 1.02, pool 3)",805571,no,2026-08-01T16:21:45+00:00,https://limitlesstcg.com/cards/PRE/12
+PRE,169,805563,verified,"limitless-fingerprint 38.46EUR~40.25EUR (ratio 1.05, pool 3)",805574,no,2026-08-01T16:21:47+00:00,https://limitlesstcg.com/cards/PRE/92
+PRE,177,805571,verified,"limitless-fingerprint 7.52EUR~7.53EUR (ratio 1.00, pool 3)",805539,no,2026-08-01T16:21:45+00:00,https://limitlesstcg.com/cards/PRE/12
+PRE,180,805574,verified,"limitless-fingerprint 8.48EUR~8.7EUR (ratio 1.03, pool 3)",805563,no,2026-08-01T16:21:47+00:00,https://limitlesstcg.com/cards/PRE/92
+PRE,92,805484,verified,"limitless-fingerprint 0.96EUR~0.99EUR (ratio 1.03, pool 3)",805484,yes,2026-08-01T16:21:47+00:00,https://limitlesstcg.com/cards/PRE/92
+SCR,128,,fingerprint_ambiguous,fingerprint_ambiguous(gap),785982,,2026-08-01T16:21:49+00:00,https://limitlesstcg.com/cards/SCR/128
+SCR,170,786024,verified,"limitless-fingerprint 54.0EUR~54EUR (ratio 1.00, pool 4)",786027,no,2026-08-01T16:21:49+00:00,https://limitlesstcg.com/cards/SCR/128
+SCR,173,786027,verified,"limitless-fingerprint 15.04EUR~15.83EUR (ratio 1.05, pool 4)",786024,no,2026-08-01T16:21:49+00:00,https://limitlesstcg.com/cards/SCR/128
+SFA,39,780934,verified,"limitless-fingerprint 1.71EUR~1.69EUR (ratio 1.01, pool 4)",780934,yes,2026-08-01T16:21:50+00:00,https://limitlesstcg.com/cards/SFA/39
+SFA,85,780980,verified,"limitless-fingerprint 3.48EUR~3.69EUR (ratio 1.06, pool 4)",780980,yes,2026-08-01T16:21:50+00:00,https://limitlesstcg.com/cards/SFA/39
+SFA,93,780988,verified,"limitless-fingerprint 20.14EUR~19.84EUR (ratio 1.02, pool 4)",780988,yes,2026-08-01T16:21:50+00:00,https://limitlesstcg.com/cards/SFA/39
+SFA,95,780990,verified,"limitless-fingerprint 29.07EUR~29.07EUR (ratio 1.00, pool 4)",780990,yes,2026-08-01T16:21:50+00:00,https://limitlesstcg.com/cards/SFA/39
+SSP,133,,fingerprint_ambiguous,fingerprint_ambiguous(0 in band),794506,,2026-08-01T16:21:52+00:00,https://limitlesstcg.com/cards/SSP/133
+SSP,219,794592,verified,"limitless-fingerprint 22.97EUR~23.9EUR (ratio 1.04, pool 4)",794592,yes,2026-08-01T16:21:54+00:00,https://limitlesstcg.com/cards/SSP/57
+SSP,225,794598,verified,"limitless-fingerprint 2.82EUR~2.84EUR (ratio 1.01, pool 4)",794598,yes,2026-08-01T16:21:52+00:00,https://limitlesstcg.com/cards/SSP/133
+SSP,238,794611,verified,"limitless-fingerprint 321.18EUR~321.84EUR (ratio 1.00, pool 4)",794621,no,2026-08-01T16:21:54+00:00,https://limitlesstcg.com/cards/SSP/57
+SSP,242,794615,verified,"limitless-fingerprint 29.51EUR~29.51EUR (ratio 1.00, pool 4)",794620,no,2026-08-01T16:21:52+00:00,https://limitlesstcg.com/cards/SSP/133
+SSP,247,794621,verified,"limitless-fingerprint 65.92EUR~65.33EUR (ratio 1.01, pool 4)",794611,no,2026-08-01T16:21:54+00:00,https://limitlesstcg.com/cards/SSP/57
+SSP,248,794620,verified,"limitless-fingerprint 10.61EUR~11.47EUR (ratio 1.08, pool 4)",794615,no,2026-08-01T16:21:52+00:00,https://limitlesstcg.com/cards/SSP/133
+SSP,57,794329,verified,"limitless-fingerprint 3.78EUR~3.84EUR (ratio 1.02, pool 4)",794329,yes,2026-08-01T16:21:54+00:00,https://limitlesstcg.com/cards/SSP/57
+SVI,125,689767,verified,"limitless-fingerprint 0.52EUR~0.52EUR (ratio 1.00, pool 6)",689767,yes,2026-08-01T16:21:55+00:00,https://limitlesstcg.com/cards/SVI/125
+SVI,227,,fingerprint_ambiguous,fingerprint_ambiguous(2 in band),690998,,2026-08-01T16:21:57+00:00,https://limitlesstcg.com/cards/SVI/81
+SVI,231,,fingerprint_ambiguous,fingerprint_ambiguous(2 in band),702527,,2026-08-01T16:21:55+00:00,https://limitlesstcg.com/cards/SVI/125
+SVI,244,702540,verified,"limitless-fingerprint 20.85EUR~20.5EUR (ratio 1.02, pool 5)",702549,no,2026-08-01T16:21:57+00:00,https://limitlesstcg.com/cards/SVI/81
+SVI,247,702543,verified,"limitless-fingerprint 21.48EUR~21.75EUR (ratio 1.01, pool 6)",703594,no,2026-08-01T16:21:55+00:00,https://limitlesstcg.com/cards/SVI/125
+SVI,253,702549,verified,"limitless-fingerprint 6.6EUR~6.47EUR (ratio 1.02, pool 5)",702540,no,2026-08-01T16:21:57+00:00,https://limitlesstcg.com/cards/SVI/81
+SVI,254,702550,verified,"limitless-fingerprint 5.85EUR~5.71EUR (ratio 1.02, pool 6)",702543,no,2026-08-01T16:21:55+00:00,https://limitlesstcg.com/cards/SVI/125
+SVI,81,689766,verified,"limitless-fingerprint 0.56EUR~0.58EUR (ratio 1.04, pool 5)",689766,yes,2026-08-01T16:21:57+00:00,https://limitlesstcg.com/cards/SVI/81
+TEF,123,760753,verified,"limitless-fingerprint 1.38EUR~1.38EUR (ratio 1.00, pool 6)",760753,yes,2026-08-01T16:22:06+00:00,https://limitlesstcg.com/cards/TEF/123
+TEF,186,760816,verified,"limitless-fingerprint 0.02EUR~0.02EUR (ratio 1.00, pool 4)",760655,no,2026-08-01T16:22:04+00:00,https://limitlesstcg.com/cards/TEF/25
+TEF,188,760818,verified,"limitless-fingerprint 2.42EUR~2.43EUR (ratio 1.00, pool 4)",760818,yes,2026-08-01T16:21:59+00:00,https://limitlesstcg.com/cards/TEF/38
+TEF,189,760819,verified,"limitless-fingerprint 2.1EUR~2.06EUR (ratio 1.02, pool 4)",760819,yes,2026-08-01T16:22:08+00:00,https://limitlesstcg.com/cards/TEF/50
+TEF,191,,fingerprint_ambiguous,fingerprint_ambiguous(2 in band),760821,,2026-08-01T16:22:03+00:00,https://limitlesstcg.com/cards/TEF/81
+TEF,192,760822,verified,"limitless-fingerprint 1.59EUR~1.53EUR (ratio 1.04, pool 4)",760822,yes,2026-08-01T16:22:01+00:00,https://limitlesstcg.com/cards/TEF/99
+TEF,196,,fingerprint_ambiguous,fingerprint_ambiguous(2 in band),760826,,2026-08-01T16:22:06+00:00,https://limitlesstcg.com/cards/TEF/123
+TEF,203,760833,verified,"limitless-fingerprint 29.33EUR~29.57EUR (ratio 1.01, pool 4)",760843,no,2026-08-01T16:22:04+00:00,https://limitlesstcg.com/cards/TEF/25
+TEF,204,760834,verified,"limitless-fingerprint 37.62EUR~36.87EUR (ratio 1.02, pool 4)",760844,no,2026-08-01T16:21:59+00:00,https://limitlesstcg.com/cards/TEF/38
+TEF,205,760835,verified,"limitless-fingerprint 44.38EUR~46.2EUR (ratio 1.04, pool 4)",760845,no,2026-08-01T16:22:08+00:00,https://limitlesstcg.com/cards/TEF/50
+TEF,206,760836,verified,"limitless-fingerprint 48.93EUR~45.97EUR (ratio 1.06, pool 6)",760846,no,2026-08-01T16:22:03+00:00,https://limitlesstcg.com/cards/TEF/81
+TEF,207,760837,verified,"limitless-fingerprint 19.6EUR~17.69EUR (ratio 1.11, pool 4)",760847,no,2026-08-01T16:22:01+00:00,https://limitlesstcg.com/cards/TEF/99
+TEF,208,760838,verified,"limitless-fingerprint 63.65EUR~63.65EUR (ratio 1.00, pool 6)",760848,no,2026-08-01T16:22:06+00:00,https://limitlesstcg.com/cards/TEF/123
+TEF,213,760843,verified,"limitless-fingerprint 9.63EUR~9.63EUR (ratio 1.00, pool 4)",760833,no,2026-08-01T16:22:04+00:00,https://limitlesstcg.com/cards/TEF/25
+TEF,214,760844,verified,"limitless-fingerprint 17.55EUR~17.48EUR (ratio 1.00, pool 4)",760834,no,2026-08-01T16:21:59+00:00,https://limitlesstcg.com/cards/TEF/38
+TEF,215,760845,verified,"limitless-fingerprint 9.64EUR~9.11EUR (ratio 1.06, pool 4)",760835,no,2026-08-01T16:22:08+00:00,https://limitlesstcg.com/cards/TEF/50
+TEF,216,760846,verified,"limitless-fingerprint 10.96EUR~10.96EUR (ratio 1.00, pool 6)",760836,no,2026-08-01T16:22:03+00:00,https://limitlesstcg.com/cards/TEF/81
+TEF,217,760847,verified,"limitless-fingerprint 9.56EUR~9.56EUR (ratio 1.00, pool 4)",760837,no,2026-08-01T16:22:01+00:00,https://limitlesstcg.com/cards/TEF/99
+TEF,218,760848,verified,"limitless-fingerprint 11.23EUR~11.23EUR (ratio 1.00, pool 6)",760838,no,2026-08-01T16:22:06+00:00,https://limitlesstcg.com/cards/TEF/123
+TEF,25,760655,verified,"limitless-fingerprint 0.73EUR~0.76EUR (ratio 1.04, pool 4)",760816,no,2026-08-01T16:22:04+00:00,https://limitlesstcg.com/cards/TEF/25
+TEF,38,760668,verified,"limitless-fingerprint 0.82EUR~0.83EUR (ratio 1.01, pool 4)",760668,yes,2026-08-01T16:21:59+00:00,https://limitlesstcg.com/cards/TEF/38
+TEF,50,760680,verified,"limitless-fingerprint 0.66EUR~0.69EUR (ratio 1.05, pool 4)",760680,yes,2026-08-01T16:22:08+00:00,https://limitlesstcg.com/cards/TEF/50
+TEF,81,760711,verified,"limitless-fingerprint 0.77EUR~0.73EUR (ratio 1.05, pool 6)",760711,yes,2026-08-01T16:22:03+00:00,https://limitlesstcg.com/cards/TEF/81
+TEF,99,760729,verified,"limitless-fingerprint 0.58EUR~0.56EUR (ratio 1.04, pool 4)",760729,yes,2026-08-01T16:22:01+00:00,https://limitlesstcg.com/cards/TEF/99
+TWM,141,769315,verified,"limitless-fingerprint 1.14EUR~1.15EUR (ratio 1.01, pool 4)",769315,yes,2026-08-01T16:22:09+00:00,https://limitlesstcg.com/cards/TWM/141
+TWM,190,,fingerprint_ambiguous,fingerprint_ambiguous(2 in band),769364,,2026-08-01T16:22:11+00:00,https://limitlesstcg.com/cards/TWM/25
+TWM,202,769376,verified,"limitless-fingerprint 2.12EUR~2.2EUR (ratio 1.04, pool 4)",769376,yes,2026-08-01T16:22:09+00:00,https://limitlesstcg.com/cards/TWM/141
+TWM,211,769385,verified,"limitless-fingerprint 20.38EUR~20.17EUR (ratio 1.01, pool 4)",769395,no,2026-08-01T16:22:11+00:00,https://limitlesstcg.com/cards/TWM/25
+TWM,216,769390,verified,"limitless-fingerprint 31.8EUR~31.87EUR (ratio 1.00, pool 4)",769396,no,2026-08-01T16:22:09+00:00,https://limitlesstcg.com/cards/TWM/141
+TWM,221,769395,verified,"limitless-fingerprint 8.66EUR~8.88EUR (ratio 1.03, pool 4)",769385,no,2026-08-01T16:22:11+00:00,https://limitlesstcg.com/cards/TWM/25
+TWM,222,769396,verified,"limitless-fingerprint 8.82EUR~8.97EUR (ratio 1.02, pool 4)",769390,no,2026-08-01T16:22:09+00:00,https://limitlesstcg.com/cards/TWM/141
+TWM,25,,fingerprint_ambiguous,fingerprint_ambiguous(gap),769199,,2026-08-01T16:22:11+00:00,https://limitlesstcg.com/cards/TWM/25
+WHT,158,836196,verified,"limitless-fingerprint 3.01EUR~2.97EUR (ratio 1.01, pool 4)",836196,yes,2026-08-01T16:22:13+00:00,https://limitlesstcg.com/cards/WHT/20
+WHT,166,836209,verified,"limitless-fingerprint 214.22EUR~198.13EUR (ratio 1.08, pool 4)",836209,yes,2026-08-01T16:22:13+00:00,https://limitlesstcg.com/cards/WHT/20
+WHT,173,836227,verified,"limitless-fingerprint 370.31EUR~379.55EUR (ratio 1.02, pool 4)",836227,yes,2026-08-01T16:22:13+00:00,https://limitlesstcg.com/cards/WHT/20
+WHT,20,835938,verified,"limitless-fingerprint 0.52EUR~0.54EUR (ratio 1.04, pool 4)",835938,yes,2026-08-01T16:22:13+00:00,https://limitlesstcg.com/cards/WHT/20

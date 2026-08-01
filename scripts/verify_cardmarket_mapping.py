@@ -257,6 +257,15 @@ def limitless_verify(args):
     session = requests.Session()
     session.headers.update({'User-Agent': HEADERS['User-Agent']})
 
+    def flush():
+        # Incremental persistence: a CI timeout kill must not discard the
+        # rows this run already judged — the CSV is the resume state.
+        with open(OUT, 'w', encoding='utf-8-sig', newline='') as f:
+            w = csv.DictWriter(f, fieldnames=FIELDNAMES)
+            w.writeheader()
+            for key in sorted(done):
+                w.writerow({k: done[key].get(k, '') for k in FIELDNAMES})
+
     fetched = 0
     consecutive_fail = 0
     new_rows = []
@@ -320,13 +329,11 @@ def limitless_verify(args):
                         'yes' if str(pid) == str(m['cardmarket_product_id']) else 'no')
             new_rows.append(row_out)
             done[key] = row_out
+        if fetched % 50 == 0:
+            flush()
         time.sleep(PACE_SECONDS * 0.75)
 
-    with open(OUT, 'w', encoding='utf-8-sig', newline='') as f:
-        w = csv.DictWriter(f, fieldnames=FIELDNAMES)
-        w.writeheader()
-        for key in sorted(done):
-            w.writerow({k: done[key].get(k, '') for k in FIELDNAMES})
+    flush()
 
     verified = [r for r in new_rows if r['status'] == 'verified']
     mismatches = [r for r in verified if r['agrees_with_heuristic'] == 'no']

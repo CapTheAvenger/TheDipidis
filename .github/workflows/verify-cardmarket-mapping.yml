@@ -23,6 +23,10 @@ on:
         description: 'Only the proven SAR-vs-Secret-Rare conflict groups (true/false)'
         required: false
         default: 'true'
+      recon:
+        description: 'Recon mode: dump Limitless price HTML to the log, verify nothing (true/false)'
+        required: false
+        default: 'false'
 
 permissions:
   contents: write
@@ -50,6 +54,9 @@ jobs:
           ARGS="--limit ${{ github.event.inputs.limit || '150' }}"
           if [ "${{ github.event.inputs.only_conflicts || 'true' }}" = "true" ]; then
             ARGS="$ARGS --only-conflicts"
+          fi
+          if [ "${{ github.event.inputs.recon || 'false' }}" = "true" ]; then
+            ARGS="$ARGS --recon"
           fi
           python scripts/verify_cardmarket_mapping.py $ARGS
 

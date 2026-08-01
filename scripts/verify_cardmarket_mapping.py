@@ -168,6 +168,54 @@ def candidate_rows(mapping, cards, only_conflicts):
     return [(r, url) for _, r, url in ordered]
 
 
+def recon(limit):
+    """Print the raw price-relevant HTML from a few Limitless card pages.
+
+    Cardmarket 403s datacenter IPs (proven: first verify run, 6x403,
+    circuit breaker, 0 verified). Limitless IS reachable from CI — the
+    whole scraper stack runs against it — and its card page shows the
+    Cardmarket price per print. Before building an extractor on
+    assumptions, this mode dumps what the page ACTUALLY contains for a
+    probe set to the job log; the extractor gets designed on that
+    evidence. Probes include the proven-swapped OBF Charizard group.
+    """
+    import requests  # noqa: PLC0415
+
+    probes = [('OBF', '223'), ('OBF', '228'), ('OBF', '125'),
+              ('OBF', '215'), ('MEW', '199'), ('DRI', '230'), ('DRI', '239')]
+    session = requests.Session()
+    session.headers.update({'User-Agent': HEADERS['User-Agent']})
+    for sc, num in probes[:limit]:
+        url = f'https://limitlesstcg.com/cards/{sc}/{num}'
+        print(f'\n===== {sc} {num} — {url} =====')
+        try:
+            resp = session.get(url, timeout=25)
+            print(f'HTTP {resp.status_code}, {len(resp.text)} bytes')
+            if resp.status_code != 200:
+                continue
+            html = resp.text
+            # Everything around the cardmarket/price links, generously.
+            for pat in (r'.{200}card-price[^>]*>.{300}',
+                        r'.{100}cardmarket\.com.{300}'):
+                for m in list(re.finditer(pat, html, re.S))[:6]:
+                    print('--- match ---')
+                    print(m.group(0).replace('\n', ' ')[:700])
+        except Exception as e:  # noqa: BLE001
+            print(f'ERROR: {e}')
+        time.sleep(1.0)
+    # Also document whether cardmarket still 403s this runner (2 probes).
+    print('\n===== cardmarket reachability probe =====')
+    cm = requests.Session()
+    cm.headers.update(HEADERS)
+    for url in ('https://www.cardmarket.com/en/Pokemon/Products/Singles/Obsidian-Flames/Charizard-ex-V3-OBF223',):
+        try:
+            r = cm.get(url, timeout=25)
+            print(f'{url} -> HTTP {r.status_code}, {len(r.text)} bytes')
+        except Exception as e:  # noqa: BLE001
+            print(f'{url} -> ERROR {e}')
+    return 0
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--limit', type=int, default=150,
@@ -176,7 +224,13 @@ def main():
                     help='only the proven SAR-vs-Secret-Rare conflict groups')
     ap.add_argument('--dry-run', action='store_true',
                     help='list what would be fetched, fetch nothing')
+    ap.add_argument('--recon', action='store_true',
+                    help='dump price-relevant HTML from Limitless probe pages '
+                         'to design the extractor on evidence, fetch nothing else')
     args = ap.parse_args()
+
+    if args.recon:
+        return recon(args.limit)
 
     import requests  # noqa: PLC0415 — keep import local for --dry-run offline use
 

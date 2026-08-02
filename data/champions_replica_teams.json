@@ -2,7 +2,7 @@
   "_meta": {
     "title": "Pokémon Champions — Current Top Doubles Teams",
     "subtitle": "Replica codes from top tournament finishes. Tap a code to copy.",
-    "last_updated": "2026-08-01",
+    "last_updated": "2026-08-02",
     "source": "VGCPastes Champions spreadsheet (auto-discovered tabs: M-B=gid1458357160, M-A=gid791705272)",
     "source_url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTXHOfUSKTZyVoxF7BO-XIEqtbrsq1OSh_4bSaO0bhAMHqtsvYqM_4eZWIMqdZ--SKCb86EXuk75o1i/pub?gid=1458357160&single=true&output=csv",
     "current_regulation": "M-B",
@@ -10,7 +10,7 @@
       "M-B",
       "M-A"
     ],
-    "team_count": 67
+    "team_count": 66
   },
   "teams": [
     {
@@ -6435,105 +6435,6 @@
             "Dire Claw",
             "Fake Out",
             "Swords Dance"
-          ]
-        }
-      ],
-      "strategy": []
-    },
-    {
-      "rank": 67,
-      "replica_code": "EVE4BJGAQR",
-      "team_name": "barudoru's Houndoom TR Team",
-      "tournament": "Video",
-      "trainer": "Ryota Otsubo",
-      "format": "VGC Champions",
-      "regulation": "M-B",
-      "sheet_rank": "",
-      "date_shared": "18 Jul 2026",
-      "pokepaste_url": "https://pokepast.es/1ff1fcc4c0817cc4",
-      "pokemon": [
-        {
-          "name": "Venusaur",
-          "item": "Life Orb",
-          "ability": "Chlorophyll",
-          "tera_type": "",
-          "evs": "2 HP / 32 SpA / 32 Spe",
-          "nature": "Modest",
-          "moves": [
-            "Sludge Bomb",
-            "Solar Beam",
-            "Earth Power",
-            "Protect"
-          ]
-        },
-        {
-          "name": "Houndoom",
-          "item": "Houndoominite",
-          "ability": "Flash Fire",
-          "tera_type": "",
-          "evs": "1 HP / 1 Def / 32 SpA / 32 Spe",
-          "nature": "Timid",
-          "moves": [
-            "Heat Wave",
-            "Dark Pulse",
-            "Overheat",
-            "Protect"
-          ]
-        },
-        {
-          "name": "Annihilape",
-          "item": "Choice Scarf",
-          "ability": "Defiant",
-          "tera_type": "",
-          "evs": "2 HP / 32 Atk / 32 Spe",
-          "nature": "Adamant",
-          "moves": [
-            "Close Combat",
-            "Ice Punch",
-            "Rock Slide",
-            "U-turn"
-          ]
-        },
-        {
-          "name": "Torkoal",
-          "item": "Charcoal",
-          "ability": "Drought",
-          "tera_type": "",
-          "evs": "32 HP / 32 SpA / 2 SpD",
-          "nature": "Quiet",
-          "moves": [
-            "Eruption",
-            "Weather Ball",
-            "Helping Hand",
-            "Protect"
-          ]
-        },
-        {
-          "name": "Kangaskhan",
-          "item": "Kangaskhanite",
-          "ability": "Scrappy",
-          "tera_type": "",
-          "evs": "27 HP / 32 Atk / 7 Def",
-          "nature": "Adamant",
-          "moves": [
-            "Double-Edge",
-            "Ice Punch",
-            "Hammer Arm",
-            "Fake Out"
-          ]
-        },
-        {
-          "name": "Farigiraf",
-          "item": "Sitrus Berry",
-          "ability": "Armor Tail",
-          "tera_type": "",
-          "evs": "31 HP / 20 Def / 3 SpA / 12 SpD",
-          "nature": "Bold",
-          "moves": [
-            "Psychic",
-            "Thunderbolt",
-            "Trick Room",
-            "Helping Hand"
           ]
         }
       ],

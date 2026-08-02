@@ -128,11 +128,21 @@
  "file_rows": {
   "cardmarket_card_images.csv": 1295,
   "cardmarket_id_mapping.csv": 17370,
-  "cm_expansions.csv": 765,
+  "cm_expansions.csv": 768,
   "price_data.csv": 20401,
   "prizepack_official_images.csv": 266
  },
- "generated": "2026-08-01 10:10 UTC",
+ "generated": "2026-08-02 10:08 UTC",
+ "price_integrity": {
+  "duplicate_idproducts": 101,
+  "match_methods": {
+   "live-verified": 4782,
+   "priced-by-all": 178,
+   "priced-by-date": 1377,
+   "unique": 11033
+  },
+  "nonempty_eur_price": 20383
+ },
  "set_coverage": {
   "AOR": [
    76,

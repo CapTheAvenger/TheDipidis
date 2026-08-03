@@ -254199,6 +254199,66 @@
       "Illustrated by 5ban Graphics"
     ]
   },
+  "MEP|37": {
+    "name": "Bulbasaur",
+    "card_type": "Basic",
+    "energy_type": "Grass",
+    "hp": "80",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Leech Seed",
+        "cost": [
+          "G"
+        ],
+        "damage": "10",
+        "text": "Heal 10 damage from this Pokémon."
+      }
+    ],
+    "rules": [
+      "Illustrated by Saboteri"
+    ]
+  },
+  "MEP|38": {
+    "name": "Charmander",
+    "card_type": "Basic",
+    "energy_type": "Fire",
+    "hp": "80",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Ember",
+        "cost": [
+          "R"
+        ],
+        "damage": "30",
+        "text": "Discard an Energy from this Pokémon."
+      }
+    ],
+    "rules": [
+      "Illustrated by Saboteri"
+    ]
+  },
+  "MEP|39": {
+    "name": "Squirtle",
+    "card_type": "Basic",
+    "energy_type": "Water",
+    "hp": "80",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Bubble",
+        "cost": [
+          "W"
+        ],
+        "damage": "10",
+        "text": "Flip a coin. If heads, your opponent's Active Pokémon is now Paralyzed."
+      }
+    ],
+    "rules": [
+      "Illustrated by Saboteri"
+    ]
+  },
   "MEP|4": {
     "name": "Lunatone",
     "card_type": "Basic",
@@ -254225,6 +254285,217 @@
       "Illustrated by Ounishi"
     ]
   },
+  "MEP|40": {
+    "name": "Turtwig",
+    "card_type": "Basic",
+    "energy_type": "Grass",
+    "hp": "90",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Razor Leaf",
+        "cost": [
+          "G",
+          "G",
+          "C"
+        ],
+        "damage": "60",
+        "text": ""
+      }
+    ],
+    "rules": [
+      "Illustrated by Saboteri"
+    ]
+  },
+  "MEP|41": {
+    "name": "Chimchar",
+    "card_type": "Basic",
+    "energy_type": "Fire",
+    "hp": "60",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Fury Swipes",
+        "cost": [
+          "C",
+          "C"
+        ],
+        "damage": "20×",
+        "text": "Flip 3 coins. This attack does 20 damage for each heads."
+      }
+    ],
+    "rules": [
+      "Illustrated by Saboteri"
+    ]
+  },
+  "MEP|42": {
+    "name": "Piplup",
+    "card_type": "Basic",
+    "energy_type": "Water",
+    "hp": "70",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Peck",
+        "cost": [
+          "W"
+        ],
+        "damage": "20",
+        "text": ""
+      }
+    ],
+    "rules": [
+      "Illustrated by Saboteri"
+    ]
+  },
+  "MEP|43": {
+    "name": "Rowlet",
+    "card_type": "Basic",
+    "energy_type": "Grass",
+    "hp": "70",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Tackle",
+        "cost": [
+          "C",
+          "C"
+        ],
+        "damage": "20",
+        "text": ""
+      }
+    ],
+    "rules": [
+      "Illustrated by Saboteri"
+    ]
+  },
+  "MEP|44": {
+    "name": "Litten",
+    "card_type": "Basic",
+    "energy_type": "Fire",
+    "hp": "70",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Fire Fang",
+        "cost": [
+          "R",
+          "R"
+        ],
+        "damage": "20",
+        "text": "Your opponent's Active Pokémon is now Burned."
+      }
+    ],
+    "rules": [
+      "Illustrated by Saboteri"
+    ]
+  },
+  "MEP|45": {
+    "name": "Popplio",
+    "card_type": "Basic",
+    "energy_type": "Water",
+    "hp": "70",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Disarming Voice",
+        "cost": [
+          "W",
+          "W"
+        ],
+        "damage": "20",
+        "text": "Your opponent's Active Pokémon is now Confused."
+      }
+    ],
+    "rules": [
+      "Illustrated by Saboteri"
+    ]
+  },
+  "MEP|46": {
+    "name": "Chikorita",
+    "card_type": "Basic",
+    "energy_type": "Grass",
+    "hp": "70",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Razor Leaf",
+        "cost": [
+          "G",
+          "C"
+        ],
+        "damage": "30",
+        "text": ""
+      }
+    ],
+    "rules": [
+      "Illustrated by Saboteri"
+    ]
+  },
+  "MEP|47": {
+    "name": "Cyndaquil",
+    "card_type": "Basic",
+    "energy_type": "Fire",
+    "hp": "70",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Tackle",
+        "cost": [
+          "R",
+          "C",
+          "C"
+        ],
+        "damage": "40",
+        "text": ""
+      }
+    ],
+    "rules": [
+      "Illustrated by Saboteri"
+    ]
+  },
+  "MEP|48": {
+    "name": "Totodile",
+    "card_type": "Basic",
+    "energy_type": "Water",
+    "hp": "80",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Bite",
+        "cost": [
+          "W",
+          "W",
+          "C"
+        ],
+        "damage": "50",
+        "text": ""
+      }
+    ],
+    "rules": [
+      "Illustrated by Saboteri"
+    ]
+  },
+  "MEP|49": {
+    "name": "Snivy",
+    "card_type": "Basic",
+    "energy_type": "Grass",
+    "hp": "60",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Vine Whip",
+        "cost": [
+          "C"
+        ],
+        "damage": "20",
+        "text": ""
+      }
+    ],
+    "rules": [
+      "Illustrated by Saboteri"
+    ]
+  },
   "MEP|5": {
     "name": "Drifloon",
     "card_type": "Basic",
@@ -254241,6 +254512,112 @@
     ],
     "rules": [
       "Illustrated by Shimaris Yukichi"
+    ]
+  },
+  "MEP|50": {
+    "name": "Tepig",
+    "card_type": "Basic",
+    "energy_type": "Fire",
+    "hp": "80",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Ember",
+        "cost": [
+          "R",
+          "R"
+        ],
+        "damage": "40",
+        "text": "Discard an Energy from this Pokémon."
+      }
+    ],
+    "rules": [
+      "Illustrated by Saboteri"
+    ]
+  },
+  "MEP|51": {
+    "name": "Oshawott",
+    "card_type": "Basic",
+    "energy_type": "Water",
+    "hp": "70",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Razor Shell",
+        "cost": [
+          "W",
+          "C"
+        ],
+        "damage": "10+",
+        "text": "Flip a coin. If heads, this attack does 30 more damage."
+      }
+    ],
+    "rules": [
+      "Illustrated by Saboteri"
+    ]
+  },
+  "MEP|52": {
+    "name": "Grookey",
+    "card_type": "Basic",
+    "energy_type": "Grass",
+    "hp": "70",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Branch Poke",
+        "cost": [
+          "G",
+          "G"
+        ],
+        "damage": "40",
+        "text": ""
+      }
+    ],
+    "rules": [
+      "Illustrated by Saboteri"
+    ]
+  },
+  "MEP|53": {
+    "name": "Scorbunny",
+    "card_type": "Basic",
+    "energy_type": "Fire",
+    "hp": "70",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Double Kick",
+        "cost": [
+          "R",
+          "C"
+        ],
+        "damage": "20×",
+        "text": "Flip 2 coins. This attack does 20 damage for each heads."
+      }
+    ],
+    "rules": [
+      "Illustrated by Saboteri"
+    ]
+  },
+  "MEP|54": {
+    "name": "Sobble",
+    "card_type": "Basic",
+    "energy_type": "Water",
+    "hp": "70",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Water Gun",
+        "cost": [
+          "W",
+          "C",
+          "C"
+        ],
+        "damage": "40",
+        "text": ""
+      }
+    ],
+    "rules": [
+      "Illustrated by Saboteri"
     ]
   },
   "MEP|6": {

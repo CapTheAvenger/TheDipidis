@@ -2,6 +2,10 @@ tournament_id,tournament_date,format,player_count,winner_archetype,winner_winrat
 6a2a2ad82d97f3b0c2613980,2026-07-01,CRI,109,Dragapult Dusknoir,25.0
 6a42564583fd320299bd3d12,2026-07-01,CRI,114,Slowking,27.0
 6a427cb383fd320299bd3ed1,2026-06-30,CRI,116,Slowking,18.0
+6a7103e1cdc0391d7fa5bb21,2026-08-04,PBL,103,Dragapult Dudunsparce,18.0
+6a640d6f937230b102d439ac,2026-08-03,PBL,194,Dragapult Dusknoir,24.0
+6a6f9fd8cdc0391d7fa5a78e,2026-08-03,PBL,127,Alakazam Dudunsparce,21.0
+6a6b5b9052c24ac2da64fd67,2026-08-03,PBL,261,Dragapult,36.0
 6a6c306552c24ac2da650b06,2026-08-03,PBL,158,Cinccino,27.0
 6a67c6de937230b102d46e9f,2026-08-02,PBL,173,Slowking,37.0
 6a6e598f2b308b6067b47028,2026-08-02,PBL,166,Alakazam Dudunsparce,21.0
@@ -76,5 +80,3 @@ goodbye-chaos,2026-07-11,PBL,365,Alakazam Dudunsparce,31.0
 6a46b80e83fd320299bd68e9,2026-07-07,PBL,151,Dragapult,21.0
 6a4c3dc765724db9ded3ec3d,2026-07-07,PBL,100,Dragapult,28.0
 6a2be310e334c3c9befd4622,2026-07-07,PBL,157,Crustle,24.0
-6a284d862d97f3b0c26124ea,2026-07-07,PBL,128,Dragapult Dusknoir,21.0
-6a431ad383fd320299bd46b4,2026-07-06,PBL,145,Lucario Hariyama,21.0

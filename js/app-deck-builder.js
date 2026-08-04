@@ -7079,6 +7079,31 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                     // console when debugging "why did THIS land?"
                     _phase_y2_trace:  result.trace || [],
                 };
+
+                // Swap-candidate bench: the build's own scoring minus the
+                // final deck. best_variant carries set_code/set_number
+                // (NOT set/number — mixing those up yields undefined keys).
+                const _deckKeys = new Set((result.deck || [])
+                    .map(e => e && e.card && e.card.key).filter(Boolean));
+                const _benchRaw = (result.scoredCards || [])
+                    .filter(c => c && !_deckKeys.has(c.key) && !c.is_basic_energy)
+                    .map(c => ({
+                        name: c.name,
+                        set: (c.best_variant && c.best_variant.set_code) || '',
+                        number: (c.best_variant && c.best_variant.set_number) || '',
+                        usagePct: (c.weightedShare || 0) * 100,
+                        avgCount: c.weightedAvgCount || 0,
+                        isAceSpec: !!c.is_ace_spec,
+                        type: c.type || '',
+                    }));
+                const _benchMore = (result.deck || [])
+                    .filter(e => e && e.card && !e.card.is_basic_energy)
+                    .map(e => ({
+                        name: fixCardNameEncoding(String(e.card.name || '').trim()),
+                        inDeck: e.count || 0,
+                        avgCount: e.card.weightedAvgCount || 0,
+                    }));
+                _finalizeDeckBench(source, _benchRaw, _benchMore);
             } catch (err) {
                 console.warn('[MostConsistencyBuilder] failed to populate Why? report:', err);
             }
@@ -7161,6 +7186,162 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
         }
         if (typeof window !== 'undefined') {
             window._filterMajorRowsToCurrentFormat = _filterMajorRowsToCurrentFormat;
+        }
+
+        // ────────────────────────────────────────────────────────────
+        // Swap-candidate bench ("Tausch-Kandidaten — die nächsten 15").
+        //
+        // After a Max-Consistency build, the cards the build ALMOST took:
+        // for tournament testing the user packs the 60 + these, and swaps
+        // between rounds. Fed from the build's own scoring (never re-derived
+        // from separate meta stats — the numbers must match the build).
+        // v1 is deliberately read-only: the per-card add path writes global
+        // print preferences (setRarityPreference) and would leave the deck
+        // at 61/60 — package actions only (proxy print list / copy list).
+        // ────────────────────────────────────────────────────────────
+        const DECK_BENCH_SHOW = 15;
+        const DECK_BENCH_MAX = 25;
+
+        function _benchPackCount(row) {
+            if (row.isAceSpec) return 1;
+            const c = Math.ceil(row.avgCount || 0);
+            return Math.min(4, Math.max(1, c || 1));
+        }
+
+        // Category top-up: a bench of 15 same-type fillers is useless at the
+        // table — if a Stadium/Supporter/Tool alternative exists among the
+        // candidates but not in the top slice, pull the best one in.
+        function _benchTopUp(sorted) {
+            const top = sorted.slice(0, DECK_BENCH_SHOW);
+            const rest = sorted.slice(DECK_BENCH_SHOW, DECK_BENCH_MAX + 10);
+            for (const cat of ['Stadium', 'Supporter', 'Tool']) {
+                if (top.some(r => (r.type || '').includes(cat))) continue;
+                const idx = rest.findIndex(r => (r.type || '').includes(cat));
+                if (idx === -1) continue;
+                const pulled = rest.splice(idx, 1)[0];
+                // Replace the weakest top row that isn't itself a sole
+                // category representative.
+                for (let i = top.length - 1; i >= 0; i--) {
+                    const t = top[i].type || '';
+                    const cat2 = ['Stadium', 'Supporter', 'Tool'].find(c2 => t.includes(c2));
+                    if (!cat2 || top.filter(r => (r.type || '').includes(cat2)).length > 1) {
+                        rest.unshift(top.splice(i, 1)[0]);
+                        break;
+                    }
+                }
+                top.push(pulled);
+            }
+            top.sort((a, b) => b.usagePct - a.usagePct);
+            return top.concat(rest).slice(0, DECK_BENCH_MAX);
+        }
+
+        function _finalizeDeckBench(source, benchRaw, moreCopies) {
+            const rows = benchRaw
+                .filter(r => r && r.name && (r.usagePct || 0) > 0)
+                .sort((a, b) => (b.usagePct || 0) - (a.usagePct || 0))
+                .slice(0, DECK_BENCH_MAX + 15);
+            const finalRows = _benchTopUp(rows).map(r => {
+                const name = fixCardNameEncoding(String(r.name || '').trim());
+                let set = r.set || '', number = r.number || '';
+                try {
+                    const pref = getPreferredVersionForCard(name, set, number);
+                    if (pref) { set = pref.set; number = pref.number; }
+                } catch (_) { /* keep the original set/number */ }
+                return { ...r, name, set, number, packCount: _benchPackCount(r) };
+            });
+            const more = (moreCopies || [])
+                .filter(r => r && r.avgCount > 0 && Math.round(r.avgCount) > r.inDeck)
+                .map(r => ({ ...r, addCount: Math.round(r.avgCount) - r.inDeck }))
+                .sort((a, b) => (b.avgCount - b.inDeck) - (a.avgCount - a.inDeck))
+                .slice(0, 5);
+            window.lastConsistencyBuild = window.lastConsistencyBuild || {};
+            const report = window.lastConsistencyBuild[source] =
+                window.lastConsistencyBuild[source] || { source };
+            report.bench = finalRows;
+            report.bench_more_copies = more;
+            renderDeckBench(source);
+        }
+
+        function renderDeckBench(source) {
+            const el = document.getElementById(`${source}BenchSection`);
+            if (!el) return;
+            const report = (window.lastConsistencyBuild || {})[source];
+            const rows = (report && report.bench) || [];
+            if (rows.length === 0) {
+                el.classList.add('d-none');
+                el.innerHTML = '';
+                return;
+            }
+            const shown = rows.slice(0, DECK_BENCH_SHOW);
+            const extra = rows.slice(DECK_BENCH_SHOW);
+            const totalCopies = rows.reduce((s, r) => s + r.packCount, 0);
+            const rowHtml = (r) => {
+                const img = (typeof getCardImageSource === 'function' && getCardImageSource(r.name, r.set, r.number)) || '';
+                const pct = Math.round(r.usagePct);
+                return `
+                <div class="deck-bench-row">
+                    ${img ? `<img class="deck-bench-thumb" loading="lazy" src="${escapeHtml(img)}" alt="" onerror="this.style.visibility='hidden'">` : '<span class="deck-bench-thumb"></span>'}
+                    <div class="deck-bench-main">
+                        <span class="deck-bench-name">${escapeHtml(r.name)}</span>
+                        <span class="deck-bench-set">${escapeHtml(r.set)} ${escapeHtml(String(r.number))}${r.isAceSpec ? ` · <span class="deck-bench-ace">${t('bench.aceSwap') || 'ACE SPEC — tauscht deinen ACE SPEC'}</span>` : ''}</span>
+                        <span class="deck-bench-bar"><span style="width:${Math.min(100, pct)}%"></span></span>
+                    </div>
+                    <div class="deck-bench-nums">
+                        <span class="deck-bench-pct">${pct}%</span>
+                        <span class="deck-bench-count">Ø ${(r.avgCount || 0).toFixed(1).replace('.', ',')} → ${r.packCount}×</span>
+                    </div>
+                </div>`;
+            };
+            const moreRows = (report.bench_more_copies || []).map(r =>
+                `<div class="deck-bench-more-row">${escapeHtml(r.name)}: ${r.inDeck}× ${t('bench.inDeck') || 'im Deck'}, Ø ${(r.avgCount).toFixed(1).replace('.', ',')} → +${r.addCount} ${t('bench.copies') || 'Kopie(n) einpacken'}</div>`
+            ).join('');
+            el.innerHTML = `
+            <details class="deck-bench">
+                <summary>🔄 ${t('bench.title') || 'Tausch-Kandidaten — die nächsten'} ${shown.length}
+                    <span class="deck-bench-sub">(${totalCopies} ${t('bench.copiesTotal') || 'Karten zum Einpacken'})</span>
+                </summary>
+                <p class="deck-bench-hint">${t('bench.hint') || 'Nicht im Deck, aber knapp dahinter. Fürs Testing: 60 + diese Karten einpacken und zwischen den Runden tauschen. Zum Übernehmen die Karte oben regulär ins Deck holen — und eine dafür raus.'}</p>
+                <div class="deck-bench-actions">
+                    <button type="button" class="btn btn-outline btn-sm" onclick="deckBenchToProxy('${source}')">${t('bench.toProxy') || 'Alle → Proxy-Druckliste'} (${totalCopies})</button>
+                    <button type="button" class="btn btn-outline btn-sm" onclick="deckBenchCopy('${source}')">${t('bench.copy') || 'Als Liste kopieren'}</button>
+                </div>
+                <div class="deck-bench-rows">${shown.map(rowHtml).join('')}</div>
+                ${extra.length > 0 ? `<details class="deck-bench-extra"><summary>${t('bench.showMore') || 'Weitere anzeigen'} (${extra.length})</summary>${extra.map(rowHtml).join('')}</details>` : ''}
+                ${moreRows ? `<div class="deck-bench-more"><h5>${t('bench.moreCopies') || 'Mehr Kopien testen'}</h5>${moreRows}</div>` : ''}
+            </details>`;
+            el.classList.remove('d-none');
+        }
+
+        function deckBenchToProxy(source) {
+            const report = (window.lastConsistencyBuild || {})[source];
+            const rows = (report && report.bench) || [];
+            if (rows.length === 0 || typeof addCardToProxy !== 'function') return;
+            let copies = 0;
+            rows.forEach(r => {
+                addCardToProxy(r.name, r.set, r.number, r.packCount, true);
+                copies += r.packCount;
+            });
+            if (typeof renderProxyQueue === 'function') renderProxyQueue();
+            if (typeof showToast === 'function') {
+                showToast((t('bench.proxyDone') || '{n} Karten zur Proxy-Druckliste hinzugefügt').replace('{n}', String(copies)), 'success');
+            }
+        }
+
+        function deckBenchCopy(source) {
+            const report = (window.lastConsistencyBuild || {})[source];
+            const rows = (report && report.bench) || [];
+            if (rows.length === 0) return;
+            const text = rows.map(r => `${r.packCount} ${r.name} ${r.set} ${r.number}`).join('\n');
+            const done = () => { if (typeof showToast === 'function') showToast(t('bench.copied') || 'Liste kopiert', 'success'); };
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).then(done).catch(() => { /* clipboard blocked */ });
+            }
+        }
+
+        if (typeof window !== 'undefined') {
+            window.renderDeckBench = renderDeckBench;
+            window.deckBenchToProxy = deckBenchToProxy;
+            window.deckBenchCopy = deckBenchCopy;
         }
 
         async function autoCompleteConsistency(source, rarityMode, options) {
@@ -9712,6 +9893,38 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                     saveCurrentMetaDeck();
                 } else if (source === 'pastMeta') {
                     savePastMetaDeck();
+                }
+
+                // Swap-candidate bench — OWN try/catch, placed after apply +
+                // save: the function-wide catch sits before those, so a bench
+                // exception anywhere earlier would leave the deck cleared and
+                // never repopulated. Diff via consistencyDeck's direct card
+                // REFERENCES (cardsToAdd holds spread copies — a reference
+                // diff against those would put the whole deck on the bench).
+                try {
+                    const _benchDeckSet = new Set(consistencyDeck.map(e => e && e.card).filter(Boolean));
+                    const _benchRaw = deckCards
+                        .filter(c => c && !_benchDeckSet.has(c) && !isBasicEnergyCardEntry(c))
+                        .map(c => ({
+                            name: fixCardNameEncoding(String(c.card_name || '').trim()),
+                            set: c.set_code || '',
+                            number: c.set_number || '',
+                            usagePct: c.sharePercent || 0,
+                            avgCount: c.avgCountWhenUsed || 0,
+                            isAceSpec: typeof window.isAceSpec === 'function'
+                                ? !!window.isAceSpec(String(c.card_name || '')) : false,
+                            type: c.type || '',
+                        }));
+                    const _benchMore = consistencyDeck
+                        .filter(e => e && e.card && !isBasicEnergyCardEntry(e.card))
+                        .map(e => ({
+                            name: fixCardNameEncoding(String(e.card.card_name || '').trim()),
+                            inDeck: e.count || 0,
+                            avgCount: e.card.avgCountWhenUsed || 0,
+                        }));
+                    _finalizeDeckBench(source, _benchRaw, _benchMore);
+                } catch (benchErr) {
+                    console.warn('[Consistency][Bench] failed (deck unaffected):', benchErr);
                 }
 
                 // Snapshot the freshly generated deck. Vanilla builds

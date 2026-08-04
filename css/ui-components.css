@@ -4954,3 +4954,63 @@ img[src*="limitlesstcg"] {
     font-weight: 800;
     font-size: 1.05rem;
 }
+
+/* ── Deck Builder: swap-candidate bench (Tausch-Kandidaten) ──────────
+   Read-only rows below the generated deck. Compact ~64px rows instead
+   of a card grid: 15 rows ≈ one screen, not three. Collapsed <details>
+   by default — the deck stays the hero. */
+.deck-bench-section { margin: 12px 0; }
+.deck-bench {
+    border: 1.5px solid rgba(59, 76, 202, 0.25);
+    border-radius: 12px;
+    padding: 4px 12px 10px;
+    background: rgba(59, 76, 202, 0.03);
+}
+.deck-bench > summary {
+    cursor: pointer;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 800;
+    color: #3B4CCA;
+    flex-wrap: wrap;
+}
+.deck-bench-sub { font-weight: 600; font-size: 0.85rem; color: #777; }
+.deck-bench-hint { font-size: 0.85rem; color: #666; margin: 4px 0 8px; }
+.deck-bench-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+.deck-bench-actions .btn { min-height: 44px; }
+.deck-bench-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 0;
+    border-bottom: 1px solid rgba(0,0,0,0.06);
+}
+.deck-bench-thumb {
+    width: 44px; height: 61px;
+    object-fit: cover;
+    border-radius: 4px;
+    flex: 0 0 44px;
+    background: rgba(0,0,0,0.05);
+}
+.deck-bench-main { flex: 1 1 auto; min-width: 0; }
+.deck-bench-name { display: block; font-weight: 700; font-size: 0.92rem; }
+.deck-bench-set { display: block; font-size: 0.75rem; color: #888; }
+.deck-bench-ace { color: #e65100; font-weight: 700; }
+.deck-bench-bar {
+    display: block;
+    height: 5px;
+    border-radius: 3px;
+    background: rgba(0,0,0,0.07);
+    margin-top: 4px;
+    overflow: hidden;
+}
+.deck-bench-bar > span { display: block; height: 100%; background: #3B4CCA; border-radius: 3px; }
+.deck-bench-nums { text-align: right; flex: 0 0 auto; }
+.deck-bench-pct { display: block; font-weight: 800; color: #3B4CCA; }
+.deck-bench-count { display: block; font-size: 0.78rem; color: #666; }
+.deck-bench-extra > summary { cursor: pointer; min-height: 40px; display: flex; align-items: center; color: #3B4CCA; font-weight: 700; font-size: 0.88rem; }
+.deck-bench-more { margin-top: 10px; padding-top: 8px; border-top: 1px dashed rgba(0,0,0,0.15); }
+.deck-bench-more h5 { margin: 0 0 6px; font-size: 0.88rem; color: #3B4CCA; }
+.deck-bench-more-row { font-size: 0.85rem; color: #555; padding: 2px 0; }

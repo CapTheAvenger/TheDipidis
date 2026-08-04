@@ -358,21 +358,28 @@
   // tolerate the blank).
   let _cardDbCache = null;
   function _getCardDb() {
-    if (_cardDbCache) return _cardDbCache;
-    _cardDbCache = new Map();
-    const src = global.allCardsData || global.allCardsByKey;
+    if (_cardDbCache && _cardDbCache.size > 0) return _cardDbCache;
+    const db = new Map();
+    // window.allCardsData only exists once the Cards tab ran loadCards();
+    // the deck builder lives on other tabs, so without the fallback to the
+    // eagerly-loaded allCardsDatabase the enrichment silently resolved
+    // NOTHING (measured: type filled on 0/266 deck cards without it,
+    // 266/266 with it). Never cache an empty map — the first call happens
+    // before the chunks finish loading and would pin the miss forever.
+    const src = global.allCardsData || global.allCardsDatabase || global.allCardsByKey;
     if (Array.isArray(src)) {
       for (const c of src) {
         const set = c.set_code || c.set || '';
         const num = c.set_number || c.number || '';
         if (!set || !num) continue;
-        _cardDbCache.set(`${set}-${num}`, {
+        db.set(`${set}-${num}`, {
           type:        c.type || c.card_type || '',
           is_ace_spec: !!c.is_ace_spec,
         });
       }
     }
-    return _cardDbCache;
+    if (db.size > 0) _cardDbCache = db;
+    return db;
   }
 
   function _isBasicEnergy(card) {
@@ -1170,6 +1177,15 @@
     // Phase 5: trim if over 60
     deck = _trimToSixty(deck, trace);
 
+    // scoredCards: the FULL per-card scoring, so the caller can show what
+    // the build almost took (swap-candidate bench). Stripped of _lists /
+    // _perListCounts: those are back-references into every parsed list —
+    // measured 20.5 MB JSON for one archetype vs 33 KB without (620x).
+    const scoredCardsOut = scored.cards.map(c => {
+      const { _lists, _perListCounts, ...rest } = c;
+      return rest;
+    });
+
     return {
       deck,
       trace,
@@ -1177,6 +1193,7 @@
       archetype,
       totalWeight:   scored.totalW,
       coreThreshold: usedThreshold,
+      scoredCards:   scoredCardsOut,
     };
   }
 

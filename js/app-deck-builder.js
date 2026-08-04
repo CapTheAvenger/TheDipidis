@@ -7280,7 +7280,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 const pct = Math.round(r.usagePct);
                 return `
                 <div class="deck-bench-row">
-                    ${img ? `<img class="deck-bench-thumb" loading="lazy" src="${escapeHtml(img)}" alt="" onerror="this.style.visibility='hidden'">` : '<span class="deck-bench-thumb"></span>'}
+                    ${img ? `<img class="deck-bench-thumb" style="width:44px;height:61px" loading="lazy" src="${escapeHtml(img)}" alt="" onerror="this.style.visibility='hidden'">` : '<span class="deck-bench-thumb"></span>'}
                     <div class="deck-bench-main">
                         <span class="deck-bench-name">${escapeHtml(r.name)}</span>
                         <span class="deck-bench-set">${escapeHtml(r.set)} ${escapeHtml(String(r.number))}${r.isAceSpec ? ` · <span class="deck-bench-ace">${t('bench.aceSwap') || 'ACE SPEC — tauscht deinen ACE SPEC'}</span>` : ''}</span>

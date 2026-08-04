@@ -4987,12 +4987,21 @@ img[src*="limitlesstcg"] {
     padding: 6px 0;
     border-bottom: 1px solid rgba(0,0,0,0.06);
 }
-.deck-bench-thumb {
-    width: 44px; height: 61px;
-    object-fit: cover;
+/* Size locked hard: several global card-image rules (width:100%
+   !important + aspect-ratio) match imgs in deck containers and blew the
+   thumbs up to full card size — belt and braces here. */
+.deck-bench-section .deck-bench-thumb,
+.deck-bench-section img.deck-bench-thumb {
+    width: 44px !important;
+    max-width: 44px !important;
+    height: 61px !important;
+    max-height: 61px !important;
+    aspect-ratio: auto !important;
+    object-fit: cover !important;
     border-radius: 4px;
-    flex: 0 0 44px;
+    flex: 0 0 44px !important;
     background: rgba(0,0,0,0.05);
+    cursor: default !important;
 }
 .deck-bench-main { flex: 1 1 auto; min-width: 0; }
 .deck-bench-name { display: block; font-weight: 700; font-size: 0.92rem; }

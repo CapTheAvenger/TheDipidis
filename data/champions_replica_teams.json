@@ -2,7 +2,7 @@
   "_meta": {
     "title": "Pokémon Champions — Current Top Doubles Teams",
     "subtitle": "Replica codes from top tournament finishes. Tap a code to copy.",
-    "last_updated": "2026-08-06",
+    "last_updated": "2026-08-07",
     "source": "VGCPastes Champions spreadsheet (auto-discovered tabs: M-B=gid1458357160, M-A=gid791705272)",
     "source_url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTXHOfUSKTZyVoxF7BO-XIEqtbrsq1OSh_4bSaO0bhAMHqtsvYqM_4eZWIMqdZ--SKCb86EXuk75o1i/pub?gid=1458357160&single=true&output=csv",
     "current_regulation": "M-B",
@@ -10,7 +10,7 @@
       "M-B",
       "M-A"
     ],
-    "team_count": 90
+    "team_count": 89
   },
   "teams": [
     {
@@ -8002,105 +8002,6 @@
     },
     {
       "rank": 82,
-      "replica_code": "GLDCRGK16K",
-      "team_name": "Normal's Mega Dragalge Team",
-      "tournament": "-",
-      "trainer": "Normal",
-      "format": "VGC Champions",
-      "regulation": "M-B",
-      "sheet_rank": "",
-      "date_shared": "23 Jul 2026",
-      "pokepaste_url": "https://pokepast.es/8441633accf45b8d",
-      "pokemon": [
-        {
-          "name": "Kingambit",
-          "item": "Black Glasses",
-          "ability": "Defiant",
-          "tera_type": "",
-          "evs": "32 HP / 32 Atk / 2 SpD",
-          "nature": "Adamant",
-          "moves": [
-            "Kowtow Cleave",
-            "Sucker Punch",
-            "Low Kick",
-            "Protect"
-          ]
-        },
-        {
-          "name": "Sinistcha",
-          "item": "Occa Berry",
-          "ability": "Hospitality",
-          "tera_type": "",
-          "evs": "32 HP / 14 Def / 20 SpD",
-          "nature": "Relaxed",
-          "moves": [
-            "Matcha Gotcha",
-            "Rage Powder",
-            "Trick Room",
-            "Protect"
-          ]
-        },
-        {
-          "name": "Rotom-Wash",
-          "item": "Choice Scarf",
-          "ability": "Levitate",
-          "tera_type": "",
-          "evs": "20 HP / 18 SpA / 28 Spe",
-          "nature": "Modest",
-          "moves": [
-            "Hydro Pump",
-            "Thunderbolt",
-            "Will-O-Wisp",
-            "Volt Switch"
-          ]
-        },
-        {
-          "name": "Ninetales-Alola",
-          "item": "Focus Sash",
-          "ability": "Snow Warning",
-          "tera_type": "",
-          "evs": "1 HP / 32 SpA / 1 SpD / 32 Spe",
-          "nature": "Timid",
-          "moves": [
-            "Blizzard",
-            "Freeze-Dry",
-            "Aurora Veil",
-            "Protect"
-          ]
-        },
-        {
-          "name": "Dragalge",
-          "item": "Dragalgite",
-          "ability": "Poison Point",
-          "tera_type": "",
-          "evs": "32 HP / 6 Def / 28 SpA",
-          "nature": "Modest",
-          "moves": [
-            "Sludge Bomb",
-            "Dragon Pulse",
-            "Thunderbolt",
-            "Protect"
-          ]
-        },
-        {
-          "name": "Incineroar",
-          "item": "Sitrus Berry",
-          "ability": "Intimidate",
-          "tera_type": "",
-          "evs": "32 HP / 10 Def / 24 SpD",
-          "nature": "Impish",
-          "moves": [
-            "Fake Out",
-            "Flare Blitz",
-            "Darkest Lariat",
-            "Parting Shot"
-          ]
-        }
-      ],
-      "strategy": []
-    },
-    {
-      "rank": 83,
       "replica_code": "38199A7XF1",
       "team_name": "Yanagi's Scizor Mega Garchomp Team",
       "tournament": "-",
@@ -8199,7 +8100,7 @@
       "strategy": []
     },
     {
-      "rank": 84,
+      "rank": 83,
       "replica_code": "T1VCT4PYJK",
       "team_name": "alcana's VR July Challenge Team Recreation",
       "tournament": "-",
@@ -8298,7 +8199,7 @@
       "strategy": []
     },
     {
-      "rank": 85,
+      "rank": 84,
       "replica_code": "JQK9EC9U7P",
       "team_name": "KoonKy's Glimmora Kommo-o Snow Team",
       "tournament": "-",
@@ -8397,7 +8298,7 @@
       "strategy": []
     },
     {
-      "rank": 86,
+      "rank": 85,
       "replica_code": "BABHS6LJP5",
       "team_name": "jude_division's Medicham TR Team",
       "tournament": "-",
@@ -8496,7 +8397,7 @@
       "strategy": []
     },
     {
-      "rank": 87,
+      "rank": 86,
       "replica_code": "DL1WTHRLSU",
       "team_name": "DjSanders' Tyranitar Aerodactyl Team",
       "tournament": "-",
@@ -8595,7 +8496,7 @@
       "strategy": []
     },
     {
-      "rank": 88,
+      "rank": 87,
       "replica_code": "JAE7WV4V6H",
       "team_name": "barudoru's Abomasnow Aerodactyl Team",
       "tournament": "-",
@@ -8692,7 +8593,7 @@
       "strategy": []
     },
     {
-      "rank": 89,
+      "rank": 88,
       "replica_code": "BT1RG88JXR",
       "team_name": "osirusvgc's Malamar Gholdengo Team",
       "tournament": "-",
@@ -8791,7 +8692,7 @@
       "strategy": []
     },
     {
-      "rank": 90,
+      "rank": 89,
       "replica_code": "8DKC2LQHQY",
       "team_name": "DubiousBulb1033's Scovillain Dragonite Team",
       "tournament": "-",

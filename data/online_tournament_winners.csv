@@ -2,6 +2,17 @@ tournament_id,tournament_date,format,player_count,winner_archetype,winner_winrat
 6a2a2ad82d97f3b0c2613980,2026-07-01,CRI,109,Dragapult Dusknoir,25.0
 6a42564583fd320299bd3d12,2026-07-01,CRI,114,Slowking,27.0
 6a427cb383fd320299bd3ed1,2026-06-30,CRI,116,Slowking,18.0
+6a74a4f02b308b6067b4bb3b,2026-08-06,PBL,103,Dragapult,25.0
+6a7113f32b308b6067b493e3,2026-08-06,PBL,123,Raging Bolt Ogerpon,27.0
+6a6ce63dcdc0391d7fa5784b,2026-08-06,PBL,244,N's Zoroark,34.0
+6a6b8596937230b102d492c6,2026-08-06,PBL,115,N's Zoroark,19.0
+6a6ffa5d2b308b6067b48537,2026-08-05,PBL,103,Mega Excadrill,24.0
+6a7113d8cdc0391d7fa5bc82,2026-08-05,PBL,102,Dragapult,25.0
+6a6ef65a2b308b6067b477cc,2026-08-05,PBL,132,Dhelmise Banette,30.0
+6a7134422b308b6067b4960d,2026-08-04,PBL,178,Mega Excadrill,21.0
+6a711369cdc0391d7fa5bc4f,2026-08-04,PBL,148,Festival Lead,28.0
+6a6f99d52b308b6067b48069,2026-08-04,PBL,118,Dragapult Dusknoir,28.0
+6a6ef634cdc0391d7fa59e53,2026-08-04,PBL,154,Dragapult,28.0
 6a7103e1cdc0391d7fa5bb21,2026-08-04,PBL,103,Dragapult Dudunsparce,18.0
 6a640d6f937230b102d439ac,2026-08-03,PBL,194,Dragapult Dusknoir,24.0
 6a6f9fd8cdc0391d7fa5a78e,2026-08-03,PBL,127,Alakazam Dudunsparce,21.0
@@ -72,11 +83,3 @@ yes-pitch-black-is-legal,2026-07-18,PBL,416,Dragapult Blaziken,34.0
 6a4eac9f65724db9ded40814,2026-07-13,PBL,233,Dragapult Blaziken,30.0
 6a4ae8c365724db9ded3da6d,2026-07-11,PBL,104,N's Zoroark,31.0
 goodbye-chaos,2026-07-11,PBL,365,Alakazam Dudunsparce,31.0
-6a47f19765724db9ded3b627,2026-07-09,PBL,148,N's Zoroark,34.0
-6a4d1d71063cb29d318e5e4f,2026-07-09,PBL,117,Dudunsparce Mega Froslass,28.0
-6a3eb961c87cd9ff0a310222,2026-07-08,PBL,115,Dragapult,21.0
-6a4c32a965724db9ded3eb6f,2026-07-08,PBL,179,N's Zoroark,28.0
-6a4c3df0063cb29d318e5594,2026-07-08,PBL,103,Rocket's Honchkrow,27.0
-6a46b80e83fd320299bd68e9,2026-07-07,PBL,151,Dragapult,21.0
-6a4c3dc765724db9ded3ec3d,2026-07-07,PBL,100,Dragapult,28.0
-6a2be310e334c3c9befd4622,2026-07-07,PBL,157,Crustle,24.0

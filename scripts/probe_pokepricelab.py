@@ -109,6 +109,29 @@ def main():
         time.sleep(1.0)
 
     print('\n' + '=' * 70)
+    print('2b) sub-sitemaps — do they enumerate catalog URLs we can map?')
+    print('=' * 70)
+    sub = [f'{BASE}/sitemap/{i}' for i in (0, 1)]
+    total_urls = 0
+    for sm in sub:
+        r = get(s, sm)
+        if r is None:
+            continue
+        locs = re.findall(r'<loc>([^<]+)</loc>', r.text)
+        total_urls += len(locs)
+        print(f'{sm} -> HTTP {r.status_code}, {len(locs)} urls')
+        for loc in locs[:6]:
+            print(f'    {loc}')
+        catalog = [l for l in locs if '/catalog/' in l]
+        with_id = [l for l in locs if re.search(r'-eu-\d{4,}$', l)]
+        langs = sorted({m.group(1) for l in locs
+                        if (m := re.search(r'pokepricelab\.com/([a-z]{2})/', l))})
+        print(f'    catalog urls: {len(catalog)} | with -eu-<id>: {len(with_id)} '
+              f'| languages: {langs}')
+        time.sleep(1.0)
+    print(f'  total urls sampled: {total_urls}')
+
+    print('\n' + '=' * 70)
     print('3+4+5) catalog pages: id exposure, language behaviour, data fields')
     print('=' * 70)
     for path in PROBE_URLS:

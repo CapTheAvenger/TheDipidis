@@ -100,6 +100,19 @@ def main():
         idp = mapping.get(key)
         guide_entry = guide.get(idp) if idp else None
 
+        # Mapping trust is computed BEFORE the branch and lives in its own
+        # column. It answers "is this price the right product's price?",
+        # which is orthogonal to price_status ("which number should I
+        # read?"). Two facts do not fit in one enum: inside the branch the
+        # flag would evaporate on any bad guide day, because the stale /
+        # no_data paths rewrite price_status and every unverified marker on
+        # the site would silently disappear. It also would have been lost on
+        # the 13 trend_below_low + 3 no_trend rows that are positional today.
+        method = mapping_method.get(key, '')
+        mapping_status = 'unverified' if method.startswith('priced-by') else 'ok'
+        if mapping_status == 'unverified':
+            stats['unverified_mapping'] += 1
+
         if guide_entry:
             # Cardmarket uses trend == 0 (and null) to mean "no trend can be
             # computed", NOT "this card is worthless". idProduct 653295
@@ -140,11 +153,10 @@ def main():
             # verify first, then correct); consumers get the honest flag.
             # Precedence: the trend-quality flags win, because they change
             # WHICH number to read — no_trend/trend_below_low rows are
-            # unusable regardless of mapping trust.
-            method = mapping_method.get(key, '')
-            unverified = method.startswith('priced-by')
-            if unverified:
-                stats['unverified_mapping'] += 1
+            # unusable regardless of mapping trust. price_status keeps the
+            # legacy 'unverified_mapping' value for consumers that already
+            # read it; mapping_status carries the same fact unconditionally.
+            unverified = mapping_status == 'unverified'
             out_rows.append({
                 'name': name,
                 'set': c['set'],
@@ -157,6 +169,7 @@ def main():
                                  else 'trend_below_low' if trend_below_low
                                  else 'unverified_mapping' if unverified
                                  else 'ok'),
+                'mapping_status': mapping_status,
             })
             stats['cardmarket'] += 1
         elif key in existing:
@@ -174,6 +187,7 @@ def main():
                 # last_updated already shows and price_status now makes
                 # filterable.
                 'price_status': 'stale' if (row.get('eur_price') or row.get('eur_low')) else 'no_data',
+                'mapping_status': mapping_status,
             })
             stats['preserved'] += 1
         else:
@@ -192,6 +206,7 @@ def main():
                 'cardmarket_url': cm_url,
                 'last_updated': '',
                 'price_status': 'no_data',
+                'mapping_status': mapping_status,
             })
             stats['no_data'] += 1
 
@@ -209,7 +224,8 @@ def main():
     # positional readers (if any exist) keep working -- data/_consumers.md
     # documents adding a column as safe, removing or reordering one as not.
     fieldnames = ['name', 'set', 'number', 'eur_price', 'eur_low',
-                  'cardmarket_url', 'last_updated', 'price_status']
+                  'cardmarket_url', 'last_updated', 'price_status',
+                  'mapping_status']
 
     def _write(f):
         w = csv.DictWriter(f, fieldnames=fieldnames, extrasaction='ignore')

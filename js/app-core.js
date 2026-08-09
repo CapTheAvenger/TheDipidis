@@ -2678,6 +2678,16 @@ const BASE_PATH = './data/';
                 return c;
             });
             window.allCardsDatabase = allCardsDatabase;
+            // Dataset-level feature detection for the price trust marker.
+            // Chunks built before mapping_status existed carry the field on
+            // NO card, and a service worker can serve those indefinitely
+            // (card-data-cache falls back to stale on any network error).
+            // Per-card "missing => unverified" would then flag the whole
+            // database — and would also flag every synthesised Prize Pack
+            // print, which never carries the field. Sampling the dataset
+            // once keeps old caches rendering exactly as before.
+            window.cardDBHasMappingStatus = allCardsDatabase.some(
+                c => c && c.mapping_status !== undefined && c.mapping_status !== '');
             cardIndexBySetNumber = buildCardIndexBySetNumber(allCardsDatabase);
             window.cardIndexBySetNumber = cardIndexBySetNumber;
             // The index was just rebuilt from scratch — re-add the synthetic

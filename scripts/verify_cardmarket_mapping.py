@@ -231,7 +231,16 @@ def load_pools():
         key = (p.get('idExpansion'), base(p.get('name')))
         product_group[p['idProduct']] = key
         g = guide.get(p['idProduct']) or {}
-        metric = g.get('trend') or g.get('avg')
+        # avg30 first: `trend` is the most volatile field in the guide and
+        # made siblings collapse into one band on the wrong day. Proven case
+        # N's Darmanitan SVP 181: on 2026-07-31 the two candidates' trends
+        # were 14.64 vs 13.59 (7.7% apart -> both in the +-15% band ->
+        # recorded ambiguous), while their avg30 stood at 14.77 vs 27.03 and
+        # separated them cleanly by 1.83x. A single 101 EUR sale had dragged
+        # one trend around (avg1=101). The 30-day mean is exactly the slow
+        # metric this identity test needs; trend/avg stay as fallbacks for
+        # products too new to have one.
+        metric = g.get('avg30') or g.get('trend') or g.get('avg')
         pools[key][p['idProduct']] = metric if metric and metric > 0 else None
     return product_group, pools
 

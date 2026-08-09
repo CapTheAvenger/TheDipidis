@@ -5023,3 +5023,24 @@ img[src*="limitlesstcg"] {
 .deck-bench-more { margin-top: 10px; padding-top: 8px; border-top: 1px dashed rgba(0,0,0,0.15); }
 .deck-bench-more h5 { margin: 0 0 6px; font-size: 0.88rem; color: #3B4CCA; }
 .deck-bench-more-row { font-size: 0.85rem; color: #555; padding: 2px 0; }
+
+/* ── Price trust marker ──────────────────────────────────────────────
+   Sits NEXT TO a price, never instead of it: an unverified mapping means
+   "this number may belong to a same-named sibling print", not "we have no
+   number". Suppressing would replace a mostly-correct answer with none. */
+.price-unverified-badge {
+    display: inline-block;
+    margin-left: 4px;
+    padding: 1px 6px;
+    border-radius: 6px;
+    background: #fff3cd;
+    color: #8a6100;
+    border: 1px solid #f0c36d;
+    font-size: 0.68em;
+    font-weight: 700;
+    text-decoration: none;
+    white-space: nowrap;
+    vertical-align: middle;
+    cursor: help;
+}
+a.price-unverified-badge:hover { background: #ffe8a1; }

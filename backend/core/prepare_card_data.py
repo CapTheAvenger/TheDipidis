@@ -270,10 +270,19 @@ def create_merged_database():
             card['eur_price'] = price
             card['eur_low'] = low
             card['price_last_updated'] = row.get('last_updated', '')
+            # Both trust dimensions reach the frontend from here — before,
+            # the status was read into a local and thrown away, so the app
+            # could not mark an unverified product mapping even though the
+            # merger had flagged it. price_status = WHICH number to read;
+            # mapping_status = is it the right product's number at all.
+            card['price_status'] = status or ''
+            card['mapping_status'] = row.get('mapping_status', '')
         else:
             card['eur_price'] = card.get('eur_price', '')
             card['eur_low'] = card.get('eur_low', '')
             card['price_last_updated'] = card.get('price_last_updated', '')
+            card['price_status'] = card.get('price_status', '')
+            card['mapping_status'] = card.get('mapping_status', '')
             
         # For JP-only cards whose international counterpart hasn't
         # shipped yet, swap the raw Japanese scan for the English
@@ -390,7 +399,10 @@ def create_merged_database():
         json.dump({'cards': merged_cards}, f, ensure_ascii=False, indent=2)
         
     csv_path = os.path.join(data_dir, 'all_cards_merged.csv')
-    fieldnames = ['name_en', 'name_de', 'set', 'number', 'pokedex_number', 'type', 'energy_type', 'rarity', 'image_url', 'international_prints', 'cardmarket_url', 'eur_price', 'eur_low', 'price_last_updated']
+    # New columns go LAST: extrasaction='ignore' drops anything missing here
+    # without a word, and positional readers keep working (data/_consumers.md
+    # documents adding a column as safe, removing/reordering one as not).
+    fieldnames = ['name_en', 'name_de', 'set', 'number', 'pokedex_number', 'type', 'energy_type', 'rarity', 'image_url', 'international_prints', 'cardmarket_url', 'eur_price', 'eur_low', 'price_last_updated', 'price_status', 'mapping_status']
     
     with open(csv_path, 'w', newline='', encoding='utf-8-sig') as f:
         writer = csv.DictWriter(f, fieldnames=fieldnames, extrasaction='ignore')

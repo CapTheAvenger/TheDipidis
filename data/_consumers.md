@@ -83,7 +83,22 @@ Each Prize Pack card mapped to its **original** print (`set_code` + `set_number`
 the join key into any card database) and to both official image URLs.
 
 ### `price_data.csv`
-`name, set, number, eur_price, eur_low, cardmarket_url, last_updated, price_status`
+`name, set, number, eur_price, eur_low, cardmarket_url, last_updated, price_status, mapping_status`
+
+**Two independent trust dimensions — don't collapse them.**
+`price_status` answers *which number to read* (see the table below).
+`mapping_status` answers *is this the right product's price at all*:
+
+| value | meaning |
+|---|---|
+| `ok`         | the (set,number) → idProduct row is `unique` or live-verified |
+| `unverified` | the row comes from the positional heuristic (`match_method priced-by-*`) — the price may belong to a same-named sibling print. 1.560 rows today. |
+
+`mapping_status` is computed independently of the guide lookup, so it
+survives a failed price download (the `stale` / `no_data` paths would
+otherwise overwrite the flag and every marker on the site would vanish
+for a day). `price_status=unverified_mapping` stays as the legacy
+carrier of the same fact for consumers that already read it.
 
 Per-print market prices. `eur_price` is the trend/average, `eur_low` the cheapest
 current offer — a card legitimately shows both (e.g. 13,07 € average vs. "from

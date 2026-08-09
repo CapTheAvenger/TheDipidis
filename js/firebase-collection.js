@@ -1516,6 +1516,47 @@ function selectPriceInput(el) {
 window.selectPriceInput = selectPriceInput;
 
 // Update wishlist UI
+/**
+ * Trust marker for a displayed price.
+ *
+ * A price is only as good as the product it was read from. ~1.560 of our
+ * (set,number) -> Cardmarket idProduct rows still come from the positional
+ * heuristic, which provably mis-paired same-named siblings (OBF 223<->228,
+ * 812 corrections in the live-verification sweep). Those rows now carry
+ * mapping_status='unverified' and get a visible marker.
+ *
+ * The marker sits NEXT TO the number, never instead of it: the very card
+ * that triggered this work (N's Darmanitan SVP 181) is unverified and its
+ * price is correct — suppressing it would replace a right answer with no
+ * answer. Of the 1.544 unverified rows only 390 are above 5 EUR; blanking
+ * all of them would hide 1.154 numbers whose error cost is cents.
+ *
+ * Feature-detected, not per-card: cards from a service-worker-cached chunk
+ * built before mapping_status existed carry no field at all, and "missing"
+ * must not read as "unverified" (Prize Pack prints are synthesised in JS
+ * and never carry it either). window.cardDBHasMappingStatus is true only
+ * when the loaded dataset knows the field.
+ */
+function priceTrustBadge(card, cmUrl) {
+  try {
+    if (!window.cardDBHasMappingStatus) return '';
+    if (!card || card.mapping_status !== 'unverified') return '';
+    const title = 'Preis nicht verifiziert: Diese Karte teilt sich den Namen mit '
+      + 'anderen Drucken derselben Edition, und die Zuordnung zum Cardmarket-Produkt '
+      + 'ist noch nicht bestätigt. Der Preis kann zu einem anderen Druck gehören — '
+      + 'auf Cardmarket prüfen.';
+    const label = '⚠ nicht verifiziert';
+    if (cmUrl) {
+      return `<a href="${escapeHtml(cmUrl)}" target="_blank" rel="noopener noreferrer" `
+        + `class="price-unverified-badge" title="${escapeHtml(title)}">${label}</a>`;
+    }
+    return `<span class="price-unverified-badge" title="${escapeHtml(title)}">${label}</span>`;
+  } catch (_) {
+    return '';
+  }
+}
+if (typeof window !== 'undefined') window.priceTrustBadge = priceTrustBadge;
+
 function updateWishlistUI(searchFilter = '', setFilter = '') {
   const wishlistGrid = document.getElementById('wishlist-grid');
   if (!wishlistGrid) return;
@@ -1610,11 +1651,29 @@ function updateWishlistUI(searchFilter = '', setFilter = '') {
       const safeNameJs = escapeJsSingleQuoted(card.name);
       const safeCardIdJs = escapeJsSingleQuoted(cardId);
 
-      // Wishlist uses Cardmarket "low" price (cheapest available) when present;
-      // falls back to "trend" (eur_price) for legacy/unmapped cards.
-      const wishlistPriceRaw = card.eur_low || card.eur_price;
-      const price = wishlistPriceRaw ? parseLocaleNumber(wishlistPriceRaw, 0) : 0;
+      // Headline price = TREND (eur_price), like every other surface.
+      //
+      // This used to be eur_low, and that is what produced the reported
+      // "4,66 € on a 16 € card": eur_low is Cardmarket's cheapest offer
+      // across ALL conditions, languages and countries, while the link
+      // right next to it opens the DE/EN-filtered page (starting at
+      // 14,99 €). The displayed number was therefore not findable on the
+      // linked page — the documented 13,07-vs-4,89 trap. Trend is above
+      // low on 15.040 of 17.346 priced rows, so the wishlist total was
+      // systematically far below reality.
+      //
+      // eur_low stays visible as a secondary "ab X €" line and keeps
+      // driving the budget pill + the Telegram alert (both answer "can I
+      // buy it at my target now?", where the floor is the right number
+      // and must stay byte-identical between the two).
+      const lowRaw = card.eur_low;
+      const trendRaw = card.eur_price || card.eur_low;
+      const wishlistPriceRaw = lowRaw;   // pill/bot semantics — unchanged
+      const price = trendRaw ? parseLocaleNumber(trendRaw, 0) : 0;
+      const lowPrice = lowRaw ? parseLocaleNumber(lowRaw, 0) : 0;
       const priceDisplay = (!isNaN(price) && price > 0) ? `${price.toFixed(2).replace('.', ',')} €` : 'N/A';
+      const lowDisplay = (!isNaN(lowPrice) && lowPrice > 0 && lowPrice < price)
+        ? `ab ${lowPrice.toFixed(2).replace('.', ',')} €` : '';
       if (!isNaN(price) && price > 0) totalValue += price * wantedCount;
 
       // Cardmarket link
@@ -1650,7 +1709,8 @@ function updateWishlistUI(searchFilter = '', setFilter = '') {
             </div>
             ${cmUrl
               ? `<a href="${safeCmUrl}" target="_blank" rel="noopener noreferrer" style="display: inline-block; margin-top: 4px; padding: 3px 8px; background: linear-gradient(135deg, #27ae60, #219a52); color: white; border-radius: 6px; font-size: 0.78em; font-weight: 600; text-decoration: none; box-shadow: 0 1px 4px rgba(0,0,0,0.15);" title="View on Cardmarket">${priceDisplay}</a>`
-              : `<div style="font-size: 0.8em; color: #999; margin-top: 4px;">${priceDisplay}</div>`}
+              : `<div style="font-size: 0.8em; color: #999; margin-top: 4px;">${priceDisplay}</div>`}${priceTrustBadge(card, cmUrl)}
+            ${lowDisplay ? `<div style="font-size: 0.7em; color: #888; margin-top: 2px;">${lowDisplay}</div>` : ''}
             <div style="display: flex; align-items: center; gap: 4px; margin-top: 4px;">
               <span style="font-size: 0.72em; color: #8e44ad; font-weight: 600;">Max:</span>
               <input type="text" inputmode="decimal" value="${maxPriceVal}" placeholder="—"

@@ -13,6 +13,12 @@
 name: Verify Cardmarket mapping
 
 on:
+  # Weekly, unattended: every run picks up rows that are not yet 'verified'
+  # (resume state lives in data/cardmarket_mapping_verified.csv), so the
+  # unverified set shrinks by itself as prices move apart far enough for
+  # the consensus rule to decide. New sets enter the same loop automatically.
+  schedule:
+    - cron: '20 4 * * 3'
   workflow_dispatch:
     inputs:
       limit:

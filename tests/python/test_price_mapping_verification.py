@@ -280,3 +280,94 @@ def test_parse_prints_prices_from_recon_html():
     assert prices[('DRI', '230')] == 256.06
     assert prices[('DRI', '239')] == 21.47, 'current row (no href) keys to the requested page'
     assert ('SV10', '230') not in prices and len(prices) == 2, 'JP prints skipped'
+
+
+# ── 6. Consensus across guide metrics (the SVP 181 class of failure) ─────
+
+def test_consensus_uses_the_stable_metric_first():
+    """N's Darmanitan SVP 181, real numbers from 2026-07-31: the two
+    candidates' TRENDS were 7.7% apart (one distorted by a single 101 EUR
+    sale) so both landed in the band -> ambiguous. Their 30-day means were
+    1.83x apart and decide cleanly."""
+    pools = {
+        'avg30': {816614: 14.77, 817772: 27.03},
+        'avg7':  {816614: 15.0,  817772: 26.0},
+        'trend': {816614: 14.64, 817772: 13.59},
+        'avg':   {816614: 14.6,  817772: 14.0},
+    }
+    pid, evidence = verify.consensus_match(14.5, pools)
+    assert pid == 816614
+    assert 'metric avg30' in evidence
+    # single-metric on trend is exactly what failed before
+    assert verify.fingerprint_match(14.5, pools['trend'])[0] is None
+
+
+def test_consensus_refuses_when_metrics_disagree():
+    pools = {
+        'avg30': {1: 10.0, 2: 40.0},
+        'avg7':  {1: 40.0, 2: 10.0},
+        'trend': {}, 'avg': {},
+    }
+    pid, reason = verify.consensus_match(10.0, pools)
+    assert pid is None
+    assert reason.startswith('metrics_disagree')
+
+
+def test_consensus_reports_the_stable_metric_reason_when_nothing_decides():
+    pools = {'avg30': {1: 10.0, 2: 10.5}, 'avg7': {}, 'trend': {}, 'avg': {}}
+    pid, reason = verify.consensus_match(10.0, pools)
+    assert pid is None
+    assert reason.startswith('fingerprint_ambiguous')
+
+
+def test_consensus_empty_pools():
+    assert verify.consensus_match(10.0, {})[0] is None
+
+
+# ── 7. Manual pins beat everything ──────────────────────────────────────
+
+def test_manual_pin_overrides_heuristic_and_verification(tmp_path):
+    _write_csv(tmp_path / 'cardmarket_mapping_manual.csv',
+               ['set', 'number', 'cardmarket_product_id', 'source', 'note'],
+               [
+                   {'set': 'SVP', 'number': '181', 'cardmarket_product_id': '816614',
+                    'source': 'maintainer', 'note': 'read off the product page'},
+                   # garbage must be skipped, never guessed at
+                   {'set': 'XXX', 'number': '1', 'cardmarket_product_id': '',
+                    'source': '', 'note': ''},
+               ])
+    mappings = [
+        {'set': 'SVP', 'number': '181', 'cardmarket_product_id': 999,
+         'match_method': 'priced-by-date(1↔2)'},
+        {'set': 'XXX', 'number': '1', 'cardmarket_product_id': 5,
+         'match_method': 'unique'},
+    ]
+    applied = mapper.apply_manual_overrides(mappings, str(tmp_path))
+    assert applied == 1
+    assert mappings[0]['cardmarket_product_id'] == 816614
+    assert mappings[0]['match_method'] == 'manual-pin'
+    assert mappings[1]['cardmarket_product_id'] == 5, 'invalid pin must not touch the row'
+
+
+def test_manual_pin_missing_file_is_noop(tmp_path):
+    mappings = [{'set': 'A', 'number': '1', 'cardmarket_product_id': 7, 'match_method': 'unique'}]
+    assert mapper.apply_manual_overrides(mappings, str(tmp_path)) == 0
+    assert mappings[0]['match_method'] == 'unique'
+
+
+def test_guardian_reports_the_unverified_worklist(tmp_path, monkeypatch):
+    monkeypatch.setattr(guardian, 'DATA', str(tmp_path))
+    _write_csv(tmp_path / 'price_data.csv',
+               ['set', 'number', 'eur_price', 'mapping_status'],
+               [
+                   {'set': 'SVP', 'number': '181', 'eur_price': '16,70€', 'mapping_status': 'unverified'},
+                   {'set': 'AAA', 'number': '1', 'eur_price': '0,10€', 'mapping_status': 'unverified'},
+                   {'set': 'BBB', 'number': '2', 'eur_price': '99,00€', 'mapping_status': 'ok'},
+               ])
+    findings = []
+    guardian.report_unverified_prices(findings)
+    assert len(findings) == 1
+    lvl, msg = findings[0]
+    assert lvl == 'WARN'
+    assert '2/3' in msg and '1 above 5 EUR' in msg
+    assert 'SVP 181' in msg, 'the priciest unverified row must be named first'

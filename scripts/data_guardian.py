@@ -361,6 +361,38 @@ def price_integrity():
     return out
 
 
+def report_unverified_prices(findings):
+    """Standing worklist: which unverified mappings actually matter.
+
+    Not a threshold check — a progress report. Prices whose product
+    identity is unproven are flagged in the UI, and this names the ones
+    where a wrong product costs real money, so they can be pinned by hand
+    (data/cardmarket_mapping_manual.csv) instead of waiting for the
+    fingerprint to become decidable."""
+    path = os.path.join(DATA, "price_data.csv")
+    if not os.path.exists(path):
+        return
+    rows = read_csv(path)
+    unver = [r for r in rows if col(r, "mapping_status") == "unverified"]
+    if not rows or not unver:
+        return
+
+    def eur(v):
+        v = (v or "").replace("€", "").replace(".", "").replace(",", ".").strip()
+        try:
+            return float(v)
+        except ValueError:
+            return 0.0
+
+    pricey = sorted(unver, key=lambda r: -eur(col(r, "eur_price")))
+    over5 = [r for r in pricey if eur(col(r, "eur_price")) > 5]
+    findings.append(("WARN",
+                     f"{len(unver)}/{len(rows)} price rows have an unverified product "
+                     f"mapping ({len(over5)} above 5 EUR). Top: "
+                     + ", ".join(f"{col(r, 'set')} {col(r, 'number')} "
+                                 f"{col(r, 'eur_price')}" for r in pricey[:5])))
+
+
 def check_price_integrity(findings, cur, base):
     if not base:
         return
@@ -426,6 +458,7 @@ def main():
     check_freshness(findings)
     check_set_order(findings)
     check_shrink(findings, rows, base_rows)
+    report_unverified_prices(findings)
     if first_run:
         print("First run — recording baseline; change-based checks start next run.")
     else:

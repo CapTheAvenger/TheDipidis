@@ -210,6 +210,58 @@ def fingerprint_match(shown_price, pool_metrics):
                  f'(ratio {ratio:.2f}, pool {len(matches) + len(others)})')
 
 
+# Metrics tried in order of stability. avg30 is the slow, hard-to-distort
+# mean; avg7 still smooths single sales; trend/avg are the volatile last
+# resort for products too new for a 30-day history.
+CONSENSUS_METRICS = ('avg30', 'avg7', 'trend', 'avg')
+
+
+def consensus_match(shown_price, pools_by_metric):
+    """Decide with several guide metrics instead of one.
+
+    pools_by_metric: {metric_name: {idProduct: value}}.
+
+    Rule: walk the metrics from most to least stable and take the first
+    that yields a unique, well-separated match — but only if NO other
+    metric uniquely picks a DIFFERENT product. A contradiction between
+    two metrics means the market data itself is inconsistent for this
+    pair, and then we record ambiguity rather than pick a winner.
+
+    This is what turns single-metric bad luck into a decision: N's
+    Darmanitan SVP 181 was recorded ambiguous because on that day the two
+    candidates' TRENDS were 7.7% apart (one distorted by a single 101 EUR
+    sale) while their 30-day means stood 1.83x apart.
+    """
+    winners = {}
+    reasons = {}
+    for name in CONSENSUS_METRICS:
+        pool = pools_by_metric.get(name) or {}
+        if not pool:
+            continue
+        pid, evidence = fingerprint_match(shown_price, pool)
+        if pid is not None:
+            winners[name] = (pid, evidence)
+        else:
+            reasons[name] = evidence
+    if not winners:
+        # Report the most stable metric's reason — that is the one we
+        # would have wanted to decide on.
+        for name in CONSENSUS_METRICS:
+            if name in reasons:
+                return None, reasons[name]
+        return None, 'no_candidate_pool'
+    distinct = {pid for pid, _ in winners.values()}
+    if len(distinct) > 1:
+        detail = ', '.join(f'{n}->{p}' for n, (p, _) in winners.items())
+        return None, f'metrics_disagree({detail})'
+    for name in CONSENSUS_METRICS:
+        if name in winners:
+            pid, evidence = winners[name]
+            agree = '+'.join(n for n in CONSENSUS_METRICS if n in winners)
+            return pid, f'{evidence} [metric {name}, agreeing: {agree}]'
+    return None, 'no_candidate_pool'
+
+
 def load_pools():
     """idProduct -> (idExpansion, base) and (idExpansion, base) -> {pid: metric}.
 
@@ -226,22 +278,19 @@ def load_pools():
         return re.sub(r'\s*[\[(].*$', '', str(name or '')).strip().lower()
 
     product_group = {}
-    pools = defaultdict(dict)
+    # One pool per metric so the consensus rule can cross-check them.
+    # `trend` alone is the guide's most volatile field and is what recorded
+    # N's Darmanitan SVP 181 as ambiguous (two trends 7.7% apart because a
+    # single 101 EUR sale distorted one) while their 30-day means stood
+    # 1.83x apart and would have decided it.
+    pools = {name: defaultdict(dict) for name in CONSENSUS_METRICS}
     for p in singles:
         key = (p.get('idExpansion'), base(p.get('name')))
         product_group[p['idProduct']] = key
         g = guide.get(p['idProduct']) or {}
-        # avg30 first: `trend` is the most volatile field in the guide and
-        # made siblings collapse into one band on the wrong day. Proven case
-        # N's Darmanitan SVP 181: on 2026-07-31 the two candidates' trends
-        # were 14.64 vs 13.59 (7.7% apart -> both in the +-15% band ->
-        # recorded ambiguous), while their avg30 stood at 14.77 vs 27.03 and
-        # separated them cleanly by 1.83x. A single 101 EUR sale had dragged
-        # one trend around (avg1=101). The 30-day mean is exactly the slow
-        # metric this identity test needs; trend/avg stay as fallbacks for
-        # products too new to have one.
-        metric = g.get('avg30') or g.get('trend') or g.get('avg')
-        pools[key][p['idProduct']] = metric if metric and metric > 0 else None
+        for name in CONSENSUS_METRICS:
+            v = g.get(name)
+            pools[name][key][p['idProduct']] = v if v and v > 0 else None
     return product_group, pools
 
 
@@ -312,7 +361,9 @@ def limitless_verify(args):
             key = (m['set'], m['number'])
             shown = prices.get(key)
             pool_key = product_group.get(int(m['cardmarket_product_id']))
-            pool = pools.get(pool_key, {}) if pool_key else {}
+            pools_by_metric = ({name: pools[name].get(pool_key, {})
+                                for name in CONSENSUS_METRICS} if pool_key else {})
+            pool = pools_by_metric.get('avg30') or {}
             row_out = {
                 'set': m['set'], 'number': m['number'],
                 'verified_product_id': '', 'status': '', 'evidence': '',
@@ -323,10 +374,10 @@ def limitless_verify(args):
             }
             if shown is None:
                 row_out['status'] = 'no_price_on_page'
-            elif not pool:
+            elif not any(pools_by_metric.get(n) for n in CONSENSUS_METRICS):
                 row_out['status'] = 'no_candidate_pool'
             else:
-                pid, evidence = fingerprint_match(shown, pool)
+                pid, evidence = consensus_match(shown, pools_by_metric)
                 if pid is None:
                     row_out['status'] = evidence.split('(')[0]
                     row_out['evidence'] = evidence

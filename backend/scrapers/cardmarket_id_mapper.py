@@ -424,6 +424,64 @@ def apply_live_verification(mappings: list, data_dir: str):
     return corrected, confirmed
 
 
+def apply_manual_overrides(mappings: list, data_dir: str):
+    """Highest-precedence pins from data/cardmarket_mapping_manual.csv.
+
+    The escape hatch for everything automation cannot decide: a human
+    opened the Cardmarket product page, read the idProduct out of the URL
+    or the page, and wrote it down. Nothing overrides this — not the
+    heuristic, not the live fingerprint — because it is the only source
+    where a person actually looked at the product.
+
+    Format: set,number,cardmarket_product_id,source,note
+    A row with an empty or non-numeric product id is skipped and reported,
+    never guessed at (report, don't repair).
+
+    Runs AFTER apply_live_verification so a pin also beats a verified row
+    — if the two ever disagree, the log says so loudly, because then
+    either the pin or the fingerprint is wrong and somebody must look.
+    """
+    path = os.path.join(data_dir, 'cardmarket_mapping_manual.csv')
+    if not os.path.isfile(path):
+        return 0
+    pins = {}
+    try:
+        with open(path, encoding='utf-8-sig', newline='') as f:
+            for r in csv.DictReader(f):
+                sc = (r.get('set') or '').strip().upper()
+                num = (r.get('number') or '').strip()
+                raw = (r.get('cardmarket_product_id') or '').strip()
+                if not sc or not num:
+                    continue
+                if not raw.isdigit():
+                    logger.warning("manual pin %s %s has no numeric product id (%r) — skipped",
+                                   sc, num, raw)
+                    continue
+                pins[(sc, num)] = (int(raw), (r.get('source') or '').strip())
+    except Exception as e:  # noqa: BLE001
+        logger.warning("could not read %s (%s) — no manual pins applied", path, e)
+        return 0
+    if not pins:
+        return 0
+
+    applied = 0
+    for row in mappings:
+        pin = pins.get((row['set'].upper(), row['number']))
+        if pin is None:
+            continue
+        pid, source = pin
+        if int(row['cardmarket_product_id']) != pid:
+            level = logger.warning if row['match_method'] == 'live-verified' else logger.info
+            level("manual pin overrides %s %s: %s -> %s (was %s%s)",
+                  row['set'], row['number'], row['cardmarket_product_id'], pid,
+                  row['match_method'], f", pinned by {source}" if source else "")
+        row['cardmarket_product_id'] = pid
+        row['match_method'] = 'manual-pin'
+        applied += 1
+    logger.info("Manual pins: %s applied (%s in file)", applied, len(pins))
+    return applied
+
+
 def write_mapping(mappings: list, out_path: str):
     fieldnames = ['set', 'number', 'cardmarket_product_id', 'match_method', 'base_name']
     def _write(f):
@@ -457,6 +515,7 @@ def main():
 
     mappings, stats = map_cards_to_products(cards, singles, set_to_exp, price_guide)
     apply_live_verification(mappings, data_dir)
+    apply_manual_overrides(mappings, data_dir)
     total_cards = sum(1 for c in cards if c.get('number'))
     coverage = len(mappings) / total_cards * 100 if total_cards else 0
     logger.info("Card mapping: %s of %s cards (%.1f%%) | %s",

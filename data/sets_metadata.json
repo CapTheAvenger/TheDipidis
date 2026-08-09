@@ -45,7 +45,7 @@
   },
   "BS": {
     "order": 2,
-    "release_date": "2099-01-09"
+    "release_date": "1999-01-09"
   },
   "BS2": {
     "order": 5,
@@ -205,7 +205,7 @@
   },
   "FO": {
     "order": 4,
-    "release_date": "2099-10-10"
+    "release_date": "1999-10-10"
   },
   "FST": {
     "order": 121,
@@ -257,7 +257,7 @@
   },
   "JU": {
     "order": 3,
-    "release_date": "2099-06-16"
+    "release_date": "1999-06-16"
   },
   "KSS": {
     "order": 78,
@@ -295,6 +295,10 @@
     "order": 153,
     "release_date": "2026-05-22"
   },
+  "M6": {
+    "order": 156,
+    "release_date": "2026-07-31"
+  },
   "MA": {
     "order": 23,
     "release_date": "2004-03-15"
@@ -311,6 +315,10 @@
     "order": 148,
     "release_date": "2025-09-26"
   },
+  "MEM": {
+    "order": 157,
+    "release_date": "2026-07-31"
+  },
   "MEP": {
     "order": 146,
     "release_date": ""
@@ -318,6 +326,10 @@
   "MEW": {
     "order": 133,
     "release_date": "2023-09-22"
+  },
+  "MEZ": {
+    "order": 158,
+    "release_date": "2026-07-31"
   },
   "MT": {
     "order": 43,
@@ -402,6 +414,10 @@
   "PAR": {
     "order": 134,
     "release_date": "2023-11-03"
+  },
+  "PBL": {
+    "order": 155,
+    "release_date": "2026-07-17"
   },
   "PFL": {
     "order": 149,

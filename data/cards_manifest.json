@@ -1,25 +1,25 @@
 {
-  "version": "ea47d6690c2b",
-  "generated": "2026-08-09T08:14:26.455797+00:00",
+  "version": "2e2b2422f2ee",
+  "generated": "2026-08-09T11:13:34.288739+00:00",
   "totalCards": 20419,
   "chunks": [
     {
       "file": "cards_chunk_standard.json",
       "era": "standard",
       "count": 3933,
-      "hash": "3fc4389c"
+      "hash": "2534e411"
     },
     {
       "file": "cards_chunk_extended.json",
       "era": "extended",
       "count": 4455,
-      "hash": "eb11c70f"
+      "hash": "471fa694"
     },
     {
       "file": "cards_chunk_legacy.json",
       "era": "legacy",
       "count": 12031,
-      "hash": "25871b43"
+      "hash": "c24e8255"
     }
   ]
 }

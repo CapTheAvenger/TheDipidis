@@ -1,0 +1,33 @@
+# Look-only probe of pokepricelab.com as a Cardmarket-identity source.
+#
+# Its catalog URLs appear to carry the Cardmarket idProduct
+# (…-n-s-darmanitan-181-eu-817772) — the number Cardmarket itself never
+# shows. Before building anything we check what robots.txt allows, whether
+# a sitemap exists, and whether the id is exposed deterministically.
+# The sandbox proxy denies this host, so CI is the only place to look.
+#
+# Writes nothing. Read the job log.
+name: Probe pokepricelab
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Probe
+        run: python scripts/probe_pokepricelab.py

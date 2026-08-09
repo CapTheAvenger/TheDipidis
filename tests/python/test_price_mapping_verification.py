@@ -371,3 +371,58 @@ def test_guardian_reports_the_unverified_worklist(tmp_path, monkeypatch):
     assert lvl == 'WARN'
     assert '2/3' in msg and '1 above 5 EUR' in msg
     assert 'SVP 181' in msg, 'the priciest unverified row must be named first'
+
+
+# ── 8. Pin from what a human can actually READ on the page ──────────────
+# The product id is not in the Cardmarket URL and not on the page, so the
+# pin workflow takes the price block instead (Price Trend / 30-days /
+# 7-days average) and resolves it to the id.
+
+pinner = _load("pin_obs", "scripts/pin_from_observation.py")
+
+
+def test_parse_eur_accepts_what_the_page_shows():
+    assert pinner.parse_eur('16,11 €') == 16.11
+    assert pinner.parse_eur('1.234,56 €') == 1234.56
+    assert pinner.parse_eur('16.11') == 16.11
+    assert pinner.parse_eur('') is None
+    assert pinner.parse_eur('—') is None
+
+
+def test_score_rejects_a_candidate_out_of_tolerance():
+    obs = {'trend': 16.11, 'avg30': 15.68}
+    assert pinner.score(obs, {'trend': 16.7, 'avg30': 15.24}) is not None
+    assert pinner.score(obs, {'trend': 34.37, 'avg30': 28.71}) is None
+    # a metric the guide lacks disqualifies rather than passes
+    assert pinner.score(obs, {'trend': 16.7}) is None
+
+
+def test_score_is_the_worst_metric_not_the_best():
+    obs = {'trend': 10.0, 'avg30': 10.0}
+    s = pinner.score(obs, {'trend': 10.0, 'avg30': 11.5})
+    assert abs(s - 1.15) < 1e-9, 'a perfect trend must not hide a weak avg30'
+
+
+def test_pin_write_replaces_the_row_for_that_card(tmp_path, monkeypatch):
+    path = tmp_path / 'cardmarket_mapping_manual.csv'
+    monkeypatch.setattr(pinner, 'MANUAL', str(path))
+    pinner.write_pin('SVP', '181', 111, 'first')
+    pinner.write_pin('OBF', '223', 222, 'other')
+    pinner.write_pin('SVP', '181', 333, 'corrected')
+    rows = list(csv.DictReader(open(path, encoding='utf-8-sig')))
+    assert len(rows) == 2, 'a re-pin must replace, not duplicate'
+    by = {(r['set'], r['number']): r for r in rows}
+    assert by[('SVP', '181')]['cardmarket_product_id'] == '333'
+    assert by[('SVP', '181')]['note'] == 'corrected'
+    assert by[('OBF', '223')]['cardmarket_product_id'] == '222'
+
+
+def test_real_repo_pin_resolves_the_reported_card():
+    """End-to-end on live data with the values the maintainer read off the
+    page for N's Darmanitan SVP 181."""
+    current, cands, _ = pinner.load_candidates('SVP', '181')
+    obs = {'trend': 16.11, 'avg30': 15.68, 'avg7': 18.42}
+    fits = [(pinner.score(obs, e), pid) for pid, e in cands]
+    fits = [(s, pid) for s, pid in fits if s]
+    assert len(fits) == 1, f'observation must identify exactly one product, got {fits}'
+    assert fits[0][1] == 816614

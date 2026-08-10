@@ -132,13 +132,14 @@
   "price_data.csv": 20419,
   "prizepack_official_images.csv": 266
  },
- "generated": "2026-08-09 09:45 UTC",
+ "generated": "2026-08-10 10:00 UTC",
  "price_integrity": {
-  "duplicate_idproducts": 102,
+  "duplicate_idproducts": 106,
   "match_methods": {
-   "live-verified": 4782,
-   "priced-by-all": 179,
-   "priced-by-date": 1381,
+   "live-verified": 5047,
+   "manual-pin": 1,
+   "priced-by-all": 152,
+   "priced-by-date": 1142,
    "unique": 11046
   },
   "nonempty_eur_price": 20403

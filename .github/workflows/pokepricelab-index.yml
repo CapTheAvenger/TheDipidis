@@ -1,0 +1,54 @@
+# Step 1 of the pokepricelab identity source: build the (set, number) ->
+# catalog URL index from their sitemap. Reads the sitemap only — no card
+# pages — so the next step fetches just the ~1.5k cards whose Cardmarket
+# mapping is still unverified instead of crawling 50k+.
+#
+# Their robots.txt has no Disallow rules and declares this sitemap; the
+# script still paces its requests. The sandbox proxy denies the host, so
+# CI is the only place this can run.
+name: Pokepricelab catalog index
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: pokepricelab-index
+  cancel-in-progress: false
+
+jobs:
+  index:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Build catalog index
+        run: python scripts/build_pokepricelab_index.py
+
+      - name: Commit index
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/pokepricelab_catalog_index.csv
+          if git diff --cached --quiet; then
+            echo "No index changes."
+            exit 0
+          fi
+          git commit -m "Auto: pokepricelab catalog index — $(date -u '+%Y-%m-%d %H:%M UTC')
+
+          Triggered by .github/workflows/pokepricelab-index.yml
+          Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          for i in 1 2 3 4; do
+            git push && break
+            git pull --rebase && sleep $((2 ** i))
+          done

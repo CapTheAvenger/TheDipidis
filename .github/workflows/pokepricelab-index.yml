@@ -21,7 +21,9 @@ concurrency:
 jobs:
   index:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    # 271 sub-sitemaps at ~0.6s pace is ~3 min of waiting, but the files
+    # are large and the first run hit the 30-min wall — give it room.
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v7
 

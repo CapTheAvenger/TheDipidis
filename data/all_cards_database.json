@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-08-07T06:28:59.590901",
+  "timestamp": "2026-08-11T06:23:14.981652",
   "source": "https://limitlesstcg.com/cards?q=lang%3Aen",
   "total_count": 20419,
   "cards": [
@@ -16382,7 +16382,7 @@
       "international_prints": "MEP-37",
       "cardmarket_url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/MEP-Black-Star-Promos/Bulbasaur-MEP037?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
       "jp_prints": "",
-      "card_url": "/cards/MEP/37",
+      "card_url": "",
       "energy_type": "Grass",
       "hp": "80",
       "card_text": "G Leech Seed 10 || Heal 10 damage from this Pokémon. || Weakness: Fire Resistance: none Retreat: 2"
@@ -16398,7 +16398,7 @@
       "international_prints": "MEP-38",
       "cardmarket_url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/MEP-Black-Star-Promos/Charmander-MEP038?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
       "jp_prints": "",
-      "card_url": "/cards/MEP/38",
+      "card_url": "",
       "energy_type": "Fire",
       "hp": "80",
       "card_text": "R Ember 30 || Discard an Energy from this Pokémon. || Weakness: Water Resistance: none Retreat: 2"
@@ -16414,7 +16414,7 @@
       "international_prints": "MEP-39",
       "cardmarket_url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/MEP-Black-Star-Promos/Squirtle-MEP039?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
       "jp_prints": "",
-      "card_url": "/cards/MEP/39",
+      "card_url": "",
       "energy_type": "Water",
       "hp": "80",
       "card_text": "W Bubble 10 || Flip a coin. If heads, your opponent's Active Pokémon is now Paralyzed. || Weakness: Lightning Resistance: none Retreat: 2"
@@ -16430,7 +16430,7 @@
       "international_prints": "MEP-40",
       "cardmarket_url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/MEP-Black-Star-Promos/Turtwig-MEP040?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
       "jp_prints": "",
-      "card_url": "/cards/MEP/40",
+      "card_url": "",
       "energy_type": "Grass",
       "hp": "90",
       "card_text": "GGC Razor Leaf 60 || Weakness: Fire Resistance: none Retreat: 3"
@@ -16446,7 +16446,7 @@
       "international_prints": "MEP-41",
       "cardmarket_url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/MEP-Black-Star-Promos/Chimchar-MEP041?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
       "jp_prints": "",
-      "card_url": "/cards/MEP/41",
+      "card_url": "",
       "energy_type": "Fire",
       "hp": "60",
       "card_text": "CC Fury Swipes 20× || Flip 3 coins. This attack does 20 damage for each heads. || Weakness: Water Resistance: none Retreat: 1"
@@ -16462,7 +16462,7 @@
       "international_prints": "MEP-42",
       "cardmarket_url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/MEP-Black-Star-Promos/Piplup-MEP042?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
       "jp_prints": "",
-      "card_url": "/cards/MEP/42",
+      "card_url": "",
       "energy_type": "Water",
       "hp": "70",
       "card_text": "W Peck 20 || Weakness: Lightning Resistance: none Retreat: 1"
@@ -16478,7 +16478,7 @@
       "international_prints": "MEP-43",
       "cardmarket_url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/MEP-Black-Star-Promos/Rowlet-MEP043?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
       "jp_prints": "",
-      "card_url": "/cards/MEP/43",
+      "card_url": "",
       "energy_type": "Grass",
       "hp": "70",
       "card_text": "CC Tackle 20 || Weakness: Fire Resistance: none Retreat: 1"
@@ -16494,7 +16494,7 @@
       "international_prints": "MEP-44",
       "cardmarket_url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/MEP-Black-Star-Promos/Litten-MEP044?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
       "jp_prints": "",
-      "card_url": "/cards/MEP/44",
+      "card_url": "",
       "energy_type": "Fire",
       "hp": "70",
       "card_text": "RR Fire Fang 20 || Your opponent's Active Pokémon is now Burned. || Weakness: Water Resistance: none Retreat: 1"
@@ -16510,7 +16510,7 @@
       "international_prints": "MEP-45",
       "cardmarket_url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/MEP-Black-Star-Promos/Popplio-MEP045?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
       "jp_prints": "",
-      "card_url": "/cards/MEP/45",
+      "card_url": "",
       "energy_type": "Water",
       "hp": "70",
       "card_text": "WW Disarming Voice 20 || Your opponent's Active Pokémon is now Confused. || Weakness: Lightning Resistance: none Retreat: 1"
@@ -16526,7 +16526,7 @@
       "international_prints": "MEP-46",
       "cardmarket_url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/MEP-Black-Star-Promos/Chikorita-MEP046?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
       "jp_prints": "",
-      "card_url": "/cards/MEP/46",
+      "card_url": "",
       "energy_type": "Grass",
       "hp": "70",
       "card_text": "GC Razor Leaf 30 || Weakness: Fire Resistance: none Retreat: 1"
@@ -16542,7 +16542,7 @@
       "international_prints": "MEP-47",
       "cardmarket_url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/MEP-Black-Star-Promos/Cyndaquil-MEP047?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
       "jp_prints": "",
-      "card_url": "/cards/MEP/47",
+      "card_url": "",
       "energy_type": "Fire",
       "hp": "70",
       "card_text": "RCC Tackle 40 || Weakness: Water Resistance: none Retreat: 1"
@@ -16558,7 +16558,7 @@
       "international_prints": "MEP-48",
       "cardmarket_url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/MEP-Black-Star-Promos/Totodile-MEP048?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
       "jp_prints": "",
-      "card_url": "/cards/MEP/48",
+      "card_url": "",
       "energy_type": "Water",
       "hp": "80",
       "card_text": "WWC Bite 50 || Weakness: Lightning Resistance: none Retreat: 2"
@@ -16574,7 +16574,7 @@
       "international_prints": "MEP-49",
       "cardmarket_url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/MEP-Black-Star-Promos/Snivy-MEP049?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
       "jp_prints": "",
-      "card_url": "/cards/MEP/49",
+      "card_url": "",
       "energy_type": "Grass",
       "hp": "60",
       "card_text": "C Vine Whip 20 || Weakness: Fire Resistance: none Retreat: 1"
@@ -16590,7 +16590,7 @@
       "international_prints": "MEP-50",
       "cardmarket_url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/MEP-Black-Star-Promos/Tepig-MEP050?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
       "jp_prints": "",
-      "card_url": "/cards/MEP/50",
+      "card_url": "",
       "energy_type": "Fire",
       "hp": "80",
       "card_text": "RR Ember 40 || Discard an Energy from this Pokémon. || Weakness: Water Resistance: none Retreat: 2"
@@ -16606,7 +16606,7 @@
       "international_prints": "MEP-51",
       "cardmarket_url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/MEP-Black-Star-Promos/Oshawott-MEP051?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
       "jp_prints": "",
-      "card_url": "/cards/MEP/51",
+      "card_url": "",
       "energy_type": "Water",
       "hp": "70",
       "card_text": "WC Razor Shell 10+ || Flip a coin. If heads, this attack does 30 more damage. || Weakness: Lightning Resistance: none Retreat: 1"
@@ -16622,7 +16622,7 @@
       "international_prints": "MEP-52",
       "cardmarket_url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/MEP-Black-Star-Promos/Grookey-MEP052?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
       "jp_prints": "",
-      "card_url": "/cards/MEP/52",
+      "card_url": "",
       "energy_type": "Grass",
       "hp": "70",
       "card_text": "GG Branch Poke 40 || Weakness: Fire Resistance: none Retreat: 1"
@@ -16638,7 +16638,7 @@
       "international_prints": "MEP-53",
       "cardmarket_url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/MEP-Black-Star-Promos/Scorbunny-MEP053?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
       "jp_prints": "",
-      "card_url": "/cards/MEP/53",
+      "card_url": "",
       "energy_type": "Fire",
       "hp": "70",
       "card_text": "RC Double Kick 20× || Flip 2 coins. This attack does 20 damage for each heads. || Weakness: Water Resistance: none Retreat: 1"
@@ -16654,7 +16654,7 @@
       "international_prints": "MEP-54",
       "cardmarket_url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/MEP-Black-Star-Promos/Sobble-MEP054?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
       "jp_prints": "",
-      "card_url": "/cards/MEP/54",
+      "card_url": "",
       "energy_type": "Water",
       "hp": "70",
       "card_text": "WCC Water Gun 40 || Weakness: Lightning Resistance: none Retreat: 1"

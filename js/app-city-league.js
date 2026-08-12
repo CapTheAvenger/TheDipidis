@@ -136,8 +136,16 @@
                         const key = deck.archetype || deck.deck_name;
                         if (key) {
                             window.m3ArchetypeData[key] = {
-                                share: parseFloat(deck.new_meta_share || deck.new_share || deck.share || 0),
-                                avgPlacement: parseFloat(deck.new_avg_placement || 0),
+                                // The scraper writes these two with decimal
+                                // commas ("9,07" / "8,46" — see
+                                // city_league_archetypes_comparison_M3.csv).
+                                // The past-comparison file is empty right now,
+                                // so this never fired; it would have truncated
+                                // silently the moment it was filled. The other
+                                // reader of the same fields (:426) already
+                                // normalises — this is the one that did not.
+                                share: parseLocaleNumber(deck.new_meta_share || deck.new_share || deck.share, 0),
+                                avgPlacement: parseLocaleNumber(deck.new_avg_placement, 0),
                                 count: parseInt(deck.new_count || 0)
                             };
                         }

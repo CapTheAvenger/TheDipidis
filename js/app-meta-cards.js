@@ -1616,7 +1616,12 @@
                     .filter(row => parseInt(row.new_count || '0', 10) >= minCountThreshold)
                     .map(row => ({
                         name: row.deck_name,
-                        winRate: parseFloat(row.new_winrate || '0'),
+                        // limitless_online_decks_comparison.csv is `;`-delimited
+                        // with German decimal commas ("53,97"). parseFloat stops
+                        // at the comma, so every win rate collapsed to a whole
+                        // number and the podium was decided by CSV row order:
+                        // 53,49 tied with 53,97 at "53" and won on position.
+                        winRate: parseLocaleNumber(row.new_winrate, 0),
                         count: parseInt(row.new_count || '0', 10)
                     }))
                     .sort((a, b) => b.winRate - a.winRate)

@@ -117,6 +117,13 @@ def load_our_mapping():
     return out
 
 
+def _count_rows(path):
+    if not os.path.exists(path):
+        return 0
+    with open(path, encoding='utf-8-sig', newline='') as f:
+        return sum(1 for _ in csv.DictReader(f))
+
+
 def load_done(targets=None):
     """Rows already checked, so a timed-out run resumes instead of restarting.
 
@@ -136,8 +143,11 @@ def load_done(targets=None):
             key = (r['set'], r['number'])
             if r.get('verdict') == 'fetch-failed':
                 continue
-            if targets is not None and key in current and current[key] != r.get('url'):
-                continue                      # URL changed → verdict is stale
+            if targets is not None:
+                if key not in current:
+                    continue                  # card lost its URL → verdict is stale
+                if current[key] != r.get('url'):
+                    continue                  # URL changed → verdict is stale
             done[key] = r
     return done
 
@@ -183,16 +193,31 @@ def main():
     s = requests.Session()
     s.headers.update({'User-Agent': UA, 'Accept-Language': 'de,en;q=0.8'})
 
-    targets, n_wanted = load_targets(only_unverified=not args.all,
-                                     limit=args.limit)
+    # Pruning is decided against the FULL target set, never the --limit
+    # slice: a smoke run must not delete the rest of the report.
+    all_targets, n_wanted = load_targets(only_unverified=not args.all)
+    targets = all_targets[:args.limit] if args.limit else all_targets
     ours = load_our_mapping()
-    done = load_done(targets)
+    before = _count_rows(OUT)
+    done = load_done(all_targets)
+    pruned = before - len(done)
     todo = [(k, u) for k, u in targets if k not in done]
 
-    print(f'cards in scope: {n_wanted} | with a base URL: {len(targets)} | '
+    print(f'cards in scope: {n_wanted} | with a base URL: {len(all_targets)} | '
           f'already checked: {len(done)} | to fetch now: {len(todo)}')
+    if pruned > 0:
+        print(f'dropped {pruned} stale rows — their URL changed or the index '
+              f'no longer maps that card, so the verdict came off a page '
+              f'about something else.')
     if not todo:
-        print('nothing to do')
+        # Still rewrite: the prune above may have removed rows, and a
+        # report keeping verdicts read off the wrong page is worse than
+        # a shorter one.
+        if pruned > 0:
+            write_rows(list(done.values()))
+            print(f'rewrote {os.path.relpath(OUT, ROOT)} ({len(done)} rows)')
+        else:
+            print('nothing to do')
         return 0
 
     rows = list(done.values())

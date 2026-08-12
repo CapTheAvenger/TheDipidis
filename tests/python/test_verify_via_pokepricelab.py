@@ -234,3 +234,22 @@ def test_without_targets_the_old_resume_behaviour_is_unchanged(tmp_path, monkeyp
                     'verdict': 'agree', 'extracted_via': '', 'url': 'u', 'checked_at': ''})
     monkeypatch.setattr(vvp, 'OUT', str(out))
     assert ('A', '1') in vvp.load_done()
+
+
+def test_a_card_that_lost_its_url_loses_its_verdict(tmp_path, monkeypatch):
+    """The index veto removed URLs entirely for some cards. Their old
+    verdicts were read off a page about a different card and must not
+    survive as data — the resume logic used to keep them because it only
+    compared URLs for cards still present in the target list."""
+    out = tmp_path / 'out.csv'
+    with open(out, 'w', encoding='utf-8-sig', newline='') as f:
+        w = csv.DictWriter(f, fieldnames=vvp.FIELDS)
+        w.writeheader()
+        for key, url in [(('SUM', '10'), 'wrong-page-url'), (('ASR', '90'), 'good-url')]:
+            w.writerow({'set': key[0], 'number': key[1], 'our_product_id': '1',
+                        'ppl_product_id': '2', 'verdict': 'disagree',
+                        'extracted_via': '', 'url': url, 'checked_at': ''})
+    monkeypatch.setattr(vvp, 'OUT', str(out))
+    done = vvp.load_done([(('ASR', '90'), 'good-url')])
+    assert ('SUM', '10') not in done, 'verdict for a card with no URL survived'
+    assert ('ASR', '90') in done

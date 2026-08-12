@@ -1,65 +1,8 @@
 ﻿klasse,set,number,name,eur_price,our_product_id,our_product_name,ppl_product_id,ppl_product_name,card_text,url
-bad-index,SSH,209,Professor's Research,"22,54€",448168,Professor's Research - Professor Magnolia,568803,Altaria [Tempting Tune | Glide],,https://pokepricelab.com/de/catalog/sword-shield-promos-altaria-s-p-209-sword-shield-promos-209
-bad-index,SUM,158,Nest Ball,"11,60€",295471,Nest Ball,469309,Luxio [Disconnect],,https://pokepricelab.com/de/catalog/sun-moon-promos-luxio-sm-p-158-sun-moon-promos-158
-bad-index,SVI,217,Klawf,"4,24€",702513,Klawf [Vise Grip | Adrenaline Hammer],780801,Pawmi [Light Punch | Zap Kick],Vise Grip Adrenaline Hammer,https://pokepricelab.com/de/catalog/scarlet-violet-promos-pawmi-sv-p-217-scarlet-violet-promos-217
-bad-index,SSH,15,Rillaboom,"3,52€",701500,Rillaboom [Voltage Beat | Hammer In],609682,Choice Belt,Drum Roll Drum Beating,https://pokepricelab.com/de/catalog/sword-shield-starter-set-lucario-vstar-choice-belt-015
-bad-index,SSH,36,Cinderace,"2,07€",436334,Cinderace [Flame Cloak | Bright Flame],463094,Rescue Team DX's Pikachu [Rescue Friends | Electro Ball],Flame Cloak Bright Flame,https://pokepricelab.com/de/catalog/sword-shield-promos-rescue-team-dx-s-pikachu-s-p-36-sword-shield-promos-36
-bad-index,SVI,234,Oinkologne ex,"1,38€",702530,Oinkologne ex [Maddening Scent | Heavy Stomp],807436,Drifloon [Pull],Maddening Scent Heavy Stomp,https://pokepricelab.com/de/catalog/scarlet-violet-promos-drifloon-sv-p-234-scarlet-violet-promos-234
-bad-index,SSH,59,Inteleon,"1,30€",450623,Inteleon [Shady Dealings | Aqua Bullet],852626,Koffing [Suffocating Gas],Silent Shot Hydro Snipe,https://pokepricelab.com/de/catalog/sword-shield-simplified-chinese-promos-koffing-s-p-cs-059-sword-shield-simplified-chinese-promos-059
-bad-index,BS,52,Machop,"0,72€",273747,Machop [Low Kick],273975,Marowak [Bonemerang | Call for Friend],Low Kick,https://pokepricelab.com/de/catalog/base-set-2-marowak-52
-bad-index,SSH,35,Cinderace,"0,67€",450573,Cinderace [Libero | Flare Striker],463089,Morpeko [Famished | Thunder Shock],Pyro Ball Burning Kick,https://pokepricelab.com/de/catalog/sword-shield-promos-morpeko-s-p-35-sword-shield-promos-35
 bad-index,SUM,136,Double Colorless Energy,"0,64€",312212,Double Colorless Energy,469189,Fairy Energy,,https://pokepricelab.com/de/catalog/sun-moon-promos-fairy-energy-sm-p-136-sun-moon-promos-136
-bad-index,SSH,34,Cinderace,"0,48€",427226,Cinderace [Libero | Flare Striker],463084,Scorbunny [Super Singe],Libero Flare Striker,https://pokepricelab.com/de/catalog/sword-shield-promos-scorbunny-s-p-34-sword-shield-promos-34
-bad-index,SSH,76,Boltund,"0,48€",436504,Boltund [Big Bite | Fighting Fangs],525110,Greedent V [Crunch | Stumbling Press],Bite Electrodash,https://pokepricelab.com/de/catalog/sword-shield-promos-greedent-v-s-p-76-sword-shield-promos-76
 bad-index,SUM,113,Oranguru,"0,46€",295425,Oranguru [Instruct | Psychic],468959,Incineroar [Fire Fang | Darkest Lariat],Instruct Psychic,https://pokepricelab.com/de/catalog/sun-moon-promos-incineroar-sm-p-113-sun-moon-promos-113
-bad-index,SSH,14,Rillaboom,"0,39€",427196,Rillaboom [Voltage Beat | Hammer In],609703,Pokégear 3.0,Voltage Beat Hammer In,https://pokepricelab.com/de/catalog/sword-shield-starter-set-darkrai-vstar-pokegear-3-0-014
-bad-index,SSH,110,Sandaconda,"0,36€",436669,Sandaconda [Sand Sac | Power Press],852867,Pikachu V-UNION [Shocking Shock],Sand Sac Power Press,https://pokepricelab.com/de/catalog/sword-shield-simplified-chinese-promos-pikachu-v-union-s-p-cs-110-sword-shield-simplified-chinese-promos-110
-bad-index,SSH,58,Inteleon,"0,35€",436429,Inteleon [Silent Shot | Hydro Snipe],852625,Trapinch [Land's Pulse],Shady Dealings Aqua Bullet,https://pokepricelab.com/de/catalog/sword-shield-simplified-chinese-promos-trapinch-s-p-cs-058-sword-shield-simplified-chinese-promos-058
-bad-index,SSH,75,Boltund,"0,23€",436509,Boltund [Bite | Electrodash],525105,Eevee [Signs of Evolution | Wild Kick],Big Bite Fighting Fangs,https://pokepricelab.com/de/catalog/sword-shield-promos-eevee-s-p-75-sword-shield-promos-75
-bad-index,SSH,3,Roselia,"0,16€",436189,Roselia [Absorb],609670,Medicham [Battle Step],Sweet Scent Sting,https://pokepricelab.com/de/catalog/sword-shield-starter-set-lucario-vstar-medicham-003
-bad-index,FLI,15,Fennekin,"0,15€",355535,Fennekin [Live Coal | Rear Kick],559560,Litleo [Headbutt],Live Coal Rear Kick,https://pokepricelab.com/de/catalog/forbidden-light-jp-litleo-015
-bad-index,SSH,146,Minccino,"0,15€",436819,Minccino [Glance | Tail Slap],852904,Manaphy [Pulling Currents | Aqua Bullet],Tail Whap,https://pokepricelab.com/de/catalog/sword-shield-simplified-chinese-promos-manaphy-s-p-cs-146-sword-shield-simplified-chinese-promos-146
-bad-index,SSH,68,Chinchou,"0,15€",436469,Chinchou [Gentle Slap],525070,Morpeko [Famished | Thunder Shock],Luring Glow Lightning Ball,https://pokepricelab.com/de/catalog/sword-shield-promos-morpeko-s-p-68-sword-shield-promos-68
-bad-index,FLI,14,Fennekin,"0,14€",355534,Fennekin [Ember],559559,Delphox [Mystical Torch | Fire Spin],Ember,https://pokepricelab.com/de/catalog/forbidden-light-jp-delphox-014
-bad-index,SSH,43,Krabby,"0,14€",436369,Krabby [Super Slice],852204,Chinchou [Luring Glow | Lightning Ball],Super Slice,https://pokepricelab.com/de/catalog/sword-shield-simplified-chinese-promos-chinchou-s-p-cs-043-sword-shield-simplified-chinese-promos-043
-bad-index,SSH,11,Grookey,"0,13€",427156,Grookey [Scratch | Beat],609678,Gutsy Pickaxe,Scratch Beat,https://pokepricelab.com/de/catalog/sword-shield-starter-set-lucario-vstar-gutsy-pickaxe-011
-bad-index,SSH,112,Clobbopus,"0,12€",436674,Clobbopus [Bind],852869,Pikachu V-UNION [Electro Ball Together],Punch,https://pokepricelab.com/de/catalog/sword-shield-simplified-chinese-promos-pikachu-v-union-s-p-cs-112-sword-shield-simplified-chinese-promos-112
-bad-index,SSH,145,Minccino,"0,12€",436824,Minccino [Tail Whap],852902,Infernape V [Meteor Punch | Bright Flame],Glance Tail Slap,https://pokepricelab.com/de/catalog/sword-shield-simplified-chinese-promos-infernape-v-s-p-cs-145-sword-shield-simplified-chinese-promos-145
-bad-index,SVI,175,Jacq,"0,11€",702471,Jacq,877668,Litten [Fake Out],,https://pokepricelab.com/de/catalog/scarlet-violet-simplified-chinese-promos-litten-sv-p-cs-175-scarlet-violet-simplified-chinese-promos-175
-bad-index,SUM,24,Litten,"0,10€",294121,Litten [Bite | Flare],565176,Hariyama [Push Out | Megaton Slap Push],Bite Flare,https://pokepricelab.com/de/catalog/sun-moon-starter-set-hariyama-024
-bad-index,SVI,190,Professor's Research,"0,10€",702485,Professor's Research - Professor Sada,793386,Jet Energy,,https://pokepricelab.com/de/catalog/scarlet-violet-promos-jet-energy-sv-p-190-scarlet-violet-promos-190
-bad-index,SSH,17,Blipbug,"0,09€",436249,Blipbug [Gnaw],609684,Barry,Call for Family,https://pokepricelab.com/de/catalog/sword-shield-starter-set-lucario-vstar-barry-017
-bad-index,SSH,45,Goldeen,"0,09€",436379,Goldeen [Horn Attack | SSH],463139,Struggle Gloves,Horn Attack,https://pokepricelab.com/de/catalog/sword-shield-promos-struggle-gloves-s-p-45-sword-shield-promos-45
-bad-index,SSH,46,Goldeen,"0,09€",436384,Goldeen [Collect | Waterfall],852207,Polteageist [Tea Break | Mad Party],Collect Waterfall,https://pokepricelab.com/de/catalog/sword-shield-simplified-chinese-promos-polteageist-s-p-cs-046-sword-shield-simplified-chinese-promos-046
-bad-index,SSH,10,Grookey,"0,08€",436229,Grookey [Fury Swipes],609677,Crobat V [Dark Asset | Venomous Fang],Fury Swipes,https://pokepricelab.com/de/catalog/sword-shield-starter-set-lucario-vstar-crobat-v-010
 bad-index,SUM,10,Dartrix,"0,08€",295316,Dartrix [Sharp Blade Quill | Leaf Blade],565162,Torracat [Fury Swipes | Flamethrower],Sharp Blade Quill Leaf Blade,https://pokepricelab.com/de/catalog/sun-moon-starter-set-torracat-010
-bad-index,SVI,136,Maschiff,"0,08€",702430,Maschiff [Rear Kick | Darkness Fang],749917,Battle Compressor Team Flare Gear,Crunch,https://pokepricelab.com/de/catalog/scarlet-violet-promos-battle-compressor-team-flare-gear-sv-p-136-scarlet-violet-promos-136
-bad-index,SVI,95,Dedenne,"0,08€",702390,Dedenne [Energy Munch],824701,Pincurchin [Stun Needle | Follow-Up Kerzap],Second Bite,https://pokepricelab.com/de/catalog/scarlet-violet-thai-promos-pincurchin-sv-p-th-095-scarlet-violet-thai-promos-095
-bad-index,FLI,46,Honedge,"0,07€",355565,Honedge [Final Hour | Slash],559591,Tyrantrum [Tyrannical Heart | Crunch],Final Hour Slash,https://pokepricelab.com/de/catalog/forbidden-light-jp-tyrantrum-046
-bad-index,SSH,111,Clobbopus,"0,07€",436679,Clobbopus [Punch],852868,Pikachu V-UNION [Disconnect],Bind,https://pokepricelab.com/de/catalog/sword-shield-simplified-chinese-promos-pikachu-v-union-s-p-cs-111-sword-shield-simplified-chinese-promos-111
-bad-index,SVI,113,Riolu,"0,07€",702409,Riolu [Punch | Reckless Charge],851946,Victini ex [Strafe | Victory Flame],Punch Reckless Charge,https://pokepricelab.com/de/catalog/scarlet-violet-simplified-chinese-promos-victini-ex-sv-p-cs-113-scarlet-violet-simplified-chinese-promos-113
-bad-index,SVI,40,Charcadet,"0,07€",702334,Charcadet [Ember],695781,Basic Lightning Energy,Heat Blast,https://pokepricelab.com/de/catalog/scarlet-violet-promos-basic-lightning-energy-sv-p-040-scarlet-violet-promos-040
-bad-index,SVI,94,Dedenne,"0,07€",702391,Dedenne [Second Bite],824700,Pikachu [Growl | Pika Bolt],Energy Munch,https://pokepricelab.com/de/catalog/scarlet-violet-thai-promos-pikachu-sv-p-th-094-scarlet-violet-thai-promos-094
-bad-index,SSH,153,Wooloo,"0,06€",436854,Wooloo [Expand],525445,Darkness Energy,Tackle Headbutt,https://pokepricelab.com/de/catalog/sword-shield-promos-darkness-energy-s-p-153-sword-shield-promos-153
-bad-index,SSH,32,Raboot,"0,06€",436319,Raboot [Flame Charge | Magnum Kick],852193,Electabuzz [Low Kick | Thunder],Flame Charge Magnum Kick,https://pokepricelab.com/de/catalog/sword-shield-simplified-chinese-promos-electabuzz-s-p-cs-032-sword-shield-simplified-chinese-promos-032
-bad-index,SVI,101,Flittle,"0,06€",702396,Flittle [Ram],731905,Basic Fire Energy,Spinning Attack,https://pokepricelab.com/de/catalog/scarlet-violet-promos-basic-fire-energy-sv-p-101-scarlet-violet-promos-101
-bad-index,SVI,155,Lechonk,"0,06€",702450,Lechonk [Repelling Odor | Stampede],766671,Kilowattrel ex [Return Charge | Thunder Lance],Collect Tackle,https://pokepricelab.com/de/catalog/scarlet-violet-promos-kilowattrel-ex-sv-p-155-scarlet-violet-promos-155
-bad-index,SVI,30,Growlithe,"0,06€",702326,Growlithe [Relentless Flames],851884,Maushold [Gentle Slap | Gnaw Relentlessly],Relentless Flames,https://pokepricelab.com/de/catalog/scarlet-violet-simplified-chinese-promos-maushold-sv-p-cs-030-scarlet-violet-simplified-chinese-promos-030
-bad-index,SVI,31,Growlithe,"0,06€",702327,Growlithe [Stoke | Fire Claws],761051,Riolu [Punch],Stoke Fire Claws,https://pokepricelab.com/de/catalog/scarlet-violet-battle-academy-riolu-031
-bad-index,SVI,74,Pawmi,"0,06€",702369,Pawmi [Jolt],727983,Pikachu [Growl | Pika Bolt],Light Punch Zap Kick,https://pokepricelab.com/de/catalog/scarlet-violet-promos-pikachu-sv-p-074-scarlet-violet-promos-074
-bad-index,SVI,98,Fidough,"0,06€",702394,Fidough [Springy | Flop],851944,Charmander [Heat Tackle],Springy Flop,https://pokepricelab.com/de/catalog/scarlet-violet-simplified-chinese-promos-charmander-sv-p-cs-098-scarlet-violet-simplified-chinese-promos-098
-bad-index,SVI,104,Greavard,"0,05€",702400,Greavard [Graveyard Gamboling],824724,Miraidon [Sharp Fang | Lightning Laser],Graveyard Gamboling,https://pokepricelab.com/de/catalog/scarlet-violet-thai-promos-miraidon-sv-p-th-104-scarlet-violet-thai-promos-104
-bad-index,SVI,105,Greavard,"0,05€",702401,Greavard [Underworld Stroll | Sharp Fang],824726,Koraidon [Claw Slash | Rampaging Fang],Underworld Stroll Sharp Fang,https://pokepricelab.com/de/catalog/scarlet-violet-thai-promos-koraidon-sv-p-th-105-scarlet-violet-thai-promos-105
-bad-index,SVI,115,Sandile,"0,05€",702411,Sandile [Gnaw | Ram],858980,Veluza [Ram | Slim Screw],Gnaw Ram,https://pokepricelab.com/de/catalog/scarlet-violet-simplified-chinese-promos-veluza-sv-p-cs-115-scarlet-violet-simplified-chinese-promos-115
-bad-index,SVI,164,Cyclizar,"0,05€",702460,Cyclizar [Touring | Speed Attack],778392,Yanmega [Gyro Shockwave],Touring Speed Attack,https://pokepricelab.com/de/catalog/scarlet-violet-promos-yanmega-sv-p-164-scarlet-violet-promos-164
-bad-index,SVI,28,Capsakid,"0,05€",702323,Capsakid [Slightly Spicy],851882,Kingambit [Leadership | Hack At],Increasing Spice Playful Kick,https://pokepricelab.com/de/catalog/scarlet-violet-simplified-chinese-promos-kingambit-sv-p-cs-028-scarlet-violet-simplified-chinese-promos-028
-bad-index,SVI,70,Rotom,"0,05€",702365,Rotom [Linear Attack],824656,Froakie [Try Bouncing],Junk Hunt Thunder Shock,https://pokepricelab.com/de/catalog/scarlet-violet-thai-promos-froakie-sv-p-th-070-scarlet-violet-thai-promos-070
-bad-index,FLI,91,Goomy,"0,04€",355606,Goomy [Rain Splash | Flail],559636,Lillie,Sticky Membrane Ram,https://pokepricelab.com/de/catalog/forbidden-light-jp-lillie-091
-bad-index,SVI,154,Lechonk,"0,04€",702452,Lechonk [Whimsy Tackle],764619,Nemona,Repelling Odor Stampede,https://pokepricelab.com/de/catalog/scarlet-violet-promos-nemona-sv-p-154-scarlet-violet-promos-154
-bad-index,SVI,27,Capsakid,"0,04€",702324,Capsakid [Increasing Spice | Playful Kick],851881,Tyranitar [Rout | Dread Mountain],Slightly Spicy,https://pokepricelab.com/de/catalog/scarlet-violet-simplified-chinese-promos-tyranitar-sv-p-cs-027-scarlet-violet-simplified-chinese-promos-027
-bad-index,SVI,39,Charcadet,"0,04€",702335,Charcadet [Heat Blast],824491,Pikachu [Charge | Pika Punch],Ember,https://pokepricelab.com/de/catalog/scarlet-violet-thai-promos-pikachu-sv-p-th-039-scarlet-violet-thai-promos-039
-bad-index,SVI,58,Cetoddle,"0,04€",702354,Cetoddle [Icicle | Sharp Fin],708469,Cetitan [Avalanche | Rolling Slider],Tackle,https://pokepricelab.com/de/catalog/scarlet-violet-promos-cetitan-sv-p-058-scarlet-violet-promos-058
-bad-index,SVI,16,Tarountula,"0,03€",702313,Tarountula [String Shot],699713,Rare Candy,String Haul Bug Bite,https://pokepricelab.com/de/catalog/scarlet-violet-promos-rare-candy-sv-p-016-scarlet-violet-promos-016
+duplicate,JU,17,Clefable,"471,57€",275572,Clefable [Metronome | Minimize],273814,Clefable [Metronome | Minimize],Metronome Minimize,https://pokepricelab.com/de/catalog/jungle-clefable-17
 duplicate,SVP,224,Paradise Resort,"451,02€",727542,Paradise Resort,844367,Paradise Resort,,https://pokepricelab.com/de/catalog/sv-black-star-promos-paradise-resort-224
 duplicate,E1,37,Blastoise,"206,69€",274879,Blastoise [Jet Stream | Energy Cannon],274912,Blastoise [Jet Stream | Energy Cannon],Jet Stream Energy Cannon,https://pokepricelab.com/de/catalog/expedition-base-set-blastoise-37
 duplicate,LTR,114,Reshiram,"199,52€",281139,Reshiram [Outrage | Blue Flare],281265,Reshiram [Outrage | Blue Flare],Outrage Blue Flare,https://pokepricelab.com/de/catalog/legendary-treasures-reshiram-114
@@ -74,20 +17,27 @@ duplicate,E1,54,Meganium,"49,61€",274893,Meganium [Soothing Aroma | Poisonpowd
 duplicate,DR,19,Salamence,"42,05€",280584,Salamence [Intimidating Fang | Dragon Flame],275896,Salamence [Intimidating Fang | Dragon Flame],Intimidating Fang Dragon Flame,https://pokepricelab.com/de/catalog/ex-dragon-salamence-19
 duplicate,E1,65,Typhlosion,"39,65€",274903,Typhlosion [Heat Up | Super Singe],274940,Typhlosion [Heat Up | Super Singe],Heat Up Super Singe,https://pokepricelab.com/de/catalog/expedition-base-set-typhlosion-65
 duplicate,E1,68,Venusaur,"34,46€",274905,Venusaur [Harvest Bounty | Body Slam],274943,Venusaur [Harvest Bounty | Body Slam],Harvest Bounty Body Slam,https://pokepricelab.com/de/catalog/expedition-base-set-venusaur-68
+duplicate,MEW,205,Mew ex,"31,73€",733800,Mew ex [Restart | Genome Hacking],720951,Mew ex [Restart | Genome Hacking],Restart Genome Hacking,https://pokepricelab.com/de/catalog/151-mew-ex-205
 duplicate,E1,70,Weezing,"30,82€",274907,Weezing [Foul Gas | Misfire],274945,Weezing [Foul Gas | Misfire],Foul Gas Misfire,https://pokepricelab.com/de/catalog/expedition-base-set-weezing-70
+duplicate,SSH,209,Professor's Research,"22,54€",448168,Professor's Research - Professor Magnolia,437134,Professor's Research - Professor Magnolia,,https://pokepricelab.com/de/catalog/sword-shield-professor-s-research-209
 duplicate,SVP,196,Charizard ex,"21,61€",751798,Charizard ex [Infernal Reign | Burning Darkness],821617,Charizard ex [Infernal Reign | Burning Darkness],Infernal Reign Burning Darkness,https://pokepricelab.com/de/catalog/sv-black-star-promos-charizard-ex-196
 duplicate,SVP,173,Eevee,"18,39€",805370,Eevee [Boosted Evolution | Reckless Charge],806407,Eevee [Boosted Evolution | Reckless Charge],Boosted Evolution Reckless Charge,https://pokepricelab.com/de/catalog/sv-black-star-promos-eevee-173
 duplicate,TR,8,Dark Gyarados,"15,77€",274078,Dark Gyarados [Final Beam | Ice Beam],274061,Dark Gyarados [Final Beam | Ice Beam],Final Beam Ice Beam,https://pokepricelab.com/de/catalog/team-rocket-dark-gyarados-8
+duplicate,SVP,182,Iono's Kilowattrel,"15,54€",816615,Iono's Kilowattrel [Flashing Draw | Mach Bolt],817773,Iono's Kilowattrel [Flashing Draw | Mach Bolt],Flashing Draw Mach Bolt,https://pokepricelab.com/de/catalog/sv-black-star-promos-iono-s-kilowattrel-182
 duplicate,E1,28,Typhlosion,"10,94€",274940,Typhlosion [Heat Up | Super Singe],274903,Typhlosion [Heat Up | Super Singe],Heat Up Super Singe,https://pokepricelab.com/de/catalog/expedition-base-set-typhlosion-28
 duplicate,SIT,207,Serena,"10,83€",682241,Serena,682256,Serena,,https://pokepricelab.com/de/catalog/silver-tempest-serena-207
+duplicate,E1,12,Feraligatr,"10,48€",274922,Feraligatr [Major Tsunami | Rending Jaws],274887,Feraligatr [Major Tsunami | Rending Jaws],Major Tsunami Rending Jaws,https://pokepricelab.com/de/catalog/expedition-base-set-feraligatr-12
 duplicate,E1,22,Pichu,"10,42€",274933,Pichu [Energy Patch],274897,Pichu [Energy Patch],Energy Patch,https://pokepricelab.com/de/catalog/expedition-base-set-pichu-22
 duplicate,SVP,14,Koraidon,"9,39€",692235,Koraidon [Claw Slash | Rampaging Fang],692236,Koraidon [Claw Slash | Rampaging Fang],Claw Slash Rampaging Fang,https://pokepricelab.com/de/catalog/sv-black-star-promos-koraidon-014
 duplicate,VIV,195,Leon,"8,66€",512620,Leon,512685,Leon,,https://pokepricelab.com/de/catalog/vivid-voltage-leon-195
 duplicate,STS,15,Volcarona,"8,53€",450483,Volcarona [Shimmering Scales | Power Hurricane],291522,Volcarona [Shimmering Scales | Power Hurricane],Shimmering Scales Power Hurricane,https://pokepricelab.com/de/catalog/steam-siege-volcarona-15
+duplicate,JU,21,Kangaskhan,"8,41€",273802,Kangaskhan [Fetch | Comet Punch],273818,Kangaskhan [Fetch | Comet Punch],Fetch Comet Punch,https://pokepricelab.com/de/catalog/jungle-kangaskhan-21
 duplicate,SIT,193,Serena,"8,25€",682256,Serena,682241,Serena,,https://pokepricelab.com/de/catalog/silver-tempest-serena-193
+duplicate,LOR,213,Hisuian Zoroark VSTAR,"8,14€",674209,Hisuian Zoroark VSTAR [Ticking Curse | Phantom Star],674219,Hisuian Zoroark VSTAR [Ticking Curse | Phantom Star],Phantom Star Ticking Curse,https://pokepricelab.com/de/catalog/lost-origin-hisuian-zoroark-vstar-213
 duplicate,BST,173,Cheryl,"7,81€",546471,Cheryl,546656,Cheryl,,https://pokepricelab.com/de/catalog/battle-styles-cheryl-173
 duplicate,CRE,214,Doctor,"7,54€",567298,Doctor,567322,Doctor,,https://pokepricelab.com/de/catalog/chilling-reign-doctor-214
 duplicate,BST,159,Cheryl,"7,45€",546656,Cheryl,546471,Cheryl,,https://pokepricelab.com/de/catalog/battle-styles-cheryl-159
+duplicate,JU,5,Kangaskhan,"7,42€",273818,Kangaskhan [Fetch | Comet Punch],273802,Kangaskhan [Fetch | Comet Punch],Fetch Comet Punch,https://pokepricelab.com/de/catalog/jungle-kangaskhan-5
 duplicate,EVS,224,Raihan,"7,37€",574260,Raihan,574282,Raihan,,https://pokepricelab.com/de/catalog/evolving-skies-raihan-224
 duplicate,VIV,193,Bea,"7,33€",512610,Bea,512675,Bea,,https://pokepricelab.com/de/catalog/vivid-voltage-bea-193
 duplicate,VIV,182,Leon,"7,29€",512685,Leon,512620,Leon,,https://pokepricelab.com/de/catalog/vivid-voltage-leon-182
@@ -105,26 +55,37 @@ duplicate,UPR,153,Lusamine,"5,42€",449883,Lusamine,316077,Lusamine,,https://po
 duplicate,SSH,201,Professor's Research,"5,30€",437134,Professor's Research - Professor Magnolia,433949,Professor's Research - Professor Magnolia,,https://pokepricelab.com/de/catalog/sword-shield-professor-s-research-201
 duplicate,SIT,196,Serperior VSTAR,"5,28€",682259,Serperior VSTAR [Regal Blender | Star Winder],682244,Serperior VSTAR [Regal Blender | Star Winder],Regal Blender Star Winder,https://pokepricelab.com/de/catalog/silver-tempest-serperior-vstar-196
 duplicate,EVS,202,Raihan,"5,09€",574282,Raihan,574260,Raihan,,https://pokepricelab.com/de/catalog/evolving-skies-raihan-202
+duplicate,SVP,134,Crabominable,"4,46€",785840,Crabominable [Food Prep | Haymaker],785841,Crabominable [Food Prep | Haymaker],Food Prep Haymaker,https://pokepricelab.com/de/catalog/sv-black-star-promos-crabominable-134
+duplicate,SP,97,Dragapult VMAX,"4,05€",549391,Dragapult VMAX [Shred | Max Phantom],556545,Dragapult VMAX [Shred | Max Phantom],Shred Max Phantom,https://pokepricelab.com/de/catalog/swsh-black-star-promos-dragapult-vmax-097
 duplicate,BST,82,Sandaconda,"3,87€",569897,Sandaconda [Big Sand Cannon | Skull Bash],569898,Sandaconda [Big Sand Cannon | Skull Bash],Big Sand Cannon Skull Bash,https://pokepricelab.com/de/catalog/battle-styles-sandaconda-82
+duplicate,SVP,56,Charizard ex,"3,21€",821616,Charizard ex [Infernal Reign | Burning Darkness],740401,Charizard ex [Infernal Reign | Burning Darkness],Infernal Reign Burning Darkness,https://pokepricelab.com/de/catalog/sv-black-star-promos-charizard-ex-056
+duplicate,SP,31,Morpeko,"3,17€",557973,Morpeko [Famished | Thunder Shock],461679,Morpeko [Famished | Thunder Shock],Famished Thunder Shock,https://pokepricelab.com/de/catalog/swsh-black-star-promos-morpeko-031
 duplicate,SP,301,Lugia V,"3,10€",719677,Lugia V [Read the Wind | Aero Dive],719676,Lugia V [Read the Wind | Aero Dive],Read the Wind Aero Dive,https://pokepricelab.com/de/catalog/swsh-black-star-promos-lugia-v-301
 duplicate,BUS,143,Guzma,"3,02€",312287,Guzma,299541,Guzma,,https://pokepricelab.com/de/catalog/burning-shadows-guzma-143
 duplicate,ROS,92,Trainers' Mail,"3,02€",297897,Trainers' Mail,282760,Trainers' Mail,,https://pokepricelab.com/de/catalog/roaring-skies-trainers-mail-92
 duplicate,SP,99,Crobat VMAX,"2,88€",549401,Crobat VMAX [Stealth Poison | Max Cutter],556553,Crobat VMAX [Stealth Poison | Max Cutter],Stealth Poison Max Cutter,https://pokepricelab.com/de/catalog/swsh-black-star-promos-crobat-vmax-099
 duplicate,EVS,40,Glaceon V,"2,59€",574064,Glaceon V [Frozen Awakening | Heavy Snow],740474,Glaceon V [Frozen Awakening | Heavy Snow],Frozen Awakening Heavy Snow,https://pokepricelab.com/de/catalog/evolving-skies-glaceon-v-040
 duplicate,SP,1,Grookey,"2,51€",427081,Grookey [Branch Poke],547426,Grookey [Branch Poke],Branch Poke,https://pokepricelab.com/de/catalog/swsh-black-star-promos-grookey-001
+duplicate,LOR,66,Gengar,"2,23€",674075,Gengar [Netherworld Gate | Screaming Circle],700344,Gengar [Netherworld Gate | Screaming Circle],Netherworld Gate Screaming Circle,https://pokepricelab.com/de/catalog/lost-origin-gengar-066
 duplicate,TEU,99,Jirachi,"2,00€",369028,Jirachi [Stellar Wish | Slap],722925,Jirachi [Stellar Wish | Slap],Stellar Wish Slap,https://pokepricelab.com/de/catalog/team-up-jirachi-99
+duplicate,UNB,81,Marshadow,"1,99€",406994,Marshadow [Resetting Hole | Red Knuckles],372373,Marshadow [Resetting Hole | Red Knuckles],Resetting Hole Red Knuckles,https://pokepricelab.com/de/catalog/unbroken-bonds-marshadow-81
 duplicate,SP,83,Alakazam V,"1,92€",530487,Alakazam V [Zen Spoon | Mind Ruler],530482,Alakazam V [Zen Spoon | Mind Ruler],Zen Spoon Mind Ruler,https://pokepricelab.com/de/catalog/swsh-black-star-promos-alakazam-v-083
 duplicate,SP,61,Pikachu V,"1,84€",565010,Pikachu V [Charge | Thunderbolt],540616,Pikachu V [Charge | Thunderbolt],Charge Thunderbolt,https://pokepricelab.com/de/catalog/swsh-black-star-promos-pikachu-v-061
 duplicate,RS,74,Torchic,"1,65€",275722,Torchic [Singe],547271,Torchic [Singe],Singe,https://pokepricelab.com/de/catalog/ex-ruby-sapphire-torchic-74
 duplicate,SP,21,Polteageist V,"1,64€",461664,Polteageist V [Teapot of Surpises | Mind Bend],576518,Polteageist V [Teapot of Surpises | Mind Bend],Teapot of Surprises Mind Bend,https://pokepricelab.com/de/catalog/swsh-black-star-promos-polteageist-v-021
 duplicate,SVP,216,Team Rocket's Mewtwo ex,"1,62€",830111,Team Rocket's Mewtwo ex [Power Saver | Erasure Ball],832225,Team Rocket's Mewtwo ex [Power Saver | Erasure Ball],Power Saver Erasure Ball,https://pokepricelab.com/de/catalog/sv-black-star-promos-team-rocket-s-mewtwo-ex-216
+duplicate,MEP,13,Mega Venusaur ex,"1,61€",859012,Mega Venusaur ex [Solar Transfer | Jungle Dump],859011,Mega Venusaur ex [Solar Transfer | Jungle Dump],Solar Transfer Jungle Dump,https://pokepricelab.com/de/catalog/mep-black-star-promos-mega-venusaur-ex-013
 duplicate,BWP,3,Oshawott,"1,46€",279923,Oshawott [Water Pulse],547306,Oshawott [Water Pulse],Water Pulse,https://pokepricelab.com/de/catalog/bw-black-star-promos-oshawott-03
 duplicate,DAA,37,Suicune,"1,42€",483059,Suicune [Wave Splash | Aurora Loop],547901,Suicune [Wave Splash | Aurora Loop],Wave Splash Aurora Loop,https://pokepricelab.com/de/catalog/darkness-ablaze-suicune-37
+duplicate,MEP,25,Mega Kangaskhan ex,"1,39€",859037,Mega Kangaskhan ex [Run Errand | Rapid-Fire Combo],859039,Mega Kangaskhan ex [Run Errand | Rapid-Fire Combo],Run Errand Rapid-Fire Combo,https://pokepricelab.com/de/catalog/mep-black-star-promos-mega-kangaskhan-ex-025
 duplicate,SIT,33,Alolan Vulpix V,"1,36€",682075,Alolan Vulpix V [White Drop | Frost Smash],740473,Alolan Vulpix V [White Drop | Frost Smash],White Drop Frost Smash,https://pokepricelab.com/de/catalog/silver-tempest-alolan-vulpix-v-033
 duplicate,SP,30,Copperajah V,"1,30€",477159,Copperajah V [Adamantine Press | Wrack Down],576519,Copperajah V [Adamantine Press | Wrack Down],Adamantine Press Wrack Down,https://pokepricelab.com/de/catalog/swsh-black-star-promos-copperajah-v-030
+duplicate,SP,298,Hisuian Zoroark VSTAR,"1,26€",671765,Hisuian Zoroark VSTAR [Ticking Curse | Phantom Star],671772,Hisuian Zoroark VSTAR [Ticking Curse | Phantom Star],Phantom Star Ticking Curse,https://pokepricelab.com/de/catalog/swsh-black-star-promos-hisuian-zoroark-vstar-298
 duplicate,CES,95,Metagross,"1,23€",360408,Metagross [Extend | Meteor Mash],371634,Metagross [Extend | Meteor Mash],Extend Meteor Mash,https://pokepricelab.com/de/catalog/celestial-storm-metagross-95
+duplicate,JU,56,Meowth,"0,97€",273853,Meowth [Pay Day],275571,Meowth [Pay Day],Pay Day,https://pokepricelab.com/de/catalog/jungle-meowth-56
 duplicate,FCO,105,N,"0,88€",295213,N,289925,N,,https://pokepricelab.com/de/catalog/fates-collide-n-105
 duplicate,SUM,161,Ultra Ball,"0,88€",312291,Ultra Ball,295474,Ultra Ball,,https://pokepricelab.com/de/catalog/sun-moon-ultra-ball-161
+duplicate,FST,39,Chandelure V,"0,76€",582983,Chandelure V [Confuse Ray | Poltergeist],582173,Chandelure V [Confuse Ray | Poltergeist],Confuse Ray Poltergeist,https://pokepricelab.com/de/catalog/fusion-strike-chandelure-v-039
 duplicate,MEP,36,Mega Feraligatr ex,"0,74€",873722,Mega Feraligatr ex [Mortal Crunch],873721,Mega Feraligatr ex [Mortal Crunch],Mortal Crunch,https://pokepricelab.com/de/catalog/mep-black-star-promos-mega-feraligatr-ex-036
 duplicate,PAL,58,Frigibax,"0,72€",785461,Frigibax [Chilly | Bite],715533,Frigibax [Chilly | Bite],Chilly Bite,https://pokepricelab.com/de/catalog/paldea-evolved-frigibax-058
 duplicate,MEP,11,Mega Latias ex,"0,67€",851063,Mega Latias ex [Strafe | Illusory Impulse],851066,Mega Latias ex [Strafe | Illusory Impulse],Strafe Illusory Impulse,https://pokepricelab.com/de/catalog/mep-black-star-promos-mega-latias-ex-011
@@ -132,6 +93,8 @@ duplicate,PLB,5,Tropius,"0,63€",281026,Tropius [Return | Energy Press],449213,
 duplicate,ASR,97,Absol,"0,55€",658743,Absol [Swirling Disaster | Claw Rend],700338,Absol [Swirling Disaster | Claw Rend],Swirling Disaster Claw Rend,https://pokepricelab.com/de/catalog/astral-radiance-absol-097
 duplicate,BS,97,Fighting Energy,"0,55€",273792,Fighting Energy,660105,Fighting Energy,,https://pokepricelab.com/de/catalog/base-set-fighting-energy-97
 duplicate,BKP,57,Garbodor,"0,50€",368705,Garbodor [Garbotoxin | Offensive Bomb],288232,Garbodor [Garbotoxin | Offensive Bomb],Garbotoxin Offensive Bomb,https://pokepricelab.com/de/catalog/breakpoint-garbodor-57
+duplicate,SSH,34,Cinderace,"0,48€",427226,Cinderace [Libero | Flare Striker],450573,Cinderace [Libero | Flare Striker],Libero Flare Striker,https://pokepricelab.com/de/catalog/sword-shield-cinderace-34
+duplicate,SSH,14,Rillaboom,"0,39€",427196,Rillaboom [Voltage Beat | Hammer In],701500,Rillaboom [Voltage Beat | Hammer In],Voltage Beat Hammer In,https://pokepricelab.com/de/catalog/sword-shield-rillaboom-14
 duplicate,CRE,98,Galarian Slowking,"0,38€",567206,Galarian Slowking [Mysterious Potion | Spray Fluid],752310,Galarian Slowking [Mysterious Potion | Spray Fluid],Mysterious Potion Spray Fluid,https://pokepricelab.com/de/catalog/chilling-reign-galarian-slowking-098
 duplicate,ASR,147,Irida,"0,30€",658808,Irida,700342,Irida,,https://pokepricelab.com/de/catalog/astral-radiance-irida-147
 duplicate,SIT,147,Archeops,"0,29€",682194,Archeops [Primal Turbo | Speed Wing],700347,Archeops [Primal Turbo | Speed Wing],Primal Turbo Speed Wing,https://pokepricelab.com/de/catalog/silver-tempest-archeops-147
@@ -148,9 +111,12 @@ duplicate,MEW,25,Pikachu,"0,13€",733620,Pikachu [Charge | Pika Punch],748474,P
 duplicate,FLF,94,Pokémon Fan Club,"0,11€",281577,Pokémon Fan Club,371603,Pokémon Fan Club,,https://pokepricelab.com/de/catalog/flashfire-pokemon-fan-club-94
 duplicate,BKP,56,Trubbish,"0,10€",368704,Trubbish [Acid Spray],288231,Trubbish [Acid Spray],Acid Spray,https://pokepricelab.com/de/catalog/breakpoint-trubbish-56
 duplicate,CRE,10,Abomasnow,"0,08€",567090,Abomasnow [Toughness Boost | Mega Punch],672374,Abomasnow [Toughness Boost | Mega Punch],Toughness Boost Mega Punch,https://pokepricelab.com/de/catalog/chilling-reign-abomasnow-010
+duplicate,SVI,105,Greavard,"0,05€",702401,Greavard [Underworld Stroll | Sharp Fang],701132,Greavard [Underworld Stroll | Sharp Fang],Underworld Stroll Sharp Fang,https://pokepricelab.com/de/catalog/scarlet-violet-greavard-105
 duplicate,FST,84,Snom,"0,04€",582218,Snom [Find Ice],740470,Snom [Find Ice],Find Ice,https://pokepricelab.com/de/catalog/fusion-strike-snom-084
+duplicate,PAF,86,Paldean Student,"0,04€",751624,Paldean Student,751625,Paldean Student,,https://pokepricelab.com/de/catalog/paldean-fates-paldean-student-086
 duplicate,SCR,107,Archaludon,"0,04€",785961,Archaludon [Metal Bridge | Iron Blaster],786546,Archaludon [Metal Bridge | Iron Blaster],Metal Bridge Iron Blaster,https://pokepricelab.com/de/catalog/stellar-crown-archaludon-107
 duplicate,SCR,119,Bouffalant,"0,04€",785973,Bouffalant [Curly Wall | Boundless Power],789025,Bouffalant [Curly Wall | Boundless Power],Curly Wall Boundless Power,https://pokepricelab.com/de/catalog/stellar-crown-bouffalant-119
+duplicate,PAF,85,Paldean Student,"0,03€",751625,Paldean Student,751624,Paldean Student,,https://pokepricelab.com/de/catalog/paldean-fates-paldean-student-085
 duplicate,BG,1,Electabuzz,"0,02€",283081,Electabuzz [Thundershock | Thunderpunch],275411,Electabuzz [Thundershock | Thunderpunch],Thundershock Thunderpunch,https://pokepricelab.com/de/catalog/best-of-game-cards-promos-electabuzz-1
 duplicate,BKT,149,Super Rod,"0,02€",295270,Super Rod,286395,Super Rod,,https://pokepricelab.com/de/catalog/breakthrough-super-rod-149
 duplicate,STS,114,Professor Sycamore,"0,02€",295231,Professor Sycamore,291561,Professor Sycamore,,https://pokepricelab.com/de/catalog/steam-siege-professor-sycamore-114
@@ -162,11 +128,10 @@ undecided,UL,91,Entei & Raikou LEGEND,"64,87€",279246,Entei & Raikou LEGEND [T
 undecided,TM,101,Palkia & Dialga LEGEND,"54,22€",279632,Palkia & Dialga LEGEND [Sudden Delete | Time Control | Bottom],279631,Palkia & Dialga LEGEND [Top],Sudden Delete Time Control,https://pokepricelab.com/de/catalog/triumphant-palkia-dialga-legend-101
 undecided,UL,93,Raikou & Suicune LEGEND,"45,70€",279248,Raikou & Suicune LEGEND [Top],279249,Raikou & Suicune LEGEND [Thunderbolt Spear | Aurora Gain | Bottom],Thunderbolt Spear Aurora Gain,https://pokepricelab.com/de/catalog/unleashed-raikou-suicune-legend-93
 undecided,UL,92,Raikou & Suicune LEGEND,"41,57€",279249,Raikou & Suicune LEGEND [Thunderbolt Spear | Aurora Gain | Bottom],279248,Raikou & Suicune LEGEND [Top],Thunderbolt Spear Aurora Gain,https://pokepricelab.com/de/catalog/unleashed-raikou-suicune-legend-92
-undecided,BS,9,Magneton,"32,54€",273704,Magneton [Thunder Wave | Selfdestruct],273932,Magneton [Thunder Wave | Selfdestruct],Thunder Wave Selfdestruct,https://pokepricelab.com/de/catalog/base-set-2-magneton-9
-undecided,BS,11,Nidoking,"23,52€",273706,Nidoking [Thrash | Toxic],273934,Nidoking [Thrash | Toxic],Thrash Toxic,https://pokepricelab.com/de/catalog/base-set-2-nidoking-11
 undecided,PL,23,Dialga,"22,88€",278543,Dialga [G] LV.X [Time Crystal | Remove Lost],278444,Dialga Lv.73 [Energy Stream | Diamond Blow],Energy Stream Diamond Blow,https://pokepricelab.com/de/catalog/platinum-dialga-lv-73-23
 undecided,PL,5,Dialga,"7,26€",278428,Dialga [G] Lv.79 [Deafen | Second Strike],278426,Dialga Lv.72 [Reverse Time | Time-Space Traveling],Reverse Time Time-Space Traveling,https://pokepricelab.com/de/catalog/platinum-dialga-lv-72-5
 undecided,E1,105,Cyndaquil,"5,10€",274979,Cyndaquil [Singe | Quick Attack],274980,Cyndaquil [Tackle | Ember | e-card],Tackle Ember,https://pokepricelab.com/de/catalog/expedition-base-set-cyndaquil-105
+undecided,SP,116,Morpeko,"4,35€",549431,Morpeko [Thunder Shock],557973,Morpeko [Famished | Thunder Shock],Famished Thunder Shock,https://pokepricelab.com/de/catalog/swsh-black-star-promos-morpeko-116
 undecided,SP,244,Scorbunny,"3,81€",516354,Scorbunny [Me First | Live Coal],665987,Scorbunny [Flaring Dash | Ember],Flaring Dash Flare,https://pokepricelab.com/de/catalog/swsh-black-star-promos-scorbunny-244
 undecided,SV,5,Garchomp,"3,49€",278751,Garchomp [C] Lv.62 [Claw Swipe | Earthquake],278696,Garchomp Lv.71 [Dragon Intimidation | Guard Claw | Speed Impact],Dragon Intimidation Guard Claw Speed Impact 120-,https://pokepricelab.com/de/catalog/supreme-victors-garchomp-lv-71-5
 undecided,SVI,241,Professor's Research,"1,98€",702536,Professor's Research - Professor Sada,702537,Professor's Research - Professor Turo,,https://pokepricelab.com/de/catalog/scarlet-violet-professor-s-research-241
@@ -174,8 +139,10 @@ undecided,SVI,240,Professor's Research,"1,40€",702537,Professor's Research - P
 undecided,BLW,45,Joltik,"0,32€",279782,Joltik [Stun Needle],279783,Joltik [Leech Life | BW],Leech Life,https://pokepricelab.com/de/catalog/black-white-joltik-45
 undecided,BST,108,Aegislash,"0,22€",545616,Aegislash [Stance Change | Full Metal Blade],545621,Aegislash [Stance Change | Giganton Bash],Stance Change Gigaton Bash,https://pokepricelab.com/de/catalog/battle-styles-aegislash-108
 undecided,CES,25,Torchic,"0,10€",361272,Torchic [Peck | Live Coal],361273,Torchic [Ember | CES],Ember,https://pokepricelab.com/de/catalog/celestial-storm-torchic-25
+undecided,SVI,190,Professor's Research,"0,10€",702485,Professor's Research - Professor Sada,689769,Professor's Research - Professor Turo,,https://pokepricelab.com/de/catalog/scarlet-violet-professor-s-research-190
 undecided,SVI,73,Pawmi,"0,05€",702370,Pawmi [Light Punch | Zap Kick],824666,Pawmi [Static Shock],Jolt,https://pokepricelab.com/de/catalog/scarlet-violet-thai-promos-pawmi-sv-p-th-073-scarlet-violet-thai-promos-073
 wrong-product,NP,35,Pikachu,"260,24€",275485,Pikachu [Agility | Thundershock],275508,Pikachu δ Delta Species [Thunder Wave | Iron Tail],Thunder Wave Iron Tail,https://pokepricelab.com/de/catalog/nintendo-black-star-promos-pikachu-delta-species-35
+wrong-product,SVP,200,Eevee,"217,98€",806407,Eevee [Boosted Evolution | Reckless Charge],826138,Eevee [Call for Family | Gnaw],Call for Family Gnaw,https://pokepricelab.com/de/catalog/sv-black-star-promos-eevee-200
 wrong-product,NP,16,Treecko,"182,73€",275480,Treecko [Tail Slap | Razor Leaf],275489,Treecko [Pound | Sporadic Sponging],Pound Sporadic Sponging,https://pokepricelab.com/de/catalog/nintendo-black-star-promos-treecko-16
 wrong-product,N1,18,Typhlosion,"159,23€",274417,Typhlosion [Fire Recharge | Flame Burst],274418,Typhlosion [Fire Boost | Flame Wheel],Fire Boost Flame Wheel,https://pokepricelab.com/de/catalog/neo-genesis-typhlosion-18
 wrong-product,E2,148,Kingdra,"156,26€",275056,Kingdra [Water Cyclone | Rapids],275224,Kingdra [Crystal Type | Aquabomb | Dual Burn],Crystal Type Aquabomb Dual Burn,https://pokepricelab.com/de/catalog/aquapolis-kingdra-148
@@ -183,9 +150,13 @@ wrong-product,SVP,148,Miraidon,"147,62€",692234,Miraidon [Sharp Fang | Lightni
 wrong-product,SVP,91,Koraidon,"107,80€",692236,Koraidon [Claw Slash | Rampaging Fang],760233,Koraidon [Primordial Beatdown | Shred],Primordial Beatdown Shred,https://pokepricelab.com/de/catalog/sv-black-star-promos-koraidon-091
 wrong-product,N1,11,Meganium,"73,46€",274410,Meganium [Herbal Scent | Body Slam],274411,Meganium [Wild Growth | Soothing Scent],Wild Growth Soothing Scent,https://pokepricelab.com/de/catalog/neo-genesis-meganium-11
 wrong-product,SP,234,Pikachu,"64,65€",461594,Pikachu [Iron Tail | Electro Ball],653698,Pikachu [Gift Delivery | Pika Ball],Gift Delivery Pika Ball,https://pokepricelab.com/de/catalog/swsh-black-star-promos-pikachu-234
+wrong-product,SP,285,Pikachu V,"64,45€",576744,Pikachu V [Volt Tackle],692429,Pikachu V [Pika Drive],Pika Drive,https://pokepricelab.com/de/catalog/swsh-black-star-promos-pikachu-v-285
 wrong-product,E3,150,Kabutops,"58,68€",275240,Kabutops [Primal Aura | Dual Cut],275408,Kabutops [Crystal Type | Draining Cut | Triple Cutter],Crystal Type Draining Cut Triple Cutter,https://pokepricelab.com/de/catalog/skyridge-kabutops-150
 wrong-product,N1,10,Meganium,"47,68€",274411,Meganium [Wild Growth | Soothing Scent],274410,Meganium [Herbal Scent | Body Slam],Herbal Scent Body Slam,https://pokepricelab.com/de/catalog/neo-genesis-meganium-10
 wrong-product,SVP,95,Cleffa,"38,75€",761128,Cleffa [Grasping Draw],751816,Cleffa [Twinkling Hope],Twinkling Hope,https://pokepricelab.com/de/catalog/sv-black-star-promos-cleffa-095
+wrong-product,SVP,88,Pikachu,"37,27€",740411,Pikachu [Scrappy Spark],751813,Pikachu [Growl | Pika Bolt],Growl Pika Bolt,https://pokepricelab.com/de/catalog/sv-black-star-promos-pikachu-088
+wrong-product,E2,15,Houndoom,"30,91€",275086,Houndoom [Smokescreen | Burn Up],275087,Houndoom [Fireworks | Dark Impact],Fireworks Dark Impact,https://pokepricelab.com/de/catalog/aquapolis-houndoom-15
+wrong-product,SVP,121,Revavroom,"22,08€",761122,Revavroom [Rumbling Engine | Knock Away],769421,Revavroom [Swagger | Huge Tackle],Swagger Huge Tackle,https://pokepricelab.com/de/catalog/sv-black-star-promos-revavroom-121
 wrong-product,E1,36,Blastoise,"20,47€",274912,Blastoise [Jet Stream | Energy Cannon],274911,Blastoise [Bubble | Double Cannon],Bubble Double Cannon,https://pokepricelab.com/de/catalog/expedition-base-set-blastoise-36
 wrong-product,E1,132,Squirtle,"19,68€",275006,Squirtle [Wave Splash | Doubleslap],275007,Squirtle [Headbutt | Bubblebeam],Headbutt Bubblebeam,https://pokepricelab.com/de/catalog/expedition-base-set-squirtle-132
 wrong-product,E1,67,Venusaur,"17,63€",274943,Venusaur [Harvest Bounty | Body Slam],274942,Venusaur [Leech Seed | Fury Strikes],Leech Seed Fury Strikes,https://pokepricelab.com/de/catalog/expedition-base-set-venusaur-67
@@ -194,6 +165,7 @@ wrong-product,NP,3,Treecko,"16,17€",275489,Treecko [Pound | Sporadic Sponging]
 wrong-product,E1,30,Venusaur,"16,02€",274942,Venusaur [Leech Seed | Fury Strikes],274905,Venusaur [Harvest Bounty | Body Slam],Harvest Bounty Body Slam,https://pokepricelab.com/de/catalog/expedition-base-set-venusaur-30
 wrong-product,SVP,161,Charizard ex,"15,71€",740401,Charizard ex [Infernal Reign | Burning Darkness],791830,Charizard ex [Brave Wing | Explosive Vortex],Brave Wing Explosive Vortex,https://pokepricelab.com/de/catalog/sv-black-star-promos-charizard-ex-161
 wrong-product,BWP,99,Genesect,"15,65€",279905,Genesect [Signal Beam | Overdrive Smash],279890,Genesect [Hyper Beam | Breaker Bazooka],Hyper Beam Breaker Bazooka,https://pokepricelab.com/de/catalog/bw-black-star-promos-genesect-99
+wrong-product,BCR,33,Psyduck,"14,06€",280619,Psyduck [Dazzle Dance],280620,Psyduck [Firefighting],Firefighting,https://pokepricelab.com/de/catalog/boundaries-crossed-psyduck-33
 wrong-product,SP,198,Pikachu V,"13,04€",576742,Pikachu V [Volt Tackle],604984,Pikachu V [Lightning Blast],Lightning Blast,https://pokepricelab.com/de/catalog/swsh-black-star-promos-pikachu-v-198
 wrong-product,DEX,61,Umbreon,"12,99€",280388,Umbreon [Shadow Drain | Slashing Strike],280389,Umbreon [Confuse Ray | Shadow Shutdown],Confuse Ray Shadow Shutdown,https://pokepricelab.com/de/catalog/dark-explorers-umbreon-61
 wrong-product,E3,20,Magneton,"11,82€",275277,Magneton [Attract Energy | Electric Blast],275278,Magneton [Bounce Off | Magnetic Wave],Bounce Off Magnetic Wave,https://pokepricelab.com/de/catalog/skyridge-magneton-20
@@ -206,6 +178,7 @@ wrong-product,CG,2,Blastoise,"9,80€",277095,Blastoise [Water Pressure | Hydro 
 wrong-product,E1,135,Totodile,"9,49€",275009,Totodile [Surf | Double Scratch],275010,Totodile [Paralyzing Gaze | Bite],Paralyzing Gaze Bite,https://pokepricelab.com/de/catalog/expedition-base-set-totodile-135
 wrong-product,PL,37,Palkia,"8,93€",278433,Palkia [G] Lv.78 [Splashing Turn | Pearl Breath],278458,Palkia Lv.72 [Tsunami | Water Pulse],Tsunami Water Pulse,https://pokepricelab.com/de/catalog/platinum-palkia-lv-72-37
 wrong-product,E2,80,Growlithe,"8,90€",275124,Growlithe [Ember],275154,Growlithe [Roar | Firebreathing],Roar Firebreathing,https://pokepricelab.com/de/catalog/aquapolis-growlithe-80
+wrong-product,E1,53,Meganium,"8,66€",274929,Meganium [Soothing Aroma | Poisonpowder],274928,Meganium [Sleep Powder | Solarbeam],Sleep Powder Solarbeam,https://pokepricelab.com/de/catalog/expedition-base-set-meganium-53
 wrong-product,E3,18,Magcargo,"8,62€",275276,Magcargo [Eruption | Fire Stream],275275,Magcargo [Streaming Mantle | Crushing Lava],Streaming Mantle Crushing Lava,https://pokepricelab.com/de/catalog/skyridge-magcargo-18
 wrong-product,PL,6,Dialga,"8,14€",371546,Dialga [G] Lv.79 [Deafen | Second Strike],278427,Dialga Lv.70 [Time Aura | Metal Burn],Time Aura Metal Burn,https://pokepricelab.com/de/catalog/platinum-dialga-lv-70-6
 wrong-product,DEX,60,Umbreon,"7,71€",280389,Umbreon [Confuse Ray | Shadow Shutdown],280388,Umbreon [Shadow Drain | Slashing Strike],Shadow Drain Slashing Strike,https://pokepricelab.com/de/catalog/dark-explorers-umbreon-60
@@ -223,25 +196,32 @@ wrong-product,E3,72,Ledyba,"4,93€",275330,Ledyba [Gnaw | Slam],275331,Ledyba [
 wrong-product,BWP,69,Meloetta,"4,61€",279864,Meloetta [Sing | Psyburn],279862,Meloetta [Smack | Acrobatics],Smack Acrobatics,https://pokepricelab.com/de/catalog/bw-black-star-promos-meloetta-69
 wrong-product,SVP,74,Charizard ex,"4,47€",791830,Charizard ex [Brave Wing | Explosive Vortex],751798,Charizard ex [Infernal Reign | Burning Darkness],Infernal Reign Burning Darkness,https://pokepricelab.com/de/catalog/sv-black-star-promos-charizard-ex-074
 wrong-product,DR,10,Salamence,"3,96€",275896,Salamence [Intimidating Fang | Dragon Flame],275887,Salamence [Dragon Wind | Agility | Dragon Claw],Dragon Wind Agility Dragon Claw,https://pokepricelab.com/de/catalog/ex-dragon-salamence-10
+wrong-product,PAF,172,Paldean Tauros,"3,90€",751650,Paldean Tauros [Raging Horns | Blaze Dash],751711,Paldean Tauros [Raging Horns | Combat Tackle],Raging Horns Combat Tackle,https://pokepricelab.com/de/catalog/paldean-fates-paldean-tauros-172
 wrong-product,N1,32,Croconaw,"3,88€",274431,Croconaw [Screech | Jaw Clamp],274432,Croconaw [Tackle | Sweep Away],Tackle Sweep Away,https://pokepricelab.com/de/catalog/neo-genesis-croconaw-32
 wrong-product,LTR,83,Stunfisk,"3,66€",281136,Stunfisk [Attract | Mud-Slap],281234,Stunfisk [Muddy Water | Rumble],Muddy Water Rumble,https://pokepricelab.com/de/catalog/legendary-treasures-stunfisk-83
 wrong-product,SP,73,Sobble,"3,61€",427091,Sobble [Bind],516364,Sobble [Growl | Rain Splash],Growl Rain Splash,https://pokepricelab.com/de/catalog/swsh-black-star-promos-sobble-073
 wrong-product,NVI,15,Victini,"3,54€",280137,Victini [Victory Star | Stored Power],280138,Victini [V-create],V-create,https://pokepricelab.com/de/catalog/noble-victories-victini-15
+wrong-product,SSH,15,Rillaboom,"3,52€",701500,Rillaboom [Voltage Beat | Hammer In],436244,Rillaboom [Drum Roll | Drum Beating],Drum Roll Drum Beating,https://pokepricelab.com/de/catalog/sword-shield-rillaboom-15
 wrong-product,BWP,68,Meloetta,"3,51€",279862,Meloetta [Smack | Acrobatics],279864,Meloetta [Sing | Psyburn],Sing Psyburn,https://pokepricelab.com/de/catalog/bw-black-star-promos-meloetta-68
+wrong-product,PAF,120,Paldean Tauros,"3,30€",751711,Paldean Tauros [Raging Horns | Combat Tackle],751659,Paldean Tauros [Raging Horns | Aqua Dive],Raging Horns Aqua Dive,https://pokepricelab.com/de/catalog/paldean-fates-paldean-tauros-120
+wrong-product,SP,71,Scorbunny,"3,24€",427086,Scorbunny [Super Singe],516354,Scorbunny [Me First | Live Coal],Me First Live Coal,https://pokepricelab.com/de/catalog/swsh-black-star-promos-scorbunny-071
 wrong-product,NVI,14,Victini,"3,04€",280138,Victini [V-create],280137,Victini [Victory Star | Stored Power],Victory Star Stored Power,https://pokepricelab.com/de/catalog/noble-victories-victini-14
 wrong-product,CG,43,Wartortle,"3,03€",277123,Wartortle [Bubble | Tackle],277124,Wartortle [Tail Whip | Bite],Tail Whip Bite,https://pokepricelab.com/de/catalog/ex-crystal-guardians-wartortle-43
 wrong-product,DX,16,Deoxys,"3,03€",276420,Deoxys [Form Change | Energy Crush],276419,Deoxys [Form Change | Link Blast],Form Change Link Blast,https://pokepricelab.com/de/catalog/ex-deoxys-deoxys-16
 wrong-product,SP,70,Grookey,"2,98€",547426,Grookey [Branch Poke],516349,Grookey [Full On],Full On,https://pokepricelab.com/de/catalog/swsh-black-star-promos-grookey-070
+wrong-product,PAF,111,Paldean Tauros,"2,75€",751659,Paldean Tauros [Raging Horns | Aqua Dive],751650,Paldean Tauros [Raging Horns | Blaze Dash],Raging Horns Blaze Dash,https://pokepricelab.com/de/catalog/paldean-fates-paldean-tauros-111
 wrong-product,N1,47,Quilava,"2,70€",274446,Quilava [Ember | Fire Wind],274447,Quilava [Smokescreen | Char],Smokescreen Char,https://pokepricelab.com/de/catalog/neo-genesis-quilava-47
 wrong-product,RS,50,Aron,"2,67€",275673,Aron [Rollout | Double Stab],275698,Aron [Gnaw],Gnaw,https://pokepricelab.com/de/catalog/ex-ruby-sapphire-aron-50
 wrong-product,E2,115,Voltorb,"2,59€",275137,Voltorb [Rollout | Thundershock],275191,Voltorb [Swift],Swift,https://pokepricelab.com/de/catalog/aquapolis-voltorb-115
 wrong-product,SP,143,Pikachu V,"2,58€",604984,Pikachu V [Lightning Blast],576742,Pikachu V [Volt Tackle],Volt Tackle,https://pokepricelab.com/de/catalog/swsh-black-star-promos-pikachu-v-143
 wrong-product,E2,85,Horsea,"2,55€",275158,Horsea [Bubble],275159,Horsea [Reverse Thrust],Reverse Thrust,https://pokepricelab.com/de/catalog/aquapolis-horsea-85
+wrong-product,SP,12,Morpeko,"2,54€",461679,Morpeko [Famished | Thunder Shock],427106,Morpeko [Thunder Shock],Thunder Shock,https://pokepricelab.com/de/catalog/swsh-black-star-promos-morpeko-012
 wrong-product,RS,71,Skitty,"2,53€",275692,Skitty [Minor Errand-Running | Lullaby],275719,Skitty [Tackle | Lunge],Tackle Lunge,https://pokepricelab.com/de/catalog/ex-ruby-sapphire-skitty-71
 wrong-product,SV,50,Arcanine,"2,41€",278706,Arcanine [G] Lv.60 [Extreme Speed | Overrun],278741,Arcanine Lv.32 [Overrun | Combustion],Overrun Combustion,https://pokepricelab.com/de/catalog/supreme-victors-arcanine-lv-32-50
 wrong-product,DRV,15,Fraxure,"2,35€",281014,Fraxure [Grit | Dragon Claw],281015,Fraxure [Scratch | Sharp Fang],Scratch Sharp Fang,https://pokepricelab.com/de/catalog/dragon-vault-fraxure-15
 wrong-product,SP,63,Pikachu V,"2,31€",540616,Pikachu V [Charge | Thunderbolt],496545,Pikachu V [Pika Ball | Circle Circuit],Pika Ball Circle Circuit,https://pokepricelab.com/de/catalog/swsh-black-star-promos-pikachu-v-063
 wrong-product,CG,31,Combusken,"2,25€",277097,Combusken [Focus Energy | High Jump Kick],277112,Combusken [Searing Flame | Firebreathing],Searing Flame Firebreathing,https://pokepricelab.com/de/catalog/ex-crystal-guardians-combusken-31
+wrong-product,E2,84,Horsea,"2,12€",275159,Horsea [Reverse Thrust],275158,Horsea [Bubble],Bubble,https://pokepricelab.com/de/catalog/aquapolis-horsea-84
 wrong-product,BLW,6,Serperior,"2,04€",279743,Serperior [Vine Whip | Leaf Storm],279744,Serperior [Royal Heal | Leaf Tornado],Royal Heal Leaf Tornado,https://pokepricelab.com/de/catalog/black-white-serperior-6
 wrong-product,RS,53,Electrike,"1,89€",275678,Electrike [Charge | Thunder Jolt],275701,Electrike [Super Thunder Wave | Tackle],Super Thunder Wave Tackle,https://pokepricelab.com/de/catalog/ex-ruby-sapphire-electrike-53
 wrong-product,E2,64,Voltorb,"1,78€",275191,Voltorb [Swift],275137,Voltorb [Rollout | Thundershock],Rollout Thundershock,https://pokepricelab.com/de/catalog/aquapolis-voltorb-64
@@ -250,6 +230,7 @@ wrong-product,N1,54,Chikorita,"1,52€",274453,Chikorita [Tackle | Deflector],27
 wrong-product,RS,60,Mudkip,"1,40€",275707,Mudkip [Bubble],275708,Mudkip [Pound | Fury Swipes],Pound Fury Swipes,https://pokepricelab.com/de/catalog/ex-ruby-sapphire-mudkip-60
 wrong-product,BLW,5,Serperior,"1,38€",279744,Serperior [Royal Heal | Leaf Tornado],279743,Serperior [Vine Whip | Leaf Storm],Vine Whip Leaf Storm,https://pokepricelab.com/de/catalog/black-white-serperior-5
 wrong-product,PAL,201,Fuecoco,"1,31€",715508,Fuecoco [Tackle],715676,Fuecoco [Spacing Out | Flare],Spacing Out Flare,https://pokepricelab.com/de/catalog/paldea-evolved-fuecoco-201
+wrong-product,SSH,59,Inteleon,"1,30€",450623,Inteleon [Shady Dealings | Aqua Bullet],436429,Inteleon [Silent Shot | Hydro Snipe],Silent Shot Hydro Snipe,https://pokepricelab.com/de/catalog/sword-shield-inteleon-59
 wrong-product,EPO,57,Excadrill,"1,23€",280021,Excadrill [Metal Claw | Drill Run],280022,Excadrill [Dig | Earthquake],Dig Earthquake,https://pokepricelab.com/de/catalog/emerging-powers-excadrill-57
 wrong-product,RS,65,Poochyena,"1,22€",275712,Poochyena [Knock Off | Rear Kick],275713,Poochyena [Shadow Bind],Shadow Bind,https://pokepricelab.com/de/catalog/ex-ruby-sapphire-poochyena-65
 wrong-product,EPO,8,Leavanny,"1,17€",279972,Leavanny [Nurturing | X-Scissor],279973,Leavanny [Slash | Triple Cutter],Slash Triple Cutter,https://pokepricelab.com/de/catalog/emerging-powers-leavanny-8
@@ -267,6 +248,7 @@ wrong-product,EPO,7,Leavanny,"0,76€",279973,Leavanny [Slash | Triple Cutter],2
 wrong-product,TEU,12,Charmander,"0,75€",368944,Charmander [Scratch | Reprisal],368945,Charmander [Ember],Ember,https://pokepricelab.com/de/catalog/team-up-charmander-12
 wrong-product,BCR,96,Skarmory,"0,70€",280682,Skarmory [Claw | Drill Peck],280683,Skarmory [Metal Sound | Swift],Metal Sound Swift,https://pokepricelab.com/de/catalog/boundaries-crossed-skarmory-96
 wrong-product,RS,76,Treecko,"0,70€",275723,Treecko [Poison Breath],275724,Treecko [Tail Slap | Razor Leaf],Tail Slap Razor Leaf,https://pokepricelab.com/de/catalog/ex-ruby-sapphire-treecko-76
+wrong-product,SSH,35,Cinderace,"0,67€",450573,Cinderace [Libero | Flare Striker],436329,Cinderace [Pyro Ball | Burning Kick],Pyro Ball Burning Kick,https://pokepricelab.com/de/catalog/sword-shield-cinderace-35
 wrong-product,UD,16,Honchkrow,"0,67€",279268,Honchkrow [Whirlwind | Blindside],279269,Honchkrow [Shadow Bind | Vengeance],Shadow Bind Vengeance,https://pokepricelab.com/de/catalog/undaunted-honchkrow-16
 wrong-product,RS,67,Ralts,"0,65€",275716,Ralts [Pound | Link Blast],275715,Ralts [Headbutt | Hypnoblast],Headbutt Hypnoblast,https://pokepricelab.com/de/catalog/ex-ruby-sapphire-ralts-67
 wrong-product,SP,85,Boltund V,"0,61€",608109,Boltund V [Smash Turn | Electrobullet],610516,Boltund V [Electrify | Bolt Storm],Electrify Bolt Storm,https://pokepricelab.com/de/catalog/swsh-black-star-promos-boltund-v-085
@@ -274,16 +256,24 @@ wrong-product,BKT,108,Axew,"0,60€",286355,Axew [Extra Chop | Dragon Claw],2863
 wrong-product,BCR,95,Skarmory,"0,57€",280683,Skarmory [Metal Sound | Swift],280682,Skarmory [Claw | Drill Peck],Claw Drill Peck,https://pokepricelab.com/de/catalog/boundaries-crossed-skarmory-95
 wrong-product,RS,58,Makuhita,"0,55€",275705,Makuhita [Fling | Low Kick],275706,Makuhita [Fake Out],Fake Out,https://pokepricelab.com/de/catalog/ex-ruby-sapphire-makuhita-58
 wrong-product,RS,64,Poochyena,"0,54€",275713,Poochyena [Shadow Bind],275712,Poochyena [Knock Off | Rear Kick],Knock Off Rear Kick,https://pokepricelab.com/de/catalog/ex-ruby-sapphire-poochyena-64
+wrong-product,SSH,76,Boltund,"0,48€",436504,Boltund [Big Bite | Fighting Fangs],436509,Boltund [Bite | Electrodash],Bite Electrodash,https://pokepricelab.com/de/catalog/sword-shield-boltund-76
 wrong-product,UD,65,Scyther,"0,47€",279289,Scyther [Afterimage Strike],279318,Scyther [Cut | Slashing Strike],Cut Slashing Strike,https://pokepricelab.com/de/catalog/undaunted-scyther-65
 wrong-product,RS,66,Ralts,"0,45€",275715,Ralts [Headbutt | Hypnoblast],275714,Ralts [Confuse Ray],Confuse Ray,https://pokepricelab.com/de/catalog/ex-ruby-sapphire-ralts-66
 wrong-product,CG,19,Grovyle,"0,43€",277113,Grovyle [Detect | Smash Kick],277100,Grovyle δ Delta Species [Scratch | Agility],Scratch Agility,https://pokepricelab.com/de/catalog/ex-crystal-guardians-grovyle-delta-species-19
+wrong-product,PLS,113,Watchog,"0,42€",280852,Watchog [Fast Swipe | Biting Fang],280853,Watchog [Second Bite | Low Kick],Second Bite Low Kick,https://pokepricelab.com/de/catalog/plasma-storm-watchog-113
+wrong-product,PLS,92,Durant,"0,38€",280831,Durant [Gnaw | Hard Crunch],280832,Durant [Call for Backup | Metal Jail],Call for Backup Metal Jail,https://pokepricelab.com/de/catalog/plasma-storm-durant-92
+wrong-product,NVI,39,Tynamo,"0,37€",280161,Tynamo [Thunder Wave],280162,Tynamo [Tackle],Tackle,https://pokepricelab.com/de/catalog/noble-victories-tynamo-39
+wrong-product,PLS,91,Durant,"0,37€",280832,Durant [Call for Backup | Metal Jail],280831,Durant [Gnaw | Hard Crunch],Gnaw Hard Crunch,https://pokepricelab.com/de/catalog/plasma-storm-durant-91
 wrong-product,BLW,28,Oshawott,"0,35€",279765,Oshawott [Tackle | Water Gun],279766,Oshawott [Razor Shell],Razor Shell,https://pokepricelab.com/de/catalog/black-white-oshawott-28
+wrong-product,SSH,58,Inteleon,"0,35€",436429,Inteleon [Silent Shot | Hydro Snipe],701501,Inteleon [Shady Dealings | Aqua Bullet],Shady Dealings Aqua Bullet,https://pokepricelab.com/de/catalog/sword-shield-inteleon-58
 wrong-product,UD,47,Eevee,"0,35€",279301,Eevee [Call for Family | Tickle],279300,Eevee [Tackle | Bite],Tackle Bite,https://pokepricelab.com/de/catalog/undaunted-eevee-47
 wrong-product,UD,36,Scyther,"0,34€",279318,Scyther [Cut | Slashing Strike],279289,Scyther [Afterimage Strike],Afterimage Strike,https://pokepricelab.com/de/catalog/undaunted-scyther-36
 wrong-product,UNM,148,Dratini,"0,33€",388527,Dratini [Agility],388532,Dratini [Aqua Lift | Jump On],Aqua Lift Jump On,https://pokepricelab.com/de/catalog/unified-minds-dratini-148
 wrong-product,UNM,150,Dragonair,"0,33€",388537,Dragonair [Twister],388542,Dragonair [Tail Whap | Destructive Whirlpool],Tail Whap Destructive Whirlpool,https://pokepricelab.com/de/catalog/unified-minds-dragonair-150
 wrong-product,FFI,60,Pancham,"0,32€",281723,Pancham [Bad-Influence Evolution | Confront],281724,Pancham [Comet Punch],Comet Punch,https://pokepricelab.com/de/catalog/furious-fists-pancham-60
 wrong-product,HL,57,Chinchou,"0,32€",276130,Chinchou [Pound | Spark],276131,Chinchou [Random Spark | Lightning Ball],Random Spark Lightning Ball,https://pokepricelab.com/de/catalog/ex-hidden-legends-chinchou-57
+wrong-product,PLS,112,Watchog,"0,32€",280853,Watchog [Second Bite | Low Kick],280852,Watchog [Fast Swipe | Biting Fang],Fast Swipe Biting Fang,https://pokepricelab.com/de/catalog/plasma-storm-watchog-112
+wrong-product,UNM,99,Salazzle,"0,32€",388002,Salazzle [Fire Claws],388302,Salazzle [Smack | Slashing Claw],Smack Slashing Claw,https://pokepricelab.com/de/catalog/unified-minds-salazzle-99
 wrong-product,EPO,46,Gothorita,"0,31€",280010,Gothorita [Double Slap | Psybeam],280011,Gothorita [Deleting Glare | Super Psy Bolt],Deleting Glare Super Psy Bolt,https://pokepricelab.com/de/catalog/emerging-powers-gothorita-46
 wrong-product,HL,56,Chinchou,"0,30€",276131,Chinchou [Random Spark | Lightning Ball],276130,Chinchou [Pound | Spark],Pound Spark,https://pokepricelab.com/de/catalog/ex-hidden-legends-chinchou-56
 wrong-product,UNM,34,Salazzle,"0,30€",388302,Salazzle [Smack | Slashing Claw],388002,Salazzle [Fire Claws],Fire Claws,https://pokepricelab.com/de/catalog/unified-minds-salazzle-34
@@ -292,44 +282,66 @@ wrong-product,UNM,149,Dragonair,"0,29€",388542,Dragonair [Tail Whap | Destruct
 wrong-product,DEX,81,Chansey,"0,28€",280408,Chansey [Sing | Double-Edge],280409,Chansey [Continuous Tumble],Continuous Tumble,https://pokepricelab.com/de/catalog/dark-explorers-chansey-81
 wrong-product,LOT,40,Cyndaquil,"0,27€",365679,Cyndaquil [Smokescreen],365680,Cyndaquil [Hammer In],Hammer In,https://pokepricelab.com/de/catalog/lost-thunder-cyndaquil-40
 wrong-product,LOT,6,Chikorita,"0,27€",365573,Chikorita [Synthesis | Razor Leaf],365574,Chikorita [Mini Drain],Mini Drain,https://pokepricelab.com/de/catalog/lost-thunder-chikorita-6
+wrong-product,UL,57,Onix,"0,27€",279212,Onix [Energy Healer | Boundless Power],279213,Onix [Swing Around],Swing Around,https://pokepricelab.com/de/catalog/unleashed-onix-57
 wrong-product,BLW,44,Joltik,"0,26€",279783,Joltik [Leech Life | BW],279782,Joltik [Stun Needle],Stun Needle,https://pokepricelab.com/de/catalog/black-white-joltik-44
 wrong-product,EPO,45,Gothorita,"0,25€",280011,Gothorita [Deleting Glare | Super Psy Bolt],280010,Gothorita [Double Slap | Psybeam],Double Slap Psybeam,https://pokepricelab.com/de/catalog/emerging-powers-gothorita-45
 wrong-product,GRI,56,Oricorio,"0,25€",297478,Oricorio [Passionate Dance | Kindle],371619,Oricorio [Supernatural Dance | Revelation Dance],Supernatural Dance Revelation Dance,https://pokepricelab.com/de/catalog/guardians-rising-oricorio-56
 wrong-product,FCO,87,Minccino,"0,23€",289907,Minccino [Cleaning Up],289908,Minccino [Tail Smack],Tail Smack,https://pokepricelab.com/de/catalog/fates-collide-minccino-87
 wrong-product,HL,53,Baltoy,"0,23€",276126,Baltoy [Psyshock],276127,Baltoy [Headbutt | Mud Slap],Headbutt Mud Slap,https://pokepricelab.com/de/catalog/ex-hidden-legends-baltoy-53
+wrong-product,SSH,75,Boltund,"0,23€",436509,Boltund [Bite | Electrodash],436504,Boltund [Big Bite | Fighting Fangs],Big Bite Fighting Fangs,https://pokepricelab.com/de/catalog/sword-shield-boltund-75
 wrong-product,BKT,116,Doduo,"0,22€",286361,Doduo [Simultaneous Peck | Doduo Delivery],286362,Doduo [Double Stab | Doduo Delivery],Double Stab Doduo Delivery,https://pokepricelab.com/de/catalog/breakthrough-doduo-116
 wrong-product,BLW,81,Lillipup,"0,22€",279818,Lillipup [Pickup | Bite],371575,Lillipup [Collect | Tackle],Collect Tackle,https://pokepricelab.com/de/catalog/black-white-lillipup-81
 wrong-product,EPO,55,Drilbur,"0,22€",280019,Drilbur [Hone Claws | Scratch],280020,Drilbur [Mud-Slap],Mud-Slap,https://pokepricelab.com/de/catalog/emerging-powers-drilbur-55
 wrong-product,GRI,55,Oricorio,"0,22€",297518,Oricorio [Supernatural Dance | Revelation Dance],450068,Oricorio [Vital Dance | Casual Slap],Vital Dance Casual Slap,https://pokepricelab.com/de/catalog/guardians-rising-oricorio-55
 wrong-product,NVI,55,Elgyem,"0,22€",280177,Elgyem [Headbutt | Calm Mind],280178,Elgyem [First Contact | Headbutt],First Contact Headbutt,https://pokepricelab.com/de/catalog/noble-victories-elgyem-55
+wrong-product,PLF,55,Yamask,"0,22€",280932,Yamask [Transfer Pain],280933,Yamask [Will-O-Wisp | Ram],Will-O-Wisp Ram,https://pokepricelab.com/de/catalog/plasma-freeze-yamask-55
 wrong-product,TEU,3,Weedle,"0,22€",368935,Weedle [Tangle Drag | Bug Bite],368936,Weedle [Reckless Charge],Reckless Charge,https://pokepricelab.com/de/catalog/team-up-weedle-3
 wrong-product,BLW,80,Lillipup,"0,21€",279819,Lillipup [Collect | Tackle],279818,Lillipup [Pickup | Bite],Pickup Bite,https://pokepricelab.com/de/catalog/black-white-lillipup-80
 wrong-product,FCO,44,Wormadam,"0,20€",289829,Wormadam [Solar Ray | Leaf Cutter],289868,Wormadam [Sand Spray | Twin Bursts],Sand Spray Twin Bursts,https://pokepricelab.com/de/catalog/fates-collide-wormadam-44
+wrong-product,UNB,93,Rhyhorn,"0,20€",372383,Rhyhorn [Push Down],372384,Rhyhorn [Horn Attack | Boulder Crush],Horn Attack Boulder Crush,https://pokepricelab.com/de/catalog/unbroken-bonds-rhyhorn-93
 wrong-product,BKT,115,Doduo,"0,19€",286362,Doduo [Double Stab | Doduo Delivery],286361,Doduo [Simultaneous Peck | Doduo Delivery],Simultaneous Peck Doduo Delivery,https://pokepricelab.com/de/catalog/breakthrough-doduo-115
 wrong-product,EPO,54,Drilbur,"0,19€",280020,Drilbur [Mud-Slap],280019,Drilbur [Hone Claws | Scratch],Hone Claws Scratch,https://pokepricelab.com/de/catalog/emerging-powers-drilbur-54
+wrong-product,FCO,3,Wormadam,"0,19€",289868,Wormadam [Sand Spray | Twin Bursts],289829,Wormadam [Solar Ray | Leaf Cutter],Solar Ray Leaf Cutter,https://pokepricelab.com/de/catalog/fates-collide-wormadam-3
 wrong-product,FCO,86,Minccino,"0,19€",289908,Minccino [Tail Smack],289907,Minccino [Cleaning Up],Cleaning Up,https://pokepricelab.com/de/catalog/fates-collide-minccino-86
 wrong-product,HL,52,Baltoy,"0,19€",276127,Baltoy [Headbutt | Mud Slap],276126,Baltoy [Psyshock],Psyshock,https://pokepricelab.com/de/catalog/ex-hidden-legends-baltoy-52
+wrong-product,PLF,54,Yamask,"0,19€",280933,Yamask [Will-O-Wisp | Ram],280932,Yamask [Transfer Pain],Transfer Pain,https://pokepricelab.com/de/catalog/plasma-freeze-yamask-54
 wrong-product,CES,8,Treecko,"0,18€",361254,Treecko [Sleep Poison],361255,Treecko [Smack | Tail Whap],Smack Tail Whap,https://pokepricelab.com/de/catalog/celestial-storm-treecko-8
 wrong-product,EPO,71,Ferroseed,"0,18€",280035,Ferroseed [Pin Missile],280036,Ferroseed [Pierce],Pierce,https://pokepricelab.com/de/catalog/emerging-powers-ferroseed-71
+wrong-product,NVI,38,Tynamo,"0,18€",280162,Tynamo [Tackle],280161,Tynamo [Thunder Wave],Thunder Wave,https://pokepricelab.com/de/catalog/noble-victories-tynamo-38
+wrong-product,PLS,111,Patrat,"0,18€",280850,Patrat [Reckless Charge],280851,Patrat [Collect | Slam],Collect Slam,https://pokepricelab.com/de/catalog/plasma-storm-patrat-111
 wrong-product,EPO,70,Ferroseed,"0,17€",280036,Ferroseed [Pierce],280035,Ferroseed [Pin Missile],Pin Missile,https://pokepricelab.com/de/catalog/emerging-powers-ferroseed-70
 wrong-product,PLF,72,Pawniard,"0,17€",280949,Pawniard [Slash],280950,Pawniard [Cut],Cut,https://pokepricelab.com/de/catalog/plasma-freeze-pawniard-72
 wrong-product,BLW,2,Snivy,"0,16€",279739,Snivy [Tackle | Vine Whip],279740,Snivy [Leaf Blade],Leaf Blade,https://pokepricelab.com/de/catalog/black-white-snivy-2
 wrong-product,CEC,100,Cosmog,"0,16€",408139,Cosmog [Ascension],408144,Cosmog [Unaware | Surprise Attack],Unaware Surprise Attack,https://pokepricelab.com/de/catalog/cosmic-eclipse-cosmog-100
 wrong-product,CES,7,Treecko,"0,16€",361255,Treecko [Smack | Tail Whap],361254,Treecko [Sleep Poison],Sleep Poison,https://pokepricelab.com/de/catalog/celestial-storm-treecko-7
 wrong-product,EPO,9,Cottonee,"0,16€",279975,Cottonee [Cotton Guard],279974,Cottonee [Absorb],Absorb,https://pokepricelab.com/de/catalog/emerging-powers-cottonee-9
+wrong-product,FCO,11,Fennekin,"0,16€",289836,Fennekin [Will-O-Wisp | Tail Whip],289837,Fennekin [Invite Out],Invite Out,https://pokepricelab.com/de/catalog/fates-collide-fennekin-11
 wrong-product,LOT,115,Larvitar,"0,16€",365751,Larvitar [Submerge | Bite],365752,Larvitar [Second Strike],Second Strike,https://pokepricelab.com/de/catalog/lost-thunder-larvitar-115
 wrong-product,NVI,54,Elgyem,"0,16€",280178,Elgyem [First Contact | Headbutt],280177,Elgyem [Headbutt | Calm Mind],Headbutt Calm Mind,https://pokepricelab.com/de/catalog/noble-victories-elgyem-54
+wrong-product,PLS,110,Patrat,"0,16€",280851,Patrat [Collect | Slam],280850,Patrat [Reckless Charge],Reckless Charge,https://pokepricelab.com/de/catalog/plasma-storm-patrat-110
+wrong-product,SSH,3,Roselia,"0,16€",436189,Roselia [Absorb],436194,Roselia [Sweet Scent | Sting],Sweet Scent Sting,https://pokepricelab.com/de/catalog/sword-shield-roselia-3
 wrong-product,TEU,2,Weedle,"0,16€",368936,Weedle [Reckless Charge],368935,Weedle [Tangle Drag | Bug Bite],Tangle Drag Bug Bite,https://pokepricelab.com/de/catalog/team-up-weedle-2
+wrong-product,CEC,108,Trapinch,"0,15€",408179,Trapinch [Nest Building | Sand Spray],408189,Trapinch [Dig],Dig,https://pokepricelab.com/de/catalog/cosmic-eclipse-trapinch-108
 wrong-product,DEX,80,Chansey,"0,15€",280409,Chansey [Continuous Tumble],280408,Chansey [Sing | Double-Edge],Sing Double-Edge,https://pokepricelab.com/de/catalog/dark-explorers-chansey-80
+wrong-product,SSH,146,Minccino,"0,15€",436819,Minccino [Glance | Tail Slap],436824,Minccino [Tail Whap],Tail Whap,https://pokepricelab.com/de/catalog/sword-shield-minccino-146
+wrong-product,SSH,68,Chinchou,"0,15€",436469,Chinchou [Gentle Slap],436474,Chinchou [Luring Glow | Lightning Ball],Luring Glow Lightning Ball,https://pokepricelab.com/de/catalog/sword-shield-chinchou-68
 wrong-product,UNM,7,Sewaddle,"0,15€",387862,Sewaddle [Multiply | Gnaw],387867,Sewaddle [Swaddling Leaves | Surprise Attack],Swaddling Leaves Surprise Attack,https://pokepricelab.com/de/catalog/unified-minds-sewaddle-7
 wrong-product,CEC,107,Trapinch,"0,14€",408189,Trapinch [Dig],408179,Trapinch [Nest Building | Sand Spray],Nest Building Sand Spray,https://pokepricelab.com/de/catalog/cosmic-eclipse-trapinch-107
+wrong-product,FCO,46,Riolu,"0,14€",290536,Riolu [Double Smash],290537,Riolu [Smash Punch],Smash Punch,https://pokepricelab.com/de/catalog/fates-collide-riolu-46
 wrong-product,GRI,14,Oricorio,"0,14€",297517,Oricorio [Vital Dance | Casual Slap],371618,Oricorio [Passionate Dance | Kindle],Passionate Dance Kindle,https://pokepricelab.com/de/catalog/guardians-rising-oricorio-14
+wrong-product,UNB,27,Litten,"0,14€",372318,Litten [Singe],372319,Litten [Caturday | Big Bite],Caturday Big Bite,https://pokepricelab.com/de/catalog/unbroken-bonds-litten-27
 wrong-product,UNM,129,Murkrow,"0,14€",388432,Murkrow [Astonish],388442,Murkrow [Peck],Peck,https://pokepricelab.com/de/catalog/unified-minds-murkrow-129
 wrong-product,BKT,32,Remoraid,"0,13€",286277,Remoraid [Wild River | Water Gun],286278,Remoraid [Ion Pool | Water Gun],Ion Pool Water Gun,https://pokepricelab.com/de/catalog/breakthrough-remoraid-32
+wrong-product,FCO,45,Riolu,"0,13€",290537,Riolu [Smash Punch],290536,Riolu [Double Smash],Double Smash,https://pokepricelab.com/de/catalog/fates-collide-riolu-45
 wrong-product,LOT,5,Chikorita,"0,13€",365574,Chikorita [Mini Drain],365573,Chikorita [Synthesis | Razor Leaf],Synthesis Razor Leaf,https://pokepricelab.com/de/catalog/lost-thunder-chikorita-5
 wrong-product,PLF,71,Pawniard,"0,13€",280950,Pawniard [Cut],280949,Pawniard [Slash],Slash,https://pokepricelab.com/de/catalog/plasma-freeze-pawniard-71
+wrong-product,UNM,93,Honedge,"0,13€",388262,Honedge [Lucky Find | Pierce],388272,Honedge [Slashing Cutter],Slashing Cutter,https://pokepricelab.com/de/catalog/unified-minds-honedge-93
 wrong-product,LOT,24,Wurmple,"0,12€",365663,Wurmple [Ram],365616,Wurmple [Poison Sting],Poison Sting,https://pokepricelab.com/de/catalog/lost-thunder-wurmple-24
+wrong-product,SSH,112,Clobbopus,"0,12€",436674,Clobbopus [Bind],436679,Clobbopus [Punch],Punch,https://pokepricelab.com/de/catalog/sword-shield-clobbopus-112
+wrong-product,SSH,145,Minccino,"0,12€",436824,Minccino [Tail Whap],436819,Minccino [Glance | Tail Slap],Glance Tail Slap,https://pokepricelab.com/de/catalog/sword-shield-minccino-145
+wrong-product,UNB,26,Litten,"0,12€",372319,Litten [Caturday | Big Bite],372318,Litten [Singe],Singe,https://pokepricelab.com/de/catalog/unbroken-bonds-litten-26
 wrong-product,BKT,31,Remoraid,"0,11€",286278,Remoraid [Ion Pool | Water Gun],286277,Remoraid [Wild River | Water Gun],Wild River Water Gun,https://pokepricelab.com/de/catalog/breakthrough-remoraid-31
+wrong-product,UNM,92,Honedge,"0,11€",388272,Honedge [Slashing Cutter],388262,Honedge [Lucky Find | Pierce],Lucky Find Pierce,https://pokepricelab.com/de/catalog/unified-minds-honedge-92
 wrong-product,BRS,77,Wormadam,"0,10€",608644,Wormadam [Matron's Anger | Scrap Drop],608527,Wormadam [Matron's Anger | Bind Down],Matron's Anger Bind Down,https://pokepricelab.com/de/catalog/brilliant-stars-wormadam-077
 wrong-product,CES,26,Torchic,"0,10€",361273,Torchic [Ember | CES],361272,Torchic [Peck | Live Coal],Peck Live Coal,https://pokepricelab.com/de/catalog/celestial-storm-torchic-26
 wrong-product,CES,93,Beldum,"0,10€",361336,Beldum [Conductive Body | Ram],361337,Beldum [Single Smash],Single Smash,https://pokepricelab.com/de/catalog/celestial-storm-beldum-93
@@ -341,10 +353,15 @@ wrong-product,SSH,97,Rhyhorn,"0,10€",436599,Rhyhorn [Horn Attack | Hammer In],
 wrong-product,SSP,33,Charcadet,"0,10€",794292,Charcadet [Will-O-Wisp],794295,Charcadet [Light Punch | Flamethrower],Light Punch Flamethrower,https://pokepricelab.com/de/catalog/surging-sparks-charcadet-033
 wrong-product,UNM,6,Sewaddle,"0,10€",387867,Sewaddle [Swaddling Leaves | Surprise Attack],387862,Sewaddle [Multiply | Gnaw],Multiply Gnaw,https://pokepricelab.com/de/catalog/unified-minds-sewaddle-6
 wrong-product,ASR,91,Hisuian Overqwil,"0,09€",658714,Hisuian Overqwil [Tormenting Poison | Pinning],658718,Hisuian Overqwil [Dirty Press | Pierce],Dirty Press Pierce,https://pokepricelab.com/de/catalog/astral-radiance-hisuian-overqwil-091
+wrong-product,PAL,54,Cetoddle,"0,09€",715528,Cetoddle [Avalanche],715529,Cetoddle [Rest | Double-Edge],Rest Double-Edge,https://pokepricelab.com/de/catalog/paldea-evolved-cetoddle-054
+wrong-product,SSH,17,Blipbug,"0,09€",436249,Blipbug [Gnaw],436254,Blipbug [Call for Family],Call for Family,https://pokepricelab.com/de/catalog/sword-shield-blipbug-17
+wrong-product,TWM,127,Dipplin,"0,09€",769192,Dipplin [Festival Lead | Do the Wave],769301,Dipplin [Syrup Catcher],Syrup Catcher,https://pokepricelab.com/de/catalog/twilight-masquerade-dipplin-127
 wrong-product,CEC,99,Cosmog,"0,08€",408144,Cosmog [Unaware | Surprise Attack],449363,Cosmog [Ascension],Ascension,https://pokepricelab.com/de/catalog/cosmic-eclipse-cosmog-99
 wrong-product,FST,28,Vulpix,"0,08€",582163,Vulpix [Smash Kick],582162,Vulpix [Live Coal],Live Coal,https://pokepricelab.com/de/catalog/fusion-strike-vulpix-028
 wrong-product,SSH,67,Chinchou,"0,08€",436474,Chinchou [Luring Glow | Lightning Ball],436469,Chinchou [Gentle Slap],Gentle Slap,https://pokepricelab.com/de/catalog/sword-shield-chinchou-67
+wrong-product,SVI,136,Maschiff,"0,08€",702430,Maschiff [Rear Kick | Darkness Fang],702431,Maschiff [Crunch],Crunch,https://pokepricelab.com/de/catalog/scarlet-violet-maschiff-136
 wrong-product,SVI,18,Tarountula,"0,08€",702312,Tarountula [String Haul | Bug Bite],702314,Tarountula [Surprise Attack],Surprise Attack,https://pokepricelab.com/de/catalog/scarlet-violet-tarountula-018
+wrong-product,SVI,95,Dedenne,"0,08€",702390,Dedenne [Energy Munch],702391,Dedenne [Second Bite],Second Bite,https://pokepricelab.com/de/catalog/scarlet-violet-dedenne-095
 wrong-product,ASR,90,Hisuian Overqwil,"0,07€",658718,Hisuian Overqwil [Dirty Press | Pierce],658714,Hisuian Overqwil [Tormenting Poison | Pinning],Tormenting Poison Pinning,https://pokepricelab.com/de/catalog/astral-radiance-hisuian-overqwil-090
 wrong-product,FLI,92,Goomy,"0,07€",355605,Goomy [Sticky Membrane | Ram],355606,Goomy [Rain Splash | Flail],Rain Splash Flail,https://pokepricelab.com/de/catalog/forbidden-light-goomy-92
 wrong-product,OBF,181,Lechonk,"0,07€",725260,Lechonk [Tackle],725261,Lechonk [Disarming Voice],Disarming Voice,https://pokepricelab.com/de/catalog/obsidian-flames-lechonk-181
@@ -352,12 +369,21 @@ wrong-product,OBF,182,Lechonk,"0,07€",725261,Lechonk [Disarming Voice],725262,
 wrong-product,OBF,76,Tadbulb,"0,07€",725154,Tadbulb [Energize | Lightning Ball],725156,Tadbulb [Shake and Discharge],Shake and Discharge,https://pokepricelab.com/de/catalog/obsidian-flames-tadbulb-076
 wrong-product,OBF,78,Bellibolt,"0,07€",725157,Bellibolt [Electrobullet],725158,Bellibolt [Insulator | Thunderous Edge],Insulator Thunderous Edge,https://pokepricelab.com/de/catalog/obsidian-flames-bellibolt-078
 wrong-product,PAL,108,Paldean Tauros,"0,07€",715501,Paldean Tauros [Raging Horns | Blaze Dash],715583,Paldean Tauros [Raging Horns | Combat Tackle],Raging Horns Combat Tackle,https://pokepricelab.com/de/catalog/paldea-evolved-paldean-tauros-108
+wrong-product,SSH,111,Clobbopus,"0,07€",436679,Clobbopus [Punch],436674,Clobbopus [Bind],Bind,https://pokepricelab.com/de/catalog/sword-shield-clobbopus-111
 wrong-product,SVI,160,Tandemaus,"0,07€",702455,Tandemaus [Gnaw],702456,Tandemaus [Double Hit],Double Hit,https://pokepricelab.com/de/catalog/scarlet-violet-tandemaus-160
+wrong-product,SVI,40,Charcadet,"0,07€",702334,Charcadet [Ember],702335,Charcadet [Heat Blast],Heat Blast,https://pokepricelab.com/de/catalog/scarlet-violet-charcadet-040
 wrong-product,SVI,56,Wiglett,"0,07€",702350,Wiglett [Twisting Strike],702351,Wiglett [Dig a Little | Ram],Dig a Little Ram,https://pokepricelab.com/de/catalog/scarlet-violet-wiglett-056
+wrong-product,SVI,94,Dedenne,"0,07€",702391,Dedenne [Second Bite],702390,Dedenne [Energy Munch],Energy Munch,https://pokepricelab.com/de/catalog/scarlet-violet-dedenne-094
 wrong-product,CES,92,Beldum,"0,06€",361337,Beldum [Single Smash],361336,Beldum [Conductive Body | Ram],Conductive Body Ram,https://pokepricelab.com/de/catalog/celestial-storm-beldum-92
+wrong-product,OBF,155,Varoom,"0,06€",725234,Varoom [Spinning Draw],725235,Varoom [Suffocating Gas],Suffocating Gas,https://pokepricelab.com/de/catalog/obsidian-flames-varoom-155
 wrong-product,OBF,77,Bellibolt,"0,06€",725158,Bellibolt [Insulator | Thunderous Edge],725157,Bellibolt [Electrobullet],Electrobullet,https://pokepricelab.com/de/catalog/obsidian-flames-bellibolt-077
+wrong-product,PAL,41,Paldean Tauros,"0,06€",715583,Paldean Tauros [Raging Horns | Combat Tackle],715515,Paldean Tauros [Raging Horns | Aqua Dive],Raging Horns Aqua Dive,https://pokepricelab.com/de/catalog/paldea-evolved-paldean-tauros-041
+wrong-product,SSH,153,Wooloo,"0,06€",436854,Wooloo [Expand],436859,Wooloo [Tackle | Headbutt],Tackle Headbutt,https://pokepricelab.com/de/catalog/sword-shield-wooloo-153
+wrong-product,SVI,101,Flittle,"0,06€",702396,Flittle [Ram],702397,Flittle [Spinning Attack],Spinning Attack,https://pokepricelab.com/de/catalog/scarlet-violet-flittle-101
 wrong-product,SVI,102,Flittle,"0,06€",702397,Flittle [Spinning Attack],702398,Flittle [Dash Off],Dash Off,https://pokepricelab.com/de/catalog/scarlet-violet-flittle-102
+wrong-product,SVI,155,Lechonk,"0,06€",702450,Lechonk [Repelling Odor | Stampede],692087,Lechonk [Collect | Tackle],Collect Tackle,https://pokepricelab.com/de/catalog/scarlet-violet-lechonk-155
 wrong-product,SVI,156,Lechonk,"0,06€",702451,Lechonk [Collect | Tackle],702452,Lechonk [Whimsy Tackle],Whimsy Tackle,https://pokepricelab.com/de/catalog/scarlet-violet-lechonk-156
+wrong-product,SVI,74,Pawmi,"0,06€",702369,Pawmi [Jolt],702370,Pawmi [Light Punch | Zap Kick],Light Punch Zap Kick,https://pokepricelab.com/de/catalog/scarlet-violet-pawmi-074
 wrong-product,SVI,78,Wattrel,"0,06€",702374,Wattrel [Collect | Glide],702375,Wattrel [Static Shock],Static Shock,https://pokepricelab.com/de/catalog/scarlet-violet-wattrel-078
 wrong-product,OBF,154,Varoom,"0,05€",725235,Varoom [Suffocating Gas],725234,Varoom [Spinning Draw],Spinning Draw,https://pokepricelab.com/de/catalog/obsidian-flames-varoom-154
 wrong-product,PAL,125,Glimmet,"0,05€",715599,Glimmet [Ascension],715600,Glimmet [Rock Throw],Rock Throw,https://pokepricelab.com/de/catalog/paldea-evolved-glimmet-125
@@ -367,19 +393,29 @@ wrong-product,PAL,69,Shinx,"0,05€",715543,Shinx [Big Roar | Ram],715544,Shinx 
 wrong-product,SSP,2,Exeggcute,"0,05€",794256,Exeggcute [Precocious Evolution],794257,Exeggcute [Absorb],Absorb,https://pokepricelab.com/de/catalog/surging-sparks-exeggcute-002
 wrong-product,SVI,135,Maschiff,"0,05€",702431,Maschiff [Crunch],702430,Maschiff [Rear Kick | Darkness Fang],Rear Kick Darkness Fang,https://pokepricelab.com/de/catalog/scarlet-violet-maschiff-135
 wrong-product,SVI,17,Tarountula,"0,05€",702314,Tarountula [Surprise Attack],702313,Tarountula [String Shot],String Shot,https://pokepricelab.com/de/catalog/scarlet-violet-tarountula-017
+wrong-product,SVI,28,Capsakid,"0,05€",702323,Capsakid [Slightly Spicy],702324,Capsakid [Increasing Spice | Playful Kick],Increasing Spice Playful Kick,https://pokepricelab.com/de/catalog/scarlet-violet-capsakid-028
 wrong-product,SVI,55,Wiglett,"0,05€",702351,Wiglett [Dig a Little | Ram],702350,Wiglett [Twisting Strike],Twisting Strike,https://pokepricelab.com/de/catalog/scarlet-violet-wiglett-055
 wrong-product,SVI,59,Cetoddle,"0,05€",702353,Cetoddle [Tackle],702354,Cetoddle [Icicle | Sharp Fin],Icicle Sharp Fin,https://pokepricelab.com/de/catalog/scarlet-violet-cetoddle-059
+wrong-product,SVI,70,Rotom,"0,05€",702365,Rotom [Linear Attack],702366,Rotom [Junk Hunt | Thunder Shock],Junk Hunt Thunder Shock,https://pokepricelab.com/de/catalog/scarlet-violet-rotom-070
 wrong-product,SVI,77,Wattrel,"0,05€",702375,Wattrel [Static Shock],702374,Wattrel [Collect | Glide],Collect Glide,https://pokepricelab.com/de/catalog/scarlet-violet-wattrel-077
+wrong-product,FLI,91,Goomy,"0,04€",355606,Goomy [Rain Splash | Flail],355605,Goomy [Sticky Membrane | Ram],Sticky Membrane Ram,https://pokepricelab.com/de/catalog/forbidden-light-goomy-91
 wrong-product,PAL,121,Nacli,"0,04€",715595,Nacli [Headbutt],715596,Nacli [Salt Coating | Tackle],Salt Coating Tackle,https://pokepricelab.com/de/catalog/paldea-evolved-nacli-121
 wrong-product,PAL,20,Nymble,"0,04€",715492,Nymble [Slight Splash | Bug Bite],715493,Nymble [Wild Kick],Wild Kick,https://pokepricelab.com/de/catalog/paldea-evolved-nymble-020
 wrong-product,PAL,39,Charcadet,"0,04€",715512,Charcadet [Kick],715513,Charcadet [Live Coal | Magnum Punch],Live Coal Magnum Punch,https://pokepricelab.com/de/catalog/paldea-evolved-charcadet-039
 wrong-product,PAL,68,Shinx,"0,04€",715544,Shinx [Wild Kick],715543,Shinx [Big Roar | Ram],Big Roar Ram,https://pokepricelab.com/de/catalog/paldea-evolved-shinx-068
 wrong-product,SSP,1,Exeggcute,"0,04€",794257,Exeggcute [Absorb],794256,Exeggcute [Precocious Evolution],Precocious Evolution,https://pokepricelab.com/de/catalog/surging-sparks-exeggcute-001
 wrong-product,SSP,32,Charcadet,"0,04€",794295,Charcadet [Light Punch | Flamethrower],794292,Charcadet [Will-O-Wisp],Will-O-Wisp,https://pokepricelab.com/de/catalog/surging-sparks-charcadet-032
+wrong-product,SVI,154,Lechonk,"0,04€",702452,Lechonk [Whimsy Tackle],702450,Lechonk [Repelling Odor | Stampede],Repelling Odor Stampede,https://pokepricelab.com/de/catalog/scarlet-violet-lechonk-154
+wrong-product,SVI,27,Capsakid,"0,04€",702324,Capsakid [Increasing Spice | Playful Kick],702323,Capsakid [Slightly Spicy],Slightly Spicy,https://pokepricelab.com/de/catalog/scarlet-violet-capsakid-027
+wrong-product,SVI,39,Charcadet,"0,04€",702335,Charcadet [Heat Blast],702334,Charcadet [Ember],Ember,https://pokepricelab.com/de/catalog/scarlet-violet-charcadet-039
+wrong-product,SVI,58,Cetoddle,"0,04€",702354,Cetoddle [Icicle | Sharp Fin],702353,Cetoddle [Tackle],Tackle,https://pokepricelab.com/de/catalog/scarlet-violet-cetoddle-058
 wrong-product,TEF,97,Great Tusk,"0,04€",760726,Great Tusk [Lunge Out | Wrathful Charge],760727,Great Tusk [Land Collapse | Giant Tusk],Land Collapse Giant Tusk,https://pokepricelab.com/de/catalog/temporal-forces-great-tusk-097
 wrong-product,OBF,74,Tadbulb,"0,03€",725156,Tadbulb [Shake and Discharge],725154,Tadbulb [Energize | Lightning Ball],Energize Lightning Ball,https://pokepricelab.com/de/catalog/obsidian-flames-tadbulb-074
 wrong-product,PAL,120,Nacli,"0,03€",715596,Nacli [Salt Coating | Tackle],715595,Nacli [Headbutt],Headbutt,https://pokepricelab.com/de/catalog/paldea-evolved-nacli-120
 wrong-product,PAL,124,Glimmet,"0,03€",715600,Glimmet [Rock Throw],715599,Glimmet [Ascension],Ascension,https://pokepricelab.com/de/catalog/paldea-evolved-glimmet-124
 wrong-product,PAL,19,Nymble,"0,03€",715493,Nymble [Wild Kick],715492,Nymble [Slight Splash | Bug Bite],Slight Splash Bug Bite,https://pokepricelab.com/de/catalog/paldea-evolved-nymble-019
+wrong-product,PAL,38,Charcadet,"0,03€",715513,Charcadet [Live Coal | Magnum Punch],715512,Charcadet [Kick],Kick,https://pokepricelab.com/de/catalog/paldea-evolved-charcadet-038
 wrong-product,SSH,152,Wooloo,"0,03€",436859,Wooloo [Tackle | Headbutt],436854,Wooloo [Expand],Expand,https://pokepricelab.com/de/catalog/sword-shield-wooloo-152
+wrong-product,SVI,16,Tarountula,"0,03€",702313,Tarountula [String Shot],702312,Tarountula [String Haul | Bug Bite],String Haul Bug Bite,https://pokepricelab.com/de/catalog/scarlet-violet-tarountula-016
 wrong-product,TEF,96,Great Tusk,"0,03€",760727,Great Tusk [Land Collapse | Giant Tusk],760726,Great Tusk [Lunge Out | Wrathful Charge],Lunge Out Wrathful Charge,https://pokepricelab.com/de/catalog/temporal-forces-great-tusk-096
+wrong-product,SP,60,Duraludon,,886516,Duraludon [Metal Claw | Steel Beam],516324,Duraludon [Metal Sharpener | Power Beam],Metal Sharpener Power Beam,https://pokepricelab.com/de/catalog/swsh-black-star-promos-duraludon-060

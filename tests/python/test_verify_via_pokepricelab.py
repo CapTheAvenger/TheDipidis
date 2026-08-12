@@ -195,3 +195,42 @@ def test_promote_is_refused():
                        capture_output=True, text=True, cwd=ROOT)
     assert r.returncode == 2
     assert 'deliberately not implemented' in r.stdout
+
+
+# ── stale rows after the index veto ─────────────────────────────────
+
+def test_a_changed_url_invalidates_an_existing_verdict(tmp_path, monkeypatch):
+    """The index veto removed 61 URLs that pointed at a different card.
+    Their verdicts were read off the wrong page; resuming must re-fetch
+    them rather than keep them because the card is 'already checked'."""
+    out = tmp_path / 'out.csv'
+    with open(out, 'w', encoding='utf-8-sig', newline='') as f:
+        w = csv.DictWriter(f, fieldnames=vvp.FIELDS)
+        w.writeheader()
+        w.writerow({'set': 'BS', 'number': '52', 'our_product_id': '1',
+                    'ppl_product_id': '2', 'verdict': 'disagree',
+                    'extracted_via': '', 'checked_at': '',
+                    'url': 'https://pokepricelab.com/de/catalog/base-set-2-marowak-52'})
+        w.writerow({'set': 'ASR', 'number': '90', 'our_product_id': '1',
+                    'ppl_product_id': '1', 'verdict': 'agree',
+                    'extracted_via': '', 'checked_at': '',
+                    'url': 'https://pokepricelab.com/de/catalog/astral-radiance-x-90'})
+    monkeypatch.setattr(vvp, 'OUT', str(out))
+    targets = [
+        (('BS', '52'), 'https://pokepricelab.com/de/catalog/base-set-machop-52'),
+        (('ASR', '90'), 'https://pokepricelab.com/de/catalog/astral-radiance-x-90'),
+    ]
+    done = vvp.load_done(targets)
+    assert ('BS', '52') not in done, 'stale verdict from the wrong page survived'
+    assert ('ASR', '90') in done, 'an unchanged URL should not be re-fetched'
+
+
+def test_without_targets_the_old_resume_behaviour_is_unchanged(tmp_path, monkeypatch):
+    out = tmp_path / 'out.csv'
+    with open(out, 'w', encoding='utf-8-sig', newline='') as f:
+        w = csv.DictWriter(f, fieldnames=vvp.FIELDS)
+        w.writeheader()
+        w.writerow({'set': 'A', 'number': '1', 'our_product_id': '', 'ppl_product_id': '',
+                    'verdict': 'agree', 'extracted_via': '', 'url': 'u', 'checked_at': ''})
+    monkeypatch.setattr(vvp, 'OUT', str(out))
+    assert ('A', '1') in vvp.load_done()

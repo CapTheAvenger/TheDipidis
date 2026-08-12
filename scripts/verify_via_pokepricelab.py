@@ -117,18 +117,28 @@ def load_our_mapping():
     return out
 
 
-def load_done():
+def load_done(targets=None):
     """Rows already checked, so a timed-out run resumes instead of restarting.
 
-    fetch-failed is NOT treated as done — those are exactly the ones worth
-    retrying."""
+    Two kinds of row are deliberately NOT treated as done:
+      · fetch-failed — exactly the ones worth retrying.
+      · rows whose recorded URL is no longer the card's target URL. The
+        index veto (build_pokepricelab_index.py) removed 61 URLs that
+        pointed at a different card entirely; their verdicts were drawn
+        from the wrong page and must not survive a re-run just because
+        the card was "already checked"."""
     if not os.path.exists(OUT):
         return {}
+    current = dict(targets or [])
     done = {}
     with open(OUT, encoding='utf-8-sig', newline='') as f:
         for r in csv.DictReader(f):
-            if r.get('verdict') != 'fetch-failed':
-                done[(r['set'], r['number'])] = r
+            key = (r['set'], r['number'])
+            if r.get('verdict') == 'fetch-failed':
+                continue
+            if targets is not None and key in current and current[key] != r.get('url'):
+                continue                      # URL changed → verdict is stale
+            done[key] = r
     return done
 
 
@@ -176,7 +186,7 @@ def main():
     targets, n_wanted = load_targets(only_unverified=not args.all,
                                      limit=args.limit)
     ours = load_our_mapping()
-    done = load_done()
+    done = load_done(targets)
     todo = [(k, u) for k, u in targets if k not in done]
 
     print(f'cards in scope: {n_wanted} | with a base URL: {len(targets)} | '

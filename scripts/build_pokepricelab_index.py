@@ -179,6 +179,46 @@ def load_our_cards():
     return cards
 
 
+def load_our_names():
+    """(set, number) -> card name, for the veto guard in index_urls."""
+    names = {}
+    with open(os.path.join(DATA, 'price_data.csv'),
+              encoding='utf-8-sig', newline='') as f:
+        for r in csv.DictReader(f):
+            names[(r['set'].strip().upper(), r['number'].strip())] = r.get('name', '')
+    return names
+
+
+def _flat(s):
+    return re.sub(r'[^a-z0-9]+', '', str(s or '').lower())
+
+
+def name_vetoes(url_body, our_name):
+    """True when the URL is about a DIFFERENT card and must be dropped.
+
+    This is a veto, not a join. Identity is still established structurally
+    (set slug + trailing number); the name only ever REJECTS a URL that
+    the structure already accepted. It never selects one, never breaks a
+    tie, and never reaches into card data — which is what the name-join
+    ban is about.
+
+    It exists because the set-slug fold-up matches related sets: a slug
+    of `base-set` also prefixes `base-set-2-marowak-52`, so BS 52 (Machop)
+    was indexed to Base Set 2's Marowak. Same for `forbidden-light` vs
+    `forbidden-light-jp-*` and a row of `sword-shield-starter-decks-*`.
+    61 such rows reached the step-2 cross-check and produced verdicts
+    that said nothing about the mapping.
+
+    Containment, not suffix: legitimate slugs carry extras
+    (`arceus-charizard-lv-60`). Names under four characters never veto —
+    the trainer card "N" would flatten to "n" and match everything.
+    """
+    ours = _flat(our_name)
+    if len(ours) < 4:
+        return False
+    return ours not in _flat(url_body)
+
+
 def fetch_sitemap_urls(session):
     import xml.etree.ElementTree as ET  # noqa: PLC0415
 
@@ -211,14 +251,18 @@ def fetch_sitemap_urls(session):
     return urls
 
 
-def index_urls(urls, slug_to_code, set_slugs, our_cards):
+def index_urls(urls, slug_to_code, set_slugs, our_cards, our_names=None):
     """Assign catalog URLs to our (set, number).
 
     A URL belongs to a card iff its slug prefix resolves to that card's
     set (see derive_slug_to_code) AND the trailing number is one of ours.
-    Card names never enter the match."""
+    The card name never SELECTS a URL — it only vetoes one that names a
+    different card (see name_vetoes), which is what stopped BS 52 from
+    being indexed to Base Set 2's Marowak."""
     rows = []
     unmatched = 0
+    vetoed = 0
+    our_names = our_names or {}
     for url in urls:
         m = CATALOG_RE.match(url)
         if not m:
@@ -253,9 +297,12 @@ def index_urls(urls, slug_to_code, set_slugs, our_cards):
         if not hit:
             unmatched += 1
             continue
+        if name_vetoes(prefix, our_names.get(hit, '')):
+            vetoed += 1
+            continue
         rows.append({'set': hit[0], 'number': hit[1], 'url': url,
                      'product_id_in_url': pid, 'lang': lang})
-    return rows, unmatched
+    return rows, unmatched, vetoed
 
 
 def main():
@@ -272,7 +319,9 @@ def main():
     print(f'\ntotal sitemap urls: {len(urls)}')
 
     slug_to_code, set_slugs = derive_slug_to_code(urls, our_expansions)
-    rows, unmatched = index_urls(urls, slug_to_code, set_slugs, our_cards)
+    rows, unmatched, vetoed = index_urls(urls, slug_to_code, set_slugs,
+                                         our_cards, load_our_names())
+    print(f'urls dropped because the slug names a different card: {vetoed}')
     matched_cards = {(r['set'], r['number']) for r in rows}
     unver = {k for k, v in our_cards.items() if v}
     covered_unver = matched_cards & unver

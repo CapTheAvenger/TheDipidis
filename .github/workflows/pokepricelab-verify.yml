@@ -1,0 +1,65 @@
+# Step 2 of the pokepricelab identity source: read the Cardmarket
+# idProduct off the catalog pages of the cards whose mapping is still
+# unverified, and cross-check it against ours.
+#
+# One request per card (the German base URL), ~760 pages at 1 req/s.
+# The script is resumable — a run that hits the wall picks up where it
+# stopped, and rows that failed to fetch are retried next time.
+#
+# It writes a REPORT ONLY. Contradictions are never auto-repaired;
+# card identity is not something a scraper gets to decide.
+name: Pokepricelab verify
+
+on:
+  workflow_dispatch:
+    inputs:
+      limit:
+        description: 'Check only the first N cards (0 = all). Use e.g. 25 for a smoke run.'
+        required: false
+        default: '0'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: pokepricelab-verify
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    # 760 pages at 1 s pace is ~13 min; leave room for retries and for a
+    # later run that also covers the cards without a base URL.
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Cross-check against pokepricelab
+        run: python scripts/verify_via_pokepricelab.py --limit "${{ inputs.limit }}"
+
+      - name: Commit report
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/pokepricelab_verification.csv
+          if git diff --cached --quiet; then
+            echo "No report changes."
+            exit 0
+          fi
+          git commit -m "Auto: pokepricelab identity cross-check — $(date -u '+%Y-%m-%d %H:%M UTC')
+
+          Report only — no mapping was changed.
+          Triggered by .github/workflows/pokepricelab-verify.yml
+          Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          for i in 1 2 3 4; do
+            git push && break
+            git pull --rebase && sleep $((2 ** i))
+          done

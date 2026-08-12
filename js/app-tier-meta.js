@@ -100,6 +100,129 @@
          * @param {Array<Object>} rows
          * @returns {Object<string, {games:number,winPct:number,day2Conv:number,players:number,tournaments:number}>}
          */
+        // ============================================================================
+        // Conversion Performance — how much more often a deck makes the cut
+        // than the field does.
+        //
+        //   expected = Σ top8_count_weighted / Σ total_brought_weighted
+        //   cut(deck) = top8_count_weighted / total_brought_weighted
+        //   performance = cut / expected − 1
+        //
+        // The raw top-8 rate we already show ("6,3 %") is not interpretable
+        // on its own; "+14 % vs. the field" is. The expected rate is NEVER
+        // hardcoded: it moved from 7,23 % to 6,32 % in five days as
+        // tournaments came in, so it is summed from the loaded rows every
+        // time.
+        //
+        // Shrinkage is not optional. Raw, decks with two entries top the
+        // list — Terapagos Noctowl sat at +295 % on 0,5 of 2 appearances.
+        // K = 50 pseudo-appearances at the field average measured as the
+        // point where no deck under 20 appearances survives in the top 5
+        // while real signal still gets through (K = 25 left two-entry decks
+        // up there; K = 100 pushed Toxtricity Box, n = 52, down to +43 %).
+        // It also matches PRIOR_GAMES in computeTierScore above, so the file
+        // keeps one convention rather than two.
+        const CONV_PRIOR = 50;      // pseudo-appearances at the field average
+        const CONV_THIN_N = 50;     // below this the estimate leans on the prior
+        const CONV_MIN_N = 20;      // below this a deck is not worth ranking
+
+        function computeConversionPerformance(rows) {
+            const num = (v) => parseLocaleNumber(v || '0', 0);
+            let totalBrought = 0, totalTop8 = 0;
+            for (const r of rows) {
+                totalBrought += num(r.total_brought_weighted);
+                totalTop8 += num(r.top8_count_weighted);
+            }
+            const expected = totalBrought > 0 ? totalTop8 / totalBrought : 0;
+            const decks = [];
+            if (expected > 0) {
+                for (const r of rows) {
+                    const brought = num(r.total_brought_weighted);
+                    if (brought <= 0) continue;
+                    const top8 = num(r.top8_count_weighted);
+                    const smoothed = (top8 + CONV_PRIOR * expected) / (brought + CONV_PRIOR);
+                    decks.push({
+                        name: r.deck_name,
+                        brought,
+                        top8,
+                        rawPct: ((top8 / brought) / expected - 1) * 100,
+                        perfPct: (smoothed / expected - 1) * 100,
+                        thin: brought < CONV_THIN_N,
+                    });
+                }
+            }
+            return { expected, totalBrought, totalTop8, decks };
+        }
+
+        // Renders the "Top-8 vs. Erwartung" block. Deliberately NOT called
+        // "Conversion Performance": that is jargon on a German-language
+        // site, and the number answers a plain question — does this deck
+        // make the cut more often than the field does.
+        //
+        // The raw (unsmoothed) value is not shown. Two percentages in one
+        // narrow cell compete; the honest confidence signal is the sample
+        // size, so that is what sits under the value.
+        //
+        // Colours come from the existing palette (accent blue #2563eb,
+        // decline red #dc2626, neutral #6b7280). Green is avoided on
+        // purpose: in the movers block right below it already means
+        // "share went up", and a second meaning would collide. The sign is
+        // always written out so colour never carries the message alone.
+        const CONV_CAP = 100;       // bars beyond this are clipped and marked
+
+        function renderConversionBlock(conv, decks) {
+            if (!conv || !(conv.expected > 0) || !decks.length) return '';
+            const l = (key, fallback) =>
+                (typeof t === 'function' && t(key) !== key) ? t(key) : fallback;
+            const de = getLang() === 'de';
+            const fmtNum = (n, digits = 1) => {
+                const s = n.toFixed(digits);
+                return de ? s.replace('.', ',') : s;
+            };
+            const rows = decks.map((d, i) => {
+                const capped = Math.abs(d.perfPct) > CONV_CAP;
+                const width = Math.min(Math.abs(d.perfPct), CONV_CAP) / CONV_CAP * 50;
+                const positive = d.perfPct >= 0;
+                const sign = positive ? '+' : '−';
+                const value = `${sign}${fmtNum(Math.abs(d.perfPct), 0)} %`;
+                const bar = `<span class="cm-conv-bar">
+                        <span class="cm-conv-fill ${positive ? 'is-up' : 'is-down'}"
+                              style="width:${width.toFixed(1)}%"></span>
+                    </span>`;
+                return `<tr class="${d.thin ? 'cm-conv-thin' : ''}">
+                        <td class="cm-vt-rank">${i + 1}</td>
+                        <td class="cm-vt-name">${escapeHtml(d.name)}</td>
+                        <td class="cm-vt-value">${fmtNum((d.top8 / d.brought) * 100)} %</td>
+                        <td class="cm-conv-cell">
+                            <span class="cm-conv-value">${capped ? '› ' : ''}${value}</span>
+                            ${bar}
+                            <small class="cm-conv-n">n=${fmtNum(d.brought, 0)}</small>
+                        </td>
+                    </tr>`;
+            }).join('');
+            const hint = l('meta.t8ExpHint', de
+                ? 'Feld-Durchschnitt: {exp} % Top-8-Quote ({t8} von {n} gewichteten Antritten). +50 % heißt: Dieses Deck erreicht Top 8 anderthalbmal so oft wie der Schnitt. Gelistet ab {min} Antritten; unter {thin} wird zum Durchschnitt hin geglättet und blasser dargestellt.'
+                : 'Field average: {exp}% top-8 rate ({t8} of {n} weighted entries). +50% means this deck reaches top 8 1.5× as often as average. Listed from {min} entries; below {thin} the value is smoothed toward the average and shown faded.')
+                .replace('{exp}', fmtNum(conv.expected * 100, 2))
+                .replace('{t8}', fmtNum(conv.totalTop8, 0))
+                .replace('{n}', fmtNum(conv.totalBrought, 0))
+                .replace('{min}', String(CONV_MIN_N))
+                .replace('{thin}', String(CONV_THIN_N));
+            return `
+                <div class="cm-vs-top8-block cm-vs-top8-block--wide">
+                    <h3>🎯 ${escapeHtml(l('meta.t8ExpTitle', de ? 'Top-8 vs. Erwartung' : 'Top-8 vs. expected'))}</h3>
+                    <table class="cm-vs-top8-table cm-vs-top8-table--perf">
+                        <thead><tr>
+                            <th>#</th><th>Deck</th>
+                            <th>${escapeHtml(l('meta.t8ExpTop8Col', de ? 'Top-8-Quote' : 'Top-8 rate'))}</th>
+                            <th>${escapeHtml(l('meta.t8ExpCol', de ? 'vs. Feld' : 'vs. field'))}</th>
+                        </tr></thead>
+                        <tbody>${rows}</tbody>
+                    </table>
+                    <p class="cm-conv-hint">${escapeHtml(hint)}</p>
+                </div>`;
+        }
+
         function aggregateLabsRowsByDeck(rows) {
             const byName = new Map();
             for (const r of (rows || [])) {
@@ -1190,6 +1313,24 @@
                     const overallTop = [...enriched].sort((a, b) => b.broughtPct - a.broughtPct).slice(0, 12);
                     const top8Top    = [...enriched].sort((a, b) => b.top8 - a.top8 || b.top8ConvPct - a.top8ConvPct).slice(0, 12);
 
+                    // Top-8 vs. expected — its own full-width block, not a
+                    // third column: .cm-vs-top8-row is a 1fr 1fr grid and the
+                    // tables are table-layout:fixed with !important column
+                    // widths (css/styles.css:9451+), so a third column would
+                    // get no width at all. It also wants a different ranking
+                    // — the point is the decks that do NOT lead on count.
+                    const conv = computeConversionPerformance(t8rows);
+                    // Ranked among decks with a usable sample. Shrinkage
+                    // stops a 2-entry deck from topping the list, but it
+                    // cannot make one INFORMATIVE: unfiltered, six of the
+                    // top twelve had between 3 and 17 appearances, and
+                    // "Lopunny Dusknoir, 40 % top-8 rate, n=3" answers
+                    // nothing. Below the floor a deck is left out of the
+                    // list, not out of the field average.
+                    const convTop = [...conv.decks]
+                        .filter(d => d.brought >= CONV_MIN_N)
+                        .sort((a, b) => b.perfPct - a.perfPct).slice(0, 12);
+
                     // escapeHtml (not escapeJsStr) — these names go straight
                     // into innerHTML, so apostrophes in "N's Zoroark" or
                     // "Cynthia's Garchomp" must turn into &#39; and not
@@ -1216,7 +1357,8 @@
                                     <tbody>${top8Top.map((d, i) => renderRow(d, i, 'top-8 conversion', d.top8ConvPct.toFixed(1) + '%')).join('')}</tbody>
                                 </table>
                             </div>
-                        </div>`;
+                        </div>
+                        ${renderConversionBlock(conv, convTop)}`;
                 }
             } catch (_e) { /* CSV missing — Predictor 2.0 not deployed yet */ }
 

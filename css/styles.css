@@ -9494,6 +9494,58 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
 .cm-vs-top8-table td:nth-child(2) { width: 60% !important; }
 .cm-vs-top8-table th:nth-child(3),
 .cm-vs-top8-table td:nth-child(3) { width: 28% !important; }
+
+/* ── Top-8 vs. expected ────────────────────────────────────────────
+   Its own full-width block under the 1fr 1fr row: the dual tables are
+   table-layout:fixed with !important column widths, so a third grid
+   column or a fourth table column would collapse to nothing. The four
+   widths below have to be !important for the same cascade reason. */
+.cm-vs-top8-block--wide { margin-bottom: 18px; }
+.cm-vs-top8-table--perf th:nth-child(1),
+.cm-vs-top8-table--perf td:nth-child(1) { width: 8% !important; }
+.cm-vs-top8-table--perf th:nth-child(2),
+.cm-vs-top8-table--perf td:nth-child(2) { width: 42% !important; }
+.cm-vs-top8-table--perf th:nth-child(3),
+.cm-vs-top8-table--perf td:nth-child(3) { width: 18% !important; }
+.cm-vs-top8-table--perf th:nth-child(4),
+.cm-vs-top8-table--perf td:nth-child(4) { width: 32% !important; }
+.cm-conv-cell { text-align: right !important; white-space: nowrap; }
+.cm-conv-value { font-weight: 700; font-variant-numeric: tabular-nums; }
+/* The sign is always written out, so colour never carries the meaning
+   on its own. Green is deliberately absent — in the movers block right
+   below it already means "share went up". */
+.cm-conv-bar {
+    display: block;
+    position: relative;
+    height: 6px;
+    margin: 3px 0 2px;
+    border-radius: 3px;
+    background: #eef2f7;
+}
+.cm-conv-bar::before {          /* the zero line the bars grow out of */
+    content: "";
+    position: absolute;
+    left: 50%; top: -1px; bottom: -1px;
+    width: 1px;
+    background: #6b7280;
+}
+.cm-conv-fill {
+    position: absolute;
+    top: 0; bottom: 0;
+    border-radius: 3px;
+}
+.cm-conv-fill.is-up   { left: 50%;  background: #2563eb; }
+.cm-conv-fill.is-down { right: 50%; background: #dc2626; }
+.cm-conv-n { display: block; color: #6b7280; font-size: 0.68rem; }
+/* A thin sample is faded rather than hidden: the deck still belongs in
+   the ranking, the reader just needs to see how little is behind it. */
+.cm-conv-thin { opacity: 0.62; }
+.cm-conv-hint {
+    color: #6b7280;
+    font-size: 0.72rem;
+    line-height: 1.45;
+    margin: 8px 2px 0;
+}
 .cm-vs-top8-table th {
     background: linear-gradient(120deg, #15396b 0%, #2a5f9d 100%) !important;
     color: #ffffff !important;

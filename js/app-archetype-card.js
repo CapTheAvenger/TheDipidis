@@ -167,11 +167,11 @@
 
         // Share carries no good/bad direction — it is neutral by nature.
         const rep = d
-            ? tile('rep', 'neutral', L('arc.repLabel', de ? 'Feldanteil' : 'Representation'),
+            ? tile('rep', 'neutral', L('arc.repLabel', de ? 'Anteil' : 'Share'),
                 `${esc(fmt(d.share))} %`,
                 esc(L('arc.repCtx', de ? '{n} Listen im Feld' : '{n} lists in the field')
                     .replace('{n}', fmt(d.count, 0))))
-            : tile('rep', 'tie', L('arc.repLabel', de ? 'Feldanteil' : 'Representation'), '–',
+            : tile('rep', 'tie', L('arc.repLabel', de ? 'Anteil' : 'Share'), '–',
                 esc(L('arc.noData', de ? 'keine Daten' : 'no data')));
 
         const wrDelta = d ? d.winRate - 50 : null;
@@ -190,7 +190,7 @@
         const c = _conv ? _conv.decks.find(x =>
             String(x.name).toLowerCase() === String(name).toLowerCase()) : null;
         const conv = c
-            ? tile('conv', toneFor(c.perfPct), L('arc.convLabel', de ? 'Top-8 vs. Erwartung' : 'Top-8 vs. expected'),
+            ? tile('conv', toneFor(c.perfPct), L('arc.convLabel', de ? 'Top-8 vs. Erw.' : 'Top-8 vs. exp.'),
                 `${c.perfPct >= 0 ? '+' : '−'}${esc(fmt(Math.abs(c.perfPct)))} %`,
                 esc(`${fmt(c.top8, 0)} / ${fmt(c.brought, 0)} → ${fmt((c.top8 / c.brought) * 100, 2)} % `
                     + L('arc.convCtx', de ? 'Cut-Quote' : 'cut rate')),
@@ -198,7 +198,7 @@
                     ? 'Kleine Stichprobe — der Wert ist zum Feld-Durchschnitt hin geglättet.'
                     : 'Small sample — the value is smoothed toward the field average.') : '',
                 arrow(c.perfPct))
-            : tile('conv', 'tie', L('arc.convLabel', de ? 'Top-8 vs. Erwartung' : 'Top-8 vs. expected'),
+            : tile('conv', 'tie', L('arc.convLabel', de ? 'Top-8 vs. Erw.' : 'Top-8 vs. exp.'),
                 '–',
                 esc(L('arc.convMissing', de ? 'zu wenig Daten' : 'not enough data')),
                 L('arc.convMissingTip', de
@@ -248,11 +248,7 @@
                 : 'Faded rows: fewer than {n} games — the rate says little there.')
                 .replace('{n}', String(THIN_GAMES)))}</p>`
             : '';
-        const more = (preview && all.length > preview)
-            ? `<button type="button" class="arc-mu-more" data-deck="${esc(name)}">${
-                esc(L('arc.showAll', de ? 'Alle {n} Matchups' : 'Show all {n} matchups')
-                    .replace('{n}', String(all.length)))}</button>`
-            : '';
+
         const table = `
             <div class="mobile-table-scroll">
                 <table class="arc-mu-table">
@@ -264,7 +260,7 @@
                     </tr></thead>
                     <tbody>${body}</tbody>
                 </table>
-            </div>${more}${note}`;
+            </div>${note}`;
         if (!collapsed) return table;
         // Closed by default inline: the tiles are the scroll content, the
         // table is a reference you open when you need it. Otherwise a
@@ -304,10 +300,17 @@
             ? matchupTableHtml(name, { collapsible: true, preview: 8 })
             : `<h4 class="arc-mu-title">${esc(L('arc.matchupTitle', de ? 'Matchups' : 'Matchups'))}</h4>`
               + matchupTableHtml(name);
-        const goto = `<button type="button" class="arc-goto" data-deck="${esc(name)}">
+        // One row of actions, not two: separate rows for "all matchups"
+        // and "full analysis" cost 108 px of a 595 px card on a phone.
+        const total = matchupsFor(name).length;
+        const moreBtn = (v === 'inline' && total > 8)
+            ? `<button type="button" class="arc-mu-more" data-deck="${esc(name)}">${
+                esc(L('arc.showAll', de ? 'Alle {n}' : 'All {n}').replace('{n}', String(total)))
+              }</button>` : '';
+        const goto = `<div class="arc-actions">${moreBtn}<button type="button" class="arc-goto" data-deck="${esc(name)}">
                     ${esc(L('arc.gotoAnalysis', de
-                        ? 'Zur vollen Matchup-Analyse →' : 'Full matchup analysis →'))}
-                </button>`;
+                        ? 'Volle Analyse →' : 'Full analysis →'))}
+                </button></div>`;
         const attrs = v === 'overlay'
             ? ` role="dialog" aria-modal="true" aria-label="${esc(name)}"` : '';
         return `<div class="arc-card arc-card--${v}"${attrs}>

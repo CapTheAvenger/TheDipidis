@@ -1917,10 +1917,28 @@
     text-transform: uppercase;
     letter-spacing: 0.02em;
 }
-#sideQuestPokedexHost .sqp-stat-top { display: block; font-size: 0.86rem; white-space: nowrap; }
-#sideQuestPokedexHost .sqp-stat-top b { font-weight: 700; }
+/* Three values per cell, three distinct treatments so a fast scan down 291
+   rows never confuses them: amber = species base stat (the number players
+   learn by heart, and the one that sums to the "Ges" column), neutral grey
+   = Lv. 50 at 0 SP, blue = the actually-played final value. */
+#sideQuestPokedexHost .sqp-stat-base {
+    display: block;
+    color: #b45309;
+    font-weight: 800;
+    font-size: 0.8rem;
+    letter-spacing: 0.01em;
+    line-height: 1.25;
+}
+#sideQuestPokedexHost .sqp-stat-top { display: block; font-size: 0.8rem; white-space: nowrap; }
+#sideQuestPokedexHost .sqp-stat-top b { font-weight: 600; color: #5a6473; }
 #sideQuestPokedexHost .sqp-stat-used { color: #1d6fd0; font-weight: 600; font-size: 0.74rem; margin-left: 2px; }
 #sideQuestPokedexHost .sqp-stat small { display: block; color: #6b7280; font-size: 0.64rem; margin-top: 1px; }
+/* Legend keys mirror the cell colours exactly — that is the whole point. */
+.sqp-key { font-weight: 700; }
+.sqp-key-base { color: #b45309; font-weight: 800; }
+.sqp-key-lv50 { color: #5a6473; }
+.sqp-key-used { color: #1d6fd0; }
+.sqp-key-range { color: #6b7280; font-weight: 600; }
 #sideQuestPokedexHost .sqp-c-total b { color: #2c3e50; }
 
 .sqp-note, .sqp-attr {
@@ -2121,6 +2139,7 @@ body.sqp-d-open { overflow: hidden; }
 .sqp-d-stats th:first-child { text-align: left; }
 .sqp-d-stats td { padding: 3px 6px; text-align: right; border-top: 1px solid #e0e0e0; }
 .sqp-d-st-lab { text-align: left !important; color: #5a6473; }
+.sqp-d-st-basebase { color: #b45309; font-weight: 800; }
 .sqp-d-st-base { color: #2c3e50; font-weight: 700; }
 .sqp-d-st-used { color: #1d6fd0; font-weight: 700; }
 .sqp-d-st-range { color: #6b7280; font-size: 0.78rem; }

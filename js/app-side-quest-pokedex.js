@@ -46,7 +46,7 @@
     const LABELS = {
         de: {
             tab: 'Pokémon',
-            intro: 'Alle in Pokémon Champions verfügbaren Pokémon — sortier- und filterbar. Basiswert mit Lv.-50-Range in Klammern. Such nach deutschem oder englischem Namen oder Pokédex-Nummer.',
+            intro: 'Alle in Pokémon Champions verfügbaren Pokémon — sortier- und filterbar. Pro Statistik: Basiswert, Lv.-50-Wert und Spanne. Such nach deutschem oder englischem Namen oder Pokédex-Nummer.',
             searchPh: '🔎 Suche: „Knakrack", „Garchomp", „445" …',
             allTypes: 'Alle Typen',
             allForms: 'Alle Formen',
@@ -64,7 +64,14 @@
             none: 'Nichts gefunden — andere Schreibweise, Nummer oder Filter probieren.',
             loading: 'Lade Pokédex …',
             error: 'Pokédex konnte nicht geladen werden.',
-            rangeNote: 'Pro Wert: Lv-50-Basiswert (in Klammern der meistgenutzte Endwert) · darunter die Range (Lv. 50, IS fix 31, 0–32 SP, Wesen ±10 %). Tipp auf ein Pokémon → alle In-Game-Infos (Wesen, SP, Attacken, Item, Team) für Doppel & Einzel.',
+            // Legend for the three lines in every stat cell. Rendered with
+            // the same colours as the cells themselves, so it decodes itself.
+            legendLead: 'Pro Zelle:',
+            legendBase: '= Basiswert der Spezies',
+            legendLv50: '= Wert auf Lv. 50 (0 SP, neutrales Wesen)',
+            legendUsed: '= meistgenutzter Endwert',
+            legendRange: '= mögliche Spanne (Lv. 50, IS fix 31, 0–32 SP, Wesen ±10 %)',
+            legendTail: 'Die Spalte „Ges“ ist die Basiswertsumme. Tipp auf ein Pokémon → alle In-Game-Infos (Wesen, SP, Attacken, Item, Team) für Doppel und Einzel.',
             metaTitle: 'Meist genutzt:',
             metaStats: 'Endwerte Lv. 50:',
             baseStatsLabel: 'Basiswerte:',
@@ -91,12 +98,12 @@
             closeLabel: 'Schließen',
             megaAbility: 'Mega-Fähigkeit',
             usageSeasonLbl: (s) => `Saison: ${s}`,
-            colBase: 'Lv50', colUsed: 'Genutzt', colRange: 'Range',
+            colBaseTrue: 'Basis', colLv50: 'Lv50', colUsed: 'Genutzt', colRange: 'Range',
             tblFormatLabel: 'Genutzte Werte:',
         },
         en: {
             tab: 'Pokémon',
-            intro: 'Every Pokémon available in Pokémon Champions — sortable and filterable. Base stat with the Lv. 50 range in brackets. Search by German or English name, or Pokédex number.',
+            intro: 'Every Pokémon available in Pokémon Champions — sortable and filterable. Per stat: base stat, Lv. 50 value and range. Search by German or English name, or Pokédex number.',
             searchPh: '🔎 Search: "Garchomp", "Knakrack", "445" …',
             allTypes: 'All types',
             allForms: 'All forms',
@@ -114,7 +121,12 @@
             none: 'Nothing found — try a different spelling, number or filter.',
             loading: 'Loading Pokédex …',
             error: 'Could not load the Pokédex.',
-            rangeNote: 'Per stat: Lv. 50 base value (in brackets the most-used final value) · range below (Lv. 50, IV fixed 31, 0–32 SP, nature ±10%). Tap a Pokémon → full in-game info (nature, SP, moves, item, team) for Doubles & Singles.',
+            legendLead: 'Per cell:',
+            legendBase: '= species base stat',
+            legendLv50: '= value at Lv. 50 (0 SP, neutral nature)',
+            legendUsed: '= most-used final value',
+            legendRange: '= possible range (Lv. 50, IV fixed 31, 0–32 SP, nature ±10%)',
+            legendTail: 'The “Tot” column is the base stat total. Tap a Pokémon → full in-game info (nature, SP, moves, item, team) for Doubles and Singles.',
             metaTitle: 'Most used:',
             metaStats: 'Final stats Lv. 50:',
             baseStatsLabel: 'Base stats:',
@@ -141,7 +153,7 @@
             closeLabel: 'Close',
             megaAbility: 'Mega ability',
             usageSeasonLbl: (s) => `Season: ${s}`,
-            colBase: 'Lv50', colUsed: 'Used', colRange: 'Range',
+            colBaseTrue: 'Base', colLv50: 'Lv50', colUsed: 'Used', colRange: 'Range',
             tblFormatLabel: 'Used values:',
         },
     };
@@ -242,12 +254,32 @@
         return `<span class="sqp-type sq-play-type-${escapeHtml(en.toLowerCase())}">${escapeHtml(uiLang() === 'de' ? de : en)}</span>`;
     }
 
-    // Top line: Lv.50 base value (0 SP, neutral) + the actually-used value
-    // from real top teams in brackets, e.g. "85 (128)". Bottom: the range.
+    // Three lines, increasing specificity:
+    //   1  species base stat (amber) — what players learn by heart, and the
+    //      only line that adds up to the "Ges"/"Tot" column (a base-stat sum)
+    //   2  Lv. 50 value at 0 SP / neutral nature, plus the actually-used
+    //      final value from real top teams in brackets, e.g. "166 (168)"
+    //   3  the Lv. 50 range
     function statCell(s, used) {
         if (!s) return '<td class="sqp-stat"></td>';
         const usedHtml = (used != null) ? `<span class="sqp-stat-used">(${used})</span>` : '';
-        return `<td class="sqp-stat"><span class="sqp-stat-top"><b>${s.lv50}</b>${usedHtml}</span><small>${s.min}–${s.max}</small></td>`;
+        const baseHtml = (s.base != null) ? `<span class="sqp-stat-base">${s.base}</span>` : '';
+        return `<td class="sqp-stat">${baseHtml}<span class="sqp-stat-top"><b>${s.lv50}</b>${usedHtml}</span><small>${s.min}–${s.max}</small></td>`;
+    }
+
+    // The legend repeats the cell's own colours on example numbers (Mega
+    // Dragoran's KP), so the three lines decode themselves without widening
+    // any column with extra header text.
+    function legendHtml() {
+        const l = t();
+        const key = (cls, num, text) =>
+            `<span class="sqp-key sqp-key-${cls}">${escapeHtml(num)}</span> ${escapeHtml(text)}`;
+        return `${escapeHtml(l.legendLead)} ` + [
+            key('base', '91', l.legendBase),
+            key('lv50', '166', l.legendLv50),
+            key('used', '(168)', l.legendUsed),
+            key('range', '166–198', l.legendRange),
+        ].join(' · ') + ` · ${escapeHtml(l.legendTail)}`;
     }
 
     const COLS = [
@@ -655,8 +687,8 @@
             </div>`;
     }
 
-    // Stats table for the detail view: Lv50 base · used (top build of the
-    // selected format) · range.
+    // Stats table for the detail view: species base · Lv50 · used (top build
+    // of the selected format) · range.
     function detailStatsTable(e, block) {
         const l = t();
         let final = null;
@@ -671,6 +703,7 @@
             const used = final && final[k] != null ? final[k] : '';
             return `<tr>
                     <td class="sqp-d-st-lab">${escapeHtml(lab)}</td>
+                    <td class="sqp-d-st-basebase">${s.base != null ? s.base : '—'}</td>
                     <td class="sqp-d-st-base">${s.lv50}</td>
                     <td class="sqp-d-st-used">${used !== '' ? escapeHtml(String(used)) : '—'}</td>
                     <td class="sqp-d-st-range">${s.min}–${s.max}</td>
@@ -678,7 +711,7 @@
         }).join('');
         return `<table class="sqp-d-stats">
                 <thead><tr>
-                    <th></th><th>${escapeHtml(l.colBase)}</th>
+                    <th></th><th>${escapeHtml(l.colBaseTrue)}</th><th>${escapeHtml(l.colLv50)}</th>
                     <th>${escapeHtml(l.colUsed)}</th><th>${escapeHtml(l.colRange)}</th>
                 </tr></thead>
                 <tbody>${rows}</tbody>
@@ -879,7 +912,7 @@
                 ${controlsHtml()}
                 <p class="sqp-count">${escapeHtml(l.count(results.length))}</p>
                 ${tableHtml(results)}
-                <p class="sqp-note">${escapeHtml(l.rangeNote)}</p>
+                <p class="sqp-note">${legendHtml()}</p>
                 <p class="sqp-attr">${escapeHtml(l.attribution)}</p>
             </div>`;
         wireEvents(host);

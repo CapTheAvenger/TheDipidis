@@ -88,7 +88,7 @@ describe('the card and the panel cannot disagree', () => {
 
         api.setData({ Dragapult: { share: 6, winRate: 54, count: 400 } }, conv);
         const html = api.tilesHtml('Dragapult');
-        const shown = html.match(/arc-tile--conv[\s\S]*?arc-tile-value">([^<]+)</)[1];
+        const shown = html.match(/arc-tile--conv[\s\S]*?arc-tile-value">(?:<span[^>]*>[^<]*<\/span>)?([^<]+)</)[1];
         const expected = `+${fromMetric.toFixed(1).replace('.', ',')} %`;
         assert.equal(shown.trim(), expected);
     });
@@ -120,8 +120,9 @@ describe('missing conversion data is said out loud', () => {
                     { expected: 0.0632, decks: [] });
         const html = api.tilesHtml('Dhelmise');
         assert.match(html, /4,5 %/);
-        assert.match(html, /48,20 %/);
+        assert.match(html, /48,2 %/);
         assert.match(html, /−1,80/, 'distance from 50 % should carry its sign');
+        assert.match(html, /▼/, 'a below-50 win rate should carry a down arrow');
     });
 });
 
@@ -161,20 +162,35 @@ describe('matchups', () => {
         assert.equal(api.THIN_GAMES, 20);
     });
 
-    it('renders Σ / W / L and fades the thin row', () => {
+    it('renders Σ / W / L and marks the thin row', () => {
         const html = api.matchupTableHtml('Dragapult');
         assert.match(html, /<th>W<\/th><th>L<\/th>/);
-        assert.match(html, /arc-mu-thin/);
+        assert.match(html, /arc-mu-n-low/, 'the thin sample size should be marked');
         assert.match(html, />438</);
         assert.match(html, />267</);
         assert.match(html, />165</);
     });
 
+    it('shades in four quantised steps, never an interpolated ramp', () => {
+        // A ramp always produces some middle shade the number vanishes
+        // into; four steps keep every contrast known up front.
+        assert.equal(api.shadeFor(0, false), '');
+        assert.equal(api.shadeFor(5, false), 'arc-mu-up-1');
+        assert.equal(api.shadeFor(10, false), 'arc-mu-up-2');
+        assert.equal(api.shadeFor(20, false), 'arc-mu-up-3');
+        assert.equal(api.shadeFor(-20, false), 'arc-mu-down-3');
+        // A thin sample never gets a loud colour.
+        assert.equal(api.shadeFor(20, true), 'arc-mu-up-1');
+    });
+
     it('uses blue and red, never green', () => {
         const html = api.matchupTableHtml('Dragapult');
-        assert.match(html, /rgba\(37, 99, 235/, 'above 50 % should be blue');
-        assert.match(html, /rgba\(220, 38, 38/, 'below 50 % should be red');
-        assert.doesNotMatch(html, /rgba\(22, 163|green/i);
+        assert.match(html, /arc-mu-up-/, 'above 50 % should be blue');
+        assert.match(html, /arc-mu-down-/, 'below 50 % should be red');
+        const block = CSS.slice(CSS.indexOf('.arc-mu-up-1'), CSS.indexOf('.arc-mu-n,'));
+        assert.match(block, /37, 99, 235|#1d4ed8/);
+        assert.match(block, /220, 38, 38|#b91c1c/);
+        assert.doesNotMatch(block, /#16a34a|#27ae60|green/i);
     });
 
     it('says so when a deck has no matchup data at all', () => {
@@ -226,6 +242,8 @@ describe('wiring', () => {
 });
 
 describe('strings and styling', () => {
+    const { api } = loadCard();
+
     it('every arc.* key exists in both languages', () => {
         const keys = [...new Set((CARD_SRC.match(/'(arc\.[A-Za-z]+)'/g) || [])
             .map(s => s.slice(1, -1)))];
@@ -236,13 +254,27 @@ describe('strings and styling', () => {
         }
     });
 
-    it('the tile colour is an edge, not a fill', () => {
-        const block = CSS.slice(CSS.indexOf('.arc-tile {'), CSS.indexOf('.arc-tile-label'));
-        assert.match(block, /border-top: 3px solid/);
-        assert.doesNotMatch(block, /background:\s*(#2563eb|#7c5cd6|#0f9d8f)/);
+    it('every tone the code can emit has a background defined', () => {
+        // The fill is quantised precisely so this list is finite and each
+        // entry's contrast against white text is known.
+        for (const tone of ['neutral', 'tie', 'up', 'up-strong', 'down', 'down-strong']) {
+            assert.match(CSS, new RegExp(`\\.arc-tone--${tone}\\s*\\{[^}]*background`),
+                `no background for tone ${tone}`);
+        }
+        assert.match(CSS, /\.arc-tile \{[^}]*color: #ffffff/);
     });
 
-    it('thin matchup rows are faded', () => {
-        assert.match(CSS, /\.arc-mu-thin \{[^}]*opacity/);
+    it('the tone thresholds match what the CSS defines', () => {
+        assert.equal(api.toneFor(0), 'tie');
+        assert.equal(api.toneFor(5), 'up');
+        assert.equal(api.toneFor(20), 'up-strong');
+        assert.equal(api.toneFor(-5), 'down');
+        assert.equal(api.toneFor(-20), 'down-strong');
+        assert.equal(api.toneFor(null), 'tie');
+    });
+
+    it('the disclosure control is a real tap target and does not navigate', () => {
+        assert.match(CSS, /\.arc-mu-summary \{[^}]*min-height: 44px/);
+        assert.match(CARD_SRC, /arc-mu-summary'\)\) \{ e\.stopPropagation\(\)/);
     });
 });

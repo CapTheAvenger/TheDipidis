@@ -1413,6 +1413,15 @@
                 const tierMeta = tierTitles[tierKey];
                 const isTrending = tierKey === 'tier-trending';
 
+                // Tier 1 and 2 get the full archetype card, stacked one per
+                // row: those are the decks people actually weigh against
+                // each other, and the numbers belong next to the ranking
+                // rather than behind a click. Tier 3 and Trending stay
+                // compact — 45 full cards with open matchup tables would be
+                // roughly 25 000 px of page.
+                const isStacked = (tierKey === 'tier-1' || tierKey === 'tier-2');
+                const gridCls = isStacked ? 'arc-inline-list' : 'deck-grid tier-deck-grid';
+
                 if (isTrending) {
                     html += `
                     <div class="tier-section ${tierKey}" id="cm-${tierKey}">
@@ -1421,12 +1430,12 @@
                                 <h3 style="display:inline;">${tierMeta.title} <small>${tierMeta.subtitle}</small></h3>
                                 <span class="tier-trending-count">${decks.length} Decks</span>
                             </summary>
-                            <div class="deck-grid tier-deck-grid">`;
+                            <div class="${gridCls}">`;
                 } else {
                     html += `
                     <div class="tier-section ${tierKey}" id="cm-${tierKey}">
                         <h3>${tierMeta.title} <small>${tierMeta.subtitle}</small></h3>
-                        <div class="deck-grid tier-deck-grid">`;
+                        <div class="${gridCls}">`;
                 }
                 
                 decks.forEach(deck => {
@@ -1485,6 +1494,14 @@
                         }
                     }
 
+                    if (isStacked) {
+                        // Placeholder only — the card data (matchups, top-cut
+                        // conversion) loads on its own schedule and must not
+                        // hold up the tier ranking.
+                        html += `<div class="arc-inline" data-deck="${escapeHtml(archetypeName)}"></div>`;
+                        return;
+                    }
+
                     html += `
                         <div class="deck-banner-card" data-deck-name="${escapeJsStr(archetypeName).toLowerCase()}" onclick="openArchetypeCard('${archetypeEscaped}')">
                             ${imageUrl ? `<div class="deck-banner-bg" style="background-image: url('${imageUrl}')"></div>` : ''}
@@ -1519,6 +1536,14 @@
             
             // Prepend hero + tier sections before existing content
             container.innerHTML = html + container.innerHTML;
+
+            // Fill the stacked archetype cards. Deliberately after the
+            // innerHTML assignment and deliberately not awaited: the tier
+            // ranking is already on screen, and the cards arrive when their
+            // own data does.
+            if (typeof window.renderInlineArchetypeCards === 'function') {
+                window.renderInlineArchetypeCards(container);
+            }
         }
         
         /**

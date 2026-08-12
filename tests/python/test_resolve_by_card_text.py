@@ -35,8 +35,8 @@ def test_a_single_attack_match_decides():
 
 def test_two_matching_candidates_are_a_tie_not_a_decision():
     hit, why = rbct.resolve('Thunder Shock Quick Attack', [
-        P(1, 'Pikachu [Thunder Shock]'),
-        P(2, 'Pikachu [Quick Attack]')])
+        P(1, 'Pikachu [Thunder Shock | Quick Attack]'),
+        P(2, 'Raichu [Thunder Shock | Quick Attack]')])
     assert hit is None
     assert why.startswith('ambiguous')
 
@@ -58,17 +58,43 @@ def test_a_partial_attack_overlap_does_not_count():
     assert hit is None
 
 
-def test_extra_attacks_in_our_text_are_tolerated():
-    """Our text may carry an ability name too; the product's attacks
-    still have to be fully present."""
+def test_a_product_listing_fewer_attacks_than_the_card_cannot_win():
+    """Containment would let a sibling naming only B match a card with
+    attacks A+B. Equality is what stops that."""
+    hit, _ = rbct.resolve('Claw Drill Peck', [P(1, 'Skarmory [Claw]')])
+    assert hit is None
+
+
+def test_the_variant_tag_counts_as_evidence_not_as_the_whole_evidence():
+    """Unown [Z] [Shuffle | Hidden Power]: reading only the first bracket
+    decided on the single token 'z'; reading only the last makes every
+    Unown in the set identical. Both together identify exactly one."""
+    cands = [P(1, 'Unown [Z] [Shuffle | Hidden Power]'),
+             P(2, 'Unown [A] [Shuffle | Hidden Power]')]
+    hit, _ = rbct.resolve('Shuffle Hidden Power Z', cands)
+    assert hit['idProduct'] == 1
+    hit, why = rbct.resolve('Shuffle Hidden Power', cands)
+    assert hit is None, 'without the tag neither candidate may win'
+
+
+def test_a_single_shared_token_is_never_enough():
+    hit, _ = rbct.resolve('Z', [P(1, 'Unown [Z]')])
+    assert hit is None
+
+
+def test_extra_words_in_our_text_break_the_match():
+    """Equality means equality — an unexplained extra token is a reason
+    to abstain, not to decide."""
     hit, _ = rbct.resolve('Garbotoxin Offensive Bomb Extra',
                           [P(1, 'Garbodor [Garbotoxin | Offensive Bomb]')])
-    assert hit['idProduct'] == 1
+    assert hit is None
 
 
 def test_attack_and_species_helpers():
     assert rbct.attacks_of('Axew [Brat Snack | Dragon Claw]') == \
         ['brat', 'snack', 'dragon', 'claw']
+    assert rbct.attacks_of('Unown [Z] [Shuffle | Hidden Power]') == \
+        ['z', 'shuffle', 'hidden', 'power']
     assert rbct.attacks_of('Irida') == []
     assert rbct.species_of("N's Darmanitan [Blaze]") == 'nsdarmanitan'
 

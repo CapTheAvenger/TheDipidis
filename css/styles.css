@@ -10192,17 +10192,15 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
 }
 
 /* ── Archetype card ────────────────────────────────────────────────
-   One deck: three headline numbers and every matchup it has played.
-   Three shapes from one renderer — a modal overlay, stacked inline in
-   the tier list (Tier 1 + 2), and tiles-only above the full analysis. */
+   Modelled on the poke_hive stat graphics: dense, flush, no floating
+   white space. Dark header, three tiles butted together, table straight
+   underneath. Every measurement here is deliberately tight — an airy
+   version of this card pushed a single deck past a full screen and the
+   list stopped being scannable. */
 body.arc-open { overflow: hidden; }
 .arc-overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 1200;
-    display: flex;
-    align-items: flex-start;
-    justify-content: center;
+    position: fixed; inset: 0; z-index: 1200;
+    display: flex; align-items: flex-start; justify-content: center;
     padding: 4vh 12px;
     background: rgba(15, 23, 42, 0.55);
     overflow-y: auto;
@@ -10212,96 +10210,106 @@ body.arc-open { overflow: hidden; }
     position: relative;
     width: min(760px, 100%);
     background: #ffffff;
-    border-radius: 14px;
-    padding: 18px 18px 22px;
+    border-radius: 10px;
+    overflow: hidden;
     box-shadow: 0 18px 50px rgba(0, 0, 0, 0.28);
 }
 .arc-card--inline {
     width: 100%;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.07);
-    border: 1px solid rgba(0, 0, 0, 0.08);
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
     cursor: pointer;
-    transition: box-shadow 0.15s ease, transform 0.15s ease;
 }
-.arc-card--inline:hover { box-shadow: 0 8px 24px rgba(0, 0, 0, 0.13); transform: translateY(-1px); }
-.arc-card--embed { width: 100%; box-shadow: none; border: 0; padding: 0 0 6px; }
-.arc-inline-list { display: flex; flex-direction: column; gap: 14px; }
+.arc-card--inline:hover { border-color: #cbd5e1; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.10); }
+.arc-card--embed { width: 100%; box-shadow: none; border: 1px solid #e2e8f0; margin-bottom: 14px; }
+.arc-inline-list { display: flex; flex-direction: column; gap: 10px; }
 
-.arc-close {
-    position: absolute;
-    top: 8px; right: 8px;
-    width: 34px; height: 34px;
-    border: 0; border-radius: 8px;
-    background: transparent;
-    color: #6b7280;
-    font-size: 1.4rem; line-height: 1; cursor: pointer;
-}
-.arc-close:hover { background: #f0f2f5; color: #2c3e50; }
-.arc-head { display: flex; align-items: center; gap: 10px; padding-right: 34px; flex-wrap: wrap; }
-.arc-name { font-size: 1.2rem; font-weight: 800; color: #2c3e50; }
-.arc-icons { display: inline-flex; gap: 4px; }
-
-/* Filled tiles. The fill is one of four QUANTISED tones, never an
-   interpolated ramp — that way every background that can occur is known
-   here and its contrast against the white text is fixed. A ramp always
-   lands on some middle shade the number disappears into.
-   Blue/red instead of the more common green/red: that pairing is the
-   most frequent colour-blindness case. The arrow carries the direction
-   for anyone who sees no colour at all. */
-.arc-tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 14px 0 6px; }
-.arc-tile {
-    border-radius: 10px;
-    padding: 14px 12px;
-    min-height: 96px;
+/* Dark header like the reference — the deck name is the anchor you scan
+   for, so it gets the strongest contrast on the card. */
+.arc-head {
+    display: flex; align-items: center; gap: 8px;
+    padding: 9px 12px;
+    background: #0f172a;
     color: #ffffff;
-    background: #64748b;
 }
+.arc-name { font-size: 1rem; font-weight: 800; letter-spacing: 0.01em; }
+.arc-icons { display: inline-flex; gap: 3px; align-items: center; }
+.arc-icons img { height: 20px; width: auto; }
+.arc-close {
+    position: absolute; top: 4px; right: 6px;
+    width: 30px; height: 30px;
+    border: 0; background: transparent;
+    color: rgba(255, 255, 255, 0.75);
+    font-size: 1.3rem; line-height: 1; cursor: pointer; z-index: 2;
+}
+.arc-close:hover { color: #ffffff; }
+
+/* Butted together, 1px apart — the seam reads as one strip of numbers
+   rather than three floating boxes. */
+/* minmax(0, 1fr), not 1fr: the tile text is nowrap, so a plain `1fr`
+   takes its min-content width as the floor and the third tile runs off
+   the card on a phone (measured: 376 px of content in a 270 px card). */
+.arc-tiles {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1px; background: #ffffff;
+}
+.arc-tile { padding: 8px 10px; color: #ffffff; background: #64748b; }
+/* Four quantised tones, never an interpolated ramp: every background
+   that can occur is known here, so its contrast against the white text
+   is fixed. A ramp always lands on some middle shade the number
+   disappears into. Blue/red rather than green/red — that pairing is the
+   most common colour-blindness case; the ▲/▼ carries direction without
+   any colour at all. */
 .arc-tone--neutral    { background: #334155; }
 .arc-tone--tie        { background: #64748b; }
 .arc-tone--up         { background: #2563eb; }
 .arc-tone--up-strong  { background: #1d4ed8; }
 .arc-tone--down       { background: #dc2626; }
 .arc-tone--down-strong{ background: #b91c1c; }
+/* Wraps rather than truncates: "TOP-8 VS. …" tells you nothing, two
+   short lines do. */
 .arc-tile-label {
-    color: rgba(255, 255, 255, 0.88);
-    font-size: 0.75rem; font-weight: 700;
+    color: rgba(255, 255, 255, 0.82);
+    font-size: 0.58rem; font-weight: 700; line-height: 1.2;
     text-transform: uppercase; letter-spacing: 0.03em;
 }
 .arc-tile-value {
-    font-size: clamp(1.4rem, 7.5vw, 2.4rem);
-    font-weight: 900;
-    line-height: 1.15;
-    font-variant-numeric: tabular-nums;
+    font-size: clamp(1.05rem, 4.4vw, 1.55rem);
+    font-weight: 800; line-height: 1.25;
+    font-variant-numeric: tabular-nums; white-space: nowrap;
 }
-.arc-tile-arrow { font-size: 0.6em; vertical-align: 0.15em; }
-.arc-tile-ctx { color: rgba(255, 255, 255, 0.86); font-size: 0.72rem; line-height: 1.35; }
-/* Three across even on a phone — that grouping is the whole shape of
-   this card; stacking them would make it just another list. */
-@media (max-width: 620px) {
-    .arc-tiles { gap: 6px; }
-    .arc-tile { padding: 10px 8px; min-height: 82px; }
-    .arc-tile-label { font-size: 0.62rem; letter-spacing: 0.01em; }
-    .arc-tile-ctx { font-size: 0.62rem; }
+.arc-tile-arrow { font-size: 0.55em; vertical-align: 0.18em; }
+.arc-tile-ctx {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.6rem; line-height: 1.3;
 }
 
-.arc-mu-title { margin: 16px 0 6px; font-size: 0.82rem; color: #5a6473;
+.arc-mu-title { margin: 10px 12px 4px; font-size: 0.72rem; color: #5a6473;
                 text-transform: uppercase; letter-spacing: 0.03em; }
-.arc-mu-details { margin-top: 12px; }
+.arc-mu-details { border-top: 1px solid #eef2f7; }
 .arc-mu-summary {
     display: flex; align-items: center;
-    min-height: 44px;                     /* tap target */
-    padding: 0 4px;
-    color: #2563eb; font-size: 0.84rem; font-weight: 600;
+    min-height: 44px; padding: 0 12px;   /* tap target floor */
+    color: #2563eb; font-size: 0.78rem; font-weight: 600;
     cursor: pointer; list-style: none;
 }
 .arc-mu-summary::-webkit-details-marker { display: none; }
-.arc-mu-summary::before { content: "▸ "; margin-right: 6px; }
-.arc-mu-details[open] .arc-mu-summary::before { content: "▾ "; }
+.arc-mu-summary::before { content: "▸"; margin-right: 6px; }
+.arc-mu-details[open] .arc-mu-summary::before { content: "▾"; }
 
+/* The project-wide .mobile-table-scroll rule puts min-width: 520px on
+   any table inside it — right for the wide data tables it was written
+   for, wrong here: this one has five narrow columns and fits a phone.
+   Without the override the card showed nothing but the deck name and
+   scrolled the rest out of view. */
 #currentMetaContent .arc-mu-table,
-#archetypeCardOverlay .arc-mu-table {
-    display: table; width: 100%; border-collapse: collapse; font-size: 0.86rem;
+#archetypeCardOverlay .arc-mu-table,
+#currentMetaArchetypeCard .arc-mu-table {
+    display: table; width: 100%; min-width: 0 !important; table-layout: fixed;
+    border-collapse: collapse; font-size: 0.76rem;
 }
+.arc-card .mobile-table-scroll { overflow-x: visible; }
 #currentMetaContent .arc-mu-table thead,
 #archetypeCardOverlay .arc-mu-table thead { display: table-header-group; }
 #currentMetaContent .arc-mu-table tbody,
@@ -10311,44 +10319,65 @@ body.arc-open { overflow: hidden; }
 #currentMetaContent .arc-mu-table th, #currentMetaContent .arc-mu-table td,
 #archetypeCardOverlay .arc-mu-table th, #archetypeCardOverlay .arc-mu-table td {
     display: table-cell;
-    padding: 5px 8px;
-    border-bottom: 1px solid #eef2f7;
-    text-align: right;
-    white-space: nowrap;
+    padding: 3px 8px;
+    border-bottom: 1px solid #f1f5f9;
+    text-align: right; white-space: nowrap;
 }
+/* Fixed widths, or the browser hands the win-rate cell a third of the
+   row and strands Σ/W/L against the right edge. */
+#currentMetaContent .arc-mu-table th:nth-child(1),
+#currentMetaContent .arc-mu-table td:nth-child(1),
+#archetypeCardOverlay .arc-mu-table th:nth-child(1),
+#archetypeCardOverlay .arc-mu-table td:nth-child(1) {
+    width: auto; text-align: left; white-space: normal;
+}
+#currentMetaContent .arc-mu-table th:nth-child(2),
+#currentMetaContent .arc-mu-table td:nth-child(2),
+#archetypeCardOverlay .arc-mu-table th:nth-child(2),
+#archetypeCardOverlay .arc-mu-table td:nth-child(2) { width: 104px; }
+#currentMetaContent .arc-mu-table th:nth-child(n+3),
+#currentMetaContent .arc-mu-table td:nth-child(n+3),
+#archetypeCardOverlay .arc-mu-table th:nth-child(n+3),
+#archetypeCardOverlay .arc-mu-table td:nth-child(n+3) { width: 58px; }
 #currentMetaContent .arc-mu-table th,
 #archetypeCardOverlay .arc-mu-table th {
-    background: #1f2937 !important;
-    color: #ffffff !important;
-    font-size: 0.68rem; font-weight: 700;
+    background: #1f2937 !important; color: #ffffff !important;
+    font-size: 0.6rem; font-weight: 700;
     text-transform: uppercase; letter-spacing: 0.02em;
+    padding: 4px 8px;
 }
-#currentMetaContent .arc-mu-table th:first-child,
-#currentMetaContent .arc-mu-table td.arc-mu-opp,
-#archetypeCardOverlay .arc-mu-table th:first-child,
-#archetypeCardOverlay .arc-mu-table td.arc-mu-opp { text-align: left; white-space: normal; }
-.arc-mu-wr { font-weight: 700; font-variant-numeric: tabular-nums; color: #0f172a; }
-/* Four steps, each with the text colour picked for that exact
-   background. Rows under 20 games are capped at step 1 rather than
-   dimmed as a whole — fading the row would take the deck name with it,
-   and the name is the part you still need to read. */
-.arc-mu-up-1   { background: rgba(37, 99, 235, 0.18); }
-.arc-mu-up-2   { background: rgba(37, 99, 235, 0.42); }
+.arc-mu-wr { font-weight: 700; font-variant-numeric: tabular-nums; color: #0f172a; text-align: center !important; }
+.arc-mu-up-1   { background: rgba(37, 99, 235, 0.16); }
+.arc-mu-up-2   { background: rgba(37, 99, 235, 0.40); }
 .arc-mu-up-3   { background: #1d4ed8; color: #ffffff; }
-.arc-mu-down-1 { background: rgba(220, 38, 38, 0.18); }
-.arc-mu-down-2 { background: rgba(220, 38, 38, 0.42); }
+.arc-mu-down-1 { background: rgba(220, 38, 38, 0.16); }
+.arc-mu-down-2 { background: rgba(220, 38, 38, 0.40); }
 .arc-mu-down-3 { background: #b91c1c; color: #ffffff; }
-.arc-mu-n, .arc-mu-w, .arc-mu-l { color: #5a6473; font-variant-numeric: tabular-nums; }
+.arc-mu-opp { font-weight: 500; color: #1f2937; }
+.arc-mu-n, .arc-mu-w, .arc-mu-l { color: #64748b; font-variant-numeric: tabular-nums; }
+/* Thin rows keep their name legible — only the sample size is marked,
+   never the whole row dimmed. */
 .arc-mu-n-low { color: #9ca3af; font-style: italic; }
-.arc-mu-note, .arc-empty { color: #6b7280; font-size: 0.72rem; line-height: 1.45; margin: 8px 2px 0; }
+.arc-mu-note, .arc-empty {
+    color: #6b7280; font-size: 0.66rem; line-height: 1.4; margin: 6px 12px;
+}
+.arc-actions { display: flex; flex-wrap: wrap; gap: 8px; padding: 8px 12px 10px; }
 .arc-mu-more, .arc-goto {
-    margin-top: 12px;
-    padding: 9px 14px;
-    min-height: 44px;
-    border: 1px solid #d8dee7;
-    border-radius: 8px;
-    background: #f8f9fa;
-    color: #2563eb;
-    font-size: 0.84rem; font-weight: 600; cursor: pointer;
+    padding: 7px 12px; min-height: 36px;
+    border: 1px solid #dbe3ec; border-radius: 7px;
+    background: #f8fafc; color: #2563eb;
+    font-size: 0.76rem; font-weight: 600; cursor: pointer;
 }
 .arc-mu-more:hover, .arc-goto:hover { background: #eef2f7; }
+
+@media (max-width: 620px) {
+    .arc-tile { padding: 6px 7px; }
+    .arc-tile-label { font-size: 0.5rem; letter-spacing: 0.01em; }
+    .arc-tile-ctx { font-size: 0.53rem; }
+    .arc-name { font-size: 0.9rem; }
+    #currentMetaContent .arc-mu-table { font-size: 0.7rem; }
+    #currentMetaContent .arc-mu-table th:nth-child(2),
+    #currentMetaContent .arc-mu-table td:nth-child(2) { width: 62px; }
+    #currentMetaContent .arc-mu-table th:nth-child(n+3),
+    #currentMetaContent .arc-mu-table td:nth-child(n+3) { width: 36px; }
+}

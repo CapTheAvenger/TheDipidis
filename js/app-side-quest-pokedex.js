@@ -94,6 +94,9 @@
             secAbility: 'Fähigkeit',
             secTeam: 'Team-Mitglieder',
             secFinal: 'Endwerte (meistgenutzter Build)',
+            secSpeedTiers: 'Speed-Tiers:',
+            stPlain: 'ohne', stScarf: 'Wahlschal ×1,5', stTailwind: 'Rückenwind ×2',
+            stNote: 'Auf Basis des meistgenutzten Builds. Wahlschal und Rückenwind kombiniert fehlt bewusst — die Rundung dafür ist für Champions nicht belegt.',
             noUsage: 'Für dieses Pokémon gibt es noch keine In-Game-Nutzungsdaten.',
             closeLabel: 'Schließen',
             megaAbility: 'Mega-Fähigkeit',
@@ -149,6 +152,9 @@
             secAbility: 'Ability',
             secTeam: 'Teammates',
             secFinal: 'Final stats (most-used build)',
+            secSpeedTiers: 'Speed tiers:',
+            stPlain: 'plain', stScarf: 'Choice Scarf ×1.5', stTailwind: 'Tailwind ×2',
+            stNote: 'Based on the most-used build. Scarf and Tailwind combined is left out on purpose — the rounding for that is not established for Champions.',
             noUsage: 'No in-game usage data for this Pokémon yet.',
             closeLabel: 'Close',
             megaAbility: 'Mega ability',
@@ -687,16 +693,55 @@
             </div>`;
     }
 
+    // Final stats of the most-used build for a format, or null when that
+    // format has no usage record. Always a FRESH object — usedFinalFor()
+    // hands out e.meta.final by reference and caches it, so anything that
+    // derives from it must not touch what it returns.
+    function topBuildFinal(e, block) {
+        if (!block) return null;
+        const nat = (block.nature || [])[0];
+        const sp = (block.stat_points || [])[0];
+        return (nat && sp) ? computeFinal(e, nat.name, sp.points) : null;
+    }
+
+    // Speed tiers: the played Speed under the two modifiers the Champions
+    // reference actually quantifies —
+    //   data/champions_items_reference.json  Choice Scarf: "Initiative ×1,5"
+    //   data/champions_moves_reference.json  Tailwind: "Verdoppelt die
+    //                                        Initiative … für 4 Runden"
+    // Deliberately NOT here:
+    //   · the two combined. floor(floor(s×1.5)×2) and floor(s×3) disagree
+    //     for every odd Speed — 140 of the 281 values between 20 and 300 —
+    //     and nothing in the repo says which one Champions uses. A tier
+    //     that is off by one is worse than no tier.
+    //   · a "+1 stage" (Dragon Dance). It exists in champions_resources.json
+    //     with verified:false and no stage→multiplier table anywhere, so
+    //     ×1.5 would be a mainline guess.
+    // Built from the played build, never from the 0-SP neutral value: a
+    // Scarf number derived from a spread nobody runs is wrong, not roughly
+    // right. No played build → no line.
+    function speedTierRow(e, final) {
+        const l = t();
+        const spe = final && final.spe;
+        if (!spe) return '';
+        const tier = (mult) => Math.floor(spe * mult);
+        const parts = [
+            `<span class="sqp-st-item"><span class="sqp-st-lab">${escapeHtml(l.stPlain)}</span><b>${spe}</b></span>`,
+            `<span class="sqp-st-item"><span class="sqp-st-lab">${escapeHtml(l.stScarf)}</span><b>${tier(1.5)}</b></span>`,
+            `<span class="sqp-st-item"><span class="sqp-st-lab">${escapeHtml(l.stTailwind)}</span><b>${tier(2)}</b></span>`,
+        ].join('');
+        return `<div class="sqp-st">
+                <span class="sqp-st-title">${escapeHtml(l.secSpeedTiers)}</span>
+                ${parts}
+                <small class="sqp-st-note">${escapeHtml(l.stNote)}</small>
+            </div>`;
+    }
+
     // Stats table for the detail view: species base · Lv50 · used (top build
     // of the selected format) · range.
     function detailStatsTable(e, block) {
         const l = t();
-        let final = null;
-        if (block) {
-            const nat = (block.nature || [])[0];
-            const sp = (block.stat_points || [])[0];
-            if (nat && sp) final = computeFinal(e, nat.name, sp.points);
-        }
+        const final = topBuildFinal(e, block);
         const rows = _FINAL_ORDER.map(([k, d, en]) => {
             const s = e[k]; if (!s) return '';
             const lab = uiLang() === 'de' ? d : en;
@@ -814,6 +859,7 @@
                 <div class="sqp-d-sec">
                     <h4 class="sqp-d-sec-title">${escapeHtml(l.secStats)}</h4>
                     ${detailStatsTable(e, block)}
+                    ${speedTierRow(e, topBuildFinal(e, block))}
                 </div>
                 ${detailUsageBlock(e, block)}
                 <p class="sqp-attr">${escapeHtml(l.attribution)}</p>

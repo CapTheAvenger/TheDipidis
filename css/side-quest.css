@@ -2143,6 +2143,27 @@ body.sqp-d-open { overflow: hidden; }
 .sqp-d-st-base { color: #2c3e50; font-weight: 700; }
 .sqp-d-st-used { color: #1d6fd0; font-weight: 700; }
 .sqp-d-st-range { color: #6b7280; font-size: 0.78rem; }
+/* Speed tiers under the stat table: the played Speed and the two
+   modifiers Champions actually quantifies. Blue, because it is derived
+   from the played value (same colour role as .sqp-d-st-used). */
+.sqp-st {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 14px;
+    margin-top: 10px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    background: rgba(95, 182, 255, 0.10);
+    font-size: 0.86rem;
+}
+.sqp-st-title { color: #5a6473; font-weight: 700; font-size: 0.72rem;
+                text-transform: uppercase; letter-spacing: 0.02em; }
+.sqp-st-item { white-space: nowrap; }
+.sqp-st-lab { color: #5a6473; font-size: 0.74rem; margin-right: 4px; }
+.sqp-st-item b { color: #1d6fd0; font-weight: 800; }
+.sqp-st-note { flex-basis: 100%; color: #6b7280; font-size: 0.68rem; line-height: 1.35; }
+
 .sqp-d-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 18px; margin-top: 4px; }
 @media (max-width: 520px) { .sqp-d-grid { grid-template-columns: 1fr; } }
 .sqp-d-row {

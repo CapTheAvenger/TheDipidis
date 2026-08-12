@@ -1263,6 +1263,23 @@
             // empty-archetype guard).
             const emptyState = document.getElementById('currentAnalysisEmptyState');
             if (emptyState) emptyState.classList.add('display-none');
+
+            // The archetype card sits right under the dropdown: after
+            // arriving here from a tier-list click, the first thing you
+            // want confirmed is that you landed on the right deck. Tiles
+            // only — the matchups ARE the rest of this tab.
+            const arcHost = document.getElementById('currentMetaArchetypeCard');
+            if (arcHost) {
+                if (archetype && typeof window.renderArchetypeCardInto === 'function') {
+                    arcHost.classList.remove('d-none');
+                    window.renderArchetypeCardInto(arcHost, archetype).catch(() => {
+                        arcHost.classList.add('d-none');
+                    });
+                } else {
+                    arcHost.classList.add('d-none');
+                }
+            }
+
             if (!archetype) {
                 if (emptyState) emptyState.classList.remove('display-none');
                 // Also hide the Quick Reference panel when the user clears
@@ -1622,7 +1639,7 @@
         }
         
         function clearCurrentMetaDeckView() {
-            ['currentMetaStatsSection', 'currentMetaMatchupsSection', 'currentMetaDeckVisual', 'currentMetaDeckTableView', 'currentMetaTop256Section'].forEach(id => {
+            ['currentMetaArchetypeCard', 'currentMetaStatsSection', 'currentMetaMatchupsSection', 'currentMetaDeckVisual', 'currentMetaDeckTableView', 'currentMetaTop256Section'].forEach(id => {
                 const el = document.getElementById(id);
                 if (el) el.classList.add('d-none');
             });

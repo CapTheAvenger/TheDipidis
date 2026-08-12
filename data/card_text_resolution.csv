@@ -1,0 +1,587 @@
+﻿set,number,name,eur_price,status,current_product_id,current_product_name,resolved_product_id,resolved_product_name,card_text,candidates
+WP,47,Mew,"133,97€",already-correct,275466,Mew [Neutral Shield | Psyshock],275466,Mew [Neutral Shield | Psyshock],Neutral Shield Psyshock,3
+N1,5,Feraligatr,"127,05€",already-correct,274405,Feraligatr [Downpour | Riptide],274405,Feraligatr [Downpour | Riptide],Downpour Riptide,2
+DX,99,Deoxys ex,"109,94€",already-correct,276502,Deoxys ex [Form Change | Psychic Shield],276502,Deoxys ex [Form Change | Psychic Shield],Form Change Psychic Shield,3
+CRZ,GG30,Pikachu,"71,30€",already-correct,691909,Pikachu [Pika Dash | Whimsy Tackle],691909,Pikachu [Pika Dash | Whimsy Tackle],Pika Dash Whimsy Tackle,2
+SP,241,Gengar,"68,77€",already-correct,665984,Gengar [Netherworld Gate | Screaming Circle],665984,Gengar [Netherworld Gate | Screaming Circle],Netherworld Gate Screaming Circle,2
+DX,98,Deoxys ex,"66,66€",already-correct,276501,Deoxys ex [Form Change | Psyburst],276501,Deoxys ex [Form Change | Psyburst],Form Change Psyburst,3
+DX,97,Deoxys ex,"64,03€",already-correct,276500,Deoxys ex [Form Change | Energy Burst],276500,Deoxys ex [Form Change | Energy Burst],Form Change Energy Burst,3
+CRZ,160,Pikachu,"62,52€",already-correct,691879,Pikachu [Wild Charge],691879,Pikachu [Wild Charge],Wild Charge,2
+N1,4,Feraligatr,"60,88€",already-correct,274404,Feraligatr [Berserk | Chomp],274404,Feraligatr [Berserk | Chomp],Berserk Chomp,2
+NP,37,Kyogre ex,"60,72€",already-correct,275510,Kyogre ex [Frenzy | Aqua Supply | Tsunami],275510,Kyogre ex [Frenzy | Aqua Supply | Tsunami],Frenzy Aqua Supply Tsunami,2
+NP,1,Kyogre ex,"59,72€",already-correct,275474,Kyogre ex [Major Flood],275474,Kyogre ex [Major Flood],Major Flood,2
+WP,46,Electabuzz,"55,74€",already-correct,275465,Electabuzz [Lightning Rod | Lightning Bolt],275465,Electabuzz [Lightning Rod | Lightning Bolt],Lightning Rod Lightning Bolt,2
+SP,52,Gengar,"53,18€",already-correct,505880,Gengar [Life Shaker | Hypnoblast],505880,Gengar [Life Shaker | Hypnoblast],Life Shaker Hypnoblast,2
+CRZ,GG48,Zacian V,"43,67€",already-correct,691928,Zacian V [Roar of the Sword | Storm Slash],691928,Zacian V [Roar of the Sword | Storm Slash],Roar of the Sword Storm Slash,3
+E1,64,Typhlosion,"20,63€",already-correct,274939,Typhlosion [Quick Attack | Thermal Blast],274939,Typhlosion [Quick Attack | Thermal Blast],Quick Attack Thermal Blast,3
+RG,113,Charmander,"19,39€",already-correct,276289,Charmander [Flare | Rage],276289,Charmander [Flare | Rage],Flare Rage,3
+WP,4,Pikachu,"16,63€",already-correct,275423,Pikachu [Recharge | Thunderbolt],275423,Pikachu [Recharge | Thunderbolt],Recharge Thunderbolt,4
+TRR,32,Dark Dragonair,"14,39€",already-correct,276324,Dark Dragonair [Double Tackle | Crushing Blow],276324,Dark Dragonair [Double Tackle | Crushing Blow],Double Tackle Crushing Blow,2
+SP,160,Mewtwo V-UNION,"14,22€",already-correct,572160,Mewtwo V-UNION [Super Regeneration],572160,Mewtwo V-UNION [Super Regeneration],Super Regeneration,5
+E1,46,Feraligatr,"11,57€",already-correct,274921,Feraligatr [Slash | Double Claw],274921,Feraligatr [Slash | Double Claw],Slash Double Claw,4
+SP,142,Pikachu V-UNION,"9,36€",already-correct,576741,Pikachu V-UNION [Electro Ball Together],576741,Pikachu V-UNION [Electro Ball Together],Electro Ball Together,5
+SP,141,Pikachu V-UNION,"8,87€",already-correct,576740,Pikachu V-UNION [Disconnect],576740,Pikachu V-UNION [Disconnect],Disconnect,5
+PRC,69,Nidoqueen,"8,84€",already-correct,273600,Nidoqueen [Poison Jab | Dynamite Punch],273600,Nidoqueen [Poison Jab | Dynamite Punch],Poison Jab Dynamite Punch,2
+XY,86,Aegislash,"8,74€",already-correct,281423,Aegislash [Stance Change | King's Shield],281423,Aegislash [Stance Change | King's Shield],Stance Change King's Shield,3
+AOR,15,Entei,"7,48€",already-correct,284196,Entei [Flame Screen | Heat Tackle],284196,Entei [Flame Screen | Heat Tackle],Flame Screen Heat Tackle,2
+PRC,77,Rhyperior,"7,21€",already-correct,273608,Rhyperior [Rock Wall | Hammer Arm],273608,Rhyperior [Rock Wall | Hammer Arm],Rock Wall Hammer Arm,2
+SHF,SV44,Morpeko,"7,21€",already-correct,539608,Morpeko [Torment | Spark],539608,Morpeko [Torment | Spark],Torment Spark,3
+TRR,41,Dark Pupitar,"6,52€",already-correct,276333,Dark Pupitar [Dark Streak | Rock Tumble],276333,Dark Pupitar [Dark Streak | Rock Tumble],Dark Streak Rock Tumble,2
+TRR,60,Houndour,"6,47€",already-correct,276352,Houndour [Dark Lift | Firebreathing],276352,Houndour [Dark Lift | Firebreathing],Dark Lift Firebreathing,2
+ROS,46,Togekiss,"6,31€",already-correct,282714,Togekiss [Serene Grace | Fairy Wind],282714,Togekiss [Serene Grace | Fairy Wind],Serene Grace Fairy Wind,2
+BWP,8,Oshawott,"5,73€",already-correct,279929,Oshawott [Sleep Pulse | Surprise Attack],279929,Oshawott [Sleep Pulse | Surprise Attack],Sleep Pulse Surprise Attack,3
+TRR,31,Dark Dragonair,"5,14€",already-correct,276323,Dark Dragonair [Evolutionary Light | Dragon Rage],276323,Dark Dragonair [Evolutionary Light | Dragon Rage],Evolutionary Light Dragon Rage,2
+SP,166,Zacian V-UNION,"5,05€",already-correct,572166,Zacian V-UNION [Master Blade],572166,Zacian V-UNION [Master Blade],Master Blade,5
+SP,235,Dragonite V,"5,03€",already-correct,664340,Dragonite V [Hyper Beam | Buster Tail],664340,Dragonite V [Hyper Beam | Buster Tail],Hyper Beam Buster Tail,3
+SP,156,Greninja V-UNION,"4,90€",already-correct,572156,Greninja V-UNION [Ninja Body | Aqua Edge],572156,Greninja V-UNION [Ninja Body | Aqua Edge],Ninja Body Aqua Edge,5
+NVI,43,Victini,"4,63€",already-correct,280166,Victini [V-blast],280166,Victini [V-blast],V-blast,5
+E3,98,Slugma,"4,60€",already-correct,275357,Slugma [Tackle | Scorching Lava],275357,Slugma [Tackle | Scorching Lava],Tackle Scorching Lava,2
+SP,165,Zacian V-UNION,"4,15€",already-correct,572165,Zacian V-UNION [Steel Cut],572165,Zacian V-UNION [Steel Cut],Steel Cut,5
+CG,58,Mudkip,"3,88€",already-correct,277139,Mudkip [Nap | Waterfall],277139,Mudkip [Nap | Waterfall],Nap Waterfall,2
+EM,16,Manectric,"3,18€",already-correct,276527,Manectric [Dazzle Blast | Zap Kick],276527,Manectric [Dazzle Blast | Zap Kick],Dazzle Blast Zap Kick,2
+TRR,53,Dratini,"2,95€",already-correct,276345,Dratini [Dragon Song | Tail Strike],276345,Dratini [Dragon Song | Tail Strike],Dragon Song Tail Strike,2
+SP,95,Eevee,"2,89€",already-correct,547026,Eevee [First Step | Tail Whap],547026,Eevee [First Step | Tail Whap],First Step Tail Whap,7
+HP,78,Pikachu,"2,78€",already-correct,277048,Pikachu [Thunder Wave | Quick Attack],277048,Pikachu [Thunder Wave | Quick Attack],Thunder Wave Quick Attack,1
+SHF,SV28,Chewtle,"2,62€",already-correct,539528,Chewtle [Bite | Water Gun],539528,Chewtle [Bite | Water Gun],Bite Water Gun,2
+PHF,17,Feraligatr,"2,54€",already-correct,281820,Feraligatr [Hyper Whirlpool | Second Strike],281820,Feraligatr [Hyper Whirlpool | Second Strike],Hyper Whirlpool Second Strike,2
+AOR,14,Entei,"2,15€",already-correct,284195,Entei [Burning Roar | Combat Blaze],284195,Entei [Burning Roar | Combat Blaze],Burning Roar Combat Blaze,2
+CG,34,Ivysaur,"2,08€",already-correct,277115,Ivysaur [Sleep Powder | Vine Whip],277115,Ivysaur [Sleep Powder | Vine Whip],Sleep Powder Vine Whip,3
+E2,87,Houndour,"2,08€",already-correct,275161,Houndour [Feint Attack],275161,Houndour [Feint Attack],Feint Attack,2
+SSH,36,Cinderace,"2,07€",already-correct,436334,Cinderace [Flame Cloak | Bright Flame],436334,Cinderace [Flame Cloak | Bright Flame],Flame Cloak Bright Flame,4
+RS,28,Combusken,"2,00€",already-correct,275676,Combusken [Natural Cure | Lunge],275676,Combusken [Natural Cure | Lunge],Natural Cure Lunge,2
+CEC,167,Eevee,"1,97€",already-correct,408459,Eevee [Follow My Tail | Tackle],408459,Eevee [Follow My Tail | Tackle],Follow My Tail Tackle,2
+TRR,63,Larvitar,"1,77€",already-correct,276355,Larvitar [Light Punch | Dig Drain],276355,Larvitar [Light Punch | Dig Drain],Light Punch Dig Drain,2
+SS,27,Anorith,"1,76€",already-correct,275804,Anorith [Fast Evolution | Pierce],275804,Anorith [Fast Evolution | Pierce],Fast Evolution Pierce,2
+SS,28,Anorith,"1,76€",already-correct,275805,Anorith [Slash | Double Scratch],275805,Anorith [Slash | Double Scratch],Slash Double Scratch,2
+XY,88,Jigglypuff,"1,62€",already-correct,281425,Jigglypuff [Body Slam],281425,Jigglypuff [Body Slam],Body Slam,2
+E2,86,Houndour,"1,53€",already-correct,275160,Houndour [Singe | Flare],275160,Houndour [Singe | Flare],Singe Flare,2
+HL,44,Metang,"1,44€",already-correct,276118,Metang [Levitate | Tackle],276118,Metang [Levitate | Tackle],Levitate Tackle,3
+DR,30,Graveler,"1,42€",already-correct,275907,Graveler [Magnitude | Rollout],275907,Graveler [Magnitude | Rollout],Magnitude Rollout,2
+DR,29,Graveler,"1,29€",already-correct,275906,Graveler [Grind | Big Explosion],275906,Graveler [Grind | Big Explosion],Grind Big Explosion,2
+N1,56,Cyndaquil,"1,29€",already-correct,274456,Cyndaquil [Leer | Swift],274456,Cyndaquil [Leer | Swift],Leer Swift,3
+BLW,43,Zebstrika,"1,19€",already-correct,279781,Zebstrika [Rear Kick | Electrispark],279781,Zebstrika [Rear Kick | Electrispark],Rear Kick Electrispark,3
+PHF,12,Pyroar,"1,18€",already-correct,281815,Pyroar [Flare Command | Inferno Onrush],281815,Pyroar [Flare Command | Inferno Onrush],Flare Command Inferno Onrush,2
+CEC,166,Eevee,"1,15€",already-correct,408454,Eevee [Lead | Bite],408454,Eevee [Lead | Bite],Lead Bite,2
+MA,57,Team Aqua's Spheal,"1,10€",already-correct,276034,Team Aqua's Spheal [Rollout | Aqua Trance],276034,Team Aqua's Spheal [Rollout | Aqua Trance],Rollout Aqua Trance,2
+TEU,23,Squirtle,"1,02€",already-correct,368955,Squirtle [Tackle | Rain Splash],368955,Squirtle [Tackle | Rain Splash],Tackle Rain Splash,2
+PHF,10,Talonflame,"1,01€",already-correct,281811,Talonflame [Acrobatics | Jet Shoot],281811,Talonflame [Acrobatics | Jet Shoot],Acrobatics Jet Shoot,2
+FST,43,Cinderace V,"0,98€",already-correct,582177,Cinderace V [Blaze Kick],582177,Cinderace V [Blaze Kick],Blaze Kick,2
+NVI,33,Cryogonal,"0,93€",already-correct,280156,Cryogonal [Ice Chain | Frost Vanish],280156,Cryogonal [Ice Chain | Frost Vanish],Ice Chain Frost Vanish,3
+TEU,22,Squirtle,"0,90€",already-correct,368954,Squirtle [Floating Shell | Water Gun],368954,Squirtle [Floating Shell | Water Gun],Floating Shell Water Gun,2
+HS,55,Unown,"0,88€",already-correct,279027,Unown [FLASH | Hidden Power],279027,Unown [FLASH | Hidden Power],FLASH Hidden Power,2
+DF,32,Kirlia,"0,86€",already-correct,277237,Kirlia [Psyshock | Link Blast],277237,Kirlia [Psyshock | Link Blast],Psyshock Link Blast,1
+DR,42,Shelgon,"0,86€",already-correct,275919,Shelgon [Granite Head | Flare],275919,Shelgon [Granite Head | Flare],Granite Head Flare,3
+DR,41,Shelgon,"0,85€",already-correct,275918,Shelgon [Energy Guard | Rollout],275918,Shelgon [Energy Guard | Rollout],Energy Guard Rollout,3
+EM,7,Manectric,"0,85€",already-correct,276518,Manectric [Swift | Tail Shock],276518,Manectric [Swift | Tail Shock],Swift Tail Shock,2
+SS,67,Lotad,"0,79€",already-correct,275844,Lotad [Tackle | Blot],275844,Lotad [Tackle | Blot],Tackle Blot,2
+AOR,11,Vespiquen,"0,76€",already-correct,284192,Vespiquen [Bee Drain | Fury Swipes],284192,Vespiquen [Bee Drain | Fury Swipes],Bee Drain Fury Swipes,3
+UL,51,Larvitar,"0,76€",already-correct,279207,Larvitar [Bite | Knuckle Punch],279207,Larvitar [Bite | Knuckle Punch],Bite Knuckle Punch,2
+HS,54,Unown,"0,72€",already-correct,279026,Unown [RETURN | Hidden Power],279026,Unown [RETURN | Hidden Power],RETURN Hidden Power,2
+DR,20,Shelgon,"0,66€",already-correct,275897,Shelgon [Scrunch | Rolling Attack],275897,Shelgon [Scrunch | Rolling Attack],Scrunch Rolling Attack,3
+XY,87,Jigglypuff,"0,65€",already-correct,281424,Jigglypuff [Rollout | Heartfelt Song],281424,Jigglypuff [Rollout | Heartfelt Song],Rollout Heartfelt Song,2
+EM,66,Spoink,"0,64€",already-correct,276577,Spoink [Lunge],276577,Spoink [Lunge],Lunge,2
+BCR,65,Croagunk,"0,58€",already-correct,280652,Croagunk [Poison Jab],280652,Croagunk [Poison Jab],Poison Jab,2
+PRC,68,Nidoqueen,"0,58€",already-correct,273599,Nidoqueen [Double Kick | Poison Fang],273599,Nidoqueen [Double Kick | Poison Fang],Double Kick Poison Fang,2
+TEU,115,Alolan Exeggutor,"0,57€",already-correct,369043,Alolan Exeggutor [Paradise Draw | Egg Splat],369043,Alolan Exeggutor [Paradise Draw | Egg Splat],Paradise Draw Egg Splat,2
+MA,50,Team Aqua's Corphish,"0,52€",already-correct,276027,Team Aqua's Corphish [Toxic Grip],276027,Team Aqua's Corphish [Toxic Grip],Toxic Grip,3
+SVP,197,Koraidon ex,"0,49€",already-correct,813956,Koraidon ex [Claw Slash | Revenge Buster],813956,Koraidon ex [Claw Slash | Revenge Buster],Claw Slash Revenge Buster,2
+DRX,96,Zweilous,"0,48€",already-correct,280535,Zweilous [Draw In | Dragon Headbutt],280535,Zweilous [Draw In | Dragon Headbutt],Draw In Dragon Headbutt,2
+DR,68,Nincada,"0,44€",already-correct,275945,Nincada [Leech Life],275945,Nincada [Leech Life],Leech Life,3
+BKT,9,Chespin,"0,43€",already-correct,286255,Chespin [Tree Climb | Seed Bomb],286255,Chespin [Tree Climb | Seed Bomb],Tree Climb Seed Bomb,3
+DR,67,Nincada,"0,41€",already-correct,275944,Nincada [Bite | Double Scratch],275944,Nincada [Bite | Double Scratch],Bite Double Scratch,3
+DRX,95,Zweilous,"0,41€",already-correct,280534,Zweilous [Crunch | Dragon Claw],280534,Zweilous [Crunch | Dragon Claw],Crunch Dragon Claw,2
+UL,39,Pupitar,"0,41€",already-correct,279195,Pupitar [Hammer In | Speed Attack],279195,Pupitar [Hammer In | Speed Attack],Hammer In Speed Attack,2
+UNB,10,Venonat,"0,41€",already-correct,372303,Venonat [Psybeam],372303,Venonat [Psybeam],Psybeam,2
+DEX,42,Joltik,"0,40€",already-correct,280370,Joltik [Static Shock],280370,Joltik [Static Shock],Static Shock,2
+DR,70,Numel,"0,40€",already-correct,275947,Numel [Rollout | Kindle],275947,Numel [Rollout | Kindle],Rollout Kindle,2
+NVI,68,Stunfisk,"0,38€",already-correct,280191,Stunfisk [Trickle | Thundershock],280191,Stunfisk [Trickle | Thundershock],Trickle Thundershock,2
+TEU,35,Alolan Geodude,"0,38€",already-correct,368966,Alolan Geodude [Charge | Smash Bomb],368966,Alolan Geodude [Charge | Smash Bomb],Charge Smash Bomb,2
+SSH,110,Sandaconda,"0,36€",already-correct,436669,Sandaconda [Sand Sac | Power Press],436669,Sandaconda [Sand Sac | Power Press],Sand Sac Power Press,2
+DR,69,Numel,"0,35€",already-correct,275946,Numel [Firebreathing | Tackle],275946,Numel [Firebreathing | Tackle],Firebreathing Tackle,2
+UNB,6,Oddish,"0,35€",already-correct,372299,Oddish [Hook],372299,Oddish [Hook],Hook,2
+DEX,41,Joltik,"0,34€",already-correct,280369,Joltik [Ram | Bug Bite],280369,Joltik [Ram | Bug Bite],Ram Bug Bite,2
+DR,56,Geodude,"0,33€",already-correct,275933,Geodude [Steady Punch],275933,Geodude [Steady Punch],Steady Punch,2
+BKT,8,Chespin,"0,32€",already-correct,286254,Chespin [Work | Seed Bomb],286254,Chespin [Work | Seed Bomb],Work Seed Bomb,3
+MEP,46,Chikorita,"0,31€",already-correct,879255,Chikorita [Razor Leaf],879255,Chikorita [Razor Leaf],Razor Leaf,2
+UD,54,Houndour,"0,31€",already-correct,279307,Houndour [Jump On],279307,Houndour [Jump On],Jump On,2
+BKT,90,Zorua,"0,29€",already-correct,286336,Zorua [Whiny Voice | Dark Edge],286336,Zorua [Whiny Voice | Dark Edge],Whiny Voice Dark Edge,2
+DR,55,Geodude,"0,29€",already-correct,275932,Geodude [Light Punch | Pebble Throw],275932,Geodude [Light Punch | Pebble Throw],Light Punch Pebble Throw,2
+PLS,65,Trubbish,"0,29€",already-correct,280805,Trubbish [Tool Drop],280805,Trubbish [Tool Drop],Tool Drop,3
+BKT,7,Chespin,"0,28€",already-correct,286253,Chespin [Nosh | Seed Bomb],286253,Chespin [Nosh | Seed Bomb],Nosh Seed Bomb,3
+BLW,41,Blitzle,"0,28€",already-correct,279779,Blitzle [Stomp],279779,Blitzle [Stomp],Stomp,2
+LTR,73,Solosis,"0,28€",already-correct,281224,Solosis [Rollout],281224,Solosis [Rollout],Rollout,2
+LTR,74,Solosis,"0,28€",already-correct,281225,Solosis [Nap | Ram],281225,Solosis [Nap | Ram],Nap Ram,2
+BCR,64,Croagunk,"0,26€",already-correct,280651,Croagunk [Paralyzing Jab],280651,Croagunk [Paralyzing Jab],Paralyzing Jab,2
+DR,66,Nincada,"0,26€",already-correct,275943,Nincada [Poison Breath],275943,Nincada [Poison Breath],Poison Breath,3
+NVI,42,Stunfisk,"0,26€",already-correct,280165,Stunfisk [Mud Shot | Thunder],280165,Stunfisk [Mud Shot | Thunder],Mud Shot Thunder,2
+PLS,64,Trubbish,"0,26€",already-correct,280804,Trubbish [Pound | Sludge Bomb],280804,Trubbish [Pound | Sludge Bomb],Pound Sludge Bomb,3
+UD,53,Houndour,"0,26€",already-correct,279306,Houndour [Sharp Fang],279306,Houndour [Sharp Fang],Sharp Fang,2
+DEX,21,Larvesta,"0,25€",already-correct,280349,Larvesta [Super Singe],280349,Larvesta [Super Singe],Super Singe,2
+HL,66,Meditite,"0,25€",already-correct,276140,Meditite [Jab | Steady Punch],276140,Meditite [Jab | Steady Punch],Jab Steady Punch,2
+LOT,162,Kecleon,"0,25€",already-correct,365798,Kecleon [Unit Color 3 | Gentle Slap],365798,Kecleon [Unit Color 3 | Gentle Slap],Unit Color 3 Gentle Slap,2
+PLS,63,Trubbish,"0,25€",already-correct,280803,Trubbish [Pile Up | Sludge Toss],280803,Trubbish [Pile Up | Sludge Toss],Pile Up Sludge Toss,3
+FCO,59,Wormadam,"0,24€",already-correct,289880,Wormadam [Strike Back | Iron Head],289880,Wormadam [Strike Back | Iron Head],Strike Back Iron Head,3
+PLF,76,Deino,"0,24€",already-correct,280954,Deino [Slam],280954,Deino [Slam],Slam,2
+UNB,68,Gastly,"0,24€",already-correct,372356,Gastly [Smog],372356,Gastly [Smog],Smog,2
+BLW,78,Patrat,"0,23€",already-correct,279816,Patrat [Hyper Fang],279816,Patrat [Hyper Fang],Hyper Fang,2
+NVI,58,Litwick,"0,23€",already-correct,280181,Litwick [Teleportation Burst],280181,Litwick [Teleportation Burst],Teleportation Burst,2
+UD,59,Murkrow,"0,23€",already-correct,279312,Murkrow [Glide | Dark Cutter],279312,Murkrow [Glide | Dark Cutter],Glide Dark Cutter,2
+UNB,37,Poliwag,"0,23€",already-correct,372328,Poliwag [Call for Family],372328,Poliwag [Call for Family],Call for Family,2
+UNB,67,Gastly,"0,23€",already-correct,372355,Gastly [Swelling Spite | Will-O-Wisp],372355,Gastly [Swelling Spite | Will-O-Wisp],Swelling Spite Will-O-Wisp,2
+ASR,85,Kleavor,"0,22€",already-correct,658702,Kleavor [Rout | Rocky Tackle],658702,Kleavor [Rout | Rocky Tackle],Rout Rocky Tackle,3
+CES,55,Oricorio,"0,22€",already-correct,361301,Oricorio [Zappy Pom-Poms | Electric Ball],361301,Oricorio [Zappy Pom-Poms | Electric Ball],Zappy Pom-Poms Electric Ball,2
+BLW,40,Blitzle,"0,21€",already-correct,279778,Blitzle [Rear Kick],279778,Blitzle [Rear Kick],Rear Kick,2
+CES,30,Oricorio,"0,21€",already-correct,361277,Oricorio [Captivating Salsa | Heat Blast],361277,Oricorio [Captivating Salsa | Heat Blast],Captivating Salsa Heat Blast,2
+SS,66,Lotad,"0,21€",already-correct,275843,Lotad [Rain Dish | Ram],275843,Lotad [Rain Dish | Ram],Rain Dish Ram,2
+TEU,117,Dratini,"0,21€",already-correct,369045,Dratini [Defensive Scales | Rain Splash],369045,Dratini [Defensive Scales | Rain Splash],Defensive Scales Rain Splash,2
+UD,63,Pineco,"0,21€",already-correct,279316,Pineco [Focus Energy | Surprise Attack],279316,Pineco [Focus Energy | Surprise Attack],Focus Energy Surprise Attack,2
+HL,65,Meditite,"0,20€",already-correct,276139,Meditite [Double Chop | Calm Mind],276139,Meditite [Double Chop | Calm Mind],Double Chop Calm Mind,2
+TEU,116,Dratini,"0,20€",already-correct,369044,Dratini [Dragon Rage],369044,Dratini [Dragon Rage],Dragon Rage,2
+BLW,77,Patrat,"0,19€",already-correct,279815,Patrat [Tackle | Bite],279815,Patrat [Tackle | Bite],Tackle Bite,2
+DEX,14,Torchic,"0,19€",already-correct,280342,Torchic [Reckless Charge],280342,Torchic [Reckless Charge],Reckless Charge,2
+DEX,20,Larvesta,"0,19€",already-correct,280348,Larvesta [Ram | Flare],280348,Larvesta [Ram | Flare],Ram Flare,2
+EPO,25,Basculin,"0,19€",already-correct,279990,Basculin [Tackle | Splatter],279990,Basculin [Tackle | Splatter],Tackle Splatter,2
+UD,62,Pineco,"0,19€",already-correct,279315,Pineco [Rollout],279315,Pineco [Rollout],Rollout,2
+BKT,132,Noibat,"0,18€",already-correct,286378,Noibat [Mysterious Beam | Gust],286378,Noibat [Mysterious Beam | Gust],Mysterious Beam Gust,2
+DEX,44,Tynamo,"0,17€",already-correct,280372,Tynamo [Charge Beam],280372,Tynamo [Charge Beam],Charge Beam,2
+DEX,45,Tynamo,"0,17€",already-correct,280373,Tynamo [Spark],280373,Tynamo [Spark],Spark,2
+BLW,16,Tepig,"0,16€",already-correct,279754,Tepig [Take Down],279754,Tepig [Take Down],Take Down,3
+CES,33,Mudkip,"0,16€",already-correct,361280,Mudkip [Tackle | Wave Splash],361280,Mudkip [Tackle | Wave Splash],Tackle Wave Splash,2
+FLF,51,Sneasel,"0,16€",already-correct,281534,Sneasel [Icy Wind | Scratch],281534,Sneasel [Icy Wind | Scratch],Icy Wind Scratch,2
+LOT,164,Pikipek,"0,16€",already-correct,365800,Pikipek [Send Back | Peck],365800,Pikipek [Send Back | Peck],Send Back Peck,2
+NVI,57,Litwick,"0,16€",already-correct,280180,Litwick [Searing Flame],280180,Litwick [Searing Flame],Searing Flame,2
+UPR,81,Magnemite,"0,16€",already-correct,316008,Magnemite [Solid Unit | Ram],316008,Magnemite [Solid Unit | Ram],Solid Unit Ram,2
+FLF,50,Sneasel,"0,15€",already-correct,281533,Sneasel [Scratch | Flash Claw],281533,Sneasel [Scratch | Flash Claw],Scratch Flash Claw,2
+FLI,6,Scatterbug,"0,15€",already-correct,355527,Scatterbug [Ultra Evolution],355527,Scatterbug [Ultra Evolution],Ultra Evolution,2
+CES,32,Mudkip,"0,14€",already-correct,361279,Mudkip [Water Reserve],361279,Mudkip [Water Reserve],Water Reserve,2
+FLI,14,Fennekin,"0,14€",already-correct,355534,Fennekin [Ember],355534,Fennekin [Ember],Ember,3
+FLI,47,Honedge,"0,14€",already-correct,355566,Honedge [Metal Sound],355566,Honedge [Metal Sound],Metal Sound,2
+LOT,65,Popplio,"0,14€",already-correct,365703,Popplio [Blot],365703,Popplio [Blot],Blot,2
+PHF,29,Helioptile,"0,14€",already-correct,281834,Helioptile [Quick Attack | Static Shock],281834,Helioptile [Quick Attack | Static Shock],Quick Attack Static Shock,2
+SSH,43,Krabby,"0,14€",already-correct,436369,Krabby [Super Slice],436369,Krabby [Super Slice],Super Slice,2
+CEC,50,Spheal,"0,13€",already-correct,407899,Spheal [Body Slam],407899,Spheal [Body Slam],Body Slam,2
+CES,104,Bagon,"0,13€",already-correct,361345,Bagon [Reckless Charge],361345,Bagon [Reckless Charge],Reckless Charge,2
+CES,64,Shuppet,"0,13€",already-correct,361308,Shuppet [Perplex],361308,Shuppet [Perplex],Perplex,3
+EPO,24,Basculin,"0,13€",already-correct,279989,Basculin [Flail | Final Gambit],279989,Basculin [Flail | Final Gambit],Flail Final Gambit,2
+LOT,163,Pikipek,"0,13€",already-correct,365799,Pikipek [Peck Off],365799,Pikipek [Peck Off],Peck Off,2
+LOT,64,Popplio,"0,13€",already-correct,365702,Popplio [Disarming Voice],365702,Popplio [Disarming Voice],Disarming Voice,2
+SSH,11,Grookey,"0,13€",already-correct,427156,Grookey [Scratch | Beat],427156,Grookey [Scratch | Beat],Scratch Beat,2
+SSH,13,Thwackey,"0,13€",already-correct,436239,Thwackey [Beat | Ambush],436239,Thwackey [Beat | Ambush],Beat Ambush,2
+UNM,168,Slakoth,"0,13€",already-correct,388627,Slakoth [Scratch | Boundless Power],388627,Slakoth [Scratch | Boundless Power],Scratch Boundless Power,2
+BKT,131,Noibat,"0,12€",already-correct,286377,Noibat [Blot],286377,Noibat [Blot],Blot,2
+CEC,49,Spheal,"0,12€",already-correct,407894,Spheal [Rollout | Icy Snow],407894,Spheal [Rollout | Icy Snow],Rollout Icy Snow,2
+HIF,38,Clefairy,"0,12€",already-correct,394597,Clefairy [Lead | Pound],394597,Clefairy [Lead | Pound],Lead Pound,2
+HIF,39,Clefairy,"0,12€",already-correct,394652,Clefairy [Pound | Moon Dance],394652,Clefairy [Pound | Moon Dance],Pound Moon Dance,2
+UNM,64,Tynamo,"0,12€",already-correct,388142,Tynamo [Generate Electricity],388142,Tynamo [Generate Electricity],Generate Electricity,2
+UPR,97,Gible,"0,12€",already-correct,316023,Gible [Rock Hiding | Gnaw],316023,Gible [Rock Hiding | Gnaw],Rock Hiding Gnaw,2
+CEC,150,Flabébé,"0,11€",already-correct,408394,Flabébé [Petal Blizzard],408394,Flabébé [Petal Blizzard],Petal Blizzard,2
+PHF,28,Helioptile,"0,11€",already-correct,281833,Helioptile [Tail Rap],281833,Helioptile [Tail Rap],Tail Rap,2
+SSH,12,Thwackey,"0,11€",already-correct,436234,Thwackey [Taunt | Double Hit],436234,Thwackey [Taunt | Double Hit],Taunt Double Hit,2
+SSH,31,Scorbunny,"0,11€",already-correct,427161,Scorbunny [Tackle | Flare],427161,Scorbunny [Tackle | Flare],Tackle Flare,2
+SSH,74,Yamper,"0,11€",already-correct,436499,Yamper [Bite | Zap Kick],436499,Yamper [Bite | Zap Kick],Bite Zap Kick,2
+UNM,98,Salandit,"0,11€",already-correct,388297,Salandit [Suffocating Gas | Gnaw],388297,Salandit [Suffocating Gas | Gnaw],Suffocating Gas Gnaw,2
+CEC,149,Flabébé,"0,10€",already-correct,408389,Flabébé [Floral Invitation],408389,Flabébé [Floral Invitation],Floral Invitation,2
+CES,103,Bagon,"0,10€",already-correct,361344,Bagon [Rock Head],361344,Bagon [Rock Head],Rock Head,2
+CES,12,Seedot,"0,10€",already-correct,361259,Seedot [Stampede],361259,Seedot [Stampede],Stampede,2
+FCO,41,Larvitar,"0,10€",already-correct,290535,Larvitar [Mountain Munch | Corkscrew Punch],290535,Larvitar [Mountain Munch | Corkscrew Punch],Mountain Munch Corkscrew Punch,2
+UNM,167,Slakoth,"0,10€",already-correct,388622,Slakoth [Lazy Howl | Hang Down],388622,Slakoth [Lazy Howl | Hang Down],Lazy Howl Hang Down,2
+UNM,63,Tynamo,"0,10€",already-correct,388137,Tynamo [Wild River],388137,Tynamo [Wild River],Wild River,2
+UPR,80,Magnemite,"0,10€",already-correct,316007,Magnemite [Searching Magnet | Tackle],316007,Magnemite [Searching Magnet | Tackle],Searching Magnet Tackle,2
+UPR,96,Gible,"0,10€",already-correct,316022,Gible [Ascension],316022,Gible [Ascension],Ascension,2
+SSH,46,Goldeen,"0,09€",already-correct,436384,Goldeen [Collect | Waterfall],436384,Goldeen [Collect | Waterfall],Collect Waterfall,2
+ASR,5,Scyther,"0,08€",already-correct,658493,Scyther [Quick Blow],658493,Scyther [Quick Blow],Quick Blow,2
+RCL,21,Applin,"0,08€",already-correct,457563,Applin [Withdraw],457563,Applin [Withdraw],Withdraw,2
+SSH,10,Grookey,"0,08€",already-correct,436229,Grookey [Fury Swipes],436229,Grookey [Fury Swipes],Fury Swipes,2
+SSH,38,Sizzlipede,"0,08€",already-correct,436344,Sizzlipede [Relentless Flames],436344,Sizzlipede [Relentless Flames],Relentless Flames,2
+SVI,147,Zangoose,"0,08€",already-correct,702443,Zangoose [Drag Off | Slashing Claw],702443,Zangoose [Drag Off | Slashing Claw],Drag Off Slashing Claw,2
+SVI,21,Smoliv,"0,08€",already-correct,702317,Smoliv [Nutrients | Spray Fluid],702317,Smoliv [Nutrients | Spray Fluid],Nutrients Spray Fluid,2
+ASR,4,Scyther,"0,07€",already-correct,658491,Scyther [Blinding Scythe],658491,Scyther [Blinding Scythe],Blinding Scythe,2
+BKT,89,Zorua,"0,07€",already-correct,286335,Zorua [Moonless Madness | Dark Edge],286335,Zorua [Moonless Madness | Dark Edge],Moonless Madness Dark Edge,2
+CRZ,42,Luxio,"0,07€",already-correct,691759,Luxio [Shorting Spark | Bite],691759,Luxio [Shorting Spark | Bite],Shorting Spark Bite,2
+FLI,46,Honedge,"0,07€",already-correct,355565,Honedge [Final Hour | Slash],355565,Honedge [Final Hour | Slash],Final Hour Slash,2
+OBF,126,Paldean Wooper,"0,07€",already-correct,725206,Paldean Wooper [Spit Poison],725206,Paldean Wooper [Spit Poison],Spit Poison,2
+OBF,127,Paldean Wooper,"0,07€",already-correct,725207,Paldean Wooper [Flop],725207,Paldean Wooper [Flop],Flop,2
+PAR,154,Tandemaus,"0,07€",already-correct,740694,Tandemaus [Tumble Over],740694,Tandemaus [Tumble Over],Tumble Over,2
+SSH,108,Silicobra,"0,07€",already-correct,436659,Silicobra [Headbutt | Tail Whap],436659,Silicobra [Headbutt | Tail Whap],Headbutt Tail Whap,2
+CES,11,Seedot,"0,06€",already-correct,361258,Seedot [Hang Down | Harden],361258,Seedot [Hang Down | Harden],Hang Down Harden,2
+CRZ,40,Shinx,"0,06€",already-correct,691757,Shinx [Thunder Jolt],691757,Shinx [Thunder Jolt],Thunder Jolt,2
+FST,106,Toxel,"0,06€",already-correct,582499,Toxel [Growl | Tiny Bolt],582499,Toxel [Growl | Tiny Bolt],Growl Tiny Bolt,2
+OBF,61,Finizen,"0,06€",already-correct,725141,Finizen [Tail Smack],725141,Finizen [Tail Smack],Tail Smack,2
+PAL,103,Tinkatuff,"0,06€",already-correct,715578,Tinkatuff [Light Punch | Boundless Power],715578,Tinkatuff [Light Punch | Boundless Power],Light Punch Boundless Power,3
+PAL,141,Maschiff,"0,06€",already-correct,715616,Maschiff [Ambush],715616,Maschiff [Ambush],Ambush,3
+RCL,20,Applin,"0,06€",already-correct,457558,Applin [Continuous Tumble],457558,Applin [Continuous Tumble],Continuous Tumble,2
+SSH,32,Raboot,"0,06€",already-correct,436319,Raboot [Flame Charge | Magnum Kick],436319,Raboot [Flame Charge | Magnum Kick],Flame Charge Magnum Kick,2
+SSH,33,Raboot,"0,06€",already-correct,436324,Raboot [Kick | Heat Blast],436324,Raboot [Kick | Heat Blast],Kick Heat Blast,2
+SSH,37,Sizzlipede,"0,06€",already-correct,436339,Sizzlipede [Bite | Combustion],436339,Sizzlipede [Bite | Combustion],Bite Combustion,2
+SVI,30,Growlithe,"0,06€",already-correct,702326,Growlithe [Relentless Flames],702326,Growlithe [Relentless Flames],Relentless Flames,2
+SVI,31,Growlithe,"0,06€",already-correct,702327,Growlithe [Stoke | Fire Claws],702327,Growlithe [Stoke | Fire Claws],Stoke Fire Claws,2
+CRZ,41,Luxio,"0,05€",already-correct,691758,Luxio [Jumping Kick | Head Bolt],691758,Luxio [Jumping Kick | Head Bolt],Jumping Kick Head Bolt,2
+FCO,40,Larvitar,"0,05€",already-correct,290534,Larvitar [Reckless Charge],290534,Larvitar [Reckless Charge],Reckless Charge,2
+FLI,5,Scatterbug,"0,05€",already-correct,355526,Scatterbug [Abnormal Outbreak | Tackle],355526,Scatterbug [Abnormal Outbreak | Tackle],Abnormal Outbreak Tackle,2
+FST,105,Toxel,"0,05€",already-correct,582498,Toxel [Ram],582498,Toxel [Ram],Ram,2
+FST,47,Sizzlipede,"0,05€",already-correct,582181,Sizzlipede [Singe],582181,Sizzlipede [Singe],Singe,2
+OBF,183,Oinkologne,"0,05€",already-correct,725263,Oinkologne [Confounding Cologne | High-Impact Kick],725263,Oinkologne [Confounding Cologne | High-Impact Kick],Confounding Cologne High-Impact Kick,2
+OBF,184,Oinkologne,"0,05€",already-correct,725264,Oinkologne [Finest Selection | Perfume Press],725264,Oinkologne [Finest Selection | Perfume Press],Finest Selection Perfume Press,2
+OBF,60,Finizen,"0,05€",already-correct,725140,Finizen [Valiant Evolution | Razor Fin],725140,Finizen [Valiant Evolution | Razor Fin],Valiant Evolution Razor Fin,2
+OBF,75,Tadbulb,"0,05€",already-correct,725155,Tadbulb [Thunder Jolt],725155,Tadbulb [Thunder Jolt],Thunder Jolt,3
+PAL,102,Tinkatink,"0,05€",already-correct,715577,Tinkatink [Brutal Swing],715577,Tinkatink [Brutal Swing],Brutal Swing,4
+PAR,133,Doublade,"0,05€",already-correct,740671,Doublade [Swords Dance | Slicing Blade],740671,Doublade [Swords Dance | Slicing Blade],Swords Dance Slicing Blade,3
+PAR,153,Tandemaus,"0,05€",already-correct,740693,Tandemaus [Damage Rush],740693,Tandemaus [Damage Rush],Damage Rush,2
+PAR,51,Wiglett,"0,05€",already-correct,740539,Wiglett [Fury Headbutt],740539,Wiglett [Fury Headbutt],Fury Headbutt,2
+PAR,52,Wiglett,"0,05€",already-correct,740542,Wiglett [Vibration],740542,Wiglett [Vibration],Vibration,2
+SVI,112,Riolu,"0,05€",already-correct,702408,Riolu [Jab | Low Kick],702408,Riolu [Jab | Low Kick],Jab Low Kick,3
+SVI,141,Varoom,"0,05€",already-correct,702436,Varoom [Hammer In],702436,Varoom [Hammer In],Hammer In,2
+SVI,20,Smoliv,"0,05€",already-correct,702316,Smoliv [Tackle],702316,Smoliv [Tackle],Tackle,2
+SVI,25,Toedscool,"0,05€",already-correct,702321,Toedscool [Spore | Ram],702321,Toedscool [Spore | Ram],Spore Ram,3
+ASR,89,Hisuian Qwilfish,"0,04€",already-correct,658710,Hisuian Qwilfish [Spiny Rush],658710,Hisuian Qwilfish [Spiny Rush],Spiny Rush,2
+CRZ,39,Shinx,"0,04€",already-correct,691756,Shinx [Rear Kick],691756,Shinx [Rear Kick],Rear Kick,2
+PAL,100,Tinkatink,"0,04€",already-correct,715575,Tinkatink [Collect | Corkscrew Punch],715575,Tinkatink [Collect | Corkscrew Punch],Collect Corkscrew Punch,4
+PAL,77,Tadbulb,"0,04€",already-correct,715552,Tadbulb [Thunder Wave],715552,Tadbulb [Thunder Wave],Thunder Wave,2
+PAL,78,Tadbulb,"0,04€",already-correct,715553,Tadbulb [Stampede | Static Shock],715553,Tadbulb [Stampede | Static Shock],Stampede Static Shock,2
+PAR,102,Nacli,"0,04€",already-correct,740616,Nacli [Corner],740616,Nacli [Corner],Corner,2
+PAR,82,Tinkatink,"0,04€",already-correct,740574,Tinkatink [Mountain Scrounging | Mumble],740574,Tinkatink [Mountain Scrounging | Mumble],Mountain Scrounging Mumble,2
+PAR,83,Tinkatink,"0,04€",already-correct,740575,Tinkatink [Boundless Power],740575,Tinkatink [Boundless Power],Boundless Power,2
+SSP,101,Paldean Tauros,"0,04€",already-correct,794418,Paldean Tauros [Smash Kick | Blocking Stomp],794418,Paldean Tauros [Smash Kick | Blocking Stomp],Smash Kick Blocking Stomp,3
+SSP,89,Oricorio,"0,04€",already-correct,794397,Oricorio [Energy Assist | Dazzle Dance],794397,Oricorio [Energy Assist | Dazzle Dance],Energy Assist Dazzle Dance,2
+TWM,21,Poltchageist,"0,04€",already-correct,769195,Poltchageist [Tea Server | Surprise Attack],769195,Poltchageist [Tea Server | Surprise Attack],Tea Server Surprise Attack,3
+ASR,88,Hisuian Qwilfish,"0,03€",already-correct,658709,Hisuian Qwilfish [Ram | Rolling Tackle],658709,Hisuian Qwilfish [Ram | Rolling Tackle],Ram Rolling Tackle,2
+CRI,31,Deoxys,"0,03€",already-correct,886423,Deoxys [Genome Charge | Psychic],886423,Deoxys [Genome Charge | Psychic],Genome Charge Psychic,4
+LOR,121,Inkay,"0,03€",already-correct,674134,Inkay [Call for Family | Tackle],674134,Inkay [Call for Family | Tackle],Call for Family Tackle,2
+PAR,101,Nacli,"0,03€",already-correct,740615,Nacli [Rock Throw | Stone Edge],740615,Nacli [Rock Throw | Stone Edge],Rock Throw Stone Edge,2
+PAR,13,Nymble,"0,03€",already-correct,740489,Nymble [Gnaw],740489,Nymble [Gnaw],Gnaw,2
+PAR,14,Nymble,"0,03€",already-correct,740490,Nymble [Flop],740490,Nymble [Flop],Flop,2
+PAR,25,Charcadet,"0,03€",already-correct,740501,Charcadet [Protect | Magma Punch],740501,Charcadet [Protect | Magma Punch],Protect Magma Punch,3
+PAR,87,Gimmighoul,"0,03€",already-correct,740579,Gimmighoul [Call for Family | Corkscrew Punch],740579,Gimmighoul [Call for Family | Corkscrew Punch],Call for Family Corkscrew Punch,3
+SSP,39,Paldean Tauros,"0,03€",already-correct,794305,Paldean Tauros [Upthrusting Horns | Jet Headbutt],794305,Paldean Tauros [Upthrusting Horns | Jet Headbutt],Upthrusting Horns Jet Headbutt,3
+SVI,140,Varoom,"0,03€",already-correct,702435,Varoom [Poison Gas],702435,Varoom [Poison Gas],Poison Gas,2
+LOR,77,Inkay,"0,02€",already-correct,674090,Inkay [Fickle Attack],674090,Inkay [Fickle Attack],Fickle Attack,2
+PAR,47,Wimpod,"0,02€",already-correct,740527,Wimpod [Hide | Gnaw],740527,Wimpod [Hide | Gnaw],Hide Gnaw,3
+SSH,54,Sobble,"0,02€",already-correct,436414,Sobble [Water Gun],436414,Sobble [Water Gun],Water Gun,2
+SSP,18,Paldean Tauros,"0,02€",already-correct,794273,Paldean Tauros [Rear Kick | Spirited Tackle],794273,Paldean Tauros [Rear Kick | Spirited Tackle],Rear Kick Spirited Tackle,3
+UNB,9,Venonat,"0,02€",already-correct,372302,Venonat [Radar Eyes | Flop],372302,Venonat [Radar Eyes | Flop],Radar Eyes Flop,2
+N2,32,Umbreon,"255,45€",correction,274524,Umbreon [Bite | Feint Attack],274543,Umbreon [Quick Attack | Pursuit],Quick Attack Pursuit,2
+SVP,200,Eevee,"217,98€",correction,806407,Eevee [Boosted Evolution | Reckless Charge],826138,Eevee [Call for Family | Gnaw],Call for Family Gnaw,4
+NP,16,Treecko,"182,73€",correction,275480,Treecko [Tail Slap | Razor Leaf],275489,Treecko [Pound | Sporadic Sponging],Pound Sporadic Sponging,3
+N1,18,Typhlosion,"159,23€",correction,274417,Typhlosion [Fire Recharge | Flame Burst],274418,Typhlosion [Fire Boost | Flame Wheel],Fire Boost Flame Wheel,2
+E2,148,Kingdra,"156,26€",correction,275056,Kingdra [Water Cyclone | Rapids],275224,Kingdra [Crystal Type | Aquabomb | Dual Burn],Crystal Type Aquabomb Dual Burn,3
+N3,17,Entei,"149,54€",correction,274592,Entei [Howl | Searing Flames],274603,Entei [Legendary Body | Mega Flame],Legendary Body Mega Flame,2
+SVP,148,Miraidon,"147,62€",correction,692234,Miraidon [Sharp Fang | Lightning Laser],769427,Miraidon [Electric Claws | Mach Bolt],Electric Claws Mach Bolt,5
+N1,11,Meganium,"73,46€",correction,274410,Meganium [Herbal Scent | Body Slam],274411,Meganium [Wild Growth | Soothing Scent],Wild Growth Soothing Scent,2
+SP,234,Pikachu,"64,65€",correction,461594,Pikachu [Iron Tail | Electro Ball],653698,Pikachu [Gift Delivery | Pika Ball],Gift Delivery Pika Ball,5
+SP,285,Pikachu V,"64,45€",correction,576744,Pikachu V [Volt Tackle],692429,Pikachu V [Pika Drive],Pika Drive,8
+WP,27,Pikachu,"53,60€",correction,275445,Pikachu [Scratch | Thunderbolt],275446,Pikachu [Thundershock | Agility],Thundershock Agility,4
+N2,13,Umbreon,"48,58€",correction,274543,Umbreon [Quick Attack | Pursuit],274524,Umbreon [Bite | Feint Attack],Bite Feint Attack,2
+N1,10,Meganium,"47,68€",correction,274411,Meganium [Wild Growth | Soothing Scent],274410,Meganium [Herbal Scent | Body Slam],Herbal Scent Body Slam,2
+SVP,95,Cleffa,"38,75€",correction,761128,Cleffa [Grasping Draw],751816,Cleffa [Twinkling Hope],Twinkling Hope,3
+SVP,88,Pikachu,"37,27€",correction,740411,Pikachu [Scrappy Spark],751813,Pikachu [Growl | Pika Bolt],Growl Pika Bolt,10
+WP,12,Mewtwo,"33,69€",correction,275422,Mewtwo [Energy Absorption | Psyburn],275431,Mewtwo [Energy Control | Telekinesis],Energy Control Telekinesis,3
+UF,Z,Unown,"26,57€",correction,276646,Unown [?] [Shuffle | Hidden Power],276639,Unown [Z] [Shuffle | Hidden Power],Shuffle Hidden Power Z,28
+UF,Y,Unown,"25,27€",correction,276638,Unown [!] [Shuffle | Hidden Power],276640,Unown [Y] [Shuffle | Hidden Power],Shuffle Hidden Power Y,28
+SVP,121,Revavroom,"22,08€",correction,761122,Revavroom [Rumbling Engine | Knock Away],769421,Revavroom [Swagger | Huge Tackle],Swagger Huge Tackle,3
+SP,119,Snorlax,"21,63€",correction,516339,Snorlax [Gormandize | Body Slam],557976,Snorlax [Slap Push | Single Strike Tackle],Slap Push Single Strike Tackle,3
+E1,36,Blastoise,"20,47€",correction,274912,Blastoise [Jet Stream | Energy Cannon],274911,Blastoise [Bubble | Double Cannon],Bubble Double Cannon,3
+E1,132,Squirtle,"19,68€",correction,275006,Squirtle [Wave Splash | Doubleslap],275007,Squirtle [Headbutt | Bubblebeam],Headbutt Bubblebeam,2
+UF,X,Unown,"19,24€",correction,276631,Unown [I] [Shuffle | Hidden Power],276637,Unown [X] [Shuffle | Hidden Power],Shuffle Hidden Power X,28
+UF,W,Unown,"18,91€",correction,276636,Unown [V] [Shuffle | Hidden Power],276635,Unown [W] [Shuffle | Hidden Power],Shuffle Hidden Power W,28
+WP,26,Pikachu,"18,63€",correction,275420,Pikachu [Growl | Thundershock],275445,Pikachu [Scratch | Thunderbolt],Scratch Thunderbolt,4
+UF,V,Unown,"17,82€",correction,276620,Unown [A] [Shuffle | Hidden Power],276636,Unown [V] [Shuffle | Hidden Power],Shuffle Hidden Power V,28
+E1,67,Venusaur,"17,63€",correction,274943,Venusaur [Harvest Bounty | Body Slam],274942,Venusaur [Leech Seed | Fury Strikes],Leech Seed Fury Strikes,4
+UF,U,Unown,"17,00€",correction,276628,Unown [D] [Shuffle | Hidden Power],276642,Unown [U] [Shuffle | Hidden Power],Shuffle Hidden Power U,28
+SP,162,Mewtwo V-UNION,"16,91€",correction,572159,Mewtwo V-UNION [Union Gain],572162,Mewtwo V-UNION [Photon Barrier | Final Burn],Photon Barrier Final Burn,5
+DX,18,Deoxys,"16,23€",correction,276419,Deoxys [Form Change | Link Blast],276421,Deoxys [Form Change | Barrier Attack],Form Change Barrier Attack,5
+UF,T,Unown,"15,79€",correction,276640,Unown [Y] [Shuffle | Hidden Power],276645,Unown [T] [Shuffle | Hidden Power],Shuffle Hidden Power T,28
+SVP,161,Charizard ex,"15,71€",correction,740401,Charizard ex [Infernal Reign | Burning Darkness],791830,Charizard ex [Brave Wing | Explosive Vortex],Brave Wing Explosive Vortex,5
+UF,S,Unown,"15,32€",correction,276632,Unown [H] [Shuffle | Hidden Power],276644,Unown [S] [Shuffle | Hidden Power],Shuffle Hidden Power S,28
+SP,161,Mewtwo V-UNION,"15,27€",correction,572162,Mewtwo V-UNION [Photon Barrier | Final Burn],572161,Mewtwo V-UNION [Psysplosion],Psysplosion,5
+UF,R,Unown,"14,76€",correction,276644,Unown [S] [Shuffle | Hidden Power],276643,Unown [R] [Shuffle | Hidden Power],Shuffle Hidden Power R,28
+UF,Q,Unown,"14,66€",correction,276645,Unown [T] [Shuffle | Hidden Power],276641,Unown [Q] [Shuffle | Hidden Power],Shuffle Hidden Power Q,28
+BCR,33,Psyduck,"14,06€",correction,280619,Psyduck [Dazzle Dance],280620,Psyduck [Firefighting],Firefighting,2
+UF,P,Unown,"13,41€",correction,276642,Unown [U] [Shuffle | Hidden Power],276633,Unown [P] [Shuffle | Hidden Power],Shuffle Hidden Power P,28
+DEX,61,Umbreon,"12,99€",correction,280388,Umbreon [Shadow Drain | Slashing Strike],280389,Umbreon [Confuse Ray | Shadow Shutdown],Confuse Ray Shadow Shutdown,3
+UF,O,Unown,"12,84€",correction,276619,Unown [B] [Shuffle | Hidden Power],276623,Unown [O] [Shuffle | Hidden Power],Shuffle Hidden Power O,28
+UF,N,Unown,"12,76€",correction,276627,Unown [E] [Shuffle | Hidden Power],276624,Unown [N] [Shuffle | Hidden Power],Shuffle Hidden Power N,28
+UF,M,Unown,"12,58€",correction,276634,Unown [L] [Shuffle | Hidden Power],276622,Unown [M] [Shuffle | Hidden Power],Shuffle Hidden Power M,28
+UF,L,Unown,"12,54€",correction,276633,Unown [P] [Shuffle | Hidden Power],276634,Unown [L] [Shuffle | Hidden Power],Shuffle Hidden Power L,28
+UF,K,Unown,"12,17€",correction,276630,Unown [G] [Shuffle | Hidden Power],276621,Unown [K] [Shuffle | Hidden Power],Shuffle Hidden Power K,28
+SP,159,Mewtwo V-UNION,"11,99€",correction,572161,Mewtwo V-UNION [Psysplosion],572159,Mewtwo V-UNION [Union Gain],Union Gain,5
+UF,J,Unown,"11,75€",correction,276625,Unown [C] [Shuffle | Hidden Power],276626,Unown [J] [Shuffle | Hidden Power],Shuffle Hidden Power J,28
+UF,I,Unown,"11,64€",correction,276643,Unown [R] [Shuffle | Hidden Power],276631,Unown [I] [Shuffle | Hidden Power],Shuffle Hidden Power I,28
+E1,131,Squirtle,"11,55€",correction,275007,Squirtle [Headbutt | Bubblebeam],275006,Squirtle [Wave Splash | Doubleslap],Wave Splash Doubleslap,2
+SP,158,Greninja V-UNION,"11,36€",correction,572155,Greninja V-UNION [Union Gain],572158,Greninja V-UNION [Feel the Way | Waterfall Bind],Feel the Way Waterfall Bind,5
+UF,H,Unown,"11,36€",correction,276637,Unown [X] [Shuffle | Hidden Power],276632,Unown [H] [Shuffle | Hidden Power],Shuffle Hidden Power H,28
+UF,G,Unown,"11,14€",correction,276624,Unown [N] [Shuffle | Hidden Power],276630,Unown [G] [Shuffle | Hidden Power],Shuffle Hidden Power G,28
+UF,F,Unown,"10,67€",correction,276622,Unown [M] [Shuffle | Hidden Power],276629,Unown [F] [Shuffle | Hidden Power],Shuffle Hidden Power F,28
+E3,115,Weedle,"10,65€",correction,275373,Weedle [Fury Attack],275372,Weedle [Entangling Thread | Poison Horn],Entangling Thread Poison Horn,2
+E3,114,Weedle,"10,38€",correction,275372,Weedle [Entangling Thread | Poison Horn],275373,Weedle [Fury Attack],Fury Attack,2
+UF,E,Unown,"10,38€",correction,276621,Unown [K] [Shuffle | Hidden Power],276627,Unown [E] [Shuffle | Hidden Power],Shuffle Hidden Power E,28
+RS,42,Mightyena,"10,29€",correction,275658,Mightyena [Intimidating Fang | Shakedown],275690,Mightyena [Bite | Ambush],Bite Ambush,2
+DS,35,Ditto,"10,14€",correction,276825,Ditto [Geodude | Duplicate | Linear Attack],276798,Ditto [Duplicate | Energy Link],Duplicate Energy Link,10
+UF,D,Unown,"10,10€",correction,276641,Unown [Q] [Shuffle | Hidden Power],276628,Unown [D] [Shuffle | Hidden Power],Shuffle Hidden Power D,28
+UF,C,Unown,"9,93€",correction,276626,Unown [J] [Shuffle | Hidden Power],276625,Unown [C] [Shuffle | Hidden Power],Shuffle Hidden Power C,28
+UF,B,Unown,"9,87€",correction,276623,Unown [O] [Shuffle | Hidden Power],276619,Unown [B] [Shuffle | Hidden Power],Shuffle Hidden Power B,28
+UF,A,Unown,"9,66€",correction,276629,Unown [F] [Shuffle | Hidden Power],276620,Unown [A] [Shuffle | Hidden Power],Shuffle Hidden Power A,28
+E1,135,Totodile,"9,49€",correction,275009,Totodile [Surf | Double Scratch],275010,Totodile [Paralyzing Gaze | Bite],Paralyzing Gaze Bite,2
+SP,232,Charmander,"9,26€",correction,547031,Charmander [Collect | Flare],664338,Charmander [Tail on Fire],Tail on Fire,2
+E2,80,Growlithe,"8,90€",correction,275124,Growlithe [Ember],275154,Growlithe [Roar | Firebreathing],Roar Firebreathing,2
+E1,53,Meganium,"8,66€",correction,274929,Meganium [Soothing Aroma | Poisonpowder],274928,Meganium [Sleep Powder | Solarbeam],Sleep Powder Solarbeam,3
+SP,140,Pikachu V-UNION,"7,70€",correction,576738,Pikachu V-UNION [Union Gain],576739,Pikachu V-UNION [Shocking Shock],Shocking Shock,5
+DX,17,Deoxys,"7,20€",correction,276421,Deoxys [Form Change | Barrier Attack],276420,Deoxys [Form Change | Energy Crush],Form Change Energy Crush,5
+SP,139,Pikachu V-UNION,"7,15€",correction,576739,Pikachu V-UNION [Shocking Shock],576738,Pikachu V-UNION [Union Gain],Union Gain,5
+SP,92,Charmander,"7,14€",correction,664338,Charmander [Tail on Fire],547031,Charmander [Collect | Flare],Collect Flare,2
+SP,210,Oricorio,"7,02€",correction,580165,Oricorio [Lesson in Zeal | Glistening Droplets],659062,Oricorio [Mixed Call | Razor Wing],Mixed Call Razor Wing,2
+SVP,76,Sprigatito,"6,75€",correction,690961,Sprigatito [Mini Drain],751801,Sprigatito [Gather Sunlight | Seed Bomb],Gather Sunlight Seed Bomb,3
+E3,73,Ledyba,"6,69€",correction,275331,Ledyba [Teary Eyes | Quick Turn],275330,Ledyba [Gnaw | Slam],Gnaw Slam,2
+E2,106,Scyther,"6,68€",correction,275130,Scyther [Quick Turn | Cross-Cut],275182,Scyther [Slash | Swift],Slash Swift,2
+E2,51,Growlithe,"6,42€",correction,275154,Growlithe [Roar | Firebreathing],275124,Growlithe [Ember],Ember,2
+E1,134,Totodile,"5,91€",correction,275010,Totodile [Paralyzing Gaze | Bite],275009,Totodile [Surf | Double Scratch],Surf Double Scratch,2
+E2,57,Scyther,"5,30€",correction,275182,Scyther [Slash | Swift],275130,Scyther [Quick Turn | Cross-Cut],Quick Turn Cross-Cut,2
+LTR,RC12,Stunfisk,"4,95€",correction,281234,Stunfisk [Muddy Water | Rumble],281136,Stunfisk [Attract | Mud-Slap],Attract Mud-Slap,2
+SP,157,Greninja V-UNION,"4,95€",correction,572158,Greninja V-UNION [Feel the Way | Waterfall Bind],572157,Greninja V-UNION [Antidote Jutsu | Twister Shuriken],Antidote Jutsu Twister Shuriken,5
+E3,72,Ledyba,"4,93€",correction,275330,Ledyba [Gnaw | Slam],275331,Ledyba [Teary Eyes | Quick Turn],Teary Eyes Quick Turn,2
+BWP,69,Meloetta,"4,61€",correction,279864,Meloetta [Sing | Psyburn],279862,Meloetta [Smack | Acrobatics],Smack Acrobatics,2
+G1,80,Lt. Surge's Magnemite,"4,29€",correction,274186,Lt. Surge's Magnemite [Removal Pulse | Confusion Pulse],274216,Lt. Surge's Magnemite [Thundershock | Tackle],Thundershock Tackle,2
+DR,10,Salamence,"3,96€",correction,275896,Salamence [Intimidating Fang | Dragon Flame],275887,Salamence [Dragon Wind | Agility | Dragon Claw],Dragon Wind Agility Dragon Claw,3
+PAF,172,Paldean Tauros,"3,90€",correction,751650,Paldean Tauros [Raging Horns | Blaze Dash],751711,Paldean Tauros [Raging Horns | Combat Tackle],Raging Horns Combat Tackle,3
+N1,32,Croconaw,"3,88€",correction,274431,Croconaw [Screech | Jaw Clamp],274432,Croconaw [Tackle | Sweep Away],Tackle Sweep Away,2
+LTR,83,Stunfisk,"3,66€",correction,281136,Stunfisk [Attract | Mud-Slap],281234,Stunfisk [Muddy Water | Rumble],Muddy Water Rumble,2
+SP,73,Sobble,"3,61€",correction,427091,Sobble [Bind],516364,Sobble [Growl | Rain Splash],Growl Rain Splash,3
+SSH,15,Rillaboom,"3,52€",correction,701500,Rillaboom [Voltage Beat | Hammer In],436244,Rillaboom [Drum Roll | Drum Beating],Drum Roll Drum Beating,4
+BWP,68,Meloetta,"3,51€",correction,279862,Meloetta [Smack | Acrobatics],279864,Meloetta [Sing | Psyburn],Sing Psyburn,2
+PAF,120,Paldean Tauros,"3,30€",correction,751711,Paldean Tauros [Raging Horns | Combat Tackle],751659,Paldean Tauros [Raging Horns | Aqua Dive],Raging Horns Aqua Dive,3
+SP,71,Scorbunny,"3,24€",correction,427086,Scorbunny [Super Singe],516354,Scorbunny [Me First | Live Coal],Me First Live Coal,4
+SS,46,Lombre,"3,18€",correction,275822,Lombre [Rain Dish | Double Scratch],275823,Lombre [Surprise | Fury Swipes],Surprise Fury Swipes,2
+SP,164,Zacian V-UNION,"3,06€",correction,572163,Zacian V-UNION [Union Gain],572164,Zacian V-UNION [Dance of the Crowned Sword],Dance of the Crowned Sword,5
+CG,43,Wartortle,"3,03€",correction,277123,Wartortle [Bubble | Tackle],277124,Wartortle [Tail Whip | Bite],Tail Whip Bite,3
+SP,70,Grookey,"2,98€",correction,547426,Grookey [Branch Poke],516349,Grookey [Full On],Full On,3
+G1,78,Erika's Oddish,"2,97€",correction,274183,Erika's Oddish [Photosynthesis | Poisonpowder],274214,Erika's Oddish [Blot | Sporadic Sponging],Blot Sporadic Sponging,2
+SP,163,Zacian V-UNION,"2,81€",correction,572164,Zacian V-UNION [Dance of the Crowned Sword],572163,Zacian V-UNION [Union Gain],Union Gain,5
+RG,55,Bulbasaur,"2,77€",correction,276230,Bulbasaur [Sleep Poison | Razor Leaf],276231,Bulbasaur [Ram | Gouge],Ram Gouge,2
+SVP,108,Flaaffy,"2,76€",correction,703183,Flaaffy [Static Shock | Extreme Current],769404,Flaaffy [Headbutt | Electro Ball],Headbutt Electro Ball,2
+PAF,111,Paldean Tauros,"2,75€",correction,751659,Paldean Tauros [Raging Horns | Aqua Dive],751650,Paldean Tauros [Raging Horns | Blaze Dash],Raging Horns Blaze Dash,3
+N1,47,Quilava,"2,70€",correction,274446,Quilava [Ember | Fire Wind],274447,Quilava [Smokescreen | Char],Smokescreen Char,2
+RS,50,Aron,"2,67€",correction,275673,Aron [Rollout | Double Stab],275698,Aron [Gnaw],Gnaw,3
+E2,115,Voltorb,"2,59€",correction,275137,Voltorb [Rollout | Thundershock],275191,Voltorb [Swift],Swift,2
+E2,85,Horsea,"2,55€",correction,275158,Horsea [Bubble],275159,Horsea [Reverse Thrust],Reverse Thrust,2
+SVP,82,Quaxly,"2,55€",correction,690963,Quaxly [Water Splash],751807,Quaxly [Reckless Charge],Reckless Charge,2
+RS,71,Skitty,"2,53€",correction,275692,Skitty [Minor Errand-Running | Lullaby],275719,Skitty [Tackle | Lunge],Tackle Lunge,3
+DRV,15,Fraxure,"2,35€",correction,281014,Fraxure [Grit | Dragon Claw],281015,Fraxure [Scratch | Sharp Fang],Scratch Sharp Fang,2
+SP,63,Pikachu V,"2,31€",correction,540616,Pikachu V [Charge | Thunderbolt],496545,Pikachu V [Pika Ball | Circle Circuit],Pika Ball Circle Circuit,8
+CG,31,Combusken,"2,25€",correction,277097,Combusken [Focus Energy | High Jump Kick],277112,Combusken [Searing Flame | Firebreathing],Searing Flame Firebreathing,2
+XY,90,Wigglytuff,"2,25€",correction,281426,Wigglytuff [Gather Energy | Hocus Pinkus],281427,Wigglytuff [Balloon Barrage | Double-Edge],Balloon Barrage Double-Edge,2
+E2,84,Horsea,"2,12€",correction,275159,Horsea [Reverse Thrust],275158,Horsea [Bubble],Bubble,2
+BLW,6,Serperior,"2,04€",correction,279743,Serperior [Vine Whip | Leaf Storm],279744,Serperior [Royal Heal | Leaf Tornado],Royal Heal Leaf Tornado,2
+RS,53,Electrike,"1,89€",correction,275678,Electrike [Charge | Thunder Jolt],275701,Electrike [Super Thunder Wave | Tackle],Super Thunder Wave Tackle,3
+E2,64,Voltorb,"1,78€",correction,275191,Voltorb [Swift],275137,Voltorb [Rollout | Thundershock],Rollout Thundershock,2
+MA,51,Team Aqua's Corphish,"1,71€",correction,276003,Team Aqua's Corphish [Double Pinchers | Dark Poison],276028,Team Aqua's Corphish [Slash | Slow-Acting Poison],Slash Slow-Acting Poison,3
+LOT,92,Unown,"1,64€",correction,365727,Unown [DAMAGE | Hidden Power],365729,Unown [MISSING | Hidden Power],MISSING Hidden Power,3
+DX,37,Magcargo,"1,58€",correction,276423,Magcargo [Smooth Over | Knock Over | Combustion],276440,Magcargo [Headbutt | Burning Ball],Headbutt Burning Ball,2
+DR,47,Vibrava,"1,49€",correction,275923,Vibrava [Levitate | Razor Wing],275924,Vibrava [Dive | Quick Turn],Dive Quick Turn,3
+G1,76,Erika's Bellsprout,"1,44€",correction,274211,Erika's Bellsprout [Poison Vine | Vine Whip],274212,Erika's Bellsprout [Careless Tackle],Careless Tackle,2
+PRC,81,Medicham,"1,40€",correction,273611,Medicham [Pure Power | Windmill Kick],273612,Medicham [Calm Mind | Yoga Kick],Calm Mind Yoga Kick,2
+RS,60,Mudkip,"1,40€",correction,275707,Mudkip [Bubble],275708,Mudkip [Pound | Fury Swipes],Pound Fury Swipes,3
+BLW,5,Serperior,"1,38€",correction,279744,Serperior [Royal Heal | Leaf Tornado],279743,Serperior [Vine Whip | Leaf Storm],Vine Whip Leaf Storm,2
+G1,50,Lt. Surge's Magnemite,"1,36€",correction,274216,Lt. Surge's Magnemite [Thundershock | Tackle],274186,Lt. Surge's Magnemite [Removal Pulse | Confusion Pulse],Removal Pulse Confusion Pulse,2
+SSH,59,Inteleon,"1,30€",correction,450623,Inteleon [Shady Dealings | Aqua Bullet],436429,Inteleon [Silent Shot | Hydro Snipe],Silent Shot Hydro Snipe,4
+EPO,57,Excadrill,"1,23€",correction,280021,Excadrill [Metal Claw | Drill Run],280022,Excadrill [Dig | Earthquake],Dig Earthquake,2
+RS,65,Poochyena,"1,22€",correction,275712,Poochyena [Knock Off | Rear Kick],275713,Poochyena [Shadow Bind],Shadow Bind,3
+EPO,8,Leavanny,"1,17€",correction,279972,Leavanny [Nurturing | X-Scissor],279973,Leavanny [Slash | Triple Cutter],Slash Triple Cutter,2
+NVI,53,Reuniclus,"1,12€",correction,280175,Reuniclus [Future Sight | Net Force],280176,Reuniclus [Dizzy Punch | Mind Bend],Dizzy Punch Mind Bend,2
+G1,83,Lt. Surge's Spearow,"1,10€",correction,274188,Lt. Surge's Spearow [Drill Peck],274219,Lt. Surge's Spearow [Whirlwind | Razor Wind],Whirlwind Razor Wind,2
+NVI,52,Reuniclus,"1,07€",correction,280176,Reuniclus [Dizzy Punch | Mind Bend],280175,Reuniclus [Future Sight | Net Force],Future Sight Net Force,2
+G1,52,Lt. Surge's Spearow,"1,05€",correction,274219,Lt. Surge's Spearow [Whirlwind | Razor Wind],274188,Lt. Surge's Spearow [Drill Peck],Drill Peck,2
+N1,31,Croconaw,"1,01€",correction,274432,Croconaw [Tackle | Sweep Away],274431,Croconaw [Screech | Jaw Clamp],Screech Jaw Clamp,2
+UD,48,Eevee,"0,99€",correction,279300,Eevee [Tackle | Bite],279301,Eevee [Call for Family | Tickle],Call for Family Tickle,2
+MA,31,Team Aqua's Sealeo,"0,96€",correction,275993,Team Aqua's Sealeo [Aqua Trance | Super Hypnoblast],276008,Team Aqua's Sealeo [Aurora Beam | Knock Over],Aurora Beam Knock Over,2
+DX,75,Slugma,"0,86€",correction,276477,Slugma [Collect | Combustion],276478,Slugma [Magma Ring | Flare],Magma Ring Flare,2
+SS,62,Duskull,"0,85€",correction,275838,Duskull [Surprise | Confuse Ray],275839,Duskull [Haunt | Dark Mind],Haunt Dark Mind,2
+BKT,109,Axew,"0,83€",correction,286354,Axew [Brat Snack | Dragon Claw],286355,Axew [Extra Chop | Dragon Claw],Extra Chop Dragon Claw,2
+EPO,31,Beartic,"0,82€",correction,279995,Beartic [Sheer Cold | Icicle Crash],279996,Beartic [Icy Wind | Superpower],Icy Wind Superpower,2
+RS,68,Ralts,"0,82€",correction,275714,Ralts [Confuse Ray],275716,Ralts [Pound | Link Blast],Pound Link Blast,3
+LOT,91,Unown,"0,79€",correction,365729,Unown [MISSING | Hidden Power],365728,Unown [HAND | Hidden Power],HAND Hidden Power,3
+PRC,46,Spheal,"0,79€",correction,273576,Spheal [Ball Roll],273577,Spheal [Ice Ball],Ice Ball,2
+SP,168,Oricorio,"0,77€",correction,659062,Oricorio [Mixed Call | Razor Wing],580165,Oricorio [Lesson in Zeal | Glistening Droplets],Lesson in Zeal Glistening Droplets,2
+EPO,7,Leavanny,"0,76€",correction,279973,Leavanny [Slash | Triple Cutter],279972,Leavanny [Nurturing | X-Scissor],Nurturing X-Scissor,2
+G1,75,Erika's Bellsprout,"0,75€",correction,274212,Erika's Bellsprout [Careless Tackle],274211,Erika's Bellsprout [Poison Vine | Vine Whip],Poison Vine Vine Whip,2
+TEU,12,Charmander,"0,75€",correction,368944,Charmander [Scratch | Reprisal],368945,Charmander [Ember],Ember,2
+MA,16,Team Aqua's Sealeo,"0,71€",correction,276008,Team Aqua's Sealeo [Aurora Beam | Knock Over],275993,Team Aqua's Sealeo [Aqua Trance | Super Hypnoblast],Aqua Trance Super Hypnoblast,2
+BCR,96,Skarmory,"0,70€",correction,280682,Skarmory [Claw | Drill Peck],280683,Skarmory [Metal Sound | Swift],Metal Sound Swift,2
+SSH,35,Cinderace,"0,67€",correction,450573,Cinderace [Libero | Flare Striker],436329,Cinderace [Pyro Ball | Burning Kick],Pyro Ball Burning Kick,4
+UD,16,Honchkrow,"0,67€",correction,279268,Honchkrow [Whirlwind | Blindside],279269,Honchkrow [Shadow Bind | Vengeance],Shadow Bind Vengeance,2
+RS,67,Ralts,"0,65€",correction,275716,Ralts [Pound | Link Blast],275715,Ralts [Headbutt | Hypnoblast],Headbutt Hypnoblast,3
+XY,77,Malamar,"0,65€",correction,281413,Malamar [Mental Trash | Distortion Beam],281414,Malamar [Mental Panic | Puncture],Mental Panic Puncture,2
+DR,62,Magnemite,"0,61€",correction,275938,Magnemite [Rollout | Hook],275939,Magnemite [Random Spark],Random Spark,3
+DR,63,Magnemite,"0,61€",correction,275939,Magnemite [Random Spark],275940,Magnemite [Thundershock],Thundershock,3
+DX,74,Slugma,"0,61€",correction,276478,Slugma [Magma Ring | Flare],276477,Slugma [Collect | Combustion],Collect Combustion,2
+BKT,108,Axew,"0,60€",correction,286355,Axew [Extra Chop | Dragon Claw],286354,Axew [Brat Snack | Dragon Claw],Brat Snack Dragon Claw,2
+BCR,95,Skarmory,"0,57€",correction,280683,Skarmory [Metal Sound | Swift],280682,Skarmory [Claw | Drill Peck],Claw Drill Peck,2
+SS,61,Duskull,"0,57€",correction,275839,Duskull [Haunt | Dark Mind],275838,Duskull [Surprise | Confuse Ray],Surprise Confuse Ray,2
+RS,58,Makuhita,"0,55€",correction,275705,Makuhita [Fling | Low Kick],275706,Makuhita [Fake Out],Fake Out,3
+RS,64,Poochyena,"0,54€",correction,275713,Poochyena [Shadow Bind],275712,Poochyena [Knock Off | Rear Kick],Knock Off Rear Kick,3
+DR,46,Vibrava,"0,51€",correction,275899,Vibrava [Quick Charge | Dragon Spark],275923,Vibrava [Levitate | Razor Wing],Levitate Razor Wing,3
+MA,59,Team Magma's Aron,"0,51€",correction,276035,Team Magma's Aron [Mud Slap | Tackle],276036,Team Magma's Aron [Dig Under],Dig Under,2
+UD,65,Scyther,"0,47€",correction,279289,Scyther [Afterimage Strike],279318,Scyther [Cut | Slashing Strike],Cut Slashing Strike,2
+RS,66,Ralts,"0,45€",correction,275715,Ralts [Headbutt | Hypnoblast],275714,Ralts [Confuse Ray],Confuse Ray,3
+MA,55,Team Aqua's Poochyena,"0,43€",correction,276031,Team Aqua's Poochyena [Double Scratch | Tail Slap],276032,Team Aqua's Poochyena [Roar | Aqua Crush],Roar Aqua Crush,2
+DRX,42,Electrike,"0,42€",correction,280480,Electrike [Tackle | Quick Attack],280481,Electrike [Quick Turn],Quick Turn,2
+NXD,11,Growlithe,"0,42€",correction,280235,Growlithe [Stoke | Firebreathing],280236,Growlithe [Combustion],Combustion,2
+PLS,113,Watchog,"0,42€",correction,280852,Watchog [Fast Swipe | Biting Fang],280853,Watchog [Second Bite | Low Kick],Second Bite Low Kick,2
+DR,54,Corphish,"0,41€",correction,275930,Corphish [Irongrip | Slash],275931,Corphish [Beat | Toxic Grip],Beat Toxic Grip,3
+DX,20,Magcargo,"0,41€",correction,276440,Magcargo [Headbutt | Burning Ball],276423,Magcargo [Smooth Over | Knock Over | Combustion],Smooth Over Knock Over Combustion,2
+DX,60,Electrike,"0,40€",correction,276462,Electrike [High Voltage | Gnaw],276463,Electrike [Recharge | Quick Attack],Recharge Quick Attack,2
+PLS,92,Durant,"0,38€",correction,280831,Durant [Gnaw | Hard Crunch],280832,Durant [Call for Backup | Metal Jail],Call for Backup Metal Jail,2
+MA,58,Team Magma's Aron,"0,37€",correction,276036,Team Magma's Aron [Dig Under],276035,Team Magma's Aron [Mud Slap | Tackle],Mud Slap Tackle,2
+NVI,39,Tynamo,"0,37€",correction,280161,Tynamo [Thunder Wave],280162,Tynamo [Tackle],Tackle,2
+PLS,91,Durant,"0,37€",correction,280832,Durant [Call for Backup | Metal Jail],280831,Durant [Gnaw | Hard Crunch],Gnaw Hard Crunch,2
+BLW,28,Oshawott,"0,35€",correction,279765,Oshawott [Tackle | Water Gun],279766,Oshawott [Razor Shell],Razor Shell,3
+DRX,13,Roselia,"0,35€",correction,280451,Roselia [Double Whip | Relaxing Fragrance],280452,Roselia [Needling Sting],Needling Sting,2
+UD,47,Eevee,"0,35€",correction,279301,Eevee [Call for Family | Tickle],279300,Eevee [Tackle | Bite],Tackle Bite,2
+UD,36,Scyther,"0,34€",correction,279318,Scyther [Cut | Slashing Strike],279289,Scyther [Afterimage Strike],Afterimage Strike,2
+UNM,148,Dratini,"0,33€",correction,388527,Dratini [Agility],388532,Dratini [Aqua Lift | Jump On],Aqua Lift Jump On,2
+UNM,150,Dragonair,"0,33€",correction,388537,Dragonair [Twister],388542,Dragonair [Tail Whap | Destructive Whirlpool],Tail Whap Destructive Whirlpool,2
+FFI,60,Pancham,"0,32€",correction,281723,Pancham [Bad-Influence Evolution | Confront],281724,Pancham [Comet Punch],Comet Punch,2
+HL,57,Chinchou,"0,32€",correction,276130,Chinchou [Pound | Spark],276131,Chinchou [Random Spark | Lightning Ball],Random Spark Lightning Ball,2
+NXD,10,Growlithe,"0,32€",correction,280236,Growlithe [Combustion],280235,Growlithe [Stoke | Firebreathing],Stoke Firebreathing,2
+PLS,112,Watchog,"0,32€",correction,280853,Watchog [Second Bite | Low Kick],280852,Watchog [Fast Swipe | Biting Fang],Fast Swipe Biting Fang,2
+UNM,99,Salazzle,"0,32€",correction,388002,Salazzle [Fire Claws],388302,Salazzle [Smack | Slashing Claw],Smack Slashing Claw,2
+DRX,41,Electrike,"0,31€",correction,280481,Electrike [Quick Turn],280480,Electrike [Tackle | Quick Attack],Tackle Quick Attack,2
+EPO,46,Gothorita,"0,31€",correction,280010,Gothorita [Double Slap | Psybeam],280011,Gothorita [Deleting Glare | Super Psy Bolt],Deleting Glare Super Psy Bolt,2
+HL,56,Chinchou,"0,30€",correction,276131,Chinchou [Random Spark | Lightning Ball],276130,Chinchou [Pound | Spark],Pound Spark,2
+NXD,45,Luxio,"0,30€",correction,280269,Luxio [Jump On | Wild Charge],280270,Luxio [Quick Turn | Bite],Quick Turn Bite,2
+UNM,34,Salazzle,"0,30€",correction,388302,Salazzle [Smack | Slashing Claw],388002,Salazzle [Fire Claws],Fire Claws,2
+EPO,10,Cottonee,"0,29€",correction,279974,Cottonee [Absorb],279975,Cottonee [Cotton Guard],Cotton Guard,2
+UNM,149,Dragonair,"0,29€",correction,388542,Dragonair [Tail Whap | Destructive Whirlpool],388537,Dragonair [Twister],Twister,2
+DEX,81,Chansey,"0,28€",correction,280408,Chansey [Sing | Double-Edge],280409,Chansey [Continuous Tumble],Continuous Tumble,2
+DRX,50,Drifloon,"0,27€",correction,280488,Drifloon [Sneaky Placement],280489,Drifloon [Beat | Gust],Beat Gust,2
+LOT,40,Cyndaquil,"0,27€",correction,365679,Cyndaquil [Smokescreen],365680,Cyndaquil [Hammer In],Hammer In,2
+LOT,6,Chikorita,"0,27€",correction,365573,Chikorita [Synthesis | Razor Leaf],365574,Chikorita [Mini Drain],Mini Drain,2
+NXD,44,Luxio,"0,27€",correction,280270,Luxio [Quick Turn | Bite],280269,Luxio [Jump On | Wild Charge],Jump On Wild Charge,2
+UL,57,Onix,"0,27€",correction,279212,Onix [Energy Healer | Boundless Power],279213,Onix [Swing Around],Swing Around,2
+BLW,44,Joltik,"0,26€",correction,279783,Joltik [Leech Life | BW],279782,Joltik [Stun Needle],Stun Needle,2
+DR,22,Vibrava,"0,26€",correction,275924,Vibrava [Dive | Quick Turn],275899,Vibrava [Quick Charge | Dragon Spark],Quick Charge Dragon Spark,3
+NXD,43,Shinx,"0,26€",correction,280267,Shinx [Jump On | Static Shock],280268,Shinx [Reckless Charge],Reckless Charge,2
+EPO,45,Gothorita,"0,25€",correction,280011,Gothorita [Deleting Glare | Super Psy Bolt],280010,Gothorita [Double Slap | Psybeam],Double Slap Psybeam,2
+FCO,87,Minccino,"0,23€",correction,289907,Minccino [Cleaning Up],289908,Minccino [Tail Smack],Tail Smack,2
+HL,53,Baltoy,"0,23€",correction,276126,Baltoy [Psyshock],276127,Baltoy [Headbutt | Mud Slap],Headbutt Mud Slap,2
+SSH,75,Boltund,"0,23€",correction,436509,Boltund [Bite | Electrodash],436504,Boltund [Big Bite | Fighting Fangs],Big Bite Fighting Fangs,3
+BKT,116,Doduo,"0,22€",correction,286361,Doduo [Simultaneous Peck | Doduo Delivery],286362,Doduo [Double Stab | Doduo Delivery],Double Stab Doduo Delivery,2
+EPO,55,Drilbur,"0,22€",correction,280019,Drilbur [Hone Claws | Scratch],280020,Drilbur [Mud-Slap],Mud-Slap,2
+NVI,55,Elgyem,"0,22€",correction,280177,Elgyem [Headbutt | Calm Mind],280178,Elgyem [First Contact | Headbutt],First Contact Headbutt,2
+PLF,55,Yamask,"0,22€",correction,280932,Yamask [Transfer Pain],280933,Yamask [Will-O-Wisp | Ram],Will-O-Wisp Ram,2
+TEU,3,Weedle,"0,22€",correction,368935,Weedle [Tangle Drag | Bug Bite],368936,Weedle [Reckless Charge],Reckless Charge,2
+BLW,80,Lillipup,"0,21€",correction,279819,Lillipup [Collect | Tackle],279818,Lillipup [Pickup | Bite],Pickup Bite,3
+BRS,98,Wormadam,"0,20€",correction,608434,Wormadam [Matron's Anger | Leaf Drain],608644,Wormadam [Matron's Anger | Scrap Drop],Matron's Anger Scrap Drop,3
+FCO,44,Wormadam,"0,20€",correction,289829,Wormadam [Solar Ray | Leaf Cutter],289868,Wormadam [Sand Spray | Twin Bursts],Sand Spray Twin Bursts,3
+UNB,93,Rhyhorn,"0,20€",correction,372383,Rhyhorn [Push Down],372384,Rhyhorn [Horn Attack | Boulder Crush],Horn Attack Boulder Crush,2
+BKT,115,Doduo,"0,19€",correction,286362,Doduo [Double Stab | Doduo Delivery],286361,Doduo [Simultaneous Peck | Doduo Delivery],Simultaneous Peck Doduo Delivery,2
+CRZ,44,Luxray,"0,19€",correction,691760,Luxray [Electrostep | Scar Strikes],691761,Luxray [Explosiveness | Seeking Fang],Explosiveness Seeking Fang,2
+EPO,54,Drilbur,"0,19€",correction,280020,Drilbur [Mud-Slap],280019,Drilbur [Hone Claws | Scratch],Hone Claws Scratch,2
+FCO,3,Wormadam,"0,19€",correction,289868,Wormadam [Sand Spray | Twin Bursts],289829,Wormadam [Solar Ray | Leaf Cutter],Solar Ray Leaf Cutter,3
+FCO,86,Minccino,"0,19€",correction,289908,Minccino [Tail Smack],289907,Minccino [Cleaning Up],Cleaning Up,2
+HL,52,Baltoy,"0,19€",correction,276127,Baltoy [Headbutt | Mud Slap],276126,Baltoy [Psyshock],Psyshock,2
+PLF,54,Yamask,"0,19€",correction,280933,Yamask [Will-O-Wisp | Ram],280932,Yamask [Transfer Pain],Transfer Pain,2
+EPO,71,Ferroseed,"0,18€",correction,280035,Ferroseed [Pin Missile],280036,Ferroseed [Pierce],Pierce,2
+NVI,38,Tynamo,"0,18€",correction,280162,Tynamo [Tackle],280161,Tynamo [Thunder Wave],Thunder Wave,2
+PLS,111,Patrat,"0,18€",correction,280850,Patrat [Reckless Charge],280851,Patrat [Collect | Slam],Collect Slam,2
+EPO,70,Ferroseed,"0,17€",correction,280036,Ferroseed [Pierce],280035,Ferroseed [Pin Missile],Pin Missile,2
+PLF,72,Pawniard,"0,17€",correction,280949,Pawniard [Slash],280950,Pawniard [Cut],Cut,2
+BLW,2,Snivy,"0,16€",correction,279739,Snivy [Tackle | Vine Whip],279740,Snivy [Leaf Blade],Leaf Blade,3
+CEC,100,Cosmog,"0,16€",correction,408139,Cosmog [Ascension],408144,Cosmog [Unaware | Surprise Attack],Unaware Surprise Attack,3
+CES,7,Treecko,"0,16€",correction,361255,Treecko [Smack | Tail Whap],361254,Treecko [Sleep Poison],Sleep Poison,3
+EPO,9,Cottonee,"0,16€",correction,279975,Cottonee [Cotton Guard],279974,Cottonee [Absorb],Absorb,2
+FCO,11,Fennekin,"0,16€",correction,289836,Fennekin [Will-O-Wisp | Tail Whip],289837,Fennekin [Invite Out],Invite Out,2
+LOT,115,Larvitar,"0,16€",correction,365751,Larvitar [Submerge | Bite],365752,Larvitar [Second Strike],Second Strike,2
+NVI,54,Elgyem,"0,16€",correction,280178,Elgyem [First Contact | Headbutt],280177,Elgyem [Headbutt | Calm Mind],Headbutt Calm Mind,2
+PLS,110,Patrat,"0,16€",correction,280851,Patrat [Collect | Slam],280850,Patrat [Reckless Charge],Reckless Charge,2
+SSH,3,Roselia,"0,16€",correction,436189,Roselia [Absorb],436194,Roselia [Sweet Scent | Sting],Sweet Scent Sting,2
+TEU,2,Weedle,"0,16€",correction,368936,Weedle [Reckless Charge],368935,Weedle [Tangle Drag | Bug Bite],Tangle Drag Bug Bite,2
+CEC,108,Trapinch,"0,15€",correction,408179,Trapinch [Nest Building | Sand Spray],408189,Trapinch [Dig],Dig,2
+DEX,80,Chansey,"0,15€",correction,280409,Chansey [Continuous Tumble],280408,Chansey [Sing | Double-Edge],Sing Double-Edge,2
+PRC,45,Spheal,"0,15€",correction,273577,Spheal [Ice Ball],273576,Spheal [Ball Roll],Ball Roll,2
+SSH,146,Minccino,"0,15€",correction,436819,Minccino [Glance | Tail Slap],436824,Minccino [Tail Whap],Tail Whap,2
+SSH,68,Chinchou,"0,15€",correction,436469,Chinchou [Gentle Slap],436474,Chinchou [Luring Glow | Lightning Ball],Luring Glow Lightning Ball,2
+UNM,7,Sewaddle,"0,15€",correction,387862,Sewaddle [Multiply | Gnaw],387867,Sewaddle [Swaddling Leaves | Surprise Attack],Swaddling Leaves Surprise Attack,2
+CEC,107,Trapinch,"0,14€",correction,408189,Trapinch [Dig],408179,Trapinch [Nest Building | Sand Spray],Nest Building Sand Spray,2
+FCO,46,Riolu,"0,14€",correction,290536,Riolu [Double Smash],290537,Riolu [Smash Punch],Smash Punch,2
+UNB,27,Litten,"0,14€",correction,372318,Litten [Singe],372319,Litten [Caturday | Big Bite],Caturday Big Bite,2
+UNM,129,Murkrow,"0,14€",correction,388432,Murkrow [Astonish],388442,Murkrow [Peck],Peck,2
+FCO,45,Riolu,"0,13€",correction,290537,Riolu [Smash Punch],290536,Riolu [Double Smash],Double Smash,2
+GRI,63,Machop,"0,13€",correction,297523,Machop [Dual Chop],297524,Machop [Dynamic Chop],Dynamic Chop,2
+LOT,5,Chikorita,"0,13€",correction,365574,Chikorita [Mini Drain],365573,Chikorita [Synthesis | Razor Leaf],Synthesis Razor Leaf,2
+PLF,71,Pawniard,"0,13€",correction,280950,Pawniard [Cut],280949,Pawniard [Slash],Slash,2
+UNM,93,Honedge,"0,13€",correction,388262,Honedge [Lucky Find | Pierce],388272,Honedge [Slashing Cutter],Slashing Cutter,2
+LOT,24,Wurmple,"0,12€",correction,365663,Wurmple [Ram],365616,Wurmple [Poison Sting],Poison Sting,2
+SSH,112,Clobbopus,"0,12€",correction,436674,Clobbopus [Bind],436679,Clobbopus [Punch],Punch,2
+SSH,145,Minccino,"0,12€",correction,436824,Minccino [Tail Whap],436819,Minccino [Glance | Tail Slap],Glance Tail Slap,2
+UNB,26,Litten,"0,12€",correction,372319,Litten [Caturday | Big Bite],372318,Litten [Singe],Singe,2
+UNM,92,Honedge,"0,11€",correction,388272,Honedge [Slashing Cutter],388262,Honedge [Lucky Find | Pierce],Lucky Find Pierce,2
+BRS,77,Wormadam,"0,10€",correction,608644,Wormadam [Matron's Anger | Scrap Drop],608527,Wormadam [Matron's Anger | Bind Down],Matron's Anger Bind Down,3
+CES,26,Torchic,"0,10€",correction,361273,Torchic [Ember | CES],361272,Torchic [Peck | Live Coal],Peck Live Coal,2
+CES,93,Beldum,"0,10€",correction,361336,Beldum [Conductive Body | Ram],361337,Beldum [Single Smash],Single Smash,2
+FST,29,Vulpix,"0,10€",correction,582162,Vulpix [Live Coal],582163,Vulpix [Smash Kick],Smash Kick,2
+LOT,114,Larvitar,"0,10€",correction,365752,Larvitar [Second Strike],365751,Larvitar [Submerge | Bite],Submerge Bite,2
+LOT,23,Wurmple,"0,10€",correction,365616,Wurmple [Poison Sting],365663,Wurmple [Ram],Ram,2
+RS,75,Treecko,"0,10€",correction,275724,Treecko [Tail Slap | Razor Leaf],275723,Treecko [Poison Breath],Poison Breath,3
+SSH,97,Rhyhorn,"0,10€",correction,436599,Rhyhorn [Horn Attack | Hammer In],436604,Rhyhorn [Stomp Off | Land Crush],Stomp Off Land Crush,2
+SSP,33,Charcadet,"0,10€",correction,794292,Charcadet [Will-O-Wisp],794295,Charcadet [Light Punch | Flamethrower],Light Punch Flamethrower,2
+UNM,6,Sewaddle,"0,10€",correction,387867,Sewaddle [Swaddling Leaves | Surprise Attack],387862,Sewaddle [Multiply | Gnaw],Multiply Gnaw,2
+ASR,91,Hisuian Overqwil,"0,09€",correction,658714,Hisuian Overqwil [Tormenting Poison | Pinning],658718,Hisuian Overqwil [Dirty Press | Pierce],Dirty Press Pierce,2
+PAL,54,Cetoddle,"0,09€",correction,715528,Cetoddle [Avalanche],715529,Cetoddle [Rest | Double-Edge],Rest Double-Edge,3
+SSH,17,Blipbug,"0,09€",correction,436249,Blipbug [Gnaw],436254,Blipbug [Call for Family],Call for Family,2
+TWM,127,Dipplin,"0,09€",correction,769192,Dipplin [Festival Lead | Do the Wave],769301,Dipplin [Syrup Catcher],Syrup Catcher,4
+FST,28,Vulpix,"0,08€",correction,582163,Vulpix [Smash Kick],582162,Vulpix [Live Coal],Live Coal,2
+GRI,62,Machop,"0,08€",correction,297524,Machop [Dynamic Chop],297523,Machop [Dual Chop],Dual Chop,2
+HIF,25,Ekans,"0,08€",correction,394722,Ekans [Tail Whap],394767,Ekans [Wrap],Wrap,2
+HIF,26,Ekans,"0,08€",correction,394767,Ekans [Wrap],394722,Ekans [Tail Whap],Tail Whap,2
+SSH,67,Chinchou,"0,08€",correction,436474,Chinchou [Luring Glow | Lightning Ball],436469,Chinchou [Gentle Slap],Gentle Slap,2
+SVI,136,Maschiff,"0,08€",correction,702430,Maschiff [Rear Kick | Darkness Fang],702431,Maschiff [Crunch],Crunch,2
+SVI,18,Tarountula,"0,08€",correction,702312,Tarountula [String Haul | Bug Bite],702314,Tarountula [Surprise Attack],Surprise Attack,4
+SVI,95,Dedenne,"0,08€",correction,702390,Dedenne [Energy Munch],702391,Dedenne [Second Bite],Second Bite,2
+ASR,90,Hisuian Overqwil,"0,07€",correction,658718,Hisuian Overqwil [Dirty Press | Pierce],658714,Hisuian Overqwil [Tormenting Poison | Pinning],Tormenting Poison Pinning,2
+FLI,92,Goomy,"0,07€",correction,355605,Goomy [Sticky Membrane | Ram],355606,Goomy [Rain Splash | Flail],Rain Splash Flail,2
+OBF,181,Lechonk,"0,07€",correction,725260,Lechonk [Tackle],725261,Lechonk [Disarming Voice],Disarming Voice,4
+OBF,182,Lechonk,"0,07€",correction,725261,Lechonk [Disarming Voice],725262,Lechonk [Headbutt Bounce | Mud Shot],Headbutt Bounce Mud Shot,4
+OBF,76,Tadbulb,"0,07€",correction,725154,Tadbulb [Energize | Lightning Ball],725156,Tadbulb [Shake and Discharge],Shake and Discharge,3
+PAR,16,Toedscool,"0,07€",correction,740491,Toedscool [Clinging Spore | Vine Slap],740492,Toedscool [Kick | Absorb],Kick Absorb,2
+SSH,111,Clobbopus,"0,07€",correction,436679,Clobbopus [Punch],436674,Clobbopus [Bind],Bind,2
+SVI,160,Tandemaus,"0,07€",correction,702455,Tandemaus [Gnaw],702456,Tandemaus [Double Hit],Double Hit,2
+SVI,40,Charcadet,"0,07€",correction,702334,Charcadet [Ember],702335,Charcadet [Heat Blast],Heat Blast,2
+SVI,56,Wiglett,"0,07€",correction,702350,Wiglett [Twisting Strike],702351,Wiglett [Dig a Little | Ram],Dig a Little Ram,3
+SVI,94,Dedenne,"0,07€",correction,702391,Dedenne [Second Bite],702390,Dedenne [Energy Munch],Energy Munch,2
+CES,92,Beldum,"0,06€",correction,361337,Beldum [Single Smash],361336,Beldum [Conductive Body | Ram],Conductive Body Ram,2
+OBF,155,Varoom,"0,06€",correction,725234,Varoom [Spinning Draw],725235,Varoom [Suffocating Gas],Suffocating Gas,3
+OBF,77,Bellibolt,"0,06€",correction,725158,Bellibolt [Insulator | Thunderous Edge],725157,Bellibolt [Electrobullet],Electrobullet,3
+PAL,41,Paldean Tauros,"0,06€",correction,715583,Paldean Tauros [Raging Horns | Combat Tackle],715515,Paldean Tauros [Raging Horns | Aqua Dive],Raging Horns Aqua Dive,4
+SSH,153,Wooloo,"0,06€",correction,436854,Wooloo [Expand],436859,Wooloo [Tackle | Headbutt],Tackle Headbutt,2
+SVI,101,Flittle,"0,06€",correction,702396,Flittle [Ram],702397,Flittle [Spinning Attack],Spinning Attack,3
+SVI,102,Flittle,"0,06€",correction,702397,Flittle [Spinning Attack],702398,Flittle [Dash Off],Dash Off,3
+SVI,74,Pawmi,"0,06€",correction,702369,Pawmi [Jolt],702370,Pawmi [Light Punch | Zap Kick],Light Punch Zap Kick,2
+SVI,78,Wattrel,"0,06€",correction,702374,Wattrel [Collect | Glide],702375,Wattrel [Static Shock],Static Shock,2
+CRZ,92,Pawniard,"0,05€",correction,691809,Pawniard [Reckless Charge],691810,Pawniard [Pierce],Pierce,2
+PAL,125,Glimmet,"0,05€",correction,715599,Glimmet [Ascension],715600,Glimmet [Rock Throw],Rock Throw,2
+PAL,28,Paldean Tauros,"0,05€",correction,715515,Paldean Tauros [Raging Horns | Aqua Dive],715501,Paldean Tauros [Raging Horns | Blaze Dash],Raging Horns Blaze Dash,4
+PAL,69,Shinx,"0,05€",correction,715543,Shinx [Big Roar | Ram],715544,Shinx [Wild Kick],Wild Kick,2
+SSP,2,Exeggcute,"0,05€",correction,794256,Exeggcute [Precocious Evolution],794257,Exeggcute [Absorb],Absorb,3
+SVI,135,Maschiff,"0,05€",correction,702431,Maschiff [Crunch],702430,Maschiff [Rear Kick | Darkness Fang],Rear Kick Darkness Fang,2
+SVI,28,Capsakid,"0,05€",correction,702323,Capsakid [Slightly Spicy],702324,Capsakid [Increasing Spice | Playful Kick],Increasing Spice Playful Kick,2
+SVI,59,Cetoddle,"0,05€",correction,702353,Cetoddle [Tackle],702354,Cetoddle [Icicle | Sharp Fin],Icicle Sharp Fin,2
+SVI,73,Pawmi,"0,05€",correction,702370,Pawmi [Light Punch | Zap Kick],702369,Pawmi [Jolt],Jolt,2
+SVI,77,Wattrel,"0,05€",correction,702375,Wattrel [Static Shock],702374,Wattrel [Collect | Glide],Collect Glide,2
+FLI,91,Goomy,"0,04€",correction,355606,Goomy [Rain Splash | Flail],355605,Goomy [Sticky Membrane | Ram],Sticky Membrane Ram,2
+PAL,20,Nymble,"0,04€",correction,715492,Nymble [Slight Splash | Bug Bite],715493,Nymble [Wild Kick],Wild Kick,2
+PAL,39,Charcadet,"0,04€",correction,715512,Charcadet [Kick],715513,Charcadet [Live Coal | Magnum Punch],Live Coal Magnum Punch,2
+PAL,68,Shinx,"0,04€",correction,715544,Shinx [Wild Kick],715543,Shinx [Big Roar | Ram],Big Roar Ram,2
+SSP,32,Charcadet,"0,04€",correction,794295,Charcadet [Light Punch | Flamethrower],794292,Charcadet [Will-O-Wisp],Will-O-Wisp,2
+SVI,27,Capsakid,"0,04€",correction,702324,Capsakid [Increasing Spice | Playful Kick],702323,Capsakid [Slightly Spicy],Slightly Spicy,2
+SVI,39,Charcadet,"0,04€",correction,702335,Charcadet [Heat Blast],702334,Charcadet [Ember],Ember,2
+SVI,58,Cetoddle,"0,04€",correction,702354,Cetoddle [Icicle | Sharp Fin],702353,Cetoddle [Tackle],Tackle,2
+TEF,97,Great Tusk,"0,04€",correction,760726,Great Tusk [Lunge Out | Wrathful Charge],760727,Great Tusk [Land Collapse | Giant Tusk],Land Collapse Giant Tusk,3
+OBF,74,Tadbulb,"0,03€",correction,725156,Tadbulb [Shake and Discharge],725154,Tadbulb [Energize | Lightning Ball],Energize Lightning Ball,3
+PAL,120,Nacli,"0,03€",correction,715596,Nacli [Salt Coating | Tackle],715595,Nacli [Headbutt],Headbutt,3
+PAL,124,Glimmet,"0,03€",correction,715600,Glimmet [Rock Throw],715599,Glimmet [Ascension],Ascension,2
+PAL,19,Nymble,"0,03€",correction,715493,Nymble [Wild Kick],715492,Nymble [Slight Splash | Bug Bite],Slight Splash Bug Bite,2
+PAL,38,Charcadet,"0,03€",correction,715513,Charcadet [Live Coal | Magnum Punch],715512,Charcadet [Kick],Kick,2
+PAR,15,Toedscool,"0,03€",correction,740492,Toedscool [Kick | Absorb],740491,Toedscool [Clinging Spore | Vine Slap],Clinging Spore Vine Slap,2
+SSH,152,Wooloo,"0,03€",correction,436859,Wooloo [Tackle | Headbutt],436854,Wooloo [Expand],Expand,2
+SVI,16,Tarountula,"0,03€",correction,702313,Tarountula [String Shot],702312,Tarountula [String Haul | Bug Bite],String Haul Bug Bite,4
+CRZ,91,Pawniard,"0,02€",correction,691810,Pawniard [Pierce],691809,Pawniard [Reckless Charge],Reckless Charge,2
+SP,60,Duraludon,,correction,886516,Duraludon [Metal Claw | Steel Beam],516324,Duraludon [Metal Sharpener | Power Beam],Metal Sharpener Power Beam,4

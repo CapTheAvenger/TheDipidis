@@ -10190,3 +10190,104 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
     border-color: #3b4cca;
     color: #1a2a83;
 }
+
+/* ── Archetype card ────────────────────────────────────────────────
+   One deck: three headline numbers and every matchup it has played.
+   Opened from a .deck-banner-card in the tier list. */
+body.arc-open { overflow: hidden; }
+.arc-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1200;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 4vh 12px;
+    background: rgba(15, 23, 42, 0.55);
+    overflow-y: auto;
+}
+.arc-overlay[hidden] { display: none; }
+.arc-card {
+    position: relative;
+    width: min(760px, 100%);
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 18px 18px 22px;
+    box-shadow: 0 18px 50px rgba(0, 0, 0, 0.28);
+}
+.arc-close {
+    position: absolute;
+    top: 8px; right: 8px;
+    width: 34px; height: 34px;
+    border: 0; border-radius: 8px;
+    background: transparent;
+    color: #6b7280;
+    font-size: 1.4rem; line-height: 1; cursor: pointer;
+}
+.arc-close:hover { background: #f0f2f5; color: #2c3e50; }
+.arc-head { display: flex; align-items: center; gap: 10px; padding-right: 34px; flex-wrap: wrap; }
+.arc-name { font-size: 1.2rem; font-weight: 800; color: #2c3e50; }
+.arc-icons { display: inline-flex; gap: 4px; }
+
+/* The colour is a thin top edge, never a fill: the number keeps normal
+   text colour so contrast holds whatever the value turns out to be. */
+.arc-tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 14px 0 6px; }
+.arc-tile {
+    background: #f9fafb;
+    border: 1px solid rgba(0, 0, 0, 0.07);
+    border-top: 3px solid #9ca3af;
+    border-radius: 10px;
+    padding: 10px 12px;
+}
+.arc-tile--rep  { border-top-color: #7c5cd6; }
+.arc-tile--wr   { border-top-color: #2563eb; }
+.arc-tile--conv { border-top-color: #0f9d8f; }
+.arc-tile-label { color: #6b7280; font-size: 0.68rem; font-weight: 700;
+                  text-transform: uppercase; letter-spacing: 0.03em; }
+.arc-tile-value { color: #2c3e50; font-size: 1.5rem; font-weight: 800;
+                  font-variant-numeric: tabular-nums; line-height: 1.2; }
+.arc-tile-ctx   { color: #6b7280; font-size: 0.72rem; line-height: 1.35; }
+@media (max-width: 620px) {
+    .arc-tiles { grid-template-columns: 1fr; }
+    .arc-tile-value { font-size: 1.3rem; }
+}
+
+.arc-mu-title { margin: 16px 0 6px; font-size: 0.82rem; color: #5a6473;
+                text-transform: uppercase; letter-spacing: 0.03em; }
+#archetypeCardOverlay .arc-mu-table {
+    display: table; width: 100%; border-collapse: collapse; font-size: 0.86rem;
+}
+#archetypeCardOverlay .arc-mu-table thead { display: table-header-group; }
+#archetypeCardOverlay .arc-mu-table tbody { display: table-row-group; }
+#archetypeCardOverlay .arc-mu-table tr { display: table-row; }
+#archetypeCardOverlay .arc-mu-table th,
+#archetypeCardOverlay .arc-mu-table td {
+    display: table-cell;
+    padding: 5px 8px;
+    border-bottom: 1px solid #eef2f7;
+    text-align: right;
+    white-space: nowrap;
+}
+#archetypeCardOverlay .arc-mu-table th {
+    color: #5a6473; font-size: 0.68rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.02em;
+}
+#archetypeCardOverlay .arc-mu-table th:first-child,
+#archetypeCardOverlay .arc-mu-table td.arc-mu-opp { text-align: left; white-space: normal; }
+.arc-mu-wr { font-weight: 700; font-variant-numeric: tabular-nums; }
+.arc-mu-n, .arc-mu-w, .arc-mu-l { color: #5a6473; font-variant-numeric: tabular-nums; }
+/* Under 20 games a win rate says almost nothing — the row stays, faded,
+   the same treatment the heatmap gives its low-n cells. */
+.arc-mu-thin { opacity: 0.55; }
+.arc-mu-note, .arc-empty { color: #6b7280; font-size: 0.72rem; line-height: 1.45; margin: 8px 2px 0; }
+.arc-goto {
+    margin-top: 14px;
+    padding: 9px 14px;
+    min-height: 40px;
+    border: 1px solid #d8dee7;
+    border-radius: 8px;
+    background: #f8f9fa;
+    color: #2563eb;
+    font-size: 0.84rem; font-weight: 600; cursor: pointer;
+}
+.arc-goto:hover { background: #eef2f7; }

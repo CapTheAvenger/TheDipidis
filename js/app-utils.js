@@ -1332,6 +1332,67 @@ function parseLocaleNumber(input, fallback = 0) {
 }
 window.parseLocaleNumber = parseLocaleNumber;
 
+// ============================================================================
+// Conversion Performance — how much more often a deck makes the cut
+// than the field does. Lives here rather than in app-tier-meta.js
+// because two surfaces need it: the Global-EN panel and the archetype
+// card. Computing it twice is how a deck ends up showing two different
+// numbers on one page.
+//
+//   expected = Σ top8_count_weighted / Σ total_brought_weighted
+//   cut(deck) = top8_count_weighted / total_brought_weighted
+//   performance = cut / expected − 1
+//
+// The raw top-8 rate we already show ("6,3 %") is not interpretable
+// on its own; "+14 % vs. the field" is. The expected rate is NEVER
+// hardcoded: it moved from 7,23 % to 6,32 % in five days as
+// tournaments came in, so it is summed from the loaded rows every
+// time.
+//
+// Shrinkage is not optional. Raw, decks with two entries top the
+// list — Terapagos Noctowl sat at +295 % on 0,5 of 2 appearances.
+// K = 50 pseudo-appearances at the field average measured as the
+// point where no deck under 20 appearances survives in the top 5
+// while real signal still gets through (K = 25 left two-entry decks
+// up there; K = 100 pushed Toxtricity Box, n = 52, down to +43 %).
+// It also matches PRIOR_GAMES in computeTierScore (app-tier-meta.js),
+// so the project keeps one convention rather than two.
+const CONV_PRIOR = 50;      // pseudo-appearances at the field average
+const CONV_THIN_N = 50;     // below this the estimate leans on the prior
+const CONV_MIN_N = 20;      // below this a deck is not worth ranking
+
+function computeConversionPerformance(rows) {
+    const num = (v) => parseLocaleNumber(v || '0', 0);
+    let totalBrought = 0, totalTop8 = 0;
+    for (const r of rows) {
+        totalBrought += num(r.total_brought_weighted);
+        totalTop8 += num(r.top8_count_weighted);
+    }
+    const expected = totalBrought > 0 ? totalTop8 / totalBrought : 0;
+    const decks = [];
+    if (expected > 0) {
+        for (const r of rows) {
+            const brought = num(r.total_brought_weighted);
+            if (brought <= 0) continue;
+            const top8 = num(r.top8_count_weighted);
+            const smoothed = (top8 + CONV_PRIOR * expected) / (brought + CONV_PRIOR);
+            decks.push({
+                name: r.deck_name,
+                brought,
+                top8,
+                rawPct: ((top8 / brought) / expected - 1) * 100,
+                perfPct: (smoothed / expected - 1) * 100,
+                thin: brought < CONV_THIN_N,
+            });
+        }
+    }
+    return { expected, totalBrought, totalTop8, decks };
+}
+window.computeConversionPerformance = computeConversionPerformance;
+window.CONV_PRIOR = CONV_PRIOR;
+window.CONV_THIN_N = CONV_THIN_N;
+window.CONV_MIN_N = CONV_MIN_N;
+
 /**
  * Escape a string for safe interpolation into HTML text content.
  *

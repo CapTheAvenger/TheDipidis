@@ -87,18 +87,40 @@
                 `;
                 
                 // 2. DECK-LISTEN AUFTEILEN (X-Achse = Gegner, Y-Achse = Dein Deck)
-                const metaDecks = window.currentMetaArchetypes || window.metaArchetypes || window.currentMetaData || [];
+                // The axis order used to depend on three globals that are
+                // assigned NOWHERE in the project (currentMetaArchetypes /
+                // metaArchetypes / currentMetaData), so metaDeckShareMap was
+                // always empty; and the fallback read opp.matches / total /
+                // totalMatches while the registry stores total_games, so that
+                // was always 0 too. Both comparators returned 0 for every
+                // pair and the axis simply kept CSV order. No visible damage
+                // so far — the scraper happens to emit rank order — which is
+                // exactly why it went unnoticed: the sorting silently
+                // depended on its input already being sorted.
+                const metaDecks = window.currentMetaArchetypes || window.metaArchetypes
+                    || window.currentMetaData || [];
                 let deckNames = Object.keys(matchupData);
-                
+
                 // PERFORMANCE: Build lookup map once (O(M)) instead of O(M) per comparator call during sort
                 const metaDeckShareMap = new Map();
                 metaDecks.forEach(d => {
-                    const share = parseFloat(d.share || d.percentage_in_archetype || 0);
+                    // parseLocaleNumber, not parseFloat: these values can
+                    // carry a decimal comma, and a parseFloat fallback would
+                    // quietly reintroduce the truncation it is guarding
+                    // against. app-utils.js loads before this file.
+                    const share = parseLocaleNumber(d.share || d.percentage_in_archetype || 0, 0);
                     if (d.name) metaDeckShareMap.set(d.name, share);
                     if (d.archetype && d.archetype !== d.name) metaDeckShareMap.set(d.archetype, share);
                 });
                 
-                // Sortierung: Prio 1 = Meta-Share, Prio 2 = Match-Anzahl
+                const countGames = (row) => {
+                    if (!row) return 0;
+                    return Object.values(row).reduce((sum, opp) => sum + (
+                        parseInt(opp.total_games ?? opp.matches ?? opp.total
+                                 ?? opp.totalMatches ?? 0, 10) || 0), 0);
+                };
+
+                // Sortierung: Prio 1 = Meta-Share, Prio 2 = Anzahl Spiele
                 deckNames.sort((a, b) => {
                     const shareA = metaDeckShareMap.get(a) ?? 0;
                     const shareB = metaDeckShareMap.get(b) ?? 0;
@@ -107,19 +129,11 @@
                         return shareB - shareA;
                     }
                     
-                    // Fallback: Match-Anzahl
-                    let gamesA = 0, gamesB = 0;
-                    if (matchupData[a]) {
-                        Object.values(matchupData[a]).forEach(opp => {
-                            gamesA += parseInt(opp.matches || opp.total || opp.totalMatches || 0, 10) || 0;
-                        });
-                    }
-                    if (matchupData[b]) {
-                        Object.values(matchupData[b]).forEach(opp => {
-                            gamesB += parseInt(opp.matches || opp.total || opp.totalMatches || 0, 10) || 0;
-                        });
-                    }
-                    return gamesB - gamesA;
+                    // Fallback: total games played. `total_games` is what
+                    // buildMatchupRegistryFromCsv actually writes
+                    // (js/app-meta-cards.js:1258); the older key names are
+                    // kept for the legacy window-scan shape.
+                    return countGames(matchupData[b]) - countGames(matchupData[a]);
                 });
                 
                 const axisDeckLimit = (window.heatmapExpanded ? deckNames : deckNames.slice(0, 10));

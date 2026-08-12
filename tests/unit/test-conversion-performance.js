@@ -31,10 +31,18 @@ function chunk(re, what) {
     return m[0];
 }
 
+// The metric moved to app-utils.js so the Global-EN panel and the
+// archetype card cannot drift apart. These tests follow it there.
+function utilsChunk(re, what) {
+    const m = UTILS.match(re);
+    if (!m) throw new Error('could not extract ' + what);
+    return m[0];
+}
+const CONV_SRC =
+    utilsChunk(/function parseLocaleNumber\(input, fallback = 0\) \{[\s\S]*?\n\}/, 'parseLocaleNumber') + '\n' +
+    utilsChunk(/const CONV_PRIOR = 50;[\s\S]*?\nfunction computeConversionPerformance\(rows\) \{[\s\S]*?\n\}\n/, 'computeConversionPerformance');
 const compute = new Function(
-    UTILS.match(/function parseLocaleNumber\(input, fallback = 0\) \{[\s\S]*?\n\}/)[0] + '\n' +
-    chunk(/        const CONV_PRIOR = 50;[\s\S]*?\n        \}\n/, 'computeConversionPerformance') +
-    '\nreturn { computeConversionPerformance, CONV_PRIOR, CONV_THIN_N };')();
+    CONV_SRC + '\nreturn { computeConversionPerformance, CONV_PRIOR, CONV_THIN_N, CONV_MIN_N };')();
 const CONV_THIN = compute.CONV_THIN_N;
 
 const row = (name, brought, top8) => ({
@@ -92,7 +100,7 @@ describe('invariants, not literals', () => {
         const b = compute.computeConversionPerformance([row('x', 1000, 200)]).expected;
         assert.equal(a, 0.1);
         assert.equal(b, 0.2);
-        assert.doesNotMatch(SRC, /6\.32|7\.23|0\.0632/,
+        assert.doesNotMatch(UTILS.slice(UTILS.indexOf('const CONV_PRIOR')), /6\.32|7\.23|0\.0632/,
             'an expected-conversion literal crept into the source');
     });
 
@@ -228,8 +236,7 @@ describe('against the real file', () => {
 
 const render = new Function(
     'getLang', 'escapeHtml', 't',
-    UTILS.match(/function parseLocaleNumber\(input, fallback = 0\) \{[\s\S]*?\n\}/)[0] + '\n' +
-    chunk(/        const CONV_PRIOR = 50;[\s\S]*?\n        \}\n/, 'compute') +
+    CONV_SRC +
     chunk(/        const CONV_CAP = 100;[\s\S]*?\n        \}\n/, 'renderConversionBlock') +
     'return { renderConversionBlock, computeConversionPerformance, CONV_MIN_N, CONV_CAP };');
 
@@ -328,7 +335,7 @@ describe('the listing floor', () => {
 
     it('the source applies the floor to the list, not to the maths', () => {
         assert.match(SRC, /filter\(d => d\.brought >= CONV_MIN_N\)/);
-        const compFn = chunk(/        function computeConversionPerformance\(rows\) \{[\s\S]*?\n        \}\n/, 'compute');
+        const compFn = utilsChunk(/function computeConversionPerformance\(rows\) \{[\s\S]*?\n\}\n/, 'compute');
         assert.doesNotMatch(compFn, /CONV_MIN_N/,
             'the floor must not touch the field average');
     });

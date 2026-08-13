@@ -1226,5 +1226,9 @@
         if (bhost && !bhost.hidden) renderBattle();
     });
 
+    // Shared with the usage view — one slug rule for the whole Champions
+    // area, so a form that resolves in one list resolves in the other.
+    window.championsSprite = { slug: spriteSlug, img: spriteImg };
+
     window.sideQuestPokedex = { activate, render, loadData, activateBattle, renderBattle };
 })();

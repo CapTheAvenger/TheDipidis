@@ -2537,3 +2537,27 @@ body.sqp-d-open { overflow: hidden; }
     padding: 4px 8px; font-size: 11.5px; color: var(--sq-txt);
 }
 .sq-console .sq-empty { color: var(--sq-dim2); font-size: 11.5px; margin: 4px 0 0; }
+
+/* Teammates: sprite + rank, like the reference. Still not bars — the
+   file carries pct: null for every entry, and a bar would claim a
+   proportion we do not have. */
+.sq-console .sq-mates { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; }
+.sq-console .sq-mate {
+    position: relative; display: flex; flex-direction: column; align-items: center;
+    gap: 1px; padding: 6px 2px 4px;
+    background: var(--sq-deep); border: .8px solid var(--sq-line); border-radius: 8px;
+    font-size: 11.5px; color: var(--sq-txt);
+}
+.sq-console .sq-mate-rk {
+    position: absolute; top: 2px; left: 3px;
+    min-width: 14px; height: 14px; padding: 0 3px; border-radius: 7px;
+    background: rgba(85,102,224,.28); color: #cfd6ff;
+    font-family: var(--sq-num); font-size: 8.5px; font-weight: 700; line-height: 14px;
+    text-align: center;
+}
+.sq-console .sq-mate-img { width: 34px; height: 34px; object-fit: contain; }
+.sq-console .sq-mate-nm {
+    font-size: 9.5px; line-height: 1.15; color: var(--sq-dim);
+    text-align: center; overflow-wrap: anywhere;
+}
+@media (max-width: 900px) { .sq-console .sq-mates { grid-template-columns: repeat(4, 1fr); } }

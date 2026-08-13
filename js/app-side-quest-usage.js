@@ -209,10 +209,22 @@
     // teammate carries pct: null throughout the file. Rendering empty
     // bars would state a proportion we do not have — chips say "these
     // appear together" and claim nothing more.
+    function sprite(name) {
+        return (window.championsSprite && typeof window.championsSprite.img === 'function')
+            ? window.championsSprite.img(name, 'sq-mate-img') : '';
+    }
+
     function matesPanel(list) {
-        const rows = (list || []).slice(0, 12);
+        const rows = (list || []).slice(0, 10);
         if (!rows.length) return '';
-        const chips = rows.map(m => `<span class="sq-mate">${esc(m.name)}</span>`).join('');
+        // Sprite plus rank, the way the reference shows teammates: you
+        // recognise the partner by its picture, and the rank says how far
+        // down the list it sits. Still no bar — see below.
+        const chips = rows.map((m, i) => `<span class="sq-mate" title="${esc(m.name)}">
+                <span class="sq-mate-rk">${i + 1}</span>
+                ${sprite(m.name)}
+                <span class="sq-mate-nm">${esc(m.name)}</span>
+            </span>`).join('');
         const hasPct = rows.some(m => m.pct != null);
         return `<div class="sq-panel">
                 ${sectionLabel(L().mates, hasPct ? tailNote(list, rows.length) : L().noShare)}

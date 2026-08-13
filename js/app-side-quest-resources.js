@@ -365,6 +365,7 @@
     // its own module (window.sideQuestPokedex).
     const VIEW_HOSTS = {
         teams: 'sideQuestTeamsHost',
+        usage: 'sideQuestUsageHost',
         pokedex: 'sideQuestPokedexHost',
         battle: 'sideQuestBattleHost',
         builder: 'sideQuestBuilderHost',
@@ -378,6 +379,13 @@
             if (el) el.hidden = (v !== view);
         });
         if (status) status.hidden = (view !== 'teams');   // team load status is teams-only
+
+        // The console view brings its own 46px header bar. Leaving the
+        // page banner above it would stack two headers and push the first
+        // number ~250px down — which is precisely the difference the
+        // redesign is about. Restored for every other view.
+        const banner = document.querySelector('#side-quest .header');
+        if (banner) banner.hidden = (view === 'usage');
         document.querySelectorAll('.side-quest-subtab').forEach(b => {
             b.classList.toggle('is-active', b.getAttribute('data-sq-view') === view);
             b.setAttribute('aria-selected', b.getAttribute('data-sq-view') === view ? 'true' : 'false');
@@ -396,6 +404,8 @@
             window.sideQuestPokedex.activateBattle();
         } else if (view === 'builder' && window.sideQuestBuilder) {
             window.sideQuestBuilder.activate();
+        } else if (view === 'usage' && window.sideQuestUsage) {
+            window.sideQuestUsage.activate();
         }
     }
 
@@ -406,7 +416,8 @@
         const builderLabel = uiLang() === 'de' ? 'Team-Builder' : 'Team Builder';
         document.querySelectorAll('.side-quest-subtab').forEach(b => {
             const v = b.getAttribute('data-sq-view');
-            b.textContent = v === 'resources' ? l.tabResources
+            b.textContent = v === 'usage' ? (uiLang() === 'de' ? 'Nutzung' : 'Usage')
+                          : v === 'resources' ? l.tabResources
                           : v === 'pokedex' ? pokedexLabel
                           : v === 'battle' ? battleLabel
                           : v === 'builder' ? builderLabel

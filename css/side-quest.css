@@ -2374,3 +2374,166 @@ body.sqp-d-open { overflow: hidden; }
 
 .sqp-sprite--hero { width: 64px; height: 64px; object-fit: contain; flex: 0 0 64px; }
 @media (max-width: 520px) { .sqp-sprite--hero { width: 52px; height: 52px; flex-basis: 52px; } }
+
+/* ── Champions "console" ───────────────────────────────────────────
+   Ported from champions-layout-prototyp.html. Scoped to .sq-console,
+   NOT #side-quest: the four existing subtabs still assume a light
+   background, and darkening their container before they are converted
+   would break all four at once. The scope moves up to #side-quest as
+   the last step, once Teams / Pokémon / Look up / Builder have been
+   converted too.
+
+   The density is the point, not the darkness — 12px base, 14px gaps,
+   one accent. Measured against the reference: 46px of header before the
+   first number instead of ~250px. */
+.sq-console {
+    --sq-bg: #0b0f1e; --sq-panel: #111730; --sq-deep: #080c19;
+    --sq-line: #253057;
+    --sq-txt: #eef2ff; --sq-dim: #8791b8; --sq-dim2: #6a739a;
+    /* --pokemon-blue #3B4CCA lightened for a dark ground, and
+       --pokemon-yellow. Not the reference's violet→turquoise: that is
+       their brand, the system is what transfers. Red stays reserved for
+       status. */
+    --sq-accent: #5566e0; --sq-accent2: #ffcb05;
+    --sq-shadow: 0 2px 12px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.035);
+    --sq-num: ui-monospace, "Cascadia Code", "JetBrains Mono", monospace;
+    background: var(--sq-bg); color: var(--sq-txt);
+    font-size: 12px; line-height: 1.45; letter-spacing: .1px;
+    border-radius: 14px; overflow: hidden; padding-bottom: 14px;
+}
+.sq-console *, .sq-console *::before, .sq-console *::after { box-sizing: border-box; }
+
+.sq-console .sq-top {
+    display: flex; align-items: center; gap: 14px;
+    padding: 7px 14px 8px;
+    background: #0a0e1c; border-bottom: .8px solid var(--sq-line);
+    position: relative; min-height: 46px;
+}
+.sq-console .sq-top::after {
+    content: ""; position: absolute; left: 0; right: 0; bottom: -2px; height: 2px;
+    background: linear-gradient(90deg, #E3350D, #FFCB05, #4ecb8b, #3B4CCA, #5566e0, #a06ee0);
+}
+.sq-console .sq-brand { font-weight: 700; font-size: 14.5px; letter-spacing: .2px; }
+.sq-console .sq-brand span { color: var(--sq-accent2); }
+.sq-console .sq-meta { font-family: var(--sq-num); font-size: 11px; color: var(--sq-dim); }
+.sq-console .sq-spacer { flex: 1; }
+.sq-console .sq-seg {
+    display: flex; background: var(--sq-deep); border: .8px solid var(--sq-line);
+    border-radius: 9px; padding: 2px;
+}
+.sq-console .sq-seg button {
+    background: none; border: 0; color: var(--sq-dim); font: inherit; font-size: 11.5px;
+    padding: 6px 12px; border-radius: 7px; cursor: pointer; min-height: 32px;
+}
+.sq-console .sq-seg button.on {
+    background: rgba(85,102,224,.22); color: var(--sq-txt);
+    box-shadow: inset 0 0 0 .8px var(--sq-accent);
+}
+
+.sq-console .sq-grid {
+    display: grid; grid-template-columns: 212px 288px minmax(0, 1fr);
+    gap: 14px; padding: 14px; align-items: start;
+}
+@media (max-width: 1100px) { .sq-console .sq-grid { grid-template-columns: 1fr; } }
+
+.sq-console .sq-panel {
+    background: var(--sq-panel); border: .8px solid var(--sq-line);
+    border-radius: 14px; padding: 11px; box-shadow: var(--sq-shadow);
+}
+.sq-console .sq-stack { display: flex; flex-direction: column; gap: 12px; }
+.sq-console .sq-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 900px) { .sq-console .sq-cols { grid-template-columns: 1fr; } }
+
+/* Section label with the accent tick — turns a run of similar blocks
+   into something you can navigate. The <em> on the right is where the
+   tail note goes, so cutting a list never hides that it was cut. */
+.sq-console .sq-lbl {
+    font-size: 10px; text-transform: uppercase; letter-spacing: .09em; font-weight: 700;
+    color: var(--sq-accent2); display: flex; align-items: center; gap: 7px; margin: 0 0 9px;
+}
+.sq-console .sq-lbl::before {
+    content: ""; width: 3px; height: 11px; border-radius: 2px; background: var(--sq-accent2);
+}
+.sq-console .sq-lbl em {
+    margin-left: auto; font-style: normal; font-weight: 500; color: var(--sq-dim2);
+    font-size: 10px; text-transform: none; letter-spacing: 0;
+}
+
+.sq-console .sq-types { display: flex; flex-wrap: wrap; gap: 4px; }
+.sq-console .sq-types button {
+    background: var(--sq-deep); border: .8px solid var(--sq-line); border-radius: 6px;
+    color: var(--sq-dim); font: inherit; font-size: 10.5px; padding: 5px 8px;
+    cursor: pointer; min-height: 30px;
+}
+.sq-console .sq-types button.on {
+    background: var(--sq-accent2); color: #0b0f1e; font-weight: 700; border-color: transparent;
+}
+.sq-console .sq-types .cnt { color: var(--sq-dim2); font-family: var(--sq-num); }
+.sq-console .sq-types button.on .cnt { color: rgba(11,15,30,.65); }
+
+.sq-console .sq-list { max-height: 74vh; overflow: auto; }
+.sq-console .sq-row {
+    display: flex; align-items: center; gap: 9px;
+    padding: 7px 9px; border-radius: 11px; cursor: pointer;
+}
+.sq-console .sq-row:hover { background: rgba(255,255,255,.035); }
+.sq-console .sq-row.sel {
+    background: rgba(85,102,224,.16); box-shadow: inset 0 0 0 .8px var(--sq-accent);
+}
+.sq-console .sq-row .rk {
+    font-family: var(--sq-num); font-size: 11px; color: var(--sq-dim2);
+    width: 20px; text-align: right; flex: 0 0 20px;
+}
+.sq-console .sq-row .nm { font-size: 13px; font-weight: 600; }
+.sq-console .sq-row .sub { font-size: 10px; color: var(--sq-dim2); font-family: var(--sq-num); }
+.sq-console .sq-row .bar {
+    margin-left: auto; width: 44px; height: 5px; border-radius: 4px;
+    background: var(--sq-deep); flex: 0 0 44px; overflow: hidden;
+}
+.sq-console .sq-row .bar i {
+    display: block; height: 100%; border-radius: 4px;
+    background: linear-gradient(90deg, var(--sq-accent), var(--sq-accent2));
+}
+
+.sq-console .sq-head { display: flex; align-items: baseline; gap: 11px; margin-bottom: 12px; flex-wrap: wrap; }
+.sq-console .sq-head .rank { font-family: var(--sq-num); font-size: 15px; color: var(--sq-accent2); font-weight: 700; }
+.sq-console .sq-head h2 { margin: 0; font-size: 21px; font-weight: 700; letter-spacing: -.01em; color: var(--sq-txt); }
+.sq-console .sq-head .de { color: var(--sq-dim2); font-size: 11.5px; }
+
+/* The bar row is the one motif the whole view is built from. */
+.sq-console .sq-item {
+    display: grid; grid-template-columns: minmax(90px, 1.15fr) 1fr 44px;
+    align-items: center; gap: 9px; padding: 2.5px 0;
+}
+.sq-console .sq-item .t {
+    font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.sq-console .sq-item .t small { color: var(--sq-dim2); font-size: 10.5px; margin-left: 5px; }
+.sq-console .sq-track { height: 7px; border-radius: 6px; background: var(--sq-deep); overflow: hidden; }
+.sq-console .sq-track i {
+    display: block; height: 100%; border-radius: 6px;
+    background: linear-gradient(90deg, var(--sq-accent), var(--sq-accent2));
+}
+.sq-console .sq-item .v, .sq-console .sq-spread .v {
+    font-family: var(--sq-num); font-size: 11px; text-align: right; color: var(--sq-dim);
+}
+
+.sq-console .sq-spread { display: grid; grid-template-columns: auto 1fr 44px; align-items: center; gap: 8px; padding: 3px 0; }
+.sq-console .sq-evs { display: flex; gap: 2px; }
+.sq-console .sq-ev {
+    background: var(--sq-deep); border: .8px solid var(--sq-line); border-radius: 5px;
+    padding: 2px 5px; min-width: 27px; text-align: center;
+    font-family: var(--sq-num); font-size: 10px;
+}
+.sq-console .sq-ev b { display: block; font-size: 11px; color: var(--sq-txt); font-weight: 600; }
+.sq-console .sq-ev span { color: var(--sq-dim2); font-size: 8.5px; text-transform: uppercase; }
+.sq-console .sq-ev.z b { color: var(--sq-dim2); }
+
+/* Chips, not bars: teammate carries pct: null throughout the file, and
+   an empty bar would state a proportion we do not have. */
+.sq-console .sq-mates { display: flex; flex-wrap: wrap; gap: 4px; }
+.sq-console .sq-mate {
+    background: var(--sq-deep); border: .8px solid var(--sq-line); border-radius: 6px;
+    padding: 4px 8px; font-size: 11.5px; color: var(--sq-txt);
+}
+.sq-console .sq-empty { color: var(--sq-dim2); font-size: 11.5px; margin: 4px 0 0; }

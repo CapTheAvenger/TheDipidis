@@ -165,6 +165,50 @@
     };
     function t() { return LABELS[uiLang()]; }
 
+    // Limitless hosts its sprites as "<species>-<form>": Dragonite-Mega,
+    // Charizard-Mega-Y, Floette-Mega — verified against the names the
+    // replica-team view already renders successfully. Our Pokédex writes
+    // the form FIRST ("Mega Dragonite", "Hisuian Goodra"), so it has to
+    // be turned around. Anything unmapped falls through as the plain
+    // lowercased name, and a miss hides itself via onerror rather than
+    // showing a broken-image icon.
+    const _REGION_SUFFIX = {
+        hisuian: 'hisui', alolan: 'alola', galarian: 'galar', paldean: 'paldea',
+    };
+
+    function spriteSlug(en) {
+        // Five names carry punctuation the URL cannot: "Mr. Rime",
+        // "Rotom (Heat)", "Lycanroc (Dusk)", "Kommo-o". Dots and brackets
+        // go, brackets becoming a plain suffix — rotom-heat, lycanroc-dusk
+        // — which is how Limitless names those forms. Hyphens inside a
+        // name ("Kommo-o") stay.
+        const cleaned = String(en || '')
+            .replace(/[().]/g, ' ')
+            .replace(/['’]/g, '')
+            .trim();
+        const parts = cleaned.split(/\s+/);
+        if (!parts.length || !parts[0]) return '';
+        const first = parts[0].toLowerCase();
+        if (first === 'mega') {
+            // "Mega Charizard Y" -> charizard-mega-y
+            const rest = parts.slice(1);
+            const variant = (rest.length > 1) ? '-' + rest.pop().toLowerCase() : '';
+            return rest.join('-').toLowerCase() + '-mega' + variant;
+        }
+        if (_REGION_SUFFIX[first]) {
+            return parts.slice(1).join('-').toLowerCase() + '-' + _REGION_SUFFIX[first];
+        }
+        return parts.join('-').toLowerCase();
+    }
+
+    function spriteImg(en, cls) {
+        const slug = spriteSlug(en);
+        if (!slug) return '';
+        return `<img class="sqp-sprite ${cls || ''}" loading="lazy" alt=""
+                     src="https://r2.limitlesstcg.net/pokemon/gen9/${slug}.png"
+                     onerror="this.style.visibility='hidden'">`;
+    }
+
     function escapeHtml(s) {
         return String(s == null ? '' : s)
             .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
@@ -344,8 +388,13 @@
         return `
             <tr class="sqp-row has-meta" data-row="${idx}" tabindex="0" role="button">
                 <td class="sqp-c-mon">
-                    <span class="sqp-mon-name">${caret}${escapeHtml(primary)}</span>
-                    <span class="sqp-mon-sub">${escapeHtml(secondary)} · ${escapeHtml(dex)}</span>
+                    <span class="sqp-mon-cell">
+                        ${spriteImg(e.en, 'sqp-sprite--row')}
+                        <span class="sqp-mon-text">
+                            <span class="sqp-mon-name">${caret}${escapeHtml(primary)}</span>
+                            <span class="sqp-mon-sub">${escapeHtml(secondary)} · ${escapeHtml(dex)}</span>
+                        </span>
+                    </span>
                 </td>
                 <td class="sqp-c-type">${typeBadge(e.t1, e.t1de)}</td>
                 <td class="sqp-c-type">${typeBadge(e.t2, e.t2de)}</td>
@@ -507,6 +556,36 @@
         const fx = _NATURE_FX[nature];
         return fx ? `${name} (${_statLabel(fx[0])}↑ ${_statLabel(fx[1])}↓)` : name;
     }
+    // "2 HP / 32 SpA / 32 Spe" -> { hp: 2, spa: 32, spe: 32 }
+    const _EVS_KEY = { HP: 'hp', Atk: 'atk', Def: 'def', SpA: 'spa', SpD: 'spd', Spe: 'spe' };
+
+    function parseEvs(evs) {
+        const out = {};
+        String(evs || '').split('/').forEach(part => {
+            const m = part.trim().match(/^(\d+)\s+(\S+)$/);
+            if (m && _EVS_KEY[m[2]]) out[_EVS_KEY[m[2]]] = parseInt(m[1], 10);
+        });
+        return out;
+    }
+
+    function spreadRow(s) {
+        const vals = parseEvs(s.evs);
+        const de = uiLang() === 'de';
+        const cells = _FINAL_ORDER.map(([k, dlab, elab]) => {
+            const v = vals[k] || 0;
+            return `<span class="sqp-ev${v ? '' : ' is-zero'}">
+                    <b>${v}</b><small>${escapeHtml(de ? dlab : elab)}</small>
+                </span>`;
+        }).join('');
+        const pct = s.pct != null ? escapeHtml(fmtPct(s.pct)) : '';
+        const width = s.pct != null ? Math.max(2, Math.min(100, s.pct)) : 0;
+        return `<div class="sqp-d-row sqp-d-evrow">
+                <div class="sqp-d-bar" style="width:${width}%"></div>
+                <span class="sqp-evs">${cells}</span>
+                <span class="sqp-d-pct">${pct}</span>
+            </div>`;
+    }
+
     function evsDisplay(evs) {
         const de = uiLang() === 'de';
         return String(evs || '').split('/').map(part => {
@@ -685,10 +764,21 @@
             : 'Estimated: the source omits the top item\'s share — computed as 100% minus the other items.';
     }
 
-    function usageSection(title, rows) {
+    // The reference names what a list leaves out ("+3 under 1%"). Without
+    // it a six-row list looks complete when it is a sixth of the truth.
+    function belowCut(list, shown) {
+        const total = (list || []).length;
+        const hidden = total - shown;
+        if (hidden <= 0) return '';
+        return uiLang() === 'de'
+            ? `+${hidden} unter 1 %` : `+${hidden} under 1%`;
+    }
+
+    function usageSection(title, rows, hint, accent) {
         if (!rows) return '';
-        return `<div class="sqp-d-sec">
-                <h4 class="sqp-d-sec-title">${escapeHtml(title)}</h4>
+        const hintHtml = hint ? `<span class="sqp-d-sec-hint">${escapeHtml(hint)}</span>` : '';
+        return `<div class="sqp-d-sec sqp-d-sec--${accent || 'default'}">
+                <h4 class="sqp-d-sec-title">${escapeHtml(title)}${hintHtml}</h4>
                 ${rows}
             </div>`;
     }
@@ -773,27 +863,35 @@
             return usageRow(nmHtml(n.name, 'nature'), n.pct, ex);
         }).join('');
 
+        // Stat points as six boxes rather than "2 HP / 32 SpA / 32 Spe":
+        // the columns line up between rows, so two spreads can be compared
+        // at a glance instead of read word by word.
         const spreadRows = (block.stat_points || [])
-            .map(s => usageRow(escapeHtml(evsDisplay(s.evs) || '—'), s.pct)).join('');
+            .map(s => spreadRow(s)).join('');
 
         const moveRows = (block.move || []).map(m => usageRow(nmHtml(m.name, 'moves'), m.pct)).join('');
         const itemRows = (block.held_item || []).map(i => usageRow(nmHtml(i.name, 'items'), i.pct, null, i.derived)).join('');
         const abilRows = (block.ability || []).map(a => abilityRow(a)).join('');
         // Teammates have no percentage in-game — just a ranked list. Render
         // them as a clean numbered list (no empty %-column / bar).
-        const teamRows = (block.teammate || []).map((tm, i) => `
-            <div class="sqp-d-team">
-                <span class="sqp-d-team-rank">${i + 1}</span>
-                <span class="sqp-d-name">${nmHtml(tm.name, 'pokemon')}</span>
-            </div>`).join('');
+        // A grid of sprites reads faster than a numbered list — you
+        // recognise a teammate by its picture long before its name.
+        const teamRows = (block.teammate || []).length
+            ? `<div class="sqp-d-teamgrid">${(block.teammate || []).map((tm, i) => `
+                <div class="sqp-d-teamcell" title="${escapeHtml(tm.name)}">
+                    <span class="sqp-d-teamrank">${i + 1}</span>
+                    ${spriteImg(tm.name, 'sqp-sprite--team')}
+                    <span class="sqp-d-teamname">${nmHtml(tm.name, 'pokemon')}</span>
+                </div>`).join('')}</div>`
+            : '';
 
         return `
             <div class="sqp-d-grid">
-                ${usageSection(l.secNature, natRows)}
-                ${usageSection(l.secSpread, spreadRows)}
-                ${usageSection(l.secMoves, moveRows)}
-                ${usageSection(l.secItem, itemRows)}
-                ${usageSection(l.secAbility, abilRows)}
+                ${usageSection(l.secNature, natRows, belowCut(block.nature, (block.nature || []).filter(x => (x.pct == null || x.pct >= 1)).length))}
+                ${usageSection(l.secSpread, spreadRows, belowCut(block.stat_points, (block.stat_points || []).filter(x => (x.pct == null || x.pct >= 1)).length))}
+                ${usageSection(l.secMoves, moveRows, belowCut(block.move, (block.move || []).filter(x => (x.pct == null || x.pct >= 1)).length))}
+                ${usageSection(l.secItem, itemRows, belowCut(block.held_item, (block.held_item || []).filter(x => (x.pct == null || x.pct >= 1)).length))}
+                ${usageSection(l.secAbility, abilRows, belowCut(block.ability, (block.ability || []).filter(x => (x.pct == null || x.pct >= 1)).length))}
                 ${usageSection(l.secTeam, teamRows)}
             </div>`;
     }
@@ -838,6 +936,7 @@
             <div class="sqp-d-card" role="dialog" aria-modal="true" aria-label="${escapeHtml(primary)}">
                 <button type="button" class="sqp-d-close" aria-label="${escapeHtml(l.closeLabel)}">×</button>
                 <div class="sqp-d-head">
+                    ${spriteImg(e.en, 'sqp-sprite--hero')}
                     <div class="sqp-d-title">
                         <span class="sqp-d-name-main">${escapeHtml(primary)}</span>
                         <span class="sqp-d-name-sub">${escapeHtml(secondary)} · ${escapeHtml(dex)}</span>

@@ -2171,9 +2171,15 @@ body.sqp-d-open { overflow: hidden; }
     padding: 4px 8px; border-radius: 6px; overflow: hidden;
     font-size: 0.84rem; margin-bottom: 2px; background: #f8f9fa;
 }
+/* Silph-Scope-style gradient rather than a flat pale fill: at 5 % the
+   old bar was nearly invisible against the row, so the proportion — the
+   only reason a bar exists — did not read. */
 .sqp-d-bar {
-    position: absolute; left: 0; top: 0; bottom: 0; z-index: 0;
-    background: rgba(95, 182, 255, 0.18); border-right: 1px solid rgba(95, 182, 255, 0.45);
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    border-radius: 6px;
+    background: linear-gradient(90deg, #6366f1 0%, #22d3ee 100%);
+    opacity: 0.22;
 }
 .sqp-d-name { position: relative; z-index: 1; color: #2c3e50; flex: 1; }
 .sqp-d-extra { color: #5a6473; font-size: 0.74rem; }
@@ -2308,3 +2314,63 @@ body.sqp-d-open { overflow: hidden; }
 /* Partial-overlap suggestions (<100%) in the Team Builder get an amber count. */
 .sqb-sugg.is-partial { background: #fffbeb; border-color: #fde68a; }
 .sqb-sugg.is-partial .sqb-sugg-count { color: #b45309; background: rgba(180,83,9,0.12); }
+
+
+/* ── Pokédex: sprites, stat-point boxes, teammate grid ─────────────
+   Adapted from the Silph Scope layout the maintainer pointed at. The
+   sprite is the fastest identifier there is — you recognise a Pokémon
+   by its picture long before you have read its name. */
+.sqp-sprite { display: block; image-rendering: -webkit-optimize-contrast; }
+.sqp-sprite--row { width: 32px; height: 32px; object-fit: contain; flex: 0 0 32px; }
+.sqp-sprite--team { width: 44px; height: 44px; object-fit: contain; margin: 0 auto; }
+.sqp-mon-cell { display: flex; align-items: center; gap: 8px; }
+.sqp-mon-text { display: flex; flex-direction: column; min-width: 0; }
+
+/* Six boxes, fixed order, zeros greyed — the columns line up between
+   rows so two spreads compare at a glance instead of being read. */
+.sqp-evs { position: relative; z-index: 1; display: flex; gap: 3px; flex: 1; }
+.sqp-ev {
+    display: flex; flex-direction: column; align-items: center;
+    min-width: 34px; padding: 1px 3px;
+    border: 1px solid #d8dee7; border-radius: 5px;
+    background: rgba(255, 255, 255, 0.75);
+    line-height: 1.1;
+}
+.sqp-ev b { font-size: 0.78rem; font-weight: 800; color: #2c3e50; font-variant-numeric: tabular-nums; }
+.sqp-ev small { font-size: 0.55rem; color: #6b7280; text-transform: uppercase; letter-spacing: 0.02em; }
+.sqp-ev.is-zero { border-color: #eef2f7; background: transparent; }
+.sqp-ev.is-zero b, .sqp-ev.is-zero small { color: #c3cad6; }
+.sqp-d-evrow { align-items: center; }
+
+.sqp-d-teamgrid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+.sqp-d-teamcell {
+    position: relative; text-align: center;
+    padding: 6px 2px 4px;
+    border: 1px solid #e7ebf1; border-radius: 8px;
+    background: #f8f9fa;
+}
+.sqp-d-teamrank {
+    position: absolute; top: 2px; left: 2px;
+    min-width: 15px; height: 15px; padding: 0 3px;
+    border-radius: 8px; background: #eef2ff; color: #4f46e5;
+    font-size: 0.58rem; font-weight: 800; line-height: 15px;
+}
+.sqp-d-teamname {
+    display: block; margin-top: 2px;
+    font-size: 0.6rem; line-height: 1.2; color: #4a4a4a;
+    overflow-wrap: anywhere;
+}
+@media (max-width: 520px) {
+    .sqp-d-teamgrid { grid-template-columns: repeat(3, 1fr); }
+}
+
+/* Section titles get the accent bar from the reference — it turns a run
+   of similar-looking blocks into something you can navigate. */
+.sqp-d-sec-title {
+    display: flex; align-items: baseline; gap: 8px;
+    border-left: 3px solid #22d3ee; padding-left: 8px;
+}
+.sqp-d-sec-hint { color: #9ca3af; font-size: 0.66rem; font-weight: 600; text-transform: none; }
+
+.sqp-sprite--hero { width: 64px; height: 64px; object-fit: contain; flex: 0 0 64px; }
+@media (max-width: 520px) { .sqp-sprite--hero { width: 52px; height: 52px; flex-basis: 52px; } }

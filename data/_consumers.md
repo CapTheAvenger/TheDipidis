@@ -150,3 +150,14 @@ shrinks, a set stops mapping, or an input goes stale.
 
 **If you need a new column or a new file, open an issue here** rather than
 parsing around the gap — that keeps the contract explicit and checkable.
+
+### `champions_type_chart.json`
+`{_meta, chart: { attackingType: { defendingType: multiplier } }}`
+
+The 18x18 type effectiveness table, listing only deviations from 1.0.
+Public game rules, hand-written — not scraped from anywhere, and not
+derived from another project's output. Read by `js/champions-damage.js`
+for the Champions matchup and damage views.
+
+> Anything absent is neutral (1.0). A missing entry therefore never
+> means "unknown", which is why the file can stay this small.

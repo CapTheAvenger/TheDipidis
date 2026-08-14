@@ -244,8 +244,17 @@ describe('against the real file', () => {
 
 // ── rendering ───────────────────────────────────────────────────────
 
+// The block formats through window.formatPercent / formatPercentSigned
+// so the same number cannot look different on a second surface. The
+// harness therefore has to supply the REAL formatters, not a stub —
+// otherwise these tests would pass while the page shows something else.
+const FORMATTERS = new Function('getLang',
+    utilsChunk(/function formatPercent\(value, digits = 1\) \{[\s\S]*?\n\}/, 'formatPercent') + '\n' +
+    utilsChunk(/function formatPercentSigned\(value, digits = 1\) \{[\s\S]*?\n\}/, 'formatPercentSigned') + '\n' +
+    'return { formatPercent, formatPercentSigned };');
+
 const render = new Function(
-    'getLang', 'escapeHtml', 't',
+    'getLang', 'escapeHtml', 't', 'window',
     CONV_SRC +
     chunk(/        const CONV_CAP = 100;[\s\S]*?\n        \}\n/, 'renderConversionBlock') +
     'return { renderConversionBlock, computeConversionPerformance, CONV_MIN_N, CONV_CAP };');
@@ -254,7 +263,8 @@ function ui(lang = 'de') {
     return render(() => lang,
                   (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;')
                                   .replace(/'/g, '&#39;'),
-                  (k) => k);          // t() unresolved -> inline fallback
+                  (k) => k,           // t() unresolved -> inline fallback
+                  FORMATTERS(() => lang));
 }
 
 describe('the block only claims what it can', () => {
@@ -270,8 +280,10 @@ describe('the block only claims what it can', () => {
     it('always writes the sign, so colour is never the only cue', () => {
         const conv = computeConversionPerformance([field, row('up', 500, 100), row('down', 500, 10)]);
         const html = renderConversionBlock(conv, conv.decks.filter(d => d.name !== 'field'));
-        assert.match(html, /\+\d+ %/);
-        assert.match(html, /−\d+ %/, 'a negative value must carry a minus sign');
+        // window.formatPercent writes the German narrow gap as U+00A0,
+        // so the assertion has to allow either space.
+        assert.match(html, /\+\d+[\s\u00a0]%/);
+        assert.match(html, /−\d+[\s\u00a0]%/, 'a negative value must carry a minus sign');
     });
 
     it('marks a clipped bar instead of pretending it fits', () => {
@@ -284,7 +296,8 @@ describe('the block only claims what it can', () => {
     it('fades a thin sample and shows the sample size', () => {
         const conv = computeConversionPerformance([field, row('thin', 30, 5)]);
         const html = renderConversionBlock(conv, conv.decks.filter(d => d.name === 'thin'));
-        assert.match(html, /cm-conv-thin/);
+        // .is-muted aus components.css — vorher .cm-conv-thin.
+        assert.match(html, /is-muted/);
         assert.match(html, /n=30/);
     });
 
@@ -305,12 +318,20 @@ describe('the block only claims what it can', () => {
             'an unreplaced placeholder reached the page');
     });
 
-    it('uses no green — that colour already means "share up" below', () => {
-        const css = fs.readFileSync(path.join(ROOT, 'css', 'styles.css'), 'utf8');
-        const block = css.slice(css.indexOf('.cm-conv-bar'), css.indexOf('.cm-conv-hint'));
+    it('uses no green — the diverging bar is blue vs red', () => {
+        // Der Balken lebt jetzt in components.css als
+        // .ds-bar-track.is-diverging und holt seine Farben aus den
+        // Tokens; die Prüfung folgt ihm dorthin.
+        const comp = fs.readFileSync(path.join(ROOT, 'css', 'components.css'), 'utf8');
+        const block = comp.slice(comp.indexOf('.ds-bar-track.is-diverging'),
+                                comp.indexOf('/* ── Datentabelle'));
         assert.doesNotMatch(block, /#16a34a|#27ae60|green/i);
-        assert.match(block, /#2563eb/);
-        assert.match(block, /#dc2626/);
+        assert.match(block, /var\(--dv-pos\)/);
+        assert.match(block, /var\(--dv-neg\)/);
+        const tokens = fs.readFileSync(path.join(ROOT, 'css', 'tokens.css'), 'utf8');
+        const pos = tokens.match(/--dv-pos:\s*#([0-9a-f]{6})/i)[1];
+        const [r, g, b] = [0, 2, 4].map(i => parseInt(pos.slice(i, i + 2), 16));
+        assert.ok(b > g && b > r, `--dv-pos #${pos} is not a blue`);
     });
 
     it('English keeps the decimal point', () => {

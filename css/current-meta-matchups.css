@@ -247,7 +247,7 @@
 }
 
 /* Table base styling for unthemed tables (Climbers/Fallers) */
-#currentMetaContent .section table {
+#currentMetaContent .section table:not(.ds-table) {
     width: 100%;
     border-collapse: collapse;
     border-radius: 8px;
@@ -268,8 +268,8 @@
  *
  * table-layout: auto lässt keine Spalte mehr verhungern, egal wie viele
  * die Tabelle künftig hat. */
-#currentMetaContent .section table th:first-child,
-#currentMetaContent .section table td:first-child {
+#currentMetaContent .section table:not(.ds-table) th:first-child,
+#currentMetaContent .section table:not(.ds-table) td:first-child {
     width: 40%;
 }
 /* Stack the primary value (#12) above the change badge ((▲ 2)) so a
@@ -278,20 +278,20 @@
  * positive / negative / neutral spans are appended after a plain text
  * node, so we have to fall back to inline-block + display: block on
  * the span itself rather than a flex container. */
-#currentMetaContent .section table td:nth-child(2),
-#currentMetaContent .section table td:nth-child(3) {
+#currentMetaContent .section table:not(.ds-table) td:nth-child(2),
+#currentMetaContent .section table:not(.ds-table) td:nth-child(3) {
     line-height: 1.25;
     padding: 8px 6px;
 }
 /* Nach Klasse ansprechen, nicht nach Spaltennummer: mit der vierten
  * Spalte war die Änderungs-Plakette in Spalte 3 und 4 gerutscht und
  * blieb dort inline stehen — genau der Text, der aus dem Fenster ragte. */
-#currentMetaContent .section table td .rank-change,
-#currentMetaContent .section table td .rank-up,
-#currentMetaContent .section table td .rank-down,
-#currentMetaContent .section table td .positive,
-#currentMetaContent .section table td .negative,
-#currentMetaContent .section table td .neutral {
+#currentMetaContent .section table:not(.ds-table) td .rank-change,
+#currentMetaContent .section table:not(.ds-table) td .rank-up,
+#currentMetaContent .section table:not(.ds-table) td .rank-down,
+#currentMetaContent .section table:not(.ds-table) td .positive,
+#currentMetaContent .section table:not(.ds-table) td .negative,
+#currentMetaContent .section table:not(.ds-table) td .neutral {
     display: block;
     margin-top: 3px;
     font-size: 0.82em;
@@ -299,7 +299,7 @@
 /* (See #currentMetaContent .rank-up / .rank-down further down for the
  * pill removal — needs source-order priority over the legacy pill
  * style block that sits below this section.) */
-#currentMetaContent .section table th {
+#currentMetaContent .section table:not(.ds-table) th {
     background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
     color: white;
     padding: 10px 12px;
@@ -309,31 +309,31 @@
     vertical-align: middle;
 }
 /* Deck column header stays left so deck names align under it */
-#currentMetaContent .section table th:first-child {
+#currentMetaContent .section table:not(.ds-table) th:first-child {
     text-align: left;
 }
-#currentMetaContent .section table td {
+#currentMetaContent .section table:not(.ds-table) td {
     padding: 9px 12px;
     border-bottom: 1px solid #f0f2f5;
     font-size: 0.9em;
     vertical-align: middle;
     text-align: center;
 }
-#currentMetaContent .section table td:first-child {
+#currentMetaContent .section table:not(.ds-table) td:first-child {
     text-align: left;
 }
 /* Vertical column separators between every column */
-#currentMetaContent .section table th:not(:last-child),
-#currentMetaContent .section table td:not(:last-child) {
+#currentMetaContent .section table:not(.ds-table) th:not(:last-child),
+#currentMetaContent .section table:not(.ds-table) td:not(:last-child) {
     border-right: 1px solid rgba(255, 255, 255, 0.1);
 }
-#currentMetaContent .section table td:not(:last-child) {
+#currentMetaContent .section table:not(.ds-table) td:not(:last-child) {
     border-right-color: rgba(0, 0, 0, 0.06);
 }
-#currentMetaContent .section table tbody tr:nth-child(even) {
+#currentMetaContent .section table:not(.ds-table) tbody tr:nth-child(even) {
     background: rgba(59, 76, 202, 0.03);
 }
-#currentMetaContent .section table tbody tr:hover {
+#currentMetaContent .section table:not(.ds-table) tbody tr:hover {
     background: rgba(59, 76, 202, 0.07);
     transition: background 0.15s;
 }
@@ -1231,25 +1231,25 @@
     #currentMetaContent .stat-card .value {
         font-size: 1.5em;
     }
-    #currentMetaContent .section table {
+    #currentMetaContent .section table:not(.ds-table) {
         overflow-x: auto;
         display: block;
     }
-    #currentMetaContent .section table thead,
-    #currentMetaContent .section table tbody {
+    #currentMetaContent .section table:not(.ds-table) thead,
+    #currentMetaContent .section table:not(.ds-table) tbody {
         display: table;
         width: 100%;
     }
-    #currentMetaContent .section table th,
-    #currentMetaContent .section table td {
+    #currentMetaContent .section table:not(.ds-table) th,
+    #currentMetaContent .section table:not(.ds-table) td {
         padding: 7px 8px;
         font-size: 0.82em;
         white-space: nowrap;
         min-width: 82px;
     }
 
-    #currentMetaContent .section table th:first-child,
-    #currentMetaContent .section table td:first-child {
+    #currentMetaContent .section table:not(.ds-table) th:first-child,
+    #currentMetaContent .section table:not(.ds-table) td:first-child {
         min-width: 150px;
         white-space: normal;
     }
@@ -1354,14 +1354,14 @@
         gap: 5px;
     }
 
-    #currentMetaContent .section table th,
-    #currentMetaContent .section table td {
+    #currentMetaContent .section table:not(.ds-table) th,
+    #currentMetaContent .section table:not(.ds-table) td {
         padding: 6px 7px;
         font-size: 0.79em;
     }
 
-    #currentMetaContent .section table th:first-child,
-    #currentMetaContent .section table td:first-child {
+    #currentMetaContent .section table:not(.ds-table) th:first-child,
+    #currentMetaContent .section table:not(.ds-table) td:first-child {
         min-width: 136px;
     }
 
@@ -1404,15 +1404,15 @@
         padding: 10px;
     }
 
-    #currentMetaContent .section table th,
-    #currentMetaContent .section table td {
+    #currentMetaContent .section table:not(.ds-table) th,
+    #currentMetaContent .section table:not(.ds-table) td {
         padding: 5px 6px;
         font-size: 0.75em;
         min-width: 74px;
     }
 
-    #currentMetaContent .section table th:first-child,
-    #currentMetaContent .section table td:first-child,
+    #currentMetaContent .section table:not(.ds-table) th:first-child,
+    #currentMetaContent .section table:not(.ds-table) td:first-child,
     #currentMetaContent .current-meta-full-comparison-table .full-col-deck {
         min-width: 126px;
     }

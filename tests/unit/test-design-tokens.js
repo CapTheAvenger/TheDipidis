@@ -174,13 +174,15 @@ describe('Phase 0: die beiden Layoutfehler', () => {
         // Spalten, während die Tabelle vier rendert (Deck | Rank | Count
         // | Win Rate). Die vierte bekam 0px, ihr Inhalt endete bei 1280px
         // Fensterbreite auf 1301px — der horizontale Überlauf.
-        assert.match(CM, /#currentMetaContent \.section table \{[\s\S]*?table-layout:\s*auto/);
-        assert.doesNotMatch(CM, /section table th:nth-child\(3\),\s*\n#currentMetaContent \.section table td:nth-child\(3\) \{\s*\n\s*width:\s*30%/);
+        // Phase 1 hat :not(.ds-table) an die Elternregel gehängt, damit
+        // die Komponente nicht dagegen anschreiben muss.
+        assert.match(CM, /#currentMetaContent \.section table(:not\(\.ds-table\))? \{[\s\S]*?table-layout:\s*auto/);
+        assert.doesNotMatch(CM, /#currentMetaContent \.section table[^\n]*td:nth-child\(3\) \{\s*\n\s*width:\s*30%/);
     });
 
     it('die Änderungs-Plakette wird nach Klasse angesprochen, nicht nach Spaltennummer', () => {
-        assert.match(CM, /#currentMetaContent \.section table td \.negative/);
-        assert.doesNotMatch(CM, /table td:nth-child\(3\) \.negative/);
+        assert.match(CM, /#currentMetaContent \.section table(:not\(\.ds-table\))? td \.negative/);
+        assert.doesNotMatch(CM, /table(:not\(\.ds-table\))? td:nth-child\(3\) \.negative/);
     });
 
     it('die Karten auf dem Handy behalten den Platz für ihre Kopfzeile', () => {

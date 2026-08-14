@@ -775,14 +775,18 @@
             display: block;
         }
         
+        /* Der rote 3px-Strich unter jeder Abschnittsüberschrift war der
+           kleine Bruder des Banners: auf einer Datenseite mit zwölf
+           Abschnitten zwölfmal derselbe laute Akzent. Eine ruhige Linie
+           aus --line trennt genauso gut. */
         .tab-content h2 {
-            color: #1a1a2e;
-            border-bottom: 3px solid var(--pokemon-red, #E3350D);
-            padding-bottom: 8px;
-            margin-bottom: 16px;
+            color: var(--ink);
+            border-bottom: 1px solid var(--line);
+            padding-bottom: var(--s-2);
+            margin-bottom: var(--s-4);
             margin-top: 0;
-            font-size: clamp(1.1em, 3vw, 1.5em);
-            font-weight: 800;
+            font-size: var(--fs-lg);
+            font-weight: 700;
         }
         
         .loading {
@@ -9493,134 +9497,37 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
     gap: 14px;
     margin-bottom: 18px;
 }
-.cm-vs-top8-block {
-    background: #f9fafb;
-    border: 1px solid rgba(0,0,0,0.08);
-    border-radius: 10px;
-    padding: 12px 14px;
-}
-.cm-vs-top8-block h3 {
-    font-size: 1rem;
-    margin: 0 0 8px;
-    color: #1f2937;
-}
-/* The Overall / Top-8 tables live inside #currentMetaContent .section
- * which carries its own theme (gradient header, 10/12 padding, etc.).
- * That parent has higher specificity (1,1,1) than a plain class
- * selector, so without !important here every cell-level layout rule
- * we set silently lost the cascade — that's how the # column ended up
- * 25-30% wide while DECK got crushed and SHARE drifted off-center. */
-.cm-vs-top8-table {
-    width: 100% !important;
-    border-collapse: separate !important;
-    border-spacing: 0 !important;
-    font-size: 0.85rem !important;
-    border: 1px solid #d7e2f0 !important;
-    border-radius: 10px !important;
-    overflow: hidden !important;
-    background: #ffffff !important;
-    table-layout: fixed !important;
-}
-/* Column widths: # is single/double digit (max "12"), value column
- * carries short percentages ("9.5%", "12.1%"). Deck column takes
- * everything else so long names like "Alakazam Dudunsparce" don't
- * wrap. !important survives the #currentMetaContent .section table
- * cascade. */
-.cm-vs-top8-table col,
-.cm-vs-top8-table th:nth-child(1),
-.cm-vs-top8-table td:nth-child(1) { width: 12% !important; }
-.cm-vs-top8-table th:nth-child(2),
-.cm-vs-top8-table td:nth-child(2) { width: 60% !important; }
-.cm-vs-top8-table th:nth-child(3),
-.cm-vs-top8-table td:nth-child(3) { width: 28% !important; }
-
-/* ── Top-8 vs. expected ────────────────────────────────────────────
-   Its own full-width block under the 1fr 1fr row: the dual tables are
-   table-layout:fixed with !important column widths, so a third grid
-   column or a fourth table column would collapse to nothing. The four
-   widths below have to be !important for the same cascade reason. */
+/* .cm-vs-top8-block, .cm-vs-top8-table und die Spaltenbreiten sind
+   nach css/components.css gewandert (.ds-panel, .ds-table). Die 30
+   !important, die hier standen, waren ausschließlich nötig, um
+   #currentMetaContent .section table (Spezifität 1,1,1) zu überstimmen
+   — diese Elternregel nimmt .ds-table jetzt per :not() aus, und keine
+   einzige davon wird noch gebraucht. */
 .cm-vs-top8-block--wide { margin-bottom: 18px; }
-.cm-vs-top8-table--perf th:nth-child(1),
-.cm-vs-top8-table--perf td:nth-child(1) { width: 8% !important; }
-.cm-vs-top8-table--perf th:nth-child(2),
-.cm-vs-top8-table--perf td:nth-child(2) { width: 42% !important; }
-.cm-vs-top8-table--perf th:nth-child(3),
-.cm-vs-top8-table--perf td:nth-child(3) { width: 18% !important; }
-.cm-vs-top8-table--perf th:nth-child(4),
-.cm-vs-top8-table--perf td:nth-child(4) { width: 32% !important; }
-.cm-conv-cell { text-align: right !important; white-space: nowrap; }
-.cm-conv-value { font-weight: 700; font-variant-numeric: tabular-nums; }
-/* The sign is always written out, so colour never carries the meaning
-   on its own. Green is deliberately absent — in the movers block right
-   below it already means "share went up". */
-.cm-conv-bar {
-    display: block;
-    position: relative;
-    height: 6px;
-    margin: 3px 0 2px;
-    border-radius: 3px;
-    background: #eef2f7;
-}
-.cm-conv-bar::before {          /* the zero line the bars grow out of */
-    content: "";
-    position: absolute;
-    left: 50%; top: -1px; bottom: -1px;
-    width: 1px;
-    background: #6b7280;
-}
-.cm-conv-fill {
-    position: absolute;
-    top: 0; bottom: 0;
-    border-radius: 3px;
-}
-.cm-conv-fill.is-up   { left: 50%;  background: #2563eb; }
-.cm-conv-fill.is-down { right: 50%; background: #dc2626; }
-.cm-conv-n { display: block; color: #6b7280; font-size: 0.68rem; }
-/* A thin sample is faded rather than hidden: the deck still belongs in
-   the ranking, the reader just needs to see how little is behind it. */
-.cm-conv-thin { opacity: 0.62; }
+/* Keine festen Spaltenbreiten mehr: .ds-table läuft auf
+   table-layout: auto. Vier feste Prozentwerte für eine Tabelle, die
+   später eine Spalte dazubekommt, war in Phase 0 genau der Grund für
+   den horizontalen Überlauf auf Current Meta. */
+/* Der divergierende Balken ist .ds-bar-track.is-diverging in
+   components.css — Nulllinie, blau nach oben, rot nach unten, aus
+   Tokens statt aus drei Hex-Werten. .cm-conv-thin ist .is-muted, und
+   das !important auf .cm-conv-cell ist mit den Tabellenregeln
+   verschwunden. Hier bleibt nur, was diese Zelle eigen hat: Wert und
+   Stichprobengröße stehen untereinander, damit die 44px breite Spalte
+   nicht dreimal so breit werden muss. */
+.cm-conv-cell { white-space: nowrap; }
+/* Der Balken gehört unter den Wert, nicht über die ganze Zellbreite:
+   die Spalte trägt drei Angaben (Wert, Balken, n) und wäre sonst
+   breiter als die Deckspalte. */
+.cm-conv-cell .ds-bar-track { width: 96px; margin: 3px 0 2px auto; }
+.cm-conv-value { font-weight: 700; }
+.cm-conv-n { display: block; color: var(--ink-3); font-size: var(--fs-xs); }
 .cm-conv-hint {
-    color: #6b7280;
-    font-size: 0.72rem;
+    color: var(--ink-3);
+    font-size: var(--fs-xs);
     line-height: 1.45;
-    margin: 8px 2px 0;
+    margin: var(--s-2) 2px 0;
 }
-.cm-vs-top8-table th {
-    background: linear-gradient(120deg, #15396b 0%, #2a5f9d 100%) !important;
-    color: #ffffff !important;
-    text-align: center !important;
-    font-size: 0.78rem !important;
-    font-weight: 700 !important;
-    text-transform: uppercase !important;
-    letter-spacing: 0.04em !important;
-    padding: 10px 4px !important;
-    vertical-align: middle !important;
-}
-/* Deck column is the only text column — left-aligned so names read
- * top-down. # and value columns center under their headers. */
-.cm-vs-top8-table th:nth-child(2) { text-align: left !important; padding-left: 10px !important; }
-.cm-vs-top8-table td {
-    padding: 8px 4px !important;
-    border-bottom: 1px solid #eef2f7 !important;
-    vertical-align: middle !important;
-    text-align: center !important;
-}
-.cm-vs-top8-table td:nth-child(2) {
-    text-align: left !important;
-    padding-left: 10px !important;
-}
-.cm-vs-top8-table tbody tr:nth-child(even) td {
-    background: #f6f9ff !important;
-}
-.cm-vs-top8-table th:not(:last-child),
-.cm-vs-top8-table td:not(:last-child) {
-    border-right: 1px solid #e4ebf6 !important;
-}
-.cm-vs-top8-table tr:last-child td { border-bottom: none !important; }
-.cm-vt-rank  { color: #6b7280 !important; font-weight: 700 !important; }
-.cm-vt-name  { color: #1f2937 !important; font-weight: 600 !important; }
-.cm-vt-value { color: #1f2937 !important; font-weight: 700 !important; font-variant-numeric: tabular-nums !important; }
-
 /* Sample-size n= label on heatmap cells — small subscript under WR. */
 .heatmap-td-n {
     display: block;

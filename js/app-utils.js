@@ -1332,6 +1332,42 @@ function parseLocaleNumber(input, fallback = 0) {
 }
 window.parseLocaleNumber = parseLocaleNumber;
 
+/**
+ * The one way to write a percentage on this site.
+ *
+ * Dragapult appeared on one page as 16,0 % (family), 6,0 % (archetype)
+ * and 5,88 % (raw), and the Improvers table rounded to whole numbers
+ * (6,0 → 5,0, Δ +1,0 %). Three renderings of one number read as a
+ * contradiction and cost more trust than the numbers are worth.
+ *
+ * One decimal place everywhere, German comma in the German UI, and the
+ * space before the sign that German typography wants (6,3 %) — English
+ * keeps 6.3%. Non-finite input yields '' rather than "NaN%".
+ */
+function formatPercent(value, digits = 1) {
+    // null / undefined / '' are Number()-coercible to 0. Writing "0,0 %"
+    // for a value we do not have would state a measurement instead of
+    // admitting a gap — the same rule the data pipeline follows.
+    if (value == null || value === '') return '';
+    const n = Number(value);
+    if (!Number.isFinite(n)) return '';
+    const s = n.toFixed(digits);
+    const de = (typeof getLang === 'function' && getLang() === 'de');
+    return de ? s.replace('.', ',') + '\u00a0%' : s + '%';
+}
+window.formatPercent = formatPercent;
+
+/** Signed variant — the sign is always written, so colour never carries
+ *  the meaning on its own. */
+function formatPercentSigned(value, digits = 1) {
+    if (value == null || value === '') return '';
+    const n = Number(value);
+    if (!Number.isFinite(n)) return '';
+    const body = formatPercent(Math.abs(n), digits);
+    return (n < 0 ? '\u2212' : '+') + body;
+}
+window.formatPercentSigned = formatPercentSigned;
+
 // ============================================================================
 // Conversion Performance — how much more often a deck makes the cut
 // than the field does. Lives here rather than in app-tier-meta.js

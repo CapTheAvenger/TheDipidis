@@ -111,8 +111,8 @@ describe('Current Meta benutzt die Komponenten wirklich', () => {
     it('die beiden Top-8-Tabellen sind .ds-table in .ds-panel', () => {
         assert.match(TIER, /<div class="ds-panel">\s*\n\s*<h3 class="ds-label">🌐/);
         assert.match(TIER, /<div class="ds-panel">\s*\n\s*<h3 class="ds-label">🏆/);
-        assert.equal((TIER.match(/class="ds-table"/g) || []).length, 3,
-            'erwartet: beide Top-8-Tabellen plus die Conversion-Tabelle');
+        assert.equal((TIER.match(/class="ds-table"/g) || []).length, 4,
+            'erwartet: beide Top-8-Tabellen, die Conversion-Tabelle und die Movers');
     });
 
     it('die Conversion-Zeile ist die divergierende Balkenzeile', () => {

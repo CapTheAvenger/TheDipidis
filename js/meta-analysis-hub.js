@@ -76,6 +76,129 @@
         return fallbacks[tileKey] || [];
     }
 
+
+    // ── Ebene 1: die Antwort ────────────────────────────────────────
+    //
+    // Die Einstiegsseite zeigte sechs Kacheln Fließtext und keine
+    // einzige Zahl. Wer wissen will "was ist gerade stark", musste erst
+    // raten, welche Kachel er braucht. Hier steht die Antwort, bevor
+    // irgendwo geklickt wird: die drei meistgespielten Decks mit
+    // Anteil und Top-8-Quote, dazu ein Satz Klartext.
+    //
+    // Alles daraus stammt aus derselben Datei und demselben Rechenweg
+    // wie das Current-Meta-Panel (window.computeConversionPerformance),
+    // damit ein Deck auf der Startseite nicht anders dasteht als eine
+    // Ebene tiefer.
+    const ANSWER_HOST_ID = 'metaHubAnswer';
+    let _answerRows = null;
+
+    function fmtPct(v, digits) {
+        return (typeof window.formatPercent === 'function')
+            ? window.formatPercent(v, digits)
+            : Number(v).toFixed(digits == null ? 1 : digits) + '%';
+    }
+    function fmtSigned(v, digits) {
+        return (typeof window.formatPercentSigned === 'function')
+            ? window.formatPercentSigned(v, digits)
+            : (v >= 0 ? '+' : '') + Number(v).toFixed(digits == null ? 1 : digits) + '%';
+    }
+    function isDe() {
+        return typeof window.getLang === 'function' ? window.getLang() === 'de' : true;
+    }
+
+    async function loadAnswerRows() {
+        if (_answerRows) return _answerRows;
+        if (typeof fetchAndParseCSV !== 'function') return null;
+        const base = (typeof BASE_PATH === 'string') ? BASE_PATH : './data/';
+        try {
+            _answerRows = await fetchAndParseCSV(`${base}online_tournament_top8_decks.csv?t=${Date.now()}`);
+        } catch (_e) {
+            _answerRows = null;      // kein Platzhalter: der Block bleibt weg
+        }
+        return _answerRows;
+    }
+
+    function answerModel(rows) {
+        if (!rows || !rows.length || typeof window.computeConversionPerformance !== 'function') return null;
+        const conv = window.computeConversionPerformance(rows);
+        if (!conv || !(conv.expected > 0)) return null;
+        const num = (v) => (typeof window.parseLocaleNumber === 'function')
+            ? window.parseLocaleNumber(v, 0) : (parseFloat(v) || 0);
+        const totalBrought = rows.reduce((sum, r) => sum + num(r.total_brought_weighted), 0);
+        if (!(totalBrought > 0)) return null;
+        const byPerf = new Map(conv.decks.map(d => [d.name, d]));
+        const top = rows
+            .map(r => {
+                const brought = num(r.total_brought_weighted);
+                const d = byPerf.get(r.deck_name);
+                return {
+                    name: r.deck_name,
+                    sharePct: (brought / totalBrought) * 100,
+                    convPct: num(r.top8_conv_rate) * 100,
+                    perfPct: d ? d.perfPct : null,
+                    brought,
+                };
+            })
+            .sort((a, b) => b.sharePct - a.sharePct)
+            .slice(0, 3);
+        return { conv, top, totalBrought };
+    }
+
+    // Ein Satz Klartext über dem Zahlenblock. Er nennt das Deck, das am
+    // deutlichsten über dem Feld liegt — nicht das meistgespielte, denn
+    // "am häufigsten" und "am erfolgreichsten" sind zwei verschiedene
+    // Fragen, und die zweite ist die interessantere.
+    function answerSentence(model) {
+        const listed = model.conv.decks
+            .filter(d => !d.thin && d.brought >= 20)
+            .sort((a, b) => b.perfPct - a.perfPct);
+        const best = listed[0];
+        if (!best) return '';
+        const de = isDe();
+        return de
+            ? `<strong>${escapeHtml(best.name)}</strong> ist derzeit das erfolgreichste Deck: ${fmtPct((best.top8 / best.brought) * 100)} der Antritte erreichen die Top 8 — ${fmtSigned(best.perfPct, 0)} gegenüber dem Feld-Durchschnitt von ${fmtPct(model.conv.expected * 100, 2)}.`
+            : `<strong>${escapeHtml(best.name)}</strong> is the strongest deck right now: ${fmtPct((best.top8 / best.brought) * 100)} of its entries reach top 8 — ${fmtSigned(best.perfPct, 0)} against the field average of ${fmtPct(model.conv.expected * 100, 2)}.`;
+    }
+
+    function answerHtml(model) {
+        const de = isDe();
+        const stamp = (typeof localStorage !== 'undefined' && localStorage.getItem('lastScraperUpdate')) || '';
+        const tile = (d) => {
+            const perf = d.perfPct == null ? '' : fmtSigned(d.perfPct, 0);
+            const cls = d.perfPct == null ? '' : (d.perfPct >= 0 ? ' is-pos' : ' is-neg');
+            return `
+                <div class="ds-stat${cls}">
+                    <span class="ds-stat-label">${escapeHtml(d.name)}</span>
+                    <span class="ds-stat-value">${fmtPct(d.sharePct)}</span>
+                    <span class="ds-stat-context">${de ? 'des Feldes' : 'of the field'} · ${
+                        de ? 'Top-8-Quote' : 'top-8 rate'} ${fmtPct(d.convPct)}${
+                        perf ? ` · ${perf} ${de ? 'ggü. Feld' : 'vs. field'}` : ''}</span>
+                </div>`;
+        };
+        return `
+            <section class="meta-hub-answer" aria-labelledby="metaHubAnswerTitle">
+                <h3 class="ds-label" id="metaHubAnswerTitle">
+                    ${de ? 'Was ist gerade stark?' : 'What is strong right now?'}
+                    ${stamp ? `<span class="ds-label-note">${de ? 'Daten' : 'Data'}: ${escapeHtml(stamp)}</span>` : ''}
+                </h3>
+                <p class="meta-hub-answer-line">${answerSentence(model)}</p>
+                <div class="ds-stat-row">${model.top.map(tile).join('')}</div>
+                <p class="ds-note">${de
+                    ? `Anteil = wie oft ein Deck gespielt wurde, gemessen an ${Math.round(model.totalBrought).toLocaleString('de-DE')} gewichteten Antritten. Top-8-Quote = wie oft es davon die Top 8 erreicht hat. Beides aus Limitless Online.`
+                    : `Share = how often a deck was played, over ${Math.round(model.totalBrought).toLocaleString('en-US')} weighted entries. Top-8 rate = how often it reached top 8. Both from Limitless Online.`}</p>
+            </section>`;
+    }
+
+    async function renderAnswer() {
+        const host = document.getElementById(ANSWER_HOST_ID);
+        if (!host) return;
+        const rows = await loadAnswerRows();
+        const model = answerModel(rows);
+        // Kein Modell, kein Block: eine leere Kachelreihe mit Strichen
+        // wäre schlechter als gar keine.
+        host.innerHTML = model ? answerHtml(model) : '';
+    }
+
     function renderTiles() {
         const grid = document.getElementById('metaHubTileGrid');
         if (!grid) return;
@@ -239,6 +362,7 @@
     }
 
     function refreshLanguage() {
+        renderAnswer();
         // Re-render tiles & any active sub-nav after a language switch.
         // For top-level sub-tabs, the host IS the .tab-content with
         // class 'active' when visible. For Meta Call, the host is
@@ -255,6 +379,8 @@
     // Public API
     window.MetaAnalysisHub = {
         renderTiles,
+        renderAnswer,
+        answerModel,
         enterSubTab,
         exitToHub,
         injectSubNav,
@@ -267,6 +393,7 @@
 
     document.addEventListener('DOMContentLoaded', () => {
         renderTiles();
+        renderAnswer();
         // If the hub is the initially-active tab, nothing else is needed.
         // Re-render on language change.
         document.addEventListener('languageChanged', refreshLanguage);

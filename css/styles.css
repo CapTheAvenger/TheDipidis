@@ -282,12 +282,12 @@
         }
         
         .tabs-container {
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.06);
-            margin-bottom: 16px;
+            background: var(--surface-1);
+            border-radius: var(--r-lg);
+            box-shadow: var(--e-2);
+            margin-bottom: var(--s-4);
             overflow: visible;
-            border: 1px solid rgba(0,0,0,0.06);
+            border: 1px solid var(--line);
         }
         
         .tab-navigation {
@@ -4920,12 +4920,14 @@ h3:first-child {
    never blur into one wall of cards while scrolling. Each tier gets
    its own light-tinted band + a thicker top divider keyed off the
    tier-colour. */
+/* Flächen und Kanten aus Tokens: damit wird dieser Block im
+   Dunkelmodus dunkel, ohne dass es eine zweite Regel braucht. */
 .tier-section {
     margin: 0 0 56px 0;
     padding: 18px 18px 22px;
-    border-radius: 14px;
-    background: #fafbfd;
-    border: 1px solid #e5eaf1;
+    border-radius: var(--r-lg);
+    background: var(--surface-2);
+    border: 1px solid var(--line);
     border-top-width: 4px;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
 }
@@ -4965,12 +4967,9 @@ h3:first-child {
     margin: 0 0 28px 0;
     padding: 20px;
     border-radius: 16px;
-    background:
-        radial-gradient(circle at 0% 0%, rgba(230, 57, 70, 0.08), transparent 46%),
-        radial-gradient(circle at 100% 0%, rgba(230, 126, 34, 0.10), transparent 52%),
-        #fff;
-    border: 1px solid #eceff1;
-    box-shadow: 0 8px 24px rgba(44, 62, 80, 0.08);
+    background: var(--surface-1);
+    border: 1px solid var(--line);
+    box-shadow: var(--e-2);
 }
 
 .tier-hero-header h2 {
@@ -9407,16 +9406,10 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
     gap: 14px;
     margin-bottom: 18px;
 }
-.tier-movers-block {
-    background: #f9fafb;
-    border: 1px solid rgba(0,0,0,0.08);
-    border-radius: 10px;
-    padding: 12px 14px;
-}
+/* .ds-panel trägt Fläche, Kante und Radius — hier bleibt nur, was
+   dieser Block eigen hat. */
 .tier-movers-block h3 {
-    font-size: 1rem;
-    margin: 0 0 8px;
-    color: #1f2937;
+    margin: 0 0 var(--s-2);
 }
 .tier-movers-table {
     width: 100%;
@@ -9730,10 +9723,10 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
 .meta-hub-tile {
     text-align: left;
     padding: 22px 20px 20px;
-    background: #ffffff;
-    border: 1px solid var(--border-light, #e0e0e0);
-    border-radius: 16px;
-    color: var(--text-primary, #333);
+    background: var(--surface-1);
+    border: 1px solid var(--line);
+    border-radius: var(--r-lg);
+    color: var(--ink);
     cursor: pointer;
     transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
@@ -9779,11 +9772,11 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
     display: flex;
     align-items: center;
     flex-wrap: wrap;
-    gap: 8px;
+    gap: var(--s-2);
     padding: 10px 12px;
-    background: #ffffff;
-    border: 1px solid var(--border-light, #e0e0e0);
-    border-radius: 12px;
+    background: var(--surface-1);
+    border: 1px solid var(--line);
+    border-radius: var(--r-lg);
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
 }
 .meta-hub-subnav-back {

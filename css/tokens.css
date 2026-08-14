@@ -93,3 +93,47 @@
      * genau einen Titel trug. Die Side-Quest-Konsole macht das vor. */
     --rule: linear-gradient(90deg, var(--brand), var(--gold));
 }
+
+/* ── Dunkelmodus: derselbe Vorrat, andere Werte ───────────────────
+ *
+ * Das ist der ganze Dunkelmodus für alles, was aus Tokens gebaut ist —
+ * kein zweites Stylesheet, keine Regel doppelt. Genau dafür stand die
+ * Tokenschicht in Phase 0 am Anfang: mit 752 fest verdrahteten Farben
+ * wäre er nicht machbar gewesen.
+ *
+ * Die Werte sind nicht neu erfunden, sondern die der Side-Quest-Konsole,
+ * die seit Wochen dunkel läuft: #0b0f1e als Grund, #111730 als Panel,
+ * #eef2ff als Text.
+ *
+ * Was hier NICHT passiert: die rund 210 Regeln, die ihre weiße Fläche
+ * hart als #fff schreiben, werden davon nicht dunkel. Deshalb schaltet
+ * die Seite noch nicht um — siehe tests/unit/test-design-dark.js, der
+ * die Zahl festhält, und den Abschnitt in docs/. */
+:root[data-theme="dark"] {
+    --surface-0: #0b0f1e;
+    --surface-1: #111730;
+    --surface-2: #161d3a;
+    --line: #253057;
+    --line-strong: #35427a;
+    --ink: #eef2ff;
+    --ink-2: #b9c1e0;
+    --ink-3: #8791b8;
+
+    --brand: #5566e0;
+    --brand-ink: #8b98ff;
+    --gold: #ffcb05;
+    --alarm: #ff6a4d;
+
+    --dv-pos: #6aa8ff;
+    --dv-neg: #ff8f7a;
+    --dv-zero: #6a739a;
+    --dv-pos-bg: rgba(106, 168, 255, .16);
+    --dv-neg-bg: rgba(255, 143, 122, .16);
+    --bar-track: #080c19;
+    --bar-fill: linear-gradient(90deg, var(--brand), #8b98ff);
+
+    /* Auf dunklem Grund braucht ein Schatten mehr Tiefe, sonst ist er
+     * unsichtbar; die Innenkante übernimmt die Kantenzeichnung. */
+    --e-1: 0 1px 3px rgba(0, 0, 0, .5);
+    --e-2: 0 2px 12px rgba(0, 0, 0, .55), inset 0 1px 0 rgba(255, 255, 255, .035);
+}

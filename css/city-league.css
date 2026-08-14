@@ -1321,8 +1321,8 @@
     margin-bottom: 20px;
 }
 .current-meta-content {
-    padding: 24px;
-    background: #fafbff;
+    padding: var(--s-6);
+    background: var(--surface-1);
 }
 .city-league-add-card-panel {
     margin-bottom: 18px;

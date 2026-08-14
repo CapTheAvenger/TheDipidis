@@ -117,6 +117,15 @@
         // always written out so colour never carries the message alone.
         const CONV_CAP = 100;       // bars beyond this are clipped and marked
 
+        // Eine Nachkommastelle, deutsches Komma, ein Leerzeichen vor dem
+        // Zeichen — über window.formatPercent, damit dieselbe Zahl auf
+        // keiner zweiten Fläche anders aussieht.
+        const fmtNumDS = (n) => Math.round(Number(n) || 0)
+            .toLocaleString(getLang() === 'de' ? 'de-DE' : 'en-US');
+        const fmtPct = (v, digits) => (typeof window.formatPercent === 'function')
+            ? window.formatPercent(v, digits)
+            : Number(v).toFixed(digits == null ? 1 : digits) + '%';
+
         function renderConversionBlock(conv, decks) {
             if (!conv || !(conv.expected > 0) || !decks.length) return '';
             const l = (key, fallback) =>
@@ -130,17 +139,20 @@
                 const capped = Math.abs(d.perfPct) > CONV_CAP;
                 const width = Math.min(Math.abs(d.perfPct), CONV_CAP) / CONV_CAP * 50;
                 const positive = d.perfPct >= 0;
-                const sign = positive ? '+' : '−';
-                const value = `${sign}${fmtNum(Math.abs(d.perfPct), 0)} %`;
-                const bar = `<span class="cm-conv-bar">
-                        <span class="cm-conv-fill ${positive ? 'is-up' : 'is-down'}"
+                const value = (typeof window.formatPercentSigned === 'function')
+                    ? window.formatPercentSigned(d.perfPct, 0)
+                    : (positive ? '+' : '−') + fmtNum(Math.abs(d.perfPct), 0) + ' %';
+                // Divergierende Balkenzeile aus components.css: Nulllinie
+                // in der Mitte, blau nach oben, rot nach unten.
+                const bar = `<span class="ds-bar-track is-diverging">
+                        <span class="ds-bar-fill ${positive ? 'is-pos' : 'is-neg'}"
                               style="width:${width.toFixed(1)}%"></span>
                     </span>`;
-                return `<tr class="${d.thin ? 'cm-conv-thin' : ''}">
-                        <td class="cm-vt-rank">${i + 1}</td>
-                        <td class="cm-vt-name">${escapeHtml(d.name)}</td>
-                        <td class="cm-vt-value">${fmtNum((d.top8 / d.brought) * 100)} %</td>
-                        <td class="cm-conv-cell">
+                return `<tr class="${d.thin ? 'is-muted' : ''}">
+                        <td class="ds-rank">${i + 1}</td>
+                        <td>${escapeHtml(d.name)}</td>
+                        <td class="ds-num">${fmtPct((d.top8 / d.brought) * 100)}</td>
+                        <td class="ds-num cm-conv-cell">
                             <span class="cm-conv-value">${capped ? '› ' : ''}${value}</span>
                             ${bar}
                             <small class="cm-conv-n">n=${fmtNum(d.brought, 0)}</small>
@@ -156,13 +168,13 @@
                 .replace('{min}', String(CONV_MIN_N))
                 .replace('{thin}', String(CONV_THIN_N));
             return `
-                <div class="cm-vs-top8-block cm-vs-top8-block--wide">
-                    <h3>🎯 ${escapeHtml(l('meta.t8ExpTitle', de ? 'Top-8 vs. Erwartung' : 'Top-8 vs. expected'))}</h3>
-                    <table class="cm-vs-top8-table cm-vs-top8-table--perf">
+                <div class="ds-panel cm-vs-top8-block--wide">
+                    <h3 class="ds-label">🎯 ${escapeHtml(l('meta.t8ExpTitle', de ? 'Top-8 vs. Erwartung' : 'Top-8 vs. expected'))}</h3>
+                    <table class="ds-table">
                         <thead><tr>
-                            <th>#</th><th>Deck</th>
-                            <th>${escapeHtml(l('meta.t8ExpTop8Col', de ? 'Top-8-Quote' : 'Top-8 rate'))}</th>
-                            <th>${escapeHtml(l('meta.t8ExpCol', de ? 'vs. Feld' : 'vs. field'))}</th>
+                            <th class="ds-rank">#</th><th>Deck</th>
+                            <th class="ds-num">${escapeHtml(l('meta.t8ExpTop8Col', de ? 'Top-8-Quote' : 'Top-8 rate'))}</th>
+                            <th class="ds-num">${escapeHtml(l('meta.t8ExpCol', de ? 'vs. Feld' : 'vs. field'))}</th>
                         </tr></thead>
                         <tbody>${rows}</tbody>
                     </table>
@@ -1242,6 +1254,7 @@
             // vertically on mobile via CSS.
             // ============================================================
             let overallTop8Html = '';
+            let fieldConv = null;   // Feld-Durchschnitt für die Kennzahl-Kachel
             try {
                 const t8resp = await fetch(`${BASE_PATH}online_tournament_top8_decks.csv?t=${timestamp}`);
                 if (t8resp.ok) {
@@ -1267,6 +1280,7 @@
                     // get no width at all. It also wants a different ranking
                     // — the point is the decks that do NOT lead on count.
                     const conv = computeConversionPerformance(t8rows);
+                    fieldConv = conv;
                     // Ranked among decks with a usable sample. Shrinkage
                     // stops a 2-entry deck from topping the list, but it
                     // cannot make one INFORMATIVE: unfiltered, six of the
@@ -1282,26 +1296,31 @@
                     // into innerHTML, so apostrophes in "N's Zoroark" or
                     // "Cynthia's Garchomp" must turn into &#39; and not
                     // a backslash-escaped \' the way escapeJsStr emits.
+                    // Datentabelle aus components.css: eine Klasse, keine
+                    // Spaltenbreiten, keine !important. Die Elternregel
+                    // #currentMetaContent .section table nimmt .ds-table
+                    // per :not() aus, statt dass hier dagegen
+                    // angeschrieben wird.
                     const renderRow = (d, i, valueLabel, valueText) => `
                         <tr>
-                            <td class="cm-vt-rank">${i + 1}</td>
-                            <td class="cm-vt-name">${escapeHtml(d.name)}</td>
-                            <td class="cm-vt-value" title="${escapeHtml(valueLabel)}">${valueText}</td>
+                            <td class="ds-rank">${i + 1}</td>
+                            <td>${escapeHtml(d.name)}</td>
+                            <td class="ds-num" title="${escapeHtml(valueLabel)}">${valueText}</td>
                         </tr>`;
                     overallTop8Html = `
                         <div class="cm-vs-top8-row">
-                            <div class="cm-vs-top8-block">
-                                <h3>🌐 ${getLang() === 'de' ? 'Wie oft gespielt' : 'Overall (brought share)'}</h3>
-                                <table class="cm-vs-top8-table">
-                                    <thead><tr><th>#</th><th>Deck</th><th>${getLang() === 'de' ? 'Anteil' : 'Share'}</th></tr></thead>
-                                    <tbody>${overallTop.map((d, i) => renderRow(d, i, 'brought share', d.broughtPct.toFixed(1) + '%')).join('')}</tbody>
+                            <div class="ds-panel">
+                                <h3 class="ds-label">🌐 ${getLang() === 'de' ? 'Wie oft gespielt' : 'Overall (brought share)'}</h3>
+                                <table class="ds-table">
+                                    <thead><tr><th class="ds-rank">#</th><th>Deck</th><th class="ds-num">${getLang() === 'de' ? 'Anteil' : 'Share'}</th></tr></thead>
+                                    <tbody>${overallTop.map((d, i) => renderRow(d, i, 'brought share', fmtPct(d.broughtPct))).join('')}</tbody>
                                 </table>
                             </div>
-                            <div class="cm-vs-top8-block">
-                                <h3>🏆 ${getLang() === 'de' ? 'Wie oft Top-8 erreicht' : 'Top-8 (conversion)'}</h3>
-                                <table class="cm-vs-top8-table">
-                                    <thead><tr><th>#</th><th>Deck</th><th>Top-8</th></tr></thead>
-                                    <tbody>${top8Top.map((d, i) => renderRow(d, i, 'top-8 conversion', d.top8ConvPct.toFixed(1) + '%')).join('')}</tbody>
+                            <div class="ds-panel">
+                                <h3 class="ds-label">🏆 ${getLang() === 'de' ? 'Wie oft Top-8 erreicht' : 'Top-8 (conversion)'}</h3>
+                                <table class="ds-table">
+                                    <thead><tr><th class="ds-rank">#</th><th>Deck</th><th class="ds-num">Top-8</th></tr></thead>
+                                    <tbody>${top8Top.map((d, i) => renderRow(d, i, 'top-8 conversion', fmtPct(d.top8ConvPct))).join('')}</tbody>
                                 </table>
                             </div>
                         </div>
@@ -1394,14 +1413,31 @@
             // ============================================================
             const totalDecks   = normalizedDecks.length;
             const totalEntries = normalizedDecks.reduce((s, d) => s + (d.new_count || 0), 0);
+            // Die Datenbasis als Kennzahl-Kacheln statt als Fließtextzeile:
+            // dieselben Zahlen, aber lesbar, ohne den Satz zu entziffern.
+            // Drei Kacheln aus components.css, keine eigene Regel.
+            const deDS = getLang() === 'de';
+            const statTile = (label, value, unit, context) => `
+                <div class="ds-stat">
+                    <span class="ds-stat-label">${escapeHtml(label)}</span>
+                    <span class="ds-stat-value">${value}${unit ? `<span class="ds-stat-unit">${unit}</span>` : ''}</span>
+                    <span class="ds-stat-context">${escapeHtml(context)}</span>
+                </div>`;
             const dataSourceHtml = `
-                <div class="tier-data-source">
-                    <span class="tier-data-source-icon">📊</span>
-                    <span class="tier-data-source-text">
-                        ${getLang() === 'de'
-                            ? `Datenbasis: <strong>${totalEntries.toLocaleString()}</strong> Decks aus <strong>${totalDecks}</strong> Archetypen (Limitless Online, aktueller Stand)`
-                            : `Data: <strong>${totalEntries.toLocaleString()}</strong> deck entries across <strong>${totalDecks}</strong> archetypes (Limitless Online, current snapshot)`}
-                    </span>
+                <div class="ds-stat-row">
+                    ${statTile(deDS ? 'Decks im Feld' : 'Decks in the field',
+                        totalEntries.toLocaleString(deDS ? 'de-DE' : 'en-US'), '',
+                        deDS ? 'Limitless Online, aktueller Stand' : 'Limitless Online, current snapshot')}
+                    ${statTile(deDS ? 'Archetypen' : 'Archetypes',
+                        String(totalDecks), '',
+                        deDS ? 'mindestens ein gemeldetes Deck' : 'at least one reported deck')}
+                    ${fieldConv && fieldConv.expected > 0
+                        ? statTile(deDS ? 'Feld-Durchschnitt' : 'Field average',
+                            fmtPct(fieldConv.expected * 100, 2), '',
+                            deDS
+                                ? `Top-8-Quote über ${fmtNumDS(fieldConv.totalBrought)} gewichtete Antritte`
+                                : `top-8 rate over ${fmtNumDS(fieldConv.totalBrought)} weighted entries`)
+                        : ''}
                 </div>`;
 
             let html = heroHtml + dataSourceHtml + filterHtml + overallTop8Html + moversHtml + '<div style="margin-bottom: 30px;">';

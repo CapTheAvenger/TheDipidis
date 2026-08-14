@@ -67,6 +67,7 @@ describe('tokens.css ist der Vorrat', () => {
     });
 
     it('führt genau sechs Schriftgrößen plus das Label', () => {
+        // Größen kennt nur der helle Satz — der dunkle ändert Farben.
         const sizes = ['--fs-xs', '--fs-sm', '--fs-md', '--fs-lg', '--fs-xl', '--fs-hero'];
         sizes.forEach(v => assert.match(TOKENS, new RegExp(`${v}:`), `${v} fehlt`));
         assert.match(TOKENS, /--lbl:/);
@@ -84,8 +85,11 @@ describe('tokens.css ist der Vorrat', () => {
     });
 
     it('führt drei Radien und zwei Schatten, nicht mehr', () => {
-        assert.equal((TOKENS.match(/--r-[a-z]+:/g) || []).length, 3);
-        assert.equal((TOKENS.match(/--e-\d:/g) || []).length, 2);
+        // Der dunkle Satz definiert dieselben Namen ein zweites Mal —
+        // gezählt wird deshalb nur der helle Block.
+        const lightOnly = TOKENS.slice(0, TOKENS.indexOf(':root[data-theme="dark"]'));
+        assert.equal((lightOnly.match(/--r-[a-z]+:/g) || []).length, 3);
+        assert.equal((lightOnly.match(/--e-\d:/g) || []).length, 2);
     });
 
     it('führt Flächen, Text, Marke und die divergierende Skala', () => {
@@ -107,7 +111,8 @@ describe('tokens.css ist der Vorrat', () => {
     it('enthält keine Komponenten, nur Werte', () => {
         // Alles außerhalb von :root wäre eine Komponente — die gehören ab
         // Phase 1 nach components.css.
-        const outside = stripComments(TOKENS).replace(/:root\s*\{[\s\S]*?\n\}/g, '').trim();
+        const outside = stripComments(TOKENS)
+            .replace(/:root(\[data-theme="dark"\])?\s*\{[\s\S]*?\n\}/g, '').trim();
         assert.equal(outside, '', `tokens.css enthält Regeln außerhalb von :root: ${outside.slice(0, 80)}`);
     });
 });

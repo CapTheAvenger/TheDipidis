@@ -1,0 +1,95 @@
+/* tokens.css — der gesamte erlaubte Vorrat an Größen, Abständen, Radien,
+ * Schatten und Farben. Erste eingebundene CSS-Datei, vor styles.css.
+ *
+ * Warum diese Datei existiert, in Zahlen (gemessen am 14.08.2026 über
+ * css/*.css, 38.629 Zeilen):
+ *
+ *     verschiedene font-size-Werte     225
+ *     verschiedene border-radius-Werte  74
+ *     verschiedene Hex-Farben          752
+ *     box-shadow-Deklarationen         484
+ *     !important                     3.392
+ *
+ * Mit 752 Farben und 225 Schriftgrößen kann keine Seite ruhig wirken,
+ * egal wie viel Sorgfalt in die einzelne Ansicht fließt. Silph Scope und
+ * poke_hive sehen nicht wegen hübscherer Farben besser aus, sondern weil
+ * dort jede Zahl aus demselben kleinen Vorrat gebaut ist.
+ *
+ * Ab hier gilt: neue Regeln benutzen nur noch Werte aus dieser Datei.
+ * Die alten 752 Farben verschwinden nicht auf einmal — jede Datei, die
+ * in einer Phase ohnehin angefasst wird, verlässt sie mit weniger
+ * Sonderwerten und weniger !important als vorher (Test:
+ * tests/unit/test-design-tokens.js, der Zähler darf nie steigen).
+ *
+ * Absichtlich NICHT hier: Komponenten. Die stehen ab Phase 1 in
+ * css/components.css und bestehen ausschließlich aus diesen Tokens.
+ */
+:root {
+    /* ── Typografie: sechs Stufen, mehr gibt es nicht ─────────────── */
+    --fs-xs: 11px;      /* Tabellenzusatz, n=, Fußnoten */
+    --fs-sm: 12px;      /* Grundgröße aller Datenansichten */
+    --fs-md: 14px;      /* Fließtext, Listen */
+    --fs-lg: 17px;      /* Abschnittsüberschrift */
+    --fs-xl: 21px;      /* Seitentitel */
+    --fs-hero: 30px;    /* die eine große Zahl auf einer Kachel */
+    --lbl: 10px;        /* Großbuchstaben-Label, siehe --lbl-* unten */
+    --lbl-track: .09em;
+    --lbl-weight: 700;
+
+    /* Ziffern in einer Monospace-Familie: untereinanderstehende Ziffern
+     * beruhigen Tabellen sichtbar, und es kostet keine Webfont-Ladung. */
+    --font-num: ui-monospace, "SF Mono", SFMono-Regular, Consolas, "Liberation Mono", monospace;
+
+    /* ── Abstände: Vielfache von 4 ───────────────────────────────── */
+    --s-1: 4px;
+    --s-2: 8px;
+    --s-3: 12px;
+    --s-4: 16px;
+    --s-6: 24px;
+    --s-8: 32px;
+
+    /* ── Radien: drei ────────────────────────────────────────────── */
+    --r-sm: 6px;        /* Chips, Zellen, kleine Knöpfe */
+    --r-md: 11px;       /* Zeilen, Listeneinträge */
+    --r-lg: 14px;       /* Panels, Karten */
+
+    /* ── Elevation: zwei ─────────────────────────────────────────── */
+    --e-1: 0 1px 3px rgba(16, 24, 40, .06);
+    --e-2: 0 2px 12px rgba(16, 24, 40, .10);
+
+    /* ── Flächen und Text (hell) ─────────────────────────────────── */
+    --surface-0: #f7f8fa;
+    --surface-1: #ffffff;
+    --surface-2: #f1f3f7;
+    --line: #e3e7ef;
+    --line-strong: #c9d0de;
+    --ink: #161a23;
+    --ink-2: #4d5566;
+    --ink-3: #79839a;
+
+    /* ── Marke: sparsam ──────────────────────────────────────────── */
+    --brand: #3B4CCA;
+    --brand-ink: #2a3899;
+    --gold: #FFCB05;
+    --alarm: #E3350D;
+
+    /* ── Datenfarben: EINE divergierende Skala für die ganze Seite ──
+     * Blau ↔ Rot mit grauem Nullpunkt, nie Grün ↔ Rot: Rot-Grün ist die
+     * häufigste Farbsehschwäche, und poke_hive hat genau da eine
+     * Schwäche, die nicht mitkopiert wird. Die Farbe sitzt im Balken
+     * oder als getönter Zellhintergrund — Text trägt immer eine
+     * Textfarbe, damit der Kontrast nie geprüft werden muss. */
+    --dv-pos: #2a78d6;
+    --dv-neg: #e34948;
+    --dv-zero: #9aa3b5;
+    --dv-pos-bg: rgba(42, 120, 214, .12);
+    --dv-neg-bg: rgba(227, 73, 72, .12);
+    --bar-track: #e9edf4;
+    --bar-fill: linear-gradient(90deg, var(--brand), #7b8bf0);
+
+    /* ── Der Signaturstrich ──────────────────────────────────────────
+     * Zwei Pixel Marke-nach-Gold unter der Kopfzeile ersetzen den alten
+     * 82px hohen roten Verlaufsbanner, der auf jeder Ansicht lag und
+     * genau einen Titel trug. Die Side-Quest-Konsole macht das vor. */
+    --rule: linear-gradient(90deg, var(--brand), var(--gold));
+}

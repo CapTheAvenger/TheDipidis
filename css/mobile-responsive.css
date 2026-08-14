@@ -19,13 +19,13 @@
 /* === HEADER & NAVIGATION (Mobile-First) === */
 @media (max-width: 768px) {
     .header {
-        padding: 12px 16px;
-        border-radius: 8px;
-        margin-bottom: 12px;
+        padding: var(--s-2) 0;
+        border-radius: 0;
+        margin-bottom: var(--s-3);
     }
-    
+
     .header h1, .header h2 {
-        font-size: clamp(1.1em, 4vw, 1.5em);
+        font-size: var(--fs-lg);
     }
     
     /* Pokeball Menu - reduce size on mobile */
@@ -1533,8 +1533,13 @@
   .tier-hero-card {
     min-height: 100px !important;
   }
+  /* Die Kopfzeile der Karte (#1 + Deckname) ist absolut gesetzt; das
+     Polster oben ist der Platz, den sie braucht. Ein pauschales
+     padding: 8px hat ihn kassiert — auf 390px stand "5 Varianten"
+     mitten im Decknamen. Ohne !important, weil mobile-responsive.css
+     ohnehin nach city-league.css geladen wird. */
   .tier-hero-card .tier-hero-content {
-    padding: 8px 10px !important;
+    padding: 38px 10px 8px;
   }
   .tier-hero-card .archetype-card-title {
     font-size: 0.9rem !important;

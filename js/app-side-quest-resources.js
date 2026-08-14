@@ -366,6 +366,7 @@
     const VIEW_HOSTS = {
         teams: 'sideQuestTeamsHost',
         usage: 'sideQuestUsageHost',
+        matchups: 'sideQuestMatchupsHost',
         pokedex: 'sideQuestPokedexHost',
         battle: 'sideQuestBattleHost',
         builder: 'sideQuestBuilderHost',
@@ -385,7 +386,7 @@
         // number ~250px down — which is precisely the difference the
         // redesign is about. Restored for every other view.
         const banner = document.querySelector('#side-quest .header');
-        if (banner) banner.hidden = (view === 'usage');
+        if (banner) banner.hidden = (view === 'usage' || view === 'matchups');
         document.querySelectorAll('.side-quest-subtab').forEach(b => {
             b.classList.toggle('is-active', b.getAttribute('data-sq-view') === view);
             b.setAttribute('aria-selected', b.getAttribute('data-sq-view') === view ? 'true' : 'false');
@@ -406,6 +407,8 @@
             window.sideQuestBuilder.activate();
         } else if (view === 'usage' && window.sideQuestUsage) {
             window.sideQuestUsage.activate();
+        } else if (view === 'matchups' && window.sideQuestMatchups) {
+            window.sideQuestMatchups.activate();
         }
     }
 
@@ -417,6 +420,7 @@
         document.querySelectorAll('.side-quest-subtab').forEach(b => {
             const v = b.getAttribute('data-sq-view');
             b.textContent = v === 'usage' ? (uiLang() === 'de' ? 'Nutzung' : 'Usage')
+                          : v === 'matchups' ? 'Matchups'
                           : v === 'resources' ? l.tabResources
                           : v === 'pokedex' ? pokedexLabel
                           : v === 'battle' ? battleLabel

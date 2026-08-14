@@ -179,9 +179,11 @@ describe('scoping', () => {
         assert.match(HTML, /js\/app-side-quest-usage\.js\?/);
     });
 
-    it('the page banner is hidden only for this view', () => {
+    it('the page banner is hidden for the console views', () => {
+        // Usage and Matchups both bring their own 46px header bar; the
+        // remaining subtabs still expect the page banner above them.
         const res = fs.readFileSync(path.join(ROOT, 'js', 'app-side-quest-resources.js'), 'utf8');
-        assert.match(res, /banner\.hidden = \(view === 'usage'\)/);
+        assert.match(res, /banner\.hidden = \(view === 'usage' \|\| view === 'matchups'\)/);
     });
 
     it('redraws on a language switch', () => {

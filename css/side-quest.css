@@ -1539,8 +1539,14 @@
 }
 
 /* ── Side Quest sub-tabs (Teams ↔ Look up) ───────────────────────── */
+/* Sieben Reiter passen auf einem 390px-Display nicht in eine Zeile: die
+   Leiste war 626px breit und hat main.tabs-container waagerecht scrollbar
+   gemacht — die ganze Seite ließ sich verschieben, ohne dass man sah,
+   warum. Umbrechen statt abschneiden, damit kein Reiter unerreichbar wird. */
 .side-quest-subtabs {
     display: inline-flex;
+    flex-wrap: wrap;
+    max-width: 100%;
     gap: 3px;
     padding: 3px;
     margin: 0 0 1rem 0;
@@ -2561,3 +2567,202 @@ body.sqp-d-open { overflow: hidden; }
     text-align: center; overflow-wrap: anywhere;
 }
 @media (max-width: 900px) { .sq-console .sq-mates { grid-template-columns: repeat(4, 1fr); } }
+
+/* ── Champions Matchups + Rechner ──────────────────────────────────
+   Set-Editor, Matchup-Tabelle und Rechner teilen sich die Bausteine der
+   Konsole oben (.sq-panel, .sq-lbl, .sq-seg) — was hier dazukommt, sind
+   nur die drei neuen Motive: das Formularfeld, die Matchup-Zeile und die
+   Schadenszeile.
+
+   Auf dem Handy fällt der Tabellenkopf weg und die Zeile klappt auf zwei
+   Blöcke um; die Spaltenüberschrift steckt dann in data-lbl an der Zelle,
+   damit „du machst" und „du nimmst" nicht verwechselbar werden. Ein
+   Vierspalter mit fester Breite war schon einmal der Grund, warum eine
+   Karte auf 376px in 270px stand. */
+.sq-console .sq-in {
+    width: 100%; background: var(--sq-deep); color: var(--sq-txt);
+    border: .8px solid var(--sq-line); border-radius: 8px;
+    font: inherit; font-size: 12px; padding: 7px 8px; min-height: 36px;
+}
+.sq-console .sq-in:focus-visible { outline: 2px solid var(--sq-accent); outline-offset: 1px; }
+.sq-console .sq-search { margin-bottom: 8px; }
+.sq-console .sq-btn {
+    background: var(--sq-deep); color: var(--sq-txt);
+    border: .8px solid var(--sq-line); border-radius: 8px;
+    font: inherit; font-size: 11.5px; padding: 9px 12px; min-height: 44px;
+    cursor: pointer; width: 100%;
+}
+.sq-console .sq-btn:hover { border-color: var(--sq-accent); }
+.sq-console .sq-back { width: auto; min-height: 32px; padding: 6px 11px; }
+.sq-console .sq-more { margin-top: 9px; }
+
+/* Set-Editor — eine Komponente, beide Seiten */
+.sq-console .sq-set-head {
+    display: flex; align-items: center; gap: 8px; margin-bottom: 9px; flex-wrap: wrap;
+}
+.sq-console .sq-set-img { width: 40px; height: 40px; object-fit: contain; flex: 0 0 40px; }
+.sq-console .sq-set-nm { font-size: 14px; font-weight: 700; }
+.sq-console .sq-set-types { display: flex; gap: 4px; flex-wrap: wrap; }
+.sq-console .sq-mu-type {
+    display: inline-block; padding: 2px 7px; border-radius: 6px;
+    font-size: 9.5px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .04em; color: #fff;
+}
+.sq-console .sq-fld { display: block; margin-bottom: 7px; }
+.sq-console .sq-fld > span {
+    display: block; font-size: 9.5px; text-transform: uppercase; letter-spacing: .08em;
+    color: var(--sq-dim2); margin-bottom: 3px;
+}
+.sq-console .sq-set-moves { display: grid; gap: 5px; margin: 9px 0; }
+.sq-console .sq-sp { margin-top: 10px; }
+.sq-console .sq-sp-head {
+    display: flex; align-items: center; justify-content: space-between;
+    font-size: 9.5px; text-transform: uppercase; letter-spacing: .08em;
+    color: var(--sq-dim2); margin-bottom: 5px;
+}
+.sq-console .sq-sp-tot { font-family: var(--sq-num); letter-spacing: 0; text-transform: none; }
+.sq-console .sq-sp-tot.is-over { color: #ff8f7a; }
+.sq-console .sq-sp-row {
+    display: grid; grid-template-columns: 34px minmax(0, 1fr) 26px;
+    align-items: center; gap: 8px; min-height: 30px;
+}
+.sq-console .sq-sp-lbl { font-size: 9.5px; color: var(--sq-dim2); text-transform: uppercase; }
+.sq-console .sq-sp-val { font-family: var(--sq-num); font-size: 11px; text-align: right; }
+.sq-console .sq-sp-range { width: 100%; accent-color: var(--sq-accent); height: 22px; }
+.sq-console .sq-mu-stats {
+    display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 3px; margin-top: 10px;
+}
+.sq-console .sq-mu-stat {
+    background: var(--sq-deep); border: .8px solid var(--sq-line); border-radius: 6px;
+    padding: 3px 2px; text-align: center; font-family: var(--sq-num);
+}
+.sq-console .sq-mu-stat b { display: block; font-size: 12px; font-weight: 700; }
+.sq-console .sq-mu-stat span { font-size: 8.5px; color: var(--sq-dim2); text-transform: uppercase; }
+
+/* Matchup-Tabelle */
+.sq-console .sq-mu-bar-top { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.sq-console .sq-mu-bar-top .sq-lbl { margin-bottom: 0; }
+.sq-console .sq-mu-type-sel { width: auto; min-width: 118px; }
+.sq-console .sq-mu-sort button { padding: 6px 9px; font-size: 11px; }
+.sq-console .sq-mu-head,
+.sq-console .sq-mu-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1.25fr) 96px minmax(0, 1.7fr) minmax(0, 1.7fr);
+    gap: 9px; align-items: center;
+}
+.sq-console .sq-mu-head {
+    margin: 10px 0 4px; padding: 0 8px;
+    font-size: 9.5px; text-transform: uppercase; letter-spacing: .08em; color: var(--sq-dim2);
+}
+.sq-console .sq-mu-rows { max-height: 72vh; overflow: auto; }
+.sq-console .sq-mu-row {
+    padding: 6px 8px; border-radius: 11px; cursor: pointer; min-height: 44px;
+    border-top: .8px solid rgba(37,48,87,.5);
+}
+.sq-console .sq-mu-row:first-child { border-top: 0; }
+.sq-console .sq-mu-row:hover { background: rgba(255,255,255,.035); }
+.sq-console .sq-mu-row:focus-visible { outline: 2px solid var(--sq-accent); outline-offset: -2px; }
+.sq-console .sq-mu-mon { display: flex; align-items: center; gap: 6px; min-width: 0; }
+.sq-console .sq-mu-img { width: 30px; height: 30px; object-fit: contain; flex: 0 0 30px; }
+.sq-console .sq-mu-nm { font-size: 12px; font-weight: 600; min-width: 0; overflow-wrap: anywhere; }
+.sq-console .sq-mu-nm small { display: block; font-size: 9.5px; color: var(--sq-dim2); font-weight: 500; }
+
+.sq-console .sq-mu-spd {
+    display: flex; align-items: baseline; gap: 5px; font-family: var(--sq-num); font-size: 11px;
+}
+.sq-console .sq-mu-spd b { font-size: 12.5px; }
+.sq-console .sq-mu-spd span {
+    font-family: inherit; font-size: 9.5px; letter-spacing: .02em;
+}
+.sq-console .sq-mu-spd i { font-style: normal; color: var(--sq-dim2); }
+.sq-console .sq-mu-spd.is-fast b, .sq-console .sq-mu-spd.is-fast span { color: #6fdca0; }
+.sq-console .sq-mu-spd.is-slow b, .sq-console .sq-mu-spd.is-slow span { color: #ff8f7a; }
+.sq-console .sq-mu-spd.is-tie b, .sq-console .sq-mu-spd.is-tie span { color: var(--sq-accent2); }
+
+.sq-console .sq-mu-cell { display: block; min-width: 0; }
+.sq-console .sq-mu-cell::before {
+    content: attr(data-lbl); display: none;
+    font-size: 9px; text-transform: uppercase; letter-spacing: .08em; color: var(--sq-dim2);
+}
+.sq-console .sq-mu-mv {
+    display: block; font-size: 11.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.sq-console .sq-mu-eff {
+    font-style: normal; font-family: var(--sq-num); font-size: 9.5px;
+    margin-left: 5px; padding: 1px 4px; border-radius: 4px;
+    background: var(--sq-deep); color: var(--sq-dim);
+}
+.sq-console .sq-mu-eff.is-super { color: #6fdca0; }
+.sq-console .sq-mu-eff.is-resist { color: #ff8f7a; }
+.sq-console .sq-mu-eff.is-immune { color: var(--sq-dim2); }
+.sq-console .sq-mu-bar {
+    display: block; height: 5px; border-radius: 4px; background: var(--sq-deep);
+    overflow: hidden; margin: 3px 0 2px;
+}
+.sq-console .sq-mu-bar i { display: block; height: 100%; border-radius: 4px; }
+.sq-console .sq-mu-bar.is-deal i { background: linear-gradient(90deg, #3f9d72, #6fdca0); }
+.sq-console .sq-mu-bar.is-take i { background: linear-gradient(90deg, #b4483a, #ff8f7a); }
+.sq-console .sq-mu-pct { font-family: var(--sq-num); font-size: 10.5px; color: var(--sq-dim); }
+.sq-console .sq-mu-ko {
+    font-family: var(--sq-num); font-size: 10px; margin-left: 6px; color: var(--sq-accent2);
+}
+.sq-console .sq-mu-ko.is-immune { color: var(--sq-dim2); }
+.sq-console .sq-mu-none { font-size: 11px; color: var(--sq-dim2); }
+
+/* Rechner */
+.sq-console .sq-grid-calc { grid-template-columns: 258px 258px minmax(0, 1fr); }
+@media (max-width: 1100px) { .sq-console .sq-grid-calc { grid-template-columns: 1fr; } }
+.sq-console .sq-speed { font-size: 12.5px; padding: 10px 12px; }
+.sq-console .sq-speed.is-fast { box-shadow: inset 3px 0 0 #6fdca0, var(--sq-shadow); }
+.sq-console .sq-speed.is-slow { box-shadow: inset 3px 0 0 #ff8f7a, var(--sq-shadow); }
+.sq-console .sq-speed.is-tie { box-shadow: inset 3px 0 0 var(--sq-accent2), var(--sq-shadow); }
+.sq-console .sq-calc-head,
+.sq-console .sq-calc-row {
+    display: grid; grid-template-columns: minmax(0, 1.7fr) 74px minmax(60px, 1fr) 86px 74px;
+    gap: 8px; align-items: center;
+}
+.sq-console .sq-calc-head {
+    font-size: 9.5px; text-transform: uppercase; letter-spacing: .08em;
+    color: var(--sq-dim2); margin-bottom: 3px;
+}
+.sq-console .sq-calc-row { padding: 5px 0; border-top: .8px solid rgba(37,48,87,.5); min-height: 38px; }
+.sq-console .sq-calc-mv { font-size: 12px; min-width: 0; }
+.sq-console .sq-calc-mv small { display: block; font-size: 9.5px; color: var(--sq-dim2); }
+.sq-console .sq-calc-meta { display: block; font-style: normal; font-size: 9.5px; color: var(--sq-dim2); }
+.sq-console .sq-calc-num,
+.sq-console .sq-calc-pct { font-family: var(--sq-num); font-size: 11px; }
+.sq-console .sq-calc-pct { color: var(--sq-dim); }
+
+.sq-console .sq-note {
+    margin: 11px 0 0; font-size: 10.5px; line-height: 1.5; color: var(--sq-dim2);
+}
+.sq-console .sq-note b { color: var(--sq-dim); }
+
+@media (max-width: 760px) {
+    .sq-console .sq-mu-head { display: none; }
+    .sq-console .sq-mu-row {
+        grid-template-columns: minmax(0, 1fr) auto; gap: 4px 9px; padding: 9px 8px;
+    }
+    .sq-console .sq-mu-cell { grid-column: 1 / -1; }
+    .sq-console .sq-mu-cell::before { display: block; }
+    .sq-console .sq-mu-rows { max-height: none; }
+    .sq-console .sq-calc-head { display: none; }
+    .sq-console .sq-calc-row {
+        grid-template-columns: minmax(0, 1fr) auto; gap: 3px 8px; padding: 8px 0;
+    }
+    .sq-console .sq-calc-mv { grid-column: 1 / -1; }
+}
+
+/* Handy-Reihenfolge: erst auswählen, dann die Matchups, dann feinjustieren.
+   Der Set-Editor ist der längste Block der Ansicht — stünde er zwischen
+   Auswahl und Tabelle, scrollte man auf dem Handy an den Zahlen vorbei,
+   für die man hergekommen ist. */
+@media (max-width: 1100px) {
+    .sq-console .sq-col-pick  { order: 1; }
+    .sq-console .sq-col-table { order: 2; }
+    .sq-console .sq-col-set   { order: 3; }
+    .sq-console .sq-mu-list { max-height: 40vh; }
+}
+.sq-console .sq-mu-spd { flex-direction: column; align-items: flex-start; gap: 0; line-height: 1.25; }
+.sq-console .sq-mu-spd-n { display: flex; align-items: baseline; gap: 5px; }
+.sq-console .sq-mu-spd-n i::before { content: "vs "; color: var(--sq-dim2); }

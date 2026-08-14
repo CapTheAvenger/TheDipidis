@@ -221,14 +221,24 @@ describe('against the real file', () => {
             'fixture no longer contains a thin deck near the top — re-check the guard');
     });
 
-    it('the biggest sample outranks the loudest small one', () => {
+    it('the loudest small sample is pushed down the smoothed list', () => {
+        // The property, not a threshold: "n > 100 at the top" was a
+        // literal that rots with the weekly data. On 2026-08-14 the
+        // smoothed leader is Toxtricity Box at n = 53 — above the thin
+        // mark, a real signal, and the test went red for no defect.
+        // What has to hold is that shrinkage works: the raw leader is a
+        // two-entry deck at +292 %, and it must not be near the top once
+        // smoothed.
         const { decks } = compute.computeConversionPerformance(rows);
         const byPerf = [...decks].sort((a, b) => b.perfPct - a.perfPct);
         const byRaw = [...decks].sort((a, b) => b.rawPct - a.rawPct);
         assert.ok(byRaw[0].brought < 20,
             'fixture changed: the raw leader is no longer a tiny sample');
-        assert.ok(byPerf[0].brought > 100,
-            `smoothed leader ${byPerf[0].name} has only n=${byPerf[0].brought}`);
+        assert.ok(!byPerf[0].thin && byPerf[0].brought >= CONV_THIN,
+            `smoothed leader ${byPerf[0].name} rests on n=${byPerf[0].brought}`);
+        const rawLeaderSmoothedRank = byPerf.findIndex(d => d.name === byRaw[0].name);
+        assert.ok(rawLeaderSmoothedRank > 10,
+            `the n=${byRaw[0].brought} raw leader still sits at #${rawLeaderSmoothedRank + 1} smoothed`);
     });
 });
 

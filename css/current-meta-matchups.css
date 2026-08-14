@@ -41,11 +41,15 @@
     text-align: center !important;
     font-weight: 700;
 }
+/* Beste ↔ schlechteste Matchups sind eine divergierende Skala und
+ * damit blau ↔ rot. Gefüllte Kopfzeilen tragen weißen Text, deshalb die
+ * dunklen Pole der Palette (--brand, --alarm) statt der helleren
+ * --dv-*-Töne, die für Text auf Weiß gedacht sind. */
 .current-meta-matchups-table.best-matchups th {
-    background: #27ae60 !important;
+    background: var(--brand) !important;
 }
 .current-meta-matchups-table.worst-matchups th {
-    background: #e74c3c !important;
+    background: var(--alarm) !important;
 }
 /* Opponent header sits over text — left-align so it lines up with
  * the deck-name strings below. */
@@ -103,10 +107,10 @@
 }
 
 .current-meta-matchups-best-title {
-    color: #27ae60;
+    color: var(--dv-pos);
 }
 .current-meta-matchups-worst-title {
-    color: #e74c3c;
+    color: var(--dv-neg);
 }
 
 .current-meta-matchups-grid-container {
@@ -250,23 +254,23 @@
     overflow: hidden;
     box-shadow: 0 2px 10px rgba(0,0,0,0.08);
     margin-top: 0;
-    table-layout: fixed;
+    table-layout: auto;
 }
-/* 3-column climbers/fallers layout (Deck | Rank | Win Rate). Deck
- * gets a generous slice for long names, rank + WR each get ~25% with
- * the change badge stacked under the primary value (see flex rules
- * on the rank-change / positive / negative spans below). */
+/* Climbers/Fallers: Deck bekommt eine großzügige Spalte für lange
+ * Namen, der Rest teilt sich den Platz nach Inhalt.
+ *
+ * Vorher standen hier feste 46 % / 24 % / 30 % für drei Spalten — die
+ * Tabelle rendert aber vier (Deck | Rank | Count | Win Rate). Mit
+ * table-layout: fixed summierten sich die drei Vorgaben auf 100 %, die
+ * vierte Spalte bekam 0 px, und ihr Inhalt stand rechts aus dem
+ * Fenster heraus: bei 1280px endete die Win-Rate-Änderung bei 1301px.
+ * Reproduziert bei 1280 und 1440, auf dem Handy genauso.
+ *
+ * table-layout: auto lässt keine Spalte mehr verhungern, egal wie viele
+ * die Tabelle künftig hat. */
 #currentMetaContent .section table th:first-child,
 #currentMetaContent .section table td:first-child {
-    width: 46%;
-}
-#currentMetaContent .section table th:nth-child(2),
-#currentMetaContent .section table td:nth-child(2) {
-    width: 24%;
-}
-#currentMetaContent .section table th:nth-child(3),
-#currentMetaContent .section table td:nth-child(3) {
-    width: 30%;
+    width: 40%;
 }
 /* Stack the primary value (#12) above the change badge ((▲ 2)) so a
  * narrow column doesn't push the badge half-out of the cell. Same
@@ -279,12 +283,15 @@
     line-height: 1.25;
     padding: 8px 6px;
 }
-#currentMetaContent .section table td:nth-child(2) .rank-change,
-#currentMetaContent .section table td:nth-child(2) .rank-up,
-#currentMetaContent .section table td:nth-child(2) .rank-down,
-#currentMetaContent .section table td:nth-child(3) .positive,
-#currentMetaContent .section table td:nth-child(3) .negative,
-#currentMetaContent .section table td:nth-child(3) .neutral {
+/* Nach Klasse ansprechen, nicht nach Spaltennummer: mit der vierten
+ * Spalte war die Änderungs-Plakette in Spalte 3 und 4 gerutscht und
+ * blieb dort inline stehen — genau der Text, der aus dem Fenster ragte. */
+#currentMetaContent .section table td .rank-change,
+#currentMetaContent .section table td .rank-up,
+#currentMetaContent .section table td .rank-down,
+#currentMetaContent .section table td .positive,
+#currentMetaContent .section table td .negative,
+#currentMetaContent .section table td .neutral {
     display: block;
     margin-top: 3px;
     font-size: 0.82em;
@@ -576,18 +583,21 @@
     font-weight: 700;
     font-size: 0.85em;
 }
+/* Blau ↔ Rot statt Grün ↔ Rot: Rot-Grün ist die häufigste
+ * Farbsehschwäche, und „aufgestiegen" und „abgestiegen" sind für rund
+ * jeden zwölften Mann sonst dieselbe Farbe. Werte aus tokens.css. */
 #currentMetaContent .rank-up {
-    color: #16a34a;
+    color: var(--dv-pos);
 }
 #currentMetaContent .rank-down {
-    color: #dc2626;
+    color: var(--dv-neg);
 }
 #currentMetaContent .positive {
-    color: #27ae60;
+    color: var(--dv-pos);
     font-weight: 700;
 }
 #currentMetaContent .negative {
-    color: #e74c3c;
+    color: var(--dv-neg);
     font-weight: 700;
 }
 

@@ -120,6 +120,30 @@
         // Eine Nachkommastelle, deutsches Komma, ein Leerzeichen vor dem
         // Zeichen — über window.formatPercent, damit dieselbe Zahl auf
         // keiner zweiten Fläche anders aussieht.
+        // Fachbegriffe erklären sich dort, wo die Zahl steht.
+        // Nicht `hint`: renderConversionBlock führt eine lokale Variable
+        // dieses Namens (den Hinweistext unter der Tabelle) und würde den
+        // Helfer überdecken — genau das hat den ganzen Block in den
+        // try/catch laufen lassen und die drei Tabellen verschwinden.
+        const hintTerm = (label, text) => (typeof window.termHint === 'function')
+            ? window.termHint(label, text) : label;
+        const TERMS = {
+            de: {
+                share: 'Wie oft dieses Deck gespielt wurde, gemessen an allen gewichteten Antritten des Zeitraums.',
+                top8: 'Wie oft dieses Deck aus seinen Antritten die Top 8 erreicht hat.',
+                vsField: 'Top-8-Quote im Vergleich zum Feld-Durchschnitt. +50 % heißt: anderthalbmal so oft in den Top 8 wie ein durchschnittliches Deck. Kleine Stichproben werden zum Durchschnitt hin geglättet.',
+                prev: 'Anteil im vorherigen Vergleichszeitraum.',
+                delta: 'Veränderung des Anteils in Prozentpunkten. Gelistet ab 0,4 pp.',
+            },
+            en: {
+                share: 'How often this deck was played, over all weighted entries in the window.',
+                top8: 'How often this deck reached top 8 out of its entries.',
+                vsField: 'Top-8 rate against the field average. +50 % means 1.5× as often in top 8 as an average deck. Small samples are smoothed toward the average.',
+                prev: 'Share in the previous comparison window.',
+                delta: 'Change in share, in percentage points. Listed from 0.4 pp.',
+            },
+        };
+        const term = (key) => TERMS[getLang() === 'de' ? 'de' : 'en'][key];
         const fmtNumDS = (n) => Math.round(Number(n) || 0)
             .toLocaleString(getLang() === 'de' ? 'de-DE' : 'en-US');
         const fmtPct = (v, digits) => (typeof window.formatPercent === 'function')
@@ -173,8 +197,8 @@
                     <table class="ds-table">
                         <thead><tr>
                             <th class="ds-rank">#</th><th>Deck</th>
-                            <th class="ds-num">${escapeHtml(l('meta.t8ExpTop8Col', de ? 'Top-8-Quote' : 'Top-8 rate'))}</th>
-                            <th class="ds-num">${escapeHtml(l('meta.t8ExpCol', de ? 'vs. Feld' : 'vs. field'))}</th>
+                            <th class="ds-num">${hintTerm(l('meta.t8ExpTop8Col', de ? 'Top-8-Quote' : 'Top-8 rate'), term('top8'))}</th>
+                            <th class="ds-num">${hintTerm(l('meta.t8ExpCol', de ? 'vs. Feld' : 'vs. field'), term('vsField'))}</th>
                         </tr></thead>
                         <tbody>${rows}</tbody>
                     </table>
@@ -222,7 +246,7 @@
         function getDeckTier(deck) {
             const shareRaw = deck.share || deck.new_share || deck.new_meta_share || deck.percentage_in_archetype || 0;
             const share = parseLocaleNumber(shareRaw, 0);
-            const winRate = parseFloat(deck.winrate || deck.new_winrate || null);
+            const winRate = parseLocaleNumber(deck.winrate || deck.new_winrate, NaN);
             const countChange = parseInt(deck.count_change || 0);
 
             // Tier 1: Share >= 8%
@@ -1040,13 +1064,20 @@
             if (metaData.length === 0) return;
             
             // Normalisiere alle Decks und sortiere nach Share (absteigend)
+            // parseLocaleNumber, nicht parseFloat: die Vergleichsdatei
+            // schreibt deutsche Dezimalkommas ("7,76"), und parseFloat
+            // schneidet dort ab — aus 7,76 wurde 7, aus 6,04 wurde 6.
+            // Sichtbar war das als "Dragapult 6,0 %" neben 5,88 % in den
+            // Rohdaten und als die ±1,0-Sprünge in Improvers/Decliners,
+            // die aus der Differenz zweier abgeschnittener Ganzzahlen
+            // entstanden.
             const normalizedDecks = metaData.map(deck => ({
                 archetype: deck.deck_name || deck.archetype,
-                share: parseFloat(deck.new_share || 0),
-                new_share: parseFloat(deck.new_share || 0),
-                old_share: parseFloat(deck.old_share || 0),
-                winrate: parseFloat(deck.new_winrate || 0),
-                new_winrate: parseFloat(deck.new_winrate || 0),
+                share: parseLocaleNumber(deck.new_share, 0),
+                new_share: parseLocaleNumber(deck.new_share, 0),
+                old_share: parseLocaleNumber(deck.old_share, 0),
+                winrate: parseLocaleNumber(deck.new_winrate, 0),
+                new_winrate: parseLocaleNumber(deck.new_winrate, 0),
                 count_change: parseInt(deck.count_change || 0),
                 new_count: parseInt(deck.new_count || 0)
             }));
@@ -1135,8 +1166,16 @@
                                 </div>
                                 <div class="tier-hero-meta">${variantCount} ${variantLabel}</div>
                                 <div class="tier-hero-stats">
-                                    <span class="stat-badge" title="${variantCount > 1 ? `Sum across ${variantCount} variants — individual cards in the comparison table below` : `Single variant`}">Share: ${shareText}%${variantCount > 1 ? ` <small class="stat-badge-suffix">(${variantCount}×)</small>` : ''}</span>
-                                    <span class="stat-badge" title="Weighted average winrate">WR: ${winrateText}%</span>
+                                    <span class="stat-badge" title="${variantCount > 1
+                                        ? (getLang() === 'de'
+                                            ? `Summe über ${variantCount} Varianten. Die einzelne Variante steht weiter unten in der Tabelle und ist entsprechend kleiner.`
+                                            : `Sum across ${variantCount} variants — the individual variant is smaller and listed in the table below.`)
+                                        : (getLang() === 'de' ? 'Eine einzelne Variante' : 'Single variant')}">${
+                                        fmtPct(parseFloat(shareText))}${variantCount > 1
+                                            ? ` <small class="stat-badge-suffix">${getLang() === 'de'
+                                                ? `über ${variantCount} Varianten` : `across ${variantCount} variants`}</small>`
+                                            : ''}</span>
+                                    <span class="stat-badge" title="${getLang() === 'de' ? 'Gewichtete durchschnittliche Siegquote' : 'Weighted average winrate'}">WR ${fmtPct(parseFloat(winrateText))}</span>
                                 </div>
                             </div>
                         </div>`;
@@ -1312,21 +1351,26 @@
                             <div class="ds-panel">
                                 <h3 class="ds-label">🌐 ${getLang() === 'de' ? 'Wie oft gespielt' : 'Overall (brought share)'}</h3>
                                 <table class="ds-table">
-                                    <thead><tr><th class="ds-rank">#</th><th>Deck</th><th class="ds-num">${getLang() === 'de' ? 'Anteil' : 'Share'}</th></tr></thead>
+                                    <thead><tr><th class="ds-rank">#</th><th>Deck</th><th class="ds-num">${hintTerm(getLang() === 'de' ? 'Anteil' : 'Share', term('share'))}</th></tr></thead>
                                     <tbody>${overallTop.map((d, i) => renderRow(d, i, 'brought share', fmtPct(d.broughtPct))).join('')}</tbody>
                                 </table>
                             </div>
                             <div class="ds-panel">
                                 <h3 class="ds-label">🏆 ${getLang() === 'de' ? 'Wie oft Top-8 erreicht' : 'Top-8 (conversion)'}</h3>
                                 <table class="ds-table">
-                                    <thead><tr><th class="ds-rank">#</th><th>Deck</th><th class="ds-num">Top-8</th></tr></thead>
+                                    <thead><tr><th class="ds-rank">#</th><th>Deck</th><th class="ds-num">${hintTerm('Top-8', term('top8'))}</th></tr></thead>
                                     <tbody>${top8Top.map((d, i) => renderRow(d, i, 'top-8 conversion', fmtPct(d.top8ConvPct))).join('')}</tbody>
                                 </table>
                             </div>
                         </div>
                         ${renderConversionBlock(conv, convTop)}`;
                 }
-            } catch (_e) { /* CSV missing — Predictor 2.0 not deployed yet */ }
+            } catch (_e) {
+                // Nicht mehr stumm: derselbe try/catch hat gerade drei
+                // Tabellen verschluckt, weil ein Helfer überdeckt war.
+                // Fehlt die CSV, ist die Warnung genauso richtig.
+                console.warn('Top-8-Block konnte nicht gerendert werden:', _e && _e.message);
+            }
 
             // ============================================================
             // Performance Improvers / Decliners (TrainerHill pattern).
@@ -1358,15 +1402,15 @@
                                     .slice(0, 5);
 
             const renderMoverRow = (m, sign) => {
-                const sharePct = m.share.toFixed(1) + '%';
-                const oldPct   = m.oldShare.toFixed(1) + '%';
-                const delta    = (sign === 'up' ? '+' : '') + m.delta.toFixed(1) + '%';
-                const cls      = sign === 'up' ? 'tier-mover-up' : 'tier-mover-down';
+                const delta = (typeof window.formatPercentSigned === 'function')
+                    ? window.formatPercentSigned(m.delta)
+                    : (m.delta >= 0 ? '+' : '') + m.delta.toFixed(1) + '%';
+                const cls = sign === 'up' ? 'tier-mover-up' : 'tier-mover-down';
                 return `<tr>
-                    <td class="tier-mover-name">${escapeHtml(m.archetype)}</td>
-                    <td class="tier-mover-share">${sharePct}</td>
-                    <td class="tier-mover-prev">${oldPct}</td>
-                    <td class="tier-mover-delta ${cls}">${delta}</td>
+                    <td>${escapeHtml(m.archetype)}</td>
+                    <td class="ds-num">${fmtPct(m.share)}</td>
+                    <td class="ds-num">${fmtPct(m.oldShare)}</td>
+                    <td class="ds-num tier-mover-delta ${cls}">${delta}</td>
                 </tr>`;
             };
 
@@ -1379,12 +1423,16 @@
                     <span class="tier-movers-empty-icon">📋</span>
                     <span>Zu wenig Bewegung diese Woche (≥ 0,4 pp Veränderung).</span>
                 </div>`;
+            const deMv = getLang() === 'de';
             const renderMoverBlock = (title, list, sign) => `
-                <div class="tier-movers-block tier-movers-${sign === 'up' ? 'improvers' : 'decliners'}">
-                    <h3>${title}</h3>
+                <div class="ds-panel tier-movers-block tier-movers-${sign === 'up' ? 'improvers' : 'decliners'}">
+                    <h3 class="ds-label">${title}</h3>
                     ${list.length > 0
-                      ? `<table class="tier-movers-table">
-                            <thead><tr><th>Deck</th><th>Share</th><th>Prev</th><th>Δ</th></tr></thead>
+                      ? `<table class="ds-table">
+                            <thead><tr><th>Deck</th>
+                                <th class="ds-num">${hintTerm(deMv ? 'Anteil' : 'Share', term('share'))}</th>
+                                <th class="ds-num">${hintTerm(deMv ? 'Vorher' : 'Prev', term('prev'))}</th>
+                                <th class="ds-num">${hintTerm('Δ', term('delta'))}</th></tr></thead>
                             <tbody>${list.map(m => renderMoverRow(m, sign)).join('')}</tbody>
                          </table>`
                       : emptyMoversNotice}
@@ -1477,9 +1525,9 @@
                 decks.forEach(deck => {
                     const archetypeName = deck.archetype;
                     
-                    const share = parseFloat(deck.share || deck.new_share || 0);
-                    const oldShare = parseFloat(deck.old_share || 0);
-                    const winRate = parseFloat(deck.winrate || deck.new_winrate || 0);
+                    const share = parseLocaleNumber(deck.share || deck.new_share, 0);
+                    const oldShare = parseLocaleNumber(deck.old_share, 0);
+                    const winRate = parseLocaleNumber(deck.winrate || deck.new_winrate, 0);
                     const powerScore = calculatePowerScore(share, winRate);
                     
                     // Get archetype image

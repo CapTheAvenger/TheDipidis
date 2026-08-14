@@ -248,6 +248,24 @@
 .ds-chip.is-pos { color: var(--dv-pos); border-color: var(--dv-pos); }
 .ds-chip.is-neg { color: var(--dv-neg); border-color: var(--dv-neg); }
 
+/* ── Fachbegriff mit Erklärung an Ort und Stelle ─────────────────
+   Der Text steht dort, wo die Zahl steht, statt auf einer Hilfeseite —
+   dort liest ihn niemand. Der Punkt hinter dem Wort ist absichtlich
+   klein: er soll auffindbar sein, nicht laut. */
+.ds-term {
+    border-bottom: 1px dotted var(--line-strong);
+    cursor: help;
+    text-decoration: none;
+}
+.ds-term::after {
+    content: "?";
+    margin-left: 2px;
+    font-size: var(--fs-xs);
+    vertical-align: super;
+    color: var(--ink-3);
+    font-weight: 700;
+}
+
 /* ── Fußnote ─────────────────────────────────────────────────────── */
 .ds-note {
     margin: var(--s-2) 0 0;
@@ -255,3 +273,17 @@
     line-height: 1.5;
     color: var(--ink-3);
 }
+
+/* ── Ebene 1: die Antwort auf der Einstiegsseite ──────────────────
+   Kein neuer Baustein, nur die Anordnung: Überschrift, ein Satz
+   Klartext, die Kacheln, die Fußnote. Die Kacheln selbst sind .ds-stat. */
+.meta-hub-answer {
+    margin: 0 0 var(--s-6);
+}
+.meta-hub-answer-line {
+    margin: 0 0 var(--s-3);
+    font-size: var(--fs-md);
+    line-height: 1.5;
+    color: var(--ink-2);
+}
+.meta-hub-answer-line strong { color: var(--ink); }

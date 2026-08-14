@@ -1368,6 +1368,26 @@ function formatPercentSigned(value, digits = 1) {
 }
 window.formatPercentSigned = formatPercentSigned;
 
+/**
+ * A term with its explanation where the number is.
+ *
+ * "Conversion Performance", "Share", "Tier" — the site already carried
+ * these texts, but in a separate "What do the symbols mean?" block at
+ * the bottom of the page, which is exactly where nobody reads them.
+ * This puts the sentence on the word itself.
+ *
+ * Returns markup, so it is the caller's job to pass trusted labels.
+ * The explanation is escaped because it ends up in a title attribute.
+ */
+function termHint(label, explanation) {
+    const esc = (s) => String(s == null ? '' : s)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    if (!explanation) return esc(label);
+    return `<span class="ds-term" title="${esc(explanation)}" tabindex="0">${esc(label)}</span>`;
+}
+window.termHint = termHint;
+
 // ============================================================================
 // Conversion Performance — how much more often a deck makes the cut
 // than the field does. Lives here rather than in app-tier-meta.js

@@ -2,6 +2,21 @@ tournament_id,tournament_date,format,player_count,winner_archetype,winner_winrat
 6a2a2ad82d97f3b0c2613980,2026-07-01,CRI,109,Dragapult Dusknoir,25.0
 6a42564583fd320299bd3d12,2026-07-01,CRI,114,Slowking,27.0
 6a427cb383fd320299bd3ed1,2026-06-30,CRI,116,Slowking,18.0
+6a7a97fa2b308b6067b50d7f,2026-08-13,PBL,127,Dhelmise Banette,27.0
+6a7a21622b308b6067b5051d,2026-08-13,PBL,169,Dragapult,30.0
+6a76139d2b308b6067b4cb68,2026-08-13,PBL,265,Clefairy Ogerpon,36.0
+6a7aa8e92b308b6067b50e60,2026-08-13,PBL,150,Dragapult Dusknoir,28.0
+6a7c79d22b308b6067b52012,2026-08-13,PBL,105,Slowking,15.0
+6a74bc282b308b6067b4bc97,2026-08-12,PBL,128,Raging Bolt Ogerpon,21.0
+6a7a21672b308b6067b5051e,2026-08-12,PBL,115,Slowking,28.0
+6a73b30fcdc0391d7fa5dbed,2026-08-12,PBL,162,Dhelmise Banette,30.0
+6a79a7f42b308b6067b4feed,2026-08-12,PBL,152,Dragapult,31.0
+6a755afbcdc0391d7fa5f0e9,2026-08-12,PBL,112,Festival Lead,21.0
+6a78d6b82b308b6067b4f569,2026-08-11,PBL,206,Raging Bolt Ogerpon,21.0
+6a759dfb2b308b6067b4c640,2026-08-11,PBL,156,Clefairy Ogerpon,24.0
+6a7a19cf2b308b6067b5047b,2026-08-11,PBL,107,Toxtricity Box,30.0
+6a78b14acdc0391d7fa61cc9,2026-08-11,PBL,174,Arboliva Ogerpon,33.0
+6a5a513152c24ac2da6446d5,2026-08-11,PBL,128,Grimmsnarl Froslass,21.0
 6a70e60ecdc0391d7fa5b8b7,2026-08-10,PBL,234,Dragapult,21.0
 6a791a40cdc0391d7fa6237a,2026-08-10,PBL,237,Dhelmise Banette,24.0
 6a7601bdcdc0391d7fa5f5bf,2026-08-10,PBL,170,Slowking,31.0
@@ -86,5 +101,3 @@ jimothy,2026-07-25,PBL,504,Grimmsnarl Froslass,39.0
 6a5b622f937230b102d3e577,2026-07-19,PBL,120,Dhelmise Banette,18.0
 6a4ae98265724db9ded3da75,2026-07-18,PBL,145,Dragapult Blaziken,36.0
 yes-pitch-black-is-legal,2026-07-18,PBL,416,Dragapult Blaziken,34.0
-6a511572063cb29d318e8c3f,2026-07-16,PBL,104,Alakazam Dudunsparce,33.0
-6a53a6d63614df026848d798,2026-07-14,PBL,151,Slowking,21.0

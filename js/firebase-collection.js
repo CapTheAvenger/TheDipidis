@@ -5537,8 +5537,35 @@ async function dexImportExecute(mode) {
     const user = typeof auth !== 'undefined' ? auth.currentUser : null;
     if (!user) { showNotification(getLang()==='de' ? 'Bitte zuerst einloggen' : 'Please log in first', 'error'); return; }
 
+    const de = getLang() === 'de';
+
+    // Schreibt die VOLLE Sammlung (update(), kein merge). Solange die
+    // Nutzerdaten noch nicht aus Firestore geladen sind, ist window.userCollection
+    // leer — dann würde selbst "Abgleichen" die echte Sammlung serverseitig durch
+    // die Importdatei ersetzen. Passiert bei langsamer Verbindung, nach einem
+    // Ladefehler oder wenn direkt nach dem Öffnen importiert wird.
+    // wishlist-bot-import.js:430 macht diese Prüfung bereits vor.
+    if (window.userDataLoaded !== true) {
+        showNotification(de
+            ? 'Deine Sammlung wird noch geladen — bitte einen Moment warten und erneut importieren.'
+            : 'Your collection is still loading — please wait a moment and import again.', 'error');
+        return;
+    }
+
+    // "Ersetzen" löscht alles, was nicht in der Datei steht. clearCollection()
+    // fragt für denselben Effekt nach; dieser Knopf tat es nicht, und beide
+    // stehen im selben Dialog nebeneinander.
+    if (mode === 'replace') {
+        const vorher = (window.userCollection && window.userCollection.size) || 0;
+        const nachher = matched.length;
+        const frage = de
+            ? `Sammlung komplett ersetzen?\n\n${vorher} Karten in deiner Sammlung werden gelöscht.\n${nachher} Karten kommen aus der Datei.\n\nDas lässt sich nicht rückgängig machen.`
+            : `Replace the entire collection?\n\n${vorher} cards in your collection will be deleted.\n${nachher} cards come from the file.\n\nThis cannot be undone.`;
+        if (!confirm(frage)) return;
+    }
+
     modal.remove();
-    showNotification(getLang()==='de' ? 'Importiere Kollektion…' : 'Importing collection…', 'info');
+    showNotification(de ? 'Importiere Kollektion…' : 'Importing collection…', 'info');
 
     try {
         // Build the new in-memory state

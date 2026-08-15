@@ -139,9 +139,41 @@
                     brought,
                 };
             })
-            .sort((a, b) => b.sharePct - a.sharePct)
-            .slice(0, 3);
-        return { conv, top, totalBrought };
+            .sort((a, b) => b.sharePct - a.sharePct);
+
+        // Das Deck aus der Überschrift steht als ERSTE Kachel. Vorher waren die
+        // Kacheln rein nach Anteil sortiert, während die Überschrift nach Erfolg
+        // wählte — unter "Was ist gerade stark?" stand dann als erstes der
+        // schwächste Performer, rot eingefasst. Headline und Kacheln
+        // widersprachen sich sichtbar.
+        // Bewusst inline statt als Helfer: answerModel wird in
+        // tests/unit/test-design-depth.js isoliert per new Function() extrahiert
+        // und muss deshalb ohne äußeren Gültigkeitsbereich laufen.
+        // Mindeststichprobe fuer die Ueberschrift. Vorher reichte brought >= 20
+        // plus "nicht duenn" (< CONV_THIN_N = 50), faktisch also 50 Antritte —
+        // damit wurde Toxtricity Box mit 53 Antritten (8 Cuts) zum "staerksten
+        // Deck" gekuert, bei einem 95-%-Intervall von rund +-10 Prozentpunkten.
+        const HEADLINE_MIN_BROUGHT = 100;
+        const headline = (conv.decks || [])
+            .filter(d => !d.thin && d.brought >= HEADLINE_MIN_BROUGHT)
+            .sort((a, b) => b.perfPct - a.perfPct)[0] || null;
+        const ordered = headline
+            ? [
+                Object.assign(
+                    top.find(d => d.name === headline.name) || {
+                        name: headline.name,
+                        sharePct: (headline.brought / totalBrought) * 100,
+                        convPct: (headline.top8 / headline.brought) * 100,
+                        perfPct: headline.perfPct,
+                        brought: headline.brought,
+                    },
+                    { role: 'best' }
+                ),
+                ...top.filter(d => d.name !== headline.name).map(d => Object.assign({}, d, { role: 'played' })),
+              ]
+            : top.map(d => Object.assign({}, d, { role: 'played' }));
+
+        return { conv, top: ordered.slice(0, 3), headline, totalBrought };
     }
 
     // Ein Satz Klartext über dem Zahlenblock. Er nennt das Deck, das am
@@ -149,15 +181,15 @@
     // "am häufigsten" und "am erfolgreichsten" sind zwei verschiedene
     // Fragen, und die zweite ist die interessantere.
     function answerSentence(model) {
-        const listed = model.conv.decks
-            .filter(d => !d.thin && d.brought >= 20)
-            .sort((a, b) => b.perfPct - a.perfPct);
-        const best = listed[0];
+        const best = model.headline;
         if (!best) return '';
         const de = isDe();
+        // Die Stichprobe steht im Satz. Eine Quote ohne n ist eine Behauptung,
+        // mit n ist sie eine Aussage.
+        const n = Math.round(best.brought).toLocaleString(de ? 'de-DE' : 'en-US');
         return de
-            ? `<strong>${escapeHtml(best.name)}</strong> ist derzeit das erfolgreichste Deck: ${fmtPct((best.top8 / best.brought) * 100)} der Antritte erreichen die Top 8 — ${fmtSigned(best.perfPct, 0)} gegenüber dem Feld-Durchschnitt von ${fmtPct(model.conv.expected * 100, 2)}.`
-            : `<strong>${escapeHtml(best.name)}</strong> is the strongest deck right now: ${fmtPct((best.top8 / best.brought) * 100)} of its entries reach top 8 — ${fmtSigned(best.perfPct, 0)} against the field average of ${fmtPct(model.conv.expected * 100, 2)}.`;
+            ? `<strong>${escapeHtml(best.name)}</strong> ist derzeit das erfolgreichste Deck: ${fmtPct((best.top8 / best.brought) * 100)} von ${n} Antritten erreichen die Top 8 — ${fmtSigned(best.perfPct, 0)} gegenüber dem Feld-Durchschnitt von ${fmtPct(model.conv.expected * 100, 2)}.`
+            : `<strong>${escapeHtml(best.name)}</strong> is the strongest deck right now: ${fmtPct((best.top8 / best.brought) * 100)} of ${n} entries reach top 8 — ${fmtSigned(best.perfPct, 0)} against the field average of ${fmtPct(model.conv.expected * 100, 2)}.`;
     }
 
     function answerHtml(model) {
@@ -166,8 +198,16 @@
         const tile = (d) => {
             const perf = d.perfPct == null ? '' : fmtSigned(d.perfPct, 0);
             const cls = d.perfPct == null ? '' : (d.perfPct >= 0 ? ' is-pos' : ' is-neg');
+            // Jede Kachel sagt, WARUM sie hier steht. Ohne diese Zeile las sich
+            // die Reihe als "die drei stärksten Decks", obwohl sie nach Anteil
+            // sortiert ist — und die erste Kachel konnte der schwächste
+            // Performer sein.
+            const role = d.role === 'best'
+                ? (de ? 'Erfolgreichstes' : 'Most successful')
+                : (de ? 'Meistgespielt' : 'Most played');
             return `
                 <div class="ds-stat${cls}">
+                    <span class="ds-stat-role">${role}</span>
                     <span class="ds-stat-label">${escapeHtml(d.name)}</span>
                     <span class="ds-stat-value">${fmtPct(d.sharePct)}</span>
                     <span class="ds-stat-context">${de ? 'des Feldes' : 'of the field'} · ${

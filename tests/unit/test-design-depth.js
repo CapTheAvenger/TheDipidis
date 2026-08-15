@@ -118,7 +118,13 @@ describe('Ebene 1 auf der Einstiegsseite', () => {
         assert.equal(model([]), null);
     });
 
-    it('nimmt die drei meistgespielten Decks', () => {
+    it('stellt das Deck aus der Überschrift voran, dann die meistgespielten', () => {
+        // Geändert am 15.08.2026 nach dem Audit: vorher war die Reihe rein nach
+        // Anteil sortiert, während die Überschrift nach Erfolg wählte. Unter
+        // "Was ist gerade stark?" stand dann als erstes der schwächste
+        // Performer, rot eingefasst — alle sieben Prüfer meldeten das unabhängig
+        // als Widerspruch. Jetzt führt das Deck aus dem Satz die Reihe an, und
+        // jede Kachel sagt über ihre Rolle, warum sie dort steht.
         const stubWindow = {
             parseLocaleNumber,
             computeConversionPerformance: () => ({
@@ -136,9 +142,30 @@ describe('Ebene 1 auf der Einstiegsseite', () => {
             { deck_name: 'D', total_brought_weighted: '50', top8_conv_rate: '0.04' },
         ];
         const out = model(rows);
-        assert.deepEqual(out.top.map(d => d.name), ['B', 'C', 'A']);
-        assert.equal(Math.round(out.top[0].sharePct), 46);   // 300 von 650
+        assert.equal(out.headline.name, 'A');
+        assert.deepEqual(out.top.map(d => d.name), ['A', 'B', 'C']);
+        assert.deepEqual(out.top.map(d => d.role), ['best', 'played', 'played']);
         assert.equal(out.top.length, 3);
+    });
+
+    it('kürt kein Deck unter 100 Antritten zum stärksten', () => {
+        // Der Auslöser: Toxtricity Box trug die Überschrift mit 53 Antritten
+        // (8 Cuts) — 95-%-Intervall rund ±10 Prozentpunkte.
+        const stubWindow = {
+            parseLocaleNumber,
+            computeConversionPerformance: () => ({
+                expected: 0.06,
+                decks: [{ name: 'Klein', perfPct: 80, brought: 53, top8: 8, thin: false }],
+            }),
+        };
+        const model = new Function('window',
+            HUB.match(/function answerModel\(rows\) \{[\s\S]*?\n    \}/)[0] +
+            '\nreturn answerModel;')(stubWindow);
+        const out = model([
+            { deck_name: 'Klein', total_brought_weighted: '53', top8_conv_rate: '0.15' },
+            { deck_name: 'Gross', total_brought_weighted: '400', top8_conv_rate: '0.07' },
+        ]);
+        assert.equal(out.headline, null, 'ein Deck mit n=53 darf die Überschrift nicht tragen');
     });
 
     it('der Satz nennt das erfolgreichste, nicht das häufigste Deck', () => {

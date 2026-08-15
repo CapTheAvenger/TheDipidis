@@ -941,16 +941,36 @@ async function loadUserDecks(userId, opts) {
   }
 }
 
+// Every per-user global lives in this table together with how to build a fresh
+// empty value. clearUserData() walks the table instead of naming each global by
+// hand — the hand-written version silently forgot the three tradelist globals,
+// so after a sign-out the cards tab still showed the PREVIOUS user's trade
+// markers (js/app-cards-db.js:2837 reads window.userTradelist directly).
+// Adding a new per-user global? Add it here and the reset follows automatically.
+const USER_STATE_SLOTS = {
+  userProfile:            () => null,
+  userCollection:         () => new Set(),
+  userCollectionCounts:   () => new Map(),
+  userWishlist:           () => new Set(),
+  userWishlistCounts:     () => new Map(),
+  userWishlistMaxPrices:  () => new Map(),
+  userTradelist:          () => new Set(),
+  userTradelistCounts:    () => new Map(),
+  userTradelistMinPrices: () => new Map(),
+  userDecks:              () => [],
+  deckFolders:            () => [],
+};
+window.USER_STATE_SLOTS = USER_STATE_SLOTS;
+
 function clearUserData() {
-  window.userProfile          = null;
-  window.userCollection       = new Set();
-  window.userCollectionCounts = new Map();
-  window.userWishlist         = new Set();
-  window.userWishlistCounts  = new Map();
-  window.userWishlistMaxPrices = new Map();
-  window.userDecks            = [];
-  window.deckFolders          = [];
+  for (const key of Object.keys(USER_STATE_SLOTS)) {
+    window[key] = USER_STATE_SLOTS[key]();
+  }
+  // Not part of the table: it is a load-status flag, not user content, and the
+  // import guard in firebase-collection.js keys off it.
+  window.userDataLoaded = false;
 }
+window.clearUserData = clearUserData;
 
 function syncAuthUiFromPendingOrCurrentState() {
   // Prefer queued auth state from firebase-config.js callback if handlers were not ready yet.

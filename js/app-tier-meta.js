@@ -1305,12 +1305,23 @@
                         return {
                             name: r.deck_name,
                             broughtPct: (brought / totalBrought) * 100,
+                            brought: brought,
                             top8: top8,
                             top8ConvPct: parseLocaleNumber(r.top8_conv_rate || '0', 0) * 100,
                         };
                     });
                     const overallTop = [...enriched].sort((a, b) => b.broughtPct - a.broughtPct).slice(0, 12);
-                    const top8Top    = [...enriched].sort((a, b) => b.top8 - a.top8 || b.top8ConvPct - a.top8ConvPct).slice(0, 12);
+                    // Rank by the number this column actually SHOWS. It used to sort by
+                    // top8 (the absolute weighted count) while printing top8ConvPct (the
+                    // rate), so rank 3 could read 7.4 % and rank 4 read 7.8 %, with the
+                    // highest rates sitting at the bottom — it read as a broken table and
+                    // contradicted this block's own stated purpose ("the decks that do
+                    // NOT lead on count"). CONV_MIN_N keeps 2-entry decks with a 50 %
+                    // rate out of the top; same floor the conversion block already uses.
+                    const top8Top    = [...enriched]
+                        .filter(d => d.brought >= CONV_MIN_N)
+                        .sort((a, b) => b.top8ConvPct - a.top8ConvPct || b.top8 - a.top8)
+                        .slice(0, 12);
 
                     // Top-8 vs. expected — its own full-width block, not a
                     // third column: .cm-vs-top8-row is a 1fr 1fr grid and the

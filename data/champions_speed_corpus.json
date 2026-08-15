@@ -1,11 +1,11 @@
 {
   "_meta": {
-    "last_updated": "2026-08-14",
+    "last_updated": "2026-08-15",
     "window_days": 14,
-    "window_start": "2026-07-31",
-    "window_end": "2026-08-14",
-    "team_count": 84,
-    "sample_count": 504,
+    "window_start": "2026-08-01",
+    "window_end": "2026-08-15",
+    "team_count": 83,
+    "sample_count": 498,
     "species_count": 100,
     "source": "VGCPastes Champions M-A spreadsheet (gid=791705272)"
   },
@@ -3495,48 +3495,6 @@
       "nature": "Timid",
       "date": "1 Aug 2026",
       "replica": "15C0Y64PGE"
-    },
-    {
-      "species": "Charizard",
-      "evs": "17 HP / 25 Def / 11 SpA / 13 Spe",
-      "nature": "Modest",
-      "date": "31 Jul 2026",
-      "replica": "GS9M8Q56AS"
-    },
-    {
-      "species": "Floette-Eternal",
-      "evs": "2 HP / 32 SpA / 32 Spe",
-      "nature": "Timid",
-      "date": "31 Jul 2026",
-      "replica": "GS9M8Q56AS"
-    },
-    {
-      "species": "Whimsicott",
-      "evs": "2 HP / 32 SpA / 32 Spe",
-      "nature": "Timid",
-      "date": "31 Jul 2026",
-      "replica": "GS9M8Q56AS"
-    },
-    {
-      "species": "Kingambit",
-      "evs": "32 HP / 32 Atk / 1 SpD / 1 Spe",
-      "nature": "Adamant",
-      "date": "31 Jul 2026",
-      "replica": "GS9M8Q56AS"
-    },
-    {
-      "species": "Basculegion",
-      "evs": "4 HP / 32 Atk / 11 Def / 19 Spe",
-      "nature": "Adamant",
-      "date": "31 Jul 2026",
-      "replica": "GS9M8Q56AS"
-    },
-    {
-      "species": "Garchomp",
-      "evs": "25 HP / 32 Atk / 6 Def / 3 Spe",
-      "nature": "Adamant",
-      "date": "31 Jul 2026",
-      "replica": "GS9M8Q56AS"
     }
   ]
 }

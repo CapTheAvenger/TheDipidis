@@ -2,6 +2,8 @@ tournament_id,tournament_date,format,player_count,winner_archetype,winner_winrat
 6a2a2ad82d97f3b0c2613980,2026-07-01,CRI,109,Dragapult Dusknoir,25.0
 6a42564583fd320299bd3d12,2026-07-01,CRI,114,Slowking,27.0
 6a427cb383fd320299bd3ed1,2026-06-30,CRI,116,Slowking,18.0
+6a7e14e22b308b6067b53026,2026-08-15,PBL,211,Arboliva Ogerpon,28.0
+6a43872683fd320299bd4942,2026-08-14,PBL,110,Clefairy Ogerpon,25.0
 6a7a97fa2b308b6067b50d7f,2026-08-13,PBL,127,Dhelmise Banette,27.0
 6a7a21622b308b6067b5051d,2026-08-13,PBL,169,Dragapult,30.0
 6a76139d2b308b6067b4cb68,2026-08-13,PBL,265,Clefairy Ogerpon,36.0
@@ -100,4 +102,3 @@ jimothy,2026-07-25,PBL,504,Grimmsnarl Froslass,39.0
 6a5938d8cc68177ec6c56e10,2026-07-20,PBL,267,Alakazam Dudunsparce,30.0
 6a5b622f937230b102d3e577,2026-07-19,PBL,120,Dhelmise Banette,18.0
 6a4ae98265724db9ded3da75,2026-07-18,PBL,145,Dragapult Blaziken,36.0
-yes-pitch-black-is-legal,2026-07-18,PBL,416,Dragapult Blaziken,34.0

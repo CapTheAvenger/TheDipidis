@@ -82,6 +82,18 @@
 }
 .ds-stat.is-pos::before { background: var(--dv-pos); }
 .ds-stat.is-neg::before { background: var(--dv-neg); }
+/* Rollen-Zeile: sagt, WARUM diese Kachel hier steht ("Erfolgreichstes" vs.
+ * "Meistgespielt"). Ohne sie liest sich eine nach Anteil sortierte Reihe als
+ * Rangliste der Stärke — genau der Widerspruch, den der Hub-Block hatte. */
+.ds-stat-role {
+    display: block;
+    margin-bottom: var(--s-1);
+    font-size: var(--fs-xs);
+    font-weight: 600;
+    color: var(--ink-3);
+}
+.ds-stat.is-pos .ds-stat-role { color: var(--dv-pos); }
+.ds-stat.is-neg .ds-stat-role { color: var(--dv-neg); }
 .ds-stat-label {
     display: block;
     font-size: var(--lbl);

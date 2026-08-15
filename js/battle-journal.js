@@ -1184,7 +1184,10 @@
         const totalL = filtered.filter(e => e.result === 'loss').length;
         const totalT = filtered.filter(e => e.result === 'tie').length;
         const total = filtered.length;
-        const winRate = total > 0 ? Math.round((totalW / total) * 100) : 0;
+        // 0 von 0 Spielen ist nicht 0 %, sondern undefiniert. Der leere Journal
+        // zeigte "0 % Win Rate" — ein neuer Nutzer liest das als "du verlierst
+        // alles", bevor er das erste Match eingetragen hat.
+        const winRateLabel = total > 0 ? `${Math.round((totalW / total) * 100)}%` : '—';
 
         if (statsEl) {
             statsEl.innerHTML = `
@@ -1192,7 +1195,7 @@
                 <div class="bj-history-stat is-win"><strong>${totalW}</strong><span>${battleJournalText('bj.win', 'Win')}</span></div>
                 <div class="bj-history-stat is-loss"><strong>${totalL}</strong><span>${battleJournalText('bj.loss', 'Loss')}</span></div>
                 <div class="bj-history-stat is-tie"><strong>${totalT}</strong><span>${battleJournalText('bj.tie', 'Tie')}</span></div>
-                <div class="bj-history-stat"><strong>${winRate}%</strong><span>${battleJournalText('bj.histWinRate', 'Win Rate')}</span></div>
+                <div class="bj-history-stat"><strong>${winRateLabel}</strong><span>${battleJournalText('bj.histWinRate', 'Win Rate')}</span></div>
             `;
         }
 

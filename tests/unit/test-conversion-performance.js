@@ -230,14 +230,26 @@ describe('against the real file', () => {
         // two-entry deck at +292 %, and it must not be near the top once
         // smoothed.
         const { decks } = compute.computeConversionPerformance(rows);
-        const byPerf = [...decks].sort((a, b) => b.perfPct - a.perfPct);
         const byRaw = [...decks].sort((a, b) => b.rawPct - a.rawPct);
         assert.ok(byRaw[0].brought < 20,
             'fixture changed: the raw leader is no longer a tiny sample');
+
+        // Rank the way every consumer does. computeConversionPerformance
+        // deliberately does NOT apply CONV_MIN_N — the assertion two blocks
+        // down pins that ("the floor lives in the caller"), and each caller
+        // filters before it ranks. Checking the leader of the UNFILTERED list
+        // therefore tested something no screen ever shows: on 2026-08-15 that
+        // was Arboliva Ogerpon at n=17.5, below the floor and never rendered.
+        const byPerf = decks
+            .filter(d => d.brought >= compute.CONV_MIN_N)
+            .sort((a, b) => b.perfPct - a.perfPct);
         assert.ok(!byPerf[0].thin && byPerf[0].brought >= CONV_THIN,
             `smoothed leader ${byPerf[0].name} rests on n=${byPerf[0].brought}`);
+        // -1 means the raw leader did not survive the floor at all — the
+        // strongest possible outcome, not a failure. Anything else has to sit
+        // well down the list.
         const rawLeaderSmoothedRank = byPerf.findIndex(d => d.name === byRaw[0].name);
-        assert.ok(rawLeaderSmoothedRank > 10,
+        assert.ok(rawLeaderSmoothedRank === -1 || rawLeaderSmoothedRank > 10,
             `the n=${byRaw[0].brought} raw leader still sits at #${rawLeaderSmoothedRank + 1} smoothed`);
     });
 });

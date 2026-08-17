@@ -569,13 +569,11 @@ jobs:
       # `on: push` workflows (GitHub recursion-prevention). Dispatch
       # deploy-pages explicitly so the SPA on Pages always reflects the
       # fresh data right after a weekly run.
-      - name: Trigger GitHub Pages deploy
-        if: steps.commit.outputs.pushed == 'true'
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          gh workflow run deploy-pages.yml --ref main
-          echo "Dispatched deploy-pages.yml on main."
+      # No explicit deploy dispatch. The push above already triggers
+      # deploy-pages (on: push to main); dispatching a second run put both into
+      # `concurrency: pages, cancel-in-progress: true`, so one of the two was
+      # cancelled and the deploy could end up watching or reporting the loser.
+      # One push, one deploy.
 
       - name: Fail job on multi-scraper / critical-scraper batch failure
         # AUDIT_DATA_PIPELINE F-D04 + F-D20: per-step `set +e` keeps a

@@ -37,12 +37,11 @@ on:
         default: '40'
 
 permissions:
-  contents: write
-  actions:  write   # needed for the `gh workflow run deploy-pages.yml`
-                    # dispatch step at the end — without this the
-                    # GITHUB_TOKEN returns 403 "Resource not accessible
-                    # by integration" on the workflow_dispatch API call
-                    # (observed 2026-06-10).
+  contents: write   # `actions: write` used to be here for the explicit
+                    # `gh workflow run deploy-pages.yml` dispatch at the end.
+                    # That dispatch is gone (it raced the push-triggered deploy
+                    # inside `concurrency: pages`), so the extra scope goes with
+                    # it — least privilege.
 
 concurrency:
   group: champions-replica-scrape
@@ -297,10 +296,8 @@ jobs:
       # run land on main but the Side Quest tab kept showing yesterday's
       # 20 teams (2026-06-09 user report). weekly-full-update.yml and
       # daily-price-refresh.yml both dispatch this — match the pattern.
-      - name: Trigger GitHub Pages deploy
-        if: steps.commit.outputs.pushed == 'true'
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          gh workflow run deploy-pages.yml --ref main
-          echo "Dispatched deploy-pages.yml on main."
+      # No explicit deploy dispatch. The push above already triggers
+      # deploy-pages (on: push to main); dispatching a second run put both into
+      # `concurrency: pages, cancel-in-progress: true`, so one of the two was
+      # cancelled and the deploy could end up watching or reporting the loser.
+      # One push, one deploy.

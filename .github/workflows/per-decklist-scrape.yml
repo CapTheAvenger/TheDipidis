@@ -217,10 +217,8 @@ jobs:
           done
           exit 1
 
-      - name: Trigger GitHub Pages deploy
-        if: steps.commit.outputs.pushed == 'true'
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          gh workflow run deploy-pages.yml --ref main
-          echo "Dispatched deploy-pages.yml on main."
+      # No explicit deploy dispatch. The push above already triggers
+      # deploy-pages (on: push to main); dispatching a second run put both into
+      # `concurrency: pages, cancel-in-progress: true`, so one of the two was
+      # cancelled and the deploy could end up watching or reporting the loser.
+      # One push, one deploy.

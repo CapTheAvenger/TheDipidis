@@ -238,10 +238,13 @@ jobs:
           fi
           exit 0
 
-      - name: Bump version
-        run: |
-          chmod +x bump-version.sh
-          ./bump-version.sh
+      # No bump here. deploy-pages.yml rewrites ?v=, APP_VERSION, the service
+      # worker CACHE_NAME, version.json and the _formatWindow snapshot inside
+      # _site/ on every deploy (its "Cache-bust asset references" step), so the
+      # stamp a data job commits never reaches a user. All it did was put
+      # index.html (845 KB), service-worker.js and version.json into ~147
+      # commits a month and churn the service worker's CACHE_NAME, which makes
+      # the activate handler drop every client cache several times a day.
 
       - name: Commit + push
         id: commit
@@ -256,8 +259,7 @@ jobs:
                   data/champions_roster_extra.json \
                   data/champions_available_items.json \
                   data/de_name_overrides.json \
-                  data/pokemonproxies_index.json \
-                  index.html service-worker.js version.json
+                  data/pokemonproxies_index.json
           # Strategies file only exists once the ANTHROPIC_API_KEY
           # secret is set and the generator ran at least once.
           if [ -f data/champions_team_strategies.json ]; then

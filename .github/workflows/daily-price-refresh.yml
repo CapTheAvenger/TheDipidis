@@ -141,10 +141,13 @@ jobs:
           python scripts/build_prizepack_official_images.py --refresh-prices || \
             echo "::warning::prize-pack price refresh failed (non-fatal)"
 
-      - name: Bump version
-        run: |
-          chmod +x bump-version.sh
-          ./bump-version.sh
+      # No bump here. deploy-pages.yml rewrites ?v=, APP_VERSION, the service
+      # worker CACHE_NAME, version.json and the _formatWindow snapshot inside
+      # _site/ on every deploy (its "Cache-bust asset references" step), so the
+      # stamp a data job commits never reaches a user. All it did was put
+      # index.html (845 KB), service-worker.js and version.json into ~147
+      # commits a month and churn the service worker's CACHE_NAME, which makes
+      # the activate handler drop every client cache several times a day.
 
       # Commit FIRST so the day's price snapshot is on main even if
       # the alert step fails. The alert script reads the file on
@@ -159,8 +162,7 @@ jobs:
                   data/cards_chunk_standard.json data/cards_chunk_extended.json \
                   data/cards_chunk_legacy.json data/cards_manifest.json \
                   data/all_cards_merged.json data/all_cards_merged.csv \
-                  data/prizepack_official_images.json \
-                  index.html service-worker.js version.json
+                  data/prizepack_official_images.json
           if git diff --cached --quiet; then
             echo "No price changes to commit — skipping push."
             echo "pushed=false" >> "$GITHUB_OUTPUT"

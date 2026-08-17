@@ -32,6 +32,21 @@ service cloud.firestore {
     }
 
     // ─────────────────────────────────────────────────────────
+    // Shared decks — the ?sharedDeck=<id> short links. Had no rule at all
+    // until 2026-08-17, so both the write and the read hit the default deny.
+    // read is open because the link IS the capability; create is bounded so
+    // an open endpoint can't be used as free storage; update/delete denied.
+    // ─────────────────────────────────────────────────────────
+    match /shared_decks/{shareId} {
+      allow read: if true;
+      allow create: if shareId.size() <= 24
+        && request.resource.data.keys().hasOnly(['deck', 'order', 'archetype', 'source', 'timestamp'])
+        && request.resource.data.deck is map
+        && request.resource.data.deck.size() <= 120;
+      allow update, delete: if false;
+    }
+
+    // ─────────────────────────────────────────────────────────
     // Public profile index — used by Testing Groups to add members
     // by email. Each user writes their own entry; anyone signed in
     // can read it (to resolve email → uid).
@@ -151,6 +166,7 @@ Changes propagate within a minute.
 |---|---|---|
 | `users/{uid}/**` | Owner only | Owner only |
 | `publicProfiles/{uid}` | Any signed-in user | Owner only |
+| `shared_decks/{shareId}` | Anyone with the link | Create only, bounded; no update/delete |
 | `testingGroups/{id}` | Members only | Owner (full) / Editor (data only) / Viewer (none) |
 | `testingGroups/{id}/activity/{id}` | Members only | Append-only by any member |
 

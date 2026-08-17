@@ -2,7 +2,7 @@
   "_meta": {
     "title": "Pokémon Champions — Current Top Doubles Teams",
     "subtitle": "Replica codes from top tournament finishes. Tap a code to copy.",
-    "last_updated": "2026-08-16",
+    "last_updated": "2026-08-17",
     "source": "VGCPastes Champions spreadsheet (auto-discovered tabs: M-B=gid1458357160, M-A=gid791705272)",
     "source_url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTXHOfUSKTZyVoxF7BO-XIEqtbrsq1OSh_4bSaO0bhAMHqtsvYqM_4eZWIMqdZ--SKCb86EXuk75o1i/pub?gid=1458357160&single=true&output=csv",
     "current_regulation": "M-B",
@@ -10,7 +10,7 @@
       "M-B",
       "M-A"
     ],
-    "team_count": 84
+    "team_count": 83
   },
   "teams": [
     {
@@ -8193,105 +8193,6 @@
             "Snarl",
             "Earth Power",
             "Dark Pulse"
-          ]
-        }
-      ],
-      "strategy": []
-    },
-    {
-      "rank": 84,
-      "replica_code": "BXNBW7B6W0",
-      "team_name": "MaineEvent's Metagross Ceruledge Team",
-      "tournament": "-",
-      "trainer": "Jermaine Mcleod",
-      "format": "VGC Champions",
-      "regulation": "M-B",
-      "sheet_rank": "",
-      "date_shared": "2 Aug 2026",
-      "pokepaste_url": "https://pokepast.es/924be7c6847f3cd4",
-      "pokemon": [
-        {
-          "name": "Metagross",
-          "item": "Metagrossite",
-          "ability": "Clear Body",
-          "tera_type": "",
-          "evs": "21 HP / 15 Atk / 14 Def / 16 Spe",
-          "nature": "Adamant",
-          "moves": [
-            "Iron Head",
-            "Psychic Fangs",
-            "Stomping Tantrum",
-            "Protect"
-          ]
-        },
-        {
-          "name": "Sinistcha",
-          "item": "Sitrus Berry",
-          "ability": "Hospitality",
-          "tera_type": "",
-          "evs": "32 HP / 14 Def / 20 SpD",
-          "nature": "Bold",
-          "moves": [
-            "Matcha Gotcha",
-            "Life Dew",
-            "Rage Powder",
-            "Trick Room"
-          ]
-        },
-        {
-          "name": "Floette-Eternal",
-          "item": "Floettite",
-          "ability": "Flower Veil",
-          "tera_type": "",
-          "evs": "32 HP / 20 Def / 5 SpA / 9 Spe",
-          "nature": "Modest",
-          "moves": [
-            "Moonblast",
-            "Dazzling Gleam",
-            "Calm Mind",
-            "Protect"
-          ]
-        },
-        {
-          "name": "Ceruledge",
-          "item": "Colbur Berry",
-          "ability": "Flash Fire",
-          "tera_type": "",
-          "evs": "31 HP / 15 Atk / 10 Def / 10 Spe",
-          "nature": "Adamant",
-          "moves": [
-            "Bitter Blade",
-            "Shadow Sneak",
-            "Bulk Up",
-            "Protect"
-          ]
-        },
-        {
-          "name": "Hydreigon",
-          "item": "Life Orb",
-          "ability": "Levitate",
-          "tera_type": "",
-          "evs": "2 HP / 32 SpA / 32 Spe",
-          "nature": "Timid",
-          "moves": [
-            "Draco Meteor",
-            "Dark Pulse",
-            "Tailwind",
-            "Protect"
-          ]
-        },
-        {
-          "name": "Sneasler",
-          "item": "Focus Sash",
-          "ability": "Unburden",
-          "tera_type": "",
-          "evs": "2 HP / 32 Atk / 32 Spe",
-          "nature": "Jolly",
-          "moves": [
-            "Fake Out",
-            "Close Combat",
-            "Dire Claw",
-            "Coaching"
           ]
         }
       ],

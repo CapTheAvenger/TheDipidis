@@ -1566,11 +1566,20 @@
             const headerWr = (typeof t === 'function' ? t('pm.matchupColWinPct') : 'Win %');
             const tournHint = (typeof t === 'function' ? t('pm.matchupTournHint') : 'Aggregated across labs tournaments where this archetype appeared.');
 
+            // Mindeststichprobe. Diese Tabelle hatte als einzige Matchup-Ansicht
+            // gar keine: "Mega Camerupt, 1 Game, 100,0 %" stand gleichrangig
+            // neben einer Zeile mit 544 Partien. Unter der Schwelle bleibt der
+            // Wert sichtbar — er ist ja gemessen — verliert aber die Farbe, die
+            // ihn als Signal ausweist, und die Zeile wird ausgegraut.
+            const MU_MIN_GAMES = (typeof window.CONV_MIN_N === 'number') ? window.CONV_MIN_N : 20;
+
             const rowsHtml = opps.map(o => {
-                const wrCls = o.winPct >= 55 ? 'past-meta-mu-good'
+                const thin = !(o.games >= MU_MIN_GAMES);
+                const wrCls = thin ? 'past-meta-mu-even'
+                           : o.winPct >= 55 ? 'past-meta-mu-good'
                            : o.winPct <= 45 ? 'past-meta-mu-bad'
                            : 'past-meta-mu-even';
-                return `<tr>
+                return `<tr${thin ? ' class="is-muted"' : ''}>
                     <td>${(typeof window.escapeHtml === 'function' ? window.escapeHtml(o.name) : o.name)}</td>
                     <td class="past-meta-mu-games">${o.games}</td>
                     <td class="past-meta-mu-wr ${wrCls}">${o.winPct.toFixed(1).replace('.', ',')}%</td>
@@ -1579,7 +1588,10 @@
 
             container.innerHTML = `
                 <h3 class="past-meta-matchup-title">${titleLabel}</h3>
-                <p class="past-meta-section-hint">${tournHint}</p>
+                <p class="past-meta-section-hint">${tournHint} ${
+                    (typeof getLang === 'function' && getLang() === 'de')
+                        ? `Unter ${MU_MIN_GAMES} Partien ausgegraut und ohne Farbe.`
+                        : `Below ${MU_MIN_GAMES} games: faded and shown without colour.`}</p>
                 <div class="past-meta-matchup-table-wrap">
                     <table class="past-meta-matchup-table">
                         <thead><tr>

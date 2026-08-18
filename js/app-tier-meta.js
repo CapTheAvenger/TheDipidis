@@ -230,9 +230,30 @@
             const out = {};
             for (const [name, e] of byName) {
                 const games = e.wins + e.losses + e.ties;
-                const winPct = games > 0 ? (e.wins + 0.5 * e.ties) / games * 100 : 0;
+
+                // ZWEI Groessen, weil es zwei Fragen sind — und weil diese
+                // Funktion vorher eine dritte Konvention erfunden hat.
+                //
+                // Bis zum 17.08.2026 stand hier (W + 0,5T)/G. Die Quelldatei
+                // data/labs_tournament_decks.csv rechnet ihre eigene Spalte
+                // win_pct aber als (3W + T)/3N — die Pokemon-Swiss-Punkte, also
+                // das, was ueber die Platzierung entscheidet. Nachgerechnet
+                // ueber alle 4.667 Zeilen: die Datei-Konvention passt exakt
+                // (max. Abweichung 0,005), die hier verwendete lag im Median
+                // 2,38 pp und maximal 12,5 pp daneben. Die App hat aus
+                // korrekten Rohdaten eine vierte Zahl gemacht.
+                //
+                //   matchPointPct  Konvention der Quelle, vergleichbar mit
+                //                  labs_tournament_decks.csv
+                //   winPct         W/(W+L+T), Konvention der Ladder-Datei
+                //                  limitless_online_decks.csv
+                //
+                // Beide werden mitgegeben, damit ein Vergleich nie stillschweigend
+                // zwischen zwei Skalen laeuft (siehe die Tier-1-Schwelle unten).
+                const matchPointPct = games > 0 ? (3 * e.wins + e.ties) / (3 * games) * 100 : 0;
+                const winPct = games > 0 ? e.wins / games * 100 : 0;
                 const day2Conv = e.day1 > 0 ? e.day2 / e.day1 : 0;
-                out[name] = { games, winPct, day2Conv,
+                out[name] = { games, winPct, matchPointPct, day2Conv,
                               players: e.players, tournaments: e.tournaments.size };
             }
             return out;
@@ -1239,6 +1260,15 @@
                 // Without this floor, popular-but-losing decks
                 // (Mega Greninja 6 %/44 % case) stay in Tier 1 just
                 // for being played a lot.
+                //
+                // BEIDE Werte muessen auf derselben Skala liegen, bevor sie
+                // gegen dieselbe Schwelle geprueft werden. sc.adjWR beruht auf
+                // deck.winrate, also der Ladder-Konvention W/(W+L+T);
+                // labsWR kam bis zum 17.08.2026 aus einer dritten Formel und
+                // lag dadurch systematisch hoeher — die Huerde war auf der
+                // Labs-Seite rund 2,4 pp weicher, und welcher Pfad griff, hing
+                // allein davon ab, ob eine Labs-Datei existierte. labsByName
+                // liefert jetzt winPct in derselben Konvention wie die Ladder.
                 const wrFloorOK = sc.adjWR >= T1_MIN_WR || labsWR >= T1_MIN_WR;
                 const tier1Eligible = meetsMinCount
                                    && deck.share >= T1_MIN_SHARE
@@ -1351,26 +1381,40 @@
                     // #currentMetaContent .section table nimmt .ds-table
                     // per :not() aus, statt dass hier dagegen
                     // angeschrieben wird.
-                    const renderRow = (d, i, valueLabel, valueText) => `
-                        <tr>
+                    // n gehört in die Zeile, nicht in die Fußnote. Diese beiden
+                    // Tabellen zeigten bisher nur Rang, Name und Wert — und
+                    // werden als Rangliste gelesen. Platz 1 war zeitweise ein
+                    // Deck mit 8 gewichteten Cuts, dessen 95-%-Wilson-Intervall
+                    // von 7,9 % bis 27,1 % reicht. Die Nachbartabelle
+                    // "Top-8 vs. Erwartung" macht es seit jeher richtig; hier
+                    // fehlte es.
+                    // Unter CONV_THIN_N wird die Zeile ausgegraut — dieselbe
+                    // Konvention wie dort, damit "dünn" überall gleich aussieht.
+                    const renderRow = (d, i, valueLabel, valueText, n) => {
+                        const thin = (typeof n === 'number') && n < CONV_THIN_N;
+                        return `
+                        <tr${thin ? ' class="is-muted"' : ''}>
                             <td class="ds-rank">${i + 1}</td>
                             <td>${escapeHtml(d.name)}</td>
                             <td class="ds-num" title="${escapeHtml(valueLabel)}">${valueText}</td>
+                            <td class="ds-num" title="${getLang() === 'de' ? 'Stichprobe' : 'sample size'}">${
+                                typeof n === 'number' ? fmtNumDS(n) : '–'}</td>
                         </tr>`;
+                    };
                     overallTop8Html = `
                         <div class="cm-vs-top8-row">
                             <div class="ds-panel">
                                 <h3 class="ds-label">🌐 ${getLang() === 'de' ? 'Wie oft gespielt' : 'Overall (brought share)'}</h3>
                                 <table class="ds-table">
-                                    <thead><tr><th class="ds-rank">#</th><th>Deck</th><th class="ds-num">${hintTerm(getLang() === 'de' ? 'Anteil' : 'Share', term('share'))}</th></tr></thead>
-                                    <tbody>${overallTop.map((d, i) => renderRow(d, i, 'brought share', fmtPct(d.broughtPct))).join('')}</tbody>
+                                    <thead><tr><th class="ds-rank">#</th><th>Deck</th><th class="ds-num">${hintTerm(getLang() === 'de' ? 'Anteil' : 'Share', term('share'))}</th><th class="ds-num">n</th></tr></thead>
+                                    <tbody>${overallTop.map((d, i) => renderRow(d, i, 'brought share', fmtPct(d.broughtPct), d.brought)).join('')}</tbody>
                                 </table>
                             </div>
                             <div class="ds-panel">
                                 <h3 class="ds-label">🏆 ${getLang() === 'de' ? 'Wie oft Top-8 erreicht' : 'Top-8 (conversion)'}</h3>
                                 <table class="ds-table">
-                                    <thead><tr><th class="ds-rank">#</th><th>Deck</th><th class="ds-num">${hintTerm('Top-8', term('top8'))}</th></tr></thead>
-                                    <tbody>${top8Top.map((d, i) => renderRow(d, i, 'top-8 conversion', fmtPct(d.top8ConvPct))).join('')}</tbody>
+                                    <thead><tr><th class="ds-rank">#</th><th>Deck</th><th class="ds-num">${hintTerm('Top-8', term('top8'))}</th><th class="ds-num">n</th></tr></thead>
+                                    <tbody>${top8Top.map((d, i) => renderRow(d, i, 'top-8 conversion', fmtPct(d.top8ConvPct), d.brought)).join('')}</tbody>
                                 </table>
                             </div>
                         </div>
@@ -1597,7 +1641,16 @@
                     if (_sc && _sc.labsHit && labsByName) {
                         const ent = labsByName[archetypeName];
                         if (ent) {
-                            labsBadge = `<span class="stat-badge stat-labs" title="Labs tournament data (${ent.tournaments} Turniere, ${ent.games} Games)">🏆 ${ent.winPct.toFixed(1)}% WR · ${ent.tournaments}T</span>`;
+                            // Formel ins Tooltip. Eine Siegquote ohne ihre
+                            // Konvention ist auf dieser Seite nicht eindeutig:
+                            // die Rohdaten tragen drei verschiedene, und der
+                            // Unterschied betraegt bis zu 6,4 pp auf identischer
+                            // Bilanz. Trainer Hill macht das vor und schreibt die
+                            // Formel neben die Zahl.
+                            const _labsTitle = (getLang() === 'de'
+                                ? `Turnierdaten aus Limitless Labs · ${ent.tournaments} Turniere, ${ent.games} Partien · Siegquote = W/(W+L+U) · Matchpunkte ${fmtPct(ent.matchPointPct)}`
+                                : `Limitless Labs tournament data · ${ent.tournaments} tournaments, ${ent.games} games · win rate = W/(W+L+T) · match points ${fmtPct(ent.matchPointPct)}`);
+                            labsBadge = `<span class="stat-badge stat-labs" title="${escapeHtml(_labsTitle)}">🏆 ${fmtPct(ent.winPct)} WR · ${ent.tournaments}T</span>`;
                         }
                     }
 

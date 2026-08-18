@@ -268,19 +268,25 @@
     //     all Ice-type Pokémon
     // All comparisons are lowercased; filter is pre-normalised by the
     // caller for speed (one toLowerCase per keystroke, not per cell).
-    function speciesMatchesFilter(name, lcFilter) {
+    //
+    // dex/namesDe sind optional und ueberschreiben den Modulzustand.
+    // Die Aufrufer im Panel lassen sie weg; der Unit-Test reicht sie
+    // durch, damit er diese Funktion pruefen kann statt einer Kopie.
+    function speciesMatchesFilter(name, lcFilter, dex, namesDe) {
         if (!lcFilter) return true;
         if (name.toLowerCase().includes(lcFilter)) return true;
         const base = baseEnglish(name);
-        if (_namesDe) {
-            const de = _namesDe[base];
+        const namesDeSrc = namesDe || _namesDe;
+        if (namesDeSrc) {
+            const de = namesDeSrc[base];
             if (de && de.toLowerCase().includes(lcFilter)) return true;
         }
         // Type rule: prefix match, NOT substring. "eis" must hit "Eis"
         // (Ice) but not "Geist" (Ghost). Without the prefix rule,
         // every Ghost-type Pokémon surfaced when the user typed "eis"
         // — exactly the wrong direction.
-        const spec = _pokedex && _pokedex[name];
+        const dexSrc = dex || _pokedex;
+        const spec = dexSrc && dexSrc[name];
         if (spec && Array.isArray(spec.types)) {
             for (const ty of spec.types) {
                 if (ty.toLowerCase().startsWith(lcFilter)) return true;
@@ -425,6 +431,21 @@
     // surfaces weaknesses (×2, ×4); resistances/immunities are a
     // separate code-path the user explicitly said they don't need
     // ("gegen was ich stark bin ist nur halb wichtig").
+    //
+    // MASSGEBLICH IST data/champions_type_chart.json — dieselbe
+    // Tabelle, die Rechner und Matchup-Ansicht laden. Hier steht sie
+    // fest im Code, weil dieses Panel am Turniertisch in 90 Sekunden
+    // gebraucht wird: eine fehlgeschlagene Anfrage darf keine leere
+    // Schwächenliste ergeben. Damit aus "zwei Orte" kein "zwei
+    // Wahrheiten" wird, vergleicht tests/unit/test-side-quest-play.js
+    // alle 18x18 Felder gegen die JSON-Datei und gegen eine unabhängig
+    // getippte Verteidigungstabelle.
+    //
+    // Gefunden am 2026-08-18, drei Felder wichen ab, alle drei hier
+    // falsch: Geist→Unlicht stand auf 2 statt 0.5 (Unlicht ist gegen
+    // Geist resistent, seit Gen 2), und die Feen-Zeile hatte die
+    // Käfer-Zeile abgeschrieben: Fee→Käfer 0.5 statt 1, Fee→Feuer
+    // fehlte ganz statt 0.5.
     const TYPE_CHART = {
         Normal:   { Rock: 0.5, Ghost: 0,   Steel: 0.5 },
         Fire:     { Fire: 0.5, Water: 0.5, Grass: 2, Ice: 2, Bug: 2, Rock: 0.5, Dragon: 0.5, Steel: 2 },
@@ -439,11 +460,11 @@
         Psychic:  { Fighting: 2, Poison: 2, Psychic: 0.5, Dark: 0, Steel: 0.5 },
         Bug:      { Fire: 0.5, Grass: 2, Fighting: 0.5, Poison: 0.5, Flying: 0.5, Psychic: 2, Ghost: 0.5, Dark: 2, Steel: 0.5, Fairy: 0.5 },
         Rock:     { Fire: 2, Ice: 2, Fighting: 0.5, Ground: 0.5, Flying: 2, Bug: 2, Steel: 0.5 },
-        Ghost:    { Normal: 0, Psychic: 2, Ghost: 2, Dark: 2 },
+        Ghost:    { Normal: 0, Psychic: 2, Ghost: 2, Dark: 0.5 },
         Dragon:   { Dragon: 2, Steel: 0.5, Fairy: 0 },
         Dark:     { Fighting: 0.5, Psychic: 2, Ghost: 2, Dark: 0.5, Fairy: 0.5 },
         Steel:    { Fire: 0.5, Water: 0.5, Electric: 0.5, Ice: 2, Rock: 2, Steel: 0.5, Fairy: 2 },
-        Fairy:    { Fighting: 2, Poison: 0.5, Bug: 0.5, Dragon: 2, Dark: 2, Steel: 0.5 },
+        Fairy:    { Fighting: 2, Poison: 0.5, Fire: 0.5, Dragon: 2, Dark: 2, Steel: 0.5 },
     };
 
     const ALL_TYPES = Object.keys(TYPE_CHART);

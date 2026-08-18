@@ -1,3 +1,25 @@
+// Saisonpause ist kein Fehler. Bis zum 17.08.2026 stand sie in einem roten
+// Fehlerkasten (class="error") — alle drei Personas im Audit haben das als
+// "die Seite ist kaputt" gelesen. Die JP-Rotation leert die Current-CSVs
+// planmaessig; was fehlt, ist eine Erklaerung und ein Weiterweg, kein Alarm.
+function cityLeagueOffSeasonHtml() {
+    var de = (typeof getLang === 'function' && getLang() === 'de');
+    if (window.DsNav) { try { window.DsNav.setSpaceFacts({ pause: true }, 'jp'); } catch (e) {} }
+    return '<div class="ds-empty">' +
+        '<div class="ds-empty-title">' + (de
+            ? 'Saisonpause in Japan'
+            : 'Off-season in Japan') + '</div>' +
+        '<p class="ds-empty-body">' + (de
+            ? 'Die City League pausiert zwischen zwei Set-Rotationen. Sobald das erste Turnier '
+              + 'im neuen Format gescrapt ist, stehen die Zahlen hier wieder — in der Regel '
+              + 'wenige Tage nach dem Release.'
+            : 'The City League pauses between set rotations. Numbers return here as soon as the '
+              + 'first tournament in the new format has been scraped — usually a few days '
+              + 'after release.') + '</p>' +
+        '<button type="button" class="ds-empty-cta" onclick="switchTabAndUpdateMenu(\'current-meta\')">' +
+        (de ? 'Stattdessen das globale Meta ansehen' : 'Look at the global meta instead') +
+        '</button></div>';
+}
 ﻿// app-city-league.js — extracted from app.js
 // Part of Hausi's Pokemon TCG Analysis
 
@@ -394,9 +416,7 @@
                         return loadCityLeagueData(_fallbackDepth + 1);
                     }
                     console.error('Hauptdaten fehlen fuer Format:', format);
-                    content.innerHTML = '<div class="error">' + (getLang() === 'de'
-                        ? 'Aktuell keine City-League-Daten verfügbar (Saison-Pause).'
-                        : 'No City League data available right now (off-season).') + '</div>';
+                    content.innerHTML = cityLeagueOffSeasonHtml();
                     return;
                 }
 
@@ -459,9 +479,7 @@
                         return loadCityLeagueData(_fallbackDepth + 1);
                     }
                     console.info('City League: no main data for format', format, '— expected during the season pause (no tournaments running).');
-                    content.innerHTML = '<div class="error">' + (getLang() === 'de'
-                        ? 'Aktuell keine City-League-Daten verfügbar (Saison-Pause).'
-                        : 'No City League data available right now (off-season).') + '</div>';
+                    content.innerHTML = cityLeagueOffSeasonHtml();
                     return;
                 }
 
@@ -569,9 +587,7 @@
                     '.deck-banner-card, .tier-section, .tier-hero-card, .city-league-table-wrap, .meta-share-section'
                 );
                 if (content && !renderedSomething) {
-                    content.innerHTML = '<div class="error">' + (getLang() === 'de'
-                        ? 'Aktuell keine City-League-Daten verfügbar (Saison-Pause).'
-                        : 'No City League data available right now (off-season).') + '</div>';
+                    content.innerHTML = cityLeagueOffSeasonHtml();
                 }
             }
         }
@@ -1248,9 +1264,7 @@
                 if (tableContainer) {
                     const errorMsg = 'Error loading City League Analysis data';
                     console.error(errorMsg, { format, hasAnalysis: !!data, hasArchetypes: !!archetypesData });
-                    tableContainer.innerHTML = `<div class="error">${getLang() === 'de'
-                        ? 'Aktuell keine City-League-Daten verfügbar (Saison-Pause).'
-                        : 'No City League data available right now (off-season).'}</div>`;
+                    tableContainer.innerHTML = cityLeagueOffSeasonHtml();
                 }
             }
         }

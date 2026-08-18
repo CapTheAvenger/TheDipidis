@@ -1,0 +1,232 @@
+/* ds-nav.css — Hauptnavigation und Datenraum-Ausweis.
+ *
+ * Ersetzt zwei Dinge, die zusammen die Navigation der Seite waren:
+ *
+ *   1. Die Leiste in index.html, die css/pokeball-menu.css mit
+ *      `display: none !important` global abgeschaltet hat. Fünf Knöpfe
+ *      Markup, auf Desktop UND Mobil unsichtbar, gemessen am 17.08.2026.
+ *   2. Den Pokéball als einzigen verbliebenen Einstieg. Er trägt kein
+ *      Label, kein Burger-Symbol und keine Menü-Affordance — im
+ *      Personatest hat ihn niemand ohne Vorwissen als Navigation erkannt.
+ *
+ * Der Pokéball bleibt: er führt weiterhin die vollständige Liste aller 30
+ * Einträge inklusive Untertabs. Neu ist die Ebene darüber — sechs
+ * beschriftete Ziele, immer sichtbar, auf Mobil als Leiste am unteren
+ * Rand, wo der Daumen liegt.
+ *
+ * Ausschließlich aus css/tokens.css gebaut: keine rohe Hex-Farbe, keine
+ * px-Schriftgröße, kein !important.
+ */
+
+/* ── Ebene 1: sechs Ziele ─────────────────────────────────────────── */
+.ds-nav {
+    display: flex;
+    gap: 2px;
+    padding: 0 var(--s-4);
+    background: var(--surface-1);
+    border-bottom: 1px solid var(--line);
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+.ds-nav::-webkit-scrollbar { display: none; }
+
+.ds-nav-btn {
+    position: relative;
+    flex: 0 0 auto;
+    min-height: 44px;          /* Trefferfläche, nicht Schriftgröße */
+    padding: 0 var(--s-4);
+    border: 0;
+    background: none;
+    color: var(--ink-2);
+    font: inherit;
+    font-size: var(--fs-md);
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+}
+.ds-nav-btn:hover { color: var(--ink); }
+.ds-nav-btn:focus-visible {
+    outline: 2px solid var(--brand);
+    outline-offset: -2px;
+    border-radius: var(--r-sm);
+}
+.ds-nav-btn[aria-current="page"] { color: var(--brand-ink); }
+.ds-nav-btn[aria-current="page"]::after {
+    content: "";
+    position: absolute;
+    left: var(--s-3);
+    right: var(--s-3);
+    bottom: 0;
+    height: 3px;
+    border-radius: 3px 3px 0 0;
+    background: var(--brand);
+}
+
+/* Champions ist ein anderes Spiel. Der Trenner und die zweite Signalfarbe
+ * sagen das, bevor jemand klickt — bisher stand es nirgends. */
+.ds-nav-sep {
+    flex: 0 0 auto;
+    width: 1px;
+    margin: 10px var(--s-3);
+    background: var(--line);
+}
+.ds-nav-btn.is-alt[aria-current="page"] { color: var(--space-jp); }
+.ds-nav-btn.is-alt[aria-current="page"]::after { background: var(--space-jp); }
+
+/* ── Ebene 1 auf Mobil: unten, nicht oben ─────────────────────────── */
+.ds-tabbar { display: none; }
+
+@media (max-width: 768px) {
+    .ds-nav { display: none; }
+
+    .ds-tabbar {
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 900;
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        background: var(--surface-1);
+        border-top: 1px solid var(--line);
+        box-shadow: 0 -2px 12px rgba(16, 24, 40, .08);
+        padding-bottom: env(safe-area-inset-bottom, 0);
+    }
+    .ds-tabbar-btn {
+        min-height: 56px;
+        border: 0;
+        background: none;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 3px;
+        color: var(--ink-3);
+        font: inherit;
+        font-size: var(--lbl);
+        font-weight: var(--lbl-weight);
+        letter-spacing: var(--lbl-track);
+        text-transform: uppercase;
+        cursor: pointer;
+    }
+    .ds-tabbar-btn .ds-tabbar-gl { font-size: var(--fs-lg); line-height: 1; }
+    .ds-tabbar-btn[aria-current="page"] { color: var(--brand-ink); }
+
+    /* Damit die Leiste den letzten Inhalt nicht verdeckt. */
+    .tabs-container { padding-bottom: 64px; }
+}
+
+/* ── Der Datenraum-Ausweis ────────────────────────────────────────────
+ *
+ * Die eine Zeile, die den teuersten Befund des Audits erledigt: auf
+ * current-meta standen vier Feldgrößen (22.699 / 23.613 / 7.456 / 14.026)
+ * und drei Anteile für dasselbe Deck nebeneinander, keiner davon
+ * beschriftet. Und der Kopf von City League trug den globalen
+ * Scraper-Stempel "17.8.2026" über einer seit dem 31.07. leeren Ansicht.
+ *
+ * Region, Format, Quelle, Stichprobe, Zeitfenster, Stand — pro Datenraum,
+ * nicht global. Plus der Satz, den sonst niemand sagt: die drei werden
+ * nicht miteinander verrechnet.
+ */
+.ds-space {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--s-2) var(--s-3);
+    padding: var(--s-2) var(--s-4);
+    background: var(--surface-2);
+    border-bottom: 1px solid var(--line);
+    border-left: 3px solid var(--dv-zero);
+    font-size: var(--fs-xs);
+    color: var(--ink-3);
+}
+/* `display: flex` schlägt sonst das hidden-Attribut, und der leere Ausweis
+ * bleibt als 3-px-Strich stehen. */
+.ds-space[hidden] { display: none; }
+
+.ds-space[data-space="jp"]   { border-left-color: var(--space-jp); }
+.ds-space[data-space="gl"]   { border-left-color: var(--brand); }
+.ds-space[data-space="past"] { border-left-color: var(--ink-3); }
+
+.ds-space-region {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--s-1);
+    font-weight: 700;
+    color: var(--ink-2);
+}
+.ds-space b { color: var(--ink-2); font-weight: 600; }
+.ds-space-sep { color: var(--line-strong); }
+
+/* Der Trennungshinweis rutscht ans Ende der Zeile und bricht auf Mobil
+ * als eigene Zeile um — er ist wichtig, aber nicht das Erste. */
+.ds-space-note { margin-left: auto; }
+
+@media (max-width: 768px) {
+    .ds-space { padding: var(--s-2) var(--s-3); }
+    .ds-space-note { margin-left: 0; flex-basis: 100%; }
+}
+
+/* Saisonpause ist kein Fehler. Der alte Zustand war ein roter
+ * Fehlerkasten — alle drei Personas haben ihn als "kaputt" gelesen. */
+.ds-space-pause {
+    padding: 2px var(--s-2);
+    border: 1px solid var(--line-strong);
+    border-radius: var(--r-sm);
+    background: var(--surface-1);
+    color: var(--ink-2);
+}
+
+/* ── Leerzustand ──────────────────────────────────────────────────────
+ *
+ * Nie in Fehlerrot. Die Saisonpause der City League stand bis zum
+ * 17.08.2026 in einem `class="error"`-Kasten; alle drei Personas im Audit
+ * haben sie als "die Seite ist kaputt" gelesen. Ein Leerzustand erklärt,
+ * warum nichts da ist, und bietet einen Weiterweg an.
+ */
+.ds-empty {
+    padding: var(--s-8) var(--s-4);
+    text-align: center;
+    background: var(--surface-2);
+    border: 1px dashed var(--line-strong);
+    border-radius: var(--r-lg);
+    color: var(--ink-2);
+}
+.ds-empty-title {
+    margin-bottom: var(--s-2);
+    font-size: var(--fs-lg);
+    font-weight: 600;
+    color: var(--ink);
+}
+.ds-empty-body {
+    max-width: 56ch;
+    margin: 0 auto var(--s-4);
+    font-size: var(--fs-sm);
+    line-height: 1.55;
+}
+.ds-empty-cta {
+    min-height: 40px;
+    padding: 0 var(--s-4);
+    border: 1px solid var(--brand);
+    border-radius: var(--r-sm);
+    background: var(--surface-1);
+    color: var(--brand-ink);
+    font: inherit;
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    cursor: pointer;
+}
+.ds-empty-cta:hover { background: var(--brand); color: var(--surface-1); }
+
+/* ── Kopfzeile auf Mobil ──────────────────────────────────────────────
+ *
+ * Die sechs Schnellzugriffe standen auf 390 px als "My De…" und "Datab…"
+ * da — abgeschnittene Labels, die weniger sagen als gar keine. Seit die
+ * Hauptnavigation unten als Leiste läuft, braucht die Kopfzeile diese
+ * Zweitnavigation nicht mehr in voller Breite: das Symbol trägt, das
+ * Label wandert ins title-/aria-Attribut, das ohnehin schon gesetzt ist.
+ */
+@media (max-width: 768px) {
+    .header-icon-label { display: none; }
+    .header-icon-btn { min-width: 44px; min-height: 44px; }
+}

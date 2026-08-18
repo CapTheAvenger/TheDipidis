@@ -593,7 +593,7 @@
             <div id="dsSpaceHost" class="ds-space" hidden></div>
             
             <!-- Meta & Deck Analysis Hub: Entry State (5 category tiles) -->
-            <div id="meta-analysis-hub" class="tab-content active">
+            <div id="meta-analysis-hub" class="tab-content">
                 <div class="meta-hub-container">
                     <div class="meta-hub-header">
                         <h2><span data-i18n="metaHub.title">Meta &amp; Deck Analysis</span> <button class="tab-help-btn" onclick="openTabHelp('meta-analysis-hub')" title="Help" aria-label="Help for Meta &amp; Deck Analysis" data-i18n-title="btn.helpTitle"></button></h2>
@@ -1045,13 +1045,20 @@
             </script>
             
             <!-- Tab 3: Current Meta -->
-            <div id="current-meta" class="tab-content">
+            <div id="current-meta" class="tab-content active">
                 <div id="current-meta-component-container">
                     <div class="container">
                         <div class="header current-meta-header">
                             <h2><span data-i18n="cm.limitlessHeading">Limitless Online Comparison</span> <button class="tab-help-btn" onclick="openTabHelp('current-meta')" title="Help" aria-label="Help for Current Meta" data-i18n-title="btn.helpTitle"></button> <span class="data-freshness-chip" title="Daten zuletzt aktualisiert"><span class="data-freshness-chip-icon" aria-hidden="true">🔄</span> <span data-i18n="data.updated">Daten:</span> <span class="js-data-freshness">…</span></span></h2>
                         </div>
-                        <div id="currentMetaContent" class="current-meta-content">
+                        <!-- Die Antwort, ohne Klick. Derselbe Rechenweg und
+                         dieselbe Datei wie im Hub — js/meta-analysis-hub.js
+                         fuellt beide Hosts. Seit die Meta-Ansicht die
+                         Startseite ist, waere sie sonst der einzige Teil
+                         des Hubs, der verloren ginge, und er ist sein
+                         bester. -->
+                    <div id="metaAnswerTop"></div>
+                    <div id="currentMetaContent" class="current-meta-content">
                             <div class="skeleton-row"><div class="skeleton-card"></div><div class="skeleton-card"></div><div class="skeleton-card"></div><div class="skeleton-card"></div><div class="skeleton-card"></div><div class="skeleton-card"></div></div>
                         </div>
                     </div>

@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>thedipidis.app — Entwurf: eine Meta-Ansicht mit Filtern</title>
+<style>
+:root{
+  --fs-xs:11px; --fs-sm:12px; --fs-md:14px; --fs-lg:17px; --fs-xl:21px; --fs-hero:30px;
+  --lbl:10px; --lbl-track:.09em; --lbl-weight:700;
+  --font-num:ui-monospace,"SF Mono",SFMono-Regular,Consolas,monospace;
+  --s-1:4px; --s-2:8px; --s-3:12px; --s-4:16px; --s-6:24px; --s-8:32px;
+  --r-sm:6px; --r-md:11px; --r-lg:14px;
+  --e-1:0 1px 3px rgba(16,24,40,.06); --e-2:0 2px 12px rgba(16,24,40,.10);
+  --surface-0:#f7f8fa; --surface-1:#fff; --surface-2:#f1f3f7;
+  --line:#e3e7ef; --line-strong:#c9d0de;
+  --ink:#161a23; --ink-2:#4d5566; --ink-3:#646c80;
+  --brand:#3B4CCA; --brand-ink:#2a3899; --gold:#FFCB05;
+  --dv-pos:#2a78d6; --dv-neg:#e34948; --dv-zero:#9aa3b5;
+  --dv-pos-bg:rgba(42,120,214,.12); --dv-neg-bg:rgba(227,73,72,.12);
+  --bar-track:#e9edf4;
+  --space-jp:#b45309; --space-gl:var(--brand); --space-past:var(--ink-3);
+  --rule:linear-gradient(90deg,var(--brand),var(--gold));
+}
+html[data-theme="dark"]{
+  --surface-0:#0b0f1e; --surface-1:#111730; --surface-2:#161d3a;
+  --line:#253057; --line-strong:#35427a;
+  --ink:#eef2ff; --ink-2:#b9c1e0; --ink-3:#8791b8;
+  --brand:#5566e0; --brand-ink:#8b98ff;
+  --dv-pos:#6aa8ff; --dv-neg:#ff8f7a; --dv-zero:#6a739a;
+  --dv-pos-bg:rgba(106,168,255,.16); --dv-neg-bg:rgba(255,143,122,.16);
+  --bar-track:#080c19; --space-jp:#f0b429;
+}
+*{box-sizing:border-box}
+body{margin:0;background:#e8eaf0;font-family:Nunito,"Segoe UI",system-ui,sans-serif;color:var(--ink)}
+html[data-theme="dark"] body{background:#05070f}
+
+/* Werkzeugleiste des Prototyps — gehoert nicht zur Seite */
+.pt-bar{position:sticky;top:0;z-index:99;display:flex;gap:var(--s-2);align-items:center;flex-wrap:wrap;
+  padding:10px 16px;background:#12172b;color:#fff;font-size:12px}
+.pt-bar b{font-size:13px}
+.pt-bar span.note{color:#9aa3c0}
+.pt-bar button{padding:5px 12px;border:1px solid #39406a;border-radius:999px;background:#1c2340;color:#dfe4f5;
+  font:inherit;cursor:pointer}
+.pt-bar button.on{background:#3B4CCA;border-color:#3B4CCA;color:#fff}
+.pt-stage{margin:18px auto;background:var(--surface-0);box-shadow:0 6px 30px rgba(10,15,35,.18);
+  transition:max-width .2s}
+.pt-stage.desktop{max-width:1280px}
+.pt-stage.mobil{max-width:390px}
+
+/* ── Kopf ─────────────────────────────────────────────── */
+.hd{display:flex;align-items:center;gap:var(--s-3);padding:var(--s-3) var(--s-4);
+  background:var(--surface-1);border-bottom:1px solid var(--line)}
+.hd-logo{width:30px;height:30px;border-radius:50%;
+  background:conic-gradient(from 180deg,#e3350d 0 50%,#fff 50% 100%);border:2px solid #222;flex:none}
+.hd-name{font-weight:800;font-size:var(--fs-md);letter-spacing:-.2px}
+.hd-sp{flex:1}
+.hd-btn{padding:5px 10px;border:1px solid var(--line);border-radius:var(--r-sm);background:var(--surface-1);
+  color:var(--ink-2);font:inherit;font-size:var(--fs-xs);cursor:pointer}
+.nav{display:flex;gap:2px;padding:0 var(--s-4);background:var(--surface-1);
+  border-bottom:1px solid var(--line);overflow-x:auto}
+.nav button{padding:11px 14px;border:0;border-bottom:2px solid transparent;background:none;
+  color:var(--ink-2);font:inherit;font-size:var(--fs-md);font-weight:700;cursor:pointer;white-space:nowrap}
+.nav button.on{color:var(--brand);border-bottom-color:var(--brand)}
+.nav .sep{width:1px;background:var(--line);margin:8px 10px}
+
+.wrap{padding:var(--s-4)}
+.mobil .wrap{padding:var(--s-3)}
+
+/* ── Filterzeile ──────────────────────────────────────── */
+.filters{display:flex;gap:var(--s-4);flex-wrap:wrap;align-items:flex-end;
+  padding:var(--s-3) var(--s-4);background:var(--surface-1);border:1px solid var(--line);
+  border-radius:var(--r-lg);box-shadow:var(--e-1);margin-bottom:var(--s-3)}
+.mobil .filters{padding:var(--s-3);gap:var(--s-3)}
+.fg{display:flex;flex-direction:column;gap:5px}
+.fg-lab{font-size:var(--lbl);letter-spacing:var(--lbl-track);font-weight:var(--lbl-weight);
+  text-transform:uppercase;color:var(--ink-3)}
+.seg{display:flex;gap:4px;background:var(--surface-2);padding:3px;border-radius:999px}
+.seg button{padding:6px 13px;border:0;border-radius:999px;background:none;color:var(--ink-2);
+  font:inherit;font-size:var(--fs-sm);font-weight:700;cursor:pointer;min-height:30px}
+.seg button.on{background:var(--surface-1);color:var(--ink);box-shadow:var(--e-1)}
+.seg button:disabled{opacity:.45;cursor:not-allowed}
+.seg.space button.on[data-v="jp"]{box-shadow:inset 0 -2px 0 var(--space-jp),var(--e-1)}
+.seg.space button.on[data-v="gl"]{box-shadow:inset 0 -2px 0 var(--space-gl),var(--e-1)}
+.seg.space button.on[data-v="past"]{box-shadow:inset 0 -2px 0 var(--space-past),var(--e-1)}
+.fg-hint{font-size:var(--fs-xs);color:var(--ink-3)}
+
+/* Datenraum-Ausweis */
+.badge{display:flex;flex-wrap:wrap;gap:var(--s-2);align-items:center;font-size:var(--fs-xs);
+  color:var(--ink-2);padding:var(--s-2) var(--s-4);background:var(--surface-2);
+  border-left:4px solid var(--line-strong);border-radius:var(--r-sm);margin-bottom:var(--s-4)}
+.badge[data-space="jp"]{border-left-color:var(--space-jp)}
+.badge[data-space="gl"]{border-left-color:var(--space-gl)}
+.badge[data-space="past"]{border-left-color:var(--space-past)}
+.badge b{color:var(--ink)}
+.badge .sep{color:var(--ink-3)}
+.badge .note{color:var(--ink-3);font-style:italic}
+
+/* ── Abschnitte ───────────────────────────────────────── */
+.sec{background:var(--surface-1);border:1px solid var(--line);border-radius:var(--r-lg);
+  box-shadow:var(--e-1);margin-bottom:var(--s-3);overflow:hidden}
+.sec-hd{display:flex;align-items:center;gap:var(--s-2);width:100%;padding:var(--s-3) var(--s-4);
+  border:0;background:none;font:inherit;text-align:left;cursor:pointer;color:var(--ink)}
+.mobil .sec-hd{padding:var(--s-3)}
+.sec-hd:hover{background:var(--surface-2)}
+.sec-arrow{color:var(--ink-3);transition:transform .15s;flex:none;font-size:12px}
+.sec.open .sec-arrow{transform:rotate(90deg)}
+.sec-t{font-size:var(--fs-lg);font-weight:800;letter-spacing:-.2px}
+.mobil .sec-t{font-size:var(--fs-md)}
+.sec-sub{font-size:var(--fs-xs);color:var(--ink-3);margin-left:auto;text-align:right;flex:none}
+.mobil .sec-sub{display:none}
+.sec-body{padding:0 var(--s-4) var(--s-4);display:none}
+.mobil .sec-body{padding:0 var(--s-3) var(--s-3)}
+.sec.open .sec-body{display:block}
+
+/* ── Antwortzeile ─────────────────────────────────────── */
+.answer{padding:var(--s-3) var(--s-4);margin-bottom:var(--s-3);background:var(--surface-1);
+  border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--e-1);
+  border-top:3px solid transparent;border-image:var(--rule) 1;border-image-slice:0 0 0 0}
+.answer-lab{font-size:var(--lbl);letter-spacing:var(--lbl-track);font-weight:var(--lbl-weight);
+  text-transform:uppercase;color:var(--ink-3);display:block;margin-bottom:6px}
+.answer-txt{margin:0;font-size:var(--fs-md);color:var(--ink-2);line-height:1.55}
+.answer-txt b{color:var(--ink)}
+
+/* ── Tabellen ─────────────────────────────────────────── */
+table{width:100%;border-collapse:collapse;font-size:var(--fs-sm)}
+th{text-align:left;font-size:var(--lbl);letter-spacing:var(--lbl-track);font-weight:var(--lbl-weight);
+  text-transform:uppercase;color:var(--ink-3);padding:6px 8px;border-bottom:1px solid var(--line);
+  white-space:nowrap}
+td{padding:8px;border-bottom:1px solid var(--line);color:var(--ink-2);vertical-align:middle}
+tr:last-child td{border-bottom:0}
+td.name{color:var(--ink);font-weight:700}
+td.num{font-family:var(--font-num);text-align:right;white-space:nowrap}
+tbody tr:hover td{background:var(--surface-2)}
+.rank{display:inline-block;min-width:20px;color:var(--ink-3);font-family:var(--font-num);font-size:var(--fs-xs)}
+.bar{position:relative;height:6px;border-radius:3px;background:var(--bar-track);min-width:60px}
+.bar i{position:absolute;inset:0 auto 0 0;border-radius:3px;background:var(--brand)}
+.pill{display:inline-block;padding:2px 7px;border-radius:999px;font-family:var(--font-num);
+  font-size:var(--fs-xs);font-weight:700}
+.pill.pos{background:var(--dv-pos-bg);color:var(--dv-pos)}
+.pill.neg{background:var(--dv-neg-bg);color:var(--dv-neg)}
+.pill.zero{background:var(--surface-2);color:var(--ink-3)}
+.n{font-size:var(--fs-xs);color:var(--ink-3);font-family:var(--font-num)}
+.scroll{overflow-x:auto}
+
+/* Heatmap */
+.hm{border-collapse:separate;border-spacing:2px;font-size:var(--fs-xs)}
+.hm th{padding:4px;font-size:9px;text-transform:none;letter-spacing:0;border:0}
+.hm th.row{position:sticky;left:0;background:var(--surface-1);text-align:left;min-width:112px;
+  max-width:112px;overflow:hidden;text-overflow:ellipsis;color:var(--ink);font-weight:700;z-index:1}
+.hm td{padding:0;border:0;text-align:center;min-width:52px;height:34px;border-radius:var(--r-sm);
+  font-family:var(--font-num);color:var(--ink);font-weight:700}
+.hm td.self{background:var(--surface-2);color:var(--ink-3);font-weight:400}
+.hm-key{display:flex;gap:var(--s-3);align-items:center;font-size:var(--fs-xs);color:var(--ink-3);
+  margin-top:var(--s-2);flex-wrap:wrap}
+.hm-key i{display:inline-block;width:22px;height:12px;border-radius:3px;vertical-align:-2px;margin-right:4px}
+
+.resetrow{display:flex;gap:var(--s-2);align-items:center;min-height:0;margin-bottom:var(--s-2)}
+.resetrow:empty{display:none}
+.resetbtn{padding:5px 12px;border:1px solid var(--line);border-radius:999px;background:var(--surface-1);
+  color:var(--brand);font:inherit;font-size:var(--fs-xs);font-weight:700;cursor:pointer;min-height:28px}
+.resetbtn:hover{background:var(--surface-2)}
+/* Kopf auf schmalen Geraeten: der Untertitel brach dreizeilig */
+.mobil .hd{flex-wrap:wrap;gap:var(--s-2)}
+.mobil .hd>div:nth-child(2){flex:1 1 auto;min-width:0}
+.mobil .hd-name{font-size:var(--fs-sm);white-space:nowrap}
+.mobil .hd>div:nth-child(2)>div:last-child{display:none}
+.mobil .hd-btn{font-size:10px;padding:4px 8px}
+.note{font-size:var(--fs-xs);color:var(--ink-3);line-height:1.6;margin:var(--s-2) 0 0}
+.empty{padding:var(--s-6);text-align:center;color:var(--ink-2);font-size:var(--fs-md);
+  background:var(--surface-2);border-radius:var(--r-md)}
+.empty b{display:block;color:var(--ink);font-size:var(--fs-lg);margin-bottom:6px}
+.linkbtn{display:inline-block;margin-top:var(--s-3);padding:8px 16px;border-radius:999px;
+  background:var(--brand);color:#fff;font-size:var(--fs-sm);font-weight:700;border:0;cursor:pointer}
+.foot{padding:var(--s-4);border-top:1px solid var(--line);background:var(--surface-1);
+  font-size:var(--fs-xs);color:var(--ink-3);display:flex;gap:var(--s-4);flex-wrap:wrap}
+.foot a{color:var(--brand);text-decoration:none}
+.tabbar{display:none}
+.mobil .tabbar{display:flex;position:sticky;bottom:0;background:var(--surface-1);
+  border-top:1px solid var(--line)}
+.mobil .tabbar button{flex:1;padding:9px 2px;border:0;background:none;color:var(--ink-3);
+  font:inherit;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;cursor:pointer}
+.mobil .tabbar button.on{color:var(--brand)}
+.mobil .tabbar button b{display:block;font-size:15px;font-weight:400}
+.deckgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:var(--s-2)}
+.dcard{background:var(--surface-2);border:1px solid var(--line);border-radius:var(--r-md);
+  padding:var(--s-2);font-size:var(--fs-xs);color:var(--ink-2)}
+.dcard b{display:block;color:var(--ink);font-size:var(--fs-sm)}
+</style>
+</head>
+<body>
+<div class="pt-bar">
+  <b>Entwurf</b> <span class="note">eine Meta-Ansicht, zwei Filter · echte Daten vom 18.08.2026</span>
+  <span style="flex:1"></span>
+  <button id="bDesk" class="on">Desktop</button>
+  <button id="bMob">Mobil 390</button>
+  <button id="bDark">Dunkel</button>
+</div>
+
+<div class="pt-stage desktop" id="stage">
+  <div class="hd">
+    <div class="hd-logo"></div>
+    <div>
+      <div class="hd-name">Pokémon TCG Hub</div>
+      <div style="font-size:11px;color:var(--ink-3)">Turniervorbereitung mit nachrechenbaren Zahlen</div>
+    </div>
+    <div class="hd-sp"></div>
+    <button class="hd-btn">Deutsch</button>
+    <button class="hd-btn">Anleitung</button>
+    <button class="hd-btn">Anmelden</button>
+  </div>
+
+  <div class="nav">
+    <button class="on">Meta</button>
+    <button>Decks</button>
+    <button>Turnier</button>
+    <button>Karten</button>
+    <span class="sep"></span>
+    <button>Champions</button>
+  </div>
+
+  <div class="wrap">
+
+    <div class="filters">
+      <div class="fg">
+        <span class="fg-lab">Datenraum</span>
+        <div class="seg space" id="segSpace">
+          <button data-v="jp">🇯🇵 Japan</button>
+          <button data-v="gl" class="on">🌐 Global</button>
+          <button data-v="past">📦 Vergangen</button>
+        </div>
+        <span class="fg-hint" id="spaceHint">Das Feld, gegen das du hier antrittst</span>
+      </div>
+      <div class="fg">
+        <span class="fg-lab">Format</span>
+        <div class="seg" id="segFormat"></div>
+        <span class="fg-hint" id="formatHint"></span>
+      </div>
+    </div>
+
+    <div class="badge" id="badge"></div>
+
+    <div class="resetrow" id="resetRow"></div>
+    <div id="answer"></div>
+    <div id="sections"></div>
+
+  </div>
+
+  <div class="foot">
+    <span>Stand der Daten: <b>18.08.2026</b></span>
+    <a href="#">Was wurde wann aktualisiert?</a>
+    <a href="#">Methodik &amp; Rechenwege</a>
+    <a href="#">Rohdaten auf GitHub</a>
+    <a href="#">Impressum &amp; Kontakt</a>
+  </div>
+
+  <div class="tabbar">
+    <button class="on"><b>◎</b>Meta</button>
+    <button><b>▤</b>Decks</button>
+    <button><b>★</b>Turnier</button>
+    <button><b>◫</b>Karten</button>
+    <button><b>◈</b>Champ.</button>
+  </div>
+</div>
+<script>
+const D = {"total":8574,"feld":6.2,"decks":[{"n":"Dragapult","b":772,"s":9.0,"t8":78,"c":10.1,"v":63,"tn":104},{"n":"Mega Excadrill","b":672,"s":7.84,"t8":31,"c":4.6,"v":-26,"tn":103},{"n":"Festival Lead","b":628,"s":7.33,"t8":41,"c":6.5,"v":5,"tn":105},{"n":"Dragapult Blaziken","b":580,"s":6.77,"t8":50,"c":8.5,"v":38,"tn":104},{"n":"Slowking","b":498,"s":5.81,"t8":32,"c":6.5,"v":5,"tn":102},{"n":"Dragapult Dusknoir","b":456,"s":5.31,"t8":28,"c":6.3,"v":1,"tn":101},{"n":"Alakazam Dudunsparce","b":456,"s":5.31,"t8":32,"c":7.0,"v":13,"tn":99},{"n":"N's Zoroark","b":437,"s":5.1,"t8":24,"c":5.5,"v":-11,"tn":99},{"n":"Grimmsnarl Froslass","b":432,"s":5.04,"t8":26,"c":6.1,"v":-1,"tn":99},{"n":"Dhelmise Banette","b":326,"s":3.81,"t8":18,"c":5.7,"v":-9,"tn":99}],"mu":{"Mega Excadrill":{"Dragapult Dusknoir":{"wr":59.74,"n":547,"rec":"322 - 217 - 8"},"Grimmsnarl Froslass":{"wr":59.38,"n":451,"rec":"266 - 182 - 3"},"N's Zoroark":{"wr":56.76,"n":492,"rec":"277 - 211 - 4"},"Festival Lead":{"wr":54.71,"n":705,"rec":"383 - 317 - 5"},"Dragapult":{"wr":52.59,"n":720,"rec":"375 - 338 - 7"},"Mega Excadrill":{"wr":50.0,"n":764,"rec":"378 - 378 - 8"},"Dragapult Blaziken":{"wr":40.61,"n":630,"rec":"253 - 370 - 7"},"Slowking":{"wr":37.76,"n":589,"rec":"219 - 361 - 9"},"Alakazam Dudunsparce":{"wr":24.75,"n":501,"rec":"123 - 374 - 4"}},"Dragapult":{"Alakazam Dudunsparce":{"wr":66.14,"n":516,"rec":"334 - 171 - 11"},"Festival Lead":{"wr":58.33,"n":638,"rec":"364 - 260 - 14"},"Grimmsnarl Froslass":{"wr":54.42,"n":448,"rec":"240 - 201 - 7"},"Dragapult Dusknoir":{"wr":53.21,"n":496,"rec":"257 - 226 - 13"},"N's Zoroark":{"wr":52.98,"n":467,"rec":"240 - 213 - 14"},"Dragapult Blaziken":{"wr":52.35,"n":637,"rec":"323 - 294 - 20"},"Dragapult":{"wr":50.0,"n":830,"rec":"401 - 401 - 28"},"Mega Excadrill":{"wr":47.41,"n":720,"rec":"338 - 375 - 7"},"Slowking":{"wr":46.64,"n":497,"rec":"229 - 262 - 6"}},"Festival Lead":{"N's Zoroark":{"wr":64.62,"n":409,"rec":"263 - 144 - 2"},"Alakazam Dudunsparce":{"wr":57.18,"n":425,"rec":"239 - 179 - 7"},"Festival Lead":{"wr":50.0,"n":594,"rec":"294 - 294 - 6"},"Slowking":{"wr":49.13,"n":465,"rec":"225 - 233 - 7"},"Dragapult Blaziken":{"wr":46.77,"n":507,"rec":"232 - 264 - 11"},"Mega Excadrill":{"wr":45.29,"n":705,"rec":"317 - 383 - 5"},"Grimmsnarl Froslass":{"wr":44.25,"n":415,"rec":"181 - 228 - 6"},"Dragapult Dusknoir":{"wr":42.89,"n":476,"rec":"202 - 269 - 5"},"Dragapult":{"wr":41.67,"n":638,"rec":"260 - 364 - 14"}},"Dragapult Blaziken":{"Alakazam Dudunsparce":{"wr":61.5,"n":457,"rec":"278 - 174 - 5"},"Mega Excadrill":{"wr":59.39,"n":630,"rec":"370 - 253 - 7"},"Festival Lead":{"wr":53.23,"n":507,"rec":"264 - 232 - 11"},"Dragapult Dusknoir":{"wr":51.84,"n":439,"rec":"225 - 209 - 5"},"Dragapult Blaziken":{"wr":50.0,"n":554,"rec":"267 - 267 - 20"},"Slowking":{"wr":48.82,"n":433,"rec":"207 - 217 - 9"},"Dragapult":{"wr":47.65,"n":637,"rec":"294 - 323 - 20"},"Grimmsnarl Froslass":{"wr":45.51,"n":350,"rec":"157 - 188 - 5"},"N's Zoroark":{"wr":44.67,"n":405,"rec":"176 - 218 - 11"}},"Dragapult Dusknoir":{"Festival Lead":{"wr":57.11,"n":476,"rec":"269 - 202 - 5"},"Alakazam Dudunsparce":{"wr":56.27,"n":386,"rec":"211 - 164 - 11"},"Dragapult Dusknoir":{"wr":50.0,"n":380,"rec":"188 - 188 - 4"},"Dragapult Blaziken":{"wr":48.16,"n":439,"rec":"209 - 225 - 5"},"Grimmsnarl Froslass":{"wr":46.84,"n":320,"rec":"148 - 168 - 4"},"Dragapult":{"wr":46.79,"n":496,"rec":"226 - 257 - 13"},"N's Zoroark":{"wr":41.3,"n":345,"rec":"140 - 199 - 6"},"Slowking":{"wr":41.06,"n":346,"rec":"140 - 201 - 5"},"Mega Excadrill":{"wr":40.26,"n":547,"rec":"217 - 322 - 8"}},"Slowking":{"Mega Excadrill":{"wr":62.24,"n":589,"rec":"361 - 219 - 9"},"Dragapult Dusknoir":{"wr":58.94,"n":346,"rec":"201 - 140 - 5"},"N's Zoroark":{"wr":53.8,"n":346,"rec":"184 - 158 - 4"},"Dragapult":{"wr":53.36,"n":497,"rec":"262 - 229 - 6"},"Dragapult Blaziken":{"wr":51.18,"n":433,"rec":"217 - 207 - 9"},"Festival Lead":{"wr":50.87,"n":465,"rec":"233 - 225 - 7"},"Grimmsnarl Froslass":{"wr":50.64,"n":316,"rec":"159 - 155 - 2"},"Slowking":{"wr":50.0,"n":392,"rec":"193 - 193 - 6"},"Alakazam Dudunsparce":{"wr":32.89,"n":380,"rec":"123 - 251 - 6"}},"Alakazam Dudunsparce":{"Mega Excadrill":{"wr":75.25,"n":501,"rec":"374 - 123 - 4"},"Slowking":{"wr":67.11,"n":380,"rec":"251 - 123 - 6"},"N's Zoroark":{"wr":57.52,"n":341,"rec":"195 - 144 - 2"},"Grimmsnarl Froslass":{"wr":50.98,"n":312,"rec":"156 - 150 - 6"},"Alakazam Dudunsparce":{"wr":50.0,"n":370,"rec":"180 - 180 - 10"},"Dragapult Dusknoir":{"wr":43.73,"n":386,"rec":"164 - 211 - 11"},"Festival Lead":{"wr":42.82,"n":425,"rec":"179 - 239 - 7"},"Dragapult Blaziken":{"wr":38.5,"n":457,"rec":"174 - 278 - 5"},"Dragapult":{"wr":33.86,"n":516,"rec":"171 - 334 - 11"}},"N's Zoroark":{"Dragapult Dusknoir":{"wr":58.7,"n":345,"rec":"199 - 140 - 6"},"Dragapult Blaziken":{"wr":55.33,"n":405,"rec":"218 - 176 - 11"},"Grimmsnarl Froslass":{"wr":51.06,"n":285,"rec":"144 - 138 - 3"},"N's Zoroark":{"wr":50.0,"n":358,"rec":"176 - 176 - 6"},"Dragapult":{"wr":47.02,"n":467,"rec":"213 - 240 - 14"},"Slowking":{"wr":46.2,"n":346,"rec":"158 - 184 - 4"},"Mega Excadrill":{"wr":43.24,"n":492,"rec":"211 - 277 - 4"},"Alakazam Dudunsparce":{"wr":42.48,"n":341,"rec":"144 - 195 - 2"},"Festival Lead":{"wr":35.38,"n":409,"rec":"144 - 263 - 2"}},"Grimmsnarl Froslass":{"Festival Lead":{"wr":55.75,"n":415,"rec":"228 - 181 - 6"},"Dragapult Blaziken":{"wr":54.49,"n":350,"rec":"188 - 157 - 5"},"Dragapult Dusknoir":{"wr":53.16,"n":320,"rec":"168 - 148 - 4"},"Grimmsnarl Froslass":{"wr":50.0,"n":264,"rec":"132 - 132 - 0"},"Slowking":{"wr":49.36,"n":316,"rec":"155 - 159 - 2"},"Alakazam Dudunsparce":{"wr":49.02,"n":312,"rec":"150 - 156 - 6"},"N's Zoroark":{"wr":48.94,"n":285,"rec":"138 - 144 - 3"},"Dragapult":{"wr":45.58,"n":448,"rec":"201 - 240 - 7"},"Mega Excadrill":{"wr":40.62,"n":451,"rec":"182 - 266 - 3"}}},"st":[{"name":"Boss's Orders","decks":1124,"quote":94.61279461279462,"avg":2.6},{"name":"Lillie's Determination","decks":1001,"quote":84.25925925925925,"avg":3.7},{"name":"Ultra Ball","decks":1000,"quote":84.17508417508418,"avg":3.0},{"name":"Night Stretcher","decks":933,"quote":78.53535353535354,"avg":1.9},{"name":"Poké Pad","decks":896,"quote":75.42087542087542,"avg":3.4},{"name":"Buddy-Buddy Poffin","decks":690,"quote":58.080808080808076,"avg":3.0},{"name":"Fezandipiti ex","decks":629,"quote":52.946127946127945,"avg":1.0},{"name":"Special Red Card","decks":599,"quote":50.42087542087542,"avg":1.1},{"name":"Meowth ex","decks":554,"quote":46.63299663299663,"avg":1.4},{"name":"Team Rocket's Petrel","decks":416,"quote":35.01683501683502,"avg":2.8},{"name":"Air Balloon","decks":415,"quote":34.93265993265993,"avg":1.6},{"name":"Psychic Energy","decks":375,"quote":31.565656565656564,"avg":3.0}],"deckSumme":1188};
+
+const SPACES = {
+  jp:   { name:'Japan · City League', quelle:'City-League-Cardshops (JP)', formate:['M6','M5'],
+          hint:'Frühindikator — läuft dem internationalen Format rund zwei Monate voraus',
+          pause:true },
+  gl:   { name:'Global · Online und Majors', quelle:'Limitless Online', formate:['TEF–PBL','TEF–BLK'],
+          hint:'Das Feld, gegen das du hier antrittst' },
+  past: { name:'Vergangen · eingefrorene Formate', quelle:'Limitless Labs', formate:['SVI–ASC','BRS–SSP','BRS–SCR'],
+          hint:'Abgeschlossen — jede Quote hat hier ihren Nenner' },
+};
+
+let space = 'gl', format = 'TEF–PBL';
+
+/* Kein Einfach/Mittel/Alles mehr.
+ *
+ * Der Gedanke war: eine Stufe setzt, welche Abschnitte offen sind. Aber
+ * sobald jeder Abschnitt einzeln klappbar ist UND sich sein Zustand
+ * merkt, ist die Stufe nur noch eine zweite Art, dasselbe zu sagen —
+ * und zwei Arten, dasselbe zu sagen, sind der Grund, warum diese Seite
+ * 31 Regeln fuer sechs Knoepfe hatte.
+ *
+ * Was bleibt: ein Startzustand, den jemand einmal gewaehlt hat und der
+ * gilt, bis er ihn aendert. Die drei Abschnitte, die die Eingangsfrage
+ * beantworten, sind offen; der Rest ist zu und sichtbar vorhanden.
+ * Wer etwas zuklappt, findet es beim naechsten Mal zugeklappt vor. */
+const START_OFFEN = ['top','mu','staple'];
+let offen = null;
+try { offen = JSON.parse(localStorage.getItem('meta_sections_v1')); } catch(e){}
+if (!Array.isArray(offen)) offen = START_OFFEN.slice();
+const merken = () => { try { localStorage.setItem('meta_sections_v1', JSON.stringify(offen)); } catch(e){} };
+
+const nf = (v,d=1)=>v.toLocaleString('de-DE',{minimumFractionDigits:d,maximumFractionDigits:d});
+const ni = v=>Math.round(v).toLocaleString('de-DE');
+const pill = v => `<span class="pill ${v>2?'pos':v<-2?'neg':'zero'}">${v>0?'+':''}${v} %</span>`;
+
+/* Die Bausteine. Sichtbar sind sie immer — offen oder zu, und der
+   Zustand wird gemerkt. Das ist der ganze Unterschied zum heutigen
+   Vanilla-Modus, der 45 von 46 Bausteinen aus der Seite nimmt. */
+const SECTIONS = [
+  { id:'top',    t:'Die Top 10 des Formats', sub:()=>`10 von 120 Archetypen · n = ${ni(D.total)} gewichtete Antritte`, body:secTop },
+  { id:'mu',     t:'Matchups untereinander', sub:()=>'9 × 9 · jede Zelle mit Partienzahl', body:secMatchups },
+  { id:'staple', t:'Karten, die fast jedes Deck spielt', sub:()=>`aus ${ni(D.deckSumme)} ausgewerteten Listen`, body:secStaples },
+  { id:'tier',   t:'Tier-Liste', sub:()=>'nach Feldanteil gruppiert', body:secTier },
+  { id:'move',   t:'Bewegung gegenüber der Vorwoche', sub:()=>'Auf- und Absteiger', body:secMove },
+  { id:'full',   t:'Vollständige Tabelle · alle 120 Archetypen', sub:()=>'inkl. Rogue und Einzelantritte', body:secFull },
+  { id:'deck',   t:'Deck-Analyse — eine Liste im Detail', sub:()=>'Kartenverteilung, Preis, Tech-Slots', body:secDeck },
+];
+
+function secTop(){
+  const max = D.decks[0].s;
+  return `<div class="scroll"><table>
+    <thead><tr><th></th><th>Deck</th><th>Feldanteil</th><th></th><th>Antritte</th>
+      <th>Top 8</th><th>Top-8-Quote</th><th>ggü. Feld</th><th>Turniere</th></tr></thead>
+    <tbody>${D.decks.map((d,i)=>`<tr>
+      <td><span class="rank">${i+1}</span></td>
+      <td class="name">${d.n}</td>
+      <td class="num">${nf(d.s,2)} %</td>
+      <td style="width:90px"><span class="bar"><i style="width:${(d.s/max*100).toFixed(0)}%"></i></span></td>
+      <td class="num n">${ni(d.b)}</td>
+      <td class="num n">${ni(d.t8)}</td>
+      <td class="num">${nf(d.c,1)} %</td>
+      <td class="num">${pill(d.v)}</td>
+      <td class="num n">${d.tn}</td></tr>`).join('')}</tbody></table></div>
+    <p class="note"><b>Feldanteil</b> = wie oft ein Deck gespielt wurde, gemessen an ${ni(D.total)} gewichteten
+    Antritten. <b>Top-8-Quote</b> = wie oft es davon die Top 8 erreicht hat. <b>ggü. Feld</b> vergleicht diese
+    Quote mit dem Feld-Durchschnitt von ${nf(D.feld,2)} % und ist geglättet (Empirical Bayes, K = 50).
+    Angezeigt ab n = 20; darunter ausgegraut und ohne Farbe.</p>`;
+}
+
+/* Kurznamen fuer die Spaltenkoepfe. Das erste Wort allein reicht nicht:
+   Dragapult, Dragapult Blaziken und Dragapult Dusknoir haetten dreimal
+   "Dragapult" ueber der Spalte stehen. In einer Matchup-Tabelle ist eine
+   mehrdeutige Spaltenbeschriftung schlimmer als eine lange. */
+function kurz(name){
+  const w = name.split(' ');
+  if (w.length === 1) return w[0];
+  return w[0] + ' ' + w.slice(1).map(x=>x.slice(0,2)).join('');
+}
+
+function secMatchups(){
+  const namen = Object.keys(D.mu);
+  const kurzNamen = namen.map(kurz);
+  if (new Set(kurzNamen).size !== namen.length) {
+    console.warn('Kurznamen nicht eindeutig', kurzNamen);
+  }
+  const zelle = (a,b)=>{
+    if(a===b) return `<td class="self">—</td>`;
+    const m = (D.mu[a]||{})[b];
+    if(!m) return `<td class="self" title="keine Partien">·</td>`;
+    const d = m.wr - 50;
+    const alpha = Math.min(Math.abs(d)/25,1)*0.30;
+    const c = d>=0 ? `rgba(42,120,214,${alpha.toFixed(2)})` : `rgba(227,73,72,${alpha.toFixed(2)})`;
+    return `<td style="background:${c}" title="${a} gegen ${b}: ${m.rec} aus ${m.n} Partien">${nf(m.wr,0)}</td>`;
+  };
+  return `<div class="scroll"><table class="hm">
+    <thead><tr><th class="row"></th>${namen.map((n,i)=>`<th title="${n}">${kurzNamen[i]}</th>`).join('')}</tr></thead>
+    <tbody>${namen.map(a=>`<tr><th class="row" title="${a}">${a}</th>${namen.map(b=>zelle(a,b)).join('')}</tr>`).join('')}</tbody>
+    </table></div>
+    <div class="hm-key">
+      <span><i style="background:rgba(42,120,214,.30)"></i>über 50 %</span>
+      <span><i style="background:var(--surface-2)"></i>ausgeglichen</span>
+      <span><i style="background:rgba(227,73,72,.30)"></i>unter 50 %</span>
+      <span>Zahl = Siegquote der Zeile gegen die Spalte</span>
+    </div>
+    <p class="note">Alle gezeigten Zellen liegen über n = 20; die kleinste hat
+    ${ni(Math.min(...Object.values(D.mu).flatMap(o=>Object.values(o).map(m=>m.n))))} Partien,
+    die größte ${ni(Math.max(...Object.values(D.mu).flatMap(o=>Object.values(o).map(m=>m.n))))}.
+    Blau–rot statt grün–rot, damit die Aussage auch ohne Farbsehen ankommt.</p>`;
+}
+
+function secStaples(){
+  return `<div class="scroll"><table>
+    <thead><tr><th>Karte</th><th>Listen mit dieser Karte</th><th></th><th>Anteil</th><th>Ø Kopien</th></tr></thead>
+    <tbody>${D.st.map(s=>`<tr>
+      <td class="name">${s.name}</td>
+      <td class="num n">${ni(s.decks)} von ${ni(D.deckSumme)}</td>
+      <td style="width:110px"><span class="bar"><i style="width:${s.quote.toFixed(0)}%"></i></span></td>
+      <td class="num">${nf(s.quote,1)} %</td>
+      <td class="num">${nf(s.avg,1)}×</td></tr>`).join('')}</tbody></table></div>
+    <p class="note">Aus ${ni(D.deckSumme)} ausgewerteten Listen des laufenden Formats. „Ø Kopien" zählt nur
+    die Listen, die die Karte überhaupt spielen.</p>`;
+}
+
+function secTier(){
+  const t1 = D.decks.filter(d=>d.s>=7), t2 = D.decks.filter(d=>d.s>=5&&d.s<7), t3 = D.decks.filter(d=>d.s<5);
+  const grp=(name,arr,erkl)=>!arr.length?'':`<h4 style="margin:16px 0 6px;font-size:var(--fs-md)">${name}
+    <span class="n" style="font-weight:400"> — ${erkl}</span></h4>
+    <div class="deckgrid">${arr.map(d=>`<div class="dcard"><b>${d.n}</b>${nf(d.s,2)} % Feldanteil ·
+      Top-8 ${nf(d.c,1)} % ${pill(d.v)}</div>`).join('')}</div>`;
+  return grp('Tier 1',t1,'ab 7 % Feldanteil')+grp('Tier 2',t2,'5 bis 7 %')+grp('Tier 3',t3,'unter 5 %')+
+    `<p class="note">Die Grenzen sind gesetzt, nicht gemessen: 7 % und 5 % Feldanteil. Sie stehen hier,
+     damit niemand sie erraten muss.</p>`;
+}
+
+function secMove(){
+  return `<p class="note" style="margin-top:0">Platzhalter im Entwurf — die Wochenvergleichsdaten liegen in
+  <code>online_share_history/</code> und werden hier eingehängt. Im Entwurf steht bewusst kein erfundener Wert.</p>`;
+}
+
+function secFull(){
+  return `<p class="note" style="margin-top:0">Alle 120 Archetypen, sortierbar und filterbar. Heute ist das
+  eine Tabelle mit 2.479 px Höhe = 22 % der ganzen Seite, ganz unten, ohne Sortierung. Im Entwurf liegt sie
+  hinter dieser Überschrift — sichtbar, dass es sie gibt, aber sie beansprucht keinen Platz mehr,
+  bis jemand sie öffnet.</p>`;
+}
+
+function secDeck(){
+  return `<p class="note" style="margin-top:0">Der Deckbau-Teil liegt als unterster Abschnitt <b>in derselben
+  Ansicht</b> — nicht in einem eigenen Reiter. Wer nur bauen will, klappt oben alles zu; die Auswahl merkt
+  sich die Seite. Heute sind das zwei getrennte Reiter (<code>current-meta</code> und
+  <code>current-analysis</code>), und der zweite öffnet ohne gewähltes Deck als leeres Formular mit 768 px.</p>
+  <div class="empty" style="margin-top:12px"><b>Kein Deck gewählt</b>
+  Wähle oben in der Tabelle ein Deck — dann erscheinen hier Kartenliste, Preis und Tech-Slots.</div>`;
+}
+
+function renderFilters(){
+  const s = SPACES[space];
+  document.getElementById('spaceHint').textContent = s.hint;
+  const sf = document.getElementById('segFormat');
+  sf.innerHTML = s.formate.map(f=>`<button data-v="${f}"${f===format?' class="on"':''}>${f}</button>`).join('');
+  sf.querySelectorAll('button').forEach(b=>b.onclick=()=>{format=b.dataset.v;render()});
+  document.getElementById('formatHint').textContent =
+    space==='past' ? 'Nur abgeschlossene Fenster' : 'Nur Formate dieses Datenraums';
+  document.querySelectorAll('#segSpace button').forEach(b=>b.classList.toggle('on',b.dataset.v===space));
+}
+
+function renderBadge(){
+  const s = SPACES[space];
+  const b = document.getElementById('badge');
+  b.dataset.space = space;
+  const teile = [`<b>${s.name}</b>`, `Format <b>${format}</b>`, `Quelle <b>${s.quelle}</b>`];
+  if(space==='gl') teile.push(`Stichprobe <b>${ni(D.total)} gewichtete Antritte</b>`, `Stand <b>18.08.2026</b>`);
+  if(space==='jp') teile.push(`<span class="note">Sommerpause seit 31.07. — keine aktuellen Daten</span>`);
+  if(space==='past') teile.push(`<b>2 Turniere · 337 Spieler</b>`);
+  b.innerHTML = teile.join('<span class="sep">·</span>') +
+    `<span class="sep">·</span><span class="note">wird nie mit den anderen Datenräumen verrechnet</span>`;
+}
+
+function renderAnswer(){
+  const a = document.getElementById('answer');
+  if(space!=='gl'){ a.innerHTML=''; return; }
+  const best = D.decks.reduce((x,y)=>y.v>x.v?y:x);
+  a.innerHTML = `<div class="answer"><span class="answer-lab">Was ist gerade stark?</span>
+    <p class="answer-txt"><b>${best.n}</b> ist derzeit das erfolgreichste Deck:
+    <b>${nf(best.c,1)} %</b> von ${ni(best.b)} Antritten erreichen die Top 8 —
+    <b>${best.v>0?'+':''}${best.v} %</b> gegenüber dem Feld-Durchschnitt von ${nf(D.feld,2)} %, geglättet.
+    Meistgespielt ist ${D.decks[0].n} mit ${nf(D.decks[0].s,2)} % Feldanteil.</p></div>`;
+}
+
+function renderSections(){
+  const host = document.getElementById('sections');
+  if(space==='jp'){
+    host.innerHTML = `<div class="sec open"><div class="sec-body" style="padding:16px">
+      <div class="empty"><b>Sommerpause</b>
+      Die City League pausiert seit dem 31.07.2026. Es gibt keine neuen japanischen Daten — die letzte
+      Momentaufnahme kannst du weiter ansehen, aber sie wird nicht frischer.
+      <br><button class="linkbtn" onclick="document.querySelector('#segSpace [data-v=gl]').click()">
+      Zum globalen Meta wechseln</button></div></div></div>`;
+    return;
+  }
+  host.innerHTML = SECTIONS.map(s=>{
+    const auf = offen.includes(s.id);
+    return `<div class="sec${auf?' open':''}" data-id="${s.id}">
+      <button class="sec-hd"><span class="sec-arrow">▶</span>
+        <span class="sec-t">${s.t}</span>
+        <span class="sec-sub">${s.sub()}</span></button>
+      <div class="sec-body">${s.body()}</div></div>`;
+  }).join('');
+  host.querySelectorAll('.sec-hd').forEach(h=>h.onclick=()=>{
+    const sec=h.parentElement, id=sec.dataset.id;
+    sec.classList.toggle('open');
+    offen = sec.classList.contains('open') ? [...new Set([...offen,id])] : offen.filter(x=>x!==id);
+    merken(); renderReset();
+  });
+  renderReset();
+}
+
+/* Kein Modus — aber ein Rueckweg. Wer sich verklickt hat, kommt mit
+   einem Wort zurueck, ohne zu wissen, welche sechs Abschnitte er
+   wieder anfassen muesste. Steht nur da, wenn etwas abweicht. */
+function renderReset(){
+  const host=document.getElementById('resetRow');
+  if(!host) return;
+  const gleich = offen.length===START_OFFEN.length && START_OFFEN.every(x=>offen.includes(x));
+  host.innerHTML = gleich ? '' :
+    `<button class="resetbtn" id="btnReset">Ansicht zurücksetzen</button>
+     <span class="n">${offen.length} von ${SECTIONS.length} Abschnitten offen</span>`;
+  const b=document.getElementById('btnReset');
+  if(b) b.onclick=()=>{ offen=START_OFFEN.slice(); merken(); renderSections(); };
+}
+
+function render(){ renderFilters(); renderBadge(); renderAnswer(); renderSections(); }
+
+document.querySelectorAll('#segSpace button').forEach(b=>b.onclick=()=>{
+  space=b.dataset.v; format=SPACES[space].formate[0]; render();
+});
+document.getElementById('bDesk').onclick=e=>{ stage.className='pt-stage desktop';
+  bDesk.classList.add('on'); bMob.classList.remove('on'); };
+document.getElementById('bMob').onclick=e=>{ stage.className='pt-stage mobil';
+  bMob.classList.add('on'); bDesk.classList.remove('on'); };
+document.getElementById('bDark').onclick=e=>{
+  const d=document.documentElement.dataset.theme==='dark';
+  document.documentElement.dataset.theme=d?'light':'dark';
+  e.target.classList.toggle('on',!d);
+};
+render();
+</script>
+</body>
+</html>

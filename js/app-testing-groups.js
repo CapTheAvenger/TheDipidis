@@ -1019,8 +1019,9 @@ window.TestingGroups = (function () {
     const result = window.MetaCall._testingGroupLoad(g.data);
     // Jump to the MetaCall tab so the user sees the imported data
     // immediately instead of having to navigate there manually.
-    if (typeof switchProfileTab === 'function') {
-      switchProfileTab('metacall');
+    // Meta Call ist ein eigener Tab, kein Profil-Untertab mehr.
+    if (typeof switchTabAndUpdateMenu === 'function') {
+      switchTabAndUpdateMenu('meta-call');
     }
     const summary = (result && typeof result === 'object')
       ? t('tg.loadedIntoMetaCallSummary')

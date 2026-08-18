@@ -1396,6 +1396,12 @@ const BASE_PATH = './data/';
                         renderProxyQueue();
                         initializeProxyManualSearchInput();
                         break;
+                    // Meta Call ist seit dem 18.08.2026 ein eigener Tab. Vorher
+                    // hing die Initialisierung an switchProfileTab('metacall')
+                    // und damit an der Anmeldung.
+                    case 'meta-call':
+                        if (typeof MetaCall !== 'undefined') MetaCall.init();
+                        break;
                 }
             }
 

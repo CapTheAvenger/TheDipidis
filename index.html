@@ -513,6 +513,9 @@
                                     <span class="menu-item-label">Probability Calculator</span>
                                 </button>
                             </div>
+                            <button id="menu-btn-meta-call" class="menu-item" data-tab-id="meta-call" onclick="switchTabAndUpdateMenu('meta-call')" data-i18n="menu.metaCall" role="menuitem" data-i18n-title="menu.metaCallTitle" title="Meta Call — vorhergesagtes Feld für dein nächstes Turnier">
+                                Meta Call
+                            </button>
                             <button id="menu-btn-profile" class="menu-item" data-tab-id="profile" onclick="switchTabAndUpdateMenu('profile')" data-i18n="menu.profile" role="menuitem">
                                 <span class="menu-item-label">My Profile</span>
                             </button>
@@ -1950,6 +1953,30 @@
             </div>
 
             <!-- Tab 6: Cards -->
+            <!-- Tab: Meta Call ────────────────────────────────────────────────
+                 Bis zum 18.08.2026 lag dieses Modul als Untertab in
+                 #profile-content und war damit ausgeloggt unsichtbar.
+                 Gezaehlt: 10.839 Zeilen in js/app-meta-call.js, davon
+                 null Treffer fuer currentUser / getCurrentUser /
+                 window.auth. Die Szenarien liegen in localStorage, die
+                 Felddaten in data/. Es brauchte den Login nie — nur den
+                 Container.
+
+                 Die eine Stelle, die Angemeldetes liest, ist der
+                 Journal-Blend ueber window.getBattleJournalWinRates().
+                 Ausgeloggt ist der Journal-Cache leer, die Funktion
+                 liefert {} und die Vorhersage laeuft ohne den Blend
+                 weiter — kein Sonderfall noetig. -->
+            <div id="meta-call" class="tab-content">
+                <div class="container">
+                    <nav class="tool-back-nav" aria-label="Back navigation">
+                        <button type="button" class="tool-back-btn" onclick="switchTabAndUpdateMenu('meta-analysis-hub')" data-i18n="metaHub.backToOverview">← Übersicht</button>
+                    </nav>
+                    <!-- Befuellt von MetaCall.init() -->
+                    <div id="metaCallHost"></div>
+                </div>
+            </div>
+
             <div id="cards" class="tab-content">
                 <div class="header">
                     <h2><span data-i18n="cards.heading">Card Database</span> <button class="tab-help-btn" onclick="openTabHelp('cards')" title="Help" aria-label="Help for Card Database" data-i18n-title="btn.helpTitle"></button> <span class="data-freshness-chip" title="Daten zuletzt aktualisiert"><span class="data-freshness-chip-icon" aria-hidden="true">🔄</span> <span data-i18n="data.updated">Daten:</span> <span class="js-data-freshness">…</span></span></h2>
@@ -2348,8 +2375,13 @@
                                     <button class="profile-tab-btn" onclick="switchProfileTab('testinggroups')">
                                         <span data-i18n="tg.title">Testing Groups</span>
                                     </button>
-                                    <button class="profile-tab-btn" onclick="switchProfileTab('metacall')">
-                                        <span>Meta Call</span>
+                                    <!-- Meta Call ist kein Profil-Untertab mehr: es braucht
+                                         keinen Login (0 currentUser-Treffer in 10.839 Zeilen)
+                                         und lag nur wegen des Containers hinter der Anmeldung.
+                                         Der Knopf bleibt, wo ihn die Nutzer gelernt haben, und
+                                         fuehrt in den eigenen Tab. -->
+                                    <button class="profile-tab-btn" onclick="switchTabAndUpdateMenu('meta-call')">
+                                        <span>Meta Call →</span>
                                     </button>
                                 </div>
                             </div>
@@ -2722,11 +2754,6 @@
                             <!-- Rendered dynamically by ProfileDeckBuilder.activate()
                                  on first switchProfileTab('deckbuilder'). Search /
                                  deck list / mulligan calculator all live here. -->
-                        </div>
-
-                        <!-- Meta Call Tab -->
-                        <div id="profile-metacall" class="profile-tab-content display-none">
-                            <!-- Rendered dynamically by MetaCall.init() -->
                         </div>
 
                         <!-- Testing Groups Tab -->

@@ -41,8 +41,8 @@
           tabs: ['current-meta', 'city-league', 'past-meta'] },
         { id: 'decks',     go: 'current-analysis',  gl: '▤',
           tabs: ['current-analysis', 'city-league-analysis'] },
-        { id: 'turnier',   go: 'profile',           gl: '★',
-          tabs: [] },                       // Profil ist geteilt, siehe unten
+        { id: 'turnier',   go: 'meta-call',         gl: '★',
+          tabs: ['meta-call'] },            // Profil ist geteilt, siehe unten
         { id: 'karten',    go: 'cards',             gl: '◫',
           tabs: ['cards', 'proxy', 'calculator'] },
         { id: 'champions', go: 'side-quest',        gl: '◆', alt: true,
@@ -110,14 +110,15 @@
         for (var i = 0; i < GROUPS.length; i++) {
             if (GROUPS[i].tabs.indexOf(tabId) !== -1) return GROUPS[i].id;
         }
-        // Das Profil trägt zwei Gruppen: Meta Call und Battle Journal sind
-        // Turniervorbereitung, alles andere gehört zu den Karten. Bis Meta
-        // Call aus #profile-content herausgelöst ist (eigener Schritt),
-        // entscheidet der aktive Untertab.
+        // Das Profil trägt weiterhin zwei Gruppen: das Battle Journal ist
+        // Turniervorbereitung, Decks / Wunschliste / Sammlung gehören zu
+        // den Karten. Meta Call steht seit dem 18.08.2026 nicht mehr in
+        // dieser Liste — es hat einen eigenen Tab und damit einen eigenen
+        // Eintrag oben.
         if (tabId === 'profile') {
             var sub = document.querySelector('.profile-tab-btn.active');
             var key = sub && (sub.dataset.profileTab || sub.getAttribute('onclick') || '');
-            return /metacall|journal/i.test(key || '') ? 'turnier' : 'karten';
+            return /journal/i.test(key || '') ? 'turnier' : 'karten';
         }
         if (tabId === 'tutorial') return 'start';
         return null;

@@ -7896,7 +7896,7 @@ window.MetaCall = (function () {
 
   // ── Full Render ────────────────────────────────────────────
   function renderAll() {
-    const container = document.getElementById('profile-metacall');
+    const container = document.getElementById('metaCallHost');
     if (!container || !_shareList) return;
     const field = buildField();
     // Date-window control — duplicates the picker in Card Analysis so
@@ -8762,7 +8762,7 @@ window.MetaCall = (function () {
   }
 
   function refreshResults() {
-    const container = document.getElementById('profile-metacall');
+    const container = document.getElementById('metaCallHost');
     if (!container || !_shareList) return;
     const field = buildField();
     const fieldTbody = container.querySelector('.metacall-table tbody');
@@ -10501,8 +10501,14 @@ window.MetaCall = (function () {
   }
 
   // ── Public Init ────────────────────────────────────────────
+  //
+  // Zielcontainer ist seit dem 18.08.2026 #metaCallHost im eigenen Tab
+  // #meta-call, nicht mehr #profile-metacall in #profile-content. Der
+  // alte Container lag hinter der Anmeldung, obwohl dieses Modul in
+  // 10.839 Zeilen keinen einzigen Treffer fuer currentUser,
+  // getCurrentUser oder window.auth hat.
   async function init() {
-    const container = document.getElementById('profile-metacall');
+    const container = document.getElementById('metaCallHost');
     if (!container) return;
     if (_shareList && _matchupMap) { renderAll(); return; }
 

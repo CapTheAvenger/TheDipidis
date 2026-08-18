@@ -119,6 +119,18 @@ function initFirebaseRuntime() {
   // Auth state observer — handlers are defined in firebase-globals.js.
   const _fbDev = typeof DEV_MODE !== 'undefined' ? DEV_MODE : false;
   firebase.auth().onAuthStateChanged(function(user) {
+    // Eine Klasse am <html>, damit CSS weiss, ob jemand angemeldet ist.
+    //
+    // Die Kartendatenbank rendert ausgeloggt 180 Sammlungs-, Wunschlisten-
+    // und Tauschlisten-Knoepfe (gezaehlt am 18.08.2026, von 291 Knoepfen
+    // im Tab). Sie bleiben sichtbar — wer die Funktion nie sieht, sucht
+    // sie auch nicht —, aber sie sehen jetzt aus, wie sie sich verhalten:
+    // gedaempft, mit Schloss im Titel, und ein Klick oeffnet die
+    // Anmeldung statt einer roten Fehlermeldung.
+    try {
+      document.documentElement.classList.toggle('is-signed-out', !user);
+      document.documentElement.classList.toggle('is-signed-in', !!user);
+    } catch (e) { /* nie an einer Klasse scheitern */ }
     if (user) {
       console.info('[Auth] Firebase state: signed in', user.email || user.uid || 'unknown-user');
       if (_fbDev) console.log('✓ User signed in:', user.email);

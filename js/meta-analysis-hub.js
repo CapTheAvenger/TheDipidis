@@ -274,14 +274,30 @@
             </section>`;
     }
 
+    // Zwei Hosts, ein Rechenweg.
+    //
+    // Seit dem 18.08.2026 ist die Meta-Ansicht die Startseite und der
+    // Hub nur noch ueber das Pokeball-Menue erreichbar. Der Antwortblock
+    // ist der beste Teil des Hubs — er beantwortet "was ist gerade
+    // stark" ohne einen einzigen Klick. Ihn dort zu lassen hiesse, ihn
+    // zu verlieren.
+    //
+    // Bewusst DIESELBE Funktion und dieselbe Datei fuer beide Stellen:
+    // zwei Herleitungen waeren zwei Wahrheiten, und genau davon hatte
+    // diese Seite vier Siegquoten fuer ein Deck auf einem Bildschirm.
+    const ANSWER_HOSTS = [ANSWER_HOST_ID, 'metaAnswerTop'];
+
     async function renderAnswer() {
-        const host = document.getElementById(ANSWER_HOST_ID);
-        if (!host) return;
+        const hosts = ANSWER_HOSTS
+            .map(id => document.getElementById(id))
+            .filter(Boolean);
+        if (!hosts.length) return;
         const rows = await loadAnswerRows();
         const model = answerModel(rows);
         // Kein Modell, kein Block: eine leere Kachelreihe mit Strichen
         // wäre schlechter als gar keine.
-        host.innerHTML = model ? answerHtml(model) : '';
+        const html = model ? answerHtml(model) : '';
+        hosts.forEach(h => { h.innerHTML = html; });
     }
 
     function renderTiles() {
@@ -365,7 +381,24 @@
         return document.getElementById(subTabId);
     }
 
+    // Die Hub-Unterleiste ist seit dem 18.08.2026 stillgelegt.
+    //
+    // Sie listete "← Uebersicht · City League Meta · Deck-Analyse
+    // (Japan) · Aktuelles Meta (Global) · Deck-Analyse (Global) ·
+    // Vergangenes Meta · Meta Call" ueber jeder dieser Ansichten. Seit
+    // die Meta-Ansicht die Startseite ist, stand sie als DRITTE
+    // Navigationsebene zwischen Hauptnavigation und Filterzeile — und
+    // die ersten drei Eintraege sind genau das, was der Datenraum-Filter
+    // eine Zeile tiefer schon anbietet. Die uebrigen erreicht die
+    // Hauptnavigation unter "Decks" und "Turnier".
+    //
+    // Bewusst ein frueher Ausstieg statt geloeschter Aufrufe: die
+    // Funktion bleibt samt Bauplan stehen, alle Aufrufer laufen weiter,
+    // und clearAllSubNavHosts() raeumt weiter auf. Eine Zeile zurueck,
+    // und die Leiste ist wieder da.
     function injectSubNav(subTabId) {
+        if (true) return null;
+
         clearAllSubNavHosts();
         const tabEl = _hostElementFor(subTabId);
         if (!tabEl) return;
@@ -438,6 +471,11 @@
             renderTiles();
             return;
         }
+        // Die Meta-Ansicht ist seit dem 18.08.2026 die Startseite und
+        // traegt den Antwortblock mit. Beim Wechsel dorthin muss er
+        // gefuellt werden — beim Seitenstart erledigt das der
+        // DOMContentLoaded-Aufruf, beim Wechsel sonst niemand.
+        if (tabId === 'current-meta') renderAnswer();
         if (isSubTab(tabId)) {
             injectSubNav(tabId);
             return;

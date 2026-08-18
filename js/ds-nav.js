@@ -34,11 +34,22 @@
     // Gruppe -> { Standardziel, Mitglieder }. Die Mitglieder entscheiden,
     // welcher Knopf aktiv leuchtet, wenn man über einen anderen Weg
     // (Pokéball, Hub-Kachel, Deep-Link) in einem Tab landet.
+    // "Start" gibt es seit dem 18.08.2026 nicht mehr.
+    //
+    // Der Hub war eine Seite, die auf die Antwort zeigt — also ein Klick
+    // VOR der Antwort. Seit die Meta-Ansicht selbst die Startseite ist
+    // und ihre Bausteine klappen (js/ds-sections.js), zeigte er auf
+    // etwas, das man schon sieht. Der Reiter existiert weiter und ist
+    // ueber das Pokeball-Menue erreichbar; er ist nur kein eigener
+    // Navigationspunkt mehr.
+    //
+    // Nebeneffekt, der ein offener Befund war: ohne "Start" bleiben
+    // genau fuenf Ziele, und Champions passt endlich in die
+    // Mobil-Leiste. Bis heute gab es ausserhalb des Pokeball-Menues
+    // keinen einzigen sichtbaren Weg dorthin.
     var GROUPS = [
-        { id: 'start',     go: 'meta-analysis-hub', gl: '◉',
-          tabs: ['meta-analysis-hub'] },
         { id: 'meta',      go: 'current-meta',      gl: '▦',
-          tabs: ['current-meta', 'city-league', 'past-meta'] },
+          tabs: ['current-meta', 'city-league', 'past-meta', 'meta-analysis-hub'] },
         { id: 'decks',     go: 'current-analysis',  gl: '▤',
           tabs: ['current-analysis', 'city-league-analysis'] },
         { id: 'turnier',   go: 'meta-call',         gl: '★',
@@ -50,9 +61,9 @@
     ];
 
     var LABELS = {
-        de: { start: 'Start', meta: 'Meta', decks: 'Decks', turnier: 'Turnier',
+        de: { meta: 'Meta', decks: 'Decks', turnier: 'Turnier',
               karten: 'Karten', champions: 'Champions' },
-        en: { start: 'Home', meta: 'Meta', decks: 'Decks', turnier: 'Event',
+        en: { meta: 'Meta', decks: 'Decks', turnier: 'Event',
               karten: 'Cards', champions: 'Champions' }
     };
 
@@ -137,10 +148,11 @@
         }).join('');
 
         if (bar) {
-            // Auf Mobil fünf Ziele — Champions ist der seltenste und bleibt
-            // dem Pokéball-Menü vorbehalten, statt einen Platz zu belegen,
-            // den Karten oder Turnier täglich brauchen.
-            bar.innerHTML = GROUPS.filter(function (g) { return !g.alt; }).map(function (g) {
+            // Auf Mobil dieselben fuenf Ziele wie oben, Champions
+            // eingeschlossen. Vorher blieb es dem Pokeball-Menue
+            // vorbehalten, weil "Start" den Platz belegte — gemessen:
+            // null sichtbare Wege zu side-quest ausserhalb des Menues.
+            bar.innerHTML = GROUPS.map(function (g) {
                 return '<button type="button" class="ds-tabbar-btn" data-ds-group="' + g.id + '">' +
                     '<span class="ds-tabbar-gl" aria-hidden="true">' + g.gl + '</span>' +
                     esc(L[g.id]) + '</button>';
@@ -336,7 +348,7 @@
         window.addEventListener('languageChanged', function () { window.DsNav.refresh(); });
 
         var active = document.querySelector('.tab-content.active');
-        onTab(active ? active.id : 'meta-analysis-hub');
+        onTab(active ? active.id : 'current-meta');
     }
 
     if (document.readyState === 'loading') {

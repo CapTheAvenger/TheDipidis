@@ -17,7 +17,12 @@
         { id: 'current-meta',         tileKey: 'currentMeta' },
         { id: 'current-analysis',     tileKey: 'currentMetaAnalysis' },
         { id: 'past-meta',            tileKey: 'pastMeta' },
-        { id: 'meta-call',            tileKey: 'metaCall', topTab: 'profile', profileSubTab: 'metacall' }
+        // Block 7 hat Meta Call zu einem eigenen Tab gemacht, diese Zeile
+        // blieb stehen: die Kachel schickte weiter ins Profil und damit
+        // gegen die Anmeldewand — 900 px "Sign in to unlock all features"
+        // statt 5.012 px gefuellte Feldtabelle. Meta Call braucht keine
+        // Anmeldung, genau das war der Sinn von Block 7.
+        { id: 'meta-call',            tileKey: 'metaCall', topTab: 'meta-call' }
     ];
 
     const SUB_NAV_HOST_ID = 'metaHubSubNavHost';

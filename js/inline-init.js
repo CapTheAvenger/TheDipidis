@@ -32,9 +32,34 @@ function syncMenuClustersForTab(tabId) {
 }
 
 function toggleMainMenu() {
-    document.getElementById('mainMenuDropdown').classList.toggle('show');
-    document.getElementById('mainMenuTrigger').classList.toggle('open');
+    const drop = document.getElementById('mainMenuDropdown');
+    const trig = document.getElementById('mainMenuTrigger');
+    const open = drop.classList.toggle('show');
+    trig.classList.toggle('open', open);
+    // aria-expanded stand fest auf "false" im Markup und wurde nie
+    // nachgezogen. Ein Menue, das sich nicht ansagt, ist fuer eine
+    // Sprachausgabe dauerhaft geschlossen.
+    trig.setAttribute('aria-expanded', String(open));
 }
+
+// Der Pokeball ist ein div mit onclick. Bis zum 18.08.2026 hatte er
+// weder tabindex noch role — gemessen: 19 Tabstopps auf der Startseite,
+// der Pokeball in keinem davon. Auf dem Telefon fuehrt er als einziger
+// Weg zu Side Quest, Anleitung, Druckliste, Rechner und Profil; die
+// untere Leiste kennt nur fuenf Ziele. Wer nicht zeigen kann, sondern
+// tippt, fuer den existierten diese fuenf Bereiche schlicht nicht.
+//
+// Markup traegt jetzt role="button" tabindex="0"; ein Knopf muss auf
+// Enter UND Leertaste reagieren, sonst ist die Rolle eine Behauptung.
+document.addEventListener('DOMContentLoaded', function () {
+    const trig = document.getElementById('mainMenuTrigger');
+    if (!trig) return;
+    trig.addEventListener('keydown', function (e) {
+        if (e.key !== 'Enter' && e.key !== ' ' && e.key !== 'Spacebar') return;
+        e.preventDefault();          // sonst scrollt die Leertaste die Seite
+        toggleMainMenu();
+    });
+});
 
 function switchTabAndUpdateMenu(tabId) {
     if (typeof switchTab === 'function') {

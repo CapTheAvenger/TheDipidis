@@ -3,8 +3,34 @@
    ═══════════════════════════════════════════════════════════════ */
 
 const I18N_STORAGE_KEY = 'app_lang';
-const I18N_DEFAULT_LANG = 'en';
 const I18N_SUPPORTED = ['en', 'de'];
+
+/* Wohin ein Schluessel faellt, den die aktive Sprache nicht kennt.
+   Beide Woerterbuecher haben heute exakt 1.745 Schluessel und decken
+   sich vollstaendig — der Rueckfall ist reine Vorsorge und bleibt auf
+   Englisch, weil neue Schluessel dort zuerst entstehen. */
+const I18N_FALLBACK_LANG = 'en';
+
+/* Was ein Besucher OHNE gespeicherte Wahl sieht.
+   Stand bis zum 18.08.2026 hart auf 'en' — auf einer Seite, deren
+   eigene Kopfzeile "Dein Portal fuer Meta-Analyse & Deckbau" heisst
+   und deren Nutzer deutsch sprechen. Jeder erste Besuch begann also in
+   der falschen Sprache, und der Umschalter half nicht weiter (siehe
+   unten).
+   Jetzt entscheidet die Browsersprache, und wenn die nichts Brauchbares
+   sagt, Deutsch. Eine gespeicherte Wahl schlaegt beides. */
+function i18nPreferredLang() {
+    try {
+        const tags = (navigator.languages && navigator.languages.length)
+            ? navigator.languages
+            : [navigator.language || ''];
+        for (const tag of tags) {
+            const base = String(tag).toLowerCase().split('-')[0];
+            if (I18N_SUPPORTED.includes(base)) return base;
+        }
+    } catch (e) { /* kein navigator, z. B. im Test */ }
+    return 'de';
+}
 
 /* ── translation dictionary ─────────────────────────────────── */
 const translations = {
@@ -18,7 +44,7 @@ const translations = {
     'header.cardsShort':      'Database',
     'header.myDecks':         'My Decks',
     'header.wishlist':        'Wishlist',
-    'header.switchLanguageTitle':'Switch language',
+    'header.switchLanguageTitle':'Switch to German',
 
     // ── Sidebar / Main Menu ──────────────────────────────────
     'menu.title':             'Main Menu',
@@ -852,6 +878,7 @@ const translations = {
     'arc.matchupsToggle':       'Show matchups ({n})',
     'arc.showAll':              'All {n}',
     'arc.shareImage':           'Image',
+    'tutorial.loading':         'Loading the guide \u2026',
     'cl.usageBarTitle':         'of the analysed lists play this card',
     'cl.skelMain':              'Main Cards',
     'cl.skelMainHint':          '(staples + #1 Ace Spec)',
@@ -1892,7 +1919,7 @@ const translations = {
 
     // ── Tutorial heading ─────────────────────────────────────
     'tutorial.heading':         'How to Use This Website',
-    'tutorial.subtitle':        'Complete guide to Pokémon TCG analysis, deck building, and playtesting — v46 (May 2026)',
+    'tutorial.subtitle':        'Complete guide to Pokémon TCG analysis, deck building and playtesting.',
 
     // ── Misc shared ──────────────────────────────────────────
     'misc.loading':             'Loading...',
@@ -1960,7 +1987,7 @@ const translations = {
     'header.cardsShort':      'Datenbank',
     'header.myDecks':         'Meine Decks',
     'header.wishlist':        'Wunschliste',
-    'header.switchLanguageTitle':'Sprache wechseln',
+    'header.switchLanguageTitle':'Auf Englisch umschalten',
 
     // ── Sidebar / Main Menu ──────────────────────────────────
     'menu.title':             'Hauptmenü',
@@ -2788,6 +2815,7 @@ const translations = {
     'arc.matchupsToggle':       'Matchups anzeigen ({n})',
     'arc.showAll':              'Alle {n}',
     'arc.shareImage':           'Bild',
+    'tutorial.loading':         'Anleitung wird geladen \u2026',
     'cl.usageBarTitle':         'der ausgewerteten Listen spielen diese Karte',
     'cl.skelMain':              'Kernkarten',
     'cl.skelMainHint':          '(Pflichtkarten + erster Ace Spec)',
@@ -3824,7 +3852,7 @@ const translations = {
 
     // ── Tutorial ─────────────────────────────────────────────
     'tutorial.heading':         'So funktioniert diese Website',
-    'tutorial.subtitle':        'Vollständige Anleitung für Pokémon TCG-Analyse, Deckbau und Playtesting — v46 (Mai 2026)',
+    'tutorial.subtitle':        'Vollständige Anleitung für Meta-Analyse, Deckbau und Playtesting.',
 
     // ── Sonstiges ────────────────────────────────────────────
     'misc.loading':             'Laden...',
@@ -3884,9 +3912,8 @@ const translations = {
 };
 
 /* ── state ───────────────────────────────────────────────────── */
-let currentLang = localStorage.getItem(I18N_STORAGE_KEY)
-                  || I18N_DEFAULT_LANG;
-if (!I18N_SUPPORTED.includes(currentLang)) currentLang = I18N_DEFAULT_LANG;
+let currentLang = localStorage.getItem(I18N_STORAGE_KEY) || i18nPreferredLang();
+if (!I18N_SUPPORTED.includes(currentLang)) currentLang = i18nPreferredLang();
 
 /* ── core API ────────────────────────────────────────────────── */
 
@@ -3897,7 +3924,7 @@ if (!I18N_SUPPORTED.includes(currentLang)) currentLang = I18N_DEFAULT_LANG;
 function t(key) {
   const lang = translations[currentLang];
   if (lang && lang[key] !== undefined) return lang[key];
-  const fallback = translations[I18N_DEFAULT_LANG];
+  const fallback = translations[I18N_FALLBACK_LANG];
   if (fallback && fallback[key] !== undefined) return fallback[key];
   return key;                     // last resort: show the key
 }
@@ -3983,9 +4010,23 @@ function updateTranslationsInDOM() {
     if (key) el.setAttribute('aria-label', t(key));
   });
 
-  // Update the language toggle button label (show active language)
+  // Der Umschalter zeigt das ZIEL, nicht den Zustand.
+  //
+  // Bis zum 18.08.2026 stand dort die aktive Sprache: ein deutscher
+  // Nutzer sah "DE" und hatte keinen Hinweis, dass ein Klick nach
+  // Englisch fuehrt — die Beschriftung beschrieb, wo man ist, statt
+  // wohin der Knopf geht. Ein Knopf beschriftet seine Wirkung.
   const toggle = document.getElementById('langToggleBtn');
-  if (toggle) toggle.textContent = currentLang === 'de' ? 'DE' : 'EN';
+  if (toggle) {
+    const target = currentLang === 'de' ? 'en' : 'de';
+    toggle.textContent = target.toUpperCase();
+    // Der Titel kommt aus dem Woerterbuch: die deutsche Fassung sagt
+    // "Auf Englisch umschalten", die englische "Switch to German" —
+    // gelesen wird immer die aktive Sprache, also stimmt die Richtung
+    // von selbst. Die data-i18n-title-Schleife oben hat den Wert schon
+    // gesetzt; hier steht nur noch das aria-label nach.
+    toggle.setAttribute('aria-label', toggle.title || t('header.switchLanguageTitle'));
+  }
 
   // Update CSS custom property for close-button tooltips
   document.documentElement.style.setProperty('--close-tooltip', `'${t('btn.close')}'`);

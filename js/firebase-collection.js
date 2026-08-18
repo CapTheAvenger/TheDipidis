@@ -5044,18 +5044,16 @@ function _printSavedDeckHelper(deck, missingOnly) {
     }
 
     // Push everything in one batch — suppressRender / suppressToast
-    // / suppressPersist on each call means we render and persist
-    // exactly once at the end.
+    // on each call means we render exactly once at the end.
     if (typeof addCardToProxyInternal !== 'function') {
         console.error('[My Decks] Proxy queue helper not loaded yet');
         return;
     }
     items.forEach(it => {
         addCardToProxyInternal(it.name, it.setCode, it.number, it.copies, {
-            suppressToast: true, suppressRender: true, suppressPersist: true
+            suppressToast: true, suppressRender: true
         });
     });
-    if (typeof saveProxyQueue === 'function') saveProxyQueue();
     if (typeof renderProxyQueue === 'function') renderProxyQueue();
 
     if (typeof showToast === 'function') {

@@ -716,10 +716,17 @@ const BASE_PATH = './data/';
             }
         }
 
-        function saveProxyQueue() {
-            // Proxy queue persistence was intentionally removed.
-        }
-
+        // Die Druckliste lebt nur solange die Seite offen ist. Das ist
+        // Absicht: clearLegacyProxyQueueStorage() raeumt den alten
+        // Eintrag proxyQueueV1 aktiv weg, damit keine Liste von
+        // vorgestern wieder auftaucht.
+        //
+        // Frueher stand hier zusaetzlich ein saveProxyQueue(), das
+        // nichts tat, und durch sechs Aufrufstellen lief ein
+        // suppressPersist-Schalter, der dieses Nichts unterdrueckte.
+        // Beides ist weg. Wer die Liste wirklich speichern will, baut
+        // eine Funktion, die speichert - und sieht dann auch, dass es
+        // vorher keine gab.
         function loadProxyQueue() {
             clearLegacyProxyQueueStorage();
             window.proxyQueue = [];
@@ -883,15 +890,13 @@ const BASE_PATH = './data/';
         function addCardToProxy(cardName, setCode = '', cardNumber = '', count = 1, suppressToast = false) {
             return addCardToProxyInternal(cardName, setCode, cardNumber, count, {
                 suppressToast,
-                suppressRender: false,
-                suppressPersist: false
+                suppressRender: false
             });
         }
 
         function addCardToProxyInternal(cardName, setCode = '', cardNumber = '', count = 1, options = {}) {
             const suppressToast = Boolean(options.suppressToast);
             const suppressRender = Boolean(options.suppressRender);
-            const suppressPersist = Boolean(options.suppressPersist);
             const name = String(cardName || '').trim();
             if (!name) return 0;
 
@@ -916,9 +921,6 @@ const BASE_PATH = './data/';
             }
 
             window.proxyQueue = queue;
-            if (!suppressPersist) {
-                saveProxyQueue();
-            }
             if (!suppressRender) {
                 renderProxyQueue();
             }
@@ -990,9 +992,9 @@ const BASE_PATH = './data/';
 
                         const match = deckKey.match(/^(.+?)\s+\(([A-Z0-9]+)\s+([A-Z0-9]+)\)$/);
                         if (match) {
-                            addCardToProxyInternal(match[1], match[2], match[3], copies, { suppressToast: true, suppressRender: true, suppressPersist: true });
+                            addCardToProxyInternal(match[1], match[2], match[3], copies, { suppressToast: true, suppressRender: true });
                         } else {
-                            addCardToProxyInternal(deckKey, '', '', copies, { suppressToast: true, suppressRender: true, suppressPersist: true });
+                            addCardToProxyInternal(deckKey, '', '', copies, { suppressToast: true, suppressRender: true });
                         }
                         addedCopies += copies;
                     });
@@ -1082,7 +1084,7 @@ const BASE_PATH = './data/';
                         const safeName = String(entry?.name || '').trim();
                         if (!safeName) return;
                         const amount = parseProxyCount(entry.count, 1);
-                        addCardToProxyInternal(safeName, entry.set, entry.number, amount, { suppressToast: true, suppressRender: true, suppressPersist: true });
+                        addCardToProxyInternal(safeName, entry.set, entry.number, amount, { suppressToast: true, suppressRender: true });
                         addedCopies += amount;
                     });
 

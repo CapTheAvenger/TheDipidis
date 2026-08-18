@@ -65,7 +65,13 @@
     --line-strong: #c9d0de;
     --ink: #161a23;
     --ink-2: #4d5566;
-    --ink-3: #79839a;
+    /* 2026-08-18: stand auf #79839a. Gemessen 3,80:1 gegen Weiss,
+       3,58:1 gegen --surface-0 und 3,42:1 gegen --surface-2 — unter
+       den 4,5:1, die lesbarer Fliesstext braucht. Der Token traegt
+       26 % aller Textstellen der Startseite (Deckname, Kontextzeile,
+       Notiz) und 38 Rangzellen in Current Meta. #646c80 raeumt alle
+       drei Untergruende: 5,25 / 4,94 / 4,73. */
+    --ink-3: #646c80;
 
     /* ── Marke: sparsam ──────────────────────────────────────────── */
     --brand: #3B4CCA;

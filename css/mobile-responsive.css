@@ -924,6 +924,18 @@
     .tab-content select,
     .tab-content input,
     .tab-content textarea,
+    /* HINWEIS 2026-08-18: diese drei Zeilen deckeln Eingabefelder auf
+       12 px und schlagen damit den iOS-Zoomschutz aus styles.css:4143
+       (@supports -webkit-touch-callout, 16 px !important), der in einer
+       frueher geladenen Datei steht. Gemessen: 47 von 48 sichtbaren
+       Feldern unter 16 px — Safari zoomt beim Antippen hinein und nicht
+       wieder heraus.
+       Sie hier einfach zu streichen reicht NICHT: ohne den Boden fallen
+       zwei Felder auf 9,8 px, weil die Regel sie zugleich nach unten
+       geschuetzt hat (gemessen 6 -> 8 Felder bei 9,8 px). Der richtige
+       Weg ist ein eigener, absoluter Wert fuer Formularelemente statt
+       eines geliehenen Bodens. Das braucht eine eigene Messreihe ueber
+       alle 48 Felder und steht als eigener Schritt aus. */
     .tab-content .btn-toggle-item,
     .tab-content [class*="count"],
     .tab-content [class*="summary"],
@@ -2487,5 +2499,35 @@
     .deck-grid-skeleton-grid {
         grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
         gap: var(--s-2);
+    }
+}
+
+
+/* ── Eine Pauschalregel, die gezielte Arbeit zunichte machte ───────
+ * 2026-08-18, von der Pruefrunde gemessen.
+ * ─────────────────────────────────────────────────────────────── */
+
+@media (max-width: 768px) {
+    /* Die klebende erste Spalte der Heatmap klebte nicht.
+     *
+     * Block 6 hat sie gebaut (position:sticky, left:0) und der
+     * Kommentar oben sagt "Die klebt jetzt". Gemessen am 18.08.:
+     * nach dem Scrollen an den rechten Anschlag steht sie bei
+     * left = -585 px, also vollstaendig ausserhalb des Bildes.
+     *
+     * Die Ursache liegt woanders: css/styles.css:2959 und :3156
+     * machen mit `.tab-content table { display:block; overflow-x:auto }`
+     * JEDE Tabelle auf dem Telefon zu ihrem eigenen Scrollbehaelter —
+     * und damit zum Bezugsrahmen fuer sticky. Ein Element kann nicht
+     * an dem Rand kleben, der mit ihm mitscrollt.
+     *
+     * Die Heatmap braucht diese Pauschalregel nicht: sie hat mit
+     * .heatmap-table-scroll ihren eigenen, richtig gebauten
+     * Scrollbehaelter. Hier wird sie nur ausgenommen, nicht
+     * abgeschafft — die anderen Tabellen leben von ihr. */
+    .tab-content table.heatmap-table,
+    #currentMetaContent .section table.heatmap-table {
+        display: table;
+        overflow: visible;
     }
 }

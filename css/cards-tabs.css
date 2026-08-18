@@ -646,12 +646,18 @@
         gap: 2px !important;
     }
 
+    /* Stand auf 6px. Die Medienabfrage trifft genau iPhone 12 bis 15
+       (390 px) — bei 391 px bekommt derselbe Chip 7 px. 6 px ist keine
+       Schrift mehr, und css/mobile-responsive.css:903 setzt fuer die
+       ganze Seite einen Boden von 12 px, den diese Regel mit
+       !important unterlaeuft. Der Seltenheits-Chip hatte damit
+       zugleich 1,73:1 — der schlechteste Kontrastwert der Seite. */
     #cards .card-database-price-btn,
     #cards .card-database-rarity-btn,
     #cards .card-database-proxy-btn,
     #cards .card-database-price-placeholder,
     #cards .card-database-limitless-btn {
-        font-size: 6px !important;
+        font-size: 11px !important;
     }
 }
 
@@ -665,9 +671,15 @@
         right: 2px !important;
     }
 
+    /* Stand auf 6px (Medienabfrage <= 360 px, also iPhone SE und
+       kleiner). Set-Kuerzel und Kartentyp sind die zwei Angaben, an
+       denen man eine Karte identifiziert — bei 6 px sind sie ein
+       grauer Strich. 9 px ist hier bewusst niedriger als die 11 px
+       der Knopfzeile: es ist Beitext, kein Bedienelement, und der
+       Platz bei 360 px ist real knapp. */
     #cards .card-database-set,
     #cards .card-database-type {
-        font-size: 6px !important;
+        font-size: 9px !important;
     }
 
     #cards .card-database-price-btn,

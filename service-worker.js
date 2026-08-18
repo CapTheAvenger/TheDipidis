@@ -142,6 +142,7 @@ const SHELL_ASSETS = [
   './js/app-profile-deck-builder.js',
   './js/current-meta-quickref.js',
   './js/ds-nav.js',
+  './js/ds-sections.js',
   './js/ds-share.js',
   './js/ds-tutorial.js',
   './images/pokeball-icon.png',

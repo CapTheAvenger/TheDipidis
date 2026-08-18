@@ -121,21 +121,49 @@
         return n;
     }
 
+    // Kandidaten sind die direkten Kinder des Hosts — UND die direkten
+    // Kinder bereits gebauter Abschnittskoerper.
+    //
+    // Der zweite Teil ist kein Luxus. Gemessen live am 18.08.2026:
+    // .top-cards-container landete im Abschnitt "Ueberblick" statt in
+    // seinem eigenen. Ursache ist das Sektionieren selbst — wer seinen
+    // Inhalt relativ zu einem anderen Block einfuegt (etwa hinter
+    // .stats-grid), fuegt ihn danach in DESSEN Abschnitt ein, weil der
+    // Bezugsknoten dorthin gewandert ist. Ohne diesen Zweig bleibt der
+    // Block fuer immer am falschen Platz und sein Abschnitt fehlt
+    // stillschweigend.
+    //
+    // Nur Tiefe 1 unter einem Koerper: tiefer zu suchen wuerde bei
+    // 'div.section' verschachtelte Treffer greifen und halbe Bloecke
+    // herausreissen.
+    function kandidaten(host) {
+        var out = [];
+        var i;
+        for (i = 0; i < host.children.length; i++) {
+            var c = host.children[i];
+            if (c.classList && c.classList.contains('ds-sec')) continue;
+            out.push(c);
+        }
+        var koerper = host.querySelectorAll(':scope > .ds-sec > .ds-sec-body');
+        for (i = 0; i < koerper.length; i++) {
+            var kids = koerper[i].children;
+            for (var j = 0; j < kids.length; j++) out.push(kids[j]);
+        }
+        return out;
+    }
+
     function sammle(host, muster) {
         var out = [];
+        var kand = kandidaten(host);
         muster.forEach(function (m) {
             if (m === '__tiers__') {
                 var t = findeTiers(host);
                 if (t) out.push(t);
                 return;
             }
-            // Nur direkte Kinder — sonst greift 'div.section' in
-            // verschachtelte Treffer und reisst halbe Bloecke heraus.
-            for (var i = 0; i < host.children.length; i++) {
-                var c = host.children[i];
-                if (c.classList && c.classList.contains('ds-sec')) continue;
+            kand.forEach(function (c) {
                 if (c.matches && c.matches(m) && out.indexOf(c) === -1) out.push(c);
-            }
+            });
         });
         return out;
     }
@@ -157,6 +185,12 @@
 
     function zeichneReset(host) {
         var alt = document.getElementById('dsSecReset');
+        // Ohne Zustand gibt es nichts zurueckzusetzen. Das passiert
+        // wirklich: wer die Sprache wechselt, ohne current-meta je
+        // geoeffnet zu haben, kommt hier mit offen === null an —
+        // gemessen am 18.08.2026 auf past-meta und city-league,
+        // TypeError: Cannot read properties of null (reading 'length').
+        if (!offen) { if (alt) alt.remove(); return; }
         var std = standard();
         var gleich = offen.length === std.length && std.every(function (x) { return offen.indexOf(x) > -1; });
         if (gleich) { if (alt) alt.remove(); return; }
@@ -288,15 +322,27 @@
         var host = document.getElementById(HOST_ID);
         if (!host) return;
         var timer = null;
+        // subtree: true ist noetig, weil spaeter gerenderte Bloecke
+        // nicht am Host landen, sondern in dem Abschnitt, neben dessen
+        // Inhalt sie eingefuegt werden — live beobachtet an
+        // .top-cards-container, das im "Ueberblick" strandete.
+        //
+        // Aufschaukeln kann es nicht: sektionieren() schreibt nur, wenn
+        // es etwas zu tun gibt, und meldet das. Die zweite Runde findet
+        // nichts, schreibt nichts, und danach ist Ruhe. Nachgemessen:
+        // nach dem vollstaendigen Rendern laeuft es genau zweimal.
         new MutationObserver(function () {
             clearTimeout(timer);
             timer = setTimeout(sektionieren, 220);
-        }).observe(host, { childList: true });
+        }).observe(host, { childList: true, subtree: true });
     }
 
     function neuBeschriften() {
         var host = document.getElementById(HOST_ID);
         if (!host) return;
+        // Noch nie sektioniert: es gibt keine Ueberschriften, die neu
+        // beschriftet werden koennten.
+        if (!host.querySelector('.ds-sec')) return;
         SECTIONS.forEach(function (s) {
             var sec = host.querySelector('.ds-sec[data-sec="' + s.id + '"]');
             if (!sec) return;

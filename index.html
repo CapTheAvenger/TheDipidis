@@ -434,7 +434,7 @@
                 <div class="header-flex-group">
                     <!-- Pokeball Menu Trigger -->
                     <div class="pokeball-wrapper">
-                        <div id="mainMenuTrigger" class="pokeball-btn" onclick="toggleMainMenu()" data-i18n-title="tip.openMenu" data-i18n-aria="tip.openMenu" title="Open menu" aria-label="Open menu" aria-haspopup="true" aria-expanded="false">
+                        <div id="mainMenuTrigger" class="pokeball-btn" role="button" tabindex="0" onclick="toggleMainMenu()" data-i18n-title="tip.openMenu" data-i18n-aria="tip.openMenu" title="Open menu" aria-label="Open menu" aria-haspopup="true" aria-expanded="false">
                             <div class="pokeball-top"></div>
                             <div class="pokeball-bottom"></div>
                             <div class="pokeball-center"></div>
@@ -514,7 +514,7 @@
                                 </button>
                             </div>
                             <button id="menu-btn-meta-call" class="menu-item" data-tab-id="meta-call" onclick="switchTabAndUpdateMenu('meta-call')" data-i18n="menu.metaCall" role="menuitem" data-i18n-title="menu.metaCallTitle" title="Meta Call — vorhergesagtes Feld für dein nächstes Turnier">
-                                Meta Call
+                                <span class="menu-item-label">Meta Call</span>
                             </button>
                             <button id="menu-btn-profile" class="menu-item" data-tab-id="profile" onclick="switchTabAndUpdateMenu('profile')" data-i18n="menu.profile" role="menuitem">
                                 <span class="menu-item-label">My Profile</span>

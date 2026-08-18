@@ -207,9 +207,27 @@ try { document.documentElement.classList.add('is-signed-out'); } catch (e) {}
         'probability':           'calculator',
         'wahrscheinlichkeit':    'calculator',
         'profile':               'profile',
-        'metacall':              'profile',    // Meta Call lives inside Profile tab
-        'meta-call':             'profile',
+        // HIER STANDEN 'metacall' UND 'meta-call' EIN ZWEITES MAL.
+        //
+        // Gefunden am 18.08.2026: dasselbe Objektliteral vergab beide
+        // Schluessel doppelt — oben auf 'meta-call' (Block 7 hat den
+        // Tab herausgeloest), hier unten noch einmal auf 'profile'.
+        // In einem Objektliteral gewinnt der SPAETERE. thedipidis.app/#meta-call
+        // landete deshalb weiter im Profil, also hinter der Anmeldewand,
+        // die Block 7 gerade beseitigt hatte. Der Fix war da, er kam nur
+        // nie an. Nachgemessen vorher: #meta-call -> profile.
+        //
+        // tests/unit/test-tieflinks.js prueft jetzt bei jedem Lauf, dass
+        // kein Schluessel in dieser Tabelle zweimal vorkommt.
         'journal':               'profile',    // Battle Journal too
+        // Ohne Eintrag steigt applyHash() wortlos aus und der Besucher
+        // landet irgendwo. Diese drei fehlten:
+        'side-quest':            'side-quest',
+        'sidequest':             'side-quest',
+        'champions':             'side-quest',
+        'meta-analysis-hub':     'meta-analysis-hub',
+        'hub':                   'meta-analysis-hub',
+        'uebersicht':            'meta-analysis-hub',
         // Per-profile-sub-tab deep links — added 2026-06 so the screenshot
         // tutorial can drive directly into a specific profile sub-tab via
         // the same hash routing mechanism the Telegram bot uses for deep-
@@ -232,8 +250,9 @@ try { document.documentElement.classList.add('is-signed-out'); } catch (e) {}
     // is the same function the in-page buttons use, so behaviour stays
     // identical regardless of how the user arrived.
     const PROFILE_SUBTAB_FOR_HASH = {
-        'metacall':       'metacall',
-        'meta-call':      'metacall',
+        // 'metacall' und 'meta-call' standen hier, seit Block 7 aber
+        // gegenstandslos: Meta Call ist ein eigener Tab und kein
+        // Profil-Untertab mehr.
         'journal':        'journal',
         'metabinder':     'metabinder',
         'meta-binder':    'metabinder',

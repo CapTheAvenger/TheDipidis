@@ -8,9 +8,10 @@ gibt 404, der Pages-Build nimmt den Ordner nicht mit.
 redesign/
 ├── README.md              diese Datei
 ├── erledigt/              was auf main ist
-│   └── etappe-0-2/        Pipeline, Navigation, Zahlen (PR #452)
+│   ├── etappe-0-2/        Pipeline, Navigation, Zahlen (PR #452)
+│   └── block3/            teilbare Bilder, Deckansicht, Platzierung (PR #453)
 ├── offen/                 was noch nicht auf main ist
-│   └── block3/            teilbare Bilder, Deckansicht, Platzierung
+│   └── block4/            Anleitung auslagern, Sprache, Service Worker
 └── prototypen/            Klickmuster zum Anschauen im Browser
 ```
 
@@ -25,8 +26,12 @@ Claude Code, ohne dass man den Pfad nennen muss.
 | 0 | Datenpipeline: Guardian, tote Jobs, Deploy-Stau | **live** seit 18.08. |
 | 1 | Sichtbare Hauptnavigation, Datenraum-Ausweis | **live** seit 18.08. |
 | 2 | Eine Herleitung je Größe, `n` an jeder Rangliste | **live** seit 18.08. |
-| 3 | Teilbare Bilder, Deckansicht, Platzierung | **offen** — `offen/block3/` |
-| 4 | Designsystem über die 16 Ansichten, Aufräumen, Zusammenlegungen | **offen** — noch nicht gebaut |
+| 3 | Teilbare Bilder, Deckansicht, Platzierung | **live** seit 18.08. (PR #453) |
+| 4 | Anleitung auslagern, Sprache, Service-Worker-Cache | **offen** — `offen/block4/` |
+| 5 | Designsystem Meta + Decks, Kartenlegende | **offen** — noch nicht gebaut |
+| 6 | Mobil: Matchup-Heatmap, `mobile-responsive.css` | **offen** |
+| 7 | Meta Call entkoppeln, Kartendatenbank ausgeloggt | **offen** |
+| 8 | Zusammenlegungen: Deck-Analyse-Shell, Matchup-Komponente | **offen** |
 
 Live heißt: auf `main` **und** deployt. Nachprüfbar an
 `thedipidis.app/version.json` — Code auf `main` ist nicht dasselbe wie
@@ -38,7 +43,7 @@ Jeder Ordner unter `offen/` enthält Patches in Reihenfolge, ein
 Merge-Skript und eine Beschreibung. Zum Beispiel:
 
 ```bash
-bash redesign/offen/block3/merge-block3.sh .
+bash redesign/offen/block4/merge-block4.sh .
 ```
 
 Das Skript legt einen Zweig an, wendet die Patches der Reihe nach an,

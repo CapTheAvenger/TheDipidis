@@ -1779,10 +1779,14 @@
     right: 2px !important;
     border-width: 1px !important;
   }
+  /* Ohne !important: ui-components.css wird frueher geladen, diese
+   * Regel gewinnt ueber die Reihenfolge. Die drei Ausrufezeichen haben
+   * hier nie etwas geschlagen — sie haben nur css/ds-share.css daran
+   * gehindert, der Anzahl-Plakette eine eigene Form zu geben. */
   .city-league-card-badge {
-    width: 18px !important;
-    height: 18px !important;
-    font-size: 0.6em !important;
+    width: 18px;
+    height: 18px;
+    font-size: 0.6em;
   }
 }
 

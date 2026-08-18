@@ -1,0 +1,225 @@
+/* ds-share.css — was zum Teilen gehört.
+ *
+ * Zwei Dinge:
+ *   1. Der Knopf, der die Bildkarte auslöst (.arc-share). Er sitzt im
+ *      Kopf der Archetyp-Karte, weil die eingebettete Variante in der
+ *      Deck-Analyse gar keine Aktionsleiste hat — und genau dort will
+ *      man das Bild.
+ *   2. Die Deckliste als Kartengitter (.ds-decklist). poke_hive zeigt
+ *      Listen so, und das ist der Grund, warum man sie dort auf einen
+ *      Blick liest: jede Karte trägt ihre Anzahl als Plakette und ihren
+ *      Anteil als Band. Die bisherige Ansicht der Seite zeigt Bilder
+ *      ohne beides — die Anzahl steht in einer Tabelle daneben.
+ *
+ * Ausschließlich aus css/tokens.css gebaut: keine rohe Hex-Farbe außer
+ * dem Rot der Plakette (dasselbe wie im Bildexport), keine px-Schrift-
+ * größe, kein !important.
+ */
+
+/* ── Der Auslöser ─────────────────────────────────────────────────── */
+.arc-share {
+    margin-left: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--s-1);
+    min-height: 30px;
+    padding: 0 var(--s-3);
+    border: 1px solid rgba(255, 255, 255, .28);
+    border-radius: var(--r-sm);
+    background: rgba(255, 255, 255, .08);
+    color: rgba(255, 255, 255, .92);
+    font: inherit;
+    font-size: var(--fs-xs);
+    font-weight: 600;
+    white-space: nowrap;
+    cursor: pointer;
+}
+.arc-share:hover { background: rgba(255, 255, 255, .18); }
+.arc-share:focus-visible {
+    outline: 2px solid var(--gold);
+    outline-offset: 2px;
+}
+/* Im Overlay sitzt oben rechts schon das Schließkreuz. */
+.arc-card--overlay .arc-share { margin-right: var(--s-6); }
+
+/* ── Die Deckliste als Gitter ─────────────────────────────────────── */
+.ds-decklist {
+    background: var(--surface-1);
+    border: 1px solid var(--line);
+    border-radius: var(--r-lg);
+    padding: var(--s-4);
+}
+.ds-decklist-head {
+    display: flex;
+    align-items: baseline;
+    gap: var(--s-3);
+    flex-wrap: wrap;
+    margin-bottom: var(--s-3);
+}
+.ds-decklist-head h3 { margin: 0; font-size: var(--fs-lg); }
+.ds-decklist-head .meta { font-size: var(--fs-xs); color: var(--ink-3); }
+
+.ds-decklist-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(112px, 1fr));
+    gap: var(--s-3);
+}
+
+.ds-dl-card {
+    position: relative;
+    aspect-ratio: 63 / 88;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: var(--r-sm);
+    background: var(--surface-2);
+}
+.ds-dl-card img.art {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Die Plakette: Anzahl unten links, als Sechseck aus reinem CSS. Rot
+ * wie im Bildexport (app-deck-builder.js:2600) — dieselbe Marke für
+ * dieselbe Aussage, damit Gitter und exportiertes Bild als eine Sache
+ * gelesen werden. */
+.ds-dl-n {
+    position: absolute;
+    left: 6px;
+    bottom: 6px;
+    display: grid;
+    place-items: center;
+    width: 30px;
+    height: 34px;
+    background: #e3350d;
+    clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
+    color: #fff;
+    font-family: var(--font-num);
+    font-size: var(--fs-md);
+    font-weight: 700;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, .55);
+}
+
+/* Das Anteilsband: wie viele der ausgewerteten Listen diese Karte
+ * spielen. Ein 3-px-Band statt einer Prozentzahl — die Zahl steht im
+ * title, das Band trägt den Vergleich. Ohne diese Information ist ein
+ * Kartengitter nur hübsch: eine 4-of, die 38 % der Listen spielen, und
+ * eine, die 100 % spielen, sehen sonst gleich aus. */
+.ds-dl-share {
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 3px;
+    background: var(--bar-track);
+}
+.ds-dl-share i {
+    display: block;
+    height: 100%;
+    background: var(--brand);
+}
+.ds-dl-card.is-core .ds-dl-share i { background: var(--gold); }
+
+.ds-decklist-legend {
+    margin-top: var(--s-3);
+    font-size: var(--fs-xs);
+    line-height: 1.6;
+    color: var(--ink-3);
+}
+
+@media (max-width: 768px) {
+    .ds-decklist { padding: var(--s-3); }
+    .ds-decklist-grid { grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); gap: var(--s-2); }
+    .ds-dl-n { width: 26px; height: 30px; font-size: var(--fs-sm); }
+}
+
+/* ── Die Deckansicht, die es schon gibt ───────────────────────────────
+ *
+ * .card-item / .city-league-card-* werden von Current Meta UND City
+ * League gemalt. Neu gebaut wird hier nichts — der Renderer ist 300
+ * Zeilen mit Preisen, Pins, Sammlungsabgleich und Druckvarianten, und
+ * den anzufassen kostet mehr, als er einbringt. Was fehlt, sind zwei
+ * Leseh1lfen, die poke_hive hat und diese Ansicht nicht:
+ *
+ *   das Anteilsband und eine Anzahl, die man auf einem Daumenbild noch
+ *   erkennt.
+ *
+ * Dazu kommt eine Korrektur: die beiden Plaketten auf jeder Karte waren
+ * ein grüner und ein roter Kreis, gleich groß, gleich rund,
+ * unterschieden allein durch Farbe und Ecke. Rot-Grün ist die häufigste
+ * Farbsehschwäche — und die beiden Zahlen bedeuten völlig
+ * Verschiedenes: „so viele spielt das Feld" gegen „so viele hast du im
+ * Deck". Sie unterscheiden sich jetzt in der Form.
+ */
+
+/* Das Band. Farbe aus Tokens statt Ampel im Markup — vorher standen
+ * #27ae60 / #f39c12 / #7f8c8d fest im style-Attribut jeder Karte. */
+.card-usage-bar {
+    height: 5px;
+    background: var(--bar-track);
+}
+.card-usage-fill { background: var(--dv-zero); }
+.card-usage-bar[data-usage="option"] .card-usage-fill { background: var(--brand); }
+.card-usage-bar[data-usage="main"]   .card-usage-fill { background: var(--gold); }
+
+/* Die Anzahl, die das Feld spielt: Sechseck unten links, wie bei
+ * poke_hive. Ein Sechseck bleibt auch auf einem 92-px-Daumenbild als
+ * Plakette erkennbar, ein 18-px-Kreis wird zum Punkt. */
+.city-league-card-image-container .city-league-card-badge-max {
+    /* Oben links, nicht unten links: die untere Kante des Bildcontainers
+     * gehoert der Infoleiste mit den Aktionsknoepfen — eine Plakette
+     * dort liegt auf dem Minus-Knopf und faengt seinen Klick ab. */
+    top: 5px;
+    left: 5px;
+    right: auto;
+    bottom: auto;
+    width: 28px;
+    height: 32px;
+    border: 0;
+    border-radius: 0;
+    background: #e3350d;
+    clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
+    font-family: var(--font-num);
+    font-size: var(--fs-md);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, .55);
+}
+
+/* Die Anzahl im eigenen Deck: eckige Marke oben rechts, in der
+ * Markenfarbe. Andere Ecke, andere Form, andere Farbfamilie — drei
+ * Unterschiede, damit einer ausfallen darf. */
+.city-league-card-image-container .city-league-card-badge-deck {
+    top: 5px;
+    left: auto;
+    right: 5px;
+    border-radius: var(--r-sm);
+    background: var(--brand);
+    font-family: var(--font-num);
+}
+
+/* Auf schmalen Geraeten schrumpft css/mobile-responsive.css alle
+ * Plaketten auf 18 px. Die Plakette darf mitschrumpfen, aber sie bleibt
+ * ein Sechseck — der Formunterschied ist genau das, was auf einem
+ * 92-px-Daumenbild noch traegt. Zwei Klassen im Selektor, damit die
+ * Regel ohne !important gewinnt, obwohl sie frueher geladen wird. */
+@media (max-width: 480px) {
+    .city-league-card-image-container .city-league-card-badge-max {
+        width: 22px;
+        height: 25px;
+        font-size: var(--fs-sm);
+    }
+}
+
+/* Der Punkt vor der Abschnittsüberschrift im Kartengitter. Vorher
+ * standen dort die Emoji 🟢 🟡 ⚪ — eine Ampel, die weder mit dem Band
+ * darunter noch mit dem Rest der Seite zusammenpasste und die in keiner
+ * Sprache übersetzt war. Gleiche drei Farben wie das Band, damit
+ * Überschrift und Karte dasselbe sagen. */
+.ds-usage-dot {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--dv-zero);
+    vertical-align: baseline;
+}
+.ds-usage-dot[data-usage="option"] { background: var(--brand); }
+.ds-usage-dot[data-usage="main"]   { background: var(--gold); }

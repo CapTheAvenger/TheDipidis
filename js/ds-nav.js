@@ -182,6 +182,32 @@
         return p.length === 3 ? (p[2] + '.' + p[1] + '.' + p[0]) : '';
     }
 
+    // Das Formatfenster ist die eine Quelle fuer "welches Format gilt hier".
+    // Steht als eigener Helfer da, weil ihn zwei Aufrufer brauchen: die
+    // Ausweiszeile und DsNav.getFacts() fuer die Bildkarte. Zwei Kopien
+    // waeren zwei Formate.
+    function formatFor(key) {
+        var w = fw();
+        if (key === 'jp' && w.current_set_jp) {
+            return { label: w.current_set_jp, since: '' };
+        }
+        if (key === 'gl' && w.current_set) {
+            return {
+                label: (w.oldest_legal_set ? w.oldest_legal_set + '\u2013' : '') + w.current_set,
+                since: w.in_person_legal_date ? fmtDate(w.in_person_legal_date) : ''
+            };
+        }
+        if (key === 'past' && w.previous_format_key) {
+            return { label: w.previous_format_key, since: '' };
+        }
+        return { label: '', since: '' };
+    }
+
+    function stampFor(facts) {
+        return (facts && facts.stamp) ||
+            (typeof localStorage !== 'undefined' ? localStorage.getItem('lastScraperUpdate') : '') || '';
+    }
+
     function renderSpace(tabId) {
         var host = document.getElementById('dsSpaceHost');
         if (!host) return;
@@ -189,19 +215,15 @@
         if (!key) { host.innerHTML = ''; host.hidden = true; return; }
         host.hidden = false;
 
-        var lg = lang(), t = SPACE_TEXT[key][lg], f = F[lg], w = fw();
+        var lg = lang(), t = SPACE_TEXT[key][lg], f = F[lg];
         var bits = [];
 
         bits.push('<span class="ds-space-region">' + t.region + '</span>');
 
-        if (key === 'jp' && w.current_set_jp) {
-            bits.push('<span><b>' + f.format + '</b> ' + esc(w.current_set_jp) + '</span>');
-        } else if (key === 'gl' && w.current_set) {
-            var since = w.in_person_legal_date ? ' (' + f.since + ' ' + fmtDate(w.in_person_legal_date) + ')' : '';
-            bits.push('<span><b>' + f.format + '</b> ' +
-                esc((w.oldest_legal_set ? w.oldest_legal_set + '–' : '') + w.current_set) + esc(since) + '</span>');
-        } else if (key === 'past' && w.previous_format_key) {
-            bits.push('<span><b>' + f.format + '</b> ' + esc(w.previous_format_key) + '</span>');
+        var fmt = formatFor(key);
+        if (fmt.label) {
+            bits.push('<span><b>' + f.format + '</b> ' + esc(fmt.label) +
+                (fmt.since ? esc(' (' + f.since + ' ' + fmt.since + ')') : '') + '</span>');
         }
 
         bits.push('<span><b>' + f.source + '</b> ' + esc(t.source) + '</span>');
@@ -216,8 +238,7 @@
         if (facts.window) {
             bits.push('<span><b>' + f.window + '</b> ' + esc(facts.window) + '</span>');
         }
-        var stamp = facts.stamp ||
-            (typeof localStorage !== 'undefined' ? localStorage.getItem('lastScraperUpdate') : '') || '';
+        var stamp = stampFor(facts);
         if (stamp) bits.push('<span><b>' + f.stamp + '</b> ' + esc(stamp) + '</span>');
         if (facts.pause) bits.push('<span class="ds-space-pause">' + esc(f.pause) + '</span>');
 
@@ -254,7 +275,31 @@
             host._facts[key] = Object.assign({}, host._facts[key] || {}, facts || {});
             renderSpace(current);
         },
-        refresh: function () { render(); onTab(current); }
+        refresh: function () { render(); onTab(current); },
+
+        // Was der Ausweis über einem Datenraum gerade weiss — Region,
+        // Quelle, Format, Stichprobe, Stand. js/ds-share.js schreibt das
+        // in den Fuss der Bildkarte: das Bild verlaesst die Seite, und
+        // ohne diese Zeile waere nicht mehr erkennbar, aus welchem der
+        // drei Raeume die Zahlen stammen.
+        getFacts: function (space) {
+            var key = space || SPACES[current];
+            if (!key || !SPACE_TEXT[key]) return null;
+            var host = document.getElementById('dsSpaceHost');
+            var live = (host && host._facts && host._facts[key]) || {};
+            var txt = SPACE_TEXT[key][lang()];
+            return {
+                space:  key,
+                region: txt.region,
+                source: live.source || txt.source,
+                format: live.format || formatFor(key).label,
+                sample: live.sample || '',
+                window: live.window || '',
+                stamp:  stampFor(live),
+                pause:  !!live.pause
+            };
+        },
+        spaceForTab: function (tabId) { return SPACES[tabId] || null; }
     };
 
     function boot() {

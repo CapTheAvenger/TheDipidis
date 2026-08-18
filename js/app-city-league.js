@@ -1297,7 +1297,13 @@ function cityLeagueOffSeasonHtml() {
             
             // Extract unique archetypes with their deck counts (total meta counts)
             const archetypeMap = new Map();
-            const sourceRows = allArchetypesData.length > 0 ? allArchetypesData : data;
+            // `data` ist optional: der languageChanged-Handler unten ruft
+            // populateCityLeagueDeckSelect() ohne Argumente. Solange die
+            // City League Daten hat, faengt allArchetypesData das ab —
+            // waehrend der Saisonpause ist die Liste leer, sourceRows wurde
+            // `undefined`, und jeder Sprachwechsel warf eine TypeError in
+            // die Konsole. Gemessen am 18.08.2026, mit leerem JP-Datenraum.
+            const sourceRows = (allArchetypesData.length > 0 ? allArchetypesData : data) || [];
             sourceRows.forEach(row => {
                 if (row.archetype && !archetypeMap.has(row.archetype)) {
                     // Use total meta counts so dropdown always shows full picture.
@@ -3161,6 +3167,12 @@ function cityLeagueOffSeasonHtml() {
             const useSkeletonLayout = selectedArchetypeForTrend && selectedArchetypeForTrend !== 'all';
             const SKELETON_MAIN_MIN  = 85; // staples
             const SKELETON_NICHE_MAX = 50; // below this = situational
+            // Titel des Anteilsbands. Steht einmal hier statt in jeder
+            // Kartenzeile — 60 Karten mal derselbe String.
+            const USAGE_TITLE = (typeof t === 'function' && t('cl.usageBarTitle'))
+                || (typeof getLang === 'function' && getLang() === 'en'
+                    ? 'of the analysed lists play this card'
+                    : 'der ausgewerteten Listen spielen diese Karte');
 
             // cardHtmls now holds objects so we can bucket by usage % at the
             // end. Each entry: { html, pct } — multiple versions of the same
@@ -3343,12 +3355,25 @@ function cityLeagueOffSeasonHtml() {
                 // Coloured usage bar overlay — only in skeleton mode so the
                 // flat overview keeps its current visual contract.
                 const usagePct = Math.max(0, Math.min(100, rawPercentage || 0));
-                const usageBarHtml = (useSkeletonLayout && usagePct > 0)
-                    ? `<div class="card-usage-bar"><div class="card-usage-fill" style="width:${usagePct}%;background:${
-                        usagePct >= SKELETON_MAIN_MIN ? '#27ae60'
-                        : usagePct >= SKELETON_NICHE_MAX ? '#f39c12'
-                        : '#7f8c8d'
-                    };"></div></div>`
+                // Das Anteilsband: wie viele der ausgewerteten Listen
+                // spielen diese Karte. Zwei Aenderungen gegenueber
+                // vorher:
+                //
+                // 1. Es laeuft immer, nicht nur im Skelettmodus. Es ist
+                //    die einzige Angabe, die ein Kartengitter lesbar
+                //    macht — eine 4-of, die 38 % der Listen spielen, und
+                //    eine, die 100 % spielen, sehen sonst gleich aus.
+                // 2. Die Farbe kommt aus css/tokens.css statt aus einer
+                //    Ampel im Markup. Gruen-Orange-Grau war hart
+                //    verdrahtet, in keinem Thema anzufassen, und genau
+                //    die Skala, die tokens.css fuer diese Seite
+                //    ausgeschlossen hat.
+                const usageBucket = usagePct >= SKELETON_MAIN_MIN ? 'main'
+                    : usagePct >= SKELETON_NICHE_MAX ? 'option' : 'niche';
+                const usageBarHtml = usagePct > 0
+                    ? `<div class="card-usage-bar" data-usage="${usageBucket}" title="${
+                        Math.round(usagePct)}% ${USAGE_TITLE}"><div class="card-usage-fill" style="width:${
+                        usagePct}%;"></div></div>`
                     : '';
 
                 // Pin functionality intentionally omitted in City League's
@@ -3464,9 +3489,15 @@ function cityLeagueOffSeasonHtml() {
                 };
 
                 gridContainer.innerHTML = `<div class="meta-card-skeleton-wrap">
-                    ${sectionHtml('🟢 Main Cards <span class="meta-card-skeleton-hint">(staples + #1 Ace Spec)</span>', mainItems)}
-                    ${sectionHtml('🟡 Options <span class="meta-card-skeleton-hint">(flex slots + Ace Spec #2–3)</span>', optionsItems)}
-                    ${sectionHtml('⚪ Situational <span class="meta-card-skeleton-hint">(rare picks — click to collapse)</span>', nicheItems, { collapsible: true })}
+                    ${sectionHtml(`<i class="ds-usage-dot" data-usage="main" aria-hidden="true"></i> ${
+                        t('cl.skelMain') || 'Main Cards'} <span class="meta-card-skeleton-hint">${
+                        t('cl.skelMainHint') || '(staples + #1 Ace Spec)'}</span>`, mainItems)}
+                    ${sectionHtml(`<i class="ds-usage-dot" data-usage="option" aria-hidden="true"></i> ${
+                        t('cl.skelOptions') || 'Options'} <span class="meta-card-skeleton-hint">${
+                        t('cl.skelOptionsHint') || '(flex slots + Ace Spec #2\u20133)'}</span>`, optionsItems)}
+                    ${sectionHtml(`<i class="ds-usage-dot" data-usage="niche" aria-hidden="true"></i> ${
+                        t('cl.skelNiche') || 'Situational'} <span class="meta-card-skeleton-hint">${
+                        t('cl.skelNicheHint') || '(rare picks \u2014 click to collapse)'}</span>`, nicheItems, { collapsible: true })}
                 </div>`;
             }
             if (visualContainer) {

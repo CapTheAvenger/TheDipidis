@@ -3054,6 +3054,12 @@
             const useSkeletonLayout = selectedArchForSkeleton && selectedArchForSkeleton !== 'all';
             const SKELETON_MAIN_MIN  = 85;
             const SKELETON_NICHE_MAX = 50;
+            // Titel des Anteilsbands. Steht einmal hier statt in jeder
+            // Kartenzeile — 60 Karten mal derselbe String.
+            const USAGE_TITLE = (typeof t === 'function' && t('cl.usageBarTitle'))
+                || (typeof getLang === 'function' && getLang() === 'en'
+                    ? 'of the analysed lists play this card'
+                    : 'der ausgewerteten Listen spielen diese Karte');
 
             const cardHtmls = [];
             sortedCards.forEach(card => {
@@ -3228,12 +3234,25 @@
                     
                     // Coloured usage bar overlay — only in skeleton mode.
                     const usagePct = Math.max(0, Math.min(100, resolvedPercentage || 0));
-                    const usageBarHtml = (useSkeletonLayout && usagePct > 0)
-                        ? `<div class="card-usage-bar"><div class="card-usage-fill" style="width:${usagePct}%;background:${
-                            usagePct >= SKELETON_MAIN_MIN ? '#27ae60'
-                            : usagePct >= SKELETON_NICHE_MAX ? '#f39c12'
-                            : '#7f8c8d'
-                        };"></div></div>`
+                    // Das Anteilsband: wie viele der ausgewerteten Listen
+                    // spielen diese Karte. Zwei Aenderungen gegenueber
+                    // vorher:
+                    //
+                    // 1. Es laeuft immer, nicht nur im Skelettmodus. Es ist
+                    //    die einzige Angabe, die ein Kartengitter lesbar
+                    //    macht — eine 4-of, die 38 % der Listen spielen, und
+                    //    eine, die 100 % spielen, sehen sonst gleich aus.
+                    // 2. Die Farbe kommt aus css/tokens.css statt aus einer
+                    //    Ampel im Markup. Gruen-Orange-Grau war hart
+                    //    verdrahtet, in keinem Thema anzufassen, und genau
+                    //    die Skala, die tokens.css fuer diese Seite
+                    //    ausgeschlossen hat.
+                    const usageBucket = usagePct >= SKELETON_MAIN_MIN ? 'main'
+                        : usagePct >= SKELETON_NICHE_MAX ? 'option' : 'niche';
+                    const usageBarHtml = usagePct > 0
+                        ? `<div class="card-usage-bar" data-usage="${usageBucket}" title="${
+                            Math.round(usagePct)}% ${USAGE_TITLE}"><div class="card-usage-fill" style="width:${
+                            usagePct}%;"></div></div>`
                         : '';
 
                     const isPinned = (typeof isPinnedCard === 'function') && isPinnedCard('currentMeta', cardName);
@@ -3366,9 +3385,15 @@
                 };
 
                 gridContainer.innerHTML = `<div class="meta-card-skeleton-wrap">
-                    ${sectionHtml('🟢 Main Cards <span class="meta-card-skeleton-hint">(staples + #1 Ace Spec)</span>', mainItems)}
-                    ${sectionHtml('🟡 Options <span class="meta-card-skeleton-hint">(flex slots + Ace Spec #2–3)</span>', optionsItems)}
-                    ${sectionHtml('⚪ Situational <span class="meta-card-skeleton-hint">(rare picks — click to collapse)</span>', nicheItems, { collapsible: true })}
+                    ${sectionHtml(`<i class="ds-usage-dot" data-usage="main" aria-hidden="true"></i> ${
+                        t('cl.skelMain') || 'Main Cards'} <span class="meta-card-skeleton-hint">${
+                        t('cl.skelMainHint') || '(staples + #1 Ace Spec)'}</span>`, mainItems)}
+                    ${sectionHtml(`<i class="ds-usage-dot" data-usage="option" aria-hidden="true"></i> ${
+                        t('cl.skelOptions') || 'Options'} <span class="meta-card-skeleton-hint">${
+                        t('cl.skelOptionsHint') || '(flex slots + Ace Spec #2\u20133)'}</span>`, optionsItems)}
+                    ${sectionHtml(`<i class="ds-usage-dot" data-usage="niche" aria-hidden="true"></i> ${
+                        t('cl.skelNiche') || 'Situational'} <span class="meta-card-skeleton-hint">${
+                        t('cl.skelNicheHint') || '(rare picks \u2014 click to collapse)'}</span>`, nicheItems, { collapsible: true })}
                 </div>`;
             }
             document.getElementById('currentMetaDeckTableView')?.classList.add('d-none');

@@ -1,0 +1,1169 @@
+From 2de366808eebd58a4bed541ef5edf702bff1c529 Mon Sep 17 00:00:00 2001
+From: "Claude (Cowork)" <claude@thedipidis>
+Date: Tue, 18 Aug 2026 10:25:59 +0000
+Subject: [PATCH 1/2] kartengitter: sechs Knoepfe, einunddreissig Regeln, neun
+ Pixel
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Gemessen am 18.08.2026 in der Deck-Analyse (Global), ein Archetyp,
+ein Bildschirm: 37 Karten, 296 Knoepfe. Jeder 43,7 x 19 px mit
+9-px-Schrift, auf 390 px sogar nur 24 x 22 px. Und sechs
+verschiedene gesaettigte Farben:
+
+    -   #ef4444 rot        L   Indigo-Verlauf
+    +   #22c55e gruen      P   Orange-Verlauf
+    *   #f59e0b bernstein  EUR Petrol-Verlauf
+
+Zwei Dinge daran sind falsch.
+
+Die beiden meistbenutzten Knoepfe sind ein rot-gruenes Paar — und
+zwar genau die beiden, deren Verwechslung wehtut: eine Kopie
+hinzufuegen gegen eine Kopie entfernen. Rot-Gruen ist die
+haeufigste Farbsehschwaeche; css/tokens.css hat das fuer die ganze
+Seite laengst entschieden und nennt poke_hive dort ausdruecklich
+als Vorbild mit genau dieser Schwaeche.
+
+Und bei sechs Signalfarben traegt keine mehr ein Signal. Dahinter
+liegt das Kartenbild, das eigentlich die Ansicht sein sollte.
+
+Jetzt: eine ruhige Chip-Familie und genau zwei Akzente je Karte.
+Das Plus traegt die Markenfarbe, weil Hinzufuegen die Handlung ist,
+wegen der man hier ist. Der Preis traegt den staerksten Kontrast,
+weil er die eine Zahl ist, auf die geschaut wird, und der einzige
+Knopf, der die Seite verlaesst. Alles andere unterscheidet sich
+durch sein Zeichen, nicht durch seine Farbe.
+
+    Desktop   43,7 x 19 px,  9 px Schrift  ->  43,7 x 24 px, 11 px
+    Mobil     24   x 22 px,  9 px Schrift  ->  24   x 28 px, 12 px
+
+WARUM DAS NICHT SCHON LAENGST SO WAR
+
+Die Groesse dieser sechs Knoepfe wurde an 31 Stellen gesetzt,
+verteilt ueber drei Stylesheets und einen Inline-Block in
+index.html, in Medienabfragen bei 768 / 600 / 480 / 430 / 420 /
+412 / 390 / 360 px. Werte bis hinunter zu 15 px Hoehe und 7 px
+Schrift.
+
+Gewonnen hat am Ende eine Regel, die nie fuer sie geschrieben
+wurde:
+
+    .card-item [class*="action"] button { min-height: 22px !important }
+
+Der Attributselektor faengt jeden Knopf, dessen Klasse irgendwo
+"action" enthaelt.
+
+Der Inline-Block in index.html hatte am 2026-06-10 genau dieses
+Problem schon einmal loesen wollen. 34 !important, und im Kommentar
+stand: "previous values (height 16px, font-size 7px) were below
+WCAG minimums ... the buttons now hit the 'I can actually tap and
+read this' bar." Er hat verloren, weil der Attributselektor
+spezifischer ist als "body .city-league-card-action-btn". Zwei
+Monate lang sah es aus, als waere es repariert.
+
+WAS SONST NOCH DABEI RAUSKAM
+
+- Dreimal exakt dieselben 40 Zeilen fuer #city-league-analysis,
+  #current-analysis und #past-meta, byte-gleich bis auf das
+  Praefix. Jetzt eine gemeinsame Selektorliste. Die echte
+  Zusammenlegung der drei Ansichten steht als Block 8 im Handbuch.
+
+- Drei Regeln mit ".city-league-card-action-row:last-child", die
+  der Preiszeile andere Verhaeltnisse geben wollten. Es gibt DREI
+  Aktionszeilen; die letzte ist die Cooking-Mode-Reihe mit Pin und
+  Exclude — ausgeblendet, aber im DOM. Die Regeln haben nie
+  gegriffen. Ohne sie waren L und P sieben Pixel breit, sobald der
+  Rest stimmte.
+
+- "min-width: 0" gehoert an die Regel, die die Knoepfe besitzt:
+  css/styles.css gibt auf Mobil jedem <button> 44 px Mindestbreite,
+  und drei davon passen nicht in eine 94 px breite Kachel. Der
+  Preis rutschte aus der Zeile.
+
+tests/unit/test-cardgrid-buttons.js haelt fest, dass es wieder EINE
+Stelle ist: hoechstens sechs bemessende Regeln, keine unter 24 px
+bzw. 11 px, kein Inline-Block im <head>, keine Wildcard, kein
+rot-gruenes Paar, hoechstens zwei Akzente.
+
+Tests: 1086 passed, 0 failed / 373 passed, 5 skipped.
+!important: 3396 -> 3364 in css/, 154 -> 115 in index.html.
+---
+ css/mobile-responsive.css           | 104 +++----
+ css/styles.css                      |  22 +-
+ css/ui-components.css               | 405 +++++++++++-----------------
+ index.html                          | 101 ++-----
+ tests/unit/test-cardgrid-buttons.js | 160 +++++++++++
+ 5 files changed, 413 insertions(+), 379 deletions(-)
+ create mode 100644 tests/unit/test-cardgrid-buttons.js
+
+diff --git a/css/mobile-responsive.css b/css/mobile-responsive.css
+index e85517d2..5b955254 100644
+--- a/css/mobile-responsive.css
++++ b/css/mobile-responsive.css
+@@ -1004,18 +1004,16 @@
+     }
+ }
+ 
+-/* --- Fix 3: Card-Action-Buttons min 12px font-size on mobile --- */
+-@media (max-width: 768px) {
+-    .city-league-card-remove-btn,
+-    .city-league-card-add-btn,
+-    .city-league-card-rarity-btn,
+-    .city-league-card-limitless-btn,
+-    .city-league-card-proxy-btn,
+-    .city-league-card-market-btn {
+-        font-size: 12px !important;
+-        min-height: 24px !important;
+-    }
+-}
++/* "Fix 3: Card-Action-Buttons min 12px font-size on mobile" stand hier
++ * und hat nie gewirkt. Zwei Regeln weiter unten in derselben Datei
++ * (`height: 16px !important`) und noch eine dritte (`height: 15px
++ * !important; font-size: 7px !important`) kamen spaeter im Dokument und
++ * haben sie ueberschrieben. Gemessen am 18.08.2026 auf 390 px: 24 x 22 px
++ * mit 9-px-Schrift — nicht 12 px, nicht 24 px hoch.
++ *
++ * Drei Regelsaetze mit !important, die um dieselben Knoepfe streiten,
++ * ergeben keinen Kompromiss, sondern den Wert des letzten. Jetzt gibt es
++ * einen Satz, weiter unten, ohne !important. */
+ 
+ /* --- Fix 4: Battle Journal FAB — WCAG 44px touch target --- */
+ @media (max-width: 768px) {
+@@ -1213,29 +1211,36 @@
+     overflow: hidden !important;
+     text-overflow: ellipsis !important;
+   }
+-  /* Action buttons: smaller height on mobile */
+-  .city-league-card-action-btn {
+-    height: 16px !important;
+-    font-size: 0.6em !important;
+-    padding: 0 2px !important;
+-    border-radius: 3px !important;
++  /* Die Trefferflaeche waechst auf dem Telefon, statt zu schrumpfen.
++   *
++   * Hier stand `height: 16px`. Auf dem Geraet, das man mit dem Daumen
++   * bedient, waren die Knoepfe kleiner als auf dem Geraet mit der Maus.
++   * 28 px ist immer noch unter den 44 px, die man sich wuenscht — mehr
++   * gibt eine 94 px breite Kachel mit drei Knoepfen pro Zeile nicht her,
++   * und die Kachelbreite ist die Ansicht.
++   *
++   * Ohne !important: css/ui-components.css wird frueher geladen, die
++   * Reihenfolge reicht. */
++  .city-league-card-action-btn,
++  .city-league-card-market-btn {
++    min-height: 28px;
++    padding: 0 var(--s-1);
+   }
+   .city-league-card-action-buttons {
+-    gap: 2px !important;
+-    margin-top: 2px !important;
++    gap: 2px;
++    margin-top: 2px;
+   }
+   .city-league-card-action-row {
+-    display: flex !important;
+-    gap: 2px !important;
++    display: flex;
++    gap: 2px;
+   }
+-  .city-league-card-action-row:last-child .city-league-card-market-btn {
+-    flex: 1 1 auto !important;
+-  }
+-  .city-league-card-action-row:last-child .city-league-card-limitless-btn,
+-  .city-league-card-action-row:last-child .city-league-card-proxy-btn {
+-    width: 18px !important;
+-    max-width: 18px !important;
+-    flex-shrink: 0 !important;
++  /* Untere Reihe: L und P sind Nebenwege und bekommen eine feste,
++   * schmale Spalte; der Preis nimmt den Rest. Bei gleicher Verteilung
++   * druecken die vier Zeichen von "12,41 €" die beiden anderen auf
++   * sieben Pixel zusammen — gemessen. */
++  .city-league-card-action-row > .city-league-card-limitless-btn,
++  .city-league-card-action-row > .city-league-card-proxy-btn {
++    flex: 0 0 24px;
+   }
+ 
+   /* UI Step 2 — Card Overview tightening on small phones.
+@@ -1708,12 +1713,23 @@
+     padding: 2px 4px !important;
+     gap: 3px !important;
+   }
+-  .card-item .card-action-overlay button,
+-  .card-item [class*="action"] button {
+-    min-height: 22px !important;
+-    min-width: 22px !important;
+-    font-size: 0.75em !important;
+-    padding: 1px 4px !important;
++  /* `[class*="action"] button` faengt jeden Knopf, dessen Klasse
++   * irgendwo "action" enthaelt — also auch die sechs Kartenknoepfe,
++   * fuer die diese Regel nie gedacht war. Sie hat mit
++   * `min-height: 22px !important` alles ueberstimmt, was weiter oben
++   * mit gutem Grund groesser gesetzt wurde, inklusive des
++   * Inline-Blocks in index.html, der genau diesen Punkt schon einmal
++   * reparieren wollte ("the buttons now hit the 'I can actually tap
++   * and read this' bar") und verloren hat: `.card-item [class*=...]
++   * button` ist spezifischer als `body .city-league-card-action-btn`.
++   *
++   * Sie gilt jetzt nur noch fuer das Overlay, fuer das sie geschrieben
++   * wurde. Die Kartenknoepfe kommen aus css/ui-components.css. */
++  .card-item .card-action-overlay button {
++    min-height: 22px;
++    min-width: 22px;
++    font-size: var(--fs-xs);
++    padding: 1px 4px;
+   }
+   /* Wishlist badge on card thumbnails */
+   .wishlist-heart-badge {
+@@ -1997,18 +2013,10 @@
+     text-align: center !important;
+   }
+ 
+-  /* ── Action buttons: smaller ── */
+-  .meta-card-grid .city-league-card-action-btn,
+-  .meta-card-analysis-grid .city-league-card-action-btn,
+-  #cityLeagueMetaGrid .city-league-card-action-btn,
+-  #currentMetaMetaGrid .city-league-card-action-btn {
+-    height: 15px !important;
+-    min-height: 15px !important;
+-    max-height: 15px !important;
+-    font-size: 7px !important;
+-    padding: 0 2px !important;
+-    border-radius: 3px !important;
+-  }
++  /* Hier stand `height: 15px; font-size: 7px`, dreifach mit !important
++   * festgenagelt (height, min-height, max-height). Sieben Pixel Schrift
++   * auf einem Knopf, den man mit dem Daumen trifft. Die Regel ist
++   * ersatzlos weg — es gilt der eine Satz weiter oben. */
+ 
+   .meta-card-grid .city-league-card-action-row,
+   .meta-card-analysis-grid .city-league-card-action-row,
+diff --git a/css/styles.css b/css/styles.css
+index 831e183a..a82a8261 100644
+--- a/css/styles.css
++++ b/css/styles.css
+@@ -3328,11 +3328,10 @@
+             }
+             
+             /* Karten-Buttons noch kompakter für kleine Screens */
+-            .card-item .card-action-buttons button {
+-                height: 18px !important;
+-                min-height: 18px !important;
+-                font-size: 10px !important;
+-            }
++            /* Die Kartenknoepfe werden an genau einer Stelle bemessen:
++             * css/ui-components.css. Hier standen 18 px und 10 px, und
++             * das war die vierte von sieben Regelgruppen, die sich um
++             * dieselben sechs Knoepfe gestritten haben. */
+             
+             .card-item .card-info-text > div {
+                 font-size: 0.6em !important;
+@@ -3498,12 +3497,11 @@
+                 flex-shrink: 0 !important;
+             }
+             
++            /* Siehe oben: Groesse kommt aus css/ui-components.css.
++             * `width: auto` bleibt, weil es die Spaltenaufteilung
++             * betrifft und nicht die Trefferflaeche. */
+             .card-item .card-action-buttons button {
+-                height: 18px !important;
+                 width: auto !important;
+-                min-height: 18px !important;
+-                max-height: 18px !important;
+-                font-size: 10px !important;
+                 padding: 0 2px !important;
+             }
+             
+@@ -7891,10 +7889,8 @@ body.battle-journal-open {
+     .card-action-buttons > div {
+         gap: 3px !important;
+     }
+-    .card-action-buttons button {
+-        height: 20px !important;
+-        font-size: 10px !important;
+-    }
++    /* Auch hier keine Groesse mehr — css/ui-components.css setzt sie,
++     * css/mobile-responsive.css hebt sie auf dem Telefon an. */
+ 
+     /* Meta Card Analysis Grids auf exakt 3 Spalten erzwingen */
+     #metaCardsGrid,
+diff --git a/css/ui-components.css b/css/ui-components.css
+index e943a981..1c8a3dce 100644
+--- a/css/ui-components.css
++++ b/css/ui-components.css
+@@ -1835,55 +1835,114 @@ img[src*="limitlesstcg"] {
+ .city-league-card-action-row > button {
+     flex: 1 1 0%;
+ }
+-.city-league-card-action-row:last-child {
+-    display: flex;
+-}
+-.city-league-card-action-row:last-child .city-league-card-market-btn {
+-    flex: 2 1 0%;
+-}
+-.city-league-card-action-row:last-child .city-league-card-limitless-btn,
+-.city-league-card-action-row:last-child .city-league-card-proxy-btn {
+-    flex: 1 1 0%;
++/* Hier stand dreimal `.city-league-card-action-row:last-child`, um der
++ * Zeile mit L / P / Preis andere Verhaeltnisse zu geben. Die Regeln
++ * haben nie gegriffen: es gibt DREI Aktionszeilen, und die letzte ist
++ * die Cooking-Mode-Reihe mit Pin und Exclude (`cm-deep-dive-only`) —
++ * ausgeblendet, aber im DOM, also ist sie das last-child. Die
++ * Preiszeile ist die vorletzte.
++ *
++ * Die drei Klassen kommen ohnehin nur in dieser einen Zeile vor, also
++ * braucht es die Zeile im Selektor gar nicht. */
++/* Der Kindselektor muss sein: `.city-league-card-action-row > button`
++ * eine Regel weiter oben ist spezifischer als eine reine Klasse und
++ * haette `flex: 1 1 0%` behalten. */
++.city-league-card-action-row > .city-league-card-limitless-btn,
++.city-league-card-action-row > .city-league-card-proxy-btn {
++    flex: 0 0 26px;
++}
++.city-league-card-action-row > .city-league-card-market-btn {
++    flex: 1 1 auto;
+ }
++/* ── Die Aktionsknoepfe auf der Karte ──────────────────────────────
++ *
++ * Gemessen am 18.08.2026 in der Deck-Analyse (Global), ein Archetyp,
++ * ein Bildschirm: 37 Karten, 296 Knoepfe. Jeder davon 43,7 x 19 px mit
++ * 9-px-Schrift, und sechs verschiedene gesaettigte Farben:
++ *
++ *     -   #ef4444 rot        L   Indigo-Verlauf
++ *     +   #22c55e gruen      P   Orange-Verlauf
++ *     *   #f59e0b bernstein  €   Petrol-Verlauf
++ *
++ * Zwei Probleme, die zusammen die Ansicht unlesbar machen.
++ *
++ * Erstens sind die beiden meistbenutzten Knoepfe ein rot-gruenes Paar,
++ * und zwar genau die beiden, deren Verwechslung wehtut: eine Kopie
++ * hinzufuegen gegen eine Kopie entfernen. Rot-Gruen ist die haeufigste
++ * Farbsehschwaeche; css/tokens.css hat das fuer die ganze Seite schon
++ * entschieden.
++ *
++ * Zweitens traegt bei sechs Signalfarben keine mehr ein Signal. Wenn
++ * alles hervorgehoben ist, ist nichts hervorgehoben — und dahinter
++ * liegt das Kartenbild, das eigentlich die Ansicht sein sollte.
++ *
++ * Jetzt: eine ruhige Familie, und genau zwei Akzente je Karte.
++ *   + traegt die Markenfarbe, weil Hinzufuegen die eine Handlung ist,
++ *     wegen der man hier ist.
++ *   Der Preis traegt den staerksten Kontrast, weil er die eine Zahl
++ *     ist, auf die geschaut wird — und weil er anklickbar ist.
++ * Alles andere ist ein Chip: gleiche Flaeche, gleiche Kante, lesbare
++ * Schrift. Unterschieden werden sie durch ihr Zeichen, nicht durch
++ * ihre Farbe.
++ *
++ * Die Hoehe steigt von 19 auf 24 px und die Schrift von 9 auf
++ * var(--fs-xs) = 11 px. 19 px ist unter jeder Trefferflaechen-Empfehlung,
++ * und 9 px liest niemand.
++ */
+ .city-league-card-action-btn {
+-    border: none;
+-    border-radius: 5px;
+-    height: 20px;
+-    cursor: pointer;
++    min-height: 24px;
++    /* css/styles.css gibt auf Mobil jedem <button> `min-width: 44px`.
++     * Drei davon passen nicht in eine 94-px-Kachel — die dritte Spalte
++     * und mit ihr der Preis rutschten aus der Zeile. Der frueher hier
++     * wirksame Gegenzug stand als `min-width: 0 !important` im
++     * Inline-Block von index.html; er gehoert an die Regel, die die
++     * Knoepfe ohnehin besitzt. */
++    min-width: 0;
++    padding: 0 var(--s-1);
++    border: 1px solid var(--line-strong);
++    border-radius: var(--r-sm);
++    background: var(--surface-2);
++    color: var(--ink-2);
++    font-size: var(--fs-xs);
+     font-weight: 700;
+-    padding: 0 3px;
++    line-height: 1;
+     display: flex;
+     align-items: center;
+     justify-content: center;
+-    min-height: unset;
+-    min-width: unset;
+-    line-height: 1;
+-    transition: filter 0.15s, transform 0.15s;
++    cursor: pointer;
++    transition: background .15s, border-color .15s, color .15s;
+ }
+ .city-league-card-action-btn:focus-visible {
+-    outline: 2px solid rgba(255, 255, 255, 0.85);
++    outline: 2px solid var(--brand);
+     outline-offset: 1px;
+ }
+ .city-league-card-action-btn:hover {
+-    filter: brightness(1.1);
+-    transform: scale(1.05);
++    background: var(--surface-1);
++    border-color: var(--ink-3);
++    color: var(--ink);
+ }
+-.city-league-card-remove-btn {
+-    background: #ef4444;
+-    color: white;
+-    font-size: 11px;
++/* Der eine Akzent: eine Kopie ins Deck. */
++.city-league-card-add-btn {
++    background: var(--brand);
++    border-color: var(--brand);
++    color: #fff;
++}
++.city-league-card-add-btn:hover {
++    background: var(--brand-ink);
++    border-color: var(--brand-ink);
++    color: #fff;
++}
++/* Sein Gegenstueck bleibt ruhig — und wird erst beim Zeigen deutlich.
++ * Kein Rot: das Paar +/- unterscheidet sich durch sein Zeichen, nicht
++ * durch eine Farbachse, auf der jeder Zwoelfte nichts sieht. */
++.city-league-card-remove-btn:hover {
++    background: var(--dv-neg-bg);
++    border-color: var(--dv-neg);
++    color: var(--ink);
+ }
+ .city-league-card-rarity-btn {
+-    background: #f59e0b;
+-    color: #333;
+-    font-size: 10px;
+     text-align: center;
+ }
+-.city-league-card-add-btn {
+-    background: #22c55e;
+-    color: white;
+-    font-size: 11px;
+-}
+ .city-league-card-pin-btn {
+     background: rgba(255, 255, 255, 0.12);
+     color: #fff;
+@@ -1970,169 +2029,101 @@ img[src*="limitlesstcg"] {
+     z-index: 3;
+     pointer-events: none;
+ }
+-.city-league-card-limitless-btn {
+-    background: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%);
+-    color: white;
+-    font-size: 10px;
+-}
++/* L und P sind Chips wie die anderen — sie oeffnen Limitless und legen
++ * einen Proxy an, beides Nebenwege. Ihre Verlaeufe (Indigo, Orange)
++ * haben sie optisch vor die beiden Knoepfe gezogen, um die es geht. */
++.city-league-card-limitless-btn,
+ .city-league-card-proxy-btn {
+-    background: linear-gradient(135deg, #f97316 0%, #c2410c 100%);
+-    color: white;
+-    font-size: 10px;
++    font-size: var(--fs-xs);
+ }
++/* Der zweite Akzent: der Preis. Die eine Zahl auf der Kachel, auf die
++ * beim Deckbau tatsaechlich geschaut wird, und der einzige Knopf, der
++ * die Seite verlaesst. Deshalb der staerkste Kontrast, den die Palette
++ * hergibt — und keine Farbe, die anderswo schon etwas bedeutet. */
+ .city-league-card-market-btn {
+-    background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+-    color: #ffffff;
+-    border: 1px solid rgba(255,255,255,0.24);
+-    height: 20px;
+-    border-radius: 5px;
+-    font-size: 10px;
+-    font-weight: 800;
+-    padding: 0 4px;
++    min-height: 24px;
++    min-width: 0;
++    padding: 0 var(--s-1);
++    border: 1px solid var(--ink);
++    border-radius: var(--r-sm);
++    background: var(--ink);
++    color: var(--surface-1);
++    font-family: var(--font-num);
++    font-size: var(--fs-xs);
++    font-weight: 700;
++    line-height: 1;
+     display: flex;
+     align-items: center;
+     justify-content: center;
+     overflow: hidden;
+     text-overflow: ellipsis;
+     white-space: nowrap;
+-    text-shadow: none;
+-    letter-spacing: 0.1px;
+-    min-height: unset;
+-    min-width: unset;
++    letter-spacing: 0;
+ }
+-.city-league-card-market-btn[data-market-cursor="pointer"] {
+-    background: linear-gradient(135deg, #0f766e 0%, #115e59 100%);
+-    color: #ffffff;
+-    cursor: pointer;
++.city-league-card-market-btn[data-market-cursor="pointer"] { cursor: pointer; }
++.city-league-card-market-btn[data-market-cursor="pointer"]:hover {
++    background: var(--brand);
++    border-color: var(--brand);
+ }
++/* Kein Preis bekannt: gedaempft und nicht anklickbar. Vorher ein grauer
++ * Verlauf, der genauso aussah wie ein Knopf, der etwas tut. */
+ .city-league-card-market-btn[data-market-cursor="not-allowed"] {
+-    background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+-    color: #f3f4f6;
++    background: var(--surface-2);
++    border-color: var(--line);
++    color: var(--ink-3);
+     cursor: not-allowed;
+ }
+ 
+-/* Deck Analysis (Japan): denser overlay and cleaner action rows */
+-#city-league-analysis .city-league-card-info-bottom {
+-    padding: 5px 6px;
++/* ── Die drei Deck-Analysen: ein Block statt drei ──────────────────
++ *
++ * Hier standen bis zum 18.08.2026 dreimal exakt dieselben 40 Zeilen,
++ * einmal je Datenraum — #city-league-analysis, #current-analysis,
++ * #past-meta. Byte-gleich bis auf das Praefix. Wer eine Zahl aendert,
++ * aendert sie an einer Stelle und wundert sich, warum die anderen
++ * beiden Ansichten anders aussehen.
++ *
++ * Die drei Ansichten sind dieselbe Ansicht mit drei Datenquellen; das
++ * steht so im Umbau-Handbuch (G2, Zusammenlegung 1). Bis die Praesen-
++ * tation wirklich eine ist, tut es eine gemeinsame Selektorliste.
++ */
++#city-league-analysis .city-league-card-info-bottom,
++#current-analysis .city-league-card-info-bottom,
++#past-meta .city-league-card-info-bottom {
++    padding: var(--s-1) var(--s-2);
+     min-height: 30px;
+ }
+ 
+ #city-league-analysis .city-league-card-stats-mobile,
+-#city-league-analysis .city-league-card-deck-stats-mobile {
+-    margin-bottom: 0;
+-    line-height: 1.2;
+-}
+-
+-#city-league-analysis .city-league-card-action-buttons {
+-    gap: 2px;
+-    margin-top: 3px;
+-}
+-
+-#city-league-analysis .city-league-card-action-row {
+-    gap: 2px;
+-}
+-
+-#city-league-analysis .city-league-card-action-row:last-child {
+-    gap: 2px;
+-}
+-
+-#city-league-analysis .city-league-card-action-btn,
+-#city-league-analysis .city-league-card-market-btn {
+-    height: 19px;
+-    border-radius: 4px;
+-    padding: 0 3px;
+-}
+-
+-#city-league-analysis .city-league-card-remove-btn,
+-#city-league-analysis .city-league-card-add-btn,
+-#city-league-analysis .city-league-card-rarity-btn,
+-#city-league-analysis .city-league-card-limitless-btn,
+-#city-league-analysis .city-league-card-proxy-btn,
+-#city-league-analysis .city-league-card-market-btn {
+-    font-size: 9px;
+-}
+-
+-/* Deck Analysis (Global): same compact card overlay behavior as Japan */
+-#current-analysis .city-league-card-info-bottom {
+-    padding: 5px 6px;
+-    min-height: 30px;
+-}
+-
++#city-league-analysis .city-league-card-deck-stats-mobile,
+ #current-analysis .city-league-card-stats-mobile,
+-#current-analysis .city-league-card-deck-stats-mobile {
+-    margin-bottom: 0;
+-    line-height: 1.2;
+-}
+-
+-#current-analysis .city-league-card-action-buttons {
+-    gap: 2px;
+-    margin-top: 3px;
+-}
+-
+-#current-analysis .city-league-card-action-row {
+-    gap: 2px;
+-}
+-
+-#current-analysis .city-league-card-action-row:last-child {
+-    gap: 2px;
+-}
+-
+-#current-analysis .city-league-card-action-btn,
+-#current-analysis .city-league-card-market-btn {
+-    height: 19px;
+-    border-radius: 4px;
+-    padding: 0 3px;
+-}
+-
+-#current-analysis .city-league-card-remove-btn,
+-#current-analysis .city-league-card-add-btn,
+-#current-analysis .city-league-card-rarity-btn,
+-#current-analysis .city-league-card-limitless-btn,
+-#current-analysis .city-league-card-proxy-btn,
+-#current-analysis .city-league-card-market-btn {
+-    font-size: 9px;
+-}
+-
+-/* Deck Analysis (Past Meta): same compact card overlay behavior as Japan/Global */
+-#past-meta .city-league-card-info-bottom {
+-    padding: 5px 6px;
+-    min-height: 30px;
+-}
+-
++#current-analysis .city-league-card-deck-stats-mobile,
+ #past-meta .city-league-card-stats-mobile,
+ #past-meta .city-league-card-deck-stats-mobile {
+     margin-bottom: 0;
+     line-height: 1.2;
+ }
+ 
++#city-league-analysis .city-league-card-action-buttons,
++#current-analysis .city-league-card-action-buttons,
+ #past-meta .city-league-card-action-buttons {
+     gap: 2px;
+     margin-top: 3px;
+ }
+ 
++#city-league-analysis .city-league-card-action-row,
++#current-analysis .city-league-card-action-row,
+ #past-meta .city-league-card-action-row {
+     gap: 2px;
+ }
+ 
+-#past-meta .city-league-card-action-row:last-child {
+-    gap: 2px;
+-}
+-
+-#past-meta .city-league-card-action-btn,
+-#past-meta .city-league-card-market-btn {
+-    height: 19px;
+-    border-radius: 4px;
+-    padding: 0 3px;
+-}
++/* Hoehe und Schriftgroesse stehen NICHT mehr hier.
++ *
++ * Die drei Kopien setzten `height: 19px` und `font-size: 9px` — neun
++ * Pixel, auf 296 Knoepfen in einem einzigen Gitter (37 Karten x 8).
++ * Beides kommt jetzt aus der Basisregel weiter oben, aus Tokens, und
++ * gilt fuer alle drei Ansichten gleich. Wer es hier wieder ueber-
++ * schreibt, baut die dritte Kopie neu auf. */
+ 
+-#past-meta .city-league-card-remove-btn,
+-#past-meta .city-league-card-add-btn,
+-#past-meta .city-league-card-rarity-btn,
+-#past-meta .city-league-card-limitless-btn,
+-#past-meta .city-league-card-proxy-btn,
+-#past-meta .city-league-card-market-btn {
+-    font-size: 9px;
+-}
+ /* City League Card Table Row Modular Styles */
+ .city-league-card-table-row {
+     display: flex;
+@@ -2229,13 +2220,11 @@ img[src*="limitlesstcg"] {
+ 
+ .city-league-card-actions .city-league-card-add-btn {
+     padding: 10px 20px;
+-    font-size: 0.95em;
+     white-space: nowrap;
+ }
+ 
+ .city-league-card-actions .city-league-card-proxy-btn {
+     padding: 10px 20px;
+-    font-size: 0.9em;
+     white-space: nowrap;
+     background: #e74c3c;
+     border-color: #c0392b;
+@@ -2351,14 +2340,12 @@ img[src*="limitlesstcg"] {
+     }
+     .city-league-card-action-btn,
+     .city-league-card-market-btn {
+-        height: 18px;
+         border-radius: 4px;
+-    }
++}
+     .city-league-card-market-btn {
+-        font-size: 8px;
+         font-weight: 800;
+         padding: 0 3px;
+-    }
++}
+ 
+     #city-league-analysis .city-league-card-info-bottom {
+         padding: 4px 5px;
+@@ -2372,19 +2359,9 @@ img[src*="limitlesstcg"] {
+ 
+     #city-league-analysis .city-league-card-action-btn,
+     #city-league-analysis .city-league-card-market-btn {
+-        height: 17px;
+         border-radius: 3px;
+         padding: 0 2px;
+-    }
+-
+-    #city-league-analysis .city-league-card-remove-btn,
+-    #city-league-analysis .city-league-card-add-btn,
+-    #city-league-analysis .city-league-card-rarity-btn,
+-    #city-league-analysis .city-league-card-limitless-btn,
+-    #city-league-analysis .city-league-card-proxy-btn,
+-    #city-league-analysis .city-league-card-market-btn {
+-        font-size: 8px;
+-    }
++}
+ 
+     #current-analysis .city-league-card-info-bottom {
+         padding: 4px 5px;
+@@ -2398,19 +2375,9 @@ img[src*="limitlesstcg"] {
+ 
+     #current-analysis .city-league-card-action-btn,
+     #current-analysis .city-league-card-market-btn {
+-        height: 17px;
+         border-radius: 3px;
+         padding: 0 2px;
+-    }
+-
+-    #current-analysis .city-league-card-remove-btn,
+-    #current-analysis .city-league-card-add-btn,
+-    #current-analysis .city-league-card-rarity-btn,
+-    #current-analysis .city-league-card-limitless-btn,
+-    #current-analysis .city-league-card-proxy-btn,
+-    #current-analysis .city-league-card-market-btn {
+-        font-size: 8px;
+-    }
++}
+ 
+     #past-meta .city-league-card-info-bottom {
+         padding: 4px 5px;
+@@ -2424,21 +2391,9 @@ img[src*="limitlesstcg"] {
+ 
+     #past-meta .city-league-card-action-btn,
+     #past-meta .city-league-card-market-btn {
+-        height: 17px;
+         border-radius: 3px;
+         padding: 0 2px;
+-    }
+-
+-    #past-meta .city-league-card-remove-btn,
+-    #past-meta .city-league-card-add-btn,
+-    #past-meta .city-league-card-rarity-btn,
+-    #past-meta .city-league-card-limitless-btn,
+-    #past-meta .city-league-card-proxy-btn {
+-        font-size: 8px;
+-    }
+-    #past-meta .city-league-card-market-btn {
+-        font-size: 8px;
+-    }
++}
+     #past-meta .city-league-card-info-bottom {
+         min-height: unset;
+     }
+@@ -2461,15 +2416,6 @@ img[src*="limitlesstcg"] {
+         font-size: 0.47em;
+         margin-bottom: 0;
+     }
+-
+-    #current-analysis .city-league-card-action-btn {
+-        height: 16px;
+-        font-size: 7px;
+-    }
+-    #current-analysis .city-league-card-market-btn {
+-        height: 16px;
+-        font-size: 7px;
+-    }
+ }
+ 
+ @media (max-width: 360px) {
+@@ -2503,16 +2449,13 @@ img[src*="limitlesstcg"] {
+     }
+ 
+     #current-analysis .city-league-card-action-btn {
+-        height: 16px;
+         border-radius: 3px;
+         padding: 0 3px;
+-    }
++}
+     #current-analysis .city-league-card-market-btn {
+-        height: 16px;
+         border-radius: 3px;
+         padding: 0 3px;
+-        font-size: 7px;
+-    }
++}
+ }
+ 
+ @media (max-width: 420px) {
+@@ -2539,20 +2482,9 @@ img[src*="limitlesstcg"] {
+     }
+     .city-league-card-action-btn,
+     .city-league-card-market-btn {
+-        height: 16px;
+         border-radius: 3px;
+         padding: 0 2px;
+-    }
+-    .city-league-card-remove-btn,
+-    .city-league-card-add-btn,
+-    .city-league-card-rarity-btn,
+-    .city-league-card-limitless-btn,
+-    .city-league-card-proxy-btn {
+-        font-size: 9px;
+-    }
+-    .city-league-card-market-btn {
+-        font-size: 7px;
+-    }
++}
+ }
+ 
+ @media (max-width: 390px) {
+@@ -2586,26 +2518,22 @@ img[src*="limitlesstcg"] {
+     }
+ 
+     #city-league-analysis .city-league-card-action-btn {
+-        height: 16px;
+         border-radius: 3px;
+         padding: 0 3px;
+-    }
++}
+ 
+     #city-league-analysis .city-league-card-remove-btn,
+     #city-league-analysis .city-league-card-add-btn,
+     #city-league-analysis .city-league-card-rarity-btn,
+     #city-league-analysis .city-league-card-limitless-btn,
+     #city-league-analysis .city-league-card-proxy-btn {
+-        font-size: 7px;
+         letter-spacing: 0;
+-    }
++}
+     #city-league-analysis .city-league-card-market-btn {
+-        height: 16px;
+         border-radius: 3px;
+         padding: 0 3px;
+-        font-size: 7px;
+         letter-spacing: 0;
+-    }
++}
+ }
+ 
+ @media (max-width: 412px) and (min-width: 391px) {
+@@ -2633,15 +2561,11 @@ img[src*="limitlesstcg"] {
+     }
+ 
+     #city-league-analysis .city-league-card-action-btn {
+-        height: 17px;
+-        font-size: 8px;
+         padding: 0 3px;
+-    }
++}
+     #city-league-analysis .city-league-card-market-btn {
+-        height: 17px;
+-        font-size: 8px;
+         padding: 0 3px;
+-    }
++}
+ }
+ 
+ /* ─────────────────────────────────────────────────────────────────────
+@@ -3013,7 +2937,6 @@ img[src*="limitlesstcg"] {
+ }
+ 
+ #city-league-analysis .city-league-card-market-btn {
+-    font-size: 8px;
+     padding: 0 4px;
+ }
+ /* Modular info grid and card styles for City League */
+diff --git a/index.html b/index.html
+index 53887ed1..ef1d7447 100644
+--- a/index.html
++++ b/index.html
+@@ -283,75 +283,28 @@
+         line-height: 1.15 !important;
+       }
+ 
+-      /* Action buttons: compact — L and P narrower, price gets flex.
++      /* Hier standen 34 !important, die die sechs Kartenknoepfe auf
++       * 28 px und 11 px zwingen wollten. Der Kommentar dazu lautete:
++       * "2026-06-10 audit fix — previous values (height 16px,
++       * font-size 7px) were below WCAG minimums ... the buttons now
++       * hit the 'I can actually tap and read this' bar."
+        *
+-       * 2026-06-10 audit fix — previous values (height 16px, font-size 7px)
+-       * were below WCAG minimums (44px touch target, 12px text legibility)
+-       * AND below practical phone readability. Bumped to 28px tall / 11px
+-       * text — still compact enough that the 6-col mobile card grid keeps
+-       * its current row count, but the buttons now hit the
+-       * "I can actually tap and read this" bar.
+-       */
+-      body .city-league-card-action-btn,
+-      body .city-league-card-add-btn,
+-      body .city-league-card-remove-btn,
+-      body .city-league-card-rarity-btn {
+-        height: 28px !important;
+-        min-height: 28px !important;
+-        max-height: 28px !important;
+-        min-width: 0 !important;
+-        flex: 1 1 0% !important;
+-        font-size: 11px !important;
+-        padding: 0 4px !important;
+-        border-radius: 4px !important;
+-        line-height: 1.1 !important;
+-      }
+-
+-      /* L and P buttons: fixed narrow width */
+-      body .city-league-card-limitless-btn,
+-      body .city-league-card-proxy-btn {
+-        height: 28px !important;
+-        min-height: 28px !important;
+-        max-height: 28px !important;
+-        min-width: 0 !important;
+-        width: 26px !important;
+-        max-width: 26px !important;
+-        font-size: 11px !important;
+-        padding: 0 2px !important;
+-        border-radius: 4px !important;
+-        line-height: 1.1 !important;
+-        flex-shrink: 0 !important;
+-      }
+-
+-      /* Price button: takes remaining space */
+-      body .city-league-card-market-btn {
+-        height: 28px !important;
+-        min-height: 28px !important;
+-        max-height: 28px !important;
+-        min-width: 0 !important;
+-        flex: 1 1 auto !important;
+-        font-size: 11px !important;
+-        padding: 0 4px !important;
+-        border-radius: 4px !important;
+-        line-height: 1.1 !important;
+-        overflow: hidden !important;
+-        text-overflow: ellipsis !important;
+-        white-space: nowrap !important;
+-      }
+-
+-      body .city-league-card-action-row {
+-        display: flex !important;
+-        gap: 2px !important;
+-      }
+-
+-      body .city-league-card-action-row:last-child {
+-        display: flex !important;
+-      }
++       * Sie haben es nie erreicht. Gemessen am 18.08.2026 auf 390 px:
++       * 24 x 22 px mit 9-px-Schrift. Geschlagen von einer einzigen
++       * Zeile in css/mobile-responsive.css — `.card-item
++       * [class*="action"] button { min-height: 22px !important }` —,
++       * die spezifischer ist als `body .city-league-card-action-btn`
++       * und die nie fuer diese Knoepfe geschrieben wurde.
++       *
++       * Die Wildcard-Regel ist jetzt eingegrenzt, die 24 verstreuten
++       * Verkleinerungsregeln in css/ui-components.css sind weg, und die
++       * Groesse steht an genau einer Stelle. Deshalb braucht es hier
++       * nichts mehr. */
+ 
+-      body .city-league-card-action-buttons {
+-        gap: 2px !important;
+-        margin-top: 2px !important;
+-      }
++      /* Abstaende der Aktionszeilen: stehen genauso in
++         css/ui-components.css. Drei Regeln mit fuenf !important, die
++         nichts anderes gesagt haben als die Datei, die dafuer zustaendig
++         ist. Das `:last-child` traf ohnehin die Cooking-Mode-Reihe. */
+ 
+       /* Count badges: 22px (was 16px — 2026-06-10 audit fix) */
+       body .city-league-card-badge {
+@@ -441,16 +394,10 @@
+         line-height: 1.15 !important;
+       }
+ 
+-      body #cityLeagueMetaGrid .city-league-card-action-btn,
+-      body #currentMetaMetaGrid .city-league-card-action-btn,
+-      body .meta-card-grid .city-league-card-action-btn {
+-        height: 16px !important;
+-        min-height: 16px !important;
+-        max-height: 16px !important;
+-        min-width: 0 !important;
+-        font-size: 7px !important;
+-        padding: 0 2px !important;
+-      }
++/* Auch der Zwilling ist weg: `... .meta-card-grid
++       * .city-league-card-action-btn { height: 16px }` hat dieselben
++       * Knoepfe im Kartenraster noch einmal geschrumpft. Die Groesse
++       * kommt aus css/ui-components.css. */
+ 
+       body #cityLeagueMetaGrid .card-badge,
+       body #currentMetaMetaGrid .card-badge,
+diff --git a/tests/unit/test-cardgrid-buttons.js b/tests/unit/test-cardgrid-buttons.js
+new file mode 100644
+index 00000000..9ce4b033
+--- /dev/null
++++ b/tests/unit/test-cardgrid-buttons.js
+@@ -0,0 +1,160 @@
++/**
++ * Die sechs Aktionsknoepfe auf einer Karte im Deck-Gitter.
++ *
++ * Gemessen am 18.08.2026 in der Deck-Analyse (Global), ein Archetyp,
++ * ein Bildschirm: 37 Karten, 296 Knoepfe, jeder 43,7 x 19 px mit
++ * 9-px-Schrift. Auf 390 px: 24 x 22 px, ebenfalls 9 px.
++ *
++ * Die Groesse dieser sechs Knoepfe wurde an 31 Stellen gesetzt, verteilt
++ * ueber drei Stylesheets und einen Inline-Block in index.html, in
++ * Medienabfragen bei 768 / 600 / 480 / 430 / 420 / 412 / 390 / 360 px.
++ * Gewonnen hat am Ende eine Regel, die nie fuer sie geschrieben wurde:
++ *
++ *     .card-item [class*="action"] button { min-height: 22px !important }
++ *
++ * Der Inline-Block in index.html hatte 2026-06-10 schon einmal genau
++ * dieses Problem loesen wollen — 34 !important, Kommentar "the buttons
++ * now hit the 'I can actually tap and read this' bar" — und verloren,
++ * weil `.card-item [class*=...] button` spezifischer ist als
++ * `body .city-league-card-action-btn`.
++ *
++ * Diese Tests halten fest, dass es wieder EINE Stelle ist.
++ */
++
++const { describe, it } = require('node:test');
++const assert = require('node:assert/strict');
++const fs = require('fs');
++const path = require('path');
++
++const ROOT = path.join(__dirname, '..', '..');
++const R = (p) => fs.readFileSync(path.join(ROOT, p), 'utf8');
++
++const UI = R('css/ui-components.css');
++const MOB = R('css/mobile-responsive.css');
++const STYLES = R('css/styles.css');
++const HTML = R('index.html');
++
++const BTN = /city-league-card-(action-btn|market-btn|remove-btn|add-btn|rarity-btn|limitless-btn|proxy-btn)/;
++const SIZE = /(^|[\s;{])(height|min-height|max-height|font-size)\s*:/;
++
++// Jede Regel eines Stylesheets als { selektor, koerper, quelle }.
++// Kommentare fliegen vorher raus: diese Datei erklaert den Berg
++// ausfuehrlich und nennt dabei jede Klasse beim Namen — ein Parser, der
++// das mitliest, findet Regeln, die es nicht gibt.
++function rules(css, name) {
++    const clean = css.replace(/\/\*[\s\S]*?\*\//g, '');
++    const out = [];
++    const re = /([^{}]+)\{([^{}]*)\}/g;
++    let m;
++    while ((m = re.exec(clean)) !== null) {
++        out.push({ sel: m[1].trim(), body: m[2], src: name });
++    }
++    return out;
++}
++const ALL = [...rules(UI, 'ui-components.css'),
++             ...rules(MOB, 'mobile-responsive.css'),
++             ...rules(STYLES, 'styles.css')];
++
++describe('Kartenknoepfe: eine Stelle, nicht einunddreissig', () => {
++    it('nur zwei Regeln bemessen die Knoepfe', () => {
++        const sizing = ALL.filter(r => BTN.test(r.sel) && SIZE.test(r.body));
++        const list = sizing.map(r => `${r.src}: ${r.sel.split('\n')[0].slice(0, 60)}`);
++        // Fuenf: die Basisregel, die Schriftgroesse fuer L und P, der
++        // Preis (der eine eigene Flaeche hat), und zwei Anhebungen auf
++        // Mobil. Vor dem 18.08.2026 waren es 31. Die Schranke fangt den
++        // Rueckfall, nicht die naechste berechtigte Regel.
++        assert.ok(sizing.length <= 6,
++            'Die Groesse dieser Knoepfe wird an ' + sizing.length + ' Stellen gesetzt. '
++            + 'Vor der Aufraeumung waren es 31, verteilt ueber drei Stylesheets und einen '
++            + 'Inline-Block:\n  ' + list.join('\n  '));
++    });
++
++    it('keine Regel schrumpft sie unter 24 px oder unter 11 px', () => {
++        const bad = [];
++        for (const r of ALL) {
++            if (!BTN.test(r.sel)) continue;
++            for (const m of r.body.matchAll(/(min-height|height|font-size)\s*:\s*(\d+)px/g)) {
++                const v = Number(m[2]);
++                const floor = m[1] === 'font-size' ? 11 : 24;
++                if (v < floor) bad.push(`${r.src}: ${r.sel.split('\n')[0].slice(0, 50)} -> ${m[0]}`);
++            }
++        }
++        assert.deepEqual(bad, [],
++            'Diese Regeln machen die Knoepfe wieder kleiner als lesbar bzw. treffbar:\n  '
++            + bad.join('\n  '));
++    });
++
++    it('index.html traegt keinen Inline-Block fuer die Knoepfe mehr', () => {
++        const head = HTML.slice(0, HTML.indexOf('</head>'))
++            .replace(/\/\*[\s\S]*?\*\//g, '')      // CSS-Kommentare im <style>
++            .replace(/<!--[\s\S]*?-->/g, '');       // HTML-Kommentare
++        assert.ok(!BTN.test(head),
++            'Im <head> von index.html steht wieder eine Regel fuer die Kartenknoepfe. '
++            + 'Ein Inline-Block ist die Stelle, an der niemand sucht — und er hat beim '
++            + 'letzten Mal verloren.');
++    });
++
++    it('die Wildcard-Regel faengt die Kartenknoepfe nicht mehr', () => {
++        const mobCode = MOB.replace(/\/\*[\s\S]*?\*\//g, '');
++        assert.ok(!/\[class\*="action"\]\s+button/.test(mobCode),
++            '`[class*="action"] button` faengt jeden Knopf, dessen Klasse irgendwo '
++            + '"action" enthaelt — auch die sechs Kartenknoepfe, fuer die die Regel '
++            + 'nie gedacht war.');
++    });
++});
++
++describe('Kartenknoepfe: die Farbregel', () => {
++    it('das Paar Hinzufuegen / Entfernen ist nicht rot-gruen', () => {
++        const add = ALL.find(r => /^\.city-league-card-add-btn\s*$/.test(r.sel));
++        const rem = ALL.find(r => /^\.city-league-card-remove-btn\s*$/.test(r.sel));
++        assert.ok(add, '.city-league-card-add-btn fehlt');
++        assert.ok(!/#22c55e|#16a34a|green/i.test(add.body),
++            'Hinzufuegen ist wieder gruen. Sein Gegenstueck ist Entfernen — das Paar '
++            + 'liegt damit auf der Achse, auf der jeder Zwoelfte nichts unterscheidet.');
++        if (rem) {
++            assert.ok(!/background:\s*#ef4444|background:\s*red/i.test(rem.body),
++                'Entfernen ist wieder rot.');
++        }
++    });
++
++    it('genau zwei Akzente je Karte', () => {
++        // Alles andere ist ein Chip aus --surface-2. Ein dritter Akzent
++        // waere der Anfang zurueck zum Regenbogen.
++        const accented = ALL.filter(r =>
++            BTN.test(r.sel) &&
++            /background:\s*var\(--(brand|ink|gold|alarm)\)/.test(r.body) &&
++            !/:hover/.test(r.sel));
++        const names = accented.map(r => r.sel.split('\n')[0].slice(0, 50));
++        assert.ok(accented.length <= 2,
++            'Mehr als zwei farbige Knoepfe je Karte: ' + names.join(' | '));
++    });
++
++    it('kein roher Hex-Verlauf mehr auf den Knoepfen', () => {
++        const grad = ALL.filter(r => BTN.test(r.sel) && /linear-gradient\([^)]*#/.test(r.body));
++        assert.deepEqual(grad.map(r => r.sel.split('\n')[0].slice(0, 50)), []);
++    });
++});
++
++describe('Kartenknoepfe: tote Selektoren', () => {
++    it('kein :last-child mehr fuer die Preiszeile', () => {
++        // Es gibt drei Aktionszeilen. Die letzte ist die Cooking-Mode-Reihe
++        // mit Pin und Exclude — ausgeblendet, aber im DOM. Die Preiszeile
++        // ist die vorletzte, also hat :last-child sie nie getroffen.
++        assert.ok(!/action-row:last-child\s+\.city-league-card-(market|limitless|proxy)-btn/.test(UI),
++            'Die :last-child-Regeln sind zurueck. Sie treffen die Cooking-Mode-Reihe, '
++            + 'nicht die Zeile mit L / P / Preis.');
++    });
++
++    it('die drei Deck-Analysen teilen sich einen Regelblock', () => {
++        // Vorher: dreimal exakt dieselben 40 Zeilen, byte-gleich bis auf
++        // das Praefix.
++        assert.match(UI, /#city-league-analysis \.city-league-card-info-bottom,\n#current-analysis \.city-league-card-info-bottom,\n#past-meta \.city-league-card-info-bottom \{/,
++            'Die gemeinsame Selektorliste fehlt — dann stehen die drei Ansichten wieder '
++            + 'je fuer sich, und wer eine Zahl aendert, aendert sie an einer Stelle.');
++        // Die drei Bloecke ausserhalb der Medienabfragen sind zu einem
++        // geworden; in den Medienabfragen leben noch Reste, die Block 8
++        // mit der echten Zusammenlegung aufloest.
++        assert.match(UI, /#city-league-analysis \.city-league-card-action-buttons,\n#current-analysis \.city-league-card-action-buttons,\n#past-meta \.city-league-card-action-buttons \{/,
++            'Auch die Aktionsleiste braucht die gemeinsame Liste.');
++    });
++});
+-- 
+2.43.0
+

@@ -104,7 +104,8 @@ describe('Bausteine — verschieben, nicht neu erzeugen', () => {
     });
 
     it('Abschnitte werden nie als Inhalt eingesammelt', () => {
-        const fn = /function sammle\(host, muster\) \{[\s\S]*?\n    \}/.exec(CODE)[0];
+        // Sonst haengt sich ein Abschnitt in seinen eigenen Koerper.
+        const fn = /function kandidaten\(host\) \{[\s\S]*?\n    \}/.exec(CODE)[0];
         assert.match(fn, /classList\.contains\('ds-sec'\)/);
     });
 });
@@ -126,6 +127,20 @@ describe('Bausteine — wiederholbar', () => {
     it('der Beobachter kann sich deshalb nicht selbst aufschaukeln', () => {
         assert.match(CODE, /MutationObserver/);
         assert.match(CODE, /setTimeout\(sektionieren, \d+\)/);
+    });
+
+    it('er beobachtet auch die Abschnitte, nicht nur den Host', () => {
+        // Spaeter gerenderte Bloecke landen nicht am Host, sondern in
+        // dem Abschnitt, neben dessen Inhalt sie eingefuegt werden.
+        // Live beobachtet: .top-cards-container strandete im
+        // "Ueberblick", und der Abschnitt "Karten" fehlte stillschweigend.
+        assert.match(CODE, /childList: true, subtree: true/);
+    });
+
+    it('gestrandete Bloecke werden zurueckgeholt', () => {
+        const fn = /function kandidaten\(host\) \{[\s\S]*?\n    \}/.exec(CODE);
+        assert.ok(fn, 'kandidaten() fehlt');
+        assert.match(fn[0], /:scope > \.ds-sec > \.ds-sec-body/);
     });
 
     it('die Reihenfolge wird nur hergestellt, wenn sie abweicht', () => {

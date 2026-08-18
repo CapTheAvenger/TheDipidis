@@ -125,6 +125,15 @@
    "PLS 130"
   ]
  },
+ "empty_files": {
+  "city_league_analysis.csv": true,
+  "city_league_archetypes.csv": true,
+  "city_league_archetypes_comparison.csv": true,
+  "city_league_archetypes_deck_stats.csv": true,
+  "city_league_archetypes_past.csv": true,
+  "city_league_archetypes_past_comparison.csv": true,
+  "city_league_archetypes_past_deck_stats.csv": true
+ },
  "file_rows": {
   "cardmarket_card_images.csv": 1295,
   "cardmarket_id_mapping.csv": 17388,
@@ -132,9 +141,9 @@
   "price_data.csv": 20419,
   "prizepack_official_images.csv": 266
  },
- "generated": "2026-08-17 09:46 UTC",
+ "generated": "2026-08-18 09:44 UTC",
  "price_integrity": {
-  "duplicate_idproducts": 104,
+  "duplicate_idproducts": 105,
   "match_methods": {
    "live-verified": 5047,
    "manual-pin": 1,

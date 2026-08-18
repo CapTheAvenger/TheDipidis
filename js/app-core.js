@@ -2532,7 +2532,38 @@ const BASE_PATH = './data/';
         }
         window.registerPrizePackPrintsInIndex = registerPrizePackPrintsInIndex;
 
+        // Genau ein Ladevorgang, auch wenn mehrere danach fragen.
+        //
+        // Gemessen am 18.08.2026 beim ersten Seitenaufruf: diese Funktion
+        // laeuft zweimal gleichzeitig — einmal aus dem normalen
+        // Startablauf, einmal aus ensureProxyManualSearchReady (Zeile
+        // 522), das nur pruefen will, ob die Kartenliste schon da ist.
+        // Beide sehen eine leere Liste, beide starten, und beide laden
+        // dieselben drei Pakete:
+        //
+        //   cards_chunk_standard.json  bei 1249 und 1250 ms   3,1 MB
+        //   cards_chunk_extended.json  bei 1371 und 1472 ms   3,4 MB
+        //   cards_chunk_legacy.json    bei 1620 und 1634 ms   9,3 MB
+        //
+        // 16,3 MB von insgesamt 17,0 MB, die der Startvorgang umsonst
+        // uebertraegt — auf dem Telefon byte-identisch zum Rechner.
+        // Der IndexedDB-Zwischenspeicher hilft dagegen nicht: beim
+        // ersten Besuch ist er leer, und danach fuellen ihn beide.
+        //
+        // Der zweite Aufrufer bekommt jetzt dasselbe Versprechen statt
+        // eines zweiten Ladevorgangs. force: true umgeht das bewusst —
+        // der Aktualisieren-Knopf (Zeile 2783) soll wirklich neu laden.
+        let _cardDbLaeuft = null;
         async function loadAllCardsDatabase(options) {
+            const force = !!(options && options.force);
+            if (!force && _cardDbLaeuft) return _cardDbLaeuft;
+            const lauf = _loadAllCardsDatabaseImpl(options)
+                .finally(function () { if (_cardDbLaeuft === lauf) _cardDbLaeuft = null; });
+            if (!force) _cardDbLaeuft = lauf;
+            return lauf;
+        }
+
+        async function _loadAllCardsDatabaseImpl(options) {
             try {
                 // --- Strategy: Chunked loading with IndexedDB cache ---
                 // 1. Try manifest-based chunked loading (Standard chunk first, rest lazy)
@@ -2719,8 +2750,24 @@ const BASE_PATH = './data/';
             window.cardIndexMap = cardIndexMap;
         }
 
+        // Ein Versprechen, auf das andere Module warten koennen, statt
+        // dieselben Daten ein zweites Mal aus dem Netz zu holen.
+        //
+        // Gemessen am 18.08.2026 beim ersten Seitenaufruf: die drei
+        // Kartenpakete werden zweimal geladen — einmal hier, einmal von
+        // app-profile-deck-builder.js, das daraus nur wissen will,
+        // welche Sets zu welcher Aera gehoeren. 9,3 + 3,4 + 3,1 MB
+        // doppelt = 16,3 MB der insgesamt 17,0 MB, die der Startvorgang
+        // umsonst uebertraegt. Der Deck-Builder versucht schon den
+        // IndexedDB-Zwischenspeicher, aber beim ersten Besuch ist der
+        // noch leer, weil dieser Ladevorgang ihn gerade erst fuellt.
+        // Beide laufen los, beide laden.
+        let _resolveCardDBReady = null;
+        window.cardDBReady = new Promise(function (resolve) { _resolveCardDBReady = resolve; });
+
         function _notifyCardDBReady() {
             devLog('Cards DB ready: ' + allCardsDatabase.length + ' cards');
+            if (_resolveCardDBReady) { _resolveCardDBReady(true); _resolveCardDBReady = null; }
 
             // Count cards with prices
             const cardsWithPrices = allCardsDatabase.filter(c => c.eur_price).length;

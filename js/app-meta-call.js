@@ -103,6 +103,10 @@ window.MetaCall = (function () {
   }
   let _trendMap   = null;  // normalize(deck) -> share_change (%-points week-over-week)
   let _tournamentStats = null; // normalize(deck) -> { broughtShare, top8Conv, top16Conv, ... }
+  // Diagnose-Marken im Vorhersage-Streifen. Standard aus: sie richten
+  // sich an Entwickler, nicht an Spieler. Einschalten mit
+  // MetaCall.setDiagnostics(true) in der Konsole.
+  let _showDiagnostics = false;
   let _predictorMode  = 'A'; // 'A' = online-only fallback, 'B' = labs-major data available
   let _labsMajorRows  = 0;   // count of labs CSV rows that informed the mode decision
   let _labsRowsByDeck = {};  // labs share data — kept after loadData so re-runs work
@@ -7941,15 +7945,25 @@ window.MetaCall = (function () {
   ${_inFrozenPastMode() ? '' : _renderCombinedConfigPanel()}
   ${renderSettingsPanel()}
   ${_inFrozenPastMode() ? renderFrozenBanner() : ''}
-  ${/* Mode B predictor-status banner (2026-06-12: user feedback —
-       "Data window: from 2026-05-22 onwards · 4520 of 4585
-       major-tournament rows excluded" is operator-grade pipeline
-       detail, not end-user info. The current format is already
-       visible in Tournament Settings above; the row-drop count
-       served the May rotation rollout and is now noise.) The
-       function stays in place so we can re-enable via a debug flag
-       if needed — devs can still call MetaCall._renderPredictorStatusBanner
-       from the console. */ ''}
+  ${/* Der GROSSE Statusstreifen (_renderPredictorStatusBanner) bleibt
+       aus. Am 12.06.2026 abgeschaltet, mit Recht: "Data window: from
+       2026-05-22 onwards · 4520 of 4585 major-tournament rows
+       excluded" ist Maschinenzustand, keine Nutzeraussage. Abrufbar
+       ueber MetaCall._renderPredictorStatusBanner in der Konsole. */ ''}
+  ${/* Der KLEINE Streifen dagegen war nie verdrahtet — renderPredictorBanner
+       existierte samt Stylesheet (css/meta-call.css:1646) und wurde von
+       keiner Stelle aufgerufen. Nachgemessen am 18.08.2026: 0 Aufrufe im
+       ganzen Projekt.
+       Er beantwortet die eine Frage, die man einer Vorhersage stellen
+       muss, bevor man ein Turnier danach plant: worauf beruht sie? Der
+       Satz dazu lag fertig und uebersetzt in i18n.js ('mc.bannerModeA':
+       "Erstes Major im Meta — Vorhersage basiert auf Online-Ladder und
+       Online-Turnier-Top-8"). Ohne ihn verwirft die Maschine still
+       4.520 von 4.667 Turnierzeilen und laeuft im reinen Ladder-Modus
+       weiter, und im sichtbaren Text steht davon kein Wort.
+       Die Diagnose-Marken (Quelle, aktive Rotation) sind dabei
+       ausgeblendet — sonst waere das derselbe Fehler wie oben. */ ''}
+  ${_inFrozenPastMode() ? '' : renderPredictorBanner()}
   ${_inFrozenPastMode() ? '' : renderFieldPanel(field)}
   ${_inFrozenPastMode() ? '' : renderCustomDecksPanel()}
   ${_inFrozenPastMode() ? '' : renderMyDeckPanel()}
@@ -8462,10 +8476,18 @@ window.MetaCall = (function () {
     //   • Past format key, if past
     //   • Whether labs state survived into past-meta mode
     //   • Active-rotation suffix (POR during lag, CRI after)
-    const sourceTag = _metaSource === 'past'
+    // Diese beiden Marken sind Diagnose, keine Nutzeraussage: sie sagen
+    // dem Entwickler, in welchem Zustand die Maschine laeuft, wenn
+    // jemand "das sieht falsch aus" meldet. Fuer den Spieler sind sie
+    // Rauschen — genau der Grund, aus dem am 12.06.2026 der andere,
+    // groessere Statusstreifen (_renderPredictorStatusBanner)
+    // abgeschaltet wurde. Sie bleiben abrufbar, aber nur auf Wunsch:
+    //   MetaCall.setDiagnostics(true)
+    const _diag = !!_showDiagnostics;
+    const sourceTag = !_diag ? '' : (_metaSource === 'past'
       ? ` <span class="mc-predictor-banner-source" style="font-weight:600;color:#6b21a8;">Past Meta · ${_pastMetaFormatKey || '?'}</span>`
-      : ` <span class="mc-predictor-banner-source" style="font-weight:600;color:#065f46;">Current Meta</span>`;
-    const activeTag = _activeInPersonSetCode
+      : ` <span class="mc-predictor-banner-source" style="font-weight:600;color:#065f46;">Current Meta</span>`);
+    const activeTag = (_diag && _activeInPersonSetCode)
       ? ` <span class="mc-predictor-banner-active" style="opacity:0.75;">active rotation: ${_activeInPersonSetCode}</span>`
       : '';
     // Lag-window chip (2026-06). When current_set is online-legal but
@@ -8479,7 +8501,7 @@ window.MetaCall = (function () {
         && _activeInPersonSetCode
         && _currentSetUpper
         && _activeInPersonSetCode !== _currentSetUpper)
-      ? ` <span class="mc-predictor-banner-lagwindow" style="opacity:0.85;color:#b45309;" title="${_currentSetUpper} is online-legal but every in-person regional still plays ${_activeInPersonSetCode}. The labs aggregate represents ${_activeInPersonSetCode} play, so it's been dropped from the ${_currentSetUpper} prediction — online ladder is the only signal until the first ${_currentSetUpper} regional lands.">lag window: ${_currentSetUpper} online-only · ${_activeInPersonSetCode} labs ignored</span>`
+      ? ` <span class="mc-predictor-banner-lagwindow" style="opacity:0.85;color:#b45309;" title="${esc(t('mc.bannerLagWindowHelp').replace(/\{new\}/g, _currentSetUpper).replace(/\{old\}/g, _activeInPersonSetCode))}">${esc(t('mc.bannerLagWindow').replace('{new}', _currentSetUpper))}</span>`
       : '';
     // Stale-cache canary (2026-06). Surfaces the newest scraped_at
     // timestamp we saw across the loaded labs CSV. If this displays
@@ -8494,10 +8516,20 @@ window.MetaCall = (function () {
           return Math.floor((Date.now() - new Date(shortDate + 'T00:00:00Z').getTime()) / 86400000);
         } catch (_e) { return 0; }
       })();
-      const isStale = ageDays > 8; // weekly scraper + 1d slack
+      const isStale = ageDays > 8; // woechentlicher Lauf + 1 Tag Luft
       const color = isStale ? '#b91c1c' : '#374151';
-      const warn = isStale ? ' ⚠ STALE' : '';
-      staleTag = ` <span class="mc-predictor-banner-stale" style="opacity:0.85;color:${color};" title="Newest scraped_at timestamp in the loaded labs CSV. If this is older than the last weekly scraper run, the browser is serving cached data — clear site data + hard-reload to refresh.">Daten: ${shortDate}${warn}</span>`;
+      // "⚠ STALE" sagt einem Spieler nichts. Was er wissen will, ist
+      // das Alter — und zwar ohne dass wir ihm die Ursache andichten.
+      // Der englische Originaltext behauptete "browser is serving
+      // cached data, hard-reload to refresh"; nachgemessen am
+      // 18.08.2026 stimmt das nicht: labs_tournament_decks.csv traegt
+      // scraped_at 2026-07-29 und liegt seit dem 31.07. unveraendert
+      // im Repo. Ein Neuladen aendert daran nichts. Majors sind selten;
+      // 20 Tage koennen einfach heissen, dass keins gespielt wurde.
+      const label = isStale
+        ? t('mc.bannerDataStale').replace('{date}', shortDate).replace('{days}', String(ageDays))
+        : t('mc.bannerDataDate').replace('{date}', shortDate);
+      staleTag = ` <span class="mc-predictor-banner-stale" style="opacity:0.85;color:${color};" title="${esc(t('mc.bannerDataHelp'))}">${esc(label)}</span>`;
     }
 
     // Predictor 3.0: when a post-major baseline snapshot is loaded, append
@@ -10722,6 +10754,18 @@ window.MetaCall = (function () {
   return {
     init,
     preload: loadData,
+    // Diagnose-Marken im Vorhersage-Streifen ein- oder ausschalten.
+    // Standard aus: Quelle und aktive Rotation sind Maschinenzustand
+    // und gehoeren nicht in eine Ansicht, die ein Spieler vor dem
+    // Turnier liest. Fuer eine Fehlermeldung dagegen sind sie genau
+    // das, was man wissen will:
+    //   MetaCall.setDiagnostics(true)
+    setDiagnostics: (on) => {
+        _showDiagnostics = !!on;
+        try { renderAll(); } catch (_e) { /* noch nicht gerendert */ }
+        return _showDiagnostics;
+    },
+    _renderPredictorStatusBanner,
     // Expose the current online deck list (sorted by share desc) so
     // Testing Groups can offer autocomplete that matches the names the
     // MetaCall calculation expects.

@@ -97,6 +97,20 @@
     }
 }
 
+/* OFFEN, siehe Block 6: die Kachelbreite auf dem Telefon.
+ *
+ * Drei Spalten ergeben auf 390 px 94 px je Kachel. Darin stehen vier
+ * Textzeilen und sechs Knoepfe — das ist der Grund fuer die 7-px-Schrift
+ * und die 15-px-Knoepfe, die Block 5 gerade abgeraeumt hat, und es ist
+ * der Grund, warum vom Preis "4,39" statt "4,39 €" uebrig bleibt.
+ *
+ * Die Spaltenzahl wird fuer dieses Gitter an DREIZEHN Stellen gesetzt,
+ * verteilt ueber css/styles.css, css/city-league.css, diese Datei und
+ * einen Inline-Block in index.html; und das Gitter, das die Kacheln
+ * wirklich traegt, ist `.card-grid` — eine Klasse, die auch die
+ * Kartensuche und die Meta-Kartenanalyse benutzen. Das sauber zu
+ * ordnen, heisst diese drei Ansichten gleichzeitig nachzumessen, und
+ * das ist Block 6 (Mobil), nicht Block 5 (Knoepfe). */
 @media (max-width: 480px) {
     .deck-grid,
     .city-league-deck-grid,
@@ -1232,6 +1246,7 @@
   }
   .city-league-card-action-row {
     display: flex;
+    flex-wrap: wrap;
     gap: 2px;
   }
   /* Untere Reihe: L und P sind Nebenwege und bekommen eine feste,
@@ -1242,6 +1257,11 @@
   .city-league-card-action-row > .city-league-card-proxy-btn {
     flex: 0 0 24px;
   }
+  /* Die Kachel ist auf 390 px 94 px breit; nach Innenabstand und Fugen
+   * bleiben 84 px fuer drei Knoepfe. L und P bekommen je 20, der Rest
+   * gehoert dem Preis — sonst steht dort "4,3" statt "4,39 €". Bei
+   * vierstelligen Preisen kuerzt er mit Auslassungszeichen; die Kachel
+   * gibt nicht mehr her, und der volle Betrag steht im title. */
 
   /* UI Step 2 — Card Overview tightening on small phones.
    *
@@ -1286,12 +1306,33 @@
     padding-left: 4px !important;
     padding-right: 4px !important;
   }
-  .city-league-card-market-btn {
-    font-size: 0.72em !important;
-    padding: 0 4px !important;
-    overflow: visible !important;
-    white-space: nowrap !important;
-    min-width: 58px !important;
+  /* Bleibt unveraendert, mit allen vier !important.
+   *
+   * Der Preisknopf ragt auf einer 94-px-Kachel ueber die rechte Kante
+   * hinaus — `min-width: 58px` und `overflow: visible` sorgen dafuer,
+   * dass der Betrag wenigstens vollstaendig lesbar ist. Nimmt man das
+   * weg, steht dort ",39 €" statt "4,39 €", und eine abgeschnittene
+   * Zahl ist genau das, was diese Seite nicht zeigen darf.
+   *
+   * Die Ursache ist nicht diese Regel, sondern die Kachelbreite: drei
+   * Spalten auf 390 px. Das ist Block 6. Bis dahin bleibt der Ueberhang
+   * das kleinere Uebel und diese Regel steht, wie sie stand. */
+  /* Eigene Zeile fuer den Preis.
+   *
+   * Neben L und P bleiben ihm auf einer 94-px-Kachel rund 32 px. Bei
+   * 12-px-Schrift steht darin von "4,39 €" noch "4,3" — und eine
+   * abgeschnittene Zahl ist das eine, was diese Seite nicht zeigen darf.
+   * Vorher passte es nur, weil die Schrift 9 px klein war.
+   *
+   * Eine Zeile mehr kostet 30 px Kachelhoehe. Sobald die Kachel breiter
+   * wird (Block 6: drei Spalten auf 390 px), faellt der Umbruch von
+   * selbst weg — flex-wrap bricht nur, wenn es muss. */
+  .city-league-card-action-row > .city-league-card-market-btn {
+    flex: 1 0 100%;
+    min-width: 0;
+    padding: 0 var(--s-1);
+    overflow: hidden;
+    white-space: nowrap;
   }
 }
 

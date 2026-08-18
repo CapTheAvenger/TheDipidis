@@ -4993,6 +4993,53 @@ img[src*="limitlesstcg"] {
 }
 a.price-unverified-badge:hover { background: #ffe8a1; }
 
+/* ── Hinweis zur einmaligen Sprachumstellung ────────────────────
+ * Erscheint genau einmal je Browser und nur, wenn eine gespeicherte
+ * Sprache ueberschrieben wurde, die nie bewusst gewaehlt war (siehe
+ * i18nMigrateStoredLang in js/i18n.js). Bewusst oben und ruhig: es
+ * ist eine Mitteilung, keine Warnung, und der Rueckweg ist ein Klick.
+ * ─────────────────────────────────────────────────────────────── */
+.lang-reset-notice {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    padding: 10px 16px;
+    background: var(--surface-2, #f1f3f7);
+    border-bottom: 1px solid var(--line, #dfe3ec);
+    color: var(--ink-2, #4d5566);
+    font-size: 13px;
+    line-height: 1.5;
+}
+.lang-reset-notice-back {
+    padding: 4px 12px;
+    min-height: 28px;
+    border: 1px solid var(--line, #dfe3ec);
+    border-radius: 999px;
+    background: var(--surface-1, #fff);
+    color: var(--ink, #161a23);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+}
+.lang-reset-notice-back:hover { background: var(--surface-2, #f1f3f7); }
+.lang-reset-notice-close {
+    margin-left: auto;
+    width: 28px;
+    height: 28px;
+    border: none;
+    border-radius: 999px;
+    background: transparent;
+    color: var(--ink-3, #79839a);
+    font-size: 18px;
+    line-height: 1;
+    cursor: pointer;
+}
+.lang-reset-notice-close:hover { color: var(--ink, #161a23); }
+@media (max-width: 480px) {
+    .lang-reset-notice { font-size: 12px; padding: 8px 12px; }
+}
+
 /* ── Die eine Versteck-Klasse ───────────────────────────────────────
  * Bis zum 2026-08-18 gab es zwei Namen fuer dieselbe Sache: .d-none
  * (193 Verwendungen) und .display-none (96). Beide waren in dieser

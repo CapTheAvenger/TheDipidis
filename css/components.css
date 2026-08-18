@@ -524,3 +524,134 @@ html.is-signed-out [onclick*="radelist"]:hover {
     /* Die Zusatzzeile kostet auf 390 px mehr Platz als sie erklaert. */
     .ds-sec-sub { display: none; }
 }
+
+/* ══ Datenraum und Format als Filter ═════════════════════════════════
+ *
+ * Dieselbe Zeile ueber allen drei Meta-Ansichten, an derselben Stelle.
+ * Nur dadurch liest sie sich als Filter statt als drei verschiedene
+ * Kopfzeilen — sie darf beim Wechseln nicht springen.
+ *
+ * Die Datenraum-Farben sind dieselben wie im Ausweis unter der
+ * Navigation und auf den Kacheln: Japan Bernstein, Global Markenblau,
+ * Vergangen Grau. Eine Farbe, eine Bedeutung.
+ * ═══════════════════════════════════════════════════════════════════ */
+
+.ds-filter {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: var(--s-6);
+    padding: var(--s-3) var(--s-4);
+    margin-bottom: var(--s-3);
+    background: var(--surface-1);
+    border: 1px solid var(--line);
+    border-radius: var(--r-lg);
+    box-shadow: var(--e-1);
+}
+
+.ds-filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    min-width: 0;
+}
+
+.ds-filter-lab {
+    font-size: var(--lbl);
+    letter-spacing: var(--lbl-track);
+    font-weight: var(--lbl-weight);
+    text-transform: uppercase;
+    color: var(--ink-3);
+}
+
+.ds-filter-seg {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s-1);
+    padding: 3px;
+    background: var(--surface-2);
+    border-radius: 999px;
+}
+
+.ds-filter-btn {
+    padding: 6px 13px;
+    min-height: 32px;
+    border: 0;
+    border-radius: 999px;
+    background: none;
+    color: var(--ink-2);
+    font: inherit;
+    font-size: var(--fs-sm);
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+}
+.ds-filter-btn:hover { color: var(--ink); }
+.ds-filter-btn.is-on {
+    background: var(--surface-1);
+    color: var(--ink);
+    box-shadow: var(--e-1);
+}
+.ds-filter-btn:focus-visible {
+    outline: 2px solid var(--brand);
+    outline-offset: 2px;
+}
+
+/* Der aktive Datenraum traegt seine Farbe als Unterkante — dieselbe
+   Zuordnung wie im Ausweis, damit sie wiedererkannt statt neu gelernt
+   werden muss. */
+.ds-filter-seg.is-space .ds-filter-btn.is-on[data-space="jp"]   { box-shadow: inset 0 -2px 0 var(--space-jp), var(--e-1); }
+.ds-filter-seg.is-space .ds-filter-btn.is-on[data-space="gl"]   { box-shadow: inset 0 -2px 0 var(--space-gl), var(--e-1); }
+.ds-filter-seg.is-space .ds-filter-btn.is-on[data-space="past"] { box-shadow: inset 0 -2px 0 var(--space-past), var(--e-1); }
+
+/* Global hat keine Formatwahl. Ein Schild, kein Schalter — ein Knopf,
+   der nichts zu waehlen hat, ist eine Luege ueber die Daten. */
+.ds-filter-fixed {
+    display: inline-block;
+    padding: 6px 13px;
+    min-height: 32px;
+    line-height: 20px;
+    border: 1px dashed var(--line-strong);
+    border-radius: 999px;
+    color: var(--ink-2);
+    font-size: var(--fs-sm);
+    font-weight: 700;
+}
+
+.ds-filter-note {
+    font-size: var(--fs-xs);
+    color: var(--ink-3);
+}
+
+@media (max-width: 768px) {
+    .ds-filter {
+        gap: var(--s-3);
+        padding: var(--s-3);
+    }
+    .ds-filter-group { width: 100%; }
+    .ds-filter-btn { font-size: var(--fs-xs); padding: 6px 10px; }
+    .ds-filter-note { display: none; }
+}
+
+/* Ab fuenf Optionen ein Auswahlfeld statt einer Knopfreihe. Sechzehn
+   Format-Knoepfe waeren eine Wand; ein Select ist ausserdem mit der
+   Tastatur bedienbar. */
+.ds-filter-select {
+    min-height: 32px;
+    max-width: 320px;
+    padding: 5px 10px;
+    border: 1px solid var(--line-strong);
+    border-radius: var(--r-sm);
+    background: var(--surface-1);
+    color: var(--ink);
+    font: inherit;
+    font-size: var(--fs-sm);
+    font-weight: 700;
+}
+.ds-filter-select:focus-visible {
+    outline: 2px solid var(--brand);
+    outline-offset: 2px;
+}
+@media (max-width: 768px) {
+    .ds-filter-select { max-width: 100%; width: 100%; }
+}

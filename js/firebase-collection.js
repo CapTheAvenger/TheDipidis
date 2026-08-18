@@ -218,12 +218,44 @@ async function updateUserDoc(payload) {
 }
 window.updateUserDoc = updateUserDoc;
 
-async function addToCollection(cardId) {
-  const user = auth.currentUser;
-  if (!user) {
-    showNotification('Please sign in to use this feature', 'error');
-    return;
+/**
+ * Ein Klick auf eine Sammlungsfunktion ohne Anmeldung.
+ *
+ * Gezaehlt am 18.08.2026 in der Kartendatenbank, ausgeloggt: 180 von 291
+ * Knoepfen gehoeren zur Sammlung, zur Wunschliste oder zur Tauschliste.
+ * Jeder davon hat auf einen Klick geantwortet mit
+ *
+ *     showNotification('Please sign in to use this feature', 'error')
+ *
+ * Drei Dinge daran sind falsch. Es ist kein Fehler, sondern eine
+ * Voraussetzung — rote Meldung fuer "du bist nicht angemeldet" ist
+ * dieselbe Sprache wie fuer "das ging schief". Die Meldung stand nur auf
+ * Englisch, auf einer deutschsprachigen Seite. Und sie liess den Nutzer
+ * dort stehen, wo er war: er weiss jetzt, dass er sich anmelden muss,
+ * und muss den Weg dahin selbst suchen.
+ *
+ * Jetzt oeffnet derselbe Klick die Anmeldung. Wer sie wegklickt, ist da,
+ * wo er vorher war.
+ */
+function requireSignIn() {
+  const user = (typeof auth !== 'undefined' && auth) ? auth.currentUser : null;
+  if (user) return true;
+  if (typeof window.showAuthModal === 'function') {
+    window.showAuthModal('signin');
+  } else if (typeof showNotification === 'function') {
+    showNotification(
+      (typeof getLang === 'function' && getLang() === 'de')
+        ? 'Dafuer musst du angemeldet sein.'
+        : 'Please sign in to use this feature.',
+      'info');
   }
+  return false;
+}
+window.requireSignIn = requireSignIn;
+
+async function addToCollection(cardId) {
+  if (!requireSignIn()) return;
+  const user = auth.currentUser;
 
   const currentCount = window.userCollectionCounts ? (window.userCollectionCounts.get(cardId) || 0) : 0;
   if (currentCount >= 4) {
@@ -362,11 +394,8 @@ async function toggleCollection(cardId) {
 
 // Add card to wishlist with a specific count (used by Meta Binder to set missing qty)
 async function addToWishlistWithCount(cardId, count) {
+  if (!requireSignIn()) return;
   const user = auth.currentUser;
-  if (!user) {
-    showNotification('Please sign in to use this feature', 'error');
-    return;
-  }
   const qty = Math.max(1, Math.min(count, 4));
   try {
     await db.collection('users').doc(user.uid).update(
@@ -393,11 +422,8 @@ async function addToWishlistWithCount(cardId, count) {
 
 // Add card to wishlist (or increment count)
 async function addToWishlist(cardId) {
+  if (!requireSignIn()) return;
   const user = auth.currentUser;
-  if (!user) {
-    showNotification('Please sign in to use this feature', 'error');
-    return;
-  }
   
   const currentCount = window.userWishlistCounts ? (window.userWishlistCounts.get(cardId) || 0) : 0;
   if (currentCount >= 4) {
@@ -1359,11 +1385,8 @@ function setCollectionFilter(mode) {
 }
 
 async function clearCollection() {
+  if (!requireSignIn()) return;
   const user = auth.currentUser;
-  if (!user) {
-    showNotification('Please sign in to use this feature', 'error');
-    return;
-  }
 
   if (!window.userCollection || window.userCollection.size === 0) {
     showNotification('Collection is already empty', 'info');
@@ -1400,11 +1423,8 @@ async function clearCollection() {
 }
 
 async function clearWishlist() {
+  if (!requireSignIn()) return;
   const user = auth.currentUser;
-  if (!user) {
-    showNotification('Please sign in to use this feature', 'error');
-    return;
-  }
 
   if (!window.userWishlist || window.userWishlist.size === 0) {
     showNotification(getLang()==='de' ? 'Wishlist ist bereits leer' : 'Wishlist is already empty', 'info');
@@ -1811,11 +1831,8 @@ function exportWishlistAsImage() {
 
 // Add a copy to collection AND auto-decrement wishlist count
 async function addOwnedFromWishlist(cardId) {
+  if (!requireSignIn()) return;
   const user = auth.currentUser;
-  if (!user) {
-    showNotification('Please sign in to use this feature', 'error');
-    return;
-  }
   // Add to collection (respects 4-max internally)
   await addToCollection(cardId);
 
@@ -3573,10 +3590,9 @@ function switchProfileTab(tabName) {
     openJournalHistoryTab();
   }
 
-  // Auto-init Meta Call
-  if (tabName === 'metacall' && typeof MetaCall !== 'undefined') {
-    MetaCall.init();
-  }
+  // Meta Call hat keinen Profil-Untertab mehr — es ist ein eigener Tab
+  // (#meta-call) und initialisiert sich in switchTab(). Der Knopf in der
+  // Profil-Leiste ruft jetzt switchTabAndUpdateMenu('meta-call').
 
   // Auto-init Testing Groups
   if (tabName === 'testinggroups' && typeof TestingGroups !== 'undefined') {
@@ -5652,7 +5668,7 @@ window.toggleWishlistBadge  = toggleWishlistBadge;
 // Add card to tradelist with a specific count
 async function addToTradelistWithCount(cardId, count) {
   const user = auth.currentUser;
-  if (!user) { showNotification('Please sign in to use this feature', 'error'); return; }
+  if (!requireSignIn()) return;
   const qty = Math.max(1, Math.min(count, 4));
   try {
     // ONE call, not two. Split into two updates this was non-atomic: a
@@ -5681,7 +5697,7 @@ async function addToTradelistWithCount(cardId, count) {
 // Add card to tradelist (or increment count)
 async function addToTradelist(cardId) {
   const user = auth.currentUser;
-  if (!user) { showNotification('Please sign in to use this feature', 'error'); return; }
+  if (!requireSignIn()) return;
   const currentCount = window.userTradelistCounts ? (window.userTradelistCounts.get(cardId) || 0) : 0;
   if (currentCount >= 4) { showNotification('Maximum 4 copies per card', 'info'); return; }
   const newCount = currentCount + 1;
@@ -5749,7 +5765,7 @@ async function toggleTradelist(cardId) {
 // Clear entire tradelist
 async function clearTradelist() {
   const user = auth.currentUser;
-  if (!user) { showNotification('Please sign in to use this feature', 'error'); return; }
+  if (!requireSignIn()) return;
   if (!window.userTradelist || window.userTradelist.size === 0) {
     showNotification(getLang()==='de' ? 'Trade List ist bereits leer' : 'Trade list is already empty', 'info');
     return;

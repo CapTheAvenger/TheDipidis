@@ -144,11 +144,19 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 // ── Deep-linking via URL hash ────────────────────────────────
+// Bis Firebase antwortet, gilt: nicht angemeldet. Ohne diese Zeile
+// blitzen die Sammlungsknoepfe beim Laden kurz im aktiven Zustand auf.
+// js/firebase-config.js korrigiert die Klasse, sobald der Zustand steht.
+try { document.documentElement.classList.add('is-signed-out'); } catch (e) {}
+
 // Users arriving via share-links like https://thedipidis.app/#tutorial
 // should land directly on that tab. Also supports friendlier aliases
 // in both languages so we can share URLs that read naturally.
 (function setupHashDeepLink() {
     const HASH_ALIASES = {
+        'meta-call':             'meta-call',
+        'metacall':              'meta-call',
+        'metacall-tab':          'meta-call',
         'tutorial':              'tutorial',
         'how-to-use':            'tutorial',
         'howto':                 'tutorial',

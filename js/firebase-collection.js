@@ -3551,7 +3551,7 @@ function formatProfileDate(timestamp) {
 function switchProfileTab(tabName) {
   // Hide all tabs
   document.querySelectorAll('.profile-tab-content').forEach(tab => {
-    tab.classList.add('display-none');
+    tab.classList.add('d-none');
     tab.classList.remove('active');
     tab.style.display = '';
   });
@@ -3564,7 +3564,7 @@ function switchProfileTab(tabName) {
   // Show selected tab
   const selectedTab = document.getElementById('profile-' + tabName);
   if (selectedTab) {
-    selectedTab.classList.remove('display-none');
+    selectedTab.classList.remove('d-none');
     selectedTab.classList.add('active');
     selectedTab.style.display = '';
   }
@@ -3952,10 +3952,10 @@ function renderFolderNav() {
   if (!nav) return;
   const folders = getDeckFolders();
   if (folders.length === 0) {
-    nav.classList.add('display-none');
+    nav.classList.add('d-none');
     return;
   }
-  nav.classList.remove('display-none');
+  nav.classList.remove('d-none');
   nav.style.display = 'flex';
   nav.style.flexWrap = 'wrap';
   nav.style.gap = '6px';
@@ -4085,7 +4085,7 @@ function renderFolderSummary(folder) {
 
   // Hide summary when "All" is selected or no folder
   if (!folder) {
-    container.classList.add('display-none');
+    container.classList.add('d-none');
     container.innerHTML = '';
     return;
   }
@@ -4093,7 +4093,7 @@ function renderFolderSummary(folder) {
   // Get decks in this folder
   const folderDecks = (window.userDecks || []).filter(d => d.folder === folder);
   if (folderDecks.length < 2) {
-    container.classList.add('display-none');
+    container.classList.add('d-none');
     container.innerHTML = '';
     return;
   }
@@ -4221,7 +4221,7 @@ function renderFolderSummary(folder) {
 
   html += `</div>`;
   container.innerHTML = html;
-  container.classList.remove('display-none');
+  container.classList.remove('d-none');
 }
 
 function lookupCardData(entry) {
@@ -5044,18 +5044,16 @@ function _printSavedDeckHelper(deck, missingOnly) {
     }
 
     // Push everything in one batch — suppressRender / suppressToast
-    // / suppressPersist on each call means we render and persist
-    // exactly once at the end.
+    // on each call means we render exactly once at the end.
     if (typeof addCardToProxyInternal !== 'function') {
         console.error('[My Decks] Proxy queue helper not loaded yet');
         return;
     }
     items.forEach(it => {
         addCardToProxyInternal(it.name, it.setCode, it.number, it.copies, {
-            suppressToast: true, suppressRender: true, suppressPersist: true
+            suppressToast: true, suppressRender: true
         });
     });
-    if (typeof saveProxyQueue === 'function') saveProxyQueue();
     if (typeof renderProxyQueue === 'function') renderProxyQueue();
 
     if (typeof showToast === 'function') {

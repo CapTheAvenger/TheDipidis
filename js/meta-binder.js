@@ -1658,7 +1658,7 @@
         if (!deltaEl) return;
         const groups = Array.isArray(window._metaBinderArchetypeGroups) ? window._metaBinderArchetypeGroups : [];
         if (groups.length === 0) {
-            deltaEl.classList.add('display-none');
+            deltaEl.classList.add('d-none');
             deltaEl.innerHTML = '';
             return;
         }
@@ -1710,7 +1710,7 @@
                 </div>`;
         }).join('');
 
-        deltaEl.classList.remove('display-none');
+        deltaEl.classList.remove('d-none');
         deltaEl.innerHTML = `<div class="meta-binder-archetype-groups">${html}</div>`;
     }
 
@@ -1718,7 +1718,7 @@
         const modal = document.getElementById('metaBinderDroppedModal');
         if (!modal) return;
         modal.classList.remove('is-open');
-        modal.classList.add('display-none');
+        modal.classList.add('d-none');
     }
 
     // cardsOverride: the Custom Binder reuses this modal with its own
@@ -1753,7 +1753,7 @@
                 .join('');
         }
 
-        modal.classList.remove('display-none');
+        modal.classList.remove('d-none');
         modal.classList.add('is-open');
     }
 
@@ -1791,7 +1791,7 @@
 
         // Stats bar
         if (statsEl) {
-            statsEl.classList.remove('display-none');
+            statsEl.classList.remove('d-none');
             statsEl.innerHTML = `
                 <div class="meta-binder-stat">
                     <span class="meta-binder-stat-value">${totalUnique}</span>
@@ -1823,7 +1823,7 @@
 
         // Filter buttons
         if (filtersEl) {
-            filtersEl.classList.remove('display-none');
+            filtersEl.classList.remove('d-none');
             filtersEl.innerHTML = `
                 <div class="filter-group">
                     <button class="meta-binder-filter-btn active" data-filter="all" onclick="setMetaBinderFilter('all')">${mbText('mb.filterAll', 'Alle')} (${totalUnique})</button>

@@ -140,7 +140,6 @@
     margin-top: 10px;
 }
 
-.tech-slot-picker.d-none { display: none !important; }
 
 .tech-slot-picker-input {
     width: 100%;
@@ -220,7 +219,6 @@
     box-shadow: 0 2px 6px rgba(0,0,0,0.05);
 }
 
-.tech-vs-normal-section.d-none { display: none !important; }
 
 .tech-vs-normal-header {
     margin-bottom: 14px;

@@ -2731,7 +2731,14 @@ function cityLeagueOffSeasonHtml() {
             return false;
         }
 
-        function getEmptyStateHtml() {
+        // Frueher hiess diese Funktion getEmptyStateHtml - genauso wie
+        // die in app-utils.js, und beide standen auf oberster Ebene.
+        // app-city-league.js laedt spaeter, also gewann diese: jeder
+        // Aufruf von window.getEmptyStateHtml({...}) landete hier, wo
+        // die Argumente ignoriert werden. Die leere Wunschliste sagte
+        // deshalb "Fuer diese Filterkombination liegen aktuell keine
+        // Turnierdaten vor." Der Name ist jetzt eindeutig.
+        function cityLeagueNoDataHtml() {
             return getEmptyStateBoxHtml({
                 title: t('cl.noDataFound'),
                 description: t('cl.noDataFoundDesc'),
@@ -3142,7 +3149,7 @@ function cityLeagueOffSeasonHtml() {
 
             if (!Array.isArray(cards) || cards.length === 0) {
                 console.info('[CityLeague] Rendering empty card overview state (0 cards after filtering)');
-                gridContainer.innerHTML = getEmptyStateHtml();
+                gridContainer.innerHTML = cityLeagueNoDataHtml();
                 if (visualContainer) {
                     visualContainer.classList.remove('d-none', 'city-league-deck-visual-hidden');
                     visualContainer.style.display = 'block';

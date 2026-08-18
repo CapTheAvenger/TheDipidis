@@ -12,14 +12,14 @@ function showAuthModal(mode = 'signin') {
   console.info(`[Auth] Opening auth modal in ${mode} mode`);
   
   if (mode === 'signin') {
-    signinForm.classList.remove('display-none', 'd-none');
-    signupForm.classList.add('display-none');
+    signinForm.classList.remove('d-none', 'd-none');
+    signupForm.classList.add('d-none');
   } else {
-    signinForm.classList.add('display-none');
-    signupForm.classList.remove('display-none', 'd-none');
+    signinForm.classList.add('d-none');
+    signupForm.classList.remove('d-none', 'd-none');
   }
   
-  modal.classList.remove('display-none', 'd-none');
+  modal.classList.remove('d-none', 'd-none');
   modal.style.display = 'flex';
 }
 
@@ -27,7 +27,7 @@ function closeAuthModal() {
   const modal = document.getElementById('auth-modal');
   if (!modal) return;
   console.info('[Auth] Closing auth modal');
-  modal.classList.add('display-none');
+  modal.classList.add('d-none');
   modal.style.display = 'none';
 }
 

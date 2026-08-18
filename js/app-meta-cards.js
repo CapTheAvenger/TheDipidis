@@ -686,7 +686,13 @@
             clearGridLoadingSkeleton(grid);
             
             if (!metaCardData[source] || metaCardData[source].length === 0) {
-                grid.innerHTML = getEmptyStateHtml();
+                // Gar keine Daten geladen - nicht dasselbe wie "der
+                // Filter hat alles weggenommen", siehe weiter unten.
+                grid.innerHTML = getEmptyStateBoxHtml({
+                    title: t('cl.noDataFound'),
+                    description: t('cl.noDataFoundDesc'),
+                    icon: 'cards'
+                });
                 countSpan.textContent = '0 Cards';
                 return;
             }
@@ -798,7 +804,14 @@
             countSpan.textContent = `${cards.length} Cards`;
             
             if (cards.length === 0) {
-                grid.innerHTML = getEmptyStateHtml();
+                // Daten sind da, der Filter laesst nichts uebrig. Der
+                // Unterschied zaehlt: das eine loest man mit Warten,
+                // das andere mit einem Klick auf den Filter.
+                grid.innerHTML = getEmptyStateBoxHtml({
+                    title: t('mc.noCardsForFilter'),
+                    description: t('mc.noCardsForFilterDesc'),
+                    icon: 'cards'
+                });
                 return;
             }
             
@@ -1220,23 +1233,11 @@
             }
         }
 
-        function filterPastMetaCards() {
-            const searchTerm = (document.getElementById('pastCardSearchInput')?.value || '').toLowerCase();
-            const rows = document.querySelectorAll('#pastMetaTable table tbody tr');
-            let visibleCount = 0;
-
-            rows.forEach(row => {
-                const text = row.textContent.toLowerCase();
-                const visible = text.includes(searchTerm);
-                row.style.display = visible ? '' : 'none';
-                if (visible) visibleCount += 1;
-            });
-
-            const countEl = document.getElementById('pastCardCount');
-            if (countEl) {
-                countEl.textContent = `${visibleCount} ${t('deck.cards')}`;
-            }
-        }
+        // Hier stand ein zweites filterPastMetaCards(). Es las
+        // #pastCardSearchInput und #pastCardCount - beide gibt es im
+        // Markup nicht - und wurde ohnehin von der gleichnamigen
+        // Funktion in app-past-meta.js ueberschrieben, die spaeter
+        // laedt. Tote Zeilen, die aussahen wie eine Suchfunktion.
 
         // Deck Builder functions (placeholder implementations)
         const deckBuilders = {
@@ -1322,6 +1323,42 @@
             return root;
         }
 
+
+        // Der Block "Matchup Analysis - Top 100 Decks" fliegt raus, bevor
+        // irgendetwas davon in den Baum kommt.
+        //
+        // Gemessen am 18.08.2026 auf 1440 px, Tab "Aktuelles Meta (Global)":
+        //
+        //     Tabhoehe gesamt        16.950 px
+        //     davon dieser Block      5.556 px   = 33 %
+        //     Suchfelder darin           200, davon mit Handler:  0
+        //     Tabellen darin             200, Zeilen: 1.033
+        //     outerHTML                1.199.003 Zeichen
+        //
+        // Die 200 Suchfelder sind tot: der Scraper haengt ihre Handler als
+        // inline-oninput an, und _sanitizeScraperHtml() entfernt jedes
+        // on*-Attribut, bevor der Block eingesetzt wird. Sie sehen aus wie
+        // Eingabefelder, nehmen Text an und tun nichts.
+        //
+        // Die Daten selbst gibt es zweimal woanders und beide Male besser:
+        // in der Matchup-Heatmap darueber (mit Partienzahl je Zelle) und
+        // in der Archetyp-Karte (beste und schlechteste Matchups mit n und
+        // Bilanz). Dieser Block ist die dritte Darstellung derselben
+        // Zahlen, ohne Stichprobengroesse.
+        //
+        // backend/scrapers/limitless_online_scraper.py erzeugt den Block
+        // ab derselben Aenderung nicht mehr. Diese Funktion bleibt
+        // trotzdem stehen: bis der naechste Scrape durchgelaufen ist,
+        // liegt die alte Datei noch auf der Seite.
+        function _dropTop100MatchupSection(root) {
+            if (!root) return root;
+            root.querySelectorAll('div.section').forEach(sec => {
+                var h2 = sec.querySelector('h2');
+                if (h2 && /Matchup Analysis/i.test(h2.textContent || '')) sec.remove();
+            });
+            return root;
+        }
+
         // Toggle for Current Meta cards
         // Load Current Meta - load HTML for display + matchup data from CSV
         async function loadCurrentMeta() {
@@ -1348,6 +1385,7 @@
                 // THEN: Extract the container content
                 const container = doc.querySelector('.container');
                 if (container) {
+                    _dropTop100MatchupSection(container);
                     // Insert the full container HTML (includes stats, climbers, matchups, table)
                     _sanitizeScraperHtml(container);
                     currentMetaContent.innerHTML = container.innerHTML;
@@ -1373,13 +1411,13 @@
                     // Patch matchup box tables (Best/Worst) for proper column widths and name wrapping
                     patchMatchupBoxTables();
 
-                    // Add aria-labels to matchup search inputs injected from static HTML
-                    document.querySelectorAll('#currentMetaContent input[id^="opponent_search_"]').forEach(input => {
-                        if (!input.getAttribute('aria-label')) {
-                            const deck = input.id.replace('opponent_search_', '').replace(/_/g, ' ');
-                            input.setAttribute('aria-label', 'Search matchup for ' + deck);
-                        }
-                    });
+                    // Die Schleife, die den 200 Suchfeldern im Top-100-Block
+                    // ein aria-label gab, ist weg. Der Block auch: er wird von
+                    // _dropTop100MatchupSection() entfernt, bevor irgendetwas
+                    // davon in den Baum kommt. Ein Vorlesegeraet hat dort nichts
+                    // mehr anzusagen — die Felder waren ohnehin ohne Wirkung,
+                    // und ein beschriftetes totes Eingabefeld ist schlechter als
+                    // keins.
                     
                     // Patch the Archetype Overview stat card with current CSV data
                     await patchArchetypeOverview();

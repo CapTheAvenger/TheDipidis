@@ -364,10 +364,9 @@
 }
 
 /* Vanilla mode: hide everything tagged as deep-dive-only.
-   `!important` is needed to override the inline-show toggles
-   (`d-none` / `display-none`) that other JS uses to reveal these
-   sections when a deck is loaded — without it, vanilla mode would
-   re-show them as soon as the user picked a deck. */
+   `!important` ist noetig, weil das Aufdecken beim Deckwechsel per
+   `.d-none`-Entfernen laeuft — ohne das Gewicht wuerde der Vanilla-
+   Modus die Abschnitte wieder zeigen, sobald ein Deck gewaehlt ist. */
 #current-analysis[data-cm-view="vanilla"] .cm-deep-dive-only {
     display: none !important;
 }

@@ -282,8 +282,6 @@
  * picker). Inherits the base modal panel styling above.
  * ──────────────────────────────────────────────────────────────── */
 
-.anti-tech-step.display-none { display: none; }
-
 /* Step 1 — selected target chips above the quick-pick grid */
 .anti-tech-chips {
     display: flex;

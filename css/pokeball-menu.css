@@ -1,11 +1,12 @@
 ﻿/* â”€â”€ Pokeball Menu & Playtester Arena Styles â”€â”€ */
 
-/* Base font for the entire page */
-body {
-    font-family: 'Nunito', sans-serif;
-    background-color: var(--bg-body);
-    color: var(--text-dark);
-}
+/* Hier stand eine body-Regel: Schriftart, Hintergrund und Textfarbe
+ * fuer die ganze Seite - in einer Datei ueber das Pokeball-Menue, und
+ * sie lud nach styles.css. Ergebnis: der Hintergrund kam aus
+ * --bg-body (#f0f2f5) statt aus dem Token --surface-0, und der
+ * Dunkelmodus in tokens.css konnte den Seitenhintergrund nie
+ * erreichen. Die Seite hat genau eine body-Regel, und die steht in
+ * styles.css. */
 
 .pokeball-wrapper { position: relative; z-index: 1000; }
 

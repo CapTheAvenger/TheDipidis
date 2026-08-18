@@ -183,13 +183,36 @@ function _renderComboTargets() {
     }
 
     _comboTargets.forEach(name => {
-        const badge = document.createElement('span');
-        badge.style.cssText = 'display:inline-flex;align-items:center;gap:4px;background:#2ecc71;color:#000;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700;cursor:pointer;';
+        // Ein Knopf, kein span: die Marke ist anklickbar, also muss sie
+        // mit der Tastatur erreichbar sein und sich als Bedienelement
+        // ansagen. Das Aussehen liegt in .draw-sim-combo-badge
+        // (ui-components.css) statt in einer Stil-Zeichenkette hier.
+        const badge = document.createElement('button');
+        badge.type = 'button';
+        badge.className = 'draw-sim-combo-badge';
         badge.title = t('draw.clickToRemove');
+        badge.setAttribute('aria-label', name + ' — ' + t('draw.clickToRemove'));
         badge.textContent = name + ' ✕';
-        badge.onclick = () => _toggleComboTarget(name);
+        badge.addEventListener('click', () => _removeComboTarget(name));
         container.appendChild(badge);
     });
+}
+
+// Die Marken versprachen seit jeher "zum Entfernen klicken" und riefen
+// dabei _toggleComboTarget() auf - eine Funktion, die es in dieser
+// Datei nie gab. Jeder Klick war ein ReferenceError in der Konsole und
+// sonst nichts. Entfernen heisst zweierlei: aus der Liste raus UND das
+// Auswahlfeld leeren, das den Namen gesetzt hat. Sonst holt der
+// naechste onComboDropdownChange() ihn sofort zurueck.
+function _removeComboTarget(name) {
+    _comboTargets = _comboTargets.filter(n => n !== name);
+    for (let i = 1; i <= 4; i++) {
+        const select = document.getElementById(`comboTarget${i}`);
+        if (select && select.value === name) select.value = '';
+    }
+    _renderComboTargets();
+    const result = document.getElementById('comboResultDisplay');
+    if (result && _comboTargets.length === 0) result.textContent = '';
 }
 
 function clearComboTargets() {

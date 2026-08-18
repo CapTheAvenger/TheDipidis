@@ -1192,303 +1192,32 @@ def create_html_report(comparison_data: List[Dict[str, Any]], output_file: str,
             </div>
         </div>
 
-        {f'''
-        <div class="section">
-            <h2>🎯 Matchup Analysis - Top 100 Decks</h2>
-            <p style="color: #7f8c8d; margin-bottom: 20px;">Best and Worst matchups against Top 10 decks · Select opponent deck for detailed matchup</p>
-            
-            ''' if matchup_data else ''}
-            
-            {f'''
-            <!-- Top 10 Decks - Expanded by default -->
-            <details open style="margin-bottom: 30px; border: 2px solid #3498db; border-radius: 8px; padding: 15px; background: #ecf7ff;">
-                <summary style="cursor: pointer; font-size: 1.3em; font-weight: bold; color: #2c3e50; padding: 10px; margin: -15px -15px 15px -15px; background: linear-gradient(135deg, #3498db 0%, #2980b9 100%); color: white; border-radius: 6px 6px 0 0;">
-                    🏆 Top 10 Decks (Rank 1-10)
-                </summary>
-                {''.join(f"""
-            <div style="margin-bottom: 40px; background: #f8f9fa; padding: 20px; border-radius: 8px;">
-                <h3 style="color: #2c3e50; margin-top: 0;">{html_mod.escape(deck_name)} <span style="font-size: 0.8em; color: #7f8c8d;">(Rank #{deck_lookup.get(deck_name, dict()).get('rank', '?')} | Total WR: {deck_lookup.get(deck_name, dict()).get('win_rate_numeric', 0):.1f}%, Vs Top20: {matchups.get('positive_vs_top20', 0)}:{matchups.get('negative_vs_top20', 0)})</span></h3>
-                
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                    <div>
-                        <h4 style="color: #27ae60; margin-bottom: 10px;">✅ Best Matchups</h4>
-                        <table style="box-shadow: none;">
-                            <tr style="background: #d4edda;">
-                                <th style="background: #27ae60;">Opponent</th>
-                                <th style="background: #27ae60;">Win Rate</th>
-                                <th style="background: #27ae60;">Record</th>
-                            </tr>
-                            {''.join(f"""
-                            <tr>
-                                <td><strong>{matchup['opponent_deck']}</strong></td>
-                                <td><strong>{matchup['win_rate_numeric']:.1f}%</strong></td>
-                                <td>{matchup['record']} ({matchup['total_games']} games)</td>
-                            </tr>
-                            """ for matchup in matchups.get('best_matchups', [])) if matchups.get('best_matchups') else '<tr><td colspan="3" style="text-align: center; color: #95a5a6;">No data available</td></tr>'}
-                        </table>
-                    </div>
-                    
-                    <div>
-                        <h4 style="color: #e74c3c; margin-bottom: 10px;">❌ Worst Matchups</h4>
-                        <table style="box-shadow: none;">
-                            <tr style="background: #f8d7da;">
-                                <th style="background: #e74c3c;">Opponent</th>
-                                <th style="background: #e74c3c;">Win Rate</th>
-                                <th style="background: #e74c3c;">Record</th>
-                            </tr>
-                            {''.join(f"""
-                            <tr>
-                                <td><strong>{matchup['opponent_deck']}</strong></td>
-                                <td><strong>{matchup['win_rate_numeric']:.1f}%</strong></td>
-                                <td>{matchup['record']} ({matchup['total_games']} games)</td>
-                            </tr>
-                            """ for matchup in matchups.get('worst_matchups', [])) if matchups.get('worst_matchups') else '<tr><td colspan="3" style="text-align: center; color: #95a5a6;">No data available</td></tr>'}
-                        </table>
-                    </div>
-                </div>
-                
-                <div style="background: white; padding: 15px; border-radius: 5px; border: 2px solid #3498db; margin-top: 20px;">
-                    <h4 style="margin-top: 0; color: #3498db;">🔍 Select & Analyze Opponent Matchup</h4>
-                    <label for="opponent_search_{deck_name.replace(' ', '_').replace(chr(39), '').replace('-', '_')}" style="display: block; margin-bottom: 8px; font-weight: bold;">Search Opponent:</label>
-                    <div style="position: relative;">
-                        <input type="text" id="opponent_search_{deck_name.replace(' ', '_').replace(chr(39), '').replace('-', '_')}" placeholder="Type to search deck..." style="width: 100%; padding: 10px; border: 2px solid #bbb; border-radius: 4px; font-size: 1em;" oninput="filterOpponents(this, '{deck_name.replace(' ', '_').replace(chr(39), '').replace('-', '_')}')">
-                        <div id="opponent_dropdown_{deck_name.replace(' ', '_').replace(chr(39), '').replace('-', '_')}" style="position: absolute; top: 100%; left: 0; right: 0; background: white; border: 2px solid #bbb; border-top: none; border-radius: 0 0 4px 4px; max-height: 250px; overflow-y: auto; display: none; z-index: 1000;">
-                            {''.join(f"<div class=\"opponent-option\" data-value=\"{html_mod.escape(opponent)}\" onclick=\"selectOpponent(this, '{deck_name.replace(' ', '_').replace(chr(39), '').replace('-', '_')}', '{html_mod.escape(opponent).replace(chr(39), chr(92)+chr(39))}')\" style=\"padding: 10px; cursor: pointer; border-bottom: 1px solid #eee; transition: background 0.2s;\">{html_mod.escape(opponent)}</div>" for opponent in sorted(matchups.get('all_opponent_matchups', dict()).keys()))}
-                        </div>
-                    </div>
-                    <input type="hidden" id="opponent_selected_{deck_name.replace(' ', '_').replace(chr(39), '').replace('-', '_')}" value="">
-                    <div id="matchup_details_{deck_name.replace(' ', '_').replace(chr(39), '').replace('-', '_')}" style="margin-top: 15px; display: none; background: #ecf0f1; padding: 15px; border-radius: 4px;"></div>
-                </div>
-                
-                <script>
-                window.matchupData_{deck_name.replace(' ', '_').replace(chr(39), '').replace('-', '_')} = {json.dumps({k: {'opponent_deck': v.get('opponent_deck'), 'win_rate': v.get('win_rate'), 'win_rate_numeric': v.get('win_rate_numeric'), 'record': v.get('record'), 'total_games': v.get('total_games')} for k, v in matchups.get('all_opponent_matchups', dict()).items()})};
-                </script>
-            </div>
-            """ for deck_name, matchups in (sorted([(dn, m) for dn, m in matchup_data.items() if int(deck_lookup.get(dn, dict()).get('rank', 999)) <= 10], key=lambda x: int(deck_lookup.get(x[0], dict()).get('rank', 999))) if matchup_data else []) if deck_name.lower() != 'other')}
-            </details>
-            
-            <!-- Rank 11-30 - Collapsed by default -->
-            <details style="margin-bottom: 30px; border: 2px solid #e67e22; border-radius: 8px; padding: 15px; background: #fef5e7;">
-                <summary style="cursor: pointer; font-size: 1.3em; font-weight: bold; color: #2c3e50; padding: 10px; margin: -15px -15px 15px -15px; background: linear-gradient(135deg, #e67e22 0%, #d35400 100%); color: white; border-radius: 6px 6px 0 0;">
-                    📊 Rank 11-30
-                </summary>
-                {''.join(f"""
-            <div style="margin-bottom: 40px; background: #f8f9fa; padding: 20px; border-radius: 8px;">
-                <h3 style="color: #2c3e50; margin-top: 0;">{html_mod.escape(deck_name)} <span style="font-size: 0.8em; color: #7f8c8d;">(Rank #{deck_lookup.get(deck_name, dict()).get('rank', '?')} | Total WR: {deck_lookup.get(deck_name, dict()).get('win_rate_numeric', 0):.1f}%, Vs Top20: {matchups.get('positive_vs_top20', 0)}:{matchups.get('negative_vs_top20', 0)})</span></h3>
-                
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                    <div>
-                        <h4 style="color: #27ae60; margin-bottom: 10px;">✅ Best Matchups</h4>
-                        <table style="box-shadow: none;">
-                            <tr style="background: #d4edda;">
-                                <th style="background: #27ae60;">Opponent</th>
-                                <th style="background: #27ae60;">Win Rate</th>
-                                <th style="background: #27ae60;">Record</th>
-                            </tr>
-                            {''.join(f"""
-                            <tr>
-                                <td><strong>{matchup['opponent_deck']}</strong></td>
-                                <td><strong>{matchup['win_rate_numeric']:.1f}%</strong></td>
-                                <td>{matchup['record']} ({matchup['total_games']} games)</td>
-                            </tr>
-                            """ for matchup in matchups.get('best_matchups', [])) if matchups.get('best_matchups') else '<tr><td colspan="3" style="text-align: center; color: #95a5a6;">No data available</td></tr>'}
-                        </table>
-                    </div>
-                    
-                    <div>
-                        <h4 style="color: #e74c3c; margin-bottom: 10px;">❌ Worst Matchups</h4>
-                        <table style="box-shadow: none;">
-                            <tr style="background: #f8d7da;">
-                                <th style="background: #e74c3c;">Opponent</th>
-                                <th style="background: #e74c3c;">Win Rate</th>
-                                <th style="background: #e74c3c;">Record</th>
-                            </tr>
-                            {''.join(f"""
-                            <tr>
-                                <td><strong>{matchup['opponent_deck']}</strong></td>
-                                <td><strong>{matchup['win_rate_numeric']:.1f}%</strong></td>
-                                <td>{matchup['record']} ({matchup['total_games']} games)</td>
-                            </tr>
-                            """ for matchup in matchups.get('worst_matchups', [])) if matchups.get('worst_matchups') else '<tr><td colspan="3" style="text-align: center; color: #95a5a6;">No data available</td></tr>'}
-                        </table>
-                    </div>
-                </div>
-                
-                <div style="background: white; padding: 15px; border-radius: 5px; border: 2px solid #3498db; margin-top: 20px;">
-                    <h4 style="margin-top: 0; color: #3498db;">🔍 Select & Analyze Opponent Matchup</h4>
-                    <label for="opponent_search_{deck_name.replace(' ', '_').replace(chr(39), '').replace('-', '_')}" style="display: block; margin-bottom: 8px; font-weight: bold;">Search Opponent:</label>
-                    <div style="position: relative;">
-                        <input type="text" id="opponent_search_{deck_name.replace(' ', '_').replace(chr(39), '').replace('-', '_')}" placeholder="Type to search deck..." style="width: 100%; padding: 10px; border: 2px solid #bbb; border-radius: 4px; font-size: 1em;" oninput="filterOpponents(this, '{deck_name.replace(' ', '_').replace(chr(39), '').replace('-', '_')}')">
-                        <div id="opponent_dropdown_{deck_name.replace(' ', '_').replace(chr(39), '').replace('-', '_')}" style="position: absolute; top: 100%; left: 0; right: 0; background: white; border: 2px solid #bbb; border-top: none; border-radius: 0 0 4px 4px; max-height: 250px; overflow-y: auto; display: none; z-index: 1000;">
-                            {''.join(f"<div class=\"opponent-option\" data-value=\"{html_mod.escape(opponent)}\" onclick=\"selectOpponent(this, '{deck_name.replace(' ', '_').replace(chr(39), '').replace('-', '_')}', '{html_mod.escape(opponent).replace(chr(39), chr(92)+chr(39))}')\" style=\"padding: 10px; cursor: pointer; border-bottom: 1px solid #eee; transition: background 0.2s;\">{html_mod.escape(opponent)}</div>" for opponent in sorted(matchups.get('all_opponent_matchups', dict()).keys()))}
-                        </div>
-                    </div>
-                    <input type="hidden" id="opponent_selected_{deck_name.replace(' ', '_').replace(chr(39), '').replace('-', '_')}" value="">
-                    <div id="matchup_details_{deck_name.replace(' ', '_').replace(chr(39), '').replace('-', '_')}" style="margin-top: 15px; display: none; background: #ecf0f1; padding: 15px; border-radius: 4px;"></div>
-                </div>
-                
-                <script>
-                window.matchupData_{deck_name.replace(' ', '_').replace(chr(39), '').replace('-', '_')} = {json.dumps({k: {'opponent_deck': v.get('opponent_deck'), 'win_rate': v.get('win_rate'), 'win_rate_numeric': v.get('win_rate_numeric'), 'record': v.get('record'), 'total_games': v.get('total_games')} for k, v in matchups.get('all_opponent_matchups', dict()).items()})};
-                </script>
-            </div>
-            """ for deck_name, matchups in (sorted([(dn, m) for dn, m in matchup_data.items() if 11 <= int(deck_lookup.get(dn, dict()).get('rank', 999)) <= 30], key=lambda x: int(deck_lookup.get(x[0], dict()).get('rank', 999))) if matchup_data else []) if deck_name.lower() != 'other')}
-            </details>
-            
-            <!-- Rank 31+ - Collapsed by default -->
-            <details style="margin-bottom: 30px; border: 2px solid #95a5a6; border-radius: 8px; padding: 15px; background: #f8f9fa;">
-                <summary style="cursor: pointer; font-size: 1.3em; font-weight: bold; color: #2c3e50; padding: 10px; margin: -15px -15px 15px -15px; background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%); color: white; border-radius: 6px 6px 0 0;">
-                    📋 Rest (Rank 31+)
-                </summary>
-                {''.join(f"""
-            <div style="margin-bottom: 40px; background: #f8f9fa; padding: 20px; border-radius: 8px;">
-                <h3 style="color: #2c3e50; margin-top: 0;">{html_mod.escape(deck_name)} <span style="font-size: 0.8em; color: #7f8c8d;">(Rank #{deck_lookup.get(deck_name, dict()).get('rank', '?')} | Total WR: {deck_lookup.get(deck_name, dict()).get('win_rate_numeric', 0):.1f}%, Vs Top20: {matchups.get('positive_vs_top20', 0)}:{matchups.get('negative_vs_top20', 0)})</span></h3>
-                
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                    <div>
-                        <h4 style="color: #27ae60; margin-bottom: 10px;">✅ Best Matchups</h4>
-                        <table style="box-shadow: none;">
-                            <tr style="background: #d4edda;">
-                                <th style="background: #27ae60;">Opponent</th>
-                                <th style="background: #27ae60;">Win Rate</th>
-                                <th style="background: #27ae60;">Record</th>
-                            </tr>
-                            {''.join(f"""
-                            <tr>
-                                <td><strong>{matchup['opponent_deck']}</strong></td>
-                                <td><strong>{matchup['win_rate_numeric']:.1f}%</strong></td>
-                                <td>{matchup['record']} ({matchup['total_games']} games)</td>
-                            </tr>
-                            """ for matchup in matchups.get('best_matchups', [])) if matchups.get('best_matchups') else '<tr><td colspan="3" style="text-align: center; color: #95a5a6;">No data available</td></tr>'}
-                        </table>
-                    </div>
-                    
-                    <div>
-                        <h4 style="color: #e74c3c; margin-bottom: 10px;">❌ Worst Matchups</h4>
-                        <table style="box-shadow: none;">
-                            <tr style="background: #f8d7da;">
-                                <th style="background: #e74c3c;">Opponent</th>
-                                <th style="background: #e74c3c;">Win Rate</th>
-                                <th style="background: #e74c3c;">Record</th>
-                            </tr>
-                            {''.join(f"""
-                            <tr>
-                                <td><strong>{matchup['opponent_deck']}</strong></td>
-                                <td><strong>{matchup['win_rate_numeric']:.1f}%</strong></td>
-                                <td>{matchup['record']} ({matchup['total_games']} games)</td>
-                            </tr>
-                            """ for matchup in matchups.get('worst_matchups', [])) if matchups.get('worst_matchups') else '<tr><td colspan="3" style="text-align: center; color: #95a5a6;">No data available</td></tr>'}
-                        </table>
-                    </div>
-                </div>
-                
-                <div style="background: white; padding: 15px; border-radius: 5px; border: 2px solid #3498db; margin-top: 20px;">
-                    <h4 style="margin-top: 0; color: #3498db;">🔍 Select & Analyze Opponent Matchup</h4>
-                    <label for="opponent_search_{deck_name.replace(' ', '_').replace(chr(39), '').replace('-', '_')}" style="display: block; margin-bottom: 8px; font-weight: bold;">Search Opponent:</label>
-                    <div style="position: relative;">
-                        <input type="text" id="opponent_search_{deck_name.replace(' ', '_').replace(chr(39), '').replace('-', '_')}" placeholder="Type to search deck..." style="width: 100%; padding: 10px; border: 2px solid #bbb; border-radius: 4px; font-size: 1em;" oninput="filterOpponents(this, '{deck_name.replace(' ', '_').replace(chr(39), '').replace('-', '_')}')">
-                        <div id="opponent_dropdown_{deck_name.replace(' ', '_').replace(chr(39), '').replace('-', '_')}" style="position: absolute; top: 100%; left: 0; right: 0; background: white; border: 2px solid #bbb; border-top: none; border-radius: 0 0 4px 4px; max-height: 250px; overflow-y: auto; display: none; z-index: 1000;">
-                            {''.join(f"<div class=\"opponent-option\" data-value=\"{html_mod.escape(opponent)}\" onclick=\"selectOpponent(this, '{deck_name.replace(' ', '_').replace(chr(39), '').replace('-', '_')}', '{html_mod.escape(opponent).replace(chr(39), chr(92)+chr(39))}')\" style=\"padding: 10px; cursor: pointer; border-bottom: 1px solid #eee; transition: background 0.2s;\">{html_mod.escape(opponent)}</div>" for opponent in sorted(matchups.get('all_opponent_matchups', dict()).keys()))}
-                        </div>
-                    </div>
-                    <input type="hidden" id="opponent_selected_{deck_name.replace(' ', '_').replace(chr(39), '').replace('-', '_')}" value="">
-                    <div id="matchup_details_{deck_name.replace(' ', '_').replace(chr(39), '').replace('-', '_')}" style="margin-top: 15px; display: none; background: #ecf0f1; padding: 15px; border-radius: 4px;"></div>
-                </div>
-                
-                <script>
-                window.matchupData_{deck_name.replace(' ', '_').replace(chr(39), '').replace('-', '_')} = {json.dumps({k: {'opponent_deck': v.get('opponent_deck'), 'win_rate': v.get('win_rate'), 'win_rate_numeric': v.get('win_rate_numeric'), 'record': v.get('record'), 'total_games': v.get('total_games')} for k, v in matchups.get('all_opponent_matchups', dict()).items()})};
-                </script>
-            </div>
-            """ for deck_name, matchups in (sorted([(dn, m) for dn, m in matchup_data.items() if int(deck_lookup.get(dn, dict()).get('rank', 999)) > 30], key=lambda x: int(deck_lookup.get(x[0], dict()).get('rank', 999))) if matchup_data else []) if deck_name.lower() != 'other')}
-            </details>
-        </div>
-        
-        <script>
-        function filterOpponents(input, deckName) {{
-            const searchTerm = input.value.toLowerCase();
-            const dropdown = document.getElementById('opponent_dropdown_' + deckName);
-            const options = dropdown.querySelectorAll('.opponent-option');
-            let visibleCount = 0;
-            
-            options.forEach(option => {{
-                const text = option.textContent.toLowerCase();
-                if (text.includes(searchTerm)) {{
-                    option.style.display = 'block';
-                    visibleCount++;
-                }} else {{
-                    option.style.display = 'none';
-                }}
-            }});
-            
-            // Show dropdown if there's input
-            if (searchTerm.length > 0 && visibleCount > 0) {{
-                dropdown.style.display = 'block';
-            }} else if (searchTerm.length > 0) {{
-                dropdown.style.display = 'block';
-            }} else {{
-                dropdown.style.display = 'none';
-            }}
-        }}
-        
-        function selectOpponent(element, deckName, opponent) {{
-            const input = document.getElementById('opponent_search_' + deckName);
-            const hidden = document.getElementById('opponent_selected_' + deckName);
-            const dropdown = document.getElementById('opponent_dropdown_' + deckName);
-            
-            input.value = opponent;
-            hidden.value = opponent;
-            dropdown.style.display = 'none';
-            
-            showMatchup(opponent, deckName);
-        }}
-        
-        function showMatchup(opponent, deckName) {{
-            const detailsDiv = document.getElementById('matchup_details_' + deckName);
-            
-            if (!opponent) {{
-                detailsDiv.style.display = 'none';
-                return;
-            }}
-            
-            const dataVar = 'matchupData_' + deckName;
-            const matchupData = window[dataVar];
-            
-            if (matchupData && matchupData[opponent]) {{
-                const data = matchupData[opponent];
-                const wr = data.win_rate_numeric;
-                const color = wr > 50 ? '#27ae60' : wr < 50 ? '#e74c3c' : '#95a5a6';
-                
-                detailsDiv.innerHTML = `
-                    <h4 style="margin-top: 0; color: #2c3e50;">Matchup vs ${{opponent}}</h4>
-                    <table style="width: 100%; border-collapse: collapse;">
-                        <tr style="background: #ddd;">
-                            <td style="padding: 8px; font-weight: bold;">Win Rate:</td>
-                            <td style="padding: 8px; font-weight: bold; color: ${{color}}; font-size: 1.4em;">${{data.win_rate}}</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 8px;">Record:</td>
-                            <td style="padding: 8px;">${{data.record}}</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 8px;">Total Games:</td>
-                            <td style="padding: 8px; font-weight: bold;">${{data.total_games}}</td>
-                        </tr>
-                    </table>
-                `;
-                detailsDiv.style.display = 'block';
-            }}
-        }}
-        
-        // Close dropdown when clicking outside
-        document.addEventListener('click', function(event) {{
-            const dropdowns = document.querySelectorAll('[id^="opponent_dropdown_"]');
-            dropdowns.forEach(dropdown => {{
-                if (!event.target.closest('div[id^="opponent_search_"]') && !dropdown.contains(event.target)) {{
-                    dropdown.style.display = 'none';
-                }}
-            }});
-        }});
-        </script>
-        ''' if matchup_data else ''}
+        <!-- Der Block "Matchup Analysis - Top 100 Decks" wird nicht mehr
+             erzeugt. Gemessen am 18.08.2026 im gerenderten Tab:
+
+                 Tabhoehe gesamt        16.950 px
+                 davon dieser Block      5.556 px   = 33 %
+                 Suchfelder darin           200, davon funktionsfaehig: 0
+                 Tabellen darin             200, Zeilen: 1.033
+                 HTML                   1.199.003 Zeichen von 1.942.773
+
+             Die Suchfelder waren tot, seit die Seite die eingebetteten
+             <script>-Bloecke nicht mehr ausfuehrt: ihre Handler haengen
+             als inline-oninput am Markup, und js/app-meta-cards.js
+             entfernt jedes on*-Attribut, bevor der Block eingesetzt wird
+             (_sanitizeScraperHtml, F-006). Sie nahmen Text an und taten
+             nichts.
+
+             Die Zahlen selbst gibt es zweimal woanders und beide Male
+             besser: in der Matchup-Heatmap (mit Partienzahl je Zelle) und
+             in der Archetyp-Karte (beste UND schlechteste Matchups mit n
+             und Bilanz). Dieser Block war die dritte Darstellung
+             derselben Daten, ohne Stichprobengroesse.
+
+             Die Matchup-Daten selbst bleiben unangetastet: sie liegen in
+             data/limitless_online_decks_matchups.csv, und von dort liest
+             buildMatchupRegistryFromCsv() sie ein. Hier faellt nur die
+             HTML-Darstellung weg. -->
 
         <div class="section">
             <h2>📋 Full Comparison Table</h2>

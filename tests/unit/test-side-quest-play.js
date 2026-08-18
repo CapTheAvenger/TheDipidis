@@ -18,108 +18,88 @@
 const { describe, it } = require('node:test');
 const assert = require('node:assert/strict');
 
-// ── Production mirrors ─────────────────────────────────────────────
+// ── Das Modul selbst, nicht eine Abschrift davon ──────────────────
+// Bis zum 2026-08-18 stand in dieser Datei eine handgetippte Kopie
+// jeder Funktion aus js/app-side-quest-play.js — samt der kompletten
+// Typentabelle. Die Tests bewiesen damit, dass die Kopie sich verhaelt
+// wie die Kopie. Als in der Tabelle drei Felder falsch waren, standen
+// dieselben drei falschen Felder auch hier, und kein Test konnte das
+// je finden.
+//
+// Jetzt wird die echte Datei geladen. Sie legt ihre reinen Helfer
+// ohnehin schon auf window.sideQuestPlay ab; hier bekommt sie ein
+// window/document-Attrappenpaar, weil sie im Browser laeuft.
+const fs = require('node:fs');
+const path = require('node:path');
 
-const LEVEL = 50;
-const MAX_IV = 31;
-const MAX_EV_MAINLINE = 252;
-const CHAMPIONS_EV_SCALE = 8;
+const ROOT = path.join(__dirname, '..', '..');
+const SRC_PATH = path.join(ROOT, 'js', 'app-side-quest-play.js');
+const SRC = fs.readFileSync(SRC_PATH, 'utf8');
 
-function speedStat(base, mainlineEV, natureMod) {
-    const ev = Math.min(MAX_EV_MAINLINE, Math.max(0, mainlineEV));
-    const inner = Math.floor(((2 * base + MAX_IV + Math.floor(ev / 4)) * LEVEL) / 100 + 5);
-    return Math.floor(inner * natureMod);
+// Geladen wird mit new Function statt mit vm: dann entstehen Arrays und
+// Objekte in derselben Realm wie der Test, und deepStrictEqual
+// vergleicht Inhalte statt Prototypen. window/document/fetch sind
+// Parameter und verdecken damit die echten Globals im Modulcode.
+function loadModule() {
+    const noop = () => {};
+    const el = () => ({
+        style: {}, dataset: {}, innerHTML: '', textContent: '', value: '',
+        classList: { add: noop, remove: noop, toggle: noop, contains: () => false },
+        appendChild: noop, removeChild: noop, remove: noop, focus: noop,
+        addEventListener: noop, removeEventListener: noop,
+        setAttribute: noop, removeAttribute: noop, getAttribute: () => null,
+        querySelector: () => null, querySelectorAll: () => [],
+    });
+    const win = {};
+    const doc = {
+        addEventListener: noop, removeEventListener: noop,
+        getElementById: () => null, querySelector: () => null,
+        querySelectorAll: () => [], createElement: el, body: el(),
+        documentElement: el(),
+    };
+    // Kein Netz im Unit-Test. Wollte das Modul beim Laden etwas holen,
+    // fiele es hier sofort auf — genau das soll es.
+    const noFetch = () => Promise.reject(new Error('kein Netz im Unit-Test'));
+    // eslint-disable-next-line no-new-func
+    const factory = new Function('window', 'document', 'fetch', SRC);
+    factory(win, doc, noFetch);
+    return win;
 }
-function baseSpeedAt50(base) { return speedStat(base, 0, 1.0); }
-function maxSpeedAt50(base)  { return speedStat(base, MAX_EV_MAINLINE, 1.1); }
-function actualSpeedAt50(base, championsEV, natureMod) {
-    return speedStat(base, championsEV * CHAMPIONS_EV_SCALE, natureMod);
-}
 
-const NATURE_SPEED = {
-    Hasty: 1.1, Jolly: 1.1, Naive: 1.1, Timid: 1.1,
-    Brave: 0.9, Quiet: 0.9, Relaxed: 0.9, Sassy: 0.9,
-};
-function natureSpeedMod(name) {
-    return NATURE_SPEED[String(name || '').trim()] || 1.0;
-}
+const P = loadModule().sideQuestPlay;
 
-const TYPE_CHART = {
-    Normal:   { Rock: 0.5, Ghost: 0,   Steel: 0.5 },
-    Fire:     { Fire: 0.5, Water: 0.5, Grass: 2, Ice: 2, Bug: 2, Rock: 0.5, Dragon: 0.5, Steel: 2 },
-    Water:    { Fire: 2, Water: 0.5, Grass: 0.5, Ground: 2, Rock: 2, Dragon: 0.5 },
-    Electric: { Water: 2, Electric: 0.5, Grass: 0.5, Ground: 0, Flying: 2, Dragon: 0.5 },
-    Grass:    { Fire: 0.5, Water: 2, Grass: 0.5, Poison: 0.5, Ground: 2, Flying: 0.5, Bug: 0.5, Rock: 2, Dragon: 0.5, Steel: 0.5 },
-    Ice:      { Fire: 0.5, Water: 0.5, Grass: 2, Ice: 0.5, Ground: 2, Flying: 2, Dragon: 2, Steel: 0.5 },
-    Fighting: { Normal: 2, Ice: 2, Poison: 0.5, Flying: 0.5, Psychic: 0.5, Bug: 0.5, Rock: 2, Ghost: 0, Dark: 2, Steel: 2, Fairy: 0.5 },
-    Poison:   { Grass: 2, Poison: 0.5, Ground: 0.5, Rock: 0.5, Ghost: 0.5, Steel: 0, Fairy: 2 },
-    Ground:   { Fire: 2, Electric: 2, Grass: 0.5, Poison: 2, Flying: 0, Bug: 0.5, Rock: 2, Steel: 2 },
-    Flying:   { Electric: 0.5, Grass: 2, Fighting: 2, Bug: 2, Rock: 0.5, Steel: 0.5 },
-    Psychic:  { Fighting: 2, Poison: 2, Psychic: 0.5, Dark: 0, Steel: 0.5 },
-    Bug:      { Fire: 0.5, Grass: 2, Fighting: 0.5, Poison: 0.5, Flying: 0.5, Psychic: 2, Ghost: 0.5, Dark: 2, Steel: 0.5, Fairy: 0.5 },
-    Rock:     { Fire: 2, Ice: 2, Fighting: 0.5, Ground: 0.5, Flying: 2, Bug: 2, Steel: 0.5 },
-    Ghost:    { Normal: 0, Psychic: 2, Ghost: 2, Dark: 2 },
-    Dragon:   { Dragon: 2, Steel: 0.5, Fairy: 0 },
-    Dark:     { Fighting: 0.5, Psychic: 2, Ghost: 2, Dark: 0.5, Fairy: 0.5 },
-    Steel:    { Fire: 0.5, Water: 0.5, Electric: 0.5, Ice: 2, Rock: 2, Steel: 0.5, Fairy: 2 },
-    Fairy:    { Fighting: 2, Poison: 0.5, Bug: 0.5, Dragon: 2, Dark: 2, Steel: 0.5 },
-};
+const speedStat                     = P.speedStat;
+const baseSpeedAt50                 = P.baseSpeedAt50;
+const maxSpeedAt50                  = P.maxSpeedAt50;
+const actualSpeedAt50               = P.actualSpeedAt50;
+const natureSpeedMod                = P.natureSpeedMod;
+const defensiveWeaknesses           = P.defensiveWeaknesses;
+const parseEVs                      = P.parseEVs;
+const aggregateLegalPool            = P.aggregateLegalPool;
+const aggregateLegalPoolFromSamples = P.aggregateLegalPoolFromSamples;
+const nextEmptyOppIndex             = P.nextEmptyOppIndex;
+const buildTypicalSpeeds            = P.buildTypicalSpeeds;
+const buildTypicalSpeedsFromSamples = P.buildTypicalSpeedsFromSamples;
+const buildSpeedLadder              = P.buildSpeedLadder;
+const speciesMatchesFilter          = P.speciesMatchesFilter;
+const baseEnglish                   = P.baseEnglish;
+
+// Die Typentabelle ist modulintern und wird nicht exportiert. Fuer den
+// Abgleich gegen data/champions_type_chart.json wird sie aus dem
+// Quelltext gelesen — nicht abgeschrieben.
+function readTypeChartFromSource() {
+    const m = SRC.match(/const TYPE_CHART = (\{[\s\S]*?\n {4}\});/);
+    if (!m) throw new Error('TYPE_CHART nicht im Quelltext gefunden');
+    // eslint-disable-next-line no-new-func
+    return new Function('return ' + m[1])();
+}
+const TYPE_CHART = readTypeChartFromSource();
 const ALL_TYPES = Object.keys(TYPE_CHART);
 
-function defensiveWeaknesses(defenderTypes) {
-    if (!defenderTypes || defenderTypes.length === 0) return [];
-    const results = [];
-    for (const atk of ALL_TYPES) {
-        let mult = 1;
-        for (const def of defenderTypes) {
-            const row = TYPE_CHART[atk];
-            if (!row) continue;
-            const v = row[def];
-            if (v !== undefined) mult *= v;
-        }
-        if (mult > 1) results.push({ type: atk, mult });
-    }
-    results.sort((a, b) => (b.mult - a.mult) || a.type.localeCompare(b.type));
-    return results;
-}
+// Nicht exportiert: pickerSortedNames haengt im Panel am DOM-Rendering.
+// Diese Nachbildung ist der letzte verbliebene Nachbau in dieser Datei
+// und als solcher hier benannt.
 
-function parseEVs(str) {
-    const out = { hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0 };
-    if (!str) return out;
-    const key = { HP:'hp', Atk:'atk', Def:'def', SpA:'spa', SpD:'spd', Spe:'spe' };
-    String(str).split('/').forEach(seg => {
-        const m = String(seg).trim().match(/^(\d+)\s+(HP|Atk|Def|SpA|SpD|Spe)$/i);
-        if (!m) return;
-        const k = key[m[2].replace(/^./, c => c.toUpperCase()).replace(/^Sp([adAD])$/, (_, x) => 'Sp' + x.toUpperCase())]
-               || key[m[2]];
-        if (k) out[k] = parseInt(m[1], 10);
-    });
-    return out;
-}
-
-// Mirror of aggregateLegalPool + the picker sort+filter rule.
-// User-flagged 2026-06-14: the opponent picker dumped the full
-// 1480-entry Showdown pokedex on a 2-second-decision UI — Absol,
-// Abra, Arceus-Dark were the first three. Restrict to species in
-// the current top-team data and sort by usage DESC so the
-// most-likely matches surface first.
-
-function aggregateLegalPool(teams) {
-    const pool = new Set();
-    const counts = new Map();
-    for (const t of (teams || [])) {
-        for (const p of (t.pokemon || [])) {
-            const name = p && p.name;
-            if (!name) continue;
-            pool.add(name);
-            counts.set(name, (counts.get(name) || 0) + 1);
-        }
-    }
-    return { pool, counts };
-}
-
-// Replays the production picker sort+filter without DOM. Inputs
-// match what app-side-quest-play.js' pickerSortedNames() sees.
 function pickerSortedNames(opts) {
     const dex = opts.dex || {};
     const legalPool = opts.legalPool || new Set();
@@ -442,13 +422,7 @@ describe('pickerSortedNames — format-pool filter + usage sort', () => {
 // all 6" button keeps the picker open and lands each tap in the
 // next empty slot. Auto-close fires when 6/6 are filled.
 
-function nextEmptyOppIndex(opponent) {
-    if (!Array.isArray(opponent)) return -1;
-    for (let i = 0; i < opponent.length; i++) {
-        if (!opponent[i]) return i;
-    }
-    return -1;
-}
+// nextEmptyOppIndex kommt aus dem Modul (siehe Kopf der Datei).
 
 describe('nextEmptyOppIndex — fill-mode next-slot resolver', () => {
     it('returns 0 for a fresh team', () => {
@@ -537,83 +511,7 @@ describe('fill-mode loop — sequential picks land in order', () => {
 // effective Speed so the at-a-glance "who's faster" answer is
 // always one screen.
 
-function buildTypicalSpeeds(teams, lookupSpec) {
-    const grouped = new Map();
-    for (const t of (teams || [])) {
-        for (const p of (t.pokemon || [])) {
-            const name = p && p.name;
-            if (!name) continue;
-            if (!grouped.has(name)) grouped.set(name, []);
-            grouped.get(name).push({ ev: parseEVs(p.evs).spe, nature: p.nature || '' });
-        }
-    }
-    const out = {};
-    for (const [name, instances] of grouped) {
-        const spec = lookupSpec(name);
-        if (!spec || !spec.baseStats) continue;
-        const baseSpe = spec.baseStats.spe;
-        const counts = new Map();
-        for (const inst of instances) {
-            const key = inst.ev + '|' + inst.nature;
-            counts.set(key, (counts.get(key) || 0) + 1);
-        }
-        let bestKey = null, bestCount = 0, bestSpeed = -1;
-        for (const [k, v] of counts) {
-            const [evStr, nat] = k.split('|');
-            const spd = actualSpeedAt50(baseSpe, parseInt(evStr, 10), natureSpeedMod(nat));
-            if (v > bestCount || (v === bestCount && spd > bestSpeed)) {
-                bestCount = v; bestKey = k; bestSpeed = spd;
-            }
-        }
-        if (!bestKey) continue;
-        const [evStr, nature] = bestKey.split('|');
-        out[name] = {
-            typicalSpeed: bestSpeed,
-            evMode: parseInt(evStr, 10),
-            natureMode: nature,
-            sampleSize: instances.length,
-            modeShare: bestCount / instances.length,
-        };
-    }
-    return out;
-}
-
-function buildSpeedLadder(team, opponent, lookupSpec, typicalMap) {
-    const rows = [];
-    for (const p of (team && team.pokemon) || []) {
-        const spec = lookupSpec(p.name);
-        if (!spec || !spec.baseStats) continue;
-        const baseSpe = spec.baseStats.spe;
-        const evs = parseEVs(p.evs);
-        const actual = actualSpeedAt50(baseSpe, evs.spe, natureSpeedMod(p.nature));
-        rows.push({
-            side: 'Y', name: p.name,
-            speed: actual, tailwind: actual * 2,
-            rangeMin: baseSpeedAt50(baseSpe), rangeMax: maxSpeedAt50(baseSpe),
-            source: 'actual',
-        });
-    }
-    for (const o of (opponent || [])) {
-        if (!o || !o.name) continue;
-        const spec = lookupSpec(o.name);
-        if (!spec || !spec.baseStats) continue;
-        const baseSpe = spec.baseStats.spe;
-        const rangeMin = baseSpeedAt50(baseSpe);
-        const rangeMax = maxSpeedAt50(baseSpe);
-        const typ = typicalMap && typicalMap[o.name];
-        if (typ && typ.typicalSpeed > 0) {
-            rows.push({ side: 'O', name: o.name, speed: typ.typicalSpeed, tailwind: typ.typicalSpeed * 2, rangeMin, rangeMax, source: 'typical' });
-        } else {
-            rows.push({ side: 'O', name: o.name, speed: rangeMin, tailwind: rangeMin * 2, rangeMin, rangeMax, source: 'base' });
-        }
-    }
-    rows.sort((a, b) => {
-        if (b.speed !== a.speed) return b.speed - a.speed;
-        if (a.side !== b.side) return a.side === 'Y' ? -1 : 1;
-        return a.name.localeCompare(b.name);
-    });
-    return rows;
-}
+// buildTypicalSpeeds und buildSpeedLadder kommen aus dem Modul.
 
 const GARCHOMP_SPEC = { baseStats: { spe: 102 }, types: ['Dragon', 'Ground'] };
 const TALONFLAME_SPEC = { baseStats: { spe: 126 }, types: ['Fire', 'Flying'] };
@@ -803,44 +701,7 @@ describe('buildSpeedLadder — base–max range column', () => {
 // across ~40 species). Same mode logic, but the input is a flat
 // list of {species, evs, nature} rather than nested team records.
 
-function buildTypicalSpeedsFromSamples(samples, lookupSpec) {
-    const grouped = new Map();
-    for (const s of (samples || [])) {
-        const name = s && s.species;
-        if (!name) continue;
-        if (!grouped.has(name)) grouped.set(name, []);
-        grouped.get(name).push({ ev: parseEVs(s.evs).spe, nature: s.nature || '' });
-    }
-    const out = {};
-    for (const [name, instances] of grouped) {
-        const spec = lookupSpec(name);
-        if (!spec || !spec.baseStats) continue;
-        const baseSpe = spec.baseStats.spe;
-        const counts = new Map();
-        for (const inst of instances) {
-            const key = inst.ev + '|' + inst.nature;
-            counts.set(key, (counts.get(key) || 0) + 1);
-        }
-        let bestKey = null, bestCount = 0, bestSpeed = -1;
-        for (const [k, v] of counts) {
-            const [evStr, nat] = k.split('|');
-            const spd = actualSpeedAt50(baseSpe, parseInt(evStr, 10), natureSpeedMod(nat));
-            if (v > bestCount || (v === bestCount && spd > bestSpeed)) {
-                bestCount = v; bestKey = k; bestSpeed = spd;
-            }
-        }
-        if (!bestKey) continue;
-        const [evStr, nature] = bestKey.split('|');
-        out[name] = {
-            typicalSpeed: bestSpeed,
-            evMode: parseInt(evStr, 10),
-            natureMode: nature,
-            sampleSize: instances.length,
-            modeShare: bestCount / instances.length,
-        };
-    }
-    return out;
-}
+// buildTypicalSpeedsFromSamples kommt aus dem Modul.
 
 describe('buildTypicalSpeedsFromSamples — corpus-driven mode', () => {
     const lookupSpec = (n) => ({
@@ -907,38 +768,8 @@ describe('buildTypicalSpeedsFromSamples — corpus-driven mode', () => {
 // "Pokémon Suche … nach deutschem Namen … nach Typen suchen, weil
 // wenn ich Eis tippe, dann werden alle Eis-Mons aufgelistet."
 
-const TYPE_NAMES_DE = {
-    Normal: 'Normal', Fire: 'Feuer', Water: 'Wasser', Electric: 'Elektro',
-    Grass: 'Pflanze', Ice: 'Eis', Fighting: 'Kampf', Poison: 'Gift',
-    Ground: 'Boden', Flying: 'Flug', Psychic: 'Psycho', Bug: 'Käfer',
-    Rock: 'Gestein', Ghost: 'Geist', Dragon: 'Drache', Dark: 'Unlicht',
-    Steel: 'Stahl', Fairy: 'Fee',
-};
-
-function baseEnglish(name) {
-    return String(name || '').split('-')[0];
-}
-
-// Mirror of speciesMatchesFilter. Production reads from module-
-// scope state (_pokedex, _namesDe); tests inject explicitly.
-function speciesMatchesFilter(name, lcFilter, deepDex, namesDe) {
-    if (!lcFilter) return true;
-    if (name.toLowerCase().includes(lcFilter)) return true;
-    const base = baseEnglish(name);
-    if (namesDe) {
-        const de = namesDe[base];
-        if (de && de.toLowerCase().includes(lcFilter)) return true;
-    }
-    const spec = deepDex && deepDex[name];
-    if (spec && Array.isArray(spec.types)) {
-        for (const ty of spec.types) {
-            if (ty.toLowerCase().startsWith(lcFilter)) return true;
-            const tyDe = TYPE_NAMES_DE[ty];
-            if (tyDe && tyDe.toLowerCase().startsWith(lcFilter)) return true;
-        }
-    }
-    return false;
-}
+// baseEnglish und speciesMatchesFilter kommen aus dem Modul; die
+// deutschen Typnamen liegen dort neben der Funktion, die sie nutzt.
 
 describe('speciesMatchesFilter — German name + type search', () => {
     const dex = {
@@ -1037,17 +868,7 @@ describe('speciesMatchesFilter — German name + type search', () => {
 // flat sample list. User-asked 2026-06-15: picker pool / count
 // ranking should reflect the 14-day window, not just the top 20.
 
-function aggregateLegalPoolFromSamples(samples) {
-    const pool = new Set();
-    const counts = new Map();
-    for (const s of (samples || [])) {
-        const name = s && s.species;
-        if (!name) continue;
-        pool.add(name);
-        counts.set(name, (counts.get(name) || 0) + 1);
-    }
-    return { pool, counts };
-}
+// aggregateLegalPoolFromSamples kommt aus dem Modul.
 
 describe('aggregateLegalPoolFromSamples — corpus-driven pool', () => {
     it('builds pool + counts from the flat samples shape', () => {
@@ -1133,5 +954,158 @@ describe('speciesMatchesFilter — type prefix vs substring', () => {
         };
         assert.ok(speciesMatchesFilter('Pikachu',   'ele', dexExt, {}));
         assert.ok(!speciesMatchesFilter('Vanilluxe', 'ele', dexExt, {}));
+    });
+});
+
+// ── Die Typentabelle gegen zwei unabhängige Instanzen ──────────────
+// Gefunden am 2026-08-18: die Tabelle in js/app-side-quest-play.js und
+// die in data/champions_type_chart.json widersprachen sich in drei
+// Feldern, und der Unit-Test enthielt eine dritte Kopie derselben
+// falschen Zahlen. Drei Abschriften, kein Abgleich.
+//
+// Der Quelltext bleibt eine Kopie — bewusst: das Panel wird am
+// Turniertisch gebraucht, eine fehlgeschlagene Anfrage darf keine
+// leere Schwächenliste ergeben. Kopie ist aber nur dann harmlos, wenn
+// jemand sie vergleicht. Das passiert hier, gegen zwei Instanzen:
+//
+//   1. data/champions_type_chart.json — dieselbe Tabelle, die
+//      Schadensrechner und Matchup-Ansicht laden. Weichen die beiden
+//      ab, zeigen zwei Panels derselben Seite verschiedene Zahlen.
+//   2. Eine von Hand getippte VERTEIDIGUNGS-Tabelle: pro Typ, was ihm
+//      wehtut. Das ist die Transponierte der Angriffstabelle, also
+//      eine wirklich andere Schreibweise — ein verrutschtes Feld kann
+//      nicht in beiden gleich falsch stehen.
+
+const CHART_JSON = JSON.parse(
+    fs.readFileSync(path.join(ROOT, 'data', 'champions_type_chart.json'), 'utf8')
+).chart;
+
+// Verteidigersicht, Gen 6+. Alles, was hier nicht steht, ist ×1.
+const DEFENSIVE_CANON = {
+    Normal:   { weak: ['Fighting'], resist: [], immune: ['Ghost'] },
+    Fire:     { weak: ['Water', 'Ground', 'Rock'], resist: ['Fire', 'Grass', 'Ice', 'Bug', 'Steel', 'Fairy'], immune: [] },
+    Water:    { weak: ['Electric', 'Grass'], resist: ['Fire', 'Water', 'Ice', 'Steel'], immune: [] },
+    Electric: { weak: ['Ground'], resist: ['Electric', 'Flying', 'Steel'], immune: [] },
+    Grass:    { weak: ['Fire', 'Ice', 'Poison', 'Flying', 'Bug'], resist: ['Water', 'Electric', 'Grass', 'Ground'], immune: [] },
+    Ice:      { weak: ['Fire', 'Fighting', 'Rock', 'Steel'], resist: ['Ice'], immune: [] },
+    Fighting: { weak: ['Flying', 'Psychic', 'Fairy'], resist: ['Bug', 'Rock', 'Dark'], immune: [] },
+    Poison:   { weak: ['Ground', 'Psychic'], resist: ['Grass', 'Fighting', 'Poison', 'Bug', 'Fairy'], immune: [] },
+    Ground:   { weak: ['Water', 'Grass', 'Ice'], resist: ['Poison', 'Rock'], immune: ['Electric'] },
+    Flying:   { weak: ['Electric', 'Ice', 'Rock'], resist: ['Grass', 'Fighting', 'Bug'], immune: ['Ground'] },
+    Psychic:  { weak: ['Bug', 'Ghost', 'Dark'], resist: ['Fighting', 'Psychic'], immune: [] },
+    Bug:      { weak: ['Fire', 'Flying', 'Rock'], resist: ['Grass', 'Fighting', 'Ground'], immune: [] },
+    Rock:     { weak: ['Water', 'Grass', 'Fighting', 'Ground', 'Steel'], resist: ['Normal', 'Fire', 'Poison', 'Flying'], immune: [] },
+    Ghost:    { weak: ['Ghost', 'Dark'], resist: ['Poison', 'Bug'], immune: ['Normal', 'Fighting'] },
+    Dragon:   { weak: ['Ice', 'Dragon', 'Fairy'], resist: ['Fire', 'Water', 'Electric', 'Grass'], immune: [] },
+    Dark:     { weak: ['Fighting', 'Bug', 'Fairy'], resist: ['Ghost', 'Dark'], immune: ['Psychic'] },
+    Steel:    { weak: ['Fire', 'Fighting', 'Ground'], resist: ['Normal', 'Grass', 'Ice', 'Flying', 'Psychic', 'Bug', 'Rock', 'Dragon', 'Steel', 'Fairy'], immune: ['Poison'] },
+    Fairy:    { weak: ['Poison', 'Steel'], resist: ['Fighting', 'Bug', 'Dark'], immune: ['Dragon'] },
+};
+
+// Transponiert die Verteidigungssicht in eine Angriffstabelle.
+function transposeCanon() {
+    const out = {};
+    Object.keys(DEFENSIVE_CANON).forEach(d => { out[d] = out[d] || {}; });
+    Object.entries(DEFENSIVE_CANON).forEach(([def, row]) => {
+        row.weak.forEach(atk   => { out[atk][def] = 2; });
+        row.resist.forEach(atk => { out[atk][def] = 0.5; });
+        row.immune.forEach(atk => { out[atk][def] = 0; });
+    });
+    return out;
+}
+
+function cell(chart, atk, def) {
+    const v = (chart[atk] || {})[def];
+    return v === undefined ? 1 : v;
+}
+
+describe('Typentabelle — eine Wahrheit, drei Prüfungen', () => {
+    const CANON = transposeCanon();
+
+    it('Verteidigungssicht deckt alle 18 Typen ab', () => {
+        assert.strictEqual(Object.keys(DEFENSIVE_CANON).length, 18);
+        assert.deepStrictEqual(Object.keys(DEFENSIVE_CANON).sort(), ALL_TYPES.slice().sort());
+    });
+
+    it('data/champions_type_chart.json entspricht der Verteidigungssicht (18×18)', () => {
+        const wrong = [];
+        for (const atk of ALL_TYPES) {
+            for (const def of ALL_TYPES) {
+                const a = cell(CHART_JSON, atk, def);
+                const b = cell(CANON, atk, def);
+                if (a !== b) wrong.push(`${atk}->${def}: json=${a} kanon=${b}`);
+            }
+        }
+        assert.deepStrictEqual(wrong, [], 'JSON weicht vom Kanon ab:\n' + wrong.join('\n'));
+    });
+
+    it('TYPE_CHART in app-side-quest-play.js entspricht der JSON-Datei (18×18)', () => {
+        const wrong = [];
+        for (const atk of ALL_TYPES) {
+            for (const def of ALL_TYPES) {
+                const a = cell(TYPE_CHART, atk, def);
+                const b = cell(CHART_JSON, atk, def);
+                if (a !== b) wrong.push(`${atk}->${def}: js=${a} json=${b}`);
+            }
+        }
+        assert.deepStrictEqual(wrong, [], 'JS-Tabelle weicht von der JSON-Datei ab:\n' + wrong.join('\n'));
+    });
+
+    it('beide Tabellen nennen dieselben 18 Typen', () => {
+        assert.deepStrictEqual(ALL_TYPES.slice().sort(), Object.keys(CHART_JSON).sort());
+        assert.deepStrictEqual(
+            ALL_TYPES.slice().sort(),
+            JSON.parse(fs.readFileSync(path.join(ROOT, 'data', 'champions_type_chart.json'), 'utf8'))
+                ._meta.types.slice().sort()
+        );
+    });
+
+    it('nur erlaubte Multiplikatoren (0, 0.5, 2) stehen in der Tabelle', () => {
+        const bad = [];
+        for (const atk of ALL_TYPES) {
+            for (const [def, v] of Object.entries(TYPE_CHART[atk] || {})) {
+                if (v !== 0 && v !== 0.5 && v !== 2) bad.push(`${atk}->${def}=${v}`);
+            }
+        }
+        assert.deepStrictEqual(bad, []);
+    });
+
+    it('die deutschen Typnamen decken exakt die Typen der Tabelle ab', () => {
+        // Der Quelltextkommentar behauptet das ("Keys müssen TYPE_CHART
+        // exakt entsprechen"). Behauptungen im Kommentar sind keine.
+        const m = SRC.match(/const TYPE_NAMES_DE = (\{[\s\S]*?\n {4}\});/);
+        assert.ok(m, 'TYPE_NAMES_DE nicht gefunden');
+        // eslint-disable-next-line no-new-func
+        const namesDe = new Function('return ' + m[1])();
+        assert.deepStrictEqual(Object.keys(namesDe).sort(), ALL_TYPES.slice().sort());
+    });
+});
+
+// ── Die drei gefundenen Felder als benannte Regressionen ───────────
+describe('Regression 2026-08-18 — drei falsche Felder der Typentabelle', () => {
+    it('Unlicht ist gegen Geist resistent, nicht schwach (war ×2, ist ×0.5)', () => {
+        assert.strictEqual(cell(TYPE_CHART, 'Ghost', 'Dark'), 0.5);
+        // Sichtbare Folge: ein reines Unlicht-Pokémon stand mit
+        // "Ghost ×2" in der Schwächenliste, Geist/Unlicht sogar mit ×4.
+        const dark = defensiveWeaknesses(['Dark']).map(w => w.type);
+        assert.ok(!dark.includes('Ghost'), 'Unlicht darf nicht als geist-schwach gelten');
+        assert.deepStrictEqual(dark, ['Bug', 'Fairy', 'Fighting']);
+        assert.deepStrictEqual(defensiveWeaknesses(['Ghost', 'Dark']), [{ type: 'Fairy', mult: 2 }]);
+    });
+
+    it('Fee gegen Käfer ist neutral, nicht halbiert (Zeile war von Käfer abgeschrieben)', () => {
+        assert.strictEqual(cell(TYPE_CHART, 'Fairy', 'Bug'), 1);
+        // Käfer/Flug (Vespiquen, Ninjask) war dadurch nicht als
+        // fee-schwach ausgewiesen: 0.5 × 2 = 1 statt 1 × 2 = 2.
+        const bugFly = defensiveWeaknesses(['Bug', 'Flying']).map(w => w.type);
+        assert.ok(bugFly.includes('Rock'));
+        assert.ok(bugFly.includes('Fire'));
+    });
+
+    it('Feuer ist gegen Fee resistent — die Zeile fehlte ganz', () => {
+        assert.strictEqual(cell(TYPE_CHART, 'Fairy', 'Fire'), 0.5);
+        const fire = defensiveWeaknesses(['Fire']).map(w => w.type);
+        assert.ok(!fire.includes('Fairy'));
+        assert.deepStrictEqual(fire, ['Ground', 'Rock', 'Water']);
     });
 });

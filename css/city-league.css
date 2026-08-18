@@ -2781,7 +2781,7 @@
  * will land until the season resumes. The banner makes that gap
  * obvious so users don't read stale numbers as live.
  *
- * Hide by adding the .display-none utility class (or by stripping
+ * Hide by adding the .d-none utility class (or by stripping
  * the markup) once a fresh season is underway.
  */
 .cl-season-notice {

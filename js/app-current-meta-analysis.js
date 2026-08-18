@@ -1262,7 +1262,7 @@
             // back if the deck-select is reset to "" (handled below at the
             // empty-archetype guard).
             const emptyState = document.getElementById('currentAnalysisEmptyState');
-            if (emptyState) emptyState.classList.add('display-none');
+            if (emptyState) emptyState.classList.add('d-none');
 
             // The archetype card sits right under the dropdown: after
             // arriving here from a tier-list click, the first thing you
@@ -1281,7 +1281,7 @@
             }
 
             if (!archetype) {
-                if (emptyState) emptyState.classList.remove('display-none');
+                if (emptyState) emptyState.classList.remove('d-none');
                 // Also hide the Quick Reference panel when the user clears
                 // the selection — without this the panel sticks around
                 // showing the previous archetype's lists.
@@ -1823,7 +1823,6 @@
             }
 
             matchupsSection.classList.remove('d-none');
-            matchupsSection.classList.remove('display-none');
             return true;
         }
 
@@ -1841,7 +1840,7 @@
             if (!section || !tbody) return;
 
             const hideSection = (reason) => {
-                section.classList.add('display-none');
+                section.classList.add('d-none');
                 if (reason) devLog(`[VsMetaCall] hidden: ${reason}`);
             };
 
@@ -1948,7 +1947,7 @@
             tbody.innerHTML = paired.map(fmtRow).join('') ||
                 '<tr><td colspan="3" class="mc-vs-empty">' + t('heatmap.noData') + '</td></tr>';
 
-            section.classList.remove('display-none');
+            section.classList.remove('d-none');
         }
 
         // ──────────────────────────────────────────────────────────
@@ -2079,7 +2078,7 @@
             if (!section || !summaryEl || !detailEl) return;
 
             const hide = (reason) => {
-                section.classList.add('display-none');
+                section.classList.add('d-none');
                 if (reason) devLog(`[UserVsVanilla] hidden: ${reason}`);
             };
 
@@ -2126,7 +2125,7 @@
                     </div>`;
                 detailEl.innerHTML = '';
                 _renderCardDiffSection(archetype);
-                section.classList.remove('display-none');
+                section.classList.remove('d-none');
                 return;
             }
 
@@ -2305,7 +2304,7 @@
 
             _renderCardDiffSection(archetype);
 
-            section.classList.remove('display-none');
+            section.classList.remove('d-none');
         }
 
         // Builds the user-deck-card-key list (SET|number + name) from
@@ -2627,11 +2626,9 @@
             if (wr >= 40) return 'wr-neg';
             return 'wr-strong-neg';
         }
-        function escapeHtml(s) {
-            return String(s).replace(/[&<>"']/g, c => ({
-                '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
-            }[c]));
-        }
+        // escapeHtml stand hier ein zweites Mal, gleicher Name, obere
+        // Ebene, spaeteres Laden - es ueberschrieb still die Fassung
+        // aus app-utils.js. Jetzt gibt es nur noch die eine dort.
 
         // Render best/worst matchups for Current Meta - extract directly from loaded HTML (1:1 copy)
         function renderCurrentMetaMatchups(archetype) {
@@ -3035,7 +3032,14 @@
             if (!gridContainer) return;
 
             if (!Array.isArray(cards) || cards.length === 0) {
-                gridContainer.innerHTML = getEmptyStateHtml();
+                // Frueher: getEmptyStateHtml() ohne Argumente. Das traf
+                // die gleichnamige Funktion aus app-city-league.js und
+                // sagte deshalb "Turnierdaten" statt "Deckliste".
+                gridContainer.innerHTML = getEmptyStateBoxHtml({
+                    title: t('cm.noCardsInDeck'),
+                    description: t('cm.noCardsInDeckDesc'),
+                    icon: 'cards'
+                });
                 if (visualContainer) {
                     document.getElementById('currentMetaDeckTableView')?.classList.add('d-none');
                     visualContainer.classList.remove('d-none');

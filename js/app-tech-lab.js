@@ -818,9 +818,9 @@
         if (beatenByNonEx)   beatenByNonEx.innerHTML   = '';
 
         const resultsWrap = document.getElementById('techLabResultsWrap');
-        if (resultsWrap) resultsWrap.classList.remove('display-none');
+        if (resultsWrap) resultsWrap.classList.remove('d-none');
         const startHint = document.getElementById('techLabStartHint');
-        if (startHint) startHint.classList.add('display-none');
+        if (startHint) startHint.classList.add('d-none');
 
         // Three parallel reads: engine direction A, engine direction
         // B, and the target's own tags (for summaries + non-EX bucket).
@@ -968,7 +968,7 @@
         const title    = document.getElementById('techLabAddTitle');
         const intro    = document.getElementById('techLabAddIntro');
         if (!overlay || !input || !dropdown) return;
-        overlay.classList.remove('display-none');
+        overlay.classList.remove('d-none');
         overlay.classList.add('show');
         if (title) {
             title.textContent = (_addDirection === 'beats')
@@ -996,7 +996,7 @@
         const overlay = document.getElementById('techLabAddOverlay');
         if (overlay) {
             overlay.classList.remove('show');
-            overlay.classList.add('display-none');
+            overlay.classList.add('d-none');
         }
     }
 
@@ -1036,7 +1036,7 @@
         document.addEventListener('keydown', (e) => {
             if (e.key !== 'Escape') return;
             const o = document.getElementById('techLabAddOverlay');
-            if (o && !o.classList.contains('display-none')) closeAddMissing();
+            if (o && !o.classList.contains('d-none')) closeAddMissing();
         });
         _devLog('initialised');
     }

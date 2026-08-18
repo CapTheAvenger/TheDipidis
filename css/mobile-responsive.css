@@ -156,7 +156,14 @@
 }
 
 @media (max-width: 480px) {
-    .card-grid,
+    /* .card-grid ist hier raus. Die Klasse traegt an genau zwei Stellen
+     * im Repo das Kartengitter der Deck-Analyse (zusammen mit
+     * .deck-grid-skeleton-grid); drei feste Spalten ergeben darauf
+     * 94 px je Kachel. Die Kachelbreite steht jetzt am Ende dieser
+     * Datei, an einer Stelle, ohne !important.
+     *
+     * Die drei Suchergebnis-Gitter behalten ihre drei Spalten: dort
+     * steht nur ein Kartenbild mit Namen, keine Infoleiste. */
     .city-league-add-card-grid,
     .current-meta-add-card-results,
     .past-meta-add-card-results {
@@ -1328,7 +1335,12 @@
    * wird (Block 6: drei Spalten auf 390 px), faellt der Umbruch von
    * selbst weg — flex-wrap bricht nur, wenn es muss. */
   .city-league-card-action-row > .city-league-card-market-btn {
-    flex: 1 0 100%;
+    /* Basis 60 px, nicht 100 %: der Preis braucht 60 px, um vollstaendig
+     * dazustehen. Passt er neben L und P, bleibt er in der Zeile; passt
+     * er nicht, bricht flex-wrap ihn auf eine eigene. Mit `100 %` brach
+     * er immer um, auch auf einer 143 px breiten Kachel, auf der er
+     * bequem danebenpasst. */
+    flex: 1 1 60px;
     min-width: 0;
     padding: 0 var(--s-1);
     overflow: hidden;
@@ -2399,4 +2411,41 @@
     width: 14px !important;
     height: 14px !important;
   }
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   Die Kachelbreite der Deck-Analyse
+   ══════════════════════════════════════════════════════════════════
+
+   Gezaehlt am 18.08.2026: die Spaltenzahl der Kartengitter wird an
+   46 Stellen gesetzt, verteilt ueber css/styles.css,
+   css/city-league.css, css/meta-card-analysis.css, css/ui-components.css,
+   diese Datei und zwei Inline-Bloecke in index.html. Fuer das Gitter der
+   Deck-Analyse gewann davon `repeat(3, 1fr) !important` — drei Spalten,
+   egal wie breit das Geraet ist.
+
+   Drei Spalten heissen auf 390 px: 94 px je Kachel. Darin stehen ein
+   Kartenbild, vier Textzeilen und sechs Knoepfe. Alles, was Block 5
+   abgeraeumt hat — 7-px-Schrift, 15-px-Knoepfe, ein abgeschnittener
+   Preis — war die Folge dieser einen Zahl.
+
+   Hier steht sie jetzt, einmal, als Mindestbreite statt als Anzahl:
+   die Kachel bestimmt, wie viele hineinpassen, nicht umgekehrt. 150 px
+   ist die Breite, ab der die Knopfzeile ohne Umbruch auskommt.
+
+   Die Regel steht am Dateiende, weil css/mobile-responsive.css als
+   letztes Stylesheet geladen wird — sie braucht deshalb kein
+   !important, um die frueheren Boeden zu schlagen. Genau dafuer wurden
+   die fuenf !important in css/styles.css gestrichen.
+
+   Nebenwirkung, die man mitnehmen muss: der Preisumbruch aus Block 5
+   faellt weg. Auf 143 px passt der Betrag neben L und P, und die
+   Kachel wird wieder 30 px flacher.
+   ══════════════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+    .card-grid.deck-grid-skeleton-grid,
+    .deck-grid-skeleton-grid {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: var(--s-2);
+    }
 }

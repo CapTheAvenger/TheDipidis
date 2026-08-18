@@ -2969,7 +2969,7 @@
 
             /* Karten-Grid optimieren */
             .card-grid {
-                grid-template-columns: repeat(auto-fill, minmax(50px, 1fr)) !important;
+                grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
                 gap: 5px;
             }
 
@@ -3214,7 +3214,7 @@
             /* Grid-Layouts optimiert */
             .card-grid,
             .compact-card-grid {
-                grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)) !important;
+                grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
                 gap: 4px;
             }
 
@@ -3312,7 +3312,7 @@
             /* Grids noch enger */
             .card-grid,
             .compact-card-grid {
-                grid-template-columns: repeat(auto-fill, minmax(60px, 1fr)) !important;
+                grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
                 gap: 6px;
             }
 
@@ -3366,7 +3366,7 @@
 
             .card-grid,
             .compact-card-grid {
-                grid-template-columns: repeat(auto-fill, minmax(60px, 1fr)) !important;
+                grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
             }
 
             /* Tabellen kompakter in landscape */
@@ -4376,7 +4376,7 @@ h3:first-child {
     /* Karten-Grids auf dem Handy: 3 bis 4 Karten nebeneinander statt riesiger Listen */
     .deck-grid, .card-grid, #archetypeDetails {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(85px, 1fr)) !important;
+        grid-template-columns: repeat(auto-fill, minmax(85px, 1fr));
         gap: 8px !important;
         padding: 5px;
     }

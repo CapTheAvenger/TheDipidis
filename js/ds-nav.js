@@ -323,6 +323,15 @@
             if (e.target.closest('.profile-tab-btn')) setTimeout(function () { syncActive(current); }, 0);
         }, true);
 
+        // Auf document, nicht auf window: js/i18n.js:3943 verschickt
+        // `new CustomEvent('languageChanged', ...)` ohne `bubbles`, also
+        // steigt das Ereignis nicht bis window auf. Der window-Listener,
+        // der hier bis zum 18.08.2026 stand, hat nie ausgeloest — die
+        // Leiste blieb nach jedem Sprachwechsel auf der alten Sprache
+        // stehen, waehrend der Rest der Seite umschaltete. Beide bleiben
+        // registriert, falls jemand spaeter auf window verschickt;
+        // refresh() ist idempotent.
+        document.addEventListener('languageChanged', function () { window.DsNav.refresh(); });
         window.addEventListener('languageChanged', function () { window.DsNav.refresh(); });
 
         var active = document.querySelector('.tab-content.active');

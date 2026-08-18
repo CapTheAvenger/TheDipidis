@@ -200,6 +200,7 @@
                lief unter jeder Tabelle durch und arbeitete gegen genau die
                Zahlen, für die die Seite da ist. */
             background-color: var(--surface-0);
+            color: var(--text-dark);
             min-height: 100vh;
             min-height: -webkit-fill-available;
             padding: 20px;
@@ -937,9 +938,16 @@
         
         /* Card Search Input - see .cards-section .card-search-input below */
         
+        /* Weisse Schrift auf hellgrauem Body: gemessen 1,12:1. Der
+         * Text war praktisch unsichtbar - und es ist ausgerechnet der
+         * Satz "Letzte Aktualisierung: <Datum>", also die einzige
+         * Stelle, an der steht, wie frisch die Zahlen der ganzen Seite
+         * sind. Jetzt aus den Tokens, damit hell und dunkel beide
+         * stimmen, und nicht kleiner als 13 px. */
         .footer {
             text-align: center;
-            color: white;
+            color: var(--ink-2);
+            font-size: 13px;
             padding: 20px;
             margin-top: 30px;
         }
@@ -3205,10 +3213,13 @@
                 font-size: 0.95em;
             }
 
-            /* Footer */
+            /* Footer — font-size bleibt bei den 13px aus der
+               Grundregel. 0.9em stand hier vorher und rechnete sich
+               gegen die Elternschrift auf gemessene 10,8px herunter.
+               Es ist das Datum der letzten Aktualisierung; das ist
+               keine Fussnote. */
             .footer {
                 padding: 15px;
-                font-size: 0.9em;
             }
 
             /* Grid-Layouts optimiert */

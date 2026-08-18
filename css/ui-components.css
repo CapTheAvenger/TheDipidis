@@ -3746,6 +3746,32 @@ img[src*="limitlesstcg"] {
     min-height: 28px;
     margin-bottom: 10px;
 }
+/* Die gewaehlten Kombo-Karten. Vorher stand das als Stil-Zeichenkette
+ * in draw-simulator.js; hier ist es aenderbar, ohne ein Skript
+ * anzufassen, und der Fokusrahmen kommt gratis dazu. */
+.draw-sim-combo-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 10px;
+    border: none;
+    border-radius: 12px;
+    background: #2ecc71;
+    color: #000;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1.6;
+    min-height: 24px;
+    cursor: pointer;
+}
+.draw-sim-combo-badge:hover {
+    background: #27ae60;
+}
+.draw-sim-combo-badge:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 2px;
+}
+
 .draw-sim-combo-actions {
     display: flex;
     gap: 10px;

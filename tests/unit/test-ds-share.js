@@ -177,6 +177,16 @@ describe('ds-share: verdrahtet', () => {
             'ds-share.js steht vor app-archetype-card.js');
     });
 
+    it('DsNav hoert den Sprachwechsel auf document ab', () => {
+        // js/i18n.js verschickt `new CustomEvent('languageChanged')` auf
+        // document und OHNE bubbles — ein Listener auf window loest nie
+        // aus. Genau so stand es hier bis zum 18.08.2026: die Leiste
+        // blieb nach jedem Sprachwechsel auf der alten Sprache stehen,
+        // waehrend der Rest der Seite umschaltete.
+        assert.match(NAV, /document\.addEventListener\('languageChanged'/,
+            'js/ds-nav.js hoert wieder nur auf window — dort kommt das Ereignis nie an.');
+    });
+
     it('DsNav gibt die Fakten für den Bildfuß heraus', () => {
         assert.match(NAV, /getFacts: function \(space\)/);
         assert.match(NAV, /spaceForTab: function \(tabId\)/);

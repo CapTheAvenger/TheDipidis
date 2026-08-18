@@ -299,3 +299,48 @@
     color: var(--ink-2);
 }
 .meta-hub-answer-line strong { color: var(--ink); }
+
+/* ── Nachgeladene Anleitung: Warten und Scheitern ──────────────────
+ *
+ * Die Anleitung steht seit dem 18.08.2026 nicht mehr in index.html,
+ * sondern wird von js/ds-tutorial.js geholt. Damit gibt es zwei
+ * Zustaende, die es vorher nicht gab, und beide brauchen eine Form:
+ * "wird geladen" und "ging nicht".
+ *
+ * Der Fehlerzustand ist bewusst kein roter Kasten. Ein fehlgeschlagener
+ * Abruf ist kein Defekt der Seite, sondern meistens eine schlechte
+ * Verbindung — und im Audit haben alle drei Personas roten Rahmen als
+ * "die Seite ist kaputt" gelesen. Er nennt den Grund und bietet zwei
+ * Wege an: noch einmal, oder direkt auf die Datei.
+ */
+.ds-tutorial-status {
+    padding: var(--s-8) var(--s-4);
+    text-align: center;
+    font-size: var(--fs-md);
+    color: var(--ink-3);
+}
+.ds-tutorial-error {
+    max-width: 56ch;
+    margin: var(--s-8) auto;
+    padding: var(--s-6) var(--s-4);
+    text-align: center;
+    background: var(--surface-2);
+    border: 1px dashed var(--line-strong);
+    border-radius: var(--r-lg);
+    color: var(--ink-2);
+}
+.ds-tutorial-error p { margin: 0 0 var(--s-3); }
+.ds-tutorial-error p:last-child { margin-bottom: 0; }
+.ds-tutorial-retry {
+    min-height: 40px;
+    padding: 0 var(--s-4);
+    border: 1px solid var(--brand);
+    border-radius: var(--r-sm);
+    background: var(--surface-1);
+    color: var(--brand-ink);
+    font: inherit;
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    cursor: pointer;
+}
+.ds-tutorial-retry:hover { background: var(--brand); color: var(--surface-1); }

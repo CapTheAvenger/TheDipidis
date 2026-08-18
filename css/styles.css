@@ -8509,9 +8509,19 @@ body.battle-journal-open {
 /* ============================================================ */
 /* LANGUAGE-CONDITIONAL BLOCKS (Tutorial / prose content)        */
 /* ============================================================ */
-html[lang="de"] .lang-en { display: none !important; }
-html[lang="en"] .lang-de { display: none !important; }
-html:not([lang="de"]):not([lang="en"]) .lang-de { display: none !important; }
+/* Die beiden Marketing-Fassungen der Anleitung lagen bis zum 18.08.2026
+ * gleichzeitig im DOM, und diese drei Regeln haben eine davon versteckt.
+ * Seit js/ds-tutorial.js genau eine Fassung nachlaedt, ist nie mehr als
+ * eine da — die Regeln haben nichts mehr zu verstecken.
+ *
+ * Sie bleiben trotzdem stehen, ohne !important: die Klassen koennen in
+ * den nachgeladenen Fragmenten weiter auftauchen, und wenn dort einmal
+ * beide Sprachen in einer Datei landen, greift die Regel wieder. Ein
+ * !important brauchte sie nie — es gibt keine konkurrierende
+ * display-Regel auf .lang-en/.lang-de. */
+html[lang="de"] .lang-en { display: none; }
+html[lang="en"] .lang-de { display: none; }
+html:not([lang="de"]):not([lang="en"]) .lang-de { display: none; }
 
 /* ==========================================
    DECK ACTION BUTTONS – Text-Labels

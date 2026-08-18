@@ -243,8 +243,29 @@ describe('against the real file', () => {
         const byPerf = decks
             .filter(d => d.brought >= compute.CONV_MIN_N)
             .sort((a, b) => b.perfPct - a.perfPct);
-        assert.ok(!byPerf[0].thin && byPerf[0].brought >= CONV_THIN,
-            `smoothed leader ${byPerf[0].name} rests on n=${byPerf[0].brought}`);
+        // Was hier NICHT mehr behauptet wird: dass der geglaettete
+        // Spitzenreiter n >= CONV_THIN (50) hat. Diese Zusicherung gibt der
+        // Code nirgends. computeConversionPerformance legt bewusst gar keinen
+        // Boden an, und die Aufrufer filtern auf CONV_MIN_N (20) — ein Deck
+        // zwischen 20 und 50 darf die Liste also voellig regelkonform anfuehren.
+        // Die Zeile war eine Aussage ueber die DATEN dieser Woche, und der
+        // Kommentar oben warnt selbst davor ("The property, not a threshold").
+        // Sie ist dreimal an neue Daten angepasst worden und am 18.08.2026
+        // wieder rot geworden: Arboliva Ogerpon fuehrt mit n = 35 bei +101 %.
+        // Da deploy-pages.yml:56 den Deploy bei jedem roten Unit-Test abbricht,
+        // hat sie die Auslieferung 21 Stunden lang blockiert — fuer einen
+        // Defekt, den es nicht gab.
+        //
+        // Geprueft wird stattdessen der Vertrag, den der Code tatsaechlich
+        // einhaelt: der Spitzenreiter liegt ueber dem Boden, den die Aufrufer
+        // anlegen, und sein thin-Flag stimmt. Das Flag ist die Zusicherung, auf
+        // die sich die Oberflaeche verlaesst (ausgegraut, ohne Farbe) — es zu
+        // pruefen faengt einen echten Regressionsfall, waehrend die alte Zeile
+        // nur meldete, wie das Feld gerade aussieht.
+        assert.ok(byPerf[0].brought >= compute.CONV_MIN_N,
+            `smoothed leader ${byPerf[0].name} sits below the caller floor at n=${byPerf[0].brought}`);
+        assert.equal(byPerf[0].thin, byPerf[0].brought < CONV_THIN,
+            `thin flag disagrees with n for the smoothed leader ${byPerf[0].name} (n=${byPerf[0].brought})`);
         // -1 means the raw leader did not survive the floor at all — the
         // strongest possible outcome, not a failure. Anything else has to sit
         // well down the list.

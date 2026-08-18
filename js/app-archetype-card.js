@@ -288,10 +288,23 @@
         const close = v === 'overlay'
             ? `<button type="button" class="arc-close"
                        aria-label="${esc(L('arc.close', de ? 'Schließen' : 'Close'))}">×</button>` : '';
+        // Der Bildexport gehoert an den Kopf, nicht in eine Aktionsleiste
+        // am Fuss: in der eingebetteten Variante gibt es keine Leiste, und
+        // genau dort — in der Deck-Analyse — will man das Bild.
+        const shareBtn = `<button type="button" class="arc-share" data-deck="${esc(name)}"
+                    title="${esc(L('arc.shareImageTip', de
+                        ? 'Analyse als Bild speichern oder teilen (1200 × 675)'
+                        : 'Save or share this analysis as an image (1200 × 675)'))}"
+                    aria-label="${esc(L('arc.shareImageTip', de
+                        ? 'Analyse als Bild speichern oder teilen'
+                        : 'Save or share this analysis as an image'))}">
+                    <span aria-hidden="true">▧</span> ${esc(L('arc.shareImage', de ? 'Bild' : 'Image'))}
+                </button>`;
         const head = `
             <div class="arc-head">
                 <span class="arc-name">${esc(name)}</span>
                 <span class="arc-icons">${icons}</span>
+                ${shareBtn}
             </div>`;
         if (v === 'embed') {
             return `${head}${tilesHtml(name)}`;
@@ -342,6 +355,14 @@
     // the full analysis — the whole card is the click target, exactly as
     // the compact banner card was.
     document.addEventListener('click', (e) => {
+        const share = e.target.closest && e.target.closest('.arc-share');
+        if (share) {
+            e.stopPropagation();
+            e.preventDefault();
+            const deck = share.getAttribute('data-deck');
+            if (deck && window.DsShare) window.DsShare.shareDeckCard(deck);
+            return;
+        }
         const more = e.target.closest && e.target.closest('.arc-mu-more');
         if (more) {
             e.stopPropagation();
@@ -420,6 +441,39 @@
         }
     });
 
+    // Die Zahlen hinter den drei Kacheln, ohne HTML drumherum.
+    // js/ds-share.js malt daraus die teilbare Bildkarte; ohne diesen
+    // Zugang müsste es beide CSVs ein zweites Mal lesen und die
+    // Glättung nachbauen — zwei Quellen für dieselbe Zahl, und die
+    // Bildkarte würde irgendwann etwas anderes behaupten als die
+    // Kachel daneben.
+    function factsFor(name) {
+        const d = _decks ? (_decks[findKey(_decks, name)] || null) : null;
+        const c = _conv ? _conv.decks.find(x =>
+            String(x.name).toLowerCase() === String(name).toLowerCase()) : null;
+        return {
+            name,
+            share:   d ? d.share : NaN,
+            winRate: d ? d.winRate : NaN,
+            count:   d ? d.count : NaN,
+            perfPct: c ? c.perfPct : NaN,
+            rawPct:  c ? c.rawPct : NaN,
+            top8:    c ? c.top8 : NaN,
+            brought: c ? c.brought : NaN,
+            thin:    c ? !!c.thin : false,
+            expected:     _conv ? _conv.expected : NaN,
+            totalBrought: _conv ? _conv.totalBrought : NaN,
+            thinGames: THIN_GAMES,
+        };
+    }
+
+    window.getArchetypeFacts = function (name) {
+        return load().then(() => factsFor(name));
+    };
+    window.getArchetypeMatchups = function (name) {
+        return load().then(() => matchupsFor(name));
+    };
+
     window.openArchetypeCard = open;
     window.closeArchetypeCard = close;
     window.renderInlineArchetypeCards = fillInline;
@@ -429,7 +483,7 @@
     };
     // Exposed for tests; not part of the page's own API surface.
     window._archetypeCardInternals = {
-        matchupsFor, parseSemicolonCsv, findKey, THIN_GAMES,
+        matchupsFor, parseSemicolonCsv, findKey, THIN_GAMES, factsFor,
         setData: (decks, conv) => { _decks = decks; _conv = conv; },
         cardHtml, tilesHtml, matchupTableHtml, render, toneFor, shadeFor,
     };

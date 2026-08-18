@@ -1273,6 +1273,14 @@
                         <button type="button" class="bj-tournament-edit-btn" onclick="openEditTournamentModal('${safeTournKey}')" title="${escapeHtml(battleJournalText('bj.editTournament', 'Edit tournament'))}">Edit</button>
                         <button type="button" class="bj-tournament-share-btn" onclick="shareTournamentSummary('${safeTournKey}', false)" title="${escapeHtml(battleJournalText('bj.shareTournament', 'Share as image'))}">Share</button>
                         <button type="button" class="bj-tournament-share-btn bj-tournament-share-details-btn" onclick="shareTournamentSummary('${safeTournKey}', true)" title="${escapeHtml(battleJournalText('bj.shareTournamentDetails', 'Share with brick + notes'))}">Share+</button>
+                        <!-- Das quadratische Ergebnisbild. shareTournamentSummary()
+                             malt 600 px breit und beliebig hoch — ein Format, das
+                             Instagram beschneidet und das auf keiner Zeitleiste
+                             lesbar bleibt. DsShare malt 1080x1080 mit Deck,
+                             Platzierung und Runde fuer Runde. Beide bleiben:
+                             das schmale Bild ist in einem Chat schneller zu
+                             lesen, das quadratische ist das, was man postet. -->
+                        <button type="button" class="bj-tournament-share-btn bj-tournament-share-card-btn" onclick="shareTournamentCard('${safeTournKey}')" title="${escapeHtml(battleJournalText('bj.shareTournamentCard', 'Post-ready image, 1080x1080'))}">◧ 1:1</button>
                     </div>`;
 
                 entries.forEach(entry => {
@@ -2386,6 +2394,18 @@
     window.clearAllJournalEntries = clearAllJournalEntries;
     window.selectJournalType = selectJournalType;
     window.shareTournamentSummary = shareTournamentSummary;
+
+    // Das quadratische Ergebnisbild lebt in js/ds-share.js — hier steht
+    // nur die Bruecke, damit der Knopf im Turnierkopf einen Namen zum
+    // Rufen hat und ein fehlendes Modul nicht als toter Knopf endet.
+    window.shareTournamentCard = function (tournamentName) {
+        if (!window.DsShare || typeof window.DsShare.shareResultCard !== 'function') {
+            showToast(battleJournalText('bj.shareCardMissing',
+                'Image module not loaded — reload the page.'), 'warning');
+            return;
+        }
+        window.DsShare.shareResultCard(tournamentName);
+    };
     window.toggleMatchupStats = toggleMatchupStats;
     window.openMatchupAnalysisModal = openMatchupAnalysisModal;
     window.closeMatchupAnalysisModal = closeMatchupAnalysisModal;

@@ -145,8 +145,8 @@
 .ds-space[hidden] { display: none; }
 
 .ds-space[data-space="jp"]   { border-left-color: var(--space-jp); }
-.ds-space[data-space="gl"]   { border-left-color: var(--brand); }
-.ds-space[data-space="past"] { border-left-color: var(--ink-3); }
+.ds-space[data-space="gl"]   { border-left-color: var(--space-gl); }
+.ds-space[data-space="past"] { border-left-color: var(--space-past); }
 
 .ds-space-region {
     display: inline-flex;

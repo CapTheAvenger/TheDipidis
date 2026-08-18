@@ -1,0 +1,61 @@
+From a9a7480f03cea23efe571167d531e8d95dfa4912 Mon Sep 17 00:00:00 2001
+From: "Claude (Cowork)" <claude@thedipidis>
+Date: Tue, 18 Aug 2026 08:44:12 +0000
+Subject: [PATCH 4/6] city league: jeder Sprachwechsel warf einen Fehler
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+populateCityLeagueDeckSelect(data, comparisonData) wird vom
+languageChanged-Handler ohne Argumente gerufen. Solange die City
+League Daten hat, faengt window.cityLeagueArchetypesData das ab.
+Waehrend der Saisonpause ist die Liste leer — dann fiel
+
+    const sourceRows = allArchetypesData.length > 0 ? allArchetypesData : data;
+
+auf undefined zurueck und die naechste Zeile warf
+
+    TypeError: Cannot read properties of undefined (reading 'forEach')
+
+Gemessen am 18.08.2026: die City League ist seit dem 31.07. leer,
+also trifft das gerade jeden Nutzer, der die Sprache umschaltet.
+Der Handler bricht an der Stelle ab, alles darunter — die
+Analysetabelle, das Kartengitter — bleibt in der alten Sprache
+stehen.
+
+Gefunden beim Verifizieren des Journal-Bildes, nicht gesucht.
+---
+ js/app-city-league.js | 10 ++++++++--
+ 1 file changed, 8 insertions(+), 2 deletions(-)
+
+diff --git a/js/app-city-league.js b/js/app-city-league.js
+index 4999d3f8..8832f68d 100644
+--- a/js/app-city-league.js
++++ b/js/app-city-league.js
+@@ -1297,7 +1297,13 @@ function cityLeagueOffSeasonHtml() {
+             
+             // Extract unique archetypes with their deck counts (total meta counts)
+             const archetypeMap = new Map();
+-            const sourceRows = allArchetypesData.length > 0 ? allArchetypesData : data;
++            // `data` ist optional: der languageChanged-Handler unten ruft
++            // populateCityLeagueDeckSelect() ohne Argumente. Solange die
++            // City League Daten hat, faengt allArchetypesData das ab —
++            // waehrend der Saisonpause ist die Liste leer, sourceRows wurde
++            // `undefined`, und jeder Sprachwechsel warf eine TypeError in
++            // die Konsole. Gemessen am 18.08.2026, mit leerem JP-Datenraum.
++            const sourceRows = (allArchetypesData.length > 0 ? allArchetypesData : data) || [];
+             sourceRows.forEach(row => {
+                 if (row.archetype && !archetypeMap.has(row.archetype)) {
+                     // Use total meta counts so dropdown always shows full picture.
+@@ -3163,7 +3169,7 @@ function cityLeagueOffSeasonHtml() {
+             const SKELETON_NICHE_MAX = 50; // below this = situational
+             // Titel des Anteilsbands. Steht einmal hier statt in jeder
+             // Kartenzeile — 60 Karten mal derselbe String.
+-            const USAGE_TITLE = (typeof t === 'function' && t('cl.usageShare'))
++            const USAGE_TITLE = (typeof t === 'function' && t('cl.usageBarTitle'))
+                 || (typeof getLang === 'function' && getLang() === 'en'
+                     ? 'of the analysed lists play this card'
+                     : 'der ausgewerteten Listen spielen diese Karte');
+-- 
+2.43.0
+

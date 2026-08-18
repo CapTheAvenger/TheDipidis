@@ -1,0 +1,198 @@
+From 1d906fdc5ceee189edc80911c331208ad7fda99a Mon Sep 17 00:00:00 2001
+From: "Claude (Cowork)" <claude@thedipidis>
+Date: Tue, 18 Aug 2026 08:14:16 +0000
+Subject: [PATCH 1/6] tokens: die drei Datenraum-Farben gab es nie
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+css/ds-nav.css benutzt --space-jp, --space-gl und --space-past seit
+dem 17.08.2026. Definiert war keine der drei. Eine undefinierte
+Variable wirft nichts — sie laesst die Deklaration still ausfallen:
+
+  border-left-color: var(--space-jp)  ->  currentColor
+  color: var(--space-jp)              ->  inherit
+
+Sichtbar war das als zwei Fehler, die man einzeln nicht erkennt:
+der Ausweis ueber Japan und der ueber Past trugen denselben grauen
+Streifen, und der Champions-Knopf verlor im aktiven Zustand seine
+zweite Signalfarbe. Beides sah nach Absicht aus.
+
+Die Farbe ist redundant codiert — daneben stehen immer Flagge und
+Wort. Sie darf deshalb warm sein, ohne in die divergierende Skala
+zu greifen: Bernstein gegen Blau bleibt auf der Blau-Gelb-Achse und
+ist auch bei Rot-Gruen-Schwaeche eindeutig.
+
+Dazu ein Helfer statt einer Kopie: formatFor() und stampFor() lagen
+inline in renderSpace(); DsNav.getFacts() braucht dieselben Werte
+fuer den Fuss der Bildkarte. Zwei Kopien waeren zwei Formate.
+---
+ css/ds-nav.css |  4 +--
+ css/tokens.css | 23 +++++++++++++++++
+ js/ds-nav.js   | 69 +++++++++++++++++++++++++++++++++++++++++---------
+ 3 files changed, 82 insertions(+), 14 deletions(-)
+
+diff --git a/css/ds-nav.css b/css/ds-nav.css
+index 863f7e7d..a15d9110 100644
+--- a/css/ds-nav.css
++++ b/css/ds-nav.css
+@@ -145,8 +145,8 @@
+ .ds-space[hidden] { display: none; }
+ 
+ .ds-space[data-space="jp"]   { border-left-color: var(--space-jp); }
+-.ds-space[data-space="gl"]   { border-left-color: var(--brand); }
+-.ds-space[data-space="past"] { border-left-color: var(--ink-3); }
++.ds-space[data-space="gl"]   { border-left-color: var(--space-gl); }
++.ds-space[data-space="past"] { border-left-color: var(--space-past); }
+ 
+ .ds-space-region {
+     display: inline-flex;
+diff --git a/css/tokens.css b/css/tokens.css
+index ac7113cf..b0448da7 100644
+--- a/css/tokens.css
++++ b/css/tokens.css
+@@ -87,6 +87,25 @@
+     --bar-track: #e9edf4;
+     --bar-fill: linear-gradient(90deg, var(--brand), #7b8bf0);
+ 
++    /* ── Die drei Datenräume ─────────────────────────────────────────
++     * 🇯🇵 City League, 🌐 Global/EN und 📦 Past sind getrennte Welten mit
++     * eigener Rotation, eigenem Feld und eigenem Stand. Der Ausweis über
++     * jeder Ansicht (css/ds-nav.css) trägt die Farbe als Randstreifen.
++     *
++     * css/ds-nav.css hat diese drei Namen ab dem 17.08.2026 benutzt, ohne
++     * dass sie irgendwo standen: `border-left-color: var(--space-jp)` fiel
++     * still auf `currentColor` zurück, `color: var(--space-jp)` auf
++     * `inherit`. Japan und Past sahen dadurch identisch aus — grau —, und
++     * Champions verlor seine zweite Signalfarbe.
++     *
++     * Die Farbe ist redundant: daneben stehen immer Flagge und Wort. Sie
++     * darf deshalb warm sein, ohne in die divergierende Skala zu greifen —
++     * Bernstein gegen Blau bleibt auf der Blau-Gelb-Achse und ist damit
++     * auch bei Rot-Grün-Schwäche eindeutig. */
++    --space-jp: #b45309;
++    --space-gl: var(--brand);
++    --space-past: var(--ink-3);
++
+     /* ── Der Signaturstrich ──────────────────────────────────────────
+      * Zwei Pixel Marke-nach-Gold unter der Kopfzeile ersetzen den alten
+      * 82px hohen roten Verlaufsbanner, der auf jeder Ansicht lag und
+@@ -132,6 +151,10 @@
+     --bar-track: #080c19;
+     --bar-fill: linear-gradient(90deg, var(--brand), #8b98ff);
+ 
++    --space-jp: #f0b429;
++    --space-gl: var(--brand);
++    --space-past: var(--ink-3);
++
+     /* Auf dunklem Grund braucht ein Schatten mehr Tiefe, sonst ist er
+      * unsichtbar; die Innenkante übernimmt die Kantenzeichnung. */
+     --e-1: 0 1px 3px rgba(0, 0, 0, .5);
+diff --git a/js/ds-nav.js b/js/ds-nav.js
+index f54354ff..fe5dd822 100644
+--- a/js/ds-nav.js
++++ b/js/ds-nav.js
+@@ -182,6 +182,32 @@
+         return p.length === 3 ? (p[2] + '.' + p[1] + '.' + p[0]) : '';
+     }
+ 
++    // Das Formatfenster ist die eine Quelle fuer "welches Format gilt hier".
++    // Steht als eigener Helfer da, weil ihn zwei Aufrufer brauchen: die
++    // Ausweiszeile und DsNav.getFacts() fuer die Bildkarte. Zwei Kopien
++    // waeren zwei Formate.
++    function formatFor(key) {
++        var w = fw();
++        if (key === 'jp' && w.current_set_jp) {
++            return { label: w.current_set_jp, since: '' };
++        }
++        if (key === 'gl' && w.current_set) {
++            return {
++                label: (w.oldest_legal_set ? w.oldest_legal_set + '\u2013' : '') + w.current_set,
++                since: w.in_person_legal_date ? fmtDate(w.in_person_legal_date) : ''
++            };
++        }
++        if (key === 'past' && w.previous_format_key) {
++            return { label: w.previous_format_key, since: '' };
++        }
++        return { label: '', since: '' };
++    }
++
++    function stampFor(facts) {
++        return (facts && facts.stamp) ||
++            (typeof localStorage !== 'undefined' ? localStorage.getItem('lastScraperUpdate') : '') || '';
++    }
++
+     function renderSpace(tabId) {
+         var host = document.getElementById('dsSpaceHost');
+         if (!host) return;
+@@ -189,19 +215,15 @@
+         if (!key) { host.innerHTML = ''; host.hidden = true; return; }
+         host.hidden = false;
+ 
+-        var lg = lang(), t = SPACE_TEXT[key][lg], f = F[lg], w = fw();
++        var lg = lang(), t = SPACE_TEXT[key][lg], f = F[lg];
+         var bits = [];
+ 
+         bits.push('<span class="ds-space-region">' + t.region + '</span>');
+ 
+-        if (key === 'jp' && w.current_set_jp) {
+-            bits.push('<span><b>' + f.format + '</b> ' + esc(w.current_set_jp) + '</span>');
+-        } else if (key === 'gl' && w.current_set) {
+-            var since = w.in_person_legal_date ? ' (' + f.since + ' ' + fmtDate(w.in_person_legal_date) + ')' : '';
+-            bits.push('<span><b>' + f.format + '</b> ' +
+-                esc((w.oldest_legal_set ? w.oldest_legal_set + '–' : '') + w.current_set) + esc(since) + '</span>');
+-        } else if (key === 'past' && w.previous_format_key) {
+-            bits.push('<span><b>' + f.format + '</b> ' + esc(w.previous_format_key) + '</span>');
++        var fmt = formatFor(key);
++        if (fmt.label) {
++            bits.push('<span><b>' + f.format + '</b> ' + esc(fmt.label) +
++                (fmt.since ? esc(' (' + f.since + ' ' + fmt.since + ')') : '') + '</span>');
+         }
+ 
+         bits.push('<span><b>' + f.source + '</b> ' + esc(t.source) + '</span>');
+@@ -216,8 +238,7 @@
+         if (facts.window) {
+             bits.push('<span><b>' + f.window + '</b> ' + esc(facts.window) + '</span>');
+         }
+-        var stamp = facts.stamp ||
+-            (typeof localStorage !== 'undefined' ? localStorage.getItem('lastScraperUpdate') : '') || '';
++        var stamp = stampFor(facts);
+         if (stamp) bits.push('<span><b>' + f.stamp + '</b> ' + esc(stamp) + '</span>');
+         if (facts.pause) bits.push('<span class="ds-space-pause">' + esc(f.pause) + '</span>');
+ 
+@@ -254,7 +275,31 @@
+             host._facts[key] = Object.assign({}, host._facts[key] || {}, facts || {});
+             renderSpace(current);
+         },
+-        refresh: function () { render(); onTab(current); }
++        refresh: function () { render(); onTab(current); },
++
++        // Was der Ausweis über einem Datenraum gerade weiss — Region,
++        // Quelle, Format, Stichprobe, Stand. js/ds-share.js schreibt das
++        // in den Fuss der Bildkarte: das Bild verlaesst die Seite, und
++        // ohne diese Zeile waere nicht mehr erkennbar, aus welchem der
++        // drei Raeume die Zahlen stammen.
++        getFacts: function (space) {
++            var key = space || SPACES[current];
++            if (!key || !SPACE_TEXT[key]) return null;
++            var host = document.getElementById('dsSpaceHost');
++            var live = (host && host._facts && host._facts[key]) || {};
++            var txt = SPACE_TEXT[key][lang()];
++            return {
++                space:  key,
++                region: txt.region,
++                source: live.source || txt.source,
++                format: live.format || formatFor(key).label,
++                sample: live.sample || '',
++                window: live.window || '',
++                stamp:  stampFor(live),
++                pause:  !!live.pause
++            };
++        },
++        spaceForTab: function (tabId) { return SPACES[tabId] || null; }
+     };
+ 
+     function boot() {
+-- 
+2.43.0
+

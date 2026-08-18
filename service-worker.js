@@ -143,6 +143,7 @@ const SHELL_ASSETS = [
   './js/current-meta-quickref.js',
   './js/ds-nav.js',
   './js/ds-sections.js',
+  './js/ds-filter.js',
   './js/ds-share.js',
   './js/ds-tutorial.js',
   './images/pokeball-icon.png',

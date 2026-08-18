@@ -136,6 +136,7 @@
          darf sich auf die Variablen verlassen. -->
     <link rel="stylesheet" href="css/tokens.css?v=202608180619" type="text/css">
     <link rel="stylesheet" href="css/components.css?v=202608180619" type="text/css">
+    <link rel="stylesheet" href="css/ds-nav.css?v=0">
     <link rel="stylesheet" href="css/styles.css?v=202608180619" type="text/css">
     <link rel="stylesheet" href="css/ui-components.css?v=202608180619" type="text/css">
     <link rel="stylesheet" href="css/pokeball-menu.css?v=202608180619" type="text/css">
@@ -632,16 +633,13 @@
         </header>
 
         <main class="tabs-container">
-            <nav class="tab-navigation cards-tab-navigation" aria-label="Main navigation">
-                <button class="tab-btn active" onclick="switchTab('meta-analysis-hub')" data-i18n="tab.metaAnalysis">Meta &amp; Deck Analysis</button>
-                <button class="tab-btn" onclick="switchTab('cards')" data-i18n="tab.cards">Cards</button>
-                <button class="tab-btn" onclick="switchTab('proxy')" data-i18n="tab.proxyPrinter">Proxy Printer</button>
-                <button class="tab-btn" onclick="switchTab('profile')" data-i18n="tab.profile">
-                    <img loading="lazy" src="images/pokeball-icon.png" alt="Profile" class="tab-btn-icon">
-                    Profile
-                </button>
-                <button class="tab-btn" onclick="switchTab('tutorial')" data-i18n="tab.howToUse">How to Use</button>
-            </nav>
+            <!-- Hauptnavigation. Ersetzt die frühere .tab-navigation, die
+                 css/pokeball-menu.css mit `display: none !important` global
+                 abgeschaltet hatte — fünf Knöpfe Markup, auf Desktop und Mobil
+                 unsichtbar. Befüllt von js/ds-nav.js; ohne JS bleibt der
+                 Pokéball die Navigation, wie bisher. -->
+            <nav id="dsNavHost" class="ds-nav" aria-label="Hauptnavigation"></nav>
+            <div id="dsSpaceHost" class="ds-space" hidden></div>
             
             <!-- Meta & Deck Analysis Hub: Entry State (5 category tiles) -->
             <div id="meta-analysis-hub" class="tab-content active">
@@ -8399,6 +8397,10 @@
                 </div>
             </div>
         </main>
+
+        <!-- Mobile Hauptnavigation: unten, wo der Daumen liegt. Auf Desktop
+             per CSS ausgeblendet, befüllt von js/ds-nav.js. -->
+        <nav id="dsTabbarHost" class="ds-tabbar" aria-label="Hauptnavigation (mobil)"></nav>
         
         <footer class="footer">
             <p><span data-i18n="footer.lastUpdate">Last Update:</span> <span id="last-update">Loading...</span></p>
@@ -9172,6 +9174,7 @@
     <script src="js/app-profile-deck-builder.js?v=202608180619" defer></script>
     <script src="js/deck-builder-consistency.js?v=202608180619" defer></script>
     <script src="js/current-meta-quickref.js?v=202608180619" defer></script>
+    <script src="js/ds-nav.js?v=0" defer></script>
 
     <!-- Draw Simulator Modal -->
     <div id="drawSimulatorModal" onclick="if(event.target===this)closeDrawSimulator()" role="dialog" aria-modal="true" aria-label="Starting hand simulator">

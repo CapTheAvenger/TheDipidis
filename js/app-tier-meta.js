@@ -1499,6 +1499,18 @@
                         : ''}
                 </div>`;
 
+            // Die Basis, auf der JEDE Quote dieser Ansicht beruht, wandert in
+            // den Datenraum-Ausweis über dem Tab. Vorher standen hier vier
+            // Feldgrößen nebeneinander (22.699 / 23.613 / 7.456 / 14.026) und
+            // keine davon sagte, welche der Nenner ist.
+            if (window.DsNav && fieldConv && fieldConv.totalBrought > 0) {
+                window.DsNav.setSpaceFacts({
+                    sample: deDS
+                        ? `${fmtNumDS(fieldConv.totalBrought)} gewichtete Antritte · ${totalEntries.toLocaleString('de-DE')} Decks`
+                        : `${fmtNumDS(fieldConv.totalBrought)} weighted entries · ${totalEntries.toLocaleString('en-US')} decks`
+                }, 'gl');
+            }
+
             let html = heroHtml + dataSourceHtml + filterHtml + overallTop8Html + moversHtml + '<div style="margin-bottom: 30px;">';
 
             // Render each tier

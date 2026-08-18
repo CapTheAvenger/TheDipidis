@@ -165,8 +165,11 @@ body {
     line-height: 1.4;
 }
 
-/* Hide old navigation bar */
-.tab-navigation { display: none !important; }
+/* Die alte .tab-navigation ist ersatzlos entfernt (index.html), zusammen
+ * mit dieser Regel: sie hat fünf Navigationsknöpfe auf Desktop UND Mobil
+ * unsichtbar gemacht, sodass der Pokéball die einzige Navigation der Seite
+ * war. Die Nachfolgerin steht in css/ds-nav.css und braucht kein
+ * !important, weil sie nicht gegen eine ältere Regel anschreibt. */
 
 @media (max-width: 768px) {
     .pokeball-btn { width: 45px; height: 45px; }

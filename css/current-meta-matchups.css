@@ -496,8 +496,15 @@
     color: #64748b;
 }
 
-/* Matchup deck section cards */
-#currentMetaContent > .section > div > div[style*="background: #f8f9fa"] {
+/* Matchup deck section cards.
+ *
+ * Stand bis zum 18.08.2026 auf `#currentMetaContent > .section`, also
+ * auf der direkten Kindbeziehung. Seit die zwoelf Bloecke von
+ * js/ds-sections.js in klappbare Abschnitte gefasst werden, ist
+ * `.section` ein Enkel und keine Kind mehr — die Regel hatte damit
+ * keinen Treffer mehr. Nachkomme statt Kind: dieselbe Wirkung, aber
+ * unabhaengig davon, wie tief der Block haengt. */
+#currentMetaContent .section > div > div[style*="background: #f8f9fa"] {
     border-radius: 10px;
     border: 1px solid #e8eaf0;
     box-shadow: 0 2px 8px rgba(0,0,0,0.06);

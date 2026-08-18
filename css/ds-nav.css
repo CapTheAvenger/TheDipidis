@@ -230,3 +230,23 @@
     .header-icon-label { display: none; }
     .header-icon-btn { min-width: 44px; min-height: 44px; }
 }
+
+/* Auf schmalen Geraeten sagen Ausweis und Filterzeile dasselbe zweimal.
+ *
+ * Seit js/ds-filter.js stehen Datenraum und Format eine Zeile tiefer als
+ * Bedienelement. Gemessen auf 390 px: der Ausweis geht von 102 auf 81 px
+ * zurueck. Der Platzgewinn ist klein; der eigentliche Grund ist, dass
+ * zweimal "Global" und zweimal "TEF–PBL" direkt untereinander sich wie
+ * ein Fehler liest.
+ *
+ * Der Ausweis behaelt, was der Filter NICHT zeigt und was die Zahlen
+ * belastbar macht: Quelle, Stichprobe, Stand und den Satz, dass die drei
+ * Datenraeume nie miteinander verrechnet werden. Auf dem Schreibtisch
+ * ist Platz genug, dort bleibt beides stehen. */
+@media (max-width: 768px) {
+    .ds-space-region,
+    .ds-space-format { display: none; }
+    /* Der erste Trenner haengt sonst am Anfang in der Luft. */
+    .ds-space-format + .ds-space-sep,
+    .ds-space-region + .ds-space-sep { display: none; }
+}

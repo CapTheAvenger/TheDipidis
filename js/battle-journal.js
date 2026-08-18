@@ -566,7 +566,7 @@
 
         if (els.fabBadge) {
             els.fabBadge.textContent = String(pendingCount);
-            els.fabBadge.classList.toggle('display-none', pendingCount === 0);
+            els.fabBadge.classList.toggle('d-none', pendingCount === 0);
         }
 
         if (!els.pendingList) return;

@@ -177,9 +177,9 @@ if (typeof window !== 'undefined') {
 function onUserSignedIn(user) {
   const authPrompt     = document.getElementById('profile-auth-prompt');
   const profileContent = document.getElementById('profile-content');
-  // Use classList so the change wins against `display: none !important` from the .display-none utility class
-  if (authPrompt)     { authPrompt.classList.add('display-none');    authPrompt.classList.remove('display-block'); }
-  if (profileContent) { profileContent.classList.remove('display-none'); profileContent.classList.add('display-block'); }
+  // Use classList so the change wins against `display: none !important` from the .d-none utility class
+  if (authPrompt)     { authPrompt.classList.add('d-none');    authPrompt.classList.remove('display-block'); }
+  if (profileContent) { profileContent.classList.remove('d-none'); profileContent.classList.add('display-block'); }
 
   // Show name/email immediately from Auth (no Firestore round-trip needed)
   const nameEl = document.getElementById('profile-user-name');
@@ -218,8 +218,8 @@ function onUserSignedOut() {
   const authPrompt     = document.getElementById('profile-auth-prompt');
   const profileContent = document.getElementById('profile-content');
   // Use classList to match the initial HTML state and respect !important CSS rules
-  if (authPrompt)     { authPrompt.classList.remove('display-none');  authPrompt.classList.add('display-block'); }
-  if (profileContent) { profileContent.classList.add('display-none');    profileContent.classList.remove('display-block'); }
+  if (authPrompt)     { authPrompt.classList.remove('d-none');  authPrompt.classList.add('display-block'); }
+  if (profileContent) { profileContent.classList.add('d-none');    profileContent.classList.remove('display-block'); }
 
   // Toggle header auth UI: show sign-in button, hide user-info bar
   const signinBtn = document.getElementById('signin-btn');

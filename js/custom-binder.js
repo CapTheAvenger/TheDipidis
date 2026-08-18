@@ -116,10 +116,10 @@
         if (!bar) return;
         if (cbPresets.length === 0) {
             bar.innerHTML = '';
-            bar.classList.add('display-none');
+            bar.classList.add('d-none');
             return;
         }
-        bar.classList.remove('display-none');
+        bar.classList.remove('d-none');
         bar.innerHTML = cbPresets.map(p => {
             const safeName = escapeHtml(p.name);
             const safeId = escapeHtml(p.id);
@@ -274,10 +274,10 @@
         const dd = document.getElementById('cbArchetypeDropdown');
         if (!dd) return;
 
-        if (dd.classList.contains('display-none')) {
+        if (dd.classList.contains('d-none')) {
             cbOpenDropdown();
         } else {
-            dd.classList.add('display-none');
+            dd.classList.add('d-none');
         }
     }
 
@@ -285,7 +285,7 @@
         const dd = document.getElementById('cbArchetypeDropdown');
         if (!dd) return;
 
-        dd.classList.remove('display-none');
+        dd.classList.remove('d-none');
         dd.innerHTML = `<div class="custom-binder-dropdown-loading">${cbText('cb.loadingArchetypes','Loading archetypes…')}</div>`;
 
         await cbEnsureArchetypeList();
@@ -352,7 +352,7 @@
 
     function cbRenderDropdownList() {
         const dd = document.getElementById('cbArchetypeDropdown');
-        if (!dd || dd.classList.contains('display-none')) return;
+        if (!dd || dd.classList.contains('d-none')) return;
 
         const searchEl = document.getElementById('cbArchetypeSearch');
         const query = String(searchEl ? searchEl.value : '').trim().toLowerCase();
@@ -540,8 +540,8 @@
             return;
         }
         const dd = document.getElementById('cbArchetypeDropdown');
-        if (dd && dd.classList.contains('display-none')) {
-            dd.classList.remove('display-none');
+        if (dd && dd.classList.contains('d-none')) {
+            dd.classList.remove('d-none');
         }
         cbRenderDropdownList();
     }
@@ -550,9 +550,9 @@
     document.addEventListener('click', function (e) {
         if (_cbSkipNextClose) { _cbSkipNextClose = false; return; }
         const dd = document.getElementById('cbArchetypeDropdown');
-        if (!dd || dd.classList.contains('display-none')) return;
+        if (!dd || dd.classList.contains('d-none')) return;
         const picker = e.target.closest('.custom-binder-picker');
-        if (!picker) dd.classList.add('display-none');
+        if (!picker) dd.classList.add('d-none');
     });
 
     // ── Build Custom Binder ──
@@ -694,7 +694,7 @@
 
         // Stats (mode-dependent: ownership vs print status)
         if (statsEl) {
-            statsEl.classList.remove('display-none');
+            statsEl.classList.remove('d-none');
             if (cbMode === 'print') {
                 cbRenderPrintStats();
             } else {
@@ -763,10 +763,10 @@
                             </details>
                         </div>`;
                 }).join('');
-                deltaEl.classList.remove('display-none');
+                deltaEl.classList.remove('d-none');
                 deltaEl.innerHTML = `<div class="meta-binder-archetype-groups">${html}</div>`;
             } else {
-                deltaEl.classList.add('display-none');
+                deltaEl.classList.add('d-none');
                 deltaEl.innerHTML = '';
             }
         }
@@ -793,7 +793,7 @@
                     <button class="meta-binder-filter-btn" data-filter="new" onclick="cbSetFilter('new')">🆕 ${cbText('cb.filterNew','New')} (${newCount})</button>
                 </div>`;
         if (filtersEl) {
-            filtersEl.classList.remove('display-none');
+            filtersEl.classList.remove('d-none');
             filtersEl.innerHTML = `${chipRow}
                 <div class="filter-group">
                     <select id="cbFilterType" onchange="cbApplyFilter()" class="select-system">
@@ -1295,7 +1295,7 @@
         const isPrint = cbMode === 'print';
         const toggleEl = (id, show) => {
             const el = document.getElementById(id);
-            if (el) el.classList.toggle('display-none', !show);
+            if (el) el.classList.toggle('d-none', !show);
         };
         toggleEl('cbAddWishlist', !isPrint);
         toggleEl('cbSendProxy', !isPrint);

@@ -155,11 +155,11 @@ def run():
             if (prof) prof.classList.add('active');
             // Activate journal sub-tab
             document.querySelectorAll('.profile-tab-content').forEach(t => {
-                t.classList.add('display-none');
+                t.classList.add('d-none');
                 t.classList.remove('active');
             });
             const jTab = document.getElementById('profile-journal');
-            if (jTab) { jTab.classList.remove('display-none'); jTab.classList.add('active'); }
+            if (jTab) { jTab.classList.remove('d-none'); jTab.classList.add('active'); }
             // Render history from cache
             if (typeof window.renderJournalHistory === 'function') {
                 window.renderJournalHistory();

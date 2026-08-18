@@ -546,7 +546,7 @@
                             <path d="M8 7h7M8 11h7"></path>
                         </svg>
                         <span class="header-icon-label" data-i18n="bj.openShort">Journal</span>
-                        <span id="battleJournalFabBadge" class="header-icon-badge display-none">0</span>
+                        <span id="battleJournalFabBadge" class="header-icon-badge d-none">0</span>
                     </button>
                     <button class="header-icon-btn header-mydecks-btn" onclick="openProfileSection('decks')" title="My Decks" aria-label="My Decks" data-i18n-title="header.myDecks" data-i18n-aria="header.myDecks">
                         <svg class="header-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
@@ -1171,7 +1171,7 @@
                     </div>
 
                     <!-- Best/Worst Matchups Section -->
-                    <div id="currentMetaMatchupsSection" class="display-none mb-40 bg-light px-30 br-8 cm-deep-dive-only">
+                    <div id="currentMetaMatchupsSection" class="d-none mb-40 bg-light px-30 br-8 cm-deep-dive-only">
                         <h3 id="currentMetaMatchupsTitle" class="current-meta-matchups-title" data-i18n="matchup.title">Deck Matchups</h3>
                         <div class="current-meta-matchups-grid-container">
                             <div>
@@ -1374,7 +1374,7 @@
                       Populated by renderMatchupsVsMetaCall() in
                       app-current-meta-analysis.js.
                     -->
-                    <div id="currentMetaVsMetaCallSection" class="display-none mb-40 bg-light px-30 br-8 mc-vs-section cm-deep-dive-only">
+                    <div id="currentMetaVsMetaCallSection" class="d-none mb-40 bg-light px-30 br-8 mc-vs-section cm-deep-dive-only">
                         <h3 id="currentMetaVsMetaCallTitle" class="mc-vs-title">
                             <span data-i18n="matchup.vsMetaCallTitle">Matchups vs Meta Call (Predicted Field)</span>
                         </h3>
@@ -1416,7 +1416,7 @@
                       the user's WR up; missing core slots push it
                       down. Populated by renderUserVsVanillaPanel().
                     -->
-                    <div id="currentMetaUserVsVanillaSection" class="display-none mb-40 bg-light px-30 br-8 mc-vs-section cm-deep-dive-only">
+                    <div id="currentMetaUserVsVanillaSection" class="d-none mb-40 bg-light px-30 br-8 mc-vs-section cm-deep-dive-only">
                         <h3 class="mc-vs-title">
                             <span data-i18n="matchup.userVsVanillaTitle">Your Build vs Vanilla (Meta-Call-weighted)</span>
                         </h3>
@@ -1663,7 +1663,7 @@
 
                             <div id="techLabStartHint" class="tech-lab-empty tech-lab-start-hint" data-i18n="techLab.startHint">Pick a target card above to see what counters it AND what it counters.</div>
 
-                            <div id="techLabResultsWrap" class="tech-lab-results-wrap display-none">
+                            <div id="techLabResultsWrap" class="tech-lab-results-wrap d-none">
                                 <!-- Section A: cards that BEAT the picked target -->
                                 <section class="tech-lab-direction tech-lab-direction-beatenby" aria-labelledby="techLabBeatenByHeading">
                                     <div class="tech-lab-direction-header">
@@ -1700,7 +1700,7 @@
                         </section>
 
                         <!-- Tech Lab — "Add missing tech" modal -->
-                        <div id="techLabAddOverlay" class="rarity-switcher-modal ui-modal-backdrop z-10000 display-none" role="dialog" aria-modal="true" aria-labelledby="techLabAddTitle">
+                        <div id="techLabAddOverlay" class="rarity-switcher-modal ui-modal-backdrop z-10000 d-none" role="dialog" aria-modal="true" aria-labelledby="techLabAddTitle">
                             <div class="rarity-switcher-modal-content ui-modal-panel tech-lab-add-panel">
                                 <span id="techLabAddCloseBtn" class="rarity-switcher-close ui-modal-close" role="button" aria-label="Close"></span>
                                 <h2 id="techLabAddTitle" data-i18n="techLab.addModalTitle">Add a tech the engine missed</h2>
@@ -2267,7 +2267,7 @@
                     </div>
                     
                     <!-- Signed in -->
-                    <div id="profile-content" class="display-none">
+                    <div id="profile-content" class="d-none">
                         <!-- Cloud-Sync diagnostic + manual trigger.
                              Surfaces the Firestore offline-cache state and
                              lets the user force a fresh server read when
@@ -2408,7 +2408,7 @@
                                     <span data-i18n="profile.dexImport">Dex Import</span>
                                 </button>
                                 <span class="fs-12 color-grey-light" data-i18n="profile.dexImportHint">Import your Dex TCG collection via CSV export</span>
-                                <input type="file" id="dexImportFileInput" accept=".csv" class="display-none" aria-label="Import collection CSV" onchange="dexImportHandleFile(this)">
+                                <input type="file" id="dexImportFileInput" accept=".csv" class="d-none" aria-label="Import collection CSV" onchange="dexImportHandleFile(this)">
                             </div>
 
                             <div class="flex gap-10 align-center mb-15 flex-wrap">
@@ -2444,7 +2444,7 @@
                                     <span data-i18n="profile.clearCollection">Clear Collection</span>
                                 </button>
                             </div>
-                            <div id="collection-type-loading" class="display-none mt--6 mb-10 fs-12 color-blue-grey" data-i18n="profile.loadingTypes">
+                            <div id="collection-type-loading" class="d-none mt--6 mb-10 fs-12 color-blue-grey" data-i18n="profile.loadingTypes">
                                 Loading element types...
                             </div>
 
@@ -2471,7 +2471,7 @@
                         </div>
                         
                         <!-- Decks Tab -->
-                        <div id="profile-decks" class="profile-tab-content display-none">
+                        <div id="profile-decks" class="profile-tab-content d-none">
                             <div class="flex align-center justify-between mb-8 flex-wrap gap-10">
                                 <h2 class="m-0" data-i18n="profile.myDecks">My Decks</h2>
                                 <div class="flex gap-8 flex-wrap">
@@ -2490,11 +2490,11 @@
                             </div>
                             
                             <!-- Folder Navigation -->
-                            <div id="decks-folder-nav" class="display-none mb-15 flex gap-8 flex-wrap align-center">
+                            <div id="decks-folder-nav" class="d-none mb-15 flex gap-8 flex-wrap align-center">
                             </div>
                             
                             <!-- Folder Summary (Core vs Tech Analysis) -->
-                            <div id="decks-folder-summary" class="display-none mb-15">
+                            <div id="decks-folder-summary" class="d-none mb-15">
                             </div>
                             
                             <div id="decks-grid" class="decks-grid">
@@ -2512,7 +2512,7 @@
                         </div>
                         
                         <!-- Wishlist Tab -->
-                        <div id="profile-wishlist" class="profile-tab-content display-none">
+                        <div id="profile-wishlist" class="profile-tab-content d-none">
                             <h2 data-i18n="profile.wishlist">Wishlist <button class="tab-help-btn" onclick="openTabHelp('wishlist')" title="Help" aria-label="Help for Wishlist" data-i18n-title="btn.helpTitle"></button></h2>
                             <p class="color-grey mb-15" data-i18n="profile.wishlistNote">Cards you want to get</p>
 
@@ -2566,7 +2566,7 @@
                         </div>
                         
                         <!-- Trade List Tab -->
-                        <div id="profile-tradelist" class="profile-tab-content display-none">
+                        <div id="profile-tradelist" class="profile-tab-content d-none">
                             <h2 data-i18n="profile.tradelist">Trade List</h2>
                             <p class="color-grey mb-15" data-i18n="profile.tradelistNote">Cards you want to trade or sell</p>
                             
@@ -2606,7 +2606,7 @@
                         </div>
 
                         <!-- Meta Binder Tab -->
-                        <div id="profile-metabinder" class="profile-tab-content display-none">
+                        <div id="profile-metabinder" class="profile-tab-content d-none">
                             <div class="meta-binder-header">
                                 <h2 data-i18n="profile.metaBinder">Meta Binder <button class="tab-help-btn" onclick="openTabHelp('meta-binder')" title="Help" aria-label="Help for Meta Binder" data-i18n-title="btn.helpTitle"></button></h2>
                                 <p class="color-grey mb-15" data-i18n="mb.subtitle">All cards needed for the current meta — compared against your collection.</p>
@@ -2618,9 +2618,9 @@
                                 <button id="metaBinderSendProxy" onclick="metaBinderSendMissingToProxy()" class="btn btn-outline" disabled data-i18n="mb.sendProxy">Proxy All Missing</button>
                                 <button id="metaBinderProxyNew" onclick="metaBinderProxyNewCards()" class="btn btn-outline" disabled data-i18n="mb.proxyNew">Proxy NEW Cards</button>
                             </div>
-                            <div id="metaBinderStats" class="meta-binder-stats display-none"></div>
-                            <div id="metaBinderFilters" class="meta-binder-filters display-none"></div>
-                            <div id="metaBinderDelta" class="meta-binder-delta display-none"></div>
+                            <div id="metaBinderStats" class="meta-binder-stats d-none"></div>
+                            <div id="metaBinderFilters" class="meta-binder-filters d-none"></div>
+                            <div id="metaBinderDelta" class="meta-binder-delta d-none"></div>
                             <div id="metaBinderGrid" class="meta-binder-grid">
                                 <div class="deck-builder-empty-state app-empty-state" role="status" aria-live="polite">
                                     <div class="deck-builder-empty-icon" aria-hidden="true">
@@ -2637,7 +2637,7 @@
                         </div>
 
                         <!-- Custom Binder Tab -->
-                        <div id="profile-custombinder" class="profile-tab-content display-none">
+                        <div id="profile-custombinder" class="profile-tab-content d-none">
                             <div class="meta-binder-header">
                                 <h2 data-i18n="profile.customBinder">Custom Binder <button class="tab-help-btn" onclick="openTabHelp('custom-binder')" title="Help" aria-label="Help for Custom Binder" data-i18n-title="btn.helpTitle"></button></h2>
                                 <p class="color-grey mb-15" data-i18n="cb.subtitle">Pick your own archetypes and generate a personal binder — same logic as Meta Binder.</p>
@@ -2657,7 +2657,7 @@
                                         <button class="btn btn-outline btn-sm" onclick="cbToggleArchetypeDropdown()" id="cbDropdownToggle">Browse ?</button>
                                         <button class="btn btn-outline btn-sm" onclick="cbAddTopMetaArchetypes()" id="cbTopMetaBtn" data-i18n="cb.topMeta" title="Top 10 des aktuellen Metas auswählen">Top 10 Meta</button>
                                     </div>
-                                    <div id="cbArchetypeDropdown" class="custom-binder-dropdown display-none"></div>
+                                    <div id="cbArchetypeDropdown" class="custom-binder-dropdown d-none"></div>
                                 </div>
                                 <div id="cbSelectedChips" class="custom-binder-chips"></div>
                             </div>
@@ -2674,15 +2674,15 @@
                                 <button onclick="cbSaveCurrentAsPreset()" class="btn btn-outline" title="Aktuelle Auswahl als Preset speichern">Speichern</button>
                                 <button id="cbAddWishlist" onclick="cbAddMissingToWishlist()" class="btn btn-outline" disabled>Add Missing to Wishlist</button>
                                 <button id="cbSendProxy" onclick="cbSendMissingToProxy()" class="btn btn-outline" disabled>Proxy All Missing</button>
-                                <button id="cbSendUnprinted" onclick="cbSendUnprintedToProxy()" class="btn btn-outline display-none" disabled data-i18n="cb.sendUnprinted">Noch nicht Gedruckte → Druckliste</button>
-                                <button id="cbBulkMarkPrinted" onclick="cbMarkFilteredPrinted()" class="btn btn-outline display-none" disabled data-i18n="cb.bulkMark">Gefilterte als gedruckt ✓</button>
+                                <button id="cbSendUnprinted" onclick="cbSendUnprintedToProxy()" class="btn btn-outline d-none" disabled data-i18n="cb.sendUnprinted">Noch nicht Gedruckte → Druckliste</button>
+                                <button id="cbBulkMarkPrinted" onclick="cbMarkFilteredPrinted()" class="btn btn-outline d-none" disabled data-i18n="cb.bulkMark">Gefilterte als gedruckt ✓</button>
                             </div>
 
-                            <div id="cbPresetBar" class="cb-preset-bar display-none"></div>
+                            <div id="cbPresetBar" class="cb-preset-bar d-none"></div>
 
-                            <div id="cbStats" class="meta-binder-stats display-none"></div>
-                            <div id="cbFilters" class="meta-binder-filters display-none"></div>
-                            <div id="cbDelta" class="meta-binder-delta display-none"></div>
+                            <div id="cbStats" class="meta-binder-stats d-none"></div>
+                            <div id="cbFilters" class="meta-binder-filters d-none"></div>
+                            <div id="cbDelta" class="meta-binder-delta d-none"></div>
                             <div id="cbGrid" class="meta-binder-grid">
                                 <div class="deck-builder-empty-state app-empty-state" role="status" aria-live="polite">
                                     <div class="deck-builder-empty-icon" aria-hidden="true">
@@ -2695,7 +2695,7 @@
                         </div>
 
                         <!-- Journal History Tab -->
-                        <div id="profile-journal" class="profile-tab-content display-none">
+                        <div id="profile-journal" class="profile-tab-content d-none">
                             <div class="flex align-center gap-10 mb-15 flex-wrap">
                                 <h2 data-i18n="bj.profileTitle">Battle Journal</h2>
                                 <button type="button" class="btn btn-primary btn-sm" onclick="openBattleJournalSheet()" data-i18n="bj.openBtn">Log Match</button>
@@ -2727,12 +2727,12 @@
                                 </select>
                                 <button type="button" class="btn btn-secondary btn-sm" onclick="toggleMatchupStats()" data-i18n="bj.matchups">Matchup Spreadsheet</button>
                             </div>
-                            <div id="journalMatchupStats" class="display-none mb-15"></div>
+                            <div id="journalMatchupStats" class="d-none mb-15"></div>
                             <div id="journalHistoryList" class="battle-journal-history-list"></div>
                         </div>
 
                         <!-- Compare Decklists Tab -->
-                        <div id="profile-deckcompare" class="profile-tab-content display-none">
+                        <div id="profile-deckcompare" class="profile-tab-content d-none">
                             <h2 data-i18n="profile.compareDecklists">Compare Decklists</h2>
                             <p class="color-grey mb-15" data-i18n="profile.compareNote">Paste two decklists to compare them side by side</p>
                             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
@@ -2750,19 +2750,19 @@
                         </div>
 
                         <!-- Deck Builder Tab -->
-                        <div id="profile-deckbuilder" class="profile-tab-content display-none">
+                        <div id="profile-deckbuilder" class="profile-tab-content d-none">
                             <!-- Rendered dynamically by ProfileDeckBuilder.activate()
                                  on first switchProfileTab('deckbuilder'). Search /
                                  deck list / mulligan calculator all live here. -->
                         </div>
 
                         <!-- Testing Groups Tab -->
-                        <div id="profile-testinggroups" class="profile-tab-content display-none">
+                        <div id="profile-testinggroups" class="profile-tab-content d-none">
                             <!-- Rendered dynamically by TestingGroups.init() -->
                         </div>
 
                         <!-- Settings Tab -->
-                        <div id="profile-settings" class="profile-tab-content display-none">
+                        <div id="profile-settings" class="profile-tab-content d-none">
                             <h2 data-i18n="profile.settings">Settings</h2>
                             <div class="maxw-600">
                                 <div class="mb-30">
@@ -2837,7 +2837,7 @@
     </div>
     
     <!-- Authentication Modal -->
-    <div id="auth-modal" class="auth-modal ui-modal-backdrop display-none" role="dialog" aria-modal="true" aria-label="Authentication" onclick="if(event.target === this) closeAuthModal()">
+    <div id="auth-modal" class="auth-modal ui-modal-backdrop d-none" role="dialog" aria-modal="true" aria-label="Authentication" onclick="if(event.target === this) closeAuthModal()">
         <div class="auth-modal-content ui-modal-panel ui-modal-md mobile-modal-panel">
             <button class="auth-modal-close ui-modal-close" onclick="closeAuthModal()" aria-label="Close" data-i18n-aria="btn.close"></button>
             
@@ -2881,7 +2881,7 @@
             </div>
             
             <!-- Sign Up Form -->
-            <div id="signup-form-container" class="display-none">
+            <div id="signup-form-container" class="d-none">
                 <h2 class="mb-20">
                     <img loading="lazy" src="images/pokeball-icon.png" alt="" class="w-28 h-28 mr-10 align-middle">
                     <span data-i18n="auth.createAccount">Create Account</span>
@@ -3288,7 +3288,7 @@
     </div>
 
     <!-- Anti-Tech Build-vs-Deck Modal -->
-    <div id="antiTechModal" class="rarity-switcher-modal ui-modal-backdrop z-10000 display-none" role="dialog" aria-modal="true" aria-labelledby="antiTechModalTitle" onclick="if(event.target === this) closeAntiTechModal()">
+    <div id="antiTechModal" class="rarity-switcher-modal ui-modal-backdrop z-10000 d-none" role="dialog" aria-modal="true" aria-labelledby="antiTechModalTitle" onclick="if(event.target === this) closeAntiTechModal()">
         <div class="rarity-switcher-modal-content ui-modal-panel anti-tech-modal-panel">
             <span class="rarity-switcher-close ui-modal-close" onclick="closeAntiTechModal()" role="button" aria-label="Close"></span>
 
@@ -3345,7 +3345,7 @@
             </div>
 
             <!-- Step 2: tech card selection (multi-select checkboxes) -->
-            <div id="antiTechStep2Wrap" class="anti-tech-step display-none">
+            <div id="antiTechStep2Wrap" class="anti-tech-step d-none">
                 <h2 data-i18n="antiTech.step2Title">Suggested Tech Cards</h2>
                 <p class="anti-tech-modal-intro" data-i18n="antiTech.step2Intro">Pick which cards to lock into your tech slots. Selected cards will be force-included on the next Consistency Generate.</p>
 
@@ -3542,7 +3542,7 @@
         </div>
     </div>
 
-    <div id="metaBinderDroppedModal" class="battle-journal-overlay display-none" onclick="if(event.target===this)closeMetaBinderDroppedModal()" aria-hidden="false">
+    <div id="metaBinderDroppedModal" class="battle-journal-overlay d-none" onclick="if(event.target===this)closeMetaBinderDroppedModal()" aria-hidden="false">
         <div class="battle-journal-sheet" role="dialog" aria-modal="true" aria-label="Dropped cards">
             <div class="battle-journal-header">
                 <div>

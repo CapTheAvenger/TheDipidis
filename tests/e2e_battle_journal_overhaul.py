@@ -112,7 +112,7 @@ def run():
 
         matchup_panel = page.locator("#journalMatchupStats")
         check("T4.1 Matchup stats panel exists", matchup_panel.count() == 1)
-        check("T4.2 Matchup panel starts hidden", matchup_panel.evaluate("el => el.classList.contains('display-none')"))
+        check("T4.2 Matchup panel starts hidden", matchup_panel.evaluate("el => el.classList.contains('d-none')"))
 
         # Toggle button exists
         toggle_btn = page.locator("button:has-text('Matchups')")
@@ -121,12 +121,12 @@ def run():
         # Toggle opens the panel
         page.evaluate("toggleMatchupStats()")
         page.wait_for_timeout(200)
-        check("T4.4 toggleMatchupStats opens panel", not matchup_panel.evaluate("el => el.classList.contains('display-none')"))
+        check("T4.4 toggleMatchupStats opens panel", not matchup_panel.evaluate("el => el.classList.contains('d-none')"))
 
         # Toggle closes it again
         page.evaluate("toggleMatchupStats()")
         page.wait_for_timeout(200)
-        check("T4.5 toggleMatchupStats closes panel", matchup_panel.evaluate("el => el.classList.contains('display-none')"))
+        check("T4.5 toggleMatchupStats closes panel", matchup_panel.evaluate("el => el.classList.contains('d-none')"))
 
         # ── Task 3: Share function exists ──────────────────────
         print("\n── Task 3: Share Tournament Summary ──")

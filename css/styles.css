@@ -9156,7 +9156,6 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
     overflow-y: auto;
     z-index: 100;
 }
-.tech-options-autocomplete.d-none { display: none; }
 .tech-options-autocomplete-row {
     display: flex;
     align-items: center;
@@ -10073,7 +10072,6 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
     color: #6b7280;
     line-height: 1.5;
 }
-.ca-empty-state.display-none { display: none; }
 
 
 /* Data-freshness chip — minimal, sits inline next to the section

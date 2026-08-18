@@ -97,11 +97,6 @@
     transform: scale(1.04);
 }
 
-/* Keep auth modal compatible with existing JS toggle logic */
-#auth-modal.display-none {
-    display: none !important;
-}
-
 /* Harmonize targeted modal containers */
 #auth-modal .auth-modal-content,
 #raritySwitcherModal .rarity-switcher-modal-content,

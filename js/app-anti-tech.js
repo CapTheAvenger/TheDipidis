@@ -705,8 +705,8 @@
         _step = n;
         const s1 = document.getElementById('antiTechStep1Wrap');
         const s2 = document.getElementById('antiTechStep2Wrap');
-        if (s1) s1.classList.toggle('display-none', n !== 1);
-        if (s2) s2.classList.toggle('display-none', n !== 2);
+        if (s1) s1.classList.toggle('d-none', n !== 1);
+        if (s2) s2.classList.toggle('d-none', n !== 2);
     }
 
     // ── PUBLIC API ───────────────────────────────────────────────────
@@ -731,7 +731,7 @@
         _suggestedCards = [];
         _selectedCards = new Set();
 
-        modal.classList.remove('display-none');
+        modal.classList.remove('d-none');
         modal.classList.add('show');
         _showStep(1);
 
@@ -754,7 +754,7 @@
         const modal = document.getElementById('antiTechModal');
         if (modal) {
             modal.classList.remove('show');
-            modal.classList.add('display-none');
+            modal.classList.add('d-none');
         }
         _source = null;
         _targets = new Set();
@@ -904,7 +904,7 @@
     document.addEventListener('keydown', (e) => {
         if (e.key !== 'Escape') return;
         const modal = document.getElementById('antiTechModal');
-        if (modal && !modal.classList.contains('display-none')) closeAntiTechModal();
+        if (modal && !modal.classList.contains('d-none')) closeAntiTechModal();
     });
 
     window.openAntiTechModal     = openAntiTechModal;

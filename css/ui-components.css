@@ -1114,7 +1114,6 @@ img[src*="limitlesstcg"] {
 .color-white-025 { color: rgba(255,255,255,0.25) !important; }
 .mx-2 { margin-left: 2px !important; margin-right: 2px !important; }
 /* Utility classes for modularizing playtester modal and controls */
-.d-none { display: none !important; }
 .pos-fixed { position: fixed !important; }
 .top-0 { top: 0 !important; }
 .left-0 { left: 0 !important; }
@@ -1220,7 +1219,6 @@ img[src*="limitlesstcg"] {
 .mh-420 { max-height: 420px !important; }
 .br-10 { border-radius: 10px !important; }
 .border-2-blue { border: 2px solid #3B4CCA !important; }
-.d-none { display: none !important; }
 .pointer { cursor: pointer !important; }
 .color-yellow { color: #FFCB05 !important; }
 .fs-12 { font-size: 12px !important; }
@@ -1369,7 +1367,6 @@ img[src*="limitlesstcg"] {
 .justify-center { justify-content: center !important; }
 .align-center { align-items: center !important; }
 /* Multiplayer Menu Utility Classes */
-.d-none { display: none !important; }
 .pos-abs { position: absolute !important; }
 .top-60 { top: 60px !important; }
 .right-12 { right: 12px !important; }
@@ -1428,7 +1425,6 @@ img[src*="limitlesstcg"] {
 /* Deck Compare Modal Utility Classes */
 .bg-gradient-blue { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important; }
 .border-1-blue { border: 1px solid #b3d9ff !important; }
-.d-none { display: none !important; }
 .color-blue-dark { color: #004085 !important; }
 .fs-95 { font-size: 0.95em !important; }
 .mb-10 { margin-bottom: 10px !important; }
@@ -1493,7 +1489,6 @@ img[src*="limitlesstcg"] {
 .gap-10 { gap: 10px; }
 .align-center { align-items: center; }
 .d-block { display: block; }
-.display-none { display: none; }
 .decks-grid { display: grid !important; grid-template-columns: 1fr; gap: 12px !important; }
 .flex-1 { flex: 1 1 0% !important; }
 .minw-200 { min-width: 200px !important; }
@@ -1525,7 +1520,6 @@ img[src*="limitlesstcg"] {
 .color-white { color: #fff !important; }
 .color-grey-light { color: #888 !important; }
 .fs-12 { font-size: 12px !important; }
-.display-none { display: none !important; }
 .minw-260 { min-width: 260px !important; }
 .minw-280 { min-width: 280px !important; }
 .btn-gradient-blue { background: linear-gradient(135deg,#667eea 0%,#764ba2 100%) !important; border: none !important; }
@@ -1550,7 +1544,6 @@ img[src*="limitlesstcg"] {
 .fs-18 { font-size: 18px !important; }
 .py-15 { padding-top: 15px !important; padding-bottom: 15px !important; }
 .px-40 { padding-left: 40px !important; padding-right: 40px !important; }
-.display-none { display: none !important; }
 .profile-stats-grid { display: grid !important; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px !important; margin-bottom: 16px !important; }
 .fw-600 { font-weight: 600 !important; }
 /* Utility classes for modularized profile/help/support sections */
@@ -1615,7 +1608,6 @@ img[src*="limitlesstcg"] {
 .border-left-green { border-left: 4px solid #2ecc71 !important; }
 .border-bottom-blue { border-bottom: 3px solid #3498db !important; }
 /* Utility classes for modularized index.html blocks */
-.display-none { display: none !important; }
 .display-block { display: block !important; }
 .mb-40 { margin-bottom: 40px !important; }
 .mb-20 { margin-bottom: 20px !important; }
@@ -4974,3 +4966,22 @@ img[src*="limitlesstcg"] {
     cursor: help;
 }
 a.price-unverified-badge:hover { background: #ffe8a1; }
+
+/* ── Die eine Versteck-Klasse ───────────────────────────────────────
+ * Bis zum 2026-08-18 gab es zwei Namen fuer dieselbe Sache: .d-none
+ * (193 Verwendungen) und .display-none (96). Beide waren in dieser
+ * Datei je viermal deklariert, dazu sieben eingegrenzte Wiederholungen
+ * in fuenf weiteren Dateien - neunzehn Regeln fuer "unsichtbar".
+ *
+ * Der Preis stand in js/app-current-meta-analysis.js: das Matchup-Feld
+ * trug .display-none aus dem Markup, der Renderer nahm nur .d-none
+ * weg. Repariert wurde damals der zweite Pfad, indem er beide Namen
+ * entfernt - der erste blieb als Falle liegen.
+ *
+ * Jetzt: ein Name, eine Regel, und sie steht bewusst am Dateiende.
+ * Verstecken muss die Layout-Utilities (.flex, .display-block,
+ * .flex-between, die Grid-Klassen) schlagen, und die stehen alle
+ * weiter oben mit demselben Gewicht. Wer etwas versteckt, meint es.
+ * tests/unit/test-eine-versteckklasse.js haelt das fest.
+ * ─────────────────────────────────────────────────────────────────── */
+.d-none { display: none !important; }

@@ -87,15 +87,15 @@ async function run() {
         const droppedStatBtn = document.querySelector('.meta-binder-stat-clickable');
         const modalEl = document.getElementById('metaBinderDroppedModal');
 
-        const droppedBefore = modalEl ? modalEl.classList.contains('display-none') : null;
+        const droppedBefore = modalEl ? modalEl.classList.contains('d-none') : null;
         if (droppedStatBtn) droppedStatBtn.click();
-        const droppedAfterOpen = modalEl ? !modalEl.classList.contains('display-none') : null;
+        const droppedAfterOpen = modalEl ? !modalEl.classList.contains('d-none') : null;
         const droppedCount = Number(document.getElementById('metaBinderDroppedCount')?.textContent || '0');
 
         if (typeof window.closeMetaBinderDroppedModal === 'function') {
             window.closeMetaBinderDroppedModal();
         }
-        const droppedAfterClose = modalEl ? modalEl.classList.contains('display-none') : null;
+        const droppedAfterClose = modalEl ? modalEl.classList.contains('d-none') : null;
 
         return {
             totalCards: gridCards.length,

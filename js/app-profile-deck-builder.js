@@ -1392,7 +1392,7 @@
     async function activate() {
         const host = document.getElementById('profile-deckbuilder');
         if (!host) return;
-        host.classList.remove('display-none');
+        host.classList.remove('d-none');
         if (!_initialized) {
             _deck = loadDeck();
             renderRoot();

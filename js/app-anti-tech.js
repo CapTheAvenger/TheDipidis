@@ -111,7 +111,15 @@
             const opp = String(r.opponent || '').trim();
             if (!opp) continue;
             const wr = parseLocaleNumber(r.win_rate || '0', 0);
-            if (Number.isFinite(wr) && wr > 0 && !map.has(opp.toLowerCase())) {
+            // Number.isFinite statt `> 0`: der Filter sollte fehlende Werte
+            // ausschliessen, traf aber auch echte Nullen. 51 von 1491 Zeilen in
+            // limitless_online_decks_matchups.csv haben win_rate = 0, verteilt
+            // auf 32 Decks — darunter Iron Thorns gegen Mega Excadrill mit
+            // 0 aus 12. Die Tabelle "Worst Matchups" konnte das schlechteste
+            // Matchup eines Decks strukturell nicht anzeigen, und der
+            // anteilsgewichtete Schnitt lag dadurch zu hoch. Fehlende Werte
+            // kommen als leerer String an und bleiben weiterhin draussen.
+            if (Number.isFinite(wr) && !map.has(opp.toLowerCase())) {
                 map.set(opp.toLowerCase(), wr);
             }
         }

@@ -1778,7 +1778,15 @@
                     wr:       parseWr(r.win_rate),
                     record:   r.record || '',
                 }))
-                .filter(m => m.opponent && m.wr > 0);
+                // Number.isFinite statt `> 0`: der Filter sollte fehlende Werte
+                // ausschliessen, traf aber auch echte Nullen. 51 von 1491 Zeilen in
+                // limitless_online_decks_matchups.csv haben win_rate = 0, verteilt
+                // auf 32 Decks — darunter Iron Thorns gegen Mega Excadrill mit
+                // 0 aus 12. Die Tabelle "Worst Matchups" konnte das schlechteste
+                // Matchup eines Decks strukturell nicht anzeigen, und der
+                // anteilsgewichtete Schnitt lag dadurch zu hoch. Fehlende Werte
+                // kommen als leerer String an und bleiben weiterhin draussen.
+                .filter(m => m.opponent && Number.isFinite(m.wr));
 
             if (enriched.length === 0) return false;
 
@@ -1867,7 +1875,7 @@
                 if (d !== target && d !== stripped) return;
                 const opp = String(r.opponent || '').trim();
                 const wr = parseWr(r.win_rate);
-                if (opp && wr > 0) wrByOpp[opp.toLowerCase()] = { opponent: opp, wr };
+                if (opp && Number.isFinite(wr)) wrByOpp[opp.toLowerCase()] = { opponent: opp, wr };
             });
 
             if (Object.keys(wrByOpp).length === 0) {
@@ -2099,7 +2107,7 @@
                 if (d !== target && d !== stripped) return;
                 const opp = String(r.opponent || '').trim();
                 const wr = parseWr(r.win_rate);
-                if (opp && wr > 0) wrByOpp[opp.toLowerCase()] = { opponent: opp, wr };
+                if (opp && Number.isFinite(wr)) wrByOpp[opp.toLowerCase()] = { opponent: opp, wr };
             });
             if (Object.keys(wrByOpp).length === 0) return hide(`no matchup rows for ${archetype}`);
 

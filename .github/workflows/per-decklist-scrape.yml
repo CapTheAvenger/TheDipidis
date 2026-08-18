@@ -184,18 +184,20 @@ jobs:
             wc -l data/tournament_decklists_per_player.csv
           fi
 
-      - name: Bump version
-        run: |
-          chmod +x bump-version.sh
-          ./bump-version.sh
+      # No bump here. deploy-pages.yml rewrites ?v=, APP_VERSION, the service
+      # worker CACHE_NAME, version.json and the _formatWindow snapshot inside
+      # _site/ on every deploy (its "Cache-bust asset references" step), so the
+      # stamp a data job commits never reaches a user. All it did was put
+      # index.html (845 KB), service-worker.js and version.json into ~147
+      # commits a month and churn the service worker's CACHE_NAME, which makes
+      # the activate handler drop every client cache several times a day.
 
       - name: Commit + push
         id: commit
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name  "github-actions[bot]"
-          git add data/tournament_decklists_per_player.csv \
-                  index.html service-worker.js version.json
+          git add data/tournament_decklists_per_player.csv
           if git diff --cached --quiet; then
             echo "No changes — skipping push."
             echo "pushed=false" >> "$GITHUB_OUTPUT"
@@ -217,10 +219,8 @@ jobs:
           done
           exit 1
 
-      - name: Trigger GitHub Pages deploy
-        if: steps.commit.outputs.pushed == 'true'
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          gh workflow run deploy-pages.yml --ref main
-          echo "Dispatched deploy-pages.yml on main."
+      # No explicit deploy dispatch. The push above already triggers
+      # deploy-pages (on: push to main); dispatching a second run put both into
+      # `concurrency: pages, cancel-in-progress: true`, so one of the two was
+      # cancelled and the deploy could end up watching or reporting the loser.
+      # One push, one deploy.

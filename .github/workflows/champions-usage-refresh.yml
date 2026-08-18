@@ -48,15 +48,34 @@ jobs:
           pip install -r requirements.txt
 
       # Authoritative in-game usage (nature / SP / item / move / ability /
-      # teammate, per format). Fail-soft + regression-guarded: a thin,
-      # rate-limited scrape never overwrites a good snapshot.
+      # teammate, per format).
+      #
+      # This step used to swallow its own failure: on a non-zero exit it ran
+      # `git checkout -- data/champions_usage.json`, printed a ::warning:: and
+      # exited 0. The commit step further down then committed the *other* files
+      # and the run went green. Result: 31 consecutive green runs while
+      # champions_usage.json had not changed since 2026-07-17, and the Side Quest
+      # usage view served month-old numbers with no indication anywhere.
+      #
+      # Keeping the last good snapshot is right — overwriting it with a thin,
+      # rate-limited scrape would be worse. Reporting success is not. The rollback
+      # stays, the green tick goes.
+      #
+      # The failure is recorded and re-raised by the final gate step, not thrown
+      # here: the Pokédex build below has been working and its commit should still
+      # go out. Fail the job, not the rest of the pipeline.
       - name: Scrape in-game Champions usage
+        id: usage
         run: |
           set +e
           python -u scripts/scrape_champions_usage.py
-          if [ "$?" -ne 0 ]; then
-              echo "::warning::scrape_champions_usage failed/guarded — keeping committed champions_usage.json"
+          rc=$?
+          if [ "$rc" -ne 0 ]; then
               git checkout -- data/champions_usage.json 2>/dev/null
+              echo "::error::scrape_champions_usage failed (exit $rc) — kept the committed champions_usage.json, which is now a day staler. data_guardian escalates once it passes its freshness budget."
+              echo "failed=$rc" >> "$GITHUB_OUTPUT"
+          else
+              echo "failed=0" >> "$GITHUB_OUTPUT"
           fi
           exit 0
 
@@ -73,10 +92,13 @@ jobs:
           fi
           exit 0
 
-      - name: Bump version
-        run: |
-          chmod +x bump-version.sh
-          ./bump-version.sh
+      # No bump here. deploy-pages.yml rewrites ?v=, APP_VERSION, the service
+      # worker CACHE_NAME, version.json and the _formatWindow snapshot inside
+      # _site/ on every deploy (its "Cache-bust asset references" step), so the
+      # stamp a data job commits never reaches a user. All it did was put
+      # index.html (845 KB), service-worker.js and version.json into ~147
+      # commits a month and churn the service worker's CACHE_NAME, which makes
+      # the activate handler drop every client cache several times a day.
 
       - name: Commit + push
         id: commit
@@ -85,8 +107,7 @@ jobs:
           git config --local user.name  "github-actions[bot]"
           git add data/champions_usage.json \
                   data/champions_pokedex.json \
-                  data/champions_names_de.json \
-                  index.html service-worker.js version.json
+                  data/champions_names_de.json
           if git diff --cached --quiet; then
             echo "No usage/pokedex changes — skipping push."
             echo "pushed=false" >> "$GITHUB_OUTPUT"
@@ -108,10 +129,16 @@ jobs:
           done
           exit 1
 
-      - name: Trigger GitHub Pages deploy
-        if: steps.commit.outputs.pushed == 'true'
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # No explicit `gh workflow run deploy-pages.yml` here. The push above
+      # already triggers deploy-pages (on: push to main), and dispatching a
+      # second run put both into `concurrency: pages, cancel-in-progress: true`
+      # — one of the two got cancelled, and the wait step could end up watching
+      # the loser. One trigger, one deploy.
+
+      # The job is only green if the scrape actually scraped. Runs last so the
+      # Pokédex build and its commit still go out on a usage-scrape failure.
+      - name: Fail the run if the usage scrape died
+        if: steps.usage.outputs.failed != '0'
         run: |
-          gh workflow run deploy-pages.yml --ref main
-          echo "Dispatched deploy-pages.yml on main."
+          echo "::error::champions usage scrape exited ${{ steps.usage.outputs.failed }} — data/champions_usage.json was NOT refreshed."
+          exit 1

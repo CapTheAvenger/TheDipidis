@@ -7430,7 +7430,19 @@ window.MetaCall = (function () {
     // source. Once major data lands and the predictor flips to Mode B,
     // the banner becomes substantive (counts the weighted majors) and
     // is shown again.
-    if (_predictorMode !== 'B') return '';
+    // UMGEKEHRT gegenueber dem Zustand bis zum 17.08.2026. Der Banner war
+    // ausgerechnet in Mode A unterdrueckt — also genau dann, wenn die
+    // Prognose auf reiner Online-Ladder beruht. Am 17.08. lief die Seite so:
+    // PBL war seit 17 Tagen in Person legal, die neueste Labs-Zeile stammte
+    // vom 10.06. aus dem Vorformat, 4520 von 4667 Turnierzeilen wurden
+    // verworfen — und die UI zeigte "Source: Current Meta · PBL" ueber einer
+    // vollstaendigen Feldtabelle. Der Nutzer konnte "Prognose aus sechs
+    // Regionals" nicht von "Prognose aus reiner Ladder" unterscheiden; beide
+    // Faelle sahen identisch aus, obwohl die Verlaesslichkeit um
+    // Groessenordnungen auseinanderliegt.
+    //
+    // Mode A ist der Fall, der den Hinweis BRAUCHT. In Mode B faellt er
+    // knapper aus, weil dort echte Turnierdaten dahinterstehen.
 
     const mode    = _predictorMode === 'B' ? 'B' : 'A';
     const setCode = (fw && fw.current_set) ? String(fw.current_set).toUpperCase() : '';

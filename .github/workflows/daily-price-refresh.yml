@@ -141,10 +141,13 @@ jobs:
           python scripts/build_prizepack_official_images.py --refresh-prices || \
             echo "::warning::prize-pack price refresh failed (non-fatal)"
 
-      - name: Bump version
-        run: |
-          chmod +x bump-version.sh
-          ./bump-version.sh
+      # No bump here. deploy-pages.yml rewrites ?v=, APP_VERSION, the service
+      # worker CACHE_NAME, version.json and the _formatWindow snapshot inside
+      # _site/ on every deploy (its "Cache-bust asset references" step), so the
+      # stamp a data job commits never reaches a user. All it did was put
+      # index.html (845 KB), service-worker.js and version.json into ~147
+      # commits a month and churn the service worker's CACHE_NAME, which makes
+      # the activate handler drop every client cache several times a day.
 
       # Commit FIRST so the day's price snapshot is on main even if
       # the alert step fails. The alert script reads the file on
@@ -159,8 +162,7 @@ jobs:
                   data/cards_chunk_standard.json data/cards_chunk_extended.json \
                   data/cards_chunk_legacy.json data/cards_manifest.json \
                   data/all_cards_merged.json data/all_cards_merged.csv \
-                  data/prizepack_official_images.json \
-                  index.html service-worker.js version.json
+                  data/prizepack_official_images.json
           if git diff --cached --quiet; then
             echo "No price changes to commit — skipping push."
             echo "pushed=false" >> "$GITHUB_OUTPUT"
@@ -182,6 +184,9 @@ jobs:
             if git push origin HEAD:main; then
               echo "Push succeeded on attempt $attempt"
               echo "pushed=true" >> "$GITHUB_OUTPUT"
+              # The sha lets the next step find the deploy run that THIS push
+              # triggered, instead of dispatching a competing one.
+              echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
               exit 0
             fi
             echo "Push rejected on attempt $attempt — pulling with rebase…"
@@ -197,33 +202,43 @@ jobs:
           echo "::error::Push failed after 3 attempts"
           exit 1
 
-      # Trigger Pages deploy so the new price_data.csv hits the
-      # live origin within minutes of the commit.
-      - name: Trigger GitHub Pages deploy
+      # The push above already triggered deploy-pages (on: push to main). This
+      # step used to ALSO `gh workflow run deploy-pages.yml`, which produced two
+      # runs competing inside `concurrency: pages, cancel-in-progress: true` —
+      # one got cancelled, and `gh run list --limit 1` could hand the wait step
+      # below the id of the loser (or of the previous deploy). The live check in
+      # deploy-pages then failed with "may have been cancelled by a later push".
+      #
+      # So: don't dispatch, find. We know the sha we pushed, so we poll for the
+      # run whose headSha matches it. Nothing races because there is only ever
+      # one deploy.
+      - name: Find the Pages deploy our push triggered
         id: pages_deploy
         if: steps.commit.outputs.pushed == 'true'
-        run: |
-          gh workflow run deploy-pages.yml --ref main
-          # Give Actions ~10 s to register the new run before we ask
-          # for its id — otherwise `gh run list` returns the previous
-          # deploy (or no row at all) and the wait step ends up
-          # watching the wrong run.
-          sleep 10
-          run_id=$(gh run list \
-              --workflow=deploy-pages.yml \
-              --branch main \
-              --limit 1 \
-              --json databaseId \
-              --jq '.[0].databaseId')
-          if [ -z "$run_id" ] || [ "$run_id" = "null" ]; then
-            echo "::warning::Could not resolve Pages deploy run id — falling back to fixed 4 min sleep before alerts."
-            echo "run_id=" >> "$GITHUB_OUTPUT"
-          else
-            echo "Pages deploy run id: $run_id"
-            echo "run_id=$run_id" >> "$GITHUB_OUTPUT"
-          fi
         env:
           GH_TOKEN: ${{ github.token }}
+          PUSHED_SHA: ${{ steps.commit.outputs.sha }}
+        run: |
+          run_id=""
+          # Actions needs a moment to register the run; 12 × 5 s is comfortably
+          # more than the few seconds it normally takes.
+          for _ in $(seq 1 12); do
+            run_id=$(gh run list \
+                --workflow=deploy-pages.yml \
+                --branch main \
+                --limit 20 \
+                --json databaseId,headSha \
+                --jq "[.[] | select(.headSha == \"$PUSHED_SHA\")] | .[0].databaseId // empty")
+            [ -n "$run_id" ] && break
+            sleep 5
+          done
+          if [ -z "$run_id" ]; then
+            echo "::warning::No deploy-pages run found for $PUSHED_SHA — falling back to a fixed 4 min sleep before alerts."
+            echo "run_id=" >> "$GITHUB_OUTPUT"
+          else
+            echo "Pages deploy run id: $run_id (sha $PUSHED_SHA)"
+            echo "run_id=$run_id" >> "$GITHUB_OUTPUT"
+          fi
 
       # Wait for the Pages deploy to actually publish before we
       # Telegram-alert users. Otherwise the user opens the site after

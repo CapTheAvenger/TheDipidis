@@ -33,6 +33,40 @@ service cloud.firestore {
     }
 
     // ─────────────────────────────────────────────────────────
+    // Shared decks — the ?sharedDeck=<id> short links produced by
+    // js/app-features.js:1065 (.set()) and read back at :1119 (.get()).
+    //
+    // This collection had NO rule at all, so both calls hit the default deny.
+    // Either deck sharing has been quietly broken since it shipped, or live
+    // was hand-edited in the Console and this file drifted again — the exact
+    // failure the header above records for 2026-06-12. Writing the rule down
+    // makes the answer observable either way.
+    //
+    // read is open on purpose: the link IS the capability, and the recipient
+    // is usually not signed in — that is what a share link is for. The payload
+    // is a public decklist, no user data. Note the id is only 6 chars from a
+    // 55-char alphabet (~1e10) and drawn with Math.random(), so treat these as
+    // unguessable-enough-for-decklists, not as secrets.
+    //
+    // create is open to match: sharing works without an account today, same as
+    // the rest of the deck builder. It is bounded instead — one write, capped
+    // size, required shape — so an open endpoint can't be used as free storage.
+    // update and delete are denied outright: a link, once handed out, must not
+    // change under the recipient.
+    match /shared_decks/{shareId} {
+      allow read: if true;
+      allow create: if shareId.size() <= 24
+        && request.resource.data.keys().hasOnly(['deck', 'order', 'archetype', 'source', 'timestamp'])
+        && request.resource.data.deck is map
+        && request.resource.data.deck.size() <= 120;
+        // No byte cap here: .size() on a map counts keys, not bytes, so a
+        // "< 200000" clause would read like a size limit and enforce nothing.
+        // The 120-entry deck cap is the real bound (a legal deck is 60 cards);
+        // Firestore's own 1 MiB document limit backs it up.
+      allow update, delete: if false;
+    }
+
+    // ─────────────────────────────────────────────────────────
     // Public profile index — used by Testing Groups to add members
     // by email. Each user writes their own entry; anyone signed in
     // can read it (to resolve email → uid).

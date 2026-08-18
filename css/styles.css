@@ -1063,26 +1063,47 @@
             overflow: hidden;
         }
 
-        /* City League banner unified with .header (Theme A Option 1).
-           Was a purple/blue gradient that visually broke the
-           consistency the rest of the site established. Now uses the
-           same red Pokémon gradient + slimmer padding as every other
-           section banner. */
+        /* Angeglichen an .header weiter oben (17.08.2026).
+           Die Regel hatte den roten Verlaufsbanner, den .header schon
+           losgeworden war — nur unter einem anderen Klassennamen, weshalb
+           der frühere Fix hier nie ankam. Gemessen 130px hoch, trug einen
+           Titel und einen halb abgeschnittenen Format-Wähler, und stand
+           damit als prominentester Block über einer leeren Ansicht.
+           Woher die Daten kommen, sagt jetzt der Datenraum-Ausweis
+           (css/ds-nav.css) eine Zeile darüber — pro Datenraum statt
+           global, was auch den falschen Stempel "17.8.2026" über der seit
+           dem 31.07. leeren JP-Ansicht erledigt. */
         .city-league-header {
-            background: linear-gradient(135deg, var(--pokemon-red) 0%, var(--pokemon-red-dark) 100%);
-            color: white;
-            padding: 10px 18px;
-            text-align: center;
-            border-radius: 10px;
-            border-bottom: 3px solid var(--pokemon-yellow, #FFCB05);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.10);
-            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: var(--s-1) var(--s-3);
+            min-height: 48px;
+            padding: var(--s-2) 0;
+            text-align: left;
+            color: var(--ink);
+            background: none;
+            border: 0;
+            border-bottom: 2px solid transparent;
+            border-image: var(--rule) 1;
+            border-radius: 0;
+            box-shadow: none;
+            margin-bottom: var(--s-4);
         }
 
         .city-league-header h2 {
-            font-size: clamp(1.05em, 4vw, 1.45em);
-            margin-bottom: 2px;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.25);
+            font-size: var(--fs-xl);
+            line-height: 1.25;
+            margin: 0;
+            color: var(--ink);
+            text-shadow: none;
+        }
+
+        /* Der Format-Wähler saß absolut im Banner und wurde rechts
+           abgeschnitten. In der Zeile braucht er nur noch seinen Platz. */
+        .city-league-header .cl-format-container {
+            margin-left: auto;
+            margin-top: 0;
         }
         
         .format-toggle-container {

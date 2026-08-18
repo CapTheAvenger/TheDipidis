@@ -478,10 +478,13 @@ jobs:
           shopt -u nullglob
           exit 0
 
-      - name: Bump version
-        run: |
-          chmod +x bump-version.sh
-          ./bump-version.sh
+      # No bump here. deploy-pages.yml rewrites ?v=, APP_VERSION, the service
+      # worker CACHE_NAME, version.json and the _formatWindow snapshot inside
+      # _site/ on every deploy (its "Cache-bust asset references" step), so the
+      # stamp a data job commits never reaches a user. All it did was put
+      # index.html (845 KB), service-worker.js and version.json into ~147
+      # commits a month and churn the service worker's CACHE_NAME, which makes
+      # the activate handler drop every client cache several times a day.
 
       - name: Data sanity check (F-D19 — revert empty/short CSVs before commit)
         # AUDIT_DATA_PIPELINE.md F-D19 — the commit step below pushes any
@@ -569,13 +572,11 @@ jobs:
       # `on: push` workflows (GitHub recursion-prevention). Dispatch
       # deploy-pages explicitly so the SPA on Pages always reflects the
       # fresh data right after a weekly run.
-      - name: Trigger GitHub Pages deploy
-        if: steps.commit.outputs.pushed == 'true'
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          gh workflow run deploy-pages.yml --ref main
-          echo "Dispatched deploy-pages.yml on main."
+      # No explicit deploy dispatch. The push above already triggers
+      # deploy-pages (on: push to main); dispatching a second run put both into
+      # `concurrency: pages, cancel-in-progress: true`, so one of the two was
+      # cancelled and the deploy could end up watching or reporting the loser.
+      # One push, one deploy.
 
       - name: Fail job on multi-scraper / critical-scraper batch failure
         # AUDIT_DATA_PIPELINE F-D04 + F-D20: per-step `set +e` keeps a

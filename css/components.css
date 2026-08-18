@@ -344,3 +344,43 @@
     cursor: pointer;
 }
 .ds-tutorial-retry:hover { background: var(--brand); color: var(--surface-1); }
+
+/* ── Eingeklappte Karten-Legende ───────────────────────────────────
+ *
+ * Die Legende erklaert die Plaketten und Knoepfe im Kartengitter. Sie
+ * lag bis zum 18.08.2026 auf dem Hub — 734 px, 45 % der Hub-Hoehe, und
+ * dort kommt keines der erklaerten Elemente vor. Jetzt liegt sie ueber
+ * dem Gitter, das sie beschreibt, und zwar zu.
+ *
+ * Eingeklappt: 44 px. Ausgeklappt: dasselbe wie vorher.
+ */
+.ds-legend {
+    margin: 0 0 var(--s-3);
+    border: 1px solid var(--line);
+    border-radius: var(--r-md);
+    background: var(--surface-1);
+}
+.ds-legend-summary {
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    gap: var(--s-2);
+    padding: 0 var(--s-4);
+    cursor: pointer;
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    color: var(--ink-2);
+    list-style: none;
+}
+.ds-legend-summary::-webkit-details-marker { display: none; }
+.ds-legend-summary::before {
+    content: "›";
+    display: inline-block;
+    font-size: var(--fs-lg);
+    line-height: 1;
+    color: var(--ink-3);
+    transition: transform .15s;
+}
+.ds-legend[open] > .ds-legend-summary::before { transform: rotate(90deg); }
+.ds-legend-summary:hover { color: var(--ink); }
+.ds-legend[open] > .ds-legend-summary { border-bottom: 1px solid var(--line); }

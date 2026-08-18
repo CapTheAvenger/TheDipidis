@@ -296,19 +296,34 @@
                             const totalGames = parseInt(cellData.total_games) || (parsedWins + parsedLosses + parsedDraws);
                             let bgColor, textColor;
                             
+                            // Blau <-> Rot mit grauem Nullpunkt, nicht Gruen <-> Rot.
+                            //
+                            // Die Heatmap war die dritte Stelle auf der Seite mit
+                            // einer rot-gruenen Skala, und die schlimmste: hier
+                            // steht die Farbe FUER die Aussage, nicht neben ihr.
+                            // Wer Rot und Gruen nicht trennt, liest aus dieser
+                            // Tabelle nichts. css/tokens.css hat die Entscheidung
+                            // fuer die ganze Seite getroffen — die Werte hier sind
+                            // --dv-pos (42,120,214) und --dv-neg (227,73,72).
+                            //
+                            // Und die Schrift traegt immer dieselbe Textfarbe. Die
+                            // alte Fassung schaltete ab 65 % auf Weiss und ab 35 %
+                            // auf Weiss um, was den Kontrast von der Zahl abhaengig
+                            // machte. Getoente Zelle, feste Schrift: der Kontrast
+                            // muss nie geprueft werden.
                             if (winRate >= 55.0) {
                                 const intensity = Math.min((winRate - 55) / 20, 1);
-                                bgColor = `rgba(76, 175, 80, ${0.3 + intensity * 0.4})`;
-                                textColor = winRate >= 65 ? 'white' : '#27ae60';
+                                bgColor = `rgba(42, 120, 214, ${0.12 + intensity * 0.34})`;
+                                textColor = 'var(--ink)';
                                 var tdClass = 'heatmap-td heatmap-td-fav';
                             } else if (winRate <= 45.0) {
                                 const intensity = Math.min((45 - winRate) / 20, 1);
-                                bgColor = `rgba(244, 67, 54, ${0.3 + intensity * 0.4})`;
-                                textColor = winRate <= 35 ? 'white' : '#e74c3c';
+                                bgColor = `rgba(227, 73, 72, ${0.12 + intensity * 0.34})`;
+                                textColor = 'var(--ink)';
                                 var tdClass = 'heatmap-td heatmap-td-unfav';
                             } else {
-                                bgColor = 'rgba(241, 196, 15, 0.2)';
-                                textColor = '#7f8c8d';
+                                bgColor = 'var(--surface-2)';
+                                textColor = 'var(--ink-3)';
                                 var tdClass = 'heatmap-td heatmap-td-even';
                             }
                             const tooltip = `${parsedWins}W - ${parsedLosses}L (${totalGames} ${t('heatmap.games')})`;
@@ -332,9 +347,10 @@
                     <div id="matchupHeatmapContainer" class="heatmap-container">
                         <h2 class="heatmap-title"><span style="font-size: 1.2em;"></span> ${t('heatmap.title')}</h2>
                         <p class="heatmap-desc">
-                            ${t('heatmap.desc')} <span class="color-green fw-600">Green</span> = ${t('heatmap.favorable')} (≥55%), 
-                            <span class="color-grey fw-600">Gray</span> = ${t('heatmap.even')} (45-54.9%), 
-                            <span class="color-red fw-600">Red</span> = ${t('heatmap.unfavorable')} (≤45%)
+                            ${t('heatmap.desc')}
+                            <span class="heatmap-key heatmap-key-fav"></span> ${t('heatmap.favorable')} (≥ 55 %),
+                            <span class="heatmap-key heatmap-key-even"></span> ${t('heatmap.even')} (45–54,9 %),
+                            <span class="heatmap-key heatmap-key-unfav"></span> ${t('heatmap.unfavorable')} (≤ 45 %)
                         </p>
                         ${searchControlsHtml}
                         <div class="heatmap-table-scroll">

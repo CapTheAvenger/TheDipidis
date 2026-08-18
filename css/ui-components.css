@@ -850,14 +850,21 @@ img[src*="limitlesstcg"] {
     background: rgba(149, 165, 166, 0.15) !important;
     color: #95a5a6 !important;
 }
-.heatmap-td-fav {
-    color: #27ae60 !important;
-}
+/* Die Schrift in der Heatmap traegt ueberall dieselbe Farbe.
+ *
+ * Hier stand gruen fuer guenstig, rot fuer unguenstig, grau fuer
+ * ausgeglichen — dreimal mit !important, und damit staerker als die
+ * Farbe, die js/app-current-meta.js je Zelle mitgibt. Die Toenung sitzt
+ * jetzt im Zellhintergrund (blau <-> rot mit grauem Nullpunkt), die
+ * Schrift bleibt Text: so muss der Kontrast nie geprueft werden, und
+ * die Aussage haengt nicht allein an einer Farbachse, auf der jeder
+ * Zwoelfte nichts unterscheidet. */
+.heatmap-td-fav,
 .heatmap-td-unfav {
-    color: #e74c3c !important;
+    color: var(--heatmap-color, var(--ink));
 }
 .heatmap-td-even {
-    color: #7f8c8d !important;
+    color: var(--heatmap-color, var(--ink-3));
 }
 .heatmap-table-scroll {
     overflow-x: auto !important;

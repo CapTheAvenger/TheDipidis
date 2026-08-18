@@ -131,3 +131,95 @@
     .ds-decklist-grid { grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); gap: var(--s-2); }
     .ds-dl-n { width: 26px; height: 30px; font-size: var(--fs-sm); }
 }
+
+/* ── Die Deckansicht, die es schon gibt ───────────────────────────────
+ *
+ * .card-item / .city-league-card-* werden von Current Meta UND City
+ * League gemalt. Neu gebaut wird hier nichts — der Renderer ist 300
+ * Zeilen mit Preisen, Pins, Sammlungsabgleich und Druckvarianten, und
+ * den anzufassen kostet mehr, als er einbringt. Was fehlt, sind zwei
+ * Leseh1lfen, die poke_hive hat und diese Ansicht nicht:
+ *
+ *   das Anteilsband und eine Anzahl, die man auf einem Daumenbild noch
+ *   erkennt.
+ *
+ * Dazu kommt eine Korrektur: die beiden Plaketten auf jeder Karte waren
+ * ein grüner und ein roter Kreis, gleich groß, gleich rund,
+ * unterschieden allein durch Farbe und Ecke. Rot-Grün ist die häufigste
+ * Farbsehschwäche — und die beiden Zahlen bedeuten völlig
+ * Verschiedenes: „so viele spielt das Feld" gegen „so viele hast du im
+ * Deck". Sie unterscheiden sich jetzt in der Form.
+ */
+
+/* Das Band. Farbe aus Tokens statt Ampel im Markup — vorher standen
+ * #27ae60 / #f39c12 / #7f8c8d fest im style-Attribut jeder Karte. */
+.card-usage-bar {
+    height: 5px;
+    background: var(--bar-track);
+}
+.card-usage-fill { background: var(--dv-zero); }
+.card-usage-bar[data-usage="option"] .card-usage-fill { background: var(--brand); }
+.card-usage-bar[data-usage="main"]   .card-usage-fill { background: var(--gold); }
+
+/* Die Anzahl, die das Feld spielt: Sechseck unten links, wie bei
+ * poke_hive. Ein Sechseck bleibt auch auf einem 92-px-Daumenbild als
+ * Plakette erkennbar, ein 18-px-Kreis wird zum Punkt. */
+.city-league-card-image-container .city-league-card-badge-max {
+    /* Oben links, nicht unten links: die untere Kante des Bildcontainers
+     * gehoert der Infoleiste mit den Aktionsknoepfen — eine Plakette
+     * dort liegt auf dem Minus-Knopf und faengt seinen Klick ab. */
+    top: 5px;
+    left: 5px;
+    right: auto;
+    bottom: auto;
+    width: 28px;
+    height: 32px;
+    border: 0;
+    border-radius: 0;
+    background: #e3350d;
+    clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
+    font-family: var(--font-num);
+    font-size: var(--fs-md);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, .55);
+}
+
+/* Die Anzahl im eigenen Deck: eckige Marke oben rechts, in der
+ * Markenfarbe. Andere Ecke, andere Form, andere Farbfamilie — drei
+ * Unterschiede, damit einer ausfallen darf. */
+.city-league-card-image-container .city-league-card-badge-deck {
+    top: 5px;
+    left: auto;
+    right: 5px;
+    border-radius: var(--r-sm);
+    background: var(--brand);
+    font-family: var(--font-num);
+}
+
+/* Auf schmalen Geraeten schrumpft css/mobile-responsive.css alle
+ * Plaketten auf 18 px. Die Plakette darf mitschrumpfen, aber sie bleibt
+ * ein Sechseck — der Formunterschied ist genau das, was auf einem
+ * 92-px-Daumenbild noch traegt. Zwei Klassen im Selektor, damit die
+ * Regel ohne !important gewinnt, obwohl sie frueher geladen wird. */
+@media (max-width: 480px) {
+    .city-league-card-image-container .city-league-card-badge-max {
+        width: 22px;
+        height: 25px;
+        font-size: var(--fs-sm);
+    }
+}
+
+/* Der Punkt vor der Abschnittsüberschrift im Kartengitter. Vorher
+ * standen dort die Emoji 🟢 🟡 ⚪ — eine Ampel, die weder mit dem Band
+ * darunter noch mit dem Rest der Seite zusammenpasste und die in keiner
+ * Sprache übersetzt war. Gleiche drei Farben wie das Band, damit
+ * Überschrift und Karte dasselbe sagen. */
+.ds-usage-dot {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--dv-zero);
+    vertical-align: baseline;
+}
+.ds-usage-dot[data-usage="option"] { background: var(--brand); }
+.ds-usage-dot[data-usage="main"]   { background: var(--gold); }

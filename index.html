@@ -8544,6 +8544,34 @@
             >
             <datalist id="bjEditTournDeckList"></datalist>
           </div>
+
+          <!-- Platzierung. Freitext mit Vorschlaegen statt Zahlenfeld: das
+               Ergebnis heisst je nach Turnier "Top 8", "2.", "9/128" oder
+               "Day 2" — eine Zahl waere die falsche Form fuer die Haelfte
+               davon. Wird auf alle Eintraege des Turniers geschrieben und
+               vom 1:1-Ergebnisbild gelesen. -->
+          <div class="bj-edit-form-group" style="margin-top: 16px;">
+            <label class="bj-edit-label" for="bjEditTournPlacement"><span data-i18n="bj.placement">Placement</span> <span style="font-size:11px;opacity:0.6;" data-i18n="bj.placementHint">(optional — shown on the shareable result image)</span></label>
+            <input
+              id="bjEditTournPlacement"
+              type="text"
+              list="bjEditTournPlacementList"
+              class="bj-edit-input"
+              maxlength="16"
+              placeholder="Top 8"
+              autocomplete="off"
+            >
+            <datalist id="bjEditTournPlacementList">
+              <option value="1."></option>
+              <option value="2."></option>
+              <option value="3."></option>
+              <option value="Top 4"></option>
+              <option value="Top 8"></option>
+              <option value="Top 16"></option>
+              <option value="Top 32"></option>
+              <option value="Day 2"></option>
+            </datalist>
+          </div>
         </div>
         <div class="bj-edit-modal-footer">
           <button type="button" class="btn btn-secondary" onclick="closeEditTournamentModal()" data-i18n="bj.cancel">Cancel</button>

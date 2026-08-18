@@ -614,10 +614,38 @@
         /* ── Das gespielte Deck ─────────────────────────────────────
          * Gross, mittig, mit Sprites. Das ist die Angabe, um die es
          * geht — wer mit was wie weit gekommen ist. */
-        var heroY = ruleY + 28;
-        var heroH = 190;
         var big = (art.icons && art.icons.length) ? art.icons : [null];
         var bs = big.length > 1 ? 132 : 156;
+        var heroH = bs + 62;                 /* Sprites plus Deckname */
+
+        /* Erst rechnen, dann malen: wie viel Platz die Rundenliste braucht,
+         * entscheidet, wo der Deckblock sitzt. Bei drei Runden stand vorher
+         * ein Drittel des Bildes leer, weil der Block oben festgenagelt war
+         * und die Liste unten mittig sass. */
+        var contentTop = ruleY + 28;
+        var footY = RC.S - 84;
+        var rounds = spec.rounds || [];
+        var band = footY - contentTop - heroH - 28;
+
+        var rowH = RC.ROW;
+        var fits = Math.max(0, Math.floor(band / (rowH + RC.GAP)));
+        var shown = rounds.slice(0, rounds.length > fits ? Math.max(0, fits - 1) : fits);
+        var rowCount = shown.length + (rounds.length > shown.length ? 1 : 0);
+        /* Wenige Runden duerfen hoehere Zeilen haben — bis 84 px. Danach
+         * bleibt Luft, aber sie verteilt sich oben und unten gleich. */
+        if (rowCount > 0) {
+            rowH = Math.max(RC.ROW, Math.min(72, Math.floor(band / rowCount) - RC.GAP));
+        }
+        var listH = rowCount ? rowCount * (rowH + RC.GAP) - RC.GAP : 0;
+        var slack = Math.max(0, band - listH);
+
+        /* Der Rest verteilt sich 40 / 35 / 25 auf ueber dem Deckblock,
+         * zwischen Deckblock und Liste, unter der Liste. Nicht gleich
+         * gedrittelt: unten steht schon die Fusszeile, oben nur der
+         * Signaturstrich. */
+        var heroY = contentTop + Math.round(slack * 0.40);
+        var listY = heroY + heroH + 28 + Math.round(slack * 0.35);
+
         var totalW = big.length * bs + (big.length - 1) * 14;
         var bx = (RC.S - totalW) / 2;
         for (var k = 0; k < big.length; k++) {
@@ -634,29 +662,17 @@
          * Eine Zeile je Partie: Runde, Ausgang, Gegner, Zugreihenfolge.
          * Ohne die Zugreihenfolge fehlt dem Ergebnis die Hälfte seiner
          * Erklärung — sie steht im Journal, also steht sie auch hier. */
-        var listY = heroY + heroH + 66;
-        var footY = RC.S - 84;
-        var rounds = spec.rounds || [];
-        var fits = Math.max(0, Math.floor((footY - listY) / (RC.ROW + RC.GAP)));
-        var shown = rounds.slice(0, rounds.length > fits ? Math.max(0, fits - 1) : fits);
-
-        /* Bei fünf Runden bliebe unten sonst ein Drittel des Bildes leer.
-         * Die Liste sitzt mittig im freien Band, nicht oben angeschlagen. */
-        var usedH = shown.length * (RC.ROW + RC.GAP) - RC.GAP
-            + (rounds.length > shown.length ? RC.ROW : 0);
-        listY += Math.max(0, Math.floor(((footY - listY) - usedH) / 2));
-
         for (var r = 0; r < shown.length; r++) {
             var m = shown[r];
-            var y = listY + r * (RC.ROW + RC.GAP);
-            var cy = y + RC.ROW / 2;
+            var y = listY + r * (rowH + RC.GAP);
+            var cy = y + rowH / 2;
 
             ctx.fillStyle = 'rgba(17,23,48,.80)';
-            rr(ctx, RC.PAD, y, RC.S - RC.PAD * 2, RC.ROW, 12); ctx.fill();
+            rr(ctx, RC.PAD, y, RC.S - RC.PAD * 2, rowH, 12); ctx.fill();
             ctx.strokeStyle = m.result === 'win' ? C.dvPos
                             : m.result === 'loss' ? C.dvNeg : C.lineStrong;
             ctx.lineWidth = 1;
-            rr(ctx, RC.PAD, y, RC.S - RC.PAD * 2, RC.ROW, 12); ctx.stroke();
+            rr(ctx, RC.PAD, y, RC.S - RC.PAD * 2, rowH, 12); ctx.stroke();
 
             ctx.font = fMono(15, 700);
             ctx.fillStyle = C.ink3;
@@ -698,7 +714,7 @@
         }
 
         if (rounds.length > shown.length) {
-            var my = listY + shown.length * (RC.ROW + RC.GAP) + RC.ROW / 2;
+            var my = listY + shown.length * (rowH + RC.GAP) + rowH / 2;
             ctx.font = fSans(15, 400);
             ctx.fillStyle = C.ink3;
             ctx.textBaseline = 'middle';
@@ -856,7 +872,10 @@
 
         return {
             tournament: tournamentName,
-            place: o.place || asc[0].placement || null,
+            // Die Platzierung haengt am Turnier, gespeichert ist sie aber an
+            // jedem Eintrag. Ein spaeter nachgetragener Match hat das Feld
+            // nicht — also nicht asc[0] fragen, sondern die Gruppe.
+            place: o.place || (asc.find(function (e) { return e.placement; }) || {}).placement || null,
             record: { w: w, l: l, t: t },
             winRate: scored ? ((w + t / 2) / scored) * 100 : NaN,
             deck: asc[0].ownDeck || '',

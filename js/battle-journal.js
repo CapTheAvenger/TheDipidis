@@ -1260,6 +1260,9 @@
                 const tWinRate = tTotal > 0 ? Math.round((tW / tTotal) * 100) : 0;
                 const safeTournKey = escapeHtml(tournKey).replace(/'/g, "\\'");
                 const groupType = (entries[0]?.tournamentType || '').replace(/'/g, "\\'");
+                // Die Platzierung haengt am Turnier, gespeichert ist sie an
+                // jedem Eintrag — ein nachgetragener Match hat sie nicht.
+                const tPlacement = (entries.find(e => e.placement) || {}).placement || '';
                 const safeMetaKey = escapeHtml(metaKey).replace(/'/g, "\\'");
                 const safeGroupType = escapeHtml(groupType);
 
@@ -1267,7 +1270,8 @@
                     <div class="bj-tournament-header">
                         <div class="bj-tournament-info">
                             <strong class="bj-tournament-name">${escapeHtml(tournLabel)}</strong>
-                            <span class="bj-tournament-record">${tW}-${tL}-${tT} (${tWinRate}%)</span>
+                            <span class="bj-tournament-record">${tW}-${tL}-${tT} (${tWinRate}%)</span>${
+                                tPlacement ? `<span class="bj-tournament-placement">${escapeHtml(tPlacement)}</span>` : ''}
                         </div>
                         <button type="button" class="bj-tournament-add-btn" onclick="continueJournalTournament('${safeTournKey}','${safeMetaKey}','${safeGroupType}')" title="${escapeHtml(battleJournalText('bj.addMatch', 'Add match'))}">+ Match</button>
                         <button type="button" class="bj-tournament-edit-btn" onclick="openEditTournamentModal('${safeTournKey}')" title="${escapeHtml(battleJournalText('bj.editTournament', 'Edit tournament'))}">Edit</button>
@@ -2000,6 +2004,14 @@
         const deckInput = document.getElementById('bjEditTournDeck');
         if (deckInput) deckInput.value = firstEntry.ownDeck || '';
 
+        // Platzierung: irgendein Eintrag der Gruppe kann sie tragen, nicht
+        // zwingend der erste. Aeltere Eintraege haben das Feld gar nicht.
+        const placeInput = document.getElementById('bjEditTournPlacement');
+        if (placeInput) {
+            const withPlace = entries.find(e => e.placement);
+            placeInput.value = withPlace ? withPlace.placement : '';
+        }
+
         modal.style.display = 'flex';
     }
 
@@ -2021,6 +2033,10 @@
         const newMeta = String(document.getElementById('bjEditTournMeta')?.value || '').trim();
         const newType = String(document.getElementById('bjEditTournType')?.value || '').trim();
         const newDeck = String(document.getElementById('bjEditTournDeck')?.value || '').trim();
+        // Leerer Text loescht die Platzierung, deshalb wird sie — anders als
+        // newDeck — immer geschrieben und nicht nur, wenn sie gefuellt ist.
+        const newPlacement = String(document.getElementById('bjEditTournPlacement')?.value || '')
+            .trim().slice(0, 16);
 
         if (!newName) {
             showToast(battleJournalText('bj.editNameRequired', 'Tournament name is required.'), 'warning');
@@ -2035,6 +2051,7 @@
                 e.tournamentName = newName;
                 e.meta = newMeta;
                 e.tournamentType = newType;
+                e.placement = newPlacement;
                 if (newDeck) e.ownDeck = newDeck;
                 outboxChanged = true;
             }
@@ -2057,6 +2074,7 @@
                             tournamentName: newName,
                             meta: newMeta,
                             tournamentType: newType,
+                            placement: newPlacement,
                             ...(newDeck ? { ownDeck: newDeck } : {}),
                             syncedAt: firebase.firestore.FieldValue.serverTimestamp()
                         });
@@ -2075,6 +2093,7 @@
                 e.tournamentName = newName;
                 e.meta = newMeta;
                 e.tournamentType = newType;
+                e.placement = newPlacement;
                 if (newDeck) e.ownDeck = newDeck;
             }
         });

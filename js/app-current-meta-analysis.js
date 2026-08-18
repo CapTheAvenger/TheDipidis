@@ -3056,7 +3056,7 @@
             const SKELETON_NICHE_MAX = 50;
             // Titel des Anteilsbands. Steht einmal hier statt in jeder
             // Kartenzeile — 60 Karten mal derselbe String.
-            const USAGE_TITLE = (typeof t === 'function' && t('cl.usageShare'))
+            const USAGE_TITLE = (typeof t === 'function' && t('cl.usageBarTitle'))
                 || (typeof getLang === 'function' && getLang() === 'en'
                     ? 'of the analysed lists play this card'
                     : 'der ausgewerteten Listen spielen diese Karte');

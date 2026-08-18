@@ -201,7 +201,9 @@ describe('ds-share: verdrahtet', () => {
 
     it('jeder neue Textschlüssel steht in beiden Sprachen', () => {
         for (const key of ['arc.shareImage', 'arc.shareImageTip',
-                           'bj.shareTournamentCard', 'bj.shareCardMissing']) {
+                           'bj.shareTournamentCard', 'bj.shareCardMissing',
+                           'bj.placement', 'bj.placementHint',
+                           'cl.usageBarTitle', 'cl.skelMain', 'cl.skelOptions', 'cl.skelNiche']) {
             const n = (I18N.match(new RegExp("'" + key.replace('.', '\\.') + "'", 'g')) || []).length;
             assert.equal(n, 2, `${key} steht ${n}× in i18n.js, erwartet 2 (en + de)`);
         }
@@ -232,6 +234,28 @@ describe('ds-share: ein Turnier ist die Gruppe seiner Partien', () => {
 
     it('zählt Unentschieden halb, wie die Siegquote überall sonst', () => {
         assert.match(SHARE, /\(\(w \+ t \/ 2\) \/ scored\) \* 100/);
+    });
+
+    it('sucht die Platzierung in der ganzen Gruppe, nicht im ersten Eintrag', () => {
+        // Die Platzierung haengt am Turnier, gespeichert ist sie an jedem
+        // Eintrag. Wer nur asc[0] fragt, verliert sie, sobald jemand nach
+        // dem Eintragen noch einen Match nachtraegt.
+        assert.match(SHARE, /asc\.find\(function \(e\) \{ return e\.placement; \}\)/);
+    });
+
+    it('das Journal schreibt die Platzierung auf alle drei Speicher', () => {
+        // Outbox, Firestore und der Cache — faellt einer aus, zeigt die
+        // Ansicht etwas anderes als das Bild.
+        const writes = (JOURNAL.match(/placement: newPlacement|e\.placement = newPlacement/g) || []);
+        assert.equal(writes.length, 3,
+            'Erwartet drei Schreibstellen (Outbox, Firestore-Batch, Cache), gefunden ' + writes.length);
+    });
+
+    it('eine geleerte Platzierung loescht sie auch', () => {
+        // newDeck wird nur geschrieben, wenn es gefuellt ist. Bei der
+        // Platzierung waere das eine Falle: man bekaeme sie nie wieder weg.
+        assert.ok(!/if \(newPlacement\)/.test(JOURNAL),
+            'Die Platzierung wird bedingt geschrieben — dann laesst sie sich nicht mehr loeschen.');
     });
 
     it('liest die Runden aus dem Cache, nicht aus Firestore', () => {

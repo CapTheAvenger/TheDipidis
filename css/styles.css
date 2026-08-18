@@ -6543,6 +6543,20 @@ details[open] > .tier-trending-summary::after {
     color: var(--text-muted, #888);
     font-weight: 600;
 }
+/* Die Platzierung steht neben der Bilanz und traegt als Einzige auf
+ * dieser Zeile Gold: sie ist das Ergebnis, alles andere ist der Weg
+ * dorthin. Sie erscheint nur, wenn sie im Turnierdialog eingetragen
+ * wurde — geraten wird sie nicht. */
+.bj-tournament-placement {
+    margin-left: var(--s-2);
+    padding: 1px var(--s-2);
+    border: 1px solid var(--gold);
+    border-radius: var(--r-sm);
+    color: var(--ink-2);
+    font-family: var(--font-num);
+    font-size: 0.72rem;
+    font-weight: 700;
+}
 .bj-tournament-share-btn {
     background: none;
     border: 1px solid rgba(0,0,0,.1);

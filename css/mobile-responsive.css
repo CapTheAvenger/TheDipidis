@@ -1004,18 +1004,16 @@
     }
 }
 
-/* --- Fix 3: Card-Action-Buttons min 12px font-size on mobile --- */
-@media (max-width: 768px) {
-    .city-league-card-remove-btn,
-    .city-league-card-add-btn,
-    .city-league-card-rarity-btn,
-    .city-league-card-limitless-btn,
-    .city-league-card-proxy-btn,
-    .city-league-card-market-btn {
-        font-size: 12px !important;
-        min-height: 24px !important;
-    }
-}
+/* "Fix 3: Card-Action-Buttons min 12px font-size on mobile" stand hier
+ * und hat nie gewirkt. Zwei Regeln weiter unten in derselben Datei
+ * (`height: 16px !important`) und noch eine dritte (`height: 15px
+ * !important; font-size: 7px !important`) kamen spaeter im Dokument und
+ * haben sie ueberschrieben. Gemessen am 18.08.2026 auf 390 px: 24 x 22 px
+ * mit 9-px-Schrift — nicht 12 px, nicht 24 px hoch.
+ *
+ * Drei Regelsaetze mit !important, die um dieselben Knoepfe streiten,
+ * ergeben keinen Kompromiss, sondern den Wert des letzten. Jetzt gibt es
+ * einen Satz, weiter unten, ohne !important. */
 
 /* --- Fix 4: Battle Journal FAB — WCAG 44px touch target --- */
 @media (max-width: 768px) {
@@ -1213,29 +1211,36 @@
     overflow: hidden !important;
     text-overflow: ellipsis !important;
   }
-  /* Action buttons: smaller height on mobile */
-  .city-league-card-action-btn {
-    height: 16px !important;
-    font-size: 0.6em !important;
-    padding: 0 2px !important;
-    border-radius: 3px !important;
+  /* Die Trefferflaeche waechst auf dem Telefon, statt zu schrumpfen.
+   *
+   * Hier stand `height: 16px`. Auf dem Geraet, das man mit dem Daumen
+   * bedient, waren die Knoepfe kleiner als auf dem Geraet mit der Maus.
+   * 28 px ist immer noch unter den 44 px, die man sich wuenscht — mehr
+   * gibt eine 94 px breite Kachel mit drei Knoepfen pro Zeile nicht her,
+   * und die Kachelbreite ist die Ansicht.
+   *
+   * Ohne !important: css/ui-components.css wird frueher geladen, die
+   * Reihenfolge reicht. */
+  .city-league-card-action-btn,
+  .city-league-card-market-btn {
+    min-height: 28px;
+    padding: 0 var(--s-1);
   }
   .city-league-card-action-buttons {
-    gap: 2px !important;
-    margin-top: 2px !important;
+    gap: 2px;
+    margin-top: 2px;
   }
   .city-league-card-action-row {
-    display: flex !important;
-    gap: 2px !important;
+    display: flex;
+    gap: 2px;
   }
-  .city-league-card-action-row:last-child .city-league-card-market-btn {
-    flex: 1 1 auto !important;
-  }
-  .city-league-card-action-row:last-child .city-league-card-limitless-btn,
-  .city-league-card-action-row:last-child .city-league-card-proxy-btn {
-    width: 18px !important;
-    max-width: 18px !important;
-    flex-shrink: 0 !important;
+  /* Untere Reihe: L und P sind Nebenwege und bekommen eine feste,
+   * schmale Spalte; der Preis nimmt den Rest. Bei gleicher Verteilung
+   * druecken die vier Zeichen von "12,41 €" die beiden anderen auf
+   * sieben Pixel zusammen — gemessen. */
+  .city-league-card-action-row > .city-league-card-limitless-btn,
+  .city-league-card-action-row > .city-league-card-proxy-btn {
+    flex: 0 0 24px;
   }
 
   /* UI Step 2 — Card Overview tightening on small phones.
@@ -1708,12 +1713,23 @@
     padding: 2px 4px !important;
     gap: 3px !important;
   }
-  .card-item .card-action-overlay button,
-  .card-item [class*="action"] button {
-    min-height: 22px !important;
-    min-width: 22px !important;
-    font-size: 0.75em !important;
-    padding: 1px 4px !important;
+  /* `[class*="action"] button` faengt jeden Knopf, dessen Klasse
+   * irgendwo "action" enthaelt — also auch die sechs Kartenknoepfe,
+   * fuer die diese Regel nie gedacht war. Sie hat mit
+   * `min-height: 22px !important` alles ueberstimmt, was weiter oben
+   * mit gutem Grund groesser gesetzt wurde, inklusive des
+   * Inline-Blocks in index.html, der genau diesen Punkt schon einmal
+   * reparieren wollte ("the buttons now hit the 'I can actually tap
+   * and read this' bar") und verloren hat: `.card-item [class*=...]
+   * button` ist spezifischer als `body .city-league-card-action-btn`.
+   *
+   * Sie gilt jetzt nur noch fuer das Overlay, fuer das sie geschrieben
+   * wurde. Die Kartenknoepfe kommen aus css/ui-components.css. */
+  .card-item .card-action-overlay button {
+    min-height: 22px;
+    min-width: 22px;
+    font-size: var(--fs-xs);
+    padding: 1px 4px;
   }
   /* Wishlist badge on card thumbnails */
   .wishlist-heart-badge {
@@ -1997,18 +2013,10 @@
     text-align: center !important;
   }
 
-  /* ── Action buttons: smaller ── */
-  .meta-card-grid .city-league-card-action-btn,
-  .meta-card-analysis-grid .city-league-card-action-btn,
-  #cityLeagueMetaGrid .city-league-card-action-btn,
-  #currentMetaMetaGrid .city-league-card-action-btn {
-    height: 15px !important;
-    min-height: 15px !important;
-    max-height: 15px !important;
-    font-size: 7px !important;
-    padding: 0 2px !important;
-    border-radius: 3px !important;
-  }
+  /* Hier stand `height: 15px; font-size: 7px`, dreifach mit !important
+   * festgenagelt (height, min-height, max-height). Sieben Pixel Schrift
+   * auf einem Knopf, den man mit dem Daumen trifft. Die Regel ist
+   * ersatzlos weg — es gilt der eine Satz weiter oben. */
 
   .meta-card-grid .city-league-card-action-row,
   .meta-card-analysis-grid .city-league-card-action-row,

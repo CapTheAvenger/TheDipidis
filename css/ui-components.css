@@ -1835,54 +1835,113 @@ img[src*="limitlesstcg"] {
 .city-league-card-action-row > button {
     flex: 1 1 0%;
 }
-.city-league-card-action-row:last-child {
-    display: flex;
+/* Hier stand dreimal `.city-league-card-action-row:last-child`, um der
+ * Zeile mit L / P / Preis andere Verhaeltnisse zu geben. Die Regeln
+ * haben nie gegriffen: es gibt DREI Aktionszeilen, und die letzte ist
+ * die Cooking-Mode-Reihe mit Pin und Exclude (`cm-deep-dive-only`) —
+ * ausgeblendet, aber im DOM, also ist sie das last-child. Die
+ * Preiszeile ist die vorletzte.
+ *
+ * Die drei Klassen kommen ohnehin nur in dieser einen Zeile vor, also
+ * braucht es die Zeile im Selektor gar nicht. */
+/* Der Kindselektor muss sein: `.city-league-card-action-row > button`
+ * eine Regel weiter oben ist spezifischer als eine reine Klasse und
+ * haette `flex: 1 1 0%` behalten. */
+.city-league-card-action-row > .city-league-card-limitless-btn,
+.city-league-card-action-row > .city-league-card-proxy-btn {
+    flex: 0 0 26px;
 }
-.city-league-card-action-row:last-child .city-league-card-market-btn {
-    flex: 2 1 0%;
+.city-league-card-action-row > .city-league-card-market-btn {
+    flex: 1 1 auto;
 }
-.city-league-card-action-row:last-child .city-league-card-limitless-btn,
-.city-league-card-action-row:last-child .city-league-card-proxy-btn {
-    flex: 1 1 0%;
-}
+/* ── Die Aktionsknoepfe auf der Karte ──────────────────────────────
+ *
+ * Gemessen am 18.08.2026 in der Deck-Analyse (Global), ein Archetyp,
+ * ein Bildschirm: 37 Karten, 296 Knoepfe. Jeder davon 43,7 x 19 px mit
+ * 9-px-Schrift, und sechs verschiedene gesaettigte Farben:
+ *
+ *     -   #ef4444 rot        L   Indigo-Verlauf
+ *     +   #22c55e gruen      P   Orange-Verlauf
+ *     *   #f59e0b bernstein  €   Petrol-Verlauf
+ *
+ * Zwei Probleme, die zusammen die Ansicht unlesbar machen.
+ *
+ * Erstens sind die beiden meistbenutzten Knoepfe ein rot-gruenes Paar,
+ * und zwar genau die beiden, deren Verwechslung wehtut: eine Kopie
+ * hinzufuegen gegen eine Kopie entfernen. Rot-Gruen ist die haeufigste
+ * Farbsehschwaeche; css/tokens.css hat das fuer die ganze Seite schon
+ * entschieden.
+ *
+ * Zweitens traegt bei sechs Signalfarben keine mehr ein Signal. Wenn
+ * alles hervorgehoben ist, ist nichts hervorgehoben — und dahinter
+ * liegt das Kartenbild, das eigentlich die Ansicht sein sollte.
+ *
+ * Jetzt: eine ruhige Familie, und genau zwei Akzente je Karte.
+ *   + traegt die Markenfarbe, weil Hinzufuegen die eine Handlung ist,
+ *     wegen der man hier ist.
+ *   Der Preis traegt den staerksten Kontrast, weil er die eine Zahl
+ *     ist, auf die geschaut wird — und weil er anklickbar ist.
+ * Alles andere ist ein Chip: gleiche Flaeche, gleiche Kante, lesbare
+ * Schrift. Unterschieden werden sie durch ihr Zeichen, nicht durch
+ * ihre Farbe.
+ *
+ * Die Hoehe steigt von 19 auf 24 px und die Schrift von 9 auf
+ * var(--fs-xs) = 11 px. 19 px ist unter jeder Trefferflaechen-Empfehlung,
+ * und 9 px liest niemand.
+ */
 .city-league-card-action-btn {
-    border: none;
-    border-radius: 5px;
-    height: 20px;
-    cursor: pointer;
+    min-height: 24px;
+    /* css/styles.css gibt auf Mobil jedem <button> `min-width: 44px`.
+     * Drei davon passen nicht in eine 94-px-Kachel — die dritte Spalte
+     * und mit ihr der Preis rutschten aus der Zeile. Der frueher hier
+     * wirksame Gegenzug stand als `min-width: 0 !important` im
+     * Inline-Block von index.html; er gehoert an die Regel, die die
+     * Knoepfe ohnehin besitzt. */
+    min-width: 0;
+    padding: 0 var(--s-1);
+    border: 1px solid var(--line-strong);
+    border-radius: var(--r-sm);
+    background: var(--surface-2);
+    color: var(--ink-2);
+    font-size: var(--fs-xs);
     font-weight: 700;
-    padding: 0 3px;
+    line-height: 1;
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height: unset;
-    min-width: unset;
-    line-height: 1;
-    transition: filter 0.15s, transform 0.15s;
+    cursor: pointer;
+    transition: background .15s, border-color .15s, color .15s;
 }
 .city-league-card-action-btn:focus-visible {
-    outline: 2px solid rgba(255, 255, 255, 0.85);
+    outline: 2px solid var(--brand);
     outline-offset: 1px;
 }
 .city-league-card-action-btn:hover {
-    filter: brightness(1.1);
-    transform: scale(1.05);
+    background: var(--surface-1);
+    border-color: var(--ink-3);
+    color: var(--ink);
 }
-.city-league-card-remove-btn {
-    background: #ef4444;
-    color: white;
-    font-size: 11px;
+/* Der eine Akzent: eine Kopie ins Deck. */
+.city-league-card-add-btn {
+    background: var(--brand);
+    border-color: var(--brand);
+    color: #fff;
+}
+.city-league-card-add-btn:hover {
+    background: var(--brand-ink);
+    border-color: var(--brand-ink);
+    color: #fff;
+}
+/* Sein Gegenstueck bleibt ruhig — und wird erst beim Zeigen deutlich.
+ * Kein Rot: das Paar +/- unterscheidet sich durch sein Zeichen, nicht
+ * durch eine Farbachse, auf der jeder Zwoelfte nichts sieht. */
+.city-league-card-remove-btn:hover {
+    background: var(--dv-neg-bg);
+    border-color: var(--dv-neg);
+    color: var(--ink);
 }
 .city-league-card-rarity-btn {
-    background: #f59e0b;
-    color: #333;
-    font-size: 10px;
     text-align: center;
-}
-.city-league-card-add-btn {
-    background: #22c55e;
-    color: white;
-    font-size: 11px;
 }
 .city-league-card-pin-btn {
     background: rgba(255, 255, 255, 0.12);
@@ -1970,169 +2029,101 @@ img[src*="limitlesstcg"] {
     z-index: 3;
     pointer-events: none;
 }
-.city-league-card-limitless-btn {
-    background: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%);
-    color: white;
-    font-size: 10px;
-}
+/* L und P sind Chips wie die anderen — sie oeffnen Limitless und legen
+ * einen Proxy an, beides Nebenwege. Ihre Verlaeufe (Indigo, Orange)
+ * haben sie optisch vor die beiden Knoepfe gezogen, um die es geht. */
+.city-league-card-limitless-btn,
 .city-league-card-proxy-btn {
-    background: linear-gradient(135deg, #f97316 0%, #c2410c 100%);
-    color: white;
-    font-size: 10px;
+    font-size: var(--fs-xs);
 }
+/* Der zweite Akzent: der Preis. Die eine Zahl auf der Kachel, auf die
+ * beim Deckbau tatsaechlich geschaut wird, und der einzige Knopf, der
+ * die Seite verlaesst. Deshalb der staerkste Kontrast, den die Palette
+ * hergibt — und keine Farbe, die anderswo schon etwas bedeutet. */
 .city-league-card-market-btn {
-    background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
-    color: #ffffff;
-    border: 1px solid rgba(255,255,255,0.24);
-    height: 20px;
-    border-radius: 5px;
-    font-size: 10px;
-    font-weight: 800;
-    padding: 0 4px;
+    min-height: 24px;
+    min-width: 0;
+    padding: 0 var(--s-1);
+    border: 1px solid var(--ink);
+    border-radius: var(--r-sm);
+    background: var(--ink);
+    color: var(--surface-1);
+    font-family: var(--font-num);
+    font-size: var(--fs-xs);
+    font-weight: 700;
+    line-height: 1;
     display: flex;
     align-items: center;
     justify-content: center;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    text-shadow: none;
-    letter-spacing: 0.1px;
-    min-height: unset;
-    min-width: unset;
+    letter-spacing: 0;
 }
-.city-league-card-market-btn[data-market-cursor="pointer"] {
-    background: linear-gradient(135deg, #0f766e 0%, #115e59 100%);
-    color: #ffffff;
-    cursor: pointer;
+.city-league-card-market-btn[data-market-cursor="pointer"] { cursor: pointer; }
+.city-league-card-market-btn[data-market-cursor="pointer"]:hover {
+    background: var(--brand);
+    border-color: var(--brand);
 }
+/* Kein Preis bekannt: gedaempft und nicht anklickbar. Vorher ein grauer
+ * Verlauf, der genauso aussah wie ein Knopf, der etwas tut. */
 .city-league-card-market-btn[data-market-cursor="not-allowed"] {
-    background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
-    color: #f3f4f6;
+    background: var(--surface-2);
+    border-color: var(--line);
+    color: var(--ink-3);
     cursor: not-allowed;
 }
 
-/* Deck Analysis (Japan): denser overlay and cleaner action rows */
-#city-league-analysis .city-league-card-info-bottom {
-    padding: 5px 6px;
+/* ── Die drei Deck-Analysen: ein Block statt drei ──────────────────
+ *
+ * Hier standen bis zum 18.08.2026 dreimal exakt dieselben 40 Zeilen,
+ * einmal je Datenraum — #city-league-analysis, #current-analysis,
+ * #past-meta. Byte-gleich bis auf das Praefix. Wer eine Zahl aendert,
+ * aendert sie an einer Stelle und wundert sich, warum die anderen
+ * beiden Ansichten anders aussehen.
+ *
+ * Die drei Ansichten sind dieselbe Ansicht mit drei Datenquellen; das
+ * steht so im Umbau-Handbuch (G2, Zusammenlegung 1). Bis die Praesen-
+ * tation wirklich eine ist, tut es eine gemeinsame Selektorliste.
+ */
+#city-league-analysis .city-league-card-info-bottom,
+#current-analysis .city-league-card-info-bottom,
+#past-meta .city-league-card-info-bottom {
+    padding: var(--s-1) var(--s-2);
     min-height: 30px;
 }
 
 #city-league-analysis .city-league-card-stats-mobile,
-#city-league-analysis .city-league-card-deck-stats-mobile {
-    margin-bottom: 0;
-    line-height: 1.2;
-}
-
-#city-league-analysis .city-league-card-action-buttons {
-    gap: 2px;
-    margin-top: 3px;
-}
-
-#city-league-analysis .city-league-card-action-row {
-    gap: 2px;
-}
-
-#city-league-analysis .city-league-card-action-row:last-child {
-    gap: 2px;
-}
-
-#city-league-analysis .city-league-card-action-btn,
-#city-league-analysis .city-league-card-market-btn {
-    height: 19px;
-    border-radius: 4px;
-    padding: 0 3px;
-}
-
-#city-league-analysis .city-league-card-remove-btn,
-#city-league-analysis .city-league-card-add-btn,
-#city-league-analysis .city-league-card-rarity-btn,
-#city-league-analysis .city-league-card-limitless-btn,
-#city-league-analysis .city-league-card-proxy-btn,
-#city-league-analysis .city-league-card-market-btn {
-    font-size: 9px;
-}
-
-/* Deck Analysis (Global): same compact card overlay behavior as Japan */
-#current-analysis .city-league-card-info-bottom {
-    padding: 5px 6px;
-    min-height: 30px;
-}
-
+#city-league-analysis .city-league-card-deck-stats-mobile,
 #current-analysis .city-league-card-stats-mobile,
-#current-analysis .city-league-card-deck-stats-mobile {
-    margin-bottom: 0;
-    line-height: 1.2;
-}
-
-#current-analysis .city-league-card-action-buttons {
-    gap: 2px;
-    margin-top: 3px;
-}
-
-#current-analysis .city-league-card-action-row {
-    gap: 2px;
-}
-
-#current-analysis .city-league-card-action-row:last-child {
-    gap: 2px;
-}
-
-#current-analysis .city-league-card-action-btn,
-#current-analysis .city-league-card-market-btn {
-    height: 19px;
-    border-radius: 4px;
-    padding: 0 3px;
-}
-
-#current-analysis .city-league-card-remove-btn,
-#current-analysis .city-league-card-add-btn,
-#current-analysis .city-league-card-rarity-btn,
-#current-analysis .city-league-card-limitless-btn,
-#current-analysis .city-league-card-proxy-btn,
-#current-analysis .city-league-card-market-btn {
-    font-size: 9px;
-}
-
-/* Deck Analysis (Past Meta): same compact card overlay behavior as Japan/Global */
-#past-meta .city-league-card-info-bottom {
-    padding: 5px 6px;
-    min-height: 30px;
-}
-
+#current-analysis .city-league-card-deck-stats-mobile,
 #past-meta .city-league-card-stats-mobile,
 #past-meta .city-league-card-deck-stats-mobile {
     margin-bottom: 0;
     line-height: 1.2;
 }
 
+#city-league-analysis .city-league-card-action-buttons,
+#current-analysis .city-league-card-action-buttons,
 #past-meta .city-league-card-action-buttons {
     gap: 2px;
     margin-top: 3px;
 }
 
+#city-league-analysis .city-league-card-action-row,
+#current-analysis .city-league-card-action-row,
 #past-meta .city-league-card-action-row {
     gap: 2px;
 }
 
-#past-meta .city-league-card-action-row:last-child {
-    gap: 2px;
-}
+/* Hoehe und Schriftgroesse stehen NICHT mehr hier.
+ *
+ * Die drei Kopien setzten `height: 19px` und `font-size: 9px` — neun
+ * Pixel, auf 296 Knoepfen in einem einzigen Gitter (37 Karten x 8).
+ * Beides kommt jetzt aus der Basisregel weiter oben, aus Tokens, und
+ * gilt fuer alle drei Ansichten gleich. Wer es hier wieder ueber-
+ * schreibt, baut die dritte Kopie neu auf. */
 
-#past-meta .city-league-card-action-btn,
-#past-meta .city-league-card-market-btn {
-    height: 19px;
-    border-radius: 4px;
-    padding: 0 3px;
-}
-
-#past-meta .city-league-card-remove-btn,
-#past-meta .city-league-card-add-btn,
-#past-meta .city-league-card-rarity-btn,
-#past-meta .city-league-card-limitless-btn,
-#past-meta .city-league-card-proxy-btn,
-#past-meta .city-league-card-market-btn {
-    font-size: 9px;
-}
 /* City League Card Table Row Modular Styles */
 .city-league-card-table-row {
     display: flex;
@@ -2229,13 +2220,11 @@ img[src*="limitlesstcg"] {
 
 .city-league-card-actions .city-league-card-add-btn {
     padding: 10px 20px;
-    font-size: 0.95em;
     white-space: nowrap;
 }
 
 .city-league-card-actions .city-league-card-proxy-btn {
     padding: 10px 20px;
-    font-size: 0.9em;
     white-space: nowrap;
     background: #e74c3c;
     border-color: #c0392b;
@@ -2351,14 +2340,12 @@ img[src*="limitlesstcg"] {
     }
     .city-league-card-action-btn,
     .city-league-card-market-btn {
-        height: 18px;
         border-radius: 4px;
-    }
+}
     .city-league-card-market-btn {
-        font-size: 8px;
         font-weight: 800;
         padding: 0 3px;
-    }
+}
 
     #city-league-analysis .city-league-card-info-bottom {
         padding: 4px 5px;
@@ -2372,19 +2359,9 @@ img[src*="limitlesstcg"] {
 
     #city-league-analysis .city-league-card-action-btn,
     #city-league-analysis .city-league-card-market-btn {
-        height: 17px;
         border-radius: 3px;
         padding: 0 2px;
-    }
-
-    #city-league-analysis .city-league-card-remove-btn,
-    #city-league-analysis .city-league-card-add-btn,
-    #city-league-analysis .city-league-card-rarity-btn,
-    #city-league-analysis .city-league-card-limitless-btn,
-    #city-league-analysis .city-league-card-proxy-btn,
-    #city-league-analysis .city-league-card-market-btn {
-        font-size: 8px;
-    }
+}
 
     #current-analysis .city-league-card-info-bottom {
         padding: 4px 5px;
@@ -2398,19 +2375,9 @@ img[src*="limitlesstcg"] {
 
     #current-analysis .city-league-card-action-btn,
     #current-analysis .city-league-card-market-btn {
-        height: 17px;
         border-radius: 3px;
         padding: 0 2px;
-    }
-
-    #current-analysis .city-league-card-remove-btn,
-    #current-analysis .city-league-card-add-btn,
-    #current-analysis .city-league-card-rarity-btn,
-    #current-analysis .city-league-card-limitless-btn,
-    #current-analysis .city-league-card-proxy-btn,
-    #current-analysis .city-league-card-market-btn {
-        font-size: 8px;
-    }
+}
 
     #past-meta .city-league-card-info-bottom {
         padding: 4px 5px;
@@ -2424,21 +2391,9 @@ img[src*="limitlesstcg"] {
 
     #past-meta .city-league-card-action-btn,
     #past-meta .city-league-card-market-btn {
-        height: 17px;
         border-radius: 3px;
         padding: 0 2px;
-    }
-
-    #past-meta .city-league-card-remove-btn,
-    #past-meta .city-league-card-add-btn,
-    #past-meta .city-league-card-rarity-btn,
-    #past-meta .city-league-card-limitless-btn,
-    #past-meta .city-league-card-proxy-btn {
-        font-size: 8px;
-    }
-    #past-meta .city-league-card-market-btn {
-        font-size: 8px;
-    }
+}
     #past-meta .city-league-card-info-bottom {
         min-height: unset;
     }
@@ -2460,15 +2415,6 @@ img[src*="limitlesstcg"] {
     #current-analysis .city-league-card-deck-stats-mobile {
         font-size: 0.47em;
         margin-bottom: 0;
-    }
-
-    #current-analysis .city-league-card-action-btn {
-        height: 16px;
-        font-size: 7px;
-    }
-    #current-analysis .city-league-card-market-btn {
-        height: 16px;
-        font-size: 7px;
     }
 }
 
@@ -2503,16 +2449,13 @@ img[src*="limitlesstcg"] {
     }
 
     #current-analysis .city-league-card-action-btn {
-        height: 16px;
         border-radius: 3px;
         padding: 0 3px;
-    }
+}
     #current-analysis .city-league-card-market-btn {
-        height: 16px;
         border-radius: 3px;
         padding: 0 3px;
-        font-size: 7px;
-    }
+}
 }
 
 @media (max-width: 420px) {
@@ -2539,20 +2482,9 @@ img[src*="limitlesstcg"] {
     }
     .city-league-card-action-btn,
     .city-league-card-market-btn {
-        height: 16px;
         border-radius: 3px;
         padding: 0 2px;
-    }
-    .city-league-card-remove-btn,
-    .city-league-card-add-btn,
-    .city-league-card-rarity-btn,
-    .city-league-card-limitless-btn,
-    .city-league-card-proxy-btn {
-        font-size: 9px;
-    }
-    .city-league-card-market-btn {
-        font-size: 7px;
-    }
+}
 }
 
 @media (max-width: 390px) {
@@ -2586,26 +2518,22 @@ img[src*="limitlesstcg"] {
     }
 
     #city-league-analysis .city-league-card-action-btn {
-        height: 16px;
         border-radius: 3px;
         padding: 0 3px;
-    }
+}
 
     #city-league-analysis .city-league-card-remove-btn,
     #city-league-analysis .city-league-card-add-btn,
     #city-league-analysis .city-league-card-rarity-btn,
     #city-league-analysis .city-league-card-limitless-btn,
     #city-league-analysis .city-league-card-proxy-btn {
-        font-size: 7px;
         letter-spacing: 0;
-    }
+}
     #city-league-analysis .city-league-card-market-btn {
-        height: 16px;
         border-radius: 3px;
         padding: 0 3px;
-        font-size: 7px;
         letter-spacing: 0;
-    }
+}
 }
 
 @media (max-width: 412px) and (min-width: 391px) {
@@ -2633,15 +2561,11 @@ img[src*="limitlesstcg"] {
     }
 
     #city-league-analysis .city-league-card-action-btn {
-        height: 17px;
-        font-size: 8px;
         padding: 0 3px;
-    }
+}
     #city-league-analysis .city-league-card-market-btn {
-        height: 17px;
-        font-size: 8px;
         padding: 0 3px;
-    }
+}
 }
 
 /* ─────────────────────────────────────────────────────────────────────
@@ -3013,7 +2937,6 @@ img[src*="limitlesstcg"] {
 }
 
 #city-league-analysis .city-league-card-market-btn {
-    font-size: 8px;
     padding: 0 4px;
 }
 /* Modular info grid and card styles for City League */

@@ -283,75 +283,28 @@
         line-height: 1.15 !important;
       }
 
-      /* Action buttons: compact — L and P narrower, price gets flex.
+      /* Hier standen 34 !important, die die sechs Kartenknoepfe auf
+       * 28 px und 11 px zwingen wollten. Der Kommentar dazu lautete:
+       * "2026-06-10 audit fix — previous values (height 16px,
+       * font-size 7px) were below WCAG minimums ... the buttons now
+       * hit the 'I can actually tap and read this' bar."
        *
-       * 2026-06-10 audit fix — previous values (height 16px, font-size 7px)
-       * were below WCAG minimums (44px touch target, 12px text legibility)
-       * AND below practical phone readability. Bumped to 28px tall / 11px
-       * text — still compact enough that the 6-col mobile card grid keeps
-       * its current row count, but the buttons now hit the
-       * "I can actually tap and read this" bar.
-       */
-      body .city-league-card-action-btn,
-      body .city-league-card-add-btn,
-      body .city-league-card-remove-btn,
-      body .city-league-card-rarity-btn {
-        height: 28px !important;
-        min-height: 28px !important;
-        max-height: 28px !important;
-        min-width: 0 !important;
-        flex: 1 1 0% !important;
-        font-size: 11px !important;
-        padding: 0 4px !important;
-        border-radius: 4px !important;
-        line-height: 1.1 !important;
-      }
+       * Sie haben es nie erreicht. Gemessen am 18.08.2026 auf 390 px:
+       * 24 x 22 px mit 9-px-Schrift. Geschlagen von einer einzigen
+       * Zeile in css/mobile-responsive.css — `.card-item
+       * [class*="action"] button { min-height: 22px !important }` —,
+       * die spezifischer ist als `body .city-league-card-action-btn`
+       * und die nie fuer diese Knoepfe geschrieben wurde.
+       *
+       * Die Wildcard-Regel ist jetzt eingegrenzt, die 24 verstreuten
+       * Verkleinerungsregeln in css/ui-components.css sind weg, und die
+       * Groesse steht an genau einer Stelle. Deshalb braucht es hier
+       * nichts mehr. */
 
-      /* L and P buttons: fixed narrow width */
-      body .city-league-card-limitless-btn,
-      body .city-league-card-proxy-btn {
-        height: 28px !important;
-        min-height: 28px !important;
-        max-height: 28px !important;
-        min-width: 0 !important;
-        width: 26px !important;
-        max-width: 26px !important;
-        font-size: 11px !important;
-        padding: 0 2px !important;
-        border-radius: 4px !important;
-        line-height: 1.1 !important;
-        flex-shrink: 0 !important;
-      }
-
-      /* Price button: takes remaining space */
-      body .city-league-card-market-btn {
-        height: 28px !important;
-        min-height: 28px !important;
-        max-height: 28px !important;
-        min-width: 0 !important;
-        flex: 1 1 auto !important;
-        font-size: 11px !important;
-        padding: 0 4px !important;
-        border-radius: 4px !important;
-        line-height: 1.1 !important;
-        overflow: hidden !important;
-        text-overflow: ellipsis !important;
-        white-space: nowrap !important;
-      }
-
-      body .city-league-card-action-row {
-        display: flex !important;
-        gap: 2px !important;
-      }
-
-      body .city-league-card-action-row:last-child {
-        display: flex !important;
-      }
-
-      body .city-league-card-action-buttons {
-        gap: 2px !important;
-        margin-top: 2px !important;
-      }
+      /* Abstaende der Aktionszeilen: stehen genauso in
+         css/ui-components.css. Drei Regeln mit fuenf !important, die
+         nichts anderes gesagt haben als die Datei, die dafuer zustaendig
+         ist. Das `:last-child` traf ohnehin die Cooking-Mode-Reihe. */
 
       /* Count badges: 22px (was 16px — 2026-06-10 audit fix) */
       body .city-league-card-badge {
@@ -441,16 +394,10 @@
         line-height: 1.15 !important;
       }
 
-      body #cityLeagueMetaGrid .city-league-card-action-btn,
-      body #currentMetaMetaGrid .city-league-card-action-btn,
-      body .meta-card-grid .city-league-card-action-btn {
-        height: 16px !important;
-        min-height: 16px !important;
-        max-height: 16px !important;
-        min-width: 0 !important;
-        font-size: 7px !important;
-        padding: 0 2px !important;
-      }
+/* Auch der Zwilling ist weg: `... .meta-card-grid
+       * .city-league-card-action-btn { height: 16px }` hat dieselben
+       * Knoepfe im Kartenraster noch einmal geschrumpft. Die Groesse
+       * kommt aus css/ui-components.css. */
 
       body #cityLeagueMetaGrid .card-badge,
       body #currentMetaMetaGrid .card-badge,

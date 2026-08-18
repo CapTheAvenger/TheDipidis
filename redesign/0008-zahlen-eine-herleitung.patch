@@ -1,0 +1,410 @@
+From 5ec3cfcb3defa5770ce4272e17867ec42fbf6229 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Tue, 18 Aug 2026 04:41:51 +0000
+Subject: [PATCH 8/9] zahlen: eine Herleitung je Groesse, n an jeder Rangliste,
+ Formel an der Quote
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Kein Rechenfehler in den Rohdaten — die Gegenpruefung hat alle Kernwerte
+unabhaengig reproduziert. Was fehlte, war die Angabe, worauf eine Zahl sich
+bezieht, dort wo sie steht.
+
+Hub-Antwortblock
+- Die Top-8-Quote wird EINMAL hergeleitet (model.headlineConvPct) und an Satz
+  und Kachel gereicht. Vorher rechnete der Satz best.top8/best.brought neu,
+  waehrend die Kachel die vorgerundete CSV-Spalte top8_conv_rate las: derselbe
+  Wert 11,8525 % wurde zu 11,9 und 11,8, drei Zeilen auseinander.
+- Der Satz vergleicht roh mit roh (+78 %) und nennt die Glaettung daneben.
+  Vorher stand die rohe Quote neben der geglaetteten Abweichung — beide fuer
+  sich richtig, zusammen nicht nachrechenbar.
+- Kacheln tragen n und einen Rang. Zwei Kacheln mit derselben Beschriftung
+  'Meistgespielt' lasen sich wie ein Fehler statt wie Platz 1 und 2.
+
+Ranglisten in current-meta
+- Beide Tabellen bekommen eine n-Spalte, Zeilen unter CONV_THIN_N werden
+  ausgegraut. Sie werden als Rangliste gelesen; Platz 1 war zeitweise ein Deck
+  mit 8 gewichteten Cuts und einem 95-%-Intervall von 7,9 % bis 27,1 %.
+  Die Nachbartabelle machte es seit jeher richtig.
+
+Matchups
+- Number.isFinite statt `> 0` an vier Stellen. Der Filter sollte fehlende
+  Werte ausschliessen, traf aber echte Nullen: 51 von 1491 Zeilen, darunter
+  Iron Thorns gegen Mega Excadrill mit 0 aus 12. 'Worst Matchups' konnte das
+  schlechteste Matchup strukturell nicht zeigen, und der gewichtete Schnitt
+  lag zu hoch.
+- Past Meta bekommt eine Mindeststichprobe (20 Partien). Es war die einzige
+  Matchup-Ansicht ohne: '1 Game, 100,0 %' stand gleichrangig neben 544 Partien.
+
+Siegquoten-Konvention
+- aggregateLabsRowsByDeck rechnete (W+0,5T)/G, waehrend die Quelldatei
+  labs_tournament_decks.csv (3W+T)/3N fuehrt — die App erfand aus korrekten
+  Rohdaten eine weitere Zahl (Median 2,38 pp, max 12,5 pp daneben, gemessen
+  ueber alle 4.667 Zeilen). Sie liefert jetzt beides benannt: matchPointPct in
+  der Konvention der Quelle, winPct in der der Ladder.
+- Damit vergleicht die Tier-1-Schwelle T1_MIN_WR endlich gleiche Skalen. Vorher
+  war die Huerde auf der Labs-Seite rund 2,4 pp weicher, und welcher Pfad griff,
+  hing allein davon ab, ob eine Labs-Datei existierte.
+- Das Labs-Abzeichen nennt die Formel im Tooltip und formatiert Prozent
+  lokalisiert statt mit hartem Punkt.
+
+Meta Call
+- Der Status-Banner war ausgerechnet in Mode A unterdrueckt — also genau dann,
+  wenn die Prognose auf reiner Online-Ladder beruht. Am 17.08. war PBL seit 17
+  Tagen legal, die neueste Labs-Zeile vom 10.06. aus dem Vorformat, 4520 von
+  4667 Zeilen verworfen; die UI zeigte 'Source: Current Meta · PBL' ueber einer
+  vollen Feldtabelle. Die Texte fuer Mode A existierten bereits und sind
+  ehrlich; sie wurden nur nie gezeigt.
+
+1010 JS-Tests und 373 Python-Tests gruen.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01Ld5WCR1Wjb95tBgocvSXbH
+---
+ js/app-anti-tech.js             | 10 ++++-
+ js/app-current-meta-analysis.js | 14 +++++--
+ js/app-meta-call.js             | 14 ++++++-
+ js/app-past-meta.js             | 18 +++++++--
+ js/app-tier-meta.js             | 71 ++++++++++++++++++++++++++++-----
+ js/meta-analysis-hub.js         | 56 ++++++++++++++++++++++----
+ 6 files changed, 158 insertions(+), 25 deletions(-)
+
+diff --git a/js/app-anti-tech.js b/js/app-anti-tech.js
+index 1ed27c80..aeffdd65 100644
+--- a/js/app-anti-tech.js
++++ b/js/app-anti-tech.js
+@@ -111,7 +111,15 @@
+             const opp = String(r.opponent || '').trim();
+             if (!opp) continue;
+             const wr = parseLocaleNumber(r.win_rate || '0', 0);
+-            if (Number.isFinite(wr) && wr > 0 && !map.has(opp.toLowerCase())) {
++            // Number.isFinite statt `> 0`: der Filter sollte fehlende Werte
++            // ausschliessen, traf aber auch echte Nullen. 51 von 1491 Zeilen in
++            // limitless_online_decks_matchups.csv haben win_rate = 0, verteilt
++            // auf 32 Decks — darunter Iron Thorns gegen Mega Excadrill mit
++            // 0 aus 12. Die Tabelle "Worst Matchups" konnte das schlechteste
++            // Matchup eines Decks strukturell nicht anzeigen, und der
++            // anteilsgewichtete Schnitt lag dadurch zu hoch. Fehlende Werte
++            // kommen als leerer String an und bleiben weiterhin draussen.
++            if (Number.isFinite(wr) && !map.has(opp.toLowerCase())) {
+                 map.set(opp.toLowerCase(), wr);
+             }
+         }
+diff --git a/js/app-current-meta-analysis.js b/js/app-current-meta-analysis.js
+index cae7c65e..5e9ef5b6 100644
+--- a/js/app-current-meta-analysis.js
++++ b/js/app-current-meta-analysis.js
+@@ -1778,7 +1778,15 @@
+                     wr:       parseWr(r.win_rate),
+                     record:   r.record || '',
+                 }))
+-                .filter(m => m.opponent && m.wr > 0);
++                // Number.isFinite statt `> 0`: der Filter sollte fehlende Werte
++                // ausschliessen, traf aber auch echte Nullen. 51 von 1491 Zeilen in
++                // limitless_online_decks_matchups.csv haben win_rate = 0, verteilt
++                // auf 32 Decks — darunter Iron Thorns gegen Mega Excadrill mit
++                // 0 aus 12. Die Tabelle "Worst Matchups" konnte das schlechteste
++                // Matchup eines Decks strukturell nicht anzeigen, und der
++                // anteilsgewichtete Schnitt lag dadurch zu hoch. Fehlende Werte
++                // kommen als leerer String an und bleiben weiterhin draussen.
++                .filter(m => m.opponent && Number.isFinite(m.wr));
+ 
+             if (enriched.length === 0) return false;
+ 
+@@ -1867,7 +1875,7 @@
+                 if (d !== target && d !== stripped) return;
+                 const opp = String(r.opponent || '').trim();
+                 const wr = parseWr(r.win_rate);
+-                if (opp && wr > 0) wrByOpp[opp.toLowerCase()] = { opponent: opp, wr };
++                if (opp && Number.isFinite(wr)) wrByOpp[opp.toLowerCase()] = { opponent: opp, wr };
+             });
+ 
+             if (Object.keys(wrByOpp).length === 0) {
+@@ -2099,7 +2107,7 @@
+                 if (d !== target && d !== stripped) return;
+                 const opp = String(r.opponent || '').trim();
+                 const wr = parseWr(r.win_rate);
+-                if (opp && wr > 0) wrByOpp[opp.toLowerCase()] = { opponent: opp, wr };
++                if (opp && Number.isFinite(wr)) wrByOpp[opp.toLowerCase()] = { opponent: opp, wr };
+             });
+             if (Object.keys(wrByOpp).length === 0) return hide(`no matchup rows for ${archetype}`);
+ 
+diff --git a/js/app-meta-call.js b/js/app-meta-call.js
+index 27d0f1a6..557eae23 100644
+--- a/js/app-meta-call.js
++++ b/js/app-meta-call.js
+@@ -7430,7 +7430,19 @@ window.MetaCall = (function () {
+     // source. Once major data lands and the predictor flips to Mode B,
+     // the banner becomes substantive (counts the weighted majors) and
+     // is shown again.
+-    if (_predictorMode !== 'B') return '';
++    // UMGEKEHRT gegenueber dem Zustand bis zum 17.08.2026. Der Banner war
++    // ausgerechnet in Mode A unterdrueckt — also genau dann, wenn die
++    // Prognose auf reiner Online-Ladder beruht. Am 17.08. lief die Seite so:
++    // PBL war seit 17 Tagen in Person legal, die neueste Labs-Zeile stammte
++    // vom 10.06. aus dem Vorformat, 4520 von 4667 Turnierzeilen wurden
++    // verworfen — und die UI zeigte "Source: Current Meta · PBL" ueber einer
++    // vollstaendigen Feldtabelle. Der Nutzer konnte "Prognose aus sechs
++    // Regionals" nicht von "Prognose aus reiner Ladder" unterscheiden; beide
++    // Faelle sahen identisch aus, obwohl die Verlaesslichkeit um
++    // Groessenordnungen auseinanderliegt.
++    //
++    // Mode A ist der Fall, der den Hinweis BRAUCHT. In Mode B faellt er
++    // knapper aus, weil dort echte Turnierdaten dahinterstehen.
+ 
+     const mode    = _predictorMode === 'B' ? 'B' : 'A';
+     const setCode = (fw && fw.current_set) ? String(fw.current_set).toUpperCase() : '';
+diff --git a/js/app-past-meta.js b/js/app-past-meta.js
+index e2ccf93e..b02c1215 100644
+--- a/js/app-past-meta.js
++++ b/js/app-past-meta.js
+@@ -1566,11 +1566,20 @@
+             const headerWr = (typeof t === 'function' ? t('pm.matchupColWinPct') : 'Win %');
+             const tournHint = (typeof t === 'function' ? t('pm.matchupTournHint') : 'Aggregated across labs tournaments where this archetype appeared.');
+ 
++            // Mindeststichprobe. Diese Tabelle hatte als einzige Matchup-Ansicht
++            // gar keine: "Mega Camerupt, 1 Game, 100,0 %" stand gleichrangig
++            // neben einer Zeile mit 544 Partien. Unter der Schwelle bleibt der
++            // Wert sichtbar — er ist ja gemessen — verliert aber die Farbe, die
++            // ihn als Signal ausweist, und die Zeile wird ausgegraut.
++            const MU_MIN_GAMES = (typeof window.CONV_MIN_N === 'number') ? window.CONV_MIN_N : 20;
++
+             const rowsHtml = opps.map(o => {
+-                const wrCls = o.winPct >= 55 ? 'past-meta-mu-good'
++                const thin = !(o.games >= MU_MIN_GAMES);
++                const wrCls = thin ? 'past-meta-mu-even'
++                           : o.winPct >= 55 ? 'past-meta-mu-good'
+                            : o.winPct <= 45 ? 'past-meta-mu-bad'
+                            : 'past-meta-mu-even';
+-                return `<tr>
++                return `<tr${thin ? ' class="is-muted"' : ''}>
+                     <td>${(typeof window.escapeHtml === 'function' ? window.escapeHtml(o.name) : o.name)}</td>
+                     <td class="past-meta-mu-games">${o.games}</td>
+                     <td class="past-meta-mu-wr ${wrCls}">${o.winPct.toFixed(1).replace('.', ',')}%</td>
+@@ -1579,7 +1588,10 @@
+ 
+             container.innerHTML = `
+                 <h3 class="past-meta-matchup-title">${titleLabel}</h3>
+-                <p class="past-meta-section-hint">${tournHint}</p>
++                <p class="past-meta-section-hint">${tournHint} ${
++                    (typeof getLang === 'function' && getLang() === 'de')
++                        ? `Unter ${MU_MIN_GAMES} Partien ausgegraut und ohne Farbe.`
++                        : `Below ${MU_MIN_GAMES} games: faded and shown without colour.`}</p>
+                 <div class="past-meta-matchup-table-wrap">
+                     <table class="past-meta-matchup-table">
+                         <thead><tr>
+diff --git a/js/app-tier-meta.js b/js/app-tier-meta.js
+index a79ec1d9..314ee666 100644
+--- a/js/app-tier-meta.js
++++ b/js/app-tier-meta.js
+@@ -230,9 +230,30 @@
+             const out = {};
+             for (const [name, e] of byName) {
+                 const games = e.wins + e.losses + e.ties;
+-                const winPct = games > 0 ? (e.wins + 0.5 * e.ties) / games * 100 : 0;
++
++                // ZWEI Groessen, weil es zwei Fragen sind — und weil diese
++                // Funktion vorher eine dritte Konvention erfunden hat.
++                //
++                // Bis zum 17.08.2026 stand hier (W + 0,5T)/G. Die Quelldatei
++                // data/labs_tournament_decks.csv rechnet ihre eigene Spalte
++                // win_pct aber als (3W + T)/3N — die Pokemon-Swiss-Punkte, also
++                // das, was ueber die Platzierung entscheidet. Nachgerechnet
++                // ueber alle 4.667 Zeilen: die Datei-Konvention passt exakt
++                // (max. Abweichung 0,005), die hier verwendete lag im Median
++                // 2,38 pp und maximal 12,5 pp daneben. Die App hat aus
++                // korrekten Rohdaten eine vierte Zahl gemacht.
++                //
++                //   matchPointPct  Konvention der Quelle, vergleichbar mit
++                //                  labs_tournament_decks.csv
++                //   winPct         W/(W+L+T), Konvention der Ladder-Datei
++                //                  limitless_online_decks.csv
++                //
++                // Beide werden mitgegeben, damit ein Vergleich nie stillschweigend
++                // zwischen zwei Skalen laeuft (siehe die Tier-1-Schwelle unten).
++                const matchPointPct = games > 0 ? (3 * e.wins + e.ties) / (3 * games) * 100 : 0;
++                const winPct = games > 0 ? e.wins / games * 100 : 0;
+                 const day2Conv = e.day1 > 0 ? e.day2 / e.day1 : 0;
+-                out[name] = { games, winPct, day2Conv,
++                out[name] = { games, winPct, matchPointPct, day2Conv,
+                               players: e.players, tournaments: e.tournaments.size };
+             }
+             return out;
+@@ -1239,6 +1260,15 @@
+                 // Without this floor, popular-but-losing decks
+                 // (Mega Greninja 6 %/44 % case) stay in Tier 1 just
+                 // for being played a lot.
++                //
++                // BEIDE Werte muessen auf derselben Skala liegen, bevor sie
++                // gegen dieselbe Schwelle geprueft werden. sc.adjWR beruht auf
++                // deck.winrate, also der Ladder-Konvention W/(W+L+T);
++                // labsWR kam bis zum 17.08.2026 aus einer dritten Formel und
++                // lag dadurch systematisch hoeher — die Huerde war auf der
++                // Labs-Seite rund 2,4 pp weicher, und welcher Pfad griff, hing
++                // allein davon ab, ob eine Labs-Datei existierte. labsByName
++                // liefert jetzt winPct in derselben Konvention wie die Ladder.
+                 const wrFloorOK = sc.adjWR >= T1_MIN_WR || labsWR >= T1_MIN_WR;
+                 const tier1Eligible = meetsMinCount
+                                    && deck.share >= T1_MIN_SHARE
+@@ -1351,26 +1381,40 @@
+                     // #currentMetaContent .section table nimmt .ds-table
+                     // per :not() aus, statt dass hier dagegen
+                     // angeschrieben wird.
+-                    const renderRow = (d, i, valueLabel, valueText) => `
+-                        <tr>
++                    // n gehört in die Zeile, nicht in die Fußnote. Diese beiden
++                    // Tabellen zeigten bisher nur Rang, Name und Wert — und
++                    // werden als Rangliste gelesen. Platz 1 war zeitweise ein
++                    // Deck mit 8 gewichteten Cuts, dessen 95-%-Wilson-Intervall
++                    // von 7,9 % bis 27,1 % reicht. Die Nachbartabelle
++                    // "Top-8 vs. Erwartung" macht es seit jeher richtig; hier
++                    // fehlte es.
++                    // Unter CONV_THIN_N wird die Zeile ausgegraut — dieselbe
++                    // Konvention wie dort, damit "dünn" überall gleich aussieht.
++                    const renderRow = (d, i, valueLabel, valueText, n) => {
++                        const thin = (typeof n === 'number') && n < CONV_THIN_N;
++                        return `
++                        <tr${thin ? ' class="is-muted"' : ''}>
+                             <td class="ds-rank">${i + 1}</td>
+                             <td>${escapeHtml(d.name)}</td>
+                             <td class="ds-num" title="${escapeHtml(valueLabel)}">${valueText}</td>
++                            <td class="ds-num" title="${getLang() === 'de' ? 'Stichprobe' : 'sample size'}">${
++                                typeof n === 'number' ? fmtNumDS(n) : '–'}</td>
+                         </tr>`;
++                    };
+                     overallTop8Html = `
+                         <div class="cm-vs-top8-row">
+                             <div class="ds-panel">
+                                 <h3 class="ds-label">🌐 ${getLang() === 'de' ? 'Wie oft gespielt' : 'Overall (brought share)'}</h3>
+                                 <table class="ds-table">
+-                                    <thead><tr><th class="ds-rank">#</th><th>Deck</th><th class="ds-num">${hintTerm(getLang() === 'de' ? 'Anteil' : 'Share', term('share'))}</th></tr></thead>
+-                                    <tbody>${overallTop.map((d, i) => renderRow(d, i, 'brought share', fmtPct(d.broughtPct))).join('')}</tbody>
++                                    <thead><tr><th class="ds-rank">#</th><th>Deck</th><th class="ds-num">${hintTerm(getLang() === 'de' ? 'Anteil' : 'Share', term('share'))}</th><th class="ds-num">n</th></tr></thead>
++                                    <tbody>${overallTop.map((d, i) => renderRow(d, i, 'brought share', fmtPct(d.broughtPct), d.brought)).join('')}</tbody>
+                                 </table>
+                             </div>
+                             <div class="ds-panel">
+                                 <h3 class="ds-label">🏆 ${getLang() === 'de' ? 'Wie oft Top-8 erreicht' : 'Top-8 (conversion)'}</h3>
+                                 <table class="ds-table">
+-                                    <thead><tr><th class="ds-rank">#</th><th>Deck</th><th class="ds-num">${hintTerm('Top-8', term('top8'))}</th></tr></thead>
+-                                    <tbody>${top8Top.map((d, i) => renderRow(d, i, 'top-8 conversion', fmtPct(d.top8ConvPct))).join('')}</tbody>
++                                    <thead><tr><th class="ds-rank">#</th><th>Deck</th><th class="ds-num">${hintTerm('Top-8', term('top8'))}</th><th class="ds-num">n</th></tr></thead>
++                                    <tbody>${top8Top.map((d, i) => renderRow(d, i, 'top-8 conversion', fmtPct(d.top8ConvPct), d.brought)).join('')}</tbody>
+                                 </table>
+                             </div>
+                         </div>
+@@ -1597,7 +1641,16 @@
+                     if (_sc && _sc.labsHit && labsByName) {
+                         const ent = labsByName[archetypeName];
+                         if (ent) {
+-                            labsBadge = `<span class="stat-badge stat-labs" title="Labs tournament data (${ent.tournaments} Turniere, ${ent.games} Games)">🏆 ${ent.winPct.toFixed(1)}% WR · ${ent.tournaments}T</span>`;
++                            // Formel ins Tooltip. Eine Siegquote ohne ihre
++                            // Konvention ist auf dieser Seite nicht eindeutig:
++                            // die Rohdaten tragen drei verschiedene, und der
++                            // Unterschied betraegt bis zu 6,4 pp auf identischer
++                            // Bilanz. Trainer Hill macht das vor und schreibt die
++                            // Formel neben die Zahl.
++                            const _labsTitle = (getLang() === 'de'
++                                ? `Turnierdaten aus Limitless Labs · ${ent.tournaments} Turniere, ${ent.games} Partien · Siegquote = W/(W+L+U) · Matchpunkte ${fmtPct(ent.matchPointPct)}`
++                                : `Limitless Labs tournament data · ${ent.tournaments} tournaments, ${ent.games} games · win rate = W/(W+L+T) · match points ${fmtPct(ent.matchPointPct)}`);
++                            labsBadge = `<span class="stat-badge stat-labs" title="${escapeHtml(_labsTitle)}">🏆 ${fmtPct(ent.winPct)} WR · ${ent.tournaments}T</span>`;
+                         }
+                     }
+ 
+diff --git a/js/meta-analysis-hub.js b/js/meta-analysis-hub.js
+index 076bddcf..52e2a31a 100644
+--- a/js/meta-analysis-hub.js
++++ b/js/meta-analysis-hub.js
+@@ -173,7 +173,14 @@
+               ]
+             : top.map(d => Object.assign({}, d, { role: 'played' }));
+ 
+-        return { conv, top: ordered.slice(0, 3), headline, totalBrought };
++        // EINE Herleitung der Headline-Quote. Die Kachel liest sie unten aus
++        // demselben `ordered[0]`, der Satz aus headlineConvPct — beide also
++        // aus derselben Zahl statt aus zwei Rechenwegen.
++        const headlineConvPct = ordered.length && ordered[0].role === 'best'
++            ? ordered[0].convPct
++            : (headline ? (headline.top8 / headline.brought) * 100 : 0);
++
++        return { conv, top: ordered.slice(0, 3), headline, totalBrought, headlineConvPct };
+     }
+ 
+     // Ein Satz Klartext über dem Zahlenblock. Er nennt das Deck, das am
+@@ -187,14 +194,34 @@
+         // Die Stichprobe steht im Satz. Eine Quote ohne n ist eine Behauptung,
+         // mit n ist sie eine Aussage.
+         const n = Math.round(best.brought).toLocaleString(de ? 'de-DE' : 'en-US');
++
++        // Die Quote wird EINMAL hergeleitet und dann an Satz und Kachel
++        // gereicht. Vorher rechnete dieser Satz best.top8/best.brought neu,
++        // während die Kachel darunter die vorgerundete CSV-Spalte
++        // top8_conv_rate las: derselbe Wert 11,8525 % wurde hier zu 11,9 und
++        // dort zu 11,8, drei Zeilen auseinander. Kein Datenfehler — zwei
++        // Herleitungen, die verschieden runden.
++        const convPct = model.headlineConvPct;
++
++        // Roh gegen roh. Der Satz mischte bisher die rohe Quote mit der
++        // geglätteten Abweichung: 11,85 % / 6,6457 % sind +78 %, angezeigt
++        // wurden die geglätteten +72 %. Beide Zahlen stimmen für sich, aber
++        // wer nachrechnet, kommt nicht auf das Ergebnis und hält die Seite
++        // für kaputt. Die Glättung steht jetzt daneben statt darin.
++        const rawPerf = (convPct / (model.conv.expected * 100) - 1) * 100;
++        const smoothed = de
++            ? `geglättet ${fmtSigned(best.perfPct, 0)}`
++            : `smoothed ${fmtSigned(best.perfPct, 0)}`;
++
+         return de
+-            ? `<strong>${escapeHtml(best.name)}</strong> ist derzeit das erfolgreichste Deck: ${fmtPct((best.top8 / best.brought) * 100)} von ${n} Antritten erreichen die Top 8 — ${fmtSigned(best.perfPct, 0)} gegenüber dem Feld-Durchschnitt von ${fmtPct(model.conv.expected * 100, 2)}.`
+-            : `<strong>${escapeHtml(best.name)}</strong> is the strongest deck right now: ${fmtPct((best.top8 / best.brought) * 100)} of ${n} entries reach top 8 — ${fmtSigned(best.perfPct, 0)} against the field average of ${fmtPct(model.conv.expected * 100, 2)}.`;
++            ? `<strong>${escapeHtml(best.name)}</strong> ist derzeit das erfolgreichste Deck: ${fmtPct(convPct)} von ${n} Antritten erreichen die Top 8 — ${fmtSigned(rawPerf, 0)} gegenüber dem Feld-Durchschnitt von ${fmtPct(model.conv.expected * 100, 2)} (${smoothed}).`
++            : `<strong>${escapeHtml(best.name)}</strong> is the strongest deck right now: ${fmtPct(convPct)} of ${n} entries reach top 8 — ${fmtSigned(rawPerf, 0)} against the field average of ${fmtPct(model.conv.expected * 100, 2)} (${smoothed}).`;
+     }
+ 
+     function answerHtml(model) {
+         const de = isDe();
+         const stamp = (typeof localStorage !== 'undefined' && localStorage.getItem('lastScraperUpdate')) || '';
++        let playedRank = 0;
+         const tile = (d) => {
+             const perf = d.perfPct == null ? '' : fmtSigned(d.perfPct, 0);
+             const cls = d.perfPct == null ? '' : (d.perfPct >= 0 ? ' is-pos' : ' is-neg');
+@@ -202,17 +229,30 @@
+             // die Reihe als "die drei stärksten Decks", obwohl sie nach Anteil
+             // sortiert ist — und die erste Kachel konnte der schwächste
+             // Performer sein.
+-            const role = d.role === 'best'
+-                ? (de ? 'Erfolgreichstes' : 'Most successful')
+-                : (de ? 'Meistgespielt' : 'Most played');
++            //
++            // Der Rang steht dazu: zwei Kacheln nebeneinander mit derselben
++            // Beschriftung "Meistgespielt" lasen sich wie ein Fehler, obwohl
++            // es Platz 1 und Platz 2 nach Anteil sind.
++            let role;
++            if (d.role === 'best') {
++                role = de ? 'Erfolgreichstes Deck' : 'Most successful deck';
++            } else {
++                playedRank += 1;
++                role = (de ? 'Meistgespielt · Rang ' : 'Most played · rank ') + playedRank;
++            }
++            // "ggü. Feld" ist der geglättete Wert (Empirical Bayes, K = 50).
++            // Ohne das Wort rechnet niemand die Quote gegen den Feldschnitt
++            // nach und kommt auf dasselbe Ergebnis.
++            const perfLabel = de ? 'ggü. Feld, geglättet' : 'vs. field, smoothed';
+             return `
+                 <div class="ds-stat${cls}">
+                     <span class="ds-stat-role">${role}</span>
+                     <span class="ds-stat-label">${escapeHtml(d.name)}</span>
+                     <span class="ds-stat-value">${fmtPct(d.sharePct)}</span>
+-                    <span class="ds-stat-context">${de ? 'des Feldes' : 'of the field'} · ${
++                    <span class="ds-stat-context">${de ? 'des Feldes' : 'of the field'} · n = ${
++                        Math.round(d.brought).toLocaleString(de ? 'de-DE' : 'en-US')}<br>${
+                         de ? 'Top-8-Quote' : 'top-8 rate'} ${fmtPct(d.convPct)}${
+-                        perf ? ` · ${perf} ${de ? 'ggü. Feld' : 'vs. field'}` : ''}</span>
++                        perf ? ` · ${perf} ${perfLabel}` : ''}</span>
+                 </div>`;
+         };
+         return `
+-- 
+2.43.0
+

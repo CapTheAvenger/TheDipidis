@@ -1,0 +1,187 @@
+From 0102585905621b7d5a99e509d9240636b304ddce Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Mon, 17 Aug 2026 22:33:15 +0000
+Subject: [PATCH 5/9] ci: stop committing a version stamp the deploy overwrites
+ anyway
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Five data jobs ran ./bump-version.sh and committed index.html,
+service-worker.js and version.json alongside their data. deploy-pages.yml
+rewrites all of it inside _site/ on every deploy — ?v=, APP_VERSION,
+CACHE_NAME, version.json and the _formatWindow snapshot (its "Cache-bust
+asset references" step) — so the committed stamp never reaches a user.
+
+What it did instead: ~147 commits a month touching the 845 KB index.html, and
+a new service-worker CACHE_NAME several times a day, which makes the activate
+handler wipe every client's cache on each visit.
+
+bump-version.sh stays for humans changing js/css/index.html by hand, exactly
+as CLAUDE.md describes. Only the data jobs stop calling it.
+
+weekly-full-update needed no git-add change (it uses `git add -A`, and with
+the bump gone those three files simply no longer differ).
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01Ld5WCR1Wjb95tBgocvSXbH
+---
+ .github/workflows/champions-replica-scrape.yml | 14 ++++++++------
+ .github/workflows/champions-usage-refresh.yml  | 14 ++++++++------
+ .github/workflows/daily-price-refresh.yml      | 14 ++++++++------
+ .github/workflows/per-decklist-scrape.yml      | 14 ++++++++------
+ .github/workflows/weekly-full-update.yml       | 11 +++++++----
+ 5 files changed, 39 insertions(+), 28 deletions(-)
+
+diff --git a/.github/workflows/champions-replica-scrape.yml b/.github/workflows/champions-replica-scrape.yml
+index 5666cb3b..5b8de507 100644
+--- a/.github/workflows/champions-replica-scrape.yml
++++ b/.github/workflows/champions-replica-scrape.yml
+@@ -238,10 +238,13 @@ jobs:
+           fi
+           exit 0
+ 
+-      - name: Bump version
+-        run: |
+-          chmod +x bump-version.sh
+-          ./bump-version.sh
++      # No bump here. deploy-pages.yml rewrites ?v=, APP_VERSION, the service
++      # worker CACHE_NAME, version.json and the _formatWindow snapshot inside
++      # _site/ on every deploy (its "Cache-bust asset references" step), so the
++      # stamp a data job commits never reaches a user. All it did was put
++      # index.html (845 KB), service-worker.js and version.json into ~147
++      # commits a month and churn the service worker's CACHE_NAME, which makes
++      # the activate handler drop every client cache several times a day.
+ 
+       - name: Commit + push
+         id: commit
+@@ -256,8 +259,7 @@ jobs:
+                   data/champions_roster_extra.json \
+                   data/champions_available_items.json \
+                   data/de_name_overrides.json \
+-                  data/pokemonproxies_index.json \
+-                  index.html service-worker.js version.json
++                  data/pokemonproxies_index.json
+           # Strategies file only exists once the ANTHROPIC_API_KEY
+           # secret is set and the generator ran at least once.
+           if [ -f data/champions_team_strategies.json ]; then
+diff --git a/.github/workflows/champions-usage-refresh.yml b/.github/workflows/champions-usage-refresh.yml
+index 06c6e3f6..6b236e69 100644
+--- a/.github/workflows/champions-usage-refresh.yml
++++ b/.github/workflows/champions-usage-refresh.yml
+@@ -92,10 +92,13 @@ jobs:
+           fi
+           exit 0
+ 
+-      - name: Bump version
+-        run: |
+-          chmod +x bump-version.sh
+-          ./bump-version.sh
++      # No bump here. deploy-pages.yml rewrites ?v=, APP_VERSION, the service
++      # worker CACHE_NAME, version.json and the _formatWindow snapshot inside
++      # _site/ on every deploy (its "Cache-bust asset references" step), so the
++      # stamp a data job commits never reaches a user. All it did was put
++      # index.html (845 KB), service-worker.js and version.json into ~147
++      # commits a month and churn the service worker's CACHE_NAME, which makes
++      # the activate handler drop every client cache several times a day.
+ 
+       - name: Commit + push
+         id: commit
+@@ -104,8 +107,7 @@ jobs:
+           git config --local user.name  "github-actions[bot]"
+           git add data/champions_usage.json \
+                   data/champions_pokedex.json \
+-                  data/champions_names_de.json \
+-                  index.html service-worker.js version.json
++                  data/champions_names_de.json
+           if git diff --cached --quiet; then
+             echo "No usage/pokedex changes — skipping push."
+             echo "pushed=false" >> "$GITHUB_OUTPUT"
+diff --git a/.github/workflows/daily-price-refresh.yml b/.github/workflows/daily-price-refresh.yml
+index b0bd6e0c..47c84451 100644
+--- a/.github/workflows/daily-price-refresh.yml
++++ b/.github/workflows/daily-price-refresh.yml
+@@ -141,10 +141,13 @@ jobs:
+           python scripts/build_prizepack_official_images.py --refresh-prices || \
+             echo "::warning::prize-pack price refresh failed (non-fatal)"
+ 
+-      - name: Bump version
+-        run: |
+-          chmod +x bump-version.sh
+-          ./bump-version.sh
++      # No bump here. deploy-pages.yml rewrites ?v=, APP_VERSION, the service
++      # worker CACHE_NAME, version.json and the _formatWindow snapshot inside
++      # _site/ on every deploy (its "Cache-bust asset references" step), so the
++      # stamp a data job commits never reaches a user. All it did was put
++      # index.html (845 KB), service-worker.js and version.json into ~147
++      # commits a month and churn the service worker's CACHE_NAME, which makes
++      # the activate handler drop every client cache several times a day.
+ 
+       # Commit FIRST so the day's price snapshot is on main even if
+       # the alert step fails. The alert script reads the file on
+@@ -159,8 +162,7 @@ jobs:
+                   data/cards_chunk_standard.json data/cards_chunk_extended.json \
+                   data/cards_chunk_legacy.json data/cards_manifest.json \
+                   data/all_cards_merged.json data/all_cards_merged.csv \
+-                  data/prizepack_official_images.json \
+-                  index.html service-worker.js version.json
++                  data/prizepack_official_images.json
+           if git diff --cached --quiet; then
+             echo "No price changes to commit — skipping push."
+             echo "pushed=false" >> "$GITHUB_OUTPUT"
+diff --git a/.github/workflows/per-decklist-scrape.yml b/.github/workflows/per-decklist-scrape.yml
+index 18057050..3ebec81a 100644
+--- a/.github/workflows/per-decklist-scrape.yml
++++ b/.github/workflows/per-decklist-scrape.yml
+@@ -184,18 +184,20 @@ jobs:
+             wc -l data/tournament_decklists_per_player.csv
+           fi
+ 
+-      - name: Bump version
+-        run: |
+-          chmod +x bump-version.sh
+-          ./bump-version.sh
++      # No bump here. deploy-pages.yml rewrites ?v=, APP_VERSION, the service
++      # worker CACHE_NAME, version.json and the _formatWindow snapshot inside
++      # _site/ on every deploy (its "Cache-bust asset references" step), so the
++      # stamp a data job commits never reaches a user. All it did was put
++      # index.html (845 KB), service-worker.js and version.json into ~147
++      # commits a month and churn the service worker's CACHE_NAME, which makes
++      # the activate handler drop every client cache several times a day.
+ 
+       - name: Commit + push
+         id: commit
+         run: |
+           git config --local user.email "github-actions[bot]@users.noreply.github.com"
+           git config --local user.name  "github-actions[bot]"
+-          git add data/tournament_decklists_per_player.csv \
+-                  index.html service-worker.js version.json
++          git add data/tournament_decklists_per_player.csv
+           if git diff --cached --quiet; then
+             echo "No changes — skipping push."
+             echo "pushed=false" >> "$GITHUB_OUTPUT"
+diff --git a/.github/workflows/weekly-full-update.yml b/.github/workflows/weekly-full-update.yml
+index c7c739d1..ef53a8fd 100644
+--- a/.github/workflows/weekly-full-update.yml
++++ b/.github/workflows/weekly-full-update.yml
+@@ -478,10 +478,13 @@ jobs:
+           shopt -u nullglob
+           exit 0
+ 
+-      - name: Bump version
+-        run: |
+-          chmod +x bump-version.sh
+-          ./bump-version.sh
++      # No bump here. deploy-pages.yml rewrites ?v=, APP_VERSION, the service
++      # worker CACHE_NAME, version.json and the _formatWindow snapshot inside
++      # _site/ on every deploy (its "Cache-bust asset references" step), so the
++      # stamp a data job commits never reaches a user. All it did was put
++      # index.html (845 KB), service-worker.js and version.json into ~147
++      # commits a month and churn the service worker's CACHE_NAME, which makes
++      # the activate handler drop every client cache several times a day.
+ 
+       - name: Data sanity check (F-D19 — revert empty/short CSVs before commit)
+         # AUDIT_DATA_PIPELINE.md F-D19 — the commit step below pushes any
+-- 
+2.43.0
+

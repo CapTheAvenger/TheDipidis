@@ -1,0 +1,196 @@
+From 3f6dd692efd8441d7bc2ce2f6dfc3f161f5dea28 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Mon, 17 Aug 2026 22:31:13 +0000
+Subject: [PATCH 4/9] =?UTF-8?q?ci:=20one=20push,=20one=20Pages=20deploy=20?=
+ =?UTF-8?q?=E2=80=94=20stop=20dispatching=20a=20competing=20run?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Four data jobs pushed to main (which triggers deploy-pages via `on: push`)
+and then ALSO ran `gh workflow run deploy-pages.yml`. Both runs landed in
+`concurrency: pages, cancel-in-progress: true`, so one was cancelled — and
+daily-price-refresh resolved its wait target with `gh run list --limit 1`,
+which could hand it the cancelled run or the previous deploy. That is where
+the 'may have been cancelled by a later push' failures come from.
+
+- champions-replica-scrape, per-decklist-scrape, weekly-full-update: dispatch
+  step removed. The push already deploys.
+- daily-price-refresh keeps its wait — it exists so Telegram never alerts a
+  price the origin has not published yet (2026-06 bug) — but now FINDS the
+  run instead of creating one: the commit step exports the pushed sha and the
+  next step polls deploy-pages runs for a matching headSha, with a 60 s window
+  and the same fixed-sleep fallback as before.
+- champions-replica-scrape drops `actions: write`; nothing dispatches now.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01Ld5WCR1Wjb95tBgocvSXbH
+---
+ .../workflows/champions-replica-scrape.yml    | 23 ++++----
+ .github/workflows/daily-price-refresh.yml     | 53 ++++++++++++-------
+ .github/workflows/per-decklist-scrape.yml     | 12 ++---
+ .github/workflows/weekly-full-update.yml      | 12 ++---
+ 4 files changed, 53 insertions(+), 47 deletions(-)
+
+diff --git a/.github/workflows/champions-replica-scrape.yml b/.github/workflows/champions-replica-scrape.yml
+index 37db25e2..5666cb3b 100644
+--- a/.github/workflows/champions-replica-scrape.yml
++++ b/.github/workflows/champions-replica-scrape.yml
+@@ -37,12 +37,11 @@ on:
+         default: '40'
+ 
+ permissions:
+-  contents: write
+-  actions:  write   # needed for the `gh workflow run deploy-pages.yml`
+-                    # dispatch step at the end — without this the
+-                    # GITHUB_TOKEN returns 403 "Resource not accessible
+-                    # by integration" on the workflow_dispatch API call
+-                    # (observed 2026-06-10).
++  contents: write   # `actions: write` used to be here for the explicit
++                    # `gh workflow run deploy-pages.yml` dispatch at the end.
++                    # That dispatch is gone (it raced the push-triggered deploy
++                    # inside `concurrency: pages`), so the extra scope goes with
++                    # it — least privilege.
+ 
+ concurrency:
+   group: champions-replica-scrape
+@@ -297,10 +296,8 @@ jobs:
+       # run land on main but the Side Quest tab kept showing yesterday's
+       # 20 teams (2026-06-09 user report). weekly-full-update.yml and
+       # daily-price-refresh.yml both dispatch this — match the pattern.
+-      - name: Trigger GitHub Pages deploy
+-        if: steps.commit.outputs.pushed == 'true'
+-        env:
+-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+-        run: |
+-          gh workflow run deploy-pages.yml --ref main
+-          echo "Dispatched deploy-pages.yml on main."
++      # No explicit deploy dispatch. The push above already triggers
++      # deploy-pages (on: push to main); dispatching a second run put both into
++      # `concurrency: pages, cancel-in-progress: true`, so one of the two was
++      # cancelled and the deploy could end up watching or reporting the loser.
++      # One push, one deploy.
+diff --git a/.github/workflows/daily-price-refresh.yml b/.github/workflows/daily-price-refresh.yml
+index 7a112184..b0bd6e0c 100644
+--- a/.github/workflows/daily-price-refresh.yml
++++ b/.github/workflows/daily-price-refresh.yml
+@@ -182,6 +182,9 @@ jobs:
+             if git push origin HEAD:main; then
+               echo "Push succeeded on attempt $attempt"
+               echo "pushed=true" >> "$GITHUB_OUTPUT"
++              # The sha lets the next step find the deploy run that THIS push
++              # triggered, instead of dispatching a competing one.
++              echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+               exit 0
+             fi
+             echo "Push rejected on attempt $attempt — pulling with rebase…"
+@@ -197,33 +200,43 @@ jobs:
+           echo "::error::Push failed after 3 attempts"
+           exit 1
+ 
+-      # Trigger Pages deploy so the new price_data.csv hits the
+-      # live origin within minutes of the commit.
+-      - name: Trigger GitHub Pages deploy
++      # The push above already triggered deploy-pages (on: push to main). This
++      # step used to ALSO `gh workflow run deploy-pages.yml`, which produced two
++      # runs competing inside `concurrency: pages, cancel-in-progress: true` —
++      # one got cancelled, and `gh run list --limit 1` could hand the wait step
++      # below the id of the loser (or of the previous deploy). The live check in
++      # deploy-pages then failed with "may have been cancelled by a later push".
++      #
++      # So: don't dispatch, find. We know the sha we pushed, so we poll for the
++      # run whose headSha matches it. Nothing races because there is only ever
++      # one deploy.
++      - name: Find the Pages deploy our push triggered
+         id: pages_deploy
+         if: steps.commit.outputs.pushed == 'true'
++        env:
++          GH_TOKEN: ${{ github.token }}
++          PUSHED_SHA: ${{ steps.commit.outputs.sha }}
+         run: |
+-          gh workflow run deploy-pages.yml --ref main
+-          # Give Actions ~10 s to register the new run before we ask
+-          # for its id — otherwise `gh run list` returns the previous
+-          # deploy (or no row at all) and the wait step ends up
+-          # watching the wrong run.
+-          sleep 10
+-          run_id=$(gh run list \
+-              --workflow=deploy-pages.yml \
+-              --branch main \
+-              --limit 1 \
+-              --json databaseId \
+-              --jq '.[0].databaseId')
+-          if [ -z "$run_id" ] || [ "$run_id" = "null" ]; then
+-            echo "::warning::Could not resolve Pages deploy run id — falling back to fixed 4 min sleep before alerts."
++          run_id=""
++          # Actions needs a moment to register the run; 12 × 5 s is comfortably
++          # more than the few seconds it normally takes.
++          for _ in $(seq 1 12); do
++            run_id=$(gh run list \
++                --workflow=deploy-pages.yml \
++                --branch main \
++                --limit 20 \
++                --json databaseId,headSha \
++                --jq "[.[] | select(.headSha == \"$PUSHED_SHA\")] | .[0].databaseId // empty")
++            [ -n "$run_id" ] && break
++            sleep 5
++          done
++          if [ -z "$run_id" ]; then
++            echo "::warning::No deploy-pages run found for $PUSHED_SHA — falling back to a fixed 4 min sleep before alerts."
+             echo "run_id=" >> "$GITHUB_OUTPUT"
+           else
+-            echo "Pages deploy run id: $run_id"
++            echo "Pages deploy run id: $run_id (sha $PUSHED_SHA)"
+             echo "run_id=$run_id" >> "$GITHUB_OUTPUT"
+           fi
+-        env:
+-          GH_TOKEN: ${{ github.token }}
+ 
+       # Wait for the Pages deploy to actually publish before we
+       # Telegram-alert users. Otherwise the user opens the site after
+diff --git a/.github/workflows/per-decklist-scrape.yml b/.github/workflows/per-decklist-scrape.yml
+index b543be06..18057050 100644
+--- a/.github/workflows/per-decklist-scrape.yml
++++ b/.github/workflows/per-decklist-scrape.yml
+@@ -217,10 +217,8 @@ jobs:
+           done
+           exit 1
+ 
+-      - name: Trigger GitHub Pages deploy
+-        if: steps.commit.outputs.pushed == 'true'
+-        env:
+-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+-        run: |
+-          gh workflow run deploy-pages.yml --ref main
+-          echo "Dispatched deploy-pages.yml on main."
++      # No explicit deploy dispatch. The push above already triggers
++      # deploy-pages (on: push to main); dispatching a second run put both into
++      # `concurrency: pages, cancel-in-progress: true`, so one of the two was
++      # cancelled and the deploy could end up watching or reporting the loser.
++      # One push, one deploy.
+diff --git a/.github/workflows/weekly-full-update.yml b/.github/workflows/weekly-full-update.yml
+index 0cb06f8d..c7c739d1 100644
+--- a/.github/workflows/weekly-full-update.yml
++++ b/.github/workflows/weekly-full-update.yml
+@@ -569,13 +569,11 @@ jobs:
+       # `on: push` workflows (GitHub recursion-prevention). Dispatch
+       # deploy-pages explicitly so the SPA on Pages always reflects the
+       # fresh data right after a weekly run.
+-      - name: Trigger GitHub Pages deploy
+-        if: steps.commit.outputs.pushed == 'true'
+-        env:
+-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+-        run: |
+-          gh workflow run deploy-pages.yml --ref main
+-          echo "Dispatched deploy-pages.yml on main."
++      # No explicit deploy dispatch. The push above already triggers
++      # deploy-pages (on: push to main); dispatching a second run put both into
++      # `concurrency: pages, cancel-in-progress: true`, so one of the two was
++      # cancelled and the deploy could end up watching or reporting the loser.
++      # One push, one deploy.
+ 
+       - name: Fail job on multi-scraper / critical-scraper batch failure
+         # AUDIT_DATA_PIPELINE F-D04 + F-D20: per-step `set +e` keeps a
+-- 
+2.43.0
+

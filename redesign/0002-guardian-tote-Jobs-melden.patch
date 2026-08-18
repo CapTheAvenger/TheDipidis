@@ -1,0 +1,283 @@
+From e76948278aa4cf0ecacb951c04ab28577aac7a0d Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Mon, 17 Aug 2026 22:27:40 +0000
+Subject: [PATCH 2/9] guardian: tote Jobs melden, ruhige Quellen nicht
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+data-guardian.yml zaehlt bei der Entscheidung, ob ein Issue aufgemacht wird,
+nur ::error::. Freshness-Befunde liefen als WARN und waren damit
+konstruktionsbedingt nicht meldbar: der Lauf vom 17.08. druckte 3 WARN /
+0 CRITICAL und schloss das Issue mit "All clear".
+
+Freshness wird deshalb ernst genommen — aber nur dort, wo ein unveraendertes
+File wirklich einen toten Job beweist. Die alte FRESHNESS-Tabelle behandelte
+sechs sehr verschiedene Dateien gleich; gegen den Stand vom 18.08. haette ein
+pauschales CRITICAL DREI Fehlalarme erzeugt:
+
+  price_guide_6.json             4 Tage / Schwelle  3  -> falsch
+  cardmarket_card_images.csv    34 Tage / Schwelle 14  -> falsch
+  prizepack_official_images.csv 35 Tage / Schwelle 14  -> falsch
+
+Also zwei Klassen:
+
+REFRESH_DRIVEN — die Quelle liefert bei jedem Lauf neue Werte und der Job
+committet sie jedes Mal. Bleibt die Datei ueber ihr Fenster hinaus stehen, ist
+der Job gestorben. CRITICAL. Die Schwelle folgt jetzt der Kadenz des Jobs, DER
+COMMITTET, nicht der des Jobs, der herunterlaedt: price_guide_6.json wird
+taeglich geladen, aber nur von weekly-full-update (Di+Fr, `git add -A`)
+committet — mit der alten 3-Tage-Schwelle haette sie jeden Montag und Dienstag
+strukturell garantiert falsch gefeuert. Jetzt 5.
+
+CONTENT_DRIVEN — der Build ist absichtlich inkrementell. CLAUDE.md: "never
+re-fetch data you already have — that's why the Prize Pack build only fetches
+new series", und build_prizepack_official_images.py:356 wiederholt es. Diese
+Dateien bleiben wochenlang byte-identisch, waehrend ihr Job gruen laeuft, weil
+die Quelle nichts Neues hat. Am 18.08. genau der Fall: beide 34 bzw. 35 Tage
+alt, beide Wochenjobs zuletzt am 16.08. gruen. Alter beweist hier nichts, also
+nur WARN nach 60 Tagen — und der Text sagt ausdruecklich, dass der Workflow-Lauf
+zu pruefen ist, bevor jemand daraus einen Defekt macht.
+
+Sauber unterscheiden liesse sich das nur mit einem Heartbeat, den jeder Job bei
+Erfolg schreibt. Als TODO vermerkt, bewusst nicht hier: er fasst sechs
+Workflows an.
+
+Neu ausserdem check_emptiness: eine header-only CSV ist die Signatur eines
+Scrapers, der lief, nichts fand und das leere Ergebnis trotzdem schrieb.
+check_shrink konnte das nie sehen (nur CONSUMERS, nur prozentual), weshalb
+sieben city_league_*.csv seit dem 31.07. leer ausgeliefert werden, ohne dass
+etwas meldet. Change-basiert nach der Modulregel: der UEBERGANG nach
+header-only ist CRITICAL, und eine Datei, die nach 21 Tagen nicht zurueckkam,
+ebenfalls. Baselines ohne das neue Feld empty_files laufen nur die
+Staleness-Haelfte, damit der erste Lauf nach dem Merge nicht sieben falsche
+Uebergangs-Alarme wirft.
+
+Geprueft gegen den Stand vom 18.08.: 0 CRITICAL, 1 WARN (die vorbestehende
+Preis-Mapping-Warnung). Mit kuenstlich auf 0 gesetzten Schwellen feuert
+REFRESH_DRIVEN als ::error:: und CONTENT_DRIVEN als ::warning:: — beide Zweige
+verhalten sich wie beschrieben.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01Ld5WCR1Wjb95tBgocvSXbH
+---
+ scripts/data_guardian.py | 158 +++++++++++++++++++++++++++++++++++----
+ 1 file changed, 143 insertions(+), 15 deletions(-)
+
+diff --git a/scripts/data_guardian.py b/scripts/data_guardian.py
+index 35cf9bd4..f39b170f 100644
+--- a/scripts/data_guardian.py
++++ b/scripts/data_guardian.py
+@@ -77,21 +77,59 @@ CONSUMERS = {
+     },
+ }
+ 
+-# Inputs that must keep refreshing; stale means a fetch job died quietly.
++# Inputs whose staleness says something. Zwei Klassen, weil "die Datei hat sich
++# nicht geändert" zwei völlig verschiedene Dinge bedeuten kann.
++#
+ # Age is measured from the file's last GIT COMMIT, never its mtime: CI checks out
+ # with fetch-depth 1, which stamps every file with the clone time, so an
+ # mtime-based check reads 0 days for everything and can never fire. (That was a
+ # real dead check here — the detector for silent job death was itself silently
+ # dead.)
+-FRESHNESS = {
+-    "price_guide_6.json": 3,       # Cardmarket publishes daily
+-    "products_singles_6.json": 10,
+-    "cardmarket_id_mapping.csv": 3,
+-    "price_data.csv": 3,
+-    "cardmarket_card_images.csv": 14,      # weekly job
+-    "prizepack_official_images.csv": 14,   # weekly job
++#
++# REFRESH_DRIVEN: upstream publishes new values on every run, and the committing
++# job writes them every time. Bleibt die Datei über ihr Fenster hinaus
++# unverändert, ist der Job gestorben. Genau dafür gibt es diese Prüfung — das
++# ist einen Fehler wert. Die Schwelle folgt der Kadenz des Jobs, DER SIE
++# COMMITTET, nicht der des Jobs, der sie herunterlädt: price_guide_6.json wird
++# täglich geladen, aber nur von weekly-full-update (Di+Fr, `git add -A`)
++# committet — mit der alten 3-Tage-Schwelle hätte sie jeden Montag und Dienstag
++# strukturell garantiert falsch gefeuert.
++REFRESH_DRIVEN = {
++    # Datei: (max_alter_in_tagen, wer committet)
++    "cardmarket_id_mapping.csv":  (3,  "daily-price-refresh, jeden Lauf"),
++    "price_data.csv":             (3,  "daily-price-refresh, jeden Lauf"),
++    "price_guide_6.json":         (5,  "weekly-full-update Di+Fr -> max. Lücke 4 Tage"),
++    "products_singles_6.json":    (10, "weekly-full-update Di+Fr"),
+ }
+ 
++# CONTENT_DRIVEN: der Build ist ABSICHTLICH inkrementell. CLAUDE.md: "never
++# re-fetch data you already have — that's why the Prize Pack build only fetches
++# new series", und build_prizepack_official_images.py:356 sagt es noch einmal
++# selbst: "A series' card list never changes once published ... so only fetch the
++# PDFs for series we don't have yet."
++#
++# Diese Dateien bleiben wochenlang byte-identisch, WÄHREND ihr Job grün läuft —
++# weil die Quelle nichts Neues hat. Ihr Alter sagt nichts über die Gesundheit des
++# Jobs. Ein CRITICAL wäre hier reines Rauschen, und der Modulkommentar oben
++# beschreibt, was Rauschen mit diesem Skript macht: es wird ignoriert.
++#
++# Gemessen am 18.08.2026: beide Dateien 34 bzw. 35 Tage alt, beide zugehörigen
++# Wochenjobs zuletzt am 16.08. grün. Genau der Fall.
++#
++# Deshalb nur ein WARN nach großzügigem Horizont, und der Text sagt ausdrücklich,
++# dass das Alter nichts beweist. Sauber lösen lässt sich das erst mit einem
++# Heartbeat — jeder Job schreibt bei Erfolg einen Zeitstempel, unabhängig davon,
++# ob sich Inhalt geändert hat. Siehe TODO unten.
++CONTENT_DRIVEN = {
++    "cardmarket_card_images.csv":    60,
++    "prizepack_official_images.csv": 60,
++}
++
++# TODO(heartbeat): data/_job_heartbeats.json mit {job: iso-zeitstempel}, von jedem
++# Datenjob bei Erfolg geschrieben. Erst damit lässt sich ein toter Job von einer
++# ruhigen Quelle unterscheiden — für CONTENT_DRIVEN ist das die einzige ehrliche
++# Prüfung. Bewusst nicht in dieser Änderung: es fasst sechs Workflows an.
++
+ COVERAGE_DROP_PP = 10.0   # percentage points a set may lose before we flag it
+ SHRINK_PCT = 10.0         # % of rows a consumer file may lose before we flag it
+ MIN_CARDS_FOR_COVERAGE = 5
+@@ -168,23 +206,110 @@ def _last_commit_date(path):
+ 
+ 
+ def check_freshness(findings):
++    """Alter der Eingabedateien — CRITICAL nur, wo es einen toten Job beweist."""
+     today = dt.date.today()
+-    for fn, max_age in FRESHNESS.items():
++
++    def age_of(fn):
+         p = os.path.join(DATA, fn)
+         if not os.path.exists(p):
+-            findings.append(("WARN", f"input missing: data/{fn}"))
+-            continue
++            findings.append(("CRITICAL", f"input missing: data/{fn}"))
++            return None
+         committed = _last_commit_date(p)
+         if committed is None:
+             findings.append(("WARN",
+                              f"could not read git history for data/{fn} — freshness "
+                              f"unchecked (is this a shallow clone without history?)"))
++            return None
++        return (today - committed).days
++
++    for fn, (max_age, who) in REFRESH_DRIVEN.items():
++        age = age_of(fn)
++        if age is not None and age > max_age:
++            findings.append(("CRITICAL",
++                             f"data/{fn} last changed {age} days ago (expected <= "
++                             f"{max_age}, written by {who}) — that job died silently"))
++
++    for fn, max_age in CONTENT_DRIVEN.items():
++        age = age_of(fn)
++        if age is not None and age > max_age:
++            findings.append(("WARN",
++                             f"data/{fn} last changed {age} days ago. Its build is "
++                             f"incremental by design, so this does NOT prove the job "
++                             f"failed — the source may simply have nothing new. Check "
++                             f"the workflow run before treating it as a defect."))
++
++
++# How long a CSV may sit header-only before we say the refill never happened.
++# Deliberately generous: a JP set rotation legitimately empties the City League
++# files for a few days. Three weeks is well past any real rotation gap.
++EMPTY_STALE_DAYS = 21
++
++
++def empty_data_files():
++    """{filename: True} for every top-level data CSV that carries only a header.
++
++    A header-only CSV is the signature of a scraper that ran, found nothing, and
++    wrote the empty result anyway. It is not the same as a missing file and it is
++    not caught by check_shrink (which only looks at CONSUMERS and only at
++    percentage loss — 100 % loss on a non-consumer file was invisible).
++    """
++    out = {}
++    for fn in sorted(os.listdir(DATA)):
++        if not fn.endswith(".csv"):
++            continue
++        p = os.path.join(DATA, fn)
++        if not os.path.isfile(p):
++            continue
++        try:
++            with open(p, encoding="utf-8-sig", newline="") as f:
++                # Two reads are enough to tell "header only" from "has data".
++                first = f.readline()
++                second = f.readline()
++            if first.strip() and not second.strip():
++                out[fn] = True
++        except OSError:
++            continue
++    return out
++
++
++def check_emptiness(findings, empties, base_empties):
++    """Flag the TRANSITION to header-only, plus refills that never arrived.
++
++    Change-based on purpose (see the module note on absolute thresholds): the
++    seven City League files have been header-only since the 2026-07-31 M6
++    rotation, and shouting about that every single day would train everyone to
++    ignore this script. What matters is (a) a file going empty that wasn't, and
++    (b) a file that went empty and never came back.
++    """
++    today = dt.date.today()
++    # base_empties is None when the baseline predates this check. Everything would
++    # then look like a fresh transition and the first run after the merge would
++    # open an issue with seven bogus "wrote an empty result over real data" lines.
++    # Without a baseline we can still answer the second question honestly ("has it
++    # been empty too long?"), so we do that and record the state for next time.
++    known = base_empties is not None
++    base_empties = base_empties or {}
++    for fn in sorted(empties):
++        if known and not base_empties.get(fn):
++            findings.append(("CRITICAL",
++                             f"data/{fn} is now header-only — it had data at the last "
++                             f"baseline. A scraper wrote an empty result over real data."))
++            continue
++        committed = _last_commit_date(os.path.join(DATA, fn))
++        if committed is None:
+             continue
+         age = (today - committed).days
+-        if age > max_age:
+-            findings.append(("WARN",
+-                             f"data/{fn} last changed {age} days ago (expected <= "
+-                             f"{max_age}) — a refresh job may have died silently"))
++        if age > EMPTY_STALE_DAYS:
++            findings.append(("CRITICAL",
++                             f"data/{fn} has been header-only for {age} days "
++                             f"(> {EMPTY_STALE_DAYS}) — the refill after the reset never "
++                             f"arrived, and the UI has been serving an empty view since."))
++
++    # A file that refilled is worth one line of good news: it tells whoever reads
++    # the log that the previous alarm was resolved rather than muted.
++    healed = sorted(fn for fn in base_empties if fn not in empties) if known else []
++    if healed:
++        print(f"  Refilled since last baseline: {', '.join(healed)}")
+ 
+ 
+ def check_coverage(findings, cov, base_cov):
+@@ -452,6 +577,7 @@ def main():
+     rows = file_rows()
+     ace = ace_guard_prints()
+     price = price_integrity()
++    empties = empty_data_files()
+ 
+     findings = []
+     check_schema(findings)
+@@ -465,6 +591,7 @@ def main():
+         check_coverage(findings, cov, base_cov)
+         check_ace_guard(findings, ace, baseline.get("ace_guard_prints"))
+         check_price_integrity(findings, price, baseline.get("price_integrity"))
++        check_emptiness(findings, empties, baseline.get("empty_files"))
+ 
+     crit = [f for lvl, f in findings if lvl == "CRITICAL"]
+     warn = [f for lvl, f in findings if lvl == "WARN"]
+@@ -487,6 +614,7 @@ def main():
+                 "file_rows": rows,
+                 "ace_guard_prints": ace,
+                 "price_integrity": price,
++                "empty_files": empties,
+             }, f, ensure_ascii=False, indent=1, sort_keys=True)
+         print(f"  Baseline updated -> {BASELINE}")
+ 
+-- 
+2.43.0
+

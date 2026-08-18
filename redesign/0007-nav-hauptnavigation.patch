@@ -1,0 +1,780 @@
+From 12f2f5ab57608ee9d587b78e77652fd98151cbbd Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Tue, 18 Aug 2026 04:41:23 +0000
+Subject: [PATCH 7/9] nav: eine sichtbare Hauptnavigation, und jede Ansicht
+ nennt ihren Datenraum
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Die Seite hatte faktisch keine sichtbare Navigation. Die Leiste in
+index.html war per `display: none !important` (css/pokeball-menu.css:169)
+global abgeschaltet — fuenf Knoepfe Markup, auf Desktop UND Mobil unsichtbar.
+Uebrig blieb der Pokeball, der kein Label und kein Menue-Symbol traegt; im
+Personatest hat ihn niemand ohne Vorwissen als Navigation erkannt. Die
+Startseite verlinkte 6 von 12 Bereichen.
+
+- Neue Ebene 1 mit sechs Zielen (css/ds-nav.css, js/ds-nav.js), geschnitten
+  nach den vier Fragen, die die Seite ohnehin beantwortet: Start / Meta /
+  Decks / Turnier / Karten, dazu Champions abgesetzt, weil Pokemon Champions
+  ein anderes Spiel ist und das nirgends stand.
+  Auf Mobil als Leiste am unteren Rand mit fuenf Zielen.
+- Kein neuer Router: jedes Ziel ruft switchTabAndUpdateMenu mit einem
+  vorhandenen Tab. switchTab wird umschlossen statt veraendert, damit
+  app-core.js unangetastet bleibt und ds-nav.js rueckbaubar ist.
+  Der Pokeball bleibt und fuehrt weiter alle 30 Eintraege.
+- Datenraum-Ausweis unter der Navigation: Region, Format, Quelle,
+  Stichprobe, Stand — pro Datenraum statt global. Er loest die vier
+  unbeschrifteten Feldgroessen auf current-meta (22.699 / 23.613 / 7.456 /
+  14.026) und den globalen Scraper-Stempel '17.8.2026', der ueber der seit
+  dem 31.07. leeren JP-Ansicht stand. Fakten werden nach DATENRAUM
+  geschluesselt, nicht nach Tab: die City-League-Daten sind beim Seitenstart
+  fertig, waehrend noch der Hub aktiv ist.
+- Saisonpause ist kein Fehler mehr. Die vier `class="error"`-Ausgaben in
+  app-city-league.js werden zu einem Leerzustand mit Erklaerung und
+  Weiterweg; alle drei Personas hatten den roten Kasten als 'die Seite ist
+  kaputt' gelesen.
+- Der rote Verlaufsbanner auf City League ist weg. Der Fix fuer .header
+  existierte seit dem 14.08., kam aber nie an: die Ansicht benutzt
+  .city-league-header. Jetzt dieselbe schlanke Zeile mit 2px-Signaturstrich.
+- Mobile Kopfzeile ohne abgeschnittene Labels ('My De…', 'Datab…') — die
+  Symbole tragen, die Texte stehen im bereits gesetzten title/aria.
+
+!important-Deklarationen 3403 -> 3402. css/ds-nav.css kommt ohne aus.
+1010 JS-Tests und 373 Python-Tests gruen, Desktop 1440 und Mobil 390 geprueft.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01Ld5WCR1Wjb95tBgocvSXbH
+---
+ css/ds-nav.css        | 232 +++++++++++++++++++++++++++++++++
+ css/pokeball-menu.css |   7 +-
+ css/styles.css        |  53 +++++---
+ js/app-city-league.js |  38 ++++--
+ js/app-tier-meta.js   |  12 ++
+ js/ds-nav.js          | 292 ++++++++++++++++++++++++++++++++++++++++++
+ 6 files changed, 604 insertions(+), 30 deletions(-)
+ create mode 100644 css/ds-nav.css
+ create mode 100644 js/ds-nav.js
+
+diff --git a/css/ds-nav.css b/css/ds-nav.css
+new file mode 100644
+index 00000000..863f7e7d
+--- /dev/null
++++ b/css/ds-nav.css
+@@ -0,0 +1,232 @@
++/* ds-nav.css — Hauptnavigation und Datenraum-Ausweis.
++ *
++ * Ersetzt zwei Dinge, die zusammen die Navigation der Seite waren:
++ *
++ *   1. Die Leiste in index.html, die css/pokeball-menu.css mit
++ *      `display: none !important` global abgeschaltet hat. Fünf Knöpfe
++ *      Markup, auf Desktop UND Mobil unsichtbar, gemessen am 17.08.2026.
++ *   2. Den Pokéball als einzigen verbliebenen Einstieg. Er trägt kein
++ *      Label, kein Burger-Symbol und keine Menü-Affordance — im
++ *      Personatest hat ihn niemand ohne Vorwissen als Navigation erkannt.
++ *
++ * Der Pokéball bleibt: er führt weiterhin die vollständige Liste aller 30
++ * Einträge inklusive Untertabs. Neu ist die Ebene darüber — sechs
++ * beschriftete Ziele, immer sichtbar, auf Mobil als Leiste am unteren
++ * Rand, wo der Daumen liegt.
++ *
++ * Ausschließlich aus css/tokens.css gebaut: keine rohe Hex-Farbe, keine
++ * px-Schriftgröße, kein !important.
++ */
++
++/* ── Ebene 1: sechs Ziele ─────────────────────────────────────────── */
++.ds-nav {
++    display: flex;
++    gap: 2px;
++    padding: 0 var(--s-4);
++    background: var(--surface-1);
++    border-bottom: 1px solid var(--line);
++    overflow-x: auto;
++    scrollbar-width: none;
++}
++.ds-nav::-webkit-scrollbar { display: none; }
++
++.ds-nav-btn {
++    position: relative;
++    flex: 0 0 auto;
++    min-height: 44px;          /* Trefferfläche, nicht Schriftgröße */
++    padding: 0 var(--s-4);
++    border: 0;
++    background: none;
++    color: var(--ink-2);
++    font: inherit;
++    font-size: var(--fs-md);
++    font-weight: 600;
++    cursor: pointer;
++    white-space: nowrap;
++}
++.ds-nav-btn:hover { color: var(--ink); }
++.ds-nav-btn:focus-visible {
++    outline: 2px solid var(--brand);
++    outline-offset: -2px;
++    border-radius: var(--r-sm);
++}
++.ds-nav-btn[aria-current="page"] { color: var(--brand-ink); }
++.ds-nav-btn[aria-current="page"]::after {
++    content: "";
++    position: absolute;
++    left: var(--s-3);
++    right: var(--s-3);
++    bottom: 0;
++    height: 3px;
++    border-radius: 3px 3px 0 0;
++    background: var(--brand);
++}
++
++/* Champions ist ein anderes Spiel. Der Trenner und die zweite Signalfarbe
++ * sagen das, bevor jemand klickt — bisher stand es nirgends. */
++.ds-nav-sep {
++    flex: 0 0 auto;
++    width: 1px;
++    margin: 10px var(--s-3);
++    background: var(--line);
++}
++.ds-nav-btn.is-alt[aria-current="page"] { color: var(--space-jp); }
++.ds-nav-btn.is-alt[aria-current="page"]::after { background: var(--space-jp); }
++
++/* ── Ebene 1 auf Mobil: unten, nicht oben ─────────────────────────── */
++.ds-tabbar { display: none; }
++
++@media (max-width: 768px) {
++    .ds-nav { display: none; }
++
++    .ds-tabbar {
++        position: fixed;
++        left: 0;
++        right: 0;
++        bottom: 0;
++        z-index: 900;
++        display: grid;
++        grid-template-columns: repeat(5, 1fr);
++        background: var(--surface-1);
++        border-top: 1px solid var(--line);
++        box-shadow: 0 -2px 12px rgba(16, 24, 40, .08);
++        padding-bottom: env(safe-area-inset-bottom, 0);
++    }
++    .ds-tabbar-btn {
++        min-height: 56px;
++        border: 0;
++        background: none;
++        display: flex;
++        flex-direction: column;
++        align-items: center;
++        justify-content: center;
++        gap: 3px;
++        color: var(--ink-3);
++        font: inherit;
++        font-size: var(--lbl);
++        font-weight: var(--lbl-weight);
++        letter-spacing: var(--lbl-track);
++        text-transform: uppercase;
++        cursor: pointer;
++    }
++    .ds-tabbar-btn .ds-tabbar-gl { font-size: var(--fs-lg); line-height: 1; }
++    .ds-tabbar-btn[aria-current="page"] { color: var(--brand-ink); }
++
++    /* Damit die Leiste den letzten Inhalt nicht verdeckt. */
++    .tabs-container { padding-bottom: 64px; }
++}
++
++/* ── Der Datenraum-Ausweis ────────────────────────────────────────────
++ *
++ * Die eine Zeile, die den teuersten Befund des Audits erledigt: auf
++ * current-meta standen vier Feldgrößen (22.699 / 23.613 / 7.456 / 14.026)
++ * und drei Anteile für dasselbe Deck nebeneinander, keiner davon
++ * beschriftet. Und der Kopf von City League trug den globalen
++ * Scraper-Stempel "17.8.2026" über einer seit dem 31.07. leeren Ansicht.
++ *
++ * Region, Format, Quelle, Stichprobe, Zeitfenster, Stand — pro Datenraum,
++ * nicht global. Plus der Satz, den sonst niemand sagt: die drei werden
++ * nicht miteinander verrechnet.
++ */
++.ds-space {
++    display: flex;
++    flex-wrap: wrap;
++    align-items: center;
++    gap: var(--s-2) var(--s-3);
++    padding: var(--s-2) var(--s-4);
++    background: var(--surface-2);
++    border-bottom: 1px solid var(--line);
++    border-left: 3px solid var(--dv-zero);
++    font-size: var(--fs-xs);
++    color: var(--ink-3);
++}
++/* `display: flex` schlägt sonst das hidden-Attribut, und der leere Ausweis
++ * bleibt als 3-px-Strich stehen. */
++.ds-space[hidden] { display: none; }
++
++.ds-space[data-space="jp"]   { border-left-color: var(--space-jp); }
++.ds-space[data-space="gl"]   { border-left-color: var(--brand); }
++.ds-space[data-space="past"] { border-left-color: var(--ink-3); }
++
++.ds-space-region {
++    display: inline-flex;
++    align-items: center;
++    gap: var(--s-1);
++    font-weight: 700;
++    color: var(--ink-2);
++}
++.ds-space b { color: var(--ink-2); font-weight: 600; }
++.ds-space-sep { color: var(--line-strong); }
++
++/* Der Trennungshinweis rutscht ans Ende der Zeile und bricht auf Mobil
++ * als eigene Zeile um — er ist wichtig, aber nicht das Erste. */
++.ds-space-note { margin-left: auto; }
++
++@media (max-width: 768px) {
++    .ds-space { padding: var(--s-2) var(--s-3); }
++    .ds-space-note { margin-left: 0; flex-basis: 100%; }
++}
++
++/* Saisonpause ist kein Fehler. Der alte Zustand war ein roter
++ * Fehlerkasten — alle drei Personas haben ihn als "kaputt" gelesen. */
++.ds-space-pause {
++    padding: 2px var(--s-2);
++    border: 1px solid var(--line-strong);
++    border-radius: var(--r-sm);
++    background: var(--surface-1);
++    color: var(--ink-2);
++}
++
++/* ── Leerzustand ──────────────────────────────────────────────────────
++ *
++ * Nie in Fehlerrot. Die Saisonpause der City League stand bis zum
++ * 17.08.2026 in einem `class="error"`-Kasten; alle drei Personas im Audit
++ * haben sie als "die Seite ist kaputt" gelesen. Ein Leerzustand erklärt,
++ * warum nichts da ist, und bietet einen Weiterweg an.
++ */
++.ds-empty {
++    padding: var(--s-8) var(--s-4);
++    text-align: center;
++    background: var(--surface-2);
++    border: 1px dashed var(--line-strong);
++    border-radius: var(--r-lg);
++    color: var(--ink-2);
++}
++.ds-empty-title {
++    margin-bottom: var(--s-2);
++    font-size: var(--fs-lg);
++    font-weight: 600;
++    color: var(--ink);
++}
++.ds-empty-body {
++    max-width: 56ch;
++    margin: 0 auto var(--s-4);
++    font-size: var(--fs-sm);
++    line-height: 1.55;
++}
++.ds-empty-cta {
++    min-height: 40px;
++    padding: 0 var(--s-4);
++    border: 1px solid var(--brand);
++    border-radius: var(--r-sm);
++    background: var(--surface-1);
++    color: var(--brand-ink);
++    font: inherit;
++    font-size: var(--fs-sm);
++    font-weight: 600;
++    cursor: pointer;
++}
++.ds-empty-cta:hover { background: var(--brand); color: var(--surface-1); }
++
++/* ── Kopfzeile auf Mobil ──────────────────────────────────────────────
++ *
++ * Die sechs Schnellzugriffe standen auf 390 px als "My De…" und "Datab…"
++ * da — abgeschnittene Labels, die weniger sagen als gar keine. Seit die
++ * Hauptnavigation unten als Leiste läuft, braucht die Kopfzeile diese
++ * Zweitnavigation nicht mehr in voller Breite: das Symbol trägt, das
++ * Label wandert ins title-/aria-Attribut, das ohnehin schon gesetzt ist.
++ */
++@media (max-width: 768px) {
++    .header-icon-label { display: none; }
++    .header-icon-btn { min-width: 44px; min-height: 44px; }
++}
+diff --git a/css/pokeball-menu.css b/css/pokeball-menu.css
+index 995ea9bc..05a83a82 100644
+--- a/css/pokeball-menu.css
++++ b/css/pokeball-menu.css
+@@ -165,8 +165,11 @@ body {
+     line-height: 1.4;
+ }
+ 
+-/* Hide old navigation bar */
+-.tab-navigation { display: none !important; }
++/* Die alte .tab-navigation ist ersatzlos entfernt (index.html), zusammen
++ * mit dieser Regel: sie hat fünf Navigationsknöpfe auf Desktop UND Mobil
++ * unsichtbar gemacht, sodass der Pokéball die einzige Navigation der Seite
++ * war. Die Nachfolgerin steht in css/ds-nav.css und braucht kein
++ * !important, weil sie nicht gegen eine ältere Regel anschreibt. */
+ 
+ @media (max-width: 768px) {
+     .pokeball-btn { width: 45px; height: 45px; }
+diff --git a/css/styles.css b/css/styles.css
+index 6b9ec881..c4a4eb6b 100644
+--- a/css/styles.css
++++ b/css/styles.css
+@@ -1063,26 +1063,47 @@
+             overflow: hidden;
+         }
+ 
+-        /* City League banner unified with .header (Theme A Option 1).
+-           Was a purple/blue gradient that visually broke the
+-           consistency the rest of the site established. Now uses the
+-           same red Pokémon gradient + slimmer padding as every other
+-           section banner. */
++        /* Angeglichen an .header weiter oben (17.08.2026).
++           Die Regel hatte den roten Verlaufsbanner, den .header schon
++           losgeworden war — nur unter einem anderen Klassennamen, weshalb
++           der frühere Fix hier nie ankam. Gemessen 130px hoch, trug einen
++           Titel und einen halb abgeschnittenen Format-Wähler, und stand
++           damit als prominentester Block über einer leeren Ansicht.
++           Woher die Daten kommen, sagt jetzt der Datenraum-Ausweis
++           (css/ds-nav.css) eine Zeile darüber — pro Datenraum statt
++           global, was auch den falschen Stempel "17.8.2026" über der seit
++           dem 31.07. leeren JP-Ansicht erledigt. */
+         .city-league-header {
+-            background: linear-gradient(135deg, var(--pokemon-red) 0%, var(--pokemon-red-dark) 100%);
+-            color: white;
+-            padding: 10px 18px;
+-            text-align: center;
+-            border-radius: 10px;
+-            border-bottom: 3px solid var(--pokemon-yellow, #FFCB05);
+-            box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+-            margin-bottom: 12px;
++            display: flex;
++            align-items: center;
++            flex-wrap: wrap;
++            gap: var(--s-1) var(--s-3);
++            min-height: 48px;
++            padding: var(--s-2) 0;
++            text-align: left;
++            color: var(--ink);
++            background: none;
++            border: 0;
++            border-bottom: 2px solid transparent;
++            border-image: var(--rule) 1;
++            border-radius: 0;
++            box-shadow: none;
++            margin-bottom: var(--s-4);
+         }
+ 
+         .city-league-header h2 {
+-            font-size: clamp(1.05em, 4vw, 1.45em);
+-            margin-bottom: 2px;
+-            text-shadow: 1px 1px 2px rgba(0,0,0,0.25);
++            font-size: var(--fs-xl);
++            line-height: 1.25;
++            margin: 0;
++            color: var(--ink);
++            text-shadow: none;
++        }
++
++        /* Der Format-Wähler saß absolut im Banner und wurde rechts
++           abgeschnitten. In der Zeile braucht er nur noch seinen Platz. */
++        .city-league-header .cl-format-container {
++            margin-left: auto;
++            margin-top: 0;
+         }
+         
+         .format-toggle-container {
+diff --git a/js/app-city-league.js b/js/app-city-league.js
+index 8d8b82d7..e0185660 100644
+--- a/js/app-city-league.js
++++ b/js/app-city-league.js
+@@ -1,3 +1,25 @@
++// Saisonpause ist kein Fehler. Bis zum 17.08.2026 stand sie in einem roten
++// Fehlerkasten (class="error") — alle drei Personas im Audit haben das als
++// "die Seite ist kaputt" gelesen. Die JP-Rotation leert die Current-CSVs
++// planmaessig; was fehlt, ist eine Erklaerung und ein Weiterweg, kein Alarm.
++function cityLeagueOffSeasonHtml() {
++    var de = (typeof getLang === 'function' && getLang() === 'de');
++    if (window.DsNav) { try { window.DsNav.setSpaceFacts({ pause: true }, 'jp'); } catch (e) {} }
++    return '<div class="ds-empty">' +
++        '<div class="ds-empty-title">' + (de
++            ? 'Saisonpause in Japan'
++            : 'Off-season in Japan') + '</div>' +
++        '<p class="ds-empty-body">' + (de
++            ? 'Die City League pausiert zwischen zwei Set-Rotationen. Sobald das erste Turnier '
++              + 'im neuen Format gescrapt ist, stehen die Zahlen hier wieder \u2014 in der Regel '
++              + 'wenige Tage nach dem Release.'
++            : 'The City League pauses between set rotations. Numbers return here as soon as the '
++              + 'first tournament in the new format has been scraped \u2014 usually a few days '
++              + 'after release.') + '</p>' +
++        '<button type="button" class="ds-empty-cta" onclick="switchTabAndUpdateMenu(\'current-meta\')">' +
++        (de ? 'Stattdessen das globale Meta ansehen' : 'Look at the global meta instead') +
++        '</button></div>';
++}
+ ﻿// app-city-league.js — extracted from app.js
+ // Part of Hausi's Pokemon TCG Analysis
+ 
+@@ -394,9 +416,7 @@
+                         return loadCityLeagueData(_fallbackDepth + 1);
+                     }
+                     console.error('Hauptdaten fehlen fuer Format:', format);
+-                    content.innerHTML = '<div class="error">' + (getLang() === 'de'
+-                        ? 'Aktuell keine City-League-Daten verfügbar (Saison-Pause).'
+-                        : 'No City League data available right now (off-season).') + '</div>';
++                    content.innerHTML = cityLeagueOffSeasonHtml();
+                     return;
+                 }
+ 
+@@ -459,9 +479,7 @@
+                         return loadCityLeagueData(_fallbackDepth + 1);
+                     }
+                     console.info('City League: no main data for format', format, '— expected during the season pause (no tournaments running).');
+-                    content.innerHTML = '<div class="error">' + (getLang() === 'de'
+-                        ? 'Aktuell keine City-League-Daten verfügbar (Saison-Pause).'
+-                        : 'No City League data available right now (off-season).') + '</div>';
++                    content.innerHTML = cityLeagueOffSeasonHtml();
+                     return;
+                 }
+ 
+@@ -569,9 +587,7 @@
+                     '.deck-banner-card, .tier-section, .tier-hero-card, .city-league-table-wrap, .meta-share-section'
+                 );
+                 if (content && !renderedSomething) {
+-                    content.innerHTML = '<div class="error">' + (getLang() === 'de'
+-                        ? 'Aktuell keine City-League-Daten verfügbar (Saison-Pause).'
+-                        : 'No City League data available right now (off-season).') + '</div>';
++                    content.innerHTML = cityLeagueOffSeasonHtml();
+                 }
+             }
+         }
+@@ -1248,9 +1264,7 @@
+                 if (tableContainer) {
+                     const errorMsg = 'Error loading City League Analysis data';
+                     console.error(errorMsg, { format, hasAnalysis: !!data, hasArchetypes: !!archetypesData });
+-                    tableContainer.innerHTML = `<div class="error">${getLang() === 'de'
+-                        ? 'Aktuell keine City-League-Daten verfügbar (Saison-Pause).'
+-                        : 'No City League data available right now (off-season).'}</div>`;
++                    tableContainer.innerHTML = cityLeagueOffSeasonHtml();
+                 }
+             }
+         }
+diff --git a/js/app-tier-meta.js b/js/app-tier-meta.js
+index 730f933a..a79ec1d9 100644
+--- a/js/app-tier-meta.js
++++ b/js/app-tier-meta.js
+@@ -1499,6 +1499,18 @@
+                         : ''}
+                 </div>`;
+ 
++            // Die Basis, auf der JEDE Quote dieser Ansicht beruht, wandert in
++            // den Datenraum-Ausweis über dem Tab. Vorher standen hier vier
++            // Feldgrößen nebeneinander (22.699 / 23.613 / 7.456 / 14.026) und
++            // keine davon sagte, welche der Nenner ist.
++            if (window.DsNav && fieldConv && fieldConv.totalBrought > 0) {
++                window.DsNav.setSpaceFacts({
++                    sample: deDS
++                        ? `${fmtNumDS(fieldConv.totalBrought)} gewichtete Antritte · ${totalEntries.toLocaleString('de-DE')} Decks`
++                        : `${fmtNumDS(fieldConv.totalBrought)} weighted entries · ${totalEntries.toLocaleString('en-US')} decks`
++                }, 'gl');
++            }
++
+             let html = heroHtml + dataSourceHtml + filterHtml + overallTop8Html + moversHtml + '<div style="margin-bottom: 30px;">';
+ 
+             // Render each tier
+diff --git a/js/ds-nav.js b/js/ds-nav.js
+new file mode 100644
+index 00000000..f54354ff
+--- /dev/null
++++ b/js/ds-nav.js
+@@ -0,0 +1,292 @@
++/* ds-nav.js — die sechs Ziele der Hauptnavigation und der Datenraum-Ausweis.
++ *
++ * WARUM ES DAS GIBT
++ * Bis zum 17.08.2026 hatte die Seite faktisch keine sichtbare Navigation:
++ * die Leiste in index.html war per `display: none !important`
++ * (css/pokeball-menu.css) global abgeschaltet, und der Pokéball daneben
++ * trägt kein Label. Die Startseite verlinkte 6 von 12 Bereichen; Card
++ * Database, Deck Builder, Rechner, Proxy, Side Quest und die Anleitung
++ * waren von dort aus unerreichbar.
++ *
++ * DER SCHNITT
++ * Die sechs Ziele folgen den vier Fragen, die die Seite ohnehin
++ * beantwortet — belegt durch das Funktionsinventar vom 17.08.:
++ *   Start    Was ist gerade stark?
++ *   Meta     Wie sieht das Feld aus?
++ *   Decks    Wie sieht die Liste dazu aus?
++ *   Turnier  Was steht am Samstag im Feld?
++ *   Karten   Was muss ich davon besitzen?
++ * Champions steht abgesetzt: Pokémon Champions ist ein anderes Spiel, und
++ * das stand bisher nirgends.
++ *
++ * WIE ES SICH EINFÜGT
++ * Kein neuer Router. Jedes Ziel ruft `switchTabAndUpdateMenu` mit einem
++ * vorhandenen Tab auf; die Untertab-Navigation des Hubs bleibt, wie sie
++ * ist. Der Pokéball bleibt ebenfalls — er führt weiter die vollständige
++ * Liste aller 30 Einträge. Neu ist nur die Ebene darüber.
++ *
++ * `switchTab` wird umschlossen statt verändert, damit app-core.js
++ * unangetastet bleibt und diese Datei ohne Folgen wieder entfernbar ist.
++ */
++(function () {
++    'use strict';
++
++    // Gruppe -> { Standardziel, Mitglieder }. Die Mitglieder entscheiden,
++    // welcher Knopf aktiv leuchtet, wenn man über einen anderen Weg
++    // (Pokéball, Hub-Kachel, Deep-Link) in einem Tab landet.
++    var GROUPS = [
++        { id: 'start',     go: 'meta-analysis-hub', gl: '◉',
++          tabs: ['meta-analysis-hub'] },
++        { id: 'meta',      go: 'current-meta',      gl: '▦',
++          tabs: ['current-meta', 'city-league', 'past-meta'] },
++        { id: 'decks',     go: 'current-analysis',  gl: '▤',
++          tabs: ['current-analysis', 'city-league-analysis'] },
++        { id: 'turnier',   go: 'profile',           gl: '★',
++          tabs: [] },                       // Profil ist geteilt, siehe unten
++        { id: 'karten',    go: 'cards',             gl: '◫',
++          tabs: ['cards', 'proxy', 'calculator'] },
++        { id: 'champions', go: 'side-quest',        gl: '◆', alt: true,
++          tabs: ['side-quest'] }
++    ];
++
++    var LABELS = {
++        de: { start: 'Start', meta: 'Meta', decks: 'Decks', turnier: 'Turnier',
++              karten: 'Karten', champions: 'Champions' },
++        en: { start: 'Home', meta: 'Meta', decks: 'Decks', turnier: 'Event',
++              karten: 'Cards', champions: 'Champions' }
++    };
++
++    // Datenraum je Tab. Region, Format und Quelle sind strukturelle
++    // Wahrheiten und stehen hier; Stichprobe und Stand werden zur Laufzeit
++    // ergänzt, wenn sie bekannt sind — lieber ein Feld weglassen als eine
++    // Zahl behaupten (Projektregel: melden, nicht raten).
++    var SPACES = {
++        'city-league':          'jp',
++        'city-league-analysis': 'jp',
++        'current-meta':         'gl',
++        'current-analysis':     'gl',
++        'past-meta':            'past'
++    };
++
++    var SPACE_TEXT = {
++        jp: {
++            de: { region: '🇯🇵 Japan · City League', source: 'limitlesstcg.com/jp',
++                  note: 'Global und Past werden getrennt geführt und nie mit diesen Zahlen gemischt.' },
++            en: { region: '🇯🇵 Japan · City League', source: 'limitlesstcg.com/jp',
++                  note: 'Global and Past are kept separate and never mixed into these numbers.' }
++        },
++        gl: {
++            de: { region: '🌐 Global · Online + Majors', source: 'Limitless Online',
++                  note: 'Japan und Past werden getrennt geführt und nie mit diesen Zahlen gemischt.' },
++            en: { region: '🌐 Global · Online + Majors', source: 'Limitless Online',
++                  note: 'Japan and Past are kept separate and never mixed into these numbers.' }
++        },
++        past: {
++            de: { region: '📦 Past · eingefrorene Formate', source: 'Limitless Labs',
++                  note: 'Japan und Global werden getrennt geführt und nie mit diesen Zahlen gemischt.' },
++            en: { region: '📦 Past · frozen formats', source: 'Limitless Labs',
++                  note: 'Japan and Global are kept separate and never mixed into these numbers.' }
++        }
++    };
++
++    var F = {
++        de: { format: 'Format', source: 'Quelle', sample: 'Stichprobe',
++              window: 'Zeitfenster', stamp: 'Stand', pause: 'Saisonpause — keine aktuellen Daten',
++              entries: 'gewichtete Antritte', since: 'in Person legal seit' },
++        en: { format: 'Format', source: 'Source', sample: 'Sample',
++              window: 'Window', stamp: 'Updated', pause: 'Off-season — no current data',
++              entries: 'weighted entries', since: 'in-person legal since' }
++    };
++
++    function lang() {
++        return (typeof window.getLang === 'function' && window.getLang() === 'en') ? 'en' : 'de';
++    }
++    function esc(s) {
++        return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
++            return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c];
++        });
++    }
++    function groupForTab(tabId) {
++        for (var i = 0; i < GROUPS.length; i++) {
++            if (GROUPS[i].tabs.indexOf(tabId) !== -1) return GROUPS[i].id;
++        }
++        // Das Profil trägt zwei Gruppen: Meta Call und Battle Journal sind
++        // Turniervorbereitung, alles andere gehört zu den Karten. Bis Meta
++        // Call aus #profile-content herausgelöst ist (eigener Schritt),
++        // entscheidet der aktive Untertab.
++        if (tabId === 'profile') {
++            var sub = document.querySelector('.profile-tab-btn.active');
++            var key = sub && (sub.dataset.profileTab || sub.getAttribute('onclick') || '');
++            return /metacall|journal/i.test(key || '') ? 'turnier' : 'karten';
++        }
++        if (tabId === 'tutorial') return 'start';
++        return null;
++    }
++
++    function render() {
++        var host = document.getElementById('dsNavHost');
++        var bar  = document.getElementById('dsTabbarHost');
++        if (!host) return;
++        var L = LABELS[lang()];
++
++        host.innerHTML = GROUPS.map(function (g, i) {
++            var sep = (g.alt && i > 0) ? '<span class="ds-nav-sep" aria-hidden="true"></span>' : '';
++            return sep + '<button type="button" class="ds-nav-btn' + (g.alt ? ' is-alt' : '') +
++                '" data-ds-group="' + g.id + '">' + esc(L[g.id]) + '</button>';
++        }).join('');
++
++        if (bar) {
++            // Auf Mobil fünf Ziele — Champions ist der seltenste und bleibt
++            // dem Pokéball-Menü vorbehalten, statt einen Platz zu belegen,
++            // den Karten oder Turnier täglich brauchen.
++            bar.innerHTML = GROUPS.filter(function (g) { return !g.alt; }).map(function (g) {
++                return '<button type="button" class="ds-tabbar-btn" data-ds-group="' + g.id + '">' +
++                    '<span class="ds-tabbar-gl" aria-hidden="true">' + g.gl + '</span>' +
++                    esc(L[g.id]) + '</button>';
++            }).join('');
++        }
++
++        [host, bar].forEach(function (el) {
++            if (!el) return;
++            el.addEventListener('click', function (e) {
++                var btn = e.target.closest('[data-ds-group]');
++                if (!btn) return;
++                var g = GROUPS.filter(function (x) { return x.id === btn.dataset.dsGroup; })[0];
++                if (!g) return;
++                if (typeof window.switchTabAndUpdateMenu === 'function') {
++                    window.switchTabAndUpdateMenu(g.go);
++                } else if (typeof window.switchTab === 'function') {
++                    window.switchTab(g.go);
++                }
++            });
++        });
++    }
++
++    function syncActive(tabId) {
++        var g = groupForTab(tabId);
++        document.querySelectorAll('[data-ds-group]').forEach(function (b) {
++            if (b.dataset.dsGroup === g) b.setAttribute('aria-current', 'page');
++            else b.removeAttribute('aria-current');
++        });
++    }
++
++    /* ── Datenraum-Ausweis ─────────────────────────────────────────── */
++
++    // Nur setzen, was wirklich bekannt ist. window._formatWindow wird beim
++    // Deploy aus data/format_window.json in index.html gestempelt.
++    function fw() { return window._formatWindow || {}; }
++
++    function fmtDate(iso) {
++        if (!iso) return '';
++        var p = String(iso).slice(0, 10).split('-');
++        return p.length === 3 ? (p[2] + '.' + p[1] + '.' + p[0]) : '';
++    }
++
++    function renderSpace(tabId) {
++        var host = document.getElementById('dsSpaceHost');
++        if (!host) return;
++        var key = SPACES[tabId];
++        if (!key) { host.innerHTML = ''; host.hidden = true; return; }
++        host.hidden = false;
++
++        var lg = lang(), t = SPACE_TEXT[key][lg], f = F[lg], w = fw();
++        var bits = [];
++
++        bits.push('<span class="ds-space-region">' + t.region + '</span>');
++
++        if (key === 'jp' && w.current_set_jp) {
++            bits.push('<span><b>' + f.format + '</b> ' + esc(w.current_set_jp) + '</span>');
++        } else if (key === 'gl' && w.current_set) {
++            var since = w.in_person_legal_date ? ' (' + f.since + ' ' + fmtDate(w.in_person_legal_date) + ')' : '';
++            bits.push('<span><b>' + f.format + '</b> ' +
++                esc((w.oldest_legal_set ? w.oldest_legal_set + '–' : '') + w.current_set) + esc(since) + '</span>');
++        } else if (key === 'past' && w.previous_format_key) {
++            bits.push('<span><b>' + f.format + '</b> ' + esc(w.previous_format_key) + '</span>');
++        }
++
++        bits.push('<span><b>' + f.source + '</b> ' + esc(t.source) + '</span>');
++
++        // Stichprobe und Stand liefert die jeweilige Ansicht über
++        // DsNav.setSpaceFacts(). Fehlt eine Angabe, bleibt sie weg — eine
++        // erfundene Zahl wäre schlimmer als eine fehlende.
++        var facts = (host._facts || {})[key] || {};
++        if (facts.sample) {
++            bits.push('<span><b>' + f.sample + '</b> ' + esc(facts.sample) + '</span>');
++        }
++        if (facts.window) {
++            bits.push('<span><b>' + f.window + '</b> ' + esc(facts.window) + '</span>');
++        }
++        var stamp = facts.stamp ||
++            (typeof localStorage !== 'undefined' ? localStorage.getItem('lastScraperUpdate') : '') || '';
++        if (stamp) bits.push('<span><b>' + f.stamp + '</b> ' + esc(stamp) + '</span>');
++        if (facts.pause) bits.push('<span class="ds-space-pause">' + esc(f.pause) + '</span>');
++
++        host.setAttribute('data-space', key);
++        host.innerHTML = bits.join('<span class="ds-space-sep" aria-hidden="true">·</span>') +
++            '<span class="ds-space-note">' + esc(t.note) + '</span>';
++    }
++
++    var current = null;
++
++    function onTab(tabId) {
++        current = tabId;
++        syncActive(tabId);
++        renderSpace(tabId);
++    }
++
++    // Öffentliche Schnittstelle für die Ansichten: sobald eine Ansicht
++    // weiß, auf wie vielen Antritten ihre Zahlen beruhen, schreibt sie es
++    // hierher. Beispiel aus app-tier-meta.js:
++    //   DsNav.setSpaceFacts({ sample: '7.456 gewichtete Antritte', window: '20.07.–17.08.' })
++    window.DsNav = {
++        // Fakten werden nach DATENRAUM abgelegt, nicht nach Tab. Die Ansichten
++        // laden asynchron: die City-League-Daten sind beim Seitenstart fertig,
++        // während noch der Hub aktiv ist — nach `current` geschlüsselt landeten
++        // sie unter 'meta-analysis-hub' und waren nie zu sehen. Der Datenraum
++        // ist ohnehin die richtige Ebene: 'gl' gilt für current-meta und
++        // current-analysis gleichermaßen.
++        setSpaceFacts: function (facts, space) {
++            var host = document.getElementById('dsSpaceHost');
++            if (!host) return;
++            var key = space || SPACES[current];
++            if (!key) return;
++            host._facts = host._facts || {};
++            host._facts[key] = Object.assign({}, host._facts[key] || {}, facts || {});
++            renderSpace(current);
++        },
++        refresh: function () { render(); onTab(current); }
++    };
++
++    function boot() {
++        render();
++
++        // switchTab umschließen statt anfassen: app-core.js bleibt
++        // unverändert, und diese Datei ist ohne Rückbau entfernbar.
++        var orig = window.switchTab;
++        if (typeof orig === 'function' && !orig.__dsWrapped) {
++            var wrapped = function (tabName) {
++                var r = orig.apply(this, arguments);
++                try { onTab(tabName); } catch (e) { /* Navigation darf nie an der Leiste scheitern */ }
++                return r;
++            };
++            wrapped.__dsWrapped = true;
++            window.switchTab = wrapped;
++        }
++
++        // Profil-Untertabs entscheiden zwischen "Turnier" und "Karten".
++        document.addEventListener('click', function (e) {
++            if (e.target.closest('.profile-tab-btn')) setTimeout(function () { syncActive(current); }, 0);
++        }, true);
++
++        window.addEventListener('languageChanged', function () { window.DsNav.refresh(); });
++
++        var active = document.querySelector('.tab-content.active');
++        onTab(active ? active.id : 'meta-analysis-hub');
++    }
++
++    if (document.readyState === 'loading') {
++        document.addEventListener('DOMContentLoaded', boot);
++    } else {
++        boot();
++    }
++})();
+-- 
+2.43.0
+

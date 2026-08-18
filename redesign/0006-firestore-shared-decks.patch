@@ -1,0 +1,120 @@
+From 59cbf642290c8ecbb8ba2e459a04fbd66dd20e22 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Mon, 17 Aug 2026 22:35:18 +0000
+Subject: [PATCH 6/9] =?UTF-8?q?firestore:=20give=20shared=5Fdecks=20a=20ru?=
+ =?UTF-8?q?le=20=E2=80=94=20it=20never=20had=20one?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+js/app-features.js writes shared_decks/{id} at :1065 and reads it back at
+:1119 for the ?sharedDeck= short links. The collection is absent from
+firestore.rules, so both calls hit the default deny. Either deck sharing has
+been quietly broken since it shipped, or live was hand-edited in the Console
+and this file drifted — the exact failure the file header records for
+2026-06-12. Writing the rule down makes the answer observable either way.
+
+- read: open. The link is the capability and the recipient is usually signed
+  out; the payload is a public decklist. (ids are 6 chars from a 55-char
+  alphabet via Math.random() — unguessable enough for decklists, not secrets.)
+- create: open, to match sharing working without an account like the rest of
+  the deck builder, but bounded — exact key set, deck must be a map of at most
+  120 entries, id at most 24 chars — so it can't serve as free storage.
+- update/delete: denied. A handed-out link must not change under the recipient.
+
+Deliberately no byte cap: .size() on a map counts keys, not bytes, so such a
+clause would read like a limit and enforce nothing. Firestore's 1 MiB document
+limit is the real backstop.
+
+FIRESTORE_RULES.md carries an embedded copy of this file; snippet and table
+updated to match, per the header's instruction.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01Ld5WCR1Wjb95tBgocvSXbH
+---
+ FIRESTORE_RULES.md | 16 ++++++++++++++++
+ firestore.rules    | 34 ++++++++++++++++++++++++++++++++++
+ 2 files changed, 50 insertions(+)
+
+diff --git a/FIRESTORE_RULES.md b/FIRESTORE_RULES.md
+index 7e565371..d11250a2 100644
+--- a/FIRESTORE_RULES.md
++++ b/FIRESTORE_RULES.md
+@@ -31,6 +31,21 @@ service cloud.firestore {
+       allow read, write: if request.auth != null && request.auth.uid == uid;
+     }
+ 
++    // ─────────────────────────────────────────────────────────
++    // Shared decks — the ?sharedDeck=<id> short links. Had no rule at all
++    // until 2026-08-17, so both the write and the read hit the default deny.
++    // read is open because the link IS the capability; create is bounded so
++    // an open endpoint can't be used as free storage; update/delete denied.
++    // ─────────────────────────────────────────────────────────
++    match /shared_decks/{shareId} {
++      allow read: if true;
++      allow create: if shareId.size() <= 24
++        && request.resource.data.keys().hasOnly(['deck', 'order', 'archetype', 'source', 'timestamp'])
++        && request.resource.data.deck is map
++        && request.resource.data.deck.size() <= 120;
++      allow update, delete: if false;
++    }
++
+     // ─────────────────────────────────────────────────────────
+     // Public profile index — used by Testing Groups to add members
+     // by email. Each user writes their own entry; anyone signed in
+@@ -151,6 +166,7 @@ Changes propagate within a minute.
+ |---|---|---|
+ | `users/{uid}/**` | Owner only | Owner only |
+ | `publicProfiles/{uid}` | Any signed-in user | Owner only |
++| `shared_decks/{shareId}` | Anyone with the link | Create only, bounded; no update/delete |
+ | `testingGroups/{id}` | Members only | Owner (full) / Editor (data only) / Viewer (none) |
+ | `testingGroups/{id}/activity/{id}` | Members only | Append-only by any member |
+ 
+diff --git a/firestore.rules b/firestore.rules
+index 6feb16db..0380e0fe 100644
+--- a/firestore.rules
++++ b/firestore.rules
+@@ -32,6 +32,40 @@ service cloud.firestore {
+       allow read, write: if request.auth != null && request.auth.uid == uid;
+     }
+ 
++    // ─────────────────────────────────────────────────────────
++    // Shared decks — the ?sharedDeck=<id> short links produced by
++    // js/app-features.js:1065 (.set()) and read back at :1119 (.get()).
++    //
++    // This collection had NO rule at all, so both calls hit the default deny.
++    // Either deck sharing has been quietly broken since it shipped, or live
++    // was hand-edited in the Console and this file drifted again — the exact
++    // failure the header above records for 2026-06-12. Writing the rule down
++    // makes the answer observable either way.
++    //
++    // read is open on purpose: the link IS the capability, and the recipient
++    // is usually not signed in — that is what a share link is for. The payload
++    // is a public decklist, no user data. Note the id is only 6 chars from a
++    // 55-char alphabet (~1e10) and drawn with Math.random(), so treat these as
++    // unguessable-enough-for-decklists, not as secrets.
++    //
++    // create is open to match: sharing works without an account today, same as
++    // the rest of the deck builder. It is bounded instead — one write, capped
++    // size, required shape — so an open endpoint can't be used as free storage.
++    // update and delete are denied outright: a link, once handed out, must not
++    // change under the recipient.
++    match /shared_decks/{shareId} {
++      allow read: if true;
++      allow create: if shareId.size() <= 24
++        && request.resource.data.keys().hasOnly(['deck', 'order', 'archetype', 'source', 'timestamp'])
++        && request.resource.data.deck is map
++        && request.resource.data.deck.size() <= 120;
++        // No byte cap here: .size() on a map counts keys, not bytes, so a
++        // "< 200000" clause would read like a size limit and enforce nothing.
++        // The 120-entry deck cap is the real bound (a legal deck is 60 cards);
++        // Firestore's own 1 MiB document limit backs it up.
++      allow update, delete: if false;
++    }
++
+     // ─────────────────────────────────────────────────────────
+     // Public profile index — used by Testing Groups to add members
+     // by email. Each user writes their own entry; anyone signed in
+-- 
+2.43.0
+

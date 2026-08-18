@@ -1,0 +1,209 @@
+From e626c4e1fc2a98eddaa1f77418e48791573af699 Mon Sep 17 00:00:00 2001
+From: "Claude (Cowork)" <claude@thedipidis>
+Date: Tue, 18 Aug 2026 09:46:03 +0000
+Subject: [PATCH 3/4] sprache: eine deutschsprachige Seite startet nicht auf
+ Englisch
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Drei Dinge, die zusammen dafuer gesorgt haben, dass ein deutscher
+Erstbesucher auf Englisch landete und keinen Weg zurueck sah.
+
+1) I18N_DEFAULT_LANG stand hart auf 'en'. Auf einer Seite, deren
+   eigene Kopfzeile "Dein Portal fuer Meta-Analyse & Deckbau"
+   heisst. Jetzt entscheidet navigator.languages, und wenn dort
+   nichts Unterstuetztes steht, Deutsch. Eine gespeicherte Wahl
+   schlaegt weiterhin beides — wer einmal umgeschaltet hat, merkt
+   nichts.
+
+2) Derselbe Wert diente als Rueckfall fuer fehlende Schluessel. Das
+   sind zwei verschiedene Fragen: "was sieht ein neuer Besucher"
+   und "wo schlage ich nach, wenn ein Schluessel fehlt". Der
+   Rueckfall heisst jetzt I18N_FALLBACK_LANG und bleibt Englisch,
+   weil neue Schluessel dort zuerst entstehen. Faktisch aendert das
+   heute nichts: beide Woerterbuecher haben exakt 1.745 Schluessel
+   und decken sich vollstaendig.
+
+3) Der Umschalter zeigte die AKTIVE Sprache. Ein deutscher Nutzer
+   sah "DE" und hatte keinen Hinweis, dass ein Klick nach Englisch
+   fuehrt — die Beschriftung beschrieb, wo man ist, statt wohin der
+   Knopf geht. Jetzt steht dort das Ziel, und der Titel sagt es aus:
+   "Auf Englisch umschalten" bzw. "Switch to German". Der Text
+   kommt aus dem Woerterbuch, also stimmt die Richtung von selbst —
+   gelesen wird immer die aktive Sprache.
+
+Nebenbei: der Untertitel der Anleitung behauptete "v46 (Mai 2026)",
+zwei Zeilen darunter stand im Hero "v47 · Juni 2026". Im selben
+Bildausschnitt. Die Versionsangabe faellt aus dem Untertitel; der
+Hero traegt sie ohnehin.
+---
+ index.html |  4 ++--
+ js/i18n.js | 63 ++++++++++++++++++++++++++++++++++++++++++++----------
+ 2 files changed, 54 insertions(+), 13 deletions(-)
+
+diff --git a/index.html b/index.html
+index 274ada49..b0c0905d 100644
+--- a/index.html
++++ b/index.html
+@@ -588,7 +588,7 @@
+                 </div>
+ 
+                 <div class="header-flex-user">
+-                    <button id="langToggleBtn" onclick="switchLanguage(getLang() === 'en' ? 'de' : 'en')" class="lang-toggle-btn" title="Switch language" data-i18n-title="header.switchLanguageTitle">DE</button>
++                    <button id="langToggleBtn" onclick="switchLanguage(getLang() === 'en' ? 'de' : 'en')" class="lang-toggle-btn" title="Auf Englisch umschalten" data-i18n-title="header.switchLanguageTitle">EN</button>
+                     <button id="battleJournalFab" class="header-icon-btn header-journal-btn" type="button" onclick="openBattleJournalSheet()" title="Battle Journal" aria-label="Battle Journal" data-i18n-title="bj.openShort" data-i18n-aria="bj.openShort">
+                         <svg class="header-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                             <path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v17a1 1 0 0 1-1 1H6.5A2.5 2.5 0 0 1 4 18.5v-14z"></path>
+@@ -2131,7 +2131,7 @@
+                     </nav>
+                     <div class="header">
+                         <h2><span data-i18n="tutorial.heading">How to Use This Website</span> <button class="tab-help-btn" onclick="openTabHelp('tutorial')" title="Help" aria-label="Help for How to Use" data-i18n-title="btn.helpTitle"></button></h2>
+-                        <p data-i18n="tutorial.subtitle">Complete guide to Pokémon TCG analysis, deck building, and playtesting — v46 (May 2026)</p>
++                        <p data-i18n="tutorial.subtitle">Vollständige Anleitung für Meta-Analyse, Deckbau und Playtesting.</p>
+                     </div>
+                     
+                     <div class="tutorial-main-container">
+diff --git a/js/i18n.js b/js/i18n.js
+index 2c06c9c3..fdfe7088 100644
+--- a/js/i18n.js
++++ b/js/i18n.js
+@@ -3,9 +3,35 @@
+    ═══════════════════════════════════════════════════════════════ */
+ 
+ const I18N_STORAGE_KEY = 'app_lang';
+-const I18N_DEFAULT_LANG = 'en';
+ const I18N_SUPPORTED = ['en', 'de'];
+ 
++/* Wohin ein Schluessel faellt, den die aktive Sprache nicht kennt.
++   Beide Woerterbuecher haben heute exakt 1.745 Schluessel und decken
++   sich vollstaendig — der Rueckfall ist reine Vorsorge und bleibt auf
++   Englisch, weil neue Schluessel dort zuerst entstehen. */
++const I18N_FALLBACK_LANG = 'en';
++
++/* Was ein Besucher OHNE gespeicherte Wahl sieht.
++   Stand bis zum 18.08.2026 hart auf 'en' — auf einer Seite, deren
++   eigene Kopfzeile "Dein Portal fuer Meta-Analyse & Deckbau" heisst
++   und deren Nutzer deutsch sprechen. Jeder erste Besuch begann also in
++   der falschen Sprache, und der Umschalter half nicht weiter (siehe
++   unten).
++   Jetzt entscheidet die Browsersprache, und wenn die nichts Brauchbares
++   sagt, Deutsch. Eine gespeicherte Wahl schlaegt beides. */
++function i18nPreferredLang() {
++    try {
++        const tags = (navigator.languages && navigator.languages.length)
++            ? navigator.languages
++            : [navigator.language || ''];
++        for (const tag of tags) {
++            const base = String(tag).toLowerCase().split('-')[0];
++            if (I18N_SUPPORTED.includes(base)) return base;
++        }
++    } catch (e) { /* kein navigator, z. B. im Test */ }
++    return 'de';
++}
++
+ /* ── translation dictionary ─────────────────────────────────── */
+ const translations = {
+   en: {
+@@ -18,7 +44,7 @@ const translations = {
+     'header.cardsShort':      'Database',
+     'header.myDecks':         'My Decks',
+     'header.wishlist':        'Wishlist',
+-    'header.switchLanguageTitle':'Switch language',
++    'header.switchLanguageTitle':'Switch to German',
+ 
+     // ── Sidebar / Main Menu ──────────────────────────────────
+     'menu.title':             'Main Menu',
+@@ -852,6 +878,7 @@ const translations = {
+     'arc.matchupsToggle':       'Show matchups ({n})',
+     'arc.showAll':              'All {n}',
+     'arc.shareImage':           'Image',
++    'tutorial.loading':         'Loading the guide \u2026',
+     'cl.usageBarTitle':         'of the analysed lists play this card',
+     'cl.skelMain':              'Main Cards',
+     'cl.skelMainHint':          '(staples + #1 Ace Spec)',
+@@ -1892,7 +1919,7 @@ const translations = {
+ 
+     // ── Tutorial heading ─────────────────────────────────────
+     'tutorial.heading':         'How to Use This Website',
+-    'tutorial.subtitle':        'Complete guide to Pokémon TCG analysis, deck building, and playtesting — v46 (May 2026)',
++    'tutorial.subtitle':        'Complete guide to Pokémon TCG analysis, deck building and playtesting.',
+ 
+     // ── Misc shared ──────────────────────────────────────────
+     'misc.loading':             'Loading...',
+@@ -1960,7 +1987,7 @@ const translations = {
+     'header.cardsShort':      'Datenbank',
+     'header.myDecks':         'Meine Decks',
+     'header.wishlist':        'Wunschliste',
+-    'header.switchLanguageTitle':'Sprache wechseln',
++    'header.switchLanguageTitle':'Auf Englisch umschalten',
+ 
+     // ── Sidebar / Main Menu ──────────────────────────────────
+     'menu.title':             'Hauptmenü',
+@@ -2788,6 +2815,7 @@ const translations = {
+     'arc.matchupsToggle':       'Matchups anzeigen ({n})',
+     'arc.showAll':              'Alle {n}',
+     'arc.shareImage':           'Bild',
++    'tutorial.loading':         'Anleitung wird geladen \u2026',
+     'cl.usageBarTitle':         'der ausgewerteten Listen spielen diese Karte',
+     'cl.skelMain':              'Kernkarten',
+     'cl.skelMainHint':          '(Pflichtkarten + erster Ace Spec)',
+@@ -3824,7 +3852,7 @@ const translations = {
+ 
+     // ── Tutorial ─────────────────────────────────────────────
+     'tutorial.heading':         'So funktioniert diese Website',
+-    'tutorial.subtitle':        'Vollständige Anleitung für Pokémon TCG-Analyse, Deckbau und Playtesting — v46 (Mai 2026)',
++    'tutorial.subtitle':        'Vollständige Anleitung für Meta-Analyse, Deckbau und Playtesting.',
+ 
+     // ── Sonstiges ────────────────────────────────────────────
+     'misc.loading':             'Laden...',
+@@ -3884,9 +3912,8 @@ const translations = {
+ };
+ 
+ /* ── state ───────────────────────────────────────────────────── */
+-let currentLang = localStorage.getItem(I18N_STORAGE_KEY)
+-                  || I18N_DEFAULT_LANG;
+-if (!I18N_SUPPORTED.includes(currentLang)) currentLang = I18N_DEFAULT_LANG;
++let currentLang = localStorage.getItem(I18N_STORAGE_KEY) || i18nPreferredLang();
++if (!I18N_SUPPORTED.includes(currentLang)) currentLang = i18nPreferredLang();
+ 
+ /* ── core API ────────────────────────────────────────────────── */
+ 
+@@ -3897,7 +3924,7 @@ if (!I18N_SUPPORTED.includes(currentLang)) currentLang = I18N_DEFAULT_LANG;
+ function t(key) {
+   const lang = translations[currentLang];
+   if (lang && lang[key] !== undefined) return lang[key];
+-  const fallback = translations[I18N_DEFAULT_LANG];
++  const fallback = translations[I18N_FALLBACK_LANG];
+   if (fallback && fallback[key] !== undefined) return fallback[key];
+   return key;                     // last resort: show the key
+ }
+@@ -3983,9 +4010,23 @@ function updateTranslationsInDOM() {
+     if (key) el.setAttribute('aria-label', t(key));
+   });
+ 
+-  // Update the language toggle button label (show active language)
++  // Der Umschalter zeigt das ZIEL, nicht den Zustand.
++  //
++  // Bis zum 18.08.2026 stand dort die aktive Sprache: ein deutscher
++  // Nutzer sah "DE" und hatte keinen Hinweis, dass ein Klick nach
++  // Englisch fuehrt — die Beschriftung beschrieb, wo man ist, statt
++  // wohin der Knopf geht. Ein Knopf beschriftet seine Wirkung.
+   const toggle = document.getElementById('langToggleBtn');
+-  if (toggle) toggle.textContent = currentLang === 'de' ? 'DE' : 'EN';
++  if (toggle) {
++    const target = currentLang === 'de' ? 'en' : 'de';
++    toggle.textContent = target.toUpperCase();
++    // Der Titel kommt aus dem Woerterbuch: die deutsche Fassung sagt
++    // "Auf Englisch umschalten", die englische "Switch to German" —
++    // gelesen wird immer die aktive Sprache, also stimmt die Richtung
++    // von selbst. Die data-i18n-title-Schleife oben hat den Wert schon
++    // gesetzt; hier steht nur noch das aria-label nach.
++    toggle.setAttribute('aria-label', toggle.title || t('header.switchLanguageTitle'));
++  }
+ 
+   // Update CSS custom property for close-button tooltips
+   document.documentElement.style.setProperty('--close-tooltip', `'${t('btn.close')}'`);
+-- 
+2.43.0
+

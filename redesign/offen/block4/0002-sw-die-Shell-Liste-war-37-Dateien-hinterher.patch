@@ -1,0 +1,249 @@
+From f643143189d0ddf62578f17dbe557cde28ece026 Mon Sep 17 00:00:00 2001
+From: "Claude (Cowork)" <claude@thedipidis>
+Date: Tue, 18 Aug 2026 09:45:28 +0000
+Subject: [PATCH 2/4] sw: die Shell-Liste war 37 Dateien hinterher
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Der Kommentar ueber SHELL_ASSETS sagte:
+
+    The list currently has to be maintained by hand. A build-step
+    that auto-generates it from index.html would eliminate the
+    manual sync, but the list changes <1x/quarter so the build
+    infra isn't worth it yet.
+
+Gemessen am 18.08.2026: 37 von 95 Assets fehlten. Darunter
+js/app-meta-call.js (das groesste Modul der Seite), alle sechs
+Side-Quest-Dateien, js/firebase-auth.js, js/firebase-globals.js,
+js/app-archetype-card.js, js/meta-analysis-hub.js und der
+Ladebildschirm. Die Handpflege hat nicht gehalten.
+
+Warum das mehr ist als "der allererste Offline-Start":
+
+CACHE_NAME traegt den Deploy-Stempel. Jeder Deploy — mehrere am Tag
+— installiert einen neuen Cache, und der activate-Handler loescht
+den alten. Vorgecacht wird beim Install nur SHELL_ASSETS; alles
+andere landet erst wieder im Cache, wenn der Nutzer es das naechste
+Mal online abruft. Wer zwischen Deploy und naechstem Abruf das Netz
+verliert, dem fehlen genau die Dateien, die nicht auf der Liste
+stehen. Wie das aussieht, steht im Repo schon als Kommentar an
+js/firebase-globals.js: "user appeared signed out and saw empty
+tabs (2026-05-28)".
+
+tests/unit/test-service-worker-shell.js vergleicht die Liste jetzt
+bei jedem Lauf mit index.html. Ein Build-Schritt waere schoener; ein
+Test, der laut wird, ist das, was die Abweichung stoppt.
+
+Der Test kennt zwei Ausnahmen und begruendet beide:
+js/firebase-credentials.js steht in .gitignore und wird erst im
+Deploy aus einem Secret geschrieben, gehoert aber auf die Seite und
+damit in den Cache. Die Tutorial-Fragmente (546 KB) stehen bewusst
+NICHT im Shell — der Tab wird selten geoeffnet, und der
+Netzwerk-zuerst-Zweig im fetch-Handler cacht sie nach dem ersten
+Oeffnen ohnehin.
+---
+ service-worker.js                       | 67 +++++++++++++++--
+ tests/unit/test-service-worker-shell.js | 98 +++++++++++++++++++++++++
+ 2 files changed, 160 insertions(+), 5 deletions(-)
+ create mode 100644 tests/unit/test-service-worker-shell.js
+
+diff --git a/service-worker.js b/service-worker.js
+index b23837b9..2d79eeb1 100644
+--- a/service-worker.js
++++ b/service-worker.js
+@@ -15,11 +15,30 @@ const CACHE_NAME = 'tcg-analysis-v202608180619';
+ // caches it for offline use. Missing entries silently fail with a
+ // network-error on offline boot.
+ //
+-// The list currently has to be maintained by hand. A build-step that
+-// auto-generates it from index.html would eliminate the manual sync,
+-// but the list changes <1×/quarter so the build infra isn't worth it
+-// yet. Tracking ticket: F-017 in
+-// docs/audit/infrastructure/findings/cluster-D-architecture.md.
++// The note above used to end with "the list changes <1×/quarter so the
++// build infra isn't worth it yet". Measured on 2026-08-18: 37 of the
++// page's 95 assets were missing — Meta Call, all six Side Quest files,
++// firebase-auth.js, firebase-globals.js, the archetype card, the hub,
++// the loading screen. The manual sync did not hold.
++//
++// Why that matters more than "first offline boot": CACHE_NAME carries
++// the deploy stamp, so every deploy — several a day — installs a new
++// cache and the activate handler deletes the old one. Only SHELL_ASSETS
++// is re-precached on install; everything else returns to the cache the
++// next time the user fetches it while online. A user whose SW updates
++// and who then loses signal is missing exactly the files that are not
++// on this list. The note at './js/firebase-globals.js' below records
++// what that looked like the last time it happened (2026-05-28).
++//
++// tests/unit/test-service-worker-shell.js now compares this list with
++// index.html on every run. A build step would still be nicer; a test
++// that fails loudly is what stops the drift.
++// Nicht in dieser Liste, mit Absicht: tutorial/tutorial.de.html und
++// tutorial/tutorial.en.html. Zusammen 546 KB, und der Tab wird selten
++// geoeffnet — sie beim Install mitzuziehen wuerde jeden Deploy fuer
++// jeden Nutzer teuer machen, um einen Tab offline zu haben, den kaum
++// jemand offline sucht. Der Abruf laeuft ueber den Netzwerk-zuerst-Zweig
++// im fetch-Handler und landet nach dem ersten Oeffnen im Cache.
+ const SHELL_ASSETS = [
+   './',
+   './index.html',
+@@ -47,6 +66,15 @@ const SHELL_ASSETS = [
+   './css/ux-step2.css',
+   './css/ux-step3.css',
+   './css/ux-step4.css',
++  './css/ds-nav.css',
++  './css/ds-share.css',
++  './css/anti-tech.css',
++  './css/tech-lab.css',
++  './css/tech-slots.css',
++  './css/profile-deck-builder.css',
++  './css/meta-call.css',
++  './css/testing-groups.css',
++  './css/archetype-icons.css',
+   './js/inline-init.js',
+   './js/app-utils.js',
+   './js/i18n.js',
+@@ -87,6 +115,35 @@ const SHELL_ASSETS = [
+   './js/vendor/papaparse.min.js',
+   './js/vendor/localforage.min.js',
+   './js/vendor/mobile-drag-drop.min.js',
++  './js/pokemon-loading-screen.js',
++  './js/csv-cache-interceptor.js',
++  './js/firebase-credentials.js',
++  './js/firebase-config.js',
++  './js/firebase-globals.js',
++  './js/firebase-auth.js',
++  './js/auth-ui-helpers.js',
++  './js/firebase-collection.js',
++  './js/tcg-showdown-link.js',
++  './js/card-capability-engine.js',
++  './js/app-tech-lab.js',
++  './js/app-anti-tech.js',
++  './js/archetype-icons.js',
++  './js/app-archetype-card.js',
++  './js/app-meta-call.js',
++  './js/meta-analysis-hub.js',
++  './js/app-testing-groups.js',
++  './js/app-side-quest-play.js',
++  './js/app-side-quest-pokedex.js',
++  './js/app-side-quest-builder.js',
++  './js/app-side-quest-resources.js',
++  './js/champions-damage.js',
++  './js/app-side-quest-usage.js',
++  './js/app-side-quest-matchups.js',
++  './js/app-profile-deck-builder.js',
++  './js/current-meta-quickref.js',
++  './js/ds-nav.js',
++  './js/ds-share.js',
++  './js/ds-tutorial.js',
+   './images/pokeball-icon.png',
+   './images/escape-rope.png'
+ ];
+diff --git a/tests/unit/test-service-worker-shell.js b/tests/unit/test-service-worker-shell.js
+new file mode 100644
+index 00000000..d0acb911
+--- /dev/null
++++ b/tests/unit/test-service-worker-shell.js
+@@ -0,0 +1,98 @@
++/**
++ * service-worker.js — die Liste, die von Hand gepflegt werden musste.
++ *
++ * SHELL_ASSETS ist die Positivliste, die beim Install vorgecacht wird.
++ * Der Kommentar darueber sagte bis zum 18.08.2026: "the list changes
++ * <1×/quarter so the build infra isn't worth it yet". Gemessen an dem
++ * Tag: 37 von 95 Assets fehlten — Meta Call, alle sechs Side-Quest-
++ * Dateien, firebase-auth.js, firebase-globals.js, die Archetyp-Karte,
++ * der Hub, der Ladebildschirm.
++ *
++ * Warum das mehr ist als "der erste Offline-Start":
++ *
++ *   CACHE_NAME traegt den Deploy-Stempel. Jeder Deploy — mehrere am Tag
++ *   — installiert einen neuen Cache, und der activate-Handler loescht
++ *   den alten. Vorgecacht wird beim Install nur SHELL_ASSETS; alles
++ *   andere landet erst wieder im Cache, wenn der Nutzer es das naechste
++ *   Mal online abruft. Wer zwischen Deploy und naechstem Abruf das Netz
++ *   verliert, dem fehlen genau die Dateien, die nicht auf der Liste
++ *   stehen. Der Kommentar an './js/firebase-globals.js' im Service
++ *   Worker haelt fest, wie das beim letzten Mal aussah: "user appeared
++ *   signed out and saw empty tabs (2026-05-28)".
++ *
++ * Ein Build-Schritt waere schoener. Ein Test, der laut wird, ist das,
++ * was die Abweichung stoppt.
++ */
++
++const { describe, it } = require('node:test');
++const assert = require('node:assert/strict');
++const fs = require('fs');
++const path = require('path');
++
++const ROOT = path.join(__dirname, '..', '..');
++const HTML = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
++const SW = fs.readFileSync(path.join(ROOT, 'service-worker.js'), 'utf8');
++
++// Was index.html an eigenen JS/CSS-Dateien anzieht, in Dokumentreihenfolge.
++function referencedAssets() {
++    const out = [];
++    const re = /(?:src|href)="((?:js|css)\/[^"?]+)/g;
++    let m;
++    while ((m = re.exec(HTML)) !== null) {
++        if (!out.includes(m[1])) out.push(m[1]);
++    }
++    return out;
++}
++
++// Was der Service Worker beim Install vorcacht.
++function shellAssets() {
++    const block = SW.slice(SW.indexOf('const SHELL_ASSETS = ['),
++                           SW.indexOf('];', SW.indexOf('const SHELL_ASSETS = [')));
++    return (block.match(/'\.\/((?:js|css)\/[^']+)'/g) || [])
++        .map(s => s.replace(/^'\.\//, '').replace(/'$/, ''));
++}
++
++describe('service worker: die Shell-Liste haelt mit index.html Schritt', () => {
++    it('jede von index.html geladene JS- und CSS-Datei steht im Shell', () => {
++        const refs = referencedAssets();
++        const shell = shellAssets();
++        const missing = refs.filter(r => !shell.includes(r));
++        assert.deepEqual(missing, [],
++            'Diese Dateien laedt index.html, der Service Worker cacht sie aber nicht vor:\n  '
++            + missing.join('\n  ')
++            + '\nNach jedem neuen <script> oder <link> gehoert der Pfad in SHELL_ASSETS.');
++    });
++
++    it('das Shell enthaelt keine Datei, die es nicht mehr gibt', () => {
++        // js/firebase-credentials.js steht in .gitignore und wird erst im
++        // Deploy aus einem Secret geschrieben (deploy-pages.yml:123). Im
++        // Repo fehlt sie also mit Absicht — auf der Seite ist sie da, und
++        // dort muss der Service Worker sie auch cachen.
++        const GENERATED = ['js/firebase-credentials.js'];
++        const dead = shellAssets()
++            .filter(a => !GENERATED.includes(a))
++            .filter(a => !fs.existsSync(path.join(ROOT, a)));
++        assert.deepEqual(dead, [],
++            'Diese Eintraege zeigen ins Leere; der Install protokolliert dafuer bei jedem '
++            + 'Nutzer eine Warnung:\n  ' + dead.join('\n  '));
++    });
++
++    it('das Grundgeruest steht drin', () => {
++        const shell = SW.slice(SW.indexOf('const SHELL_ASSETS = ['));
++        for (const must of ["'./'", "'./index.html'", "'./css/tokens.css'"]) {
++            assert.ok(shell.includes(must), `${must} fehlt im Shell — ohne das bootet nichts offline.`);
++        }
++    });
++
++    it('die Anleitung wird bewusst NICHT vorgecacht', () => {
++        // 546 KB fuer einen Tab, den kaum jemand offline sucht. Der
++        // Netzwerk-zuerst-Zweig im fetch-Handler cacht sie nach dem
++        // ersten Oeffnen ohnehin.
++        const arrayStart = SW.indexOf('const SHELL_ASSETS = [');
++        const array = SW.slice(arrayStart, SW.indexOf('];', arrayStart));
++        assert.ok(!/tutorial\/tutorial\.[a-z]{2}\.html/.test(array),
++            'Die Tutorial-Fragmente stehen im Shell — das zieht 546 KB bei jedem Deploy.');
++        assert.match(SW, /Nicht in dieser Liste, mit Absicht/,
++            'Die Begruendung fuer die Ausnahme ist verschwunden.');
++    });
++});
+-- 
+2.43.0
+

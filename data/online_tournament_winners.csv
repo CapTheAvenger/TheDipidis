@@ -2,7 +2,20 @@ tournament_id,tournament_date,format,player_count,winner_archetype,winner_winrat
 6a2a2ad82d97f3b0c2613980,2026-07-01,CRI,109,Dragapult Dusknoir,25.0
 6a42564583fd320299bd3d12,2026-07-01,CRI,114,Slowking,27.0
 6a427cb383fd320299bd3ed1,2026-06-30,CRI,116,Slowking,18.0
+6a8314365a30714095572e93,2026-08-18,PBL,118,Raging Bolt Ogerpon,18.0
+6a791dd8cdc0391d7fa62496,2026-08-17,PBL,209,Cynthia's Garchomp,24.0
+6a82476c5a3071409557297b,2026-08-17,PBL,259,Raging Bolt Ogerpon,24.0
+6a7f2c0978baaa6d1c21f0cb,2026-08-17,PBL,182,Dragapult,28.0
+6a7e153e2b308b6067b53028,2026-08-17,PBL,168,Dragapult Blaziken,27.0
+6a7219f62b308b6067b49d9b,2026-08-16,PBL,172,Raging Bolt Ogerpon,35.0
+6a81729a78baaa6d1c22128e,2026-08-16,PBL,197,Dragapult Blaziken,24.0
+worlds-of-doom-day-two,2026-08-16,PBL,163,Arboliva Ogerpon,28.0
+6a7ea49f2b308b6067b53832,2026-08-16,PBL,164,Dragapult Blaziken,29.0
+6a7b1904cdc0391d7fa63d42,2026-08-15,PBL,346,Greninja,30.0
+worlds-2026-day-one,2026-08-15,PBL,909,Dragapult Dusknoir,24.0
+6a7d35cfcdc0391d7fa65386,2026-08-15,PBL,102,Dragapult Dudunsparce,30.0
 6a7e14e22b308b6067b53026,2026-08-15,PBL,211,Arboliva Ogerpon,28.0
+6a7a2978cdc0391d7fa63281,2026-08-14,PBL,133,Dragapult,25.0
 6a43872683fd320299bd4942,2026-08-14,PBL,110,Clefairy Ogerpon,25.0
 6a7a97fa2b308b6067b50d7f,2026-08-13,PBL,127,Dhelmise Banette,27.0
 6a7a21622b308b6067b5051d,2026-08-13,PBL,169,Dragapult,30.0
@@ -94,11 +107,3 @@ jimothy,2026-07-25,PBL,504,Grimmsnarl Froslass,39.0
 6a4e22cd063cb29d318e68d8,2026-07-21,PBL,118,Festival Lead,21.0
 6a5baefb52c24ac2da645a63,2026-07-21,PBL,141,Dragapult Dusknoir,30.0
 6a5b9ac952c24ac2da645851,2026-07-21,PBL,114,Festival Lead,25.0
-6a5e8dd6937230b102d40677,2026-07-21,PBL,117,Cynthia's Garchomp,18.0
-6a543fe6c0a6bab82fbbcca8,2026-07-20,PBL,210,Dragapult,21.0
-6a5d1549937230b102d3fa6f,2026-07-20,PBL,133,Alakazam Dudunsparce,21.0
-6a56672b6355385f44dd4a4d,2026-07-20,PBL,224,Dragapult Blaziken,35.0
-6a5b9aa7937230b102d3e961,2026-07-20,PBL,104,Festival Lead,27.0
-6a5938d8cc68177ec6c56e10,2026-07-20,PBL,267,Alakazam Dudunsparce,30.0
-6a5b622f937230b102d3e577,2026-07-19,PBL,120,Dhelmise Banette,18.0
-6a4ae98265724db9ded3da75,2026-07-18,PBL,145,Dragapult Blaziken,36.0

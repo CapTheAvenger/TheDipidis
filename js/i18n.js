@@ -3925,7 +3925,48 @@ const translations = {
   }
 };
 
+/* Einmalige Bereinigung einer Wahl, die nie eine war.
+ *
+ * Bis zum 18.08.2026 stand der Standard hart auf 'en' UND der
+ * Umschalter zeigte die aktuelle statt der Zielsprache. Wer damals auf
+ * "DE" tippte, weil er Deutsch wollte, schaltete damit auf Englisch —
+ * und switchLanguage() schrieb das als vermeintlich bewusste Wahl in
+ * den Speicher. Block 4 hat Standard und Beschriftung repariert, aber
+ * eine gespeicherte Wahl schlaegt beides. Jeder Bestandsnutzer mit
+ * deutschem Browser sitzt seither auf Englisch fest — nachgemessen am
+ * 18.08.2026 im Browser des Seitenbetreibers selbst:
+ *   navigator.language      de-DE
+ *   localStorage.app_lang   en      <- gewinnt
+ *   i18nPreferredLang()     de      <- wirkungslos
+ *
+ * Diese Bereinigung laeuft genau einmal je Browser und nur in dem
+ * einen Fall, der praktisch immer ein Versehen ist: gespeichert steht
+ * der alte Standardwert 'en', der Browser spricht aber etwas anderes.
+ * Wer Englisch wirklich will, klickt einmal — die Marke sorgt dafuer,
+ * dass danach nie wieder umgeschaltet wird.
+ *
+ * Rueckgabe: die Zielsprache, wenn umgestellt wurde, sonst null. Der
+ * Aufrufer nutzt das, um einen Hinweis mit Rueckweg anzuzeigen —
+ * stilles Umstellen waere dasselbe Vergehen mit umgekehrtem Vorzeichen.
+ */
+const I18N_MIGRATION_KEY = 'app_lang_reset_2026_08';
+
+function i18nMigrateStoredLang() {
+    try {
+        if (localStorage.getItem(I18N_MIGRATION_KEY)) return null;
+        localStorage.setItem(I18N_MIGRATION_KEY, '1');
+        const stored = localStorage.getItem(I18N_STORAGE_KEY);
+        const preferred = i18nPreferredLang();
+        if (stored === 'en' && preferred !== 'en') {
+            localStorage.setItem(I18N_STORAGE_KEY, preferred);
+            return preferred;
+        }
+    } catch (e) { /* kein localStorage, z. B. im Test */ }
+    return null;
+}
+
 /* ── state ───────────────────────────────────────────────────── */
+const I18N_MIGRATED_TO = i18nMigrateStoredLang();
 let currentLang = localStorage.getItem(I18N_STORAGE_KEY) || i18nPreferredLang();
 if (!I18N_SUPPORTED.includes(currentLang)) currentLang = i18nPreferredLang();
 
@@ -4046,14 +4087,54 @@ function updateTranslationsInDOM() {
   document.documentElement.style.setProperty('--close-tooltip', `'${t('btn.close')}'`);
 }
 
+/* Der Hinweis zur einmaligen Sprachumstellung.
+ *
+ * Wenn i18nMigrateStoredLang() etwas umgestellt hat, sagen wir es —
+ * mit einem Rueckweg in einem Klick. Eine Sprache still zu wechseln
+ * waere derselbe Uebergriff, den wir hier gerade reparieren, nur in
+ * die andere Richtung. Der Hinweis steht in der Zielsprache, weil das
+ * die Sprache ist, die der Nutzer nach unserer Annahme lesen kann;
+ * das Rueckweg-Wort steht zusaetzlich auf Englisch, damit auch die
+ * Gegenannahme bedienbar bleibt.
+ */
+function renderLangResetNotice(target) {
+  if (!target || document.getElementById('langResetNotice')) return;
+  const bar = document.createElement('div');
+  bar.id = 'langResetNotice';
+  bar.className = 'lang-reset-notice';
+  bar.setAttribute('role', 'status');
+  const text = document.createElement('span');
+  text.textContent = target === 'de'
+    ? 'Diese Seite ist jetzt auf Deutsch — deine gespeicherte Einstellung stand noch auf Englisch.'
+    : 'This page switched to your browser language.';
+  const back = document.createElement('button');
+  back.type = 'button';
+  back.className = 'lang-reset-notice-back';
+  back.textContent = target === 'de' ? 'Keep English' : 'Zurück zu Deutsch';
+  back.addEventListener('click', () => {
+    switchLanguage(target === 'de' ? 'en' : 'de');
+    bar.remove();
+  });
+  const close = document.createElement('button');
+  close.type = 'button';
+  close.className = 'lang-reset-notice-close';
+  close.setAttribute('aria-label', target === 'de' ? 'Hinweis schließen' : 'Dismiss');
+  close.textContent = '×';
+  close.addEventListener('click', () => bar.remove());
+  bar.append(text, back, close);
+  document.body.prepend(bar);
+}
+
 // Expose i18n functions globally
 window.t = t;
 window.switchLanguage = switchLanguage;
 window.getLang = getLang;
 window.updateTranslationsInDOM = updateTranslationsInDOM;
+window.i18nPreferredLang = i18nPreferredLang;
 
 /* ── auto-init on load ───────────────────────────────────────── */
 document.addEventListener('DOMContentLoaded', () => {
   document.documentElement.lang = currentLang;
   updateTranslationsInDOM();
+  renderLangResetNotice(I18N_MIGRATED_TO);
 });

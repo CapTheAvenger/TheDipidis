@@ -1458,11 +1458,16 @@ window.CONV_MIN_N = CONV_MIN_N;
  * the variable becomes visible text — five files had a local copy
  * each, this is the single source.
  */
+// Es gab davon zwei: diese hier und eine gleichnamige in
+// app-current-meta-analysis.js, beide auf oberster Ebene. Die andere
+// lud spaeter und gewann still - sie maskierte fuenf Zeichen statt
+// drei, dafuer wurde aus escapeHtml(null) der sichtbare Text "null".
+// Diese Fassung ist die Vereinigung beider: fuenf Zeichen, und leer
+// bleibt leer.
 function escapeHtml(s) {
-    return String(s ?? '')
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;');
+    return String(s ?? '').replace(/[&<>"']/g, c => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+    }[c]));
 }
 window.escapeHtml = escapeHtml;
 

@@ -2626,11 +2626,9 @@
             if (wr >= 40) return 'wr-neg';
             return 'wr-strong-neg';
         }
-        function escapeHtml(s) {
-            return String(s).replace(/[&<>"']/g, c => ({
-                '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
-            }[c]));
-        }
+        // escapeHtml stand hier ein zweites Mal, gleicher Name, obere
+        // Ebene, spaeteres Laden - es ueberschrieb still die Fassung
+        // aus app-utils.js. Jetzt gibt es nur noch die eine dort.
 
         // Render best/worst matchups for Current Meta - extract directly from loaded HTML (1:1 copy)
         function renderCurrentMetaMatchups(archetype) {
@@ -3034,7 +3032,14 @@
             if (!gridContainer) return;
 
             if (!Array.isArray(cards) || cards.length === 0) {
-                gridContainer.innerHTML = getEmptyStateHtml();
+                // Frueher: getEmptyStateHtml() ohne Argumente. Das traf
+                // die gleichnamige Funktion aus app-city-league.js und
+                // sagte deshalb "Turnierdaten" statt "Deckliste".
+                gridContainer.innerHTML = getEmptyStateBoxHtml({
+                    title: t('cm.noCardsInDeck'),
+                    description: t('cm.noCardsInDeckDesc'),
+                    icon: 'cards'
+                });
                 if (visualContainer) {
                     document.getElementById('currentMetaDeckTableView')?.classList.add('d-none');
                     visualContainer.classList.remove('d-none');

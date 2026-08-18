@@ -1,0 +1,453 @@
+From 5da1e8c33a2cc2b4f98031736c575f76b3015a3c Mon Sep 17 00:00:00 2001
+From: "Claude (Cowork)" <claude@thedipidis>
+Date: Tue, 18 Aug 2026 12:36:24 +0000
+Subject: [PATCH 1/2] meta call: das groesste Modul der Seite lag hinter der
+ Anmeldung
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+js/app-meta-call.js hat 10.839 Zeilen. Treffer fuer currentUser,
+getCurrentUser oder window.auth: null. Die Szenarien liegen in
+localStorage, die Felddaten in data/. Das Modul braucht die
+Anmeldung nicht — es lag nur im falschen Container.
+
+    <div id="profile-content" class="display-none">
+      ...
+      <div id="profile-metacall" class="profile-tab-content ...">
+
+#profile-content ist ausgeloggt versteckt. Damit war das Werkzeug,
+das die Frage "welche Decks treffe ich am Samstag" beantwortet, fuer
+jeden unsichtbar, der noch kein Konto hat — also fuer jeden, der die
+Seite zum ersten Mal aufmacht.
+
+Jetzt ein eigener Tab #meta-call mit #metaCallHost. Geaendert hat
+sich sonst nichts: dieselbe init(), dieselben drei Container-Aufrufe,
+nur ein anderer Knoten.
+
+DIE EINE STELLE, DIE ANGEMELDETES LIEST
+
+Der Journal-Blend ueber window.getBattleJournalWinRates(). Der liest
+journalHistoryCache, und der ist ausgeloggt leer — die Funktion
+liefert {}, die Vorhersage laeuft ohne den Blend weiter. Kein
+Sonderfall noetig, gepruefte Annahme.
+
+WAS MITZIEHEN MUSSTE
+
+- switchTab() initialisiert den Tab (case 'meta-call').
+- switchProfileTab() hat seinen metacall-Zweig verloren.
+- Der Knopf in der Profil-Leiste bleibt stehen, wo ihn die Nutzer
+  gelernt haben, und fuehrt jetzt in den eigenen Tab.
+- js/app-testing-groups.js springt nach dem Import einer Gruppe
+  ebenfalls dorthin.
+- Pokeball-Menue: eigener Eintrag, beide Sprachen.
+- Tiefenlinks #meta-call / #metacall / #metacall-tab.
+- js/ds-nav.js zeigt unter "Turnier" jetzt direkt darauf. Der
+  Sonderfall in groupForTab(), der den aktiven Profil-Untertab
+  abfragen musste, um Meta Call von der Wunschliste zu unterscheiden,
+  kennt nur noch das Battle Journal.
+
+Geprueft mit Playwright, ausgeloggt, auf 1440x900 und 390x844:
+Tab aktiv, 51 Zeilen in der Prognosetabelle, kein Ladefehler, keine
+Konsolenfehler, Hauptnavigation hebt "Turnier" hervor.
+
+Tests: 1110 passed, 0 failed / 373 passed, 5 skipped.
+---
+ index.html                | 41 ++++++++++++++++----
+ js/app-core.js            |  6 +++
+ js/app-meta-call.js       | 12 ++++--
+ js/app-testing-groups.js  |  5 ++-
+ js/ds-nav.js              | 15 ++++----
+ js/firebase-collection.js | 78 +++++++++++++++++++++++----------------
+ js/i18n.js                |  4 ++
+ js/inline-init.js         |  8 ++++
+ 8 files changed, 119 insertions(+), 50 deletions(-)
+
+diff --git a/index.html b/index.html
+index f3c95e95..9add03a9 100644
+--- a/index.html
++++ b/index.html
+@@ -513,6 +513,9 @@
+                                     <span class="menu-item-label">Probability Calculator</span>
+                                 </button>
+                             </div>
++                            <button id="menu-btn-meta-call" class="menu-item" data-tab-id="meta-call" onclick="switchTabAndUpdateMenu('meta-call')" data-i18n="menu.metaCall" role="menuitem" data-i18n-title="menu.metaCallTitle" title="Meta Call — vorhergesagtes Feld für dein nächstes Turnier">
++                                Meta Call
++                            </button>
+                             <button id="menu-btn-profile" class="menu-item" data-tab-id="profile" onclick="switchTabAndUpdateMenu('profile')" data-i18n="menu.profile" role="menuitem">
+                                 <span class="menu-item-label">My Profile</span>
+                             </button>
+@@ -1950,6 +1953,30 @@
+             </div>
+ 
+             <!-- Tab 6: Cards -->
++            <!-- Tab: Meta Call ────────────────────────────────────────────────
++                 Bis zum 18.08.2026 lag dieses Modul als Untertab in
++                 #profile-content und war damit ausgeloggt unsichtbar.
++                 Gezaehlt: 10.839 Zeilen in js/app-meta-call.js, davon
++                 null Treffer fuer currentUser / getCurrentUser /
++                 window.auth. Die Szenarien liegen in localStorage, die
++                 Felddaten in data/. Es brauchte den Login nie — nur den
++                 Container.
++
++                 Die eine Stelle, die Angemeldetes liest, ist der
++                 Journal-Blend ueber window.getBattleJournalWinRates().
++                 Ausgeloggt ist der Journal-Cache leer, die Funktion
++                 liefert {} und die Vorhersage laeuft ohne den Blend
++                 weiter — kein Sonderfall noetig. -->
++            <div id="meta-call" class="tab-content">
++                <div class="container">
++                    <nav class="tool-back-nav" aria-label="Back navigation">
++                        <button type="button" class="tool-back-btn" onclick="switchTabAndUpdateMenu('meta-analysis-hub')" data-i18n="metaHub.backToOverview">← Übersicht</button>
++                    </nav>
++                    <!-- Befuellt von MetaCall.init() -->
++                    <div id="metaCallHost"></div>
++                </div>
++            </div>
++
+             <div id="cards" class="tab-content">
+                 <div class="header">
+                     <h2><span data-i18n="cards.heading">Card Database</span> <button class="tab-help-btn" onclick="openTabHelp('cards')" title="Help" aria-label="Help for Card Database" data-i18n-title="btn.helpTitle"></button> <span class="data-freshness-chip" title="Daten zuletzt aktualisiert"><span class="data-freshness-chip-icon" aria-hidden="true">🔄</span> <span data-i18n="data.updated">Daten:</span> <span class="js-data-freshness">…</span></span></h2>
+@@ -2348,8 +2375,13 @@
+                                     <button class="profile-tab-btn" onclick="switchProfileTab('testinggroups')">
+                                         <span data-i18n="tg.title">Testing Groups</span>
+                                     </button>
+-                                    <button class="profile-tab-btn" onclick="switchProfileTab('metacall')">
+-                                        <span>Meta Call</span>
++                                    <!-- Meta Call ist kein Profil-Untertab mehr: es braucht
++                                         keinen Login (0 currentUser-Treffer in 10.839 Zeilen)
++                                         und lag nur wegen des Containers hinter der Anmeldung.
++                                         Der Knopf bleibt, wo ihn die Nutzer gelernt haben, und
++                                         fuehrt in den eigenen Tab. -->
++                                    <button class="profile-tab-btn" onclick="switchTabAndUpdateMenu('meta-call')">
++                                        <span>Meta Call →</span>
+                                     </button>
+                                 </div>
+                             </div>
+@@ -2724,11 +2756,6 @@
+                                  deck list / mulligan calculator all live here. -->
+                         </div>
+ 
+-                        <!-- Meta Call Tab -->
+-                        <div id="profile-metacall" class="profile-tab-content display-none">
+-                            <!-- Rendered dynamically by MetaCall.init() -->
+-                        </div>
+-
+                         <!-- Testing Groups Tab -->
+                         <div id="profile-testinggroups" class="profile-tab-content display-none">
+                             <!-- Rendered dynamically by TestingGroups.init() -->
+diff --git a/js/app-core.js b/js/app-core.js
+index 7f6d622d..09b705c7 100644
+--- a/js/app-core.js
++++ b/js/app-core.js
+@@ -1396,6 +1396,12 @@ const BASE_PATH = './data/';
+                         renderProxyQueue();
+                         initializeProxyManualSearchInput();
+                         break;
++                    // Meta Call ist seit dem 18.08.2026 ein eigener Tab. Vorher
++                    // hing die Initialisierung an switchProfileTab('metacall')
++                    // und damit an der Anmeldung.
++                    case 'meta-call':
++                        if (typeof MetaCall !== 'undefined') MetaCall.init();
++                        break;
+                 }
+             }
+ 
+diff --git a/js/app-meta-call.js b/js/app-meta-call.js
+index 557eae23..b5a22a73 100644
+--- a/js/app-meta-call.js
++++ b/js/app-meta-call.js
+@@ -7896,7 +7896,7 @@ window.MetaCall = (function () {
+ 
+   // ── Full Render ────────────────────────────────────────────
+   function renderAll() {
+-    const container = document.getElementById('profile-metacall');
++    const container = document.getElementById('metaCallHost');
+     if (!container || !_shareList) return;
+     const field = buildField();
+     // Date-window control — duplicates the picker in Card Analysis so
+@@ -8762,7 +8762,7 @@ window.MetaCall = (function () {
+   }
+ 
+   function refreshResults() {
+-    const container = document.getElementById('profile-metacall');
++    const container = document.getElementById('metaCallHost');
+     if (!container || !_shareList) return;
+     const field = buildField();
+     const fieldTbody = container.querySelector('.metacall-table tbody');
+@@ -10501,8 +10501,14 @@ window.MetaCall = (function () {
+   }
+ 
+   // ── Public Init ────────────────────────────────────────────
++  //
++  // Zielcontainer ist seit dem 18.08.2026 #metaCallHost im eigenen Tab
++  // #meta-call, nicht mehr #profile-metacall in #profile-content. Der
++  // alte Container lag hinter der Anmeldung, obwohl dieses Modul in
++  // 10.839 Zeilen keinen einzigen Treffer fuer currentUser,
++  // getCurrentUser oder window.auth hat.
+   async function init() {
+-    const container = document.getElementById('profile-metacall');
++    const container = document.getElementById('metaCallHost');
+     if (!container) return;
+     if (_shareList && _matchupMap) { renderAll(); return; }
+ 
+diff --git a/js/app-testing-groups.js b/js/app-testing-groups.js
+index a8b48ccf..cc82dd8a 100644
+--- a/js/app-testing-groups.js
++++ b/js/app-testing-groups.js
+@@ -1019,8 +1019,9 @@ window.TestingGroups = (function () {
+     const result = window.MetaCall._testingGroupLoad(g.data);
+     // Jump to the MetaCall tab so the user sees the imported data
+     // immediately instead of having to navigate there manually.
+-    if (typeof switchProfileTab === 'function') {
+-      switchProfileTab('metacall');
++    // Meta Call ist ein eigener Tab, kein Profil-Untertab mehr.
++    if (typeof switchTabAndUpdateMenu === 'function') {
++      switchTabAndUpdateMenu('meta-call');
+     }
+     const summary = (result && typeof result === 'object')
+       ? t('tg.loadedIntoMetaCallSummary')
+diff --git a/js/ds-nav.js b/js/ds-nav.js
+index 61de1f3a..1a83eefe 100644
+--- a/js/ds-nav.js
++++ b/js/ds-nav.js
+@@ -41,8 +41,8 @@
+           tabs: ['current-meta', 'city-league', 'past-meta'] },
+         { id: 'decks',     go: 'current-analysis',  gl: '▤',
+           tabs: ['current-analysis', 'city-league-analysis'] },
+-        { id: 'turnier',   go: 'profile',           gl: '★',
+-          tabs: [] },                       // Profil ist geteilt, siehe unten
++        { id: 'turnier',   go: 'meta-call',         gl: '★',
++          tabs: ['meta-call'] },            // Profil ist geteilt, siehe unten
+         { id: 'karten',    go: 'cards',             gl: '◫',
+           tabs: ['cards', 'proxy', 'calculator'] },
+         { id: 'champions', go: 'side-quest',        gl: '◆', alt: true,
+@@ -110,14 +110,15 @@
+         for (var i = 0; i < GROUPS.length; i++) {
+             if (GROUPS[i].tabs.indexOf(tabId) !== -1) return GROUPS[i].id;
+         }
+-        // Das Profil trägt zwei Gruppen: Meta Call und Battle Journal sind
+-        // Turniervorbereitung, alles andere gehört zu den Karten. Bis Meta
+-        // Call aus #profile-content herausgelöst ist (eigener Schritt),
+-        // entscheidet der aktive Untertab.
++        // Das Profil trägt weiterhin zwei Gruppen: das Battle Journal ist
++        // Turniervorbereitung, Decks / Wunschliste / Sammlung gehören zu
++        // den Karten. Meta Call steht seit dem 18.08.2026 nicht mehr in
++        // dieser Liste — es hat einen eigenen Tab und damit einen eigenen
++        // Eintrag oben.
+         if (tabId === 'profile') {
+             var sub = document.querySelector('.profile-tab-btn.active');
+             var key = sub && (sub.dataset.profileTab || sub.getAttribute('onclick') || '');
+-            return /metacall|journal/i.test(key || '') ? 'turnier' : 'karten';
++            return /journal/i.test(key || '') ? 'turnier' : 'karten';
+         }
+         if (tabId === 'tutorial') return 'start';
+         return null;
+diff --git a/js/firebase-collection.js b/js/firebase-collection.js
+index 69a5fb5a..dc7af09a 100644
+--- a/js/firebase-collection.js
++++ b/js/firebase-collection.js
+@@ -218,12 +218,44 @@ async function updateUserDoc(payload) {
+ }
+ window.updateUserDoc = updateUserDoc;
+ 
++/**
++ * Ein Klick auf eine Sammlungsfunktion ohne Anmeldung.
++ *
++ * Gezaehlt am 18.08.2026 in der Kartendatenbank, ausgeloggt: 180 von 291
++ * Knoepfen gehoeren zur Sammlung, zur Wunschliste oder zur Tauschliste.
++ * Jeder davon hat auf einen Klick geantwortet mit
++ *
++ *     showNotification('Please sign in to use this feature', 'error')
++ *
++ * Drei Dinge daran sind falsch. Es ist kein Fehler, sondern eine
++ * Voraussetzung — rote Meldung fuer "du bist nicht angemeldet" ist
++ * dieselbe Sprache wie fuer "das ging schief". Die Meldung stand nur auf
++ * Englisch, auf einer deutschsprachigen Seite. Und sie liess den Nutzer
++ * dort stehen, wo er war: er weiss jetzt, dass er sich anmelden muss,
++ * und muss den Weg dahin selbst suchen.
++ *
++ * Jetzt oeffnet derselbe Klick die Anmeldung. Wer sie wegklickt, ist da,
++ * wo er vorher war.
++ */
++function requireSignIn() {
++  const user = (typeof auth !== 'undefined' && auth) ? auth.currentUser : null;
++  if (user) return true;
++  if (typeof window.showAuthModal === 'function') {
++    window.showAuthModal('signin');
++  } else if (typeof showNotification === 'function') {
++    showNotification(
++      (typeof getLang === 'function' && getLang() === 'de')
++        ? 'Dafuer musst du angemeldet sein.'
++        : 'Please sign in to use this feature.',
++      'info');
++  }
++  return false;
++}
++window.requireSignIn = requireSignIn;
++
+ async function addToCollection(cardId) {
++  if (!requireSignIn()) return;
+   const user = auth.currentUser;
+-  if (!user) {
+-    showNotification('Please sign in to use this feature', 'error');
+-    return;
+-  }
+ 
+   const currentCount = window.userCollectionCounts ? (window.userCollectionCounts.get(cardId) || 0) : 0;
+   if (currentCount >= 4) {
+@@ -362,11 +394,8 @@ async function toggleCollection(cardId) {
+ 
+ // Add card to wishlist with a specific count (used by Meta Binder to set missing qty)
+ async function addToWishlistWithCount(cardId, count) {
++  if (!requireSignIn()) return;
+   const user = auth.currentUser;
+-  if (!user) {
+-    showNotification('Please sign in to use this feature', 'error');
+-    return;
+-  }
+   const qty = Math.max(1, Math.min(count, 4));
+   try {
+     await db.collection('users').doc(user.uid).update(
+@@ -393,11 +422,8 @@ async function addToWishlistWithCount(cardId, count) {
+ 
+ // Add card to wishlist (or increment count)
+ async function addToWishlist(cardId) {
++  if (!requireSignIn()) return;
+   const user = auth.currentUser;
+-  if (!user) {
+-    showNotification('Please sign in to use this feature', 'error');
+-    return;
+-  }
+   
+   const currentCount = window.userWishlistCounts ? (window.userWishlistCounts.get(cardId) || 0) : 0;
+   if (currentCount >= 4) {
+@@ -1359,11 +1385,8 @@ function setCollectionFilter(mode) {
+ }
+ 
+ async function clearCollection() {
++  if (!requireSignIn()) return;
+   const user = auth.currentUser;
+-  if (!user) {
+-    showNotification('Please sign in to use this feature', 'error');
+-    return;
+-  }
+ 
+   if (!window.userCollection || window.userCollection.size === 0) {
+     showNotification('Collection is already empty', 'info');
+@@ -1400,11 +1423,8 @@ async function clearCollection() {
+ }
+ 
+ async function clearWishlist() {
++  if (!requireSignIn()) return;
+   const user = auth.currentUser;
+-  if (!user) {
+-    showNotification('Please sign in to use this feature', 'error');
+-    return;
+-  }
+ 
+   if (!window.userWishlist || window.userWishlist.size === 0) {
+     showNotification(getLang()==='de' ? 'Wishlist ist bereits leer' : 'Wishlist is already empty', 'info');
+@@ -1811,11 +1831,8 @@ function exportWishlistAsImage() {
+ 
+ // Add a copy to collection AND auto-decrement wishlist count
+ async function addOwnedFromWishlist(cardId) {
++  if (!requireSignIn()) return;
+   const user = auth.currentUser;
+-  if (!user) {
+-    showNotification('Please sign in to use this feature', 'error');
+-    return;
+-  }
+   // Add to collection (respects 4-max internally)
+   await addToCollection(cardId);
+ 
+@@ -3573,10 +3590,9 @@ function switchProfileTab(tabName) {
+     openJournalHistoryTab();
+   }
+ 
+-  // Auto-init Meta Call
+-  if (tabName === 'metacall' && typeof MetaCall !== 'undefined') {
+-    MetaCall.init();
+-  }
++  // Meta Call hat keinen Profil-Untertab mehr — es ist ein eigener Tab
++  // (#meta-call) und initialisiert sich in switchTab(). Der Knopf in der
++  // Profil-Leiste ruft jetzt switchTabAndUpdateMenu('meta-call').
+ 
+   // Auto-init Testing Groups
+   if (tabName === 'testinggroups' && typeof TestingGroups !== 'undefined') {
+@@ -5652,7 +5668,7 @@ window.toggleWishlistBadge  = toggleWishlistBadge;
+ // Add card to tradelist with a specific count
+ async function addToTradelistWithCount(cardId, count) {
+   const user = auth.currentUser;
+-  if (!user) { showNotification('Please sign in to use this feature', 'error'); return; }
++  if (!requireSignIn()) return;
+   const qty = Math.max(1, Math.min(count, 4));
+   try {
+     // ONE call, not two. Split into two updates this was non-atomic: a
+@@ -5681,7 +5697,7 @@ async function addToTradelistWithCount(cardId, count) {
+ // Add card to tradelist (or increment count)
+ async function addToTradelist(cardId) {
+   const user = auth.currentUser;
+-  if (!user) { showNotification('Please sign in to use this feature', 'error'); return; }
++  if (!requireSignIn()) return;
+   const currentCount = window.userTradelistCounts ? (window.userTradelistCounts.get(cardId) || 0) : 0;
+   if (currentCount >= 4) { showNotification('Maximum 4 copies per card', 'info'); return; }
+   const newCount = currentCount + 1;
+@@ -5749,7 +5765,7 @@ async function toggleTradelist(cardId) {
+ // Clear entire tradelist
+ async function clearTradelist() {
+   const user = auth.currentUser;
+-  if (!user) { showNotification('Please sign in to use this feature', 'error'); return; }
++  if (!requireSignIn()) return;
+   if (!window.userTradelist || window.userTradelist.size === 0) {
+     showNotification(getLang()==='de' ? 'Trade List ist bereits leer' : 'Trade list is already empty', 'info');
+     return;
+diff --git a/js/i18n.js b/js/i18n.js
+index a0432f52..e5aaab13 100644
+--- a/js/i18n.js
++++ b/js/i18n.js
+@@ -60,6 +60,8 @@ const translations = {
+     'menu.hubTitle':          'Overview of all meta and deck analysis tools',
+     'menu.deckBuilderTitle':  'Deck Builder — build, save and analyse decks',
+     'menu.cardDatabase':      'Card Database',
++    'menu.metaCall':          'Meta Call',
++    'menu.metaCallTitle':     'Meta Call \u2014 predicted field for your next tournament',
+     'menu.deckBuilder':       'Deck Builder',
+     'menu.proxyPrinter':      'Proxy Printer',
+     'menu.calculator':        'Calculator',
+@@ -2004,6 +2006,8 @@ const translations = {
+     'menu.hubTitle':          'Übersicht über alle Meta- und Deck-Analyse-Tools',
+     'menu.deckBuilderTitle':  'Deck Builder — Decks bauen, speichern und analysieren',
+     'menu.cardDatabase':      'Kartendatenbank',
++    'menu.metaCall':          'Meta Call',
++    'menu.metaCallTitle':     'Meta Call \u2014 vorhergesagtes Feld f\u00fcr dein n\u00e4chstes Turnier',
+     'menu.deckBuilder':       'Deck Builder',
+     'menu.proxyPrinter':      'Proxy-Drucker',
+     'menu.calculator':        'Rechner',
+diff --git a/js/inline-init.js b/js/inline-init.js
+index 8a8544fb..9593b23f 100644
+--- a/js/inline-init.js
++++ b/js/inline-init.js
+@@ -144,11 +144,19 @@ document.addEventListener('DOMContentLoaded', function () {
+ });
+ 
+ // ── Deep-linking via URL hash ────────────────────────────────
++// Bis Firebase antwortet, gilt: nicht angemeldet. Ohne diese Zeile
++// blitzen die Sammlungsknoepfe beim Laden kurz im aktiven Zustand auf.
++// js/firebase-config.js korrigiert die Klasse, sobald der Zustand steht.
++try { document.documentElement.classList.add('is-signed-out'); } catch (e) {}
++
+ // Users arriving via share-links like https://thedipidis.app/#tutorial
+ // should land directly on that tab. Also supports friendlier aliases
+ // in both languages so we can share URLs that read naturally.
+ (function setupHashDeepLink() {
+     const HASH_ALIASES = {
++        'meta-call':             'meta-call',
++        'metacall':              'meta-call',
++        'metacall-tab':          'meta-call',
+         'tutorial':              'tutorial',
+         'how-to-use':            'tutorial',
+         'howto':                 'tutorial',
+-- 
+2.43.0
+

@@ -1,0 +1,329 @@
+// ds-sections.js — die Meta-Ansicht als Bausteine statt als Wand.
+//
+// GEMESSEN am 18.08.2026, bevor es diese Datei gab:
+//
+//   current-meta        11.364 px Desktop  /  14.046 px Mobil
+//                       = 12,6 / 16,6 Bildschirmhoehen
+//   Matchup-Heatmap     stand bei y = 6.562 px  (7,3 Bildschirme tief)
+//   Most Used Cards     stand bei y = 7.417 px  (8,2 Bildschirme tief)
+//   Vollstaendige Tabelle  2.479 px = 22 % der ganzen Seite
+//
+// Die drei Dinge, wegen derer jemand diese Seite oeffnet — welche Decks
+// gewinnen, wie stehen sie zueinander, welche Karten spielen alle —
+// lagen ueber 7.400 px verteilt. Dazwischen 4.500 px Tier-Liste.
+//
+// WAS DIESE DATEI TUT
+//
+// #currentMetaContent hat zwoelf direkte Kinder, jedes ein sauberer
+// Block mit eigener Ueberschrift. Sie werden hier in benannte,
+// klappbare Abschnitte gefasst und in eine Reihenfolge gebracht, die
+// mit der Antwort beginnt. Der Zustand jedes Abschnitts wird gemerkt.
+//
+// WAS SIE AUSDRUECKLICH NICHT TUT
+//
+// Sie nimmt nichts weg. Der heutige Vanilla-Modus in der Deck-Analyse
+// tut genau das — gemessen: 4.039 px mit 0 von 46 Bausteinen sichtbar
+// gegen 7.691 px mit 45 von 46, und darunter sind die besten und
+// schlechtesten Matchups. Ein Abschnitt, der zugeklappt ist, steht
+// weiter mit seiner Ueberschrift da. Wer ihn sucht, findet ihn.
+//
+// Sie schreibt auch keinen Renderer neu. Die Bloecke werden VERSCHOBEN
+// (appendChild), nicht neu erzeugt — damit ueberleben alle
+// Ereignis-Handler, die app-tier-meta.js, app-current-meta.js und
+// app-meta-cards.js daran gehaengt haben. Dieselbe Technik wie
+// js/ds-nav.js, das switchTab umschliesst statt app-core.js anzufassen:
+// diese Datei ist ohne Rueckbau entfernbar.
+(function () {
+    'use strict';
+
+    var HOST_ID = 'currentMetaContent';
+    var STORE = 'ds_sections_v1';
+
+    // Reihenfolge = Reihenfolge auf der Seite. `auf` ist der
+    // Startzustand; wer etwas anders einstellt, bekommt seine
+    // Einstellung wieder, nicht diese hier.
+    //
+    // Die ersten drei beantworten die Eingangsfrage. Alles danach ist
+    // Vertiefung und faengt zugeklappt an — sichtbar vorhanden, aber
+    // nicht im Weg.
+    var SECTIONS = [
+        { id: 'top',     auf: true,  nimm: ['section.tier-hero-section', 'div.ds-stat-row', 'div.tier-search-row'],
+          de: ['Die stärksten Decks', 'Feldanteil und Top-8-Quote, mit Nenner'],
+          en: ['The strongest decks', 'Share and top-8 rate, with denominators'] },
+        { id: 'heatmap', auf: true,  nimm: ['#matchupHeatmapContainer'],
+          de: ['Matchups untereinander', 'wer schlägt wen, jede Zelle mit Partienzahl'],
+          en: ['Matchups', 'who beats whom, every cell with its game count'] },
+        { id: 'cards',   auf: true,  nimm: ['div.top-cards-container'],
+          de: ['Karten, die fast jedes Deck spielt', 'Format-Staples'],
+          en: ['Cards nearly every deck plays', 'format staples'] },
+        { id: 'tiers',   auf: false, nimm: ['__tiers__'],
+          de: ['Tier-Liste', 'alle Archetypen nach Stärke gruppiert'],
+          en: ['Tier list', 'all archetypes grouped by strength'] },
+        { id: 'played',  auf: false, nimm: ['div.cm-vs-top8-row'],
+          de: ['Gespielt gegen erfolgreich', 'die beiden Ranglisten nebeneinander'],
+          en: ['Played versus successful', 'the two rankings side by side'] },
+        { id: 'expect',  auf: false, nimm: ['div.cm-vs-top8-block--wide'],
+          de: ['Top 8 gegen Erwartung', 'wer über und unter seinem Anteil abschneidet'],
+          en: ['Top 8 versus expectation', 'who over- and underperforms their share'] },
+        { id: 'movers',  auf: false, nimm: ['div.tier-movers-row', 'div.matchups-grid-container'],
+          de: ['Auf- und Absteiger', 'Bewegung gegenüber der Vorwoche'],
+          en: ['Climbers and fallers', 'movement against last week'] },
+        { id: 'overview',auf: false, nimm: ['div.stats-grid'],
+          de: ['Überblick', 'Kennzahlen des Formats'],
+          en: ['Overview', 'format key figures'] },
+        { id: 'full',    auf: false, nimm: ['div.section'],
+          de: ['Vollständige Tabelle', 'jeder Archetyp, auch die mit einem Antritt'],
+          en: ['Full table', 'every archetype, including single entries'] },
+    ];
+
+    function de() {
+        return (typeof window.getLang === 'function' && window.getLang() === 'de');
+    }
+
+    function texte(s) { return de() ? s.de : s.en; }
+
+    function gemerkt() {
+        try {
+            var v = JSON.parse(localStorage.getItem(STORE));
+            if (Array.isArray(v)) return v;
+        } catch (e) { /* kein Speicher, kein Problem */ }
+        return null;
+    }
+
+    function merken(offen) {
+        try { localStorage.setItem(STORE, JSON.stringify(offen)); } catch (e) {}
+    }
+
+    function standard() {
+        return SECTIONS.filter(function (s) { return s.auf; }).map(function (s) { return s.id; });
+    }
+
+    var offen = null;
+
+    // Die Tier-Bloecke haengen in einem klassenlosen div. Es ueber die
+    // Kinder zu erkennen ist stabiler als ueber die Position: das div
+    // ist genau das, welches #cm-tier-1 enthaelt.
+    //
+    // Der Aufstieg muss an ZWEI Stellen halten: direkt unter dem Host
+    // (vor dem Sektionieren) und direkt unter einem .ds-sec-body
+    // (danach). Ohne die zweite Bedingung lief er beim zweiten Durchlauf
+    // bis zum Abschnitt selbst hinauf, und der sollte dann in seinen
+    // eigenen Koerper gehaengt werden:
+    //   HierarchyRequestError: The new child element contains the parent.
+    function findeTiers(host) {
+        var t1 = host.querySelector('#cm-tier-1');
+        if (!t1) return null;
+        var n = t1;
+        while (n && n.parentElement && n.parentElement !== host
+               && !n.parentElement.classList.contains('ds-sec-body')) {
+            n = n.parentElement;
+        }
+        return n;
+    }
+
+    function sammle(host, muster) {
+        var out = [];
+        muster.forEach(function (m) {
+            if (m === '__tiers__') {
+                var t = findeTiers(host);
+                if (t) out.push(t);
+                return;
+            }
+            // Nur direkte Kinder — sonst greift 'div.section' in
+            // verschachtelte Treffer und reisst halbe Bloecke heraus.
+            for (var i = 0; i < host.children.length; i++) {
+                var c = host.children[i];
+                if (c.classList && c.classList.contains('ds-sec')) continue;
+                if (c.matches && c.matches(m) && out.indexOf(c) === -1) out.push(c);
+            }
+        });
+        return out;
+    }
+
+    function kopf(s, aufgeklappt) {
+        var t = texte(s);
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'ds-sec-hd';
+        b.setAttribute('aria-expanded', String(aufgeklappt));
+        b.innerHTML =
+            '<span class="ds-sec-arrow" aria-hidden="true">▸</span>' +
+            '<span class="ds-sec-t"></span>' +
+            '<span class="ds-sec-sub"></span>';
+        b.querySelector('.ds-sec-t').textContent = t[0];
+        b.querySelector('.ds-sec-sub').textContent = t[1];
+        return b;
+    }
+
+    function zeichneReset(host) {
+        var alt = document.getElementById('dsSecReset');
+        var std = standard();
+        var gleich = offen.length === std.length && std.every(function (x) { return offen.indexOf(x) > -1; });
+        if (gleich) { if (alt) alt.remove(); return; }
+        var row = alt || document.createElement('div');
+        row.id = 'dsSecReset';
+        row.className = 'ds-sec-reset';
+        row.innerHTML = '';
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'ds-sec-reset-btn';
+        b.textContent = de() ? 'Ansicht zurücksetzen' : 'Reset view';
+        b.addEventListener('click', function () {
+            offen = standard();
+            merken(offen);
+            anwenden(host);
+        });
+        var n = document.createElement('span');
+        n.className = 'ds-sec-reset-n';
+        n.textContent = de()
+            ? offen.length + ' von ' + SECTIONS.length + ' Abschnitten offen'
+            : offen.length + ' of ' + SECTIONS.length + ' sections open';
+        row.appendChild(b);
+        row.appendChild(n);
+        if (!alt) host.insertBefore(row, host.firstChild);
+    }
+
+    function anwenden(host) {
+        host.querySelectorAll('.ds-sec').forEach(function (sec) {
+            var auf = offen.indexOf(sec.getAttribute('data-sec')) > -1;
+            sec.classList.toggle('is-open', auf);
+            var hd = sec.querySelector('.ds-sec-hd');
+            if (hd) hd.setAttribute('aria-expanded', String(auf));
+        });
+        zeichneReset(host);
+    }
+
+    // Schrittweise und wiederholbar.
+    //
+    // Der Inhalt entsteht aus drei Quellen zu verschiedenen Zeiten:
+    // app-tier-meta.js, app-current-meta.js und app-meta-cards.js
+    // schreiben nacheinander in denselben Host. Ein einmaliges
+    // "fertig"-Kennzeichen war der erste Versuch und war falsch —
+    // gemessen: auf dem Schreibtisch waren nach der ersten Welle vier
+    // von neun Abschnitten gebaut und sieben Bloecke blieben fuer immer
+    // draussen liegen, auf dem Telefon war zufaellig alles da.
+    //
+    // Diese Fassung laeuft so oft sie will: sie legt fehlende
+    // Abschnitte an, holt nachgereichte Bloecke in ihren Abschnitt und
+    // ruehrt nichts an, wenn nichts zu tun ist. Nur das Nichtstun macht
+    // den Beobachter unten harmlos — sonst loeste jede eigene Aenderung
+    // die naechste Runde aus.
+    function sektionieren() {
+        var host = document.getElementById(HOST_ID);
+        if (!host) return false;
+        if (!host.querySelector('.tier-hero-section, #matchupHeatmapContainer, .top-cards-container, #cm-tier-1')) {
+            return false;
+        }
+        if (!offen) offen = gemerkt() || standard();
+
+        var geaendert = false;
+
+        SECTIONS.forEach(function (s) {
+            var teile = sammle(host, s.nimm);
+            var sec = host.querySelector(':scope > .ds-sec[data-sec="' + s.id + '"]');
+
+            if (!teile.length) return;                 // Block noch nicht da
+
+            if (!sec) {
+                sec = document.createElement('section');
+                sec.className = 'ds-sec';
+                sec.setAttribute('data-sec', s.id);
+                var auf = offen.indexOf(s.id) > -1;
+                var hd = kopf(s, auf);
+                var body = document.createElement('div');
+                body.className = 'ds-sec-body';
+                sec.appendChild(hd);
+                sec.appendChild(body);
+                hd.addEventListener('click', function () {
+                    var jetzt = offen.indexOf(s.id) > -1;
+                    offen = jetzt ? offen.filter(function (x) { return x !== s.id; })
+                                  : offen.concat([s.id]);
+                    merken(offen);
+                    anwenden(host);
+                });
+                host.appendChild(sec);
+                geaendert = true;
+            }
+
+            // VERSCHIEBEN, nicht neu erzeugen: appendChild haengt den
+            // vorhandenen Knoten um und laesst jeden Ereignis-Handler
+            // daran haengen. Ein innerHTML-Umweg schnitte sie alle
+            // stillschweigend ab.
+            var body2 = sec.querySelector('.ds-sec-body');
+            teile.forEach(function (t) {
+                if (t.parentElement === body2) return;
+                // Guertel und Hosentraeger: ein Knoten, der das Ziel
+                // enthaelt, darf niemals hinein. Das waere ein
+                // HierarchyRequestError und wuerde den Rest der Runde
+                // abbrechen.
+                if (t.contains(body2)) return;
+                body2.appendChild(t);
+                geaendert = true;
+            });
+        });
+
+        // Reihenfolge herstellen — aber nur, wenn sie abweicht.
+        var soll = SECTIONS.map(function (s) { return s.id; })
+            .filter(function (id) { return host.querySelector(':scope > .ds-sec[data-sec="' + id + '"]'); });
+        var ist = [].slice.call(host.querySelectorAll(':scope > .ds-sec'))
+            .map(function (e) { return e.getAttribute('data-sec'); });
+        if (soll.join() !== ist.join()) {
+            soll.forEach(function (id) {
+                host.appendChild(host.querySelector(':scope > .ds-sec[data-sec="' + id + '"]'));
+            });
+            geaendert = true;
+        }
+
+        if (geaendert) anwenden(host);
+        return geaendert;
+    }
+
+    // Der Inhalt entsteht aus drei Quellen (app-tier-meta.js,
+    // app-current-meta.js, app-meta-cards.js) und zu verschiedenen
+    // Zeiten. Statt zu raten, wann alle fertig sind, wird beobachtet —
+    // und die Marke MARK sorgt dafuer, dass zweimal Aufraeumen nichts
+    // doppelt macht. Ersetzt eine Quelle den Inhalt komplett, faellt
+    // die Marke mit weg und es wird neu sektioniert.
+    function beobachte() {
+        var host = document.getElementById(HOST_ID);
+        if (!host) return;
+        var timer = null;
+        new MutationObserver(function () {
+            clearTimeout(timer);
+            timer = setTimeout(sektionieren, 220);
+        }).observe(host, { childList: true });
+    }
+
+    function neuBeschriften() {
+        var host = document.getElementById(HOST_ID);
+        if (!host) return;
+        SECTIONS.forEach(function (s) {
+            var sec = host.querySelector('.ds-sec[data-sec="' + s.id + '"]');
+            if (!sec) return;
+            var t = texte(s);
+            sec.querySelector('.ds-sec-t').textContent = t[0];
+            sec.querySelector('.ds-sec-sub').textContent = t[1];
+        });
+        zeichneReset(host);
+    }
+
+    function start() {
+        sektionieren();
+        beobachte();
+        // i18n verschickt auf document und ohne bubbles — auf window
+        // kaeme es nie an. Das war der Fehler aus Block 4.
+        document.addEventListener('languageChanged', neuBeschriften);
+        window.addEventListener('languageChanged', neuBeschriften);
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', start);
+    } else {
+        start();
+    }
+
+    window.DsSections = {
+        resektionieren: sektionieren,
+        zustand: function () { return (offen || []).slice(); }
+    };
+})();

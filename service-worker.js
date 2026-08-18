@@ -15,11 +15,30 @@ const CACHE_NAME = 'tcg-analysis-v202608180619';
 // caches it for offline use. Missing entries silently fail with a
 // network-error on offline boot.
 //
-// The list currently has to be maintained by hand. A build-step that
-// auto-generates it from index.html would eliminate the manual sync,
-// but the list changes <1×/quarter so the build infra isn't worth it
-// yet. Tracking ticket: F-017 in
-// docs/audit/infrastructure/findings/cluster-D-architecture.md.
+// The note above used to end with "the list changes <1×/quarter so the
+// build infra isn't worth it yet". Measured on 2026-08-18: 37 of the
+// page's 95 assets were missing — Meta Call, all six Side Quest files,
+// firebase-auth.js, firebase-globals.js, the archetype card, the hub,
+// the loading screen. The manual sync did not hold.
+//
+// Why that matters more than "first offline boot": CACHE_NAME carries
+// the deploy stamp, so every deploy — several a day — installs a new
+// cache and the activate handler deletes the old one. Only SHELL_ASSETS
+// is re-precached on install; everything else returns to the cache the
+// next time the user fetches it while online. A user whose SW updates
+// and who then loses signal is missing exactly the files that are not
+// on this list. The note at './js/firebase-globals.js' below records
+// what that looked like the last time it happened (2026-05-28).
+//
+// tests/unit/test-service-worker-shell.js now compares this list with
+// index.html on every run. A build step would still be nicer; a test
+// that fails loudly is what stops the drift.
+// Nicht in dieser Liste, mit Absicht: tutorial/tutorial.de.html und
+// tutorial/tutorial.en.html. Zusammen 546 KB, und der Tab wird selten
+// geoeffnet — sie beim Install mitzuziehen wuerde jeden Deploy fuer
+// jeden Nutzer teuer machen, um einen Tab offline zu haben, den kaum
+// jemand offline sucht. Der Abruf laeuft ueber den Netzwerk-zuerst-Zweig
+// im fetch-Handler und landet nach dem ersten Oeffnen im Cache.
 const SHELL_ASSETS = [
   './',
   './index.html',
@@ -47,6 +66,15 @@ const SHELL_ASSETS = [
   './css/ux-step2.css',
   './css/ux-step3.css',
   './css/ux-step4.css',
+  './css/ds-nav.css',
+  './css/ds-share.css',
+  './css/anti-tech.css',
+  './css/tech-lab.css',
+  './css/tech-slots.css',
+  './css/profile-deck-builder.css',
+  './css/meta-call.css',
+  './css/testing-groups.css',
+  './css/archetype-icons.css',
   './js/inline-init.js',
   './js/app-utils.js',
   './js/i18n.js',
@@ -87,6 +115,35 @@ const SHELL_ASSETS = [
   './js/vendor/papaparse.min.js',
   './js/vendor/localforage.min.js',
   './js/vendor/mobile-drag-drop.min.js',
+  './js/pokemon-loading-screen.js',
+  './js/csv-cache-interceptor.js',
+  './js/firebase-credentials.js',
+  './js/firebase-config.js',
+  './js/firebase-globals.js',
+  './js/firebase-auth.js',
+  './js/auth-ui-helpers.js',
+  './js/firebase-collection.js',
+  './js/tcg-showdown-link.js',
+  './js/card-capability-engine.js',
+  './js/app-tech-lab.js',
+  './js/app-anti-tech.js',
+  './js/archetype-icons.js',
+  './js/app-archetype-card.js',
+  './js/app-meta-call.js',
+  './js/meta-analysis-hub.js',
+  './js/app-testing-groups.js',
+  './js/app-side-quest-play.js',
+  './js/app-side-quest-pokedex.js',
+  './js/app-side-quest-builder.js',
+  './js/app-side-quest-resources.js',
+  './js/champions-damage.js',
+  './js/app-side-quest-usage.js',
+  './js/app-side-quest-matchups.js',
+  './js/app-profile-deck-builder.js',
+  './js/current-meta-quickref.js',
+  './js/ds-nav.js',
+  './js/ds-share.js',
+  './js/ds-tutorial.js',
   './images/pokeball-icon.png',
   './images/escape-rope.png'
 ];

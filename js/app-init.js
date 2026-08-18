@@ -27,28 +27,14 @@
                     el.textContent = lastUpdate;
                 });
 
-                // Tutorial visual-guide screenshots: read each slot's
-                // data-tutorial-img attribute, probe whether the file
-                // exists, and only then set it as the slot's background.
-                // The default CSS gradient + label stays visible as a
-                // fallback when the image is missing, so the section
-                // never renders broken-image icons. Image swap is
-                // transparent — drop a PNG into /images/tutorials/
-                // matching one of these paths and the slot adopts it
-                // automatically on the next page load.
-                document.querySelectorAll('.tutorial-screenshot-frame[data-tutorial-img]').forEach(slot => {
-                    const src = slot.getAttribute('data-tutorial-img');
-                    if (!src) return;
-                    const probe = new Image();
-                    probe.onload = () => {
-                        slot.style.backgroundImage = `url("${src}")`;
-                        slot.classList.add('tutorial-screenshot-frame-loaded');
-                    };
-                    probe.onerror = () => {
-                        // Leave the gradient + label fallback in place.
-                    };
-                    probe.src = src;
-                });
+                // Tutorial-Bildsonde. Der Code dafuer liegt seit dem
+                // 18.08.2026 in js/ds-tutorial.js und laeuft dort nach
+                // dem Nachladen der Anleitung — beim Seitenstart gibt es
+                // die Slots noch gar nicht mehr. Der Aufruf hier bleibt
+                // fuer den Fall, dass die Anleitung doch schon haengt.
+                if (typeof window.hydrateTutorialImages === 'function') {
+                    window.hydrateTutorialImages(document);
+                }
                 
                 // Initialize City League format dropdowns.
                 //

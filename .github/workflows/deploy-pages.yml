@@ -154,6 +154,12 @@ jobs:
           cp -r js _site/js
           cp -r images _site/images 2>/dev/null || true
           cp -r data _site/data
+          # Die Anleitung. Seit dem 18.08.2026 laedt js/ds-tutorial.js sie
+          # aus tutorial/ nach, statt sie in index.html mitzuschleppen —
+          # ohne diese Zeile fehlt sie im Deploy und der Tab zeigt seinen
+          # Fehlerzustand. Das Verzeichnis MUSS hier stehen: _site wird
+          # aus einer Positivliste gebaut, nicht aus dem Repo-Inhalt.
+          cp -r tutorial _site/tutorial
           cp pokemon_sets_mapping.csv _site/ 2>/dev/null || true
           mkdir -p _site/config
           cp config/current_meta_analysis_settings.json _site/config/ 2>/dev/null || true

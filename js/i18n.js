@@ -122,6 +122,7 @@ const translations = {
         'Expected encounters per round, with matchup overview'
     ],
     'legend.title':                             'What do the symbols mean?',
+    'legend.summary':                           'What do the symbols on the cards mean?',
 
     // ── Toolbar / metric tooltips ─────────────────────────────
     // Shared across the Deck Builder header on every tab (city-league,
@@ -2065,6 +2066,7 @@ const translations = {
         'Erwartete Begegnungen pro Runde inkl. Matchup-Übersicht'
     ],
     'legend.title':                             'Was bedeuten die Symbole?',
+    'legend.summary':                           'Was bedeuten die Symbole auf den Karten?',
 
     // ── Toolbar / metric tooltips ─────────────────────────────
     'tip.openMenu':                             'Menü öffnen',

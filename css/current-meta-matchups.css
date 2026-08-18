@@ -1417,3 +1417,24 @@
         min-width: 126px;
     }
 }
+
+/* ── Die Legende der Heatmap ───────────────────────────────────────
+ *
+ * Sie bestand aus den Woertern "Green", "Gray" und "Red" in genau
+ * diesen Farben — und beschrieb damit eine Skala, die die Seite nicht
+ * mehr benutzt. Jetzt ein Farbfeld statt eines Farbworts: es zeigt die
+ * Toenung, die auch in der Tabelle steht, und funktioniert in jeder
+ * Sprache.
+ */
+.heatmap-key {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    margin-right: 2px;
+    border: 1px solid var(--line-strong);
+    border-radius: 3px;
+    vertical-align: -2px;
+}
+.heatmap-key-fav   { background: rgba(42, 120, 214, .34); }
+.heatmap-key-even  { background: var(--surface-2); }
+.heatmap-key-unfav { background: rgba(227, 73, 72, .34); }

@@ -641,10 +641,50 @@
     }
 }
 
-/* Hide heatmap on mobile — table not usable on small screens */
+/* Die Matchup-Heatmap bleibt auf dem Telefon sichtbar.
+ *
+ * Hier stand `display: none !important` mit der Begruendung "table not
+ * usable on small screens". Gemessen am 18.08.2026: 0 px, ersatzlos,
+ * ohne Hinweis, dass es sie ueberhaupt gibt. Das ist die Ansicht, die
+ * man zwischen zwei Runden auf dem Telefon aufmacht — die Frage "wie
+ * steht mein Deck gegen das da drueben" ist die Frage, fuer die man
+ * waehrend eines Turniers zum Handy greift.
+ *
+ * Die Tabelle war die ganze Zeit bedienbar: `.heatmap-table-scroll` hat
+ * `overflow-x: auto`. Was gefehlt hat, ist die Orientierung beim
+ * Seitwaertsscrollen — sobald die erste Spalte aus dem Bild laeuft,
+ * weiss man nicht mehr, welche Zeile man liest. Die klebt jetzt.
+ */
 @media (max-width: 768px) {
-    .heatmap-container {
-        display: none !important;
+    /* Die Breitenangaben in css/current-meta-matchups.css tragen
+     * !important und stehen ausserhalb jeder Medienabfrage. Sie hier
+     * ohne !important zu ueberschreiben, geht nicht; sie dort zu
+     * entschaerfen, laesst die Tabelle auf dem Schreibtisch auseinander
+     * laufen — die erste Spalte nimmt dann die ganze Breite, weil
+     * `table-layout: fixed` ohne feste Spaltenbreiten anders rechnet.
+     * Gemessen: 152.174 px. Also hier mit derselben Muenze. */
+    #matchupHeatmapContainer .heatmap-th-row {
+        position: sticky;
+        left: 0;
+        z-index: 2;
+        width: 116px !important;
+        min-width: 116px !important;
+        background: var(--surface-1);
+        box-shadow: 1px 0 0 var(--line);
+    }
+    #matchupHeatmapContainer .heatmap-col-first { width: 116px !important; }
+    /* Die Datenspalten duerfen schmaler werden, damit ohne Scrollen
+     * mehr als zwei Gegner ins Bild passen. Die Zahl bleibt lesbar;
+     * das n darunter wird kleiner, nicht unsichtbar. */
+    #matchupHeatmapContainer .heatmap-td,
+    #matchupHeatmapContainer .heatmap-th-y {
+        width: 64px !important;
+        min-width: 64px !important;
+    }
+    #matchupHeatmapContainer .heatmap-table { min-width: 0 !important; }
+    #matchupHeatmapContainer .heatmap-table-scroll {
+        /* Damit sichtbar ist, dass es seitwaerts weitergeht. */
+        scrollbar-width: thin;
     }
 }
 

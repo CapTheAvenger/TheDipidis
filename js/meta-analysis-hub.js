@@ -173,7 +173,14 @@
               ]
             : top.map(d => Object.assign({}, d, { role: 'played' }));
 
-        return { conv, top: ordered.slice(0, 3), headline, totalBrought };
+        // EINE Herleitung der Headline-Quote. Die Kachel liest sie unten aus
+        // demselben `ordered[0]`, der Satz aus headlineConvPct — beide also
+        // aus derselben Zahl statt aus zwei Rechenwegen.
+        const headlineConvPct = ordered.length && ordered[0].role === 'best'
+            ? ordered[0].convPct
+            : (headline ? (headline.top8 / headline.brought) * 100 : 0);
+
+        return { conv, top: ordered.slice(0, 3), headline, totalBrought, headlineConvPct };
     }
 
     // Ein Satz Klartext über dem Zahlenblock. Er nennt das Deck, das am
@@ -187,14 +194,34 @@
         // Die Stichprobe steht im Satz. Eine Quote ohne n ist eine Behauptung,
         // mit n ist sie eine Aussage.
         const n = Math.round(best.brought).toLocaleString(de ? 'de-DE' : 'en-US');
+
+        // Die Quote wird EINMAL hergeleitet und dann an Satz und Kachel
+        // gereicht. Vorher rechnete dieser Satz best.top8/best.brought neu,
+        // während die Kachel darunter die vorgerundete CSV-Spalte
+        // top8_conv_rate las: derselbe Wert 11,8525 % wurde hier zu 11,9 und
+        // dort zu 11,8, drei Zeilen auseinander. Kein Datenfehler — zwei
+        // Herleitungen, die verschieden runden.
+        const convPct = model.headlineConvPct;
+
+        // Roh gegen roh. Der Satz mischte bisher die rohe Quote mit der
+        // geglätteten Abweichung: 11,85 % / 6,6457 % sind +78 %, angezeigt
+        // wurden die geglätteten +72 %. Beide Zahlen stimmen für sich, aber
+        // wer nachrechnet, kommt nicht auf das Ergebnis und hält die Seite
+        // für kaputt. Die Glättung steht jetzt daneben statt darin.
+        const rawPerf = (convPct / (model.conv.expected * 100) - 1) * 100;
+        const smoothed = de
+            ? `geglättet ${fmtSigned(best.perfPct, 0)}`
+            : `smoothed ${fmtSigned(best.perfPct, 0)}`;
+
         return de
-            ? `<strong>${escapeHtml(best.name)}</strong> ist derzeit das erfolgreichste Deck: ${fmtPct((best.top8 / best.brought) * 100)} von ${n} Antritten erreichen die Top 8 — ${fmtSigned(best.perfPct, 0)} gegenüber dem Feld-Durchschnitt von ${fmtPct(model.conv.expected * 100, 2)}.`
-            : `<strong>${escapeHtml(best.name)}</strong> is the strongest deck right now: ${fmtPct((best.top8 / best.brought) * 100)} of ${n} entries reach top 8 — ${fmtSigned(best.perfPct, 0)} against the field average of ${fmtPct(model.conv.expected * 100, 2)}.`;
+            ? `<strong>${escapeHtml(best.name)}</strong> ist derzeit das erfolgreichste Deck: ${fmtPct(convPct)} von ${n} Antritten erreichen die Top 8 — ${fmtSigned(rawPerf, 0)} gegenüber dem Feld-Durchschnitt von ${fmtPct(model.conv.expected * 100, 2)} (${smoothed}).`
+            : `<strong>${escapeHtml(best.name)}</strong> is the strongest deck right now: ${fmtPct(convPct)} of ${n} entries reach top 8 — ${fmtSigned(rawPerf, 0)} against the field average of ${fmtPct(model.conv.expected * 100, 2)} (${smoothed}).`;
     }
 
     function answerHtml(model) {
         const de = isDe();
         const stamp = (typeof localStorage !== 'undefined' && localStorage.getItem('lastScraperUpdate')) || '';
+        let playedRank = 0;
         const tile = (d) => {
             const perf = d.perfPct == null ? '' : fmtSigned(d.perfPct, 0);
             const cls = d.perfPct == null ? '' : (d.perfPct >= 0 ? ' is-pos' : ' is-neg');
@@ -202,17 +229,30 @@
             // die Reihe als "die drei stärksten Decks", obwohl sie nach Anteil
             // sortiert ist — und die erste Kachel konnte der schwächste
             // Performer sein.
-            const role = d.role === 'best'
-                ? (de ? 'Erfolgreichstes' : 'Most successful')
-                : (de ? 'Meistgespielt' : 'Most played');
+            //
+            // Der Rang steht dazu: zwei Kacheln nebeneinander mit derselben
+            // Beschriftung "Meistgespielt" lasen sich wie ein Fehler, obwohl
+            // es Platz 1 und Platz 2 nach Anteil sind.
+            let role;
+            if (d.role === 'best') {
+                role = de ? 'Erfolgreichstes Deck' : 'Most successful deck';
+            } else {
+                playedRank += 1;
+                role = (de ? 'Meistgespielt · Rang ' : 'Most played · rank ') + playedRank;
+            }
+            // "ggü. Feld" ist der geglättete Wert (Empirical Bayes, K = 50).
+            // Ohne das Wort rechnet niemand die Quote gegen den Feldschnitt
+            // nach und kommt auf dasselbe Ergebnis.
+            const perfLabel = de ? 'ggü. Feld, geglättet' : 'vs. field, smoothed';
             return `
                 <div class="ds-stat${cls}">
                     <span class="ds-stat-role">${role}</span>
                     <span class="ds-stat-label">${escapeHtml(d.name)}</span>
                     <span class="ds-stat-value">${fmtPct(d.sharePct)}</span>
-                    <span class="ds-stat-context">${de ? 'des Feldes' : 'of the field'} · ${
+                    <span class="ds-stat-context">${de ? 'des Feldes' : 'of the field'} · n = ${
+                        Math.round(d.brought).toLocaleString(de ? 'de-DE' : 'en-US')}<br>${
                         de ? 'Top-8-Quote' : 'top-8 rate'} ${fmtPct(d.convPct)}${
-                        perf ? ` · ${perf} ${de ? 'ggü. Feld' : 'vs. field'}` : ''}</span>
+                        perf ? ` · ${perf} ${perfLabel}` : ''}</span>
                 </div>`;
         };
         return `

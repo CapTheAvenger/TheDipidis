@@ -1,0 +1,439 @@
+From 0e4bc4c9d18cbffe0c9c62094025e08be4395817 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Tue, 18 Aug 2026 13:52:25 +0000
+Subject: [PATCH 5/6] zwei versprechen, die die seite nicht gehalten hat
+
+1) Der Knopf, der nichts tat
+
+js/draw-simulator.js:190 rief beim Klick auf eine Kombo-Marke
+_toggleComboTarget(name) auf. Diese Funktion gibt es in keiner Datei
+des Projekts. Der Titel der Marke sagte dabei "zum Entfernen
+klicken". Jeder Klick war ein ReferenceError in der Konsole.
+
+Im Browser nachgestellt, altes gegen neues Verhalten:
+
+  vorher   2 Marken, Klick -> ReferenceError: _toggleComboTarget is
+           not defined, weiterhin 2 Marken
+  nachher  2 Marken, Klick -> 1 Marke, Auswahlfeld geleert, kein Fehler
+
+Entfernen heisst dabei zweierlei: aus _comboTargets raus UND das
+Auswahlfeld leeren, das den Namen gesetzt hat. Sonst holt der naechste
+onComboDropdownChange() ihn sofort zurueck.
+
+Die Marke ist jetzt ein button statt eines span - anklickbar heisst
+mit der Tastatur erreichbar, mit aria-label und Fokusrahmen. Ihr
+Aussehen liegt in .draw-sim-combo-badge statt in einer 200 Zeichen
+langen Stil-Zeichenkette im Skript.
+
+Der allgemeinere Test dazu: jede im Modul gerufene _-Funktion muss im
+Modul auch definiert sein. Genau diese Pruefung haette den Fehler bei
+der Einfuehrung gefunden.
+
+2) Die unsichtbare Fussleiste
+
+.footer stand auf color: white, der Seitenhintergrund ist hell.
+Gemessen 1,12:1. Der Text lautet "Letzte Aktualisierung: <Datum>" -
+die einzige Stelle der ganzen Seite, an der steht, wie frisch die
+Zahlen sind. Auf Mobil kam ein font-size: 0.9em obendrauf, das sich
+gegen die Elternschrift auf gemessene 10,8px herunterrechnete.
+
+Warum das nie auffiel, steht in css/pokeball-menu.css. Eine Datei
+ueber ein Menue erklaerte dort body { font-family, background-color,
+color } fuer die ganze Seite - und sie laedt nach styles.css. Der
+Seitenhintergrund kam deshalb aus --bg-body (#f0f2f5) statt aus dem
+Token --surface-0, und der Dunkelmodus in tokens.css konnte den
+Hintergrund nie erreichen. Die Seite hat jetzt eine body-Regel, und
+die steht in styles.css.
+
+Gemessen, beide Themes, beide Breiten:
+
+  vorher   hell   1,12:1   16px / 10,8px
+  nachher  hell   7,04:1   13px / 13px
+  nachher  dunkel 10,68:1  13px / 13px   (vorher unerreichbar)
+
+Abgleich der berechneten Stile gegen HEAD, alle acht Tabs, 1440x900
+und 390x844: 10.546 Elemente gleich, 16 veraendert - das sind FOOTER
+und #last-update auf je acht Tabs, also genau die beiden gemeinten.
+Der Seitenhintergrund geht von #f0f2f5 auf #f7f8fa.
+
+Tests: 1157 JS (vorher 1140, +17), 373 Python
+!important: 3347 unveraendert
+---
+ css/pokeball-menu.css                     |  13 +--
+ css/styles.css                            |  17 +++-
+ css/ui-components.css                     |  26 +++++
+ js/draw-simulator.js                      |  29 +++++-
+ tests/unit/test-fussleiste-und-koerper.js | 111 ++++++++++++++++++++++
+ tests/unit/test-kombo-marken.js           |  93 ++++++++++++++++++
+ 6 files changed, 277 insertions(+), 12 deletions(-)
+ create mode 100644 tests/unit/test-fussleiste-und-koerper.js
+ create mode 100644 tests/unit/test-kombo-marken.js
+
+diff --git a/css/pokeball-menu.css b/css/pokeball-menu.css
+index 05a83a82..ea371ffc 100644
+--- a/css/pokeball-menu.css
++++ b/css/pokeball-menu.css
+@@ -1,11 +1,12 @@
+ ﻿/* â”€â”€ Pokeball Menu & Playtester Arena Styles â”€â”€ */
+ 
+-/* Base font for the entire page */
+-body {
+-    font-family: 'Nunito', sans-serif;
+-    background-color: var(--bg-body);
+-    color: var(--text-dark);
+-}
++/* Hier stand eine body-Regel: Schriftart, Hintergrund und Textfarbe
++ * fuer die ganze Seite - in einer Datei ueber das Pokeball-Menue, und
++ * sie lud nach styles.css. Ergebnis: der Hintergrund kam aus
++ * --bg-body (#f0f2f5) statt aus dem Token --surface-0, und der
++ * Dunkelmodus in tokens.css konnte den Seitenhintergrund nie
++ * erreichen. Die Seite hat genau eine body-Regel, und die steht in
++ * styles.css. */
+ 
+ .pokeball-wrapper { position: relative; z-index: 1000; }
+ 
+diff --git a/css/styles.css b/css/styles.css
+index a164c5ef..074059e0 100644
+--- a/css/styles.css
++++ b/css/styles.css
+@@ -200,6 +200,7 @@
+                lief unter jeder Tabelle durch und arbeitete gegen genau die
+                Zahlen, für die die Seite da ist. */
+             background-color: var(--surface-0);
++            color: var(--text-dark);
+             min-height: 100vh;
+             min-height: -webkit-fill-available;
+             padding: 20px;
+@@ -937,9 +938,16 @@
+         
+         /* Card Search Input - see .cards-section .card-search-input below */
+         
++        /* Weisse Schrift auf hellgrauem Body: gemessen 1,12:1. Der
++         * Text war praktisch unsichtbar - und es ist ausgerechnet der
++         * Satz "Letzte Aktualisierung: <Datum>", also die einzige
++         * Stelle, an der steht, wie frisch die Zahlen der ganzen Seite
++         * sind. Jetzt aus den Tokens, damit hell und dunkel beide
++         * stimmen, und nicht kleiner als 13 px. */
+         .footer {
+             text-align: center;
+-            color: white;
++            color: var(--ink-2);
++            font-size: 13px;
+             padding: 20px;
+             margin-top: 30px;
+         }
+@@ -3205,10 +3213,13 @@
+                 font-size: 0.95em;
+             }
+ 
+-            /* Footer */
++            /* Footer — font-size bleibt bei den 13px aus der
++               Grundregel. 0.9em stand hier vorher und rechnete sich
++               gegen die Elternschrift auf gemessene 10,8px herunter.
++               Es ist das Datum der letzten Aktualisierung; das ist
++               keine Fussnote. */
+             .footer {
+                 padding: 15px;
+-                font-size: 0.9em;
+             }
+ 
+             /* Grid-Layouts optimiert */
+diff --git a/css/ui-components.css b/css/ui-components.css
+index 60cde9b3..1d4c6ed2 100644
+--- a/css/ui-components.css
++++ b/css/ui-components.css
+@@ -3746,6 +3746,32 @@ img[src*="limitlesstcg"] {
+     min-height: 28px;
+     margin-bottom: 10px;
+ }
++/* Die gewaehlten Kombo-Karten. Vorher stand das als Stil-Zeichenkette
++ * in draw-simulator.js; hier ist es aenderbar, ohne ein Skript
++ * anzufassen, und der Fokusrahmen kommt gratis dazu. */
++.draw-sim-combo-badge {
++    display: inline-flex;
++    align-items: center;
++    gap: 4px;
++    padding: 3px 10px;
++    border: none;
++    border-radius: 12px;
++    background: #2ecc71;
++    color: #000;
++    font-size: 11px;
++    font-weight: 700;
++    line-height: 1.6;
++    min-height: 24px;
++    cursor: pointer;
++}
++.draw-sim-combo-badge:hover {
++    background: #27ae60;
++}
++.draw-sim-combo-badge:focus-visible {
++    outline: 2px solid #fff;
++    outline-offset: 2px;
++}
++
+ .draw-sim-combo-actions {
+     display: flex;
+     gap: 10px;
+diff --git a/js/draw-simulator.js b/js/draw-simulator.js
+index dfa58fab..c0aefaca 100644
+--- a/js/draw-simulator.js
++++ b/js/draw-simulator.js
+@@ -183,15 +183,38 @@ function _renderComboTargets() {
+     }
+ 
+     _comboTargets.forEach(name => {
+-        const badge = document.createElement('span');
+-        badge.style.cssText = 'display:inline-flex;align-items:center;gap:4px;background:#2ecc71;color:#000;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700;cursor:pointer;';
++        // Ein Knopf, kein span: die Marke ist anklickbar, also muss sie
++        // mit der Tastatur erreichbar sein und sich als Bedienelement
++        // ansagen. Das Aussehen liegt in .draw-sim-combo-badge
++        // (ui-components.css) statt in einer Stil-Zeichenkette hier.
++        const badge = document.createElement('button');
++        badge.type = 'button';
++        badge.className = 'draw-sim-combo-badge';
+         badge.title = t('draw.clickToRemove');
++        badge.setAttribute('aria-label', name + ' — ' + t('draw.clickToRemove'));
+         badge.textContent = name + ' ✕';
+-        badge.onclick = () => _toggleComboTarget(name);
++        badge.addEventListener('click', () => _removeComboTarget(name));
+         container.appendChild(badge);
+     });
+ }
+ 
++// Die Marken versprachen seit jeher "zum Entfernen klicken" und riefen
++// dabei _toggleComboTarget() auf - eine Funktion, die es in dieser
++// Datei nie gab. Jeder Klick war ein ReferenceError in der Konsole und
++// sonst nichts. Entfernen heisst zweierlei: aus der Liste raus UND das
++// Auswahlfeld leeren, das den Namen gesetzt hat. Sonst holt der
++// naechste onComboDropdownChange() ihn sofort zurueck.
++function _removeComboTarget(name) {
++    _comboTargets = _comboTargets.filter(n => n !== name);
++    for (let i = 1; i <= 4; i++) {
++        const select = document.getElementById(`comboTarget${i}`);
++        if (select && select.value === name) select.value = '';
++    }
++    _renderComboTargets();
++    const result = document.getElementById('comboResultDisplay');
++    if (result && _comboTargets.length === 0) result.textContent = '';
++}
++
+ function clearComboTargets() {
+     _comboTargets = [];
+     for (let i = 1; i <= 4; i++) {
+diff --git a/tests/unit/test-fussleiste-und-koerper.js b/tests/unit/test-fussleiste-und-koerper.js
+new file mode 100644
+index 00000000..d02d0291
+--- /dev/null
++++ b/tests/unit/test-fussleiste-und-koerper.js
+@@ -0,0 +1,111 @@
++/**
++ * Die Fussleiste und die eine body-Regel.
++ *
++ * Zwei Funde vom 2026-08-18, die zusammengehoeren:
++ *
++ * 1. .footer stand auf color: white. Der Seitenhintergrund ist hell.
++ *    Gemessen 1,12:1 - der Text war praktisch unsichtbar. Er lautet
++ *    "Letzte Aktualisierung: <Datum>", also die einzige Stelle auf der
++ *    ganzen Seite, an der steht, wie frisch die Zahlen sind. Auf
++ *    Mobil kam ein font-size: 0.9em obendrauf, das sich gegen die
++ *    Elternschrift auf gemessene 10,8px herunterrechnete.
++ *
++ * 2. Warum die Farbe nie auffiel: css/pokeball-menu.css - eine Datei
++ *    ueber ein Menue - erklaerte body { background-color, color,
++ *    font-family } fuer die ganze Seite und lud nach styles.css.
++ *    Der Seitenhintergrund kam damit aus --bg-body statt aus dem
++ *    Token --surface-0, und der Dunkelmodus aus tokens.css konnte den
++ *    Hintergrund nie erreichen.
++ */
++
++const { describe, it } = require('node:test');
++const assert = require('node:assert/strict');
++const fs = require('node:fs');
++const path = require('node:path');
++
++const ROOT = path.join(__dirname, '..', '..');
++const CSS_DIR = path.join(ROOT, 'css');
++
++const strip = s => s.replace(/\/\*[\s\S]*?\*\//g, '');
++const read = f => strip(fs.readFileSync(path.join(CSS_DIR, f), 'utf8'));
++const cssFiles = fs.readdirSync(CSS_DIR).filter(f => f.endsWith('.css'));
++
++// Alle Regeln, deren Selektorliste ein nacktes "body" enthaelt —
++// also solche, die die ganze Seite betreffen. "body.foo" oder
++// "body .bar" zaehlen nicht mit, die meinen etwas Engeres.
++function bodyRules() {
++    const out = [];
++    for (const f of cssFiles) {
++        const src = read(f);
++        const re = /(^|[}\s])([^{}]*?)\{([^}]*)\}/g;
++        let m;
++        while ((m = re.exec(src)) !== null) {
++            const sels = m[2].split(',').map(s => s.trim()).filter(Boolean);
++            if (sels.some(s => s === 'body')) {
++                out.push({ file: f, index: m.index, body: m[3] });
++            }
++        }
++    }
++    return out;
++}
++
++describe('die eine body-Regel', () => {
++    it('nur styles.css faerbt den Seitenhintergrund', () => {
++        const painting = bodyRules().filter(r => /background(-color)?\s*:/.test(r.body));
++        assert.deepStrictEqual(
++            painting.map(r => r.file), ['styles.css'],
++            'mehr als eine Datei setzt den Seitenhintergrund: ' + painting.map(r => r.file).join(', ')
++        );
++    });
++
++    it('nur styles.css setzt die Grundtextfarbe', () => {
++        const coloring = bodyRules().filter(r => /(^|[;\s])color\s*:/.test(r.body));
++        assert.deepStrictEqual(coloring.map(r => r.file), ['styles.css']);
++    });
++
++    it('der Seitenhintergrund kommt aus einem Token, nicht aus einer Farbe', () => {
++        const [rule] = bodyRules().filter(r => r.file === 'styles.css' && /background-color/.test(r.body));
++        assert.ok(rule, 'keine body-Regel in styles.css gefunden');
++        assert.match(rule.body, /background-color:\s*var\(--surface-0\)/,
++            'sonst erreicht der Dunkelmodus den Hintergrund nie');
++    });
++});
++
++describe('die Fussleiste ist lesbar', () => {
++    const styles = read('styles.css');
++
++    it('.footer steht nicht mehr auf weiss', () => {
++        const rules = [...styles.matchAll(/(^|[}\s])\.footer\s*\{([^}]*)\}/g)].map(m => m[2]);
++        assert.ok(rules.length > 0, '.footer nicht gefunden');
++        for (const body of rules) {
++            assert.ok(!/color:\s*(white|#fff(fff)?)\b/i.test(body),
++                'weisse Schrift auf hellem Grund: gemessen 1,12:1');
++        }
++    });
++
++    it('die Grundregel nimmt ihre Farbe aus den Tokens', () => {
++        const base = /(^|[}\s])\.footer\s*\{([^}]*)\}/.exec(styles);
++        assert.match(base[2], /color:\s*var\(--/);
++    });
++
++    it('keine .footer-Regel schrumpft die Schrift relativ (em/%/rem unter 1)', () => {
++        // 0.9em rechnet sich gegen die Elternschrift und landete bei
++        // 10,8px. Absolute Werte oder gar keine Angabe.
++        const bad = [];
++        for (const m of styles.matchAll(/(^|[}\s])\.footer\s*\{([^}]*)\}/g)) {
++            const fs_ = /font-size:\s*([\d.]+)(em|rem|%)/.exec(m[2]);
++            if (fs_) {
++                const v = parseFloat(fs_[1]) / (fs_[3] === '%' ? 100 : 1);
++                if (v < 1) bad.push(fs_[0]);
++            }
++        }
++        assert.deepStrictEqual(bad, []);
++    });
++
++    it('die Grundschrift der Fussleiste ist mindestens 13px', () => {
++        const base = /(^|[}\s])\.footer\s*\{([^}]*)\}/.exec(styles);
++        const m = /font-size:\s*(\d+)px/.exec(base[2]);
++        assert.ok(m, '.footer hat keine absolute Schriftgroesse');
++        assert.ok(Number(m[1]) >= 13, `nur ${m[1]}px`);
++    });
++});
+diff --git a/tests/unit/test-kombo-marken.js b/tests/unit/test-kombo-marken.js
+new file mode 100644
+index 00000000..117a3a51
+--- /dev/null
++++ b/tests/unit/test-kombo-marken.js
+@@ -0,0 +1,93 @@
++/**
++ * Der Ziehsimulator: Marken, die entfernt werden koennen.
++ *
++ * js/draw-simulator.js:190 rief beim Klick auf eine Kombo-Marke
++ * _toggleComboTarget(name) auf. Diese Funktion gab es in der Datei
++ * nie - und weil sie in keiner anderen Datei steht, war jeder Klick
++ * ein ReferenceError in der Konsole und sonst nichts. Der Titel der
++ * Marke versprach dabei "zum Entfernen klicken".
++ *
++ * Nachgestellt im Browser, vorher/nachher:
++ *   vorher   2 Marken, Klick -> ReferenceError, weiterhin 2 Marken
++ *   nachher  2 Marken, Klick -> 1 Marke, Auswahlfeld geleert
++ */
++
++const { describe, it } = require('node:test');
++const assert = require('node:assert/strict');
++const fs = require('node:fs');
++const path = require('node:path');
++
++const ROOT = path.join(__dirname, '..', '..');
++const SRC = fs.readFileSync(path.join(ROOT, 'js', 'draw-simulator.js'), 'utf8');
++const CSS = fs.readFileSync(path.join(ROOT, 'css', 'ui-components.css'), 'utf8');
++
++const stripJs = s => s.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:"'`])\/\/.*$/gm, '$1');
++const CODE = stripJs(SRC);
++
++describe('Kombo-Marken — jeder aufgerufene Name existiert', () => {
++    it('_toggleComboTarget wird nirgends mehr aufgerufen', () => {
++        assert.ok(!/_toggleComboTarget/.test(CODE), 'die Funktion gab es nie');
++    });
++
++    it('_removeComboTarget ist definiert und wird benutzt', () => {
++        assert.match(CODE, /function _removeComboTarget\s*\(/);
++        assert.match(CODE, /_removeComboTarget\s*\(\s*name\s*\)/);
++    });
++
++    it('jede im Modul gerufene _-Funktion ist im Modul auch definiert', () => {
++        // Der eigentliche Fehler in allgemeiner Form. Die Datei ist ein
++        // klassisches Skript ohne Modulgrenzen; ein Tippfehler im
++        // Funktionsnamen faellt sonst erst beim Klick auf.
++        const defined = new Set([...CODE.matchAll(/function\s+(_[\w$]+)\s*\(/g)].map(m => m[1]));
++        const called = new Set([...CODE.matchAll(/(?<![\w$.])(_[\w$]+)\s*\(/g)].map(m => m[1]));
++        const missing = [...called].filter(n => !defined.has(n) && !/^_+$/.test(n));
++        assert.deepStrictEqual(missing, [], 'gerufen, aber nicht definiert: ' + missing.join(', '));
++    });
++});
++
++describe('Kombo-Marken — Entfernen heisst wirklich entfernen', () => {
++    const fn = /function _removeComboTarget\(name\) \{([\s\S]*?)\n\}/.exec(CODE);
++
++    it('die Funktion nimmt den Namen aus der Liste', () => {
++        assert.ok(fn, '_removeComboTarget nicht gefunden');
++        assert.match(fn[1], /_comboTargets\s*=\s*_comboTargets\.filter/);
++    });
++
++    it('und leert das Auswahlfeld, das ihn gesetzt hat', () => {
++        // Ohne das holt der naechste onComboDropdownChange() den
++        // gerade entfernten Namen sofort zurueck.
++        assert.match(fn[1], /comboTarget\$\{i\}/);
++        assert.match(fn[1], /select\.value\s*=\s*''/);
++    });
++
++    it('und zeichnet die Marken neu', () => {
++        assert.match(fn[1], /_renderComboTargets\(\)/);
++    });
++});
++
++describe('Kombo-Marken — anklickbar heisst bedienbar', () => {
++    it('die Marke ist ein button, kein span', () => {
++        const render = /function _renderComboTargets\(\)[\s\S]*?\n\}/.exec(CODE)[0];
++        assert.match(render, /createElement\('button'\)/);
++        assert.match(render, /badge\.type\s*=\s*'button'/);
++    });
++
++    it('sie traegt eine Beschriftung fuer Screenreader', () => {
++        const render = /function _renderComboTargets\(\)[\s\S]*?\n\}/.exec(CODE)[0];
++        assert.match(render, /setAttribute\('aria-label'/);
++    });
++
++    it('ihr Aussehen steht im Stylesheet, nicht in einer Zeichenkette', () => {
++        const render = /function _renderComboTargets\(\)[\s\S]*?\n\}/.exec(CODE)[0];
++        assert.ok(!/style\.cssText/.test(render), 'Stil-Zeichenkette im Skript');
++        assert.match(render, /className\s*=\s*'draw-sim-combo-badge'/);
++        assert.match(CSS, /\.draw-sim-combo-badge\s*\{/);
++    });
++
++    it('sie hat einen sichtbaren Fokusrahmen und eine tippbare Hoehe', () => {
++        const rule = /\.draw-sim-combo-badge\s*\{([^}]*)\}/.exec(CSS)[1];
++        assert.match(rule, /min-height:\s*(\d+)px/);
++        assert.ok(Number(/min-height:\s*(\d+)px/.exec(rule)[1]) >= 24);
++        assert.match(CSS, /\.draw-sim-combo-badge:focus-visible\s*\{[^}]*outline/);
++    });
++});

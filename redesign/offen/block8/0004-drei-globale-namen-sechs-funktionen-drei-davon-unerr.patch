@@ -1,0 +1,402 @@
+From d6491c8e7e446968c90d563734fabd9bf2aeb982 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Tue, 18 Aug 2026 13:42:57 +0000
+Subject: [PATCH 4/6] drei globale namen, sechs funktionen, drei davon
+ unerreichbar
+
+633 Funktionen in js/ stehen auf oberster Ebene, also alle im selben
+globalen Namensraum. Drei Namen waren doppelt vergeben. Wer spaeter
+laedt, gewinnt still - und zweimal war die verlierende Fassung genau
+die, fuer die der aufrufende Code geschrieben war.
+
+  getEmptyStateHtml
+    app-utils.js:1487        nimmt {title, body, cta, icon}   VERLOREN
+    app-city-league.js:2734  ohne Argumente, fester Text
+
+  Die leere Wunschliste und die leere Tauschliste rufen
+  window.getEmptyStateHtml({...}) mit Titel, Text und Knopf auf. Sie
+  landeten in der City-League-Fassung, die alle Argumente ignoriert.
+  Was der Nutzer sah, im Browser nachgestellt:
+
+    "No Data  No data found  No tournament data available for this
+     filter combination."
+
+  Das ist die erste Begegnung eines neuen Nutzers mit diesen beiden
+  Tabs. Drei weitere Aufrufstellen (app-meta-cards.js zweimal,
+  app-current-meta-analysis.js) riefen bewusst ohne Argumente - sie
+  waren fuer die City-League-Fassung geschrieben und haetten nach
+  einer Umbenennung eine voellig leere Box gezeigt. Sie sagen jetzt,
+  was sie meinen, und unterscheiden dabei zwei Lagen, die vorher
+  denselben Satz bekamen: "gar keine Daten" und "der Filter laesst
+  nichts uebrig". Das eine loest man mit Warten, das andere mit einem
+  Klick.
+
+  escapeHtml
+    app-utils.js:1397                  3 Zeichen, null -> ''   VERLOREN
+    app-current-meta-analysis.js:2598  5 Zeichen, null -> "null"
+
+  Die strengere gewann, das war Glueck. Aus escapeHtml(null) wurde
+  aber der sichtbare Text "null". Es gibt jetzt eine Fassung, die
+  Vereinigung beider: fuenf Zeichen, und leer bleibt leer.
+
+  filterPastMetaCards
+    app-meta-cards.js:1211   VERLOREN, dazu tot
+    app-past-meta.js:845
+
+  Die verlorene las #pastCardSearchInput und #pastCardCount. Beide
+  gibt es im Markup nicht. 18 Zeilen, die aussahen wie eine
+  Suchfunktion, und entfernt sind.
+
+Ein Linter faellt darauf nicht herein: jede Datei ist fuer sich
+gueltig. Nur der Blick ueber alle Dateien zeigt es, und den macht
+jetzt tests/unit/test-globale-namen.js bei jedem Lauf.
+
+Geprueft im Browser, beide Sprachen, keine Seitenfehler:
+  Wunschliste  "Deine Wunschliste ist leer / Suche Karten und tippe
+               aufs Herz."
+  Deck leer    "Keine Deckliste geladen"
+  Filter leer  "Kein Treffer fuer diesen Filter"
+  escapeHtml   null -> "",  <b>"x"</b> -> vollstaendig maskiert
+
+Sichtbarkeitsabgleich gegen HEAD, alle acht Tabs, 1440x900 und
+390x844: 10.562 Elemente, 0 veraendert.
+
+Tests: 1140 JS (vorher 1133, +7), 373 Python
+---
+ js/app-city-league.js            |  11 ++-
+ js/app-current-meta-analysis.js  |  17 ++--
+ js/app-meta-cards.js             |  39 +++++----
+ js/app-utils.js                  |  13 ++-
+ js/i18n.js                       |   8 ++
+ tests/unit/test-globale-namen.js | 143 +++++++++++++++++++++++++++++++
+ 6 files changed, 200 insertions(+), 31 deletions(-)
+ create mode 100644 tests/unit/test-globale-namen.js
+
+diff --git a/js/app-city-league.js b/js/app-city-league.js
+index 8832f68d..940c4811 100644
+--- a/js/app-city-league.js
++++ b/js/app-city-league.js
+@@ -2731,7 +2731,14 @@ function cityLeagueOffSeasonHtml() {
+             return false;
+         }
+ 
+-        function getEmptyStateHtml() {
++        // Frueher hiess diese Funktion getEmptyStateHtml - genauso wie
++        // die in app-utils.js, und beide standen auf oberster Ebene.
++        // app-city-league.js laedt spaeter, also gewann diese: jeder
++        // Aufruf von window.getEmptyStateHtml({...}) landete hier, wo
++        // die Argumente ignoriert werden. Die leere Wunschliste sagte
++        // deshalb "Fuer diese Filterkombination liegen aktuell keine
++        // Turnierdaten vor." Der Name ist jetzt eindeutig.
++        function cityLeagueNoDataHtml() {
+             return getEmptyStateBoxHtml({
+                 title: t('cl.noDataFound'),
+                 description: t('cl.noDataFoundDesc'),
+@@ -3142,7 +3149,7 @@ function cityLeagueOffSeasonHtml() {
+ 
+             if (!Array.isArray(cards) || cards.length === 0) {
+                 console.info('[CityLeague] Rendering empty card overview state (0 cards after filtering)');
+-                gridContainer.innerHTML = getEmptyStateHtml();
++                gridContainer.innerHTML = cityLeagueNoDataHtml();
+                 if (visualContainer) {
+                     visualContainer.classList.remove('d-none', 'city-league-deck-visual-hidden');
+                     visualContainer.style.display = 'block';
+diff --git a/js/app-current-meta-analysis.js b/js/app-current-meta-analysis.js
+index d0711803..f0aa9713 100644
+--- a/js/app-current-meta-analysis.js
++++ b/js/app-current-meta-analysis.js
+@@ -2626,11 +2626,9 @@
+             if (wr >= 40) return 'wr-neg';
+             return 'wr-strong-neg';
+         }
+-        function escapeHtml(s) {
+-            return String(s).replace(/[&<>"']/g, c => ({
+-                '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+-            }[c]));
+-        }
++        // escapeHtml stand hier ein zweites Mal, gleicher Name, obere
++        // Ebene, spaeteres Laden - es ueberschrieb still die Fassung
++        // aus app-utils.js. Jetzt gibt es nur noch die eine dort.
+ 
+         // Render best/worst matchups for Current Meta - extract directly from loaded HTML (1:1 copy)
+         function renderCurrentMetaMatchups(archetype) {
+@@ -3034,7 +3032,14 @@
+             if (!gridContainer) return;
+ 
+             if (!Array.isArray(cards) || cards.length === 0) {
+-                gridContainer.innerHTML = getEmptyStateHtml();
++                // Frueher: getEmptyStateHtml() ohne Argumente. Das traf
++                // die gleichnamige Funktion aus app-city-league.js und
++                // sagte deshalb "Turnierdaten" statt "Deckliste".
++                gridContainer.innerHTML = getEmptyStateBoxHtml({
++                    title: t('cm.noCardsInDeck'),
++                    description: t('cm.noCardsInDeckDesc'),
++                    icon: 'cards'
++                });
+                 if (visualContainer) {
+                     document.getElementById('currentMetaDeckTableView')?.classList.add('d-none');
+                     visualContainer.classList.remove('d-none');
+diff --git a/js/app-meta-cards.js b/js/app-meta-cards.js
+index 847ca066..932ab0e3 100644
+--- a/js/app-meta-cards.js
++++ b/js/app-meta-cards.js
+@@ -686,7 +686,13 @@
+             clearGridLoadingSkeleton(grid);
+             
+             if (!metaCardData[source] || metaCardData[source].length === 0) {
+-                grid.innerHTML = getEmptyStateHtml();
++                // Gar keine Daten geladen - nicht dasselbe wie "der
++                // Filter hat alles weggenommen", siehe weiter unten.
++                grid.innerHTML = getEmptyStateBoxHtml({
++                    title: t('cl.noDataFound'),
++                    description: t('cl.noDataFoundDesc'),
++                    icon: 'cards'
++                });
+                 countSpan.textContent = '0 Cards';
+                 return;
+             }
+@@ -798,7 +804,14 @@
+             countSpan.textContent = `${cards.length} Cards`;
+             
+             if (cards.length === 0) {
+-                grid.innerHTML = getEmptyStateHtml();
++                // Daten sind da, der Filter laesst nichts uebrig. Der
++                // Unterschied zaehlt: das eine loest man mit Warten,
++                // das andere mit einem Klick auf den Filter.
++                grid.innerHTML = getEmptyStateBoxHtml({
++                    title: t('mc.noCardsForFilter'),
++                    description: t('mc.noCardsForFilterDesc'),
++                    icon: 'cards'
++                });
+                 return;
+             }
+             
+@@ -1220,23 +1233,11 @@
+             }
+         }
+ 
+-        function filterPastMetaCards() {
+-            const searchTerm = (document.getElementById('pastCardSearchInput')?.value || '').toLowerCase();
+-            const rows = document.querySelectorAll('#pastMetaTable table tbody tr');
+-            let visibleCount = 0;
+-
+-            rows.forEach(row => {
+-                const text = row.textContent.toLowerCase();
+-                const visible = text.includes(searchTerm);
+-                row.style.display = visible ? '' : 'none';
+-                if (visible) visibleCount += 1;
+-            });
+-
+-            const countEl = document.getElementById('pastCardCount');
+-            if (countEl) {
+-                countEl.textContent = `${visibleCount} ${t('deck.cards')}`;
+-            }
+-        }
++        // Hier stand ein zweites filterPastMetaCards(). Es las
++        // #pastCardSearchInput und #pastCardCount - beide gibt es im
++        // Markup nicht - und wurde ohnehin von der gleichnamigen
++        // Funktion in app-past-meta.js ueberschrieben, die spaeter
++        // laedt. Tote Zeilen, die aussahen wie eine Suchfunktion.
+ 
+         // Deck Builder functions (placeholder implementations)
+         const deckBuilders = {
+diff --git a/js/app-utils.js b/js/app-utils.js
+index 55fb7faa..a3fde0d9 100644
+--- a/js/app-utils.js
++++ b/js/app-utils.js
+@@ -1458,11 +1458,16 @@ window.CONV_MIN_N = CONV_MIN_N;
+  * the variable becomes visible text — five files had a local copy
+  * each, this is the single source.
+  */
++// Es gab davon zwei: diese hier und eine gleichnamige in
++// app-current-meta-analysis.js, beide auf oberster Ebene. Die andere
++// lud spaeter und gewann still - sie maskierte fuenf Zeichen statt
++// drei, dafuer wurde aus escapeHtml(null) der sichtbare Text "null".
++// Diese Fassung ist die Vereinigung beider: fuenf Zeichen, und leer
++// bleibt leer.
+ function escapeHtml(s) {
+-    return String(s ?? '')
+-        .replace(/&/g, '&amp;')
+-        .replace(/</g, '&lt;')
+-        .replace(/>/g, '&gt;');
++    return String(s ?? '').replace(/[&<>"']/g, c => ({
++        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
++    }[c]));
+ }
+ window.escapeHtml = escapeHtml;
+ 
+diff --git a/js/i18n.js b/js/i18n.js
+index e5aaab13..57f27de6 100644
+--- a/js/i18n.js
++++ b/js/i18n.js
+@@ -486,6 +486,10 @@ const translations = {
+     'cl.resultsFound':          'result(s) found',
+     'cl.noDataFound':           'No data found',
+     'cl.noDataFoundDesc':       'No tournament data available for this filter combination.',
++    'cm.noCardsInDeck':         'No decklist loaded',
++    'cm.noCardsInDeckDesc':     'Pick an archetype from the dropdown to see its cards.',
++    'mc.noCardsForFilter':      'No cards match this filter',
++    'mc.noCardsForFilterDesc':  'The data is there — the filter removes everything. Loosen it or reset it.',
+     'cl.cards':                 'Cards',
+     'cl.selectDeck':            '-- Select a Deck --',
+     'cl.topMetaDecks':          'Top 10 Meta Decks',
+@@ -2426,6 +2430,10 @@ const translations = {
+     'cl.resultsFound':          'Ergebnis(se) gefunden',
+     'cl.noDataFound':           'Keine Daten gefunden',
+     'cl.noDataFoundDesc':       'Für diese Filterkombination liegen aktuell keine Turnierdaten vor.',
++    'cm.noCardsInDeck':         'Keine Deckliste geladen',
++    'cm.noCardsInDeckDesc':     'Wähle oben einen Archetyp aus, dann erscheinen seine Karten.',
++    'mc.noCardsForFilter':      'Kein Treffer für diesen Filter',
++    'mc.noCardsForFilterDesc':  'Daten sind da — der Filter lässt nichts übrig. Lockere ihn oder setze ihn zurück.',
+     'cl.cards':                 'Karten',
+     'cl.selectDeck':            '-- Deck auswählen --',
+     'cl.topMetaDecks':          'Top 10 Meta-Decks',
+diff --git a/tests/unit/test-globale-namen.js b/tests/unit/test-globale-namen.js
+new file mode 100644
+index 00000000..6cef0093
+--- /dev/null
++++ b/tests/unit/test-globale-namen.js
+@@ -0,0 +1,143 @@
++/**
++ * Ein globaler Name, eine Funktion.
++ *
++ * Gefunden am 2026-08-18: 633 Funktionen liegen in js/ auf oberster
++ * Ebene, also alle im selben globalen Namensraum. Drei Namen waren
++ * doppelt vergeben — und weil ein Skript, das spaeter laedt, das
++ * frueher geladene still ueberschreibt, war jedes Mal genau eine der
++ * beiden Fassungen unerreichbar. Zweimal war es die, fuer die der
++ * aufrufende Code geschrieben war:
++ *
++ *   getEmptyStateHtml   app-utils.js (Optionen)  <- verloren
++ *                       app-city-league.js (ohne Argumente)
++ *     Folge: die leere Wunschliste und die leere Tauschliste sagten
++ *     "Fuer diese Filterkombination liegen aktuell keine Turnierdaten
++ *     vor." Sie riefen window.getEmptyStateHtml({title, body, cta})
++ *     auf und bekamen eine Funktion, die alles davon ignoriert.
++ *
++ *   escapeHtml          app-utils.js (3 Zeichen, null -> '')  <- verloren
++ *                       app-current-meta-analysis.js (5 Zeichen, null -> "null")
++ *
++ *   filterPastMetaCards app-meta-cards.js  <- verloren, dazu tot
++ *                       app-past-meta.js
++ *
++ * Ein Linter faellt darauf nicht herein, weil jede Datei fuer sich
++ * gueltig ist. Nur der Blick ueber alle Dateien zeigt es.
++ */
++
++const { describe, it } = require('node:test');
++const assert = require('node:assert/strict');
++const fs = require('node:fs');
++const path = require('node:path');
++
++const ROOT = path.join(__dirname, '..', '..');
++const JS_DIR = path.join(ROOT, 'js');
++
++function stripComments(src) {
++    return src
++        .replace(/\/\*[\s\S]*?\*\//g, '')
++        .replace(/(^|[^:"'`\\])\/\/.*$/gm, '$1');
++}
++
++// Sammelt jede Funktionsdeklaration auf Klammertiefe 0 — genau die,
++// die im globalen Namensraum landen. Die Tiefe wird grob ueber
++// geschweifte Klammern gezaehlt; das reicht, weil eine Fehlzaehlung
++// hoechstens zu einem uebersehenen Namen fuehrt, nie zu einem
++// erfundenen.
++function topLevelFunctions() {
++    const found = new Map();
++    for (const f of fs.readdirSync(JS_DIR).filter(n => n.endsWith('.js'))) {
++        const src = stripComments(fs.readFileSync(path.join(JS_DIR, f), 'utf8'));
++        let depth = 0;
++        src.split('\n').forEach((line, i) => {
++            const m = /^\s*function\s+([A-Za-z_$][\w$]*)\s*\(/.exec(line);
++            if (m && depth === 0) {
++                if (!found.has(m[1])) found.set(m[1], []);
++                found.get(m[1]).push(`${f}:${i + 1}`);
++            }
++            depth += (line.match(/\{/g) || []).length - (line.match(/\}/g) || []).length;
++            if (depth < 0) depth = 0;
++        });
++    }
++    return found;
++}
++
++describe('globale Namen — keiner ist doppelt vergeben', () => {
++    const fns = topLevelFunctions();
++
++    it('js/ hat ueberhaupt globale Funktionen zu pruefen', () => {
++        // Wenn die Zaehlung kaputtgeht, soll dieser Test es sagen und
++        // nicht der naechste stillschweigend gruen bleiben.
++        assert.ok(fns.size > 400, `nur ${fns.size} gefunden — Zaehlung defekt?`);
++    });
++
++    it('kein Funktionsname wird in zwei Dateien auf oberster Ebene vergeben', () => {
++        const dups = [...fns.entries()]
++            .filter(([, where]) => where.length > 1)
++            .map(([name, where]) => `${name}: ${where.join(', ')}`);
++        assert.deepStrictEqual(
++            dups, [],
++            'doppelt vergeben — die spaeter geladene Datei gewinnt still:\n' + dups.join('\n')
++        );
++    });
++});
++
++describe('globale Namen — die drei Faelle von 2026-08-18 bleiben geloest', () => {
++    const read = f => fs.readFileSync(path.join(JS_DIR, f), 'utf8');
++
++    it('getEmptyStateHtml gibt es nur in app-utils.js', () => {
++        const fns = topLevelFunctions();
++        assert.deepStrictEqual(fns.get('getEmptyStateHtml'), ['app-utils.js:' + (
++            stripComments(read('app-utils.js')).split('\n')
++                .findIndex(l => /^\s*function\s+getEmptyStateHtml\s*\(/.test(l)) + 1
++        )]);
++    });
++
++    it('kein Aufruf von getEmptyStateHtml ohne Argumente', () => {
++        // Ohne Argumente liefert die Fassung aus app-utils.js eine
++        // leere Box. Wer sie ruft, muss sagen, was drinstehen soll.
++        const bad = [];
++        for (const f of fs.readdirSync(JS_DIR).filter(n => n.endsWith('.js'))) {
++            const src = stripComments(read(f));
++            src.split('\n').forEach((line, i) => {
++                if (/\bgetEmptyStateHtml\s*\(\s*\)/.test(line)) bad.push(`${f}:${i + 1}`);
++            });
++        }
++        assert.deepStrictEqual(bad, []);
++    });
++
++    it('escapeHtml maskiert fuenf Zeichen und macht aus null keinen Text', () => {
++        const src = stripComments(read('app-utils.js'));
++        const m = /function escapeHtml\(s\) \{([\s\S]*?)\n\}/.exec(src);
++        assert.ok(m, 'escapeHtml nicht gefunden');
++        const body = m[1];
++        for (const ch of ['&amp;', '&lt;', '&gt;', '&quot;', '&#39;']) {
++            assert.ok(body.includes(ch), `escapeHtml maskiert ${ch} nicht`);
++        }
++        assert.ok(/\?\?\s*''/.test(body), 'escapeHtml faengt null/undefined nicht ab');
++
++        // Und einmal wirklich ausfuehren, statt es nur zu lesen.
++        // eslint-disable-next-line no-new-func
++        const fn = new Function(m[0] + '\nreturn escapeHtml;')();
++        assert.strictEqual(fn(null), '');
++        assert.strictEqual(fn(undefined), '');
++        assert.strictEqual(fn(`<a href="x">O'Brien & co</a>`),
++            '&lt;a href=&quot;x&quot;&gt;O&#39;Brien &amp; co&lt;/a&gt;');
++    });
++
++    it('filterPastMetaCards gibt es nur in app-past-meta.js', () => {
++        const fns = topLevelFunctions();
++        const where = fns.get('filterPastMetaCards') || [];
++        assert.strictEqual(where.length, 1);
++        assert.ok(where[0].startsWith('app-past-meta.js:'), where[0]);
++    });
++
++    it('die vier neuen Leerzustands-Texte gibt es in beiden Sprachen', () => {
++        const i18n = read('i18n.js');
++        for (const k of ['cm.noCardsInDeck', 'cm.noCardsInDeckDesc',
++                         'mc.noCardsForFilter', 'mc.noCardsForFilterDesc']) {
++            const n = (i18n.match(new RegExp("'" + k.replace('.', '\\.') + "'", 'g')) || []).length;
++            assert.strictEqual(n, 2, `${k} steht ${n}x in i18n.js, erwartet 2 (de + en)`);
++        }
++    });
++});

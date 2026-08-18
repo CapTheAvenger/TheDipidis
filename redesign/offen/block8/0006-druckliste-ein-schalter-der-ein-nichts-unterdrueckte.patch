@@ -1,0 +1,137 @@
+From 504534e47ad8eb01158fb0388efd3b6913d41b73 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Tue, 18 Aug 2026 13:54:47 +0000
+Subject: [PATCH 6/6] druckliste: ein schalter, der ein nichts unterdrueckte
+
+js/app-core.js hatte eine Funktion saveProxyQueue() mit leerem Koerper
+und dem Kommentar "Proxy queue persistence was intentionally removed".
+Durch sechs Aufrufstellen lief dazu ein Schalter suppressPersist, der
+genau dieses Nichts unterdrueckte, und firebase-collection.js pruefte
+vor dem Aufruf noch, ob es die Funktion ueberhaupt gibt.
+
+Das Handbuch fuehrt den leeren Rumpf als Fehler. Er ist keiner: die
+Druckliste ist bewusst nur fuer die aktuelle Sitzung gedacht,
+clearLegacyProxyQueueStorage() raeumt den alten Eintrag proxyQueueV1
+beim Laden aktiv weg. Das sage ich lieber, als eine Reparatur zu
+erfinden.
+
+Was bleibt, ist das Beiwerk drumherum: zehn Stellen, die so aussehen,
+als gaebe es eine Speicherung. Genau das ist die Falle - wer die
+Druckliste kuenftig wirklich speichern will, sieht einen Aufhaenger,
+der nie funktioniert hat, und baut darauf auf. Beiwerk entfernt, der
+Grund steht als Kommentar an der einen verbliebenen Stelle.
+
+Verhalten unveraendert, im Browser gegen HEAD geprueft:
+  vorher   ["Iono PAL 185 x3","Ultra Ball SVI 196 x4"], 2 Zeilen gerendert
+  nachher  ["Iono PAL 185 x3","Ultra Ball SVI 196 x4"], 2 Zeilen gerendert
+  keine Seitenfehler, kein proxyQueueV1 im Speicher
+
+Offene Produktfrage fuer dich, nicht von mir entschieden: wenn jemand
+eine 60-Karten-Druckliste zusammenstellt und die Seite neu laedt, ist
+sie weg. Soll sie das?
+
+Tests: 1157 JS, 373 Python
+---
+ js/app-core.js            | 28 +++++++++++++++-------------
+ js/firebase-collection.js |  6 ++----
+ 2 files changed, 17 insertions(+), 17 deletions(-)
+
+diff --git a/js/app-core.js b/js/app-core.js
+index 09b705c7..bf1b66d9 100644
+--- a/js/app-core.js
++++ b/js/app-core.js
+@@ -716,10 +716,17 @@ const BASE_PATH = './data/';
+             }
+         }
+ 
+-        function saveProxyQueue() {
+-            // Proxy queue persistence was intentionally removed.
+-        }
+-
++        // Die Druckliste lebt nur solange die Seite offen ist. Das ist
++        // Absicht: clearLegacyProxyQueueStorage() raeumt den alten
++        // Eintrag proxyQueueV1 aktiv weg, damit keine Liste von
++        // vorgestern wieder auftaucht.
++        //
++        // Frueher stand hier zusaetzlich ein saveProxyQueue(), das
++        // nichts tat, und durch sechs Aufrufstellen lief ein
++        // suppressPersist-Schalter, der dieses Nichts unterdrueckte.
++        // Beides ist weg. Wer die Liste wirklich speichern will, baut
++        // eine Funktion, die speichert - und sieht dann auch, dass es
++        // vorher keine gab.
+         function loadProxyQueue() {
+             clearLegacyProxyQueueStorage();
+             window.proxyQueue = [];
+@@ -883,15 +890,13 @@ const BASE_PATH = './data/';
+         function addCardToProxy(cardName, setCode = '', cardNumber = '', count = 1, suppressToast = false) {
+             return addCardToProxyInternal(cardName, setCode, cardNumber, count, {
+                 suppressToast,
+-                suppressRender: false,
+-                suppressPersist: false
++                suppressRender: false
+             });
+         }
+ 
+         function addCardToProxyInternal(cardName, setCode = '', cardNumber = '', count = 1, options = {}) {
+             const suppressToast = Boolean(options.suppressToast);
+             const suppressRender = Boolean(options.suppressRender);
+-            const suppressPersist = Boolean(options.suppressPersist);
+             const name = String(cardName || '').trim();
+             if (!name) return 0;
+ 
+@@ -916,9 +921,6 @@ const BASE_PATH = './data/';
+             }
+ 
+             window.proxyQueue = queue;
+-            if (!suppressPersist) {
+-                saveProxyQueue();
+-            }
+             if (!suppressRender) {
+                 renderProxyQueue();
+             }
+@@ -990,9 +992,9 @@ const BASE_PATH = './data/';
+ 
+                         const match = deckKey.match(/^(.+?)\s+\(([A-Z0-9]+)\s+([A-Z0-9]+)\)$/);
+                         if (match) {
+-                            addCardToProxyInternal(match[1], match[2], match[3], copies, { suppressToast: true, suppressRender: true, suppressPersist: true });
++                            addCardToProxyInternal(match[1], match[2], match[3], copies, { suppressToast: true, suppressRender: true });
+                         } else {
+-                            addCardToProxyInternal(deckKey, '', '', copies, { suppressToast: true, suppressRender: true, suppressPersist: true });
++                            addCardToProxyInternal(deckKey, '', '', copies, { suppressToast: true, suppressRender: true });
+                         }
+                         addedCopies += copies;
+                     });
+@@ -1082,7 +1084,7 @@ const BASE_PATH = './data/';
+                         const safeName = String(entry?.name || '').trim();
+                         if (!safeName) return;
+                         const amount = parseProxyCount(entry.count, 1);
+-                        addCardToProxyInternal(safeName, entry.set, entry.number, amount, { suppressToast: true, suppressRender: true, suppressPersist: true });
++                        addCardToProxyInternal(safeName, entry.set, entry.number, amount, { suppressToast: true, suppressRender: true });
+                         addedCopies += amount;
+                     });
+ 
+diff --git a/js/firebase-collection.js b/js/firebase-collection.js
+index 172c2dae..bb7bbdf8 100644
+--- a/js/firebase-collection.js
++++ b/js/firebase-collection.js
+@@ -5044,18 +5044,16 @@ function _printSavedDeckHelper(deck, missingOnly) {
+     }
+ 
+     // Push everything in one batch — suppressRender / suppressToast
+-    // / suppressPersist on each call means we render and persist
+-    // exactly once at the end.
++    // on each call means we render exactly once at the end.
+     if (typeof addCardToProxyInternal !== 'function') {
+         console.error('[My Decks] Proxy queue helper not loaded yet');
+         return;
+     }
+     items.forEach(it => {
+         addCardToProxyInternal(it.name, it.setCode, it.number, it.copies, {
+-            suppressToast: true, suppressRender: true, suppressPersist: true
++            suppressToast: true, suppressRender: true
+         });
+     });
+-    if (typeof saveProxyQueue === 'function') saveProxyQueue();
+     if (typeof renderProxyQueue === 'function') renderProxyQueue();
+ 
+     if (typeof showToast === 'function') {

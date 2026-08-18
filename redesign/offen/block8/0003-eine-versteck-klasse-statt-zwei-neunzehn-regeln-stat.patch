@@ -1,0 +1,1286 @@
+From d2b67e1521e43cabdb987ab8378690dfd0aaf37a Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Tue, 18 Aug 2026 13:33:29 +0000
+Subject: [PATCH 3/6] eine versteck-klasse statt zwei, neunzehn regeln statt
+ einer
+
+Das Projekt hatte zwei Namen fuer dieselbe Sache:
+
+  .d-none          193 Verwendungen
+  .display-none     96 Verwendungen
+
+Erklaert wurden sie von 19 CSS-Regeln. Acht davon standen Wort fuer
+Wort identisch in ui-components.css (viermal .d-none, viermal
+.display-none), sieben weitere wiederholten dasselbe eingegrenzt in
+fuenf anderen Dateien (.anti-tech-step.display-none,
+.ca-empty-state.display-none, .tech-lab-results-wrap.display-none,
+#auth-modal.display-none, .tech-options-autocomplete.d-none,
+.tech-slot-picker.d-none, .tech-vs-normal-section.d-none). Alle 19
+sagten dasselbe: display: none.
+
+Was das gekostet hat, steht in js/app-current-meta-analysis.js. Das
+Matchup-Feld traegt .display-none aus dem Markup, der Renderer nahm
+in Zeile 2786 nur .d-none weg. Ein Feld, das befuellt ist und das
+niemand sieht. Repariert wurde damals nur der zweite Renderpfad
+(Zeile 1825/1826, der entfernt seither beide Namen) - der erste blieb
+als Falle liegen. Genau die Sorte Reparatur, die das Problem am
+Symptom loest und die Ursache stehen laesst.
+
+Jetzt: ein Name (.d-none), eine Regel, am Ende von ui-components.css.
+
+Die Position ist Absicht. .d-none hat Gewicht (0,1,0) und !important -
+genau wie .flex, .display-block, .flex-between und die Grid-Utilities,
+die in derselben Datei stehen. Wer spaeter steht, gewinnt. Ein Element
+mit class="d-none flex" war bisher sichtbar, weil .flex hinter der
+alten .d-none-Regel stand. Verstecken muss gewinnen: wer etwas
+versteckt, meint es.
+
+Gemessen, Playwright, Servicemitarbeiter blockiert, alle acht Tabs,
+alter Stand aus einem git-worktree auf HEAD danebengestellt:
+
+  1440x900   10.562 Elemente verglichen, 0 veraendert
+   390x844   10.562 Elemente verglichen, 0 veraendert
+
+Und die Matchup-Ansicht selbst, Deep-Dive-Modus, vier Archetypen
+durchgeklickt: display=block, 520 px hoch, 5 Zeilen je Tabelle.
+
+tests/unit/test-eine-versteckklasse.js haelt neun Punkte fest, darunter
+zwei, die die urspruengliche Falle direkt adressieren: keine Klasse
+darf gesetzt werden, die nie wieder entfernt wird, und keine
+Versteck-Klasse aus dem Markup darf ohne Gegenstueck in js/ bleiben.
+
+!important: 3356 -> 3347
+Tests: 1133 JS (vorher 1124, +9), 373 Python
+---
+ css/anti-tech.css                      |   2 -
+ css/city-league.css                    |   2 +-
+ css/meta-card-analysis.css             |   7 +-
+ css/styles.css                         |   2 -
+ css/tech-lab.css                       |   3 -
+ css/tech-slots.css                     |   2 -
+ css/ui-components.css                  |  27 ++--
+ css/ux-step3.css                       |   5 -
+ index.html                             |  74 +++++------
+ js/app-anti-tech.js                    |  10 +-
+ js/app-current-meta-analysis.js        |  15 ++-
+ js/app-profile-deck-builder.js         |   2 +-
+ js/app-tech-lab.js                     |  10 +-
+ js/auth-ui-helpers.js                  |  12 +-
+ js/battle-journal.js                   |   2 +-
+ js/custom-binder.js                    |  30 ++---
+ js/firebase-collection.js              |  14 +--
+ js/firebase-globals.js                 |  10 +-
+ js/meta-binder.js                      |  12 +-
+ tests/e2e/meta-binder-walkthrough.js   |   6 +-
+ tests/e2e_battle_journal_edit.py       |   4 +-
+ tests/e2e_battle_journal_overhaul.py   |   6 +-
+ tests/unit/test-eine-versteckklasse.js | 168 +++++++++++++++++++++++++
+ 23 files changed, 294 insertions(+), 131 deletions(-)
+ create mode 100644 tests/unit/test-eine-versteckklasse.js
+
+diff --git a/css/anti-tech.css b/css/anti-tech.css
+index 9367357f..2d529a42 100644
+--- a/css/anti-tech.css
++++ b/css/anti-tech.css
+@@ -282,8 +282,6 @@
+  * picker). Inherits the base modal panel styling above.
+  * ──────────────────────────────────────────────────────────────── */
+ 
+-.anti-tech-step.display-none { display: none; }
+-
+ /* Step 1 — selected target chips above the quick-pick grid */
+ .anti-tech-chips {
+     display: flex;
+diff --git a/css/city-league.css b/css/city-league.css
+index f4f66785..835d618d 100644
+--- a/css/city-league.css
++++ b/css/city-league.css
+@@ -2781,7 +2781,7 @@
+  * will land until the season resumes. The banner makes that gap
+  * obvious so users don't read stale numbers as live.
+  *
+- * Hide by adding the .display-none utility class (or by stripping
++ * Hide by adding the .d-none utility class (or by stripping
+  * the markup) once a fresh season is underway.
+  */
+ .cl-season-notice {
+diff --git a/css/meta-card-analysis.css b/css/meta-card-analysis.css
+index a83bf595..5a02c884 100644
+--- a/css/meta-card-analysis.css
++++ b/css/meta-card-analysis.css
+@@ -364,10 +364,9 @@
+ }
+ 
+ /* Vanilla mode: hide everything tagged as deep-dive-only.
+-   `!important` is needed to override the inline-show toggles
+-   (`d-none` / `display-none`) that other JS uses to reveal these
+-   sections when a deck is loaded — without it, vanilla mode would
+-   re-show them as soon as the user picked a deck. */
++   `!important` ist noetig, weil das Aufdecken beim Deckwechsel per
++   `.d-none`-Entfernen laeuft — ohne das Gewicht wuerde der Vanilla-
++   Modus die Abschnitte wieder zeigen, sobald ein Deck gewaehlt ist. */
+ #current-analysis[data-cm-view="vanilla"] .cm-deep-dive-only {
+     display: none !important;
+ }
+diff --git a/css/styles.css b/css/styles.css
+index cf8def34..a164c5ef 100644
+--- a/css/styles.css
++++ b/css/styles.css
+@@ -9156,7 +9156,6 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
+     overflow-y: auto;
+     z-index: 100;
+ }
+-.tech-options-autocomplete.d-none { display: none; }
+ .tech-options-autocomplete-row {
+     display: flex;
+     align-items: center;
+@@ -10073,7 +10072,6 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
+     color: #6b7280;
+     line-height: 1.5;
+ }
+-.ca-empty-state.display-none { display: none; }
+ 
+ 
+ /* Data-freshness chip — minimal, sits inline next to the section
+diff --git a/css/tech-lab.css b/css/tech-lab.css
+index ee4aed60..12b6f1e5 100644
+--- a/css/tech-lab.css
++++ b/css/tech-lab.css
+@@ -216,9 +216,6 @@
+     gap: 18px;
+     margin-top: 10px;
+ }
+-.tech-lab-results-wrap.display-none {
+-    display: none;
+-}
+ .tech-lab-direction {
+     padding: 14px 16px;
+     border-radius: 10px;
+diff --git a/css/tech-slots.css b/css/tech-slots.css
+index 6184bf92..8daf46dd 100644
+--- a/css/tech-slots.css
++++ b/css/tech-slots.css
+@@ -140,7 +140,6 @@
+     margin-top: 10px;
+ }
+ 
+-.tech-slot-picker.d-none { display: none !important; }
+ 
+ .tech-slot-picker-input {
+     width: 100%;
+@@ -220,7 +219,6 @@
+     box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+ }
+ 
+-.tech-vs-normal-section.d-none { display: none !important; }
+ 
+ .tech-vs-normal-header {
+     margin-bottom: 14px;
+diff --git a/css/ui-components.css b/css/ui-components.css
+index 67dece95..60cde9b3 100644
+--- a/css/ui-components.css
++++ b/css/ui-components.css
+@@ -1114,7 +1114,6 @@ img[src*="limitlesstcg"] {
+ .color-white-025 { color: rgba(255,255,255,0.25) !important; }
+ .mx-2 { margin-left: 2px !important; margin-right: 2px !important; }
+ /* Utility classes for modularizing playtester modal and controls */
+-.d-none { display: none !important; }
+ .pos-fixed { position: fixed !important; }
+ .top-0 { top: 0 !important; }
+ .left-0 { left: 0 !important; }
+@@ -1220,7 +1219,6 @@ img[src*="limitlesstcg"] {
+ .mh-420 { max-height: 420px !important; }
+ .br-10 { border-radius: 10px !important; }
+ .border-2-blue { border: 2px solid #3B4CCA !important; }
+-.d-none { display: none !important; }
+ .pointer { cursor: pointer !important; }
+ .color-yellow { color: #FFCB05 !important; }
+ .fs-12 { font-size: 12px !important; }
+@@ -1369,7 +1367,6 @@ img[src*="limitlesstcg"] {
+ .justify-center { justify-content: center !important; }
+ .align-center { align-items: center !important; }
+ /* Multiplayer Menu Utility Classes */
+-.d-none { display: none !important; }
+ .pos-abs { position: absolute !important; }
+ .top-60 { top: 60px !important; }
+ .right-12 { right: 12px !important; }
+@@ -1428,7 +1425,6 @@ img[src*="limitlesstcg"] {
+ /* Deck Compare Modal Utility Classes */
+ .bg-gradient-blue { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important; }
+ .border-1-blue { border: 1px solid #b3d9ff !important; }
+-.d-none { display: none !important; }
+ .color-blue-dark { color: #004085 !important; }
+ .fs-95 { font-size: 0.95em !important; }
+ .mb-10 { margin-bottom: 10px !important; }
+@@ -1493,7 +1489,6 @@ img[src*="limitlesstcg"] {
+ .gap-10 { gap: 10px; }
+ .align-center { align-items: center; }
+ .d-block { display: block; }
+-.display-none { display: none; }
+ .decks-grid { display: grid !important; grid-template-columns: 1fr; gap: 12px !important; }
+ .flex-1 { flex: 1 1 0% !important; }
+ .minw-200 { min-width: 200px !important; }
+@@ -1525,7 +1520,6 @@ img[src*="limitlesstcg"] {
+ .color-white { color: #fff !important; }
+ .color-grey-light { color: #888 !important; }
+ .fs-12 { font-size: 12px !important; }
+-.display-none { display: none !important; }
+ .minw-260 { min-width: 260px !important; }
+ .minw-280 { min-width: 280px !important; }
+ .btn-gradient-blue { background: linear-gradient(135deg,#667eea 0%,#764ba2 100%) !important; border: none !important; }
+@@ -1550,7 +1544,6 @@ img[src*="limitlesstcg"] {
+ .fs-18 { font-size: 18px !important; }
+ .py-15 { padding-top: 15px !important; padding-bottom: 15px !important; }
+ .px-40 { padding-left: 40px !important; padding-right: 40px !important; }
+-.display-none { display: none !important; }
+ .profile-stats-grid { display: grid !important; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px !important; margin-bottom: 16px !important; }
+ .fw-600 { font-weight: 600 !important; }
+ /* Utility classes for modularized profile/help/support sections */
+@@ -1615,7 +1608,6 @@ img[src*="limitlesstcg"] {
+ .border-left-green { border-left: 4px solid #2ecc71 !important; }
+ .border-bottom-blue { border-bottom: 3px solid #3498db !important; }
+ /* Utility classes for modularized index.html blocks */
+-.display-none { display: none !important; }
+ .display-block { display: block !important; }
+ .mb-40 { margin-bottom: 40px !important; }
+ .mb-20 { margin-bottom: 20px !important; }
+@@ -4974,3 +4966,22 @@ img[src*="limitlesstcg"] {
+     cursor: help;
+ }
+ a.price-unverified-badge:hover { background: #ffe8a1; }
++
++/* ── Die eine Versteck-Klasse ───────────────────────────────────────
++ * Bis zum 2026-08-18 gab es zwei Namen fuer dieselbe Sache: .d-none
++ * (193 Verwendungen) und .display-none (96). Beide waren in dieser
++ * Datei je viermal deklariert, dazu sieben eingegrenzte Wiederholungen
++ * in fuenf weiteren Dateien - neunzehn Regeln fuer "unsichtbar".
++ *
++ * Der Preis stand in js/app-current-meta-analysis.js: das Matchup-Feld
++ * trug .display-none aus dem Markup, der Renderer nahm nur .d-none
++ * weg. Repariert wurde damals der zweite Pfad, indem er beide Namen
++ * entfernt - der erste blieb als Falle liegen.
++ *
++ * Jetzt: ein Name, eine Regel, und sie steht bewusst am Dateiende.
++ * Verstecken muss die Layout-Utilities (.flex, .display-block,
++ * .flex-between, die Grid-Klassen) schlagen, und die stehen alle
++ * weiter oben mit demselben Gewicht. Wer etwas versteckt, meint es.
++ * tests/unit/test-eine-versteckklasse.js haelt das fest.
++ * ─────────────────────────────────────────────────────────────────── */
++.d-none { display: none !important; }
+diff --git a/css/ux-step3.css b/css/ux-step3.css
+index d8e9f38b..a153d2a0 100644
+--- a/css/ux-step3.css
++++ b/css/ux-step3.css
+@@ -97,11 +97,6 @@
+     transform: scale(1.04);
+ }
+ 
+-/* Keep auth modal compatible with existing JS toggle logic */
+-#auth-modal.display-none {
+-    display: none !important;
+-}
+-
+ /* Harmonize targeted modal containers */
+ #auth-modal .auth-modal-content,
+ #raritySwitcherModal .rarity-switcher-modal-content,
+diff --git a/index.html b/index.html
+index 9add03a9..972d19e1 100644
+--- a/index.html
++++ b/index.html
+@@ -546,7 +546,7 @@
+                             <path d="M8 7h7M8 11h7"></path>
+                         </svg>
+                         <span class="header-icon-label" data-i18n="bj.openShort">Journal</span>
+-                        <span id="battleJournalFabBadge" class="header-icon-badge display-none">0</span>
++                        <span id="battleJournalFabBadge" class="header-icon-badge d-none">0</span>
+                     </button>
+                     <button class="header-icon-btn header-mydecks-btn" onclick="openProfileSection('decks')" title="My Decks" aria-label="My Decks" data-i18n-title="header.myDecks" data-i18n-aria="header.myDecks">
+                         <svg class="header-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+@@ -1171,7 +1171,7 @@
+                     </div>
+ 
+                     <!-- Best/Worst Matchups Section -->
+-                    <div id="currentMetaMatchupsSection" class="display-none mb-40 bg-light px-30 br-8 cm-deep-dive-only">
++                    <div id="currentMetaMatchupsSection" class="d-none mb-40 bg-light px-30 br-8 cm-deep-dive-only">
+                         <h3 id="currentMetaMatchupsTitle" class="current-meta-matchups-title" data-i18n="matchup.title">Deck Matchups</h3>
+                         <div class="current-meta-matchups-grid-container">
+                             <div>
+@@ -1374,7 +1374,7 @@
+                       Populated by renderMatchupsVsMetaCall() in
+                       app-current-meta-analysis.js.
+                     -->
+-                    <div id="currentMetaVsMetaCallSection" class="display-none mb-40 bg-light px-30 br-8 mc-vs-section cm-deep-dive-only">
++                    <div id="currentMetaVsMetaCallSection" class="d-none mb-40 bg-light px-30 br-8 mc-vs-section cm-deep-dive-only">
+                         <h3 id="currentMetaVsMetaCallTitle" class="mc-vs-title">
+                             <span data-i18n="matchup.vsMetaCallTitle">Matchups vs Meta Call (Predicted Field)</span>
+                         </h3>
+@@ -1416,7 +1416,7 @@
+                       the user's WR up; missing core slots push it
+                       down. Populated by renderUserVsVanillaPanel().
+                     -->
+-                    <div id="currentMetaUserVsVanillaSection" class="display-none mb-40 bg-light px-30 br-8 mc-vs-section cm-deep-dive-only">
++                    <div id="currentMetaUserVsVanillaSection" class="d-none mb-40 bg-light px-30 br-8 mc-vs-section cm-deep-dive-only">
+                         <h3 class="mc-vs-title">
+                             <span data-i18n="matchup.userVsVanillaTitle">Your Build vs Vanilla (Meta-Call-weighted)</span>
+                         </h3>
+@@ -1663,7 +1663,7 @@
+ 
+                             <div id="techLabStartHint" class="tech-lab-empty tech-lab-start-hint" data-i18n="techLab.startHint">Pick a target card above to see what counters it AND what it counters.</div>
+ 
+-                            <div id="techLabResultsWrap" class="tech-lab-results-wrap display-none">
++                            <div id="techLabResultsWrap" class="tech-lab-results-wrap d-none">
+                                 <!-- Section A: cards that BEAT the picked target -->
+                                 <section class="tech-lab-direction tech-lab-direction-beatenby" aria-labelledby="techLabBeatenByHeading">
+                                     <div class="tech-lab-direction-header">
+@@ -1700,7 +1700,7 @@
+                         </section>
+ 
+                         <!-- Tech Lab — "Add missing tech" modal -->
+-                        <div id="techLabAddOverlay" class="rarity-switcher-modal ui-modal-backdrop z-10000 display-none" role="dialog" aria-modal="true" aria-labelledby="techLabAddTitle">
++                        <div id="techLabAddOverlay" class="rarity-switcher-modal ui-modal-backdrop z-10000 d-none" role="dialog" aria-modal="true" aria-labelledby="techLabAddTitle">
+                             <div class="rarity-switcher-modal-content ui-modal-panel tech-lab-add-panel">
+                                 <span id="techLabAddCloseBtn" class="rarity-switcher-close ui-modal-close" role="button" aria-label="Close"></span>
+                                 <h2 id="techLabAddTitle" data-i18n="techLab.addModalTitle">Add a tech the engine missed</h2>
+@@ -2267,7 +2267,7 @@
+                     </div>
+                     
+                     <!-- Signed in -->
+-                    <div id="profile-content" class="display-none">
++                    <div id="profile-content" class="d-none">
+                         <!-- Cloud-Sync diagnostic + manual trigger.
+                              Surfaces the Firestore offline-cache state and
+                              lets the user force a fresh server read when
+@@ -2408,7 +2408,7 @@
+                                     <span data-i18n="profile.dexImport">Dex Import</span>
+                                 </button>
+                                 <span class="fs-12 color-grey-light" data-i18n="profile.dexImportHint">Import your Dex TCG collection via CSV export</span>
+-                                <input type="file" id="dexImportFileInput" accept=".csv" class="display-none" aria-label="Import collection CSV" onchange="dexImportHandleFile(this)">
++                                <input type="file" id="dexImportFileInput" accept=".csv" class="d-none" aria-label="Import collection CSV" onchange="dexImportHandleFile(this)">
+                             </div>
+ 
+                             <div class="flex gap-10 align-center mb-15 flex-wrap">
+@@ -2444,7 +2444,7 @@
+                                     <span data-i18n="profile.clearCollection">Clear Collection</span>
+                                 </button>
+                             </div>
+-                            <div id="collection-type-loading" class="display-none mt--6 mb-10 fs-12 color-blue-grey" data-i18n="profile.loadingTypes">
++                            <div id="collection-type-loading" class="d-none mt--6 mb-10 fs-12 color-blue-grey" data-i18n="profile.loadingTypes">
+                                 Loading element types...
+                             </div>
+ 
+@@ -2471,7 +2471,7 @@
+                         </div>
+                         
+                         <!-- Decks Tab -->
+-                        <div id="profile-decks" class="profile-tab-content display-none">
++                        <div id="profile-decks" class="profile-tab-content d-none">
+                             <div class="flex align-center justify-between mb-8 flex-wrap gap-10">
+                                 <h2 class="m-0" data-i18n="profile.myDecks">My Decks</h2>
+                                 <div class="flex gap-8 flex-wrap">
+@@ -2490,11 +2490,11 @@
+                             </div>
+                             
+                             <!-- Folder Navigation -->
+-                            <div id="decks-folder-nav" class="display-none mb-15 flex gap-8 flex-wrap align-center">
++                            <div id="decks-folder-nav" class="d-none mb-15 flex gap-8 flex-wrap align-center">
+                             </div>
+                             
+                             <!-- Folder Summary (Core vs Tech Analysis) -->
+-                            <div id="decks-folder-summary" class="display-none mb-15">
++                            <div id="decks-folder-summary" class="d-none mb-15">
+                             </div>
+                             
+                             <div id="decks-grid" class="decks-grid">
+@@ -2512,7 +2512,7 @@
+                         </div>
+                         
+                         <!-- Wishlist Tab -->
+-                        <div id="profile-wishlist" class="profile-tab-content display-none">
++                        <div id="profile-wishlist" class="profile-tab-content d-none">
+                             <h2 data-i18n="profile.wishlist">Wishlist <button class="tab-help-btn" onclick="openTabHelp('wishlist')" title="Help" aria-label="Help for Wishlist" data-i18n-title="btn.helpTitle"></button></h2>
+                             <p class="color-grey mb-15" data-i18n="profile.wishlistNote">Cards you want to get</p>
+ 
+@@ -2566,7 +2566,7 @@
+                         </div>
+                         
+                         <!-- Trade List Tab -->
+-                        <div id="profile-tradelist" class="profile-tab-content display-none">
++                        <div id="profile-tradelist" class="profile-tab-content d-none">
+                             <h2 data-i18n="profile.tradelist">Trade List</h2>
+                             <p class="color-grey mb-15" data-i18n="profile.tradelistNote">Cards you want to trade or sell</p>
+                             
+@@ -2606,7 +2606,7 @@
+                         </div>
+ 
+                         <!-- Meta Binder Tab -->
+-                        <div id="profile-metabinder" class="profile-tab-content display-none">
++                        <div id="profile-metabinder" class="profile-tab-content d-none">
+                             <div class="meta-binder-header">
+                                 <h2 data-i18n="profile.metaBinder">Meta Binder <button class="tab-help-btn" onclick="openTabHelp('meta-binder')" title="Help" aria-label="Help for Meta Binder" data-i18n-title="btn.helpTitle"></button></h2>
+                                 <p class="color-grey mb-15" data-i18n="mb.subtitle">All cards needed for the current meta — compared against your collection.</p>
+@@ -2618,9 +2618,9 @@
+                                 <button id="metaBinderSendProxy" onclick="metaBinderSendMissingToProxy()" class="btn btn-outline" disabled data-i18n="mb.sendProxy">Proxy All Missing</button>
+                                 <button id="metaBinderProxyNew" onclick="metaBinderProxyNewCards()" class="btn btn-outline" disabled data-i18n="mb.proxyNew">Proxy NEW Cards</button>
+                             </div>
+-                            <div id="metaBinderStats" class="meta-binder-stats display-none"></div>
+-                            <div id="metaBinderFilters" class="meta-binder-filters display-none"></div>
+-                            <div id="metaBinderDelta" class="meta-binder-delta display-none"></div>
++                            <div id="metaBinderStats" class="meta-binder-stats d-none"></div>
++                            <div id="metaBinderFilters" class="meta-binder-filters d-none"></div>
++                            <div id="metaBinderDelta" class="meta-binder-delta d-none"></div>
+                             <div id="metaBinderGrid" class="meta-binder-grid">
+                                 <div class="deck-builder-empty-state app-empty-state" role="status" aria-live="polite">
+                                     <div class="deck-builder-empty-icon" aria-hidden="true">
+@@ -2637,7 +2637,7 @@
+                         </div>
+ 
+                         <!-- Custom Binder Tab -->
+-                        <div id="profile-custombinder" class="profile-tab-content display-none">
++                        <div id="profile-custombinder" class="profile-tab-content d-none">
+                             <div class="meta-binder-header">
+                                 <h2 data-i18n="profile.customBinder">Custom Binder <button class="tab-help-btn" onclick="openTabHelp('custom-binder')" title="Help" aria-label="Help for Custom Binder" data-i18n-title="btn.helpTitle"></button></h2>
+                                 <p class="color-grey mb-15" data-i18n="cb.subtitle">Pick your own archetypes and generate a personal binder — same logic as Meta Binder.</p>
+@@ -2657,7 +2657,7 @@
+                                         <button class="btn btn-outline btn-sm" onclick="cbToggleArchetypeDropdown()" id="cbDropdownToggle">Browse ?</button>
+                                         <button class="btn btn-outline btn-sm" onclick="cbAddTopMetaArchetypes()" id="cbTopMetaBtn" data-i18n="cb.topMeta" title="Top 10 des aktuellen Metas auswählen">Top 10 Meta</button>
+                                     </div>
+-                                    <div id="cbArchetypeDropdown" class="custom-binder-dropdown display-none"></div>
++                                    <div id="cbArchetypeDropdown" class="custom-binder-dropdown d-none"></div>
+                                 </div>
+                                 <div id="cbSelectedChips" class="custom-binder-chips"></div>
+                             </div>
+@@ -2674,15 +2674,15 @@
+                                 <button onclick="cbSaveCurrentAsPreset()" class="btn btn-outline" title="Aktuelle Auswahl als Preset speichern">Speichern</button>
+                                 <button id="cbAddWishlist" onclick="cbAddMissingToWishlist()" class="btn btn-outline" disabled>Add Missing to Wishlist</button>
+                                 <button id="cbSendProxy" onclick="cbSendMissingToProxy()" class="btn btn-outline" disabled>Proxy All Missing</button>
+-                                <button id="cbSendUnprinted" onclick="cbSendUnprintedToProxy()" class="btn btn-outline display-none" disabled data-i18n="cb.sendUnprinted">Noch nicht Gedruckte → Druckliste</button>
+-                                <button id="cbBulkMarkPrinted" onclick="cbMarkFilteredPrinted()" class="btn btn-outline display-none" disabled data-i18n="cb.bulkMark">Gefilterte als gedruckt ✓</button>
++                                <button id="cbSendUnprinted" onclick="cbSendUnprintedToProxy()" class="btn btn-outline d-none" disabled data-i18n="cb.sendUnprinted">Noch nicht Gedruckte → Druckliste</button>
++                                <button id="cbBulkMarkPrinted" onclick="cbMarkFilteredPrinted()" class="btn btn-outline d-none" disabled data-i18n="cb.bulkMark">Gefilterte als gedruckt ✓</button>
+                             </div>
+ 
+-                            <div id="cbPresetBar" class="cb-preset-bar display-none"></div>
++                            <div id="cbPresetBar" class="cb-preset-bar d-none"></div>
+ 
+-                            <div id="cbStats" class="meta-binder-stats display-none"></div>
+-                            <div id="cbFilters" class="meta-binder-filters display-none"></div>
+-                            <div id="cbDelta" class="meta-binder-delta display-none"></div>
++                            <div id="cbStats" class="meta-binder-stats d-none"></div>
++                            <div id="cbFilters" class="meta-binder-filters d-none"></div>
++                            <div id="cbDelta" class="meta-binder-delta d-none"></div>
+                             <div id="cbGrid" class="meta-binder-grid">
+                                 <div class="deck-builder-empty-state app-empty-state" role="status" aria-live="polite">
+                                     <div class="deck-builder-empty-icon" aria-hidden="true">
+@@ -2695,7 +2695,7 @@
+                         </div>
+ 
+                         <!-- Journal History Tab -->
+-                        <div id="profile-journal" class="profile-tab-content display-none">
++                        <div id="profile-journal" class="profile-tab-content d-none">
+                             <div class="flex align-center gap-10 mb-15 flex-wrap">
+                                 <h2 data-i18n="bj.profileTitle">Battle Journal</h2>
+                                 <button type="button" class="btn btn-primary btn-sm" onclick="openBattleJournalSheet()" data-i18n="bj.openBtn">Log Match</button>
+@@ -2727,12 +2727,12 @@
+                                 </select>
+                                 <button type="button" class="btn btn-secondary btn-sm" onclick="toggleMatchupStats()" data-i18n="bj.matchups">Matchup Spreadsheet</button>
+                             </div>
+-                            <div id="journalMatchupStats" class="display-none mb-15"></div>
++                            <div id="journalMatchupStats" class="d-none mb-15"></div>
+                             <div id="journalHistoryList" class="battle-journal-history-list"></div>
+                         </div>
+ 
+                         <!-- Compare Decklists Tab -->
+-                        <div id="profile-deckcompare" class="profile-tab-content display-none">
++                        <div id="profile-deckcompare" class="profile-tab-content d-none">
+                             <h2 data-i18n="profile.compareDecklists">Compare Decklists</h2>
+                             <p class="color-grey mb-15" data-i18n="profile.compareNote">Paste two decklists to compare them side by side</p>
+                             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+@@ -2750,19 +2750,19 @@
+                         </div>
+ 
+                         <!-- Deck Builder Tab -->
+-                        <div id="profile-deckbuilder" class="profile-tab-content display-none">
++                        <div id="profile-deckbuilder" class="profile-tab-content d-none">
+                             <!-- Rendered dynamically by ProfileDeckBuilder.activate()
+                                  on first switchProfileTab('deckbuilder'). Search /
+                                  deck list / mulligan calculator all live here. -->
+                         </div>
+ 
+                         <!-- Testing Groups Tab -->
+-                        <div id="profile-testinggroups" class="profile-tab-content display-none">
++                        <div id="profile-testinggroups" class="profile-tab-content d-none">
+                             <!-- Rendered dynamically by TestingGroups.init() -->
+                         </div>
+ 
+                         <!-- Settings Tab -->
+-                        <div id="profile-settings" class="profile-tab-content display-none">
++                        <div id="profile-settings" class="profile-tab-content d-none">
+                             <h2 data-i18n="profile.settings">Settings</h2>
+                             <div class="maxw-600">
+                                 <div class="mb-30">
+@@ -2837,7 +2837,7 @@
+     </div>
+     
+     <!-- Authentication Modal -->
+-    <div id="auth-modal" class="auth-modal ui-modal-backdrop display-none" role="dialog" aria-modal="true" aria-label="Authentication" onclick="if(event.target === this) closeAuthModal()">
++    <div id="auth-modal" class="auth-modal ui-modal-backdrop d-none" role="dialog" aria-modal="true" aria-label="Authentication" onclick="if(event.target === this) closeAuthModal()">
+         <div class="auth-modal-content ui-modal-panel ui-modal-md mobile-modal-panel">
+             <button class="auth-modal-close ui-modal-close" onclick="closeAuthModal()" aria-label="Close" data-i18n-aria="btn.close"></button>
+             
+@@ -2881,7 +2881,7 @@
+             </div>
+             
+             <!-- Sign Up Form -->
+-            <div id="signup-form-container" class="display-none">
++            <div id="signup-form-container" class="d-none">
+                 <h2 class="mb-20">
+                     <img loading="lazy" src="images/pokeball-icon.png" alt="" class="w-28 h-28 mr-10 align-middle">
+                     <span data-i18n="auth.createAccount">Create Account</span>
+@@ -3288,7 +3288,7 @@
+     </div>
+ 
+     <!-- Anti-Tech Build-vs-Deck Modal -->
+-    <div id="antiTechModal" class="rarity-switcher-modal ui-modal-backdrop z-10000 display-none" role="dialog" aria-modal="true" aria-labelledby="antiTechModalTitle" onclick="if(event.target === this) closeAntiTechModal()">
++    <div id="antiTechModal" class="rarity-switcher-modal ui-modal-backdrop z-10000 d-none" role="dialog" aria-modal="true" aria-labelledby="antiTechModalTitle" onclick="if(event.target === this) closeAntiTechModal()">
+         <div class="rarity-switcher-modal-content ui-modal-panel anti-tech-modal-panel">
+             <span class="rarity-switcher-close ui-modal-close" onclick="closeAntiTechModal()" role="button" aria-label="Close"></span>
+ 
+@@ -3345,7 +3345,7 @@
+             </div>
+ 
+             <!-- Step 2: tech card selection (multi-select checkboxes) -->
+-            <div id="antiTechStep2Wrap" class="anti-tech-step display-none">
++            <div id="antiTechStep2Wrap" class="anti-tech-step d-none">
+                 <h2 data-i18n="antiTech.step2Title">Suggested Tech Cards</h2>
+                 <p class="anti-tech-modal-intro" data-i18n="antiTech.step2Intro">Pick which cards to lock into your tech slots. Selected cards will be force-included on the next Consistency Generate.</p>
+ 
+@@ -3542,7 +3542,7 @@
+         </div>
+     </div>
+ 
+-    <div id="metaBinderDroppedModal" class="battle-journal-overlay display-none" onclick="if(event.target===this)closeMetaBinderDroppedModal()" aria-hidden="false">
++    <div id="metaBinderDroppedModal" class="battle-journal-overlay d-none" onclick="if(event.target===this)closeMetaBinderDroppedModal()" aria-hidden="false">
+         <div class="battle-journal-sheet" role="dialog" aria-modal="true" aria-label="Dropped cards">
+             <div class="battle-journal-header">
+                 <div>
+diff --git a/js/app-anti-tech.js b/js/app-anti-tech.js
+index aeffdd65..31594a8c 100644
+--- a/js/app-anti-tech.js
++++ b/js/app-anti-tech.js
+@@ -705,8 +705,8 @@
+         _step = n;
+         const s1 = document.getElementById('antiTechStep1Wrap');
+         const s2 = document.getElementById('antiTechStep2Wrap');
+-        if (s1) s1.classList.toggle('display-none', n !== 1);
+-        if (s2) s2.classList.toggle('display-none', n !== 2);
++        if (s1) s1.classList.toggle('d-none', n !== 1);
++        if (s2) s2.classList.toggle('d-none', n !== 2);
+     }
+ 
+     // ── PUBLIC API ───────────────────────────────────────────────────
+@@ -731,7 +731,7 @@
+         _suggestedCards = [];
+         _selectedCards = new Set();
+ 
+-        modal.classList.remove('display-none');
++        modal.classList.remove('d-none');
+         modal.classList.add('show');
+         _showStep(1);
+ 
+@@ -754,7 +754,7 @@
+         const modal = document.getElementById('antiTechModal');
+         if (modal) {
+             modal.classList.remove('show');
+-            modal.classList.add('display-none');
++            modal.classList.add('d-none');
+         }
+         _source = null;
+         _targets = new Set();
+@@ -904,7 +904,7 @@
+     document.addEventListener('keydown', (e) => {
+         if (e.key !== 'Escape') return;
+         const modal = document.getElementById('antiTechModal');
+-        if (modal && !modal.classList.contains('display-none')) closeAntiTechModal();
++        if (modal && !modal.classList.contains('d-none')) closeAntiTechModal();
+     });
+ 
+     window.openAntiTechModal     = openAntiTechModal;
+diff --git a/js/app-current-meta-analysis.js b/js/app-current-meta-analysis.js
+index 41d2a02f..d0711803 100644
+--- a/js/app-current-meta-analysis.js
++++ b/js/app-current-meta-analysis.js
+@@ -1262,7 +1262,7 @@
+             // back if the deck-select is reset to "" (handled below at the
+             // empty-archetype guard).
+             const emptyState = document.getElementById('currentAnalysisEmptyState');
+-            if (emptyState) emptyState.classList.add('display-none');
++            if (emptyState) emptyState.classList.add('d-none');
+ 
+             // The archetype card sits right under the dropdown: after
+             // arriving here from a tier-list click, the first thing you
+@@ -1281,7 +1281,7 @@
+             }
+ 
+             if (!archetype) {
+-                if (emptyState) emptyState.classList.remove('display-none');
++                if (emptyState) emptyState.classList.remove('d-none');
+                 // Also hide the Quick Reference panel when the user clears
+                 // the selection — without this the panel sticks around
+                 // showing the previous archetype's lists.
+@@ -1823,7 +1823,6 @@
+             }
+ 
+             matchupsSection.classList.remove('d-none');
+-            matchupsSection.classList.remove('display-none');
+             return true;
+         }
+ 
+@@ -1841,7 +1840,7 @@
+             if (!section || !tbody) return;
+ 
+             const hideSection = (reason) => {
+-                section.classList.add('display-none');
++                section.classList.add('d-none');
+                 if (reason) devLog(`[VsMetaCall] hidden: ${reason}`);
+             };
+ 
+@@ -1948,7 +1947,7 @@
+             tbody.innerHTML = paired.map(fmtRow).join('') ||
+                 '<tr><td colspan="3" class="mc-vs-empty">' + t('heatmap.noData') + '</td></tr>';
+ 
+-            section.classList.remove('display-none');
++            section.classList.remove('d-none');
+         }
+ 
+         // ──────────────────────────────────────────────────────────
+@@ -2079,7 +2078,7 @@
+             if (!section || !summaryEl || !detailEl) return;
+ 
+             const hide = (reason) => {
+-                section.classList.add('display-none');
++                section.classList.add('d-none');
+                 if (reason) devLog(`[UserVsVanilla] hidden: ${reason}`);
+             };
+ 
+@@ -2126,7 +2125,7 @@
+                     </div>`;
+                 detailEl.innerHTML = '';
+                 _renderCardDiffSection(archetype);
+-                section.classList.remove('display-none');
++                section.classList.remove('d-none');
+                 return;
+             }
+ 
+@@ -2305,7 +2304,7 @@
+ 
+             _renderCardDiffSection(archetype);
+ 
+-            section.classList.remove('display-none');
++            section.classList.remove('d-none');
+         }
+ 
+         // Builds the user-deck-card-key list (SET|number + name) from
+diff --git a/js/app-profile-deck-builder.js b/js/app-profile-deck-builder.js
+index 6821d8a7..5e1bbc67 100644
+--- a/js/app-profile-deck-builder.js
++++ b/js/app-profile-deck-builder.js
+@@ -1392,7 +1392,7 @@
+     async function activate() {
+         const host = document.getElementById('profile-deckbuilder');
+         if (!host) return;
+-        host.classList.remove('display-none');
++        host.classList.remove('d-none');
+         if (!_initialized) {
+             _deck = loadDeck();
+             renderRoot();
+diff --git a/js/app-tech-lab.js b/js/app-tech-lab.js
+index 78dd0abc..e0ca541f 100644
+--- a/js/app-tech-lab.js
++++ b/js/app-tech-lab.js
+@@ -818,9 +818,9 @@
+         if (beatenByNonEx)   beatenByNonEx.innerHTML   = '';
+ 
+         const resultsWrap = document.getElementById('techLabResultsWrap');
+-        if (resultsWrap) resultsWrap.classList.remove('display-none');
++        if (resultsWrap) resultsWrap.classList.remove('d-none');
+         const startHint = document.getElementById('techLabStartHint');
+-        if (startHint) startHint.classList.add('display-none');
++        if (startHint) startHint.classList.add('d-none');
+ 
+         // Three parallel reads: engine direction A, engine direction
+         // B, and the target's own tags (for summaries + non-EX bucket).
+@@ -968,7 +968,7 @@
+         const title    = document.getElementById('techLabAddTitle');
+         const intro    = document.getElementById('techLabAddIntro');
+         if (!overlay || !input || !dropdown) return;
+-        overlay.classList.remove('display-none');
++        overlay.classList.remove('d-none');
+         overlay.classList.add('show');
+         if (title) {
+             title.textContent = (_addDirection === 'beats')
+@@ -996,7 +996,7 @@
+         const overlay = document.getElementById('techLabAddOverlay');
+         if (overlay) {
+             overlay.classList.remove('show');
+-            overlay.classList.add('display-none');
++            overlay.classList.add('d-none');
+         }
+     }
+ 
+@@ -1036,7 +1036,7 @@
+         document.addEventListener('keydown', (e) => {
+             if (e.key !== 'Escape') return;
+             const o = document.getElementById('techLabAddOverlay');
+-            if (o && !o.classList.contains('display-none')) closeAddMissing();
++            if (o && !o.classList.contains('d-none')) closeAddMissing();
+         });
+         _devLog('initialised');
+     }
+diff --git a/js/auth-ui-helpers.js b/js/auth-ui-helpers.js
+index b7dc32ef..a3f9a0ed 100644
+--- a/js/auth-ui-helpers.js
++++ b/js/auth-ui-helpers.js
+@@ -12,14 +12,14 @@ function showAuthModal(mode = 'signin') {
+   console.info(`[Auth] Opening auth modal in ${mode} mode`);
+   
+   if (mode === 'signin') {
+-    signinForm.classList.remove('display-none', 'd-none');
+-    signupForm.classList.add('display-none');
++    signinForm.classList.remove('d-none', 'd-none');
++    signupForm.classList.add('d-none');
+   } else {
+-    signinForm.classList.add('display-none');
+-    signupForm.classList.remove('display-none', 'd-none');
++    signinForm.classList.add('d-none');
++    signupForm.classList.remove('d-none', 'd-none');
+   }
+   
+-  modal.classList.remove('display-none', 'd-none');
++  modal.classList.remove('d-none', 'd-none');
+   modal.style.display = 'flex';
+ }
+ 
+@@ -27,7 +27,7 @@ function closeAuthModal() {
+   const modal = document.getElementById('auth-modal');
+   if (!modal) return;
+   console.info('[Auth] Closing auth modal');
+-  modal.classList.add('display-none');
++  modal.classList.add('d-none');
+   modal.style.display = 'none';
+ }
+ 
+diff --git a/js/battle-journal.js b/js/battle-journal.js
+index 7d5921ae..4ee3097d 100644
+--- a/js/battle-journal.js
++++ b/js/battle-journal.js
+@@ -566,7 +566,7 @@
+ 
+         if (els.fabBadge) {
+             els.fabBadge.textContent = String(pendingCount);
+-            els.fabBadge.classList.toggle('display-none', pendingCount === 0);
++            els.fabBadge.classList.toggle('d-none', pendingCount === 0);
+         }
+ 
+         if (!els.pendingList) return;
+diff --git a/js/custom-binder.js b/js/custom-binder.js
+index da5ffd6d..cf7aaeeb 100644
+--- a/js/custom-binder.js
++++ b/js/custom-binder.js
+@@ -116,10 +116,10 @@
+         if (!bar) return;
+         if (cbPresets.length === 0) {
+             bar.innerHTML = '';
+-            bar.classList.add('display-none');
++            bar.classList.add('d-none');
+             return;
+         }
+-        bar.classList.remove('display-none');
++        bar.classList.remove('d-none');
+         bar.innerHTML = cbPresets.map(p => {
+             const safeName = escapeHtml(p.name);
+             const safeId = escapeHtml(p.id);
+@@ -274,10 +274,10 @@
+         const dd = document.getElementById('cbArchetypeDropdown');
+         if (!dd) return;
+ 
+-        if (dd.classList.contains('display-none')) {
++        if (dd.classList.contains('d-none')) {
+             cbOpenDropdown();
+         } else {
+-            dd.classList.add('display-none');
++            dd.classList.add('d-none');
+         }
+     }
+ 
+@@ -285,7 +285,7 @@
+         const dd = document.getElementById('cbArchetypeDropdown');
+         if (!dd) return;
+ 
+-        dd.classList.remove('display-none');
++        dd.classList.remove('d-none');
+         dd.innerHTML = `<div class="custom-binder-dropdown-loading">${cbText('cb.loadingArchetypes','Loading archetypes…')}</div>`;
+ 
+         await cbEnsureArchetypeList();
+@@ -352,7 +352,7 @@
+ 
+     function cbRenderDropdownList() {
+         const dd = document.getElementById('cbArchetypeDropdown');
+-        if (!dd || dd.classList.contains('display-none')) return;
++        if (!dd || dd.classList.contains('d-none')) return;
+ 
+         const searchEl = document.getElementById('cbArchetypeSearch');
+         const query = String(searchEl ? searchEl.value : '').trim().toLowerCase();
+@@ -540,8 +540,8 @@
+             return;
+         }
+         const dd = document.getElementById('cbArchetypeDropdown');
+-        if (dd && dd.classList.contains('display-none')) {
+-            dd.classList.remove('display-none');
++        if (dd && dd.classList.contains('d-none')) {
++            dd.classList.remove('d-none');
+         }
+         cbRenderDropdownList();
+     }
+@@ -550,9 +550,9 @@
+     document.addEventListener('click', function (e) {
+         if (_cbSkipNextClose) { _cbSkipNextClose = false; return; }
+         const dd = document.getElementById('cbArchetypeDropdown');
+-        if (!dd || dd.classList.contains('display-none')) return;
++        if (!dd || dd.classList.contains('d-none')) return;
+         const picker = e.target.closest('.custom-binder-picker');
+-        if (!picker) dd.classList.add('display-none');
++        if (!picker) dd.classList.add('d-none');
+     });
+ 
+     // ── Build Custom Binder ──
+@@ -694,7 +694,7 @@
+ 
+         // Stats (mode-dependent: ownership vs print status)
+         if (statsEl) {
+-            statsEl.classList.remove('display-none');
++            statsEl.classList.remove('d-none');
+             if (cbMode === 'print') {
+                 cbRenderPrintStats();
+             } else {
+@@ -763,10 +763,10 @@
+                             </details>
+                         </div>`;
+                 }).join('');
+-                deltaEl.classList.remove('display-none');
++                deltaEl.classList.remove('d-none');
+                 deltaEl.innerHTML = `<div class="meta-binder-archetype-groups">${html}</div>`;
+             } else {
+-                deltaEl.classList.add('display-none');
++                deltaEl.classList.add('d-none');
+                 deltaEl.innerHTML = '';
+             }
+         }
+@@ -793,7 +793,7 @@
+                     <button class="meta-binder-filter-btn" data-filter="new" onclick="cbSetFilter('new')">🆕 ${cbText('cb.filterNew','New')} (${newCount})</button>
+                 </div>`;
+         if (filtersEl) {
+-            filtersEl.classList.remove('display-none');
++            filtersEl.classList.remove('d-none');
+             filtersEl.innerHTML = `${chipRow}
+                 <div class="filter-group">
+                     <select id="cbFilterType" onchange="cbApplyFilter()" class="select-system">
+@@ -1295,7 +1295,7 @@
+         const isPrint = cbMode === 'print';
+         const toggleEl = (id, show) => {
+             const el = document.getElementById(id);
+-            if (el) el.classList.toggle('display-none', !show);
++            if (el) el.classList.toggle('d-none', !show);
+         };
+         toggleEl('cbAddWishlist', !isPrint);
+         toggleEl('cbSendProxy', !isPrint);
+diff --git a/js/firebase-collection.js b/js/firebase-collection.js
+index dc7af09a..172c2dae 100644
+--- a/js/firebase-collection.js
++++ b/js/firebase-collection.js
+@@ -3551,7 +3551,7 @@ function formatProfileDate(timestamp) {
+ function switchProfileTab(tabName) {
+   // Hide all tabs
+   document.querySelectorAll('.profile-tab-content').forEach(tab => {
+-    tab.classList.add('display-none');
++    tab.classList.add('d-none');
+     tab.classList.remove('active');
+     tab.style.display = '';
+   });
+@@ -3564,7 +3564,7 @@ function switchProfileTab(tabName) {
+   // Show selected tab
+   const selectedTab = document.getElementById('profile-' + tabName);
+   if (selectedTab) {
+-    selectedTab.classList.remove('display-none');
++    selectedTab.classList.remove('d-none');
+     selectedTab.classList.add('active');
+     selectedTab.style.display = '';
+   }
+@@ -3952,10 +3952,10 @@ function renderFolderNav() {
+   if (!nav) return;
+   const folders = getDeckFolders();
+   if (folders.length === 0) {
+-    nav.classList.add('display-none');
++    nav.classList.add('d-none');
+     return;
+   }
+-  nav.classList.remove('display-none');
++  nav.classList.remove('d-none');
+   nav.style.display = 'flex';
+   nav.style.flexWrap = 'wrap';
+   nav.style.gap = '6px';
+@@ -4085,7 +4085,7 @@ function renderFolderSummary(folder) {
+ 
+   // Hide summary when "All" is selected or no folder
+   if (!folder) {
+-    container.classList.add('display-none');
++    container.classList.add('d-none');
+     container.innerHTML = '';
+     return;
+   }
+@@ -4093,7 +4093,7 @@ function renderFolderSummary(folder) {
+   // Get decks in this folder
+   const folderDecks = (window.userDecks || []).filter(d => d.folder === folder);
+   if (folderDecks.length < 2) {
+-    container.classList.add('display-none');
++    container.classList.add('d-none');
+     container.innerHTML = '';
+     return;
+   }
+@@ -4221,7 +4221,7 @@ function renderFolderSummary(folder) {
+ 
+   html += `</div>`;
+   container.innerHTML = html;
+-  container.classList.remove('display-none');
++  container.classList.remove('d-none');
+ }
+ 
+ function lookupCardData(entry) {
+diff --git a/js/firebase-globals.js b/js/firebase-globals.js
+index 746f11ab..83c94560 100644
+--- a/js/firebase-globals.js
++++ b/js/firebase-globals.js
+@@ -177,9 +177,9 @@ if (typeof window !== 'undefined') {
+ function onUserSignedIn(user) {
+   const authPrompt     = document.getElementById('profile-auth-prompt');
+   const profileContent = document.getElementById('profile-content');
+-  // Use classList so the change wins against `display: none !important` from the .display-none utility class
+-  if (authPrompt)     { authPrompt.classList.add('display-none');    authPrompt.classList.remove('display-block'); }
+-  if (profileContent) { profileContent.classList.remove('display-none'); profileContent.classList.add('display-block'); }
++  // Use classList so the change wins against `display: none !important` from the .d-none utility class
++  if (authPrompt)     { authPrompt.classList.add('d-none');    authPrompt.classList.remove('display-block'); }
++  if (profileContent) { profileContent.classList.remove('d-none'); profileContent.classList.add('display-block'); }
+ 
+   // Show name/email immediately from Auth (no Firestore round-trip needed)
+   const nameEl = document.getElementById('profile-user-name');
+@@ -218,8 +218,8 @@ function onUserSignedOut() {
+   const authPrompt     = document.getElementById('profile-auth-prompt');
+   const profileContent = document.getElementById('profile-content');
+   // Use classList to match the initial HTML state and respect !important CSS rules
+-  if (authPrompt)     { authPrompt.classList.remove('display-none');  authPrompt.classList.add('display-block'); }
+-  if (profileContent) { profileContent.classList.add('display-none');    profileContent.classList.remove('display-block'); }
++  if (authPrompt)     { authPrompt.classList.remove('d-none');  authPrompt.classList.add('display-block'); }
++  if (profileContent) { profileContent.classList.add('d-none');    profileContent.classList.remove('display-block'); }
+ 
+   // Toggle header auth UI: show sign-in button, hide user-info bar
+   const signinBtn = document.getElementById('signin-btn');
+diff --git a/js/meta-binder.js b/js/meta-binder.js
+index 7db6d12f..90551c9d 100644
+--- a/js/meta-binder.js
++++ b/js/meta-binder.js
+@@ -1658,7 +1658,7 @@
+         if (!deltaEl) return;
+         const groups = Array.isArray(window._metaBinderArchetypeGroups) ? window._metaBinderArchetypeGroups : [];
+         if (groups.length === 0) {
+-            deltaEl.classList.add('display-none');
++            deltaEl.classList.add('d-none');
+             deltaEl.innerHTML = '';
+             return;
+         }
+@@ -1710,7 +1710,7 @@
+                 </div>`;
+         }).join('');
+ 
+-        deltaEl.classList.remove('display-none');
++        deltaEl.classList.remove('d-none');
+         deltaEl.innerHTML = `<div class="meta-binder-archetype-groups">${html}</div>`;
+     }
+ 
+@@ -1718,7 +1718,7 @@
+         const modal = document.getElementById('metaBinderDroppedModal');
+         if (!modal) return;
+         modal.classList.remove('is-open');
+-        modal.classList.add('display-none');
++        modal.classList.add('d-none');
+     }
+ 
+     // cardsOverride: the Custom Binder reuses this modal with its own
+@@ -1753,7 +1753,7 @@
+                 .join('');
+         }
+ 
+-        modal.classList.remove('display-none');
++        modal.classList.remove('d-none');
+         modal.classList.add('is-open');
+     }
+ 
+@@ -1791,7 +1791,7 @@
+ 
+         // Stats bar
+         if (statsEl) {
+-            statsEl.classList.remove('display-none');
++            statsEl.classList.remove('d-none');
+             statsEl.innerHTML = `
+                 <div class="meta-binder-stat">
+                     <span class="meta-binder-stat-value">${totalUnique}</span>
+@@ -1823,7 +1823,7 @@
+ 
+         // Filter buttons
+         if (filtersEl) {
+-            filtersEl.classList.remove('display-none');
++            filtersEl.classList.remove('d-none');
+             filtersEl.innerHTML = `
+                 <div class="filter-group">
+                     <button class="meta-binder-filter-btn active" data-filter="all" onclick="setMetaBinderFilter('all')">${mbText('mb.filterAll', 'Alle')} (${totalUnique})</button>
+diff --git a/tests/e2e/meta-binder-walkthrough.js b/tests/e2e/meta-binder-walkthrough.js
+index cfb89548..41103322 100644
+--- a/tests/e2e/meta-binder-walkthrough.js
++++ b/tests/e2e/meta-binder-walkthrough.js
+@@ -87,15 +87,15 @@ async function run() {
+         const droppedStatBtn = document.querySelector('.meta-binder-stat-clickable');
+         const modalEl = document.getElementById('metaBinderDroppedModal');
+ 
+-        const droppedBefore = modalEl ? modalEl.classList.contains('display-none') : null;
++        const droppedBefore = modalEl ? modalEl.classList.contains('d-none') : null;
+         if (droppedStatBtn) droppedStatBtn.click();
+-        const droppedAfterOpen = modalEl ? !modalEl.classList.contains('display-none') : null;
++        const droppedAfterOpen = modalEl ? !modalEl.classList.contains('d-none') : null;
+         const droppedCount = Number(document.getElementById('metaBinderDroppedCount')?.textContent || '0');
+ 
+         if (typeof window.closeMetaBinderDroppedModal === 'function') {
+             window.closeMetaBinderDroppedModal();
+         }
+-        const droppedAfterClose = modalEl ? modalEl.classList.contains('display-none') : null;
++        const droppedAfterClose = modalEl ? modalEl.classList.contains('d-none') : null;
+ 
+         return {
+             totalCards: gridCards.length,
+diff --git a/tests/e2e_battle_journal_edit.py b/tests/e2e_battle_journal_edit.py
+index efa62cd3..e079f222 100644
+--- a/tests/e2e_battle_journal_edit.py
++++ b/tests/e2e_battle_journal_edit.py
+@@ -155,11 +155,11 @@ def run():
+             if (prof) prof.classList.add('active');
+             // Activate journal sub-tab
+             document.querySelectorAll('.profile-tab-content').forEach(t => {
+-                t.classList.add('display-none');
++                t.classList.add('d-none');
+                 t.classList.remove('active');
+             });
+             const jTab = document.getElementById('profile-journal');
+-            if (jTab) { jTab.classList.remove('display-none'); jTab.classList.add('active'); }
++            if (jTab) { jTab.classList.remove('d-none'); jTab.classList.add('active'); }
+             // Render history from cache
+             if (typeof window.renderJournalHistory === 'function') {
+                 window.renderJournalHistory();
+diff --git a/tests/e2e_battle_journal_overhaul.py b/tests/e2e_battle_journal_overhaul.py
+index a5f35696..17cc890d 100644
+--- a/tests/e2e_battle_journal_overhaul.py
++++ b/tests/e2e_battle_journal_overhaul.py
+@@ -112,7 +112,7 @@ def run():
+ 
+         matchup_panel = page.locator("#journalMatchupStats")
+         check("T4.1 Matchup stats panel exists", matchup_panel.count() == 1)
+-        check("T4.2 Matchup panel starts hidden", matchup_panel.evaluate("el => el.classList.contains('display-none')"))
++        check("T4.2 Matchup panel starts hidden", matchup_panel.evaluate("el => el.classList.contains('d-none')"))
+ 
+         # Toggle button exists
+         toggle_btn = page.locator("button:has-text('Matchups')")
+@@ -121,12 +121,12 @@ def run():
+         # Toggle opens the panel
+         page.evaluate("toggleMatchupStats()")
+         page.wait_for_timeout(200)
+-        check("T4.4 toggleMatchupStats opens panel", not matchup_panel.evaluate("el => el.classList.contains('display-none')"))
++        check("T4.4 toggleMatchupStats opens panel", not matchup_panel.evaluate("el => el.classList.contains('d-none')"))
+ 
+         # Toggle closes it again
+         page.evaluate("toggleMatchupStats()")
+         page.wait_for_timeout(200)
+-        check("T4.5 toggleMatchupStats closes panel", matchup_panel.evaluate("el => el.classList.contains('display-none')"))
++        check("T4.5 toggleMatchupStats closes panel", matchup_panel.evaluate("el => el.classList.contains('d-none')"))
+ 
+         # ── Task 3: Share function exists ──────────────────────
+         print("\n── Task 3: Share Tournament Summary ──")
+diff --git a/tests/unit/test-eine-versteckklasse.js b/tests/unit/test-eine-versteckklasse.js
+new file mode 100644
+index 00000000..4348eb55
+--- /dev/null
++++ b/tests/unit/test-eine-versteckklasse.js
+@@ -0,0 +1,168 @@
++/**
++ * Eine Klasse fuer "unsichtbar".
++ *
++ * Ausgangslage am 2026-08-18: das Projekt hatte zwei Namen fuer
++ * dieselbe Sache — .d-none (193 Verwendungen) und .display-none (96).
++ * Neunzehn CSS-Regeln erklaerten beide, acht davon Wort fuer Wort
++ * identisch in einer einzigen Datei.
++ *
++ * Der Preis stand in js/app-current-meta-analysis.js: das Matchup-Feld
++ * trug .display-none aus dem Markup, der Renderer nahm nur .d-none
++ * weg. Der zweite Renderpfad wurde spaeter repariert, indem er beide
++ * Namen entfernt — der erste blieb als Falle liegen. Genau so entsteht
++ * ein Element, das befuellt ist und trotzdem niemand sieht.
++ *
++ * Diese Tests halten den aufgeraeumten Zustand fest:
++ *   - nur noch .d-none, nirgends mehr .display-none
++ *   - genau eine unbeschraenkte Regel, die sie erklaert
++ *   - diese Regel steht hinter allen Layout-Utilities derselben
++ *     Gewichtsklasse, damit Verstecken gewinnt
++ */
++
++const { describe, it } = require('node:test');
++const assert = require('node:assert/strict');
++const fs = require('node:fs');
++const path = require('node:path');
++
++const ROOT = path.join(__dirname, '..', '..');
++const CSS_DIR = path.join(ROOT, 'css');
++const JS_DIR = path.join(ROOT, 'js');
++
++function stripCssComments(s) { return s.replace(/\/\*[\s\S]*?\*\//g, ''); }
++function stripJsComments(s) {
++    return s.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:])\/\/.*$/gm, '$1');
++}
++
++const cssFiles = fs.readdirSync(CSS_DIR).filter(f => f.endsWith('.css'));
++const jsFiles = fs.readdirSync(JS_DIR).filter(f => f.endsWith('.js'));
++const HTML = stripJsComments(fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8'));
++
++describe('eine Versteck-Klasse — .display-none ist abgeschafft', () => {
++    it('index.html benutzt sie nirgends mehr', () => {
++        const hits = (HTML.match(/\bdisplay-none\b/g) || []).length;
++        assert.strictEqual(hits, 0, 'index.html traegt noch display-none');
++    });
++
++    it('kein Skript in js/ fasst sie noch an', () => {
++        const bad = [];
++        for (const f of jsFiles) {
++            const src = stripJsComments(fs.readFileSync(path.join(JS_DIR, f), 'utf8'));
++            if (/\bdisplay-none\b/.test(src)) bad.push(f);
++        }
++        assert.deepStrictEqual(bad, []);
++    });
++
++    it('keine CSS-Datei erklaert sie noch', () => {
++        const bad = [];
++        for (const f of cssFiles) {
++            const src = stripCssComments(fs.readFileSync(path.join(CSS_DIR, f), 'utf8'));
++            if (/\.display-none\b/.test(src)) bad.push(f);
++        }
++        assert.deepStrictEqual(bad, []);
++    });
++});
++
++describe('eine Versteck-Klasse — genau eine Regel erklaert .d-none', () => {
++    // Eine Regel heisst hier: Selektor ist genau ".d-none", ohne
++    // Einschraenkung auf ein Element. Verbund-Selektoren wie
++    // ".action-bar .d-none + .action-divider" machen etwas anderes und
++    // zaehlen nicht mit.
++    function blanketRules() {
++        const out = [];
++        for (const f of cssFiles) {
++            const src = stripCssComments(fs.readFileSync(path.join(CSS_DIR, f), 'utf8'));
++            const re = /(^|[}\s])\.d-none\s*\{([^}]*)\}/g;
++            let m;
++            while ((m = re.exec(src)) !== null) {
++                out.push({ file: f, index: m.index, body: m[2].trim() });
++            }
++        }
++        return out;
++    }
++
++    it('genau eine unbeschraenkte .d-none-Regel im ganzen Projekt', () => {
++        const rules = blanketRules();
++        assert.strictEqual(
++            rules.length, 1,
++            'gefunden: ' + rules.map(r => r.file).join(', ')
++        );
++    });
++
++    it('sie versteckt, und zwar mit !important', () => {
++        const [rule] = blanketRules();
++        assert.match(rule.body, /display:\s*none\s*!important/);
++    });
++
++    it('keine Datei wiederholt sie eingegrenzt (.foo.d-none { display: none })', () => {
++        const bad = [];
++        for (const f of cssFiles) {
++            const src = stripCssComments(fs.readFileSync(path.join(CSS_DIR, f), 'utf8'));
++            const re = /([#.][\w-]+)\.d-none\s*\{([^}]*)\}/g;
++            let m;
++            while ((m = re.exec(src)) !== null) {
++                if (/display\s*:\s*none/.test(m[2])) bad.push(`${f}: ${m[1]}.d-none`);
++            }
++        }
++        assert.deepStrictEqual(bad, [], 'die eine Regel deckt das schon ab');
++    });
++});
++
++describe('eine Versteck-Klasse — Verstecken schlaegt Layout', () => {
++    // .d-none hat Gewicht (0,1,0) und !important. Jede Layout-Utility
++    // derselben Klasse mit display + !important — .flex,
++    // .display-block, .flex-between, die Grid-Klassen — gewinnt gegen
++    // sie, wenn sie SPAETER in der Datei steht. Ein Element mit
++    // class="d-none flex" waere dann sichtbar. Deshalb muss die
++    // Versteck-Regel hinter allen anderen stehen.
++    it('die .d-none-Regel steht hinter jeder display-!important-Utility ihrer Gewichtsklasse', () => {
++        const file = path.join(CSS_DIR, 'ui-components.css');
++        const src = stripCssComments(fs.readFileSync(file, 'utf8'));
++        const hidePos = src.search(/(^|[}\s])\.d-none\s*\{/);
++        assert.ok(hidePos > -1, '.d-none nicht in ui-components.css gefunden');
++
++        const later = [];
++        const re = /(^|[}\s])(\.[\w-]+)\s*\{([^}]*)\}/g;
++        let m;
++        while ((m = re.exec(src)) !== null) {
++            if (m[2] === '.d-none') continue;
++            if (!/display\s*:[^;]*!important/.test(m[3])) continue;
++            if (m.index > hidePos) later.push(m[2]);
++        }
++        assert.deepStrictEqual(
++            later, [],
++            'diese Utilities stehen hinter .d-none und wuerden es ueberstimmen: ' + later.join(', ')
++        );
++    });
++});
++
++describe('eine Versteck-Klasse — kein Renderpfad vergisst das Aufdecken', () => {
++    // Der urspruengliche Fehler in Textform: ein add() mit einem Namen,
++    // ein remove() mit einem anderen. Mit nur noch einem Namen kann das
++    // nicht mehr passieren — dieser Test haelt fest, dass es dabei
++    // bleibt, auch wenn jemand spaeter eine zweite Klasse einfuehrt.
++    it('kein Skript versteckt mit einer Klasse, die es nie wieder entfernt', () => {
++        const hideNames = new Set();
++        const showNames = new Set();
++        for (const f of jsFiles) {
++            const src = stripJsComments(fs.readFileSync(path.join(JS_DIR, f), 'utf8'));
++            for (const m of src.matchAll(/classList\.add\(\s*'([\w-]*none[\w-]*)'/g)) hideNames.add(m[1]);
++            for (const m of src.matchAll(/classList\.remove\(\s*'([\w-]*none[\w-]*)'/g)) showNames.add(m[1]);
++        }
++        const orphan = [...hideNames].filter(n => !showNames.has(n));
++        assert.deepStrictEqual(orphan, [], 'wird gesetzt, aber nie entfernt: ' + orphan.join(', '));
++    });
++
++    it('jede Versteck-Klasse aus index.html wird von js/ auch wieder entfernt', () => {
++        const inHtml = new Set();
++        for (const m of HTML.matchAll(/class="([^"]*)"/g)) {
++            for (const c of m[1].split(/\s+/)) if (/^d-none$/.test(c)) inHtml.add(c);
++        }
++        const removedByJs = new Set();
++        for (const f of jsFiles) {
++            const src = stripJsComments(fs.readFileSync(path.join(JS_DIR, f), 'utf8'));
++            for (const m of src.matchAll(/classList\.remove\(\s*'([\w-]+)'/g)) removedByJs.add(m[1]);
++        }
++        const stuck = [...inHtml].filter(c => !removedByJs.has(c));
++        assert.deepStrictEqual(stuck, [], 'im Markup versteckt, von keinem Skript aufgedeckt: ' + stuck.join(', '));
++    });
++});

@@ -1297,7 +1297,13 @@ function cityLeagueOffSeasonHtml() {
             
             // Extract unique archetypes with their deck counts (total meta counts)
             const archetypeMap = new Map();
-            const sourceRows = allArchetypesData.length > 0 ? allArchetypesData : data;
+            // `data` ist optional: der languageChanged-Handler unten ruft
+            // populateCityLeagueDeckSelect() ohne Argumente. Solange die
+            // City League Daten hat, faengt allArchetypesData das ab —
+            // waehrend der Saisonpause ist die Liste leer, sourceRows wurde
+            // `undefined`, und jeder Sprachwechsel warf eine TypeError in
+            // die Konsole. Gemessen am 18.08.2026, mit leerem JP-Datenraum.
+            const sourceRows = (allArchetypesData.length > 0 ? allArchetypesData : data) || [];
             sourceRows.forEach(row => {
                 if (row.archetype && !archetypeMap.has(row.archetype)) {
                     // Use total meta counts so dropdown always shows full picture.
@@ -3163,7 +3169,7 @@ function cityLeagueOffSeasonHtml() {
             const SKELETON_NICHE_MAX = 50; // below this = situational
             // Titel des Anteilsbands. Steht einmal hier statt in jeder
             // Kartenzeile — 60 Karten mal derselbe String.
-            const USAGE_TITLE = (typeof t === 'function' && t('cl.usageShare'))
+            const USAGE_TITLE = (typeof t === 'function' && t('cl.usageBarTitle'))
                 || (typeof getLang === 'function' && getLang() === 'en'
                     ? 'of the analysed lists play this card'
                     : 'der ausgewerteten Listen spielen diese Karte');

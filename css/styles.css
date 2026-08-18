@@ -3328,11 +3328,10 @@
             }
             
             /* Karten-Buttons noch kompakter für kleine Screens */
-            .card-item .card-action-buttons button {
-                height: 18px !important;
-                min-height: 18px !important;
-                font-size: 10px !important;
-            }
+            /* Die Kartenknoepfe werden an genau einer Stelle bemessen:
+             * css/ui-components.css. Hier standen 18 px und 10 px, und
+             * das war die vierte von sieben Regelgruppen, die sich um
+             * dieselben sechs Knoepfe gestritten haben. */
             
             .card-item .card-info-text > div {
                 font-size: 0.6em !important;
@@ -3498,12 +3497,11 @@
                 flex-shrink: 0 !important;
             }
             
+            /* Siehe oben: Groesse kommt aus css/ui-components.css.
+             * `width: auto` bleibt, weil es die Spaltenaufteilung
+             * betrifft und nicht die Trefferflaeche. */
             .card-item .card-action-buttons button {
-                height: 18px !important;
                 width: auto !important;
-                min-height: 18px !important;
-                max-height: 18px !important;
-                font-size: 10px !important;
                 padding: 0 2px !important;
             }
             
@@ -7891,10 +7889,8 @@ body.battle-journal-open {
     .card-action-buttons > div {
         gap: 3px !important;
     }
-    .card-action-buttons button {
-        height: 20px !important;
-        font-size: 10px !important;
-    }
+    /* Auch hier keine Groesse mehr — css/ui-components.css setzt sie,
+     * css/mobile-responsive.css hebt sie auf dem Telefon an. */
 
     /* Meta Card Analysis Grids auf exakt 3 Spalten erzwingen */
     #metaCardsGrid,

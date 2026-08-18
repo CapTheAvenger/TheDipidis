@@ -97,6 +97,20 @@
     }
 }
 
+/* OFFEN, siehe Block 6: die Kachelbreite auf dem Telefon.
+ *
+ * Drei Spalten ergeben auf 390 px 94 px je Kachel. Darin stehen vier
+ * Textzeilen und sechs Knoepfe — das ist der Grund fuer die 7-px-Schrift
+ * und die 15-px-Knoepfe, die Block 5 gerade abgeraeumt hat, und es ist
+ * der Grund, warum vom Preis "4,39" statt "4,39 €" uebrig bleibt.
+ *
+ * Die Spaltenzahl wird fuer dieses Gitter an DREIZEHN Stellen gesetzt,
+ * verteilt ueber css/styles.css, css/city-league.css, diese Datei und
+ * einen Inline-Block in index.html; und das Gitter, das die Kacheln
+ * wirklich traegt, ist `.card-grid` — eine Klasse, die auch die
+ * Kartensuche und die Meta-Kartenanalyse benutzen. Das sauber zu
+ * ordnen, heisst diese drei Ansichten gleichzeitig nachzumessen, und
+ * das ist Block 6 (Mobil), nicht Block 5 (Knoepfe). */
 @media (max-width: 480px) {
     .deck-grid,
     .city-league-deck-grid,
@@ -1004,18 +1018,16 @@
     }
 }
 
-/* --- Fix 3: Card-Action-Buttons min 12px font-size on mobile --- */
-@media (max-width: 768px) {
-    .city-league-card-remove-btn,
-    .city-league-card-add-btn,
-    .city-league-card-rarity-btn,
-    .city-league-card-limitless-btn,
-    .city-league-card-proxy-btn,
-    .city-league-card-market-btn {
-        font-size: 12px !important;
-        min-height: 24px !important;
-    }
-}
+/* "Fix 3: Card-Action-Buttons min 12px font-size on mobile" stand hier
+ * und hat nie gewirkt. Zwei Regeln weiter unten in derselben Datei
+ * (`height: 16px !important`) und noch eine dritte (`height: 15px
+ * !important; font-size: 7px !important`) kamen spaeter im Dokument und
+ * haben sie ueberschrieben. Gemessen am 18.08.2026 auf 390 px: 24 x 22 px
+ * mit 9-px-Schrift — nicht 12 px, nicht 24 px hoch.
+ *
+ * Drei Regelsaetze mit !important, die um dieselben Knoepfe streiten,
+ * ergeben keinen Kompromiss, sondern den Wert des letzten. Jetzt gibt es
+ * einen Satz, weiter unten, ohne !important. */
 
 /* --- Fix 4: Battle Journal FAB — WCAG 44px touch target --- */
 @media (max-width: 768px) {
@@ -1213,30 +1225,43 @@
     overflow: hidden !important;
     text-overflow: ellipsis !important;
   }
-  /* Action buttons: smaller height on mobile */
-  .city-league-card-action-btn {
-    height: 16px !important;
-    font-size: 0.6em !important;
-    padding: 0 2px !important;
-    border-radius: 3px !important;
+  /* Die Trefferflaeche waechst auf dem Telefon, statt zu schrumpfen.
+   *
+   * Hier stand `height: 16px`. Auf dem Geraet, das man mit dem Daumen
+   * bedient, waren die Knoepfe kleiner als auf dem Geraet mit der Maus.
+   * 28 px ist immer noch unter den 44 px, die man sich wuenscht — mehr
+   * gibt eine 94 px breite Kachel mit drei Knoepfen pro Zeile nicht her,
+   * und die Kachelbreite ist die Ansicht.
+   *
+   * Ohne !important: css/ui-components.css wird frueher geladen, die
+   * Reihenfolge reicht. */
+  .city-league-card-action-btn,
+  .city-league-card-market-btn {
+    min-height: 28px;
+    padding: 0 var(--s-1);
   }
   .city-league-card-action-buttons {
-    gap: 2px !important;
-    margin-top: 2px !important;
+    gap: 2px;
+    margin-top: 2px;
   }
   .city-league-card-action-row {
-    display: flex !important;
-    gap: 2px !important;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px;
   }
-  .city-league-card-action-row:last-child .city-league-card-market-btn {
-    flex: 1 1 auto !important;
+  /* Untere Reihe: L und P sind Nebenwege und bekommen eine feste,
+   * schmale Spalte; der Preis nimmt den Rest. Bei gleicher Verteilung
+   * druecken die vier Zeichen von "12,41 €" die beiden anderen auf
+   * sieben Pixel zusammen — gemessen. */
+  .city-league-card-action-row > .city-league-card-limitless-btn,
+  .city-league-card-action-row > .city-league-card-proxy-btn {
+    flex: 0 0 24px;
   }
-  .city-league-card-action-row:last-child .city-league-card-limitless-btn,
-  .city-league-card-action-row:last-child .city-league-card-proxy-btn {
-    width: 18px !important;
-    max-width: 18px !important;
-    flex-shrink: 0 !important;
-  }
+  /* Die Kachel ist auf 390 px 94 px breit; nach Innenabstand und Fugen
+   * bleiben 84 px fuer drei Knoepfe. L und P bekommen je 20, der Rest
+   * gehoert dem Preis — sonst steht dort "4,3" statt "4,39 €". Bei
+   * vierstelligen Preisen kuerzt er mit Auslassungszeichen; die Kachel
+   * gibt nicht mehr her, und der volle Betrag steht im title. */
 
   /* UI Step 2 — Card Overview tightening on small phones.
    *
@@ -1281,12 +1306,33 @@
     padding-left: 4px !important;
     padding-right: 4px !important;
   }
-  .city-league-card-market-btn {
-    font-size: 0.72em !important;
-    padding: 0 4px !important;
-    overflow: visible !important;
-    white-space: nowrap !important;
-    min-width: 58px !important;
+  /* Bleibt unveraendert, mit allen vier !important.
+   *
+   * Der Preisknopf ragt auf einer 94-px-Kachel ueber die rechte Kante
+   * hinaus — `min-width: 58px` und `overflow: visible` sorgen dafuer,
+   * dass der Betrag wenigstens vollstaendig lesbar ist. Nimmt man das
+   * weg, steht dort ",39 €" statt "4,39 €", und eine abgeschnittene
+   * Zahl ist genau das, was diese Seite nicht zeigen darf.
+   *
+   * Die Ursache ist nicht diese Regel, sondern die Kachelbreite: drei
+   * Spalten auf 390 px. Das ist Block 6. Bis dahin bleibt der Ueberhang
+   * das kleinere Uebel und diese Regel steht, wie sie stand. */
+  /* Eigene Zeile fuer den Preis.
+   *
+   * Neben L und P bleiben ihm auf einer 94-px-Kachel rund 32 px. Bei
+   * 12-px-Schrift steht darin von "4,39 €" noch "4,3" — und eine
+   * abgeschnittene Zahl ist das eine, was diese Seite nicht zeigen darf.
+   * Vorher passte es nur, weil die Schrift 9 px klein war.
+   *
+   * Eine Zeile mehr kostet 30 px Kachelhoehe. Sobald die Kachel breiter
+   * wird (Block 6: drei Spalten auf 390 px), faellt der Umbruch von
+   * selbst weg — flex-wrap bricht nur, wenn es muss. */
+  .city-league-card-action-row > .city-league-card-market-btn {
+    flex: 1 0 100%;
+    min-width: 0;
+    padding: 0 var(--s-1);
+    overflow: hidden;
+    white-space: nowrap;
   }
 }
 
@@ -1708,12 +1754,23 @@
     padding: 2px 4px !important;
     gap: 3px !important;
   }
-  .card-item .card-action-overlay button,
-  .card-item [class*="action"] button {
-    min-height: 22px !important;
-    min-width: 22px !important;
-    font-size: 0.75em !important;
-    padding: 1px 4px !important;
+  /* `[class*="action"] button` faengt jeden Knopf, dessen Klasse
+   * irgendwo "action" enthaelt — also auch die sechs Kartenknoepfe,
+   * fuer die diese Regel nie gedacht war. Sie hat mit
+   * `min-height: 22px !important` alles ueberstimmt, was weiter oben
+   * mit gutem Grund groesser gesetzt wurde, inklusive des
+   * Inline-Blocks in index.html, der genau diesen Punkt schon einmal
+   * reparieren wollte ("the buttons now hit the 'I can actually tap
+   * and read this' bar") und verloren hat: `.card-item [class*=...]
+   * button` ist spezifischer als `body .city-league-card-action-btn`.
+   *
+   * Sie gilt jetzt nur noch fuer das Overlay, fuer das sie geschrieben
+   * wurde. Die Kartenknoepfe kommen aus css/ui-components.css. */
+  .card-item .card-action-overlay button {
+    min-height: 22px;
+    min-width: 22px;
+    font-size: var(--fs-xs);
+    padding: 1px 4px;
   }
   /* Wishlist badge on card thumbnails */
   .wishlist-heart-badge {
@@ -1997,18 +2054,10 @@
     text-align: center !important;
   }
 
-  /* ── Action buttons: smaller ── */
-  .meta-card-grid .city-league-card-action-btn,
-  .meta-card-analysis-grid .city-league-card-action-btn,
-  #cityLeagueMetaGrid .city-league-card-action-btn,
-  #currentMetaMetaGrid .city-league-card-action-btn {
-    height: 15px !important;
-    min-height: 15px !important;
-    max-height: 15px !important;
-    font-size: 7px !important;
-    padding: 0 2px !important;
-    border-radius: 3px !important;
-  }
+  /* Hier stand `height: 15px; font-size: 7px`, dreifach mit !important
+   * festgenagelt (height, min-height, max-height). Sieben Pixel Schrift
+   * auf einem Knopf, den man mit dem Daumen trifft. Die Regel ist
+   * ersatzlos weg — es gilt der eine Satz weiter oben. */
 
   .meta-card-grid .city-league-card-action-row,
   .meta-card-analysis-grid .city-league-card-action-row,

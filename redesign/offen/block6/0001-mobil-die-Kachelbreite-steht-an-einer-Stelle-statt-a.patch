@@ -1,0 +1,191 @@
+From dad5fc4b70627e8336100da6b304123c3bc7bae2 Mon Sep 17 00:00:00 2001
+From: "Claude (Cowork)" <claude@thedipidis>
+Date: Tue, 18 Aug 2026 11:43:16 +0000
+Subject: [PATCH 1/3] mobil: die Kachelbreite steht an einer Stelle statt an
+ sechsundvierzig
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Gezaehlt am 18.08.2026: die Spaltenzahl der Kartengitter wird an
+46 Stellen gesetzt, verteilt ueber css/styles.css,
+css/city-league.css, css/meta-card-analysis.css,
+css/ui-components.css, css/mobile-responsive.css und zwei
+Inline-Bloecke in index.html.
+
+Fuer das Gitter der Deck-Analyse gewann davon
+"repeat(3, 1fr) !important" — drei Spalten, egal wie breit das
+Geraet ist. Auf 390 px sind das 94 px je Kachel, und darin stehen
+ein Kartenbild, vier Textzeilen und sechs Knoepfe.
+
+Alles, was Block 5 abgeraeumt hat, war die Folge dieser einen Zahl:
+7-px-Schrift, 15-px-Knoepfe, ein Preis, von dem "4,3" uebrig blieb.
+Der Kommentar an der Regel sagte es sogar selbst — "uses
+minmax(120px) which gives only 2 cards per row. Fix: Override to
+always show 3 cards per row".
+
+Jetzt steht die Zahl einmal, und als Mindestbreite statt als
+Anzahl: die Kachel bestimmt, wie viele hineinpassen, nicht
+umgekehrt. 150 px ist die Breite, ab der die Knopfzeile ohne
+Umbruch auskommt.
+
+    Kachelbreite auf 390 px   94 px  ->  143 px
+    Knoepfe                   24x28  ->  40x28
+    Preis                     eigene Zeile -> zurueck in die Zeile
+    Infoleiste                155 px ->  124 px
+
+Damit faellt auch der Preisumbruch aus Block 5 wieder weg — auf
+143 px passt der Betrag neben L und P. Die Basis steht deshalb auf
+60 px statt auf 100 %: umbrechen soll er nur, wenn er muss.
+
+DREI DINGE, DIE DAFUER WEG MUSSTEN
+
+- ".card-grid" ist aus der Festzahl-Regel raus. Die Klasse traegt im
+  ganzen Repo an genau zwei Stellen das Kartengitter der
+  Deck-Analyse; die drei Suchergebnis-Gitter in derselben Regel
+  behalten ihre drei Spalten, dort steht nur ein Kartenbild mit
+  Namen.
+- Fuenf !important auf .card-grid-Boeden in css/styles.css sind
+  gestrichen (minmax 50 / 70 / 60 / 60 / 85 px). Ohne das braeuchte
+  die eine Regel selbst ein !important — und dann waeren es wieder
+  zwei, die sich streiten.
+- Die neue Regel steht am Dateiende von css/mobile-responsive.css,
+  weil das als letztes Stylesheet geladen wird. Reihenfolge statt
+  Brechstange.
+
+Geprueft mit Playwright auf 390 px und 1440 px. Der Schreibtisch
+bleibt unveraendert bei 145 px Kachelbreite.
+
+Tests: 1086 passed, 0 failed / 373 passed, 5 skipped.
+---
+ css/mobile-responsive.css | 53 +++++++++++++++++++++++++++++++++++++--
+ css/styles.css            | 10 ++++----
+ 2 files changed, 56 insertions(+), 7 deletions(-)
+
+diff --git a/css/mobile-responsive.css b/css/mobile-responsive.css
+index 8fb1dcb3..98918f54 100644
+--- a/css/mobile-responsive.css
++++ b/css/mobile-responsive.css
+@@ -156,7 +156,14 @@
+ }
+ 
+ @media (max-width: 480px) {
+-    .card-grid,
++    /* .card-grid ist hier raus. Die Klasse traegt an genau zwei Stellen
++     * im Repo das Kartengitter der Deck-Analyse (zusammen mit
++     * .deck-grid-skeleton-grid); drei feste Spalten ergeben darauf
++     * 94 px je Kachel. Die Kachelbreite steht jetzt am Ende dieser
++     * Datei, an einer Stelle, ohne !important.
++     *
++     * Die drei Suchergebnis-Gitter behalten ihre drei Spalten: dort
++     * steht nur ein Kartenbild mit Namen, keine Infoleiste. */
+     .city-league-add-card-grid,
+     .current-meta-add-card-results,
+     .past-meta-add-card-results {
+@@ -1328,7 +1335,12 @@
+    * wird (Block 6: drei Spalten auf 390 px), faellt der Umbruch von
+    * selbst weg — flex-wrap bricht nur, wenn es muss. */
+   .city-league-card-action-row > .city-league-card-market-btn {
+-    flex: 1 0 100%;
++    /* Basis 60 px, nicht 100 %: der Preis braucht 60 px, um vollstaendig
++     * dazustehen. Passt er neben L und P, bleibt er in der Zeile; passt
++     * er nicht, bricht flex-wrap ihn auf eine eigene. Mit `100 %` brach
++     * er immer um, auch auf einer 143 px breiten Kachel, auf der er
++     * bequem danebenpasst. */
++    flex: 1 1 60px;
+     min-width: 0;
+     padding: 0 var(--s-1);
+     overflow: hidden;
+@@ -2400,3 +2412,40 @@
+     height: 14px !important;
+   }
+ }
++
++/* ══════════════════════════════════════════════════════════════════
++   Die Kachelbreite der Deck-Analyse
++   ══════════════════════════════════════════════════════════════════
++
++   Gezaehlt am 18.08.2026: die Spaltenzahl der Kartengitter wird an
++   46 Stellen gesetzt, verteilt ueber css/styles.css,
++   css/city-league.css, css/meta-card-analysis.css, css/ui-components.css,
++   diese Datei und zwei Inline-Bloecke in index.html. Fuer das Gitter der
++   Deck-Analyse gewann davon `repeat(3, 1fr) !important` — drei Spalten,
++   egal wie breit das Geraet ist.
++
++   Drei Spalten heissen auf 390 px: 94 px je Kachel. Darin stehen ein
++   Kartenbild, vier Textzeilen und sechs Knoepfe. Alles, was Block 5
++   abgeraeumt hat — 7-px-Schrift, 15-px-Knoepfe, ein abgeschnittener
++   Preis — war die Folge dieser einen Zahl.
++
++   Hier steht sie jetzt, einmal, als Mindestbreite statt als Anzahl:
++   die Kachel bestimmt, wie viele hineinpassen, nicht umgekehrt. 150 px
++   ist die Breite, ab der die Knopfzeile ohne Umbruch auskommt.
++
++   Die Regel steht am Dateiende, weil css/mobile-responsive.css als
++   letztes Stylesheet geladen wird — sie braucht deshalb kein
++   !important, um die frueheren Boeden zu schlagen. Genau dafuer wurden
++   die fuenf !important in css/styles.css gestrichen.
++
++   Nebenwirkung, die man mitnehmen muss: der Preisumbruch aus Block 5
++   faellt weg. Auf 143 px passt der Betrag neben L und P, und die
++   Kachel wird wieder 30 px flacher.
++   ══════════════════════════════════════════════════════════════════ */
++@media (max-width: 768px) {
++    .card-grid.deck-grid-skeleton-grid,
++    .deck-grid-skeleton-grid {
++        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
++        gap: var(--s-2);
++    }
++}
+diff --git a/css/styles.css b/css/styles.css
+index a82a8261..cf8def34 100644
+--- a/css/styles.css
++++ b/css/styles.css
+@@ -2969,7 +2969,7 @@
+ 
+             /* Karten-Grid optimieren */
+             .card-grid {
+-                grid-template-columns: repeat(auto-fill, minmax(50px, 1fr)) !important;
++                grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
+                 gap: 5px;
+             }
+ 
+@@ -3214,7 +3214,7 @@
+             /* Grid-Layouts optimiert */
+             .card-grid,
+             .compact-card-grid {
+-                grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)) !important;
++                grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+                 gap: 4px;
+             }
+ 
+@@ -3312,7 +3312,7 @@
+             /* Grids noch enger */
+             .card-grid,
+             .compact-card-grid {
+-                grid-template-columns: repeat(auto-fill, minmax(60px, 1fr)) !important;
++                grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+                 gap: 6px;
+             }
+ 
+@@ -3366,7 +3366,7 @@
+ 
+             .card-grid,
+             .compact-card-grid {
+-                grid-template-columns: repeat(auto-fill, minmax(60px, 1fr)) !important;
++                grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+             }
+ 
+             /* Tabellen kompakter in landscape */
+@@ -4376,7 +4376,7 @@ h3:first-child {
+     /* Karten-Grids auf dem Handy: 3 bis 4 Karten nebeneinander statt riesiger Listen */
+     .deck-grid, .card-grid, #archetypeDetails {
+         display: grid;
+-        grid-template-columns: repeat(auto-fill, minmax(85px, 1fr)) !important;
++        grid-template-columns: repeat(auto-fill, minmax(85px, 1fr));
+         gap: 8px !important;
+         padding: 5px;
+     }
+-- 
+2.43.0
+

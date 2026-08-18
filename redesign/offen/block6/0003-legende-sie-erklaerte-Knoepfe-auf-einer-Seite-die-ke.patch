@@ -1,0 +1,518 @@
+From 40bedd68c2d7d73809c45faf1b6313f300f11a6d Mon Sep 17 00:00:00 2001
+From: "Claude (Cowork)" <claude@thedipidis>
+Date: Tue, 18 Aug 2026 11:44:03 +0000
+Subject: [PATCH 3/3] legende: sie erklaerte Knoepfe auf einer Seite, die keine
+ hat
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Die Karten-Legende lag unter den Kacheln des Hubs. Gemessen am
+18.08.2026:
+
+    Hub-Hoehe Schreibtisch   1.691 px, davon Legende   764 px  = 45 %
+    Hub-Hoehe Telefon        3.499 px, davon Legende 1.640 px  = 47 %
+
+Sie erklaert Anzahl-Plakette, Deck-Plakette, Wunschzettel-Herz,
+Set + Inklusionsrate, Durchschnittswerte und die sechs
+Aktionsknoepfe. Keines dieser Elemente gibt es auf dem Hub. Wer zum
+ersten Mal auf der Seite landet, liest also eine halbe
+Bildschirmseite ueber Knoepfe, die er noch nicht gesehen hat — und
+scrollt an den Kacheln vorbei, die der Hub eigentlich anbietet.
+
+Sie liegt jetzt in der Deck-Analyse, direkt ueber dem Kartengitter,
+das sie beschreibt, und eingeklappt: 44 px statt 764, einen Klick
+entfernt.
+
+    Hub-Hoehe Schreibtisch   1.691 px  ->    895 px
+    Hub-Hoehe Telefon        3.499 px  ->  1.836 px
+
+ANMERKUNG ZUM UMBAU-HANDBUCH
+
+Dort steht: "Karten-Legende A–K vom Hub wegnehmen ... sie gehoert in
+die Kartendatenbank, wo die Knoepfe tatsaechlich stehen."
+
+Nachgemessen stimmt das nicht. Die Kartendatenbank rendert
+.card-database-item und hat weder Plaketten noch Aktionsknoepfe —
+nur Bild, Name und Preis. Die Elemente, die die Legende erklaert,
+gibt es ausschliesslich im Kartengitter der Deck-Analyse
+(.city-league-card-item). Dorthin ist sie gewandert.
+
+Der Hilfetext des Hubs bewarb die Legende ebenfalls ("Below the tile
+grid, a mock card explains every badge..."). Der Absatz ist raus,
+in beiden Sprachen.
+
+tests/unit/test-mobil.js haelt alle drei Befunde von Block 6 fest:
+die Kachelbreite an einer Stelle, die sichtbare Heatmap ohne
+rot-gruene Skala, und die Legende dort, wo die Karten sind.
+
+Tests: 1098 passed, 0 failed / 373 passed, 5 skipped.
+!important: 3359 -> 3356.
+---
+ css/components.css       |  40 ++++++++
+ index.html               | 205 ++++++++++++++++++++++-----------------
+ js/app-core.js           |   4 +-
+ js/i18n.js               |   2 +
+ tests/unit/test-mobil.js | 137 ++++++++++++++++++++++++++
+ 5 files changed, 297 insertions(+), 91 deletions(-)
+ create mode 100644 tests/unit/test-mobil.js
+
+diff --git a/css/components.css b/css/components.css
+index 54bb456d..3976bc46 100644
+--- a/css/components.css
++++ b/css/components.css
+@@ -344,3 +344,43 @@
+     cursor: pointer;
+ }
+ .ds-tutorial-retry:hover { background: var(--brand); color: var(--surface-1); }
++
++/* ── Eingeklappte Karten-Legende ───────────────────────────────────
++ *
++ * Die Legende erklaert die Plaketten und Knoepfe im Kartengitter. Sie
++ * lag bis zum 18.08.2026 auf dem Hub — 734 px, 45 % der Hub-Hoehe, und
++ * dort kommt keines der erklaerten Elemente vor. Jetzt liegt sie ueber
++ * dem Gitter, das sie beschreibt, und zwar zu.
++ *
++ * Eingeklappt: 44 px. Ausgeklappt: dasselbe wie vorher.
++ */
++.ds-legend {
++    margin: 0 0 var(--s-3);
++    border: 1px solid var(--line);
++    border-radius: var(--r-md);
++    background: var(--surface-1);
++}
++.ds-legend-summary {
++    min-height: 44px;
++    display: flex;
++    align-items: center;
++    gap: var(--s-2);
++    padding: 0 var(--s-4);
++    cursor: pointer;
++    font-size: var(--fs-sm);
++    font-weight: 600;
++    color: var(--ink-2);
++    list-style: none;
++}
++.ds-legend-summary::-webkit-details-marker { display: none; }
++.ds-legend-summary::before {
++    content: "›";
++    display: inline-block;
++    font-size: var(--fs-lg);
++    line-height: 1;
++    color: var(--ink-3);
++    transition: transform .15s;
++}
++.ds-legend[open] > .ds-legend-summary::before { transform: rotate(90deg); }
++.ds-legend-summary:hover { color: var(--ink); }
++.ds-legend[open] > .ds-legend-summary { border-bottom: 1px solid var(--line); }
+diff --git a/index.html b/index.html
+index ef1d7447..f3c95e95 100644
+--- a/index.html
++++ b/index.html
+@@ -602,95 +602,24 @@
+                     <div id="metaHubAnswer"></div>
+                     <div class="meta-hub-tile-grid" id="metaHubTileGrid"></div>
+ 
+-                    <!-- Card legend: explains every badge / button / stat line on a
+-                         card so a new user understands the overview at a glance.
+-                         The mock-card on the left uses the same .city-league-card-*
+-                         classes as the real cards, so any future visual tweak to
+-                         those classes is reflected here automatically. -->
+-                    <section class="meta-hub-legend" aria-labelledby="metaHubLegendTitle">
+-                        <h3 id="metaHubLegendTitle" class="meta-hub-legend-title" data-i18n="legend.title">Was bedeuten die Symbole?</h3>
+-                        <div class="meta-hub-legend-grid">
+-                            <!-- Mock card with every badge / overlay enabled -->
+-                            <div class="meta-hub-legend-card-wrap" aria-hidden="true">
+-                                <div class="card-item city-league-card-item meta-hub-legend-card">
+-                                    <div class="card-image-container city-league-card-image-container">
+-                                        <img class="meta-hub-legend-card-art-img"
+-                                             src="https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_288_R_EN_LG.png"
+-                                             alt="Fezandipiti ex"
+-                                             loading="lazy"
+-                                             referrerpolicy="no-referrer">
+-                                        <!-- (A) Red max-count badge — most copies seen in any single deck -->
+-                                        <div class="city-league-card-badge city-league-card-badge-max meta-hub-legend-marker" data-legend-key="A">4</div>
+-                                        <!-- (B) Green deck-count badge — copies currently in your deck -->
+-                                        <div class="city-league-card-badge city-league-card-badge-deck meta-hub-legend-marker" data-legend-key="B">2</div>
+-                                        <!-- (C) Pink wishlist heart -->
+-                                        <div class="wishlist-heart-badge meta-hub-legend-marker" data-legend-key="C">♥</div>
+-                                        <!-- (D) Amber owned-other-prints badge -->
+-                                        <div class="city-league-other-print-sparkle meta-hub-legend-marker" data-legend-key="D">3</div>
+-                                        <div class="card-info-bottom city-league-card-info-bottom">
+-                                            <div class="card-info-text city-league-card-info-text">
+-                                                <!-- (E) Card name -->
+-                                                <div class="city-league-card-title-mobile meta-hub-legend-line" data-legend-key="E">Karten-Name</div>
+-                                                <!-- (F) Set + percentage in archetype -->
+-                                                <div class="city-league-card-set-stats-row meta-hub-legend-line" data-legend-key="F">
+-                                                    <div class="city-league-card-set-mobile">SET 123</div>
+-                                                    <div class="city-league-card-stats-mobile">100%</div>
+-                                                </div>
+-                                                <!-- (G) Avg counts (used / overall) -->
+-                                                <div class="city-league-card-avg-mobile meta-hub-legend-line" data-legend-key="G">Ø 3,2x (2,8x)</div>
+-                                                <!-- (H) Decks running this card -->
+-                                                <div class="city-league-card-deck-stats-mobile meta-hub-legend-line" data-legend-key="H">87/100 (87%)</div>
+-                                            </div>
+-                                            <div class="card-action-buttons city-league-card-action-buttons">
+-                                                <div class="city-league-card-action-row">
+-                                                    <!-- (I) Remove / Add / Switch print buttons -->
+-                                                    <button type="button" class="city-league-card-action-btn city-league-card-remove-btn meta-hub-legend-marker" data-legend-key="I" disabled>−</button>
+-                                                    <button type="button" class="city-league-card-action-btn city-league-card-add-btn" disabled>+</button>
+-                                                    <button type="button" class="city-league-card-action-btn city-league-card-rarity-btn" disabled>★</button>
+-                                                </div>
+-                                                <div class="city-league-card-action-row">
+-                                                    <!-- (J) Limitless / Proxy / Cardmarket -->
+-                                                    <button type="button" class="city-league-card-action-btn city-league-card-limitless-btn meta-hub-legend-marker" data-legend-key="J" disabled>L</button>
+-                                                    <button type="button" class="city-league-card-action-btn city-league-card-proxy-btn" disabled>P</button>
+-                                                    <button type="button" class="city-league-card-action-btn city-league-card-market-btn" disabled>2,50€</button>
+-                                                </div>
+-                                                <div class="city-league-card-action-row">
+-                                                    <!-- (K) Cooking-mode-only: pin + exclude -->
+-                                                    <button type="button" class="city-league-card-action-btn city-league-card-pin-btn meta-hub-legend-marker" data-legend-key="K" disabled>📌</button>
+-                                                    <button type="button" class="city-league-card-action-btn city-league-card-exclude-btn" disabled>🚫</button>
+-                                                </div>
+-                                            </div>
+-                                        </div>
+-                                    </div>
+-                                </div>
+-                            </div>
+-                            <!-- Legend list — each row matches a marker on the mock card -->
+-                            <dl class="meta-hub-legend-list">
+-                                <div class="meta-hub-legend-item"><dt><span class="meta-hub-legend-key meta-hub-legend-key-red">A</span></dt>
+-                                    <dd data-i18n="legend.maxInDeck" data-i18n-html><strong>Max-Anzahl im Deck</strong> — Höchste Anzahl an Kopien dieser Karte, die in einem einzelnen Deck verwendet wurde (über alle ausgewerteten Listen). Sagt dir, wie viele Kopien Top-Spieler maximal spielen.</dd></div>
+-                                <div class="meta-hub-legend-item"><dt><span class="meta-hub-legend-key meta-hub-legend-key-green">B</span></dt>
+-                                    <dd data-i18n="legend.inYourDeck" data-i18n-html><strong>In deinem Deck</strong> — Anzahl Kopien, die aktuell in deinem Deck-Build sind. Nur sichtbar wenn &gt; 0.</dd></div>
+-                                <div class="meta-hub-legend-item"><dt><span class="meta-hub-legend-key meta-hub-legend-key-pink">C</span></dt>
+-                                    <dd data-i18n="legend.wishlist" data-i18n-html><strong>Wunschliste</strong> — Tippen markiert die Karte als „möchte ich kaufen". Erscheint später in deinem Profil unter Wishlist.</dd></div>
+-                                <div class="meta-hub-legend-item"><dt><span class="meta-hub-legend-key meta-hub-legend-key-amber">D</span></dt>
+-                                    <dd data-i18n="legend.otherPrintsOwned" data-i18n-html><strong>Andere Prints im Besitz</strong> — Du besitzt diese Karte in einer anderen Variante (anderes Set, alternative Artwork, Holo / Full Art / Special Illustration). Zahl = wie viele Kopien insgesamt.</dd></div>
+-                                <div class="meta-hub-legend-item"><dt><span class="meta-hub-legend-key">E</span></dt>
+-                                    <dd data-i18n="legend.cardName" data-i18n-html><strong>Karten-Name</strong> — Offizieller englischer Karten-Name.</dd></div>
+-                                <div class="meta-hub-legend-item"><dt><span class="meta-hub-legend-key">F</span></dt>
+-                                    <dd data-i18n="legend.setAndInclusion" data-i18n-html><strong>Set + Inklusionsrate</strong> — Set-Code + Karten-Nummer · % der Decks in diesem Archetype, die diese Karte spielen.</dd></div>
+-                                <div class="meta-hub-legend-item"><dt><span class="meta-hub-legend-key">G</span></dt>
+-                                    <dd data-i18n="legend.avgInDeck" data-i18n-html><strong>Ø-Anzahl im Deck</strong> — Durchschnittliche Kopien pro Deck. Erste Zahl: nur Decks die sie spielen. In Klammern: gemittelt über alle Decks des Archetype.</dd></div>
+-                                <div class="meta-hub-legend-item"><dt><span class="meta-hub-legend-key">H</span></dt>
+-                                    <dd data-i18n="legend.deckCoverage" data-i18n-html><strong>Deck-Verbreitung</strong> — Decks mit dieser Karte / Decks insgesamt (Inklusionsrate in %).</dd></div>
+-                                <div class="meta-hub-legend-item"><dt><span class="meta-hub-legend-key meta-hub-legend-key-action">I</span></dt>
+-                                    <dd data-i18n="legend.plusMinus" data-i18n-html><strong>− / + / ★</strong> — Kopie entfernen / hinzufügen / Print &amp; Seltenheit wechseln (z.B. Rare → Holo).</dd></div>
+-                                <div class="meta-hub-legend-item"><dt><span class="meta-hub-legend-key meta-hub-legend-key-action">J</span></dt>
+-                                    <dd data-i18n="legend.lpPrice" data-i18n-html><strong>L / P / Preis</strong> — <em>L</em>imitless TCG öffnen · zum <em>P</em>roxy-Printer hinzufügen · Cardmarket-Preis (Klick öffnet das Angebot).</dd></div>
+-                                <div class="meta-hub-legend-item"><dt><span class="meta-hub-legend-key meta-hub-legend-key-action">K</span></dt>
+-                                    <dd data-i18n="legend.pinExclude" data-i18n-html><strong>📌 Pin / 🚫 Exclude</strong> — Nur im <em>Cooking Mode</em> sichtbar. Pin = Karte zwingend in den nächsten Generate-Build aufnehmen. Exclude = Karte nie aufnehmen.</dd></div>
+-                            </dl>
+-                        </div>
+-                    </section>
++                    <!-- Die Karten-Legende stand hier, unter den Kacheln des Hubs.
++                         Gemessen am 18.08.2026: 734 px = 45 % der Hub-Hoehe, und
++                         sie erklaert Bedienelemente, die es auf dem Hub gar nicht
++                         gibt — Anzahl-Plakette, Wunschzettel-Herz, die sechs
++                         Aktionsknoepfe. Wer zum ersten Mal hier landet, liest
++                         eine halbe Bildschirmseite ueber Knoepfe, die er noch
++                         nicht gesehen hat.
++
++                         Sie liegt jetzt in der Deck-Analyse, direkt ueber dem
++                         Kartengitter, und zwar eingeklappt.
++
++                         Anmerkung zum Umbau-Handbuch: dort steht "sie gehoert in
++                         die Kartendatenbank, wo die Knoepfe tatsaechlich stehen".
++                         Nachgemessen stimmt das nicht — die Kartendatenbank
++                         rendert .card-database-item und hat weder Plaketten noch
++                         Aktionsknoepfe. Die Elemente, die die Legende erklaert,
++                         gibt es ausschliesslich im Kartengitter der
++                         Deck-Analyse. -->
+                 </div>
+             </div>
+ 
+@@ -1324,6 +1253,104 @@
+                             </div>
+                         </div>
+                         
++                        <!-- Die Karten-Legende, eingeklappt. Sie erklaert genau die
++                             Plaketten, Zeilen und Knoepfe, die im Gitter darunter
++                             stehen — vorher lag sie auf dem Hub, wo keines dieser
++                             Elemente vorkommt. Eingeklappt kostet sie 44 px statt
++                             734 und ist einen Klick entfernt, wenn man sie braucht. -->
++                        <details class="ds-legend">
++                            <summary class="ds-legend-summary" data-i18n="legend.summary">Was bedeuten die Symbole auf den Karten?</summary>
++    <!-- Card legend: explains every badge / button / stat line on a
++                             card so a new user understands the overview at a glance.
++                             The mock-card on the left uses the same .city-league-card-*
++                             classes as the real cards, so any future visual tweak to
++                             those classes is reflected here automatically. -->
++                        <section class="meta-hub-legend" aria-labelledby="metaHubLegendTitle">
++                            <h3 id="metaHubLegendTitle" class="meta-hub-legend-title" data-i18n="legend.title">Was bedeuten die Symbole?</h3>
++                            <div class="meta-hub-legend-grid">
++                                <!-- Mock card with every badge / overlay enabled -->
++                                <div class="meta-hub-legend-card-wrap" aria-hidden="true">
++                                    <div class="card-item city-league-card-item meta-hub-legend-card">
++                                        <div class="card-image-container city-league-card-image-container">
++                                            <img class="meta-hub-legend-card-art-img"
++                                                 src="https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_288_R_EN_LG.png"
++                                                 alt="Fezandipiti ex"
++                                                 loading="lazy"
++                                                 referrerpolicy="no-referrer">
++                                            <!-- (A) Red max-count badge — most copies seen in any single deck -->
++                                            <div class="city-league-card-badge city-league-card-badge-max meta-hub-legend-marker" data-legend-key="A">4</div>
++                                            <!-- (B) Green deck-count badge — copies currently in your deck -->
++                                            <div class="city-league-card-badge city-league-card-badge-deck meta-hub-legend-marker" data-legend-key="B">2</div>
++                                            <!-- (C) Pink wishlist heart -->
++                                            <div class="wishlist-heart-badge meta-hub-legend-marker" data-legend-key="C">♥</div>
++                                            <!-- (D) Amber owned-other-prints badge -->
++                                            <div class="city-league-other-print-sparkle meta-hub-legend-marker" data-legend-key="D">3</div>
++                                            <div class="card-info-bottom city-league-card-info-bottom">
++                                                <div class="card-info-text city-league-card-info-text">
++                                                    <!-- (E) Card name -->
++                                                    <div class="city-league-card-title-mobile meta-hub-legend-line" data-legend-key="E">Karten-Name</div>
++                                                    <!-- (F) Set + percentage in archetype -->
++                                                    <div class="city-league-card-set-stats-row meta-hub-legend-line" data-legend-key="F">
++                                                        <div class="city-league-card-set-mobile">SET 123</div>
++                                                        <div class="city-league-card-stats-mobile">100%</div>
++                                                    </div>
++                                                    <!-- (G) Avg counts (used / overall) -->
++                                                    <div class="city-league-card-avg-mobile meta-hub-legend-line" data-legend-key="G">Ø 3,2x (2,8x)</div>
++                                                    <!-- (H) Decks running this card -->
++                                                    <div class="city-league-card-deck-stats-mobile meta-hub-legend-line" data-legend-key="H">87/100 (87%)</div>
++                                                </div>
++                                                <div class="card-action-buttons city-league-card-action-buttons">
++                                                    <div class="city-league-card-action-row">
++                                                        <!-- (I) Remove / Add / Switch print buttons -->
++                                                        <button type="button" class="city-league-card-action-btn city-league-card-remove-btn meta-hub-legend-marker" data-legend-key="I" disabled>−</button>
++                                                        <button type="button" class="city-league-card-action-btn city-league-card-add-btn" disabled>+</button>
++                                                        <button type="button" class="city-league-card-action-btn city-league-card-rarity-btn" disabled>★</button>
++                                                    </div>
++                                                    <div class="city-league-card-action-row">
++                                                        <!-- (J) Limitless / Proxy / Cardmarket -->
++                                                        <button type="button" class="city-league-card-action-btn city-league-card-limitless-btn meta-hub-legend-marker" data-legend-key="J" disabled>L</button>
++                                                        <button type="button" class="city-league-card-action-btn city-league-card-proxy-btn" disabled>P</button>
++                                                        <button type="button" class="city-league-card-action-btn city-league-card-market-btn" disabled>2,50€</button>
++                                                    </div>
++                                                    <div class="city-league-card-action-row">
++                                                        <!-- (K) Cooking-mode-only: pin + exclude -->
++                                                        <button type="button" class="city-league-card-action-btn city-league-card-pin-btn meta-hub-legend-marker" data-legend-key="K" disabled>📌</button>
++                                                        <button type="button" class="city-league-card-action-btn city-league-card-exclude-btn" disabled>🚫</button>
++                                                    </div>
++                                                </div>
++                                            </div>
++                                        </div>
++                                    </div>
++                                </div>
++                                <!-- Legend list — each row matches a marker on the mock card -->
++                                <dl class="meta-hub-legend-list">
++                                    <div class="meta-hub-legend-item"><dt><span class="meta-hub-legend-key meta-hub-legend-key-red">A</span></dt>
++                                        <dd data-i18n="legend.maxInDeck" data-i18n-html><strong>Max-Anzahl im Deck</strong> — Höchste Anzahl an Kopien dieser Karte, die in einem einzelnen Deck verwendet wurde (über alle ausgewerteten Listen). Sagt dir, wie viele Kopien Top-Spieler maximal spielen.</dd></div>
++                                    <div class="meta-hub-legend-item"><dt><span class="meta-hub-legend-key meta-hub-legend-key-green">B</span></dt>
++                                        <dd data-i18n="legend.inYourDeck" data-i18n-html><strong>In deinem Deck</strong> — Anzahl Kopien, die aktuell in deinem Deck-Build sind. Nur sichtbar wenn &gt; 0.</dd></div>
++                                    <div class="meta-hub-legend-item"><dt><span class="meta-hub-legend-key meta-hub-legend-key-pink">C</span></dt>
++                                        <dd data-i18n="legend.wishlist" data-i18n-html><strong>Wunschliste</strong> — Tippen markiert die Karte als „möchte ich kaufen". Erscheint später in deinem Profil unter Wishlist.</dd></div>
++                                    <div class="meta-hub-legend-item"><dt><span class="meta-hub-legend-key meta-hub-legend-key-amber">D</span></dt>
++                                        <dd data-i18n="legend.otherPrintsOwned" data-i18n-html><strong>Andere Prints im Besitz</strong> — Du besitzt diese Karte in einer anderen Variante (anderes Set, alternative Artwork, Holo / Full Art / Special Illustration). Zahl = wie viele Kopien insgesamt.</dd></div>
++                                    <div class="meta-hub-legend-item"><dt><span class="meta-hub-legend-key">E</span></dt>
++                                        <dd data-i18n="legend.cardName" data-i18n-html><strong>Karten-Name</strong> — Offizieller englischer Karten-Name.</dd></div>
++                                    <div class="meta-hub-legend-item"><dt><span class="meta-hub-legend-key">F</span></dt>
++                                        <dd data-i18n="legend.setAndInclusion" data-i18n-html><strong>Set + Inklusionsrate</strong> — Set-Code + Karten-Nummer · % der Decks in diesem Archetype, die diese Karte spielen.</dd></div>
++                                    <div class="meta-hub-legend-item"><dt><span class="meta-hub-legend-key">G</span></dt>
++                                        <dd data-i18n="legend.avgInDeck" data-i18n-html><strong>Ø-Anzahl im Deck</strong> — Durchschnittliche Kopien pro Deck. Erste Zahl: nur Decks die sie spielen. In Klammern: gemittelt über alle Decks des Archetype.</dd></div>
++                                    <div class="meta-hub-legend-item"><dt><span class="meta-hub-legend-key">H</span></dt>
++                                        <dd data-i18n="legend.deckCoverage" data-i18n-html><strong>Deck-Verbreitung</strong> — Decks mit dieser Karte / Decks insgesamt (Inklusionsrate in %).</dd></div>
++                                    <div class="meta-hub-legend-item"><dt><span class="meta-hub-legend-key meta-hub-legend-key-action">I</span></dt>
++                                        <dd data-i18n="legend.plusMinus" data-i18n-html><strong>− / + / ★</strong> — Kopie entfernen / hinzufügen / Print &amp; Seltenheit wechseln (z.B. Rare → Holo).</dd></div>
++                                    <div class="meta-hub-legend-item"><dt><span class="meta-hub-legend-key meta-hub-legend-key-action">J</span></dt>
++                                        <dd data-i18n="legend.lpPrice" data-i18n-html><strong>L / P / Preis</strong> — <em>L</em>imitless TCG öffnen · zum <em>P</em>roxy-Printer hinzufügen · Cardmarket-Preis (Klick öffnet das Angebot).</dd></div>
++                                    <div class="meta-hub-legend-item"><dt><span class="meta-hub-legend-key meta-hub-legend-key-action">K</span></dt>
++                                        <dd data-i18n="legend.pinExclude" data-i18n-html><strong>📌 Pin / 🚫 Exclude</strong> — Nur im <em>Cooking Mode</em> sichtbar. Pin = Karte zwingend in den nächsten Generate-Build aufnehmen. Exclude = Karte nie aufnehmen.</dd></div>
++                                </dl>
++                            </div>
++                        </section>
++                        </details>
++
+                         <!-- Card Table View (Default) -->
+                         <div class="deck-table-view d-none" id="currentMetaDeckTableView">
+                             <div id="currentMetaDeckTable"></div>
+diff --git a/js/app-core.js b/js/app-core.js
+index 85ff7e5a..7f6d622d 100644
+--- a/js/app-core.js
++++ b/js/app-core.js
+@@ -202,7 +202,7 @@ const BASE_PATH = './data/';
+             },
+             'meta-analysis-hub': {
+                 title: '\ud83d\udcca Meta & Deck Analysis Hub',
+-                html: '<p>The starting page for every meta + deck data view. Pick a category tile to drill into one of the six data sources.</p><ul><li><strong>City League Meta:</strong> Weekly Japanese meta snapshot \u2014 archetype share, tier list, top-N variants combined by main Pok\u00e9mon.</li><li><strong>Deck Analysis (Japan):</strong> Card overview + per-card statistics for any City-League archetype.</li><li><strong>Current Meta (Global):</strong> Limitless Online tier list, top archetypes, climbers / fallers, full comparison table.</li><li><strong>Deck Analysis (Global):</strong> Same depth as the Japan tab but for global online tournaments \u2014 plus Cooking Mode for power-user fusion + matchup analysis.</li><li><strong>Past Meta:</strong> Historical Labs-only snapshot of the previous rotation. Use it to baseline current decks against where the format started.</li><li><strong>Meta Call:</strong> Predicted meta share for your next tournament. Blends online + Major data with your own estimates.</li></ul><p><strong>Card Legend:</strong> Below the tile grid, a mock card explains every badge, button, and stat line you\u2019ll encounter on real cards \u2014 max-count, deck-count, wishlist heart, owned-other-prints, set + inclusion rate, avg-counts, action buttons, and the cooking-mode pin + exclude row.</p>'
++                html: '<p>The starting page for every meta + deck data view. Pick a category tile to drill into one of the six data sources.</p><ul><li><strong>City League Meta:</strong> Weekly Japanese meta snapshot \u2014 archetype share, tier list, top-N variants combined by main Pok\u00e9mon.</li><li><strong>Deck Analysis (Japan):</strong> Card overview + per-card statistics for any City-League archetype.</li><li><strong>Current Meta (Global):</strong> Limitless Online tier list, top archetypes, climbers / fallers, full comparison table.</li><li><strong>Deck Analysis (Global):</strong> Same depth as the Japan tab but for global online tournaments \u2014 plus Cooking Mode for power-user fusion + matchup analysis.</li><li><strong>Past Meta:</strong> Historical Labs-only snapshot of the previous rotation. Use it to baseline current decks against where the format started.</li><li><strong>Meta Call:</strong> Predicted meta share for your next tournament. Blends online + Major data with your own estimates.</li></ul>'
+             },
+             'meta-call': {
+                 title: '\ud83d\udcca Meta Call',
+@@ -281,7 +281,7 @@ const BASE_PATH = './data/';
+             },
+             'meta-analysis-hub': {
+                 title: '\ud83d\udcca Meta- & Deck-Analyse Hub',
+-                html: '<p>Der Startpunkt f\u00fcr alle Meta- und Deck-Daten-Ansichten. Tippe eine Kategorie-Kachel an, um in eine der sechs Datenquellen einzutauchen.</p><ul><li><strong>City League Meta:</strong> W\u00f6chentlicher japanischer Meta-Snapshot \u2014 Archetyp-Anteile, Tier-Liste, Top-Varianten gruppiert nach Haupt-Pok\u00e9mon.</li><li><strong>Deck Analyse (Japan):</strong> Karten-\u00dcbersicht + Pro-Karte-Statistiken f\u00fcr jeden City-League-Archetyp.</li><li><strong>Current Meta (Global):</strong> Limitless-Online Tier-Liste, Top-Archetypen, Climbers/Fallers, Full-Comparison-Tabelle.</li><li><strong>Deck Analyse (Global):</strong> Gleiche Tiefe wie der Japan-Tab, aber f\u00fcr globale Online-Turniere \u2014 plus Cooking Mode f\u00fcr Power-User-Fusion + Matchup-Analyse.</li><li><strong>Past Meta:</strong> Historischer Labs-only-Snapshot der vorherigen Rotation. Ideal als Baseline um aktuelle Decks gegen den Format-Start zu vergleichen.</li><li><strong>Meta Call:</strong> Vorhergesagter Meta-Anteil f\u00fcr dein n\u00e4chstes Turnier. Kombiniert Online + Major-Daten mit deinen eigenen Sch\u00e4tzungen.</li></ul><p><strong>Karten-Legende:</strong> Unter den Kacheln erkl\u00e4rt eine Beispielkarte alle Badges, Buttons und Stat-Zeilen, die du auf echten Karten siehst \u2014 Max-Anzahl, Deck-Count, Wishlist-Herz, andere Prints im Besitz, Set + Inklusionsrate, \u00d8-Anzahl, Aktions-Buttons und die Cooking-Mode-Reihe mit Pin + Exclude.</p>'
++                html: '<p>Der Startpunkt f\u00fcr alle Meta- und Deck-Daten-Ansichten. Tippe eine Kategorie-Kachel an, um in eine der sechs Datenquellen einzutauchen.</p><ul><li><strong>City League Meta:</strong> W\u00f6chentlicher japanischer Meta-Snapshot \u2014 Archetyp-Anteile, Tier-Liste, Top-Varianten gruppiert nach Haupt-Pok\u00e9mon.</li><li><strong>Deck Analyse (Japan):</strong> Karten-\u00dcbersicht + Pro-Karte-Statistiken f\u00fcr jeden City-League-Archetyp.</li><li><strong>Current Meta (Global):</strong> Limitless-Online Tier-Liste, Top-Archetypen, Climbers/Fallers, Full-Comparison-Tabelle.</li><li><strong>Deck Analyse (Global):</strong> Gleiche Tiefe wie der Japan-Tab, aber f\u00fcr globale Online-Turniere \u2014 plus Cooking Mode f\u00fcr Power-User-Fusion + Matchup-Analyse.</li><li><strong>Past Meta:</strong> Historischer Labs-only-Snapshot der vorherigen Rotation. Ideal als Baseline um aktuelle Decks gegen den Format-Start zu vergleichen.</li><li><strong>Meta Call:</strong> Vorhergesagter Meta-Anteil f\u00fcr dein n\u00e4chstes Turnier. Kombiniert Online + Major-Daten mit deinen eigenen Sch\u00e4tzungen.</li></ul>'
+             },
+             'meta-call': {
+                 title: '\ud83d\udcca Meta Call',
+diff --git a/js/i18n.js b/js/i18n.js
+index fdfe7088..a0432f52 100644
+--- a/js/i18n.js
++++ b/js/i18n.js
+@@ -122,6 +122,7 @@ const translations = {
+         'Expected encounters per round, with matchup overview'
+     ],
+     'legend.title':                             'What do the symbols mean?',
++    'legend.summary':                           'What do the symbols on the cards mean?',
+ 
+     // ── Toolbar / metric tooltips ─────────────────────────────
+     // Shared across the Deck Builder header on every tab (city-league,
+@@ -2065,6 +2066,7 @@ const translations = {
+         'Erwartete Begegnungen pro Runde inkl. Matchup-Übersicht'
+     ],
+     'legend.title':                             'Was bedeuten die Symbole?',
++    'legend.summary':                           'Was bedeuten die Symbole auf den Karten?',
+ 
+     // ── Toolbar / metric tooltips ─────────────────────────────
+     'tip.openMenu':                             'Menü öffnen',
+diff --git a/tests/unit/test-mobil.js b/tests/unit/test-mobil.js
+new file mode 100644
+index 00000000..7ca7943d
+--- /dev/null
++++ b/tests/unit/test-mobil.js
+@@ -0,0 +1,137 @@
++/**
++ * Block 6 — was auf dem Telefon passiert.
++ *
++ * Drei Befunde, die alle dieselbe Form haben: eine Entscheidung, die
++ * einmal getroffen wurde, hat sich als Regel festgesetzt, und alles
++ * danach war Schadensbegrenzung.
++ *
++ *   1. Drei feste Spalten fuer das Kartengitter. Daraus folgten 94 px
++ *      Kachelbreite und daraus 7-px-Schrift.
++ *   2. `display: none` fuer die Matchup-Heatmap, begruendet mit "table
++ *      not usable on small screens" — bei einer Tabelle, die seit jeher
++ *      in einem Scrollcontainer sitzt.
++ *   3. Die Karten-Legende auf dem Hub, wo keines der erklaerten
++ *      Elemente vorkommt. Gemessen: 764 px von 1.691 px Hub-Hoehe auf
++ *      dem Schreibtisch, 1.640 von 3.499 auf dem Telefon.
++ */
++
++const { describe, it } = require('node:test');
++const assert = require('node:assert/strict');
++const fs = require('fs');
++const path = require('path');
++
++const ROOT = path.join(__dirname, '..', '..');
++const R = (p) => fs.readFileSync(path.join(ROOT, p), 'utf8');
++const strip = (css) => css.replace(/\/\*[\s\S]*?\*\//g, '');
++
++const MOB = strip(R('css/mobile-responsive.css'));
++const STYLES = strip(R('css/styles.css'));
++const UI = strip(R('css/ui-components.css'));
++const HTML = R('index.html');
++const META = R('js/app-current-meta.js');
++const CORE = R('js/app-core.js');
++const I18N = R('js/i18n.js');
++
++describe('Mobil: die Kachelbreite steht an einer Stelle', () => {
++    it('das Gitter der Deck-Analyse bekommt keine feste Spaltenzahl mehr', () => {
++        // `.card-grid` traegt im ganzen Repo an zwei Stellen das
++        // Kartengitter der Deck-Analyse (zusammen mit
++        // .deck-grid-skeleton-grid). Eine feste Anzahl ignoriert die
++        // Geraetebreite; eine Mindestbreite nicht.
++        const fixed = [...MOB.matchAll(/([^{}]*\.card-grid[^{}]*)\{([^}]*repeat\(\d+, 1fr\)[^}]*)\}/g)]
++            .map(m => m[1].replace(/\s+/g, ' ').trim().slice(0, 70));
++        assert.deepEqual(fixed, [],
++            'Diese Regeln zwingen .card-grid wieder auf eine feste Spaltenzahl:\n  '
++            + fixed.join('\n  '));
++    });
++
++    it('es gibt genau eine Regel fuer die Kachelbreite', () => {
++        const rules = [...MOB.matchAll(/[^{}]*deck-grid-skeleton-grid[^{}]*\{[^}]*grid-template-columns[^}]*\}/g)];
++        assert.equal(rules.length, 1,
++            `Erwartet eine Regel, gefunden ${rules.length}.`);
++        assert.match(rules[0][0], /minmax\(150px/,
++            '150 px ist die Breite, ab der die Knopfzeile ohne Umbruch auskommt.');
++    });
++
++    it('die fuenf card-grid-Boeden in styles.css sind nicht mehr !important', () => {
++        // Ohne diese Streichung braeuchte die eine Regel oben selbst ein
++        // !important, um sie zu schlagen — und dann waeren es wieder zwei
++        // Regeln, die sich streiten.
++        // Nur die Regeln, die .card-grid direkt meinen. Ein Selektor, der
++        // ihn unter einem anderen Behaelter einschraenkt (etwa
++        // `[class*="most-used-cards"] .card-grid`), betrifft ein anderes
++        // Gitter und darf bleiben.
++        const bad = [...STYLES.matchAll(/([^{}]*\.card-grid[^{}]*)\{([^}]*grid-template-columns[^;]*!important[^}]*)\}/g)]
++            .map(m => m[1].replace(/\s+/g, ' ').trim())
++            .filter(sel => sel.split(',').some(part => /^\s*\.card-grid\s*$/.test(part)))
++            .map(sel => sel.slice(0, 60));
++        assert.deepEqual(bad, [], 'Wieder !important auf einem .card-grid-Boden:\n  ' + bad.join('\n  '));
++    });
++});
++
++describe('Mobil: die Matchup-Heatmap ist sichtbar', () => {
++    it('kein display:none mehr', () => {
++        assert.ok(!/\.heatmap-container\s*\{[^}]*display:\s*none/.test(MOB),
++            'Die Heatmap ist auf dem Telefon wieder ausgeblendet. Das ist die Ansicht, '
++            + 'die man zwischen zwei Runden aufmacht.');
++    });
++
++    it('die erste Spalte klebt beim Seitwaertsscrollen', () => {
++        assert.match(MOB, /#matchupHeatmapContainer \.heatmap-th-row \{[^}]*position: sticky/,
++            'Ohne sie weiss man nach zwei Wischern nicht mehr, welche Zeile man liest.');
++    });
++
++    it('die Skala ist blau gegen rot, nicht gruen gegen rot', () => {
++        assert.ok(!/rgba\(76, 175, 80/.test(META), 'Das Gruen (#4caf50) ist zurueck.');
++        assert.ok(!/rgba\(244, 67, 54/.test(META), 'Das Rot (#f44336) ist zurueck.');
++        assert.match(META, /rgba\(42, 120, 214/, '--dv-pos fehlt in der Heatmap.');
++        assert.match(META, /rgba\(227, 73, 72/, '--dv-neg fehlt in der Heatmap.');
++    });
++
++    it('die Zellschrift traegt eine Textfarbe, keine Aussagefarbe', () => {
++        // Vorher: gruen / rot / grau je Zelle, dreimal mit !important in
++        // ui-components.css, und ab 65 % bzw. 35 % auf Weiss umgeschaltet.
++        assert.ok(!/\.heatmap-td-fav \{\s*color: #27ae60/.test(UI));
++        assert.match(UI, /\.heatmap-td-fav,\n\.heatmap-td-unfav \{\s*color: var\(--heatmap-color, var\(--ink\)\)/);
++    });
++
++    it('die Legende benennt keine Farbwoerter mehr', () => {
++        // "Green" / "Gray" / "Red" als Text beschrieb eine Skala, die es
++        // nicht mehr gibt — und half niemandem, der sie nicht sieht.
++        assert.ok(!/>Green<|>Gray<|>Red</.test(META));
++        assert.match(META, /heatmap-key heatmap-key-fav/);
++    });
++});
++
++describe('Mobil: die Karten-Legende liegt bei den Karten', () => {
++    it('sie steht nicht mehr im Hub', () => {
++        const hubStart = HTML.indexOf('id="meta-analysis-hub"');
++        const hubEnd = HTML.indexOf('id="city-league"');
++        const hub = HTML.slice(hubStart, hubEnd);
++        assert.ok(!/class="meta-hub-legend"/.test(hub),
++            'Die Legende ist zurueck auf dem Hub — 45 % seiner Hoehe fuer Bedienelemente, '
++            + 'die es dort nicht gibt.');
++    });
++
++    it('sie steht in der Deck-Analyse, eingeklappt', () => {
++        // Der Tab-Container, nicht der Menueeintrag: beide Namen kommen
++        // weiter oben schon in der Navigation vor.
++        const a = HTML.indexOf('<div id="current-analysis" class="tab-content');
++        const b = HTML.indexOf('<div id="past-meta" class="tab-content');
++        assert.ok(a > 0 && b > a, 'Die Tab-Container wurden nicht gefunden.');
++        const view = HTML.slice(a, b);
++        assert.match(view, /<details class="ds-legend">/);
++        assert.match(view, /class="meta-hub-legend"/);
++        assert.match(view, /data-i18n="legend\.summary"/);
++    });
++
++    it('der Hilfetext des Hubs wirbt nicht mehr damit', () => {
++        assert.ok(!/Card Legend:<\/strong> Below the tile grid/.test(CORE));
++        assert.ok(!/Karten-Legende:<\/strong> Unter den Kacheln/.test(CORE));
++    });
++
++    it('der neue Textschluessel steht in beiden Sprachen', () => {
++        const n = (I18N.match(/'legend\.summary'/g) || []).length;
++        assert.equal(n, 2, `legend.summary steht ${n}x in i18n.js, erwartet 2.`);
++    });
++});
+-- 
+2.43.0
+

@@ -1,0 +1,252 @@
+From f35a2a7233de2593754d8a1847dc4521b4a59d1c Mon Sep 17 00:00:00 2001
+From: "Claude (Cowork)" <claude@thedipidis>
+Date: Tue, 18 Aug 2026 11:43:42 +0000
+Subject: [PATCH 2/3] heatmap: sie war auf dem Telefon nicht da, und sie war
+ rot-gruen
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Zwei Dinge an derselben Ansicht.
+
+SIE WAR AUSGEBLENDET
+
+    /* Hide heatmap on mobile — table not usable on small screens */
+    @media (max-width: 768px) {
+        .heatmap-container { display: none !important; }
+    }
+
+Gemessen am 18.08.2026: 0 px, ersatzlos, ohne Hinweis, dass es sie
+ueberhaupt gibt. Das ist die Ansicht, die man zwischen zwei Runden
+auf dem Telefon aufmacht — "wie steht mein Deck gegen das da
+drueben" ist die Frage, fuer die man waehrend eines Turniers zum
+Handy greift.
+
+Die Tabelle war die ganze Zeit bedienbar: .heatmap-table-scroll hat
+overflow-x: auto. Was gefehlt hat, ist die Orientierung beim
+Seitwaertsscrollen — sobald die Deckspalte aus dem Bild laeuft,
+weiss man nicht mehr, welche Zeile man liest. Sie klebt jetzt, und
+sie ist auf 116 statt 170 px geschrumpft: 170 px sind auf einem
+390-px-Geraet die halbe Breite, daneben passte genau eine
+Gegnerspalte.
+
+Die Breitenangaben in css/current-meta-matchups.css tragen weiter
+!important. Sie dort zu entschaerfen, laesst die Tabelle auf dem
+Schreibtisch auseinanderlaufen — die erste Spalte nimmt dann die
+ganze Breite, weil table-layout: fixed ohne feste Spaltenbreiten
+anders rechnet. Gemessen: 152.174 px. Also hier mit derselben
+Muenze, und der Grund steht daneben.
+
+SIE WAR ROT-GRUEN
+
+Die dritte Stelle auf der Seite mit dieser Skala, und die
+schlimmste: hier steht die Farbe FUER die Aussage, nicht neben ihr.
+Wer Rot und Gruen nicht trennt, liest aus dieser Tabelle nichts.
+
+    rgba(76, 175, 80, ...)  ->  rgba(42, 120, 214, ...)   --dv-pos
+    rgba(244, 67, 54, ...)  ->  rgba(227, 73, 72, ...)    --dv-neg
+    rgba(241, 196, 15, .2)  ->  var(--surface-2)          Nullpunkt
+
+Dazu die Schriftfarbe: sie schaltete ab 65 % auf Weiss und ab 35 %
+auf Weiss um, machte den Kontrast also von der Zahl abhaengig. Und
+drei Regeln in css/ui-components.css setzten sie zusaetzlich mit
+!important auf gruen / rot / grau — staerker als der Wert, den
+js/app-current-meta.js je Zelle mitgibt. Jetzt: getoente Zelle,
+feste Textfarbe. Der Kontrast muss nie geprueft werden.
+
+Die Legende bestand aus den Woertern "Green", "Gray" und "Red" in
+genau diesen Farben. Ein Farbwort hilft niemandem, der die Farbe
+nicht sieht; jetzt steht dort das Feld selbst, in der Toenung, die
+auch in der Tabelle steht.
+
+Geprueft auf 390 px und 1440 px: Container 0 px -> 944 px auf dem
+Telefon, Deckspalte klebt bei 141 px, Zellhintergrund
+rgba(42,120,214,.2), Schrift rgb(22,26,35). Der Schreibtisch bleibt
+bei 229,9 px Spaltenbreite unveraendert.
+---
+ css/current-meta-matchups.css | 21 ++++++++++++++++
+ css/mobile-responsive.css     | 46 ++++++++++++++++++++++++++++++++---
+ css/ui-components.css         | 17 +++++++++----
+ js/app-current-meta.js        | 34 +++++++++++++++++++-------
+ 4 files changed, 101 insertions(+), 17 deletions(-)
+
+diff --git a/css/current-meta-matchups.css b/css/current-meta-matchups.css
+index 1ea3b03f..8b62bf4d 100644
+--- a/css/current-meta-matchups.css
++++ b/css/current-meta-matchups.css
+@@ -1417,3 +1417,24 @@
+         min-width: 126px;
+     }
+ }
++
++/* ── Die Legende der Heatmap ───────────────────────────────────────
++ *
++ * Sie bestand aus den Woertern "Green", "Gray" und "Red" in genau
++ * diesen Farben — und beschrieb damit eine Skala, die die Seite nicht
++ * mehr benutzt. Jetzt ein Farbfeld statt eines Farbworts: es zeigt die
++ * Toenung, die auch in der Tabelle steht, und funktioniert in jeder
++ * Sprache.
++ */
++.heatmap-key {
++    display: inline-block;
++    width: 14px;
++    height: 14px;
++    margin-right: 2px;
++    border: 1px solid var(--line-strong);
++    border-radius: 3px;
++    vertical-align: -2px;
++}
++.heatmap-key-fav   { background: rgba(42, 120, 214, .34); }
++.heatmap-key-even  { background: var(--surface-2); }
++.heatmap-key-unfav { background: rgba(227, 73, 72, .34); }
+diff --git a/css/mobile-responsive.css b/css/mobile-responsive.css
+index 98918f54..7e2db2be 100644
+--- a/css/mobile-responsive.css
++++ b/css/mobile-responsive.css
+@@ -641,10 +641,50 @@
+     }
+ }
+ 
+-/* Hide heatmap on mobile — table not usable on small screens */
++/* Die Matchup-Heatmap bleibt auf dem Telefon sichtbar.
++ *
++ * Hier stand `display: none !important` mit der Begruendung "table not
++ * usable on small screens". Gemessen am 18.08.2026: 0 px, ersatzlos,
++ * ohne Hinweis, dass es sie ueberhaupt gibt. Das ist die Ansicht, die
++ * man zwischen zwei Runden auf dem Telefon aufmacht — die Frage "wie
++ * steht mein Deck gegen das da drueben" ist die Frage, fuer die man
++ * waehrend eines Turniers zum Handy greift.
++ *
++ * Die Tabelle war die ganze Zeit bedienbar: `.heatmap-table-scroll` hat
++ * `overflow-x: auto`. Was gefehlt hat, ist die Orientierung beim
++ * Seitwaertsscrollen — sobald die erste Spalte aus dem Bild laeuft,
++ * weiss man nicht mehr, welche Zeile man liest. Die klebt jetzt.
++ */
+ @media (max-width: 768px) {
+-    .heatmap-container {
+-        display: none !important;
++    /* Die Breitenangaben in css/current-meta-matchups.css tragen
++     * !important und stehen ausserhalb jeder Medienabfrage. Sie hier
++     * ohne !important zu ueberschreiben, geht nicht; sie dort zu
++     * entschaerfen, laesst die Tabelle auf dem Schreibtisch auseinander
++     * laufen — die erste Spalte nimmt dann die ganze Breite, weil
++     * `table-layout: fixed` ohne feste Spaltenbreiten anders rechnet.
++     * Gemessen: 152.174 px. Also hier mit derselben Muenze. */
++    #matchupHeatmapContainer .heatmap-th-row {
++        position: sticky;
++        left: 0;
++        z-index: 2;
++        width: 116px !important;
++        min-width: 116px !important;
++        background: var(--surface-1);
++        box-shadow: 1px 0 0 var(--line);
++    }
++    #matchupHeatmapContainer .heatmap-col-first { width: 116px !important; }
++    /* Die Datenspalten duerfen schmaler werden, damit ohne Scrollen
++     * mehr als zwei Gegner ins Bild passen. Die Zahl bleibt lesbar;
++     * das n darunter wird kleiner, nicht unsichtbar. */
++    #matchupHeatmapContainer .heatmap-td,
++    #matchupHeatmapContainer .heatmap-th-y {
++        width: 64px !important;
++        min-width: 64px !important;
++    }
++    #matchupHeatmapContainer .heatmap-table { min-width: 0 !important; }
++    #matchupHeatmapContainer .heatmap-table-scroll {
++        /* Damit sichtbar ist, dass es seitwaerts weitergeht. */
++        scrollbar-width: thin;
+     }
+ }
+ 
+diff --git a/css/ui-components.css b/css/ui-components.css
+index 1c8a3dce..67dece95 100644
+--- a/css/ui-components.css
++++ b/css/ui-components.css
+@@ -850,14 +850,21 @@ img[src*="limitlesstcg"] {
+     background: rgba(149, 165, 166, 0.15) !important;
+     color: #95a5a6 !important;
+ }
+-.heatmap-td-fav {
+-    color: #27ae60 !important;
+-}
++/* Die Schrift in der Heatmap traegt ueberall dieselbe Farbe.
++ *
++ * Hier stand gruen fuer guenstig, rot fuer unguenstig, grau fuer
++ * ausgeglichen — dreimal mit !important, und damit staerker als die
++ * Farbe, die js/app-current-meta.js je Zelle mitgibt. Die Toenung sitzt
++ * jetzt im Zellhintergrund (blau <-> rot mit grauem Nullpunkt), die
++ * Schrift bleibt Text: so muss der Kontrast nie geprueft werden, und
++ * die Aussage haengt nicht allein an einer Farbachse, auf der jeder
++ * Zwoelfte nichts unterscheidet. */
++.heatmap-td-fav,
+ .heatmap-td-unfav {
+-    color: #e74c3c !important;
++    color: var(--heatmap-color, var(--ink));
+ }
+ .heatmap-td-even {
+-    color: #7f8c8d !important;
++    color: var(--heatmap-color, var(--ink-3));
+ }
+ .heatmap-table-scroll {
+     overflow-x: auto !important;
+diff --git a/js/app-current-meta.js b/js/app-current-meta.js
+index 58917994..866602f4 100644
+--- a/js/app-current-meta.js
++++ b/js/app-current-meta.js
+@@ -296,19 +296,34 @@
+                             const totalGames = parseInt(cellData.total_games) || (parsedWins + parsedLosses + parsedDraws);
+                             let bgColor, textColor;
+                             
++                            // Blau <-> Rot mit grauem Nullpunkt, nicht Gruen <-> Rot.
++                            //
++                            // Die Heatmap war die dritte Stelle auf der Seite mit
++                            // einer rot-gruenen Skala, und die schlimmste: hier
++                            // steht die Farbe FUER die Aussage, nicht neben ihr.
++                            // Wer Rot und Gruen nicht trennt, liest aus dieser
++                            // Tabelle nichts. css/tokens.css hat die Entscheidung
++                            // fuer die ganze Seite getroffen — die Werte hier sind
++                            // --dv-pos (42,120,214) und --dv-neg (227,73,72).
++                            //
++                            // Und die Schrift traegt immer dieselbe Textfarbe. Die
++                            // alte Fassung schaltete ab 65 % auf Weiss und ab 35 %
++                            // auf Weiss um, was den Kontrast von der Zahl abhaengig
++                            // machte. Getoente Zelle, feste Schrift: der Kontrast
++                            // muss nie geprueft werden.
+                             if (winRate >= 55.0) {
+                                 const intensity = Math.min((winRate - 55) / 20, 1);
+-                                bgColor = `rgba(76, 175, 80, ${0.3 + intensity * 0.4})`;
+-                                textColor = winRate >= 65 ? 'white' : '#27ae60';
++                                bgColor = `rgba(42, 120, 214, ${0.12 + intensity * 0.34})`;
++                                textColor = 'var(--ink)';
+                                 var tdClass = 'heatmap-td heatmap-td-fav';
+                             } else if (winRate <= 45.0) {
+                                 const intensity = Math.min((45 - winRate) / 20, 1);
+-                                bgColor = `rgba(244, 67, 54, ${0.3 + intensity * 0.4})`;
+-                                textColor = winRate <= 35 ? 'white' : '#e74c3c';
++                                bgColor = `rgba(227, 73, 72, ${0.12 + intensity * 0.34})`;
++                                textColor = 'var(--ink)';
+                                 var tdClass = 'heatmap-td heatmap-td-unfav';
+                             } else {
+-                                bgColor = 'rgba(241, 196, 15, 0.2)';
+-                                textColor = '#7f8c8d';
++                                bgColor = 'var(--surface-2)';
++                                textColor = 'var(--ink-3)';
+                                 var tdClass = 'heatmap-td heatmap-td-even';
+                             }
+                             const tooltip = `${parsedWins}W - ${parsedLosses}L (${totalGames} ${t('heatmap.games')})`;
+@@ -332,9 +347,10 @@
+                     <div id="matchupHeatmapContainer" class="heatmap-container">
+                         <h2 class="heatmap-title"><span style="font-size: 1.2em;"></span> ${t('heatmap.title')}</h2>
+                         <p class="heatmap-desc">
+-                            ${t('heatmap.desc')} <span class="color-green fw-600">Green</span> = ${t('heatmap.favorable')} (≥55%), 
+-                            <span class="color-grey fw-600">Gray</span> = ${t('heatmap.even')} (45-54.9%), 
+-                            <span class="color-red fw-600">Red</span> = ${t('heatmap.unfavorable')} (≤45%)
++                            ${t('heatmap.desc')}
++                            <span class="heatmap-key heatmap-key-fav"></span> ${t('heatmap.favorable')} (≥ 55 %),
++                            <span class="heatmap-key heatmap-key-even"></span> ${t('heatmap.even')} (45–54,9 %),
++                            <span class="heatmap-key heatmap-key-unfav"></span> ${t('heatmap.unfavorable')} (≤ 45 %)
+                         </p>
+                         ${searchControlsHtml}
+                         <div class="heatmap-table-scroll">
+-- 
+2.43.0
+

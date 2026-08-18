@@ -137,3 +137,32 @@ describe('Startvorgang — die Kartendatenbank lädt genau einmal', () => {
         assert.match(CORE_CODE, /_resolveCardDBReady\(true\)/);
     });
 });
+
+describe('Meta Call — die Spalte heisst, was sie zeigt', () => {
+    // Sie hiess "Online %" und zeigte d.onlineShare — das ist seit
+    // js/app-meta-call.js:3916 (d.onlineShare = d.predictedShare) die
+    // Modellausgabe, nicht der rohe Anteil. Gemessen am 18.08.2026,
+    // Zeile Dragapult: Spalte 13,10 %, Detailzeile derselben Zeile
+    // "Online-Share heute 7,1 %", Quelldatei limitless_online_decks.csv
+    // 7,06 %. Faktor 1,86. Der Tooltip nannte sie dabei "die Basisdaten".
+    it('der Spaltenkopf heisst nicht mehr "Online %"', () => {
+        for (const m of I18N.matchAll(/'mc\.headerOnline':\s*'([^']*)'/g)) {
+            assert.notStrictEqual(m[1].trim(), 'Online %');
+        }
+    });
+
+    it('er steht in beiden Sprachen und meint eine Prognose', () => {
+        const werte = [...I18N.matchAll(/'mc\.headerOnline':\s*'([^']*)'/g)].map(m => m[1]);
+        assert.strictEqual(werte.length, 2);
+        for (const w of werte) assert.match(w, /Prognose|Predicted|Forecast/i);
+    });
+
+    it('der Tooltip behauptet nicht mehr, es seien die Basisdaten', () => {
+        for (const m of I18N.matchAll(/'mc\.headerOnlineTooltip':\s*'([^']*)'/g)) {
+            assert.ok(!/baseline data point|die Basisdaten\.?'?$/i.test(m[1]),
+                'Tooltip nennt die Modellausgabe weiter Basisdaten');
+            assert.match(m[1], /NOT the raw|NICHT der rohe/,
+                'der Tooltip muss den Unterschied benennen, sonst bleibt die Verwechslung');
+        }
+    });
+});

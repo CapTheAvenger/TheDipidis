@@ -233,9 +233,20 @@
 
         bits.push('<span class="ds-space-region">' + t.region + '</span>');
 
+        // Region und Format bekommen eine eigene Klasse, damit sie auf
+        // schmalen Geraeten weichen koennen: seit js/ds-filter.js stehen
+        // beide eine Zeile tiefer als BEDIENELEMENT.
+        //
+        // Gemessen auf 390 px: der Ausweis schrumpft von 102 auf 81 px.
+        // Das ist weniger, als ich beim Hinsehen geschaetzt habe — die
+        // Zahl steht hier, damit die Schaetzung nicht die Zahl wird. Der
+        // Grund bleibt trotzdem gut: zweimal "Global" und zweimal
+        // "TEF-PBL" direkt untereinander liest sich wie ein Fehler.
+        // Der Ausweis behaelt, was der Filter nicht zeigt — Quelle,
+        // Stichprobe, Stand und den Trennungshinweis.
         var fmt = formatFor(key);
         if (fmt.label) {
-            bits.push('<span><b>' + f.format + '</b> ' + esc(fmt.label) +
+            bits.push('<span class="ds-space-format"><b>' + f.format + '</b> ' + esc(fmt.label) +
                 (fmt.since ? esc(' (' + f.since + ' ' + fmt.since + ')') : '') + '</span>');
         }
 

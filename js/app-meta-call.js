@@ -7645,6 +7645,14 @@ window.MetaCall = (function () {
       <thead>
         <tr>
           <th class="mc-th-deck">${t('mc.headerDeck')}</th>
+          ${/* Hiess bis zum 18.08.2026 "Online %", zeigt aber d.onlineShare —
+               und das ist seit Zeile 3916 (d.onlineShare = d.predictedShare)
+               die Modellausgabe, nicht der rohe Anteil. Gemessen am selben
+               Tag, Zeile Dragapult: Spalte 13,10 %, Detailzeile derselben
+               Zeile "Online-Share heute 7,1 %", Quelldatei
+               limitless_online_decks.csv 7,06 %. Faktor 1,86. Der Tooltip
+               nannte die Spalte dabei "die Basisdaten".
+               Der Wert ist richtig, der Name war falsch. */ ''}
           <th class="mc-th-online" title="${esc(t('mc.headerOnlineTooltip'))}">${t('mc.headerOnline')}</th>
           <th class="mc-th-est" title="${esc(t('mc.headerPersonalTooltip'))}">${t('mc.headerPersonal')}</th>
           <th class="mc-th-final" title="${esc(t('mc.headerFinalTooltip'))}">${t('mc.headerFinal')}</th>

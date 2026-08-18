@@ -384,3 +384,35 @@
 .ds-legend[open] > .ds-legend-summary::before { transform: rotate(90deg); }
 .ds-legend-summary:hover { color: var(--ink); }
 .ds-legend[open] > .ds-legend-summary { border-bottom: 1px solid var(--line); }
+
+/* ── Was ohne Anmeldung nicht geht ─────────────────────────────────
+ *
+ * Gezaehlt am 18.08.2026 in der Kartendatenbank, ausgeloggt: 180 von
+ * 291 Knoepfen gehoeren zur Sammlung, zur Wunschliste oder zur
+ * Tauschliste. Sie sahen aus wie jeder andere Knopf und antworteten auf
+ * einen Klick mit einer roten Fehlermeldung auf Englisch.
+ *
+ * Ausblenden waere die falsche Antwort: wer die Funktion nie sieht,
+ * sucht sie auch nicht. Sie bleiben also stehen und sehen aus, wie sie
+ * sich verhalten — gedaempft, und ein Klick oeffnet die Anmeldung.
+ *
+ * Die Klasse setzt js/firebase-config.js beim Auth-Wechsel;
+ * js/inline-init.js setzt sie beim Start, damit nichts aufblitzt.
+ */
+html.is-signed-out [onclick*="Collection"],
+html.is-signed-out [onclick*="collection"],
+html.is-signed-out [onclick*="Wishlist"],
+html.is-signed-out [onclick*="ishlist"],
+html.is-signed-out [onclick*="Tradelist"],
+html.is-signed-out [onclick*="radelist"] {
+    opacity: .5;
+    filter: saturate(.35);
+}
+html.is-signed-out [onclick*="Collection"]:hover,
+html.is-signed-out [onclick*="Wishlist"]:hover,
+html.is-signed-out [onclick*="ishlist"]:hover,
+html.is-signed-out [onclick*="Tradelist"]:hover,
+html.is-signed-out [onclick*="radelist"]:hover {
+    opacity: .85;
+    filter: none;
+}

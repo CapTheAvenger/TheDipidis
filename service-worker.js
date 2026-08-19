@@ -82,6 +82,7 @@ const SHELL_ASSETS = [
   './js/app-price.js',
   './js/matchup-glaettung.js',
   './js/rangliste-sortieren.js',
+  './js/ds-bildvorschau.js',
   './js/app-tier-meta.js',
   './js/app-city-league.js',
   './js/app-deck-builder.js',

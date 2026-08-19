@@ -9577,15 +9577,37 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
     display: block;
     font-size: 0.62em;
     font-weight: 500;
-    opacity: 0.65;
+    /* Volle Deckkraft. opacity: 0.65 auf einer ohnehin gedaempften Farbe
+       ergab gemessen 3,42:1 — unter den geforderten 4,5:1. Die Partienzahl
+       ist kein Beiwerk, sie ist die Angabe, an der man ablesen soll, wie
+       ernst die Quote darueber zu nehmen ist. */
+    opacity: 1;
+    color: var(--ink-2);
     line-height: 1;
     margin-top: 2px;
     font-variant-numeric: tabular-nums;
 }
-.heatmap-td-n.heatmap-td-n-low {
-    opacity: 0.85;
-    font-style: italic;
+/* Wenig Partien: gestrichelt, nicht blass.
+
+   Vorher trug die Blaesse die Aussage — opacity 0.65 auf dem n und eine
+   ausgegraute Zelle. Gemessen kam dabei ein Kontrast von 3,42:1 heraus,
+   unter den geforderten 4,5:1. Die Information "hier stehen wenige Spiele
+   dahinter" wurde also bezahlt mit "diese Zelle ist schlechter zu lesen" —
+   und getroffen hat es ausgerechnet die Zellen, bei denen man zweimal
+   hinsehen will.
+
+   Eine gestrichelte Innenkante sagt dasselbe und kostet keinen Kontrast.
+   Die Idee ist von Metagross-EV (reillycooper.com/metagross-ev, MIT), das
+   duenne Paarungen genauso markiert.
+
+   Schwelle 20 Partien, dieselbe wie THIN_GAMES in
+   js/app-archetype-card.js. */
+.heatmap-td-thin {
+    box-shadow: inset 0 0 0 2px transparent;
+    outline: 2px dashed var(--ink-3);
+    outline-offset: -3px;
 }
+
 
 @media (max-width: 700px) {
     .tier-movers-row,
@@ -10329,9 +10351,12 @@ body.arc-open { overflow: hidden; }
 #currentMetaContent .arc-mu-table td:nth-child(n+3),
 #archetypeCardOverlay .arc-mu-table th:nth-child(n+3),
 #archetypeCardOverlay .arc-mu-table td:nth-child(n+3) { width: 58px; }
+/* Ohne Ausrufezeichen: der einzige Gegenspieler ist `table thead` aus
+   css/styles.css:839 mit Element-Spezifitaet (0,0,1). Diese Regel hier
+   liegt bei (1,1,1) und gewinnt ohnehin. */
 #currentMetaContent .arc-mu-table th,
 #archetypeCardOverlay .arc-mu-table th {
-    background: #1f2937 !important; color: #ffffff !important;
+    background: #1f2937; color: #ffffff;
     font-size: 0.6rem; font-weight: 700;
     text-transform: uppercase; letter-spacing: 0.02em;
     padding: 4px 8px;

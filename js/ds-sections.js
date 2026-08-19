@@ -46,6 +46,10 @@
     // Die ersten drei beantworten die Eingangsfrage. Alles danach ist
     // Vertiefung und faengt zugeklappt an — sichtbar vorhanden, aber
     // nicht im Weg.
+    // Luft ueber dem aufgeklappten Abschnitt. Oben klebt nichts fest,
+    // also reicht ein schmaler Rand, damit er nicht an der Kante pickt.
+    var ABSTAND_OBEN = 16;
+
     var SECTIONS = [
         { id: 'top',     auf: true,  nimm: ['section.tier-hero-section', 'div.ds-stat-row', 'div.tier-search-row'],
           de: ['Die stärksten Decks', 'Feldanteil und Top-8-Quote, mit Nenner'],
@@ -217,6 +221,45 @@
         if (!alt) host.insertBefore(row, host.firstChild);
     }
 
+    // Aufklappen, das man auch sieht.
+    //
+    // GEMESSEN am 19.08.2026 auf der Live-Seite, Fenster 1175 px hoch, mit
+    // dem Kopf "Auf- und Absteiger" 44 px ueber der unteren Bildkante — die
+    // Lage, in der man zwangslaeufig steht, wenn man die letzten drei
+    // Abschnitte aufklappen will:
+    //
+    //     neuer Inhalt        692 px hoch
+    //     davon sichtbar       44 px  =  6 %
+    //     Seite gescrollt       0 px
+    //
+    // Sechs Prozent am unteren Rand sieht aus wie nichts. Darum den
+    // Abschnitt nach dem Aufklappen an den oberen Bildrand holen — aber nur,
+    // wenn er sonst nicht hineinpasst. Ein Sprung ohne Anlass stoert genauso
+    // wie eine ausbleibende Reaktion.
+    function insBild(sec) {
+        if (!sec || typeof sec.getBoundingClientRect !== 'function') return;
+        // Direkt nach dem Umschalten stimmt die Messung noch nicht.
+        var rahmen = (typeof requestAnimationFrame === 'function')
+            ? requestAnimationFrame
+            : function (f) { setTimeout(f, 16); };
+        rahmen(function () {
+            var r = sec.getBoundingClientRect();
+            var sicht = window.innerHeight || document.documentElement.clientHeight;
+            if (r.top >= 0 && r.bottom <= sicht) return;   // passt ohnehin
+            if (r.top >= 0 && r.top <= ABSTAND_OBEN) return;  // steht schon oben
+            var ziel = (window.pageYOffset || document.documentElement.scrollTop || 0)
+                     + r.top - ABSTAND_OBEN;
+            if (ziel < 0) ziel = 0;
+            var sanft = !(window.matchMedia
+                && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+            try {
+                window.scrollTo({ top: ziel, behavior: sanft ? 'smooth' : 'auto' });
+            } catch (e) {
+                window.scrollTo(0, ziel);
+            }
+        });
+    }
+
     function anwenden(host) {
         host.querySelectorAll('.ds-sec').forEach(function (sec) {
             var auf = offen.indexOf(sec.getAttribute('data-sec')) > -1;
@@ -250,6 +293,57 @@
         }
         if (!offen) offen = gemerkt() || standard();
 
+        // EINE Weiche am Host statt eines Handlers je Kopf.
+        //
+        // Der Grund steht in zwei fremden Zeilen:
+        //     js/app-tier-meta.js:1041   content.innerHTML = html + content.innerHTML
+        //     js/app-meta-cards.js:1406  currentMetaContent.innerHTML = container.innerHTML
+        //
+        // Die erste ist die heimtueckische. Sie liest den vorhandenen Inhalt
+        // als Text zurueck und setzt ihn neu: das Markup der Abschnitte
+        // ueberlebt Zeichen fuer Zeichen, jeder daran haengende Handler
+        // nicht. Danach findet sektionieren() die Abschnitte vor, haelt sie
+        // fuer fertig und haengt keinen neuen an. Ergebnis sind Koepfe, die
+        // aussehen wie Knoepfe und keine mehr sind.
+        //
+        // GEMESSEN am 19.08.2026, lokal bei 1440 px, Klick auf
+        // "Auf- und Absteiger": aria-expanded bleibt false, ds_sections_v1
+        // bleibt leer, keine Reset-Zeile. Bei 390 px ging es, weil dort eine
+        // andere Renderwelle zuletzt lief. Der Nutzer sitzt am Laptop — er
+        // hat genau die kaputte Haelfte gesehen.
+        //
+        // Der Host selbst wird nie ersetzt, nur sein Inhalt. Ein Handler an
+        // IHM ueberlebt jedes innerHTML darunter. Das Kennzeichen sorgt
+        // dafuer, dass nicht bei jedem Durchlauf ein weiterer dazukommt.
+        if (!host.__dsSecWeiche) {
+            host.__dsSecWeiche = true;
+            host.addEventListener('click', function (ev) {
+                if (!ev.target || !ev.target.closest) return;
+                // Der Zuruecksetzen-Knopf haengt am selben Problem: er sitzt
+                // im Host und verliert seinen Handler bei jedem fremden
+                // innerHTML. Hier mitbehandelt, statt ihn spaeter einzeln
+                // wiederzufinden.
+                if (ev.target.closest('.ds-sec-reset-btn')) {
+                    offen = standard();
+                    merken(offen);
+                    anwenden(host);
+                    return;
+                }
+                var hd = ev.target.closest('.ds-sec-hd');
+                if (!hd || !host.contains(hd)) return;
+                var sec = hd.closest('.ds-sec');
+                var id = sec && sec.getAttribute('data-sec');
+                if (!id) return;
+                if (!offen) offen = gemerkt() || standard();
+                var jetzt = offen.indexOf(id) > -1;
+                offen = jetzt ? offen.filter(function (x) { return x !== id; })
+                              : offen.concat([id]);
+                merken(offen);
+                anwenden(host);
+                if (!jetzt) insBild(sec);
+            });
+        }
+
         var geaendert = false;
 
         SECTIONS.forEach(function (s) {
@@ -268,13 +362,6 @@
                 body.className = 'ds-sec-body';
                 sec.appendChild(hd);
                 sec.appendChild(body);
-                hd.addEventListener('click', function () {
-                    var jetzt = offen.indexOf(s.id) > -1;
-                    offen = jetzt ? offen.filter(function (x) { return x !== s.id; })
-                                  : offen.concat([s.id]);
-                    merken(offen);
-                    anwenden(host);
-                });
                 host.appendChild(sec);
                 geaendert = true;
             }

@@ -886,3 +886,46 @@ html.is-signed-out [onclick*="radelist"]:hover {
     max-width: 100vw;
   }
 }
+
+/* ── Knöpfe an der Karte ────────────────────────────────────────────
+ *
+ * Die Format-Staples zeigten fünfzehn Karten und boten nichts an. Zwei
+ * Dinge lagen nahe und waren beide schon gebaut, nur nicht verdrahtet:
+ * auf die Wunschliste legen und die anderen Artworks derselben Karte
+ * ansehen.
+ *
+ * 32 px hoch: kleiner als der 40-px-Standardknopf, weil fünfzehn Karten
+ * nebeneinander stehen — aber nicht kleiner als ein Daumen. Auf dem
+ * Telefon wächst er auf 36.
+ */
+.top-card-actions {
+    display: flex;
+    gap: var(--s-1);
+    margin-top: var(--s-1);
+}
+.top-card-act {
+    flex: 1;
+    min-height: 32px;
+    padding: 0 var(--s-2);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: var(--surface-1);
+    color: var(--brand);
+    font: inherit;
+    font-size: var(--fs-md);
+    line-height: 1;
+    cursor: pointer;
+    transition: background .15s ease, border-color .15s ease;
+}
+.top-card-act:hover {
+    background: var(--surface-2);
+    border-color: var(--brand);
+}
+.top-card-act:focus-visible {
+    outline: 2px solid var(--brand);
+    outline-offset: 1px;
+}
+
+@media (max-width: 768px) {
+    .top-card-act { min-height: 36px; }
+}

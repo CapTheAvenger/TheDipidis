@@ -64,17 +64,11 @@
           de: ['Tier-Liste', 'alle Archetypen nach Stärke gruppiert'],
           en: ['Tier list', 'all archetypes grouped by strength'] },
         { id: 'rang',    auf: false, nimm: ['div.cm-rangliste-block'],
-          de: ['Wer wird gespielt, wer kommt durch', 'eine sortierbare Rangliste statt drei Tabellen'],
-          en: ['Who gets played, who gets through', 'one sortable ranking instead of three tables'] },
+          de: ['Meta-Performance', 'Listen, Win Rate und Top-8-Quote je Deck — sortierbar'],
+          en: ['Meta performance', 'lists, win rate and top-8 rate per deck — sortable'] },
         { id: 'movers',  auf: false, nimm: ['div.tier-movers-row', 'div.matchups-grid-container'],
           de: ['Auf- und Absteiger', 'Bewegung gegenüber der Vorwoche'],
           en: ['Climbers and fallers', 'movement against last week'] },
-        { id: 'overview',auf: false, nimm: ['div.stats-grid'],
-          de: ['Überblick', 'Kennzahlen des Formats'],
-          en: ['Overview', 'format key figures'] },
-        { id: 'full',    auf: false, nimm: ['div.section'],
-          de: ['Vollständige Tabelle', 'jeder Archetyp, auch die mit einem Antritt'],
-          en: ['Full table', 'every archetype, including single entries'] },
     ];
 
     function de() {

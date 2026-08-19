@@ -293,14 +293,28 @@
          * Zahl. */
         ctx.fillStyle = C.line;
         ctx.fillRect(0, DC.HEAD, DC.W, DC.STATS);
-        var units = 1 + 1.35 + 1.35;
-        var free = DC.W - 4;
-        var w1 = Math.round(free * (1 / units));
-        var w2 = Math.round(free * (1.35 / units));
+        /* Die erste Fuge sitzt genau ueber der Kante des Koerpers darunter.
+         *
+         * Vorher wurden die drei Spalten nach 1 / 1,35 / 1,35 aufgeteilt. Das
+         * ergab fuer die erste 323 px, also eine Fuge bei x = 323..325 —
+         * waehrend der Koerper darunter bei DC.KEY_W = 300 seine Kante hat.
+         * 25 px daneben, ueber die ganze Kartenhoehe sichtbar.
+         *
+         * Gemeldet am 19.08.2026: "der eine Strich, der neben dem Bild ist, und
+         * der eine Strich, der neben dem Anteil im Feld ist, die sind so leicht
+         * versetzt, sieht irgendwie komisch aus."
+         *
+         * Jetzt liegt die erste Kante fest auf KEY_W; die beiden rechten teilen
+         * sich den Rest im bisherigen Verhaeltnis (1,35 zu 1,35, also haelftig).
+         * Sie tragen je eine Herleitung, die linke nur eine Zahl — deshalb
+         * durfte sie ohnehin die schmalste sein. */
+        var w1 = DC.KEY_W - 2;              /* Fuge endet exakt auf KEY_W */
+        var restW = DC.W - (w1 + 2) - 2;    /* zwei Fugen a 2 px */
+        var w2 = Math.round(restW / 2);
         var cols = [
             { x: 0, w: w1 },
-            { x: w1 + 2, w: w2 },
-            { x: w1 + w2 + 4, w: DC.W - (w1 + w2 + 4) }
+            { x: DC.KEY_W, w: w2 },
+            { x: DC.KEY_W + w2 + 2, w: DC.W - (DC.KEY_W + w2 + 2) }
         ];
 
         function statCol(col, accent, value, valueColor, key, note, note2) {

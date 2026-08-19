@@ -1369,45 +1369,93 @@
                     // Verwechslung gar nicht erst moeglich ist.
                     const deR = getLang() === 'de';
                     const perfVon = new Map((conv.decks || []).map(d => [d.name, d.perfPct]));
-                    const reihen = enriched
-                        .filter(d => d.brought >= CONV_MIN_N)
-                        .map(d => ({
-                            name: d.name,
-                            anteil: d.broughtPct,
-                            antritte: d.brought,
-                            quote: d.top8ConvPct,
-                            cuts: d.top8,
-                            faktor: perfVon.has(d.name) ? 1 + perfVon.get(d.name) / 100 : null,
-                            duenn: d.brought < CONV_THIN_N,
-                        }));
+
+                    // ZWEI Zaehlungen desselben Feldes, und beide gehoeren hierher.
+                    //
+                    // Gemeldet am 19.08.2026: "Du hast hier Mega Excadrill 7,8 %
+                    // Anteil mit 673 Antritten. Unten in der Liste steht aber ein
+                    // Deckcount von 2121 und eine Winrate von 49 %. Irgendwie
+                    // gehen da die Daten auseinander."
+                    //
+                    // Sie gehen nicht auseinander — es sind zwei verschiedene
+                    // Groessen, die bis heute in zwei getrennten Tabellen standen
+                    // und deshalb wie ein Widerspruch aussahen:
+                    //
+                    //   data/online_tournament_top8_decks.csv
+                    //       672,5 gewichtete TURNIER-Antritte, 31 davon Top 8
+                    //       Summe ueber alle Decks: 8.574
+                    //   data/limitless_online_decks.csv  (via normalizedDecks)
+                    //       2.121 DECKLISTEN auf der Online-Ladder, 49,46 % WR
+                    //       Summe ueber alle Decks: 26.319
+                    //
+                    // Der Anteil ist in beiden fast gleich (7,8 gegen 7,75 %) —
+                    // dasselbe Feld, anders gezaehlt. 113 der 131 Decks stehen in
+                    // beiden Dateien; wo eine fehlt, steht ein Strich statt einer
+                    // erfundenen Zahl.
+                    //
+                    // Damit faellt die "Vollstaendige Tabelle" als eigener
+                    // Abschnitt weg: sie zeigte genau die Ladder-Spalten, die
+                    // jetzt hier stehen.
+                    const ladderVon = new Map((normalizedDecks || []).map(d => [d.archetype, d]));
+                    const alleNamen = new Set([
+                        ...enriched.map(d => d.name),
+                        ...(normalizedDecks || []).map(d => d.archetype),
+                    ]);
+                    const turnierVon = new Map(enriched.map(d => [d.name, d]));
+
+                    const reihen = [...alleNamen].map(name => {
+                        const t = turnierVon.get(name) || null;
+                        const l = ladderVon.get(name) || null;
+                        const antritte = t ? t.brought : null;
+                        return {
+                            name,
+                            listen:  l ? l.new_count : null,
+                            anteil:  l ? l.share : (t ? t.broughtPct : null),
+                            wr:      l && l.winrate > 0 ? l.winrate : null,
+                            antritte,
+                            quote:   t ? t.top8ConvPct : null,
+                            cuts:    t ? t.top8 : null,
+                            faktor:  perfVon.has(name) ? 1 + perfVon.get(name) / 100 : null,
+                            // Duenn heisst hier: zu wenig TURNIER-Antritte, um die
+                            // Top-8-Quote zu glauben. Die Ladder-Spalten sind davon
+                            // unberuehrt, die stehen auf 2.121 Listen.
+                            duenn: !(antritte >= CONV_THIN_N),
+                            rang: l ? (l.new_count || 0) : 0,
+                        };
+                    });
 
                     const SPALTEN = [
-                        { k: 'name',     de: 'Deck',         en: 'Deck',        num: false },
-                        { k: 'anteil',   de: 'Anteil',       en: 'Share',       num: true, hilf: 'share' },
-                        { k: 'antritte', de: 'Antritte',     en: 'Entries',     num: true },
-                        { k: 'quote',    de: 'Top-8-Quote',  en: 'Top-8 rate',  num: true, hilf: 'top8' },
-                        { k: 'cuts',     de: 'davon Top 8',  en: 'made top 8',  num: true },
-                        { k: 'faktor',   de: 'ggü. Schnitt', en: 'vs. average', num: true },
+                        { k: 'name',     de: 'Deck',          en: 'Deck',        num: false },
+                        { k: 'listen',   de: 'Listen',        en: 'Lists',       num: true,
+                          tip: { de: 'Decklisten auf der Online-Ladder', en: 'decklists on the online ladder' } },
+                        { k: 'anteil',   de: 'Anteil',        en: 'Share',       num: true, hilf: 'share' },
+                        { k: 'wr',       de: 'Win Rate',      en: 'Win rate',    num: true,
+                          tip: { de: 'gewonnene Partien auf der Ladder', en: 'games won on the ladder' } },
+                        { k: 'antritte', de: 'Antritte',      en: 'Entries',     num: true,
+                          tip: { de: 'gewichtete Turnier-Antritte', en: 'weighted tournament entries' } },
+                        { k: 'cuts',     de: 'davon Top 8',   en: 'made top 8',  num: true },
+                        { k: 'quote',    de: 'Top-8-Quote',   en: 'Top-8 rate',  num: true, hilf: 'top8' },
+                        { k: 'faktor',   de: 'Top 8 ggü. Ø',  en: 'Top 8 vs. avg', num: true,
+                          tip: { de: '1,6-mal heißt: erreicht die Top 8 anderthalbmal so oft wie ein durchschnittliches Deck',
+                                 en: '1.6× means: reaches top 8 one and a half times as often as an average deck' } },
                     ];
 
                     const zelle = (r, k) => {
                         if (k === 'name')     return escapeHtml(r.name);
-                        if (k === 'anteil')   return fmtPct(r.anteil);
-                        if (k === 'antritte') return fmtNumDS(r.antritte);
-                        if (k === 'quote')    return fmtPct(r.quote);
-                        if (k === 'cuts')     return fmtNumDS(r.cuts);
+                        if (k === 'listen')   return r.listen   == null ? '–' : fmtNumDS(r.listen);
+                        if (k === 'anteil')   return r.anteil   == null ? '–' : fmtPct(r.anteil);
+                        if (k === 'wr')       return r.wr       == null ? '–' : fmtPct(r.wr);
+                        if (k === 'antritte') return r.antritte == null ? '–' : fmtNumDS(r.antritte);
+                        if (k === 'quote')    return r.quote    == null ? '–' : fmtPct(r.quote);
+                        if (k === 'cuts')     return r.cuts     == null ? '–' : fmtNumDS(r.cuts);
                         if (r.faktor == null) return '–';
                         const txt = r.faktor.toLocaleString(deR ? 'de-DE' : 'en-US',
                             { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + (deR ? '-mal' : '×');
-                        // Der divergierende Balken aus components.css: Nulllinie
-                        // in der Mitte, blau nach oben, rot nach unten. Er stand
-                        // vorher im eigenen Block "Top 8 vs. Erwartung" und ist
-                        // das Beste daran gewesen — er zeigt auf einen Blick,
-                        // wer ueber und wer unter dem Schnitt liegt. Der Block
-                        // ist weg, der Balken bleibt.
-                        //
-                        // Der Balken traegt keine Ziffern, darum liest die
-                        // Sortierung weiter die Zahl aus dem Text der Zelle.
+                        // Der divergierende Balken aus components.css: Nulllinie in
+                        // der Mitte, blau nach oben, rot nach unten. Er zeigt auf
+                        // einen Blick, wer ueber dem Schnitt liegt. Er traegt keine
+                        // Ziffern, darum liest die Sortierung weiter die Zahl aus
+                        // dem Text der Zelle.
                         const abw = (r.faktor - 1) * 100;
                         const breite = Math.min(Math.abs(abw), CONV_CAP) / CONV_CAP * 50;
                         const posi = abw >= 0;
@@ -1417,40 +1465,72 @@
                             + ` style="width:${breite.toFixed(1)}%"></span></span>`;
                     };
 
-                    // Standardreihenfolge: nach Anteil, absteigend. Das ist die
-                    // Frage, die die meisten zuerst haben.
-                    reihen.sort((a, b) => b.anteil - a.anteil);
+                    // Nach Listen, absteigend. Das ist dieselbe Reihenfolge,
+                    // die die "Vollstaendige Tabelle" hatte — sie ist hier
+                    // aufgegangen, und wer sie gewohnt war, findet sie wieder.
+                    reihen.sort((x, y) => (y.listen || 0) - (x.listen || 0)
+                                       || (y.anteil || 0) - (x.anteil || 0));
 
                     const kopfZellen = SPALTEN.map(c => {
                         const txt = deR ? c.de : c.en;
-                        const beschriftet = c.hilf ? hintTerm(txt, term(c.hilf)) : escapeHtml(txt);
+                        const beschriftet = c.hilf ? hintTerm(txt, term(c.hilf))
+                                          : (c.tip ? hintTerm(txt, deR ? c.tip.de : c.tip.en)
+                                                   : escapeHtml(txt));
                         return `<th class="${c.num ? 'ds-num ' : ''}cm-rang-th" data-rang-spalte="${c.k}"
-                                    role="button" tabindex="0" aria-sort="${c.k === 'anteil' ? 'descending' : 'none'}"
+                                    role="button" tabindex="0" aria-sort="${c.k === 'listen' ? 'descending' : 'none'}"
                                     title="${escapeHtml(deR ? 'Nach dieser Spalte sortieren' : 'Sort by this column')}">${
                                     beschriftet}<span class="cm-rang-pfeil" aria-hidden="true"></span></th>`;
                     }).join('');
 
+                    // Vorne die Decks, ueber die es etwas zu sagen gibt; der Rest
+                    // auf Knopfdruck. Die "Vollstaendige Tabelle" hiess so, weil
+                    // sie JEDEN Archetyp zeigte, auch den mit einem einzigen
+                    // Antritt — das bleibt moeglich, kostet aber nicht mehr
+                    // standardmaessig 138 Zeilen Seitenhoehe.
+                    const SICHTBAR = 25;
+                    const ladderSumme = (normalizedDecks || [])
+                        .reduce((sum, d) => sum + (d.new_count || 0), 0);
                     const zeilen = reihen.map((r, i) => `
-                        <tr${r.duenn ? ' class="is-muted"' : ''}>
+                        <tr class="${r.duenn ? 'is-muted' : ''}${i >= SICHTBAR ? ' cm-rang-mehr' : ''}"${
+                            i >= SICHTBAR ? ' hidden' : ''}>
                             <td class="ds-rank">${i + 1}</td>
                             ${SPALTEN.map(c => `<td class="${c.num ? 'ds-num' : ''}">${zelle(r, c.k)}</td>`).join('')}
                         </tr>`).join('');
+                    const versteckt = Math.max(0, reihen.length - SICHTBAR);
 
                     overallTop8Html = `
                         <div class="ds-panel cm-rangliste-block">
-                            <h3 class="ds-label">🏆 ${deR ? 'Wer wird gespielt, wer kommt durch'
-                                                        : 'Who gets played, who gets through'}</h3>
+                            <h3 class="ds-label">🏆 ${deR ? 'Meta-Performance' : 'Meta performance'}</h3>
                             <p class="ds-note cm-rang-hinweis">${deR
-                                ? 'Eine Zeile je Deck. Auf eine Spaltenüberschrift tippen sortiert danach. '
-                                  + 'Blasse Zeilen haben unter ' + CONV_THIN_N + ' Antritte — dort ist die Quote noch wackelig.'
-                                : 'One row per deck. Tap a column heading to sort by it. '
-                                  + 'Faded rows have fewer than ' + CONV_THIN_N + ' entries — the rate is shaky there.'}</p>
+                                ? 'Eine Zeile je Deck, jede Spaltenüberschrift sortiert. '
+                                  + '<strong>Listen</strong> und <strong>Win Rate</strong> kommen von der Online-Ladder '
+                                  + '(' + fmtNumDS(ladderSumme) + ' Decklisten), <strong>Antritte</strong> und '
+                                  + '<strong>Top 8</strong> aus den Turnieren (' + fmtNumDS(conv.totalBrought)
+                                  + ' gewichtete Antritte). Zwei Zählungen desselben Feldes — darum ist der Anteil '
+                                  + 'in beiden fast gleich, die Stückzahlen aber nicht. Ein Strich heißt: dieses Deck '
+                                  + 'steht in der einen Datei und in der anderen nicht. Blasse Zeilen haben unter '
+                                  + CONV_THIN_N + ' Turnier-Antritte — dort ist die Top-8-Quote noch wackelig.'
+                                : 'One row per deck, every column heading sorts. <strong>Lists</strong> and '
+                                  + '<strong>win rate</strong> come from the online ladder (' + fmtNumDS(ladderSumme)
+                                  + ' decklists), <strong>entries</strong> and <strong>top 8</strong> from tournaments ('
+                                  + fmtNumDS(conv.totalBrought) + ' weighted entries). Two counts of the same field — '
+                                  + 'which is why the share matches but the totals do not. A dash means the deck is in '
+                                  + 'one file and not the other. Faded rows have fewer than ' + CONV_THIN_N
+                                  + ' tournament entries.'}</p>
                             <div class="mobile-table-scroll">
-                                <table class="ds-table cm-rangliste" data-rang-sortiert="anteil" data-rang-richtung="ab">
+                                <table class="ds-table cm-rangliste" data-rang-sortiert="listen" data-rang-richtung="ab">
                                     <thead><tr><th class="ds-rank">#</th>${kopfZellen}</tr></thead>
                                     <tbody>${zeilen}</tbody>
                                 </table>
                             </div>
+                            ${versteckt > 0 ? `
+                            <div class="cm-rang-mehr-zeile">
+                                <button type="button" class="ds-btn cm-rang-mehr-btn"
+                                        data-rang-mehr="${versteckt}"
+                                        data-mehr-text="${escapeHtml(deR ? 'Alle ' + reihen.length + ' Decks zeigen' : 'Show all ' + reihen.length + ' decks')}"
+                                        data-weniger-text="${escapeHtml(deR ? 'Nur die Top ' + SICHTBAR + ' zeigen' : 'Show only the top ' + SICHTBAR)}">${
+                                        escapeHtml(deR ? 'Alle ' + reihen.length + ' Decks zeigen' : 'Show all ' + reihen.length + ' decks')}</button>
+                            </div>` : ''}
                         </div>`;
                 }
             } catch (_e) {
@@ -1553,6 +1633,27 @@
             // dieselben Zahlen, aber lesbar, ohne den Satz zu entziffern.
             // Drei Kacheln aus components.css, keine eigene Regel.
             const deDS = getLang() === 'de';
+
+            // Die Turnierzahlen standen bisher im Abschnitt "Ueberblick" ganz
+            // unten, in einer lila Kachel, auf Englisch, hinter zwei weiteren
+            // Abschnitten. Gemeldet: "die Ueberblick koennen wir rausnehmen,
+            // wenn wir davon noch Daten verwenden wollen, dann koennen wir die
+            // oben mit reinnehmen". Genau eine Angabe daraus ist es wert: woraus
+            // die 26.319 Listen eigentlich bestehen.
+            let metaStats = null;
+            try {
+                const ms = await fetch(`${BASE_PATH}limitless_meta_stats.json?t=${timestamp}`);
+                if (ms.ok) {
+                    const j = await ms.json();
+                    const z = (v) => parseInt(v, 10) || 0;
+                    if (z(j.tournaments) > 0) {
+                        metaStats = { turniere: z(j.tournaments), spieler: z(j.players), partien: z(j.matches) };
+                    }
+                }
+            } catch (e) {
+                // Fehlt die Datei, bleibt die Kachel bei ihrer kurzen Zeile.
+                console.warn('limitless_meta_stats.json nicht geladen:', e && e.message);
+            }
             const statTile = (label, value, unit, context) => `
                 <div class="ds-stat">
                     <span class="ds-stat-label">${escapeHtml(label)}</span>
@@ -1563,7 +1664,11 @@
                 <div class="ds-stat-row">
                     ${statTile(deDS ? 'Gemeldete Listen' : 'Reported lists',
                         totalEntries.toLocaleString(deDS ? 'de-DE' : 'en-US'), '',
-                        deDS ? 'einzelne Decklisten, nicht Deckarten' : 'individual decklists, not deck types')}
+                        metaStats
+                            ? (deDS
+                                ? `aus ${fmtNumDS(metaStats.turniere)} Turnieren · ${fmtNumDS(metaStats.spieler)} Spieler · ${fmtNumDS(metaStats.partien)} Partien`
+                                : `from ${fmtNumDS(metaStats.turniere)} tournaments · ${fmtNumDS(metaStats.spieler)} players · ${fmtNumDS(metaStats.partien)} matches`)
+                            : (deDS ? 'einzelne Decklisten, nicht Deckarten' : 'individual decklists, not deck types'))}
                     ${statTile(deDS ? 'Archetypen' : 'Archetypes',
                         String(totalDecks), '',
                         deDS ? 'mindestens ein gemeldetes Deck' : 'at least one reported deck')}
@@ -1590,11 +1695,16 @@
                         const acht = top.slice(0, 8).reduce((sum, d) => sum + d.brought, 0)
                                      / fieldConv.totalBrought * 100;
                         if (!(acht > 0)) return '';
-                        return statTile(deDS ? 'Die acht größten' : 'The top eight',
+                        // "Die acht groessten" war zwar deutsch, aber niemand
+                        // sagt das. Gemeldet: "man wuerde hier von Top 8
+                        // Archetypes sprechen … die englischen Woerter, die in
+                        // der Community benutzt werden, sollten wir schon
+                        // benutzen." Meta, Top 8 und Archetype sind genau solche.
+                        return statTile(deDS ? 'Top 8 Archetypes' : 'Top 8 archetypes',
                             fmtPct(acht, 0), '',
                             deDS
-                                ? `von ${totalDecks} Archetypen — so eng ist das Feld`
-                                : `of ${totalDecks} archetypes — how tight the field is`);
+                                ? `des Feldes — ${totalDecks} Archetypen insgesamt`
+                                : `of the field — ${totalDecks} archetypes in total`);
                     })()}
                 </div>`;
 
@@ -1889,6 +1999,13 @@
                 else if (rank === 3) rankColor = '#cd7f32'; // Bronze
                 else if (rank <= 5) rankColor = '#3498db'; // Blue for top 5
                 
+                // ♡ und ★ sind die Symbole, die diese Seite schon benutzt:
+                // &#9825; fuer "auf die Wunschliste" (js/app-cards-db.js:2867)
+                // und ★ fuer den Artwork-/Rarity-Wechsel (app-city-league.js,
+                // app-deck-builder.js, app-current-meta-analysis.js). Hier stand
+                // zuerst ein ▧ — gemeldet: "es waer schon gut, wenn wir ueberall
+                // immer das gleiche Logo nutzen".
+                //
                 // Zwei Knoepfe je Karte, gemeldet am 19.08.2026: "hier muesste
                 // man vielleicht nur noch die Moeglichkeit haben, die direkt
                 // auf die Wunschliste zu packen, und dass man die Chance hat,
@@ -1913,7 +2030,7 @@
                             <button type="button" class="top-card-act"
                                     onclick="openRaritySwitcherFromDB('${escapeJsStr(card.name)}', '${escapeJsStr(card.set_code)}', '${escapeJsStr(String(card.set_number))}')"
                                     title="${escapeHtml(deLbl ? 'Andere Artworks dieser Karte' : 'Other artworks of this card')}"
-                                    aria-label="${escapeHtml((deLbl ? 'Artworks: ' : 'Artworks: ') + card.name)}">▧</button>
+                                    aria-label="${escapeHtml((deLbl ? 'Artworks: ' : 'Artworks: ') + card.name)}">★</button>
                         </div>` : '';
 
                 html += `

@@ -1365,11 +1365,36 @@
         // ab derselben Aenderung nicht mehr. Diese Funktion bleibt
         // trotzdem stehen: bis der naechste Scrape durchgelaufen ist,
         // liegt die alte Datei noch auf der Seite.
+        // Am 19.08.2026 kamen drei weitere dazu, und aus demselben Grund:
+        // jede von ihnen zeigt Zahlen, die woanders auf derselben Seite
+        // schon stehen — besser beschriftet, auf Deutsch und sortierbar.
+        //
+        //   "Biggest Rank Climbers" / "Biggest Rank Fallers"
+        //       Der Abschnitt "Auf- und Absteiger" zeigt dieselbe Bewegung
+        //       aus derselben Quelle, nur mit Anteil und Vorwoche daneben.
+        //   "Full Comparison Table"
+        //       Rang, Count und Win Rate sind in die Rangline
+        //       "Meta-Performance" eingegangen — dort zusammen mit Antritten
+        //       und Top-8-Quote und in jeder Spalte sortierbar. Gemeldet:
+        //       "die vollstaendige Tabelle brauchen wir doch theoretisch auch
+        //       nicht … das muessen wir nicht separat halten."
+        //   .stats-grid ("Archetype Overview" / "Top 10 Changes" / "Meta")
+        //       Drei lila Kacheln auf Englisch. Die einzige Angabe daraus,
+        //       die sonst nirgends stand — 199 Turniere, 14.026 Spieler,
+        //       31.411 Partien — steht jetzt oben in der Kachel "Gemeldete
+        //       Listen". Gemeldet: "die Ueberblick koennen wir rausnehmen."
+        //
+        // Danach traegt die Scraper-Datei nichts Sichtbares mehr bei. Sie
+        // bleibt vorerst die Grundlage, in die app-tier-meta.js hineinschreibt
+        // — sie ganz abzuschaffen ist ein eigener Schritt.
         function _dropTop100MatchupSection(root) {
             if (!root) return root;
+            root.querySelectorAll('div.stats-grid').forEach(g => g.remove());
             root.querySelectorAll('div.section').forEach(sec => {
                 var h2 = sec.querySelector('h2');
-                if (h2 && /Matchup Analysis/i.test(h2.textContent || '')) sec.remove();
+                var titel = (h2 && h2.textContent) || '';
+                if (/Rank Climbers|Rank Fallers|Full Comparison Table/i.test(titel)) { sec.remove(); return; }
+                if (h2 && /Matchup Analysis/i.test(titel)) sec.remove();
             });
             return root;
         }

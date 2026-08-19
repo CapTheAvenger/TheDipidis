@@ -355,8 +355,14 @@
                             // THIN_GAMES in js/app-archetype-card.js.
                             const lowSample = totalGames < 20;
                             const sampleClass = 'heatmap-td-n';
-                            const sampleHtml = `<small class="${sampleClass}">n=${totalGames}</small>`;
-                            tableHtml += `<td class="${tdClass} heatmap-td-dyn${lowSample ? ' heatmap-td-thin' : ''}" style="--heatmap-bg: ${bgColor}; --heatmap-color: ${textColor};" title="${tooltip}" onclick="showToast('${safeRow} vs ${safeCol}: ${tooltip}', 'info', 3000)">${winRate.toFixed(1)}%${sampleHtml}</td>`;
+                            // "n=638" ist Rechnerjargon. Gemeldet am 19.08.2026:
+                            // "n ist gleich sagt nichts aus … es muss fuer jeden
+                            // von der Strasse klar sein, was sind hier die Daten,
+                            // die ich sehen kann." Also steht da jetzt, was es ist.
+                            const sampleHtml = `<small class="${sampleClass}">${totalGames} ${
+                                t('heatmap.gamesShort')}</small>`;
+                            tableHtml += `<td class="${tdClass} heatmap-td-dyn${lowSample ? ' heatmap-td-thin' : ''}" style="--heatmap-bg: ${bgColor}; --heatmap-color: ${textColor};" title="${tooltip}" onclick="showToast('${safeRow} vs ${safeCol}: ${tooltip}', 'info', 3000)">${(typeof window.formatPercent === 'function')
+                                ? window.formatPercent(winRate) : winRate.toFixed(1) + ' %'}${sampleHtml}</td>`;
                         }
                     });
                     tableHtml += '</tr>';

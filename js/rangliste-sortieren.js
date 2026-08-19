@@ -86,9 +86,22 @@
         // Rangspalte neu durchzaehlen: sie nummeriert die ANZEIGE, nicht das
         // Deck. Bliebe sie stehen, saehe die sortierte Tabelle aus wie eine
         // kaputte Rangliste (3, 17, 5, ...).
+        // Sichtbarkeit haengt an der POSITION, nicht an der Zeile: nach dem
+        // Sortieren sollen wieder die ersten 25 zu sehen sein, nicht dieselben
+        // 25 Decks wie vorher. Sonst sortiert man nach Win Rate und sieht
+        // trotzdem die meistgespielten.
+        var block = tab.closest('.cm-rangliste-block');
+        var knopf = block && block.querySelector('.cm-rang-mehr-btn');
+        var allesOffen = !knopf || knopf.getAttribute('aria-expanded') === 'true';
+        var grenze = 25;
         zeilen.forEach(function (tr, n) {
             var rang = tr.querySelector('.ds-rank');
             if (rang) rang.textContent = String(n + 1);
+            if (!allesOffen) {
+                tr.classList.toggle('cm-rang-mehr', n >= grenze);
+                if (n >= grenze) tr.setAttribute('hidden', '');
+                else tr.removeAttribute('hidden');
+            }
             koerper.appendChild(tr);
         });
 
@@ -108,7 +121,42 @@
         return tab ? { tab: tab, schluessel: th.getAttribute('data-rang-spalte') } : null;
     }
 
+    /* Der Rest der Liste auf Knopfdruck.
+     *
+     * Die frueher eigenstaendige "Vollstaendige Tabelle" hiess so, weil sie
+     * JEDEN Archetyp zeigte, auch den mit einem einzigen Antritt. Sie ist in
+     * diese Tabelle aufgegangen — aber 138 Zeilen als Grundzustand waeren
+     * dieselbe Seitenhoehe wie vorher, nur an einer anderen Stelle. Also 25
+     * sichtbar, der Rest hinter einem Knopf, der sagt, wie viele es sind.
+     *
+     * Auch dieser Handler haengt am Document, aus demselben Grund wie die
+     * Sortierung: app-tier-meta.js und app-meta-cards.js setzen innerHTML neu
+     * und nehmen jeden Handler mit, der weiter unten haengt. */
+    function mehrOderWeniger(btn) {
+        var block = btn.closest('.cm-rangliste-block');
+        if (!block) return;
+        var zeilen = block.querySelectorAll('tbody tr.cm-rang-mehr');
+        var zu = btn.getAttribute('aria-expanded') !== 'true';
+        zeilen.forEach(function (tr) {
+            if (zu) tr.removeAttribute('hidden');
+            else tr.setAttribute('hidden', '');
+        });
+        btn.setAttribute('aria-expanded', String(zu));
+        var txt = zu ? btn.getAttribute('data-weniger-text') : btn.getAttribute('data-mehr-text');
+        if (txt) btn.textContent = txt;
+        // Beim Zuklappen zurueck an den Anfang der Tabelle, sonst steht man
+        // im Nichts, wo eben noch hundert Zeilen waren.
+        if (!zu) {
+            var r = block.getBoundingClientRect();
+            if (r.top < 0) window.scrollTo({ top: (window.pageYOffset || 0) + r.top - 16, behavior: 'auto' });
+        }
+    }
+
     document.addEventListener('click', function (ev) {
+        if (ev.target && ev.target.closest) {
+            var mehr = ev.target.closest('.cm-rang-mehr-btn');
+            if (mehr) { mehrOderWeniger(mehr); return; }
+        }
         var a = ausloeser(ev.target);
         if (a) sortiere(a.tab, a.schluessel);
     });

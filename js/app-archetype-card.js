@@ -269,8 +269,10 @@
                     <thead><tr>
                         <th>${esc(L('arc.colOpponent', de ? 'Gegner-Deck' : 'Deck'))}</th>
                         <th>${esc(L('arc.colWinRate', de ? 'Siegquote' : 'Win Rate'))}</th>
-                        <th title="${esc(L('arc.colGames', de ? 'Spiele' : 'Games'))}">Σ</th>
-                        <th>W</th><th>L</th>
+                        <th title="${esc(L('arc.colGames', de ? 'gespielte Partien' : 'games played'))}">${
+                            esc(de ? 'Partien' : 'Games')}</th>
+                        <th title="${esc(de ? 'gewonnene Partien' : 'games won')}">W</th>
+                        <th title="${esc(de ? 'verlorene Partien' : 'games lost')}">L</th>
                     </tr></thead>
                     <tbody>${body}</tbody>
                 </table>

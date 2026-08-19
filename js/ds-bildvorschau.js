@@ -40,6 +40,13 @@
             .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
     }
 
+    /* Kurze Rueckmeldung. showToast gehoert der Seite; fehlt es, sagt die
+       Konsole Bescheid, statt dass gar nichts passiert. */
+    function melde(text) {
+        if (typeof window.showToast === 'function') window.showToast(text, 'success', 2500);
+        else console.info('[Bildvorschau]', text);
+    }
+
     function speichern(blob, dateiname) {
         var url = URL.createObjectURL(blob);
         var a = document.createElement('a');
@@ -69,7 +76,10 @@
         modal.className = 'ds-bildvorschau-modal';
         // navigator.share kann Dateien nicht ueberall. Steht der Knopf da,
         // ohne zu funktionieren, ist das schlechter als kein Knopf.
-        var kannTeilen = !!(navigator.share);
+        // Der Knopf heisst jetzt "Kopieren" und tut auch genau das. Ob er
+        // erscheint, haengt nicht mehr an navigator.share — er faellt zur Not
+        // auf Speichern zurueck und sagt das auch.
+        var kannTeilen = true;
         modal.innerHTML =
             '<div class="ds-bildvorschau-backdrop"></div>' +
             '<div class="ds-bildvorschau-content" role="dialog" aria-modal="true" aria-label="' +
@@ -84,8 +94,8 @@
                     esc(o.alt || o.titel || L('Vorschau', 'Preview')) + '">' +
               '</div>' +
               '<div class="ds-bildvorschau-actions">' +
-                (kannTeilen ? '<button type="button" class="ds-bildvorschau-btn-share">📤 ' +
-                    esc(L('Teilen', 'Share')) + '</button>' : '') +
+                (kannTeilen ? '<button type="button" class="ds-bildvorschau-btn-kopieren">📋 ' +
+                    esc(L('Kopieren', 'Copy')) + '</button>' : '') +
                 '<button type="button" class="ds-bildvorschau-btn-download">💾 ' +
                     esc(L('Speichern', 'Save')) + '</button>' +
                 '<button type="button" class="ds-bildvorschau-btn-secondary">' +
@@ -121,17 +131,46 @@
                 }, 'image/png');
             });
 
-            var teilen = modal.querySelector('.ds-bildvorschau-btn-share');
+            var teilen = modal.querySelector('.ds-bildvorschau-btn-kopieren');
             if (teilen) {
                 teilen.addEventListener('click', function () {
+                    /* Kopieren statt Teilen-Menue.
+                     *
+                     * Gemeldet am 19.08.2026: "cool waer, wenn ich auf Teilen
+                     * druecke, dass dann nicht 'n extra Menue aufgeht, sondern
+                     * dass es automatisch in die Zwischenablage kopiert wird und
+                     * ich dann irgendwo anders hingehen kann — beim Speichern
+                     * wird's ja schon in die Fotomediathek gespeichert."
+                     *
+                     * Genau so: der eine Knopf legt das Bild in die
+                     * Zwischenablage, der andere auf die Platte. Das
+                     * System-Teilen-Menue war ein dritter Weg, der beides
+                     * konnte und keins davon direkt.
+                     *
+                     * navigator.clipboard.write mit ClipboardItem kann nicht
+                     * jeder Browser und braucht einen sicheren Kontext. Wo es
+                     * nicht geht, wird gespeichert — ein Knopf, der nichts tut,
+                     * waere schlechter. */
                     canvas.toBlob(function (blob) {
                         if (!blob) { zu(); return; }
-                        var datei = new File([blob], dateiname, { type: 'image/png' });
-                        navigator.share({ files: [datei], title: o.titel || dateiname, text: o.text || '' })
+                        var kannKopieren = !!(navigator.clipboard
+                            && window.ClipboardItem
+                            && typeof navigator.clipboard.write === 'function');
+                        if (!kannKopieren) {
+                            speichern(blob, dateiname);
+                            melde(L('Kopieren geht hier nicht — gespeichert.',
+                                    'Copying is not available here — saved instead.'));
+                            zu();
+                            return;
+                        }
+                        navigator.clipboard.write([new window.ClipboardItem({ 'image/png': blob })])
+                            .then(function () {
+                                melde(L('Bild in der Zwischenablage.', 'Image copied to clipboard.'));
+                            })
                             .catch(function () {
-                                // Abgebrochen oder nicht unterstuetzt: dann eben
-                                // speichern, statt den Klick ins Leere laufen zu lassen.
                                 speichern(blob, dateiname);
+                                melde(L('Kopieren abgelehnt — gespeichert.',
+                                        'Copy was refused — saved instead.'));
                             })
                             .then(zu, zu);
                     }, 'image/png');

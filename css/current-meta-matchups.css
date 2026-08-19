@@ -139,12 +139,33 @@
     -webkit-overflow-scrolling: touch;
 }
 
+/* Die Heatmap ist eine echte Tabelle.
+
+   css/styles.css:820 macht mit `table { display: block }` und direkt darunter
+   `table thead, table tbody { display: table; table-layout: fixed }` aus JEDER
+   Tabelle zwei voneinander unabhaengige Tabellen: Kopf und Koerper loesen ihre
+   Spaltenbreiten getrennt auf, und das <colgroup> haengt an der Blockbox und
+   wirkt auf keine von beiden. Gemessen auf 1908 px: erste Spalte im Kopf
+   511 px, im Koerper 231 px — 280 px Versatz, bei 11 gegen 11 Zellen.
+
+   css/mobile-responsive.css:2529 nimmt die Heatmap davon bereits aus, aber erst
+   unter 768 px. Auf dem Laptop blieb sie deshalb schief. Dieselbe Ausnahme gilt
+   ab hier fuer jede Breite. Verloren geht nichts: das seitliche Scrollen bringt
+   .heatmap-table-scroll mit (overflow-x: auto), nicht die Pauschalregel.
+
+   .arc-mu-table loest es seit jeher genauso (css/styles.css:10303). */
 #matchupHeatmapContainer .heatmap-table {
+    display: table;
+    overflow: visible;
     width: 100% !important;
     min-width: 900px !important;
     max-width: none !important;
-    table-layout: fixed !important;
+    table-layout: fixed;
 }
+
+#matchupHeatmapContainer .heatmap-table thead { display: table-header-group; }
+#matchupHeatmapContainer .heatmap-table tbody { display: table-row-group; }
+#matchupHeatmapContainer .heatmap-table tr    { display: table-row; }
 
 #matchupHeatmapContainer .heatmap-col-first {
     width: 170px !important;

@@ -489,6 +489,38 @@ html.is-signed-out [onclick*="radelist"]:hover {
 /* Der Rueckweg. Steht nur da, wenn jemand vom Startzustand abweicht —
    sonst waere er ein Bedienelement fuer einen Zustand, in dem es
    nichts zu tun gibt. */
+/* Ein Knopf, der aussieht wie der Rest der Seite.
+
+   `class="action-btn"` kam im ganzen Projekt genau einmal vor: am Knopf
+   "Alle Decks zeigen" unter der Heatmap. Gestylt war die Klasse nur in
+   css/ui-components.css:2306 — und zwar innerhalb einer @media
+   (max-width: ...)-Abfrage. Auf dem Laptop griff also keine einzige Regel:
+   gemessen 108x18 px, `border: 1.11px outset black`, eckig, grau. Das war
+   der Browser-Standardknopf, kein Entwurf.
+
+   .ds-btn benutzt dieselben Tokens wie .ds-sec-reset-btn direkt darunter,
+   nur eine Stufe groesser, weil er ein Abschnitt umschaltet und nicht nur
+   zuruecksetzt. Ohne !important. */
+.ds-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--s-2);
+    min-height: 40px;
+    padding: 9px 18px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--surface-1);
+    color: var(--brand);
+    font: inherit;
+    font-size: var(--fs-sm);
+    font-weight: 700;
+    cursor: pointer;
+    transition: background .15s ease, border-color .15s ease;
+}
+.ds-btn:hover { background: var(--surface-2); border-color: var(--brand); }
+.ds-btn:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+
 .ds-sec-reset {
     display: flex;
     align-items: center;

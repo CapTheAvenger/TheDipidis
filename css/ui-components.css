@@ -2303,11 +2303,6 @@ img[src*="limitlesstcg"] {
         font-size: 0.84rem !important;
     }
 
-    .heatmap-btn-row .action-btn {
-        min-height: 34px !important;
-        padding: 7px 10px !important;
-        font-size: 0.82rem !important;
-    }
 }
 
 @media (max-width: 768px) {

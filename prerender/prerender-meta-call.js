@@ -354,24 +354,35 @@ async function renderMetaCall(baseUrl, currentFormatKey) {
         });
 
         // Helper: trigger MetaCall.exportFieldAndRecsShareImage(),
-        // wait for the share-preview modal's <img> to appear, grab
-        // the base64 data URL, then remove the modal so the NEXT
-        // export call mounts a fresh one (the export function does
-        // `old?.remove()` itself — but our waitForSelector keys off
-        // the same id, so reusing the modal would short-circuit the
-        // wait and return the previous render).
+        // wait for the preview modal's <img> to appear, grab the base64
+        // data URL, then remove the modal so the NEXT export call mounts
+        // a fresh one (the export function does `old?.remove()` itself —
+        // but our waitForSelector keys off the same id, so reusing the
+        // modal would short-circuit the wait and return the previous
+        // render).
+        //
+        // Die Kennungen heissen seit dem 19.08.2026 #dsBildvorschau und
+        // .ds-bildvorschau-img: das Fenster war nie meta-call-spezifisch
+        // und wird jetzt auch von der Tier-Liste benutzt
+        // (js/ds-bildvorschau.js).
+        //
+        // Diese Datei ist beim Umbenennen uebersehen worden — gesucht war
+        // in js/ und css/, nicht in prerender/. Der Deploy ist daran
+        // gescheitert, zweimal, mit einem 30-Sekunden-Timeout auf einen
+        // Selektor, den es nicht mehr gab. Ein grep ueber das ganze Repo
+        // haette es gefunden.
         async function renderCurrentState(viewMode = 'single') {
             await page.evaluate((mode) => {
-                const old = document.getElementById('mc-share-preview-modal');
+                const old = document.getElementById('dsBildvorschau');
                 if (old) old.remove();
                 window.MetaCall.exportFieldAndRecsShareImage(mode);
             }, viewMode);
             await page.waitForSelector(
-                '#mc-share-preview-modal .mc-share-preview-img',
+                '#dsBildvorschau .ds-bildvorschau-img',
                 { timeout: 30_000 },
             );
             const dataUrl = await page.$eval(
-                '#mc-share-preview-modal .mc-share-preview-img',
+                '#dsBildvorschau .ds-bildvorschau-img',
                 (img) => img.src,
             );
             if (!dataUrl?.startsWith('data:image/png;base64,')) {

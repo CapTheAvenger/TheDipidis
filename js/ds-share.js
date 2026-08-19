@@ -756,22 +756,32 @@
     }
 
     function deliver(canvas, name) {
+        /* Erst zeigen, dann entscheiden.
+         *
+         * Bis zum 19.08.2026 schob diese Funktion die PNG-Datei direkt in
+         * den Download-Ordner (oder in das Teilen-Menue des Systems). Man
+         * bekam also ein Bild, das man erst nach dem Speichern zu sehen
+         * bekam. Gemeldet: "wenn man auf Bild generieren drueckt, bekommt
+         * man 'n schoenes Bild — warum zeigen wir das nicht direkt in der
+         * Seite an?"
+         *
+         * Das Fenster dafuer gab es schon, nur im Meta Call. Es liegt jetzt
+         * in js/ds-bildvorschau.js und wird von beiden benutzt.
+         *
+         * Faellt das Modul aus, bleibt der alte Weg: lieber ein Download
+         * ohne Vorschau als ein Knopf, der nichts tut. */
+        if (window.DsBildvorschau && typeof window.DsBildvorschau.zeige === 'function') {
+            return window.DsBildvorschau.zeige(canvas, {
+                dateiname: name,
+                titel: L('Bildkarte', 'Image card'),
+                alt: L('Analyse als Bild', 'Analysis as an image'),
+            });
+        }
         return new Promise(function (resolve) {
             canvas.toBlob(function (blob) {
                 if (!blob) {
                     toast(L('Bild-Export fehlgeschlagen', 'Image export failed'), 'error');
                     return resolve(false);
-                }
-                var file = new File([blob], name, { type: 'image/png' });
-                /* navigator.share wird versucht, sobald es existiert —
-                 * canShare({files}) meldet im iOS-Standalone-PWA
-                 * gelegentlich false, obwohl das Teilen funktioniert.
-                 * Dieselbe Erfahrung steht in app-deck-builder.js. */
-                if (navigator.share) {
-                    navigator.share({ files: [file], title: name })
-                        .then(function () { resolve(true); })
-                        .catch(function () { download(blob, name); resolve(true); });
-                    return;
                 }
                 download(blob, name);
                 resolve(true);

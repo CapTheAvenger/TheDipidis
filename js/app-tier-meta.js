@@ -1597,13 +1597,29 @@
                 const tierMeta = tierTitles[tierKey];
                 const isTrending = tierKey === 'tier-trending';
 
-                // Tier 1 and 2 get the full archetype card, stacked one per
-                // row: those are the decks people actually weigh against
-                // each other, and the numbers belong next to the ranking
-                // rather than behind a click. Tier 3 and Trending stay
-                // compact — 45 full cards with open matchup tables would be
-                // roughly 25 000 px of page.
-                const isStacked = (tierKey === 'tier-1' || tierKey === 'tier-2');
+                // Tier 1 bis 3 bekommen die volle Archetyp-Karte, eine je
+                // Zeile: das sind die Decks, die man wirklich gegeneinander
+                // abwaegt, und die Zahlen gehoeren neben die Rangliste statt
+                // hinter einen Klick.
+                //
+                // Tier 3 stand bis zum 19.08.2026 nicht dabei. Die Begruendung
+                // im alten Kommentar war "45 volle Karten mit offenen
+                // Matchup-Tabellen waeren rund 25 000 px" — die galt fuer Tier 3
+                // UND Trending zusammen und fuer offene Tabellen. Beides trifft
+                // nicht mehr zu: die Karte klappt ihre Matchups zu.
+                //
+                // GEMESSEN am 19.08.2026, 1440 px:
+                //     eine Karte                220 px
+                //     Tier 3, 9 Decks           als Kacheln:   590 px
+                //                               als Karten:  2.161 px
+                //     Abschnitt "Tier-Liste"    4.631 px -> 6.202 px
+                //
+                // Das kostet niemanden etwas, der es nicht sehen will: der
+                // ganze Abschnitt faengt zugeklappt an.
+                //
+                // Trending bleibt kompakt — 20 Decks, und das sind gerade die,
+                // bei denen die Zahlen am duennsten sind.
+                const isStacked = (tierKey === 'tier-1' || tierKey === 'tier-2' || tierKey === 'tier-3');
                 const gridCls = isStacked ? 'arc-inline-list' : 'deck-grid tier-deck-grid';
 
                 if (isTrending) {

@@ -8880,61 +8880,28 @@ window.MetaCall = (function () {
   // decide to share/download or just close. Matches the user flow:
   // "erst das Bild selbst sehen, dann teilen".
   function _showSharePreview(canvas, filename, title, text) {
-    const dataUrl = canvas.toDataURL('image/png');
-
-    // Remove any existing preview first
-    const old = document.getElementById('mc-share-preview-modal');
-    if (old) old.remove();
-
-    const modal = document.createElement('div');
-    modal.id = 'mc-share-preview-modal';
-    modal.className = 'mc-share-preview-modal';
-    modal.innerHTML = `
-      <div class="mc-share-preview-backdrop"></div>
-      <div class="mc-share-preview-content" role="dialog" aria-modal="true">
-        <div class="mc-share-preview-header">
-          <h3>${esc(t('mc.sharePreviewTitle'))}</h3>
-          <button type="button" class="mc-share-preview-close" aria-label="${esc(t('mc.close'))}">×</button>
-        </div>
-        <div class="mc-share-preview-body">
-          <img src="${dataUrl}" alt="Meta Call share preview" class="mc-share-preview-img">
-        </div>
-        <div class="mc-share-preview-actions">
-          <button type="button" class="mc-share-preview-btn-share">📤 ${esc(t('mc.share'))}</button>
-          <button type="button" class="mc-share-preview-btn-download">💾 ${esc(t('mc.download'))}</button>
-          <button type="button" class="mc-share-preview-btn-secondary">${esc(t('mc.close'))}</button>
-        </div>
-      </div>`;
-    document.body.appendChild(modal);
-
-    const close = () => { modal.remove(); };
-    modal.querySelector('.mc-share-preview-backdrop').addEventListener('click', close);
-    modal.querySelector('.mc-share-preview-close').addEventListener('click', close);
-    modal.querySelector('.mc-share-preview-btn-secondary').addEventListener('click', close);
-
-    modal.querySelector('.mc-share-preview-btn-share').addEventListener('click', () => {
-      canvas.toBlob(blob => {
-        _shareOrDownloadBlob(blob, filename, title, text);
-        close();
-      }, 'image/png');
-    });
-
-    // Direct download button — always saves to disk, never triggers
-    // the OS share sheet (which on Windows gives no "Save to file" option).
-    modal.querySelector('.mc-share-preview-btn-download').addEventListener('click', () => {
-      canvas.toBlob(blob => {
-        if (!blob) return;
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        setTimeout(() => URL.revokeObjectURL(url), 1000);
-        close();
-      }, 'image/png');
-    });
+    /* Das Fenster ist umgezogen.
+     *
+     * Es war hier zuerst gebaut, mit dem richtigen Gedanken im Kommentar:
+     * "erst das Bild selbst sehen, dann teilen". Nur hatte die Tier-Liste
+     * es nie bekommen — ihr Knopf "Bild" lud sofort herunter. Statt es
+     * dort ein zweites Mal zu bauen, liegt es jetzt in
+     * js/ds-bildvorschau.js und beide benutzen dasselbe.
+     *
+     * Diese Funktion bleibt als Name stehen: sie hat drei Aufrufer in
+     * dieser Datei, und die sollen sich nicht darum kuemmern muessen. */
+    if (window.DsBildvorschau && typeof window.DsBildvorschau.zeige === 'function') {
+      return window.DsBildvorschau.zeige(canvas, {
+        dateiname: filename,
+        titel: title || t('mc.sharePreviewTitle'),
+        text: text,
+      });
+    }
+    // Ohne das Modul wenigstens speichern, statt gar nichts zu tun.
+    canvas.toBlob(function (blob) {
+      if (blob) _shareOrDownloadBlob(blob, filename, title, text);
+    }, 'image/png');
+    return Promise.resolve(false);
   }
 
   // Shared canvas helpers

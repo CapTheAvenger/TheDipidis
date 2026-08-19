@@ -824,10 +824,10 @@
             });
 
             const tierTitles = {
-                'tier-1':        { title: 'Tier 1',          subtitle: 'Meta Definition'      },
-                'tier-2':        { title: 'Tier 2',          subtitle: 'Strong Contenders'     },
-                'tier-3':        { title: 'Tier 3',          subtitle: 'Viable Options'        },
-                'tier-trending': { title: 'Rogue / Trending', subtitle: 'Emerging Archetypes' }
+                'tier-1':        { title: 'Tier 1',           subtitle: t('tier.sub1')     },
+                'tier-2':        { title: 'Tier 2',           subtitle: t('tier.sub2')     },
+                'tier-3':        { title: 'Tier 3',           subtitle: t('tier.sub3')     },
+                'tier-trending': { title: 'Rogue / Trending',  subtitle: t('tier.subRogue') }
             };
 
             // 3. Within each tier sort by avg_placement ascending (lower = better).
@@ -1289,10 +1289,10 @@
             });
             
             const tierTitles = {
-                'tier-1':        { title: 'Tier 1',          subtitle: 'Meta Dominators'     },
-                'tier-2':        { title: 'Tier 2',          subtitle: 'Strong Contenders'    },
-                'tier-3':        { title: 'Tier 3',          subtitle: 'Viable Options'       },
-                'tier-trending': { title: 'Rogue / Trending', subtitle: 'Emerging Archetypes' }
+                'tier-1':        { title: 'Tier 1',           subtitle: t('tier.sub1')     },
+                'tier-2':        { title: 'Tier 2',           subtitle: t('tier.sub2')     },
+                'tier-3':        { title: 'Tier 3',           subtitle: t('tier.sub3')     },
+                'tier-trending': { title: 'Rogue / Trending',  subtitle: t('tier.subRogue') }
             };
             
             // Limit trending decks to top 20
@@ -1309,10 +1309,10 @@
             const filterHtml = `
                 <div class="tier-search-row">
                     <input type="search" class="tier-search-input"
-                           placeholder="🔎 Search archetype…"
-                           aria-label="Filter deck cards"
+                           placeholder="${escapeHtml(t('tier.searchPlaceholder'))}"
+                           aria-label="${escapeHtml(t('tier.searchAria'))}"
                            oninput="filterTierDeckCards(this.value)">
-                    <span class="tier-search-clear" onclick="this.previousElementSibling.value=''; filterTierDeckCards('');" title="Clear filter">✕</span>
+                    <span class="tier-search-clear" onclick="this.previousElementSibling.value=''; filterTierDeckCards('');" title="${escapeHtml(t('tier.clearFilter'))}">✕</span>
                 </div>`;
 
             // ============================================================
@@ -1802,7 +1802,7 @@
             let html = `
                 <div class="top-cards-container">
                     <h3 style="color: #2c3e50; margin: 0 0 15px 0; font-size: 1.3em; font-weight: 800; display: flex; align-items: center; gap: 10px;">
-                        Most Used Cards (Format Staples)
+                        ${t('tier.mostUsedCards')}
                     </h3>
                     <div class="top-cards-grid">`;
             

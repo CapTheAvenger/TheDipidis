@@ -449,6 +449,14 @@ const translations = {
     'heatmap.mirror':           'Mirror match',
     'heatmap.noData':           'No data available',
     'heatmap.games':            'games',
+    'tier.sub1':                 'Meta Dominators',
+    'tier.sub2':                 'Strong Contenders',
+    'tier.sub3':                 'Viable Options',
+    'tier.subRogue':             'Emerging Archetypes',
+    'tier.searchPlaceholder':    '🔎 Search archetype…',
+    'tier.searchAria':           'Filter deck cards',
+    'tier.clearFilter':          'Clear filter',
+    'tier.mostUsedCards':        'Most Used Cards (Format Staples)',
 
     // ── City League ──────────────────────────────────────────
     'cl.archetypeOverview':     'Archetype Overview',
@@ -2379,7 +2387,7 @@ const translations = {
     'pt.btnActions':            'Aktionen',
 
     // ── Heatmap (Current Meta) ───────────────────────────────
-    'heatmap.title':            'Matchup Heatmap',
+    'heatmap.title':            'Matchup-Heatmap',
     'heatmap.yLabel':           'Y-Achse (Dein Deck)',
     'heatmap.xLabel':           'X-Achse (Gegner, optional)',
     'heatmap.placeholderY':     'z.B. N\'s Zoroark',
@@ -2398,6 +2406,14 @@ const translations = {
     'heatmap.mirror':           'Spiegelmatch',
     'heatmap.noData':           'Keine Daten verfügbar',
     'heatmap.games':            'Spiele',
+    'tier.sub1':                 'Beherrschen das Meta',
+    'tier.sub2':                 'Starke Herausforderer',
+    'tier.sub3':                 'Spielbare Optionen',
+    'tier.subRogue':             'Aufkommende Archetypen',
+    'tier.searchPlaceholder':    '🔎 Archetyp suchen…',
+    'tier.searchAria':           'Deck-Karten filtern',
+    'tier.clearFilter':          'Filter zurücksetzen',
+    'tier.mostUsedCards':        'Meistgespielte Karten (Format-Staples)',
 
     // ── City League ──────────────────────────────────────────
     'cl.archetypeOverview':     'Archetypen-Übersicht',
@@ -2609,7 +2625,7 @@ const translations = {
     'pm.matchupTournHint':      'Aggregiert über alle Labs-Turniere in denen dieser Archetyp auftrat.',
     'pm.matchupColOpponent':    'Gegner',
     'pm.matchupColGames':       'Spiele',
-    'pm.matchupColWinPct':      'Win %',
+    'pm.matchupColWinPct':      'Sieg %',
 
     // ── Matchup extras ───────────────────────────────────────
     'matchup.searchOpponent':   'Gegner suchen...',
@@ -2936,7 +2952,7 @@ const translations = {
     'mc.frozenRecEmpty':        'Keine Labs-Daten für dieses Format verfügbar — die Brought-Share-Tabelle oben ist die vollständige Bilanz.',
     'mc.frozenColScore':        'Score',
     'mc.frozenColScoreHint':    'Final-Cumulative = Win % × (1 + Day-2-Conversion). Höher = stärkere Gesamt-Meta-Präsenz.',
-    'mc.frozenColWinPct':       'Win %',
+    'mc.frozenColWinPct':       'Sieg %',
     'mc.frozenColDay2Conv':     'Day-2-Conv',
     'mc.frozenColPlayers':      'Spieler',
     'mc.frozenShareTitle':      'Finaler Field-Share',
@@ -3259,7 +3275,7 @@ const translations = {
     'ma.forDeck':               'Für',
 
     // ── Current-Meta-Analyse ─────────────────────────────────
-    'currentMeta.topArchetypes':      'Top Archetypes',
+    'currentMeta.topArchetypes':      'Top-Archetypen',
     'currentMeta.topArchetypesSub':   'Meistgespielte Deck-Varianten (Global)',
     'currentMeta.selectDeck':         '-- Deck wählen --',
     'currentMeta.activeFilter':       'Aktiver Filter:',
@@ -3564,7 +3580,7 @@ const translations = {
     'cm.filterPlay':            'Große Turnier-Decks',
     'stats.totalWinrate':       'Gesamte Siegesrate Limitless Online Turniere',
     'stats.matchupTop20':       'Matchup gegen Top 20',
-    'matchup.title':            'Deck Matchups',
+    'matchup.title':            'Deck-Matchups',
     'matchup.best':             'Beste Matchups',
     'matchup.worst':            'Schlechteste Matchups',
     'matchup.opponent':         'Gegner',

@@ -357,7 +357,7 @@
                             ${tableHtml}
                         </div>
                         <div class="heatmap-btn-row">
-                            <button class="action-btn" onclick="window.heatmapExpanded = !window.heatmapExpanded; renderMatchupHeatmap();">
+                            <button class="ds-btn" onclick="window.heatmapExpanded = !window.heatmapExpanded; renderMatchupHeatmap();">
                                 ${window.heatmapExpanded ? t('heatmap.showTop10') : t('heatmap.showAll')}
                             </button>
                         </div>

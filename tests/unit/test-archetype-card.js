@@ -162,9 +162,16 @@ describe('matchups', () => {
         assert.equal(api.THIN_GAMES, 20);
     });
 
-    it('renders Σ / W / L and marks the thin row', () => {
+    it('names the columns and marks the thin row', () => {
+        // Die Spalte hiess Σ. Gemeldet am 19.08.2026: "n ist gleich sagt nichts
+        // aus … es muss fuer jeden von der Strasse klar sein." Dasselbe gilt
+        // fuer ein Summenzeichen ueber einer Zahlenspalte. W und L bleiben —
+        // die sagt die Szene wirklich so.
         const html = api.matchupTableHtml('Dragapult');
-        assert.match(html, /<th>W<\/th><th>L<\/th>/);
+        assert.match(html, />Partien</, 'die Partienspalte heisst nicht mehr Σ');
+        assert.ok(!/<th[^>]*>Σ<\/th>/.test(html), 'Σ ist zurueck');
+        assert.match(html, /title="[^"]*gewonnene Partien[^"]*">W</);
+        assert.match(html, /title="[^"]*verlorene Partien[^"]*">L</);
         assert.match(html, /arc-mu-n-low/, 'the thin sample size should be marked');
         assert.match(html, />438</);
         assert.match(html, />267</);

@@ -135,13 +135,24 @@ describe('Bildvorschau — das Fenster selbst', () => {
         assert.match(SRC, /removeEventListener\('keydown', taste, true\)/);
     });
 
-    it('zeigt den Teilen-Knopf nur, wenn es ihn gibt', () => {
-        assert.match(SRC, /kannTeilen = !!\(navigator\.share\)/);
-        assert.match(SRC, /kannTeilen \?/);
+    it('der zweite Knopf kopiert, statt ein Menue zu oeffnen', () => {
+        // Gemeldet: "cool waer, wenn ich auf Teilen druecke, dass dann nicht
+        // 'n extra Menue aufgeht, sondern dass es automatisch in die
+        // Zwischenablage kopiert wird … beim Speichern wird's ja schon in die
+        // Fotomediathek gespeichert." Also ein Knopf in die Zwischenablage,
+        // einer auf die Platte, und kein dritter Weg dazwischen.
+        assert.match(SRC, /ds-bildvorschau-btn-kopieren/);
+        assert.match(SRC, /navigator\.clipboard\.write/);
+        assert.match(SRC, /new window\.ClipboardItem\(\{ 'image\/png': blob \}\)/);
+        assert.ok(!/navigator\.share\(/.test(SRC),
+            'das System-Teilen-Menue ist zurueck');
     });
 
-    it('faengt ein abgebrochenes Teilen ab und speichert stattdessen', () => {
-        assert.match(SRC, /\.catch\(function \(\) \{[\s\S]{0,200}speichern\(blob, dateiname\)/);
+    it('und speichert, wo Kopieren nicht geht — mit Ansage', () => {
+        // ClipboardItem gibt es nicht ueberall und nur im sicheren Kontext.
+        assert.match(SRC, /kannKopieren = !!\(navigator\.clipboard/);
+        assert.match(SRC, /\.catch\(function \(\) \{[\s\S]{0,240}speichern\(blob, dateiname\)/);
+        assert.match(SRC, /function melde\(/, 'ohne Rueckmeldung merkt niemand, dass kopiert wurde');
     });
 
     it('maskiert alles, was in das Markup geht', () => {

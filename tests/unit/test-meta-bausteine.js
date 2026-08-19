@@ -48,27 +48,31 @@ describe('Bausteine — Aufbau', () => {
         assert.match(SW, /'\.\/js\/ds-sections\.js'/);
     });
 
-    it('acht Abschnitte, jeder in beiden Sprachen benannt', () => {
+    it('sechs Abschnitte, jeder in beiden Sprachen benannt', () => {
         const block = /var SECTIONS = \[([\s\S]*?)\n    \];/.exec(CODE);
         assert.ok(block, 'SECTIONS nicht gefunden');
         const ids = [...block[1].matchAll(/id:\s*'([^']+)'/g)].map(m => m[1]);
-        // Waren neun. "Gespielt gegen erfolgreich" und "Top 8 gegen
-        // Erwartung" zeigten dieselben Decks mit denselben Spalten in anderer
-        // Reihenfolge und sind am 19.08.2026 zu einer sortierbaren Rangliste
-        // zusammengelegt worden.
-        assert.strictEqual(ids.length, 8, 'gefunden: ' + ids.join(', '));
-        assert.strictEqual(new Set(ids).size, 8, 'doppelte id');
+        // Waren neun, am 19.08.2026 in zwei Schritten auf sechs:
+        //   "Gespielt gegen erfolgreich" + "Top 8 gegen Erwartung"
+        //       -> eine sortierbare Rangliste "Meta-Performance"
+        //   "Ueberblick" + "Vollstaendige Tabelle"
+        //       -> aufgeloest. Die eine Angabe aus dem Ueberblick, die sonst
+        //          nirgends stand (Turniere/Spieler/Partien), steht jetzt in
+        //          der Kachel "Gemeldete Listen"; die vollstaendige Tabelle ist
+        //          in der Rangliste aufgegangen, samt Ausklappen fuer den Rest.
+        assert.strictEqual(ids.length, 6, 'gefunden: ' + ids.join(', '));
+        assert.strictEqual(new Set(ids).size, 6, 'doppelte id');
         const de = (block[1].match(/de:\s*\[/g) || []).length;
         const en = (block[1].match(/en:\s*\[/g) || []).length;
-        assert.strictEqual(de, 8);
-        assert.strictEqual(en, 8);
+        assert.strictEqual(de, 6);
+        assert.strictEqual(en, 6);
     });
 
     it('die ersten drei sind offen, der Rest zu', () => {
         const block = /var SECTIONS = \[([\s\S]*?)\n    \];/.exec(CODE)[1];
         const flags = [...block.matchAll(/auf:\s*(true|false)/g)].map(m => m[1] === 'true');
         assert.deepStrictEqual(flags.slice(0, 3), [true, true, true]);
-        assert.deepStrictEqual(flags.slice(3), [false, false, false, false, false]);
+        assert.deepStrictEqual(flags.slice(3), [false, false, false]);
     });
 
     it('die Antwort steht vorn: Decks, Matchups, Karten — dann der Rest', () => {
@@ -76,8 +80,13 @@ describe('Bausteine — Aufbau', () => {
         const ids = [...block.matchAll(/id:\s*'([^']+)'/g)].map(m => m[1]);
         assert.deepStrictEqual(ids.slice(0, 3), ['top', 'heatmap', 'cards'],
             'die Heatmap stand vorher 7,3 Bildschirme tief');
-        assert.strictEqual(ids[ids.length - 1], 'full',
-            'die 2.479-px-Tabelle gehoert ans Ende');
+        // 'full' gibt es nicht mehr — die vollstaendige Tabelle ist in die
+        // Rangliste aufgegangen. Ans Ende gehoert jetzt, was am wenigsten
+        // beantwortet: die Bewegung gegenueber der Vorwoche.
+        assert.strictEqual(ids[ids.length - 1], 'movers',
+            'der am wenigsten dringende Abschnitt gehoert ans Ende');
+        assert.ok(!ids.includes('full') && !ids.includes('overview'),
+            'aufgeloeste Abschnitte sind zurueck: ' + ids.join(', '));
     });
 });
 

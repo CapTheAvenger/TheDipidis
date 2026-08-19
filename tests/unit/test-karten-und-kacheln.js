@@ -68,9 +68,12 @@ describe('Kennzahl-Kacheln', () => {
             'die Kachel wiederholt wieder eine Zahl von weiter oben');
     });
 
-    it('stattdessen etwas, das sonst nirgends steht', () => {
-        assert.match(TIER, /'Die acht größten'/);
-        assert.match(TIER, /so eng ist das Feld/);
+    it('stattdessen etwas, das sonst nirgends steht — in Szene-Sprache', () => {
+        // Hiess zuerst "Die acht groessten". Gemeldet: "man wuerde hier von
+        // Top 8 Archetypes sprechen … die englischen Woerter, die in der
+        // Community benutzt werden, sollten wir schon benutzen."
+        assert.match(TIER, /'Top 8 Archetypes'/);
+        assert.ok(!/'Die acht größten'/.test(TIER), 'die alte Beschriftung ist zurueck');
     });
 
     it('und sie rechnet aus fieldConv, nicht aus enriched', () => {
@@ -78,11 +81,22 @@ describe('Kennzahl-Kacheln', () => {
         // Kachelstelle nicht mehr im Scope. Beim ersten Versuch stand es
         // hier — das haette die ganze Reihe still gerissen, weil ein
         // try/catch darum liegt.
-        const a = TIER.indexOf("'Die acht größten'");
-        const block = TIER.slice(Math.max(0, a - 900), a);
+        const a = TIER.indexOf("'Top 8 Archetypes'");
+        assert.ok(a > -1);
+        // Nur der Kachel-Block selbst, nicht die Rangliste weiter oben:
+        // die darf enriched benutzen, sie steht im try.
+        const start = TIER.lastIndexOf('${(() => {', a);
+        const block = TIER.slice(start, a);
         assert.match(block, /fieldConv\.decks/);
-        assert.ok(!/\[\.\.\.enriched\]/.test(block),
-            'enriched ist hier nicht im Scope');
+        assert.ok(!/enriched/.test(block),
+            'enriched ist an dieser Stelle nicht im Scope');
+    });
+
+    it('die Kachel nennt, woraus die Listen bestehen', () => {
+        // Die einzige Angabe aus dem aufgeloesten Abschnitt "Ueberblick", die
+        // sonst nirgends stand.
+        assert.match(TIER, /limitless_meta_stats\.json/);
+        assert.match(TIER, /aus \$\{fmtNumDS\(metaStats\.turniere\)\} Turnieren/);
     });
 });
 

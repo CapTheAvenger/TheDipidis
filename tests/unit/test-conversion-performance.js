@@ -286,11 +286,15 @@ const FORMATTERS = new Function('getLang',
     utilsChunk(/function formatPercentSigned\(value, digits = 1\) \{[\s\S]*?\n\}/, 'formatPercentSigned') + '\n' +
     'return { formatPercent, formatPercentSigned };');
 
+// renderConversionBlock gibt es nicht mehr. Der Block "Top 8 vs.
+// Erwartung" zeigte dieselben Decks mit denselben Spalten wie zwei
+// Nachbartabellen und ist am 19.08.2026 in die sortierbare Rangliste
+// aufgegangen (js/app-tier-meta.js, .cm-rangliste). Sein divergierender
+// Balken ist mitgewandert und wird weiter unten geprueft.
 const render = new Function(
     'getLang', 'escapeHtml', 't', 'window',
     CONV_SRC +
-    chunk(/        const CONV_CAP = 100;[\s\S]*?\n        \}\n/, 'renderConversionBlock') +
-    'return { renderConversionBlock, computeConversionPerformance, CONV_MIN_N, CONV_CAP };');
+    'return { computeConversionPerformance, CONV_MIN_N };');
 
 function ui(lang = 'de') {
     return render(() => lang,
@@ -300,61 +304,12 @@ function ui(lang = 'de') {
                   FORMATTERS(() => lang));
 }
 
-describe('the block only claims what it can', () => {
-    const { renderConversionBlock, computeConversionPerformance } = ui();
-    const field = row('field', 100000, 6320);
-
-    it('renders nothing when the field has no conversion at all', () => {
-        const conv = computeConversionPerformance([row('a', 100, 0)]);
-        assert.equal(renderConversionBlock(conv, conv.decks), '');
-        assert.equal(renderConversionBlock(null, []), '');
-    });
-
-    it('always writes the sign, so colour is never the only cue', () => {
-        const conv = computeConversionPerformance([field, row('up', 500, 100), row('down', 500, 10)]);
-        const html = renderConversionBlock(conv, conv.decks.filter(d => d.name !== 'field'));
-        // window.formatPercent writes the German narrow gap as U+00A0,
-        // so the assertion has to allow either space.
-        assert.match(html, /\+\d+[\s\u00a0]%/);
-        assert.match(html, /−\d+[\s\u00a0]%/, 'a negative value must carry a minus sign');
-    });
-
-    it('marks a clipped bar instead of pretending it fits', () => {
-        const conv = computeConversionPerformance([field, row('huge', 200, 60)]);
-        const html = renderConversionBlock(conv, conv.decks.filter(d => d.name === 'huge'));
-        assert.match(html, /›/, 'value beyond the cap is not marked');
-        assert.match(html, /width:50\.0%/, 'the bar should sit exactly at the cap');
-    });
-
-    it('fades a thin sample and shows the sample size', () => {
-        const conv = computeConversionPerformance([field, row('thin', 30, 5)]);
-        const html = renderConversionBlock(conv, conv.decks.filter(d => d.name === 'thin'));
-        // .is-muted aus components.css — vorher .cm-conv-thin.
-        assert.match(html, /is-muted/);
-        assert.match(html, /n=30/);
-    });
-
-    it('escapes deck names', () => {
-        const conv = computeConversionPerformance([field, row("N's Zoroark", 500, 50)]);
-        const html = renderConversionBlock(conv, conv.decks.filter(d => d.name !== 'field'));
-        assert.match(html, /N&#39;s Zoroark/);
-        assert.doesNotMatch(html, /N's Zoroark/);
-    });
-
-    it('names the field average and its sample in the hint', () => {
-        const conv = computeConversionPerformance([field]);
-        const html = renderConversionBlock(conv, conv.decks);
-        assert.match(html, /6,32 %/, 'German decimal comma expected');
-        assert.match(html, /6320/);
-        assert.match(html, /100000/);
-        assert.doesNotMatch(html, /\{exp\}|\{t8\}|\{n\}|\{min\}|\{thin\}/,
-            'an unreplaced placeholder reached the page');
-    });
-
+describe('the diverging bar keeps its colours', () => {
+    // Von diesem describe-Block sind die Zusagen uebrig, die nicht an
+    // renderConversionBlock hingen. Was die Tabelle selbst verspricht —
+    // Vorzeichen, gedaempfte duenne Zeilen, Sortierbarkeit — steht jetzt in
+    // tests/unit/test-rangliste.js.
     it('uses no green — the diverging bar is blue vs red', () => {
-        // Der Balken lebt jetzt in components.css als
-        // .ds-bar-track.is-diverging und holt seine Farben aus den
-        // Tokens; die Prüfung folgt ihm dorthin.
         const comp = fs.readFileSync(path.join(ROOT, 'css', 'components.css'), 'utf8');
         const block = comp.slice(comp.indexOf('.ds-bar-track.is-diverging'),
                                 comp.indexOf('/* ── Datentabelle'));
@@ -367,11 +322,11 @@ describe('the block only claims what it can', () => {
         assert.ok(b > g && b > r, `--dv-pos #${pos} is not a blue`);
     });
 
-    it('English keeps the decimal point', () => {
-        const en = ui('en');
-        const conv = en.computeConversionPerformance([row('field', 100000, 6320)]);
-        const html = en.renderConversionBlock(conv, conv.decks);
-        assert.match(html, /6\.32%/);
+    it('and it is still used somewhere', () => {
+        // Ein Balken, den niemand mehr rendert, ist toter Stil.
+        const tier = fs.readFileSync(path.join(ROOT, 'js', 'app-tier-meta.js'), 'utf8');
+        assert.match(tier, /ds-bar-track is-diverging/,
+            'der divergierende Balken wird nirgends mehr erzeugt');
     });
 });
 

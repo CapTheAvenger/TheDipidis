@@ -40,8 +40,14 @@ pruefe('Hero: Mindeststichprobe für die Überschrift ist >= 100', () => {
 });
 
 pruefe('Hero: die Überschrift nennt die Stichprobe', () => {
-    assert.ok(/von \$\{n\} Antritten/.test(hub), 'deutscher Satz nennt n nicht');
-    assert.ok(/of \$\{n\} entries/.test(hub), 'englischer Satz nennt n nicht');
+    // Geprueft wird die Aussage, nicht der Variablenname: der Satz muss die
+    // Zahl der Antritte nennen. Seit dem 19.08.2026 nennt er zusaetzlich die
+    // absolute Zahl der Top-8-Plaetze ("78 von 772"), weil "n = 772" als
+    // Rechnerjargon beanstandet wurde.
+    assert.ok(/von \$\{\w+\} Antritten/.test(hub), 'deutscher Satz nennt die Antritte nicht');
+    assert.ok(/of \$\{\w+\} entries/.test(hub), 'englischer Satz nennt die Antritte nicht');
+    assert.ok(/\$\{cuts\} von/.test(hub), 'die absolute Zahl der Top-8-Plaetze fehlt');
+    assert.ok(!/n = \$\{/.test(hub), '"n = " ist wieder da — bitte ausschreiben');
 });
 
 pruefe('Hero: das Deck aus der Überschrift steht als erste Kachel', () => {

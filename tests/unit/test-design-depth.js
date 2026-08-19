@@ -216,7 +216,10 @@ describe('Fachbegriffe erklären sich dort, wo die Zahl steht', () => {
         assert.match(TIER, /hintTerm\(/);
         assert.match(TIER, /vsField:/);
         assert.match(TIER, /Feld-Durchschnitt/);
-        assert.ok((TIER.match(/hintTerm\(/g) || []).length >= 6,
+        // Waren >= 6, solange drei Tabellen dieselben Begriffe je einzeln
+        // erklaerten. Seit der Zusammenlegung zur Rangliste erklaert jeder
+        // Begriff sich genau einmal — weniger Aufrufe, gleiche Abdeckung.
+        assert.ok((TIER.match(/hintTerm\(/g) || []).length >= 4,
             'zu wenige Begriffe erklärt');
     });
 

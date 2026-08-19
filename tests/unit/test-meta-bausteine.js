@@ -48,23 +48,27 @@ describe('Bausteine — Aufbau', () => {
         assert.match(SW, /'\.\/js\/ds-sections\.js'/);
     });
 
-    it('neun Abschnitte, jeder in beiden Sprachen benannt', () => {
+    it('acht Abschnitte, jeder in beiden Sprachen benannt', () => {
         const block = /var SECTIONS = \[([\s\S]*?)\n    \];/.exec(CODE);
         assert.ok(block, 'SECTIONS nicht gefunden');
         const ids = [...block[1].matchAll(/id:\s*'([^']+)'/g)].map(m => m[1]);
-        assert.strictEqual(ids.length, 9, 'gefunden: ' + ids.join(', '));
-        assert.strictEqual(new Set(ids).size, 9, 'doppelte id');
+        // Waren neun. "Gespielt gegen erfolgreich" und "Top 8 gegen
+        // Erwartung" zeigten dieselben Decks mit denselben Spalten in anderer
+        // Reihenfolge und sind am 19.08.2026 zu einer sortierbaren Rangliste
+        // zusammengelegt worden.
+        assert.strictEqual(ids.length, 8, 'gefunden: ' + ids.join(', '));
+        assert.strictEqual(new Set(ids).size, 8, 'doppelte id');
         const de = (block[1].match(/de:\s*\[/g) || []).length;
         const en = (block[1].match(/en:\s*\[/g) || []).length;
-        assert.strictEqual(de, 9);
-        assert.strictEqual(en, 9);
+        assert.strictEqual(de, 8);
+        assert.strictEqual(en, 8);
     });
 
     it('die ersten drei sind offen, der Rest zu', () => {
         const block = /var SECTIONS = \[([\s\S]*?)\n    \];/.exec(CODE)[1];
         const flags = [...block.matchAll(/auf:\s*(true|false)/g)].map(m => m[1] === 'true');
         assert.deepStrictEqual(flags.slice(0, 3), [true, true, true]);
-        assert.deepStrictEqual(flags.slice(3), [false, false, false, false, false, false]);
+        assert.deepStrictEqual(flags.slice(3), [false, false, false, false, false]);
     });
 
     it('die Antwort steht vorn: Decks, Matchups, Karten — dann der Rest', () => {

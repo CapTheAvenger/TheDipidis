@@ -108,16 +108,28 @@ describe('die Datentabelle braucht kein !important mehr', () => {
 });
 
 describe('Current Meta benutzt die Komponenten wirklich', () => {
-    it('die beiden Top-8-Tabellen sind .ds-table in .ds-panel', () => {
-        assert.match(TIER, /<div class="ds-panel">\s*\n\s*<h3 class="ds-label">🌐/);
-        assert.match(TIER, /<div class="ds-panel">\s*\n\s*<h3 class="ds-label">🏆/);
-        assert.equal((TIER.match(/class="ds-table"/g) || []).length, 4,
-            'erwartet: beide Top-8-Tabellen, die Conversion-Tabelle und die Movers');
+    it('die Rangliste ist .ds-table in .ds-panel', () => {
+        // Waren zwei Tabellen nebeneinander (🌐 "Wie oft gespielt" und
+        // 🏆 "Wie oft Top-8 erreicht") plus eine dritte darunter. Alle drei
+        // zeigten dieselben Decks mit denselben Spalten in anderer
+        // Reihenfolge; seit dem 19.08.2026 ist es eine sortierbare Tabelle.
+        assert.match(TIER, /<div class="ds-panel cm-rangliste-block">\s*\n\s*<h3 class="ds-label">🏆/);
+        assert.ok(!/<h3 class="ds-label">🌐/.test(TIER),
+            'die zweite Rangliste ist wieder da');
+        const tabellen = (TIER.match(/class="ds-table[^"]*"/g) || []);
+        assert.equal(tabellen.length, 2,
+            'erwartet: die Rangliste und die Movers-Tabelle — gefunden: ' + tabellen.join(', '));
+        assert.ok(tabellen.some(t => t.indexOf('cm-rangliste') > -1),
+            'die Rangliste traegt ihre eigene Klasse nicht');
     });
 
-    it('die Conversion-Zeile ist die divergierende Balkenzeile', () => {
+    it('die Balkenzeile lebt jetzt in der Rangliste', () => {
+        // Sie stand im eigenen Block "Top 8 vs. Erwartung". Der Block ist am
+        // 19.08.2026 in die sortierbare Rangliste aufgegangen, der Balken ist
+        // mitgewandert — er zeigt auf einen Blick, wer ueber dem Schnitt liegt.
         assert.match(TIER, /ds-bar-track is-diverging/);
-        assert.match(TIER, /ds-bar-fill \$\{positive \? 'is-pos' : 'is-neg'\}/);
+        assert.match(TIER, /ds-bar-fill \$\{posi \? 'is-pos' : 'is-neg'\}/);
+        assert.match(TIER, /cm-rangliste/, 'der Balken haengt nicht an der Rangliste');
     });
 
     it('die Datenbasis erscheint als Kennzahl-Kacheln', () => {

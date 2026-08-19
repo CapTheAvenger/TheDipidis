@@ -196,31 +196,44 @@
         const best = model.headline;
         if (!best) return '';
         const de = isDe();
-        // Die Stichprobe steht im Satz. Eine Quote ohne n ist eine Behauptung,
-        // mit n ist sie eine Aussage.
-        const n = Math.round(best.brought).toLocaleString(de ? 'de-DE' : 'en-US');
+        const loc = de ? 'de-DE' : 'en-US';
+        const zahl = (v) => Math.round(v).toLocaleString(loc);
 
-        // Die Quote wird EINMAL hergeleitet und dann an Satz und Kachel
-        // gereicht. Vorher rechnete dieser Satz best.top8/best.brought neu,
-        // während die Kachel darunter die vorgerundete CSV-Spalte
-        // top8_conv_rate las: derselbe Wert 11,8525 % wurde hier zu 11,9 und
-        // dort zu 11,8, drei Zeilen auseinander. Kein Datenfehler — zwei
-        // Herleitungen, die verschieden runden.
-        const convPct = model.headlineConvPct;
+        // EINE Zahl, nicht zwei.
+        //
+        // Hier standen bis zum 19.08.2026 beide nebeneinander:
+        // "+63 % gegenueber dem Feld-Durchschnitt von 6,20 % (geglaettet
+        // +59 %)". Gemeint war dasselbe, gezeigt wurden zwei Werte, und der
+        // Leser musste raten, welcher gilt. Zu Recht beanstandet:
+        // "entscheide Dich fuer eine Zahl, ansonsten ist das totaler Quatsch".
+        //
+        // Der Ausweg ist nicht, eine der beiden zu streichen, sondern die
+        // Groesse zu wechseln. "Plus 63 Prozent" ist ohnehin schwer zu lesen,
+        // weil es eine Prozentzahl VON einer Prozentzahl ist. Ein Vielfaches
+        // sagt dasselbe in einem Wort: 10,1 gegen 6,2 ist "rund anderthalbmal
+        // so oft". Und weil auf eine Nachkommastelle gerundet wird, fallen
+        // roher und geglaetteter Wert hier zusammen — 1,63 gegen 1,59, beide
+        // 1,6. Die Zahl ist also die geglaettete (die belastbare) und
+        // trotzdem nachrechenbar.
+        const faktor = 1 + (best.perfPct / 100);
+        const fak = faktor.toLocaleString(loc, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 
-        // Roh gegen roh. Der Satz mischte bisher die rohe Quote mit der
-        // geglätteten Abweichung: 11,85 % / 6,6457 % sind +78 %, angezeigt
-        // wurden die geglätteten +72 %. Beide Zahlen stimmen für sich, aber
-        // wer nachrechnet, kommt nicht auf das Ergebnis und hält die Seite
-        // für kaputt. Die Glättung steht jetzt daneben statt darin.
-        const rawPerf = (convPct / (model.conv.expected * 100) - 1) * 100;
-        const smoothed = de
-            ? `geglättet ${fmtSigned(best.perfPct, 0)}`
-            : `smoothed ${fmtSigned(best.perfPct, 0)}`;
+        // Absolute Zahlen zuerst. "78 von 772" versteht jeder sofort;
+        // "10,1 %" ist die Ableitung daraus, nicht umgekehrt.
+        const cuts = zahl(best.top8);
+        const antritte = zahl(best.brought);
+        const quote = fmtPct(model.headlineConvPct);
+        const schnitt = fmtPct(model.conv.expected * 100, 1);
 
         return de
-            ? `<strong>${escapeHtml(best.name)}</strong> ist derzeit das erfolgreichste Deck: ${fmtPct(convPct)} von ${n} Antritten erreichen die Top 8 — ${fmtSigned(rawPerf, 0)} gegenüber dem Feld-Durchschnitt von ${fmtPct(model.conv.expected * 100, 2)} (${smoothed}).`
-            : `<strong>${escapeHtml(best.name)}</strong> is the strongest deck right now: ${fmtPct(convPct)} of ${n} entries reach top 8 — ${fmtSigned(rawPerf, 0)} against the field average of ${fmtPct(model.conv.expected * 100, 2)} (${smoothed}).`;
+            ? `<strong>${escapeHtml(best.name)}</strong> ist gerade das erfolgreichste Deck: `
+              + `${cuts} von ${antritte} Antritten kamen in die Top 8, das sind ${quote}. `
+              + `Über alle Decks zusammen sind es ${schnitt} — `
+              + `${escapeHtml(best.name)} schafft es also rund ${fak}-mal so oft.`
+            : `<strong>${escapeHtml(best.name)}</strong> is the strongest deck right now: `
+              + `${cuts} of ${antritte} entries made top 8, that is ${quote}. `
+              + `Across all decks it is ${schnitt} — `
+              + `so ${escapeHtml(best.name)} gets there about ${fak}× as often.`;
     }
 
     function answerHtml(model) {
@@ -245,19 +258,28 @@
                 playedRank += 1;
                 role = (de ? 'Meistgespielt · Rang ' : 'Most played · rank ') + playedRank;
             }
-            // "ggü. Feld" ist der geglättete Wert (Empirical Bayes, K = 50).
-            // Ohne das Wort rechnet niemand die Quote gegen den Feldschnitt
-            // nach und kommt auf dasselbe Ergebnis.
-            const perfLabel = de ? 'ggü. Feld, geglättet' : 'vs. field, smoothed';
+            // "n = 772" ist Rechnerjargon. Wer neu im Kartenspiel ist, liest
+            // daraus nichts — "aus 772 Antritten" schon.
+            //
+            // Und statt "+59 % ggü. Feld, geglättet" dasselbe Vielfache wie im
+            // Satz darüber. Zwei Darstellungen derselben Groesse auf einem
+            // Bildschirm waren genau das, was hier beanstandet wurde.
+            const loc = de ? 'de-DE' : 'en-US';
+            const antritte = Math.round(d.brought).toLocaleString(loc);
+            const fak = d.perfPct == null ? '' :
+                (1 + d.perfPct / 100).toLocaleString(loc, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+            const verglichen = d.perfPct == null ? '' : (de
+                ? `${fak}-mal so oft wie der Schnitt`
+                : `${fak}× as often as average`);
             return `
                 <div class="ds-stat${cls}">
                     <span class="ds-stat-role">${role}</span>
                     <span class="ds-stat-label">${escapeHtml(d.name)}</span>
                     <span class="ds-stat-value">${fmtPct(d.sharePct)}</span>
-                    <span class="ds-stat-context">${de ? 'des Feldes' : 'of the field'} · n = ${
-                        Math.round(d.brought).toLocaleString(de ? 'de-DE' : 'en-US')}<br>${
+                    <span class="ds-stat-context">${de ? 'des Feldes' : 'of the field'} · ${
+                        de ? 'aus ' + antritte + ' Antritten' : 'from ' + antritte + ' entries'}<br>${
                         de ? 'Top-8-Quote' : 'top-8 rate'} ${fmtPct(d.convPct)}${
-                        perf ? ` · ${perf} ${perfLabel}` : ''}</span>
+                        verglichen ? ` · ${verglichen}` : ''}</span>
                 </div>`;
         };
         return `
@@ -269,8 +291,8 @@
                 <p class="meta-hub-answer-line">${answerSentence(model)}</p>
                 <div class="ds-stat-row">${model.top.map(tile).join('')}</div>
                 <p class="ds-note">${de
-                    ? `Anteil = wie oft ein Deck gespielt wurde, gemessen an ${Math.round(model.totalBrought).toLocaleString('de-DE')} gewichteten Antritten. Top-8-Quote = wie oft es davon die Top 8 erreicht hat. Beides aus Limitless Online.`
-                    : `Share = how often a deck was played, over ${Math.round(model.totalBrought).toLocaleString('en-US')} weighted entries. Top-8 rate = how often it reached top 8. Both from Limitless Online.`}</p>
+                    ? `Anteil = wie oft ein Deck gespielt wurde, gemessen an ${Math.round(model.totalBrought).toLocaleString('de-DE')} gewichteten Antritten. Top-8-Quote = wie oft es davon die Top 8 erreicht hat. Die Angabe „…-mal so oft wie der Schnitt“ vergleicht diese Quote mit ${fmtPct(model.conv.expected * 100, 1)} — so oft kommt ein durchschnittliches Deck in die Top 8. Kleine Stichproben werden dabei zum Schnitt hin geglättet. Alles aus Limitless Online.`
+                    : `Share = how often a deck was played, over ${Math.round(model.totalBrought).toLocaleString('en-US')} weighted entries. Top-8 rate = how often it reached top 8. "As often as average" compares that rate against ${fmtPct(model.conv.expected * 100, 1)} — how often an average deck makes top 8. Small samples are smoothed toward the average. All from Limitless Online.`}</p>
             </section>`;
     }
 

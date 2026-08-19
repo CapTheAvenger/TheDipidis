@@ -121,10 +121,12 @@
         // Zeichen — über window.formatPercent, damit dieselbe Zahl auf
         // keiner zweiten Fläche anders aussieht.
         // Fachbegriffe erklären sich dort, wo die Zahl steht.
-        // Nicht `hint`: renderConversionBlock führt eine lokale Variable
-        // dieses Namens (den Hinweistext unter der Tabelle) und würde den
-        // Helfer überdecken — genau das hat den ganzen Block in den
-        // try/catch laufen lassen und die drei Tabellen verschwinden.
+        // Heisst absichtlich hintTerm und nicht hint: der alte
+        // Conversion-Block fuehrte eine lokale Variable `hint` (den
+        // Hinweistext unter seiner Tabelle) und ueberdeckte damit den
+        // Helfer — das hat den ganzen Block in den try/catch laufen lassen
+        // und drei Tabellen verschwinden lassen. Der Block ist seit dem
+        // 19.08.2026 weg, der Name bleibt als Warnung.
         const hintTerm = (label, text) => (typeof window.termHint === 'function')
             ? window.termHint(label, text) : label;
         const TERMS = {
@@ -150,61 +152,6 @@
             ? window.formatPercent(v, digits)
             : Number(v).toFixed(digits == null ? 1 : digits) + '%';
 
-        function renderConversionBlock(conv, decks) {
-            if (!conv || !(conv.expected > 0) || !decks.length) return '';
-            const l = (key, fallback) =>
-                (typeof t === 'function' && t(key) !== key) ? t(key) : fallback;
-            const de = getLang() === 'de';
-            const fmtNum = (n, digits = 1) => {
-                const s = n.toFixed(digits);
-                return de ? s.replace('.', ',') : s;
-            };
-            const rows = decks.map((d, i) => {
-                const capped = Math.abs(d.perfPct) > CONV_CAP;
-                const width = Math.min(Math.abs(d.perfPct), CONV_CAP) / CONV_CAP * 50;
-                const positive = d.perfPct >= 0;
-                const value = (typeof window.formatPercentSigned === 'function')
-                    ? window.formatPercentSigned(d.perfPct, 0)
-                    : (positive ? '+' : '−') + fmtNum(Math.abs(d.perfPct), 0) + ' %';
-                // Divergierende Balkenzeile aus components.css: Nulllinie
-                // in der Mitte, blau nach oben, rot nach unten.
-                const bar = `<span class="ds-bar-track is-diverging">
-                        <span class="ds-bar-fill ${positive ? 'is-pos' : 'is-neg'}"
-                              style="width:${width.toFixed(1)}%"></span>
-                    </span>`;
-                return `<tr class="${d.thin ? 'is-muted' : ''}">
-                        <td class="ds-rank">${i + 1}</td>
-                        <td>${escapeHtml(d.name)}</td>
-                        <td class="ds-num">${fmtPct((d.top8 / d.brought) * 100)}</td>
-                        <td class="ds-num cm-conv-cell">
-                            <span class="cm-conv-value">${capped ? '› ' : ''}${value}</span>
-                            ${bar}
-                            <small class="cm-conv-n">n=${fmtNum(d.brought, 0)}</small>
-                        </td>
-                    </tr>`;
-            }).join('');
-            const hint = l('meta.t8ExpHint', de
-                ? 'Feld-Durchschnitt: {exp} % Top-8-Quote ({t8} von {n} gewichteten Antritten). +50 % heißt: Dieses Deck erreicht Top 8 anderthalbmal so oft wie der Schnitt. Gelistet ab {min} Antritten; unter {thin} wird zum Durchschnitt hin geglättet und blasser dargestellt.'
-                : 'Field average: {exp}% top-8 rate ({t8} of {n} weighted entries). +50% means this deck reaches top 8 1.5× as often as average. Listed from {min} entries; below {thin} the value is smoothed toward the average and shown faded.')
-                .replace('{exp}', fmtNum(conv.expected * 100, 2))
-                .replace('{t8}', fmtNum(conv.totalTop8, 0))
-                .replace('{n}', fmtNum(conv.totalBrought, 0))
-                .replace('{min}', String(CONV_MIN_N))
-                .replace('{thin}', String(CONV_THIN_N));
-            return `
-                <div class="ds-panel cm-vs-top8-block--wide">
-                    <h3 class="ds-label">🎯 ${escapeHtml(l('meta.t8ExpTitle', de ? 'Top-8 vs. Erwartung' : 'Top-8 vs. expected'))}</h3>
-                    <table class="ds-table">
-                        <thead><tr>
-                            <th class="ds-rank">#</th><th>Deck</th>
-                            <th class="ds-num">${hintTerm(l('meta.t8ExpTop8Col', de ? 'Top-8-Quote' : 'Top-8 rate'), term('top8'))}</th>
-                            <th class="ds-num">${hintTerm(l('meta.t8ExpCol', de ? 'vs. Feld' : 'vs. field'), term('vsField'))}</th>
-                        </tr></thead>
-                        <tbody>${rows}</tbody>
-                    </table>
-                    <p class="cm-conv-hint">${escapeHtml(hint)}</p>
-                </div>`;
-        }
 
         function aggregateLabsRowsByDeck(rows) {
             const byName = new Map();
@@ -1401,24 +1348,110 @@
                                 typeof n === 'number' ? fmtNumDS(n) : '–'}</td>
                         </tr>`;
                     };
+                    // EINE Rangliste statt drei Auswertungen.
+                    //
+                    // Bis zum 19.08.2026 standen hier nebeneinander:
+                    //   "Wie oft gespielt"        Rang, Deck, Anteil, n
+                    //   "Wie oft Top-8 erreicht"  Rang, Deck, Top-8-Quote, n
+                    //   "Top 8 gegen Erwartung"   Rang, Deck, Top-8-Quote, vs. Feld
+                    //
+                    // Dreimal dieselben Decks, dreimal dieselben Spalten in
+                    // anderer Reihenfolge, ueber drei Bildschirmhoehen verteilt.
+                    // Beanstandet mit: "wir brauchen jetzt nicht drei
+                    // verschiedene Felder fuer das Gleiche — mach lieber eine
+                    // draus, und dann so, dass man sortieren kann."
+                    //
+                    // Dazu kam ein echter Fehler: die Spalte n der mittleren
+                    // Tabelle zeigte d.brought, also ALLE Antritte des Decks.
+                    // Neben einer Top-8-Quote gelesen sah das aus, als haetten
+                    // 772 Decks die Top 8 erreicht. Gemeint waren 78. Die neue
+                    // Tabelle hat beide Zahlen als eigene Spalten, damit die
+                    // Verwechslung gar nicht erst moeglich ist.
+                    const deR = getLang() === 'de';
+                    const perfVon = new Map((conv.decks || []).map(d => [d.name, d.perfPct]));
+                    const reihen = enriched
+                        .filter(d => d.brought >= CONV_MIN_N)
+                        .map(d => ({
+                            name: d.name,
+                            anteil: d.broughtPct,
+                            antritte: d.brought,
+                            quote: d.top8ConvPct,
+                            cuts: d.top8,
+                            faktor: perfVon.has(d.name) ? 1 + perfVon.get(d.name) / 100 : null,
+                            duenn: d.brought < CONV_THIN_N,
+                        }));
+
+                    const SPALTEN = [
+                        { k: 'name',     de: 'Deck',         en: 'Deck',        num: false },
+                        { k: 'anteil',   de: 'Anteil',       en: 'Share',       num: true, hilf: 'share' },
+                        { k: 'antritte', de: 'Antritte',     en: 'Entries',     num: true },
+                        { k: 'quote',    de: 'Top-8-Quote',  en: 'Top-8 rate',  num: true, hilf: 'top8' },
+                        { k: 'cuts',     de: 'davon Top 8',  en: 'made top 8',  num: true },
+                        { k: 'faktor',   de: 'ggü. Schnitt', en: 'vs. average', num: true },
+                    ];
+
+                    const zelle = (r, k) => {
+                        if (k === 'name')     return escapeHtml(r.name);
+                        if (k === 'anteil')   return fmtPct(r.anteil);
+                        if (k === 'antritte') return fmtNumDS(r.antritte);
+                        if (k === 'quote')    return fmtPct(r.quote);
+                        if (k === 'cuts')     return fmtNumDS(r.cuts);
+                        if (r.faktor == null) return '–';
+                        const txt = r.faktor.toLocaleString(deR ? 'de-DE' : 'en-US',
+                            { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + (deR ? '-mal' : '×');
+                        // Der divergierende Balken aus components.css: Nulllinie
+                        // in der Mitte, blau nach oben, rot nach unten. Er stand
+                        // vorher im eigenen Block "Top 8 vs. Erwartung" und ist
+                        // das Beste daran gewesen — er zeigt auf einen Blick,
+                        // wer ueber und wer unter dem Schnitt liegt. Der Block
+                        // ist weg, der Balken bleibt.
+                        //
+                        // Der Balken traegt keine Ziffern, darum liest die
+                        // Sortierung weiter die Zahl aus dem Text der Zelle.
+                        const abw = (r.faktor - 1) * 100;
+                        const breite = Math.min(Math.abs(abw), CONV_CAP) / CONV_CAP * 50;
+                        const posi = abw >= 0;
+                        return `<span class="cm-rang-wert">${txt}</span>`
+                            + `<span class="ds-bar-track is-diverging">`
+                            + `<span class="ds-bar-fill ${posi ? 'is-pos' : 'is-neg'}"`
+                            + ` style="width:${breite.toFixed(1)}%"></span></span>`;
+                    };
+
+                    // Standardreihenfolge: nach Anteil, absteigend. Das ist die
+                    // Frage, die die meisten zuerst haben.
+                    reihen.sort((a, b) => b.anteil - a.anteil);
+
+                    const kopfZellen = SPALTEN.map(c => {
+                        const txt = deR ? c.de : c.en;
+                        const beschriftet = c.hilf ? hintTerm(txt, term(c.hilf)) : escapeHtml(txt);
+                        return `<th class="${c.num ? 'ds-num ' : ''}cm-rang-th" data-rang-spalte="${c.k}"
+                                    role="button" tabindex="0" aria-sort="${c.k === 'anteil' ? 'descending' : 'none'}"
+                                    title="${escapeHtml(deR ? 'Nach dieser Spalte sortieren' : 'Sort by this column')}">${
+                                    beschriftet}<span class="cm-rang-pfeil" aria-hidden="true"></span></th>`;
+                    }).join('');
+
+                    const zeilen = reihen.map((r, i) => `
+                        <tr${r.duenn ? ' class="is-muted"' : ''}>
+                            <td class="ds-rank">${i + 1}</td>
+                            ${SPALTEN.map(c => `<td class="${c.num ? 'ds-num' : ''}">${zelle(r, c.k)}</td>`).join('')}
+                        </tr>`).join('');
+
                     overallTop8Html = `
-                        <div class="cm-vs-top8-row">
-                            <div class="ds-panel">
-                                <h3 class="ds-label">🌐 ${getLang() === 'de' ? 'Wie oft gespielt' : 'Overall (brought share)'}</h3>
-                                <table class="ds-table">
-                                    <thead><tr><th class="ds-rank">#</th><th>Deck</th><th class="ds-num">${hintTerm(getLang() === 'de' ? 'Anteil' : 'Share', term('share'))}</th><th class="ds-num">n</th></tr></thead>
-                                    <tbody>${overallTop.map((d, i) => renderRow(d, i, 'brought share', fmtPct(d.broughtPct), d.brought)).join('')}</tbody>
+                        <div class="ds-panel cm-rangliste-block">
+                            <h3 class="ds-label">🏆 ${deR ? 'Wer wird gespielt, wer kommt durch'
+                                                        : 'Who gets played, who gets through'}</h3>
+                            <p class="ds-note cm-rang-hinweis">${deR
+                                ? 'Eine Zeile je Deck. Auf eine Spaltenüberschrift tippen sortiert danach. '
+                                  + 'Blasse Zeilen haben unter ' + CONV_THIN_N + ' Antritte — dort ist die Quote noch wackelig.'
+                                : 'One row per deck. Tap a column heading to sort by it. '
+                                  + 'Faded rows have fewer than ' + CONV_THIN_N + ' entries — the rate is shaky there.'}</p>
+                            <div class="mobile-table-scroll">
+                                <table class="ds-table cm-rangliste" data-rang-sortiert="anteil" data-rang-richtung="ab">
+                                    <thead><tr><th class="ds-rank">#</th>${kopfZellen}</tr></thead>
+                                    <tbody>${zeilen}</tbody>
                                 </table>
                             </div>
-                            <div class="ds-panel">
-                                <h3 class="ds-label">🏆 ${getLang() === 'de' ? 'Wie oft Top-8 erreicht' : 'Top-8 (conversion)'}</h3>
-                                <table class="ds-table">
-                                    <thead><tr><th class="ds-rank">#</th><th>Deck</th><th class="ds-num">${hintTerm('Top-8', term('top8'))}</th><th class="ds-num">n</th></tr></thead>
-                                    <tbody>${top8Top.map((d, i) => renderRow(d, i, 'top-8 conversion', fmtPct(d.top8ConvPct), d.brought)).join('')}</tbody>
-                                </table>
-                            </div>
-                        </div>
-                        ${renderConversionBlock(conv, convTop)}`;
+                        </div>`;
                 }
             } catch (_e) {
                 // Nicht mehr stumm: derselbe try/catch hat gerade drei

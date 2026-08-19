@@ -1561,19 +1561,41 @@
                 </div>`;
             const dataSourceHtml = `
                 <div class="ds-stat-row">
-                    ${statTile(deDS ? 'Decks im Feld' : 'Decks in the field',
+                    ${statTile(deDS ? 'Gemeldete Listen' : 'Reported lists',
                         totalEntries.toLocaleString(deDS ? 'de-DE' : 'en-US'), '',
-                        deDS ? 'Limitless Online, aktueller Stand' : 'Limitless Online, current snapshot')}
+                        deDS ? 'einzelne Decklisten, nicht Deckarten' : 'individual decklists, not deck types')}
                     ${statTile(deDS ? 'Archetypen' : 'Archetypes',
                         String(totalDecks), '',
                         deDS ? 'mindestens ein gemeldetes Deck' : 'at least one reported deck')}
-                    ${fieldConv && fieldConv.expected > 0
-                        ? statTile(deDS ? 'Feld-Durchschnitt' : 'Field average',
-                            fmtPct(fieldConv.expected * 100, 2), '',
+                    ${(() => {
+                        // Dritte Kachel: wie eng ist das Feld?
+                        //
+                        // Hier stand der Feld-Durchschnitt (6,20 % Top-8-Quote).
+                        // Der steht seit dem 19.08.2026 schon im Satz darueber
+                        // — zweimal dieselbe Zahl auf einem Bildschirm war der
+                        // Grund fuer die Rueckmeldung "entscheide Dich fuer eine
+                        // Zahl". Also eine, die sonst nirgends steht.
+                        //
+                        // Und "Decks im Feld" hiess es fuer 26.319 Eintraege,
+                        // obwohl es nur 131 Deckarten gibt. Gemeldet: "jetzt
+                        // sind ja nicht 26.000 verschiedene Decks, wir haben
+                        // 26.000 verschiedene Listen." Jetzt heisst es so.
+                        // fieldConv, nicht enriched: enriched steht mit const
+                        // im try-Block oben und ist hier nicht mehr im Scope.
+                        // Beim ersten Versuch stand hier enriched — das haette
+                        // die ganze Kachelreihe mit einem ReferenceError
+                        // gerissen, still, weil ein try/catch darum liegt.
+                        if (!fieldConv || !(fieldConv.totalBrought > 0)) return '';
+                        const top = [...(fieldConv.decks || [])].sort((x, y) => y.brought - x.brought);
+                        const acht = top.slice(0, 8).reduce((sum, d) => sum + d.brought, 0)
+                                     / fieldConv.totalBrought * 100;
+                        if (!(acht > 0)) return '';
+                        return statTile(deDS ? 'Die acht größten' : 'The top eight',
+                            fmtPct(acht, 0), '',
                             deDS
-                                ? `Top-8-Quote über ${fmtNumDS(fieldConv.totalBrought)} gewichtete Antritte`
-                                : `top-8 rate over ${fmtNumDS(fieldConv.totalBrought)} weighted entries`)
-                        : ''}
+                                ? `von ${totalDecks} Archetypen — so eng ist das Feld`
+                                : `of ${totalDecks} archetypes — how tight the field is`);
+                    })()}
                 </div>`;
 
             // Die Basis, auf der JEDE Quote dieser Ansicht beruht, wandert in
@@ -1847,6 +1869,7 @@
             if (!topCards || topCards.length === 0) return '';
             
             const top15 = topCards.slice(0, 15);
+            const deLbl = getLang() === 'de';
             
             let html = `
                 <div class="top-cards-container">
@@ -1866,17 +1889,45 @@
                 else if (rank === 3) rankColor = '#cd7f32'; // Bronze
                 else if (rank <= 5) rankColor = '#3498db'; // Blue for top 5
                 
+                // Zwei Knoepfe je Karte, gemeldet am 19.08.2026: "hier muesste
+                // man vielleicht nur noch die Moeglichkeit haben, die direkt
+                // auf die Wunschliste zu packen, und dass man die Chance hat,
+                // sich alle verschiedenen Artworks anzeigen zu lassen".
+                //
+                // Beides gibt es laengst — addToWishlist() in
+                // js/firebase-collection.js und openRaritySwitcherFromDB() in
+                // js/app-cards-db.js. Nur hier waren sie nie verdrahtet. Die
+                // Kartendaten tragen set_code und set_number ohnehin mit.
+                //
+                // Ohne Set und Nummer laesst sich weder eine Wunschliste
+                // fuehren noch ein Artwork nachschlagen — dann bleibt die
+                // Karte eben ohne Knoepfe, statt zwei tote anzubieten.
+                const hatDruck = !!(card.set_code && card.set_number);
+                const kartenId = hatDruck ? `${card.name}|${card.set_code}|${card.set_number}` : '';
+                const aktionen = hatDruck ? `
+                        <div class="top-card-actions">
+                            <button type="button" class="top-card-act"
+                                    onclick="addToWishlist('${escapeJsStr(kartenId)}')"
+                                    title="${escapeHtml(deLbl ? 'Auf die Wunschliste' : 'Add to wishlist')}"
+                                    aria-label="${escapeHtml((deLbl ? 'Auf die Wunschliste: ' : 'Add to wishlist: ') + card.name)}">♡</button>
+                            <button type="button" class="top-card-act"
+                                    onclick="openRaritySwitcherFromDB('${escapeJsStr(card.name)}', '${escapeJsStr(card.set_code)}', '${escapeJsStr(String(card.set_number))}')"
+                                    title="${escapeHtml(deLbl ? 'Andere Artworks dieser Karte' : 'Other artworks of this card')}"
+                                    aria-label="${escapeHtml((deLbl ? 'Artworks: ' : 'Artworks: ') + card.name)}">▧</button>
+                        </div>` : '';
+
                 html += `
                     <div class="top-card-item">
                         <div style="position:relative;">
-                            <img src="${imageUrl}" class="top-card-img" alt="${card.name}" loading="lazy" data-image-source="limitless-en">
+                            <img src="${imageUrl}" class="top-card-img" alt="${escapeHtml(card.name)}" loading="lazy" data-image-source="limitless-en">
                             <div class="top-card-rank" style="background: ${rankColor};">#${rank}</div>
                         </div>
                         <div class="top-card-stats">
-                            <div class="top-card-name">${card.name}</div>
-                            <div class="top-card-share">${card.global_share.toFixed(1)}% Usage</div>
-                            <div class="top-card-decks">${card.deck_inclusion_count} decks</div>
+                            <div class="top-card-name">${escapeHtml(card.name)}</div>
+                            <div class="top-card-share">${fmtPct(card.global_share)} ${escapeHtml(deLbl ? 'der Decks' : 'of decks')}</div>
+                            <div class="top-card-decks">${card.deck_inclusion_count} ${escapeHtml(deLbl ? 'Decks' : 'decks')}</div>
                         </div>
+                        ${aktionen}
                     </div>`;
             });
             

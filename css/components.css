@@ -834,7 +834,7 @@ html.is-signed-out [onclick*="radelist"]:hover {
   border-top: 1px solid var(--line);
   background: var(--surface-1);
 }
-.ds-bildvorschau-btn-share {
+.ds-bildvorschau-btn-kopieren {
   flex: 1;
   background: var(--brand);
   color: var(--surface-1);
@@ -846,8 +846,8 @@ html.is-signed-out [onclick*="radelist"]:hover {
   cursor: pointer;
   transition: filter 0.15s, transform 0.1s;
 }
-.ds-bildvorschau-btn-share:hover { filter: brightness(1.1); }
-.ds-bildvorschau-btn-share:active { transform: scale(0.98); }
+.ds-bildvorschau-btn-kopieren:hover { filter: brightness(1.1); }
+.ds-bildvorschau-btn-kopieren:active { transform: scale(0.98); }
 .ds-bildvorschau-btn-download {
   flex: 1;
   background: var(--brand-ink);
@@ -928,4 +928,11 @@ html.is-signed-out [onclick*="radelist"]:hover {
 
 @media (max-width: 768px) {
     .top-card-act { min-height: 36px; }
+}
+
+/* Der Knopf unter der Rangliste, der den Rest aufdeckt. */
+.cm-rang-mehr-zeile {
+    display: flex;
+    justify-content: center;
+    margin-top: var(--s-3);
 }

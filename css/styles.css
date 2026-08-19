@@ -10234,7 +10234,28 @@ body.arc-open { overflow: hidden; }
 }
 .arc-card--inline:hover { border-color: #cbd5e1; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.10); }
 .arc-card--embed { width: 100%; box-shadow: none; border: 1px solid #e2e8f0; margin-bottom: 14px; }
-.arc-inline-list { display: flex; flex-direction: column; gap: 10px; }
+/* Auf dem Schreibtisch nebeneinander, auf dem Telefon untereinander.
+ *
+ * Untereinander war die Vorgabe, solange nur Tier 1 und 2 Karten bekamen —
+ * 15 Karten a 220 px. Seit dem 19.08.2026 ist Tier 3 dabei, das sind 24, und
+ * gemeldet wurde: "auf der PC Version verschwenden wir einfach zu viel Platz.
+ * Es sollte irgendwie sein, dass zwei, drei Archetypen immer nebeneinander
+ * sind."
+ *
+ * auto-fill mit 400 px Mindestbreite: bei 1440 px werden das drei Spalten,
+ * bei 1024 zwei, unter 860 eine — ohne dass hier eine Breite festgeschrieben
+ * steht, die beim naechsten Geraet nicht mehr passt. Unter 400 px bricht die
+ * Kopfzeile der Matchup-Tabelle in der Karte um. */
+.arc-inline-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+    gap: 10px;
+    align-items: start;
+}
+
+@media (max-width: 860px) {
+    .arc-inline-list { grid-template-columns: 1fr; }
+}
 
 /* Dark header like the reference — the deck name is the anchor you scan
    for, so it gets the strongest contrast on the card. */
@@ -10361,7 +10382,13 @@ body.arc-open { overflow: hidden; }
     text-transform: uppercase; letter-spacing: 0.02em;
     padding: 4px 8px;
 }
-.arc-mu-wr { font-weight: 700; font-variant-numeric: tabular-nums; color: #0f172a; text-align: center !important; }
+.arc-mu-wr { font-weight: 700; font-variant-numeric: tabular-nums; color: #0f172a; }
+/* Zentriert statt rechtsbuendig — ohne Ausrufezeichen. Der Gegenspieler
+   (#currentMetaContent .arc-mu-table td, weiter oben) liegt bei (1,1,1);
+   .arc-mu-wr allein bei (0,1,0) und verlor. Statt das mit !important zu
+   erzwingen, steht hier dieselbe Spezifitaet plus die Klasse. */
+#currentMetaContent .arc-mu-table td.arc-mu-wr,
+#archetypeCardOverlay .arc-mu-table td.arc-mu-wr { text-align: center; }
 .arc-mu-up-1   { background: rgba(37, 99, 235, 0.16); }
 .arc-mu-up-2   { background: rgba(37, 99, 235, 0.40); }
 .arc-mu-up-3   { background: #1d4ed8; color: #ffffff; }

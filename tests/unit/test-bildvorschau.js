@@ -53,6 +53,47 @@ describe('Bildvorschau — es gibt sie genau einmal', () => {
             'die alten Regeln stehen wieder in meta-call.css');
     });
 
+    it('NIRGENDS im Projekt steht noch der alte Selektor', () => {
+        // Diese Zusage ist aus Schaden entstanden. Beim Umbenennen war in
+        // js/ und css/ gesucht worden — nicht in prerender/. Dort treibt
+        // prerender-meta-call.js die Seite mit Playwright und wartete auf
+        // '#mc-share-preview-modal .mc-share-preview-img'. Den Selektor gab
+        // es nicht mehr. Der Deploy ist zweimal gescheitert, jedes Mal nach
+        // 30 Sekunden Timeout, und die Seite blieb auf dem alten Stand.
+        const wurzel = path.join(__dirname, '..', '..');
+        const ueberspringen = new Set(['node_modules', '.git', 'test-results', 'dist', '_site']);
+        const treffer = [];
+        (function lauf(ordner, tiefe) {
+            if (tiefe > 4) return;
+            for (const e of fs.readdirSync(ordner, { withFileTypes: true })) {
+                if (ueberspringen.has(e.name)) continue;
+                const voll = path.join(ordner, e.name);
+                if (e.isDirectory()) { lauf(voll, tiefe + 1); continue; }
+                if (!/\.(js|mjs|cjs|css|html|py|yml|yaml|sh)$/.test(e.name)) continue;
+                const rel = path.relative(wurzel, voll);
+                if (rel === path.join('tests', 'unit', 'test-bildvorschau.js')) continue;
+                if (fs.readFileSync(voll, 'utf8').includes('mc-share-preview')) treffer.push(rel);
+            }
+        }(wurzel, 0));
+        assert.deepEqual(treffer, [],
+            'alter Selektor noch in: ' + treffer.join(', '));
+    });
+
+    it('der Vorab-Renderer greift auf die neuen Kennungen zu', () => {
+        const pre = read('prerender/prerender-meta-call.js');
+        assert.match(pre, /#dsBildvorschau \.ds-bildvorschau-img/,
+            'prerender-meta-call.js findet das Bild nicht — der Deploy scheitert daran');
+        assert.match(pre, /getElementById\('dsBildvorschau'\)/);
+    });
+
+    it('und die drei Aufrufer warten nicht auf das Fenster', () => {
+        // zeige() erfuellt sich erst beim Schliessen. Wuerde ein Aufrufer
+        // darauf warten, bliebe der Vorab-Renderer stehen, bis jemand das
+        // Fenster zuklickt — im CI also fuer immer.
+        assert.ok(!/await _showSharePreview\(/.test(MC),
+            'ein Aufrufer wartet auf das Schliessen des Fensters');
+    });
+
     it('beide Aufrufer benutzen dasselbe Modul', () => {
         assert.match(SHARE, /window\.DsBildvorschau/, 'ds-share.js zeigt kein Bild');
         assert.match(MC, /window\.DsBildvorschau/, 'app-meta-call.js benutzt das Modul nicht');

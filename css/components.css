@@ -687,3 +687,52 @@ html.is-signed-out [onclick*="radelist"]:hover {
 @media (max-width: 768px) {
     .ds-filter-select { max-width: 100%; width: 100%; }
 }
+
+/* ── Sortierbare Rangliste ──────────────────────────────────────────
+ *
+ * Ersetzt drei Auswertungen, die dieselben Decks in anderer Reihenfolge
+ * zeigten. Statt drei vorgegebener Sortierungen waehlt man selbst — und
+ * die Kopfzelle muss aussehen, als koenne man auf sie tippen.
+ *
+ * Kein !important: .ds-table steht in derselben Datei und wird von
+ * #currentMetaContent .section table per :not() ausgenommen.
+ */
+.cm-rang-th {
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
+}
+.cm-rang-th:hover { color: var(--brand); }
+.cm-rang-th:focus-visible {
+    outline: 2px solid var(--brand);
+    outline-offset: -2px;
+}
+
+/* Der Pfeil steht immer da, damit die Zeile beim Sortieren nicht
+   umbricht — er ist nur unsichtbar, solange nicht danach sortiert ist. */
+.cm-rang-pfeil {
+    display: inline-block;
+    width: 0.9em;
+    margin-left: 2px;
+    opacity: 0;
+}
+.cm-rang-th[aria-sort="ascending"]  .cm-rang-pfeil { opacity: 1; }
+.cm-rang-th[aria-sort="descending"] .cm-rang-pfeil { opacity: 1; }
+.cm-rang-th[aria-sort="ascending"]  .cm-rang-pfeil::after { content: '▲'; }
+.cm-rang-th[aria-sort="descending"] .cm-rang-pfeil::after { content: '▼'; }
+
+.cm-rang-hinweis { margin: 0 0 var(--s-3) 0; }
+
+/* Duenne Zeilen: gedaempft, aber lesbar. Dieselbe Konvention wie in der
+   Heatmap — die Aussage "wenig Antritte" darf keinen Kontrast kosten. */
+.cm-rangliste tbody tr.is-muted td { color: var(--ink-2); }
+
+/* Der Balken sitzt jetzt in der Rangliste, nicht mehr im eigenen Block.
+   Wert oben, Balken darunter — in einer schmalen Zahlenspalte ist
+   nebeneinander kein Platz. */
+.cm-rangliste .cm-rang-wert { display: block; }
+.cm-rangliste .ds-bar-track {
+    display: block;
+    margin-top: 3px;
+    min-width: 64px;
+}

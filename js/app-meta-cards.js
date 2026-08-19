@@ -1282,11 +1282,26 @@
                     // Schema matches what the legacy scripts produced:
                     //   { opponent_deck, win_rate (display string with %),
                     //     win_rate_numeric (float), record, total_games }
+                    // Bilanz und geglaettete Quote werden hier EINMAL
+                    // berechnet, nicht bei jedem Leser noch einmal. Die
+                    // Formel steht in js/matchup-glaettung.js — zwei
+                    // Deklarationen derselben Rechnung laufen auseinander,
+                    // sobald eine angefasst wird.
+                    const rec = String(r.record || '');
+                    const G = window.DsGlaettung;
+                    const b = G ? G.bilanz(rec) : { siege: 0, niederlagen: 0, unentschieden: 0 };
                     registry[deck][opp] = {
                         opponent_deck   : opp,
                         win_rate        : wrNum.toFixed(2) + '%',
+                        // Bleibt der ROHWERT. Alles, was ihn heute liest,
+                        // liest ihn weiter unveraendert.
                         win_rate_numeric: wrNum,
-                        record          : String(r.record || ''),
+                        // Neu: geglaettet, fuer die Anzeige.
+                        win_rate_shrunk : G ? G.quote(b.siege, b.niederlagen) : wrNum,
+                        wins            : b.siege,
+                        losses          : b.niederlagen,
+                        ties            : b.unentschieden,
+                        record          : rec,
                         total_games     : parseInt(r.total_games || '0', 10) || 0,
                     };
                     pairs++;

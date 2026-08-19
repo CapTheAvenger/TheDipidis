@@ -294,6 +294,19 @@
                             tableHtml += '<td class="heatmap-td heatmap-td-nodata">-</td>';
                         } else {
                             const totalGames = parseInt(cellData.total_games) || (parsedWins + parsedLosses + parsedDraws);
+                            // Angezeigt wird die geglaettete Quote, nicht der
+                            // Rohwert. Der Median unserer Paarungen hat 16
+                            // Partien, 55 % liegen unter 20 — roh stand in
+                            // dieser Tabelle "100,0 %" auf einem 3-0.
+                            // js/matchup-glaettung.js haelt die Formel, der
+                            // Rohwert steht weiter im Tooltip.
+                            const _G = window.DsGlaettung;
+                            const winRateRoh = winRate;
+                            if (_G) {
+                                winRate = Number.isFinite(Number(cellData.win_rate_shrunk))
+                                    ? Number(cellData.win_rate_shrunk)
+                                    : _G.quote(parsedWins, parsedLosses);
+                            }
                             let bgColor, textColor;
                             
                             // Blau <-> Rot mit grauem Nullpunkt, nicht Gruen <-> Rot.
@@ -326,16 +339,24 @@
                                 textColor = 'var(--ink-3)';
                                 var tdClass = 'heatmap-td heatmap-td-even';
                             }
-                            const tooltip = `${parsedWins}W - ${parsedLosses}L (${totalGames} ${t('heatmap.games')})`;
+                            const tooltip = `${parsedWins}W - ${parsedLosses}L (${totalGames} ${t('heatmap.games')}) · ${t('heatmap.raw')} ${winRateRoh.toFixed(1)} %`;
                             const safeRow = escapeJsStr(rowDeck);
                             const safeCol = escapeJsStr(colDeck);
                             // Inline sample-size below the WR. Cells with n<10 get a
                             // muted "low" tag so users can see at a glance which numbers
                             // are statistically thin (TrainerHill's confidence cue).
-                            const lowSample = totalGames < 10;
-                            const sampleClass = lowSample ? 'heatmap-td-n heatmap-td-n-low' : 'heatmap-td-n';
+                            // Duenn wird ueber eine gestrichelte Umrandung
+                            // gezeigt, nicht ueber Blaesse. Blaesse war der
+                            // Grund fuer den Kontrast von 3,42:1 an genau
+                            // diesen Zellen — die Information "wenig Partien"
+                            // wurde bezahlt mit "schlechter lesbar". Die
+                            // Strichelung traegt dieselbe Aussage und laesst
+                            // den Kontrast in Ruhe. Schwelle 20, dieselbe wie
+                            // THIN_GAMES in js/app-archetype-card.js.
+                            const lowSample = totalGames < 20;
+                            const sampleClass = 'heatmap-td-n';
                             const sampleHtml = `<small class="${sampleClass}">n=${totalGames}</small>`;
-                            tableHtml += `<td class="${tdClass} heatmap-td-dyn" style="--heatmap-bg: ${bgColor}; --heatmap-color: ${textColor};" title="${tooltip}" onclick="showToast('${safeRow} vs ${safeCol}: ${tooltip}', 'info', 3000)">${winRate.toFixed(1)}%${sampleHtml}</td>`;
+                            tableHtml += `<td class="${tdClass} heatmap-td-dyn${lowSample ? ' heatmap-td-thin' : ''}" style="--heatmap-bg: ${bgColor}; --heatmap-color: ${textColor};" title="${tooltip}" onclick="showToast('${safeRow} vs ${safeCol}: ${tooltip}', 'info', 3000)">${winRate.toFixed(1)}%${sampleHtml}</td>`;
                         }
                     });
                     tableHtml += '</tr>';

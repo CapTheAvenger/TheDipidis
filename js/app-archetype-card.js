@@ -116,9 +116,19 @@
             // record is "61 - 28 - 0" — wins, losses, ties.
             const parts = String(m.record || '').split('-').map(x => parseInt(x.trim(), 10));
             const games = parseInt(m.total_games, 10) || 0;
+            // Angezeigt wird die geglaettete Quote (js/matchup-glaettung.js),
+            // nicht der Rohwert: der Median unserer Paarungen hat 16 Partien,
+            // 55 % liegen unter 20. Roh stand hier "100 %" auf einem 3-0.
+            // winRateRoh bleibt fuer den Tooltip erhalten.
+            const G = (typeof window !== 'undefined') ? window.DsGlaettung : null;
+            const roh = Number(m.win_rate_numeric) || 0;
+            const geglaettet = Number.isFinite(Number(m.win_rate_shrunk))
+                ? Number(m.win_rate_shrunk)
+                : (G ? G.ausEintrag(m) : roh);
             return {
                 opponent: m.opponent_deck,
-                winRate: Number(m.win_rate_numeric) || 0,
+                winRate: geglaettet,
+                winRateRoh: roh,
                 wins: Number.isFinite(parts[0]) ? parts[0] : null,
                 losses: Number.isFinite(parts[1]) ? parts[1] : null,
                 games,
@@ -235,7 +245,11 @@
             const shade = shadeFor(m.winRate - 50, m.thin);
             return `<tr>
                     <td class="arc-mu-opp">${esc(m.opponent)}</td>
-                    <td class="arc-mu-wr ${shade}">${esc(fmt(m.winRate))} %</td>
+                    <td class="arc-mu-wr ${shade}" title="${esc(
+                        (de ? 'Geglättet aus ' : 'Smoothed from ')
+                        + (m.wins == null ? '?' : m.wins) + '–' + (m.losses == null ? '?' : m.losses)
+                        + (de ? ' (roh ' : ' (raw ') + fmt(m.winRateRoh) + ' %)')
+                    }">${esc(fmt(m.winRate))} %</td>
                     <td class="arc-mu-n${m.thin ? ' arc-mu-n-low' : ''}">${m.games}</td>
                     <td class="arc-mu-w">${m.wins == null ? '–' : m.wins}</td>
                     <td class="arc-mu-l">${m.losses == null ? '–' : m.losses}</td>

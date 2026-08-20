@@ -131,6 +131,12 @@
                 winRateRoh: roh,
                 wins: Number.isFinite(parts[0]) ? parts[0] : null,
                 losses: Number.isFinite(parts[1]) ? parts[1] : null,
+                // Die Unentschieden lagen im Register und wurden nirgends
+                // ausgegeben. In 423 von 1.546 Zeilen ist W + L kleiner als
+                // die Partienzahl daneben, und die Differenz ist jedes Mal
+                // genau diese Zahl — drei Werte in einer Zeile, die sich
+                // nicht addieren. Sie stehen jetzt in der Tabelle.
+                ties: Number.isFinite(parts[2]) ? parts[2] : null,
                 games,
                 thin: games < THIN_GAMES,
             };
@@ -282,11 +288,14 @@
                         fmt(bar.pct, 1).replace(',', '.')}%" title="${esc(
                         (de ? 'Geglättet aus ' : 'Smoothed from ')
                         + (m.wins == null ? '?' : m.wins) + '–' + (m.losses == null ? '?' : m.losses)
-                        + (de ? ' (roh ' : ' (raw ') + fmt(m.winRateRoh) + ' %)')
+                        + '–' + (m.ties == null ? '?' : m.ties)
+                        + (de ? ' (roh ' : ' (raw ') + fmt(m.winRateRoh) + ' %'
+                        + (de ? '; Unentschieden zählen nicht mit)' : '; ties are left out)'))
                     }">${esc(fmt(m.winRate))} %</td>
                     <td class="arc-mu-n${m.thin ? ' arc-mu-n-low' : ''}">${m.games}</td>
                     <td class="arc-mu-w">${m.wins == null ? '–' : m.wins}</td>
                     <td class="arc-mu-l">${m.losses == null ? '–' : m.losses}</td>
+                    <td class="arc-mu-u">${m.ties == null ? '–' : m.ties}</td>
                 </tr>`;
         }).join('');
         const thinCount = rows.filter(m => m.thin).length;
@@ -302,11 +311,15 @@
                 <table class="arc-mu-table">
                     <thead><tr>
                         <th>${esc(L('arc.colOpponent', de ? 'Gegner-Deck' : 'Deck'))}</th>
-                        <th>${esc(L('arc.colWinRate', 'Win Rate'))}</th>
+                        <th title="${esc(window.WinRateKonvention
+                            ? window.WinRateKonvention.hinweis('ohneUnentschieden')
+                            : '')}">${esc(L('arc.colWinRate', 'Win Rate'))}</th>
                         <th title="${esc(L('arc.colGames', de ? 'gespielte Partien' : 'games played'))}">${
                             esc(de ? 'Partien' : 'Games')}</th>
                         <th title="${esc(de ? 'gewonnene Partien' : 'games won')}">W</th>
                         <th title="${esc(de ? 'verlorene Partien' : 'games lost')}">L</th>
+                        <th title="${esc(de ? 'unentschiedene Partien — sie zählen in der Win Rate dieser Tabelle nicht mit'
+                                            : 'ties — they do not count in this table\'s win rate')}">U</th>
                     </tr></thead>
                     <tbody>${body}</tbody>
                 </table>

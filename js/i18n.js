@@ -661,7 +661,7 @@ const translations = {
     'pm.perfStatTournaments':   'Tournaments',
     'pm.perfStatPlayers':       'Players',
     'pm.perfStatRecord':        'Record (W-L-T)',
-    'pm.perfStatWinPct':        'Cumulative Win %',
+    'pm.perfStatWinPct':        'Match points % (cumulative)',
     'pm.perfStatDay2Conv':      'Day-2 Conversion',
     'pm.matchupMatrixTitle':    'Matchup Matrix',
     'pm.matchupLoading':        'Loading matchup data…',
@@ -670,7 +670,7 @@ const translations = {
     'pm.matchupTournHint':      'Aggregated across labs tournaments where this archetype appeared.',
     'pm.matchupColOpponent':    'Opponent',
     'pm.matchupColGames':       'Games',
-    'pm.matchupColWinPct':      'Win %',
+    'pm.matchupColWinPct':      'Match points %',
 
     // ── Matchup extras ───────────────────────────────────────
     'matchup.searchOpponent':   'Search opponent...',
@@ -2623,7 +2623,7 @@ const translations = {
     'pm.perfStatTournaments':   'Turniere',
     'pm.perfStatPlayers':       'Spieler',
     'pm.perfStatRecord':        'Bilanz (W-L-U)',
-    'pm.perfStatWinPct':        'Kumulierte Win %',
+    'pm.perfStatWinPct':        'Matchpunkte % (kumuliert)',
     'pm.perfStatDay2Conv':      'Day-2-Conversion',
     'pm.matchupMatrixTitle':    'Matchup-Matrix',
     'pm.matchupLoading':        'Lade Matchup-Daten…',
@@ -2632,7 +2632,7 @@ const translations = {
     'pm.matchupTournHint':      'Aggregiert über alle Labs-Turniere in denen dieser Archetyp auftrat.',
     'pm.matchupColOpponent':    'Gegner',
     'pm.matchupColGames':       'Spiele',
-    'pm.matchupColWinPct':      'Sieg %',
+    'pm.matchupColWinPct':      'Matchpunkte %',
 
     // ── Matchup extras ───────────────────────────────────────
     'matchup.searchOpponent':   'Gegner suchen...',

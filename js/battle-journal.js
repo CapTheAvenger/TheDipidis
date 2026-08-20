@@ -1275,8 +1275,8 @@
                         </div>
                         <button type="button" class="bj-tournament-add-btn" onclick="continueJournalTournament('${safeTournKey}','${safeMetaKey}','${safeGroupType}')" title="${escapeHtml(battleJournalText('bj.addMatch', 'Add match'))}">+ Match</button>
                         <button type="button" class="bj-tournament-edit-btn" onclick="openEditTournamentModal('${safeTournKey}')" title="${escapeHtml(battleJournalText('bj.editTournament', 'Edit tournament'))}">Edit</button>
-                        <button type="button" class="bj-tournament-share-btn" onclick="shareTournamentSummary('${safeTournKey}', false)" title="${escapeHtml(battleJournalText('bj.shareTournament', 'Share as image'))}">Share</button>
-                        <button type="button" class="bj-tournament-share-btn bj-tournament-share-details-btn" onclick="shareTournamentSummary('${safeTournKey}', true)" title="${escapeHtml(battleJournalText('bj.shareTournamentDetails', 'Share with brick + notes'))}">Share+</button>
+                        <button type="button" class="bj-tournament-share-btn" onclick="shareTournamentSummary('${safeTournKey}', false, '${safeMetaKey}')" title="${escapeHtml(battleJournalText('bj.shareTournament', 'Share as image'))}">Share</button>
+                        <button type="button" class="bj-tournament-share-btn bj-tournament-share-details-btn" onclick="shareTournamentSummary('${safeTournKey}', true, '${safeMetaKey}')" title="${escapeHtml(battleJournalText('bj.shareTournamentDetails', 'Share with brick + notes'))}">Share+</button>
                         <!-- Das quadratische Ergebnisbild. shareTournamentSummary()
                              malt 600 px breit und beliebig hoch — ein Format, das
                              Instagram beschneidet und das auf keiner Zeitleiste
@@ -1284,7 +1284,7 @@
                              Platzierung und Runde fuer Runde. Beide bleiben:
                              das schmale Bild ist in einem Chat schneller zu
                              lesen, das quadratische ist das, was man postet. -->
-                        <button type="button" class="bj-tournament-share-btn bj-tournament-share-card-btn" onclick="shareTournamentCard('${safeTournKey}')" title="${escapeHtml(battleJournalText('bj.shareTournamentCard', 'Post-ready image, 1080x1080'))}">◧ 1:1</button>
+                        <button type="button" class="bj-tournament-share-btn bj-tournament-share-card-btn" onclick="shareTournamentCard('${safeTournKey}','${safeMetaKey}')" title="${escapeHtml(battleJournalText('bj.shareTournamentCard', 'Post-ready image, 1080x1080'))}">◧ 1:1</button>
                     </div>`;
 
                 entries.forEach(entry => {
@@ -1428,8 +1428,8 @@
         return lines;
     }
 
-    async function shareTournamentSummary(tournamentName, withDetails) {
-        const entries = journalHistoryCache.filter(e => e.tournamentName === tournamentName);
+    async function shareTournamentSummary(tournamentName, withDetails, metaKey) {
+        const entries = journalGruppe(tournamentName, metaKey);
         if (entries.length === 0) return;
 
         const wins = entries.filter(e => e.result === 'win').length;
@@ -2408,6 +2408,41 @@
     window.openJournalHistoryTab = openJournalHistoryTab;
     window._bjSetCache = function(entries) { journalHistoryCache = _migrateTypeValues(entries); };
     window._bjGetCache = function() { return journalHistoryCache; };
+
+    /**
+     * Genau die Eintraege, aus denen die Kopfzeile eines Turnierblocks
+     * gerechnet wurde.
+     *
+     * Die Kopfzeile entsteht aus der GEFILTERTEN Liste, gruppiert nach
+     * Meta UND Turniername. Das Teilen-Bild filterte bis zum 20.08.2026
+     * nur nach dem Turniernamen und ueber den ungefilterten Bestand —
+     * gemessen: Kopfzeile 2-1-1 (50 %), Bild 2-3-1 (33 %), 17 Punkte und
+     * zwei Matches Unterschied. Der Meta-Schluessel lag an der Stelle
+     * bereits vor, er wurde nur nicht mitgegeben.
+     *
+     * Ein Bild, das etwas anderes behauptet als die Zeile, neben der sein
+     * Knopf steht, ist schlimmer als kein Bild: es verlaesst die Seite.
+     */
+    function journalGruppe(tournamentName, metaKey) {
+        var liste = journalHistoryCache || [];
+        var el = function (id) { var e = document.getElementById(id); return e ? e.value : ''; };
+        var fTournament = el('journalFilterTournament');
+        var fResult     = el('journalFilterResult');
+        var fMeta       = el('journalFilterMeta');
+        var fType       = el('journalFilterType');
+        if (fTournament) liste = liste.filter(function (e) { return e.tournamentName === fTournament; });
+        if (fResult)     liste = liste.filter(function (e) { return e.result === fResult; });
+        if (fMeta)       liste = liste.filter(function (e) { return (e.meta || '') === fMeta; });
+        if (fType)       liste = liste.filter(function (e) { return (e.tournamentType || '') === fType; });
+        liste = liste.filter(function (e) {
+            return String(e.tournamentName || '') === String(tournamentName || '');
+        });
+        if (metaKey != null) {
+            liste = liste.filter(function (e) { return String(e.meta || '') === String(metaKey); });
+        }
+        return liste;
+    }
+    window._bjGetGroup = journalGruppe;
     window.copyJournalEntry = copyJournalEntry;
     window.copyAllJournalEntries = copyAllJournalEntries;
     window.clearAllJournalEntries = clearAllJournalEntries;
@@ -2417,13 +2452,13 @@
     // Das quadratische Ergebnisbild lebt in js/ds-share.js — hier steht
     // nur die Bruecke, damit der Knopf im Turnierkopf einen Namen zum
     // Rufen hat und ein fehlendes Modul nicht als toter Knopf endet.
-    window.shareTournamentCard = function (tournamentName) {
+    window.shareTournamentCard = function (tournamentName, metaKey) {
         if (!window.DsShare || typeof window.DsShare.shareResultCard !== 'function') {
             showToast(battleJournalText('bj.shareCardMissing',
                 'Image module not loaded — reload the page.'), 'warning');
             return;
         }
-        window.DsShare.shareResultCard(tournamentName);
+        window.DsShare.shareResultCard(tournamentName, { metaKey: metaKey });
     };
     window.toggleMatchupStats = toggleMatchupStats;
     window.openMatchupAnalysisModal = openMatchupAnalysisModal;

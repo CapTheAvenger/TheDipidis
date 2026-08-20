@@ -1793,17 +1793,33 @@
                     console.warn('Could not load config/current_meta_analysis_settings.json:', e);
                 }
                 
-                // Load Limitless meta statistics from JSON file
+                // Load Limitless meta statistics from JSON file.
+                //
+                // Dieselbe Alterspruefung wie in js/app-tier-meta.js: die Datei
+                // stand bis zum 20.08.2026 nicht in SYNC_PATTERNS und war seit
+                // dem 20.04.2026 eingefroren. Ohne generated_at oder aelter als
+                // 14 Tage bleiben die Zahlen auf 0 — die aufrufende Stelle zeigt
+                // dann nichts statt etwas Falsches.
+                const META_STATS_HOECHSTALTER_TAGE = 14;
                 let metaStats = { tournaments: 0, players: 0, matches: 0 };
                 try {
                     const metaResponse = await fetch(BASE_PATH + 'limitless_meta_stats.json?t=' + Date.now());
                     if (metaResponse.ok) {
                         const statsData = await metaResponse.json();
-                        metaStats = {
-                            tournaments: parseInt(statsData?.tournaments, 10) || 0,
-                            players: parseInt(statsData?.players, 10) || 0,
-                            matches: parseInt(statsData?.matches, 10) || 0
-                        };
+                        const stand = statsData && statsData.generated_at
+                            ? new Date(statsData.generated_at) : null;
+                        const frisch = stand && !isNaN(stand.getTime())
+                            && (Date.now() - stand.getTime()) / 86400000 <= META_STATS_HOECHSTALTER_TAGE;
+                        if (frisch) {
+                            metaStats = {
+                                tournaments: parseInt(statsData?.tournaments, 10) || 0,
+                                players: parseInt(statsData?.players, 10) || 0,
+                                matches: parseInt(statsData?.matches, 10) || 0
+                            };
+                        } else {
+                            console.warn('limitless_meta_stats.json ohne oder mit zu altem '
+                                + 'generated_at — Zahlen werden nicht angezeigt');
+                        }
                     }
                 } catch (e) {
                     console.warn('Could not load limitless_meta_stats.json:', e);

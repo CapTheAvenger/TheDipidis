@@ -857,17 +857,31 @@
                     const deckName = archetypeName;
                     const isCurrentFormat = window.currentCityLeagueFormat === 'current';
 
-                    // Use format-appropriate values while keeping the banner layout identical for current and past
-                    const currentRankValue = parseFloat(
+                    // parseLocaleNumber, nicht parseFloat.
+                    //
+                    // Diese Felder kommen aus data/city_league_archetypes_comparison.csv
+                    // und tragen ein deutsches Dezimalkomma — js/app-city-league.js:303
+                    // schreibt sie ausdruecklich mit .replace('.', ','). parseFloat('23,08')
+                    // ergibt 23: die Nachkommastellen fielen ab. Gemessen am 20.08.2026 am
+                    // letzten vollstaendigen Datenstand: 143 falsche Oe-Platzierungen und
+                    // 114 falsche Anteile, dazu 146 Aufwaertspfeile ohne echte Veraenderung.
+                    //
+                    // Heute unsichtbar, weil die City-League-Dateien seit der Rotation am
+                    // 31.07.2026 leer sind — es schlaegt in der Sekunde durch, in der
+                    // wieder Daten kommen. js/app-city-league.js:169 liest dieselben
+                    // Felder seit jeher richtig; hier fehlte es.
+                    const zahlAus = (typeof window.parseLocaleNumber === 'function')
+                        ? window.parseLocaleNumber : parseFloat;
+                    const currentRankValue = zahlAus(
                         isCurrentFormat
                             ? (deck.new_avg_placement || deck.avg_placement || deck.average_placement || 0)
                             : (deck.average_placement || deck.avg_placement || deck.new_avg_placement || 0)
-                    );
-                    const currentShareValue = parseFloat(
+                    , 0);
+                    const currentShareValue = zahlAus(
                         isCurrentFormat
                             ? (deck.new_meta_share || deck.new_share || deck.share || deck.percentage_in_archetype || 0)
                             : (deck.share || deck.percentage_in_archetype || deck.new_meta_share || deck.new_share || 0)
-                    );
+                    , 0);
                     
                     // Get archetype image
                     const archetypeCards = fuzzyArchetypeLookup(archetypeName, cardDataByArchetype);
@@ -1643,14 +1657,45 @@
             // wenn wir davon noch Daten verwenden wollen, dann koennen wir die
             // oben mit reinnehmen". Genau eine Angabe daraus ist es wert: woraus
             // die 26.319 Listen eigentlich bestehen.
+            // Diese Zeile darf nur erscheinen, wenn sie zu den Listen daneben passt.
+            //
+            // GEMESSEN am 20.08.2026: data/limitless_meta_stats.json war seit dem
+            // 20.04.2026 unveraendert — vier Monate. Der Scraper schreibt die Datei
+            // nach backend/core/data/ (limitless_online_scraper.py:133), aber sie
+            // stand nicht in SYNC_PATTERNS und kam deshalb nie in data/ an. Die
+            // Kachel behauptete also "26.319 Listen aus 199 Turnieren", wobei die
+            // 26.319 woechentlich frisch waren und die 199 aus dem April stammten.
+            // Die Partienzahl war zusaetzlich in sich falsch: 119.820
+            // Partie-Eintraege in den Matchup-Daten sind mindestens 59.910
+            // gespielte Partien, angezeigt wurden 31.411.
+            //
+            // Zwei Sachen sind dagegen noetig, und beide gehoeren hierher:
+            //   1. die Datei muss ankommen (SYNC_PATTERNS, siehe backend/core/
+            //      prepare_card_data.py) — das behebt die Ursache;
+            //   2. die Anzeige darf sich darauf nicht verlassen — das behebt den
+            //      Schaden, auch wenn der naechste Lauf wieder ausfaellt.
+            //
+            // Punkt 2 steht hier: ohne generated_at, oder wenn der Stand aelter
+            // ist als die Deckdatei, faellt die Zeile weg. Lieber keine Herkunft
+            // als eine falsche — eine Zahl ohne Beleg ist besser als eine Zahl
+            // mit dem Beleg eines anderen Tages.
+            const HOECHSTALTER_TAGE = 14;
             let metaStats = null;
+            let metaStatsStand = null;
             try {
                 const ms = await fetch(`${BASE_PATH}limitless_meta_stats.json?t=${timestamp}`);
                 if (ms.ok) {
                     const j = await ms.json();
                     const z = (v) => parseInt(v, 10) || 0;
-                    if (z(j.tournaments) > 0) {
+                    const stand = j.generated_at ? new Date(j.generated_at) : null;
+                    const frisch = stand && !isNaN(stand.getTime())
+                        && (Date.now() - stand.getTime()) / 86400000 <= HOECHSTALTER_TAGE;
+                    if (z(j.tournaments) > 0 && frisch) {
                         metaStats = { turniere: z(j.tournaments), spieler: z(j.players), partien: z(j.matches) };
+                        metaStatsStand = stand;
+                    } else if (z(j.tournaments) > 0) {
+                        console.warn('limitless_meta_stats.json ist zu alt oder ohne Stand '
+                            + '(generated_at=' + (j.generated_at || 'fehlt') + ') — Herkunftszeile bleibt weg');
                     }
                 }
             } catch (e) {
@@ -1670,7 +1715,9 @@
                         metaStats
                             ? (deDS
                                 ? `aus ${fmtNumDS(metaStats.turniere)} Turnieren · ${fmtNumDS(metaStats.spieler)} Spieler · ${fmtNumDS(metaStats.partien)} Partien`
-                                : `from ${fmtNumDS(metaStats.turniere)} tournaments · ${fmtNumDS(metaStats.spieler)} players · ${fmtNumDS(metaStats.partien)} matches`)
+                                  + ` (Stand ${metaStatsStand.toLocaleDateString('de-DE')})`
+                                : `from ${fmtNumDS(metaStats.turniere)} tournaments · ${fmtNumDS(metaStats.spieler)} players · ${fmtNumDS(metaStats.partien)} matches`
+                                  + ` (as of ${metaStatsStand.toLocaleDateString('en-GB')})`)
                             : (deDS ? 'einzelne Decklisten, nicht Deckarten' : 'individual decklists, not deck types'))}
                     ${statTile(deDS ? 'Archetypen' : 'Archetypes',
                         String(totalDecks), '',

@@ -30,9 +30,19 @@ The join key for everything price-related: our `(set, number)` → Cardmarket
 
 `match_method` tells you how confident the row is:
 * `unique` — only one candidate product with that name in the expansion. Safe.
-* `live-verified` — the idProduct was read off the live Cardmarket product
-  page behind Limitless' per-print URL (`cardmarket_mapping_verified.csv`
-  below). Safest — this is an identity statement, not a heuristic.
+* `live-verified` — **a price fingerprint, not an identity statement.** This
+  line used to claim the idProduct was read off the live Cardmarket product
+  page. It is not. `scripts/verify_cardmarket_mapping.py` compares the price
+  shown on the Limitless per-print page against the price-guide metric of each
+  candidate and accepts the closest one within `FP_TOLERANCE = 1.15`. Measured
+  over all 5.048 verified rows on 2026-08-20: every single one carries the
+  evidence form `limitless-fingerprint <A>EUR~<B>EUR (ratio X, pool N)`, ratios
+  run from 1.00 to 1.15, and 802 rows (15,9 %) sit more than 5 % apart. It is
+  the strongest signal we have and much better than the positional heuristic —
+  but it can be wrong, and it demonstrably is: nine product ids are
+  `live-verified` for **two different cards at once** (BUS 112a/142, BWP 30/31,
+  DRM 60/60a, FLF 18/19, HL 28/29, JTG 143/144, ROS 54/55, TRR 19/20,
+  UPR 20/21). An identity check would make that impossible.
 * `priced-by-*` — several same-named variants, paired POSITIONALLY (card
   number rank ↔ trend price rank). **Known failure mode:** the pairing
   inverts when a Special Art Rare sits at a lower number than a more
@@ -91,8 +101,15 @@ the join key into any card database) and to both official image URLs.
 
 | value | meaning |
 |---|---|
-| `ok`         | the (set,number) → idProduct row is `unique` or live-verified |
-| `unverified` | the row comes from the positional heuristic (`match_method priced-by-*`) — the price may belong to a same-named sibling print. 1.560 rows today. |
+| `ok`         | the (set,number) → idProduct row is `unique` or live-verified. 15.960 rows on 2026-08-20. |
+| `unverified` | the row comes from the positional heuristic (`match_method priced-by-*`) — the price may belong to a same-named sibling print. 1.244 rows. |
+| `unmapped`   | **there is no mapping row at all.** Added 2026-08-20. Until then these rows carried `ok`, because a missing entry fell through the merger's default branch — 3.015 rows, 66.549 € (24,8 % of the catalogue value), none of them touched since 2026-04-01. `ok` meant "verified" for 16k rows and "nothing known" for 3k, in the same column. |
+| `collision`  | **the product id serves more than one card.** Added 2026-08-20. 100 ids appear twice in the mapping (200 rows); in the published file all of those pairs share one `eur_price` while their `cardmarket_url` point at two different products, so at least one of the two numbers belongs to the other card. The price is kept — it is right for one of them — and marked, per the house rule *report, don't silently repair*. |
+
+**A new value is not a new column.** Consumers that branch on
+`mapping_status === 'ok'` were, before 2026-08-20, silently including 3.015
+rows with no mapping at all; after it they are not. Consumers that only test
+`!== 'unverified'` need updating.
 
 `mapping_status` is computed independently of the guide lookup, so it
 survives a failed price download (the `stale` / `no_data` paths would

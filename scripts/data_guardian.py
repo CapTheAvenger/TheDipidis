@@ -500,7 +500,8 @@ def price_integrity():
     Returns {nonempty_eur_price, match_methods: {method_family: n},
              duplicate_idproducts}. All diffed against the baseline — a
     changed number is REPORTED, never repaired."""
-    out = {'nonempty_eur_price': 0, 'match_methods': {}, 'duplicate_idproducts': 0}
+    out = {'nonempty_eur_price': 0, 'match_methods': {}, 'duplicate_idproducts': 0,
+           'verified_collisions': []}
     price_path = os.path.join(DATA, "price_data.csv")
     if os.path.exists(price_path):
         out['nonempty_eur_price'] = sum(
@@ -509,6 +510,7 @@ def price_integrity():
     if os.path.exists(map_path):
         methods = collections.Counter()
         ids = collections.Counter()
+        nach_id = collections.defaultdict(list)
         for r in read_csv(map_path):
             m = col(r, 'match_method')
             # Family only: 'priced-by-date(4<->5)' fluctuates per run.
@@ -516,9 +518,31 @@ def price_integrity():
             pid = col(r, 'cardmarket_product_id')
             if pid:
                 ids[pid] += 1
+                nach_id[pid].append((f"{col(r, 'set')} {col(r, 'number')}".strip(), m))
         out['match_methods'] = dict(methods)
         out['duplicate_idproducts'] = sum(1 for n in ids.values() if n > 1)
+        # Zwei Karten, eine Nummer, BEIDE als live-verified ausgewiesen.
+        #
+        # Das ist kein Drift, sondern ein Widerspruch in sich: dieselbe
+        # Produktnummer kann nicht zwei Identitaeten belegen. Deshalb steht
+        # er ausserhalb der Grundlinien-Logik — er wird gemeldet, solange es
+        # ihn gibt, nicht erst wenn die Zahl steigt.
+        out['verified_collisions'] = sorted(
+            pid for pid, eintraege in nach_id.items()
+            if len(eintraege) > 1 and all(m == 'live-verified' for _, m in eintraege))
     return out
+
+
+def check_verified_collisions(findings, cur):
+    kol = cur.get('verified_collisions') or []
+    if not kol:
+        return
+    findings.append(("CRITICAL",
+                     f"{len(kol)} Cardmarket product id(s) are 'live-verified' for TWO "
+                     f"different cards at once: {', '.join(kol[:12])}"
+                     f"{' …' if len(kol) > 12 else ''} — a verification that returns two "
+                     f"answers for one product is not a verification. See "
+                     f"data/_consumers.md on match_method."))
 
 
 def report_unverified_prices(findings):
@@ -630,6 +654,8 @@ def main():
     # Der Paar-Widerspruch braucht keine Grundlinie: er ist auch beim ersten
     # Lauf eine Aussage ueber den Zustand, nicht ueber eine Veraenderung.
     check_paired_emptiness(findings, empties)
+    # Widersprueche brauchen keine Grundlinie.
+    check_verified_collisions(findings, price)
 
     crit = [f for lvl, f in findings if lvl == "CRITICAL"]
     warn = [f for lvl, f in findings if lvl == "WARN"]

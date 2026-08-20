@@ -17,6 +17,7 @@ Output:
   data/price_data.csv  (atomic overwrite)
 """
 
+import collections
 import os
 import sys
 import csv
@@ -73,6 +74,32 @@ def main():
             key = (m['set'], m['number'])
             mapping[key] = int(m['cardmarket_product_id'])
             mapping_method[key] = m.get('match_method', '')
+
+    # Eine Produktnummer, zwei Karten.
+    #
+    # Gemessen am 20.08.2026: 100 idProduct-Werte stehen in je zwei Zeilen,
+    # 95 der Paare im selben Set. In der ausgelieferten price_data.csv haben
+    # alle denselben eur_price und verschiedene cardmarket_url — die Links
+    # zeigen also auf zwei verschiedene Produkte, der Preis kann nicht
+    # beiden gehoeren. Bei neun Paaren tragen BEIDE Seiten 'live-verified',
+    # was ein Widerspruch in sich ist: dieselbe Nummer kann nicht zwei
+    # Identitaeten belegen (BUS 112a/142, BWP 30/31, DRM 60/60a, FLF 18/19,
+    # HL 28/29, JTG 143/144, ROS 54/55, TRR 19/20, UPR 20/21).
+    #
+    # Der Preis wird NICHT geloescht — er stimmt fuer eine der beiden
+    # Karten, und ein Loch ist keine bessere Antwort als eine markierte
+    # Zahl (Hausregel: melden, nicht stillschweigend reparieren). Beide
+    # Zeilen bekommen aber mapping_status='collision', und die Oberflaeche
+    # schreibt das an den Preis.
+    id_counts = collections.Counter(mapping.values())
+    kollidierend = {i for i, n in id_counts.items() if n > 1}
+    if kollidierend:
+        logger.warning(
+            "%d Cardmarket-Produktnummern bedienen mehr als eine Karte "
+            "(%d Zeilen betroffen) — diese Preise werden als 'collision' "
+            "gekennzeichnet, nicht geloescht.",
+            len(kollidierend),
+            sum(n for i, n in id_counts.items() if n > 1))
     with open(guide_path, encoding='utf-8') as f:
         guide = {int(p['idProduct']): p for p in json.load(f).get('priceGuides', [])}
 
@@ -88,7 +115,8 @@ def main():
     now = datetime.now().isoformat()
     out_rows = []
     stats = {'cardmarket': 0, 'preserved': 0, 'no_data': 0, 'no_trend': 0,
-             'trend_below_low': 0, 'unverified_mapping': 0}
+             'trend_below_low': 0, 'unverified_mapping': 0,
+             'unmapped': 0, 'collision': 0}
 
     for c in cards:
         if not c.get('number'):
@@ -108,10 +136,27 @@ def main():
         # no_data paths rewrite price_status and every unverified marker on
         # the site would silently disappear. It also would have been lost on
         # the 13 trend_below_low + 3 no_trend rows that are positional today.
+        # 'ok' war der stille Vorgabewert fuer "keine Zuordnungszeile".
+        #
+        # mapping_method.get(key, '') liefert fuer eine Karte ohne Eintrag
+        # einen leeren String, der nicht mit 'priced-by' beginnt — und damit
+        # fiel sie in den ok-Zweig. Am 20.08.2026 betraf das 3.015
+        # Preiszeilen mit zusammen 66.549 EUR, also 24,8 % des Katalogwerts,
+        # alle seit dem 01.04.2026 unberuehrt. data/_consumers.md versprach
+        # fuer 'ok' ausdruecklich "unique or live-verified". Jetzt gibt es
+        # dafuer einen eigenen Wert.
         method = mapping_method.get(key, '')
-        mapping_status = 'unverified' if method.startswith('priced-by') else 'ok'
-        if mapping_status == 'unverified':
+        if idp is None:
+            mapping_status = 'unmapped'
+            stats['unmapped'] += 1
+        elif idp in kollidierend:
+            mapping_status = 'collision'
+            stats['collision'] += 1
+        elif method.startswith('priced-by'):
+            mapping_status = 'unverified'
             stats['unverified_mapping'] += 1
+        else:
+            mapping_status = 'ok'
 
         if guide_entry:
             # Cardmarket uses trend == 0 (and null) to mean "no trend can be
@@ -212,10 +257,12 @@ def main():
 
     logger.info("Result: %s from Cardmarket (%s without a usable trend, "
                 "%s with a trend below the cheapest offer, "
-                "%s on an unverified positional mapping) | "
+                "%s on an unverified positional mapping, "
+                "%s without any mapping row, "
+                "%s on a product id shared with another card) | "
                 "%s preserved (Limitless/historic) | %s no data",
                 stats['cardmarket'], stats['no_trend'], stats['trend_below_low'],
-                stats['unverified_mapping'],
+                stats['unverified_mapping'], stats['unmapped'], stats['collision'],
                 stats['preserved'], stats['no_data'])
 
     # extrasaction='ignore' below means a key missing from THIS list is dropped

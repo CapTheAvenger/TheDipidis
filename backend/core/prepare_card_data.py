@@ -156,9 +156,32 @@ def create_merged_database():
     # merger and is authoritative — never let a Limitless backend row
     # overwrite it (would clobber the trend+low pair).
     be_override = 0
+    # Preis und Vertrauensflag duerfen nicht gemeinsam altern.
+    #
+    # Gemessen am 20.08.2026: 27 Karten stehen in der ausgelieferten
+    # cards_chunk_*.json mit einem Preis, den price_data.csv gar nicht mehr
+    # fuehrt — dort sind eur_price und eur_low leer und price_status ist
+    # 'no_trend'. Der Wert stammt vom Vortag, weil die Schleife unten eine
+    # leere Backend-Zeile ueberspringt und die Frontend-Zeile damit
+    # unveraendert stehenlaesst — mitsamt ihrem 'ok'. Sieben Zeilen wurden
+    # so von no_trend auf ok und sieben weitere auf unverified_mapping
+    # "hochgestuft", 19 von unverified auf ok.
+    #
+    # Die Betraege sind klein (0,02 bis 0,19 EUR), der Mechanismus ist es
+    # nicht: er ist auf keine Zahl begrenzt. Jede Karte, die der Tageslauf
+    # verfehlt, erbt Preis UND Kennzeichnung des Vortags.
+    #
+    # Der Preis bleibt stehen — er ist die letzte bekannte Wahrheit. Aber er
+    # wird als 'stale' gekennzeichnet, und last_updated bleibt der alte.
+    uebernommen = 0
     for p in load_csv(backend_prices):
         key = f"{p.get('set')}_{p.get('number')}"
         if not (p.get('eur_price') or p.get('eur_low')):
+            alt_zeile = prices_dict.get(key)
+            if alt_zeile and (alt_zeile.get('eur_price') or alt_zeile.get('eur_low')):
+                if alt_zeile.get('price_status') != 'stale':
+                    alt_zeile['price_status'] = 'stale'
+                    uebernommen += 1
             continue
         existing = prices_dict.get(key)
         if not existing:
@@ -173,6 +196,9 @@ def create_merged_database():
                 prices_dict[key] = p
                 be_override += 1
     print(f"✓ Preise geladen: {len(prices_dict)} Einträge ({fe_count} frontend, {be_override} backend-override)")
+    if uebernommen:
+        print(f"  ! {uebernommen} Preise vom Vortag uebernommen — als 'stale' gekennzeichnet, "
+              f"weil der heutige Lauf fuer sie keinen Wert geliefert hat")
     en_keys = {f"{c.get('set')}_{c.get('number')}" for c in english_cards}
 
     # "EN beats JP": when an EN card's detail page lists a JP print (captured by

@@ -845,7 +845,18 @@ function getCollectionStats() {
   
   let totalValue = 0;
   let cardCount = 0;
-  
+  // Woraus die Summe besteht.
+  //
+  // Die Kachel "Collection Value" addierte bis zum 20.08.2026 blind jeden
+  // eur_price. Katalogweit tragen 3.015 Zeilen einen Preis, zu dem es gar
+  // keine Zuordnung gibt — 66.549 EUR, also 24,8 % des Katalogwerts, alle
+  // seit dem 01.04.2026 unberuehrt. In einer Summe sieht man davon nichts.
+  // Deshalb kommen die Bestandteile mit zurueck, und die Kachel schreibt
+  // sie darunter.
+  let unsicherValue = 0;      // ohne Zuordnung, doppelte Nummer, Heuristik
+  let unsicherCount = 0;
+  let aeltester = '';         // aeltester last_updated, der einfliesst
+
   // Calculate total value based on actual card prices
   collection.forEach(cardId => {
     if (typeof cardId !== 'string' || !cardId.includes('|')) return;
@@ -863,6 +874,13 @@ function getCollectionStats() {
       const price = parseLocaleNumber(card.eur_price, 0);
       if (!isNaN(price)) {
         totalValue += price * ownedCount;
+        const ms = card.mapping_status;
+        if (ms === 'unverified' || ms === 'unmapped' || ms === 'collision') {
+          unsicherValue += price * ownedCount;
+          unsicherCount += ownedCount;
+        }
+        const stand = String(card.price_last_updated || card.last_updated || '');
+        if (stand && (!aeltester || stand < aeltester)) aeltester = stand;
       }
     }
   });
@@ -870,8 +888,55 @@ function getCollectionStats() {
   return {
     cardCount,
     totalValue,
-    uniqueCards: cardCount
+    uniqueCards: cardCount,
+    unsicherValue,
+    unsicherCount,
+    aeltesterPreisstand: aeltester
   };
+}
+
+/**
+ * Ein Satz unter die Summe: wie viel davon auf ungesicherten Preisen steht
+ * und wie alt der aelteste einfliessende Stand ist. Leer, wenn es nichts
+ * zu sagen gibt — eine Kachel ohne Vorbehalt ist besser als eine mit
+ * einem leeren.
+ */
+function collectionValueNote(stats) {
+  try {
+    if (!stats || !(stats.totalValue > 0)) return '';
+    const de = (typeof window.getLang === 'function' && window.getLang() === 'de');
+    const teile = [];
+    if (stats.unsicherValue > 0) {
+      const anteil = (stats.unsicherValue / stats.totalValue) * 100;
+      const betrag = stats.unsicherValue.toFixed(2).replace('.', ',');
+      teile.push(de
+        ? `davon ${betrag} € (${anteil.toFixed(0)} %) auf ungesicherter Produktzuordnung`
+        : `of which ${betrag} € (${anteil.toFixed(0)} %) rests on an unproven product mapping`);
+    }
+    if (stats.aeltesterPreisstand) {
+      const d = new Date(stats.aeltesterPreisstand);
+      if (!isNaN(d.getTime())) {
+        const tage = Math.floor((Date.now() - d.getTime()) / 86400000);
+        if (tage > 14) {
+          teile.push(de
+            ? `ältester einfließender Preisstand: ${d.toLocaleDateString('de-DE')} (${tage} Tage)`
+            : `oldest price feeding in: ${d.toLocaleDateString('en-GB')} (${tage} days)`);
+        }
+      }
+    }
+    return teile.join(' · ');
+  } catch (_) {
+    return '';
+  }
+}
+if (typeof window !== 'undefined') window.collectionValueNote = collectionValueNote;
+
+/** Die Notizzeile unter der Wert-Kachel setzen — oder verstecken. */
+function setzeSammlungsNotiz(text) {
+  const el = document.getElementById('profile-collection-value-note');
+  if (!el) return;
+  if (text) { el.textContent = text; el.hidden = false; }
+  else { el.textContent = ''; el.hidden = true; }
 }
 
 // Update card UI to show ownership status
@@ -1356,7 +1421,8 @@ function updateCollectionUI(searchFilter = '', filterMode = '') {
         <span class="stat-value">${stats.cardCount}</span>
         <span class="stat-label">Cards Owned</span>
       </div>
-      <div class="stat-item">
+      <div class="stat-item"${collectionValueNote(stats)
+            ? ` title="${escapeHtml(collectionValueNote(stats))}"` : ''}>
         <span class="stat-value">${stats.totalValue.toFixed(2)}€</span>
         <span class="stat-label">Collection Value</span>
       </div>
@@ -1371,6 +1437,7 @@ function updateCollectionUI(searchFilter = '', filterMode = '') {
   const profileCollectionValueEl = document.getElementById('profile-collection-value');
   if (profileCollectionValueEl) {
     profileCollectionValueEl.textContent = `${stats.totalValue.toFixed(2)}€`;
+    setzeSammlungsNotiz(collectionValueNote(stats));
   }
 }
 
@@ -1557,15 +1624,44 @@ window.selectPriceInput = selectPriceInput;
  * and never carry it either). window.cardDBHasMappingStatus is true only
  * when the loaded dataset knows the field.
  */
+const PRICE_TRUST_CASES = {
+  unverified: {
+    label: '⚠ nicht verifiziert',
+    title: 'Preis nicht verifiziert: Diese Karte teilt sich den Namen mit '
+      + 'anderen Drucken derselben Edition, und die Zuordnung zum Cardmarket-Produkt '
+      + 'ist noch nicht bestätigt. Der Preis kann zu einem anderen Druck gehören — '
+      + 'auf Cardmarket prüfen.',
+  },
+  // Bis zum 20.08.2026 trugen 3.015 Preiszeilen ohne jede Zuordnungszeile
+  // den Wert 'ok' — der Vorgabewert eines fehlenden Eintrags im Mischer.
+  // Sie machen 24,8 % des Katalogwerts aus und sind seit dem 01.04.2026
+  // nicht mehr angefasst worden. 'ok' hiess dort nicht "geprueft", sondern
+  // "nichts bekannt".
+  unmapped: {
+    label: '⚠ ohne Zuordnung',
+    title: 'Zu dieser Karte gibt es keine Zeile in der Cardmarket-Zuordnung. '
+      + 'Der Preis stammt aus einem alten Bestand und wurde nie einem Produkt '
+      + 'zugeordnet — er kann beliebig danebenliegen.',
+  },
+  // 100 Produktnummern bedienen je zwei verschiedene Karten. Beide zeigen
+  // denselben Preis, obwohl ihre Cardmarket-Links auf verschiedene Produkte
+  // zeigen — mindestens eine der beiden Zahlen ist zwangslaeufig falsch.
+  collision: {
+    label: '⚠ Nummer doppelt vergeben',
+    title: 'Diese Cardmarket-Produktnummer ist zwei verschiedenen Karten '
+      + 'zugeordnet. Beide zeigen denselben Preis, und mindestens einer der '
+      + 'beiden gehoert der anderen Karte — auf Cardmarket pruefen.',
+  },
+};
+
 function priceTrustBadge(card, cmUrl) {
   try {
     if (!window.cardDBHasMappingStatus) return '';
-    if (!card || card.mapping_status !== 'unverified') return '';
-    const title = 'Preis nicht verifiziert: Diese Karte teilt sich den Namen mit '
-      + 'anderen Drucken derselben Edition, und die Zuordnung zum Cardmarket-Produkt '
-      + 'ist noch nicht bestätigt. Der Preis kann zu einem anderen Druck gehören — '
-      + 'auf Cardmarket prüfen.';
-    const label = '⚠ nicht verifiziert';
+    if (!card) return '';
+    const fall = PRICE_TRUST_CASES[card.mapping_status];
+    if (!fall) return '';
+    const label = fall.label;
+    const title = fall.title;
     if (cmUrl) {
       return `<a href="${escapeHtml(cmUrl)}" target="_blank" rel="noopener noreferrer" `
         + `class="price-unverified-badge" title="${escapeHtml(title)}">${label}</a>`;
@@ -2138,6 +2234,7 @@ function updateProfileUI(profile) {
   const collectionValue = document.getElementById('profile-collection-value');
   if (collectionValue) {
     collectionValue.textContent = `${stats.totalValue.toFixed(2)}€`;
+    setzeSammlungsNotiz(collectionValueNote(stats));
   }
   
   const decksCount = document.getElementById('profile-decks-count');

@@ -135,6 +135,16 @@
     font-weight: bold;
 }
 
+/* Der Vorbehalt unter der Zahl. Spaeter notiert als `.stat-card p` und
+   damit bei gleicher Spezifitaet gewinnend — ohne Ausrufezeichen. */
+.stat-card p.stat-card-note {
+    margin: 6px 0 0;
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1.35;
+    opacity: 0.85;
+}
+
 /* Profile Tabs */
 .profile-tab-btn {
     background: none;

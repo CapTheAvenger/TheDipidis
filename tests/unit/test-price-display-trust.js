@@ -27,11 +27,17 @@ const FC = fs.readFileSync(path.join(ROOT, 'js', 'firebase-collection.js'), 'utf
 const CORE = fs.readFileSync(path.join(ROOT, 'js', 'app-core.js'), 'utf8');
 
 function loadBadge() {
+    // Seit dem 20.08.2026 kennt der Marker drei Faelle und liest sie aus
+    // PRICE_TRUST_CASES. Ohne die Konstante wirft die Funktion, und ihr
+    // try/catch verschluckt das zu einem leeren String — dieser Test sah
+    // dann "kein Marker" statt "kaputt". Also mitausschneiden.
+    const c = FC.match(/const PRICE_TRUST_CASES = \{[\s\S]*?\n\};/);
+    if (!c) throw new Error('PRICE_TRUST_CASES not found');
     const m = FC.match(/function priceTrustBadge\(card, cmUrl\) \{[\s\S]*?\n\}\n/);
     if (!m) throw new Error('priceTrustBadge not found');
     const ns = {};
     new Function('window', 'escapeHtml', 'exports',
-        m[0] + 'exports.fn = priceTrustBadge;')(
+        c[0] + '\n' + m[0] + 'exports.fn = priceTrustBadge;')(
         globalThisStub(), (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;'), ns);
     return ns.fn;
 }
@@ -81,6 +87,16 @@ describe('price trust marker', () => {
         assert.equal(badge({ mapping_status: 'ok' }, 'https://cm/x'), '');
     });
 
+    it('also marks the two cases that used to hide inside "ok"', () => {
+        // 3.015 Zeilen ohne jede Zuordnung und 200 Zeilen auf einer doppelt
+        // vergebenen Produktnummer trugen bis zum 20.08.2026 dieselbe
+        // Kennzeichnung wie eine live gepruefte Zuordnung.
+        _flag = true;
+        const badge = loadBadge();
+        assert.match(badge({ mapping_status: 'unmapped' }, ''), /ohne Zuordnung/);
+        assert.match(badge({ mapping_status: 'collision' }, ''), /doppelt vergeben/);
+    });
+
     it('never fires on a dataset that predates the field (stale SW chunk, Prize Pack prints)', () => {
         _flag = false;
         const badge = loadBadge();
@@ -100,6 +116,14 @@ describe('price trust marker', () => {
             'badge must be appended to the rendered price, not swapped in for it');
         const m = FC.match(/function priceTrustBadge\(card, cmUrl\) \{[\s\S]*?\n\}\n/)[0];
         assert.ok(!/priceDisplay|N\/A/.test(m), 'the badge must not decide the number');
+    });
+
+    it('reaches the card database too, not just the wishlist', () => {
+        // Es hing an genau einem Aufruf in updateWishlistUI, waehrend die
+        // Kartendatenbank — wo die meisten Preise gelesen werden — Preise
+        // ohne jedes Vertrauenszeichen zeigte.
+        const DB = fs.readFileSync(path.join(ROOT, 'js', 'app-cards-db.js'), 'utf8');
+        assert.ok(/window\.priceTrustBadge\(card, displayCardMarketUrl\)/.test(DB));
     });
 
     it('is feature-detected once per dataset, not per card', () => {

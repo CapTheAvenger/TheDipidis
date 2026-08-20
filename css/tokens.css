@@ -134,6 +134,26 @@
  * hart als #fff schreiben, werden davon nicht dunkel. Deshalb schaltet
  * die Seite noch nicht um — siehe tests/unit/test-design-dark.js, der
  * die Zahl festhält, und den Abschnitt in docs/. */
+/* ── Eine Groesse, die auf dem Telefon anders ausfaellt ───────────
+ *
+ * --lbl ist die Grossbuchstaben-Beschriftung: klein, gesperrt, ruhig.
+ * 10 px traegt das auf dem Schreibtisch. Auf dem Telefon nicht — und
+ * bis zum 20.08.2026 ist es dort auch nie erschienen, weil der
+ * 12-px-Boden aus css/mobile-responsive.css jede Beschriftung
+ * stillschweigend auf 12 px hob. Mit dem Boden fiel die Stuetze weg
+ * und 10 px wurden zum ersten Mal wirklich sichtbar: gemessen 38
+ * Beschriftungen ueber vier Reiter.
+ *
+ * 11 px statt eines Bodens: die Groesse gehoert in die Tokenschicht,
+ * nicht in eine Ausnahmeliste. Der Abstand zu --fs-sm (12) bleibt
+ * erhalten, die Rangordnung also auch — sie wird nur eine Stufe
+ * flacher, so wie auf einem kleinen Schirm ueblich. */
+@media (max-width: 768px) {
+    :root {
+        --lbl: 11px;
+    }
+}
+
 :root[data-theme="dark"] {
     --surface-0: #0b0f1e;
     --surface-1: #111730;

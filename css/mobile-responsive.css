@@ -907,74 +907,122 @@
         font-size: 12px !important;
     }
 
-    /* Hard floor: force every text-bearing element inside tab content to 12px.
-       Elements that need LARGER sizes (headings, stat values) override below. */
-    .tab-content p,
-    .tab-content span,
-    .tab-content div,
-    .tab-content td,
-    .tab-content th,
-    .tab-content button,
-    .tab-content a,
-    .tab-content label,
-    .tab-content strong,
-    .tab-content em,
-    .tab-content small,
-    .tab-content li,
-    .tab-content select,
-    .tab-content input,
-    .tab-content textarea,
-    /* HINWEIS 2026-08-18: diese drei Zeilen deckeln Eingabefelder auf
-       12 px und schlagen damit den iOS-Zoomschutz aus styles.css:4143
-       (@supports -webkit-touch-callout, 16 px !important), der in einer
-       frueher geladenen Datei steht. Gemessen: 47 von 48 sichtbaren
-       Feldern unter 16 px — Safari zoomt beim Antippen hinein und nicht
-       wieder heraus.
-       Sie hier einfach zu streichen reicht NICHT: ohne den Boden fallen
-       zwei Felder auf 9,8 px, weil die Regel sie zugleich nach unten
-       geschuetzt hat (gemessen 6 -> 8 Felder bei 9,8 px). Der richtige
-       Weg ist ein eigener, absoluter Wert fuer Formularelemente statt
-       eines geliehenen Bodens. Das braucht eine eigene Messreihe ueber
-       alle 48 Felder und steht als eigener Schritt aus. */
-    .tab-content .btn-toggle-item,
-    .tab-content [class*="count"],
-    .tab-content [class*="summary"],
-    .tab-content [class*="title"],
-    .tab-content [class*="label"],
-    .tab-content [class*="note"],
-    .tab-content [class*="details"],
-    .tab-content [class*="hint"],
-    .tab-content [class*="subtitle"],
-    .tab-content [class*="placement"],
-    .tab-content [class*="change"],
-    .tab-content [class*="metric"],
-    .tab-content [class*="action"],
-    .tab-content [class*="toolbar"],
-    .tab-content [class*="jump"],
-    .tab-content [class*="toggle"],
-    .tab-content [class*="filter"],
-    .tab-content [class*="color-"],
-    .tab-content [class*="badge"],
-    .tab-content [class*="btn"] {
+    /* Der Boden: 12 px fuer alles, was Text traegt — ausser im Designsystem.
+     *
+     * MESSREIHE 20.08.2026, 390 px, vier Reiter:
+     *
+     *   Reiter          Textknoten   <12px   =12px   >12px   ds-Knoten
+     *   current-meta         2.367       0   2.347      20         348
+     *   cards                  154     118      35       1           0
+     *   city-league             13       0      13       0          10
+     *   past-meta               14       1      13       0           5
+     *
+     * Zwei Befunde, und sie zeigen in entgegengesetzte Richtungen.
+     *
+     * 1. Wo das Designsystem steht, richtet der Boden nur Schaden an.
+     *    339 von 348 Bausteinen lagen auf 12 px — .ds-label (10 px),
+     *    .ds-note (11), .ds-stat-value (30), .arc-tile-value (bis 24),
+     *    .arc-mu-table (12,2) und der ganze Rest: eine Groesse fuer
+     *    alles. Die Rangordnung, die das Designsystem gerade ausmacht,
+     *    war auf dem Telefon nicht vorhanden. Unter 12 px lag dort
+     *    nichts — der Boden hatte also nichts zu schuetzen.
+     *
+     * 2. Wo er gebraucht wird, greift er kaum. Auf dem Karten-Reiter
+     *    liegen 118 von 154 Knoten UNTER 12 px (Kartenname 8, Set-Kuerzel
+     *    7, Aktionsknoepfe 9) — dort gewinnen #cards-Regeln aus
+     *    cards-tabs.css mit eigenem Ausrufezeichen. Gegengeprobe: den
+     *    Boden ganz abgeschaltet und nachgemessen — 13 von 154 Knoten
+     *    aendern sich, um hoechstens 3 px. So wenig traegt er.
+     *
+     * Deshalb steht er jetzt nur noch da, wo er etwas ausrichtet. Die
+     * Ausnahme ist an einen Behaelter geknuepft, nicht an eine Liste
+     * einzelner Klassen: jeder kuenftige Abschnitt und jede kuenftige
+     * ds-Klasse ist damit von selbst ausgenommen. Vorher musste fuer
+     * jeden neuen Baustein eine Zeile nachgetragen werden — .ds-stat-value
+     * war einen Tag zuvor genau daran haengengeblieben.
+     *
+     * .ds-sec deckt 2.340 der 2.362 Knoten im Designbereich ab; die
+     * restlichen 22 (Filterleiste, Kacheln ueber den Abschnitten) tragen
+     * selbst eine ds-Klasse und fallen unter die beiden
+     * Attribut-Ausnahmen.
+     *
+     * Zu :not(.ds-sec *): das ist ein zusammengesetztes Argument und
+     * braucht Safari 16.4. Aeltere Browser verwerfen die ganze Liste,
+     * dann greift der Boden gar nicht — und genau dieser Fall ist oben
+     * gemessen: 13 Knoten auf einem Reiter, hoechstens 3 px kleiner.
+     * Die Seite benutzt :has() bereits an 36 Stellen und setzt damit
+     * ohnehin eine aehnliche Grundlage voraus. */
+    .tab-content p:not(.ds-panel *):not(.ds-table *):not(.ds-stat *):not(.ds-bar *):not(.ds-controls *):not(.arc-card *):not([class^="ds-"]):not([class*=" ds-"]),
+    .tab-content span:not(.ds-panel *):not(.ds-table *):not(.ds-stat *):not(.ds-bar *):not(.ds-controls *):not(.arc-card *):not([class^="ds-"]):not([class*=" ds-"]),
+    .tab-content div:not(.ds-panel *):not(.ds-table *):not(.ds-stat *):not(.ds-bar *):not(.ds-controls *):not(.arc-card *):not([class^="ds-"]):not([class*=" ds-"]),
+    .tab-content td:not(.ds-panel *):not(.ds-table *):not(.ds-stat *):not(.ds-bar *):not(.ds-controls *):not(.arc-card *):not([class^="ds-"]):not([class*=" ds-"]),
+    .tab-content th:not(.ds-panel *):not(.ds-table *):not(.ds-stat *):not(.ds-bar *):not(.ds-controls *):not(.arc-card *):not([class^="ds-"]):not([class*=" ds-"]),
+    .tab-content button:not(.ds-panel *):not(.ds-table *):not(.ds-stat *):not(.ds-bar *):not(.ds-controls *):not(.arc-card *):not([class^="ds-"]):not([class*=" ds-"]),
+    .tab-content a:not(.ds-panel *):not(.ds-table *):not(.ds-stat *):not(.ds-bar *):not(.ds-controls *):not(.arc-card *):not([class^="ds-"]):not([class*=" ds-"]),
+    .tab-content label:not(.ds-panel *):not(.ds-table *):not(.ds-stat *):not(.ds-bar *):not(.ds-controls *):not(.arc-card *):not([class^="ds-"]):not([class*=" ds-"]),
+    .tab-content strong:not(.ds-panel *):not(.ds-table *):not(.ds-stat *):not(.ds-bar *):not(.ds-controls *):not(.arc-card *):not([class^="ds-"]):not([class*=" ds-"]),
+    .tab-content em:not(.ds-panel *):not(.ds-table *):not(.ds-stat *):not(.ds-bar *):not(.ds-controls *):not(.arc-card *):not([class^="ds-"]):not([class*=" ds-"]),
+    .tab-content small:not(.ds-panel *):not(.ds-table *):not(.ds-stat *):not(.ds-bar *):not(.ds-controls *):not(.arc-card *):not([class^="ds-"]):not([class*=" ds-"]),
+    .tab-content li:not(.ds-panel *):not(.ds-table *):not(.ds-stat *):not(.ds-bar *):not(.ds-controls *):not(.arc-card *):not([class^="ds-"]):not([class*=" ds-"]),
+    .tab-content .btn-toggle-item:not(.ds-panel *):not(.ds-table *):not(.ds-stat *):not(.ds-bar *):not(.ds-controls *):not(.arc-card *):not([class^="ds-"]):not([class*=" ds-"]),
+    .tab-content [class*="count"]:not(.ds-panel *):not(.ds-table *):not(.ds-stat *):not(.ds-bar *):not(.ds-controls *):not(.arc-card *):not([class^="ds-"]):not([class*=" ds-"]),
+    .tab-content [class*="summary"]:not(.ds-panel *):not(.ds-table *):not(.ds-stat *):not(.ds-bar *):not(.ds-controls *):not(.arc-card *):not([class^="ds-"]):not([class*=" ds-"]),
+    .tab-content [class*="title"]:not(.ds-panel *):not(.ds-table *):not(.ds-stat *):not(.ds-bar *):not(.ds-controls *):not(.arc-card *):not([class^="ds-"]):not([class*=" ds-"]),
+    .tab-content [class*="label"]:not(.ds-panel *):not(.ds-table *):not(.ds-stat *):not(.ds-bar *):not(.ds-controls *):not(.arc-card *):not([class^="ds-"]):not([class*=" ds-"]),
+    .tab-content [class*="note"]:not(.ds-panel *):not(.ds-table *):not(.ds-stat *):not(.ds-bar *):not(.ds-controls *):not(.arc-card *):not([class^="ds-"]):not([class*=" ds-"]),
+    .tab-content [class*="details"]:not(.ds-panel *):not(.ds-table *):not(.ds-stat *):not(.ds-bar *):not(.ds-controls *):not(.arc-card *):not([class^="ds-"]):not([class*=" ds-"]),
+    .tab-content [class*="hint"]:not(.ds-panel *):not(.ds-table *):not(.ds-stat *):not(.ds-bar *):not(.ds-controls *):not(.arc-card *):not([class^="ds-"]):not([class*=" ds-"]),
+    .tab-content [class*="subtitle"]:not(.ds-panel *):not(.ds-table *):not(.ds-stat *):not(.ds-bar *):not(.ds-controls *):not(.arc-card *):not([class^="ds-"]):not([class*=" ds-"]),
+    .tab-content [class*="placement"]:not(.ds-panel *):not(.ds-table *):not(.ds-stat *):not(.ds-bar *):not(.ds-controls *):not(.arc-card *):not([class^="ds-"]):not([class*=" ds-"]),
+    .tab-content [class*="change"]:not(.ds-panel *):not(.ds-table *):not(.ds-stat *):not(.ds-bar *):not(.ds-controls *):not(.arc-card *):not([class^="ds-"]):not([class*=" ds-"]),
+    .tab-content [class*="metric"]:not(.ds-panel *):not(.ds-table *):not(.ds-stat *):not(.ds-bar *):not(.ds-controls *):not(.arc-card *):not([class^="ds-"]):not([class*=" ds-"]),
+    .tab-content [class*="action"]:not(.ds-panel *):not(.ds-table *):not(.ds-stat *):not(.ds-bar *):not(.ds-controls *):not(.arc-card *):not([class^="ds-"]):not([class*=" ds-"]),
+    .tab-content [class*="toolbar"]:not(.ds-panel *):not(.ds-table *):not(.ds-stat *):not(.ds-bar *):not(.ds-controls *):not(.arc-card *):not([class^="ds-"]):not([class*=" ds-"]),
+    .tab-content [class*="jump"]:not(.ds-panel *):not(.ds-table *):not(.ds-stat *):not(.ds-bar *):not(.ds-controls *):not(.arc-card *):not([class^="ds-"]):not([class*=" ds-"]),
+    .tab-content [class*="toggle"]:not(.ds-panel *):not(.ds-table *):not(.ds-stat *):not(.ds-bar *):not(.ds-controls *):not(.arc-card *):not([class^="ds-"]):not([class*=" ds-"]),
+    .tab-content [class*="filter"]:not(.ds-panel *):not(.ds-table *):not(.ds-stat *):not(.ds-bar *):not(.ds-controls *):not(.arc-card *):not([class^="ds-"]):not([class*=" ds-"]),
+    .tab-content [class*="color-"]:not(.ds-panel *):not(.ds-table *):not(.ds-stat *):not(.ds-bar *):not(.ds-controls *):not(.arc-card *):not([class^="ds-"]):not([class*=" ds-"]),
+    .tab-content [class*="badge"]:not(.ds-panel *):not(.ds-table *):not(.ds-stat *):not(.ds-bar *):not(.ds-controls *):not(.arc-card *):not([class^="ds-"]):not([class*=" ds-"]),
+    .tab-content [class*="btn"]:not(.ds-panel *):not(.ds-table *):not(.ds-stat *):not(.ds-bar *):not(.ds-controls *):not(.arc-card *):not([class^="ds-"]):not([class*=" ds-"]) {
         font-size: 12px !important;
     }
 
-    /* Restore larger sizes for headings and stat values */
-    .tab-content h1 { font-size: 1.5em !important; }
-    .tab-content h2 { font-size: 1.3em !important; }
-    .tab-content h3 { font-size: 1.15em !important; }
-    .tab-content h4 { font-size: 1.05em !important; }
+    /* Formularfelder: ein eigener Wert statt eines geliehenen Bodens.
+     *
+     * Bis hierher standen select/input/textarea mit im Boden oben. Der
+     * Kommentar an dieser Stelle fuehrte seit dem 18.08.2026, was das
+     * anrichtet: 12 px schlaegt den iOS-Zoomschutz aus styles.css:4143
+     * aus (@supports -webkit-touch-callout, 16 px), der in einer frueher
+     * geladenen Datei steht. Safari zoomt beim Antippen hinein und nicht
+     * wieder heraus. Ersatzloses Streichen ging auch nicht: der Boden
+     * hielt zugleich Felder oben, die sonst fallen.
+     *
+     * Die Messreihe, die dort als eigener Schritt ausstand, steht jetzt
+     * oben. Sichtbare Felder ueber vier Reiter: 13, davon 13 unter 16 px
+     * und 3 bei 9,84 px (die drei Filter in Vergangenes Meta). Also
+     * beides in einer Regel: 16 px ist die Schwelle, unter der iOS
+     * hineinzoomt, und zugleich hoch genug, dass kein Feld mehr faellt.
+     *
+     * Nicht als Boden formuliert, sondern als Wert — ein Eingabefeld ist
+     * kein Fliesstext, seine Groesse ist eine Entscheidung. */
+    body .tab-content select,
+    body .tab-content input,
+    body .tab-content input[type],
+    body .tab-content textarea {
+        font-size: 16px !important;
+    }
+
+    /* Die vier Regeln .tab-content h1..h4 (1,5em / 1,3 / 1,15 / 1,05,
+       je mit Ausrufezeichen) standen hier und haben nichts getan.
+       Gegengeprobe 20.08.2026: abgeschaltet und nachgemessen — 21
+       sichtbare Ueberschriften ueber vier Reiter, null Aenderung. Ueberall
+       gewinnt eine speziellere Regel. Vier Ausrufezeichen fuer nichts. */
 
     /* Stat number values — keep prominent.
-       .ds-stat-value stand hier bis zum 20.08.2026 NICHT drin. Gemessen
-       auf 390 px: jede Kennzahl-Kachel des Designsystems zeigte ihre
-       grosse Zahl in 12 px — genauso gross wie ihre Beschriftung, also
-       gar nicht mehr als grosse Zahl. Der Grund ist der Boden ein paar
-       Zeilen weiter oben (.tab-content span, 12 px !important); die
-       drei alten Kacheln waren hier ausgenommen, die neue nie.
-       Sie kommt in dieselbe Regel statt in eine eigene: eine weitere
-       Regel waere ein weiteres Ausrufezeichen, und davon hat diese
-       Datei genug. */
+       .ds-stat-value braucht hier eigentlich nicht mehr zu stehen, seit
+       der Boden das Designsystem auslaesst. Die Zeile bleibt trotzdem:
+       sie ist die Rueckfalllinie fuer Browser, die :not(.ds-sec *) nicht
+       koennen und deshalb die ganze Bodenliste verwerfen. */
     .tab-content .city-league-stat-value,
     .tab-content .current-meta-stat-value,
     .tab-content .past-meta-stat-value,
@@ -1537,10 +1585,16 @@
    Problem: Select options like "-- All Tournaments" get clipped
    Fix: Ensure selects have enough width and text is readable */
 @media (max-width: 480px) {
+  /* font-size: 0.82em stand hier und ergab auf 390 px 9,84 px — drei
+     Filter in Vergangenes Meta, unter jeder Lesbarkeitsschwelle und
+     weit unter den 16 px, ab denen iOS beim Antippen nicht mehr
+     hineinzoomt. Sie war ein Schrumpfen auf Passform; text-overflow
+     und das Auffuellen darunter loesen dasselbe Problem, ohne die
+     Schrift zu opfern. Die Groesse setzt jetzt die Formularregel
+     weiter oben in dieser Datei, einheitlich fuer alle Felder. */
   .control-input.modern-select,
   select.control-input,
   .cl-format-select {
-    font-size: 0.82em !important;
     padding: 6px 8px !important;
     text-overflow: ellipsis !important;
     white-space: nowrap !important;

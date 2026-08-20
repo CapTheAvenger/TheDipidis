@@ -1921,9 +1921,17 @@
                     const sc = deck._tierScore;
                     const zeigWR = (sc && isFinite(sc.adjWR)) ? sc.adjWR : winRate;
                     const listenN = parseInt(deck.new_count || 0) || 0;
-                    const wrTitel = (sc && isFinite(sc.adjWR)) ? escapeHtml(getLang() === 'de'
+                    // Und dazu, welche der drei Konventionen das ist. Die
+                    // Ladder-Datei rechnet S/(S+N+U); die Matchup-Tabelle im
+                    // Archetyp-Kaertchen daneben rechnet S/(S+N). Zwei
+                    // richtige Zahlen, die ohne diesen Zusatz aussehen wie
+                    // ein Widerspruch.
+                    const wrKonv = window.WinRateKonvention
+                        ? ' · ' + window.WinRateKonvention.kurzHinweis('mitUnentschieden') : '';
+                    const wrTitel = (sc && isFinite(sc.adjWR)) ? escapeHtml((getLang() === 'de'
                         ? `geglättet (k = 50) — roh ${winRate.toFixed(1)} % aus ${listenN} Listen`
-                        : `smoothed (k = 50) — raw ${winRate.toFixed(1)} % from ${listenN} lists`) : '';
+                        : `smoothed (k = 50) — raw ${winRate.toFixed(1)} % from ${listenN} lists`)
+                        + wrKonv) : '';
                     
                     // Get archetype image
                     const archetypeCards = fuzzyArchetypeLookup(archetypeName, cardDataByArchetype);

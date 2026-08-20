@@ -353,8 +353,19 @@
             'Win Rate',   /* in beiden Sprachen gleich — die Szene sagt Win Rate */
             wrDelta === null ? L('keine Daten', 'no data')
                 : signed(wrDelta, 2) + ' ' + L('ggü. 50 %', 'vs 50%'),
-            L('Siege ÷ gewertete Partien, Unentschieden halb',
-              'wins ÷ scored games, ties count half'));
+            /* Die Fussnote beschrieb eine vierte Konvention, die hier
+               niemand rechnet. spec.winRate ist die Deck-Win-Rate aus
+               data/limitless_online_decks.csv (win_rate_numeric), und die
+               ist S/(S+N+U) — Unentschieden zaehlen im Nenner mit, aber
+               nicht als halber Sieg. Nachgemessen ueber die Datei: mittlere
+               Abweichung 0,0033 Punkte zu dieser Formel, 0,42 zur
+               Konvention ohne Unentschieden. Dieselbe Zahl liefert das
+               Battle Journal (js/battle-journal.js), das ebenfalls hier
+               hineinzeichnet. */
+            (window.WinRateKonvention
+                ? window.WinRateKonvention.kurzHinweis('mitUnentschieden')
+                : L('Siege ÷ alle gespielten Partien',
+                    'wins ÷ all games played')));
 
         var hasConv = isFinite(spec.perfPct);
         statCol(cols[2],
@@ -874,11 +885,24 @@
      * shareTournamentSummary() im Journal, und genau so wird hier
      * gruppiert, damit beide Bilder dieselbe Bilanz zeigen. */
     function collectTournamentSpec(tournamentName, opts) {
-        var cache = [];
-        try { cache = (window._bjGetCache && window._bjGetCache()) || []; } catch (e) { cache = []; }
-        var entries = cache.filter(function (e) {
-            return String(e.tournamentName || '') === String(tournamentName || '');
-        });
+        var o0 = opts || {};
+        // Dieselbe Gruppe, aus der die Kopfzeile im Journal gerechnet wurde
+        // — nicht der ungefilterte Bestand. Ohne den Meta-Schluessel und die
+        // aktiven Filter zeigte das Bild eine andere Bilanz als die Zeile,
+        // neben der sein Knopf steht (gemessen: 2-1-1 gegen 2-3-1).
+        var entries = [];
+        try {
+            if (typeof window._bjGetGroup === 'function') {
+                entries = window._bjGetGroup(tournamentName, o0.metaKey) || [];
+            }
+        } catch (e) { entries = []; }
+        if (!entries.length) {
+            var cache = [];
+            try { cache = (window._bjGetCache && window._bjGetCache()) || []; } catch (e2) { cache = []; }
+            entries = cache.filter(function (e) {
+                return String(e.tournamentName || '') === String(tournamentName || '');
+            });
+        }
         if (!entries.length) return null;
 
         var asc = entries.slice().sort(function (a, b) {
@@ -892,7 +916,7 @@
         });
         var scored = w + l + t;
         var last = asc[asc.length - 1];
-        var o = opts || {};
+        var o = o0;
 
         return {
             tournament: tournamentName,
@@ -901,7 +925,13 @@
             // nicht — also nicht asc[0] fragen, sondern die Gruppe.
             place: o.place || (asc.find(function (e) { return e.placement; }) || {}).placement || null,
             record: { w: w, l: l, t: t },
-            winRate: scored ? ((w + t / 2) / scored) * 100 : NaN,
+            // S/(S+N+U) — dieselbe Konvention, die das Journal selbst
+            // rechnet und die auf der Tier-Karte steht. Hier stand
+            // (S + U/2)/Partien: eine vierte Konvention, die keine Quelle
+            // dieses Hauses benutzt, und die Fussnote darunter behauptete
+            // sie auch noch. Bei 2-1-1 waren das 62,5 % im Bild gegen
+            // 50 % in der Zeile daneben.
+            winRate: scored ? (w / scored) * 100 : NaN,
             deck: asc[0].ownDeck || '',
             format: asc[0].meta || '',
             type: asc[0].tournamentType || '',

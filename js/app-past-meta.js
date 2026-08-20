@@ -1590,10 +1590,24 @@
                 return;
             }
 
-            // Aggregate across the matching rows. Ties counted as 0.5 win
-            // so the headline win % matches how players describe records
-            // ("6-2-1 = 6.5/9 = 72 %") and stays consistent with the
-            // labs win_pct definition used elsewhere in the app.
+            // Aggregate across the matching rows.
+            //
+            // Hier stand (S + 0,5·U)/Partien, mit der Begruendung, das sei
+            // "consistent with the labs win_pct definition used elsewhere in
+            // the app". Das war nachweislich falsch: die Quelldatei
+            // data/labs_tournament_decks.csv rechnet ihre Spalte win_pct als
+            // Matchpunkte (3S+U)/3P. Ueber alle 4.667 Zeilen weicht die
+            // Quelle davon maximal 0,005 Punkte ab — von der hier
+            // verwendeten Formel dagegen im Median 2,38 und maximal 12,5.
+            //
+            // Sichtbar wurde das als Widerspruch IM SELBEN PANEL: fuer
+            // Dragapult (TEF-CRI) stand hier 56,3 %, waehrend die
+            // Matchup-Tabelle direkt darunter aus derselben Datenlage
+            // my_deck_overall_win_pct = 53,7 laedt. Zwei Definitionen, eine
+            // Ansicht, kein Wort dazu.
+            //
+            // Jetzt: dieselbe Konvention wie die Quelle, benannt ueber
+            // js/win-rate-konvention.js, und die Formel steht an der Kachel.
             let players = 0, wins = 0, losses = 0, ties = 0;
             let day1 = 0, day2 = 0;
             const seenTournaments = new Set();
@@ -1608,7 +1622,10 @@
                 if (tid) seenTournaments.add(tid);
             }
             const games = wins + losses + ties;
-            const winPct = games > 0 ? (wins + 0.5 * ties) / games * 100 : 0;
+            const WK = window.WinRateKonvention;
+            const winPct = WK
+                ? WK.KONVENTIONEN.matchpunkte.rechne(wins, losses, ties)
+                : (games > 0 ? (3 * wins + ties) / (3 * games) * 100 : 0);
             const day2Conv = day1 > 0 ? (day2 / day1) * 100 : 0;
             const fmtPct = (n) => n.toFixed(1).replace('.', ',') + '%';
             const fmtInt = (n) => Math.round(n).toLocaleString();
@@ -1617,6 +1634,7 @@
             const playersLabel = (typeof t === 'function' ? t('pm.perfStatPlayers') : 'Players');
             const recordLabel = (typeof t === 'function' ? t('pm.perfStatRecord') : 'Record (W-L-T)');
             const winPctLabel = (typeof t === 'function' ? t('pm.perfStatWinPct') : 'Cumulative Win %');
+            const winPctHinweis = WK ? WK.hinweis('matchpunkte') : '';
             const day2Label = (typeof t === 'function' ? t('pm.perfStatDay2Conv') : 'Day-2 Conversion');
 
             cards.innerHTML = `
@@ -1632,9 +1650,9 @@
                     <div class="past-meta-stat-label">${recordLabel}</div>
                     <div class="past-meta-stat-value past-meta-stat-mono">${fmtInt(wins)}-${fmtInt(losses)}-${fmtInt(ties)}</div>
                 </div>
-                <div class="past-meta-stat-card">
+                <div class="past-meta-stat-card" title="${(winPctHinweis || '').replace(/"/g, '&quot;')}">
                     <div class="past-meta-stat-label">${winPctLabel}</div>
-                    <div class="past-meta-stat-value">${fmtPct(winPct)}</div>
+                    <div class="past-meta-stat-value">${isFinite(winPct) ? fmtPct(winPct) : '–'}</div>
                 </div>
                 <div class="past-meta-stat-card">
                     <div class="past-meta-stat-label">${day2Label}</div>
@@ -1716,6 +1734,23 @@
             // ihn als Signal ausweist, und die Zeile wird ausgegraut.
             const MU_MIN_GAMES = (typeof window.CONV_MIN_N === 'number') ? window.CONV_MIN_N : 20;
 
+            // Die Spalte hiess "Sieg %" und zeigte Matchpunkte.
+            //
+            // Nachgewiesen an data/labs_tournament_matchups.csv: von 38.259
+            // Paaren mit Gegenrichtung summieren sich 16.707 (43,7 %) NICHT
+            // auf 100 % — bei einer echten Siegquote muesste das immer
+            // aufgehen. Und alle 351 Spiegel-Zeilen liegen unter 50 %
+            // (Median 47,57), was fuer eine Siegquote gegen sich selbst
+            // unmoeglich ist. Loest man nach den Unentschieden auf, kommen
+            // ganze Zahlen heraus: es sind Matchpunkte.
+            //
+            // Unter dieser Skala ist ein Spiegel-Matchup UNTER 50 % der
+            // Normalfall, nicht ein schlechtes Ergebnis — die Unentschieden
+            // ziehen beide Seiten herunter. Die Farbschwellen bleiben, wo
+            // sie waren; der Kopf sagt jetzt, welche Skala darunter liegt.
+            const wkMatch = window.WinRateKonvention;
+            const wrTitel = wkMatch ? wkMatch.hinweis('matchpunkte') : '';
+
             const rowsHtml = opps.map(o => {
                 const thin = !(o.games >= MU_MIN_GAMES);
                 const wrCls = thin ? 'past-meta-mu-even'
@@ -1740,7 +1775,7 @@
                         <thead><tr>
                             <th>${headerOpp}</th>
                             <th>${headerGames}</th>
-                            <th>${headerWr}</th>
+                            <th title="${wrTitel.replace(/"/g, '&quot;')}">${headerWr}</th>
                         </tr></thead>
                         <tbody>${rowsHtml}</tbody>
                     </table>

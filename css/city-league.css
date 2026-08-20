@@ -633,6 +633,24 @@
     font-weight: 800;
     color: var(--pokemon-blue, #3B4CCA);
 }
+/* Der Nenner unter der Quote. "100,0 %" aus einem Day-1-Spieler sah
+   genauso aus wie aus 600 — die zwei Zahlen, aus denen sie entsteht,
+   stehen jetzt darunter. Klein und grau: sie soll die Quote erklaeren,
+   nicht mit ihr konkurrieren. */
+.past-meta-stat-nenner {
+    margin-top: 3px;
+    font-size: 0.72em;
+    font-weight: 600;
+    color: #6b7280;
+    letter-spacing: 0.2px;
+}
+/* Unter der Schwelle warm eingefaerbt — ein Vorbehalt, keine Warnung. */
+.past-meta-stat-card.past-meta-stat-duenn .past-meta-stat-nenner {
+    color: var(--vorbehalt);
+}
+.past-meta-stat-card.past-meta-stat-duenn .past-meta-stat-value {
+    color: var(--vorbehalt);
+}
 /* Most Successful List panel (Feature A) — surfaces the single best-
    placed decklist for the current archetype + filter and exposes a
    one-click "Compare with built deck" button. */

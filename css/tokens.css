@@ -108,6 +108,20 @@
      * darf deshalb warm sein, ohne in die divergierende Skala zu greifen —
      * Bernstein gegen Blau bleibt auf der Blau-Gelb-Achse und ist damit
      * auch bei Rot-Grün-Schwäche eindeutig. */
+    /* ── Der Vorbehalt ───────────────────────────────────────────────
+     * Eine Zahl auf einer duennen Stichprobe ist kein Fehler — sie ist
+     * eine Zahl mit einem Vorbehalt. Sie darf deshalb nicht in --alarm
+     * stehen (das ist Rot und heisst "kaputt") und nicht in --dv-neg
+     * (das ist die Datenachse und heisst "schlechter"). Bernstein liegt
+     * auf der Blau-Gelb-Achse, bleibt also auch bei Rot-Gruen-Schwaeche
+     * von beidem unterscheidbar, und es steht nie allein: daneben steht
+     * immer das Wort "duenn" oder der Nenner.
+     *
+     * Eingefuehrt am 20.08.2026 mit Gruppe 8 der Pruefrunde, als drei
+     * Ansichten unabhaengig voneinander denselben Farbwert brauchten. */
+    --vorbehalt: #92700e;
+    --vorbehalt-bg: rgba(234, 179, 8, .16);
+
     --space-jp: #b45309;
     --space-gl: var(--brand);
     --space-past: var(--ink-3);
@@ -176,6 +190,11 @@
     --dv-neg-bg: rgba(255, 143, 122, .16);
     --bar-track: #080c19;
     --bar-fill: linear-gradient(90deg, var(--brand), #8b98ff);
+
+    /* Auf dunklem Grund muss der Vorbehalt heller werden, sonst
+     * verschwindet er im Hintergrund. */
+    --vorbehalt: #e0b849;
+    --vorbehalt-bg: rgba(224, 184, 73, .18);
 
     --space-jp: #f0b429;
     --space-gl: var(--brand);

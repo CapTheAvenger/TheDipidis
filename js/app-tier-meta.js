@@ -265,10 +265,12 @@
         function getDeckTrendBadge(deckName, shareChange) {
             if (!shareChange || Math.abs(shareChange) < 0.1) return '';
             
+            // Dezimalkomma wie ueberall sonst auf dieser Karte.
+            const betrag = fmtPct(Math.abs(shareChange));
             if (shareChange > 0) {
-                return `<span class="stat-badge stat-trend-up">+${Math.abs(shareChange).toFixed(1)}%</span>`;
+                return `<span class="stat-badge stat-trend-up">+${betrag}</span>`;
             } else {
-                return `<span class="stat-badge stat-trend-down">-${Math.abs(shareChange).toFixed(1)}%</span>`;
+                return `<span class="stat-badge stat-trend-down">−${betrag}</span>`;
             }
         }
 
@@ -781,7 +783,33 @@
                     weightedRank: item.totalCount > 0 ? (item.weightedRankSum / item.totalCount) : 999
                 }));
 
-            // 2. Fixed index-based tier assignment: Top-3 | Next-7 | Next-10 | Rest
+            // ── Tier 1 heisst hier "Listenplatz 1 bis 3", nicht "gut" (20.08.2026) ──
+            //
+            // Diese Einteilung ist ein reiner Indexschnitt auf einer nach
+            // Listenzahl absteigend sortierten Liste. Sie sagt nichts ueber
+            // Spielstaerke, und sie kennt keine Mindeststichprobe: aus einem
+            // einzigen Sonderturnier mit 26 Decks entstand eine vollstaendige
+            // Tier-Liste, in der Tier 2 vier Archetypen mit je EINEM Deck
+            // enthielt.
+            //
+            // Die Untertitel sagten dazu "Beherrschen das Meta" / "Starke
+            // Herausforderer" / "Spielbare Optionen" — drei Qualitaetsaussagen
+            // ueber eine Rangfolge nach Beliebtheit. Am letzten vollstaendigen
+            // Datenstand (city_league_archetypes_comparison_M3.csv, 304
+            // Archetypen) traegt das nicht:
+            //
+            //     Tier 1 (Raenge 1-3):  Oe-Platzierung 8,07 - 8,73
+            //     Tier 2 (Raenge 4-10): Oe-Platzierung 7,74 - 8,60
+            //
+            // Das beste Tier-2-Deck steht besser da als JEDES Tier-1-Deck. Die
+            // gesamte Spreizung ueber die 20 gelisteten Decks betraegt 1,72
+            // Plaetze, und das 95-%-Intervall des groessten Decks allein liegt
+            // bei +-0,37. Es wird also eine Rangfolge gezeigt, deren Abstaende
+            // groesstenteils in ihrer eigenen Unsicherheit verschwinden.
+            //
+            // Die Einteilung selbst bleibt — sie ist eine brauchbare
+            // Gliederung nach Verbreitung. Nur ihr Name sagt jetzt, was sie
+            // misst, und die Grundlage steht darueber.
             const tierGroups = { 'tier-1': [], 'tier-2': [], 'tier-3': [], 'tier-trending': [] };
             archetypeArray.forEach((deck, idx) => {
                 if (idx <= 2)       tierGroups['tier-1'].push(deck);
@@ -791,15 +819,45 @@
             });
 
             const tierTitles = {
-                'tier-1':        { title: 'Tier 1',           subtitle: t('tier.sub1')     },
-                'tier-2':        { title: 'Tier 2',           subtitle: t('tier.sub2')     },
-                'tier-3':        { title: 'Tier 3',           subtitle: t('tier.sub3')     },
-                'tier-trending': { title: 'Rogue / Trending',  subtitle: t('tier.subRogue') }
+                'tier-1':        { title: 'Tier 1',           subtitle: t('tier.clSub1')     },
+                'tier-2':        { title: 'Tier 2',           subtitle: t('tier.clSub2')     },
+                'tier-3':        { title: 'Tier 3',           subtitle: t('tier.clSub3')     },
+                'tier-trending': { title: 'Rogue / Trending',  subtitle: t('tier.clSubRogue') }
             };
 
+            // Die Gesamtstichprobe, aus der das hier entsteht. Ohne sie sieht
+            // eine Tier-Liste aus 26 Decks genauso aus wie eine aus 8.000.
+            const clGesamtListen = archetypeArray.reduce((s, d) => s + parseDeckCount(d), 0);
+            const clArchetypen   = archetypeArray.length;
+            const clEinzelstueck = archetypeArray.filter(d => parseDeckCount(d) === 1).length;
+            // Fuer den Pfeil-Schwellwert weiter unten: unter wie vielen Listen
+            // ist eine Oe-Platzierung nicht mehr als eine Anekdote?
+            const CL_MIN_LISTEN_PFEIL = 20;
+            // Und wie gross muss der Unterschied mindestens sein? Gemessen am
+            // letzten vollstaendigen Datenstand liegt das 95-%-Intervall des
+            // groessten Archetyps bei +-0,37 Plaetzen; bei 100 Listen sind es
+            // +-0,90. Ein halber Platz ist die untere Grenze dessen, was man
+            // ueberhaupt behaupten kann — darunter gibt es keinen Pfeil.
+            const CL_MIN_DIFF_PFEIL = 0.5;
+
             // 3. Within each tier sort by avg_placement ascending (lower = better).
+            //
+            // Ausser im Rogue-Block. Dort stehen die Archetypen mit den
+            // duennsten Stichproben, und eine Sortierung nach Oe-Platzierung
+            // stellt genau die nach oben, die aus einer einzigen Liste
+            // bestehen: am gemessenen Datenstand fuehrten drei Decks mit je
+            // EINER Liste und Platzierung 1,00 den Block an, und 170 von 284
+            // Rogue-Decks zeigten eine bessere Platzierung als das
+            // schlechteste Tier-3-Deck (Dusknoir Mega Diancie, 9,46 aus 98
+            // Listen). Nicht weil sie besser waeren, sondern weil ein
+            // Einzelergebnis keinen Mittelwert hat, gegen den es zurueckfaellt.
+            // Der Rogue-Block sortiert deshalb nach Listenzahl.
             Object.keys(tierGroups).forEach((tierKey) => {
-                tierGroups[tierKey].sort((a, b) => parseDeckRank(a) - parseDeckRank(b));
+                if (tierKey === 'tier-trending') {
+                    tierGroups[tierKey].sort((a, b) => parseDeckCount(b) - parseDeckCount(a));
+                } else {
+                    tierGroups[tierKey].sort((a, b) => parseDeckRank(a) - parseDeckRank(b));
+                }
             });
 
             let heroHtml = '';
@@ -847,7 +905,15 @@
                     </section>`;
             }
 
-            let html = heroHtml + '<div style="margin-bottom: 30px;">';
+            // Woraus das hier entsteht — eine Zeile, die es vorher nicht gab.
+            const clGrundlage = `
+                <p class="tier-grundlage">${escapeHtml(
+                    t('tier.clBasis')
+                        .replace('{listen}', clGesamtListen.toLocaleString(getLang() === 'de' ? 'de-DE' : 'en-US'))
+                        .replace('{archetypen}', String(clArchetypen))
+                        .replace('{einzel}', String(clEinzelstueck)))}</p>`;
+
+            let html = heroHtml + clGrundlage + '<div style="margin-bottom: 30px;">';
             
             // Render each tier
             ['tier-1', 'tier-2', 'tier-3', 'tier-trending'].forEach(tierKey => {
@@ -909,9 +975,20 @@
                         ? getImageUrlFuzzy(archetypeName, imageMap)
                         : getArchetypeImage(archetypeName, archetypeCards);
                     
-                    const currentRank = currentRankValue > 0 ? currentRankValue.toFixed(1) : '0.0';
-                    const currentShare = currentShareValue.toFixed(1);
+                    // Deutsches Dezimalkomma. Die Werte kommen aus einer
+                    // Datei mit Komma, werden zum Rechnen auf Punkt gedreht
+                    // und standen danach als "8.1" auf einer deutschen Seite —
+                    // waehrend die Karte daneben "54,0 %" schreibt.
+                    const kommaAus = (x, n) => (getLang() === 'de'
+                        ? x.toFixed(n).replace('.', ',') : x.toFixed(n));
+                    const currentRank = currentRankValue > 0 ? kommaAus(currentRankValue, 1) : kommaAus(0, 1);
+                    const currentShare = kommaAus(currentShareValue, 1);
                     const m3Deck = window.m3BaselineData ? window.m3BaselineData[deckName] : null;
+
+                    // Wie viele Listen stehen hinter dieser Zeile? Ohne diese
+                    // Zahl sieht "Rank: 1.0" aus einer einzigen Liste genauso
+                    // aus wie "Rank: 8.5" aus 608.
+                    const listenN = parseDeckCount(deck);
 
                     let rankTrendClass = 'trend-neutral';
                     let shareTrendClass = 'trend-neutral';
@@ -936,7 +1013,25 @@
                         let rankClass = "trend-neutral";
                         rankIcon = "\u2013";
 
-                        if (Number.isFinite(currentR) && Number.isFinite(previousR) && previousR > 0) {
+                        // Ein Pfeil braucht einen Unterschied, den man
+                        // behaupten kann (20.08.2026).
+                        //
+                        // Bis hierher genuegte `currentR !== previousR`: 8,46
+                        // gegen 8,47 ergab einen roten Abwaertspfeil. Die
+                        // gesamte Spreizung ueber alle gelisteten Archetypen
+                        // betraegt 1,72 Plaetze, das 95-%-Intervall des
+                        // groessten Decks +-0,37 — bei einem Hundertstel Platz
+                        // ist ein Farbpfeil eine Behauptung ueber Rauschen.
+                        //
+                        // Jetzt braucht er beides: genug Listen auf beiden
+                        // Seiten und mindestens einen halben Platz Unterschied.
+                        // Sonst bleibt der neutrale Strich stehen, den es
+                        // ohnehin schon gibt.
+                        const vorherN = m3Deck ? parseDeckCount(m3Deck) : 0;
+                        const genugListen = listenN >= CL_MIN_LISTEN_PFEIL
+                                         && vorherN >= CL_MIN_LISTEN_PFEIL;
+                        if (Number.isFinite(currentR) && Number.isFinite(previousR) && previousR > 0
+                            && genugListen && Math.abs(currentR - previousR) >= CL_MIN_DIFF_PFEIL) {
                             // TCG LOGIK: Kleinerer Rang = Besser (Aufstieg)
                             if (currentR < previousR) {
                                 // Beispiel: 7.0 (M4) < 8.5 (M3) -> Verbesserung!
@@ -953,7 +1048,12 @@
                         // 3. SHARE-TREND (Höher ist besser!)
                         let shareClass = "trend-neutral";
                         shareIcon = "\u2013";
-                        if (normalizedPreviousS !== null) {
+                        // Dieselbe Schwelle fuer den Anteil: 0,1 Prozentpunkte.
+                        // Darunter bewegt sich ein Archetyp mit 20 Listen schon
+                        // durch eine einzige Liste mehr oder weniger.
+                        const CL_MIN_DIFF_ANTEIL = 0.1;
+                        if (normalizedPreviousS !== null
+                            && Math.abs(normalizedCurrentS - normalizedPreviousS) >= CL_MIN_DIFF_ANTEIL) {
                             if (normalizedCurrentS > normalizedPreviousS) {
                                 // Mehr Marktanteil
                                 shareIcon = "▲";
@@ -966,22 +1066,39 @@
                         }
                         shareTrendClass = shareClass;
 
+                        const _komma = (x, n) => (getLang() === 'de'
+                            ? x.toFixed(n).replace('.', ',') : x.toFixed(n));
                         m3RankDisplay = Number.isFinite(previousR)
-                            ? `<span class="stat-compare-value">(M3: ${previousR.toFixed(1)})</span>`
+                            ? `<span class="stat-compare-value">(M3: ${_komma(previousR, 1)})</span>`
                             : '';
                         m3ShareDisplay = Number.isFinite(normalizedPreviousS)
-                            ? `<span class="stat-compare-value">(M3: ${normalizedPreviousS.toFixed(1)}%)</span>`
+                            ? `<span class="stat-compare-value">(M3: ${_komma(normalizedPreviousS, 1)}%)</span>`
                             : '';
                     }
 
+                    // Die Zahl, die alles andere traegt, stand nicht auf der
+                    // Karte: aus wie vielen Listen kommen Platzierung und
+                    // Anteil? Am gemessenen Datenstand haben 128 von 304
+                    // Archetypen genau EINE, der Median liegt bei zwei. Eine
+                    // Platzierung aus einer Liste ist keine Ø-Platzierung, sie
+                    // ist ein Ergebnis. Sie steht jetzt daneben, und unter der
+                    // Schwelle traegt sie den Zusatz.
+                    const listenText = (getLang() === 'de'
+                        ? `${listenN.toLocaleString('de-DE')} ${listenN === 1 ? 'Liste' : 'Listen'}`
+                        : `${listenN.toLocaleString('en-US')} ${listenN === 1 ? 'list' : 'lists'}`);
+                    const duenn = listenN > 0 && listenN < CL_MIN_LISTEN_PFEIL;
+                    const duennTitel = escapeHtml(t('tier.clThinSampleTip')
+                        .replace('{n}', String(CL_MIN_LISTEN_PFEIL)));
+
                     const statsHtml = `
                         <div class="deck-banner-stats" style="display: flex; flex-direction: column; align-items: flex-start;">
-                            <span class="stat-badge rank-performance-hint" style="background: #fff3e0; color: #e65100;" title="Lower Rank = Better Performance">
-                                Rank: ${currentRank} ${m3RankDisplay} ${isM4WithComparison ? `<span class="trend-icon ${rankTrendClass}">${rankIcon}</span>` : ''}
+                            <span class="stat-badge rank-performance-hint" style="background: #fff3e0; color: #e65100;" title="${escapeHtml(t('cl.heroRankHint'))}">
+                                ${escapeHtml(t('tier.clRank'))}: ${currentRank} ${m3RankDisplay} ${isM4WithComparison ? `<span class="trend-icon ${rankTrendClass}">${rankIcon}</span>` : ''}
                             </span>
                             <span class="stat-badge">
-                                Share: ${currentShare}% ${m3ShareDisplay} ${isM4WithComparison ? `<span class="trend-icon ${shareTrendClass}">${shareIcon}</span>` : ''}
+                                ${escapeHtml(t('tier.clShare'))}: ${currentShare}% ${m3ShareDisplay} ${isM4WithComparison ? `<span class="trend-icon ${shareTrendClass}">${shareIcon}</span>` : ''}
                             </span>
+                            ${listenN > 0 ? `<span class="stat-badge tier-listen-n${duenn ? ' tier-listen-duenn' : ''}"${duenn ? ` title="${duennTitel}"` : ''}>${escapeHtml(listenText)}${duenn ? ` · ${escapeHtml(t('tier.clThinSample'))}` : ''}</span>` : ''}
                         </div>
                     `;
                     
@@ -1273,7 +1390,11 @@
                 'tier-1':        { title: 'Tier 1',           subtitle: t('tier.sub1')     },
                 'tier-2':        { title: 'Tier 2',           subtitle: t('tier.sub2')     },
                 'tier-3':        { title: 'Tier 3',           subtitle: t('tier.sub3')     },
-                'tier-trending': { title: 'Rogue / Trending',  subtitle: t('tier.subRogue') }
+                // "Aufkommende Archetypen" war eine Aussage ueber die Zukunft
+                // dieser Decks. Was den Block wirklich zusammenhaelt, ist,
+                // dass sie unter den Tier-Schwellen liegen — und dass ihre
+                // Zahlen auf den duennsten Stichproben der Seite stehen.
+                'tier-trending': { title: 'Rogue / Trending',  subtitle: t('tier.cmSubRogue') }
             };
             
             // Limit trending decks to top 20
@@ -1921,6 +2042,14 @@
                     const sc = deck._tierScore;
                     const zeigWR = (sc && isFinite(sc.adjWR)) ? sc.adjWR : winRate;
                     const listenN = parseInt(deck.new_count || 0) || 0;
+                    // Und ab wann eine Zahl hier als duenn markiert wird.
+                    // Die Glaettung zieht kleine Stichproben schon Richtung
+                    // 50 %, aber sie sagt es nicht: "51,3 % WR · 10 Listen"
+                    // sieht aus wie "51,1 % WR · 187 Listen". Dieselbe
+                    // Groessenordnung wie die Untergrenze der Konversions-
+                    // tabelle (CONV_MIN_N = 20), damit die Seite ueberall
+                    // dieselbe Grenze zieht.
+                    const ROGUE_MIN_LISTEN = (typeof CONV_MIN_N === 'number') ? CONV_MIN_N : 20;
                     // Und dazu, welche der drei Konventionen das ist. Die
                     // Ladder-Datei rechnet S/(S+N+U); die Matchup-Tabelle im
                     // Archetyp-Kaertchen daneben rechnet S/(S+N). Zwei
@@ -1958,13 +2087,21 @@
                     // F-20 from visual sweep: tooltip now spells out the
                     // 7-day window so '-0.1 %' isn't read as 'since
                     // yesterday' or 'since last quarter'.
+                    //
+                    // Der Chip trug einen englischen Titel und einen Punkt als
+                    // Dezimaltrenner auf einer deutschen Seite. Beides folgt
+                    // jetzt derselben Formatierung wie die Zahlen daneben.
                     let inlineTrend = '';
-                    if (oldShare > 0 && Math.abs(shareChange) >= 0.05) {
-                        const arrow = shareChange > 0 ? '▲' : '▼';
-                        const cls   = shareChange > 0 ? 'tier-trend-up' : 'tier-trend-down';
-                        inlineTrend = `<span class="tier-trend-chip ${cls}" title="Trend over the last 7 days (previous snapshot: ${oldShare.toFixed(1)}%)">${arrow}&nbsp;${oldShare.toFixed(1)}%</span>`;
-                    } else if (oldShare > 0) {
-                        inlineTrend = `<span class="tier-trend-chip tier-trend-flat" title="Trend over the last 7 days (previous snapshot: ${oldShare.toFixed(1)}%)">→&nbsp;${oldShare.toFixed(1)}%</span>`;
+                    if (oldShare > 0) {
+                        const vorher = fmtPct(oldShare);
+                        const chipTitel = escapeHtml(t('tier.rogueTrendTip').replace('{vorher}', vorher));
+                        if (Math.abs(shareChange) >= 0.05) {
+                            const arrow = shareChange > 0 ? '▲' : '▼';
+                            const cls   = shareChange > 0 ? 'tier-trend-up' : 'tier-trend-down';
+                            inlineTrend = `<span class="tier-trend-chip ${cls}" title="${chipTitel}">${arrow}&nbsp;${vorher}</span>`;
+                        } else {
+                            inlineTrend = `<span class="tier-trend-chip tier-trend-flat" title="${chipTitel}">→&nbsp;${vorher}</span>`;
+                        }
                     }
 
                     // When labs CSV is loaded for this meta, surface the
@@ -2004,9 +2141,13 @@
                             <div class="deck-banner-content">
                                 <div class="deck-banner-name">${archetypeName}</div>
                                 <div class="deck-banner-stats">
-                                    <span class="stat-badge"${wrTitel ? ` title="${wrTitel}"` : ''}>${share.toFixed(1)}% · ${zeigWR.toFixed(1)}% WR</span>
-                                    ${parseInt(deck.new_count || 0) > 0
-                                      ? `<span class="stat-badge stat-sample-size" title="Anzahl Decks in dieser Auswertung">${parseInt(deck.new_count)} Decks</span>`
+                                    <span class="stat-badge"${wrTitel ? ` title="${wrTitel}"` : ''}>${fmtPct(share)} · ${fmtPct(zeigWR)} WR</span>
+                                    ${listenN > 0
+                                      ? `<span class="stat-badge stat-sample-size${listenN < ROGUE_MIN_LISTEN ? ' tier-listen-duenn' : ''}" title="${escapeHtml(listenN < ROGUE_MIN_LISTEN ? t('tier.rogueThinTip').replace('{n}', String(ROGUE_MIN_LISTEN)) : t('tier.rogueSampleTip'))}">${
+                                          getLang() === 'de'
+                                            ? `${listenN.toLocaleString('de-DE')} ${listenN === 1 ? 'Liste' : 'Listen'}`
+                                            : `${listenN.toLocaleString('en-US')} ${listenN === 1 ? 'list' : 'lists'}`
+                                        }${listenN < ROGUE_MIN_LISTEN ? ` · ${escapeHtml(t('tier.clThinSample'))}` : ''}</span>`
                                       : ''}
                                     ${labsBadge}
                                     ${inlineTrend}

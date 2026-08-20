@@ -250,10 +250,43 @@
         var engerAusschnitt = isFinite(r.gerechnet)
             && r.gerechnet > 0 && (r.abdeckung - r.gerechnet) >= 1;
 
+        /* Eine duenne Rechnung sieht aus wie eine dicke (20.08.2026).
+
+           Das Unsicherheitsband unter der Zahl ist rechnerisch in Ordnung —
+           es traegt die Varianz jedes Gegners gewichtet weiter. Aber die
+           Zahl selbst steht in derselben Groesse da, ob 11 Partien oder
+           5.000 dahinterstehen, und ein Band liest sich anders als eine
+           Warnung. Gemeldet wurde genau dieser Fall: 51,0 % aus 11 Partien
+           bei 16 % Feldabdeckung.
+
+           Die Kachel bekommt deshalb einen Vorbehalt an der Rolle, wenn
+           entweder zu wenige Partien gezaehlt oder zu wenig Feld gerechnet
+           wurde. 30 Partien ist bewusst niedrig angesetzt: es geht nicht
+           darum, die Zahl zu verstecken, sondern darum, dass sie nicht
+           aussieht wie eine gesicherte. */
+        var EV_MIN_PARTIEN = 30;
+        var EV_MIN_ABDECKUNG = 25;
+        var evDuenn = (r.partien > 0 && r.partien < EV_MIN_PARTIEN)
+            || (isFinite(r.abdeckung) && r.abdeckung > 0 && r.abdeckung < EV_MIN_ABDECKUNG);
+        var evDuennText = evDuenn
+            ? L(' · dünne Grundlage', ' · thin basis')
+            : '';
+        var evDuennTitel = evDuenn
+            ? L('Weniger als ' + EV_MIN_PARTIEN + ' gezählte Partien oder unter '
+                + EV_MIN_ABDECKUNG + ' % Feldabdeckung. Die Zahl steht da, aber das '
+                + 'Unsicherheitsband darunter ist hier der wichtigere Teil.',
+                'Fewer than ' + EV_MIN_PARTIEN + ' games counted, or under '
+                + EV_MIN_ABDECKUNG + ' % field coverage. The number is shown, but the '
+                + 'uncertainty band below it is the part that matters here.')
+            : '';
+
         var kacheln =
             '<div class="ds-stat-row">'
-            + '<div class="ds-stat ' + (r.ev >= 50 ? 'is-pos' : 'is-neg') + '">'
-              + '<span class="ds-stat-role">' + esc(L('gegen dieses Feld', 'against this field')) + '</span>'
+            + '<div class="ds-stat ' + (r.ev >= 50 ? 'is-pos' : 'is-neg')
+              + (evDuenn ? ' is-duenn' : '') + '"'
+              + (evDuenn ? ' title="' + esc(evDuennTitel) + '"' : '') + '>'
+              + '<span class="ds-stat-role">'
+              + esc(L('gegen dieses Feld', 'against this field') + evDuennText) + '</span>'
               + '<span class="ds-stat-label">' + esc(L('Erwartete Win Rate', 'Expected win rate')) + '</span>'
               + '<span class="ds-stat-value">' + esc(zahl(r.ev, 1)) + '<span class="ds-stat-unit"> %</span></span>'
               + '<span class="ds-stat-context">' + esc(L(

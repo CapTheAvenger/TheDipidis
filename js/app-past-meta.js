@@ -1627,6 +1627,20 @@
                 ? WK.KONVENTIONEN.matchpunkte.rechne(wins, losses, ties)
                 : (games > 0 ? (3 * wins + ties) / (3 * games) * 100 : 0);
             const day2Conv = day1 > 0 ? (day2 / day1) * 100 : 0;
+            // Eine Quote braucht einen Nenner, den man sehen kann (20.08.2026).
+            //
+            // In labs_tournament_decks.csv tragen 74 von 4.667 Zeilen eine
+            // Day-1-zu-Day-2-Konversion von genau 100 %. 65 davon stehen auf
+            // EINEM Spieler, acht auf zweien, eine auf vieren. Das ist keine
+            // Konversionsrate, das ist "der eine Spieler kam durch".
+            //
+            // Die Kachel zeigte davon nichts: "100,0 %" in derselben Groesse
+            // und Form wie eine Quote aus 600 Spielern. Jetzt steht der
+            // Nenner darunter, und unter der Schwelle sagt die Kachel, dass
+            // sie keine Quote ist. Der Wert bleibt sichtbar — er ist ja
+            // richtig, er ist nur nicht das, wonach er aussieht.
+            const DAY2_MIN_SPIELER = 10;
+            const day2Duenn = day1 > 0 && day1 < DAY2_MIN_SPIELER;
             const fmtPct = (n) => n.toFixed(1).replace('.', ',') + '%';
             const fmtInt = (n) => Math.round(n).toLocaleString();
 
@@ -1654,9 +1668,19 @@
                     <div class="past-meta-stat-label">${winPctLabel}</div>
                     <div class="past-meta-stat-value">${isFinite(winPct) ? fmtPct(winPct) : '–'}</div>
                 </div>
-                <div class="past-meta-stat-card">
+                <div class="past-meta-stat-card${day2Duenn ? ' past-meta-stat-duenn' : ''}"${
+                    day2Duenn ? ` title="${((typeof t === 'function'
+                        ? t('pm.day2ThinTip')
+                        : 'Fewer than {n} day-1 players — this is a single result, not a rate.')
+                        .replace('{n}', String(DAY2_MIN_SPIELER))).replace(/"/g, '&quot;')}"` : ''}>
                     <div class="past-meta-stat-label">${day2Label}</div>
-                    <div class="past-meta-stat-value">${fmtPct(day2Conv)}</div>
+                    <div class="past-meta-stat-value">${day1 > 0 ? fmtPct(day2Conv) : '–'}</div>
+                    <div class="past-meta-stat-nenner">${
+                        day1 > 0
+                            ? `${fmtInt(day2)} / ${fmtInt(day1)}` + (day2Duenn
+                                ? ` · ${(typeof t === 'function' ? t('pm.day2Thin') : 'thin')}` : '')
+                            : (typeof t === 'function' ? t('pm.day2NoBasis') : 'no day-1 figures')
+                    }</div>
                 </div>
             `;
 

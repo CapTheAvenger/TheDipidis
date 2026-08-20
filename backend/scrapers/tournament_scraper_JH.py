@@ -720,6 +720,52 @@ def _resolve_labs_tournament_id(name: str, date_str: str, cards_tid: str = "") -
     return lookup.get(key, "")
 
 
+
+# ----------------------------------------------------------------------------
+# Ausgangspruefung: was hier nicht durchkommt, wird nicht geschrieben
+# ----------------------------------------------------------------------------
+#
+# Am 20.08.2026 lagen in data/tournament_cards_data_cards_TEF-CRI.csv
+# 1.263 von 2.737 Zeilen (46,1 %) zerrissen vor — alle aus Turnier 540.
+# Ein Python-Listen-Text ("['0', '0']") war in die Zeile geraten und hatte
+# drei Spalten auseinandergeschnitten:
+#
+#     ...;12;4;3;"4,""['0";3;100', '0;ASC;...;"No']"""
+#
+# Aus average_count wurde `4,"['0`, aus percentage_in_archetype `100', '0`,
+# aus is_ace_spec `No']"`. TEF-CRI ist der Standard-Chunk des Reiters
+# "Vergangenes Meta"; die Datei wurde ausgeliefert und angezeigt, ohne dass
+# irgendwo etwas auffiel. Kein Lauf hat je geprueft, was er geschrieben hat.
+#
+# Diese Pruefung laeuft unmittelbar vor dem Schreiben und bricht ab, statt
+# eine kaputte Datei zu veroeffentlichen. Lieber kein neuer Stand als ein
+# falscher — dieselbe Regel wie in scripts/data_guardian.py.
+_ZAHL_FORM = re.compile(r"^-?\d+(?:[.,]\d+)?$")
+
+
+def _pruefe_kartenzeilen(rows, ziel):
+    """Bricht ab, wenn eine Kartenzeile nicht die erwartete Form hat."""
+    fehler = []
+    for i, r in enumerate(rows):
+        for feld in ("average_count", "percentage_in_archetype"):
+            if feld not in r:
+                continue
+            wert = str(r.get(feld, ""))
+            if wert and not _ZAHL_FORM.match(wert):
+                fehler.append("%s Zeile %d: %s=%r" % (ziel, i, feld, wert))
+        ace = str(r.get("is_ace_spec", "")).strip()
+        if ace and ace not in ("Yes", "No", "True", "False", "1", "0"):
+            fehler.append("%s Zeile %d: is_ace_spec=%r" % (ziel, i, ace))
+        if len(fehler) >= 10:
+            break
+    if fehler:
+        raise ValueError(
+            "Kartenzeilen sind nicht schreibbar: %d Verstoss/Verstoesse in %d "
+            "Zeilen. Nichts geschrieben.\n  %s"
+            % (len(fehler), len(rows), "\n  ".join(fehler))
+        )
+
+
 def save_csv_files(data: list, output_file: str, append_mode: bool):
     overview_f = os.path.join(get_data_dir(), output_file.replace(".csv", "_overview.csv"))
     cards_f    = os.path.join(get_data_dir(), output_file.replace(".csv", "_cards.csv"))
@@ -748,6 +794,8 @@ def save_csv_files(data: list, output_file: str, append_mode: bool):
             if "average_count" in cr:
                 cr["average_count"] = str(cr["average_count"]).replace(".", ",")
             c_rows.append(cr)
+
+    _pruefe_kartenzeilen(c_rows, cards_f)
 
     for f_path, rows in [(overview_f, o_rows), (cards_f, c_rows)]:
         if not rows:

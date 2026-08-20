@@ -10484,11 +10484,21 @@ body.arc-open { overflow: hidden; }
 #currentMetaContent .arc-mu-table th:nth-child(2),
 #currentMetaContent .arc-mu-table td:nth-child(2),
 #archetypeCardOverlay .arc-mu-table th:nth-child(2),
-#archetypeCardOverlay .arc-mu-table td:nth-child(2) { width: 104px; }
+#archetypeCardOverlay .arc-mu-table td:nth-child(2) { width: 88px; }
 #currentMetaContent .arc-mu-table th:nth-child(n+3),
 #currentMetaContent .arc-mu-table td:nth-child(n+3),
 #archetypeCardOverlay .arc-mu-table th:nth-child(n+3),
 #archetypeCardOverlay .arc-mu-table td:nth-child(n+3) { width: 58px; }
+/* W, L und U sind ein- bis dreistellige Zahlen — 58 px sind dafuer zu viel,
+   seit die Unentschieden als eigene Spalte dazugekommen sind (20.08.2026).
+   Mit 42 px und einer auf 88 px verschmaelerten Quote-Spalte bleiben auf
+   390 px 94 px fuer den Deck-Namen; gemessen passt "Dragapult Dusknoir"
+   damit wieder in eine Zeile. Gleiche Spezifitaet wie die Regel darueber,
+   spaeter notiert — deshalb ohne Ausrufezeichen. */
+#currentMetaContent .arc-mu-table th:nth-child(n+4),
+#currentMetaContent .arc-mu-table td:nth-child(n+4),
+#archetypeCardOverlay .arc-mu-table th:nth-child(n+4),
+#archetypeCardOverlay .arc-mu-table td:nth-child(n+4) { width: 42px; }
 /* Ohne Ausrufezeichen: der einzige Gegenspieler ist `table thead` aus
    css/styles.css:839 mit Element-Spezifitaet (0,0,1). Diese Regel hier
    liegt bei (1,1,1) und gewinnt ohnehin. */
@@ -10537,7 +10547,7 @@ body.arc-open { overflow: hidden; }
 .arc-mu-wr-up::after   { left: 50%; background: var(--arc-pos); }
 .arc-mu-wr-down::after { right: 50%; background: var(--arc-neg); }
 .arc-mu-opp { font-weight: 500; color: var(--arc-ink); }
-.arc-mu-n, .arc-mu-w, .arc-mu-l {
+.arc-mu-n, .arc-mu-w, .arc-mu-l, .arc-mu-u {
     color: var(--arc-ink3); font-variant-numeric: tabular-nums;
     font-family: var(--arc-mono);
 }

@@ -1143,7 +1143,7 @@
                                             ? ` <small class="stat-badge-suffix">${getLang() === 'de'
                                                 ? `über ${variantCount} Varianten` : `across ${variantCount} variants`}</small>`
                                             : ''}</span>
-                                    <span class="stat-badge" title="${getLang() === 'de' ? 'Gewichtete durchschnittliche Siegquote' : 'Weighted average winrate'}">WR ${fmtPct(parseFloat(winrateText))}</span>
+                                    <span class="stat-badge" title="${getLang() === 'de' ? 'Gewichtete durchschnittliche Win Rate' : 'Weighted average winrate'}">WR ${fmtPct(parseFloat(winrateText))}</span>
                                 </div>
                             </div>
                         </div>`;
@@ -1573,7 +1573,10 @@
                 const delta = (typeof window.formatPercentSigned === 'function')
                     ? window.formatPercentSigned(m.delta)
                     : (m.delta >= 0 ? '+' : '') + m.delta.toFixed(1) + '%';
-                const cls = sign === 'up' ? 'tier-mover-up' : 'tier-mover-down';
+                // Getoente Zelle statt farbigem Text — der Baustein dafuer
+                // steht schon in css/components.css und garantiert, dass
+                // der Kontrast der Zahl unabhaengig vom Wert bleibt.
+                const cls = sign === 'up' ? 'ds-tint-pos' : 'ds-tint-neg';
                 return `<tr>
                     <td>${escapeHtml(m.archetype)}</td>
                     <td class="ds-num">${fmtPct(m.share)}</td>
@@ -1822,14 +1825,14 @@
                     if (_sc && _sc.labsHit && labsByName) {
                         const ent = labsByName[archetypeName];
                         if (ent) {
-                            // Formel ins Tooltip. Eine Siegquote ohne ihre
+                            // Formel ins Tooltip. Eine Win Rate ohne ihre
                             // Konvention ist auf dieser Seite nicht eindeutig:
                             // die Rohdaten tragen drei verschiedene, und der
                             // Unterschied betraegt bis zu 6,4 pp auf identischer
                             // Bilanz. Trainer Hill macht das vor und schreibt die
                             // Formel neben die Zahl.
                             const _labsTitle = (getLang() === 'de'
-                                ? `Turnierdaten aus Limitless Labs · ${ent.tournaments} Turniere, ${ent.games} Partien · Siegquote = W/(W+L+U) · Matchpunkte ${fmtPct(ent.matchPointPct)}`
+                                ? `Turnierdaten aus Limitless Labs · ${ent.tournaments} Turniere, ${ent.games} Partien · Win Rate = W/(W+L+U) · Matchpunkte ${fmtPct(ent.matchPointPct)}`
                                 : `Limitless Labs tournament data · ${ent.tournaments} tournaments, ${ent.games} games · win rate = W/(W+L+T) · match points ${fmtPct(ent.matchPointPct)}`);
                             labsBadge = `<span class="stat-badge stat-labs" title="${escapeHtml(_labsTitle)}">🏆 ${fmtPct(ent.winPct)} WR · ${ent.tournaments}T</span>`;
                         }

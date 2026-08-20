@@ -306,7 +306,7 @@
     //
     // Bewusst DIESELBE Funktion und dieselbe Datei fuer beide Stellen:
     // zwei Herleitungen waeren zwei Wahrheiten, und genau davon hatte
-    // diese Seite vier Siegquoten fuer ein Deck auf einem Bildschirm.
+    // diese Seite vier Win Rates fuer ein Deck auf einem Bildschirm.
     const ANSWER_HOSTS = [ANSWER_HOST_ID, 'metaAnswerTop'];
 
     async function renderAnswer() {

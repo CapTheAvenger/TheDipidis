@@ -5,7 +5,7 @@
  * sind die beiden Bilder, nach denen im Wettkampfumfeld tatsächlich
  * gefragt wird:
  *
- *   1. Die Deck-Analyse als 1200×675 — Anteil, Siegquote, Top-8 gegen
+ *   1. Die Deck-Analyse als 1200×675 — Anteil, Win Rate, Top-8 gegen
  *      Erwartung, dazu die Matchup-Tabelle. Nach poke_hives Vorlage,
  *      mit drei Korrekturen: die Skala ist blau↔rot statt grün↔rot
  *      (css/tokens.css nennt poke_hive dort ausdrücklich als Vorbild
@@ -350,7 +350,7 @@
             wrDelta === null ? C.dvZero : (wrDelta >= 0 ? C.dvPos : C.dvNeg),
             isFinite(spec.winRate) ? num(spec.winRate, 2) + ' %' : '–',
             C.ink,
-            L('Siegquote', 'Win rate'),
+            'Win Rate',   /* in beiden Sprachen gleich — die Szene sagt Win Rate */
             wrDelta === null ? L('keine Daten', 'no data')
                 : signed(wrDelta, 2) + ' ' + L('ggü. 50 %', 'vs 50%'),
             L('Siege ÷ gewertete Partien, Unentschieden halb',
@@ -431,7 +431,7 @@
         ctx.textAlign = 'right';
         label(ctx, L('Partien', 'Games'), xGames, ty);
         label(ctx, L('Bilanz', 'Record'), xRecord, ty);
-        label(ctx, L('Siegquote', 'Win rate'), wrX + wrW - 10, ty);
+        label(ctx, 'Win Rate', wrX + wrW - 10, ty);
         ctx.textAlign = 'start';
         ctx.fillStyle = C.line;
         ctx.fillRect(tx, ty + 8, DC.W - 20 - tx, 1);
@@ -517,7 +517,7 @@
             var note = mus.some(function (m) { return m.thin; })
                 ? L('Graue Zeilen: unter ' + (spec.thinGames || 20) + ' Partien — die Quote ist dort noch ein Gerücht.',
                     'Grey rows: fewer than ' + (spec.thinGames || 20) + ' games — that rate is still a rumour.')
-                : L('Sortiert nach Siegquote. Jede Zeile trägt ihre Partienzahl.',
+                : L('Sortiert nach Win Rate. Jede Zeile trägt ihre Partienzahl.',
                     'Sorted by win rate. Every row carries its game count.');
             ctx.font = fSans(11, 400);
             ctx.fillStyle = C.ink3;

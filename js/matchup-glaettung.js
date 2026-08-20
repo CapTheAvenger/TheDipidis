@@ -19,7 +19,7 @@
  * Blass dargestellt und mit n=3 daneben, aber eben hingeschrieben.
  *
  * Die Loesung ist im Haus schon in Gebrauch, nur eine Etage hoeher:
- * js/app-tier-meta.js glaettet die Deck-Siegquote seit jeher mit einem
+ * js/app-tier-meta.js glaettet die Deck-Win-Rate seit jeher mit einem
  * 50-Partien-Prior auf 50 %, und zwar mit genau dieser Begruendung im
  * Kommentar — "ein Deck was nur 5x zu nem Turnier geht und alle gewinnt
  * … ist ja kein Tier 1". Dasselbe Argument gilt fuer Matchups. Auf der
@@ -74,7 +74,7 @@
     }
 
     /**
-     * Geglaettete Siegquote in Prozent.
+     * Geglaettete Win Rate in Prozent.
      * Ohne entscheidende Partien (0-0) kommt 50 heraus — das ist die
      * ehrliche Antwort fuer die 84 % der Deck-Paare, die nie gegeneinander
      * gespielt haben.

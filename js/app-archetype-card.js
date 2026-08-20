@@ -139,18 +139,19 @@
 
     // ── rendering ───────────────────────────────────────────────────
 
-    // The colour sits on a thin top edge, never as a fill: the number
-    // stays in normal text colour so its contrast is guaranteed whatever
-    // the value is.
-    // Four tones, quantised — never an interpolated ramp. Every possible
-    // background is then known at authoring time and its contrast against
-    // white text is fixed; a ramp always produces some middle shade the
-    // text disappears into.
+    // Die Farbe sitzt auf einer 3 px hohen Oberkante, nie als Flaeche.
+    // Genau so macht es die Bildkarte (js/ds-share.js, statCol) — und
+    // seit dem 20.08.2026 macht es diese Karte auch, weil der Nutzer
+    // das Aussehen des Bildes in der Seite haben wollte.
     //
-    // Blue/red rather than the original's green/red: that pairing is the
-    // most common colour-blindness case. The punch comes from size and
-    // saturation instead, and the arrow makes the direction readable with
-    // no colour perception at all.
+    // Der Nebeneffekt ist der eigentliche Gewinn: die Zahl steht immer
+    // in --arc-ink auf --arc-s1, 15,79:1, unabhaengig vom Wert. Solange
+    // die Kachel selbst eingefaerbt war, musste jeder einzelne Farbton
+    // gegen den Text geprueft werden.
+    //
+    // Vier Toene, gerastert — nie eine stufenlose Rampe. Blau/Rot statt
+    // Gruen/Rot: das ist der haeufigste Fall von Farbfehlsichtigkeit.
+    // Die Richtung traegt zusaetzlich der Pfeil, ganz ohne Farbe.
     const TONE_STRONG_AT = 15;      // points away from the neutral line
 
     function toneFor(delta) {
@@ -163,9 +164,18 @@
     function tile(role, tone, label, value, context, titleAttr, arrow) {
         const ttl = titleAttr ? ` title="${esc(titleAttr)}"` : '';
         const arw = arrow ? `<span class="arc-tile-arrow" aria-hidden="true">${arrow}</span>` : '';
+        // Wert oben, Bezeichnung darunter — genau die Reihenfolge, in der
+        // statCol() in js/ds-share.js die Bildkarte malt (Wert auf +62,
+        // Bezeichnung auf +84, Herleitung auf +102).
+        //
+        // Das ist nicht nur Nachbau: mit der Bezeichnung oben stand der
+        // Wert der dritten Kachel auf dem Telefon eine Zeile tiefer als
+        // die der ersten, weil "Top-8 vs. Erw." umbricht und "Anteil"
+        // nicht. Drei Zahlen nebeneinander, die nicht auf einer Linie
+        // liegen, liest niemand als eine Reihe.
         return `<div class="arc-tile arc-tile--${role} arc-tone--${tone}"${ttl}>
-                <div class="arc-tile-label">${esc(label)}</div>
                 <div class="arc-tile-value">${arw}${value}</div>
+                <div class="arc-tile-label">${esc(label)}</div>
                 <div class="arc-tile-ctx">${context}</div>
             </div>`;
     }
@@ -186,12 +196,12 @@
 
         const wrDelta = d ? d.winRate - 50 : null;
         const wr = d
-            ? tile('wr', toneFor(wrDelta), L('arc.wrLabel', de ? 'Siegquote' : 'Win Rate'),
+            ? tile('wr', toneFor(wrDelta), L('arc.wrLabel', 'Win Rate'),
                 `${esc(fmt(d.winRate))} %`,
                 esc((wrDelta >= 0 ? '+' : '−') + fmt(Math.abs(wrDelta), 2) + ' '
                     + L('arc.wrCtx', de ? 'gegenüber 50 %' : 'vs 50%')),
                 '', arrow(wrDelta))
-            : tile('wr', 'tie', L('arc.wrLabel', de ? 'Siegquote' : 'Win Rate'), '–',
+            : tile('wr', 'tie', L('arc.wrLabel', 'Win Rate'), '–',
                 esc(L('arc.noData', de ? 'keine Daten' : 'no data')));
 
         // The conversion file covers fewer decks than the deck list —
@@ -212,7 +222,7 @@
                 '–',
                 esc(L('arc.convMissing', de ? 'zu wenig Daten' : 'not enough data')),
                 L('arc.convMissingTip', de
-                    ? 'Dieses Deck fehlt in der Top-Cut-Datei. Das heißt nicht, dass es nie konvertiert — die Siegquote stammt aus einer anderen Quelle.'
+                    ? 'Dieses Deck fehlt in der Top-Cut-Datei. Das heißt nicht, dass es nie konvertiert — die Win Rate stammt aus einer anderen Quelle.'
                     : 'This deck is absent from the top-cut file. That does not mean it never converts — the win rate comes from a different source.'));
         return `<div class="arc-tiles">${rep}${wr}${conv}</div>`;
     }
@@ -230,6 +240,23 @@
         return `arc-mu-${delta >= 0 ? 'up' : 'down'}-${step}`;
     }
 
+    // Der Balken unter der Quote. Er laeuft aus der Mitte der Zelle
+    // heraus — nach rechts ueber 50 %, nach links darunter — und ist
+    // damit ohne jede Farbwahrnehmung lesbar. Die Toenung sagt dasselbe
+    // ein zweites Mal, aber niemand muss sie sehen koennen.
+    //
+    // Die Skala endet bei 25 Punkten Abstand: nach der Glaettung (k=20)
+    // liegt die aeusserste Zelle bei 24,4 bzw. 75,0 %, ein Balken, der
+    // erst bei 50 Punkten voll waere, bliebe ueberall halb leer.
+    const BAR_FULL_AT = 25;
+
+    function barFor(delta) {
+        if (delta == null || !isFinite(delta)) return { cls: '', pct: 0 };
+        const pct = Math.min(1, Math.abs(delta) / BAR_FULL_AT) * 50;
+        if (pct < 0.5) return { cls: '', pct: 0 };
+        return { cls: delta >= 0 ? 'arc-mu-wr-up' : 'arc-mu-wr-down', pct };
+    }
+
     function matchupTableHtml(name, opts) {
         const de = isDe();
         const collapsed = !!(opts && opts.collapsible);
@@ -243,9 +270,11 @@
         const rows = (preview && all.length > preview) ? all.slice(0, preview) : all;
         const body = rows.map(m => {
             const shade = shadeFor(m.winRate - 50, m.thin);
+            const bar = barFor(m.winRate - 50);
             return `<tr>
                     <td class="arc-mu-opp">${esc(m.opponent)}</td>
-                    <td class="arc-mu-wr ${shade}" title="${esc(
+                    <td class="arc-mu-wr ${shade} ${bar.cls}" style="--arc-bar:${
+                        fmt(bar.pct, 1).replace(',', '.')}%" title="${esc(
                         (de ? 'Geglättet aus ' : 'Smoothed from ')
                         + (m.wins == null ? '?' : m.wins) + '–' + (m.losses == null ? '?' : m.losses)
                         + (de ? ' (roh ' : ' (raw ') + fmt(m.winRateRoh) + ' %)')
@@ -268,7 +297,7 @@
                 <table class="arc-mu-table">
                     <thead><tr>
                         <th>${esc(L('arc.colOpponent', de ? 'Gegner-Deck' : 'Deck'))}</th>
-                        <th>${esc(L('arc.colWinRate', de ? 'Siegquote' : 'Win Rate'))}</th>
+                        <th>${esc(L('arc.colWinRate', 'Win Rate'))}</th>
                         <th title="${esc(L('arc.colGames', de ? 'gespielte Partien' : 'games played'))}">${
                             esc(de ? 'Partien' : 'Games')}</th>
                         <th title="${esc(de ? 'gewonnene Partien' : 'games won')}">W</th>
@@ -489,6 +518,19 @@
     window.getArchetypeMatchups = function (name) {
         return load().then(() => matchupsFor(name));
     };
+    // Die Feldanteile, so wie diese Datei sie ohnehin schon geparst hat.
+    // js/ds-ev-rechner.js braucht sie, um das Feld zu gewichten — und
+    // holt sich dieselbe CSV NICHT ein zweites Mal: zwei Parser fuer eine
+    // Datei sind zwei Zahlen fuer eine Sache, sobald einer angefasst wird.
+    window.getArchetypeShares = function () {
+        return load().then(() => {
+            const out = {};
+            Object.keys(_decks || {}).forEach(k => {
+                out[k] = { share: _decks[k].share, count: _decks[k].count, winRate: _decks[k].winRate };
+            });
+            return out;
+        });
+    };
 
     window.openArchetypeCard = open;
     window.closeArchetypeCard = close;
@@ -501,6 +543,6 @@
     window._archetypeCardInternals = {
         matchupsFor, parseSemicolonCsv, findKey, THIN_GAMES, factsFor,
         setData: (decks, conv) => { _decks = decks; _conv = conv; },
-        cardHtml, tilesHtml, matchupTableHtml, render, toneFor, shadeFor,
+        cardHtml, tilesHtml, matchupTableHtml, render, toneFor, shadeFor, barFor,
     };
 })();

@@ -96,23 +96,51 @@ describe('js/app-tier-meta.js — nichts mehr fest verdrahtet', () => {
         });
     }
 
-    it('beide tierTitles-Tabellen holen ihre Untertitel aus t()', () => {
+    it('beide tierTitles-Tabellen holen jeden Untertitel aus t()', () => {
         const tabellen = TIER.match(/const tierTitles = \{[\s\S]*?\};/g) || [];
         assert.equal(tabellen.length, 2,
             'erwartet werden genau die zwei bekannten Tabellen, gefunden: ' + tabellen.length);
         for (const [i, tb] of tabellen.entries()) {
-            for (const key of ['tier.sub1', 'tier.sub2', 'tier.sub3', 'tier.subRogue']) {
-                assert.ok(tb.includes("t('" + key + "')"),
-                    'Tabelle ' + (i + 1) + ' benutzt ' + key + ' nicht');
-            }
+            // Vier Eintraege, vier t()-Aufrufe, kein Literal dazwischen.
+            const rufe = tb.match(/t\('([^']+)'\)/g) || [];
+            assert.equal(rufe.length, 4,
+                'Tabelle ' + (i + 1) + ' hat ' + rufe.length + ' statt 4 t()-Aufrufe');
+            assert.doesNotMatch(tb, /subtitle:\s*'/,
+                'Tabelle ' + (i + 1) + ' traegt einen fest verdrahteten Untertitel');
         }
     });
 
-    it('und sie sagen jetzt beide dasselbe', () => {
-        // Vorher: 'Meta Definition' gegen 'Meta Dominators' fuer denselben Tier.
+    it('die zwei Tabellen duerfen verschieden sein — aber jeder Schluessel muss existieren', () => {
+        // Bis zum 20.08.2026 verlangte diese Pruefung, dass beide Tabellen
+        // ZEICHENGLEICH sind. Das war richtig, solange beide dieselbe
+        // generische Liste benutzten ('Beherrschen das Meta' und so fort).
+        //
+        // Es ist jetzt falsch, und zwar aus einem inhaltlichen Grund: die
+        // zwei Tier-Listen messen nicht dasselbe. Die des aktuellen Metas
+        // sortiert nach einem zusammengesetzten Score mit WR-Boden; die der
+        // City League ist ein reiner Indexschnitt auf einer nach Listenzahl
+        // sortierten Liste. Am letzten vollstaendigen City-League-Datenstand
+        // stand das beste Tier-2-Deck (7,74) besser da als jedes Tier-1-Deck
+        // (8,07-8,73) — dort 'Beherrschen das Meta' zu schreiben, war eine
+        // Behauptung, die die eigenen Zahlen widerlegen.
+        //
+        // Geprueft wird deshalb nicht mehr Gleichheit, sondern dass jeder
+        // benutzte Schluessel in BEIDEN Sprachen existiert. Ein Tippfehler
+        // im Schluessel faellt damit weiterhin auf — er faellt sogar
+        // haerter auf als vorher, weil er nicht mehr nur in einer Tabelle
+        // auffiele.
         const tabellen = TIER.match(/const tierTitles = \{[\s\S]*?\};/g) || [];
-        const norm = s => s.replace(/\s+/g, ' ').trim();
-        assert.equal(norm(tabellen[0]), norm(tabellen[1]),
-            'die zwei Tabellen weichen wieder voneinander ab');
+        const schluessel = new Set();
+        for (const tb of tabellen) {
+            for (const m of tb.matchAll(/t\('([^']+)'\)/g)) schluessel.add(m[1]);
+        }
+        assert.ok(schluessel.size >= 5,
+            'die beiden Tabellen benutzen dieselben Schluessel — dann sagen sie wieder dasselbe');
+        const I18N = fs.readFileSync(path.join(ROOT, 'js/i18n.js'), 'utf8');
+        for (const k of schluessel) {
+            const treffer = I18N.match(new RegExp("'" + k.replace('.', '\\.') + "':", 'g')) || [];
+            assert.equal(treffer.length, 2,
+                k + ' ist ' + treffer.length + '-mal in i18n.js definiert, erwartet werden zwei (de + en)');
+        }
     });
 });

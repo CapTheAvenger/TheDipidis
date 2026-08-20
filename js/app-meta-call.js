@@ -8231,7 +8231,7 @@ window.MetaCall = (function () {
       // Aufgefuellte Zeilen als solche kennzeichnen: die Liste ist immer
       // zehn Zeilen lang, auch wenn weniger Decks die 20 % erreichen.
       const unterSchwelleTag = r.unterSchwelle
-        ? ` <span class="mc-rec-unter-schwelle" title="${esc(t('mc.recBelowThresholdTip'))}">${
+        ? `<span class="mc-rec-unter-schwelle" title="${esc(t('mc.recBelowThresholdTip'))}">${
             esc(t('mc.recBelowThreshold'))}</span>`
         : '';
       const fieldShare = fieldShareByName[normalize(r.name)] || 0;

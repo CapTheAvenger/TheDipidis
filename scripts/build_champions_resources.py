@@ -195,6 +195,47 @@ def pokeapi_move_priority():
     return out
 
 
+# PokéAPI move_target ids that mean "this move hits more than one Pokémon".
+#   9  all-other-pokemon   Every other Pokémon on the field (Earthquake)
+#   11 all-opponents       All opposing Pokémon (Rock Slide, Heat Wave)
+#   14 all-pokemon         Every Pokémon on the field
+# In a double battle these take the 0.75 spread reduction; everything else
+# does not. The ids and their descriptions come from
+# data/v2/csv/move_target_prose.csv in the same PokéAPI dump.
+SPREAD_TARGETS = {9, 11, 14}
+
+# Where the hand-verified Champions reference contradicts the mainline
+# target, the Champions reference wins — same rule the builder already
+# applies to de_effect.
+#
+# Exactly one move is affected today (checked 20.08.2026 across all 494
+# entries): Matcha Gotcha. PokéAPI carries target 10 (selected Pokémon);
+# our verified German text says "Trifft beide Gegner", which is correct
+# for Champions. Every other disagreement runs the other way — the
+# German prose is simply silent about the target, and PokéAPI is right.
+SPREAD_OVERRIDE = {
+    norm("Matcha Gotcha"): True,
+}
+
+
+def pokeapi_move_target():
+    """norm(EN name) -> PokéAPI move_target id (int).
+
+    Same source and keying as pokeapi_move_priority(). Without this the
+    damage calculator cannot tell a spread move from a single-target one
+    and applies full damage to both — 31 damaging moves in the Champions
+    pool are spread moves, among them Earthquake, Rock Slide and Heat
+    Wave.
+    """
+    out = {}
+    for r in fetch_csv("moves"):
+        try:
+            out[norm(r["identifier"])] = int(r["target_id"])
+        except (KeyError, ValueError, TypeError):
+            pass
+    return out
+
+
 def load_verified():
     """norm(EN) -> {de_name, effect, type} from the hand-verified references."""
     out = {}
@@ -219,6 +260,7 @@ def main():
     de_abil = pokeapi_de_map("ability_names", "ability_flavor_text", "ability_id")
     de_move = pokeapi_de_map("move_names", "move_flavor_text", "move_id")
     prio_move = pokeapi_move_priority()
+    ziel_move = pokeapi_move_target()
 
     verified = load_verified()
     supp = {norm(k): v for k, v in DE_NAME_SUPPLEMENT.items()}
@@ -302,10 +344,20 @@ def main():
         if cat == "move" and stats:
             for src, dst in (("power", "power"), ("accuracy", "accuracy"),
                              ("pp", "pp"), ("damage_class", "damage_class"),
-                             ("priority", "priority")):
+                             ("priority", "priority"), ("target", "target")):
                 val = stats.get(src)
                 if val is not None and val != "":
                     entry[dst] = val
+            # Derived, but derived from a field that is also written out:
+            # a reader who disagrees with our resolution can recompute it
+            # from `target`. Absent when the target is unknown — then the
+            # calculator must say "unknown", not assume single-target.
+            tgt = stats.get("target")
+            ueber = SPREAD_OVERRIDE.get(norm(en))
+            if ueber is not None:
+                entry["spread"] = ueber
+            elif tgt is not None:
+                entry["spread"] = tgt in SPREAD_TARGETS
         if cat == "item":
             entry["group"] = item_group(en)   # Champions item-menu category
             # Only flag as Champions-available if Serebii lists it (held
@@ -326,16 +378,37 @@ def main():
               mtype=mv.get("type", ""),
               stats={"power": mv.get("power"), "accuracy": mv.get("accuracy"),
                      "pp": mv.get("pp"), "damage_class": mv.get("category"),
-                     "priority": prio_move.get(norm(mv["name"]))})
+                     "priority": prio_move.get(norm(mv["name"])),
+                     "target": ziel_move.get(norm(mv["name"]))})
 
     entries.sort(key=lambda e: (e["cat"], e["de"].lower()))
-    counts = {"item": 0, "ability": 0, "move": 0, "field": 0, "de_effect": 0}
+    counts = {"item": 0, "ability": 0, "move": 0, "field": 0, "de_effect": 0,
+              "spread": 0, "target_unknown": 0}
     for e in entries:
         counts[e["cat"]] += 1
         if e["field"]:
             counts["field"] += 1
         if e["de_effect"].strip():
             counts["de_effect"] += 1
+        if e["cat"] == "move" and e.get("power"):
+            if e.get("spread"):
+                counts["spread"] += 1
+            if "spread" not in e:
+                counts["target_unknown"] += 1
+
+    # Melden, nicht stillschweigend aufloesen: wo die hand-geprüfte
+    # deutsche Prosa eine Flaechenwirkung nennt, das PokéAPI-Ziel aber
+    # keine, gehoert das in den Lauf-Bericht — sonst faellt der naechste
+    # Konflikt niemandem auf.
+    import re as _re
+    _flaeche_prosa = _re.compile(r"[Tt]rifft (beide|alle)")
+    for e in entries:
+        if e["cat"] != "move" or not e.get("power"):
+            continue
+        prosa = bool(_flaeche_prosa.search(e.get("de_effect") or ""))
+        if "spread" in e and prosa != e["spread"] and norm(e["en"]) not in SPREAD_OVERRIDE:
+            print(f"  ! Ziel-Widerspruch {e['en']}: Prosa sagt "
+                  f"{'Flaeche' if prosa else 'Einzelziel'}, target={e.get('target')}")
 
     out = {
         "_meta": {

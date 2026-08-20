@@ -169,6 +169,7 @@ jobs:
               pokemon_card_text.json \
               pokemon_card_effects.json \
               active_threats.json \
+              limitless_meta_stats.json \
               online_tournament_dated_cards.csv \
               city_league_analysis_scraped.json \
               city_league_analysis_past_scraped.json \
@@ -520,6 +521,17 @@ jobs:
             backend/logs/**/*.log
           retention-days: 7
           if-no-files-found: ignore
+
+      # Den Stand festhalten, BEVOR committet wird — danach meldet
+      # `git status` nichts mehr und die Information ist weg.
+      #
+      # Bis zum 20.08.2026 zeigte jeder Frische-Chip der Seite den Tag des
+      # Besuchs (js/app-init.js las 'lastScraperUpdate', das nirgends
+      # geschrieben wird). Der Last-Modified-Kopf traegt nicht: GitHub Pages
+      # setzt dort die Deploy-Zeit, fuer alle Dateien dieselbe. Also wird der
+      # Stand dort festgehalten, wo er entsteht: hier.
+      - name: Datenstaende fortschreiben
+        run: python3 scripts/build_data_stand.py
 
       - name: Commit + push
         id: commit

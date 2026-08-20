@@ -312,6 +312,41 @@ def check_emptiness(findings, empties, base_empties):
         print(f"  Refilled since last baseline: {', '.join(healed)}")
 
 
+# Paare, die nur gemeinsam etwas bedeuten.
+#
+# Jede Zeile: (Datei A, Datei B, was der Widerspruch heisst). Ist A leer und
+# B nicht, beschreiben zwei Dateien dasselbe Fenster verschieden — und die
+# Oberflaeche zeigt am Ende die leere.
+#
+# Gemessen am 20.08.2026: city_league_archetypes_past.csv hat nur die
+# Kopfzeile, city_league_analysis_past.csv 315 Datenzeilen aus einem
+# einzigen Turnier. Die Rotation auf M6 am 31.07. hat beide geleert
+# (backend/core/update_sets.py), der Nachlauf hat nur eine wieder gefuellt.
+# Das Auswahlmenue der Vergangenheits-Ansicht wird aus der leeren gebaut,
+# also ist der Reiter tot — und meldet "Saisonpause", obwohl die
+# Vergangenheit nicht pausiert. check_emptiness sieht das nicht: beide
+# Dateien sind einzeln erklaerbar, der Widerspruch steht zwischen ihnen.
+PAIRED_FILES = [
+    ("city_league_archetypes_past.csv", "city_league_analysis_past.csv",
+     "the past-rotation view builds its dropdown from the archetypes file; "
+     "with only the analysis file filled, the tab renders empty"),
+    ("city_league_archetypes.csv", "city_league_analysis.csv",
+     "the current-rotation view builds its dropdown from the archetypes file"),
+]
+
+
+def check_paired_emptiness(findings, empties):
+    """Flag pairs where one half is header-only and the other is not."""
+    for a, b, folge in PAIRED_FILES:
+        a_leer, b_leer = bool(empties.get(a)), bool(empties.get(b))
+        if a_leer == b_leer:
+            continue
+        leer, voll = (a, b) if a_leer else (b, a)
+        findings.append(("CRITICAL",
+                         f"data/{leer} is header-only while data/{voll} has rows — "
+                         f"two files describing the same window disagree. {folge}."))
+
+
 def check_coverage(findings, cov, base_cov):
     for s, (m, total, pct) in sorted(cov.items()):
         prev = base_cov.get(s)
@@ -592,6 +627,9 @@ def main():
         check_ace_guard(findings, ace, baseline.get("ace_guard_prints"))
         check_price_integrity(findings, price, baseline.get("price_integrity"))
         check_emptiness(findings, empties, baseline.get("empty_files"))
+    # Der Paar-Widerspruch braucht keine Grundlinie: er ist auch beim ersten
+    # Lauf eine Aussage ueber den Zustand, nicht ueber eine Veraenderung.
+    check_paired_emptiness(findings, empties)
 
     crit = [f for lvl, f in findings if lvl == "CRITICAL"]
     warn = [f for lvl, f in findings if lvl == "WARN"]

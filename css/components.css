@@ -213,6 +213,21 @@
     border-top: 1px solid var(--line);
     vertical-align: middle;
 }
+/* Textspalten duerfen umbrechen, Zahlenspalten nie.
+ *
+ * GEMESSEN am 20.08.2026 auf 390 px: die Namensspalte bekam 86 px, ihr
+ * Inhalt brauchte 168 — "Ogerpon Meganium Hydrapple" lag quer ueber der
+ * Anteilsspalte, in der Rangliste ebenso ("Rocket's Honchkrow" ueber
+ * "334"). Der Umbruch kam nicht, weil .tab-content table (styles.css)
+ * white-space: nowrap vererbt und die Tabelle wegen min-width: 520px
+ * ihre Spalten fest aufteilt, statt die breiteste wachsen zu lassen.
+ *
+ * Die Zahlenspalten behalten nowrap: "1.234" ueber zwei Zeilen ist
+ * schlimmer als ein Umbruch im Decknamen. */
+.ds-table th:not(.ds-num):not(.ds-rank),
+.ds-table td:not(.ds-num):not(.ds-rank) {
+    white-space: normal;
+}
 .ds-table tbody tr:first-child td { border-top: 0; }
 .ds-table tbody tr:nth-child(even) td { background: var(--surface-2); }
 .ds-table tbody tr:hover td { background: var(--surface-0); }
@@ -935,4 +950,58 @@ html.is-signed-out [onclick*="radelist"]:hover {
     display: flex;
     justify-content: center;
     margin-top: var(--s-3);
+}
+
+/* ── Bedienzeile ─────────────────────────────────────────────────
+   Die Abnahmebedingung dieser Datei lautet: ein neuer Screen laesst
+   sich ohne eine einzige neue CSS-Regel bauen — und wenn nicht, fehlt
+   hier eine Komponente. Beim EV-Rechner ("Gegen welches Feld?") war
+   genau das der Fall: Panel, Kacheln, Balken, Tabelle und Fussnote
+   standen bereit, die drei Auswahlfelder darueber nicht.
+
+   Also keine ds-ev-*-Sonderregeln, sondern der fehlende Baustein:
+   .ds-controls ist die Zeile, .ds-field ein beschriftetes Feld darin,
+   .ds-select und .ds-number die beiden Eingaben. Aus Tokens, ohne
+   Ausrufezeichen, wie alles hier. */
+.ds-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s-3);
+    align-items: flex-end;
+    margin: var(--s-3) 0;
+}
+.ds-field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--s-1);
+    min-width: 0;
+}
+/* Das breite Feld darf den Rest der Zeile nehmen, die schmalen nicht. */
+.ds-field.is-wide { flex: 1 1 260px; }
+.ds-field.is-narrow { flex: 0 0 auto; }
+
+.ds-select,
+.ds-number {
+    min-height: 40px;
+    max-width: 100%;
+    padding: var(--s-2) var(--s-3);
+    border: 1px solid var(--line);
+    border-radius: var(--r-sm);
+    background: var(--surface-1);
+    color: var(--ink);
+    font: inherit;
+    font-size: var(--fs-sm);
+    line-height: 1.3;
+}
+.ds-number {
+    width: 5.5em;
+    font-family: var(--font-num);
+    font-variant-numeric: tabular-nums;
+}
+.ds-select:hover,
+.ds-number:hover { border-color: var(--line-strong); }
+.ds-select:focus-visible,
+.ds-number:focus-visible {
+    outline: 2px solid var(--brand);
+    outline-offset: 1px;
 }

@@ -965,10 +965,20 @@
     .tab-content h3 { font-size: 1.15em !important; }
     .tab-content h4 { font-size: 1.05em !important; }
 
-    /* Stat number values — keep prominent */
+    /* Stat number values — keep prominent.
+       .ds-stat-value stand hier bis zum 20.08.2026 NICHT drin. Gemessen
+       auf 390 px: jede Kennzahl-Kachel des Designsystems zeigte ihre
+       grosse Zahl in 12 px — genauso gross wie ihre Beschriftung, also
+       gar nicht mehr als grosse Zahl. Der Grund ist der Boden ein paar
+       Zeilen weiter oben (.tab-content span, 12 px !important); die
+       drei alten Kacheln waren hier ausgenommen, die neue nie.
+       Sie kommt in dieselbe Regel statt in eine eigene: eine weitere
+       Regel waere ein weiteres Ausrufezeichen, und davon hat diese
+       Datei genug. */
     .tab-content .city-league-stat-value,
     .tab-content .current-meta-stat-value,
-    .tab-content .past-meta-stat-value {
+    .tab-content .past-meta-stat-value,
+    .tab-content .ds-stat-value {
         font-size: 1.5rem !important;
     }
 

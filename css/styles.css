@@ -9498,8 +9498,18 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
 .tier-mover-share { color: #374151; font-variant-numeric: tabular-nums; }
 .tier-mover-prev  { color: #6b7280; font-variant-numeric: tabular-nums; font-size: 0.82rem; }
 .tier-mover-delta { font-weight: 800; font-variant-numeric: tabular-nums; }
-.tier-mover-delta.tier-mover-up   { color: #16a34a; }
-.tier-mover-delta.tier-mover-down { color: #dc2626; }
+/* Hier stand bis zum 20.08.2026 #16a34a gegen #dc2626 — Gruen gegen
+   Rot, also genau das Paar, das der haeufigste Fall von
+   Farbfehlsichtigkeit nicht trennen kann. Die Hausregel dagegen steht
+   seit Phase 0 in css/tokens.css; das war die letzte Stelle, die sie
+   nicht befolgte.
+   Ersetzt ist sie nicht durch ein anderes Farbpaar auf dem Text: die
+   divergierenden Toene tragen auf Weiss 4,42:1 und 3,95:1, beide unter
+   der Schwelle fuer 12-px-Text. Stattdessen die getoente Zelle, die
+   .ds-table ohnehin fuehrt (.ds-tint-pos / .ds-tint-neg) — der Text
+   bleibt in --ink, sein Kontrast ist damit fest, und das Vorzeichen
+   steht wie bisher daneben. */
+.tier-mover-delta { color: var(--ink); }
 
 /* Sparse-data fallback for the Improvers / Decliners blocks. Shown
    when one or both sides have nothing meaningful to report this week,
@@ -10202,38 +10212,80 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
     border-color: #3b4cca;
     color: #1a2a83;
 }
+/* ── Archetyp-Karte ────────────────────────────────────────────────
+   Am 19.08.2026 gemeldet: "nach wie vor bin ich immer noch Fan davon,
+   dass wir eigentlich immer direkt das Bild zeigen."
 
-/* ── Archetype card ────────────────────────────────────────────────
-   Modelled on the poke_hive stat graphics: dense, flush, no floating
-   white space. Dark header, three tiles butted together, table straight
-   underneath. Every measurement here is deliberately tight — an airy
-   version of this card pushed a single deck past a full screen and the
-   list stopped being scannable. */
+   Das Bild — die teilbare 1200x675-Karte aus js/ds-share.js — laesst
+   sich hier nicht einbetten: auf dem Telefon waere es ein 390 px
+   breites Miniaturbild mit 3 px hoher Schrift, ohne markierbaren Text,
+   ohne Vorlesefunktion, und 24 Karten waeren rund 6 MB Ladelast.
+   Also andersherum: die HTML-Karte bekommt das Aussehen des Bildes.
+   Dunkler Grund, farbige Akzentkante statt farbiger Flaeche, Ziffern
+   in Festbreite, Matchup-Zeilen mit getoenter Quote und Balken.
+
+   Die Karte ist eine dunkle Insel auf heller Seite — genau wie das
+   Bild, das die Seite verlaesst und ueberall gleich aussehen soll.
+   Deshalb stehen die Werte hier als eigene Variablen und nicht als
+   var(--surface-1): die Karte darf ihre Farbe nicht verlieren, wenn
+   die Seite eines Tages den Dunkelmodus schaltet.
+
+   Es sind Wert fuer Wert die Dunkelmodus-Token aus css/tokens.css und
+   damit dieselbe Palette wie die Tabelle C in js/ds-share.js.
+   tests/unit/test-archetype-card.js vergleicht die drei Stellen
+   miteinander und schlaegt an, sobald eine davon wandert. */
 body.arc-open { overflow: hidden; }
 .arc-overlay {
     position: fixed; inset: 0; z-index: 1200;
     display: flex; align-items: flex-start; justify-content: center;
     padding: 4vh 12px;
-    background: rgba(15, 23, 42, 0.55);
+    background: rgba(5, 7, 15, 0.72);
     overflow-y: auto;
 }
 .arc-overlay[hidden] { display: none; }
 .arc-card {
+    /* Die Palette der Bildkarte, einmal. */
+    --arc-bg0:  #05070f;
+    --arc-bg1:  #0b0f1e;
+    --arc-s1:   #111730;
+    --arc-s2:   #161d3a;
+    --arc-line: #253057;
+    --arc-line-strong: #35427a;
+    --arc-ink:  #eef2ff;
+    --arc-ink2: #b9c1e0;
+    --arc-ink3: #8791b8;
+    --arc-brand: #5566e0;
+    --arc-brand-ink: #8b98ff;
+    --arc-gold: #ffcb05;
+    --arc-pos:  #6aa8ff;
+    --arc-neg:  #ff8f7a;
+    --arc-zero: #6a739a;
+    --arc-mono: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+
     position: relative;
     width: min(760px, 100%);
-    background: #ffffff;
+    background: var(--arc-bg1);
+    color: var(--arc-ink);
     border-radius: 10px;
     overflow: hidden;
-    box-shadow: 0 18px 50px rgba(0, 0, 0, 0.28);
+    box-shadow: 0 18px 50px rgba(0, 0, 0, 0.45);
 }
 .arc-card--inline {
     width: 100%;
-    border: 1px solid #e2e8f0;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+    border: 1px solid var(--arc-line);
+    box-shadow: 0 1px 3px rgba(5, 7, 15, 0.35);
     cursor: pointer;
 }
-.arc-card--inline:hover { border-color: #cbd5e1; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.10); }
-.arc-card--embed { width: 100%; box-shadow: none; border: 1px solid #e2e8f0; margin-bottom: 14px; }
+.arc-card--inline:hover {
+    border-color: var(--arc-line-strong);
+    box-shadow: 0 6px 18px rgba(5, 7, 15, 0.45);
+}
+.arc-card--embed {
+    width: 100%;
+    box-shadow: none;
+    border: 1px solid var(--arc-line);
+    margin-bottom: 14px;
+}
 /* Auf dem Schreibtisch nebeneinander, auf dem Telefon untereinander.
  *
  * Untereinander war die Vorgabe, solange nur Tier 1 und 2 Karten bekamen —
@@ -10257,13 +10309,15 @@ body.arc-open { overflow: hidden; }
     .arc-inline-list { grid-template-columns: 1fr; }
 }
 
-/* Dark header like the reference — the deck name is the anchor you scan
-   for, so it gets the strongest contrast on the card. */
+/* Kopf: die tiefste Flaeche der Karte, wie der Kopfbalken im Bild.
+   Ohne eigene Farblinie darunter — die drei Akzentkanten der Kacheln
+   sitzen direkt darauf, und zwei Linien uebereinander lasen sich als
+   ein einziger unentschiedener Streifen. */
 .arc-head {
     display: flex; align-items: center; gap: 8px;
     padding: 9px 12px;
-    background: #0f172a;
-    color: #ffffff;
+    background: var(--arc-bg0);
+    color: var(--arc-ink);
 }
 .arc-name { font-size: 1rem; font-weight: 800; letter-spacing: 0.01em; }
 .arc-icons { display: inline-flex; gap: 3px; align-items: center; }
@@ -10272,75 +10326,97 @@ body.arc-open { overflow: hidden; }
     position: absolute; top: 4px; right: 6px;
     width: 30px; height: 30px;
     border: 0; background: transparent;
-    color: rgba(255, 255, 255, 0.75);
+    color: var(--arc-ink2);
     font-size: 1.3rem; line-height: 1; cursor: pointer; z-index: 2;
 }
-.arc-close:hover { color: #ffffff; }
+.arc-close:hover { color: var(--arc-ink); }
 
-/* Butted together, 1px apart — the seam reads as one strip of numbers
-   rather than three floating boxes. */
-/* minmax(0, 1fr), not 1fr: the tile text is nowrap, so a plain `1fr`
-   takes its min-content width as the floor and the third tile runs off
-   the card on a phone (measured: 376 px of content in a 270 px card). */
+/* Drei Kacheln, 2 px Fuge in --arc-line: dieselbe Aufteilung wie im
+   Bild, und die Fuge liest sich als Naht statt als Abstand. */
+/* minmax(0, 1fr), nicht 1fr: der Kacheltext bricht nicht um, also nimmt
+   ein blosses `1fr` die Mindestbreite des Inhalts als Untergrenze und
+   die dritte Kachel laeuft auf dem Telefon aus der Karte heraus
+   (gemessen: 376 px Inhalt in einer 270 px breiten Karte). */
 .arc-tiles {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 1px; background: #ffffff;
+    gap: 2px;
+    background: var(--arc-line);
 }
-.arc-tile { padding: 8px 10px; color: #ffffff; background: #64748b; }
-/* Four quantised tones, never an interpolated ramp: every background
-   that can occur is known here, so its contrast against the white text
-   is fixed. A ramp always lands on some middle shade the number
-   disappears into. Blue/red rather than green/red — that pairing is the
-   most common colour-blindness case; the ▲/▼ carries direction without
-   any colour at all. */
-.arc-tone--neutral    { background: #334155; }
-.arc-tone--tie        { background: #64748b; }
-.arc-tone--up         { background: #2563eb; }
-.arc-tone--up-strong  { background: #1d4ed8; }
-.arc-tone--down       { background: #dc2626; }
-.arc-tone--down-strong{ background: #b91c1c; }
-/* Wraps rather than truncates: "TOP-8 VS. …" tells you nothing, two
-   short lines do. */
+/* Die Farbe sitzt auf einer 3 px hohen Kante, nie als Flaeche.
+   Das ist der eine Unterschied, der die Karte wie das Bild aussehen
+   laesst: die Zahl steht in Textfarbe, ihr Kontrast ist damit fest,
+   egal welchen Wert sie hat. Vorher war die ganze Kachel eingefaerbt
+   und jeder Farbton musste einzeln gegen Weiss geprueft werden. */
+.arc-tile {
+    padding: 9px 10px 8px;
+    background: var(--arc-s1);
+    color: var(--arc-ink);
+    border-top: 3px solid var(--arc-zero);
+}
+.arc-tone--neutral    { border-top-color: var(--arc-zero); }
+.arc-tone--tie        { border-top-color: var(--arc-zero); }
+.arc-tone--up         { border-top-color: var(--arc-pos); }
+.arc-tone--up-strong  { border-top-color: var(--arc-pos); background: linear-gradient(180deg, rgba(106, 168, 255, .14), rgba(106, 168, 255, 0) 46px), var(--arc-s1); }
+.arc-tone--down       { border-top-color: var(--arc-neg); }
+.arc-tone--down-strong{ border-top-color: var(--arc-neg); background: linear-gradient(180deg, rgba(255, 143, 122, .14), rgba(255, 143, 122, 0) 46px), var(--arc-s1); }
+/* Bricht um statt abzuschneiden: "TOP-8 GGUE. …" sagt nichts,
+   zwei kurze Zeilen schon. */
 .arc-tile-label {
-    color: rgba(255, 255, 255, 0.82);
+    color: var(--arc-ink3);
     font-size: 0.58rem; font-weight: 700; line-height: 1.2;
-    text-transform: uppercase; letter-spacing: 0.03em;
+    text-transform: uppercase; letter-spacing: 0.04em;
+    margin-top: 1px;
 }
+/* Die Zahl steht zuoberst und in Festbreite — beides wie im Bild.
+   Festbreite ist hier nicht Geschmack: drei Werte untereinander in
+   einer Proportionalschrift stehen nie auf derselben Ziffernspalte. */
 .arc-tile-value {
-    font-size: clamp(1.05rem, 4.4vw, 1.55rem);
-    font-weight: 800; line-height: 1.25;
+    font-family: var(--arc-mono);
+    font-size: clamp(1.05rem, 4.4vw, 1.5rem);
+    font-weight: 700; line-height: 1.25;
     font-variant-numeric: tabular-nums; white-space: nowrap;
+    color: var(--arc-ink);
 }
-.arc-tile-arrow { font-size: 0.55em; vertical-align: 0.18em; }
+.arc-tile-arrow { font-size: 0.6em; vertical-align: 0.16em; }
+.arc-tone--up .arc-tile-arrow, .arc-tone--up-strong .arc-tile-arrow { color: var(--arc-pos); }
+.arc-tone--down .arc-tile-arrow, .arc-tone--down-strong .arc-tile-arrow { color: var(--arc-neg); }
 .arc-tile-ctx {
-    color: rgba(255, 255, 255, 0.8);
-    font-size: 0.6rem; line-height: 1.3;
+    color: var(--arc-ink3);
+    font-size: 0.6rem; line-height: 1.35;
 }
 
-.arc-mu-title { margin: 10px 12px 4px; font-size: 0.72rem; color: #5a6473;
-                text-transform: uppercase; letter-spacing: 0.03em; }
-.arc-mu-details { border-top: 1px solid #eef2f7; }
+.arc-mu-title {
+    margin: 10px 12px 4px; font-size: 0.72rem; color: var(--arc-ink3);
+    text-transform: uppercase; letter-spacing: 0.04em;
+}
+.arc-mu-details { border-top: 1px solid var(--arc-line); }
 .arc-mu-summary {
     display: flex; align-items: center;
-    min-height: 44px; padding: 0 12px;   /* tap target floor */
-    color: #2563eb; font-size: 0.78rem; font-weight: 600;
+    min-height: 44px; padding: 0 12px;   /* Fingerflaeche */
+    color: var(--arc-brand-ink); font-size: 0.78rem; font-weight: 600;
     cursor: pointer; list-style: none;
 }
 .arc-mu-summary::-webkit-details-marker { display: none; }
 .arc-mu-summary::before { content: "▸"; margin-right: 6px; }
 .arc-mu-details[open] .arc-mu-summary::before { content: "▾"; }
 
-/* The project-wide .mobile-table-scroll rule puts min-width: 520px on
-   any table inside it — right for the wide data tables it was written
-   for, wrong here: this one has five narrow columns and fits a phone.
-   Without the override the card showed nothing but the deck name and
-   scrolled the rest out of view. */
+/* Die projektweite Regel .mobile-table-scroll setzt min-width: 520px auf
+   jede Tabelle darin — richtig fuer die breiten Datentabellen, fuer die
+   sie geschrieben wurde, falsch hier: diese hat fuenf schmale Spalten und
+   passt auf ein Telefon. Ohne die Ausnahme zeigte die Karte nur den
+   Decknamen und schob den Rest aus dem Bild. */
 #currentMetaContent .arc-mu-table,
 #archetypeCardOverlay .arc-mu-table,
 #currentMetaArchetypeCard .arc-mu-table {
-    display: table; width: 100%; min-width: 0 !important; table-layout: fixed;
+    /* Ohne Ausrufezeichen: `.mobile-table-scroll > table` aus
+       css/mobile-responsive.css:567 liegt bei (0,1,1), diese drei
+       Selektoren liegen bei (1,1,0) und gewinnen ueber die
+       Bezeichner-Stelle. Das Ausrufezeichen stand hier seit dem ersten
+       Entwurf und war nie noetig. */
+    display: table; width: 100%; min-width: 0; table-layout: fixed;
     border-collapse: collapse; font-size: 0.76rem;
+    background: var(--arc-s1);
 }
 .arc-card .mobile-table-scroll { overflow-x: visible; }
 #currentMetaContent .arc-mu-table thead,
@@ -10353,16 +10429,39 @@ body.arc-open { overflow: hidden; }
 #archetypeCardOverlay .arc-mu-table th, #archetypeCardOverlay .arc-mu-table td {
     display: table-cell;
     padding: 3px 8px;
-    border-bottom: 1px solid #f1f5f9;
+    border-bottom: 1px solid var(--arc-line);
     text-align: right; white-space: nowrap;
 }
-/* Fixed widths, or the browser hands the win-rate cell a third of the
-   row and strands Σ/W/L against the right edge. */
+/* Feste Breiten, sonst gibt der Browser der Quotenzelle ein Drittel der
+   Zeile und draengt Partien/W/L an den rechten Rand. */
+/* Die erste Spalte traegt nichts Klebriges.
+   css/styles.css:8394 heftet in jeder Tabelle unter .tab-content die
+   erste Spalte fest und legt sie auf Weiss — richtig fuer die breiten
+   Tabellen, die waagerecht scrollen, falsch hier: diese Tabelle scrollt
+   nicht (.arc-card .mobile-table-scroll { overflow-x: visible }), und
+   seit die Karte dunkel ist, stand der Deckname in --arc-ink auf einer
+   weissen Zelle. Er war schlicht nicht mehr lesbar.
+   Ohne Ausrufezeichen: die Regel dort liegt bei (0,2,2), diese hier bei
+   (1,2,1) und gewinnt ueber die Bezeichner-Stelle. */
 #currentMetaContent .arc-mu-table th:nth-child(1),
 #currentMetaContent .arc-mu-table td:nth-child(1),
 #archetypeCardOverlay .arc-mu-table th:nth-child(1),
-#archetypeCardOverlay .arc-mu-table td:nth-child(1) {
+#archetypeCardOverlay .arc-mu-table td:nth-child(1),
+#currentMetaArchetypeCard .arc-mu-table th:nth-child(1),
+#currentMetaArchetypeCard .arc-mu-table td:nth-child(1) {
     width: auto; text-align: left; white-space: normal;
+    position: static;
+    background-color: transparent;
+    box-shadow: none;
+}
+/* Dieselbe Geschichte eine Zeile hoeher: css/styles.css:8403 gibt der
+   ersten Kopfzelle var(--bg-light). Sie muss den Grund der uebrigen
+   Kopfzellen zurueckbekommen, sonst sitzt links ein helleres Kaestchen
+   in der Kopfleiste. */
+#currentMetaContent .arc-mu-table th:nth-child(1),
+#archetypeCardOverlay .arc-mu-table th:nth-child(1),
+#currentMetaArchetypeCard .arc-mu-table th:nth-child(1) {
+    background-color: var(--arc-bg0);
 }
 #currentMetaContent .arc-mu-table th:nth-child(2),
 #currentMetaContent .arc-mu-table td:nth-child(2),
@@ -10377,44 +10476,75 @@ body.arc-open { overflow: hidden; }
    liegt bei (1,1,1) und gewinnt ohnehin. */
 #currentMetaContent .arc-mu-table th,
 #archetypeCardOverlay .arc-mu-table th {
-    background: #1f2937; color: #ffffff;
+    background: var(--arc-bg0); color: var(--arc-ink2);
     font-size: 0.6rem; font-weight: 700;
-    text-transform: uppercase; letter-spacing: 0.02em;
-    padding: 4px 8px;
+    text-transform: uppercase; letter-spacing: 0.03em;
+    padding: 5px 8px;
+    border-bottom: 1px solid var(--arc-line-strong);
 }
-.arc-mu-wr { font-weight: 700; font-variant-numeric: tabular-nums; color: #0f172a; }
+.arc-mu-wr {
+    position: relative;
+    font-family: var(--arc-mono);
+    font-weight: 700; font-variant-numeric: tabular-nums;
+    color: var(--arc-ink);
+}
 /* Zentriert statt rechtsbuendig — ohne Ausrufezeichen. Der Gegenspieler
    (#currentMetaContent .arc-mu-table td, weiter oben) liegt bei (1,1,1);
    .arc-mu-wr allein bei (0,1,0) und verlor. Statt das mit !important zu
    erzwingen, steht hier dieselbe Spezifitaet plus die Klasse. */
 #currentMetaContent .arc-mu-table td.arc-mu-wr,
 #archetypeCardOverlay .arc-mu-table td.arc-mu-wr { text-align: center; }
-.arc-mu-up-1   { background: rgba(37, 99, 235, 0.16); }
-.arc-mu-up-2   { background: rgba(37, 99, 235, 0.40); }
-.arc-mu-up-3   { background: #1d4ed8; color: #ffffff; }
-.arc-mu-down-1 { background: rgba(220, 38, 38, 0.16); }
-.arc-mu-down-2 { background: rgba(220, 38, 38, 0.40); }
-.arc-mu-down-3 { background: #b91c1c; color: #ffffff; }
-.arc-mu-opp { font-weight: 500; color: #1f2937; }
-.arc-mu-n, .arc-mu-w, .arc-mu-l { color: #64748b; font-variant-numeric: tabular-nums; }
-/* Thin rows keep their name legible — only the sample size is marked,
-   never the whole row dimmed. */
-.arc-mu-n-low { color: #9ca3af; font-style: italic; }
-.arc-mu-note, .arc-empty {
-    color: #6b7280; font-size: 0.66rem; line-height: 1.4; margin: 6px 12px;
+/* Vier Stufen, nie eine stufenlose Rampe. Auf dunklem Grund bleibt die
+   Zahl bei jeder Stufe in --arc-ink stehen: die schwaechste Toenung
+   traegt 12,96:1, die staerkste noch 7,07:1. Auf hellem Grund musste
+   die dritte Stufe den Text auf Weiss kippen — das faellt hier weg. */
+.arc-mu-up-1   { background: rgba(106, 168, 255, 0.12); }
+.arc-mu-up-2   { background: rgba(106, 168, 255, 0.24); }
+.arc-mu-up-3   { background: rgba(106, 168, 255, 0.40); }
+.arc-mu-down-1 { background: rgba(255, 143, 122, 0.12); }
+.arc-mu-down-2 { background: rgba(255, 143, 122, 0.24); }
+.arc-mu-down-3 { background: rgba(255, 143, 122, 0.40); }
+/* Der Balken unter der Quote laeuft aus der Mitte heraus: nach rechts,
+   wenn das Deck ueber 50 % liegt, nach links darunter. Damit ist die
+   Richtung ohne jede Farbwahrnehmung lesbar — die Toenung sagt dasselbe
+   noch einmal, aber niemand muss sie sehen koennen.
+   Die Breite kommt als --arc-bar aus dem HTML, weil nur der Wert der
+   Zeile sie kennt; die Regel selbst steht genau einmal hier. */
+.arc-mu-wr::after {
+    content: "";
+    position: absolute; bottom: 0; height: 3px;
+    width: var(--arc-bar, 0%);
+    background: var(--arc-zero);
 }
-.arc-actions { display: flex; flex-wrap: wrap; gap: 8px; padding: 8px 12px 10px; }
+.arc-mu-wr-up::after   { left: 50%; background: var(--arc-pos); }
+.arc-mu-wr-down::after { right: 50%; background: var(--arc-neg); }
+.arc-mu-opp { font-weight: 500; color: var(--arc-ink); }
+.arc-mu-n, .arc-mu-w, .arc-mu-l {
+    color: var(--arc-ink3); font-variant-numeric: tabular-nums;
+    font-family: var(--arc-mono);
+}
+/* Duenne Zeilen behalten ihren Namen lesbar — markiert wird nur die
+   Stichprobe, nie die ganze Zeile abgedunkelt. */
+.arc-mu-n-low { color: var(--arc-ink3); font-style: italic; }
+.arc-mu-note, .arc-empty {
+    color: var(--arc-ink3); font-size: 0.66rem; line-height: 1.4; margin: 6px 12px;
+}
+.arc-actions {
+    display: flex; flex-wrap: wrap; gap: 8px;
+    padding: 8px 12px 10px;
+    background: var(--arc-bg0);
+}
 .arc-mu-more, .arc-goto {
     padding: 7px 12px; min-height: 36px;
-    border: 1px solid #dbe3ec; border-radius: 7px;
-    background: #f8fafc; color: #2563eb;
+    border: 1px solid var(--arc-line-strong); border-radius: 7px;
+    background: var(--arc-s1); color: var(--arc-brand-ink);
     font-size: 0.76rem; font-weight: 600; cursor: pointer;
 }
-.arc-mu-more:hover, .arc-goto:hover { background: #eef2f7; }
+.arc-mu-more:hover, .arc-goto:hover { background: var(--arc-s2); }
 
 @media (max-width: 620px) {
-    .arc-tile { padding: 6px 7px; }
-    .arc-tile-label { font-size: 0.5rem; letter-spacing: 0.01em; }
+    .arc-tile { padding: 7px 7px 6px; }
+    .arc-tile-label { font-size: 0.5rem; letter-spacing: 0.02em; }
     .arc-tile-ctx { font-size: 0.53rem; }
     .arc-name { font-size: 0.9rem; }
     #currentMetaContent .arc-mu-table { font-size: 0.7rem; }

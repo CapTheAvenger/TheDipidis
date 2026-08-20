@@ -335,3 +335,24 @@ describe('strings and styling', () => {
         assert.match(CARD_SRC, /arc-mu-summary'\)\) \{ e\.stopPropagation\(\)/);
     });
 });
+
+describe('Archetyp-Karte — die Zahl passt in ihre Kachel', () => {
+    // Gemessen am 20.08.2026 auf 390, 320 und 1440 px, nachdem der
+    // 12-px-Boden aus mobile-responsive.css die Zahl nicht mehr
+    // stillschweigend klein hielt: "▲ +59,2 %" stiess um 4 px an und
+    // das Prozentzeichen wurde von .arc-card { overflow: hidden }
+    // abgeschnitten — auf dem Schreibtisch genauso wie auf dem Telefon.
+    it('der Pfeil traegt kein Leerzeichen mehr mit sich', () => {
+        // Es steckte im span mit 0,6em und kostete bei 24 px rund 14 px.
+        assert.match(CARD_SRC, /v > 0 \? '▲' : '▼'/);
+        assert.doesNotMatch(CARD_SRC, /'▲ '/);
+        assert.match(CSS, /\.arc-tile-arrow \{[^}]*margin-right: 3px/);
+    });
+
+    it('und die Zahl wird auf schmalen Schirmen kleiner statt beschnitten', () => {
+        const block = CSS.slice(CSS.indexOf('@media (max-width: 620px)',
+            CSS.indexOf('.arc-tile-label')));
+        assert.match(block, /\.arc-tile-value \{ font-size: clamp\(/);
+        assert.match(CSS, /@media \(max-width: 360px\)[^}]*\{[^}]*\.arc-tile \{ padding/);
+    });
+});

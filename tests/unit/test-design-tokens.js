@@ -111,7 +111,29 @@ describe('tokens.css ist der Vorrat', () => {
     it('enthält keine Komponenten, nur Werte', () => {
         // Alles außerhalb von :root wäre eine Komponente — die gehören ab
         // Phase 1 nach components.css.
-        const outside = stripComments(TOKENS)
+        //
+        // Seit dem 20.08.2026 darf ein Wert je Bildschirmbreite anders
+        // ausfallen: --lbl ist auf dem Telefon 11px statt 10. Das ist
+        // keine Komponente, sondern immer noch ein Wert — und genau der
+        // Ort, an den er gehört. Vorher hob ihn der 12-px-Boden aus
+        // mobile-responsive.css stillschweigend an, zusammen mit allem
+        // anderen. Erlaubt ist deshalb ein @media-Block, der nichts
+        // anderes enthält als ein :root mit Werten.
+        const rein = stripComments(TOKENS);
+        const medien = [...rein.matchAll(/@media[^{]*\{([\s\S]*?\})\s*\}/g)];
+        for (const m of medien) {
+            const innen = m[1].trim();
+            assert.match(innen, /^:root\s*\{[\s\S]*\}$/,
+                `@media in tokens.css enthält mehr als ein :root: ${innen.slice(0, 60)}`);
+            const deklarationen = innen.slice(innen.indexOf('{') + 1, innen.lastIndexOf('}'))
+                .split(';').map(x => x.trim()).filter(Boolean);
+            assert.ok(deklarationen.length > 0, 'leerer :root-Block');
+            for (const d of deklarationen) {
+                assert.match(d, /^--/, `keine Variable, sondern eine Eigenschaft: ${d}`);
+            }
+        }
+        const outside = rein
+            .replace(/@media[^{]*\{[\s\S]*?\}\s*\}/g, '')
             .replace(/:root(\[data-theme="dark"\])?\s*\{[\s\S]*?\n\}/g, '').trim();
         assert.equal(outside, '', `tokens.css enthält Regeln außerhalb von :root: ${outside.slice(0, 80)}`);
     });

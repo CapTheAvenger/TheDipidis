@@ -545,6 +545,12 @@ window.MetaCall = (function () {
   // Missing / malformed file → predictor falls back to no filter / no
   // weighting (= legacy 4.0 behaviour, never breaks).
   let _formatWindow = null;      // { current_set, set_release_date, in_person_legal_date, lag_days }
+  // Zustand des Lag-Fensters, damit die Oberflaeche ihn benennen kann,
+  // statt ihn zu behaupten. Siehe die lange Notiz bei der Erkennung.
+  let _lagFensterAlterTage = null;   // Alter der neuesten Labs-Zeile in Tagen
+  let _lagFensterAbgelaufen = false; // aelter als lag_days + Karenz
+  let _lagNeuesteLabsZeile = '';     // deren Datum
+  let _activeMetaKeyVoll = '';       // voller Format-Schluessel, z. B. 'TEF-CRI'
 
   // ── Predictor 4.0a — Meta Dynamics (counter-meta surge detection) ──
   // After a major, decks that overperformed surge on the online ladder
@@ -714,7 +720,10 @@ window.MetaCall = (function () {
     day2Points    : 16,         // repurposed: "target points to clear"
     topCutSize    : 8,          // only used when tournamentType === 'cup'
     junkPct       : 0,          // legacy: minimum-junk floor (UI removed; auto-computed now)
-    junkWinRate   : 55,         // assumed WR vs small-share decks lumped into Junk (slight edge)
+    // Nur noch der Rueckfall. Der wirkliche Wert wird in
+    // _junkWinRatePct() aus den Anteilen und Win Rates des Restfeldes
+    // gerechnet — siehe die Notiz dort.
+    junkWinRate   : 55,         // Rueckfall, wenn nichts messbar ist
     myDeck        : '',
     excludeBricks : false,
   };
@@ -5005,6 +5014,59 @@ window.MetaCall = (function () {
             const m = activeMetaKey.match(/-([A-Z0-9]+)$/);
             activeSetCode = m ? m[1] : activeMetaKey;
           }
+          // ── Ein Lag-Fenster, das nicht mehr zugeht (20.08.2026) ──
+          //
+          // Die Erkennung oben ist rein datengetrieben: sie nimmt die
+          // NEUESTE Labs-Zeile und liest deren Format. Das ist richtig,
+          // solange ueberhaupt noch Turniere im alten Format stattfinden —
+          // genau dafuer wurde sie 2026-06 gebaut.
+          //
+          // Sie kann aber nicht zwischen "die Rotation hinkt nach" und
+          // "seit Wochen ist gar nichts mehr gescrapt" unterscheiden.
+          // Gemessen am 20.08.2026: die neueste Labs-Zeile ist vom
+          // 10.06.2026 — 71 Tage alt, aus zwei Turnieren. in_person_legal
+          // fuer PBL war am 31.07. Es gibt also kein Nachhinken mehr, es
+          // gibt eine Luecke. Das Fenster blieb trotzdem offen und hatte
+          // zwei Folgen:
+          //
+          //   * Der Guard weiter unten leerte JEDE Labs-Kennzahl — richtig
+          //     im Ergebnis (TEF-CRI darf eine PBL-Prognose nicht ankern),
+          //     aber mit der falschen Begruendung auf dem Bildschirm.
+          //   * Predictor 4.7 filterte die Online-Siege gegen 'CRI' und
+          //     warf damit alle 38 Siege des LAUFENDEN Formats weg, die
+          //     ueber der Spielerschwelle im Zerfallsfenster lagen. Das
+          //     einzige frische Signal, das es gibt, fiel dem Fenster zum
+          //     Opfer, das die Abwesenheit von Daten ueberbruecken sollte.
+          //
+          // Das Fenster bekommt deshalb eine Altersgrenze: es ist nur
+          // offen, solange die alten Turniere wirklich noch laufen.
+          // Danach gilt schlicht "fuer dieses Format liegen keine
+          // Vor-Ort-Daten vor" — dieselbe leere Labs-Ebene, aber unter
+          // ihrem richtigen Namen, und die Online-Siege zaehlen wieder.
+          const LAG_KARENZ_TAGE = 21;
+          const lagTage = (_formatWindow && Number(_formatWindow.lag_days)) || 14;
+          let lagAlterTage = null;
+          if (activeNewestDate) {
+            const d = new Date(activeNewestDate + 'T00:00:00Z');
+            if (!isNaN(d.getTime())) {
+              lagAlterTage = Math.floor((Date.now() - d.getTime()) / 86400000);
+            }
+          }
+          const lagFensterAbgelaufen = lagAlterTage != null
+            && lagAlterTage > (lagTage + LAG_KARENZ_TAGE);
+          if (lagFensterAbgelaufen && activeSetCode !== currentSetCode) {
+            console.info(
+              '[MetaCall] Lag-Fenster abgelaufen — neueste Labs-Zeile %s ist %d Tage alt '
+              + '(Grenze %d). Kein Nachhinken, sondern eine Datenluecke: aktives Format '
+              + 'bleibt %s, die Vor-Ort-Ebene fehlt fuer dieses Format.',
+              activeNewestDate, lagAlterTage, lagTage + LAG_KARENZ_TAGE, currentSetCode);
+            activeSetCode = currentSetCode;
+          }
+          _lagFensterAlterTage = lagAlterTage;
+          _lagFensterAbgelaufen = lagFensterAbgelaufen;
+          _lagNeuesteLabsZeile = activeNewestDate;
+          _activeMetaKeyVoll = activeMetaKey;
+
           // Expose to outer scope for Predictor 4.7 (Online winners
           // filter) which needs to know the active in-person rotation.
           _activeInPersonSetCode = activeSetCode;
@@ -5765,6 +5827,29 @@ window.MetaCall = (function () {
       // magnitude guards keep the correction conservative.
       _computeMatchupAdjustments();
 
+      // ── Der Rennlauf, den niemand gewinnen konnte (20.08.2026) ──
+      //
+      // Die Empfehlungstabelle wurde einmal gerendert und nie wieder.
+      // Gemessen mit einer Sonde in renderRecommendationsPanel: der
+      // Aufruf faellt auf t = 5.577 ms, _matchupMap ist zu dem Zeitpunkt
+      // noch `null`, und diese Datei hier ist erst bei t = 5.770 ms
+      // fertig. 193 Millisekunden — und danach aendert sich nichts mehr.
+      //
+      // Ohne Matchup-Karte faellt JEDE Paarung auf die Vorgabe zurueck.
+      // Alle zehn Zeilen zeigten dann dieselbe Day-2-Chance (17,3 %) und
+      // dieselbe Win Rate (50,1–50,2 %); die Reihenfolge entstand aus
+      // Rundungsresten. Mit geladener Karte steht Dragapult mit 21,3 %
+      // ueber der Schwelle und Mega Excadrill bei 14,6 % — die Tabelle
+      // zeigte also nicht eine ungenaue Rangfolge, sondern gar keine.
+      //
+      // Der Kommentar zwei Absaetze weiter unten ("subsequent panel
+      // renders pick up the fields") beschrieb genau die Nachziehung,
+      // die es nie gab. Hier ist sie. Sie fasst nur die zwei Bereiche
+      // an, die von Matchups abhaengen — die Feldtabelle bleibt
+      // unberuehrt, damit eine gerade getippte eigene Schaetzung nicht
+      // unter den Fingern verschwindet.
+      try { _panelsNachMatchupsNachziehen(); } catch (_e) { /* nicht toedlich */ }
+
       // Predictor 5.0 Phase 2 + 3 — decorate top-N entries with
       // best/worst matchups (now that _matchupMap is populated),
       // main-attacker HP + tier, and doctrine-quality score. Fires
@@ -6184,9 +6269,54 @@ window.MetaCall = (function () {
     }
   }
 
+  /**
+   * Die Win Rate gegen den Rest des Feldes — gemessen, nicht angenommen.
+   *
+   * '_junk' fasst alles jenseits von TOP_N zusammen: am 20.08.2026 sind
+   * das 106 Decks mit 4.718 Listen, 17,9 % des Feldes. Dagegen stand hier
+   * eine feste 55 mit dem Kommentar "assumed WR ... (slight edge)" —
+   * ohne Quelle, ohne Bedienelement, ohne einen Hinweis auf der Seite
+   * (der zugehoerige Erklaertext mc.junkExplanation wird seit dem Umbau
+   * von keiner Stelle mehr gerendert). Sie steuert rund ein Fuenftel
+   * jeder angezeigten Day-1-Win-Rate.
+   *
+   * Nachgemessen: die gewichtete Ø-Win-Rate dieser 106 Decks ist 45,53 %.
+   * Ihre Gegner gewinnen also im Mittel 54,47 % — die 55 war gut geraten,
+   * aber eben geraten. Jetzt wird sie aus denselben Daten gerechnet, aus
+   * denen auch die Anteile kommen, und faellt nur auf die 55 zurueck,
+   * wenn nichts messbar ist.
+   */
+  let _junkWrCacheQuelle = null;
+  let _junkWrCacheWert = null;
+  function _junkWinRatePct() {
+    if (_junkWrCacheQuelle === _shareList && _junkWrCacheWert != null) {
+      return _junkWrCacheWert;
+    }
+    let wert = _settings.junkWinRate;
+    try {
+      if (Array.isArray(_shareList) && _shareList.length > TOP_N) {
+        const rest = [..._shareList]
+          .sort((a, b) => (b.onlineShare || 0) - (a.onlineShare || 0))
+          .slice(TOP_N)
+          .filter(d => (d.onlineShare || 0) > 0 && (d.onlineWinPct || 0) > 0);
+        const gewicht = rest.reduce((s, d) => s + d.onlineShare, 0);
+        if (gewicht > 0 && rest.length >= 5) {
+          const wrRest = rest.reduce((s, d) => s + d.onlineShare * d.onlineWinPct, 0) / gewicht;
+          // Ihre Quote ist die Gegenquote meiner. Geklemmt, damit ein
+          // kaputter Datentag nicht 0 oder 100 durchreicht.
+          wert = Math.min(70, Math.max(30, 100 - wrRest));
+        }
+      }
+    } catch (_e) { /* Rueckfall bleibt die Voreinstellung */ }
+    _junkWrCacheQuelle = _shareList;
+    _junkWrCacheWert = wert;
+    return wert;
+  }
+  if (typeof window !== 'undefined') window._mcJunkWinRatePct = _junkWinRatePct;
+
   function getBaseMatchup(deckA, deckB) {
     if (deckB === '_junk') {
-      const wr = _settings.junkWinRate / 100;
+      const wr = _junkWinRatePct() / 100;
       return { pWin: wr, pTie: 0.02, pLoss: Math.max(0, 1 - wr - 0.02) };
     }
     const a = normalize(deckA);
@@ -6253,9 +6383,43 @@ window.MetaCall = (function () {
     // branch above. Format comes from format_window.current_set;
     // absence (no labs majors for the live format yet) cleanly skips
     // the entire blend and we fall through to online-only.
-    const currentMeta = (_formatWindow && _formatWindow.current_set)
+    // Der Schluessel muss der VOLLE Format-Schluessel sein, nicht das
+    // Set allein.
+    //
+    // _majorMatchupMap wird mit der meta-Spalte von
+    // labs_tournament_matchups.csv gefuellt, und die enthaelt
+    // ausschliesslich Paarschluessel wie 'TEF-CRI' oder 'SVI-MEG' — nie
+    // ein blosses 'PBL'. Der Scraper leitet sie aus den Chunk-Namen
+    // 'ALT-NEU' ab (backend/scrapers/labs_tournament_scraper.py), ein
+    // PBL-Major bekaeme also 'TEF-PBL'. Mit current_set als Schluessel
+    // konnte dieser Blend deshalb NIE greifen — auch kuenftig nicht.
+    //
+    // Heute faellt das nicht auf, weil ohnehin keine Major-Matchups fuer
+    // das laufende Format vorliegen. Es faellt in dem Moment auf, in dem
+    // welche vorliegen und der Blend trotzdem stumm bleibt.
+    //
+    // _lagNeuesteLabsZeile/_activeMetaKeyVoll fuehren den vollen
+    // Schluessel; als Rueckfall wird ein Schluessel gesucht, dessen
+    // letztes Segment current_set ist — dasselbe Muster, das diese Datei
+    // an anderer Stelle schon richtig anwendet.
+    const _currentSetOnly = (_formatWindow && _formatWindow.current_set)
       ? String(_formatWindow.current_set).trim().toUpperCase()
       : '';
+    const currentMeta = (function () {
+      if (!_currentSetOnly) return '';
+      if (_activeMetaKeyVoll
+          && _activeMetaKeyVoll.split('-').pop() === _currentSetOnly) {
+        return _activeMetaKeyVoll;
+      }
+      const quellen = [_majorMatchupMap, _majorMatchupMapDay1, _majorMatchupMapDay2];
+      for (const m of quellen) {
+        if (!m) continue;
+        const treffer = Object.keys(m).find(
+          k => String(k).toUpperCase().split('-').pop() === _currentSetOnly);
+        if (treffer) return treffer;
+      }
+      return _currentSetOnly;
+    })();
     const _lookupPair = (map, key1, key2) => {
       if (!map) return null;
       const direct = map[key1]?.[key2];
@@ -6361,7 +6525,7 @@ window.MetaCall = (function () {
   // when `myDeck` is the user's actual deck of choice.
   function getMatchup(myDeck, opponent) {
     if (opponent === '_junk') {
-      const wr = _settings.junkWinRate / 100;
+      const wr = _junkWinRatePct() / 100;
       return { pWin: wr, pTie: 0.02, pLoss: Math.max(0, 1 - wr - 0.02) };
     }
     // Manual override (user-entered) takes top priority. Use normalize-
@@ -6660,7 +6824,7 @@ window.MetaCall = (function () {
   //               ships with a text reason explaining the signal.
   function calcRecommendationsSplit(field) {
     if (!_shareList || !field || field.length === 0) {
-      return { day2: [], geheimtipps: [] };
+      return { day2: [], geheimtipps: [], day2UeberSchwelle: 0 };
     }
     // Two-tier candidate pool:
     //   - DAY2_POOL_SIZE (30): "established" decks — feed the Day-2-fähig
@@ -6764,10 +6928,22 @@ window.MetaCall = (function () {
     // Basic Box: 55.5 % → ×1.55) — the multiplier moves Basic Box
     // and Dragapult-Dudunsparce ahead of Festival Lead in the
     // ranking, matching the user's after-the-fact assessment.
-    function _d2WrMultiplier(d2WrPct) {
+    function _d2WrMultiplier(d2WrPct, majors) {
       if (d2WrPct == null) return 1.0;
-      const raw = 1.0 + (d2WrPct - 50) / 10;
+      let raw = 1.0 + (d2WrPct - 50) / 10;
+      // Eine einzige Beobachtung darf den Hebel nicht bis an die
+      // Kappung reissen. Bei n = 1 zaehlt der Ausschlag halb — dieselbe
+      // Idee wie die Glaettung der Matchup-Ebene, nur grober, weil hier
+      // nur die Turnierzahl bekannt ist.
+      if (majors != null && majors <= 1) raw = 1.0 + (raw - 1.0) * 0.5;
       return Math.max(0.4, Math.min(1.6, raw));
+    }
+
+    /** Wie viele Majors stecken in der d2WR-Zahl? */
+    function _d2WrMajors(k) {
+      const q = _labsDay2WrByDeck[k];
+      if (!q || !Array.isArray(q.samples)) return 0;
+      return new Set(q.samples.map(x => x.tid || x.date)).size;
     }
 
     const evaluated = candidates.map(name => {
@@ -6787,18 +6963,32 @@ window.MetaCall = (function () {
       const q = _labsDay2ConvByDeck[k];
       let blendedDay2 = r.day2Prob;
       let empConv = null;
-      if (q && q.n >= 1) {
+      if (q && q.n > 0) {
         empConv = _rankWeightedConv(q);
-        // Single-major sample gets a smaller blend weight (15 %) since
-        // it's higher variance than a 2+-major mean (30 %).
-        const blendW = q.n >= 2 ? 0.30 : 0.15;
+        // Wie viele MAJORS, nicht wie viel Gewicht.
+        //
+        // q.n ist die Summe der Recency-Gewichte (siehe die Zeile
+        // `_labsDay2ConvByDeck[k].n += w` beim Aufbau) — ein Nenner fuer
+        // den Mittelwert, keine Anzahl. Der Test darauf las sie aber als
+        // Turnierzahl. Im aktuellen Fenster ist w konstant 0,5, weil alle
+        // Zeilen vor dem Stichtag liegen: 24 Decks mit ZWEI Majors kamen
+        // damit auf n = 1,0 und bekamen 15 % statt 30 % Gewicht, und 12
+        // Decks mit EINEM Major auf n = 0,5 und scheiterten an `>= 1`,
+        // bekamen also gar kein Gewicht statt 15 %.
+        //
+        // Die Zahl der Turniere steht daneben, in samples.
+        const majors = Array.isArray(q.samples) && q.samples.length
+          ? new Set(q.samples.map(x => x.tid || x.date)).size
+          : (q.n >= 2 ? 2 : 1);
+        const blendW = majors >= 2 ? 0.30 : 0.15;
         blendedDay2 = r.day2Prob * (1 - blendW) + empConv * blendW;
       }
       // d2WR multiplier — applies AFTER the conv blend so the
       // "wins-in-cut" signal modulates the merged simulation +
       // empirical-conversion number, not just one of them.
       const d2WrPct = _d2WrAggregate(k);
-      const d2WrMult = _d2WrMultiplier(d2WrPct);
+      const d2WrMajors = _d2WrMajors(k);
+      const d2WrMult = _d2WrMultiplier(d2WrPct, d2WrMajors);
       let adjustedDay2 = blendedDay2 * d2WrMult;
 
       // Predictor 4.6 inheritance for the reco engine (Hydrapple Indy
@@ -6846,6 +7036,7 @@ window.MetaCall = (function () {
         blendedDay2Prob: blendedDay2,
         empConv,
         d2WrPct,
+        d2WrMajors,
         d2WrMult,
         p46RecoMult,
         underdogChampion: champ || null,
@@ -6880,8 +7071,16 @@ window.MetaCall = (function () {
     const DAY2_MAX = 10;
     const day2Eval = evaluated.filter(e => day2Eligible.has(normalize(e.name)));
     let day2 = day2Eval.filter(e => e.day2Prob >= DAY2_THRESHOLD);
+    // Wie viele es WIRKLICH ueber die Schwelle schaffen. Das Abzeichen
+    // zeigte bisher die Laenge der aufgefuellten Liste und behauptete
+    // damit "10 Day-2-faehig", auch wenn es sechs waren. Die Auffuellung
+    // selbst bleibt — sie ist im Kommentar oben begruendet —, sie wird
+    // nur nicht mehr mitgezaehlt, und aufgefuellte Zeilen sind markiert.
+    const day2UeberSchwelle = day2.length;
     if (day2.length < DAY2_MIN) day2 = day2Eval.slice(0, DAY2_MIN);
     if (day2.length > DAY2_MAX) day2 = day2.slice(0, DAY2_MAX);
+    day2 = day2.map(e => (e.day2Prob >= DAY2_THRESHOLD
+      ? e : Object.assign({}, e, { unterSchwelle: true })));
     const day2Names = new Set(day2.map(d => normalize(d.name)));
 
     // Geheimtipps — off-radar, strong-signal picks below the Day-2 line.
@@ -6997,7 +7196,7 @@ window.MetaCall = (function () {
     .sort((a, b) => b.score - a.score)
     .slice(0, 3);
 
-    return { day2, geheimtipps: tips };
+    return { day2, geheimtipps: tips, day2UeberSchwelle };
   }
 
   // Poisson P(k; λ)
@@ -8029,6 +8228,12 @@ window.MetaCall = (function () {
         : '';
       const day2Pct = (r.day2Prob * 100).toFixed(1).replace('.', ',');
       const wrPct   = r.avgWR.toFixed(1).replace('.', ',');
+      // Aufgefuellte Zeilen als solche kennzeichnen: die Liste ist immer
+      // zehn Zeilen lang, auch wenn weniger Decks die 20 % erreichen.
+      const unterSchwelleTag = r.unterSchwelle
+        ? ` <span class="mc-rec-unter-schwelle" title="${esc(t('mc.recBelowThresholdTip'))}">${
+            esc(t('mc.recBelowThreshold'))}</span>`
+        : '';
       const fieldShare = fieldShareByName[normalize(r.name)] || 0;
       // 2026-06-12: counter-pick badge removed from the rec rows per user
       // feedback — the truncated "COUNTER-P" pill (see CSS clip) was
@@ -8059,6 +8264,14 @@ window.MetaCall = (function () {
       // User-flagged 2026-06 Indy reco post-mortem: distinguishes
       // Basic Box-shape (55 % d2WR, wins cut) from Festival Lead
       // shape (47 % d2WR, makes cut but loses early).
+      // Die Beschriftung sagte "letzte 5 Majors" und meinte hoechstens
+      // zwei. Der Bestand enthaelt genau zwei Turniere; bei 9 von 23
+      // Decks steht die Zahl auf EINEM. Der Multiplikator laeuft
+      // trotzdem bis an seine Kappung (x0,4 / x1,6) — eine einzige
+      // Beobachtung von 46 % oder 56 % reicht dafuer. Jetzt traegt die
+      // Zeile ihre Stichprobe, und bei einem einzigen Major wird der
+      // Ausschlag halbiert.
+      const d2WrN = r.d2WrMajors || 0;
       const d2WrHtml = (r.d2WrPct != null)
         ? `<div class="mc-rec-d2wr ${r.d2WrPct >= 52 ? 'mc-rec-d2wr-good'
               : r.d2WrPct >= 49 ? 'mc-rec-d2wr-mid'
@@ -8066,6 +8279,8 @@ window.MetaCall = (function () {
              title="${esc(t('mc.d2WrTooltip'))}">
             <span class="mc-rec-d2wr-label">${esc(t('mc.d2WrLabel'))}:</span>
             <span class="mc-rec-d2wr-value">${r.d2WrPct.toFixed(1).replace('.', ',')} %</span>
+            ${d2WrN ? `<span class="mc-rec-d2wr-n">${esc(
+                t('mc.d2WrSample').replace('{n}', String(d2WrN)))}</span>` : ''}
             <span class="mc-rec-d2wr-mult">×${r.d2WrMult.toFixed(2).replace('.', ',')}</span>
           </div>`
         : '';
@@ -8133,7 +8348,7 @@ window.MetaCall = (function () {
             data-reason-id="${reasonId}">
         <td class="mc-rec-rank">${i + 1}</td>
         <td class="mc-rec-name"><span class="mc-rec-name-inner">${icon}<span class="mc-rec-name-text">${esc(r.name)}</span>${isMine ? `<span class="mc-rec-mine-tag">${esc(t('mc.recYourDeck'))}</span>` : ''}${counterPickTag}</span>${historyLine}</td>
-        <td class="mc-rec-day2"><strong>${day2Pct}%</strong></td>
+        <td class="mc-rec-day2"><strong>${day2Pct}%</strong>${unterSchwelleTag}</td>
         <td class="mc-rec-wr">${wrPct}%</td>
         <td class="mc-rec-wins">∅ ${r.expWin.toFixed(2)}</td>
         <td class="mc-rec-toggle"><span class="mc-rec-chevron" aria-hidden="true">▼</span></td>
@@ -8206,7 +8421,8 @@ window.MetaCall = (function () {
 <div class="metacall-panel mc-rec-panel">
   <div class="metacall-panel-title">
     ${t('mc.panelRecommendations')}
-    <span class="mc-badge">${t('mc.recBadgeDay2Count').replace('{n}', split.day2.length)}</span>
+    <span class="mc-badge">${t('mc.recBadgeDay2Count').replace('{n}',
+        (split.day2UeberSchwelle != null ? split.day2UeberSchwelle : split.day2.length))}</span>
     ${shareBtn}
   </div>
   ${day2Section}
@@ -8516,15 +8732,32 @@ window.MetaCall = (function () {
     // a date the user knows is older than the latest scraper run,
     // their browser is serving stale-cached CSVs and they need to
     // hard-reload / clear site data.
+    // Zwei verschiedene Daten, und der Chip zeigte das falsche.
+    //
+    // _dataLastScrapedAt ist das Maximum der Spalte scraped_at — wann der
+    // Scraper zuletzt gelaufen ist. Was ein Spieler wissen will, ist,
+    // WIE ALT DIE TURNIERE SIND. Gemessen am 20.08.2026: der Chip sagte
+    // "Turnierdaten: 2026-07-29 — 22 Tage alt", waehrend das juengste
+    // Turnier im Bestand vom 10.06.2026 stammt, also 71 Tage her ist.
+    // 49 Tage Unterschied, und der groessere davon ist der, der zaehlt.
+    //
+    // Der Scrape-Zeitstempel bleibt als das erhalten, wofuer er laut
+    // Kommentar gedacht war: ein Kanarienvogel fuer veraltete Caches.
+    // Er steht jetzt im Titel, nicht in der Zeile.
     let staleTag = '';
-    if (_dataLastScrapedAt) {
-      const shortDate = _dataLastScrapedAt.slice(0, 10);
+    const _chipDatum = _lagNeuesteLabsZeile || (_dataLastScrapedAt || '').slice(0, 10);
+    if (_chipDatum) {
+      const shortDate = _chipDatum;
       const ageDays = (function () {
         try {
           return Math.floor((Date.now() - new Date(shortDate + 'T00:00:00Z').getTime()) / 86400000);
         } catch (_e) { return 0; }
       })();
-      const isStale = ageDays > 8; // woechentlicher Lauf + 1 Tag Luft
+      // Die Schwelle misst jetzt das Alter der TURNIERE, nicht das des
+      // Laufs. Majors sind selten; acht Tage waren fuer einen Wochenlauf
+      // gedacht und sind fuer Turniere zu streng. 35 Tage = lag_days plus
+      // Karenz, dieselbe Grenze, an der auch das Lag-Fenster zugeht.
+      const isStale = ageDays > 35;
       const color = isStale ? '#b91c1c' : '#374151';
       // "⚠ STALE" sagt einem Spieler nichts. Was er wissen will, ist
       // das Alter — und zwar ohne dass wir ihm die Ursache andichten.
@@ -8537,7 +8770,10 @@ window.MetaCall = (function () {
       const label = isStale
         ? t('mc.bannerDataStale').replace('{date}', shortDate).replace('{days}', String(ageDays))
         : t('mc.bannerDataDate').replace('{date}', shortDate);
-      staleTag = ` <span class="mc-predictor-banner-stale" style="opacity:0.85;color:${color};" title="${esc(t('mc.bannerDataHelp'))}">${esc(label)}</span>`;
+      const scrapeHinweis = _dataLastScrapedAt
+        ? ` — ${t('mc.bannerScrapedAt').replace('{date}', _dataLastScrapedAt.slice(0, 10))}`
+        : '';
+      staleTag = ` <span class="mc-predictor-banner-stale" style="opacity:0.85;color:${color};" title="${esc(t('mc.bannerDataHelp') + scrapeHinweis)}">${esc(label)}</span>`;
     }
 
     // Predictor 3.0: when a post-major baseline snapshot is loaded, append
@@ -8596,6 +8832,8 @@ window.MetaCall = (function () {
     const convFactor = meanConv > 0
       ? Math.max(0.5, Math.min(2.0, top8Conv / meanConv))
       : 1.0;
+    // top8Conv ist ein Anteil (0,101), die Kachel zeigt Prozent.
+    const convPct = (top8Conv || 0) * 100;
     const trendPct  = entry.trend || 0;
     const trendArrow = trendPct > 0 ? '↑' : (trendPct < 0 ? '↓' : '→');
     const trendSign  = trendPct > 0 ? '+' : '';
@@ -8606,10 +8844,22 @@ window.MetaCall = (function () {
     const tiles = [];
     tiles.push(_intelStatTile(t('mc.intelOnlineShareToday'), `${fmt(ladderPct, 1)} %`));
     if (broughtPct > 0) {
+      // Beschriftung und Hauptwert passten nicht zusammen.
+      //
+      // Die Kachel hiess "Top-8-Major-Conversion" und zeigte als
+      // Hauptwert broughtShare, also den ANTEIL AN DEN ANTRITTEN
+      // (brought / broughtSum). Bei Mega Excadrill waren das 7,84 %,
+      // waehrend die Top-8-Quote desselben Decks 4,61 % betraegt. Und
+      // "Major" war auch nicht richtig: online_tournament_top8_decks.csv
+      // fuehrt ausschliesslich source_format 'PBL', also Online-Turniere.
+      //
+      // Jetzt oben die Quote, darunter der Anteil, und der Name nennt
+      // die Quelle.
       tiles.push(_intelStatTile(
         t('mc.intelTop8Conv'),
-        `${fmt(broughtPct, 1)} %`,
-        `${fmt(convFactor, 1)}× ${t('mc.intelTop8AvgSuffix')}`
+        `${fmt(convPct, 1)} %`,
+        `${fmt(convFactor, 1)}× ${t('mc.intelTop8AvgSuffix')} · `
+          + `${fmt(broughtPct, 1)} % ${t('mc.intelTop8BroughtSuffix')}`
       ));
     }
     if (Math.abs(trendPct) > 0.05 || _baselineSnapshotDate) {
@@ -8799,6 +9049,41 @@ window.MetaCall = (function () {
       <span class="mc-intel-major-chip-sep">·</span>
       <span class="mc-intel-major-chip-seg"><span class="mc-intel-major-chip-k">${esc(t('mc.intelMajorConv'))}</span> ${convVal}</span>
     </div>`;
+  }
+
+  /**
+   * Zieht die matchup-abhaengigen Bereiche nach, sobald _matchupMap
+   * geladen ist. Absichtlich enger als refreshResults(): die
+   * Feldtabelle enthaelt Eingabefelder fuer die eigene Schaetzung und
+   * wird deshalb nicht angefasst.
+   *
+   * Tut nichts, wenn der Tab noch nicht gerendert ist — dann rendert er
+   * ohnehin gleich mit vollstaendiger Karte.
+   */
+  function _panelsNachMatchupsNachziehen() {
+    const container = document.getElementById('metaCallHost');
+    if (!container || !_shareList) return;
+    const recPanel = container.querySelector('.mc-rec-panel');
+    const resultsGrid = container.querySelector('.metacall-results-grid');
+    if (!recPanel && !resultsGrid) return;   // noch nichts da
+    const field = buildField();
+    if (resultsGrid) {
+      const wrap = resultsGrid.closest('.metacall-panel');
+      if (wrap) {
+        const tmp = document.createElement('div');
+        tmp.innerHTML = renderResultsPanel(field);
+        const neu = tmp.querySelector('.metacall-panel');
+        if (neu) wrap.innerHTML = neu.innerHTML;
+      }
+    }
+    if (recPanel) {
+      const tmp = document.createElement('div');
+      tmp.innerHTML = renderRecommendationsPanel(field);
+      const neu = tmp.querySelector('.mc-rec-panel');
+      if (neu) recPanel.innerHTML = neu.innerHTML;
+    }
+    console.info('[MetaCall] Empfehlungen nach dem Laden der Matchup-Karte nachgezogen '
+      + '(%d Decks in der Karte).', _matchupMap ? Object.keys(_matchupMap).length : 0);
   }
 
   function refreshResults() {

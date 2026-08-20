@@ -183,7 +183,12 @@
     function tilesHtml(name) {
         const de = isDe();
         const d = _decks[findKey(_decks, name)] || null;
-        const arrow = (v) => (Math.abs(v) < 0.05 ? '' : (v > 0 ? '▲ ' : '▼ '));
+        // Ohne Leerzeichen hinter dem Pfeil: es steckte im span mit
+        // 0,6em Groesse und kostete auf dem Schreibtisch rund 14 px —
+        // genug, dass "▲ +59,2 %" in seiner Kachel um 4 px anstiess und
+        // das Prozentzeichen abgeschnitten wurde. Den Abstand setzt
+        // jetzt margin-right in css/styles.css, in px statt in em.
+        const arrow = (v) => (Math.abs(v) < 0.05 ? '' : (v > 0 ? '▲' : '▼'));
 
         // Share carries no good/bad direction — it is neutral by nature.
         const rep = d

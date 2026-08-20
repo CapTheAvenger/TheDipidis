@@ -38,6 +38,43 @@ function utilsChunk(re, what) {
     if (!m) throw new Error('could not extract ' + what);
     return m[0];
 }
+
+/**
+ * Die Zellenfunktion der Meta-Performance-Tabelle aus dem Quelltext holen
+ * und ausfuehrbar machen.
+ *
+ * Sie schliesst ueber ein halbes Dutzend Helfer, die im Browser aus zwei
+ * anderen Dateien kommen. Statt die ganze Datei zu laden — sie ruft beim
+ * Einlesen fetch() und document auf — wird genau dieser Ausdruck
+ * herausgeschnitten und mit denselben Helfern versorgt, die er im Browser
+ * vorfindet. Bricht das Herausschneiden, bricht der Test: die Struktur,
+ * auf die er sich stuetzt, ist damit selbst mitgeprueft.
+ */
+function ladeZelle() {
+    const quelle = chunk(/const zelle = \(r, k\) => \{[\s\S]*?\n                    \};/, 'zelle');
+    const deLoc = 'de-DE';
+    const helfer = {
+        escapeHtml: (x) => String(x == null ? '' : x)
+            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;').replace(/'/g, '&#39;'),
+        fmtNumDS: (n) => Math.round(Number(n) || 0).toLocaleString(deLoc),
+        fmtHalb: (n) => {
+            const v = Number(n) || 0;
+            return Number.isInteger(v)
+                ? Math.round(v).toLocaleString(deLoc)
+                : v.toLocaleString(deLoc, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+        },
+        fmtPct: (v, d) => Number(v).toFixed(d == null ? 1 : d).replace('.', ',') + ' %',
+        deR: true,
+        CONV_MIN_N: compute.CONV_MIN_N,
+        CONV_PRIOR: compute.CONV_PRIOR,
+        CONV_CAP: 100,
+    };
+    const namen = Object.keys(helfer);
+    // eslint-disable-next-line no-new-func
+    const bauen = new Function(...namen, quelle + '\nreturn zelle;');
+    return bauen(...namen.map(n => helfer[n]));
+}
 const CONV_SRC =
     utilsChunk(/function parseLocaleNumber\(input, fallback = 0\) \{[\s\S]*?\n\}/, 'parseLocaleNumber') + '\n' +
     utilsChunk(/const CONV_PRIOR = 50;[\s\S]*?\nfunction computeConversionPerformance\(rows\) \{[\s\S]*?\n\}\n/, 'computeConversionPerformance');
@@ -352,10 +389,38 @@ describe('the listing floor', () => {
         assert.ok(excluded.reduce((s, d) => s + d.brought, 0) > 0);
     });
 
-    it('the source applies the floor to the list, not to the maths', () => {
-        assert.match(SRC, /filter\(d => d\.brought >= CONV_MIN_N\)/);
+    // Bis zum 20.08.2026 stand hier eine Regex auf
+    // '.filter(d => d.brought >= CONV_MIN_N)'. Sie war gruen — und
+    // bezeugte eine Schranke, die es nicht mehr gab: die drei Ranglisten,
+    // die den Filter trugen, waren am 19.08. in der Meta-Performance
+    // aufgegangen, ihre Variablen blieben als toter Code stehen. 23 Decks
+    // ohne einen einzigen Cut standen derweil mit "1,0-mal" in der
+    // Tabelle. Ein gruener Test auf totem Code ist die gefaehrlichste
+    // Form von Nachweis. Dieser hier RUFT die Zellenfunktion auf.
+    it('the floor is applied where the number is printed, not in the maths', () => {
+        const zelle = ladeZelle();
+        const MIN = compute.CONV_MIN_N;
+        const unterGrenze = zelle({ name: 'X', faktor: 1.0, faktorRoh: 0.96,
+                                    antritte: MIN - 0.5 }, 'faktor');
+        assert.ok(!/\d/.test(unterGrenze.replace(/[^>]*>/g, '').trim()),
+            'unter der Mindeststichprobe darf keine Faktor-Zahl gedruckt werden: ' + unterGrenze);
+        assert.match(unterGrenze, /–/);
+
+        const drueber = zelle({ name: 'X', faktor: 1.6, faktorRoh: 1.2,
+                                antritte: MIN }, 'faktor');
+        assert.match(drueber, /1,6-mal/);
+        assert.match(drueber, /roh 1,2-mal/, 'der rohe Wert gehoert in den Titel');
+
         const compFn = utilsChunk(/function computeConversionPerformance\(rows\) \{[\s\S]*?\n\}\n/, 'compute');
         assert.doesNotMatch(compFn, /CONV_MIN_N/,
             'the floor must not touch the field average');
+    });
+
+    it('halbe gewichtete Antritte werden nicht als ganze gedruckt', () => {
+        const zelle = ladeZelle();
+        // Terapagos Noctowl: echt 0,5 von 1,5 — gezeigt wurde "2 / 1 / 33,3 %".
+        assert.equal(zelle({ antritte: 1.5 }, 'antritte'), '1,5');
+        assert.equal(zelle({ cuts: 0.5 }, 'cuts'), '0,5');
+        assert.equal(zelle({ antritte: 42 }, 'antritte'), '42');
     });
 });

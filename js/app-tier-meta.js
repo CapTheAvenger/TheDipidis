@@ -131,16 +131,21 @@
             ? window.termHint(label, text) : label;
         const TERMS = {
             de: {
-                share: 'Wie oft dieses Deck gespielt wurde, gemessen an allen gewichteten Antritten des Zeitraums.',
+                // Der Text beschrieb bis zum 20.08.2026 den Nenner der
+                // Turnier-Zaehlung (8.574 gewichtete Antritte) — der gilt aber
+                // nur fuer 7 von 138 Zeilen. Die uebrigen 131 stehen auf den
+                // gemeldeten Listen der Ladder. Jetzt nennt der Text beide
+                // Nenner, und die sieben Ausnahmen sind in der Spalte markiert.
+                share: 'Anteil an den gemeldeten Listen der Online-Ladder. Decks ohne Ladder-Zeile zeigen stattdessen ihren Anteil an den gewichteten Turnier-Antritten — diese Werte stehen kursiv.',
                 top8: 'Wie oft dieses Deck aus seinen Antritten die Top 8 erreicht hat.',
-                vsField: 'Top-8-Quote im Vergleich zum Feld-Durchschnitt. +50 % heißt: anderthalbmal so oft in den Top 8 wie ein durchschnittliches Deck. Kleine Stichproben werden zum Durchschnitt hin geglättet.',
+                vsField: '1,6-mal heißt: erreicht die Top 8 anderthalbmal so oft wie ein durchschnittliches Deck. Kleine Stichproben werden zum Durchschnitt hin geglättet (k = 50) — der rohe Wert steht im Tooltip der Zelle.',
                 prev: 'Anteil im vorherigen Vergleichszeitraum.',
                 delta: 'Veränderung des Anteils in Prozentpunkten. Gelistet ab 0,4 pp.',
             },
             en: {
-                share: 'How often this deck was played, over all weighted entries in the window.',
+                share: 'Share of reported lists on the online ladder. Decks without a ladder row show their share of weighted tournament entries instead — those values are italic.',
                 top8: 'How often this deck reached top 8 out of its entries.',
-                vsField: 'Top-8 rate against the field average. +50 % means 1.5× as often in top 8 as an average deck. Small samples are smoothed toward the average.',
+                vsField: '1.6× means: reaches top 8 one and a half times as often as an average deck. Small samples are smoothed toward the average (k = 50) — the raw value is in the cell tooltip.',
                 prev: 'Share in the previous comparison window.',
                 delta: 'Change in share, in percentage points. Listed from 0.4 pp.',
             },
@@ -148,6 +153,21 @@
         const term = (key) => TERMS[getLang() === 'de' ? 'de' : 'en'][key];
         const fmtNumDS = (n) => Math.round(Number(n) || 0)
             .toLocaleString(getLang() === 'de' ? 'de-DE' : 'en-US');
+        // Halbe Antritte sind echt, nicht Rauschen: online_tournament_top8_decks.csv
+        // gewichtet Turniere nach Alter, ein Antritt aus der zweiten Woche zaehlt
+        // 0,5. fmtNumDS rundete beides — Antritte UND Cuts — auf ganze Zahlen,
+        // waehrend die Quote daneben ungerundet aus den echten Gewichten kam.
+        // Terapagos Noctowl las sich dadurch als "2 / 1 / 33,3 %": aus den
+        // gezeigten Zahlen waeren 50 %, echt sind es 0,5 von 1,5. 29 von 120
+        // Decks widersprachen sich so, das Maximum lag bei 16,7 Prozentpunkten.
+        // Mit einer Nachkommastelle, wo der Wert keine ganze Zahl ist, geht die
+        // Zeile wieder auf, und die Halbgewichtung wird nebenbei sichtbar.
+        const fmtHalb = (n) => {
+            const v = Number(n) || 0;
+            if (Number.isInteger(v)) return fmtNumDS(v);
+            return v.toLocaleString(getLang() === 'de' ? 'de-DE' : 'en-US',
+                { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+        };
         const fmtPct = (v, digits) => (typeof window.formatPercent === 'function')
             ? window.formatPercent(v, digits)
             : Number(v).toFixed(digits == null ? 1 : digits) + '%';
@@ -1301,18 +1321,17 @@
                             top8ConvPct: parseLocaleNumber(r.top8_conv_rate || '0', 0) * 100,
                         };
                     });
-                    const overallTop = [...enriched].sort((a, b) => b.broughtPct - a.broughtPct).slice(0, 12);
-                    // Rank by the number this column actually SHOWS. It used to sort by
-                    // top8 (the absolute weighted count) while printing top8ConvPct (the
-                    // rate), so rank 3 could read 7.4 % and rank 4 read 7.8 %, with the
-                    // highest rates sitting at the bottom — it read as a broken table and
-                    // contradicted this block's own stated purpose ("the decks that do
-                    // NOT lead on count"). CONV_MIN_N keeps 2-entry decks with a 50 %
-                    // rate out of the top; same floor the conversion block already uses.
-                    const top8Top    = [...enriched]
-                        .filter(d => d.brought >= CONV_MIN_N)
-                        .sort((a, b) => b.top8ConvPct - a.top8ConvPct || b.top8 - a.top8)
-                        .slice(0, 12);
+                    // Hier standen bis zum 20.08.2026 drei Ranglisten
+                    // (overallTop, top8Top, convTop) und ein renderRow. Die
+                    // drei Tabellen sind am 19.08. in der Meta-Performance
+                    // aufgegangen; die Variablen blieben stehen und wurden von
+                    // niemandem mehr gelesen. Gefaehrlich war daran nicht der
+                    // tote Code, sondern der gruene Test darauf: er suchte den
+                    // Mindeststichproben-Filter per Regex im Quelltext und
+                    // bezeugte damit eine Schranke, die in keiner gerenderten
+                    // Zeile mehr wirkte. Die Schranke gilt jetzt dort, wo sie
+                    // gebraucht wird — in der Faktor-Spalte, und der Test ruft
+                    // die Zellenfunktion auf, statt nach ihr zu greppen.
 
                     // Top-8 vs. expected — its own full-width block, not a
                     // third column: .cm-vs-top8-row is a 1fr 1fr grid and the
@@ -1329,9 +1348,6 @@
                     // "Lopunny Dusknoir, 40 % top-8 rate, n=3" answers
                     // nothing. Below the floor a deck is left out of the
                     // list, not out of the field average.
-                    const convTop = [...conv.decks]
-                        .filter(d => d.brought >= CONV_MIN_N)
-                        .sort((a, b) => b.perfPct - a.perfPct).slice(0, 12);
 
                     // escapeHtml (not escapeJsStr) — these names go straight
                     // into innerHTML, so apostrophes in "N's Zoroark" or
@@ -1351,17 +1367,6 @@
                     // fehlte es.
                     // Unter CONV_THIN_N wird die Zeile ausgegraut — dieselbe
                     // Konvention wie dort, damit "dünn" überall gleich aussieht.
-                    const renderRow = (d, i, valueLabel, valueText, n) => {
-                        const thin = (typeof n === 'number') && n < CONV_THIN_N;
-                        return `
-                        <tr${thin ? ' class="is-muted"' : ''}>
-                            <td class="ds-rank">${i + 1}</td>
-                            <td>${escapeHtml(d.name)}</td>
-                            <td class="ds-num" title="${escapeHtml(valueLabel)}">${valueText}</td>
-                            <td class="ds-num" title="${getLang() === 'de' ? 'Stichprobe' : 'sample size'}">${
-                                typeof n === 'number' ? fmtNumDS(n) : '–'}</td>
-                        </tr>`;
-                    };
                     // EINE Rangliste statt drei Auswertungen.
                     //
                     // Bis zum 19.08.2026 standen hier nebeneinander:
@@ -1383,6 +1388,16 @@
                     // Verwechslung gar nicht erst moeglich ist.
                     const deR = getLang() === 'de';
                     const perfVon = new Map((conv.decks || []).map(d => [d.name, d.perfPct]));
+                    // Der ROHE Faktor derselben Zeile. Die Spalte "Top 8 ggue. Oe"
+                    // zeigt den geglaetteten Wert (k = 50 Pseudo-Antritte am
+                    // Feld-Durchschnitt), die Top-8-Quote unmittelbar daneben ist
+                    // roh — in 108 von 120 Zeilen weichen beide auf eine
+                    // Nachkommastelle ab. Mega Greninja: roh 0,12-mal, angezeigt
+                    // 0,4-mal. Wer die Quote durch den Feld-Durchschnitt teilt,
+                    // bekommt etwas anderes als die Nachbarspalte und haelt sich
+                    // fuer zu dumm zum Rechnen. Beide Zahlen stehen jetzt an der
+                    // Zelle, und die Spalte erklaert die Glaettung im Kopf.
+                    const rohVon = new Map((conv.decks || []).map(d => [d.name, d.rawPct]));
 
                     // ZWEI Zaehlungen desselben Feldes, und beide gehoeren hierher.
                     //
@@ -1425,11 +1440,13 @@
                             name,
                             listen:  l ? l.new_count : null,
                             anteil:  l ? l.share : (t ? t.broughtPct : null),
+                            anteilAusTurnier: !l && !!t,
                             wr:      l && l.winrate > 0 ? l.winrate : null,
                             antritte,
                             quote:   t ? t.top8ConvPct : null,
                             cuts:    t ? t.top8 : null,
                             faktor:  perfVon.has(name) ? 1 + perfVon.get(name) / 100 : null,
+                            faktorRoh: rohVon.has(name) ? 1 + rohVon.get(name) / 100 : null,
                             // Duenn heisst hier: zu wenig TURNIER-Antritte, um die
                             // Top-8-Quote zu glauben. Die Ladder-Spalten sind davon
                             // unberuehrt, die stehen auf 2.121 Listen.
@@ -1449,22 +1466,49 @@
                           tip: { de: 'gewichtete Turnier-Antritte', en: 'weighted tournament entries' } },
                         { k: 'cuts',     de: 'davon Top 8',   en: 'made top 8',  num: true },
                         { k: 'quote',    de: 'Top-8-Quote',   en: 'Top-8 rate',  num: true, hilf: 'top8' },
-                        { k: 'faktor',   de: 'Top 8 ggü. Ø',  en: 'Top 8 vs. avg', num: true,
-                          tip: { de: '1,6-mal heißt: erreicht die Top 8 anderthalbmal so oft wie ein durchschnittliches Deck',
-                                 en: '1.6× means: reaches top 8 one and a half times as often as an average deck' } },
+                        // hilf statt tip: TERMS.vsField sagt beides — was 1,6-mal
+                        // heisst UND dass kleine Stichproben geglaettet werden.
+                        // Der Text stand seit jeher im File und wurde von keiner
+                        // Stelle benutzt; angehaengt war der kurze tip, der die
+                        // Glaettung verschweigt.
+                        { k: 'faktor',   de: 'Top 8 ggü. Ø',  en: 'Top 8 vs. avg', num: true, hilf: 'vsField' },
                     ];
 
                     const zelle = (r, k) => {
                         if (k === 'name')     return escapeHtml(r.name);
                         if (k === 'listen')   return r.listen   == null ? '–' : fmtNumDS(r.listen);
-                        if (k === 'anteil')   return r.anteil   == null ? '–' : fmtPct(r.anteil);
+                        if (k === 'anteil') {
+                            if (r.anteil == null) return '–';
+                            const txt = fmtPct(r.anteil);
+                            return r.anteilAusTurnier
+                                ? `<em title="${escapeHtml(deR
+                                    ? 'Anteil an den gewichteten Turnier-Antritten — dieses Deck hat keine Ladder-Zeile'
+                                    : 'Share of weighted tournament entries — this deck has no ladder row')}">${txt}</em>`
+                                : txt;
+                        }
                         if (k === 'wr')       return r.wr       == null ? '–' : fmtPct(r.wr);
-                        if (k === 'antritte') return r.antritte == null ? '–' : fmtNumDS(r.antritte);
+                        if (k === 'antritte') return r.antritte == null ? '–' : fmtHalb(r.antritte);
                         if (k === 'quote')    return r.quote    == null ? '–' : fmtPct(r.quote);
-                        if (k === 'cuts')     return r.cuts     == null ? '–' : fmtNumDS(r.cuts);
+                        if (k === 'cuts')     return r.cuts     == null ? '–' : fmtHalb(r.cuts);
                         if (r.faktor == null) return '–';
-                        const txt = r.faktor.toLocaleString(deR ? 'de-DE' : 'en-US',
-                            { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + (deR ? '-mal' : '×');
+                        // Unter CONV_MIN_N gewichteten Antritten ist die Zahl der
+                        // Prior, nicht die Schaetzung: 23 Decks ohne einen
+                        // einzigen Cut standen mit "1,0-mal" und einem Balken auf
+                        // der Nulllinie da — das liest sich als "genau
+                        // Durchschnitt" und heisst "wir wissen nichts". Die Zeile
+                        // bleibt, ihre Antritte zaehlen weiter in den
+                        // Feld-Durchschnitt; nur der Faktor schweigt.
+                        if (!(r.antritte >= CONV_MIN_N)) {
+                            return `<span class="cm-rang-wert" title="${escapeHtml(deR
+                                ? 'Unter ' + CONV_MIN_N + ' gewichteten Antritten — zu wenig fuer eine Schaetzung'
+                                : 'Fewer than ' + CONV_MIN_N + ' weighted entries — too little for an estimate')}">–</span>`;
+                        }
+                        const einsNK = (v) => v.toLocaleString(deR ? 'de-DE' : 'en-US',
+                            { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+                        const txt = einsNK(r.faktor) + (deR ? '-mal' : '×');
+                        const titel = r.faktorRoh == null ? '' : escapeHtml(deR
+                            ? `geglättet (k = ${CONV_PRIOR}); roh ${einsNK(r.faktorRoh)}-mal`
+                            : `smoothed (k = ${CONV_PRIOR}); raw ${einsNK(r.faktorRoh)}×`);
                         // Der divergierende Balken aus components.css: Nulllinie in
                         // der Mitte, blau nach oben, rot nach unten. Er zeigt auf
                         // einen Blick, wer ueber dem Schnitt liegt. Er traegt keine
@@ -1473,7 +1517,7 @@
                         const abw = (r.faktor - 1) * 100;
                         const breite = Math.min(Math.abs(abw), CONV_CAP) / CONV_CAP * 50;
                         const posi = abw >= 0;
-                        return `<span class="cm-rang-wert">${txt}</span>`
+                        return `<span class="cm-rang-wert"${titel ? ` title="${titel}"` : ''}>${txt}</span>`
                             + `<span class="ds-bar-track is-diverging">`
                             + `<span class="ds-bar-fill ${posi ? 'is-pos' : 'is-neg'}"`
                             + ` style="width:${breite.toFixed(1)}%"></span></span>`;
@@ -1523,14 +1567,25 @@
                                   + ' gewichtete Antritte). Zwei Zählungen desselben Feldes — darum ist der Anteil '
                                   + 'in beiden fast gleich, die Stückzahlen aber nicht. Ein Strich heißt: dieses Deck '
                                   + 'steht in der einen Datei und in der anderen nicht. Blasse Zeilen haben unter '
-                                  + CONV_THIN_N + ' Turnier-Antritte — dort ist die Top-8-Quote noch wackelig.'
+                                  + CONV_THIN_N + ' Turnier-Antritte — dort ist die Top-8-Quote noch wackelig. '
+                                  + 'Der <strong>Feld-Durchschnitt</strong>, gegen den die letzte Spalte vergleicht, '
+                                  + 'liegt bei ' + fmtPct(conv.expected * 100, 1) + ' Top-8-Quote. Die letzte Spalte '
+                                  + 'selbst ist geglättet (k = ' + CONV_PRIOR + '), die Top-8-Quote daneben ist roh; '
+                                  + 'beide Werte stehen im Tooltip der Zelle. Unter ' + CONV_MIN_N + ' Antritten steht '
+                                  + 'dort ein Strich statt einer Zahl, die nur den Durchschnitt wiederholt. Antritte '
+                                  + 'werden nach Turnieralter gewichtet, halbe Werte sind deshalb echt und keine Rundung.'
                                 : 'One row per deck, every column heading sorts. <strong>Lists</strong> and '
                                   + '<strong>win rate</strong> come from the online ladder (' + fmtNumDS(ladderSumme)
                                   + ' decklists), <strong>entries</strong> and <strong>top 8</strong> from tournaments ('
                                   + fmtNumDS(conv.totalBrought) + ' weighted entries). Two counts of the same field — '
                                   + 'which is why the share matches but the totals do not. A dash means the deck is in '
                                   + 'one file and not the other. Faded rows have fewer than ' + CONV_THIN_N
-                                  + ' tournament entries.'}</p>
+                                  + ' tournament entries. The <strong>field average</strong> the last column compares '
+                                  + 'against is ' + fmtPct(conv.expected * 100, 1) + ' top-8 rate. That column is '
+                                  + 'smoothed (k = ' + CONV_PRIOR + ') while the top-8 rate beside it is raw; the cell '
+                                  + 'tooltip carries both. Below ' + CONV_MIN_N + ' entries it shows a dash instead of '
+                                  + 'a number that merely repeats the average. Entries are weighted by tournament age, '
+                                  + 'so half values are real, not a rounding artefact.'}</p>
                             <div class="mobile-table-scroll">
                                 <table class="ds-table cm-rangliste" data-rang-sortiert="listen" data-rang-richtung="ab">
                                     <thead><tr><th class="ds-rank">#</th>${kopfZellen}</tr></thead>
@@ -1646,6 +1701,24 @@
             // ============================================================
             const totalDecks   = normalizedDecks.length;
             const totalEntries = normalizedDecks.reduce((s, d) => s + (d.new_count || 0), 0);
+            // Der Rest, den niemand ausweist.
+            //
+            // Die gelisteten Anteile summieren sich auf 96,19 %, nicht auf 100.
+            // Limitless fuehrt alles unterhalb seiner Namensschwelle als
+            // "Other" — am 20.08.2026 waren das 1.038 Listen —, und
+            // backend/scrapers/limitless_online_scraper.py:152 wirft diese
+            // Zeile weg. Keine angezeigte Zahl ist dadurch falsch: 26.319 ist
+            // die richtige Zahl gelisteter Listen, und 7,75 % ist der richtige
+            // Anteil am Feld. Nur passte beides bisher nicht zusammen, weil
+            // der Nenner der Prozentzahl (27.357) nirgends stand.
+            // feldGroesseAusAnteilen grenzt den Nenner ein, den Limitless
+            // benutzt hat; die Herleitung steht im Kopf der Funktion.
+            const feldGesamt = (typeof window.feldGroesseAusAnteilen === 'function')
+                ? window.feldGroesseAusAnteilen(normalizedDecks.map(
+                    d => ({ anteil: d.share || 0, anzahl: d.new_count || 0 })))
+                : 0;
+            const restAnteil = feldGesamt > totalEntries
+                ? (feldGesamt - totalEntries) / feldGesamt * 100 : 0;
             // Die Datenbasis als Kennzahl-Kacheln statt als Fließtextzeile:
             // dieselben Zahlen, aber lesbar, ohne den Satz zu entziffern.
             // Drei Kacheln aus components.css, keine eigene Regel.
@@ -1712,13 +1785,22 @@
                 <div class="ds-stat-row">
                     ${statTile(deDS ? 'Gemeldete Listen' : 'Reported lists',
                         totalEntries.toLocaleString(deDS ? 'de-DE' : 'en-US'), '',
-                        metaStats
+                        (metaStats
                             ? (deDS
                                 ? `aus ${fmtNumDS(metaStats.turniere)} Turnieren · ${fmtNumDS(metaStats.spieler)} Spieler · ${fmtNumDS(metaStats.partien)} Partien`
                                   + ` (Stand ${metaStatsStand.toLocaleDateString('de-DE')})`
                                 : `from ${fmtNumDS(metaStats.turniere)} tournaments · ${fmtNumDS(metaStats.spieler)} players · ${fmtNumDS(metaStats.partien)} matches`
                                   + ` (as of ${metaStatsStand.toLocaleDateString('en-GB')})`)
-                            : (deDS ? 'einzelne Decklisten, nicht Deckarten' : 'individual decklists, not deck types'))}
+                            : (deDS ? 'einzelne Decklisten, nicht Deckarten' : 'individual decklists, not deck types'))
+                        + (restAnteil > 0
+                            ? (deDS
+                                ? ` · ${fmtPct(100 - restAnteil, 1)} von ${fmtNumDS(feldGesamt)} Listen im Feld;`
+                                  + ` die uebrigen ${fmtNumDS(feldGesamt - totalEntries)} (${fmtPct(restAnteil, 1)})`
+                                  + ' fuehrt Limitless als "Other" und meldet sie nicht einzeln'
+                                : ` · ${fmtPct(100 - restAnteil, 1)} of ${fmtNumDS(feldGesamt)} lists in the field;`
+                                  + ` the remaining ${fmtNumDS(feldGesamt - totalEntries)} (${fmtPct(restAnteil, 1)})`
+                                  + ' Limitless files as "Other" and does not report them individually')
+                            : ''))}
                     ${statTile(deDS ? 'Archetypen' : 'Archetypes',
                         String(totalDecks), '',
                         deDS ? 'mindestens ein gemeldetes Deck' : 'at least one reported deck')}
@@ -1827,6 +1909,21 @@
                     const oldShare = parseLocaleNumber(deck.old_share, 0);
                     const winRate = parseLocaleNumber(deck.winrate || deck.new_winrate, 0);
                     const powerScore = calculatePowerScore(share, winRate);
+                    // Das Banner zeigte die ROHE Win Rate, waehrend dieselbe
+                    // Datei fuer die Tier-Einordnung die geglaettete adjWR
+                    // benutzt (computeTierScore, k = 50). Sichtbar wurde das im
+                    // Rogue-Block: "0.0 % · 100.0 % WR · 1 Decks" — eine Kachel
+                    // in Tier-1-Groesse fuer ein Deck mit drei Partien. Die
+                    // Seite glaubte ihrer eigenen Rohzahl fuer die Sortierung
+                    // nicht und druckte sie trotzdem gross. Jetzt steht die
+                    // Zahl da, nach der auch einsortiert wird; die rohe steht
+                    // im Titel, wo man sie nachschlagen kann.
+                    const sc = deck._tierScore;
+                    const zeigWR = (sc && isFinite(sc.adjWR)) ? sc.adjWR : winRate;
+                    const listenN = parseInt(deck.new_count || 0) || 0;
+                    const wrTitel = (sc && isFinite(sc.adjWR)) ? escapeHtml(getLang() === 'de'
+                        ? `geglättet (k = 50) — roh ${winRate.toFixed(1)} % aus ${listenN} Listen`
+                        : `smoothed (k = 50) — raw ${winRate.toFixed(1)} % from ${listenN} lists`) : '';
                     
                     // Get archetype image
                     const archetypeCards = fuzzyArchetypeLookup(archetypeName, cardDataByArchetype);
@@ -1899,7 +1996,7 @@
                             <div class="deck-banner-content">
                                 <div class="deck-banner-name">${archetypeName}</div>
                                 <div class="deck-banner-stats">
-                                    <span class="stat-badge">${share.toFixed(1)}% · ${winRate.toFixed(1)}% WR</span>
+                                    <span class="stat-badge"${wrTitel ? ` title="${wrTitel}"` : ''}>${share.toFixed(1)}% · ${zeigWR.toFixed(1)}% WR</span>
                                     ${parseInt(deck.new_count || 0) > 0
                                       ? `<span class="stat-badge stat-sample-size" title="Anzahl Decks in dieser Auswertung">${parseInt(deck.new_count)} Decks</span>`
                                       : ''}

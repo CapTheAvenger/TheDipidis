@@ -472,7 +472,21 @@
                     archetype: d.deck_name || d.archetype || '',
                     new_count: parseInt(d.total_decks || d.count || d.new_count || 0)
                 })).filter(d => d.archetype && d.new_count > 0).sort((a, b) => b.new_count - a.new_count);
-                setTimeout(() => renderMetaChart('currentMeta', chartData), 400);
+                // Die gelisteten Anteile summieren sich auf 96,19 %, nicht auf
+                // 100: Limitless fuehrt rund 1.038 Listen (3,8 %) als "Other",
+                // und der Scraper laesst diese Zeile weg. Ohne den echten
+                // Nenner zeigte der Donut fuer Mega Excadrill 8,1 %, die
+                // Tabelle daneben 7,75 %. Die Herleitung steht im Kopf von
+                // feldGroesseAusAnteilen (js/app-utils.js).
+                const feldGesamt = (typeof window.feldGroesseAusAnteilen === 'function')
+                    ? window.feldGroesseAusAnteilen(deckStats.map(d => ({
+                        anteil: window.parseLocaleNumber
+                            ? window.parseLocaleNumber(d.share_numeric != null ? d.share_numeric : d.share, 0)
+                            : parseFloat(String(d.share_numeric || d.share || '0').replace(',', '.')),
+                        anzahl: parseInt(d.total_decks || d.count || d.new_count || 0) || 0,
+                    })))
+                    : 0;
+                setTimeout(() => renderMetaChart('currentMeta', chartData, feldGesamt), 400);
             }
             
             // Load matchup data

@@ -216,9 +216,40 @@
         function getPastMetaSummaryTotalCount(cards) {
             if (!Array.isArray(cards) || cards.length === 0) return 0;
 
-            // Sum the rounded display counts so the total matches what the user
-            // sees on each individual card badge.
-            return cards.reduce((sum, card) => sum + getPastMetaDisplayCount(card), 0);
+            // Die Summe darf NICHT die Anzeigewerte der einzelnen Karten
+            // addieren.
+            //
+            // getPastMetaDisplayCount hebt jede Karte auf mindestens eine
+            // Kopie — richtig fuer das Kaertchen, weil eine Karte, die in
+            // 0,3 % der Listen steht, im Gitter nicht als "0" dastehen soll.
+            // Aufsummiert wird daraus aber eine Deckgroesse, die es nicht
+            // geben kann: Dragapult in TEF-CRI hat 89 verschiedene Karten,
+            // 65 davon mit einem echten Mittelwert unter 0,5 Kopien, und die
+            // Kachel meldete deshalb 124 Karten fuer ein 60-Karten-Deck.
+            // Gemessen ueber die grossen Archetypen: 75 bis 135.
+            //
+            // Die ungerundeten Mittelwerte summieren sich auf 60,03 — das ist
+            // die Zahl, die die Kachel meint. Der Boden bleibt auf der
+            // einzelnen Karte, wo er hingehoert.
+            //
+            // Auch der zweite Boden aus getPastMetaRepresentativeCardCopies
+            // darf hier nicht mitlaufen: 16 der 89 Karten haben in diesem
+            // Chunk einen Mittelwert von exakt 0 (total_count fehlt), und der
+            // Helfer gibt fuer sie "1 Kopie" zurueck, weil sie in Listen
+            // vorkommen. Fuer das Kaertchen ist das richtig, fuer die Summe
+            // waeren es 16 erfundene Karten — 76 statt 60.
+            //
+            // Bei einer Auswahl aus einer einzigen Liste gibt es keinen
+            // Mittelwert; dort ist max_count die echte Kopienzahl, und die
+            // Summe darueber ergibt wieder 60.
+            if (!pastMetaCurrentScope || pastMetaCurrentScope.totalDecklists <= 1) {
+                return cards.reduce(
+                    (sum, card) => sum + (parseInt(card?.max_count || 0, 10) || 0), 0);
+            }
+            return cards.reduce((sum, card) => {
+                const avg = parsePastMetaNumber(card?.card_count ?? card?.average_count_overall, 0);
+                return sum + (avg > 0 ? avg : 0);
+            }, 0);
         }
         
         async function loadPastMeta() {
@@ -806,12 +837,27 @@
             document.getElementById('pastMetaStatCards').textContent = `${aggregatedCards.length} / ${Math.round(totalCards)}`;
             
             // Show tournament info based on count
-            if (uniqueTournamentCount === 1) {
-                const cleanName = tournamentNames[0];
-                document.getElementById('pastMetaStatTournament').textContent = `${cleanName} (${totalDecklists} decklists)`;
-            } else {
-                document.getElementById('pastMetaStatTournament').textContent = `${uniqueTournamentCount} Tournaments (${totalDecklists} total decklists)`;
-            }
+            //
+            // "total decklists" war zu viel versprochen. Limitless
+            // veroeffentlicht Decklisten erst ab Tag 2, und die Kartendateien
+            // enthalten deshalb ausschliesslich Tag-2-Listen: 1.058 Listen im
+            // Chunk TEF-CRI gegen 5.775 gemeldete Spieler an Tag 1 — 18,3 %.
+            // Der Abgleich stimmt nicht nur global, sondern je Turnier und
+            // Archetyp (Dragapult 0069: 270 Spieler, 83 Tag 2, 83 Listen).
+            // Jeder Inklusionsanteil dieses Reiters beschreibt also den Top
+            // Cut, nicht das Feld. Das gehoert an die Zahl geschrieben.
+            const deckKachel = document.getElementById('pastMetaStatTournament');
+            const dePM = (typeof getLang === 'function' && getLang() === 'de');
+            const listenWort = dePM ? 'Tag-2-Decklisten' : 'day-2 decklists';
+            deckKachel.textContent = uniqueTournamentCount === 1
+                ? `${tournamentNames[0]} (${totalDecklists} ${listenWort})`
+                : `${uniqueTournamentCount} Tournaments (${totalDecklists} ${listenWort})`;
+            deckKachel.title = dePM
+                ? 'Limitless veroeffentlicht Decklisten erst ab Tag 2. Alle Kartenzahlen dieses '
+                  + 'Reiters stammen aus dem Top Cut, nicht aus dem ganzen Feld — Anteile sind '
+                  + 'dadurch nach oben verzerrt.'
+                : 'Limitless publishes decklists from day 2 onward. Every card figure on this tab '
+                  + 'comes from the top cut, not the whole field — inclusion rates are biased upward.';
             
             document.getElementById('pastMetaStatFormat').textContent = pastMetaCurrentDeck.format;
 
@@ -1157,7 +1203,10 @@
                         <div class="card-item city-league-card-item${pinnedClass}" data-card-name="${cardName.toLowerCase()}" data-card-name-de="${germanCardNameEscaped}" data-card-set="${setCode.toLowerCase()}" data-card-number="${setNumber.toLowerCase()}" data-card-type="${filterCategory}">
                             <div class="card-image-container city-league-card-image-container">
                                 <img src="${imageUrl}" alt="${cardName}" loading="lazy" referrerpolicy="no-referrer" class="city-league-card-image" onerror="handleCardImageError(this, '${setCode}', '${setNumber}')" onclick="if (typeof event !== 'undefined' && event) event.stopPropagation(); showSingleCard(this.src, '${cardNameEscaped} (${setCode} ${setNumber})');">
-                                <div class="city-league-card-badge city-league-card-badge-max">${maxCount}</div>
+                                <div class="city-league-card-badge city-league-card-badge-max"${
+                                    avgCount > 0 && avgCount < 0.5
+                                        ? ` title="Ø ${avgCount.toFixed(2)} Kopien je Liste — auf 1 aufgerundet, damit die Karte nicht als 0 dasteht"`
+                                        : ''}>${maxCount}</div>
                                 ${pinBadgeHtml}
                                 ${typeof getWishlistBadgeHtml === 'function' ? getWishlistBadgeHtml(cardName, setCode, setNumber) : ''}
                                 ${deckCount > 0 ? `<div class="city-league-card-badge city-league-card-badge-deck">${deckCount}</div>` : ''}

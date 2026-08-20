@@ -48,7 +48,7 @@ describe('Bausteine — Aufbau', () => {
         assert.match(SW, /'\.\/js\/ds-sections\.js'/);
     });
 
-    it('sechs Abschnitte, jeder in beiden Sprachen benannt', () => {
+    it('sieben Abschnitte, jeder in beiden Sprachen benannt', () => {
         const block = /var SECTIONS = \[([\s\S]*?)\n    \];/.exec(CODE);
         assert.ok(block, 'SECTIONS nicht gefunden');
         const ids = [...block[1].matchAll(/id:\s*'([^']+)'/g)].map(m => m[1]);
@@ -60,19 +60,22 @@ describe('Bausteine — Aufbau', () => {
         //          nirgends stand (Turniere/Spieler/Partien), steht jetzt in
         //          der Kachel "Gemeldete Listen"; die vollstaendige Tabelle ist
         //          in der Rangliste aufgegangen, samt Ausklappen fuer den Rest.
-        assert.strictEqual(ids.length, 6, 'gefunden: ' + ids.join(', '));
-        assert.strictEqual(new Set(ids).size, 6, 'doppelte id');
+        // Und am 20.08.2026 einer dazu: 'ev', der Rechner "Gegen welches
+        // Feld?". Er kam bewusst NICHT nach vorn — die ersten drei sind
+        // die Eingangsantwort und bleiben zu dritt.
+        assert.strictEqual(ids.length, 7, 'gefunden: ' + ids.join(', '));
+        assert.strictEqual(new Set(ids).size, 7, 'doppelte id');
         const de = (block[1].match(/de:\s*\[/g) || []).length;
         const en = (block[1].match(/en:\s*\[/g) || []).length;
-        assert.strictEqual(de, 6);
-        assert.strictEqual(en, 6);
+        assert.strictEqual(de, 7);
+        assert.strictEqual(en, 7);
     });
 
     it('die ersten drei sind offen, der Rest zu', () => {
         const block = /var SECTIONS = \[([\s\S]*?)\n    \];/.exec(CODE)[1];
         const flags = [...block.matchAll(/auf:\s*(true|false)/g)].map(m => m[1] === 'true');
         assert.deepStrictEqual(flags.slice(0, 3), [true, true, true]);
-        assert.deepStrictEqual(flags.slice(3), [false, false, false]);
+        assert.deepStrictEqual(flags.slice(3), [false, false, false, false]);
     });
 
     it('die Antwort steht vorn: Decks, Matchups, Karten — dann der Rest', () => {

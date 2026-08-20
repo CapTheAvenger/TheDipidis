@@ -100,7 +100,7 @@ describe('Meta-Performance — was dafuer wegfiel', () => {
         assert.ok(!/id: 'overview'/.test(SEC));
         assert.ok(!/id: 'full'/.test(SEC));
         const ids = [...SEC.matchAll(/id: '([a-z]+)'/g)].map(m => m[1]);
-        assert.deepEqual(ids, ['top', 'heatmap', 'cards', 'tiers', 'rang', 'movers'],
+        assert.deepEqual(ids, ['top', 'heatmap', 'cards', 'ev', 'tiers', 'rang', 'movers'],
             'Abschnitte: ' + ids.join(', '));
     });
 
@@ -161,5 +161,33 @@ describe('Platz auf dem Schreibtisch', () => {
 
     it('auf dem Telefon aber wieder einspaltig', () => {
         assert.match(CSS, /@media \(max-width: 860px\)[\s\S]{0,120}\.arc-inline-list \{ grid-template-columns: 1fr; \}/);
+    });
+});
+
+describe('Auf- und Absteiger — nie gruen gegen rot', () => {
+    // Die Hausregel steht seit Phase 0 in css/tokens.css: divergierende
+    // Skalen sind blau/rot, weil gruen/rot der haeufigste Fall von
+    // Farbfehlsichtigkeit ist. Die Delta-Spalte der Auf- und Absteiger
+    // war bis zum 20.08.2026 die letzte Stelle, die sie nicht befolgte.
+    const CSS = fs.readFileSync(path.join(ROOT, 'css', 'styles.css'), 'utf8');
+
+    it('die Delta-Spalte faerbt die Zelle, nicht den Text', () => {
+        assert.match(TIER, /ds-tint-pos/);
+        assert.match(TIER, /ds-tint-neg/);
+        assert.doesNotMatch(TIER, /tier-mover-up|tier-mover-down/);
+    });
+
+    it('und das alte Gruen ist weg', () => {
+        // Ohne Kommentare: die Begruendung im Kommentar NENNT das alte
+        // Gruen, und das soll sie auch.
+        const ohne = CSS.replace(/\/\*[\s\S]*?\*\//g, '');
+        const block = ohne.slice(ohne.indexOf('.tier-mover-delta'),
+                                 ohne.indexOf('.tier-mover-delta') + 300);
+        assert.doesNotMatch(block, /#16a34a/i);
+        assert.match(block, /color: var\(--ink\)/);
+    });
+
+    it('das Vorzeichen steht neben der Zahl, die Farbe traegt nie allein', () => {
+        assert.match(TIER, /formatPercentSigned/);
     });
 });

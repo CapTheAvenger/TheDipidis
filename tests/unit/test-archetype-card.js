@@ -28,6 +28,7 @@ const UTILS = fs.readFileSync(path.join(ROOT, 'js', 'app-utils.js'), 'utf8');
 const TIER = fs.readFileSync(path.join(ROOT, 'js', 'app-tier-meta.js'), 'utf8');
 const I18N = fs.readFileSync(path.join(ROOT, 'js', 'i18n.js'), 'utf8');
 const CSS = fs.readFileSync(path.join(ROOT, 'css', 'styles.css'), 'utf8');
+const TOKENS = fs.readFileSync(path.join(ROOT, 'css', 'tokens.css'), 'utf8');
 const HTML = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
 
 function utilsChunk(re, what) {
@@ -194,10 +195,30 @@ describe('matchups', () => {
         const html = api.matchupTableHtml('Dragapult');
         assert.match(html, /arc-mu-up-/, 'above 50 % should be blue');
         assert.match(html, /arc-mu-down-/, 'below 50 % should be red');
-        const block = CSS.slice(CSS.indexOf('.arc-mu-up-1'), CSS.indexOf('.arc-mu-n,'));
-        assert.match(block, /37, 99, 235|#1d4ed8/);
-        assert.match(block, /220, 38, 38|#b91c1c/);
+        const block = CSS.slice(CSS.indexOf('.arc-mu-up-1'), CSS.indexOf('.arc-mu-opp'));
+        assert.match(block, /106, 168, 255/, 'the positive tint is --dv-pos');
+        assert.match(block, /255, 143, 122/, 'the negative tint is --dv-neg');
         assert.doesNotMatch(block, /#16a34a|#27ae60|green/i);
+    });
+
+    it('draws a diverging bar from the middle of the cell', () => {
+        // Die Richtung muss ohne jede Farbwahrnehmung lesbar sein. Die
+        // Toenung sagt dasselbe noch einmal — aber nur noch einmal.
+        assert.equal(api.barFor(0).cls, '');
+        assert.equal(api.barFor(0).pct, 0);
+        assert.equal(api.barFor(12.5).cls, 'arc-mu-wr-up');
+        assert.equal(api.barFor(12.5).pct, 25);
+        assert.equal(api.barFor(-12.5).cls, 'arc-mu-wr-down');
+        // Ueber der Skalengrenze laeuft der Balken nicht aus der Zelle.
+        assert.equal(api.barFor(80).pct, 50);
+        assert.equal(api.barFor(-80).pct, 50);
+
+        const html = api.matchupTableHtml('Dragapult');
+        assert.match(html, /--arc-bar:[0-9.]+%/, 'the width reaches the cell');
+        // Ein Dezimalpunkt, kein Komma: das ist CSS, keine Anzeige.
+        assert.doesNotMatch(html, /--arc-bar:[0-9]+,/);
+        assert.match(CSS, /\.arc-mu-wr-up::after\s*\{[^}]*left: 50%/);
+        assert.match(CSS, /\.arc-mu-wr-down::after\s*\{[^}]*right: 50%/);
     });
 
     it('says so when a deck has no matchup data at all', () => {
@@ -261,14 +282,43 @@ describe('strings and styling', () => {
         }
     });
 
-    it('every tone the code can emit has a background defined', () => {
-        // The fill is quantised precisely so this list is finite and each
-        // entry's contrast against white text is known.
+    it('every tone the code can emit has an accent edge defined', () => {
+        // Seit dem 20.08.2026 faerbt der Ton die 3 px hohe Oberkante,
+        // nicht mehr die Flaeche — so macht es die Bildkarte, und so
+        // steht die Zahl immer auf demselben Grund.
         for (const tone of ['neutral', 'tie', 'up', 'up-strong', 'down', 'down-strong']) {
-            assert.match(CSS, new RegExp(`\\.arc-tone--${tone}\\s*\\{[^}]*background`),
-                `no background for tone ${tone}`);
+            assert.match(CSS, new RegExp(`\\.arc-tone--${tone}[^{]*\\{[^}]*border-top-color`),
+                `no accent edge for tone ${tone}`);
         }
-        assert.match(CSS, /\.arc-tile \{[^}]*color: #ffffff/);
+        assert.match(CSS, /\.arc-tile \{[^}]*border-top: 3px solid/);
+        assert.match(CSS, /\.arc-tile \{[^}]*background: var\(--arc-s1\)/);
+        assert.match(CSS, /\.arc-tile \{[^}]*color: var\(--arc-ink\)/);
+    });
+
+    it('the card carries the image palette itself, not the page theme', () => {
+        // Die Karte ist eine dunkle Insel auf heller Seite — genau wie
+        // das Bild, das die Seite verlaesst. Wuerde sie var(--surface-1)
+        // benutzen, verloere sie ihre Farbe, sobald die Seite selbst
+        // dunkel schaltet.
+        const dark = TOKENS.slice(TOKENS.indexOf(':root[data-theme="dark"]'));
+        const card = CSS.slice(CSS.indexOf('.arc-card {'), CSS.indexOf('.arc-card--inline'));
+        const paare = [
+            ['--arc-s1', '--surface-1'], ['--arc-s2', '--surface-2'],
+            ['--arc-bg1', '--surface-0'], ['--arc-line', '--line'],
+            ['--arc-line-strong', '--line-strong'],
+            ['--arc-ink', '--ink'], ['--arc-ink2', '--ink-2'], ['--arc-ink3', '--ink-3'],
+            ['--arc-pos', '--dv-pos'], ['--arc-neg', '--dv-neg'], ['--arc-zero', '--dv-zero'],
+            ['--arc-brand', '--brand'], ['--arc-brand-ink', '--brand-ink'],
+            ['--arc-gold', '--gold'],
+        ];
+        for (const [hier, dort] of paare) {
+            const a = new RegExp(`${hier}:\\s*(#[0-9a-f]{6})`, 'i').exec(card);
+            const b = new RegExp(`${dort}:\\s*(#[0-9a-f]{6})`, 'i').exec(dark);
+            assert.ok(a, `${hier} fehlt in .arc-card`);
+            assert.ok(b, `${dort} fehlt im Dunkelmodus-Block von tokens.css`);
+            assert.equal(a[1].toLowerCase(), b[1].toLowerCase(),
+                `${hier} ist von ${dort} abgewichen`);
+        }
     });
 
     it('the tone thresholds match what the CSS defines', () => {

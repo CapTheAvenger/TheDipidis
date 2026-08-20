@@ -667,6 +667,12 @@ SYNC_PATTERNS = [
     "city_league_archetypes_past_comparison.csv",
     "city_league_archetypes_past_deck_stats.csv",
     # Limitless Online  →  Current Meta deck stats
+    # limitless_meta_stats.json stand hier bis zum 20.08.2026 NICHT drin.
+    # limitless_online_scraper.py:133 schreibt sie nach get_data_dir()
+    # (= backend/core/data/); ohne diesen Eintrag kam sie nie in data/ an.
+    # Die ausgelieferte Fassung war vom 20.04.2026 — vier Monate alt —
+    # und lieferte die Herkunftszeile der Kachel "Gemeldete Listen".
+    "limitless_meta_stats.json",
     "limitless_online_decks.csv",
     "limitless_online_decks.html",
     "limitless_online_decks_comparison.csv",

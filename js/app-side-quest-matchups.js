@@ -88,6 +88,14 @@
             more: (n) => `+${n} weitere anzeigen`,
             noMove: 'keine Angriffsattacke',
             immune: 'immun',
+            keinKO: 'kein K.O.',
+            flaeche: 'Fläche ×0,75',
+            flaecheTitel: 'Flächenattacke im Doppelkampf — trifft mehrere Ziele und '
+                        + 'macht deshalb 25 % weniger Schaden je Ziel.',
+            zielUnbekannt: 'Ziel unbekannt',
+            zielUnbekanntTitel: 'Für diese Attacke liegt kein Zielfeld vor. Im Doppelkampf '
+                        + 'ist deshalb offen, ob der 25-%-Abzug für Flächenattacken gilt — '
+                        + 'gerechnet wird ohne ihn.',
             loading: 'Lade Matchup-Daten …',
             pickMon: 'Wähle links ein Pokémon.',
             noUsage: 'Für dieses Pokémon liegt in diesem Format kein Set vor.',
@@ -119,6 +127,14 @@
             more: (n) => `show ${n} more`,
             noMove: 'no damaging move',
             immune: 'immune',
+            keinKO: 'no KO',
+            flaeche: 'spread ×0.75',
+            flaecheTitel: 'Spread move in a double battle — hits more than one target and '
+                        + 'therefore deals 25 % less damage to each.',
+            zielUnbekannt: 'target unknown',
+            zielUnbekanntTitel: 'No target field for this move. In a double battle it is '
+                        + 'therefore open whether the 25 % spread reduction applies — '
+                        + 'the calculation runs without it.',
             loading: 'Loading matchup data …',
             pickMon: 'Pick a Pokémon on the left.',
             noUsage: 'No set for this Pokémon in this format.',
@@ -321,20 +337,52 @@
 
     function moveEntry(name) { return (name && _moves[name]) || null; }
 
+    /**
+     * Im Doppelmodus fehlten 25 % Abzug auf jede Flaechenattacke (20.08.2026).
+     *
+     * Der Umschalter oben rechts steht auf „Doppel" — das ist die Vorgabe
+     * dieser Ansicht, `_format` startet auf 'doubles'. Der Aufruf hier
+     * uebergab trotzdem fest `spread: false`. Die Zeichenfolge
+     * `spread: true` kam im ganzen Projekt nicht vor.
+     *
+     * ChampionsDamage.damageRange kann den Abzug seit jeher (`opts.spread
+     * ? 0.75 : 1`); es fehlte allein die Angabe, WELCHE Attacke eine
+     * Flaechenattacke ist. Die Attackendaten fuehrten dafuer kein Feld.
+     *
+     * Sie tun es jetzt: `target` (PokéAPI move_target_id) und das daraus
+     * abgeleitete `spread` stehen in champions_resources.json, 32 der
+     * Champions-Schadensattacken sind Flaechenattacken — darunter
+     * Erdbeben, Steinhagel, Hitzewelle, Surf und Entladung. Bei einem
+     * Erdbeben mit Staerke 100 sind das 25 Schadenspunkte Unterschied
+     * pro Wurf, oft der Unterschied zwischen 2HKO und 3HKO.
+     *
+     * Fehlt das Feld, wird NICHT stillschweigend Einzelziel angenommen —
+     * dann bleibt `spread` undefined, und die Zeile weist das aus.
+     */
+    function istFlaeche(mv) {
+        return (mv && typeof mv.spread === 'boolean') ? mv.spread : null;
+    }
+
     function rangeFor(attName, attSet, attStats, defName, defSet, defStats, moveName) {
         const mv = moveEntry(moveName);
         if (!mv) return null;
         const a = _dex[attName], d = _dex[defName];
         if (!a || !d) return null;
-        return window.ChampionsDamage.damageRange({
+        const flaeche = istFlaeche(mv);
+        const r = window.ChampionsDamage.damageRange({
             move: mv,
             attackerStats: attStats,
             defenderStats: defStats,
             attackerTypes: [a.t1, a.t2].filter(Boolean),
             effectiveness: _eff(mv.type, [d.t1, d.t2].filter(Boolean)),
             item: attSet.item,
-            spread: false,
+            spread: _format === 'doubles' && flaeche === true,
         });
+        if (r) {
+            r.spreadAngewendet = _format === 'doubles' && flaeche === true;
+            r.zielUnbekannt = _format === 'doubles' && flaeche === null;
+        }
+        return r;
     }
 
     // Alle Attacken eines Sets gegen ein Ziel, stärkste zuerst. Attacken
@@ -372,10 +420,21 @@
     }
 
     // „OHKO" heißt: auch der niedrigste Wurf tötet. Wenn nur ein Teil der
-    // 16 Würfe reicht, steht der Anteil dabei — alles andere überzeichnet.
+    // Würfe reicht, steht der Anteil dabei — alles andere überzeichnet.
+    //
+    // „5+" ist weg. Es entstand daraus, dass koChance() nur bis vier
+    // Treffer rechnete und danach pauschal `{hits: 5, chance: 0}`
+    // zurückgab — die Beschriftung schrieb also „5+HKO 0 %", auch wo ein
+    // fünfter Treffer sicher tötet. Die Rechnung geht jetzt bis neun und
+    // nennt die Trefferzahl, die sie gefunden hat.
+    //
+    // Erst wenn auch neun Treffer nicht reichen, gibt es keine Zahl mehr —
+    // dann steht da, dass es keinen K.O. gibt, statt eines „0 %", das wie
+    // eine gerechnete Wahrscheinlichkeit aussieht.
     function koLabel(ko) {
         if (!ko) return '';
-        const base = ko.hits === 1 ? 'OHKO' : `${ko.hits >= 5 ? '5+' : ko.hits}HKO`;
+        if (ko.hits == null) return L().keinKO;
+        const base = ko.hits === 1 ? 'OHKO' : `${ko.hits}HKO`;
         if (ko.chance >= 1) return base;
         return `${base} ${Math.round(ko.chance * 100)} %`;
     }
@@ -660,11 +719,23 @@
             const g = r.range;
             const eff = effLabel(g.effectiveness);
             const w = Math.max(2, Math.min(100, g.maxPct));
+            // Der 25-%-Abzug fuer Flaechenattacken muss dastehen, wo er
+            // greift — sonst sieht ein Erdbeben mit 75 statt 100 Schaden
+            // nach einem Rechenfehler aus. Und wo das Zielfeld fehlt,
+            // steht das ebenfalls da, statt Einzelziel zu unterstellen.
+            const flaecheHtml = g.spreadAngewendet
+                ? ` · <span class="sq-calc-flaeche" title="${esc(L().flaecheTitel)}">${
+                      esc(L().flaeche)}</span>`
+                : (g.zielUnbekannt
+                    ? ` · <span class="sq-calc-unklar" title="${esc(L().zielUnbekanntTitel)}">${
+                          esc(L().zielUnbekannt)}</span>`
+                    : '');
             return `<div class="sq-calc-row">
                     <span class="sq-calc-mv">${nameHtml(r.name, 'moves')}
                         <i class="sq-calc-meta">${esc(tName(r.move.type))} · ${
                             esc(r.move.power)}${g.stab > 1 ? ' · STAB' : ''}${
-                            eff ? ` · <span class="sq-mu-eff${effClass(g.effectiveness)}">${eff}</span>` : ''}</i>
+                            eff ? ` · <span class="sq-mu-eff${effClass(g.effectiveness)}">${eff}</span>` : ''}${
+                            flaecheHtml}</i>
                     </span>
                     <span class="sq-calc-num">${g.min}–${g.max}</span>
                     <span class="sq-mu-bar ${tone || 'is-deal'}"><i style="width:${w}%"></i></span>

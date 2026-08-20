@@ -2729,6 +2729,14 @@ body.sqp-d-open { overflow: hidden; }
 .sq-console .sq-calc-mv { font-size: 12px; min-width: 0; }
 .sq-console .sq-calc-mv small { display: block; font-size: 9.5px; color: var(--sq-dim2); }
 .sq-console .sq-calc-meta { display: block; font-style: normal; font-size: 9.5px; color: var(--sq-dim2); }
+/* Der 25-%-Abzug fuer Flaechenattacken im Doppelkampf. Er steht in der
+   Metazeile der Attacke, weil ein Erdbeben mit 75 statt 100 Schaden sonst
+   nach einem Rechenfehler aussieht. Bernstein wie ueberall sonst auf der
+   Seite, wo eine Zahl einen Vorbehalt traegt. */
+.sq-console .sq-calc-flaeche { color: var(--vorbehalt, #92700e); font-weight: 600; }
+/* Und wo das Zielfeld fehlt, steht das ebenfalls da — gerechnet wird ohne
+   Abzug, aber nicht stillschweigend. */
+.sq-console .sq-calc-unklar { color: var(--vorbehalt, #92700e); font-style: italic; }
 .sq-console .sq-calc-num,
 .sq-console .sq-calc-pct { font-family: var(--sq-num); font-size: 11px; }
 .sq-console .sq-calc-pct { color: var(--sq-dim); }

@@ -3779,6 +3779,28 @@ img[src*="limitlesstcg"] {
     font-weight: 700;
     color: #2ecc71;
 }
+/* Wonach gerechnet wurde, steht unter der Zahl. Der Unterschied zwischen
+   einer Rechnung mit und ohne Mulligan-Regel betraegt bis zu drei
+   Prozentpunkte — ohne diesen Zusatz sieht man ihn der Zahl nicht an. */
+.combo-result-hinweis {
+    flex-basis: 100%;
+    text-align: right;
+    margin-top: 2px;
+    font-size: 0.72em;
+    font-weight: 600;
+    line-height: 1.4;
+    color: var(--vorbehalt, #92700e);
+}
+.combo-result-hinweis:empty { display: none; }
+
+/* Eine Eingabe, die in den gueltigen Bereich gezogen wurde. Kurz sichtbar,
+   damit man merkt, dass das Feld sich geaendert hat — und in Bernstein,
+   nicht in Rot: es ist eine Korrektur, kein Fehler. */
+.calc-input-geklemmt {
+    border-color: var(--vorbehalt, #92700e);
+    box-shadow: 0 0 0 2px var(--vorbehalt-bg, rgba(234, 179, 8, .16));
+    transition: border-color .2s, box-shadow .2s;
+}
 
 /* ====================================
    PLAYTEST SETUP MODALS (was inline styles)

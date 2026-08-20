@@ -5605,6 +5605,32 @@ details[open] > .tier-trending-summary::after {
     font-weight: 500;
 }
 
+/* Anzahl der Listen hinter einer City-League-Tier-Karte. Am letzten
+ * vollstaendigen Datenstand hatten 128 von 304 Archetypen genau eine —
+ * ohne diese Zahl sieht eine Platzierung aus einer Liste genauso aus wie
+ * eine aus 608. Gedaempft wie die Stichprobenmarke daneben. */
+.stat-badge.tier-listen-n {
+    background: rgba(108, 117, 125, 0.12);
+    color: #4b5563;
+    font-weight: 500;
+}
+/* Unter der Schwelle: warm statt grau, aber kein Rot — eine duenne
+ * Stichprobe ist kein Fehler, sie ist ein Vorbehalt. */
+.stat-badge.tier-listen-n.tier-listen-duenn {
+    background: var(--vorbehalt-bg);
+    color: var(--vorbehalt);
+}
+
+/* Die Zeile ueber der Tier-Liste, die sagt, woraus sie entsteht.
+ * Zurueckhaltend: sie ist ein Vorbehalt, keine Ueberschrift. */
+.tier-grundlage {
+    margin: 0 0 14px;
+    font-size: 0.82rem;
+    line-height: 1.5;
+    color: #6b7280;
+    max-width: 78ch;
+}
+
 /* Surfaces the labs tournament WR + tournament count when the
  * Current-Meta tier list has labs_tournament_decks_<META>.csv loaded.
  * Slight gold tint so it reads as "tournament-validated" without

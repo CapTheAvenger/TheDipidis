@@ -83,12 +83,56 @@ pruefe('Meta-Performance: sortierbar nach jeder angezeigten Spalte', () => {
 });
 
 pruefe('Meta-Performance: keine Faktor-Zahl unter der Mindeststichprobe', () => {
+    // Diese Pruefung las bis zum 20.08.2026 den QUELLTEXT: sie suchte die
+    // Zeichenfolge `if (!(r.antritte >= CONV_MIN_N))` und war gruen, sobald
+    // sie sie fand. Ein Test, der eine Schranke am Text bezeugt, bezeugt
+    // nicht, dass die Schranke wirkt — genau so war die Vorgaengerpruefung
+    // an `top8Top` gruen geblieben, nachdem die Rangliste dahinter
+    // verschwunden war. Jetzt wird die Zellenfunktion herausgeschnitten,
+    // ausgefuehrt und an ihrer Ausgabe gemessen.
     assert.ok(!/const (top8Top|convTop|overallTop)\s*=/.test(tier),
         'die toten Ranglisten sind zurück — mit ihnen ein Test auf Code, der nichts rendert');
     const zelle = tier.match(/const zelle = \(r, k\) => \{[\s\S]*?\n                    \};/);
     assert.ok(zelle, 'Zellenfunktion nicht gefunden');
-    assert.ok(/if \(!\(r\.antritte >= CONV_MIN_N\)\)/.test(zelle[0]),
-        'die Faktor-Spalte kennt keine Untergrenze — 23 Decks ohne einen Cut zeigten "1,0-mal"');
+
+    const rumpf = `
+        const CONV_MIN_N = 20, CONV_PRIOR = 50, CONV_CAP = 100;
+        const deR = true;
+        const escapeHtml = (x) => String(x);
+        const fmtPct = (v) => String(v) + '%';
+        const fmtNumDS = (v) => String(v);
+        const fmtHalb = (v) => String(v);
+        const getLang = () => 'de';
+        const perfVon = new Map();
+        ${zelle[0]}
+        return zelle;
+    `;
+    // eslint-disable-next-line no-new-func
+    const f = new Function(rumpf)();
+
+    // Genau an der Grenze: 20 gewichtete Antritte reichen, 19,9 nicht.
+    const drueber = f({ faktor: 1.4, faktorRoh: 1.9, antritte: 20 }, 'faktor');
+    assert.ok(/1,4-mal/.test(drueber),
+        'ab CONV_MIN_N muss der Faktor dastehen, war: ' + drueber);
+
+    for (const n of [0, 1, 8, 19, 19.9, null, undefined, NaN]) {
+        const aus = f({ faktor: 1.0, faktorRoh: 1.0, antritte: n }, 'faktor');
+        assert.ok(!/-mal/.test(aus),
+            'bei ' + n + ' Antritten steht wieder eine Faktor-Zahl da: ' + aus);
+        assert.ok(aus.includes('–'),
+            'bei ' + n + ' Antritten fehlt der Strich: ' + aus);
+    }
+
+    // Der gemeldete Fall: 23 Decks ohne einen einzigen Cut standen mit
+    // "1,0-mal" und einem Balken auf der Nulllinie da.
+    const ohneCut = f({ faktor: 1.0, faktorRoh: 1.0, antritte: 3, cuts: 0 }, 'faktor');
+    assert.ok(!/ds-bar-fill/.test(ohneCut),
+        'ohne Stichprobe darf auch kein Balken gezeichnet werden');
+
+    // Und die Untergrenze gilt nur fuer den Faktor: die Rohspalten daneben
+    // sollen weiterhin zeigen, worauf er verzichtet.
+    assert.equal(f({ antritte: 3 }, 'antritte'), '3',
+        'die Antritte selbst muessen sichtbar bleiben');
 });
 
 // ---------------------------------------------------------------------------

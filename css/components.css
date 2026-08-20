@@ -94,6 +94,13 @@
 }
 .ds-stat.is-pos .ds-stat-role { color: var(--dv-pos); }
 .ds-stat.is-neg .ds-stat-role { color: var(--dv-neg); }
+/* Duenne Grundlage: der farbige Streifen links tritt zurueck, die
+   Rollenzeile wird neutral. Kein Rot — eine kleine Stichprobe ist kein
+   Fehler, und die Kachel darf nicht wie eine Warnung aussehen; sie soll
+   nur nicht wie eine gesicherte Zahl aussehen. */
+.ds-stat.is-duenn::before { opacity: 0.35; }
+.ds-stat.is-duenn .ds-stat-role { color: var(--vorbehalt); }
+.ds-stat.is-duenn .ds-stat-value { opacity: 0.82; }
 .ds-stat-label {
     display: block;
     font-size: var(--lbl);

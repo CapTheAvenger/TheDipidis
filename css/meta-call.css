@@ -1819,10 +1819,25 @@
 /* Aufgefuellte Zeilen der Day-2-Liste. Die Liste ist immer zehn Zeilen
    lang; wer unter der Schwelle steht, soll das an seiner Zahl sehen und
    nicht erst im Hinweistext unter der Tabelle. Bewusst zurueckhaltend —
-   die Zeile ist ein Vorschlag, keine Warnung. */
+   die Zeile ist ein Vorschlag, keine Warnung.
+
+   Steht unter der Zahl, nicht daneben: die Spalte ist 90 px breit, und
+   neben "18,0 %" bleibt kein Platz fuer eine Plakette — gemessen ragte
+   sie bei 1440 px wie bei 390 px aus ihrer Zelle heraus.
+
+   Auf dem Handy sind es trotz 0.62rem 12px: die Sammelregel in
+   styles.css (`.tab-content p, span, div, td, th, small, …`) setzt dort
+   12px !important und trifft jedes dieser Elemente — ein anderer Tag
+   hilft nicht, `small` ist in der Liste. Das bleibt bewusst so: eine
+   weitere Ausnahme in dieser ohnehin zu langen Liste waere teurer als
+   eine Plakette, die auf dem Handy so gross ist wie die Zeile. In ihre
+   Zelle passt sie seit dem Umbruch. */
 .mc-rec-unter-schwelle {
-    margin-left: 6px;
+    display: block;
+    width: fit-content;
+    margin: 2px 0 0;
     font-size: 0.62rem;
+    line-height: 1.4;
     font-weight: 600;
     padding: 1px 6px;
     border-radius: 999px;

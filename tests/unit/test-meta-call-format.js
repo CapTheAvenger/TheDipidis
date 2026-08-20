@@ -511,6 +511,19 @@ describe('Die Markierungen sind gestaltet', () => {
                 `${klasse} bringt ein !important mit`);
         }
     });
+
+    it('die Schwellen-Plakette steht unter der Zahl, nicht daneben', () => {
+        // Gemessen bei 1440x900 und 390x844: neben "18,0 %" ragte sie aus
+        // ihrer 90 px breiten Zelle heraus. Der Umbruch ist die Loesung,
+        // nicht eine kleinere Schrift — auf dem Handy setzt die
+        // Sammelregel in styles.css ohnehin 12px !important.
+        const i = CSS.indexOf('.mc-rec-unter-schwelle {');
+        const regel = CSS.slice(i, CSS.indexOf('}', i));
+        assert.match(regel, /display:\s*block/,
+            'ohne display:block sitzt die Plakette wieder neben der Zahl');
+        assert.doesNotMatch(regel, /margin-left:\s*6px/,
+            'der seitliche Abstand gehoert zur alten Anordnung');
+    });
 });
 
 // ───────────────────────────────────────────────────────────────────

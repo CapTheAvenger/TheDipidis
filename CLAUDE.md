@@ -28,6 +28,20 @@ way; each one exists because breaking it cost real time.
    `main` ≠ deployed.
 4. Tell the user to hard-refresh (`Strg`+`Umschalt`+`R`) for JS/CSS changes;
    pure data files (`data/*.json`) are fetched fresh and need no bump.
+5. **If `git push` is blocked, ship onto a branch and merge — never a series
+   of commits straight to `main`.** Some sessions cannot push (the git proxy
+   answers 403 for this repo) and have to use the GitHub web upload UI, which
+   commits **one directory at a time**. Code and its tests live in different
+   directories, so every intermediate commit is an inconsistent tree: CI goes
+   red, the deploy job is skipped, and the owner gets a failure mail per
+   commit. Measured 20.08.2026: six red runs for two green deploys, all
+   self-inflicted (`test-design-tokens.js` failing on the commit that carried
+   the CSS but not yet the updated test).
+   The fix costs nothing: on the first upload pick *"Create a new branch for
+   this commit and start a pull request"*, then upload the remaining
+   directories to `.../upload/<branch>/<dir>`, then merge. `main` sees one
+   commit and one CI run. The clean alternative is a PAT with push rights —
+   the user has to create it, and the assistant must never handle it.
 
 ## Data rules
 

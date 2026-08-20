@@ -2943,9 +2943,16 @@
             if (card.eur_price && card.eur_price !== '' && card.eur_price !== '0' && card.eur_price !== 'N/A') {
                 const price = parseLocaleNumber(card.eur_price, 0);
                 if (!isNaN(price)) {
+                    // Das Vertrauenszeichen hing bis zum 20.08.2026 allein an
+                    // der Wunschlisten-Kachel — die Kartendatenbank, in der
+                    // die meisten Preise gelesen werden, zeigte 1.343
+                    // Positionsheuristik-Zeilen (gemessene Fehlerquote 17,5 %)
+                    // und 3.015 Zeilen ohne jede Zuordnung ohne ein Wort dazu.
+                    const trust = (typeof window.priceTrustBadge === 'function')
+                        ? window.priceTrustBadge(card, displayCardMarketUrl) : '';
                     priceButton = `<a href="${displayCardMarketUrl}" target="_blank" rel="noopener noreferrer" class="card-database-price-btn" title="View on CardMarket" aria-label="View ${displayName} on CardMarket (opens in new tab)">
                         <span class="card-database-price-value">Ø ${price.toFixed(2).replace('.', ',')} €</span>
-                    </a>`;
+                    </a>${trust}`;
                 }
             }
             if (!priceButton) {

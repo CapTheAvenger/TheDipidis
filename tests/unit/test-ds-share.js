@@ -203,7 +203,9 @@ describe('ds-share: verdrahtet', () => {
     });
 
     it('das Journal hat einen Knopf für das quadratische Bild', () => {
-        assert.match(JOURNAL, /shareTournamentCard\('\$\{safeTournKey\}'\)/);
+        // Mit dem Meta-Schluessel: das Bild muss dieselbe Gruppe zeigen wie
+        // die Kopfzeile, neben der der Knopf steht.
+        assert.match(JOURNAL, /shareTournamentCard\('\$\{safeTournKey\}','\$\{safeMetaKey\}'\)/);
         assert.match(JOURNAL, /window\.shareTournamentCard = function/);
         // Fehlt das Modul, sagt der Knopf das — er ist nicht einfach tot.
         assert.match(JOURNAL, /bj\.shareCardMissing/);
@@ -237,13 +239,27 @@ describe('ds-share: ein Turnier ist die Gruppe seiner Partien', () => {
     // Runden. Der Sammler muss gruppieren — und genauso rechnen wie
     // shareTournamentSummary(), sonst zeigen die beiden Bilder desselben
     // Turniers verschiedene Bilanzen.
-    it('gruppiert nach tournamentName und sortiert aufsteigend nach Zeit', () => {
-        assert.match(SHARE, /String\(e\.tournamentName \|\| ''\) === String\(tournamentName \|\| ''\)/);
+    it('nimmt die Gruppe, aus der die Kopfzeile gerechnet wurde', () => {
+        // Bis zum 20.08.2026 filterte der Sammler nur nach dem Turniernamen
+        // und ueber den UNGEFILTERTEN Bestand, waehrend die Kopfzeile daneben
+        // aus der gefilterten Liste nach Meta UND Turniername gruppiert.
+        // Gemessen: Kopfzeile 2-1-1 (50 %), Bild 2-3-1 (33 %).
+        assert.match(SHARE, /window\._bjGetGroup\(tournamentName, o0\.metaKey\)/);
+        assert.match(JOURNAL, /window\._bjGetGroup = journalGruppe/);
+        assert.match(JOURNAL, /function journalGruppe\(tournamentName, metaKey\)/);
         assert.match(SHARE, /\(a\.createdAtMs \|\| 0\) - \(b\.createdAtMs \|\| 0\)/);
     });
 
-    it('zählt Unentschieden halb, wie die Siegquote überall sonst', () => {
-        assert.match(SHARE, /\(\(w \+ t \/ 2\) \/ scored\) \* 100/);
+    it('rechnet dieselbe Win Rate wie das Journal — keine vierte Konvention', () => {
+        // Hier stand (S + U/2)/Partien, und dieser Test hat das ZERTIFIZIERT:
+        // "zaehlt Unentschieden halb, wie die Siegquote ueberall sonst". Das
+        // stimmte nicht. Das Journal rechnet durchgaengig S/(S+N+U), und die
+        // Tier-Karte, aus der die Deck-Bildkarte ihre Zahl zieht, ebenfalls.
+        // Bei 2-1-1 waren das 62,5 % im Bild gegen 50 % in der Zeile daneben.
+        assert.match(SHARE, /winRate: scored \? \(w \/ scored\) \* 100 : NaN/);
+        assert.doesNotMatch(SHARE, /\(w \+ t \/ 2\) \/ scored/);
+        // Und die Fussnote nennt genau diese Konvention.
+        assert.match(SHARE, /kurzHinweis\('mitUnentschieden'\)/);
     });
 
     it('sucht die Platzierung in der ganzen Gruppe, nicht im ersten Eintrag', () => {

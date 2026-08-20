@@ -10149,6 +10149,19 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
     font-variant-numeric: tabular-nums;
     margin-left: 3px;
 }
+/* Ein alter oder unbekannter Stand darf nicht aussehen wie ein frischer.
+   Bis zum 20.08.2026 stand in jedem Chip das heutige Datum — es gab also
+   nie einen Anlass, zwei Zustaende zu unterscheiden. Jetzt gibt es drei:
+   frisch, aelter als vierzehn Tage, unbekannt. Keine Ampel, nur so viel
+   Auszeichnung, dass man hinsieht. */
+.data-freshness-chip.is-alt .js-data-freshness {
+    color: var(--alarm);
+    font-weight: 600;
+}
+.data-freshness-chip.is-unbekannt .js-data-freshness {
+    color: var(--ink-3);
+    font-style: italic;
+}
 @media (max-width: 600px) {
     .data-freshness-chip {
         margin-left: 0;

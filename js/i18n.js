@@ -565,6 +565,7 @@ const translations = {
     'cl.deckStats':             'Deck Stats',
     'cl.deckLabel':             'Deck:',
     'cl.cardsInDeck':           'Cards in Deck:',
+    'pm.cardsInDeck':           'Cards in deck (unique / avg. list)',
     'cl.of60Cards':             'of 60 Cards',
     'cl.unique':                'Unique:',
     'cl.searchDeck':            'Search Deck...',
@@ -1378,6 +1379,7 @@ const translations = {
     'chart.metaShareTitle':     'Meta Share Chart – Top Archetypes',
     'chart.toggle':             'Toggle',
     'chart.deckCount':          'Deck Count',
+    'chart.otherShare':         'All other archetypes',
 
     // ── Cards DB extras ──────────────────────────────────────
     'cardsDb.savedDeckLoadError':'Could not load saved deck.',
@@ -2524,6 +2526,7 @@ const translations = {
     'cl.deckStats':             'Deck-Statistiken',
     'cl.deckLabel':             'Deck:',
     'cl.cardsInDeck':           'Karten im Deck:',
+    'pm.cardsInDeck':           'Karten im Deck (verschiedene / Ø-Liste)',
     'cl.of60Cards':             'von 60 Karten',
     'cl.unique':                'Einzigartig:',
     'cl.searchDeck':            'Deck suchen...',
@@ -3336,6 +3339,7 @@ const translations = {
     'chart.metaShareTitle':     'Meta Share Chart – Top Archetypen',
     'chart.toggle':             'umschalten',
     'chart.deckCount':          'Deck-Anzahl',
+    'chart.otherShare':         'Alle uebrigen Archetypen',
 
     // ── Cards DB extras ──────────────────────────────────────
     'cardsDb.savedDeckLoadError':'Gespeichertes Deck konnte nicht geladen werden.',

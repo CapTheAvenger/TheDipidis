@@ -58,9 +58,15 @@
     var FELDER = [
         { id: 'alle',  de: 'Das ganze Feld',      en: 'The whole field',
           deSub: 'gewichtet nach gemessenem Anteil', enSub: 'weighted by measured share' },
-        { id: 'top8',  de: 'Nur Top 8 Archetypes', en: 'Top 8 archetypes only',
-          deSub: 'die acht meistgespielten, untereinander gewichtet',
-          enSub: 'the eight most played, weighted among themselves' },
+        /* Hiess "Nur Top 8 Archetypes". Genommen werden aber die acht
+           groessten Gegner MIT DATEN, nicht die acht groessten des Feldes
+           — bei 25 von 100 Decks ist das nicht dieselbe Menge, und 16
+           Decks haben ueberhaupt keine acht Gegner mit Daten, drei nur
+           drei. Der Name sagt das jetzt, und wenn es weniger als acht
+           sind, steht die echte Zahl in der Zeile darunter. */
+        { id: 'top8',  de: 'Die größten Gegner mit Daten', en: 'Largest opponents with data',
+          deSub: 'die acht größten, zu denen Paarungen vorliegen, untereinander gewichtet',
+          enSub: 'the eight largest we have pairings for, weighted among themselves' },
         { id: 'gleich', de: 'Jedes Deck gleich oft', en: 'Every deck equally likely',
           deSub: 'ignoriert den Anteil — zeigt die reine Kartenstärke',
           enSub: 'ignores share — shows raw matchup strength' },
@@ -175,6 +181,12 @@
             return s + (v && isFinite(v.share) ? v.share : 0);
         }, 0);
         var abgedeckt = kandidaten.reduce(function (s, k10) { return s + k10.feldAnteil; }, 0);
+        /* Was in DIESE Rechnung eingeht, ist bei 'top8' etwas anderes als
+           das, was abgedeckt waere: acht Gegner statt aller, gemessen
+           48,5 % statt 77 %. Die Kachel "Wovon die Zahl kommt" nannte
+           trotzdem beide Male 77 % — sie beantwortete eine andere Frage
+           als ihre Rolle behauptet. Beide Zahlen stehen jetzt da. */
+        var gerechnet = genommen.reduce(function (s, k14) { return s + (k14.feldAnteil || 0); }, 0);
 
         genommen.forEach(function (k11) {
             k11.beitrag = k11.gewicht * (k11.quote - 50);
@@ -190,6 +202,8 @@
             zeilen: genommen,
             gegner: genommen.length,
             abdeckung: feldSumme > 0 ? (abgedeckt / feldSumme) * 100 : 0,
+            gerechnet: feldSumme > 0 ? (gerechnet / feldSumme) * 100 : 0,
+            feldbild: feld,
             duenn: genommen.filter(function (k12) { return k12.partien < 20; }).length,
             partien: genommen.reduce(function (s, k13) { return s + k13.partien; }, 0),
         };
@@ -229,6 +243,13 @@
         var groesster = r.zeilen.reduce(function (m, z) {
             return Math.max(m, Math.abs(z.beitrag)); }, 0);
 
+        /* Nur zeigen, wenn die Rechnung wirklich auf einem engeren
+           Ausschnitt steht als die Abdeckung behauptet. Bei "Jedes Deck
+           gleich oft" sind die Gewichte ohnehin kuenstlich, und die Zeile
+           unter der Auswahl sagt das. */
+        var engerAusschnitt = isFinite(r.gerechnet)
+            && r.gerechnet > 0 && (r.abdeckung - r.gerechnet) >= 1;
+
         var kacheln =
             '<div class="ds-stat-row">'
             + '<div class="ds-stat ' + (r.ev >= 50 ? 'is-pos' : 'is-neg') + '">'
@@ -255,9 +276,15 @@
               + '<span class="ds-stat-value">' + esc(zahl(r.abdeckung, 0)) + '<span class="ds-stat-unit"> %</span></span>'
               + '<span class="ds-stat-context">' + esc(L(
                   r.gegner + ' Gegner-Decks · ' + r.partien.toLocaleString('de-DE') + ' gezählte Partien'
-                    + (r.duenn ? ' · ' + r.duenn + ' davon unter 20 Partien' : ''),
+                    + (r.duenn ? ' · ' + r.duenn + ' davon unter 20 Partien' : '')
+                    + (engerAusschnitt
+                        ? ' · in dieser Rechnung nur ' + zahl(r.gerechnet, 1) + ' % des Feldes'
+                        : ''),
                   r.gegner + ' opponent decks · ' + r.partien.toLocaleString('en-GB') + ' games counted'
-                    + (r.duenn ? ' · ' + r.duenn + ' of them under 20 games' : '')))
+                    + (r.duenn ? ' · ' + r.duenn + ' of them under 20 games' : '')
+                    + (engerAusschnitt
+                        ? ' · this calculation uses only ' + zahl(r.gerechnet, 1) + ' % of the field'
+                        : '')))
               + '</span>'
             + '</div>'
             + '</div>';
@@ -278,10 +305,22 @@
             + '<table class="ds-table ds-ev-tabelle">'
             + '<thead><tr>'
               + '<th>' + esc(L('Gegner-Deck', 'Opponent deck')) + '</th>'
+              /* Hier stand "Anteil am Feld" mit dem Untertitel "Wie oft du
+                 diesem Deck begegnest". Gerendert wird aber das GEWICHT:
+                 der Anteil unter den abgedeckten Gegnern, normiert auf
+                 100 %. Bei Terapagos Noctowl (16 % Abdeckung) lagen
+                 Beschriftung und Inhalt um den Faktor 6,5 auseinander.
+                 Die Zahl bleibt — sie muss auf 100 % summieren, sonst
+                 stimmt die Punkte-Spalte daneben nicht mehr. Nur der Name
+                 sagt jetzt, was sie ist. */
               + '<th class="ds-num" title="' + esc(L(
-                  'Wie oft du diesem Deck begegnest, wenn das Feld so aussieht wie gemessen',
-                  'How often you meet this deck if the field looks as measured'))
-                + '">' + esc(L('Anteil am Feld', 'Share of field')) + '</th>'
+                  'Anteil unter den Gegnern, zu denen Daten vorliegen — auf 100 % normiert, weil '
+                    + 'fehlende Paarungen weggelassen statt mit 50 % aufgefüllt werden. Der gemessene '
+                    + 'Feldanteil dieses Decks steht in der Meta-Performance-Tabelle.',
+                  'Share among the opponents we have data for — normalised to 100 % because missing '
+                    + 'pairings are left out rather than filled in at 50 %. The measured field share '
+                    + 'is in the meta performance table.'))
+                + '">' + esc(L('Gewicht hier', 'Weight here')) + '</th>'
               + '<th class="ds-num" title="' + esc(L(
                   'Geglättete Quote (k = 20) — ein 3-0 zählt hier nicht als 100 %',
                   'Smoothed rate (k = 20) — a 3-0 does not count as 100 % here'))
@@ -369,10 +408,16 @@
         if (String(runden) !== rEl.value) rEl.value = runden;
 
         var f = FELDER.filter(function (x) { return x.id === feld; })[0] || FELDER[0];
-        block.querySelector('.ds-ev-feldnote').textContent =
-            (de() ? f.de : f.en) + ' — ' + (de() ? f.deSub : f.enSub) + '.';
-
         var r = rechne(deck, shares, feld);
+        var sub = (de() ? f.deSub : f.enSub);
+        if (feld === 'top8' && r && r.gegner < 8) {
+            sub = de()
+                ? 'nur ' + r.gegner + ' Gegner haben Paarungen mit diesem Deck — mehr gibt es nicht'
+                : 'only ' + r.gegner + ' opponents have pairings with this deck — there are no more';
+        }
+        block.querySelector('.ds-ev-feldnote').textContent =
+            (de() ? f.de : f.en) + ' — ' + sub + '.';
+
         block.querySelector('.ds-ev-ergebnis').innerHTML = ergebnisHtml(r, runden);
         block.querySelector('.ds-ev-fuss').innerHTML = fussHtml(r);
         merke({ deck: deck, feld: feld, runden: runden });
@@ -388,6 +433,45 @@
        Sitzung leer. */
     var _baut = false;
 
+    /* Die Feldanteile liegen beim Bauen vor, gebraucht werden sie bei
+       jedem Klick. Weil die Bedienung ueber das Dokument delegiert wird
+       (siehe unten), muss der Handler sie irgendwo finden. */
+    var _shares = null;
+
+    /* EINMAL am Dokument, nicht am Block.
+     *
+     * Der Block hing seine beiden Handler an sich selbst. Das haelt genau
+     * so lange, bis jemand den Inhalt der Meta-Ansicht als Text neu setzt
+     * — und das passiert: js/app-meta-cards.js ersetzt
+     * currentMetaContent.innerHTML, js/app-tier-meta.js liest an einer
+     * Stelle den vorhandenen Inhalt zurueck und schreibt ihn wieder hin.
+     * Das Markup ueberlebt Zeichen fuer Zeichen, jeder daran haengende
+     * Handler nicht. js/ds-sections.js traegt denselben Befund schon im
+     * Kopfkommentar und loest ihn genauso.
+     *
+     * Gemessen am 20.08.2026 im Browser: Deckwahl, Feldbild und
+     * Rundenzahl waren allesamt tot — die Auswahl sprang um, die Zahlen
+     * darunter blieben stehen. Der Block war seit dem 20.08. 05:49 live.
+     *
+     * Delegation am Dokument ueberlebt jedes innerHTML darunter, weil das
+     * Dokument selbst nie ersetzt wird.
+     */
+    var _delegiert = false;
+    function delegiere() {
+        if (_delegiert) return;
+        _delegiert = true;
+        var reagiere = function (e) {
+            var ziel = e.target;
+            if (!ziel || typeof ziel.closest !== 'function') return;
+            var block = ziel.closest('.' + BLOCK);
+            if (!block || !_shares) return;
+            if (e.type === 'input' && !ziel.classList.contains('ds-ev-runden')) return;
+            zeichne(block, _shares);
+        };
+        document.addEventListener('change', reagiere);
+        document.addEventListener('input', reagiere);
+    }
+
     function baue() {
         var host = document.getElementById(HOST_ID);
         if (!host) return Promise.resolve(false);
@@ -400,6 +484,7 @@
 
         _baut = true;
         return window.getArchetypeShares().then(function (shares) {
+            _shares = shares;
             var reg = window._matchupRegistry || {};
             /* Auswahlliste nach Feldanteil, nicht alphabetisch: das
                meistgespielte Deck steht oben, weil es am haeufigsten
@@ -427,10 +512,7 @@
             var block = wrap.firstElementChild;
             host.appendChild(block);
 
-            block.addEventListener('change', function () { zeichne(block, shares); });
-            block.addEventListener('input', function (e) {
-                if (e.target && e.target.classList.contains('ds-ev-runden')) zeichne(block, shares);
-            });
+            delegiere();
             zeichne(block, shares);
 
             /* Die Abschnitte werden von js/ds-sections.js gebildet; der

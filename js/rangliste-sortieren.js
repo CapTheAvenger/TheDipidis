@@ -28,16 +28,52 @@
 
     var AUF = 'auf', AB = 'ab';
 
-    /** "1.234,5 %" -> 1234.5 · "0,8-mal" -> 0.8 · "–" -> null */
+    /** "1.234,5 %" -> 1234.5 · "0,8-mal" -> 0.8 · "2.121" -> 2121 · "–" -> null
+     *
+     * GEMESSEN am 20.08.2026 auf thedipidis.app: ein Klick auf die Spalte
+     * "Listen" ergab Toucannon (908) auf Platz 1, waehrend Mega Excadrill
+     * (2.121) aus den sichtbaren Top 25 verschwand. Grund war die alte
+     * Fassung dieser Funktion: sie entfernte den Tausenderpunkt NUR, wenn
+     * die Zelle auch ein Dezimalkomma trug. "2.121" blieb stehen und
+     * parseFloat las 2,121 — jede Ganzzahl ueber 999 sortierte damit
+     * zwischen 1 und 2. Zehn Decks betroffen, deutsche und englische
+     * Oberflaeche gleichermassen.
+     *
+     * Diese Funktion liest ANGEZEIGTEN TEXT, nicht CSV. Deshalb steht hier
+     * ein eigener Leser und nicht parseLocaleNumber aus app-utils.js: der
+     * ist fuer Dateiwerte gebaut, in denen "0.101" wirklich 0,101 bedeutet
+     * (data/online_tournament_top8_decks.csv fuehrt top8_conv_rate so,
+     * data/labs_tournament_decks.csv day1_share_pct=18.973). Fuer
+     * Dateiwerte waere die Regel unten falsch, fuer Anzeigetext ist sie
+     * richtig — diese Tabelle zeigt hoechstens eine Nachkommastelle.
+     *
+     * Die Regel: ein Trennzeichen gruppiert genau dann, wenn JEDER Block
+     * dahinter aus genau drei Ziffern besteht. Das ist die Form, die
+     * toLocaleString in beiden Sprachen erzeugt.
+     */
     function zahl(text) {
         if (text == null) return null;
-        var t = String(text).replace(/ /g, ' ').trim();
-        if (!t || t === '–' || t === '-') return null;
+        var t = String(text).replace(/\u00a0/g, ' ').trim();
+        if (!t || t === '\u2013' || t === '-') return null;
         // Nur Ziffern, Trennzeichen und Vorzeichen behalten.
         t = t.replace(/[^\d.,+-]/g, '');
         if (!t) return null;
-        // Deutsche Schreibweise: Punkt ist Tausender, Komma ist Dezimal.
-        if (t.indexOf(',') > -1) t = t.replace(/\./g, '').replace(',', '.');
+
+        var komma = t.lastIndexOf(','), punkt = t.lastIndexOf('.');
+        if (komma > -1 && punkt > -1) {
+            // Beide vorhanden: das spaetere ist das Dezimaltrennzeichen,
+            // das andere gruppiert. Deckt "1.234,5" und "1,234.5" ab.
+            var dez = komma > punkt ? ',' : '.';
+            var tsd = dez === ',' ? '.' : ',';
+            t = t.split(tsd).join('').replace(dez, '.');
+        } else if (komma > -1 || punkt > -1) {
+            var z = komma > -1 ? ',' : '.';
+            var teile = t.split(z);
+            var gruppiert = teile.length > 1 && teile.slice(1).every(function (p) {
+                return /^\d{3}$/.test(p);
+            });
+            t = gruppiert ? teile.join('') : teile.join('.');
+        }
         var v = parseFloat(t);
         return isNaN(v) ? null : v;
     }

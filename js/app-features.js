@@ -1444,7 +1444,7 @@
 
         window._metaChartInstances = {};
 
-        function renderMetaChart(sourceKey, sorted) {
+        function renderMetaChart(sourceKey, sorted, gesamtVorgabe) {
             if (typeof Chart === 'undefined') return;
             const containerId = sourceKey + 'MetaChartSection';
             let container = document.getElementById(containerId);
@@ -1478,24 +1478,49 @@
                 window._metaChartInstances[sourceKey + 'Bar'].destroy();
                 window._metaChartInstances[sourceKey + 'Bar'] = null;
             }
-            const top = (sorted || []).slice(0, 12);
+            const alle = (sorted || []);
+            const zahl = d => parseInt(d.new_count || d.count || 0) || 0;
+            // Der Nenner ist das ganze Feld, nicht der Bildausschnitt. Bis zum
+            // 20.08.2026 teilte der Tooltip durch die Summe der gezeigten zwoelf
+            // und meldete deshalb fast doppelte Anteile: Mega Excadrill 12,4 %
+            // im Donut gegen 7,75 % in der Tabelle daneben, in der City League
+            // Faktor 1,98. Der Rest steht jetzt als eigenes Segment da, damit
+            // der Kreis weiter auf 100 % aufgeht und die Zahl zur Tabelle passt.
+            // gesamtVorgabe: die City League listet jedes Deck einzeln, dort IST
+            // die Summe das Feld. Das globale Meta listet nur benannte
+            // Archetypen; Limitless fuehrt den Rest als "Other" und der Scraper
+            // wirft ihn weg. Der Aufrufer reicht deshalb die Feldgroesse durch,
+            // damit der Donut dieselbe Zahl zeigt wie die Tabelle daneben.
+            const gesamtRoh = alle.reduce((a, d) => a + zahl(d), 0);
+            const gesamt = (gesamtVorgabe > gesamtRoh) ? Math.round(gesamtVorgabe) : gesamtRoh;
+            const top = alle.slice(0, 12);
             const labels = top.map(d => d.archetype || d.main || 'Unknown');
-            const counts = top.map(d => parseInt(d.new_count || d.count || 0));
+            const counts = top.map(d => zahl(d));
             const PALETTE = ['#6c5ce7','#0984e3','#00b894','#fdcb6e','#e17055','#d63031','#a29bfe','#55efc4','#ffeaa7','#fab1a0','#81ecec','#fd79a8'];
+            const rest = gesamt - counts.reduce((a, b) => a + b, 0);
+            const donutLabels = rest > 0 ? labels.concat([t('chart.otherShare')]) : labels;
+            const donutCounts = rest > 0 ? counts.concat([rest]) : counts;
+            const donutFarben = rest > 0 ? PALETTE.concat(['#c8ccd4']) : PALETTE;
             const donutCtx = document.getElementById(sourceKey + 'DonutChart');
             if (donutCtx) {
                 window._metaChartInstances[sourceKey + 'Donut'] = new Chart(donutCtx, {
                     type: 'doughnut',
-                    data: { labels, datasets: [{ data: counts, backgroundColor: PALETTE, borderWidth: 2, borderColor: '#fff' }] },
+                    data: { labels: donutLabels, datasets: [{ data: donutCounts, backgroundColor: donutFarben, borderWidth: 2, borderColor: '#fff' }] },
                     options: {
                         responsive: true,
                         maintainAspectRatio: true,
                         plugins: {
                             legend: { display: false },
                             tooltip: { callbacks: { label: (ctx) => {
-                                const total = counts.reduce((a,b) => a+b, 0);
-                                const pct = total > 0 ? ((ctx.parsed / total)*100).toFixed(1) : 0;
-                                return ` ${ctx.label}: ${ctx.parsed} (${pct}%)`;
+                                const loc = (typeof window.getLang === 'function' && window.getLang() === 'de') ? 'de-DE' : 'en-US';
+                                const anteil = gesamt > 0 ? (ctx.parsed / gesamt) * 100 : 0;
+                                // formatPercent, nicht toFixed: in der deutschen
+                                // Oberflaeche gehoert ein Komma und ein Leerzeichen
+                                // vor das Prozentzeichen.
+                                const pct = (typeof window.formatPercent === 'function')
+                                    ? window.formatPercent(anteil, 1) : anteil.toFixed(1) + '%';
+                                const von = `${ctx.parsed.toLocaleString(loc)} / ${gesamt.toLocaleString(loc)}`;
+                                return ` ${ctx.label}: ${von} (${pct})`;
                             }}}
                         }
                     }

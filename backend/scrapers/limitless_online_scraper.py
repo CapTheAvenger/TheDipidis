@@ -10,7 +10,7 @@ import json
 import html as html_mod
 import os
 import urllib.parse
-from datetime import datetime
+from datetime import datetime, timezone
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import List, Dict, Optional, Tuple, Any
 
@@ -125,10 +125,24 @@ def scrape_deck_statistics(
         text = p.get_text()
         m = re.search(r"(\d+)\s+tournaments,\s+(\d+)\s+players,\s+(\d+)\s+matches", text)
         if m:
+            # generated_at ist nicht Zierrat, sondern die Bedingung dafuer,
+            # dass die Zahlen ueberhaupt angezeigt werden.
+            #
+            # Bis zum 20.08.2026 stand diese Datei nicht in SYNC_PATTERNS und
+            # kam nie in data/ an: die ausgelieferte Fassung war vom
+            # 20.04.2026, waehrend die Kachel daneben ("26.319 gemeldete
+            # Listen") woechentlich frisch war. Vier Monate alte Herkunft
+            # unter einer aktuellen Zahl.
+            #
+            # js/app-tier-meta.js und js/app-meta-cards.js blenden die Zeile
+            # jetzt aus, wenn generated_at fehlt oder aelter als 14 Tage ist.
+            # Ohne dieses Feld bleibt sie also dauerhaft weg — das ist
+            # Absicht: lieber keine Herkunft als die eines anderen Tages.
             meta_stats = {
                 "tournaments": int(m.group(1)),
                 "players": int(m.group(2)),
                 "matches": int(m.group(3)),
+                "generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
             }
             meta_path = os.path.join(get_data_dir(), "limitless_meta_stats.json")
             with open(meta_path, "w", encoding="utf-8") as f:

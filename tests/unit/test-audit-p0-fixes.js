@@ -66,14 +66,29 @@ pruefe('Hero: jede Kachel trägt eine Rollen-Zeile', () => {
 // ---------------------------------------------------------------------------
 const tier = read('js/app-tier-meta.js');
 
-pruefe('Top-8-Panel: sortiert nach der angezeigten Quote, nicht nach Absolutzahl', () => {
-    const m = tier.match(/const top8Top\s*=[\s\S]{0,400}?\.slice\(0, 12\)/);
-    assert.ok(m, 'top8Top-Definition nicht gefunden');
-    const block = m[0];
-    assert.ok(/\.sort\(\(a, b\) => b\.top8ConvPct - a\.top8ConvPct/.test(block),
-        'sortiert nicht primär nach top8ConvPct — genau der Fall, der wie ein kaputtes Ranking aussah');
-    assert.ok(/CONV_MIN_N/.test(block),
-        'keine Mindeststichprobe — 2-Antritts-Decks mit 50 % würden die Liste anführen');
+// Diese Prüfung hing an `top8Top` — einer von drei Ranglisten, die am
+// 19.08.2026 in der Meta-Performance-Tabelle aufgegangen sind. Die
+// Variablen blieben als toter Code stehen, die Prüfung blieb grün, und
+// die Schranke, die sie bezeugte, wirkte in keiner gerenderten Zeile
+// mehr. Am 20.08. sind die toten Variablen weg; geprüft wird jetzt die
+// Tabelle, die es wirklich gibt.
+pruefe('Meta-Performance: sortierbar nach jeder angezeigten Spalte', () => {
+    const m = tier.match(/const SPALTEN = \[[\s\S]*?\n                    \];/);
+    assert.ok(m, 'SPALTEN-Definition nicht gefunden');
+    for (const k of ['listen', 'anteil', 'wr', 'antritte', 'cuts', 'quote', 'faktor']) {
+        assert.ok(m[0].includes(`k: '${k}'`), `Spalte ${k} fehlt`);
+    }
+    assert.ok(/data-rang-spalte="\$\{c\.k\}"/.test(tier),
+        'die Spaltenköpfe tragen keinen Sortierschlüssel');
+});
+
+pruefe('Meta-Performance: keine Faktor-Zahl unter der Mindeststichprobe', () => {
+    assert.ok(!/const (top8Top|convTop|overallTop)\s*=/.test(tier),
+        'die toten Ranglisten sind zurück — mit ihnen ein Test auf Code, der nichts rendert');
+    const zelle = tier.match(/const zelle = \(r, k\) => \{[\s\S]*?\n                    \};/);
+    assert.ok(zelle, 'Zellenfunktion nicht gefunden');
+    assert.ok(/if \(!\(r\.antritte >= CONV_MIN_N\)\)/.test(zelle[0]),
+        'die Faktor-Spalte kennt keine Untergrenze — 23 Decks ohne einen Cut zeigten "1,0-mal"');
 });
 
 // ---------------------------------------------------------------------------

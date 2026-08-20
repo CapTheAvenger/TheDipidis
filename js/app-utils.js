@@ -1444,6 +1444,51 @@ function computeConversionPerformance(rows) {
     }
     return { expected, totalBrought, totalTop8, decks };
 }
+/**
+ * Wie gross ist das Feld wirklich, wenn nur ein Teil davon gelistet ist?
+ *
+ * Limitless fuehrt alles unterhalb seiner Namensschwelle als "Other" und
+ * der Scraper laesst diese Zeile weg
+ * (backend/scrapers/limitless_online_scraper.py). Die verbleibenden
+ * Anteile summieren sich deshalb nicht auf 100, sondern am 20.08.2026 auf
+ * 96,19 %, und der Nenner, gegen den Limitless gerechnet hat, steht
+ * nirgends in der Datei. Ohne ihn zeigte der Donut fuer Mega Excadrill
+ * 8,1 %, die Tabelle daneben 7,75 % — dieselbe Groesse, zwei Zahlen.
+ *
+ * Geteilt wird NICHT (Listen / Anteilssumme haengt an der Rundung der
+ * Summe und liegt um mehrere Listen daneben). Stattdessen grenzt jede
+ * Zeile den Nenner exakt ein: der Anteil ist auf zwei Nachkommastellen
+ * gerundet, also gilt
+ *
+ *     N ∈ [ count / (s + 0,005) , count / (s − 0,005) ]
+ *
+ * Der Schnitt ueber alle Zeilen war am 20.08.2026 1,4 Listen breit:
+ * [27.356,9 ; 27.358,3] bei 26.319 gelisteten. Gibt es keine brauchbare
+ * Eingrenzung, kommt 0 zurueck — dann faellt der Aufrufer auf die Summe
+ * zurueck und schreibt keine Zahl hin, die er nicht belegen kann.
+ *
+ * @param {Array<{anteil:number,anzahl:number}>} zeilen
+ * @returns {number} gerundete Feldgroesse, oder 0
+ */
+function feldGroesseAusAnteilen(zeilen) {
+    let unten = 0, oben = Infinity, gelistet = 0, anteilSumme = 0;
+    for (const z of (zeilen || [])) {
+        const s = Number(z && z.anteil) || 0;
+        const c = Number(z && z.anzahl) || 0;
+        if (!(c > 0)) continue;
+        gelistet += c;
+        anteilSumme += s;
+        if (!(s > 0.005)) continue;
+        unten = Math.max(unten, c / ((s + 0.005) / 100));
+        oben  = Math.min(oben,  c / ((s - 0.005) / 100));
+    }
+    if (!(anteilSumme > 50) || anteilSumme >= 99.5) return 0;
+    if (!(unten > 0) || !isFinite(oben) || oben < unten) return 0;
+    const n = Math.round((unten + oben) / 2);
+    return n > gelistet ? n : 0;
+}
+window.feldGroesseAusAnteilen = feldGroesseAusAnteilen;
+
 window.computeConversionPerformance = computeConversionPerformance;
 window.CONV_PRIOR = CONV_PRIOR;
 window.CONV_THIN_N = CONV_THIN_N;

@@ -15,17 +15,29 @@
                     try { localStorage.removeItem(key); } catch (_) {}
                 });
 
-                const lastUpdate = localStorage.getItem('lastScraperUpdate') || new Date().toLocaleDateString('de-DE');
+                // Das heutige Datum ist KEIN Datenstand.
+                //
+                // Hier stand bis zum 20.08.2026:
+                //   localStorage.getItem('lastScraperUpdate') || new Date().toLocaleDateString('de-DE')
+                // und der linke Teil ist immer leer — 'lastScraperUpdate' wird
+                // nirgends im Repo geschrieben. Es lief also immer der
+                // Ersatzwert, und jeder Chip der Seite zeigte den Tag des
+                // Besuchs. Fuenf Reiter, deren Daten bis zu 19 Tage
+                // auseinanderliegen, trugen dasselbe Datum.
+                //
+                // Die Chips fuellt jetzt js/ds-datenstand.js aus dem
+                // Last-Modified der jeweiligen Datei — je Ansicht der Stand
+                // IHRER Quelle. Hier bleibt nur die Fusszeile, und die sagt
+                // "unbekannt", wenn sie es nicht weiss.
                 const lastUpdateEl = document.getElementById('last-update');
-                if (lastUpdateEl) {
-                    lastUpdateEl.textContent = lastUpdate;
+                if (lastUpdateEl && window.DsDatenstand) {
+                    window.DsDatenstand.stand('limitless_online_decks.csv').then(d => {
+                        lastUpdateEl.textContent = window.DsDatenstand.alsText(d);
+                    });
+                } else if (lastUpdateEl) {
+                    lastUpdateEl.textContent = (typeof getLang === 'function' && getLang() === 'de')
+                        ? 'unbekannt' : 'unknown';
                 }
-                // Mirror the date into all section-header freshness chips
-                // so the user always sees how fresh the data they're
-                // looking at is, not just in the footer.
-                document.querySelectorAll('.js-data-freshness').forEach(el => {
-                    el.textContent = lastUpdate;
-                });
 
                 // Tutorial-Bildsonde. Der Code dafuer liegt seit dem
                 // 18.08.2026 in js/ds-tutorial.js und laeuft dort nach

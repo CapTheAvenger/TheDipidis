@@ -211,10 +211,15 @@
         // Groesse zu wechseln. "Plus 63 Prozent" ist ohnehin schwer zu lesen,
         // weil es eine Prozentzahl VON einer Prozentzahl ist. Ein Vielfaches
         // sagt dasselbe in einem Wort: 10,1 gegen 6,2 ist "rund anderthalbmal
-        // so oft". Und weil auf eine Nachkommastelle gerundet wird, fallen
-        // roher und geglaetteter Wert hier zusammen — 1,63 gegen 1,59, beide
-        // 1,6. Die Zahl ist also die geglaettete (die belastbare) und
-        // trotzdem nachrechenbar.
+        // so oft".
+        //
+        // Hier stand bis zum 20.08.2026 der Satz, roher und geglaetteter
+        // Wert fielen auf eine Nachkommastelle zusammen. Nachgemessen gilt
+        // das fuer GENAU EIN Deck — Dragapult, 1,63 gegen 1,59. Ueber die
+        // ganze Tabelle weichen 108 von 120 Zeilen ab, Mega Greninja um den
+        // Faktor 3,3 (roh 0,12-mal, geglaettet 0,4-mal). Gezeigt wird die
+        // geglaettete Zahl, weil sie die belastbare ist; nachrechenbar ist
+        // sie damit NICHT, und der Satz darunter sagt das jetzt auch.
         const faktor = 1 + (best.perfPct / 100);
         const fak = faktor.toLocaleString(loc, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 
@@ -291,8 +296,8 @@
                 <p class="meta-hub-answer-line">${answerSentence(model)}</p>
                 <div class="ds-stat-row">${model.top.map(tile).join('')}</div>
                 <p class="ds-note">${de
-                    ? `Anteil = wie oft ein Deck gespielt wurde, gemessen an ${Math.round(model.totalBrought).toLocaleString('de-DE')} gewichteten Antritten. Top-8-Quote = wie oft es davon die Top 8 erreicht hat. Die Angabe „…-mal so oft wie der Schnitt“ vergleicht diese Quote mit ${fmtPct(model.conv.expected * 100, 1)} — so oft kommt ein durchschnittliches Deck in die Top 8. Kleine Stichproben werden dabei zum Schnitt hin geglättet. Alles aus Limitless Online.`
-                    : `Share = how often a deck was played, over ${Math.round(model.totalBrought).toLocaleString('en-US')} weighted entries. Top-8 rate = how often it reached top 8. "As often as average" compares that rate against ${fmtPct(model.conv.expected * 100, 1)} — how often an average deck makes top 8. Small samples are smoothed toward the average. All from Limitless Online.`}</p>
+                    ? `Anteil = wie oft ein Deck gespielt wurde, gemessen an ${Math.round(model.totalBrought).toLocaleString('de-DE')} gewichteten Antritten. Top-8-Quote = wie oft es davon die Top 8 erreicht hat. Die Angabe „…-mal so oft wie der Schnitt“ vergleicht diese Quote mit ${fmtPct(model.conv.expected * 100, 1)} — so oft kommt ein durchschnittliches Deck <em>mit erkanntem Archetyp</em> in die Top 8. Der Vergleichswert ist geglättet (k = ${window.CONV_PRIOR || 50}), die Quote daneben ist roh; beide Zahlen decken sich nur bei großen Stichproben. Alles aus Limitless Online.`
+                    : `Share = how often a deck was played, over ${Math.round(model.totalBrought).toLocaleString('en-US')} weighted entries. Top-8 rate = how often it reached top 8. "As often as average" compares that rate against ${fmtPct(model.conv.expected * 100, 1)} — how often an average deck <em>with a recognised archetype</em> makes top 8. That comparison value is smoothed (k = ${window.CONV_PRIOR || 50}) while the rate beside it is raw; the two only coincide on large samples. All from Limitless Online.`}</p>
             </section>`;
     }
 

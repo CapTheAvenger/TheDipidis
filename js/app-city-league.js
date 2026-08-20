@@ -937,7 +937,11 @@ function cityLeagueOffSeasonHtml() {
                 data.forEach(d => {
                     const changeValue = parseInt(d.count_change || 0);
                     const changeColor = changeValue > 0 ? '#27ae60' : changeValue < 0 ? '#e74c3c' : '#95a5a6';
-                    const placementChange = parseFloat(d.avg_placement_change || '0');
+                    // parseLocaleNumber: avg_placement_change traegt ein deutsches
+                    // Komma (Zeile 306 schreibt es mit .replace('.', ',')).
+                    // parseFloat('1,25') ergab 1 — die Aenderung wurde auf ganze
+                    // Plaetze gerundet und das Vorzeichen entschied ueber die Farbe.
+                    const placementChange = parseLocaleNumber(d.avg_placement_change || '0', 0);
                     const placementColor = placementChange < 0 ? '#27ae60' : placementChange > 0 ? '#e74c3c' : '#95a5a6';
                     const displayName = d.main.charAt(0).toUpperCase() + d.main.slice(1);
                     const variantsJson = encodeURIComponent(JSON.stringify(d.variants || []));
@@ -971,7 +975,11 @@ function cityLeagueOffSeasonHtml() {
                     const changeColor = changeValue > 0 ? '#27ae60' : changeValue < 0 ? '#e74c3c' : '#95a5a6';
                     const changeText = changeValue > 0 ? `+${changeValue}` : `${changeValue}`;
                     
-                    const placementChange = parseFloat(d.avg_placement_change || '0');
+                    // parseLocaleNumber: avg_placement_change traegt ein deutsches
+                    // Komma (Zeile 306 schreibt es mit .replace('.', ',')).
+                    // parseFloat('1,25') ergab 1 — die Aenderung wurde auf ganze
+                    // Plaetze gerundet und das Vorzeichen entschied ueber die Farbe.
+                    const placementChange = parseLocaleNumber(d.avg_placement_change || '0', 0);
                     const placementColor = placementChange < 0 ? '#27ae60' : placementChange > 0 ? '#e74c3c' : '#95a5a6';
                     const placementText = placementChange > 0 ? `+${placementChange.toFixed(2)}` : placementChange.toFixed(2);
                     

@@ -237,6 +237,33 @@
           sizes.set(tid, total);
         }
       }
+      // Dieselbe Groesse noch einmal unter der Limitless-Kennung ablegen.
+      //
+      // data/tournament_decklists_per_player.csv fuehrt zwei Turniere:
+      // Turin (tournament_id '0069') und NAIC 2026, dessen tournament_id
+      // LEER ist — der Lauf vom 16.06.2026 lief, bevor der Override
+      // 518 -> 0070 griff. _byList faellt deshalb auf
+      // limitless_tournament_id '518' zurueck, und '518' steht in keiner
+      // Labs-Datei. _sizeWeight(0) vergab still den Notwert 0,5.
+      //
+      // Gemessen: NAIC (3.743 Spieler, 675 Listen) trug 44,1 % der
+      // Gewichtsmasse statt 61,2 % — 17,1 Prozentpunkte. Sichtbar wurde
+      // das als bis zu 3,2 pp auf Karten-Inklusionsanteilen und als 23
+      // von 935 Karten, die anders ueber die Core-Schwelle fielen.
+      //
+      // Die Bruecke steht in tournament_cards_data_overview.csv
+      // (tournament_id -> labs_tournament_id) und ist genau dafuer da.
+      try {
+        const ueber = await _loadCsv('data/tournament_cards_data_overview.csv');
+        for (const r of ueber) {
+          const limitless = String(r.tournament_id || '').trim();
+          const labs = String(r.labs_tournament_id || '').trim();
+          if (!limitless || !labs || sizes.has(limitless)) continue;
+          if (sizes.has(labs)) sizes.set(limitless, sizes.get(labs));
+        }
+      } catch (e) {
+        console.warn('[MostConsistencyBuilder] keine Turnier-Bruecke:', e);
+      }
     } catch (e) {
       console.warn('[MostConsistencyBuilder] could not load labs sizes:', e);
     }

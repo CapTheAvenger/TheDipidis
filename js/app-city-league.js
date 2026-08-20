@@ -1,21 +1,97 @@
-// Saisonpause ist kein Fehler. Bis zum 17.08.2026 stand sie in einem roten
+﻿// Saisonpause ist kein Fehler. Bis zum 17.08.2026 stand sie in einem roten
 // Fehlerkasten (class="error") — alle drei Personas im Audit haben das als
 // "die Seite ist kaputt" gelesen. Die JP-Rotation leert die Current-CSVs
 // planmaessig; was fehlt, ist eine Erklaerung und ein Weiterweg, kein Alarm.
-function cityLeagueOffSeasonHtml() {
+//
+// Zwei Faelle, eine Meldung — das war zu wenig.
+//
+// "Saisonpause" stand am 20.08.2026 auf BEIDEN Reitern. Fuer das laufende
+// Format ist die Aussage richtig: die Rotation auf M6 am 31.07. hat die
+// Dateien planmaessig geleert (Commit b6ecb0ab). Fuer den Reiter
+// "Vergangenes Meta" ist sie sachlich falsch — die Vergangenheit pausiert
+// nicht. Dort fehlt der Schnappschuss: die Rotation hat auch die
+// _past-Dateien geleert, und der Nachlauf hat nur
+// city_league_analysis_past.csv wieder gefuellt (315 Zeilen, ein einziges
+// Turnier, 23 Listen). city_league_archetypes_past.csv, aus der das
+// Auswahlmenue gebaut wird, ist bis heute leer. Zwei Dateien desselben
+// Fensters widersprechen sich, und der Reiter sagt "Pause".
+//
+// Und: "in der Regel wenige Tage nach dem Release" stand da, als das
+// Release 20 Tage zurueck lag. Wer das liest, wartet auf etwas, das
+// offenbar nicht kommt. Die Zahl der Tage steht jetzt dabei.
+//
+// data/format_window.json wird an vier Stellen im Haus geladen, aber
+// nirgends abgelegt. Hier einmal holen und merken; fehlt sie, bleibt die
+// Tagesangabe einfach weg — lieber keine Zahl als eine geratene.
+var _clFormatFenster = null;
+var _clAusgewichen = false;
+(function ladeFormatFenster() {
+    try {
+        var basis = (typeof BASE_PATH === 'string' && BASE_PATH) ? BASE_PATH : 'data/';
+        fetch(basis + 'format_window.json?t=' + Date.now())
+            .then(function (r) { return r && r.ok ? r.json() : null; })
+            .then(function (j) { _clFormatFenster = j || null; })
+            .catch(function () { _clFormatFenster = null; });
+    } catch (e) { _clFormatFenster = null; }
+})();
+
+function cityLeagueTageSeitRotation() {
+    try {
+        var w = _clFormatFenster;
+        var d = w && w.jp_release_date ? new Date(w.jp_release_date + 'T00:00:00Z') : null;
+        if (!d || isNaN(d.getTime())) return null;
+        var tage = Math.floor((Date.now() - d.getTime()) / 86400000);
+        return tage >= 0 ? tage : null;
+    } catch (e) { return null; }
+}
+
+function cityLeagueOffSeasonHtml(istVergangenheit) {
     var de = (typeof getLang === 'function' && getLang() === 'de');
     if (window.DsNav) { try { window.DsNav.setSpaceFacts({ pause: true }, 'jp'); } catch (e) {} }
-    return '<div class="ds-empty">' +
-        '<div class="ds-empty-title">' + (de
-            ? 'Saisonpause in Japan'
-            : 'Off-season in Japan') + '</div>' +
-        '<p class="ds-empty-body">' + (de
+    var tage = cityLeagueTageSeitRotation();
+    var titel, text;
+    if (istVergangenheit) {
+        titel = de ? 'Kein Vergangenheits-Schnappschuss' : 'No past snapshot';
+        text = de
+            ? 'Die Set-Rotation hat auch die Vergangenheits-Dateien geleert, und der Nachlauf '
+              + 'hat sie nicht wieder gefuellt. Die Vergangenheit pausiert nicht \u2014 hier fehlt '
+              + 'schlicht der Schnappschuss des letzten vollstaendigen Zeitraums.'
+            : 'The set rotation emptied the past-snapshot files as well, and the follow-up run '
+              + 'never refilled them. The past does not pause \u2014 the snapshot of the last '
+              + 'complete window is simply missing.';
+        if (_clAusgewichen) {
+            titel = de ? 'Keine City-League-Daten' : 'No City League data';
+            text = (de
+                ? 'Im laufenden Format ist noch kein Turnier gescrapt'
+                  + (tage != null ? ' \u2014 die Rotation liegt ' + tage + ' Tage zurueck' : '')
+                  + '. Und der Vergangenheits-Schnappschuss fehlt ebenfalls: die Rotation hat '
+                  + 'auch ihn geleert, der Nachlauf hat ihn nicht wieder gefuellt. '
+                : 'No tournament in the current format has been scraped yet'
+                  + (tage != null ? ' \u2014 the rotation was ' + tage + ' days ago' : '')
+                  + '. And the past snapshot is missing as well: the rotation emptied it too and '
+                  + 'the follow-up run never refilled it. ')
+                + (de
+                    ? 'Beide Ansichten sind deshalb leer \u2014 keine Zahl fehlt, es fehlen die Daten.'
+                    : 'Both views are therefore empty \u2014 no number is missing, the data is.');
+        }
+    } else {
+        titel = de ? 'Saisonpause in Japan' : 'Off-season in Japan';
+        text = de
             ? 'Die City League pausiert zwischen zwei Set-Rotationen. Sobald das erste Turnier '
-              + 'im neuen Format gescrapt ist, stehen die Zahlen hier wieder \u2014 in der Regel '
-              + 'wenige Tage nach dem Release.'
+              + 'im neuen Format gescrapt ist, stehen die Zahlen hier wieder.'
             : 'The City League pauses between set rotations. Numbers return here as soon as the '
-              + 'first tournament in the new format has been scraped \u2014 usually a few days '
-              + 'after release.') + '</p>' +
+              + 'first tournament in the new format has been scraped.';
+        if (tage != null) {
+            text += de
+                ? ' Die Rotation liegt ' + tage + ' Tage zurueck; seither ist kein Turnier '
+                  + 'im neuen Format gescrapt worden.'
+                : ' The rotation was ' + tage + ' days ago; no tournament in the new format has '
+                  + 'been scraped since.';
+        }
+    }
+    return '<div class="ds-empty">' +
+        '<div class="ds-empty-title">' + titel + '</div>' +
+        '<p class="ds-empty-body">' + text + '</p>' +
         '<button type="button" class="ds-empty-cta" onclick="switchTabAndUpdateMenu(\'current-meta\')">' +
         (de ? 'Stattdessen das globale Meta ansehen' : 'Look at the global meta instead') +
         '</button></div>';
@@ -55,8 +131,26 @@ function cityLeagueOffSeasonHtml() {
                 .replace(/['‘’‛`´ʼ]/g, "'")
                 .replace(/\s+/g, ' ');
         }
+        /**
+         * "mega " streichen — wiederholt und auch mitten im Namen.
+         *
+         * Der City-League-Vergleichsscraper schreibt fuenf Archetypen mit
+         * doppeltem Praefix: "Mega Mega Charizard-X Zoroark",
+         * "Typhlosion Mega Mega Charizard-X". Das alte
+         * `replace(/^mega /, '')` strich genau ein fuehrendes Vorkommen,
+         * und beim Ziel "Typhlosion Mega Mega Charizard-X" steht das
+         * Praefix nicht einmal vorn. Die fuenf blieben unaufloesbar, die
+         * Kartenauswahl lieferte 0 Zeilen ohne jede Meldung (9 Decks).
+         *
+         * Die Ursache liegt im Scraper — dort entsteht das doppelte
+         * Praefix, und dort gehoert sie behoben. Bis dahin faengt der
+         * Aufloeser sie, statt still eine leere Liste zu zeigen.
+         */
         function _normalizeArchetypeNoMega(name) {
-            return _normalizeArchetypeForMatch(name).replace(/^mega /, '');
+            let n = _normalizeArchetypeForMatch(name);
+            let vorher;
+            do { vorher = n; n = n.replace(/\bmega mega\b/g, 'mega'); } while (n !== vorher);
+            return n.replace(/^mega /, '');
         }
         function _resolveArchetypeNames(targets, dataArchetypes) {
             if (!Array.isArray(targets) || targets.length === 0) return [];
@@ -238,6 +332,12 @@ function cityLeagueOffSeasonHtml() {
         // notice the CSV is non-empty on the next load and stop
         // fallback-ing.
         function _applyCityLeaguePastFallback() {
+            // Gemerkt, damit die Leermeldung sagen kann, dass BEIDES fehlt:
+            // der Nutzer hat den laufenden Reiter geoeffnet und landet nach
+            // dem Ausweichen im Vergangenheitsformat. Ohne diese Notiz
+            // stuende "Kein Vergangenheits-Schnappschuss" ueber einer
+            // Ansicht, nach der niemand gefragt hat.
+            _clAusgewichen = true;
             window.currentCityLeagueFormat = 'past';
             try { localStorage.setItem('cityLeagueFormat', 'past'); } catch (_) { /* private mode */ }
             // Disable the "Current Meta" option in both dropdowns so a
@@ -416,7 +516,7 @@ function cityLeagueOffSeasonHtml() {
                         return loadCityLeagueData(_fallbackDepth + 1);
                     }
                     console.error('Hauptdaten fehlen fuer Format:', format);
-                    content.innerHTML = cityLeagueOffSeasonHtml();
+                    content.innerHTML = cityLeagueOffSeasonHtml(format === 'past');
                     return;
                 }
 
@@ -479,7 +579,7 @@ function cityLeagueOffSeasonHtml() {
                         return loadCityLeagueData(_fallbackDepth + 1);
                     }
                     console.info('City League: no main data for format', format, '— expected during the season pause (no tournaments running).');
-                    content.innerHTML = cityLeagueOffSeasonHtml();
+                    content.innerHTML = cityLeagueOffSeasonHtml(format === 'past');
                     return;
                 }
 
@@ -587,7 +687,8 @@ function cityLeagueOffSeasonHtml() {
                     '.deck-banner-card, .tier-section, .tier-hero-card, .city-league-table-wrap, .meta-share-section'
                 );
                 if (content && !renderedSomething) {
-                    content.innerHTML = cityLeagueOffSeasonHtml();
+                    content.innerHTML = cityLeagueOffSeasonHtml(
+                        (window.currentCityLeagueFormat || 'current') === 'past');
                 }
             }
         }
@@ -1272,7 +1373,7 @@ function cityLeagueOffSeasonHtml() {
                 if (tableContainer) {
                     const errorMsg = 'Error loading City League Analysis data';
                     console.error(errorMsg, { format, hasAnalysis: !!data, hasArchetypes: !!archetypesData });
-                    tableContainer.innerHTML = cityLeagueOffSeasonHtml();
+                    tableContainer.innerHTML = cityLeagueOffSeasonHtml(format === 'past');
                 }
             }
         }

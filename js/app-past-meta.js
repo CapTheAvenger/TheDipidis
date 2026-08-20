@@ -108,6 +108,38 @@
         const parsePastMetaNumber = (value, fallback = 0) =>
             window.parseLocaleNumber(value, fallback);
 
+        /**
+         * Eine Zahl nur dann uebernehmen, wenn das Feld auch wie eine Zahl
+         * aussieht.
+         *
+         * data/tournament_cards_data_cards_TEF-CRI.csv ist zu 46,1 %
+         * fehlerhaft geschrieben (1.263 von 2.737 Zeilen, alle aus Turnier
+         * 540): ein Python-Listen-Text ist in die Zeile geraten und
+         * zerreisst drei Spalten. Aus average_count wird `4,"['0`, aus
+         * percentage_in_archetype `100', '0`, aus is_ace_spec `No']"`.
+         *
+         * parseLocaleNumber liest davon den Ganzzahlteil und liefert eine
+         * Zahl, die groesser als 0 ist — die Anzeige haelt sie deshalb fuer
+         * gueltig und rechnet NICHT neu. Angezeigt wurden dadurch bis zu
+         * 309 falsche Durchschnitts-Kopienzahlen (max. 0,97 daneben).
+         *
+         * Die uebrigen Spalten derselben Zeile (total_count,
+         * deck_inclusion_count, total_decks_in_archetype) sind unversehrt,
+         * und aus ihnen rechnet die Aggregation beide Werte ohnehin neu.
+         * Es genuegt also, den zerrissenen Wert als FEHLEND zu behandeln
+         * statt als Zahl. Nichts wird geraten, nur nichts Falsches gezeigt.
+         *
+         * Behoben gehoert das im Schreibweg — backend prueft seine Ausgabe
+         * seit dem 20.08.2026 gegen dieselbe Form.
+         */
+        const PM_ZAHL_FORM = /^\s*-?\d+(?:[.,]\d+)?\s*$/;
+        function pastMetaZahlFeld(value, fallback = null) {
+            if (value == null || value === '') return fallback;
+            if (typeof value === 'number') return isFinite(value) ? value : fallback;
+            if (!PM_ZAHL_FORM.test(String(value))) return fallback;
+            return window.parseLocaleNumber(value, fallback == null ? 0 : fallback);
+        }
+
         function normalizeCardAggregationKey(name) {
             if (typeof normalizeCardName === 'function') {
                 return normalizeCardName(name);
@@ -525,13 +557,22 @@
                     }
                     
                     // Store card data directly in the deck
+                    // Zerrissene Felder kommen als leerer String durch, nicht
+                    // als Zahl — die Aggregation rechnet sie dann aus den
+                    // unversehrten Spalten neu, statt einen halben Wert zu
+                    // zeigen. Siehe pastMetaZahlFeld.
+                    const zerrissen = (v) => {
+                        const z = pastMetaZahlFeld(v, null);
+                        return z == null ? '' : z;
+                    };
                     deckMap.get(deckKey).cards.push({
                         ...card,
                         total_count: parsePastMetaNumber(card.total_count, 0),
                         card_count: parsePastMetaNumber(card.average_count_overall, 0),
-                        average_count: parsePastMetaNumber(card.average_count, 0),
+                        average_count: zerrissen(card.average_count),
                         average_count_overall: parsePastMetaNumber(card.average_count_overall, 0),
-                        percentage_in_archetype: parsePastMetaNumber(card.percentage_in_archetype, 0),
+                        percentage_in_archetype: zerrissen(card.percentage_in_archetype),
+                        is_ace_spec: /^(yes|true|1)$/i.test(String(card.is_ace_spec || '').trim()),
                         decklist_count: parseInt(card.total_decks_in_archetype || 1, 10) || 1,
                         deck_count: parseInt(card.deck_inclusion_count || card.deck_count || 0, 10) || 0,
                         deck_inclusion_count: parseInt(card.deck_inclusion_count || card.deck_count || 0, 10) || 0
@@ -1454,6 +1495,46 @@
             }
         }
 
+        /**
+         * Drei Kennungen fuer dasselbe Turnier.
+         *
+         * Das Auswahlmenue traegt die Limitless-ID aus
+         * tournament_cards_data_overview.csv (391…552). Die Labs-Dateien
+         * fuehren ihre eigene, vierstellige Kennung (0001…0070), und
+         * labs_tournament_matchups_*.csv schreibt dieselbe Zahl noch einmal
+         * ohne fuehrende Nullen in tournaments_used ('69,70').
+         *
+         * Verglichen wurde bis zum 20.08.2026 die Limitless-ID gegen die
+         * Labs-ID. Die Schnittmenge beider Mengen ist LEER — bei jeder
+         * Einzelturnier-Auswahl blieben Leistungskacheln und
+         * Matchup-Tabelle leer, obwohl die Daten im Repo liegen (Spezial
+         * Turin, Labs 0069: 383 Listen; NAIC, Labs 0070: 675 Listen).
+         *
+         * Die Uebersetzungsspalte stand die ganze Zeit in derselben Datei,
+         * aus der das Menue gebaut wird: labs_tournament_id. Sie wurde im
+         * Frontend nie gelesen.
+         */
+        function pastMetaLabsTid(limitlessTid) {
+            const gesucht = String(limitlessTid == null ? '' : limitlessTid).trim();
+            if (!gesucht) return null;
+            const eintrag = (pastMetaTournaments || []).find(
+                t => String(t.tournament_id || '').trim() === gesucht);
+            const labs = eintrag ? String(eintrag.labs_tournament_id || '').trim() : '';
+            if (!labs) return null;
+            const roh = String(Number(labs));
+            return { gepolstert: labs, roh: isNaN(Number(labs)) ? labs : roh };
+        }
+
+        /** Trifft eine Kennung aus einer Labs-Datei die gewaehlte Auswahl? */
+        function pastMetaTidPasst(kandidat, tids) {
+            if (!tids) return true;
+            const k = String(kandidat == null ? '' : kandidat).trim();
+            if (!k) return false;
+            if (k === tids.gepolstert || k === tids.roh) return true;
+            const n = Number(k);
+            return !isNaN(n) && String(n) === tids.roh;
+        }
+
         async function renderPastMetaPerformance(archetype, formatKey, tournamentFilter) {
             const section = document.getElementById('pastMetaPerformanceSection');
             const cards   = document.getElementById('pastMetaPerformanceCards');
@@ -1486,10 +1567,21 @@
             // (the labs CSV uses the same canonical archetype label as
             // tournament_cards_data_cards_<META>.csv, sanitized of price
             // tags). When a single tournament is selected, narrow further.
-            const wantedTid = tournamentFilter && tournamentFilter !== 'all' ? String(tournamentFilter) : null;
+            const gewaehlt = tournamentFilter && tournamentFilter !== 'all' ? String(tournamentFilter) : null;
+            const wantedTid = gewaehlt ? pastMetaLabsTid(gewaehlt) : null;
+            // Ein Turnier ohne Labs-Kennung kann hier nichts liefern. Das
+            // sagen, statt eine leere Ansicht als "keine Zeilen" auszugeben.
+            if (gewaehlt && !wantedTid) {
+                cards.innerHTML = `<p class="past-meta-section-hint past-meta-empty-state">${
+                    (typeof getLang === 'function' && getLang() === 'de')
+                        ? 'Fuer dieses Turnier gibt es keine Turnierauswertung — es fehlt die Zuordnung zu den Labs-Daten.'
+                        : 'No tournament breakdown for this event — it has no link to the labs data.'}</p>`;
+                matchup.innerHTML = '';
+                return;
+            }
             const deckRows = decksRows.filter(r => {
                 if ((r.deck_name || '').trim() !== archetype) return false;
-                if (wantedTid && (r.tournament_id || '').trim() !== wantedTid) return false;
+                if (!pastMetaTidPasst(r.tournament_id, wantedTid)) return false;
                 return true;
             });
 
@@ -1585,9 +1677,11 @@
                 if ((r.my_deck_name || '').trim() !== archetype) return false;
                 if ((r.day_filter || '').trim() !== 'overall') return false;
                 if (tournamentFilter) {
-                    // tournaments_used is comma-separated; check membership
-                    const used = (r.tournaments_used || '').split(',').map(s => s.trim());
-                    if (!used.includes(String(tournamentFilter))) return false;
+                    // tournaments_used ist kommagetrennt und schreibt die
+                    // Labs-Kennung OHNE fuehrende Nullen ('69,70'). Beide
+                    // Schreibweisen zaehlen.
+                    const used = (r.tournaments_used || '').split(',');
+                    if (!used.some(x => pastMetaTidPasst(x, tournamentFilter))) return false;
                 }
                 return true;
             });

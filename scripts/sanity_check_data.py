@@ -18,14 +18,21 @@ the row in the table as documentation and surfaces a warning if a
 future scrape DOES come back with data.
 
 Usage:
-    python3 scripts/sanity_check_data.py [DATA_DIR]
+    python3 scripts/sanity_check_data.py [DATA_DIR] [--strict]
 
-Defaults DATA_DIR to ./data/. Returns 0 always (the failure mode is
-soft — we revert files and warn, never abort the workflow).
+Defaults DATA_DIR to ./data/. Returns 0 by default (the failure mode is
+soft — we revert files and warn, never abort the workflow), so the
+weekly commit step below still runs and the previous good snapshot is
+what gets pushed.
 
 Exit-code policy:
     0  → ran successfully (regardless of how many reverts happened)
     1  → script bug (couldn't open data dir etc.) — propagates to CI
+    1  → with --strict: at least one file was reverted
+
+Eine fehlende oder unlesbare Datei ist seit 21.08.2026 kein SKIP mehr,
+sondern derselbe Revert-Pfad wie "zu wenige Zeilen", mit ::error::
+statt ::warning:: — ein Loch faellt sonst leiser auf als eine Delle.
 """
 
 from __future__ import annotations
@@ -72,9 +79,13 @@ THRESHOLDS: Dict[str, int] = {
     # Lauf sie auf M6 plus vier Promo-Sets zusammengestrichen hatte; M5,
     # M4 und M3 waren verschwunden. Die Datei stand bis dahin in KEINER
     # der beiden Listen hier, der Verlust fiel also nirgends auf.
-    # Schwelle bewusst unter dem heutigen Stand: sie soll den Totalverlust
-    # abfangen, nicht eine legitime Rotation blockieren.
-    'japanese_cards_database.csv':           400,     # 772 beobachtet
+    # Am 21.08.2026 wurden M4 (83) und M5 (81) aus der Git-Historie
+    # zurueckgespielt — 936 Zeilen. Die Schwelle liegt jetzt UEBER den
+    # damaligen 772: genau der Zusammenbruch, der unbemerkt blieb, wuerde
+    # ab sofort anschlagen. Die eigentliche Absicherung ist die
+    # Veraenderungspruefung in scripts/data_guardian.py (Verlust > 10 % und
+    # verschwundene Set-Codes) — diese Zahl ist der grobe Auffangbalken.
+    'japanese_cards_database.csv':           850,     # 936 beobachtet
 
     # ── Card master DB: 0-row would brick the Card Database tab.
     'all_cards_database.csv':                15_000,  # 20 248 observed
@@ -96,7 +107,60 @@ THRESHOLDS: Dict[str, int] = {
     'city_league_archetypes.csv':            0,
     'city_league_archetypes_comparison.csv': 0,
     'city_league_archetypes_deck_stats.csv': 0,
+
+    # ── City League Japan, VERGANGENES Fenster (M5). Anders als die
+    # vier oben duerfen diese nicht leer sein: im Vorfenster stand ein
+    # grosses Championship-Turnier. Die Kartenanalyse desselben
+    # Fensters hat 315 Zeilen, die Archetypdatei am 21.08.2026 genau
+    # eine (nur den Kopf) — die beiden widersprechen sich seither.
+    # Schwelle 0 heisst hier "beobachtet, solange der Past-Scraper
+    # nichts liefert"; sie steigt auf einen echten Wert, sobald der
+    # Lauf die Zeilen zurueckbringt (S9).
+    'city_league_analysis_past.csv':         100,   # 315 beobachtet
+    'city_league_archetypes_past.csv':       0,     # SOLL: > 0, siehe S9
+    'city_league_archetypes_past_comparison.csv':  0,
+    'city_league_archetypes_past_deck_stats.csv':  0,
 }
+
+
+# ── S19: Glob-Regeln. Die Chunkdateien heissen nach ihrem Format
+# (tournament_cards_data_cards_TEF-CRI.csv, labs_tournament_decks_
+# SVI-JTG.csv …), es kommen mit jeder Rotation neue dazu. Eine feste
+# Schwelle je Datei waere hier eine Pflegeaufgabe, die niemand macht —
+# also wird jede Datei gegen ihren EIGENEN letzten committeten Stand
+# gemessen. Verliert sie mehr als GLOB_MAX_LOSS ihrer Zeilen, wird sie
+# zurueckgesetzt. Wachsen darf sie beliebig.
+#
+# Das ist genau der Fall, den die Zeilenzahl-Tabelle oben nicht
+# abdeckt: 1.263 von 2.737 Zeilen im Turin-Chunk waren im August 2026
+# beschaedigt, ohne dass eine einzige Schwelle angeschlagen haette.
+GLOB_RULES: tuple = (
+    'tournament_cards_data_cards_*.csv',
+    'labs_tournament_decks_*.csv',
+    'labs_tournament_matchups_*.csv',
+)
+GLOB_MAX_LOSS = 0.10   # mehr als 10 % weniger Zeilen als in HEAD = Revert
+
+
+def head_csv_rows(path: str, repo_root: str) -> int:
+    """Zeilenzahl derselben Datei im letzten Commit. -1, wenn die Datei
+    dort nicht existiert (neu angelegt) oder git nicht antwortet."""
+    try:
+        rel = os.path.relpath(path, repo_root).replace(os.sep, '/')
+        res = subprocess.run(
+            ['git', 'show', f'HEAD:{rel}'],
+            cwd=repo_root, capture_output=True, timeout=60,
+        )
+        if res.returncode != 0 or not res.stdout:
+            return -1
+        text = res.stdout.decode('utf-8', errors='replace')
+        zeilen = text.count(chr(10))
+        # Kopfzeile abziehen; eine Datei ohne abschliessenden Zeilenumbruch
+        # zaehlt eine Zeile weniger, das faellt bei der 10-%-Grenze nicht
+        # ins Gewicht.
+        return max(0, zeilen - 1)
+    except (subprocess.SubprocessError, OSError):
+        return -1
 
 
 # Files that should normally be EMPTY — emit a warning when rows
@@ -142,7 +206,9 @@ def git_checkout(path: str, repo_root: str) -> bool:
 
 
 def main(argv: list[str]) -> int:
-    data_dir = argv[1] if len(argv) > 1 else 'data'
+    args = [a for a in argv[1:] if not a.startswith('--')]
+    strict = '--strict' in argv[1:]
+    data_dir = args[0] if args else 'data'
     repo_root = os.path.abspath(os.path.join(os.path.dirname(data_dir), '.'))
     data_dir_abs = os.path.abspath(data_dir)
 
@@ -161,12 +227,30 @@ def main(argv: list[str]) -> int:
 
     for fname, threshold in sorted(THRESHOLDS.items()):
         path = os.path.join(data_dir_abs, fname)
+
+        # S4 — die beiden folgenden Faelle waren bis 21.08.2026 ein
+        # `continue`: eine geloeschte und eine unlesbare Datei rutschten
+        # leiser durch das Tor als eine zu kurze. Beides ist schwerer als
+        # "zu wenige Zeilen", also derselbe Weg (Revert aus HEAD) plus
+        # ::error:: statt ::warning::.
         if not os.path.isfile(path):
-            print(f'  SKIP  {fname:55s} (file not on disk)')
+            ok = git_checkout(path, repo_root)
+            tag = 'RESTORED' if ok else 'RESTORE-FAILED'
+            reverts.append(f'{fname}: fehlt → {tag}')
+            print(f'  ❌ {fname:55s} {"fehlt":>8}        ({tag})')
+            print(f'    ::error::Data sanity: {fname} fehlt auf der Platte; '
+                  f'aus HEAD wiederhergestellt ({tag})')
             continue
+
         rows = count_csv_rows(path)
         if rows < 0:
-            print(f'  SKIP  {fname:55s} (read error)')
+            ok = git_checkout(path, repo_root)
+            tag = 'REVERTED' if ok else 'REVERT-FAILED'
+            reverts.append(f'{fname}: unlesbar → {tag}')
+            print(f'  ❌ {fname:55s} {"unlesbar":>8}     ({tag})')
+            print(f'    ::error::Data sanity: {fname} ist nicht lesbar '
+                  f'(Kodierung oder E/A); auf den letzten guten Stand '
+                  f'zurueckgesetzt ({tag})')
             continue
 
         if threshold == 0:
@@ -189,6 +273,50 @@ def main(argv: list[str]) -> int:
         else:
             passes.append(f'{fname}: {rows} rows')
             print(f'  ✓     {fname:55s} {rows:>8} rows  (≥{threshold})')
+
+    # ── S19: Glob-Regeln gegen den eigenen HEAD-Stand ──
+    import glob as _glob
+    glob_treffer = 0
+    for muster in GLOB_RULES:
+        for path in sorted(_glob.glob(os.path.join(data_dir_abs, muster))):
+            fname = os.path.basename(path)
+            if fname in THRESHOLDS:
+                continue          # feste Schwelle gewinnt
+            if fname in ANOMALY_WATCH:
+                continue          # soll leer sein — Schrumpfen ist dort gut
+            glob_treffer += 1
+            rows = count_csv_rows(path)
+            vorher = head_csv_rows(path, repo_root)
+            if rows < 0:
+                ok = git_checkout(path, repo_root)
+                tag = 'REVERTED' if ok else 'REVERT-FAILED'
+                reverts.append(f'{fname}: unlesbar → {tag}')
+                print(f'  ❌ {fname:55s} {"unlesbar":>8}     ({tag})')
+                print(f'    ::error::Data sanity: {fname} ist nicht lesbar; '
+                      f'auf den letzten guten Stand zurueckgesetzt ({tag})')
+                continue
+            if vorher < 0:
+                passes.append(f'{fname}: {rows} rows (neu)')
+                print(f'  ✓     {fname:55s} {rows:>8} rows  (neu, kein Vergleich)')
+                continue
+            grenze = int(vorher * (1 - GLOB_MAX_LOSS))
+            if rows < grenze:
+                ok = git_checkout(path, repo_root)
+                tag = 'REVERTED' if ok else 'REVERT-FAILED'
+                reverts.append(f'{fname}: {rows} < {grenze} (HEAD {vorher}) → {tag}')
+                print(f'  ❌ {fname:55s} {rows:>8} rows  (HEAD {vorher}, {tag})')
+                print(f'    ::warning::Data sanity: {fname} verliert '
+                      f'{vorher - rows} von {vorher} Zeilen '
+                      f'(> {int(GLOB_MAX_LOSS * 100)} %); auf den letzten '
+                      f'guten Stand zurueckgesetzt')
+            else:
+                passes.append(f'{fname}: {rows} rows (HEAD {vorher})')
+                print(f'  ✓     {fname:55s} {rows:>8} rows  (HEAD {vorher})')
+    if glob_treffer:
+        print(f'  … {glob_treffer} Chunkdatei(en) gegen den eigenen '
+              f'HEAD-Stand geprueft (Verlustgrenze '
+              f'{int(GLOB_MAX_LOSS * 100)} %)')
+        print()
 
     # Anomaly watch — files that should be empty (F-D08 __unsorted etc.).
     anomalies: list[str] = []
@@ -216,9 +344,14 @@ def main(argv: list[str]) -> int:
         for a in anomalies:
             print(f'  - {a}')
 
-    # Always exit 0: the failure mode is "this file got rolled back",
-    # not "the entire pipeline is broken". The reverts produce
-    # ::warning:: lines that the workflow summary will surface.
+    # Exit 0 by default: the failure mode is "this file got rolled back",
+    # not "the entire pipeline is broken" — and a hard failure here would
+    # skip the commit step below, which would throw away the good data
+    # too. The reverts produce ::warning:: / ::error:: lines that the
+    # workflow summary surfaces. --strict flips this for callers that
+    # want the gate to bite.
+    if strict and reverts:
+        return 1
     return 0
 
 

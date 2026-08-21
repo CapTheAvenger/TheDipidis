@@ -129,10 +129,14 @@ describe('Karten der Format-Staples', () => {
         assert.match(TIER, /alt="\$\{escapeHtml\(card\.name\)\}"/);
     });
 
-    it('"% Usage" und "decks" sind uebersetzt', () => {
+    it('"% Usage" ist uebersetzt und der Nenner heisst Archetypen, nicht Decks', () => {
+        // F21 (Audit 2, 21.08.2026): der Nenner der Top-Cards-Prozente ist die
+        // Zahl der Archetypen (gemessen 60), nicht der Decklisten. "der Decks"
+        // suggerierte 26.319 Listen. Deshalb jetzt "der Archetypen".
         assert.ok(!/% Usage/.test(TIER), '"% Usage" steht wieder da');
         assert.ok(!/\}\s*decks<\/div>/.test(TIER), '"decks" steht wieder fest verdrahtet da');
-        assert.match(TIER, /deLbl \? 'der Decks' : 'of decks'/);
+        assert.match(TIER, /deLbl \? 'der Archetypen' : 'of archetypes'/);
+        assert.ok(!/'der Decks' : 'of decks'/.test(TIER), '"der Decks" ist wieder da');
     });
 
     it('die Prozentzahl laeuft ueber fmtPct', () => {

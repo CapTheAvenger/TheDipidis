@@ -207,7 +207,108 @@ def summarize_csv(text):
             else:                                # move / ability / teammate
                 items.append({"name": r.get("name", "").strip(), "pct": pct})
         out[OUT_KEY.get(cat, cat)] = items
+
+    pruefe_plausibel(out)
     return out
+
+
+# Wie weit darf eine Anteilsliste ueber 100 % liegen, bevor sie als kaputt
+# gilt? Die Quelle rundet auf eine Nachkommastelle und zeigt eine gekuerzte
+# Liste; 105 % laesst dafuer reichlich Luft. Gemessen am Datenstand vom
+# 20.08.2026 liegt kein gesunder Eintrag ueber 101,4 %.
+SUMMEN_GRENZE = 105.0
+
+# Nur die Kategorien, in denen sich die Anteile auf ~100 % addieren MUESSEN.
+# Attacken tun das nicht (ein Pokemon hat vier), Teamkameraden auch nicht.
+SUMMEN_KATEGORIEN = ("held_item", "nature", "ability")
+
+
+def pruefe_plausibel(block):
+    """Meldet und entschaerft unmoegliche Anteilslisten — repariert nichts.
+
+    Zwei Befunde vom 20.08.2026, beide in data/champions_usage.json:
+
+      * Acht Item-Listen summieren sich auf bis zu 139,1 %, und in JEDER
+        steht an Position 6 exakt 53,9 % — bei fuenf verschiedenen Items
+        (Leftovers, Wise Glasses, Magnet …). Ein konstanter Wert an fester
+        Position ueber neun voneinander unabhaengige Pokemon ist keine
+        Nutzungszahl, sondern ein Wert aus einer anderen Spalte.
+      * Sechs Wesens-Listen fuehren dieselbe Zeile zweimal (Flareon
+        'Adamant', Rotom 'Bold' …); rotom-fan kommt damit auf 105,4 %.
+
+    Was hier NICHT passiert: den richtigen Wert erraten. Er steht nur an
+    der Quelle, und die ist aus dem Build heraus nicht nachpruefbar. Der
+    unmoegliche Wert wird auf None gesetzt und die Liste bekommt einen
+    Vermerk — eine gemeldete Luecke ist heilbar, eine falsche Zahl sieht
+    richtig aus. Die Oberflaeche kann mit pct = None seit jeher umgehen.
+    """
+    meldungen = []
+
+    for kat in SUMMEN_KATEGORIEN:
+        liste = block.get(kat) or []
+        if not liste:
+            continue
+
+        # 1. Dieselbe Zeile zweimal.
+        gesehen, doppelt = set(), []
+        entdoppelt = []
+        for e in liste:
+            n = (e.get("name") or "").strip()
+            if n and n in gesehen:
+                doppelt.append(n)
+                continue
+            gesehen.add(n)
+            entdoppelt.append(e)
+        if doppelt:
+            meldungen.append(f"{kat}: doppelte Zeile(n) {', '.join(sorted(set(doppelt)))}")
+            block[kat] = liste = entdoppelt
+
+        # 2. Summe ueber der Grenze -> welcher Wert kann es nicht sein?
+        summe = sum(e.get("pct") or 0 for e in liste)
+        if summe > SUMMEN_GRENZE:
+            # Die Quelle liefert diese Listen ABSTEIGEND sortiert. Ein Wert,
+            # der groesser ist als sein Vorgaenger, bricht die Ordnung der
+            # Quelle — und genau das tun alle acht gefundenen Faelle: die
+            # 53,9 steht jeweils an Position 6 zwischen 6,7 und 5,4.
+            #
+            # Das ist der bessere Verdaechtige als "der Wert, dessen
+            # Entfernen die Summe rettet". Bei Passimian (128,2 %) waeren
+            # das ZWEI Werte: die 53,9 und der fuehrende Choice Scarf mit
+            # 23,3 % — und ein fuehrender Anteil von 23 % ist voellig
+            # normal. Die Ordnung zeigt eindeutig auf die 53,9.
+            ausserDerReihe = []
+            vorher = None
+            for e in liste:
+                p = e.get("pct")
+                if p is None:
+                    continue
+                if vorher is not None and p > vorher + 0.05:
+                    ausserDerReihe.append(e)
+                else:
+                    vorher = p
+            kandidaten = [e for e in ausserDerReihe
+                          if (summe - (e.get("pct") or 0)) <= SUMMEN_GRENZE]
+            if len(kandidaten) == 1:
+                schuld = kandidaten[0]
+                roh = schuld["pct"]          # VOR dem Nullen merken
+                meldungen.append(
+                    f"{kat}: Summe {summe:.1f} % — '{schuld.get('name')}' "
+                    f"({roh} %) auf unbekannt gesetzt")
+                schuld["pct"] = None
+                schuld["unplausibel"] = (
+                    f"Quelle meldete {roh} %; die Liste summierte sich damit "
+                    f"auf {summe:.1f} %.")
+            else:
+                meldungen.append(
+                    f"{kat}: Summe {summe:.1f} % — kein einzelner Ausreisser, "
+                    f"Liste unveraendert markiert")
+            block.setdefault("_warnungen", []).append(
+                f"{kat}: Anteile summierten sich auf {summe:.1f} %")
+
+    if meldungen:
+        block.setdefault("_warnungen", [])
+        print("      ! " + " | ".join(meldungen))
+    return block
 
 
 def scrape_pokemon(slug):

@@ -545,6 +545,72 @@ def check_verified_collisions(findings, cur):
                      f"data/_consumers.md on match_method."))
 
 
+def check_champions_usage(findings):
+    """Anteilslisten, die sich nicht auf 100 % addieren koennen.
+
+    Ein Pokemon traegt genau EIN Item und hat genau EIN Wesen; die
+    Anteile dieser Listen muessen sich auf rund 100 % summieren. Am
+    20.08.2026 taten das acht Item-Listen nicht — sie kamen auf bis zu
+    139,1 %, und in jeder stand an Position 6 exakt 53,9 % bei fuenf
+    verschiedenen Items. Dazu sechs Wesens-Listen mit einer doppelten
+    Zeile.
+
+    Der Scraper faengt das inzwischen ab (scripts/scrape_champions_usage.py,
+    pruefe_plausibel) und setzt den unmoeglichen Wert auf unbekannt. Diese
+    Pruefung ist das Netz darunter: sie schlaegt an, wenn eine Liste die
+    Grenze reisst, OHNE dass der Scraper sie markiert hat — dann hat sich
+    die Quelle auf eine Art veraendert, die die Erkennung nicht kennt.
+    """
+    path = os.path.join(DATA, "champions_usage.json")
+    if not os.path.exists(path):
+        return
+    try:
+        with open(path, encoding="utf-8") as f:
+            daten = json.load(f)
+    except Exception as e:                                  # noqa: BLE001
+        findings.append(("CRITICAL", f"champions_usage.json is unreadable: {e}"))
+        return
+
+    GRENZE = 105.0
+    unmarkiert, doppelt, markiert = [], [], 0
+    for name, eintrag in (daten.get("pokemon") or {}).items():
+        for fmt in ("doubles", "singles"):
+            block = eintrag.get(fmt)
+            if not isinstance(block, dict):
+                continue
+            if block.get("_warnungen"):
+                markiert += 1
+            for kat in ("held_item", "nature", "ability"):
+                liste = block.get(kat) or []
+                if not liste:
+                    continue
+                summe = sum(e.get("pct") or 0 for e in liste)
+                if summe > GRENZE and not block.get("_warnungen"):
+                    unmarkiert.append(f"{name}/{fmt}/{kat} = {summe:.1f} %")
+                namen = [(e.get("name") or "").strip() for e in liste]
+                if len(namen) != len(set(namen)):
+                    doppelt.append(f"{name}/{fmt}/{kat}")
+
+    if unmarkiert:
+        findings.append(("CRITICAL",
+                         f"{len(unmarkiert)} champions usage list(s) sum to more than "
+                         f"{GRENZE:.0f} % WITHOUT the scraper flagging them: "
+                         f"{', '.join(unmarkiert[:8])}"
+                         f"{' …' if len(unmarkiert) > 8 else ''} — a Pokémon holds one "
+                         f"item and has one nature, so these shares cannot both be right. "
+                         f"pruefe_plausibel() in scrape_champions_usage.py did not catch "
+                         f"this shape; the source has changed."))
+    if doppelt:
+        findings.append(("WARN",
+                         f"{len(doppelt)} champions usage list(s) carry the same row twice: "
+                         f"{', '.join(doppelt[:8])}{' …' if len(doppelt) > 8 else ''}"))
+    if markiert:
+        findings.append(("INFO",
+                         f"{markiert} champions usage block(s) carry a plausibility warning "
+                         f"from the scraper — the impossible value was set to unknown, not "
+                         f"guessed. Fixing it needs the source, not this repo."))
+
+
 def report_unverified_prices(findings):
     """Standing worklist: which unverified mappings actually matter.
 
@@ -656,16 +722,24 @@ def main():
     check_paired_emptiness(findings, empties)
     # Widersprueche brauchen keine Grundlinie.
     check_verified_collisions(findings, price)
+    check_champions_usage(findings)
 
     crit = [f for lvl, f in findings if lvl == "CRITICAL"]
     warn = [f for lvl, f in findings if lvl == "WARN"]
+    # INFO wurde gesammelt und nie ausgegeben (20.08.2026). Zwei Pruefungen
+    # melden auf dieser Stufe — report_unverified_prices und die neue
+    # Champions-Pruefung —, und beide waren damit stumm. Eine Meldung, die
+    # niemand sieht, ist keine Meldung.
+    info = [f for lvl, f in findings if lvl == "INFO"]
 
     print(f"\nData guardian — {len(cov)} sets, {len(rows)} consumer files checked")
-    print(f"  CRITICAL: {len(crit)} | WARN: {len(warn)}")
+    print(f"  CRITICAL: {len(crit)} | WARN: {len(warn)} | INFO: {len(info)}")
     for f in crit:
         print(f"::error::{f}")
     for f in warn:
         print(f"::warning::{f}")
+    for f in info:
+        print(f"::notice::{f}")
     if not findings:
         print("  All checks passed — no action needed.")
 

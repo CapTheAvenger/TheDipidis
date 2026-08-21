@@ -14,7 +14,9 @@
 //   /testingGroups/{groupId}/activity/{autoId}
 //     { uid, displayName, timestamp, action, field, oldValue, newValue }
 //   /publicProfiles/{uid}
-//     { email, displayName }       ← lookup table for "invite by email"
+//     { displayName }              ← uid → Anzeigename (direkter get)
+//   /emailIndex/{sha256(email)}
+//     { uid }                      ← "invite by email", OHNE Klartext-E-Mail
 //
 // See FIRESTORE_RULES.md for the matching security rules.
 // ============================================================
@@ -70,8 +72,42 @@ window.TestingGroups = (function () {
     return err.message || String(err);
   }
 
-  // Make sure the logged-in user has a publicProfiles/{uid} entry so
-  // other users can find them by email when adding to a group.
+  // SHA-256 (hex) einer normalisierten E-Mail.
+  //
+  // Warum ueberhaupt ein Hash: die Suche "Mitglied per E-Mail einladen" war
+  // frueher eine QUERY auf publicProfiles (.where('email','==',...)). Eine
+  // Query braucht in Firestore die list-Berechtigung — und list gilt fuer die
+  // GANZE Collection. Gemessen am 21.08.2026 gegen die Produktivdatenbank:
+  // ein einziges db.collection('publicProfiles').get() lieferte jedem
+  // eingeloggten Nutzer alle 5 Konten samt vollstaendiger E-Mail-Adresse.
+  //
+  // Mit der E-Mail als Dokument-ID (gehasht) wird aus der Suche ein direkter
+  // get() auf genau ein Dokument. Damit darf list komplett zu, und in der
+  // Datenbank steht keine Klartext-E-Mail mehr.
+  //
+  // crypto.subtle gibt es nur im sicheren Kontext (https bzw. localhost) —
+  // beides trifft hier zu; ohne sicheren Kontext liefert die Funktion null und
+  // die Aufrufer behandeln das wie "nicht gefunden", statt zu werfen.
+  async function _emailHash(email) {
+    const norm = (email || '').trim().toLowerCase();
+    if (!norm) return null;
+    const subtle = window.crypto && window.crypto.subtle;
+    if (!subtle) {
+      console.warn('[TestingGroups] crypto.subtle nicht verfuegbar (kein sicherer Kontext)');
+      return null;
+    }
+    const buf = await subtle.digest('SHA-256', new TextEncoder().encode(norm));
+    return Array.from(new Uint8Array(buf))
+      .map(b => b.toString(16).padStart(2, '0')).join('');
+  }
+
+  // Make sure the logged-in user is findable: displayName under
+  // publicProfiles/{uid}, and the email→uid pointer under emailIndex/{hash}.
+  //
+  // Das ist zugleich die Migration: jeder Nutzer traegt sich beim naechsten
+  // Login selbst in den Hash-Index ein, und die alte Klartext-E-Mail wird aus
+  // seinem eigenen publicProfiles-Dokument geloescht. Niemand muss ein fremdes
+  // Dokument anfassen — die Regel laesst das auch gar nicht zu.
   async function _ensurePublicProfile() {
     const u = _currentUser();
     const db = _db();
@@ -80,26 +116,72 @@ window.TestingGroups = (function () {
     try {
       const snap = await ref.get();
       const data = {
-        email       : (u.email || '').toLowerCase(),
         displayName : u.displayName || u.email || 'Anonymous',
         updatedAt   : _fsNow(),
       };
       if (!snap.exists) data.createdAt = _fsNow();
+      // Klartext-E-Mail aus dem Altbestand entfernen, falls noch vorhanden.
+      if (snap.exists && snap.data() && snap.data().email !== undefined) {
+        data.email = firebase.firestore.FieldValue.delete();
+      }
       await ref.set(data, { merge: true });
     } catch (err) {
       console.warn('[TestingGroups] ensurePublicProfile failed', err);
+    }
+    try {
+      const hash = await _emailHash(u.email);
+      if (hash) {
+        // Nur { uid } — bewusst kein weiteres Feld, die Regel erzwingt das.
+        await db.collection('emailIndex').doc(hash).set({ uid: u.uid });
+      }
+    } catch (err) {
+      console.warn('[TestingGroups] emailIndex write failed', err);
     }
   }
 
   async function _lookupUidByEmail(email) {
     const db = _db();
     if (!db || !email) return null;
-    const q = await db.collection('publicProfiles')
-      .where('email', '==', email.toLowerCase().trim())
-      .limit(1).get();
-    if (q.empty) return null;
-    const doc = q.docs[0];
-    return { uid: doc.id, ...doc.data() };
+
+    // Weg 1: direkter get() auf den Hash-Index. Braucht KEIN list, also kann
+    // die Regel die Enumeration der ganzen Collection verbieten.
+    const hash = await _emailHash(email);
+    if (hash) {
+      try {
+        const idx = await db.collection('emailIndex').doc(hash).get();
+        if (idx.exists && idx.data() && idx.data().uid) {
+          const uid = idx.data().uid;
+          let displayName = '';
+          try {
+            const prof = await db.collection('publicProfiles').doc(uid).get();
+            if (prof.exists && prof.data()) displayName = prof.data().displayName || '';
+          } catch (err) {
+            // Anzeigename ist Kosmetik — der Aufrufer faellt auf die E-Mail zurueck.
+            console.warn('[TestingGroups] displayName lookup failed', err);
+          }
+          return { uid, displayName };
+        }
+      } catch (err) {
+        console.warn('[TestingGroups] emailIndex lookup failed', err);
+      }
+    }
+
+    // Weg 2: Uebergangs-Fallback auf die alte Query, fuer Nutzer, die sich seit
+    // der Umstellung noch nicht eingeloggt haben. Sobald die Regel list sperrt,
+    // wirft das permission-denied — genau dann ist der Fallback zu Ende, und
+    // das ist der gewollte Endzustand. Der Aufrufer zeigt dann
+    // tg.errNoSuchUser ("muss sich mindestens einmal einloggen"), was den Fall
+    // bereits korrekt beschreibt.
+    try {
+      const q = await db.collection('publicProfiles')
+        .where('email', '==', email.toLowerCase().trim())
+        .limit(1).get();
+      if (q.empty) return null;
+      const doc = q.docs[0];
+      return { uid: doc.id, ...doc.data() };
+    } catch (err) {
+      return null;
+    }
   }
 
   async function _loadBootstrap() {

@@ -2703,9 +2703,17 @@ function cityLeagueOffSeasonHtml(istVergangenheit) {
             // Store unfiltered deck cards for filter function
             window.currentCityLeagueDeckCards = deckCards;
             
-            // Calculate stats - use max_count which represents typical deck composition
-            const totalCardsInDeck = deckCards.reduce((sum, card) => sum + parseInt(card.max_count || 0), 0);
+            // Kartenzahl der Kachel — Summe der ungerundeten Mittelwerte,
+            // nicht der max_count-Werte. Die alte Zeile summierte die je
+            // Karte groesste je gesehene Kopienzahl ueber alle Listen des
+            // Archetyps und nannte das Ergebnis "Gesamt": eine Deckgroesse
+            // von 101 bei 60 erlaubten Karten. Siehe mittlereDeckGroesse().
             const uniqueCards = deckCards.length;
+            const deckGroesse = (typeof mittlereDeckGroesse === 'function')
+                ? mittlereDeckGroesse(deckCards)
+                : { groesse: 0, basis: 'unbekannt' };
+            const totalCardsInDeck = deckGroesse.basis === 'unbekannt'
+                ? '–' : Math.round(deckGroesse.groesse);
             
             // Two distinct deck counts that USED to be one variable —
             // splitting them resolves the user complaint that "Decks
@@ -4379,8 +4387,13 @@ function cityLeagueOffSeasonHtml(istVergangenheit) {
             devLog(`Filter applied: ${filterValue}, showing ${filteredCards.length} of ${allCards.length} cards`);
             
             // Calculate total card counts (sum of max_count)
-            const filteredTotal = filteredCards.reduce((sum, card) => sum + parseInt(card.max_count || 0), 0);
-            const allTotal = allCards.reduce((sum, card) => sum + parseInt(card.max_count || 0), 0);
+            // Siehe mittlereDeckGroesse(): Mittelwerte, nicht max_count.
+            const _fT = (typeof mittlereDeckGroesse === 'function')
+                ? mittlereDeckGroesse(filteredCards) : { groesse: 0, basis: 'unbekannt' };
+            const _aT = (typeof mittlereDeckGroesse === 'function')
+                ? mittlereDeckGroesse(allCards) : { groesse: 0, basis: 'unbekannt' };
+            const filteredTotal = _fT.basis === 'unbekannt' ? '–' : Math.round(_fT.groesse);
+            const allTotal = _aT.basis === 'unbekannt' ? '–' : Math.round(_aT.groesse);
             
             // Update deck visual - check which view is active
             const tableViewContainer = document.getElementById('cityLeagueDeckTableView');

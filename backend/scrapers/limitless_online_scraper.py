@@ -1009,6 +1009,42 @@ def create_html_report(comparison_data: List[Dict[str, Any]], output_file: str,
     else:
         top10_changes_html = 'No changes'
     
+    # Warum der Top-100-Block in der erzeugten Datei fehlt — und warum
+    # diese Begruendung ein PYTHON-Kommentar ist und kein HTML-Kommentar
+    # im Template: als <!-- ... --> stand sie mitten im f-String und wurde
+    # damit an jeden Besucher mit ausgeliefert. Gemessen am 21.08.2026 in
+    # der frisch erzeugten Datei: 1.430 Zeichen ueber 26 Zeilen, also die
+    # gesamte Begruendung als Nutzlast. Aufgefallen erst, als der
+    # Wochenlauf die Datei zum ersten Mal seit der Aenderung neu erzeugte —
+    # der Test gruente vorher nur, weil die eingecheckte HTML noch aus der
+    # Zeit davor stammte.
+    #
+    #  Der Block "Matchup Analysis - Top 100 Decks" wird nicht mehr
+    # erzeugt. Gemessen am 18.08.2026 im gerenderten Tab:
+    #
+    # Tabhoehe gesamt        16.950 px
+    # davon dieser Block      5.556 px   = 33 %
+    # Suchfelder darin           200, davon funktionsfaehig: 0
+    # Tabellen darin             200, Zeilen: 1.033
+    # HTML                   1.199.003 Zeichen von 1.942.773
+    #
+    # Die Suchfelder waren tot, seit die Seite die eingebetteten
+    # <script>-Bloecke nicht mehr ausfuehrt: ihre Handler haengen
+    # als inline-oninput am Markup, und js/app-meta-cards.js
+    # entfernt jedes on*-Attribut, bevor der Block eingesetzt wird
+    # (_sanitizeScraperHtml, F-006). Sie nahmen Text an und taten
+    # nichts.
+    #
+    # Die Zahlen selbst gibt es zweimal woanders und beide Male
+    # besser: in der Matchup-Heatmap (mit Partienzahl je Zelle) und
+    # in der Archetyp-Karte (beste UND schlechteste Matchups mit n
+    # und Bilanz). Dieser Block war die dritte Darstellung
+    # derselben Daten, ohne Stichprobengroesse.
+    #
+    # Die Matchup-Daten selbst bleiben unangetastet: sie liegen in
+    # data/limitless_online_decks_matchups.csv, und von dort liest
+    # buildMatchupRegistryFromCsv() sie ein. Hier faellt nur die
+    # HTML-Darstellung weg.
     html_content = f"""<!DOCTYPE html>
 <html lang="de">
 <head>
@@ -1206,32 +1242,6 @@ def create_html_report(comparison_data: List[Dict[str, Any]], output_file: str,
             </div>
         </div>
 
-        <!-- Der Block "Matchup Analysis - Top 100 Decks" wird nicht mehr
-             erzeugt. Gemessen am 18.08.2026 im gerenderten Tab:
-
-                 Tabhoehe gesamt        16.950 px
-                 davon dieser Block      5.556 px   = 33 %
-                 Suchfelder darin           200, davon funktionsfaehig: 0
-                 Tabellen darin             200, Zeilen: 1.033
-                 HTML                   1.199.003 Zeichen von 1.942.773
-
-             Die Suchfelder waren tot, seit die Seite die eingebetteten
-             <script>-Bloecke nicht mehr ausfuehrt: ihre Handler haengen
-             als inline-oninput am Markup, und js/app-meta-cards.js
-             entfernt jedes on*-Attribut, bevor der Block eingesetzt wird
-             (_sanitizeScraperHtml, F-006). Sie nahmen Text an und taten
-             nichts.
-
-             Die Zahlen selbst gibt es zweimal woanders und beide Male
-             besser: in der Matchup-Heatmap (mit Partienzahl je Zelle) und
-             in der Archetyp-Karte (beste UND schlechteste Matchups mit n
-             und Bilanz). Dieser Block war die dritte Darstellung
-             derselben Daten, ohne Stichprobengroesse.
-
-             Die Matchup-Daten selbst bleiben unangetastet: sie liegen in
-             data/limitless_online_decks_matchups.csv, und von dort liest
-             buildMatchupRegistryFromCsv() sie ein. Hier faellt nur die
-             HTML-Darstellung weg. -->
 
         <div class="section">
             <h2>📋 Full Comparison Table</h2>

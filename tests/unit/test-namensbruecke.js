@@ -157,13 +157,26 @@ describe('Was nicht verbunden wird, bleibt sichtbar unverbunden', () => {
             'ein Turniername ist weder verbrückt noch als offen ausgewiesen');
     });
 
-    it('und es sind genau die sieben aus dem Befund', () => {
+    it('und es sind so viele, wie die Bruecke ausweist', () => {
+        // Fruehere Fassung verdrahtete turnierNamen.size = 120,
+        // ladderNamen.size = 131 und gemeinsam = 113 fest. Der Wochenlauf vom
+        // 21.08.2026 machte daraus 123 / 132 / 116 — die Bruecke selbst hat
+        // gehalten, es waren weiterhin exakt sieben nicht treffende Namen
+        // (4 verbrueckt, 3 bewusst offen). Fest verdrahtete Mengen messen also
+        // nicht die Bruecke, sondern nur, wann zuletzt gescrapt wurde, und
+        // machen den Lauf rot, obwohl nichts kaputt ist. Der Deploy haengt an
+        // gruenen Tests — das blockierte ausgerechnet die frischen Daten.
         const nichtTreffend = [...turnierNamen].filter(n => !ladderNamen.has(n));
-        assert.equal(nichtTreffend.length, 7);
-        assert.equal(turnierNamen.size, 120);
-        assert.equal(ladderNamen.size, 131);
+        const ausgewiesen = ALIAS.turnier_zu_ladder.length
+            + ALIAS.bewusst_nicht_verbunden.length;
+        assert.equal(nichtTreffend.length, ausgewiesen,
+            'nicht treffende Namen: ' + nichtTreffend.length
+            + ', in archetype_aliases.json ausgewiesen: ' + ausgewiesen);
+        // Die Mengen duerfen wachsen, aber die Ueberschneidung muss die Regel
+        // bleiben und die Ausnahme klein. Gemessen 21.08.2026: 116 von 123.
         const gemeinsam = [...turnierNamen].filter(n => ladderNamen.has(n)).length;
-        assert.equal(gemeinsam, 113);
+        assert.ok(gemeinsam > turnierNamen.size * 0.8,
+            `nur ${gemeinsam} von ${turnierNamen.size} Turniernamen treffen die Ladder`);
     });
 });
 

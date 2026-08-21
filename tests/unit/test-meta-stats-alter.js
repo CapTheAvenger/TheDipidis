@@ -86,11 +86,35 @@ describe('Der Schaden: ohne frischen Stand wird nichts behauptet', () => {
 });
 
 describe('Die ausgelieferte Datei heute', () => {
-    it('traegt genau die drei Zahlen, die der Bericht nennt', () => {
-        // Bleibt als Beleg stehen, bis der erste Lauf sie ersetzt.
+    it('traegt einen Stand und in sich stimmige Zahlen', () => {
+        // Der Vorgaenger pinnte 199 / 14.026 / 31.411 fest, mit dem Zusatz
+        // "bleibt als Beleg stehen, bis der erste Lauf sie ersetzt". Genau das
+        // ist am 21.08.2026 passiert: der Wochenlauf hat die seit 2026-04-20
+        // eingefrorene Datei zum ersten Mal wieder geschrieben — jetzt
+        // 392 Turniere / 29.436 Spieler / 66.656 Partien, generated_at
+        // 2026-08-21T06:14:41+00:00.
+        //
+        // Feste Gleichheit waere hier aber die falsche Zusicherung: die Datei
+        // wird dienstags und freitags neu geschrieben, und der Deploy haengt
+        // an gruenen Tests (deploy-pages.yml, job `test`). Ein fest verdrahteter
+        // Wert macht also ausgerechnet an den Tagen rot, an denen frische Daten
+        // live gehen sollen — der Test wuerde seinen eigenen Deploy blockieren.
+        // Deshalb: Struktur und Verhaeltnisse pruefen, die Messung steht im
+        // Kommentar.
         const j = JSON.parse(read('data/limitless_meta_stats.json'));
-        assert.equal(j.tournaments, 199);
-        assert.equal(j.players, 14026);
-        assert.equal(j.matches, 31411);
+        for (const k of ['tournaments', 'players', 'matches']) {
+            assert.equal(typeof j[k], 'number', k + ' fehlt oder ist keine Zahl');
+            assert.ok(j[k] > 0, k + ' ist ' + j[k]);
+        }
+        // Ein Turnier hat mehr als einen Spieler, ein Spieler spielt mehr als
+        // eine Partie. Faellt eine dieser Ordnungen um, stimmt die Erhebung nicht.
+        assert.ok(j.players > j.tournaments, `players ${j.players} <= tournaments ${j.tournaments}`);
+        assert.ok(j.matches > j.players, `matches ${j.matches} <= players ${j.players}`);
+        // Der Grund, warum die Seite die Zahlen ueberhaupt wieder zeigt: ohne
+        // generated_at unterdrueckt sie Zahl UND Herkunftszeile (bewusst —
+        // "lieber keine Herkunft als eine falsche").
+        assert.ok(j.generated_at, 'ohne generated_at unterdrueckt die Seite die Zahlen');
+        assert.ok(!Number.isNaN(Date.parse(j.generated_at)),
+            'generated_at ist kein lesbares Datum: ' + j.generated_at);
     });
 });

@@ -65,6 +65,19 @@ describe('comparison.html — was ausgeliefert wird, wird auch gebraucht', () =>
             'der Abschnitt ist wieder da — der Client wirft ihn weg, der Besucher laedt ihn trotzdem');
     });
 
+    it('kein Erklaertext in der Nutzlast', () => {
+        // Am 21.08.2026 erzeugte der Wochenlauf die Datei zum ersten Mal seit
+        // der Top-100-Entfernung neu — und schrieb dabei die 26-zeilige
+        // Begruendung als HTML-Kommentar mit hinein: 1.430 von 27.589 Zeichen,
+        // also 5,2 % der Datei, die jeder Besucher fuer nichts laedt.
+        // Die Begruendung gehoert in den Generator, nicht in die Ausgabe.
+        const kommentare = HTML.match(/<!--[\s\S]*?-->/g) || [];
+        const zeichen = kommentare.reduce((a, k) => a + k.length, 0);
+        assert.ok(zeichen < 200,
+            zeichen + ' Zeichen HTML-Kommentar in der ausgelieferten Datei: '
+            + kommentare.map(k => k.slice(0, 40)).join(' | '));
+    });
+
     it('die drei echten Abschnitte stehen noch', () => {
         for (const h of ['Biggest Rank Climbers', 'Biggest Rank Fallers', 'Full Comparison Table']) {
             assert.ok(HTML.includes(h), 'Abschnitt fehlt: ' + h);

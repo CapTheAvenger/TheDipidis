@@ -330,7 +330,7 @@ jobs:
           # stay as `::warning::` only.
           fail_count=$(printf '%s\n' "${rc_summary[@]}" | grep -c '^FAIL ' || true)
           critical_failed=$(printf '%s\n' "${rc_summary[@]}" \
-            | grep -E '^FAIL (core/update_sets|scrapers/all_cards_scraper|scrapers/current_meta_analysis_scraper|scrapers/limitless_online_scraper)' \
+            | grep -E '^FAIL (core/update_sets|core/prepare_card_data|scrapers/all_cards_scraper|scrapers/japanese_cards_scraper|scrapers/current_meta_analysis_scraper|scrapers/limitless_online_scraper)' \
             | wc -l)
           echo "  failed_step_count=$fail_count critical_failed=$critical_failed"
           if [ "$fail_count" -gt 2 ] || [ "$critical_failed" -gt 0 ]; then
@@ -370,10 +370,17 @@ jobs:
           rc=$?
           if [ "$rc" -ne 0 ]; then
               echo "::warning::labs_tournament_scraper exited with $rc"
+              echo "FAIL scrapers/labs_tournament_scraper.py (rc=$rc)" >> "$RUNNER_TEMP/rc_extra.txt"
+          else
+              echo "OK   scrapers/labs_tournament_scraper.py" >> "$RUNNER_TEMP/rc_extra.txt"
           fi
           echo "::endgroup::"
-          # Always exit 0 — failures here shouldn't kill the whole pipeline
-          # (matchup CSV is gracefully optional in Meta Call).
+          # Bleibt bewusst nicht blockierend (die Matchup-CSV ist in Meta
+          # Call optional) — aber der Rueckgabewert steht jetzt in der
+          # Bilanz, die der Schritt "Bilanz der nicht blockierenden
+          # Schritte" weiter unten auswertet. Bis 21.08.2026 verschwand
+          # er hier spurlos: vier Schritte konnten reihenweise scheitern,
+          # ohne dass der Lauf etwas anderes als gruen zeigte (S5).
           exit 0
 
       - name: Run player-continuity scraper
@@ -397,10 +404,14 @@ jobs:
           rc=$?
           if [ "$rc" -ne 0 ]; then
               echo "::warning::player_continuity_scraper exited with $rc"
+              echo "FAIL scrapers/player_continuity_scraper.py (rc=$rc)" >> "$RUNNER_TEMP/rc_extra.txt"
+          else
+              echo "OK   scrapers/player_continuity_scraper.py" >> "$RUNNER_TEMP/rc_extra.txt"
           fi
           echo "::endgroup::"
           exit 0  # never block the pipeline — Predictor 5.8 degrades
-                  # gracefully when the CSV is missing
+                  # gracefully when the CSV is missing. Der rc steht in
+                  # der Bilanz weiter unten (S5).
 
       - name: Run per-decklist scraper (success-weighted card stats)
         env:
@@ -420,9 +431,12 @@ jobs:
           rc=$?
           if [ "$rc" -ne 0 ]; then
               echo "::warning::per_decklist_scraper exited with $rc"
+              echo "FAIL scrapers/per_decklist_scraper.py (rc=$rc)" >> "$RUNNER_TEMP/rc_extra.txt"
+          else
+              echo "OK   scrapers/per_decklist_scraper.py" >> "$RUNNER_TEMP/rc_extra.txt"
           fi
           echo "::endgroup::"
-          exit 0
+          exit 0  # nicht blockierend, aber sichtbar (S5)
 
       - name: Run champions-replica scraper (Pokémon Champions Side Quest)
         env:
@@ -442,8 +456,82 @@ jobs:
           rc=$?
           if [ "$rc" -ne 0 ]; then
               echo "::warning::champions_replica_scraper exited with $rc"
+              echo "FAIL scrapers/champions_replica_scraper.py (rc=$rc)" >> "$RUNNER_TEMP/rc_extra.txt"
+          else
+              echo "OK   scrapers/champions_replica_scraper.py" >> "$RUNNER_TEMP/rc_extra.txt"
           fi
           echo "::endgroup::"
+          exit 0  # nicht blockierend, aber sichtbar (S5)
+
+      - name: Bilanz der nicht blockierenden Schritte (S5)
+        if: always()
+        # Die vier Schritte darueber duerfen den Lauf nicht abbrechen —
+        # ihre Ausgaben sind im Frontend optional. Sie durften bis
+        # 21.08.2026 aber auch nichts hinterlassen: ein `exit 0` ohne
+        # Buchfuehrung. Vier Schritte konnten also wochenlang scheitern,
+        # waehrend der Lauf gruen blieb und die zugehoerigen Dateien
+        # unveraendert alt wurden.
+        #
+        # Hier wird nur gelesen und gemeldet, nicht abgebrochen: ein
+        # Ausfall faerbt den Lauf ab zwei Schritten rot (::error:: loest
+        # die Standard-Benachrichtigung aus), ein einzelner bleibt eine
+        # Warnung. Zusaetzlich landet der Stand in
+        # data/_job_heartbeats.json, damit "der Schritt lief" und "die
+        # Datei hat sich geaendert" getrennt sichtbar sind.
+        run: |
+          set +e
+          bilanz="$RUNNER_TEMP/rc_extra.txt"
+          if [ ! -f "$bilanz" ]; then
+              echo "::warning::Kein rc-Protokoll der nicht blockierenden Schritte gefunden."
+              exit 0
+          fi
+          echo "── Bilanz nicht blockierender Schritte ──"
+          cat "$bilanz"
+          fails=$(grep -c '^FAIL ' "$bilanz")
+          echo "  fehlgeschlagen=$fails"
+          {
+            echo "### Nicht blockierende Schritte"
+            echo ""
+            echo '```'
+            cat "$bilanz"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          python3 - "$bilanz" <<'PYHEARTBEAT'
+          import json, os, sys, datetime
+          pfad = os.path.join('data', '_job_heartbeats.json')
+          try:
+              with open(pfad, encoding='utf-8') as f:
+                  stand = json.load(f)
+          except Exception:
+              stand = {}
+          if not isinstance(stand, dict):
+              stand = {}
+          jetzt = datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
+          with open(sys.argv[1], encoding='utf-8') as f:
+              for zeile in f:
+                  teile = zeile.split()
+                  if len(teile) < 2:
+                      continue
+                  status, name = teile[0], teile[1]
+                  eintrag = stand.get(name) or {}
+                  eintrag['zuletzt_gelaufen'] = jetzt
+                  eintrag['status'] = status
+                  if status == 'OK':
+                      eintrag['zuletzt_erfolgreich'] = jetzt
+                  stand[name] = eintrag
+          stand['_hinweis'] = ('Wann lief welcher nicht blockierende Schritt zuletzt, '
+                               'und mit welchem Ergebnis. Getrennt von der Frage, ob '
+                               'sich die zugehoerige Datei geaendert hat.')
+          os.makedirs('data', exist_ok=True)
+          with open(pfad, 'w', encoding='utf-8') as f:
+              json.dump(stand, f, ensure_ascii=False, indent=2, sort_keys=True)
+          print(f'  Herzschlag geschrieben: {pfad}')
+          PYHEARTBEAT
+          if [ "$fails" -ge 2 ]; then
+              echo "::error::Weekly: $fails nicht blockierende Schritte sind gescheitert. Die zugehoerigen Dateien sind damit von diesem Lauf unberuehrt."
+          elif [ "$fails" -eq 1 ]; then
+              echo "::warning::Weekly: ein nicht blockierender Schritt ist gescheitert (siehe Bilanz oben)."
+          fi
           exit 0
 
       - name: Sync labs output to data/ (post-scraper)

@@ -103,9 +103,17 @@
     var F = {
         de: { format: 'Format', source: 'Quelle', sample: 'Stichprobe',
               window: 'Zeitfenster', stamp: 'Stand', pause: 'Saisonpause — keine aktuellen Daten',
+              // Die Vergangenheit pausiert nicht. Bis zum 20.08.2026 trug der
+              // Ausweis auch fuer das VERGANGENE Fenster "Saisonpause", weil
+              // cityLeagueOffSeasonHtml() pause:true unbedingt setzte — auch
+              // dort, wo der Text daneben schon richtig sagte, dass der
+              // Schnappschuss schlicht fehlt. Zwei verschiedene Zustaende
+              // brauchen zwei verschiedene Saetze.
+              luecke: 'Schnappschuss fehlt — nicht erhoben',
               entries: 'gewichtete Antritte', since: 'in Person legal seit' },
         en: { format: 'Format', source: 'Source', sample: 'Sample',
               window: 'Window', stamp: 'Updated', pause: 'Off-season — no current data',
+              luecke: 'Snapshot missing — never collected',
               entries: 'weighted entries', since: 'in-person legal since' }
     };
 
@@ -265,6 +273,7 @@
         var stamp = stampFor(facts);
         if (stamp) bits.push('<span><b>' + f.stamp + '</b> ' + esc(stamp) + '</span>');
         if (facts.pause) bits.push('<span class="ds-space-pause">' + esc(f.pause) + '</span>');
+        else if (facts.luecke) bits.push('<span class="ds-space-pause">' + esc(f.luecke) + '</span>');
 
         host.setAttribute('data-space', key);
         host.innerHTML = bits.join('<span class="ds-space-sep" aria-hidden="true">·</span>') +

@@ -1924,6 +1924,7 @@
                     if (!hit) return null;
                     return {
                         opponent:   hit.opponent,
+                        fieldKey:   k,
                         fieldShare: d.finalShare || 0,
                         wr:         hit.wr,
                     };
@@ -1940,10 +1941,33 @@
             // how much of the meaningful meta the panel actually reflects.
             const totalShare = paired.reduce((s, p) => s + p.fieldShare, 0) || 1;
             const weightedWr = paired.reduce((s, p) => s + p.wr * p.fieldShare, 0) / totalShare;
+            // Abdeckung: Zaehler und Nenner muessen dieselbe Menge meinen.
+            //
+            // Vorher stand im Nenner der Anteil der Top 12, im Zaehler aber
+            // der Anteil ALLER gepaarten Gegner — auch derer auf Rang 13 und
+            // tiefer. Das Verhaeltnis lief regelmaessig ueber 1 und wurde mit
+            // Math.min(100, …) auf 100 gedeckelt. Auf dem Schirm stand dann
+            // "Feld-Abdeckung: 100 %", was sich liest wie "das ganze Feld ist
+            // erfasst" — die Deckelung war der einzige Grund fuer die Zahl,
+            // und ein Nenner stand nirgends.
+            //
+            // Jetzt zaehlt nur, was auch im Nenner steht: die Top 12 des
+            // vorhergesagten Feldes. Damit kann der Quotient 100 % gar nicht
+            // ueberschreiten, und 100 % heisst wieder, was es sagt. Wie viele
+            // Gegner insgesamt Daten haben, steht als eigene Zahl daneben,
+            // statt sich in die Prozentzahl zu mischen.
             const FIELD_REF_TOP_N = 12;
-            const top12Share = field.slice(0, FIELD_REF_TOP_N).reduce((s, d) => s + (d.finalShare || 0), 0) || 1;
-            const matchedTop12 = paired.filter(p => p.fieldShare > 0).reduce((s, p) => s + p.fieldShare, 0);
-            const coveragePct = Math.min(100, (matchedTop12 / top12Share) * 100);
+            const referenz = field.slice(0, FIELD_REF_TOP_N);
+            const referenzSchluessel = new Set(
+                referenz.map(d => String(d.name || '').trim().toLowerCase()));
+            const referenzAnteil = referenz.reduce((s, d) => s + (d.finalShare || 0), 0);
+            const inReferenz = paired.filter(p => referenzSchluessel.has(p.fieldKey));
+            const abgedeckterAnteil = inReferenz.reduce((s, p) => s + p.fieldShare, 0);
+            const coveragePct = referenzAnteil > 0
+                ? (abgedeckterAnteil / referenzAnteil) * 100
+                : 0;
+            const refGesamt = referenz.length;
+            const refGetroffen = inReferenz.length;
 
             // Verdict — same thresholds as the per-row WR pills below.
             // i18n strings keep the verdict text aligned EN/DE.
@@ -1966,7 +1990,12 @@
                     <span class="mc-vs-summary-label">${t('matchup.weightedWrLabel')}</span>
                     <span class="mc-vs-pill ${wrClass}">${fmt(weightedWr)}%</span>
                     <span class="mc-vs-summary-verdict">${t(verdictKey)}</span>
-                    <span class="mc-vs-summary-coverage">${t('matchup.fieldCoverage')} ${coveragePct.toFixed(0)}% (${paired.length} ${t('matchup.opponents')})</span>
+                    <span class="mc-vs-summary-coverage" title="${escapeHtml(
+                        t('matchup.fieldCoverageTip')
+                            .replace('{n}', String(refGesamt)))}">${
+                        t('matchup.fieldCoverage')} ${coveragePct.toFixed(0)}% ${
+                        t('matchup.fieldCoverageOf').replace('{n}', String(refGesamt))} (${
+                        refGetroffen}/${refGesamt}) · ${paired.length} ${t('matchup.opponents')}</span>
                 </div>`;
 
             const fmtRow = (m) => `

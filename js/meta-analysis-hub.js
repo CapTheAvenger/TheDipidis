@@ -249,7 +249,15 @@
 
     function answerHtml(model) {
         const de = isDe();
-        const stamp = (typeof localStorage !== 'undefined' && localStorage.getItem('lastScraperUpdate')) || '';
+        // Der Stand kam bis hierher aus localStorage['lastScraperUpdate'].
+        // Diesen Schluessel schreibt niemand — kein Scraper, kein
+        // Workflow, keine Zeile JavaScript —, also war der Ausdruck immer
+        // leer und die Zeile "Daten: …" erschien nie. Den echten Stand
+        // fuehrt data/data_stand.json aus dem Git-Verlauf; ds-datenstand.js
+        // fuellt jeden Chip mit data-quelle. Die Quelle dieses Blocks ist
+        // online_tournament_top8_decks.csv — dieselbe Datei, aus der
+        // loadAnswerRows() rechnet, damit der Stand die Zahlen darunter
+        // beschreibt und nicht irgendeinen Lauf.
         let playedRank = 0;
         const tile = (d) => {
             const perf = d.perfPct == null ? '' : fmtSigned(d.perfPct, 0);
@@ -315,7 +323,10 @@
             <section class="meta-hub-answer" aria-labelledby="metaHubAnswerTitle">
                 <h3 class="ds-label" id="metaHubAnswerTitle">
                     ${de ? 'Was ist gerade stark?' : 'What is strong right now?'}
-                    ${stamp ? `<span class="ds-label-note">${de ? 'Daten' : 'Data'}: ${escapeHtml(stamp)}</span>` : ''}
+                    <span class="ds-label-note">${de ? 'Daten' : 'Data'}: <span
+                        class="js-data-freshness"
+                        data-quelle="online_tournament_top8_decks.csv"
+                        >${de ? 'unbekannt' : 'unknown'}</span></span>
                 </h3>
                 <p class="meta-hub-answer-line">${answerSentence(model)}</p>
                 <div class="ds-stat-row">${model.top.map(tile).join('')}</div>
@@ -349,6 +360,11 @@
         // wäre schlechter als gar keine.
         const html = model ? answerHtml(model) : '';
         hosts.forEach(h => { h.innerHTML = html; });
+        // Der Frische-Chip wird erst nach dem Einhaengen gefuellt:
+        // zeichne() liest data-quelle aus dem DOM, nicht aus dem String.
+        if (window.DsDatenstand && typeof window.DsDatenstand.zeichne === 'function') {
+            hosts.forEach(h => window.DsDatenstand.zeichne(h));
+        }
     }
 
     function renderTiles() {

@@ -261,8 +261,26 @@ def _scrape_single_tournament(tournament: dict) -> list:
         placement = cells[0].get_text(strip=True)
         player = cells[1].get_text(strip=True)
 
-        # Extrahiere Pokémon-Namen aus img.pokemon Elementen
-        pokemon_imgs = cells[2].select('img.pokemon')
+        # Zeilenweit suchen, nicht in einer festen Spalte.
+        #
+        # Diese Stelle stand hier auf cells[2], waehrend der Scraper des
+        # LAUFENDEN Fensters (city_league_archetype_scraper.py:272) seit
+        # Juli 2026 row.select benutzt — mit dem Kommentar, dass Japan
+        # Championships eine zusaetzliche Laender-Spalte einschieben und
+        # die Deck-Symbole dadurch in cells[3] rutschen. Turnier 568 ist
+        # dort namentlich genannt.
+        #
+        # Die Korrektur ist nie in dieser Datei angekommen. Folge,
+        # gemessen am 21.08.2026: data/city_league_archetypes_past.csv hat
+        # 73 Byte und eine Zeile — nur den Kopf. Genau das eine grosse
+        # Championship-Turnier, das im Vorfenster stehen sollte, faellt
+        # heraus, weil cells[2] dort leer ist. Die Kartenanalyse desselben
+        # Fensters hat 315 Zeilen; die beiden Dateien widersprechen sich
+        # seit dem 31.07.2026.
+        #
+        # img.pokemon markiert ausschliesslich die Pokemon eines Decks,
+        # eine zeilenweite Suche ist also unabhaengig vom Spaltenlayout.
+        pokemon_imgs = row.select('img.pokemon')
         raw_names = [img['alt'] for img in pokemon_imgs if img.has_attr('alt')]
 
         # Bereinige Namen (entferne -EX, -VSTAR, etc. und fixe Mega)
@@ -713,6 +731,26 @@ def main():
         save_to_csv(new_data, settings['output_file'])
         save_deck_statistics(new_data, settings['output_file'])
         create_comparison_report(old_data, new_data, settings['output_file'])
+    else:
+        # Kein einziger Treffer, und trotzdem lief dieser Lauf bisher mit
+        # "ERFOLGREICH BEENDET" durch. Genau so ist unbemerkt geblieben,
+        # dass die Spaltensuche oben das Championship-Turnier nicht mehr
+        # gefunden hat: die Datei blieb einfach stehen, der Lauf war
+        # gruen, und niemand hatte etwas zu sehen.
+        #
+        # Ein Turnierlauf ohne Ergebnis IST ein Befund — er kann harmlos
+        # sein (Saisonpause, nichts Neues) oder das Zeichen dafuer, dass
+        # die Quelle ihr Layout geaendert hat. Beides gehoert ins Log,
+        # damit man den Unterschied ueberhaupt sehen kann.
+        logger.warning(
+            "Kein einziger Archetyp gefunden — %s Turniere geprueft, 0 Decks "
+            "gelesen. Bestehende Datei bleibt unveraendert.",
+            len(tournaments) if 'tournaments' in dir() else '?'
+        )
+        print("::warning::city_league_past_archetype_scraper: 0 Archetypen aus "
+              "0 gelesenen Decks. Entweder laeuft nichts (Saisonpause) oder die "
+              "Tabellenstruktur der Quelle hat sich geaendert — die Deck-Symbole "
+              "werden zeilenweit gesucht, ein Ausfall deutet also auf mehr hin.")
 
     # Phase 4: backfill archetype_icons.json with the JP-only combos we
     # saw this run. Runs even when all_data is empty so we still pick

@@ -36,8 +36,46 @@
             return isNaN(d.getTime()) ? null : d;
         }
 
-        // Load tournament start date from settings (called once during init)
+        /**
+         * Ab welchem Datum zaehlt ein Turnier zum aktuellen Meta?
+         *
+         * Die Antwort stand bis zum 21.08.2026 allein in
+         * config/current_meta_analysis_settings.json — einer Scraper-Config,
+         * die bei der Rotation niemand mitgedreht hat. GEMESSEN an diesem
+         * Tag: dort stand "10.04.2026", waehrend dieselbe Angabe in
+         * config/scraper_settings.json bereits auf "31.07.2026" stand und
+         * data/format_window.json den Praesenzstart von PBL mit
+         * 2026-07-31 fuehrt. 112 Tage Unterschied, drei Formate.
+         * update_sets.py dreht in der Standalone-Datei nur den
+         * format_filter, nicht das Startdatum (behoben im selben Zug).
+         *
+         * Dieselbe Falle hat schon einmal die Format-Beschriftung
+         * getroffen; dort gewinnt seit dem 20.08.2026 das Formatfenster
+         * und die Config ist nur noch Rueckfall (js/app-meta-cards.js).
+         * Hier jetzt genauso: eine Quelle der Wahrheit, die niemand von
+         * Hand nachziehen muss.
+         */
         async function loadCurrentMetaTournamentStartDate() {
+            // 1. Das Formatfenster — es wird bei jeder Rotation geschrieben.
+            try {
+                const basis = (typeof BASE_PATH === 'string' && BASE_PATH) ? BASE_PATH : 'data/';
+                const r = await fetch(basis + 'format_window.json?t=' + Date.now());
+                if (r && r.ok) {
+                    const fw = await r.json();
+                    const iso = String((fw && (fw.in_person_legal_date || fw.set_release_date)) || '').trim();
+                    if (/^\d{4}-\d{2}-\d{2}$/.test(iso)) {
+                        const [j, m, tg] = iso.split('-').map(Number);
+                        const d = new Date(Date.UTC(j, m - 1, tg));
+                        if (!isNaN(d.getTime())) {
+                            currentMetaTournamentStartDate = d;
+                            devLog(`[Current Meta] Startdatum aus format_window: ${iso}`);
+                            return;
+                        }
+                    }
+                }
+            } catch (_e) { /* Rueckfall auf die Config unten */ }
+
+            // 2. Rueckfall: die Scraper-Config. Nur, wenn das Fenster fehlt.
             const paths = [
                 './config/current_meta_analysis_settings.json?t=' + Date.now(),
                 './current_meta_analysis_settings.json?t=' + Date.now()
@@ -932,6 +970,80 @@
             window._applyCurrentMetaFusionStateClass = _applyCurrentMetaFusionStateClass;
         }
         
+        // Das Formatfenster wird an mehreren Stellen im Haus geladen, hier
+        // aber nirgends gemerkt. Einmal holen genuegt: der Reiter braucht es
+        // nur, um dem Nutzer sagen zu koennen, WELCHES Format gerade laeuft.
+        let _cmFormatFenster = null;
+        async function _cmHoleFormatFenster() {
+            if (_cmFormatFenster !== null) return _cmFormatFenster;
+            try {
+                const basis = (typeof BASE_PATH === 'string' && BASE_PATH) ? BASE_PATH : 'data/';
+                const r = await fetch(basis + 'format_window.json?t=' + Date.now());
+                _cmFormatFenster = (r && r.ok) ? await r.json() : {};
+            } catch (_e) { _cmFormatFenster = {}; }
+            return _cmFormatFenster;
+        }
+
+        /** "TEF-PBL" — oder leer, wenn das Fenster fehlt. */
+        async function _cmFormatSchluessel() {
+            const w = await _cmHoleFormatFenster();
+            const alt = String((w && w.oldest_legal_set) || '').trim();
+            const neu = String((w && w.current_set) || '').trim();
+            if (alt && neu) return `${alt}-${neu}`;
+            return neu || '';
+        }
+
+        /**
+         * Warum ist die Major-Liste leer?
+         *
+         * Der Filter "Major Tournament Decks" liest
+         * tournament_cards_data_cards.csv mit latestChunkOnly. Dieser Lader
+         * gibt seit dem Formatwechsel bewusst NICHTS zurueck, wenn zum
+         * aktuellen Set kein Chunk existiert (app-core.js) — richtig, denn
+         * ein Chunk aus dem Vorformat waere schlicht das falsche Meta.
+         *
+         * Auf dem Schirm kam davon nichts an: das Auswahlmenue war leer und
+         * darunter stand "Bitte waehle ein Deck aus dem Dropdown" — eine
+         * Aufforderung, die niemand befolgen kann. Gemessen am 21.08.2026 im
+         * Format TEF-PBL: 0 Eintraege im Menue, weil bis heute kein einziges
+         * Regional, International oder Special Event in diesem Format
+         * gespielt wurde (die Weltmeisterschaft steht erst bevor). Das ist
+         * keine Stoerung, sondern der Stand der Saison — und genau das muss
+         * dastehen.
+         *
+         * Rueckgabe: { grund, text } mit grund
+         *   'kein-major-im-format' — das Format hat noch kein Major-Turnier
+         *   'datumsfenster'        — es gaebe Daten, der Datumsfilter nimmt sie weg
+         *   'unbekannt'            — leer, aber der Grund laesst sich nicht belegen
+         */
+        async function _cmMajorLeerGrund() {
+            const de = (typeof getLang === 'function' && getLang() === 'de');
+            const format = await _cmFormatSchluessel();
+            const roh = Array.isArray(window.currentMetaTournamentCardsDataRaw)
+                ? window.currentMetaTournamentCardsDataRaw : [];
+            const gefiltert = Array.isArray(window.currentMetaTournamentCardsData)
+                ? window.currentMetaTournamentCardsData : [];
+
+            if (roh.length > 0 && gefiltert.length === 0) {
+                return {
+                    grund: 'datumsfenster',
+                    text: (typeof t === 'function' ? t('currentMeta.majorLeerDatum') : '')
+                        .replace('{format}', format || '?')
+                };
+            }
+            if (roh.length === 0) {
+                return {
+                    grund: 'kein-major-im-format',
+                    text: (typeof t === 'function' ? t('currentMeta.majorLeerFormat') : '')
+                        .replace('{format}', format || (de ? 'dieses Format' : 'this format'))
+                };
+            }
+            return {
+                grund: 'unbekannt',
+                text: (typeof t === 'function' ? t('currentMeta.majorLeerUnbekannt') : '')
+            };
+        }
+
         // Format filter functions
         async function setCurrentMetaFormatFilter(format) {
             currentMetaFormatFilter = format;
@@ -978,6 +1090,33 @@
                 await populateCurrentMetaDeckSelect(dataToUse);
             }
             
+            // Leere Major-Liste erklaeren, statt den Nutzer auf ein leeres
+            // Menue zeigen zu lassen. Siehe _cmMajorLeerGrund().
+            const echteOptionen = currentMetaDeckSelect
+                ? Array.from(currentMetaDeckSelect.options).filter(o => o.value).length
+                : 0;
+            if (format === 'play' && echteOptionen === 0) {
+                const grund = await _cmMajorLeerGrund();
+                if (statusEl && grund.text) {
+                    statusEl.textContent = grund.text;
+                    statusEl.classList.add('cm-filter-status-vorbehalt');
+                }
+                if (typeof renderNoDeckSelectedState === 'function') {
+                    renderNoDeckSelectedState('currentMetaDeckGrid', grund.text || '');
+                }
+                clearCurrentMetaDeckView();
+                if (typeof renderNoDeckSelectedState === 'function') {
+                    renderNoDeckSelectedState('currentMetaDeckGrid', grund.text || '');
+                }
+                if (currentMetaDeckSelect) currentMetaDeckSelect.value = '';
+                if (typeof syncSearchableSelectDisplay === 'function') {
+                    syncSearchableSelectDisplay(currentMetaDeckSelect);
+                }
+                devLog(`[Current Meta] Major-Liste leer — Grund: ${grund.grund}`);
+                return;
+            }
+            if (statusEl) statusEl.classList.remove('cm-filter-status-vorbehalt');
+
             // Respect value already set by populateCurrentMetaDeckSelect (pending selection)
             const currentValue = currentMetaDeckSelect ? currentMetaDeckSelect.value : '';
             if (!currentValue && previouslySelected && currentMetaDeckSelect) {

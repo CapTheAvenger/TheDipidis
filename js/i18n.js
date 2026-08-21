@@ -260,7 +260,7 @@ const translations = {
     'auth.email':             'Email',
     'auth.password':          'Password',
     'auth.confirmPassword':   'Confirm Password',
-    'auth.noAccount':         "Don't have an account? Sign Up",
+    'auth.noAccount':         "Don't have an account? <strong>Sign Up</strong>",
     'auth.forgotPassword':    'Forgot password?',
     'auth.googleSignIn':      'Sign in with Google',
 
@@ -2246,7 +2246,7 @@ const translations = {
     'auth.email':             'E-Mail',
     'auth.password':          'Passwort',
     'auth.confirmPassword':   'Passwort bestätigen',
-    'auth.noAccount':         'Noch kein Konto? Registrieren',
+    'auth.noAccount':         'Noch kein Konto? <strong>Registrieren</strong>',
     'auth.forgotPassword':    'Passwort vergessen?',
     'auth.googleSignIn':      'Mit Google anmelden',
 

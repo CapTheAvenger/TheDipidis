@@ -7279,6 +7279,21 @@ window.MetaCall = (function () {
       .replace(/\n/g, '\\n');
   }
 
+  // Dezimalzahl in der Sprache der Oberfläche: Komma für de, Punkt für en.
+  // Ohne das rendert der Meta-Call rohes toFixed als '10.00%' in der
+  // deutschen UI, direkt neben Komma-Werten wie '7,1' im selben Reiter (F11).
+  function _mcNum(n, dp) {
+    const s = Number(n).toFixed(dp);
+    return (typeof getLang === 'function' && getLang() === 'de') ? s.replace('.', ',') : s;
+  }
+  // Prozent-Anteil, locale-korrekt. Deutsche UI bekommt das schmale
+  // geschützte Leerzeichen vor dem % wie window.formatPercent auf der
+  // restlichen Seite.
+  function _mcPct(n, dp) {
+    const de = (typeof getLang === 'function' && getLang() === 'de');
+    return _mcNum(n, dp) + (de ? ' %' : '%');
+  }
+
   // Suggested Swiss round count by attendance — matches the standard
   // table the Limitless Swiss Calculator uses
   // (limitlesstcg.com/tools/swisscalc). Pure heuristic, the user can
@@ -7600,7 +7615,7 @@ window.MetaCall = (function () {
                 value="${hasPersonal ? deck.personalShare : ''}"
                 class="mc-personal-input${hasPersonal ? ' has-value' : ''}" data-deck="${esc(deck.name)}"
                 oninput="MetaCall._onPersonalShare('${escJs(deck.name)}', this.value)">`;
-    const onlineDisplay = isCustom ? '—' : deck.onlineShare.toFixed(2) + '%';
+    const onlineDisplay = isCustom ? '—' : _mcPct(deck.onlineShare, 2);
     const intelHtml = (isJunk || isCustom) ? '' : _renderDeckBadge(deck.name);
     const k = normalize(deck.name);
     const expanded = _isDetailExpanded(k);
@@ -7619,12 +7634,12 @@ window.MetaCall = (function () {
       </td>
       <td class="mc-cell-online"><span class="mc-share-online">${onlineDisplay}</span></td>
       <td class="mc-cell-est">${personalCell}</td>
-      <td class="mc-cell-final"><span class="mc-share-final${hasPersonal ? ' has-personal' : ''}">${deck.finalShare.toFixed(2)}%</span></td>
+      <td class="mc-cell-final"><span class="mc-share-final${hasPersonal ? ' has-personal' : ''}">${_mcPct(deck.finalShare, 2)}</span></td>
       <td class="mc-cell-players"><span class="mc-players-count">${deck.count.toLocaleString()}</span></td>
       <td class="mc-cell-enc">
         <div class="mc-encounters-bar mc-enc-${encTier}">
           <div class="mc-bar-bg"><div class="mc-bar-fill" style="width:${barW}%"></div></div>
-          <span class="mc-encounters-label">∅ ${lambda.toFixed(2)}</span>
+          <span class="mc-encounters-label">∅ ${_mcNum(lambda, 2)}</span>
         </div>
       </td>
     </tr>`;
@@ -7765,14 +7780,14 @@ window.MetaCall = (function () {
     <span class="mc-deck-name">${_mcIconHtml(group.main)}${esc(_familyDisplayForKey(group.main))}</span>
     <span class="mc-group-count">${group.variants.length} ${t('mc.variants')}</span>
   </td>
-  <td class="mc-cell-online"><span class="mc-share-online">${group.totalOnline.toFixed(2)}%</span></td>
+  <td class="mc-cell-online"><span class="mc-share-online">${_mcPct(group.totalOnline, 2)}</span></td>
   <td class="mc-cell-est"><span class="mc-cell-dash">—</span></td>
-  <td class="mc-cell-final"><span class="mc-share-final">${group.totalShare.toFixed(2)}%</span></td>
+  <td class="mc-cell-final"><span class="mc-share-final">${_mcPct(group.totalShare, 2)}</span></td>
   <td class="mc-cell-players"><span class="mc-players-count">${group.totalCount.toLocaleString()}</span></td>
   <td class="mc-cell-enc">
     <div class="mc-encounters-bar mc-enc-${groupEncTier}">
       <div class="mc-bar-bg"><div class="mc-bar-fill" style="width:${barW}%"></div></div>
-      <span class="mc-encounters-label">∅ ${lambda.toFixed(2)}</span>
+      <span class="mc-encounters-label">∅ ${_mcNum(lambda, 2)}</span>
     </div>
   </td>
 </tr>`;
@@ -7801,14 +7816,14 @@ window.MetaCall = (function () {
               <span class="mc-deck-name mc-variant-name">${_mcIconHtml(deck.name)}${esc(deck.name)}</span>
               ${variantToggle}
             </td>
-            <td class="mc-cell-online"><span class="mc-share-online">${deck.onlineShare.toFixed(2)}%</span></td>
+            <td class="mc-cell-online"><span class="mc-share-online">${_mcPct(deck.onlineShare, 2)}</span></td>
             <td class="mc-cell-est">${pCell}</td>
-            <td class="mc-cell-final"><span class="mc-share-final${hasP ? ' has-personal' : ''}">${deck.finalShare.toFixed(2)}%</span></td>
+            <td class="mc-cell-final"><span class="mc-share-final${hasP ? ' has-personal' : ''}">${_mcPct(deck.finalShare, 2)}</span></td>
             <td class="mc-cell-players"><span class="mc-players-count">${deck.count.toLocaleString()}</span></td>
             <td class="mc-cell-enc">
               <div class="mc-encounters-bar mc-enc-${dEncTier}">
                 <div class="mc-bar-bg"><div class="mc-bar-fill" style="width:${dBarW}%"></div></div>
-                <span class="mc-encounters-label">∅ ${dLam.toFixed(2)}</span>
+                <span class="mc-encounters-label">∅ ${_mcNum(dLam, 2)}</span>
               </div>
             </td>
           </tr>`;
@@ -8079,7 +8094,7 @@ window.MetaCall = (function () {
           <div class="mc-enc-wr ${wrCls}">WR ${wrPct}% · P(1×) ${p1.toFixed(0)}% · P(2×) ${p2.toFixed(0)}%</div>
         </div>
         <div class="mc-enc-bar-bg"><div class="mc-enc-bar-fill" style="width:${barW}%"></div></div>
-        <div class="mc-enc-val">∅ ${lambda.toFixed(2)}</div>
+        <div class="mc-enc-val">∅ ${_mcNum(lambda, 2)}</div>
       </div>`;
     }).join('');
 

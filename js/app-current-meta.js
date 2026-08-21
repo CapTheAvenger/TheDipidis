@@ -339,7 +339,13 @@
                                 textColor = 'var(--ink-3)';
                                 var tdClass = 'heatmap-td heatmap-td-even';
                             }
-                            const tooltip = `${parsedWins}W - ${parsedLosses}L (${totalGames} ${t('heatmap.games')}) · ${t('heatmap.raw')} ${winRateRoh.toFixed(1)} %`;
+                            // Die Unentschieden gehören in den Tooltip, sonst
+                            // geht die Bilanz nicht auf: 375W - 338L = 713, aber
+                            // total_games = 720 (die 7 Unentschieden fehlten
+                            // unbenannt). Gemessen am 21.08.2026 in 423 von 1546
+                            // Zellen (27 %) ist W+L != total_games. Mit U aufgeführt
+                            // summieren sich die genannten Zahlen sichtbar auf.
+                            const tooltip = `${parsedWins}W - ${parsedLosses}L - ${parsedDraws}U (${totalGames} ${t('heatmap.games')}) · ${t('heatmap.raw')} ${winRateRoh.toFixed(1)} %`;
                             const safeRow = escapeJsStr(rowDeck);
                             const safeCol = escapeJsStr(colDeck);
                             // Inline sample-size below the WR. Cells with n<10 get a

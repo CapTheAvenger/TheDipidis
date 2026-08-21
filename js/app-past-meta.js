@@ -1943,7 +1943,18 @@
             window.pastMetaMostSuccessfulList = { ...best, cards };
 
             const totalCards = cards.reduce((s, c) => s + (c.count || 0), 0);
-            const wpStr = (_pmListWinRate(best) * 100).toFixed(1).replace('.', ',') + '%';
+            // Die ANGEZEIGTE Quote nennt jetzt ihre Konvention: Matchpunkte,
+            // wie die Performance-Sektion oben (Z.1625/1775) und wie die
+            // Platzierung tatsächlich entschieden wird. Vorher stand hier die
+            // unbenannte, hauseigen als "erfunden" markierte Formel
+            // (S+0,5·U)/Partien aus _pmListWinRate — die bleibt nur noch als
+            // interner Sortier-Tiebreak oben, nicht als angezeigte Zahl (F24).
+            const _WK = window.WinRateKonvention;
+            const _wpVal = _WK
+                ? _WK.KONVENTIONEN.matchpunkte.rechne(best.wins || 0, best.losses || 0, best.ties || 0)
+                : (_pmListWinRate(best) * 100);
+            const wpStr = (Number.isFinite(_wpVal) ? _wpVal : 0).toFixed(1).replace('.', ',') + '%';
+            const wpHinweis = _WK ? _WK.hinweis('matchpunkte') : '';
             const placeStr = (best.place && best.place < 9999) ? `#${best.place}` : '—';
             const tournName = _pmCleanTournamentName(best.tournament_name);
             const _esc = (s) => String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -2045,7 +2056,7 @@
             // hide the block than display misleading data.
             const games = (best.wins || 0) + (best.losses || 0) + (best.ties || 0);
             const recordBlock = games > 0
-                ? `<span class="past-meta-best-record">${best.wins || 0}-${best.losses || 0}-${best.ties || 0} · ${wpStr}</span>`
+                ? `<span class="past-meta-best-record"${wpHinweis ? ` title="${_esc(wpHinweis)}"` : ''}>${best.wins || 0}-${best.losses || 0}-${best.ties || 0} · ${wpStr}</span>`
                 : '';
 
             body.innerHTML = `

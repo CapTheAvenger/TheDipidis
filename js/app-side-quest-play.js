@@ -125,7 +125,7 @@
             tailwindLabel:  'TW',
             rangeTitle:     'Basis–Max bei Level 50 (kein EV/+Nature → voll-EV/+Nature)',
             megaShort:      'M',
-            megaTitle:      (base, mega) => `Mega-Initiative bei Level 50: ${mega} (Basis ${base}). Mega-Stein im Item — bei Mega-Entwicklung ändern sich die Stats.`,
+            megaTitle:      (base, mega) => `Mega-Initiative bei Level 50: ${mega} (aktuell, vor Mega ${base}). Mega-Stein im Item — bei Mega-Entwicklung ändern sich die Stats.`,
             megaRangeTitle: (min, max) => `Mega-Initiative-Range bei Level 50: ${min}–${max} (kein EV/+Nature → voll-EV/+Nature, nach Mega-Entwicklung).`,
         },
         en: {
@@ -165,7 +165,7 @@
             tailwindLabel:  'TW',
             rangeTitle:     'Base–Max at Level 50 (zero EV / neutral nature → max EV / +nature)',
             megaShort:      'M',
-            megaTitle:      (base, mega) => `Mega Speed at Level 50: ${mega} (base ${base}). Mega Stone held — stats change on Mega Evolution.`,
+            megaTitle:      (base, mega) => `Mega Speed at Level 50: ${mega} (current, pre-Mega ${base}). Mega Stone held — stats change on Mega Evolution.`,
             megaRangeTitle: (min, max) => `Mega Speed range at Level 50: ${min}–${max} (zero EV / neutral nature → max EV / +nature, after Mega Evolution).`,
         },
     };

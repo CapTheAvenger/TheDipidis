@@ -576,8 +576,19 @@
       // tables). 0-0-0 / 0,0% reads as "this player went 0-0-0" which
       // is misleading; better to show nothing than wrong data.
       const games = (ref.wins || 0) + (ref.losses || 0) + (ref.ties || 0);
+      // Die angezeigte Quote nennt ihre Konvention: Matchpunkte, wie die
+      // Turnier-Platzierung tatsächlich entschieden wird und wie die
+      // Past-Meta-Seite rechnet. Vorher stand hier die unbenannte, hauseigen
+      // als "erfunden" markierte Formel (S+0,5·U)/Partien aus _winRate — die
+      // bleibt nur noch interner Sortier-Tiebreak, nicht angezeigte Zahl (F24).
+      const _qWK = window.WinRateKonvention;
+      const _qWpVal = _qWK
+        ? _qWK.KONVENTIONEN.matchpunkte.rechne(ref.wins || 0, ref.losses || 0, ref.ties || 0)
+        : (_winRate(ref) * 100);
+      const _qWpStr = (Number.isFinite(_qWpVal) ? _qWpVal : 0).toFixed(1).replace('.', ',') + '%';
+      const _qWpHinweis = _qWK ? _qWK.hinweis('matchpunkte') : '';
       const recordBlock = games > 0
-        ? `<span class="past-meta-best-record">${ref.wins || 0}-${ref.losses || 0}-${ref.ties || 0} · ${(_winRate(ref) * 100).toFixed(1).replace('.', ',')}%</span>`
+        ? `<span class="past-meta-best-record"${_qWpHinweis ? ` title="${_escHtml(_qWpHinweis)}"` : ''}>${ref.wins || 0}-${ref.losses || 0}-${ref.ties || 0} · ${_qWpStr}</span>`
         : '';
       return `
         <div class="past-meta-best-header" style="background: linear-gradient(135deg, #fff9f0 0%, #fff3e0 100%);">

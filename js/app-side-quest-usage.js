@@ -62,6 +62,10 @@
             loading: 'Lade Nutzungsdaten …',
             noType: 'Kein Pokémon mit diesem Typ.',
             noUsage: 'Für dieses Pokémon liegen in diesem Format keine Nutzungsdaten vor.',
+            // champions_usage.json trägt kein Datumsfeld — 'Current' würde
+            // Frische suggerieren, die nicht belegbar ist. Deshalb explizit
+            // Quelle + 'Stand unbekannt' (Audit 2, F03).
+            sourceNote: 'Quelle: championsbattledata.com · Stand unbekannt',
             evs: ['KP', 'ANG', 'VER', 'SPA', 'SPV', 'INI'],
         },
         en: {
@@ -73,6 +77,7 @@
             loading: 'Loading usage data …',
             noType: 'No Pokémon of that type.',
             noUsage: 'No usage data for this Pokémon in this format.',
+            sourceNote: 'Source: championsbattledata.com · date unknown',
             evs: ['HP', 'ATK', 'DEF', 'SPA', 'SPD', 'SPE'],
         },
     };
@@ -322,6 +327,7 @@
                 <div class="sq-top">
                     <span class="sq-brand">Champions <span>${esc(L().brand)}</span></span>
                     <span class="sq-meta">${_teams.length} ${esc(L().pokemonCount)}</span>
+                    <span class="sq-meta sq-source" title="${esc(L().sourceNote)}">${esc(L().sourceNote)}</span>
                     <span class="sq-spacer"></span>
                     <span class="sq-seg">
                         ${seg('doubles', L().doubles)}

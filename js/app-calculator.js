@@ -28,6 +28,17 @@
         return Math.max(min, Math.min(max, val));
     }
 
+    // Prozent locale-abhaengig, 2 Nachkommastellen. Nutzt app-utils.formatPercent
+    // (de: "11,67 %", en: "11.67%"); faellt bei fehlendem Helfer sprachbewusst
+    // zurueck, damit die deutsche UI nie einen Punkt-Dezimaltrenner zeigt
+    // (Audit 2, F10).
+    function _calcPct(prob) {
+        if (typeof formatPercent === 'function') return formatPercent(prob, 2);
+        const de = (typeof getLang === 'function' && getLang() === 'de');
+        const s = Number(prob).toFixed(2);
+        return de ? s.replace('.', ',') + ' %' : s + '%';
+    }
+
     /**
      * Klemmen und es sagen (20.08.2026).
      *
@@ -92,7 +103,11 @@
         // 1. Wahrscheinlichkeit mindestens 1 beim Ziehen (z.B. Starthand)
         const drawProb = probabilityAtLeastOne(deckSize, copies, drawn);
         const drawResEl = document.getElementById('res-draw');
-        if (drawResEl) drawResEl.textContent = drawProb.toFixed(2) + '%';
+        // Locale-abhaengig formatieren (de: "11,67 %", en: "11.67%") —
+        // konsistent mit app-utils.formatPercent statt rohem toFix(2)+'%',
+        // das in der deutschen UI einen Punkt-Dezimaltrenner zeigte
+        // (Audit 2, F10, gemessen 21.08.2026).
+        if (drawResEl) drawResEl.textContent = _calcPct(drawProb);
 
         // 2. Preiskarten-Wahrscheinlichkeit (mindestens 1 in den 6 Preiskarten)
         const copiesLeft = copies - inHand;
@@ -102,7 +117,7 @@
             prizeProb = probabilityAtLeastOne(prizePool, copiesLeft, 6);
         }
         const prizeResEl = document.getElementById('res-prize');
-        if (prizeResEl) prizeResEl.textContent = prizeProb.toFixed(2) + '%';
+        if (prizeResEl) prizeResEl.textContent = _calcPct(prizeProb);
 
         // 3. Topdeck-Wahrscheinlichkeit (nächste Karte nach Hand + Preise)
         //
@@ -119,7 +134,7 @@
             topdeckProb = Math.min(100, (copiesLeft / unseen) * 100);
         }
         const topdeckResEl = document.getElementById('res-topdeck');
-        if (topdeckResEl) topdeckResEl.textContent = topdeckProb.toFixed(2) + '%';
+        if (topdeckResEl) topdeckResEl.textContent = _calcPct(topdeckProb);
 
         // Farbe der Hauptanzeige
             const drawEl = document.getElementById('res-draw');

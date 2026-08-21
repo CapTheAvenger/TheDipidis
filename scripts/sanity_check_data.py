@@ -67,6 +67,15 @@ THRESHOLDS: Dict[str, int] = {
     # ── Player continuity: Predictor 5.8 stickiness signal.
     'player_continuity.csv':                 2_000,   # 5 107 observed
 
+    # ── Japanische Kartendatenbank: speist ueber prepare_card_data.py
+    # den Deck Builder. Stand 21.08.2026: 772 Zeilen — aber nur, weil ein
+    # Lauf sie auf M6 plus vier Promo-Sets zusammengestrichen hatte; M5,
+    # M4 und M3 waren verschwunden. Die Datei stand bis dahin in KEINER
+    # der beiden Listen hier, der Verlust fiel also nirgends auf.
+    # Schwelle bewusst unter dem heutigen Stand: sie soll den Totalverlust
+    # abfangen, nicht eine legitime Rotation blockieren.
+    'japanese_cards_database.csv':           400,     # 772 beobachtet
+
     # ── Card master DB: 0-row would brick the Card Database tab.
     'all_cards_database.csv':                15_000,  # 20 248 observed
     'all_cards_merged.csv':                  15_000,  # 20 455 observed

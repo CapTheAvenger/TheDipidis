@@ -110,7 +110,18 @@ def _normalize_format(value: str) -> str:
 # format_filter default. Hardcoded set codes (PFL, POR, ...) rot
 # every rotation; this reads the same source of truth the predictor
 # uses so the scraper stays current without per-rotation edits.
-def _current_set_code(fallback: str = 'CRI') -> str:
+def _current_set_code(fallback: str = '') -> str:
+    """Das laufende Set aus data/format_window.json.
+
+    Der Rueckfallwert war bis zum 21.08.2026 die Zeichenkette 'CRI' — das
+    Set, das beim Schreiben dieser Zeile gerade lief. Ein einziger nicht
+    lesbarer Zugriff auf format_window.json (OSError, kaputtes JSON) liess
+    den Scraper deshalb still ins VORLETZTE Format zurueckfallen, und die
+    Selbstheilung darunter ueberschrieb damit sogar ein korrekt
+    eingestelltes format_filter. Ein hart geschriebenes Set-Kuerzel altert
+    bei jeder Rotation; ein leerer Rueckfall nicht: er laesst die
+    ausdrueckliche Einstellung gewinnen, statt sie zu verdraengen.
+    """
     candidates = [
         os.path.join(_PROJECT_ROOT, 'data', 'format_window.json'),
     ]
@@ -207,6 +218,18 @@ def _enumerate_tournaments(settings: Dict[str, Any]) -> List[Dict[str, Any]]:
     """Walk listing pages until we hit the max-tournaments cap, the
     max-pages cap, or run out of qualifying entries."""
     fmt = settings.get("format_filter") or _current_set_code()
+    if not fmt:
+        # Ohne Set-Kuerzel wuerde die Turnierliste OHNE Formatfilter
+        # abgefragt — das Ergebnis waere ein Querschnitt durch alle
+        # Formate, der wie ein Meta-Snapshot aussieht. Lieber nichts
+        # holen und es sagen (CLAUDE.md: melden, nicht still reparieren).
+        logger.error(
+            "Kein Formatfilter: weder settings.format_filter noch "
+            "data/format_window.json liefern ein Set-Kuerzel. Abbruch."
+        )
+        print("::error::online_tournament_scraper: kein Formatfilter bestimmbar "
+              "(settings + format_window.json leer) — keine Turniere geholt.")
+        return []
     min_players = int(settings.get("min_players", 100))
     max_tournaments = int(settings.get("max_tournaments", 200))
     max_pages = int(settings.get("max_listing_pages", 30))

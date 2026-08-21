@@ -131,6 +131,14 @@
          *
          * Behoben gehoert das im Schreibweg — backend prueft seine Ausgabe
          * seit dem 20.08.2026 gegen dieselbe Form.
+         *
+         * NACHTRAG 21.08.2026: die Datei ist repariert. Die 1.263 Zeilen
+         * wurden aus den unversehrten Spalten derselben Zeile nachgerechnet
+         * (scripts/repariere_turnier_kartenzeilen.py), is_ace_spec blieb
+         * leer statt geraten. Diese Pruefung hier bleibt trotzdem stehen:
+         * sie kostet nichts und faengt den naechsten Schreibfehler ab,
+         * bevor er als Zahl auf dem Schirm landet. Ein Netz nimmt man
+         * nicht weg, weil gerade niemand faellt.
          */
         const PM_ZAHL_FORM = /^\s*-?\d+(?:[.,]\d+)?\s*$/;
         function pastMetaZahlFeld(value, fallback = null) {

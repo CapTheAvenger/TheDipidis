@@ -22,6 +22,28 @@ sys.path.insert(0, str(_REPO_ROOT / "backend" / "core"))
 import update_sets  # noqa: E402
 
 
+@pytest.fixture(autouse=True)
+def isolierter_config_ordner(tmp_path, monkeypatch):
+    """Kein Test darf die echten Dateien unter config/ anfassen.
+
+    Bis zum 21.08.2026 hat nur EIN Test in dieser Datei _CONFIG_DIR
+    umgebogen; die uebrigen liefen gegen das echte Verzeichnis. Solange
+    apply_format_window_to_scraper_settings dort nur den format_filter
+    drehte und der in der Ablage ohnehin stimmte, fiel das nicht auf.
+    Mit dem neu hinzugekommenen start_date schrieb ein Testlauf sofort
+    "05.06.2026" (aus der Testvorrichtung) in die echte
+    config/current_meta_analysis_settings.json — ein Test, der das
+    Arbeitsverzeichnis veraendert.
+
+    Deshalb autouse: die Isolierung gilt fuer jeden Test dieser Datei,
+    auch fuer jeden, der spaeter dazukommt.
+    """
+    cfg = tmp_path / "config-isoliert"
+    cfg.mkdir()
+    monkeypatch.setattr(update_sets, "_CONFIG_DIR", str(cfg))
+    return cfg
+
+
 @pytest.fixture
 def isolated_data_dir(tmp_path, monkeypatch):
     """Redirect update_sets.data_dir to a per-test scratch directory so

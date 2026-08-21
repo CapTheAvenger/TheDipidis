@@ -952,39 +952,104 @@
      * gemessen: 13 Knoten auf einem Reiter, hoechstens 3 px kleiner.
      * Die Seite benutzt :has() bereits an 36 Stellen und setzt damit
      * ohnehin eine aehnliche Grundlage voraus. */
-    .tab-content p:not(.ds-panel *):not(.ds-table *):not(.ds-stat *):not(.ds-bar *):not(.ds-controls *):not(.arc-card *):not([class^="ds-"]):not([class*=" ds-"]),
-    .tab-content span:not(.ds-panel *):not(.ds-table *):not(.ds-stat *):not(.ds-bar *):not(.ds-controls *):not(.arc-card *):not([class^="ds-"]):not([class*=" ds-"]),
-    .tab-content div:not(.ds-panel *):not(.ds-table *):not(.ds-stat *):not(.ds-bar *):not(.ds-controls *):not(.arc-card *):not([class^="ds-"]):not([class*=" ds-"]),
-    .tab-content td:not(.ds-panel *):not(.ds-table *):not(.ds-stat *):not(.ds-bar *):not(.ds-controls *):not(.arc-card *):not([class^="ds-"]):not([class*=" ds-"]),
-    .tab-content th:not(.ds-panel *):not(.ds-table *):not(.ds-stat *):not(.ds-bar *):not(.ds-controls *):not(.arc-card *):not([class^="ds-"]):not([class*=" ds-"]),
-    .tab-content button:not(.ds-panel *):not(.ds-table *):not(.ds-stat *):not(.ds-bar *):not(.ds-controls *):not(.arc-card *):not([class^="ds-"]):not([class*=" ds-"]),
-    .tab-content a:not(.ds-panel *):not(.ds-table *):not(.ds-stat *):not(.ds-bar *):not(.ds-controls *):not(.arc-card *):not([class^="ds-"]):not([class*=" ds-"]),
-    .tab-content label:not(.ds-panel *):not(.ds-table *):not(.ds-stat *):not(.ds-bar *):not(.ds-controls *):not(.arc-card *):not([class^="ds-"]):not([class*=" ds-"]),
-    .tab-content strong:not(.ds-panel *):not(.ds-table *):not(.ds-stat *):not(.ds-bar *):not(.ds-controls *):not(.arc-card *):not([class^="ds-"]):not([class*=" ds-"]),
-    .tab-content em:not(.ds-panel *):not(.ds-table *):not(.ds-stat *):not(.ds-bar *):not(.ds-controls *):not(.arc-card *):not([class^="ds-"]):not([class*=" ds-"]),
-    .tab-content small:not(.ds-panel *):not(.ds-table *):not(.ds-stat *):not(.ds-bar *):not(.ds-controls *):not(.arc-card *):not([class^="ds-"]):not([class*=" ds-"]),
-    .tab-content li:not(.ds-panel *):not(.ds-table *):not(.ds-stat *):not(.ds-bar *):not(.ds-controls *):not(.arc-card *):not([class^="ds-"]):not([class*=" ds-"]),
-    .tab-content .btn-toggle-item:not(.ds-panel *):not(.ds-table *):not(.ds-stat *):not(.ds-bar *):not(.ds-controls *):not(.arc-card *):not([class^="ds-"]):not([class*=" ds-"]),
-    .tab-content [class*="count"]:not(.ds-panel *):not(.ds-table *):not(.ds-stat *):not(.ds-bar *):not(.ds-controls *):not(.arc-card *):not([class^="ds-"]):not([class*=" ds-"]),
-    .tab-content [class*="summary"]:not(.ds-panel *):not(.ds-table *):not(.ds-stat *):not(.ds-bar *):not(.ds-controls *):not(.arc-card *):not([class^="ds-"]):not([class*=" ds-"]),
-    .tab-content [class*="title"]:not(.ds-panel *):not(.ds-table *):not(.ds-stat *):not(.ds-bar *):not(.ds-controls *):not(.arc-card *):not([class^="ds-"]):not([class*=" ds-"]),
-    .tab-content [class*="label"]:not(.ds-panel *):not(.ds-table *):not(.ds-stat *):not(.ds-bar *):not(.ds-controls *):not(.arc-card *):not([class^="ds-"]):not([class*=" ds-"]),
-    .tab-content [class*="note"]:not(.ds-panel *):not(.ds-table *):not(.ds-stat *):not(.ds-bar *):not(.ds-controls *):not(.arc-card *):not([class^="ds-"]):not([class*=" ds-"]),
-    .tab-content [class*="details"]:not(.ds-panel *):not(.ds-table *):not(.ds-stat *):not(.ds-bar *):not(.ds-controls *):not(.arc-card *):not([class^="ds-"]):not([class*=" ds-"]),
-    .tab-content [class*="hint"]:not(.ds-panel *):not(.ds-table *):not(.ds-stat *):not(.ds-bar *):not(.ds-controls *):not(.arc-card *):not([class^="ds-"]):not([class*=" ds-"]),
-    .tab-content [class*="subtitle"]:not(.ds-panel *):not(.ds-table *):not(.ds-stat *):not(.ds-bar *):not(.ds-controls *):not(.arc-card *):not([class^="ds-"]):not([class*=" ds-"]),
-    .tab-content [class*="placement"]:not(.ds-panel *):not(.ds-table *):not(.ds-stat *):not(.ds-bar *):not(.ds-controls *):not(.arc-card *):not([class^="ds-"]):not([class*=" ds-"]),
-    .tab-content [class*="change"]:not(.ds-panel *):not(.ds-table *):not(.ds-stat *):not(.ds-bar *):not(.ds-controls *):not(.arc-card *):not([class^="ds-"]):not([class*=" ds-"]),
-    .tab-content [class*="metric"]:not(.ds-panel *):not(.ds-table *):not(.ds-stat *):not(.ds-bar *):not(.ds-controls *):not(.arc-card *):not([class^="ds-"]):not([class*=" ds-"]),
-    .tab-content [class*="action"]:not(.ds-panel *):not(.ds-table *):not(.ds-stat *):not(.ds-bar *):not(.ds-controls *):not(.arc-card *):not([class^="ds-"]):not([class*=" ds-"]),
-    .tab-content [class*="toolbar"]:not(.ds-panel *):not(.ds-table *):not(.ds-stat *):not(.ds-bar *):not(.ds-controls *):not(.arc-card *):not([class^="ds-"]):not([class*=" ds-"]),
-    .tab-content [class*="jump"]:not(.ds-panel *):not(.ds-table *):not(.ds-stat *):not(.ds-bar *):not(.ds-controls *):not(.arc-card *):not([class^="ds-"]):not([class*=" ds-"]),
-    .tab-content [class*="toggle"]:not(.ds-panel *):not(.ds-table *):not(.ds-stat *):not(.ds-bar *):not(.ds-controls *):not(.arc-card *):not([class^="ds-"]):not([class*=" ds-"]),
-    .tab-content [class*="filter"]:not(.ds-panel *):not(.ds-table *):not(.ds-stat *):not(.ds-bar *):not(.ds-controls *):not(.arc-card *):not([class^="ds-"]):not([class*=" ds-"]),
-    .tab-content [class*="color-"]:not(.ds-panel *):not(.ds-table *):not(.ds-stat *):not(.ds-bar *):not(.ds-controls *):not(.arc-card *):not([class^="ds-"]):not([class*=" ds-"]),
-    .tab-content [class*="badge"]:not(.ds-panel *):not(.ds-table *):not(.ds-stat *):not(.ds-bar *):not(.ds-controls *):not(.arc-card *):not([class^="ds-"]):not([class*=" ds-"]),
-    .tab-content [class*="btn"]:not(.ds-panel *):not(.ds-table *):not(.ds-stat *):not(.ds-bar *):not(.ds-controls *):not(.arc-card *):not([class^="ds-"]):not([class*=" ds-"]) {
+    /* :not(.fs-scale *) ist der Ausstieg aus diesem Boden, eine Ansicht nach
+     * der anderen (Weg 2, abgestimmt am 21.08.2026). Wer die Klasse traegt,
+     * bekommt seine Groessen aus der Skala in tokens.css (--fs-xs bis
+     * --fs-hero) statt aus dieser einen Zeile.
+     *
+     * Warum ueberhaupt: gemessen bei 390 px im Aktuellen Meta lagen 354 von
+     * 395 sichtbaren Textknoten auf exakt 12 px — 89,6 %. Eine Rangordnung,
+     * die das Designsystem am Schreibtisch herstellt, war auf dem Telefon
+     * nicht vorhanden.
+     *
+     * Der Ausstieg geht bewusst ueber eine Klasse und nicht ueber die
+     * Reiter-ID: so ist das Uebernehmen einer Ansicht eine Wortaenderung im
+     * HTML und keine weitere Zeile in dieser Liste. Die Liste war der Fehler,
+     * nicht ihre Laenge — jede neue Komponente brauchte bisher einen weiteren
+     * Eintrag. */
+    .tab-content p:not(.ds-panel *):not(.ds-table *):not(.ds-stat *):not(.ds-bar *):not(.ds-controls *):not(.arc-card *):not([class^="ds-"]):not([class*=" ds-"]):not(.fs-scale *),
+    .tab-content span:not(.ds-panel *):not(.ds-table *):not(.ds-stat *):not(.ds-bar *):not(.ds-controls *):not(.arc-card *):not([class^="ds-"]):not([class*=" ds-"]):not(.fs-scale *),
+    .tab-content div:not(.ds-panel *):not(.ds-table *):not(.ds-stat *):not(.ds-bar *):not(.ds-controls *):not(.arc-card *):not([class^="ds-"]):not([class*=" ds-"]):not(.fs-scale *),
+    .tab-content td:not(.ds-panel *):not(.ds-table *):not(.ds-stat *):not(.ds-bar *):not(.ds-controls *):not(.arc-card *):not([class^="ds-"]):not([class*=" ds-"]):not(.fs-scale *),
+    .tab-content th:not(.ds-panel *):not(.ds-table *):not(.ds-stat *):not(.ds-bar *):not(.ds-controls *):not(.arc-card *):not([class^="ds-"]):not([class*=" ds-"]):not(.fs-scale *),
+    .tab-content button:not(.ds-panel *):not(.ds-table *):not(.ds-stat *):not(.ds-bar *):not(.ds-controls *):not(.arc-card *):not([class^="ds-"]):not([class*=" ds-"]):not(.fs-scale *),
+    .tab-content a:not(.ds-panel *):not(.ds-table *):not(.ds-stat *):not(.ds-bar *):not(.ds-controls *):not(.arc-card *):not([class^="ds-"]):not([class*=" ds-"]):not(.fs-scale *),
+    .tab-content label:not(.ds-panel *):not(.ds-table *):not(.ds-stat *):not(.ds-bar *):not(.ds-controls *):not(.arc-card *):not([class^="ds-"]):not([class*=" ds-"]):not(.fs-scale *),
+    .tab-content strong:not(.ds-panel *):not(.ds-table *):not(.ds-stat *):not(.ds-bar *):not(.ds-controls *):not(.arc-card *):not([class^="ds-"]):not([class*=" ds-"]):not(.fs-scale *),
+    .tab-content em:not(.ds-panel *):not(.ds-table *):not(.ds-stat *):not(.ds-bar *):not(.ds-controls *):not(.arc-card *):not([class^="ds-"]):not([class*=" ds-"]):not(.fs-scale *),
+    .tab-content small:not(.ds-panel *):not(.ds-table *):not(.ds-stat *):not(.ds-bar *):not(.ds-controls *):not(.arc-card *):not([class^="ds-"]):not([class*=" ds-"]):not(.fs-scale *),
+    .tab-content li:not(.ds-panel *):not(.ds-table *):not(.ds-stat *):not(.ds-bar *):not(.ds-controls *):not(.arc-card *):not([class^="ds-"]):not([class*=" ds-"]):not(.fs-scale *),
+    .tab-content .btn-toggle-item:not(.ds-panel *):not(.ds-table *):not(.ds-stat *):not(.ds-bar *):not(.ds-controls *):not(.arc-card *):not([class^="ds-"]):not([class*=" ds-"]):not(.fs-scale *),
+    .tab-content [class*="count"]:not(.ds-panel *):not(.ds-table *):not(.ds-stat *):not(.ds-bar *):not(.ds-controls *):not(.arc-card *):not([class^="ds-"]):not([class*=" ds-"]):not(.fs-scale *),
+    .tab-content [class*="summary"]:not(.ds-panel *):not(.ds-table *):not(.ds-stat *):not(.ds-bar *):not(.ds-controls *):not(.arc-card *):not([class^="ds-"]):not([class*=" ds-"]):not(.fs-scale *),
+    .tab-content [class*="title"]:not(.ds-panel *):not(.ds-table *):not(.ds-stat *):not(.ds-bar *):not(.ds-controls *):not(.arc-card *):not([class^="ds-"]):not([class*=" ds-"]):not(.fs-scale *),
+    .tab-content [class*="label"]:not(.ds-panel *):not(.ds-table *):not(.ds-stat *):not(.ds-bar *):not(.ds-controls *):not(.arc-card *):not([class^="ds-"]):not([class*=" ds-"]):not(.fs-scale *),
+    .tab-content [class*="note"]:not(.ds-panel *):not(.ds-table *):not(.ds-stat *):not(.ds-bar *):not(.ds-controls *):not(.arc-card *):not([class^="ds-"]):not([class*=" ds-"]):not(.fs-scale *),
+    .tab-content [class*="details"]:not(.ds-panel *):not(.ds-table *):not(.ds-stat *):not(.ds-bar *):not(.ds-controls *):not(.arc-card *):not([class^="ds-"]):not([class*=" ds-"]):not(.fs-scale *),
+    .tab-content [class*="hint"]:not(.ds-panel *):not(.ds-table *):not(.ds-stat *):not(.ds-bar *):not(.ds-controls *):not(.arc-card *):not([class^="ds-"]):not([class*=" ds-"]):not(.fs-scale *),
+    .tab-content [class*="subtitle"]:not(.ds-panel *):not(.ds-table *):not(.ds-stat *):not(.ds-bar *):not(.ds-controls *):not(.arc-card *):not([class^="ds-"]):not([class*=" ds-"]):not(.fs-scale *),
+    .tab-content [class*="placement"]:not(.ds-panel *):not(.ds-table *):not(.ds-stat *):not(.ds-bar *):not(.ds-controls *):not(.arc-card *):not([class^="ds-"]):not([class*=" ds-"]):not(.fs-scale *),
+    .tab-content [class*="change"]:not(.ds-panel *):not(.ds-table *):not(.ds-stat *):not(.ds-bar *):not(.ds-controls *):not(.arc-card *):not([class^="ds-"]):not([class*=" ds-"]):not(.fs-scale *),
+    .tab-content [class*="metric"]:not(.ds-panel *):not(.ds-table *):not(.ds-stat *):not(.ds-bar *):not(.ds-controls *):not(.arc-card *):not([class^="ds-"]):not([class*=" ds-"]):not(.fs-scale *),
+    .tab-content [class*="action"]:not(.ds-panel *):not(.ds-table *):not(.ds-stat *):not(.ds-bar *):not(.ds-controls *):not(.arc-card *):not([class^="ds-"]):not([class*=" ds-"]):not(.fs-scale *),
+    .tab-content [class*="toolbar"]:not(.ds-panel *):not(.ds-table *):not(.ds-stat *):not(.ds-bar *):not(.ds-controls *):not(.arc-card *):not([class^="ds-"]):not([class*=" ds-"]):not(.fs-scale *),
+    .tab-content [class*="jump"]:not(.ds-panel *):not(.ds-table *):not(.ds-stat *):not(.ds-bar *):not(.ds-controls *):not(.arc-card *):not([class^="ds-"]):not([class*=" ds-"]):not(.fs-scale *),
+    .tab-content [class*="toggle"]:not(.ds-panel *):not(.ds-table *):not(.ds-stat *):not(.ds-bar *):not(.ds-controls *):not(.arc-card *):not([class^="ds-"]):not([class*=" ds-"]):not(.fs-scale *),
+    .tab-content [class*="filter"]:not(.ds-panel *):not(.ds-table *):not(.ds-stat *):not(.ds-bar *):not(.ds-controls *):not(.arc-card *):not([class^="ds-"]):not([class*=" ds-"]):not(.fs-scale *),
+    .tab-content [class*="color-"]:not(.ds-panel *):not(.ds-table *):not(.ds-stat *):not(.ds-bar *):not(.ds-controls *):not(.arc-card *):not([class^="ds-"]):not([class*=" ds-"]):not(.fs-scale *),
+    .tab-content [class*="badge"]:not(.ds-panel *):not(.ds-table *):not(.ds-stat *):not(.ds-bar *):not(.ds-controls *):not(.arc-card *):not([class^="ds-"]):not([class*=" ds-"]):not(.fs-scale *),
+    .tab-content [class*="btn"]:not(.ds-panel *):not(.ds-table *):not(.ds-stat *):not(.ds-bar *):not(.ds-controls *):not(.arc-card *):not([class^="ds-"]):not([class*=" ds-"]):not(.fs-scale *) {
         font-size: 12px !important;
+    }
+
+    /* Etappe 1 des Ausstiegs: das Aktuelle Meta bekommt seine Groessen aus
+     * der Skala (tokens.css) statt aus dem Boden oben.
+     *
+     * Was der Boden verdeckt hat, zeigte sich erst beim Abschalten. Gemessen
+     * bei 390 px, 395 sichtbare Textknoten im Reiter:
+     *
+     *     mit Boden      354 x 12 px, 26 x 11, Rest vereinzelt  (89,6 % auf 12)
+     *     ohne Boden     181 Knoten unter 11 px, davon 90 auf 6,6 px
+     *
+     * Ursache ist keine bewusste Wahl, sondern multiplizierendes em:
+     * .top-card-stats steht auf 0.65em, seine Kinder noch einmal auf 0.82em,
+     * 0.78em und 0.72em. Der Boden hat jedes dieser Elemente EINZELN auf 12 px
+     * gehoben, weshalb die Verschachtelung nie auffiel. Ohne ihn multipliziert
+     * sie sich bis auf 5,6 px. Dasselbe bei .heatmap-td-n (0.55em).
+     *
+     * Deshalb hier absolute Tokenwerte statt em: die Groesse gehoert in die
+     * Tokenschicht, nicht in eine Ausnahmeliste (tokens.css, Kopf).
+     *
+     * Alle Werte liegen bei 11 oder 12 px und damit NICHT ueber dem, was der
+     * Boden vorher erzwungen hat (12 px) — das Layout muss also nichts
+     * aushalten, was es nicht schon ausgehalten hat. Der Gewinn steht auf der
+     * anderen Seite: Ueberschriften und Kennzahlen duerfen jetzt groesser sein
+     * als der Fliesstext (gemessen danach: 24, 21,6, 18, 15,6, 14 px kommen
+     * ueberhaupt erst vor).
+     *
+     * Ohne !important — der Boden greift in dieser Ansicht nicht mehr, also
+     * genuegt normale Spezifitaet. #current-meta.fs-scale (1,2,0) schlaegt
+     * #currentMetaContent (1,1,0) und .heatmap-td-n (0,1,0). */
+    #current-meta.fs-scale .top-card-stats,
+    #current-meta.fs-scale .top-card-share,
+    #current-meta.fs-scale .top-card-decks,
+    #current-meta.fs-scale .top-card-rank,
+    #current-meta.fs-scale .top-cards-denominator,
+    #current-meta.fs-scale .heatmap-td-n,
+    #current-meta.fs-scale .heatmap-desc,
+    #current-meta.fs-scale .heatmap-desc *,
+    #current-meta.fs-scale .heatmap-hint,
+    #current-meta.fs-scale .heatmap-hint *,
+    #current-meta.fs-scale .heatmap-th-x,
+    #current-meta.fs-scale .top-cards-denominator *,
+    #current-meta.fs-scale .stat-badge,
+    #current-meta.fs-scale .stat-badge-suffix,
+    #current-meta.fs-scale .js-data-freshness {
+        font-size: var(--fs-xs);
+    }
+
+    #current-meta.fs-scale .top-card-name {
+        font-size: var(--fs-sm);
     }
 
     /* Formularfelder: ein eigener Wert statt eines geliehenen Bodens.

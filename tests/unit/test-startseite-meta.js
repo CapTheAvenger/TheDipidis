@@ -36,12 +36,20 @@ const HUB = stripJs(read('js/meta-analysis-hub.js'));
 
 describe('Startseite — die Meta-Ansicht empfaengt', () => {
     it('current-meta traegt active, der Hub nicht mehr', () => {
-        assert.match(HTML, /<div id="current-meta" class="tab-content active">/);
+        // class-Liste statt exakter Zeichenfolge: seit Audit 3 traegt der
+        // Reiter zusaetzlich .fs-scale (Ausstieg aus dem 12-px-Boden, Etappe 1).
+        // Geprueft wird, was gemeint ist — dass genau dieser Reiter aktiv ist —,
+        // nicht die zufaellige Reihenfolge seiner Klassen.
+        const cm = HTML.match(/<div id="current-meta" class="([^"]*)"/);
+        assert.ok(cm, '#current-meta nicht gefunden');
+        const klassen = cm[1].trim().split(/\s+/);
+        assert.ok(klassen.includes('tab-content'), 'tab-content fehlt: ' + cm[1]);
+        assert.ok(klassen.includes('active'), 'active fehlt: ' + cm[1]);
         assert.match(HTML, /<div id="meta-analysis-hub" class="tab-content">/);
     });
 
     it('genau ein Reiter ist beim Laden aktiv', () => {
-        const n = (HTML.match(/class="tab-content active"/g) || []).length;
+        const n = (HTML.match(/class="tab-content active(?:[ "])/g) || []).length;
         assert.strictEqual(n, 1);
     });
 

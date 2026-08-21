@@ -708,15 +708,30 @@ img[src*="limitlesstcg"] {
     align-items: center !important;
     gap: 10px !important;
 }
+/* font-size ohne !important und aus der Skala statt als em.
+ *
+ * Warum: der 12-px-Boden fuers Handy wird ansichtsweise abgeloest
+ * (css/mobile-responsive.css, .fs-scale). In der abgeloesten Ansicht gewinnt
+ * eine normale Regel — aber nicht gegen ein !important, das hier stand. Diese
+ * beiden Beschriftungen blieben deshalb als einzige auf 9,6 bzw. 9,7 px
+ * haengen, gemessen bei 390 px im Aktuellen Meta.
+ *
+ * Noch ein !important dagegenzusetzen haette den Zaehler erhoeht; stattdessen
+ * faellt es hier weg — die Datei verlaesst die Aenderung mit zwei weniger.
+ *
+ * Die Tokenwerte sind so gewaehlt, dass der Desktop bleibt, wo er war:
+ * 0.9em von 16 px sind 14,4 px (--fs-md = 14), 0.8em sind 12,8 px
+ * (--fs-sm = 12). Farbe und Abstand behalten ihr !important, an denen
+ * aendert sich nichts. */
 .heatmap-desc {
     color: #7f8c8d !important;
     margin: 0 0 20px 0 !important;
-    font-size: 0.9em !important;
+    font-size: var(--fs-md);
 }
 .heatmap-hint {
     color: #95a5a6 !important;
     margin: 15px 0 0 0 !important;
-    font-size: 0.8em !important;
+    font-size: var(--fs-sm);
     font-style: italic !important;
 }
 .heatmap-search-wrapper {

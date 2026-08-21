@@ -1199,6 +1199,13 @@ def apply_format_window_to_scraper_settings(format_window_path: str,
     standalone_rotations = [
         ('current_meta_analysis_settings.json',
          ('sources', 'limitless_online', 'format_filter'), current_set),
+        # Das Startdatum wurde hier NICHT mitgedreht. Gemessen 21.08.2026:
+        # in dieser Datei stand "10.04.2026", in scraper_settings.json
+        # laengst "31.07.2026" — 112 Tage und drei Formate auseinander.
+        # Das Frontend liest die Standalone-Datei, also entschied die
+        # veraltete Zahl, welche Turniere als "aktuelles Meta" gelten.
+        ('current_meta_analysis_settings.json',
+         ('sources', 'tournaments', 'start_date'), in_person_de),
         ('online_tournament_scraper_settings.json',
          ('format_filter',), current_set),
         ('limitless_online_settings.json',

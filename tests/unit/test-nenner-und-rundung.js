@@ -90,14 +90,38 @@ describe('Donut: der Anteil steht auf dem ganzen Feld', () => {
 
         const gelistet = zeilen.reduce((a, z) => a + z.anzahl, 0);
         const n = fn(zeilen);
-        // Die Eingrenzung aus der Pruefung vom 20.08.2026: N ∈ [27356,9; 27358,3].
-        assert.ok(n >= 27356 && n <= 27359, 'Feldgroesse: ' + n);
-        assert.equal(gelistet, 26319);
-        assert.ok(n - gelistet >= 1037 && n - gelistet <= 1040, 'Other: ' + (n - gelistet));
-        // Und die Probe, um derentwillen das Ganze existiert:
-        const excadrill = zeilen.find(z => z.anzahl === 2121);
-        assert.ok(Math.abs(excadrill.anzahl / n * 100 - 7.75) < 0.01,
-            'der Donut muss dieselben 7,75 % zeigen wie die Tabelle');
+
+        // Frueher stand hier die feste Eingrenzung N ∈ [27356; 27359] und
+        // gelistet === 26319 aus der Pruefung vom 20.08.2026. Der Wochenlauf
+        // vom 21.08.2026 machte daraus N = 29.437 und gelistet = 28.324 — der
+        // Test wurde rot, obwohl die Rechnung stimmte. Da der Deploy an gruenen
+        // Tests haengt, blockierte das den Lauf, der die frischen Daten
+        // ausliefern sollte.
+        //
+        // Der bessere Beleg ist ohnehin kein fester Wert, sondern ein Quercheck
+        // gegen eine UNABHAENGIGE Quelle: limitless_meta_stats.json zaehlt die
+        // Spieler direkt, statt sie aus gerundeten Anteilen zu rekonstruieren.
+        // Gemessen 21.08.2026: rekonstruiert 29.437, gemeldet 29.436 — eine
+        // Person Unterschied auf 29.000, also rund 0,003 %.
+        const stats = JSON.parse(fs.readFileSync(
+            path.join(ROOT, 'data', 'limitless_meta_stats.json'), 'utf8'));
+        assert.ok(Math.abs(n - stats.players) <= 5,
+            `rekonstruiert ${n}, limitless_meta_stats.json meldet ${stats.players}`);
+
+        // Der Nenner muss groesser sein als die gelisteten Decks — die Differenz
+        // ist die weggeworfene "Other"-Zeile. Gemessen 21.08.2026: 1.113 von
+        // 29.437, also 3,8 %.
+        assert.ok(n > gelistet, `Feldgroesse ${n} <= gelistet ${gelistet}`);
+        const other = n - gelistet;
+        assert.ok(other > 0 && other < n * 0.15, 'Other: ' + Math.round(other));
+
+        // Und die Probe, um derentwillen das Ganze existiert — datengetrieben
+        // statt auf ein bestimmtes Deck verdrahtet: fuer das groesste Deck muss
+        // count/N genau den Anteil ergeben, den die Tabelle nennt.
+        const groesstes = zeilen.reduce((a, z) => (z.anzahl > a.anzahl ? z : a));
+        assert.ok(Math.abs(groesstes.anzahl / n * 100 - groesstes.anteil) < 0.01,
+            `der Donut muss dieselben ${groesstes.anteil} % zeigen wie die Tabelle, `
+            + `rechnet aber ${(groesstes.anzahl / n * 100).toFixed(2)} %`);
     });
 
     it('ohne brauchbare Eingrenzung wird nichts behauptet', () => {

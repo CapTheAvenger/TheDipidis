@@ -141,9 +141,9 @@
   "price_data.csv": 20419,
   "prizepack_official_images.csv": 266
  },
- "generated": "2026-08-20 09:44 UTC",
+ "generated": "2026-08-21 09:45 UTC",
  "price_integrity": {
-  "duplicate_idproducts": 100,
+  "duplicate_idproducts": 101,
   "match_methods": {
    "live-verified": 5047,
    "manual-pin": 1,
@@ -151,7 +151,18 @@
    "priced-by-date": 1199,
    "unique": 11013
   },
-  "nonempty_eur_price": 20375
+  "nonempty_eur_price": 20377,
+  "verified_collisions": [
+   "276103",
+   "276311",
+   "279943",
+   "281502",
+   "282722",
+   "299540",
+   "315951",
+   "363531",
+   "817297"
+  ]
  },
  "set_coverage": {
   "AOR": [

@@ -66,6 +66,9 @@ function loadFilterFns(overrides = {}) {
 
     const snippets = [
         extractFunction(utilsSrc, 'parseLocaleNumber'),
+        // Deckgroesse der Summenzeile — seit der Korrektur die Summe
+        // der Mittelwerte statt der max_count-Werte.
+        extractFunction(utilsSrc, 'mittlereDeckGroesse'),
         'let _cityLeagueSortCache = null;',
         'let _cityLeagueSortDataRef = null;',
         extractFunction(citySrc, 'getCardShareValue'),
@@ -246,10 +249,16 @@ describe('applyCurrentMetaFilter', () => {
             renderCurrentMetaDeckGrid: (rows) => { gridRendered = rows; },
         });
 
+        // average_count_overall gehoert seit der Deckgroessen-Korrektur
+        // dazu: die Summenzeile zaehlt Mittelwerte, nicht max_count.
+        // 3,50 + 0,50 = 4,00 fuer die beiden gefilterten Karten.
         fns._sandbox.window.currentCurrentMetaDeckCards = [
-            { card_name: 'Arven', percentage_in_archetype: '95', max_count: '4' },
-            { card_name: 'Prime Catcher', percentage_in_archetype: '65', max_count: '1' },
-            { card_name: 'Iono', percentage_in_archetype: '50', max_count: '2' },
+            { card_name: 'Arven', percentage_in_archetype: '95', max_count: '4',
+              average_count_overall: '3,50', total_decks_in_archetype: '20' },
+            { card_name: 'Prime Catcher', percentage_in_archetype: '65', max_count: '1',
+              average_count_overall: '0,50', total_decks_in_archetype: '20' },
+            { card_name: 'Iono', percentage_in_archetype: '50', max_count: '2',
+              average_count_overall: '1,00', total_decks_in_archetype: '20' },
         ];
 
         const filterSelect = { value: '90' };
@@ -272,7 +281,7 @@ describe('applyCurrentMetaFilter', () => {
         assert.equal(tableRendered.length, 2);
         assert.equal(gridRendered, null);
         assert.equal(countEl.textContent, '2 deck.cards');
-        assert.equal(summaryEl.textContent, '/ 5 Total');
+        assert.equal(summaryEl.textContent, '/ 4 Total');
     });
 
     it('renders grid view when table is hidden', () => {

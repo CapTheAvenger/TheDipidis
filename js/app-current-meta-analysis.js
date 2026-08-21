@@ -596,6 +596,12 @@
                 );
                 const pct = totalCombined > 0 ? Math.min(100, dwCombined / totalCombined * 100) : 0;
                 const avgCount = dwCombined > 0 ? (tcCombined / dwCombined) : 0;
+                // average_count_overall muss mitgerechnet werden, sonst
+                // erbt die fusionierte Zeile ueber `...rep` den Mittelwert
+                // EINES der beiden Archetypen. Die Deckgroessen-Kachel
+                // summiert genau dieses Feld und meldete fuer eine Fusion
+                // deshalb rund 30 statt 60 Karten.
+                const avgOverall = totalCombined > 0 ? (tcCombined / totalCombined) : 0;
                 merged.push({
                     ...rep,
                     // Set both `deck_count` and `deck_inclusion_count` to the
@@ -613,6 +619,7 @@
                     total_count: tcCombined,
                     max_count: maxCombined,
                     average_count: avgCount.toFixed(2),
+                    average_count_overall: avgOverall.toFixed(2),
                     total_decks_in_archetype: totalCombined,
                     percentage_in_archetype: pct.toFixed(2).replace('.', ',')
                 });
@@ -1564,11 +1571,22 @@
             
                 window.currentCurrentMetaDeckCards = deckCards;
                 
-                // Calculate stats
-                // Use max_count to match the filter view calculations for consistency
-                // (both must use the same base to avoid logical impossibilities like "87 unique / 75 total")
-                const totalCardsInDeck = deckCards.reduce((sum, card) => sum + parseInt(card.max_count || 0, 10), 0);
+                // Kartenzahl der Kachel.
+                //
+                // Frueher stand hier die Summe der max_count-Werte. Die
+                // beschreibt kein Deck: Mega Excadrill meldete 101 Karten,
+                // N's Zoroark 106, Toucannon 183 — bei 60 erlaubten. Der
+                // damalige Kommentar begruendete das mit Gleichlauf zur
+                // Filteransicht; die rechnete denselben Fehler, also war
+                // beides gleich falsch. Jetzt rechnen beide ueber
+                // mittlereDeckGroesse() die Summe der ungerundeten
+                // Mittelwerte, und die ergibt je Archetyp 60.
                 const uniqueCards = deckCards.length;
+                const deckGroesse = (typeof mittlereDeckGroesse === 'function')
+                    ? mittlereDeckGroesse(deckCards)
+                    : { groesse: 0, basis: 'unbekannt' };
+                const totalCardsInDeck = deckGroesse.basis === 'unbekannt'
+                    ? '–' : Math.round(deckGroesse.groesse);
                 
                 // Get winrate from deck stats
                 let winrate = '-';
@@ -2887,8 +2905,13 @@
             
             devLog(`Filter applied: ${filterValue}, showing ${filteredCards.length} of ${allCards.length} cards`);
             
-            const filteredTotal = filteredCards.reduce((sum, card) => sum + parseInt(card.max_count || 0), 0);
-            const allTotal = allCards.reduce((sum, card) => sum + parseInt(card.max_count || 0), 0);
+            // Siehe mittlereDeckGroesse(): Mittelwerte, nicht max_count.
+            const _fT = (typeof mittlereDeckGroesse === 'function')
+                ? mittlereDeckGroesse(filteredCards) : { groesse: 0, basis: 'unbekannt' };
+            const _aT = (typeof mittlereDeckGroesse === 'function')
+                ? mittlereDeckGroesse(allCards) : { groesse: 0, basis: 'unbekannt' };
+            const filteredTotal = _fT.basis === 'unbekannt' ? '–' : Math.round(_fT.groesse);
+            const allTotal = _aT.basis === 'unbekannt' ? '–' : Math.round(_aT.groesse);
             
             const tableViewContainer = document.getElementById('currentMetaDeckTableView');
             const gridViewContainer = document.getElementById('currentMetaDeckVisual');

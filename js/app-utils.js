@@ -1626,3 +1626,74 @@ window.archetypSchreibwegSchluessel = archetypSchreibwegSchluessel;
 window.legeSchreibwegeZusammen = legeSchreibwegeZusammen;
 
 window.getEmptyStateHtml = getEmptyStateHtml;
+
+/**
+ * Mittlere Deckgroesse einer Kartenauswahl — die Zahl hinter dem
+ * Schraegstrich in "Karten im Deck (verschiedene / Ø-Liste)".
+ *
+ * Vorher summierten Current Meta und City League `max_count`. Das ist
+ * die groesste je gesehene Kopienzahl pro Karte, aufaddiert ueber alle
+ * Karten des Archetyps — eine Zahl, die kein Deck je hatte. Mega
+ * Excadrill meldete so 101 Karten, N's Zoroark 106, Toucannon 183. Ein
+ * Deck hat 60. Die Beschriftung sagte "Gesamt" und meinte damit etwas,
+ * das keine Deckliste beschreibt.
+ *
+ * Richtig ist die Summe der ungerundeten Mittelwerte je Karte
+ * (`average_count_overall` = Kopien ueber ALLE Listen des Archetyps,
+ * nicht nur ueber die, die die Karte spielen). Gemessen ueber
+ * data/current_meta_card_data.csv ergibt das je Archetyp exakt 60,00 —
+ * genau die Deckgroesse, die es beschreiben soll. Past Meta rechnet
+ * seit getPastMetaSummaryTotalCount() schon so; hier zieht der Rest
+ * der Seite nach.
+ *
+ * Bei genau einer Liste gibt es keinen Mittelwert. Dort ist max_count
+ * die echte Kopienzahl dieser einen Liste, und die Summe darueber ist
+ * wieder 60.
+ *
+ * Rueckgabe { groesse, basis } statt einer nackten Zahl, damit die
+ * Seite eine fehlende Datengrundlage anschreiben kann, statt eine 0
+ * zu zeigen, die wie eine Messung aussieht.
+ *   basis 'einzelliste' — aus max_count einer einzelnen Liste
+ *   basis 'mittelwert'  — aus average_count_overall
+ *   basis 'unbekannt'   — keine Zeile traegt einen Mittelwert
+ *   basis 'leer'        — keine Karten
+ */
+function mittlereDeckGroesse(karten, anzahlListen) {
+    if (!Array.isArray(karten) || karten.length === 0) {
+        return { groesse: 0, basis: 'leer' };
+    }
+    if (!(anzahlListen > 0)) {
+        anzahlListen = karten.reduce((m, k) => Math.max(
+            m, parseInt((k && k.total_decks_in_archetype) || 0, 10) || 0), 0);
+    }
+    if (anzahlListen === 1) {
+        return {
+            groesse: karten.reduce((s, k) => s + (parseInt((k && k.max_count) || 0, 10) || 0), 0),
+            basis: 'einzelliste'
+        };
+    }
+    const zahl = (w) => (typeof parseLocaleNumber === 'function')
+        ? parseLocaleNumber(w, 0)
+        : (parseFloat(String(w == null ? '' : w).replace(',', '.')) || 0);
+    let summe = 0, mitMittelwert = 0;
+    karten.forEach(k => {
+        const a = zahl(k && (k.average_count_overall != null ? k.average_count_overall : k.card_count));
+        if (a > 0) { summe += a; mitMittelwert++; }
+    });
+    if (mitMittelwert === 0) {
+        // Kein Mittelwert in den Daten. Lieber nichts sagen als
+        // max_count als Deckgroesse ausgeben — das war der Fehler.
+        return { groesse: 0, basis: 'unbekannt' };
+    }
+    return { groesse: summe, basis: 'mittelwert' };
+}
+
+/** "42 / 60" bzw. "42 / –", wenn die Daten keine Deckgroesse hergeben. */
+function deckGroessenText(karten, anzahlListen) {
+    const r = mittlereDeckGroesse(karten, anzahlListen);
+    const rechts = (r.basis === 'unbekannt') ? '–' : String(Math.round(r.groesse));
+    return { text: `${karten ? karten.length : 0} / ${rechts}`, rechts, basis: r.basis };
+}
+
+window.mittlereDeckGroesse = mittlereDeckGroesse;
+window.deckGroessenText = deckGroessenText;

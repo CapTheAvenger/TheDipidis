@@ -189,7 +189,18 @@ def save_meta_play_cache(cache: Dict[str, list]) -> None:
 # read this at runtime — hardcoded defaults rot every rotation. Used
 # as a safety net when the per-scraper settings file is missing or its
 # format_filter has not been updated for the current rotation.
-def _current_set_code(fallback: str = 'CRI') -> str:
+def _current_set_code(fallback: str = '') -> str:
+    """Das laufende Set aus data/format_window.json.
+
+    Der Rueckfallwert war bis zum 21.08.2026 die Zeichenkette 'CRI' — das
+    Set, das beim Schreiben dieser Zeile gerade lief. Ein einziger nicht
+    lesbarer Zugriff auf format_window.json (OSError, kaputtes JSON) liess
+    den Scraper deshalb still ins VORLETZTE Format zurueckfallen, und die
+    Selbstheilung darunter ueberschrieb damit sogar ein korrekt
+    eingestelltes format_filter. Ein hart geschriebenes Set-Kuerzel altert
+    bei jeder Rotation; ein leerer Rueckfall nicht: er laesst die
+    ausdrueckliche Einstellung gewinnen, statt sie zu verdraengen.
+    """
     candidates = [
         os.path.join(get_data_dir(), 'format_window.json'),
         os.path.normpath(os.path.join(os.path.dirname(__file__), '..', '..', 'data', 'format_window.json')),
@@ -365,6 +376,17 @@ def scrape_limitless_online(settings: dict, card_db: CardDatabaseLookup) -> list
         format_filter = live
     else:
         format_filter = configured or live
+    if not format_filter:
+        # Siehe _current_set_code(): ohne Set-Kuerzel wuerde hier ohne
+        # Formatfilter gescrapt und das Ergebnis saehe aus wie ein
+        # Meta-Snapshot. Lieber nichts liefern und es sagen.
+        logger.error(
+            "Kein Formatfilter bestimmbar: settings.format_filter ist leer und "
+            "data/format_window.json liefert kein current_set. Abbruch."
+        )
+        print("::error::current_meta_analysis_scraper: kein Formatfilter "
+              "bestimmbar — Limitless-Online-Durchgang uebersprungen.")
+        return []
     timeout = settings.get("request_timeout", 20)
     max_workers = settings.get("max_workers", 5)
 

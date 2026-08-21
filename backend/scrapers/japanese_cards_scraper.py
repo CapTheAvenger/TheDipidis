@@ -16,7 +16,7 @@ import time
 import threading
 import concurrent.futures
 from datetime import datetime
-from typing import List, Dict, Set, Tuple
+from typing import List, Dict, Optional, Set, Tuple
 
 from bs4 import BeautifulSoup
 
@@ -79,20 +79,65 @@ def fetch_page_bs4(url: str, retries: int = 3):
 # ============================================================================
 # LOGIC
 # ============================================================================
-def load_existing_sets() -> Set[str]:
+def load_existing_rows() -> List[Dict[str, str]]:
+    """Alle Zeilen der bestehenden JP-Datenbank, oder eine leere Liste."""
     csv_path = os.path.join(data_dir, "japanese_cards_database.csv")
     if not os.path.exists(csv_path):
-        return set()
+        return []
     try:
-        existing = set()
         with open(csv_path, "r", encoding="utf-8-sig") as f:
-            for row in csv.DictReader(f):
-                if row.get("set"):
-                    existing.add(row["set"])
-        return existing
+            return [dict(row) for row in csv.DictReader(f)]
     except Exception as e:
         logger.warning("Konnte bestehende DB nicht lesen: %s", e)
-        return set()
+        return []
+
+
+def load_existing_sets() -> Set[str]:
+    return {r["set"] for r in load_existing_rows() if r.get("set")}
+
+
+def merge_rows(alt: List[Dict[str, str]],
+               neu: List[Dict[str, str]]) -> Tuple[List[Dict[str, str]], Set[str], Set[str]]:
+    """Neue Zeilen ueber die alten legen, ohne die alten zu verlieren.
+
+    GEMESSEN am 21.08.2026: data/japanese_cards_database.csv enthielt
+    772 Zeilen aus genau fuenf Sets — M6 und vier Promo-Sets. M5, M4 und
+    M3 fehlten vollstaendig, obwohl sie frueher darin standen. Ursache
+    ist die Schreibweise weiter unten: die Datei wurde mit "w" geoeffnet
+    und komplett durch das Ergebnis EINES Laufs ersetzt. Faellt in einem
+    Lauf die Set-Uebersicht aus (Cloudflare, geaenderte Seitenstruktur),
+    fragt der Scraper nur noch die fest verdrahteten Promo-Sets ab — und
+    dieses Ergebnis loeschte alles andere.
+
+    Deshalb wird jetzt zusammengelegt statt ersetzt: ein Set, das dieser
+    Lauf geliefert hat, wird darin vollstaendig erneuert; ein Set, das er
+    nicht angefasst hat, bleibt unveraendert stehen.
+
+    Rueckgabe: (zeilen, erneuerte_sets, behaltene_sets)
+    """
+    neue_sets = {r["set"] for r in neu if r.get("set")}
+    behalten = [r for r in alt if r.get("set") and r["set"] not in neue_sets]
+    behaltene_sets = {r["set"] for r in behalten}
+    return behalten + list(neu), neue_sets, behaltene_sets
+
+
+def pruefe_kein_verlust(alt: List[Dict[str, str]],
+                        zusammengelegt: List[Dict[str, str]]) -> Optional[str]:
+    """Gibt einen Grund zurueck, wenn das Ergebnis schlechter waere als der Bestand.
+
+    Melden, nicht still reparieren (CLAUDE.md): lieber die alte Datei
+    behalten und laut sein, als eine kleinere zu schreiben, die richtig
+    aussieht.
+    """
+    alt_sets = {r["set"] for r in alt if r.get("set")}
+    neu_sets = {r["set"] for r in zusammengelegt if r.get("set")}
+    verloren = alt_sets - neu_sets
+    if verloren:
+        return f"Sets wuerden verschwinden: {', '.join(sorted(verloren))}"
+    if alt and len(zusammengelegt) < len(alt) * 0.9:
+        return (f"Ergebnis waere deutlich kleiner: {len(zusammengelegt)} statt "
+                f"{len(alt)} Zeilen")
+    return None
 
 def quick_check_latest_sets() -> Set[str]:
     logger.info("Quick Check: Pruefe die neusten Sets auf Limitless...")
@@ -279,12 +324,25 @@ def main():
         logger.info("Lokale Datenbank enthaelt %s Sets.", len(existing_sets))
 
     latest_online = quick_check_latest_sets()
-    if latest_online:
-        logger.info(f"Neueste Sets online: {', '.join(latest_online)}")
-        if latest_online.issubset(existing_sets):
-            logger.info("DATENBANK IST BEREITS AKTUELL!")
-            logger.info("Die neusten Sets sind bereits in der lokalen Datenbank. Abbruch.")
-            return
+    if not latest_online:
+        # Ohne die Set-Uebersicht weiss dieser Lauf nicht, WELCHE Sets es
+        # gibt. Frueher lief er trotzdem weiter und fragte nur die fest
+        # verdrahteten Promo-Sets ab — deren Ergebnis ersetzte dann die
+        # ganze Datenbank. Genau so sind M5, M4 und M3 verschwunden.
+        logger.error(
+            "Set-Uebersicht auf limitlesstcg.com/cards/jp lieferte kein einziges "
+            "Set. Ohne sie ist nicht bestimmbar, was zu holen waere — Abbruch "
+            "OHNE Schreiben. Bestehende Datenbank bleibt unveraendert."
+        )
+        print("::error::japanese_cards_scraper: JP-Set-Uebersicht leer — "
+              "Seitenstruktur oder Cloudflare pruefen. Datenbank unveraendert.")
+        return
+
+    logger.info(f"Neueste Sets online: {', '.join(sorted(latest_online))}")
+    if latest_online.issubset(existing_sets):
+        logger.info("DATENBANK IST BEREITS AKTUELL!")
+        logger.info("Die neusten Sets sind bereits in der lokalen Datenbank. Abbruch.")
+        return
 
     all_cards = scrape_japanese_cards_list(latest_online)
     if not all_cards:
@@ -299,13 +357,26 @@ def main():
 
     csv_path  = os.path.join(data_dir, "japanese_cards_database.csv")
 
+    bestand = load_existing_rows()
+    zusammengelegt, erneuert, behalten = merge_rows(bestand, filtered_cards)
+    logger.info("Zusammengelegt: %s Sets erneuert (%s), %s Sets unveraendert behalten.",
+                len(erneuert), ", ".join(sorted(erneuert)) or "-", len(behalten))
+
+    grund = pruefe_kein_verlust(bestand, zusammengelegt)
+    if grund:
+        logger.error("Schreiben abgebrochen — %s", grund)
+        print(f"::error::japanese_cards_scraper: nicht geschrieben ({grund}). "
+              f"Bestehende Datenbank bleibt unveraendert.")
+        return
+
     with open(csv_path, "w", encoding="utf-8", newline="") as f:
         writer = csv.DictWriter(
             f, fieldnames=["name", "set", "number", "type", "rarity", "image_url"],
             extrasaction="ignore"
         )
         writer.writeheader()
-        writer.writerows(filtered_cards)
+        writer.writerows(zusammengelegt)
+    filtered_cards = zusammengelegt
 
     # NOTE: the legacy japanese_cards_database.json output was dropped
     # 2026-06-12 (AUDIT_DATA_PIPELINE.md F-D15). Only the CSV is

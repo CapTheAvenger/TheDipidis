@@ -102,11 +102,73 @@ OUTPUT_PATH = _resolve_output_path()
 #   4a → M4 (Chaos Rising, retired — intl set shipped)
 #   5a → M5 (current JP-only set, 2026-05-22)
 # When a new JP-only Champions set drops, add its prefix here.
-PREFIX_TO_SET = {
+#
+# NACHTRAG 21.08.2026 — diese Liste war der Grund fuer "0 URLs".
+#
+# M6 erschien am 31.07.2026. Seither meldet der Wochenlauf jedes Mal
+# "pokemonproxies scrape returned 0 URLs — site structure may have
+# changed" und behaelt die alte Karte. Die Seitenstruktur hat sich aber
+# nicht geaendert: der Ausdruck unten kennt nur 3a, 4a und 5a, und
+# M6-Dateien heissen 6a-*. Der Scraper hat also gefunden, wonach er
+# gesucht hat — nur suchte er nach dem falschen.
+#
+# Gemessen: data/pokemonproxies_url_map.json traegt 79 Eintraege, alle
+# M5, scraped_at 2026-07-21. Kein einziger M6-Eintrag. JP-only-Karten
+# aus M6 haben damit kein Bild.
+#
+# Eine von Hand gepflegte Liste altert bei jedem japanischen Set. Die
+# Kuerzel folgen aber einer Regel — M3→3a, M4→4a, M5→5a —, und welches
+# Set laeuft, steht in data/format_window.json (current_set_jp). Also
+# wird die Liste jetzt abgeleitet und nur noch mit den historischen
+# Eintraegen ergaenzt.
+_PREFIX_STATISCH = {
     "3a": "M3",
     "4a": "M4",
     "5a": "M5",
 }
+
+
+def _jp_set_aus_formatfenster() -> str:
+    """current_set_jp aus data/format_window.json, oder leer."""
+    kandidaten = [
+        os.path.join(os.path.dirname(OUTPUT_PATH), "format_window.json"),
+        os.path.normpath(os.path.join(os.path.dirname(__file__), "..", "..",
+                                      "data", "format_window.json")),
+        os.path.join("data", "format_window.json"),
+    ]
+    for pfad in kandidaten:
+        try:
+            with open(pfad, "r", encoding="utf-8") as f:
+                return str(json.load(f).get("current_set_jp") or "").strip().upper()
+        except (OSError, ValueError):
+            continue
+    return ""
+
+
+def _prefix_fuer(set_code: str) -> str:
+    """'M6' -> '6a'. Leer, wenn das Kuerzel nicht dem Muster folgt."""
+    m = re.fullmatch(r"M(\d{1,2})", (set_code or "").strip().upper())
+    return f"{m.group(1)}a" if m else ""
+
+
+def baue_prefix_karte(jp_set: str = "", rueckwaerts: int = 3) -> dict:
+    """Historische Eintraege plus das laufende JP-Set und seine Vorgaenger.
+
+    `rueckwaerts` deckt die Sets ab, die noch keinen internationalen
+    Druck haben — es kostet nichts, sie mitzusuchen, und es verhindert,
+    dass ein uebersprungener Lauf eine Luecke hinterlaesst.
+    """
+    karte = dict(_PREFIX_STATISCH)
+    m = re.fullmatch(r"M(\d{1,2})", (jp_set or "").strip().upper())
+    if not m:
+        return karte
+    nummer = int(m.group(1))
+    for n in range(max(1, nummer - rueckwaerts), nummer + 1):
+        karte[f"{n}a"] = f"M{n}"
+    return karte
+
+
+PREFIX_TO_SET = baue_prefix_karte(_jp_set_aus_formatfenster())
 
 # Regex that picks the asset URL pattern out of any chunk of text:
 #   /assets/<prefix>-<NNN>-<Name>-<hash>.png
@@ -125,7 +187,11 @@ _ASSET_RE = re.compile(
 # routes 200 with a shared HTML shell that won't help us, but the
 # routes themselves can show up in the linked sitemap / pre-rendered
 # pages of some Vite setups.
-FALLBACK_PATHS = ["/", "/cards", "/sets", "/m5", "/m4", "/m3"]
+# Die Set-Routen ergeben sich aus derselben Karte — sonst zeigt auch
+# diese Liste bei jedem neuen JP-Set auf das vorletzte.
+FALLBACK_PATHS = ["/", "/cards", "/sets"] + [
+    "/" + s.lower() for s in sorted(set(PREFIX_TO_SET.values()), reverse=True)
+]
 
 
 # ─────────────────────────── HTTP helper ───────────────────────────

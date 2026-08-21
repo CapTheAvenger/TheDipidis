@@ -51,9 +51,25 @@ class TestExtractUrls:
         assert out[0][1] == "001"
 
     def test_unknown_prefix_is_ignored(self):
-        # '6a' isn't in PREFIX_TO_SET yet — the regex must not match.
-        html = '<img src="/assets/6a-001-Future-XX.png">'
-        assert extract_urls(html) == []
+        """Ein Praefix, das die Karte nicht kennt, darf nicht durchrutschen.
+
+        Hier stand bis zum 21.08.2026 '6a' als Beispiel fuer "unbekannt".
+        Genau dieses Set (M6) erschien am 31.07.2026 — und weil die
+        Praefix-Liste von Hand gepflegt wurde, blieb es unbekannt und der
+        Scraper fand seine Karten nicht. Der Test hielt den Fehler fest,
+        statt ihn zu zeigen.
+
+        Das Beispiel wird jetzt aus der Karte ABGELEITET: es ist immer ein
+        Praefix, das gerade nicht drinsteht. Damit kann es nicht wieder
+        zufaellig zum laufenden Set werden.
+        """
+        import scrape_pokemonproxies_urls as modul
+        vorhanden = {int(p[:-1]) for p in modul.PREFIX_TO_SET if p[:-1].isdigit()}
+        unbekannt = f"{max(vorhanden) + 5}a"
+        html = f'<img src="/assets/{unbekannt}-001-Future-XX.png">'
+        assert extract_urls(html) == [], (
+            f"{unbekannt} steht nicht in PREFIX_TO_SET, wurde aber getroffen"
+        )
 
     def test_extracts_all_known_prefixes(self):
         html = """

@@ -17,13 +17,73 @@ den Stand zusaetzlich in data/_job_heartbeats.json ab.
 import os
 import re
 import subprocess
+import textwrap
 
 import pytest
-import yaml
 
 HIER = os.path.dirname(os.path.abspath(__file__))
 WURZEL = os.path.normpath(os.path.join(HIER, "..", ".."))
 WOCHENLAUF = os.path.join(WURZEL, ".github", "workflows", "weekly-full-update.yml")
+
+# Bewusst ohne PyYAML — die CI installiert nur pytest, beautifulsoup4,
+# requests und lxml (deploy-pages.yml). Ein `import yaml` bricht pytest
+# schon in der Sammlung mit Exit-Code 2 ab, und weil der Deploy am
+# Test-Job haengt, blockiert ausgerechnet der Waechter den Deploy, den er
+# schuetzen soll. Dieselbe Falle steht in test_deploy_dispatch.py
+# beschrieben; gemessen wieder am 21.08.2026, Run 32532643519.
+
+
+def _schritte_lesen(pfad):
+    """Die Schritte eines Workflows als [{name, run, if}] — von Hand.
+
+    Reicht fuer diesen Zweck vollstaendig aus: die Datei ist mit festen
+    zwei Leerzeichen je Ebene geschrieben, und gebraucht werden nur der
+    Name, der `run`-Block und ein etwaiges `if`.
+    """
+    with open(pfad, encoding="utf-8") as f:
+        zeilen = f.read().splitlines()
+
+    schritte = []
+    aktuell = None
+    run_einzug = None
+
+    for zeile in zeilen:
+        nackt = zeile.strip()
+        treffer_name = re.match(r"^(\s*)-\s+name:\s*(.+?)\s*$", zeile)
+        if treffer_name:
+            if aktuell:
+                schritte.append(aktuell)
+            aktuell = {"name": treffer_name.group(2).strip().strip("'\""),
+                       "run": "", "if": None,
+                       "_einzug": len(treffer_name.group(1))}
+            run_einzug = None
+            continue
+        if aktuell is None:
+            continue
+
+        if run_einzug is not None:
+            # Innerhalb eines run-Blocks: alles, was tiefer eingerueckt ist
+            # als der Schluessel selbst, gehoert dazu.
+            if nackt == "" or (len(zeile) - len(zeile.lstrip())) > run_einzug:
+                aktuell["run"] += zeile + "\n"
+                continue
+            run_einzug = None
+
+        treffer_run = re.match(r"^(\s*)run:\s*\|\s*$", zeile)
+        if treffer_run:
+            run_einzug = len(treffer_run.group(1))
+            continue
+        treffer_if = re.match(r"^\s*if:\s*(.+?)\s*$", zeile)
+        if treffer_if:
+            aktuell["if"] = treffer_if.group(1).strip()
+            continue
+
+    if aktuell:
+        schritte.append(aktuell)
+
+    for s in schritte:
+        s["run"] = textwrap.dedent(s["run"])
+    return schritte
 
 NICHT_BLOCKIEREND = (
     "scrapers/labs_tournament_scraper.py",
@@ -35,9 +95,9 @@ NICHT_BLOCKIEREND = (
 
 @pytest.fixture(scope="module")
 def schritte():
-    with open(WOCHENLAUF, encoding="utf-8") as f:
-        daten = yaml.safe_load(f)
-    return daten["jobs"]["scrape"]["steps"]
+    gelesen = _schritte_lesen(WOCHENLAUF)
+    assert len(gelesen) > 5, f"nur {len(gelesen)} Schritte gelesen — Parser pruefen"
+    return gelesen
 
 
 @pytest.mark.parametrize("skript", NICHT_BLOCKIEREND)
@@ -67,7 +127,7 @@ def test_es_gibt_einen_auswertenden_schritt(schritte):
 def test_die_bilanz_laeuft_auch_wenn_vorher_etwas_schiefging(schritte):
     bilanz = [s for s in schritte if "rc_extra.txt" in (s.get("run") or "")
               and "GITHUB_STEP_SUMMARY" in (s.get("run") or "")][0]
-    assert str(bilanz.get("if", "")).strip() == "always()", (
+    assert str(bilanz.get("if") or "").strip() == "always()", (
         "ohne if: always() faellt die Bilanz genau dann aus, wenn man sie "
         "am dringendsten braucht")
 

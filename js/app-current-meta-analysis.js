@@ -96,15 +96,45 @@
             devLog('[Current Meta] No tournament start_date found in settings');
         }
 
-        // Filter tournament CSV rows to only include tournaments >= start_date
+        // Eine Datumsgrenze, nicht zwei.
+        //
+        // Hier stand eine eigene Umsetzung neben
+        // window._filterMajorRowsToCurrentFormat (app-deck-builder.js).
+        // Beide schnitten Turniere vor dem Formatstart weg, aber
+        // unterschiedlich: diese hier warf Zeilen OHNE lesbares Datum
+        // mit hinaus, die andere behaelt sie ausdruecklich — "Daten
+        // wegwerfen, die man nicht datieren kann, waere eine stille
+        // Reparatur". Zwei Grenzen mit zwei Antworten auf denselben
+        // Datenbestand sind eine Fehlerquelle, die niemand sieht: der
+        // Deckbauer und die Metaansicht koennen dieselbe Frage
+        // verschieden beantworten.
+        //
+        // Massgeblich ist ab jetzt die Fassung aus dem Deckbauer. Die
+        // Zeilen hier sind nur noch die Uebersetzung: aus dem
+        // ermittelten Startdatum wird das Feld, das jene Funktion liest.
         function filterTournamentRowsByMetaDate(rows) {
             if (!currentMetaTournamentStartDate || !Array.isArray(rows)) return rows;
             const cutoff = currentMetaTournamentStartDate;
+            const iso = cutoff.toISOString().slice(0, 10);
+
+            const gemeinsam = (typeof window !== 'undefined')
+                ? window._filterMajorRowsToCurrentFormat : null;
+            if (typeof gemeinsam === 'function') {
+                const res = gemeinsam(rows, { in_person_legal_date: iso });
+                const gefiltert = (res && Array.isArray(res.rows)) ? res.rows : rows;
+                devLog(`[Current Meta] Tournament date filter: ${rows.length} → ${gefiltert.length} rows (cutoff: ${iso})`);
+                return gefiltert;
+            }
+
+            // Rueckfall, falls der Deckbauer nicht geladen ist: dieselbe
+            // Regel, hier noch einmal ausgeschrieben — undatierte Zeilen
+            // bleiben drin.
             const filtered = rows.filter(row => {
                 const d = parseEnglishTournamentDate(row.tournament_date);
-                return d && d >= cutoff;
+                if (!d) return true;
+                return d >= cutoff;
             });
-            devLog(`[Current Meta] Tournament date filter: ${rows.length} → ${filtered.length} rows (cutoff: ${cutoff.toISOString().slice(0, 10)})`);
+            devLog(`[Current Meta] Tournament date filter (Rueckfall): ${rows.length} → ${filtered.length} rows (cutoff: ${iso})`);
             return filtered;
         }
         
@@ -317,7 +347,7 @@
             let onlineTotal = 0;
             onlineRows.forEach(card => {
                 const meta = (card.meta || '').trim();
-                if (meta && meta !== 'Meta Live') return;
+                if (meta && !meta.startsWith('Meta Live')) return;
                 const t = parseInt(card.total_decks_in_archetype || 0, 10) || 0;
                 if (t > onlineTotal) onlineTotal = t;
             });
@@ -707,7 +737,9 @@
 
             let filteredData = data;
             if (currentMetaFormatFilter === 'live') {
-                filteredData = data.filter(row => row.meta === 'Meta Live');
+                // 'Meta Live (Dated)' ist auch live — siehe Kommentar an
+                // der zweiten Filterstelle weiter unten.
+                filteredData = data.filter(row => String(row.meta || '').startsWith('Meta Live'));
                 devLog(`Filtered archetypes to Limitless only: ${filteredData.length} rows`);
             } else if (currentMetaFormatFilter === 'all') {
                 devLog(`Keeping all archetype data: ${filteredData.length} rows`);
@@ -790,7 +822,11 @@
                 const archetypeDecks = filteredData.filter(row => row.archetype === archetypeName);
 
                 if (archetypeDecks.length > 0 && archetypeDecks[0].meta) {
-                    const liveEntry = archetypeDecks.find(row => row.meta === 'Meta Live');
+                    // Auch hier zaehlt 'Meta Live (Dated)' als live —
+                    // sonst steht die Limitless-Zahl bei gesetztem
+                    // Datenfenster auf 0.
+                    const liveEntry = archetypeDecks.find(
+                        row => String(row.meta || '').startsWith('Meta Live'));
                     const limitlessCount = liveEntry ? parseInt(liveEntry.total_decks_in_archetype || 0, 10) : 0;
 
                     const playEntry = archetypeDecks.find(row => row.meta === 'Meta Play!');
@@ -1115,7 +1151,27 @@
                 devLog(`[Current Meta] Major-Liste leer — Grund: ${grund.grund}`);
                 return;
             }
-            if (statusEl) statusEl.classList.remove('cm-filter-status-vorbehalt');
+            // "Alle" und "Nur Limitless" zeigen dasselbe, solange es im
+            // Format kein Major gibt. Zwei Knoepfe mit identischem
+            // Ergebnis und ohne Erklaerung lesen sich wie ein Fehler —
+            // also sagt die Statuszeile, warum das so ist.
+            if (format === 'all') {
+                const grund = await _cmMajorLeerGrund();
+                if (grund.grund === 'kein-major-im-format') {
+                    const format_ = await _cmFormatSchluessel();
+                    const hinweis = (typeof t === 'function'
+                        ? t('currentMeta.alleWieLive') : '')
+                        .replace('{format}', format_ || '?');
+                    if (statusEl && hinweis) {
+                        statusEl.textContent = hinweis;
+                        statusEl.classList.add('cm-filter-status-vorbehalt');
+                    }
+                } else if (statusEl) {
+                    statusEl.classList.remove('cm-filter-status-vorbehalt');
+                }
+            } else if (statusEl) {
+                statusEl.classList.remove('cm-filter-status-vorbehalt');
+            }
 
             // Respect value already set by populateCurrentMetaDeckSelect (pending selection)
             const currentValue = currentMetaDeckSelect ? currentMetaDeckSelect.value : '';
@@ -1579,8 +1635,19 @@
             // Apply format filter only when using current_meta data with 'live' or 'all'
             // (tournament_cards_data is already filtered to Top 256, should NOT be filtered further by meta)
             if (currentMetaFormatFilter === 'live' && !needsAggregation) {
-                primaryRows = primaryRows.filter(row => row.meta === 'Meta Live');
-                secondaryRows = secondaryRows.filter(row => row.meta === 'Meta Live');
+                // 'Meta Live (Dated)' gehoert dazu. Der strikte Vergleich
+                // auf 'Meta Live' liess genau die Zeilen fallen, die
+                // _fuseArchetypeRows fuer ein gesetztes Datenfenster
+                // erzeugt (siehe die Zuweisung meta: 'Meta Live (Dated)'
+                // weiter oben) — der Filter "live" war damit leer,
+                // sobald ein Datumsfenster aktiv war, und die Oberflaeche
+                // sagte "No data found" statt "keine Zeilen im Fenster".
+                const istLive = (row) => {
+                    const m = String((row && row.meta) || '');
+                    return m === 'Meta Live' || m.startsWith('Meta Live');
+                };
+                primaryRows = primaryRows.filter(istLive);
+                secondaryRows = secondaryRows.filter(istLive);
             }
 
             // Combining primary + secondary is deferred to the setTimeout
@@ -1609,7 +1676,13 @@
                     const rawTournament = await loadCSV('tournament_cards_data_cards.csv', { latestChunkOnly: true });
                     if (rawTournament && rawTournament.length) {
                         window.currentMetaTournamentCardsDataRaw = rawTournament;
-                        window.currentMetaTournamentCardsData = rawTournament;
+                        // Diese Zuweisung ging bis 21.08.2026 ungefiltert
+                        // durch — an allen anderen Stellen laeuft dieselbe
+                        // Liste durch die Datumsgrenze. Der Filter "Alle"
+                        // konnte damit Turniere von VOR dem Formatstart
+                        // einrechnen, waehrend "Nur Major" sie wegliess.
+                        window.currentMetaTournamentCardsData =
+                            filterTournamentRowsByMetaDate(rawTournament);
                     }
                 } catch (e) {
                     devLog('[Current Meta] Could not load tournament data for Online+Major merge:', e);

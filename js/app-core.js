@@ -2097,7 +2097,13 @@ const BASE_PATH = './data/';
                     return primary;
                 }
 
-                const fallback = await loadCSV('tournament_cards_data_cards.csv', options);
+                // latestChunkOnly ausdruecklich mitgeben: ohne das laedt
+                // der Rueckfall ALLE Chunks — 461.176 Zeilen aus drei
+                // Jahren — und die Oberflaeche beschriftet sie als
+                // "Meta Play!". Ein Notfall darf nicht mehr behaupten
+                // als der Normalfall.
+                const fallback = await loadCSV('tournament_cards_data_cards.csv',
+                    Object.assign({}, options, { latestChunkOnly: true }));
                 if (Array.isArray(fallback) && fallback.length > 0) {
                     const normalizedFallback = normalizeCurrentMetaFallbackRows(fallback);
                     console.warn(`[Current Meta] Using tournament fallback dataset (${normalizedFallback.length} rows) because current_meta_card_data.csv is missing or empty.`);
@@ -2127,6 +2133,49 @@ const BASE_PATH = './data/';
          * Load chunked tournament CSV via manifest.
          * Returns merged array from all per-meta chunk files.
          */
+        /**
+         * Welcher Turnier-Chunk gehoert zum aktuellen Format?
+         *
+         * Eine Regel, an einer Stelle. Vorher gab es zwei: hier die
+         * formatbewusste Auswahl, und in app-cards-db.js ein schlichtes
+         * chunks[length-1] — also der ALPHABETISCH letzte Chunk, was in
+         * einem Verzeichnis mit "TEF-CRI" und "TEF-POR" rein zufaellig
+         * mal stimmt und mal nicht.
+         *
+         * Rueckgabe ist eine Liste mit hoechstens einem Dateinamen. Eine
+         * LEERE Liste ist eine Antwort, kein Fehler: vor dem ersten
+         * Major eines Formats gibt es keine Turnierkarten, und das
+         * naechstaeltere Set hereinzuziehen waere schlechter als nichts
+         * zu zeigen.
+         */
+        function waehleAktuellenChunk(manifest, currentSet) {
+            const chunks = (manifest && Array.isArray(manifest.chunks)) ? manifest.chunks : [];
+            if (chunks.length === 0) return [];
+            const set = String(currentSet || '').trim().toUpperCase();
+            if (!set) return [];
+
+            const suffix = `-${set}`;
+            const passend = chunks.filter(c => {
+                const m = String(c || '').toUpperCase();
+                return m.endsWith(`${suffix}.CSV`) || m.endsWith(`${set}.CSV`);
+            });
+            if (passend.length === 0) return [];
+            if (passend.length === 1) return passend;
+
+            // Mehrere Treffer (archiviert + aktuell): der mit dem
+            // juengsten Datum gewinnt. Ohne Datumsangaben der letzte.
+            const daten = (manifest && manifest.chunk_dates) || {};
+            const mitDatum = passend
+                .map(c => ({ chunk: c, max: daten[c] && daten[c].max_date }))
+                .filter(x => x.max);
+            if (mitDatum.length > 0) {
+                mitDatum.sort((a, b) => b.max.localeCompare(a.max));
+                return [mitDatum[0].chunk];
+            }
+            return [passend[passend.length - 1]];
+        }
+        window.waehleAktuellenChunk = waehleAktuellenChunk;
+
         async function _loadTournamentCardsChunked(options) {
             const forceRefresh = Boolean(options && options.forceRefresh);
             const latestOnly = Boolean(options && options.latestChunkOnly);
@@ -2141,71 +2190,53 @@ const BASE_PATH = './data/';
 
                 let chunksToLoad = manifest.chunks;
                 if (latestOnly && chunksToLoad.length > 0) {
-                    // W3 Phase 1 — format-aware chunk selection.
+                    // W3 Phase 1 — formatbewusste Chunkwahl.
                     //
-                    // "Latest" used to mean "chunk with the highest max_date"
-                    // but that's wrong across a format rotation: when the
-                    // English set rotates (e.g. POR → CRI on 2026-05-22),
-                    // the highest-date chunk (TEF-POR with Utrecht/Campinas
-                    // 16.05) still belongs to the rotated-OUT format and
-                    // its card lists no longer represent the current meta.
+                    // "Neueste" hiess frueher "Chunk mit dem hoechsten
+                    // max_date". Ueber eine Rotation hinweg ist das falsch:
+                    // beim Wechsel POR -> CRI (22.05.2026) gehoerte der
+                    // Chunk mit dem juengsten Datum (TEF-POR, Utrecht und
+                    // Campinas am 16.05.) noch zum ROTIERTEN Format, und
+                    // seine Kartenlisten beschreiben das aktuelle Meta
+                    // nicht mehr.
                     //
-                    // Prefer format_window.current_set when available:
-                    // match chunks whose meta-key ends with that set code
-                    // (e.g. "TEF-CRI" matches current_set "CRI"). If no
-                    // chunk matches, return EMPTY rather than fall back to
-                    // the date-based selection — "no current-format Major
-                    // data" is the correct answer pre-rotation-data.
+                    // Massgeblich ist current_set aus format_window.json.
+                    // Passt kein Chunk, ist die richtige Antwort LEER —
+                    // "in diesem Format gab es noch kein Major" — und
+                    // nicht der naechstaeltere Chunk.
                     let currentSet = '';
+                    let fensterGelesen = false;
                     try {
                         const fwResp = await fetch(`${BASE_PATH}format_window.json${cacheBust}`);
                         if (fwResp.ok) {
                             const fw = await fwResp.json();
                             currentSet = String((fw && fw.current_set) || '').trim().toUpperCase();
+                            fensterGelesen = Boolean(currentSet);
                         }
-                    } catch (_e) { /* optional — fall back to date selection */ }
+                    } catch (_e) { /* unten behandelt */ }
 
-                    if (currentSet) {
-                        // Match chunks like "TEF-CRI", "POR-CRI", or bare "CRI".
-                        const setSuffix = `-${currentSet}`;
-                        const matchedChunks = chunksToLoad.filter(c => {
-                            const m = (c || '').toUpperCase();
-                            return m.endsWith(`${setSuffix}.CSV`) || m.endsWith(`${currentSet}.CSV`);
-                        });
-                        if (matchedChunks.length === 0) {
-                            devLog(`[Tournament CSV] No chunks match current_set=${currentSet} — returning empty (format has no Major data yet)`);
-                            return [];
-                        }
-                        // If multiple chunks match (e.g. archived + current),
-                        // pick the date-latest of them.
-                        const dates = manifest.chunk_dates || {};
-                        const matchedWithDates = matchedChunks
-                            .map(c => ({ chunk: c, max: dates[c] && dates[c].max_date }))
-                            .filter(x => x.max);
-                        if (matchedWithDates.length > 0) {
-                            matchedWithDates.sort((a, b) => b.max.localeCompare(a.max));
-                            chunksToLoad = [matchedWithDates[0].chunk];
-                        } else {
-                            chunksToLoad = [matchedChunks[matchedChunks.length - 1]];
-                        }
-                        devLog(`[Tournament CSV] Loading current-format chunk: ${chunksToLoad[0]} (current_set=${currentSet})`);
-                    } else {
-                        // No format_window — fall back to date-based selection
-                        // (legacy behavior for repos without the rotation
-                        // metadata).
-                        const dates = manifest.chunk_dates || {};
-                        const withDates = chunksToLoad
-                            .map(c => ({ chunk: c, max: dates[c] && dates[c].max_date }))
-                            .filter(x => x.max);
-                        if (withDates.length > 0) {
-                            withDates.sort((a, b) => b.max.localeCompare(a.max));
-                            chunksToLoad = [withDates[0].chunk];
-                            devLog(`[Tournament CSV] Loading latest chunk by date (no format_window): ${chunksToLoad[0]} (max_date=${withDates[0].max})`);
-                        } else {
-                            chunksToLoad = [chunksToLoad[chunksToLoad.length - 1]];
-                            devLog(`[Tournament CSV] Loading latest chunk (no chunk_dates in manifest): ${chunksToLoad[0]}`);
-                        }
+                    if (!fensterGelesen) {
+                        // Hier stand ein Rueckfall auf "Chunk mit dem
+                        // juengsten Datum". Der laedt bei einem Ausfall
+                        // von format_window.json TEF-CRI und etikettiert
+                        // Vorformat-Karten als aktuell — genau der Fehler,
+                        // den die formatbewusste Auswahl verhindern soll.
+                        // Ohne aufloesbares Format ist die ehrliche
+                        // Antwort: keine Daten, und sichtbar sagen warum.
+                        console.warn('[Tournament CSV] format_window.json nicht lesbar — '
+                            + 'keine Turnierkarten geladen. Lieber leer als das '
+                            + 'falsche Format.');
+                        window._turnierChunkFormatUnbekannt = true;
+                        return [];
                     }
+                    window._turnierChunkFormatUnbekannt = false;
+
+                    chunksToLoad = waehleAktuellenChunk(manifest, currentSet);
+                    if (chunksToLoad.length === 0) {
+                        devLog(`[Tournament CSV] No chunks match current_set=${currentSet} — returning empty (format has no Major data yet)`);
+                        return [];
+                    }
+                    devLog(`[Tournament CSV] Loading current-format chunk: ${chunksToLoad[0]} (current_set=${currentSet})`);
                 } else {
                     devLog(`[Tournament CSV] Loading ${chunksToLoad.length} chunks (${manifest.total_rows} rows)`);
                 }

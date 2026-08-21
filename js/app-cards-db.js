@@ -348,27 +348,70 @@
             if (cacheRef === 'currentMeta' && _cachedCurrentMetaRows) return _cachedCurrentMetaRows;
 
             let rows;
-            // Tournament cards: prefer latest chunk only (current format is sufficient for playability)
+            // Turnierkarten: nur der Chunk des AKTUELLEN Formats.
+            //
+            // Hier stand `manifest.chunks[manifest.chunks.length - 1]` —
+            // der alphabetisch letzte Eintrag der Liste. Dass das lange
+            // funktioniert hat, war Zufall: in einem Verzeichnis mit
+            // "TEF-CRI" und "TEF-POR" ist der letzte Name mal der
+            // richtige und mal nicht, und mit der naechsten Rotation
+            // aendert sich die Antwort ohne Zutun.
+            //
+            // Es gilt dieselbe Regel wie in app-core.js, aus derselben
+            // Funktion: window.waehleAktuellenChunk. Eine leere Auswahl
+            // ist eine gueltige Antwort — im aktuellen Format TEF-PBL
+            // gab es noch kein Major, die Turnierebene der
+            // Kartendatenbank ist deswegen leer und nicht kaputt.
             if (file === 'tournament_cards_data_cards.csv') {
                 try {
-                    const manifestResp = await fetch(BASE_PATH + 'tournament_cards_manifest.json');
-                    if (manifestResp.ok) {
+                    const [manifestResp, fensterResp] = await Promise.all([
+                        fetch(BASE_PATH + 'tournament_cards_manifest.json'),
+                        fetch(BASE_PATH + 'format_window.json'),
+                    ]);
+                    if (manifestResp.ok && fensterResp.ok) {
                         const manifest = await manifestResp.json();
-                        if (manifest && Array.isArray(manifest.chunks) && manifest.chunks.length > 0) {
-                            const latestChunk = manifest.chunks[manifest.chunks.length - 1];
-                            const resp = await fetch(BASE_PATH + latestChunk);
+                        const fenster = await fensterResp.json();
+                        const aktuell = String((fenster && fenster.current_set) || '').trim();
+                        const waehle = window.waehleAktuellenChunk;
+                        const gewaehlt = (typeof waehle === 'function')
+                            ? waehle(manifest, aktuell)
+                            : [];
+                        if (gewaehlt.length === 0) {
+                            devLog(`[Cards DB] Kein Chunk fuer current_set=${aktuell || '?'} — `
+                                + 'Turnierebene bleibt leer (kein Major in diesem Format).');
+                            window._kartenDbTurnierLeerGrund = aktuell
+                                ? `kein-major-in-${aktuell}`
+                                : 'format-unbekannt';
+                            rows = [];
+                        } else {
+                            const resp = await fetch(BASE_PATH + gewaehlt[0]);
                             if (resp.ok) {
                                 const text = await resp.text();
                                 rows = parseCSV(text);
+                                window._kartenDbTurnierLeerGrund = null;
                             }
                         }
+                    } else {
+                        // Ohne Formatfenster ist nicht entscheidbar, welcher
+                        // Chunk der richtige ist. Leer und benannt ist besser
+                        // als irgendein Chunk.
+                        console.warn('[Cards DB] Manifest oder Formatfenster nicht lesbar — '
+                            + 'Turnierebene bleibt leer.');
+                        window._kartenDbTurnierLeerGrund = 'format-unbekannt';
+                        rows = [];
                     }
                 } catch (e) {
-                    console.warn('[Cards DB] Manifest not available, using monolith:', e);
+                    console.warn('[Cards DB] Chunkwahl fehlgeschlagen:', e);
+                    window._kartenDbTurnierLeerGrund = 'format-unbekannt';
+                    rows = [];
                 }
             }
 
             if (!rows) {
+                // Der frueher hier stehende Rueckfall auf die Monolithdatei
+                // tournament_cards_data_cards.csv ist entfallen: die Datei
+                // existiert im Repo nicht mehr, der Zweig konnte also nur
+                // einen 404 produzieren.
                 const response = await fetch(BASE_PATH + file);
                 if (!response.ok) throw new Error(`HTTP ${response.status}`);
                 const text = await response.text();

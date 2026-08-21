@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-08-21T06:18:45Z",
+  "generated_at": "2026-08-21T21:32:36Z",
   "format_window": "PBL",
-  "format_label": "TEF-MEZ",
+  "format_label": "TEF-PBL",
   "legal_format_min_set": "TEF",
   "tuning": {
     "meta_share_floor": 0.005,

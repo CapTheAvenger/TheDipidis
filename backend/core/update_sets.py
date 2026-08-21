@@ -67,7 +67,8 @@ IN_PERSON_LEGAL_LAG_DAYS = 14
 # because the sets aren't the same physical product. City League JP
 # data tracks the JP rotation; the EN scrapers track the EN rotation.
 FALLBACK_JP_RELEASE_DATES = {
-    'M5':  '2026-05-22',  # Mega Symphonia — current JP rotation anchor
+    'M6':  '2026-07-31',  # aktueller JP-Anker (Stand 21.08.2026)
+    'M5':  '2026-05-22',  # Mega Symphonia
     'M4':  '2026-03-13',  # Ninja Spinner
     'M3':  '2025-12-26',  # Nihil Zero (POR-EN counterpart)
 }
@@ -78,7 +79,8 @@ FALLBACK_JP_RELEASE_DATES = {
 # back to this dict. Keep the most recent ~6 sets here so a fresh
 # install still has a working format_window.json.
 FALLBACK_RELEASE_DATES = {
-    'CRI': '2026-05-22',  # Chaos Rising — current rotation anchor
+    'PBL': '2026-07-17',  # Phantasmal Blaze — aktueller EN-Anker (21.08.2026)
+    'CRI': '2026-05-22',  # Chaos Rising
     'POR': '2026-03-27',  # Perfect Order
     'BLK': '2026-01-17',
     'WHT': '2026-01-17',
@@ -107,6 +109,7 @@ INTENTIONALLY_UNORDERED_SETS = {'M3'}
 # happens.
 FALLBACK_SET_ORDER = {
     # Mega (2026)
+    'MEZ': 158, 'MEM': 157, 'M6': 156, 'PBL': 155,
     'CRI': 154, 'M5': 153,
     'M4': 152, 'POR': 151, 'ASC': 150, 'PFL': 149, 'MEG': 148, 'MEE': 147, 'MEP': 146,
     # Scarlet & Violet (2023-2025)
@@ -718,8 +721,49 @@ def write_format_window(sets_metadata_path: str,
         try:
             with open(out_path, encoding='utf-8') as f:
                 existing = json.load(f)
-        except Exception:
-            existing = {}
+        except Exception as fehler:
+            # Bis 21.08.2026 wurde hier `existing = {}` gesetzt und
+            # anschliessend geschrieben. Eine einzige unlesbare Datei
+            # (halber Schreibvorgang, kaputte Kodierung) hat damit
+            # previous_format_key und set_addition_only still geloescht —
+            # und genau diese beiden Felder schalten die Predictor-Stufen
+            # 5.5/5.6/5.8/5.9. Lieber nichts schreiben und laut sein.
+            print(f"[Update Sets] ! format_window.json ist nicht lesbar "
+                  f"({fehler}) — es wird NICHTS geschrieben, damit die "
+                  f"manuellen Felder nicht verloren gehen.")
+            print("::error::update_sets: format_window.json unlesbar — "
+                  "Schreibvorgang abgebrochen, Datei bitte von Hand pruefen.")
+            return ''
+
+        # Monotonie-Riegel: ein Formatfenster laeuft vorwaerts. Ein
+        # aelteres set_release_date als das gespeicherte bedeutet, dass
+        # die Erkennung zurueckgefallen ist (Quelle geblockt, Fallback
+        # gezogen) — nicht, dass ein Set zurueckgenommen wurde. Ein
+        # solcher Ruecksprung hat im August 2026 CRI/M5 wieder aktuell
+        # gemacht, obwohl PBL/M6 laengst standen.
+        alt_datum = str(existing.get('set_release_date') or '')
+        neu_datum = str(out.get('set_release_date') or '')
+        if alt_datum and neu_datum and neu_datum < alt_datum:
+            print(f"[Update Sets] ! Ruecksprung erkannt: gespeichert "
+                  f"{existing.get('current_set')} {alt_datum}, errechnet "
+                  f"{out.get('current_set')} {neu_datum}. Es wird NICHTS "
+                  f"geschrieben.")
+            print(f"::error::update_sets: Formatfenster wuerde von "
+                  f"{existing.get('current_set')} ({alt_datum}) auf "
+                  f"{out.get('current_set')} ({neu_datum}) zurueckfallen — "
+                  f"abgebrochen. Meist heisst das, dass die Quelle nicht "
+                  f"erreichbar war und der Fallback gegriffen hat.")
+            return ''
+
+        alt_jp = str(existing.get('jp_release_date') or '')
+        neu_jp = str(out.get('jp_release_date') or '')
+        if alt_jp and neu_jp and neu_jp < alt_jp:
+            print(f"::error::update_sets: japanisches Fenster wuerde von "
+                  f"{existing.get('current_set_jp')} ({alt_jp}) auf "
+                  f"{out.get('current_set_jp')} ({neu_jp}) zurueckfallen — "
+                  f"abgebrochen.")
+            return ''
+
         for k in ('previous_format_key', 'set_addition_only'):
             if k in existing and k not in out:
                 out[k] = existing[k]

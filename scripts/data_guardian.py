@@ -28,6 +28,7 @@ import argparse
 import collections
 import csv
 import datetime as dt
+import glob
 import json
 import os
 import sys
@@ -66,6 +67,16 @@ CONSUMERS = {
         "required": ["series", "gallery_number", "set_code", "set_number",
                      "name_de", "name_en", "image_url_de", "image_url_en"],
         "purpose": "Prize Pack card -> official play.pokemon.com image + its original print.",
+    },
+    "japanese_cards_database.csv": {
+        "required": ["name", "set", "number", "type", "rarity", "image_url"],
+        "purpose": "Japanische Karten -> Deck Builder (ueber prepare_card_data). "
+                   "Der Scraper holt je Lauf nur das NEUESTE JP-Set; alles "
+                   "aeltere lebt allein davon, dass der Schreibweg zusammenlegt "
+                   "statt zu ersetzen. Genau das hat im August 2026 nicht "
+                   "gestimmt: M3, M4 und M5 waren weg, 772 Zeilen blieben. "
+                   "Steht hier, damit die Veraenderungspruefung (check_shrink) "
+                   "einen Wiederholungsfall sofort sieht.",
     },
     "price_data.csv": {
         "required": ["name", "set", "number", "eur_price", "eur_low",
@@ -742,6 +753,201 @@ def check_shrink(findings, rows, base_rows):
                              f"({100.0*(prev-n)/prev:.0f}% fewer) — upstream fetch likely failed"))
 
 
+def check_jp_setbestand(findings):
+    """Ein Set-Code darf aus der japanischen Datenbank nicht verschwinden.
+
+    Die Zeilenzahl allein reicht nicht: ein Lauf, der M5 verliert und
+    dafuer 90 neue Promos bringt, sieht in der Summe gesund aus. Der
+    Bestand ist aber je Set zu betrachten — ein verschwundener Set-Code
+    heisst, dass der Schreibweg wieder ersetzt statt zusammengelegt hat.
+
+    Gegen die Grundlinie, nicht gegen eine feste Liste: welche Sets es
+    gibt, entscheidet die Rotation, nicht dieses Skript.
+    """
+    pfad = os.path.join(DATA, "japanese_cards_database.csv")
+    if not os.path.isfile(pfad):
+        findings.append(("CRITICAL", "japanese_cards_database.csv fehlt."))
+        return {}
+    try:
+        zeilen = read_csv(pfad)
+    except Exception as e:  # noqa: BLE001
+        findings.append(("CRITICAL", f"japanese_cards_database.csv nicht lesbar: {e}"))
+        return {}
+    je_set = collections.Counter(col(z, "set") for z in zeilen if col(z, "set"))
+    return dict(je_set)
+
+
+def check_jp_setbestand_vergleich(findings, jetzt, vorher):
+    if not vorher:
+        return
+    verschwunden = sorted(set(vorher) - set(jetzt))
+    if verschwunden:
+        findings.append((
+            "CRITICAL",
+            "japanese_cards_database.csv hat Set-Code(s) verloren: "
+            + ", ".join(f"{s} ({vorher[s]} Zeilen)" for s in verschwunden)
+            + ". Der Scraper holt je Lauf nur das neueste Set — verschwindet "
+              "ein aelteres, hat der Schreibweg ersetzt statt zusammengelegt."))
+    geschrumpft = [
+        f"{s}: {vorher[s]} → {jetzt[s]}"
+        for s in sorted(set(vorher) & set(jetzt))
+        if jetzt[s] < vorher[s] * 0.9
+    ]
+    if geschrumpft:
+        findings.append((
+            "WARN",
+            "japanische Sets mit deutlich weniger Karten als zuvor: "
+            + "; ".join(geschrumpft)))
+
+
+def check_proxy_frische(findings):
+    """S17 — die Proxy-URL-Karte altert unsichtbar.
+
+    data/pokemonproxies_url_map.json ist die einzige Moeglichkeit, an
+    die Bilder der japanischen Karten zu kommen: die CDN-URLs tragen
+    einen Vite-Hash, der sich bei jedem Deploy der Fremdseite aendert.
+    Wird die Karte nicht nachgezogen, zeigen die Kartenbilder ins
+    Leere — sichtbar erst im Browser, nicht in der Datei.
+
+    Wie bei champions_usage.json ueber `_meta.scraped_at` und nicht
+    ueber das Git-Datum: die Datei wird auch von Aenderungen angefasst,
+    die nichts mit dem Scrape zu tun haben, und sieht danach frisch aus.
+    """
+    path = os.path.join(DATA, "pokemonproxies_url_map.json")
+    if not os.path.exists(path):
+        return
+    try:
+        with open(path, encoding="utf-8") as f:
+            daten = json.load(f) or {}
+    except Exception as e:                                  # noqa: BLE001
+        findings.append(("CRITICAL", f"pokemonproxies_url_map.json ist nicht lesbar: {e}"))
+        return
+    meta = daten.get("_meta") or {}
+    roh = meta.get("scraped_at")
+    if not roh:
+        findings.append(("WARN",
+                         "pokemonproxies_url_map.json traegt kein _meta.scraped_at — "
+                         "die Frische der Kartenbild-URLs laesst sich nicht pruefen."))
+        return
+    try:
+        stand = dt.datetime.fromisoformat(roh.replace("Z", "+00:00"))
+    except ValueError:
+        findings.append(("WARN",
+                         f"pokemonproxies_url_map.json: _meta.scraped_at ist kein "
+                         f"lesbares Datum ({roh!r})"))
+        return
+    if stand.tzinfo is None:
+        stand = stand.replace(tzinfo=dt.timezone.utc)
+    alter = (dt.datetime.now(dt.timezone.utc) - stand).days
+
+    MAX_ALTER = 10   # der Scraper laeuft im Wochenlauf; zehn Tage decken
+                     # einen ausgefallenen Lauf ab, zwei nicht mehr.
+    if alter > MAX_ALTER:
+        findings.append((
+            "WARN",
+            f"pokemonproxies_url_map.json wurde zuletzt vor {alter} Tagen "
+            f"gescrapt (erwartet <= {MAX_ALTER}). Die URLs tragen einen "
+            f"Inhalts-Hash der Fremdseite: veraltet heisst hier nicht "
+            f"'aelter', sondern 'zeigt ins Leere'. "
+            f"{meta.get('entry_count', '?')} Eintraege, Sets: "
+            f"{', '.join(sorted((meta.get('set_breakdown') or {}).keys())) or '—'}."))
+
+
+def check_uebersicht_gegen_chunks(findings):
+    """S20 — die Turnieruebersicht gegen die Chunkdateien halten.
+
+    data/tournament_cards_data_overview.csv fuehrt je Turnier eine
+    Zeile mit `total_cards`. Die eigentlichen Kartenzeilen liegen in
+    tournament_cards_data_cards_<FORMAT>.csv. Bis 21.08.2026 hat
+    niemand die beiden gegeneinander gehalten — und genau dort standen
+    drei Abweichungen: zwei Turniere ohne Format (540, 518) und eine
+    Dublette (539) mit einem `total_cards`, das in keiner Datei
+    vorkam.
+
+    Bewusst nur melden, nie korrigieren: welche der beiden Seiten recht
+    hat, entscheidet die Quelle, nicht dieses Skript (CLAUDE.md,
+    "Report, don't silently repair").
+    """
+    pfad = os.path.join(DATA, "tournament_cards_data_overview.csv")
+    if not os.path.isfile(pfad):
+        return
+    try:
+        with open(pfad, encoding="utf-8-sig", newline="") as f:
+            zeilen = list(csv.DictReader(f, delimiter=";"))
+    except Exception as e:  # noqa: BLE001
+        findings.append(("WARN", f"tournament_cards_data_overview.csv nicht lesbar: {e}"))
+        return
+
+    # (a) Eindeutigkeit der tournament_id
+    gesehen = {}
+    for z in zeilen:
+        tid = col(z, "tournament_id")
+        if not tid:
+            continue
+        gesehen.setdefault(tid, []).append(z)
+    doppelt = {t: v for t, v in gesehen.items() if len(v) > 1}
+    if doppelt:
+        findings.append((
+            "CRITICAL",
+            "tournament_cards_data_overview.csv fuehrt "
+            f"{len(doppelt)} Turnier-ID(s) mehrfach: "
+            + ", ".join(sorted(doppelt)[:8])
+            + ". Eine ID steht fuer genau ein Turnier — welche der Zeilen "
+              "stimmt, muss ein Mensch entscheiden."))
+
+    # (b) total_cards gegen die tatsaechlichen Chunkzeilen
+    chunk_zaehler = {}
+    for datei in sorted(glob.glob(os.path.join(DATA, "tournament_cards_data_cards_*.csv"))):
+        meta = os.path.basename(datei)[len("tournament_cards_data_cards_"):-len(".csv")]
+        try:
+            with open(datei, encoding="utf-8-sig", newline="") as f:
+                for row in csv.DictReader(f, delimiter=";"):
+                    tid = (row.get("tournament_id") or "").strip()
+                    if tid:
+                        chunk_zaehler[(meta, tid)] = chunk_zaehler.get((meta, tid), 0) + 1
+        except Exception:  # noqa: BLE001
+            continue
+    je_turnier = {}
+    for (meta, tid), n in chunk_zaehler.items():
+        je_turnier.setdefault(tid, {})[meta] = n
+
+    abweichungen = []
+    ohne_chunk = []
+    for tid, gruppe in sorted(gesehen.items()):
+        z = gruppe[0]
+        if col(z, "status") and col(z, "status") != "success":
+            continue
+        gemeldet_roh = col(z, "total_cards")
+        try:
+            gemeldet = int(float(gemeldet_roh.replace(",", ".")))
+        except (ValueError, AttributeError):
+            continue
+        treffer = je_turnier.get(tid) or {}
+        tatsaechlich = sum(treffer.values())
+        if not treffer:
+            if gemeldet > 0:
+                ohne_chunk.append(f"{tid} (Uebersicht: {gemeldet})")
+            continue
+        if tatsaechlich != gemeldet:
+            abweichungen.append(
+                f"{tid}: Uebersicht {gemeldet}, Chunk "
+                f"{tatsaechlich} ({'+'.join(sorted(treffer))})")
+
+    if abweichungen:
+        findings.append((
+            "WARN",
+            f"{len(abweichungen)} Turnier(e) mit abweichender Kartenzahl "
+            f"zwischen Uebersicht und Chunkdatei: "
+            + "; ".join(abweichungen[:6])
+            + ("; …" if len(abweichungen) > 6 else "")))
+    if ohne_chunk:
+        findings.append((
+            "WARN",
+            f"{len(ohne_chunk)} Turnier(e) stehen in der Uebersicht, aber in "
+            f"keiner Chunkdatei: " + ", ".join(ohne_chunk[:8])
+            + ("; …" if len(ohne_chunk) > 8 else "")))
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--update-baseline", action="store_true",
@@ -767,6 +973,7 @@ def main():
     ace = ace_guard_prints()
     price = price_integrity()
     empties = empty_data_files()
+    jp_sets = None
 
     findings = []
     check_schema(findings)
@@ -788,6 +995,11 @@ def main():
     check_verified_collisions(findings, price)
     check_champions_usage(findings)
     check_champions_freshness(findings)
+    check_uebersicht_gegen_chunks(findings)
+    check_proxy_frische(findings)
+    jp_sets = check_jp_setbestand(findings)
+    if not first_run:
+        check_jp_setbestand_vergleich(findings, jp_sets, baseline.get("jp_set_rows"))
 
     crit = [f for lvl, f in findings if lvl == "CRITICAL"]
     warn = [f for lvl, f in findings if lvl == "WARN"]
@@ -818,6 +1030,7 @@ def main():
                 "ace_guard_prints": ace,
                 "price_integrity": price,
                 "empty_files": empties,
+                "jp_set_rows": jp_sets or {},
             }, f, ensure_ascii=False, indent=1, sort_keys=True)
         print(f"  Baseline updated -> {BASELINE}")
 

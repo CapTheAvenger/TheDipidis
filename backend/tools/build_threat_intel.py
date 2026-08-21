@@ -53,6 +53,7 @@ from __future__ import annotations
 import csv
 import json
 import os
+import re
 import sys
 from collections import defaultdict
 from datetime import datetime, timezone
@@ -155,22 +156,78 @@ def load_set_order() -> Dict[str, int]:
     return {k: int(v) for k, v in order_map.items() if isinstance(v, (int, float))}
 
 
+def _japanische_set_codes(order_map: Dict[str, int]) -> set:
+    """Set-Codes, die zum japanischen Zweig gehoeren — abgeleitet, nicht
+    handgepflegt.
+
+    Drei Quellen, alle im Repo: der aktuelle JP-Code aus
+    format_window.json, die tatsaechlich beobachteten Set-Codes in der
+    japanischen Kartendatenbank, und das Namensmuster M<Zahl> (M3, M4,
+    M5, M6 …), das ausschliesslich der JP-Zweig benutzt.
+
+    Bewusst NICHT enthalten: JP-Sets, die keiner dieser Regeln folgen
+    (MEM, MEZ). Die fallen ueber die Obergrenze des Formatfensters
+    heraus, nicht ueber diese Liste — geraten wird hier nichts.
+    """
+    codes: set = set()
+    try:
+        with open(FORMAT_WINDOW_JSON, "r", encoding="utf-8") as f:
+            jp = (json.load(f).get("current_set_jp") or "").strip().upper()
+        if jp:
+            codes.add(jp)
+    except Exception:
+        pass
+    jp_csv = os.path.join(DATA_DIR, "japanese_cards_database.csv")
+    if os.path.isfile(jp_csv):
+        try:
+            with open(jp_csv, "r", encoding="utf-8-sig", newline="") as f:
+                for row in csv.DictReader(f):
+                    code = (row.get("set") or "").strip().upper()
+                    if code:
+                        codes.add(code)
+        except Exception:
+            pass
+    codes |= {c for c in order_map if re.fullmatch(r"M\d{1,2}", c or "")}
+    return codes
+
+
 def load_legal_set_codes(order_map: Dict[str, int]) -> Tuple[set, str]:
     """Return ``(legal_set_codes, format_label)`` for the current
     Standard rotation. ``legal_set_codes`` is the set of upper-case set
-    codes whose numeric ordering >= LEGAL_FORMAT_MIN_SET, plus the
-    promo/energy ALWAYS_LEGAL_SETS. Empty set + empty label if sets.json
-    is missing or unreadable — caller falls back to no filtering."""
+    codes between LEGAL_FORMAT_MIN_SET and the current set of the
+    format window (inclusive), plus the promo/energy
+    ALWAYS_LEGAL_SETS, minus the Japanese branch. Empty set + empty
+    label if sets.json is missing or unreadable — caller falls back to
+    no filtering.
+
+    Die Obergrenze fehlte bis 21.08.2026. Folge: `format_label` in
+    data/active_threats.json stand auf "TEF-MEZ" — MEZ ist ein
+    japanisches Set und in keinem internationalen Format legal. Alles,
+    was oberhalb des aktuellen Sets rangiert, ist entweder japanisch
+    oder noch nicht erschienen; beides gehoert nicht in die
+    Counter-Empfehlungen.
+    """
     if not order_map:
         return set(), ""
     cutoff = order_map.get(LEGAL_FORMAT_MIN_SET)
     if cutoff is None:
         return set(), ""
-    legal = {s for s, idx in order_map.items() if idx >= cutoff}
+
+    aktuell = load_format_code().upper()
+    obergrenze = order_map.get(aktuell)
+    if obergrenze is None:
+        # Ohne aufloesbares current_set lieber keine Legalitaetsgrenze
+        # als eine falsche — der Aufrufer filtert dann gar nicht und
+        # sagt das auch.
+        print("::warning::build_threat_intel: current_set aus format_window.json "
+              "ist in sets.json unbekannt — Legalitaetsfilter bleibt aus.")
+        return set(), ""
+
+    japanisch = _japanische_set_codes(order_map)
+    legal = {s for s, idx in order_map.items()
+             if cutoff <= idx <= obergrenze and s not in japanisch}
     legal |= {s for s in ALWAYS_LEGAL_SETS if s in order_map}
-    # Format label like "TEF-POR" using the highest-ordering legal set
-    top_set = max((s for s in legal), key=lambda s: order_map.get(s, 0)) if legal else LEGAL_FORMAT_MIN_SET
-    return legal, f"{LEGAL_FORMAT_MIN_SET}-{top_set}"
+    return legal, f"{LEGAL_FORMAT_MIN_SET}-{aktuell}"
 
 
 def load_format_code() -> str:
@@ -422,15 +479,30 @@ def save(payload: Mapping[str, Any]) -> None:
         json.dump(payload, f, ensure_ascii=False, indent=2, sort_keys=False)
 
 
-def main() -> None:
+def main() -> int:
     payload = build()
+
+    # S6 — ein leeres Ergebnis ist kein Erfolg. Faellt eine der beiden
+    # Eingangsdateien aus (Quelle blockt, Datei leer), baut build() eine
+    # syntaktisch tadellose, inhaltlich leere active_threats.json und
+    # ueberschreibt damit den letzten guten Stand. Der Lauf war bisher
+    # gruen. Lieber die alte Datei stehen lassen und laut sein.
+    threats = payload.get("threats") or {}
+    counters = payload.get("counters") or {}
+    if not threats and not counters:
+        print("::error::build_threat_intel: weder Bedrohungen noch Counter "
+              "berechnet — Eingangsdaten (current_meta_card_data.csv / "
+              "limitless_online_decks.csv) sind leer oder unlesbar. "
+              f"{OUTPUT_JSON} bleibt unveraendert.")
+        return 1
+
     save(payload)
-    threats = payload.get("threats", {})
     print(f"[build_threat_intel] wrote {OUTPUT_JSON}")
     for cat, info in threats.items():
         print(f"  {cat:18s} weighted_share={info['weighted_meta_share']:.3f}  "
               f"cards={len(info['cards'])}  counters={len(payload['counters'].get(cat, []))}")
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main() or 0)

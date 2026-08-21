@@ -1103,4 +1103,11 @@ if __name__ == "__main__":
         create_merged_database()
         sync_scraper_data_to_frontend()
     except Exception as e:
+        # Ein Abbruch hier darf nicht gruen aussehen: der Workflow wertet
+        # den Rueckgabewert aus, und die zusammengefuehrte Datenbank ist
+        # die Grundlage fuer Preise und Kartenidentitaet (S3).
+        print(f"::error::prepare_card_data abgebrochen: {e}")
         print(f"Fehler: {e}")
+        import traceback
+        traceback.print_exc()
+        sys.exit(1)

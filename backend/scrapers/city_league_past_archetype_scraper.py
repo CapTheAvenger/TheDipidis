@@ -231,6 +231,26 @@ def get_tournament_by_id(tournament_id: str) -> dict:
         'shop': name
     }
 
+# S6 — Verwurfsgruende. Ein leerer Lauf sagt fuer sich genommen nichts:
+# er kann Saisonpause heissen oder "die Quelle hat ihr Layout geaendert".
+# Erst die Aufschluesselung macht den Unterschied sichtbar, deswegen
+# zaehlt der Worker mit, warum eine Zeile nicht in das Ergebnis kam.
+_verwurf_lock = threading.Lock()
+_verwurf: Dict[str, int] = {
+    'seite_nicht_ladbar': 0,
+    'keine_tabelle': 0,
+    'zu_wenige_spalten': 0,
+    'kein_symbol': 0,
+    'platzierung_nicht_numerisch': 0,
+    'zeilen_gesehen': 0,
+}
+
+
+def _zaehle(grund: str, n: int = 1) -> None:
+    with _verwurf_lock:
+        _verwurf[grund] = _verwurf.get(grund, 0) + n
+
+
 def _scrape_single_tournament(tournament: dict) -> list:
     """
     Worker function for multithreading.
@@ -239,6 +259,7 @@ def _scrape_single_tournament(tournament: dict) -> list:
     soup = fetch_page_bs4(tournament['url'])
     results = []
     if not soup:
+        _zaehle('seite_nicht_ladbar')
         return results
 
     # ROBUST: Finde zuerst die Tabelle, dann alle <tr> direkt
@@ -246,6 +267,7 @@ def _scrape_single_tournament(tournament: dict) -> list:
     table = soup.select_one('table.striped')
     if not table:
         logger.debug(f"Keine Tabelle gefunden für Turnier {tournament.get('tournament_id', 'unknown')}")
+        _zaehle('keine_tabelle')
         return results
     
     # Iteriere über ALLE <tr>-Zeilen, überspringe Header-Zeilen
@@ -255,7 +277,9 @@ def _scrape_single_tournament(tournament: dict) -> list:
             continue
         
         cells = row.find_all('td')
+        _zaehle('zeilen_gesehen')
         if len(cells) < 4:
+            _zaehle('zu_wenige_spalten')
             continue
 
         placement = cells[0].get_text(strip=True)
@@ -311,6 +335,11 @@ def _scrape_single_tournament(tournament: dict) -> list:
         # slugs matches the frontend renderer's display cap.
         if archetype and slug_candidates:
             _record_observed_icons(archetype, slug_candidates[:2])
+
+        if not archetype:
+            _zaehle('kein_symbol')
+        elif not placement.isdigit():
+            _zaehle('platzierung_nicht_numerisch')
 
         if placement.isdigit() and archetype:
             results.append({
@@ -648,7 +677,7 @@ def create_html_comparison(comparison_data: list, output_file: str):
 # ============================================================================
 # MAIN EXECUTION
 # ============================================================================
-def main():
+def main() -> int:
     logger.info("=" * 60)
     logger.info("CITY LEAGUE PAST ARCHETYPE SCRAPER - FAST EDITION")
     logger.info("=" * 60)
@@ -660,7 +689,7 @@ def main():
     # scraper_settings. Skip cleanly if the window isn't set yet.
     if not settings.get('start_date') or not settings.get('end_date'):
         logger.info("Past meta window not yet configured (no rotation seen since deploy) — skipping.")
-        return
+        return 0
 
     start_date_str, end_date_str = calculate_date_range(settings['start_date'], settings['end_date'])
 
@@ -668,7 +697,10 @@ def main():
         start_date = parse_date(start_date_str)
         end_date = parse_date(end_date_str)
     except ValueError:
-        return
+        logger.error("Zeitfenster nicht lesbar: %s bis %s", start_date_str, end_date_str)
+        print("::error::city_league_past_archetype_scraper: Zeitfenster aus den "
+              "Einstellungen ist nicht als Datum lesbar — kein Lauf moeglich.")
+        return 1
 
     logger.info("Zeitraum: %s bis %s", start_date_str, end_date_str)
 
@@ -681,8 +713,14 @@ def main():
             logger.info("Zusaetzliches Turnier %s geladen.", t_id)
 
     if not tournaments:
-        logger.info("Keine Turniere gefunden.")
-        return
+        # Kein Turnier im Fenster ist im japanischen Sommer normal, aber es
+        # ist trotzdem eine Aussage — sichtbar, nicht still.
+        logger.warning("Keine Turniere im Fenster %s bis %s gefunden.",
+                       start_date_str, end_date_str)
+        print(f"::warning::city_league_past_archetype_scraper: keine Turniere im "
+              f"Fenster {start_date_str} bis {end_date_str}. Bei Saisonpause "
+              f"richtig, sonst ein Hinweis auf die Quelle.")
+        return 0
 
     # Load existing to skip already scraped tournaments
     existing_ids = set()
@@ -697,8 +735,8 @@ def main():
     new_tournaments = [t for t in tournaments if str(t['tournament_id']) not in existing_ids]
 
     if not new_tournaments:
-        logger.info("Alle Turniere wurden bereits erfasst!")
-        return
+        logger.info("Alle %s Turniere wurden bereits erfasst.", len(tournaments))
+        return 0
 
     logger.info("Starte Multithreading Download fuer %s Turniere...", len(new_tournaments))
     all_data = []
@@ -712,13 +750,17 @@ def main():
                 res = future.result()
                 if len(res) < min_size:
                     logger.info(f"  {t.get('shop', t['tournament_id'])} (ID: {t['tournament_id']}) -> {len(res)} Decks (< {min_size} – uebersprungen)")
+                    _zaehle('turnier_zu_klein')
                     continue
                 all_data.extend(res)
                 logger.info(f"  {t.get('shop', t['tournament_id'])} (ID: {t['tournament_id']}) -> {len(res)} Decks")
             except Exception as e:
                 logger.error(f"Fehler bei {t['tournament_id']}: {e}")
+                _zaehle('turnier_fehler')
 
     logger.info("Scraping beendet. %s neue Archetypes gefunden.", len(all_data))
+    logger.info("Verwurfsbilanz: %s", ", ".join(
+        f"{k}={v}" for k, v in sorted(_verwurf.items()) if v))
 
     old_data = []
     if os.path.exists(output_path):
@@ -742,15 +784,41 @@ def main():
         # sein (Saisonpause, nichts Neues) oder das Zeichen dafuer, dass
         # die Quelle ihr Layout geaendert hat. Beides gehoert ins Log,
         # damit man den Unterschied ueberhaupt sehen kann.
+        # Ein leerer Lauf ist erklaerbar oder er ist ein Defekt — und nur
+        # die Verwurfsbilanz sagt, welches von beidem. Waren alle Turniere
+        # schlicht zu klein oder nicht erreichbar, ist das eine Meldung.
+        # Wurden Zeilen gelesen und trotzdem kein einziger Archetyp
+        # erkannt, hat die Quelle ihr Layout geaendert: das ist ein Fehler
+        # und muss den Lauf rot faerben, sonst bleibt die Datei still auf
+        # ihren 73 Byte stehen wie seit dem 31.07.2026.
+        erklaert = (_verwurf.get('turnier_zu_klein', 0)
+                    + _verwurf.get('turnier_fehler', 0)
+                    + _verwurf.get('seite_nicht_ladbar', 0))
+        bilanz = ", ".join(f"{k}={v}" for k, v in sorted(_verwurf.items()) if v) or "keine"
         logger.warning(
-            "Kein einziger Archetyp gefunden — %s Turniere geprueft, 0 Decks "
-            "gelesen. Bestehende Datei bleibt unveraendert.",
-            len(tournaments) if 'tournaments' in dir() else '?'
+            "Kein einziger Archetyp gefunden — %s Turniere geprueft, %s Zeilen "
+            "gelesen. Bestehende Datei bleibt unveraendert. Verwurfsbilanz: %s",
+            len(new_tournaments), _verwurf.get('zeilen_gesehen', 0), bilanz,
         )
-        print("::warning::city_league_past_archetype_scraper: 0 Archetypen aus "
-              "0 gelesenen Decks. Entweder laeuft nichts (Saisonpause) oder die "
-              "Tabellenstruktur der Quelle hat sich geaendert — die Deck-Symbole "
-              "werden zeilenweit gesucht, ein Ausfall deutet also auf mehr hin.")
+        if erklaert >= len(new_tournaments) and _verwurf.get('zeilen_gesehen', 0) == 0:
+            print(f"::warning::city_league_past_archetype_scraper: 0 Archetypen, "
+                  f"aber alle {len(new_tournaments)} Turniere sind erklaerbar "
+                  f"ausgefallen ({bilanz}). Kein Layoutproblem erkennbar.")
+            merge_observed_icons_into_json()
+            logger.info("=" * 60)
+            logger.info("BEENDET OHNE NEUE DATEN")
+            logger.info("=" * 60)
+            return 0
+
+        print(f"::error::city_league_past_archetype_scraper: {_verwurf.get('zeilen_gesehen', 0)} "
+              f"Tabellenzeilen gelesen und daraus 0 Archetypen gewonnen "
+              f"({bilanz}). Die Deck-Symbole werden zeilenweit gesucht — faellt "
+              f"das trotzdem aus, hat die Quelle ihre Tabelle geaendert.")
+        merge_observed_icons_into_json()
+        logger.info("=" * 60)
+        logger.info("ABGEBROCHEN: 0 Archetypen aus gelesenen Zeilen")
+        logger.info("=" * 60)
+        return 1
 
     # Phase 4: backfill archetype_icons.json with the JP-only combos we
     # saw this run. Runs even when all_data is empty so we still pick
@@ -762,11 +830,15 @@ def main():
     logger.info("=" * 60)
     logger.info("ERFOLGREICH BEENDET")
     logger.info("=" * 60)
+    return 0
 
 if __name__ == "__main__":
     try:
-        main()
+        sys.exit(main() or 0)
     except KeyboardInterrupt:
         logger.warning("Abbruch durch Benutzer.")
+        sys.exit(130)
     except Exception as e:
         logger.critical(f"Unerwarteter Fehler: {e}", exc_info=True)
+        print(f"::error::city_league_past_archetype_scraper abgebrochen: {e}")
+        sys.exit(1)

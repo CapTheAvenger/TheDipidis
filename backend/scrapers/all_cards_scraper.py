@@ -898,6 +898,10 @@ def main():
 
     except Exception as e:
         logger.critical(f"KRITISCHER FEHLER - Scraper abgebrochen: {e}", exc_info=True)
+        # Ohne den Rueckgabewert kann der Kritisch-Regex in
+        # weekly-full-update.yml fuer diesen Scraper nie ausloesen (S7).
+        print(f"::error::all_cards_scraper abgebrochen: {e}")
+        sys.exit(1)
 
 
 if __name__ == "__main__":

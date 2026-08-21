@@ -21,9 +21,36 @@ OUT = os.path.join(os.path.dirname(__file__), "..", "data", "pokemonproxies_inde
 
 # pokemonproxies set code -> our (Limitless/DB) set code. Extend as new
 # Japanese-only sets get proxied. Only mapped codes are written.
-SET_MAP = {
+# NACHTRAG 21.08.2026: Dieselbe Falle wie in
+# backend/scrapers/scrape_pokemonproxies_urls.py — eine von Hand
+# gepflegte Liste altert bei jedem japanischen Set. M6 (31.07.2026)
+# stand hier nicht drin, also konnte diese Datei nur M5 finden.
+# data/pokemonproxies_index.json enthaelt entsprechend 0 M6-Eintraege.
+# Die Kuerzel folgen der Regel M<n> -> <n>a; welches Set laeuft, steht
+# in data/format_window.json.
+_SET_MAP_STATISCH = {
     "5a": "M5",   # Abyss Eye (JP Mega set) — Dunkelnacht line
 }
+
+
+def _baue_set_map(rueckwaerts: int = 3) -> dict:
+    karte = dict(_SET_MAP_STATISCH)
+    pfad = os.path.join(os.path.dirname(__file__), "..", "data", "format_window.json")
+    try:
+        with open(pfad, encoding="utf-8") as f:
+            jp = str(json.load(f).get("current_set_jp") or "").strip().upper()
+    except (OSError, ValueError):
+        return karte
+    m = re.fullmatch(r"M(\d{1,2})", jp)
+    if not m:
+        return karte
+    nummer = int(m.group(1))
+    for n in range(max(1, nummer - rueckwaerts), nummer + 1):
+        karte[f"{n}a"] = f"M{n}"
+    return karte
+
+
+SET_MAP = _baue_set_map()
 
 ASSET_RE = re.compile(r"([0-9a-z]{1,4}-\d{3}-[A-Za-z0-9'.()\-]+?-[A-Za-z0-9]{5,10}-?\.png)")
 

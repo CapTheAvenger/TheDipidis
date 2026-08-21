@@ -401,11 +401,36 @@ def get_tournament_info(url: str) -> dict:
     if players_match:
         info["players"] = players_match.group(1)
 
-    # 3. Format aus URL-Parametern extrahieren (falls vorhanden)
-    format_code_match = re.search(r'<a[^>]*href=["\'][^"\']*[?&]format=([^"\'&]+)["\'][^>]*>', html_text, re.IGNORECASE)
-    if format_code_match:
-        raw_format = urllib.parse.unquote(format_code_match.group(1).strip())
-        info["format"] = normalize_tournament_format(raw_format)
+    # 3. Format aus den Decks-Links lesen — ueber das href-ATTRIBUT.
+    #
+    # Hier stand ein Regex gegen str(soup). Beim Re-Serialisieren
+    # verwandelt BeautifulSoup jedes & in &amp;, und ein Muster, das nach
+    # dem nackten [?&]format= sucht, findet dann nichts mehr. Nachgestellt
+    # am 21.08.2026 mit bs4:
+    #
+    #     href="/tournaments/540/decks?time=all&format=TEF-CRI"
+    #       -> str(soup) liefert "...&amp;format=TEF-CRI"
+    #       -> alter Regex: kein Treffer
+    #       -> href-Attribut:  TEF-CRI
+    #
+    # Getroffen hat der alte Weg nur dort, wo format der EINZIGE oder
+    # erste Parameter war. Deshalb stehen in
+    # data/tournament_cards_data_overview.csv zwei Zeilen ohne Format da —
+    # Turin (540) und NAIC (518) —, waehrend dieselben Turniere in der
+    # Kartendatei meta='TEF-CRI' tragen.
+    #
+    # Genau dieser Fehler ist in _fetch_current_format weiter unten schon
+    # beschrieben UND behoben; die Korrektur ist hier nie angekommen. Sie
+    # ist zeitkritisch: die Weltmeisterschaft steht bevor, und ihre
+    # Uebersichtszeile bekaeme sonst mit einiger Wahrscheinlichkeit
+    # wieder ein leeres Format.
+    for _a in soup.select('a[href]'):
+        _m = re.search(r'[?&]format=([^&]+)', _a.get('href') or '', re.IGNORECASE)
+        if _m:
+            info["format"] = normalize_tournament_format(
+                urllib.parse.unquote(_m.group(1).strip()))
+            if info["format"]:
+                break
 
     # 3b. Fallback: bekannte Format-Namen direkt im Seitentext erkennen
     if not info["format"]:
@@ -776,7 +801,14 @@ def save_csv_files(data: list, output_file: str, append_mode: bool):
             "tournament_name": t["name"],
             "tournament_date": t.get("date", ""),
             "players": t.get("players", ""),
-            "format": t.get("format", ""),
+            # Zweiter Weg zum Format, falls die Seite keinen Decks-Link
+            # mit ?format= hergibt. _derive_meta_from_date_JH leitet den
+            # Meta-Schluessel aus dem Turnierdatum und dem Formatfenster
+            # ab — die Kartenzeilen benutzen ihn seit Langem
+            # (aggregate_tournament_cards), die Uebersicht nicht. Deshalb
+            # konnten dieselben zwei Turniere in der Kartendatei
+            # meta='TEF-CRI' tragen und in der Uebersicht format='' haben.
+            "format": t.get("format") or _derive_meta_from_date_JH(t.get("date", "")),
             "cards_url": t["cards_url"],
             "total_cards": t.get("total_cards", 0),
             "status": t["status"],

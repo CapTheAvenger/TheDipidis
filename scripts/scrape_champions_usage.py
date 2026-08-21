@@ -28,6 +28,7 @@ with a browser User-Agent. Fail-soft — on any hard error the caller keeps
 the committed champions_usage.json.
 """
 
+import datetime as dt
 import json
 import os
 import re
@@ -450,6 +451,23 @@ def main():
             "source": "championsbattledata.com — public mirror of the in-game "
                       "Pokémon Champions ranked usage analysis (nature, SP "
                       "spread, item, move, ability, teammate), per format.",
+            # Zeitstempel jedes ERFOLGREICHEN Laufs. Bis 21.08.2026 trug die
+            # Datei kein Datum, und die Seite zeigte die Zahlen trotzdem als
+            # "Saison: Current" — am 21.08. waren sie 35 Tage alt, weil
+            # championsbattledata.com den Scrape aus CI-IPs drosselt und der
+            # Job zwar rot wurde, aber nichts mehr committete.
+            #
+            # Ohne dieses Feld laesst sich Frische nicht pruefen: das
+            # Git-Datum der Datei taugt nicht, weil Fremd-Aenderungen (z. B.
+            # eine Plausibilitaetskorrektur) sie anfassen und damit frisch
+            # aussehen lassen. Nur der Scraper selbst weiss, wann er zuletzt
+            # wirklich Daten geholt hat.
+            #
+            # Das Feld entsteht erst mit dem naechsten erfolgreichen Lauf.
+            # data_guardian und Frontend behandeln sein Fehlen deshalb als
+            # "Stand unbekannt", nicht als Fehler.
+            "scraped_at": dt.datetime.now(dt.timezone.utc)
+                            .replace(microsecond=0).isoformat(),
             "season": season,
             "count": ok,
             "formats": ["doubles", "singles"],

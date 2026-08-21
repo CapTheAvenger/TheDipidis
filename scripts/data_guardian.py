@@ -611,6 +611,70 @@ def check_champions_usage(findings):
                          f"guessed. Fixing it needs the source, not this repo."))
 
 
+def check_champions_freshness(findings):
+    """Der stille Stillstand der In-Game-Nutzung.
+
+    champions_usage.json wird von champions-usage-refresh.yml geschrieben.
+    Gemessen am 21.08.2026 stand die Datei seit dem 17.07.2026 unveraendert —
+    championsbattledata.com drosselt den Bulk-Scrape aus CI-IPs — waehrend das
+    Side-Quest-Panel die Zahlen weiter als "Saison: Current" zeigte. 35 Tage
+    alt, als aktuell beschriftet.
+
+    Der Workflow-Kommentar versprach "data_guardian escalates once it passes
+    its freshness budget". Dieses Budget gab es nicht: champions_usage.json
+    stand in keiner der beiden Frische-Listen. Hier ist es.
+
+    Warum nicht ueber das Git-Datum wie check_freshness(): die Datei wird auch
+    von Aenderungen angefasst, die nichts mit dem Scrape zu tun haben (am
+    21.08. etwa von der Plausibilitaetskorrektur aus Gruppe 3). Danach sieht
+    sie frisch aus, obwohl der Scrape steht. Nur der Scraper selbst weiss, wann
+    er zuletzt wirklich Daten geholt hat — deshalb _meta.scraped_at.
+
+    WARN statt CRITICAL: der Job stirbt nicht, er committet nur nichts, und
+    eine gedrosselte Fremdquelle ist ein Datenlauf-Thema, kein Repo-Fehler.
+    Sichtbar altern soll sie trotzdem.
+    """
+    path = os.path.join(DATA, "champions_usage.json")
+    if not os.path.exists(path):
+        return
+    try:
+        with open(path, encoding="utf-8") as f:
+            meta = (json.load(f) or {}).get("_meta") or {}
+    except Exception as e:                                  # noqa: BLE001
+        findings.append(("CRITICAL", f"champions_usage.json is unreadable: {e}"))
+        return
+
+    roh = meta.get("scraped_at")
+    if not roh:
+        findings.append(("INFO",
+                         "champions_usage.json traegt noch kein _meta.scraped_at — "
+                         "das Feld entsteht erst beim naechsten ERFOLGREICHEN Lauf von "
+                         "scrape_champions_usage.py. Bis dahin laesst sich die Frische "
+                         "nicht pruefen, und die Seite schreibt ehrlich 'Stand unbekannt'."))
+        return
+
+    try:
+        stand = dt.datetime.fromisoformat(roh)
+    except ValueError:
+        findings.append(("WARN",
+                         f"champions_usage.json: _meta.scraped_at ist kein lesbares "
+                         f"Datum ({roh!r})"))
+        return
+    if stand.tzinfo is None:
+        stand = stand.replace(tzinfo=dt.timezone.utc)
+    alter = (dt.datetime.now(dt.timezone.utc) - stand).days
+
+    MAX_ALTER = 7  # der Job laeuft taeglich; eine Woche ist grosszuegig
+    if alter > MAX_ALTER:
+        findings.append(("WARN",
+                         f"champions_usage.json wurde zuletzt vor {alter} Tagen wirklich "
+                         f"gescrapt (erwartet <= {MAX_ALTER}, Job champions-usage-refresh.yml "
+                         f"laeuft taeglich). Der Scrape-Step wird bei Drosselung zwar rot, "
+                         f"committet aber nichts — die Zahlen altern still weiter. Das "
+                         f"Side-Quest-Panel weist den Stand aus, die Quelle braucht "
+                         f"trotzdem einen Blick."))
+
+
 def report_unverified_prices(findings):
     """Standing worklist: which unverified mappings actually matter.
 
@@ -723,6 +787,7 @@ def main():
     # Widersprueche brauchen keine Grundlinie.
     check_verified_collisions(findings, price)
     check_champions_usage(findings)
+    check_champions_freshness(findings)
 
     crit = [f for lvl, f in findings if lvl == "CRITICAL"]
     warn = [f for lvl, f in findings if lvl == "WARN"]

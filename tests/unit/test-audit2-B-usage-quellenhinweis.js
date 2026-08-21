@@ -5,6 +5,10 @@
  * unbelegbare Frische. Fix (nur Frontend): Saison-/Nutzungsanzeige traegt jetzt
  * einen Quell-/Stand-Hinweis (Quelle championsbattledata.com · Stand unbekannt).
  *
+ * Audit 3 hat nachgezogen: sobald champions_usage.json ein _meta.scraped_at
+ * traegt, zeigt die Zeile das echte Datum. Dieser Test beschreibt weiterhin den
+ * Zustand OHNE Datum — dann muss es ehrlich bei "Stand unbekannt" bleiben.
+ *
  * Test: a) das ECHTE usageSeasonLbl (Pokédex-Overlay) wird ausgefuehrt und muss
  * Quelle + Stand-unbekannt tragen; b) die ECHTE render()-Kopfzeile des
  * Nutzung-Reiters wird mit einem DOM-Stub ausgefuehrt und muss den Quellhinweis
@@ -84,6 +88,18 @@ describe('F03 (Nutzung-Reiter) — render() traegt den Quellhinweis in der Kopfz
         sourceNote: realSourceNote(),
       }),
       filterHtml: () => '', listHtml: () => '', detailHtml: () => '', wire: () => {},
+      // Seit Audit 3 baut render() die Zeile ueber quellHinweis(), damit ein
+      // vorhandenes _meta.scraped_at als echtes Datum erscheint. Ohne Datum —
+      // und genau das ist der Zustand, den dieser Test beschreibt — faellt die
+      // Funktion auf sourceNote zurueck. Hier die ECHTE Funktion aus der
+      // Quelle einsetzen statt eine Attrappe, sonst prueft der Test seinen
+      // eigenen Nachbau.
+      quellHinweis: (function () {
+        const src = cutBalanced(USAGE, 'function quellHinweis(') + '\n; return quellHinweis;';
+        // eslint-disable-next-line no-new-func
+        return new Function('_usageMeta', 'L', 'getLang', src)(
+          {}, () => ({ sourceNote: realSourceNote() }), () => 'de');
+      }()),
     };
     const names = Object.keys(scope);
     // eslint-disable-next-line no-new-func

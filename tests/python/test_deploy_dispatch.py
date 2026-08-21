@@ -27,7 +27,6 @@ import os
 import re
 
 import pytest
-import yaml
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 WF_DIR = os.path.join(ROOT, ".github", "workflows")
@@ -65,6 +64,36 @@ AUSNAHMEN = {
         "schreibt images/tutorials/, ohne pushed-Ausgang; "
         "geht spaetestens mit dem Wochenlauf live (Verzug bis 4 Tage).",
 }
+
+
+def _ohne_kommentare(text):
+    """Kommentarzeilen entfernen — sonst zaehlt eine Erklaerung wie ein Schritt.
+
+    Bewusst ohne PyYAML: die CI installiert nur pytest, beautifulsoup4,
+    requests und lxml (deploy-pages.yml). Ein `import yaml` liess pytest hier
+    mit Exit-Code 2 schon in der Sammlung abbrechen — und weil der Deploy am
+    Test-Job haengt, blockierte ausgerechnet dieser Waechter den Deploy, den er
+    schuetzen soll. Gemessen am 21.08.2026, Run 32462853838.
+    """
+    aus = []
+    for zeile in text.splitlines():
+        nackt = zeile.strip()
+        if nackt.startswith("#"):
+            continue
+        aus.append(zeile)
+    return "\n".join(aus)
+
+
+def _schritt_um(text, treffer_index):
+    """Der YAML-Schritt (`- name:` ... bis zum naechsten `- name:`), in dem
+    die Fundstelle liegt."""
+    beginn = text.rfind("\n      - name:", 0, treffer_index)
+    if beginn == -1:
+        beginn = 0
+    ende = text.find("\n      - name:", treffer_index)
+    if ende == -1:
+        ende = len(text)
+    return text[beginn:ende]
 
 
 def _workflows():
@@ -123,20 +152,18 @@ def test_wer_nach_main_pusht_stoesst_den_deploy_an(name, text):
 @pytest.mark.parametrize("name,text", PUSHER, ids=[n for n, _ in PUSHER])
 def test_dispatch_haengt_an_einem_echten_push(name, text):
     """Sonst deployt der Workflow auch, wenn er gar nichts committet hat."""
-    if not DISPATCH_RE.search(text):
-        return
-    doc = yaml.safe_load(text)
-    treffer = []
-    for job in (doc.get("jobs") or {}).values():
-        for step in (job.get("steps") or []):
-            if DISPATCH_RE.search(str(step.get("run", ""))):
-                treffer.append(step)
-    assert treffer, f"{name}: Dispatch nur im Kommentar, nicht als Schritt"
-    for step in treffer:
-        assert "pushed" in str(step.get("if", "")), (
-            f"{name}: der Dispatch-Schritt haengt nicht an "
-            f"steps.commit.outputs.pushed — er wuerde auch ohne Commit deployen"
+    roh = _ohne_kommentare(text)
+    m = DISPATCH_RE.search(roh)
+    if not m:
+        assert not DISPATCH_RE.search(text), (
+            f"{name}: Dispatch steht nur im Kommentar, nicht als Schritt"
         )
+        return
+    schritt = _schritt_um(roh, m.start())
+    assert "pushed" in schritt, (
+        f"{name}: der Dispatch-Schritt haengt nicht an "
+        f"steps.commit.outputs.pushed — er wuerde auch ohne Commit deployen"
+    )
 
 
 @pytest.mark.parametrize("name", sorted(AUSNAHMEN))
@@ -148,11 +175,12 @@ def test_ausnahmeliste_verrottet_nicht(name):
 
 @pytest.mark.parametrize("name,text", PUSHER, ids=[n for n, _ in PUSHER])
 def test_dispatch_braucht_actions_write(name, text):
-    if not DISPATCH_RE.search(text):
+    roh = _ohne_kommentare(text)
+    if not DISPATCH_RE.search(roh):
         return
-    doc = yaml.safe_load(text)
-    perms = doc.get("permissions") or {}
-    assert perms.get("actions") == "write", (
+    # Zeilenende-Anker mit Rand fuer Inline-Kommentare: im Repo steht
+    # `actions:  write   # for the deploy-pages dispatch`.
+    assert re.search(r"^\s*actions:\s*write\s*(#.*)?$", roh, re.M), (
         f"{name}: `gh workflow run` braucht `actions: write`, sonst scheitert "
         f"der Dispatch zur Laufzeit mit 403"
     )

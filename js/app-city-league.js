@@ -47,7 +47,18 @@ function cityLeagueTageSeitRotation() {
 
 function cityLeagueOffSeasonHtml(istVergangenheit) {
     var de = (typeof getLang === 'function' && getLang() === 'de');
-    if (window.DsNav) { try { window.DsNav.setSpaceFacts({ pause: true }, 'jp'); } catch (e) {} }
+    // Der Ausweis oben bekam bis zum 20.08.2026 unbedingt pause:true — auch
+    // fuer das VERGANGENE Fenster. Der Text darunter sagte schon richtig
+    // "Die Vergangenheit pausiert nicht"; der Ausweis widersprach ihm im
+    // selben Bild. Eine Saisonpause und ein fehlender Schnappschuss sind
+    // zwei verschiedene Zustaende, und nur der erste ist ein Warten.
+    if (window.DsNav) {
+        try {
+            window.DsNav.setSpaceFacts(istVergangenheit
+                ? { pause: false, luecke: true }
+                : { pause: true, luecke: false }, 'jp');
+        } catch (e) {}
+    }
     var tage = cityLeagueTageSeitRotation();
     var titel, text;
     if (istVergangenheit) {

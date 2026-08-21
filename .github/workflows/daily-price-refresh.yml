@@ -83,9 +83,29 @@ jobs:
       - name: Seed backend/core/data/ from data/
         run: |
           mkdir -p backend/core/data
+          # japanese_cards_database.csv und pokemonproxies_url_map.json
+          # standen hier NICHT — und genau das hat jeden Tag die
+          # japanischen Karten aus all_cards_merged.json geloescht.
+          #
+          # prepare_card_data.py liest sechs Dateien; zwei davon sind die
+          # japanische Seite. Fehlen sie im Saatgut, entsteht eine
+          # zusammengefuehrte Datenbank OHNE JP-Karten — und der Schritt
+          # "Commit + push price updates" weiter unten committet genau
+          # diese Datei. Gemessen am 21.08.2026: der Wochenlauf um 06:20
+          # schrieb 76 M6-Karten hinein, der Preislauf um 08:13 nahm sie
+          # wieder heraus. all_cards_merged.json fuehrte danach 0
+          # japanische Karten, waehrend japanese_cards_database.csv 772
+          # Zeilen hatte. Im Deck Builder waren JP-Karten damit an fuenf
+          # von sieben Tagen verschwunden.
+          #
+          # Die Liste muss deshalb alles enthalten, was prepare_card_data
+          # liest. tests/python/test_daily_seed_vollstaendig.py haelt das
+          # fest, damit der naechste Eingang nicht wieder vergessen wird.
           for f in \
               all_cards_database.csv \
               all_cards_database.json \
+              japanese_cards_database.csv \
+              pokemonproxies_url_map.json \
               cardmarket_id_mapping.csv \
               price_data.csv \
               sets.json \

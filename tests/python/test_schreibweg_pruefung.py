@@ -82,12 +82,30 @@ def test_die_pruefung_haengt_vor_dem_schreiben():
     assert aufruf < schreiben, "die Pruefung laeuft erst nach dem Schreiben"
 
 
-def test_der_chunk_ist_noch_kaputt():
-    """Faellt dieser Test, ist die Datei sauber und die Sonderbehandlung
-    im Frontend (js/app-past-meta.js, pastMetaZahlFeld) kann weg."""
+def test_der_chunk_ist_wieder_sauber():
+    """Am 21.08.2026 repariert — vorher stand hier die Umkehrung.
+
+    Bis dahin hielt dieser Test fest, dass die Datei kaputt IST, damit
+    die Sonderbehandlung im Frontend eine Begruendung hat. Die 1.263
+    zerrissenen Zeilen sind jetzt nachgerechnet
+    (scripts/repariere_turnier_kartenzeilen.py), also dreht sich die
+    Zusicherung um.
+
+    Die Sonderbehandlung in js/app-past-meta.js bleibt trotzdem stehen:
+    sie kostet nichts und faengt den naechsten Schreibfehler ab, bevor er
+    als Zahl auf dem Schirm landet. Das prueft der Test darunter.
+    """
     pfad = os.path.join(ROOT, "data", "tournament_cards_data_cards_TEF-CRI.csv")
     roh = io.open(pfad, encoding="utf-8-sig").read()
-    assert "['0" in roh, "TEF-CRI ist sauber — Sonderbehandlung pruefen"
+    assert "['0" not in roh, "TEF-CRI enthaelt wieder Listen-Text"
+
+
+def test_die_sonderbehandlung_im_frontend_bleibt():
+    """Ein Netz nimmt man nicht weg, weil gerade niemand faellt."""
+    quelle = io.open(os.path.join(ROOT, "js", "app-past-meta.js"),
+                     encoding="utf-8").read()
+    assert "function pastMetaZahlFeld(" in quelle
+    assert "PM_ZAHL_FORM" in quelle
 
 
 # ---------------------------------------------------------------------------

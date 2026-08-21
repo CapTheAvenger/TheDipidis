@@ -41,8 +41,10 @@ describe('Kein geratenes Datum mehr', () => {
 
     it('niemand sonst liest den nie geschriebenen Schluessel als Datum', () => {
         // ds-nav.js und meta-analysis-hub.js lasen ihn ebenfalls; sie duerfen
-        // daraus kein Datum ableiten, das es nicht gibt.
-        for (const datei of ['js/app-init.js']) {
+        // daraus kein Datum ableiten, das es nicht gibt. Bis zum 21.08.2026
+        // stand hier nur app-init.js in der Liste — der Kommentar nannte drei
+        // Dateien, geprueft wurde eine.
+        for (const datei of ['js/app-init.js', 'js/ds-nav.js', 'js/meta-analysis-hub.js']) {
             assert.doesNotMatch(ohneKommentar(read(datei)), /lastScraperUpdate/, datei);
         }
     });
@@ -51,6 +53,23 @@ describe('Kein geratenes Datum mehr', () => {
         assert.match(MODUL, /return de\(\) \? 'unbekannt' : 'unknown';/);
         // Und nirgends ein new Date() als Ersatzwert fuer einen Stand.
         assert.doesNotMatch(MODUL, /new Date\(\)\.toLocaleDateString/);
+    });
+});
+
+describe('Der Antwortblock der Meta-Ansicht traegt einen echten Stand', () => {
+    const HUB = read('js/meta-analysis-hub.js');
+
+    it('nennt als Quelle genau die Datei, aus der er rechnet', () => {
+        const gerechnet = /fetchAndParseCSV\(`\$\{base\}([a-z0-9_]+\.csv)/.exec(HUB);
+        assert.ok(gerechnet, 'Datenquelle des Antwortblocks nicht gefunden');
+        assert.match(HUB, new RegExp('data-quelle="' + gerechnet[1] + '"'),
+            `Chip nennt nicht ${gerechnet[1]}`);
+    });
+
+    it('laesst den Chip nach dem Einhaengen fuellen', () => {
+        // Ohne diesen Aufruf bleibt "unbekannt" stehen: zeichne() liest
+        // data-quelle aus dem DOM, der HTML-String kennt es noch nicht.
+        assert.match(ohneKommentar(HUB), /DsDatenstand\.zeichne\(h\)/);
     });
 });
 

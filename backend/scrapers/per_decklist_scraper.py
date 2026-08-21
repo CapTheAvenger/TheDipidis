@@ -58,7 +58,7 @@ import re
 import sys
 import time
 from collections import OrderedDict
-from datetime import datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 from typing import Dict, List, Optional, Tuple
 
 _SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -560,6 +560,58 @@ def scrape_one_tournament(
     return out_rows
 
 
+def _nach_datum(werke, overview, cutoff_iso):
+    """Turniere ab `cutoff_iso` behalten.
+
+    Zeilen ohne Datum bleiben drin: die Uebersicht kennt frisch
+    entdeckte Turniere manchmal noch nicht, und etwas wegzuwerfen, das
+    man nicht datieren kann, waere eine stille Reparatur.
+    """
+    kept = []
+    for w in werke:
+        d = (overview.get(w['id']) or {}).get('date_iso', '')
+        if not d or d >= cutoff_iso:
+            kept.append(w)
+    return kept
+
+
+def _vorformat_fenster(data_dir):
+    """(Startdatum, Name) des vorherigen Formats — oder (None, None).
+
+    previous_format_key steht in format_window.json und wird bei jeder
+    Rotation von Hand gepflegt (z. B. "TEF-CRI"). Die neuere Haelfte
+    davon ist das Set, dessen Erscheinungsdatum plus lag_days den
+    Beginn des damaligen Praesenzfensters ergibt — dieselbe Rechnung
+    wie fuer das laufende Format.
+    """
+    try:
+        with open(os.path.join(data_dir, 'format_window.json'), encoding='utf-8') as f:
+            fw = json.load(f)
+    except Exception:
+        return None, None
+    schluessel = str(fw.get('previous_format_key') or '').strip()
+    if not schluessel or '-' not in schluessel:
+        return None, None
+    neueres_set = schluessel.split('-')[-1].strip().upper()
+    if not neueres_set:
+        return None, None
+    try:
+        with open(os.path.join(data_dir, 'sets_metadata.json'), encoding='utf-8') as f:
+            meta = json.load(f)
+    except Exception:
+        return None, schluessel
+    eintrag = meta.get(neueres_set) or {}
+    erschienen = str(eintrag.get('release_date') or '').strip()
+    if not re.fullmatch(r'\d{4}-\d{2}-\d{2}', erschienen):
+        return None, schluessel
+    try:
+        tage = int(fw.get('lag_days') or 14)
+    except (TypeError, ValueError):
+        tage = 14
+    d = date.fromisoformat(erschienen) + timedelta(days=tage)
+    return d.isoformat(), schluessel
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--tournament-url', type=str,
@@ -626,6 +678,11 @@ def main():
         logger.info("--from-tournament-id %d: %d → %d tournaments",
                     args.from_tournament_id, before, len(work))
 
+    # Merker: welchen Wert hat "auto" aufgeloest? Nur dann darf der
+    # Rueckfall unten greifen — ein von Hand gesetztes --from-date ist
+    # eine Ansage und wird nicht hintergangen.
+    _auto_fenster_datum = None
+
     # Resolve "auto" sentinel from format_window.json — keeps the
     # scrape window pinned to the current format so old rotation
     # data (TEF-POR, SVI-ASC etc.) doesn't pile up in the output
@@ -640,6 +697,7 @@ def main():
                 legal = (fw.get('in_person_legal_date') or '').strip()
                 if legal:
                     args.from_date = legal
+                    _auto_fenster_datum = legal
                     logger.info("--from-date auto → %s (in_person_legal_date "
                                 "from format_window.json, current format: %s-%s)",
                                 legal,
@@ -658,6 +716,9 @@ def main():
                            "— disabling date filter.", fw_path)
             args.from_date = ''
 
+    # Stand vor dem Datumsfilter — der Rueckfall unten misst gegen ihn.
+    alle_vor_datum = list(work)
+
     overview = None
     if args.from_date or args.meta:
         overview = load_tournament_metadata_lookup()
@@ -669,21 +730,47 @@ def main():
     if args.from_date and overview:
         before = len(work)
         cutoff_iso = args.from_date.strip()
-        kept = []
-        for w in work:
-            d = (overview.get(w['id']) or {}).get('date_iso', '')
-            if not d:
-                # No date metadata — keep it so we don't accidentally drop
-                # tournaments the overview CSV missed (newer tournaments
-                # the JH scraper just discovered). Per-fetch filter applies
-                # downstream.
-                kept.append(w)
-                continue
-            if d >= cutoff_iso:
-                kept.append(w)
-        work = kept
+        work = _nach_datum(work, overview, cutoff_iso)
         logger.info("--from-date %s: %d → %d tournaments (using overview metadata)",
                     cutoff_iso, before, len(work))
+
+        # S11 — Rueckfall auf das Vorformat.
+        #
+        # "auto" pinnt das Fenster auf das laufende Format. Das ist
+        # richtig, solange es dort Turniere GIBT. In TEF-PBL gibt es
+        # bisher keins: das erste Major des Formats ist die
+        # Weltmeisterschaft. Der Lauf holte damit null Turniere,
+        # meldete Erfolg, und tournament_decklists_per_player.csv
+        # blieb bei den zwei Turnieren von Turin stehen — ohne dass
+        # irgendwo stand, dass das am Filter liegt und nicht an der
+        # Quelle.
+        #
+        # Also: bleibt nach dem automatischen Fenster nichts uebrig,
+        # wird das Fenster des VORFORMATS versucht. Die Alternative
+        # waere, den Filter ganz zu streichen — dann liefen wieder
+        # drei Jahre Turniere durch, und genau das sollte er
+        # verhindern.
+        if not work and args.from_date == _auto_fenster_datum:
+            vorher_datum, vorher_name = _vorformat_fenster(data_dir)
+            if vorher_datum and vorher_datum != cutoff_iso:
+                zurueck = _nach_datum(alle_vor_datum, overview, vorher_datum)
+                logger.warning(
+                    "Im aktuellen Format kein Turnier im Fenster ab %s. "
+                    "Rueckfall auf das Vorformat %s (ab %s): %d Turnier(e).",
+                    cutoff_iso, vorher_name or '?', vorher_datum, len(zurueck))
+                print(f"::warning::per_decklist_scraper: im aktuellen Format "
+                      f"liegt kein Turnier ab {cutoff_iso}. Es wird das "
+                      f"Vorformat {vorher_name or '?'} ab {vorher_datum} "
+                      f"geholt, damit der Deckbauer nicht ohne Einzellisten "
+                      f"dasteht.")
+                work = zurueck
+            else:
+                logger.warning(
+                    "Im aktuellen Format kein Turnier im Fenster ab %s, und "
+                    "das Vorformat liess sich nicht bestimmen.", cutoff_iso)
+                print(f"::warning::per_decklist_scraper: kein Turnier ab "
+                      f"{cutoff_iso}, kein Vorformat bestimmbar — dieser Lauf "
+                      f"holt nichts.")
 
     if args.meta and overview:
         wanted = {m.strip().upper() for m in args.meta.split(',') if m.strip()}

@@ -74,6 +74,67 @@ describe('Audit 3 — Etappe 1 des 12-px-Ausstiegs', () => {
       'die Groessen muessen aus der Skala kommen, nicht als neue Sonderwerte');
   });
 
+  it('Etappe 2: das Vergangene Meta ist die zweite uebernommene Ansicht', () => {
+    assert.match(INDEX, /id="past-meta"[^>]*class="[^"]*\bfs-scale\b/,
+      '#past-meta traegt die Klasse nicht');
+    const block = MOBILE.slice(MOBILE.indexOf('#past-meta.fs-scale'));
+    // Genau die Komponenten, die ohne Boden unter 11 px fielen — gemessen
+    // bei 390 px, Chunk TEF-CRI: 555 von 1.058 Knoten, der kleinste 5,0 px.
+    for (const k of ['.city-league-card-title-mobile', '.city-league-card-set-mobile',
+                     '.city-league-card-stats-mobile', '.city-league-card-avg-mobile',
+                     '.city-league-card-deck-stats-mobile', '.city-league-card-badge',
+                     '.past-meta-matchup-table td', '.past-meta-stat-label',
+                     '.past-meta-stat-nenner', '.toolbar-metric-value']) {
+      assert.ok(block.includes('#past-meta.fs-scale ' + k),
+        'ohne Tokenwert faellt diese Klasse unter 11 px: ' + k);
+    }
+  });
+
+  it('die Kartenkacheln haben nur noch EINEN Haltepunkt, und der steht auf der Skala', () => {
+    const UI = R('css/ui-components.css');
+    // Vorher: 11/10/9 px und 12/11/10,5 px an drei Haltepunkten, alle mit
+    // !important — und alle wirkungslos, weil der Boden spaeter laedt.
+    const kachelBlock = UI.slice(UI.indexOf('CARD OVERVIEW INFO PANEL'),
+                                 UI.indexOf('Card table row list container'));
+    assert.ok(kachelBlock.length > 200, 'Kachelblock nicht gefunden');
+    for (const wert of ['10.5px', '9px', '10px', '11px !important', '12px !important']) {
+      assert.ok(!kachelBlock.includes(wert), 'alter Sonderwert steht noch da: ' + wert);
+    }
+    assert.equal((kachelBlock.match(/@media/g) || []).length, 1,
+      'es soll genau ein Haltepunkt uebrig sein');
+    const zeile = /\.card-item\.city-league-card-item \.city-league-card-title-mobile \{\s*font-size: var\(--fs-sm\);/;
+    assert.match(UI, zeile, 'der Kartentitel kommt nicht aus der Skala');
+  });
+
+  it('kein !important mehr auf den Schriftgroessen der Kartenkacheln', () => {
+    // Sie waren der Grund, warum die Skala in einer .fs-scale-Ansicht nicht
+    // durchkam: bei gleicher Wichtigkeit entscheidet die Ladefolge, und der
+    // Boden laedt zuletzt. Ohne Boden gewann dann die em-Kette — 4,95 px.
+    const dateien = ['css/mobile-responsive.css', 'css/ui-components.css',
+                     'css/styles.css', 'index.html'];
+    const klassen = ['city-league-card-title-mobile', 'city-league-card-set-mobile',
+                     'city-league-card-stats-mobile', 'city-league-card-avg-mobile',
+                     'city-league-card-deck-stats-mobile', 'city-league-card-badge',
+                     'card-info-text'];
+    for (const d of dateien) {
+      // Kommentare zitieren die alten Werte absichtlich — sie duerfen den
+      // Test nicht ausloesen.
+      const text = R(d)
+        .replace(/\/\*[\s\S]*?\*\//g, '')
+        .replace(/<!--[\s\S]*?-->/g, '');
+      const teile = text.split('}');
+      for (const teil of teile) {
+        const auf = teil.lastIndexOf('{');
+        if (auf < 0) continue;
+        const sel = teil.slice(0, auf);
+        const koerper = teil.slice(auf);
+        if (!klassen.some(k => sel.includes('.' + k))) continue;
+        assert.ok(!/font-size:[^;]*!important/.test(koerper),
+          `${d}: font-size mit !important auf einer Kartenklasse — ` + sel.trim().slice(-70));
+      }
+    }
+  });
+
   it('der Ausstieg kommt ohne neues !important aus', () => {
     // Der Boden greift in der Ansicht nicht mehr, also genuegt Spezifitaet.
     // #current-meta.fs-scale (1,2,0) schlaegt #currentMetaContent (1,1,0).

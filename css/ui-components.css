@@ -2598,42 +2598,42 @@ img[src*="limitlesstcg"] {
  * compound) with !important. Uses absolute px (not em) so the cascade
  * never touches the inherited size and the four lines are always equal
  * regardless of which .card-info-bottom override is winning above. */
+ * NACHTRAG 21.08.2026 — zwei Dinge stimmten an diesem Block nicht.
+ *
+ * 1. Er hat den Wettstreit NICHT gewonnen. Der 12-px-Boden in
+ *    mobile-responsive.css traegt ebenfalls !important und laedt spaeter;
+ *    bei gleicher Wichtigkeit entscheidet die Ladefolge. Gemessen bei
+ *    390 px standen alle vier Zeilen auf 12 px, nicht auf den hier
+ *    geschriebenen 9 px. Die Absicht des Blocks — vier gleich grosse
+ *    Zeilen — war zufaellig trotzdem erfuellt, aber vom Boden, nicht
+ *    von hier.
+ *
+ * 2. Die drei Haltepunkte 11/10/9 px und 12/11/10,5 px liegen unter
+ *    --fs-xs (11 px). Sichtbar wurde das erst beim Ausstieg aus dem
+ *    Boden: im Vergangenen Meta fiel der Kartentitel auf 10,5 px und
+ *    die Statistikzeilen auf 9 px, waehrend sie tags zuvor 12 px waren.
+ *
+ * Es bleibt EIN Haltepunkt mit den Werten der Skala. Dass sie tragen,
+ * ist gemessen und nicht geschaetzt: der Boden hat dieselben Kacheln bei
+ * 390 px bisher auf 12 px gehalten, 11 px ist kleiner.
+ *
+ * font-size steht jetzt ohne !important. In Ansichten mit Boden
+ * entscheidet ohnehin der Boden; in Ansichten mit .fs-scale soll die
+ * Skala entscheiden duerfen, und dafuer genuegt normale Spezifitaet. */
 @media (max-width: 768px) {
     .card-item.city-league-card-item .city-league-card-set-mobile,
     .card-item.city-league-card-item .city-league-card-stats-mobile,
     .card-item.city-league-card-item .city-league-card-avg-mobile,
     .card-item.city-league-card-item .city-league-card-deck-stats-mobile {
-        font-size: 11px !important;
+        font-size: var(--fs-xs);
         line-height: 1.25 !important;
         margin-bottom: 0 !important;
         font-weight: 600 !important;
     }
     .card-item.city-league-card-item .city-league-card-title-mobile {
-        font-size: 12px !important;
+        font-size: var(--fs-sm);
         font-weight: 700 !important;
         line-height: 1.25 !important;
-    }
-}
-@media (max-width: 480px) {
-    .card-item.city-league-card-item .city-league-card-set-mobile,
-    .card-item.city-league-card-item .city-league-card-stats-mobile,
-    .card-item.city-league-card-item .city-league-card-avg-mobile,
-    .card-item.city-league-card-item .city-league-card-deck-stats-mobile {
-        font-size: 10px !important;
-    }
-    .card-item.city-league-card-item .city-league-card-title-mobile {
-        font-size: 11px !important;
-    }
-}
-@media (max-width: 390px) {
-    .card-item.city-league-card-item .city-league-card-set-mobile,
-    .card-item.city-league-card-item .city-league-card-stats-mobile,
-    .card-item.city-league-card-item .city-league-card-avg-mobile,
-    .card-item.city-league-card-item .city-league-card-deck-stats-mobile {
-        font-size: 9px !important;
-    }
-    .card-item.city-league-card-item .city-league-card-title-mobile {
-        font-size: 10.5px !important;
     }
 }
 /* Card table row list container */

@@ -1556,4 +1556,73 @@ function getEmptyStateHtml(opts) {
     const ctaHtml = btn(o.cta) + btn(o.cta2);
     return '<div class="empty-state" role="status" aria-live="polite">' + iconHtml + titleHtml + bodyHtml + ctaHtml + '</div>';
 }
+/**
+ * Ein Deck, das dreimal in der Liste steht (20.08.2026).
+ *
+ * Die City-League-Quelle schreibt die Pokemon eines Archetyps in
+ * wechselnder Reihenfolge. Gemessen am letzten vollstaendigen Datenstand
+ * (304 Archetypen): 38 Namen sind ein zweiter Schreibweg eines bereits
+ * vorhandenen. "Ogerpon Raging-Bolt" (78 Listen) und "Raging-Bolt
+ * Ogerpon" (31) sind ein Deck; "Mega Venusaur Ogerpon" (144) und
+ * "Ogerpon Mega Venusaur" (70) auch. Zusammengelegt bleiben 266 statt
+ * 304 Archetypen — und ein Deck steht nicht mehr gleichzeitig in Tier 2
+ * und Tier 3.
+ *
+ * Der Schluessel sortiert AUSSCHLIESSLICH die Woerter. Er entfernt
+ * nichts. Das ist der Punkt: ein naives Streichen von "Mega" wuerde
+ * Mega Greninja mit Greninja verschmelzen, Mega Gengar mit Gengar und
+ * Mega Feraligatr mit Feraligatr — drei verschiedene Decks je Paar,
+ * gemessen und verworfen. Gegenprobe am selben Datenstand: keine der 38
+ * Gruppen mischt einen Mega-Namen mit einem Nicht-Mega-Namen.
+ *
+ * Der Schluessel ist NICHT zum Nachschlagen in anderen Dateien gedacht.
+ * Wer Kartendaten zu einem Archetyp holt, braucht den Originalnamen.
+ */
+function archetypSchreibwegSchluessel(name) {
+    return String(name || '')
+        .trim()
+        .toLowerCase()
+        .split(/\s+/)
+        .filter(Boolean)
+        .sort()
+        .join(' ');
+}
+
+/**
+ * Legt Zeilen zusammen, die denselben Schreibweg-Schluessel tragen.
+ *
+ * `zaehl` liest die Stueckzahl einer Zeile, `verschmelze(ziel, quelle)`
+ * addiert eine Zeile auf die Zielzeile. Angezeigt wird der Name der
+ * groessten Zeile — die haeufigste Schreibweise, nicht die erste.
+ * Zurueck kommt { zeilen, gruppen, zusammengelegt }, damit die Seite
+ * sagen kann, was sie getan hat, statt es still zu tun.
+ */
+function legeSchreibwegeZusammen(zeilen, zaehl, verschmelze) {
+    const nach = new Map();
+    let zusammengelegt = 0, gruppen = 0;
+    (zeilen || []).forEach(z => {
+        const name = (z && (z.archetype || z.deck_name || z.name)) || '';
+        const k = archetypSchreibwegSchluessel(name);
+        if (!k) return;
+        const vorhanden = nach.get(k);
+        if (!vorhanden) { nach.set(k, { haupt: z, teile: [z] }); return; }
+        vorhanden.teile.push(z);
+        zusammengelegt++;
+        if (vorhanden.teile.length === 2) gruppen++;
+    });
+    const raus = [];
+    for (const eintrag of nach.values()) {
+        if (eintrag.teile.length === 1) { raus.push(eintrag.teile[0]); continue; }
+        // Die haeufigste Schreibweise fuehrt.
+        const sortiert = [...eintrag.teile].sort((a, b) => zaehl(b) - zaehl(a));
+        const ziel = sortiert[0];
+        sortiert.slice(1).forEach(q => verschmelze(ziel, q));
+        raus.push(ziel);
+    }
+    return { zeilen: raus, gruppen, zusammengelegt };
+}
+
+window.archetypSchreibwegSchluessel = archetypSchreibwegSchluessel;
+window.legeSchreibwegeZusammen = legeSchreibwegeZusammen;
+
 window.getEmptyStateHtml = getEmptyStateHtml;

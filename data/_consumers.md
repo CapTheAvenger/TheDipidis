@@ -168,6 +168,27 @@ shrinks, a set stops mapping, or an input goes stale.
 **If you need a new column or a new file, open an issue here** rather than
 parsing around the gap — that keeps the contract explicit and checkable.
 
+### `archetype_aliases.json`
+`{_meta, turnier_zu_ladder: [{turnier, ladder, beleg}], bewusst_nicht_verbunden: [{turnier, vermutet, grund}]}`
+
+The curated bridge between archetype names in `limitless_online_decks.csv`
+(ladder) and `online_tournament_top8_decks.csv` (tournaments) — two sources
+that name the same deck differently. Hand-written, never generated. The
+ladder name is always canonical.
+
+An entry goes in only after both rows have been checked individually and
+their numbers line up. A plausible name is not enough: dropping "Mega"
+would merge Mega Greninja with Greninja, Mega Gengar with Gengar and Mega
+Feraligatr with Feraligatr — three distinct decks per pair.
+
+`bewusst_nicht_verbunden` is not a TODO list, it is part of the contract:
+these names stay separate on purpose, and the page lists them as
+unresolved. A visible gap is recoverable; a wrong merge looks right.
+
+> Read by `js/app-tier-meta.js` for the Meta-Performance table. Without the
+> file the join falls back to exact string matching — the previous
+> behaviour, which put a deck with 326.5 weighted entries on row 132 of 138.
+
 ### `champions_type_chart.json`
 `{_meta, chart: { attackingType: { defendingType: multiplier } }}`
 

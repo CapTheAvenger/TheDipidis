@@ -5628,6 +5628,18 @@ details[open] > .tier-trending-summary::after {
     color: var(--vorbehalt);
 }
 
+/* Was der Namensverbund nicht aufloest. Steht unter der Tabelle, weil ein
+   stiller Fehlschlag hier wie "dieses Deck spielt keine Turniere" aussieht —
+   und weil ein Deck mit 326,5 gewichteten Antritten genau so aus der Sicht
+   verschwand. */
+.cm-rang-offen {
+    margin-top: 10px;
+    font-size: 0.8rem;
+    line-height: 1.55;
+    color: var(--vorbehalt);
+    max-width: 88ch;
+}
+
 /* Die Zeile ueber der Tier-Liste, die sagt, woraus sie entsteht.
  * Zurueckhaltend: sie ist ein Vorbehalt, keine Ueberschrift. */
 .tier-grundlage {

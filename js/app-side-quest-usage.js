@@ -24,6 +24,7 @@
     const TOP_N = 8;
 
     let _usage = null;        // slug -> record
+    let _usageMeta = null;    // _meta aus champions_usage.json (u. a. scraped_at)
     let _teams = null;        // ranking [{ name, count, slug, t1, t2 }]
     let _typeOf = null;       // display name -> [type1, type2]
     let _loading = null;
@@ -66,6 +67,8 @@
             // Frische suggerieren, die nicht belegbar ist. Deshalb explizit
             // Quelle + 'Stand unbekannt' (Audit 2, F03).
             sourceNote: 'Quelle: championsbattledata.com · Stand unbekannt',
+            sourceStand: (d) => `Quelle: championsbattledata.com · Stand ${d}`,
+            sourceAlt: (t) => `seit ${t} Tagen unveraendert`,
             evs: ['KP', 'ANG', 'VER', 'SPA', 'SPV', 'INI'],
         },
         en: {
@@ -78,6 +81,8 @@
             noType: 'No Pokémon of that type.',
             noUsage: 'No usage data for this Pokémon in this format.',
             sourceNote: 'Source: championsbattledata.com · date unknown',
+            sourceStand: (d) => `Source: championsbattledata.com · as of ${d}`,
+            sourceAlt: (t) => `unchanged for ${t} days`,
             evs: ['HP', 'ATK', 'DEF', 'SPA', 'SPD', 'SPE'],
         },
     };
@@ -101,6 +106,7 @@
         _loading = Promise.all([jget(USAGE_URL), jget(DEX_URL), jget(TEAMS_URL)])
             .then(([usage, dex, teams]) => {
                 _usage = (usage && usage.pokemon) || {};
+                _usageMeta = (usage && usage._meta) || {};
                 _typeOf = {};
                 ((dex && dex.entries) || []).forEach(e => {
                     _typeOf[e.en] = [e.t1, e.t2].filter(Boolean);
@@ -109,6 +115,25 @@
                 return true;
             });
         return _loading;
+    }
+
+    // Quell- und Standzeile fuer die Nutzungszahlen.
+    //
+    // Bis 21.08.2026 trug champions_usage.json kein Datum, und die Ansicht
+    // zeigte trotzdem "Saison: Current" — an dem Tag waren die Zahlen 35 Tage
+    // alt, weil championsbattledata.com den Scrape aus CI-IPs drosselt.
+    // scrape_champions_usage.py schreibt seither bei jedem ERFOLGREICHEN Lauf
+    // ein _meta.scraped_at. Fehlt es (Altbestand, bis zum naechsten geglueckten
+    // Lauf), bleibt es ehrlich bei "Stand unbekannt" statt Frische zu behaupten.
+    function quellHinweis() {
+        const roh = _usageMeta && _usageMeta.scraped_at;
+        if (!roh) return L().sourceNote;
+        const d = new Date(roh);
+        if (isNaN(d.getTime())) return L().sourceNote;
+        const datum = d.toLocaleDateString(getLang() === 'de' ? 'de-DE' : 'en-GB');
+        const tage = Math.floor((Date.now() - d.getTime()) / 86400000);
+        const zusatz = tage >= 7 ? ' · ' + L().sourceAlt(tage) : '';
+        return L().sourceStand(datum) + zusatz;
     }
 
     // Ranked by how often a Pokémon appears across the replica teams —
@@ -327,7 +352,7 @@
                 <div class="sq-top">
                     <span class="sq-brand">Champions <span>${esc(L().brand)}</span></span>
                     <span class="sq-meta">${_teams.length} ${esc(L().pokemonCount)}</span>
-                    <span class="sq-meta sq-source" title="${esc(L().sourceNote)}">${esc(L().sourceNote)}</span>
+                    <span class="sq-meta sq-source" title="${esc(quellHinweis())}">${esc(quellHinweis())}</span>
                     <span class="sq-spacer"></span>
                     <span class="sq-seg">
                         ${seg('doubles', L().doubles)}

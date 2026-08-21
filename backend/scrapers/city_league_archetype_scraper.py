@@ -712,6 +712,20 @@ def main():
         save_to_csv(new_data, settings['output_file'])
         save_deck_statistics(new_data, settings['output_file'])
         create_comparison_report(old_data, new_data, settings['output_file'])
+    else:
+        # Im LAUFENDEN japanischen Fenster ist leer derzeit der richtige
+        # Zustand (Saisonpause der City League), deswegen hier bewusst
+        # nur eine Meldung und kein Fehler. Sichtbar muss es trotzdem
+        # sein: "nichts gefunden" und "nichts da" sehen im Log sonst
+        # gleich aus. Der Past-Zwilling behandelt denselben Fall
+        # strenger, weil dort ein Turnier stehen muss.
+        logger.warning(
+            "Kein einziger Archetyp gefunden — %s Turniere geprueft. "
+            "Bestehende Datei bleibt unveraendert.", len(new_tournaments))
+        print(f"::warning::city_league_archetype_scraper: 0 Archetypen aus "
+              f"{len(new_tournaments)} Turnieren. Bei Saisonpause richtig; "
+              f"kommen Turniere zurueck und das bleibt so, hat die Quelle "
+              f"ihr Tabellenlayout geaendert.")
 
     # Phase 4: backfill archetype_icons.json with the JP-only combos we
     # saw this run. Runs even when all_data is empty so we still pick
@@ -729,5 +743,8 @@ if __name__ == "__main__":
         main()
     except KeyboardInterrupt:
         logger.warning("Abbruch durch Benutzer.")
+        sys.exit(130)
     except Exception as e:
         logger.critical(f"Unerwarteter Fehler: {e}", exc_info=True)
+        print(f"::error::city_league_archetype_scraper abgebrochen: {e}")
+        sys.exit(1)

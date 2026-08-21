@@ -475,21 +475,46 @@ def main(argv: List[str]) -> int:
     try:
         scraped = run_scrape(debug=args.debug)
     except Exception as e:                       # noqa: BLE001
-        print(f"::warning::pokemonproxies scrape failed: {e}", file=sys.stderr)
+        print(f"::error::pokemonproxies scrape failed: {e}", file=sys.stderr)
         print("Keeping existing map untouched.")
-        return 0
+        # Rueckgabewert 1 statt 0: der Lauf hat sein Ziel nicht erreicht.
+        # Der Wochenlauf bricht davon nicht ab (er sammelt die
+        # Rueckgabewerte ein), aber der Ausfall steht in der Bilanz statt
+        # nur in einer Warnzeile, die niemand liest.
+        return 1
 
     print(f"Scraped:      {len(scraped)} entries")
 
     if not scraped:
-        print("::warning::pokemonproxies scrape returned 0 URLs — "
+        print("::error::pokemonproxies scrape returned 0 URLs — "
               "site structure may have changed. Keeping existing map.")
-        return 0
+        return 1
+
+    # Regressionsbremse (Muster aus scrape_champions_usage.py:444-447).
+    # Ein Lauf, der deutlich weniger findet als der letzte, hat kein
+    # kleineres Ergebnis — er hat ein Problem. Genau so hat die
+    # japanische Kartendatenbank im August 2026 drei Sets verloren:
+    # ein Teilergebnis wurde als vollstaendiges geschrieben.
+    if existing and len(scraped) < len(existing) * 0.8:
+        print(f"::error::pokemonproxies: nur {len(scraped)} von zuletzt "
+              f"{len(existing)} Eintraegen gefunden (< 80 %). Die Karte "
+              f"bleibt unveraendert — ein Teilergebnis ueberschreibt hier "
+              f"nichts.")
+        return 1
+
+    # Zusammenlegen statt ersetzen. Die Karte ist ein Bestand, kein
+    # Abbild eines einzelnen Laufs: was diesmal nicht gefunden wurde,
+    # ist deswegen nicht verschwunden. Neue und geaenderte URLs
+    # gewinnen, alles andere bleibt stehen.
+    zusammengelegt = dict(existing)
+    zusammengelegt.update(scraped)
 
     new_keys = set(scraped) - set(existing)
     changed_urls = {k for k in (set(scraped) & set(existing)) if scraped[k] != existing[k]}
+    behalten = set(existing) - set(scraped)
     print(f"New keys:     {len(new_keys)}  "
-          f"Changed URLs: {len(changed_urls)}")
+          f"Changed URLs: {len(changed_urls)}  "
+          f"Behalten:     {len(behalten)}")
 
     if args.dry_run:
         print("(dry-run — not writing)")
@@ -502,12 +527,13 @@ def main(argv: List[str]) -> int:
     if not new_keys and not changed_urls and existing:
         # Same data — still rewrite for the scraped_at timestamp so
         # the freshness gate downstream is happy. But skip the noise.
-        write_map(OUTPUT_PATH, scraped)
+        write_map(OUTPUT_PATH, zusammengelegt)
         print(f"No data changes; refreshed timestamp on {OUTPUT_PATH}.")
         return 0
 
-    write_map(OUTPUT_PATH, scraped)
-    print(f"Wrote {OUTPUT_PATH} ({len(scraped)} entries).")
+    write_map(OUTPUT_PATH, zusammengelegt)
+    print(f"Wrote {OUTPUT_PATH} ({len(zusammengelegt)} entries, "
+          f"davon {len(behalten)} aus dem Bestand uebernommen).")
     return 0
 
 

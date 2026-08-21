@@ -12,6 +12,7 @@ Scrapes LATEST Japanese Pokemon Cards from Limitless TCG.
 import csv
 import json
 import os
+import sys
 import time
 import threading
 import concurrent.futures
@@ -339,10 +340,24 @@ def main():
         return
 
     logger.info(f"Neueste Sets online: {', '.join(sorted(latest_online))}")
+
+    # Hier stand ein Abbruch, sobald die neuesten Set-CODES schon in der
+    # Datenbank vorkamen. Ein Set ist aber kein Ereignis, sondern ein
+    # Bestand: nach dem Erscheinen kommen Secret Rares und Nachdrucke
+    # dazu, und die hat dieser Lauf danach nie wieder geholt — M6 stand
+    # seit dem 28.07. unveraendert bei 76 Karten, waehrend der Lauf jede
+    # Woche "DATENBANK IST BEREITS AKTUELL" meldete.
+    #
+    # Ein Kartenzahlvergleich je Set waere der genauere Weg, dafuer
+    # muesste die Set-Uebersicht eine Kartenzahl liefern; sie liefert nur
+    # Codes. Also faellt der Abbruch weg. Der Preis ist ein zusaetzlicher
+    # Abruf des NEUESTEN Sets pro Lauf (keep_latest_sets steht auf 1), der
+    # Gewinn ist, dass Nachtraege ankommen. Verloren gehen kann dabei
+    # nichts mehr: merge_rows() legt zusammen, statt zu ersetzen, und
+    # pruefe_kein_verlust() haelt dagegen.
     if latest_online.issubset(existing_sets):
-        logger.info("DATENBANK IST BEREITS AKTUELL!")
-        logger.info("Die neusten Sets sind bereits in der lokalen Datenbank. Abbruch.")
-        return
+        logger.info("Die neuesten Set-Codes sind bereits bekannt — es wird "
+                    "trotzdem geholt, weil Sets nachtraeglich wachsen.")
 
     all_cards = scrape_japanese_cards_list(latest_online)
     if not all_cards:
@@ -392,5 +407,11 @@ if __name__ == "__main__":
         main()
     except KeyboardInterrupt:
         logger.warning("Abbruch durch Benutzer.")
+        sys.exit(130)
     except Exception as e:
         logger.critical(f"Fehler aufgetreten: {e}", exc_info=True)
+        # Ohne Rueckgabewert bleibt ein Absturz dieses Scrapers in CI
+        # unsichtbar - und genau dieser Scraper hat schon einmal still
+        # den halben japanischen Bestand verloren (S7).
+        print(f"::error::japanese_cards_scraper abgebrochen: {e}")
+        sys.exit(1)

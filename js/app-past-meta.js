@@ -1728,6 +1728,25 @@
                 return true;
             });
 
+            // F14 — die Matrix bleibt formatweit, auch wenn ein einzelnes
+            // Turnier gewaehlt ist.
+            //
+            // labs_tournament_matchups_<META>.csv fuehrt KEINE Zeile je
+            // Turnier. Gemessen am 21.08.2026: alle 5.819 Zeilen des Chunks
+            // TEF-CRI tragen tournaments_used='69,70' und tournament_count=2,
+            // in TEF-POR sind es sieben Turniere je Zeile. Der Filter oben
+            // trifft also, sobald das gewaehlte Turnier in der Liste steht —
+            // und zeigt danach den Schnitt ueber ALLE Turniere des Formats.
+            //
+            // Die Daten je Turnier gibt es nicht; erfinden laesst sich das
+            // nicht. Was fehlt, ist der Satz darueber. Ohne ihn liest sich
+            // "Spezial Turin, Dragapult vs Gardevoir 54,2 %" als Ergebnis
+            // dieses einen Turniers, und das ist es nicht.
+            const _muTurniere = new Set();
+            myRows.forEach(r => String(r.tournaments_used || '').split(',')
+                .forEach(x => { const v = x.trim(); if (v) _muTurniere.add(v); }));
+            const _muFormatweit = !!tournamentFilter && _muTurniere.size > 1;
+
             if (myRows.length === 0) {
                 const noPairsLabel = (typeof t === 'function' ? t('pm.matchupNoPairs') : 'No matchup pairs recorded for this archetype.');
                 container.innerHTML = `
@@ -1788,8 +1807,15 @@
                 </tr>`;
             }).join('');
 
+            const _muVorbehalt = _muFormatweit
+                ? `<p class="past-meta-mu-vorbehalt">${
+                    (typeof t === 'function' ? t('pm.matchupFormatWide') : '')
+                        .replace('{n}', String(_muTurniere.size))}</p>`
+                : '';
+
             container.innerHTML = `
                 <h3 class="past-meta-matchup-title">${titleLabel}</h3>
+                ${_muVorbehalt}
                 <p class="past-meta-section-hint">${tournHint} ${
                     (typeof getLang === 'function' && getLang() === 'de')
                         ? `Unter ${MU_MIN_GAMES} Partien ausgegraut und ohne Farbe.`

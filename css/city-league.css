@@ -1639,13 +1639,24 @@
 .toolbar-metric-price .toolbar-metric-value {
     color: #27ae60;
 }
-.city-league-deck-count.color-red,
-.current-meta-deck-count.color-red,
-.past-meta-deck-count.color-red,
-.toolbar-metric .city-league-deck-count.color-red,
-.toolbar-metric .current-meta-deck-count.color-red,
-.toolbar-metric .past-meta-deck-count.color-red {
-    color: #e74c3c !important;
+/* Der Block, der hier stand, setzte fuer sechs Selektoren dieselbe Farbe
+   mit !important, die ui-components.css:1305 fuer .color-red ohnehin und
+   ebenfalls mit !important setzt (#e74c3c). Er konnte nichts entscheiden
+   und nur Regeln blockieren. Entfernt am 21.08.2026; die Deckzahlen
+   bleiben rot, weil die globale Regel sie faerbt.
+
+   Vorbehalt unter der Matchup-Matrix: die Labs-Daten kennen keine
+   Matchups je Turnier, nur je Format. Wer ein einzelnes Turnier waehlt,
+   bekommt trotzdem den Formatschnitt — das muss dastehen, statt still
+   zu passieren. Warm, nicht rot: ein Vorbehalt ist keine Stoerung. */
+.past-meta-mu-vorbehalt {
+    color: var(--vorbehalt);
+    background: var(--vorbehalt-bg);
+    border-radius: 8px;
+    padding: 8px 12px;
+    margin: 0 0 12px 0;
+    font-size: 0.84rem;
+    line-height: 1.5;
 }
 @media (max-width: 768px) {
     .deck-builder-metrics-inline {

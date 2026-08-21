@@ -8173,10 +8173,25 @@ window.MetaCall = (function () {
     const _dateValue = (_dateCutoff && /^\d{4}-\d{2}-\d{2}$/.test(_dateCutoff)) ? _dateCutoff : '';
     const _autoCutoff = (!_dateValue && typeof _effectiveDateCutoff === 'function')
       ? _effectiveDateCutoff() : null;
+    // Das Datum im Hinweistext stand als ISO-Zeichenkette da
+    // ("Daten >= 2026-07-24"), waehrend jede andere Datumsangabe der
+    // Seite in der Sprachkonvention steht. Das Eingabefeld selbst
+    // zeichnet der Browser in SEINER Locale — bei einem englischen
+    // Browser also mm/dd/yyyy, mitten in einer deutschen Oberflaeche.
+    // Daran laesst sich nichts aendern; deshalb steht der Hinweis
+    // darunter jetzt ausgeschrieben in der Seitensprache, und das Feld
+    // traegt denselben Format-Titel wie die drei anderen Datumsfelder
+    // der Seite.
+    const _datumLesbar = (iso) => {
+      if (!iso || !/^\d{4}-\d{2}-\d{2}$/.test(iso)) return iso || '';
+      const [j, m, tg] = iso.split('-');
+      const de = (typeof getLang === 'function' && getLang() === 'de');
+      return de ? `${tg}.${m}.${j}` : `${tg}/${m}/${j}`;
+    };
     const _activeWindowText = _dateValue
-      ? t('mc.dateWindowActive').replace('{date}', _dateValue)
+      ? t('mc.dateWindowActive').replace('{date}', _datumLesbar(_dateValue))
       : (_autoCutoff
-          ? t('mc.dateWindowAuto').replace('{date}', _autoCutoff)
+          ? t('mc.dateWindowAuto').replace('{date}', _datumLesbar(_autoCutoff))
           : t('mc.dateWindowNone'));
     const dateBanner = `
       <div class="metacall-date-window">
@@ -8186,10 +8201,11 @@ window.MetaCall = (function () {
         </label>
         <input type="date" id="metacallDateFrom" class="metacall-date-input"
                value="${_dateValue}"
+               data-i18n-title="tip.dateFormat" title="${esc(t('tip.dateFormat'))}"
                onchange="if (typeof setCurrentMetaDateFrom === 'function') setCurrentMetaDateFrom(this.value)">
         <button type="button" class="metacall-date-clear"
                 onclick="if (typeof clearCurrentMetaDateFrom === 'function') clearCurrentMetaDateFrom()"
-                ${_dateValue ? '' : 'style="display:none"'}>Clear</button>
+                ${_dateValue ? '' : 'style="display:none"'}>${esc(t('btn.clear'))}</button>
         <span class="metacall-date-window-hint">${_activeWindowText}</span>
       </div>`;
     container.innerHTML = `

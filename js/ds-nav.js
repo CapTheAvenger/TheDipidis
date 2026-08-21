@@ -224,9 +224,13 @@
         return { label: '', since: '' };
     }
 
+    // Kein Rueckfall auf localStorage mehr. 'lastScraperUpdate' wird
+    // nirgends im Repo geschrieben — der Schluessel war immer leer, und
+    // der Ausdruck las sich, als gaebe es dort eine zweite Quelle. Den
+    // Stand liefert die jeweilige Ansicht ueber setSpaceFacts({stamp}),
+    // oder er fehlt; ein fehlender Stand ist ehrlicher als ein geerbter.
     function stampFor(facts) {
-        return (facts && facts.stamp) ||
-            (typeof localStorage !== 'undefined' ? localStorage.getItem('lastScraperUpdate') : '') || '';
+        return (facts && facts.stamp) || '';
     }
 
     function renderSpace(tabId) {

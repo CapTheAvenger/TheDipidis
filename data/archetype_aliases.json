@@ -1,0 +1,50 @@
+{
+  "_meta": {
+    "version": 1,
+    "format": "Pokémon TCG · Archetyp-Namensbrücke",
+    "description": "Gepflegte Brücke zwischen den Archetyp-Namen zweier Quellen, die dasselbe Deck verschieden nennen. Wird beim Verbinden von limitless_online_decks.csv (Ladder) und online_tournament_top8_decks.csv (Turniere) angewandt. Kanonisch ist IMMER der Ladder-Name — das ist der Name, der auf der Seite steht, und die größere Erhebung.",
+    "regel": "Ein Eintrag kommt nur hinein, wenn beide Zeilen einzeln nachgerechnet wurden und die Zahlen zusammenpassen. Ein plausibler Name genügt nicht. Was nicht drinsteht, bleibt unverbunden und wird auf der Seite als 'nicht zugeordnet' ausgewiesen — eine falsche Verschmelzung ist schlimmer als eine sichtbare Lücke.",
+    "warnung": "Niemals über Namensähnlichkeit automatisieren. Gemessen am 20.08.2026: ein naives Streichen von 'Mega' verschmilzt Mega Greninja mit Greninja, Mega Gengar mit Gengar und Mega Feraligatr mit Feraligatr — drei verschiedene Decks je Paar.",
+    "geprueft_am": "2026-08-20",
+    "quelle": "Gegenprobe der Prüfrunde: je Paar Antritte und Listen gegeneinander nachgerechnet."
+  },
+  "turnier_zu_ladder": [
+    {
+      "turnier": "Dhelmise Banette",
+      "ladder": "Dhelmise",
+      "beleg": "326,5 gewichtete Antritte aus 99 Turnieren gegen 1.123 Ladder-Listen. Nach gewichteten Antritten das zehntgrößte Turnierdeck des Feldes — es stand als eigene Zeile auf Platz 132 von 138 und war damit unsichtbar."
+    },
+    {
+      "turnier": "Dudunsparce Mega Froslass",
+      "ladder": "Froslass Dudunsparce",
+      "beleg": "13,0 Antritte aus 15 Turnieren gegen 48 Ladder-Listen. Dieselben zwei Pokémon in umgekehrter Reihenfolge, die Turnierquelle nennt zusätzlich die Mega-Form."
+    },
+    {
+      "turnier": "Bolt",
+      "ladder": "Raging Bolt",
+      "beleg": "0,5 Antritte aus einem Turnier gegen 2 Ladder-Listen. Verkürzter Name in der Turnierquelle."
+    },
+    {
+      "turnier": "Cornerstone Ogerpon",
+      "ladder": "Cornerstone Mask Ogerpon",
+      "beleg": "0,5 Antritte aus einem Turnier gegen 3 Ladder-Listen. Die Turnierquelle lässt 'Mask' weg."
+    }
+  ],
+  "bewusst_nicht_verbunden": [
+    {
+      "turnier": "Arboliva Ogerpon",
+      "vermutet": "Ogerpon Meganium Arboliva",
+      "grund": "Der Ladder-Name führt Meganium, der Turniername nicht. Das können zwei Schalen desselben Kerns sein oder zwei Decks. 35,0 Antritte gegen 96 Listen — groß genug, dass eine falsche Verschmelzung wehtut."
+    },
+    {
+      "turnier": "Clefairy Box",
+      "vermutet": "Lillie's Clefairy",
+      "grund": "'Box' bezeichnet eine andere Schale als ein benanntes Haupt-Pokémon. 23,5 Antritte gegen 72 Listen."
+    },
+    {
+      "turnier": "Noctowl Ogerpon-Wellspring",
+      "vermutet": null,
+      "grund": "Keine erkennbare Entsprechung auf der Ladder-Seite. 13,0 Antritte aus 17 Turnieren."
+    }
+  ]
+}

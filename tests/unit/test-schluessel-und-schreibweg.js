@@ -135,13 +135,20 @@ describe('Zerrissene CSV-Felder werden nicht als Zahl gelesen', () => {
         assert.match(PAST, /is_ace_spec: \/\^\(yes\|true\|1\)\$\/i\.test/);
     });
 
-    it('die kaputten Zeilen liegen wirklich in der Datei — und nur dort', () => {
-        // Wenn der Chunk eines Tages sauber neu geschrieben ist, faellt
-        // dieser Test auf und der Kommentar oben kann weg.
+    it('die Datei ist repariert — die Pruefung bleibt trotzdem', () => {
+        // Bis zum 21.08.2026 stand hier die Umkehrung: der Chunk MUSSTE
+        // kaputt sein, damit die Sonderbehandlung eine Begruendung hat.
+        // Die 1.263 Zeilen sind jetzt aus den unversehrten Spalten
+        // derselben Zeile nachgerechnet
+        // (scripts/repariere_turnier_kartenzeilen.py).
+        //
+        // Die Pruefung im Leseweg bleibt: sie kostet nichts und faengt den
+        // naechsten Schreibfehler ab, bevor er als Zahl auf dem Schirm
+        // landet. Genau das sichern die Faelle darueber zu.
         const roh = lies('data/tournament_cards_data_cards_TEF-CRI.csv');
         const treffer = (roh.match(/\['0/g) || []).length;
-        assert.ok(treffer > 0,
-            'TEF-CRI ist sauber — Kommentar und Sonderbehandlung koennen entfallen');
+        assert.equal(treffer, 0,
+            `TEF-CRI enthaelt wieder Listen-Text (${treffer} Stellen)`);
     });
 });
 

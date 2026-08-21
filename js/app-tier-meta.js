@@ -1546,12 +1546,86 @@
                     // Damit faellt die "Vollstaendige Tabelle" als eigener
                     // Abschnitt weg: sie zeigte genau die Ladder-Spalten, die
                     // jetzt hier stehen.
+                    // ── Zwei Namen, ein Deck (20.08.2026) ──
+                    //
+                    // Der Verbund lief ueber die Zeichenkette. 113 von 131
+                    // Ladder-Namen trafen einen Turniernamen, 7 Turniernamen
+                    // trafen keinen — und dann entstand nicht eine Luecke,
+                    // sondern eine ZWEITE ZEILE fuer dasselbe Deck.
+                    //
+                    // Der teuerste Fall: Dhelmise stand mit 1.123 Listen auf
+                    // Platz 10, und "Dhelmise Banette" mit 326,5 gewichteten
+                    // Antritten auf Platz 132 von 138 — also hinter der
+                    // Sichtgrenze. Nach Antritten ist das das ZEHNTGROESSTE
+                    // Turnierdeck des Feldes, und es war im Grundzustand der
+                    // Tabelle unsichtbar. Wer auf die Dhelmise-Zeile sah, sah
+                    // vier Striche und schloss daraus, das Deck spiele keine
+                    // Turniere.
+                    //
+                    // Die Bruecke ist GEPFLEGT, nicht geraten:
+                    // data/archetype_aliases.json enthaelt genau die Paare,
+                    // die einzeln nachgerechnet wurden. Was nicht drinsteht,
+                    // bleibt unverbunden und wird unter der Tabelle als "nicht
+                    // zugeordnet" ausgewiesen. Die Hausregel gilt hier
+                    // besonders: ueber Namensaehnlichkeit zu automatisieren
+                    // wuerde Mega Greninja mit Greninja verschmelzen.
+                    let _alias = new Map();
+                    let _aliasOffen = [];
+                    try {
+                        const aResp = await fetch(`${BASE_PATH}archetype_aliases.json?t=${timestamp}`);
+                        if (aResp.ok) {
+                            const aJson = await aResp.json();
+                            (aJson.turnier_zu_ladder || []).forEach(e => {
+                                if (e && e.turnier && e.ladder) _alias.set(e.turnier, e.ladder);
+                            });
+                            _aliasOffen = (aJson.bewusst_nicht_verbunden || [])
+                                .map(e => e && e.turnier).filter(Boolean);
+                        }
+                    } catch (_e) { /* ohne Bruecke bleibt es beim alten Verhalten */ }
+                    const kanon = (n) => _alias.get(n) || n;
+
+                    // Die beiden Faktor-Karten sind mit dem TURNIERNAMEN
+                    // gefuellt (computeConversionPerformance sieht nur die
+                    // Turnierdatei). Ohne dieses Umschluesseln stand bei
+                    // Dhelmise nach dem Zusammenfuehren ein Strich in der
+                    // Faktor-Spalte, obwohl 326,5 Antritte dahinterstehen —
+                    // die Bruecke haette den Befund halb behoben und einen
+                    // neuen aufgemacht. Live nachgesehen, nicht vermutet.
+                    [perfVon, rohVon].forEach(karte => {
+                        for (const [n, v] of [...karte]) {
+                            const k = kanon(n);
+                            if (k !== n && !karte.has(k)) karte.set(k, v);
+                        }
+                    });
+
                     const ladderVon = new Map((normalizedDecks || []).map(d => [d.archetype, d]));
+                    // Turnierzeilen unter ihrem kanonischen Namen zusammenfassen.
+                    // Zwei Turnierzeilen koennten theoretisch auf denselben
+                    // Ladder-Namen zeigen; dann werden sie addiert statt dass
+                    // die letzte gewinnt.
+                    const turnierVon = new Map();
+                    enriched.forEach(d => {
+                        const k = kanon(d.name);
+                        const v = turnierVon.get(k);
+                        if (!v) { turnierVon.set(k, Object.assign({}, d, { name: k })); return; }
+                        v.brought += d.brought;
+                        v.top8    += d.top8;
+                        v.broughtPct += d.broughtPct;
+                        v.top8ConvPct = v.brought > 0 ? (v.top8 / v.brought) * 100 : 0;
+                    });
                     const alleNamen = new Set([
-                        ...enriched.map(d => d.name),
+                        ...[...turnierVon.keys()],
                         ...(normalizedDecks || []).map(d => d.archetype),
                     ]);
-                    const turnierVon = new Map(enriched.map(d => [d.name, d]));
+                    // Was die Bruecke NICHT aufloest — gezaehlt, nicht geschaetzt.
+                    const nichtZugeordnet = enriched
+                        .filter(d => !ladderVon.has(kanon(d.name)))
+                        .map(d => d.name)
+                        .sort();
+                    if (nichtZugeordnet.length) {
+                        console.info('[Meta-Performance] %d Turniernamen ohne Ladder-Entsprechung: %s',
+                            nichtZugeordnet.length, nichtZugeordnet.join(', '));
+                    }
 
                     const reihen = [...alleNamen].map(name => {
                         const t = turnierVon.get(name) || null;
@@ -1677,6 +1751,25 @@
                         </tr>`).join('');
                     const versteckt = Math.max(0, reihen.length - SICHTBAR);
 
+                    // Was der Verbund nicht aufloest, steht unter der Tabelle.
+                    // Ein stiller Fehlschlag waere hier das Schlimmste: er
+                    // sieht aus wie "dieses Deck spielt keine Turniere".
+                    const offenHtml = nichtZugeordnet.length
+                        ? `<p class="ds-note cm-rang-offen">${escapeHtml(deR
+                            ? `${nichtZugeordnet.length} Turniername${nichtZugeordnet.length === 1 ? '' : 'n'} `
+                              + `${nichtZugeordnet.length === 1 ? 'findet' : 'finden'} keine Ladder-Entsprechung und `
+                              + `${nichtZugeordnet.length === 1 ? 'steht' : 'stehen'} deshalb als eigene Zeile: `
+                              + nichtZugeordnet.join(', ')
+                              + '. Die gepflegte Namensbrücke in data/archetype_aliases.json nimmt nur Paare auf, '
+                              + 'die einzeln nachgerechnet wurden — ein ähnlicher Name genügt nicht.'
+                            : `${nichtZugeordnet.length} tournament name${nichtZugeordnet.length === 1 ? '' : 's'} `
+                              + `${nichtZugeordnet.length === 1 ? 'has' : 'have'} no ladder counterpart and therefore `
+                              + `${nichtZugeordnet.length === 1 ? 'appears' : 'appear'} as separate rows: `
+                              + nichtZugeordnet.join(', ')
+                              + '. The curated name bridge in data/archetype_aliases.json only takes pairs that were '
+                              + 'checked one by one — a similar name is not enough.')}</p>`
+                        : '';
+
                     overallTop8Html = `
                         <div class="ds-panel cm-rangliste-block">
                             <h3 class="ds-label">🏆 ${deR ? 'Meta-Performance' : 'Meta performance'}</h3>
@@ -1687,7 +1780,8 @@
                                   + '<strong>Top 8</strong> aus den Turnieren (' + fmtNumDS(conv.totalBrought)
                                   + ' gewichtete Antritte). Zwei Zählungen desselben Feldes — darum ist der Anteil '
                                   + 'in beiden fast gleich, die Stückzahlen aber nicht. Ein Strich heißt: dieses Deck '
-                                  + 'steht in der einen Datei und in der anderen nicht. Blasse Zeilen haben unter '
+                                  + 'steht in der einen Datei und in der anderen nicht — oder es heißt in den beiden '
+                                  + 'Quellen verschieden. Blasse Zeilen haben unter '
                                   + CONV_THIN_N + ' Turnier-Antritte — dort ist die Top-8-Quote noch wackelig. '
                                   + 'Der <strong>Feld-Durchschnitt</strong>, gegen den die letzte Spalte vergleicht, '
                                   + 'liegt bei ' + fmtPct(conv.expected * 100, 1) + ' Top-8-Quote. Die letzte Spalte '
@@ -1700,7 +1794,8 @@
                                   + ' decklists), <strong>entries</strong> and <strong>top 8</strong> from tournaments ('
                                   + fmtNumDS(conv.totalBrought) + ' weighted entries). Two counts of the same field — '
                                   + 'which is why the share matches but the totals do not. A dash means the deck is in '
-                                  + 'one file and not the other. Faded rows have fewer than ' + CONV_THIN_N
+                                  + 'one file and not the other — or it goes by a different name in the two sources. '
+                                  + 'Faded rows have fewer than ' + CONV_THIN_N
                                   + ' tournament entries. The <strong>field average</strong> the last column compares '
                                   + 'against is ' + fmtPct(conv.expected * 100, 1) + ' top-8 rate. That column is '
                                   + 'smoothed (k = ' + CONV_PRIOR + ') while the top-8 rate beside it is raw; the cell '
@@ -1721,6 +1816,7 @@
                                         data-weniger-text="${escapeHtml(deR ? 'Nur die Top ' + SICHTBAR + ' zeigen' : 'Show only the top ' + SICHTBAR)}">${
                                         escapeHtml(deR ? 'Alle ' + reihen.length + ' Decks zeigen' : 'Show all ' + reihen.length + ' decks')}</button>
                             </div>` : ''}
+                            ${offenHtml}
                         </div>`;
                 }
             } catch (_e) {

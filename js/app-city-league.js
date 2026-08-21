@@ -611,6 +611,90 @@ function cityLeagueOffSeasonHtml(istVergangenheit) {
                     ? enrichCityLeagueDataWithPlacementStats(comparisonData, placementStatsMap)
                     : enrichCityLeagueDataWithPlacementStats(deriveCityLeagueComparisonData(archetypesData), placementStatsMap);
 
+                // ── Ein Deck, drei Zeilen (20.08.2026) ──
+                //
+                // Die Quelle schreibt die Pokemon eines Archetyps in
+                // wechselnder Reihenfolge. Gemessen am letzten
+                // vollstaendigen Datenstand: 38 der 304 Namen sind ein
+                // zweiter Schreibweg eines bereits vorhandenen.
+                // "Ogerpon Raging-Bolt" (78 Listen) und "Raging-Bolt
+                // Ogerpon" (31) sind dasselbe Deck — getrennt gezaehlt
+                // fiel es von Rang 3 auf die Raenge 9, 16 und 50 und stand
+                // gleichzeitig in Tier 2 und Tier 3.
+                //
+                // Zusammengelegt wird ueber archetypSchreibwegSchluessel:
+                // nur Wortreihenfolge, nichts wird entfernt. Die Notiz
+                // dort erklaert, warum das Entfernen von "Mega" gemessen
+                // und verworfen wurde.
+                //
+                // Die Zusammenlegung passiert HIER und nicht im Scraper,
+                // weil die schon vorhandenen Dateien sonst geteilt
+                // blieben. Kommt sie spaeter in den Scraper, ist dieser
+                // Schritt wirkungslos und schadet nicht — er findet dann
+                // nichts mehr zusammenzulegen.
+                if (typeof window.legeSchreibwegeZusammen === 'function') {
+                    const zahlVon = (r) => parseInt(
+                        String(r.new_count || r.count || r.old_count || 0).replace(',', '.'), 10) || 0;
+                    const summe = (a, b) => {
+                        const s = (String(a || '0').includes(','))
+                            ? String(a).replace(',', '.') : a;
+                        const t = (String(b || '0').includes(','))
+                            ? String(b).replace(',', '.') : b;
+                        return (parseFloat(s) || 0) + (parseFloat(t) || 0);
+                    };
+                    const erg = window.legeSchreibwegeZusammen(cityLeagueData, zahlVon, (ziel, quelle) => {
+                        // Die Gewichte VOR dem Addieren merken. Sonst
+                        // gewichtet die Platzierung weiter unten mit der
+                        // bereits zusammengezaehlten Listenzahl — bei 78
+                        // gegen 31 kam damit 8,18 statt 8,20 heraus. Vom
+                        // Test gefunden, nicht beim Lesen.
+                        const nZiel = zahlVon(ziel), nQuelle = zahlVon(quelle);
+                        // Stueckzahlen addieren.
+                        ['new_count', 'old_count', 'count'].forEach(k => {
+                            if (ziel[k] != null || quelle[k] != null) {
+                                ziel[k] = String(Math.round(summe(ziel[k], quelle[k])));
+                            }
+                        });
+                        // Anteile addieren (deutsches Komma erhalten).
+                        ['new_meta_share', 'old_meta_share', 'share'].forEach(k => {
+                            if (ziel[k] != null || quelle[k] != null) {
+                                ziel[k] = summe(ziel[k], quelle[k]).toFixed(2).replace('.', ',');
+                            }
+                        });
+                        // Platzierungen: nach Listenzahl GEWICHTET mitteln.
+                        // Ein einfacher Mittelwert der zwei Mittelwerte
+                        // waere falsch, sobald die Zeilen verschieden gross
+                        // sind — und das sind sie hier immer (78 gegen 31).
+                        ['new_avg_placement', 'old_avg_placement', 'average_placement'].forEach(k => {
+                            const pz = parseFloat(String(ziel[k] || '0').replace(',', '.')) || 0;
+                            const pq = parseFloat(String(quelle[k] || '0').replace(',', '.')) || 0;
+                            const nz = nZiel, nq = nQuelle;
+                            if (pz > 0 && pq > 0 && (nz + nq) > 0) {
+                                ziel[k] = ((pz * nz + pq * nq) / (nz + nq)).toFixed(2).replace('.', ',');
+                            } else if (pq > 0 && !(pz > 0)) {
+                                ziel[k] = quelle[k];
+                            }
+                        });
+                        // Beste Platzierung ist ein Minimum, kein Mittel.
+                        ['new_best', 'old_best', 'best_placement'].forEach(k => {
+                            const bz = parseInt(ziel[k], 10), bq = parseInt(quelle[k], 10);
+                            if (Number.isFinite(bq)) {
+                                ziel[k] = String(Number.isFinite(bz) ? Math.min(bz, bq) : bq);
+                            }
+                        });
+                        // Und die zusammengelegten Schreibweisen mitfuehren,
+                        // damit die Karte sie nennen kann.
+                        ziel._schreibwege = (ziel._schreibwege || [ziel.archetype])
+                            .concat(quelle.archetype);
+                    });
+                    if (erg.zusammengelegt > 0) {
+                        console.info('[City League] %d Schreibweisen zu %d Archetypen zusammengelegt '
+                            + '(%d Zeilen statt %d) — nur Wortreihenfolge, nichts entfernt.',
+                            erg.zusammengelegt, erg.gruppen, erg.zeilen.length, cityLeagueData.length);
+                    }
+                    cityLeagueData = erg.zeilen;
+                }
+
                 if (!comparisonData || comparisonData.length === 0) {
                     console.warn(`Comparison data missing for ${format}; using derived fallback from archetypes data`);
                 }

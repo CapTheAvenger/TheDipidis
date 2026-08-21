@@ -3349,8 +3349,15 @@
              * das war die vierte von sieben Regelgruppen, die sich um
              * dieselben sechs Knoepfe gestritten haben. */
             
+            /* Ohne !important: der 12-px-Boden aus mobile-responsive.css
+             * traegt hier ohnehin ein !important und laedt spaeter, also
+             * entscheidet diese Zeile in keiner Ansicht mit Boden etwas.
+             * In den Ansichten OHNE Boden (.fs-scale) hat sie mit
+             * !important verhindert, dass die Schriftskala greift — der
+             * Kartentitel landete bei 4,95 px. Gemessen 21.08.2026 im
+             * Vergangenen Meta bei 390 px. */
             .card-item .card-info-text > div {
-                font-size: 0.6em !important;
+                font-size: 0.6em;
             }
         }
 
@@ -3457,7 +3464,9 @@
              * at the same height — the per-class overrides for the
              * set-stats-row children already match. */
             .card-item .card-info-text > div {
-                font-size: 0.6em !important;
+                /* font-size ohne !important — siehe die Begruendung am
+                 * gleichlautenden Block weiter oben. */
+                font-size: 0.6em;
                 margin-bottom: 0 !important;
                 line-height: 1.2 !important;
                 white-space: nowrap !important;
@@ -3468,7 +3477,7 @@
 
             .card-item .card-info-text > div:nth-child(1) {
                 font-weight: 700 !important;
-                font-size: 0.75em !important;
+                font-size: 0.75em;
                 color: #1a1a2e !important;
             }
 

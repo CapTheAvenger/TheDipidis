@@ -1052,6 +1052,58 @@
         font-size: var(--fs-sm);
     }
 
+    /* Etappe 2: Vergangenes Meta.
+     *
+     * Gemessen bei 390 px, Reiter "Vergangenes Meta", Chunk TEF-CRI,
+     * erstes Deck — 1.058 sichtbare Textknoten:
+     *
+     *     mit Boden      1.052 x 12 px, 5 x 11, 1 x 15,6  (99,4 % auf 12)
+     *     ohne Boden     555 Knoten unter 11 px, der kleinste bei 5,0 px
+     *
+     * Dieselbe Ursache wie in Etappe 1: multiplizierendes em. Die
+     * Kartenkacheln stehen auf 0.7em bzw. 0.6em, ihr Behaelter ist selbst
+     * schon verkleinert, und der Titel landet bei 5,0 px. Der Boden hat das
+     * nie sichtbar werden lassen, weil er jedes Element einzeln angehoben
+     * hat.
+     *
+     * Auch hier absolute Tokenwerte und kein Wert ueber 12 px: das Layout
+     * bekommt nichts Groesseres zu tragen, als der Boden ihm ohnehin
+     * aufgezwungen hat.
+     *
+     * Die Kartenklassen heissen city-league-*, werden aber von drei Reitern
+     * benutzt. Die Regel ist deshalb an #past-meta.fs-scale gebunden — die
+     * anderen Ansichten behalten ihren Boden, bis sie an der Reihe sind. */
+    #past-meta.fs-scale .city-league-card-set-mobile,
+    #past-meta.fs-scale .city-league-card-stats-mobile,
+    #past-meta.fs-scale .city-league-card-avg-mobile,
+    #past-meta.fs-scale .city-league-card-deck-stats-mobile,
+    #past-meta.fs-scale .city-league-card-badge,
+    #past-meta.fs-scale .past-meta-matchup-table th,
+    #past-meta.fs-scale .past-meta-matchup-table td,
+    #past-meta.fs-scale .past-meta-cards-type-btn,
+    #past-meta.fs-scale .past-meta-stat-label,
+    #past-meta.fs-scale .past-meta-stat-nenner,
+    #past-meta.fs-scale .past-meta-section-hint,
+    #past-meta.fs-scale .toolbar-metric,
+    #past-meta.fs-scale .toolbar-metric-value,
+    #past-meta.fs-scale .toolbar-metric-sep,
+    #past-meta.fs-scale .past-meta-deck-count-unique,
+    #past-meta.fs-scale .toolbar-metric-icon,
+    #past-meta.fs-scale .tech-slots-hint,
+    #past-meta.fs-scale .tech-slots-count,
+    #past-meta.fs-scale .btn-toggle-item,
+    #past-meta.fs-scale .action-group-label,
+    #past-meta.fs-scale .js-data-freshness {
+        font-size: var(--fs-xs);
+    }
+
+    /* Der Kartentitel bleibt die Grundgroesse — er ist die Zeile, an der
+     * man die Karte erkennt, und stand vorher (durch den Boden) ebenfalls
+     * auf 12 px. */
+    #past-meta.fs-scale .city-league-card-title-mobile {
+        font-size: var(--fs-sm);
+    }
+
     /* Formularfelder: ein eigener Wert statt eines geliehenen Bodens.
      *
      * Bis hierher standen select/input/textarea mit im Boden oben. Der
@@ -1392,7 +1444,7 @@
     gap: 1px !important;
   }
   .city-league-card-title-mobile {
-    font-size: 0.58em !important;
+    font-size: 0.58em;
     line-height: 1.1 !important;
     white-space: nowrap !important;
     overflow: hidden !important;
@@ -1401,7 +1453,7 @@
   .city-league-card-set-mobile,
   .city-league-card-stats-mobile,
   .city-league-card-deck-stats-mobile {
-    font-size: 0.52em !important;
+    font-size: 0.52em;
     line-height: 1.1 !important;
     white-space: nowrap !important;
     overflow: hidden !important;
@@ -2055,13 +2107,13 @@
   .city-league-card-info-bottom {
     padding: 3px 4px 4px !important;
     min-height: unset !important;
-    font-size: 0.6em !important;
+    font-size: 0.6em;
   }
   .city-league-card-info-text {
     text-align: center !important;
   }
   .city-league-card-title-mobile {
-    font-size: 0.6em !important;
+    font-size: 0.6em;
     line-height: 1.2 !important;
     margin-bottom: 1px !important;
     white-space: nowrap !important;
@@ -2070,14 +2122,14 @@
     font-weight: 700 !important;
   }
   .city-league-card-set-mobile {
-    font-size: 0.6em !important;
+    font-size: 0.6em;
     line-height: 1.15 !important;
     margin-bottom: 0 !important;
     white-space: nowrap !important;
     flex-shrink: 0 !important;
   }
   .city-league-card-stats-mobile {
-    font-size: 0.6em !important;
+    font-size: 0.6em;
     line-height: 1.15 !important;
     margin-bottom: 0 !important;
     white-space: nowrap !important;
@@ -2094,7 +2146,7 @@
     margin-bottom: 1px !important;
   }
   .city-league-card-avg-mobile {
-    font-size: 0.6em !important;
+    font-size: 0.6em;
     color: #b8860b !important;
     line-height: 1.15 !important;
     margin-bottom: 1px !important;
@@ -2103,7 +2155,7 @@
     text-overflow: ellipsis !important;
   }
   .city-league-card-deck-stats-mobile {
-    font-size: 0.6em !important;
+    font-size: 0.6em;
     line-height: 1.15 !important;
   }
 }
@@ -2161,7 +2213,7 @@
   .meta-card-analysis-grid .card-info-text > div:nth-child(1),
   #cityLeagueMetaGrid .card-info-text > div:nth-child(1),
   #currentMetaMetaGrid .card-info-text > div:nth-child(1) {
-    font-size: 1em !important;
+    font-size: 1em;
     font-weight: 700 !important;
     color: #1a1a2e !important;
     line-height: 1.15 !important;
@@ -2173,7 +2225,7 @@
   .meta-card-analysis-grid .card-info-text > div:nth-child(2),
   #cityLeagueMetaGrid .card-info-text > div:nth-child(2),
   #currentMetaMetaGrid .card-info-text > div:nth-child(2) {
-    font-size: 0.9em !important;
+    font-size: 0.9em;
     color: rgba(30, 30, 50, 0.6) !important;
     line-height: 1.15 !important;
   }
@@ -2204,13 +2256,13 @@
   .meta-card-analysis-grid .city-league-card-set-stats-row .city-league-card-set-mobile,
   #cityLeagueMetaGrid .city-league-card-set-stats-row .city-league-card-set-mobile,
   #currentMetaMetaGrid .city-league-card-set-stats-row .city-league-card-set-mobile {
-    font-size: 1em !important;
+    font-size: 1em;
   }
   .meta-card-grid .city-league-card-set-stats-row .city-league-card-stats-mobile,
   .meta-card-analysis-grid .city-league-card-set-stats-row .city-league-card-stats-mobile,
   #cityLeagueMetaGrid .city-league-card-set-stats-row .city-league-card-stats-mobile,
   #currentMetaMetaGrid .city-league-card-set-stats-row .city-league-card-stats-mobile {
-    font-size: 1em !important;
+    font-size: 1em;
     color: #b8860b !important;
   }
 
@@ -2219,7 +2271,7 @@
   .meta-card-analysis-grid .city-league-card-avg-mobile,
   #cityLeagueMetaGrid .city-league-card-avg-mobile,
   #currentMetaMetaGrid .city-league-card-avg-mobile {
-    font-size: 0.9em !important;
+    font-size: 0.9em;
     color: #b8860b !important;
     line-height: 1.15 !important;
   }
@@ -2229,7 +2281,7 @@
   .meta-card-analysis-grid .card-info-text > div:nth-child(4),
   #cityLeagueMetaGrid .card-info-text > div:nth-child(4),
   #currentMetaMetaGrid .card-info-text > div:nth-child(4) {
-    font-size: 0.9em !important;
+    font-size: 0.9em;
     color: rgba(30, 30, 50, 0.55) !important;
     line-height: 1.15 !important;
     margin-top: 0 !important;

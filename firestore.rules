@@ -67,13 +67,55 @@ service cloud.firestore {
     }
 
     // ─────────────────────────────────────────────────────────
-    // Public profile index — used by Testing Groups to add members
-    // by email. Each user writes their own entry; anyone signed in
-    // can read it (to resolve email → uid).
+    // Public profile — uid → Anzeigename. NUR get, NIE list.
+    //
+    // Die alte Regel lautete `allow read: if request.auth != null`. `read`
+    // umfasst `get` UND `list`, und `list` gilt fuer die ganze Collection:
+    // gemessen am 21.08.2026 gegen die Produktivdatenbank lieferte ein
+    // einziges db.collection('publicProfiles').get() jedem eingeloggten
+    // Nutzer alle 5 Konten samt vollstaendiger E-Mail-Adresse — zwei davon
+    // fremde Adressen. Das war ein echter Datenabfluss, kein Design-Kompromiss.
+    //
+    // `list` ist hier auch nicht noetig: seit dem Hash-Index (unten) schlaegt
+    // Testing Groups eine E-Mail per direktem get() nach, nicht per Query.
+    // Die Klartext-E-Mail faellt zugleich ganz aus dieser Collection —
+    // _ensurePublicProfile() loescht sie beim naechsten Login des jeweiligen
+    // Nutzers aus dessen eigenem Dokument.
+    //
+    // `allow list: if false` steht ausdruecklich da, statt nur weggelassen zu
+    // werden: eine fehlende Regel liest sich wie ein Versehen, eine
+    // ausgeschriebene Verweigerung wie eine Entscheidung.
     // ─────────────────────────────────────────────────────────
     match /publicProfiles/{uid} {
-      allow read:  if request.auth != null;
+      allow get:   if request.auth != null;
+      allow list:  if false;
       allow write: if request.auth != null && request.auth.uid == uid;
+    }
+
+    // ─────────────────────────────────────────────────────────
+    // E-Mail-Index — SHA-256(kleingeschriebene E-Mail) → { uid }.
+    //
+    // Ersetzt die Query `.where('email','==',...)`, die zwingend `list`
+    // brauchte. Die Dokument-ID IST der Suchschluessel, also genuegt get():
+    // wer die E-Mail kennt, findet den Nutzer; wer sie nicht kennt, kann
+    // nichts aufzaehlen. In der Datenbank steht kein Klartext mehr.
+    //
+    // Die Schreibregel bindet den Hash an den angemeldeten Nutzer selbst
+    // (hashing.sha256 ueber request.auth.token.email), damit niemand den Hash
+    // einer fremden E-Mail auf die eigene uid zeigen lassen kann — sonst
+    // koennte ein Angreifer sich beim Einladen an fremder Stelle einsetzen.
+    // hasOnly(['uid']) haelt das Dokument auf genau ein Feld.
+    // ─────────────────────────────────────────────────────────
+    match /emailIndex/{emailHash} {
+      allow get:  if request.auth != null;
+      allow list: if false;
+      allow create, update: if request.auth != null
+        && request.auth.token.email != null
+        && request.resource.data.keys().hasOnly(['uid'])
+        && request.resource.data.uid == request.auth.uid
+        && emailHash ==
+             hashing.sha256(request.auth.token.email.lower()).toHexString().lower();
+      allow delete: if false;
     }
 
     // ─────────────────────────────────────────────────────────

@@ -22,7 +22,6 @@ def print_menu() -> None:
     print("  [1]  Update Sets (sets.json)")
     print("  [2]  All Cards Scraper (EN/DE)")
     print("  [3]  Japanese Cards Scraper")
-    print("  [4]  Card Price Scraper (Limitless – Fallback fuer unmapped)")
     print("  [14] Cardmarket Price Merger (taeglich, primaere Preisquelle)")
     print("  [15] Cardmarket ID Mapper (einmalig / bei neuen Sets)")
     print("  [CM] Cardmarket JSONs jetzt frisch laden (force refresh)")
@@ -37,17 +36,19 @@ def print_menu() -> None:
     print("  [10] Labs Major Tournament Scraper")
     print("  [13] Online Tournament Top-8 Scraper (Predictor 2.0)")
     print("  --- CARD INTEL (texts / effects for Consistency Builder) ---")
+    print("  [18] Card Text Scraper (Kartentexte, Vorstufe zu [16])")
     print("  [16] Card Effects Scraper (attack/ability text from Limitless)")
     print("  [17] Threat-Intel Builder (active_threats.json for tech audit)")
     print("       (Note: per-tournament dated CSV is produced by [5] now)")
     print("  --- FRONTEND ---")
     print("  [11] Prepare Frontend Data (Merge)")
     print("  [12] Archetype Icons (Pokemon-Bilder Mapping)")
+    print("  [19] Proxy-URL-Karte (japanische Kartenbilder)")
     print("-" * 52)
     print("  --- BATCH SHORTCUTS ---")
-    print("  [B]  Base Data Update (1, 2, 3, 4, 14, 11)")
+    print("  [B]  Base Data Update (1, 2, 3, 14, 11)")
     print("  [M]  Meta Update / Dienstags-Update (5-10, 13, 14, 17, 11, 12)")
-    print("  [F]  Full System Update (1, 2, 15, 3-10, 13, 14, 16, 17, 11, 12)")
+    print("  [F]  Full System Update - Reihenfolge wie im Wochenlauf")
     print("  [0]  Exit")
     print("=" * 52)
 
@@ -70,6 +71,11 @@ SCRIPTS = {
     "15": os.path.join("scrapers", "cardmarket_id_mapper.py"),
     "16": os.path.join("scrapers", "pokemon_card_effects_scraper.py"),
     "17": os.path.join("tools",    "build_threat_intel.py"),
+    # [18] / [19] liefen bisher nur in CI und fehlten im Menue — wer
+    # lokal ein FULL fuhr, bekam ein anderes Ergebnis als der
+    # Wochenlauf, ohne dass irgendwo stand, welches.
+    "18": os.path.join("scrapers", "pokemon_card_text_scraper.py"),
+    "19": os.path.join("scrapers", "scrape_pokemonproxies_urls.py"),
     # [18] (online_tournament_dated_scraper.py) removed: its output —
     # data/online_tournament_dated_cards.csv — is now produced as a
     # second output of [5] current_meta_analysis_scraper.py, since both
@@ -96,7 +102,6 @@ TASK_NAMES = {
     "1": "Update Sets",
     "2": "All Cards Scraper",
     "3": "Japanese Cards Scraper",
-    "4": "Card Price Scraper",
     "5": "Current Meta Analysis",
     "6": "Limitless Online Scraper",
     "7": "City League Analysis",
@@ -112,9 +117,16 @@ TASK_NAMES = {
     "15": "Cardmarket ID Mapper",
     "16": "Card Effects Scraper (attack/ability text from Limitless)",
     "17": "Threat-Intel Builder (active_threats.json for tech audit)",
+    "18": "Card Text Scraper (Kartentexte)",
+    "19": "Proxy-URL-Karte (japanische Kartenbilder)",
 }
 
-BATCH_BASE = ["1", "2", "3", "4", "14", "11"]
+# [4] stand bis 21.08.2026 in BATCH_BASE und BATCH_FULL, obwohl es in
+# SCRIPTS keinen Eintrag "4" gibt (der Limitless-Preis-Scraper wurde
+# entfernt). Der Zugriff SCRIPTS[key] weiter unten haette den Stapel
+# mitten im Lauf mit einem KeyError abgebrochen — beim vierten von
+# neunzehn Skripten, nach denen niemand mehr geschaut haette.
+BATCH_BASE = ["1", "2", "3", "14", "11"]
 # 17 (threat-intel) depends on 5+6 (current meta + online decks) plus the
 # rotation-stable 16 effects file; both meta inputs are refreshed by
 # BATCH_META so 17 runs there too.  Dated-tournament rows that feed the
@@ -127,7 +139,13 @@ BATCH_META = ["5", "6", "7", "8", "7p", "8p", "9", "10", "13", "14", "17", "11",
 # CI weekly-update produces.  Order matters: 16 (effects) must run
 # BEFORE 17 (threat-intel reads pokemon_card_effects.json), and 11
 # must come last so prepare_card_data picks up everything written above.
-BATCH_FULL = ["1", "2", "15", "3", "4", "5", "6", "7", "8", "7p", "8p", "9", "10", "13", "14", "16", "17", "11", "12"]
+# Reihenfolge = die des Wochenlaufs (.github/workflows/
+# weekly-full-update.yml). Vorher lief lokal 11/12 NACH 16/17, in CI
+# davor — zwei Reihenfolgen fuer denselben Stapel, und die Frage,
+# welche stimmt, war nirgends beantwortet. tests/python/
+# test_dashboard_stapel.py haelt die beiden jetzt gegeneinander.
+BATCH_FULL = ["1", "2", "15", "5", "6", "7", "8", "7p", "8p", "9", "10",
+              "13", "14", "3", "19", "11", "12", "18", "16", "17"]
 
 def git_commit_push(description: str) -> None:
     """Bump version, stage all changes, commit, and push to origin main."""
@@ -344,7 +362,12 @@ def run_batch(batch_list: list, batch_name: str) -> None:
 
     batch_started = time.monotonic()
     for key in batch_list:
-        script = SCRIPTS[key]
+        script = SCRIPTS.get(key)
+        if not script:
+            print(f"\n  [!] Stapel-Eintrag '{key}' hat kein Skript in SCRIPTS — "
+                  f"uebersprungen. Das ist ein Fehler in dieser Datei, nicht "
+                  f"in deinem Aufruf.")
+            continue
         run_script(script, wait_at_end=False, extra_args=TASK_CLI_ARGS.get(key))
         if key != batch_list[-1]:
             print("\n  Warte 3 Sekunden vor dem naechsten Skript ...")

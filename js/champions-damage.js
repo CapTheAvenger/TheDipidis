@@ -144,19 +144,93 @@
         };
     }
 
+    // How many hits koChance() looks ahead. Beyond this the answer stops
+    // being useful — nothing in this format survives nine hits of a move
+    // that can damage it at all — and the return says so explicitly
+    // instead of pretending to a number.
+    const KO_MAX_HITS = 9;
+
     /**
      * The honest KO statement. "OHKO" is only true when the LOWEST roll
      * kills; when only some rolls do, the share of rolls that get there
      * is the answer, and hiding it would overstate the result.
+     *
+     * ── Two things were wrong here until 20.08.2026 ──
+     *
+     * 1. `rolls.filter(r => r * hits >= hp)` asked "does ONE roll,
+     *    multiplied by the hit count, kill?". That is not n hits — it is
+     *    the same hit happening n times. Real damage over n hits is the
+     *    SUM OF n INDEPENDENT DRAWS from the 16 rolls, and that sum is
+     *    far more concentrated than one roll scaled up.
+     *
+     *    The hit COUNT came out right either way (min·n and max·n bound
+     *    the sum correctly). The CHANCE did not. Swept over 2.556
+     *    base-damage / HP combinations: the reported chance was off by
+     *    more than half a point in 53,3 % of them, by up to 43,8
+     *    percentage points. Base damage 13 into 45 HP read "4HKO 50 %";
+     *    the true figure is 93,8 %. The old form could also only ever
+     *    print sixteenths — 50 %, 56 %, 62 % — because it counted
+     *    single rolls no matter how many hits it was talking about.
+     *
+     * 2. The loop stopped at four hits and then returned
+     *    `{ hits: 5, chance: 0 }`. "5+HKO 0 %" says "five hits will not
+     *    kill it", which is the opposite of the truth whenever five hits
+     *    do. In a 21.336-combination sweep, 332 rows said 0 % where the
+     *    LOWEST roll five times over already kills — a guaranteed 5HKO
+     *    printed as impossible.
+     *
+     * The distribution is now built exactly, by convolution, one hit at a
+     * time, and the loop stops at the first hit count that can kill at
+     * all. No sampling: with 16 integer rolls the support stays small
+     * (a few dozen sums), so the exact answer is also the cheap one.
+     *
+     * Returns { hits, chance } — or { hits: null, chance: 0 } when even
+     * KO_MAX_HITS hits of the highest roll cannot get there.
      */
     function koChance(rolls, hp) {
         if (!hp) return null;
-        for (let hits = 1; hits <= 4; hits++) {
-            const killing = rolls.filter(r => r * hits >= hp).length;
-            if (killing === rolls.length) return { hits, chance: 1 };
-            if (killing > 0) return { hits, chance: killing / rolls.length };
+        if (!rolls || !rolls.length) return null;
+
+        // Verteilung der Summe nach n Treffern, als Map Summe -> Wahrscheinlichkeit.
+        // Startpunkt ist "null Treffer, Schaden 0 mit Sicherheit".
+        let verteilung = new Map([[0, 1]]);
+        const p = 1 / rolls.length;
+
+        for (let hits = 1; hits <= KO_MAX_HITS; hits++) {
+            const naechste = new Map();
+            for (const [summe, wk] of verteilung) {
+                for (let i = 0; i < rolls.length; i++) {
+                    const s = summe + rolls[i];
+                    naechste.set(s, (naechste.get(s) || 0) + wk * p);
+                }
+            }
+            verteilung = naechste;
+
+            let chance = 0;
+            for (const [summe, wk] of verteilung) {
+                if (summe >= hp) chance += wk;
+            }
+            if (chance > 0) {
+                // Gleitkomma: 0,9999999999 ist eine Garantie, kein 99,99 %.
+                if (chance > 1 - 1e-9) return { hits, chance: 1 };
+                return { hits, chance };
+            }
+
+            // Wenn selbst der hoechste Wurf n-mal nicht reicht, brauchen
+            // wir die kleinen Summen nicht weiterzutragen — alles unter
+            // (hp - (KO_MAX_HITS - hits) * maxWurf) kann nie ankommen.
+            // Ohne das waechst die Map bei sehr grossen Trefferzahlen
+            // unnoetig.
+            const maxWurf = rolls[rolls.length - 1];
+            const untergrenze = hp - (KO_MAX_HITS - hits) * maxWurf;
+            if (untergrenze > 0) {
+                for (const summe of verteilung.keys()) {
+                    if (summe < untergrenze) verteilung.delete(summe);
+                }
+                if (!verteilung.size) break;
+            }
         }
-        return { hits: 5, chance: 0 };
+        return { hits: null, chance: 0 };
     }
 
     // Ties count as "not faster" — going first on a speed tie is a coin
@@ -167,7 +241,7 @@
     }
 
     global.ChampionsDamage = {
-        LEVEL, ROLLS, NATURES,
+        LEVEL, ROLLS, NATURES, KO_MAX_HITS,
         statAt50, hpAt50, natureMult, buildStats,
         makeChart, damageRange, koChance, speedComparison,
     };

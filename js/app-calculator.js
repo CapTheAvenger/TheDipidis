@@ -28,6 +28,42 @@
         return Math.max(min, Math.min(max, val));
     }
 
+    /**
+     * Klemmen und es sagen (20.08.2026).
+     *
+     * Bisher wurde jede Eingabe still in den gueltigen Bereich gezogen,
+     * ohne das Feld anzufassen. Auf dem Bildschirm stand dann eine Zahl,
+     * mit der NICHT gerechnet wurde:
+     *
+     *     Kopien 0   ->  gerechnet mit 1  ->  Anzeige "11,67 %"
+     *     Deck 0     ->  gerechnet mit 1  ->  Anzeige "100,00 %"
+     *
+     * Beides sieht aus wie ein Ergebnis fuer die eingegebene Zahl. Jetzt
+     * wird der geklemmte Wert ins Feld zurueckgeschrieben und das Feld
+     * kurz markiert — die Rechnung und das, was dasteht, sagen wieder
+     * dasselbe.
+     */
+    function leseUndKlemme(id, fallback, min, max) {
+        const el = document.getElementById(id);
+        const roh = getInputNumber(id, fallback);
+        const wert = clamp(roh, min, max);
+        if (el && roh !== wert && String(el.value).trim() !== '') {
+            el.value = String(wert);
+            el.classList.add('calc-input-geklemmt');
+            el.setAttribute('title', (typeof getLang === 'function' && getLang() === 'de')
+                ? `Wert auf den gültigen Bereich ${min}–${max} gesetzt — gerechnet wird mit ${wert}.`
+                : `Value set to the valid range ${min}–${max} — the calculation uses ${wert}.`);
+            clearTimeout(el._klemmTimer);
+            el._klemmTimer = setTimeout(() => {
+                el.classList.remove('calc-input-geklemmt');
+            }, 1600);
+        } else if (el && roh === wert) {
+            el.classList.remove('calc-input-geklemmt');
+            el.removeAttribute('title');
+        }
+        return wert;
+    }
+
     function getInputNumber(id, fallback) {
         const el = document.getElementById(id);
         if (!el) return fallback;
@@ -43,10 +79,10 @@
             const inHandEl = document.getElementById('calc-in-hand');
             if (!deckSizeEl || !copiesEl || !drawnEl || !inHandEl) return;
 
-        const deckSize = clamp(getInputNumber('calc-deck-size', 60), 1, 99);
-        const copies = clamp(getInputNumber('calc-copies', 1), 1, deckSize);
-        const drawn = clamp(getInputNumber('calc-drawn', 7), 1, deckSize);
-        const inHand = clamp(getInputNumber('calc-in-hand', 0), 0, copies);
+        const deckSize = leseUndKlemme('calc-deck-size', 60, 1, 99);
+        const copies = leseUndKlemme('calc-copies', 1, 1, deckSize);
+        const drawn = leseUndKlemme('calc-drawn', 7, 1, deckSize);
+        const inHand = leseUndKlemme('calc-in-hand', 0, 0, copies);
 
         // Verbleibende Karten im Deck nach Hand und Preisen
         const remaining = Math.max(deckSize - drawn - 6, 0);

@@ -235,8 +235,23 @@ describe('die Aussagen über K.O. und Effektivität', () => {
         assert.equal(api.koLabel({ hits: 1, chance: 1 }), 'OHKO');
         assert.equal(api.koLabel({ hits: 1, chance: 0.75 }), 'OHKO 75 %');
         assert.equal(api.koLabel({ hits: 2, chance: 1 }), '2HKO');
-        assert.equal(api.koLabel({ hits: 5, chance: 0 }), '5+HKO 0 %');
         assert.equal(api.koLabel(null), '');
+    });
+
+    it('kein „5+" mehr — die Trefferzahl wird genannt', () => {
+        // "5+HKO 0 %" war keine Beschriftung, sondern der Abdruck eines
+        // Rechenfehlers: koChance() hoerte bei vier Treffern auf und gab
+        // danach pauschal { hits: 5, chance: 0 } zurueck. Gemessen ueber
+        // 21.336 Kombinationen sagten 332 Zeilen "0 %", obwohl schon der
+        // NIEDRIGSTE Wurf fuenfmal toetet.
+        assert.equal(api.koLabel({ hits: 5, chance: 1 }), '5HKO');
+        assert.equal(api.koLabel({ hits: 7, chance: 0.5 }), '7HKO 50 %');
+        assert.ok(!/5\+/.test(api.koLabel({ hits: 5, chance: 1 })));
+    });
+
+    it('und wo es keinen K.O. gibt, steht kein „0 %"', () => {
+        // Eine 0 sieht aus wie eine gerechnete Wahrscheinlichkeit.
+        assert.equal(api.koLabel({ hits: null, chance: 0 }), 'kein K.O.');
     });
 
     it('neutral wird nicht beschriftet, alles andere schon', () => {

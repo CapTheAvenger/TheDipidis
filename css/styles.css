@@ -5615,8 +5615,15 @@ details[open] > .tier-trending-summary::after {
     font-weight: 500;
 }
 /* Unter der Schwelle: warm statt grau, aber kein Rot — eine duenne
- * Stichprobe ist kein Fehler, sie ist ein Vorbehalt. */
-.stat-badge.tier-listen-n.tier-listen-duenn {
+ * Stichprobe ist kein Fehler, sie ist ein Vorbehalt.
+ *
+ * Zwei Selektoren, weil zwei Ansichten dieselbe Marke tragen: die
+ * City-League-Karte fuehrt sie an .tier-listen-n, die Rogue-Kachel des
+ * aktuellen Metas an der aelteren .stat-sample-size. Live nachgesehen am
+ * 20.08.2026: dort blieb das Wort "duenn" grau, weil die zweite Regel
+ * fehlte — die Aussage stand da, die Farbe nicht. */
+.stat-badge.tier-listen-n.tier-listen-duenn,
+.stat-badge.stat-sample-size.tier-listen-duenn {
     background: var(--vorbehalt-bg);
     color: var(--vorbehalt);
 }

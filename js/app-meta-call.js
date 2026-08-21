@@ -7207,6 +7207,42 @@ window.MetaCall = (function () {
     return Math.exp(lp);
   }
 
+  /**
+   * Genau die Verteilung, die die Day-2-Kette daneben schon benutzt
+   * (20.08.2026).
+   *
+   * P(1×) und P(2×) in der Begegnungsliste rechneten Poisson, waehrend
+   * im SELBEN Bereich die Day-2-Wahrscheinlichkeit exakt binomial
+   * gerechnet wird. Zwei Verteilungen fuer dieselbe Frage — "wie oft
+   * treffe ich dieses Deck in n Runden" —, und die Poisson-Naeherung ist
+   * hier nicht einmal gut: sie gilt fuer viele Versuche mit kleiner
+   * Wahrscheinlichkeit, und hier sind es acht bis neun Runden mit
+   * Anteilen bis ueber 30 %.
+   *
+   * Gemessen bei 9 Runden:
+   *     Anteil 10 %   P(1×)  36,6 %  statt  38,7 %   (-2,2 pp)
+   *     Anteil 25 %   P(2×)  26,7 %  statt  30,0 %   (-3,4 pp)
+   *     Junk 40 %     P(1×)   9,8 %  statt   6,0 %   (+3,8 pp)
+   *
+   * Die groesste Abweichung ueber den gepruefteren Bereich lag bei
+   * 5,4 Prozentpunkten. Binomial ist hier nicht nur richtiger, sondern
+   * auch billiger — n ist einstellig.
+   *
+   * poissonP bleibt: es wird an anderer Stelle fuer eine andere Frage
+   * gebraucht, und ein Loeschen waere eine Aenderung, die niemand
+   * angefordert hat.
+   */
+  function binomialP(k, n, p) {
+    if (!(n >= 0) || k < 0 || k > n) return 0;
+    if (p <= 0) return k === 0 ? 1 : 0;
+    if (p >= 1) return k === n ? 1 : 0;
+    let lp = 0;
+    for (let i = 1; i <= k; i++) lp += Math.log(n - k + i) - Math.log(i);
+    lp += k * Math.log(p) + (n - k) * Math.log1p(-p);
+    return Math.exp(lp);
+  }
+  if (typeof window !== 'undefined') window._mcBinomialP = binomialP;
+
   // ── Rendering ──────────────────────────────────────────────
   function esc(s) {
     return String(s)
@@ -8029,8 +8065,10 @@ window.MetaCall = (function () {
       const wrCls  = wrPct >= 55 ? 'favorable' : wrPct <= 45 ? 'unfavorable' : 'even';
       const barW   = Math.round((lambda / maxEnc) * 100);
       const name   = deck.name === '_junk' ? t('mc.junkDecks') : deck.name;
-      const p1     = poissonP(1, lambda) * 100;
-      const p2     = poissonP(2, lambda) * 100;
+      // Binomial, nicht Poisson — siehe die Notiz bei binomialP().
+      const pRunde = Math.max(0, Math.min(1, deck.finalShare / 100));
+      const p1     = binomialP(1, _settings.rounds, pRunde) * 100;
+      const p2     = binomialP(2, _settings.rounds, pRunde) * 100;
       const js     = _journalStats[deck.name];
       const jTag   = js && js.total > 0
         ? `<span class="mc-enc-journal-tag" title="${t('mc.personalGames').replace('{n}', js.total)}">📓${js.total}</span>`
@@ -8098,7 +8136,7 @@ window.MetaCall = (function () {
         </div>
       </div>
 
-      <div class="mc-section-sep">${t('mc.encounters')}</div>
+      <div class="mc-section-sep">${esc(t('mc.encounters').replace('{r}', String(_settings.rounds)))}</div>
       <div class="mc-encounter-list">${encRows}</div>
     </div>
   </div>
@@ -10010,7 +10048,7 @@ window.MetaCall = (function () {
     ctx.fillStyle = '#3498db';
     ctx.font = 'bold 13px system-ui, sans-serif';
     ctx.textBaseline = 'alphabetic';
-    ctx.fillText(t('mc.encounters').toUpperCase(), 28, secY + 24);
+    ctx.fillText(t('mc.encounters').replace('{r}', String(_settings.rounds)).toUpperCase(), 28, secY + 24);
 
     let y = secY + SECTION_H;
     matchups.forEach((deck, i) => {

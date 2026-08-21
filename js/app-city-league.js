@@ -373,6 +373,28 @@ function cityLeagueOffSeasonHtml(istVergangenheit) {
                         archetype,
                         count: 0,
                         placementSum: 0,
+                        // Zähler und Nenner müssen dieselbe Menge beschreiben
+                        // (20.08.2026).
+                        //
+                        // placementSum wurde nur über GÜLTIGE Platzierungen
+                        // gebildet, geteilt wurde aber durch count, also durch
+                        // ALLE Zeilen des Archetyps. Jede Zeile ohne Platzierung
+                        // zog den Mittelwert damit um den Faktor
+                        // (gültige / alle) nach unten — die Ø-Platzierung sah
+                        // also besser aus, als sie ist.
+                        //
+                        // Heute schlägt es nicht durch: im geprüften Datenstand
+                        // haben alle 8.693 Zeilen eine Platzierung. Es schlägt in
+                        // der Sekunde durch, in der eine Zeile ohne kommt — und
+                        // bei Turnier 568 fehlen bereits die Plätze 17, 18, 23,
+                        // 29, 30 und 31. Genau in diesem Zustand fällt die
+                        // Ansicht zudem auf DIESE Funktion zurück, weil die
+                        // Vergleichsdatei leer ist.
+                        //
+                        // buildCityLeaguePlacementStatsMap in js/app-utils.js
+                        // macht es seit jeher richtig, mit einem eigenen
+                        // placementCount. Hier steht jetzt dasselbe.
+                        placementCount: 0,
                         bestPlacement: Number.POSITIVE_INFINITY
                     });
                 }
@@ -382,6 +404,7 @@ function cityLeagueOffSeasonHtml(istVergangenheit) {
                 entry.count += 1;
                 if (!Number.isNaN(placement) && placement > 0) {
                     entry.placementSum += placement;
+                    entry.placementCount += 1;
                     entry.bestPlacement = Math.min(entry.bestPlacement, placement);
                 }
             });
@@ -391,7 +414,8 @@ function cityLeagueOffSeasonHtml(istVergangenheit) {
             return Array.from(grouped.values())
                 .map(entry => {
                     const metaShare = totalCount > 0 ? (entry.count / totalCount) * 100 : 0;
-                    const avgPlacement = entry.count > 0 ? (entry.placementSum / entry.count) : 0;
+                    const avgPlacement = entry.placementCount > 0
+                        ? (entry.placementSum / entry.placementCount) : 0;
                     return {
                         archetype: entry.archetype,
                         status: 'AKTUELL',
@@ -1824,8 +1848,16 @@ function cityLeagueOffSeasonHtml(istVergangenheit) {
             });
 
             const decksCount = matches.length;
-            const avgPlacement = matches.length > 0
-                ? (matches.reduce((sum, row) => sum + parseInt(row.placement || 0, 10), 0) / matches.length).toFixed(2)
+            // Dieselbe Sache noch einmal, und hier schlimmer: `row.placement
+            // || 0` machte aus einem leeren Feld eine NULL, die als
+            // Platzierung in den Zähler einging. Eine fehlende Platzierung
+            // ist kein Platz 0 — sie ist keine Platzierung. Gezählt wird
+            // jetzt nur, was auch summiert wird.
+            const platzierungen = matches
+                .map(row => parseInt(row.placement, 10))
+                .filter(p => Number.isFinite(p) && p > 0);
+            const avgPlacement = platzierungen.length > 0
+                ? (platzierungen.reduce((sum, p) => sum + p, 0) / platzierungen.length).toFixed(2)
                 : '-';
 
             return {

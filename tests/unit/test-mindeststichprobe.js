@@ -269,6 +269,19 @@ describe('Stichproben sind sichtbar', () => {
         assert.ok(/clEinzelstueck = archetypeArray\.filter/.test(TIER));
     });
 
+    it('die Duenn-Marke ist in beiden Ansichten auch eingefaerbt', () => {
+        // Live gesehen: in der Rogue-Kachel blieb "duenn" grau, weil die
+        // Regel nur .tier-listen-n traf. Die Kachel dort fuehrt die aeltere
+        // Klasse .stat-sample-size — das Wort stand da, die Farbe nicht.
+        const CSS = lies('css/styles.css');
+        const i = CSS.indexOf('.stat-badge.tier-listen-n.tier-listen-duenn');
+        assert.ok(i >= 0, 'die Duenn-Regel fehlt');
+        const regel = CSS.slice(i, CSS.indexOf('}', i));
+        assert.ok(regel.includes('.stat-badge.stat-sample-size.tier-listen-duenn'),
+            'die Rogue-Kachel faellt wieder aus der Einfaerbung');
+        assert.ok(regel.includes('var(--vorbehalt)'));
+    });
+
     it('die Rogue-Kachel des aktuellen Metas markiert duenne Zeilen', () => {
         assert.ok(/const ROGUE_MIN_LISTEN = \(typeof CONV_MIN_N === 'number'\) \? CONV_MIN_N : 20;/.test(TIER),
             'die Rogue-Kachel benutzt nicht dieselbe Schwelle wie der Rest der Seite');

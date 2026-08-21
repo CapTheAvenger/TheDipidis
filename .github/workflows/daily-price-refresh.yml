@@ -202,16 +202,34 @@ jobs:
           echo "::error::Push failed after 3 attempts"
           exit 1
 
-      # The push above already triggered deploy-pages (on: push to main). This
-      # step used to ALSO `gh workflow run deploy-pages.yml`, which produced two
-      # runs competing inside `concurrency: pages, cancel-in-progress: true` —
-      # one got cancelled, and `gh run list --limit 1` could hand the wait step
-      # below the id of the loser (or of the previous deploy). The live check in
-      # deploy-pages then failed with "may have been cancelled by a later push".
+      # Der Push allein loest KEINEN Deploy aus — GitHub unterdrueckt
+      # `on: push` fuer Pushes, die mit GITHUB_TOKEN authentifiziert sind.
       #
-      # So: don't dispatch, find. We know the sha we pushed, so we poll for the
-      # run whose headSha matches it. Nothing races because there is only ever
-      # one deploy.
+      # Der Dispatch stand hier frueher und wurde entfernt, weil er den
+      # push-getriggerten Deploy gerannt haben soll. Es gibt aber keinen
+      # push-getriggerten Deploy: gemessen am 21.08.2026 stammten die letzten
+      # acht Pages-Deploys ausnahmslos aus PR-Merges (#462-#469), kein einziger
+      # aus einem der sieben Auto-Commits seit dem 19.08.
+      #
+      # Fuer diesen Workflow war die Folge besonders unangenehm: der Suchlauf
+      # unten findet nichts, warnt, wartet pauschal vier Minuten — und danach
+      # gehen die Telegram-Preisalarme raus. Also genau der 2026-06-Fehler,
+      # den der Kommentar weiter unten beschreibt: der Bot meldet Preise, die
+      # auf der Seite noch gar nicht stehen.
+      #
+      # Der Workflow hat es selbst jeden Tag protokolliert: am 18., 19. und
+      # 20.08.2026 stand je ein "::warning::No deploy-pages run found for
+      # <sha>" im Log — und der Lauf war jedes Mal trotzdem gruen. Eine
+      # Warnung, die nichts rot macht, liest niemand.
+      #
+      # Erst anstossen, dann suchen. Gerannt wird dabei nichts, weil der Push
+      # selbst keinen zweiten Lauf erzeugt.
+      - name: Deploy anstossen (GITHUB_TOKEN-Push triggert ihn nicht)
+        if: steps.commit.outputs.pushed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run deploy-pages.yml --ref main
+
       - name: Find the Pages deploy our push triggered
         id: pages_deploy
         if: steps.commit.outputs.pushed == 'true'

@@ -129,14 +129,31 @@ jobs:
           done
           exit 1
 
-      # No explicit `gh workflow run deploy-pages.yml` here. The push above
-      # already triggers deploy-pages (on: push to main), and dispatching a
-      # second run put both into `concurrency: pages, cancel-in-progress: true`
-      # — one of the two got cancelled, and the wait step could end up watching
-      # the loser. One trigger, one deploy.
-
-      # The job is only green if the scrape actually scraped. Runs last so the
-      # Pokédex build and its commit still go out on a usage-scrape failure.
+      # Der Push allein loest KEINEN Deploy aus.
+      #
+      # GitHub unterdrueckt bei Pushes, die mit GITHUB_TOKEN authentifiziert
+      # sind, alle `on: push`-Workflows (Rekursionsschutz). Genau dieser
+      # Dispatch stand hier frueher und wurde entfernt mit der Begruendung,
+      # "der Push oben triggert deploy-pages ohnehin und die zwei Laeufe rennen
+      # sich in `concurrency: pages` tot". Der zweite Teil stimmt, der erste
+      # nicht — und ohne den ersten gibt es gar keinen Deploy, also auch kein
+      # Rennen. Der erklaerende Kommentar dazu stammt aus f1cb44a (19.08.2026);
+      # wie lange es davor schon so war, gibt die flache Klon-Historie nicht her.
+      #
+      # Gemessen am 21.08.2026: die letzten acht Pages-Deploys stammten
+      # ausnahmslos aus PR-Merges (#462-#469), kein einziger aus einem der
+      # sieben Auto-Commits seit dem 19.08. Live standen deshalb 199 Turniere
+      # und 14.026 Spieler, waehrend data/limitless_meta_stats.json im Repo
+      # schon 392 / 29.436 fuehrte (generated_at 2026-08-21T06:14). Frische
+      # Daten erreichten die Seite nur noch zufaellig — dann, wenn jemand
+      # gerade Code merget.
+      #
+      # `if` bindet den Deploy an Laeufe, die wirklich etwas gepusht haben.
+      - name: Deploy anstossen (GITHUB_TOKEN-Push triggert ihn nicht)
+        if: steps.commit.outputs.pushed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh workflow run deploy-pages.yml --ref main
       - name: Fail the run if the usage scrape died
         if: steps.usage.outputs.failed != '0'
         run: |

@@ -351,7 +351,12 @@
         // EVs / Nature are only populated for refreshes after the
         // 2026-06-09 scraper update — older snapshots have empty
         // strings and the rows simply hide.
-        const evs = p.evs ? `<div class="side-quest-evs"><span class="side-quest-evs-label">EVs:</span> ${escapeHtml(p.evs)}</div>` : '';
+        // Anzeige-Label: dieselbe Groesse heisst im Matchups-Subtab
+        // 'Statuswertpunkte' (app-side-quest-matchups.js:80) — die Champions-
+        // Statuswertpunkte (0–32, Budget 66), NICHT die Mainline-EVs. Hier
+        // vereinheitlicht (Audit 2, F20). Das Showdown-Round-Trip-Format
+        // (Export ~Z.705, Import ~Z.1118, Placeholder ~Z.127/183) bleibt 'EVs:'.
+        const evs = p.evs ? `<div class="side-quest-evs"><span class="side-quest-evs-label">Statuswertpunkte:</span> ${escapeHtml(p.evs)}</div>` : '';
         const nature = p.nature ? `<div class="side-quest-nature">${escapeHtml(p.nature)} Nature</div>` : '';
         return `
             <div class="side-quest-mon">
@@ -580,7 +585,10 @@
                              : 'Mega Evolves (item is a Mega Stone)');
             }
             if (p.nature) meta.push((de ? 'Wesen: ' : 'Nature: ') + p.nature);
-            if (p.evs) meta.push('EVs: ' + p.evs);
+            // Anzeige-Label im Claude-Prompt — vereinheitlicht auf
+            // 'Statuswertpunkte' (Audit 2, F20). Das Showdown-Export-Format
+            // (Z.705) bleibt unabhaengig davon 'EVs:'.
+            if (p.evs) meta.push((de ? 'Statuswertpunkte: ' : 'Stat points: ') + p.evs);
             let line = parts.join(' ');
             if (meta.length) line += ' | ' + meta.join(' | ');
             const moves = (p.moves || []).slice(0, 4).filter(Boolean);

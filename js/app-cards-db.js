@@ -985,11 +985,13 @@
             const container = document.getElementById('deckCoverageFilterOptions');
             if (!container) return;
 
+            // Das globale Coverage-Maximum liegt strukturell bei ~84,86 %
+            // (Boss's Orders, 1244/1466 Decks). Die frueheren Optionen
+            // '>= 90%' und '100%' konnten deshalb NIE treffen (0 Karten) —
+            // entfernt (Audit 2, F07, gemessen 21.08.2026).
             const thresholds = [
                 { value: '50', label: '>= 50%' },
-                { value: '70', label: '>= 70%' },
-                { value: '90', label: '>= 90%' },
-                { value: '100', label: '100%' }
+                { value: '70', label: '>= 70%' }
             ];
 
             container.innerHTML = thresholds.map(threshold => (
@@ -2420,6 +2422,15 @@
                 return;
             }
 
+            // Der "{n} cards found"-Zaehler muss dieselbe Menge meinen wie
+            // "Copy Names" (kopiert window.filteredCardsData, nur echte Karten).
+            // Die Prize-Pack-Augmentierung unten fuegt ~116 synthetische
+            // Kacheln (Duplikate echter Karten als gestempelte Prints) ein;
+            // frueher zaehlte der Zaehler DIESE mit (4.403), Copy aber nur die
+            // echten (4.287). Der Zaehler stuetzt sich daher auf die echten
+            // Karten VOR der Augmentierung (Audit 2, F08, gemessen 21.08.2026).
+            const realCardsCount = cards.filter(c => !c || !c.__prizePack).length;
+
             // Augment the list with official Prize Pack (stamped) prints: for every
             // shown print that has one, insert a read-only stamped tile right after
             // it. Guarded so a failure can never affect the normal grid.
@@ -2473,7 +2484,7 @@
                 startIndex = 0;
                 endIndex = cards.length;
                 const allShownTpl = _cdbT('cdb.cardsFoundAllShown', '{n} cards found (all shown)');
-                resultsInfo.textContent = allShownTpl.replace('{n}', cards.length.toLocaleString(_cdbLocale));
+                resultsInfo.textContent = allShownTpl.replace('{n}', realCardsCount.toLocaleString(_cdbLocale));
             } else {
                 totalPages = Math.ceil(cards.length / cardsPerPage);
                 startIndex = (currentCardsPage - 1) * cardsPerPage;
@@ -2481,7 +2492,7 @@
                 cardsToShow = cards.slice(startIndex, endIndex);
                 const pageTpl = _cdbT('cdb.cardsFoundPage', '{n} cards found (page {page} of {total})');
                 resultsInfo.textContent = pageTpl
-                    .replace('{n}', cards.length.toLocaleString(_cdbLocale))
+                    .replace('{n}', realCardsCount.toLocaleString(_cdbLocale))
                     .replace('{page}', String(currentCardsPage))
                     .replace('{total}', String(totalPages));
             }

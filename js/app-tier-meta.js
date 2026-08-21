@@ -2359,7 +2359,13 @@
             
             // Sort by global share (descending)
             result.sort((a, b) => b.global_share - a.global_share);
-            
+
+            // Der Nenner der Prozente ist die Zahl der Archetypen (nicht der
+            // Decklisten). Er wird an das Ergebnis gehängt, damit das Widget
+            // ihn einmal ausweisen kann ("von N Archetypen") — sonst liest der
+            // Prozentwert wie ein Anteil an allen Decklisten (F21).
+            result.totalArchetypes = safeTotalDecks;
+
             return result;
         }
         
@@ -2372,11 +2378,20 @@
             
             const top15 = topCards.slice(0, 15);
             const deLbl = getLang() === 'de';
-            
+            // Der Nenner der Prozente sind die Archetypen, nicht die Decklisten.
+            // Er wird einmal als Untertitel ausgewiesen ("von N Archetypen"),
+            // damit "96,7% der Archetypen" nicht als Anteil an allen Decklisten
+            // missverstanden wird (F21).
+            const nArchetypen = topCards.totalArchetypes;
+            const nennerSub = (nArchetypen != null)
+                ? `<span class="top-cards-denominator" style="font-size:0.62em; font-weight:600; color:#7f8c8d;">${
+                    deLbl ? 'von ' + nArchetypen + ' Archetypen' : 'of ' + nArchetypen + ' archetypes'}</span>`
+                : '';
+
             let html = `
                 <div class="top-cards-container">
                     <h3 style="color: #2c3e50; margin: 0 0 15px 0; font-size: 1.3em; font-weight: 800; display: flex; align-items: center; gap: 10px;">
-                        ${t('tier.mostUsedCards')}
+                        ${t('tier.mostUsedCards')}${nennerSub}
                     </h3>
                     <div class="top-cards-grid">`;
             
@@ -2433,8 +2448,8 @@
                         </div>
                         <div class="top-card-stats">
                             <div class="top-card-name">${escapeHtml(card.name)}</div>
-                            <div class="top-card-share">${fmtPct(card.global_share)} ${escapeHtml(deLbl ? 'der Decks' : 'of decks')}</div>
-                            <div class="top-card-decks">${card.deck_inclusion_count} ${escapeHtml(deLbl ? 'Decks' : 'decks')}</div>
+                            <div class="top-card-share">${fmtPct(card.global_share)} ${escapeHtml(deLbl ? 'der Archetypen' : 'of archetypes')}</div>
+                            <div class="top-card-decks">${card.deck_inclusion_count} ${escapeHtml(deLbl ? 'Archetypen' : 'archetypes')}</div>
                         </div>
                         ${aktionen}
                     </div>`;

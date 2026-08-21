@@ -146,6 +146,12 @@
             })
             .sort((a, b) => b.sharePct - a.sharePct);
 
+        // Der wahre Feldrang jedes Decks nach Anteil (1 = anteilsstärkstes).
+        // Er wird an der Kachel angezeigt, sobald das erfolgreichste Deck als
+        // Headline aus der Meistgespielt-Zählung fällt — dann behalten die
+        // übrigen ihren echten Rang, statt neu von 1 durchgezählt zu werden.
+        top.forEach((d, i) => { d.fieldRank = i + 1; });
+
         // Das Deck aus der Überschrift steht als ERSTE Kachel. Vorher waren die
         // Kacheln rein nach Anteil sortiert, während die Überschrift nach Erfolg
         // wählte — unter "Was ist gerade stark?" stand dann als erstes der
@@ -260,8 +266,17 @@
             if (d.role === 'best') {
                 role = de ? 'Erfolgreichstes Deck' : 'Most successful deck';
             } else {
+                // Der angezeigte Rang ist die ECHTE Anteils-Position des Decks
+                // (fieldRank aus der share-sortierten Liste), kein laufender
+                // Zähler über die sichtbaren Kacheln. Sonst trägt — sobald das
+                // erfolgreichste Deck zugleich das anteilsstärkste ist und als
+                // Headline aus der Zählung fällt — das Rang-2-Deck fälschlich
+                // "Rang 1". Gemessen 21.08.2026: Dragapult 9,0% ist Headline
+                // UND Feldrang 1, Mega Excadrill 7,84% ist Feldrang 2 und muss
+                // "Rang 2" heissen, nicht "Rang 1".
                 playedRank += 1;
-                role = (de ? 'Meistgespielt · Rang ' : 'Most played · rank ') + playedRank;
+                const rang = d.fieldRank != null ? d.fieldRank : playedRank;
+                role = (de ? 'Meistgespielt · Rang ' : 'Most played · rank ') + rang;
             }
             // "n = 772" ist Rechnerjargon. Wer neu im Kartenspiel ist, liest
             // daraus nichts — "aus 772 Antritten" schon.
@@ -276,12 +291,21 @@
             const verglichen = d.perfPct == null ? '' : (de
                 ? `${fak}-mal so oft wie der Schnitt`
                 : `${fak}× as often as average`);
+            // Die grosse Zahl ist IMMER der Feldanteil — auch auf der Best-
+            // Kachel, deren Überschrift "Erfolgreichstes Deck" lautet. Dort
+            // liest ein Anfänger die 9,0% sonst als Erfolgsquote, obwohl sie
+            // der Anteil ist; die Erfolgsgröße (Top-8-Quote) steht daneben im
+            // Kontext. Auf der Best-Kachel wird der Anteil deshalb ausdrücklich
+            // als "Feldanteil" benannt, statt nur "des Feldes" (F05).
+            const anteilWort = d.role === 'best'
+                ? (de ? 'Feldanteil' : 'field share')
+                : (de ? 'des Feldes' : 'of the field');
             return `
                 <div class="ds-stat${cls}">
                     <span class="ds-stat-role">${role}</span>
                     <span class="ds-stat-label">${escapeHtml(d.name)}</span>
                     <span class="ds-stat-value">${fmtPct(d.sharePct)}</span>
-                    <span class="ds-stat-context">${de ? 'des Feldes' : 'of the field'} · ${
+                    <span class="ds-stat-context">${anteilWort} · ${
                         de ? 'aus ' + antritte + ' Antritten' : 'from ' + antritte + ' entries'}<br>${
                         de ? 'Top-8-Quote' : 'top-8 rate'} ${fmtPct(d.convPct)}${
                         verglichen ? ` · ${verglichen}` : ''}</span>

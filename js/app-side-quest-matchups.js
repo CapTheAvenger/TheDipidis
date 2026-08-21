@@ -86,6 +86,7 @@
             allTypes: 'Alle Typen', sortRank: 'Meta', sortDeal: 'Schaden',
             sortTake: 'Gefahr', sortSpeed: 'Initiative',
             more: (n) => `+${n} weitere anzeigen`,
+            showingOf: (shown, total) => `zeige ${shown} von ${total} — per Suche verfeinern`,
             noMove: 'keine Angriffsattacke',
             immune: 'immun',
             keinKO: 'kein K.O.',
@@ -125,6 +126,7 @@
             allTypes: 'All types', sortRank: 'Meta', sortDeal: 'Damage',
             sortTake: 'Danger', sortSpeed: 'Speed',
             more: (n) => `show ${n} more`,
+            showingOf: (shown, total) => `showing ${shown} of ${total} — refine via search`,
             noMove: 'no damaging move',
             immune: 'immune',
             keinKO: 'no KO',
@@ -592,15 +594,22 @@
         const rows = _roster.filter(r => !q
             || r.name.toLowerCase().indexOf(q) !== -1
             || localName(r.name, 'pokemon').toLowerCase().indexOf(q) !== -1);
-        const body = rows.length ? rows.slice(0, 200).map(r => `
+        const RENDER_LIMIT = 200;
+        const body = rows.length ? rows.slice(0, RENDER_LIMIT).map(r => `
             <div class="sq-row${_me === r.name ? ' sel' : ''}" data-sq-mine="${esc(r.name)}"
                  role="button" tabindex="0">
                 <span class="nm">${esc(r.name)}${r.count
                     ? `<span class="sub"> ${r.count}</span>` : ''}</span>
             </div>`).join('')
             : `<p class="sq-empty">${esc(L().noHit)}</p>`;
+        // Gerendert werden nur RENDER_LIMIT Zeilen; bei mehr muss das Label die
+        // verborgene Menge signalisieren, statt die volle Zeilenzahl zu nennen
+        // (frueher log das Label "287", angezeigt waren 200 — Audit 2, F19).
+        const note = rows.length > RENDER_LIMIT
+            ? L().showingOf(RENDER_LIMIT, rows.length)
+            : `${rows.length}`;
         return `<div class="sq-panel">
-                ${sectionLabel(L().mine, `${rows.length}`)}
+                ${sectionLabel(L().mine, note)}
                 <input class="sq-in sq-search" type="search" value="${esc(_q)}"
                        placeholder="${esc(L().search)}" data-sq-q aria-label="${esc(L().search)}">
                 <div class="sq-list sq-mu-list">${body}</div>

@@ -2384,7 +2384,7 @@
             // missverstanden wird (F21).
             const nArchetypen = topCards.totalArchetypes;
             const nennerSub = (nArchetypen != null)
-                ? `<span class="top-cards-denominator" style="font-size:0.62em; font-weight:600; color:#7f8c8d;">${
+                ? `<span class="top-cards-denominator" style="font-weight:600; color:#7f8c8d;">${
                     deLbl ? 'von ' + nArchetypen + ' Archetypen' : 'of ' + nArchetypen + ' archetypes'}</span>`
                 : '';
 

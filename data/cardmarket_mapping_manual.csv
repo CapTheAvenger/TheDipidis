@@ -1,2 +1,20 @@
-set,number,cardmarket_product_id,source,note
+﻿set,number,cardmarket_product_id,source,note
 SVP,181,816614,maintainer-observation,"observed trend=16.11, avg30=15.68, avg7=18.42"
+HL,28,276102,tcggo+kartentext,"tcggo /ex-hidden-legends/beldum-28; Cardmarket-Name ""Beldum [Levitate | Tackle]"" deckt sich mit unserem Kartentext ""Levitate Tackle"""
+HL,29,276103,tcggo+kartentext,"tcggo /ex-hidden-legends/beldum-29; Kartentext ""Magnetic Call Metal Charge"". Loest die Doppelbelegung 276103 (stand auf HL-28 UND HL-29)"
+TRR,19,276311,tcggo+kartentext,"tcggo /ex-team-rocket-returns/dark-tyranitar-19; Kartentext ""Grind Spinning Tail Bite Off"". Loest 276311"
+TRR,20,276312,tcggo+kartentext,"tcggo /ex-team-rocket-returns/dark-tyranitar-20; Kartentext ""Sand Damage Second Strike"""
+FLF,19,281502,tcggo+kartentext,"tcggo /flashfire/litleo-19; Kartentext ""Fire Mane"". Loest 281502"
+ROS,54,282722,tcggo+kartentext,"tcggo /roaring-skies/bagon-54; Kartentext ""Continuous Headbutt"". Loest 282722"
+ROS,55,282723,tcggo+kartentext,"tcggo /roaring-skies/bagon-55; Kartentext ""Leer Almost Flight"""
+UPR,20,315951,tcggo+kartentext,"tcggo /ultra-prism/chimchar-20; Kartentext ""Flare"". Loest 315951"
+UPR,21,315952,tcggo+kartentext,"tcggo /ultra-prism/chimchar-21; Kartentext ""Fury Swipes"""
+BWP,30,279947,tcggo,"tcggo /bw-black-star-promos/victory-cup-bw30. ACHTUNG: die IDs stehen hier NICHT in Kartenreihenfolge (30 -> 279947, 31 -> 279943)"
+BWP,31,279943,tcggo,tcggo /bw-black-star-promos/victory-cup-bw31. Loest 279943
+BUS,112a,371642,tcggo,tcggo /burning-shadows/acerola-112a
+BUS,142,299540,tcggo,tcggo /burning-shadows/acerola-142. Loest 299540
+JTG,143,817295,tcggo,tcggo /journey-together/black-belts-training-143. Die strittige 817297 gehoert zu JTG-145 — beide bisherigen Zuordnungen waren falsch
+JTG,144,817296,tcggo,tcggo /journey-together/black-belts-training-144
+JTG,145,817297,tcggo,tcggo /journey-together/black-belts-training-145. Das ist die wahre Heimat der strittigen 817297
+DRM,60a,448143,tcggo,"tcggo /dragon-majesty/fiery-flint-60a. DRM-60 bleibt offen: tcggo nennt dafuer 585901, und die ID steht nicht in products_singles_6.json"
+FLF,18,281501,kartentext,"tcggo hat unter /flashfire/litleo-18 keine Seite. Cardmarket fuehrt in Flashfire genau zwei Litleo: 281501 ""[Combustion]"" und 281502 ""[Fire Mane]""; unser Kartentext sagt FLF-18 Combustion, FLF-19 Fire Mane. Eindeutig auch ohne tcggo"

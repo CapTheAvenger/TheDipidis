@@ -111,15 +111,28 @@ THRESHOLDS: Dict[str, int] = {
     # ── City League Japan, VERGANGENES Fenster (M5). Anders als die
     # vier oben duerfen diese nicht leer sein: im Vorfenster stand ein
     # grosses Championship-Turnier. Die Kartenanalyse desselben
-    # Fensters hat 315 Zeilen, die Archetypdatei am 21.08.2026 genau
-    # eine (nur den Kopf) — die beiden widersprechen sich seither.
-    # Schwelle 0 heisst hier "beobachtet, solange der Past-Scraper
-    # nichts liefert"; sie steigt auf einen echten Wert, sobald der
-    # Lauf die Zeilen zurueckbringt (S9).
+    # Fensters hat 315 Zeilen, die Archetypdatei stand am 21.08.2026
+    # bei genau einer (nur der Kopf) — die beiden widersprachen sich.
+    #
+    # Der Wochenlauf vom 22.08.2026 hat die Zeilen zurueckgebracht:
+    # 26 / 11 / 11 aus Turnier 568 (Japan Championships 2026, elf
+    # Archetypen). Damit loest diese Zeile die Zusage aus S9 ein —
+    # "Schwelle 0 heisst beobachtet, solange der Past-Scraper nichts
+    # liefert; sie steigt auf einen echten Wert, sobald der Lauf die
+    # Zeilen zurueckbringt".
+    #
+    # Bewusst deutlich unter dem beobachteten Stand: ein vergangenes
+    # Fenster wird beim naechsten Formatwechsel neu gefuellt und kann
+    # dann legitim kleiner ausfallen. Die Schwelle soll den gemessenen
+    # Fehler fangen (Datei faellt auf den Kopf zurueck), nicht eine
+    # kleinere, aber richtige Rotation zurueckwerfen — ein Revert
+    # ueberschreibt neue Wahrheit und ist teurer als eine Meldung.
+    # Feinere Drift deckt der Waechter nicht ab: file_rows fuehrt diese
+    # drei Dateien nicht.
     'city_league_analysis_past.csv':         100,   # 315 beobachtet
-    'city_league_archetypes_past.csv':       0,     # SOLL: > 0, siehe S9
-    'city_league_archetypes_past_comparison.csv':  0,
-    'city_league_archetypes_past_deck_stats.csv':  0,
+    'city_league_archetypes_past.csv':       10,    # 26 beobachtet
+    'city_league_archetypes_past_comparison.csv':  5,   # 11 beobachtet
+    'city_league_archetypes_past_deck_stats.csv':  5,   # 11 beobachtet
 }
 
 
@@ -168,11 +181,20 @@ def head_csv_rows(path: str, repo_root: str) -> int:
 # and an operator needs to look. AUDIT_DATA_PIPELINE.md F-D08.
 ANOMALY_WATCH: Dict[str, str] = {
     'labs_tournament_decks__unsorted.csv': (
-        'rows here mean labs_tournament_scraper.py routed tournaments '
-        'into the in-person-legal lag window with no matching meta '
-        'chunk — operator needs to set previous_format_key in '
-        'format_window.json or hand-classify the entries. See the '
-        'scraper warning at backend/scrapers/labs_tournament_scraper.py:497.'
+        'Zeilen hier heissen: labs_tournament_scraper.py konnte ein '
+        'Turnier keinem Meta-Chunk zuordnen. Es gibt ZWEI Wege hierher, '
+        'und der Text nannte bis zum 22.08.2026 nur den selteneren. '
+        '(a) Das Turnier hat ein Datum, faellt aber in das '
+        'in-person-legal-Lag-Fenster und kein Vorgaenger-Chunk deckt es '
+        'ab — dann hilft previous_format_key in format_window.json. '
+        '(b) Das Turnier hat GAR KEIN Datum: der Labs-Index wird '
+        'teilweise clientseitig gerendert, und ohne Datum greift weder '
+        'die Datums- noch die Namensableitung. Das ist der gemessene '
+        'Fall der 96 Zeilen vom 25.05.2026 (Turnier 0042 Regional '
+        'Brisbane, 0019 Special Event San Juan) — dort hilft '
+        'previous_format_key nichts, die Turniere kommen beim naechsten '
+        'Lauf von selbst zur Wiedervorlage. Beide Wege melden sich jetzt '
+        'im Scraperlog mit logger.warning.'
     ),
 }
 

@@ -598,6 +598,51 @@ def check_verified_collisions(findings, cur):
                      f"data/_consumers.md on match_method."))
 
 
+def check_kartentext_bericht(findings):
+    """data/card_text_resolution.csv gegen die Menge, die sie beschreibt.
+
+    Der Bericht listet je eine Zeile fuer jede Karte, deren
+    mapping_status in price_data.csv 'unverified' ist — die entschiedenen
+    UND die abgelehnten, weil die Abstentionen die Arbeitsliste des
+    Live-Pruefers sind.
+
+    Gemessen am 22.08.2026: der Bericht fuehrte 1314 Zeilen, die
+    Grundmenge nur noch 1244. Die Differenz war KEIN Defekt — 91 Karten
+    sind seit der letzten Erzeugung von 'unverified' auf 'collision'
+    gewandert, 21 kamen dazu. Aber sie war auch nicht sichtbar: kein Lauf
+    erzeugt diese Datei, sie wird von Hand angestossen und committet.
+    Zwischen zwei Anstoessen driftet sie stumm von den Daten weg, die sie
+    beschreibt, und wer sie liest, arbeitet eine veraltete Liste ab.
+
+    Deshalb WARN und nicht CRITICAL: ein veralteter Bericht ist kein
+    Datenverlust. Er ist nur eine Landkarte von gestern.
+    """
+    bericht = os.path.join(DATA, "card_text_resolution.csv")
+    preise = os.path.join(DATA, "price_data.csv")
+    if not os.path.isfile(bericht) or not os.path.isfile(preise):
+        return
+    try:
+        with open(bericht, encoding="utf-8-sig") as f:
+            zeilen = sum(1 for _ in csv.DictReader(f))
+        with open(preise, encoding="utf-8-sig") as f:
+            grundmenge = sum(
+                1 for r in csv.DictReader(f)
+                if (r.get("mapping_status") or "").strip() == "unverified")
+    except (OSError, csv.Error) as e:
+        findings.append(("WARN", f"card_text_resolution.csv ist unlesbar: {e}"))
+        return
+    if zeilen == grundmenge:
+        return
+    findings.append((
+        "WARN",
+        f"card_text_resolution.csv fuehrt {zeilen} Zeilen, price_data.csv "
+        f"aber {grundmenge} Karten mit mapping_status 'unverified' "
+        f"(Differenz {zeilen - grundmenge:+d}). Den Bericht erzeugt kein "
+        f"Lauf — er wird von Hand angestossen. Neu erzeugen mit "
+        f"'python3 scripts/resolve_by_card_text.py' (schreibt nur den "
+        f"Bericht, aendert keine Zuordnung)."))
+
+
 def check_champions_usage(findings):
     """Anteilslisten, die sich nicht auf 100 % addieren koennen.
 
@@ -1043,6 +1088,7 @@ def main():
     check_paired_emptiness(findings, empties)
     # Widersprueche brauchen keine Grundlinie.
     check_verified_collisions(findings, price)
+    check_kartentext_bericht(findings)
     check_champions_usage(findings)
     check_champions_freshness(findings)
     check_uebersicht_gegen_chunks(findings)

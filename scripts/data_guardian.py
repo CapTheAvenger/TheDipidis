@@ -554,7 +554,7 @@ def price_integrity():
              duplicate_idproducts}. All diffed against the baseline — a
     changed number is REPORTED, never repaired."""
     out = {'nonempty_eur_price': 0, 'match_methods': {}, 'duplicate_idproducts': 0,
-           'verified_collisions': []}
+           'verified_collisions': [], 'verified_collision_owners': {}}
     price_path = os.path.join(DATA, "price_data.csv")
     if os.path.exists(price_path):
         out['nonempty_eur_price'] = sum(
@@ -583,19 +583,124 @@ def price_integrity():
         out['verified_collisions'] = sorted(
             pid for pid, eintraege in nach_id.items()
             if len(eintraege) > 1 and all(m == 'live-verified' for _, m in eintraege))
+        # Wer die ID beansprucht. check_verified_collisions braucht das,
+        # um zu erkennen, ob ein Handpin die Kollision bereits
+        # entschieden hat — die Pins wirken erst beim naechsten
+        # Mapperlauf, stehen aber schon fest.
+        out['verified_collision_owners'] = {
+            pid: sorted((k.split(' ', 1)[0].strip().upper(),
+                         k.split(' ', 1)[1].strip() if ' ' in k else '')
+                        for k, _ in nach_id[pid])
+            for pid in out['verified_collisions']}
     return out
 
 
+def _gepinnte_karten() -> set:
+    """(set, number) aus data/cardmarket_mapping_manual.csv.
+
+    apply_manual_overrides setzt diese Pins NACH der Live-Pruefung und
+    schlaegt sie damit. Eine Kollision, deren beide Karten gepinnt sind,
+    ist beim naechsten Mapperlauf weg — sie steht nur noch in der
+    ausgelieferten Datei.
+    """
+    pfad = os.path.join(DATA, "cardmarket_mapping_manual.csv")
+    if not os.path.isfile(pfad):
+        return set()
+    try:
+        with open(pfad, encoding="utf-8-sig", newline="") as f:
+            return {((r.get("set") or "").strip().upper(),
+                     (r.get("number") or "").strip())
+                    for r in csv.DictReader(f)
+                    if (r.get("cardmarket_product_id") or "").strip().isdigit()}
+    except (OSError, csv.Error):
+        return set()
+
+
 def check_verified_collisions(findings, cur):
+    """Zwei Karten auf einer Produkt-ID — und was die Handpins davon
+    schon erledigt haben.
+
+    Die Trennung ist wichtig: die Pins wirken erst, wenn der Mapper das
+    naechste Mal laeuft. Bis dahin steht die Doppelbelegung weiter in
+    cardmarket_id_mapping.csv. Sie deshalb zu verschweigen waere falsch,
+    sie unveraendert als CRITICAL zu melden aber auch — der Befund ist
+    dann bereits beantwortet und wartet nur auf den Lauf.
+    """
     kol = cur.get('verified_collisions') or []
     if not kol:
         return
-    findings.append(("CRITICAL",
-                     f"{len(kol)} Cardmarket product id(s) are 'live-verified' for TWO "
-                     f"different cards at once: {', '.join(kol[:12])}"
-                     f"{' …' if len(kol) > 12 else ''} — a verification that returns two "
-                     f"answers for one product is not a verification. See "
-                     f"data/_consumers.md on match_method."))
+    gepinnt = _gepinnte_karten()
+    besitzer = cur.get('verified_collision_owners') or {}
+    erledigt, offen = [], []
+    for pid in kol:
+        karten = [tuple(k) if isinstance(k, (list, tuple)) else k
+                  for k in (besitzer.get(pid) or [])]
+        if karten and all(tuple(k) in gepinnt for k in karten):
+            erledigt.append(pid)
+        else:
+            offen.append(pid)
+    if offen:
+        findings.append(("CRITICAL",
+                         f"{len(offen)} Cardmarket product id(s) are 'live-verified' for TWO "
+                         f"different cards at once: {', '.join(offen[:12])}"
+                         f"{' …' if len(offen) > 12 else ''} — a verification that returns two "
+                         f"answers for one product is not a verification. See "
+                         f"data/_consumers.md on match_method."))
+    if erledigt:
+        findings.append((
+            "WARN",
+            f"{len(erledigt)} Doppelbelegung(en) stehen noch in "
+            f"cardmarket_id_mapping.csv, sind aber in "
+            f"cardmarket_mapping_manual.csv bereits von Hand entschieden "
+            f"({', '.join(erledigt[:12])}"
+            f"{' …' if len(erledigt) > 12 else ''}). Die Pins wirken beim "
+            f"naechsten Lauf von cardmarket_id_mapper.py; verschwindet die "
+            f"Meldung danach nicht, greift der Pin nicht."))
+
+
+def check_kartentext_bericht(findings):
+    """data/card_text_resolution.csv gegen die Menge, die sie beschreibt.
+
+    Der Bericht listet je eine Zeile fuer jede Karte, deren
+    mapping_status in price_data.csv 'unverified' ist — die entschiedenen
+    UND die abgelehnten, weil die Abstentionen die Arbeitsliste des
+    Live-Pruefers sind.
+
+    Gemessen am 22.08.2026: der Bericht fuehrte 1314 Zeilen, die
+    Grundmenge nur noch 1244. Die Differenz war KEIN Defekt — 91 Karten
+    sind seit der letzten Erzeugung von 'unverified' auf 'collision'
+    gewandert, 21 kamen dazu. Aber sie war auch nicht sichtbar: kein Lauf
+    erzeugt diese Datei, sie wird von Hand angestossen und committet.
+    Zwischen zwei Anstoessen driftet sie stumm von den Daten weg, die sie
+    beschreibt, und wer sie liest, arbeitet eine veraltete Liste ab.
+
+    Deshalb WARN und nicht CRITICAL: ein veralteter Bericht ist kein
+    Datenverlust. Er ist nur eine Landkarte von gestern.
+    """
+    bericht = os.path.join(DATA, "card_text_resolution.csv")
+    preise = os.path.join(DATA, "price_data.csv")
+    if not os.path.isfile(bericht) or not os.path.isfile(preise):
+        return
+    try:
+        with open(bericht, encoding="utf-8-sig") as f:
+            zeilen = sum(1 for _ in csv.DictReader(f))
+        with open(preise, encoding="utf-8-sig") as f:
+            grundmenge = sum(
+                1 for r in csv.DictReader(f)
+                if (r.get("mapping_status") or "").strip() == "unverified")
+    except (OSError, csv.Error) as e:
+        findings.append(("WARN", f"card_text_resolution.csv ist unlesbar: {e}"))
+        return
+    if zeilen == grundmenge:
+        return
+    findings.append((
+        "WARN",
+        f"card_text_resolution.csv fuehrt {zeilen} Zeilen, price_data.csv "
+        f"aber {grundmenge} Karten mit mapping_status 'unverified' "
+        f"(Differenz {zeilen - grundmenge:+d}). Den Bericht erzeugt kein "
+        f"Lauf — er wird von Hand angestossen. Neu erzeugen mit "
+        f"'python3 scripts/resolve_by_card_text.py' (schreibt nur den "
+        f"Bericht, aendert keine Zuordnung)."))
 
 
 def check_kartentext_bericht(findings):

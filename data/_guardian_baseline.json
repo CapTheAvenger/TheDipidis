@@ -129,21 +129,28 @@
   "city_league_analysis.csv": true,
   "city_league_archetypes.csv": true,
   "city_league_archetypes_comparison.csv": true,
-  "city_league_archetypes_deck_stats.csv": true,
-  "city_league_archetypes_past.csv": true,
-  "city_league_archetypes_past_comparison.csv": true,
-  "city_league_archetypes_past_deck_stats.csv": true
+  "city_league_archetypes_deck_stats.csv": true
  },
  "file_rows": {
   "cardmarket_card_images.csv": 1295,
   "cardmarket_id_mapping.csv": 17404,
   "cm_expansions.csv": 771,
+  "japanese_cards_database.csv": 936,
   "price_data.csv": 20419,
   "prizepack_official_images.csv": 266
  },
- "generated": "2026-08-21 09:45 UTC",
+ "generated": "2026-08-22 09:40 UTC",
+ "jp_set_rows": {
+  "HSP": 9,
+  "M4": 83,
+  "M5": 81,
+  "M6": 76,
+  "SMP": 194,
+  "SP": 265,
+  "SVP": 228
+ },
  "price_integrity": {
-  "duplicate_idproducts": 101,
+  "duplicate_idproducts": 100,
   "match_methods": {
    "live-verified": 5047,
    "manual-pin": 1,

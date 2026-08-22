@@ -1063,7 +1063,10 @@ img[src*="limitlesstcg"] {
 .right-0 { right: 0 !important; }
 .bg-purple-dark-08 { background: rgba(80,0,80,0.8) !important; }
 .color-white { color: #fff !important; }
-.fs-9 { font-size: 9px !important; }
+/* .fs-9 entfernt (22.08.2026): 9 px ist unter der Lesbarkeitsgrenze, und
+   die Klasse hatte null Verwendungen in js/ und index.html. Sie auf 11 px
+   zu heben haette einen Namen hinterlassen, der das Gegenteil seines Werts
+   behauptet. Wer 11 px braucht, nimmt .fs-11 oder var(--fs-xs). */
 .px-4 { padding-left: 4px !important; padding-right: 4px !important; }
 .py-2 { padding-top: 2px !important; padding-bottom: 2px !important; }
 .br-bottom-6 { border-radius: 0 0 6px 6px !important; }
@@ -3023,7 +3026,7 @@ img[src*="limitlesstcg"] {
     background: #fff3cd;
     color: #8a6d3b;
     border: 1px solid #f0ad4e;
-    font-size: 9px;
+    font-size: var(--fs-xs);
     line-height: 1;
     vertical-align: middle;
     cursor: help;
@@ -4152,7 +4155,7 @@ img[src*="limitlesstcg"] {
     color: #b42318;
     padding: 2px 6px;
     border-radius: 4px;
-    font-size: 0.6rem;
+    font-size: var(--fs-xs);
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -4352,7 +4355,7 @@ img[src*="limitlesstcg"] {
     color: #fff;
     padding: 1px 5px;
     border-radius: 4px;
-    font-size: 0.6rem;
+    font-size: var(--fs-xs);
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }

@@ -263,7 +263,7 @@
         height: 22px;
     }
     .header-icon-label {
-        font-size: 9px;
+        font-size: var(--fs-xs);
     }
     .lang-toggle-btn {
         height: 50px;
@@ -322,7 +322,7 @@
 @media (max-width: 380px) {
     /* Very small phones: drop the label font another notch so 5 buttons
        + lang toggle still fit in one row without overflowing. */
-    .header-icon-label { font-size: 9.5px; }
+    .header-icon-label { font-size: var(--fs-xs); }
     .header-icon-btn   { padding: 6px 2px 5px; }
 }
 

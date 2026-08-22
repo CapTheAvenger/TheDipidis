@@ -1160,7 +1160,7 @@
     #current-analysis .current-meta-stat-label-cards::before,
     #current-analysis .current-meta-stat-label-winrate::before,
     #current-analysis .current-meta-stat-label-matchup::before {
-        font-size: 9px !important;
+        font-size: var(--fs-xs) !important;
     }
 
     /* --- ID-scoped overrides for remaining font-size < 12px elements ---
@@ -1426,7 +1426,7 @@
   .wishlist-heart-badge {
     width: 16px !important;
     height: 16px !important;
-    font-size: 9px !important;
+    font-size: var(--fs-xs) !important;
     top: 20px !important;
     right: 3px !important;
   }
@@ -1584,7 +1584,7 @@
     gap: 4px !important;
   }
   #city-league-analysis .city-league-stat-label {
-    font-size: 0.52rem !important;
+    font-size: var(--fs-xs) !important;
     white-space: normal !important;
     word-break: break-word !important;
     hyphens: auto !important;
@@ -1889,7 +1889,7 @@
   }
   .tier-section .stat-badge,
   .tier-deck-grid .stat-badge {
-    font-size: 0.58rem;
+    font-size: var(--fs-xs);
     padding: 1px 4px;
     flex-wrap: wrap;
     column-gap: 3px;
@@ -1898,7 +1898,7 @@
   }
   .tier-section .stat-compare-value,
   .tier-deck-grid .stat-compare-value {
-    font-size: 0.55rem;
+    font-size: var(--fs-xs);
     margin-left: 0;
   }
   .tier-section .trend-icon,
@@ -2076,7 +2076,7 @@
   .wishlist-heart-badge {
     width: 16px !important;
     height: 16px !important;
-    font-size: 9px !important;
+    font-size: var(--fs-xs) !important;
     top: 22px !important;
     right: 2px !important;
     border-width: 1px !important;
@@ -2514,7 +2514,7 @@
 .my-deck-card-btn--rarity { background: #ffc107; color: #333; font-size: 10px; }
 .my-deck-card-btn--add    { background: #28a745; }
 .my-deck-card-btn--market {
-  font-size: 9px;
+  font-size: var(--fs-xs);
   padding: 0 2px;
   text-shadow: 0 1px 2px rgba(0,0,0,0.4);
   letter-spacing: -0.2px;
@@ -2522,7 +2522,7 @@
 .my-deck-card-btn--market-na { cursor: not-allowed; opacity: 0.7; }
 .my-deck-card-btn--coll       { background: #95a5a6; font-size: 12px; }
 .my-deck-card-btn--coll-owned { background: #27ae60; }
-.my-deck-card-btn--coll-tiny  { font-size: 9px; }
+.my-deck-card-btn--coll-tiny  { font-size: var(--fs-xs); }
 .my-deck-card-btn--wish       { background: #bdc3c7; font-size: 11px; }
 .my-deck-card-btn--wish-on    { background: #E91E63; }
 .my-deck-card-btn--delete     { background: #c0392b; font-size: 10px; }
@@ -2533,18 +2533,18 @@
 @media (max-width: 900px) {
   .my-deck-card-btn {
     height: 15px;
-    font-size: 9px;
+    font-size: var(--fs-xs);
   }
-  .my-deck-card-btn--rarity { font-size: 9px; }
-  .my-deck-card-btn--market { font-size: 7px; }
+  .my-deck-card-btn--rarity { font-size: var(--fs-xs); }
+  .my-deck-card-btn--market { font-size: var(--fs-xs); }
   .my-deck-card-btn--coll       { font-size: 10px; }
-  .my-deck-card-btn--coll-tiny  { font-size: 8px; }
-  .my-deck-card-btn--wish       { font-size: 9px; }
-  .my-deck-card-btn--delete     { font-size: 9px; }
+  .my-deck-card-btn--coll-tiny  { font-size: var(--fs-xs); }
+  .my-deck-card-btn--wish       { font-size: var(--fs-xs); }
+  .my-deck-card-btn--delete     { font-size: var(--fs-xs); }
   .my-deck-card-count {
     width: 15px;
     height: 15px;
-    font-size: 9px;
+    font-size: var(--fs-xs);
     top: 2px;
     right: 2px;
   }

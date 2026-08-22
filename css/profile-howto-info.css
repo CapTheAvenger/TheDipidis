@@ -953,7 +953,7 @@
 }
 .mockup-card-badge {
     position: absolute;
-    font-size: 0.6rem;
+    font-size: var(--fs-xs);
     font-weight: 800;
     width: 20px;
     height: 20px;
@@ -993,7 +993,7 @@
     flex-wrap: wrap;
 }
 .mockup-action-btn {
-    font-size: 0.55rem;
+    font-size: var(--fs-xs);
     font-weight: 800;
     padding: 3px 6px;
     border-radius: 4px;
@@ -1047,7 +1047,7 @@
     gap: 4px;
 }
 .mockup-nav-chip-count {
-    font-size: 0.6rem;
+    font-size: var(--fs-xs);
     font-weight: 800;
     background: rgba(255, 255, 255, 0.7);
     color: #64748b;
@@ -1175,7 +1175,7 @@
     gap: 4px;
     padding: 2px 6px;
     border-radius: 4px;
-    font-size: 0.6rem;
+    font-size: var(--fs-xs);
     font-weight: 700;
     background: rgba(255, 255, 255, 0.95);
     border: 1px solid rgba(0, 0, 0, 0.05);
@@ -1208,7 +1208,7 @@
 }
 .mockup-movers-head {
     padding: 5px 8px;
-    font-size: 0.62rem;
+    font-size: var(--fs-xs);
     font-weight: 800;
     letter-spacing: 0.04em;
     color: #fff;
@@ -1218,7 +1218,7 @@
 .mockup-movers-table {
     display: grid;
     grid-template-columns: 1fr 36px;
-    font-size: 0.62rem;
+    font-size: var(--fs-xs);
 }
 .mockup-movers-row {
     display: contents;
@@ -1258,7 +1258,7 @@
 }
 .mockup-vs-top8-head {
     padding: 5px 8px;
-    font-size: 0.62rem;
+    font-size: var(--fs-xs);
     font-weight: 800;
     letter-spacing: 0.04em;
     color: #fff;
@@ -1281,7 +1281,7 @@
     font-weight: 800;
     color: #94a3b8;
     text-align: right;
-    font-size: 0.6rem;
+    font-size: var(--fs-xs);
 }
 .mockup-vs-top8-name {
     font-weight: 700;
@@ -1333,7 +1333,7 @@
 .mockup-comparison-row .mockup-row-rank small {
     display: inline-block;
     margin-left: 4px;
-    font-size: 0.62rem;
+    font-size: var(--fs-xs);
     font-weight: 800;
     padding: 0 4px;
     border-radius: 4px;
@@ -1343,7 +1343,7 @@
 .mockup-comparison-row .mockup-row-count { font-weight: 800; color: var(--pokemon-blue, #3B4CCA); text-align: right; }
 .mockup-comparison-row .mockup-row-count small {
     display: block;
-    font-size: 0.62rem;
+    font-size: var(--fs-xs);
     font-weight: 800;
 }
 .mockup-comparison-row .mockup-row-count small.up   { color: #16a34a; }
@@ -1464,7 +1464,7 @@
     line-height: 1.2;
 }
 .mockup-wt-card-owned {
-    font-size: 0.62rem;
+    font-size: var(--fs-xs);
     color: #94a3b8;
     line-height: 1.2;
 }
@@ -1600,7 +1600,7 @@
     background: rgba(142, 68, 173, 0.85);
     color: #fff;
     text-align: center;
-    font-size: 0.6rem;
+    font-size: var(--fs-xs);
     font-weight: 800;
     padding: 2px 0;
 }
@@ -1802,7 +1802,7 @@
     white-space: nowrap;
 }
 .mockup-deck-row-name small {
-    font-size: 0.6rem;
+    font-size: var(--fs-xs);
     color: #64748b;
     font-weight: 700;
     letter-spacing: 0.04em;
@@ -1853,7 +1853,7 @@
     padding: 0 2px;
 }
 .mockup-filter-chip {
-    font-size: 0.62rem;
+    font-size: var(--fs-xs);
     font-weight: 800;
     padding: 3px 8px;
     border-radius: 999px;
@@ -1986,7 +1986,7 @@
     display: flex;
     justify-content: space-between;
     margin-top: 6px;
-    font-size: 0.62rem;
+    font-size: var(--fs-xs);
     font-weight: 800;
     color: #475569;
 }
@@ -2065,7 +2065,7 @@
 }
 .mockup-deckgrid-badge {
     position: absolute;
-    font-size: 0.6rem;
+    font-size: var(--fs-xs);
     font-weight: 800;
     padding: 2px 6px;
     border-radius: 999px;
@@ -2092,7 +2092,7 @@
     display: flex;
     flex-direction: column;
     gap: 2px;
-    font-size: 0.62rem;
+    font-size: var(--fs-xs);
     background: #fff;
     text-align: center;
     border-top: 1px solid #f0f0f0;
@@ -2129,7 +2129,7 @@
 .mockup-deckgrid-info .deck-stats {
     color: #475569;
     font-weight: 600;
-    font-size: 0.6rem;
+    font-size: var(--fs-xs);
 }
 .mockup-deckgrid-actions {
     display: flex;
@@ -2143,7 +2143,7 @@
     text-align: center;
     height: 17px;
     line-height: 17px;
-    font-size: 0.56rem;
+    font-size: var(--fs-xs);
     font-weight: 800;
     border-radius: 3px;
     background: #f1f5f9;
@@ -2210,7 +2210,7 @@
     background: #1e293b;
     color: #cbd5e1;
     padding: 6px 10px;
-    font-size: 0.62rem;
+    font-size: var(--fs-xs);
     font-weight: 800;
     letter-spacing: 0.06em;
     text-transform: uppercase;
@@ -2250,7 +2250,7 @@
     min-width: 0;
 }
 .mockup-bs-deck small {
-    font-size: 0.58rem;
+    font-size: var(--fs-xs);
     font-weight: 700;
     color: #64748b;
     letter-spacing: 0.04em;
@@ -2267,7 +2267,7 @@
     gap: 1px;
 }
 .mockup-bs-share small {
-    font-size: 0.58rem;
+    font-size: var(--fs-xs);
     font-weight: 800;
     padding: 0 4px;
     border-radius: 4px;
@@ -2289,7 +2289,7 @@
 
 /* Format-legality stamp pill (e.g. TEF-CRI) */
 .mockup-legality {
-    font-size: 0.55rem;
+    font-size: var(--fs-xs);
     font-weight: 800;
     padding: 1px 5px;
     border-radius: 3px;
@@ -2364,7 +2364,7 @@
     white-space: nowrap;
 }
 .mockup-staple-set {
-    font-size: 0.58rem;
+    font-size: var(--fs-xs);
     font-weight: 700;
     color: #64748b;
     letter-spacing: 0.04em;
@@ -2506,7 +2506,7 @@
 .mockup-matchup-wr.is-bad  { color: #dc2626; background: rgba(239, 68, 68, 0.14); }
 .mockup-matchup-wr.is-even { color: #b45309; background: rgba(245, 158, 11, 0.16); }
 .mockup-matchup-record {
-    font-size: 0.62rem;
+    font-size: var(--fs-xs);
     color: #64748b;
     font-weight: 700;
     font-variant-numeric: tabular-nums;
@@ -2632,7 +2632,7 @@
     letter-spacing: 0.02em;
 }
 .mockup-aggression-card .desc {
-    font-size: 0.58rem;
+    font-size: var(--fs-xs);
     color: #64748b;
     margin-top: 2px;
     line-height: 1.25;
@@ -2700,7 +2700,7 @@
     white-space: nowrap;
 }
 .mockup-techlist-tag {
-    font-size: 0.58rem;
+    font-size: var(--fs-xs);
     font-weight: 800;
     color: #b45309;
     background: rgba(245, 158, 11, 0.14);
@@ -2710,7 +2710,7 @@
     align-self: flex-start;
 }
 .mockup-techlist-threat {
-    font-size: 0.6rem;
+    font-size: var(--fs-xs);
     font-weight: 800;
     padding: 2px 8px;
     border-radius: 5px;
@@ -2806,7 +2806,7 @@
 }
 .mockup-format-chip small {
     display: block;
-    font-size: 0.55rem;
+    font-size: var(--fs-xs);
     font-weight: 700;
     opacity: 0.7;
     margin-top: 2px;
@@ -2838,7 +2838,7 @@
     color: var(--pokemon-blue, #3B4CCA);
 }
 .mockup-picker-row .meta {
-    font-size: 0.6rem;
+    font-size: var(--fs-xs);
     font-weight: 800;
     color: #64748b;
     letter-spacing: 0.04em;
@@ -2906,7 +2906,7 @@
     font-variant-numeric: tabular-nums;
 }
 .mockup-stat-cell .label {
-    font-size: 0.58rem;
+    font-size: var(--fs-xs);
     font-weight: 800;
     letter-spacing: 0.06em;
     text-transform: uppercase;
@@ -2973,7 +2973,7 @@
     text-align: center;
     background: rgba(255, 255, 255, 0.92);
     color: var(--pokemon-blue, #3B4CCA);
-    font-size: 0.62rem;
+    font-size: var(--fs-xs);
     font-weight: 800;
     padding: 2px 4px;
     border-radius: 4px;
@@ -3002,7 +3002,7 @@
 }
 .mockup-bj-field span {
     display: block;
-    font-size: 0.55rem;
+    font-size: var(--fs-xs);
     font-weight: 800;
     color: #64748b;
     letter-spacing: 0.04em;
@@ -3059,13 +3059,13 @@
 }
 .mockup-bj-vs small {
     display: block;
-    font-size: 0.58rem;
+    font-size: var(--fs-xs);
     color: #64748b;
     font-weight: 700;
     margin-top: 2px;
 }
 .mockup-bj-order {
-    font-size: 0.6rem;
+    font-size: var(--fs-xs);
     font-weight: 800;
     color: #475569;
     text-align: right;
@@ -3118,7 +3118,7 @@
     text-align: center;
     background: rgba(0, 0, 0, 0.7);
     color: #fde68a;
-    font-size: 0.5rem;
+    font-size: var(--fs-xs);
     font-weight: 800;
     padding: 1px 2px;
     border-radius: 3px;
@@ -3194,7 +3194,7 @@
 .mockup-trend-foot {
     display: flex;
     justify-content: space-between;
-    font-size: 0.6rem;
+    font-size: var(--fs-xs);
     font-weight: 800;
     color: #64748b;
     letter-spacing: 0.04em;
@@ -3234,7 +3234,7 @@
 }
 .mockup-tg-bot-card .head .status {
     margin-left: auto;
-    font-size: 0.6rem;
+    font-size: var(--fs-xs);
     color: #4ade80;
     font-weight: 700;
 }

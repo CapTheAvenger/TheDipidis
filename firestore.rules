@@ -53,8 +53,18 @@ service cloud.firestore {
     // size, required shape — so an open endpoint can't be used as free storage.
     // update and delete are denied outright: a link, once handed out, must not
     // change under the recipient.
+    //
+    // `list` ausdruecklich gesperrt (21.08.2026). `read` umfasst `get` UND
+    // `list`, und mit offenem `list` haette man die ganze Collection
+    // aufzaehlen koennen — womit die unerratbare ID aufhoert, eine
+    // Zugangsberechtigung zu sein. Genau derselbe Denkfehler wie bei
+    // publicProfiles, eine Collection weiter. Gemessen an der
+    // Produktivdatenbank: die Aufzaehlung ging (0 Dokumente, also kein
+    // Abfluss — aber die Tuer stand offen). js/app-features.js liest
+    // ausschliesslich per .doc(shareId).get(), `list` braucht niemand.
     match /shared_decks/{shareId} {
-      allow read: if true;
+      allow get:  if true;
+      allow list: if false;
       allow create: if shareId.size() <= 24
         && request.resource.data.keys().hasOnly(['deck', 'order', 'archetype', 'source', 'timestamp'])
         && request.resource.data.deck is map
@@ -119,13 +129,28 @@ service cloud.firestore {
     }
 
     // ─────────────────────────────────────────────────────────
-    // Testing Group Invites — one invite doc per group, world-readable
-    // by authenticated users so a non-member clicking a shared link
-    // can validate the token before attempting to join.
+    // Testing Group Invites — one invite doc per group, readable by
+    // authenticated users so a non-member clicking a shared link can
+    // validate the token before attempting to join.
     // Only the group owner can create/update/delete.
+    //
+    // NUR get, NIE list (21.08.2026). Die alte Regel lautete
+    // `allow read: if request.auth != null` — und `read` umfasst `list`.
+    // Gemessen an der Produktivdatenbank lieferte ein einziges
+    // db.collection('testingGroupInvites').get() jedem eingeloggten
+    // Nutzer jede Einladung samt `token`, `groupName` und `createdBy`.
+    // Der Token ist die Zugangsberechtigung zur Gruppe; wer ihn
+    // aufzaehlen kann, braucht den Einladungslink nicht mehr.
+    //
+    // Dieselbe Bauart wie der publicProfiles-Abfluss: eine Regel, die
+    // `get` gemeint und `read` geschrieben hat. Der Kommentar oben sagt
+    // es selbst — "a non-member CLICKING A SHARED LINK" ist ein get.
+    // js/app-testing-groups.js liest an allen vier Stellen per
+    // .doc(groupId).get(); `list` braucht niemand.
     // ─────────────────────────────────────────────────────────
     match /testingGroupInvites/{groupId} {
-      allow read: if request.auth != null;
+      allow get:  if request.auth != null;
+      allow list: if false;
       allow write: if request.auth != null
         && get(/databases/$(database)/documents/testingGroups/$(groupId))
              .data.ownerUid == request.auth.uid;

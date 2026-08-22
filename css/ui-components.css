@@ -3923,7 +3923,7 @@ img[src*="limitlesstcg"] {
    VISUAL HIERARCHY & SPACING
    ==================================== */
 .tab-content {
-    padding: 16px;
+    padding: 16px var(--page-gutter);
 }
 .section-grid-container {
     margin-bottom: 20px;

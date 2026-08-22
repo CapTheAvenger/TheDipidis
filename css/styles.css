@@ -203,7 +203,8 @@
             color: var(--text-dark);
             min-height: 100vh;
             min-height: -webkit-fill-available;
-            padding: 20px;
+            /* waagerecht: --page-gutter, siehe tokens.css */
+            padding: 20px var(--page-gutter);
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
             overflow-x: hidden;
@@ -767,7 +768,8 @@
         
         .tab-content {
             display: none;
-            padding: 20px;
+            /* waagerecht: --page-gutter, siehe tokens.css */
+            padding: 20px var(--page-gutter);
             background: white;
             min-height: 400px;
         }
@@ -2814,7 +2816,7 @@
         /* Medium Mobile Devices (Tablets & Large Phones) */
         @media (max-width: 768px) {
             body {
-                padding: 10px;
+                padding: 10px var(--page-gutter);
             }
 
             .header h1, .header h2 {
@@ -2826,7 +2828,7 @@
             }
 
             .tab-content {
-                padding: 15px;
+                padding: 15px var(--page-gutter);
             }
 
             .stat-card .value {
@@ -2884,7 +2886,7 @@
             }
 
             .tab-content {
-                padding: 6px 2px;
+                padding: 6px var(--page-gutter);
                 min-height: 300px;
             }
 
@@ -3104,11 +3106,11 @@
         
         /* iPhone 17 Pro Max & ähnliche große Smartphones (390px - 430px) */
         @media (max-width: 430px) {
-            /* Weniger Padding für mehr Kartenplatz */
-            body {
-                padding: 3px !important;
-            }
-            
+            /* Der waagerechte Rand kommt aus --page-gutter (tokens.css).
+               Hier stand bis zum 22.08.2026 `padding: 3px !important` mit
+               der Begruendung "Weniger Padding fuer mehr Kartenplatz" —
+               ein !important, das dieselbe Absicht verfolgte wie der
+               Token, nur unsichtbar und nur fuer einen Breakpoint. */
             /* Overview Grid - optimal für iPhone */
             .overview-grid {
                 grid-template-columns: 1fr !important;
@@ -3191,7 +3193,7 @@
 
             /* Tab Content Padding reduziert */
             .tab-content {
-                padding: 12px;
+                padding: 12px var(--page-gutter);
             }
 
             .tab-content h2 {
@@ -3311,7 +3313,7 @@
 
             /* Content Padding minimal */
             .tab-content {
-                padding: 10px;
+                padding: 10px var(--page-gutter);
             }
 
             /* Tables kompakt aber lesbar */
@@ -3364,7 +3366,7 @@
         /* Landscape Mode optimiert */
         @media (max-width: 932px) and (orientation: landscape) {
             body {
-                padding: 8px;
+                padding: 8px var(--page-gutter);
             }
 
             .header {
@@ -3377,7 +3379,7 @@
             }
 
             .tab-content {
-                padding: 15px;
+                padding: 15px var(--page-gutter);
                 min-height: 200px;
             }
 
@@ -3867,7 +3869,10 @@
             
             /* Tab Content */
             .tab-content {
-                padding: 12px !important;
+                /* ohne !important: die Regel musste sich frueher gegen sechs
+                   andere .tab-content-Regeln durchsetzen. Jetzt gibt es
+                   fuer den waagerechten Rand nur noch eine Quelle. */
+                padding: 12px var(--page-gutter);
             }
             
             /* Search Inputs */

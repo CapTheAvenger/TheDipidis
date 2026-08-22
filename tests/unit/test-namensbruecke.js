@@ -73,13 +73,50 @@ const turnierNamen = new Set(TURNIER.map(r => (r.deck_name || '').trim()).filter
 // 1. Die Bruecke selbst
 // ───────────────────────────────────────────────────────────────────
 describe('Die Namensbrücke ist gepflegt, nicht geraten', () => {
-    it('jede Brücke verbindet einen echten Turniernamen mit einem echten Ladder-Namen', () => {
+    it('jede Brücke zeigt auf einen echten Ladder-Namen', () => {
+        // Das Ziel MUSS es geben: es ist der kanonische Name, unter dem
+        // beide Quellen zusammengeführt werden. Zeigt er ins Leere,
+        // erzeugt die Brücke ein Deck, das es nicht gibt.
         for (const e of ALIAS.turnier_zu_ladder) {
-            assert.ok(turnierNamen.has(e.turnier),
-                `"${e.turnier}" steht in keiner Turnierdatei — die Brücke zeigt ins Leere`);
             assert.ok(ladderNamen.has(e.ladder),
                 `"${e.ladder}" steht in keiner Ladder-Datei`);
         }
+    });
+
+    it('und die Turnierseite ist entweder da oder nachweislich ausgerollt', () => {
+        // Die Turnierdatei ist ein ROLLENDES FENSTER. Gemessen am
+        // 22.08.2026: der Wochenlauf schrieb sie von 124 auf 123 Zeilen,
+        // und heraus fiel "Cornerstone Ogerpon" — 0,5 gewichtete
+        // Antritte aus einem einzigen Turnier, der kleinstmögliche
+        // Eintrag. Der Brückeneintrag war beim Anlegen richtig und ist
+        // jetzt wirkungslos, nicht falsch.
+        //
+        // Deshalb hier keine harte Forderung mehr, dass der Turniername
+        // im aktuellen Fenster steht — sondern die Forderung, die
+        // wirklich zählt: dass er belegt ist. Ein Eintrag ohne Beleg
+        // wäre geraten; ein belegter Eintrag, dessen Deck gerade nicht
+        // gespielt wird, ist einfach still. Kommt das Deck zurück,
+        // greift er wieder.
+        //
+        // Was hier NICHT gelockert wird: das Ziel muss existieren (Test
+        // darüber), der Turniername darf nicht ohnehin schon treffen
+        // (Test darunter), und jeder Eintrag braucht Zahlen im Beleg.
+        const ausgerollt = ALIAS.turnier_zu_ladder
+            .filter(e => !turnierNamen.has(e.turnier))
+            .map(e => e.turnier);
+        for (const e of ALIAS.turnier_zu_ladder) {
+            if (turnierNamen.has(e.turnier)) continue;
+            assert.ok(e.beleg && /\d/.test(e.beleg),
+                `"${e.turnier}" steht nicht im aktuellen Turnierfenster UND hat `
+                + 'keinen bezifferten Beleg — dann ist nicht mehr nachvollziehbar, '
+                + 'ob es den Namen je gab');
+        }
+        // Rollen ALLE heraus, ist nicht ein Deck ausgeschieden, sondern
+        // die Quelle kaputt oder umbenannt. Das ist ein Befund.
+        assert.notEqual(ausgerollt.length, ALIAS.turnier_zu_ladder.length,
+            'kein einziger Brückeneintrag trifft noch einen Turniernamen — '
+            + 'das ist kein Meta-Wandel mehr, sondern ein Quellenproblem: '
+            + `${ausgerollt.join(', ')}`);
     });
 
     it('und die Turnierseite hat vorher wirklich nicht getroffen', () => {
@@ -147,14 +184,28 @@ describe('Was nicht verbunden wird, bleibt sichtbar unverbunden', () => {
     });
 
     it('Brücken plus offene decken alle nicht treffenden Turniernamen ab', () => {
-        // Sonst faellt einer still durch, und genau das war der Befund.
+        // Die Richtung, auf die es ankommt: kein Turniername faellt still
+        // durch. Sonst entsteht wieder eine zweite Zeile fuer dasselbe
+        // Deck, und genau das war der Befund vom 20.08.2026.
+        //
+        // Die Gegenrichtung wird NICHT geprueft. Die Turnierdatei ist ein
+        // rollendes Fenster: am 22.08.2026 schrieb der Wochenlauf sie von
+        // 124 auf 123 Zeilen, und heraus fiel "Cornerstone Ogerpon" mit
+        // 0,5 Antritten aus einem Turnier. Ein ausgewiesener Eintrag ohne
+        // aktuellen Treffer ist wirkungslos, nicht falsch — und beim
+        // naechsten Auftreten des Decks sofort wieder richtig. Eine
+        // Mengengleichheit haette den Lauf hier rot gemacht, obwohl
+        // nichts kaputt ist; der Kommentar im Test darunter beschreibt
+        // dieselbe Falle eine Ebene tiefer.
         const nichtTreffend = [...turnierNamen].filter(n => !ladderNamen.has(n)).sort();
-        const bekannt = [
+        const bekannt = new Set([
             ...ALIAS.turnier_zu_ladder.map(e => e.turnier),
             ...ALIAS.bewusst_nicht_verbunden.map(e => e.turnier),
-        ].sort();
-        assert.deepEqual(nichtTreffend, bekannt,
-            'ein Turniername ist weder verbrückt noch als offen ausgewiesen');
+        ]);
+        const durchgefallen = nichtTreffend.filter(n => !bekannt.has(n));
+        assert.deepEqual(durchgefallen, [],
+            'ein Turniername ist weder verbrückt noch als offen ausgewiesen: '
+            + durchgefallen.join(', '));
     });
 
     it('und es sind so viele, wie die Bruecke ausweist', () => {
@@ -166,12 +217,21 @@ describe('Was nicht verbunden wird, bleibt sichtbar unverbunden', () => {
         // nicht die Bruecke, sondern nur, wann zuletzt gescrapt wurde, und
         // machen den Lauf rot, obwohl nichts kaputt ist. Der Deploy haengt an
         // gruenen Tests — das blockierte ausgerechnet die frischen Daten.
+        //
+        // Nachtrag 22.08.2026: auch die Gleichheit der ANZAHL ist eine fest
+        // verdrahtete Menge, nur besser getarnt. Rollt ein Deck aus dem
+        // Turnierfenster, sinkt die linke Seite und die rechte bleibt —
+        // dieselbe rote Ampel ohne Defekt. Geprueft wird deshalb die
+        // Richtung, die etwas bedeutet: es darf nichts UNausgewiesenes
+        // geben. Mehr Ausgewiesene als aktuell Treffende ist der Normalfall
+        // eines rollenden Fensters.
         const nichtTreffend = [...turnierNamen].filter(n => !ladderNamen.has(n));
         const ausgewiesen = ALIAS.turnier_zu_ladder.length
             + ALIAS.bewusst_nicht_verbunden.length;
-        assert.equal(nichtTreffend.length, ausgewiesen,
+        assert.ok(nichtTreffend.length <= ausgewiesen,
             'nicht treffende Namen: ' + nichtTreffend.length
-            + ', in archetype_aliases.json ausgewiesen: ' + ausgewiesen);
+            + ', in archetype_aliases.json ausgewiesen: ' + ausgewiesen
+            + ' — es gibt mehr unverbundene Namen als ausgewiesene Faelle');
         // Die Mengen duerfen wachsen, aber die Ueberschneidung muss die Regel
         // bleiben und die Ausnahme klein. Gemessen 21.08.2026: 116 von 123.
         const gemeinsam = [...turnierNamen].filter(n => ladderNamen.has(n)).length;

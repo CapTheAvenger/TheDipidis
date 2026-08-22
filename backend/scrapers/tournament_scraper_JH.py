@@ -591,7 +591,8 @@ def aggregate_tournament_cards(all_decks: list, t_info: dict, card_db: CardDatab
                 "tournament_id": t_info.get("id", ""),
                 "tournament_name": t_info.get("name", ""),
                 "meta": api_format or "Past Meta",
-                "tournament_date": t_info.get("date", ""),
+                "tournament_date": _datum_mit_override(
+                    t_info.get("id", ""), t_info.get("date", "")),
                 "archetype": arch_name,
                 "card_name": samp["name"],
                 "card_identifier": f"{samp['set_code']} {samp['card_number']}".strip(),
@@ -687,6 +688,61 @@ def _load_labs_id_overrides() -> Dict[str, str]:
     _LABS_ID_OVERRIDES_CACHE = out
     logger.info("[labs-id-overrides] loaded %d manual mappings", len(out))
     return out
+
+
+_DATE_OVERRIDES_CACHE: Optional[Dict[str, dict]] = None
+
+
+def _load_date_overrides() -> Dict[str, dict]:
+    """Korrigierte Turnierdaten aus data/labs_tournament_id_overrides.json.
+
+    Limitless ist unsere Quelle, aber nicht unfehlbar. Gemessen am
+    22.08.2026: Turnier 518 (NAIC 2026, New Orleans, 3.752 Spieler)
+    steht dort — in der Liste UND auf der Turnierseite — auf dem
+    10. Juni 2026. Das war ein Mittwoch. Ein International
+    Championship dieser Groesse laeuft Freitag bis Sonntag; das
+    Turnier fand vom 12. bis 14. Juni statt.
+
+    Wir uebernehmen die Quelle sonst unveraendert. Wo sie nachweislich
+    falsch liegt, steht die Korrektur hier — mit Begruendung, an
+    derselben Stelle wie die Labs-ID-Zuordnungen, und nicht als stille
+    Handkorrektur in der CSV, die der naechste Lauf ueberschreibt.
+
+    Rueckgabe: {tournament_id: {"tournament_date": ..., "reason": ...}}
+    """
+    global _DATE_OVERRIDES_CACHE
+    if _DATE_OVERRIDES_CACHE is not None:
+        return _DATE_OVERRIDES_CACHE
+    path = os.path.join(get_data_dir(), "labs_tournament_id_overrides.json")
+    out: Dict[str, dict] = {}
+    if os.path.exists(path):
+        try:
+            with open(path, encoding="utf-8") as f:
+                data = json.load(f)
+            for tid, info in (data.get("overrides") or {}).items():
+                if isinstance(info, dict) and (info.get("tournament_date") or "").strip():
+                    out[str(tid).strip()] = {
+                        "tournament_date": info["tournament_date"].strip(),
+                        "reason": (info.get("date_reason") or "").strip(),
+                    }
+        except Exception as e:
+            logger.warning("[date-overrides] Konnte %s nicht lesen: %s", path, e)
+    _DATE_OVERRIDES_CACHE = out
+    if out:
+        logger.info("[date-overrides] %d korrigierte Turnierdaten geladen: %s",
+                    len(out), ", ".join(sorted(out)))
+    return out
+
+
+def _datum_mit_override(tournament_id: str, datum_aus_quelle: str) -> str:
+    """Das korrigierte Datum, falls eines hinterlegt ist — sonst die Quelle."""
+    eintrag = _load_date_overrides().get(str(tournament_id).strip())
+    if not eintrag:
+        return datum_aus_quelle
+    logger.info("[date-overrides] Turnier %s: %r aus der Quelle wird zu %r (%s)",
+                tournament_id, datum_aus_quelle, eintrag["tournament_date"],
+                eintrag["reason"] or "ohne Begruendung")
+    return eintrag["tournament_date"]
 
 
 def _build_labs_id_lookup() -> dict:
@@ -799,7 +855,7 @@ def save_csv_files(data: list, output_file: str, append_mode: bool):
         {
             "tournament_id": t["id"],
             "tournament_name": t["name"],
-            "tournament_date": t.get("date", ""),
+            "tournament_date": _datum_mit_override(t.get("id", ""), t.get("date", "")),
             "players": t.get("players", ""),
             # Zweiter Weg zum Format, falls die Seite keinen Decks-Link
             # mit ?format= hergibt. _derive_meta_from_date_JH leitet den

@@ -1,0 +1,23 @@
+{
+  "_hinweis": "Wann lief welcher nicht blockierende Schritt zuletzt, und mit welchem Ergebnis. Getrennt von der Frage, ob sich die zugehoerige Datei geaendert hat.",
+  "scrapers/champions_replica_scraper.py": {
+    "status": "OK",
+    "zuletzt_erfolgreich": "2026-08-22T03:31:31Z",
+    "zuletzt_gelaufen": "2026-08-22T03:31:31Z"
+  },
+  "scrapers/labs_tournament_scraper.py": {
+    "status": "OK",
+    "zuletzt_erfolgreich": "2026-08-22T03:31:31Z",
+    "zuletzt_gelaufen": "2026-08-22T03:31:31Z"
+  },
+  "scrapers/per_decklist_scraper.py": {
+    "status": "OK",
+    "zuletzt_erfolgreich": "2026-08-22T03:31:31Z",
+    "zuletzt_gelaufen": "2026-08-22T03:31:31Z"
+  },
+  "scrapers/player_continuity_scraper.py": {
+    "status": "OK",
+    "zuletzt_erfolgreich": "2026-08-22T03:31:31Z",
+    "zuletzt_gelaufen": "2026-08-22T03:31:31Z"
+  }
+}

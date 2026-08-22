@@ -1,12 +1,12 @@
 {
   "_meta": {
-    "last_updated": "2026-08-21",
+    "last_updated": "2026-08-22",
     "window_days": 14,
-    "window_start": "2026-08-07",
-    "window_end": "2026-08-21",
-    "team_count": 53,
-    "sample_count": 318,
-    "species_count": 92,
+    "window_start": "2026-08-08",
+    "window_end": "2026-08-22",
+    "team_count": 48,
+    "sample_count": 288,
+    "species_count": 89,
     "source": "VGCPastes Champions M-A spreadsheet (gid=791705272)"
   },
   "samples": [
@@ -1104,132 +1104,6 @@
     },
     {
       "species": "Staraptor",
-      "evs": "25 HP / 15 Atk / 26 Spe",
-      "nature": "Jolly",
-      "date": "7 Aug 2026",
-      "replica": "4BBK5FUML9"
-    },
-    {
-      "species": "Farigiraf",
-      "evs": "29 HP / 12 Def / 25 SpD",
-      "nature": "Sassy",
-      "date": "7 Aug 2026",
-      "replica": "4BBK5FUML9"
-    },
-    {
-      "species": "Torkoal",
-      "evs": "32 HP / 1 Def / 32 SpA / 1 SpD",
-      "nature": "Quiet",
-      "date": "7 Aug 2026",
-      "replica": "4BBK5FUML9"
-    },
-    {
-      "species": "Basculegion",
-      "evs": "32 Atk / 2 Def / 32 Spe",
-      "nature": "Adamant",
-      "date": "7 Aug 2026",
-      "replica": "4BBK5FUML9"
-    },
-    {
-      "species": "Sneasler",
-      "evs": "4 HP / 32 Atk / 30 Spe",
-      "nature": "Adamant",
-      "date": "7 Aug 2026",
-      "replica": "4BBK5FUML9"
-    },
-    {
-      "species": "Aegislash",
-      "evs": "32 HP / 32 Atk / 2 Def",
-      "nature": "Brave",
-      "date": "7 Aug 2026",
-      "replica": "4BBK5FUML9"
-    },
-    {
-      "species": "Aerodactyl",
-      "evs": "28 HP / 11 Atk / 9 Def / 1 SpD / 17 Spe",
-      "nature": "Jolly",
-      "date": "7 Aug 2026",
-      "replica": "BEJH8RYMWG"
-    },
-    {
-      "species": "Charizard",
-      "evs": "30 HP / 30 Def / 1 SpA / 5 Spe",
-      "nature": "Modest",
-      "date": "7 Aug 2026",
-      "replica": "BEJH8RYMWG"
-    },
-    {
-      "species": "Archaludon",
-      "evs": "32 HP / 1 Def / 15 SpA / 18 SpD",
-      "nature": "Modest",
-      "date": "7 Aug 2026",
-      "replica": "BEJH8RYMWG"
-    },
-    {
-      "species": "Sylveon",
-      "evs": "18 HP / 32 Def / 10 SpA / 6 Spe",
-      "nature": "Modest",
-      "date": "7 Aug 2026",
-      "replica": "BEJH8RYMWG"
-    },
-    {
-      "species": "Basculegion",
-      "evs": "32 Atk / 2 Def / 32 Spe",
-      "nature": "Adamant",
-      "date": "7 Aug 2026",
-      "replica": "BEJH8RYMWG"
-    },
-    {
-      "species": "Incineroar",
-      "evs": "31 Atk / 12 Def / 23 Spe",
-      "nature": "Adamant",
-      "date": "7 Aug 2026",
-      "replica": "BEJH8RYMWG"
-    },
-    {
-      "species": "Froslass",
-      "evs": "26 HP / 1 Def / 4 SpA / 3 SpD / 32 Spe",
-      "nature": "Modest",
-      "date": "7 Aug 2026",
-      "replica": "MTGF5EC5XT"
-    },
-    {
-      "species": "Sneasler",
-      "evs": "4 HP / 26 Atk / 18 Def / 18 Spe",
-      "nature": "Jolly",
-      "date": "7 Aug 2026",
-      "replica": "MTGF5EC5XT"
-    },
-    {
-      "species": "Lycanroc-Dusk",
-      "evs": "32 Atk / 1 Def / 1 SpD / 32 Spe",
-      "nature": "Adamant",
-      "date": "7 Aug 2026",
-      "replica": "MTGF5EC5XT"
-    },
-    {
-      "species": "Scovillain",
-      "evs": "31 HP / 29 Def / 6 SpA",
-      "nature": "Bold",
-      "date": "7 Aug 2026",
-      "replica": "MTGF5EC5XT"
-    },
-    {
-      "species": "Kingambit",
-      "evs": "26 HP / 32 Atk / 2 Def / 6 Spe",
-      "nature": "Adamant",
-      "date": "7 Aug 2026",
-      "replica": "MTGF5EC5XT"
-    },
-    {
-      "species": "Basculegion",
-      "evs": "12 HP / 12 Atk / 28 Def / 4 SpD / 10 Spe",
-      "nature": "Adamant",
-      "date": "7 Aug 2026",
-      "replica": "MTGF5EC5XT"
-    },
-    {
-      "species": "Staraptor",
       "evs": "32 HP / 5 Atk / 29 Spe",
       "nature": "Adamant",
       "date": "19 Aug 2026",
@@ -2151,90 +2025,6 @@
       "nature": "Jolly",
       "date": "9 Aug 2026",
       "replica": "QP1XX6PC1F"
-    },
-    {
-      "species": "Gengar",
-      "evs": "15 HP / 1 Def / 30 SpA / 20 Spe",
-      "nature": "Modest",
-      "date": "7 Aug 2026",
-      "replica": "2Y5Y0VE6AK"
-    },
-    {
-      "species": "Incineroar",
-      "evs": "32 HP / 5 Atk / 18 Def / 10 SpD / 1 Spe",
-      "nature": "Adamant",
-      "date": "7 Aug 2026",
-      "replica": "2Y5Y0VE6AK"
-    },
-    {
-      "species": "Palafin",
-      "evs": "24 HP / 30 Atk / 1 SpD / 11 Spe",
-      "nature": "Adamant",
-      "date": "7 Aug 2026",
-      "replica": "2Y5Y0VE6AK"
-    },
-    {
-      "species": "Volcarona",
-      "evs": "32 HP / 18 Def / 5 SpA / 11 Spe",
-      "nature": "Modest",
-      "date": "7 Aug 2026",
-      "replica": "2Y5Y0VE6AK"
-    },
-    {
-      "species": "Sylveon",
-      "evs": "25 HP / 15 Def / 21 SpA / 5 Spe",
-      "nature": "Modest",
-      "date": "7 Aug 2026",
-      "replica": "2Y5Y0VE6AK"
-    },
-    {
-      "species": "Hydreigon",
-      "evs": "4 HP / 30 SpA / 32 Spe",
-      "nature": "Modest",
-      "date": "7 Aug 2026",
-      "replica": "2Y5Y0VE6AK"
-    },
-    {
-      "species": "Staraptor",
-      "evs": "31 HP / 1 Atk / 2 SpD / 32 Spe",
-      "nature": "Jolly",
-      "date": "7 Aug 2026",
-      "replica": "ANYKV92YU5"
-    },
-    {
-      "species": "Glimmora",
-      "evs": "1 HP / 1 Def / 32 SpA / 32 Spe",
-      "nature": "Modest",
-      "date": "7 Aug 2026",
-      "replica": "ANYKV92YU5"
-    },
-    {
-      "species": "Whimsicott",
-      "evs": "30 HP / 29 Def / 7 Spe",
-      "nature": "Timid",
-      "date": "7 Aug 2026",
-      "replica": "ANYKV92YU5"
-    },
-    {
-      "species": "Kingambit",
-      "evs": "32 HP / 25 Atk / 2 Def / 6 SpD / 1 Spe",
-      "nature": "Adamant",
-      "date": "7 Aug 2026",
-      "replica": "ANYKV92YU5"
-    },
-    {
-      "species": "Dragapult",
-      "evs": "2 HP / 32 Atk / 32 Spe",
-      "nature": "Jolly",
-      "date": "7 Aug 2026",
-      "replica": "ANYKV92YU5"
-    },
-    {
-      "species": "Delphox",
-      "evs": "3 HP / 32 Def / 10 SpA / 21 Spe",
-      "nature": "Timid",
-      "date": "7 Aug 2026",
-      "replica": "ANYKV92YU5"
     }
   ]
 }

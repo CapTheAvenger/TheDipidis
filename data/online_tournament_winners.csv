@@ -2,7 +2,12 @@ tournament_id,tournament_date,format,player_count,winner_archetype,winner_winrat
 6a2a2ad82d97f3b0c2613980,2026-07-01,CRI,109,Dragapult Dusknoir,25.0
 6a42564583fd320299bd3d12,2026-07-01,CRI,114,Slowking,27.0
 6a427cb383fd320299bd3ed1,2026-06-30,CRI,116,Slowking,18.0
+6a87870778baaa6d1c224c74,2026-08-21,PBL,103,Slowking,27.0
+6a84abd678baaa6d1c22307b,2026-08-21,PBL,143,N's Zoroark,30.0
+6a85ebda5a30714095574742,2026-08-21,PBL,144,Lopunny Dusknoir,27.0
+6a43872bc87cd9ff0a31356d,2026-08-21,PBL,106,Raging Bolt Ogerpon,25.0
 6a77f30ccdc0391d7fa61541,2026-08-21,PBL,137,Dragapult Dusknoir,25.0
+6a7a28522b308b6067b50584,2026-08-20,PBL,155,Dragapult Blaziken,30.0
 6a7f474278baaa6d1c21f248,2026-08-20,PBL,274,Dragapult,34.0
 6a81a7a55a30714095572196,2026-08-20,PBL,177,Lucario Hariyama,30.0
 6a7d2c8a2b308b6067b528cf,2026-08-19,PBL,128,Dragapult,21.0
@@ -102,8 +107,3 @@ so-many-cats,2026-07-28,PBL,128,Mega Excadrill,21.0
 6a4aeae265724db9ded3da7f,2026-07-25,PBL,111,Grimmsnarl Froslass,27.0
 6a4aea4965724db9ded3da7a,2026-07-25,PBL,168,Dragapult,40.0
 6a4578d8c87cd9ff0a314b60,2026-07-25,PBL,193,Festival Lead,7.0
-jimothy,2026-07-25,PBL,504,Grimmsnarl Froslass,39.0
-6a60c53152c24ac2da648d96,2026-07-24,PBL,105,Dragapult Blaziken,27.0
-6a5e2d9f937230b102d401a6,2026-07-24,PBL,115,Mega Excadrill,24.0
-6a5baf52937230b102d3eb53,2026-07-24,PBL,111,Palafin,27.0
-6a5f729b52c24ac2da6480ec,2026-07-24,PBL,133,Dragapult Blaziken,28.0

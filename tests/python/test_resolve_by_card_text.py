@@ -14,8 +14,30 @@ two cards claim one product.
 import importlib.util
 import os
 
+import pytest
+
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 SCRIPT = os.path.join(ROOT, 'scripts', 'resolve_by_card_text.py')
+BERICHT = os.path.join(ROOT, 'data', 'card_text_resolution.csv')
+
+
+@pytest.fixture()
+def bericht_unangetastet():
+    """Legt data/card_text_resolution.csv nach dem Test zurueck.
+
+    Ein Test darf getrackte Dateien nicht veraendern. Wer das Skript
+    von Hand laufen laesst, will den neuen Bericht — wer die Tests
+    laufen laesst, will ein sauberes Arbeitsverzeichnis."""
+    vorher = None
+    if os.path.exists(BERICHT):
+        with open(BERICHT, 'rb') as f:
+            vorher = f.read()
+    try:
+        yield
+    finally:
+        if vorher is not None:
+            with open(BERICHT, 'wb') as f:
+                f.write(vorher)
 
 spec = importlib.util.spec_from_file_location('rbct', SCRIPT)
 rbct = importlib.util.module_from_spec(spec)
@@ -114,9 +136,30 @@ def test_the_script_cannot_write_the_mapping():
     assert src.count("open(OUT, 'w'") == 1
 
 
-def test_apply_refuses_and_says_why():
+def test_apply_refuses_and_says_why(bericht_unangetastet):
     import subprocess
     r = subprocess.run(['python3', SCRIPT, '--apply'],
                        capture_output=True, text=True, cwd=ROOT)
     assert r.returncode == 2
     assert 'rebuilt from' in r.stdout
+
+
+def test_der_testlauf_hinterlaesst_das_repo_sauber():
+    """Der Test oben startet das Skript als Subprozess — dort ist
+    __name__ == '__main__', also laeuft main() und schreibt seinen
+    Bericht nach data/card_text_resolution.csv, bevor er --apply
+    verweigert. Die Datei ist getrackt.
+
+    Gemessen am 22.08.2026: ein `pytest tests/python` liess sie von
+    1.314 auf 1.244 Zeilen schrumpfen und das Arbeitsverzeichnis
+    schmutzig zurueck — dreimal in einer Nacht, jedes Mal von Hand
+    zurueckgenommen. Zwei Merge-Skripte unter redesign/ umgehen das
+    seit Monaten mit einem eigenen Handgriff, statt es zu beheben.
+
+    Am Skript ist nichts falsch: es ist ein Berichtsskript, das seinen
+    Bericht schreiben soll. Falsch war, dass ein TEST das ausloest und
+    den Stand nicht zuruecklegt. Das erledigt jetzt die Fixture."""
+    inhalt = open(BERICHT, encoding='utf-8-sig').read()
+    assert inhalt.startswith('set,number,name'), (
+        'card_text_resolution.csv hat nicht mehr ihren urspruenglichen Kopf — '
+        'die Fixture hat den Stand nicht zurueckgelegt')

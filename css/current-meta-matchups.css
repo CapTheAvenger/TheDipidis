@@ -480,7 +480,7 @@
     padding: 2px 5px;
     border-radius: 4px;
     font-weight: 900;
-    font-size: 0.6rem;
+    font-size: var(--fs-xs);
     line-height: 1;
     z-index: 2;
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
@@ -496,7 +496,10 @@
 
 #currentMetaContent .top-card-name {
     margin: 0 0 1px;
-    font-size: 0.82em;
+    /* Letztes Glied der em-Kette in dieser Ansicht: 0.82em ergab
+       gemessene 8,53 px. Die drei Geschwisterklassen darunter
+       (.top-card-share, .top-card-decks) stehen bereits auf dem Token. */
+    font-size: var(--fs-sm);
     font-weight: 800;
     color: #1a2c43;
     line-height: 1.15;
@@ -506,12 +509,26 @@
 }
 
 #currentMetaContent .top-card-share {
+    /* 0.78em ergibt gemessene 8,11 px — eigentlich zu klein. Am
+       22.08.2026 auf var(--fs-xs) gehoben und wieder zurueckgenommen.
+       Der Grund ist NICHT, dass die Anhebung etwas kaputt gemacht
+       haette: die Kachel laeuft schon vorher ueber (gemessen mit
+       unveraenderter CSS, 390 px: Inhalt 61 px in einer 55 px breiten
+       Kachel). Bei 11 px braeuchte derselbe Text rund 84 px, der
+       Ueberlauf waechst also von unauffaellig auf offensichtlich —
+       "100,0 % der Archetypen" steht dann sichtbar ueber dem Rand.
+       Die Kachel braucht ein anderes Layout, nicht eine andere
+       Schriftgroesse. Bis dahin bleibt es klein, und der Ueberlauf
+       steht als eigener Punkt auf der Mangelliste. */
     font-size: 0.78em;
     font-weight: 700;
     color: #2563eb;
 }
 
 #currentMetaContent .top-card-decks {
+    /* 0.72em ergibt gemessene 7,49 px. Wie bei .top-card-share darueber
+       am 22.08.2026 auf den Token gehoben und wieder zurueckgenommen —
+       die Kachel ist zu schmal dafuer. Siehe dort. */
     font-size: 0.72em;
     font-weight: 600;
     color: #64748b;

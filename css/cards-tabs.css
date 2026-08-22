@@ -168,7 +168,7 @@
 #cards .card-database-name {
     margin: 0 !important;
     padding-top: 1px !important;
-    font-size: 9px !important;
+    font-size: var(--fs-xs) !important;
     line-height: 1.15 !important;
     font-weight: 800 !important;
     color: #1b2537 !important;
@@ -194,7 +194,7 @@
     justify-content: center !important;
     min-height: 15px !important;
     border-radius: 999px !important;
-    font-size: 8px !important;
+    font-size: var(--fs-xs) !important;
     font-weight: 700 !important;
     padding: 1px 5px !important;
     white-space: nowrap !important;
@@ -230,7 +230,7 @@
 #cards .card-database-price-placeholder {
     min-height: 24px !important;
     border-radius: 6px !important;
-    font-size: 8px !important;
+    font-size: var(--fs-xs) !important;
     font-weight: 800 !important;
     letter-spacing: 0.1px !important;
     display: flex !important;
@@ -277,7 +277,7 @@
     width: 100% !important;
     min-height: 20px !important;
     border-radius: 6px !important;
-    font-size: 8px !important;
+    font-size: var(--fs-xs) !important;
     font-weight: 700 !important;
     display: flex !important;
     align-items: center !important;
@@ -301,7 +301,7 @@
     margin-top: 0 !important;
     min-height: 22px !important;
     border-radius: 6px !important;
-    font-size: 9px !important;
+    font-size: var(--fs-xs) !important;
     font-weight: 700 !important;
     display: flex !important;
     align-items: center !important;
@@ -510,7 +510,7 @@
     }
 
     #cards .card-database-name {
-        font-size: 8px !important;
+        font-size: var(--fs-xs) !important;
         -webkit-line-clamp: 1 !important;
     }
 
@@ -527,19 +527,19 @@
     #cards .card-database-proxy-btn,
     #cards .card-database-price-placeholder {
         min-height: 20px !important;
-        font-size: 7px !important;
+        font-size: var(--fs-xs) !important;
         padding: 1px 2px !important;
     }
 
     #cards .card-database-limitless-btn,
     #cards .card-database-limitless-placeholder {
         min-height: 18px !important;
-        font-size: 7px !important;
+        font-size: var(--fs-xs) !important;
     }
 
     #cards .card-database-coverage {
         min-height: 18px !important;
-        font-size: 7px !important;
+        font-size: var(--fs-xs) !important;
     }
 
     #cards .pagination-controls .btn-lg {
@@ -570,7 +570,7 @@
     }
 
     #cards .card-database-name {
-        font-size: 8px !important;
+        font-size: var(--fs-xs) !important;
         line-height: 1.15 !important;
         -webkit-line-clamp: 1 !important;
     }
@@ -581,7 +581,7 @@
 
     #cards .card-database-set,
     #cards .card-database-type {
-        font-size: 7px !important;
+        font-size: var(--fs-xs) !important;
         padding: 1px 4px !important;
         min-height: 14px !important;
     }
@@ -592,13 +592,13 @@
     #cards .card-database-price-placeholder,
     #cards .card-database-limitless-btn {
         min-height: 18px !important;
-        font-size: 7px !important;
+        font-size: var(--fs-xs) !important;
         padding: 1px 2px !important;
     }
 
     #cards .card-database-coverage {
         min-height: 16px !important;
-        font-size: 7px !important;
+        font-size: var(--fs-xs) !important;
         padding: 1px 4px !important;
     }
 
@@ -610,7 +610,7 @@
         min-height: 18px !important;
         max-width: 18px !important;
         max-height: 18px !important;
-        font-size: 9px !important;
+        font-size: var(--fs-xs) !important;
     }
 
     #cards .pagination-controls {
@@ -663,7 +663,7 @@
 
 @media (max-width: 360px) {
     #cards .card-database-name {
-        font-size: 7px !important;
+        font-size: var(--fs-xs) !important;
     }
 
     #cards .card-database-top-actions {
@@ -679,7 +679,7 @@
        Platz bei 360 px ist real knapp. */
     #cards .card-database-set,
     #cards .card-database-type {
-        font-size: 9px !important;
+        font-size: var(--fs-xs) !important;
     }
 
     #cards .card-database-price-btn,

@@ -2268,7 +2268,7 @@
 
     #city-league-analysis .city-league-stat-label {
         gap: 4px;
-        font-size: 0.6rem;
+        font-size: var(--fs-xs);
     }
 
     #city-league-analysis .city-league-stat-label-cards::before,
@@ -2276,7 +2276,7 @@
     #city-league-analysis .city-league-stat-label-placement::before {
         width: 13px;
         height: 13px;
-        font-size: 0.48rem;
+        font-size: var(--fs-xs);
     }
 
     #city-league-analysis .city-league-stat-value {
@@ -2303,7 +2303,7 @@
     }
 
     #city-league-analysis .city-league-stat-label {
-        font-size: 0.62rem;
+        font-size: var(--fs-xs);
         gap: 4px;
     }
 
@@ -2500,7 +2500,7 @@
 
     #current-analysis .current-meta-stat-label {
         gap: 4px;
-        font-size: 0.6rem;
+        font-size: var(--fs-xs);
     }
 
     #current-analysis .current-meta-stat-label-cards::before,
@@ -2508,7 +2508,7 @@
     #current-analysis .current-meta-stat-label-matchup::before {
         width: 13px;
         height: 13px;
-        font-size: 0.48rem;
+        font-size: var(--fs-xs);
     }
 
     #current-analysis .current-meta-stat-value {
@@ -2659,7 +2659,7 @@
 
     #past-meta .past-meta-stat-label {
         gap: 4px;
-        font-size: 0.6rem;
+        font-size: var(--fs-xs);
     }
 
     #past-meta .past-meta-stat-label-cards::before,
@@ -2667,7 +2667,7 @@
     #past-meta .past-meta-stat-label-format::before {
         width: 13px;
         height: 13px;
-        font-size: 0.48rem;
+        font-size: var(--fs-xs);
     }
 
     #past-meta .past-meta-stat-value {
@@ -2695,7 +2695,7 @@
   }
   /* Stat grid: Beschriftung kompakt */
   .city-league-stat-label {
-    font-size: 0.6rem !important;
+    font-size: var(--fs-xs) !important;
     text-align: center !important;
     word-break: break-word !important;
   }

@@ -1218,7 +1218,7 @@
     font-weight: 900;
 }
 .sq-play-picker-cell-name {
-    font-size: 0.62rem; text-align: center;
+    font-size: var(--fs-xs); text-align: center;
     line-height: 1.1; max-width: 100%; overflow: hidden; text-overflow: ellipsis;
     white-space: nowrap; width: 100%;
 }
@@ -1255,7 +1255,7 @@
     top: 2px; right: 2px;
     background: #4cd182; color: #0a1018;
     border-radius: 999px;
-    font-size: 0.55rem; font-weight: 800;
+    font-size: var(--fs-xs); font-weight: 800;
     padding: 1px 5px;
     line-height: 1.2;
     box-shadow: 0 1px 2px rgba(0,0,0,0.3);
@@ -1409,7 +1409,7 @@
 }
 .sq-play-ladder-side {
     text-align: center;
-    font-size: 0.62rem;
+    font-size: var(--fs-xs);
     font-weight: 800;
     padding: 1px 5px;
     border-radius: 8px;
@@ -1515,7 +1515,7 @@
     color: #2563ad;
 }
 .sq-play-opp-speed-typ small {
-    font-size: 0.62rem;
+    font-size: var(--fs-xs);
     color: #6b7280;
     font-weight: 500;
 }
@@ -2343,7 +2343,7 @@ body.sqp-d-open { overflow: hidden; }
     line-height: 1.1;
 }
 .sqp-ev b { font-size: 0.78rem; font-weight: 800; color: #2c3e50; font-variant-numeric: tabular-nums; }
-.sqp-ev small { font-size: 0.55rem; color: #6b7280; text-transform: uppercase; letter-spacing: 0.02em; }
+.sqp-ev small { font-size: var(--fs-xs); color: #6b7280; text-transform: uppercase; letter-spacing: 0.02em; }
 .sqp-ev.is-zero { border-color: #eef2f7; background: transparent; }
 .sqp-ev.is-zero b, .sqp-ev.is-zero small { color: #c3cad6; }
 .sqp-d-evrow { align-items: center; }
@@ -2359,11 +2359,11 @@ body.sqp-d-open { overflow: hidden; }
     position: absolute; top: 2px; left: 2px;
     min-width: 15px; height: 15px; padding: 0 3px;
     border-radius: 8px; background: #eef2ff; color: #4f46e5;
-    font-size: 0.58rem; font-weight: 800; line-height: 15px;
+    font-size: var(--fs-xs); font-weight: 800; line-height: 15px;
 }
 .sqp-d-teamname {
     display: block; margin-top: 2px;
-    font-size: 0.6rem; line-height: 1.2; color: #4a4a4a;
+    font-size: var(--fs-xs); line-height: 1.2; color: #4a4a4a;
     overflow-wrap: anywhere;
 }
 @media (max-width: 520px) {
@@ -2532,7 +2532,7 @@ body.sqp-d-open { overflow: hidden; }
     font-family: var(--sq-num); font-size: 10px;
 }
 .sq-console .sq-ev b { display: block; font-size: 11px; color: var(--sq-txt); font-weight: 600; }
-.sq-console .sq-ev span { color: var(--sq-dim2); font-size: 8.5px; text-transform: uppercase; }
+.sq-console .sq-ev span { color: var(--sq-dim2); font-size: var(--fs-xs); text-transform: uppercase; }
 .sq-console .sq-ev.z b { color: var(--sq-dim2); }
 
 /* Chips, not bars: teammate carries pct: null throughout the file, and
@@ -2558,12 +2558,12 @@ body.sqp-d-open { overflow: hidden; }
     position: absolute; top: 2px; left: 3px;
     min-width: 14px; height: 14px; padding: 0 3px; border-radius: 7px;
     background: rgba(85,102,224,.28); color: #cfd6ff;
-    font-family: var(--sq-num); font-size: 8.5px; font-weight: 700; line-height: 14px;
+    font-family: var(--sq-num); font-size: var(--fs-xs); font-weight: 700; line-height: 14px;
     text-align: center;
 }
 .sq-console .sq-mate-img { width: 34px; height: 34px; object-fit: contain; }
 .sq-console .sq-mate-nm {
-    font-size: 9.5px; line-height: 1.15; color: var(--sq-dim);
+    font-size: var(--fs-xs); line-height: 1.15; color: var(--sq-dim);
     text-align: center; overflow-wrap: anywhere;
 }
 @media (max-width: 900px) { .sq-console .sq-mates { grid-template-columns: repeat(4, 1fr); } }
@@ -2605,19 +2605,19 @@ body.sqp-d-open { overflow: hidden; }
 .sq-console .sq-set-types { display: flex; gap: 4px; flex-wrap: wrap; }
 .sq-console .sq-mu-type {
     display: inline-block; padding: 2px 7px; border-radius: 6px;
-    font-size: 9.5px; font-weight: 700; text-transform: uppercase;
+    font-size: var(--fs-xs); font-weight: 700; text-transform: uppercase;
     letter-spacing: .04em; color: #fff;
 }
 .sq-console .sq-fld { display: block; margin-bottom: 7px; }
 .sq-console .sq-fld > span {
-    display: block; font-size: 9.5px; text-transform: uppercase; letter-spacing: .08em;
+    display: block; font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: .08em;
     color: var(--sq-dim2); margin-bottom: 3px;
 }
 .sq-console .sq-set-moves { display: grid; gap: 5px; margin: 9px 0; }
 .sq-console .sq-sp { margin-top: 10px; }
 .sq-console .sq-sp-head {
     display: flex; align-items: center; justify-content: space-between;
-    font-size: 9.5px; text-transform: uppercase; letter-spacing: .08em;
+    font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: .08em;
     color: var(--sq-dim2); margin-bottom: 5px;
 }
 .sq-console .sq-sp-tot { font-family: var(--sq-num); letter-spacing: 0; text-transform: none; }
@@ -2626,7 +2626,7 @@ body.sqp-d-open { overflow: hidden; }
     display: grid; grid-template-columns: 34px minmax(0, 1fr) 26px;
     align-items: center; gap: 8px; min-height: 30px;
 }
-.sq-console .sq-sp-lbl { font-size: 9.5px; color: var(--sq-dim2); text-transform: uppercase; }
+.sq-console .sq-sp-lbl { font-size: var(--fs-xs); color: var(--sq-dim2); text-transform: uppercase; }
 .sq-console .sq-sp-val { font-family: var(--sq-num); font-size: 11px; text-align: right; }
 .sq-console .sq-sp-range { width: 100%; accent-color: var(--sq-accent); height: 22px; }
 .sq-console .sq-mu-stats {
@@ -2637,7 +2637,7 @@ body.sqp-d-open { overflow: hidden; }
     padding: 3px 2px; text-align: center; font-family: var(--sq-num);
 }
 .sq-console .sq-mu-stat b { display: block; font-size: 12px; font-weight: 700; }
-.sq-console .sq-mu-stat span { font-size: 8.5px; color: var(--sq-dim2); text-transform: uppercase; }
+.sq-console .sq-mu-stat span { font-size: var(--fs-xs); color: var(--sq-dim2); text-transform: uppercase; }
 
 /* Matchup-Tabelle */
 .sq-console .sq-mu-bar-top { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
@@ -2652,7 +2652,7 @@ body.sqp-d-open { overflow: hidden; }
 }
 .sq-console .sq-mu-head {
     margin: 10px 0 4px; padding: 0 8px;
-    font-size: 9.5px; text-transform: uppercase; letter-spacing: .08em; color: var(--sq-dim2);
+    font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: .08em; color: var(--sq-dim2);
 }
 .sq-console .sq-mu-rows { max-height: 72vh; overflow: auto; }
 .sq-console .sq-mu-row {
@@ -2665,14 +2665,14 @@ body.sqp-d-open { overflow: hidden; }
 .sq-console .sq-mu-mon { display: flex; align-items: center; gap: 6px; min-width: 0; }
 .sq-console .sq-mu-img { width: 30px; height: 30px; object-fit: contain; flex: 0 0 30px; }
 .sq-console .sq-mu-nm { font-size: 12px; font-weight: 600; min-width: 0; overflow-wrap: anywhere; }
-.sq-console .sq-mu-nm small { display: block; font-size: 9.5px; color: var(--sq-dim2); font-weight: 500; }
+.sq-console .sq-mu-nm small { display: block; font-size: var(--fs-xs); color: var(--sq-dim2); font-weight: 500; }
 
 .sq-console .sq-mu-spd {
     display: flex; align-items: baseline; gap: 5px; font-family: var(--sq-num); font-size: 11px;
 }
 .sq-console .sq-mu-spd b { font-size: 12.5px; }
 .sq-console .sq-mu-spd span {
-    font-family: inherit; font-size: 9.5px; letter-spacing: .02em;
+    font-family: inherit; font-size: var(--fs-xs); letter-spacing: .02em;
 }
 .sq-console .sq-mu-spd i { font-style: normal; color: var(--sq-dim2); }
 .sq-console .sq-mu-spd.is-fast b, .sq-console .sq-mu-spd.is-fast span { color: #6fdca0; }
@@ -2682,13 +2682,13 @@ body.sqp-d-open { overflow: hidden; }
 .sq-console .sq-mu-cell { display: block; min-width: 0; }
 .sq-console .sq-mu-cell::before {
     content: attr(data-lbl); display: none;
-    font-size: 9px; text-transform: uppercase; letter-spacing: .08em; color: var(--sq-dim2);
+    font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: .08em; color: var(--sq-dim2);
 }
 .sq-console .sq-mu-mv {
     display: block; font-size: 11.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 .sq-console .sq-mu-eff {
-    font-style: normal; font-family: var(--sq-num); font-size: 9.5px;
+    font-style: normal; font-family: var(--sq-num); font-size: var(--fs-xs);
     margin-left: 5px; padding: 1px 4px; border-radius: 4px;
     background: var(--sq-deep); color: var(--sq-dim);
 }
@@ -2722,13 +2722,13 @@ body.sqp-d-open { overflow: hidden; }
     gap: 8px; align-items: center;
 }
 .sq-console .sq-calc-head {
-    font-size: 9.5px; text-transform: uppercase; letter-spacing: .08em;
+    font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: .08em;
     color: var(--sq-dim2); margin-bottom: 3px;
 }
 .sq-console .sq-calc-row { padding: 5px 0; border-top: .8px solid rgba(37,48,87,.5); min-height: 38px; }
 .sq-console .sq-calc-mv { font-size: 12px; min-width: 0; }
-.sq-console .sq-calc-mv small { display: block; font-size: 9.5px; color: var(--sq-dim2); }
-.sq-console .sq-calc-meta { display: block; font-style: normal; font-size: 9.5px; color: var(--sq-dim2); }
+.sq-console .sq-calc-mv small { display: block; font-size: var(--fs-xs); color: var(--sq-dim2); }
+.sq-console .sq-calc-meta { display: block; font-style: normal; font-size: var(--fs-xs); color: var(--sq-dim2); }
 /* Der 25-%-Abzug fuer Flaechenattacken im Doppelkampf. Er steht in der
    Metazeile der Attacke, weil ein Erdbeben mit 75 statt 100 Schaden sonst
    nach einem Rechenfehler aussieht. Bernstein wie ueberall sonst auf der

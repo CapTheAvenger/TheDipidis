@@ -374,7 +374,7 @@
 .pt-btn { background: rgba(255,255,255,0.9); color: #1b3b8c; border: 2px solid var(--pokemon-yellow); border-radius: 20px; padding: 4px 12px; cursor: pointer; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); white-space: nowrap; transition: all 0.15s ease; font-family: inherit; }
 .pt-btn:hover { background: var(--pokemon-yellow); color: #000; transform: translateY(-2px); }
 .pt-btn.pt-danger { background: var(--color-error); color: white; border-color: var(--color-error-dark); min-height: 44px; min-width: 44px; }
-.pt-zone-label { color: rgba(255,255,255,0.9); font-size: 9px; text-transform: uppercase; letter-spacing: 1px; font-weight: 900; margin-bottom: 2px; text-shadow: 1px 1px 2px rgba(0,0,0,0.8); }
+.pt-zone-label { color: rgba(255,255,255,0.9); font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: 1px; font-weight: 900; margin-bottom: 2px; text-shadow: 1px 1px 2px rgba(0,0,0,0.8); }
 
 .pt-arena {
     position: relative;
@@ -399,7 +399,7 @@
     border: 2px solid rgba(255,255,255,0.2); border-radius: 50%; transform: translate(-50%, -50%); z-index: 0; pointer-events: none;
 }
 
-.pt-empty-slot { width: clamp(45px, 7vw, 58px); height: auto; aspect-ratio: 2.5 / 3.5; border: 2px dashed rgba(255,255,255,0.28); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,0.32); font-size: 9px; cursor: pointer; transition: all 0.2s; text-align: center; user-select: none; box-sizing: border-box; flex-shrink: 0; background: rgba(0,0,0,0.15); position: relative; z-index: 2; }
+.pt-empty-slot { width: clamp(45px, 7vw, 58px); height: auto; aspect-ratio: 2.5 / 3.5; border: 2px dashed rgba(255,255,255,0.28); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,0.32); font-size: var(--fs-xs); cursor: pointer; transition: all 0.2s; text-align: center; user-select: none; box-sizing: border-box; flex-shrink: 0; background: rgba(0,0,0,0.15); position: relative; z-index: 2; }
 .pt-empty-slot.pt-drop-target, .pt-empty-slot:hover { border-color: var(--pokemon-yellow); background: rgba(255, 203, 5, 0.15); color: var(--pokemon-yellow); box-shadow: 0 0 10px rgba(255,203,5,0.3); }
 .pt-field-card { position: relative; width: clamp(45px, 7vw, 58px); height: auto; aspect-ratio: 2.5 / 3.5; cursor: pointer; border-radius: 4px; transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 2px 2px 6px rgba(0,0,0,0.4); user-select: none; flex-shrink: 0; z-index: 2; }
 .pt-field-card:hover { transform: scale(1.2); z-index: 10; }
@@ -462,7 +462,7 @@
 
 .pt-field-actions { position: absolute; bottom: -30px; left: 50%; transform: translateX(-50%); display: none; gap: 2px; z-index: 100; background: rgba(0,0,0,0.9); padding: 4px; border-radius: 6px; border: 1px solid #444; flex-direction: column; }
 .pt-field-card:hover ~ .pt-field-actions, .pt-field-actions:hover { display: flex; }
-.pt-action-btn { background: #333; color: #fff; border: 1px solid #555; border-radius: 4px; padding: 2px 5px; font-size: 9px; font-weight: bold; cursor: pointer; }
+.pt-action-btn { background: #333; color: #fff; border: 1px solid #555; border-radius: 4px; padding: 2px 5px; font-size: var(--fs-xs); font-weight: bold; cursor: pointer; }
 .pt-action-btn.red { background: var(--color-error); border-color: var(--color-error-dark); }
 .pt-action-btn:hover { background: #555; }
 
@@ -495,7 +495,7 @@
 .pt-hand-wrapper:hover .pt-hand-disc-btn,
 .pt-hand-wrapper:hover .pt-hand-play-btn { display: flex; }
 
-.pt-marker { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 18px; border-radius: 4px; font-weight: 900; font-size: 9px; cursor: pointer; border: 2px solid; transition: all 0.2s; }
+.pt-marker { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 18px; border-radius: 4px; font-weight: 900; font-size: var(--fs-xs); cursor: pointer; border: 2px solid; transition: all 0.2s; }
 .pt-marker-vstar { background: linear-gradient(135deg, #fff, #a8e6cf); color: #000; border-color: #fff; }
 .pt-marker-gx { background: linear-gradient(135deg, #333, #000); color: #fff; border-color: #00bcd4; }
 .pt-marker.used { opacity: 0.3; filter: grayscale(1); transform: scale(0.95); }
@@ -607,10 +607,10 @@ input[type="number"] { -moz-appearance: textfield; }
 @media (max-width: 1024px) {
     .pt-arena { min-height: min(500px, 75vh); border-radius: 12px; }
     .pt-btn { font-size: 10px; padding: 3px 8px; }
-    .pt-zone-label { font-size: 8px; }
+    .pt-zone-label { font-size: var(--fs-xs); }
     .pt-deck-controls { width: 120px; padding: 6px; left: 50px; }
     .pt-cmd-input { width: 85px; font-size: 10px; padding: 4px 6px; }
-    .pt-legend-box { font-size: 9px; padding: 6px 8px; }
+    .pt-legend-box { font-size: var(--fs-xs); padding: 6px 8px; }
     #ptActionLogPanel { width: 180px; height: 200px; font-size: 10px; right: 8px; top: 50px; }
 }
 
@@ -618,9 +618,9 @@ input[type="number"] { -moz-appearance: textfield; }
     .pt-arena { min-height: min(420px, 70vh); border-width: 2px; border-radius: 8px; }
     .pt-legend-box { display: none; }
     .pt-deck-controls { width: 110px; padding: 4px; left: 40px; }
-    .pt-btn { font-size: 9px; padding: 2px 6px; }
+    .pt-btn { font-size: var(--fs-xs); padding: 2px 6px; }
     .pt-hand-zone { padding: 4px 8px; padding-bottom: 8px; }
-    #ptActionLogPanel { width: 150px; height: 160px; font-size: 9px; }
+    #ptActionLogPanel { width: 150px; height: 160px; font-size: var(--fs-xs); }
 }
 
 /* â”€â”€ CARD CONTEXT MENU (HOVER OVERLAY) â”€â”€ */

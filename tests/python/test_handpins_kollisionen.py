@@ -146,6 +146,29 @@ def test_die_beiden_belege_des_betreibers_stimmen(pins):
         "tcggo /ex-team-rocket-returns/dark-tyranitar-19")
 
 
+# Zwei Pins, bei denen der Cardmarket-Produktname die Attacken anders
+# schreibt als die Karte selbst. Beides sind Cardmarket-Ungenauigkeiten,
+# keine falschen Karten — einzeln auf tcggo nachgesehen und bestaetigt:
+#
+#   PBL-55 Morpeko ex   CM "Wheel Draw | Hangry Bomber"
+#                       Karte "Wheely Draw" / "Hangry Blaster"
+#                       tcggo /pitch-black/morpeko-ex -> 895840 (= unsere)
+#   POR-52 Drapion      CM "Wrack Down | Hazard Tail"
+#                       Karte "Wrack Down" / "Hazardous Tail"
+#                       tcggo /perfect-order/drapion -> 877468 (= unsere)
+#   CRI-32 Deoxys       CM "Psychic Spear", Karte "Psyspear"
+#                       tcggo /chaos-rising/deoxys-32 -> 886424
+#                       Hier ist die Abweichung sogar ein Beleg FUER die
+#                       Korrektur: die alte Zuordnung 886425 hiess
+#                       "Psychic Protect" — eine andere Attacke, nicht
+#                       eine andere Schreibweise.
+#
+# Die Ausnahme steht hier namentlich und nicht als aufgeweichter
+# Vergleich: eine Fuzzy-Regel wuerde auch echte Verwechslungen
+# durchlassen.
+CM_NAME_WEICHT_AB = {("PBL", "55"), ("POR", "52"), ("CRI", "32")}
+
+
 def test_der_kartentext_widerspricht_keinem_pin(pins):
     """Gegenprobe aus einer Quelle, die Cardmarket nie beruehrt hat: wo
     der Cardmarket-Produktname die Attacken in Klammern fuehrt, muessen
@@ -162,6 +185,8 @@ def test_der_kartentext_widerspricht_keinem_pin(pins):
 
     geprueft = 0
     for r in pins:
+        if (r["set"], r["number"]) in CM_NAME_WEICHT_AB:
+            continue
         name = prod.get(r["cardmarket_product_id"].strip(), "")
         if "[" not in name or "]" not in name:
             continue          # Trainer o. ae. — kein Attackenteil im Namen

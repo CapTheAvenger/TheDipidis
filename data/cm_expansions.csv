@@ -7,7 +7,7 @@ id_expansion,expansion_code,name,release_date,code_source,n_singles
 2916,SP,Sword & Shield Ultra-Premium Collection - Charizard Promos,2019-12-02,tcg,386
 6673,,,2026-07-28,,380
 5519,,Shiny Treasure ex,2023-10-20,,360
-6328,,Mission Reward Vol. 1 Pack,2025-04-07,,357
+6328,,Mission Reward Vol. 1 Pack,2025-04-07,,358
 6582,,,2026-05-22,,357
 3214,,12th Pokémon Card Gym Promo Sword & Shield,2020-05-25,,354
 5318,PAL,Paldea Evolved,2023-03-24,tcg,337
@@ -23,9 +23,9 @@ id_expansion,expansion_code,name,release_date,code_source,n_singles
 4382,FST,Fusion Strike,2021-08-30,tcg,303
 6127,,,2025-05-02,,302
 6395,ASC,Ascended Heroes,2025-11-20,tcg,296
+6455,,,2026-01-28,,296
 2487,UNM,Unified Minds,2019-06-13,tcg,293
 4390,,VMAX Climax,2021-10-04,,293
-6455,,,2026-01-28,,293
 6633,,CSV10C: Chasing Glory Together,2026-06-30,,287
 2644,CEC,Cosmic Eclipse,2019-09-03,tcg,285
 5879,SSP,Surging Sparks,2024-08-23,tcg,281
@@ -39,10 +39,11 @@ id_expansion,expansion_code,name,release_date,code_source,n_singles
 5093,LOR,Lost Origin,2022-06-24,tcg,266
 5142,SIT,Silver Tempest 6,2022-08-25,tcg,266
 6568,,CSV9C: Stellar Crystal,2026-04-30,,266
+6699,,,2026-08-19,,266
 6495,,CSV8C: Brilliant Fantasy,2026-02-17,,264
 5589,TEF,Temporal Forces,2024-01-11,tcg,263
 5198,,VSTAR Universe,2022-10-28,,262
-4328,EVS,Evolving Skies,2021-06-10,tcg,259
+4328,EVS,Evolving Skies,2021-06-10,tcg,260
 6416,,CSV7C: Blade Awakening,2025-12-08,,259
 6595,,CSV9.5C: Terastal Gathering,2026-05-28,,259
 2921,SSH,Sword & Shield,2019-12-02,tcg,258
@@ -81,12 +82,13 @@ id_expansion,expansion_code,name,release_date,code_source,n_singles
 5328,,Pokémon Card 151,2023-04-05,,210
 5802,SCR,Stellar Crown,2024-06-28,tcg,209
 3630,SHF,Shining Fates,2020-12-10,tcg,208
+4170,,,2021-04-01,,207
 3675,BST,Battle Styles,2020-12-15,tcg,206
-4170,,,2021-04-01,,206
 6342,,CSM1bC: Storming Emergence - Verdant,2024-11-14,,204
 6311,,CSVE1C: Battle Party Dream Together Set,2025-04-24,,202
 5431,PPS3,Play! Pokémon Prize Pack Series Three,2023-08-02,pps,201
 6298,,CS1bC: Dynamax Clash - Flame,2024-07-24,,199
+6391,,,2025-11-19,,198
 6447,,CBB4C: Gem Pack Vol. 4,2026-01-13,,196
 6544,,CBB5C: Gem Pack Vol. 5,2026-03-31,,196
 6669,,CBB6C: Gem Pack Vol. 6,2026-07-22,,196
@@ -145,18 +147,18 @@ id_expansion,expansion_code,name,release_date,code_source,n_singles
 4168,,Pokémon Card VS Grass/Lightning,2021-03-23,,151
 6543,,CSVH4C: Happy Set Decidueye & Melmetal & Koraidon & Miraidon Box Set,2026-03-31,,151
 1843,CIN,Crimson Invasion,2017-08-25,tcg,150
+6232,MEP,First Partner Illustration,2025-09-25,tcg,149
 1548,UF,EX Unseen Forces,0000-00-00,tcg,147
 1581,LTR,Legendary Treasures,0000-00-00,tcg,147
 6672,,,2026-07-27,,146
 1555,DP,Diamond & Pearl,0000-00-00,tcg,145
-6232,MEP,First Partner Illustration,2025-09-25,tcg,145
 1571,BLW,Black & White,0000-00-00,tcg,144
 1578,PLS,Plasma Storm,0000-00-00,tcg,144
 1693,GEN,Generations,2016-02-02,tcg,143
 1716,STS,Steam Siege,2016-05-04,tcg,143
+6230,,Pokémon Card Gym Promo MEGA Vol. 1,2025-07-25,,143
 6279,,CS2aC: Vivid Portrayals - Obsidian,2024-07-24,,143
 6281,,CS2bC: Vivid Portrayals - Indigo,2024-07-24,,143
-6230,,Pokémon Card Gym Promo MEGA Vol. 1,2025-07-25,,142
 5409,,Ruler of the Black Flame,2023-06-22,,141
 6168,,CSVL1C: Adventure Special Pack,2025-06-11,,141
 6634,,CSVH5C: Happy Set Mewtwo & Dragonite & Camerupt & Sinistcha Box Set,2026-07-02,,141
@@ -190,7 +192,6 @@ id_expansion,expansion_code,name,release_date,code_source,n_singles
 4360,,Fusion Arts,2021-08-02,,129
 6393,,,2025-11-19,,129
 1563,RR,Rising Rivals,0000-00-00,tcg,128
-6391,,,2025-11-19,,128
 1575,DEX,Dark Explorers,0000-00-00,tcg,127
 1583,FLF,Flashfire,0000-00-00,tcg,127
 3389,,V Starter Decks: Eevee V Starter Deck,2020-07-10,,127
@@ -522,6 +523,7 @@ id_expansion,expansion_code,name,release_date,code_source,n_singles
 4515,,Premium Trainer Box VSTAR,2022-01-19,,38
 5422,,Ruler of the Black Flame Deck Build Box,2023-06-22,,38
 5724,,Gift Box Emerald,2024-04-08,,38
+6697,SVE,,2026-08-17,tcg,37
 5796,,Trick or Trade 2024,2024-06-24,,36
 4249,,Tag Team GX Premium Trainer Box,2021-03-17,,35
 5530,,Pokémon Trading Card Game Classic: Venusaur & Lugia ex Deck,2023-11-17,,35
@@ -649,6 +651,7 @@ id_expansion,expansion_code,name,release_date,code_source,n_singles
 5874,,Mudkip Constructed Starter Deck,2024-08-21,,19
 5875,,Torchic Constructed Starter Deck,2024-08-21,,19
 5876,,Treecko Constructed Starter Deck,2024-08-21,,19
+6231,,Mega Latias ex Box,2025-07-25,,19
 6368,,Arceus & Dialga & Palkia GX Premium Deck Building Box,2024-11-14,,19
 6402,,Mew Confluence Deck Building Advanced Gift Box,2024-11-28,,19
 6404,,CSBC: Primordial Arts Deck Building Gift Box Venusaur,2024-07-24,,19
@@ -691,7 +694,6 @@ id_expansion,expansion_code,name,release_date,code_source,n_singles
 5720,,Feraligatr Constructed Starter Deck,2024-04-08,,16
 5721,,Typhlosion Constructed Starter Deck,2024-04-08,,16
 5722,,Meganium Constructed Starter Deck,2024-04-08,,16
-6231,,Mega Latias ex Box,2025-07-25,,16
 6302,,Poké Ball Gift Box: Pokémon Art Illustration Celebration Gathering,2024-12-11,,16
 6349,,Art Illustration Celebration: Poké Ball,2025-10-14,,16
 4144,,Yveltal Half Deck,2021-03-19,,15
@@ -748,7 +750,7 @@ id_expansion,expansion_code,name,release_date,code_source,n_singles
 4299,,Pokémon Movie: Premium Cards Collection 2008,2021-05-28,,9
 4342,,,2021-06-22,,9
 4343,,,2021-06-22,,9
-5415,MEE,Legacy Evolution Collection,2017-04-12,tcg,9
+5415,,Legacy Evolution Collection,2017-04-12,,9
 5861,,,2024-08-20,,9
 6401,,Vaporeon VMAX Gift Box,2024-06-24,,9
 3610,,VMAX Special Set,2020-12-02,,8

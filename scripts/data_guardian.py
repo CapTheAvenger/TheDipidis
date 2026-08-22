@@ -658,49 +658,71 @@ def check_verified_collisions(findings, cur):
             f"Meldung danach nicht, greift der Pin nicht."))
 
 
-def check_kartentext_bericht(findings):
-    """data/card_text_resolution.csv gegen die Menge, die sie beschreibt.
+def check_meta_preiszuordnung(findings):
+    """Preiszuordnungen der Karten, die im aktuellen Meta WIRKLICH gespielt
+    werden.
 
-    Der Bericht listet je eine Zeile fuer jede Karte, deren
-    mapping_status in price_data.csv 'unverified' ist — die entschiedenen
-    UND die abgelehnten, weil die Abstentionen die Arbeitsliste des
-    Live-Pruefers sind.
+    Die Gesamtzahl der unbestaetigten Zuordnungen ist als Kennzahl fast
+    wertlos: am 22.08.2026 waren es 1.244 von 20.419 Preiszeilen — aber nur
+    **28** davon standen in einer Deckliste des laufenden Formats. Die
+    anderen 1.216 sind alte Karten, die niemand mehr spielt. Eine Meldung
+    ueber 1.244 Zeilen laesst den Leser die falsche Groesse sehen und wird
+    nach dem dritten Mal ueberblaettert.
 
-    Gemessen am 22.08.2026: der Bericht fuehrte 1314 Zeilen, die
-    Grundmenge nur noch 1244. Die Differenz war KEIN Defekt — 91 Karten
-    sind seit der letzten Erzeugung von 'unverified' auf 'collision'
-    gewandert, 21 kamen dazu. Aber sie war auch nicht sichtbar: kein Lauf
-    erzeugt diese Datei, sie wird von Hand angestossen und committet.
-    Zwischen zwei Anstoessen driftet sie stumm von den Daten weg, die sie
-    beschreibt, und wer sie liest, arbeitet eine veraltete Liste ab.
+    Diese Pruefung zaehlt deshalb nur, was zaehlt: Karten aus
+    current_meta_card_data.csv, deren Zuordnung nicht bestaetigt ist.
 
-    Deshalb WARN und nicht CRITICAL: ein veralteter Bericht ist kein
-    Datenverlust. Er ist nur eine Landkarte von gestern.
+    Die acht MEE-Grundenergien sind ein bekannter, gesondert dokumentierter
+    Fall (Cardmarket fuehrt fuer MEE keine eigene Expansion, die Zuordnung
+    faellt auf die SVE-Energien zurueck). Sie stehen getrennt in der
+    Meldung — sonst verdecken sie den Fall, der neu waere.
     """
-    bericht = os.path.join(DATA, "card_text_resolution.csv")
-    preise = os.path.join(DATA, "price_data.csv")
-    if not os.path.isfile(bericht) or not os.path.isfile(preise):
+    meta_pfad = os.path.join(DATA, "current_meta_card_data.csv")
+    preis_pfad = os.path.join(DATA, "price_data.csv")
+    if not (os.path.isfile(meta_pfad) and os.path.isfile(preis_pfad)):
         return
     try:
-        with open(bericht, encoding="utf-8-sig") as f:
-            zeilen = sum(1 for _ in csv.DictReader(f))
-        with open(preise, encoding="utf-8-sig") as f:
-            grundmenge = sum(
-                1 for r in csv.DictReader(f)
-                if (r.get("mapping_status") or "").strip() == "unverified")
+        gespielt = set()
+        with open(meta_pfad, encoding="utf-8-sig", newline="") as f:
+            for r in csv.DictReader(f, delimiter=";"):
+                sc = (r.get("set_code") or "").strip().upper()
+                nr = (r.get("set_number") or "").strip()
+                if sc and nr:
+                    gespielt.add((sc, nr))
+        offen, energien = [], []
+        with open(preis_pfad, encoding="utf-8-sig", newline="") as f:
+            for r in csv.DictReader(f):
+                k = ((r.get("set") or "").strip().upper(),
+                     (r.get("number") or "").strip())
+                if k not in gespielt:
+                    continue
+                if (r.get("mapping_status") or "").strip() in ("ok", ""):
+                    continue
+                (energien if k[0] == "MEE" else offen).append(f"{k[0]} {k[1]}")
     except (OSError, csv.Error) as e:
-        findings.append(("WARN", f"card_text_resolution.csv ist unlesbar: {e}"))
+        findings.append(("WARN", f"Meta-Preiszuordnung nicht pruefbar: {e}"))
         return
-    if zeilen == grundmenge:
+    if not gespielt:
+        findings.append(("WARN",
+                         "current_meta_card_data.csv nennt keine Karten — "
+                         "die Meta-Preispruefung laeuft ins Leere"))
         return
-    findings.append((
-        "WARN",
-        f"card_text_resolution.csv fuehrt {zeilen} Zeilen, price_data.csv "
-        f"aber {grundmenge} Karten mit mapping_status 'unverified' "
-        f"(Differenz {zeilen - grundmenge:+d}). Den Bericht erzeugt kein "
-        f"Lauf — er wird von Hand angestossen. Neu erzeugen mit "
-        f"'python3 scripts/resolve_by_card_text.py' (schreibt nur den "
-        f"Bericht, aendert keine Zuordnung)."))
+    if offen:
+        findings.append((
+            "WARN",
+            f"{len(offen)} von {len(gespielt)} im aktuellen Meta gespielten "
+            f"Karten haben keine bestaetigte Produktzuordnung: "
+            f"{', '.join(sorted(offen)[:15])}"
+            f"{' …' if len(offen) > 15 else ''}. Belegbare Faelle gehoeren "
+            f"nach data/cardmarket_mapping_manual.csv — tcggo.com nennt auf "
+            f"jeder Kartenseite die Cardmarket-ID."))
+    if energien:
+        findings.append((
+            "INFO",
+            f"{len(energien)} MEE-Grundenergie(n) im Meta ohne bestaetigte "
+            f"Zuordnung — bekannter Fall: Cardmarket fuehrt fuer MEE keine "
+            f"eigene Expansion, die Zuordnung faellt auf die SVE-Energien "
+            f"zurueck. Betrag je Karte im Centbereich."))
 
 
 def check_kartentext_bericht(findings):
@@ -1194,6 +1216,7 @@ def main():
     # Widersprueche brauchen keine Grundlinie.
     check_verified_collisions(findings, price)
     check_kartentext_bericht(findings)
+    check_meta_preiszuordnung(findings)
     check_champions_usage(findings)
     check_champions_freshness(findings)
     check_uebersicht_gegen_chunks(findings)

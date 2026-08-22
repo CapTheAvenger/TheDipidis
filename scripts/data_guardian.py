@@ -283,6 +283,35 @@ def empty_data_files():
     return out
 
 
+def _leer_erlaubt() -> set:
+    """Dateien, die laut Sanity-Tor leer sein DUERFEN.
+
+    scripts/sanity_check_data.py fuehrt sie mit Schwelle 0 — woertlich
+    "watched but allowed to be empty (Sommerpause + similar)". Diese
+    Deklaration existiert bereits; der Waechter hat sie bis zum
+    22.08.2026 nur nicht gelesen und die vier City-League-Dateien des
+    LAUFENDEN japanischen Fensters nach 21 Tagen zu CRITICAL eskaliert.
+
+    Gemessen an diesem Tag: vier von fuenf kritischen Befunden waren
+    genau diese Meldung — waehrend die japanische City League
+    nachweislich in der Saisonpause steht und leer der richtige Zustand
+    ist. Ein Waechter, der viermal falschen Alarm schlaegt, wird beim
+    fuenften Mal nicht mehr gelesen; der Modulkommentar oben sagt das
+    selbst ueber absolute Schwellen.
+
+    Zwei Listen, eine Wahrheit: statt hier eine zweite Ausnahmeliste zu
+    pflegen, wird die vorhandene gelesen. Faellt der Import aus, bleibt
+    das alte, strengere Verhalten.
+    """
+    try:
+        import sys as _sys
+        _sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        from sanity_check_data import THRESHOLDS as _T   # type: ignore
+        return {name for name, schwelle in _T.items() if schwelle == 0}
+    except Exception:
+        return set()
+
+
 def check_emptiness(findings, empties, base_empties):
     """Flag the TRANSITION to header-only, plus refills that never arrived.
 
@@ -311,10 +340,23 @@ def check_emptiness(findings, empties, base_empties):
             continue
         age = (today - committed).days
         if age > EMPTY_STALE_DAYS:
-            findings.append(("CRITICAL",
-                             f"data/{fn} has been header-only for {age} days "
-                             f"(> {EMPTY_STALE_DAYS}) — the refill after the reset never "
-                             f"arrived, and the UI has been serving an empty view since."))
+            if fn in _leer_erlaubt():
+                # Ausdruecklich als "darf leer sein" gefuehrt. Sichtbar
+                # bleibt es trotzdem — nur nicht als Notfall, und mit der
+                # Angabe, was es zu einem machen wuerde.
+                findings.append(("WARN",
+                                 f"data/{fn} ist seit {age} Tagen leer. Das ist "
+                                 f"so vorgesehen (Schwelle 0 im Sanity-Tor, "
+                                 f"Saisonpause). Zum Befund wird es, wenn die "
+                                 f"Quelle wieder Turniere fuehrt und die Datei "
+                                 f"leer bleibt — oder wenn eine der Dateien "
+                                 f"desselben Fensters Zeilen bekommt und diese "
+                                 f"nicht (siehe Paar-Pruefung)."))
+            else:
+                findings.append(("CRITICAL",
+                                 f"data/{fn} has been header-only for {age} days "
+                                 f"(> {EMPTY_STALE_DAYS}) — the refill after the reset never "
+                                 f"arrived, and the UI has been serving an empty view since."))
 
     # A file that refilled is worth one line of good news: it tells whoever reads
     # the log that the previous alarm was resolved rather than muted.
@@ -926,7 +968,14 @@ def check_uebersicht_gegen_chunks(findings):
         tatsaechlich = sum(treffer.values())
         if not treffer:
             if gemeldet > 0:
-                ohne_chunk.append(f"{tid} (Uebersicht: {gemeldet})")
+                # Das Datum mitschreiben: 443 und 444 sind die Thailand-
+                # und die Japan-Championships von MAI 2024, gepruefen am
+                # 22.08.2026 an der Quelle. Ihre Kartendaten stammen aus
+                # der Zeit vor der Chunk-Aufteilung und liegen in keiner
+                # der heutigen Dateien. Ohne das Datum in der Meldung
+                # wird dieser Befund alle paar Wochen neu untersucht.
+                datum = col(z, "tournament_date") or "?"
+                ohne_chunk.append(f"{tid} vom {datum} (Uebersicht: {gemeldet})")
             continue
         if tatsaechlich != gemeldet:
             abweichungen.append(
@@ -944,7 +993,8 @@ def check_uebersicht_gegen_chunks(findings):
         findings.append((
             "WARN",
             f"{len(ohne_chunk)} Turnier(e) stehen in der Uebersicht, aber in "
-            f"keiner Chunkdatei: " + ", ".join(ohne_chunk[:8])
+            f"keiner Chunkdatei (bei Turnieren von vor der Chunk-Aufteilung "
+            f"ist das erwartbar, nicht reparierbar und kein Datenverlust): " + ", ".join(ohne_chunk[:8])
             + ("; …" if len(ohne_chunk) > 8 else "")))
 
 

@@ -180,6 +180,34 @@ def scrape_live_sets() -> dict:
                 continue
             soup = BeautifulSoup(html, 'lxml')
 
+            # Strategie 0: <span class="code"> — so zeichnet die Seite ihre
+            # Set-Codes aus, und zwar in Erscheinungsreihenfolge, neuestes
+            # zuerst:
+            #     <a href="/cards/PBL"> … <span class="code annotation">PBL</span></a>
+            #
+            # Gemessen am 22.08.2026 an der echten Seite: 153 Codes von PBL
+            # bis hinunter zu BS/JU/FO. Die beiden Strategien darunter
+            # fanden davon NICHTS — die <select> auf der Seite sind
+            # Sprach- und Bereichswahl (EN_US, JP_JP, CARDS, DECKS), und
+            # eine Tabelle gibt es dort gar nicht mehr. Ergebnis im
+            # Wochenlauf: "order scrape returned <10 sets", sets.json haengt
+            # seither ganz an FALLBACK_SET_ORDER, und ein neues Set bekommt
+            # seine Ordnungszahl nur noch ueber den Datums-Nachtrag.
+            #
+            # Derselbe Marker, den quick_check_latest_sets() im japanischen
+            # Scraper seit jeher benutzt (span.code). Der EN-Zweig hat ihn
+            # nie bekommen.
+            found = []
+            for span in soup.select('span.code'):
+                val = span.get_text(strip=True).upper()
+                if 2 <= len(val) <= 6 and val.replace('-', '').replace('_', '').isalnum():
+                    if val not in found:
+                        found.append(val)
+            if len(found) >= 10:
+                set_codes_ordered = found
+                print(f"[Update Sets]   Found {len(found)} sets via span.code")
+                break
+
             # Strategy 1: Look for <select> or <option> elements with set codes
             for select in soup.find_all('select'):
                 opts = select.find_all('option')

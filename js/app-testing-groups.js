@@ -166,22 +166,24 @@ window.TestingGroups = (function () {
       }
     }
 
-    // Weg 2: Uebergangs-Fallback auf die alte Query, fuer Nutzer, die sich seit
-    // der Umstellung noch nicht eingeloggt haben. Sobald die Regel list sperrt,
-    // wirft das permission-denied — genau dann ist der Fallback zu Ende, und
-    // das ist der gewollte Endzustand. Der Aufrufer zeigt dann
-    // tg.errNoSuchUser ("muss sich mindestens einmal einloggen"), was den Fall
-    // bereits korrekt beschreibt.
-    try {
-      const q = await db.collection('publicProfiles')
-        .where('email', '==', email.toLowerCase().trim())
-        .limit(1).get();
-      if (q.empty) return null;
-      const doc = q.docs[0];
-      return { uid: doc.id, ...doc.data() };
-    } catch (err) {
-      return null;
-    }
+    // Hier stand ein Uebergangs-Fallback auf die alte Query
+    // (.where('email','==',...)) fuer Nutzer, die sich seit der
+    // Umstellung noch nicht eingeloggt hatten. Sein eigener Kommentar
+    // nannte die Bedingung fuer sein Ende: "sobald die Regel list
+    // sperrt, wirft das permission-denied".
+    //
+    // Diese Regel ist am 21.08.2026 veroeffentlicht und gemessen:
+    // db.collection('publicProfiles').get() antwortet mit
+    // permission-denied. Der Zweig konnte ab da nur noch scheitern —
+    // ein garantiert vergeblicher Netzaufruf plus eine Warnung in der
+    // Konsole, mit demselben Ergebnis wie ohne ihn.
+    //
+    // Das Verhalten aendert sich dadurch nicht: findet der Hash-Index
+    // nichts, gibt diese Funktion null zurueck, und der Aufrufer zeigt
+    // tg.errNoSuchUser ("muss sich mindestens einmal einloggen") — was
+    // den Fall korrekt beschreibt. Der Eintrag im Hash-Index entsteht
+    // beim naechsten Login des jeweiligen Nutzers.
+    return null;
   }
 
   async function _loadBootstrap() {

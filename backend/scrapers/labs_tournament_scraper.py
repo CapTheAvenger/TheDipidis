@@ -2000,7 +2000,39 @@ def main() -> None:
         )
     existing_deck_rows = _reassemble_labs_monolith('labs_tournament_decks', CSV_FIELDS)
     existing_matchup_rows = _reassemble_labs_monolith('labs_tournament_matchups', MATCHUP_CSV_HEADER)
-    seen_tids = {str(r.get('tournament_id') or '').strip() for r in existing_deck_rows}
+    # Ein Turnier gilt als erledigt, wenn seine Zeilen in einem ECHTEN
+    # Meta-Chunk liegen. Zeilen in __unsorted zaehlen NICHT.
+    #
+    # BEFUND (22.08.2026): _list_labs_chunk_paths sammelt alles mit dem
+    # Praefix "labs_tournament_decks_" — und
+    # labs_tournament_decks__unsorted.csv passt darauf. Damit landeten
+    # unsortierte Turniere in seen_tids und wurden bei JEDEM weiteren Lauf
+    # uebersprungen. Sie konnten sich nie erholen.
+    #
+    # Gemessen: 0042 (Regional Brisbane) und 0019 (Special Event San Juan),
+    # beide am 25.05.2026 gescrapt, beide seither ohne Datum und ohne Meta.
+    # Die Quelle liefert ihr Datum inzwischen wieder ("November 1-2, 2025"
+    # bzw. "February 15-16, 2025"); die Seite ist teilweise clientseitig
+    # gerendert, weshalb der Abruf es mal sieht und mal nicht. Mit Datum
+    # ordnet _derive_meta_from_date sie sauber SVI-MEG bzw. BRS-PRE zu —
+    # die Zuordnung war nie das Problem, nur die Wiedervorlage.
+    #
+    # Kosten: die unsortierten Turniere werden je Lauf einmal neu versucht.
+    # Das sind heute zwei.
+    seen_tids = {
+        str(r.get('tournament_id') or '').strip()
+        for r in existing_deck_rows
+        if (r.get('meta') or '').strip()
+    }
+    _unsortiert = {
+        str(r.get('tournament_id') or '').strip()
+        for r in existing_deck_rows
+        if not (r.get('meta') or '').strip()
+    } - seen_tids - {''}
+    if _unsortiert:
+        logger.info(
+            "Wiedervorlage: %d Turnier(e) liegen unsortiert und werden erneut "
+            "versucht: %s", len(_unsortiert), ", ".join(sorted(_unsortiert)))
     # tid → full meta dict (name, date, type, country, total_players).
     # First occurrence per tid wins (we only care that we have *some* known-
     # good values; chunks shouldn't disagree within a tid).

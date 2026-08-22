@@ -1,9 +1,11 @@
 {
-  "comment": "Manual cards-tid → labs-tid overrides for tournaments where automatic name-matching fails. Used by backend/scrapers/tournament_scraper_JH.py (_resolve_labs_tournament_id) for new scrapes and by backend/scrapers/backfill_labs_tournament_id.py for historical overview rows. Cause of mismatch is in 'reason' for each entry. Add new entries when the limitlesstcg.com name diverges from the labs.limitlesstcg.com name in a way the normalize step can't bridge.",
+  "comment": "Manual cards-tid → labs-tid overrides for tournaments where automatic name-matching fails. Used by backend/scrapers/tournament_scraper_JH.py (_resolve_labs_tournament_id) for new scrapes and by backend/scrapers/backfill_labs_tournament_id.py for historical overview rows. Cause of mismatch is in 'reason' for each entry. Add new entries when the limitlesstcg.com name diverges from the labs.limitlesstcg.com name in a way the normalize step can't bridge. | 22.08.2026: Die Eintraege koennen zusaetzlich 'tournament_date' + 'date_reason' tragen. Damit wird ein nachweislich falsches Datum der Quelle korrigiert, ohne dass der naechste Lauf die Korrektur ueberschreibt (tournament_scraper_JH._datum_mit_override).",
   "overrides": {
     "518": {
       "labs_tournament_id": "0070",
-      "reason": "NAIC 2026 abbreviation vs labs 'International Championship New Orleans' — same event 2026-06-10 (same city, same date, same event type; exactly the pattern of its 2025 sibling, cards 463 -> labs 0034). The name normaliser cannot bridge it: it strips 'international/championship/limitless' but nothing strips the acronym 'naic' or the year, so the keys are 'new orleans' vs 'naic 2026 new orleans'."
+      "reason": "NAIC 2026 abbreviation vs labs 'International Championship New Orleans' — same event (same city, 3752 players). Limitless dates it 2026-06-10; the event actually ran 12.-14.06.2026, see tournament_date below.",
+      "tournament_date": "12th June 2026",
+      "date_reason": "Limitless fuehrt das Turnier in der Liste UND auf der Turnierseite auf dem 10. Juni 2026. Das war ein Mittwoch; ein International Championship mit 3.752 Spielern laeuft Freitag bis Sonntag. Tatsaechlicher Zeitraum: 12.-14.06.2026 (Fr-So), bestaetigt vom Betreiber am 22.08.2026 und konsistent mit Labs 0070. Eingetragen ist der ERSTE Turniertag, wie bei allen mehrtaegigen Turnieren in dieser Datei. Beide Daten liegen im TEF-CRI-Fenster, das Format aendert sich dadurch nicht — korrigiert wird die angezeigte Tatsache, nicht eine Auswertung."
     },
     "533": {
       "labs_tournament_id": "0059",

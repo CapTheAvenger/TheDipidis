@@ -499,6 +499,21 @@ def _derive_meta_for_labs_tournament(
             )
             return ('', effective_date)
         return (current_meta, effective_date)
+    # Kein Datum, kein Namenstreffer, kein current_meta: die Zeile geht
+    # nach __unsorted. Das war bis zum 22.08.2026 der einzige Weg
+    # dorthin, der SCHWEIGEND war — die Lag-Fenster-Meldung oben deckt
+    # nur den Fall mit Datum ab. Gemessen: Turnier 0042 (Regional
+    # Brisbane) und 0019 (Special Event San Juan) liegen seit dem
+    # 25.05.2026 unsortiert, ohne dass irgendwo eine Zeile davon stand.
+    # Der Labs-Index wird teilweise clientseitig gerendert; faellt das
+    # Datum dabei aus, greift keine der drei Ableitungen.
+    logger.warning(
+        "Tournament tid=%s name=%r hat kein verwertbares Datum (Labs "
+        "lieferte %r), keinen Namenstreffer in der Kartenuebersicht und "
+        "kein current_meta. Geht nach __unsorted und wird beim naechsten "
+        "Lauf erneut versucht.",
+        tid, tournament_name, iso_date,
+    )
     return ('', effective_date)
 
 

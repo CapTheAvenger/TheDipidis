@@ -132,3 +132,81 @@ def test_alle_ueberwachten_dateien_existieren_im_repo():
         if not os.path.isfile(os.path.join(WURZEL, "data", name))
     ]
     assert not fehlend, f"ueberwacht, aber nicht im Repo: {fehlend}"
+
+
+# ── Das vergangene japanische Fenster ──────────────────────────────────
+#
+# Die drei Past-Archetypdateien standen mit Schwelle 0 in der Liste, mit
+# einem ausdruecklichen Versprechen im Kommentar: "sie steigt auf einen
+# echten Wert, sobald der Lauf die Zeilen zurueckbringt (S9)". Der
+# Wochenlauf vom 22.08.2026 hat sie zurueckgebracht (26 / 11 / 11 aus
+# Turnier 568). Ein Versprechen im Kommentar wird ohne Test wieder
+# vergessen — deshalb steht es hier.
+#
+# Die Schwelle 0 hat eine zweite, nicht offensichtliche Wirkung:
+# data_guardian._leer_erlaubt() liest genau diese Liste und stuft eine
+# leere Datei mit Schwelle 0 von CRITICAL auf WARN herab. Solange die
+# drei Past-Dateien dort standen, waere ihr erneutes Leerlaufen still
+# durchgegangen.
+
+PAST_ARCHETYPEN = (
+    "city_league_archetypes_past.csv",
+    "city_league_archetypes_past_comparison.csv",
+    "city_league_archetypes_past_deck_stats.csv",
+)
+
+# Diese vier duerfen leer sein: das laufende japanische Fenster steht in
+# der Saisonpause. Das ist der richtige Zustand, nicht ein Defekt.
+LAUFENDES_JP_FENSTER = (
+    "city_league_analysis.csv",
+    "city_league_archetypes.csv",
+    "city_league_archetypes_comparison.csv",
+    "city_league_archetypes_deck_stats.csv",
+)
+
+
+@pytest.mark.parametrize("name", PAST_ARCHETYPEN)
+def test_past_dateien_haben_eine_echte_schwelle(name):
+    schwelle = tor.THRESHOLDS[name]
+    assert schwelle > 0, (
+        f"{name} steht wieder auf Schwelle 0. Damit faellt sie zurueck auf "
+        f"'darf leer sein' — und ein erneuter Leerlauf des Past-Scrapers "
+        f"waere weder ein Revert noch ein CRITICAL.")
+
+
+@pytest.mark.parametrize("name", PAST_ARCHETYPEN)
+def test_past_dateien_erfuellen_ihre_schwelle(name):
+    """Die Schwelle muss zum echten Datenstand passen, sonst setzt der
+    naechste Lauf eine korrekte Datei zurueck."""
+    pfad = os.path.join(WURZEL, "data", name)
+    zeilen = tor.count_csv_rows(pfad)
+    schwelle = tor.THRESHOLDS[name]
+    assert zeilen >= schwelle, (
+        f"{name} hat {zeilen} Zeilen, die Schwelle steht auf {schwelle} — "
+        f"das Tor wuerde den aktuellen Stand zurueckwerfen.")
+
+
+@pytest.mark.parametrize("name", LAUFENDES_JP_FENSTER)
+def test_laufendes_jp_fenster_darf_leer_bleiben(name):
+    """Gegenprobe: die Saisonpause bleibt erlaubt. Ohne diese Haelfte
+    waere der Test oben eine Einladung, einfach alles hochzusetzen."""
+    assert tor.THRESHOLDS[name] == 0, (
+        f"{name} gehoert zum laufenden Fenster in der Saisonpause und "
+        f"darf leer sein — eine Schwelle > 0 erzeugt hier taeglich "
+        f"Fehlalarm.")
+
+
+def test_waechter_liest_dieselbe_liste():
+    """data_guardian._leer_erlaubt() darf nicht auseinanderlaufen: genau
+    das laufende Fenster (plus per-decklist) darf leer sein, die drei
+    Past-Dateien nicht mehr."""
+    sys.path.insert(0, os.path.join(WURZEL, "scripts"))
+    import data_guardian  # noqa: E402
+
+    erlaubt = data_guardian._leer_erlaubt()
+    assert erlaubt, "Import der Schwellenliste ist ausgefallen"
+    for name in LAUFENDES_JP_FENSTER:
+        assert name in erlaubt, f"{name} muesste leer sein duerfen"
+    for name in PAST_ARCHETYPEN:
+        assert name not in erlaubt, (
+            f"{name} wird vom Waechter noch als 'darf leer sein' gefuehrt")

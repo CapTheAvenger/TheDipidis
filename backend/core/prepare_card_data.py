@@ -128,6 +128,48 @@ def create_merged_database():
 
     english_cards = load_csv(os.path.join(data_dir, 'all_cards_database.csv'))
     japanese_cards = load_csv(os.path.join(data_dir, 'japanese_cards_database.csv'))
+
+    # S8: Aus einer leeren Eingangsdatei darf keine zusammengefuehrte
+    # Datenbank entstehen.
+    #
+    # load_csv gibt fuer eine FEHLENDE Datei dieselbe leere Liste zurueck
+    # wie fuer eine leere — beide Faelle liefen bis hierher stumm durch.
+    # Die Folge waere kein Absturz, sondern das Schlimmere: eine
+    # syntaktisch tadellose all_cards_merged.json, der einfach eine ganze
+    # Sprachhaelfte fehlt. Die Chunks werden neu geschrieben, der Lauf
+    # meldet Erfolg, und die japanischen Karten sind aus der Oberflaeche
+    # verschwunden, ohne dass irgendwo eine Zeile davon spricht.
+    #
+    # Das ist derselbe Fehler, den build_threat_intel hatte (S3): ein
+    # Teilergebnis wird wie ein vollstaendiges behandelt. Der Vorfall vom
+    # 21.08.2026 zeigt, dass die JP-Datei real auf einen Bruchteil fallen
+    # kann — sie stand bei 772 Zeilen und genau einem regulaeren Set.
+    #
+    # Absichtlich nur die Null: die Zeilenzahl selbst bewacht das
+    # Sanity-Tor (Schwelle 850) samt Pruefung auf verschwundene
+    # Set-Codes. Hier geht es allein darum, den Zusammenbau zu verweigern,
+    # wenn eine Haelfte fehlt.
+    #
+    # (Die beiden load_csv-Aufrufe oben stehen bewusst ausgeschrieben und
+    # nicht ueber eine Pfadvariable: tests/python/test_daily_seed_
+    # vollstaendig.py erkennt die Eingaben dieses Skripts an genau diesem
+    # Muster und gleicht sie gegen den Seed der Workflows ab.)
+    for bezeichnung, zeilen in (
+        ('all_cards_database.csv', english_cards),
+        ('japanese_cards_database.csv', japanese_cards),
+    ):
+        if zeilen:
+            continue
+        pfad = os.path.join(data_dir, bezeichnung)
+        grund = ('existiert nicht' if not os.path.exists(pfad)
+                 else 'enthaelt keine verwertbare Zeile')
+        raise RuntimeError(
+            f"{bezeichnung} {grund} ({pfad}). Die zusammengefuehrte "
+            f"Kartendatenbank wird NICHT geschrieben — sonst ersetzt ein "
+            f"Lauf ohne diese Haelfte den guten Stand, und der Verlust "
+            f"faellt erst in der Oberflaeche auf."
+        )
+
     pokedex = load_pokedex()
 
     # Merge price data from both backend and frontend sources.

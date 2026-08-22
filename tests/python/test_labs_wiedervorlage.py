@@ -114,3 +114,62 @@ def test_das_praefix_faengt_unsorted_mit_ein(labs):
     assert any("__unsorted" in n for n in namen), (
         "labs_tournament_decks__unsorted.csv wird vom Praefix nicht mehr "
         f"erfasst — gefunden: {namen}")
+
+
+# ── Der stille Weg nach __unsorted ─────────────────────────────────────
+#
+# _derive_meta_for_labs_tournament hat zwei Ausgaenge nach __unsorted.
+# Der eine (Datum vorhanden, faellt ins Lag-Fenster, kein
+# Vorgaenger-Chunk) meldete sich seit jeher mit logger.warning. Der
+# andere (gar kein Datum) gab stillschweigend ('', '') zurueck — und
+# genau der hat 0042 und 0019 erwischt. Zwei Turniere lagen drei Monate
+# unsortiert, ohne dass eine einzige Logzeile davon sprach.
+
+def test_kein_datum_meldet_sich(labs, caplog):
+    import logging
+    with caplog.at_level(logging.WARNING):
+        meta, datum = labs._derive_meta_for_labs_tournament(
+            tid="0042",
+            tournament_name="Regional Championship Brisbane",
+            iso_date="",
+            labs_name_meta_lookup={},
+            current_meta="",
+        )
+    assert meta == "", "ohne Datum darf nichts geraten werden"
+    text = caplog.text
+    assert "0042" in text, "die Turnier-ID muss in der Meldung stehen"
+    assert "__unsorted" in text, (
+        "die Meldung muss sagen, wo die Zeilen landen — sonst sucht sie "
+        "niemand")
+
+
+def test_treffer_meldet_sich_nicht(labs, caplog):
+    """Gegenprobe: eine erfolgreiche Ableitung darf das Log nicht
+    zumuellen. Eine Warnung, die bei jedem Turnier kommt, wird nicht
+    gelesen."""
+    import logging
+    with caplog.at_level(logging.WARNING):
+        meta, _ = labs._derive_meta_for_labs_tournament(
+            tid="0042",
+            tournament_name="Regional Championship Brisbane",
+            iso_date="",
+            labs_name_meta_lookup={"0042": ("SVI-MEG", "2025-11-01")},
+            current_meta="",
+        )
+    assert meta == "SVI-MEG"
+    assert "__unsorted" not in caplog.text
+
+
+def test_anomaly_watch_nennt_beide_wege():
+    """Der Hinweistext im Sanity-Tor nannte nur previous_format_key —
+    das half bei 0042/0019 nicht, weil dort schlicht das Datum fehlte.
+    Wer den Text befolgt haette, haette am falschen Ende gesucht."""
+    sys.path.insert(0, os.path.join(WURZEL, "scripts"))
+    import sanity_check_data as tor  # noqa: E402
+
+    text = tor.ANOMALY_WATCH["labs_tournament_decks__unsorted.csv"]
+    assert "previous_format_key" in text, "Weg (a) muss weiter dastehen"
+    assert "kein datum" in text.lower(), (
+        "Weg (b) — das fehlende Datum — fehlt im Hinweistext")
+    assert "0042" in text and "0019" in text, (
+        "der gemessene Fall gehoert benannt, sonst wird er wieder geraten")

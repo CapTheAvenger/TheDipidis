@@ -48,6 +48,27 @@
     --s-6: 24px;
     --s-8: 32px;
 
+    /* ── Der Seitenrand: EINE Zahl fuer die ganze Anwendung ───────────
+     *
+     * Bis zum 22.08.2026 entschied ueber den waagerechten Rand ein
+     * Zufall aus Dateireihenfolge und !important. Gemessen an der
+     * laufenden Seite bewarben sich um `body` acht Regeln aus zwei
+     * Dateien und sechs Breakpoints, um `.tab-content` ebenfalls acht.
+     * Gewonnen hat auf dem Telefon `@media (max-width: 430px) body
+     * { padding: 3px !important }` — und fuer .tab-content die
+     * 768er-Regel mit `!important`, weshalb die eigens fuer 390 px
+     * geschriebene Regel (10 px) nie gefeuert hat. Zwei Regeln waren
+     * tot, ohne dass es jemand sehen konnte.
+     *
+     * Jetzt gibt es einen Wert. Wer den Rand aendern will, aendert ihn
+     * hier und nirgends sonst.
+     *
+     * 0 ist Absicht: der Rand gehoert der Kachel, nicht der Seite. Jede
+     * Kachel bringt ihre eigene Innenpolsterung mit (8-36 px), der Text
+     * klebt also nicht am Glas — aber die Flaeche darunter reicht bis
+     * an den Rand, so wie es eine Anwendung tun sollte. */
+    --page-gutter: 0px;
+
     /* ── Radien: drei ────────────────────────────────────────────── */
     --r-sm: 6px;        /* Chips, Zellen, kleine Knöpfe */
     --r-md: 11px;       /* Zeilen, Listeneinträge */

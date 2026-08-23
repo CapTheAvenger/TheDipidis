@@ -29,9 +29,26 @@
     let cbArchetypesLoaded = false;
     let cbFilter = 'all';
     let cbAllPrints = false;
+    let cbSort = 'binder';   // binder | set | typ | decks | fehlend | name
     let _cbSkipNextClose = false;
     let _cbTierGroups = null; // cached tier groups for dropdown
     let cbPresets = []; // [{id, name, archetypes: [{name, source}]}]
+
+    // ── Gespeicherte Ordner ──
+    //
+    // Ein Ordner ist Name + Archetypen + Schwelle + Schnappschuss + Fortschritt.
+    // Er liegt in der UNTERSAMMLUNG users/{uid}/customBinders/{id}, bewusst NICHT
+    // als Feld auf users/{uid}: dort liegen bereits collection, collectionCounts,
+    // wishlist, tradelist und deckFolders unter EINEM 1-MiB-Limit, und ein
+    // Schnappschuss mit 533 Karten wiegt gemessen 157 KB. Ein Sammler mit grosser
+    // Sammlung waere damit irgendwann ueber dem Limit — und der Schreibfehler
+    // faellt still aus, der Nutzer saehe einen Ordner, dessen "was ist neu" fuer
+    // immer eingefroren ist. printedProxies macht es bereits richtig.
+    const CB_BINDERS_KEY = 'customBindersV1';   // Spiegel / Gastspeicher
+    let cbBinders = [];            // [{id, name, archetypes, threshold, snapshot, erledigt}]
+    let cbBindersGeladen = false;
+    let cbAktiverBinder = null;    // id des geladenen Ordners
+    let _cbAbgleich = null;        // {raus:[], reinHabe:[], reinFehlt:[], stand}
 
     // ── Helpers ──
     function mb() { return window._mbShared || {}; }
@@ -188,8 +205,500 @@
             return a.name.localeCompare(b.name);
         });
 
+        // Welche Namen haben ueberhaupt eigene Kartenzeilen?
+        //
+        // Der Picker speist sich aus Vergleichsdateien, die reine NAMENSLISTEN
+        // sind — sie sagen nichts darueber, ob zu einem Namen auch Karten
+        // vorliegen. Gemessen am 23.08.2026: von 132 Namen der aktuellen
+        // Vergleichsdatei haben 53 exakte Kartendaten, 41 landen ueber die
+        // unscharfe Namenssuche in getCardsForArchetypeSource bei einem ANDEREN
+        // Archetyp und 38 liefern gar nichts. Von den 41 sind 28 harmlos (der
+        // Treffer ist dasselbe Deck unter laengerem Namen, "Dhelmise" ->
+        // "Dhelmise Pbl"), 13 sind ein fremdes Deck: "Hop's Zacian" liefert die
+        // Karten von "Hop's Trevenant", "Terapagos Noctowl" die von "Flareon
+        // Noctowl".
+        //
+        // Das ist im Alltag harmloser, als es klingt — die Liste ist nach
+        // Metarang sortiert, und die ersten 40 Raenge sind ausnahmslos sauber;
+        // der erste kaputte Eintrag steht auf Rang 60 mit 0,18 % Anteil, alle
+        // kaputten zusammen tragen 2,91 % Metaanteil. Aber "still ein fremdes
+        // Deck einsetzen" ist genau das, was die Hausregel verbietet: melden,
+        // nicht heimlich reparieren. Also wird es angezeigt statt versteckt.
+        markiereKartendaten(result, shared);
+
         cbAllArchetypes = result;
         cbArchetypesLoaded = true;
+    }
+
+    /** Setzt je Eintrag datenlage: 'exakt' | 'ersatz' | 'keine'. */
+    function markiereKartendaten(eintraege, shared) {
+        const norm = n => (shared.normalizeArchetypeKey ? shared.normalizeArchetypeKey(n) : String(n || '').toLowerCase());
+        const quellen = {
+            'current-meta': window.currentMetaAnalysisData,
+            'city-current': window.cityLeagueAnalysisDataCurrent || window.cityLeagueAnalysisData,
+            'city-past': window.cityLeagueAnalysisDataPast || window.cityLeagueAnalysisM3Data || []
+        };
+        const exakteNamen = {};
+        Object.keys(quellen).forEach(k => {
+            const rows = Array.isArray(quellen[k]) ? quellen[k] : [];
+            const set = new Set();
+            rows.forEach(r => { const n = String(r.archetype || '').trim(); if (n) set.add(norm(n)); });
+            exakteNamen[k] = set;
+        });
+        eintraege.forEach(e => {
+            const set = exakteNamen[e.source];
+            if (set && set.has(norm(e.name))) { e.datenlage = 'exakt'; return; }
+            // Kein exakter Treffer: was wuerde die unscharfe Suche liefern?
+            let ersatz = '';
+            if (shared.getCardsForArchetypeSource) {
+                const rows = shared.getCardsForArchetypeSource(e.name, e.source) || [];
+                ersatz = rows.length ? String(rows[0].archetype || '').trim() : '';
+            }
+            e.datenlage = ersatz ? 'ersatz' : 'keine';
+            e.ersatzFuer = ersatz;
+        });
+    }
+
+    // ── Gespeicherte Ordner: Speicher ──
+
+    /** Firestore-Sammlung des angemeldeten Nutzers, sonst null. */
+    function cbBinderCol() {
+        try {
+            if (typeof firebase === 'undefined' || !firebase.firestore) return null;
+            const u = (typeof auth !== 'undefined' && auth && auth.currentUser) ? auth.currentUser : null;
+            if (!u) return null;
+            return firebase.firestore().collection('users').doc(u.uid).collection('customBinders');
+        } catch (_) { return null; }
+    }
+
+    function cbBinderLocalLesen() {
+        try {
+            const roh = JSON.parse(localStorage.getItem(CB_BINDERS_KEY) || '[]');
+            return Array.isArray(roh) ? roh : [];
+        } catch (_) { return []; }
+    }
+
+    function cbBinderLocalSchreiben() {
+        try { localStorage.setItem(CB_BINDERS_KEY, JSON.stringify(cbBinders)); } catch (_) { /* voll */ }
+    }
+
+    /**
+     * Ordnerliste laden. Angemeldet aus Firestore, sonst aus localStorage.
+     * Beim ersten angemeldeten Laden werden alte Presets uebernommen — sie
+     * haben keinen Schnappschuss, ihr erster Abgleich meldet darum ehrlich
+     * "noch nie abgeglichen" statt hunderte Karten als neu.
+     */
+    async function cbLadeBinderListe(erzwingen) {
+        if (cbBindersGeladen && !erzwingen) return cbBinders;
+        const col = cbBinderCol();
+        if (!col) {
+            cbBinders = cbBinderLocalLesen();
+            cbBindersGeladen = true;
+            return cbBinders;
+        }
+        try {
+            const snap = await col.get();
+            cbBinders = snap.docs.map(d => Object.assign({ id: d.id }, d.data()));
+            if (cbBinders.length === 0) await cbUebernehmePresets(col);
+            cbBinders.sort((a, b) => String(a.name || '').localeCompare(String(b.name || '')));
+            cbBindersGeladen = true;
+            cbBinderLocalSchreiben();
+        } catch (e) {
+            console.warn('[CustomBinder] Ordnerliste nicht ladbar:', e && e.message);
+            cbBinders = cbBinderLocalLesen();
+            cbBindersGeladen = true;
+        }
+        return cbBinders;
+    }
+
+    async function cbUebernehmePresets(col) {
+        const alt = cbLoadPresets();
+        if (!Array.isArray(alt) || alt.length === 0) return;
+        alt.forEach(p => {
+            const id = col.doc().id;
+            const doc = {
+                schemaVersion: 1,
+                name: p.name || cbText('cb.binderDefaultName', 'Mein Ordner'),
+                archetypes: Array.isArray(p.archetypes) ? p.archetypes : [],
+                threshold: cbThreshold,
+                snapshot: null,
+                erledigt: []
+            };
+            cbBinders.push(Object.assign({ id }, doc));
+            col.doc(id).set(doc).catch(err =>
+                console.warn('[CustomBinder] Preset-Uebernahme fehlgeschlagen:', err && err.message));
+        });
+    }
+
+    /** Schlanker Schnappschuss: nur was der Vergleich und die Raus-Kacheln brauchen. */
+    function cbBaueSchnappschuss(karten) {
+        return {
+            takenAt: new Date().toISOString(),
+            cards: (karten || []).map(c => ({
+                cardId: c.cardId, name: c.name, set: c.set, number: c.number,
+                maxCount: c.maxCount,
+                familyRefs: Array.isArray(c.familyRefs) ? c.familyRefs : []
+            }))
+        };
+    }
+
+    /**
+     * Ordner anlegen oder ueberschreiben. Optimistisch: die Liste und die
+     * Rueckmeldung stehen sofort, der Schreibvorgang laeuft nebenher — so
+     * macht es saveDeck() auch, und aus demselben Grund (ein await haengt
+     * offline endlos). Fehler werden gemeldet, nicht verschluckt.
+     */
+    function cbSchreibeBinder(binder) {
+        const idx = cbBinders.findIndex(b => b.id === binder.id);
+        if (idx >= 0) cbBinders[idx] = binder; else cbBinders.push(binder);
+        cbBinderLocalSchreiben();
+        const col = cbBinderCol();
+        if (!col) return;
+        const nutzlast = {
+            schemaVersion: 1,
+            name: binder.name,
+            archetypes: binder.archetypes,
+            threshold: binder.threshold,
+            snapshot: binder.snapshot || null,
+            erledigt: Array.isArray(binder.erledigt) ? binder.erledigt : []
+        };
+        const groesse = JSON.stringify(nutzlast).length;
+        if (groesse > 700000) {
+            // Vor dem Limit abbiegen und es sagen, statt in einen stillen
+            // Schreibfehler zu laufen.
+            nutzlast.snapshot = binder.snapshot
+                ? { takenAt: binder.snapshot.takenAt, cards: binder.snapshot.cards.map(c => ({ cardId: c.cardId, maxCount: c.maxCount })), reduziert: true }
+                : null;
+            if (typeof showToast === 'function') {
+                showToast(cbText('cb.binderTooBig', 'Ordner sehr gross — Schnappschuss verkürzt gespeichert.'), 'warning');
+            }
+        }
+        col.doc(binder.id).set(nutzlast).catch(err => {
+            console.warn('[CustomBinder] Ordner nicht gespeichert:', err && err.message);
+            if (typeof showToast === 'function') {
+                showToast(cbText('cb.binderSaveFailed', 'Ordner konnte nicht im Konto gespeichert werden — nur auf diesem Gerät.'), 'error');
+            }
+        });
+    }
+
+    function cbNeueBinderId() {
+        const col = cbBinderCol();
+        if (col) { try { return col.doc().id; } catch (_) { /* weiter unten */ } }
+        return 'lok-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+    }
+
+    // ── Gespeicherte Ordner: Bedienung ──
+
+    function cbAktuellerBinder() {
+        return cbBinders.find(b => b.id === cbAktiverBinder) || null;
+    }
+
+    function cbVorschlagName() {
+        if (cbSelectedArchetypes.length === 0) return cbText('cb.binderDefaultName', 'Mein Ordner');
+        if (cbBinders.length === 0) return cbText('cb.binderDefaultName', 'Mein Ordner');
+        return cbSelectedArchetypes.slice(0, 2).map(a => a.name).join(' + ');
+    }
+
+    /** Aktuelle Auswahl als Ordner sichern. Ohne id: neu anlegen. */
+    async function cbSpeichereBinder(alsNeu) {
+        if (cbSelectedArchetypes.length === 0) {
+            if (typeof showToast === 'function') showToast(cbText('cb.pickFirst', 'Bitte zuerst Decks auswählen.'), 'warning');
+            return;
+        }
+        await cbLadeBinderListe();
+        const vorhanden = alsNeu ? null : cbAktuellerBinder();
+        const name = vorhanden ? vorhanden.name : (cbFrageName(cbVorschlagName()) || '').trim();
+        if (!vorhanden && !name) return;
+        const karten = (window._cbDelta && window._cbDelta.cards) || [];
+        const binder = {
+            id: vorhanden ? vorhanden.id : cbNeueBinderId(),
+            name: vorhanden ? vorhanden.name : name,
+            archetypes: cbSelectedArchetypes.map(a => ({ name: a.name, source: a.source })),
+            threshold: cbThreshold,
+            snapshot: karten.length ? cbBaueSchnappschuss(karten) : (vorhanden ? vorhanden.snapshot : null),
+            erledigt: []
+        };
+        cbAktiverBinder = binder.id;
+        cbSchreibeBinder(binder);
+        cbRenderBinderBar();
+        if (typeof showToast === 'function') showToast(cbText('cb.binderSaved', 'Ordner gespeichert.'), 'success');
+    }
+
+    function cbFrageName(vorschlag) {
+        // prompt() ist auf dem Telefon ein Systemdialog mitten im Screen —
+        // haesslich, aber ein eigenes Eingabefeld waere ein zweiter Dialog-
+        // Mechanismus fuer eine einzelne Zeile. Bewusst so belassen.
+        try { return window.prompt(cbText('cb.nameLabel', 'Name für diesen Ordner'), vorschlag); }
+        catch (_) { return vorschlag; }
+    }
+
+    /** Ordner oeffnen: Auswahl, Schwelle und Schnappschuss wiederherstellen. */
+    async function cbOeffneBinder(id) {
+        await cbLadeBinderListe();
+        const b = cbBinders.find(x => x.id === id);
+        if (!b) return;
+        cbAktiverBinder = id;
+        cbSelectedArchetypes = Array.isArray(b.archetypes) ? b.archetypes.map(a => ({ name: a.name, source: a.source })) : [];
+        if (b.threshold === 0 || b.threshold === 30 || b.threshold === 70) cbThreshold = b.threshold;
+        _cbSessionBaseline = null;   // Vergleichspunkt kommt jetzt aus DIESEM Ordner
+        _cbAbgleich = null;
+        cbSaveSelections();
+        cbRenderChips();
+        cbRenderBinderBar();
+        await buildCustomBinder();
+    }
+
+    async function cbLoescheBinder(id) {
+        const b = cbBinders.find(x => x.id === id);
+        if (!b) return;
+        const frage = cbText('cb.deleteConfirm', '„{name}" löschen? Deine Sammlung bleibt unberührt.').replace('{name}', b.name);
+        if (typeof window.confirm === 'function' && !window.confirm(frage)) return;
+        cbBinders = cbBinders.filter(x => x.id !== id);
+        if (cbAktiverBinder === id) { cbAktiverBinder = null; _cbAbgleich = null; }
+        cbBinderLocalSchreiben();
+        const col = cbBinderCol();
+        if (col) col.doc(id).delete().catch(err => console.warn('[CustomBinder] Löschen fehlgeschlagen:', err && err.message));
+        cbRenderBinderBar();
+    }
+
+    function cbDatumKurz(iso) {
+        const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(iso || ''));
+        return m ? `${m[3]}.${m[2]}.${m[1]}` : cbText('cb.never', 'noch nie abgeglichen');
+    }
+
+    /** Die Ordnerleiste ueber dem Picker. */
+    function cbRenderBinderBar() {
+        const el = document.getElementById('cbBinderBar');
+        if (!el) return;
+        if (!cbBinders.length) {
+            el.innerHTML = `<div class="cb-binder-empty">${escapeHtml(cbText('cb.noBinders', 'Noch kein Ordner gespeichert. Wähle Decks und speichere sie als Ordner.'))}</div>`;
+            return;
+        }
+        const zeilen = cbBinders.map(b => {
+            const aktiv = b.id === cbAktiverBinder;
+            const stand = b.snapshot && b.snapshot.takenAt
+                ? cbText('cb.binderMeta', '{n} Decks · Stand {date}')
+                    .replace('{n}', String((b.archetypes || []).length))
+                    .replace('{date}', cbDatumKurz(b.snapshot.takenAt))
+                : cbText('cb.binderMetaNever', '{n} Decks · noch nie abgeglichen')
+                    .replace('{n}', String((b.archetypes || []).length));
+            return `<div class="cb-binder-row ${aktiv ? 'is-active' : ''}">
+                <button type="button" class="cb-binder-open" onclick="cbOeffneBinder('${escapeHtmlAttr(b.id)}')">
+                    <span class="cb-binder-name">${escapeHtml(b.name)}</span>
+                    <span class="cb-binder-meta">${escapeHtml(stand)}</span>
+                </button>
+                <button type="button" class="cb-binder-del" onclick="cbLoescheBinder('${escapeHtmlAttr(b.id)}')" aria-label="${escapeHtmlAttr(cbText('cb.delete', 'Löschen'))}: ${escapeHtmlAttr(b.name)}">×</button>
+            </div>`;
+        }).join('');
+        el.innerHTML = `<div class="cb-binder-list">${zeilen}</div>`;
+    }
+
+    // ── Abgleich: was muss rein, was muss raus ──
+
+    /**
+     * Den geladenen Ordner gegen den heutigen Stand rechnen.
+     *
+     * Drei Stapel, weil es drei verschiedene Handgriffe sind:
+     *   RAUS         — aus dem Ordner nehmen
+     *   REIN, hast du— in der Box suchen und einsortieren
+     *   REIN, fehlt  — kannst du am Tisch gar nicht erledigen
+     * Sie in einen Topf zu werfen hiesse, ein Drittel der Liste anzuzeigen,
+     * das man gerade nicht abarbeiten kann.
+     */
+    async function cbAktualisiereBinder() {
+        const b = cbAktuellerBinder();
+        if (!b) {
+            if (typeof showToast === 'function') showToast(cbText('cb.loadFirst', 'Zuerst einen Ordner laden.'), 'warning');
+            return;
+        }
+        await buildCustomBinder();
+        const delta = window._cbDelta;
+        if (!delta) return;
+
+        const vorherIds = new Set(((b.snapshot && b.snapshot.cards) || []).map(c => c.cardId));
+        const hatSchnappschuss = vorherIds.size > 0;
+        const raus = (delta.droppedCards || []).slice();
+        const reinAlle = hatSchnappschuss
+            ? delta.cards.filter(c => !vorherIds.has(c.cardId))
+            : [];
+
+        _cbAbgleich = {
+            stand: (b.snapshot && b.snapshot.takenAt) || null,
+            hatSchnappschuss,
+            raus,
+            reinHabe: reinAlle.filter(c => c.missing === 0),
+            reinFehlt: reinAlle.filter(c => c.missing > 0)
+        };
+        cbRenderAbgleich();
+        const el = document.getElementById('cbAbgleich');
+        if (el && el.scrollIntoView) el.scrollIntoView({ block: 'start', behavior: 'smooth' });
+    }
+
+    function cbErledigtSet() {
+        const b = cbAktuellerBinder();
+        return new Set(Array.isArray(b && b.erledigt) ? b.erledigt : []);
+    }
+
+    function cbOffeneAnzahl() {
+        if (!_cbAbgleich) return 0;
+        const fertig = cbErledigtSet();
+        const alle = _cbAbgleich.raus.concat(_cbAbgleich.reinHabe, _cbAbgleich.reinFehlt);
+        return alle.filter(c => !fertig.has(c.cardId)).length;
+    }
+
+    /** Eine Karte als erledigt markieren bzw. zurueckholen. Ueberlebt das Weglegen. */
+    function cbHakeAb(cardId) {
+        const b = cbAktuellerBinder();
+        if (!b) return;
+        const liste = Array.isArray(b.erledigt) ? b.erledigt.slice() : [];
+        const i = liste.indexOf(cardId);
+        if (i >= 0) liste.splice(i, 1); else liste.push(cardId);
+        b.erledigt = liste;
+        cbSchreibeBinder(b);
+        cbRenderAbgleich();
+    }
+
+    /** Abgleich abschliessen: der heutige Stand wird der neue Vergleichspunkt. */
+    function cbAbgleichFertig() {
+        const b = cbAktuellerBinder();
+        if (!b) return;
+        const karten = (window._cbDelta && window._cbDelta.cards) || [];
+        if (karten.length) b.snapshot = cbBaueSchnappschuss(karten);
+        b.erledigt = [];
+        b.threshold = cbThreshold;
+        b.archetypes = cbSelectedArchetypes.map(a => ({ name: a.name, source: a.source }));
+        cbSchreibeBinder(b);
+        _cbAbgleich = null;
+        cbRenderAbgleich();
+        cbRenderBinderBar();
+        if (typeof showToast === 'function') showToast(cbText('cb.binderUpToDate', 'Ordner ist auf dem aktuellen Stand.'), 'success');
+    }
+
+    function cbAbgleichKachel(c, farbe) {
+        const fertig = cbErledigtSet().has(c.cardId);
+        const rec = (mb().findCardRecord ? mb().findCardRecord(c.name, c.set, c.number) : null);
+        const bild = rec && rec.image_url ? rec.image_url : '';
+        const menge = c.maxCount || 1;
+        return `<button type="button" class="cb-ab-kachel ${fertig ? 'is-fertig' : ''}"
+            style="--ab-farbe:${farbe}" onclick="cbHakeAb('${escapeHtmlAttr(c.cardId)}')"
+            aria-pressed="${fertig ? 'true' : 'false'}"
+            aria-label="${escapeHtmlAttr(c.name)} — ${escapeHtmlAttr(fertig ? cbText('cb.doneUndo', 'erledigt, zurücknehmen') : cbText('cb.markDone', 'als erledigt markieren'))}">
+            ${bild ? `<img src="${escapeHtmlAttr(bild)}" alt="" loading="lazy">` : '<span class="cb-ab-kein-bild"></span>'}
+            <span class="cb-ab-menge">${menge}</span>
+            <span class="cb-ab-name">${escapeHtml(c.name)}</span>
+            ${fertig ? '<span class="cb-ab-haken">✓</span>' : ''}
+        </button>`;
+    }
+
+    function cbAbgleichAbschnitt(titel, hinweis, karten, farbe) {
+        if (!karten.length) return '';
+        const fertig = cbErledigtSet();
+        const offen = karten.filter(c => !fertig.has(c.cardId)).length;
+        return `<section class="cb-ab-block">
+            <h4 class="cb-ab-titel" style="color:${farbe}">${escapeHtml(titel)} (${offen}/${karten.length})</h4>
+            <p class="cb-ab-hinweis">${escapeHtml(hinweis)}</p>
+            <div class="cb-ab-gitter">${karten.map(c => cbAbgleichKachel(c, farbe)).join('')}</div>
+        </section>`;
+    }
+
+    function cbRenderAbgleich() {
+        const el = document.getElementById('cbAbgleich');
+        if (!el) return;
+        if (!_cbAbgleich) { el.innerHTML = ''; el.classList.add('d-none'); return; }
+        el.classList.remove('d-none');
+        const a = _cbAbgleich;
+
+        if (!a.hatSchnappschuss) {
+            el.innerHTML = `<div class="cb-ab-karte"><p class="cb-ab-hinweis">${escapeHtml(cbText('cb.noBaseline', 'Dieser Ordner wurde noch nie abgeglichen — es gibt nichts zu vergleichen. Der heutige Stand wird als Ausgangspunkt gespeichert.'))}</p>
+                <button type="button" class="cb-ab-fertig" onclick="cbAbgleichFertig()">${escapeHtml(cbText('cb.setBaseline', 'Als Ausgangspunkt speichern'))}</button></div>`;
+            return;
+        }
+
+        const gesamt = a.raus.length + a.reinHabe.length + a.reinFehlt.length;
+        if (gesamt === 0) {
+            el.innerHTML = `<div class="cb-ab-karte"><p class="cb-ab-nix">${escapeHtml(cbText('cb.diffNothing', 'Nichts zu tun — dein Ordner ist auf dem aktuellen Stand.'))}</p></div>`;
+            return;
+        }
+
+        // Blau statt Gruen fuer "rein": tokens.css verbietet Rot-Gruen als
+        // alleinigen Bedeutungstraeger. Zeichen und Wort tragen die Bedeutung,
+        // die Farbe ist nur Zugabe.
+        const rot = 'var(--dv-neg)';
+        const blau = 'var(--dv-pos)';
+        const offen = cbOffeneAnzahl();
+        const kopf = cbText('cb.diffSummary', '{out} raus · {in} rein · {missing} davon fehlen dir')
+            .replace('{out}', String(a.raus.length))
+            .replace('{in}', String(a.reinHabe.length + a.reinFehlt.length))
+            .replace('{missing}', String(a.reinFehlt.length));
+
+        el.innerHTML = `<div class="cb-ab-karte">
+            <div class="cb-ab-kopf">
+                <strong>${escapeHtml(kopf)}</strong>
+                <span class="cb-ab-offen">${escapeHtml(cbText('cb.diffOpen', 'Noch offen: {n}').replace('{n}', String(offen)))}</span>
+            </div>
+            ${a.stand ? `<p class="cb-ab-stand">${escapeHtml(cbText('cb.diffSince', 'Verglichen mit deinem Stand vom {date}').replace('{date}', cbDatumKurz(a.stand)))}</p>` : ''}
+            ${cbAbgleichAbschnitt(cbText('cb.diffOut', '➖ Raus aus dem Ordner'), cbText('cb.diffOutHint', 'Diese Karten aus dem Ordner nehmen.'), a.raus, rot)}
+            ${cbAbgleichAbschnitt(cbText('cb.diffInOwned', '➕ Rein — hast du'), cbText('cb.diffInOwnedHint', 'Liegt in deiner Sammlung — raussuchen und einsortieren.'), a.reinHabe, blau)}
+            ${cbAbgleichAbschnitt(cbText('cb.diffInMissing', '➕ Rein — fehlt dir'), cbText('cb.diffInMissingHint', 'Kannst du jetzt nicht einsortieren — Wunschliste oder Druckliste.'), a.reinFehlt, blau)}
+            <button type="button" class="cb-ab-fertig" onclick="cbAbgleichFertig()">${escapeHtml(cbText('cb.diffDone', 'Fertig — Ordner ist aktuell'))}</button>
+        </div>`;
+    }
+
+    // ── Sortierung ──
+
+    /**
+     * Die Ordner-Sortierung. Voreinstellung 'binder' ist exakt die bisherige
+     * Reihenfolge (Kartenart, dann neuestes Set, dann Sammelnummer) — sie war
+     * schon immer die richtige, nur nie beschriftet und nie umschaltbar.
+     */
+    function cbSortiere(karten, shared) {
+        const nameVergleich = (a, b) => String(a.name || '').localeCompare(String(b.name || ''), 'de');
+        if (cbSort === 'name') return karten.sort(nameVergleich);
+        if (cbSort === 'decks') {
+            return karten.sort((a, b) => {
+                const d = (b.decks ? b.decks.length : 0) - (a.decks ? a.decks.length : 0);
+                return d !== 0 ? d : nameVergleich(a, b);
+            });
+        }
+        if (cbSort === 'fehlend') {
+            return karten.sort((a, b) => {
+                const f = (b.missing || 0) - (a.missing || 0);
+                if (f !== 0) return f;
+                const d = (b.decks ? b.decks.length : 0) - (a.decks ? a.decks.length : 0);
+                return d !== 0 ? d : nameVergleich(a, b);
+            });
+        }
+        if (cbSort === 'typ') {
+            // Kartenart zuerst, innerhalb der Art nach Element bzw. Name —
+            // das ist die Reihenfolge, in der viele ihren Ordner physisch fuehren.
+            return karten.sort((a, b) => {
+                const ma = shared.getMetaBinderTypeMeta(a);
+                const mb_ = shared.getMetaBinderTypeMeta(b);
+                const ta = String(ma.type || ''), tb = String(mb_.type || '');
+                if (ta !== tb) return ta.localeCompare(tb);
+                return nameVergleich(a, b);
+            });
+        }
+        if (cbSort === 'set') {
+            return karten.sort((a, b) => {
+                const sa = shared.getMetaBinderSetOrderValue ? shared.getMetaBinderSetOrderValue(a.set) : 0;
+                const sb = shared.getMetaBinderSetOrderValue ? shared.getMetaBinderSetOrderValue(b.set) : 0;
+                if (sa !== sb) return sb - sa;
+                const na = shared.parseCardNumberForSort ? shared.parseCardNumberForSort(a.number) : 0;
+                const nb = shared.parseCardNumberForSort ? shared.parseCardNumberForSort(b.number) : 0;
+                if (na !== nb) return na - nb;
+                return nameVergleich(a, b);
+            });
+        }
+        return cbAllPrints
+            ? shared.sortMetaCardsAllPrints(karten)
+            : shared.sortMetaCards(karten, cbAllPrints);
+    }
+
+    function cbSetSort(wert) {
+        const erlaubt = ['binder', 'set', 'typ', 'decks', 'fehlend', 'name'];
+        cbSort = erlaubt.indexOf(wert) >= 0 ? wert : 'binder';
+        cbApplyFilter();
     }
 
     // ── UI: Archetype Picker ──
@@ -229,11 +738,6 @@
         });
         if (exists) return;
 
-        if (cbSelectedArchetypes.length >= 30) {
-            if (typeof showToast === 'function') showToast(cbText('cb.maxArchetypes', 'Maximum 30 archetypes.'), 'warning');
-            return;
-        }
-
         cbSelectedArchetypes.push({ name, source });
         cbSaveSelections();
         cbRenderChips();
@@ -250,10 +754,6 @@
         if (idx >= 0) {
             cbSelectedArchetypes.splice(idx, 1);
         } else {
-            if (cbSelectedArchetypes.length >= 30) {
-                if (typeof showToast === 'function') showToast(cbText('cb.maxArchetypes', 'Maximum 30 archetypes.'), 'warning');
-                return;
-            }
             cbSelectedArchetypes.push({ name, source });
         }
         cbSaveSelections();
@@ -483,9 +983,19 @@
                 const icon = (typeof window.ArchetypeIcons !== 'undefined')
                     ? window.ArchetypeIcons.getIconHtml(a.name, { size: 'sm', layout: 'inline' })
                     : '';
-                html += `<button type="button" class="custom-binder-dropdown-item ${isSelected ? 'is-selected' : ''}"
+                // Datenlage sichtbar machen statt still ein fremdes Deck liefern.
+                let hinweis = '';
+                let klasse = '';
+                if (a.datenlage === 'keine') {
+                    klasse = ' is-ohne-daten';
+                    hinweis = `<small class="cb-dd-warn">${escapeHtml(cbText('cb.noCardData', 'keine Kartendaten'))}</small>`;
+                } else if (a.datenlage === 'ersatz') {
+                    klasse = ' is-ersatz';
+                    hinweis = `<small class="cb-dd-warn" title="${escapeHtmlAttr(cbText('cb.substituteHint', 'Für diesen Namen liegen keine eigenen Kartendaten vor. Angezeigt werden die Karten von:') + ' ' + a.ersatzFuer)}">${escapeHtml(cbText('cb.substituteShort', 'Karten von'))} ${escapeHtml(a.ersatzFuer)}</small>`;
+                }
+                html += `<button type="button" class="custom-binder-dropdown-item ${isSelected ? 'is-selected' : ''}${klasse}"
                     onclick="cbToggleArchetype('${a.name.replace(/'/g, "\\'")}','${escapeHtml(a.source)}')">
-                    <span class="cb-dd-check">${isSelected ? '✓' : ''}</span>${rankBadge}${icon} ${safeName} ${shareText}
+                    <span class="cb-dd-check">${isSelected ? '✓' : ''}</span>${rankBadge}${icon} ${safeName} ${shareText}${hinweis}
                 </button>`;
             });
         }
@@ -514,16 +1024,17 @@
                 );
             });
         } else {
-            // Add missing variants (respect 30-deck limit)
+            // Alle fehlenden Varianten aufnehmen. Frueher stand hier eine
+            // Obergrenze von 30; gemessen ergibt die Vereinigung ALLER 60
+            // Archetypen mit Kartendaten 533 verschiedene Karten, bei der
+            // Standardschwelle 329 — also kein Groessenproblem, das eine
+            // Obergrenze rechtfertigt.
             names.forEach(name => {
                 const normKey = shared.normalizeArchetypeKey ? shared.normalizeArchetypeKey(name) : name.toLowerCase();
                 const already = cbSelectedArchetypes.some(a =>
                     (shared.normalizeArchetypeKey ? shared.normalizeArchetypeKey(a.name) : a.name.toLowerCase()) === normKey && a.source === source
                 );
-                if (!already) {
-                    if (cbSelectedArchetypes.length >= 30) return;
-                    cbSelectedArchetypes.push({ name, source });
-                }
+                if (!already) cbSelectedArchetypes.push({ name, source });
             });
         }
 
@@ -622,6 +1133,27 @@
     // in localStorage, per device.
     async function cbComputeDelta(binderMap, shared) {
         let previous = { ids: new Set(), cards: [], date: null, hasProfile: false };
+
+        // Ist ein Ordner geladen, ist SEIN Schnappschuss der Vergleichspunkt.
+        // Vorher gab es genau einen globalen Schluessel customBinderCacheV2 fuer
+        // alle Ordner: sobald es zwei gab, ueberschrieben sie gegenseitig ihren
+        // "was ist neu"-Bezugspunkt, und ein Wechsel meldete den halben anderen
+        // Ordner als neu. Der Vergleichspunkt gehoert zum Ordner, nicht zum Geraet.
+        const geladen = cbAktuellerBinder();
+        if (geladen && geladen.snapshot && Array.isArray(geladen.snapshot.cards)) {
+            const gleicheSchwelle = geladen.threshold === undefined || geladen.threshold === cbThreshold;
+            if (gleicheSchwelle) {
+                return shared.computeDelta(binderMap, {
+                    previous: {
+                        ids: new Set(geladen.snapshot.cards.map(c => c.cardId)),
+                        cards: geladen.snapshot.cards,
+                        date: geladen.snapshot.takenAt || null,
+                        hasProfile: true
+                    }
+                });
+            }
+        }
+
         try {
             const cachedV2 = JSON.parse(localStorage.getItem(CB_CACHE_KEY_V2) || 'null');
             // A baseline generated at a DIFFERENT threshold is not comparable:
@@ -691,6 +1223,10 @@
         const missingCopies = cards.reduce((s, c) => s + c.missing, 0);
         const ownedComplete = cards.filter(c => c.missing === 0).length;
         const newCount = cards.filter(c => c.isNew).length;
+        // Die binderspezifischste Zahl ueberhaupt und bisher nirgends zu sehen:
+        // wie viele Neunerseiten das Ganze braucht. Sie entscheidet, ob der
+        // Ordner reicht. Ein Fach je verschiedener Karte, nicht je Kopie.
+        const seiten = Math.ceil(totalUnique / 9);
 
         // Stats (mode-dependent: ownership vs print status)
         if (statsEl) {
@@ -718,6 +1254,10 @@
                 <div class="meta-binder-stat">
                     <span class="meta-binder-stat-value" style="color:#3B4CCA">${newCount}</span>
                     <span class="meta-binder-stat-label">${cbText('mb.newThisWeek', 'New This Week')}</span>
+                </div>
+                <div class="meta-binder-stat">
+                    <span class="meta-binder-stat-value">${seiten}</span>
+                    <span class="meta-binder-stat-label">${cbText('cb.pages', 'Seiten (9er)')}</span>
                 </div>`;
             }
         }
@@ -821,12 +1361,41 @@
                     </select>
                 </div>
                 <div class="filter-group">
+                    <input type="search" id="cbFilterName" class="input-system cb-filter-name" oninput="cbApplyFilter()"
+                        placeholder="${escapeHtmlAttr(cbText('cb.filterName','Kartenname suchen'))}"
+                        aria-label="${escapeHtmlAttr(cbText('cb.filterName','Kartenname suchen'))}">
+                    <select id="cbFilterDecks" onchange="cbApplyFilter()" class="select-system" aria-label="${escapeHtmlAttr(cbText('cb.filterDecks','Wie viele Decks'))}">
+                        <option value="0">${cbText('cb.decksAny','Decks: alle')}</option>
+                        <option value="2">${cbText('cb.decks2','ab 2 Decks')}</option>
+                        <option value="3">${cbText('cb.decks3','ab 3 Decks')}</option>
+                        <option value="5">${cbText('cb.decks5','ab 5 Decks')}</option>
+                    </select>
+                    <select id="cbFilterMissing" onchange="cbApplyFilter()" class="select-system" aria-label="${escapeHtmlAttr(cbText('cb.filterMissing','Fehlmenge'))}">
+                        <option value="all">${cbText('cb.missingAny','Fehlmenge: egal')}</option>
+                        <option value="ab1">${cbText('cb.missing1','fehlt mindestens 1')}</option>
+                        <option value="ab2">${cbText('cb.missing2','fehlen mindestens 2')}</option>
+                        <option value="voll">${cbText('cb.missingFull','fehlt komplett')}</option>
+                    </select>
+                    <select id="cbSortOrder" onchange="cbSetSort(this.value)" class="select-system" aria-label="${escapeHtmlAttr(cbText('cb.sortLabel','Sortierung'))}">
+                        <option value="binder">${cbText('cb.sortBinder','Ordner-Reihenfolge')}</option>
+                        <option value="set">${cbText('cb.sortSet','Set (neu → alt)')}</option>
+                        <option value="typ">${cbText('cb.sortType','Kartenart')}</option>
+                        <option value="decks">${cbText('cb.sortDecks','Meiste Decks zuerst')}</option>
+                        <option value="fehlend">${cbText('cb.sortMissing','Fehlende zuerst')}</option>
+                        <option value="name">${cbText('cb.sortName','Name A–Z')}</option>
+                    </select>
+                </div>
+                <div class="filter-group">
                     <button id="cbBtnStandardPrint" class="meta-binder-filter-btn active" onclick="cbSetPrintView(false)">${cbText('mb.standardPrint','Standard Print')}</button>
                     <button id="cbBtnAllPrints" class="meta-binder-filter-btn" onclick="cbSetPrintView(true)">${cbText('mb.allPrints','All Prints')}</button>
                 </div>`;
 
             // Populate set filter
             cbUpdateSetFilter(cards);
+            // Die Sortierung ueberlebt den Neuaufbau der Filterzeile — sonst
+            // muesste man sie nach jedem Generieren neu einstellen.
+            const sortEl = document.getElementById('cbSortOrder');
+            if (sortEl) sortEl.value = cbSort;
         }
 
         // Enable action buttons
@@ -949,11 +1518,31 @@
             filtered = cards;
         }
 
+        // Zusaetzliche, stapelbare Filter. Sie greifen ZUSAMMEN mit den Chips
+        // oben, nicht statt ihrer — die eine Frage, die man bei 500 Karten
+        // wirklich stellt, ist zusammengesetzt ("fehlt mir UND in >= 3 Decks").
+        const suchEl = document.getElementById('cbFilterName');
+        const deckEl = document.getElementById('cbFilterDecks');
+        const fehltEl = document.getElementById('cbFilterMissing');
+        const suche = suchEl ? String(suchEl.value || '').trim().toLowerCase() : '';
+        const minDecks = deckEl ? (parseInt(deckEl.value, 10) || 0) : 0;
+        const minFehlt = fehltEl ? String(fehltEl.value || 'all') : 'all';
+
         return filtered.filter(card => {
             const meta = shared.getMetaBinderTypeMeta(card);
             const cardSet = String(card.set || '').toLowerCase();
             if (typeFilter !== 'all' && meta.type !== typeFilter) return false;
             if (setFilter !== 'all' && cardSet !== setFilter) return false;
+            if (minDecks > 0 && (card.decks ? card.decks.length : 0) < minDecks) return false;
+            if (minFehlt === 'ab1' && !(card.missing >= 1)) return false;
+            if (minFehlt === 'ab2' && !(card.missing >= 2)) return false;
+            if (minFehlt === 'voll' && !(card.missing >= card.maxCount)) return false;
+            if (suche) {
+                const rec = shared.findCardRecord ? shared.findCardRecord(card.name, card.set, card.number) : null;
+                const treffer = String(card.name || '').toLowerCase().includes(suche)
+                    || (rec && String(rec.name_de || '').toLowerCase().includes(suche));
+                if (!treffer) return false;
+            }
             // Print mode: basic energies are hidden by default — nobody
             // proxies them, and 8 energy tiles are pure noise in a print
             // list. Explicitly selecting the type filter still shows them.
@@ -994,9 +1583,7 @@
             filtered = expanded;
         }
 
-        const sorted = cbAllPrints
-            ? shared.sortMetaCardsAllPrints([...filtered])
-            : shared.sortMetaCards([...filtered]);
+        const sorted = cbSortiere([...filtered], shared);
 
         if (sorted.length === 0) {
             // "Everything printed" is success, not an error-looking empty state.
@@ -1469,6 +2056,10 @@
         cbRenderPresetBar();
         cbUpdateActionButtons();
         cbSetThreshold(cbThreshold); // paint the persisted segment state
+        // Ordnerliste nachziehen: sie ist der Einstieg in den Tab. Bewusst
+        // ohne await — die Liste erscheint, sobald sie da ist, und blockiert
+        // den Rest der Oberflaeche nicht.
+        cbLadeBinderListe().then(cbRenderBinderBar).catch(() => cbRenderBinderBar());
     }
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', _cbInitDom);
@@ -1553,4 +2144,13 @@
     window.cbAddTopMetaArchetypes = cbAddTopMetaArchetypes;
     window.cbLoadBinderIntoProxy = cbLoadBinderIntoProxy;
     window.cbOpenDroppedModal = cbOpenDroppedModal;
+    window.cbSpeichereBinder = cbSpeichereBinder;
+    window.cbOeffneBinder = cbOeffneBinder;
+    window.cbLoescheBinder = cbLoescheBinder;
+    window.cbAktualisiereBinder = cbAktualisiereBinder;
+    window.cbHakeAb = cbHakeAb;
+    window.cbAbgleichFertig = cbAbgleichFertig;
+    window.cbSetSort = cbSetSort;
+    window.cbLadeBinderListe = cbLadeBinderListe;
+    window.cbRenderBinderBar = cbRenderBinderBar;
 })();

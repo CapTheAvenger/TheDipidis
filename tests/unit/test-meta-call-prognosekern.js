@@ -188,3 +188,83 @@ describe('Prognosekern: die Verdrahtung haelt', () => {
             'ein Deck ohne Praesenzhistorie faellt auf nichts zurueck');
     });
 });
+
+describe('Day-2-Empfehlung: die Schrumpfung ordnet, nicht die Markow-Kette', () => {
+    it('die geschrumpfte Quote existiert und traegt ihr k', () => {
+        assert.match(SRC, /function _day2Schrumpfung\(\)/,
+            'die gemessene Empfehlungsgrundlage fehlt');
+        const m = SRC.match(/const DAY2_SCHRUMPFUNG_K\s*=\s*(\d+)/);
+        assert.ok(m, 'die Schrumpfungsstaerke k fehlt');
+        assert.equal(parseInt(m[1], 10), 30, 'k=30 war der gemessene Wert');
+    });
+
+    it('sie zieht duenne Decks kraeftig zum Feldmittel', () => {
+        const m = SRC.match(/function _day2Schrumpfung\(\)[\s\S]*?\n  \}\n/);
+        assert.ok(m, 'Funktion nicht herausloesbar');
+        function rechne(faelle) {
+            const ctx = { Math, Object, Map, Array, DAY2_SCHRUMPFUNG_K: 30, DAY2_MIN_ANKER: 30,
+                _majorSharesByDeck: faelle.anteile, _labsDay2ConvByDeck: faelle.conv };
+            vm.createContext(ctx);
+            new vm.Script(m[0] + '\nglobalThis.__f = _day2Schrumpfung;').runInContext(ctx);
+            return ctx.__f();
+        }
+        const r = rechne({
+            anteile: { dick: [{ tid: 't1', day1Players: 1000 }],
+                       duenn: [{ tid: 't1', day1Players: 6 }],
+                       hauch: [{ tid: 't1', day1Players: 2 }] },
+            conv: { dick:  { samples: [{ tid: 't1', conv: 0.30 }] },
+                    duenn: { samples: [{ tid: 't1', conv: 1.00 }] },
+                    hauch: { samples: [{ tid: 't1', conv: 1.00 }] } }
+        });
+        // Die Rohquote ist bei beiden duennen Decks 100 %. Die Schrumpfung
+        // muss sie deutlich herunterziehen — und zwar umso staerker, je
+        // duenner die Datenlage ist.
+        // Bei k=30 landen 6 Spieler mit 100 % rechnerisch bei 0,42 und
+        // schluegen damit ein solides 30-%-Deck. Deshalb greift ZUSAETZLICH
+        // die Mindestgroesse — Schrumpfung allein reicht nicht.
+        assert.equal(r.get('hauch'), undefined,
+            'ein Deck mit zwei Spielern darf gar nicht erst empfohlen werden');
+        assert.equal(r.get('duenn'), undefined,
+            'ein Deck mit sechs Spielern darf gar nicht erst empfohlen werden');
+        // Und das dicke Deck bleibt praktisch bei seinem Messwert.
+        assert.ok(Math.abs(r.get('dick') - 0.30) < 0.02,
+            'ein Deck mit tausend Spielern darf kaum bewegt werden');
+    });
+
+    it('die beiden schaedlichen Multiplikatoren wirken nicht mehr', () => {
+        const code = ohneKommentar(SRC);
+        assert.ok(!/adjustedDay2 = blendedDay2 \* d2WrMult/.test(code),
+            'der d2WR-Multiplikator wirkt wieder — gemessen nimmt er den Gewinn weg '
+            + '(+8,68 auf +7,04 pp)');
+        assert.ok(!/adjustedDay2 \*= p46RecoMult/.test(code),
+            'der Underdog-Multiplikator wirkt wieder — gemessen wirkungslos');
+        // Beide muessen weiter BERECHNET werden, die Oberflaeche zeigt sie an.
+        assert.match(code, /const d2WrMult = _d2WrMultiplier/, 'd2WrMult wird nicht mehr berechnet');
+        assert.match(code, /p46RecoMult = 1\.0 \+ 0\.50/, 'p46RecoMult wird nicht mehr berechnet');
+    });
+
+    it('day2Prob wird aus der Schrumpfung gespeist, nicht aus der Markow-Kette', () => {
+        // Die Liste wird nach day2Prob sortiert. Steht dort wieder der
+        // Markow-Wert, ist der ganze Umbau wirkungslos — die Zahl aendert
+        // sich, die Reihenfolge nicht.
+        assert.match(SRC, /day2Prob: _rang,/,
+            'day2Prob kommt nicht aus dem Schrumpfungsrang');
+        assert.match(SRC, /const _rang = \(typeof _schrumpf === 'number' && _schrumpf > 0\) \? _schrumpf : adjustedDay2;/,
+            'der Rang faellt nicht sauber auf den alten Wert zurueck');
+    });
+
+    it('die Markow-Zahl bleibt sichtbar, statt still zu verschwinden', () => {
+        assert.match(SRC, /markowDay2Prob: adjustedDay2/,
+            'die Markow-Zahl wird nicht mehr mitgegeben');
+        assert.match(SRC, /simDay2Prob: r\.day2Prob/,
+            'die rohe Simulation wird nicht mehr mitgegeben');
+    });
+
+    it('die Schrumpfung wird einmal je Aufruf gerechnet, nicht je Deck', () => {
+        const code = ohneKommentar(SRC);
+        assert.match(code, /const _day2SchrumpfCache = _day2Schrumpfung\(\)/,
+            'kein Zwischenspeicher');
+        const aufrufe = (code.match(/(?<!function )_day2Schrumpfung\(\)/g) || []).length;
+        assert.equal(aufrufe, 1, `${aufrufe} Aufrufe, erwartet 1`);
+    });
+});

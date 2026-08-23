@@ -2883,6 +2883,199 @@ window.MetaCall = (function () {
   // re-run the prediction without a full data reload. Uses module
   // state: _shareList (with raw .ladderShare), _tournamentStats,
   // _labsRowsByDeck, _tgFieldShares, _predictorMode.
+  // ── Prognosekern (gemessen, 23.08.2026) ─────────────────────────────
+  //
+  // WARUM DIESER KERN DIE 46 STUFEN ERSETZT
+  //
+  // Der bisherige Motor wurde gegen eine leckfreie Rueckwaertsstrecke ueber
+  // 54 Turniere aus zehn Formatepochen gemessen (tools/prognose_strecke.py).
+  // Ergebnis: 1,714 pp mittlerer absoluter Fehler. Ein simples Mittel der
+  // letzten zwei Turniere derselben Epoche liegt bei 1,376 pp — der Motor
+  // war in 50 von 54 Turnieren SCHLECHTER als nichts zu tun.
+  //
+  // Isoliert gemessen war der Konzentrations-Exponent allein dafuer
+  // verantwortlich: er kostete +0,361 pp und war in 52 von 54 Turnieren
+  // schlechter. Er ist entfernt.
+  //
+  // Dieser Kern misst 1,256 pp. Zum Vergleich die Obergrenze: ein Orakel,
+  // das ALLE Turniere der Epoche kennt, auch die nach dem Ziel, kommt auf
+  // 1,020 pp. Tiefer geht es nicht, weil ein einzelnes Turnier eine
+  // Stichprobe ist — zwei Turniere desselben Metas unterscheiden sich im
+  // Mittel um 1,608 pp allein durch Zufall und Ortsunterschiede.
+  //
+  // DREI BAUSTEINE, IN DIESER REIHENFOLGE GEMESSEN
+  //   1 Rezenzgewichteter Anker  1,376 pp   (= Grundlinie, kein Gewinn)
+  //   2 + Mittelwertrueckkehr    1,338 pp
+  //   3 + Leistungsfaktor        1,256 pp   t=-5,16 gegen die Grundlinie,
+  //                                         besser in 42 von 54 Turnieren
+  //
+  // WAS GEMESSEN NICHTS BEITRAEGT UND DARUM FEHLT
+  //   Die Online-Leiter. Roh gemessen 1,778 pp gegen 1,285 pp fuer das
+  //   letzte Praesenzturnier; als Mischterm von einem unabhaengigen
+  //   Pruefdurchgang als ueberangepasst bestaetigt. Der alte Motor
+  //   gewichtete sie mit 15 bis 30 Prozent.
+  //   Trendfortschreibung des Anteils. Das Optimum liegt bei alpha = -0,3,
+  //   also GLAETTUNG; jede Fortschreibung verschlechtert monoton.
+  //   Platzierungszaehler (top8_conv_rate und Verwandte). Sie sind in allen
+  //   9334 Datenzeilen LEER — die zugehoerigen Stufen liefen ins Nichts.
+  //   Alterung nach Datum statt nach Turnierrang: durchweg schlechter.
+  //
+  // GRENZEN, DIE MITGESAGT GEHOEREN
+  //   Die Funktionsform wurde an denselben 54 Zielen ausgesiebt wie die
+  //   Parameter. Kreuzvalidierung deckt die Parameter ab (Auslass-eine-
+  //   Epoche: 1,238 statt 1,224; alle zehn Epochen zeigen einen Vorsprung),
+  //   nicht aber die Wahl der Form. Nur neue Turniere pruefen die.
+  //   Das ERSTE Turnier einer Epoche ist nie Ziel der Strecke gewesen.
+  //   Fuer diesen Fall gibt es hier den Rueckfall auf die Online-Leiter.
+  const PROGNOSE_LAMBDA = 0.40;  // Rezenzzerfall je Turnier zurueck
+  const PROGNOSE_GAMMA  = 0.92;  // Mittelwertrueckkehr. Plateau 0,86-1,00;
+                                 // unter 0,80 und ueber 1,05 faellt das
+                                 // Modell unter die Grundlinie zurueck.
+  const PROGNOSE_DELTA  = 0.04;  // Anteilsschub je pp Winrate-Ueberrendite
+  const PROGNOSE_UNTEN  = 0.85;  // Untergrenze des Leistungsfaktors
+  const PROGNOSE_NT     = 2;     // Turniere im Leistungsfenster
+
+  /** Die Praesenzturniere der aktiven Epoche, aeltestes zuerst. */
+  function _prognoseTurniere() {
+    const nach = new Map();
+    Object.keys(_majorSharesByDeck || {}).forEach(k => {
+      (_majorSharesByDeck[k] || []).forEach(e => {
+        if (!e || !e.tid || !e.date) return;
+        let t = nach.get(e.tid);
+        if (!t) { t = { datum: e.date, decks: new Map() }; nach.set(e.tid, t); }
+        const anteil  = (typeof e.day1Share === 'number' && e.day1Share > 0) ? e.day1Share : (e.share || 0);
+        const winrate = (typeof e.day1WinPct === 'number' && e.day1WinPct > 0) ? e.day1WinPct : (e.winPct || 0);
+        const koepfe  = (e.day1Players || e.players || 0);
+        if (anteil > 0) t.decks.set(k, { anteil: anteil, winrate: winrate, koepfe: koepfe });
+      });
+    });
+    return Array.from(nach.values()).sort((a, b) => (a.datum < b.datum ? -1 : (a.datum > b.datum ? 1 : 0)));
+  }
+
+  /**
+   * Prognostizierter Anteil je Deck, aus den Praesenzturnieren der Epoche.
+   * Map<deckKey, prozent> — noch nicht auf 100 normiert, das macht der Aufrufer.
+   */
+  function _prognoseKern() {
+    const turniere = _prognoseTurniere();
+    if (turniere.length === 0) return new Map();
+
+    // 1. Rezenzgewichteter Anker. Gewichtet nach RANG, nicht nach Datum:
+    //    die Turniere einer Epoche liegen zeitlich zu dicht, gemessen ist
+    //    Datumsalterung durchweg schlechter (Halbwert 30 Tage: 1,448 pp).
+    const anker = new Map();
+    let gewichtSumme = 0;
+    for (let i = turniere.length - 1, rang = 0; i >= 0; i--, rang++) {
+      const g = Math.pow(1 - PROGNOSE_LAMBDA, rang);
+      gewichtSumme += g;
+      turniere[i].decks.forEach((v, k) => anker.set(k, (anker.get(k) || 0) + g * v.anteil));
+    }
+    if (gewichtSumme <= 0) return new Map();
+
+    // 2. Leistungsfaktor: um wieviel besser als das Feld hat ein Deck bei den
+    //    letzten Turnieren abgeschnitten? Der Term traegt gemessen 0,08 pp —
+    //    real, aber klein, darum nach unten gedeckelt.
+    const summe = new Map(), koepfe = new Map();
+    turniere.slice(-PROGNOSE_NT).forEach(t => {
+      t.decks.forEach((v, k) => {
+        if (!(v.winrate > 0) || !(v.koepfe > 0)) return;
+        summe.set(k, (summe.get(k) || 0) + v.winrate * v.koepfe);
+        koepfe.set(k, (koepfe.get(k) || 0) + v.koepfe);
+      });
+    });
+    let feldSumme = 0, feldKoepfe = 0;
+    summe.forEach((v, k) => { feldSumme += v; feldKoepfe += koepfe.get(k) || 0; });
+    const feldMittel = feldKoepfe > 0 ? feldSumme / feldKoepfe : 0;
+
+    // 3. Mittelwertrueckkehr. Grosse Anteile werden zusammengedrueckt, kleine
+    //    angehoben — ein Deck auf dem Gipfel faellt eher, als dass es steigt.
+    //    Staerkster einzelner Baustein und der einzige empfindliche Parameter.
+    const aus = new Map();
+    anker.forEach((rohSumme, k) => {
+      const basis = rohSumme / gewichtSumme;
+      if (!(basis > 0)) return;
+      let faktor = 1.0;
+      if (feldMittel > 0 && koepfe.get(k) > 0) {
+        const eigen = summe.get(k) / koepfe.get(k);
+        faktor = Math.max(PROGNOSE_UNTEN, 1.0 + PROGNOSE_DELTA * (eigen - feldMittel));
+      }
+      aus.set(k, Math.pow(basis * faktor, PROGNOSE_GAMMA));
+    });
+    return aus;
+  }
+
+  /**
+   * Geschrumpfte Day-2-Quote je Deck — die gemessene Empfehlungsgrundlage.
+   *
+   * WARUM SIE DIE MARKOW-KETTE ALS RANGORDNUNG ABLOEST
+   *
+   * Gemessen ueber 44 Turniere, Zielgroesse ist die tatsaechliche
+   * Day-2-Quote des empfohlenen Decks, streng gewertet (empfiehlt das
+   * Verfahren ein Deck, das gar nicht antrat, zaehlt das als Null — denn
+   * genau das passiert dem Nutzer dann auch):
+   *
+   *   diese Schrumpfung        +7,80 pp gegen den Feldschnitt,  3/44 Geister
+   *   Markow-Kette             +1,47 pp                        16/44 Geister
+   *   Motor wie ausgeliefert   -5,88 pp                        25/44 Geister
+   *
+   * Der ausgelieferte Motor empfahl also in ueber der Haelfte der Faelle ein
+   * Deck, das beim Zielturnier nicht auftauchte — und war damit schlechter,
+   * als blind den Feldschnitt zu nehmen. Die nachsichtige Wertung (naechst-
+   * bestes messbares Deck) verdeckt das und meldet +7,18 pp.
+   *
+   * Score(d) = (D2 + k*p0) / (D1 + k), k = 30
+   *   D1 Spieler des Decks am Tag 1, ueber die Turniere der Epoche
+   *   D2 davon in Tag 2, also D1 mal Konversionsrate
+   *   p0 Konversion des gesamten Feldes
+   * Ein Deck mit sechs Spielern und einem Gluecksturnier wird dadurch zum
+   * Feldmittel gezogen; ein Deck mit tausend Spielern kaum. Genau diese
+   * Schrumpfung fehlte der Markow-Kette, und sie ist der ganze Unterschied.
+   *
+   * Die Markow-Kette bleibt als simDay2Prob erhalten und wird angezeigt —
+   * gemessen ist sie ohnehin Zierrat: der blosse feldgewichtete Mittelwert
+   * der Matchups ohne jede Punkteverteilung waehlt in 41 von 44 Faellen
+   * dasselbe Deck.
+   */
+  const DAY2_SCHRUMPFUNG_K = 30;
+  // Mindestzahl ausgewerteter Spieler, damit ein Deck ueberhaupt empfohlen
+  // werden darf. Ohne sie schlaegt ein Deck mit zwei Spielern und einem
+  // Gluecksturnier ein solides Deck mit tausend: bei k=30 landet es nach der
+  // Schrumpfung bei 0,349 gegen 0,300. Rechnerisch richtig, als Empfehlung
+  // unbrauchbar — genau daher kommen die Geisterempfehlungen. Dieselbe
+  // Schwelle wie MIN_ANZEIGE in scripts/build_deckempfehlung.py.
+  const DAY2_MIN_ANKER = 30;
+
+  function _day2Schrumpfung() {
+    const d1 = new Map(), d2 = new Map();
+    Object.keys(_majorSharesByDeck || {}).forEach(k => {
+      const proben = new Map();
+      const eintrag = _labsDay2ConvByDeck && _labsDay2ConvByDeck[k];
+      ((eintrag && eintrag.samples) || []).forEach(s => {
+        if (s && s.tid) proben.set(s.tid, s.conv);
+      });
+      (_majorSharesByDeck[k] || []).forEach(e => {
+        const koepfe = (e && (e.day1Players || e.players)) || 0;
+        if (!(koepfe > 0)) return;
+        d1.set(k, (d1.get(k) || 0) + koepfe);
+        const c = proben.get(e.tid);
+        if (typeof c === 'number' && c > 0) d2.set(k, (d2.get(k) || 0) + koepfe * c);
+      });
+    });
+    let gesamt1 = 0, gesamt2 = 0;
+    d1.forEach((v, k) => { gesamt1 += v; gesamt2 += (d2.get(k) || 0); });
+    if (!(gesamt1 > 0)) return new Map();
+    const p0 = gesamt2 / gesamt1;
+    const aus = new Map();
+    d1.forEach((n, k) => {
+      // Zu duenne Decks bekommen keinen Rang. Sie verschwinden nicht — sie
+      // koennen weiter unter den Geheimtipps auftauchen, wo eine gewagte
+      // Wahl hingehoert. Nur als EMPFEHLUNG sind sie es nicht.
+      if (n < DAY2_MIN_ANKER) return;
+      aus.set(k, ((d2.get(k) || 0) + DAY2_SCHRUMPFUNG_K * p0) / (n + DAY2_SCHRUMPFUNG_K));
+    });
+    return aus;
+  }
+
   function _runPredictor() {
     if (!_shareList) return;
 
@@ -2925,6 +3118,9 @@ window.MetaCall = (function () {
       ? Object.values(_tournamentStats).filter(s => s && s.broughtShare > 0)
       : [];
     const totalBroughtForConv = convStats.reduce((a, s) => a + s.broughtShare, 0) || 1;
+    // Einmal je Lauf: der gemessene Prognosekern.
+    const _prognoseKernCache = (_predictorMode === 'B') ? _prognoseKern() : null;
+
     const meanConv = convStats.length > 0
       ? convStats.reduce((a, s) => a + (s.top8Conv || 0) * s.broughtShare, 0) / totalBroughtForConv
       : 0.08;
@@ -3296,7 +3492,15 @@ window.MetaCall = (function () {
       }
 
       let predicted;
-      if (_predictorMode === 'B') {
+      // Der gemessene Kern hat Vorrang, wo er etwas weiss. Wo nicht — ein Deck
+      // ohne jede Praesenzhistorie in dieser Epoche —, bleibt nur die
+      // Online-Leiter. Gemessen sind das 1,8 % der Decks und 2,6 % der
+      // Fehlermasse; ein perfektes Orakel dafuer braechte 0,044 pp. Darum
+      // ein schlichter Rueckfall und kein eigenes Verfahren.
+      const _kernWert = _prognoseKernCache ? _prognoseKernCache.get(k) : undefined;
+      if (_predictorMode === 'B' && typeof _kernWert === 'number' && _kernWert > 0) {
+        predicted = _kernWert;
+      } else if (_predictorMode === 'B') {
         // Mode B (Predictor 3.0 + 4.2 + 4.4): labs majors authoritative
         // + conv-rate weighted, plus post-major and weekly trend signals
         // from the online ladder. Ladder term damped by 4.2; labs term
@@ -3787,35 +3991,20 @@ window.MetaCall = (function () {
     // toward the underweighted variants without changing low-share
     // behaviour. exp(0..5%) = 1.50, exp(5..10%) decays linearly to
     // 1.10, exp(10%+) = 1.10. Sub-3% decks keep full bandwagon boost.
-    const CONCENTRATION_EXP_BASE = 1.50;
-    const CONCENTRATION_EXP_MIN  = 1.10;
-    const CONCENTRATION_SOFT_LO  = 5.0;   // below this: full boost
-    const CONCENTRATION_SOFT_HI  = 10.0;  // at/above: minimum boost
-    // Past Meta — skip the concentration boost entirely. The boost
-    // exists to bridge "online ladder under-counts dominant decks
-    // because casual players spread thin" → that gap doesn't exist
-    // in past-meta major data, which IS the ground truth: 738
-    // Dragapult players is 738, not "really 1100 once concentration
-    // is applied". With the boost the family-leader inflates from
-    // its real ~29.8 % share to ~40 % after renormalisation — a
-    // distortion the user spotted instantly.
-    const _skipConcentration = (_metaSource === 'past');
-    _shareList.forEach(d => {
-      const raw = d.predictedShareRaw || 0;
-      if (_skipConcentration) {
-        d.concentrationExp = 1.00;
-        d.predictedShareRaw = raw;
-        return;
-      }
-      let exp = CONCENTRATION_EXP_BASE;
-      if (raw > CONCENTRATION_SOFT_LO) {
-        const t = Math.min(1, (raw - CONCENTRATION_SOFT_LO) /
-                              (CONCENTRATION_SOFT_HI - CONCENTRATION_SOFT_LO));
-        exp = CONCENTRATION_EXP_BASE - (CONCENTRATION_EXP_BASE - CONCENTRATION_EXP_MIN) * t;
-      }
-      d.concentrationExp   = Math.round(exp * 100) / 100;
-      d.predictedShareRaw  = Math.pow(raw, exp);
-    });
+    // Konzentrations-Exponent (Predictor 5.2) — ENTFERNT am 23.08.2026.
+    //
+    // Er hob jeden Rohanteil in eine Potenz: 1,50 unter 5 %, linear fallend
+    // auf 1,10 ab 10 %. Die Begruendung war plausibel — die Online-Leiter
+    // unterzaehle dominante Decks, weil Gelegenheitsspieler sich breiter
+    // verteilen. Gemessen an 54 Turnieren aus zehn Epochen kostete er
+    // +0,361 pp (SE 0,029, t=+12,30) und war in 52 von 54 Turnieren
+    // schlechter. Er allein machte den Motor schlechter als ein simples
+    // Mittel der letzten zwei Turniere.
+    //
+    // Die Stelle bleibt als Kommentar stehen, damit niemand die Idee erneut
+    // fuer ungeprueft haelt und wieder einbaut. concentrationExp wird weiter
+    // gesetzt, weil die Oberflaeche das Feld liest — jetzt konstant 1,00.
+    _shareList.forEach(d => { d.concentrationExp = 1.00; });
 
     // Quality-Floor (Predictor 5.2) — Coverage fix for high-conv
     // underdogs. LA showed Lopunny Dudunsparce (Prag 3 D1 / 33.3 %
@@ -6946,6 +7135,9 @@ window.MetaCall = (function () {
       return new Set(q.samples.map(x => x.tid || x.date)).size;
     }
 
+    // Einmal je Aufruf: die gemessene Empfehlungsgrundlage.
+    const _day2SchrumpfCache = _day2Schrumpfung();
+
     const evaluated = candidates.map(name => {
       const r = calcDay2(field, name);
       const topMatchups = _topMatchupsVsField(name, field, 3);
@@ -6988,8 +7180,17 @@ window.MetaCall = (function () {
       // empirical-conversion number, not just one of them.
       const d2WrPct = _d2WrAggregate(k);
       const d2WrMajors = _d2WrMajors(k);
+      // GEMESSEN AM 23.08.2026, 44 Turniere, Zielgroesse ist die tatsaechliche
+      // Day-2-Quote des empfohlenen Decks:
+      //   Markow pur                          +7,43 pp gegen den Feldschnitt
+      //   + empirische Konversion             +8,68 pp
+      //   + d2WR-Multiplikator                +7,04 pp  <- nimmt den Gewinn weg
+      //   + Underdog-Multiplikator            +7,18 pp  <- wirkungslos
+      // Beide Multiplikatoren sind darum abgeschaltet. Sie werden weiter
+      // BERECHNET und mitgegeben, weil die Oberflaeche sie anzeigt — aber
+      // sie veraendern die Empfehlung nicht mehr.
       const d2WrMult = _d2WrMultiplier(d2WrPct, d2WrMajors);
-      let adjustedDay2 = blendedDay2 * d2WrMult;
+      let adjustedDay2 = blendedDay2;
 
       // Predictor 4.6 inheritance for the reco engine (Hydrapple Indy
       // reco gap). The share-side predictor (in _runPredictor) already
@@ -7027,11 +7228,19 @@ window.MetaCall = (function () {
         // with how-close-to-the-4-%-ceiling the deck was at win time.
         p46RecoMult = 1.0 + 0.50 * fresh * underdogStrength;
       }
-      adjustedDay2 *= p46RecoMult;
+      // p46RecoMult wird angezeigt, aber nicht mehr angewandt (siehe oben).
+
+      // Die Rangordnung kommt aus der geschrumpften Day-2-Quote, nicht aus
+      // der Markow-Kette (siehe _day2Schrumpfung). Kennt die Schrumpfung ein
+      // Deck nicht, bleibt der bisherige Wert — besser eine schwaechere
+      // Antwort als gar keine.
+      const _schrumpf = _day2SchrumpfCache ? _day2SchrumpfCache.get(k) : undefined;
+      const _rang = (typeof _schrumpf === 'number' && _schrumpf > 0) ? _schrumpf : adjustedDay2;
 
       return {
         name,
-        day2Prob: adjustedDay2,
+        day2Prob: _rang,
+        markowDay2Prob: adjustedDay2,
         simDay2Prob: r.day2Prob,
         blendedDay2Prob: blendedDay2,
         empConv,

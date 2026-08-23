@@ -3004,6 +3004,78 @@ window.MetaCall = (function () {
     return aus;
   }
 
+  /**
+   * Geschrumpfte Day-2-Quote je Deck — die gemessene Empfehlungsgrundlage.
+   *
+   * WARUM SIE DIE MARKOW-KETTE ALS RANGORDNUNG ABLOEST
+   *
+   * Gemessen ueber 44 Turniere, Zielgroesse ist die tatsaechliche
+   * Day-2-Quote des empfohlenen Decks, streng gewertet (empfiehlt das
+   * Verfahren ein Deck, das gar nicht antrat, zaehlt das als Null — denn
+   * genau das passiert dem Nutzer dann auch):
+   *
+   *   diese Schrumpfung        +7,80 pp gegen den Feldschnitt,  3/44 Geister
+   *   Markow-Kette             +1,47 pp                        16/44 Geister
+   *   Motor wie ausgeliefert   -5,88 pp                        25/44 Geister
+   *
+   * Der ausgelieferte Motor empfahl also in ueber der Haelfte der Faelle ein
+   * Deck, das beim Zielturnier nicht auftauchte — und war damit schlechter,
+   * als blind den Feldschnitt zu nehmen. Die nachsichtige Wertung (naechst-
+   * bestes messbares Deck) verdeckt das und meldet +7,18 pp.
+   *
+   * Score(d) = (D2 + k*p0) / (D1 + k), k = 30
+   *   D1 Spieler des Decks am Tag 1, ueber die Turniere der Epoche
+   *   D2 davon in Tag 2, also D1 mal Konversionsrate
+   *   p0 Konversion des gesamten Feldes
+   * Ein Deck mit sechs Spielern und einem Gluecksturnier wird dadurch zum
+   * Feldmittel gezogen; ein Deck mit tausend Spielern kaum. Genau diese
+   * Schrumpfung fehlte der Markow-Kette, und sie ist der ganze Unterschied.
+   *
+   * Die Markow-Kette bleibt als simDay2Prob erhalten und wird angezeigt —
+   * gemessen ist sie ohnehin Zierrat: der blosse feldgewichtete Mittelwert
+   * der Matchups ohne jede Punkteverteilung waehlt in 41 von 44 Faellen
+   * dasselbe Deck.
+   */
+  const DAY2_SCHRUMPFUNG_K = 30;
+  // Mindestzahl ausgewerteter Spieler, damit ein Deck ueberhaupt empfohlen
+  // werden darf. Ohne sie schlaegt ein Deck mit zwei Spielern und einem
+  // Gluecksturnier ein solides Deck mit tausend: bei k=30 landet es nach der
+  // Schrumpfung bei 0,349 gegen 0,300. Rechnerisch richtig, als Empfehlung
+  // unbrauchbar — genau daher kommen die Geisterempfehlungen. Dieselbe
+  // Schwelle wie MIN_ANZEIGE in scripts/build_deckempfehlung.py.
+  const DAY2_MIN_ANKER = 30;
+
+  function _day2Schrumpfung() {
+    const d1 = new Map(), d2 = new Map();
+    Object.keys(_majorSharesByDeck || {}).forEach(k => {
+      const proben = new Map();
+      const eintrag = _labsDay2ConvByDeck && _labsDay2ConvByDeck[k];
+      ((eintrag && eintrag.samples) || []).forEach(s => {
+        if (s && s.tid) proben.set(s.tid, s.conv);
+      });
+      (_majorSharesByDeck[k] || []).forEach(e => {
+        const koepfe = (e && (e.day1Players || e.players)) || 0;
+        if (!(koepfe > 0)) return;
+        d1.set(k, (d1.get(k) || 0) + koepfe);
+        const c = proben.get(e.tid);
+        if (typeof c === 'number' && c > 0) d2.set(k, (d2.get(k) || 0) + koepfe * c);
+      });
+    });
+    let gesamt1 = 0, gesamt2 = 0;
+    d1.forEach((v, k) => { gesamt1 += v; gesamt2 += (d2.get(k) || 0); });
+    if (!(gesamt1 > 0)) return new Map();
+    const p0 = gesamt2 / gesamt1;
+    const aus = new Map();
+    d1.forEach((n, k) => {
+      // Zu duenne Decks bekommen keinen Rang. Sie verschwinden nicht — sie
+      // koennen weiter unter den Geheimtipps auftauchen, wo eine gewagte
+      // Wahl hingehoert. Nur als EMPFEHLUNG sind sie es nicht.
+      if (n < DAY2_MIN_ANKER) return;
+      aus.set(k, ((d2.get(k) || 0) + DAY2_SCHRUMPFUNG_K * p0) / (n + DAY2_SCHRUMPFUNG_K));
+    });
+    return aus;
+  }
+
   function _runPredictor() {
     if (!_shareList) return;
 
@@ -7063,6 +7135,9 @@ window.MetaCall = (function () {
       return new Set(q.samples.map(x => x.tid || x.date)).size;
     }
 
+    // Einmal je Aufruf: die gemessene Empfehlungsgrundlage.
+    const _day2SchrumpfCache = _day2Schrumpfung();
+
     const evaluated = candidates.map(name => {
       const r = calcDay2(field, name);
       const topMatchups = _topMatchupsVsField(name, field, 3);
@@ -7105,8 +7180,17 @@ window.MetaCall = (function () {
       // empirical-conversion number, not just one of them.
       const d2WrPct = _d2WrAggregate(k);
       const d2WrMajors = _d2WrMajors(k);
+      // GEMESSEN AM 23.08.2026, 44 Turniere, Zielgroesse ist die tatsaechliche
+      // Day-2-Quote des empfohlenen Decks:
+      //   Markow pur                          +7,43 pp gegen den Feldschnitt
+      //   + empirische Konversion             +8,68 pp
+      //   + d2WR-Multiplikator                +7,04 pp  <- nimmt den Gewinn weg
+      //   + Underdog-Multiplikator            +7,18 pp  <- wirkungslos
+      // Beide Multiplikatoren sind darum abgeschaltet. Sie werden weiter
+      // BERECHNET und mitgegeben, weil die Oberflaeche sie anzeigt — aber
+      // sie veraendern die Empfehlung nicht mehr.
       const d2WrMult = _d2WrMultiplier(d2WrPct, d2WrMajors);
-      let adjustedDay2 = blendedDay2 * d2WrMult;
+      let adjustedDay2 = blendedDay2;
 
       // Predictor 4.6 inheritance for the reco engine (Hydrapple Indy
       // reco gap). The share-side predictor (in _runPredictor) already
@@ -7144,11 +7228,19 @@ window.MetaCall = (function () {
         // with how-close-to-the-4-%-ceiling the deck was at win time.
         p46RecoMult = 1.0 + 0.50 * fresh * underdogStrength;
       }
-      adjustedDay2 *= p46RecoMult;
+      // p46RecoMult wird angezeigt, aber nicht mehr angewandt (siehe oben).
+
+      // Die Rangordnung kommt aus der geschrumpften Day-2-Quote, nicht aus
+      // der Markow-Kette (siehe _day2Schrumpfung). Kennt die Schrumpfung ein
+      // Deck nicht, bleibt der bisherige Wert — besser eine schwaechere
+      // Antwort als gar keine.
+      const _schrumpf = _day2SchrumpfCache ? _day2SchrumpfCache.get(k) : undefined;
+      const _rang = (typeof _schrumpf === 'number' && _schrumpf > 0) ? _schrumpf : adjustedDay2;
 
       return {
         name,
-        day2Prob: adjustedDay2,
+        day2Prob: _rang,
+        markowDay2Prob: adjustedDay2,
         simDay2Prob: r.day2Prob,
         blendedDay2Prob: blendedDay2,
         empConv,

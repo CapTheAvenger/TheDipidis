@@ -3890,7 +3890,9 @@ img[src*="limitlesstcg"] {
     margin-bottom: 20px;
 }
 .cl-content-panel {
-    padding: 12px;
+    /* Waagerecht ueber --page-gutter: gleiche Lage wie .current-meta-content,
+       eine randlose Seitenflaeche und keine Karte. */
+    padding: 12px var(--page-gutter);
     background: #ffffff;
 }
 

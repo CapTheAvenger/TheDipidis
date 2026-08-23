@@ -1354,7 +1354,13 @@
     margin-bottom: 20px;
 }
 .current-meta-content {
-    padding: var(--s-6);
+    /* Waagerecht ueber --page-gutter, nicht ueber --s-6.
+       Das hier ist keine Karte, sondern die Seitenflaeche des Meta-Tabs:
+       weisser Grund, aber ohne Rahmen, ohne Radius, ohne Schatten. Ihre
+       24 px je Seite waren darum ein verkappter Seitenrand — und sie kamen
+       ZUSAETZLICH zu den 12 px, die jede .ds-sec-Karte darin schon hat.
+       Gemessen auf 390 px: die Heatmap kam damit auf 314 statt 362 px. */
+    padding: var(--s-6) var(--page-gutter);
     background: var(--surface-1);
 }
 .city-league-add-card-panel {

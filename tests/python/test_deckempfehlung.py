@@ -152,7 +152,7 @@ def test_rueckwaertsstrecke_sieht_das_ziel_nicht(modul):
         "2": _turnier("2", "X", "2026-01-08", zeilen_vor),
         "3": _turnier("3", "X", "2026-01-15", ziel_zeilen),
     }
-    faelle = modul.rueckwaertsstrecke(turniere)
+    faelle = modul.rueckwaertsstrecke(turniere, "A")
     assert len(faelle) == 1
     assert faelle[0]["deck"] == modul.schluessel("Solide"), (
         "empfohlen wurde das Deck mit dem besten Ergebnis AM ZIEL — "
@@ -168,7 +168,7 @@ def test_gleiches_datum_zaehlt_nicht_als_vorgaenger(modul):
         "2": _turnier("2", "X", "2026-01-08", z),
         "3": _turnier("3", "X", "2026-01-08", z),
     }
-    faelle = modul.rueckwaertsstrecke(turniere)
+    faelle = modul.rueckwaertsstrecke(turniere, "A")
     # Ziel 3 hat nur EINEN strikt frueheren Vorgaenger (1), also < ANKERTIEFE.
     assert all(f["datum"] != "2026-01-08" or f["turnier"] != "T3" for f in faelle) or not faelle
 
@@ -182,17 +182,31 @@ def test_nur_die_eigene_epoche_zaehlt(modul):
         "2": _turnier("2", "ALT", "2026-01-08", z),
         "3": _turnier("3", "NEU", "2026-01-15", z),
     }
-    assert modul.rueckwaertsstrecke(turniere) == []
+    assert modul.rueckwaertsstrecke(turniere, "A") == []
 
 
 # ── 3. Wirkung am echten Bestand ───────────────────────────────────────
 
 @pytest.fixture(scope="module")
-def echte_strecke(modul):
+def echte_turniere(modul):
     turniere = modul.lies_turniere(os.path.join(WURZEL, "data"))
     if not turniere:
         pytest.skip("keine Turnierdaten im Repo")
-    return modul.rueckwaertsstrecke(turniere)
+    return turniere
+
+
+@pytest.fixture(scope="module")
+def echte_strecke(modul, echte_turniere):
+    """Betriebsart A — der Normalfall."""
+    return modul.rueckwaertsstrecke(echte_turniere, "A")
+
+
+@pytest.fixture(scope="module")
+def echte_strecke_kalt(modul, echte_turniere):
+    """Betriebsart B — der Kaltstart. Muss getrennt gemessen werden: die
+    erste Fassung pruefte nur A und stellte deren Zahl neben eine
+    B-Empfehlung. Genau das soll hier nie wieder unbemerkt passieren."""
+    return modul.rueckwaertsstrecke(echte_turniere, "B")
 
 
 def test_die_strecke_hat_genug_ziele(echte_strecke):
@@ -211,11 +225,57 @@ def test_empfehlung_schlaegt_das_durchschnittsdeck(modul, echte_strecke):
         f"der Vorsprung ist auf {empf - feld:.2f} pp gefallen")
 
 
-def test_empfehlung_holt_die_haelfte_des_erreichbaren(modul, echte_strecke):
+def test_empfehlung_holt_ein_drittel_des_erreichbaren_zugewinns(modul, echte_strecke):
+    """Anteil am erreichbaren ZUGEWINN, nicht am Bestwert.
+
+    Die erste Fassung rechnete Empfehlung / bestmoeglich und kam auf 69 %.
+    Diese Groesse ist wertlos: wer immer das Feldmittel trifft, steht damit
+    schon bei 42 %, ohne irgendetwas beigetragen zu haben. Gemessen mit der
+    richtigen Formel sind es 47 %; der Test schlaegt unter 33 % an.
+    """
     empf = statistics.mean(f["quote"] for f in echte_strecke)
+    feld = statistics.mean(f["feld"] for f in echte_strecke)
     best = statistics.mean(f["best"] for f in echte_strecke)
-    assert empf / best >= 0.50, (
-        f"nur {empf / best * 100:.0f} % des Erreichbaren — gemessen waren es 69 %")
+    anteil = (empf - feld) / (best - feld)
+    assert anteil >= 0.33, (
+        f"nur {anteil * 100:.0f} % des erreichbaren Zugewinns")
+
+
+def test_kaltstart_wird_gegen_eigene_faelle_gemessen(modul, echte_strecke, echte_strecke_kalt):
+    """Die beiden Betriebsarten teilen sich kein einziges Turnier.
+
+    Waere das nicht so, koennte die Zahl der einen als Beleg fuer die andere
+    durchgehen — der Fehler, den diese Datei gemacht hat.
+    """
+    a = {(f["turnier"], f["datum"]) for f in echte_strecke}
+    b = {(f["turnier"], f["datum"]) for f in echte_strecke_kalt}
+    assert a and b, "beide Betriebsarten brauchen eigene Faelle"
+    assert not (a & b), f"{len(a & b)} Turniere zaehlen fuer beide Betriebsarten"
+
+
+def test_kaltstart_schlaegt_das_feld_wenn_auch_schwaecher(modul, echte_strecke_kalt):
+    """Der Kaltstart darf schwaecher sein als der Normalfall — aber nicht wertlos.
+
+    Gemessen +7,1 pp bei SE 2,4 ueber 22 Turniere. Der Test schlaegt unter
+    +2 pp an. Bewusst weit unter dem Messwert: bei 22 Faellen schwankt die
+    Zahl, und ein Test, der bei normaler Datenbewegung rot wird, wird
+    abgeschaltet statt gelesen.
+    """
+    empf = statistics.mean(f["quote"] for f in echte_strecke_kalt)
+    feld = statistics.mean(f["feld"] for f in echte_strecke_kalt)
+    assert empf - feld >= 2.0, (
+        f"Kaltstart {empf:.2f} % gegen Feld {feld:.2f} % — "
+        f"nur noch {empf - feld:.2f} pp Vorsprung")
+
+
+def test_kaltstart_findet_weniger_zieldecks_wieder(modul, echte_strecke, echte_strecke_kalt):
+    """Der benennbare Grund, warum B schwaecher ist: ueber eine Epochengrenze
+    kennt der Anker weniger Decks des Zielturniers. Faellt dieser Test, ist
+    die Erklaerung im Kopf der Datei nicht mehr wahr."""
+    ab_a = statistics.mean(f["abdeckung"] for f in echte_strecke)
+    ab_b = statistics.mean(f["abdeckung"] for f in echte_strecke_kalt)
+    assert ab_b < ab_a, (
+        f"Kaltstart-Abdeckung {ab_b:.3f} nicht unter Normalfall {ab_a:.3f}")
 
 
 def test_haeufiger_besser_als_der_feldschnitt(echte_strecke):
@@ -306,3 +366,87 @@ def test_ausgabedatei_ist_vollstaendig(modul, tmp_path):
         "die Vertrauensangabe muss den echten Vorsprung tragen")
     assert v["bestmoeglich_mittel"] > v["empfehlung_mittel"], (
         "bestmoeglich muss ueber der Empfehlung liegen, sonst stimmt die Rechnung nicht")
+
+
+# ── 4. Anzeige: was der Nutzer zu sehen bekommt ────────────────────────
+
+def test_duenne_decks_stehen_nicht_in_der_rangliste(modul, echte_turniere):
+    """Kein Deck unter MIN_ANZEIGE Ankerspielern bekommt einen Rang.
+
+    Geprueft wird die ausgelieferte Funktion, nicht die Regel nachgebaut —
+    ein Test, der die Filterung selbst noch einmal hinschreibt, bleibt gruen,
+    wenn die Filterung im Skript verschwindet.
+    """
+    sortiert = sorted(echte_turniere.values(), key=lambda t: (t["datum"], t["id"]))
+    anker = sortiert[-modul.ANKERTIEFE:]
+    score, detail, _ = modul.bewerte(anker, modul.K_NORMAL)
+    voll, sichtbar = modul.ranglisten(score, detail)
+    assert sichtbar, "die Rangliste darf nicht leer werden"
+    for e in sichtbar:
+        assert e["ankerspieler"] >= modul.MIN_ANZEIGE, (
+            f"{e['deck']} steht mit nur {e['ankerspieler']} Ankerspielern in der Rangliste")
+    # Die vollstaendige Liste bleibt nachpruefbar und ist laenger.
+    assert len(voll) >= len(sichtbar)
+
+
+def test_die_duennen_verschwinden_nicht_spurlos(modul):
+    """Was gefiltert wird, muss in der vollstaendigen Liste noch auftauchen."""
+    detail = {
+        "d1": {"dick": 1000.0, "duenn": 4.0},
+        "roh": {"dick": 25.0, "duenn": 75.0},
+        "namen": {"dick": "Dickes Deck", "duenn": "Duennes Deck"},
+    }
+    voll, sichtbar = modul.ranglisten({"duenn": 40.0, "dick": 25.0}, detail)
+    assert [e["schluessel"] for e in sichtbar] == ["dick"], (
+        "das duenne Deck darf trotz hoeherem Score nicht angezeigt werden")
+    assert {e["schluessel"] for e in voll} == {"dick", "duenn"}
+
+
+def test_kaltstart_anker_umfasst_mehr_als_eine_epoche(modul, echte_turniere):
+    """Zwei Epochen statt einer — gemessen +1,87 pp bei SE 0,83.
+
+    Der Test prueft die Wirkung, nicht die Konstante: der Anker muss mehr
+    Turniere enthalten als die juengste Epoche allein hergibt.
+    """
+    assert modul.EPOCHENTIEFE_KALTSTART >= 2
+    sortiert = sorted(echte_turniere.values(), key=lambda t: (t["datum"], t["id"]))
+    folge = modul.epochenfolge(sortiert)
+    assert len(folge) >= 3, "zu wenige Epochen im Bestand, um das zu pruefen"
+    ziel_epoche = folge[-1]
+    anker = modul.kaltstart_anker(sortiert, ziel_epoche, folge[-2])
+    nur_eine = [t for t in sortiert if t["meta"] == folge[-2]]
+    assert len(anker) > len(nur_eine), (
+        f"Kaltstart-Anker hat {len(anker)} Turniere, die Vorepoche allein "
+        f"schon {len(nur_eine)} — die zweite Epoche fehlt")
+    assert all(t["meta"] != ziel_epoche for t in anker), (
+        "der Kaltstart-Anker darf kein Turnier aus dem Zielformat enthalten")
+
+
+def test_kaltstart_anker_respektiert_das_stichdatum(modul, echte_turniere):
+    """bis_datum muss wirken, sonst leckt die Rueckwaertsstrecke."""
+    sortiert = sorted(echte_turniere.values(), key=lambda t: (t["datum"], t["id"]))
+    folge = modul.epochenfolge(sortiert)
+    ziel_epoche = folge[-1]
+    voll = modul.kaltstart_anker(sortiert, ziel_epoche, folge[-2])
+    assert voll, "ohne Stichdatum muss ein Anker herauskommen"
+    grenze = sorted(t["datum"] for t in voll)[len(voll) // 2]
+    beschnitten = modul.kaltstart_anker(sortiert, ziel_epoche, folge[-2], grenze)
+    assert len(beschnitten) < len(voll), "das Stichdatum hat nichts abgeschnitten"
+    for t in beschnitten:
+        assert t["datum"] < grenze, f"{t['datum']} liegt nicht vor {grenze}"
+
+
+def test_vertrauen_meldet_vorsprung_und_streuung(modul, echte_strecke):
+    """Ohne Standardfehler liest sich jede Differenz wie ein Ergebnis."""
+    v = modul.vertrauen(echte_strecke)
+    assert v["vorsprung"] > 0
+    assert v["vorsprung_standardfehler"] is not None and v["vorsprung_standardfehler"] > 0
+    erwartet = (statistics.mean(f["quote"] for f in echte_strecke)
+                - statistics.mean(f["feld"] for f in echte_strecke))
+    assert abs(v["vorsprung"] - erwartet) < 0.01
+    # Der Anteil am Erreichbaren muss der Zugewinn sein, nicht das Verhaeltnis
+    # zum Bestwert — sonst steht dort auch fuer eine wertlose Regel eine
+    # zweistellige Zahl.
+    best = statistics.mean(f["best"] for f in echte_strecke)
+    feld = statistics.mean(f["feld"] for f in echte_strecke)
+    assert abs(v["anteil_am_erreichbaren"] - erwartet / (best - feld) * 100) < 0.2

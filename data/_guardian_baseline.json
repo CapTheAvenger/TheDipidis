@@ -134,12 +134,12 @@
  "file_rows": {
   "cardmarket_card_images.csv": 1295,
   "cardmarket_id_mapping.csv": 17404,
-  "cm_expansions.csv": 771,
+  "cm_expansions.csv": 773,
   "japanese_cards_database.csv": 936,
   "price_data.csv": 20419,
   "prizepack_official_images.csv": 266
  },
- "generated": "2026-08-22 09:40 UTC",
+ "generated": "2026-08-23 09:40 UTC",
  "jp_set_rows": {
   "HSP": 9,
   "M4": 83,
@@ -150,26 +150,17 @@
   "SVP": 228
  },
  "price_integrity": {
-  "duplicate_idproducts": 100,
+  "duplicate_idproducts": 91,
   "match_methods": {
-   "live-verified": 5047,
-   "manual-pin": 1,
-   "priced-by-all": 144,
-   "priced-by-date": 1199,
+   "live-verified": 5028,
+   "manual-pin": 51,
+   "priced-by-all": 141,
+   "priced-by-date": 1171,
    "unique": 11013
   },
   "nonempty_eur_price": 20377,
-  "verified_collisions": [
-   "276103",
-   "276311",
-   "279943",
-   "281502",
-   "282722",
-   "299540",
-   "315951",
-   "363531",
-   "817297"
-  ]
+  "verified_collision_owners": {},
+  "verified_collisions": []
  },
  "set_coverage": {
   "AOR": [

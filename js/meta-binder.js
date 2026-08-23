@@ -1372,7 +1372,14 @@
         return META_BINDER_POKEMON_TYPE_ORDER[element] || 99;
     }
 
-    function compareMetaBinderEntries(a, b) {
+    function compareMetaBinderEntries(a, b, alleDrucke) {
+        // alleDrucke wird uebergeben, nicht aus dem Modul gelesen. Vorher stand
+        // hier metaBinderAllPrints — die Umschaltung des META Binders. Der Custom
+        // Binder ruft dieselbe Funktion auf, also hat ein Klick auf "Alle Drucke"
+        // im einen Tab die Sortierung des anderen umgestellt: gemessen aendern
+        // sich dabei 108 von 121 Positionen. Fehlt das Argument, gilt weiterhin
+        // der Modulwert, damit bestehende Aufrufer sich nicht aendern.
+        const anzeigeAlleDrucke = (alleDrucke === undefined) ? metaBinderAllPrints : !!alleDrucke;
         const aTypeMeta = a.typeMeta || getMetaBinderTypeMeta(a);
         const bTypeMeta = b.typeMeta || getMetaBinderTypeMeta(b);
 
@@ -1387,7 +1394,7 @@
         // (001, 002, 003 …). No element/Pokédex interleave: with meta cards
         // spanning many sets that looked chaotic. (All Prints keeps the
         // element/dex grouping below so every print of a card stays together.)
-        if (!metaBinderAllPrints) {
+        if (!anzeigeAlleDrucke) {
             const aSetTop = Number.isFinite(a.setOrder) ? a.setOrder : 0;
             const bSetTop = Number.isFinite(b.setOrder) ? b.setOrder : 0;
             if (aSetTop !== bSetTop) return bSetTop - aSetTop;
@@ -1471,7 +1478,7 @@
         return 0;
     }
 
-    function sortMetaCards(cards) {
+    function sortMetaCards(cards, alleDrucke) {
         return cards.sort((a, b) => {
             const aCardDb = findCardRecord(a.name, a.set, a.number);
             const bCardDb = findCardRecord(b.name, b.set, b.number);
@@ -1496,7 +1503,8 @@
                     setOrder: getMetaBinderSetOrderValue(b.set),
                     numberSort: parseCardNumberForSort(b.number),
                     deckCount: Array.isArray(b.decks) ? b.decks.length : 0
-                }
+                },
+                alleDrucke
             );
         });
     }
@@ -1945,7 +1953,7 @@
         // In All Prints mode: group by card name so all prints appear together
         const sorted = metaBinderAllPrints
             ? sortMetaCardsAllPrints([...filtered])
-            : sortMetaCards([...filtered]);
+            : sortMetaCards([...filtered], metaBinderAllPrints);
 
         if (sorted.length === 0) {
             grid.innerHTML = `<p class="color-grey">${mbText('mb.empty', 'No meta card data found. Make sure Current Meta or City League data is loaded.')}</p>`;

@@ -1384,6 +1384,10 @@ const BASE_PATH = './data/';
                         break;
                     case 'current-meta':
                         if (!window.currentMetaLoaded) loadCurrentMeta();
+                        // Die Deckempfehlung zeichnet sich beim Laden selbst;
+                        // dieser Aufruf holt sie nach, wenn der Nutzer von einem
+                        // anderen Tab zurueckkommt.
+                        if (window.Deckempfehlung) window.Deckempfehlung.init();
                         break;
                     case 'current-analysis':
                         if (!window.currentAnalysisLoaded) loadCurrentAnalysis();

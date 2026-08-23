@@ -1012,3 +1012,56 @@ html.is-signed-out [onclick*="radelist"]:hover {
     outline: 2px solid var(--brand);
     outline-offset: 1px;
 }
+
+/* ── Deckempfehlung ────────────────────────────────────────────────────
+   Die Karte auf der Startseite, die sagt, welches Deck man mitbringt.
+   Fuenf Regeln, alle aus einem benannten Grund — nicht aus Geschmack.
+
+   Warum nicht mit .ds-stat-value fuer den Decknamen: dieses Element ist
+   --fs-hero in var(--font-num), also 30 px Monospace, gebaut fuer EINE
+   Zahl. Ein Deckname darin ist bei 360 px Breite nach etwa neun Zeichen
+   zu Ende, und .ds-stat hat overflow:hidden — "Ogerpon Meganium Arboliva"
+   waere still abgeschnitten. Eine Empfehlung, deren Name nicht ganz
+   lesbar ist, ist keine. Darum eine eigene, proportionale Zeile, die
+   mitwaechst und umbrechen darf.
+
+   Warum der Vorbehalt eigene Flaeche bekommt: als .ds-note stand er in
+   11 px --ink-3 unter der Empfehlung, also leiser als alles andere auf
+   der Karte. Er ist aber die einzige Einschraenkung, die der Leser
+   kennen muss. --vorbehalt ist bewusst Bernstein und nicht Rot: eine
+   Datenluecke ist kein Fehler, sondern eine Grenze. */
+.de-empfehlung { margin-bottom: var(--s-4); }
+
+.de-empfehlung .de-deck {
+    margin: var(--s-2) 0 var(--s-3);
+    font-size: clamp(var(--fs-xl), 6vw, var(--fs-hero));
+    font-weight: 700;
+    line-height: 1.15;
+    color: var(--ink);
+    overflow-wrap: anywhere;
+}
+
+.de-empfehlung .de-vorbehalt {
+    margin: var(--s-3) 0;
+    padding: var(--s-2) var(--s-3);
+    border-left: 3px solid var(--vorbehalt);
+    border-radius: var(--r-sm);
+    background: var(--vorbehalt-bg);
+    color: var(--ink-2);
+    font-size: var(--fs-sm);
+    line-height: 1.45;
+}
+
+.de-empfehlung .de-beleg { margin: var(--s-3) 0; }
+.de-empfehlung .de-beleg > summary {
+    cursor: pointer;
+    color: var(--ink-2);
+    font-size: var(--fs-sm);
+    font-weight: 600;
+}
+.de-empfehlung .de-beleg > summary:focus-visible {
+    outline: 2px solid var(--brand);
+    outline-offset: 2px;
+}
+
+.de-empfehlung .de-mehr { color: var(--brand); font-weight: 600; }

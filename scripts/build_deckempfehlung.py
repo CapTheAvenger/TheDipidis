@@ -5,18 +5,7 @@ WARUM ES DIESE DATEI GIBT
 
 Das Meta-Call-Feature sagte bisher Meta-ANTEILE voraus. Der Betreiber braucht
 aber eine Entscheidung: welchen Archetyp bringe ich mit, um Day 2 zu erreichen.
-Das ist eine andere Frage, und sie hat eine andere Antwort — gemessen am
-23.08.2026 ueber 44 vergangene Turniere:
-
-    Durchschnittsdeck des Feldes      14,88 %  Day-2-Quote
-    das meistgespielte Deck           17,4  %
-    diese Regel                       24,75 %   <- 69 % des Erreichbaren
-    bestmoegliche Wahl im Nachhinein  35,83 %
-
-Die Regel hebt die Day-2-Chance also von rund 15 auf rund 25 %. Sie macht sie
-nicht sicher: in drei von vier Turnieren reicht es trotzdem nicht. Genau
-deshalb steht die Verteilung mit in der Datei — eine Empfehlung ohne ihre
-Trefferquote erzeugt Vertrauen, das sie nicht deckt.
+Das ist eine andere Frage, und sie hat eine andere Antwort.
 
 DIE REGEL
 
@@ -32,35 +21,66 @@ duenner die Datenlage:
     p0    = Feldkonversion des gesamten Ankers
     k     = 30 im Normalfall, 60 im Kaltstart
 
-Ein Parameter. Er ist bewusst nicht ausgereizt: ueber k = 10 bis 100 bewegt
-sich das Ergebnis nur zwischen 24,3 und 24,8 %. Ein breites Plateau statt
-einer Spitze heisst, dass hier nichts an die Daten angepasst wurde.
+Kein Winrate-Term. Die Siegquote empfiehlt fuer sich genommen aehnlich gut,
+traegt neben der geschrumpften Day-2-Quote aber nichts mehr bei.
 
-Kein Winrate-Term. Die Siegquote empfiehlt fuer sich genommen genauso gut
-(23,1 %), traegt neben der geschrumpften Day-2-Quote aber nichts mehr bei.
-(Sie ist damit NICHT wertlos — fuer die Anteilsprognose ist sie es, fuer die
-Empfehlung war sie ein gleichwertiger Weg zum selben Ziel.)
-
-ZWEI BETRIEBSARTEN
+ZWEI BETRIEBSARTEN — UND WARUM SIE GETRENNT GEMESSEN WERDEN
 
   A  Das laufende Format hat schon Praesenzturniere.
-     Anker = die letzten zwei. k = 30. Gemessen 24,75 %.
+     Anker = die letzten zwei desselben Formats. k = 30.
 
-  B  Kaltstart: das Format hat noch keines (Stand 23.08.2026 gilt das fuer
-     TEF-PBL, in dem Worlds gespielt wird).
-     Anker = die KOMPLETTE Vorepoche, nicht ihre letzten zwei. k = 60.
-     Gemessen 22,2 % — schlechter, und das aus einem benennbaren Grund:
-     ueber eine Epochengrenze findet der Anker im Mittel nur 85 % der
-     Zieldecks wieder, innerhalb einer Epoche 99,5 %. Decks, die es erst im
-     neuen Set gibt, kann er nicht kennen. Diese Luecke wird in der Datei
-     beziffert statt verschwiegen.
+  B  Kaltstart: das Format hat noch keines. Stand 23.08.2026 gilt das fuer
+     TEF-PBL, in dem Worlds gespielt wird.
+     Anker = die letzten EPOCHENTIEFE_KALTSTART Epochen davor. k = 60.
+
+Das ist der wichtigste Punkt dieser Datei, und er wurde beim ersten Bauen
+falsch gemacht: die Rueckwaertsstrecke pruefte ausschliesslich Betriebsart A
+und ihre Zahl (+9,9 pp) wurde als Beleg neben eine Empfehlung gestellt, die
+in Betriebsart B entstanden war. Zwei verschiedene Verfahren, eine Zahl.
+Seitdem wird jede Betriebsart gegen ihre EIGENEN Faelle gemessen, und die
+Datei traegt beide Ergebnisse. Was die Oberflaeche zeigt, ist die Zahl der
+Betriebsart, die tatsaechlich gelaufen ist.
+
+Gemessen am 23.08.2026, paarweise je Turnier gegen den Feldschnitt:
+
+    A   44 Turniere   Vorsprung  +9,9 pp   SE 1,40   in 42/44 besser
+    B   22 Turniere   Vorsprung  +7,1 pp   SE 2,40   in 15/22 besser
+
+B ist schwaecher, und das aus einem benennbaren Grund: ueber eine
+Epochengrenze findet der Anker im Mittel 86 % der Zieldecks wieder, innerhalb
+einer Epoche 99,4 %. Decks, die es erst im neuen Set gibt, kann er nicht
+kennen. Diese Luecke wird in der Datei beziffert statt verschwiegen — gegen
+den heutigen Online-Stand, nicht geschaetzt.
+
+WARUM DER KALTSTART-ANKER ZWEI EPOCHEN UMFASST
+
+Eine Epoche gibt +5,3 pp, zwei geben +7,1 pp. Paarweise ueber dieselben 22
+Turniere: +1,87 pp, SE 0,83, besser in 6 Faellen, schlechter in 1. Drei
+Epochen bringen nichts mehr (+6,6 pp). Die Aussage, die diese Zahlen tragen,
+ist "mehr als eine Epoche", nicht "genau zwei" — 2 und 3 sind nicht
+unterscheidbar.
+
+WARUM k NICHT NACHGEZOGEN WURDE
+
+Ein Durchlauf ueber k = 30/60/100/200/400 gibt in Betriebsart B Werte
+zwischen +5,3 und +7,8 pp. Das sieht nach k = 100 als Sieger aus. Paarweise
+gegen k = 60 gerechnet unterscheiden sich die beiden aber in genau 2 von 22
+Turnieren (t = 1,42). Bei 22 Faellen und SE 2,4 ist die ganze Spannweite
+Rauschen. Ein k, das aus so einem Durchlauf gezogen wird, ist an zwei
+Turniere angepasst und nicht an die Welt. Deshalb bleibt k, wo es war.
 
 WAS HIER NICHT DRINSTEHT UND WARUM
 
 Matchup-Daten. data/limitless_online_decks_matchups.csv traegt weder Datum
 noch Format; zeittreu geprueft verschlechtert jede Gewichtung damit das
-Ergebnis. Ein Feldbezug waere die naheliegende Erweiterung — er ist mit den
-heutigen Daten nicht belegbar.
+Ergebnis.
+
+Die Online-Leiter als Korrektur im Kaltstart. Sie waere die naheliegende
+Antwort auf die 14-Prozent-Luecke, denn sie hat das laufende Format gesehen
+und der Anker nicht. Sie ist hier trotzdem nicht verbaut:
+data/online_share_history reicht bis 2026-04-29 zurueck und deckt damit 2 der
+22 Kaltstart-Faelle ab. An zwei Faellen laesst sich nichts pruefen, und eine
+ungepruefte Gewichtung ist genau das, was diese Datei ersetzen sollte.
 """
 
 import argparse
@@ -82,6 +102,8 @@ K_NORMAL = 30          # Schrumpfung im Normalfall
 K_KALTSTART = 60       # im Kaltstart, weil der Anker aus einer fremden Epoche kommt
 MIN_ZIELSPIELER = 8    # darunter ist die Day-2-Quote eines Decks Rauschen
 ANKERTIEFE = 2         # Turniere im Normalfall
+EPOCHENTIEFE_KALTSTART = 2   # Epochen im Kaltstart; siehe Kopf, "mehr als eine"
+MIN_ANZEIGE = 30       # Ankerspieler, ab denen ein Deck in der Rangliste auftaucht
 
 
 def zahl(wert, standard=0.0):
@@ -157,49 +179,88 @@ def ziel_quoten(turnier):
     return out
 
 
-def rueckwaertsstrecke(turniere):
-    """Die Regel gegen jedes Turnier mit >= ANKERTIEFE Vorgaengern derselben Epoche.
+def rueckwaertsstrecke(turniere, betriebsart, vorformat=None):
+    """Die Regel gegen jedes Turnier nachspielen, das zu dieser Betriebsart passt.
 
-    Nur Daten, die VOR dem Zieldatum liegen. Das ist der ganze Sinn der
-    Uebung — eine Empfehlung, die das Ergebnis kennt, ist keine.
+    Betriebsart A bekommt die Turniere, die genug Vorgaenger im eigenen Format
+    haben. Betriebsart B bekommt genau die anderen — die, bei denen das Format
+    noch (fast) leer war, also echte Kaltstarts. Kein Turnier zaehlt fuer beide,
+    und keine Betriebsart wird mit den Faellen der anderen bewertet. Genau das
+    war der Fehler der ersten Fassung.
+
+    Nur Daten, die VOR dem Zieldatum liegen. Das ist der ganze Sinn der Uebung —
+    eine Empfehlung, die das Ergebnis kennt, ist keine.
     """
     sortiert = sorted(turniere.values(), key=lambda t: (t["datum"], t["id"]))
     faelle = []
     for ziel in sortiert:
-        vorher = [t for t in sortiert
+        eigene = [t for t in sortiert
                   if t["meta"] == ziel["meta"] and t["datum"] < ziel["datum"]]
-        if len(vorher) < ANKERTIEFE:
+        kaltstart = len(eigene) < ANKERTIEFE
+        if kaltstart != (betriebsart == "B"):
+            continue
+        if betriebsart == "A":
+            anker, k = eigene[-ANKERTIEFE:], K_NORMAL
+        else:
+            anker = kaltstart_anker(sortiert, ziel["meta"], vorformat, ziel["datum"])
+            k = K_KALTSTART
+        if not anker:
             continue
         ist = ziel_quoten(ziel)
         if len(ist) < 5:
             continue
-        score, _, _ = bewerte(vorher[-ANKERTIEFE:], K_NORMAL)
-        moeglich = [k for k in score if k in ist]
+        score, _, _ = bewerte(anker, k)
+        moeglich = [kk for kk in score if kk in ist]
         if not moeglich:
             continue
-        gewaehlt = max(moeglich, key=lambda k: (score[k], k))
+        gewaehlt = max(moeglich, key=lambda kk: (score[kk], kk))
         rang = sorted(ist.values(), reverse=True).index(ist[gewaehlt]) + 1
         faelle.append({
             "turnier": ziel["name"], "datum": ziel["datum"], "spieler": ziel["spieler"],
             "deck": gewaehlt, "quote": ist[gewaehlt],
             "feld": statistics.mean(ist.values()), "best": max(ist.values()),
             "rang": rang, "decks": len(ist),
+            "abdeckung": len(moeglich) / len(ist),
         })
     return faelle
 
 
 def vertrauen(faelle):
+    """Was die Regel in dieser Betriebsart tatsaechlich gebracht hat.
+
+    Die Kennzahl, auf die es ankommt, ist der PAARWEISE Vorsprung: je Turnier
+    die Quote des empfohlenen Decks minus dem Feldschnitt desselben Turniers.
+    Paarweise, weil Turniere sich stark unterscheiden — ein gutes Turnier hebt
+    Empfehlung und Feld gleichermassen, und ein Mittelwertvergleich ueber
+    verschiedene Turniere verwechselt das mit Koennen.
+
+    Dazu der Standardfehler. Ohne ihn liest sich jede Differenz wie ein
+    Ergebnis; mit ihm sieht man, ab wann sie eine ist.
+
+    "anteil_am_erreichbaren" ist der Anteil am erreichbaren ZUGEWINN,
+    (Empfehlung - Feld) / (bestmoeglich - Feld). Die erste Fassung rechnete
+    hier Empfehlung / bestmoeglich und kam damit auf 69 % statt 47 % — eine
+    Zahl, die auch dann gross aussieht, wenn die Regel gar nichts beitraegt.
+    """
     if not faelle:
         return {}
     q = [f["quote"] for f in faelle]
-    viertel = statistics.quantiles(q, n=4) if len(q) >= 4 else [min(q), statistics.median(q), max(q)]
+    feld = [f["feld"] for f in faelle]
+    best = [f["best"] for f in faelle]
+    vorsprung = [a - b for a, b in zip(q, feld)]
+    n = len(faelle)
+    se = (statistics.stdev(vorsprung) / (n ** 0.5)) if n > 1 else None
+    m_q, m_feld, m_best = statistics.mean(q), statistics.mean(feld), statistics.mean(best)
+    spanne = m_best - m_feld
+    viertel = statistics.quantiles(q, n=4) if n >= 4 else [min(q), statistics.median(q), max(q)]
     return {
-        "turniere": len(faelle),
-        "empfehlung_mittel": round(statistics.mean(q), 2),
-        "feld_mittel": round(statistics.mean(f["feld"] for f in faelle), 2),
-        "bestmoeglich_mittel": round(statistics.mean(f["best"] for f in faelle), 2),
-        "anteil_am_erreichbaren": round(
-            statistics.mean(q) / statistics.mean(f["best"] for f in faelle) * 100, 1),
+        "turniere": n,
+        "empfehlung_mittel": round(m_q, 2),
+        "feld_mittel": round(m_feld, 2),
+        "bestmoeglich_mittel": round(m_best, 2),
+        "vorsprung": round(statistics.mean(vorsprung), 2),
+        "vorsprung_standardfehler": round(se, 2) if se is not None else None,
+        "anteil_am_erreichbaren": round((m_q - m_feld) / spanne * 100, 1) if spanne > 0 else None,
         "median": round(statistics.median(q), 2),
         "quartil_unten": round(viertel[0], 2),
         "quartil_oben": round(viertel[2], 2),
@@ -208,6 +269,7 @@ def vertrauen(faelle):
         "bestes_deck_getroffen": sum(1 for f in faelle if f["rang"] == 1),
         "unter_den_besten_drei": sum(1 for f in faelle if f["rang"] <= 3),
         "schlechtester_fall": round(min(q), 2),
+        "deckabdeckung": round(statistics.mean(f["abdeckung"] for f in faelle) * 100, 1),
     }
 
 
@@ -224,6 +286,59 @@ def aktuelles_format(datenordner):
     return (f"{alt}-{neu}" if alt and neu else ""), vor
 
 
+def epochenfolge(sortiert):
+    """Die Formatepochen in der Reihenfolge, in der sie gespielt wurden."""
+    folge = []
+    for t in sortiert:
+        if t["meta"] and t["meta"] not in folge:
+            folge.append(t["meta"])
+    return folge
+
+
+def kaltstart_anker(sortiert, format_key, vorformat, bis_datum=None):
+    """Die letzten EPOCHENTIEFE_KALTSTART Epochen vor format_key.
+
+    bis_datum grenzt auf Turniere davor ein — das braucht die Rueckwaertsstrecke,
+    damit kein Turnier sein eigenes Ergebnis mitbekommt.
+    """
+    folge = epochenfolge(sortiert)
+    if format_key in folge:
+        i = folge.index(format_key)
+    elif vorformat in folge:
+        i = folge.index(vorformat) + 1
+    else:
+        i = len(folge)
+    vor = folge[max(0, i - EPOCHENTIEFE_KALTSTART):i]
+    if not vor:
+        return []
+    return [t for t in sortiert
+            if t["meta"] in vor and (bis_datum is None or t["datum"] < bis_datum)]
+
+
+def ranglisten(score, detail):
+    """(vollstaendige Liste, Anzeigeliste).
+
+    Decks unter MIN_ANZEIGE Ankerspielern fliegen aus der ANZEIGE, nicht nur in
+    eine Fussnote. Die Schrumpfung faengt sie rechnerisch bereits ab, aber ein
+    Platz in einer nummerierten Liste ist das lauteste Signal auf dem Schirm —
+    lauter als jeder Warnhinweis daneben. Sylveon stand mit 6 Ankerspielern und
+    einem Gluecksturnier auf Rang 5; wer das liest, spielt Sylveon. Die
+    vollstaendige Liste bleibt nachpruefbar in der Datei.
+    """
+    def eintrag(kk, v):
+        return {
+            "deck": detail["namen"].get(kk, kk),
+            "schluessel": kk,
+            "ankerspieler": int(detail["d1"][kk]),
+            "day2_roh": round(detail["roh"][kk], 2),
+            "day2_geschrumpft": round(v, 2),
+        }
+
+    rang = sorted(score.items(), key=lambda x: (-x[1], x[0]))
+    voll = [eintrag(kk, v) for kk, v in rang[:25]]
+    return voll, [e for e in voll if e["ankerspieler"] >= MIN_ANZEIGE][:10]
+
+
 def waehle_anker(turniere, format_key, vorformat):
     """(Ankerliste, k, Betriebsart). Betriebsart B, wenn das Format noch leer ist."""
     sortiert = sorted(turniere.values(), key=lambda t: (t["datum"], t["id"]))
@@ -231,14 +346,55 @@ def waehle_anker(turniere, format_key, vorformat):
     if len(eigene) >= 1:
         tiefe = min(ANKERTIEFE, len(eigene))
         return eigene[-tiefe:], K_NORMAL, "A"
-    vorherige = [t for t in sortiert if t["meta"] == vorformat]
-    if vorherige:
-        return vorherige, K_KALTSTART, "B"
-    # Kein benanntes Vorformat: die juengste Epoche, die es gibt.
-    if sortiert:
-        juengste = sortiert[-1]["meta"]
-        return [t for t in sortiert if t["meta"] == juengste], K_KALTSTART, "B"
+    anker = kaltstart_anker(sortiert, format_key, vorformat)
+    if anker:
+        return anker, K_KALTSTART, "B"
     return [], K_KALTSTART, "B"
+
+
+def online_abdeckung(datenordner, d1):
+    """Wieviel Prozent des heutigen Online-Feldes kennt der Anker nicht?
+
+    Der Anker sind Praesenzturniere. Im Kaltstart stammt er sogar aus der
+    Vorepoche. Zwischen Anker und heute erscheinen neue Decks — nach einem
+    Set-Release sind das nicht wenige. Fuer die kennt die Regel keine
+    Day-2-Quote, sie kann sie also gar nicht empfehlen, egal wie gut sie sind.
+
+    Diese Zahl beziffert genau diese blinde Stelle: den Anteil der heutigen
+    Online-Spielerschaft, dessen Deck im Anker nicht vorkommt. Sie ist die
+    ehrliche Obergrenze fuer das Vertrauen in die Empfehlung, und sie gehoert
+    darum neben die Empfehlung und nicht in eine Fussnote.
+
+    Gibt None zurueck, wenn kein Online-Schnappschuss vorliegt. Kein Schaetzwert
+    — eine fehlende Zahl ist ehrlicher als eine erfundene.
+    """
+    ordner = os.path.join(datenordner, "online_share_history")
+    dateien = sorted(glob.glob(os.path.join(ordner, "20??-??-??.csv")))
+    if not dateien:
+        return None
+    pfad = dateien[-1]
+    bekannt = set(d1)
+    gesamt = 0.0
+    fremd = 0.0
+    fremde_decks = []
+    with open(pfad, encoding="utf-8-sig", newline="") as f:
+        for r in csv.DictReader(f, delimiter=";"):
+            anteil = zahl(r.get("share"))
+            name = (r.get("deck_name") or "").strip()
+            if anteil <= 0 or not name:
+                continue
+            gesamt += anteil
+            if schluessel(name) not in bekannt:
+                fremd += anteil
+                fremde_decks.append((name, round(anteil, 2)))
+    if gesamt <= 0:
+        return None
+    fremde_decks.sort(key=lambda x: -x[1])
+    return {
+        "schnappschuss": os.path.basename(pfad)[:-4],
+        "anteil_unbekannt": round(fremd / gesamt * 100.0, 2),
+        "groesste_unbekannte": [{"deck": n, "anteil": a} for n, a in fremde_decks[:5]],
+    }
 
 
 def main():
@@ -268,16 +424,14 @@ def main():
         print("::error::build_deckempfehlung: Anker enthaelt keine verwertbaren Zeilen")
         return 1
 
-    rang = sorted(score.items(), key=lambda x: (-x[1], x[0]))
-    liste = [{
-        "deck": detail["namen"].get(kk, kk),
-        "schluessel": kk,
-        "ankerspieler": int(detail["d1"][kk]),
-        "day2_roh": round(detail["roh"][kk], 2),
-        "day2_geschrumpft": round(v, 2),
-    } for kk, v in rang[:15]]
+    voll, liste = ranglisten(score, detail)
 
-    faelle = rueckwaertsstrecke(turniere)
+    # Beide Betriebsarten gegen ihre eigenen Faelle. Die Oberflaeche zeigt die
+    # Zahl der Betriebsart, die tatsaechlich gelaufen ist — nicht die schoenere.
+    vertrauen_je = {
+        "A": vertrauen(rueckwaertsstrecke(turniere, "A")),
+        "B": vertrauen(rueckwaertsstrecke(turniere, "B", vorformat)),
+    }
     ergebnis = {
         "erzeugt": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S+00:00"),
         "format": format_key,
@@ -290,9 +444,13 @@ def main():
         "anker": [{"id": t["id"], "name": t["name"], "datum": t["datum"], "spieler": t["spieler"]}
                   for t in anker],
         "ankerspieler_gesamt": sum(t["spieler"] for t in anker),
+        "online_abdeckung": online_abdeckung(args.daten, detail["d1"]),
+        "min_ankerspieler_anzeige": MIN_ANZEIGE,
         "empfehlung": liste[0] if liste else None,
         "rangliste": liste,
-        "vertrauen": vertrauen(faelle),
+        "rangliste_vollstaendig": voll,
+        "vertrauen": vertrauen_je.get(art, {}),
+        "vertrauen_je_betriebsart": vertrauen_je,
     }
 
     print(f"Format {format_key} · Betriebsart {art} · k={k} · "
@@ -300,14 +458,23 @@ def main():
     for i, e in enumerate(liste[:6], 1):
         print(f"  {i}. {e['deck'][:28]:28} {e['ankerspieler']:5} Sp.  "
               f"roh {e['day2_roh']:5.1f} %  -> {e['day2_geschrumpft']:5.2f} %")
-    v = ergebnis["vertrauen"]
-    if v:
-        print(f"\nRueckwaerts ueber {v['turniere']} Turniere: Empfehlung {v['empfehlung_mittel']} % · "
-              f"Feld {v['feld_mittel']} % · bestmoeglich {v['bestmoeglich_mittel']} % "
-              f"({v['anteil_am_erreichbaren']} % des Erreichbaren)")
-        print(f"  ueber Feldschnitt in {v['ueber_feldschnitt']}/{v['turniere']}, "
-              f"bestes Deck getroffen {v['bestes_deck_getroffen']}/{v['turniere']}, "
-              f"schlechtester Fall {v['schlechtester_fall']} %")
+    oa = ergebnis["online_abdeckung"]
+    if oa:
+        print(f"  Anker kennt {100 - oa['anteil_unbekannt']:.1f} % des Online-Feldes "
+              f"(Stand {oa['schnappschuss']}); unbekannt: "
+              + ", ".join(f"{d['deck']} {d['anteil']} %" for d in oa["groesste_unbekannte"][:3]))
+
+    print()
+    for a in ("A", "B"):
+        v = vertrauen_je.get(a) or {}
+        if not v:
+            continue
+        marke = "  <- gilt hier" if a == art else ""
+        print(f"Betriebsart {a}: {v['turniere']:3} Turniere · Empfehlung {v['empfehlung_mittel']:5.2f} % · "
+              f"Feld {v['feld_mittel']:5.2f} % · Vorsprung {v['vorsprung']:+5.2f} pp "
+              f"(SE {v['vorsprung_standardfehler']}) · besser in {v['ueber_feldschnitt']}/{v['turniere']} · "
+              f"{v['anteil_am_erreichbaren']} % des erreichbaren Zugewinns · "
+              f"Deckabdeckung {v['deckabdeckung']} %{marke}")
 
     if args.trocken:
         return 0

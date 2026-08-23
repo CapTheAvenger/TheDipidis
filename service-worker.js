@@ -1,12 +1,12 @@
 // Service Worker for Pokemon TCG Analysis PWA
-// v202608220722
+// v202608231506
 // Strategies:
 //   HTML / navigation → Network-first  (users always see latest version)
 //   JS / CSS          → Network-first  (always serve fresh; fall back to cache offline)
 //   Images            → Cache-first    (rarely change)
 //   Data files        → Network-first  (fresh scraper output; fall back to cache offline)
 
-const CACHE_NAME = 'tcg-analysis-v202608220722';
+const CACHE_NAME = 'tcg-analysis-v202608231506';
 
 // Static shell — cached on install.
 //
@@ -134,6 +134,7 @@ const SHELL_ASSETS = [
   './js/archetype-icons.js',
   './js/app-archetype-card.js',
   './js/app-meta-call.js',
+  './js/app-deckempfehlung.js',
   './js/meta-analysis-hub.js',
   './js/app-testing-groups.js',
   './js/app-side-quest-play.js',

@@ -618,6 +618,18 @@ jobs:
       # geschrieben wird). Der Last-Modified-Kopf traegt nicht: GitHub Pages
       # setzt dort die Deploy-Zeit, fuer alle Dateien dieselbe. Also wird der
       # Stand dort festgehalten, wo er entsteht: hier.
+      # Die Deckempfehlung neu rechnen, nachdem die Turnier- und
+      # Online-Daten frisch sind. Ohne diesen Schritt friert
+      # data/deckempfehlung.json auf dem Stand ein, an dem es zuletzt von
+      # Hand erzeugt wurde, und die Startseite empfiehlt monatelang
+      # dasselbe Deck mit einem selbstbewussten Datum daneben. Genau das
+      # war beim Bauen der Fall und ist beim Review aufgefallen.
+      #
+      # Hart: schlaegt der Lauf fehl, soll der Wochenlauf rot werden. Eine
+      # stumm veraltete Empfehlung ist schlimmer als eine fehlende.
+      - name: Deckempfehlung neu rechnen
+        run: python3 scripts/build_deckempfehlung.py
+
       - name: Datenstaende fortschreiben
         run: python3 scripts/build_data_stand.py
 

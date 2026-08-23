@@ -5093,3 +5093,118 @@ a.price-unverified-badge:hover { background: #ffe8a1; }
  * tests/unit/test-eine-versteckklasse.js haelt das fest.
  * ─────────────────────────────────────────────────────────────────── */
 .d-none { display: none !important; }
+
+/* ── Custom Binder: gespeicherte Ordner und Abgleich ──────────────────
+   Warum Blau fuer "rein" und nicht Gruen: css/tokens.css legt die
+   Datenskala als Blau ↔ Rot fest und verbietet Gruen ↔ Rot ausdruecklich,
+   weil Rot-Gruen die haeufigste Farbsehschwaeche ist. Die Deck-Vergleichs-
+   ansicht nutzt Gruen, kommt damit aber nur durch, weil Zeichen und Wort
+   die Bedeutung tragen. Hier steht dasselbe Wort daneben — und trotzdem
+   die richtige Farbe, weil es nichts kostet. */
+.cb-binder-bar { margin-bottom: var(--s-4); }
+.cb-binder-empty {
+    padding: var(--s-3);
+    border: 1px dashed var(--line);
+    border-radius: var(--r-md);
+    color: var(--ink-3);
+    font-size: var(--fs-sm);
+}
+.cb-binder-list { display: flex; flex-direction: column; gap: var(--s-2); }
+.cb-binder-row {
+    display: flex; align-items: stretch; gap: var(--s-2);
+    border: 1px solid var(--line);
+    border-radius: var(--r-md);
+    background: var(--surface-1);
+    overflow: hidden;
+}
+.cb-binder-row.is-active { border-color: var(--brand); box-shadow: var(--e-1); }
+.cb-binder-open {
+    flex: 1 1 auto;
+    display: flex; flex-direction: column; gap: 2px;
+    padding: var(--s-3);
+    background: none; border: 0; cursor: pointer; text-align: left;
+    min-height: 44px;
+}
+.cb-binder-name { font-weight: 700; color: var(--ink); font-size: var(--fs-md); }
+.cb-binder-meta { color: var(--ink-3); font-size: var(--fs-xs); }
+.cb-binder-del {
+    flex: 0 0 auto; width: 44px;
+    background: none; border: 0; border-left: 1px solid var(--line);
+    color: var(--ink-3); font-size: var(--fs-lg); cursor: pointer;
+}
+.cb-binder-del:hover { color: var(--dv-neg); }
+
+/* Das Abgleich-Board: steht ueber dem Gitter, nicht in einem Fenster.
+   Ein Fenster muesste man schliessen, um nachzusehen, ob die Karte
+   wirklich in der Box liegt — und dann waere der Fortschritt weg. */
+.cb-abgleich { margin-bottom: var(--s-4); }
+.cb-ab-karte {
+    border: 1px solid var(--line);
+    border-radius: var(--r-lg);
+    background: var(--surface-1);
+    padding: var(--s-3);
+}
+.cb-ab-kopf {
+    display: flex; flex-wrap: wrap; align-items: baseline;
+    justify-content: space-between; gap: var(--s-2);
+    color: var(--ink); font-size: var(--fs-md);
+}
+.cb-ab-offen { color: var(--ink-2); font-size: var(--fs-sm); font-weight: 700; }
+.cb-ab-stand { margin: var(--s-1) 0 var(--s-3); color: var(--ink-3); font-size: var(--fs-xs); }
+.cb-ab-nix { color: var(--ink-2); font-size: var(--fs-md); text-align: center; padding: var(--s-4) 0; }
+.cb-ab-block { margin-top: var(--s-4); }
+.cb-ab-titel { margin: 0 0 2px; font-size: var(--fs-md); }
+.cb-ab-hinweis { margin: 0 0 var(--s-2); color: var(--ink-3); font-size: var(--fs-xs); }
+.cb-ab-gitter {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+    gap: var(--s-2);
+}
+
+/* Die ganze Kachel ist die Trefferflaeche, nicht ein kleines Kaestchen —
+   man haelt Karten in der Hand und tippt nebenbei. */
+.cb-ab-kachel {
+    position: relative;
+    display: flex; flex-direction: column; gap: 3px;
+    padding: 4px;
+    border: 2px solid var(--ab-farbe, var(--line));
+    border-radius: var(--r-sm);
+    background: var(--surface-1);
+    cursor: pointer;
+    min-height: 44px;
+    text-align: center;
+}
+.cb-ab-kachel img { width: 100%; aspect-ratio: 2.5 / 3.5; object-fit: cover; border-radius: 4px; display: block; }
+.cb-ab-kein-bild { width: 100%; aspect-ratio: 2.5 / 3.5; border-radius: 4px; background: var(--surface-2); display: block; }
+.cb-ab-menge {
+    position: absolute; top: 4px; right: 4px;
+    min-width: 22px; padding: 1px 6px;
+    border-radius: 999px;
+    background: var(--ab-farbe, var(--ink-3));
+    color: #fff; font-weight: 800; font-size: var(--fs-xs);
+}
+.cb-ab-name {
+    font-size: var(--fs-xs); font-weight: 600; color: var(--ink);
+    line-height: 1.2; overflow-wrap: anywhere;
+}
+.cb-ab-haken {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: var(--fs-hero); color: var(--ink-2);
+}
+.cb-ab-kachel.is-fertig { opacity: .45; }
+.cb-ab-kachel.is-fertig img { filter: grayscale(1); }
+.cb-ab-fertig {
+    display: block; width: 100%;
+    margin-top: var(--s-4); padding: var(--s-3);
+    border: 0; border-radius: var(--r-md);
+    background: var(--brand); color: var(--brand-ink);
+    font-size: var(--fs-md); font-weight: 700; cursor: pointer;
+    min-height: 44px;
+}
+
+/* Archetypen ohne eigene Kartendaten sichtbar machen, statt still
+   die Karten eines fremden Decks zu liefern. */
+.custom-binder-dropdown-item.is-ohne-daten { opacity: .55; }
+.cb-dd-warn { display: block; color: var(--vorbehalt); font-size: var(--fs-xs); }
+.cb-filter-name { min-width: 140px; }

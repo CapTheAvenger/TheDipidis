@@ -118,11 +118,29 @@ def schluessel(name):
 
 
 def lies_turniere(datenordner):
-    """Alle Praesenzturniere als {tid: {...}}, Zeilen je Deck."""
+    """Alle Praesenzturniere als {tid: {...}}, Zeilen je Deck — JEDE GENAU EINMAL.
+
+    Die Sammeldatei labs_tournament_decks.csv fuehrt alle 70 Turniere, und die
+    13 Epochendateien fuehren dieselben Turniere noch einmal. Wer beide einliest,
+    zaehlt jeden Spieler doppelt — gemessen Faktor exakt 2,00.
+
+    Fuer Quoten faellt das nicht auf, weil Zaehler und Nenner gemeinsam
+    verdoppeln. Fuer die Schrumpfung schon: in (D2 + k*p0)/(D1 + k) verdoppeln
+    D1 und D2, k aber nicht. Die Schrumpfung mit k=60 wirkte dadurch wie k=30 —
+    also halb so stark wie dokumentiert, und die Konstante im Kopf dieser Datei
+    log. Erste Datei gewinnt, spaetere Zeilen derselben (Turnier, Deck) fliegen raus.
+    """
     zeilen = []
+    gesehen = set()
     for pfad in sorted(glob.glob(os.path.join(datenordner, "labs_tournament_decks*.csv"))):
         with open(pfad, encoding="utf-8-sig", newline="") as f:
-            zeilen.extend(csv.DictReader(f))
+            for r in csv.DictReader(f):
+                tid = (r.get("tournament_id") or "").strip()
+                marke = (tid, (r.get("deck_name") or "").strip())
+                if not tid or marke in gesehen:
+                    continue
+                gesehen.add(marke)
+                zeilen.append(r)
     turniere = {}
     for r in zeilen:
         tid = (r.get("tournament_id") or "").strip()

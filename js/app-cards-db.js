@@ -1499,6 +1499,51 @@
             filterAndRenderCards();
         }
         
+        // Japanische Sets sind NIE international legal — auch dann nicht,
+        // wenn ihr Rang mitten im internationalen Fenster liegt.
+        //
+        // BEFUND (23.08.2026): data/sets.json fuehrt M4 = 152 und M5 = 153
+        // zwischen POR (151) und CRI (154). Der Rangbereich unten zog sie
+        // damit als "legal" herein, und in den ausgelieferten Chunks stehen
+        // 83 M4-, 81 M5- und 76 M6-Karten. Die Kartendatenbank zeigte sie im
+        // Standardformat an — doppelt sogar, denn dieselben Karten stehen
+        // international unter CRI und PBL schon drin. Nachgemessen an den
+        // Kartenlisten: M4 deckt sich zu 95 % mit CRI, M5 zu 94 % mit PBL.
+        // Es sind dieselben Karten unter japanischem Setnamen.
+        //
+        // Keine gepflegte Sperrliste: die Kartendaten wissen es selbst. Jede
+        // Karte aus M4/M5/M6 traegt jp_only, und die Trennung ist sauber —
+        // genau diese drei Sets bestehen zu 100 % aus jp_only-Karten,
+        // waehrend die beidseitigen Promo-Sets gemischt sind (SMP 31 %,
+        // SVP 22 %, SP 11 %, HSP 22 %) und legal bleiben muessen.
+        //
+        // Eine Sperrliste waere ausserdem schon morgen unvollstaendig: M6
+        // faellt heute nur deshalb heraus, weil PBL zufaellig das neueste
+        // internationale Set ist.
+        let _jpOnlySetCache = null;
+        function getJapaneseOnlySetCodes() {
+            if (_jpOnlySetCache) return _jpOnlySetCache;
+            const daten = (typeof window !== 'undefined' && window.allCardsData) || [];
+            if (!daten.length) return new Set();   // noch nicht geladen: nichts sperren
+            const gesamt = new Map();
+            const nurJp = new Map();
+            for (const karte of daten) {
+                const code = (karte && karte.set ? String(karte.set) : '').toUpperCase();
+                if (!code) continue;
+                gesamt.set(code, (gesamt.get(code) || 0) + 1);
+                if (karte.jp_only) nurJp.set(code, (nurJp.get(code) || 0) + 1);
+            }
+            const raus = new Set();
+            for (const [code, n] of gesamt) {
+                if (n > 0 && nurJp.get(code) === n) raus.add(code);
+            }
+            _jpOnlySetCache = raus;
+            return raus;
+        }
+        if (typeof window !== 'undefined') {
+            window.getJapaneseOnlySetCodes = getJapaneseOnlySetCodes;
+        }
+
         function getFormatLegalSetCodes(formatCode) {
             const map = window.setOrderMap;
             if (!map || !formatCode) return null;
@@ -1509,8 +1554,10 @@
             if (startOrder == null || endOrder == null) return null;
             const minOrder = Math.min(startOrder, endOrder);
             const maxOrder = Math.max(startOrder, endOrder);
+            const japanisch = getJapaneseOnlySetCodes();
             const legalSets = new Set();
             for (const [code, order] of Object.entries(map)) {
+                if (japanisch.has(code)) continue;
                 if (order >= minOrder && order <= maxOrder) legalSets.add(code);
             }
             // Promo & energy sets from current era are always Standard-legal

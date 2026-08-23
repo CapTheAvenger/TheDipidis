@@ -125,7 +125,23 @@ describe('Die Zahlen stimmen mit den Rohdaten überein', () => {
             'kollidierende IDs: ' + doppelt.length);
     });
 
-    it('neun davon sind auf BEIDEN Seiten live-verified — ein Widerspruch in sich', () => {
+    it('kein Paar ist auf BEIDEN Seiten live-verified', () => {
+        // Bis zum 23.08.2026 war das umgekehrt: neun Produktnummern trugen auf
+        // beiden kollidierenden Zeilen match_method='live-verified' — ein
+        // Widerspruch in sich, denn dieselbe Nummer kann nicht zwei Karten
+        // bestaetigt zugeordnet sein. Der Test hielt diesen Zustand als Zahl
+        // fest und verlangte ausdruecklich, dass er auffaellt, sobald er
+        // verschwindet ("Verschwinden die Kollisionen eines Tages, faellt der
+        // Test auf"). Genau das ist passiert: die manuellen Pins in
+        // data/cardmarket_mapping_manual.csv haben alle neun aufgeloest, jedes
+        // Paar hat jetzt zwei verschiedene Produktnummern per 'manual-pin'
+        // (HL-28/29, TRR-19/20, BWP-30/31, FLF-18/19, ROS-54/55, BUS-112a/142,
+        // UPR-20/21, DRM-60/60a, JTG-143/144).
+        //
+        // Aus dem Befund wird damit eine Regressionsschranke: taucht wieder
+        // ein beidseitig verifiziertes Paar auf, hat entweder ein Pin seine
+        // Wirkung verloren oder der Zuordner schreibt 'live-verified' erneut
+        // als stillen Vorgabewert, statt den Fehlschlag zu melden.
         const nach = new Map();
         for (const r of mapping()) {
             if (!nach.has(r.id)) nach.set(r.id, []);
@@ -133,9 +149,12 @@ describe('Die Zahlen stimmen mit den Rohdaten überein', () => {
         }
         const beide = [...nach.entries()].filter(([, v]) =>
             v.length > 1 && v.every(x => x.method === 'live-verified'));
-        assert.ok(beide.length > 0,
-            'keine doppelt verifizierten mehr — Waechter-Pruefung und Kommentare pruefen');
-        assert.ok(beide.length <= 20, 'unerwartet viele: ' + beide.length);
+        assert.deepEqual(beide.map(([id, v]) =>
+            id + ': ' + v.map(x => x.set + '-' + x.number).join(' + ')), [],
+            'Diese Produktnummern sind auf beiden Seiten als bestaetigt markiert. '
+            + 'Eine Nummer kann nicht zwei Karten bestaetigt zugeordnet sein — '
+            + 'entweder fehlt ein Pin in data/cardmarket_mapping_manual.csv, oder '
+            + 'der Zuordner setzt live-verified wieder als Vorgabewert.');
     });
 
     it('3.015 Preiszeilen haben keine Zuordnungszeile', () => {

@@ -95,14 +95,34 @@ def test_die_einteilung_reproduziert_die_pruefzahlen():
     assert sum(c.values()) == sum(1 for x in cards if x.get("number"))
 
 
-def test_neun_nummern_sind_doppelt_verifiziert():
+def test_keine_nummer_ist_doppelt_verifiziert():
+    """Aus einem Befund wird eine Schranke.
+
+    Bis zum 23.08.2026 trugen neun Produktnummern auf beiden kollidierenden
+    Zeilen match_method='live-verified'. Dieselbe Nummer kann nicht zwei
+    Karten bestaetigt zugeordnet sein — das war kein Randfall, sondern ein
+    stiller Vorgabewert: der Fehlschlag der Pruefung wurde als "geprueft"
+    verbucht. Der alte Test hielt die Zahl fest und verlangte, dass er
+    auffaellt, sobald sie verschwindet.
+
+    Sie ist verschwunden. Die manuellen Pins in
+    data/cardmarket_mapping_manual.csv loesen alle neun auf; jedes Paar hat
+    jetzt zwei verschiedene Nummern per 'manual-pin' — HL-28/29, TRR-19/20,
+    BWP-30/31, FLF-18/19, ROS-54/55, BUS-112a/142, UPR-20/21, DRM-60/60a,
+    JTG-143/144.
+
+    Taucht wieder ein solches Paar auf, hat entweder ein Pin seine Wirkung
+    verloren oder der Zuordner setzt 'live-verified' erneut als Vorgabewert.
+    """
     nach_id = collections.defaultdict(list)
     for m in _mapping():
         nach_id[m["cardmarket_product_id"]].append(m)
-    beide = [k for k, v in nach_id.items()
-             if len(v) > 1 and all(x.get("match_method") == "live-verified" for x in v)]
-    assert beide, "keine mehr — Waechter-Pruefung und Kommentare pruefen"
-    assert len(beide) <= 20, len(beide)
+    beide = {k: [x["set"] + "-" + x["number"] for x in v]
+             for k, v in nach_id.items()
+             if len(v) > 1 and all(x.get("match_method") == "live-verified" for x in v)}
+    assert beide == {}, (
+        "Diese Produktnummern sind auf beiden Seiten als bestaetigt markiert: "
+        f"{beide}")
 
 
 # ---------------------------------------------------------------------------
@@ -132,9 +152,20 @@ def test_waechter_schweigt_ohne_widerspruch():
     assert findings == []
 
 
-def test_waechter_findet_sie_in_den_echten_daten():
-    kol = data_guardian.price_integrity().get("verified_collisions")
-    assert kol, "price_integrity liefert die Kollisionen nicht mehr"
+def test_waechter_schweigt_zu_den_echten_daten():
+    """Der Waechter muss den Schluessel liefern und im Reinzustand leer lassen.
+
+    Beide Haelften zaehlen. Waere nur "leer" verlangt, wuerde der Test auch
+    dann gruen, wenn price_integrity den Schluessel gar nicht mehr kennt —
+    also genau dann, wenn die Pruefung ausgebaut wurde. Deshalb erst die
+    Anwesenheit des Schluessels pruefen, dann seinen Inhalt.
+    """
+    bericht = data_guardian.price_integrity()
+    assert "verified_collisions" in bericht, (
+        "price_integrity kennt verified_collisions nicht mehr — die Pruefung "
+        "wurde ausgebaut, nicht erfuellt")
+    assert bericht["verified_collisions"] == [], (
+        f"Widersprueche in den echten Daten: {bericht['verified_collisions']}")
 
 
 # ---------------------------------------------------------------------------
